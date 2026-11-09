@@ -118,18 +118,18 @@ Juurdepääs: WhatsApp, Telegram, Slack, Discord, iMessage, Signal...
 
 ---
 
-## 📖 Teenusepakkuja seadistamine
+## 📖 Pakkuja seadistamine
 
-API-võtme ühenduste hulgi lisamiseks CSV- või JSON-failist kasutage valikut **Dashboard → Providers → Import from file**. Veerud on positsioonipõhised (`provider,name,apiKey,baseUrl,priority`); `provider` peab juba olemas olema hallatud teenusepakkuja või ühilduva sõlmena. Vaadake jaotist [Teenusepakkujate importimine CSV- või JSON-failist](../providers/CSV-IMPORT.md).
+API-võtmega ühenduste massiliseks lisamiseks CSV- või JSON-failist kasutage **Armatuurlaud → Pakkujad → Impordi failist**. Veerud on positsioonipõhised (`provider,name,apiKey,baseUrl,priority`); `provider` peab juba olemas olema hallatava pakkujana või ühilduva sõlmena. Vt [Pakkujate importimine CSV- või JSON-failist](../providers/CSV-IMPORT.md).
 
-### 🔐 Tellimuspõhised teenusepakkujad
+### 🔐 Tellimuspõhised pakkujad
 
 #### Claude Code (Pro/Max)
 
 ```bash
-Dashboard → Providers → Connect Claude Code
-→ OAuthi sisselogimine → Tokeni automaatne värskendamine
-→ 5 tunni ja nädala kvoodi jälgimine
+Armatuurlaud → Pakkujad → Ühenda Claude Code
+→ OAuthi sisselogimine → Automaatne tokeni värskendamine
+→ 5-tunnise + nädalase kvoodi jälgimine
 
 Mudelid:
   cc/claude-opus-4-7
@@ -137,20 +137,20 @@ Mudelid:
   cc/claude-haiku-4-5-20251001
 ```
 
-**Profinõuanne:** Kasutage keerukate ülesannete jaoks Opust ja kiiruse jaoks Sonnetit. OmniRoute jälgib iga mudeli kvooti!
+**Professionaalne nõuanne:** kasutage keerukate ülesannete jaoks Opust ja kiiruse jaoks Sonnetit. OmniRoute jälgib kvooti mudelite kaupa!
 
-Kas OmniRoute'i hostis pole brauserit? Käivitage `claude setup-token` mis tahes kohas, kus Claude Code'i on sisse logitud, ja kleepige üheaastane token vahekaardile **Setup Token**. Vaadake jaotist [Claude Code seadistustokeniga](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
+Kas OmniRoute'i hostis pole brauserit? Käivitage `claude setup-token` kõikjal, kus Claude Code on sisse logitud, ja kleepige üheaastane token vahekaardile **Seadistustoken**. Vt [Claude Code seadistustokeniga](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
 
-Claude'i ja Claude Code'iga ühilduvad marsruudid säilitavad Opuse ja Sonneti mudelite puhul mõtlemispingutuse taseme `max`.
-Haiku mudelid ei aktsepteeri pingutustaset `max`, seega alandab OmniRoute selle
-päringu enne ülesvoolu saatmist kõrgele mõtlemiseelarve tasemele.
+Claude'i ja Claude Code'iga ühilduvad marsruudid säilitavad Opuse ja Sonneti
+mudelite puhul `max` mõtlemisjõupingutuse. Haiku mudelid ei aktsepteeri `max` jõupingutuse
+taset, seega vähendab OmniRoute selle päringu enne ülesvoolu saatmist suure mõtlemiseelarveni.
 
 #### OpenAI Codex (Plus/Pro)
 
 ```bash
-Dashboard → Providers → Connect Codex
+Armatuurlaud → Pakkujad → Ühenda Codex
 → OAuthi sisselogimine (port 1455)
-→ Lähtestamine iga 5 tunni järel ja kord nädalas
+→ 5-tunnine + nädalane lähtestamine
 
 Mudelid:
   cx/gpt-5.5
@@ -162,7 +162,7 @@ Mudelid:
 #### GitHub Copilot
 
 ```bash
-Dashboard → Providers → Connect GitHub
+Armatuurlaud → Pakkujad → Ühenda GitHub
 → OAuth GitHubi kaudu
 → Igakuine lähtestamine (kuu 1. kuupäeval)
 
@@ -174,55 +174,70 @@ Mudelid:
   gh/gemini-3.1-pro-preview
 ```
 
-### 💰 Soodsad teenusepakkujad
+**AI-krediidid (tokenipõhine arveldamine).** Kui GitHub teatab konto kohta
+`credits_used`, kuvab pakkuja piirangute kaart **AI-krediitide** rea, kus näidatakse
+praegusel arveldusperioodil kasutatud krediite, sealhulgas piiramatu mahuga organisatsiooniplaanide puhul.
+
+**Kohalik AI-krediitide piirang.** Muutke GitHubi ühendust ja määrake **AI-krediitide piirang
+arveldusperioodi kohta** (`providerSpecificData.githubCreditLimit`). Tühi väärtus keelab piirangu; `0`
+jätab ühenduse alati vahele. Kui viimane kasutusnäit on piiranguga võrdne või sellest suurem,
+jätab konto valik selle ühenduse vahele ja marsruutimine läheb üle teie teistele
+ühendustele samamoodi nagu kvoodipoliitika katkestuse korral. Kontroll kasutab kasutust, mille
+perioodiline kvoodi värskendus juba kogub — see ei kutsu GitHubi päringu teekonnal kunagi — ning
+on tõrgete suhtes lubav: puuduv või aegunud näit (vanem kui 15 minutit või pärineb juba lähtestatud
+arveldusperioodist) ei blokeeri ühendust. See on kohalik kaitsemehhanism, **mitte garanteeritud kululagi**:
+GitHubi aruandluse viivitused, värskendusintervall, pooleliolevad päringud ja OmniRoute'ist väljaspool
+toimuv kasutus võivad seda ületada. Kõva ülempiiri jaoks kasutage GitHubi enda kulupiiranguid.
+
+### 💰 Soodsad pakkujad
 
 #### GLM-4.7 (igapäevane lähtestamine, $0.6/1M)
 
 1. Registreeruge: [Zhipu AI](https://open.bigmodel.cn)
 2. Hankige Coding Planist API-võti
-3. Dashboard → Add API Key: Teenusepakkuja: `glm`, API-võti: `your-key`
+3. Armatuurlaud → Lisa API-võti: pakkuja: `glm`, API-võti: `your-key`
 
-**Kasutamine:** `glm/glm-4.7` — **Profinõuanne:** Coding Plan pakub 3× kvooti 1/7 hinnaga! Lähtestamine toimub iga päev kell 10.00.
+**Kasutage:** `glm/glm-4.7` — **Professionaalne nõuanne:** Coding Plan pakub 3× suuremat kvooti 1/7 hinnaga! Lähtestamine iga päev kell 10.00.
 
-#### MiniMax M2.1 (lähtestamine iga 5 tunni järel, $0.20/1M)
+#### MiniMax M2.1 (5-tunnine lähtestamine, $0.20/1M)
 
 1. Registreeruge: [MiniMax](https://www.minimax.io)
-2. Hankige API-võti → Dashboard → Add API Key
+2. Hankige API-võti → Armatuurlaud → Lisa API-võti
 
-**Kasutamine:** `minimax/MiniMax-M2.1` — **Profinõuanne:** Odavaim valik pika konteksti jaoks (1M tokenit)!
+**Kasutage:** `minimax/MiniMax-M2.1` — **Professionaalne nõuanne:** kõige soodsam valik pika konteksti jaoks (1M tokenit)!
 
-#### Kimi K2 (fikseeritud $9 kuus)
+#### Kimi K2 (kindel hind $9 kuus)
 
 1. Tellige: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
-2. Hankige API-võti → Dashboard → Add API Key
+2. Hankige API-võti → Armatuurlaud → Lisa API-võti
 
-**Kasutamine:** `kimi/kimi-k2.5` — **Profinõuanne:** Fikseeritud $9 kuus 10M tokeni eest = tegelik kulu $0.90/1M!
+**Kasutage:** `kimi/kimi-k2.5` — **Professionaalne nõuanne:** kindel hind $9 kuus 10M tokeni eest = efektiivne hind $0.90/1M!
 
 #### Baidu Qianfan / ERNIE
 
 1. Registreeruge: [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
-2. Looge Qianfani API-võti → Dashboard → Add API Key: Teenusepakkuja: `qianfan`
+2. Looge Qianfani API-võti → Armatuurlaud → Lisa API-võti: pakkuja: `qianfan`
 
-**Kasutamine:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` või mõni muu Qianfani OpenAI-ga ühilduva mudeli ID.
+**Kasutage:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` või mõnda muud Qianfani OpenAI-ga ühilduvat mudeli ID-d.
 
-### 🆓 TASUTA teenusepakkujad
+### 🆓 TASUTA pakkujad
 
-Autentimist mittevajavate tasuta teenusepakkujate lehel on valiku **No authentication required** kõrval lüliti.
-Selle väljalülitamine keelab vastava teenusepakkuja, eemaldab selle teenusepakkujate seadistatud/kompaktvaadetest ning
-eemaldab selle mudelid asukohast `/v1/models`.
+Autentimiseta tasuta pakkujate lehel on lüliti **Autentimine pole nõutav** kõrval.
+Selle väljalülitamine keelab pakkuja, eemaldab selle pakkujate konfigureeritud ja kompaktsetest vaadetest
+ning eemaldab selle mudelid `/v1/models`-ist.
 
 #### Qoder (9 TASUTA mudelit)
 
 ```bash
-Dashboard → Connect Qoder → OAuthi sisselogimine → Juurdepääs sõltub teenusepakkuja kehtivatest piirangutest
+Armatuurlaud → Ühenda Qoder → OAuthi sisselogimine → Juurdepääs sõltub pakkuja kehtivatest piirangutest
 
 Mudelid: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
 ```
 
-#### Kiro (Claude TASUTA)
+#### Kiro (Claude'i TASUTA versioon)
 
 ```bash
-Dashboard → Connect Kiro → AWS Builder ID või Google/GitHub → ~50 krediiti kuus
+Armatuurlaud → Ühenda Kiro → AWS Builder ID või Google/GitHub → ~50 krediiti kuus
 
 Mudelid: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 ```
@@ -337,82 +352,82 @@ Model: cc/claude-opus-4-7
 
 ---
 
-## 🚀 Juurutamine
+## 🚀 juurutamine
 
-### Globaalne npm-paigaldus (soovitatav)
+### Globaalne npm installimine (soovitatav)
 
 ```bash
 npm install -g omniroute
 
-# Loo konfiguratsioonikataloog
+# Create config directory
 mkdir -p ~/.omniroute
 
-# Loo .env fail (vaata .env.example)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# Käivita server
+# Start server
 omniroute
-# Või kohandatud pordiga:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI laadib automaatselt faili `.env` asukohast `~/.omniroute/.env` või `./.env`.
+CLI laadib `.env` automaatselt `~/.omniroute/.env` või `./.env`. Töökataloogis olev `./.env` võib määrata vaid lühikese lubatud võtmete loendi (pordid, `REQUIRE_API_KEY`, lokaadi ja värvi sätted); pane kõik muu `~/.omniroute/.env` sse. Vaadake [CLI käivituslepinguid](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
-### Salveraadi (tray) režiim
+### Salve režiim
 
-Käivita OmniRoute süsteemi salveraadis:
+Käivitage OmniRoute süsteemses salves:
 
 ```bash
 omniroute serve --tray
 ```
 
-Käsk tagastab väljundi pärast serveri ja salveraadi valmimist.
+Käsk naaseb pärast seda, kui server ja salv on valmis.
 
-Server jätkab töötamist ka pärast terminali sulgemist.
+Server jätkab ilma terminalita.
 
-Salveraadi režiim toetab macOS-i, Windowsi ja graafilisi Linuxi seansse. Salveraadi režiim ei ava juhtpaneeli automaatselt.
+Salve režiim toetab macOS, Windows ja graafilisi Linux seansse. Salverežiim ei ava armatuurlauda automaatselt.
 
-Kasuta salveraadi menüüd järgmiste toimingute jaoks:
+Kasutage salve menüüd järgmiste toimingute tegemiseks.
 
-- Ava juhtpaneel.
-- Ava `/dashboard/logs`.
-- Muuda automaatkäivitust.
-- Peata OmniRoute.
+- Avage armatuurlaud.
+- Avage `/dashboard/logs`.
+- Muuda automaatset käivitust.
+- Lõpeta OmniRoute.
 
-Ei tohi kombineerida `--tray` võtit järgmistega:
+Ärge kombineerige `--tray` järgmiste valikutega:
 
 - `--daemon`
 - `--log`
 - `--no-recovery`
 
-Need režiimid vajavad erinevat protsessi omandiõigust.
+Need režiimid nõuavad erinevat protsessi omandiõigust.
 
-Lubage käivitamine järgmisel masinasse sisselogimisel:
+Luba käivitamine järgmisel masina sisselogimisel:
 
 ```bash
 omniroute autostart enable
 ```
 
-Automaatkäivitus kasutab salveraadi režiimi macOS-il, Windowsil ja graafilistes Linuxi seanssides. Kasutajaliideseta (headless) Linux kasutab olemasolevat systemd kasutajateenust.
+Automaatkäivitus kasutab macOS, Windows ja graafilise Linux seanssidel salverežiimi. Peata Linux kasutab olemasolevat systemd kasutajateenust.
 
-Sisselogimisel käivitamise keelamine:
+Keela käivitamine sisselogimisel:
 
 ```bash
 omniroute autostart disable
 ```
 
-### Eemaldamine
+### Desinstallimine
 
-Kui OmniRoute't ei ole enam vaja, pakume kahte kiiret skripti puhtaks eemaldamiseks:
+Kui te OmniRoute enam ei vaja, pakume puhtaks eemaldamiseks kahte kiiret skripti:
 
-| Käsk                     | Tegevus                                                                                         |
-| ------------------------ | ----------------------------------------------------------------------------------------------- |
-| `npm run uninstall`      | Eemaldab süsteemirakenduse, kuid **säilitab teie andmebaasi ja seaded** kaustas `~/.omniroute`. |
-| `npm run uninstall:full` | Eemaldab rakenduse JA **kustutab jäädavalt kõik seaded, võtmed ja andmebaasid**.                |
+| Käsk                     | Tegevus                                                                                       |
+| ------------------------ | --------------------------------------------------------------------------------------------- |
+| `npm run uninstall`      | Eemaldab süsteemirakenduse, kuid** säilitab teie DB ja konfiguratsioonid** `~/.omniroute`.    |
+| `npm run uninstall:full` | Eemaldab rakenduse AND jäädavalt** kustutab kõik konfiguratsioonid, võtmed ja andmebaasid** . |
 
-> Märkus: nende käskude käivitamiseks liikuge OmniRoute projekti kausta (kui kloonisite selle) ja käivitage need seal. Kui rakendus on paigaldatud globaalselt, võite lihtsalt käivitada `npm uninstall -g omniroute`.
+> Märkus. Nende käskude käivitamiseks liikuge OmniRoute projekti kausta (kui te selle kloonisite) ja käivitage need. Teise võimalusena, kui see on globaalselt installitud, võite lihtsalt käivitada `npm uninstall -g omniroute`.
 
-### VPS-i juurutamine
+### VPS juurutamine
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -428,25 +443,25 @@ export NEXT_PUBLIC_BASE_URL="http://localhost:20128"
 export API_KEY_SECRET="endpoint-proxy-api-key-secret"
 
 npm run start
-# Või: pm2 start npm --name omniroute -- start
+# Or: pm2 start npm --name omniroute -- start
 ```
 
-### PM2 juurutamine (väikese mäluga)
+### PM2 juurutamine (vähe mälu)
 
-Piiratud RAM-i mahuga serverite jaoks kasutage mälupiirangu valikut:
+Piiratud RAM ga serverite puhul kasutage mälupiirangu valikut:
 
 ```bash
-# 512 MB piiranguga (vaikimisi)
+# With 512MB limit (default)
 pm2 start npm --name omniroute -- start
 
-# Või kohandatud mälupiiranguga
+# Or with custom memory limit
 OMNIROUTE_MEMORY_MB=512 pm2 start npm --name omniroute -- start
 
-# Või kasutades ecosystem.config.js
+# Or using ecosystem.config.js
 pm2 start ecosystem.config.js
 ```
 
-Loo fail `ecosystem.config.js`:
+Loo `ecosystem.config.js`:
 
 ```javascript
 module.exports = {
@@ -471,24 +486,24 @@ module.exports = {
 ### Docker
 
 ```bash
-# Ehita image (vaikimisi = runner-cli koos eelnevalt paigaldatud codex/claude/droid-iga)
+# Build image (default = runner-cli with codex/claude/droid preinstalled)
 docker build -t omniroute:cli .
 
-# Portatiivne režiim (soovitatav)
+# Portable mode (recommended)
 docker run -d --name omniroute -p 20128:20128 --env-file ./.env -v omniroute-data:/app/data omniroute:cli
 ```
 
-Hostiga integreeritud režiimi kohta CLI binaaridega vaata Dockeri jaotist peamises dokumentatsioonis.
+Hostiga integreeritud režiimi CLI binaarfailidega vaadake peamiste dokumentide jaotisest Docker.
 
-### Void Linux (xbps-src)
+### Kehtetu Linux (xbps-src)
 
-Void Linuxi kasutajad saavad paketeerida ja paigaldada OmniRoute'i loomulikul viisil, kasutades `xbps-src` risttõlkimise raamistikku. See automatiseerib Node.js iseseisva (standalone) ehituse koos vajalike `better-sqlite3` natiivsete seostustega (bindings).
+Kehtetu Linux kasutajad saavad OmniRoute natiivselt pakendada ja installida, kasutades `xbps-src` ristkompileerimise raamistikku. See automatiseerib Node.js eraldiseisva koostamise koos vajalike `better-sqlite3` natiivsete sidemetega.
 
 <details>
-<summary><b>Vaata xbps-src malli</b></summary>
+<summary><b>Vaadake xbps-src malli</b></summary>
 
 ```bash
-# Malli fail 'omniroute' jaoks
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -509,7 +524,7 @@ export npm_config_fund=false
 export npm_config_audit=false
 
 do_build() {
-	# Määra sihtprotsessori arhitektuur node-gyp jaoks
+	# Determine target CPU arch for node-gyp
 	local _gyp_arch
 	case "$XBPS_TARGET_MACHINE" in
 		aarch64*) _gyp_arch=arm64 ;;
@@ -518,29 +533,29 @@ do_build() {
 		*) _gyp_arch=x64 ;;
 	esac
 
-	# 1) Paigalda kõik sõltuvused – jäta skriptid vahele
+	# 1) Install all deps – skip scripts
 	NODE_ENV=development npm ci --ignore-scripts
 
-	# 2) Ehita Next.js iseseisev pakett
+	# 2) Build the Next.js standalone bundle
 	npm run build
 
-	# 3) Kopeeri staatilised failid iseseisvasse paketti
+	# 3) Copy static assets into standalone
 	cp -r .next/static .next/standalone/.next/static
 	[ -d public ] && cp -r public .next/standalone/public || true
 
-	# 4) Kompileeri better-sqlite3 natiivne seostus
+	# 4) Compile better-sqlite3 native binding
 	local _node_gyp=/usr/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js
 	(cd node_modules/better-sqlite3 && node "$_node_gyp" rebuild --arch="$_gyp_arch")
 
-	# 5) Paiguta kompileeritud seostus iseseisvasse paketti
+	# 5) Place the compiled binding into the standalone bundle
 	local _bs3_release=.next/standalone/node_modules/better-sqlite3/build/Release
 	mkdir -p "$_bs3_release"
 	cp node_modules/better-sqlite3/build/Release/better_sqlite3.node "$_bs3_release/"
 
-	# 6) Eemalda arhitektuurispetsiifilised sharp paketid
+	# 6) Remove arch-specific sharp bundles
 	rm -rf .next/standalone/node_modules/@img
 
-	# 7) Kopeeri pino käitusaja sõltuvused, mille Next.js'i staatiline analüüs vahele jättis:
+	# 7) Copy pino runtime deps omitted by Next.js static analysis:
 	for _mod in pino-abstract-transport split2 process-warning; do
 		cp -r "node_modules/$_mod" .next/standalone/node_modules/
 	done
@@ -554,7 +569,7 @@ do_install() {
 	vmkdir usr/lib/omniroute/.next
 	vcopy .next/standalone/. usr/lib/omniroute/.next/standalone
 
-	# Väldi tühjade Next.js app router kataloogide eemaldamist paigaldusjärgse hoogi (hook) poolt
+	# Prevent removal of empty Next.js app router dirs by the post-install hook
 	for _d in \
 		.next/standalone/.next/server/app/dashboard \
 		.next/standalone/.next/server/app/dashboard/settings \
@@ -582,30 +597,30 @@ post_install() {
 
 ### Keskkonnamuutujad
 
-| Muutuja                                 | Vaikeväärtus                         | Kirjeldus                                                                                                                                                        |
-| --------------------------------------- | ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `JWT_SECRET`                            | `omniroute-default-secret-change-me` | JWT allkirjastamise saladus (**muutke tootmiskeskkonnas**)                                                                                                       |
-| `INITIAL_PASSWORD`                      | `CHANGEME`                           | Esimese sisselogimise parool                                                                                                                                     |
-| `DATA_DIR`                              | `~/.omniroute`                       | Andmekataloog (andmebaas, kasutus, logid)                                                                                                                        |
-| `PORT`                                  | raamistiku vaikeväärtus              | Teenuse port (näidetes `20128`)                                                                                                                                  |
-| `HOSTNAME`                              | raamistiku vaikeväärtus              | Sidumise host (Dockeri vaikeväärtus on `0.0.0.0`)                                                                                                                |
-| `NODE_ENV`                              | käitusaja vaikeväärtus               | Määra `production` juurutamiseks                                                                                                                                 |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`             | Avalik baas-URL, mida näidatakse juhtpaneelis ja mis avaldatakse serverile (asendab vana `BASE_URL`)                                                             |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`              | Pilvesünkroonimise lõpp-punkti baas-URL (asendab vana `CLOUD_URL`)                                                                                               |
-| `API_KEY_SECRET`                        | `endpoint-proxy-api-key-secret`      | HMAC saladus loodud API võtmete jaoks                                                                                                                            |
-| `REQUIRE_API_KEY`                       | `false`                              | Nõua Bearer API võtit teel `/v1/*`                                                                                                                               |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                              | Luba autenditud juhtpaneeli kasutajatel nõudmisel näidata salvestatud API võtme täisväärtusi                                                                     |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                 | Serveripoolne värskendamise sagedus vahemällu salvestatud Provider Limits andmete jaoks; kasutajaliidese värskendusnupud käivitavad ikkagi käsitsi sünkroonimise |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                              | Keela automaatsed SQLite hetktõmmised enne kirjutamist/importi/taastamist; käsitsi varundamine töötab jätkuvalt                                                  |
-| `APP_LOG_TO_FILE`                       | `true`                               | Lubab rakenduse ja auditilogide väljundi kettale                                                                                                                 |
-| `AUTH_COOKIE_SECURE`                    | `false`                              | Sunni `Secure` autentimisküpsis (HTTPS pöördproksi taga)                                                                                                         |
-| `CLOUDFLARED_BIN`                       | määramata                            | Kasuta olemasolevat `cloudflared` binaari halduva allalaadimise asemel                                                                                           |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                              | Transport hallatavatele Quick Tunnels'idele (`http2`, `quic` või `auto`)                                                                                         |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                                | Node.js hunniku (heap) piirang MB-des                                                                                                                            |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                 | Vahemälu (prompt cache) kirjete maksimaalne arv                                                                                                                  |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                | Semantilise vahemälu kirjete maksimaalne arv                                                                                                                     |
+| Muutuv                                  | Vaikimisi                     | Kirjeldus                                                                                                                                                              |
+| --------------------------------------- | ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `JWT_SECRET`                            | _(automaatselt genereeritud)_ | JWT allkirjastamise salajane — genereeriti automaatselt esimesel käivitamisel ja jäi alles `server.env`; määrake see selgesõnaliselt, kui andmekataloog on lühiajaline |
+| `INITIAL_PASSWORD`                      | _(määramata)_                 | Esimene sisselogimisparool. npm/source installid algavad tähega `CHANGEME`: asendage see. Määramata: liitumisviisard                                                   |
+| `DATA_DIR`                              | `~/.omniroute`                | Andmekataloog (db, kasutus, logid)                                                                                                                                     |
+| `PORT`                                  | raamistiku vaikeseade         | Teenindusport (näidetes `20128` )                                                                                                                                      |
+| `HOSTNAME`                              | raamistiku vaikeseade         | Seo host (Docker vaikimisi `0.0.0.0`)                                                                                                                                  |
+| `NODE_ENV`                              | käitusaja vaikeseade          | Määra juurutamiseks `production`                                                                                                                                       |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`      | Avalik baas URL ilmus armatuurlauale ja avalikustati serverisse (asendab pärand `BASE_URL`)                                                                            |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`       | Pilvesünkroonimise lõpp-punkti baas URL (asendab pärand `CLOUD_URL`)                                                                                                   |
+| `API_KEY_SECRET`                        | _(automaatselt genereeritud)_ | HMAC saladus loodud API võtmete jaoks — genereeriti automaatselt esimesel käivitamisel ja säilis `server.env`-s                                                        |
+| `REQUIRE_API_KEY`                       | `false`                       | Jõusta kandja API klahv `/v1/*`                                                                                                                                        |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                       | Lubage autentitud armatuurlaua kasutajatel nõudmisel avaldada täielikud salvestatud API võtmeväärtused                                                                 |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                          | Serveripoolne värskendussagedus vahemällu salvestatud teenusepakkuja piirangute andmete jaoks; UI värskendusnupud käivitavad endiselt käsitsi sünkroonimise            |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                       | Keela automaatsed SQLite hetktõmmised enne writes/import/restore; käsitsi varukoopiad töötavad endiselt                                                                |
+| `APP_LOG_TO_FILE`                       | `true`                        | Lubab rakenduse ja auditi logi väljundi kettale                                                                                                                        |
+| `AUTH_COOKIE_SECURE`                    | `false`                       | Sundima `Secure` autentimise küpsisefail ( HTTPS vastupidise puhverserveri taga)                                                                                       |
+| `CLOUDFLARED_BIN`                       | määramata                     | Kasutage hallatud allalaadimise asemel olemasolevat `cloudflared` binaarfaili                                                                                          |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                       | Hallatud kiirtunnelite transport (`http2`, `quic` või `auto`)                                                                                                          |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                         | Node.js hunniku limiit MB                                                                                                                                              |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                          | Maksimaalsed viipade vahemälu kirjed                                                                                                                                   |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                         | Maksimaalne semantilise vahemälu kirje                                                                                                                                 |
 
-Täieliku keskkonnamuutujate loendi leiate [README](../README.md) failist.
+Täieliku keskkonnamuutuja viite saamiseks vaadake [README](../README.md).
 
 ---
 
@@ -614,17 +629,17 @@ Täieliku keskkonnamuutujate loendi leiate [README](../README.md) failist.
 <details>
 <summary><b>Kuva kõik saadaolevad mudelid</b></summary>
 
-> Allolev loend on koostatud failist `open-sse/config/providerRegistry.ts` versiooni v3.8.0 jaoks. Pilvekataloogid (Gemini, OpenRouter jne) sünkroonitakse dünaamiliselt — täieliku reaalajas kataloogi nägemiseks avage **Dashboard → Providers → [provider] → Available Models** või tehke päring `GET /api/models/catalog`.
+> Allolev loend on koostatud faili `open-sse/config/providerRegistry.ts` põhjal versiooni v3.8.0 jaoks. Pilvekatalooge (Gemini, OpenRouter jne) sünkroonitakse dünaamiliselt — täieliku jooksva kataloogi vaatamiseks ava **Töölaud → Pakkujad → [pakkuja] → Saadaolevad mudelid** või kutsu välja `GET /api/models/catalog`.
 >
-> Kui mõne pakkuja sisseehitatud loend on aegunud, kasutage sellel lehel valikut **Import from /models** (või lubage **Auto-Sync**), et tõmmata reaalajas ülemvoo kataloog. See kinnitati versioonis v3.8.50 LLM7.io (`gemini-3.1-flash-lite`) ja UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) puhul; Pollinationsi anonüümne juurdepääs jäi sama testitsükli jooksul ülemvoo poolt piiratuks.
+> Kui pakkuja sisseehitatud loend on aegunud, kasuta sellel lehel käsku **Impordi aadressilt /models** (või luba **Automaatne sünkroonimine**), et laadida ülesvoolu tegelik kataloog. Seda kontrolliti versioonis v3.8.50 pakkujate LLM7.io (`gemini-3.1-flash-lite`) ja UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) puhul; Pollinationsi anonüümne juurdepääs oli sama testimise ajal ülesvoolu piirangutega.
 
 **Claude Code (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
-**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ pingutustasemed: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
+**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ jõudlustasemed: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — TASUTA OAuth: kasutage reaalajas kataloogi, mida kuvatakse jaotises **Dashboard → Providers → Kiro → Available Models**. Saadavus sõltub kontost ja paketist.
+**Kiro (`kr/`)** — TASUTA OAuth: kasuta jaotises **Töölaud → Pakkujad → Kiro → Saadaolevad mudelid** kuvatavat jooksvat kataloogi. Saadavus sõltub kontost ja paketist.
 
 **Qoder (`if/`)** — TASUTA OAuth: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
@@ -632,37 +647,37 @@ Täieliku keskkonnamuutujate loendi leiate [README](../README.md) failist.
 
 **MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/kuus fikseeritud hinnaga või kasutuspõhiselt: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — kindel kuutasu $9 või kasutuspõhine tasu: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
 **DeepSeek (`ds/`)** — API-võti: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
-**Groq (`groq/`)** — Ülikiire: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
+**Groq (`groq/`)** — ülikiire: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
 
-**xAI (`xai/`)** — Groki-natiivne: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
+**xAI (`xai/`)** — Groki algupärane: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
-**Mistral (`mistral/`)** — EL-is majutatud: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
+**Mistral (`mistral/`)** — majutatud EL-is: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/codestral-latest`
 
-**Perplexity (`pplx/`)** — Otsinguga täiendatud: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
+**Perplexity (`pplx/`)** — otsinguga täiendatud: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
-**Together AI (`together/`)** — Avatud lähtekoodiga: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (tasuta), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
+**Together AI (`together/`)** — avatud lähtekoodiga: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (tasuta), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
-**Fireworks AI (`fireworks/`)** — Kiire järeldamine: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
+**Fireworks AI (`fireworks/`)** — kiire järeldamine: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
-**Cerebras (`cerebras/`)** — Wafer-scale: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
+**Cerebras (`cerebras/`)** — vahvlimõõdus: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
-**Cohere (`cohere/`)** — RAG-keskne: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
+**Cohere (`cohere/`)** — RAG-ile keskendunud: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — Ettevõtlusklass: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — ettevõtetele: `nvidia/google/gemma-4-31b-it`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`, `nvidia/nvidia/nemotron-3-ultra-550b-a55b`, `nvidia/nvidia/nemotron-3.5-lightning-30b-a3b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: Sünkroonitakse reaalajas iga API-võtme kohta Google'ist — staatilist loendit pole. Ühendage võti jaotises **Dashboard → Providers** ja seejärel kasutage praeguse kataloogi importimiseks valikut **Available Models** (nt `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
+**Gemini (Google Cloud `gemini/`)**: sünkroonitakse iga API-võtme puhul Google’ist jooksvalt — staatilist loendit pole. Ühenda võti menüüs **Töölaud → Pakkujad** ja kasuta seejärel praeguse kataloogi importimiseks valikut **Saadaolevad mudelid** (nt `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
-**Muud ühilduvad pakkujad** (valik): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (läbi `aws-bedrock`), `azure-ai`, `openrouter` (edastusreežimi kataloog), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Igaüks haldab oma mudeliloendit failis `providerRegistry.ts` ja seda saab automaatselt sünkroonida, kui pakkuja pakub `/models` lõpp-punkti.
+**Muud ühilduvad pakkujad** (valik): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (teenuse `aws-bedrock` kaudu), `azure-ai`, `openrouter` (läbipääsukataloog), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Igaüks haldab oma mudeliloendit failis `providerRegistry.ts` ja seda saab automaatselt sünkroonida, kui pakkuja pakub lõpp-punkti `/models`.
 
-**Märkus mudeli-ID-de kohta:** OmniRoute kasutab pakkuja-põhiseid ID-sid (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Mõned ID-d sisaldavad punktidega versiooninumbreid, sest ülemvoo API ootab neid just nii. Kui mudelit pole ülal loetletud, käivitage `omniroute models --search <term>` või tehke päring `GET /api/models/catalog`, et saadavust kinnitada.
+**Märkus mudelite ID-de kohta:** OmniRoute kasutab pakkuja algupäraseid ID-sid (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Mõned ID-d sisaldavad punktidega versioone, sest ülesvoolu API eeldab neid sellisel kujul. Kui mudelit pole ülal loetletud, käivita saadavuse kontrollimiseks `omniroute models --search <term>` või kutsu välja `GET /api/models/catalog`.
 
 </details>
 

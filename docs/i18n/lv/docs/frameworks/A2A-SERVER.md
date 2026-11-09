@@ -156,7 +156,7 @@ OmniRoute atklāj 6 A2A prasmes, kas pievienotas `src/lib/a2a/taskExecution.ts::
 | Pārskats par veselību           | `health-report`      | Agregāti ķēdes pārtraucējs, dzesēšana, bloķēšanas stāvoklis katram pakalpojumu sniedzējam                                                                               | veselība, izturība                  | "Rādīt visu pakalpojumu sniedzēju veselības stāvokli" |
 | Saraksta iespējas               | `list-capabilities`  | Atgriež pilnu 45 ierakstu aģentu prasmju katalogu (23 API + 21 CLI + 1 konfigurācija) kā cenu samazināšanas tabulu ar neapstrādātu SKILL.md URLs konteksta ievadīšanai. | katalogs, atklājums, prasmes        | "Uzskaitiet visas OmniRoute iespējas"                 |
 
-> Aģenta kartei jābūt saskaņotai ar tiešsaistes 377 pakalpojumu sniedzēju katalogu; nodrošinātāju skaits un free/no-auth metadati tiek iegūti no izpildlaika reģistra.
+> Aģenta kartei jābūt saskaņotai ar tiešsaistes 381 pakalpojumu sniedzēju katalogu; nodrošinātāju skaits un free/no-auth metadati tiek iegūti no izpildlaika reģistra.
 
 ### `list-capabilities` Skill Detail
 
@@ -173,42 +173,50 @@ Katrā rindā ir `rawUrl` kolonna, lai aģenti varētu nekavējoties izgūt piln
 
 ---
 
-## REST API (papildu)
+## REST API (palīgsistēma)
 
-JSON-RPC galapunkts `/a2a` ir oficiālais A2A ieejas punkts. Tālāk minētie REST galapunkti nodrošina papildu piekļuvi informācijas paneļiem un ārējiem rīkiem:
+JSON-RPC galapunkts `/a2a` ir kanoniskais A2A ieejas punkts. Tālāk norādītie REST galapunkti nodrošina papildu piekļuvi informācijas paneļiem un ārējiem rīkiem.
 
-| Endpoint                     | Method | Description                                                       | Auth                                           |
-| :--------------------------- | :----- | :---------------------------------------------------------------- | :--------------------------------------------- |
-| `/api/a2a/status`            | GET    | Servera stāvoklis, reģistrētās prasmes                            | (publiski)                                     |
-| `/api/a2a/tasks`             | GET    | Uzdevumu saraksts ar filtriem                                     | administrācijas                                |
-| `/api/a2a/tasks/[id]`        | GET    | Uzdevuma iegūšana pēc ID                                          | administrācijas                                |
-| `/api/a2a/tasks/[id]/cancel` | POST   | Pašreizējā uzdevuma atcelšana                                     | administrācijas                                |
-| `/.well-known/agent.json`    | GET    | Aģenta karte (A2A atklāšana)                                      | (publiski, kešots 3600s)                       |
-| `/api/a2a/tasks`             | POST   | Ienākošā deleģēšana uz OmniConductor klasteri (Conductor PRD RF5) | Bearer pret `OMNIROUTE_API_KEY` + `a2aEnabled` |
+| Galapunkts                   | Metode | Apraksts                                                     | Auth                                                                                                          |
+| :--------------------------- | :----- | :----------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------ |
+| `/api/a2a/status`            | GET    | Servera statuss, reģistrētas prasmes                         | (publisks)                                                                                                    |
+| `/api/a2a/tasks`             | GET    | Uzskaitiet uzdevumus ar filtriem                             | vadība vai API taustiņš (skatīt zemāk)                                                                        |
+| `/api/a2a/tasks/[id]`        | GET    | Saņemt uzdevumu, izmantojot ID                               | vadība vai API taustiņš (skatīt zemāk)                                                                        |
+| `/api/a2a/tasks/[id]/cancel` | POST   | Atcelt izpildes uzdevumu                                     | vadība vai API taustiņš (skatīt zemāk)                                                                        |
+| `/.well-known/agent.json`    | GET    | Aģenta karte (A2A discovery)                                 | (publisks, kešatmiņā saglabāts 3600s)                                                                         |
+| `/api/a2a/tasks`             | POST   | Ienākošā delegācija OmniConductor flotei (diriģents PRD RF5) | tas pats, kas `GET`, plus `OMNIROUTE_API_KEY` ja iestatīts, kamēr `REQUIRE_API_KEY` ir izslēgts; `a2aEnabled` |
 
-**Ienākošā Conductor deleģēšana (`POST /api/a2a/tasks`):** ārējie A2A aģenti deleģē kodēšanas darbus OmniConductor klasterim, izmantojot OmniRoute. Pieprasījuma ķermenis: `{ skill: "conductor" | "conductor-cli-<profile>", messages: [{role, content}], metadata: { conductor: { repo: { url, base_ref? }, mode?, cli?, model? } } }` — deleģējamas ir tikai Conductor klastera prasmes (tās, kas norādītas Aģenta kartē); lauka `metadata.conductor.repo.url` vērtība ir obligāta (klasteris strādā ar Git repozitorijiem). Maršruts tiek pārveidots uz centra `POST /v1/tasks`, izmantojot servera puses `CONDUCTOR_ORCHESTRATOR_TOKEN` (rezerves variantā `CONDUCTOR_HUB_TOKEN`), un atgriež `201 { conductor_task_id, state: "submitted" }`; uzdevumu stāvokļi tiek nodoti atpakaļ caur SSE→A2A spoguļojumu (RF1) un ir pieejami, izmantojot `GET /api/a2a/tasks?skill=conductor`.
+Tas, kurš nokļūst `/api/a2a/tasks*` maršrutos, ir atkarīgs no pieteikšanās un API atslēgas iestatījumiem:
+
+- `requireLogin=true` (noklusējums): starpprogrammatūra pieļauj tikai pārvaldības akreditācijas datus (informācijas paneļa sesija, `manage` -scope API atslēga, `oma_` piekļuves pilnvara) un `OMNIROUTE_API_KEY`. Vienkārša secinājuma atslēga iegūst `403`. `Authorization` galvenē starpprogrammatūra izmanto tikai `OMNIROUTE_API_KEY` kā `Bearer <key>`; tukša atslēga vai cilne pēc `Bearer` iegūst `401`.
+- `requireLogin=false` vai cilpas logs pirms ieslēgšanas: ar `REQUIRE_API_KEY=true` tiek pieņemta jebkura derīga OmniRoute API atslēga vai pārvaldības akreditācijas dati, un anonīmie zvanītāji saņem `401`; ar `REQUIRE_API_KEY` off maršruti ir atvērti.
+- `POST /api/a2a/tasks` papildus pieprasa `OMNIROUTE_API_KEY` `Authorization` galvenē, ja šis mainīgais ir iestatīts un `REQUIRE_API_KEY` ir izslēgts. Citas galvenes, piemēram, `x-api-key`, tur netiek ņemtas vērā. Izslēdzot pieteikšanos vai pirms ieslēgšanas, atslēga tiek nodota ar `Bearer` prefiksu vai bez tā; ar pieteikšanos tikai `Bearer <key>` tiek pāri starpprogrammatūrai.
+
+Ja ir nepieciešami akreditācijas dati, `read` -scope `oma_` pilnvara darbojas tikai `GET`.
+
+**Ienākošo vadītāju delegācija (`POST /api/a2a/tasks`):** ārējie A2A aģenti deleģē kodēšanas darbu OmniConductor flotei, izmantojot OmniRoute. Korpuss: tikai `{ skill: "conductor" | "conductor-cli-<profile>", messages: [{role, content}], metadata: { conductor: { repo: { url, base_ref? }, mode?, cli?, model? } } }` — Diriģentu flotes prasmes (tās, kas norādītas aģenta kartē) ir deleģējamas; Nepieciešams `metadata.conductor.repo.url` (flote darbojas ar git repo). Maršruts pārvēršas par centrmezgla `POST /v1/tasks`, izmantojot servera puses `CONDUCTOR_ORCHESTRATOR_TOKEN` (atkāpšanās `CONDUCTOR_HUB_TOKEN`), un atgriež `201 { conductor_task_id, state: "submitted" }`; uzdevuma stāvokļi plūst atpakaļ caur SSE→A2A spoguli (RF1) un ir redzami caur `GET /api/a2a/tasks?skill=conductor`.
 
 ---
 
 ## Jaunas prasmes pievienošana
 
-1. **Izveidojiet prasmes failu:** `src/lib/a2a/skills/<your-skill>.ts`
+1. **Izveidojiet prasmju failu:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   Eksportējiet asinhronu funkciju `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Ievērojiet esošo prasmju, piemēram, `smartRouting.ts`, struktūru.
+   Eksportējiet asinhrono funkciju `(task: A2ATask, caller?: A2ACallerContext) => Promise<{ artifacts, metadata }>`. Sekojiet esošo prasmju formai, piemēram, `smartRouting.ts`. Ja prasme atgriežas OmniRoute izmantojot HTTP, izveidojiet galvenes ar `buildSelfLoopHeaders(caller)` no `src/lib/a2a/selfLoopAuth.ts`, lai izsaukums tiktu izpildīts ar A2A zvanītāja atslēgu, nevis `OMNIROUTE_API_KEY`, un nododiet `redirect: "error"` uz `fetch`, lai novirzīšana nekad nesaņemtu atslēgu. Palīgs veido tikai galvenes; katra prasme nosaka pašu novirzīšanas politiku. Tas izmet `UnsafeSelfLoopTargetError` nevis pievieno atslēgu, ja atrisinātais bāzes URL ir vienkāršs http ārpus privātā tīkla (atgriezeniskā cilpa, konteinera vai pakalpojuma nosaukums un privātās adreses ir labi) vai tajā ir akreditācijas dati, tāpēc prasmēm, kas norīt noraidītos zvanus, šī kļūda ir jāatmet.
 
-2. **Reģistrējiet apstrādātāju:** failā `src/lib/a2a/taskExecution.ts` pievienojiet ierakstu objektam `A2A_SKILL_HANDLERS`:
+2. **Reģistra apstrādātājs:** `src/lib/a2a/taskExecution.ts`, pievienojiet ierakstu `A2A_SKILL_HANDLERS`:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...esošās prasmes
-     "your-skill": async (task) => {
+     // ...existing skills
+     "your-skill": async (task, caller) => {
        const skillModule = await import("./skills/yourSkill");
-       return skillModule.executeYourSkill(task);
+       return skillModule.executeYourSkill(task, caller);
      },
    };
    ```
 
-3. **Publicējiet aģenta kartē:** failā `src/lib/a2a/agentCardMetadata.ts` (ko kopīgi izmanto `/.well-known/agent.json` un `/.well-known/agent-card.json`) papildiniet masīvu `skills`:
+3. **Atklāt aģenta kartē:** `src/lib/a2a/agentCardMetadata.ts` (kopīgos ar `/.well-known/agent.json` un `/.well-known/agent-card.json`), pievienojiet `skills` masīvam:
 
    ```json
    {
@@ -220,9 +228,9 @@ JSON-RPC galapunkts `/a2a` ir oficiālais A2A ieejas punkts. Tālāk minētie RE
    }
    ```
 
-4. **Uzrakstiet testus:** `tests/unit/a2a-<your-skill>.test.ts`. Aptveriet veiksmīgo scenāriju un kļūdas scenāriju.
+4. **Rakstiet testus:** `tests/unit/a2a-<your-skill>.test.ts`. Cover happy path + error path.
 
-5. **Dokumentējiet** jauno prasmi šī faila tabulā `Available Skills`.
+5. **Dokuments** jaunā prasme šī faila `Available Skills` tabulā.
 
 ---
 

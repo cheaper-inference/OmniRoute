@@ -200,7 +200,7 @@ Le haghaidh cumraíocht mhionsonraithe de réir uirlise (Claude Code, Codex CLI,
 
 ## Socrú Prótacail (MCP + A2A)
 
-### Socrú MCP (Prótacal Comhthéacs Samhla)
+### MCP Socrú (Prótacal Comhthéacs Samhail)
 
 Tosaigh iompar MCP i mód stdio:
 
@@ -211,28 +211,28 @@ omniroute --mcp
 Sreabhadh bailíochtaithe molta:
 
 ```bash
-# 1. Tosaigh an freastalaí MCP
+# 1. Start MCP server
 omniroute --mcp
 
-# 2. Ó do chliant MCP, glaoigh ar:
-omniroute_get_health        # Ba cheart dó sláinte an chórais a thabhairt ar ais
-omniroute_list_combos       # Ba cheart dó teaglamaí gníomhacha a thabhairt ar ais
+# 2. From your MCP client, call:
+omniroute_get_health        # Should return system health
+omniroute_list_combos       # Should return active combos
 
-# 3. Nó rith an tsraith iomlán E2E:
+# 3. Or run the full E2E suite:
 npm run test:protocols:e2e
 ```
 
-#### Cumraíocht Chliaint MCP
+#### MCP Cumraíocht Cliant
 
-**Claude Code:**
+**Cód Claude :**
 
 ```bash
-claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
 ```
 
 **Cursor / Cline:**
 
-Cuir le do shocruithe MCP é:
+Cuir le do shocruithe MCP (stdio, leis an eochair ionas go mbeidh príomhoide ag an nglaoiteoir):
 
 ```json
 {
@@ -240,17 +240,24 @@ Cuir le do shocruithe MCP é:
     "omniroute": {
       "command": "omniroute",
       "args": ["--mcp"],
-      "env": {}
+      "env": {
+        "OMNIROUTE_API_KEY": "your-key",
+        "OMNIROUTE_BASE_URL": "http://localhost:20128"
+      }
     }
   }
 }
 ```
 
-**Doiciméadacht iomlán MCP:** [README Fhreastalaí MCP](../../open-sse/mcp-server/README.md) — 110 uirlis, cumraíochtaí IDE, cliaint Python/TS/Go.
+Nó, nuair a bhíonn `mcpTransport` `streamable-http` (socraigh ar `/dashboard/mcp` nó le `omniroute mcp enable --transport streamable-http`) é, cuir in iúl d'iontráil iargúlta freastalaí MCP an chliaint ag `http://localhost:20128/api/mcp/stream`.
 
-### Socrú A2A (Prótacal Gníomhaire-go-Gníomhaire)
+Taistealaíonn an eochair mar `Authorization: Bearer <api-key>` (féach [MCP Server → Cianrochtain](../frameworks/MCP-SERVER.md#remote-access-manage-scope-bypass) d’óstach iargúlta; tá gá le `mcp:connect` agus a scóip read/write ar eochair iargúlta).
 
-Fíoraigh Cárta an Ghníomhaire:
+**Doiciméadúchán iomlán MCP :** [Freastalaí MCP README](../../open-sse/mcp-server/README.md) — 110 uirlisí, IDE configs, cliaint Python/TS/Go. Tagairt oibreora do na huirlisí comhbhrú CCR/dedup (marcóirí, réamhriachtanais, scopes in aghaidh an uirlis, uimhriú aisghabhála, diagnóisic): [Innill Chomhbhrú → Réamhriachtanais / treoir oibreoir](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+
+### Socrú A2A (Prótacal Gníomhaire go Gníomhaire)
+
+Fíoraigh an Cárta Gníomhaire:
 
 ```bash
 curl http://localhost:20128/.well-known/agent.json
@@ -264,7 +271,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"Give me a short quota summary."}]}}'
 ```
 
-**Doiciméadacht iomlán A2A:** [README Fhreastalaí A2A](../../src/lib/a2a/README.md) — JSON-RPC 2.0, scileanna, sruthú, saolré tascanna.
+**Doiciméadúchán iomlán A2A :** [Freastalaí A2A README](../../src/lib/a2a/README.md) — JSON-RPC 2.0, scileanna, sruthú, saolré tasc.
 
 ---
 
@@ -323,23 +330,23 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ---
 
-## Teimpléad Void Linux (xbps-src)
+## Teimpléad ar neamhní Linux (xbps-src).
 
-D’úsáideoirí Void Linux, is féidir leat pacáiste dúchasach a thógáil le `xbps-src`. Sábháil an bloc seo mar `srcpkgs/omniroute/template`:
+I gcás úsáideoirí Void Linux, is féidir leat pacáiste dúchais a thógáil ag baint úsáide as `xbps-src`. Sábháil an bloc seo mar `srcpkgs/omniroute/template`:
 
 ```bash
-# Comhad teimpléid le haghaidh 'omniroute'
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
 hostmakedepends="nodejs python3 make"
 depends="openssl"
-short_desc="Geata uilíoch IS le ródú cliste do sholáthraithe iomadúla LLM"
+short_desc="Universal AI gateway with smart routing for multiple LLM providers"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# Athghin an tsuim sheiceála do gach eisiúint le:
+# Regenerate the checksum for each release with:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

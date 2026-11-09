@@ -58,6 +58,8 @@ function isNonTerminalProviderError(providerErrorType: string | null): boolean {
     // Anthropic OAuth 403 "Request not allowed" refuses ONE request; the token
     // keeps serving the next one — never a terminal account state.
     providerErrorType === PROVIDER_ERROR_TYPES.REQUEST_REJECTED ||
+    // A provider safety stop refuses one request's content; the account is healthy.
+    providerErrorType === PROVIDER_ERROR_TYPES.PROVIDER_SAFETY_REFUSAL ||
     // A model the account is not entitled to is a MODEL fact, never a credential
     // fact. Aggregator gateways answer 401 (not 404) for it — classifyProviderError
     // already detects that phrasing and yields MODEL_NOT_FOUND (#7268) — but the

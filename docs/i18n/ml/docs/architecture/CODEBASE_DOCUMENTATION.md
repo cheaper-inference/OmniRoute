@@ -443,7 +443,7 @@ server/
 
 ---
 
-## 4. `open-sse/` - സ്ട്രീമിംഗ് എഞ്ചിൻ വർക്ക്സ്പേസ്
+## 4. `open-sse/` — സ്ട്രീമിംഗ് എഞ്ചിൻ വർക്ക്സ്പേസ്
 
 പ്രത്യേക npm വർക്ക്സ്പെയ്സ് `@omniroute/open-sse` ആയി പ്രസിദ്ധീകരിച്ചു. അഭ്യർത്ഥന പ്രോസസ്സിംഗ്, എക്സിക്യൂട്ടർമാർ, വിവർത്തകർ, സേവനങ്ങൾ, ട്രാൻസ്ഫോർമർ, MCP സെർവർ എന്നിവ സ്വന്തമാക്കി.
 
@@ -455,7 +455,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Provider registries, header profiles, identity, …
 ├── handlers/               Request handlers (chat, embeddings, audio, image, …)
-├── executors/              156 provider executor modules (executor classes + per-provider helpers)
+├── executors/              159 provider executor modules (executor classes + per-provider helpers)
 ├── translator/             Format conversion (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions stream transformer
 ├── services/               80+ service modules (combos, fallback, quotas, identity, …)
@@ -485,11 +485,11 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 ടോപ്പ്-ലെവൽ എക്സിക്യൂട്ടർ മൊഡ്യൂളുകൾ (`*.ts` മൈനസ് `base.ts`, `index.ts`, ടെസ്റ്റുകൾ - കൗണ്ട് `npm run check:docs-counts` അളവുകൾ). എല്ലാ എക്സിക്യൂട്ടർ ക്ലാസും `BaseExecutor` (`base.ts`), നേരിട്ടോ അല്ലെങ്കിൽ `DefaultExecutor` വഴിയോ മറ്റൊരു എക്സിക്യൂട്ടർ വഴിയോ നീട്ടുന്നു; ശേഷിക്കുന്ന മൊഡ്യൂളുകൾ ഓരോ പ്രൊവൈഡർ സഹായികളാണ് (ടൂൾ സ്കീമുകൾ, fetch/TTS അഡാപ്റ്ററുകൾ, ക്വിർക്ക് ഹാൻഡ്ലറുകൾ). എക്സിക്യൂട്ടീവുകളിൽ ഉൾപ്പെടുന്നു:
+159 ടോപ്പ്-ലെവൽ എക്സിക്യൂട്ടർ മൊഡ്യൂളുകൾ (`*.ts` മൈനസ് `base.ts`, `index.ts`, ടെസ്റ്റുകൾ — കൗണ്ട് `npm run check:docs-counts` അളവുകൾ). എല്ലാ എക്സിക്യൂട്ടർ ക്ലാസ്സും `BaseExecutor` (`base.ts`), നേരിട്ടോ അല്ലെങ്കിൽ `DefaultExecutor` വഴിയോ മറ്റൊരു എക്സിക്യൂട്ടർ വഴിയോ നീട്ടുന്നു; ശേഷിക്കുന്ന മൊഡ്യൂളുകൾ ഓരോ പ്രൊവൈഡർ സഹായികളാണ് (ടൂൾ സ്കീമുകൾ, fetch/TTS അഡാപ്റ്ററുകൾ, ക്വിർക്ക് ഹാൻഡ്ലറുകൾ). എക്സിക്യൂട്ടീവുകളിൽ ഉൾപ്പെടുന്നു:
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex` `vertex` `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `qoder`, പ്ലസ് `devin-desktop`(പങ്കിട്ട ഐഡൻ്റിറ്റി സഹായി) `pollinations` `claudeIdentity.ts` (രജിസ്ട്രി) `index.ts`
 
-> ശ്രദ്ധിക്കുക: ഇവിടെ ലിസ്റ്റുചെയ്തിട്ടില്ലാത്ത ദാതാക്കൾക്ക് പൊതുവായ OpenAI-അനുയോജ്യമായ എക്സിക്യൂട്ടർ ഉപയോഗിച്ച് `default.ts` സേവനം നൽകുന്നു. പൂർണ്ണ ദാതാവിൻ്റെ കാറ്റലോഗ് (377 ദാതാക്കൾ) `src/shared/constants/providers.ts` ൽ താമസിക്കുന്നു.
+> ശ്രദ്ധിക്കുക: ഇവിടെ ലിസ്റ്റുചെയ്തിട്ടില്ലാത്ത ദാതാക്കൾക്ക് പൊതുവായ OpenAI-അനുയോജ്യമായ എക്സിക്യൂട്ടർ ഉപയോഗിച്ച് `default.ts` സേവനം നൽകുന്നു. പൂർണ്ണ ദാതാവിൻ്റെ കാറ്റലോഗ് (381 ദാതാക്കൾ) `src/shared/constants/providers.ts` ൽ താമസിക്കുന്നു.
 
 ### 4.3 `open-sse/translator/`
 
@@ -498,16 +498,16 @@ open-sse/
 - **9 അഭ്യർത്ഥന വിവർത്തകർ** (`translator/request/`): `antigravity-to-openai`, `claude-to-gemini`, `claude-to-openai`, `gemini-to-openai`, `openai-responses`, `openai-to-claude`, `openai-to-cursor`, `openai-to-gemini`, `openai-to-kiro`.
 - **9 പ്രതികരണ വിവർത്തകർ** (`translator/response/`): `claude-to-openai`, `cursor-to-openai`, `gemini-to-claude`, `gemini-to-openai`, `kiro-to-openai`, `openai-responses`, `openai-to-antigravity`, `openai-to-claude`.
 - **9 സഹായികൾ** (`translator/helpers/`): `claudeHelper`, `geminiHelper`, `geminiToolsSanitizer`, `maxTokensHelper`, `openaiHelper`, `responsesApiHelper`, `schemaCoercion`, `toolCallHelper`, കൂടാതെ സഹായ പരിശോധനകൾ.
-- **ചിത്ര സഹായികൾ** (`translator/image/sizeMapper.ts`).
+- **ഇമേജ് സഹായികൾ** (`translator/image/sizeMapper.ts`).
 - ഉയർന്ന തലം: `bootstrap.ts`, `formats.ts`, `registry.ts`, `index.ts`.
 
 ### 4.4 `open-sse/transformer/`
 
-- `responsesTransformer.ts` — `TransformStream` -based പ്രതികരണങ്ങൾ API ↔ ചാറ്റ് പൂർത്തീകരണ കൺവെർട്ടർ ( `responses/` റൂട്ട് ക്യാച്ച്-ഓൾ ഉപയോഗിക്കുന്നു).
+- `responsesTransformer.ts` — `TransformStream` -based പ്രതികരണങ്ങൾ API ↔ ചാറ്റ് പൂർത്തിയാക്കൽ കൺവെർട്ടർ ( `responses/` റൂട്ട് ക്യാച്ച്-ഓൾ ഉപയോഗിക്കുന്നു).
 
 ### 4.5 `open-sse/services/`
 
-ഹൈലൈറ്റുകൾ ( `open-sse/services/` കീഴിലുള്ള മുഴുവൻ ലിസ്റ്റ്):
+ഹൈലൈറ്റുകൾ ( `open-sse/services/` യുടെ പൂർണ്ണമായ ലിസ്റ്റ്):
 
 | ആശങ്ക                | ഫയലുകൾ                                                                                                                                                                                                                                                   |
 | -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -518,7 +518,7 @@ open-sse/
 | കാഷിംഗ്              | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                            |
 | റൂട്ടിംഗ് ഇൻ്റലിജൻസ് | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                             |
 | മോഡൽ കൈകാര്യം ചെയ്യൽ | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                              |
-| കംപ്രഷൻ              | `compression/` - പൂർണ്ണ കംപ്രഷൻ എഞ്ചിൻ വയറിംഗ്                                                                                                                                                                                                           |
+| കംപ്രഷൻ              | `compression/` — പൂർണ്ണ കംപ്രഷൻ എഞ്ചിൻ വയറിംഗ്                                                                                                                                                                                                           |
 | ടോക്കൺ + സെഷൻ        | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts`        |
 | ടയർ / മാനിഫെസ്റ്റ്   | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                            |
 | IP / നെറ്റ്വർക്ക്    | `ipFilter.ts`, `webSearchFallback.ts`                                                                                                                                                                                                                    |
@@ -527,16 +527,16 @@ open-sse/
 
 ### 4.6 `open-sse/mcp-server/`
 
-- **110 അദ്വിതീയ ഉപകരണങ്ങൾ** `server.ts` ൽ വയർ ചെയ്തു ( `schemas/tools.ts` + മെമ്മറിയിൽ 45 കാനോനിക്കൽ, കഴിവുകൾ, GitHub-നൈപുണ്യങ്ങൾ, പൂൾ, gamification, പ്ലഗിൻ, Notion, Obsidian, ലോക്കൽ-കോർപ്പസ്, കംപ്രഷൻ മൊഡ്യൂളുകൾ - യൂണിയൻ കണക്കാക്കുന്നത് `countUniqueMcpTools`).
+- **110 അദ്വിതീയ ഉപകരണങ്ങൾ** `server.ts` യിൽ വയർ ചെയ്തത് ( `schemas/tools.ts` + മെമ്മറിയിൽ 45 കാനോനിക്കൽ, കഴിവുകൾ, GitHub-നൈപുണ്യങ്ങൾ, പൂൾ, gamification, പ്ലഗിൻ, Notion, Obsidian, ലോക്കൽ-കോർപ്പസ്, കംപ്രഷൻ മൊഡ്യൂളുകൾ — യൂണിയൻ കണക്കാക്കുന്നത് `countUniqueMcpTools`).
 - **3 ഗതാഗതം** : stdio, HTTP സ്ട്രീം ചെയ്യാവുന്ന, SSE.
-- **33 സ്കോപ്പുകൾ** റൺടൈമിൽ നടപ്പിലാക്കുന്നു - `src/shared/constants/mcpScopes.ts` യിലെ അടിസ്ഥാന ലിസ്റ്റ്, ഓരോ ടൂൾ മൊഡ്യൂളും പ്രഖ്യാപിച്ച സ്കോപ്പുകളുടെ യൂണിയൻ ആണ് പൂർണ്ണ സെറ്റ്.
+- **33 സ്കോപ്പുകൾ** `src/shared/constants/mcpScopes.ts` ലെ റൺടൈം — ബേസ് ലിസ്റ്റിൽ നടപ്പിലാക്കുന്നു, ഓരോ ടൂൾ മൊഡ്യൂളും പ്രഖ്യാപിച്ച സ്കോപ്പുകളുടെ യൂണിയൻ ആണ് പൂർണ്ണ സെറ്റ്.
 - ഓഡിറ്റ് പട്ടിക: `mcp_tool_audit` ( `audit.ts` ജനസംഖ്യയുള്ളത്).
 - ഫയലുകൾ: `server.ts`, `index.ts`, `httpTransport.ts`, `audit.ts`, `scopeEnforcement.ts`, `runtimeHeartbeat.ts`, `descriptionCompressor.ts`, `schemas/{tools, a2a, audit, index}.ts`, `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts`, കൂടാതെ `__tests__/` ന് കീഴിലുള്ള ടെസ്റ്റുകൾ.
 - മുഴുവൻ ടൂൾ കാറ്റലോഗിനും [MCP-SERVER.md](../frameworks/MCP-SERVER.md) കാണുക.
 
 ### 4.7 `open-sse/config/`
 
-ദാതാവിൻ്റെ രജിസ്ട്രികൾ (`providerRegistry.ts`, `providerModels.ts`, `providerHeaderProfiles.ts`), ഓരോ ഫോർമാറ്റ് മോഡൽ രജിസ്ട്രികൾ (`audioRegistry.ts`, `embeddingRegistry.ts`, `imageRegistry.ts`, `moderationRegistry.ts`, `musicRegistry.ts`, `rerankRegistry.ts`, `searchRegistry.ts`, `videoRegistry.ts`), ഐഡൻ്റിറ്റി സഹായികൾ (`codexIdentity.ts`, `codexInstructions.ts`, `anthropicHeaders.ts`, `antigravityUpstream.ts`, `antigravityModelAliases.ts` `defaultThinkingSignature.ts` `cliFingerprints.ts` `toolCloaking.ts` ക്രെഡൻഷ്യൽ സഹായികൾ (`credentialLoader.ts`, `codexClient.ts`), ക്ലൗഡ് അഡാപ്റ്ററുകൾ (`azureAi.ts`, `bedrock.ts`, `datarobot.ts`, zqy, `oci.ts` `petals.ts` `glmProvider.ts`, `maritalk.ts`, `runway.ts`, `sap.ts`, `watsonx.ts` `errorConfig.ts` `ollamaModels.ts`, `constants.ts` `registryUtils.ts`.
+Provider registries (`providerRegistry.ts`, `providerModels.ts`, `providerHeaderProfiles.ts`), per-format model registries (`audioRegistry.ts`, `embeddingRegistry.ts`, `imageRegistry.ts`, `moderationRegistry.ts`, `musicRegistry.ts`, `rerankRegistry.ts`, `searchRegistry.ts`, `videoRegistry.ts`), identity helpers (`codexIdentity.ts`, `codexInstructions.ts`, `anthropicHeaders.ts`, `antigravityUpstream.ts`, `antigravityModelAliases.ts`, `cliFingerprints.ts`, `toolCloaking.ts`, `defaultThinkingSignature.ts`), credential helpers (`credentialLoader.ts`, `codexClient.ts`), and cloud adapters (`azureAi.ts`, `bedrock.ts`, `datarobot.ts`, `glmProvider.ts`, `maritalk.ts`, `oci.ts`, `petals.ts`, `runway.ts`, `sap.ts`, `watsonx.ts`, `ollamaModels.ts`, `errorConfig.ts`, `constants.ts`, `registryUtils.ts`).
 
 ### 4.8 `open-sse/utils/`
 

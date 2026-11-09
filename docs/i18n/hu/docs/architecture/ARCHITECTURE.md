@@ -14,14 +14,14 @@ OmniRoute egy helyi AI útválasztási átjáró és műszerfal, amely Next.js r
 
 Alapvető képességek:
 
-- OpenAI-kompatibilis API felület CLI/tools (377 szolgáltató, 156 végrehajtó modul)
+- OpenAI-kompatibilis API felület CLI/tools (381 szolgáltató, 159 végrehajtó modul)
 - Request/response fordítás a szolgáltatói formátumok között
 - Modell kombinált tartalék (több modell sorozat)
 - Strukturált kombinált lépések (`provider + model + connection`) `compositeTiers` futásidejű sorrendjével
 - Fiókszintű tartalék (szolgáltatónként több fiók)
 - Kvóta előzetes ellenőrzése és kvóta-tudatos P2C -fiók kiválasztása a fő csevegési útvonalon
 - OAuth + API-kulcs szolgáltató kapcsolatkezelés (27 OAuth szolgáltató modul)
-- Generálás beágyazása `/v1/embeddings` keresztül (18 szolgáltató)
+- Generáció beágyazása `/v1/embeddings` keresztül (18 szolgáltató)
 - Képgenerálás `/v1/images/generations` keresztül (10 + szolgáltató, 20 + modell)
 - Hang átírása `/v1/audio/transcriptions` keresztül (18 szolgáltató)
 - Szövegfelolvasó `/v1/audio/speech` keresztül (24 beépített szolgáltató)
@@ -70,7 +70,7 @@ Alapvető képességek:
 - Szinkron tokenkezelés (issue/revoke, ETag-verziójú konfigurációs csomag letöltése)
 - GLM Thinking (`glmt`) első osztályú szolgáltató előre beállított
 - Hibrid token számlálás (szolgáltató oldali `/messages/count_tokens` becslési tartalékkal)
-- Modell alias automatikus vetés (30 + proxy dialektusok közötti normalizálás indításkor)
+- Modellalias automatikus vetés (30 + proxy dialektusok közötti normalizálás indításkor)
 - Biztonságos kimenő letöltés SSRF védelemmel, privát URL blokkolással és konfigurálható újrapróbálkozással
 - Lehűlés-tudatos csevegési próbálkozások konfigurálható `requestRetry` és `maxRetryIntervalSec` segítségével
 - Futási környezet ellenőrzése Zod val indításkor
@@ -413,7 +413,7 @@ A `src/domain/` névtér központosítja a politikai döntéseket, így az útvo
 - Connection/model szabálycsatlakozó: `src/domain/connectionModelRules.ts`
 - Modell elérhetőségi pillanatképek: `src/domain/modelAvailability.ts`
 - Szolgáltató lejáratának követése: `src/domain/providerExpiration.ts`
-- Kvóta gyorsítótár: `src/domain/quotaCache.ts`
+- Kvóta gyorsítótár: `src/domain/quotaCache.ts`. A szolgáltatók kvótaablakokat adnak hozzá és távolítanak el (OpenAI elvetette az 5 órás Codex ablakot egyes terveknél), így a szolgáltató adapterét leolvasó használat teljesnek igazolja (`quotasComplete`, lásd `src/lib/usage/usageReading.ts`) a fiók teljes ablakkészlete: a korábban ismert, de abból hiányzó ablak megszűnik, a gyorsítótárban, a rependedqrekordban, a restartqreffates. megmaradt a Codex kvóta állapota és Claude `quota_snapshots` sávjaiban. A részleges bizonyítékok (válaszfejlécek, elavult másolatok) csak az általuk hordozott ablakokat frissítik.
 - Lebomlási állapot: `src/domain/degradation.ts`
 - Konfiguráció audit: `src/domain/configAudit.ts`
 - OmniRoute válasz metaadat-készítő: `src/domain/omnirouteResponseMeta.ts`

@@ -1,0 +1,1 @@
+- **fix(compression):** Preserve OpenCode's automatically cached prompt prefix across tool turns while allowing compression of newly appended outputs ([#18902](https://github.com/cheaper-inference/OmniRoute/pull/18902)) — thanks @fabioKoruja00

@@ -14,7 +14,7 @@ OmniRoute jẹ ẹnu-ọna afisona AI agbegbe ati dasibodu ti a ṣe lori Next.j
 
 Awọn agbara koko:
 
-- Ṣii-ibaramu API dada fun CLI/tools (awọn olupese 377, awọn modulu alaṣẹ 156)
+- Ṣii-ibaramu API dada fun CLI/tools (awọn olupese 381, awọn modulu alaṣẹ 159)
 - Request/response itumọ kọja awọn ọna kika olupese
 - Awoṣe konbo fallback (ọkọọkan awoṣe pupọ)
 - Awọn igbesẹ konbo ti a ṣeto (`provider + model + connection`) pẹlu pipaṣẹ akoko ṣiṣe nipasẹ `compositeTiers`
@@ -33,7 +33,7 @@ Awọn agbara koko:
 - Ronu tag parsing (`<think>...</think>`) fun ero awọn awoṣe
 - Idahun imototo fun ibamu OpenAI SDK ti o muna
 - Iṣe deede ipa (eto → olupilẹṣẹ, olumulo → eto) fun ibaramu olupese
-- Iyipada igbejade ti a ṣeto (json_schema → Gemini respondSchema)
+- Iyipada igbejade ti a ṣeto (json_schema → Gemini responseSchema)
 - Iduroṣinṣin agbegbe fun awọn olupese, awọn bọtini, awọn inagijẹ, awọn akojọpọ, awọn eto, idiyele (awọn modulu DB 122)
 - Usage/cost titele ati ìbéèrè gedu
 - Imuṣiṣẹpọ awọsanma iyan fun ìsiṣẹpọ multi-device/state
@@ -46,7 +46,7 @@ Awọn agbara koko:
 - Idaabobo agbo egboogi-ãra pẹlu titiipa mutex
 - Kaṣe yiyọkuro ibeere ti o da lori Ibuwọlu
 - Layer ase: awọn ofin iye owo, eto imupadabọ, eto imulo titiipa
-- Yiyi ọrọ ọrọ: awọn akopọ imudani igba fun lilọsiwaju yiyi akọọlẹ
+- Yiyi ọrọ-ọrọ: awọn akopọ imudani igba fun lilọsiwaju yiyi akọọlẹ
 - Itẹramọṣẹ ipinlẹ agbegbe (SQLite kikọ-nipasẹ kaṣe fun awọn ipadasẹhin, awọn inawo, awọn titiipa, awọn fifọ iyika)
 - Ẹrọ eto imulo fun igbelewọn ibeere aarin (lockout → budget → fallback)
 - Beere telemetry pẹlu akopọ lairi p50/p95/p99
@@ -412,7 +412,7 @@ Aaye orukọ `src/domain/` ṣe agbedemeji awọn ipinnu eto imulo nitorinaa aw�
 - Connection/model ofin joiner: `src/domain/connectionModelRules.ts`
 - Awoṣe wiwa snapshots: `src/domain/modelAvailability.ts`
 - Titele ipari ti olupese: `src/domain/providerExpiration.ts`
-- Kaṣe ipin: `src/domain/quotaCache.ts`
+- Quota cache: `src/domain/quotaCache.ts`. Providers add and remove quota windows (OpenAI dropped the 5-hour Codex window for some plans), so a usage reading the provider's adapter attests as complete (`quotasComplete`, see `src/lib/usage/usageReading.ts`) is the account's full window set: a window known earlier but absent from it is retired, in the cache, in the `quota_snapshots` a restart rehydrates (an appended retirement record), in the persisted Codex quota state and in Claude's saturation buckets. Partial evidence (response headers, stale copies) only updates the windows it carries.
 - Ipinlẹ ibajẹ: `src/domain/degradation.ts`
 - Ayẹwo iṣeto ni: `src/domain/configAudit.ts`
 - OmniRoute idahun metadata Akole: `src/domain/omnirouteResponseMeta.ts`

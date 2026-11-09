@@ -59,8 +59,8 @@ const EXPLICIT_ONLY_PROVIDERS = EXPLICIT_ONLY_WEB_FETCH_PROVIDERS;
 const ANONYMOUS_CAPABLE_PROVIDERS = ANONYMOUS_CAPABLE_WEB_FETCH_PROVIDERS;
 
 // Providers whose free/low tiers surface quota exhaustion as 402/403 instead
-// of (or in addition to) 429. jina-reader has no such quota-status signal —
-// a 402/403 there is a real auth/bad-request failure, not exhaustion.
+// of (or in addition to) 429. Jina uses 402 for insufficient balance, but
+// its 403 remains an authorization failure and must not trigger fallback.
 const QUOTA_STATUS_PROVIDERS = new Set<WebFetchProviderId>([
   "firecrawl",
   "tavily-search",
@@ -96,6 +96,7 @@ async function resolveCredentials(
 /** A request-time upstream status that means "try the next provider" instead of giving up. */
 function isRetryableWebFetchStatus(providerId: WebFetchProviderId, status?: number): boolean {
   if (status === HTTP_STATUS.RATE_LIMITED) return true;
+  if (providerId === "jina-reader" && status === HTTP_STATUS.PAYMENT_REQUIRED) return true;
   if (status === HTTP_STATUS.PAYMENT_REQUIRED || status === HTTP_STATUS.FORBIDDEN) {
     return QUOTA_STATUS_PROVIDERS.has(providerId);
   }

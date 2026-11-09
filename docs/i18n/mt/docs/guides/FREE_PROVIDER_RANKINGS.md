@@ -13,13 +13,13 @@
 
 ## X'inhu
 
-OmniRoute tirreġistra 377 fornitur, inklużi 155 entrati fil-katalgu mmarkati**free/no-auth** (no-auth, free-tier OAuth, jew free-tier API key — ara l- [Gwida tal-Livelli Ħieles](../getting-started/FREE-TIERS-GUIDE.md) u d- [direttorju sħiħ tal-Livelli Ħieles](../reference/FREE_TIERS.md) ). Il-qabda: il-fornituri b'xejn ivarjaw ħafna fil-kwalità tal-mudell. Fornitur mingħajr awtorizzazzjoni li jservi mudell ta' fruntiera huwa ferm aktar utli minn wieħed li jservi mudell żgħir ta' wirt.
+OmniRoute tirreġistra 381 fornitur, inklużi 155 entrati fil-katalgu mmarkati**free/no-auth** (no-auth, free-tier OAuth, jew free-tier API key — ara l- [Gwida tal-Livelli Ħieles](../getting-started/FREE-TIERS-GUIDE.md) u d- [direttorju sħiħ tal-Livelli Ħieles](../reference/FREE_TIERS.md) ). Il-qabda: il-fornituri b'xejn ivarjaw ħafna fil-kwalità tal-mudell. Fornitur mingħajr awtorizzazzjoni li jservi mudell ta' fruntiera huwa ferm aktar utli minn wieħed li jservi mudell żgħir ta' wirt.
 
-**Klassifiki tal-Fornituri Ħieles** tweġibiet "** liema fornitur b'xejn jagħtini l-aħjar mudell?** " billi tingħaqad mal-katalgu ta' kull fornitur b'xejn ma'** punteġġi tal-kwalità li jinxtraw mill-folla** mill-** Arena AI leaderboard** (human-preference ELO, l-istess idea wara l-LMArena chatbot arena). Il-fornituri huma mbagħad ikklassifikati skont is-saħħa tagħhom** l-aħjar mudell b'xejn** .
+**Klassifiki tal-Fornituri Ħieles** tweġibiet "** liema fornitur b'xejn jagħtini l-aħjar mudell?** " billi tingħaqad mal-katalgu ta' kull fornitur b'xejn ma'** punteġġi tal-kwalità li jinxtraw mill-folla** mill-** Arena AI leaderboard** (human-preferenza ELO, l-istess idea wara l-arena LMArena chatbot). Il-fornituri huma mbagħad ikklassifikati skont is-saħħa tagħhom** l-aħjar mudell b'xejn** .
 
 Il-klassifikazzjoni hija kkalkulata minn tliet sorsi reali:
 
-1. Il-listi tal-fornituri b'xejn — `NOAUTH_PROVIDERS`, flimkien ma' entrati `OAUTH_PROVIDERS` / `APIKEY_PROVIDERS` immarkati `hasFree` (`src/shared/constants/providers.ts`).
+1. Il-fornitur b'xejn jelenka — `NOAUTH_PROVIDERS`, flimkien ma' entrati `OAUTH_PROVIDERS` / `APIKEY_PROVIDERS` immarkati `hasFree` (`src/shared/constants/providers.ts`).
 2. Il-katalgu mudell ta' kull fornitur mir-reġistru tal-fornitur (`open-sse/config/providerRegistry.ts`).
 3. Punteġġi ta 'adegwatezza tal-kompiti derivati mill-ELO maħżuna fit-tabella `model_intelligence` DB mill-magna tas-sinkronizzazzjoni Arena ELO (`src/lib/arenaEloSync.ts`).
 

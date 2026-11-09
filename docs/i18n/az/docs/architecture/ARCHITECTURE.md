@@ -14,7 +14,7 @@ OmniRoute Next.js üzərində qurulmuş yerli AI marşrutlaşdırma şlüzü və
 
 Əsas imkanlar:
 
-- CLI/tools üçün OpenAI uyğun API səthi (377 provayder, 156 icraçı modul)
+- CLI/tools üçün OpenAI uyğun API səthi (381 provayder, 159 icraçı modul)
 - provayder formatları arasında Request/response tərcüməsi
 - Model kombinasiyası (çox model ardıcıllığı)
 - Strukturlaşdırılmış kombinasiya addımları (`provider + model + connection`) `compositeTiers` tərəfindən iş vaxtı sifarişi ilə
@@ -33,7 +33,7 @@ OmniRoute Next.js üzərində qurulmuş yerli AI marşrutlaşdırma şlüzü və
 - Düşüncə modelləri üçün etiketin təhlilini (`<think>...</think>`) düşünün
 - Ciddi OpenAI SDK uyğunluğu üçün cavab sanitarizasiyası
 - Provayderlər arası uyğunluq üçün rolun normallaşdırılması (developer → sistemi, sistem → istifadəçisi)
-- Strukturlaşdırılmış çıxış çevrilməsi (json_schema → Gemini respondSchema)
+- Strukturlaşdırılmış çıxış çevrilməsi (json_schema → Gemini responseSchema)
 - Provayderlər, açarlar, ləqəblər, kombinlər, parametrlər, qiymətlər üçün yerli davamlılıq (122 DB modulu)
 - Usage/cost izləmə və sorğu qeydi
 - multi-device/state sinxronizasiyası üçün əlavə bulud sinxronizasiyası
@@ -413,7 +413,7 @@ Qaydalar toplusunun yaradılması və həddi tənzimləmək üçün [`docs/secur
 - Connection/model qayda qovşağı: `src/domain/connectionModelRules.ts`
 - Modelin mövcudluğu anlıq görüntüləri: `src/domain/modelAvailability.ts`
 - Provayderin istifadə müddətinin izlənməsi: `src/domain/providerExpiration.ts`
-- Kvota keşi: `src/domain/quotaCache.ts`
+- Kvota keşi: `src/domain/quotaCache.ts`. Provayderlər kvota pəncərələrini əlavə edir və silir (OpenAI bəzi planlar üçün 5 saatlıq Codex pəncərəsini buraxdı), buna görə də provayderin adapterini oxuyan istifadə tam olduğunu təsdiq edir (`quotasComplete`, bax `src/lib/usage/usageReading.ts`) hesabın tam pəncərə dəstidir: əvvəllər məlum olan, lakin orada olmayan pəncərə işdən çıxarılıb, keşdə, rehidrasyonda (rehidrəndə) davamlı Codex kvota vəziyyəti və `quota_snapshots` Claude s doyma vedrələrində. Qismən sübut (cavab başlıqları, köhnə nüsxələr) yalnız daşıdığı pəncərələri yeniləyir.
 - Deqradasiya vəziyyəti: `src/domain/degradation.ts`
 - Konfiqurasiya auditi: `src/domain/configAudit.ts`
 - OmniRoute cavab metadata qurucusu: `src/domain/omnirouteResponseMeta.ts`

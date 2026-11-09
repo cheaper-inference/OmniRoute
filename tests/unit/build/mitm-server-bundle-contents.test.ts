@@ -3,9 +3,10 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { syncStandaloneExtraModules } from "../../../scripts/build/assembleStandalone.mjs";
 
-const repoRoot = path.resolve(new URL(".", import.meta.url).pathname, "../../..");
+const repoRoot = fileURLToPath(new URL("../../../", import.meta.url));
 
 /**
  * Regression guard for #9451: the MITM `server.cjs` runs as a separate `node`

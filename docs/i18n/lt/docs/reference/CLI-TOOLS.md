@@ -107,7 +107,7 @@ vienos sąsajos, bet nepridėjus prie kitų, testų rinkinys nepavyksta, užuot 
 
 ---
 
-## 1. CLI kodo katalogas (27 įrankiai)
+## 1. CLI kodo katalogas (28 įrankiai)
 
 Visi įrankiai, kurie rodomi `/dashboard/cli-code`. Tie, kurie turi `baseUrlSupport: none` yra prijungti per MITM arba rankinį vadovą, o ne tinkintą bazinį URL:
 
@@ -134,6 +134,7 @@ Visi įrankiai, kurie rodomi `/dashboard/cli-code`. Tie, kurie turi `baseUrlSupp
 | grok-statyti     | Grok Build                  | xAI                         | pilnas         | paprotys                  | klaidinga    |
 | sutraiškyti      | Sutraiškyti                 | OSS (žavesys)               | pilnas         | paprotys                  | klaidinga    |
 | qwen             | Qwen kodas                  | Alibaba                     | pilnas         | vadovas                   | tiesa        |
+| openclaude       | OpenClaude                  | Gitlawb (OSS)               | pilnas         | vadovas                   | klaidinga    |
 | zed              | Zed                         | Zed Industries              | pilnas         | vadovas                   | klaidinga    |
 | žymeklį          | Cursor                      | Bet kuri sfera              | jokios         | vadovas                   | klaidinga    |
 | antigravitacija  | Antigravity                 | Google                      | jokios         | mitm                      | klaidinga    |
@@ -221,20 +222,20 @@ interface ToolBatchStatus {
 
 ## 6. Naujų įrankių nustatymų tvarkyklės
 
-Nauji įrankiai su `configType: "custom"` turi specialius nustatymų API maršrutus:
+Nauji įrankiai su `configType: "custom"` turi specialius API maršrutų nustatymus:
 
-| Maršrutas                                   | Įrankis                                                                          |
-| ------------------------------------------- | -------------------------------------------------------------------------------- |
-| `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                                          |
-| `POST /api/cli-tools/jcode-settings`        | jcode (--base-url vėliavėlė)                                                     |
-| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, senasis)                                          |
-| `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, pagrindinis + senojo `~/.deepseek` sinchronizavimas) |
-| `POST /api/cli-tools/smelt-settings`        | Smelt                                                                            |
-| `POST /api/cli-tools/pi-settings`           | Pi programavimo agentas                                                          |
-| `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)                            |
-| `POST /api/cli-tools/qwen-settings`         | Qwen Code (`~/.qwen/settings.json` + specialus `.env` raktas)                    |
+| Maršrutas                                   | Įrankis                                                                        |
+| ------------------------------------------- | ------------------------------------------------------------------------------ |
+| `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                                        |
+| `POST /api/cli-tools/jcode-settings`        | jcode (--base-url vėliava)                                                     |
+| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, palikimas)                                      |
+| `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, pirminis + senasis `~/.deepseek` sinchronizavimas) |
+| `POST /api/cli-tools/smelt-settings`        | Stintos                                                                        |
+| `POST /api/cli-tools/pi-settings`           | Pi kodavimo agentas (`~/.pi/agent/models.json`, `providers.omniroute`)         |
+| `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)                          |
+| `POST /api/cli-tools/qwen-settings`         | Qwen kodas (`~/.qwen/settings.json` + skirtas `.env` raktas)                   |
 
-Visuose maršrutuose klaidų atsakymams naudojama `sanitizeErrorMessage()` (griežta taisyklė Nr. 12).
+Visuose maršrutuose klaidų atsakymui naudojamas `sanitizeErrorMessage()` (12 griežta taisyklė).
 
 ---
 
@@ -291,21 +292,21 @@ Pateikti išsamūs PT-BR ir EN vertimai. Kitoms 39 lokalėms automatiškai naudo
 
 ---
 
-## 9. Greitoji pradžia
+## 9. Greita pradžia
 
-### 1 veiksmas — gaukite OmniRoute API raktą
+### 1 veiksmas — Gaukite OmniRoute API raktą
 
-1. Atidarykite `/dashboard/api-manager` → **Sukurti API raktą**
+1. Atidarykite `/dashboard/api-manager` →** Sukurkite API raktą**
 2. Suteikite jam pavadinimą (pvz., `cli-tools`) ir pasirinkite visus leidimus
-3. Nukopijuokite raktą — jo reikės kiekvienam toliau nurodytam CLI
+3. Nukopijuokite raktą — kurio jums prireiks kiekvienam CLI žemiau
 
 > Jūsų raktas atrodo taip: `sk-xxxxxxxxxxxxxxxx-xxxxxxxxx`
 
 ---
 
-### 2 veiksmas — įdiekite CLI įrankius
+### 2 veiksmas — Įdiekite CLI įrankius
 
-Visiems npm pagrįstiems įrankiams reikalinga Node.js 22.22.2+ arba 24.x:
+Visiems npm pagrįstiems įrankiams reikia Node.js 22.22.2 + arba 24.x:
 
 ```bash
 # Claude Code (Anthropic)
@@ -326,58 +327,57 @@ npm install -g kilocode
 # Qwen Code
 npm install -g @qwen-code/qwen-code
 
-# Google Gemini CLI (paleidžiama naudojant `omniroute run gemini` → /v1beta sąsają)
+# Google Gemini CLI (launchable via `omniroute run gemini` → /v1beta surface)
 npm install -g @google/gemini-cli
 
 # Aider
 pip install aider-chat
 
 # Smelt
-cargo install smelt  # Pagrįsta Rust
+cargo install smelt  # Rust-based
 
-# Pi programavimo agentas
-# diegimo instrukcijas žr. https://github.com/zechnerj/pi-coding-agent
+# Pi coding agent
+npm install -g --ignore-scripts @earendil-works/pi-coding-agent
 
 # jcode
-# diegimo instrukcijas žr. https://github.com/1jehuang/jcode
+# see https://github.com/1jehuang/jcode for install
 ```
 
 ---
 
-### 3 veiksmas — sukonfigūruokite valdymo skydelyje
+### 3 veiksmas — Konfigūruokite per prietaisų skydelį
 
-1. Eikite į `http://localhost:20128/dashboard/cli-code`
-2. Tinklelyje raskite savo įrankį
+1. Eik į `http://localhost:20128/dashboard/cli-code`
+2. Raskite savo įrankį tinklelyje
 3. Spustelėkite kortelę, kad atidarytumėte išsamios įrankio informacijos puslapį
-4. Pasirinkite savo API raktą ir bazinį URL
-5. Spustelėkite **Taikyti konfigūraciją** arba nukopijuokite rankinės konfigūracijos fragmentą
+4. Pasirinkite savo API raktą ir pagrindinį URL
+5. Spustelėkite** Taikyti konfigūraciją** arba nukopijuokite rankinio konfigūracijos fragmentą
 
 ---
 
-### 4 veiksmas — nustatykite visuotinius aplinkos kintamuosius
+### 4 veiksmas — Nustatykite pasaulinius aplinkos kintamuosius
 
 ```bash
-# Universalus OmniRoute galinis taškas
+# OmniRoute Universal Endpoint
 export OPENAI_BASE_URL="http://localhost:20128/v1"
 export OPENAI_API_KEY="sk-your-omniroute-key"
 export ANTHROPIC_BASE_URL="http://localhost:20128"
 export ANTHROPIC_AUTH_TOKEN="sk-your-omniroute-key"
-# Gemini CLI nuskaito GOOGLE_GEMINI_BASE_URL ŠAKNINIU lygmeniu (jo SDK pats prideda /v1beta/...)
+# Gemini CLI reads GOOGLE_GEMINI_BASE_URL at the ROOT (its SDK appends /v1beta/... itself)
 export GOOGLE_GEMINI_BASE_URL="http://localhost:20128"
 export GEMINI_API_KEY="sk-your-omniroute-key"
 ```
 
-> Jei naudojate **nuotolinį serverį**, pakeiskite `localhost:20128` serverio IP adresu arba domenu,
-> pvz., `http://<your-server-ip>:20128`.
+> Dėl a** nuotolinis serveris** pakeiskite `localhost:20128` serveriu IP arba domenu, pvz., `http://<your-server-ip>:20128`.
 
 ---
 
-### 4 veiksmas — sukonfigūruokite kiekvieną įrankį
+### 4 veiksmas — Konfigūruokite kiekvieną įrankį
 
-#### Claude Code
+#### Claude kodas
 
 ```bash
-# Sukurkite ~/.claude/settings.json:
+# Create ~/.claude/settings.json:
 mkdir -p ~/.claude && cat > ~/.claude/settings.json << EOF
 {
   "env": {
@@ -388,18 +388,15 @@ mkdir -p ~/.claude && cat > ~/.claude/settings.json << EOF
 EOF
 ```
 
-Claude Code naudokite suvienodinto Anthropic šliuzo šakninį adresą. Čia nepridėkite `/v1`.
+Claude kodui naudokite vieningą Anthropic šliuzo šaknį. Nepridėkite čia `/v1`.
 
-**Bandymas:** `claude "say hello"`
+**Testas:** `claude "say hello"`
 
 ---
 
 #### OpenAI Codex
 
-Šiuolaikinė Codex versija (v0.137+) nuskaito tik `~/.codex/config.toml` — senasis
-`config.yaml` priklauso ankstesniam npm CLI ir yra nepastebimai ignoruojamas. API
-raktas saugomas aplinkos kintamajame `OMNIROUTE_API_KEY` (`env_key`), o ne
-faile:
+Šiuolaikinis Codex (v0.137 +) skaito tik `~/.codex/config.toml` — senasis `config.yaml` priklauso senajam npm CLI ir tyliai ignoruojamas. Raktas API lieka `OMNIROUTE_API_KEY` aplinkos kintamajame (`env_key`), niekada failo viduje:
 
 ```bash
 mkdir -p ~/.codex && cat > ~/.codex/config.toml << EOF
@@ -414,9 +411,9 @@ EOF
 export OMNIROUTE_API_KEY="sk-your-omniroute-key"
 ```
 
-Išsamus žinynas (profiliai, `wire_api`, konteksto langai): [CODEX-CLI-CONFIGURATION.md](../guides/CODEX-CLI-CONFIGURATION.md).
+Visa nuoroda (profiliai, `wire_api`, kontekstiniai langai): [CODEX-CLI-CONFIGURATION.md](../guides/CODEX-CLI-CONFIGURATION.md).
 
-**Bandymas:** `codex "what is 2+2?"`
+**Testas:** `codex "what is 2+2?"`
 
 ---
 
@@ -445,14 +442,44 @@ mkdir -p ~/.config/opencode && cat > ~/.config/opencode/opencode.json << EOF
 EOF
 ```
 
-**Bandymas:** `opencode`
+**Testas:** `opencode`
 
-> Norėdami siųsti mąstymo variantus, naudokite
-> `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high`.
+> Naudokite `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high` norėdami siųsti mąstymo variantus.
 
 ---
 
-#### Cline (CLI arba VS Code)
+#### Pi kodavimo agentas
+
+Įdiekite oficialų Pi kodavimo agento paketą su `npm install -g --ignore-scripts @earendil-works/pi-coding-agent`. Pi skaito pasirinktinius teikėjus iš `~/.pi/agent/models.json`; nustatykite `PI_CODING_AGENT_DIR`, kad perkeltumėte visą agento katalogą. Prietaisų skydelis seka tą nepaisymą. Pi neatranda modelių iš pasirinktinių galinių taškų, todėl OmniRoute įrašo pasirinktą modelį į `models[]` naudodamas Pi `openai-completions` API ir OmniRoute su OpenAI suderinamą `/v1` galinį tašką.
+
+Į**CLI Tools → Pi** , pasirinkite galinį tašką, API raktą ir modelį, peržiūrėkite teikėjo peržiūrą, tada pritaikykite. Peržiūra yra teikėjo fragmentas: sujunkite `providers.omniroute` su esamu `models.json`, kai konfigūruojate Pi rankiniu būdu, kad kiti teikėjai ir nustatymai liktų nepakitę.
+
+```json
+{
+  "$schema": "https://pi.dev/schemas/models.schema.json",
+  "providers": {
+    "omniroute": {
+      "baseUrl": "http://localhost:20128/v1",
+      "api": "openai-completions",
+      "apiKey": "sk-your-omniroute-key",
+      "omnirouteManaged": true,
+      "models": [{ "id": "auto/best-coding", "name": "auto/best-coding" }]
+    }
+  }
+}
+```
+
+Pi iš naujo įkelia `models.json` kai atidarote `/model`. Išbandykite sukonfigūruotą maršrutą naudodami pasirinktą teikėjo ID ir modelio ID:
+
+```bash
+pi --provider omniroute --model auto/best-coding --print "Reply with a short greeting."
+```
+
+Nuorodos: [Pi modeliai ir pasirinktiniai teikėjai](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/models.md), [Pi aplinkos kintamieji](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/environment-variables.md), [Pi diegimo instrukcijos](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/README.md).
+
+---
+
+#### Cline (CLI arba VS kodas)
 
 **CLI režimas:**
 
@@ -466,14 +493,13 @@ mkdir -p ~/.cline/data && cat > ~/.cline/data/globalState.json << EOF
 EOF
 ```
 
-**VS Code režimas:**
-Cline plėtinio nuostatos → API teikėjas: `OpenAI Compatible` → Bazinis URL: `http://localhost:20128/v1`
+**VS kodo režimas:** Cline plėtinio nustatymai → API Teikėjas: `OpenAI Compatible` → Bazė URL: `http://localhost:20128/v1`
 
-Arba naudokite OmniRoute valdymo skydelį → **CLI įrankiai → Cline → Taikyti konfigūraciją**.
+Arba naudokite OmniRoute prietaisų skydelį →**CLI įrankiai → Cline → Taikyti konfig** .
 
 ---
 
-#### KiloCode (CLI arba VS Code)
+#### KiloCode (CLI arba VS kodas)
 
 **CLI režimas:**
 
@@ -481,7 +507,7 @@ Arba naudokite OmniRoute valdymo skydelį → **CLI įrankiai → Cline → Taik
 kilocode --api-base http://localhost:20128/v1 --api-key sk-your-omniroute-key
 ```
 
-**VS Code nuostatos:**
+**VS kodo nustatymai:**
 
 ```json
 {
@@ -490,13 +516,13 @@ kilocode --api-base http://localhost:20128/v1 --api-key sk-your-omniroute-key
 }
 ```
 
-Arba naudokite OmniRoute valdymo skydelį → **CLI įrankiai → KiloCode → Taikyti konfigūraciją**.
+Arba naudokite OmniRoute prietaisų skydelį →**CLI įrankiai → KiloCode → Taikyti konfig** .
 
 ---
 
-#### Continue (VS Code plėtinys)
+#### Tęsti (VS kodo plėtinys)
 
-Redaguokite `~/.continue/config.yaml`:
+Redaguoti `~/.continue/config.yaml`:
 
 ```yaml
 models:
@@ -508,20 +534,20 @@ models:
     default: true
 ```
 
-Baigę redaguoti, paleiskite VS Code iš naujo.
+Po redagavimo paleiskite VS kodą iš naujo.
 
 ---
 
 #### VS Code Insiders (`chatLanguageModels.json`)
 
-Naudokite tai, kai VS Code Insiders sukonfigūruotas naudoti pasirinktinių galinių taškų modelius ir norite, kad OmniRoute veiktų be pasirinktinio antraštės lauko.
+Naudokite tai, kai VS Code Insiders sukonfigūruotas pasirinktiniams galutinio taško modeliams ir norite, kad OmniRoute veiktų be pasirinktinio antraštės lauko.
 
 **Rekomenduojama vieta:**
 
 - Linux: `~/.config/Code - Insiders/User/chatLanguageModels.json`
 - Windows: `%APPDATA%/Code - Insiders/User/chatLanguageModels.json`
 
-**Pavyzdys, kuriame naudojamas prieigos raktu apsaugotas „OmniRoute“ alternatyvusis pavadinimas:**
+**Tokenizuoto OmniRoute slapyvardžio naudojimo pavyzdys:**
 
 ```json
 [
@@ -545,27 +571,26 @@ Naudokite tai, kai VS Code Insiders sukonfigūruotas naudoti pasirinktinių gali
 
 **Pastabos:**
 
-- Pakeiskite `sk-your-omniroute-key` „OmniRoute“ sukurtu API raktu.
-- Laukas `url` turėtų nurodyti `/api/v1/vscode/{token}/chat/completions`.
-- Laukas `modelsUrl` turėtų nurodyti `/api/v1/vscode/{token}/models`.
-- Kai klientas palaiko pasirinktines antraštes, pirmenybę teikite įprastam `/v1` ir „Bearer“ antraštės naudojimui.
-- URL įterpti prieigos raktai yra suderinamumui skirtas atsarginis sprendimas ir gali būti rodomi redaktoriaus žurnaluose arba tarpinio serverio istorijoje.
+- Pakeiskite `sk-your-omniroute-key` API raktu, sukurtu OmniRoute.
+- `url` laukas turi būti nukreiptas į `/api/v1/vscode/{token}/chat/completions`.
+- `modelsUrl` laukas turi būti nukreiptas į `/api/v1/vscode/{token}/models`.
+- Pirmenybę teikite įprastam `/v1` + nešiklio antraštės srautui, kai klientas palaiko pasirinktines antraštes.
+- URL įterptieji prieigos raktai yra suderinamumo atsarginė priemonė ir gali būti rodoma redaktoriaus žurnaluose arba tarpinio serverio istorijoje.
 
 ---
 
 #### Kiro CLI (Amazon)
 
 ```bash
-# Prisijunkite prie savo AWS/Kiro paskyros:
+# Login to your AWS/Kiro account:
 kiro-cli login
 
-# CLI naudoja savo autentifikavimą — pačiai Kiro CLI „OmniRoute“ kaip vidinė sistema nereikalinga.
-# Naudokite kiro-cli kartu su „OmniRoute“, skirtu kitiems įrankiams.
+# The CLI uses its own auth — OmniRoute is not needed as backend for Kiro CLI itself.
+# Use kiro-cli alongside OmniRoute for other tools.
 kiro-cli status
 ```
 
-**Kiro IDE** darbalaukio programai naudokite „OmniRoute“ pateikiamą MITM galinį tašką,
-esantį `/dashboard/cli-tools → Kiro`.
+Dėl**Kiro IDE** darbalaukio programą, naudokite MITM galinį tašką, kurį rodo OmniRoute esantį `/dashboard/cli-tools → Kiro`.
 
 ---
 

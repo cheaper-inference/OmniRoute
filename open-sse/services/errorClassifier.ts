@@ -7,6 +7,7 @@ import {
   isOAuthInvalidToken,
 } from "./accountFallback.ts";
 import { isSubscriptionQuotaText } from "./quotaTextCooldowns.ts";
+import { isProviderSafetyRefusalBody } from "../utils/providerSafety.ts";
 import { isModelScopedAccessDenial } from "./accountFallback/modelScopedAccessDenial.ts";
 import { getProviderCategory, getRegistryEntry } from "../config/providerRegistry.ts";
 
@@ -127,6 +128,9 @@ export const PROVIDER_ERROR_TYPES = {
   // First case: Anthropic's OAuth 403 "Request not allowed" (#12859), which
   // lands on a handful of requests between thousands of 200s on the same token.
   REQUEST_REJECTED: "request_rejected",
+  // An explicit provider safety stop (e.g. Codex `misalignment_policy_violation`): refuses one
+  // request, says nothing about the account. Never terminal, never counted toward a ban.
+  PROVIDER_SAFETY_REFUSAL: "provider_safety_refusal",
 } as const;
 
 export type ProviderErrorType = (typeof PROVIDER_ERROR_TYPES)[keyof typeof PROVIDER_ERROR_TYPES];
@@ -408,6 +412,13 @@ export function classifyProviderError(
   const accountDeactivated = isAccountDeactivated(bodyStr);
   const oauthInvalid = isOAuthInvalidToken(bodyStr);
   const preserveQuota429 = shouldPreserveQuotaSignalsFor429(provider);
+
+  if (
+    (statusCode === 400 || statusCode === 403) &&
+    isProviderSafetyRefusalBody(statusCode, responseBody)
+  ) {
+    return PROVIDER_ERROR_TYPES.PROVIDER_SAFETY_REFUSAL;
+  }
 
   if (
     (creditsExhausted || subscriptionQuotaExhausted) &&

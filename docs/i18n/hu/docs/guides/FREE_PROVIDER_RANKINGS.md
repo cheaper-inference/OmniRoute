@@ -14,13 +14,13 @@
 
 ## Mi az
 
-OmniRoute 377 szolgáltatót regisztrál, köztük 155 katalógus bejegyzést megjelölve**free/no-auth** (no-auth, free-tier OAuth vagy free-tier API key – lásd a [Free Tiers Guide](../getting-started/FREE-TIERS-GUIDE.md) és a teljes [Free Tiers könyvtárat](../reference/FREE_TIERS.md) ). A fogás: az ingyenes szolgáltatók vad modellminőségben különböznek egymástól. A határmenti modellt kiszolgáló hitelesítés nélküli szolgáltató sokkal hasznosabb, mint egy kis örökölt modellt kiszolgáló.
+OmniRoute 381 szolgáltatót tart nyilván, ebből 155 katalógus bejegyzés van megjelölve**free/no-auth** (no-auth, free-tier OAuth vagy free-tier API key — lásd a [Free Tiers Guide](../getting-started/FREE-TIERS-GUIDE.md) és a teljes [Free Tiers könyvtárat](../reference/FREE_TIERS.md) ). A fogás: az ingyenes szolgáltatók vad modellminőségben különböznek egymástól. A határmenti modellt kiszolgáló hitelesítés nélküli szolgáltató sokkal hasznosabb, mint egy kis örökölt modellt kiszolgáló.
 
-**Ingyenes szolgáltatói rangsor** válaszok"** melyik ingyenes szolgáltató adja a legjobb modellt?** ", ha csatlakozik az egyes ingyenes szolgáltatók katalógusához** tömegből származó minőségi pontszámok** a** Arena AI ranglista** (human-preference ELO, ugyanaz az ötlet az LMArena chatbot arénája mögött). A szolgáltatókat ezután az erősségük alapján rangsorolják** legjobb ingyenes modell** .
+**Ingyenes szolgáltatói rangsor** válaszok"** melyik ingyenes szolgáltató adja a legjobb modellt?** ", ha csatlakozik az egyes ingyenes szolgáltatók katalógusához** tömegből származó minőségi pontszámok** a** Arena AI ranglista** (human-preference ELO, ugyanaz az ötlet a LMArena chatbot arénája mögött). A szolgáltatókat ezután az erősségük alapján rangsorolják** legjobb ingyenes modell** .
 
 A rangsort három valós forrásból számítják ki:
 
-1. Az ingyenes szolgáltatók listái – `NOAUTH_PROVIDERS`, plusz `OAUTH_PROVIDERS` / `APIKEY_PROVIDERS` bejegyzések `hasFree` (`src/shared/constants/providers.ts`) megjelöléssel.
+1. Az ingyenes szolgáltató felsorolja — `NOAUTH_PROVIDERS`, valamint `OAUTH_PROVIDERS` / `APIKEY_PROVIDERS` bejegyzéseket, amelyek `hasFree` (`src/shared/constants/providers.ts`) jelzéssel vannak megjelölve.
 2. Minden szolgáltató modellkatalógusa a szolgáltatói nyilvántartásból (`open-sse/config/providerRegistry.ts`).
 3. Az Arena ELO szinkronizáló motorja (`src/lib/arenaEloSync.ts`) által a `model_intelligence` DB táblázatban tárolt ELO-eredetű feladat-illesztési pontszámok.
 

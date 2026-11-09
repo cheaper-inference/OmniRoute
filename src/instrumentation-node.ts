@@ -7,6 +7,7 @@
  */
 
 import { markServerReady, markServerStarting } from "@/lib/serverLifecycle";
+import { isBackgroundServicesDisabled } from "@/lib/env/backgroundServices";
 import { normalizeBootError } from "@/lib/instrumentationBootError";
 import { isHeadless, skipInHeadless } from "@/lib/system/headless";
 
@@ -103,11 +104,7 @@ export async function ensureDbReadyForBoot(
   }
 }
 
-export function isBackgroundServicesDisabled(): boolean {
-  const raw = process.env.OMNIROUTE_DISABLE_BACKGROUND_SERVICES;
-  if (!raw) return false;
-  return new Set(["1", "true", "yes", "on"]).has(raw.trim().toLowerCase());
-}
+export { isBackgroundServicesDisabled };
 
 async function ensureSecrets(): Promise<void> {
   let getPersistedSecret = (_key: string): string | null => null;
@@ -463,6 +460,22 @@ export const OPTIONAL_BOOT_SUBSYSTEMS: ReadonlyArray<OptionalBootSubsystem> = [
           console.warn("[STARTUP] models.dev sync failed to start (non-fatal):", msg);
         }),
   },
+  // OpenCode free-tier Bun relay: self-gated on OPENCODE_FREE_TIER_RELAY_URL. Non-blocking,
+  // never fatal.
+  {
+    name: "opencode-free-relay",
+    start: () =>
+      import("@/lib/opencodeFreeRelay")
+        .then(async (m) => {
+          const result = await m.startOpencodeFreeRelay();
+          if (result.status !== "disabled")
+            console.log(`[STARTUP] OpenCode free relay: ${result.status} ${result.detail ?? ""}`);
+        })
+        .catch((err: unknown) => {
+          const msg = err instanceof Error ? err.message : String(err);
+          console.warn("[STARTUP] OpenCode free relay failed to start (non-fatal):", msg);
+        }),
+  },
   // Real-time dashboard WebSocket daemon (port 20132): powers Combo Studio Live,
   // the Home live-pulse, and Live Compression. Side-effect import triggers the
   // flag-gated auto-start (OMNIROUTE_ENABLE_LIVE_WS, default ON).
@@ -612,6 +625,13 @@ export async function registerNodejs(): Promise<void> {
   }
 
   await scanComboModelNameCollisionsAtBoot();
+  try {
+    const { warnProviderPrefixCollisionsAtBoot } =
+      await import("@/lib/providers/providerPrefixCollision");
+    await warnProviderPrefixCollisionsAtBoot();
+  } catch {
+    console.warn("[STARTUP] Could not scan provider-prefix collisions (non-fatal).");
+  }
   await warmAdaptiveVirtualLanesIntoRuntime();
 
   const [
@@ -677,6 +697,12 @@ export async function registerNodejs(): Promise<void> {
     const { startCodexWakeups } = await import("@/lib/services/codexWakeups");
     startCodexWakeups();
     console.log("[STARTUP] Codex wakeup scheduler started (no-op until a task is created)");
+    const { startCodexResetCreditAutospend } =
+      await import("@/lib/services/codexResetCreditAutospend");
+    startCodexResetCreditAutospend();
+    console.log(
+      "[STARTUP] Codex reset-credit auto-spend scheduler started (opt-in, no-op until enabled)"
+    );
     // Optional: cloud/model sync is skipped in headless mode (src/lib/system/headless.ts).
     if (!skipInHeadless("cloud-sync")) {
       const cloudSyncInitialized = await ensureCloudSyncInitialized();
@@ -831,26 +857,30 @@ export async function registerNodejs(): Promise<void> {
     console.warn("[COMPLIANCE] Could not initialize audit log:", msg);
   }
 
-  // Storage-configured scheduled VACUUM (#4437): registers the timer from
-  // Settings > System & Storage and persists lastVacuumAt for the UI.
-  try {
-    const { initVacuumScheduler } = await import("@/lib/db/vacuumScheduler");
-    initVacuumScheduler();
-    console.log("[STARTUP] Scheduled VACUUM initialized (#4437)");
-  } catch (err: unknown) {
-    const msg = err instanceof Error ? err.message : String(err);
-    console.warn("[STARTUP] Could not initialize vacuum scheduler (non-fatal):", msg);
-  }
+  if (!isBackgroundServicesDisabled()) {
+    // Storage-configured scheduled VACUUM (#4437): registers the timer from
+    // Settings > System & Storage and persists lastVacuumAt for the UI.
+    try {
+      const { initVacuumScheduler } = await import("@/lib/db/vacuumScheduler");
+      initVacuumScheduler();
+      console.log("[STARTUP] Scheduled VACUUM initialized (#4437)");
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.warn("[STARTUP] Could not initialize vacuum scheduler (non-fatal):", msg);
+    }
 
-  // Retention cleanup scheduler (#4691/#6988, #9624): runs the general retention
-  // cleanup once after startup and then every 6 hours. Previously this was only
-  // wired into the unused src/server-init.ts, so telemetry tables grew unboundedly
-  // even with retention.autoCleanupEnabled=true. Idempotent (guarded internally).
-  try {
-    startCleanupScheduler();
-  } catch (err: unknown) {
-    const msg = err instanceof Error ? err.message : String(err);
-    console.warn("[STARTUP] Could not start cleanup scheduler (non-fatal):", msg);
+    // Retention cleanup scheduler (#4691/#6988, #9624): runs the general retention
+    // cleanup once after startup and then every 6 hours. Previously this was only
+    // wired into the unused src/server-init.ts, so telemetry tables grew unboundedly
+    // even with retention.autoCleanupEnabled=true. Idempotent (guarded internally).
+    try {
+      startCleanupScheduler();
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.warn("[STARTUP] Could not start cleanup scheduler (non-fatal):", msg);
+    }
+  } else {
+    console.log("[STARTUP] Background schedulers disabled (vacuum, cleanup)");
   }
 
   if (!isBackgroundServicesDisabled()) {

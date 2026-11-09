@@ -80,6 +80,33 @@ test("model settings are per connection, preserve provider data and do not send"
   assert.equal(JSON.stringify(firstConfig).includes("sk-connection"), false);
 });
 
+test("Cloudflare model IDs beginning with @ can be saved without sending upstream", async () => {
+  const selected = await connection("sk-cloudflare-test", {
+    provider: "cloudflare-ai",
+    providerSpecificData: { accountId: "cloudflare-account" },
+  });
+  globalThis.fetch = async () => {
+    throw new Error("Saving must not send upstream");
+  };
+  const cloudflareModelIds = [
+    "@cf/meta/llama-3.2-3b-instruct",
+    "@cf/mistral/mistral-7b-instruct-v0.2-lora",
+    "@cf/qwen/qwen2.5-coder-32b-instruct",
+    "@cf/deepseek-ai/deepseek-r1-distill-qwen-32b",
+  ] as const;
+  for (const modelId of cloudflareModelIds) {
+    const response = await route.PUT(
+      await request(selected.id, "PUT", { modelId }),
+      context(selected.id)
+    );
+    assert.equal(response.status, 200, modelId);
+    const body: unknown = await response.json();
+    assert.deepEqual(body, { modelId });
+    const saved = await db.getProviderConnectionById(selected.id);
+    assert.equal(saved?.providerSpecificData.connectionTestModel, modelId);
+  }
+});
+
 test("custom prompt goes to exactly the selected account and repeat sends bypass cache", async () => {
   await connection("sk-unselected-account");
   const selected = await connection("sk-selected-account");
@@ -166,13 +193,22 @@ test("invalid models and oversized or blank messages are rejected", async () => 
   );
   assert.equal(updateSettingsSchema.safeParse({ connectionTestPrompt: "Hello" }).success, true);
   const selected = await connection("sk-invalid-model");
-  const response = await route.PUT(
-    await request(selected.id, "PUT", { modelId: "bad\nmodel" }),
-    context(selected.id)
-  );
-  assert.equal(response.status, 400);
-  const body = await response.json();
-  assert.equal(body.error.message.includes("at /"), false);
+  const invalidBodies = [
+    { modelId: " " },
+    { modelId: "x".repeat(257) },
+    { modelId: "bad\nmodel" },
+    { modelId: "gpt-4o-mini", unexpected: true },
+    null,
+  ];
+  for (const invalidBody of invalidBodies) {
+    const response = await route.PUT(
+      await request(selected.id, "PUT", invalidBody),
+      context(selected.id)
+    );
+    assert.equal(response.status, 400, JSON.stringify(invalidBody));
+    const body: unknown = await response.json();
+    assert.equal(JSON.stringify(body).includes("at /"), false);
+  }
 });
 
 test("paid-model policy also applies to manual messages", async () => {

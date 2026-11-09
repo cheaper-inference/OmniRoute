@@ -71,3 +71,20 @@ export function defaultComboForRequest(
   );
   return { ...compressionCombo, pipeline: stackedPipeline as RuntimeCompressionCombo["pipeline"] };
 }
+
+/**
+ * Whether chatCore must run the resolved plan's pipeline instead of the merged config's.
+ * Without a combo the derived plan always runs. The seeded default combo is operator
+ * configuration, not a choice for this request, so when the context-budget dial had to
+ * escalate (the request does not fit the model window) its escalated pipeline runs too.
+ * Named and routing-assigned combos are explicit choices and keep their own pipeline.
+ */
+export function shouldRunResolvedPipeline(state: {
+  comboApplied: boolean;
+  comboIsDefault: boolean;
+  comboIdConfigured: boolean;
+  adaptiveStagesApplied: number;
+}): boolean {
+  if (!state.comboApplied && !state.comboIdConfigured) return true;
+  return state.comboIsDefault && state.adaptiveStagesApplied > 0;
+}
