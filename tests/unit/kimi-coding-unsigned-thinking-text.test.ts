@@ -11,7 +11,11 @@ import { translateRequest } from "../../open-sse/translator/index.ts";
 
 type Block = Record<string, unknown>;
 
-function assistantBlocks(provider: string, thinkingPart: Block): Block[] {
+function assistantBlocks(
+  provider: string,
+  thinkingPart: Block,
+  extra: Record<string, unknown> = {}
+): Block[] {
   const translated = translateRequest(
     FORMATS.OPENAI,
     FORMATS.CLAUDE,
@@ -25,6 +29,7 @@ function assistantBlocks(provider: string, thinkingPart: Block): Block[] {
         {
           role: "assistant",
           content: [thinkingPart, { type: "text", text: "searching" }],
+          ...extra,
           tool_calls: [
             { id: "call_1", type: "function", function: { name: "search", arguments: "{}" } },
           ],
@@ -65,4 +70,35 @@ test("Kimi keeps the text of a signed thinking block and drops the foreign signa
 test("an Anthropic target still drops an unsigned thinking block", () => {
   const blocks = assistantBlocks("claude", { type: "thinking", thinking: "plan A" });
   assert.ok(!blocks.some((b) => b.type === "thinking" && b.thinking === "plan A"));
+});
+
+test("Kimi uses reasoning_content when its only thinking block is unsigned and empty", () => {
+  const blocks = assistantBlocks(
+    "kimi-coding",
+    { type: "thinking", thinking: "" },
+    { reasoning_content: "plan B" }
+  );
+  assert.deepEqual(
+    blocks.filter((b) => b.type === "thinking"),
+    [{ type: "thinking", thinking: "plan B" }]
+  );
+});
+
+test("Kimi keeps an empty unsigned thinking block when reasoning_content has no text", () => {
+  for (const extra of [{}, { reasoning_content: "" }, { reasoning_content: "  " }]) {
+    const blocks = assistantBlocks("kimi-coding", { type: "thinking", thinking: "" }, extra);
+    assert.deepEqual(blocks[0], { type: "thinking", thinking: "" });
+  }
+});
+
+test("Kimi keeps its own thinking text over reasoning_content", () => {
+  const blocks = assistantBlocks(
+    "kimi-coding",
+    { type: "thinking", thinking: "plan A" },
+    { reasoning_content: "plan B" }
+  );
+  assert.deepEqual(
+    blocks.filter((b) => b.type === "thinking"),
+    [{ type: "thinking", thinking: "plan A" }]
+  );
 });

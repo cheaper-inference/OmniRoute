@@ -931,8 +931,16 @@ function getContentBlocksFromMessage(
         hasThinkingBlock = true;
       }
     }
-    if (isKimiCoding && typeof msg.reasoning_content === "string" && !hasThinkingBlock) {
-      blocks.unshift({ type: "thinking", thinking: msg.reasoning_content });
+    if (isKimiCoding && typeof msg.reasoning_content === "string") {
+      if (!hasThinkingBlock) {
+        blocks.unshift({ type: "thinking", thinking: msg.reasoning_content });
+      } else if (msg.reasoning_content.trim()) {
+        // Only empty thinking blocks: they must not hide the reasoning the client sent.
+        const thinkingBlocks = blocks.filter((b) => b.type === "thinking");
+        const hasText = thinkingBlocks.some((b) => String(b.thinking ?? "").trim());
+        if (thinkingBlocks.length > 0 && !hasText)
+          thinkingBlocks[0].thinking = msg.reasoning_content;
+      }
     }
     // A store miss injects nothing: adaptive thinking has no precursor requirement, and
     // prepareClaudeRequest disables manual thinking when the final tool turn has no
