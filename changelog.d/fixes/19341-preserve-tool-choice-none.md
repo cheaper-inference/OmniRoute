@@ -1,0 +1,1 @@
+- **fix(sse):** Preserve explicit `tool_choice: "none"` with empty or absent tools through resolved-target normalization and Responses-to-Chat conversion, including streaming finalizers with prior tool history ([#19341](https://github.com/cheaper-inference/OmniRoute/pull/19341)) — thanks @tiangao88
