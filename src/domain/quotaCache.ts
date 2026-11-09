@@ -292,6 +292,7 @@ function isWindowParkReleased(entry: QuotaCacheEntry, now: number): boolean {
 
 export function __clearForTests() {
   getState().cache.clear();
+  noSnapshotUntil.clear();
 }
 
 function resolveAntigravityQuotaWindowsForModel(
@@ -876,6 +877,7 @@ export function setQuotaCache(
       : new Set<string>();
   const exhausted = isExhausted(quotas);
   if (isTelemetryOnlyRefresh(prior, quotas, modelQuotas)) return;
+  noSnapshotUntil.delete(connectionId);
   const entry: QuotaCacheEntry = {
     connectionId,
     provider,
@@ -938,9 +940,19 @@ export function getQuotaCacheOrSnapshot(connectionId: string): QuotaCacheEntry |
   return hydrateQuotaCacheFromSnapshots(connectionId);
 }
 
+// Connections whose last lookup found no snapshot rows, mapped to the time that verdict expires.
+// Credential selection asks about every candidate on every request; without this a pool with no
+// snapshots repeats the same empty query per candidate. setQuotaCache drops the verdict when it
+// records a reading. shortcut: module state, so a second bundle chunk (#8065) keeps its own copy
+// for at most NO_SNAPSHOT_TTL_MS; the shared cache entry is checked first and covers fresh writes.
+const NO_SNAPSHOT_TTL_MS = 30_000;
+const NO_SNAPSHOT_MAX_ENTRIES = 5_000;
+const noSnapshotUntil = new Map<string, number>();
+
 function hydrateQuotaCacheFromSnapshots(connectionId: string): QuotaCacheEntry | null {
   const { cache } = getState();
   if (cache.has(connectionId)) return cache.get(connectionId) || null;
+  if ((noSnapshotUntil.get(connectionId) ?? 0) > Date.now()) return null;
 
   let snapshots;
   try {
@@ -948,7 +960,11 @@ function hydrateQuotaCacheFromSnapshots(connectionId: string): QuotaCacheEntry |
   } catch {
     return null;
   }
-  if (!snapshots.length) return null;
+  if (!snapshots.length) {
+    if (noSnapshotUntil.size >= NO_SNAPSHOT_MAX_ENTRIES) noSnapshotUntil.clear();
+    noSnapshotUntil.set(connectionId, Date.now() + NO_SNAPSHOT_TTL_MS);
+    return null;
+  }
 
   const quotas: Record<string, QuotaInfo> = {};
   let provider = "";
