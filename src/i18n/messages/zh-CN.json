@@ -7910,6 +7910,7 @@
     "systemActor": "系统",
     "ipAccessControl": "IP访问控制",
     "ipAccessControlDesc": "阻止或允许特定 IP 地址",
+    "ipAccessMode": "访问模式",
     "ipModeDisabled": "已禁用",
     "ipModeBlacklist": "黑名单",
     "ipModeWhitelist": "白名单",

@@ -7910,6 +7910,7 @@
     "systemActor": "mfumo",
     "ipAccessControl": "Udhibiti wa Ufikiaji kwa IP",
     "ipAccessControlDesc": "Zuia au ruhusu anwani mahususi za IP",
+    "ipAccessMode": "Hali ya ufikiaji",
     "ipModeDisabled": "Imezimwa",
     "ipModeBlacklist": "Orodha ya kuzuia",
     "ipModeWhitelist": "Orodha ya kuruhusu",

@@ -7910,6 +7910,7 @@
     "systemActor": "sistema",
     "ipAccessControl": "Kontrol sa Access ng IP",
     "ipAccessControlDesc": "I-block o payagan ang mga partikular na IP address",
+    "ipAccessMode": "Mode ng access",
     "ipModeDisabled": "Hindi pinagana",
     "ipModeBlacklist": "Listahan ng Hinarang",
     "ipModeWhitelist": "Listahan ng Pinapayagan",

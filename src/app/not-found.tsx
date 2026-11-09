@@ -1,5 +1,6 @@
-"use client";
-
+// Server component on purpose (#18078): the not-found boundary can render inside the dashboard,
+// whose client providers serve only the chrome and section namespaces. Translating on the server
+// reads the full request catalog, so `publicSystem` never has to ship to every dashboard page.
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { OmniRouteLockup } from "@/shared/components/OmniRouteLogo";
