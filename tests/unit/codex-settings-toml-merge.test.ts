@@ -153,3 +153,25 @@ test("DELETE refuses a config.toml it cannot parse and leaves it byte-identical"
   assert.equal(res.status, 409);
   assert.equal(await fs.readFile(CONFIG_PATH, "utf8"), broken);
 });
+
+// A whole-number float (30.0) and an integer (60) both parse to a JS number: the file text is
+// the only place the type survives, so read the raw text, not the parsed value.
+test("POST and DELETE keep a whole-number float a float and an integer an integer", async () => {
+  await fs.writeFile(
+    CONFIG_PATH,
+    `${USER_CONFIG}\n[mcp_servers.slow]\ncommand = "slow"\nstartup_timeout_sec = 30.0\ntool_timeout_sec = 60\n`
+  );
+  const timeouts = async () => {
+    const text = await fs.readFile(CONFIG_PATH, "utf8");
+    return [
+      /startup_timeout_sec = (\S+)/.exec(text)?.[1],
+      /tool_timeout_sec = (\S+)/.exec(text)?.[1],
+    ];
+  };
+
+  assert.equal((await post()).status, 200);
+  assert.deepEqual(await timeouts(), ["30.0", "60"]);
+
+  assert.equal((await call("DELETE")).status, 200);
+  assert.deepEqual(await timeouts(), ["30.0", "60"]);
+});

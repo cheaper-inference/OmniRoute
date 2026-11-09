@@ -45,8 +45,11 @@ const asRecord = (value: unknown): TomlDoc =>
 // merge does not own (arrays, inline tables, quoted keys, arrays of tables) stays valid TOML.
 // A config.toml that Codex itself could not load throws here and is refused, never rewritten.
 // shortcut: comments and formatting are not kept (smol-toml has no comment model), only values.
-const parseConfig = (content: string): TomlDoc => parseToml(content) as TomlDoc;
-const toToml = (doc: TomlDoc) => stringifyToml(doc) + "\n";
+// Integers parse as BigInt and plain numbers write as floats, so `30.0` stays a float and `60`
+// stays an integer. The merge only writes strings, so BigInt never reaches a key it owns.
+const parseConfig = (content: string): TomlDoc =>
+  parseToml(content, { integersAsBigInt: true }) as TomlDoc;
+const toToml = (doc: TomlDoc) => stringifyToml(doc, { numbersAsFloat: true }) + "\n";
 
 // migrateCodexFeatureFlags reads `[features]` from `_sections`; the parsed document is that map.
 const migrateFeatureFlags = (doc: TomlDoc) =>
