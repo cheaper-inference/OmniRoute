@@ -682,6 +682,11 @@ export async function registerNodejs(): Promise<void> {
   console.log("[STARTUP] Spend batch writer started");
   console.log("[STARTUP] Guardrail registry initialized");
   console.log("[STARTUP] Builtin skill handlers registered");
+  // Request-path gate (not a background service): with "auto-apply banked resets" off it
+  // defers to the per-account autoLimitReset toggle, so behavior is unchanged.
+  const { registerClaudeSessionResetPolicy } = await import("@/lib/usage/claudeSessionResetPolicy");
+  registerClaudeSessionResetPolicy();
+  console.log("[STARTUP] Claude session-reset policy gate registered");
   if (!isBackgroundServicesDisabled()) {
     // Grok Bot remote-cleanup sweeper (spec step 14): drain the persistent
     // retry queue once at boot, then every 60s -- independent of new requests
@@ -738,6 +743,11 @@ export async function registerNodejs(): Promise<void> {
     const { startQuotaAutoPing } = await import("@/lib/services/quotaAutoPing");
     startQuotaAutoPing();
     console.log("[STARTUP] Quota auto-ping scheduler started (opt-in, no-op until enabled)");
+    const { startBankedResetAutoApply } = await import("@/lib/services/bankedResetAutoApply");
+    startBankedResetAutoApply();
+    console.log(
+      "[STARTUP] Banked-reset auto-apply scheduler started (opt-in, no-op until enabled)"
+    );
     const { startCodexWakeups } = await import("@/lib/services/codexWakeups");
     startCodexWakeups();
     console.log("[STARTUP] Codex wakeup scheduler started (no-op until a task is created)");
