@@ -288,6 +288,7 @@ export default function Sidebar({ isMacElectron = false }: SidebarProps) {
   const getSidebarLabel = (key: string, fallback: string) =>
     typeof t.has === "function" && t.has(key) ? t(key) : fallback;
 
+  /** Apply runtime gates and labels; only normal navigation passes the preset-hidden IDs. */
   const resolveItem = (item: SidebarItemDefinition, hidden?: Set<string>) => {
     if (hidden?.has(item.id)) return null;
     if (!isSidebarItemVisibleForFlags(item, featureFlags)) return null;

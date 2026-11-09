@@ -49,6 +49,7 @@ beforeEach(() => {
   );
 });
 afterEach(() => {
+  vi.restoreAllMocks();
   act(() => root.unmount());
   container.remove();
   localStorage.clear();

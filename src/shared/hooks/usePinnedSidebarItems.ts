@@ -7,6 +7,7 @@ const UPDATED_EVENT = "omniroute:sidebar-pinned-items-updated";
 // Keep controls usable for this session when browser storage is blocked or full.
 let unsavedSnapshot: string | null = null;
 
+/** Read a stable storage value, preferring unsaved session state after a failed write. */
 function readSnapshot(): string {
   if (unsavedSnapshot !== null) return unsavedSnapshot;
   try {
@@ -16,6 +17,7 @@ function readSnapshot(): string {
   }
 }
 
+/** Normalize legacy browser data to unique string IDs without trusting its shape. */
 function parsePins(raw: string): Set<string> {
   try {
     const value: unknown = JSON.parse(raw);
@@ -28,7 +30,9 @@ function parsePins(raw: string): Set<string> {
   return new Set();
 }
 
+/** Synchronize page/sidebar controls and release both listeners when a consumer unmounts. */
 function subscribe(onChange: () => void): () => void {
+  /** A newer cross-tab save or clear supersedes any unsaved local snapshot. */
   const onStorage = (event: StorageEvent) => {
     if (event.key !== STORAGE_KEY && event.key !== null) return;
     unsavedSnapshot = null;
@@ -48,6 +52,7 @@ const serverSnapshot = () => "[]";
 export function usePinnedSidebarItems() {
   const raw = useSyncExternalStore(subscribe, readSnapshot, serverSnapshot);
   const pinnedItems = useMemo(() => parsePins(raw), [raw]);
+  /** Toggle against the latest snapshot, persist when possible, and notify same-tab controls. */
   const togglePinItem = useCallback((id: string) => {
     // Read at click time so repeated actions and different controls do not overwrite each other.
     const next = parsePins(readSnapshot());

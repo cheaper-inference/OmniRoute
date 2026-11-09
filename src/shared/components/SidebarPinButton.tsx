@@ -5,6 +5,7 @@ import { usePinnedSidebarItems } from "@/shared/hooks/usePinnedSidebarItems";
 import Button from "./Button";
 import Icon from "./Icon";
 
+/** Expose a page-level action for the same persisted shortcuts used by the sidebar. */
 export default function SidebarPinButton({ itemId }: { itemId: string }) {
   const t = useTranslations("sidebar");
   const { pinnedItems, togglePinItem } = usePinnedSidebarItems();
