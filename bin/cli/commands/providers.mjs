@@ -389,6 +389,23 @@ function retireQuotaSnapshots(db, connectionId) {
   }
 }
 
+// The key is already written when this runs, so a failure here (locked or read-only database)
+// is a warning: it must not turn a finished rotation into a failed command.
+async function retireQuotaSnapshotsAfterRotate(connectionId) {
+  try {
+    const { db } = await openOmniRouteDb();
+    try {
+      retireQuotaSnapshots(db, connectionId);
+    } finally {
+      db.close();
+    }
+  } catch (error) {
+    console.warn(
+      `Warning: the key was rotated, but the old quota snapshots were not cleared (${error?.message ?? error}).`
+    );
+  }
+}
+
 export async function runProvidersRotateCommand(selector, opts = {}) {
   if (!selector) {
     console.error("Provider connection id or name is required.");
@@ -507,12 +524,7 @@ export async function runProvidersRotateCommand(selector, opts = {}) {
     }
   }
 
-  const { db: quotaDb } = await openOmniRouteDb();
-  try {
-    retireQuotaSnapshots(quotaDb, connection.id);
-  } finally {
-    quotaDb.close();
-  }
+  await retireQuotaSnapshotsAfterRotate(connection.id);
 
   console.log(
     t("providers.rotate.success", { name: connection.name, id: connection.id.slice(0, 8) })

@@ -134,3 +134,44 @@ test("rotating through a running server also retires the old key's quota snapsho
   }
   assert.equal(quotaCache.isAccountQuotaExhausted(id), false);
 });
+
+test("a failed quota retirement after the key write is a warning, not a failed rotation", async () => {
+  const id = addConnection("Locked");
+  // Any insert into quota_snapshots now fails, like a locked or read-only database would.
+  coreDb
+    .getDbInstance()
+    .exec(
+      "CREATE TRIGGER rotate_retire_fails BEFORE INSERT ON quota_snapshots BEGIN SELECT RAISE(ABORT, 'database is locked'); END"
+    );
+  globalThis.fetch = (async () => {
+    throw new Error("offline");
+  }) as typeof fetch;
+  process.env.TEST_ROTATED_KEY = "sk-new-key-4";
+  const out: string[] = [];
+  const warnings: string[] = [];
+  const { log, warn } = console;
+  console.log = (...args: unknown[]) => out.push(args.join(" "));
+  console.warn = (...args: unknown[]) => warnings.push(args.join(" "));
+  let exitCode: number | undefined;
+  try {
+    exitCode = await runProvidersRotateCommand(id, {
+      fromEnv: "TEST_ROTATED_KEY",
+      yes: true,
+      skipTest: true,
+    });
+  } finally {
+    console.log = log;
+    console.warn = warn;
+    delete process.env.TEST_ROTATED_KEY;
+    coreDb.getDbInstance().exec("DROP TRIGGER rotate_retire_fails");
+  }
+  assert.equal(exitCode, 0, "the key is already rotated, so the command succeeds");
+  assert.ok(
+    out.some((line) => line.includes(id.slice(0, 8))),
+    `the success message must still print; got ${JSON.stringify(out)}`
+  );
+  assert.ok(
+    warnings.some((line) => /quota/i.test(line)),
+    `a warning about the quota snapshots must print; got ${JSON.stringify(warnings)}`
+  );
+});
