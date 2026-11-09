@@ -1,24 +1,36 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {
-  getVideoJobPreset,
-  handleVideoJobGeneration,
-} from "../../open-sse/handlers/videoGeneration/job.ts";
-import { createMediaSink, readMediaFile } from "../../src/lib/media/mediaStore.ts";
-import { getVideoProvider } from "../../open-sse/config/videoRegistry.ts";
-import { IMAGE_PROVIDERS } from "../../open-sse/config/imageRegistryData.ts";
-import {
-  AUDIO_SPEECH_PROVIDERS,
-  AUDIO_TRANSCRIPTION_PROVIDERS,
-} from "../../open-sse/config/audioRegistry.ts";
-import { EMBEDDING_PROVIDERS } from "../../open-sse/config/embeddingRegistry.ts";
-import { handleAudioSpeech } from "../../open-sse/handlers/audioSpeech.ts";
-import { getRegistryMediaKinds } from "../../open-sse/config/mediaServiceKinds.ts";
-import { APIKEY_PROVIDERS_SPECIALTY } from "../../src/shared/constants/providers/apikey/specialty-media.ts";
-import {
-  IMAGE_ONLY_PROVIDER_IDS,
-  VIDEO_PROVIDER_IDS,
-} from "../../src/shared/constants/providers.ts";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
+
+// The video tests store downloads through the media store, so give this file its own DATA_DIR
+// before that module loads. Running the file on its own (without the suite's isolateDataDir
+// import) must never touch, or prune, the developer's real media directory.
+const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-deapi-"));
+process.env.DATA_DIR = TEST_DATA_DIR;
+test.after(() => {
+  try {
+    fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+  } catch {
+    // Best effort, as in tests/_setup/isolateDataDir.ts: Windows can still hold a handle here.
+  }
+});
+
+const { getVideoJobPreset, handleVideoJobGeneration } =
+  await import("../../open-sse/handlers/videoGeneration/job.ts");
+const { createMediaSink, readMediaFile } = await import("../../src/lib/media/mediaStore.ts");
+const { getVideoProvider } = await import("../../open-sse/config/videoRegistry.ts");
+const { IMAGE_PROVIDERS } = await import("../../open-sse/config/imageRegistryData.ts");
+const { AUDIO_SPEECH_PROVIDERS, AUDIO_TRANSCRIPTION_PROVIDERS } =
+  await import("../../open-sse/config/audioRegistry.ts");
+const { EMBEDDING_PROVIDERS } = await import("../../open-sse/config/embeddingRegistry.ts");
+const { handleAudioSpeech } = await import("../../open-sse/handlers/audioSpeech.ts");
+const { getRegistryMediaKinds } = await import("../../open-sse/config/mediaServiceKinds.ts");
+const { APIKEY_PROVIDERS_SPECIALTY } =
+  await import("../../src/shared/constants/providers/apikey/specialty-media.ts");
+const { IMAGE_ONLY_PROVIDER_IDS, VIDEO_PROVIDER_IDS } =
+  await import("../../src/shared/constants/providers.ts");
 
 const GATEWAY = "https://oai.deapi.ai/v1";
 
@@ -202,6 +214,50 @@ test("deapi video preset reports a failed job instead of downloading", async () 
     assert.equal(result.success, false);
     assert.equal(result.success === false && result.status, 502);
     assert.ok(!urls.some((url) => url.endsWith("/content")), "a failed job must not be downloaded");
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("deapi video preset stores nothing when the caller aborts during the /content download", async () => {
+  const originalFetch = globalThis.fetch;
+  const controller = new AbortController();
+  const stored: string[] = [];
+  globalThis.fetch = async (input, init) => {
+    const url = String(input);
+    if (String(init?.method ?? "GET") === "POST") {
+      return jsonResponse({ id: "vid-3", status: "queued" });
+    }
+    if (url.endsWith("/content")) {
+      // The caller goes away while the bytes are on their way.
+      controller.abort();
+      return new Response(new Uint8Array([0, 0, 0, 24]), {
+        status: 200,
+        headers: { "content-type": "video/mp4" },
+      });
+    }
+    return jsonResponse({ id: "vid-3", status: "completed" });
+  };
+
+  try {
+    const result = await handleVideoJobGeneration({
+      model: "Ltx2_3_22B_Dist_INT8",
+      presetName: "deapi-video-job",
+      body: { prompt: "a paper boat" },
+      credentials: { apiKey: "sk-dp-1-test" },
+      pollIntervalMs: 1,
+      signal: controller.signal,
+      mediaSink: {
+        store: (_bytes: Buffer, format: string) => {
+          stored.push(format);
+          return `https://gw.example/api/v1/media/none__test.${format}`;
+        },
+      },
+    });
+
+    assert.equal(result.success, false);
+    assert.equal(result.success === false && result.status, 499);
+    assert.deepEqual(stored, [], "an aborted download must not be stored");
   } finally {
     globalThis.fetch = originalFetch;
   }
