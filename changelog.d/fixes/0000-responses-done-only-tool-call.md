@@ -1,1 +1,0 @@
-- **fix(sse):** Chat Completions clients now get the tool call id and name when a Responses upstream sends a function call only in `output_item.done`.

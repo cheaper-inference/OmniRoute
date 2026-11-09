@@ -1,1 +1,0 @@
-- **fix(sse):** Chat -> Responses streams keep the billed cost, cached tokens and reasoning tokens from the upstream usage, and `response.completed` waits for real usage when the upstream sends a zero or empty usage placeholder.
