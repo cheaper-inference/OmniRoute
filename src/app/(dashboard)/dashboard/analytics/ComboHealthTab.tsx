@@ -288,7 +288,7 @@ function ComboAutopilotPanel({ report }: { report: ComboAutopilotReport }) {
           </div>
           <p className="mt-1 text-sm text-text-muted">{t("comboHealthAutopilotDescription")}</p>
         </div>
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:min-w-90">
+        <div className="grid grid-cols-2 gap-2 lg:min-w-90 2xl:min-w-120 2xl:grid-cols-4">
           <MetricBlock
             icon="monitor_heart"
             label={t("comboHealthIssues")}
