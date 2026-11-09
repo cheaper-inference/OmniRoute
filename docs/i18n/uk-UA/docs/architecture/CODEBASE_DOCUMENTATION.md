@@ -456,7 +456,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Provider registries, header profiles, identity, …
 ├── handlers/               Request handlers (chat, embeddings, audio, image, …)
-├── executors/              156 provider executor modules (executor classes + per-provider helpers)
+├── executors/              159 provider executor modules (executor classes + per-provider helpers)
 ├── translator/             Format conversion (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions stream transformer
 ├── services/               80+ service modules (combos, fallback, quotas, identity, …)
@@ -486,11 +486,11 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 модулів-виконавців верхнього рівня (`*.ts` мінус `base.ts`, `index.ts` і тести — кількість вимірювань `npm run check:docs-counts` ). Кожен клас виконавця розширює `BaseExecutor` (`base.ts`) безпосередньо або через `DefaultExecutor` або інший виконавець; решта модулів є допоміжними для кожного постачальника (схеми інструментів, адаптери fetch/TTS, обробники особливостей). До виконавців належать:
+159 модулів-виконавців верхнього рівня (`*.ts` мінус `base.ts`, `index.ts` і тести — кількість вимірювань `npm run check:docs-counts` ). Кожен клас виконавця розширює `BaseExecutor` (`base.ts`) безпосередньо або через `DefaultExecutor` або інший виконавець; решта модулів є допоміжними для кожного постачальника (схеми інструментів, адаптери fetch/TTS, обробники особливостей). До виконавців належать:
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `qoder`, `vertex`, `devin-desktop`, а також `claudeIdentity.ts` (помічник спільної ідентифікації) та `index.ts` (реєстр).
 
-> Примітка: постачальники, яких тут немає в списку, обслуговуються `default.ts` за допомогою загального OpenAI-сумісного виконавця. Повний каталог постачальників (377 постачальників) знаходиться в `src/shared/constants/providers.ts`.
+> Примітка: постачальники, яких тут немає в списку, обслуговуються `default.ts` за допомогою загального OpenAI-сумісного виконавця. Повний каталог постачальників (381 постачальник) знаходиться в `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`
 
@@ -504,7 +504,7 @@ Hub-and-spoke переклад (OpenAI — центр).
 
 ### 4.4 `open-sse/transformer/`
 
-- `responsesTransformer.ts` — `TransformStream` -based відповіді API ↔ Конвертер завершення чату (використовується маршрутом `responses/` catch-all).
+- `responsesTransformer.ts` — `TransformStream` -based Відповіді API ↔ Конвертер завершених чатів (використовується маршрутом `responses/` catch-all).
 
 ### 4.5 `open-sse/services/`
 
@@ -519,7 +519,7 @@ Hub-and-spoke переклад (OpenAI — центр).
 | Кешування                 | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                            |
 | Інтелект маршрутизації    | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                             |
 | Обробка моделі            | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                              |
-| Компресія                 | `compression/` — проводка двигуна повного стиснення                                                                                                                                                                                                      |
+| Компресія                 | `compression/` — електропроводка двигуна повного стиснення                                                                                                                                                                                               |
 | Сеанс токена +            | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts`        |
 | Рівень / маніфест         | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                            |
 | IP / мережа               | `ipFilter.ts`, `webSearchFallback.ts`                                                                                                                                                                                                                    |
@@ -528,9 +528,9 @@ Hub-and-spoke переклад (OpenAI — центр).
 
 ### 4.6 `open-sse/mcp-server/`
 
-- **110 унікальних інструментів** підключено до `server.ts` (45 канонічних у `schemas/tools.ts` + пам’ять, навички, навички GitHub, пул, гейміфікація, плагін, Notion, Obsidian, локальний корпус і модулі стиснення — об’єднання підраховано `countUniqueMcpTools`).
+- **110 унікальних інструментів** підключено до `server.ts` (45 канонічних пам’яті `schemas/tools.ts` +, навичок, навичок GitHub, пулу, гейміфікації, плагіна, Notion, Obsidian, локального корпусу та модулів стиснення — union, підрахованих `countUniqueMcpTools`).
 - **3 транспорти** : stdio, HTTP Streamable, SSE.
-- **33 приціли** примусово під час виконання — базовий список у `src/shared/constants/mcpScopes.ts`, повний набір — це об’єднання областей, оголошених кожним модулем інструменту.
+- **33 приціли** застосований під час виконання базового списку — в `src/shared/constants/mcpScopes.ts`, повний набір є об’єднанням областей, оголошених кожним модулем інструменту.
 - Таблиця аудиту: `mcp_tool_audit` (заповнюється `audit.ts`).
 - Файли: `server.ts`, `index.ts`, `httpTransport.ts`, `audit.ts`, `scopeEnforcement.ts`, `runtimeHeartbeat.ts`, `descriptionCompressor.ts`, `schemas/{tools, a2a, audit, index}.ts`, `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts`, а також тести під `__tests__/`.
 - Перегляньте повний каталог інструментів [MCP-SERVER.md](../frameworks/MCP-SERVER.md).

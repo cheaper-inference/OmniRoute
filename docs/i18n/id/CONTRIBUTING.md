@@ -17,10 +17,15 @@ dan langkah-langkah rekonsiliasinya.
 
 ### Prasyarat
 
-- **Node.js** `>=22.22.2 <23`, atau `>=24.0.0 <27` (direkomendasikan: 24 LTS)
+- **Node.js** `>=22.22.2 <23`, atau `>=24.0.0 <27` (disarankan: 24 LTS)
 - **npm** 10+
 
-> **Pengguna npm v11+ (Node 24+):** Setelah `npm install`, pastikan modul native telah diinstal:
+> **Windows dengan Node 24:** gunakan rilis patch 24 LTS saat ini (setidaknya 24.20.0).
+> Rilis sebelumnya dapat berhenti setelah pengujian berhasil ketika `--test-force-exit` menutup
+> proses. [Perbaikan libuv Windows](https://github.com/nodejs/node/pull/61999) dari Node
+> mengatasi crash runtime ini; tetap aktifkan assertion pengujian dan pemeriksaan keluar runner.
+
+> **Pengguna npm v11+ (Node 24+):** Setelah `npm install`, verifikasi bahwa modul native telah terpasang:
 > `node -e "require('better-sqlite3')"`. Jika gagal dengan `MODULE_NOT_FOUND`,
 > jalankan `npm approve-scripts better-sqlite3 && npm install`. Lihat
 > [Pemecahan Masalah](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
@@ -41,84 +46,84 @@ npm install
 # Buat .env Anda dari templat
 cp .env.example .env
 
-# Buat secret yang diperlukan
+# Buat rahasia yang diperlukan
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
 Variabel utama untuk pengembangan:
 
-| Variabel               | Nilai Default Pengembangan | Deskripsi                  |
-| ---------------------- | -------------------------- | -------------------------- |
-| `PORT`                 | `20128`                    | Port server                |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`   | URL dasar untuk frontend   |
-| `JWT_SECRET`           | (buat seperti di atas)     | Secret penandatanganan JWT |
-| `INITIAL_PASSWORD`     | `CHANGEME`                 | Kata sandi login pertama   |
-| `APP_LOG_LEVEL`        | `info`                     | Tingkat verbositas log     |
+| Variabel               | Default Pengembangan     | Deskripsi                   |
+| ---------------------- | ------------------------ | --------------------------- |
+| `PORT`                 | `20128`                  | Port server                 |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | URL dasar untuk frontend    |
+| `JWT_SECRET`           | (buat di atas)           | Rahasia penandatanganan JWT |
+| `INITIAL_PASSWORD`     | `CHANGEME`               | Kata sandi login pertama    |
+| `APP_LOG_LEVEL`        | `info`                   | Tingkat detail log          |
 
 ### Pengaturan Dasbor
 
-Dasbor menyediakan tombol UI untuk fitur-fitur yang juga dapat dikonfigurasi melalui variabel lingkungan:
+Dasbor menyediakan toggle UI untuk fitur yang juga dapat dikonfigurasi melalui variabel lingkungan:
 
-| Lokasi Pengaturan     | Tombol                 | Deskripsi                               |
-| --------------------- | ---------------------- | --------------------------------------- |
-| Pengaturan → Lanjutan | Mode Debug             | Aktifkan log permintaan debug (UI)      |
-| Pengaturan → Umum     | Visibilitas Bilah Sisi | Tampilkan/sembunyikan bagian bilah sisi |
+| Lokasi Pengaturan   | Toggle             | Deskripsi                            |
+| ------------------- | ------------------ | ------------------------------------ |
+| Settings → Advanced | Debug Mode         | Aktifkan log permintaan debug (UI)   |
+| Settings → General  | Sidebar Visibility | Tampilkan/sembunyikan bagian sidebar |
 
-Pengaturan ini disimpan dalam basis data dan tetap berlaku setelah proses dimulai ulang, serta mengesampingkan nilai default variabel lingkungan jika telah ditetapkan.
+Pengaturan ini disimpan di database dan tetap berlaku setelah restart, serta mengesampingkan default variabel lingkungan jika ditetapkan.
 
 ### Menjalankan Secara Lokal
 
 ```bash
-# Mode pengembangan (pemuatan ulang otomatis)
+# Mode pengembangan (muat ulang otomatis)
 npm run dev
 
 # Build produksi
 npm run build    # next build → .build/next/ lalu assembleStandalone → dist/
 npm run start
 
-# Kompilasi cepat khusus backend/API untuk perubahan kontributor
+# Kompilasi backend/API saja yang cepat untuk perubahan kontributor
 npm run build:contributor
 
 # Build rilis (build ulang bersih + sentinel HEAD — diperlukan untuk deployment)
-npm run build:release   # rm -rf .build dist && build + menulis dist/BUILD_SHA
+npm run build:release   # rm -rf .build dist lalu build + menulis dist/BUILD_SHA
 
 # Konfigurasi port umum
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Build kontributor melakukan validasi kompilasi saja: build ini tidak merakit distribusi mandiri
-atau membangun aset pengemasan native opsional. Gunakan build produksi reguler ketika
-Anda perlu memvalidasi bundel yang siap didistribusikan.
+Build kontributor melakukan validasi khusus kompilasi: build ini tidak merakit
+distribusi standalone atau membangun aset pengemasan native opsional. Gunakan build produksi biasa saat
+Anda perlu memvalidasi bundel yang siap dikirim.
 
-### Tata Letak Keluaran Build
+### Tata Letak Output Build
 
-| Direktori | Isi                                                                               | Dilacak |
-| --------- | --------------------------------------------------------------------------------- | ------- |
-| `src/`    | Sumber aplikasi (TypeScript / TSX)                                                | Ya      |
-| `.build/` | Berkas perantara — keluaran `next build` (diabaikan Git, `distDir = .build/next`) | Tidak   |
-| `dist/`   | Bundel siap didistribusikan — dirakit oleh `assembleStandalone` (diabaikan Git)   | Tidak   |
+| Direktori | Isi                                                                      | Dilacak |
+| --------- | ------------------------------------------------------------------------ | ------- |
+| `src/`    | Sumber aplikasi (TypeScript / TSX)                                       | Ya      |
+| `.build/` | Perantara — output `next build` (diabaikan git, `distDir = .build/next`) | Tidak   |
+| `dist/`   | Bundel siap dikirim — dirakit oleh `assembleStandalone` (diabaikan git)  | Tidak   |
 
-Pipeline build dilakukan dalam satu lintasan:
+Pipeline build adalah satu tahap:
 
 ```
 npm run build
-  └─ next build → .build/next/standalone  (keluaran Next.js)
+  └─ next build → .build/next/standalone  (output Next.js)
   └─ assembleStandalone()                 (menyalin standalone + static + public + aset native)
-       └─ keluaran: dist/                 (server.js, .next/static/, public/, node_modules/)
+       └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
 `npm run build:release` juga membersihkan kedua direktori terlebih dahulu dan menulis
 `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) sebagai sentinel integritas deployment.
 
-`npm run build:contributor` menggunakan profil build khusus backend. Profil ini membuat stub sementara
-untuk berkas UI dasbor selama proses build, mempertahankan handler rute API, dan memulihkan berkas asli
-setelah build. Gunakan `npm run build` untuk perubahan yang memengaruhi UI dasbor atau untuk validasi
-rilis penuh; profil kontributor bukan pengganti build rilis.
+`npm run build:contributor` menggunakan profil build khusus backend. Profil ini sementara mengganti file
+UI dasbor dengan stub saat melakukan build, mempertahankan handler rute API, lalu memulihkan file asli
+setelah build selesai. Gunakan `npm run build` untuk perubahan yang memengaruhi UI dasbor atau untuk validasi
+rilis lengkap; profil kontributor bukan pengganti build rilis.
 
 > **Catatan deployment VPS:** direktori image jarak jauh `/usr/lib/node_modules/omniroute/app/`
-> tidak berubah. Skill deployment melakukan rsync terhadap isi `dist/` ke direktori tersebut.
-> Hanya jalur keluaran build di dalam repositori yang berubah (`app/` → `dist/`).
+> tidak berubah. Skill deployment melakukan rsync terhadap isi `dist/` ke dalamnya.
+> Hanya jalur output build di dalam repositori yang berpindah (`app/` → `dist/`).
 
 URL default:
 

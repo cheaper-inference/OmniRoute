@@ -1,5 +1,6 @@
 "use client";
 
+import { Disclosure, DisclosureContent, DisclosureTrigger } from "@omniroute/ui-kit/disclosure";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useRef } from "react";
@@ -1029,14 +1030,14 @@ export default function ReasoningRoutingRules({
                 {String(warning)}
               </p>
             ))}
-            <details>
-              <summary className="cursor-pointer text-sm text-text-muted">
-                {e("technicalDetails")}
-              </summary>
-              <pre className="mt-3 max-h-64 overflow-auto whitespace-pre-wrap break-all text-xs text-text-muted">
-                {JSON.stringify(simulation, null, 2)}
-              </pre>
-            </details>
+            <Disclosure>
+              <DisclosureTrigger>{e("technicalDetails")}</DisclosureTrigger>
+              <DisclosureContent keepMounted>
+                <pre className="mt-3 max-h-64 overflow-auto whitespace-pre-wrap break-all text-xs text-text-muted">
+                  {JSON.stringify(simulation, null, 2)}
+                </pre>
+              </DisclosureContent>
+            </Disclosure>
           </div>
         )}
       </Card>

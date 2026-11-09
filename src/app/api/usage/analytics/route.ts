@@ -68,7 +68,6 @@ function getRangeStartIso(range: string): string | null {
 const WEEKDAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 type PricingByProvider = Record<string, Record<string, Record<string, unknown>>>;
-type UsageRows = Array<Record<string, unknown>>;
 type ComputeCostFromPricing = (
   pricing: Record<string, unknown> | null | undefined,
   tokens: Record<string, number | undefined> | null | undefined,
@@ -361,8 +360,13 @@ function resolveModelPricing(
   );
 }
 
+// `row` is declared as `object` rather than `Record<string, unknown>` because the
+// callers pass concrete row interfaces, which have no index signature and so are
+// not assignable to a Record. The body reads camelCase and snake_case spellings
+// off the same shape, so the widening happens once, here, instead of at 13 call
+// sites with `as unknown as`.
 function computeUsageRowCost(
-  row: Record<string, unknown>,
+  row: object,
   pricingByProvider: PricingByProvider,
   providerAliasMap: Record<string, string>,
   normalizeModelName: (model: string) => string,
@@ -370,12 +374,13 @@ function computeUsageRowCost(
   flatRateAsZero = true,
   pricingContext?: PricingResolutionContext
 ): number {
-  const provider = toStringValue(row.provider);
-  const model = toStringValue(row.model);
+  const r = row as Record<string, unknown>;
+  const provider = toStringValue(r.provider);
+  const model = toStringValue(r.model);
   if (!provider || !model) return 0;
-  const serviceTier = normalizeServiceTier(row.serviceTier ?? row.service_tier);
-  const isAggregated = toNumber(row.isAggregated ?? row.is_aggregated) > 0;
-  const storedCost = toNumber(row.storedCost ?? row.stored_cost);
+  const serviceTier = normalizeServiceTier(r.serviceTier ?? r.service_tier);
+  const isAggregated = toNumber(r.isAggregated ?? r.is_aggregated) > 0;
+  const storedCost = toNumber(r.storedCost ?? r.stored_cost);
 
   // Billed-cost views show flat-rate providers as $0, whatever was stored.
   if (flatRateAsZero && isFlatRateProvider(provider)) return 0;
@@ -406,11 +411,11 @@ function computeUsageRowCost(
     computeCostFromPricing(
       pricing,
       {
-        input: toNumber(row.costPromptTokens ?? row.promptTokens),
-        output: toNumber(row.costCompletionTokens ?? row.completionTokens),
-        cacheRead: toNumber(row.costCacheReadTokens ?? row.cacheReadTokens),
-        cacheCreation: toNumber(row.costCacheCreationTokens ?? row.cacheCreationTokens),
-        reasoning: toNumber(row.costReasoningTokens ?? row.reasoningTokens),
+        input: toNumber(r.costPromptTokens ?? r.promptTokens),
+        output: toNumber(r.costCompletionTokens ?? r.completionTokens),
+        cacheRead: toNumber(r.costCacheReadTokens ?? r.cacheReadTokens),
+        cacheCreation: toNumber(r.costCacheCreationTokens ?? r.cacheCreationTokens),
+        reasoning: toNumber(r.costReasoningTokens ?? r.reasoningTokens),
       },
       {
         provider,
@@ -423,7 +428,8 @@ function computeUsageRowCost(
 }
 
 function computeUsageRowStandardCost(
-  row: Record<string, unknown>,
+  // Concrete rows have no index signature; widen once here.
+  row: object,
   pricingByProvider: PricingByProvider,
   providerAliasMap: Record<string, string>,
   normalizeModelName: (model: string) => string,
@@ -431,11 +437,12 @@ function computeUsageRowStandardCost(
   flatRateAsZero = true,
   pricingContext?: PricingResolutionContext
 ): number {
+  const r = row as Record<string, unknown>;
   // A raw row's provider-reported cost has no standard-tier alternative to compare
   // against, so it counts the same on both sides and yields no savings. A rollup's
   // stored cost is tier-specific and is re-priced from its tokens instead.
-  const keepsReportedCost = toNumber(row.isAggregated ?? row.is_aggregated) === 0;
-  const reportedCost = keepsReportedCost ? toNumber(row.storedCost ?? row.stored_cost) : 0;
+  const keepsReportedCost = toNumber(r.isAggregated ?? r.is_aggregated) === 0;
+  const reportedCost = keepsReportedCost ? toNumber(r.storedCost ?? r.stored_cost) : 0;
   return computeUsageRowCost(
     {
       ...row,
@@ -456,13 +463,15 @@ function computeUsageRowStandardCost(
 }
 
 function computeUsageSavingsTokens(
-  row: Record<string, unknown>,
+  // Concrete rows have no index signature; widen once here.
+  row: object,
   serviceTier: string,
   getCodexFastCostMultiplier: GetCodexFastCostMultiplier
 ): number {
-  const provider = toStringValue(row.provider);
-  const model = toStringValue(row.model);
-  const totalTokens = toNumber(row.totalTokens);
+  const r = row as Record<string, unknown>;
+  const provider = toStringValue(r.provider);
+  const model = toStringValue(r.model);
+  const totalTokens = toNumber(r.totalTokens);
   if (!provider || !model || totalTokens <= 0) return 0;
 
   const standardMultiplier = getCodexFastCostMultiplier(provider, model, "standard");
@@ -629,10 +638,13 @@ async function computeAnalyticsResponse(
       return NextResponse.json({ byApiKey });
     }
 
-    const summaryRow = getUsageSummary(unifiedSource, unifiedParams) as Record<string, unknown>;
+    const summaryRow = getUsageSummary(unifiedSource, unifiedParams) as unknown as Record<
+      string,
+      unknown
+    >;
 
-    const dailyRows = getDailyUsage(unifiedSource, unifiedParams) as UsageRows;
-    const dailyCostRows = getDailyCostRows(unifiedSource, unifiedParams) as UsageRows;
+    const dailyRows = getDailyUsage(unifiedSource, unifiedParams);
+    const dailyCostRows = getDailyCostRows(unifiedSource, unifiedParams);
 
     const heatmapStart = new Date();
     heatmapStart.setUTCDate(heatmapStart.getUTCDate() - 364);
@@ -654,26 +666,26 @@ async function computeAnalyticsResponse(
       });
     }
 
-    const heatmapRows = getHeatmapRows(heatmapConditions, heatmapParams) as UsageRows;
+    const heatmapRows = getHeatmapRows(heatmapConditions, heatmapParams);
 
-    const modelRows = getModelUsageRows(unifiedSource, unifiedParams) as UsageRows;
+    const modelRows = getModelUsageRows(unifiedSource, unifiedParams);
 
-    const providerCostRows = getProviderCostRows(unifiedSource, unifiedParams) as UsageRows;
+    const providerCostRows = getProviderCostRows(unifiedSource, unifiedParams);
 
-    const providerRows = getProviderUsageRows(unifiedSource, unifiedParams) as UsageRows;
+    const providerRows = getProviderUsageRows(unifiedSource, unifiedParams);
 
     const accountCostWhereClause = whereClause
       .replace(/timestamp/g, "usage_history.timestamp")
       .replace(/api_key_/g, "usage_history.api_key_");
-    const accountCostRows = getAccountCostRows(accountCostWhereClause, params) as UsageRows;
+    const accountCostRows = getAccountCostRows(accountCostWhereClause, params);
 
-    const accountRows = getAccountUsageRows(accountCostWhereClause, params) as UsageRows;
+    const accountRows = getAccountUsageRows(accountCostWhereClause, params);
 
-    const apiKeyRows = getApiKeyUsageRows(apiKeyWhereClause, params) as UsageRows;
+    const apiKeyRows = getApiKeyUsageRows(apiKeyWhereClause, params);
 
-    const serviceTierRows = getServiceTierUsageRows(unifiedSource, unifiedParams) as UsageRows;
+    const serviceTierRows = getServiceTierUsageRows(unifiedSource, unifiedParams);
 
-    const apiKeyMetadataRows = getApiKeyMetadataRows(apiKeyWhereClause, params) as UsageRows;
+    const apiKeyMetadataRows = getApiKeyMetadataRows(apiKeyWhereClause, params);
 
     const apiKeyMetadata = new Map<string, { latestName: string; aliases: Set<string> }>();
     for (const row of apiKeyMetadataRows) {
@@ -690,9 +702,9 @@ async function computeAnalyticsResponse(
       apiKeyMetadata.set(groupKey, existing);
     }
 
-    const weeklyRows = getWeeklyPatternRows(unifiedSource, unifiedParams) as UsageRows;
+    const weeklyRows = getWeeklyPatternRows(unifiedSource, unifiedParams);
 
-    const fallbackRow = getFallbackStats(whereClause, params) as Record<string, unknown>;
+    const fallbackRow = getFallbackStats(whereClause, params) as unknown as Record<string, unknown>;
     const errorBreakdown = getErrorTypeBreakdown(whereClause, params);
 
     const summary = {
@@ -1131,7 +1143,7 @@ async function computeAnalyticsResponse(
           apiKeyParams: apiKeyParamEntries,
         });
 
-        const presetModelRows = getPresetCostModelRows(pSrc, pParams) as UsageRows;
+        const presetModelRows = getPresetCostModelRows(pSrc, pParams);
 
         let presetTotalCost = 0;
         for (const row of presetModelRows) {

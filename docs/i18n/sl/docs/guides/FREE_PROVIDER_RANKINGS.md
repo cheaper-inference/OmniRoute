@@ -13,13 +13,13 @@
 
 ## Kaj je
 
-OmniRoute registrira 377 ponudnikov, vključno z označenimi 155 kataloškimi vpisi**free/no-auth** (ključ brez avtorizacije, brezplačne ravni OAuth ali brezplačne API ključ — glejte [Vodnik po brezplačnih stopnjah](../getting-started/FREE-TIERS-GUIDE.md) in celoten [imenik brezplačnih stopenj](../reference/FREE_TIERS.md) ). Ulov: brezplačni ponudniki se zelo razlikujejo glede kakovosti modelov. Ponudnik brez avtorizacije, ki služi mejnemu modelu, je veliko bolj uporaben kot tisti, ki služi majhnemu starejšemu modelu.
+OmniRoute registrira 381 ponudnikov, vključno z označenimi 155 kataloškimi vpisi**free/no-auth** (no-auth, free-tier OAuth ali free-tier API ključ — glejte [Vodnik po brezplačnih stopnjah](../getting-started/FREE-TIERS-GUIDE.md) in celoten [imenik brezplačnih stopenj](../reference/FREE_TIERS.md) ). Ulov: brezplačni ponudniki se zelo razlikujejo glede kakovosti modelov. Ponudnik brez avtorizacije, ki služi mejnemu modelu, je veliko bolj uporaben kot tisti, ki služi majhnemu starejšemu modelu.
 
 **Brezplačne lestvice ponudnikov** odgovori "** kateri brezplačni ponudnik mi ponudi najboljši model?** " z včlanitvijo v katalog vsakega brezplačnega ponudnika s** ocene kakovosti, pridobljene iz množice** od** Arena AI lestvica najboljših** (human-preference ELO, ista ideja za LMArena chatbot areno). Ponudniki so nato razvrščeni glede na moč svojih** najboljši brezplačni model** .
 
 Razvrstitev je izračunana iz treh dejanskih virov:
 
-1. Seznami brezplačnih ponudnikov — `NOAUTH_PROVIDERS`, plus vnosi `OAUTH_PROVIDERS` / `APIKEY_PROVIDERS` z zastavico `hasFree` (`src/shared/constants/providers.ts`).
+1. Brezplačni ponudnik navaja — `NOAUTH_PROVIDERS` in vnose `OAUTH_PROVIDERS` / `APIKEY_PROVIDERS` z zastavico `hasFree` (`src/shared/constants/providers.ts`).
 2. Katalog modelov vsakega ponudnika iz registra ponudnikov (`open-sse/config/providerRegistry.ts`).
 3. ELO izpeljani rezultati prileganja nalogi, ki jih v tabeli `model_intelligence` DB shrani sinhronizacijski mehanizem Arena ELO (`src/lib/arenaEloSync.ts`).
 

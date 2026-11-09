@@ -108,7 +108,7 @@ loc să permită apariția silențioasă a divergențelor.
 
 ---
 
-## 1. Catalogul codului CLI (27 de instrumente)
+## 1. Catalogul codului CLI (28 de instrumente)
 
 Toate instrumentele care apar în `/dashboard/cli-code`. Cele cu `baseUrlSupport: none` sunt conectate prin MITM sau un ghid manual în loc de o bază personalizată URL:
 
@@ -135,6 +135,7 @@ Toate instrumentele care apar în `/dashboard/cli-code`. Cele cu `baseUrlSupport
 | grok-build     | Grok Build                      | xAI                 | deplin         | personalizat           | fals         |
 | zdrobi         | Zdrobi                          | OSS (farmec)        | deplin         | personalizat           | fals         |
 | qwen           | Codul Qwen                      | Alibaba             | deplin         | ghid                   | adevărat     |
+| openclaude     | OpenClaude                      | Gitlawb (OSS)       | deplin         | ghid                   | fals         |
 | zed            | Zed                             | Zed Industries      | deplin         | ghid                   | fals         |
 | cursor         | Cursor                          | Oricare sferă       | nici unul      | ghid                   | fals         |
 | antigravitație | Antigravity                     | Google              | nici unul      | mitm                   | fals         |
@@ -220,22 +221,22 @@ interface ToolBatchStatus {
 
 ---
 
-## 6. Gestionarea setărilor pentru instrumentele noi
+## 6. Setări Handler pentru instrumente noi
 
-Instrumentele noi cu `configType: "custom"` au rute API dedicate pentru setări:
+Noile instrumente cu `configType: "custom"` au setări dedicate rute API :
 
-| Rută                                        | Instrument                                                                       |
-| ------------------------------------------- | -------------------------------------------------------------------------------- |
-| `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                                          |
-| `POST /api/cli-tools/jcode-settings`        | jcode (opțiunea --base-url)                                                      |
-| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, moștenit)                                         |
-| `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, principal + sincronizare moștenită cu `~/.deepseek`) |
-| `POST /api/cli-tools/smelt-settings`        | Smelt                                                                            |
-| `POST /api/cli-tools/pi-settings`           | Agent de programare Pi                                                           |
-| `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)                            |
-| `POST /api/cli-tools/qwen-settings`         | Qwen Code (`~/.qwen/settings.json` + cheie `.env` dedicată)                      |
+| Traseu                                      | Instrument                                                            |
+| ------------------------------------------- | --------------------------------------------------------------------- |
+| `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                               |
+| `POST /api/cli-tools/jcode-settings`        | jcode (steagul --base-url )                                           |
+| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, moștenire)                             |
+| `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, + primar legacy `~/.deepseek` sync)       |
+| `POST /api/cli-tools/smelt-settings`        | Mirosit                                                               |
+| `POST /api/cli-tools/pi-settings`           | Agent de codare Pi (`~/.pi/agent/models.json`, `providers.omniroute`) |
+| `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)                 |
+| `POST /api/cli-tools/qwen-settings`         | Qwen Code (`~/.qwen/settings.json` + dedicated `.env` key)            |
 
-Toate rutele utilizează `sanitizeErrorMessage()` pentru răspunsurile de eroare (Regula strictă nr. 12).
+Toate rutele folosesc `sanitizeErrorMessage()` pentru răspunsuri la erori (Regula dura #12).
 
 ---
 
@@ -294,19 +295,19 @@ Sunt furnizate traduceri complete în PT-BR și EN. Alte 39 de localizări folos
 
 ## 9. Pornire rapidă
 
-### Pasul 1 — Obțineți o cheie API OmniRoute
+### Pasul 1 — Obțineți o cheie OmniRoute API
 
-1. Deschideți `/dashboard/api-manager` → **Creați o cheie API**
+1. Deschideți `/dashboard/api-manager` →** Creați cheia API**
 2. Dați-i un nume (de ex. `cli-tools`) și selectați toate permisiunile
-3. Copiați cheia — veți avea nevoie de ea pentru fiecare CLI de mai jos
+3. Copiați cheia — veți avea nevoie pentru fiecare CLI de mai jos
 
-> Cheia dvs. arată astfel: `sk-xxxxxxxxxxxxxxxx-xxxxxxxxx`
+> Cheia ta arată astfel: `sk-xxxxxxxxxxxxxxxx-xxxxxxxxx`
 
 ---
 
 ### Pasul 2 — Instalați instrumentele CLI
 
-Toate instrumentele bazate pe npm necesită Node.js 22.22.2+ sau 24.x:
+Toate instrumentele bazate pe npm necesită Node.js 22.22.2 + sau 24.x:
 
 ```bash
 # Claude Code (Anthropic)
@@ -327,58 +328,57 @@ npm install -g kilocode
 # Qwen Code
 npm install -g @qwen-code/qwen-code
 
-# Google Gemini CLI (poate fi lansat prin `omniroute run gemini` → interfața /v1beta)
+# Google Gemini CLI (launchable via `omniroute run gemini` → /v1beta surface)
 npm install -g @google/gemini-cli
 
 # Aider
 pip install aider-chat
 
 # Smelt
-cargo install smelt  # Bazat pe Rust
+cargo install smelt  # Rust-based
 
-# Agentul de programare Pi
-# consultați https://github.com/zechnerj/pi-coding-agent pentru instalare
+# Pi coding agent
+npm install -g --ignore-scripts @earendil-works/pi-coding-agent
 
 # jcode
-# consultați https://github.com/1jehuang/jcode pentru instalare
+# see https://github.com/1jehuang/jcode for install
 ```
 
 ---
 
-### Pasul 3 — Configurați prin panoul de control
+### Pasul 3 — Configurați prin tabloul de bord
 
-1. Accesați `http://localhost:20128/dashboard/cli-code`
-2. Găsiți instrumentul în grilă
+1. Du-te la `http://localhost:20128/dashboard/cli-code`
+2. Găsiți instrumentul dvs. în grilă
 3. Faceți clic pe card pentru a deschide pagina cu detaliile instrumentului
-4. Selectați cheia API și adresa URL de bază
-5. Faceți clic pe **Aplicați configurația** sau copiați fragmentul de configurare manuală
+4. Selectați cheia API și baza URL
+5. Clic** Aplicați Config** sau copiați fragmentul de configurare manuală
 
 ---
 
-### Pasul 4 — Setați variabilele globale de mediu
+### Pasul 4 — Setați variabilele de mediu globale
 
 ```bash
-# Endpoint universal OmniRoute
+# OmniRoute Universal Endpoint
 export OPENAI_BASE_URL="http://localhost:20128/v1"
 export OPENAI_API_KEY="sk-your-omniroute-key"
 export ANTHROPIC_BASE_URL="http://localhost:20128"
 export ANTHROPIC_AUTH_TOKEN="sk-your-omniroute-key"
-# Gemini CLI citește GOOGLE_GEMINI_BASE_URL la RĂDĂCINĂ (SDK-ul său adaugă singur /v1beta/...)
+# Gemini CLI reads GOOGLE_GEMINI_BASE_URL at the ROOT (its SDK appends /v1beta/... itself)
 export GOOGLE_GEMINI_BASE_URL="http://localhost:20128"
 export GEMINI_API_KEY="sk-your-omniroute-key"
 ```
 
-> Pentru un **server la distanță**, înlocuiți `localhost:20128` cu adresa IP sau domeniul serverului,
-> de ex. `http://<your-server-ip>:20128`.
+> Pentru a** server la distanță** înlocuiți `localhost:20128` cu serverul IP sau domeniul, de exemplu `http://<your-server-ip>:20128`.
 
 ---
 
 ### Pasul 4 — Configurați fiecare instrument
 
-#### Claude Code
+#### Codul Claude
 
 ```bash
-# Creați ~/.claude/settings.json:
+# Create ~/.claude/settings.json:
 mkdir -p ~/.claude && cat > ~/.claude/settings.json << EOF
 {
   "env": {
@@ -389,7 +389,7 @@ mkdir -p ~/.claude && cat > ~/.claude/settings.json << EOF
 EOF
 ```
 
-Utilizați rădăcina gateway-ului Anthropic unificat pentru Claude Code. Nu adăugați `/v1` aici.
+Utilizați rădăcina unificată de gateway Anthropic pentru codul Claude. Nu adăugați `/v1` aici.
 
 **Test:** `claude "say hello"`
 
@@ -397,10 +397,7 @@ Utilizați rădăcina gateway-ului Anthropic unificat pentru Claude Code. Nu ad�
 
 #### OpenAI Codex
 
-Versiunea modernă Codex (v0.137+) citește numai `~/.codex/config.toml` — vechiul
-`config.yaml` aparține CLI-ului npm vechi și este ignorat fără notificare. Cheia API
-rămâne în variabila de mediu `OMNIROUTE_API_KEY` (`env_key`), niciodată
-în interiorul fișierului:
+Codex modern (v0.137 +) citește numai `~/.codex/config.toml` — vechiul `config.yaml` aparține moștenirii npm CLI și este ignorat în tăcere. Cheia API rămâne în variabila de mediu `OMNIROUTE_API_KEY` (`env_key`), niciodată în fișier:
 
 ```bash
 mkdir -p ~/.codex && cat > ~/.codex/config.toml << EOF
@@ -448,14 +445,44 @@ EOF
 
 **Test:** `opencode`
 
-> Utilizați `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high`
-> pentru a trimite variante cu raționament.
+> Utilizați `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high` pentru a trimite variante de gândire.
 
 ---
 
-#### Cline (CLI sau VS Code)
+#### Agent de codare Pi
 
-**Modul CLI:**
+Instalați pachetul oficial Pi Coding Agent cu `npm install -g --ignore-scripts @earendil-works/pi-coding-agent`. Pi citește furnizorii personalizați din `~/.pi/agent/models.json`; setați `PI_CODING_AGENT_DIR` pentru a muta întregul director al agenților. Tabloul de bord urmează această modificare. Pi nu descoperă modele din punctele finale personalizate, așa că OmniRoute scrie modelul selectat în `models[]` folosind `openai-completions` API al lui Pi și punctul final `/v1` compatibil cu OmniRoute OpenAI.
+
+În**CLI Tools → Pi** , alegeți un punct final, o cheie API și un model, examinați previzualizarea furnizorului, apoi aplicați. Previzualizarea este un fragment de furnizor: îmbinați `providers.omniroute` în `models.json` dvs. existent atunci când configurați Pi manual, astfel încât ceilalți furnizori și setări să rămână intacte.
+
+```json
+{
+  "$schema": "https://pi.dev/schemas/models.schema.json",
+  "providers": {
+    "omniroute": {
+      "baseUrl": "http://localhost:20128/v1",
+      "api": "openai-completions",
+      "apiKey": "sk-your-omniroute-key",
+      "omnirouteManaged": true,
+      "models": [{ "id": "auto/best-coding", "name": "auto/best-coding" }]
+    }
+  }
+}
+```
+
+Pi reîncarcă `models.json` când deschideți `/model`. Testați ruta configurată cu ID-ul furnizorului și ID-ul modelului pe care le-ați selectat:
+
+```bash
+pi --provider omniroute --model auto/best-coding --print "Reply with a short greeting."
+```
+
+Referințe: [modele Pi și furnizori personalizați](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/models.md), [variabile de mediu Pi](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/environment-variables.md), [instrucțiuni de instalare Pi](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/README.md).
+
+---
+
+#### Cline (codul CLI sau VS )
+
+**modul CLI :**
 
 ```bash
 mkdir -p ~/.cline/data && cat > ~/.cline/data/globalState.json << EOF
@@ -467,22 +494,21 @@ mkdir -p ~/.cline/data && cat > ~/.cline/data/globalState.json << EOF
 EOF
 ```
 
-**Modul VS Code:**
-Setările extensiei Cline → Furnizor API: `OpenAI Compatible` → URL de bază: `http://localhost:20128/v1`
+**Modul cod VS :** Setări extensie Cline → API Furnizor: `OpenAI Compatible` → Baza URL: `http://localhost:20128/v1`
 
-Sau utilizați panoul de control OmniRoute → **Instrumente CLI → Cline → Aplicați configurația**.
+Sau folosiți tabloul de bord OmniRoute →**CLI Tools → Cline → Aplicare config** .
 
 ---
 
-#### KiloCode (CLI sau VS Code)
+#### KiloCode (codul CLI sau VS )
 
-**Modul CLI:**
+**modul CLI :**
 
 ```bash
 kilocode --api-base http://localhost:20128/v1 --api-key sk-your-omniroute-key
 ```
 
-**Setări VS Code:**
+**Setări cod VS :**
 
 ```json
 {
@@ -491,13 +517,13 @@ kilocode --api-base http://localhost:20128/v1 --api-key sk-your-omniroute-key
 }
 ```
 
-Sau utilizați panoul de control OmniRoute → **Instrumente CLI → KiloCode → Aplicați configurația**.
+Sau folosiți tabloul de bord OmniRoute →**CLI Tools → KiloCode → Aplicare config** .
 
 ---
 
-#### Continue (extensie VS Code)
+#### Continuați ( Extensia de cod VS )
 
-Editați `~/.continue/config.yaml`:
+Editează `~/.continue/config.yaml`:
 
 ```yaml
 models:
@@ -509,20 +535,20 @@ models:
     default: true
 ```
 
-Reporniți VS Code după editare.
+Reporniți codul VS după editare.
 
 ---
 
 #### VS Code Insiders (`chatLanguageModels.json`)
 
-Utilizați această opțiune atunci când VS Code Insiders este configurat pentru modele cu endpoint personalizat și doriți ca OmniRoute să funcționeze fără un câmp de antet personalizat.
+Utilizați acest lucru atunci când VS Code Insiders este configurat pentru modele de puncte finale personalizate și doriți ca OmniRoute să funcționeze fără un câmp de antet personalizat.
 
 **Locație recomandată:**
 
 - Linux: `~/.config/Code - Insiders/User/chatLanguageModels.json`
 - Windows: `%APPDATA%/Code - Insiders/User/chatLanguageModels.json`
 
-**Exemplu folosind aliasul OmniRoute cu token:**
+**Exemplu de utilizare a aliasului OmniRoute tokenizat:**
 
 ```json
 [
@@ -547,26 +573,25 @@ Utilizați această opțiune atunci când VS Code Insiders este configurat pentr
 **Note:**
 
 - Înlocuiți `sk-your-omniroute-key` cu o cheie API creată în OmniRoute.
-- Câmpul `url` trebuie să indice către `/api/v1/vscode/{token}/chat/completions`.
-- Câmpul `modelsUrl` trebuie să indice către `/api/v1/vscode/{token}/models`.
-- Preferați fluxul obișnuit `/v1` + antet Bearer atunci când clientul acceptă antete personalizate.
-- Tokenurile încorporate în URL reprezintă o soluție de rezervă pentru compatibilitate și pot apărea în jurnalele editorului sau în istoricul proxy-ului.
+- Câmpul `url` ar trebui să indice către `/api/v1/vscode/{token}/chat/completions`.
+- Câmpul `modelsUrl` ar trebui să indice către `/api/v1/vscode/{token}/models`.
+- Preferați fluxul normal de antet `/v1` + Bearer atunci când clientul acceptă anteturi personalizate.
+- Tokenurile încorporate în URL sunt o rezervă de compatibilitate și pot apărea în jurnalele editorului sau în istoricul proxy.
 
 ---
 
 #### Kiro CLI (Amazon)
 
 ```bash
-# Autentificați-vă în contul AWS/Kiro:
+# Login to your AWS/Kiro account:
 kiro-cli login
 
-# CLI-ul folosește propria autentificare — OmniRoute nu este necesar ca backend pentru Kiro CLI.
-# Folosiți kiro-cli împreună cu OmniRoute pentru alte instrumente.
+# The CLI uses its own auth — OmniRoute is not needed as backend for Kiro CLI itself.
+# Use kiro-cli alongside OmniRoute for other tools.
 kiro-cli status
 ```
 
-Pentru aplicația desktop **Kiro IDE**, utilizați endpointul MITM expus de OmniRoute
-în `/dashboard/cli-tools → Kiro`.
+Pentru**Kiro IDE** aplicație desktop, utilizați punctul final MITM expus de OmniRoute sub `/dashboard/cli-tools → Kiro`.
 
 ---
 

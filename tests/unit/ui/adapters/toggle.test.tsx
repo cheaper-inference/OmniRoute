@@ -55,24 +55,39 @@ describe("Toggle adapter → kit Switch", () => {
     expect(sw.getAttribute("title")).toBe("Disable provider");
   });
 
-  it("xs/sm sizes use the compact extension; className reaches the root", () => {
+  it("xs/sm sizes render the kit sm switch, md/lg the default; className reaches the root", () => {
     const { container, rerender } = render(
       <Toggle onChange={() => {}} ariaLabel="x" size="sm" className="ml-auto" />
     );
-    const root = container.firstElementChild as HTMLElement;
-    expect(root.className).toContain("ci-switch--compact");
-    expect(root.className).toContain("ml-auto");
-    rerender(<Toggle onChange={() => {}} ariaLabel="x" size="md" />);
-    expect((container.firstElementChild as HTMLElement).className).not.toContain(
-      "ci-switch--compact"
-    );
+    const root = () => container.firstElementChild as HTMLElement;
+    expect(root().getAttribute("data-size")).toBe("sm");
+    expect(root().className).toContain("ci-switch--size-sm");
+    expect(root().className).toContain("ml-auto");
+    expect(root().className).not.toContain("ci-switch--compact");
+    rerender(<Toggle onChange={() => {}} ariaLabel="x" size="xs" />);
+    expect(root().getAttribute("data-size")).toBe("sm");
+    rerender(<Toggle onChange={() => {}} label="Row" size="sm" />);
+    expect(root().getAttribute("data-size")).toBe("sm");
+    expect(root().className).toContain("ci-switch--size-sm");
+    for (const size of ["md", "lg"] as const) {
+      rerender(<Toggle onChange={() => {}} ariaLabel="x" size={size} />);
+      expect(root().getAttribute("data-size")).toBe("default");
+      expect(root().className).toContain("ci-switch--size-default");
+      expect(root().className).not.toContain("ci-switch--size-sm");
+      expect(root().className).not.toContain("ci-switch--compact");
+    }
   });
 
-  it("a disabled switch without a label row is dimmed like the legacy toggle", () => {
+  it("a disabled switch is dimmed by the kit, with or without a label row", () => {
     const { container, rerender } = render(<Toggle disabled onChange={() => {}} ariaLabel="x" />);
-    expect((container.firstElementChild as HTMLElement).className).toContain("opacity-50");
+    // the bare control carries the kit's standalone-disabled hooks (data-slot + data-disabled)
+    const control = container.firstElementChild as HTMLElement;
+    expect(control.className).toContain("ci-switch__control");
+    expect(control.getAttribute("data-slot")).toBe("switch");
+    expect(control.getAttribute("data-disabled")).toBe("true");
+    expect(control.className).not.toContain("opacity-50");
     rerender(<Toggle onChange={() => {}} ariaLabel="x" />);
-    expect((container.firstElementChild as HTMLElement).className).not.toContain("opacity-50");
+    expect((container.firstElementChild as HTMLElement).getAttribute("data-disabled")).toBeNull();
     // a labelled row is dimmed by the kit itself (data-disabled → opacity .48)
     rerender(<Toggle disabled onChange={() => {}} label="L" />);
     const row = container.firstElementChild as HTMLElement;
@@ -80,13 +95,27 @@ describe("Toggle adapter → kit Switch", () => {
     expect(row.className).not.toContain("opacity-50");
   });
 
-  it("globals.css stretches the transparent input over the control (unlabelled switches stay clickable)", () => {
-    const css = readFileSync(path.resolve(process.cwd(), "src/app/globals.css"), "utf8");
-    const at = css.indexOf(".ci-switch__control > .ci-switch__input {");
-    expect(at).toBeGreaterThan(-1);
-    const rule = css.slice(at, css.indexOf("}", at));
-    expect(rule).toMatch(/inset:\s*0/);
-    expect(rule).toMatch(/width:\s*100%/);
-    expect(rule).toMatch(/height:\s*100%/);
+  it("the kit stretches the transparent input over the control and dims a bare disabled switch", () => {
+    const css = readFileSync(path.resolve(process.cwd(), "packages/ui-kit/src/ci-ui.css"), "utf8");
+    const ruleOf = (selector: string) => {
+      const at = css.indexOf(`${selector} {`);
+      expect(at).toBeGreaterThan(-1);
+      return css.slice(at, css.indexOf("}", at));
+    };
+    const input = ruleOf("  .ci-switch__input");
+    expect(input).toMatch(/inset:\s*0/);
+    expect(input).toMatch(/width:\s*100%/);
+    expect(input).toMatch(/height:\s*100%/);
+    expect(input).toMatch(/z-index:\s*1/);
+    const sm = ruleOf("  .ci-switch--size-sm .ci-switch__input");
+    expect(sm).toMatch(/width:\s*100%/);
+    expect(sm).toMatch(/height:\s*100%/);
+    expect(ruleOf('  .ci-switch__control[data-slot="switch"][data-disabled="true"]')).toMatch(
+      /opacity:\s*0\.48/
+    );
+    // the OmniRoute workarounds are gone from globals.css
+    const globals = readFileSync(path.resolve(process.cwd(), "src/app/globals.css"), "utf8");
+    expect(globals).not.toContain(".ci-switch--compact");
+    expect(globals).not.toContain(".ci-switch__control > .ci-switch__input");
   });
 });

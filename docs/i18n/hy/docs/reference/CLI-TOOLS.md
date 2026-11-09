@@ -100,7 +100,7 @@ omniroute setup-whycodes
 
 ---
 
-## 1. CLI Code-ի կատալոգ (27 գործիք)
+## 1. CLI Code-ի կատալոգ (28 գործիք)
 
 Բոլոր գործիքները, որոնք հայտնվում են `/dashboard/cli-code` ում: Նրանք, ովքեր ունեն `baseUrlSupport: none` միացված են MITM կամ ձեռնարկի ուղեցույցի միջոցով՝ սովորական URL բազայի փոխարեն:
 
@@ -127,6 +127,7 @@ omniroute setup-whycodes
 | գրոկ-կառուց      | Grok Կառուցել               | xAI                   | լիքը           | սովորություն     | կեղծ         |
 | ջախջախել         | Ջախջախել                    | OSS (հմայքը)          | լիքը           | սովորություն     | կեղծ         |
 | qwen             | Qwen ծածկագիր               | Alibaba               | լիքը           | ուղեցույց        | ճշմարիտ      |
+| openclaude       | OpenClaude                  | Gitlawb (OSS)         | լիքը           | ուղեցույց        | կեղծ         |
 | զեդ              | Zed                         | Zed Industries        | լիքը           | ուղեցույց        | կեղծ         |
 | կուրսորը         | Cursor                      | Անիսֆերա              | ոչ մեկը        | ուղեցույց        | կեղծ         |
 | հակագրավիտացիա   | Antigravity                 | Google                | ոչ մեկը        | միտմ             | կեղծ         |
@@ -212,22 +213,22 @@ interface ToolBatchStatus {
 
 ---
 
-## 6. Նոր գործիքների կարգավորումների մշակիչներ
+## 6. Կարգավորումների կարգավորիչներ նոր գործիքների համար
 
-`configType: "custom"` ունեցող նոր գործիքներն ունեն կարգավորումների API-ի առանձին երթուղիներ.
+`configType: "custom"` հետ նոր գործիքներն ունեն հատուկ կարգավորումներ API երթուղիներ.
 
-| Երթուղի                                     | Գործիք                                                                    |
-| ------------------------------------------- | ------------------------------------------------------------------------- |
-| `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                                   |
-| `POST /api/cli-tools/jcode-settings`        | jcode (--base-url դրոշակ)                                                 |
-| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, հնացած)                                    |
-| `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, հիմնական + հնացած `~/.deepseek` համաժամացում) |
-| `POST /api/cli-tools/smelt-settings`        | Smelt                                                                     |
-| `POST /api/cli-tools/pi-settings`           | Pi ծրագրավորման գործակալ                                                  |
-| `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)                     |
-| `POST /api/cli-tools/qwen-settings`         | Qwen Code (`~/.qwen/settings.json` + առանձին `.env` բանալի)               |
+| Երթուղի                                     | Գործիք                                                                            |
+| ------------------------------------------- | --------------------------------------------------------------------------------- |
+| `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                                           |
+| `POST /api/cli-tools/jcode-settings`        | jcode (--base-url դրոշ)                                                           |
+| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, ժառանգություն)                                     |
+| `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, առաջնային + ժառանգություն `~/.deepseek` համաժամեցում) |
+| `POST /api/cli-tools/smelt-settings`        | Smelt                                                                             |
+| `POST /api/cli-tools/pi-settings`           | Pi կոդավորման գործակալ (`~/.pi/agent/models.json`, `providers.omniroute`)         |
+| `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)                             |
+| `POST /api/cli-tools/qwen-settings`         | Qwen կոդ (`~/.qwen/settings.json` + նվիրված `.env` բանալի)                        |
 
-Բոլոր երթուղիները սխալների պատասխանների համար օգտագործում են `sanitizeErrorMessage()`-ը (Խիստ կանոն #12)։
+Բոլոր երթուղիները օգտագործում են `sanitizeErrorMessage()` սխալի պատասխանների համար (Դժվար կանոն #12):
 
 ---
 
@@ -288,17 +289,17 @@ interface ToolBatchStatus {
 
 ### Քայլ 1 — Ստացեք OmniRoute API բանալի
 
-1. Բացեք `/dashboard/api-manager` → **Ստեղծել API բանալի**
-2. Անվանեք այն (օրինակ՝ `cli-tools`) և ընտրեք բոլոր թույլտվությունները
-3. Պատճենեք բանալին․ այն ձեզ անհրաժեշտ կլինի ստորև ներկայացված յուրաքանչյուր CLI-ի համար
+1. Բաց `/dashboard/api-manager` →** Ստեղծեք API բանալին**
+2. Անուն տվեք (օր. `cli-tools`) և ընտրեք բոլոր թույլտվությունները
+3. Պատճենեք — բանալին, որը ձեզ անհրաժեշտ կլինի ստորև բերված յուրաքանչյուր CLI համար
 
-> Ձեր բանալին ունի հետևյալ տեսքը՝ `sk-xxxxxxxxxxxxxxxx-xxxxxxxxx`
+> Ձեր բանալին նման է՝ `sk-xxxxxxxxxxxxxxxx-xxxxxxxxx`
 
 ---
 
 ### Քայլ 2 — Տեղադրեք CLI գործիքները
 
-npm-ի վրա հիմնված բոլոր գործիքները պահանջում են Node.js 22.22.2+ կամ 24.x՝
+npm-ի վրա հիմնված բոլոր գործիքները պահանջում են Node.js 22.22.2 + կամ 24.x:
 
 ```bash
 # Claude Code (Anthropic)
@@ -319,58 +320,57 @@ npm install -g kilocode
 # Qwen Code
 npm install -g @qwen-code/qwen-code
 
-# Google Gemini CLI (գործարկվում է `omniroute run gemini`-ի միջոցով → /v1beta մակերես)
+# Google Gemini CLI (launchable via `omniroute run gemini` → /v1beta surface)
 npm install -g @google/gemini-cli
 
 # Aider
 pip install aider-chat
 
 # Smelt
-cargo install smelt  # Rust-ի վրա հիմնված
+cargo install smelt  # Rust-based
 
-# Pi ծրագրավորման գործակալ
-# տեղադրման համար տե՛ս https://github.com/zechnerj/pi-coding-agent
+# Pi coding agent
+npm install -g --ignore-scripts @earendil-works/pi-coding-agent
 
 # jcode
-# տեղադրման համար տե՛ս https://github.com/1jehuang/jcode
+# see https://github.com/1jehuang/jcode for install
 ```
 
 ---
 
-### Քայլ 3 — Կարգավորեք կառավարման վահանակի միջոցով
+### Քայլ 3 — Կարգավորեք վահանակի միջոցով
 
-1. Անցեք `http://localhost:20128/dashboard/cli-code`
-2. Ցանցում գտեք ձեր գործիքը
+1. Գնացեք `http://localhost:20128/dashboard/cli-code`
+2. Գտեք ձեր գործիքը ցանցում
 3. Սեղմեք քարտը՝ գործիքի մանրամասների էջը բացելու համար
-4. Ընտրեք ձեր API բանալին և բազային URL-ը
-5. Սեղմեք **Կիրառել կազմաձևումը** կամ պատճենեք ձեռքով կազմաձևման հատվածը
+4. Ընտրեք ձեր API բանալին և բազային URL
+5. Սեղմեք** Կիրառել Config** կամ պատճենեք ձեռքով կազմաձևման հատվածը
 
 ---
 
-### Քայլ 4 — Սահմանեք միջավայրի գլոբալ փոփոխականները
+### Քայլ 4 — Սահմանել գլոբալ շրջակա միջավայրի փոփոխականները
 
 ```bash
-# OmniRoute համընդհանուր վերջնակետ
+# OmniRoute Universal Endpoint
 export OPENAI_BASE_URL="http://localhost:20128/v1"
 export OPENAI_API_KEY="sk-your-omniroute-key"
 export ANTHROPIC_BASE_URL="http://localhost:20128"
 export ANTHROPIC_AUTH_TOKEN="sk-your-omniroute-key"
-# Gemini CLI-ն կարդում է GOOGLE_GEMINI_BASE_URL-ը ԱՐՄԱՏԱՅԻՆ մակարդակում (դրա SDK-ն ինքնուրույն ավելացնում է /v1beta/...)
+# Gemini CLI reads GOOGLE_GEMINI_BASE_URL at the ROOT (its SDK appends /v1beta/... itself)
 export GOOGLE_GEMINI_BASE_URL="http://localhost:20128"
 export GEMINI_API_KEY="sk-your-omniroute-key"
 ```
 
-> **Հեռակա սերվերի** դեպքում `localhost:20128`-ը փոխարինեք սերվերի IP հասցեով կամ տիրույթով,
-> օրինակ՝ `http://<your-server-ip>:20128`։
+> Համար ա** հեռավոր սերվեր** փոխարինել `localhost:20128` սերվերով IP կամ տիրույթով, օրինակ `http://<your-server-ip>:20128`.
 
 ---
 
-### Քայլ 4 — Կարգավորեք յուրաքանչյուր գործիքը
+### Քայլ 4 — Կազմաձևեք յուրաքանչյուր գործիք
 
-#### Claude Code
+#### Claude ծածկագիր
 
 ```bash
-# Ստեղծեք ~/.claude/settings.json-ը՝
+# Create ~/.claude/settings.json:
 mkdir -p ~/.claude && cat > ~/.claude/settings.json << EOF
 {
   "env": {
@@ -381,18 +381,15 @@ mkdir -p ~/.claude && cat > ~/.claude/settings.json << EOF
 EOF
 ```
 
-Claude Code-ի համար օգտագործեք Anthropic-ի միասնական դարպասի արմատը։ Այստեղ մի՛ ավելացրեք `/v1`։
+Օգտագործեք Anthropic gateway արմատը Claude կոդի համար: Մի ավելացրեք `/v1` այստեղ:
 
-**Փորձարկում՝** `claude "say hello"`
+**Փորձարկում:** `claude "say hello"`
 
 ---
 
 #### OpenAI Codex
 
-Ժամանակակից Codex-ը (v0.137+) կարդում է միայն `~/.codex/config.toml`-ը․ հին
-`config.yaml`-ը պատկանում է ժառանգական npm CLI-ին և անաղմուկ անտեսվում է։ API
-բանալին պահվում է `OMNIROUTE_API_KEY` միջավայրի փոփոխականում (`env_key`) և երբեք՝
-ֆայլի ներսում՝
+Ժամանակակից Codex (v0.137 +) կարդում է `~/.codex/config.toml` միայն — հին `config.yaml` պատկանում է ժառանգության npm CLI ին և լուռ անտեսվում է: API ստեղնը մնում է `OMNIROUTE_API_KEY` միջավայրի փոփոխականում (`env_key`), երբեք ֆայլի ներսում.
 
 ```bash
 mkdir -p ~/.codex && cat > ~/.codex/config.toml << EOF
@@ -407,9 +404,9 @@ EOF
 export OMNIROUTE_API_KEY="sk-your-omniroute-key"
 ```
 
-Ամբողջական տեղեկատու (պրոֆիլներ, `wire_api`, համատեքստի պատուհաններ)՝ [CODEX-CLI-CONFIGURATION.md](../guides/CODEX-CLI-CONFIGURATION.md)։
+Ամբողջական հղում (պրոֆիլներ, `wire_api`, համատեքստային պատուհաններ). [CODEX-CLI-CONFIGURATION.md](../guides/CODEX-CLI-CONFIGURATION.md).
 
-**Փորձարկում՝** `codex "what is 2+2?"`
+**Փորձարկում:** `codex "what is 2+2?"`
 
 ---
 
@@ -438,16 +435,46 @@ mkdir -p ~/.config/opencode && cat > ~/.config/opencode/opencode.json << EOF
 EOF
 ```
 
-**Փորձարկում՝** `opencode`
+**Փորձարկում:** `opencode`
 
-> Մտածողության տարբերակներ ուղարկելու համար օգտագործեք
-> `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high`։
+> Օգտագործեք `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high` մտածողության տարբերակներ ուղարկելու համար:
 
 ---
 
-#### Cline (CLI կամ VS Code)
+#### Pi կոդավորման գործակալ
 
-**CLI ռեժիմ՝**
+Տեղադրեք պաշտոնական Pi Coding Agent փաթեթը `npm install -g --ignore-scripts @earendil-works/pi-coding-agent` ով: Pi-ն կարդում է մաքսային պրովայդերներ `~/.pi/agent/models.json` ից; սահմանել `PI_CODING_AGENT_DIR` գործակալի ամբողջ գրացուցակը տեղափոխելու համար: Վահանակը հետևում է այդ անտեսմանը: Pi-ը չի հայտնաբերում մոդելներ հատուկ վերջնակետերից, ուստի OmniRoute ընտրված մոդելը գրում է `models[]`, օգտագործելով Pi-ի `openai-completions` API և OmniRoute OpenAI-ին համապատասխան `/v1` վերջնակետը:
+
+Մեջ**CLI Գործիքներ → Pi** , ընտրեք վերջնակետ, API բանալի և մոդել, վերանայեք մատակարարի նախադիտումը, ապա կիրառեք: Նախադիտումը մատակարարի հատված է. միացրեք `providers.omniroute` ձեր գոյություն ունեցող `models.json` ին, երբ Pi-ն ձեռքով կարգավորեք, որպեսզի մյուս մատակարարներն ու կարգավորումները մնան անփոփոխ:
+
+```json
+{
+  "$schema": "https://pi.dev/schemas/models.schema.json",
+  "providers": {
+    "omniroute": {
+      "baseUrl": "http://localhost:20128/v1",
+      "api": "openai-completions",
+      "apiKey": "sk-your-omniroute-key",
+      "omnirouteManaged": true,
+      "models": [{ "id": "auto/best-coding", "name": "auto/best-coding" }]
+    }
+  }
+}
+```
+
+Pi-ն վերաբեռնում է `models.json` երբ բացում եք `/model`: Փորձարկեք կազմաձևված երթուղին ձեր ընտրած մատակարարի և մոդելի ID-ով.
+
+```bash
+pi --provider omniroute --model auto/best-coding --print "Reply with a short greeting."
+```
+
+Հղումներ՝ [Pi մոդելներ և մաքսային մատակարարներ](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/models.md), [Pi միջավայրի փոփոխականներ](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/environment-variables.md), [Pi տեղադրման հրահանգներ](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/README.md) :
+
+---
+
+#### Cline (CLI կամ VS ծածկագիր)
+
+**CLI ռեժիմ:**
 
 ```bash
 mkdir -p ~/.cline/data && cat > ~/.cline/data/globalState.json << EOF
@@ -459,22 +486,21 @@ mkdir -p ~/.cline/data && cat > ~/.cline/data/globalState.json << EOF
 EOF
 ```
 
-**VS Code ռեժիմ՝**
-Cline ընդլայնման կարգավորումներ → API մատակարար՝ `OpenAI Compatible` → Բազային URL՝ `http://localhost:20128/v1`
+**VS Code ռեժիմ.** Cline ընդլայնման կարգավորումներ → API Մատակարար. `OpenAI Compatible` → Base URL: `http://localhost:20128/v1`
 
-Կամ օգտագործեք OmniRoute-ի կառավարման վահանակը → **CLI գործիքներ → Cline → Կիրառել կազմաձևումը**։
+Կամ օգտագործեք OmniRoute վահանակը →**CLI Գործիքներ → Cline → Կիրառել Կարգ** .
 
 ---
 
-#### KiloCode (CLI կամ VS Code)
+#### KiloCode (CLI կամ VS ծածկագիր)
 
-**CLI ռեժիմ՝**
+**CLI ռեժիմ:**
 
 ```bash
 kilocode --api-base http://localhost:20128/v1 --api-key sk-your-omniroute-key
 ```
 
-**VS Code-ի կարգավորումներ՝**
+**VS կոդի կարգավորումներ.**
 
 ```json
 {
@@ -483,13 +509,13 @@ kilocode --api-base http://localhost:20128/v1 --api-key sk-your-omniroute-key
 }
 ```
 
-Կամ օգտագործեք OmniRoute-ի կառավարման վահանակը → **CLI գործիքներ → KiloCode → Կիրառել կազմաձևումը**։
+Կամ օգտագործեք OmniRoute վահանակը →**CLI Գործիքներ → KiloCode → Կիրառել Կարգ** .
 
 ---
 
-#### Continue (VS Code ընդլայնում)
+#### Շարունակել (VS Code Extension)
 
-Խմբագրեք `~/.continue/config.yaml`-ը՝
+Խմբագրել `~/.continue/config.yaml`:
 
 ```yaml
 models:
@@ -501,20 +527,20 @@ models:
     default: true
 ```
 
-Խմբագրելուց հետո վերագործարկեք VS Code-ը։
+Խմբագրելուց հետո վերագործարկեք VS կոդը:
 
 ---
 
 #### VS Code Insiders (`chatLanguageModels.json`)
 
-Օգտագործեք սա, երբ VS Code Insiders-ը կազմաձևված է հատուկ վերջնակետերի մոդելների համար, և ցանկանում եք, որ OmniRoute-ն աշխատի առանց հատուկ վերնագրի դաշտի։
+Օգտագործեք սա, երբ VS Code Insiders-ը կազմաձևված է մաքսային վերջնակետի մոդելների համար, և դուք ցանկանում եք, որ OmniRoute աշխատի առանց հատուկ վերնագրի դաշտի:
 
-**Առաջարկվող տեղադրություն՝**
+**Առաջարկվող գտնվելու վայրը.**
 
-- Linux՝ `~/.config/Code - Insiders/User/chatLanguageModels.json`
-- Windows՝ `%APPDATA%/Code - Insiders/User/chatLanguageModels.json`
+- Linux: `~/.config/Code - Insiders/User/chatLanguageModels.json`
+- Windows: `%APPDATA%/Code - Insiders/User/chatLanguageModels.json`
 
-**Օրինակ՝ օգտագործելով թոքենացված OmniRoute կեղծանունը.**
+**Օրինակ՝ օգտագործելով նշանավորված OmniRoute կեղծանունը.**
 
 ```json
 [
@@ -536,29 +562,28 @@ models:
 ]
 ```
 
-**Նշումներ.**
+**Նշումներ:**
 
-- `sk-your-omniroute-key`-ը փոխարինեք OmniRoute-ում ստեղծված API բանալիով։
-- `url` դաշտը պետք է մատնանշի `/api/v1/vscode/{token}/chat/completions` հասցեն։
-- `modelsUrl` դաշտը պետք է մատնանշի `/api/v1/vscode/{token}/models` հասցեն։
-- Երբ հաճախորդը աջակցում է հատուկ վերնագրեր, նախընտրեք սովորական `/v1` + Bearer վերնագրի հոսքը։
-- URL-ում ներդրված թոքենները համատեղելիության համար նախատեսված պահուստային տարբերակ են և կարող են հայտնվել խմբագրիչի մատյաններում կամ պրոքսիի պատմության մեջ։
+- Փոխարինեք `sk-your-omniroute-key` OmniRoute ում ստեղծված API ստեղնով:
+- `url` դաշտը պետք է ցույց տա `/api/v1/vscode/{token}/chat/completions`:
+- `modelsUrl` դաշտը պետք է ցույց տա `/api/v1/vscode/{token}/models`:
+- Նախընտրեք `/v1` + Bearer վերնագրի նորմալ հոսքը, երբ հաճախորդն աջակցում է հատուկ վերնագրերին:
+- URL-ում ներկառուցված նշանները համատեղելիության հետադարձ կապ են և կարող են հայտնվել խմբագրի տեղեկամատյաններում կամ վստահված անձի պատմության մեջ:
 
 ---
 
 #### Kiro CLI (Amazon)
 
 ```bash
-# Մուտք գործեք ձեր AWS/Kiro հաշիվ.
+# Login to your AWS/Kiro account:
 kiro-cli login
 
-# CLI-ն օգտագործում է իր սեփական նույնականացումը. OmniRoute-ը որպես հետնամաս անհրաժեշտ չէ հենց Kiro CLI-ի համար։
-# Այլ գործիքների համար օգտագործեք kiro-cli-ն OmniRoute-ի հետ միասին։
+# The CLI uses its own auth — OmniRoute is not needed as backend for Kiro CLI itself.
+# Use kiro-cli alongside OmniRoute for other tools.
 kiro-cli status
 ```
 
-**Kiro IDE** աշխատասեղանի հավելվածի համար օգտագործեք OmniRoute-ի տրամադրած MITM վերջնակետը՝
-`/dashboard/cli-tools → Kiro` բաժնում։
+Համար**Kiro IDE** աշխատասեղանի հավելված, օգտագործեք MITM վերջնակետը, որը ցուցադրվում է OmniRoute ի կողմից `/dashboard/cli-tools → Kiro` տակ:
 
 ---
 

@@ -20,14 +20,19 @@ katvuse ja vastavusse viimise sammudega.
 - **Node.js** `>=22.22.2 <23` või `>=24.0.0 <27` (soovitatav: 24 LTS)
 - **npm** 10+
 
-> **npm v11+ kasutajad (Node 24+):** Pärast käsku `npm install` kontrollige, kas omamoodulid installiti:
-> `node -e "require('better-sqlite3')"`. Kui see ebaõnnestub veaga `MODULE_NOT_FOUND`,
-> käivitage `npm approve-scripts better-sqlite3 && npm install`. Vaadake jaotist
+> **Windows koos Node 24-ga:** kasutage praeguse 24 LTS-i haru uusimat paigaversiooni (vähemalt 24.20.0).
+> Varasemad versioonid võivad pärast edukalt läbitud teste katkestada, kui `--test-force-exit` protsessi
+> sulgeb. Node'i [Windowsi libuv parandus](https://github.com/nodejs/node/pull/61999) lahendab
+> selle käitusaegse krahhi; jätke testiväited ja käituri väljumise kontrollid sisse.
+
+> **npm v11+ kasutajad (Node 24+):** pärast `npm install` käivitamist kontrollige, kas natiivsed moodulid on installitud:
+> `node -e "require('better-sqlite3')"`. Kui see nurjub veaga `MODULE_NOT_FOUND`,
+> käivitage `npm approve-scripts better-sqlite3 && npm install`. Vt
 > [Tõrkeotsing](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
 
 - **Git**
 
-### Kloonimine ja installimine
+### Klooni loomine ja installimine
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -38,92 +43,92 @@ npm install
 ### Keskkonnamuutujad
 
 ```bash
-# Looge malli põhjal oma .env
+# Looge mallist oma .env
 cp .env.example .env
 
-# Genereerige nõutavad saladused
+# Genereerige vajalikud saladused
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-Peamised arenduskeskkonna muutujad:
+Arenduse jaoks olulised muutujad:
 
-| Muutuja                | Arenduskeskkonna vaikeväärtus | Kirjeldus                       |
-| ---------------------- | ----------------------------- | ------------------------------- |
-| `PORT`                 | `20128`                       | Serveri port                    |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`      | Kasutajaliidese baas-URL        |
-| `JWT_SECRET`           | (genereerige ülal)            | JWT allkirjastamise saladus     |
-| `INITIAL_PASSWORD`     | `CHANGEME`                    | Esmakordse sisselogimise parool |
-| `APP_LOG_LEVEL`        | `info`                        | Logimise detailsusaste          |
+| Muutuja                | Arenduse vaikeväärtus    | Kirjeldus                      |
+| ---------------------- | ------------------------ | ------------------------------ |
+| `PORT`                 | `20128`                  | Serveri port                   |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | Veebikliendi baas-URL          |
+| `JWT_SECRET`           | (genereerige ülal)       | JWT allkirjastamise saladus    |
+| `INITIAL_PASSWORD`     | `CHANGEME`               | Esimese sisselogimise parool   |
+| `APP_LOG_LEVEL`        | `info`                   | Logimise üksikasjalikkuse tase |
 
-### Juhtpaneeli seaded
+### Armatuurlaua seaded
 
-Juhtpaneel pakub funktsioonide jaoks kasutajaliidese lüliteid, mida saab seadistada ka keskkonnamuutujate kaudu:
+Armatuurlaud pakub kasutajaliidese lüliteid funktsioonide jaoks, mida saab seadistada ka keskkonnamuutujate kaudu:
 
-| Seadete asukoht   | Lüliti            | Kirjeldus                                    |
-| ----------------- | ----------------- | -------------------------------------------- |
-| Seaded → Täpsemad | Silumisrežiim     | Luba päringute silumislogid (kasutajaliides) |
-| Seaded → Üldine   | Külgriba nähtavus | Kuva või peida külgriba jaotised             |
+| Seadistuse asukoht  | Lüliti             | Kirjeldus                                  |
+| ------------------- | ------------------ | ------------------------------------------ |
+| Settings → Advanced | Debug Mode         | Silumisrežiimi päringulogide lubamine (UI) |
+| Settings → General  | Sidebar Visibility | Külgriba jaotiste kuvamine/peitmine        |
 
-Need seaded salvestatakse andmebaasi ja säilivad taaskäivituste vahel, alistades määramise korral keskkonnamuutujate vaikeväärtused.
+Need seaded salvestatakse andmebaasi ja säilivad taaskäivituste vahel, kui need on määratud, tühistades keskkonnamuutujate vaikeväärtused.
 
 ### Kohalik käivitamine
 
 ```bash
-# Arendusrežiim (automaatne taaslaadimine)
+# Arendusrežiim (kuumlaadimine)
 npm run dev
 
-# Tootmisversiooni koostamine
-npm run build    # next build → .build/next/, seejärel assembleStandalone → dist/
+# Tootmisjärk
+npm run build    # next build → .build/next/ then assembleStandalone → dist/
 npm run start
 
-# Kiire, ainult taustsüsteemi/API kompileerimine kaastöötajate muudatuste jaoks
+# Kiire ainult tagarakenduse/API kompileerimine kaasautorite muudatuste jaoks
 npm run build:contributor
 
-# Väljalaske koostamine (puhas korduskoostamine + HEAD-valvur — juurutamiseks kohustuslik)
-npm run build:release   # rm -rf .build dist && build + kirjutab faili dist/BUILD_SHA
+# Väljalaskejärk (puhas ümberehitus + HEAD-i marker — juurutamiseks nõutav)
+npm run build:release   # rm -rf .build dist && build + writes dist/BUILD_SHA
 
-# Levinud pordikonfiguratsioon
+# Levinud pordi seadistus
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Kaastöötaja koostamine teostab ainult kompileerimise valideerimise: see ei koosta autonoomset
-jaotust ega valikulisi omarakenduse pakendamise ressursse. Kasutage tavalist tootmiskoostamist,
-kui peate kontrollima väljastatavat paketti.
+Kaasautorite järk teostab ainult kompileerimise valideerimise: see ei koosta eraldiseisvat
+distributsiooni ega ehita valikulisi natiivse pakendamise varasid. Kui teil on vaja
+valmivat paketti valideerida, kasutage tavalist tootmisjärku.
 
-### Koostamisväljundi paigutus
+### Järgu väljundipaigutus
 
-| Kataloog  | Sisu                                                                                      | Versioonihalduses |
-| --------- | ----------------------------------------------------------------------------------------- | ----------------- |
-| `src/`    | Rakenduse lähtekood (TypeScript / TSX)                                                    | Jah               |
-| `.build/` | Vahefailid — käsu `next build` väljund (gitignore’iga eiratud, `distDir = .build/next`)   | Ei                |
-| `dist/`   | Väljastatav pakett — koostatud funktsiooniga `assembleStandalone` (gitignore’iga eiratud) | Ei                |
+| Kataloog  | Sisu                                                                    | Jälgitav |
+| --------- | ----------------------------------------------------------------------- | -------- |
+| `src/`    | Rakenduse lähtekood (TypeScript / TSX)                                  | Jah      |
+| `.build/` | Vahefailid — `next build` väljund (gitignored, `distDir = .build/next`) | Ei       |
+| `dist/`   | Valmis pakett — koostatud `assembleStandalone` abil (gitignored)        | Ei       |
 
-Koostamiskonveier läbitakse ühe korraga:
+Järgu töövoog on ühekordne:
 
 ```
 npm run build
-  └─ next build → .build/next/standalone  (Next.js-i väljund)
-  └─ assembleStandalone()                 (kopeerib autonoomse väljundi + staatilised failid + avalikud failid + omarakenduse ressursid)
-       └─ väljund: dist/                   (server.js, .next/static/, public/, node_modules/)
+  └─ next build → .build/next/standalone  (Next.js väljund)
+  └─ assembleStandalone()                 (kopeerib standalone + static + public + native assets)
+       └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` puhastab esmalt mõlemad kataloogid ja kirjutab juurutuse tervikluse
-valvurina faili `dist/BUILD_SHA` (= `git rev-parse --short HEAD`).
+`npm run build:release` puhastab lisaks esmalt mõlemad kataloogid ja kirjutab
+`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) juurutamise terviklikkuse markerina.
 
-`npm run build:contributor` kasutab ainult taustsüsteemi koostamisprofiili. See asendab koostamise
-ajaks juhtpaneeli kasutajaliidese failid ajutiselt tüvifailidega, säilitab API marsruudikäitlejad
-ja taastab pärast koostamist algsed failid. Kasutage käsku `npm run build` muudatuste puhul,
-mis mõjutavad juhtpaneeli kasutajaliidest, või väljalaske täielikuks valideerimiseks;
-kaastöötaja profiil ei asenda väljalaske koostamist.
+`npm run build:contributor` kasutab ainult tagarakenduse järgu profiili. See asendab
+järgu ajaks ajutiselt armatuurlaua kasutajaliidese failid, säilitab API marsruudikäitlejad
+ja taastab pärast järku algsed failid. Kasutage `npm run build` muudatuste korral, mis
+mõjutavad armatuurlaua kasutajaliidest, või täielikuks väljalaske valideerimiseks;
+kaasautorite profiil ei asenda väljalaskejärku.
 
-> **Märkus VPS-i juurutamise kohta:** kaugserveri tõmmise kataloog `/usr/lib/node_modules/omniroute/app/`
-> ei ole muutunud. Juurutusoskused sünkroonivad käsuga rsync kataloogi `dist/` sisu sinna.
-> Muutus ainult hoidlasisese koostamisväljundi asukoht (`app/` → `dist/`).
+> **VPS-i juurutamise märkus:** kaugpildi kataloog `/usr/lib/node_modules/omniroute/app/`
+> jääb muutmata. Juurutamisoskused sünkroonivad `dist/` sisu sinna rsynci abil.
+> Muudeti ainult repositooriumisisese järgu väljundirada (`app/` → `dist/`).
 
-Vaikimisi URL-id:
+Vaike-URL-id:
 
-- **Juhtpaneel**: `http://localhost:20128/dashboard`
+- **Armatuurlaud**: `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`
 
 ---

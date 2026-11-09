@@ -163,7 +163,7 @@ OmniRoute odhaluje 6 dovedností A2A zapojených v `src/lib/a2a/taskExecution.ts
 | Zpráva o zdraví          | `health-report`      | Jistič agregátů, cooldown, stav uzamčení podle poskytovatele                                                                                                      | zdraví, odolnost           | "Zobrazit zdravotní stav všech poskytovatelů" |
 | Seznam schopností        | `list-capabilities`  | Vrátí úplný katalog dovedností agenta se 45 položkami (konfigurace 23 API + 21 CLI + 1) jako tabulku markdown s nezpracovaným SKILL.md URLs pro vkládání kontextu | katalog, objev, dovednosti | "Seznam všech schopností OmniRoute "          |
 
-> Karta agenta by měla být zarovnána s aktuálním katalogem poskytovatelů 377; počty poskytovatelů a metadata free/no-auth jsou získávány z runtime registru.
+> Karta agenta by měla být zarovnána s aktuálním katalogem poskytovatelů 381; počty poskytovatelů a metadata free/no-auth jsou získávány z runtime registru.
 
 ### Detail dovednosti `list-capabilities`
 
@@ -180,56 +180,64 @@ Každý řádek obsahuje sloupec `rawUrl`, takže agenti mohou okamžitě načí
 
 ---
 
-## REST API (pomocné)
+## REST API (pomocný)
 
-Koncový bod JSON-RPC `/a2a` je kanonickým vstupním bodem A2A. Níže uvedené koncové body REST poskytují pomocný přístup pro řídicí panely a externí nástroje:
+Koncový bod JSON-RPC `/a2a` je kanonický vstupní bod A2A. Níže uvedené koncové body REST poskytují pomocný přístup k řídicím panelům a externím nástrojům:
 
-| Koncový bod                  | Metoda | Popis                                                            | Autorizace                                     |
-| :--------------------------- | :----- | :--------------------------------------------------------------- | :--------------------------------------------- |
-| `/api/a2a/status`            | GET    | Stav serveru, registrované dovednosti                            | (veřejné)                                      |
-| `/api/a2a/tasks`             | GET    | Seznam úloh s filtry                                             | správa                                         |
-| `/api/a2a/tasks/[id]`        | GET    | Získání úlohy podle ID                                           | správa                                         |
-| `/api/a2a/tasks/[id]/cancel` | POST   | Zrušení probíhající úlohy                                        | správa                                         |
-| `/.well-known/agent.json`    | GET    | Karta agenta (zjišťování A2A)                                    | (veřejné, ukládáno do mezipaměti po 3600 s)    |
-| `/api/a2a/tasks`             | POST   | Příchozí delegování do flotily OmniConductor (Conductor PRD RF5) | Bearer vůči `OMNIROUTE_API_KEY` + `a2aEnabled` |
+| Koncový bod                  | Metoda | Popis                                                            | Auth                                                                                                            |
+| :--------------------------- | :----- | :--------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------- |
+| `/api/a2a/status`            | GET    | Stav serveru, registrované dovednosti                            | (veřejnost)                                                                                                     |
+| `/api/a2a/tasks`             | GET    | Seznam úkolů s filtry                                            | management nebo klíč API (viz níže)                                                                             |
+| `/api/a2a/tasks/[id]`        | GET    | Získejte úkol od ID                                              | management nebo klíč API (viz níže)                                                                             |
+| `/api/a2a/tasks/[id]/cancel` | POST   | Zrušit běžící úlohu                                              | management nebo klíč API (viz níže)                                                                             |
+| `/.well-known/agent.json`    | GET    | Karta agenta (A2A discovery)                                     | (veřejné, mezipaměti 3600s)                                                                                     |
+| `/api/a2a/tasks`             | POST   | Příchozí delegování do flotily OmniConductor (Conductor PRD RF5) | stejné jako `GET`, plus `OMNIROUTE_API_KEY` pokud je nastaveno, když je `REQUIRE_API_KEY` vypnuto; `a2aEnabled` |
 
-**Příchozí delegování Conductor (`POST /api/a2a/tasks`):** externí agenti A2A delegují programátorskou práci flotile OmniConductor prostřednictvím OmniRoute. Tělo: `{ skill: "conductor" | "conductor-cli-<profile>", messages: [{role, content}], metadata: { conductor: { repo: { url, base_ref? }, mode?, cli?, model? } } }` — delegovat lze pouze dovednosti flotily Conductor (ty, které jsou uvedeny na kartě agenta); `metadata.conductor.repo.url` je povinné (flotila pracuje s repozitáři git). Trasa se převede na `POST /v1/tasks` centra pomocí serverového tokenu `CONDUCTOR_ORCHESTRATOR_TOKEN` (záložně `CONDUCTOR_HUB_TOKEN`) a vrátí `201 { conductor_task_id, state: "submitted" }`; stavy úloh jsou zpětně přenášeny prostřednictvím zrcadlení SSE→A2A (RF1) a jsou viditelné přes `GET /api/a2a/tasks?skill=conductor`.
+Kdo se dostane k trasám `/api/a2a/tasks*` závisí na přihlášení a nastavení klíče API:
+
+- `requireLogin=true` (výchozí): middleware připouští pouze přihlašovací údaje pro správu (relaci řídicího panelu, klíč `manage` -scope API, přístupový token `oma_` ) a `OMNIROUTE_API_KEY`. Prostý inferenční klíč dostane `403`. V hlavičce `Authorization` middleware bere pouze `OMNIROUTE_API_KEY` jako `Bearer <key>`; holý klíč nebo karta po `Bearer` získá `401`.
+- `requireLogin=false` nebo okno zpětné smyčky před připojením: se `REQUIRE_API_KEY=true` je akceptován jakýkoli platný klíč OmniRoute API nebo pověření pro správu a anonymní volající obdrží `401`; se `REQUIRE_API_KEY` jsou trasy otevřené.
+- `POST /api/a2a/tasks` navíc vyžaduje `OMNIROUTE_API_KEY` v hlavičce `Authorization`, když je tato proměnná nastavena a `REQUIRE_API_KEY` je vypnuto. Ostatní hlavičky, jako je `x-api-key`, se tam nepočítají. Při odhlášení nebo před začleněním klíč prochází s předponou `Bearer` nebo bez něj; se zapnutým přihlášením se přes middleware dostane pouze `Bearer <key>`.
+
+Kde je vyžadováno pověření, token `read` -scope `oma_` funguje pouze pro `GET`.
+
+**Delegování příchozího dirigenta (`POST /api/a2a/tasks`):** externí agenti A2A delegují práci kódování na flotilu OmniConductor prostřednictvím OmniRoute. Tělo: `{ skill: "conductor" | "conductor-cli-<profile>", messages: [{role, content}], metadata: { conductor: { repo: { url, base_ref? }, mode?, cli?, model? } } }` — pouze dovednosti velitelské flotily (ty uvedené na kartě agenta) lze delegovat; je vyžadován `metadata.conductor.repo.url` (flotila funguje na git repo). Trasa se převádí na `POST /v1/tasks` hubu pomocí `CONDUCTOR_ORCHESTRATOR_TOKEN` na straně serveru (záložní `CONDUCTOR_HUB_TOKEN`) a vrací `201 { conductor_task_id, state: "submitted" }`; Stavy úloh proudí zpět přes SSE→A2A mirror (RF1) a jsou viditelné přes `GET /api/a2a/tasks?skill=conductor`.
 
 ---
 
 ## Přidání nové dovednosti
 
-1. **Vytvořte soubor dovednosti:** `src/lib/a2a/skills/<your-skill>.ts`
+1. **Vytvořte soubor dovedností:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   Exportujte asynchronní funkci `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Dodržujte strukturu existujících dovedností, například `smartRouting.ts`.
+   Exportujte asynchronní funkci `(task: A2ATask, caller?: A2ACallerContext) => Promise<{ artifacts, metadata }>`. Sledujte tvar stávajících dovedností, jako je `smartRouting.ts`. Pokud dovednost volá zpět do OmniRoute přes HTTP, sestavte hlavičky se `buildSelfLoopHeaders(caller)` z `src/lib/a2a/selfLoopAuth.ts`, aby volání probíhalo s klíčem volajícího A2A, nikoli `OMNIROUTE_API_KEY`, a předejte `redirect: "error"` do `fetch`, aby přesměrování nikdy nezískalo klíč. Pomocník vytváří pouze hlavičky; každá dovednost si sama nastavuje politiku přesměrování. Pokud je vyřešený základní URL prostý http mimo privátní síť (loopback, název kontejneru nebo služby a soukromé adresy jsou v pořádku), vyhazuje `UnsafeSelfLoopTargetError` spíše než připojuje klíč, nebo pokud obsahuje přihlašovací údaje, takže dovednost, která polyká odmítnutá volání, musí tuto chybu znovu vyvolat.
 
-2. **Zaregistrujte obslužnou funkci:** v souboru `src/lib/a2a/taskExecution.ts` přidejte položku do `A2A_SKILL_HANDLERS`:
+2. **Správce registrace:** v `src/lib/a2a/taskExecution.ts` přidejte záznam do `A2A_SKILL_HANDLERS`:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...existující dovednosti
-     "your-skill": async (task) => {
+     // ...existing skills
+     "your-skill": async (task, caller) => {
        const skillModule = await import("./skills/yourSkill");
-       return skillModule.executeYourSkill(task);
+       return skillModule.executeYourSkill(task, caller);
      },
    };
    ```
 
-3. **Zpřístupněte dovednost v kartě agenta:** v souboru `src/lib/a2a/agentCardMetadata.ts` (sdíleném koncovými body `/.well-known/agent.json` a `/.well-known/agent-card.json`) přidejte položku do pole `skills`:
+3. **Vystavit na kartě agenta:** v `src/lib/a2a/agentCardMetadata.ts` (sdíleno `/.well-known/agent.json` a `/.well-known/agent-card.json`), připojte k poli `skills` :
 
    ```json
    {
      "id": "your-skill",
-     "name": "Vaše dovednost",
-     "description": "Stručný popis zaměřený na záměr",
-     "tags": ["směrování", "kvóta"],
-     "examples": ["Ukázkové vyvolání v přirozeném jazyce"]
+     "name": "Your Skill",
+     "description": "Brief, intent-focused description",
+     "tags": ["routing", "quota"],
+     "examples": ["Sample natural-language invocation"]
    }
    ```
 
-4. **Napište testy:** `tests/unit/a2a-<your-skill>.test.ts`. Pokryjte úspěšný scénář i chybový scénář.
+4. **Napište testy:** `tests/unit/a2a-<your-skill>.test.ts`. Cover happy path + error path.
 
-5. **Zdokumentujte** novou dovednost v tabulce `Available Skills` v tomto souboru.
+5. **Dokument** nová dovednost v tabulce `Available Skills` tohoto souboru.
 
 ---
 

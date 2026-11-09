@@ -25,26 +25,27 @@ omniroute launch --profile glm52  # OmniRoute મારફતે glm/glm-5.2 વ
 
 ---
 
-## Claude Code ગેટવે સાથે કેવી રીતે કનેક્ટ થાય છે
+## Claude કોડ ગેટવે સાથે કેવી રીતે જોડાય છે
 
-Claude Code **Anthropic Messages API** સાથે સંચાર કરે છે અને environment variables દ્વારા કસ્ટમ
-endpoint તરફ નિર્દેશિત થાય છે (તેમાં `--base-url` flag નથી):
+Claude કોડ વાત કરે છે**Anthropic સંદેશાઓ API** અને પર્યાવરણ ચલો સાથે કસ્ટમ એન્ડપોઇન્ટ પર નિર્દેશિત છે (તેમાં કોઈ `--base-url` ધ્વજ નથી):
 
-| Variable                                     | હેતુ                                                                                          |
-| -------------------------------------------- | --------------------------------------------------------------------------------------------- |
-| `ANTHROPIC_BASE_URL`                         | ગેટવેનું root URL (Claude Code `/v1/messages` ઉમેરે છે). **`/v1` suffix નહીં.**               |
-| `ANTHROPIC_AUTH_TOKEN`                       | `Authorization: Bearer …` તરીકે મોકલાય છે — તમારું OmniRoute access token / API key વાપરો     |
-| `ANTHROPIC_API_KEY`                          | વિકલ્પ: `x-api-key` તરીકે મોકલાય છે. બંને સેટ હોય તો `ANTHROPIC_AUTH_TOKEN` પ્રાધાન્ય પામે છે |
-| `ANTHROPIC_MODEL`                            | ચોક્કસ મોડેલ ફરજિયાત બનાવે છે (`/model` picker ના default ને override કરે છે)                 |
-| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → મૂળ `/model` picker `/v1/models` માંથી `claude*`/`anthropic*` મોડેલોની યાદી દર્શાવે છે  |
-| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | દરેક response માટે output tokens ની મર્યાદા નક્કી કરે છે (દા.ત. `65536`)                      |
-| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | auto-compaction માટેની token threshold                                                        |
+| ચલ                                           | હેતુ                                                                                             |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| `ANTHROPIC_BASE_URL`                         | ગેટવે રૂટ URL (Claude કોડ `/v1/messages` ને જોડે છે).** કોઈ `/v1` પ્રત્યય નથી.**                 |
+| `ANTHROPIC_AUTH_TOKEN`                       | `Authorization: Bearer …` — તરીકે મોકલેલ તમારા OmniRoute એક્સેસ ટોકન / API કીનો ઉપયોગ કરો        |
+| `ANTHROPIC_API_KEY`                          | વૈકલ્પિક: `x-api-key` તરીકે મોકલવામાં આવે છે. જો બંને સેટ થાય, તો `ANTHROPIC_AUTH_TOKEN` જીતે છે |
+| `ANTHROPIC_MODEL`                            | ચોક્કસ મોડેલને દબાણ કરો ( `/model` પીકર ડિફોલ્ટને ઓવરરાઇડ કરે છે)                                |
+| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → મૂળ `/model` પીકર `/v1/models` ના `claude*`/`anthropic*` મોડલ્સની યાદી આપે છે              |
+| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | પ્રતિ પ્રતિસાદ કેપ આઉટપુટ ટોકન્સ (દા.ત. `65536`)                                                 |
+| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | ઓટો-કોમ્પેક્શન માટે ટોકન થ્રેશોલ્ડ                                                               |
 
-> Env vars **સ્ટાર્ટઅપ વખતે માત્ર એક જ વાર** વાંચવામાં આવે છે — તેમને બદલ્યા પછી Claude Code ફરી શરૂ કરો.
+> Env vars વાંચવામાં આવે છે** એકવાર સ્ટાર્ટઅપ પર** — તેમને બદલ્યા પછી Claude કોડ પુનઃપ્રારંભ કરો.
 
-`omniroute launch` તમારા માટે આ બધું સેટ કરે છે: તે સક્રિય context માંથી base URL + token
-મેળવે છે (એટલે `omniroute connect <vps>` પછી `omniroute launch`
-સીધું કામ કરે છે), server નું health-check કરે છે અને `claude` ને exec કરે છે.
+નિશ્ચિત સ્ટ્રિંગને બદલે ફરે તેવા ઓળખપત્ર માટે, `~/.claude/settings.json` માં `apiKeyHelper` આદેશ પર સેટ કરો જે વર્તમાન ઓળખપત્રને stdout પર છાપે છે. Claude કોડ તેના આઉટપુટને મૂળભૂત રીતે પાંચ મિનિટ માટે કેશ કરે છે (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` તેને ઓવરરાઇડ કરે છે) અને `Authorization: Bearer` અને `x-api-key` બંનેમાં મૂલ્ય મોકલે છે. સ્ક્રિપ્ટે ઓળખપત્રને છાપવું આવશ્યક છે અને તેની સાથેના બેનર — અન્ય કંઈપણ v2.1.227 + પર સહાયકને નિષ્ફળ કરે છે.
+
+Entra ID SSO આ રીતે કામ કરે છે: `scripts/cli/omniroute-sso.mjs token` ટૂંકા ગાળા માટે એન્ટ્રા એક્સેસ ટોકન છાપે છે જે API કીને બદલે OmniRoute ચકાસે છે. [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md) જુઓ.
+
+`omniroute launch` તમારા માટે આ બધું સુયોજિત કરે છે: તે સક્રિય સંદર્ભમાંથી આધાર URL + ટોકનનું નિરાકરણ કરે છે (જેથી `omniroute connect <vps>` પછી `omniroute launch` માત્ર કામ કરે છે), સર્વરની આરોગ્ય-તપાસ કરે છે, અને `claude` અમલીકરણ કરે છે.
 
 ---
 

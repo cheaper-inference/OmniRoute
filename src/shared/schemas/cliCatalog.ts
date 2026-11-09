@@ -16,7 +16,7 @@ export const CliCatalogEntrySchema = z.object({
   description: z.string().min(1),
   docsUrl: z.string().min(1),
   configType: z.enum(["env", "custom", "guide", "custom-builder", "mitm"]),
-  envVars: z.record(z.string()).optional(),
+  envVars: z.record(z.string(), z.string()).optional(),
   modelAliases: z.array(z.string()).optional(),
   settingsFile: z.string().optional(),
   defaultCommand: z.string().optional(),
@@ -45,7 +45,9 @@ export const CliCatalogEntrySchema = z.object({
       })
     )
     .optional(),
-  codeBlock: z.object({ language: z.string(), code: z.string() }).optional(),
+  codeBlock: z
+    .object({ title: z.string().optional(), language: z.string(), code: z.string() })
+    .optional(),
   notes: z
     .array(z.object({ type: z.enum(["info", "warning", "error", "cloudCheck"]), text: z.string() }))
     .optional(),
@@ -57,7 +59,7 @@ export const CliCatalogEntrySchema = z.object({
 
 export type CliCatalogEntry = z.infer<typeof CliCatalogEntrySchema>;
 
-export const CliCatalogSchema = z.record(CliCatalogEntrySchema);
+export const CliCatalogSchema = z.record(z.string(), CliCatalogEntrySchema);
 
 /** Cardinalidade obrigatória (Plano §3.1/§3.2 + D15). +1 (crush, decolua/9router#1233). */
 // +1 (2026-07-02): "codewhale" added as a dual entry alongside "deepseek-tui"

@@ -1,1 +1,0 @@
-- **feat(affinity):** optional Redis store (`OMNIROUTE_SESSION_AFFINITY_STORE=redis`) so multiple instances share session-to-account affinity by hashed account identity; default SQLite behaviour is unchanged ([#16569](https://github.com/diegosouzapw/OmniRoute/pull/16569)) — thanks @xiaoyaner0201

@@ -63,11 +63,12 @@ test("recurring-uncapped models are surfaced but NEVER summed into the steady he
     if (m.freeType === "recurring-uncapped")
       assert.equal(m.monthlyTokens, 0, `${m.provider}/${m.modelId} uncapped but counted`);
   }
-  // uncappedProviders is the de-duped provider list and is non-empty (glm-cn, kilo, tencent…)
+  // uncappedProviders is the de-duped provider list and is non-empty (glm-cn, kilo…)
   assert.ok(Array.isArray(t.uncappedProviders) && t.uncappedProviders.length >= 3);
-  for (const p of ["glm-cn", "kilo-gateway", "tencent"]) {
+  for (const p of ["glm-cn", "kilo-gateway"]) {
     assert.ok(t.uncappedProviders.includes(p), `expected ${p} among uncapped providers`);
   }
+  assert.ok(!t.uncappedProviders.includes("tencent"), "retired Hunyuan must not be uncapped");
   // #17028: SiliconFlow's flagship models are priced per token — no recurring free grant.
   assert.ok(!t.uncappedProviders.includes("siliconflow"), "siliconflow must not be uncapped");
 });

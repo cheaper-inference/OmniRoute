@@ -69,7 +69,8 @@ async function cancelAfterFirstChunk({
   };
 }
 
-test("Codex tool handoff drains the trailing Responses completion instead of persisting 499", async () => {
+test("Codex tool handoff drains the trailing Responses completion instead of persisting 499", async (t) => {
+  t.mock.timers.enable({ apis: ["Date", "setTimeout"], now: Date.now() });
   let upstreamController: ReadableStreamDefaultController<Uint8Array> | null = null;
   let upstreamCancelled = false;
   let completionRecorded = false;
@@ -194,8 +195,13 @@ test("Codex tool handoff drains the trailing Responses completion instead of per
     }
   }, 0);
 
+  t.mock.timers.tick(1);
   await cancelPromise;
-  await wait(70);
+  // Let the stream's promise chain finish before advancing the 50 ms grace deadline.
+  await new Promise<void>((resolve) => setImmediate(resolve));
+  assert.equal(completionRecorded, true, "the trailing completion must drain inside the grace");
+  t.mock.timers.tick(70);
+  await new Promise<void>((resolve) => setImmediate(resolve));
 
   assert.equal(upstreamCancelled, false, "the completed tool handoff must be drained, not aborted");
   assert.equal(disconnectFinalizedAs499, false, "the real completion must beat the 499 finalizer");

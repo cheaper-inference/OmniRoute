@@ -14,7 +14,7 @@ OmniRoute est une passerelle de routage AI locale et un tableau de bord construi
 
 Capacités de base :
 
-- Surface API compatible OpenAI pour CLI/tools (377 fournisseurs, 156 modules d'exécution)
+- Surface API compatible OpenAI pour CLI/tools (381 fournisseurs, 159 modules d'exécution)
 - traduction Request/response dans tous les formats de fournisseurs
 - Modèle de secours combiné (séquence multimodèle)
 - Étapes combinées structurées (`provider + model + connection`) avec classement d'exécution par `compositeTiers`
@@ -33,7 +33,7 @@ Capacités de base :
 - Pensez à l'analyse des balises (`<think>...</think>`) pour les modèles de raisonnement
 - Désinfection des réponses pour une compatibilité stricte OpenAI SDK
 - Normalisation des rôles (développeur du système →, utilisateur du système →) pour une compatibilité entre fournisseurs
-- Conversion de sortie structurée (json_schema → Gemini ResponseSchema)
+- Conversion de sortie structurée (json_schema → Gemini responseSchema)
 - Persistance locale pour les fournisseurs, les clés, les alias, les combos, les paramètres, la tarification (122 modules DB )
 - suivi Usage/cost et journalisation des demandes
 - Synchronisation cloud en option pour la synchronisation multi-device/state
@@ -399,7 +399,7 @@ Le module guardrails est une couche middleware rechargeable à chaud qui inspect
 - Points de connexion : entrée du gestionnaire de discussion, gestionnaire de génération d'images, désinfectant de réponse
 - Contrat HTTP : les violations font surface sous forme `503` avec `error.code = "GUARDRAIL_VIOLATION"`
 
-Pour la création d'ensembles de règles et le réglage des seuils, voir [`docs/security/GUARDRAILS.md`](../security/GUARDRAILS.md).
+Pour la création d’ensembles de règles et le réglage des seuils, voir [`docs/security/GUARDRAILS.md`](../security/GUARDRAILS.md).
 
 ### D. Couche de domaine
 
@@ -414,7 +414,7 @@ L'espace de noms `src/domain/` centralise les décisions politiques afin que les
 - menuisier de règles Connection/model : `src/domain/connectionModelRules.ts`
 - Instantanés de disponibilité du modèle : `src/domain/modelAvailability.ts`
 - Suivi de l'expiration du fournisseur : `src/domain/providerExpiration.ts`
-- Cache de quota : `src/domain/quotaCache.ts`
+- Cache de quotas : `src/domain/quotaCache.ts`. Les fournisseurs ajoutent et suppriment des fenêtres de quota (OpenAI a supprimé la fenêtre Codex de 5 heures pour certains plans), donc une utilisation lisant l'adaptateur du fournisseur atteste comme complète (`quotasComplete`, voir `src/lib/usage/usageReading.ts`) est l'ensemble de fenêtres complet du compte : une fenêtre connue précédemment mais absente est retirée, dans le cache, dans le `quota_snapshots` un redémarrage se réhydrate (un enregistrement de retrait ajouté), dans l'état de quota Codex persistant et dans la saturation de Claude seaux. Les preuves partielles (en-têtes de réponse, copies obsolètes) ne mettent à jour que les fenêtres qu'elles contiennent.
 - État de dégradation : `src/domain/degradation.ts`
 - Audit de configuration : `src/domain/configAudit.ts`
 - Générateur de métadonnées de réponse OmniRoute : `src/domain/omnirouteResponseMeta.ts`
@@ -432,7 +432,7 @@ Le pipeline d'autorisation classe chaque demande entrante et applique la chaîne
 - Assistant d'assertion : `src/server/authz/assertAuth.ts`
 - Contexte de la requête : `src/server/authz/context.ts`
 
-Les routes publiques et de gestion constituent une frontière stricte : les mutations agent/cooldown APIs et du fournisseur nécessitent une authentification de gestion (HTTP 401 s'il est manquant).
+Les routes publiques et de gestion constituent une frontière stricte : les mutations agent/cooldown APIs et de fournisseur nécessitent une authentification de gestion (HTTP 401 s'il est manquant).
 
 Pour les règles complètes de classification des itinéraires, voir [`docs/architecture/AUTHZ_GUIDE.md`](./AUTHZ_GUIDE.md).
 

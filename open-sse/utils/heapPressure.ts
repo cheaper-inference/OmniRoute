@@ -1,3 +1,4 @@
+import { markLocalProcessPressureResponse } from "./localPressureResponse.ts";
 import v8 from "node:v8";
 
 /**
@@ -71,11 +72,13 @@ export function checkHeapPressureGuard(
     success: false,
     status: 503,
     error: HEAP_PRESSURE_MESSAGE,
-    response: new Response(
-      JSON.stringify({
-        error: { message: HEAP_PRESSURE_MESSAGE, type: "server_error", code: "heap_pressure" },
-      }),
-      { status: 503, headers: { "Content-Type": "application/json", "Retry-After": "5" } }
+    response: markLocalProcessPressureResponse(
+      new Response(
+        JSON.stringify({
+          error: { message: HEAP_PRESSURE_MESSAGE, type: "server_error", code: "heap_pressure" },
+        }),
+        { status: 503, headers: { "Content-Type": "application/json", "Retry-After": "5" } }
+      )
     ),
   };
 }

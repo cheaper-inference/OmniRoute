@@ -62,6 +62,10 @@ export type PendingRequestDetail = {
     compressed: number | null;
   };
   id: string;
+  /** Actual durable ID, assigned only after a successful insert. */
+  persistedLogId?: string;
+  /** Private identity for each attempt sharing a public preview ID. */
+  attemptGeneration?: string;
   model: string;
   provider: string;
   connectionId: string | null;
@@ -174,6 +178,8 @@ declare global {
           byAccount: Record<string, Record<string, number>>;
           details: Record<string, Record<string, PendingRequestDetail[]>>;
         };
+        // Absent/non-finite on state created by older module instances; recounted once below.
+        totalPendingDetailBytes: number;
         pendingById: Map<string, PendingRequestDetail>;
         pendingIdByCorrelation: Map<string, { id: string; touchedAt: number }>;
       }
@@ -194,6 +200,7 @@ const pendingState = (globalThis.__omnirouteUsageHistoryPendingState ??= {
     byAccount: Object.create(null) as Record<string, Record<string, number>>,
     details: Object.create(null) as Record<string, Record<string, PendingRequestDetail[]>>,
   },
+  totalPendingDetailBytes: 0,
   pendingById: new Map<string, PendingRequestDetail>(),
   pendingIdByCorrelation: new Map<string, { id: string; touchedAt: number }>(),
 });
@@ -225,19 +232,6 @@ const DEFAULT_MAX_PENDING_REQUEST_AGE_MS = 60 * 60 * 1000;
 const DEFAULT_MAX_PENDING_DETAILS = 5000;
 const PENDING_SWEEP_INTERVAL_MS = 5 * 60 * 1000;
 const MAX_PENDING_DETAIL_BYTES = 256 * 1024 * 1024;
-
-/**
- * Accounted pending-preview byte total for `pendingById`. The 5000-entry cap
- * bounds COUNT but not preview bytes: each entry retains up to four payloads
- * (clientRequest + providerRequest + providerResponse + clientResponse, see
- * pendingRequestScope.ts::PENDING_PAYLOAD_KEYS). Payloads are preview-truncated
- * first, so a worst-case entry measures ~50 KB and the 5000 cap lands near
- * 250 MB — close enough to the process ceiling that a byte ceiling is the
- * safer invariant, and it bounds those previews within a single burst instead of
- * waiting for the 5-minute age sweep. Mirrors the accounting
- * completedRequestDetails.ts already does for the same payloads.
- */
-let totalPendingDetailBytes = 0;
 
 /** Monotonic suffix making pending ids unique even inside one millisecond. */
 let pendingIdSequence = 0;
@@ -290,19 +284,40 @@ function removePendingCorrelationFor(detail: PendingRequestDetail): void {
 }
 
 /**
+ * Accounted pending-preview byte total for `pendingById`
+ * (`pendingState.totalPendingDetailBytes`, shared across module reloads). The
+ * 5000-entry cap bounds COUNT but not preview bytes: each entry retains up to
+ * four payloads (clientRequest + providerRequest + providerResponse +
+ * clientResponse, see pendingRequestScope.ts::PENDING_PAYLOAD_KEYS). Payloads
+ * are preview-truncated first, so a worst-case entry measures ~50 KB and the
+ * 5000 cap lands near 250 MB — close enough to the process ceiling that a byte
+ * ceiling is the safer invariant, and it bounds those previews within a single
+ * burst instead of waiting for the 5-minute age sweep. Mirrors the accounting
+ * completedRequestDetails.ts already does for the same payloads.
+ */
+// Older module instances preserved the map without a shared byte total. Recount
+// that legacy state once, after the payload-size helpers are initialized.
+if (!Number.isFinite(pendingState.totalPendingDetailBytes)) {
+  pendingState.totalPendingDetailBytes = 0;
+  for (const detail of pendingById.values()) {
+    pendingState.totalPendingDetailBytes += pendingDetailBytes(detail);
+  }
+}
+
+/**
  * Hard byte ceiling on the pending map. Runs after every insert so a burst of
  * large-context requests cannot push the process past the 85% heap guard before
  * the 5-minute age sweep runs. Eviction order matches the count-cap path
  * (stale-marked first, then oldest) so the dashboard's pending counters self-heal.
  */
 function enforcePendingByteCeiling(): void {
-  if (totalPendingDetailBytes <= MAX_PENDING_DETAIL_BYTES) return;
+  if (pendingState.totalPendingDetailBytes <= MAX_PENDING_DETAIL_BYTES) return;
   const victims = [...pendingById.values()].sort((a, b) => {
     if (Boolean(a.stale) !== Boolean(b.stale)) return a.stale ? -1 : 1;
     return a.startedAt - b.startedAt;
   });
   for (const detail of victims) {
-    if (totalPendingDetailBytes <= MAX_PENDING_DETAIL_BYTES) break;
+    if (pendingState.totalPendingDetailBytes <= MAX_PENDING_DETAIL_BYTES) break;
     const modelKey = detail.provider ? `${detail.model} (${detail.provider})` : detail.model;
     forgetPendingDetail(detail);
     removePendingCorrelationFor(detail);
@@ -320,7 +335,7 @@ function enforcePendingByteCeiling(): void {
 
 /** Retained bytes currently held by the pending map (diagnostics + tests). */
 export function getPendingRetainedBytes(): number {
-  return totalPendingDetailBytes;
+  return pendingState.totalPendingDetailBytes;
 }
 let _pendingSweepTimer: ReturnType<typeof setInterval> | null = null;
 
@@ -409,7 +424,7 @@ export function sweepStalePendingRequests(
       detail.stageUpdatedAt = undefined;
       detail.error = undefined;
       detail.errorCode = undefined;
-      totalPendingDetailBytes += pendingDetailBytes(detail) - before;
+      pendingState.totalPendingDetailBytes += pendingDetailBytes(detail) - before;
       detail.sweptAt = now;
       detail.stale = true;
     }
@@ -463,7 +478,7 @@ function resolvePendingIdentity(identity: PendingRequestIdentity | null | undefi
 
 function forgetPendingDetail(detail: PendingRequestDetail, bytes = pendingDetailBytes(detail)) {
   if (pendingById.get(detail.id) === detail) pendingById.delete(detail.id);
-  totalPendingDetailBytes -= bytes;
+  pendingState.totalPendingDetailBytes -= bytes;
 }
 
 function removePendingDetail(detail: PendingRequestDetail): boolean {
@@ -571,6 +586,7 @@ export function trackPendingRequest(
           `${now}-${(globalThis.crypto.randomUUID() as string).replace(/-/g, "").slice(0, 12)}-${(++pendingIdSequence).toString(
             36
           )}`,
+        attemptGeneration: globalThis.crypto.randomUUID(),
         model,
         provider,
         connectionId,
@@ -579,7 +595,7 @@ export function trackPendingRequest(
       };
       pendingRequests.details[connectionId][modelKey].push(newDetail);
       pendingById.set(newDetail.id, newDetail);
-      totalPendingDetailBytes += pendingDetailBytes(newDetail);
+      pendingState.totalPendingDetailBytes += pendingDetailBytes(newDetail);
       enforcePendingByteCeiling();
       if (normalizedMetadata.correlationId && pendingById.get(newDetail.id) === newDetail) {
         pendingIdByCorrelation.delete(normalizedMetadata.correlationId);
@@ -636,7 +652,7 @@ export function updatePendingRequest(
   if (!pendingRequests.details[connectionId]?.[modelKey]?.includes(detail)) return;
   const before = pendingDetailBytes(detail);
   Object.assign(detail, normalized);
-  totalPendingDetailBytes += pendingDetailBytes(detail) - before;
+  pendingState.totalPendingDetailBytes += pendingDetailBytes(detail) - before;
   enforcePendingByteCeiling();
 }
 
@@ -650,9 +666,24 @@ export function updatePendingRequestById(
   if (resolvePendingIdentity(id) !== detail) return false;
   const before = pendingDetailBytes(detail);
   Object.assign(detail, normalized);
-  totalPendingDetailBytes += pendingDetailBytes(detail) - before;
+  pendingState.totalPendingDetailBytes += pendingDetailBytes(detail) - before;
   enforcePendingByteCeiling();
   return true;
+}
+
+/** Link the first confirmed insert to its exact preview, before or after finalization. */
+export function markRequestPersistedById(
+  id: unknown,
+  attemptGeneration: unknown,
+  persistedLogId: string
+) {
+  if (typeof id !== "string" || typeof attemptGeneration !== "string") return;
+  const pending = pendingById.get(id);
+  if (pending?.attemptGeneration === attemptGeneration) pending.persistedLogId ??= persistedLogId;
+  const completed = getCompletedDetails().get(id);
+  if (completed?.attemptGeneration === attemptGeneration && !completed.persistedLogId) {
+    storeCompletedDetail({ ...completed, persistedLogId });
+  }
 }
 
 /** Attach scalar usage to the exact attempt, even if its stream already finalized. */
@@ -797,7 +828,7 @@ export function updatePendingRequestStreamChunksById(
         Object.entries(streamChunks).map(([key, chunks]) => [key, chunks?.slice()])
       )
     : streamChunks;
-  totalPendingDetailBytes += pendingDetailBytes(entry) - before;
+  pendingState.totalPendingDetailBytes += pendingDetailBytes(entry) - before;
   enforcePendingByteCeiling();
   return true;
 }
@@ -848,7 +879,7 @@ export function clearPendingRequests() {
   >;
   pendingById.clear();
   pendingIdByCorrelation.clear();
-  totalPendingDetailBytes = 0;
+  pendingState.totalPendingDetailBytes = 0;
   clearCompletedDetails();
 }
 
