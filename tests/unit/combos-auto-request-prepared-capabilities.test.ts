@@ -136,11 +136,11 @@ test("prepared loader runs only when a combo materializes, once per attempt", as
   );
 });
 
-test("default path: an unknown auto id keeps the 400", async () => {
+test("default path: an unknown auto id is a 404 model_not_found", async () => {
   await seedProviders();
   const result = await resolveModelOrError("auto/zzz-not-a-builtin", BODY, "/v1/chat/completions");
   assert.ok(result.error, "unknown built-in id must stay an error");
-  assert.equal(result.error.status, 400);
+  assert.equal(result.error.status, 404);
   assert.equal(result.combo, undefined);
   await result.error.body?.cancel();
 });

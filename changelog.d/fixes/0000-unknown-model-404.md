@@ -1,0 +1,1 @@
+- **fix(sse):** a request for a model OmniRoute cannot resolve now answers HTTP 404 in the caller's own error format (OpenAI `model_not_found`, Anthropic `not_found_error` on `/messages`, Gemini `NOT_FOUND` on `/v1beta`) instead of a generic 400, so clients such as Claude Code can offer a model switch; malformed or ambiguous model names still answer 400

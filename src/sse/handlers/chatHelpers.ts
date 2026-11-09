@@ -34,6 +34,7 @@ import {
 import {
   errorResponse,
   providerCircuitOpenResponse,
+  sanitizeErrorMessage,
   unavailableResponse,
 } from "@omniroute/open-sse/utils/error.ts";
 import { inheritTrustedLocalRateLimitResponse } from "@omniroute/open-sse/services/rateLimitManager/errors.ts";
@@ -120,6 +121,32 @@ async function hasOnlyActiveCodexAccount() {
   } catch {
     return false;
   }
+}
+
+/**
+ * 404 for a model that cannot be resolved, in the caller's wire format: Gemini for /v1beta,
+ * Anthropic for any /messages route, OpenAI otherwise. Clients key on the 404 status
+ * (Claude Code offers a model switch on it); a malformed or ambiguous model stays a 400.
+ */
+function unknownModelResponse(message: string, endpointPath: string): Response {
+  const path = String(endpointPath || "");
+  const safe = sanitizeErrorMessage(message);
+  if (/(?:^|\/)v1beta(?:\/|$)/i.test(path)) {
+    return Response.json(
+      { error: { code: HTTP_STATUS.NOT_FOUND, message: safe, status: "NOT_FOUND" } },
+      { status: HTTP_STATUS.NOT_FOUND }
+    );
+  }
+  if (/\/messages(?:\/|$)/i.test(path)) {
+    return Response.json(
+      { type: "error", error: { type: "not_found_error", message: safe } },
+      { status: HTTP_STATUS.NOT_FOUND }
+    );
+  }
+  return errorResponse(HTTP_STATUS.NOT_FOUND, message, {
+    code: "model_not_found",
+    type: "invalid_request_error",
+  });
 }
 
 export async function resolveModelOrError(
@@ -266,7 +293,7 @@ export async function resolveModelOrError(
 
     const message = `Model '${modelStr}' is not a valid combo or provider. Unknown built-in auto combo.`;
     log.warn("CHAT", message, { model: modelStr });
-    return { error: errorResponse(HTTP_STATUS.BAD_REQUEST, message) };
+    return { error: unknownModelResponse(message, endpointPath) };
   }
 
   if (!modelInfo.provider) {
@@ -278,7 +305,7 @@ export async function resolveModelOrError(
         (modelInfo as any).errorMessage ||
         `Model '${modelStr}' could not be resolved to a known provider.`;
       log.warn("CHAT", message, { model: modelStr });
-      return { error: errorResponse(HTTP_STATUS.BAD_REQUEST, message) };
+      return { error: unknownModelResponse(message, endpointPath) };
     }
 
     if ((modelInfo as any).errorType === "ambiguous_model") {
