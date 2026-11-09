@@ -29,7 +29,7 @@ import {
 // ── small tables — full snapshot ─────────────────────────────────────────────
 
 describe("migrationRunner/constants — exact small-table snapshots", () => {
-  it("LEGACY_VERSION_SLOT_MIGRATIONS is the 9-entry list, in order", () => {
+  it("LEGACY_VERSION_SLOT_MIGRATIONS is the 16-entry list, in order", () => {
     assert.deepEqual(
       LEGACY_VERSION_SLOT_MIGRATIONS.map((m) => `${m.version}:${m.name}`),
       [
@@ -42,6 +42,13 @@ describe("migrationRunner/constants — exact small-table snapshots", () => {
         "033:add_batch_id_to_call_logs",
         "046:remove_status_from_files",
         "051:remove_status_from_files",
+        "140:ccr_blocks",
+        "141:api_key_cache_default_mode",
+        "142:connection_runtime_state",
+        "176:provider_connection_synced_models_at",
+        "177:xp_action_counts",
+        "178:memory_fts_skip_access_updates",
+        "197:model_capabilities_reasoning_efforts",
       ]
     );
   });

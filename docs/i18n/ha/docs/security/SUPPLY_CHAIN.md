@@ -49,28 +49,11 @@ Duk ƙofofin **suna tsallakewa da kyau** (fita 0) lokacin da kayan aikin ba su n
 ya gaza (osv-scanner ba a cikin PATH, osv.dev/network ba za a iya isa ba, JSON mara inganci) —
 gazawar **ma'auni** ba ta taɓa toshewa ba, kawai koma baya **da aka auna** ke toshewa.
 
-## Sanannun Hadarurruka Masu Karɓa
+## Hadarin dogaro mai ritaya
 
-### extract-zip 2.0.1 — GHSA-7pqw-9j4j-h8q3 / GHSA-jmr9-qjv8-65gv (#14482)
+Tushen kulle fayil ɗin baya haɗawa da `extract-zip` ko abin dogaro da shi bayan haɓaka kayan aikin haɓakawa da sauri. Wannan yana janye sarkar da aka karɓa a baya `promptfoo` → `@openai/codex-security` → `extract-zip` sarkar da aka sa ido a cikin #14482. Binciken koma baya a cikin `tests/unit/extract-zip-14482-exposure.test.ts` ya ƙi sake shigar da shi kuma ya riƙe haramcin shigo da kaya daga lambar samarwa.
 
-`extract-zip@2.0.1` yana ɗauke da shawarwari biyu na symlink-traversal masu tsanani waɗanda ba a gyara ba.
-Bisa ga reshen "babu gyara daga tushe" na maganin CVE Variance da ke sama, wannan **hadari ne da aka karɓa**, ba haɓakawa ba ne:
-
-- **Sarka:** `promptfoo` (devDependency) → `@openai/codex-security` → `extract-zip@2.0.1`.
-  An tabbatar ta hanyar `package-lock.json` — fakiti ɗaya tak a cikin dukkan bishiyar dogaro (`@openai/codex-security`) ya bayyana `extract-zip`, kuma fakiti ɗaya tak (`promptfoo`) ya bayyana `@openai/codex-security`.
-- **Babu wani fitowar da aka gyara a ko'ina a cikin sarka.** `extract-zip@2.0.1` (wanda aka buga a 2020) shine fitowar ƙarshe na fakitin — ba a kula da shi. `@openai/codex-security`'s
-  current npm-latest (`0.1.29`) har yanzu yana jawo `extract-zip@2.0.1`.
-- **Ba za a iya isa gare shi daga samarwa ba.** `promptfoo` devDependency-only ne (ba a taɓa lissafa shi a ƙarƙashin `dependencies` ba), kuma babu wani fayil a ƙarƙashin `src/`, `open-sse/`, ko `bin/` da ke shigo da fakitin npm na
-  `extract-zip` — OmniRoute's own `extractZip()` helper
-  (`src/lib/versionManager/binaryManager.ts:93`) yana amfani da `unzip`/`tar` na asali kuma ba shi da alaƙa. `@openai/codex-security` kuma yana jigilar nasa mai gadi na symlink-traversal a saman kiran baya na onEntry na extract-zip.
-- **Kada** a yi amfani da sunan `extract-zip` ta hanyar `package.json` `overrides` — kawai madadin da za a iya amfani da shi shine Electron-org-internal kuma API-incompatible ne da binciken onEntry/defaultDirMode/defaultFileMode na
-  `@openai/codex-security`; maye gurbinsa zai karya binciken tsaro na wannan fakitin a hankali.
-- **Matsayin Farko:** osv `vulnCount` (3) da aka auna ya riga ya kasance ƙasa da matsayin farko na
-  `config/quality/quality-baseline.json` (27) — babu buƙatar canjin ratchet.
-- **Mai gadi na koma baya:** `tests/unit/extract-zip-14482-exposure.test.ts` yana tabbatar da
-  sarka da kuma invariant na rashin shigo da samarwa da ke sama; yana kasa CI idan ɗayan ya taɓa
-  karyewa (misali, PR na gaba ya sa `extract-zip` ya zama mai isa daga samarwa).
-- **Bibiya:** issue #14482.
+Gyaran abin dogaro na yanzu kuma yana da iyakacin dacewa ya wuce zuwa abokin ciniki na MSAL na Azure da abokin ciniki na FTP na get-uri. Ana gwada sayan alamar Azure da dawo da FTP tare da jigilar kayayyaki masu sarrafawa; duka fakitin OpenCode suna gudanar da nasu gini da gwajin suites. Ƙididdigar shawarwarin rajista ma'aunai ne a lokaci guda kuma suna iya canzawa bayan ƙaddamar da fayil ɗin kulle.
 
 ## Baya: Shawarwarin Scorecard → toshewa
 

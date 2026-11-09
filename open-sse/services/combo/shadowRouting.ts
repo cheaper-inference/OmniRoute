@@ -71,12 +71,29 @@ export function resolveShadowTargets(
     }));
 }
 
-async function drainShadowResponse(response: Response): Promise<void> {
+/**
+ * A shadow response is never forwarded to a client. Consume its original
+ * stream one chunk at a time rather than teeing it with Response.clone() and
+ * buffering the entire body with arrayBuffer(). The latter retains both a
+ * growing byte buffer and an unread tee branch for large model outputs.
+ */
+export async function drainShadowResponse(response: Response): Promise<void> {
+  if (!response.body) return;
+  let reader: ReadableStreamDefaultReader<Uint8Array>;
   try {
-    if (!response.body) return;
-    await response.arrayBuffer();
+    reader = response.body.getReader();
   } catch {
-    // Shadow draining is best-effort and must never affect the production response.
+    return; // A locked or already consumed body is best-effort.
+  }
+  try {
+    while (true) {
+      const { done } = await reader.read();
+      if (done) break;
+    }
+  } catch {
+    // Shadow draining must not affect production routing.
+  } finally {
+    reader.releaseLock();
   }
 }
 
@@ -164,7 +181,7 @@ export function scheduleShadowRouting(
             }),
             shadowConfig.timeoutMs
           );
-          await drainShadowResponse(response.clone());
+          await drainShadowResponse(response);
           recordComboShadowRequest(combo.name, target.modelStr, {
             success: response.ok,
             latencyMs: Date.now() - startedAt,

@@ -14,6 +14,7 @@ import { OMNIROUTE_WEB_FETCH_FALLBACK_TOOL_NAME } from "../../services/webFetchI
 import { CLAUDE_OAUTH_TOOL_PREFIX } from "../../translator/request/openai-to-claude.ts";
 import { applyToolDisclosure, type ToolDisclosureConfig } from "../../utils/toolDisclosure.ts";
 import {
+  isOpenCodeLane,
   providerSupportsCaching,
   resolveConnectionCacheOverride,
   type ConnectionCacheOverride,
@@ -307,6 +308,16 @@ function defaultImageDetail(bodyToSend: Body, isOpencodeClient: boolean): Body {
   return nextBody;
 }
 
+// OpenCode's model-derived cache support only describes implicit prefix caching. Nothing shows
+// its gateway accepts this field, so only an explicit connection opt-in sends it (#18787).
+function providerRejectsPromptCacheKey(
+  provider: string | null | undefined,
+  connectionCacheOverride: ConnectionCacheOverride | null
+): boolean {
+  if (["nvidia", "xai"].includes(provider)) return true;
+  return isOpenCodeLane(provider) && connectionCacheOverride?.supportsPromptCaching !== true;
+}
+
 // Inject prompt_cache_key only for providers that support it.
 async function injectPromptCacheKey(
   bodyToSend: Body,
@@ -324,7 +335,7 @@ async function injectPromptCacheKey(
     ) &&
     !bodyToSend.prompt_cache_key &&
     Array.isArray(bodyToSend.messages) &&
-    !["nvidia", "xai"].includes(provider)
+    !providerRejectsPromptCacheKey(provider, connectionCacheOverride)
   ) {
     const { generatePromptCacheKey } = await import("@/lib/promptCache");
     const cacheKey = generatePromptCacheKey(bodyToSend.messages);

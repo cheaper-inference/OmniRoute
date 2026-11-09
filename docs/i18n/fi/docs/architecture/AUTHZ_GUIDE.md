@@ -168,15 +168,15 @@ se on poissa käytöstä, kunnes operaattori ottaa sen käyttöön
 
 ## Reittiluokat
 
-`src/server/authz/types.ts` määrittelee kolme luokkaa. Jokainen reitti, jota ei voi luokitella deterministisesti, palautuu oletuksena luokkaan `MANAGEMENT`.
+`src/server/authz/types.ts` määrittelee kolme luokkaa; mikä tahansa reitti, jota ei voida luokitella deterministisesti, kuuluu takaisin `MANAGEMENT`.
 
-| Luokka       | Kuvaus                                                                                                                                                 | Todennus vaaditaan                                                |
-| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------- |
-| `PUBLIC`     | Nimenomaisesti turvalliset reitit: kirjautuminen, uloskirjautuminen, tila, alustus, terveystarkistus ja onboarding-bootstrap.                          | Ei mitään                                                         |
-| `CLIENT_API` | Mallipalvelun päätepisteet: `/api/v1/*`, `/api/v1beta/*` sekä aliakset `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | Bearer-avain, kun `REQUIRE_API_KEY`-ominaisuusliput ovat käytössä |
-| `MANAGEMENT` | Dashboard-sivut, asetukset, palveluntarjoajat, avaimet, ylläpito- ja diagnostiikkapäätepisteet.                                                        | Dashboard-istunto TAI Bearer, jolla on `manage`-laajuus           |
+| Luokka       | Kuvaus                                                                                                                                                      | Todennus vaaditaan                                                            |
+| ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| `PUBLIC`     | Erityisen turvalliset reitit — kirjautuminen, uloskirjautuminen, tila, kunto, aloituskäynnistys.                                                            | Ei mitään                                                                     |
+| `CLIENT_API` | Mallia palvelevat päätepisteet — `/api/v1/*`, `/api/v1beta/*` sekä aliakset `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | Siirtotieavain, kun tehokas `REQUIRE_API_KEY` -ominaisuuden lippu on käytössä |
+| `MANAGEMENT` | Kojelautasivut, asetukset, palveluntarjoajat, avaimet, järjestelmänvalvojan ja diagnostiikan päätepisteet.                                                  | Dashboard-istunto OR Bearer `manage` -säteellä                                |
 
-Osa `MANAGEMENT`-toiminnoista on **vain operaattorille**: `manage`-avain ei riitä. Tallennettujen tunnistetietojen vieminen (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), varmuuskopion palauttaminen nykyisen datan päälle (`POST /api/db-backups/import` mukaan lukien `dryRun=true`, `POST /api/db-backups` palautus tunnuksella, `POST /api/settings/import-json`) ja palautuspisteiden tuhoaminen (`DELETE /api/db-backups` siivous sekä `PATCH /api/db-backups`, koska tallennettu säilytysaika ohjaa jokaisen varmuuskopioinnin jälkeisen automaattisen siivouksen) vaativat dashboard-istunnon, paikallisen CLI-identiteetin tai sen, että kirjautuminen on poistettu käytöstä. Synkronointitunnuksen myöntäminen (`POST /api/sync/tokens`) ja `admin`-laajuuden CLI-käyttötunnuksen luominen (`POST /api/cli/tokens`) vaativat dashboard-istunnon tai paikallisen CLI-identiteetin kaikissa kirjautumistiloissa. API-avaimet millä tahansa laajuudella ja `oma_`-käyttötunnukset eivät ole operaattorin tunnistetietoja: ne saavat `403`-virheen aina, kun sellainen vaaditaan. Tarkistus on tiedostossa `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`). Kirjautumisasetusten muuttaminen on myös vain operaattorille: `POST /api/settings/require-login` (aseta hallintasalasana / vaihda `requireLogin`) hyväksyy nämä tunnistetiedot vain, kun salasana on jo olemassa. Ensimmäisen käynnistyksen bootstrap-ikkuna (ei vielä salasanaa) on ennallaan, ja dashboard-istunnon on lähetettävä `currentPassword`, jotta salasana voidaan korvata (`403`, kun se puuttuu tai on väärä, kirjattu tilaan `settings.update_failed`). Paikallinen CLI ja instanssi, jossa kirjautuminen on pois käytöstä, säilyttävät palautusreitin ja saavat asettaa salasanan ilman sitä, koska molemmat on sidottu isäntään, joka omistaa datahakemiston.
+A few `MANAGEMENT` actions are **operator-only**: a `manage` key is not enough. Exporting stored credentials (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), restoring a backup over the live data (`POST /api/db-backups/import` including `dryRun=true`, `POST /api/db-backups` restore by id, `POST /api/settings/import-json`), destroying restore points (`DELETE /api/db-backups` cleanup, and `PATCH /api/db-backups` because the retention it persists drives the automatic pruning after every backup) require a dashboard session, the local CLI subject, or login disabled. Issuing a sync token (`POST /api/sync/tokens`) and minting an `admin` CLI access token (`POST /api/cli/tokens`) require a dashboard session or the local CLI subject in every login mode. API keys of any scope and `oma_` access tokens are not operator credentials: they get `403` whenever one is required. The check lives in `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`). Changing the login settings is operator-only too: `POST /api/settings/require-login` (set the management password / toggle `requireLogin`) accepts only those credentials once a password exists — the first-run bootstrap window (no password yet) is unchanged — and a dashboard session must send `currentPassword` to replace the password (`403` when it is missing or wrong, audited as `settings.update_failed`). The local CLI and an instance with login disabled keep the recovery path and may set a password without it, since both are bound to the host that owns the data directory.
 
 ## Putkilinja
 
@@ -209,51 +209,47 @@ Onnistunut käytäntö palauttaa `AuthSubject` ja `kind ∈ { client_api_key, da
 
 ## Julkisten reittien luettelo
 
-`src/shared/constants/publicApiRoutes.ts` on eksplisiittinen sallittujen reittien luettelo:
+`src/shared/constants/publicApiRoutes.ts` on selkeä sallittu luettelo:
 
-Luettelo on jaettu **muodon** mukaan, ja jaolla on merkitystä (GHSA-74g9-q8f6-793h): etuliite
-täsmäytetään `startsWith()`-funktion avulla, joten se täsmää myös kaikkiin viereisiin polkuihin, joilla on samat alkumerkit.
-`/api/usage/om-usage` etuliitteenä merkitsee `/api/usage/om-usage<anything>`-reitin JULKISEKSI, ja Next ratkaisee
-sen reitiksi `/api/usage/[connectionId]` — käsittelijäksi, jolla ei ole omaa todennusta.
+Lista on jaettu** muoto** , ja jako on kantava (GHSA-74g9-q8f6-793h): etuliite yhdistetään `startsWith()` lle, joten se vastaa myös kaikkia viereisiä polkuja, jotka jakavat johtavat merkit. `/api/usage/om-usage` etuliitteenä merkitty `/api/usage/om-usage<anything>` PUBLIC, ja Next ratkaisee sen `/api/usage/[connectionId]` — -käsittelijäksi, jolla ei ole omaa todennusta.
 
 ```ts
-// Aidot alireitistöt. Jokaisen merkinnän TÄYTYY päättyä merkkiin "/" (yksikkötesti varmistaa tämän).
+// Genuine subtrees. Every entry MUST end in "/" (asserted by a unit test).
 PUBLIC_API_ROUTE_PREFIXES = [
   "/api/auth/oidc/",
-  "/api/v1/", // käsitellään classify-funktiossa CLIENT_API-reittinä, ei "no-auth public" -reittinä
+  "/api/v1/", // treated as CLIENT_API in classify, not as "no-auth public"
   "/api/oauth/",
   "/api/codex/connect/",
   "/api/telegram/",
   "/api/cursor-cli/",
 ];
 
-// Yksittäiset reitit, täsmäytetään TÄSMÄLLEEN (sekä lopettavan kauttaviivan kanssa että ilman sitä).
+// Single routes, matched EXACTLY (with or without a trailing slash).
 PUBLIC_API_ROUTES_EXACT = new Set([
   "/api/auth/login",
   "/api/auth/logout",
   "/api/auth/status",
-  "/api/auth/mfa/verify", // kirjautumisen vaihe 2 valinnaiselle TOTP:lle; tarvitsee MFA-pending-evästeen
-  "/api/init",
+  "/api/auth/mfa/verify", // login step 2 for opt-in TOTP; needs the MFA-pending cookie
   "/api/sync/bundle",
   "/api/cli/connect",
   "/api/usage/om-usage",
   "/api/skills/collect/chaos",
 ]);
 
-// Vain luku -tilassa olevat yksittäiset reitit, joihin sovelletaan myös CORS-alkuperän rajoituksen lievennystä.
+// Read-only single routes that also take the CORS origin relaxation.
 PUBLIC_READONLY_CORS_API_ROUTES = [
   "/api/health/ping",
   "/api/monitoring/health",
   "/api/settings/require-login",
 ];
 
-// Vain luku -tilassa oleva yksittäinen reitti, johon EI sovelleta CORS-rajoituksen lievennystä.
+// Read-only single route WITHOUT the CORS relaxation.
 PUBLIC_READONLY_API_ROUTES_EXACT = new Set(["/api/health"]);
 
 PUBLIC_READONLY_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 ```
 
-Vain turvallisia menetelmiä käyttävät vain luku -tilan reitit ovat julkisia. Huomautus: `classifyRoute()` jättää `/api/v1/*`- ja `/api/v1beta/*`-reitit PUBLIC-käsittelyn ulkopuolelle — ne ovat aina `CLIENT_API`-reittejä, joten Bearer-avaimen käytäntöä sovelletaan edelleen.
+Vain luku -reitit ovat julkisia** vain** turvallisia menetelmiä varten. Huomautus: `classifyRoute()` sulkee pois `/api/v1/*` ja `/api/v1beta/*` PUBLIC fall-through —, ne ovat aina `CLIENT_API` joten siirtoavaimen käytäntö on edelleen voimassa.
 
 ## Uuden reitin lisääminen
 
@@ -330,15 +326,15 @@ Se pysyy poissa käytöstä, ellei `OMNIROUTE_MCP_ENFORCE_SCOPES=true`.
 (`src/lib/accessTokens/scopes.ts`). Tämä järjestys koskee vain käyttöoikeustunnuksen
 tunnistetietoja. Katso [Hallinnan todennus](../guides/MANAGEMENT-AUTH.md).
 
-## Todennuksen pakollisuuden kytkin
+## Todennus vaaditaan -kytkin
 
-`isAuthRequired()` tiedostossa `src/shared/utils/apiAuth.ts` ratkaisee, pakotetaanko pyynnölle **mitään** todennusta:
+`isAuthRequired()` in `src/shared/utils/apiAuth.ts` päättää, onko** mikä tahansa** todennus pakotetaan pyynnölle:
 
-- `settings.requireLogin === false` → todennus on kytketty globaalisti pois päältä, lukuun ottamatta aina suojattua tasoa (ks. [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md)) ja kutsuja, jotka antavat ulos tunnistetiedon, jonka se hyväksyy. Nämä vaativat saman tunnistetiedon kuin kirjautumisen ollessa päällä: synkronointitunnusten myöntäminen, CLI-käyttötunnusten myöntäminen millä tahansa laajuudella sekä `manage`/`admin`-laajuuden API-avaimen luominen, tuon laajuuden myöntäminen avaimelle tai sellaisen avaimen uudelleengenerointi tai näyttäminen (`requireCredentialForManagementScopedKey()` tiedostossa `src/lib/api/requireManagementAuth.ts`). Pelkkiä päättelyavaimia varten jäävät avoimiksi.
-- Salasanaa ei ole määritetty **eikä** `INITIAL_PASSWORD`-ympäristömuuttujaa ole → bootstrap-tila sallii käyttöönottotoimet ja loopback-pyynnöt, mutta verkkoon avatut pyynnöt vaativat edelleen tunnistetiedot.
-- Mikä tahansa tietokantavirhe → estää pääsyn (oletusarvoisesti turvallinen).
+- `settings.requireLogin === false` → auth on maailmanlaajuisesti poistettu käytöstä, lukuun ottamatta aina suojattua tasoa (katso [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md) ) ja kutsuja, jotka jakavat sen hyväksymän valtuustiedot, jotka tarvitsevat samat valtuustiedot kuin sisäänkirjautumisen yhteydessä: synkronointitunnisteiden myöntäminen, CLI käyttötunnisteiden lyöminen missä tahansa laajuudessa, API avaimen luominen `manage`-`admin` -avaimella. avain tai sellaisen avaimen uudelleen luominen tai paljastaminen (`requireCredentialForManagementScopedKey()` in `src/lib/api/requireManagementAuth.ts`). Vain päättelyavaimet pysyvät auki. Suojatun ominaisuuden lipun kirjoittaminen (`REQUIRE_API_KEY`, muut suojausliput ja [Ominaisuusliput](../reference/FEATURE_FLAGS.md#rest-api) -osiossa luetellut SSRF / TLS / MCP-scope / sandbox -liput) ja PII peiteasetusten (`PUT /api/settings/pii`) tallentaminen edellyttävät myös valtuustietoja.
+- Salasanaa ei ole määritetty** ja** no `INITIAL_PASSWORD` env var → bootstrap -tila mahdollistaa ohjatun aloitustoiminnon ja takaisinkytkentäpyynnöt, mutta avoimet verkkopyynnöt tarvitsevat silti kirjautumistiedot. Poikkeus: suojatun ominaisuuden lipun kirjoittaminen ja PII peittoasetusten (`PUT /api/settings/pii`) tallentaminen vaativat valtuustiedot jopa silmukasta, joten silmukka itsessään ei riitä.
+- Kaikki DB -virheet → epäonnistuu sulkeutumaan (oletussuojattu).
 
-Asiakas-API:n avainten pakottaminen käyttää `isRequireApiKeyEnabled()`-funktiota tiedostossa `src/shared/utils/featureFlags.ts`, ei suoraan `process.env.REQUIRE_API_KEY`-lukua. Tällä on merkitystä käyttöönotetuille instansseille: `REQUIRE_API_KEY`-arvon vaihtaminen kohdassa Dashboard → Feature Flags tallentaa tietokantaan ohituksen ja vaikuttaa välittömästi reitteihin `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` ja muihin asiakas-API:n todennustarkistuksiin, jotka jakavat tämän apufunktion. Jos feature flag -varastoa ei voi lukea, asiakas-API:n todennus estää pääsyn ja vaatii avaimen.
+Asiakkaan API -avaimen valvonta käyttää `isRequireApiKeyEnabled()` `src/shared/utils/featureFlags.ts` ssä, ei suoraa `process.env.REQUIRE_API_KEY` lukua. Tällä on merkitystä käyttöönotetuissa tapauksissa: `REQUIRE_API_KEY` vaihtaminen Dashboardissa → Feature Flags tallentaa DB -korjauksen ja vaikuttaa välittömästi `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` ja muihin asiakassovellusliittymän todennustarkistuksiin, jotka jakavat tämän apuohjelman. Jos ominaisuuden lippuvarastoa ei voida lukea, asiakkaan API -todennus epäonnistuu ja vaatii avaimen.
 
 ## Rikkova muutos — v3.8.0
 

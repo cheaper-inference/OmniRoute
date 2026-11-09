@@ -1325,6 +1325,11 @@ jobs:
         uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
         with:
           files: coverage/lcov.info
+          # `files` does not stop the uploader from also searching the workspace: on the
+          # v3.8.53 release push (run 42180292091) it found the 22207 per-shard JSON files
+          # under coverage-shards/, hit the 5-minute ceiling and never uploaded anything,
+          # while continue-on-error kept the step green. lcov.info is the only report.
+          disable_search: true
           token: ${{ secrets.CODECOV_TOKEN }}
           fail_ci_if_error: false
       - name: Upload coverage artifacts
