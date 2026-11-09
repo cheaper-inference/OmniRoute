@@ -931,7 +931,7 @@ export default function RoutingTab() {
         <div className="mt-4 pt-4 border-t border-border/30">
           <RadioGroup
             label={t("routingDefaultAutoVariant")}
-            orientation="horizontal"
+            columns={3}
             value={settings.autoRoutingDefaultVariant}
             onValueChange={(next) => updateSetting({ autoRoutingDefaultVariant: next })}
             disabled={loading}

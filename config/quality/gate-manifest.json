@@ -714,6 +714,11 @@
       "disposition": "separately-invoked"
     },
     {
+      "name": "typecheck:build",
+      "command": "tsc --pretty false -p tsconfig.build.json",
+      "disposition": "separately-invoked"
+    },
+    {
       "name": "typecheck:noimplicit:core",
       "command": "tsc --pretty false -p tsconfig.typecheck-noimplicit-core.json",
       "disposition": "separately-invoked"

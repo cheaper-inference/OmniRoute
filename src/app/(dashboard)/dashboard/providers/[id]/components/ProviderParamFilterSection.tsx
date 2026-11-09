@@ -1,5 +1,6 @@
 "use client";
 
+import { Skeleton } from "@omniroute/ui-kit/skeleton";
 import { Button, Card, Checkbox, Input } from "@/shared/components";
 
 /**
@@ -200,8 +201,8 @@ function useProviderParamFilterConfig(providerId: string, t: Translate) {
 function ParamFilterSectionSkeleton() {
   return (
     <Card padding="sm" className="p-5">
-      <div className="h-5 w-48 animate-pulse rounded bg-bg-subtle" />
-      <div className="mt-4 h-20 animate-pulse rounded bg-bg-subtle" />
+      <Skeleton variant="text" width="12rem" />
+      <Skeleton height={80} className="mt-4" />
     </Card>
   );
 }

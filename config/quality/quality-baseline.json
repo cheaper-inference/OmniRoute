@@ -394,7 +394,7 @@
       "_seeded_2026_11_09": "#19066 block 7. Measured by scripts/check/check-type-scale-ratchet.mjs (text-[8px]..text-[11px], fractions included, in src/): 971 on release/v3.8.54 565dda8d, 914 after the same PR moved 57 non-dense hints and empty states from text-[11px] to text-xs. Ceiling = the live count, without the velocity 20% headroom, on the owner's instruction: it may only go down. Enforced by the pre-commit hook and tests/unit/check-type-scale-ratchet.test.ts."
     },
     "typeScaleFontBold": {
-      "value": 254,
+      "value": 252,
       "direction": "down",
       "eps": 0,
       "dedicatedGate": true,

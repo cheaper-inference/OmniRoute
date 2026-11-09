@@ -304,6 +304,95 @@ Haɗe-haɗen matsawa su ne bayanan martabar matsawa masu suna waɗanda za a iya 
 
 Wurin dashboard: `Dashboard -> Context & Cache -> Compression Combos`.
 
+## Abubuwan buƙatu / jagorar mai aiki (CCR &-deup-deup)
+
+CCR (`ccr`) da `session-dedup` maye gurbin ko goge rubutu kuma su bar a** alama** a baya. Wannan sashe shine bayanin mai aiki don haɗa abokin ciniki sama, karanta alamomin biyu, da maidowa ko gano abin da ya ɓoye. An rufe injiniyoyin kowane injin a sama; wannan shine Layer "yadda zan gudanar da shi".
+
+### Transport & wuraren ƙarshe
+
+Sabar MCP da ke fallasa kayan aikin CCR ana iya isa ta hanyoyi uku. Tsohuwar tushe URL shine `http://localhost:20128` (`OMNIROUTE_BASE_URL`):
+
+| Sufuri                                    | URL / umurnin                           | Bayanan kula                                                                                                                                              |
+| ----------------------------------------- | --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| HTTP mai gudana (abokin ciniki, shawarar) | `http://localhost:20128/api/mcp/stream` | Abokan ciniki MCP na ƙarshe suna magana da.                                                                                                               |
+| Legacy SSE singleton                      | `http://localhost:20128/api/mcp/sse`    | Tsofaffin jigilar singleton. Yana** yana rufewa** lokuta masu gudana; yi amfani da abokan cinikin `streamable-http` akan `/api/mcp/stream`, ba wannan ba. |
+| gidan rediyo                              | `omniroute --mcp`                       | Don tsarin IDE MCP wanda ke haifar da tsari. Babu tutar `--dev` ; `omniroute --mcp` shine wurin shiga stdio.                                              |
+
+### Matakan ajiya (abin da ya tsira daga sake farawa)
+
+CCR a** mataki biyu** kantin sayar da, ba a cikin ƙwaƙwalwar ajiya-kawai:
+
+- **Zafafan matakin ƙwaƙwalwar ajiya** — per-block cap 2 MiB, per-principal 16 MiB, duniya 64 MiB. Shigar da tsoho zuwa 24 h TTL (mafi girman kwanaki 7). Cikakken dawo da MCP daga ƙwaƙwalwar ajiya an rufe shi a 256 KiB; Har yanzu ana iya samun duk wani abu mafi girma ta hanyar kewayon / grep.
+- **Matsayin SQLite mai dorewa** (`ccr_blocks`, `COMPRESSION_CCR_DURABLE_STORE`, a kan ta tsohuwa) — yana goyan bayan matakin ƙwaƙwalwar ajiya don haka toshe ya tsira daga korar LRU, sake farawa, ko dawo da saukowa a wani misali. Layin yana kiyaye TTL na toshe, don haka shingen da ya wuce TTL ɗinsa ya ɓace daga duka matakan biyu.
+
+Masu gadi guda uku suna kiyaye iyakar — mai ɗorewa mai ɗorewa-kawai lokacin da:
+
+1. toshe ya ƙare** 512 KB** (`MAX_DURABLE_BLOCK_BYTES`);
+2. lokacin aiki shine lokacin gudu na girgije (babu diski na gida);
+3. `COMPRESSION_CCR_DURABLE_STORE=false`.
+
+Don haka "toshe ya ɓace" ba labarin sake kunnawa ba ne: toshe sub-512 KB a kan wani yanki na gida, lokacin da ba na girgije ba yana tsira daga sake kunnawa ta hanyar matakin mai ɗorewa har sai TTL ɗinsa ya ƙare. Duba [Maganar Muhalli](../reference/ENVIRONMENT.md) don ma'auni.
+
+### Alamar biyu
+
+| Alamar alama                          | Ma'ana                                                                                                                                            | Abin da samfurin ya kamata ya yi                                                                                                                                                                             |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `[CCR retrieve hash=<24hex> chars=N]` | An adana babban toshe mai magana da abun ciki.                                                                                                    | Kira `omniroute_ccr_retrieve` tare da** 24-hex hash da aka kwafi a zahiri** don dawo da asalin rubutun.                                                                                                      |
+| `[dedup:ref sha=…]`                   | `session-dedup` riga an aika da rubutun da aka goge a farkon juyi na wannan zama. Wannan wani** kallon baya da gangan** , ba asara ko kuskure ba. | Yi** ba** kira kowane kayan aiki kuma yi** ba** kokarin "sake gina" shi. Farkon abin da ke faruwa na rubutu shine kwafin canonical; juzu'i na yanzu ba a sake rubutawa ba, ana cire shi akan juzu'i na gaba. |
+
+Duba baya `[dedup:ref]` yanke shawara ce da gangan — babu wani sake ginawa da aka riga aka aika. Yi la'akari da shi kamar "wannan ainihin rubutun ya riga ya kasance akan waya a farkon wannan zaman."
+
+### Abubuwan buƙatun abokin ciniki
+
+- **Maɓalli (stdio):** mai kiran stdio ba ya ɗauke da shaidar kowane buƙatun, don haka yana tabbatarwa da `OMNIROUTE_API_KEY` (wanda aka saita a cikin `env` uwar garken MCP ). Idan ba tare da shi ba mai kiran ba a san sunansa ba kuma kayan aikin da ke buƙatar shugaban makaranta na iya ƙasƙanta.
+- **`tools[]` shine sharadin allura.** An yi alluran umarnin dawo da tsari CCR (#8033).** kawai** lokacin da buƙatun da aka yi tallan `tools[]` ya tabbatar abokin ciniki zai iya kai ga `omniroute_ccr_retrieve` a zahiri. Wasan wasa ne na bi-biyu wanda ke daure da mai raba (`__`, `.`, `/`, `:`) — bai taba zama rukunonin rukunin igiya — ba don haka sunan da aka raba suna kamar `mcp__gateway__omniroute_ccr_retrieve` har yanzu ana kirgawa. `tools[]` da ba ya nan ko bai dace ba yana nufin ba a yi wa umarnin _ba_ allura ba, ta ƙira.
+- **`codemode:false` (abokan ciniki OpenCode ).** OpenCode ya gaza zuwa Yanayin Code, wanda ke tallata kayan aikin sa na asali kawai zuwa samfurin kuma** ba** saka kayan aikin MCP akan jerin `tools[]` na asali. Saita `codemode: false` akan shigarwar uwar garken MCP domin ana tallata kayan aikin `omniroute_ccr_*`. Wannan a** abokin ciniki** saitin, ba OmniRoute daya ba. Ba ya samun alluran umarnin CCR har yanzu: OpenCode suna suna `<server>_<tool>` kayan aiki, don haka uwar garken da ake kira `omniroute` ta fallasa `omniroute_omniroute_ccr_retrieve`, kuma `_` baya ɗaya daga cikin masu raba daidai.
+- **Shugabanni.** An keɓance ma'ajiya da dawo da su kowane ingantacciyar shugaba (kowane maɓallin API ). Maɓalli yana ganin tubalan sa kawai.
+
+### Matsakaicin kowane kayan aiki
+
+Koyaushe ana aiwatar da aiwatar da iyaka ga masu kiran HTTP/SSE kunkuntar. Kayan aikin `omniroute_` CCR suna buƙatar:
+
+| Kayan aiki               | Iyakar              |
+| ------------------------ | ------------------- |
+| `omniroute_ccr_store`    | `write:compression` |
+| `omniroute_ccr_delete`   | `write:compression` |
+| `omniroute_ccr_retrieve` | `read:compression`  |
+| `omniroute_ccr_inspect`  | `read:compression`  |
+| `omniroute_ccr_list`     | `read:compression`  |
+| `omniroute_ccr_stats`    | `read:compression`  |
+
+Wurin da ya ɓace yana dawo da wani** sakamakon kuskuren kayan aiki MCP** (`isError: true`, ba HTTP 403 — da `403 LOCAL_ONLY` shine keɓantaccen madaidaicin hanya-gadi auth): `Error: Insufficient MCP scopes for <tool>. Missing: <scope>.` Maɓalli kaɗan na nesa zai iya riƙe `mcp:connect` (yana ba da izini ga `/api/mcp/` na gida-kawai sassaƙa) tare da takamaiman iyakar read/write da yake buƙata.
+
+### Abokin ciniki matrix
+
+| Abokin ciniki      | Sufuri                                | Sanya don amfani                                                                                                                                                                                                                                               | `tools[]` tallar? ( CCR →                                                                                                                                                                                                    |
+| ------------------ | ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Claude Code        | mai gudana-http                       | `claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream`                                                                                                                                                                              | Ee — MCP-mai iyawa; allura.                                                                                                                                                                                                  |
+| Cursor / Cline     | `stdio`** ko** `streamable-http`      | stdio: `omniroute --mcp` tare da `OMNIROUTE_API_KEY` a cikin `env`; ko shigarwar MCP mai nisa mai nuni a `http://localhost:20128/api/mcp/stream` (duba [Saitin Jagorar → MCP Kanfigareshan Abokin ciniki](../guides/SETUP_GUIDE.md#mcp-client-configuration) ) | Ee — tallata kayan aikin `omniroute_ccr_*`.                                                                                                                                                                                  |
+| OpenCode           | mai gudana-http                       | `opencode mcp add omniroute --url http://localhost:20128/api/mcp/stream`, da `codemode: false`                                                                                                                                                                 | Kayan aikin da aka tallata da `codemode: false` kawai; Har yanzu ba a yi alluran umarnin ba, saboda `omniroute_omniroute_ccr_retrieve` bai dace ba (duba [abubuwan da ake buƙata na Abokin ciniki](#client-prerequisites) ). |
+| Buɗe AI-mai jituwa | BudeAI mai jituwa HTTP (kammala taɗi) | daidaitaccen abokin ciniki-kammala hira akan madaidaicin wurin ƙarshen OpenAI                                                                                                                                                                                  | **Taba** — mai kira mai jituwa na OpenAI mai jituwa ba a taɓa gaya masa ya kira kayan aikin ba, kuma ba a allurar wa'azin ba.                                                                                                |
+
+### Iyaka maidowa & pagination
+
+Ana yanke sakamakon rubutun kayan aikin MCP a kusa da `mcpAccessibility.maxTextChars` (tsoho `50000`). Maido da `full` na toshe an sanya shi a 256 KiB —** babu cikakken maidowa mara iyaka** . Lokacin da toshe `chars=N` yana da girma, shafi shi maimakon ja da duka:
+
+- Ka'idodin yatsan hannu:**`chars > 40000` → amfani da `mode`** , ba komai ya cika ba.
+- `mode:"grep"` — regex `pattern` madaidaicin layi ta layi, har zuwa layukan daidaitawa 1,000 (`unique: true` drops repeats), mafi arha don "nemo layin da nake buƙata."
+- `mode:"lines"` — kewayon layi na 1; yana buƙatar duka `start` da `end`.
+- `mode:"head"` / `mode:"tail"` — first/last `n` layi.
+- `mode:"stats"` — layi, hali, da byte ƙidaya ba tare da jiki ba.
+
+Yi amfani da `mode:"lines"` tare da `start`/`end` don yin tafiya mai tsayi a cikin shafuka maimakon neman duka abu lokaci guda.
+
+### Sunan kayan aiki
+
+A halin yanzu ana kiran kayan aikin maido da `omniroute_ccr_retrieve` (prefix ɗin `omniroute_` ƙwararriyar aikin kwanan wata ce don karon sunan uwar garken). Sunan kayan aiki mai ƙayyadaddun ƙayyadaddun ƙayyadaddun ƙayyadaddun ƙayyadaddun ƙayyadaddun kayan aiki da gyara don sakamakon MCP JSON da aka yanke tsakiyar kirtani ana bin diddigin su azaman masu biyo baya; wannan shafin yana tsara halin yanzu, da aka aika kawai.
+
+### Zagayowar rayuwa
+
+Streamable-HTTP zaman mara amfani da uwar garken girbe su; an saita taga mara aiki ta hanyar `OMNIROUTE_MCP_SESSION_IDLE_MS` (tsohon mintuna 5; ana magana da suna, ba ƙima mai lamba ba, don haka wannan shafin baya yin shuɗi lokacin da ya canza). Alamar zaman girbi mara aiki shine HTTP 404 tare da `Unknown Mcp-Session-Id` — maganin shine sake haɗawa ko sake farawa zaman,** ba** don juya maɓalli, canza iyaka, ko sake suna kayan aiki.
+
 ## Fuskar API
 
 | Hanya                                  | Manufa                                                                       |
@@ -387,7 +476,7 @@ masu tasirin cache, da sauransu).
 
 ## Tabbatarwa
 
-Ƙofofin da aka fi mayar da hankali a wannan yanki sune:
+Ƙofofin da aka mayar da hankali ga wannan yanki sune:
 
 ```bash
 node --import tsx/esm --test tests/unit/compression/rtk-*.test.ts tests/unit/compression/pipeline-integration.test.ts tests/unit/compression/context-compression-api.test.ts

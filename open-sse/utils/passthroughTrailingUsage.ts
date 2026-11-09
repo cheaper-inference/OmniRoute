@@ -1,4 +1,5 @@
 import { estimateUsage } from "./usageTracking.ts";
+import { mergeCacheCreationFields } from "./cacheWriteUsage.ts";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type UsageRecord = Record<string, any>;
@@ -31,7 +32,7 @@ export function resolveTrailingUsageSummary(
     }
   }
   if (previous && typeof previous === "object" && !Array.isArray(previous)) {
-    return { ...previous, ...summary };
+    return { ...previous, ...summary, ...mergeCacheCreationFields(previous, summary) };
   }
   return summary;
 }

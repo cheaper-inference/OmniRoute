@@ -160,6 +160,7 @@ export default function AutoDisableCard() {
         <div className="mt-4 rounded-lg bg-bg-subtle p-4">
           <RadioGroup
             name="auto-disable-banned-scope"
+            columns={2}
             label={t("autoDisableBannedScope")}
             description={t("autoDisableBannedScopeDesc")}
             value={current.scope}
@@ -167,7 +168,6 @@ export default function AutoDisableCard() {
               setDraft((prev) => ({ ...prev, scope: next as (typeof scopes)[number] }))
             }
             disabled={!editMode || !current.enabled}
-            orientation="horizontal"
           >
             {scopes.map((scope) => (
               <RadioGroupItem
