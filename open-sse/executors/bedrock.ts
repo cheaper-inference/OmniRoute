@@ -436,6 +436,23 @@ function toolConfigFromOpenAI(tools, toolChoice): ToolConfiguration | undefined 
   return config;
 }
 
+// Converse model ids that reject a `system` block ("This model doesn't support system
+// messages"). Data, not logic: add an entry when Bedrock rejects another family.
+const BEDROCK_NO_SYSTEM_MODEL_PATTERNS: readonly RegExp[] = [
+  /(^|\.)amazon\.titan-text/i,
+  /(^|\.)cohere\.command(-light)?-text/i,
+  /(^|\.)mistral\.mistral-7b-instruct/i,
+  /(^|\.)mistral\.mixtral-8x7b-instruct/i,
+];
+
+// Fold the system text into the first user turn instead of sending a block the model rejects.
+function foldSystemIntoFirstUserTurn(messages: Message[], system: SystemContentBlock[]) {
+  const block = { text: system.map((b) => ("text" in b ? b.text : "")).join("\n") };
+  const first = messages[0];
+  if (first?.role === "user") first.content = [block, ...(first.content ?? [])];
+  else messages.unshift({ role: "user", content: [block] });
+}
+
 export function openAIToBedrockConverse(model, body) {
   const request = asRecord(body);
   const messages = Array.isArray(request.messages) ? request.messages : [];
@@ -464,7 +481,13 @@ export function openAIToBedrockConverse(model, body) {
   };
 
   const system = systemBlocksFromOpenAI(messages);
-  if (system.length > 0) payload.system = system;
+  if (system.length > 0) {
+    if (BEDROCK_NO_SYSTEM_MODEL_PATTERNS.some((pattern) => pattern.test(model))) {
+      foldSystemIntoFirstUserTurn(payload.messages, system);
+    } else {
+      payload.system = system;
+    }
+  }
   if (Object.keys(inferenceConfig).length > 0) payload.inferenceConfig = inferenceConfig;
 
   const toolConfig = toolConfigFromOpenAI(request.tools, request.tool_choice);
