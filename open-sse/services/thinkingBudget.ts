@@ -99,15 +99,16 @@ export function gemini38ThinkingLevelFromBudget(
   return "high";
 }
 
-function clientAskedForThoughts(body: Record<string, unknown>): boolean {
-  return body.includeThoughts === true || body.include_thoughts === true;
+function clientOptedOutOfThoughts(body: Record<string, unknown>): boolean {
+  return body.includeThoughts === false || body.include_thoughts === false;
 }
 
 /**
  * Gemini 3.8 honors thinkingLevel, not a 3.7 numeric thinkingBudget.
  * Gemini 4+ rejects the numeric budget off-switch, so there it becomes thinkingLevel "low";
  * versions <= 3 keep { thinkingBudget: 0, includeThoughts: false }.
- * Omit includeThoughts unless the client asked - thoughts share maxOutputTokens.
+ * Thinking-level models stream thought summaries by default (#19302), like the rest
+ * of the Gemini family (#4170). includeThoughts: false remains the opt-out.
  */
 export function gemini38ThinkingConfig(
   model: string,
@@ -122,16 +123,10 @@ export function gemini38ThinkingConfig(
     }
     return { thinkingBudget: 0, includeThoughts: false };
   }
-  const thinkingConfig: {
-    thinkingLevel: Gemini38ThinkingLevel;
-    includeThoughts?: boolean;
-  } = {
+  return {
     thinkingLevel: gemini38ThinkingLevelFromBudget(model, budget),
+    includeThoughts: !clientOptedOutOfThoughts(body),
   };
-  if (clientAskedForThoughts(body)) {
-    thinkingConfig.includeThoughts = true;
-  }
-  return thinkingConfig;
 }
 
 // Default config (passthrough = backward compatible)
