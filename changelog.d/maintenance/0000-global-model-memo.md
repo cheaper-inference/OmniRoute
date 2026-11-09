@@ -1,0 +1,1 @@
+- **perf(routing):** a request for a model that is not listed under its own provider (custom, passthrough and OpenAI-compatible models) no longer walks the whole model registry on every lookup; the answer is reused until the registry changes.
