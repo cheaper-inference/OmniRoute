@@ -68,6 +68,18 @@ function extractGeminiMarkdownShortcut(parsed: Record<string, unknown>): string 
   return typeof response?.markdown === "string" ? response.markdown : null;
 }
 
+function pushTextualToolCall(
+  call: { name: string; args: unknown },
+  acc: GeminiSSEAccumulator
+): void {
+  acc.toolCalls.push({
+    id: `${call.name}-${Date.now()}-${acc.toolCalls.length}`,
+    index: acc.toolCalls.length,
+    type: "function",
+    function: { name: call.name, arguments: JSON.stringify(call.args || {}) },
+  });
+}
+
 /** Append one candidate content part (text or textual tool call) onto the accumulator. */
 function applyCandidatePart(part: Record<string, unknown>, acc: GeminiSSEAccumulator): void {
   // Native function calls (Gemini 3.x / Antigravity)
@@ -85,6 +97,7 @@ function applyCandidatePart(part: Record<string, unknown>, acc: GeminiSSEAccumul
         arguments: JSON.stringify(stripZeroWidth(fc.args ?? {})),
       },
     });
+    acc.sawContent = true; // a tool-only stream cut before finishReason is still a cut stream
     return;
   }
 
@@ -92,15 +105,7 @@ function applyCandidatePart(part: Record<string, unknown>, acc: GeminiSSEAccumul
 
   const textualToolCall = tryParseTextualToolCall(part.text);
   if (textualToolCall) {
-    acc.toolCalls.push({
-      id: `${textualToolCall.name}-${Date.now()}-${acc.toolCalls.length}`,
-      index: acc.toolCalls.length,
-      type: "function",
-      function: {
-        name: textualToolCall.name,
-        arguments: JSON.stringify(textualToolCall.args || {}),
-      },
-    });
+    pushTextualToolCall(textualToolCall, acc);
   } else {
     acc.textContent += part.text;
   }
@@ -365,6 +370,13 @@ export function parseSSEToGeminiResponse(
     if (!payload || payload === "[DONE]") continue;
 
     applyGeminiSSEDataLine(payload, acc);
+  }
+
+  // The marker and its arguments are usually split over several parts: retry on the joined text.
+  const joinedToolCall = tryParseTextualToolCall(acc.textContent);
+  if (joinedToolCall) {
+    pushTextualToolCall(joinedToolCall, acc);
+    acc.textContent = "";
   }
 
   if (!acc.sawContent && acc.toolCalls.length === 0) return null;
