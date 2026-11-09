@@ -1,1 +1,0 @@
-- **fix(claude):** Claude requests whose last assistant turn ends in whitespace no longer fail with a 400 from Anthropic. The trailing whitespace is trimmed before the request is sent.
