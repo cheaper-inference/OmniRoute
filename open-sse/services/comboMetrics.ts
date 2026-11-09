@@ -215,14 +215,19 @@ export function getPersistedSkipBypassed(comboName: string): number {
 const MAX_METRICS_ENTRIES = 500;
 const METRICS_TTL_MS = 60 * 60 * 1000; // 1 hour
 
+// Last-use time as a number per entry, so the eviction scan compares numbers
+// instead of parsing up to 500 ISO strings per new combo name. Kept outside the
+// entries so the public metric views keep their shape.
+const lastUsedMs = new WeakMap<object, number>();
+
 function evictOldestMetric(
-  targetMap: Map<string, { lastUsedAt: string | null }>,
+  targetMap: Map<string, object>,
   options: { deletePairedShadow?: boolean } = {}
 ): void {
   let oldest: string | null = null;
   let oldestTime = Infinity;
   for (const [name, entry] of targetMap) {
-    const t = entry.lastUsedAt ? new Date(entry.lastUsedAt).getTime() : Date.now();
+    const t = lastUsedMs.get(entry) ?? Date.now();
     if (t < oldestTime) {
       oldestTime = t;
       oldest = name;
@@ -298,12 +303,14 @@ export function recordComboRequest(
   const combo = metrics.get(comboName);
   if (!combo) return;
 
-  const usedAt = new Date().toISOString();
+  const now = Date.now();
+  const usedAt = new Date(now).toISOString();
   combo.totalRequests++;
   combo.totalLatencyMs += latencyMs;
   combo.totalFallbacks += fallbackCount;
   if (fallbackCount > 0) combo.requestsWithFallback++;
   combo.lastUsedAt = usedAt;
+  lastUsedMs.set(combo, now);
   combo.strategy = strategy;
 
   if (success) {
@@ -374,10 +381,12 @@ export function recordComboShadowRequest(
   const combo = shadowMetrics.get(comboName);
   if (!combo) return;
 
-  const usedAt = new Date().toISOString();
+  const now = Date.now();
+  const usedAt = new Date(now).toISOString();
   combo.totalRequests++;
   combo.totalLatencyMs += latencyMs;
   combo.lastUsedAt = usedAt;
+  lastUsedMs.set(combo, now);
 
   if (success) combo.totalSuccesses++;
   else combo.totalFailures++;
