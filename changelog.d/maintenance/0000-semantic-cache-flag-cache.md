@@ -1,1 +1,0 @@
-- **perf(db):** chat requests no longer reload both settings namespaces and decrypt the cache secrets to check whether the semantic cache is on. The answer is kept in memory for 5 s and is cleared on every database settings write and every database reset.
