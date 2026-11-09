@@ -128,6 +128,67 @@ export function withCatalogDisplayName<T extends Record<string, unknown>>(model:
   return derived && derived !== name ? { ...model, name: derived } : model;
 }
 
+// `-max` is also a plain model-name word (qwen3-max), so it counts only beside a listed stem.
+const FIXED_EFFORT_SUFFIX_RE = /-(minimal|xhigh|high|medium|low|max)$/;
+const TRAILING_EFFORT_LABEL_RE = /\s*\(?\s*(?:minimal|xhigh|high|medium|low|max)\s*\)?$/i;
+
+/**
+ * Add codex-registry style `metadata` (`display_name`, `supported_reasoning_levels`,
+ * `default_reasoning_level`, `reasoning_required`, `reasoning`) — the fields catalog
+ * clients such as oh-my-pi read instead of `capabilities.effort_tiers`. A `-{effort}` id
+ * is a fixed-effort route: its name carries the tier and its ladder is that one tier, so
+ * clients offer no effort picker. A bare reasoning model keeps its selectable tiers.
+ * `display_name` never carries the `disambiguateCatalogModelNames` provider prefix.
+ */
+export function withClientReasoningMetadata<T extends Record<string, unknown>>(models: T[]): T[] {
+  const cleanName = (model: Record<string, unknown>): string | undefined => {
+    const id = typeof model.id === "string" ? model.id : "";
+    const name = typeof model.name === "string" ? model.name.trim() : "";
+    const prefix = id.slice(0, id.indexOf("/") + 1);
+    return (prefix && name.startsWith(prefix) ? name.slice(prefix.length) : name) || undefined;
+  };
+  const namesById = new Map<unknown, string | undefined>(
+    models.map((model) => [model.id, cleanName(model)])
+  );
+  return models.map((model) => {
+    const id = typeof model.id === "string" ? model.id : "";
+    const capabilities = (
+      model.capabilities && typeof model.capabilities === "object" ? model.capabilities : {}
+    ) as Record<string, unknown>;
+    const name = namesById.get(id);
+    const suffix = FIXED_EFFORT_SUFFIX_RE.exec(id)?.[1];
+    const stem = suffix ? id.slice(0, -suffix.length - 1) : "";
+    const metadata: Record<string, unknown> = {};
+    if (
+      suffix &&
+      capabilities.supportsThinking === true &&
+      (suffix !== "max" || namesById.has(stem))
+    ) {
+      const baseName = namesById.get(stem) ?? name?.replace(TRAILING_EFFORT_LABEL_RE, "");
+      const label = suffix === "xhigh" ? "XHigh" : suffix[0].toUpperCase() + suffix.slice(1);
+      if (baseName) metadata.display_name = `${baseName} ${label}`;
+      metadata.supported_reasoning_levels = [suffix];
+      metadata.default_reasoning_level = suffix;
+      metadata.reasoning_required = true;
+    } else {
+      if (name) metadata.display_name = name;
+      const tiers = capabilities.effort_tiers;
+      if (capabilities.supportsThinking === false) {
+        metadata.reasoning = false;
+      } else if (capabilities.supportsThinking === true && Array.isArray(tiers) && tiers.length) {
+        metadata.supported_reasoning_levels = tiers;
+        if (tiers.includes("medium")) metadata.default_reasoning_level = "medium";
+      }
+    }
+    if (Object.keys(metadata).length === 0) return model;
+    const existing =
+      model.metadata && typeof model.metadata === "object"
+        ? (model.metadata as Record<string, unknown>)
+        : {};
+    return { ...model, metadata: { ...existing, ...metadata } };
+  });
+}
+
 /**
  * The name a synced row should carry: its own published name, unless the static
  * registry already names the model (the registry name keeps winning, as before).

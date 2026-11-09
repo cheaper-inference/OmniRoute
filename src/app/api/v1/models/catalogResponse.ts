@@ -51,7 +51,11 @@ import {
   isCatalogMirrorRefinementsEnabled,
 } from "@/shared/utils/featureFlags";
 import { extractApiKey } from "@/sse/services/auth";
-import { maybeOmitCatalogModelName, withCatalogDisplayName } from "./catalogHelpers";
+import {
+  maybeOmitCatalogModelName,
+  withCatalogDisplayName,
+  withClientReasoningMetadata,
+} from "./catalogHelpers";
 import { applyCatalogPage, catalogJsonResponse, parseCatalogPage } from "./catalogPagination";
 import { isCodexModelCatalogClient } from "./catalogRequest";
 import {
@@ -466,7 +470,7 @@ export async function finalizeCatalogResponse(
     }
   }
   await yieldTurn();
-  const enrichedModels = disambiguateCatalogModelNames(enriched);
+  const enrichedModels = disambiguateCatalogModelNames(withClientReasoningMetadata(enriched));
   await yieldTurn();
   const orderedModels = sortCatalogModelsProviderGrouped(enrichedModels);
   await yieldTurn();
