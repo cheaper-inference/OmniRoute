@@ -1,7 +1,7 @@
 ---
 title: "Cost & Spend Tracking"
 version: 3.8.54
-lastUpdated: 2026-11-08
+lastUpdated: 2026-11-09
 ---
 
 # Cost & Spend Tracking
@@ -130,6 +130,11 @@ token counts. Legacy token-only rows still change when their catalogue price cha
 - Requests with document or bounding-box annotations require a separate
   `ocr_cost_per_annotated_page` tariff. Without it, the cost remains unknown;
   the ordinary OCR tariff is not silently substituted.
+- LiteLLM sync maps its upstream `annotation_cost_per_page` field into
+  `ocr_cost_per_annotated_page`, retaining the absolute USD/page value and
+  annotation-only entries, including explicit zero. A supplied canonical field
+  takes precedence; invalid alias values are ignored. User pricing overrides
+  retain their normal priority. See [LiteLLM's OCR pricing keys](https://docs.litellm.ai/docs/providers/mistral_batches#batch-ocr-cost-tracking).
 - OCR usage stores the page count, unit price, calculated USD cost, API key
   and selected connection. Pages are never represented as tokens. Call logs
   contain billing metadata, not document URLs, PDF bytes or extracted text.
