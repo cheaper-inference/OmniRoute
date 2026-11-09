@@ -195,6 +195,29 @@ test("Codex image models are not blocked by an empty account inventory; chat mod
   );
 });
 
+test("Codex hosted-tool image ids are chat models and still honour the account inventory (#18687)", async () => {
+  // gpt-6.1-sol is registered as a Codex image model (hosted image_generation tool), but
+  // the request still runs the chat model on the account, and the Codex chat inventory
+  // lists it. An account that does not advertise it must stay ineligible for chat and
+  // image requests alike.
+  await resetStorage();
+  const { proId, plusId } = await seedTwoAccounts();
+  await modelsDb.replaceSyncedAvailableModelsForConnection(PROVIDER, proId, [
+    { id: "gpt-6.1-sol", name: "gpt-6.1-sol" },
+  ]);
+  assert.equal(
+    selectedConnectionId(await auth.getProviderCredentials(PROVIDER, null, null, "gpt-6.1-sol")),
+    proId
+  );
+  assert.equal(
+    selectedConnectionId(
+      await auth.getProviderCredentials(PROVIDER, null, [plusId], "gpt-6.1-sol")
+    ),
+    null,
+    "the plus account never advertised gpt-6.1-sol"
+  );
+});
+
 test("Codex forced and API-key restricted selection cannot bypass the account inventory", async () => {
   await resetStorage();
   const { plusId } = await seedTwoAccounts();

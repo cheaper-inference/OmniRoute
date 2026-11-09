@@ -4,12 +4,14 @@
 
 ---
 
-🌐 **Ngôn ngữ:** 🇺🇸 [English](./API_REFERENCE.md) | 🇪🇹 [አማርኛ](../i18n/am/docs/reference/API_REFERENCE.md) | 🇸🇦 [العربية](../i18n/ar/docs/reference/API_REFERENCE.md) | 🇦🇿 [Azərbaycan dili](../i18n/az/docs/reference/API_REFERENCE.md) | 🇧🇬 [Български](../i18n/bg/docs/reference/API_REFERENCE.md) | 🇧🇩 [বাংলা](../i18n/bn/docs/reference/API_REFERENCE.md) | 🇧🇦 [Bosanski](../i18n/bs/docs/reference/API_REFERENCE.md) | 🇨🇿 [Čeština](../i18n/cs/docs/reference/API_REFERENCE.md) | 🇩🇰 [Dansk](../i18n/da/docs/reference/API_REFERENCE.md) | 🇩🇪 [Deutsch](../i18n/de/docs/reference/API_REFERENCE.md) | 🇬🇷 [Ελληνικά](../i18n/el/docs/reference/API_REFERENCE.md) | 🇪🇸 [Español](../i18n/es/docs/reference/API_REFERENCE.md) | 🇪🇪 [Eesti](../i18n/et/docs/reference/API_REFERENCE.md) | 🇮🇷 [فارسی](../i18n/fa/docs/reference/API_REFERENCE.md) | 🇫🇮 [Suomi](../i18n/fi/docs/reference/API_REFERENCE.md) | 🇫🇷 [Français](../i18n/fr/docs/reference/API_REFERENCE.md) | 🇮🇪 [Gaeilge](../i18n/ga/docs/reference/API_REFERENCE.md) | 🇮🇳 [ગુજરાતી](../i18n/gu/docs/reference/API_REFERENCE.md) | 🇳🇬 [Hausa](../i18n/ha/docs/reference/API_REFERENCE.md) | 🇮🇱 [עברית](../i18n/he/docs/reference/API_REFERENCE.md) | 🇮🇳 [हिन्दी](../i18n/hi/docs/reference/API_REFERENCE.md) | 🇭🇷 [Hrvatski](../i18n/hr/docs/reference/API_REFERENCE.md) | 🇭🇺 [Magyar](../i18n/hu/docs/reference/API_REFERENCE.md) | 🇦🇲 [Հայերեն](../i18n/hy/docs/reference/API_REFERENCE.md) | 🇮🇩 [Bahasa Indonesia](../i18n/id/docs/reference/API_REFERENCE.md) | 🇳🇬 [Igbo](../i18n/ig/docs/reference/API_REFERENCE.md) | 🇮🇹 [Italiano](../i18n/it/docs/reference/API_REFERENCE.md) | 🇯🇵 [日本語](../i18n/ja/docs/reference/API_REFERENCE.md) | 🇬🇪 [ქართული](../i18n/ka/docs/reference/API_REFERENCE.md) | 🇰🇭 [ខ្មែរ](../i18n/km/docs/reference/API_REFERENCE.md) | 🇮🇳 [ಕನ್ನಡ](../i18n/kn/docs/reference/API_REFERENCE.md) | 🇰🇷 [한국어](../i18n/ko/docs/reference/API_REFERENCE.md) | 🇱🇹 [Lietuvių](../i18n/lt/docs/reference/API_REFERENCE.md) | 🇱🇻 [Latviešu](../i18n/lv/docs/reference/API_REFERENCE.md) | 🇮🇳 [മലയാളം](../i18n/ml/docs/reference/API_REFERENCE.md) | 🇮🇳 [मराठी](../i18n/mr/docs/reference/API_REFERENCE.md) | 🇲🇾 [Bahasa Melayu](../i18n/ms/docs/reference/API_REFERENCE.md) | 🇲🇹 [Malti](../i18n/mt/docs/reference/API_REFERENCE.md) | 🇲🇲 [မြန်မာ](../i18n/my/docs/reference/API_REFERENCE.md) | 🇳🇵 [नेपाली](../i18n/ne/docs/reference/API_REFERENCE.md) | 🇳🇱 [Nederlands](../i18n/nl/docs/reference/API_REFERENCE.md) | 🇳🇴 [Norsk](../i18n/no/docs/reference/API_REFERENCE.md) | 🇮🇳 [ଓଡ଼ିଆ](../i18n/or/docs/reference/API_REFERENCE.md) | 🇮🇳 [ਪੰਜਾਬੀ](../i18n/pa/docs/reference/API_REFERENCE.md) | 🇵🇭 [Filipino](../i18n/phi/docs/reference/API_REFERENCE.md) | 🇵🇱 [Polski](../i18n/pl/docs/reference/API_REFERENCE.md) | 🇵🇹 [Português (Portugal)](../i18n/pt/docs/reference/API_REFERENCE.md) | 🇧🇷 [Português (Brasil)](../i18n/pt-BR/docs/reference/API_REFERENCE.md) | 🇷🇴 [Română](../i18n/ro/docs/reference/API_REFERENCE.md) | 🇷🇺 [Русский](../i18n/ru/docs/reference/API_REFERENCE.md) | 🇱🇰 [සිංහල](../i18n/si/docs/reference/API_REFERENCE.md) | 🇸🇰 [Slovenčina](../i18n/sk/docs/reference/API_REFERENCE.md) | 🇸🇮 [Slovenščina](../i18n/sl/docs/reference/API_REFERENCE.md) | 🇷🇸 [Српски](../i18n/sr/docs/reference/API_REFERENCE.md) | 🇸🇪 [Svenska](../i18n/sv/docs/reference/API_REFERENCE.md) | 🇰🇪 [Kiswahili](../i18n/sw/docs/reference/API_REFERENCE.md) | 🇮🇳 [தமிழ்](../i18n/ta/docs/reference/API_REFERENCE.md) | 🇮🇳 [తెలుగు](../i18n/te/docs/reference/API_REFERENCE.md) | 🇹🇭 [ไทย](../i18n/th/docs/reference/API_REFERENCE.md) | 🇹🇷 [Türkçe](../i18n/tr/docs/reference/API_REFERENCE.md) | 🇺🇦 [Українська](../i18n/uk-UA/docs/reference/API_REFERENCE.md) | 🇵🇰 [اردو](../i18n/ur/docs/reference/API_REFERENCE.md) | 🇺🇿 [Oʻzbekcha](../i18n/uz/docs/reference/API_REFERENCE.md) | 🇻🇳 [Tiếng Việt](../i18n/vi/docs/reference/API_REFERENCE.md) | 🇳🇬 [Yorùbá](../i18n/yo/docs/reference/API_REFERENCE.md) | 🇨🇳 [中文 (简体)](../i18n/zh-CN/docs/reference/API_REFERENCE.md) | 🇹🇼 [中文 (繁體)](../i18n/zh-TW/docs/reference/API_REFERENCE.md)
+🌐 **Ngôn ngữ:** 🇺🇸 [Tiếng Anh](./API_REFERENCE.md) | 🇪🇹 [Tiếng Amharic](../i18n/am/docs/reference/API_REFERENCE.md) | 🇸🇦 [Tiếng Ả Rập](../i18n/ar/docs/reference/API_REFERENCE.md) | 🇦🇿 [Tiếng Azerbaijan](../i18n/az/docs/reference/API_REFERENCE.md) | 🇧🇬 [Tiếng Bulgaria](../i18n/bg/docs/reference/API_REFERENCE.md) | 🇧🇩 [Tiếng Bengal](../i18n/bn/docs/reference/API_REFERENCE.md) | 🇧🇦 [Tiếng Bosna](../i18n/bs/docs/reference/API_REFERENCE.md) | 🇨🇿 [Tiếng Séc](../i18n/cs/docs/reference/API_REFERENCE.md) | 🇩🇰 [Tiếng Đan Mạch](../i18n/da/docs/reference/API_REFERENCE.md) | 🇩🇪 [Tiếng Đức](../i18n/de/docs/reference/API_REFERENCE.md) | 🇬🇷 [Tiếng Hy Lạp](../i18n/el/docs/reference/API_REFERENCE.md) | 🇪🇸 [Tiếng Tây Ban Nha](../i18n/es/docs/reference/API_REFERENCE.md) | 🇪🇪 [Tiếng Estonia](../i18n/et/docs/reference/API_REFERENCE.md) | 🇮🇷 [Tiếng Ba Tư](../i18n/fa/docs/reference/API_REFERENCE.md) | 🇫🇮 [Tiếng Phần Lan](../i18n/fi/docs/reference/API_REFERENCE.md) | 🇫🇷 [Tiếng Pháp](../i18n/fr/docs/reference/API_REFERENCE.md) | 🇮🇪 [Tiếng Ireland](../i18n/ga/docs/reference/API_REFERENCE.md) | 🇮🇳 [Tiếng Gujarati](../i18n/gu/docs/reference/API_REFERENCE.md) | 🇳🇬 [Tiếng Hausa](../i18n/ha/docs/reference/API_REFERENCE.md) | 🇮🇱 [Tiếng Hebrew](../i18n/he/docs/reference/API_REFERENCE.md) | 🇮🇳 [Tiếng Hindi](../i18n/hi/docs/reference/API_REFERENCE.md) | 🇭🇷 [Tiếng Croatia](../i18n/hr/docs/reference/API_REFERENCE.md) | 🇭🇺 [Tiếng Hungary](../i18n/hu/docs/reference/API_REFERENCE.md) | 🇦🇲 [Tiếng Armenia](../i18n/hy/docs/reference/API_REFERENCE.md) | 🇮🇩 [Tiếng Indonesia](../i18n/id/docs/reference/API_REFERENCE.md) | 🇳🇬 [Tiếng Igbo](../i18n/ig/docs/reference/API_REFERENCE.md) | 🇮🇹 [Tiếng Ý](../i18n/it/docs/reference/API_REFERENCE.md) | 🇯🇵 [Tiếng Nhật](../i18n/ja/docs/reference/API_REFERENCE.md) | 🇬🇪 [Tiếng Gruzia](../i18n/ka/docs/reference/API_REFERENCE.md) | 🇰🇭 [Tiếng Khmer](../i18n/km/docs/reference/API_REFERENCE.md) | 🇮🇳 [Tiếng Kannada](../i18n/kn/docs/reference/API_REFERENCE.md) | 🇰🇷 [Tiếng Hàn](../i18n/ko/docs/reference/API_REFERENCE.md) | 🇱🇹 [Tiếng Litva](../i18n/lt/docs/reference/API_REFERENCE.md) | 🇱🇻 [Tiếng Latvia](../i18n/lv/docs/reference/API_REFERENCE.md) | 🇮🇳 [Tiếng Malayalam](../i18n/ml/docs/reference/API_REFERENCE.md) | 🇮🇳 [Tiếng Marathi](../i18n/mr/docs/reference/API_REFERENCE.md) | 🇲🇾 [Tiếng Mã Lai](../i18n/ms/docs/reference/API_REFERENCE.md) | 🇲🇹 [Tiếng Malta](../i18n/mt/docs/reference/API_REFERENCE.md) | 🇲🇲 [Tiếng Myanmar](../i18n/my/docs/reference/API_REFERENCE.md) | 🇳🇵 [Tiếng Nepal](../i18n/ne/docs/reference/API_REFERENCE.md) | 🇳🇱 [Tiếng Hà Lan](../i18n/nl/docs/reference/API_REFERENCE.md) | 🇳🇴 [Tiếng Na Uy](../i18n/no/docs/reference/API_REFERENCE.md) | 🇮🇳 [Tiếng Odia](../i18n/or/docs/reference/API_REFERENCE.md) | 🇮🇳 [Tiếng Punjab](../i18n/pa/docs/reference/API_REFERENCE.md) | 🇵🇭 [Tiếng Filipino](../i18n/phi/docs/reference/API_REFERENCE.md) | 🇵🇱 [Tiếng Ba Lan](../i18n/pl/docs/reference/API_REFERENCE.md) | 🇵🇹 [Tiếng Bồ Đào Nha (Bồ Đào Nha)](../i18n/pt/docs/reference/API_REFERENCE.md) | 🇧🇷 [Tiếng Bồ Đào Nha (Brasil)](../i18n/pt-BR/docs/reference/API_REFERENCE.md) | 🇷🇴 [Tiếng Romania](../i18n/ro/docs/reference/API_REFERENCE.md) | 🇷🇺 [Tiếng Nga](../i18n/ru/docs/reference/API_REFERENCE.md) | 🇱🇰 [Tiếng Sinhala](../i18n/si/docs/reference/API_REFERENCE.md) | 🇸🇰 [Tiếng Slovak](../i18n/sk/docs/reference/API_REFERENCE.md) | 🇸🇮 [Tiếng Slovenia](../i18n/sl/docs/reference/API_REFERENCE.md) | 🇷🇸 [Tiếng Serbia](../i18n/sr/docs/reference/API_REFERENCE.md) | 🇸🇪 [Tiếng Thụy Điển](../i18n/sv/docs/reference/API_REFERENCE.md) | 🇰🇪 [Tiếng Swahili](../i18n/sw/docs/reference/API_REFERENCE.md) | 🇮🇳 [Tiếng Tamil](../i18n/ta/docs/reference/API_REFERENCE.md) | 🇮🇳 [Tiếng Telugu](../i18n/te/docs/reference/API_REFERENCE.md) | 🇹🇭 [Tiếng Thái](../i18n/th/docs/reference/API_REFERENCE.md) | 🇹🇷 [Tiếng Thổ Nhĩ Kỳ](../i18n/tr/docs/reference/API_REFERENCE.md) | 🇺🇦 [Tiếng Ukraina](../i18n/uk-UA/docs/reference/API_REFERENCE.md) | 🇵🇰 [Tiếng Urdu](../i18n/ur/docs/reference/API_REFERENCE.md) | 🇺🇿 [Tiếng Uzbek](../i18n/uz/docs/reference/API_REFERENCE.md) | 🇻🇳 [Tiếng Việt](../i18n/vi/docs/reference/API_REFERENCE.md) | 🇳🇬 [Tiếng Yoruba](../i18n/yo/docs/reference/API_REFERENCE.md) | 🇨🇳 [Tiếng Trung (Giản thể)](../i18n/zh-CN/docs/reference/API_REFERENCE.md) | 🇹🇼 [Tiếng Trung (Phồn thể)](../i18n/zh-TW/docs/reference/API_REFERENCE.md)
 
 Tài liệu tham khảo cốt lõi cho API OmniRoute. Tài liệu này bao quát bề mặt `/v1` công khai và các endpoint quản lý được sử dụng nhiều nhất; [`docs/openapi.yaml`](../openapi.yaml) ở định dạng máy có thể đọc và cây route trong `src/app/api/` là các nguồn đầy đủ nhất.
 
-Để xem giao thức tương thích với OpenAI và ma trận khả năng của nhà cung cấp, hãy xem
+Để xem ma trận khả năng của giao thức tương thích với OpenAI và các provider chuyên biệt, hãy xem
 [`OPENAI_COMPATIBILITY.md`](./OPENAI_COMPATIBILITY.md).
+
+Mỗi bản triển khai cung cấp bản sao riêng của đặc tả tại `/openapi.yaml`, được tạo từ `docs/openapi.yaml` trong quá trình build. Đặc tả này chứa phiên bản của bản build và URL máy chủ tương đối (`./`), vì vậy các yêu cầu vẫn được gửi đến máy chủ đã cung cấp tài liệu. Công cụ nhập tệp đã tải xuống không có máy chủ như vậy và cần được đặt URL cơ sở theo cách thủ công.
 
 ---
 
@@ -1621,7 +1623,7 @@ Mô hình kênh (`latest` = v3 cho đến khi có bản GA 4.0, `next` = rc, `ni
 
 ---
 
-## Phiên âm âm thanh
+## Chuyển đổi âm thanh thành văn bản
 
 ```bash
 POST /v1/audio/transcriptions
@@ -1629,7 +1631,8 @@ Authorization: Bearer your-api-key
 Content-Type: multipart/form-data
 ```
 
-Phiên âm các tệp âm thanh bằng bất kỳ nhà cung cấp STT nào đã được cấu hình. Phân đoạn đường dẫn đầu tiên chọn nhà cung cấp gốc (`openai/…`, `deepgram/…`). Các gateway tái xuất bản mô hình của nhà cung cấp khác sử dụng id đủ điều kiện (`openrouter/deepgram/nova-3`).
+Chuyển đổi các tệp âm thanh thành văn bản bằng bất kỳ nhà cung cấp STT nào đã được cấu hình. Phân đoạn đường dẫn đầu tiên sẽ chọn nhà cung cấp gốc (`openai/…`, `deepgram/…`). Các gateway tái xuất mô hình của nhà cung cấp khác sẽ sử dụng mã định danh đủ điều kiện
+(`openrouter/deepgram/nova-3`).
 
 **Yêu cầu:**
 
@@ -1651,12 +1654,20 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 }
 ```
 
-**Ví dụ về id mô hình:** `openai/whisper-1` (yêu cầu khóa OpenAI),
+**Mã định danh mô hình mẫu:** `openai/whisper-1` (yêu cầu khóa OpenAI),
 `openrouter/deepgram/nova-3` (yêu cầu khóa OpenRouter),
-`deepgram/nova-3` (yêu cầu khóa Deepgram gốc). Một yêu cầu `deepgram/nova-3` không
-sử dụng OpenRouter.
+`deepgram/nova-3` (yêu cầu khóa Deepgram gốc). Một yêu cầu
+`deepgram/nova-3` đơn lẻ **không** sử dụng OpenRouter.
 
 **Các định dạng được hỗ trợ:** `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`.
+
+**Gemini Live (`gemini/gemini-3.5-transcribe-live`):** chuyển đổi tệp thành văn bản ở chế độ tệp thông qua
+WebSocket Gemini Live (yêu cầu khóa API Gemini). Tệp tải lên được chuyển đổi thành PCM đơn kênh 16 kHz bằng `ffmpeg`
+(`ffmpeg` phải có trong `PATH`, trừ khi tệp đã là WAV PCM đơn kênh 16 kHz), được truyền đến phiên và
+văn bản đã hoàn tất được trả về dưới dạng `{ "text": "..." }`. Các trường biểu mẫu `language` và `prompt` tùy chọn
+sẽ được chuyển tiếp. Giới hạn: các tệp tải lên lớn hơn 25 MiB hoặc âm thanh đã giải mã dài hơn 10 phút sẽ trả về
+`413`; quá trình chuyển đổi chạy lâu hơn 60 giây sẽ bị dừng và trả về `504`. Khóa API chỉ được gửi
+trong tiêu đề `x-goog-api-key`, không bao giờ được đưa vào URL WebSocket.
 
 ---
 

@@ -7,6 +7,7 @@ import { normalizeClaudeToolInputSchema, sanitizeToolId } from "../helpers/schem
 import { safeParseJSON } from "../helpers/jsonUtil.ts";
 import {
   applyKimiCodingThinking,
+  createClaudeTailCacheControl,
   createDefaultClaudeCacheControl,
 } from "../helpers/claudeHelper.ts";
 import { restoreClaudeThinkingBlocks } from "../../services/claudeThinkingStore.ts";
@@ -381,6 +382,24 @@ export function openaiToClaudeRequest(
     // tool result is paired with the oldest of them instead of being dropped.
     let pendingToolUseIds: string[] = [];
 
+    // Tool_call ids that appear on more than one assistant turn in the client history
+    // (a retried turn re-sends the same id for a different generation of the answer).
+    // The signed-thinking store is keyed by tool_use id and holds only the newest
+    // generation, so restoring into an older turn replays a block Anthropic never saw
+    // in that position and it answers 400 "…blocks in the latest assistant message
+    // cannot be modified". Skip the restore entirely for such turns: a request without
+    // thinking blocks is valid and is what older clients sent.
+    const toolUseIdCounts = new Map<string, number>();
+    for (const m of nonSystemMessages) {
+      for (const tc of Array.isArray(m?.tool_calls) ? m.tool_calls : []) {
+        const id = typeof tc?.id === "string" ? tc.id : "";
+        if (id) toolUseIdCounts.set(id, (toolUseIdCounts.get(id) ?? 0) + 1);
+      }
+    }
+    const ambiguousToolUseIds = new Set(
+      [...toolUseIdCounts.entries()].filter(([, n]) => n > 1).map(([id]) => id)
+    );
+
     for (const msg of nonSystemMessages) {
       const newRole = msg.role === "user" || msg.role === "tool" ? "user" : "assistant";
       const blocks = getContentBlocksFromMessage(
@@ -393,6 +412,7 @@ export function openaiToClaudeRequest(
           provider: routedProvider,
           model,
           disabled: credentials?._videoTranscriptSensitive === true,
+          ambiguousToolUseIds,
           connectionId:
             typeof credentials?._connectionId === "string" ? credentials._connectionId : undefined,
         },
@@ -459,7 +479,7 @@ export function openaiToClaudeRequest(
       ) {
         const lastBlock = message.content[message.content.length - 1];
         if (lastBlock) {
-          lastBlock.cache_control = { type: "ephemeral" };
+          lastBlock.cache_control = createClaudeTailCacheControl(routedProvider);
           break;
         }
       }
@@ -550,6 +570,12 @@ export function openaiToClaudeRequest(
   } else if (body.tool_choice) {
     result.tool_choice = convertOpenAIToolChoice(body.tool_choice);
   }
+  // A forced tool must use the prefixed name `tools` declares, or Claude rejects the request.
+  const forced = result.tool_choice;
+  const prefixedForced = typeof forced === "object" && CLAUDE_OAUTH_TOOL_PREFIX + forced.name;
+  if (prefixedForced && forced.type === "tool" && toolNameMap.has(prefixedForced)) {
+    result.tool_choice = { ...forced, name: prefixedForced };
+  }
 
   // OpenAI `parallel_tool_calls: false` ↔ Claude `tool_choice.disable_parallel_tool_use`.
   // Claude carries the flag on tool_choice, so synthesize `auto` when none was sent; it is
@@ -638,6 +664,7 @@ function getContentBlocksFromMessage(
     model?: unknown;
     disabled?: boolean;
     connectionId?: unknown;
+    ambiguousToolUseIds?: Set<string>;
   } = {},
   pendingToolUseIds: string[] = [],
   thinkingTypeForRequest: string | undefined = undefined
@@ -833,32 +860,50 @@ function getContentBlocksFromMessage(
     const hasToolUseBlock = blocks.some((b) => b.type === "tool_use");
     // Signed-thinking continuity: the client (OpenAI Chat / Responses) never held the
     // signed blocks Claude produced for this tool turn, but claude-to-openai stored them
-    // keyed by the tool_use ids. Restore them verbatim before the owning tool_use —
+    // keyed by the tool_use ids. Put each run back where Claude emitted it: after the
+    // turn's previous tool_use (or at the front), before the tool_use it preceded —
     // only for MANUAL extended thinking (`type:"enabled"`), for the same provider +
     // model + connection, only when the client sent no thinking block of its own,
-    // never for a video-derived request. A miss injects nothing.
+    // never for a video-derived request. A fragment that does not carry a run's
+    // tool_use skips that run, so a turn the client split into several messages
+    // replays every block once (#18607). A miss injects nothing.
     // #17324 recurrence (2026-10-27): adaptive-only models (Opus 4.7+/5.x, Fable 5)
     // accept a tool_use turn with NO thinking block at all, but replaying stored
     // signed blocks there breaks Anthropic's warm-cache block-equality whenever the
     // restore hits/misses differently than the turn that warmed the cache (TTL,
     // eviction, completed-turn rewrite) → 400 "latest assistant message cannot be
     // modified".
+    const ownToolUseIds = blocks.filter((b) => b.type === "tool_use").map((b) => String(b.id));
+    // A duplicated tool_call id makes the store's entry ambiguous (it may belong to a
+    // different generation of this turn); restoring it replays a block the upstream
+    // did not see here and it answers 400 "cannot be modified". Skip instead: an
+    // assistant turn without thinking blocks is accepted.
+    const hasAmbiguousToolUseId = ownToolUseIds.some((id) =>
+      thinkingBinding.ambiguousToolUseIds?.has(id)
+    );
     if (
       !isKimiCoding &&
       !thinkingBinding.disabled &&
       thinkingEnabledForRequest &&
       thinkingTypeForRequest === "enabled" &&
       hasToolUseBlock &&
-      !hasThinkingBlock
+      !hasThinkingBlock &&
+      !hasAmbiguousToolUseId
     ) {
       const restored = restoreClaudeThinkingBlocks({
-        toolUseIds: blocks.filter((b) => b.type === "tool_use").map((b) => b.id),
+        toolUseIds: ownToolUseIds,
         provider: thinkingBinding.provider,
         model: thinkingBinding.model,
         connectionId: thinkingBinding.connectionId,
       });
-      if (restored) {
-        blocks.unshift(...restored);
+      let cursor = 0;
+      for (const { toolUseId, blocks: signed } of restored ?? []) {
+        const owner = blocks.findIndex(
+          (b, i) => i >= cursor && b.type === "tool_use" && b.id === toolUseId
+        );
+        if (owner < 0) continue;
+        blocks.splice(cursor, 0, ...signed);
+        cursor = owner + signed.length + 1;
         hasThinkingBlock = true;
       }
     }
@@ -981,6 +1026,17 @@ function openaiToClaudeRequestForAntigravity(model, body, stream) {
       }
       return tool;
     });
+  }
+  const forced = result.tool_choice;
+  if (
+    typeof forced === "object" &&
+    forced.type === "tool" &&
+    String(forced.name).startsWith(CLAUDE_OAUTH_TOOL_PREFIX)
+  ) {
+    result.tool_choice = {
+      ...forced,
+      name: String(forced.name).slice(CLAUDE_OAUTH_TOOL_PREFIX.length),
+    };
   }
 
   // Strip prefix from tool_use in messages

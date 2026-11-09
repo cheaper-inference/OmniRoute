@@ -4,12 +4,14 @@
 
 ---
 
-🌐 **భాషలు:** 🇺🇸 [ఇంగ్లీష్](./API_REFERENCE.md) | 🇪🇹 [అమ్హారిక్](../i18n/am/docs/reference/API_REFERENCE.md) | 🇸🇦 [అరబిక్](../i18n/ar/docs/reference/API_REFERENCE.md) | 🇦🇿 [అజర్బైజానీ](../i18n/az/docs/reference/API_REFERENCE.md) | 🇧🇬 [బల్గేరియన్](../i18n/bg/docs/reference/API_REFERENCE.md) | 🇧🇩 [బెంగాలీ](../i18n/bn/docs/reference/API_REFERENCE.md) | 🇧🇦 [బోస్నియన్](../i18n/bs/docs/reference/API_REFERENCE.md) | 🇨🇿 [చెక్](../i18n/cs/docs/reference/API_REFERENCE.md) | 🇩🇰 [డానిష్](../i18n/da/docs/reference/API_REFERENCE.md) | 🇩🇪 [జర్మన్](../i18n/de/docs/reference/API_REFERENCE.md) | 🇬🇷 [గ్రీక్](../i18n/el/docs/reference/API_REFERENCE.md) | 🇪🇸 [స్పానిష్](../i18n/es/docs/reference/API_REFERENCE.md) | 🇪🇪 [ఎస్టోనియన్](../i18n/et/docs/reference/API_REFERENCE.md) | 🇮🇷 [పర్షియన్](../i18n/fa/docs/reference/API_REFERENCE.md) | 🇫🇮 [ఫిన్నిష్](../i18n/fi/docs/reference/API_REFERENCE.md) | 🇫🇷 [ఫ్రెంచ్](../i18n/fr/docs/reference/API_REFERENCE.md) | 🇮🇪 [ఐరిష్](../i18n/ga/docs/reference/API_REFERENCE.md) | 🇮🇳 [గుజరాతీ](../i18n/gu/docs/reference/API_REFERENCE.md) | 🇳🇬 [హౌసా](../i18n/ha/docs/reference/API_REFERENCE.md) | 🇮🇱 [హీబ్రూ](../i18n/he/docs/reference/API_REFERENCE.md) | 🇮🇳 [హిందీ](../i18n/hi/docs/reference/API_REFERENCE.md) | 🇭🇷 [క్రొయేషియన్](../i18n/hr/docs/reference/API_REFERENCE.md) | 🇭🇺 [హంగేరియన్](../i18n/hu/docs/reference/API_REFERENCE.md) | 🇦🇲 [ఆర్మేనియన్](../i18n/hy/docs/reference/API_REFERENCE.md) | 🇮🇩 [ఇండోనేషియన్](../i18n/id/docs/reference/API_REFERENCE.md) | 🇳🇬 [ఇగ్బో](../i18n/ig/docs/reference/API_REFERENCE.md) | 🇮🇹 [ఇటాలియన్](../i18n/it/docs/reference/API_REFERENCE.md) | 🇯🇵 [జపనీస్](../i18n/ja/docs/reference/API_REFERENCE.md) | 🇬🇪 [జార్జియన్](../i18n/ka/docs/reference/API_REFERENCE.md) | 🇰🇭 [ఖ్మేర్](../i18n/km/docs/reference/API_REFERENCE.md) | 🇮🇳 [కన్నడ](../i18n/kn/docs/reference/API_REFERENCE.md) | 🇰🇷 [కొరియన్](../i18n/ko/docs/reference/API_REFERENCE.md) | 🇱🇹 [లిథువేనియన్](../i18n/lt/docs/reference/API_REFERENCE.md) | 🇱🇻 [లాట్వియన్](../i18n/lv/docs/reference/API_REFERENCE.md) | 🇮🇳 [మలయాళం](../i18n/ml/docs/reference/API_REFERENCE.md) | 🇮🇳 [మరాఠీ](../i18n/mr/docs/reference/API_REFERENCE.md) | 🇲🇾 [మలయ్](../i18n/ms/docs/reference/API_REFERENCE.md) | 🇲🇹 [మాల్టీస్](../i18n/mt/docs/reference/API_REFERENCE.md) | 🇲🇲 [బర్మీస్](../i18n/my/docs/reference/API_REFERENCE.md) | 🇳🇵 [నేపాలీ](../i18n/ne/docs/reference/API_REFERENCE.md) | 🇳🇱 [డచ్](../i18n/nl/docs/reference/API_REFERENCE.md) | 🇳🇴 [నార్వేజియన్](../i18n/no/docs/reference/API_REFERENCE.md) | 🇮🇳 [ఒడియా](../i18n/or/docs/reference/API_REFERENCE.md) | 🇮🇳 [పంజాబీ](../i18n/pa/docs/reference/API_REFERENCE.md) | 🇵🇭 [ఫిలిపినో](../i18n/phi/docs/reference/API_REFERENCE.md) | 🇵🇱 [పోలిష్](../i18n/pl/docs/reference/API_REFERENCE.md) | 🇵🇹 [పోర్చుగీస్ (పోర్చుగల్)](../i18n/pt/docs/reference/API_REFERENCE.md) | 🇧🇷 [పోర్చుగీస్ (బ్రెజిల్)](../i18n/pt-BR/docs/reference/API_REFERENCE.md) | 🇷🇴 [రోమేనియన్](../i18n/ro/docs/reference/API_REFERENCE.md) | 🇷🇺 [రష్యన్](../i18n/ru/docs/reference/API_REFERENCE.md) | 🇱🇰 [సింహళం](../i18n/si/docs/reference/API_REFERENCE.md) | 🇸🇰 [స్లోవాక్](../i18n/sk/docs/reference/API_REFERENCE.md) | 🇸🇮 [స్లోవేనియన్](../i18n/sl/docs/reference/API_REFERENCE.md) | 🇷🇸 [సెర్బియన్](../i18n/sr/docs/reference/API_REFERENCE.md) | 🇸🇪 [స్వీడిష్](../i18n/sv/docs/reference/API_REFERENCE.md) | 🇰🇪 [స్వాహిలీ](../i18n/sw/docs/reference/API_REFERENCE.md) | 🇮🇳 [తమిళం](../i18n/ta/docs/reference/API_REFERENCE.md) | 🇮🇳 [తెలుగు](../i18n/te/docs/reference/API_REFERENCE.md) | 🇹🇭 [థాయ్](../i18n/th/docs/reference/API_REFERENCE.md) | 🇹🇷 [టర్కిష్](../i18n/tr/docs/reference/API_REFERENCE.md) | 🇺🇦 [ఉక్రేనియన్](../i18n/uk-UA/docs/reference/API_REFERENCE.md) | 🇵🇰 [ఉర్దూ](../i18n/ur/docs/reference/API_REFERENCE.md) | 🇺🇿 [ఉజ్బెక్](../i18n/uz/docs/reference/API_REFERENCE.md) | 🇻🇳 [వియత్నామీస్](../i18n/vi/docs/reference/API_REFERENCE.md) | 🇳🇬 [యోరుబా](../i18n/yo/docs/reference/API_REFERENCE.md) | 🇨🇳 [చైనీస్ (సరళీకృత)](../i18n/zh-CN/docs/reference/API_REFERENCE.md) | 🇹🇼 [చైనీస్ (సాంప్రదాయ)](../i18n/zh-TW/docs/reference/API_REFERENCE.md)
+🌐 **భాషలు:** 🇺🇸 [English](./API_REFERENCE.md) | 🇪🇹 [አማርኛ](../i18n/am/docs/reference/API_REFERENCE.md) | 🇸🇦 [العربية](../i18n/ar/docs/reference/API_REFERENCE.md) | 🇦🇿 [Azərbaycan dili](../i18n/az/docs/reference/API_REFERENCE.md) | 🇧🇬 [Български](../i18n/bg/docs/reference/API_REFERENCE.md) | 🇧🇩 [বাংলা](../i18n/bn/docs/reference/API_REFERENCE.md) | 🇧🇦 [Bosanski](../i18n/bs/docs/reference/API_REFERENCE.md) | 🇨🇿 [Čeština](../i18n/cs/docs/reference/API_REFERENCE.md) | 🇩🇰 [Dansk](../i18n/da/docs/reference/API_REFERENCE.md) | 🇩🇪 [Deutsch](../i18n/de/docs/reference/API_REFERENCE.md) | 🇬🇷 [Ελληνικά](../i18n/el/docs/reference/API_REFERENCE.md) | 🇪🇸 [Español](../i18n/es/docs/reference/API_REFERENCE.md) | 🇪🇪 [Eesti](../i18n/et/docs/reference/API_REFERENCE.md) | 🇮🇷 [فارسی](../i18n/fa/docs/reference/API_REFERENCE.md) | 🇫🇮 [Suomi](../i18n/fi/docs/reference/API_REFERENCE.md) | 🇫🇷 [Français](../i18n/fr/docs/reference/API_REFERENCE.md) | 🇮🇪 [Gaeilge](../i18n/ga/docs/reference/API_REFERENCE.md) | 🇮🇳 [ગુજરાતી](../i18n/gu/docs/reference/API_REFERENCE.md) | 🇳🇬 [Hausa](../i18n/ha/docs/reference/API_REFERENCE.md) | 🇮🇱 [עברית](../i18n/he/docs/reference/API_REFERENCE.md) | 🇮🇳 [हिन्दी](../i18n/hi/docs/reference/API_REFERENCE.md) | 🇭🇷 [Hrvatski](../i18n/hr/docs/reference/API_REFERENCE.md) | 🇭🇺 [Magyar](../i18n/hu/docs/reference/API_REFERENCE.md) | 🇦🇲 [Հայերեն](../i18n/hy/docs/reference/API_REFERENCE.md) | 🇮🇩 [Bahasa Indonesia](../i18n/id/docs/reference/API_REFERENCE.md) | 🇳🇬 [Igbo](../i18n/ig/docs/reference/API_REFERENCE.md) | 🇮🇹 [Italiano](../i18n/it/docs/reference/API_REFERENCE.md) | 🇯🇵 [日本語](../i18n/ja/docs/reference/API_REFERENCE.md) | 🇬🇪 [ქართული](../i18n/ka/docs/reference/API_REFERENCE.md) | 🇰🇭 [ខ្មែរ](../i18n/km/docs/reference/API_REFERENCE.md) | 🇮🇳 [ಕನ್ನಡ](../i18n/kn/docs/reference/API_REFERENCE.md) | 🇰🇷 [한국어](../i18n/ko/docs/reference/API_REFERENCE.md) | 🇱🇹 [Lietuvių](../i18n/lt/docs/reference/API_REFERENCE.md) | 🇱🇻 [Latviešu](../i18n/lv/docs/reference/API_REFERENCE.md) | 🇮🇳 [മലയാളം](../i18n/ml/docs/reference/API_REFERENCE.md) | 🇮🇳 [मराठी](../i18n/mr/docs/reference/API_REFERENCE.md) | 🇲🇾 [Bahasa Melayu](../i18n/ms/docs/reference/API_REFERENCE.md) | 🇲🇹 [Malti](../i18n/mt/docs/reference/API_REFERENCE.md) | 🇲🇲 [မြန်မာ](../i18n/my/docs/reference/API_REFERENCE.md) | 🇳🇵 [नेपाली](../i18n/ne/docs/reference/API_REFERENCE.md) | 🇳🇱 [Nederlands](../i18n/nl/docs/reference/API_REFERENCE.md) | 🇳🇴 [Norsk](../i18n/no/docs/reference/API_REFERENCE.md) | 🇮🇳 [ଓଡ଼ିଆ](../i18n/or/docs/reference/API_REFERENCE.md) | 🇮🇳 [ਪੰਜਾਬੀ](../i18n/pa/docs/reference/API_REFERENCE.md) | 🇵🇭 [Filipino](../i18n/phi/docs/reference/API_REFERENCE.md) | 🇵🇱 [Polski](../i18n/pl/docs/reference/API_REFERENCE.md) | 🇵🇹 [Português (Portugal)](../i18n/pt/docs/reference/API_REFERENCE.md) | 🇧🇷 [Português (Brasil)](../i18n/pt-BR/docs/reference/API_REFERENCE.md) | 🇷🇴 [Română](../i18n/ro/docs/reference/API_REFERENCE.md) | 🇷🇺 [Русский](../i18n/ru/docs/reference/API_REFERENCE.md) | 🇱🇰 [සිංහල](../i18n/si/docs/reference/API_REFERENCE.md) | 🇸🇰 [Slovenčina](../i18n/sk/docs/reference/API_REFERENCE.md) | 🇸🇮 [Slovenščina](../i18n/sl/docs/reference/API_REFERENCE.md) | 🇷🇸 [Српски](../i18n/sr/docs/reference/API_REFERENCE.md) | 🇸🇪 [Svenska](../i18n/sv/docs/reference/API_REFERENCE.md) | 🇰🇪 [Kiswahili](../i18n/sw/docs/reference/API_REFERENCE.md) | 🇮🇳 [தமிழ்](../i18n/ta/docs/reference/API_REFERENCE.md) | 🇮🇳 [తెలుగు](../i18n/te/docs/reference/API_REFERENCE.md) | 🇹🇭 [ไทย](../i18n/th/docs/reference/API_REFERENCE.md) | 🇹🇷 [Türkçe](../i18n/tr/docs/reference/API_REFERENCE.md) | 🇺🇦 [Українська](../i18n/uk-UA/docs/reference/API_REFERENCE.md) | 🇵🇰 [اردو](../i18n/ur/docs/reference/API_REFERENCE.md) | 🇺🇿 [Oʻzbekcha](../i18n/uz/docs/reference/API_REFERENCE.md) | 🇻🇳 [Tiếng Việt](../i18n/vi/docs/reference/API_REFERENCE.md) | 🇳🇬 [Yorùbá](../i18n/yo/docs/reference/API_REFERENCE.md) | 🇨🇳 [中文 (简体)](../i18n/zh-CN/docs/reference/API_REFERENCE.md) | 🇹🇼 [中文 (繁體)](../i18n/zh-TW/docs/reference/API_REFERENCE.md)
 
-OmniRoute APIకి సంబంధించిన ప్రధాన సూచన ఇది. ఇది పబ్లిక్ `/v1` ఉపరితలాన్ని మరియు ఎక్కువగా ఉపయోగించే నిర్వహణ ఎండ్పాయింట్లను వివరిస్తుంది; మెషిన్-రీడబుల్ [`docs/openapi.yaml`](../openapi.yaml) మరియు `src/app/api/` కింద ఉన్న రూట్ ట్రీ పూర్తి ఆధారాలు.
+OmniRoute APIకి సంబంధించిన ప్రధాన సూచన. ఇది పబ్లిక్ `/v1` ఉపరితలం మరియు అత్యధికంగా ఉపయోగించే నిర్వహణ ఎండ్పాయింట్లను కవర్ చేస్తుంది; యంత్రం చదవగల [`docs/openapi.yaml`](../openapi.yaml) మరియు `src/app/api/` కింద ఉన్న రూట్ ట్రీ పూర్తి స్థాయి మూలాలు.
 
-OpenAI-అనుకూల ప్రోటోకాల్ మరియు ప్రొవైడర్ సామర్థ్యాల మ్యాట్రిక్స్ కోసం,
+OpenAI-అనుకూల ప్రోటోకాల్ మరియు ప్రొవైడర్ సామర్థ్యాల మ్యాట్రిక్స్పై కేంద్రీకృత సమాచారం కోసం
 [`OPENAI_COMPATIBILITY.md`](./OPENAI_COMPATIBILITY.md) చూడండి.
+
+ప్రతి డిప్లాయ్మెంట్ `/openapi.yaml` వద్ద తన స్వంత స్పెక్ కాపీని అందిస్తుంది; ఇది బిల్డ్ సమయంలో `docs/openapi.yaml` నుంచి రూపొందించబడుతుంది. ఇందులో బిల్డ్ వెర్షన్ మరియు సాపేక్ష సర్వర్ URL (`./`) ఉంటాయి, అందువల్ల అభ్యర్థనలు పత్రాన్ని అందించిన హోస్ట్పైనే కొనసాగుతాయి. డౌన్లోడ్ చేసిన ఫైల్ను దిగుమతి చేసుకునే సాధనానికి అలాంటి హోస్ట్ ఉండదు, కాబట్టి బేస్ URLను చేతితో సెట్ చేయాలి.
 
 ---
 
@@ -1497,7 +1499,7 @@ GET /api/system/version
 
 ---
 
-## ఆడియో లిప్యంతరీకరణ
+## ఆడియో ట్రాన్స్క్రిప్షన్
 
 ```bash
 POST /v1/audio/transcriptions
@@ -1505,8 +1507,8 @@ Authorization: Bearer your-api-key
 Content-Type: multipart/form-data
 ```
 
-కాన్ఫిగర్ చేయబడిన ఏదైనా STT ప్రొవైడర్ను ఉపయోగించి ఆడియో ఫైళ్లను లిప్యంతరీకరించండి. మొదటి పాత్
-సెగ్మెంట్ స్థానిక ప్రొవైడర్ను (`openai/…`, `deepgram/…`) ఎంచుకుంటుంది. మరొక విక్రేత మోడల్ను
+కాన్ఫిగర్ చేసిన ఏదైనా STT ప్రొవైడర్ను ఉపయోగించి ఆడియో ఫైళ్లను ట్రాన్స్క్రైబ్ చేయండి. మొదటి పాత్
+సెగ్మెంట్ స్థానిక ప్రొవైడర్ను ఎంచుకుంటుంది (`openai/…`, `deepgram/…`). మరొక విక్రేత మోడల్ను
 మళ్లీ ఎగుమతి చేసే గేట్వేలు అర్హత కలిగిన idను ఉపయోగిస్తాయి
 (`openrouter/deepgram/nova-3`).
 
@@ -1530,12 +1532,22 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 }
 ```
 
-**ఉదాహరణ మోడల్ idలు:** `openai/whisper-1` (OpenAI కీ అవసరం),
+**ఉదాహరణ model ids:** `openai/whisper-1` (OpenAI కీ అవసరం),
 `openrouter/deepgram/nova-3` (OpenRouter కీ అవసరం),
 `deepgram/nova-3` (స్థానిక Deepgram కీ అవసరం). కేవలం
 `deepgram/nova-3`తో చేసే అభ్యర్థన OpenRouterను ఉపయోగించదు.
 
 **మద్దతు ఉన్న ఫార్మాట్లు:** `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`.
+
+**Gemini Live (`gemini/gemini-3.5-transcribe-live`):** Gemini Live
+WebSocket ద్వారా ఫైల్-మోడ్ ట్రాన్స్క్రిప్షన్ (Gemini API కీ అవసరం). అప్లోడ్ను `ffmpeg`
+తో 16 kHz మోనో PCMకు మార్చి (ఫైల్ ఇప్పటికే 16 kHz మోనో PCM WAV అయితే తప్పనిసరిగా
+`PATH`లో ఉండాలి), సెషన్కు స్ట్రీమ్ చేసి, తుది టెక్స్ట్ను `{ "text": "..." }`గా అందిస్తుంది. ఐచ్ఛికమైన
+`language` మరియు `prompt` ఫారమ్ ఫీల్డ్లు ఫార్వర్డ్ చేయబడతాయి. పరిమితులు: 25 MiB కంటే
+పెద్ద అప్లోడ్లు లేదా డీకోడ్ చేసిన 10 నిమిషాల కంటే ఎక్కువ నిడివి ఉన్న ఆడియోకు `413`
+ప్రతిస్పందన వస్తుంది; మార్పిడి 60 s కంటే ఎక్కువ సమయం తీసుకుంటే అది నిలిపివేయబడి `504`
+ప్రతిస్పందన వస్తుంది. API కీ `x-goog-api-key` హెడర్లో మాత్రమే పంపబడుతుంది, WebSocket URLలో
+ఎప్పుడూ పంపబడదు.
 
 ---
 

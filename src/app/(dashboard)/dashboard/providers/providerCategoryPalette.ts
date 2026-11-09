@@ -1,30 +1,33 @@
 import { categoricalSlot, type CategoricalSlot } from "@/shared/utils/categoricalPalette";
 
 /**
- * Provider category legend (summary chips, section headers, card dots) on the kit's five chart
- * tokens (KEA-7886, P8). The index in this list IS the colour: `chart-(index % 5 + 1)`, and the
- * marker shape changes every five (0–4 circle, 5–9 square, 10–12 diamond), so all 13 categories
- * stay distinct by colour + shape. The order is fixed (append new categories at the end) and was
- * picked so the first cycle keeps the closest hue to the old raw palette:
+ * Provider category legend (summary chips, section headers, card dots) on the kit's eight chart
+ * tokens (KEA-7886 P8; #19066). The index in this list IS the colour: token
+ * `ciChartSeriesOrder[index % 8]` (the kit series order 4, 3, 6, 7, 8, 2, 1, 5), and the marker
+ * shape changes every eight (0–7 circle, 8–12 square), so all 13 categories stay distinct by
+ * colour + shape. Only the colour depends on the order (no list renders in it), and the order was
+ * picked so the categories keep the closest hue of the earlier five-token palette:
  *
- *   apikey(amber→chart-1) oauth(blue→2) web-cookie(purple→3) free(green→4) audio(rose→5)
- *   compatible(■1) ide(■2) upstream-proxy(■3) local(■4) webfetch(■5)
- *   no-auth(◆1) search(◆2) cloud-agent(◆3)
+ *   free(green→chart-4) web-cookie(purple→3) compatible(orange→6) local(teal→7)
+ *   apikey(amber→brown 8) oauth(blue→2) ide(lime→1) audio(rose→pink 5)
+ *   upstream-proxy(■4) cloud-agent(■3) webfetch(orange■6) search(■7) no-auth(■8)
+ *
+ * Append new categories at the end.
  */
 export const PROVIDER_CATEGORY_ORDER = [
+  "free",
+  "web-cookie",
+  "compatible",
+  "local",
   "apikey",
   "oauth",
-  "web-cookie",
-  "free",
-  "audio",
-  "compatible",
   "ide",
+  "audio",
   "upstream-proxy",
-  "local",
-  "webfetch",
-  "no-auth",
-  "search",
   "cloud-agent",
+  "webfetch",
+  "search",
+  "no-auth",
 ] as const;
 
 export type ProviderCategoryKey = (typeof PROVIDER_CATEGORY_ORDER)[number];

@@ -6,44 +6,46 @@
 
 🌐 **Kielet:** 🇺🇸 [English](./API_REFERENCE.md) | 🇪🇹 [አማርኛ](../i18n/am/docs/reference/API_REFERENCE.md) | 🇸🇦 [العربية](../i18n/ar/docs/reference/API_REFERENCE.md) | 🇦🇿 [Azərbaycan dili](../i18n/az/docs/reference/API_REFERENCE.md) | 🇧🇬 [Български](../i18n/bg/docs/reference/API_REFERENCE.md) | 🇧🇩 [বাংলা](../i18n/bn/docs/reference/API_REFERENCE.md) | 🇧🇦 [Bosanski](../i18n/bs/docs/reference/API_REFERENCE.md) | 🇨🇿 [Čeština](../i18n/cs/docs/reference/API_REFERENCE.md) | 🇩🇰 [Dansk](../i18n/da/docs/reference/API_REFERENCE.md) | 🇩🇪 [Deutsch](../i18n/de/docs/reference/API_REFERENCE.md) | 🇬🇷 [Ελληνικά](../i18n/el/docs/reference/API_REFERENCE.md) | 🇪🇸 [Español](../i18n/es/docs/reference/API_REFERENCE.md) | 🇪🇪 [Eesti](../i18n/et/docs/reference/API_REFERENCE.md) | 🇮🇷 [فارسی](../i18n/fa/docs/reference/API_REFERENCE.md) | 🇫🇮 [Suomi](../i18n/fi/docs/reference/API_REFERENCE.md) | 🇫🇷 [Français](../i18n/fr/docs/reference/API_REFERENCE.md) | 🇮🇪 [Gaeilge](../i18n/ga/docs/reference/API_REFERENCE.md) | 🇮🇳 [ગુજરાતી](../i18n/gu/docs/reference/API_REFERENCE.md) | 🇳🇬 [Hausa](../i18n/ha/docs/reference/API_REFERENCE.md) | 🇮🇱 [עברית](../i18n/he/docs/reference/API_REFERENCE.md) | 🇮🇳 [हिन्दी](../i18n/hi/docs/reference/API_REFERENCE.md) | 🇭🇷 [Hrvatski](../i18n/hr/docs/reference/API_REFERENCE.md) | 🇭🇺 [Magyar](../i18n/hu/docs/reference/API_REFERENCE.md) | 🇦🇲 [Հայերեն](../i18n/hy/docs/reference/API_REFERENCE.md) | 🇮🇩 [Bahasa Indonesia](../i18n/id/docs/reference/API_REFERENCE.md) | 🇳🇬 [Igbo](../i18n/ig/docs/reference/API_REFERENCE.md) | 🇮🇹 [Italiano](../i18n/it/docs/reference/API_REFERENCE.md) | 🇯🇵 [日本語](../i18n/ja/docs/reference/API_REFERENCE.md) | 🇬🇪 [ქართული](../i18n/ka/docs/reference/API_REFERENCE.md) | 🇰🇭 [ខ្មែរ](../i18n/km/docs/reference/API_REFERENCE.md) | 🇮🇳 [ಕನ್ನಡ](../i18n/kn/docs/reference/API_REFERENCE.md) | 🇰🇷 [한국어](../i18n/ko/docs/reference/API_REFERENCE.md) | 🇱🇹 [Lietuvių](../i18n/lt/docs/reference/API_REFERENCE.md) | 🇱🇻 [Latviešu](../i18n/lv/docs/reference/API_REFERENCE.md) | 🇮🇳 [മലയാളം](../i18n/ml/docs/reference/API_REFERENCE.md) | 🇮🇳 [मराठी](../i18n/mr/docs/reference/API_REFERENCE.md) | 🇲🇾 [Bahasa Melayu](../i18n/ms/docs/reference/API_REFERENCE.md) | 🇲🇹 [Malti](../i18n/mt/docs/reference/API_REFERENCE.md) | 🇲🇲 [မြန်မာ](../i18n/my/docs/reference/API_REFERENCE.md) | 🇳🇵 [नेपाली](../i18n/ne/docs/reference/API_REFERENCE.md) | 🇳🇱 [Nederlands](../i18n/nl/docs/reference/API_REFERENCE.md) | 🇳🇴 [Norsk](../i18n/no/docs/reference/API_REFERENCE.md) | 🇮🇳 [ଓଡ଼ିଆ](../i18n/or/docs/reference/API_REFERENCE.md) | 🇮🇳 [ਪੰਜਾਬੀ](../i18n/pa/docs/reference/API_REFERENCE.md) | 🇵🇭 [Filipino](../i18n/phi/docs/reference/API_REFERENCE.md) | 🇵🇱 [Polski](../i18n/pl/docs/reference/API_REFERENCE.md) | 🇵🇹 [Português (Portugal)](../i18n/pt/docs/reference/API_REFERENCE.md) | 🇧🇷 [Português (Brasil)](../i18n/pt-BR/docs/reference/API_REFERENCE.md) | 🇷🇴 [Română](../i18n/ro/docs/reference/API_REFERENCE.md) | 🇷🇺 [Русский](../i18n/ru/docs/reference/API_REFERENCE.md) | 🇱🇰 [සිංහල](../i18n/si/docs/reference/API_REFERENCE.md) | 🇸🇰 [Slovenčina](../i18n/sk/docs/reference/API_REFERENCE.md) | 🇸🇮 [Slovenščina](../i18n/sl/docs/reference/API_REFERENCE.md) | 🇷🇸 [Српски](../i18n/sr/docs/reference/API_REFERENCE.md) | 🇸🇪 [Svenska](../i18n/sv/docs/reference/API_REFERENCE.md) | 🇰🇪 [Kiswahili](../i18n/sw/docs/reference/API_REFERENCE.md) | 🇮🇳 [தமிழ்](../i18n/ta/docs/reference/API_REFERENCE.md) | 🇮🇳 [తెలుగు](../i18n/te/docs/reference/API_REFERENCE.md) | 🇹🇭 [ไทย](../i18n/th/docs/reference/API_REFERENCE.md) | 🇹🇷 [Türkçe](../i18n/tr/docs/reference/API_REFERENCE.md) | 🇺🇦 [Українська](../i18n/uk-UA/docs/reference/API_REFERENCE.md) | 🇵🇰 [اردو](../i18n/ur/docs/reference/API_REFERENCE.md) | 🇺🇿 [Oʻzbekcha](../i18n/uz/docs/reference/API_REFERENCE.md) | 🇻🇳 [Tiếng Việt](../i18n/vi/docs/reference/API_REFERENCE.md) | 🇳🇬 [Yorùbá](../i18n/yo/docs/reference/API_REFERENCE.md) | 🇨🇳 [中文 (简体)](../i18n/zh-CN/docs/reference/API_REFERENCE.md) | 🇹🇼 [中文 (繁體)](../i18n/zh-TW/docs/reference/API_REFERENCE.md)
 
-OmniRoute API:n keskeinen viite. Se kattaa julkisen `/v1`-rajapinnan sekä yleisimmin käytetyt hallintapäätepisteet; koneellisesti luettava [`docs/openapi.yaml`](../openapi.yaml) ja `src/app/api/`-hakemiston reittipuu ovat kattavat lähteet.
+OmniRoute API:n keskeinen viite. Se kattaa julkisen `/v1`-rajapinnan ja useimmin käytetyt hallinnan päätepisteet; koneellisesti luettava [`docs/openapi.yaml`](../openapi.yaml) ja kohteen `src/app/api/` alla oleva reittipuu ovat kattavat lähteet.
 
-Keskitetyn OpenAI-yhteensopivan protokollan ja palveluntarjoajien ominaisuusmatriisin osalta katso
+Kohdennettua OpenAI-yhteensopivaa protokollaa ja palveluntarjoajien ominaisuusmatriisia varten katso
 [`OPENAI_COMPATIBILITY.md`](./OPENAI_COMPATIBILITY.md).
+
+Kukin käyttöönotto tarjoaa oman kopionsa määrityksestä osoitteessa `/openapi.yaml`, joka luodaan tiedostosta `docs/openapi.yaml` koontiversion aikana. Se sisältää koontiversion version ja suhteellisen palvelimen URL-osoitteen (`./`), joten pyynnöt pysyvät asiakirjan tarjonneessa isännässä. Ladatun tiedoston tuovalla työkalulla ei ole tällaista isäntää, joten perus-URL-osoite on määritettävä manuaalisesti.
 
 ---
 
 ## Sisällysluettelo
 
-- [Chat Completions](#chat-completions)
-- [Exclusive Managed Session Leases](#exclusive-managed-session-leases)
-- [Embeddings](#embeddings)
-- [Image Generation](#image-generation)
-- [Document OCR](#document-ocr)
-- [List Models](#list-models)
-- [Provider Plugin Manifest](#provider-plugin-manifest)
-- [Compatibility Endpoints](#compatibility-endpoints)
-- [Files API](#files-api)
-- [Batches API](#batches-api)
-- [Search API](#search-api)
-- [WebSocket Streaming](#websocket-streaming)
-- [Quotas & Issues Reporting](#quotas--issues-reporting)
-- [Semantic Cache](#semantic-cache)
-- [CLIProxyAPI Management Compatibility](#cliproxyapi-management-compatibility)
-- [Dashboard & Management](#dashboard--management)
-- [Combo Management](#combo-management)
-- [Webhooks](#webhooks)
-- [Registered Keys (Auto-Management)](#registered-keys-auto-management)
-- [Agents Protocol](#agents-protocol)
-- [Management Proxies](#management-proxies)
-- [Resilience (extended)](#resilience-extended)
-- [Skills](#skills)
-- [Memory](#memory)
-- [MCP Server](#mcp-server)
-- [A2A Server](#a2a-server)
-- [Cloud, Evals & Assess](#cloud-evals--assess)
-- [Request Processing](#request-processing)
-- [Authentication](#authentication)
+- [Chat-täydennykset](#chat-completions)
+- [Eksklusiiviset hallittujen istuntojen käyttöoikeudet](#exclusive-managed-session-leases)
+- [Upotukset](#embeddings)
+- [Kuvan generointi](#image-generation)
+- [Asiakirjojen OCR](#document-ocr)
+- [Mallien luettelo](#list-models)
+- [Palveluntarjoajan laajennuksen manifesti](#provider-plugin-manifest)
+- [Yhteensopivuuden päätepisteet](#compatibility-endpoints)
+- [Tiedostojen API](#files-api)
+- [Eräajojen API](#batches-api)
+- [Haku-API](#search-api)
+- [WebSocket-suoratoisto](#websocket-streaming)
+- [Kiintiöt ja ongelmista ilmoittaminen](#quotas--issues-reporting)
+- [Semanttinen välimuisti](#semantic-cache)
+- [CLIProxyAPI:n hallintayhteensopivuus](#cliproxyapi-management-compatibility)
+- [Koontinäyttö ja hallinta](#dashboard--management)
+- [Yhdistelmän hallinta](#combo-management)
+- [Webhookit](#webhooks)
+- [Rekisteröidyt avaimet (automaattinen hallinta)](#registered-keys-auto-management)
+- [Agenttiprotokolla](#agents-protocol)
+- [Hallintavälityspalvelimet](#management-proxies)
+- [Häiriönsieto (laajennettu)](#resilience-extended)
+- [Taidot](#skills)
+- [Muisti](#memory)
+- [MCP-palvelin](#mcp-server)
+- [A2A-palvelin](#a2a-server)
+- [Pilvi, evalit ja Assess](#cloud-evals--assess)
+- [Pyyntöjen käsittely](#request-processing)
+- [Todennus](#authentication)
 
 ---
 
@@ -1608,7 +1610,7 @@ Kanavamalli (`latest` = v3 ennen versiota 4.0 GA, `next` = rc, `nightly` = `deve
 
 ---
 
-## Äänitiedoston transkriptio
+## Äänen transkriptio
 
 ```bash
 POST /v1/audio/transcriptions
@@ -1616,9 +1618,9 @@ Authorization: Bearer your-api-key
 Content-Type: multipart/form-data
 ```
 
-Transkriboi äänitiedostoja käyttämällä mitä tahansa määritettyä STT-palveluntarjoajaa. Polun ensimmäinen
-segmentti valitsee natiivin palveluntarjoajan (`openai/…`, `deepgram/…`). Yhdyskäytävät, jotka
-jälleenvievät toisen toimittajan mallin, käyttävät tarkennettua tunnistetta
+Transkriboi äänitiedostoja millä tahansa määritetyllä STT-palveluntarjoajalla. Polun
+ensimmäinen osa valitsee natiivin palveluntarjoajan (`openai/…`, `deepgram/…`). Yhdyskäytävät,
+jotka tarjoavat uudelleen jonkin toisen toimittajan mallin, käyttävät määritettyä tunnistetta
 (`openrouter/deepgram/nova-3`).
 
 **Pyyntö:**
@@ -1634,19 +1636,28 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 
 ```json
 {
-  "text": "Hello, this is the transcribed audio content.",
+  "text": "Hei, tämä on transkriboidun äänisisällön teksti.",
   "task": "transcribe",
   "language": "en",
   "duration": 12.5
 }
 ```
 
-**Esimerkkejä mallitunnisteista:** `openai/whisper-1` (vaatii OpenAI-avaimen),
-`openrouter/deepgram/nova-3` (vaatii OpenRouter-avaimen),
-`deepgram/nova-3` (vaatii natiivin Deepgram-avaimen). Pelkkä
+**Esimerkkejä mallien tunnisteista:** `openai/whisper-1` (edellyttää OpenAI-avainta),
+`openrouter/deepgram/nova-3` (edellyttää OpenRouter-avainta),
+`deepgram/nova-3` (edellyttää natiivin Deepgram-avaimen). Pelkkä
 `deepgram/nova-3`-pyyntö **ei** käytä OpenRouteria.
 
 **Tuetut muodot:** `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`.
+
+**Gemini Live (`gemini/gemini-3.5-transcribe-live`):** tiedostomuotoinen transkriptio Gemini Liven
+WebSocket-yhteyden kautta (edellyttää Gemini API -avainta). Lähetetty tiedosto muunnetaan 16 kHz:n
+mono-PCM-muotoon `ffmpeg`-ohjelmalla
+(sen on oltava `PATH`-muuttujassa, paitsi jos tiedosto on jo 16 kHz:n mono-PCM WAV-tiedosto), suoratoistetaan istuntoon ja
+viimeistelty teksti palautetaan muodossa `{ "text": "..." }`. Valinnaiset `language`- ja `prompt`-lomakekentät
+välitetään eteenpäin. Rajoitukset: yli 25 MiB:n lataukset tai yli 10 minuuttia pitkiksi puretut äänitiedostot palauttavat
+tilakoodin `413`; jos muunnos kestää yli 60 sekuntia, se lopetetaan ja palautetaan tilakoodi `504`. API-avain lähetetään
+vain `x-goog-api-key`-otsakkeessa, ei koskaan WebSocket-URL-osoitteessa.
 
 ---
 
@@ -1741,15 +1752,15 @@ Content-Type: application/json
 
 > **Skeemahuomautukset** (`setBudgetSchema`): `apiKeyId` on pakollinen; vähintään yhden kentistä `dailyLimitUsd`, `weeklyLimitUsd` tai `monthlyLimitUsd` on oltava suurempi kuin nolla. Valinnaiset kentät: `warningThreshold` (0–1), `resetInterval` (`daily` | `weekly` | `monthly`), `resetTime` (`HH:MM`). Vanhan muodon `{keyId, limit, period}` käyttö palauttaa virheen `400 Bad Request`.
 
-## Tokenrajoitukset
+## Token-rajoitukset
 
-API-avainkohtaiset **token**-budjetit (erillään edellä mainitusta USD-pohjaisesta budjetista). Rajoitukset valvotaan pyyntöpolulla: kun avaimen nykyisen ikkunan käyttö saavuttaa rajansa, pyynnöt hylätään virheellä `429 Too Many Requests`. Rajoitukset voidaan kohdistaa tiettyyn `model`-malliin tai `provider`-palveluntarjoajaan tai niitä voidaan soveltaa avaimen laajuisesti `global`-tasolla; jos pyyntöön täsmää useita rajoituksia, niistä tiukin on voimassa.
+API-avainkohtaiset **token**-budjetit (erillään yllä mainitusta USD-pohjaisesta budjetista). Ne valvotaan suoraan pyyntöpolulla: kun avaimen nykyisen aikaikkunan käyttö saavuttaa rajansa, pyynnöt hylätään virheellä `429 Too Many Requests`. Rajat voidaan kohdistaa tiettyyn `model`-malliin tai `provider`-palveluntarjoajaan tai määrittää koskemaan avainta `global`-tasolla; jos pyyntöön sopii useita rajoja, tiukin niistä on voimassa.
 
 ```bash
-# List a key's token limits (includes live window usage)
+# Listaa avaimen token-rajoitukset (sisältää reaaliaikaisen aikaikkunan käytön)
 GET /api/usage/token-limits?apiKeyId=key-123
 
-# Create or update a token limit
+# Luo token-rajoitus tai päivitä olemassa olevaa
 POST /api/usage/token-limits
 Content-Type: application/json
 
@@ -1762,11 +1773,11 @@ Content-Type: application/json
   "enabled": true
 }
 
-# Delete a token limit by id
+# Poista token-rajoitus tunnisteen perusteella
 DELETE /api/usage/token-limits?id=tl-abc
 ```
 
-> **Skeemahuomautukset** (`setTokenLimitSchema`): `apiKeyId` ja `scopeType` (`model` | `provider` | `global`) ovat pakollisia. `scopeValue` on pakollinen, ellei `scopeType` ole `global` (esimerkiksi mallitunniste `model`-kohdistuksessa tai palveluntarjoajan tunniste `provider`-kohdistuksessa). `tokenLimit`-arvon on oltava positiivinen kokonaisluku (muunnetaan merkkijonosta). Valinnaiset kentät: `id` (jätä pois luotaessa, anna päivitettäessä), `resetInterval` (`daily` | `weekly` | `monthly`, oletus `monthly`), `resetTime` (`HH:MM`), `enabled` (oletus `true`). `GET`-vastaukset täydentävät jokaisen rajoituksen kentillä `tokensUsed`, `remaining`, `windowStart`, `periodStartAt` ja `nextResetAt`. Tämä on hallintatason päätepiste (todennus pakotetaan keskitetysti authz-putkessa).
+> **Kaavion huomautukset** (`setTokenLimitSchema`): `apiKeyId` ja `scopeType` (`model` | `provider` | `global`) ovat pakollisia. `scopeValue` on pakollinen, ellei `scopeType` ole `global` (esimerkiksi mallin tunniste `model`-kohdistuksessa tai palveluntarjoajan tunniste `provider`-kohdistuksessa). `tokenLimit`-arvon on oltava positiivinen kokonaisluku (muunnetaan merkkijonosta). Valinnaiset kentät: `id` (jätä pois luotaessa, anna päivitettäessä), `resetInterval` (`daily` | `weekly` | `monthly`, oletusarvo `monthly`), `resetTime` (`HH:MM`) ja `enabled` (oletusarvo `true`). `GET`-vastaukset täydentävät jokaisen rajoituksen kentillä `tokensUsed`, `remaining`, `windowStart`, `periodStartAt` ja `nextResetAt`. Tämä on hallintoluokan päätepiste (todennus valvotaan keskitetysti valtuutusputkessa).
 
 ## Pyyntöjen käsittely
 

@@ -17,64 +17,74 @@ Nəzarətləri") və `src/lib/compliance/providerAudit.ts` fayllarında yerləş
 hər hansı nasazlıq baş verdikdə çağırış səssizcə dayandırılır ki, audit jurnalına yazma
 əsas sorğu axınını poza bilməsin.
 
-## Nələr Jurnala Yazılır
+## Nələr qeydə alınır
 
 ### İnzibati audit hadisələri (`audit_log`)
 
-`logAuditEvent({ action, actor, target, details, ... })` funksiyasına edilən hər çağırış
-bir sətir yaradır. Əməliyyat sətirləri `domain.verb` (və ya `domain.verb.outcome`)
-şablonuna uyğundur. Mənbə ağacında təsdiqlənmiş əməliyyat növlərinə aşağıdakılar daxildir:
+`logAuditEvent({ action, actor, target, details, ... })` çağırışlarının hər biri
+bir sətir yaradır. Əməl sətirləri `domain.verb` (və ya `domain.verb.outcome`)
+şablonuna uyğun gəlir. Ağac daxilində təsdiqlənmiş əməl növləri:
 
-| Əməliyyat                            | Mənbə                                   |
-| ------------------------------------ | --------------------------------------- |
-| `auth.login.success`                 | `src/app/api/auth/login/route.ts`       |
-| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.error`                   | `src/app/api/auth/login/route.ts`       |
-| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`       |
-| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`       |
-| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`      |
-| `provider.credentials.created`       | `src/app/api/providers/route.ts`        |
-| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`        |
-| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`      |
-| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts` |
-| `compliance.cleanup`                 | `src/lib/compliance/index.ts`           |
+| Əməl                                 | Mənbə                                    |
+| ------------------------------------ | ---------------------------------------- |
+| `auth.login.success`                 | `src/app/api/auth/login/route.ts`        |
+| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.error`                   | `src/app/api/auth/login/route.ts`        |
+| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`        |
+| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`        |
+| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`       |
+| `provider.credentials.created`       | `src/app/api/providers/route.ts`         |
+| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`         |
+| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`       |
+| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts`  |
+| `compliance.cleanup`                 | `src/lib/compliance/index.ts`            |
+| `api_key.auth.touch`                 | `src/server/authz/policies/clientApi.ts` |
 
 Hər qeyd `action`, `actor` (standart olaraq `"system"`), `target`,
 `details`/`metadata` (JSON), `ip_address`, `resource_type`, `status`,
-`request_id` və `timestamp` sahələrini əhatə edir. Həssas açarlar (`apiKey`, `accessToken`,
-`refreshToken`, `password`, `*token`/`*secret`/`*apikey` şablonlarına uyğun gələn hər şey
-və s.) sətir yazılmazdan əvvəl rekursiv şəkildə `"[redacted]"` ilə əvəzlənir.
+`request_id` və `timestamp` məlumatlarını saxlayır. Həssas açarlar (`apiKey`,
+`accessToken`, `refreshToken`, `password`, `*token`/`*secret`/`*apikey` ilə
+uyğun gələn hər şey və s.) sətir yazılmazdan əvvəl rekursiv şəkildə
+`"[redacted]"` ilə əvəzlənir.
 
-### MCP aləti çağırışları (`mcp_tool_audit`)
+`api_key.auth.touch` sətirləri sorğu jurnalına heç vaxt çatmayan uğurlu API açarı
+metadatası və aşkarlama oxunuşlarını (GET/HEAD) qeyd edir: hansı açarın istifadə
+edildiyini, nə vaxt istifadə edildiyini və normallaşdırılmış yolu; bu qeydlər
+birləşdirilir və 1.000 sətirlə məhdudlaşdırılır. `noLog` xüsusiyyətinə malik
+açarlar və mühit açarı ötürülür. Çağıranın IP ünvanı və user-agent yalnız
+`API_KEY_AUDIT_CLIENT_DETAILS_ENABLED` funksiya bayrağı aktiv olduqda əlavə edilir
+(standart olaraq deaktivdir).
 
-Hər MCP aləti çağırışı
-`open-sse/mcp-server/audit.ts` vasitəsilə bir sətir yazır. Sxem
-(`src/lib/db/migrations/002_mcp_a2a_tables.sql` faylından):
+### MCP alət çağırışları (`mcp_tool_audit`)
 
-| Sütun            | Qeydlər                                     |
-| ---------------- | ------------------------------------------- |
-| `id`             | avtomatik artım                             |
-| `tool_name`      | MCP alət identifikatoru                     |
-| `input_hash`     | girişin sha256 heşi (faydalı yük saxlanmır) |
-| `output_summary` | qısa, ixtisar edilmiş xülasə                |
-| `duration_ms`    | ümumi icra müddəti                          |
-| `api_key_id`     | çağıran tərəf (null ola bilər)              |
-| `success`        | `1` / `0`                                   |
-| `error_code`     | uğursuzluq zamanı yekun xəta kodu           |
-| `created_at`     | ISO zaman damğası                           |
+Hər bir MCP alət çağırışı `open-sse/mcp-server/audit.ts` vasitəsilə bir sətir
+yazır. Sxem
+`src/lib/db/migrations/002_mcp_a2a_tables.sql` faylından:
+
+| Sütun            | Qeydlər                              |
+| ---------------- | ------------------------------------ |
+| `id`             | avtomatik artım                      |
+| `tool_name`      | MCP alət identifikatoru              |
+| `input_hash`     | girişin sha256 heşi (yük saxlanmır)  |
+| `output_summary` | qısa, kəsilmiş xülasə                |
+| `duration_ms`    | divar saatı üzrə müddət              |
+| `api_key_id`     | çağıran (nullable)                   |
+| `success`        | `1` / `0`                            |
+| `error_code`     | uğursuzluq zamanı terminal xəta kodu |
+| `created_at`     | ISO zaman damğası                    |
 
 ### Sorğu / istifadə jurnalları
 
 Bunlar əməliyyat telemetriyasıdır (ciddi mənada inzibati audit deyil), lakin eyni
 saxlama müddəti konveyerindən istifadə edir:
 
-- `usage_history` — hər sorğu üzrə ümumiləşdirilmiş istifadə məlumatı
-- `call_logs` — hər sorğu üzrə tam jurnal (sətir limitinə tabedir, aşağıya baxın)
-- `proxy_logs` — proksi trafiki jurnalı (sətir limitinə tabedir)
-- `request_detail_logs` — köhnəlmiş təfərrüatlı sorğu jurnalı (mövcud olarsa, yenə də təmizlənir)
+- `usage_history` — hər sorğu üzrə istifadə yekunu
+- `call_logs` — hər sorğu üzrə tam jurnal (sətir limiti tətbiq olunur, aşağıya baxın)
+- `proxy_logs` — proksi trafik jurnalı (sətir limiti tətbiq olunur)
+- `request_detail_logs` — köhnə ətraflı sorğu jurnalı (mövcud olduqda yenə də təmizlənir)
 
 ## Saxlama Sxemi
 

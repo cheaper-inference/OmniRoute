@@ -120,7 +120,7 @@
 
 ## 📖 Подешавање провајдера
 
-Да бисте групно додали везе са API кључевима из CSV или JSON датотеке, користите **Контролна табла → Провајдери → Увези из датотеке**. Колоне су позиционе (`provider,name,apiKey,baseUrl,priority`); `provider` већ мора постојати као управљани провајдер или компатибилан чвор. Погледајте [Увоз провајдера из CSV или JSON датотеке](../providers/CSV-IMPORT.md).
+Да бисте групно додали везе са API кључевима из CSV или JSON датотеке, користите **Контролна табла → Провајдери → Увези из датотеке**. Колоне су позиционе (`provider,name,apiKey,baseUrl,priority`); `provider` већ мора да постоји као управљани провајдер или компатибилан чвор. Погледајте [Увоз провајдера из CSV или JSON датотеке](../providers/CSV-IMPORT.md).
 
 ### 🔐 Претплатнички провајдери
 
@@ -128,8 +128,8 @@
 
 ```bash
 Контролна табла → Провајдери → Повежи Claude Code
-→ OAuth пријављивање → Аутоматско освежавање токена
-→ Праћење петочасовне и недељне квоте
+→ OAuth пријава → Аутоматско освежавање токена
+→ Праћење квоте од 5 сати + недељне квоте
 
 Модели:
   cc/claude-opus-4-7
@@ -137,18 +137,20 @@
   cc/claude-haiku-4-5-20251001
 ```
 
-**Професионални савет:** Користите Opus за сложене задатке, а Sonnet за брзину. OmniRoute прати квоту за сваки модел!
+**Корисни савет:** Користите Opus за сложене задатке, а Sonnet за брзину. OmniRoute прати квоту по моделу!
 
-Немате прегледач на OmniRoute хосту? Покрените `claude setup-token` било где где сте пријављени у Claude Code и налепите једногодишњи токен на картицу **Токен за подешавање**. Погледајте [Claude Code са токеном за подешавање](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
+Немате прегледач на OmniRoute хосту? Покрените `claude setup-token` било где где сте пријављени у Claude Code и налепите једногодишњи токен у картицу **Setup Token**. Погледајте [Claude Code са токеном за подешавање](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
 
-Руте компатибилне са Claude и Claude Code чувају `max` ниво интензитета размишљања за моделе Opus и Sonnet. Модели Haiku не прихватају `max` ниво интензитета, па OmniRoute пре слања надређеном сервису такав захтев своди на висок буџет за размишљање.
+Руте компатибилне са Claude и Claude Code чувају ниво размишљања `max` за
+моделе Opus и Sonnet. Haiku модели не прихватају ниво напора `max`, па OmniRoute
+пре слања узводно снижава тај захтев на велики буџет за размишљање.
 
 #### OpenAI Codex (Plus/Pro)
 
 ```bash
 Контролна табла → Провајдери → Повежи Codex
-→ OAuth пријављивање (порт 1455)
-→ Ресетовање на сваких 5 сати и недељно
+→ OAuth пријава (порт 1455)
+→ Ресетовање на 5 сати + недељно
 
 Модели:
   cx/gpt-5.5
@@ -172,47 +174,63 @@
   gh/gemini-3.1-pro-preview
 ```
 
+**AI кредити (обрачун на основу токена).** Када GitHub пријави `credits_used` за
+налог, картица Ограничења провајдера приказује ред **AI кредити** са бројем
+кредита потрошених у тренутном обрачунском периоду, укључујући и неограничене
+организационе планове.
+
+**Локално ограничење AI кредита.** Измените GitHub везу и подесите **Ограничење AI кредита по
+обрачунском периоду** (`providerSpecificData.githubCreditLimit`). Празна вредност га онемогућава; `0`
+увек прескаче везу. Када је последње очитавање потрошње једнако ограничењу или веће од њега,
+избор налога прескаче ту везу, а рутирање прелази на друге везе, на исти начин као код
+прекида према политици квоте. Провера користи податке о потрошњи које већ прикупља периодично
+освежавање квоте — никада не позива GitHub током обраде захтева — и подразумевано пропушта:
+недостајуће или застарело очитавање (старије од 15 минута или из обрачунског периода који је
+већ ресетован) не блокира везу. Ово је локална заштита, **а не гарантована горња граница потрошње**:
+кашњења у GitHub извештавању, интервал освежавања, захтеви у току и потрошња ван OmniRoute-а
+могу довести до прекорачења. За чврсто ограничење користите GitHub-ове сопствене контроле потрошње.
+
 ### 💰 Јефтини провајдери
 
-#### GLM-4.7 (Дневно ресетовање, $0.6/1M)
+#### GLM-4.7 (дневно ресетовање, $0.6/1M)
 
 1. Региструјте се: [Zhipu AI](https://open.bigmodel.cn)
 2. Преузмите API кључ из Coding Plan-а
 3. Контролна табла → Додај API кључ: Провајдер: `glm`, API кључ: `your-key`
 
-**Употреба:** `glm/glm-4.7` — **Професионални савет:** Coding Plan нуди 3× већу квоту по 7 пута нижој цени! Ресетује се сваког дана у 10:00.
+**Користите:** `glm/glm-4.7` — **Корисни савет:** Coding Plan нуди 3× већу квоту по 1/7 цене! Ресетовање је сваког дана у 10:00.
 
-#### MiniMax M2.1 (Ресетовање на 5 сати, $0.20/1M)
+#### MiniMax M2.1 (ресетовање на 5 сати, $0.20/1M)
 
 1. Региструјте се: [MiniMax](https://www.minimax.io)
 2. Преузмите API кључ → Контролна табла → Додај API кључ
 
-**Употреба:** `minimax/MiniMax-M2.1` — **Професионални савет:** Најјефтинија опција за дугачак контекст (1M токена)!
+**Користите:** `minimax/MiniMax-M2.1` — **Корисни савет:** Најјефтинија опција за дугачак контекст (1M токена)!
 
-#### Kimi K2 ($9 месечно, фиксно)
+#### Kimi K2 (фиксно $9 месечно)
 
 1. Претплатите се: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
 2. Преузмите API кључ → Контролна табла → Додај API кључ
 
-**Употреба:** `kimi/kimi-k2.5` — **Професионални савет:** Фиксних $9 месечно за 10M токена = ефективни трошак од $0.90/1M!
+**Користите:** `kimi/kimi-k2.5` — **Корисни савет:** Фиксних $9 месечно за 10M токена = ефективна цена од $0.90/1M!
 
 #### Baidu Qianfan / ERNIE
 
 1. Региструјте се: [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
 2. Направите Qianfan API кључ → Контролна табла → Додај API кључ: Провајдер: `qianfan`
 
-**Употреба:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` или други идентификатор Qianfan модела компатибилног са OpenAI-јем.
+**Користите:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` или други OpenAI-компатибилни идентификатор модела за Qianfan.
 
 ### 🆓 БЕСПЛАТНИ провајдери
 
-Бесплатни провајдери без аутентификације имају прекидач поред опције **Аутентификација није потребна** на својој страници провајдера.
-Његовим искључивањем онемогућава се тај провајдер, уклања се из конфигурисаног/сажетог приказа провајдера и
-његови модели се уклањају из `/v1/models`.
+Бесплатни провајдери без аутентификације имају прекидач поред опције **Аутентификација није потребна** на страници провајдера.
+Његово искључивање онемогућава тог провајдера, уклања га из приказа конфигурисаних/сажетих провајдера и
+уклања његове моделе из `/v1/models`.
 
 #### Qoder (9 БЕСПЛАТНИХ модела)
 
 ```bash
-Контролна табла → Повежи Qoder → OAuth пријављивање → Приступ подлеже актуелним ограничењима провајдера
+Контролна табла → Повежи Qoder → OAuth пријава → Приступ зависи од тренутних ограничења провајдера
 
 Модели: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
 ```
@@ -607,60 +625,60 @@ Za kompletnu referencu environment varijabli, pogledajte [README](../README.md).
 
 ---
 
-## 📊 Dostupni modeli
+## 📊 Доступни модели
 
 <details>
-<summary><b>Pogledajte sve dostupne modele</b></summary>
+<summary><b>Прикажи све доступне моделе</b></summary>
 
-> Lista ispod je sastavljena iz `open-sse/config/providerRegistry.ts` za v3.8.0. Katalozi u oblaku (Gemini, OpenRouter, itd.) sinhronizuju se dinamički — za potpuni katalog uživo otvorite **Kontrolna tabla → Dobavljači → [dobavljač] → Dostupni modeli** ili pozovite `GET /api/models/catalog`.
+> Списак у наставку је припремљен на основу `open-sse/config/providerRegistry.ts` за v3.8.0. Каталози у облаку (Gemini, OpenRouter итд.) синхронизују се динамички — за потпун ажурни каталог отворите **Контролна табла → Добављачи → [добављач] → Доступни модели** или позовите `GET /api/models/catalog`.
 >
-> Ako je ugrađena lista nekog dobavljača zastarela, koristite **Uvoz iz /models** na toj stranici (ili omogućite **Automatsku sinhronizaciju**) da biste povukli katalog uživo sa izvora. Ovo je potvrđeno u v3.8.50 za LLM7.io (`gemini-3.1-flash-lite`) i UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); anonimni pristup servisu Pollinations ostao je ograničen sa izvorne strane tokom istog ciklusa testiranja.
+> Ако је уграђени списак неког добављача застарео, на тој страници користите **Увези из /models** (или омогућите **Аутоматску синхронизацију**) да бисте преузели актуелни каталог са изворног сервиса. Ово је проверено у v3.8.50 за LLM7.io (`gemini-3.1-flash-lite`) и UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); анонимни приступ сервису Pollinations остао је ограничен изворним сервисом током истог циклуса тестирања.
 
-**Claude Code (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
+**Claude Code (`cc/`)** — OAuth за Pro/Max: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
-**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ nivoi napora: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
+**Codex (`cx/`)** — OAuth за Plus/Pro: `cx/gpt-5.5` (+ нивои напора: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — BESPLATAN OAuth: koristite katalog uživo prikazan pod **Kontrolna tabla → Dobavljači → Kiro → Dostupni modeli**. Dostupnost zavisi od naloga i plana.
+**Kiro (`kr/`)** — БЕСПЛАТНИ OAuth: користите ажурни каталог приказан у одељку **Контролна табла → Добављачи → Kiro → Доступни модели**. Доступност зависи од налога и тарифног плана.
 
-**Qoder (`if/`)** — BESPLATAN OAuth: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
+**Qoder (`if/`)** — БЕСПЛАТНИ OAuth: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
-**GLM (`glm/`, `glm-cn/`, `zai/`, `glmt/`)** — $0.2–0.6/1M: `glm/glm-5.1`, `glm/glm-5`, `glm/glm-5-turbo`, `glm/glm-4.7`, `glm/glm-4.7-flash`, `glm/glm-4.6`, `glm/glm-4.6v`, `glm/glm-4.5`, `glm/glm-4.5v`, `glm/glm-4.5-air`
+**GLM (`glm/`, `glm-cn/`, `zai/`, `glmt/`)** — 0,2–0,6 USD/1M: `glm/glm-5.1`, `glm/glm-5`, `glm/glm-5-turbo`, `glm/glm-4.7`, `glm/glm-4.7-flash`, `glm/glm-4.6`, `glm/glm-4.6v`, `glm/glm-4.5`, `glm/glm-4.5v`, `glm/glm-4.5-air`
 
-**MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
+**MiniMax (`minimax/`, `minimax-cn/`)** — 0,2 USD/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/mesečno fiksno ili po korišćenju: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — 9 USD месечно или по употреби: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
-**DeepSeek (`ds/`)** — API ključ: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
+**DeepSeek (`ds/`)** — API кључ: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
-**Groq (`groq/`)** — Izuzetno brz: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
+**Groq (`groq/`)** — Ултрабрзо: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
 
-**xAI (`xai/`)** — Izvorni Grok: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
+**xAI (`xai/`)** — Изворни Grok: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
-**Mistral (`mistral/`)** — Hostovano u EU: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
+**Mistral (`mistral/`)** — Хостовано у ЕУ: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/codestral-latest`
 
-**Perplexity (`pplx/`)** — Prošireno pretragom: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
+**Perplexity (`pplx/`)** — Допуњено претрагом: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
-**Together AI (`together/`)** — Otvorenog koda: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (besplatan), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
+**Together AI (`together/`)** — Отвореног кода: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (бесплатно), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
-**Fireworks AI (`fireworks/`)** — Brza inferencija: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
+**Fireworks AI (`fireworks/`)** — Брзо извођење: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
-**Cerebras (`cerebras/`)** — Skala vefera: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
+**Cerebras (`cerebras/`)** — На нивоу плочице: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
-**Cohere (`cohere/`)** — Fokusirano na RAG: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
+**Cohere (`cohere/`)** — Усмерено на RAG: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — Za preduzeća: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — За предузећа: `nvidia/google/gemma-4-31b-it`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`, `nvidia/nvidia/nemotron-3-ultra-550b-a55b`, `nvidia/nvidia/nemotron-3.5-lightning-30b-a3b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: Sinhronizovano uživo po API ključu od Google-a — bez statičke liste. Povežite ključ u **Kontrolna tabla → Dobavljači**, a zatim koristite **Dostupni modeli** za uvoz trenutnog kataloga (npr. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
+**Gemini (Google Cloud `gemini/`)**: Синхронизује се уживо за сваки API кључ са сервиса Google — нема статичког списка. Повежите кључ у одељку **Контролна табла → Добављачи**, а затим користите **Доступни модели** да бисте увезли актуелни каталог (нпр. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
-**Ostali kompatibilni dobavljači** (odabrani): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (preko `aws-bedrock`), `azure-ai`, `openrouter` (prolazni katalog), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Svaki održava sopstvenu listu modela u `providerRegistry.ts` i može se automatski sinhronizovati kada dobavljač izlaže krajnju tačku `/models`.
+**Други компатибилни добављачи** (изабрани): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (преко `aws-bedrock`), `azure-ai`, `openrouter` (каталог прослеђивања), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Сваки од њих одржава сопствени списак модела у датотеци `providerRegistry.ts` и може се аутоматски синхронизовати када добављач излаже крајњу тачку `/models`.
 
-**Napomena o ID-evima modela:** OmniRoute koristi izvorne ID-eve dobavljača (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Neki ID-evi uključuju verzije sa tačkama zato što ih izvorni API tako očekuje. Ako model nije naveden iznad, pokrenite `omniroute models --search <term>` ili pozovite `GET /api/models/catalog` da biste potvrdili dostupnost.
+**Напомена о ID-овима модела:** OmniRoute користи изворне ID-ове добављача (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Неки ID-ови садрже верзије са тачкама јер их изворни API тако захтева. Ако модел није наведен изнад, покрените `omniroute models --search <term>` или позовите `GET /api/models/catalog` да бисте потврдили доступност.
 
 </details>
 

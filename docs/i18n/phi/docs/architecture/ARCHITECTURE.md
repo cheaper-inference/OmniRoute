@@ -8,78 +8,79 @@
 
 _Huling na-update: 2026-06-28_
 
-## Executive Summary
+## Buod na Ehekutibo
 
-OmniRoute ay isang lokal AI routing gateway at dashboard na binuo sa Next.js. Nagbibigay ito ng isang endpoint na katugma sa OpenAI (`/v1/*`) at ruta ng trapiko sa maraming upstream provider na may pagsasalin, fallback, pag-refresh ng token, at pagsubaybay sa paggamit.
+Ang OmniRoute ay isang lokal na AI routing gateway at dashboard na binuo sa Next.js.  
+Nagbibigay ito ng iisang endpoint na compatible sa OpenAI (`/v1/*`) at niruruta ang trapiko sa maraming upstream provider gamit ang translation, fallback, token refresh, at pagsubaybay sa paggamit.
 
 Mga pangunahing kakayahan:
 
-- OpenAI-compatible API surface para sa CLI/tools (380 provider, 158 executor modules)
-- pagsasalin ng Request/response sa mga format ng provider
-- Modelong combo fallback (multi-model sequence)
-- Structured combo steps (`provider + model + connection`) na may runtime na pag-order sa pamamagitan ng `compositeTiers`
-- Account-level fallback (multi-account bawat provider)
-- Quota preflight at quota-aware P2C account na pagpili sa pangunahing landas ng chat
-- OAuth + API-key na pamamahala sa koneksyon ng provider (27 OAuth provider modules)
-- Pag-embed ng henerasyon sa pamamagitan ng `/v1/embeddings` (18 provider)
-- Pagbuo ng larawan sa pamamagitan ng `/v1/images/generations` (10 + provider, 20 + na modelo)
-- Audio transcription sa pamamagitan ng `/v1/audio/transcriptions` (18 provider)
-- Text-to-speech sa pamamagitan ng `/v1/audio/speech` (24 na built-in na provider)
+- API surface na compatible sa OpenAI para sa CLI/tools (380 provider, 159 executor module)
+- Translation ng request/response sa iba’t ibang format ng provider
+- Fallback ng model combo (sequence ng maraming modelo)
+- Mga structured combo step (`provider + model + connection`) na may runtime ordering ayon sa `compositeTiers`
+- Fallback sa antas ng account (maraming account bawat provider)
+- Quota preflight at quota-aware na pagpili ng P2C account sa pangunahing chat path
+- Pamamahala ng koneksyon ng OAuth + API-key provider (27 OAuth provider module)
+- Pagbuo ng embedding sa pamamagitan ng `/v1/embeddings` (18 provider)
+- Pagbuo ng larawan sa pamamagitan ng `/v1/images/generations` (10+ provider, 20+ modelo)
+- Transkripsyon ng audio sa pamamagitan ng `/v1/audio/transcriptions` (18 provider)
+- Text-to-speech sa pamamagitan ng `/v1/audio/speech` (24 built-in provider)
 - Pagbuo ng video sa pamamagitan ng `/v1/videos/generations` (ComfyUI + SD WebUI)
 - Pagbuo ng musika sa pamamagitan ng `/v1/music/generations` (ComfyUI)
 - Paghahanap sa web sa pamamagitan ng `/v1/search` (20 provider)
 - Mga moderation sa pamamagitan ng `/v1/moderations`
-- Muling pagraranggo sa pamamagitan ng `/v1/rerank`
-- Isipin ang pag-parse ng tag (`<think>...</think>`) para sa mga modelo ng pangangatwiran
-- Response sanitization para sa mahigpit na OpenAI SDK compatibility
-- Pag-normalize ng tungkulin (developer → system, system → user) para sa cross-provider compatibility
-- Structured output conversion (json_schema → Gemini responseSchema)
-- Lokal na pagtitiyaga para sa mga provider, key, alias, combo, setting, pagpepresyo (122 DB modules)
-- pagsubaybay ng Usage/cost at pag-log ng kahilingan
+- Reranking sa pamamagitan ng `/v1/rerank`
+- Pag-parse ng think tag (`<think>...</think>`) para sa mga reasoning model
+- Paglilinis ng response para sa mahigpit na compatibility sa OpenAI SDK
+- Normalisasyon ng role (developer→system, system→user) para sa cross-provider compatibility
+- Conversion ng structured output (json_schema → Gemini responseSchema)
+- Lokal na persistence para sa mga provider, key, alias, combo, setting, pricing (122 DB module)
+- Pagsubaybay sa paggamit/gastos at pag-log ng request
 - Opsyonal na cloud sync para sa multi-device/state sync
-- IP allowlist/blocklist para sa API access control
-- Pag-iisip ng pamamahala ng badyet (passthrough/auto/custom/adaptive)
-- Global system prompt injection
+- IP allowlist/blocklist para sa access control ng API
+- Pamamahala ng thinking budget (passthrough/auto/custom/adaptive)
+- Pandaigdigang injection ng system prompt
 - Pagsubaybay sa session at fingerprinting
-- Paglilimita sa pinahusay na rate ng bawat account gamit ang mga profile na partikular sa provider
+- Pinahusay na rate limiting bawat account na may mga profile na partikular sa provider
 - Pattern ng circuit breaker para sa katatagan ng provider
-- Proteksyon laban sa dumadagundong na kawan na may mutex locking
-- Cache ng deduplication ng kahilingan na nakabatay sa lagda
-- Layer ng domain: mga panuntunan sa gastos, patakaran sa fallback, patakaran sa lockout
-- Relay ng Konteksto: mga buod ng handoff ng session para sa pagpapatuloy ng pag-ikot ng account
-- Pananatili ng estado ng domain (SQLite write-through cache para sa mga fallback, badyet, lockout, circuit breaker)
-- Policy engine para sa sentralisadong pagsusuri ng kahilingan (lockout → budget → fallback)
-- Humiling ng telemetry na may p50/p95/p99 latency aggregation
-- Combo target telemetry at historical combo target na kalusugan sa pamamagitan ng `combo_execution_key` / `combo_step_id`
-- Correlation ID (X-Request-Id) para sa end-to-end na pagsubaybay
-- Pag-log sa audit ng pagsunod gamit ang opt-out sa bawat API key
-- Eval framework para sa LLM quality assurance
-- Health dashboard na may real-time na provider ng circuit breaker status
-- MCP Server (110 tool) na may 3 transports (stdio/SSE/Streamable HTTP)
-- A2A Server (JSON-RPC 2.0 + SSE) na may mga kasanayan at lifecycle ng gawain
-- Sistema ng memorya (pagkuha, iniksyon, pagkuha, pagbubuod)
-- Skills system (registry, executor, sandbox, built-in na kasanayan)
-- MITM proxy na may pamamahala ng sertipiko at paghawak ng DNS
-- Prompt injection guard middleware
-- Prompt compression pipeline na may Caveman, RTK, stacked pipelines, compression combos, language pack, at analytics
-- ACP (Agent Communication Protocol) na pagpapatala
-- Modular OAuth providers (22 indibidwal na module sa ilalim ng `src/lib/oauth/providers/`)
-- Uninstall/full-uninstall script
-- aksyon sa pag-aayos ng kapaligiran OAuth
-- WebSocket bridge para sa OpenAI-compatible WS client (`/v1/ws`)
-- I-sync ang pamamahala ng token (issue/revoke, ETag-versioned config bundle download)
-- GLM Thinking (`glmt`) preset ng first-class na provider
-- Hybrid token counting (provider-side `/messages/count_tokens` na may fallback sa pagtatantya)
-- Model alias auto-seeding (30 + cross-proxy dialect normalizations sa startup)
-- Ligtas na outbound fetch na may SSRF guard, pribadong URL blocking, at na-configure na muling subukan
-- Sinusubukang muli ng cooldown-aware na chat ang na-configure na `requestRetry` at `maxRetryIntervalSec`
-- Pagpapatunay ng kapaligiran ng runtime gamit ang Zod sa pagsisimula
-- Compliance audit v2 na may pagination, provider CRUD event, at SSRF-blocked validation logging
+- Proteksyon laban sa thundering herd gamit ang mutex locking
+- Signature-based na cache para sa deduplication ng request
+- Domain layer: mga panuntunan sa gastos, polisiya ng fallback, polisiya ng lockout
+- Context Relay: mga buod ng session handoff para sa pagpapatuloy sa pag-ikot ng account
+- Persistence ng domain state (SQLite write-through cache para sa mga fallback, budget, lockout, circuit breaker)
+- Policy engine para sa sentralisadong pagsusuri ng request (lockout → budget → fallback)
+- Telemetry ng request na may aggregation ng latency na p50/p95/p99
+- Telemetry ng combo target at historikal na kalusugan ng combo target sa pamamagitan ng `combo_execution_key` / `combo_step_id`
+- Correlation ID (X-Request-Id) para sa end-to-end tracing
+- Compliance audit logging na may opt-out bawat API key
+- Eval framework para sa quality assurance ng LLM
+- Health dashboard na may real-time na status ng circuit breaker ng provider
+- MCP Server (110 tool) na may 3 transport (stdio/SSE/Streamable HTTP)
+- A2A Server (JSON-RPC 2.0 + SSE) na may mga skill at lifecycle ng task
+- Memory system (extraction, injection, retrieval, summarization)
+- Skills system (registry, executor, sandbox, built-in skill)
+- MITM proxy na may pamamahala ng certificate at paghawak sa DNS
+- Middleware na panangga sa prompt injection
+- Pipeline ng prompt compression na may Caveman, RTK, stacked pipeline, compression combo, language pack, at analytics
+- ACP (Agent Communication Protocol) registry
+- Mga modular OAuth provider (22 indibidwal na module sa ilalim ng `src/lib/oauth/providers/`)
+- Mga script para sa pag-uninstall/full-uninstall
+- Aksyon para sa pag-aayos ng OAuth environment
+- WebSocket bridge para sa mga OpenAI-compatible WS client (`/v1/ws`)
+- Pamamahala ng sync token (issue/revoke, pag-download ng config bundle na may bersyong ETag)
+- GLM Thinking (`glmt`) na first-class provider preset
+- Hybrid na pagbibilang ng token (provider-side `/messages/count_tokens` na may fallback sa estimation)
+- Awtomatikong pag-seed ng model alias (30+ cross-proxy dialect normalization sa pagsisimula)
+- Ligtas na outbound fetch na may SSRF guard, pagharang sa pribadong URL, at nako-configure na retry
+- Mga chat retry na may kamalayan sa cooldown at nako-configure na `requestRetry` at `maxRetryIntervalSec`
+- Pagpapatunay ng runtime environment gamit ang Zod sa pagsisimula
+- Compliance audit v2 na may pagination, mga event ng CRUD ng provider, at pag-log ng validation na na-block ng SSRF
 
-Pangunahing modelo ng runtime:
+Pangunahing runtime model:
 
-- Ang mga ruta Next.js app sa ilalim ng `src/app/api/*` ay nagpapatupad ng parehong dashboard APIs at compatibility APIs
-- Ang isang nakabahaging SSE/routing core sa `src/sse/*` + `open-sse/*` ay humahawak sa pagpapatupad ng provider, pagsasalin, streaming, fallback, at paggamit
+- Ipinapatupad ng mga app route ng Next.js sa ilalim ng `src/app/api/*` ang mga API para sa dashboard at mga compatibility API
+- Pinangangasiwaan ng isang shared SSE/routing core sa `src/sse/*` + `open-sse/*` ang execution ng provider, translation, streaming, fallback, at paggamit
 
 ## Mga Reference Diagram
 

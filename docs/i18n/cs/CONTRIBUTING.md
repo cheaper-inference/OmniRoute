@@ -8,14 +8,19 @@ Thank you for your interest in contributing! This guide covers everything you ne
 
 ---
 
-## Nastavení vývojového prostředí
+## Nastavení vývoje
 
-### Předpoklady
+### Požadavky
 
-- **Node.js** `>=22.22.2 <23` nebo `>=24.0.0 <27` (doporučeno: 24 LTS)
+- **Node.js** `>=22.22.2 <23`, nebo `>=24.0.0 <27` (doporučeno: 24 LTS)
 - **npm** 10+
 
-> **Uživatelé npm v11+ (Node 24+):** Po spuštění `npm install` ověřte, že byly nainstalovány nativní moduly:
+> **Windows s Node 24:** použijte aktuální opravnou verzi 24 LTS (nejméně 24.20.0).
+> Starší verze mohou po úspěšném dokončení testů ukončit proces, když `--test-force-exit`
+> proces zavře. Tento pád za běhu řeší [oprava Windows pro libuv](https://github.com/nodejs/node/pull/61999);
+> ponechte povolené kontroly asercí testů a ukončení runneru.
+
+> **Uživatelé npm v11+ (Node 24+):** Po `npm install` ověřte, že byly nainstalovány nativní moduly:
 > `node -e "require('better-sqlite3')"`. Pokud příkaz selže s chybou `MODULE_NOT_FOUND`,
 > spusťte `npm approve-scripts better-sqlite3 && npm install`. Viz
 > [Řešení problémů](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
@@ -36,86 +41,88 @@ npm install
 # Vytvořte soubor .env ze šablony
 cp .env.example .env
 
-# Vygenerujte požadované tajné klíče
+# Vygenerujte požadované tajné hodnoty
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
 Klíčové proměnné pro vývoj:
 
-| Proměnná               | Výchozí hodnota pro vývoj | Popis                            |
-| ---------------------- | ------------------------- | -------------------------------- |
-| `PORT`                 | `20128`                   | Port serveru                     |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`  | Základní URL frontendu           |
-| `JWT_SECRET`           | (vygenerujte výše)        | Tajný klíč pro podpis JWT        |
-| `INITIAL_PASSWORD`     | `CHANGEME`                | Heslo pro první přihlášení       |
-| `APP_LOG_LEVEL`        | `info`                    | Úroveň podrobnosti protokolování |
+| Proměnná               | Výchozí hodnota pro vývoj | Popis                           |
+| ---------------------- | ------------------------- | ------------------------------- |
+| `PORT`                 | `20128`                   | Port serveru                    |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`  | Základní URL frontendu          |
+| `JWT_SECRET`           | (vygenerujte výše)        | Tajný klíč pro podepisování JWT |
+| `INITIAL_PASSWORD`     | `CHANGEME`                | Heslo pro první přihlášení      |
+| `APP_LOG_LEVEL`        | `info`                    | Úroveň podrobnosti protokolů    |
 
 ### Nastavení řídicího panelu
 
-Řídicí panel poskytuje přepínače uživatelského rozhraní pro funkce, které lze také konfigurovat prostřednictvím proměnných prostředí:
+Řídicí panel poskytuje přepínače uživatelského rozhraní pro funkce, které lze konfigurovat také prostřednictvím proměnných prostředí:
 
-| Umístění nastavení    | Přepínač                       | Popis                                       |
-| --------------------- | ------------------------------ | ------------------------------------------- |
-| Nastavení → Pokročilé | Režim ladění                   | Povolit protokoly požadavků pro ladění (UI) |
-| Nastavení → Obecné    | Viditelnost postranního panelu | Zobrazit/skrýt sekce postranního panelu     |
+| Umístění nastavení    | Přepínač                       | Popis                                   |
+| --------------------- | ------------------------------ | --------------------------------------- |
+| Nastavení → Pokročilé | Režim ladění                   | Povolit protokoly požadavků ladění (UI) |
+| Nastavení → Obecné    | Viditelnost postranního panelu | Zobrazit/skrýt části postranního panelu |
 
-Tato nastavení jsou uložena v databázi, přetrvávají mezi restarty a po nastavení přepisují výchozí hodnoty proměnných prostředí.
+Tato nastavení se ukládají do databáze a přetrvávají po restartování. Pokud jsou nastavena,
+mají přednost před výchozími hodnotami proměnných prostředí.
 
 ### Lokální spuštění
 
 ```bash
-# Vývojový režim (automatické opětovné načítání)
+# Vývojový režim (automatické načítání změn)
 npm run dev
 
 # Produkční sestavení
-npm run build    # next build → .build/next/, poté assembleStandalone → dist/
+npm run build    # next build → .build/next/ a poté assembleStandalone → dist/
 npm run start
 
 # Rychlá kompilace pouze backendu/API pro změny přispěvatelů
 npm run build:contributor
 
 # Sestavení vydání (čisté sestavení + sentinel HEAD — vyžadováno pro nasazení)
-npm run build:release   # rm -rf .build dist && sestavení + zápis dist/BUILD_SHA
+npm run build:release   # rm -rf .build dist a poté build + zápis dist/BUILD_SHA
 
-# Běžná konfigurace portu
+# Běžné nastavení portu
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
 Sestavení pro přispěvatele provádí pouze ověření kompilace: nesestavuje samostatnou
-distribuci ani volitelné nativní balíčkové prostředky. Když potřebujete ověřit
-distribuovatelný balíček, použijte běžné produkční sestavení.
+distribuci ani nevytváří volitelné nativní balicí prostředky. Pokud potřebujete ověřit
+balíček připravený k distribuci, použijte běžné produkční sestavení.
 
 ### Struktura výstupu sestavení
 
-| Adresář   | Obsah                                                                               | Sledováno |
-| --------- | ----------------------------------------------------------------------------------- | --------- |
-| `src/`    | Zdrojový kód aplikace (TypeScript / TSX)                                            | Ano       |
-| `.build/` | Mezivýstupy — výstup `next build` (ignorováno Gitem, `distDir = .build/next`)       | Ne        |
-| `dist/`   | Distribuovatelný balíček — sestavený pomocí `assembleStandalone` (ignorováno Gitem) | Ne        |
+| Adresář   | Obsah                                                                                            | Sledován |
+| --------- | ------------------------------------------------------------------------------------------------ | -------- |
+| `src/`    | Zdrojový kód aplikace (TypeScript / TSX)                                                         | Ano      |
+| `.build/` | Meziprodukty — výstup `next build` (ignorován systémem git, `distDir = .build/next`)             | Ne       |
+| `dist/`   | Balíček připravený k distribuci — sestavený pomocí `assembleStandalone` (ignorován systémem git) | Ne       |
 
 Proces sestavení probíhá v jediném průchodu:
 
 ```
 npm run build
   └─ next build → .build/next/standalone  (výstup Next.js)
-  └─ assembleStandalone()                 (zkopíruje samostatné, statické, veřejné a nativní prostředky)
+  └─ assembleStandalone()                 (zkopíruje standalone + static + public + nativní prostředky)
        └─ výstup: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
 `npm run build:release` navíc nejprve vyčistí oba adresáře a zapíše
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) jako kontrolní sentinel integrity nasazení.
+`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) jako sentinel integrity nasazení.
 
-`npm run build:contributor` používá profil sestavení pouze pro backend. Během sestavení dočasně nahrazuje
-soubory uživatelského rozhraní řídicího panelu zástupnými soubory, zachovává obslužné rutiny tras API a po
-sestavení obnoví původní soubory. Pro změny ovlivňující uživatelské rozhraní řídicího panelu nebo pro úplné
-ověření vydání použijte `npm run build`; profil pro přispěvatele nenahrazuje sestavení vydání.
+`npm run build:contributor` používá profil sestavení pouze pro backend. Během sestavení
+dočasně nahradí soubory uživatelského rozhraní řídicího panelu, zachová obslužné rutiny
+API tras a po dokončení sestavení obnoví původní soubory. Pro změny ovlivňující uživatelské
+rozhraní řídicího panelu nebo pro úplné ověření vydání použijte `npm run build`;
+profil pro přispěvatele není náhradou za sestavení vydání.
 
-> **Poznámka k nasazení na VPS:** vzdálený adresář obrazu `/usr/lib/node_modules/omniroute/app/`
-> zůstává beze změny. Nástroje pro nasazení pomocí rsync synchronizují jeho obsah s obsahem `dist/`.
-> Změnila se pouze cesta k výstupu sestavení v repozitáři (`app/` → `dist/`).
+> **Poznámka k nasazení na VPS:** vzdálený adresář s obrazem `/usr/lib/node_modules/omniroute/app/`
+> se nemění. Nástroje pro nasazení do něj synchronizují obsah `dist/` pomocí rsync.
+> Přesunuta byla pouze cesta výstupu sestavení v repozitáři (`app/` → `dist/`).
 
-Výchozí adresy URL:
+Výchozí URL:
 
 - **Řídicí panel**: `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`

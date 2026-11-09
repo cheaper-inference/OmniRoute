@@ -481,7 +481,14 @@ async function lookupModelMeta(
       compatOverrideMatch
     );
     if (effort) metadata.resolvedThinkingEffort = effort;
-    if (!metadata.targetFormat && !syncedMatch && !registryMatch) {
+    const syncedDeclaresChatEndpoint =
+      Array.isArray(syncedMatch?.supportedEndpoints) &&
+      syncedMatch.supportedEndpoints.some(
+        (ep: unknown) =>
+          typeof ep === "string" &&
+          (ep === "chat" || ep.includes("chat/completions") || ep.includes("chat-completions"))
+      );
+    if (!metadata.targetFormat && !syncedDeclaresChatEndpoint && !registryMatch) {
       const inferredTargetFormat = inferGithubUnsyncedTargetFormat(providerId, resolvedModelId);
       if (inferredTargetFormat) metadata.targetFormat = inferredTargetFormat;
     }

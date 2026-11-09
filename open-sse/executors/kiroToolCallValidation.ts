@@ -56,9 +56,40 @@ export function validateKiroToolCallWrapperInput(toolInput: unknown): void {
   }
 }
 
-export function validateKiroToolUse(toolUse: JsonRecord): void {
+/**
+ * Does the translated Kiro request declare a client tool whose name collides with
+ * the MCP wrapper (`tool_call`)? Agent runtimes such as OpenClaw and Hermes expose
+ * their own deferred-tool bridge under that name (#18675). A call to it carries the
+ * client's schema, not `{name, arguments}`, so it must pass through untouched.
+ *
+ * openai-to-kiro always places the tool list on the current message (and strips it
+ * from history), so that is the only place checked. Pass the translated body as
+ * built by openai-to-kiro (before the executor's allowlist): names it synthesized
+ * from history in `_kiroSynthesizedToolNames` were never declared by the client.
+ */
+export function kiroRequestDeclaresToolCallWrapperName(transformedBody: unknown): boolean {
+  const asRecord = (value: unknown): JsonRecord | null =>
+    value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : null;
+  const synthesized = asRecord(transformedBody)?._kiroSynthesizedToolNames;
+  if (synthesized instanceof Map && synthesized.has(KIRO_TOOL_CALL_WRAPPER)) return false;
+  const userInput = asRecord(
+    asRecord(asRecord(asRecord(transformedBody)?.conversationState)?.currentMessage)
+      ?.userInputMessage
+  );
+  const tools = asRecord(userInput?.userInputMessageContext)?.tools;
+  if (!Array.isArray(tools)) return false;
+  return tools.some((tool) => {
+    const name = asRecord(asRecord(tool)?.toolSpecification)?.name;
+    return typeof name === "string" && name.trim() === KIRO_TOOL_CALL_WRAPPER;
+  });
+}
+
+export function validateKiroToolUse(
+  toolUse: JsonRecord,
+  options: { clientDeclaresWrapperName?: boolean } = {}
+): void {
   const toolName = validateKiroToolName(toolUse);
-  if (toolName === KIRO_TOOL_CALL_WRAPPER) {
+  if (toolName === KIRO_TOOL_CALL_WRAPPER && !options.clientDeclaresWrapperName) {
     validateKiroToolCallWrapperInput(toolUse.input);
   }
 }

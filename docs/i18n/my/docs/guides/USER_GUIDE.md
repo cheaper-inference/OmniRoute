@@ -120,39 +120,40 @@ $20 ပေးပြီး ကန့်သတ်ချက်များနှင
 
 ## 📖 Provider စနစ်ထည့်သွင်းခြင်း
 
-CSV သို့မဟုတ် JSON ဖိုင်တစ်ခုမှ API-key ချိတ်ဆက်မှုများကို အစုလိုက်ထည့်ရန် **Dashboard → Providers → Import from file** ကို အသုံးပြုပါ။ ကော်လံများကို အစဉ်လိုက် သတ်မှတ်ထားသည် (`provider,name,apiKey,baseUrl,priority`)။ `provider` သည် စီမံခန့်ခွဲထားသော provider သို့မဟုတ် ကိုက်ညီမှုရှိသော node တစ်ခုအဖြစ် ရှိနှင့်ပြီးသား ဖြစ်ရမည်။ [CSV သို့မဟုတ် JSON ဖိုင်မှ provider များ ထည့်သွင်းခြင်း](../providers/CSV-IMPORT.md) ကို ကြည့်ပါ။
+CSV သို့မဟုတ် JSON ဖိုင်မှ API key ချိတ်ဆက်မှုများကို အစုလိုက်ထည့်ရန် **Dashboard → Providers → Import from file** ကို အသုံးပြုပါ။ ကော်လံများသည် အစဉ်လိုက်ဖြစ်သည် (`provider,name,apiKey,baseUrl,priority`)။ `provider` သည် စီမံခန့်ခွဲထားသော provider တစ်ခု သို့မဟုတ် ကိုက်ညီသည့် node တစ်ခုအဖြစ် ကြိုတင်ရှိရမည်။ [Import providers from a CSV or JSON file](../providers/CSV-IMPORT.md) ကို ကြည့်ပါ။
 
-### 🔐 စာရင်းသွင်းမှုအခြေပြု Provider များ
+### 🔐 Subscription Provider များ
 
 #### Claude Code (Pro/Max)
 
 ```bash
-Dashboard → Providers → Claude Code ကို ချိတ်ဆက်ပါ
-→ OAuth ဖြင့် ဝင်ရောက်ပါ → Token အလိုအလျောက် ပြန်လည်စတင်ခြင်း
-→ ၅ နာရီစာ + အပတ်စဉ် quota စောင့်ကြည့်ခြင်း
+Dashboard → Providers → Claude Code ချိတ်ဆက်ရန်
+→ OAuth login → Token အလိုအလျောက် refresh
+→ ၅ နာရီ + အပတ်စဉ် quota ခြေရာခံခြင်း
 
-မော်ဒယ်များ:
+Models:
   cc/claude-opus-4-7
   cc/claude-sonnet-4-6
   cc/claude-haiku-4-5-20251001
 ```
 
-**ကျွမ်းကျင်သူ အကြံပြုချက်:** ရှုပ်ထွေးသော လုပ်ငန်းများအတွက် Opus ကို အသုံးပြုပြီး မြန်နှုန်းအတွက် Sonnet ကို အသုံးပြုပါ။ OmniRoute သည် မော်ဒယ်တစ်ခုချင်းစီအလိုက် quota ကို စောင့်ကြည့်ပေးသည်!
+**အသုံးဝင်သော အကြံပြုချက်:** ရှုပ်ထွေးသောလုပ်ငန်းများအတွက် Opus၊ မြန်ဆန်မှုအတွက် Sonnet ကို အသုံးပြုပါ။ OmniRoute သည် model တစ်ခုချင်းစီအလိုက် quota ကို ခြေရာခံပေးသည်။
 
-OmniRoute host ပေါ်တွင် browser မရှိပါသလား။ Claude Code ဖြင့် ဝင်ရောက်ထားသည့် မည်သည့်နေရာတွင်မဆို `claude setup-token` ကို လုပ်ဆောင်ပြီး တစ်နှစ်သက်တမ်းရှိ token ကို **Setup Token** tab ထဲသို့ ကူးထည့်ပါ။ [Setup token ဖြင့် Claude Code အသုံးပြုခြင်း](../providers/CLAUDE_CODE_SETUP_TOKEN.md) ကို ကြည့်ပါ။
+OmniRoute host တွင် browser မရှိပါက Claude Code login ဝင်ထားသည့် မည်သည့်နေရာတွင်မဆို `claude setup-token` ကို run ပြီး တစ်နှစ်သက်တမ်းရှိ token ကို **Setup Token** tab ထဲသို့ paste လုပ်ပါ။ [Claude Code with a setup token](../providers/CLAUDE_CODE_SETUP_TOKEN.md) ကို ကြည့်ပါ။
 
-Claude နှင့် Claude Code နှင့် ကိုက်ညီသော route များသည် Opus နှင့် Sonnet
-မော်ဒယ်များအတွက် `max` thinking effort ကို ဆက်လက်ထိန်းသိမ်းထားသည်။ Haiku မော်ဒယ်များသည် `max` effort အဆင့်ကို လက်မခံသောကြောင့် OmniRoute သည်
-ထို request ကို upstream သို့ မပို့မီ high thinking budget အဖြစ် လျှော့ချပေးသည်။
+Claude နှင့် Claude Code-compatible route များသည် Opus နှင့် Sonnet
+model များအတွက် `max` thinking effort ကို ထိန်းသိမ်းပေးသည်။ Haiku model များသည် `max`
+effort tier ကို လက်မခံသောကြောင့် OmniRoute သည် အဆိုပါ request ကို upstream သို့ မပို့မီ
+မြင့်မားသော thinking budget သို့ လျှော့ချပြောင်းလဲပေးသည်။
 
 #### OpenAI Codex (Plus/Pro)
 
 ```bash
-Dashboard → Providers → Codex ကို ချိတ်ဆက်ပါ
-→ OAuth ဖြင့် ဝင်ရောက်ပါ (port 1455)
-→ ၅ နာရီစာ + အပတ်စဉ် ပြန်လည်သတ်မှတ်ခြင်း
+Dashboard → Providers → Codex ချိတ်ဆက်ရန်
+→ OAuth login (port 1455)
+→ ၅ နာရီ + အပတ်စဉ် reset
 
-မော်ဒယ်များ:
+Models:
   cx/gpt-5.5
   cx/gpt-5.4
   cx/gpt-5.3-codex
@@ -162,11 +163,11 @@ Dashboard → Providers → Codex ကို ချိတ်ဆက်ပါ
 #### GitHub Copilot
 
 ```bash
-Dashboard → Providers → GitHub ကို ချိတ်ဆက်ပါ
+Dashboard → Providers → GitHub ချိတ်ဆက်ရန်
 → GitHub မှတစ်ဆင့် OAuth
-→ လစဉ် ပြန်လည်သတ်မှတ်ခြင်း (လတိုင်း၏ ၁ ရက်နေ့)
+→ လစဉ် reset (လ၏ ၁ ရက်နေ့)
 
-မော်ဒယ်များ:
+Models:
   gh/gpt-5.5
   gh/gpt-5.4
   gh/claude-sonnet-4.6
@@ -174,57 +175,63 @@ Dashboard → Providers → GitHub ကို ချိတ်ဆက်ပါ
   gh/gemini-3.1-pro-preview
 ```
 
+**AI Credits (token အခြေပြု ငွေတောင်းခံခြင်း)။** GitHub မှ account အတွက်
+`credits_used` ကို report လုပ်သောအခါ Provider Limits card တွင် **AI Credits** row ကို
+ပြသပြီး လက်ရှိငွေတောင်းခံကာလအတွင်း အသုံးပြုထားသည့် credits ကို ဖော်ပြသည်။ unlimited
+organization plan များတွင်လည်း အလားတူဖြစ်သည်။
+
+**Local AI Credits limit။** GitHub connection ကို edit လုပ်ပြီး billing period တစ်ခုလျှင်
+**AI Credits limit per billing period** (`providerSpecificData.githubCreditLimit`) ကို သတ်မှတ်ပါ။ ဗလာထားပါက ပိတ်ထားမည်ဖြစ်ပြီး `0` ဖြစ်ပါက အဆိုပါ connection ကို အမြဲကျော်သွားမည်။ နောက်ဆုံး usage reading သည် limit နှင့် တူညီခြင်း သို့မဟုတ် ကျော်လွန်ခြင်းရှိပါက account ရွေးချယ်မှုသည် ထို connection ကို ကျော်သွားပြီး quota-policy cutoff ကဲ့သို့ပင် routing သည် သင့်အခြား connection များသို့ fallback လုပ်မည်။ ဤစစ်ဆေးမှုသည် ပုံမှန် quota refresh က စုဆောင်းထားပြီးသား usage ကိုသာ ဖတ်ရှုသည် — request path တွင် GitHub ကို မည်သည့်အခါမျှ မခေါ်ပါ — ထို့အပြင် fail open လုပ်သည်။ ဆိုလိုသည်မှာ usage reading ပျောက်ဆုံးနေခြင်း သို့မဟုတ် ဟောင်းနွမ်းနေခြင်း (၁၅ မိနစ်ထက်ပိုဟောင်းခြင်း၊ သို့မဟုတ် reset ပြုလုပ်ပြီးသည့် billing period မှ ဖြစ်ခြင်း) သည် connection ကို ပိတ်ဆို့မည်မဟုတ်ပါ။ ဤသည်မှာ local safeguard တစ်ခုသာဖြစ်ပြီး **အသုံးစရိတ်ကို အာမခံကန့်သတ်ပေးသည့် ceiling မဟုတ်ပါ**။ GitHub ၏ reporting နှောင့်နှေးမှု၊ refresh interval၊ လက်ရှိလုပ်ဆောင်နေသော request များနှင့် OmniRoute ပြင်ပအသုံးပြုမှုများကြောင့် သတ်မှတ်ချက်ကို ကျော်လွန်နိုင်သည်။ တိကျသော အမြင့်ဆုံးကန့်သတ်ချက်အတွက် GitHub ၏ ကိုယ်ပိုင် spending controls များကို အသုံးပြုပါ။
+
 ### 💰 စျေးသက်သာသော Provider များ
 
-#### GLM-4.7 (နေ့စဉ် ပြန်လည်သတ်မှတ်ခြင်း၊ $0.6/1M)
+#### GLM-4.7 (နေ့စဉ် reset၊ $0.6/1M)
 
 1. စာရင်းသွင်းရန်: [Zhipu AI](https://open.bigmodel.cn)
 2. Coding Plan မှ API key ရယူပါ
 3. Dashboard → Add API Key: Provider: `glm`, API Key: `your-key`
 
-**အသုံးပြုရန်:** `glm/glm-4.7` — **ကျွမ်းကျင်သူ အကြံပြုချက်:** Coding Plan သည် ကုန်ကျစရိတ် 1/7 ဖြင့် quota 3× ပေးသည်! နေ့စဉ် နံနက် 10:00 တွင် ပြန်လည်သတ်မှတ်သည်။
+**အသုံးပြုရန်:** `glm/glm-4.7` — **အသုံးဝင်သော အကြံပြုချက်:** Coding Plan သည် ကုန်ကျစရိတ် 1/7 ဖြင့် quota ၃ ဆ ပေးသည်။ နေ့စဉ် မနက် ၁၀:၀၀ နာရီတွင် reset လုပ်သည်။
 
-#### MiniMax M2.1 (၅ နာရီတိုင်း ပြန်လည်သတ်မှတ်ခြင်း၊ $0.20/1M)
+#### MiniMax M2.1 (၅ နာရီ reset၊ $0.20/1M)
 
 1. စာရင်းသွင်းရန်: [MiniMax](https://www.minimax.io)
-2. API key ရယူပါ → Dashboard → Add API Key
+2. API key ရယူရန် → Dashboard → Add API Key
 
-**အသုံးပြုရန်:** `minimax/MiniMax-M2.1` — **ကျွမ်းကျင်သူ အကြံပြုချက်:** ရှည်လျားသော context (1M tokens) အတွက် စျေးအသက်သာဆုံး ရွေးချယ်မှုဖြစ်သည်!
+**အသုံးပြုရန်:** `minimax/MiniMax-M2.1` — **အသုံးဝင်သော အကြံပြုချက်:** context ရှည်လျားသော လုပ်ငန်းများအတွက် စျေးအသက်သာဆုံး ရွေးချယ်မှု (tokens 1M) ဖြစ်သည်။
 
-#### Kimi K2 (တစ်လလျှင် ပုံသေ $9)
+#### Kimi K2 ($9/month flat)
 
 1. စာရင်းသွင်းရန်: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
-2. API key ရယူပါ → Dashboard → Add API Key
+2. API key ရယူရန် → Dashboard → Add API Key
 
-**အသုံးပြုရန်:** `kimi/kimi-k2.5` — **ကျွမ်းကျင်သူ အကြံပြုချက်:** 10M tokens အတွက် တစ်လလျှင် ပုံသေ $9 ဖြစ်သဖြင့် ထိရောက်သော ကုန်ကျစရိတ်မှာ $0.90/1M ဖြစ်သည်!
+**အသုံးပြုရန်:** `kimi/kimi-k2.5` — **အသုံးဝင်သော အကြံပြုချက်:** tokens 10M အတွက် တစ်လလျှင် ပုံသေ $9 ဖြစ်သောကြောင့် ထိရောက်သောကုန်ကျစရိတ်မှာ $0.90/1M ဖြစ်သည်။
 
 #### Baidu Qianfan / ERNIE
 
 1. စာရင်းသွင်းရန်: [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
-2. Qianfan API key တစ်ခု ဖန်တီးပါ → Dashboard → Add API Key: Provider: `qianfan`
+2. Qianfan API key ဖန်တီးရန် → Dashboard → Add API Key: Provider: `qianfan`
 
 **အသုံးပြုရန်:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` သို့မဟုတ် အခြား Qianfan OpenAI-compatible model ID တစ်ခု။
 
 ### 🆓 အခမဲ့ Provider များ
 
-Authentication မလိုအပ်သော အခမဲ့ provider များ၏ provider စာမျက်နှာတွင် **No authentication required** ဘေး၌ ခလုတ်တစ်ခု ရှိသည်။
-၎င်းကို ပိတ်လိုက်ပါက ထို provider ကို ပိတ်ထားမည်ဖြစ်ပြီး Providers configured/compact view များမှ ဖယ်ရှားကာ
-၎င်း၏ မော်ဒယ်များကိုလည်း `/v1/models` မှ ဖယ်ရှားမည်ဖြစ်သည်။
+Authentication မလိုအပ်သော အခမဲ့ provider များတွင် ၎င်းတို့၏ provider စာမျက်နှာရှိ **No authentication required** ဘေးတွင် switch တစ်ခု ပါရှိသည်။ ၎င်းကို ပိတ်လိုက်ပါက ထို provider ကို disable လုပ်မည်၊ Providers configured/compact view များမှ ဖယ်ရှားမည်၊ ထို့အပြင် ၎င်း၏ model များကို `/v1/models` မှ ဖယ်ရှားမည်။
 
-#### Qoder (အခမဲ့ မော်ဒယ် ၉ ခု)
+#### Qoder (အခမဲ့ model ၉ ခု)
 
 ```bash
-Dashboard → Qoder ကို ချိတ်ဆက်ပါ → OAuth ဖြင့် ဝင်ရောက်ပါ → အသုံးပြုခွင့်သည် provider ၏ လက်ရှိ ကန့်သတ်ချက်များအပေါ် မူတည်သည်
+Dashboard → Qoder ချိတ်ဆက်ရန် → OAuth login → လက်ရှိ provider limits များအပေါ် မူတည်၍ အသုံးပြုခွင့်ရှိသည်
 
-မော်ဒယ်များ: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
+Models: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
 ```
 
 #### Kiro (Claude အခမဲ့)
 
 ```bash
-Dashboard → Kiro ကို ချိတ်ဆက်ပါ → AWS Builder ID သို့မဟုတ် Google/GitHub → တစ်လလျှင် credit ~50
+Dashboard → Kiro ချိတ်ဆက်ရန် → AWS Builder ID သို့မဟုတ် Google/GitHub → တစ်လလျှင် credits ~၅၀
 
-မော်ဒယ်များ: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
+Models: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 ```
 
 ---
@@ -608,22 +615,22 @@ post_install() {
 
 ---
 
-## 📊 ရနိုင်သော မော်ဒယ်များ
+## 📊 ရရှိနိုင်သော မော်ဒယ်များ
 
 <details>
-<summary><b>ရနိုင်သော မော်ဒယ်အားလုံးကို ကြည့်ရန်</b></summary>
+<summary><b>ရရှိနိုင်သော မော်ဒယ်အားလုံးကို ကြည့်ရန်</b></summary>
 
-> အောက်ပါစာရင်းကို v3.8.0 အတွက် `open-sse/config/providerRegistry.ts` မှ ရွေးချယ်စုစည်းထားခြင်း ဖြစ်ပါသည်။ Cloud catalog များ (Gemini, OpenRouter စသည်) ကို dynamic ပုံစံဖြင့် sync လုပ်ထားပါသည် — live catalog အပြည့်အစုံကို ကြည့်ရန် **ဒက်ရှ်ဘုတ် → Providers → [provider] → ရနိုင်သော မော်ဒယ်များ** ကို ဖွင့်ပါ သို့မဟုတ် `GET /api/models/catalog` ကို ခေါ်ဆိုပါ။
+> အောက်ပါစာရင်းကို v3.8.0 အတွက် `open-sse/config/providerRegistry.ts` မှ ရွေးချယ်စုစည်းထားခြင်းဖြစ်သည်။ Cloud catalog များ (Gemini၊ OpenRouter စသည်) ကို အလိုအလျောက် synchronize လုပ်ထားသည် — လက်ရှိ live catalog အပြည့်အစုံအတွက် **Dashboard → Providers → [provider] → Available Models** ကိုဖွင့်ပါ သို့မဟုတ် `GET /api/models/catalog` ကိုခေါ်ပါ။
 >
-> ပံ့ပိုးပေးသူတစ်ခုခု၏ built-in စာရင်းမှာ ပြောင်းလဲသွားနေပါက၊ live upstream catalog ကို ဆွဲယူရန် ထိုစာမျက်နှာရှိ **/models မှ ထည့်သွင်းရန်** ကို အသုံးပြုပါ (သို့မဟုတ် **Auto-Sync** ကို ဖွင့်ပါ)။ ဤအချက်ကို v3.8.50 တွင် LLM7.io (`gemini-3.1-flash-lite`) နှင့် UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) အတွက် အတည်ပြုပြီးဖြစ်ပြီး၊ Pollinations ၏ အမည်မသိ ဝင်ရောက်မှုမှာ တူညီသော စမ်းသပ်မှုအတွင်းပင် upstream ကန့်သတ်ချက် ရှိနေဆဲဖြစ်ပါသည်။
+> Provider တစ်ခု၏ built-in list သည် နောက်ကျကျန်နေပါက ထိုစာမျက်နှာရှိ **Import from /models** ကိုအသုံးပြုပါ (သို့မဟုတ် **Auto-Sync** ကိုဖွင့်ပါ)၊ ထို့နောက် live upstream catalog ကို ရယူပါ။ ၎င်းကို v3.8.50 တွင် LLM7.io (`gemini-3.1-flash-lite`) နှင့် UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) အတွက် အတည်ပြုထားသည်။ တူညီသော စမ်းသပ်မှုအတွင်း Pollinations ၏ anonymous access သည် upstream ကန့်သတ်ချက်အောက်တွင် ဆက်လက်ရှိနေခဲ့သည်။
 
 **Claude Code (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
-**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ effort အဆင့်များ: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
+**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ အားထုတ်မှုအဆင့်များ: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — အခမဲ့ OAuth: **ဒက်ရှ်ဘုတ် → Providers → Kiro → ရနိုင်သော မော်ဒယ်များ** အောက်တွင် ပြသထားသော live catalog ကို အသုံးပြုပါ။ ရနိုင်မှုမှာ အကောင့်နှင့် plan ပေါ် မူတည်ပါသည်။
+**Kiro (`kr/`)** — အခမဲ့ OAuth: **Dashboard → Providers → Kiro → Available Models** အောက်တွင် ပြသထားသော live catalog ကို အသုံးပြုပါ။ ရရှိနိုင်မှုသည် account နှင့် plan ပေါ်မူတည်သည်။
 
 **Qoder (`if/`)** — အခမဲ့ OAuth: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
@@ -631,17 +638,17 @@ post_install() {
 
 **MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — လစဉ် $9 flat သို့မဟုတ် အသုံးပြုမှုအလိုက်: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — တစ်လလျှင် $9 flat သို့မဟုတ် အသုံးပြုမှုအလိုက်: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
 **DeepSeek (`ds/`)** — API key: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
-**Groq (`groq/`)** — အလွန်မြန်ဆန်: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
+**Groq (`groq/`)** — အလွန်မြန်ဆန်သော: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
 
-**xAI (`xai/`)** — Grok native: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
+**xAI (`xai/`)** — မူရင်း Grok: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
-**Mistral (`mistral/`)** — EU တွင် host လုပ်ထား: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
+**Mistral (`mistral/`)** — EU တွင် host ပြုထားသော: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/codestral-latest`
 
-**Perplexity (`pplx/`)** — ရှာဖွေမှု ပံ့ပိုးထား: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
+**Perplexity (`pplx/`)** — Search ဖြင့် အထောက်အကူပြုထားသော: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
 **Together AI (`together/`)** — Open-source: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (အခမဲ့), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
@@ -649,19 +656,19 @@ post_install() {
 
 **Cerebras (`cerebras/`)** — Wafer-scale: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
-**Cohere (`cohere/`)** — RAG အဓိက: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
+**Cohere (`cohere/`)** — RAG ကို အဓိကထားသော: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — Enterprise: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — လုပ်ငန်းသုံး: `nvidia/google/gemma-4-31b-it`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`, `nvidia/nvidia/nemotron-3-ultra-550b-a55b`, `nvidia/nvidia/nemotron-3.5-lightning-30b-a3b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: Google မှ API key တစ်ခုချင်းစီအလိုက် live sync လုပ်ထားပါသည် — static စာရင်း မရှိပါ။ **ဒက်ရှ်ဘုတ် → Providers** တွင် key တစ်ခု ချိတ်ဆက်ပါ၊ ပြီးနောက် လက်ရှိ catalog ကို ထည့်သွင်းရန် **ရနိုင်သော မော်ဒယ်များ** ကို အသုံးပြုပါ (ဥပမာ `gemini/gemini-3-pro`, `gemini/gemini-3-flash`)။
+**Gemini (Google Cloud `gemini/`)**: Google မှ API key တစ်ခုချင်းစီအလိုက် live အနေဖြင့် synchronize လုပ်ထားသည် — static list မရှိပါ။ **Dashboard → Providers** တွင် key တစ်ခုချိတ်ဆက်ပြီး **Available Models** ကိုအသုံးပြု၍ လက်ရှိ catalog ကို import လုပ်ပါ (ဥပမာ `gemini/gemini-3-pro`, `gemini/gemini-3-flash`)။
 
-**အခြား သဟဇာတဖြစ်သော ပံ့ပိုးပေးသူများ** (ရွေးချယ်ထားသော): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (`aws-bedrock` မှတစ်ဆင့်), `azure-ai`, `openrouter` (passthrough catalog), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`။ တစ်ခုချင်းစီသည် `providerRegistry.ts` တွင် ကိုယ်ပိုင် မော်ဒယ်စာရင်းကို ထိန်းသိမ်းထားပြီး၊ ပံ့ပိုးပေးသူက `/models` endpoint ကို ပုံပေါ်စေပါက auto-sync လုပ်နိုင်ပါသည်။
+**အခြား ကိုက်ညီသော provider များ** (ရွေးချယ်ထားသည်): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (`aws-bedrock` မှတစ်ဆင့်), `azure-ai`, `openrouter` (passthrough catalog), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`။ တစ်ခုချင်းစီသည် `providerRegistry.ts` တွင် ကိုယ်ပိုင် model list ကို ထိန်းသိမ်းထားပြီး provider က `/models` endpoint ကို ဖော်ပြပေးပါက အလိုအလျောက် synchronize လုပ်နိုင်သည်။
 
-**မော်ဒယ် ID များဆိုင်ရာ မှတ်ချက်:** OmniRoute သည် provider-native ID များ (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`) ကို အသုံးပြုပါသည်။ အချို့ ID များတွင် အစက်အပြောက်ပါ ဗားရှင်းများ ပါဝင်သည်မှာ upstream API က ထိုပုံစံအတိုင်း တောင်းဆိုသောကြောင့် ဖြစ်ပါသည်။ မော်ဒယ်တစ်ခုခုသည် အထက်ပါစာရင်းတွင် မပါဝင်ပါက `omniroute models --search <term>` ကို run လုပ်ပါ သို့မဟုတ် `GET /api/models/catalog` ကို ခေါ်ဆိုပြီး ရနိုင်မှုကို အတည်ပြုပါ။
+**Model ID များအကြောင်း မှတ်ချက်:** OmniRoute သည် provider-native ID များကို အသုံးပြုသည် (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`)။ အချို့ ID များတွင် dotted version များ ပါဝင်သည်၊ အကြောင်းမှာ upstream API က ထိုပုံစံအတိုင်း မျှော်လင့်ထားသောကြောင့် ဖြစ်သည်။ မော်ဒယ်တစ်ခုကို အထက်ပါစာရင်းတွင် မတွေ့ပါက ရရှိနိုင်မှုကို အတည်ပြုရန် `omniroute models --search <term>` ကို run လုပ်ပါ သို့မဟုတ် `GET /api/models/catalog` ကိုခေါ်ပါ။
 
 </details>
 

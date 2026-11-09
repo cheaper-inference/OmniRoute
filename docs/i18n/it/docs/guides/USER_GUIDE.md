@@ -120,7 +120,7 @@ Accesso tramite: WhatsApp, Telegram, Slack, Discord, iMessage, Signal...
 
 ## 📖 Configurazione dei provider
 
-Per aggiungere in blocco connessioni tramite chiave API da un file CSV o JSON, usa **Dashboard → Providers → Import from file**. Le colonne sono posizionali (`provider,name,apiKey,baseUrl,priority`); `provider` deve esistere già come provider gestito o nodo compatibile. Consulta [Importare provider da un file CSV o JSON](../providers/CSV-IMPORT.md).
+Per aggiungere in blocco connessioni con chiave API da un file CSV o JSON, usa **Dashboard → Providers → Import from file**. Le colonne sono posizionali (`provider,name,apiKey,baseUrl,priority`); `provider` deve già esistere come provider gestito o come nodo compatibile. Consulta [Importare provider da un file CSV o JSON](../providers/CSV-IMPORT.md).
 
 ### 🔐 Provider in abbonamento
 
@@ -129,7 +129,7 @@ Per aggiungere in blocco connessioni tramite chiave API da un file CSV o JSON, u
 ```bash
 Dashboard → Providers → Connect Claude Code
 → Accesso OAuth → Aggiornamento automatico del token
-→ Monitoraggio delle quote di 5 ore e settimanali
+→ Monitoraggio della quota di 5 ore + settimanale
 
 Modelli:
   cc/claude-opus-4-7
@@ -137,18 +137,20 @@ Modelli:
   cc/claude-haiku-4-5-20251001
 ```
 
-**Suggerimento:** usa Opus per le attività complesse e Sonnet per la velocità. OmniRoute monitora la quota per ciascun modello!
+**Consiglio:** usa Opus per le attività complesse e Sonnet per la velocità. OmniRoute tiene traccia della quota per modello!
 
-Non è disponibile un browser sull'host di OmniRoute? Esegui `claude setup-token` ovunque sia stato effettuato l'accesso a Claude Code e incolla il token valido per un anno nella scheda **Setup Token**. Consulta [Claude Code con un token di configurazione](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
+Nessun browser sull'host OmniRoute? Esegui `claude setup-token` ovunque Claude Code abbia effettuato l'accesso e incolla il token valido un anno nella scheda **Setup Token**. Consulta [Claude Code con un token di configurazione](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
 
-Le route compatibili con Claude e Claude Code mantengono il livello di ragionamento `max` per i modelli Opus e Sonnet. I modelli Haiku non accettano il livello `max`, quindi OmniRoute riduce tale richiesta a un budget di ragionamento elevato prima di inviarla al provider upstream.
+I percorsi compatibili con Claude e Claude Code mantengono il livello di ragionamento `max` per i
+modelli Opus e Sonnet. I modelli Haiku non accettano il livello di ragionamento `max`, quindi OmniRoute
+riduce la richiesta a un budget di ragionamento alto prima di inviarla al servizio upstream.
 
 #### OpenAI Codex (Plus/Pro)
 
 ```bash
 Dashboard → Providers → Connect Codex
 → Accesso OAuth (porta 1455)
-→ Reimpostazione ogni 5 ore e settimanale
+→ Reimpostazione dopo 5 ore + settimanale
 
 Modelli:
   cx/gpt-5.5
@@ -162,7 +164,7 @@ Modelli:
 ```bash
 Dashboard → Providers → Connect GitHub
 → OAuth tramite GitHub
-→ Reimpostazione mensile (il 1° del mese)
+→ Reimpostazione mensile (il primo giorno del mese)
 
 Modelli:
   gh/gpt-5.5
@@ -172,42 +174,58 @@ Modelli:
   gh/gemini-3.1-pro-preview
 ```
 
+**Crediti AI (fatturazione basata sui token).** Quando GitHub segnala `credits_used` per
+l'account, la scheda Provider Limits mostra una riga **AI Credits** con i crediti
+consumati nel periodo di fatturazione corrente, anche nei piani organizzativi illimitati.
+
+**Limite locale dei crediti AI.** Modifica una connessione GitHub e imposta **AI Credits limit per
+billing period** (`providerSpecificData.githubCreditLimit`). Un valore vuoto lo disabilita; `0`
+ignora sempre la connessione. Quando l'ultima lettura dell'utilizzo è pari o superiore al limite,
+la selezione dell'account ignora quella connessione e il routing passa alle altre
+connessioni, come avviene per un'interruzione dovuta ai criteri di quota. Il controllo legge l'utilizzo che
+l'aggiornamento periodico della quota raccoglie già — non chiama mai GitHub durante il percorso della richiesta —
+e, in caso di errore, lascia passare la connessione: una lettura mancante o obsoleta (più vecchia di 15 minuti
+o relativa a un periodo di fatturazione già reimpostato) non blocca la connessione. Si tratta di una
+protezione locale, **non di un tetto di spesa garantito**: ritardi nella segnalazione da parte di GitHub, l'intervallo
+di aggiornamento, le richieste in corso e l'utilizzo esterno a OmniRoute possono far superare il limite. Usa i
+controlli di spesa di GitHub per un limite rigido.
+
 ### 💰 Provider economici
 
-#### GLM-4.7 (Reimpostazione giornaliera, $0.6/1M)
+#### GLM-4.7 (reimpostazione giornaliera, $0.6/1M)
 
 1. Registrati: [Zhipu AI](https://open.bigmodel.cn)
 2. Ottieni la chiave API dal Coding Plan
 3. Dashboard → Add API Key: Provider: `glm`, API Key: `your-key`
 
-**Uso:** `glm/glm-4.7` — **Suggerimento:** il Coding Plan offre una quota 3 volte superiore a 1/7 del costo! Reimpostazione giornaliera alle 10:00.
+**Utilizzo:** `glm/glm-4.7` — **Consiglio:** il Coding Plan offre una quota 3× a 1/7 del costo! Reimpostazione giornaliera alle 10:00.
 
-#### MiniMax M2.1 (Reimpostazione ogni 5 ore, $0.20/1M)
+#### MiniMax M2.1 (reimpostazione ogni 5 ore, $0.20/1M)
 
 1. Registrati: [MiniMax](https://www.minimax.io)
 2. Ottieni la chiave API → Dashboard → Add API Key
 
-**Uso:** `minimax/MiniMax-M2.1` — **Suggerimento:** l'opzione più economica per contesti lunghi (1 milione di token)!
+**Utilizzo:** `minimax/MiniMax-M2.1` — **Consiglio:** l'opzione più economica per contesti lunghi (1M di token)!
 
-#### Kimi K2 ($9/mese a tariffa fissa)
+#### Kimi K2 ($9/mese fissi)
 
 1. Abbonati: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
 2. Ottieni la chiave API → Dashboard → Add API Key
 
-**Uso:** `kimi/kimi-k2.5` — **Suggerimento:** $9/mese fissi per 10 milioni di token = costo effettivo di $0.90/1M!
+**Utilizzo:** `kimi/kimi-k2.5` — **Consiglio:** $9/mese fissi per 10M di token = costo effettivo di $0.90/1M!
 
 #### Baidu Qianfan / ERNIE
 
 1. Registrati: [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
 2. Crea una chiave API Qianfan → Dashboard → Add API Key: Provider: `qianfan`
 
-**Uso:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` o un altro ID modello Qianfan compatibile con OpenAI.
+**Utilizzo:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` oppure un altro ID modello compatibile con OpenAI di Qianfan.
 
 ### 🆓 Provider GRATUITI
 
-I provider gratuiti senza autenticazione dispongono di un interruttore accanto a **No authentication required** nella rispettiva pagina.
-Disattivandolo, il provider viene disabilitato e rimosso dalle viste configurata/compatta di Providers;
-inoltre, i suoi modelli vengono rimossi da `/v1/models`.
+I provider gratuiti senza autenticazione hanno un interruttore accanto a **No authentication required** nella pagina del provider.
+Disattivandolo, il provider viene disabilitato, rimosso dalle viste Providers configured/compact e
+i suoi modelli vengono rimossi da `/v1/models`.
 
 #### Qoder (9 modelli GRATUITI)
 
@@ -612,17 +630,17 @@ Per il riferimento completo delle variabili d'ambiente, consultare il [README](.
 <details>
 <summary><b>Visualizza tutti i modelli disponibili</b></summary>
 
-> L'elenco seguente è curato da `open-sse/config/providerRegistry.ts` per la v3.8.0. I cataloghi cloud (Gemini, OpenRouter, ecc.) sono sincronizzati dinamicamente — per il catalogo completo e aggiornato apri **Dashboard → Provider → [provider] → Modelli disponibili** oppure chiama `GET /api/models/catalog`.
+> L'elenco seguente è curato da `open-sse/config/providerRegistry.ts` per la v3.8.0. I cataloghi cloud (Gemini, OpenRouter, ecc.) vengono sincronizzati dinamicamente: per consultare il catalogo live completo, apri **Dashboard → Providers → [provider] → Available Models** oppure chiama `GET /api/models/catalog`.
 >
-> Se l'elenco integrato di un provider non è più allineato, usa **Importa da /models** in quella pagina (oppure abilita **Sincronizzazione automatica**) per scaricare il catalogo aggiornato dall'upstream. Questo è stato verificato nella v3.8.50 per LLM7.io (`gemini-3.1-flash-lite`) e UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); l'accesso anonimo a Pollinations è rimasto limitato lato upstream durante lo stesso ciclo di test.
+> Se l'elenco integrato di un provider non è aggiornato, usa **Import from /models** in quella pagina (oppure abilita **Auto-Sync**) per recuperare il catalogo upstream live. Questa procedura è stata verificata nella v3.8.50 per LLM7.io (`gemini-3.1-flash-lite`) e UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); durante lo stesso ciclo di test, l'accesso anonimo a Pollinations è rimasto limitato upstream.
 
 **Claude Code (`cc/`)** — OAuth Pro/Max: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
-**Codex (`cx/`)** — OAuth Plus/Pro: `cx/gpt-5.5` (+ livelli di effort: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
+**Codex (`cx/`)** — OAuth Plus/Pro: `cx/gpt-5.5` (+ livelli di impegno: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — OAuth GRATUITO: usa il catalogo aggiornato mostrato in **Dashboard → Provider → Kiro → Modelli disponibili**. La disponibilità dipende dall'account e dal piano.
+**Kiro (`kr/`)** — OAuth GRATUITO: usa il catalogo live mostrato in **Dashboard → Providers → Kiro → Available Models**. La disponibilità dipende dall'account e dal piano.
 
 **Qoder (`if/`)** — OAuth GRATUITO: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
@@ -630,7 +648,7 @@ Per il riferimento completo delle variabili d'ambiente, consultare il [README](.
 
 **MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/mese flat o a consumo: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/mese fisso o a consumo: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
 **DeepSeek (`ds/`)** — Chiave API: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
@@ -638,29 +656,29 @@ Per il riferimento completo delle variabili d'ambiente, consultare il [README](.
 
 **xAI (`xai/`)** — Grok nativo: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
-**Mistral (`mistral/`)** — Hosting nell'UE: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
+**Mistral (`mistral/`)** — Ospitato nell'UE: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/codestral-latest`
 
 **Perplexity (`pplx/`)** — Con ricerca integrata: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
 **Together AI (`together/`)** — Open source: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (gratuito), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
-**Fireworks AI (`fireworks/`)** — Inferenza veloce: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
+**Fireworks AI (`fireworks/`)** — Inferenza rapida: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
-**Cerebras (`cerebras/`)** — Wafer-scale: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
+**Cerebras (`cerebras/`)** — Su scala wafer: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
-**Cohere (`cohere/`)** — Orientato al RAG: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
+**Cohere (`cohere/`)** — Incentrato sul RAG: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — Enterprise: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — Enterprise: `nvidia/google/gemma-4-31b-it`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`, `nvidia/nvidia/nemotron-3-ultra-550b-a55b`, `nvidia/nvidia/nemotron-3.5-lightning-30b-a3b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: Sincronizzato in tempo reale per chiave API da Google — nessun elenco statico. Collega una chiave in **Dashboard → Provider** e poi usa **Modelli disponibili** per importare il catalogo corrente (es. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
+**Gemini (Google Cloud `gemini/`)**: sincronizzato in tempo reale per chiave API da Google — nessun elenco statico. Collega una chiave in **Dashboard → Providers**, quindi usa **Available Models** per importare il catalogo aggiornato (ad es. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
-**Altri provider compatibili** (selezione): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (tramite `aws-bedrock`), `azure-ai`, `openrouter` (catalogo passthrough), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Ognuno mantiene il proprio elenco di modelli in `providerRegistry.ts` e può essere sincronizzato automaticamente quando il provider espone un endpoint `/models`.
+**Altri provider compatibili** (selezionati): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (tramite `aws-bedrock`), `azure-ai`, `openrouter` (catalogo passthrough), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Ognuno gestisce il proprio elenco di modelli in `providerRegistry.ts` e può essere sincronizzato automaticamente quando il provider espone un endpoint `/models`.
 
-**Nota sugli ID dei modelli:** OmniRoute usa gli ID nativi dei provider (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Alcuni ID includono versioni con punti perché è così che l'API upstream li richiede. Se un modello non è elencato sopra, esegui `omniroute models --search <term>` oppure chiama `GET /api/models/catalog` per confermarne la disponibilità.
+**Nota sugli ID dei modelli:** OmniRoute usa gli ID nativi dei provider (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Alcuni ID includono versioni con punti perché è così che l'API upstream li prevede. Se un modello non è elencato sopra, esegui `omniroute models --search <term>` oppure richiama `GET /api/models/catalog` per verificarne la disponibilità.
 
 </details>
 
