@@ -1,1 +1,0 @@
-- **fix(responses):** a Responses stream built from a chat upstream that sends a finish reason but no usage and no `[DONE]` now completes after 3 seconds, instead of waiting for the stream stall timeout.
