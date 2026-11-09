@@ -346,7 +346,7 @@ describe("MonitorTab", () => {
   });
 
   // ── 4. Auto-refresh toggle ───────────────────────────────────────────────────
-  it("toggle auto-refresh button is named by its visible live-state text (label-in-name, #18074)", async () => {
+  it("toggle auto-refresh button is named by its visible action text (label-in-name, #18074)", async () => {
     mockFetchEmpty();
     const { default: MonitorTab } =
       await import("@/app/(dashboard)/dashboard/translator/components/MonitorTab");
@@ -359,14 +359,16 @@ describe("MonitorTab", () => {
     expect(toggleBtn).toBeTruthy();
 
     // Initial state: auto-refresh is ON — translateOrFallback detects key === translation → uses fallback
-    expect(toggleBtn?.textContent?.trim()).toContain("Live — Auto-refreshing");
-    // WCAG 2.5.3: no aria-label overriding the visible text, so the accessible name IS the
-    // visible text; the action ("Pause auto-refresh") is the description (title).
+    expect(toggleBtn?.textContent?.trim()).toBe("Pause auto-refresh");
+    // WCAG 2.5.3: no aria-label/title overriding the visible text, so the accessible name IS
+    // the visible action; the state is shown by the Live/Paused badge beside it.
     expect(toggleBtn?.hasAttribute("aria-label")).toBe(false);
-    expect(toggleBtn?.getAttribute("title")).toBe("Pause auto-refresh");
+    expect(toggleBtn?.hasAttribute("title")).toBe(false);
+    const badge = container.querySelector("[data-testid='badge']");
+    expect(badge?.textContent).toBe("Live");
   });
 
-  it("clicking toggle changes button text from live to paused", async () => {
+  it("clicking toggle switches the button to the resume action and the badge to paused", async () => {
     mockFetchEmpty();
     const { default: MonitorTab } =
       await import("@/app/(dashboard)/dashboard/translator/components/MonitorTab");
@@ -384,9 +386,9 @@ describe("MonitorTab", () => {
     });
 
     // After pause: button text should switch to the "paused" fallback
-    expect(toggleBtn?.textContent?.trim()).toContain("Paused");
+    expect(toggleBtn?.textContent?.trim()).toBe("Resume auto-refresh");
     expect(toggleBtn?.hasAttribute("aria-label")).toBe(false);
-    expect(toggleBtn?.getAttribute("title")).toBe("Resume auto-refresh");
+    expect(container.querySelector("[data-testid='badge']")?.textContent).toBe("Paused");
   });
 
   it("auto-refresh polling fires fetch again after 3 seconds", async () => {
