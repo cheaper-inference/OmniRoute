@@ -81,3 +81,14 @@ test("import-json keeps the legacy boolean codexServiceTier that the Codex resol
     assert.equal(resolveCodexGlobalFastServiceTier(stored).enabled, legacy);
   }
 });
+
+test("import-json stores the value the PATCH schema parsed, not the raw input", async () => {
+  const body = await importSettings({
+    connectionAwareExpansionMaxPerTarget: "8", // schema: z.coerce.number()
+    tailscaleUrl: "https://example.ts.net", // not in the schema: stored as sent
+  });
+  assert.equal("ignoredKeys" in body, false);
+  const stored = (await settingsDb.getSettings()) as Record<string, unknown>;
+  assert.strictEqual(stored.connectionAwareExpansionMaxPerTarget, 8);
+  assert.strictEqual(stored.tailscaleUrl, "https://example.ts.net");
+});

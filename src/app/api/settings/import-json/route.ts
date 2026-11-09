@@ -43,8 +43,14 @@ function dropInvalidSettings(settings: Record<string, unknown>) {
       valid[key] = value;
       continue;
     }
-    if (settingsKeySchema.safeParse({ [key]: value }).success) valid[key] = value;
-    else ignoredKeys.push(key);
+    const parsed = settingsKeySchema.safeParse({ [key]: value });
+    if (!parsed.success) {
+      ignoredKeys.push(key);
+      continue;
+    }
+    // Store what PATCH would store (coerced and trimmed). The schema strips keys it does not
+    // know, so for those keep the value as sent.
+    valid[key] = Object.hasOwn(parsed.data, key) ? parsed.data[key] : value;
   }
   return { valid, ignoredKeys };
 }
