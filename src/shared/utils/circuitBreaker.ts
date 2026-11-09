@@ -23,6 +23,7 @@ import {
   deleteCircuitBreakerState,
   deleteAllCircuitBreakerStates,
 } from "../../lib/db/domainState";
+import { registerDbStateResetter } from "../../lib/db/stateReset";
 import type { FailureKind } from "./classify429";
 
 /**
@@ -708,6 +709,12 @@ export class CircuitBreakerOpenError extends Error {
 
 const MAX_REGISTRY_SIZE = 500;
 const registry = new Map<string, CircuitBreaker>();
+
+// A restore or import swaps the database file under live breakers. What they last wrote is no
+// longer in the file, so forget it: the next change check writes the live state over a restored row.
+registerDbStateResetter(() => {
+  for (const breaker of registry.values()) breaker._lastPersisted = null;
+});
 
 /** Test-only: current number of registered circuit breakers. */
 export function __getCircuitRegistrySizeForTests(): number {

@@ -22,7 +22,8 @@ process.env.DATA_DIR = TEST_DATA_DIR;
 const core = await import("../../src/lib/db/core.ts");
 const { CircuitBreaker, getCircuitBreaker, resetAllCircuitBreakers } =
   await import("../../src/shared/utils/circuitBreaker.ts");
-const { loadCircuitBreakerState } = await import("../../src/lib/db/domainState.ts");
+const { loadCircuitBreakerState, saveCircuitBreakerState } =
+  await import("../../src/lib/db/domainState.ts");
 
 test.after(() => {
   resetAllCircuitBreakers();
@@ -120,4 +121,31 @@ test("a manual reset is written even when the breaker was already clean", () => 
   const saved = loadCircuitBreakerState(name);
   assert.equal(saved?.state, "CLOSED");
   assert.equal(saved?.failureCount, 0);
+});
+
+// A backup restore or database import replaces the file under the live breakers. The restored
+// file may hold an OPEN row for a breaker that is CLOSED in memory: the next write must replace
+// it with the live state, or a restart inside the restored cooldown would block the provider.
+test("a database replacement makes the next lookup write the live state over a restored row", () => {
+  const name = uniqueName("restore");
+  const breaker = getCircuitBreaker(name, OPTIONS); // row written: CLOSED, the cache now matches
+  assert.equal(loadCircuitBreakerState(name)?.state, "CLOSED");
+
+  core.resetDbInstance(); // what restoreDbBackup and the import route do before swapping the file
+  saveCircuitBreakerState(name, {
+    state: "OPEN",
+    failureCount: 5,
+    lastFailureTime: Date.now(),
+    options: { lastFailureKind: "transient", openCycleCount: 1, kindFailureCounts: {} },
+  }); // the restored file holds an OPEN row for this breaker
+
+  getCircuitBreaker(name, OPTIONS);
+  breaker._onSuccess();
+
+  assert.equal(
+    loadCircuitBreakerState(name)?.state,
+    "CLOSED",
+    "the live CLOSED breaker must overwrite the restored OPEN row"
+  );
+  assert.equal(new CircuitBreaker(name, OPTIONS).state, "CLOSED", "a restart sees CLOSED");
 });
