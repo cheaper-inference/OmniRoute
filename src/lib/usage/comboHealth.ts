@@ -104,6 +104,10 @@ type HistoricalTargetMetricView = {
   lastUsedAt: string | null;
 };
 
+// A 499 is the client hanging up. It stays in the request count but is not a provider fault.
+// shortcut: 499 only; a 400 or 429 can be either side's fault, so they need a body classifier.
+const NOT_A_FAULT_SQL = "(status = 499 OR (status >= 200 AND status < 400))";
+
 const RANGE_MS: Record<UtilizationTimeRange, number> = {
   "1h": 60 * 60 * 1000,
   "24h": 24 * 60 * 60 * 1000,
@@ -339,7 +343,7 @@ function buildPerformance(comboName: string, since: string): ComboHealthMetrics[
     .prepare(
       `SELECT
          COUNT(*) as totalRequests,
-         SUM(CASE WHEN status >= 200 AND status < 400 THEN 1 ELSE 0 END) as successCount,
+         SUM(CASE WHEN ${NOT_A_FAULT_SQL} THEN 1 ELSE 0 END) as successCount,
          AVG(duration) as avgLatencyMs
        FROM call_logs
        WHERE ${logicalCallSql()} AND combo_name = ?
@@ -423,7 +427,7 @@ function getHistoricalTargetMetrics(comboName: string, since: string): Historica
            metricScope,
            metricKey,
            COUNT(*) AS requests,
-           SUM(CASE WHEN status >= 200 AND status < 400 THEN 1 ELSE 0 END) AS successCount,
+           SUM(CASE WHEN ${NOT_A_FAULT_SQL} THEN 1 ELSE 0 END) AS successCount,
            AVG(duration) AS avgLatencyMs,
            MAX(timestamp) AS lastUsedAt
          FROM scoped_logs
