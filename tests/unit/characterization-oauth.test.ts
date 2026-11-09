@@ -100,6 +100,7 @@ test("oauth constants (src/lib/oauth/constants/oauth.ts) export exactly this sur
     "KILOCODE_CONFIG",
     "KIMI_CODING_CONFIG",
     "KIRO_CONFIG",
+    "MINIMAX_CODE_CONFIG",
     "MUSE_CODE_CONFIG",
     "OAUTH_TIMEOUT",
     "OPENAI_CONFIG",
@@ -148,6 +149,8 @@ test("OAuth provider registry: ids and flow types", () => {
     zed: "import_token",
     "zed-hosted": "authorization_code",
     "muse-code": "device_code",
+    "minimax-code": "device_code",
+    "copilot-m365-web": "authorization_code_pkce",
   });
   // Aliases share the same module object.
   assert.equal(registry.PROVIDERS["amazon-q"], registry.PROVIDERS.kiro);

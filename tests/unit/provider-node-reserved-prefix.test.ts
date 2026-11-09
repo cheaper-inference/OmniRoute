@@ -223,13 +223,17 @@ test("shared set size includes live REGISTRY and retired Designer + Felo + Qwen 
   // Runcrate (#18061) registers id "runcrate" with the same alias — one more
   // (434 -> 435). Measured on the merged tree: RESERVED_PROVIDER_PREFIXES.size = 435.
   // Gisoo (#18112) adds id and alias "gisoo" (+1 distinct prefix: 435 -> 436).
-  // Supersonic Labs reserves its native provider id.
-  assert.equal(RESERVED_PREFIX_COUNT, 437);
+  // MiniMax Code (#17286) registers id "minimax-code" and alias "mmcode" — two
+  // more (436 -> 438).
+  // Supersonic Labs (#18838) reserves its native provider id (438 -> 439).
+  assert.equal(RESERVED_PREFIX_COUNT, 439);
   assert.equal(RESERVED_PROVIDER_PREFIXES.has("supersoniclabs"), true);
   assert.equal(RESERVED_PROVIDER_PREFIXES.has("ainetcafe"), true);
   assert.equal(RESERVED_PROVIDER_PREFIXES.has("tokenharbor"), true);
   assert.equal(RESERVED_PROVIDER_PREFIXES.has("runcrate"), true);
   assert.equal(RESERVED_PROVIDER_PREFIXES.has("gisoo"), true);
+  assert.equal(RESERVED_PROVIDER_PREFIXES.has("minimax-code"), true);
+  assert.equal(RESERVED_PROVIDER_PREFIXES.has("mmcode"), true);
 });
 
 test("notrack-web registry id and alias stay reserved", () => {

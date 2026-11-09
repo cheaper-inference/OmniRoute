@@ -409,6 +409,11 @@ return an error rather than an empty success. Model access depends on the ZenMux
 See [ZenMux's Vertex API](https://docs.zenmux.ai/api/vertexai/generate-images) and
 [OpenAI Images API](https://docs.zenmux.ai/api/openai/generate-an-image).
 
+A Microsoft 365 Copilot sign-in connection serves `copilot-m365-web/m365-copilot-image`
+through Copilot's built-in image tool: one Copilot turn per image (`n` 1–4), `size` steering
+only the orientation, and images returned inline (`b64_json`, or a data URL for
+`response_format: "url"`). See [Microsoft 365 Copilot](../providers/COPILOT-M365.md#image-generation).
+
 ```bash
 # List all image models
 GET /v1/images/generations

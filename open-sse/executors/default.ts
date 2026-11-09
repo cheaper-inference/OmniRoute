@@ -268,7 +268,10 @@ export class DefaultExecutor extends BaseExecutor {
       }
       case "perplexity-agent":
         return this.config.baseUrl;
+      case "mistral":
       case "openai": {
+        // Mistral opts in per model; a custom model arrives as the marker, see
+        // resolveExecutionCredentials.
         // #5842: responses-only models (o1-pro / gpt-5.x-pro) 404 on
         // /v1/chat/completions ("only supported in v1/responses"). Route them to
         // the native /responses endpoint — the per-model targetFormat (registry tag
@@ -281,8 +284,11 @@ export class DefaultExecutor extends BaseExecutor {
             ? (credentials.providerSpecificData.baseUrl as string)
             : null;
         const chatUrl = customBaseUrl ? normalizeOpenAIChatUrl(customBaseUrl) : this.config.baseUrl;
-        if (getModelTargetFormat("openai", model) === "openai-responses") {
-          return chatUrl.replace(/\/chat\/completions\/?$/, "/responses");
+        if (
+          credentials?.providerSpecificData?._omnirouteForceResponsesUpstream === true ||
+          getModelTargetFormat(this.provider, model) === "openai-responses"
+        ) {
+          return chatUrl.replace(/\/chat(?:\/completions)?\/?$/, "/responses");
         }
         return chatUrl;
       }

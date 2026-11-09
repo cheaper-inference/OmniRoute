@@ -150,6 +150,7 @@ test("builtin skill handlers validate required fields and perform real sandboxed
           : originalPromisesLookup(hostname, options);
       const { setSafeOutboundPinnedFetchTestOverride } =
         await import("../../src/shared/network/safeOutboundFetch.ts");
+      const { runWithDirectFetchContext } = await import("../../open-sse/utils/proxyFetch.ts");
       const pinnedTo = [];
       setSafeOutboundPinnedFetchTestOverride((address) => {
         pinnedTo.push(address);
@@ -173,14 +174,16 @@ test("builtin skill handlers validate required fields and perform real sandboxed
         });
       };
 
-      const httpResult = await builtinSkills.http_request(
-        {
-          url: "https://example.com/api",
-          method: "POST",
-          headers: { Accept: "application/json", Authorization: "Bearer secret" },
-          body: { ok: true },
-        },
-        context
+      const httpResult = await runWithDirectFetchContext(() =>
+        builtinSkills.http_request(
+          {
+            url: "https://example.com/api",
+            method: "POST",
+            headers: { Accept: "application/json", Authorization: "Bearer secret" },
+            body: { ok: true },
+          },
+          context
+        )
       );
 
       assert.equal(httpResult.success, true);
