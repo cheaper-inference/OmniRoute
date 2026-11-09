@@ -7916,6 +7916,7 @@
     "systemActor": "ប្រព័ន្ធ",
     "ipAccessControl": "ការគ្រប់គ្រងការចូលប្រើតាម IP",
     "ipAccessControlDesc": "ទប់ស្កាត់ ឬអនុញ្ញាតអាសយដ្ឋាន IP ជាក់លាក់",
+    "ipAccessMode": "របៀបចូលប្រើ",
     "ipModeDisabled": "បានបិទ",
     "ipModeBlacklist": "បញ្ជីខ្មៅ",
     "ipModeWhitelist": "បញ្ជីស",

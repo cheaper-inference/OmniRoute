@@ -7916,6 +7916,7 @@
     "systemActor": "sistem",
     "ipAccessControl": "IP Erişim Kontrolü",
     "ipAccessControlDesc": "Belirli IP adreslerini engelleyin veya izin verin",
+    "ipAccessMode": "Erişim modu",
     "ipModeDisabled": "Devre dışı",
     "ipModeBlacklist": "Kara liste",
     "ipModeWhitelist": "Beyaz liste",

@@ -7916,6 +7916,7 @@
     "systemActor": "systém",
     "ipAccessControl": "Řízení IP přístupu",
     "ipAccessControlDesc": "Blokovat nebo povolit konkrétní IP adresy",
+    "ipAccessMode": "Režim přístupu",
     "ipModeDisabled": "Zakázáno",
     "ipModeBlacklist": "Černá listina",
     "ipModeWhitelist": "Bílá listina",

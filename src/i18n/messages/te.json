@@ -7916,6 +7916,7 @@
     "systemActor": "సిస్టమ్",
     "ipAccessControl": "IP యాక్సెస్ నియంత్రణ",
     "ipAccessControlDesc": "నిర్దిష్ట IP చిరునామాలను బ్లాక్ చేయండి లేదా అనుమతించండి",
+    "ipAccessMode": "యాక్సెస్ మోడ్",
     "ipModeDisabled": "నిలిపివేయబడింది",
     "ipModeBlacklist": "బ్లాక్లిస్ట్",
     "ipModeWhitelist": "వైట్లిస్ట్",

@@ -7916,6 +7916,7 @@
     "systemActor": "hệ thống",
     "ipAccessControl": "Kiểm soát truy cập IP",
     "ipAccessControlDesc": "Chặn hoặc cho phép các địa chỉ IP cụ thể",
+    "ipAccessMode": "Chế độ truy cập",
     "ipModeDisabled": "Tắt",
     "ipModeBlacklist": "Danh sách đen",
     "ipModeWhitelist": "Danh sách trắng",
