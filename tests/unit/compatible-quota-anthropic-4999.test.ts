@@ -4,7 +4,7 @@
  * The configurable quota fetcher used to cover only `openai-compatible-*`. These tests pin:
  *  - `anthropic-compatible-*` (CC-compatible included) is dispatched and gated too;
  *  - the standard `/credits` preset the dashboard toggle writes, and its Zod validation;
- *  - the quota call goes through the SSRF-guarded outbound fetch;
+ *  - the quota call goes through the SSRF-guarded provider dispatch and never follows a redirect;
  *  - the node update route writes/removes the preset on the node's connections without
  *    touching a hand-written endpoint.
  */
@@ -125,6 +125,26 @@ test("the quota call is SSRF-guarded: a cloud-metadata endpoint is never fetched
   const message = String((result as UsageResult).message);
   assert.match(message, /unreachable|blocked/i);
   assert.doesNotMatch(message, /169\.254/, "the operator URL is not echoed");
+});
+
+test("the quota call never follows a redirect, so the key cannot leave the configured host", async () => {
+  const original = globalThis.fetch;
+  const redirects: Array<RequestRedirect | undefined> = [];
+  globalThis.fetch = (async (_url: string | URL, init?: RequestInit) => {
+    redirects.push(init?.redirect);
+    return new Response(null, { status: 302, headers: { location: "https://elsewhere/steal" } });
+  }) as typeof fetch;
+  try {
+    const result = (await getUsageForProvider({
+      provider: "openai-compatible-chat-abc",
+      apiKey: "sk-oai",
+      providerSpecificData: { quotaEndpoint: buildStandardCreditsQuotaEndpoint("https://x/v1") },
+    })) as UsageResult;
+    assert.deepEqual(redirects, ["manual"], "exactly one request, with redirects not followed");
+    assert.match(String(result.message), /HTTP 302/);
+  } finally {
+    globalThis.fetch = original;
+  }
 });
 
 test("the visibility gate accepts anthropic-compatible connections with an endpoint", () => {

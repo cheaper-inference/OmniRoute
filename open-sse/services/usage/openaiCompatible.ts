@@ -32,8 +32,8 @@
  * reads 0/0 looks exhausted, and an operator would reasonably act on that.
  */
 
-import { SafeOutboundFetchError, safeOutboundFetch } from "@/shared/network/safeOutboundFetch";
-import { getProviderOutboundGuard } from "@/shared/network/outboundUrlGuardPolicy";
+import { assertDispatchUrlAllowed, dispatchGuarded } from "../../executors/dispatchPin.ts";
+import { isConnectGuardRefusal } from "../../utils/connectGuardDispatcher.ts";
 import { type UsageQuota, createQuotaFromUsage } from "./quota.ts";
 
 /**
@@ -43,6 +43,14 @@ import { type UsageQuota, createQuotaFromUsage } from "./quota.ts";
  * Provider Limits sync.
  */
 const QUOTA_ENDPOINT_TIMEOUT_MS = 15_000;
+
+/**
+ * Provider id handed to the dispatch guard. Compatible nodes are never local or
+ * self-hosted providers, so the guard applies the operator's provider URL policy
+ * exactly as it does for their chat dispatch.
+ */
+const QUOTA_GUARD_PROVIDER = "openai-compatible-quota";
+const QUOTA_ENDPOINT_BLOCKED_MESSAGE = "Quota endpoint blocked by the outbound URL policy.";
 
 export interface OpenAiCompatibleQuotaMapping {
   used?: string;
@@ -150,19 +158,30 @@ export async function getOpenAiCompatibleUsage(
     return { message: "Quota endpoint configured without a `quotas` mapping." };
   }
 
+  // Same SSRF policy as every other provider outbound call (the dispatch guard in
+  // `executors/dispatchPin.ts`): local/LAN hosts follow the operator's setting and
+  // cloud-metadata is always refused, by host name here and again at connect time.
+  try {
+    assertDispatchUrlAllowed(QUOTA_GUARD_PROVIDER, endpoint.url);
+  } catch {
+    // Deliberately not echoing the error: it carries the operator-supplied URL.
+    return { message: QUOTA_ENDPOINT_BLOCKED_MESSAGE };
+  }
+
   let body: unknown;
   try {
-    // Same SSRF policy as every other provider outbound call: local/LAN hosts
-    // follow the operator's setting, cloud-metadata is always refused, and a
-    // redirect cannot carry the API key to another host.
-    const response = await safeOutboundFetch(endpoint.url, {
-      method: endpoint.method ?? "GET",
-      headers: buildAuthHeaders(endpoint, apiKey),
-      timeoutMs: QUOTA_ENDPOINT_TIMEOUT_MS,
-      guard: getProviderOutboundGuard(),
-      allowRedirect: false,
-      retry: false,
-    });
+    const response = await dispatchGuarded(
+      QUOTA_GUARD_PROVIDER,
+      endpoint.url,
+      {
+        method: endpoint.method ?? "GET",
+        headers: buildAuthHeaders(endpoint, apiKey),
+        signal: AbortSignal.timeout(QUOTA_ENDPOINT_TIMEOUT_MS),
+        // A redirect is never followed, so it cannot carry the API key to another host.
+        redirect: "manual",
+      },
+      { providerSpecificData: { baseUrl: endpoint.url } }
+    );
     if (!response.ok) {
       return { message: `Quota endpoint returned HTTP ${response.status}.` };
     }
@@ -170,12 +189,7 @@ export async function getOpenAiCompatibleUsage(
   } catch (error) {
     // Deliberately not echoing the error: the URL is operator-supplied and the
     // message can carry it (and any query string) into the dashboard.
-    if (
-      error instanceof SafeOutboundFetchError &&
-      (error.code === "URL_GUARD_BLOCKED" || error.code === "INVALID_URL")
-    ) {
-      return { message: "Quota endpoint blocked by the outbound URL policy." };
-    }
+    if (isConnectGuardRefusal(error)) return { message: QUOTA_ENDPOINT_BLOCKED_MESSAGE };
     return { message: "Quota endpoint unreachable." };
   }
 
