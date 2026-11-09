@@ -127,6 +127,27 @@ Automaattinen pisteytys valitsee parhaan palveluntarjoajan/mallin kullekin pyynn
 | `src/sse/handlers/chat.ts`                                | Integraatio: auto-etuliitteen oikopolku            |
 | `src/shared/constants/providers.ts`                       | Järjestelmämerkintä `SYSTEM_PROVIDERS.auto`        |
 
+## Tallennettujen automaattisten yhdistelmien tiliasetukset
+
+Älykäs automaattinen editori tarjoaa valinnaisen** Tiliasetukset** osio. Jokainen yhteys voi olla ensisijainen, normaali (oletus), varata tai poissuljettu. Useat yhteydet voivat jakaa saman tason. Automaattinen valitsee ensimmäisestä kelvollisesta tasosta ja säilyttää scoring/router käyttäytymisensä siellä; epäonnistuneet yritykset jäävät jäljelle jääneisiin konkreettisiin tileihin, mieluiten ennen normaalia ennen varausta. Tämä yhdistelmä ei koskaan käytä poissuljettuja yhteyksiä.
+
+Asetus tallennetaan muodossa `config.accountPreferences`, joka on näppäilty liitännällä ID:
+
+```json
+{
+  "accountPreferences": {
+    "connection-a": "preferred",
+    "connection-b": "preferred",
+    "connection-c": "reserve",
+    "connection-d": "excluded"
+  }
+}
+```
+
+Pois jätetty tai tyhjä kartta säilyttää olemassa olevan reitityksen. Asetukset eivät salli käytöstä poistettuja yhteyksiä, myönnä API-avaimen käyttöoikeuksia, palauta kiintiöillä estettyjä ehdokkaita tai ohita budjettitarkistuksia. Jokainen yritys on rajoitettu sen konkreettiseen yhteyteen, joten tilin varoitus ei voi hypätä yhdistelmäreitittimen taakse. Olemassa oleva istuntosuhde voi säilyttää kelvollisen tilin. alkuperäiseen käännökseen sidotun tilin poissulkeminen pysähtyy, joka kääntyy tilien hiljaisen vaihtamisen sijaan.
+
+Määritetyt asetukset käyttävät tilitietoista automaattista polkua: sitomatonta kontekstivälimuistia, älykästä putkistoa, kaaosta ja varjopikakuvakkeita ei lähetetä. Spekulatiivinen suojaus on poistettu käytöstä näille pyynnöille, joten varaustilit eivät voi kilpailla ensisijaisista tileistä. Muut yhdistelmästrategiat eivät tulkitse tätä asetusta. Yhdistelmän muuttaminen pois Auto-tilasta säilyttää tallennetut asetukset myöhempää vaihtoa varten.
+
 ## Yhdistelmien nimet, jotka vastaavat todellista mallitunnusta
 
 Yhdistelmä, jonka `name` on sama kuin pelkkä mallitunnus (esim. yhdistelmä nimeltä

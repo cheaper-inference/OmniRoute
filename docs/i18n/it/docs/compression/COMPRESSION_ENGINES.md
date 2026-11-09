@@ -391,7 +391,7 @@ Lo strumento di recupero è attualmente denominato `omniroute_ccr_retrieve` (il 
 
 ### Ciclo di vita della sessione
 
-Le sessioni HTTP streaming sono inattive e il server le raccoglie; la finestra inattiva è la costante `MCP_SESSION_IDLE_MS` (a cui fa riferimento il nome, non un valore codificato, quindi questa pagina non va alla deriva quando cambia). Il sintomo di una sessione inattiva è uno HTTP 404 con `Unknown Mcp-Session-Id` — il rimedio è riconnettersi o riavviare la sessione,** non** per ruotare una chiave, modificare un ambito o rinominare uno strumento.
+Le sessioni HTTP streaming sono inattive e il server le raccoglie; la finestra di inattività è impostata da `OMNIROUTE_MCP_SESSION_IDLE_MS` (impostazione predefinita 5 minuti; referenziata dal nome, non da un valore hardcoded, quindi questa pagina non va alla deriva quando cambia). Il sintomo di una sessione inattiva è uno HTTP 404 con `Unknown Mcp-Session-Id` — il rimedio è riconnettersi o riavviare la sessione,** non** per ruotare una chiave, modificare un ambito o rinominare uno strumento.
 
 ## Superficie API
 

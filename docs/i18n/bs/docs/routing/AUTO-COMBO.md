@@ -128,6 +128,27 @@ Automatsko bodovanje odabire najboljeg pružatelja/model za svaki zahtjev
 | `src/sse/handlers/chat.ts`                                | Integracija: kratki spoj za automatski prefiks |
 | `src/shared/constants/providers.ts`                       | Sistemski unos `SYSTEM_PROVIDERS.auto`         |
 
+## Postavke računa za sačuvane automatske kombinacije
+
+Inteligentni automatski uređivač nudi opciju** Postavke računa** odjeljak. Svaka veza može biti Preferirana, Normalna (podrazumevana), Rezervisana ili Isključena. Više veza može dijeliti nivo. Automatski bira unutar prvog prihvatljivog nivoa, zadržavajući svoje scoring/router ponašanje tamo; neuspjeli pokušaji padaju na preostale konkretne račune, preferirani prije normalnog prije rezerve. Ova kombinacija nikada ne koristi izuzete veze.
+
+Postavka je pohranjena kao `config.accountPreferences`, ključna vezom ID:
+
+```json
+{
+  "accountPreferences": {
+    "connection-a": "preferred",
+    "connection-b": "preferred",
+    "connection-c": "reserve",
+    "connection-d": "excluded"
+  }
+}
+```
+
+Izostavljena ili prazna mapa zadržava postojeće rute. Preference ne omogućavaju onemogućene veze, ne odobravaju pristup API ključu, vraćaju kandidate blokirane kvotom ili zaobilaze provjere budžeta. Svaki pokušaj je ograničen na njegovu konkretnu vezu, tako da rezervni račun ne može preskočiti nivoe iza kombiniranog rutera. Postojeći afinitet sesije može zadržati odgovarajući nalog; isključivanje računa vezanog za izvorni okret zaustavlja taj okret umjesto tihe promjene računa.
+
+Konfigurisane postavke koriste automatsku putanju svjesnu naloga: nevezani kontekstni keš, pametni kanal, haos i prečice u sjeni se ne šalju. Špekulativno osiguranje je onemogućeno za ove zahtjeve, tako da rezervni računi ne mogu da se takmiče sa preferiranim. Druge kombinovane strategije ne tumače ovu postavku. Promjena kombinacije iz Auto zadržava sačuvane postavke za kasniji povratak.
+
 ## Nazivi kombinacija koji odgovaraju stvarnom ID-u modela
 
 Kombinacija čiji je `name` identičan osnovnom ID-u modela (npr. kombinacija nazvana
