@@ -12,6 +12,7 @@ import {
   type ManagedListener,
 } from "./config";
 import { installManagedCore } from "./install";
+import { FragmentSchema, type FragmentOptions } from "./fragment";
 import { ensureManagedDirectory } from "./directories";
 import type { allocatePort, checkNative, startManaged, stopManaged } from "./runtime";
 
@@ -21,6 +22,7 @@ const EntrySchema = z
     name: z.string().min(1).max(120),
     port: z.number().int().min(1).max(65535),
     sourceEnc: z.string().startsWith("enc:v1:"),
+    fragment: FragmentSchema.optional(),
   })
   .strict();
 const ManifestSchema = z
@@ -51,7 +53,12 @@ export function managedListeners(core: ManagedCore, entries: Entry[]): ManagedLi
     const source = decrypt(entry.sourceEnc);
     if (!source || looksEncrypted(source))
       throw new Error("Managed proxy source cannot be decrypted; verify STORAGE_ENCRYPTION_KEY");
-    return { id: entry.id, port: entry.port, outbound: sourceOutbound(core, source) };
+    return {
+      id: entry.id,
+      port: entry.port,
+      outbound: sourceOutbound(core, source),
+      ...(entry.fragment ? { fragment: entry.fragment } : {}),
+    };
   });
 }
 
@@ -79,7 +86,13 @@ export function managedEntries(core: ManagedCore, root = managedRoot()) {
   );
 }
 
-export type ManagedSave = { core: ManagedCore; name: string; sourceLink: string; id?: string };
+export type ManagedSave = {
+  core: ManagedCore;
+  name: string;
+  sourceLink: string;
+  id?: string;
+  fragment?: FragmentOptions;
+};
 export type ActivationDependencies = {
   install: typeof installManagedCore;
   check: typeof checkNative;
@@ -153,7 +166,15 @@ export async function saveManagedProxy<T>(
   dependencies?: ActivationDependencies
 ): Promise<T> {
   // Reject unsupported source options before any download or config write.
-  sourceOutbound(input.core, input.sourceLink);
+  const outbound = sourceOutbound(input.core, input.sourceLink);
+  renderManagedConfig(input.core, [
+    {
+      id: "validation",
+      port: 1,
+      outbound,
+      ...(input.fragment ? { fragment: input.fragment } : {}),
+    },
+  ]);
   if (!isEncryptionEnabled())
     throw new Error("STORAGE_ENCRYPTION_KEY is required for managed proxy sources");
   const sourceEnc = encrypt(input.sourceLink);
@@ -183,7 +204,13 @@ export async function saveManagedProxy<T>(
     const port =
       existing?.port ||
       (await deps.allocate(new Set([...entries, ...oppositeEntries].map((entry) => entry.port))));
-    const candidate = { id, name: input.name, port, sourceEnc };
+    const candidate = {
+      id,
+      name: input.name,
+      port,
+      sourceEnc,
+      ...(input.fragment ? { fragment: input.fragment } : {}),
+    };
     const nextEntries = existing
       ? entries.map((entry) => (entry.id === id ? candidate : entry))
       : [...entries, candidate];

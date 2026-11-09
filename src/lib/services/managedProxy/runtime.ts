@@ -6,7 +6,6 @@ import { ServiceSupervisor } from "../ServiceSupervisor";
 import { registerSupervisor, getSupervisor, unregisterSupervisor } from "../registry";
 import { upsertVersionManagerTool } from "@/lib/db/versionManager";
 import { nativeCheckArgs, type ManagedCore, type ManagedListener } from "./config";
-import { officialRelease } from "./releases";
 
 const execute = promisify(execFile);
 
@@ -106,7 +105,7 @@ export async function startManaged(
   log.info({ listeners: listeners.length }, "Starting managed proxy core");
   await upsertVersionManagerTool({
     tool,
-    installedVersion: officialRelease(core).version,
+    installedVersion: path.basename(path.dirname(executable)),
     binaryPath: executable,
     status: "stopped",
     port: listeners[0].port,

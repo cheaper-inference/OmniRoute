@@ -1,6 +1,12 @@
+import { fragmentedXrayOutbound, type FragmentOptions } from "./fragment";
 export type ManagedCore = "singbox" | "xray";
 type Json = Record<string, unknown>;
-export type ManagedListener = { id: string; port: number; outbound: Json };
+export type ManagedListener = {
+  id: string;
+  port: number;
+  outbound: Json;
+  fragment?: FragmentOptions;
+};
 
 const URI_PROTOCOLS = new Set([
   "vless",
@@ -517,6 +523,8 @@ export function renderManagedConfig(core: ManagedCore, entries: ManagedListener[
     if (!/^[a-zA-Z0-9-]{1,64}$/.test(entry.id) || ports.has(port(entry.port)))
       throw new Error("Duplicate or invalid managed listener");
     ports.add(entry.port);
+    if (entry.fragment && core !== "xray")
+      throw new Error("Managed fragmentation is available only for Xray-compatible cores");
   }
   if (core === "singbox")
     return {
@@ -539,7 +547,11 @@ export function renderManagedConfig(core: ManagedCore, entries: ManagedListener[
       port: e.port,
       settings: { auth: "noauth", udp: true },
     })),
-    outbounds: entries.map((e) => ({ ...e.outbound, tag: `out-${e.id}` })),
+    outbounds: entries.flatMap((e) =>
+      e.fragment
+        ? fragmentedXrayOutbound(e.id, e.outbound, e.fragment)
+        : [{ ...e.outbound, tag: `out-${e.id}` }]
+    ),
     routing: {
       rules: entries.map((e) => ({
         type: "field",

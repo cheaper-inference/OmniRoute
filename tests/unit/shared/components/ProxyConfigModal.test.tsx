@@ -199,6 +199,29 @@ describe("ProxyConfigModal custom registry saves", () => {
       fetchCalls.some((call) => call.method === "POST" && call.url === "/api/settings/proxies")
     ).toBe(false);
   }, 5000);
+  it("tests an unsaved tunnel without saving or assigning it", async () => {
+    installFetchMock((url, init) => {
+      if (url === "/api/services/managed-proxy" && init?.method === "PATCH") {
+        return { body: { success: true, publicIp: "203.0.113.5", latencyMs: 10 } };
+      }
+      return defaultProxyConfigResponses(url) || { status: 404, body: {} };
+    });
+    const { container } = await renderProxyConfigModal();
+    const link = "vless://11111111-1111-4111-8111-111111111111@example.invalid:443?security=tls";
+    await setInputValue(getInput(container, "hostPlaceholder"), link);
+    await clickButton(container, "testConnection");
+    expect(fetchCalls.some((call) => call.method === "PATCH")).toBe(false);
+    const select = container.querySelector<HTMLSelectElement>("#proxy-managed-core");
+    await act(async () => {
+      select!.value = "xray";
+      select!.dispatchEvent(new Event("change", { bubbles: true }));
+    });
+    await clickButton(container, "testConnection");
+    const tested = fetchCalls.find((call) => call.method === "PATCH");
+    expect(tested?.body).toEqual({ action: "test", core: "xray", sourceLink: link });
+    expect(fetchCalls.some((call) => ["POST", "PUT"].includes(call.method))).toBe(false);
+    expect(getInput(container, "hostPlaceholder").value).toBe(link);
+  });
   beforeEach(() => {
     (
       globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT?: boolean }

@@ -6,6 +6,9 @@ import AdmZip from "adm-zip";
 import { Parser } from "tar";
 import { officialRelease } from "./releases";
 import type { ManagedCore } from "./config";
+import { readCoreSelection, verifyCustomBinary, type CoreSelection } from "./selection";
+import { selectionRelease } from "./catalog";
+import { ensureManagedDirectory } from "./directories";
 
 const MAX_ARCHIVE = 128 * 1024 * 1024;
 const MAX_EXPANDED = 384 * 1024 * 1024;
@@ -132,14 +135,26 @@ async function regularPrivateDirectory(directory: string): Promise<void> {
 export async function installManagedCore(
   core: ManagedCore,
   root: string,
-  allowDownload = true
+  allowDownload = true,
+  selected: CoreSelection | null = readCoreSelection(core, root)
 ): Promise<string> {
-  const release = officialRelease(core);
+  if (selected?.source === "custom") return verifyCustomBinary(core, selected, root);
+  const release = selected ? selectionRelease(core, selected) : officialRelease(core);
+  ensureManagedDirectory(path.join(root, "binaries", core));
   const directory = path.join(root, "binaries", core, release.version);
   await regularPrivateDirectory(path.join(root, "binaries"));
   await regularPrivateDirectory(path.join(root, "binaries", core));
   const binaryPath = path.join(directory, release.executable);
   try {
+    const directoryInfo = await fs.lstat(directory);
+    const metadataInfo = await fs.lstat(path.join(directory, "verified.json"));
+    if (
+      !directoryInfo.isDirectory() ||
+      directoryInfo.isSymbolicLink() ||
+      !metadataInfo.isFile() ||
+      metadataInfo.isSymbolicLink()
+    )
+      throw new Error("Installed core verification failed");
     const metadata = JSON.parse(await fs.readFile(path.join(directory, "verified.json"), "utf8"));
     const info = await fs.lstat(binaryPath);
     const bytes = await fs.readFile(binaryPath);

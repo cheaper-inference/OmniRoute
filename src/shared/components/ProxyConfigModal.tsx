@@ -473,6 +473,25 @@ export default function ProxyConfigModal({
     setTesting(true);
     setTestResult(null);
     try {
+      if (mode === "custom" && isManagedProxySource(host)) {
+        if (!managedCore) {
+          setFormError(t("errorSelectManagedCore"));
+          return;
+        }
+        const response = await fetch("/api/services/managed-proxy", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            action: "test",
+            core: managedCore,
+            sourceLink: String(host).trim(),
+          }),
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error?.message || t("connectionFailed"));
+        setTestResult(result);
+        return;
+      }
       let proxy: {
         type: string;
         host: string;
@@ -666,7 +685,7 @@ export default function ProxyConfigModal({
                 disabled={
                   mode === "saved"
                     ? !selectedProxyId
-                    : isManagedProxySource(host) || !String(host || "").trim()
+                    : (isManagedProxySource(host) && !managedCore) || !String(host || "").trim()
                 }
               >
                 {t("testConnection")}
