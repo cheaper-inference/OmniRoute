@@ -77,18 +77,41 @@ describe("migrationRunner/constants — exact small-table snapshots", () => {
 // ── large tables — count + shape + spot-checks (corruption guard) ─────────────
 
 describe("migrationRunner/constants — large-table integrity", () => {
-  it("RENAMED_MIGRATION_COMPATIBILITY has 51 well-formed entries", () => {
-    assert.equal(RENAMED_MIGRATION_COMPATIBILITY.length, 51);
+  it("RENAMED_MIGRATION_COMPATIBILITY has 64 well-formed entries", () => {
+    assert.equal(RENAMED_MIGRATION_COMPATIBILITY.length, 64);
     assert.deepEqual(
-      RENAMED_MIGRATION_COMPATIBILITY.filter((entry) => entry.fromName === "proxy_payload_traffic"),
-      ["206", "207", "213", "214", "215", "217", "218", "223", "224", "225", "226", "228"].map(
+      RENAMED_MIGRATION_COMPATIBILITY.filter((entry) => entry.fromName === "daily_cached_input"),
+      ["206", "213", "214", "215", "217", "218", "223", "224", "225", "226", "228", "229"].map(
         (fromVersion) => ({
           fromVersion,
-          fromName: "proxy_payload_traffic",
-          toVersion: "229",
-          toName: "proxy_payload_traffic",
+          fromName: "daily_cached_input",
+          toVersion: "231",
+          toName: "daily_cached_input",
         })
       )
+    );
+    assert.deepEqual(
+      RENAMED_MIGRATION_COMPATIBILITY.filter((entry) => entry.fromName === "proxy_payload_traffic"),
+      [
+        "206",
+        "207",
+        "213",
+        "214",
+        "215",
+        "217",
+        "218",
+        "223",
+        "224",
+        "225",
+        "226",
+        "228",
+        "229",
+      ].map((fromVersion) => ({
+        fromVersion,
+        fromName: "proxy_payload_traffic",
+        toVersion: "232",
+        toName: "proxy_payload_traffic",
+      }))
     );
     for (const e of RENAMED_MIGRATION_COMPATIBILITY) {
       assert.equal(typeof e.fromVersion, "string");

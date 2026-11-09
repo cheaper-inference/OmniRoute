@@ -63,6 +63,7 @@ const probeFetch = (async (input: string | URL | Request) => {
   }
   return new Response("not found", { status: 404 });
 }) as typeof fetch;
+globalThis.fetch = probeFetch;
 
 const core = await import("../../src/lib/db/core.ts");
 const providerNodesRoute = await import("../../src/app/api/provider-nodes/route.ts");
@@ -76,6 +77,10 @@ const autopilot = await import("../../src/lib/monitoring/providerHealthAutopilot
 const settingsDb = await import("../../src/lib/db/settings.ts");
 const { maybeAutoDisableBannedAccount } =
   await import("../../src/sse/services/autoDisableBannedAccount.ts");
+
+// Loading the routes can install the proxy fetch interceptor. Keep every probe
+// on the fixture transport, including the initial fire-and-forget auto-test.
+globalThis.fetch = probeFetch;
 
 const OPERATOR_DISABLED_AT_KEY = operatorDisable.OPERATOR_DISABLED_AT_KEY;
 // Not imported from the module on purpose: the marker is persisted JSON, and the

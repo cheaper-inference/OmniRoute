@@ -20,7 +20,7 @@ process.env.DISABLE_SQLITE_AUTO_BACKUP = "true";
 const traffic = await import("../../src/lib/db/proxyTraffic.ts");
 const { meterPayloadAttempt } = await import("../../open-sse/utils/proxyPayloadMetering.ts");
 const sql = fs.readFileSync(
-  new URL("../../src/lib/db/migrations/229_proxy_payload_traffic.sql", import.meta.url),
+  new URL("../../src/lib/db/migrations/232_proxy_payload_traffic.sql", import.meta.url),
   "utf8"
 );
 

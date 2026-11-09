@@ -3,6 +3,7 @@ import {
   findToolCallSchema,
 } from "../translator/helpers/toolCallShim.ts";
 import { FORMATS } from "../translator/formats.ts";
+import { cacheCreationFields } from "../utils/cacheWriteUsage.ts";
 import {
   buildGeminiThoughtSignatureKey,
   storeGeminiThoughtSignature,
@@ -26,6 +27,7 @@ import {
 import { restoreDeclaredToolName } from "../services/declaredToolCasing.ts";
 import { extractReplayableResponsesReasoningText } from "../services/reasoningInputPolicy.ts";
 import { sanitizeToolId } from "../translator/helpers/schemaCoercion.ts";
+import { stripGeminiPlaceholderArgs } from "../translator/helpers/geminiPlaceholderArgs.ts";
 import { stripEmptyOptionalToolArgs } from "../translator/response/openai-responses/pureHelpers.ts";
 import { toNumber as toFiniteNumber } from "../utils/numeric.ts";
 import { geminiExtraUsageCounts } from "../translator/response/geminiUsageMetadata.ts";
@@ -511,7 +513,13 @@ export function translateNonStreamingResponse(
                       type: "function",
                       function: {
                         name: restoredName,
-                        arguments: JSON.stringify(normalizeToolCallArgs(fn.args || {})),
+                        arguments: JSON.stringify(
+                          stripGeminiPlaceholderArgs(
+                            restoredName,
+                            normalizeToolCallArgs(fn.args || {}),
+                            clientTools
+                          )
+                        ),
                       },
                     });
                   }
@@ -713,7 +721,7 @@ export function translateNonStreamingResponse(
           usageOut.completion_tokens_details = { reasoning_tokens: reasoningTokens };
         }
         if (cachedTokens > 0 || cacheCreationTokens > 0) {
-          const details: JsonRecord = {};
+          const details: JsonRecord = { ...cacheCreationFields(usage) };
           if (cachedTokens > 0) details.cached_tokens = cachedTokens;
           if (cacheCreationTokens > 0) {
             details.cache_creation_tokens = cacheCreationTokens;
@@ -721,7 +729,7 @@ export function translateNonStreamingResponse(
           }
           usageOut.prompt_tokens_details = details;
         }
-        result.usage = usageOut;
+        result.usage = { ...usageOut, ...cacheCreationFields(usage) };
       }
 
       intermediateOpenAI = result;
@@ -946,6 +954,7 @@ function convertOpenAINonStreamingToClaude(
   );
 
   const usage: JsonRecord = {
+    ...cacheCreationFields(usageSrc),
     input_tokens: inputTokens,
     output_tokens: outputTokens,
   };
