@@ -19,6 +19,8 @@ const oauthModule = await import("../../src/lib/oauth/constants/oauth.ts");
 const antigravityHeadersModule = await import("../../open-sse/services/antigravityHeaders.ts");
 const antigravityVersionModule = await import("../../open-sse/services/antigravityVersion.ts");
 const oauthHelpersModule = await import("../../src/lib/oauth/providers.ts");
+const { M365_NATIVE_OAUTH_CONFIG } =
+  await import("../../src/lib/oauth/providers/copilot-m365-web.ts");
 
 const PROVIDERS = providersModule.default;
 const { resolveBrowserOAuthRedirectUri } = oauthHelpersModule;
@@ -51,6 +53,7 @@ const {
   INF_CODE_CONFIG,
   ZED_HOSTED_CONFIG,
   MUSE_CODE_CONFIG,
+  MINIMAX_CODE_CONFIG,
 } = oauthModule;
 const { getAntigravityLoadCodeAssistMetadata } = antigravityHeadersModule;
 const {
@@ -91,6 +94,8 @@ const EXPECTED_PROVIDER_KEYS = [
   "zed",
   "zed-hosted",
   "muse-code",
+  "minimax-code",
+  "copilot-m365-web",
 ];
 
 const browserUrl = "http://localhost:20128/callback";
@@ -130,6 +135,8 @@ const EXPECTED_CONFIG_BY_PROVIDER = {
   zed: ZED_CONFIG,
   "zed-hosted": ZED_HOSTED_CONFIG,
   "muse-code": MUSE_CODE_CONFIG,
+  "minimax-code": MINIMAX_CODE_CONFIG,
+  "copilot-m365-web": M365_NATIVE_OAUTH_CONFIG,
 };
 
 const KIRO_REQUIRED_FIELDS = [
@@ -180,6 +187,7 @@ const REQUIRED_FIELDS_BY_PROVIDER = {
   // prettier-ignore
   "zed-hosted": ["webBaseUrl", "cloudBaseUrl", "llmBaseUrl", "userInfoUrl", "llmTokenUrl", "modelsUrl"],
   "muse-code": ["deviceCodeUrl", "tokenUrl", "clientId", "mintUrl"],
+  "minimax-code": ["deviceCodeUrl", "tokenUrl", "clientId", "scope", "audience"],
 };
 
 function getByPath(object, path) {
@@ -274,6 +282,9 @@ test("OAuth constants include all provider ids and use a sane timeout", () => {
   }
 });
 
+/** Providers whose token mapper validates the token response and fails closed on bad input. */
+const FAIL_CLOSED_TOKEN_MAPPERS = new Set(["copilot-m365-web"]);
+
 test("every registered OAuth provider has a valid config object, flow type and token mapper", () => {
   const allowedFlowTypes = new Set([
     "authorization_code",
@@ -287,6 +298,16 @@ test("every registered OAuth provider has a valid config object, flow type and t
     assert.ok(allowedFlowTypes.has(provider.flowType), `${providerId} has unsupported flowType`);
     assert.equal(typeof provider.mapTokens, "function", `${providerId} must expose mapTokens`);
 
+    if (FAIL_CLOSED_TOKEN_MAPPERS.has(providerId)) {
+      // Rejecting an empty token response is this provider's contract: it never becomes a
+      // connection, and only a fixed message crosses the boundary.
+      assert.throws(
+        () => provider.mapTokens({}),
+        /token response is invalid/,
+        `${providerId} mapTokens must reject an empty token response`
+      );
+      continue;
+    }
     const mapped = provider.mapTokens({});
     assert.ok(
       mapped && typeof mapped === "object",

@@ -1,0 +1,1 @@
+- **fix(sse):** A request field that the upstream rejected with a 400 now stays removed when the same URL is retried after a 429, WAF block or usage-wall retry. Before, the retry sent the rejected field again and the client got a 400. ([#19033](https://github.com/cheaper-inference/OmniRoute/pull/19033))
