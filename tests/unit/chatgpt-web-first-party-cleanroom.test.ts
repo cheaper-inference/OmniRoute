@@ -505,7 +505,6 @@ describe("ChatGPT Web integrity module resolution", () => {
   });
 });
 
-
 describe("ChatGPT Web bridge CSP choreography", () => {
   const BRIDGE_INSTALL_ASSET = "https://chatgpt.com/cdn/assets/discovery-current.js";
   const CONTRACT_SOURCE = [
@@ -532,7 +531,7 @@ describe("ChatGPT Web bridge CSP choreography", () => {
     const injections: Array<"ok" | "fail"> = [];
     const page = {
       async evaluate(
-        pageFunction: (argument: unknown) => unknown,
+        _pageFunction: (argument: unknown) => unknown,
         argument: unknown,
         _third: unknown
       ) {
@@ -561,14 +560,12 @@ describe("ChatGPT Web bridge CSP choreography", () => {
         newCDPSession: options.cdp
           ? () => {
               state.sessions += 1;
-              const used = state.sessions - 1;
               return {
                 send: async (_method: string) => {
                   state.bypassSends += 1;
                   if (state.bypassSends <= options.sendFailures) {
                     throw new Error("Session closed by target");
                   }
-                  void used;
                 },
               };
             }
@@ -586,8 +583,7 @@ describe("ChatGPT Web bridge CSP choreography", () => {
 
   function installFakeAssetFetch(): () => void {
     const previous = globalThis.fetch;
-    globalThis.fetch = (async () =>
-      new Response(CONTRACT_SOURCE, { status: 200 })) as typeof fetch;
+    globalThis.fetch = (async () => new Response(CONTRACT_SOURCE, { status: 200 })) as typeof fetch;
     return () => {
       globalThis.fetch = previous;
     };
