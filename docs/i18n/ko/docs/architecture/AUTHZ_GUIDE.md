@@ -139,17 +139,17 @@ JWT가 검증되고 **`authenticated: true`**를 포함하는 경우에만 쿠�
      `secondFactor: "recovery_switch"`로 감사 기록을 남깁니다.
   4. `OMNIROUTE_DISABLE_MFA`를 설정 해제하고 서버를 다시 시작한 다음, 필요한 경우 다시 등록합니다.
 
-## 라우트 클래스
+## 경로 클래스
 
-`src/server/authz/types.ts`는 세 가지 클래스를 정의합니다. 결정론적으로 분류할 수 없는 라우트는 모두 `MANAGEMENT`로 대체됩니다.
+`src/server/authz/types.ts` 세 가지 클래스를 정의합니다. 결정적으로 분류될 수 없는 모든 경로는 `MANAGEMENT` 로 대체됩니다.
 
-| Class        | Description                                                                                                                                      | Auth required                                                  |
-| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------- |
-| `PUBLIC`     | 명시적으로 안전한 라우트 — 로그인, 로그아웃, 상태, 초기화, 헬스 체크, 온보딩 부트스트랩.                                                         | 없음                                                           |
-| `CLIENT_API` | 모델 서빙 엔드포인트 — `/api/v1/*`, `/api/v1beta/*`, 그리고 별칭 `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | 유효한 `REQUIRE_API_KEY` 기능 플래그가 활성화된 경우 Bearer 키 |
-| `MANAGEMENT` | 대시보드 페이지, 설정, 프로바이더, 키, 관리 및 진단 엔드포인트.                                                                                  | 대시보드 세션 또는 `manage` 스코프의 Bearer                    |
+| 수업         | 설명                                                                                                                                        | 인증이 필요합니다                                              |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
+| `PUBLIC`     | 명시적으로 안전한 경로는 — 로그인, 로그아웃, 상태, 상태, 온보딩 부트스트랩입니다.                                                           | 없음                                                           |
+| `CLIENT_API` | 모델 제공 엔드포인트 — `/api/v1/*`, `/api/v1beta/*` 와 별칭 `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | 유효한 `REQUIRE_API_KEY` 기능 플래그가 활성화된 경우 베어러 키 |
+| `MANAGEMENT` | 대시보드 페이지, 설정, 공급자, 키, 관리 및 진단 엔드포인트.                                                                                 | `manage` 범위를 사용하는 대시보드 세션 OR Bearer               |
 
-일부 `MANAGEMENT` 작업은 **운영자 전용**입니다. `manage` 키만으로는 충분하지 않습니다. 저장된 자격 증명 내보내기(`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), 라이브 데이터 위에 백업 복원(`dryRun=true`를 포함한 `POST /api/db-backups/import`, ID 기준 `POST /api/db-backups` 복원, `POST /api/settings/import-json`), 복원 지점 삭제(`DELETE /api/db-backups` 정리, 그리고 `PATCH /api/db-backups` — 여기서 저장되는 보존 설정이 백업 후 자동 정리를 결정하기 때문입니다)에는 대시보드 세션, 로컬 CLI 주체, 또는 로그인 비활성화 상태가 필요합니다. 동기화 토큰 발급(`POST /api/sync/tokens`)과 `admin` CLI 액세스 토큰 발급(`POST /api/cli/tokens`)은 모든 로그인 모드에서 대시보드 세션 또는 로컬 CLI 주체가 필요합니다. 어떤 스코프의 API 키와 `oma_` 액세스 토큰도 운영자 자격 증명이 아니므로, 이런 자격 증명이 요구되는 곳에서는 항상 `403`을 받습니다. 이 검사는 `src/lib/api/operatorCredential.ts`(`resolveOperatorCredential()` / `requireOperatorCredential()`)에 있습니다. 로그인 설정 변경도 운영자 전용입니다. `POST /api/settings/require-login`(관리 비밀번호 설정, `requireLogin` 토글)은 비밀번호가 한 번 만들어진 뒤에는 이 자격 증명만 받아들입니다. 최초 실행 부트스트랩 기간(아직 비밀번호가 없는 상태)은 그대로 유지됩니다. 대시보드 세션으로 비밀번호를 교체하려면 `currentPassword`를 보내야 하며(누락되거나 틀리면 `403`, `settings.update_failed`로 감사 기록), 로컬 CLI와 로그인이 비활성화된 인스턴스는 복구 경로를 유지하여 이것 없이도 비밀번호를 설정할 수 있습니다. 둘 다 데이터 디렉터리를 소유한 호스트에 묶여 있기 때문입니다.
+몇 가지 `MANAGEMENT` 작업은 다음과 같습니다.** 운영자 전용** : `manage` 키로는 충분하지 않습니다. 저장된 자격 증명(`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`) 내보내기, 라이브 데이터에 대한 백업 복원(`POST /api/db-backups/import` 포함 `dryRun=true`, ID별 `POST /api/db-backups` 복원, `POST /api/settings/import-json`), 복원 지점 삭제(`DELETE /api/db-backups` 정리 및 `PATCH /api/db-backups` 지속되는 보존으로 인해 모든 백업 후 자동 정리가 이루어지기 때문에) 대시보드 세션, 로컬 CLI 주제 또는 로그인 비활성화가 필요합니다. 동기화 토큰(`POST /api/sync/tokens`)을 발행하고 `admin` CLI 액세스 토큰(`POST /api/cli/tokens`)을 발행하려면 모든 로그인 모드에서 대시보드 세션 또는 로컬 CLI 제목이 필요합니다. 모든 범위의 API 키와 `oma_` 액세스 토큰은 운영자 자격 증명이 아닙니다. 필요할 때마다 `403` 얻습니다. 수표는 `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`)에 있습니다. 로그인 설정 변경은 운영자 전용입니다. `POST /api/settings/require-login` (관리 비밀번호 설정/ `requireLogin` 전환)는 비밀번호가 존재하는 경우에만 해당 자격 증명을 허용합니다. — 첫 번째 실행 부트스트랩 창(아직 비밀번호 없음)은 변경되지 않습니다. — 및 대시보드 세션은 비밀번호를 대체하기 위해 `currentPassword` 보내야 합니다(누락되었거나 잘못된 경우 `403`, `settings.update_failed` 로 감사됨). 로컬 CLI 와 로그인이 비활성화된 인스턴스는 복구 경로를 유지하고 복구 경로 없이 비밀번호를 설정할 수 있습니다. 둘 다 데이터 디렉토리를 소유한 호스트에 바인딩되어 있기 때문입니다.
 
 ## 관로
 
@@ -180,53 +180,49 @@ Incoming request → src/proxy.ts
 
 성공적인 정책은 `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }` 와 함께 `AuthSubject` 반환합니다. 다운스트림 핸들러는 인증 로직을 다시 실행하는 대신 `src/server/authz/assertAuth.ts` 의 `assertAuth(request, "CLIENT_API")` 통해 이를 읽을 수 있습니다.
 
-## 공개 라우트 목록
+## 공용 경로 목록
 
-`src/shared/constants/publicApiRoutes.ts`는 명시적인 허용 목록입니다.
+`src/shared/constants/publicApiRoutes.ts` 는 명시적인 허용 목록입니다.
 
-목록은 **형태**별로 나뉘며, 이 구분은 보안상 중요합니다(GHSA-74g9-q8f6-793h). 접두사는
-`startsWith()`로 매칭되므로, 선행 문자를 공유하는 모든 인접 경로에도 매칭됩니다.
-`/api/usage/om-usage`가 접두사로 표시되어 `/api/usage/om-usage<anything>`을 PUBLIC으로 만들고, Next는
-이를 자체 인증이 없는 핸들러인 `/api/usage/[connectionId]`로 확인합니다.
+목록은 다음과 같이 나뉩니다.** 모양** , 분할은 로드 베어링(GHSA-74g9-q8f6-793h)입니다. 접두사는 `startsWith()` 와 일치하므로 선행 문자를 공유하는 모든 인접한 경로와도 일치합니다. `/api/usage/om-usage` `/api/usage/om-usage<anything>` PUBLIC 로 표시된 접두사로 사용되며 Next는 이를 자체 인증이 없는 처리기인 `/api/usage/[connectionId]` — 로 확인합니다.
 
 ```ts
-// 실제 하위 트리입니다. 모든 항목은 반드시 "/"로 끝나야 합니다(단위 테스트에서 검증).
+// Genuine subtrees. Every entry MUST end in "/" (asserted by a unit test).
 PUBLIC_API_ROUTE_PREFIXES = [
   "/api/auth/oidc/",
-  "/api/v1/", // classify에서 CLIENT_API로 처리되며, "인증 없는 공개"로 처리되지 않음
+  "/api/v1/", // treated as CLIENT_API in classify, not as "no-auth public"
   "/api/oauth/",
   "/api/codex/connect/",
   "/api/telegram/",
   "/api/cursor-cli/",
 ];
 
-// 단일 라우트이며, 뒤에 슬래시가 있거나 없어도 정확히 매칭됩니다.
+// Single routes, matched EXACTLY (with or without a trailing slash).
 PUBLIC_API_ROUTES_EXACT = new Set([
   "/api/auth/login",
   "/api/auth/logout",
   "/api/auth/status",
-  "/api/auth/mfa/verify", // 선택적 TOTP를 사용하는 로그인 2단계이며, MFA 대기 쿠키가 필요함
-  "/api/init",
+  "/api/auth/mfa/verify", // login step 2 for opt-in TOTP; needs the MFA-pending cookie
   "/api/sync/bundle",
   "/api/cli/connect",
   "/api/usage/om-usage",
   "/api/skills/collect/chaos",
 ]);
 
-// CORS origin 완화도 적용되는 읽기 전용 단일 라우트입니다.
+// Read-only single routes that also take the CORS origin relaxation.
 PUBLIC_READONLY_CORS_API_ROUTES = [
   "/api/health/ping",
   "/api/monitoring/health",
   "/api/settings/require-login",
 ];
 
-// CORS 완화가 적용되지 않는 읽기 전용 단일 라우트입니다.
+// Read-only single route WITHOUT the CORS relaxation.
 PUBLIC_READONLY_API_ROUTES_EXACT = new Set(["/api/health"]);
 
 PUBLIC_READONLY_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 ```
 
-읽기 전용 라우트는 안전한 메서드에 대해서만 공개됩니다. 참고: `classifyRoute()`는 PUBLIC 폴스루에서 `/api/v1/*` 및 `/api/v1beta/*`를 제외합니다. 이러한 라우트는 항상 `CLIENT_API`이므로 Bearer 키 정책이 계속 적용됩니다.
+읽기 전용 경로는 공개입니다.** 오직** 안전한 방법을 위해. 참고: `classifyRoute()` PUBLIC fall-through — 에서 `/api/v1/*` 및 `/api/v1beta/*` 제외합니다. 이들은 항상 `CLIENT_API` 이므로 Bearer-key 정책이 계속 적용됩니다.
 
 ## 새 라우트 추가하기
 
@@ -292,13 +288,13 @@ API 키는 `scopes` 배열을 가집니다 (`api_keys.scopes`에 JSON으로 저�
 
 ## 인증 필요 토글
 
-`src/shared/utils/apiAuth.ts`의 `isAuthRequired()`는 요청에 대해 **어떤** 인증이라도 강제할지 결정합니다:
+`src/shared/utils/apiAuth.ts` 의 `isAuthRequired()` 여부를 결정합니다.** 어느** 요청에 대해 인증이 시행됩니다.
 
-- `settings.requireLogin === false` → 인증이 전역적으로 비활성화됩니다. 단, 항상 보호되는 계층([Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md) 참조)과, 로그인이 켜져 있을 때와 같은 자격 증명이 필요한 자격 증명 발급 호출은 예외입니다. 동기화 토큰 발급, 모든 스코프의 CLI 액세스 토큰 발급, `manage`/`admin` 스코프 API 키 생성, 해당 스코프를 키에 부여하기, 그런 키를 재생성하거나 표시하기가 여기에 해당합니다(`src/lib/api/requireManagementAuth.ts`의 `requireCredentialForManagementScopedKey()`). 추론 전용 키는 계속 열려 있습니다.
-- 비밀번호가 설정되어 있지 않고 **동시에** `INITIAL_PASSWORD` 환경 변수도 없으면 → 부트스트랩 모드에서는 온보딩 마법사와 루프백 요청을 허용하지만, 외부 네트워크 요청은 여전히 자격 증명이 필요합니다.
-- 모든 DB 오류 → 닫힘(fail closed, 보안 기본값).
+- `settings.requireLogin === false` → 인증은 항상 보호되는 계층( [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md) 참조)과 허용되는 자격 증명을 전달하는 호출을 제외하고 전역적으로 비활성화됩니다. 여기에는 로그인과 동일한 자격 증명이 필요합니다. 즉, 동기화 토큰 발급, 모든 범위에서 CLI 액세스 토큰 생성, `manage`/`admin` 범위로 API 키 생성, 해당 범위를 키에 부여 또는 이러한 키 재생성 또는 공개(`requireCredentialForManagementScopedKey()` in `src/lib/api/requireManagementAuth.ts`). 추론 전용 키는 열려 있습니다. 보호된 기능 플래그(`REQUIRE_API_KEY`, 기타 보안 플래그 및 [기능 플래그](../reference/FEATURE_FLAGS.md#rest-api) 에 나열된 SSRF / TLS / MCP 범위 / 샌드박스 플래그)를 작성하고 PII 마스킹 설정(`PUT /api/settings/pii`)을 저장하려면 계속 자격 증명이 필요합니다.
+- 비밀번호가 구성되지 않았습니다.** 그리고** no `INITIAL_PASSWORD` env var → bootstrap 모드는 온보딩 마법사 및 루프백 요청을 허용하지만 노출된 네트워크 요청에는 여전히 자격 증명이 필요합니다. 예외: 보호된 기능 플래그를 작성하고 PII 마스킹 설정(`PUT /api/settings/pii`)을 저장하려면 루프백에서도 자격 증명이 필요하므로 루프백 자체로는 충분하지 않습니다.
+- 모든 DB 오류 → 실패하여 닫히지 않습니다(기본적으로 보안).
 
-클라이언트 API 키 강제는 `process.env.REQUIRE_API_KEY`를 직접 읽는 대신 `src/shared/utils/featureFlags.ts`의 `isRequireApiKeyEnabled()`를 사용합니다. 이는 배포된 인스턴스에서 중요합니다. 대시보드 → Feature Flags에서 `REQUIRE_API_KEY`를 전환하면 DB 오버라이드가 저장되어 즉시 `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` 및 이 헬퍼를 공유하는 다른 클라이언트 API 인증 검사에 영향을 줍니다. 기능 플래그 저장소를 읽을 수 없으면 클라이언트 API 인증은 닫힘 상태가 되어 키를 요구합니다.
+클라이언트 API 키 적용은 직접 `process.env.REQUIRE_API_KEY` 읽기가 아닌 `src/shared/utils/featureFlags.ts` 의 `isRequireApiKeyEnabled()` 사용합니다. 이는 배포된 인스턴스에 중요합니다. 대시보드 → 기능 플래그에서 `REQUIRE_API_KEY` 전환하면 DB 재정의가 저장되고 `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` 및 이 도우미를 공유하는 기타 클라이언트 API 인증 검사에 즉시 영향을 미칩니다. 기능 플래그 저장소를 읽을 수 없는 경우 클라이언트 API 인증이 실패하고 키가 필요합니다.
 
 ## 호환성을 깨는 변경 사항 — v3.8.0
 

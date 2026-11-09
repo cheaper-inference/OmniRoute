@@ -10,7 +10,7 @@
 
 ## Pag-install
 
-Built-in ang OmniRoute MCP. Simulan ito gamit ang:
+OmniRoute MCP ay built-in. Simulan ito sa:
 
 ```bash
 omniroute --mcp
@@ -19,20 +19,21 @@ omniroute --mcp
 O sa pamamagitan ng open-sse transport:
 
 ```bash
-# HTTP streamable transport (port 20130)
-omniroute --dev  # Awtomatikong nagsisimula ang MCP sa /mcp endpoint
+# Streamable HTTP transport (default port 20128, in-process on the dashboard server)
+# Client endpoint: http://localhost:20128/api/mcp/stream
+# stdio: omniroute --mcp
 ```
 
-Naka-off bilang default ang mga HTTP transport (`sse` / `streamable-http`, na inihahatid sa loob ng proseso ng dashboard server) at dati ay maaari lamang i-toggle mula sa `/dashboard/mcp` page. Simula sa v3.8.51, may kapantay na kakayahan na rin ang CLI:
+Ang HTTP transports (`sse` / `streamable-http`, na inihahatid sa proseso ng dashboard server) ay naka-off bilang default at dati ay na-toggle lang mula sa `/dashboard/mcp` page. Sa v3.8.51 ang CLI ay may parity:
 
 ```bash
-omniroute mcp status                                  # enabled/online, transport, bilang ng tool
+omniroute mcp status                                  # enabled/online, transport, tool count
 omniroute mcp enable [--transport stdio|sse|streamable-http]
 omniroute mcp disable
-omniroute mcp restart                                 # nire-reset ang mga aktibong sse/streamable-http session
+omniroute mcp restart                                 # resets active sse/streamable-http sessions
 ```
 
-Ang `mcp enable`/`mcp disable` ay nagpa-PATCH sa parehong `mcpEnabled` (at opsyonal na `mcpTransport`) setting na tina-toggle ng dashboard sa pamamagitan ng `/api/settings`. Tinatawag ng `mcp restart` ang `POST /api/mcp/restart`: isinasara nito ang mga aktibong `sse`/`streamable-http` session upang malinis na makapag-initialize muli ang susunod na request, nagbabalik ng `409` kung naka-disable ang MCP, at `501` para sa `stdio` transport (ang mga stdio client ang namamahala sa sarili nilang subprocess — walang in-process handle na maaaring i-restart).
+`mcp enable`/`mcp disable` PATCH ang parehong `mcpEnabled` (at opsyonal `mcpTransport`) ang pagtatakda ng mga toggle ng dashboard sa pamamagitan ng `/api/settings`. `mcp restart` ay tumatawag `POST /api/mcp/restart`: pinuputol nito ang mga aktibong `sse`/`streamable-http` session kaya ang susunod na kahilingan ay muling magsisimula nang malinis, nagbabalik ng `409` kung MCP ay hindi pinagana, at `501` para sa `stdio` transport (ang mga kliyente ng stdio ay nagmamay-ari ng kanilang sariling subprocess — walang in-process na handle upang i-restart).
 
 ## Mga Transport
 
@@ -125,55 +126,42 @@ Cursor, Cline, at mga katugmang MCP client.
 | `omniroute_cache_stats` | `read:cache`  | Mga stat ng semantic cache, prompt-cache, at idempotency |
 | `omniroute_cache_flush` | `write:cache` | I-flush ang cache sa kabuuan o ayon sa signature/model   |
 
-## Mga Compression Tool (13)
+## Mga Tool sa Compression (13)
 
-| Tool                                | Mga Scope           | Paglalarawan                                                                                                                            |
-| :---------------------------------- | :------------------ | :-------------------------------------------------------------------------------------------------------------------------------------- |
-| `omniroute_compression_status`      | `read:compression`  | Mga setting ng compression, buod ng analytics, at mga cache-aware na stat (kabilang ang `analytics.mcpDescriptionCompression` metadata) |
-| `omniroute_compression_configure`   | `write:compression` | I-configure ang compression mode, threshold, target ratio, pagpapanatili ng system-prompt, at toggle ng MCP description compression     |
-| `omniroute_set_compression_engine`  | `write:compression` | Piliin ang aktibong engine (off/caveman/rtk/stacked) at intensity ng Caveman/RTK                                                        |
-| `omniroute_list_compression_combos` | `read:compression`  | Ilista ang mga pinangalanang compression combo at ang mga engine pipeline ng mga ito                                                    |
-| `omniroute_compression_combo_stats` | `read:compression`  | Analytics na nakapangkat ayon sa compression combo at engine                                                                            |
-| `omniroute_ccr_store`               | `write:compression` | Mag-imbak ng caller-isolated na content sa bounded in-memory CCR store at magbalik ng marker kasama ang `ccr://` reference              |
-| `omniroute_ccr_retrieve`            | `read:compression`  | Kunin ang CCR content nang buo o gamit ang mga mode na head, tail, lines, grep, at stats                                                |
-| `omniroute_ccr_inspect`             | `read:compression`  | Siyasatin ang CCR metadata na pag-aari ng caller nang hindi ibinabalik ang content                                                      |
-| `omniroute_ccr_list`                | `read:compression`  | Ilista ang naka-pagination na metadata para sa mga CCR block na pag-aari ng caller                                                      |
-| `omniroute_ccr_delete`              | `write:compression` | Magtanggal ng CCR block na pag-aari ng caller                                                                                           |
-| `omniroute_ccr_stats`               | `read:compression`  | Iulat ang caller-scoped na paggamit ng memory, mga lifecycle counter, at mga limitasyon ng store                                        |
-| `omniroute_rtk_discover`            | `read:compression`  | Tuklasin ang paulit-ulit na ingay sa mga opt-in na sample ng RTK output                                                                 |
-| `omniroute_rtk_learn`               | `read:compression`  | Bumuo ng masusuring draft ng RTK filter mula sa mga opt-in na sample                                                                    |
+| Tool                                | Saklaw              | Paglalarawan                                                                                                                                        |
+| :---------------------------------- | :------------------ | :-------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `omniroute_compression_status`      | `read:compression`  | Mga setting ng compression, buod ng analytics, at mga istatistika ng kamalayan sa cache (kasama ang `analytics.mcpDescriptionCompression` metadata) |
+| `omniroute_compression_configure`   | `write:compression` | I-configure ang compression mode, threshold, target ratio, system-prompt preservation, MCP description compression toggle                           |
+| `omniroute_set_compression_engine`  | `write:compression` | Piliin ang aktibong makina (off/caveman/rtk/stacked) at Caveman/RTK intensity                                                                       |
+| `omniroute_list_compression_combos` | `read:compression`  | Ilista ang pinangalanang compression combos at ang kanilang mga pipeline ng engine                                                                  |
+| `omniroute_compression_combo_stats` | `read:compression`  | Ang Analytics ay nakapangkat ayon sa compression combo at engine                                                                                    |
+| `omniroute_ccr_store`               | `write:compression` | Mag-imbak ng content na nakahiwalay sa tumatawag sa bounded in-memory CCR store at magbalik ng marker at `ccr://` reference                         |
+| `omniroute_ccr_retrieve`            | `read:compression`  | Kunin ang nilalaman CCR nang buo o may mga mode ng head, tail, lines, grep, at stats                                                                |
+| `omniroute_ccr_inspect`             | `read:compression`  | Suriin ang CCR metadata na pagmamay-ari ng tumatawag nang hindi nagbabalik ng nilalaman                                                             |
+| `omniroute_ccr_list`                | `read:compression`  | Ilista ang paginated metadata para sa mga block CCR na pagmamay-ari ng tumatawag                                                                    |
+| `omniroute_ccr_delete`              | `write:compression` | Magtanggal ng CCR block na pagmamay-ari ng tumatawag                                                                                                |
+| `omniroute_ccr_stats`               | `read:compression`  | Iulat ang paggamit ng memory na saklaw ng tumatawag, mga lifecycle counter, at mga limitasyon sa tindahan                                           |
+| `omniroute_rtk_discover`            | `read:compression`  | Tuklasin ang paulit-ulit na ingay sa mga opt-in na RTK output sample                                                                                |
+| `omniroute_rtk_learn`               | `read:compression`  | Bumuo ng nasusuri na RTK filter draft mula sa mga opt-in na sample                                                                                  |
 
-Ang mga CCR entry ay nasa memory lamang at nawawala kapag nag-restart. Limitado ang bawat block sa 2 MiB, ang bawat
-principal sa 16 MiB, at ang global store sa 64 MiB. Bilang default, may 24 na oras na TTL ang mga entry (maximum na
-pitong araw). Limitado sa 256 KiB ang buong MCP retrieval; mananatiling available ang mas malalaking block sa pamamagitan ng
-mga ranged at grep mode. Ang storage, retrieval, listing, inspection, deletion, at stats ay nakahiwalay ayon sa
-authenticated na API-key principal. Ang mga audit record ay naglalaman ng mga hash at size metadata, at hindi kailanman ng content.
+Gumagamit ang mga entry CCR ng dalawang-tier na tindahan: isang mainit na in-memory na tier na naka-back, sa mga lokal na non-cloud na runtime, ng isang matibay SQLite tier (`ccr_blocks`, naka-on bilang default) kaya ang isang block ay nakaligtas sa pagpapaalis o isang pag-restart hanggang sa TTL nito ay maubusan ng — maliban sa mga bloke ng higit sa 512 KB at cloud runtime, na nananatiling memory-only. Ang bawat bloke ay limitado sa 2 MiB, bawat punong-guro sa 16 MiB, at ang pandaigdigang tindahan sa 64 MiB. Default ang mga entry sa 24 na oras TTL (maximum na pitong araw). Ang buong pagkuha MCP ay limitado sa 256 KiB; mananatiling available ang malalaking bloke sa pamamagitan ng ranged at grep mode. Ang storage, retrieval, listing, inspeksyon, pagtanggal, at mga istatistika ay ibinukod ng na-authenticate na API-key principal. Ang mga talaan ng audit ay naglalaman ng mga hash at laki ng metadata, hindi kailanman nilalaman. Ang mga detalyeng nakaharap sa operator (ang dalawang marker, mga kinakailangan ng kliyente, `codemode:false`, mga saklaw ng bawat tool, pagination, at isang diagnostic matrix) ay nakatira sa [Mga Compression Engine → Mga Kinakailangan / gabay ng operator](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
 
-Iniuulat ng `omniroute_compression_status` nang hiwalay ang compression ng paglalarawan ng MCP sa ilalim ng
-`analytics.mcpDescriptionCompression`. Ang mga value na iyon ay mga pagtatantya sa laki ng metadata para sa mga
-paglalarawang maaaring ilista ng MCP (`tools`, `prompts`, `resources`, at `resourceTemplates`); hindi ang mga ito mga resibo
-ng paggamit ng provider at minarkahan ang mga ito ng `source: "mcp_metadata_estimate"`.
+Iniuulat ng `omniroute_compression_status` ang MCP description compression nang hiwalay sa ilalim ng `analytics.mcpDescriptionCompression`. Ang mga halagang iyon ay mga pagtatantya sa laki ng metadata para sa mga nakalistang paglalarawan MCP (`tools`, `prompts`, `resources`, at `resourceTemplates`); hindi sila mga resibo sa paggamit ng provider at minarkahan ng `source: "mcp_metadata_estimate"`.
 
-### Filter ng Accessibility Tree ng MCP (v3.8.0)
+### MCP Accessibility Tree Filter (v3.8.0)
 
-Hiwalay sa mga compression tool sa itaas, may kasamang post-execution filter ang OmniRoute na
-nagko-compress sa mga **resulta ng tool** ng mga MCP browser/accessibility tool bago ibalik ang mga ito sa
-agent. Ang filter na ito ay hindi mismo isang tool — awtomatiko itong tumatakbo sa anumang resulta ng tool na naglalaman ng
-detalyadong accessibility-tree o browser-snapshot text (≥2000 character).
+Hiwalay sa mga compression tool sa itaas, OmniRoute ay may kasamang post-execution na filter na nag-compress sa** resulta ng tool** ng MCP browser/accessibility tools bago sila ibalik sa ahente. Ang filter na ito ay hindi mismo isang tool — ito ay tumatakbo nang malinaw sa anumang resulta ng tool na naglalaman ng verbose accessibility-tree o browser-snapshot text (≥ 2000 chars).
 
 Mga pangunahing gawi:
 
-- Pinagsasama ang ≥30 magkakasunod at nauulit na sibling line sa buod ng simula + dulo
+- Kino-collapse ang ≥ ng 30 magkakasunod na paulit-ulit na linya ng magkapatid sa head + tail summary
 - Pinapanatili ang mga `[ref=eXX]` anchor na kinakailangan ng Playwright/computer-use
-- Sapilitang pinuputol ang sobrang laking text (>50,000 character) na may pahiwatig sa pag-navigate
-- Inaasahang matitipid: **60–80%** sa mga browser snapshot payload
+- Mga hard-truncate na sobrang laki ng text (> 50,000 chars) na may hint ng navigation
+- Inaasahang matitipid:** 60–80%** sa mga snapshot payload ng browser
 
-Configuration: `compression.mcpAccessibility` sa mga global setting (migration 056).
-Implementation: `open-sse/services/compression/engines/mcpAccessibility/`.
-Buong dokumentasyon: [Mga Compression Engine — Filter ng Accessibility Tree ng MCP](../compression/COMPRESSION_ENGINES.md#mcp-accessibility-tree-filter).
+Configuration: `compression.mcpAccessibility` sa mga pandaigdigang setting (migration 056). Pagpapatupad: `open-sse/services/compression/engines/mcpAccessibility/`. Mga kumpletong doc: [Mga Compression Engine — MCP Accessibility Tree Filter](../compression/COMPRESSION_ENGINES.md#mcp-accessibility-tree-filter).
 
-Tingnan ang [Mga Compression Engine](../compression/COMPRESSION_ENGINES.md) at [RTK Compression](../compression/RTK_COMPRESSION.md) para sa
-runtime compression model na ginagamit ng mga tool na ito.
+Tingnan ang [Compression Engines](../compression/COMPRESSION_ENGINES.md) at [RTK Compression](../compression/RTK_COMPRESSION.md) para sa runtime compression model sa likod ng mga tool na ito.
 
 ## Mga Tool ng 1Proxy (3)
 
