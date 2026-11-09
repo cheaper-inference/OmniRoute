@@ -32,12 +32,14 @@ import {
   buildPassthroughTestBody,
   shouldSwitchToVisibleFilter,
   type CompatModelRow,
-  type CompatByProtocolMap,
 } from "../providerPageHelpers";
 import { ModelVisibilityToolbar } from "./ModelRow";
 import { sortModelsFreeFirst, isModelFreeBadge } from "@/shared/utils/freeModels";
 import { useStrictFreeBadge } from "./useStrictFreeBadge";
 import PassthroughModelRow from "./PassthroughModelRow";
+import { useModelVisionOverrides } from "../hooks/useModelVisionOverrides";
+import { useModelOutputOverrides } from "../hooks/useModelOutputOverrides";
+import { useProviderContextOverrides } from "../hooks/useProviderContextOverrides";
 
 // ---------------------------------------------------------------------------
 // Props
@@ -142,7 +144,7 @@ export default function PassthroughModelsSection({
   const [adding, setAdding] = useState(false);
   const [modelFilter, setModelFilter] = useState("");
   const [testingAll, setTestingAll] = useState(false);
-  const [testProgress, setTestProgress] = useState<{ done: number; total: number } | null>(null);
+  const [_testProgress, setTestProgress] = useState<{ done: number; total: number } | null>(null);
   const [localAutoHideFailed, setLocalAutoHideFailed] = useState(false);
   const autoHideFailed =
     autoHideFailedProp !== undefined ? autoHideFailedProp : localAutoHideFailed;
@@ -206,7 +208,7 @@ export default function PassthroughModelsSection({
           await onToggleHidden(model.modelId, true);
           hiddenCount++;
         }
-      } catch (e) {
+      } catch (_e) {
         tally.error++;
         onModelTestStatusChange?.(model.modelId, "error");
       }
@@ -226,6 +228,11 @@ export default function PassthroughModelsSection({
     setTestingAll(false);
     setTestProgress(null);
   };
+
+  const outputOverrides = useModelOutputOverrides(providerId, t);
+  const visionOverrides = useModelVisionOverrides(providerId, t, onModelsChanged);
+  const { contextOverrides, savingContextModelId, saveContextWindowOverride } =
+    useProviderContextOverrides(providerId, t);
 
   const providerAliases = useMemo(
     () =>
@@ -247,6 +254,7 @@ export default function PassthroughModelsSection({
       source: string;
       isFree: boolean;
       isHidden: boolean;
+      supportsVision?: boolean;
     }> = [];
     const seenModelIds = new Set<string>();
 
@@ -280,6 +288,7 @@ export default function PassthroughModelsSection({
           { strict: strictFreeBadge }
         ),
         isHidden: isModelHidden(model.id),
+        supportsVision: model.supportsVision,
       });
       seenModelIds.add(model.id);
     };
@@ -323,6 +332,7 @@ export default function PassthroughModelsSection({
           { strict: strictFreeBadge }
         ),
         isHidden: isModelHidden(modelId),
+        supportsVision: customModel?.supportsVision,
       });
       seenModelIds.add(modelId);
     }
@@ -450,56 +460,79 @@ export default function PassthroughModelsSection({
             onSortFreeFirstChange={setSortFreeFirst}
           />
           <div className="grid grid-cols-1 gap-3 xl:grid-cols-2">
-            {displayModels.map(({ modelId, fullModel, alias, isHidden, source, isFree }) => (
-              <PassthroughModelRow
-                key={fullModel as string}
-                modelId={modelId}
-                fullModel={fullModel}
-                provider={providerId}
-                endpointInfo={(() => {
-                  const discovered = availableModels.find((row) => row.id === modelId);
-                  const selected = customModelMap.get(modelId);
-                  const catalog = catalogModels.find((row) => row.id === modelId);
-                  return {
-                    supportedEndpoints:
-                      selected?.supportedEndpoints ??
-                      discovered?.supportedEndpoints ??
-                      catalog?.supportedEndpoints,
-                    endpointCapabilitySource:
-                      selected?.endpointCapabilitySource ??
-                      discovered?.endpointCapabilitySource ??
-                      catalog?.endpointCapabilitySource,
-                    discoveredEndpoints: discovered?.supportedEndpoints,
-                    resettable: Boolean(
-                      discovered && selected?.endpointCapabilitySource === "operator"
-                    ),
-                    onChanged: onModelsChanged,
-                    adapterStatuses: endpointAdapters,
-                  };
-                })()}
-                alias={alias}
-                source={source}
-                isFree={isFree}
-                isHidden={isHidden}
-                combos={comboUsage?.[modelId]}
-                copied={copied}
-                onCopy={onCopy}
-                onDeleteAlias={source === "alias" && alias ? () => onDeleteAlias(alias) : undefined}
-                onSetAlias={(a) => onSetAlias(modelId, a)}
-                t={t}
-                showDeveloperToggle
-                effectiveModelNormalize={effectiveModelNormalize}
-                effectiveModelPreserveDeveloper={effectiveModelPreserveDeveloper}
-                getUpstreamHeadersRecord={(p) => getUpstreamHeadersRecord(modelId, p)}
-                saveModelCompatFlags={saveModelCompatFlags}
-                compatDisabled={compatSavingModelId === modelId}
-                onToggleHidden={onToggleHidden}
-                togglingHidden={togglingModelId === modelId}
-                onTestModel={onTestModel}
-                testStatus={modelTestStatus?.[modelId] || null}
-                testingModel={testingModelId === modelId}
-              />
-            ))}
+            {displayModels.map(
+              ({ modelId, fullModel, alias, isHidden, source, isFree, supportsVision }) => {
+                const discovered = availableModels.find((row) => row.id === modelId);
+                const selected = customModelMap.get(modelId);
+                const catalog = catalogModels.find((row) => row.id === modelId);
+                const effectiveVision =
+                  visionOverrides.overrides[modelId] ??
+                  supportsVision ??
+                  selected?.supportsVision ??
+                  discovered?.supportsVision ??
+                  catalog?.supportsVision;
+
+                return (
+                  <PassthroughModelRow
+                    key={fullModel as string}
+                    modelId={modelId}
+                    fullModel={fullModel}
+                    provider={providerId}
+                    endpointInfo={(() => {
+                      return {
+                        supportedEndpoints:
+                          selected?.supportedEndpoints ??
+                          discovered?.supportedEndpoints ??
+                          catalog?.supportedEndpoints,
+                        endpointCapabilitySource:
+                          selected?.endpointCapabilitySource ??
+                          discovered?.endpointCapabilitySource ??
+                          catalog?.endpointCapabilitySource,
+                        discoveredEndpoints: discovered?.supportedEndpoints,
+                        resettable: Boolean(
+                          discovered && selected?.endpointCapabilitySource === "operator"
+                        ),
+                        onChanged: onModelsChanged,
+                        adapterStatuses: endpointAdapters,
+                      };
+                    })()}
+                    alias={alias}
+                    source={source}
+                    isFree={isFree}
+                    isHidden={isHidden}
+                    combos={comboUsage?.[modelId]}
+                    copied={copied}
+                    onCopy={onCopy}
+                    onDeleteAlias={
+                      source === "alias" && alias ? () => onDeleteAlias(alias) : undefined
+                    }
+                    onSetAlias={(a) => onSetAlias(modelId, a)}
+                    t={t}
+                    showDeveloperToggle
+                    effectiveModelNormalize={effectiveModelNormalize}
+                    effectiveModelPreserveDeveloper={effectiveModelPreserveDeveloper}
+                    getUpstreamHeadersRecord={(p) => getUpstreamHeadersRecord(modelId, p)}
+                    saveModelCompatFlags={saveModelCompatFlags}
+                    compatDisabled={compatSavingModelId === modelId}
+                    onToggleHidden={onToggleHidden}
+                    togglingHidden={togglingModelId === modelId}
+                    onTestModel={onTestModel}
+                    testStatus={modelTestStatus?.[modelId] ?? null}
+                    testingModel={testingModelId === modelId}
+                    supportsVision={effectiveVision}
+                    visionOverride={visionOverrides.overrides[modelId]}
+                    onSaveVisionOverride={visionOverrides.save}
+                    savingVisionOverride={visionOverrides.savingModelId !== null}
+                    maxOutputTokenOverride={outputOverrides.overrides[modelId] ?? null}
+                    onSaveMaxOutputTokenOverride={outputOverrides.save}
+                    savingOutputOverride={outputOverrides.savingModelId === modelId}
+                    contextWindowOverride={contextOverrides[modelId] ?? null}
+                    onSaveContextWindowOverride={saveContextWindowOverride}
+                    savingContextOverride={savingContextModelId === modelId}
+                  />
+                );
+              }
+            )}
           </div>
           {filteredModels.length === 0 && modelFilter && (
             <p className="py-2 text-sm text-text-muted">
