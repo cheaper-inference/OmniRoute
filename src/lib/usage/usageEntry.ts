@@ -14,6 +14,8 @@
  * `getLoggedInputTokens`/`getLoggedOutputTokens`/`getPromptCache*Tokens` in
  * `./tokenAccounting` accept both and extract the right fields.
  */
+import type { AgentContext } from "./usageHistory/agentSessionUsage";
+
 export interface UsageEntry {
   provider?: string | null;
   model?: string | null;
@@ -43,4 +45,6 @@ export interface UsageEntry {
   endpoint?: string | null;
   /** Opaque CLIProxyAPI auth_index. Never a label, path, token, or email. */
   cpaAuthIndex?: string | null;
+  /** Coding-agent session/project; recorded atomically with this usage row. */
+  agentContext?: AgentContext | null;
 }

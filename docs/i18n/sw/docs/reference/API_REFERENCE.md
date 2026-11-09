@@ -981,31 +981,26 @@ uhakika huishia katika `needs_confirmation` badala ya kutumwa mara mbili. Chanzo
 
 ## Matumizi ya kujihudumia (`/api/usage/om-usage`)
 
-Ufunguo wowote wa API unaweza kusoma matumizi na viwango vyake vya matumizi — hakuna
-uthibitishaji wa usimamizi unaohitajika. Hiki ndicho kituo ambacho mteja (CLI, paneli ya
-OmniCopilot) hutumia kumwonyesha mwenye ufunguo matumizi yake.
+Kitufe chochote API kinaweza kusoma** yake mwenyewe** matumizi na upendeleo — hakuna usimamizi auth. Huu ndio mwisho ambao mteja (CLI, paneli ya OmniCopilot ) hutumia kumwonyesha mwenye ufunguo matumizi yake.
 
 ```bash
-# Muundo wa maandishi (mkataba wa kihistoria — maandishi wazi kwa terminal)
+# Text form (the historical contract — plain text for a terminal)
 curl -H "Authorization: Bearer <your-api-key>" \
   http://localhost:20128/api/usage/om-usage
 
-# Muundo uliopangwa — kile ambacho kiolesura hutumia
+# Structured form — what a UI consumes
 curl -H "Authorization: Bearer <your-api-key>" \
   "http://localhost:20128/api/usage/om-usage?format=json"
 ```
 
-Ufunguo lazima uwe na **`allowUsageCommand`** iliyowezeshwa (imezimwa kwa chaguo-msingi —
-kidhibiti cha funguo za API kwenye dashibodi huibadilisha kwa kila ufunguo). Bila hiyo,
-kituo hurudisha `403`.
+Ufunguo lazima uwe nao**`allowUsageCommand`** kuwezeshwa (kuzimwa kwa chaguo-msingi — kidhibiti cha ufunguo wa API cha dashibodi hukigeuza kwa kila kitufe). Bila hiyo mwisho hujibu `403`.
 
-`?format=json` hurudisha muundo unaotofautisha hali ili mpigaji asiwahi kusoma sehemu ya data
-kutoka kwenye jibu la kukataliwa. Linapofaulu:
+`?format=json` hurejesha umbo lililobaguliwa ili mpigaji simu kamwe asisome sehemu ya data bila kukataa. Juu ya mafanikio:
 
 ```jsonc
 {
   "allowed": true,
-  // huwepo tu wakati ufunguo umechagua vikomo vya matumizi kwa kila ufunguo (USD ya kila siku/kila wiki):
+  // present only when the key opted into per-key usage limits (daily/weekly/5-hour USD):
   "personal": {
     "dailySpentUsd": 1.25,
     "dailyLimitUsd": 5,
@@ -1014,9 +1009,9 @@ kutoka kwenye jibu la kukataliwa. Linapofaulu:
     "weeklyLimitUsd": 20,
     "weeklyResetAtIso": "…" /* … */,
   },
-  // muhtasari wa kiwango cha matumizi cha mtoa huduma aliyechaguliwa, au null wakati bado hakuna kilichohifadhiwa:
+  // the selected provider quota snapshot, or null when nothing is cached yet:
   "provider": { "connectionId": "…", "provider": "claude", "plan": "…", "quotas": {/* … */} },
-  // muhtasari wa kila muunganisho, ili kiolesura kiweze kuonyesha watoa huduma kadhaa kwa kulinganisha:
+  // every connection's snapshot, so a UI can render several providers side by side:
   "providers": [
     { "connectionId": "…", "provider": "claude" /* … */ },
     { "provider": "codex" /* … */ },
@@ -1024,60 +1019,49 @@ kutoka kwenye jibu la kukataliwa. Linapofaulu:
 }
 ```
 
-Linapokataliwa (`401` ufunguo mbaya / `403` hairuhusiwi), njia hiyo hiyo hurudisha
-`{ "allowed": false, "error": { "message": "…" } }` — `personal`/`provider`
-iliyopo lakini tupu (ufunguo unaruhusiwa, hakuna taarifa iliyojifunzwa bado) ni hali
-tofauti na kukataliwa, na ni muundo wa JSON pekee unaotofautisha hali hizo.
+Inapokataa (`401` bad key / `403` hairuhusiwi) njia hiyo hiyo inarudisha `{ "allowed": false, "error": { "message": "…" } }` — `personal`/`provider` ya sasa-lakini-tupu (ufunguo unaruhusiwa, hakuna kitu kilichojifunza bado) ni hali tofauti na kukataa, na ni fomu ya JSON pekee inayowatofautisha.
 
-**Uthibitishaji:** ufunguo wa API wa Bearer wa mpigaji mwenyewe, unaothibitishwa kwa
-`isValidApiKey` — huu **si** uso wa usimamizi (`/api/keys/…`), ambao unaendelea kulindwa na
-`requireManagementAuth`.
+**Uthibitishaji:** ufunguo wa API wa mpigaji mwenyewe, uliothibitishwa na `isValidApiKey` — huu ni _not_ uso wa usimamizi (`/api/keys/…`), ambao unabaki nyuma `requireManagementAuth`.
 
-### Asilimia za Kiwango cha Matumizi Ghafi dhidi ya Zilizorekebishwa kwa Kikomo
+### Mbichi dhidi ya Asilimia ya Sehemu Iliyorekebishwa ya Cutoff
 
-Wakati wa kutumia `/api/usage/om-usage`, wapigaji wanapaswa kuzingatia tofauti kati ya
-asilimia zinazoonyeshwa na **matokeo ya maandishi wazi** na matokeo yaliyopangwa ya **JSON**:
+Wakati wa kutumia `/api/usage/om-usage`, wapigaji wanapaswa kutambua tofauti kati ya asilimia iliyotolewa na** pato la maandishi wazi** na muundo** pato JSON** :
 
-| Kipengele               | Muundo wa maandishi wazi (`/api/usage/om-usage` / `@@om-usage`)                                      | Muundo wa JSON (`?format=json`)                                                                 |
-| :---------------------- | :--------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------- |
-| **Sehemu ya matokeo**   | `NN% left` (mf. `20% left`)                                                                          | `provider.quotas` / `providers[].quotas`                                                        |
-| **Kipimo**              | **Ruhusa inayoweza kutumika iliyorekebishwa kwa kikomo**: uwezo uliobaki juu ya kizingiti cha kikomo | **Kiwango ghafi cha matumizi kutoka kwa mtoa huduma**: kipimo cha mtoa huduma kisichorekebishwa |
-| **Uongezaji wa kikomo** | Huongezwa kwa kipimo kupitia `effectiveRemainingPercent()` ili akiba iliyolindwa isomeke `0% left`   | Hakuna (thamani ghafi za muhtasari kama zilivyoripotiwa na mtoa huduma)                         |
-| **Data ya kizingiti**   | Hujumuishwa katika asilimia inayoonyeshwa                                                            | Huhifadhiwa katika `quotaWindowThresholds` kwa kila muunganisho (au chaguo-msingi za seva)      |
-| **Mtumiaji mkuu**       | CLI shirikishi, vidokezo vya terminal, waendeshaji binadamu                                          | Miunganisho ya kiprogramu, dashibodi, uchanganuzi, vifuatiliaji vya malipo                      |
+| Kipengele              | Umbizo la maandishi wazi (`/api/usage/om-usage` / `@@om-usage`)                                 | umbizo JSON (`?format=json`)                                                                   |
+| :--------------------- | :---------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------- |
+| **Sehemu ya pato**     | `NN% left` (kwa mfano, `20% left`)                                                              | `provider.quotas` / `providers[].quotas`                                                       |
+| **Kipimo**             | **Posho inayoweza kutumika iliyorekebishwa** : uwezo uliosalia juu ya kizingiti cha kukata      | **Kiwango kibichi cha sehemu ya juu ya mto** : kipimo cha mtoa huduma ambacho hakijarekebishwa |
+| **Upanuzi wa kukata**  | Imeongezwa kupitia `effectiveRemainingPercent()` ili hifadhi iliyolindwa isomeke kama `0% left` | Hakuna (thamani mbichi za muhtasari kama ilivyoripotiwa na mtoa huduma)                        |
+| **Data ya kizingiti**  | Imejumuishwa katika asilimia iliyoonyeshwa                                                      | Imehifadhiwa katika `quotaWindowThresholds` kwa muunganisho (au chaguo-msingi za seva)         |
+| **Mtumiaji wa msingi** | Interactive CLIs, terminal prompts, waendeshaji binadamu                                        | Miunganisho ya programu, dashibodi, uchanganuzi, vifuatiliaji vya malipo                       |
 
-#### Fomula ya Marekebisho ya Kikomo
+#### Mfumo wa Marekebisho ya Kukatwa
 
-OmniRoute inaauni vikomo vya kiwango cha matumizi vya kinga ili kuzuia kuisha kwa kiwango cha
-matumizi cha mtoa huduma wa juu (hus konfigurishwa kupitia muunganisho
-`quotaWindowThresholds`, chaguo-msingi za mtoa huduma, au mipangilio ya jumla ya ustahimilivu).
-Wakati kizingiti cha kikomo (kwa mfano, `cutoff = 25%`) kinatumika kwenye dirisha la kiwango
-cha matumizi, kiwasilishaji cha maandishi hukokotoa ruhusa iliyobaki kama ifuatavyo:
+OmniRoute inaauni vipunguzo vya mgao vinavyotumika ili kuzuia uchovu wa juu (imesanidiwa kupitia muunganisho `quotaWindowThresholds`, chaguomsingi za watoa huduma, au mipangilio ya kimataifa ya ustahimilivu). Wakati kizingiti cha kukatwa (kwa mfano, `cutoff = 25%`) kinatumika kwenye dirisha la kiasi, kionyeshi cha maandishi hukokotoa posho iliyosalia kama:
 
-- Ikiwa `remaining <= cutoff`: hurejesha `0%`.
-- Ikiwa `remaining > cutoff`: hurejesha `((remaining - cutoff) / (100 - cutoff)) * 100`.
+- Ikiwa `remaining <= cutoff`: inarudisha `0%`.
+- Ikiwa `remaining > cutoff`: inarudisha `((remaining - cutoff) / (100 - cutoff)) * 100`.
 
-Matokeo ya maandishi yaliyoumbizwa huzungushwa hadi nambari kamili iliyo karibu
-(`Math.round(...)`).
+Toleo la maandishi lililoumbizwa huzunguka hii hadi nambari kamili iliyo karibu zaidi (`Math.round(...)`).
 
 #### Mfano wa Kielelezo
 
-Fikiria dirisha la mtoa huduma lenye **60% matumizi ghafi** (hivyo **40% ya kiasi ghafi kilichosalia**) na kizingiti kilichosanidiwa cha **25% cha kiasi kilichosalia**:
+Fikiria dirisha la mtoa huduma na** 60% ya matumizi ghafi** (kwa hivyo** 40% ya mgao ghafi uliosalia** ) na iliyosanidiwa** 25% iliyosalia-kukatwa kwa mgawo** kizingiti:
 
-| Uwakilishi                           | Hesabu                                             | Kilichosalia |            Kilichotumika Kinachodokezwa            |
-| :----------------------------------- | :------------------------------------------------- | :----------: | :------------------------------------------------: |
-| **JSON ghafi (`?format=json`)**      | Picha ya hali kutoka upstream (`quotas[window]`)   |   **40%**    |                      **60%**                       |
-| **Muundo wa maandishi (`NN% left`)** | `((40 - 25) / (100 - 25)) * 100 = (15 / 75) * 100` |   **20%**    | **80%** (ikiwa inahesabiwa kama `100 - remaining`) |
+| Uwakilishi                           | Hesabu                                             | Iliyosalia |            Inamaanisha Kutumika             |
+| :----------------------------------- | :------------------------------------------------- | :--------: | :-----------------------------------------: |
+| **JSON mbichi (`?format=json`)**     | Picha ya juu ya mkondo (`quotas[window]`)          |  **40%**   |                   **60%**                   |
+| **Umbizo la maandishi (`NN% left`)** | `((40 - 25) / (100 - 25)) * 100 = (15 / 75) * 100` |  **20%**   | **80%** (ikiwa unahesabu `100 - remaining`) |
 
-- **Kwa nini maandishi yanaonyesha 20% iliyosalia:** Kati ya 40% ya kiasi halisi kilichosalia kwenye akaunti, 25% imehifadhiwa na sera ya kikomo. Mpigaji ana 15% tu kati ya 75% ya nafasi ya matumizi inayoweza kutumika iliyosalia kabla ya kipanga njia kuacha kuelekeza maombi kwenye muunganisho huu. Upimaji huboresha ishara ya muunganisho ya kuisha (`0% left`) hasa wakati uelekezaji utakaposimamishwa.
-- **Kwa nini JSON huhifadhi thamani ghafi:** Mzigo wa JSON hurejesha picha kamili ya hali ya mtoa huduma (`UsageSnapshot`), ili zana za nje zipate matumizi halisi ya upstream na `quotaWindowThresholds` za kiwango cha muunganisho bila upimaji wa kupoteza usahihi unaofanywa na seva.
+- **Kwa nini maandishi yanaonyesha 20% iliyobaki:** Kati ya 40% ya kiasi halisi kilichosalia kwenye akaunti, 25% imehifadhiwa na sera ya kukatwa. Mpigaji simu ana 15% pekee kati ya 75% ya chumba cha habari kinachoweza kutumika kilichosalia kabla ya kipanga njia kuacha kuelekeza kwenye muunganisho huu. Kuongeza kasi huhakikisha muunganisho unaashiria uchovu (`0% left`) haswa wakati uelekezaji utakoma.
+- **Kwa nini JSON huhifadhi maadili ghafi:** Upakiaji wa JSON hurejesha muhtasari wa mtoa huduma (`UsageSnapshot`) ili zana za nje ziwe na ufikiaji wa utumiaji wa mkondo wa juu wa ukweli wa ardhini na `quotaWindowThresholds` ya kiwango cha muunganisho bila kuongeza hasara ya upande wa seva.
 
-#### Mwongozo wa Kuhamisha Watumiaji
+#### Mwongozo wa Uhamiaji wa Watumiaji
 
-Iwapo muunganisho wa nje (kama vile programu-jalizi ya kihariri au kiendelezi cha wakala) ulikuwa ukikusanya data kutoka kwenye endpoint ya maandishi (`NN% left`) na kuhesabu asilimia iliyotumika kama `100 - NN`, kuhamia kwenye `?format=json` kunamaanisha:
+Ikiwa muunganisho wa nje (kama vile programu-jalizi ya kihariri au kiendelezi cha wakala) hapo awali ulikwangua mwisho wa maandishi (`NN% left`) na kukokotoa asilimia iliyotumika kama `100 - NN`, kuhamia `?format=json` kunamaanisha:
 
-- Kusoma thamani ghafi za JSON kutaonyesha **matumizi halisi ya upstream** (60% iliyotumika katika mfano ulio hapo juu).
-- Ikiwa muunganisho unataka kuhifadhi maana ya kiasi kinachoweza kutumika ya endpoint ya maandishi, unaweza kutathmini fomula ya kiasi halisi kilichosalia upande wa mteja kwa kutumia `quotaWindowThresholds` kwa mibatilisho ya kiwango cha muunganisho.
+- Kusoma maadili ghafi ya JSON kutaonyesha** matumizi halisi ya mto** (60% imetumika katika mfano hapo juu).
+- Ikiwa muunganisho ungependa kuhifadhi semantiki za posho zinazoweza kutumika za mwisho wa maandishi, inaweza kutathmini upande wa mteja wa fomula bora kwa kutumia `quotaWindowThresholds` kwa ubatilishaji wa kiwango cha muunganisho.
 
 ---
 
@@ -1162,46 +1146,38 @@ OmniRoute hujibu endpointi tatu za usimamizi za [CLIProxyAPI](https://github.com
 
 ## Dashibodi na Usimamizi
 
-Njia za usimamizi (`/api/*` isipokuwa uthibitishaji wa umma wa kuingia) **hazijaidhinishwi** na funguo za kawaida za API za inference. Familia za vitambulisho, ruhusa, na mifano ya curl:
-[Uthibitishaji wa Usimamizi](../guides/MANAGEMENT-AUTH.md).
+Njia za usimamizi (`/api/*` isipokuwa auth/login za umma ) ni** sivyo** iliyoidhinishwa na funguo za kawaida za uelekezaji API. Familia za kitambulisho, upeo, na mifano curl: [Uthibitishaji wa Usimamizi](../guides/MANAGEMENT-AUTH.md).
 
 ### Uthibitishaji
 
-| Endpoint                      | Method   | Description                                                                                                                                                                                                                                                                                                            |
-| ----------------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/auth/login`             | POST     | Kuingia                                                                                                                                                                                                                                                                                                                |
-| `/api/auth/logout`            | POST     | Kutoka                                                                                                                                                                                                                                                                                                                 |
-| `/api/settings/require-login` | GET/POST | Hali ya kuingia (GET, ya umma). POST huweka nenosiri / hubadilisha hali ya kuingia: ni ya waendeshaji pekee baada ya nenosiri kuwepo (kikao cha dashibodi, CLI ya ndani, au kuingia kumezimwa — funguo za API na tokeni za `oma_` hupata `403`); kikao cha dashibodi hutuma `currentPassword` ili kubadilisha nenosiri |
+| Mwisho                        | Mbinu    | Maelezo                                                                                                                                                                                                                                                                                    |
+| ----------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `/api/auth/login`             | POST     | Ingia                                                                                                                                                                                                                                                                                      |
+| `/api/auth/logout`            | POST     | Ondoka                                                                                                                                                                                                                                                                                     |
+| `/api/settings/require-login` | GET/POST | Hali ya kuingia (GET, public). POST huweka nenosiri / kugeuza kuingia: opereta-pekee mara tu nenosiri lipo (kipindi cha dashibodi, local CLI, au kuingia kimezimwa — API funguo na `oma_` tokeni kupata `403`); kipindi cha dashibodi hutuma `currentPassword` kuchukua nafasi ya nenosiri |
 
-### Usimamizi wa Watoa Huduma
+### Usimamizi wa Mtoa huduma
 
-| Endpoint                                | Method                    | Description                                                                                                                                                                                       |
-| --------------------------------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/providers`                        | GET/POST                  | Orodhesha / unda watoa huduma                                                                                                                                                                     |
-| `/api/providers/[id]`                   | GET/PUT/DELETE            | Simamia mtoa huduma                                                                                                                                                                               |
-| `/api/providers/[id]/test`              | POST                      | Jaribu muunganisho wa mtoa huduma                                                                                                                                                                 |
-| `/api/providers/[id]/models`            | GET                       | Orodhesha miundo ya mtoa huduma                                                                                                                                                                   |
-| `/api/providers/validate`               | POST                      | Thibitisha usanidi wa mtoa huduma                                                                                                                                                                 |
-| `/api/providers/bulk`                   | POST                      | Ongeza kwa wingi funguo za API za mtoa huduma MMOJA                                                                                                                                               |
-| `/api/providers/import`                 | POST                      | Leta ORODHA mseto ya watoa huduma kutoka kwenye faili ya CSV/JSON iliyochanganuliwa (#6836); matokeo ya kushindwa kwa sehemu kwa kila safu                                                        |
-| `/api/provider-nodes*`                  | Various                   | Usimamizi wa nodi za watoa huduma                                                                                                                                                                 |
-| `/api/provider-models`                  | GET/POST/PUT/PATCH/DELETE | Miundo maalum na ubatilishaji wa kila muundo (ongeza, sasisha, ficha/onyesha, futa)                                                                                                               |
-| `/api/provider-models/validate-and-add` | POST                      | Uthibitishaji mkali wa muunganisho unaothibitishwa na usimamizi na wa kuchaguliwa, pamoja na usajili wa atomiki wa muundo maalum; tazama [Uthibitishaji wa muundo](../guides/MODEL-VALIDATION.md) |
+| Mwisho                                  | Mbinu                     | Maelezo                                                                                                                                                                                              |
+| --------------------------------------- | ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/providers`                        | GET/POST                  | Orodhesha / unda watoa huduma                                                                                                                                                                        |
+| `/api/providers/[id]`                   | GET/PUT/DELETE            | Dhibiti mtoaji                                                                                                                                                                                       |
+| `/api/providers/[id]/test`              | POST                      | Jaribu muunganisho wa mtoaji                                                                                                                                                                         |
+| `/api/providers/[id]/models`            | GET                       | Orodhesha mifano ya watoa huduma                                                                                                                                                                     |
+| `/api/providers/validate`               | POST                      | Thibitisha usanidi wa mtoa huduma                                                                                                                                                                    |
+| `/api/providers/bulk`                   | POST                      | Vifunguo vya kuongeza API kwa wingi kwa mtoaji wa ONE                                                                                                                                                |
+| `/api/providers/import`                 | POST                      | Ingiza mtoa huduma LIST kutoka kwa faili iliyochanganuliwa CSV/JSON (#6836); kwa kila safu-mlalo matokeo ya kutofaulu kwa sehemu                                                                     |
+| `/api/provider-nodes*`                  | Mbalimbali                | Usimamizi wa nodi za mtoaji                                                                                                                                                                          |
+| `/api/provider-models`                  | GET/POST/PUT/PATCH/DELETE | Miundo maalum na ubatilishaji wa kila modeli (ongeza, sasisha, hide/show, futa)                                                                                                                      |
+| `/api/provider-models/validate-and-add` | POST                      | Imethibitishwa na usimamizi, chagua kuingia katika uthibitishaji wa muunganisho madhubuti na usajili wa kielelezo maalum cha atomiki; tazama [uthibitishaji wa Mfano](../guides/MODEL-VALIDATION.md) |
 
-Kwa miundo iliyosawazishwa/iliyoletwa, `PUT /api/provider-models` hukubali `provider`, `modelId`, na
-`maxOutputTokenOverride`: nambari kamili chanya huweka kikomo cha tokeni za matokeo kwa mikono, na `null`
-huiondoa ili kurejesha chaguo-msingi. `GET /api/provider-models?provider=<provider>` hurejesha thamani hizi katika
-`modelOutputOverrides`, ikijumuisha miundo isiyo na safu ya muundo maalum. Ubatilishaji huu hutumia uwezo wa wakati wa utekelezaji wa
-`max_output_tokens` na hudumu baada ya usawazishaji upya wa muundo. Ukurasa wa mtoa huduma anayeoana na OpenAI hutoa vidhibiti hivyo hivyo vya kuhariri/kufuta na huweka alama kwenye miundo yenye usaidizi wa wazi wa vision.
+Kwa miundo ya synced/imported, `PUT /api/provider-models` inakubali `provider`, `modelId`, na `maxOutputTokenOverride`: nambari kamili chanya huweka kofia ya tokeni ya mwongozo, na `null` huifuta ili kurejesha chaguo-msingi. `GET /api/provider-models?provider=<provider>` hurejesha maadili haya `modelOutputOverrides`, ikijumuisha mifano isiyo na safu mlalo ya kielelezo maalum. Ubatilishaji hutumia uwezo wa `max_output_tokens` wa wakati wa utekelezaji na huendelea kusawazisha muundo. Ukurasa wa mtoa huduma unaooana na OpenAI unatoa vidhibiti sawa edit/clear na alama za miundo kwa usaidizi wa maono dhahiri.
 
-Kwenye nodi ya mtoa huduma anayeoana, njia za kuandika (`POST`, `PUT`, `PATCH`, `DELETE` na
-`/api/provider-models/validate-and-add`) huhifadhi kitambulisho cha muundo kama kitambulisho tupu cha upstream: kitambulisho
-kilichobandikwa kutoka kwenye orodha yenye kiambishi awali huondolewa mfululizo wa viambishi awali vya nodi yenyewe, na
-majibu huonyesha tena kitambulisho kilichohifadhiwa. Vitambulisho vilivyogawanywa kwa mistari vya watoa huduma wa kanoni (kwa mfano `nvidia/nemotron-…`) huhifadhiwa jinsi vilivyo. `/v1/models` haitoi kamwe kitambulisho cha muundo cha `<prefix>/<prefix>/<model>` kilichorundikwa.
+Kwenye nodi ya mtoa huduma inayoendana, njia za uandishi (`POST`, `PUT`, `PATCH`, `DELETE` na `/api/provider-models/validate-and-add`) huhifadhi kitambulisho cha kielelezo kama kitambulisho cha juu cha juu: kitambulisho kilichobandikwa kutoka kwenye orodha iliyoamrishwa kina mrundikano wowote wa kiambishi awali wa nodi iliyoanguka, na majibu yanarudia kitambulisho kilichohifadhiwa. Vitambulisho vilivyopunguzwa vya watoa huduma wa kanuni (km `nvidia/nemotron-…`) huhifadhiwa neno moja. `/v1/models` kamwe haitoi kitambulisho `<prefix>/<prefix>/<model>` kilichopangwa.
 
-Nodi maalum za Chat Completions hubadilisha chaguo wazi za kutotumia ufikiri ili ziendane na mfumo wa nyuma wa upstream. Jaribio la muunganisho likifanikiwa huchagua kiotomatiki vidhibiti vya chat-template kwa kila kitambulisho halisi cha modeli ambacho ingizo lake la `/models` linathibitisha thamani inayotambulika ya `owned_by`: `vllm`, `sglang`, au `llamacpp`. Vifungashio vinavyooana na OpenAI vinaweza kuhifadhi ingizo la awali la modeli ndani ya kitu kilichowekwa kwenye `openai`; utambuzi hufuata hadi bahasha tatu kama hizo. Modeli zilizo na umiliki unaokosekana, usiojulikana, au unaokinzana hubaki na tabia ya kawaida ya OpenAI. Utambuzi hutumia tena ombi lililopo la katalogi, hautengenezi tokeni za kukamilisha, na hubatilishwa kituo cha muunganisho kinapobadilika.
+Nodi Maalum za Kukamilisha Gumzo hurekebisha chaguzi za kuondoka kwa hoja zilizo wazi kwenye mandhari ya juu ya mkondo. Jaribio la muunganisho lililofaulu huteua kiotomatiki vidhibiti vya kiolezo cha gumzo kwa kila muundo halisi ID ambao ingizo la `/models` linathibitisha thamani ya `owned_by` inayotambulika: `vllm`, `sglang`, au `llamacpp`. Vifungashio vinavyooana na OpenAI vinaweza kuhifadhi ingizo la modeli asili ndani ya kitu cha `openai` kilichowekwa kiota; utambuzi hufuata hadi bahasha tatu kama hizo. Miundo iliyo na umiliki unaokosekana, usiojulikana, au unaokinzana huweka tabia ya kawaida OpenAI. Ugunduzi hutumia tena ombi la katalogi iliyopo, haitoi tokeni za kukamilisha, na huwa batili wakati ncha ya muunganisho inabadilika.
 
-Ili kubandika tabia hii kwa mfumo wa nyuma ambao hauonyeshi metadata hiyo, tumia API iliyopo ya masasisho ya sehemu ya mtoa huduma:
+Ili kubandika tabia ya mandharinyuma ambayo haifichui metadata hiyo, tumia sasisho la mtoa huduma lililopo API:
 
 ```json
 {
@@ -1211,91 +1187,91 @@ Ili kubandika tabia hii kwa mfumo wa nyuma ambao hauonyeshi metadata hiyo, tumia
 }
 ```
 
-Tuma mwili huo kwa `PUT /api/providers/<connection-id>`. Kwenye muunganisho huo, juhudi wazi ya ufikiri ya `none` hutumwa kama `chat_template_kwargs.thinking=false` na `chat_template_kwargs.enable_thinking=false`. Thamani wazi za violezo asilia hubaki na mamlaka isipokuwa sheria ya ufikiri ya upande wa seva ilazimishe juhudi fulani. Mpangilio huu hutumika tu pale muunganisho maalum unaooana na OpenAI unapotuma mwili wa Chat Completions; ombi za Responses na watoa huduma wa kawaida hubaki na muundo wao asilia wa ombi. Weka `reasoningControl` kuwa `openai` ili kulazimisha upitishaji wa kawaida wa OpenAI wa `reasoning_effort`, au uache bila kuweka/uweke kuwa `null` ili kutumia utambuzi wa kiotomatiki.
+Tuma mwili huo na `PUT /api/providers/<connection-id>`. Kwenye muunganisho huo, juhudi ya hoja ya wazi ya `none` inatumwa kama `chat_template_kwargs.thinking=false` na `chat_template_kwargs.enable_thinking=false`. Thamani za violezo vya asili husalia kuwa na mamlaka isipokuwa kanuni ya hoja ya upande wa seva italazimisha juhudi. Mpangilio hutumika tu wakati muunganisho maalum unaooana na OpenAI unatuma mwili wa Kukamilisha Gumzo; Maombi ya majibu na watoa huduma wa kawaida huweka umbo la ombi lao asili. Weka `reasoningControl` hadi `openai` ili kulazimisha upitishaji wa OpenAI `reasoning_effort` wa kawaida, au uiachie it/set kuwa `null` ili kutumia utambuzi wa kiotomatiki.
 
-Maombi ya kiainishaji ya hali ya kiotomatiki ya Claude Code huzima ufikiri asilia kwa chaguomsingi yanapokuwa hayana vidhibiti wazi vya ufikiri. Utambuzi hutumia alama ya mfumo ya kiainishaji katika maombi yaliyo katika muundo wa Claude, si majina ya modeli au vikomo vya ukamilishaji. Vidhibiti wazi vya mwili, vichwa vinavyotumika vya juhudi/ufikiri, sheria za uelekezaji, na juhudi ya modeli iliyotatuliwa huhifadhi kipaumbele chake cha awali. Hatua zote mbili za kiainishaji huhifadhi vidokezo vyake, vikomo vya ukamilishaji, mfuatano wa kusitisha, na hukumu halisi za ruhusa kutoka mfumo wa upstream; hatua ya pili bado inaweza kutoa ufikiri wake ulioombwa unaoonekana kama maandishi ya kawaida.
+Claude Kiainishi cha hali-otomatiki ya msimbo huomba fikra asilia chaguo-msingi kuzimwa wakati hakina vidhibiti dhahiri vya hoja. Ugunduzi hutumia kialamisho cha mfumo wa kiainishaji katika maombi ya umbizo la Claude, si majina ya miundo au vikomo vya kukamilisha. Vidhibiti vya wazi vya mwili, vichwa vya effort/thinking vinavyotumika, sheria za uelekezaji, na juhudi za muundo zilizotatuliwa huweka kipaumbele chao kilichopo. Hatua zote mbili za uainishaji huhifadhi vidokezo vyake, vikomo vya kukamilisha, mifuatano ya kukomesha, na hukumu halisi za ruhusa za juu; hatua ya pili bado inaweza kutoa hoja inayoonekana iliyoombwa kama maandishi ya kawaida.
 
-### Mitiririko ya OAuth
+### OAuth Mitiririko
 
-| Endpoint                         | Method  | Description                   |
-| -------------------------------- | ------- | ----------------------------- |
-| `/api/oauth/[provider]/[action]` | Various | OAuth mahususi ya mtoa huduma |
+| Mwisho                           | Mbinu      | Maelezo                |
+| -------------------------------- | ---------- | ---------------------- |
+| `/api/oauth/[provider]/[action]` | Mbalimbali | OAuth maalum ya mtoaji |
 
 ### Uelekezaji na Usanidi
 
-| Endpoint              | Method   | Description                          |
-| --------------------- | -------- | ------------------------------------ |
-| `/api/models`         | GET/PUT  | Orodha ya modeli / sasisho la lakabu |
-| `/api/models/alias`   | GET/POST | Lakabu za modeli                     |
-| `/api/models/catalog` | GET      | Modeli zote kwa mtoa huduma + aina   |
-| `/api/combos*`        | Various  | Usimamizi wa michanganyiko           |
-| `/api/keys*`          | Various  | Usimamizi wa funguo za API           |
-| `/api/pricing`        | GET      | Bei za modeli                        |
+| Mwisho                | Mbinu      | Maelezo                             |
+| --------------------- | ---------- | ----------------------------------- |
+| `/api/models`         | GET/PUT    | Orodha ya mfano / sasisho la lakabu |
+| `/api/models/alias`   | GET/POST   | Majina ya utani wa mfano            |
+| `/api/models/catalog` | GET        | Mifano zote kwa aina ya mtoaji +    |
+| `/api/combos*`        | Mbalimbali | Usimamizi wa Combo                  |
+| `/api/keys*`          | Mbalimbali | API usimamizi muhimu                |
+| `/api/pricing`        | GET        | Bei ya mfano                        |
 
-#### Asili ya mipaka ya modeli
+#### Mfano wa kikomo cha asili
 
-`GET /api/models?withLimits=1` (pia `true`; `0`/`false` au kukiacha huweka mzigo chaguomsingi bila mabadiliko) huongeza `contextWindow`, `maxInputTokens`, `maxOutputTokens` na kitu cha `capsSource` kwenye kila safu ya modeli. `capsSource` hutaja sheria iliyotoa kila mpaka, ili mpaka unaoshangaza (kwa mfano 128k kwenye modeli ya 1M) uweze kufuatiliwa hadi kwenye asili yake. Thamani zilizotatuliwa ni zilezile zinazotumiwa na uelekezaji; alama hiyo huongeza sehemu pekee na haibadilishi thamani yoyote. Thamani nyingine yoyote ya `withLimits` hukataliwa kwa `400`.
+`GET /api/models?withLimits=1` (pia `true`; `0`/`false` au kuiacha huweka upakiaji chaguo-msingi bila kubadilika) huongeza `contextWindow`, `maxInputTokens`, `maxOutputTokens` na kitu cha `capsSource` kwa kila safu mlalo ya mfano. `capsSource` inataja sheria ambayo ilitoa kila kikomo, kwa hivyo kikomo cha kushangaza (kwa mfano 128k kwenye muundo wa 1M) kinaweza kufuatiliwa hadi asili yake. Thamani zilizotatuliwa ni zile zile za matumizi ya uelekezaji; bendera huongeza tu sehemu na kamwe haibadilishi thamani. Thamani nyingine yoyote `withLimits` imekataliwa na `400`.
 
-| `capsSource` value                           | Origin                                                                                    |
-| -------------------------------------------- | ----------------------------------------------------------------------------------------- |
-| `override:context`                           | Ubatilishaji uliodumu wa dirisha la muktadha (`model_context_overrides`)                  |
-| `override:max_input` / `override:max_output` | Ubatilishaji uliodumu wa uwezo wa `max_input_tokens` / `max_output_tokens`                |
-| `static-authoritative:<provider>/<model>`    | Jedwali tuli lenye mamlaka la dirisha la muktadha                                         |
-| `synced:<provider>/<model>`                  | Safu ya uwezo iliyosawazishwa ya models.dev                                               |
-| `registry:<provider>/<model>`                | Ingizo la sajili ya mtoa huduma                                                           |
-| `spec:<model>`                               | Vipimo tuli vya modeli                                                                    |
-| `effort-base:` prefix                        | Safu iliyonakiliwa kutoka kwenye modeli ya msingi ya kibadala chenye kiambishi cha juhudi |
-| `none`                                       | Hakuna chanzo kinachotangaza mpaka huo (thamani ni `null`)                                |
+| thamani `capsSource`                         | Asili                                                                                 |
+| -------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `override:context`                           | Ubatilishaji wa dirisha-muktadha unaoendelea (`model_context_overrides`)              |
+| `override:max_input` / `override:max_output` | Uwezo unaoendelea wa `max_input_tokens` / `max_output_tokens` kubatilisha             |
+| `static-authoritative:<provider>/<model>`    | Jedwali la dirisha la muktadha lenye mamlaka thabiti                                  |
+| `synced:<provider>/<model>`                  | Safu mlalo ya uwezo iliyosawazishwa ya models.dev                                     |
+| `registry:<provider>/<model>`                | Ingizo la usajili wa mtoaji                                                           |
+| `spec:<model>`                               | Vipimo vya mfano tuli                                                                 |
+| kiambishi awali `effort-base:`               | Safu mlalo iliyokopwa kutoka kwa muundo wa msingi wa lahaja iliyoamilishwa kwa juhudi |
+| `none`                                       | Hakuna chanzo kinachotangaza kikomo (thamani ni `null`)                               |
 
-Utekelezaji: `getResolvedModelCapabilitiesWithLimitSources()` katika `src/lib/modelCapabilities.ts`
-na misururu ya kipaumbele katika `src/lib/modelCapabilityLimits.ts`.
+Utekelezaji: `getResolvedModelCapabilitiesWithLimitSources()` katika `src/lib/modelCapabilities.ts` na minyororo ya utangulizi katika `src/lib/modelCapabilityLimits.ts`.
 
 ### Matumizi na Uchanganuzi
 
-| Endpoint                         | Method          | Maelezo                                                                                                                                                                                                                                                                                                                                                   |
-| -------------------------------- | --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/usage/history`             | GET             | Historia ya matumizi                                                                                                                                                                                                                                                                                                                                      |
-| `/api/usage/logs`                | GET             | Kumbukumbu za matumizi                                                                                                                                                                                                                                                                                                                                    |
-| `/api/usage/request-logs`        | GET             | Kumbukumbu za kiwango cha ombi                                                                                                                                                                                                                                                                                                                            |
-| `/api/usage/[connectionId]`      | GET             | Matumizi kwa kila muunganisho                                                                                                                                                                                                                                                                                                                             |
-| `/api/usage/token-limits`        | GET/POST/DELETE | Bajeti za viwango vya token kwa kila API key                                                                                                                                                                                                                                                                                                              |
-| `/api/usage/model-latency-stats` | GET             | Jumlisho linalosonga la ucheleweshaji kwa kila mtoa huduma/modeli (wastani/p50/p95/p99, kiwango cha mafanikio); vichujio: `windowHours`/`minSamples`/`maxRows`/`provider`/`model` (#6873)                                                                                                                                                                 |
-| `/api/usage/cache-health`        | GET             | Muhtasari wa afya ya akiba ya prompt kwenye `call_logs` — uwiano wa kuandika/kusoma, usambazaji wa ukubwa wa kuandika wa p50/p90/p99, mkusanyiko wa uandishi mzito, mgawanyo kwa kila modeli, na uamuzi wa `healthy`/`degraded`/`thrash`/`no-data`; parameta za query `range` (`1h`\|`24h`\|`7d`\|`30d`, chaguo-msingi `24h`) na `model` ya hiari (#8827) |
+| Mwisho                           | Mbinu           | Maelezo                                                                                                                                                                                                                                                                                                                                               |
+| -------------------------------- | --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/usage/history`             | GET             | Historia ya matumizi                                                                                                                                                                                                                                                                                                                                  |
+| `/api/usage/logs`                | GET             | Kumbukumbu za matumizi                                                                                                                                                                                                                                                                                                                                |
+| `/api/usage/request-logs`        | GET             | Kumbukumbu za kiwango cha ombi                                                                                                                                                                                                                                                                                                                        |
+| `/api/usage/[connectionId]`      | GET             | Matumizi ya kila muunganisho                                                                                                                                                                                                                                                                                                                          |
+| `/api/usage/token-limits`        | GET/POST/DELETE | Bajeti za kikomo za tokeni za ufunguo wa Per-API                                                                                                                                                                                                                                                                                                      |
+| `/api/usage/model-latency-stats` | GET             | Rolling per-provider/model latency aggregate (avg/p50/p95/p99, kiwango cha mafanikio); vichungi: `windowHours`/`minSamples`/`maxRows`/`provider`/`model` (#6873)                                                                                                                                                                                      |
+| `/api/usage/cache-health`        | GET             | Muhtasari wa kiafya wa papo hapo juu ya uwiano wa `call_logs` — write/read, usambazaji wa ukubwa wa uandishi p50/p90/p99, mkusanyiko wa maandishi mazito, mgawanyiko wa kila mtindo, na uamuzi wa `healthy`/`degraded`/`thrash`/`no-data` ; vigezo vya kuuliza `range` (`1h`\| `24h`\| `7d`\| `30d`, chaguo-msingi `24h`) na `model` ya hiari (#8827) |
 
-### Ruhusa za API key
+### API ruhusa muhimu
 
-`PATCH /api/keys/{id}` husasisha ruhusa za key iliyopo. Kama ilivyo kwa kila route ya `/api/keys*`, inahitaji idhini ya usimamizi (angalia [Uthibitishaji wa Usimamizi](../guides/MANAGEMENT-AUTH.md)), si inference key. Tuma sehemu pekee unazotaka kubadilisha; ombi lisilo na sehemu yoyote kati ya hizo hukataliwa kwa `No valid fields to update`. Sehemu zinazokubalika zimefafanuliwa na `updateKeyPermissionsSchema` katika `src/shared/validation/schemas/keys.ts`.
+`PATCH /api/keys/{id}` inasasisha ruhusa za ufunguo uliopo. Kama kila njia `/api/keys*` inahitaji idhini ya usimamizi (tazama [Uthibitishaji wa Usimamizi](../guides/MANAGEMENT-AUTH.md) ), sio ufunguo wa uelekezaji. Tuma sehemu unazotaka kubadilisha tu; ombi lisilo na hata mmoja wao linakataliwa na `No valid fields to update`. Sehemu zinazokubalika zimefafanuliwa na `updateKeyPermissionsSchema` katika `src/shared/validation/schemas/keys.ts`.
 
-| Sehemu                                      | Aina                                                              | Maelezo                                                                                                                                              |
-| ------------------------------------------- | ----------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `name`                                      | string, herufi 1-200                                              |                                                                                                                                                      |
-| `isActive`                                  | boolean                                                           |                                                                                                                                                      |
-| `isBanned`                                  | boolean                                                           |                                                                                                                                                      |
-| `expiresAt`                                 | tarehe na wakati ya ISO 8601 au `null`                            | `null` huondoa muda wa kuisha                                                                                                                        |
-| `modelAccessMode`                           | `all` \| `restricted`                                             | `allowedModels` lazima iwe tupu wakati hali ni `all`                                                                                                 |
-| `allowedModels`, `blockedModels`            | array ya strings, hadi 1000                                       |                                                                                                                                                      |
-| `allowedCombos`                             | array ya strings, hadi 500                                        | Hudhibiti combos ambazo ufunguo unaweza kuita; miundo ya moja kwa moja inadhibitiwa na `modelAccessMode` / `allowedModels`                           |
-| `connectionAccessMode`                      | `all` \| `restricted`                                             | `allowedConnections` lazima isiwe tupu wakati wa `restricted` na iwe tupu wakati wa `all`                                                            |
-| `allowedConnections`                        | array ya UUIDs, hadi 100                                          |                                                                                                                                                      |
-| `allowAutoCombos`                           | boolean                                                           | `false` hukataa maombi ya miundo ya `auto/*` yenye ufunguo huu; funguo ambazo hazijawahi kuiweka zinaruhusiwa                                        |
-| `catalogScope`                              | `all` \| `combos` \| `models`                                     | Kinachoorodheshwa na `GET /v1/models` kwa ufunguo huu (combos pekee, miundo pekee, au vyote viwili); haibadilishi kile ambacho ufunguo unaweza kuita |
-| `forcedModel`                               | string yenye hadi herufi 300, au `null`                           | Huelekeza maombi ya mazungumzo kwenye modeli/combo hii, ikiwa juu ya `X-Route-Model` na `body.model`; vikomo vya ufunguo bado vinatumika             |
-| `noLog`, `autoResolve`                      | boolean                                                           |                                                                                                                                                      |
-| `throttleDelayMs`                           | integer, 0-300000                                                 |                                                                                                                                                      |
-| `maxSessions`                               | integer, 0-10000                                                  |                                                                                                                                                      |
-| `rateLimits`                                | array ya `{ limit, window }` (integers chanya, hadi 50) au `null` | `null` huondoa vikomo                                                                                                                                |
-| `accessSchedule`                            | kitu cha ratiba au `null`                                         | `null` huondoa ratiba                                                                                                                                |
-| `scopes`                                    | array ya strings, hadi 32                                         |                                                                                                                                                      |
-| `allowedEndpoints`                          | array ya strings, hadi 20                                         |                                                                                                                                                      |
-| `streamDefaultMode`                         | `legacy` \| `json`                                                |                                                                                                                                                      |
-| `cacheDefaultMode`                          | `legacy` \| `bypass`                                              | Tazama [kupita akiba kwa kila ufunguo](#per-key-cache-bypass)                                                                                        |
-| `compressionEnabled`                        | boolean                                                           |                                                                                                                                                      |
-| `codexServiceMode`                          | mojawapo ya hali za huduma za Codex                               |                                                                                                                                                      |
-| `disableNonPublicModels`                    | boolean                                                           |                                                                                                                                                      |
-| `allowUsageCommand`                         | boolean                                                           |                                                                                                                                                      |
-| `usageLimitEnabled`                         | boolean                                                           |                                                                                                                                                      |
-| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | number >= 0 or `null`                                             |                                                                                                                                                      |
-| `chaosModeEnabled`                          | boolean                                                           |                                                                                                                                                      |
+| Shamba                                      | Aina                                                            | Vidokezo                                                                                                                                                                                                                                                                                  |
+| ------------------------------------------- | --------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`                                      | kamba, chars 1-200                                              |                                                                                                                                                                                                                                                                                           |
+| `isActive`                                  | boolean                                                         |                                                                                                                                                                                                                                                                                           |
+| `isBanned`                                  | boolean                                                         |                                                                                                                                                                                                                                                                                           |
+| `expiresAt`                                 | ISO 8601 tarehe au `null`                                       | `null` huondoa mwisho wa matumizi                                                                                                                                                                                                                                                         |
+| `modelAccessMode`                           | `all` \| `restricted`                                           | `allowedModels` lazima iwe tupu wakati modi ni `all`                                                                                                                                                                                                                                      |
+| `allowedModels`, `blockedModels`            | safu ya masharti, hadi 1000                                     |                                                                                                                                                                                                                                                                                           |
+| `allowedCombos`                             | safu ya nyuzi, hadi 500                                         | Milango ambayo inachanganya ufunguo inaweza kupiga simu; mifano ya moja kwa moja inatawaliwa na `modelAccessMode` / `allowedModels`                                                                                                                                                       |
+| `connectionAccessMode`                      | `all` \| `restricted`                                           | `allowedConnections` lazima iwe tupu wakati `restricted` na iwe tupu wakati `all`                                                                                                                                                                                                         |
+| `allowedConnections`                        | safu ya UUIDs, hadi 100                                         |                                                                                                                                                                                                                                                                                           |
+| `allowAutoCombos`                           | boolean                                                         | `false` inakataa maombi ya miundo `auto/*` kwa ufunguo huu; funguo ambazo hazijaiweka zinaruhusiwa                                                                                                                                                                                        |
+| `catalogScope`                              | `all` \| `combos` \| `models`                                   | Je `GET /v1/models` inaorodhesha nini kwa ufunguo huu (combos pekee, mifano pekee, au zote mbili); haibadilishi ufunguo unaweza kuita                                                                                                                                                     |
+| `forcedModel`                               | kamba hadi char 300, au `null`                                  | Huelekeza maombi ya gumzo kwa model/combo hii, juu ya `X-Route-Model` na `body.model`; vikomo vya ufunguo bado vinatumika                                                                                                                                                                 |
+| `noLog`, `autoResolve`                      | boolean                                                         |                                                                                                                                                                                                                                                                                           |
+| `throttleDelayMs`                           | jumla, 0-300000                                                 |                                                                                                                                                                                                                                                                                           |
+| `maxSessions`                               | jumla, 0-10000                                                  |                                                                                                                                                                                                                                                                                           |
+| `rateLimits`                                | safu ya `{ limit, window }` (nambari kamili, hadi 50) au `null` | `null` inafuta mipaka                                                                                                                                                                                                                                                                     |
+| `accessSchedule`                            | panga kitu au `null`                                            | `null` inafuta ratiba                                                                                                                                                                                                                                                                     |
+| `scopes`                                    | safu ya nyuzi, hadi 32                                          |                                                                                                                                                                                                                                                                                           |
+| `allowedEndpoints`                          | safu ya nyuzi, hadi 20                                          |                                                                                                                                                                                                                                                                                           |
+| `streamDefaultMode`                         | `legacy` \| `json`                                              |                                                                                                                                                                                                                                                                                           |
+| `cacheDefaultMode`                          | `legacy` \| `bypass`                                            | Tazama [bypass ya kache ya Per-key](#per-key-cache-bypass)                                                                                                                                                                                                                                |
+| `compressionEnabled`                        | boolean                                                         |                                                                                                                                                                                                                                                                                           |
+| `codexServiceMode`                          | mojawapo ya njia za huduma Codex                                |                                                                                                                                                                                                                                                                                           |
+| `disableNonPublicModels`                    | boolean                                                         |                                                                                                                                                                                                                                                                                           |
+| `allowUsageCommand`                         | boolean                                                         |                                                                                                                                                                                                                                                                                           |
+| `usageLimitEnabled`                         | boolean                                                         |                                                                                                                                                                                                                                                                                           |
+| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | nambari >= 0 au `null`                                          |                                                                                                                                                                                                                                                                                           |
+| `fiveHourUsageLimitUsd`                     | nambari >= 0 au `null`                                          | Bajeti USD ya saa 5, inayotekelezwa kama vile vikomo vya kila siku na vya wiki (`usageLimitEnabled`, `UNPRICED_USAGE_BUDGET_POLICY`). `retry-after` ni wakati matumizi ya zamani zaidi kwenye dirisha yanazeeka, ambayo inaweza kuacha ufunguo mbali zaidi ya kikomo chake bado umezuiwa. |
+| `chaosModeEnabled`                          | boolean                                                         |                                                                                                                                                                                                                                                                                           |
 
 ```bash
 curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
@@ -1306,192 +1282,163 @@ curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
 
 ### Mipangilio
 
-| Endpoint                              | Method        | Maelezo                                                                                                                                                                                                                                                                                                            |
-| ------------------------------------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `/api/settings`                       | GET/PUT/PATCH | Mipangilio ya jumla. Vifunguo vya sera ya usalama (`requireLogin`, `newPassword`, `oidc*`, `corsOrigins`, `bruteForceProtection`) vinahitaji `currentPassword` na kitambulisho cha mwendeshaji — funguo za API na tokeni za `oma_` hupata `403`; kila mabadiliko linahitaji scope ya tokeni ya ufikiaji ya `admin` |
-| `/api/settings/proxy`                 | GET/PUT       | Mipangilio ya proksi ya mtandao                                                                                                                                                                                                                                                                                    |
-| `/api/settings/proxy/test`            | POST          | Jaribu muunganisho wa proksi                                                                                                                                                                                                                                                                                       |
-| `/api/settings/ip-filter`             | GET/PUT       | Orodha ya kuruhusu/kuzuia anwani za IP                                                                                                                                                                                                                                                                             |
-| `/api/settings/thinking-budget`       | GET/PUT       | Hali ya kuandika upya **maombi** ya kufikiri/kutoa hoja (passthrough / auto-strip / custom / adaptive). Huru kutoka kwa mbano. Tazama [THINKING_BUDGET.md](../guides/THINKING_BUDGET.md).                                                                                                                          |
-| `/api/settings/system-prompt`         | GET/PUT       | Maelekezo ya mfumo ya jumla                                                                                                                                                                                                                                                                                        |
-| `/api/settings/compression`           | GET/PUT       | Mipangilio ya mbano ya jumla                                                                                                                                                                                                                                                                                       |
-| `/api/settings/purge-request-history` | POST          | Futa safu za kumbukumbu ya maombi na vizalia vya kumbukumbu za simu za ndani                                                                                                                                                                                                                                       |
+| Mwisho                                | Mbinu         | Maelezo                                                                                                                                                                                                                                                                                           |
+| ------------------------------------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/settings`                       | GET/PUT/PATCH | Mipangilio ya jumla. Vifunguo vya sera ya usalama (`requireLogin`, `newPassword`, `oidc*`, `corsOrigins`, `bruteForceProtection`) vinahitaji `currentPassword` na vibonye vyeti vya opereta — API na tokeni za `oma_` kupata `403`; kila mabadiliko yanahitaji wigo wa ishara ya ufikiaji `admin` |
+| `/api/settings/proxy`                 | GET/PUT       | Mipangilio ya seva mbadala ya mtandao                                                                                                                                                                                                                                                             |
+| `/api/settings/proxy/test`            | POST          | Jaribu muunganisho wa seva mbadala                                                                                                                                                                                                                                                                |
+| `/api/settings/ip-filter`             | GET/PUT       | IP allowlist/blocklist                                                                                                                                                                                                                                                                            |
+| `/api/settings/thinking-budget`       | GET/PUT       | Thinking/reasoning** ombi** hali ya kuandika upya (njia ya kupitisha / strip-otomatiki / desturi / adaptive). Kujitegemea kwa compression. Angalia [THINKING_BUDGET.md](../guides/THINKING_BUDGET.md).                                                                                            |
+| `/api/settings/system-prompt`         | GET/PUT       | Agizo la mfumo wa kimataifa                                                                                                                                                                                                                                                                       |
+| `/api/settings/compression`           | GET/PUT       | Mipangilio ya ukandamizaji wa kimataifa                                                                                                                                                                                                                                                           |
+| `/api/settings/purge-request-history` | POST          | Futa safu mlalo za kumbukumbu za ombi na vizalia vya programu vya kumbukumbu za simu                                                                                                                                                                                                              |
 
-### Muktadha na Mbano
+### Muktadha & Mfinyazo
 
-| Endpoint                               | Method         | Maelezo                                                                                        |
-| -------------------------------------- | -------------- | ---------------------------------------------------------------------------------------------- |
-| `/api/compression/preview`             | POST           | Onyesho la compression ya off/lite/standard/aggressive/ultra/RTK/stacked                       |
-| `/api/compression/language-packs`      | GET            | Orodhesha vifurushi vya lugha vya Caveman vinavyopatikana                                      |
-| `/api/compression/rules`               | GET            | Orodhesha metadata ya sheria za Caveman                                                        |
-| `/api/context/caveman/config`          | GET/PUT        | Lakabu ya mipangilio mahususi ya Caveman                                                       |
-| `/api/context/rtk/config`              | GET/PUT        | Mipangilio mahususi ya RTK, ikijumuisha vichujio maalum na uhifadhi wa matokeo ghafi           |
-| `/api/context/rtk/filters`             | GET            | Katalogi ya vichujio vya RTK na uchunguzi wa vichujio maalum                                   |
-| `/api/context/rtk/test`                | POST           | Tekeleza onyesho/majaribio ya RTK dhidi ya mzigo wa maandishi                                  |
-| `/api/context/rtk/raw-output/[id]`     | GET            | Soma matokeo ghafi yaliyohifadhiwa na kufichwa data nyeti kwa kutumia kitambulisho cha pointer |
-| `/api/context/combos`                  | GET/POST       | Orodhesha/unda mchanganyiko wa compression                                                     |
-| `/api/context/combos/[id]`             | GET/PUT/DELETE | Maelezo/sasisho/ufutaji wa mchanganyiko wa compression                                         |
-| `/api/context/combos/[id]/assignments` | GET/PUT        | Weka mchanganyiko wa compression kwenye mchanganyiko wa uelekezaji                             |
-| `/api/context/analytics`               | GET            | Lakabu ya uchanganuzi wa compression                                                           |
+| Mwisho                                 | Mbinu          | Maelezo                                                                           |
+| -------------------------------------- | -------------- | --------------------------------------------------------------------------------- |
+| `/api/compression/preview`             | POST           | Hakiki mgandamizo wa off/lite/standard/aggressive/ultra/RTK/stacked               |
+| `/api/compression/language-packs`      | GET            | Orodhesha vifurushi vya lugha vya Caveman vinavyopatikana                         |
+| `/api/compression/rules`               | GET            | Orodhesha metadata ya sheria ya Caveman                                           |
+| `/api/context/caveman/config`          | GET/PUT        | Lakabu za mipangilio mahususi ya Caveman                                          |
+| `/api/context/rtk/config`              | GET/PUT        | Mipangilio mahususi ya RTK, ikijumuisha vichujio maalum na uhifadhi wa pato ghafi |
+| `/api/context/rtk/filters`             | GET            | katalogi ya kichujio cha RTK na uchunguzi wa kichujio maalum                      |
+| `/api/context/rtk/test`                | POST           | Endesha RTK preview/test dhidi ya upakiaji wa maandishi                           |
+| `/api/context/rtk/raw-output/[id]`     | GET            | Soma matokeo ghafi yaliyohifadhiwa kwa kutumia kitambulisho cha kielekezi         |
+| `/api/context/combos`                  | GET/POST       | Mchanganyiko wa compression list/create                                           |
+| `/api/context/combos/[id]`             | GET/PUT/DELETE | Mchanganyiko wa compression detail/update/delete                                  |
+| `/api/context/combos/[id]/assignments` | GET/PUT        | Agiza michanganyiko ya mbano kwa michanganyiko ya kuelekeza                       |
+| `/api/context/analytics`               | GET            | Uchanganuzi wa ukandamizaji                                                       |
 
 ### Ufuatiliaji
 
-| Endpoint                             | Method     | Maelezo                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| ------------------------------------ | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/sessions`                      | GET        | Ufuatiliaji wa vipindi amilifu                                                                                                                                                                                                                                                                                                                                                                                              |
-| `/api/rate-limits`                   | GET        | Vikomo vya kasi kwa kila akaunti                                                                                                                                                                                                                                                                                                                                                                                            |
-| `/api/monitoring/health`             | GET        | Ukaguzi wa afya + muhtasari wa watoa huduma (`catalogCount`, `configuredCount`, `activeCount`, `monitoredCount`). Mwonekano wa usimamizi unajumuisha `credentialHealth`: thamani za probe-cache, `failedConnections` wakati `failed>0`, na `staleDbNonOkCount` (`test_status` ya SQLite inayobaki, si kipimo). Tazama [MONITORING_GUIDE.md](../ops/MONITORING_GUIDE.md#credentialhealth-probe-cache-vs-sqlite-test_status). |
-| `/api/cache/stats`                   | GET/DELETE | Takwimu za akiba / futa akiba                                                                                                                                                                                                                                                                                                                                                                                               |
-| `/api/modality-bridge/stats`         | GET        | `attempts` za kumbukumbu ya ndani, mafanikio/`bridged`, kushindwa, mipigo ya akiba, `totalLatencyMs`, `latencySamples`, `averageLatencyMs` inayotegemea sampuli, na muda wa matumizi ya mwisho (huwekwa upya wakati wa kuwasha upya; uthibitishaji wa usimamizi)                                                                                                                                                            |
-| `/api/modality-bridge/video/runtime` | GET        | Ukaguzi mkali wa trusted-loopback kabla ya uthibitishaji/uchunguzi wa usimamizi; upatikanaji na matoleo ya FFmpeg/ffprobe yaliyosafishwa (no-store)                                                                                                                                                                                                                                                                         |
-| `/api/modality-bridge/video/extract` | POST       | Dalali wa ndani wa baiti aliyeidhinishwa wa trusted-loopback; ingizo la 50 MiB, foleni yenye kikomo/matokeo ya 32 MiB, uwezo wa `503`, kukatika kwa `499`, muda wa mwisho wa `504`; si API ya umma ya kupakia faili                                                                                                                                                                                                         |
+| Mwisho                               | Mbinu      | Maelezo                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| ------------------------------------ | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/sessions`                      | GET        | Ufuatiliaji wa kipindi kinachoendelea                                                                                                                                                                                                                                                                                                                                                                                      |
+| `/api/rate-limits`                   | GET        | Vikomo vya ada kwa kila akaunti                                                                                                                                                                                                                                                                                                                                                                                            |
+| `/api/monitoring/health`             | GET        | Muhtasari wa mtoa huduma wa + kuangalia afya (`catalogCount`, `configuredCount`, `activeCount`, `monitoredCount`). Mwonekano wa usimamizi unajumuisha `credentialHealth`: chembe za kache za uchunguzi, `failedConnections` wakati `failed>0`, na `staleDbNonOkCount` (SQLite nata `test_status`, si kipimo). Tazama [MONITORING_GUIDE.md](../ops/MONITORING_GUIDE.md#credentialhealth-probe-cache-vs-sqlite-test_status). |
+| `/api/cache/stats`                   | GET/DELETE | Cache takwimu / wazi                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `/api/modality-bridge/stats`         | GET        | In-memory `attempts`, successes/`bridged`, kushindwa, akiba hits, `totalLatencyMs`, `latencySamples`, sampuli-denominated `averageLatencyMs`, na muda wa matumizi ya mwisho (weka upya juu ya kuanzisha upya; usimamizi auth)                                                                                                                                                                                              |
+| `/api/modality-bridge/video/runtime` | GET        | Ukaguzi mkali unaoaminika kabla ya usimamizi auth/probe; upatikanaji na matoleo ya FFmpeg/ffprobe iliyosafishwa (hakuna duka)                                                                                                                                                                                                                                                                                              |
+| `/api/modality-bridge/video/extract` | POST       | Dalali aliyeidhinishwa wa ndani anayeaminika-loopback; Ingizo la MiB 50, pato la queue/32 MiB lililofungwa, uwezo wa `503`, `499` kukata, tarehe ya mwisho ya `504` ; sio upakiaji wa umma API                                                                                                                                                                                                                             |
 
-### Uchunguzi wa kina wa fremu za video
+### Uchimbaji wa fremu ya video
 
-`GET /api/v1/video-bridge/drilldown` husoma kishikio kisicho wazi kilichofungamanishwa na tenant kinachorejeshwa katika
-`x-omniroute-video-drilldown` baada ya ombi la Video Bridge lililoidhinishwa waziwazi.
-Usomaji na `DELETE` kila mara huhitaji API key halali na ruhusa huru ya mwendeshaji ya
-`modalityBridgeVideoDrilldownRemoteEnabled`. Uhifadhi wa uzalishaji pia huhitaji
-`modalityBridgeVideoDrilldownEnabled` na `drilldown: true` kali kwa kila sehemu.
-Ikiwa key ina orodha isiyo tupu ya endpoints zinazoruhusiwa, lazima iwe na `video` kwa GET na DELETE,
-bila kujali mpigaji anatumia `/v1` au `/api/v1`.
+`GET /api/v1/video-bridge/drilldown` inasoma mpini usio wazi uliofungwa na mpangaji uliorudishwa katika `x-omniroute-video-drilldown` baada ya ombi lililoidhinishwa wazi la Daraja la Video. Usomaji na `DELETE` kila mara huhitaji kitufe halali API na ruhusa huru `modalityBridgeVideoDrilldownRemoteEnabled` ya mendeshaji. Uhifadhi wa uzalishaji unahitaji `modalityBridgeVideoDrilldownEnabled` na ukali kwa kila sehemu `drilldown: true`. Ikiwa ufunguo una orodha ya viingilio isiyo na kitu, lazima ijumuishe `video` kwa GET na DELETE, iwe mpigaji simu anatumia `/v1` au `/api/v1`.
 
-GET query: `handle` inahitajika; `variant` ni ya hiari (`preview`, `standard`, `detail`),
-`limit` (1–8; `frames` ya zamani inakubaliwa lakini haiwezi kutumiwa pamoja na `limit`),
-`page` yenye msingi wa sifuri, na sekunde za `start`/`end`. Mipaka yote miwili ya kulenga
-ikitolewa, `end` lazima iwe kubwa kuliko `start`. Vifunguo vya query vilivyorudiwa au visivyojulikana
-hukatalika. Majibu yaliyofaulu huwa na `derivation`, `durationSeconds`, `frames`,
-`hasMore`, `page`, `variant`, na `focusWindow` ya hiari; JSON ya no-store ina kikomo cha
-32 MiB ikijumuisha Base64. Matokeo makubwa kupita kiasi hurejesha 413; omba fremu chache.
+GET swala: inahitajika `handle`; `variant` ya hiari (`preview`, `standard`, `detail`), `limit` (1–8; `frames` urithi inakubaliwa lakini haiwezi kuunganishwa na `limit`), `page` yenye sifuri na sekunde `start`/`end`. Wakati mipaka yote miwili ya kuzingatia inatolewa, `end` lazima iwe kubwa kuliko `start`. Duplicate/unknown funguo za swala zimekataliwa. Majibu yaliyofaulu yana `derivation`, `durationSeconds`, `frames`, `hasMore`, `page`, `variant`, na `focusWindow` ya hiari ; no-store JSON imefungwa kwa 32 MiB pamoja na Base64. Ukubwa wa pato unarudi 413; omba fremu chache.
 
-`DELETE /api/v1/video-bridge/drilldown?handle=...` hurejesha `{ "removed": 0|1 }`.
-GET za vishikio visivyojulikana, vilivyoisha muda na vya cross-key haziwezi kutofautishwa na majibu ya 404;
-DELETE ya cross-key haiwezi kuondoa ingizo la mmiliki. Ufikiaji uliozimwa hurejesha 403, uthibitishaji
-uliokosekana/usio halali 401, query zisizo halali 400, kughairi 499 na hitilafu za muda 503.
-Vishikio ni vya ndani ya mchakato, huisha baada ya dakika kumi, na haviendelei baada ya kuwasha upya.
-Vishikio vipya hutumia `v1.` pamoja na token ya nasibu ya Base64URL yenye baiti 32; heshi za token pekee
-ndizo huhifadhiwa. Token za zamani zenye herufi 64 za hex bado zinaweza kusomwa kisintaksia kwa uoanifu.
-Tazama [vidhibiti vya Video Bridge](../security/GUARDRAILS.md#video-bridge-videobridgets-videobridgepipelinets)
-kwa maelezo ya idhini, viwango na uundaji wa variant.
+`DELETE /api/v1/video-bridge/drilldown?handle=...` inarudi `{ "removed": 0|1 }`. GETs zisizojulikana, zilizokwisha muda wake na ufunguo-mtambuka ni majibu 404 yasiyotambulika; cross-key DELETE haiwezi kuondoa ingizo la mmiliki. Ufikiaji uliozimwa hurejesha 403, uthibitishaji wa missing/invalid 401, hoji batili 400, kughairiwa 499 na hitilafu za muda 503. Hushughulikia ni za ndani, huisha baada ya dakika kumi, na haziishi baada ya kuanzishwa upya. Vipini vipya hutumia `v1.` pamoja na ishara ya Base64URL ya baiti 32; heshi za ishara pekee ndizo zinazobaki. Tokeni za urithi za 64-hex zinasalia kusomeka kisintaksia kwa uoanifu. Tazama [Viunga vya Daraja la Video](../security/GUARDRAILS.md#video-bridge-videobridgets-videobridgepipelinets) kwa idhini, sehemu na maelezo ya chimbuko lao.
 
-### Kuhifadhi Nakala na Kuhamisha/Kuingiza
+### Hifadhi nakala na Export/Import
 
-| Endpoint                    | Method | Description                                                                            |
-| --------------------------- | ------ | -------------------------------------------------------------------------------------- |
-| `/api/db-backups`           | GET    | Orodhesha nakala za kuhifadhi zinazopatikana                                           |
-| `/api/db-backups`           | PUT    | Unda nakala ya kuhifadhi ya mwongozo                                                   |
-| `/api/db-backups`           | POST   | Rejesha kutoka kwenye nakala mahususi ya kuhifadhi                                     |
-| `/api/db-backups`           | PATCH  | Hifadhi mipangilio ya uhifadhi wa nakala (mwendeshaji pekee)                           |
-| `/api/db-backups`           | DELETE | Punguza nakala zilizohifadhiwa kulingana na mipangilio ya uhifadhi (mwendeshaji pekee) |
-| `/api/db-backups/export`    | GET    | Pakua hifadhidata kama faili ya .sqlite                                                |
-| `/api/db-backups/import`    | POST   | Pakia faili ya .sqlite ili kubadilisha hifadhidata (`?dryRun=true` huthibitisha pekee) |
-| `/api/db-backups/exportAll` | GET    | Pakua nakala kamili ya kuhifadhi kama jalada la .tar.gz                                |
+| Mwisho                      | Mbinu  | Maelezo                                                                                        |
+| --------------------------- | ------ | ---------------------------------------------------------------------------------------------- |
+| `/api/db-backups`           | GET    | Orodhesha nakala rudufu zinazopatikana                                                         |
+| `/api/db-backups`           | PUT    | Unda nakala rudufu ya mwongozo                                                                 |
+| `/api/db-backups`           | POST   | Rejesha kutoka kwa nakala maalum                                                               |
+| `/api/db-backups`           | PATCH  | Hifadhi mipangilio ya kuhifadhi chelezo (kiendeshaji pekee)                                    |
+| `/api/db-backups`           | DELETE | Punguza nakala rudufu zilizohifadhiwa kwenye mipangilio ya uhifadhi (kiendeshaji pekee)        |
+| `/api/db-backups/export`    | GET    | Pakua hifadhidata kama faili ya .sqlite                                                        |
+| `/api/db-backups/import`    | POST   | Pakia faili ya .sqlite ili kuchukua nafasi ya hifadhidata (`?dryRun=true` inathibitisha pekee) |
+| `/api/db-backups/exportAll` | GET    | Pakua nakala kamili kama kumbukumbu ya .tar.gz                                                 |
 
-`/api/db-backups/export`, `/api/db-backups/exportAll` na `/api/settings/export-json` hutoa
-kila credential iliyohifadhiwa, kwa hiyo huhitaji kipindi cha dashboard au CLI ya ndani (au kuingia
-kumezimwa). API keys za scope yoyote na tokeni za ufikiaji za `oma_` hupata `403`. Marejesho yana
-mpaka huohuo: `POST /api/db-backups/import` (`dryRun=true` ikijumuishwa), `POST /api/db-backups`
-(marejesho kwa id) na `POST /api/settings/import-json` hubadilisha hifadhidata au mipangilio hai,
-kwa hiyo credential ya mashine hupata `403` pia; `omniroute sync import` hutuma credential ya CLI ya
-ndani. Hivyo ndivyo ilivyo pia kwa `DELETE /api/db-backups` (punguza nakala zilizohifadhiwa) na
-`PATCH /api/db-backups` (mipangilio ya uhifadhi: thamani zilizodumu huendesha upunguzaji wa kiotomatiki
-baada ya kila nakala). Kuorodhesha (`GET`) na kuunda nakala ya mwongozo (`PUT`) huendelea kutumia
-uthibitishaji wa kawaida wa usimamizi.
+`/api/db-backups/export`, `/api/db-backups/exportAll` na `/api/settings/export-json` hutoa kila kitambulisho kilichohifadhiwa, kwa hivyo zinahitaji kikao cha dashibodi au CLI ya ndani (au kuingia kumezimwa). API funguo za wigo wowote na ishara za ufikiaji `oma_` pata `403`. Marejesho yanashikilia mpaka sawa: `POST /api/db-backups/import` (`dryRun=true` pamoja), `POST /api/db-backups` (rejesha kwa kitambulisho) na `POST /api/settings/import-json` badala ya hifadhidata ya moja kwa moja au mipangilio, kwa hivyo kitambulisho cha mashine hupata `403` hapo pia; `omniroute sync import` hutuma kitambulisho cha CLI cha ndani. Vivyo hivyo `DELETE /api/db-backups` (pogoa chelezo zilizohifadhiwa) na `PATCH /api/db-backups` (mipangilio ya uhifadhi: maadili yanayoendelea huendesha upogoaji otomatiki baada ya kila chelezo). Kuorodhesha (`GET`) na kuunda nakala rudufu ya mwongozo (`PUT`) weka maandishi ya kawaida ya usimamizi.
 
 ### Usawazishaji wa Wingu
 
-| Endpoint               | Method  | Description                         |
-| ---------------------- | ------- | ----------------------------------- |
-| `/api/sync/cloud`      | Various | Operesheni za usawazishaji wa wingu |
-| `/api/sync/initialize` | POST    | Anzisha usawazishaji                |
-| `/api/cloud/*`         | Various | Usimamizi wa wingu                  |
+| Mwisho                 | Mbinu      | Maelezo                             |
+| ---------------------- | ---------- | ----------------------------------- |
+| `/api/sync/cloud`      | Mbalimbali | Uendeshaji wa usawazishaji wa wingu |
+| `/api/sync/initialize` | POST       | Anzisha usawazishaji                |
+| `/api/cloud/*`         | Mbalimbali | Usimamizi wa wingu                  |
 
 ### Vichuguu
 
-| Endpoint                   | Method | Description                                                                    |
-| -------------------------- | ------ | ------------------------------------------------------------------------------ |
-| `/api/tunnels/cloudflared` | GET    | Soma hali ya usakinishaji/utekelezaji wa Cloudflare Quick Tunnel kwa dashboard |
-| `/api/tunnels/cloudflared` | POST   | Washa au zima Cloudflare Quick Tunnel (`action=enable/disable`)                |
-| `/api/tunnels/ngrok`       | GET    | Soma hali ya utekelezaji wa ngrok Tunnel kwa dashboard                         |
-| `/api/tunnels/ngrok`       | POST   | Washa au zima ngrok Tunnel (`action=enable/disable`)                           |
+| Mwisho                     | Mbinu | Maelezo                                                              |
+| -------------------------- | ----- | -------------------------------------------------------------------- |
+| `/api/tunnels/cloudflared` | GET   | Soma hali ya Cloudflare Quick Tunnel install/runtime kwa dashibodi   |
+| `/api/tunnels/cloudflared` | POST  | Washa au zima Njia ya Haraka ya Cloudflare (`action=enable/disable`) |
+| `/api/tunnels/ngrok`       | GET   | Soma hali ya muda wa ngrok Tunnel kwa dashibodi                      |
+| `/api/tunnels/ngrok`       | POST  | Washa au zima Tunnel ngrok (`action=enable/disable`)                 |
 
-### Zana za CLI
+### CLI
 
-| Endpoint                           | Method | Description                 |
-| ---------------------------------- | ------ | --------------------------- |
-| `/api/cli-tools/claude-settings`   | GET    | Hali ya Claude CLI          |
-| `/api/cli-tools/codex-settings`    | GET    | Hali ya Codex CLI           |
-| `/api/cli-tools/droid-settings`    | GET    | Hali ya Droid CLI           |
-| `/api/cli-tools/openclaw-settings` | GET    | Hali ya OpenClaw CLI        |
-| `/api/cli-tools/runtime/[toolId]`  | GET    | Utekelezaji wa jumla wa CLI |
+| Mwisho                             | Mbinu | Maelezo             |
+| ---------------------------------- | ----- | ------------------- |
+| `/api/cli-tools/claude-settings`   | GET   | Claude CLI          |
+| `/api/cli-tools/codex-settings`    | GET   | Codex CLI           |
+| `/api/cli-tools/droid-settings`    | GET   | Droid CLI hali      |
+| `/api/cli-tools/openclaw-settings` | GET   | OpenClaw CLI        |
+| `/api/cli-tools/runtime/[toolId]`  | GET   | generic CLI runtime |
 
-Majibu ya CLI yanajumuisha: `installed`, `runnable`, `command`, `commandPath`, `runtimeMode`, `reason`.
+majibu CLI ni pamoja na: `installed`, `runnable`, `command`, `commandPath`, `runtimeMode`, `reason`.
 
-### Mawakala wa ACP
+### ACP Mawakala
 
-| Endpoint          | Method | Description                                                                             |
-| ----------------- | ------ | --------------------------------------------------------------------------------------- |
-| `/api/acp/agents` | GET    | Orodhesha mawakala wote waliotambuliwa (waliojengewa ndani + maalum) pamoja na hali yao |
-| `/api/acp/agents` | POST   | Ongeza wakala maalum au onyesha upya akiba ya utambuzi                                  |
-| `/api/acp/agents` | DELETE | Ondoa wakala maalum kwa kigezo cha query cha `id`                                       |
+| Mwisho            | Mbinu  | Maelezo                                                                          |
+| ----------------- | ------ | -------------------------------------------------------------------------------- |
+| `/api/acp/agents` | GET    | Orodhesha mawakala wote waliogunduliwa (desturi iliyojengwa ndani ya + ) na hali |
+| `/api/acp/agents` | POST   | Ongeza wakala maalum au onyesha upya akiba ya utambuzi                           |
+| `/api/acp/agents` | DELETE | Ondoa wakala maalum kwa `id` query param                                         |
 
-Jibu la GET linajumuisha `agents[]` (id, name, binary, version, installed, protocol, isCustom) na `summary` (total, installed, notFound, builtIn, custom).
+GET majibu ni pamoja na `agents[]` (id, jina, binary, toleo, iliyosakinishwa, itifaki, isCustom) na `summary` (jumla, imesakinishwa, notFound, builtIn, desturi).
 
-### Ustahimilivu na Vikomo vya Kiwango
+### Ustahimilivu na Vikomo vya Viwango
 
-| Endpoint                          | Method    | Maelezo                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| Mwisho                            | Mbinu     | Maelezo                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 | --------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `/api/resilience`                 | GET/PATCH | Pata/sasisha foleni ya maombi, muda wa kusubiri kabla ya kuunganisha tena, kivunja mzunguko cha mtoa huduma, na mipangilio ya kusubiri                                                                                                                                                                                                                                                                                                                             |
-| `/api/resilience/reset`           | POST      | Weka upya vivunja mzunguko vya watoa huduma                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| `/api/resilience/model-cooldowns` | GET       | Orodhesha vizuizi vinavyotumika vya kila (mtoa huduma, muunganisho, modeli), vilivyopangwa kulingana na muda uliosalia                                                                                                                                                                                                                                                                                                                                             |
-| `/api/resilience/model-cooldowns` | DELETE    | Ondoa kizuizi cha modeli — mwili `{provider, model}` au `{all: true}` ili kufuta vyote                                                                                                                                                                                                                                                                                                                                                                             |
-| `/api/rate-limits`                | GET/POST  | Hali ya kikomo cha kiwango kwa kila akaunti (GET) au washa/zima ulinzi wa kikomo cha kiwango kwa muunganisho (POST `{connectionId, enabled}`). Njia ya uandishi inayotumika kwa `rateLimitProtection` (haibadilishwi kamwe kupitia `PUT /api/providers/[id]`). Kumbuka: `enabled: false` huzima ulinzi wa wazi lakini haiondoi muunganisho unaotumia API key kutoka kwenye mtandao wa usalama wa kuwezesha kiotomatiki wa kimataifa (`autoEnableApiKeyProviders`). |
-| `/api/rate-limit`                 | GET       | Usanidi wa kimataifa wa kikomo cha kiwango (umeacha kutumika; ni jina mbadala la `/api/rate-limits`)                                                                                                                                                                                                                                                                                                                                                               |
+| `/api/resilience`                 | GET/PATCH | Get/update foleni, upunguzaji wa muunganisho, kivunja mtoa huduma, na mipangilio ya kusubiri                                                                                                                                                                                                                                                                                                                                                                       |
+| `/api/resilience/reset`           | POST      | Weka upya vivunja mzunguko wa watoa huduma                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `/api/resilience/model-cooldowns` | GET       | Orodhesha kufuli zinazotumika kwa kila-(mtoa huduma, muunganisho, modeli), iliyopangwa kwa muda uliosalia                                                                                                                                                                                                                                                                                                                                                          |
+| `/api/resilience/model-cooldowns` | DELETE    | Futa mtindo wa kufuli — mwili `{provider, model}` au `{all: true}` ili kufuta kila kitu                                                                                                                                                                                                                                                                                                                                                                            |
+| `/api/rate-limits`                | GET/POST  | Hali ya kikomo cha kiwango cha kila akaunti (GET) au geuza ulinzi wa kiwango cha juu kwa muunganisho (POST `{connectionId, enabled}`). Njia ya uandishi inayotumika kwa `rateLimitProtection` (haijabadilishwa kamwe kupitia `PUT /api/providers/[id]`). Kumbuka: `enabled: false` huzima ulinzi wazi lakini haichagui muunganisho unaotumika wa ufunguo wa API kutoka kwenye wavu wa usalama wa kuwezesha kiotomatiki duniani kote (`autoEnableApiKeyProviders`). |
+| `/api/rate-limit`                 | GET       | Usanidi wa kikomo cha viwango vya kimataifa (umeacha kutumika; lak kuwa `/api/rate-limits`)                                                                                                                                                                                                                                                                                                                                                                        |
 
-> Njia zote nne za `/api/resilience/*` zinahitaji **uthibitishaji wa usimamizi** (`requireManagementAuth`). Angalia [Ustahimilivu (uliopanuliwa)](#resilience-extended) kwa maelezo kamili ya tofauti kati ya kivunja mzunguko cha mtoa huduma, muda wa kusubiri kabla ya kuunganisha tena, na kizuizi cha modeli.
+> Njia zote nne `/api/resilience/*` zinahitaji** hati ya usimamizi** (`requireManagementAuth`). Tazama [Ustahimilivu (iliyopanuliwa)](#resilience-extended) kwa uchanganuzi kamili wa kivunja mtoa huduma dhidi ya hali tulivu ya muunganisho dhidi ya kufungia nje kwa mfano.
 
-### Tathmini
+### Evals
 
-| Endpoint     | Method   | Maelezo                                       |
-| ------------ | -------- | --------------------------------------------- |
-| `/api/evals` | GET/POST | Orodhesha seti za tathmini / endesha tathmini |
+| Mwisho       | Mbinu    | Maelezo                                  |
+| ------------ | -------- | ---------------------------------------- |
+| `/api/evals` | GET/POST | Orodhesha vyumba vya tathmini / tathmini |
 
 ### Sera
 
-| Endpoint        | Method          | Maelezo                    |
+| Mwisho          | Mbinu           | Maelezo                    |
 | --------------- | --------------- | -------------------------- |
 | `/api/policies` | GET/POST/DELETE | Dhibiti sera za uelekezaji |
 
-### Uzingatiaji
+### Kuzingatia
 
-| Endpoint                    | Method | Maelezo                                            |
-| --------------------------- | ------ | -------------------------------------------------- |
-| `/api/compliance/audit-log` | GET    | Kumbukumbu ya ukaguzi wa uzingatiaji (N za mwisho) |
+| Mwisho                      | Mbinu | Maelezo                                   |
+| --------------------------- | ----- | ----------------------------------------- |
+| `/api/compliance/audit-log` | GET   | Rekodi ya ukaguzi wa utiifu (N ya mwisho) |
 
-### v1beta (Inaoana na Gemini)
+### v1beta (Inayolingana na Gemini)
 
-| Endpoint                   | Method | Maelezo                                  |
-| -------------------------- | ------ | ---------------------------------------- |
-| `/v1beta/models`           | GET    | Orodhesha modeli katika umbizo la Gemini |
-| `/v1beta/models/{...path}` | POST   | Mwisho wa Gemini `generateContent`       |
+| Mwisho                     | Mbinu | Maelezo                               |
+| -------------------------- | ----- | ------------------------------------- |
+| `/v1beta/models`           | GET   | Orodhesha mifano katika umbizo Gemini |
+| `/v1beta/models/{...path}` | POST  | Gemini `generateContent` mwisho       |
 
-Njia hizi zinaakisi umbizo la API ya Gemini kwa wateja wanaotarajia uoanifu asilia wa Gemini SDK.
+Vipeo hivi vinaakisi umbizo la Gemini la API kwa wateja wanaotarajia utangamano wa asili Gemini SDK.
 
-### API za Ndani / Mfumo
+### Ndani / Mfumo APIs
 
-| Endpoint                 | Method | Maelezo                                                                         |
-| ------------------------ | ------ | ------------------------------------------------------------------------------- |
-| `/api/init`              | GET    | Anzisha huduma za ulandanishi za chinichini (uthibitishaji wa usimamizi)        |
-| `/api/tags`              | GET    | Lebo za modeli zinazoendana na Ollama (kwa wateja wa Ollama)                    |
-| `/api/restart`           | POST   | Anzisha upya seva kwa utaratibu                                                 |
-| `/api/shutdown`          | POST   | Zima seva kwa utaratibu                                                         |
-| `/api/system/env/repair` | POST   | Rekebisha vigezo vya mazingira vya watoa huduma wa OAuth                        |
-| `/api/system/version`    | GET    | Toleo la sasa/la hivi karibuni, hali ya sasisho, kituo cha uchapishaji          |
-| `/api/system/version`    | POST   | Anzisha sasisho linalozingatia uchapishaji kwenda kwenye toleo la hivi karibuni |
+| Mwisho                   | Mbinu | Maelezo                                                           |
+| ------------------------ | ----- | ----------------------------------------------------------------- |
+| `/api/init`              | GET   | Anzisha huduma za ulandanishi wa usuli (uthibitisho wa usimamizi) |
+| `/api/tags`              | GET   | Lebo za modeli zinazolingana na Ollama (kwa wateja Ollama )       |
+| `/api/restart`           | POST  | Anzisha tena seva nzuri                                           |
+| `/api/shutdown`          | POST  | Anzisha uzimaji mzuri wa seva                                     |
+| `/api/system/env/repair` | POST  | Rekebisha vigezo vya mazingira ya mtoaji OAuth                    |
+| `/api/system/version`    | GET   | toleo la Current/latest, hali ya sasisho, kituo cha kutolewa      |
+| `/api/system/version`    | POST  | Anzisha sasisho la ufahamu wa upelekaji kwa toleo jipya zaidi     |
 
-> **Kumbuka:** Vituo hivi hutumiwa ndani na mfumo au kwa uoanifu wa mteja wa Ollama. Kwa kawaida haviitwi na watumiaji wa mwisho.
+> **Kumbuka:** Vipeo hivi vinatumiwa ndani na mfumo au kwa uoanifu wa mteja Ollama. Kawaida hazijaitwa na watumiaji wa mwisho.
 
-### Marekebisho ya Mazingira ya OAuth _(v3.6.1+)_
+### OAuth Urekebishaji wa Mazingira _(v3.6.1 +)_
 
 ```bash
 POST /api/system/env/repair
@@ -1502,7 +1449,7 @@ Content-Type: application/json
 }
 ```
 
-Hurekebisha vigezo vya mazingira vya OAuth vilivyokosekana au kuharibika kwa mtoa huduma mahususi. Hurejesha:
+Hurekebisha vigeu vya mazingira OAuth vilivyokosekana au vilivyoharibika kwa mtoa huduma mahususi. Inarudi:
 
 ```json
 {
@@ -1512,16 +1459,13 @@ Hurekebisha vigezo vya mazingira vya OAuth vilivyokosekana au kuharibika kwa mto
 }
 ```
 
-### Toleo na Mkondo wa Utoaji
+### Toleo na Chaneli ya Kutolewa
 
 ```bash
 GET /api/system/version
 ```
 
-Njia ya usimamizi ya loopback pekee (inahitajika uthibitishaji wa msimamizi). Hurejesha toleo linaloendesha, toleo jipya zaidi
-lililochapishwa na hali ya usasishaji wa kiotomatiki. `releaseChannel` na `channels` ni
-sehemu za ziada (rail 3.8.54); `channel` inaendelea na maana yake — hali ya uwekaji ambayo kisasishaji
-cha dashibodi hutumia (`npm`, `source` au `docker-compose`).
+Njia ya usimamizi ya Loopback-pekee (admin auth). Hurejesha toleo linaloendeshwa, toleo jipya zaidi lililochapishwa na hali ya kusasisha kiotomatiki. `releaseChannel` na `channels` ni mashamba ya nyongeza (reli 3.8.54); `channel` huweka maana yake — hali ya utumaji ambayo kisasishaji cha dashibodi hutumia (`npm`, `source` au `docker-compose`).
 
 ```json
 {
@@ -1537,19 +1481,10 @@ cha dashibodi hutumia (`npm`, `source` au `docker-compose`).
 }
 ```
 
-- `releaseChannel` — mkondo wa npm wa toleo linaloendesha: `nightly` kwa matoleo ya `-nightly.*`,
-  `next` kwa matoleo mengine ya awali (`-rc.*`, `-beta.*`, `-alpha.*`), `lts` kwa toleo thabiti la
-  toleo kuu la zamani kuliko `channels.latest`, vinginevyo `latest`. Sheria ni zilezile kama za
-  `scripts/release/dist-tag.mjs`, ambayo huchagua lebo ya npm ya dist wakati wa uchapishaji.
-- `channels` — kichwa kilichochapishwa cha kila dist-tag, kutoka `npm view omniroute dist-tags` (ikiwa
-  sajili ya HTTP itatumika kama hifadhi rudufu), kilichowekwa kwenye akiba kwa TTL ya dakika 10 sawa na
-  `latest`. `latest` huwa ipo kila wakati (hurudi kwenye sehemu ya `latest`, kisha `"unavailable"`); `next`, `nightly`
-  na `lts` huonekana tu wakati dist-tag hiyo ipo. Ombi lenye `Cache-Control: no-cache` husasisha utafutaji wote
-  wawili.
+- `releaseChannel` — npm chaneli ya muundo unaoendelea: `nightly` kwa matoleo ya `-nightly.*`, `next` kwa matoleo mengine ya awali (`-rc.*`, `-beta.*`, `-alpha.*`), `lts` kwa toleo thabiti la kuu kuu kuliko `channels.latest`, vinginevyo `latest`. Sheria sawa na `scripts/release/dist-tag.mjs`, ambayo huchagua npm dist-tag wakati wa kuchapisha.
+- `channels` — iliyochapishwa kichwa cha kila dist-tag, kutoka `npm view omniroute dist-tags` (rejisja HTTP fallback), iliyohifadhiwa kwa TTL ya dakika 10 sawa na `latest`. `latest` daima iko (huanguka nyuma kwenye uwanja wa `latest`, kisha `"unavailable"`); `next`, `nightly` na `lts` huonekana tu wakati dist-tag hiyo ipo. Ombi la `Cache-Control: no-cache` huonyesha upya utafutaji wote.
 
-Muundo wa mikondo (`latest` = v3 hadi GA ya 4.0, `next` = rc, `nightly` = miundo ya `develop`,
-`lts` = viraka vya v3 baada ya GA ya 4.0) umeelezwa katika
-`docs/ops/RELEASE_STRATEGY.md`.
+Muundo wa chaneli (`latest` = v3 hadi 4.0 GA, `next` = rc, `nightly` = `develop` hujenga, `lts` = v3 viraka baada ya 4.0 GA) imeelezwa katika `docs/ops/RELEASE_STRATEGY.md`.
 
 ---
 

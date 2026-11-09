@@ -18,6 +18,9 @@ const files = [
   "230_call_logs_cache_write_tiers.sql",
   "231_daily_cached_input.sql",
   "232_proxy_payload_traffic.sql",
+  "233_api_key_self_service_settings.sql",
+  "234_agent_sessions.sql",
+  "235_usage_history_agent_session_id.sql",
   accountingFile,
 ];
 // Copy actual SQL under its actual filename: no test-only collision workaround.
@@ -41,7 +44,10 @@ const expectedLedger = [
   { version: "230", name: "call_logs_cache_write_tiers" },
   { version: "231", name: "daily_cached_input" },
   { version: "232", name: "proxy_payload_traffic" },
-  { version: "233", name: accountingName },
+  { version: "233", name: "api_key_self_service_settings" },
+  { version: "234", name: "agent_sessions" },
+  { version: "235", name: "usage_history_agent_session_id" },
+  { version: "236", name: accountingName },
 ];
 
 test.after(() => {
@@ -97,6 +103,15 @@ function assertComplete(db: SqliteAdapter, cacheReadTokens: number | null = null
   assert.ok(
     db.prepare("SELECT name FROM sqlite_master WHERE name = 'proxy_payload_traffic'").get()
   );
+  for (const table of ["api_key_self_service_settings", "agent_sessions"]) {
+    assert.ok(db.prepare("SELECT name FROM sqlite_master WHERE name = ?").get(table));
+  }
+  assert.ok(
+    db
+      .prepare<{ name: string }>("PRAGMA table_info(usage_history)")
+      .all()
+      .some((column) => column.name === "agent_session_id")
+  );
   const columns = db.prepare<{ name: string }>("PRAGMA table_info(usage_history)").all();
   for (const name of billingColumns)
     assert.equal(columns.filter((column) => column.name === name).length, 1);
@@ -137,7 +152,7 @@ function assertComplete(db: SqliteAdapter, cacheReadTokens: number | null = null
   );
 }
 
-function assertLegacyBillingUnchanged(db: SqliteAdapter) {
+function assertLegacyBillingUnchanged(db: SqliteAdapter, agentSessionId: string | null = null) {
   assert.deepEqual(db.prepare("SELECT * FROM usage_history WHERE id = 1").get(), {
     id: 1,
     tokens_input: 12,
@@ -146,6 +161,7 @@ function assertLegacyBillingUnchanged(db: SqliteAdapter) {
     billing_unit: "page",
     billing_quantity: 155,
     billing_unit_price_usd: 0.004,
+    agent_session_id: agentSessionId,
   });
 }
 
@@ -156,8 +172,8 @@ function applyLegacyBilling(db: SqliteAdapter) {
   );
 }
 
-test("accounting uses 233, leaving upstream's 228–232 migrations intact", () => {
-  assert.equal(accountingFile, "233_usage_history_calculated_cost.sql");
+test("accounting uses 236, leaving upstream's 228–235 migrations intact", () => {
+  assert.equal(accountingFile, "236_usage_history_calculated_cost.sql");
   for (const file of files) assert.ok(fs.existsSync(path.join(realDir, file)));
   assert.equal(fs.existsSync(path.join(realDir, "228_usage_history_calculated_cost.sql")), false);
   assert.equal(fs.existsSync(path.join(realDir, "231_usage_history_calculated_cost.sql")), false);
@@ -166,7 +182,7 @@ test("accounting uses 233, leaving upstream's 228–232 migrations intact", () =
 test("pre-228 schema applies cleanup, five-hour limits and billing; second run is a no-op", async () => {
   const db = await createDb();
   try {
-    assert.equal(runMigrations(db), 6);
+    assert.equal(runMigrations(db), 9);
     assertComplete(db);
     assert.equal(
       db
@@ -189,7 +205,7 @@ test("canonical 228 cleanup ledger row is not rehomed as accounting", async () =
   try {
     db.exec(cleanupSql);
     record(db, "228", "purge_orphaned_provider_catalogs");
-    assert.equal(runMigrations(db), 5);
+    assert.equal(runMigrations(db), 8);
     assertComplete(db);
     assert.equal(
       db
@@ -204,19 +220,19 @@ test("canonical 228 cleanup ledger row is not rehomed as accounting", async () =
   }
 });
 
-for (const legacyVersion of ["228", "231"]) {
-  test(`legacy ${legacyVersion} accounting is rehomed to 233 without replay or data loss`, async () => {
+for (const legacyVersion of ["228", "231", "233"]) {
+  test(`legacy ${legacyVersion} accounting is rehomed to 236 without replay or data loss`, async () => {
     const db = await createDb();
     try {
       applyLegacyBilling(db);
       record(db, legacyVersion, accountingName);
-      assert.equal(runMigrations(db), 5);
+      assert.equal(runMigrations(db), 8);
       assertComplete(db);
       assertLegacyBillingUnchanged(db);
       assert.equal(
         db
           .prepare<{ applied_at: string }>(
-            "SELECT applied_at FROM _omniroute_migrations WHERE version = '233'"
+            "SELECT applied_at FROM _omniroute_migrations WHERE version = '236'"
           )
           .get()?.applied_at,
         appliedAt
@@ -236,7 +252,8 @@ test("legacy and canonical accounting markers coexist safely during repair", asy
     record(db, "228", accountingName);
     record(db, "231", accountingName);
     record(db, "233", accountingName);
-    assert.equal(runMigrations(db), 5);
+    record(db, "236", accountingName);
+    assert.equal(runMigrations(db), 8);
     assertComplete(db);
     assertLegacyBillingUnchanged(db);
     assert.equal(runMigrations(db), 0);
@@ -259,11 +276,11 @@ test("genuine upstream 231/232 markers and measured data survive legacy billing 
     const trafficBefore = db.prepare("SELECT * FROM proxy_payload_traffic").all();
     applyLegacyBilling(db);
     record(db, "228", accountingName);
-    assert.equal(runMigrations(db), 3);
+    assert.equal(runMigrations(db), 6);
     assertComplete(db, 7);
     assertLegacyBillingUnchanged(db);
     assert.deepEqual(db.prepare("SELECT * FROM proxy_payload_traffic").all(), trafficBefore);
-    for (const version of ["231", "232", "233"]) {
+    for (const version of ["231", "232", "236"]) {
       assert.equal(
         db
           .prepare<{ applied_at: string }>(
@@ -288,10 +305,10 @@ test("legacy cache at 228 and billing at 231 rehome in order without blocking ei
     record(db, "228", "daily_cached_input");
     applyLegacyBilling(db);
     record(db, "231", accountingName);
-    assert.equal(runMigrations(db), 4);
+    assert.equal(runMigrations(db), 7);
     assertComplete(db, 9);
     assertLegacyBillingUnchanged(db);
-    for (const version of ["231", "233"]) {
+    for (const version of ["231", "236"]) {
       assert.equal(
         db
           .prepare<{ applied_at: string }>(
@@ -307,16 +324,17 @@ test("legacy cache at 228 and billing at 231 rehome in order without blocking ei
   }
 });
 
-test("an unrelated migration occupying 233 is rejected before deleting ledger or catalog data", async () => {
+test("an unrelated migration occupying 236 is rejected before deleting ledger or catalog data", async () => {
   const db = await createDb();
   try {
     applyLegacyBilling(db);
     record(db, "228", accountingName);
-    record(db, "233", "unrelated_migration");
+    record(db, "236", "unrelated_migration");
     const before = ledger(db);
-    assert.throws(() => runMigrations(db), /target version 233 is occupied by unknown migration/);
+    const usageBefore = db.prepare("SELECT * FROM usage_history WHERE id = 1").get();
+    assert.throws(() => runMigrations(db), /target version 236 is occupied by unknown migration/);
     assert.deepEqual(ledger(db), before);
-    assertLegacyBillingUnchanged(db);
+    assert.deepEqual(db.prepare("SELECT * FROM usage_history WHERE id = 1").get(), usageBefore);
     assert.equal(
       db.prepare<{ count: number }>("SELECT COUNT(*) AS count FROM key_value").get()?.count,
       3
@@ -326,11 +344,56 @@ test("an unrelated migration occupying 233 is rejected before deleting ledger or
   }
 });
 
+test("upstream 233–235 settings and agent-session data survive legacy accounting repair", async () => {
+  const db = await createDb();
+  try {
+    for (const [index, version, name] of [
+      [5, "233", "api_key_self_service_settings"],
+      [6, "234", "agent_sessions"],
+      [7, "235", "usage_history_agent_session_id"],
+    ] as const) {
+      db.exec(fs.readFileSync(path.join(realDir, files[index]), "utf8"));
+      record(db, version, name);
+    }
+    db.exec(`INSERT INTO api_key_self_service_settings
+      (api_key_id, shared_quota_providers, anthropic_ratelimit_headers)
+      VALUES ('synthetic-key', '["fixture"]', 'strip');
+      INSERT INTO agent_sessions (id, api_key_id, first_seen_at, last_seen_at, request_count, cost_usd)
+      VALUES ('synthetic-session', 'synthetic-key', 'before', 'before', 2, 0.7);
+      UPDATE usage_history SET agent_session_id = 'synthetic-session' WHERE id = 1;`);
+    const settingsBefore = db.prepare("SELECT * FROM api_key_self_service_settings").all();
+    const sessionsBefore = db.prepare("SELECT * FROM agent_sessions").all();
+    applyLegacyBilling(db);
+    record(db, "228", accountingName);
+    assert.equal(runMigrations(db), 5);
+    assertComplete(db);
+    assertLegacyBillingUnchanged(db, "synthetic-session");
+    assert.deepEqual(
+      db.prepare("SELECT * FROM api_key_self_service_settings").all(),
+      settingsBefore
+    );
+    assert.deepEqual(db.prepare("SELECT * FROM agent_sessions").all(), sessionsBefore);
+    for (const version of ["233", "234", "235", "236"]) {
+      assert.equal(
+        db
+          .prepare<{ applied_at: string }>(
+            "SELECT applied_at FROM _omniroute_migrations WHERE version = ?"
+          )
+          .get(version)?.applied_at,
+        appliedAt
+      );
+    }
+    assert.equal(runMigrations(db), 0);
+  } finally {
+    db.close();
+  }
+});
+
 test("already-present billing columns with a missing marker are not applied twice", async () => {
   const db = await createDb();
   try {
     applyLegacyBilling(db);
-    assert.equal(runMigrations(db), 6);
+    assert.equal(runMigrations(db), 9);
     assertComplete(db);
     assertLegacyBillingUnchanged(db);
     assert.equal(runMigrations(db), 0);
@@ -347,7 +410,7 @@ test("a partial billing schema receives missing columns without rewriting stored
     db.exec(
       "UPDATE usage_history SET calculated_cost_usd = 0.62, billing_unit = 'page' WHERE id = 1;"
     );
-    assert.equal(runMigrations(db), 6);
+    assert.equal(runMigrations(db), 9);
     assertComplete(db);
     assert.deepEqual(db.prepare("SELECT * FROM usage_history WHERE id = 1").get(), {
       id: 1,
@@ -357,6 +420,7 @@ test("a partial billing schema receives missing columns without rewriting stored
       billing_unit: "page",
       billing_quantity: null,
       billing_unit_price_usd: null,
+      agent_session_id: null,
     });
     assert.equal(runMigrations(db), 0);
   } finally {
