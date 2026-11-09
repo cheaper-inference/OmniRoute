@@ -8,8 +8,14 @@
  */
 
 import { logToolCall } from "../audit.ts";
-// Lazy-loaded: src/lib/db/compression transitively pulls the compression engine
-// chain (lite/stats -> omniglyph, ~47 MB retained). Loaded on first use.
+/**
+ * Lazily loads src/lib/db/compression on first compression tool invocation.
+ *
+ * This module transitively pulls the compression engine chain
+ * (lite/stats -> omniglyph, ~47 MB retained heap), so loading is deferred.
+ *
+ * @returns {Promise<Record<string, unknown>>}
+ */
 async function getCompressionDb() {
   return await import("../../../src/lib/db/compression.ts");
 }
@@ -17,8 +23,14 @@ import { getCompressionAnalyticsSummary } from "../../../src/lib/db/compressionA
 import { getCacheStatsSummary } from "../../../src/lib/db/compressionCacheStats.ts";
 import { listCompressionCombos } from "../../../src/lib/db/compressionCombos.ts";
 import type { McpToolExtraLike } from "../scopeEnforcement.ts";
-// Lazy-loaded: descriptionCompressor pulls the caveman compression engine
-// (~47 MB retained via stats -> omniglyph). Loaded on first use.
+/**
+ * Lazily loads the description compressor on first compression tool invocation.
+ *
+ * descriptionCompressor pulls the caveman compression engine (~47 MB retained
+ * heap via stats -> omniglyph), so loading is deferred.
+ *
+ * @returns {Promise<Record<string, unknown>>}
+ */
 async function getDescriptionCompressor() {
   return await import("../descriptionCompressor.ts");
 }
@@ -253,11 +265,19 @@ import {
   ccrDeleteInput,
   ccrStatsInput,
 } from "../schemas/tools.ts";
-// Lazy-loaded CCR engine.
+/**
+ * Lazily loads the CCR compression engine on first CCR tool invocation.
+ *
+ * @returns {Promise<Record<string, unknown>>}
+ */
 async function getCcrEngine() {
   return await import("../../services/compression/engines/ccr/index.ts");
 }
-// Lazy-loaded RTK engine.
+/**
+ * Lazily loads the RTK compression engine on first RTK tool invocation.
+ *
+ * @returns {Promise<Record<string, unknown>>}
+ */
 async function getRtkEngine() {
   return await import("../../services/compression/engines/rtk/index.ts");
 }
@@ -521,9 +541,7 @@ function resolveSampleLimit(limit?: number): number {
   return Math.min(2000, Math.floor(limit));
 }
 
-export async function handleRtkDiscover(
-  args: z.infer<typeof rtkDiscoverInput>
-): Promise<{
+export async function handleRtkDiscover(args: z.infer<typeof rtkDiscoverInput>): Promise<{
   sampleCount: number;
   candidates: Awaited<
     ReturnType<
@@ -541,9 +559,7 @@ export async function handleRtkDiscover(
   return result;
 }
 
-export async function handleRtkLearn(
-  args: z.infer<typeof rtkLearnInput>
-): Promise<{
+export async function handleRtkLearn(args: z.infer<typeof rtkLearnInput>): Promise<{
   command: string;
   sampleCount: number;
   filter: Awaited<

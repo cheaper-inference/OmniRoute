@@ -1,9 +1,23 @@
 import { z } from "zod";
-// Lazy-loaded: the skills executor pulls in the memory/embeddings chain
-// (~50+ MB retained heap at import). Loaded on first skill tool invocation.
+/**
+ * Lazily loads the skills registry on first skill tool invocation.
+ *
+ * The skills registry pulls in the skill executor chain (~50+ MB retained heap),
+ * so loading is deferred until needed.
+ *
+ * @returns {Promise<import("@/lib/skills/registry").SkillRegistry>}
+ */
 async function getSkillRegistry() {
   return (await import("@/lib/skills/registry")).skillRegistry;
 }
+/**
+ * Lazily loads the skills executor on first skill tool invocation.
+ *
+ * The skills executor pulls in the memory/embeddings chain (~50+ MB retained heap),
+ * so loading is deferred until needed.
+ *
+ * @returns {Promise<import("@/lib/skills/executor").SkillExecutor>}
+ */
 async function getSkillExecutor() {
   return (await import("@/lib/skills/executor")).skillExecutor;
 }
