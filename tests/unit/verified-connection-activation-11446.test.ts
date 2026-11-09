@@ -37,6 +37,9 @@ process.env.DISABLE_SQLITE_AUTO_BACKUP = "true";
 // /api/providers) gets a harmless 404 instead of touching the network.
 const VALIDATION_BASE_URL = "https://proxy.activation-11446.example.com/v1";
 let nextModelsProbeStatus: number | null = 200;
+// Initialize the global wrapper before stubbing probes; the first route import
+// must not replace this stub and send synthetic credentials to a real proxy.
+await import("../../open-sse/utils/proxyFetch.ts");
 const originalFetch = globalThis.fetch;
 const probeFetch = (async (input: string | URL | Request) => {
   const url =
