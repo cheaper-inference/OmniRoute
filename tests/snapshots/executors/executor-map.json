@@ -440,6 +440,16 @@
       "configSource": "maxai",
       "provider": "maxai"
     },
+    "minimax-code": {
+      "className": "MinimaxCodeExecutor",
+      "configSource": "<custom-config>",
+      "provider": "minimax-code"
+    },
+    "mmcode": {
+      "className": "MinimaxCodeExecutor",
+      "configSource": "<custom-config>",
+      "provider": "minimax-code"
+    },
     "moonshot": {
       "className": "MoonshotExecutor",
       "configSource": "moonshot",
@@ -701,6 +711,6 @@
       "provider": "zai-web"
     }
   },
-  "keyCount": 140,
+  "keyCount": 142,
   "sharedInstances": []
 }
