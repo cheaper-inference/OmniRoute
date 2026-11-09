@@ -1228,7 +1228,7 @@ Vipimo kanoniki mnamo 2026-10-18: **video 1.976 za kipekee** · **mara 20.220.28
   <tr><td nowrap><b>Muda wa uendeshaji</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Lugha</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> katika <code>src/</code> na <code>open-sse/</code> (<code>any</code> sifuri katika msingi tangu v2.0)</td></tr>
   <tr><td nowrap><b>Mfumo wa uundaji</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Hifadhidata</b></td><td>better-sqlite3 (SQLite, uwekaji kumbukumbu wa WAL) + LowDB (JSON ya zamani) — moduli 147 za kikoa, uhamishaji 229</td></tr>
+  <tr><td nowrap><b>Hifadhidata</b></td><td>better-sqlite3 (SQLite, uwekaji kumbukumbu wa WAL) + LowDB (JSON ya zamani) — moduli 147 za kikoa, uhamishaji 230</td></tr>
   <tr><td nowrap><b>Kumbukumbu</b></td><td>Utafutaji wa maandishi kamili wa SQLite FTS5 + vembeddings za vekta zilizopunguzwa kwa int8, uozo wenye aina</td></tr>
   <tr><td nowrap><b>Miundo</b></td><td>Zod 4 — uthibitishaji wa ingizo/tokeo la zana za MCP + mikataba ya API</td></tr>
   <tr><td nowrap><b>Itifaki</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
