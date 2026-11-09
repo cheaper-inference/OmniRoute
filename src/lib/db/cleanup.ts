@@ -101,6 +101,12 @@ export async function cleanupCallLogs(): Promise<CleanupResult> {
       cutoffISO,
       { progress: result }
     );
+    // A failed legacy offload keeps old bodies in call_logs_v1_legacy. Age them out too; a row that
+    // has not expired stays for the next boot's retry. The helper skips a missing table.
+    await deleteFromTableBeforeInBatches(
+      { table: "call_logs_v1_legacy", column: "timestamp", cutoff: "iso" },
+      cutoffISO
+    );
 
     console.log(`[Cleanup] Deleted ${result.deleted} call_logs older than ${retentionDays} days`);
   } catch (err: unknown) {

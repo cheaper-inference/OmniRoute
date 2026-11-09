@@ -88,3 +88,31 @@ test("an unrelated save does not freeze the inherited age: a later env override 
   assert.equal(resolveCallLogRetentionDays(), 14, "rotation follows the override");
   assert.equal(getUserDatabaseSettings().retention.callLogs, 14, "display and cleanup follow it");
 });
+
+test("scheduled cleanup also ages out bodies kept in the legacy table after a failed offload", async () => {
+  const db = core.getDbInstance();
+  db.exec(
+    "CREATE TABLE call_logs_v1_legacy (id TEXT PRIMARY KEY, timestamp TEXT, request_body TEXT, response_body TEXT, error TEXT)"
+  );
+  const insert = db.prepare("INSERT INTO call_logs (id, timestamp) VALUES (?, ?)");
+  const insertLegacy = db.prepare(
+    "INSERT INTO call_logs_v1_legacy (id, timestamp, request_body) VALUES (?, ?, ?)"
+  );
+  for (const [id, days] of [
+    ["ten-days", 10],
+    ["one-day", 1],
+  ] as const) {
+    const timestamp = new Date(Date.now() - days * DAY_MS).toISOString();
+    insert.run(id, timestamp);
+    insertLegacy.run(id, timestamp, JSON.stringify({ body: id }));
+  }
+
+  assert.deepEqual(await cleanupCallLogs(), { deleted: 1, errors: 0 });
+
+  const left = db.prepare("SELECT id FROM call_logs_v1_legacy").all() as Array<{ id: string }>;
+  assert.deepEqual(
+    left.map((row) => row.id),
+    ["one-day"],
+    "an expired body must not outlive its call log row"
+  );
+});
