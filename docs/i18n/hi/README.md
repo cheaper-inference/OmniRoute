@@ -15,7 +15,7 @@
 
 **[डिएगो सूजा](https://github.com/diegosouzapw) द्वारा बनाया गया**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Never stop coding. Every AI tool → 384 providers — 150+ free — through one endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity into FREE Claude / GPT / Gemini with auto-fallback. RTK + Caveman stacked compression saves 15–95% tokens (~89% avg) — never hit limits. 384 AI providers · 150+ free tiers · ~1.62B free tokens/mo · 20 routing strategies · $0 to start."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Never stop coding. Every AI tool → 385 providers — 150+ free — through one endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity into FREE Claude / GPT / Gemini with auto-fallback. RTK + Caveman stacked compression saves 15–95% tokens (~89% avg) — never hit limits. 385 AI providers · 150+ free tiers · ~1.62B free tokens/mo · 20 routing strategies · $0 to start."/>
 
 </div>
 
@@ -67,8 +67,8 @@
 
 |                           |          v3.8.50          | **v3.8.51** |      `v3.8.54+`       |
 | ------------------------- | :-----------------------: | :---------: | :-------------------: |
-| 🌐 प्रदाता                |            352            |   **358**   |          384          |
-| 🧠 अनोखा चैट मॉडल IDs     |           1320            |  **1374**   |         1525          |
+| 🌐 प्रदाता                |            352            |   **358**   |          385          |
+| 🧠 अनोखा चैट मॉडल IDs     |           1320            |  **1374**   |         1535          |
 | 🖼️ मॉडेलिटी ब्रिज         | 🆕 विज़न + ऑडियो + वीडियो |      ✓      |           ✓           |
 | 📡 रडार मुफ़्त कैटलॉग     |        🆕 ऑप्ट-इन         |      ✓      |           ✓           |
 | ⚖️ कोटा-जागरूक शेड्यूलिंग |       🆕 कोटा-शेयर        |      ✓      |           ✓           |
@@ -103,7 +103,7 @@
   <tr>
     <td align="right"><b>⚙️ Features</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 Combos</a></td>
-    <td align="center"><a href="#-384-ai-providers--156-catalog-marked-free">🌐 Providers</a></td>
+    <td align="center"><a href="#-385-ai-providers--156-catalog-marked-free">🌐 Providers</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI &amp; MCP</a></td>
   </tr>
   <tr>
@@ -239,7 +239,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="The Promise — One endpoint and 384 providers. Automatic fallback keeps routing while another healthy target is available. Six pillars: resilient fallback across 384 providers · up to 95% token savings on eligible workloads · $0 to start with 150+ free tiers and 52 recurring/keyless free-forever providers · 39 CLI/agent integrations through one config · OpenAI, Claude, Gemini and Responses API compatibility at /v1 · production controls including circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals and 56,000+ static test declarations across 7,800+ tracked test files."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="The Promise — One endpoint and 385 providers. Automatic fallback keeps routing while another healthy target is available. Six pillars: resilient fallback across 385 providers · up to 95% token savings on eligible workloads · $0 to start with 150+ free tiers and 52 recurring/keyless free-forever providers · 39 CLI/agent integrations through one config · OpenAI, Claude, Gemini and Responses API compatibility at /v1 · production controls including circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals and 56,000+ static test declarations across 7,800+ tracked test files."/>
 
 <br/>
 <br/>
@@ -499,7 +499,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="OmniRoute को क्या अलग बनाता है — एक दिनांकित फीचर स्नैपशॉट बनाम 9router, OpenRouter, CLIProxyAPI और LiteLLM के साथ 13 क्षमताओं में तुलना। OmniRoute: 384 प्रदाता, 150+ मुफ्त टियर बिल्ट-इन, 20 रूटिंग रणनीतियाँ, 12-इंजन टोकन कंप्रेशन, बिल्ट-इन MCP सर्वर के साथ 110 टूल्स, A2A एजेंट प्रोटोकॉल, स्थायी मेमोरी, गार्डरेल्स, क्लाउड एजेंट्स, TLS फिंगरप्रिंट स्टेल्थ, डेस्कटॉप/Termux/PWA और 67 i18n UI लोकल्स। OmniRoute MIT-लाइसेंस प्राप्त और स्वयं-होस्टेबल है। प्रतियोगी क्षमताएँ और गिनती बदल सकती हैं; लिंक की गई कार्यप्रणाली देखें।"/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="OmniRoute को क्या अलग बनाता है — एक दिनांकित फीचर स्नैपशॉट बनाम 9router, OpenRouter, CLIProxyAPI और LiteLLM के साथ 13 क्षमताओं में तुलना। OmniRoute: 385 प्रदाता, 150+ मुफ्त टियर बिल्ट-इन, 20 रूटिंग रणनीतियाँ, 12-इंजन टोकन कंप्रेशन, बिल्ट-इन MCP सर्वर के साथ 110 टूल्स, A2A एजेंट प्रोटोकॉल, स्थायी मेमोरी, गार्डरेल्स, क्लाउड एजेंट्स, TLS फिंगरप्रिंट स्टेल्थ, डेस्कटॉप/Termux/PWA और 67 i18n UI लोकल्स। OmniRoute MIT-लाइसेंस प्राप्त और स्वयं-होस्टेबल है। प्रतियोगी क्षमताएँ और गिनती बदल सकती हैं; लिंक की गई कार्यप्रणाली देखें।"/>
 
 <sub>📊 पूरी कार्यप्रणाली और प्रति-फीचर विवरण 9router, OpenRouter, CLIProxyAPI और LiteLLM के मुकाबले → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -603,7 +603,7 @@ Radar ऑप्ट-इन और केवल-GET है। OmniRoute क्ल�
 - **🖼️ नए समापन बिंदु** — `/v1/ocr` (Mistral OCR) और `/v1/audio/translations` (व्हिस्पर-शैली) मीडिया सतह को घेरते हैं। → [API संदर्भ](docs/reference/API_REFERENCE.md)
 - **🎨 छवि/वीडियो/ऑडियो पीढ़ी** मीडिया के लिए — वन API : xAI Grok इमेजिन और नोविता AI वीडियो, ComfyUI, मैग्निफिक, Adobe Firefly, Segmind, और ElevenLabs जैसे भाषण प्रदाता। → [API संदर्भ](docs/reference/API_REFERENCE.md)
 - **🌍 परिनियोजन और संचालन** — रिवर्स-प्रॉक्सी `basePath`, ब्राउज़र-भाषा ऑटो-डिटेक्ट, प्रति-कुंजी डिवाइस ट्रैकिंग, रूट-लेस MITM ट्रस्ट, zh-TW स्थानीयकरण। → [पर्यावरण](docs/reference/ENVIRONMENT.md)
-- **🤝 अधिक प्रदाता एवं एजेंट** — क्लाउड एजेंट (Codex क्लाउड, Cursor, Devin, Jules), Grok बिल्ड (xAI) ब्राउज़र + OAuth लॉगिन के साथ, Ollama प्रथम श्रेणी कार्ड, Claude ओपस 5 और सॉनेट 5, Kimi आधिकारिक साझेदारी (Code/Web/Moonshot), Zed, रिक्वेस्टी, SenseNova, युआनबाओ, एग्नेस AI... और एक ताज़ा**384-प्रदाता सूची** . → [प्रदाता](docs/reference/PROVIDER_REFERENCE.md)
+- **🤝 अधिक प्रदाता एवं एजेंट** — क्लाउड एजेंट (Codex क्लाउड, Cursor, Devin, Jules), Grok बिल्ड (xAI) ब्राउज़र + OAuth लॉगिन के साथ, Ollama प्रथम श्रेणी कार्ड, Claude ओपस 5 और सॉनेट 5, Kimi आधिकारिक साझेदारी (Code/Web/Moonshot), Zed, रिक्वेस्टी, SenseNova, युआनबाओ, एग्नेस AI... और एक ताज़ा**385-प्रदाता सूची** . → [प्रदाता](docs/reference/PROVIDER_REFERENCE.md)
 - **📡 रूटिंग पारदर्शिता** — प्रत्येक प्रतिक्रिया में एक `X-OmniRoute-Decision` हेडर होता है, जो strategy/provider/latency का नामकरण करता है, जो इसे सेवा प्रदान करता है, एक नई `cache-optimized` कॉम्बो रणनीति + ऑटो-कॉम्बो `cacheAffinity` फैक्टर रूट कैश्ड उपसर्ग को पकड़े हुए कनेक्शन पर वापस अनुरोध दोहराता है, और एक रीड-ओनली `/v1/auto-combo/{channel}/candidates` एंडपॉइंट एक `auto/*` चैनल के लाइव कैंडिडेट पूल को उजागर करता है। → [ऑटो-कॉम्बो](docs/routing/AUTO-COMBO.md)
 - **⚡ स्थानीय प्रदर्शन और बुनियादी ढांचा** — एक-क्लिक स्थानीय Redis, Cloudflare वर्कर्स / डेनो पर्यवेक्षित एम्बेडेड सेवाओं के रूप में रिले डिप्लॉयर्स, बिफ्रोस्ट और मक्स को तैनात करता है। → [एंबेडेड सेवाएँ](docs/frameworks/EMBEDDED-SERVICES.md)
 - **🧩 भी बॉक्स में है** — प्लगइन फ्रेमवर्क + मार्केटप्लेस, Omni/Agent/GitHub स्किल फ्रेमवर्क, Obsidian वॉल्ट इंटीग्रेशन (22 MCP टूल्स), OpenAI-संगत बैच और फाइल्स APIs, सिमेंटिक रिस्पॉन्स कैश, लीडरबोर्ड के साथ गेमिफिकेशन, ACP एजेंट डिस्कवरी (15 बिल्ट-इन एजेंट), BigQuery के लिए शेड्यूल्ड लॉग एक्सपोर्ट, `auto/chaos` पैरेलल मल्टी-मॉडल फैन-आउट, एक Telegram बॉट ब्रिज, एक इन-ऐप वर्जन मैनेजर और LMArena-ELO मुफ़्त-प्रदाता रैंकिंग। → [दस्तावेज़](docs/README.md)
@@ -686,11 +686,11 @@ omniroute configure codex          # साथ ही: claude opencode qwen aide
 
 <div align="center">
 
-## 🌐 384 AI प्रदाता — 156 कैटलॉग-चिह्नित निःशुल्क
+## 🌐 385 AI प्रदाता — 156 कैटलॉग-चिह्नित निःशुल्क
 
 </div>
 
-> **384 पंजीकृत प्रदाता** कैनोनिकल चैट, मीडिया, खोज, स्थानीय, क्लाउड-एजेंट और सिस्टम संग्रह सहित **156 `hasFree: true` डिस्कवरी मेटाडेटा ले जा रहा है** . चैट मॉडल रजिस्ट्री कवर करती है**244 प्रदाता / 3,157 विशिष्ट प्रदाता-मॉडल जोड़े / 1,525 कच्चे मॉडल IDs** ; अलग फ्री-बजट कैटलॉग है**466 प्रति-मॉडल पंक्तियाँ** ,**34 आवर्ती पूल** और **52 recurring/keyless मुफ़्त-हमेशा के लिए प्रदाता** . डिज़ाइन के अनुसार ये अलग-अलग भाजक हैं; परिभाषाएँ और पूल-डिडुप्ड गणनाएँ [प्रदाता संदर्भ](docs/reference/PROVIDER_REFERENCE.md) और [फ्री टियर](docs/reference/FREE_TIERS.md) में रहती हैं।
+> **385 पंजीकृत प्रदाता** कैनोनिकल चैट, मीडिया, खोज, स्थानीय, क्लाउड-एजेंट और सिस्टम संग्रह सहित **156 `hasFree: true` डिस्कवरी मेटाडेटा ले जा रहा है** . चैट मॉडल रजिस्ट्री कवर करती है**245 प्रदाता / 3,172 विशिष्ट प्रदाता-मॉडल जोड़े / 1,535 कच्चे मॉडल IDs** ; अलग फ्री-बजट कैटलॉग है**466 प्रति-मॉडल पंक्तियाँ** ,**34 आवर्ती पूल** और **52 recurring/keyless मुफ़्त-हमेशा के लिए प्रदाता** . डिज़ाइन के अनुसार ये अलग-अलग भाजक हैं; परिभाषाएँ और पूल-डिडुप्ड गणनाएँ [प्रदाता संदर्भ](docs/reference/PROVIDER_REFERENCE.md) और [फ्री टियर](docs/reference/FREE_TIERS.md) में रहती हैं।
 
 <div align="center">
 

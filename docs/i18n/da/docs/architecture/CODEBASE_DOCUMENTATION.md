@@ -499,7 +499,7 @@ udbyderspecifikke hjælpefunktioner (værktøjsskemaer, fetch-/TTS-adaptere og h
 (delt identitetshjælpefunktion) og `index.ts` (register).
 
 > Bemærk: Udbydere, der ikke er angivet her, betjenes af `default.ts` ved hjælp af den generiske
-> OpenAI-kompatible eksekutor. Det fulde udbyderkatalog (384 udbydere) findes i
+> OpenAI-kompatible eksekutor. Det fulde udbyderkatalog (385 udbydere) findes i
 > `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`

@@ -691,6 +691,27 @@ export const OPENAPI_ENDPOINTS: OpenApiEndpoint[] = [
     hasRequestBody: false,
   },
   {
+    path: "/api/v1/me/sessions",
+    method: "GET",
+    summary: "GET me › sessions",
+    description:
+      "List agent sessions opened by the calling API key (also served at /v1/me/sessions). Authenticate with `Authorization: Bearer <key>`; requires scope `self:usage`. Every filter applies on top of the calling key, so other keys' sessions are never listed. Session `costUsd` is the list-price cost of the session's requests; flat-rate providers are not counted as $0. It has the same meaning as `/v1/me/status` `listPriceUsd`, except that sessions are priced when each request is recorded and status with the current prices, so the two differ if prices changed in between. `unpricedCount` counts the requests that used tokens but had no known price and are therefore missing from `costUsd`, like status `unpricedRequests`.",
+    tag: "V1 Me",
+    tags: ["V1 Me"],
+    requiresAuth: true,
+    hasRequestBody: false,
+  },
+  {
+    path: "/api/v1/me/sessions/{id}",
+    method: "GET",
+    summary: "GET me › sessions › <id>",
+    description: "Get details and recent requests of a session owned by the calling API key.",
+    tag: "V1 Me",
+    tags: ["V1 Me"],
+    requiresAuth: false,
+    hasRequestBody: false,
+  },
+  {
     path: "/api/v1/me/status",
     method: "GET",
     summary: "GET me › status",

@@ -15,7 +15,7 @@ Tas nodrošina vienotu ar OpenAI saderīgu galapunktu (`/v1/*`) un maršrutē da
 
 Galvenās iespējas:
 
-- Ar OpenAI saderīga API saskarne CLI/rīkiem (384 pakalpojumu sniedzēji, 159 izpildītāju moduļi)
+- Ar OpenAI saderīga API saskarne CLI/rīkiem (385 pakalpojumu sniedzēji, 159 izpildītāju moduļi)
 - Pieprasījumu/atbilžu formātu pārveidošana starp pakalpojumu sniedzējiem
 - Modeļu kombināciju rezerves pārslēgšana (vairāku modeļu secība)
 - Strukturēti kombināciju soļi (`provider + model + connection`) ar izpildlaika secības noteikšanu pēc `compositeTiers`

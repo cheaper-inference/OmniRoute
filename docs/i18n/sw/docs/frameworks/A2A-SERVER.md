@@ -163,7 +163,7 @@ OmniRoute inafichua ujuzi 6 A2A unaotumia waya katika `src/lib/a2a/taskExecution
 | Ripoti ya Afya          | `health-report`      | Hukusanya kikatiza mzunguko, hali tulivu, hali ya kufunga kwa kila mtoa huduma                                                                                     | afya, uvumilivu           | "Onyesha hali ya afya ya watoa huduma wote"      |
 | Orodha ya Uwezo         | `list-capabilities`  | Hurejesha katalogi kamili ya Ujuzi wa Wakala yenye ingizo 45 (23 API + 21 CLI + 1 usanidi) kama jedwali la alama iliyo na SKILL.md URLs ghafi ya kudunga muktadha. | katalogi, ugunduzi, ujuzi | "Orodhesha uwezo wote OmniRoute "                |
 
-> Kadi ya Wakala inapaswa kuwekwa kulingana na orodha ya moja kwa moja ya watoa huduma 384; hesabu za watoa huduma na metadata free/no-auth hutolewa kutoka kwa sajili ya wakati wa utekelezaji.
+> Kadi ya Wakala inapaswa kuwekwa kulingana na orodha ya moja kwa moja ya watoa huduma 385; hesabu za watoa huduma na metadata free/no-auth hutolewa kutoka kwa sajili ya wakati wa utekelezaji.
 
 ### `list-capabilities` Maelezo ya Ujuzi
 

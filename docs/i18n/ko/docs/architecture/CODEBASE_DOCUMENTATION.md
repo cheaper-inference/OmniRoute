@@ -491,7 +491,7 @@ open-sse/
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `qoder`, `vertex`, `devin-desktop`, `claudeIdentity.ts` (공유 ID 도우미) 및 `index.ts` (레지스트리).
 
-> 참고: 여기에 나열되지 않은 제공업체는 일반 OpenAI 호환 실행기를 사용하여 `default.ts` 에서 서비스를 제공합니다. 전체 공급자 카탈로그(384개 공급자)는 `src/shared/constants/providers.ts` 에 있습니다.
+> 참고: 여기에 나열되지 않은 제공업체는 일반 OpenAI 호환 실행기를 사용하여 `default.ts` 에서 서비스를 제공합니다. 전체 공급자 카탈로그(385개 공급자)는 `src/shared/constants/providers.ts` 에 있습니다.
 
 ### 4.3 `open-sse/translator/`
 

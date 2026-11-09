@@ -15,7 +15,7 @@
 
 **Ṣẹda nipasẹ [Diego Souza](https://github.com/diegosouzapw)**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Never stop coding. Every AI tool → 384 providers — 150+ free — through one endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity into FREE Claude / GPT / Gemini with auto-fallback. RTK + Caveman stacked compression saves 15–95% tokens (~89% avg) — never hit limits. 384 AI providers · 150+ free tiers · ~1.62B free tokens/mo · 20 routing strategies · $0 to start."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Never stop coding. Every AI tool → 385 providers — 150+ free — through one endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity into FREE Claude / GPT / Gemini with auto-fallback. RTK + Caveman stacked compression saves 15–95% tokens (~89% avg) — never hit limits. 385 AI providers · 150+ free tiers · ~1.62B free tokens/mo · 20 routing strategies · $0 to start."/>
 
 </div>
 
@@ -67,8 +67,8 @@
 
 |                           |        v3.8.50        | **v3.8.51** |       `v3.8.54+`       |
 | ------------------------- | :-------------------: | :---------: | :--------------------: |
-| Awọn olupese 🌐           |          352          |   **358**   |          384           |
-| 🧠 Oto iwiregbe awoṣe IDs |         1320          |  **1374**   |          1525          |
+| Awọn olupese 🌐           |          352          |   **358**   |          385           |
+| 🧠 Oto iwiregbe awoṣe IDs |         1320          |  **1374**   |          1535          |
 | 🖼️ Modality Bridge        | 🆕 iran + iwe + fidio |      ✓      |           ✓            |
 | 📡 Reda free katalogi     |    Ijade-iwọle 🆕     |      ✓      |           ✓            |
 | ⚖️ Quota-mọ siseto        |     🆕 Quota-Pin      |      ✓      |           ✓            |
@@ -103,7 +103,7 @@
   <tr>
     <td align="right"><b>⚙️ Features</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 Combos</a></td>
-    <td align="center"><a href="#-384-ai-providers--156-catalog-marked-free">🌐 Providers</a></td>
+    <td align="center"><a href="#-385-ai-providers--156-catalog-marked-free">🌐 Providers</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI &amp; MCP</a></td>
   </tr>
   <tr>
@@ -239,7 +239,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="The Promise — One endpoint and 384 providers. Automatic fallback keeps routing while another healthy target is available. Six pillars: resilient fallback across 384 providers · up to 95% token savings on eligible workloads · $0 to start with 150+ free tiers and 52 recurring/keyless free-forever providers · 39 CLI/agent integrations through one config · OpenAI, Claude, Gemini and Responses API compatibility at /v1 · production controls including circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals and 56,000+ static test declarations across 7,800+ tracked test files."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="The Promise — One endpoint and 385 providers. Automatic fallback keeps routing while another healthy target is available. Six pillars: resilient fallback across 385 providers · up to 95% token savings on eligible workloads · $0 to start with 150+ free tiers and 52 recurring/keyless free-forever providers · 39 CLI/agent integrations through one config · OpenAI, Claude, Gemini and Responses API compatibility at /v1 · production controls including circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals and 56,000+ static test declarations across 7,800+ tracked test files."/>
 
 <br/>
 <br/>
@@ -499,7 +499,7 @@ Gbogbo ọgbọ́n **20** náà — parapọ̀ wọn bí o ṣe fẹ́ fún ìgb
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Ohun tí ó yà OmniRoute kúrò — àkótán àwọn ẹ̀yà tó ní ọjọ́ sílẹ̀ tí a fi wé 9router, OpenRouter, CLIProxyAPI àti LiteLLM ní gbogbo agbára 13. OmniRoute: àwọn olupèsè 384, àwọn ìpele ọ̀fẹ́ 150+ tí a ti kọ́ sínú rẹ̀, àwọn ọgbọ́n ìtọ́sọ́nà 20, ìfúnpọ̀ token pẹ̀lú ẹ́ńjìnì 12, olupèsè MCP tí a ti kọ́ sínú rẹ̀ pẹ̀lú àwọn irinṣẹ́ 110, ìlànà aṣojú A2A, ìrántí aláìgbéyìn, àwọn ìdènà ààbò, àwọn aṣojú awọ̀n, ìfarapamọ́ àpẹẹrẹ TLS, Desktop/Termux/PWA àti àwọn locale UI i18n 67. OmniRoute ní ìwé-aṣẹ MIT, ó sì lè gbàlejò fúnra rẹ. Àwọn agbára àti iye àwọn olùdíje lè yí padà; wo ìlànà tí a so mọ́."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Ohun tí ó yà OmniRoute kúrò — àkótán àwọn ẹ̀yà tó ní ọjọ́ sílẹ̀ tí a fi wé 9router, OpenRouter, CLIProxyAPI àti LiteLLM ní gbogbo agbára 13. OmniRoute: àwọn olupèsè 385, àwọn ìpele ọ̀fẹ́ 150+ tí a ti kọ́ sínú rẹ̀, àwọn ọgbọ́n ìtọ́sọ́nà 20, ìfúnpọ̀ token pẹ̀lú ẹ́ńjìnì 12, olupèsè MCP tí a ti kọ́ sínú rẹ̀ pẹ̀lú àwọn irinṣẹ́ 110, ìlànà aṣojú A2A, ìrántí aláìgbéyìn, àwọn ìdènà ààbò, àwọn aṣojú awọ̀n, ìfarapamọ́ àpẹẹrẹ TLS, Desktop/Termux/PWA àti àwọn locale UI i18n 67. OmniRoute ní ìwé-aṣẹ MIT, ó sì lè gbàlejò fúnra rẹ. Àwọn agbára àti iye àwọn olùdíje lè yí padà; wo ìlànà tí a so mọ́."/>
 
 <sub>📊 Ìlànà kíkún àti àlàyé ẹ̀yà kọ̀ọ̀kan ní ìfiwéra pẹ̀lú 9router, OpenRouter, CLIProxyAPI àti LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -603,7 +603,7 @@ tẹlifíṣọ̀nù lílò, tàbí ipò ìkọ̀sílẹ̀ ìkéde abẹ́lẹ̀
 - **🖼️ New endpoints** — `/v1/ocr` (Mistral OCR) ati `/v1/audio/translations` (Whisper-ara) yika awọn media dada. → [API itọkasi](docs/reference/API_REFERENCE.md)
 - **Aworan 🎨 / fidio / iran ohun** — ọkan API fun media: xAI Grok Fojuinu & Novita AI fidio, ComfyUI, Magnific, Adobe Firefly, Segmind, ati awọn olupese ọrọ gẹgẹbi ElevenLabs. → [API Itọkasi](docs/reference/API_REFERENCE.md)
 - **🌍 imuṣiṣẹ & ops** — aṣoju-aṣoju `basePath`, wiwa aifọwọyi-ede aṣawakiri, ipasẹ ẹrọ-bọtini, igbẹkẹle MITM ti ko ni gbongbo, agbegbe zh-TW. → [Ayika](docs/reference/ENVIRONMENT.md)
-- **🤝 Awọn olupese diẹ sii & awọn aṣoju** Awọn aṣoju awọsanma — (Codex Cloud, Cursor, Devin, Jules), Grok Kọ (xAI) pẹlu iwọle + OAuth ẹrọ aṣawakiri, kaadi Ollama akọkọ-kilasi, Claude Opus 5 & Sonnet 5, Kimi ajọṣepọ osise (Code/Web/Moonshot), Zed, Ibeere, SenseNova, Agfrey AI, Ag Yuannes **384-olupese katalogi** . [Awọn olupese](docs/reference/PROVIDER_REFERENCE.md) →
+- **🤝 Awọn olupese diẹ sii & awọn aṣoju** Awọn aṣoju awọsanma — (Codex Cloud, Cursor, Devin, Jules), Grok Kọ (xAI) pẹlu iwọle + OAuth ẹrọ aṣawakiri, kaadi Ollama akọkọ-kilasi, Claude Opus 5 & Sonnet 5, Kimi ajọṣepọ osise (Code/Web/Moonshot), Zed, Ibeere, SenseNova, Agfrey AI, Ag Yuannes **385-olupese katalogi** . [Awọn olupese](docs/reference/PROVIDER_REFERENCE.md) →
 - **📡 afisona akoyawo** — gbogbo idahun n gbe akọsori `X-OmniRoute-Decision` kan ti o n sọ orukọ strategy/provider/latency ti o ṣe iranṣẹ rẹ, ilana tuntun `cache-optimized` konbo + Auto-Combo `cacheAffinity` ifosiwewe ipa tun awọn ibeere pada si asopọ ti o ni imuduro iṣaaju ti a fi pamọ, ati ipari ipari `/v1/auto-combo/{channel}/candidates` kika-nikan ṣafihan adagun-idije ifiwe laaye ikanni `auto/*` kan. → [Aifọwọyi-Konbo](docs/routing/AUTO-COMBO.md)
 - **⚡ Agbegbe išẹ & infra** — ọkan-tẹ agbegbe Redis, Cloudflare Workers / Deno Deploy relay deployers, Bifrost & Mux bi abojuto awọn iṣẹ ifibọ. [Awọn iṣẹ ifibọ](docs/frameworks/EMBEDDED-SERVICES.md) →
 - **🧩 Tun ninu apoti** — itanna ilana + ọjà, Omni/Agent/GitHub ogbon nílẹ, Obsidian ifinkan Integration (22 MCP irinṣẹ), OpenAI-ibaramu Batch & Faili APIs, atunmọ idahun kaṣe, gamification pẹlu leaderboards, ACP oluranlowo Awari (15-itumọ ti ni òjíṣẹ 15), eto okeere log to BigQuery, `auto/chaos` -apapọ-pupọ-bot app, afara-pupọ Telegram ni app. oluṣakoso ẹya ati LMArena-ELO awọn ipo olupese ọfẹ. [Awọn iwe aṣẹ](docs/README.md) →
@@ -687,11 +687,11 @@ nínú ìtàn shell rẹ. → [Àwọn Ìṣọ̀kan CLI](docs/guides/CLI-INTEGR
 
 <div align="center">
 
-## 🌐 384 AI Olupese — 156 Katalogi-Sami Ọfẹ
+## 🌐 385 AI Olupese — 156 Katalogi-Sami Ọfẹ
 
 </div>
 
-> **384 awọn olupese ti o forukọsilẹ** kọja iwiregbe canonical, media, wiwa, agbegbe, aṣoju-awọsanma ati awọn akojọpọ eto, pẹlu **156 ti n gbe metadata iwari `hasFree: true`** . Iforukọsilẹ awoṣe iwiregbe ni wiwa **Awọn olupese 244 / 3,157 awọn orisii olupese-awoṣe pato / 1,525 awoṣe aise IDs** ; awọn lọtọ free-isuna katalogi ni o ni **466 fun-awoṣe kana** ,**34 loorekoore adagun** ati **52 recurring/keyless awọn olupese ọfẹ-lailai** . Awọn wọnyi ni o yatọ si iyeida nipa oniru; awọn asọye ati awọn iṣiro ti a yọkuro adagun n gbe ni [Itọkasi Olupese](docs/reference/PROVIDER_REFERENCE.md) ati [Awọn ipele Ọfẹ](docs/reference/FREE_TIERS.md).
+> **385 awọn olupese ti o forukọsilẹ** kọja iwiregbe canonical, media, wiwa, agbegbe, aṣoju-awọsanma ati awọn akojọpọ eto, pẹlu **156 ti n gbe metadata iwari `hasFree: true`** . Iforukọsilẹ awoṣe iwiregbe ni wiwa **Awọn olupese 245 / 3,172 awọn orisii olupese-awoṣe pato / 1,535 awoṣe aise IDs** ; awọn lọtọ free-isuna katalogi ni o ni **466 fun-awoṣe kana** ,**34 loorekoore adagun** ati **52 recurring/keyless awọn olupese ọfẹ-lailai** . Awọn wọnyi ni o yatọ si iyeida nipa oniru; awọn asọye ati awọn iṣiro ti a yọkuro adagun n gbe ni [Itọkasi Olupese](docs/reference/PROVIDER_REFERENCE.md) ati [Awọn ipele Ọfẹ](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 

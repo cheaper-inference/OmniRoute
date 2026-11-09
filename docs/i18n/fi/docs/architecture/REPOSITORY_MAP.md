@@ -242,7 +242,7 @@ src/
 | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
 | `components/`                    | Hallintapaneelin komponenttirajapinta: sovittimet `packages/ui-kit`-paketin päälle — katso `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: näkymissä käytetyt kuvakenimet → Lucide-komponentit (`<Icon>`)                                                      |
-| `constants/providers.ts`         | **384 palveluntarjoajaa** Zod-validoinnilla (ainoa totuuden lähde)                                                              |
+| `constants/providers.ts`         | **385 palveluntarjoajaa** Zod-validoinnilla (ainoa totuuden lähde)                                                              |
 | `constants/cliTools.ts`          | Ulkoisten CLI-työkalujen rekisteri                                                                                              |
 | `constants/routingStrategies.ts` | **20 reititysstrategiaa** prioriteetteineen                                                                                     |
 | `constants/publicApiRoutes.ts`   | Reitit, jotka edellyttävät Bearer-todennusta (hallintatodennuksen sijaan)                                                       |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Ulkoiset CLI-integraatiot + sisäinen OmniRoute CLI                                                   |
 | `I18N.md`                   | i18n-arkkitehtuuri, kielen lisääminen, 67 kielialuetta                                               |
 | `UNINSTALL.md`              | Puhtaan asennuksen poiston vaiheet                                                                   |
-| `PROVIDER_REFERENCE.md`     | **Automaattisesti luotu** 384 tarjoajan luettelo (uudelleenluonti: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Automaattisesti luotu** 385 tarjoajan luettelo (uudelleenluonti: `npm run gen:provider-reference`) |
 
 ### Alijärjestelmien syvälliset kuvaukset
 

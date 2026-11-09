@@ -163,7 +163,7 @@ OmniRoute na-ekpughe nkà 6 A2A wired na `src/lib/a2a/taskExecution.ts::A2A_SKIL
 | Akụkọ ahụike           | `health-report`      | Na-achịkọta ihe mgbaji sekit, nkwụsịtụ, ọnọdụ mkpọchi maka onye na-eweta ya                                                                           | ahụike, resilience      | "Gosi ọkwa ahụike nke ndị niile na-enye ya"  |
 | Ike ndepụta            | `list-capabilities`  | Na-eweghachite katalọgụ Skills nke ntinye 45 zuru ezu (23 API + 21 CLI + 1 config) dị ka tebụl akara nwere SKILL.md URLs raw maka ịgbanye gburugburu. | katalọgụ, nchọpụta, nkà | "Depụta ikike OmniRoute niile"               |
 
-> Ekwesịrị idowe Kaadị Agent ka ọ dabara na katalọgụ ndị na-eweta 384 dị ndụ; Ọnụọgụ ndị na-eweta yana metadata free/no-auth na-enweta site na ndekọ oge ojiri gaa.
+> Ekwesịrị idowe Kaadị Agent ka ọ dabara na katalọgụ ndị na-eweta 385 dị ndụ; Ọnụọgụ ndị na-eweta yana metadata free/no-auth na-enweta site na ndekọ oge ojiri gaa.
 
 ### `list-capabilities` Skill nkọwa
 

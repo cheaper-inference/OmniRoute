@@ -498,7 +498,7 @@ kọ̀ọ̀kan (àwọn schema irinṣẹ́, àwọn adapter fetch/TTS, àwọn 
 (olùrànlọ́wọ́ ìdánimọ̀ tí a ń pín) àti `index.ts` (àkọsílẹ̀).
 
 > Àkíyèsí: `default.ts` ló ń pèsè àwọn olùpèsè tí a kò tò síbí nípasẹ̀ amúṣẹ gbogbogbò
-> tó bá OpenAI mu. Àkójọ olùpèsè kíkún (àwọn olùpèsè 384) wà nínú
+> tó bá OpenAI mu. Àkójọ olùpèsè kíkún (àwọn olùpèsè 385) wà nínú
 > `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`

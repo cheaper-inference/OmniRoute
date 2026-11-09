@@ -15,7 +15,7 @@
 
 **[Diego Souza](https://github.com/diegosouzapw) ne ya kirkiro**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Never stop coding. Every AI tool → 384 providers — 150+ free — through one endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity into FREE Claude / GPT / Gemini with auto-fallback. RTK + Caveman stacked compression saves 15–95% tokens (~89% avg) — never hit limits. 384 AI providers · 150+ free tiers · ~1.62B free tokens/mo · 20 routing strategies · $0 to start."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Never stop coding. Every AI tool → 385 providers — 150+ free — through one endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity into FREE Claude / GPT / Gemini with auto-fallback. RTK + Caveman stacked compression saves 15–95% tokens (~89% avg) — never hit limits. 385 AI providers · 150+ free tiers · ~1.62B free tokens/mo · 20 routing strategies · $0 to start."/>
 
 </div>
 
@@ -67,8 +67,8 @@
 
 |                                     |             v3.8.50             | **v3.8.51** |      `v3.8.54+`       |
 | ----------------------------------- | :-----------------------------: | :---------: | :-------------------: |
-| Masu Bayar 🌐                       |               352               |   **358**   |          384          |
-| Samfurin taɗi na musamman na 🧠 IDs |              1320               |  **1374**   |         1525          |
+| Masu Bayar 🌐                       |               352               |   **358**   |          385          |
+| Samfurin taɗi na musamman na 🧠 IDs |              1320               |  **1374**   |         1535          |
 | 🖼️ Modality Bridge                  | 🆕 hangen nesa + audio + bidiyo |      ✓      |           ✓           |
 | 📡 Radar kasida kyauta              |            Shiga 🆕             |      ✓      |           ✓           |
 | ⚖️ Quota-sanarwa tsarawa            |        Share-Share na 🆕        |      ✓      |           ✓           |
@@ -103,7 +103,7 @@
   <tr>
     <td align="right"><b>⚙️ Features</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 Combos</a></td>
-    <td align="center"><a href="#-384-ai-providers--156-catalog-marked-free">🌐 Providers</a></td>
+    <td align="center"><a href="#-385-ai-providers--156-catalog-marked-free">🌐 Providers</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI &amp; MCP</a></td>
   </tr>
   <tr>
@@ -239,7 +239,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="The Promise — One endpoint and 384 providers. Automatic fallback keeps routing while another healthy target is available. Six pillars: resilient fallback across 384 providers · up to 95% token savings on eligible workloads · $0 to start with 150+ free tiers and 52 recurring/keyless free-forever providers · 39 CLI/agent integrations through one config · OpenAI, Claude, Gemini and Responses API compatibility at /v1 · production controls including circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals and 56,000+ static test declarations across 7,800+ tracked test files."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="The Promise — One endpoint and 385 providers. Automatic fallback keeps routing while another healthy target is available. Six pillars: resilient fallback across 385 providers · up to 95% token savings on eligible workloads · $0 to start with 150+ free tiers and 52 recurring/keyless free-forever providers · 39 CLI/agent integrations through one config · OpenAI, Claude, Gemini and Responses API compatibility at /v1 · production controls including circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals and 56,000+ static test declarations across 7,800+ tracked test files."/>
 
 <br/>
 <br/>
@@ -499,7 +499,7 @@ Dukkan dabaru **20** — haɗa su yadda kake so a kowane mataki na haɗi:
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Abin da ya bambanta OmniRoute — kwatancen fasali na zamani da 9router, OpenRouter, CLIProxyAPI da LiteLLM a fadin fasaloli 13. OmniRoute: masu samarwa 384, fiye da 150 matakan kyauta a ciki, dabarun tura 20, matse token injina 12, sabar MCP a ciki tare da kayan aiki 110, yarjejeniyar wakili A2A, ƙwaƙwalwar dindindin, matakan tsaro, wakilan girgije, ɓoyayyen TLS fingerprint, Desktop/Termux/PWA da harsunan UI 67 na i18n. OmniRoute yana da lasisin MIT kuma ana iya girka shi da kanka. Fasali da adadin abokan hamayya na iya canzawa; duba hanyar da aka danganta."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Abin da ya bambanta OmniRoute — kwatancen fasali na zamani da 9router, OpenRouter, CLIProxyAPI da LiteLLM a fadin fasaloli 13. OmniRoute: masu samarwa 385, fiye da 150 matakan kyauta a ciki, dabarun tura 20, matse token injina 12, sabar MCP a ciki tare da kayan aiki 110, yarjejeniyar wakili A2A, ƙwaƙwalwar dindindin, matakan tsaro, wakilan girgije, ɓoyayyen TLS fingerprint, Desktop/Termux/PWA da harsunan UI 67 na i18n. OmniRoute yana da lasisin MIT kuma ana iya girka shi da kanka. Fasali da adadin abokan hamayya na iya canzawa; duba hanyar da aka danganta."/>
 
 <sub>📊 Cikakken hanyar aiki &amp; bayanin fasali-da-fasali da 9router, OpenRouter, CLIProxyAPI &amp; LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -594,7 +594,7 @@ Radar na zaɓi ne kuma GET-only. Abokin hulɗar OmniRoute ba ya loda prompts, zi
 - **🖼️ Sabbin wuraren ƙarshe** — `/v1/ocr` (Mistral OCR) kuma `/v1/audio/translations` (Salon waswasi) zagaye saman kafofin watsa labarai. → [API Magana](docs/reference/API_REFERENCE.md)
 - **🎨 Hoto / bidiyo / tsarar sauti** — daya API ga kafofin watsa labarai: xAI Grok Yi tunanin & Novita AI bidiyo, ComfyUI, Magnific, Adobe Firefly, Segmind, da masu ba da magana kamar ElevenLabs. → [API Magana](docs/reference/API_REFERENCE.md)
 - **Aiwatar 🌍 & ops** — reverse-proxy `basePath`, gano atomatik-harshen burauza, bin diddigin kowane maɓalli, amintaccen MITM mai tushe, zh-TW. [Muhalli](docs/reference/ENVIRONMENT.md) →
-- **🤝 Ƙarin masu samarwa & wakilai** — girgije jamiái (Codex Cloud, Cursor, Devin, Jules), Grok Gina (xAI) tare da browser + OAuth login, Ollama katin farko-aji, Claude Opus 5 & Sonnet 5, Kimi hukuma haɗin gwiwa (Code/Web/Moonshot), Zed, Buƙatun, SenseNova, da Ag Yuan AI rerequest **384-kasidar masu bayarwa** . [Masu ba da](docs/reference/PROVIDER_REFERENCE.md) →
+- **🤝 Ƙarin masu samarwa & wakilai** — girgije jamiái (Codex Cloud, Cursor, Devin, Jules), Grok Gina (xAI) tare da browser + OAuth login, Ollama katin farko-aji, Claude Opus 5 & Sonnet 5, Kimi hukuma haɗin gwiwa (Code/Web/Moonshot), Zed, Buƙatun, SenseNova, da Ag Yuan AI rerequest **385-kasidar masu bayarwa** . [Masu ba da](docs/reference/PROVIDER_REFERENCE.md) →
 - **📡 Tsare-tsare bayyananne** — kowane amsa yana ɗauke da taken `X-OmniRoute-Decision` mai suna strategy/provider/latency wanda ya yi aiki da shi, sabon dabarun haɗin `cache-optimized` + Auto-Combo `cacheAffinity` factor hanyar maimaita buƙatun baya ga haɗin da ke riƙe da prefix ɗin da aka adana, kuma ƙarshen ƙarshen `/v1/auto-combo/{channel}/candidates` mai karantawa kawai yana fallasa tafkin ɗan takara na tashar `auto/*`. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **Ayyukan gida na ⚡ & infra** — danna sau ɗaya na gida Redis, Ma'aikatan Cloudflare / Deno Deploy deployers relay, Bifrost & Mux azaman sabis na saka idanu. [Ayyukan Haɗe-haɗe na](docs/frameworks/EMBEDDED-SERVICES.md) →
 - **🧩 Hakanan a cikin akwatin** — plugin framework + kasuwa, Omni/Agent/GitHub basira frameworks, Obsidian vault hadewa (22 MCP kayan aikin), OpenAI-jituwa Batch & Fayiloli APIs, ma'anar amsa cache, gamification tare da jagorori, ACP gano wakili (15 ginannen jamiái), shirya log log zuwa BigQuery, `auto/chaos` a layi daya-app fandel-bot a Telegram -bot. Manajan sigar da martabar masu ba da kyauta na LMArena-ELO. → [Docs](docs/README.md)
@@ -677,11 +677,11 @@ yana nuna ainihin muhalli/huɗɗa ba tare da aiwatarwa ba, kuma `--api-key-env N
 
 <div align="center">
 
-## 🌐 384 AI Masu Bayar da — 156 Kundin Lissafin Kyauta
+## 🌐 385 AI Masu Bayar da — 156 Kundin Lissafin Kyauta
 
 </div>
 
-> **384 masu bada rajista** a cikin taɗi na canonical, kafofin watsa labaru, bincike, gida, wakilin girgije da tarin tsarin, gami da **156 yana ɗauke da metadata na binciken `hasFree: true`** . Rijistar ƙirar taɗi ta rufe **244 masu bayarwa / 3,157 nau'i-nau'i-nau'i-nau'i-nau'i-nau'i-nau'i / 1,525 raw model IDs** ; Katalogin kyauta na kyauta yana da **466 na kowane nau'i na layi** ,**34 tafkuna masu maimaitawa** kuma **52 recurring/keyless masu ba da kyauta na har abada** . Waɗannan su ne ma'auni daban-daban ta hanyar ƙira; ma'anoni da lissafin da aka cire daga tafkin suna rayuwa a cikin [Maganar Mai bayarwa](docs/reference/PROVIDER_REFERENCE.md) da [Tiers Kyauta](docs/reference/FREE_TIERS.md).
+> **385 masu bada rajista** a cikin taɗi na canonical, kafofin watsa labaru, bincike, gida, wakilin girgije da tarin tsarin, gami da **156 yana ɗauke da metadata na binciken `hasFree: true`** . Rijistar ƙirar taɗi ta rufe **245 masu bayarwa / 3,172 nau'i-nau'i-nau'i-nau'i-nau'i-nau'i-nau'i / 1,535 raw model IDs** ; Katalogin kyauta na kyauta yana da **466 na kowane nau'i na layi** ,**34 tafkuna masu maimaitawa** kuma **52 recurring/keyless masu ba da kyauta na har abada** . Waɗannan su ne ma'auni daban-daban ta hanyar ƙira; ma'anoni da lissafin da aka cire daga tafkin suna rayuwa a cikin [Maganar Mai bayarwa](docs/reference/PROVIDER_REFERENCE.md) da [Tiers Kyauta](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 

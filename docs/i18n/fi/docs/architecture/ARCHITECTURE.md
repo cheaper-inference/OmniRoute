@@ -15,7 +15,7 @@ Se tarjoaa yhden OpenAI-yhteensopivan päätepisteen (`/v1/*`) ja reitittää li
 
 Keskeiset ominaisuudet:
 
-- OpenAI-yhteensopiva API-rajapinta komentorivityökaluille ja muille työkaluille (384 palveluntarjoajaa, 159 suoritusmoduulia)
+- OpenAI-yhteensopiva API-rajapinta komentorivityökaluille ja muille työkaluille (385 palveluntarjoajaa, 159 suoritusmoduulia)
 - Pyyntöjen ja vastausten muuntaminen palveluntarjoajien eri muotojen välillä
 - Malliyhdistelmien varajärjestelyt (usean mallin sarja)
 - Rakenteiset yhdistelmävaiheet (`provider + model + connection`) ja niiden ajonaikainen järjestäminen `compositeTiers`-arvon perusteella

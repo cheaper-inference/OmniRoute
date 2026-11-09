@@ -163,7 +163,7 @@ OmniRoute yana fallasa ƙwarewar A2A guda 6 da aka haɗa a cikin `src/lib/a2a/ta
 | Rahoton Lafiya   | `health-report`      | Haɗa mai watsewar kewayawa, sanyi, yanayin kulle kowane mai bayarwa                                                                                       | lafiya, juriya          | "Nuna halin kiwon lafiya na duk masu bayarwa"                |
 | Ƙarfin Lissafi   | `list-capabilities`  | Yana dawo da cikakken katalogin Ƙwararrun Agent 45 (23 API + 21 CLI + 1 config) azaman tebur mai alamar tare da danyen SKILL.md URLs don allurar mahallin | catalog, ganowa, basira | "Jerin duk damar OmniRoute "                                 |
 
-> Katin Wakilin yakamata a kiyaye shi daidai da kundin mai ba da 384 mai rai; Ƙididdigar mai badawa da metadata free/no-auth an samo su daga wurin yin rajistar lokacin aiki.
+> Katin Wakilin yakamata a kiyaye shi daidai da kundin mai ba da 385 mai rai; Ƙididdigar mai badawa da metadata free/no-auth an samo su daga wurin yin rajistar lokacin aiki.
 
 ### `list-capabilities` Skill Detail
 

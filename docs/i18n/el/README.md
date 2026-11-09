@@ -15,7 +15,7 @@
 
 **Δημιουργήθηκε από τον [Diego Souza](https://github.com/diegosouzapw)**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Never stop coding. Every AI tool → 384 providers — 150+ free — through one endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity into FREE Claude / GPT / Gemini with auto-fallback. RTK + Caveman stacked compression saves 15–95% tokens (~89% avg) — never hit limits. 384 AI providers · 150+ free tiers · ~1.62B free tokens/mo · 20 routing strategies · $0 to start."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Never stop coding. Every AI tool → 385 providers — 150+ free — through one endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity into FREE Claude / GPT / Gemini with auto-fallback. RTK + Caveman stacked compression saves 15–95% tokens (~89% avg) — never hit limits. 385 AI providers · 150+ free tiers · ~1.62B free tokens/mo · 20 routing strategies · $0 to start."/>
 
 </div>
 
@@ -67,8 +67,8 @@
 
 |                                            |          v3.8.50          | **v3.8.51** |       `v3.8.54+`       |
 | ------------------------------------------ | :-----------------------: | :---------: | :--------------------: |
-| Πάροχοι 🌐                                 |            352            |   **358**   |          384           |
-| 🧠 Μοναδικό μοντέλο συνομιλίας IDs         |           1320            |  **1374**   |          1525          |
+| Πάροχοι 🌐                                 |            352            |   **358**   |          385           |
+| 🧠 Μοναδικό μοντέλο συνομιλίας IDs         |           1320            |  **1374**   |          1535          |
 | 🖼️ Modality Bridge                         | 🆕 vision + ήχος βίντεο + |      ✓      |           ✓            |
 | Δωρεάν κατάλογος 📡 Radar                  |       Συμμετοχή 🆕        |      ✓      |           ✓            |
 | Προγραμματισμός με επίγνωση ποσοστώσεων ⚖️ |      🆕 Quota-Share       |      ✓      |           ✓            |
@@ -103,7 +103,7 @@
   <tr>
     <td align="right"><b>⚙️ Features</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 Combos</a></td>
-    <td align="center"><a href="#-384-ai-providers--156-catalog-marked-free">🌐 Providers</a></td>
+    <td align="center"><a href="#-385-ai-providers--156-catalog-marked-free">🌐 Providers</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI &amp; MCP</a></td>
   </tr>
   <tr>
@@ -239,7 +239,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="The Promise — One endpoint and 384 providers. Automatic fallback keeps routing while another healthy target is available. Six pillars: resilient fallback across 384 providers · up to 95% token savings on eligible workloads · $0 to start with 150+ free tiers and 52 recurring/keyless free-forever providers · 39 CLI/agent integrations through one config · OpenAI, Claude, Gemini and Responses API compatibility at /v1 · production controls including circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals and 56,000+ static test declarations across 7,800+ tracked test files."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="The Promise — One endpoint and 385 providers. Automatic fallback keeps routing while another healthy target is available. Six pillars: resilient fallback across 385 providers · up to 95% token savings on eligible workloads · $0 to start with 150+ free tiers and 52 recurring/keyless free-forever providers · 39 CLI/agent integrations through one config · OpenAI, Claude, Gemini and Responses API compatibility at /v1 · production controls including circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals and 56,000+ static test declarations across 7,800+ tracked test files."/>
 
 <br/>
 <br/>
@@ -499,7 +499,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Τι κάνει το OmniRoute να ξεχωρίζει — ένα στιγμιότυπο χαρακτηριστικών σε σύγκριση με 9router, OpenRouter, CLIProxyAPI και LiteLLM σε 13 δυνατότητες. OmniRoute: 384 πάροχοι, 150+ ενσωματωμένα δωρεάν πακέτα, 20 στρατηγικές δρομολόγησης, συμπίεση tokens με 12 μηχανές, ενσωματωμένος MCP server με 110 εργαλεία, πρωτόκολλο agent A2A, επίμονη μνήμη, guardrails, cloud agents, stealth αποτύπωμα TLS, Desktop/Termux/PWA και 67 τοπικές διεπαφές χρήστη. Το OmniRoute διαθέτει άδεια MIT και μπορεί να φιλοξενηθεί τοπικά. Οι δυνατότητες και οι αριθμοί των ανταγωνιστών ενδέχεται να αλλάξουν· δείτε τη συνδεδεμένη μεθοδολογία."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Τι κάνει το OmniRoute να ξεχωρίζει — ένα στιγμιότυπο χαρακτηριστικών σε σύγκριση με 9router, OpenRouter, CLIProxyAPI και LiteLLM σε 13 δυνατότητες. OmniRoute: 385 πάροχοι, 150+ ενσωματωμένα δωρεάν πακέτα, 20 στρατηγικές δρομολόγησης, συμπίεση tokens με 12 μηχανές, ενσωματωμένος MCP server με 110 εργαλεία, πρωτόκολλο agent A2A, επίμονη μνήμη, guardrails, cloud agents, stealth αποτύπωμα TLS, Desktop/Termux/PWA και 67 τοπικές διεπαφές χρήστη. Το OmniRoute διαθέτει άδεια MIT και μπορεί να φιλοξενηθεί τοπικά. Οι δυνατότητες και οι αριθμοί των ανταγωνιστών ενδέχεται να αλλάξουν· δείτε τη συνδεδεμένη μεθοδολογία."/>
 
 <sub>📊 Πλήρης μεθοδολογία &amp; λεπτομέρειες ανά χαρακτηριστικό σε σύγκριση με 9router, OpenRouter, CLIProxyAPI &amp; LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -603,7 +603,7 @@ Pix copia-e-cola:
 - **🖼️ Νέα τελικά σημεία** — `/v1/ocr` (Mistral OCR) και `/v1/audio/translations` (στυλ Whisper) στρογγυλοποιήστε την επιφάνεια του μέσου. → [API Αναφορά](docs/reference/API_REFERENCE.md)
 - **🎨 Δημιουργία εικόνας / βίντεο / ήχου** — ένας API για ΜΜΕ: xAI Grok Imagine & Novita AI βίντεο, ComfyUI, Magnific, Adobe Firefly, Segmind και παρόχους ομιλίας όπως ElevenLabs. → [API Αναφορά](docs/reference/API_REFERENCE.md)
 - **🌍 Deployment & ops** — reverse-proxy `basePath`, αυτόματη ανίχνευση γλώσσας προγράμματος περιήγησης, παρακολούθηση συσκευής ανά κλειδί, αξιοπιστία MITM χωρίς root, τοπική προσαρμογή zh-TW. [Περιβάλλον](docs/reference/ENVIRONMENT.md) →
-- **🤝 Περισσότεροι πάροχοι και πράκτορες** Πράκτορες cloud — (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) με σύνδεση προγράμματος περιήγησης + OAuth, κάρτα AI κατηγορίας Ollama, Claude Opus 5 & Sonnet 5, επίσημη συνεργασία Kimi (Code/Web/Moonshot), Zed, SenseNova a, Requesty ανανεωμένο **384-κατάλογος παρόχων** . [Πάροχοι](docs/reference/PROVIDER_REFERENCE.md) →
+- **🤝 Περισσότεροι πάροχοι και πράκτορες** Πράκτορες cloud — (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) με σύνδεση προγράμματος περιήγησης + OAuth, κάρτα AI κατηγορίας Ollama, Claude Opus 5 & Sonnet 5, επίσημη συνεργασία Kimi (Code/Web/Moonshot), Zed, SenseNova a, Requesty ανανεωμένο **385-κατάλογος παρόχων** . [Πάροχοι](docs/reference/PROVIDER_REFERENCE.md) →
 - **Διαφάνεια δρομολόγησης 📡** Κάθε απάντηση — φέρει μια κεφαλίδα `X-OmniRoute-Decision` που ονομάζει το strategy/provider/latency που την εξυπηρέτησε, μια νέα σύνθετη στρατηγική `cache-optimized` + Auto-Combo παράγοντας `cacheAffinity` αιτήματα επανάληψης διαδρομής πίσω στη σύνδεση που κρατά το προσωρινά αποθηκευμένο πρόθεμα και ένα τελικό σημείο `/v1/auto-combo/{channel}/candidates` μόνο για ανάγνωση εκθέτει τη ζωντανή ομάδα υποψηφίων καναλιών `auto/*`. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **⚡ Local performance & infra** — με ένα κλικ τοπικές Redis, Cloudflare Workers / Deno Deploy προγραμματιστές ρελέ, Bifrost & Mux ως εποπτευόμενες ενσωματωμένες υπηρεσίες. → [Embedded Services](docs/frameworks/EMBEDDED-SERVICES.md)
 - **🧩 Επίσης στο κουτί** Πλαίσιο προσθηκών — Αγορά +, πλαίσια δεξιοτήτων Omni/Agent/GitHub, ενσωμάτωση Obsidian vault (22 εργαλεία MCP ), Συμβατό με OpenAI Batch & Files APIs, κρυφή μνήμη σημασιολογικής απόκρισης, παιχνιδοποίηση με βαθμολογικούς πίνακες, ανακάλυψη πρακτόρων ACP (15 ενσωματωμένοι πράκτορες), προγραμματισμένη εξαγωγή αρχείων καταγραφής σε BigQuery- Telegram `auto/chaos` bridge, ένας διαχειριστής εκδόσεων εντός εφαρμογής και κατάταξη δωρεάν παρόχων LMARena-ELO. [Έγγραφα](docs/README.md) →
@@ -687,11 +687,11 @@ omniroute configure codex          # επίσης: claude opencode qwen aider go
 
 <div align="center">
 
-## 🌐 384 AI Providers — 156 Δωρεάν σήμανση καταλόγου
+## 🌐 385 AI Providers — 156 Δωρεάν σήμανση καταλόγου
 
 </div>
 
-> **384 εγγεγραμμένοι πάροχοι** σε όλες τις κανονικές συλλογές συνομιλίας, πολυμέσων, αναζήτησης, τοπικής, cloud-agent και συστήματος, συμπεριλαμβανομένων **156 που φέρει μεταδεδομένα ανακάλυψης `hasFree: true`** . Το μητρώο μοντέλου συνομιλίας καλύπτει **244 πάροχοι / 3.157 ξεχωριστά ζεύγη παρόχου-μοντέλου / 1.525 ακατέργαστο μοντέλο IDs** ; ο χωριστός κατάλογος ελεύθερου προϋπολογισμού έχει **466 σειρές ανά μοντέλο** ,**34 επαναλαμβανόμενες πισίνες** και **52 πάροχοι recurring/keyless δωρεάν για πάντα** . Αυτοί είναι διαφορετικοί παρονομαστές από το σχεδιασμό. Οι ορισμοί και οι υπολογισμοί που έχουν διαγραφεί από την ομάδα είναι ζωντανοί στην [Αναφορά παρόχου](docs/reference/PROVIDER_REFERENCE.md) και [στις δωρεάν βαθμίδες](docs/reference/FREE_TIERS.md).
+> **385 εγγεγραμμένοι πάροχοι** σε όλες τις κανονικές συλλογές συνομιλίας, πολυμέσων, αναζήτησης, τοπικής, cloud-agent και συστήματος, συμπεριλαμβανομένων **156 που φέρει μεταδεδομένα ανακάλυψης `hasFree: true`** . Το μητρώο μοντέλου συνομιλίας καλύπτει **245 πάροχοι / 3.172 ξεχωριστά ζεύγη παρόχου-μοντέλου / 1.535 ακατέργαστο μοντέλο IDs** ; ο χωριστός κατάλογος ελεύθερου προϋπολογισμού έχει **466 σειρές ανά μοντέλο** ,**34 επαναλαμβανόμενες πισίνες** και **52 πάροχοι recurring/keyless δωρεάν για πάντα** . Αυτοί είναι διαφορετικοί παρονομαστές από το σχεδιασμό. Οι ορισμοί και οι υπολογισμοί που έχουν διαγραφεί από την ομάδα είναι ζωντανοί στην [Αναφορά παρόχου](docs/reference/PROVIDER_REFERENCE.md) και [στις δωρεάν βαθμίδες](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 

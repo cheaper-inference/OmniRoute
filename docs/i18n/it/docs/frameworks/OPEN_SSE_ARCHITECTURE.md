@@ -488,7 +488,7 @@ Questo gestisce:
 
 | File                          | Scopo                                                      |
 | ----------------------------- | ---------------------------------------------------------- |
-| `providerRegistry.ts`         | Registro del modello di chat sul catalogo del provider 384 |
+| `providerRegistry.ts`         | Registro del modello di chat sul catalogo del provider 385 |
 | `providerModels.ts`           | Alias del modello, mappatura del formato                   |
 | `constants.ts`                | Timeout, limiti, codici di stato                           |
 | `defaultThinkingSignature.ts` | Firma di pensiero Claude predefinita                       |

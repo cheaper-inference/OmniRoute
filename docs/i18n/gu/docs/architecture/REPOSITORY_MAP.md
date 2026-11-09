@@ -242,7 +242,7 @@ src/
 | -------------------------------- | ---------------------------------------------------------------------------------------------------- |
 | `components/`                    | ડૅશબોર્ડ કોમ્પોનન્ટ API: `packages/ui-kit` પરના ઍડૅપ્ટર્સ — `docs/architecture/DESIGN_SYSTEM.md` જુઓ |
 | `constants/iconMap.ts`           | `ICON_MAP`: સ્ક્રીન્સ દ્વારા ઉપયોગમાં લેવાતા આઇકનનાં નામ → Lucide કોમ્પોનન્ટ્સ (`<Icon>`)            |
-| `constants/providers.ts`         | Zod માન્યતા સાથેના **384 પ્રદાતાઓ** (સત્યનો અધિકૃત સ્રોત)                                            |
+| `constants/providers.ts`         | Zod માન્યતા સાથેના **385 પ્રદાતાઓ** (સત્યનો અધિકૃત સ્રોત)                                            |
 | `constants/cliTools.ts`          | બાહ્ય CLI ટૂલ રજિસ્ટ્રી                                                                              |
 | `constants/routingStrategies.ts` | પ્રાથમિકતાઓ સાથેની **20 રૂટિંગ વ્યૂહરચનાઓ**                                                          |
 | `constants/publicApiRoutes.ts`   | એવા રૂટ્સ કે જેને (મેનેજમેન્ટની સરખામણીએ) Bearer પ્રમાણીકરણ જરૂરી છે                                 |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | બાહ્ય CLI ઇન્ટિગ્રેશન્સ + આંતરિક OmniRoute CLI                                    |
 | `I18N.md`                   | i18n આર્કિટેક્ચર, ભાષા ઉમેરવી, 67 લોકેલ્સ                                         |
 | `UNINSTALL.md`              | સ્વચ્છ અનઇન્સ્ટોલ પગલાં                                                           |
-| `PROVIDER_REFERENCE.md`     | 384 પ્રોવાઇડર્સનો **ઓટો-જનરેટેડ** કેટલોગ (રિજન: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | 385 પ્રોવાઇડર્સનો **ઓટો-જનરેટેડ** કેટલોગ (રિજન: `npm run gen:provider-reference`) |
 
 ### સબસિસ્ટમ ડીપ-ડાઇવ્સ
 

@@ -163,7 +163,7 @@ OmniRoute paljastab 6 A2A oskust, mis on ühendatud `src/lib/a2a/taskExecution.t
 | Tervisearuanne        | `health-report`      | Agregeerib kaitselülitit, jahtumist, lukustuse olekut pakkuja kohta                                                                                                                  | tervis, vastupidavus       | "Kuva kõigi teenuseosutajate tervislik seisund" |
 | Loetlege võimalused   | `list-capabilities`  | Tagastab täieliku 45 kirjest koosneva Agent Skills kataloogi (23 API + 21 CLI + 1 konfiguratsiooni) allahindluste tabelina koos töötlemata SKILL.md URLs iga konteksti sisestamiseks | kataloog, avastus, oskused | "Loetlege kõik OmniRoute võimalused"            |
 
-> Agendikaarti tuleks hoida vastavuses reaalajas 384-pakkujakataloogiga; pakkujate arv ja free/no-auth metaandmed pärinevad käitusaegsest registrist.
+> Agendikaarti tuleks hoida vastavuses reaalajas 385-pakkujakataloogiga; pakkujate arv ja free/no-auth metaandmed pärinevad käitusaegsest registrist.
 
 ### `list-capabilities` oskuste üksikasjad
 
