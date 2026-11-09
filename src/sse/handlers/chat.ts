@@ -2072,9 +2072,8 @@ async function handleSingleModelChat(
         pendingStreamRetryConnectionId = null;
       }
       // Refresh on every selected credential so fallback never reports a stale plan.
-      selectedConnectionPlan = provider === "codex"
-        ? getCodexPlanType(credentials.providerSpecificData)
-        : null;
+      selectedConnectionPlan =
+        provider === "codex" ? getCodexPlanType(credentials.providerSpecificData) : null;
       const accountId = credentials.connectionId.slice(0, 8);
       const releaseOAuthSession = credentials.releaseOAuthSession ?? (() => {});
       // Undefined whenever the lease flag is off, which makes every release/hold below a no-op.
