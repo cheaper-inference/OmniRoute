@@ -66,6 +66,7 @@
       "tests/unit/veoaifree-optional-credentials.test.ts",
       "tests/unit/16380-opencode-401-model-scope.test.ts",
       "tests/unit/account-fallback-concurrency-429.test.ts",
+      "tests/unit/provider-profile-memo.test.ts",
       "tests/unit/antigravity-exact-lock-aliases.test.ts",
       "tests/unit/cursor-entitlement-scope-17167.test.ts",
       "tests/unit/cursor-execute-error-stream.test.ts",
