@@ -146,7 +146,7 @@ test("getUsageForProvider(antigravity) merges weekly quotas with the selected CL
   globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
     const url = requestUrl(input);
     const headers = new Headers(init?.headers);
-    assert.match(headers.get("User-Agent") ?? "", /^antigravity\/cli\/1\.3\.4 /);
+    assert.match(headers.get("User-Agent") ?? "", /^antigravity\/cli\/1\.5\.3 /);
     assert.equal(headers.get("X-Goog-Api-Client"), null);
 
     if (url.includes("retrieveUserQuotaSummary")) {

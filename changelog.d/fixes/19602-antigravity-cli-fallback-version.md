@@ -1,0 +1,1 @@
+- **fix(antigravity):** update Antigravity CLI fallback version from 1.3.4 to 1.5.3, matching Google's latest supported release and ensuring Argon and Claude 5.5 discovery and streaming requests succeed without deprecation notices ([#19602](https://github.com/cheaper-inference/OmniRoute/pull/19602)) — thanks @bufftop25
