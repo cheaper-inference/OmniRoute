@@ -6,11 +6,11 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { openMemorySqliteAdapter } from "../_helpers/memorySqliteAdapter.ts";
 
-// The cache-write tier migration was renumbered (213 -> 217 -> 226 -> 227 -> 228 -> 229) because
+// The cache-write tier migration was renumbered (213 -> 217 -> 226 -> 227 -> 228 -> 229 -> 230) because
 // 213 belongs to api_key_preferred_connections on the release. Its isSchemaAlreadyApplied guard
-// must follow the file: left on "213", "226", "227" or "228", a DB that already carries the
-// cache-write columns would skip the unrelated api_keys, request_cost_ledger, quota_recovery or
-// orphaned-catalog purge migration.
+// must follow the file: left on "213", "226", "227", "228" or "229", a DB that already carries the
+// cache-write columns would skip the unrelated api_keys, request_cost_ledger, quota_recovery,
+// orphaned-catalog purge or five-hour usage limit migration.
 const sourceDir = fileURLToPath(new URL("../../../src/lib/db/migrations/", import.meta.url));
 const cacheWriteFile = fs
   .readdirSync(sourceDir)
@@ -22,6 +22,7 @@ for (const name of [
   "226_request_cost_ledger_read_indexes.sql",
   "227_quota_recovery_due_cover.sql",
   "228_purge_orphaned_provider_catalogs.sql",
+  "229_api_key_five_hour_limit.sql",
   cacheWriteFile!,
 ]) {
   fs.copyFileSync(path.join(sourceDir, name), path.join(migrationsDir, name));
@@ -41,6 +42,7 @@ test("cache-write tiers migration does not reuse the api_key_preferred_connectio
   assert.notEqual(cacheWriteFile!.split("_")[0], "226");
   assert.notEqual(cacheWriteFile!.split("_")[0], "227");
   assert.notEqual(cacheWriteFile!.split("_")[0], "228");
+  assert.notEqual(cacheWriteFile!.split("_")[0], "229");
 });
 
 test("existing cache-write columns never skip the migrations that held its old numbers", () => {
@@ -64,6 +66,7 @@ test("existing cache-write columns never skip the migrations that held its old n
       db.prepare("PRAGMA table_info(api_keys)").all() as Array<{ name: string }>
     ).map((column) => column.name);
     assert.ok(columns.includes("preferred_connections"), columns.join(","));
+    assert.ok(columns.includes("five_hour_usage_limit_usd"), columns.join(","));
     const indexes = (
       db.prepare("PRAGMA index_list(request_cost_ledger)").all() as Array<{ name: string }>
     ).map((index) => index.name);
