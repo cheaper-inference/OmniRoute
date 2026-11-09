@@ -18,6 +18,11 @@ type Schema = {
   [keyword: string]: unknown;
 };
 
+/**
+ * Translate a one-tool Antigravity request and return the cleaned OpenAI `parameters`.
+ * @param parameters - Antigravity `functionDeclarations[0].parameters` schema.
+ * @returns The schema the OpenAI-format request carries for that tool.
+ */
 function cleanedParameters(parameters: Record<string, unknown>): Schema {
   const result = antigravityToOpenAIRequest(
     "gpt-4o",

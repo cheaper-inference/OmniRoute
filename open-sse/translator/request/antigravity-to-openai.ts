@@ -199,6 +199,12 @@ const DRAFT_META_KEYS = new Set([
   "title",
 ]);
 
+/**
+ * Remove `DRAFT_META_KEYS` and `x-*` keywords from every schema node, in place.
+ * The keys of a `properties` map are parameter names, so they are kept and only
+ * each child schema is cleaned.
+ * @param obj - JSON Schema node (or array of nodes) to clean; non-objects are ignored.
+ */
 function stripDraftMeta(obj: unknown): void {
   if (!obj || typeof obj !== "object") return;
   if (Array.isArray(obj)) {
