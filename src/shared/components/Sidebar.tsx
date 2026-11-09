@@ -4,6 +4,7 @@ import { Fragment, useState, useEffect, useCallback, useSyncExternalStore, useId
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/shared/utils/cn";
+import { usePinnedSidebarItems } from "@/shared/hooks/usePinnedSidebarItems";
 import { getActiveSidebarHref } from "@/shared/utils/sidebarRouteMatch";
 import { filterSidebarSectionsByQuery } from "@/shared/utils/sidebarSearch";
 import {
@@ -50,6 +51,7 @@ import {
   applySectionOrder,
   applyItemOrder,
   isSidebarItemVisibleForFlags,
+  getSectionItems,
   resolveRuntimeSidebarSections,
   type SidebarSectionId,
   type SidebarItemDefinition,
@@ -77,7 +79,6 @@ const isE2EMode = process.env.NEXT_PUBLIC_OMNIROUTE_E2E_MODE === "1";
 const DEFAULT_EXPANDED: SidebarSectionId = "omni-proxy";
 const EXPANDED_SECTIONS_KEY = "sidebar-expanded-sections";
 const PINNED_SECTIONS_KEY = "sidebar-pinned-sections";
-const PINNED_ITEMS_KEY = "sidebar-pinned-items";
 
 type SidebarProps = {
   onClose?: () => void;
@@ -124,13 +125,6 @@ function readStoredPinnedRaw() {
     return null;
   }
 }
-function readStoredPinnedItemsRaw() {
-  try {
-    return localStorage.getItem(PINNED_ITEMS_KEY);
-  } catch {
-    return null;
-  }
-}
 
 /**
  * Dashboard navigation. Must render inside the kit `SidebarProvider` + `<Sidebar>` (DashboardShell
@@ -172,7 +166,7 @@ export default function Sidebar({ isMacElectron = false }: SidebarProps) {
     new Set([DEFAULT_EXPANDED])
   );
   const [pinnedSections, setPinnedSections] = useState<Set<SidebarSectionId>>(new Set());
-  const [pinnedItems, setPinnedItems] = useState<Set<string>>(new Set());
+  const { pinnedItems, togglePinItem } = usePinnedSidebarItems();
   const [pinnedSectionCollapsed, setPinnedSectionCollapsed] = useState(false);
   const [sidebarExpansionLoaded, setSidebarExpansionLoaded] = useState(false);
   const [skipInitialActiveExpansion, setSkipInitialActiveExpansion] = useState(false);
@@ -198,11 +192,6 @@ export default function Sidebar({ isMacElectron = false }: SidebarProps) {
     readStoredPinnedRaw,
     getServerSnapshotNull
   );
-  const storedPinnedItemsRaw = useSyncExternalStore(
-    noopSubscribe,
-    readStoredPinnedItemsRaw,
-    getServerSnapshotNull
-  );
   if (hydrated && !sidebarExpansionLoaded) {
     const storedExpanded = parseStoredArray<SidebarSectionId[]>(storedExpandedRaw, [
       DEFAULT_EXPANDED,
@@ -211,7 +200,6 @@ export default function Sidebar({ isMacElectron = false }: SidebarProps) {
       storedPinnedRaw !== null
         ? parseStoredArray<SidebarSectionId[]>(storedPinnedRaw, [])
         : (SIDEBAR_SECTIONS.filter((s) => s.defaultPinned).map((s) => s.id) as SidebarSectionId[]);
-    const storedPinnedItems = parseStoredArray<string[]>(storedPinnedItemsRaw, []);
 
     const initialPinned = new Set<SidebarSectionId>(storedPinned);
     const initialExpanded = hydrateExpandedSections(storedExpanded, initialPinned);
@@ -219,7 +207,6 @@ export default function Sidebar({ isMacElectron = false }: SidebarProps) {
     setSkipInitialActiveExpansion(storedExpanded.length === 0);
     setExpandedSections(initialExpanded);
     setPinnedSections(initialPinned);
-    setPinnedItems(new Set(storedPinnedItems));
     setSidebarExpansionLoaded(true);
   }
 
@@ -301,8 +288,8 @@ export default function Sidebar({ isMacElectron = false }: SidebarProps) {
   const getSidebarLabel = (key: string, fallback: string) =>
     typeof t.has === "function" && t.has(key) ? t(key) : fallback;
 
-  const resolveItem = (item: SidebarItemDefinition, hidden: Set<string>) => {
-    if (hidden.has(item.id)) return null;
+  const resolveItem = (item: SidebarItemDefinition, hidden?: Set<string>) => {
+    if (hidden?.has(item.id)) return null;
     if (!isSidebarItemVisibleForFlags(item, featureFlags)) return null;
     const subtitle = item.subtitleKey
       ? getSidebarLabel(item.subtitleKey, item.subtitleFallback ?? "")
@@ -371,8 +358,14 @@ export default function Sidebar({ isMacElectron = false }: SidebarProps) {
     section.children.flatMap((child: any) => (child.type === "group" ? child.items : [child]))
   );
 
+  // Pins are explicit shortcuts, independent of the sidebar preset's hidden entries.
+  // Resolve against the runtime catalog so feature gates and private URLs still apply.
+  const pinnableItems = orderedSections.flatMap(getSectionItems);
   const pinnedItemList = Array.from(pinnedItems)
-    .map((id) => allVisibleItems.find((item) => item.id === id))
+    .map((id) => {
+      const item = pinnableItems.find((entry) => entry.id === id);
+      return item ? resolveItem(item) : null;
+    })
     .filter(Boolean) as (SidebarItemDefinition & { label: string; subtitle?: string })[];
 
   const homeIndex = visibleSections.findIndex((s) => s.id === "home");
@@ -395,7 +388,7 @@ export default function Sidebar({ isMacElectron = false }: SidebarProps) {
         ]
       : visibleSections;
 
-  const activeHref = getActiveSidebarHref(pathname, allVisibleItems);
+  const activeHref = getActiveSidebarHref(pathname, [...allVisibleItems, ...pinnedItemList]);
 
   const isSearching = searchQuery.trim().length > 0;
   // Section master toggle: hidden sections drop out of the normal display,
@@ -474,19 +467,6 @@ export default function Sidebar({ isMacElectron = false }: SidebarProps) {
         });
       }
       saveToStorage(PINNED_SECTIONS_KEY, [...next]);
-      return next;
-    });
-  }, []);
-
-  const togglePinItem = useCallback((itemId: string) => {
-    setPinnedItems((prev) => {
-      const next = new Set(prev);
-      if (next.has(itemId)) {
-        next.delete(itemId);
-      } else {
-        next.add(itemId);
-      }
-      saveToStorage(PINNED_ITEMS_KEY, [...next]);
       return next;
     });
   }, []);
