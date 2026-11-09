@@ -1,1 +1,0 @@
-- **fix(settings):** `PATCH /api/settings` now lists the keys it ignored in an `ignoredKeys` field of the 200 answer, so a typo or an unknown setting no longer looks like a saved change.
