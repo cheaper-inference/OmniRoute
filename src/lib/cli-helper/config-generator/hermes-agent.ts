@@ -123,6 +123,27 @@ export function sanitizeOmniRouteRoleCredentials(config: any): void {
 }
 
 /**
+ * Read the existing config.yaml for a non-destructive merge. Only a missing
+ * (or empty) file means "start fresh" ({}); anything that fails to read or
+ * parse, or is not a mapping, returns null so the caller refuses the write
+ * instead of replacing the file.
+ */
+async function readExistingHermesConfig(): Promise<any | null> {
+  let existing: unknown;
+  try {
+    const fs = await import("node:fs/promises");
+    const raw = await fs.readFile(getConfigPath(), "utf-8");
+    // js-yaml 5 throws on an empty document; an empty file is a fresh start.
+    existing = raw.trim() === "" ? {} : yaml.load(raw) || {};
+  } catch (error) {
+    // no existing file — start fresh
+    return (error as NodeJS.ErrnoException)?.code === "ENOENT" ? {} : null;
+  }
+  const isMapping = typeof existing === "object" && existing !== null && !Array.isArray(existing);
+  return isMapping ? existing : null;
+}
+
+/**
  * Generate the full merged YAML for Hermes Agent config.
  * This is the core of the rich implementation.
  */
@@ -135,22 +156,8 @@ export async function generateHermesAgentConfig(
     return { yaml: "", error: "baseUrl is required" };
   }
 
-  // Read existing config if present (non-destructive merge). Only a missing
-  // (or empty) file means "start fresh" — anything else that fails to read or
-  // parse must refuse the write instead of replacing the file.
-  let existing: any = {};
-  try {
-    const fs = await import("node:fs/promises");
-    const raw = await fs.readFile(getConfigPath(), "utf-8");
-    // js-yaml 5 throws on an empty document; an empty file is a fresh start.
-    existing = raw.trim() === "" ? {} : yaml.load(raw) || {};
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException)?.code !== "ENOENT") {
-      return { yaml: "", error: UNPARSEABLE_EXISTING_CONFIG };
-    }
-    // no existing file — start fresh
-  }
-  if (typeof existing !== "object" || existing === null || Array.isArray(existing)) {
+  const existing = await readExistingHermesConfig();
+  if (existing === null) {
     return { yaml: "", error: UNPARSEABLE_EXISTING_CONFIG };
   }
 
