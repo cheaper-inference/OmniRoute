@@ -163,10 +163,32 @@ export function createSSEOutputSink(
 
   const wrap = <T extends Transformer<Uint8Array, Uint8Array>>(transformer: T): T => {
     if (!deltaStage && frameWindowMs <= 0) return transformer;
+    const originalTransform = transformer.transform;
     const originalFlush = transformer.flush;
     const originalCancel = (transformer as CancelableTransformer<Uint8Array, Uint8Array>).cancel;
+    // A preserved stream failure ends the stream with `controller.terminate()` from inside
+    // `transform()`. `flush()` never runs after that, so drain the queued delta and the failure
+    // frame (they may be held in the batch) right before the readable side closes.
+    let drainingController: OutputController | null = null;
+    const withDrainOnTerminate = (controller: OutputController): OutputController =>
+      (drainingController ??= {
+        get desiredSize() {
+          return controller.desiredSize;
+        },
+        enqueue: (chunk) => controller.enqueue(chunk),
+        error: (reason) => controller.error(reason),
+        terminate: () => {
+          drain(controller);
+          dispose();
+          controller.terminate();
+        },
+      });
     return {
       ...transformer,
+      transform: originalTransform
+        ? (chunk: Uint8Array, controller: OutputController) =>
+            originalTransform.call(transformer, chunk, withDrainOnTerminate(controller))
+        : undefined,
       async flush(controller: OutputController) {
         try {
           await originalFlush?.call(transformer, controller);
