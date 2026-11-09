@@ -21,7 +21,12 @@ import { getModelCatalogCacheVersion as getDatabaseCatalogVersion } from "@/lib/
 import { extractApiKey } from "@/sse/services/auth";
 import { buildErrorBody } from "@omniroute/open-sse/utils/error";
 
-import { catalogPageCacheKey, catalogStringResponse, parseCatalogPage } from "./catalogPagination";
+import {
+  CATALOG_BODY_CHUNK_BYTES,
+  catalogPageCacheKey,
+  catalogStringResponse,
+  parseCatalogPage,
+} from "./catalogPagination";
 import { isCodexModelCatalogClient } from "./catalogRequest";
 
 /** Fingerprint an API key for the catalog memo Map. Never store the raw secret. */
@@ -35,8 +40,9 @@ export function fingerprintCatalogAuthKey(apiKey: string): string {
     .slice(0, 16);
 }
 
+/** The body is kept as UTF-8 bytes so a cache hit never re-encodes the catalog string. */
 export type CachedCatalog = {
-  body: string;
+  body: Buffer;
   headers: Record<string, string>;
   status: number;
   expiresAt: number;
@@ -170,16 +176,16 @@ class BoundedCatalogCache {
   }
 
   set(key: string, entry: CachedCatalog): void {
-    // Two bytes per UTF-16 code unit bounds V8's one-/two-byte string storage.
-    // Entry-count limits bound object/Map overhead independently of string size.
+    // The body is a Buffer, so its length is its retained size. Key and header strings
+    // count two bytes per UTF-16 code unit. Entry-count limits bound object/Map overhead.
     const bytes =
+      entry.body.length +
       2 *
-      (key.length +
-        entry.body.length +
-        Object.entries(entry.headers).reduce(
-          (total, [name, value]) => total + name.length + value.length,
-          0
-        ));
+        (key.length +
+          Object.entries(entry.headers).reduce(
+            (total, [name, value]) => total + name.length + value.length,
+            0
+          ));
     if (bytes > CATALOG_CACHE_MAX_BYTES) return;
     // An oversized refresh must preserve an existing bounded last-good entry.
     this.delete(key);
@@ -316,6 +322,29 @@ function dropCatalogCacheIfStateChanged(): void {
   // the build still ran — wasted work with no correctness gain.
 }
 
+/**
+ * Serve cached bytes with Content-Length and chunked delivery, like
+ * `catalogStringResponse`, without encoding the body again. The Buffer is shared
+ * and read-only: chunks are views over it.
+ */
+function catalogBytesResponse(bytes: Buffer, headers: Headers, status: number): Response {
+  const merged = new Headers(headers);
+  merged.set("content-type", "application/json");
+  merged.set("content-length", String(bytes.length));
+  // A small body is copied (<= 64 KiB) so no Response ever holds the shared cached Buffer.
+  if (bytes.length <= CATALOG_BODY_CHUNK_BYTES)
+    return new Response(new Uint8Array(bytes), { status, headers: merged });
+  const stream = new ReadableStream<Uint8Array>({
+    start(controller) {
+      for (let offset = 0; offset < bytes.length; offset += CATALOG_BODY_CHUNK_BYTES) {
+        controller.enqueue(bytes.subarray(offset, offset + CATALOG_BODY_CHUNK_BYTES));
+      }
+      controller.close();
+    },
+  });
+  return new Response(stream, { status, headers: merged });
+}
+
 // Header sources mix Title-Case keys (diagnostic/cors headers built by app code) with
 // lower-case ones (payload headers captured via the Fetch `Headers` iterator). A plain
 // object spread keeps both casings as distinct keys, and the `Response` constructor
@@ -349,7 +378,7 @@ function storePayload(
   buildGeneration: string
 ): CachedCatalog {
   const entry: CachedCatalog = {
-    body: payload.body,
+    body: Buffer.from(payload.body),
     headers: payload.headers,
     status: payload.status,
     expiresAt: Date.now() + payload.cacheTTL,
@@ -450,7 +479,7 @@ async function awaitCatalogInFlight(
     }
     const lastGood = catalogLastGood.get(cacheKey);
     if (lastGood) {
-      return catalogStringResponse(
+      return catalogBytesResponse(
         lastGood.body,
         mergeCatalogHeaders(corsHeaders, lastGood.headers, diagnosticHeaders, {
           "x-omniroute-catalog": "last-good",
@@ -488,7 +517,7 @@ async function awaitCatalogInFlight(
       503
     );
   }
-  return catalogStringResponse(
+  return catalogBytesResponse(
     payload.body,
     mergeCatalogHeaders(corsHeaders, payload.headers, diagnosticHeaders),
     payload.status
@@ -520,7 +549,7 @@ export async function resolveCachedCatalogResponse(
 
   if (cached && cached.expiresAt > now) {
     if (cached.status === 200) catalogLastGood.get(cacheKey);
-    return catalogStringResponse(
+    return catalogBytesResponse(
       cached.body,
       mergeCatalogHeaders(corsHeaders, cached.headers, diagnosticHeaders),
       cached.status
@@ -540,7 +569,7 @@ export async function resolveCachedCatalogResponse(
       buildPayload,
       catalogSettings?.scheduleBackgroundRefresh ?? defaultBackgroundRefreshScheduler
     );
-    return catalogStringResponse(
+    return catalogBytesResponse(
       cached.body,
       mergeCatalogHeaders(corsHeaders, cached.headers, diagnosticHeaders),
       cached.status
@@ -587,7 +616,7 @@ export function __resetCatalogBuilderRunsForTest(): void {
   lastSeenCatalogCacheVersion = getModelCatalogCacheVersion();
 }
 
-/** Retained-string accounting only; successful bodies may be shared across maps. */
+/** Retained-byte accounting only; successful bodies may be shared across maps. */
 export function __getCatalogCacheStatsForTest() {
   return { cache: catalogCache.stats(), lastGood: catalogLastGood.stats() };
 }
@@ -614,8 +643,11 @@ export function __expireCatalogCacheForTest(msAgo = 1): void {
  * intentionally exception-resistant builder cannot be made to produce (e.g. a cached
  * non-200). Takes the Request so the cache-key format stays private to this module.
  */
-export function __setCatalogCacheEntryForTest(request: Request, entry: CachedCatalog): void {
-  catalogCache.set(buildCatalogCacheKey(request), entry);
+export function __setCatalogCacheEntryForTest(
+  request: Request,
+  entry: Omit<CachedCatalog, "body"> & { body: string }
+): void {
+  catalogCache.set(buildCatalogCacheKey(request), { ...entry, body: Buffer.from(entry.body) });
 }
 
 /** Awaits any background refresh in flight, instead of guessing at a real-time sleep. */

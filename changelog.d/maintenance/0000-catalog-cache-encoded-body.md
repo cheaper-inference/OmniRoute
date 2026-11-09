@@ -1,0 +1,1 @@
+- **perf(models):** repeated `GET /v1/models` polls reuse the cached UTF-8 bytes of the catalog instead of encoding the whole body again on every hit, and the cache byte cap now counts real bytes.
