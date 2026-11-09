@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
+import { Tile } from "@omniroute/ui-kit/tile";
 import { aggregateComboEventsToSets } from "@/app/(dashboard)/dashboard/combos/live/fleetAggregation";
 import type { ComboEventInput } from "@/app/(dashboard)/dashboard/combos/live/comboFlowModel";
 import Button from "@/shared/components/Button";
@@ -116,20 +117,24 @@ export function OverviewTab({
     <div className="flex flex-col gap-4 p-4 h-full overflow-auto">
       <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
         {(Object.keys(counts) as OrchState[]).map((s) => (
-          // kit-exception: Two-line count tile that filters the board: stays a native <button> (the kit
-          // Button is a single-line pill), on kit tokens, with the filter state in aria-pressed.
-          <button
+          // Kit Tile as a filter toggle (aria-pressed); the title (its accessible name) keeps the
+          // count above the state label, as before.
+          <Tile
             key={s}
-            type="button"
-            aria-pressed={filter === s}
+            pressed={filter === s}
             onClick={() => setFilter(filter === s ? null : s)}
-            className={`rounded-lg border bg-surface p-2 text-center ${filter === s ? "border-primary" : "border-border"}`}
-          >
-            <div className="text-lg font-semibold" style={{ color: orchStateColor(s) }}>
-              {counts[s]}
-            </div>
-            <div className="text-[10px] text-text-muted">{t(STATE_KEY[s])}</div>
-          </button>
+            className="p-2"
+            title={
+              <>
+                <span className="block text-lg font-semibold" style={{ color: orchStateColor(s) }}>
+                  {counts[s]}
+                </span>{" "}
+                <span className="block text-[10px] font-normal text-text-muted">
+                  {t(STATE_KEY[s])}
+                </span>
+              </>
+            }
+          />
         ))}
       </div>
       <div className="grid grid-cols-1 md:grid-cols-4 gap-3 items-start">

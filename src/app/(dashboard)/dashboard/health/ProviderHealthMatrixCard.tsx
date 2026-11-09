@@ -10,6 +10,7 @@ import Input from "@/shared/components/Input";
 import Select from "@/shared/components/Select";
 import { Card } from "@/shared/components";
 import { getProviderDisplayName } from "@/lib/display/names";
+import { startVisiblePolling } from "@/shared/utils/visiblePolling";
 import { cn } from "@/shared/utils/cn";
 
 type HealthState = "healthy" | "degraded" | "down";
@@ -306,11 +307,8 @@ export default function ProviderHealthMatrixCard() {
   }, [onlyIssues, providerFilter, range]);
 
   useEffect(() => {
-    void (async () => {
-      await fetchMatrix();
-    })();
-    const id = setInterval(fetchMatrix, 30000);
-    return () => clearInterval(id);
+    // Skips ticks while the tab is hidden and catches up on return.
+    return startVisiblePolling(fetchMatrix, 30000);
   }, [fetchMatrix]);
 
   const providers = useMemo(() => data?.providers ?? [], [data?.providers]);

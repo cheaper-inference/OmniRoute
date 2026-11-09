@@ -163,7 +163,7 @@ OmniRoute `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS` တွင်ကြ�
 | ကျန်းမာရေးအစီရင်ခံစာ             | `health-report`      | ဝန်ဆောင်မှုပေးသူတိုင်းအတွက် circuit breaker၊ cooldown၊ လော့ခ်ချမှုအခြေအနေတို့ကို စုစည်းထားသည်။                                                                       | ကျန်းမာရေး၊ ကြံ့ခိုင်မှု                   | "ဝန်ဆောင်မှုပေးသူအားလုံး၏ ကျန်းမာရေးအခြေအနေကို ပြပါ"     |
 | စွမ်းဆောင်ရည်များစာရင်း          | `list-capabilities`  | ထည့်သွင်းမှု 45 ပါ Agent Skills ကတ်တလောက် (23 API + 21 CLI + 1 config) အပြည့်အစုံကို ဆက်စပ်ထိုးသွင်းမှုအတွက် SKILL.md URLs အကြမ်းပါသော အမှတ်အသားဇယားအဖြစ် ပြန်ပေးသည် | ကတ်တလောက်၊ ရှာဖွေတွေ့ရှိမှု၊ ကျွမ်းကျင်မှု | " OmniRoute စွမ်းရည်အားလုံးကို စာရင်းပြုစုပါ"            |
 
-> အေးဂျင့်ကတ်ကို တိုက်ရိုက် 377-ပံ့ပိုးပေးသူကတ်တလောက်နှင့် ချိန်ညှိထားသင့်သည်။ ဝန်ဆောင်မှုပေးသူ အရေအတွက်နှင့် free/no-auth မက်တာဒေတာများကို runtime registry မှ ရင်းမြစ်ဖြစ်သည်။
+> အေးဂျင့်ကတ်ကို တိုက်ရိုက်ထုတ်လွှ 380-ပံ့ပိုးပေးသူကတ်တလောက်နှင့် ဆက်လက်ထားရှိသင့်သည်။ ဝန်ဆောင်မှုပေးသူ အရေအတွက်နှင့် free/no-auth မက်တာဒေတာများကို runtime registry မှ ရင်းမြစ်ဖြစ်သည်။
 
 ### `list-capabilities` ကျွမ်းကျင်မှုအသေးစိတ်
 
@@ -197,17 +197,17 @@ JSON-RPC endpoint `/a2a` သည် ပင်မ A2A ဝင်ပေါက်ဖ�
 
 ---
 
-## Skill အသစ်တစ်ခု ထည့်သွင်းခြင်း
+## ကျွမ်းကျင်မှုအသစ်တစ်ခုထပ်ထည့်ခြင်း။
 
-1. **Skill ဖိုင် ဖန်တီးပါ:** `src/lib/a2a/skills/<your-skill>.ts`
+1. **ကျွမ်းကျင်မှုဖိုင်ကို ဖန်တီးပါ-** `src/lib/a2a/skills/<your-skill>.ts`
 
-   Async function `(task: A2ATask) => Promise<{ artifacts, metadata }>` ကို export လုပ်ပါ။ `smartRouting.ts` ကဲ့သို့ ရှိပြီးသား skill များ၏ ပုံစံကို လိုက်နာပါ။
+   async လုပ်ဆောင်ချက် `(task: A2ATask) => Promise<{ artifacts, metadata }>` ထုတ်ယူပါ။ `smartRouting.ts` ကဲ့သို့သော ရှိပြီးသားကျွမ်းကျင်မှုပုံစံကို လိုက်နာပါ။
 
-2. **Handler ကို မှတ်ပုံတင်ပါ:** `src/lib/a2a/taskExecution.ts` တွင် `A2A_SKILL_HANDLERS` ထဲသို့ entry တစ်ခု ထည့်ပါ-
+2. **ကိုင်တွယ်သူကို မှတ်ပုံတင်ပါ-** `src/lib/a2a/taskExecution.ts` တွင် `A2A_SKILL_HANDLERS` သို့ entry ကိုထည့်ပါ။
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...ရှိပြီးသား skill များ
+     // ...existing skills
      "your-skill": async (task) => {
        const skillModule = await import("./skills/yourSkill");
        return skillModule.executeYourSkill(task);
@@ -215,7 +215,7 @@ JSON-RPC endpoint `/a2a` သည် ပင်မ A2A ဝင်ပေါက်ဖ�
    };
    ```
 
-3. **Agent Card တွင် ဖော်ပြပါ:** `src/lib/a2a/agentCardMetadata.ts` (`/.well-known/agent.json` နှင့် `/.well-known/agent-card.json` တို့က မျှဝေအသုံးပြုသည်) ရှိ `skills` array ထဲသို့ အောက်ပါတို့ကို ထည့်ပါ-
+3. **အေးဂျင့်ကတ်တွင် ဖော်ပြပါ-** `src/lib/a2a/agentCardMetadata.ts` တွင် ( `/.well-known/agent.json` နှင့် `/.well-known/agent-card.json` ကမျှဝေသည်) ၊ `skills` ခင်းကျင်းသို့ ပေါင်းထည့်သည်-
 
    ```json
    {
@@ -227,9 +227,9 @@ JSON-RPC endpoint `/a2a` သည် ပင်မ A2A ဝင်ပေါက်ဖ�
    }
    ```
 
-4. **Test များ ရေးပါ:** `tests/unit/a2a-<your-skill>.test.ts`။ အောင်မြင်သည့် လမ်းကြောင်းနှင့် အမှားဖြစ်သည့် လမ်းကြောင်း နှစ်မျိုးစလုံးကို စမ်းသပ်ပါ။
+4. **စာမေးပွဲများရေးပါ-** `tests/unit/a2a-<your-skill>.test.ts` ပျော်ရွှင်သောလမ်းကြောင်း + အမှားလမ်းကြောင်းကိုဖုံးအုပ်ပါ။
 
-5. ဤဖိုင်၏ `Available Skills` ဇယားတွင် skill အသစ်ကို **မှတ်တမ်းတင်ပါ**။
+5. **စာရွက်စာတမ်း** ဤဖိုင်၏ `Available Skills` ဇယားရှိ ကျွမ်းကျင်မှုအသစ်။
 
 ---
 

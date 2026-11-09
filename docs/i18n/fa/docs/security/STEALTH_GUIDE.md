@@ -236,19 +236,18 @@ interface CliFingerprint {
 
 ---
 
-## بازنویسیهای User-Agent — متغیرهای محیطی (بخش 12 از `.env.example`)
+## User-Agent — env vars را لغو می کند (بخش 12 `.env.example` )
 
-| متغیر                    | مقدار پیشفرض                                                    |
-| ------------------------ | --------------------------------------------------------------- |
-| `CLAUDE_USER_AGENT`      | `claude-cli/2.1.280 (external, cli)`                            |
-| `CODEX_USER_AGENT`       | `codex-cli/0.155.0 (Windows 10.0.26200; x64)`                   |
-| `GITHUB_USER_AGENT`      | `GitHubCopilotChat/0.54.0`                                      |
-| `ANTIGRAVITY_USER_AGENT` | `antigravity/2.0.1 linux/arm64 google-api-nodejs-client/10.3.0` |
-| `KIRO_USER_AGENT`        | `AWS-SDK-JS/3.0.0 kiro-ide/1.0.0`                               |
-| `QODER_USER_AGENT`       | `Qoder-Cli`                                                     |
-| `CURSOR_USER_AGENT`      | `Cursor/3.4`                                                    |
+| متغیر               | پیش فرض                                       |
+| ------------------- | --------------------------------------------- |
+| `CLAUDE_USER_AGENT` | `claude-cli/2.1.280 (external, cli)`          |
+| `CODEX_USER_AGENT`  | `codex-cli/0.155.0 (Windows 10.0.26200; x64)` |
+| `GITHUB_USER_AGENT` | `GitHubCopilotChat/0.54.0`                    |
+| `KIRO_USER_AGENT`   | `AWS-SDK-JS/3.0.0 kiro-ide/1.0.0`             |
+| `QODER_USER_AGENT`  | `Qoder-Cli`                                   |
+| `CURSOR_USER_AGENT` | `Cursor/3.4`                                  |
 
-توسط `open-sse/executors/base.ts::buildHeaders()` و از طریق جستوجوی پویا مصرف میشوند. **هنگامی که ارائهدهندگان نسخههای جدید CLI را منتشر میکنند، این مقادیر را بهروزرسانی کنید** — رشتههای UA قدیمی بهعنوان کلاینتهای منسوخ رد میشوند.
+توسط `open-sse/executors/base.ts::buildHeaders()` از طریق جستجوی پویا مصرف می شود.** هنگامی که ارائه دهندگان نسخه های جدید CLI را منتشر می کنند، این موارد را افزایش دهید** — کهنه رشته های UA شروع به رد شدن به عنوان مشتری های قدیمی می کنند.
 
 ## کلیدهای تغییر حالت سازگاری CLI (بخش 13 فایل `.env.example`)
 

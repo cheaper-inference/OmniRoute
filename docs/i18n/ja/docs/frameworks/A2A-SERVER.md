@@ -163,7 +163,7 @@ OmniRoute `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`に接続された 6
 | 健康レポート         | `health-report`      | プロバイダーごとにサーキット ブレーカー、クールダウン、ロックアウト状態を集約します                                                                                             | 健康、回復力               | 「すべてのプロバイダーの健康状態を表示」                 |
 | リスト機能           | `list-capabilities`  | 完全な 45 エントリのエージェント スキル カタログ (23 API + 21 CLI + 1 config) を、コンテキスト インジェクション用の生のSKILL.md URLsを含むマークダウン テーブルとして返します。 | カタログ、発見、スキル     | 「すべてのOmniRoute機能をリストする」                    |
 
-> エージェント カードは、ライブ 377 プロバイダー カタログと一致させておく必要があります。プロバイダー数とfree/no-authメタデータは、ランタイム レジストリから取得されます。
+> エージェント カードは、ライブ 380 プロバイダー カタログと一致させておく必要があります。プロバイダー数とfree/no-authメタデータは、ランタイム レジストリから取得されます。
 
 ### `list-capabilities`スキル詳細
 
@@ -199,15 +199,15 @@ JSON-RPC エンドポイント `/a2a` は、正式な A2A エントリーポイ�
 
 ## 新しいスキルの追加
 
-1. **スキルファイルを作成:** `src/lib/a2a/skills/<your-skill>.ts`
+1. **スキルファイルを作成します。** `src/lib/a2a/skills/<your-skill>.ts`
 
-   非同期関数 `(task: A2ATask) => Promise<{ artifacts, metadata }>` をエクスポートします。`smartRouting.ts` など、既存のスキルの形式に従ってください。
+   非同期関数`(task: A2ATask) => Promise<{ artifacts, metadata }>`をエクスポートします。 `smartRouting.ts`などの既存スキルの形状を踏襲。
 
-2. **ハンドラーを登録:** `src/lib/a2a/taskExecution.ts` で、`A2A_SKILL_HANDLERS` にエントリを追加します。
+2. **レジスタハンドラー:** `src/lib/a2a/taskExecution.ts`で、 `A2A_SKILL_HANDLERS`にエントリを追加します。
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...既存のスキル
+     // ...existing skills
      "your-skill": async (task) => {
        const skillModule = await import("./skills/yourSkill");
        return skillModule.executeYourSkill(task);
@@ -215,7 +215,7 @@ JSON-RPC エンドポイント `/a2a` は、正式な A2A エントリーポイ�
    };
    ```
 
-3. **Agent Card で公開:** `src/lib/a2a/agentCardMetadata.ts`（`/.well-known/agent.json` と `/.well-known/agent-card.json` で共有）で、`skills` 配列に以下を追加します。
+3. **エージェントカードで公開:** `src/lib/a2a/agentCardMetadata.ts` ( `/.well-known/agent.json`と`/.well-known/agent-card.json`で共有) で、 `skills`配列に追加します。
 
    ```json
    {
@@ -227,9 +227,9 @@ JSON-RPC エンドポイント `/a2a` は、正式な A2A エントリーポイ�
    }
    ```
 
-4. **テストを作成:** `tests/unit/a2a-<your-skill>.test.ts`。正常系とエラー系を網羅してください。
+4. **テストを作成します。** `tests/unit/a2a-<your-skill>.test.ts`。ハッピーパス+エラーパスをカバーします。
 
-5. **ドキュメント化:** このファイルの `Available Skills` テーブルに新しいスキルを追加してください。
+5. **書類**このファイルの`Available Skills`テーブル内の新しいスキル。
 
 ---
 

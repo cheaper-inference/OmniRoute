@@ -17,6 +17,7 @@ import {
 } from "@/shared/components";
 import Icon from "@/shared/components/Icon";
 import { useNotificationStore } from "@/store/notificationStore";
+import { useConfirmDialog } from "@/shared/hooks/useConfirmDialog";
 import { matchesSearch } from "@/shared/utils/turkishText";
 
 type EvalTargetType = "suite-default" | "model" | "combo";
@@ -435,6 +436,7 @@ function getResultDetails(
 export default function EvalsTab() {
   const t = useTranslations("usage");
   const notify = useNotificationStore();
+  const { requestConfirm, confirmDialog } = useConfirmDialog();
   const [suites, setSuites] = useState<EvalSuite[]>([]);
   const [recentRuns, setRecentRuns] = useState<EvalRun[]>([]);
   const [scorecard, setScorecard] = useState<EvalScorecard | null>(null);
@@ -755,7 +757,7 @@ export default function EvalsTab() {
 
   async function handleDeleteSuite(suite: EvalSuite) {
     if (suite.source !== "custom") return;
-    const confirmDelete = window.confirm(
+    const confirmDelete = await requestConfirm(
       t("suiteBuilderDeleteConfirm", { name: suite.name || suite.id })
     );
     if (!confirmDelete) return;
@@ -1331,7 +1333,8 @@ export default function EvalsTab() {
             >
               <Icon name="upload_file" size={18} />
               {t("importSuite")}
-              {/* kit-exception: Hidden native file picker inside the label (the adapters have no file input). */}
+              {/* kit-exception: Hidden picker in a toolbar import button; the pick imports at once, so the
+                  kit FileInput status line would only add noise beside Run all / New suite. */}
               <input
                 type="file"
                 accept="application/json,.json"
@@ -1852,6 +1855,7 @@ export default function EvalsTab() {
         saving={savingSuite}
         t={t}
       />
+      {confirmDialog}
     </div>
   );
 }

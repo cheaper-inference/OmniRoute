@@ -107,39 +107,40 @@ otu mpaghara na-enweghị ndị ọzọ na-eme ka test suite daa kama ikwe ka nd
 
 ---
 
-## 1. CLI Code's katalọgụ (ngwaọrụ 27)
+## 1. CLI Code's katalọgụ (ngwaọrụ 28)
 
 Ngwa niile pụtara na `/dashboard/cli-code`. Ndị nwere `baseUrlSupport: none` na-eji MITM ma ọ bụ ntuziaka ntuziaka kama ịbụ URL ntọala omenala:
 
-| id            | aha                                 | onye na-ere ere       | nkwado ndabereUrl    | configType  | acpSpawnable |
-| ------------- | ----------------------------------- | --------------------- | -------------------- | ----------- | ------------ |
-| claude        | koodu Claude                        | Anthropic             | juputara             | env         | eziokwu      |
-| codex         | OpenAI Codex CLI                    | OpenAI                | juputara             | omenala     | eziokwu      |
-| zcode         | ZCode (atụmatụ ntinye akwụkwọ GLM ) | Z.ai                  | onweghi              | omenala     | ụgha         |
-| kline         | Cline                               | OSS (bụbu Claude Dev) | juputara             | omenala     | eziokwu      |
-| kilo          | Koodu kilo                          | Kilo-Org              | juputara             | omenala     | ụgha         |
-| roo           | Koodu Roo                           | Roo (OSS)             | juputara             | ndu         | ụgha         |
-| gaa n'ihu     | Gaa n'ihu                           | gaa n'ihu.dev         | juputara             | ndu         | ụgha         |
-| onye enyemaka | Onye enyemaka                       | OSS (P. Gauthier)     | juputara             | ndu         | eziokwu      |
-| akpu          | ForgeCode                           | Antinomy HQ           | juputara             | omenala     | eziokwu      |
-| jcode         | jcode                               | 1 jehuang (OSS)       | juputara             | omenala     | ụgha         |
-| achọ-tui      | DeepSeek TUI                        | Hunter Bown (OSS)     | juputara             | omenala     | ụgha         |
-| codewhale     | CodeWhale                           | Hmbown (OSS)          | juputara             | omenala     | ụgha         |
-| oghe koodu    | OpenCode                            | Anomaly (bụbu-SST)    | juputara             | ndu         | eziokwu      |
-| droid         | Ụlọ ọrụ Droid                       | Ụlọ ọrụ AI            | ele mmadụ anya n'ihu | ndu         | ụgha         |
-| pilot         | GitHub Copilot CLI                  | GitHub/MS             | juputara             | omenala     | ụgha         |
-| cursor-cli    | Cursor CLI                          | Ebe ọ bụla            | ele mmadụ anya n'ihu | ndu         | eziokwu      |
-| agbaze        | Agbaze                              | leonardcser (OSS)     | juputara             | omenala     | ụgha         |
-| pi            | Pi (onye na-ede koodu)              | M. Zechner (OSS)      | juputara             | omenala     | ụgha         |
-| grook-ewu     | Grok Mee                            | xAI                   | juputara             | omenala     | ụgha         |
-| zọpịa         | Ghichaa                             | OSS (Amara)           | juputara             | omenala     | ụgha         |
-| qwen          | koodu Qwen                          | Alibaba               | juputara             | ndu         | eziokwu      |
-| zed           | Zed                                 | Zed Industries        | juputara             | ndu         | ụgha         |
-| cursor        | Cursor                              | Ebe ọ bụla            | onweghi              | ndu         | ụgha         |
-| antigravity   | Antigravity                         | Google                | onweghi              | nkem        | ụgha         |
-| hamis         | Hamis                               | Nchọpụta Nous         | onweghi              | ndu         | ụgha         |
-| kiro          | Kiro AI                             | Amazon                | onweghi              | nkem        | ụgha         |
-| omenala       | Omenala CLI                         | —                     | juputara             | omenala-ewu | ụgha         |
+| id            | aha                        | onye na-ere ere       | baseUrlSupport       | configType  | acpSpawnable |
+| ------------- | -------------------------- | --------------------- | -------------------- | ----------- | ------------ |
+| claude        | koodu Claude               | Anthropic             | juputara             | env         | eziokwu      |
+| codex         | OpenAI Codex CLI           | OpenAI                | juputara             | omenala     | eziokwu      |
+| zcode         | ZCode (atụmatụ koodu GLM ) | Z.ai                  | onweghi              | omenala     | ụgha         |
+| kline         | Cline                      | OSS (bụbu Claude Dev) | juputara             | omenala     | eziokwu      |
+| kilo          | Koodu kilo                 | Kilo-Org              | juputara             | omenala     | ụgha         |
+| roo           | Koodu Roo                  | Roo (OSS)             | juputara             | ndu         | ụgha         |
+| gaa n'ihu     | Gaa n'ihu                  | gaa n'ihu.dev         | juputara             | ndu         | ụgha         |
+| onye enyemaka | Onye enyemaka              | OSS (P. Gauthier)     | juputara             | ndu         | eziokwu      |
+| akpu          | ForgeCode                  | Antinomy HQ           | juputara             | omenala     | eziokwu      |
+| jcode         | jcode                      | 1 jehuang (OSS)       | juputara             | omenala     | ụgha         |
+| achọ-tui      | DeepSeek TUI               | Hunter Bown (OSS)     | juputara             | omenala     | ụgha         |
+| codewhale     | CodeWhale                  | Hmbown (OSS)          | juputara             | omenala     | ụgha         |
+| oghe koodu    | OpenCode                   | Anomaly (bụbu-SST)    | juputara             | ndu         | eziokwu      |
+| droid         | Ụlọ ọrụ Droid              | Ụlọ ọrụ AI            | ele mmadụ anya n'ihu | ndu         | ụgha         |
+| pilot         | GitHub Copilot CLI         | GitHub/MS             | juputara             | omenala     | ụgha         |
+| cursor-cli    | Cursor CLI                 | Ebe ọ bụla            | ele mmadụ anya n'ihu | ndu         | eziokwu      |
+| agbaze        | Agbaze                     | leonardcser (OSS)     | juputara             | omenala     | ụgha         |
+| pi            | Pi (onye na-ede koodu)     | M. Zechner (OSS)      | juputara             | omenala     | ụgha         |
+| grook-ewu     | Grok Mee                   | xAI                   | juputara             | omenala     | ụgha         |
+| zọpịa         | Ghichaa                    | OSS (Amara)           | juputara             | omenala     | ụgha         |
+| qwen          | koodu Qwen                 | Alibaba               | juputara             | ndu         | eziokwu      |
+| oghe oghe     | OpenClaude                 | Gitlawb (OSS)         | juputara             | ndu         | ụgha         |
+| zed           | Zed                        | Zed Industries        | juputara             | ndu         | ụgha         |
+| cursor        | Cursor                     | Ebe ọ bụla            | onweghi              | ndu         | ụgha         |
+| antigravity   | Antigravity                | Google                | onweghi              | nkem        | ụgha         |
+| hamis         | Hamis                      | Nchọpụta Nous         | onweghi              | ndu         | ụgha         |
+| kiro          | Kiro AI                    | Amazon                | onweghi              | nkem        | ụgha         |
+| omenala       | Omenala CLI                | —                     | juputara             | omenala-ewu | ụgha         |
 
 Ngwa nwere `baseUrlSupport: "partial"` na-egosi baajị "⚠ Base URL parcial" na kaadị dashboard.
 ---
@@ -219,22 +220,22 @@ interface ToolBatchStatus {
 
 ---
 
-## 6. Ndị Na-ahụ Maka Ntọala Maka Ngwa Ọrụ Ọhụrụ
+## 6. Ndị na-edozi ntọala maka Ngwaọrụ ọhụrụ
 
-Ngwa ọrụ ọhụrụ nwere `configType: "custom"` nwere ụzọ API ntọala pụrụ iche:
+Ngwa ọhụrụ nwere `configType: "custom"` nwere ụzọ API ntọala raara onwe ya nye:
 
-| Ụzọ                                         | Ngwa ọrụ                                                                       |
-| ------------------------------------------- | ------------------------------------------------------------------------------ |
-| `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                                        |
-| `POST /api/cli-tools/jcode-settings`        | jcode (akara `--base-url`)                                                     |
-| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, nke ochie)                                      |
-| `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, nke bụ isi + mmekọrịta nke ochie na `~/.deepseek`) |
-| `POST /api/cli-tools/smelt-settings`        | Smelt                                                                          |
-| `POST /api/cli-tools/pi-settings`           | Onye nnọchi anya Pi maka ide koodu                                             |
-| `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)                          |
-| `POST /api/cli-tools/qwen-settings`         | Qwen Code (`~/.qwen/settings.json` + igodo `.env` pụrụ iche)                   |
+| Ụzọ                                         | Ngwá ọrụ                                                                    |
+| ------------------------------------------- | --------------------------------------------------------------------------- |
+| `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                                     |
+| `POST /api/cli-tools/jcode-settings`        | jcode (ọkọlọtọ --base-url )                                                 |
+| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, ihe nketa)                                   |
+| `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, izizi + nketa `~/.deepseek` mmekọrịta)          |
+| `POST /api/cli-tools/smelt-settings`        | Agbaze                                                                      |
+| `POST /api/cli-tools/pi-settings`           | Ndị nnọchi anya koodu Pi (`~/.pi/agent/models.json`, `providers.omniroute`) |
+| `POST /api/cli-tools/grok-build-settings`   | Grok Mee (~/.grok/config.toml, `[model.omniroute]`)                         |
+| `POST /api/cli-tools/qwen-settings`         | Koodu Qwen ( igodo `~/.qwen/settings.json` raara onwe ya nye `.env` + )     |
 
-Ụzọ niile na-eji `sanitizeErrorMessage()` maka nzaghachi njehie (Iwu Siri Ike #12).
+Ụzọ niile na-eji `sanitizeErrorMessage()` maka nzaghachi njehie (Iwu siri ike #12).
 
 ---
 
@@ -289,21 +290,21 @@ E nyere ntụgharị PT-BR na EN zuru ezu. Locale 39 ndị ọzọ na-alaghachi 
 
 ---
 
-## 9. Mmalite Ngwa Ngwa
+## 9. Ngwa ngwa ngwa
 
-### Nzọụkwụ 1 — Nweta Igodo API OmniRoute
+### Nzọụkwụ 1 — Nweta igodo OmniRoute API
 
-1. Mepee `/dashboard/api-manager` → **Mepụta Igodo API**
-2. Nye ya aha (dịka ọmụmaatụ `cli-tools`) ma họrọ ikike niile
-3. Detuo igodo ahụ — ị ga-achọ ya maka CLI ọ bụla dị n'okpuru
+1. Mepee `/dashboard/api-manager` →** Mepụta igodo API**
+2. Nye ya aha (dịka `cli-tools`) wee họrọ ikike niile
+3. Detuo igodo — ị ga-achọ ya maka CLI ọ bụla n'okpuru
 
-> Igodo gị ga-adị ka nke a: `sk-xxxxxxxxxxxxxxxx-xxxxxxxxx`
+> Igodo gị dị ka: `sk-xxxxxxxxxxxxxxxx-xxxxxxxxx`
 
 ---
 
-### Nzọụkwụ 2 — Wụnye Ngwaọrụ CLI
+### Nzọụkwụ 2 — CLI Ngwaọrụ
 
-Ngwaọrụ niile dabere na npm chọrọ Node.js 22.22.2+ ma ọ bụ 24.x:
+Ngwa niile dabere na npm chọrọ Node.js 22.22.2 + ma ọ bụ 24.x:
 
 ```bash
 # Claude Code (Anthropic)
@@ -324,20 +325,20 @@ npm install -g kilocode
 # Qwen Code
 npm install -g @qwen-code/qwen-code
 
-# Google Gemini CLI (enwere ike ịmalite ya site na `omniroute run gemini` → /v1beta surface)
+# Google Gemini CLI (launchable via `omniroute run gemini` → /v1beta surface)
 npm install -g @google/gemini-cli
 
 # Aider
 pip install aider-chat
 
 # Smelt
-cargo install smelt  # Dabere na Rust
+cargo install smelt  # Rust-based
 
 # Pi coding agent
-# lee https://github.com/zechnerj/pi-coding-agent maka ntinye
+npm install -g --ignore-scripts @earendil-works/pi-coding-agent
 
 # jcode
-# lee https://github.com/1jehuang/jcode maka ntinye
+# see https://github.com/1jehuang/jcode for install
 ```
 
 ---
@@ -345,37 +346,36 @@ cargo install smelt  # Dabere na Rust
 ### Nzọụkwụ 3 — Hazie site na Dashboard
 
 1. Gaa na `http://localhost:20128/dashboard/cli-code`
-2. Chọta ngwaọrụ gị na grid
-3. Pịa kaadị ahụ iji mepee ibe nkọwa ngwaọrụ
-4. Họrọ igodo API gị na URL ntọala
-5. Pịa **Tinye Nhazi** ma ọ bụ detuo obere ederede nhazi aka
+2. Chọta ngwá ọrụ gị na grid
+3. Pịa kaadị ahụ ka imepe ibe nkọwa ngwá ọrụ
+4. Họrọ igodo API gị na ntọala URL
+5. Pịa** Tinye Config** ma ọ bụ detuo snippet nhazi akwụkwọ ntuziaka
 
 ---
 
-### Nzọụkwụ 4 — Tọọ Mgbanwe Gburugburuwuru nke G gburugburu Ebe Ọrụ
+### Nzọụkwụ 4 — mgbanwe gburugburu gburugburu ụwa
 
 ```bash
-# Ebe njedebe zuru ụwa ọnụ nke OmniRoute
+# OmniRoute Universal Endpoint
 export OPENAI_BASE_URL="http://localhost:20128/v1"
 export OPENAI_API_KEY="sk-your-omniroute-key"
 export ANTHROPIC_BASE_URL="http://localhost:20128"
 export ANTHROPIC_AUTH_TOKEN="sk-your-omniroute-key"
-# Gemini CLI na-agụ GOOGLE_GEMINI_BASE_URL na ROOT (SDK ya na-agbakwụnye /v1beta/... n'onwe ya)
+# Gemini CLI reads GOOGLE_GEMINI_BASE_URL at the ROOT (its SDK appends /v1beta/... itself)
 export GOOGLE_GEMINI_BASE_URL="http://localhost:20128"
 export GEMINI_API_KEY="sk-your-omniroute-key"
 ```
 
-> Maka **sava dị anya**, jiri IP ma ọ bụ domain sava dochie `localhost:20128`,
-> dịka ọmụmaatụ `http://<your-server-ip>:20128`.
+> Maka a** ihe nkesa dịpụrụ adịpụ** dochie `localhost:20128` na IP nkesa ma ọ bụ ngalaba, dịka `http://<your-server-ip>:20128`.
 
 ---
 
-### Nzọụkwụ 4 — Hazie Ngwaọrụ Ọ Bụla
+### Nzọụkwụ 4 — Ngwá Ọrụ ọ bụla
 
-#### Claude Code
+#### koodu Claude
 
 ```bash
-# Mepụta ~/.claude/settings.json:
+# Create ~/.claude/settings.json:
 mkdir -p ~/.claude && cat > ~/.claude/settings.json << EOF
 {
   "env": {
@@ -386,18 +386,15 @@ mkdir -p ~/.claude && cat > ~/.claude/settings.json << EOF
 EOF
 ```
 
-Jiri mgbọrọgwụ ọnụ ụzọ Anthropic jikọtara ọnụ maka Claude Code. Etinyela `/v1` ebe a.
+Jiri mgbọrọgwụ ọnụ ụzọ Anthropic jikọrọ ọnụ maka koodu Claude. Etinyekwala `/v1` ebe a.
 
-**Nnwale:** `claude "say hello"`
+**Nwalee:** `claude "say hello"`
 
 ---
 
 #### OpenAI Codex
 
-Codex ọgbara ọhụrụ (v0.137+) na-agụ naanị `~/.codex/config.toml` — `config.yaml`
-ochie bụ nke CLI npm nke mgbe ochie, a na-eleghara ya anya n'enweghị ọkwa. Igodo API
-na-anọgide na mgbanwe gburugburu ebe ọrụ `OMNIROUTE_API_KEY` (`env_key`), ọ dịghị mgbe
-ọ ga-adị n'ime faịlụ ahụ:
+Codex nke oge a (v0.137 +) na-agụ `~/.codex/config.toml` naanị — ochie `config.yaml` bụ nke nketa npm CLI ma na-eleghara ya anya. Igodo API na-anọ na mgbanwe gburugburu `OMNIROUTE_API_KEY` (`env_key`), ọ dịghị mgbe ọ bụla n'ime faịlụ:
 
 ```bash
 mkdir -p ~/.codex && cat > ~/.codex/config.toml << EOF
@@ -412,9 +409,9 @@ EOF
 export OMNIROUTE_API_KEY="sk-your-omniroute-key"
 ```
 
-Ntụaka zuru ezu (profaịlụ, `wire_api`, windo ọnọdụ): [CODEX-CLI-CONFIGURATION.md](../guides/CODEX-CLI-CONFIGURATION.md).
+Ntụaka n'uju (profaịlụ, `wire_api`, windo okirikiri): [CODEX-CLI-CONFIGURATION.md](../guides/CODEX-CLI-CONFIGURATION.md).
 
-**Nnwale:** `codex "what is 2+2?"`
+**Nwalee:** `codex "what is 2+2?"`
 
 ---
 
@@ -443,16 +440,46 @@ mkdir -p ~/.config/opencode && cat > ~/.config/opencode/opencode.json << EOF
 EOF
 ```
 
-**Nnwale:** `opencode`
+**Nwalee:** `opencode`
 
-> Jiri `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high`
-> iji zipụ ụdị ndị na-eche echiche.
+> Jiri `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high` izipu iche iche echiche.
 
 ---
 
-#### Cline (CLI ma ọ bụ VS Code)
+#### Onye nnọchi anya koodu Pi
 
-**Ụdị CLI:**
+Wụnye ngwungwu Pi Coding Agent na `npm install -g --ignore-scripts @earendil-works/pi-coding-agent`. Pi na-agụ ndị na-eweta omenala site na `~/.pi/agent/models.json`; tọọ `PI_CODING_AGENT_DIR` ka ọ bugharịa ndekọ aha ndị ọrụ niile. Dashboard na-esochi nke ahụ. Pi anaghị achọpụta ụdị sitere na njedebe omenala, yabụ OmniRoute na-ede ụdị ahọpụtara na `models[]` na iji Pi's `openai-completions` API yana ebe njedebe `/v1` OpenAI dakọtara OmniRoute.
+
+N'ime**CLI Ngwa → Pi** , họrọ njedebe njedebe, igodo API, na ihe nlereanya, nyochaa nhụchalụ ndị na-eweta ya, wee tinye. Ihe nhụchalụ bụ iberibe ndị na-eweta: jikọta `providers.omniroute` n'ime `models.json` dị gị mgbe ị na-ahazi Pi aka ka ndị na-eweta na ntọala ndị ọzọ ghara ịdị irè.
+
+```json
+{
+  "$schema": "https://pi.dev/schemas/models.schema.json",
+  "providers": {
+    "omniroute": {
+      "baseUrl": "http://localhost:20128/v1",
+      "api": "openai-completions",
+      "apiKey": "sk-your-omniroute-key",
+      "omnirouteManaged": true,
+      "models": [{ "id": "auto/best-coding", "name": "auto/best-coding" }]
+    }
+  }
+}
+```
+
+Pi bugharịa `models.json` mgbe imepere `/model`. Jiri id onye na-eweta ya na ụdị ụdị ị họrọla nwalee ụzọ ahaziri:
+
+```bash
+pi --provider omniroute --model auto/best-coding --print "Reply with a short greeting."
+```
+
+Ntụaka: [Pi ụdị na ndị na-eweta omenala](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/models.md), [Pi gburugburu ebe obibi variables](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/environment-variables.md), [Pi wụnye ntuziaka](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/README.md).
+
+---
+
+#### Cline ( koodu CLI ma ọ bụ VS )
+
+**ụdị CLI :**
 
 ```bash
 mkdir -p ~/.cline/data && cat > ~/.cline/data/globalState.json << EOF
@@ -464,22 +491,21 @@ mkdir -p ~/.cline/data && cat > ~/.cline/data/globalState.json << EOF
 EOF
 ```
 
-**Ụdị VS Code:**
-Ntọala mgbakwunye Cline → Onye na-enye API: `OpenAI Compatible` → URL ntọala: `http://localhost:20128/v1`
+**Usoro koodu VS :** ntọala ndọtị Cline → API Onye na-eweta: `OpenAI Compatible` → Isi URL: `http://localhost:20128/v1`
 
-Ma ọ bụ jiri dashboard OmniRoute → **Ngwaọrụ CLI → Cline → Tinye Nhazi**.
+Ma ọ bụ jiri OmniRoute dashboard →**CLI → Cline → Config** .
 
 ---
 
-#### KiloCode (CLI ma ọ bụ VS Code)
+#### KiloCode ( koodu CLI ma ọ bụ VS )
 
-**Ụdị CLI:**
+**ụdị CLI :**
 
 ```bash
 kilocode --api-base http://localhost:20128/v1 --api-key sk-your-omniroute-key
 ```
 
-**Ntọala VS Code:**
+**Ntọala koodu VS :**
 
 ```json
 {
@@ -488,13 +514,13 @@ kilocode --api-base http://localhost:20128/v1 --api-key sk-your-omniroute-key
 }
 ```
 
-Ma ọ bụ jiri dashboard OmniRoute → **Ngwaọrụ CLI → KiloCode → Tinye Nhazi**.
+Ma ọ bụ jiri OmniRoute dashboard →**CLI → KiloCode → Config** .
 
 ---
 
-#### Continue (Mgbakwunye VS Code)
+#### Gaa n'ihu (mgbakwunye koodu VS )
 
-Dezie `~/.continue/config.yaml`:
+dezie `~/.continue/config.yaml`:
 
 ```yaml
 models:
@@ -506,20 +532,20 @@ models:
     default: true
 ```
 
-Malitegharịa VS Code mgbe idezichara ya.
+Malitegharịa koodu VS ka emezigharị ya.
 
 ---
 
 #### VS Code Insiders (`chatLanguageModels.json`)
 
-Jiri nke a mgbe ahaziri VS Code Insiders maka model ebe njedebe ahaziri iche, ma ịchọrọ ka OmniRoute rụọ ọrụ na-enweghị oghere header ahaziri iche.
+Jiri nke a mgbe ahaziri VS Code Insiders maka ụdị njedebe njedebe ma ịchọrọ OmniRoute ka ọ rụọ ọrụ na-enweghị mpaghara nkụnye eji isi mee.
 
 **Ebe akwadoro:**
 
 - Linux: `~/.config/Code - Insiders/User/chatLanguageModels.json`
 - Windows: `%APPDATA%/Code - Insiders/User/chatLanguageModels.json`
 
-**Ọmụmaatụ iji utuaha OmniRoute e tinyere token:**
+**Ọmụmaatụ na-eji utu aha OmniRoute akara:**
 
 ```json
 [
@@ -541,29 +567,28 @@ Jiri nke a mgbe ahaziri VS Code Insiders maka model ebe njedebe ahaziri iche, ma
 ]
 ```
 
-**Ihe ndetu:**
+**ndetu:**
 
-- Jiri igodo API e mepụtara na OmniRoute dochie `sk-your-omniroute-key`.
-- Oghere `url` kwesịrị ịtụ aka na `/api/v1/vscode/{token}/chat/completions`.
-- Oghere `modelsUrl` kwesịrị ịtụ aka na `/api/v1/vscode/{token}/models`.
-- Họrọ usoro nkịtị `/v1` + nkụnyeisi Bearer mgbe ngwa ahịa ahụ na-akwado nkụnyeisi ahaziri iche.
-- Token ndị etinyere n'ime URL bụ ụzọ ndabere maka ndakọrịta, ha nwekwara ike ịpụta na ndekọ editọ ma ọ bụ akụkọ proxy.
+- Dochie `sk-your-omniroute-key` jiri igodo API emebere na OmniRoute.
+- Ogige `url` kwesịrị ịtụ aka na `/api/v1/vscode/{token}/chat/completions`.
+- Ogige `modelsUrl` kwesịrị ịtụ aka na `/api/v1/vscode/{token}/models`.
+- Na-ahọrọ ịgbanye nkụnye eji isi mee `/v1` + nkịtị mgbe onye ahịa na-akwado nkụnye eji isi mee.
+- Ihe nrịbama agbakwunyere URL bụ ndakọrịta ndakọrịta ma nwee ike ịpụta na ndekọ ndetu ma ọ bụ akụkọ proxy.
 
 ---
 
 #### Kiro CLI (Amazon)
 
 ```bash
-# Banye na akaụntụ AWS/Kiro gị:
+# Login to your AWS/Kiro account:
 kiro-cli login
 
-# CLI na-eji usoro njirimara nke ya — OmniRoute adịghị mkpa dịka backend maka Kiro CLI n'onwe ya.
-# Jiri kiro-cli yana OmniRoute maka ngwaọrụ ndị ọzọ.
+# The CLI uses its own auth — OmniRoute is not needed as backend for Kiro CLI itself.
+# Use kiro-cli alongside OmniRoute for other tools.
 kiro-cli status
 ```
 
-Maka ngwa desktọọpụ **Kiro IDE**, jiri endpoint MITM nke OmniRoute na-ewepụta
-n'okpuru `/dashboard/cli-tools → Kiro`.
+Maka**Kiro IDE** ngwa desktọpụ, jiri ebe ngwụcha MITM kpughere OmniRoute n'okpuru `/dashboard/cli-tools → Kiro`.
 
 ---
 

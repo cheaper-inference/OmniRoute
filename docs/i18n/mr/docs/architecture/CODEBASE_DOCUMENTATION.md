@@ -444,7 +444,7 @@ server/
 
 ---
 
-## 4. `open-sse/` — प्रवाहित इंजिन कार्यक्षेत्र
+## 4. `open-sse/` — स्ट्रीमिंग इंजिन वर्कस्पेस
 
 स्वतंत्र npm कार्यस्थान `@omniroute/open-sse` म्हणून प्रकाशित केले आहे. विनंती प्रक्रिया, एक्झिक्युटर, अनुवादक, सेवा, ट्रान्सफॉर्मर आणि MCP सर्व्हरची मालकी आहे.
 
@@ -456,7 +456,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Provider registries, header profiles, identity, …
 ├── handlers/               Request handlers (chat, embeddings, audio, image, …)
-├── executors/              156 provider executor modules (executor classes + per-provider helpers)
+├── executors/              159 provider executor modules (executor classes + per-provider helpers)
 ├── translator/             Format conversion (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions stream transformer
 ├── services/               80+ service modules (combos, fallback, quotas, identity, …)
@@ -486,11 +486,11 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 उच्च-स्तरीय एक्झिक्युटर मॉड्यूल्स (`*.ts` वजा `base.ts`, `index.ts` आणि चाचण्या — `npm run check:docs-counts` मोजणी मोजणे). प्रत्येक एक्झिक्युटर वर्ग `BaseExecutor` (`base.ts`), थेट किंवा `DefaultExecutor` किंवा अन्य एक्झिक्युटरद्वारे विस्तारित करतो; उर्वरित मॉड्यूल प्रति-प्रदाता मदतनीस आहेत (टूल स्कीमा, fetch/TTS अडॅप्टर, क्विर्क हँडलर). एक्झिक्युटरमध्ये हे समाविष्ट आहे:
+159 उच्च-स्तरीय एक्झिक्युटर मॉड्यूल्स (`*.ts` वजा `base.ts`, `index.ts` आणि चाचण्या — `npm run check:docs-counts` मोजणी मोजतात). प्रत्येक एक्झिक्युटर वर्ग `BaseExecutor` (`base.ts`), थेट किंवा `DefaultExecutor` किंवा अन्य एक्झिक्युटरद्वारे विस्तारित करतो; उर्वरित मॉड्यूल प्रति-प्रदाता मदतनीस आहेत (टूल स्कीमा, fetch/TTS अडॅप्टर, क्विर्क हँडलर). एक्झिक्युटरमध्ये हे समाविष्ट आहे:
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `qoder`, `vertex`, अधिक `devin-desktop`(शेअर आयडेंटिटी हेल्पर) आणि `claudeIdentity.ts` ( `index.ts` ).
 
-> टीप: येथे सूचीबद्ध नसलेले प्रदाते जेनेरिक OpenAI- सुसंगत एक्झिक्युटर वापरून `default.ts` द्वारे सर्व्ह केले जातात. संपूर्ण प्रदाता कॅटलॉग (377 प्रदाता) `src/shared/constants/providers.ts` मध्ये राहतात.
+> टीप: येथे सूचीबद्ध नसलेले प्रदाते जेनेरिक OpenAI- सुसंगत एक्झिक्युटर वापरून `default.ts` द्वारे सर्व्ह केले जातात. संपूर्ण प्रदाता कॅटलॉग (381 प्रदाता) `src/shared/constants/providers.ts` मध्ये राहतात.
 
 ### 4.3 `open-sse/translator/`
 
@@ -504,7 +504,7 @@ open-sse/
 
 ### 4.4 `open-sse/transformer/`
 
-- `responsesTransformer.ts` — `TransformStream` -based प्रतिसाद API ↔ चॅट पूर्णता कनवर्टर ( `responses/` मार्ग कॅच-ऑलद्वारे वापरलेला).
+- `responsesTransformer.ts` — `TransformStream` -based प्रतिसाद API ↔ चॅट पूर्णता कनवर्टर ( `responses/` मार्ग कॅच-ऑल द्वारे वापरलेले).
 
 ### 4.5 `open-sse/services/`
 
@@ -528,9 +528,9 @@ open-sse/
 
 ### 4.6 `open-sse/mcp-server/`
 
-- **110 अद्वितीय साधने** `server.ts` मध्ये वायर्ड ( `schemas/tools.ts` + मेमरी, कौशल्य, GitHub-कौशल्य, पूल, गेमिफिकेशन, प्लगइन, Notion, Obsidian, लोकल-कॉर्पस आणि कॉम्प्रेशन मॉड्यूल्समधील 45 कॅनोनिकल — `countUniqueMcpTools` द्वारे मोजले जाणारे युनियन).
+- **110 अद्वितीय साधने** `server.ts` मध्ये वायर्ड ( `schemas/tools.ts` + मेमरी, कौशल्य, GitHub-कौशल्य, पूल, गेमिफिकेशन, प्लगइन, Notion, Obsidian, स्थानिक-कॉर्पस आणि कॉम्प्रेशन मॉड्यूल — युनियन `countUniqueMcpTools` द्वारे मोजले जाणारे 45 कॅनोनिकल).
 - **3 वाहतूक** : stdio, HTTP स्ट्रीम करण्यायोग्य, SSE.
-- **33 स्कोप** रनटाइमवर लागू केले जाते — `src/shared/constants/mcpScopes.ts` मधील बेस लिस्ट, पूर्ण सेट म्हणजे प्रत्येक टूल मॉड्यूलद्वारे घोषित केलेल्या स्कोपचे युनियन.
+- **33 स्कोप** `src/shared/constants/mcpScopes.ts` मधील रनटाइम — बेस लिस्टवर लागू केले जाते, पूर्ण सेट म्हणजे प्रत्येक टूल मॉड्यूलद्वारे घोषित केलेल्या स्कोपचे संघटन.
 - लेखापरीक्षण सारणी: `mcp_tool_audit` ( `audit.ts` द्वारे पॉप्युलेट केलेले).
 - फाइल्स: `server.ts`, `index.ts`, `httpTransport.ts`, `audit.ts`, `scopeEnforcement.ts`, `runtimeHeartbeat.ts`, `descriptionCompressor.ts`, `schemas/{tools, a2a, audit, index}.ts`, `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts`, अधिक `__tests__/` अंतर्गत चाचण्या.
 - संपूर्ण टूल कॅटलॉगसाठी [MCP-SERVER.md](../frameworks/MCP-SERVER.md) पहा.
@@ -541,7 +541,7 @@ open-sse/
 
 ### 4.8 `open-sse/utils/`
 
-स्ट्रीमिंग आदिम आणि प्रदाता मदतनीस: `stream.ts`, `streamHandler.ts`, `streamHelpers.ts`, `streamPayloadCollector.ts`, `streamReadiness.ts`, `sseHeartbeat.ts`, `proxyFetch.ts`, `proxyDispatcher.ts`, `tlsClient.ts`, `networkProxy.ts`, `awsSigV4.ts`, `cacheControlPolicy.ts`, `cursorChecksum.ts`, `cursorAgentProtobuf.ts`, `cursorVersionDetector.ts`, `comfyuiClient.ts`, `kieTask.ts`, `bypassHandler.ts` `ollamaTransform.ts` `aiSdkCompat.ts`, `thinkTagParser.ts`, `urlSanitize.ts`, `usageTracking.ts`, `requestLogger.ts`, `progressTracker.ts`, `cors.ts`, `error.ts`, `logger.ts`, `sleep.ts`.
+स्ट्रीमिंग आदिम आणि प्रदाता मदतनीस: `stream.ts`, `streamHandler.ts`, `streamHelpers.ts`, `streamPayloadCollector.ts`, `streamReadiness.ts`, `sseHeartbeat.ts`, `proxyFetch.ts`, `proxyDispatcher.ts`, `tlsClient.ts`, `networkProxy.ts`, `awsSigV4.ts`, `cacheControlPolicy.ts`, `cursorChecksum.ts`, `cursorAgentProtobuf.ts`, `cursorVersionDetector.ts`, `comfyuiClient.ts`, `kieTask.ts` `ollamaTransform.ts` `bypassHandler.ts`, `aiSdkCompat.ts`, `thinkTagParser.ts`, `urlSanitize.ts`, `usageTracking.ts`, `requestLogger.ts`, `progressTracker.ts`, `cors.ts`, `error.ts`, `logger.ts`, `sleep.ts`.
 
 ---
 

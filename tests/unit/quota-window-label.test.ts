@@ -47,9 +47,9 @@ test("buildCodexUsageQuotas labels a 30-day primary window Monthly, not Weekly",
       },
     },
   });
-  assert.ok(quotas.session);
-  assert.equal(quotas.session.displayName, "Monthly");
-  assert.equal(quotas.session.windowSeconds, 2_592_000);
+  assert.ok(quotas.unknown_primary);
+  assert.equal(quotas.unknown_primary.displayName, "Monthly");
+  assert.equal(quotas.unknown_primary.windowSeconds, 2_592_000);
 });
 
 test("AUTH reasons match usage duration labels for a 30-day Codex session window", () => {

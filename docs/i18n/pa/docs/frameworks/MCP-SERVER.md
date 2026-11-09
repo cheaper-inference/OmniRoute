@@ -10,35 +10,30 @@
 
 ## ਇੰਸਟਾਲੇਸ਼ਨ
 
-OmniRoute MCP ਅੰਦਰੂਨੀ ਤੌਰ 'ਤੇ ਸ਼ਾਮਲ ਹੈ। ਇਸਨੂੰ ਇਸ ਤਰ੍ਹਾਂ ਸ਼ੁਰੂ ਕਰੋ:
+OmniRoute MCP ਬਿਲਟ-ਇਨ ਹੈ। ਇਸ ਨਾਲ ਸ਼ੁਰੂ ਕਰੋ:
 
 ```bash
 omniroute --mcp
 ```
 
-ਜਾਂ open-sse ਟ੍ਰਾਂਸਪੋਰਟ ਰਾਹੀਂ:
+ਜਾਂ ਓਪਨ-ਐਸਐਸਈ ਟ੍ਰਾਂਸਪੋਰਟ ਦੁਆਰਾ:
 
 ```bash
-# HTTP ਸਟ੍ਰੀਮਯੋਗ ਟ੍ਰਾਂਸਪੋਰਟ (ਪੋਰਟ 20130)
-omniroute --dev  # MCP /mcp ਐਂਡਪੌਇੰਟ 'ਤੇ ਆਪਣੇ ਆਪ ਸ਼ੁਰੂ ਹੁੰਦਾ ਹੈ
+# Streamable HTTP transport (default port 20128, in-process on the dashboard server)
+# Client endpoint: http://localhost:20128/api/mcp/stream
+# stdio: omniroute --mcp
 ```
 
-HTTP ਟ੍ਰਾਂਸਪੋਰਟ (`sse` / `streamable-http`, ਜੋ ਡੈਸ਼ਬੋਰਡ ਸਰਵਰ ਦੁਆਰਾ ਉਸੇ ਪ੍ਰੋਸੈੱਸ ਵਿੱਚ ਸਰਵ ਕੀਤੇ ਜਾਂਦੇ ਹਨ)
-ਮੂਲ ਰੂਪ ਵਿੱਚ ਬੰਦ ਹੁੰਦੇ ਹਨ ਅਤੇ ਪਹਿਲਾਂ ਸਿਰਫ਼ `/dashboard/mcp` ਪੰਨੇ ਤੋਂ ਹੀ ਚਾਲੂ ਜਾਂ ਬੰਦ ਕੀਤੇ ਜਾ ਸਕਦੇ ਸਨ। v3.8.51
-ਤੋਂ CLI ਵਿੱਚ ਵੀ ਬਰਾਬਰ ਦੀ ਕਾਰਜਸ਼ੀਲਤਾ ਹੈ:
+HTTP ਟ੍ਰਾਂਸਪੋਰਟ (`sse` / `streamable-http`, ਡੈਸ਼ਬੋਰਡ ਸਰਵਰ ਦੁਆਰਾ ਪ੍ਰਕ੍ਰਿਆ ਵਿੱਚ ਸੇਵਾ ਕੀਤੀ ਜਾਂਦੀ ਹੈ) ਮੂਲ ਰੂਪ ਵਿੱਚ ਬੰਦ ਹਨ ਅਤੇ ਪਹਿਲਾਂ ਸਿਰਫ `/dashboard/mcp` ਪੰਨੇ ਤੋਂ ਟੌਗਲ ਕਰਨ ਯੋਗ ਸਨ। v3.8.51 ਤੱਕ CLI ਦੀ ਸਮਾਨਤਾ ਹੈ:
 
 ```bash
-omniroute mcp status                                  # ਸਮਰੱਥ/ਔਨਲਾਈਨ, ਟ੍ਰਾਂਸਪੋਰਟ, ਟੂਲਾਂ ਦੀ ਗਿਣਤੀ
+omniroute mcp status                                  # enabled/online, transport, tool count
 omniroute mcp enable [--transport stdio|sse|streamable-http]
 omniroute mcp disable
-omniroute mcp restart                                 # ਸਰਗਰਮ sse/streamable-http ਸੈਸ਼ਨਾਂ ਨੂੰ ਰੀਸੈੱਟ ਕਰਦਾ ਹੈ
+omniroute mcp restart                                 # resets active sse/streamable-http sessions
 ```
 
-`mcp enable`/`mcp disable`, `/api/settings` ਰਾਹੀਂ ਉਸੇ `mcpEnabled` (ਅਤੇ ਵਿਕਲਪਿਕ ਤੌਰ 'ਤੇ `mcpTransport`) ਸੈਟਿੰਗ ਨੂੰ
-PATCH ਕਰਦੇ ਹਨ ਜਿਸਨੂੰ ਡੈਸ਼ਬੋਰਡ ਚਾਲੂ ਜਾਂ ਬੰਦ ਕਰਦਾ ਹੈ। `mcp restart`, `POST /api/mcp/restart` ਨੂੰ ਕਾਲ ਕਰਦਾ ਹੈ: ਇਹ
-ਸਰਗਰਮ `sse`/`streamable-http` ਸੈਸ਼ਨਾਂ ਨੂੰ ਬੰਦ ਕਰ ਦਿੰਦਾ ਹੈ ਤਾਂ ਜੋ ਅਗਲੀ ਬੇਨਤੀ ਸਾਫ਼ ਢੰਗ ਨਾਲ ਮੁੜ ਸ਼ੁਰੂ ਹੋਵੇ, MCP ਅਸਮਰੱਥ ਹੋਣ 'ਤੇ
-`409`, ਅਤੇ `stdio` ਟ੍ਰਾਂਸਪੋਰਟ ਲਈ `501` ਵਾਪਸ ਕਰਦਾ ਹੈ (stdio ਕਲਾਇੰਟ ਆਪਣੇ ਸਬਪ੍ਰੋਸੈੱਸ ਦੇ ਖੁਦ ਮਾਲਕ ਹੁੰਦੇ ਹਨ —
-ਮੁੜ ਸ਼ੁਰੂ ਕਰਨ ਲਈ ਉਸੇ ਪ੍ਰੋਸੈੱਸ ਵਿੱਚ ਕੋਈ ਹੈਂਡਲ ਉਪਲਬਧ ਨਹੀਂ ਹੁੰਦਾ)।
+`mcp enable`/`mcp disable` PATCH ਉਹੀ `mcpEnabled` (ਅਤੇ ਵਿਕਲਪਿਕ ਤੌਰ 'ਤੇ `mcpTransport`) ਡੈਸ਼ਬੋਰਡ ਨੂੰ `/api/settings` ਰਾਹੀਂ ਟੌਗਲ ਕਰਨਾ ਸੈੱਟ ਕਰਨਾ। `mcp restart` `POST /api/mcp/restart` ਨੂੰ ਕਾਲ ਕਰਦਾ ਹੈ: ਇਹ ਕਿਰਿਆਸ਼ੀਲ `sse`/`streamable-http` ਸੈਸ਼ਨਾਂ ਨੂੰ ਢਾਹ ਦਿੰਦਾ ਹੈ ਤਾਂ ਜੋ ਅਗਲੀ ਬੇਨਤੀ ਸਾਫ਼-ਸੁਥਰੀ ਮੁੜ-ਸ਼ੁਰੂ ਹੋ ਜਾਂਦੀ ਹੈ, `409` ਵਾਪਸ ਕਰਦਾ ਹੈ ਜੇਕਰ MCP ਅਸਮਰੱਥ ਹੈ, ਅਤੇ `stdio` ਟ੍ਰਾਂਸਪੋਰਟ ਲਈ `501` (stdio ਕਲਾਇੰਟਸ ਆਪਣੇ ਖੁਦ ਦੇ ਉਪ-ਪ੍ਰਕਿਰਿਆ — ਨੂੰ ਮੁੜ ਚਾਲੂ ਕਰਨ ਲਈ ਕੋਈ ਇਨ-ਪ੍ਰੋਸੈਸ ਹੈਂਡਲ ਨਹੀਂ ਹੈ)।
 
 ## ਟ੍ਰਾਂਸਪੋਰਟ
 
@@ -130,48 +125,42 @@ Claude Desktop, Cursor, Cline ਅਤੇ ਅਨੁਕੂਲ MCP ਕਲਾਇੰ�
 | `omniroute_cache_stats` | `read:cache`  | ਸਿਮੈਂਟਿਕ ਕੈਸ਼, ਪ੍ਰੌਂਪਟ-ਕੈਸ਼ ਅਤੇ ਆਈਡੈਂਪੋਟੈਂਸੀ ਅੰਕੜੇ      |
 | `omniroute_cache_flush` | `write:cache` | ਕੈਸ਼ ਨੂੰ ਗਲੋਬਲ ਤੌਰ 'ਤੇ ਜਾਂ ਸਿਗਨੇਚਰ/ਮਾਡਲ ਅਨੁਸਾਰ ਫਲੱਸ਼ ਕਰੋ |
 
-## ਕੰਪ੍ਰੈਸ਼ਨ ਟੂਲ (13)
+## ਕੰਪਰੈਸ਼ਨ ਟੂਲ (13)
 
-| ਟੂਲ                                 | ਸਕੋਪ                | ਵੇਰਵਾ                                                                                                          |
-| :---------------------------------- | :------------------ | :------------------------------------------------------------------------------------------------------------- |
-| `omniroute_compression_status`      | `read:compression`  | ਕੰਪ੍ਰੈਸ਼ਨ ਸੈਟਿੰਗਾਂ, ਵਿਸ਼ਲੇਸ਼ਣ ਸੰਖੇਪ ਅਤੇ ਕੈਸ਼-ਅਵੇਅਰ ਅੰਕੜੇ (`analytics.mcpDescriptionCompression` ਮੈਟਾਡੇਟਾ ਸਮੇਤ) |
-| `omniroute_compression_configure`   | `write:compression` | ਕੰਪ੍ਰੈਸ਼ਨ ਮੋਡ, ਥ੍ਰੈਸ਼ਹੋਲਡ, ਟੀਚਾ ਅਨੁਪਾਤ, ਸਿਸਟਮ-ਪ੍ਰੌਂਪਟ ਸੰਭਾਲ ਅਤੇ MCP ਵੇਰਵਾ ਕੰਪ੍ਰੈਸ਼ਨ ਟੌਗਲ ਕੌਂਫਿਗਰ ਕਰੋ           |
-| `omniroute_set_compression_engine`  | `write:compression` | ਸਰਗਰਮ ਇੰਜਣ (off/caveman/rtk/stacked) ਅਤੇ Caveman/RTK ਤੀਬਰਤਾ ਚੁਣੋ                                               |
-| `omniroute_list_compression_combos` | `read:compression`  | ਨਾਮਿਤ ਕੰਪ੍ਰੈਸ਼ਨ ਕੰਬੋ ਅਤੇ ਉਨ੍ਹਾਂ ਦੀਆਂ ਇੰਜਣ ਪਾਈਪਲਾਈਨਾਂ ਦੀ ਸੂਚੀ ਦਿਖਾਓ                                             |
-| `omniroute_compression_combo_stats` | `read:compression`  | ਕੰਪ੍ਰੈਸ਼ਨ ਕੰਬੋ ਅਤੇ ਇੰਜਣ ਅਨੁਸਾਰ ਸਮੂਹਬੱਧ ਵਿਸ਼ਲੇਸ਼ਣ                                                               |
-| `omniroute_ccr_store`               | `write:compression` | ਸੀਮਿਤ ਇਨ-ਮੈਮੋਰੀ CCR ਸਟੋਰ ਵਿੱਚ ਕਾਲਰ-ਅਲੱਗ ਕੀਤੀ ਸਮੱਗਰੀ ਸਟੋਰ ਕਰੋ ਅਤੇ ਮਾਰਕਰ ਦੇ ਨਾਲ `ccr://` ਹਵਾਲਾ ਵਾਪਸ ਕਰੋ          |
-| `omniroute_ccr_retrieve`            | `read:compression`  | CCR ਸਮੱਗਰੀ ਨੂੰ ਪੂਰੀ ਤਰ੍ਹਾਂ ਜਾਂ ਹੈੱਡ, ਟੇਲ, ਲਾਈਨਾਂ, grep ਅਤੇ ਅੰਕੜਾ ਮੋਡਾਂ ਨਾਲ ਪ੍ਰਾਪਤ ਕਰੋ                          |
-| `omniroute_ccr_inspect`             | `read:compression`  | ਸਮੱਗਰੀ ਵਾਪਸ ਕੀਤੇ ਬਿਨਾਂ ਕਾਲਰ ਦੀ ਮਲਕੀਅਤ ਵਾਲੇ CCR ਮੈਟਾਡੇਟਾ ਦੀ ਜਾਂਚ ਕਰੋ                                            |
-| `omniroute_ccr_list`                | `read:compression`  | ਕਾਲਰ ਦੀ ਮਲਕੀਅਤ ਵਾਲੇ CCR ਬਲਾਕਾਂ ਲਈ ਪੰਨਾਬੱਧ ਮੈਟਾਡੇਟਾ ਦੀ ਸੂਚੀ ਦਿਖਾਓ                                               |
-| `omniroute_ccr_delete`              | `write:compression` | ਕਾਲਰ ਦੀ ਮਲਕੀਅਤ ਵਾਲਾ CCR ਬਲਾਕ ਮਿਟਾਓ                                                                             |
-| `omniroute_ccr_stats`               | `read:compression`  | ਕਾਲਰ-ਸਕੋਪਡ ਮੈਮੋਰੀ ਵਰਤੋਂ, ਜੀਵਨ-ਚੱਕਰ ਕਾਊਂਟਰ ਅਤੇ ਸਟੋਰ ਸੀਮਾਵਾਂ ਦੀ ਰਿਪੋਰਟ ਕਰੋ                                       |
-| `omniroute_rtk_discover`            | `read:compression`  | ਆਪਟ-ਇਨ RTK ਆਉਟਪੁੱਟ ਨਮੂਨਿਆਂ ਵਿੱਚ ਦੁਹਰਾਉਂਦੇ ਸ਼ੋਰ ਦੀ ਖੋਜ ਕਰੋ                                                      |
-| `omniroute_rtk_learn`               | `read:compression`  | ਆਪਟ-ਇਨ ਨਮੂਨਿਆਂ ਤੋਂ ਸਮੀਖਿਆਯੋਗ RTK ਫਿਲਟਰ ਡਰਾਫਟ ਤਿਆਰ ਕਰੋ                                                          |
+| ਟੂਲ                                 | ਦਾਇਰੇ               | ਵਰਣਨ                                                                                                                 |
+| :---------------------------------- | :------------------ | :------------------------------------------------------------------------------------------------------------------- |
+| `omniroute_compression_status`      | `read:compression`  | ਕੰਪਰੈਸ਼ਨ ਸੈਟਿੰਗਾਂ, ਵਿਸ਼ਲੇਸ਼ਣ ਸੰਖੇਪ, ਅਤੇ ਕੈਸ਼-ਜਾਗਰੂਕ ਅੰਕੜੇ ( `analytics.mcpDescriptionCompression` ਮੈਟਾਡੇਟਾ ਸ਼ਾਮਲ ਹਨ) |
+| `omniroute_compression_configure`   | `write:compression` | ਕੰਪਰੈਸ਼ਨ ਮੋਡ, ਥ੍ਰੈਸ਼ਹੋਲਡ, ਟੀਚਾ ਅਨੁਪਾਤ, ਸਿਸਟਮ-ਪ੍ਰੋਂਪਟ ਸੁਰੱਖਿਆ, MCP ਵਰਣਨ ਕੰਪਰੈਸ਼ਨ ਟੌਗਲ ਨੂੰ ਕੌਂਫਿਗਰ ਕਰੋ                 |
+| `omniroute_set_compression_engine`  | `write:compression` | ਕਿਰਿਆਸ਼ੀਲ ਇੰਜਣ (off/caveman/rtk/stacked) ਅਤੇ Caveman/RTK ਤੀਬਰਤਾ ਨੂੰ ਚੁਣੋ                                             |
+| `omniroute_list_compression_combos` | `read:compression`  | ਕੰਪਰੈਸ਼ਨ ਕੰਬੋਜ਼ ਅਤੇ ਉਹਨਾਂ ਦੀਆਂ ਇੰਜਣ ਪਾਈਪਲਾਈਨਾਂ ਦੀ ਸੂਚੀ ਬਣਾਓ                                                          |
+| `omniroute_compression_combo_stats` | `read:compression`  | ਕੰਪਰੈਸ਼ਨ ਕੰਬੋ ਅਤੇ ਇੰਜਣ ਦੁਆਰਾ ਗਰੁੱਪਬੱਧ ਵਿਸ਼ਲੇਸ਼ਣ                                                                      |
+| `omniroute_ccr_store`               | `write:compression` | ਕਾਲਰ-ਅਲੱਗ-ਥਲੱਗ ਸਮੱਗਰੀ ਨੂੰ ਬਾਊਂਡਡ ਇਨ-ਮੈਮੋਰੀ CCR ਸਟੋਰ ਵਿੱਚ ਸਟੋਰ ਕਰੋ ਅਤੇ ਮਾਰਕਰ ਪਲੱਸ `ccr://` ਹਵਾਲਾ ਵਾਪਸ ਕਰੋ             |
+| `omniroute_ccr_retrieve`            | `read:compression`  | CCR ਸਮੱਗਰੀ ਨੂੰ ਪੂਰੀ ਤਰ੍ਹਾਂ ਜਾਂ ਸਿਰ, ਪੂਛ, ਲਾਈਨਾਂ, grep, ਅਤੇ ਅੰਕੜਿਆਂ ਦੇ ਮੋਡਾਂ ਨਾਲ ਮੁੜ ਪ੍ਰਾਪਤ ਕਰੋ                       |
+| `omniroute_ccr_inspect`             | `read:compression`  | ਸਮੱਗਰੀ ਵਾਪਸ ਕੀਤੇ ਬਿਨਾਂ ਕਾਲਰ ਦੀ ਮਲਕੀਅਤ ਵਾਲੇ CCR ਮੈਟਾਡੇਟਾ ਦੀ ਜਾਂਚ ਕਰੋ                                                  |
+| `omniroute_ccr_list`                | `read:compression`  | ਕਾਲਰ ਦੀ ਮਲਕੀਅਤ ਵਾਲੇ CCR ਬਲਾਕਾਂ ਲਈ ਪੰਨਾਬੱਧ ਮੈਟਾਡੇਟਾ ਦੀ ਸੂਚੀ ਬਣਾਓ                                                      |
+| `omniroute_ccr_delete`              | `write:compression` | ਕਾਲਰ ਦੀ ਮਲਕੀਅਤ ਵਾਲੇ CCR ਬਲਾਕ ਨੂੰ ਮਿਟਾਓ                                                                               |
+| `omniroute_ccr_stats`               | `read:compression`  | ਕਾਲਰ-ਸਕੋਪਡ ਮੈਮੋਰੀ ਵਰਤੋਂ, ਲਾਈਫਸਾਈਕਲ ਕਾਊਂਟਰ, ਅਤੇ ਸਟੋਰ ਸੀਮਾਵਾਂ ਦੀ ਰਿਪੋਰਟ ਕਰੋ                                            |
+| `omniroute_rtk_discover`            | `read:compression`  | ਔਪਟ-ਇਨ RTK ਆਉਟਪੁੱਟ ਨਮੂਨਿਆਂ ਵਿੱਚ ਆਵਰਤੀ ਰੌਲੇ ਦੀ ਖੋਜ ਕਰੋ                                                                |
+| `omniroute_rtk_learn`               | `read:compression`  | ਔਪਟ-ਇਨ ਨਮੂਨਿਆਂ ਤੋਂ ਸਮੀਖਿਆਯੋਗ RTK ਫਿਲਟਰ ਡਰਾਫਟ ਤਿਆਰ ਕਰੋ                                                                |
 
-CCR ਐਂਟਰੀਆਂ ਸਿਰਫ਼ ਇਨ-ਮੈਮੋਰੀ ਹਨ ਅਤੇ ਰੀਸਟਾਰਟ ਹੋਣ 'ਤੇ ਗਾਇਬ ਹੋ ਜਾਂਦੀਆਂ ਹਨ। ਹਰੇਕ ਬਲਾਕ 2 MiB ਤੱਕ, ਹਰੇਕ
-ਪ੍ਰਿੰਸੀਪਲ 16 MiB ਤੱਕ ਅਤੇ ਗਲੋਬਲ ਸਟੋਰ 64 MiB ਤੱਕ ਸੀਮਿਤ ਹੈ। ਐਂਟਰੀਆਂ ਲਈ ਡਿਫੌਲਟ TTL 24 ਘੰਟੇ ਹੈ (ਵੱਧ ਤੋਂ ਵੱਧ
-ਸੱਤ ਦਿਨ)। ਪੂਰੀ MCP ਪ੍ਰਾਪਤੀ 256 KiB ਤੱਕ ਸੀਮਿਤ ਹੈ; ਵੱਡੇ ਬਲਾਕ ਰੇਂਜਡ ਅਤੇ grep ਮੋਡਾਂ ਰਾਹੀਂ
-ਉਪਲਬਧ ਰਹਿੰਦੇ ਹਨ। ਸਟੋਰੇਜ, ਪ੍ਰਾਪਤੀ, ਸੂਚੀਕਰਨ, ਜਾਂਚ, ਮਿਟਾਉਣਾ ਅਤੇ ਅੰਕੜੇ ਪ੍ਰਮਾਣਿਤ
-API-ਕੁੰਜੀ ਪ੍ਰਿੰਸੀਪਲ ਅਨੁਸਾਰ ਅਲੱਗ ਰੱਖੇ ਜਾਂਦੇ ਹਨ। ਆਡਿਟ ਰਿਕਾਰਡਾਂ ਵਿੱਚ ਹੈਸ਼ ਅਤੇ ਆਕਾਰ ਦਾ ਮੈਟਾਡੇਟਾ ਹੁੰਦਾ ਹੈ, ਸਮੱਗਰੀ ਕਦੇ ਨਹੀਂ।
+CCR ਐਂਟਰੀਆਂ ਦੋ-ਪੱਧਰੀ ਸਟੋਰ ਦੀ ਵਰਤੋਂ ਕਰਦੀਆਂ ਹਨ: ਇੱਕ ਗਰਮ ਇਨ-ਮੈਮੋਰੀ ਟੀਅਰ ਬੈਕਡ, ਸਥਾਨਕ ਗੈਰ-ਕਲਾਊਡ ਰਨਟਾਈਮ 'ਤੇ, ਇੱਕ ਟਿਕਾਊ SQLite ਟੀਅਰ (`ccr_blocks`, ਮੂਲ ਰੂਪ ਵਿੱਚ) ਦੁਆਰਾ, ਇਸਲਈ ਇੱਕ ਬਲਾਕ ਬੇਦਖਲੀ ਜਾਂ ਮੁੜ ਚਾਲੂ ਹੋਣ ਤੱਕ ਬਚਦਾ ਹੈ ਜਦੋਂ ਤੱਕ ਇਸਦਾ TTL — ਖਤਮ ਨਹੀਂ ਹੁੰਦਾ ਹੈ, ਸਿਵਾਏ 512 ਤੋਂ ਵੱਧ ਬਲਾਕਾਂ ਨੂੰ ਛੱਡ ਕੇ, ਜੋ ਕਿ ਕਲਾਉਡ- KB ਟਾਈਮ ਚੱਲਦਾ ਹੈ। ਹਰ ਬਲਾਕ 2 MiB ਤੱਕ ਸੀਮਿਤ ਹੈ, ਹਰੇਕ ਪ੍ਰਿੰਸੀਪਲ 16 MiB ਤੱਕ, ਅਤੇ ਗਲੋਬਲ ਸਟੋਰ 64 MiB ਤੱਕ ਸੀਮਿਤ ਹੈ। 24-ਘੰਟੇ TTL (ਵੱਧ ਤੋਂ ਵੱਧ ਸੱਤ ਦਿਨ) ਲਈ ਡਿਫਾਲਟ ਐਂਟਰੀਆਂ। ਪੂਰੀ MCP ਪ੍ਰਾਪਤੀ 256 KiB ਤੱਕ ਸੀਮਿਤ ਹੈ; ਵੱਡੇ ਬਲਾਕ ਰੇਂਜਡ ਅਤੇ ਗ੍ਰੇਪ ਮੋਡਾਂ ਰਾਹੀਂ ਉਪਲਬਧ ਰਹਿੰਦੇ ਹਨ। ਸਟੋਰੇਜ਼, ਮੁੜ ਪ੍ਰਾਪਤੀ, ਸੂਚੀਕਰਨ, ਨਿਰੀਖਣ, ਮਿਟਾਉਣਾ, ਅਤੇ ਅੰਕੜੇ ਪ੍ਰਮਾਣਿਤ API-ਕੁੰਜੀ ਪ੍ਰਿੰਸੀਪਲ ਦੁਆਰਾ ਅਲੱਗ ਕੀਤੇ ਗਏ ਹਨ। ਆਡਿਟ ਰਿਕਾਰਡਾਂ ਵਿੱਚ ਹੈਸ਼ ਅਤੇ ਆਕਾਰ ਦਾ ਮੈਟਾਡੇਟਾ ਹੁੰਦਾ ਹੈ, ਕਦੇ ਵੀ ਸਮੱਗਰੀ ਨਹੀਂ ਹੁੰਦੀ। ਆਪਰੇਟਰ-ਸਾਹਮਣਾ ਵਾਲੇ ਵੇਰਵੇ (ਦੋ ਮਾਰਕਰ, ਕਲਾਇੰਟ ਪੂਰਵ-ਸ਼ਰਤਾਂ, `codemode:false`, ਪ੍ਰਤੀ-ਟੂਲ ਸਕੋਪ, ਪੰਨਾ ਨੰਬਰ, ਅਤੇ ਇੱਕ ਡਾਇਗਨੌਸਟਿਕ ਮੈਟ੍ਰਿਕਸ) [ਕੰਪਰੈਸ਼ਨ ਇੰਜਣ → ਪੂਰਵ-ਲੋੜਾਂ / ਆਪਰੇਟਰ ਗਾਈਡ](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup) ਵਿੱਚ ਰਹਿੰਦੇ ਹਨ।
 
-`omniroute_compression_status`, `analytics.mcpDescriptionCompression` ਦੇ ਅਧੀਨ MCP ਵਰਣਨ ਕੰਪਰੈਸ਼ਨ ਦੀ ਵੱਖਰੇ ਤੌਰ 'ਤੇ ਰਿਪੋਰਟ ਕਰਦਾ ਹੈ। ਇਹ ਮੁੱਲ MCP ਦੀਆਂ ਸੂਚੀਬੱਧ ਕੀਤੀਆਂ ਜਾ ਸਕਣ ਵਾਲੀਆਂ ਵਰਣਨਾਵਾਂ (`tools`, `prompts`, `resources`, ਅਤੇ `resourceTemplates`) ਲਈ ਮੈਟਾਡੇਟਾ-ਆਕਾਰ ਦੇ ਅਨੁਮਾਨ ਹਨ; ਇਹ ਪ੍ਰਦਾਤਾ ਵਰਤੋਂ ਦੀਆਂ ਰਸੀਦਾਂ ਨਹੀਂ ਹਨ ਅਤੇ ਇਨ੍ਹਾਂ ਨੂੰ `source: "mcp_metadata_estimate"` ਨਾਲ ਚਿੰਨ੍ਹਿਤ ਕੀਤਾ ਜਾਂਦਾ ਹੈ।
+`omniroute_compression_status` `analytics.mcpDescriptionCompression` ਦੇ ਅਧੀਨ ਵੱਖਰੇ ਤੌਰ 'ਤੇ MCP ਵਰਣਨ ਕੰਪਰੈਸ਼ਨ ਦੀ ਰਿਪੋਰਟ ਕਰਦਾ ਹੈ। ਉਹ ਮੁੱਲ MCP ਸੂਚੀਬੱਧ ਵਰਣਨ (`tools`, `prompts`, `resources`, ਅਤੇ `resourceTemplates`) ਲਈ ਮੈਟਾਡੇਟਾ-ਆਕਾਰ ਅਨੁਮਾਨ ਹਨ; ਉਹ ਪ੍ਰਦਾਤਾ ਵਰਤੋਂ ਦੀਆਂ ਰਸੀਦਾਂ ਨਹੀਂ ਹਨ ਅਤੇ `source: "mcp_metadata_estimate"` ਨਾਲ ਚਿੰਨ੍ਹਿਤ ਹਨ।
 
-### MCP ਐਕਸੈਸਿਬਿਲਿਟੀ ਟ੍ਰੀ ਫਿਲਟਰ (v3.8.0)
+### MCP ਅਸੈਸਬਿਲਟੀ ਟ੍ਰੀ ਫਿਲਟਰ (v3.8.0)
 
-ਉਪਰੋਕਤ ਕੰਪਰੈਸ਼ਨ ਟੂਲਾਂ ਤੋਂ ਵੱਖਰੇ ਤੌਰ 'ਤੇ, OmniRoute ਵਿੱਚ ਇੱਕ ਪੋਸਟ-ਐਗਜ਼ੀਕਿਊਸ਼ਨ ਫਿਲਟਰ ਸ਼ਾਮਲ ਹੈ ਜੋ MCP ਬ੍ਰਾਊਜ਼ਰ/ਐਕਸੈਸਿਬਿਲਿਟੀ ਟੂਲਾਂ ਦੇ **ਟੂਲ ਨਤੀਜਿਆਂ** ਨੂੰ ਏਜੰਟ ਕੋਲ ਵਾਪਸ ਭੇਜਣ ਤੋਂ ਪਹਿਲਾਂ ਕੰਪ੍ਰੈੱਸ ਕਰਦਾ ਹੈ। ਇਹ ਫਿਲਟਰ ਆਪਣੇ ਆਪ ਵਿੱਚ ਕੋਈ ਟੂਲ ਨਹੀਂ ਹੈ — ਇਹ ਅਜਿਹੇ ਕਿਸੇ ਵੀ ਟੂਲ ਨਤੀਜੇ ਉੱਤੇ ਪਾਰਦਰਸ਼ੀ ਢੰਗ ਨਾਲ ਚੱਲਦਾ ਹੈ ਜਿਸ ਵਿੱਚ ਵਿਸਤ੍ਰਿਤ ਐਕਸੈਸਿਬਿਲਿਟੀ-ਟ੍ਰੀ ਜਾਂ ਬ੍ਰਾਊਜ਼ਰ-ਸਨੈਪਸ਼ਾਟ ਟੈਕਸਟ (≥2000 ਅੱਖਰ) ਸ਼ਾਮਲ ਹੋਵੇ।
+ਉੱਪਰ ਦਿੱਤੇ ਕੰਪਰੈਸ਼ਨ ਟੂਲਸ ਤੋਂ ਵੱਖ, OmniRoute ਵਿੱਚ ਇੱਕ ਪੋਸਟ-ਐਕਜ਼ੀਕਿਊਸ਼ਨ ਫਿਲਟਰ ਸ਼ਾਮਲ ਹੁੰਦਾ ਹੈ ਜੋ** ਸੰਦ ਦੇ ਨਤੀਜੇ** ਏਜੰਟ ਨੂੰ ਵਾਪਸ ਕੀਤੇ ਜਾਣ ਤੋਂ ਪਹਿਲਾਂ MCP browser/accessibility ਟੂਲਸ ਦੀ। ਇਹ ਫਿਲਟਰ ਆਪਣੇ ਆਪ ਵਿੱਚ ਇੱਕ ਟੂਲ — ਨਹੀਂ ਹੈ ਇਹ ਕਿਸੇ ਵੀ ਟੂਲ ਨਤੀਜੇ 'ਤੇ ਪਾਰਦਰਸ਼ੀ ਢੰਗ ਨਾਲ ਚੱਲਦਾ ਹੈ ਜਿਸ ਵਿੱਚ ਵਰਬੋਜ਼ ਐਕਸੈਸਬਿਲਟੀ-ਟਰੀ ਜਾਂ ਬ੍ਰਾਊਜ਼ਰ-ਸਨੈਪਸ਼ਾਟ ਟੈਕਸਟ (≥ 2000 ਅੱਖਰ) ਸ਼ਾਮਲ ਹੁੰਦੇ ਹਨ।
 
-ਮੁੱਖ ਵਿਹਾਰ:
+ਮੁੱਖ ਵਿਵਹਾਰ:
 
-- ≥30 ਲਗਾਤਾਰ ਦੁਹਰਾਈਆਂ ਗਈਆਂ ਸਿਬਲਿੰਗ ਲਾਈਨਾਂ ਨੂੰ ਸ਼ੁਰੂਆਤੀ + ਅੰਤਿਮ ਸੰਖੇਪ ਵਿੱਚ ਸਮੇਟਦਾ ਹੈ
-- Playwright/ਕੰਪਿਊਟਰ-ਵਰਤੋਂ ਲਈ ਲੋੜੀਂਦੇ `[ref=eXX]` ਐਂਕਰਾਂ ਨੂੰ ਸੁਰੱਖਿਅਤ ਰੱਖਦਾ ਹੈ
-- ਬਹੁਤ ਵੱਡੇ ਟੈਕਸਟ (>50,000 ਅੱਖਰ) ਨੂੰ ਨੈਵੀਗੇਸ਼ਨ ਸੰਕੇਤ ਦੇ ਨਾਲ ਨਿਰਧਾਰਤ ਸੀਮਾ 'ਤੇ ਕੱਟਦਾ ਹੈ
-- ਉਮੀਦ ਕੀਤੀ ਬਚਤ: ਬ੍ਰਾਊਜ਼ਰ ਸਨੈਪਸ਼ਾਟ ਪੇਲੋਡਾਂ ਉੱਤੇ **60–80%**
+- ≥ 30 ਲਗਾਤਾਰ ਦੁਹਰਾਈਆਂ ਗਈਆਂ ਸਿਬਲ ਲਾਈਨਾਂ ਨੂੰ ਸਿਰ + ਟੇਲ ਸਾਰਾਂਸ਼ ਵਿੱਚ ਸਮੇਟਦਾ ਹੈ
+- Playwright/computer-use ਦੁਆਰਾ ਲੋੜੀਂਦੇ `[ref=eXX]` ਐਂਕਰਾਂ ਨੂੰ ਸੁਰੱਖਿਅਤ ਰੱਖਦਾ ਹੈ
+- ਨੈਵੀਗੇਸ਼ਨ ਸੰਕੇਤ ਦੇ ਨਾਲ ਵੱਡੇ ਆਕਾਰ ਦੇ ਟੈਕਸਟ (> 50,000 ਅੱਖਰਾਂ) ਨੂੰ ਸਖ਼ਤ-ਛਾਂਟਦਾ ਹੈ
+- ਉਮੀਦ ਕੀਤੀ ਬੱਚਤ:** 60-80%** ਬ੍ਰਾਊਜ਼ਰ ਸਨੈਪਸ਼ਾਟ ਪੇਲੋਡਸ 'ਤੇ
 
-ਸੰਰਚਨਾ: ਗਲੋਬਲ ਸੈਟਿੰਗਾਂ ਵਿੱਚ `compression.mcpAccessibility` (ਮਾਈਗ੍ਰੇਸ਼ਨ 056)।
-ਲਾਗੂਕਰਨ: `open-sse/services/compression/engines/mcpAccessibility/`।
-ਪੂਰੇ ਦਸਤਾਵੇਜ਼: [ਕੰਪਰੈਸ਼ਨ ਇੰਜਣ — MCP ਐਕਸੈਸਿਬਿਲਿਟੀ ਟ੍ਰੀ ਫਿਲਟਰ](../compression/COMPRESSION_ENGINES.md#mcp-accessibility-tree-filter)।
+ਸੰਰਚਨਾ: ਗਲੋਬਲ ਸੈਟਿੰਗਾਂ ਵਿੱਚ `compression.mcpAccessibility` (ਮਾਈਗ੍ਰੇਸ਼ਨ 056)। ਲਾਗੂ ਕਰਨਾ: `open-sse/services/compression/engines/mcpAccessibility/`. ਪੂਰਾ ਡੌਕਸ: [ਕੰਪਰੈਸ਼ਨ ਇੰਜਣ — MCP ਅਸੈਸਬਿਲਟੀ ਟ੍ਰੀ ਫਿਲਟਰ](../compression/COMPRESSION_ENGINES.md#mcp-accessibility-tree-filter) ।
 
-ਇਨ੍ਹਾਂ ਟੂਲਾਂ ਦੇ ਪਿੱਛੇ ਮੌਜੂਦ ਰਨਟਾਈਮ ਕੰਪਰੈਸ਼ਨ ਮਾਡਲ ਲਈ [ਕੰਪਰੈਸ਼ਨ ਇੰਜਣ](../compression/COMPRESSION_ENGINES.md) ਅਤੇ [RTK ਕੰਪਰੈਸ਼ਨ](../compression/RTK_COMPRESSION.md) ਵੇਖੋ।
+ਇਹਨਾਂ ਟੂਲਸ ਦੇ ਪਿੱਛੇ ਰਨਟਾਈਮ ਕੰਪਰੈਸ਼ਨ ਮਾਡਲ ਲਈ [ਕੰਪਰੈਸ਼ਨ ਇੰਜਣ](../compression/COMPRESSION_ENGINES.md) ਅਤੇ [RTK ਕੰਪਰੈਸ਼ਨ](../compression/RTK_COMPRESSION.md) ਦੇਖੋ।
 
 ## 1Proxy ਟੂਲ (3)
 
@@ -291,78 +280,73 @@ SSE ਅਤੇ ਸਟ੍ਰੀਮਯੋਗ HTTP—ਦੋਵੇਂ ਟ੍ਰਾਂ
 
 ---
 
-## ਪ੍ਰਮਾਣੀਕਰਨ ਅਤੇ ਸਕੋਪ
+## ਪ੍ਰਮਾਣੀਕਰਨ ਅਤੇ ਦਾਇਰੇ
 
-MCP ਟੂਲ ਕਾਲਾਂ ਕਾਲਰ ਤੋਂ ਸਕੋਪ ਸਤਰੀਆਂ ਪੜ੍ਹਦੀਆਂ ਹਨ। ਇਹ ਜਾਂਚ ਤਿੰਨ ਆਜ਼ਾਦ ਨੇਮਸਪੇਸ ਵਿੱਚੋਂ ਇੱਕ ਹੈ। ਇੱਕ ਚੈੱਕਰ ਤੋਂ ਪਾਸ ਹੋਣਾ ਇਸ ਦਾ ਮਤਲਬ ਨਹੀਂ ਕਿ ਬਾਕੀਆਂ ਤੋਂ ਵੀ ਪਾਸ ਹੋਣਾ। ਨਿਯਮ [ਤਿੰਨ ਸਕੋਪ ਨੇਮਸਪੇਸ](#three-scope-namespaces) ਵਿੱਚ ਦਿੱਤੇ ਗਏ ਹਨ। ਟੂਲ ਕੈਟਾਲਾਗ [MCP ਟੂਲ ਸਕੋਪ](#mcp-tool-scopes) ਹੈ।
+MCP ਟੂਲ ਕਾਲ ਕਾਲਰ ਤੋਂ ਸਕੋਪ ਸਤਰ ਪੜ੍ਹਦਾ ਹੈ। ਇਹ ਚੈੱਕ ਤਿੰਨ ਸੁਤੰਤਰ ਨੇਮਸਪੇਸਾਂ ਵਿੱਚੋਂ ਇੱਕ ਹੈ। ਇੱਕ ਚੈਕਰ ਦਾ ਪਾਸ ਦੂਜੇ ਤੋਂ ਪਾਸ ਨਹੀਂ ਹੁੰਦਾ। ਨਿਯਮ [ਤਿੰਨ ਸਕੋਪ ਨਾਮ-ਸਥਾਨ](#three-scope-namespaces) ਹਨ। ਟੂਲ ਕੈਟਾਲਾਗ [MCP ਟੂਲ ਸਕੋਪ](#mcp-tool-scopes) ਹੈ।
 
-### ਤਿੰਨ ਸਕੋਪ ਨੇਮਸਪੇਸ
+### ਤਿੰਨ ਦਾਇਰੇ ਵਾਲੇ ਨਾਮ-ਸਥਾਨਾਂ
 
-ਇੱਕ API key ਤੇ `manage`, ਇੱਕ MCP ਟੂਲ ਤੇ `read:compression`, ਅਤੇ ਇੱਕ `oma_live_…` ਐਕਸੈਸ ਟੋਕਨ ਤੇ `read` — ਇਹ ਤਿੰਨ ਵੱਖ-ਵੱਖ ਅਨੁਮਤੀਆਂ ਹਨ। ਜੋ ਕਾਲਰ `read` ਐਕਸੈਸ ਟੋਕਨ ਨਾਲ ਬਦਲਵੀਂ ਵਾਲੀ ਮੈਨੇਜਮੈਂਟ ਰੂਟ ਕੁੱਲੇ ਹਨ, ਉਹਨਾਂ ਨੂੰ HTTP 403 ਮਿਲਦਾ ਹੈ: `Access token scope 'read' is insufficient; 'write' required.` ਇਹ ਰੈਂਕ `scopeSatisfies` ਹੈ। ਇਹ MCP ਟੇਬਲ ਨਾਲ ਸੰਪਰਕ ਨਹੀਂ ਕਰਦਾ, ਅਤੇ MCP ਮੈਚਰ ਵੀ ਇਸ ਨਾਲ ਸੰਪਰਕ ਨਹੀਂ ਕਰਦਾ।
+ਇੱਕ API ਕੁੰਜੀ ਉੱਤੇ`manage`, ਇੱਕ MCP ਟੂਲ ਉੱਤੇ `read:compression`, ਅਤੇ ਇੱਕ `oma_live_…` ਐਕਸੈਸ ਟੋਕਨ ਉੱਤੇ `read` ਤਿੰਨ ਵੱਖ-ਵੱਖ ਗ੍ਰਾਂਟਾਂ ਹਨ। ਕਾਲਰ ਜੋ ਇੱਕ ਪਰਿਵਰਤਨ ਪ੍ਰਬੰਧਨ ਰੂਟ ਤੇ ਇੱਕ `read` ਪਹੁੰਚ ਟੋਕਨ ਭੇਜਦੇ ਹਨ ਉਹਨਾਂ ਨੂੰ HTTP 403 `Access token scope 'read' is insufficient; 'write' required.` ਮਿਲਦਾ ਹੈ ਉਹ ਰੈਂਕ `scopeSatisfies` ਹੈ। ਇਹ MCP ਸਾਰਣੀ ਨਾਲ ਸਲਾਹ ਨਹੀਂ ਕਰਦਾ, ਅਤੇ MCP ਮੈਚਰ ਇਸ ਨਾਲ ਸਲਾਹ ਨਹੀਂ ਕਰਦਾ.
 
-| ਨੇਮਸਪੇਸ         | ਕ੍ਰੈਡੈਂਸ਼ਿਅਲ                                                                                | ਚੈੱਕਰ                     | ਪਾਸ ਹੋਣ ਨਾਲ ਕੀ ਮਨਜ਼ੂਰ                                      |
-| :-------------- | :------------------------------------------------------------------------------------------ | :------------------------ | :--------------------------------------------------------- |
-| API-key ਪ੍ਰਬੰਧਨ | `api_keys.scopes`                                                                           | `hasManageScope`          | ਉਸੇ ਹੀ Bearer key ਲਈ ਮੈਨੇਜਮੈਂਟ REST                        |
-| API-key ਐਡਿਟਿਵ  | ਉਹੀ ਐਰੇ, ਇੱਕ ਸਹੀ ਸਤਰ                                                                        | ਹੇਠਾਂ ਨਾਮ ਦਿੱਤਾ ਹੋਆ ਹੈਲਪਰ | ਸਿਰਫ਼ ਉਹੀ ਇੱਕ ਸਮਰੱਥਾ                                       |
-| MCP ਟੂਲ ਸਕੋਪ    | ਉਹੀ ਐਰੇ, ਜਿਵੇਂ ਨਹੀਂ ਤਾਂ MCP `_meta` (ਸਿਰਫ਼ HTTP/SSE), ਜਿਵੇਂ ਨਹੀਂ ਤਾਂ `OMNIROUTE_MCP_SCOPES` | `scopeMatches`            | ਉਹ ਟੂਲ, ਜਦੋਂ ਲਾਗੂਕਰਨ ਚਾਲੂ ਹੋ                               |
-| ਐਕਸੈਸ ਟੋਕਨ      | `oma_live_…`                                                                                | `scopeSatisfies`          | ਉਹ ਮੈਨੇਜਮੈਂਟ ਰੂਟ ਜਿਸ ਦੀ ਵਿਧੀ ਅਤੇ ਪਾਥ ਨੂੰ ਉਹ ਰੈਂਕ ਚਾਹੀਦਾ ਹੈ |
+| ਨੇਮਸਪੇਸ           | ਪ੍ਰਮਾਣ-ਪੱਤਰ                                                             | ਚੈਕਰ              | ਇੱਕ ਪਾਸ ਆਗਿਆ ਦਿੰਦਾ ਹੈ                                      |
+| :---------------- | :---------------------------------------------------------------------- | :---------------- | :--------------------------------------------------------- |
+| API-ਕੁੰਜੀ ਪ੍ਰਬੰਧਨ | `api_keys.scopes`                                                       | `hasManageScope`  | ਉਸ ਬੇਅਰਰ ਕੁੰਜੀ ਲਈ ਪ੍ਰਬੰਧਨ REST                             |
+| API-ਕੁੰਜੀ ਜੋੜ     | ਇੱਕੋ ਐਰੇ, ਇੱਕ ਸਟੀਕ ਸਤਰ                                                  | ਹੇਠਾਂ ਦਿੱਤਾ ਸਹਾਇਕ | ਕੇਵਲ ਇੱਕ ਹੀ ਸਮਰੱਥਾ ਹੈ                                      |
+| MCP ਟੂਲ ਸਕੋਪ      | ਸਮਾਨ ਐਰੇ, else MCP `_meta` (ਸਿਰਫ਼HTTP/SSE ), ਹੋਰ `OMNIROUTE_MCP_SCOPES` | `scopeMatches`    | ਉਹ ਟੂਲ, ਜਦੋਂ ਲਾਗੂ ਕਰਨਾ ਚਾਲੂ ਹੁੰਦਾ ਹੈ                       |
+| ਪਹੁੰਚ ਟੋਕਨ        | `oma_live_…`                                                            | `scopeSatisfies`  | ਪ੍ਰਬੰਧਨ ਰੂਟ ਜਿਸਦੀ ਵਿਧੀ ਅਤੇ ਮਾਰਗ ਲਈ ਉਸ ਦਰਜੇ ਦੀ ਲੋੜ ਹੁੰਦੀ ਹੈ |
 
-ਹਰੇਕ ਕ੍ਰੈਡੈਂਸ਼ਿਅਲ ਜਾਰੀ ਕਰਨ ਦੀ ਵਿਵਸਥਾ [ਮੈਨੇਜਮੈਂਟ ਪ੍ਰਮਾਣੀਕਰਨ](../guides/MANAGEMENT-AUTH.md) ਵਿੱਚ ਲਿਖਿਆ ਗਿਆ ਹੈ।
+[ਪ੍ਰਬੰਧਨ ਪ੍ਰਮਾਣਿਕਤਾ](../guides/MANAGEMENT-AUTH.md) ਵਿੱਚ ਹਰੇਕ ਪ੍ਰਮਾਣ-ਪੱਤਰ ਨੂੰ ਮਿਨਟਿੰਗ ਕਰਨਾ ਸ਼ਾਮਲ ਹੈ।
 
-#### API-key ਸਕੋਪ
+#### API-ਕੁੰਜੀ ਸਕੋਪ
 
-ਇੱਕ `api_keys.scopes` ਐਰੇ ਦੋ ਕੰਮਾਂ ਨੂੰ ਭਰਦਾ ਹੈ। ਦੋਵੇਂ ਵੱਖ-ਵੱਖ ਫੰਕਸ਼ਨਾਂ ਵਰਤਦੀਆਂ ਹਨ।
+ਇੱਕ `api_keys.scopes` ਐਰੇ ਦੋ ਨੌਕਰੀਆਂ ਨੂੰ ਫੀਡ ਕਰਦਾ ਹੈ। ਉਹ ਵੱਖ-ਵੱਖ ਫੰਕਸ਼ਨਾਂ ਦੀ ਵਰਤੋਂ ਕਰਦੇ ਹਨ।
 
-**ਮੈਨੇਜਮੈਂਟ REST.** `manage` ਅਤੇ `admin` ਇਹ `MANAGEMENT_API_KEY_SCOPES` (`src/shared/constants/managementScopes.ts`) ਦੇ ਮੈਂਬਰ ਹਨ। `hasManageScope` ਹੀ ਉਸ key ਲਈ ਮੈਨੇਜਮੈਂਟ ਰੂਟਾਂ ਨੂੰ ਅਧਿਕਾਰਤ ਬਣਾਉਂਦਾ ਹੈ। ਉਨ੍ਹਾਂ ਰੂਟਾਂ ਤੇ `admin` ਮੈਨੇਜਮੈਂਟ-ਸਮਰੱਥ ਹੈ। ਇੱਥੇ ਸ਼ਬਦ `admin` ਐਕਸੈਸ-ਟੋਕਨ ਰੈਂਕ ਨਹੀਂ ਹੈ ਅਤੇ ਇਹ MCP ਟੂਲ ਸਕੋਪਾਂ ਵਿੱਚ ਫੈਲਦਾ ਨਹੀਂ ਹੈ।
+**ਪ੍ਰਬੰਧਨ REST.** `manage` ਅਤੇ `admin` `MANAGEMENT_API_KEY_SCOPES` (`src/shared/constants/managementScopes.ts`) ਦੇ ਮੈਂਬਰ ਹਨ। `hasManageScope` ਉਹ ਹੈ ਜੋ ਉਸ ਕੁੰਜੀ ਲਈ ਪ੍ਰਬੰਧਨ ਰੂਟਾਂ ਨੂੰ ਅਧਿਕਾਰਤ ਕਰਦਾ ਹੈ। `admin` ਉਹਨਾਂ ਰੂਟਾਂ 'ਤੇ ਪ੍ਰਬੰਧਨ-ਸਮਰੱਥ ਹੈ। ਇੱਥੇ `admin` ਸ਼ਬਦ ਐਕਸੈਸ-ਟੋਕਨ ਰੈਂਕ ਨਹੀਂ ਹੈ ਅਤੇ ਇਹ MCP ਟੂਲ ਸਕੋਪਾਂ ਵਿੱਚ ਨਹੀਂ ਫੈਲਦਾ ਹੈ।
 
-**ਐਡਿਟਿਵ ਸਤਰ.** ਹਰੇਕ ਸਹੀ ਮੈਂਬਰਸ਼ਿਪ ਟੈਸਟ ਹੈ, ਅਤੇ ਹਰੇਕ `MANAGEMENT_API_KEY_SCOPES` ਤੋਂ ਬਾਹਰ ਰਹਿੰਦਾ ਹੈ।
+**ਜੋੜਨ ਵਾਲੀਆਂ ਤਾਰਾਂ।** ਹਰ ਇੱਕ ਇੱਕ ਸਹੀ ਮੈਂਬਰਸ਼ਿਪ ਟੈਸਟ ਹੈ, ਅਤੇ ਹਰ ਇੱਕ `MANAGEMENT_API_KEY_SCOPES` ਤੋਂ ਬਾਹਰ ਰਹਿੰਦਾ ਹੈ।
 
-| ਸਕੋਪ                           | ਪਾਸ ਹੋਣ ਨਾਲ ਕੀ ਮਨਜ਼ੂਰ                                                                                                                                          |
-| :----------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `mcp:connect`                  | ਸਿਰਫ਼ ਗੈਰ-ਲੂਪਬੈਕ `/api/mcp/` LOCAL_ONLY carve-out (`hasMcpConnectOrManageScope`)। `manage` ਜਾਂ `admin` ਵਾਲੀ key ਵੀ ਉਹ carve-out ਪਾਸ ਕਰਦੀ ਹੈ।                   |
-| `self:usage`                   | ਇਸ key ਲਈ `GET /api/v1/me/status` (`src/app/api/v1/me/status/route.ts`)। `POST /api/keys` ਬਣਾਉਣ ਵੇਲੇ ਇਹ ਸਕੋਪ ਜੋੜਦਾ ਹੈ (`normalizeSelfServiceScopesForCreate`)। |
-| `self:account-quota`           | ਉਸ ਸਟੇਟਸ ਪੇਲੋਡ ਦੇ ਅੰਦਰ ਅਪਸਟ੍ਰੀਮ ਖਾਤਾ ਕੋਟਾ (`src/lib/usage/apiKeySelfService.ts`)। ਸਟੇਟਸ ਰੂਟ ਫਿਰ ਵੀ `self:usage` ਮੰਗਦਾ ਹੈ।                                      |
-| `policy:bypass-provider-quota` | ਇਸ key ਦੇ ਇਨਫਰੈਂਸ ਕਾਲ ਪ੍ਰਵਾਈਡਰ-ਕੋਟਾ ਨੀਤੀ ਛੱਡ ਦਿੰਦੇ ਹਨ (`src/sse/handlers/chat.ts` ਵਿੱਚ `hasProviderQuotaBypassScope`)।                                         |
+| ਸਕੋਪ                           | ਇੱਕ ਪਾਸ ਆਗਿਆ ਦਿੰਦਾ ਹੈ                                                                                                                                                |
+| :----------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mcp:connect`                  | ਗੈਰ-ਲੂਪਬੈਕ `/api/mcp/` LOCAL_ONLY ਕਾਰਵ-ਆਊਟ ਸਿਰਫ਼ (`hasMcpConnectOrManageScope`)। `manage` ਜਾਂ `admin` ਵਾਲੀ ਇੱਕ ਕੁੰਜੀ ਅਜੇ ਵੀ ਉਸ ਉੱਕਰੀ-ਆਊਟ ਨੂੰ ਪਾਸ ਕਰਦੀ ਹੈ।            |
+| `self:usage`                   | ਇਸ ਕੁੰਜੀ ਲਈ `GET /api/v1/me/status` (`src/app/api/v1/me/status/route.ts`)। `POST /api/keys` ਇਸ ਸਕੋਪ ਨੂੰ create (`normalizeSelfServiceScopesForCreate`) 'ਤੇ ਜੋੜਦਾ ਹੈ। |
+| `self:account-quota`           | ਉਸ ਸਥਿਤੀ ਪੇਲੋਡ (`src/lib/usage/apiKeySelfService.ts`) ਦੇ ਅੰਦਰ ਅੱਪਸਟਰੀਮ ਖਾਤਾ ਕੋਟਾ। ਸਥਿਤੀ ਰੂਟ ਲਈ ਅਜੇ ਵੀ `self:usage` ਦੀ ਲੋੜ ਹੈ।                                        |
+| `policy:bypass-provider-quota` | ਇਸ ਕੁੰਜੀ ਦਾ ਅਨੁਮਾਨ ਪ੍ਰਦਾਤਾ-ਕੋਟਾ ਨੀਤੀ (`hasProviderQuotaBypassScope` in `src/sse/handlers/chat.ts`) ਨੂੰ ਛੱਡਣ ਲਈ ਕਾਲ ਕਰਦਾ ਹੈ।                                          |
 
-#### ਮੈਚਿੰਗ
+#### ਮੇਲ ਖਾਂਦਾ ਹੈ
 
-ਕੈਟਾਲਾਗ [MCP ਟੂਲ ਸਕੋਪ](#mcp-tool-scopes) ਹੇਠਾਂ ਦੀ ਟੇਬਲ ਹੈ। `src/shared/constants/mcpScopes.ts` ਵਿੱਚ ਮੌਜੂਦ `MCP_SCOPE_LIST` ਨੂੰ ਉਸ ਕੈਟਾਲਾਗ ਨਾ ਮੰਨੋ: ਇਹ ਮੂਲ ਟਾਈਪਡ ਉਪ-ਸੈੱਟ ਹੈ। ਬਾਅਦ ਦੇ ਟੂਲ ਇਸ ਦੇ ਨਾਲ ਹੋਰ ਸਕੋਪ ਐਲਾਨ ਕਰਦੇ ਹਨ (`read:notion`, `read:skills`, `read:local-corpus`, ਅਤੇ ਟੇਬਲ ਦਾ ਬਾਕੀ ਹਿੱਸਾ)।
+ਕੈਟਾਲਾਗ [MCP ਟੂਲ ਸਕੋਪ](#mcp-tool-scopes) ਦੇ ਅਧੀਨ ਸਾਰਣੀ ਹੈ। `src/shared/constants/mcpScopes.ts` ਵਿੱਚ `MCP_SCOPE_LIST` ਉਸ ਕੈਟਾਲਾਗ ਵਜੋਂ ਨਾ ਮੰਨੋ: ਇਹ ਮੂਲ ਟਾਈਪ ਕੀਤਾ ਸਬਸੈੱਟ ਹੈ। ਬਾਅਦ ਵਿੱਚ ਟੂਲ ਇਸਦੇ ਨਾਲ ਹੋਰ ਸਕੋਪਾਂ ਦਾ ਐਲਾਨ ਕਰਦੇ ਹਨ (`read:notion`, `read:skills`, `read:local-corpus`, ਅਤੇ ਬਾਕੀ ਟੇਬਲ)।
 
-`open-sse/mcp-server/scopeEnforcement.ts` ਵਿੱਚ `evaluateToolScopes` ਉਸ ਸਮੇਂ ਕਾਲ ਨੂੰ ਮਨਜ਼ੂਰ ਕਰਦਾ ਹੈ ਜਦੋਂ ਹਰ ਲੋੜੀਂਦਾ ਸਕੋਪ ਕਿਸੇ ਦੇਣ ਵਾਲੇ ਸਕੋਪ ਨਾਲ ਮੈਚ ਕਰੇ:
+`open-sse/mcp-server/scopeEnforcement.ts` ਵਿੱਚ `evaluateToolScopes` ਇੱਕ ਕਾਲ ਦੀ ਇਜਾਜ਼ਤ ਦਿੰਦਾ ਹੈ ਜਦੋਂ ਹਰ ਲੋੜੀਂਦਾ ਸਕੋਪ ਕੁਝ ਦਿੱਤੇ ਗਏ ਸਕੋਪ ਨਾਲ ਮੇਲ ਖਾਂਦਾ ਹੈ:
 
-- `*` ਹਰ ਲੋੜੀਂਦੇ ਸਕੋਪ ਨਾਲ ਮੈਚ ਕਰਦਾ ਹੈ।
-- ਜੋ ਦੇਣ ਵਾਲਾ ਸਕੋਪ `*` ਤੇ ਖਤਮ ਹੁੰਦਾ ਹੈ, ਉਹ ਉਸ ਲੋੜੀਂਦੇ ਸਕੋਪ ਨਾਲ ਮੈਚ ਕਰਦਾ ਹੈ ਜੋ ਸਟਾਰ ਤੋਂ ਪਹਿਲਾਂ ਦੇ ਪ੍ਰਿਫਿਕਸ ਨਾਲ ਸ਼ੁਰੂ ਹੁੰਦਾ ਹੈ। `read:*` ਨਾਲ `read:compression` ਮੈਚ ਕਰਦਾ ਹੈ।
-- ਹਰ ਹੋਰ ਦੇਣ ਵਾਲਾ ਸਕੋਪ ਸਿਰਫ਼ ਬਿਲਕੁਲ ਉਸੇ ਲੋੜੀਂਦੇ ਸਤਰ ਨਾਲ ਮੈਚ ਕਰਦਾ ਹੈ।
+- `*` ਹਰ ਲੋੜੀਂਦੇ ਦਾਇਰੇ ਨਾਲ ਮੇਲ ਖਾਂਦਾ ਹੈ।
+- ਇੱਕ ਪ੍ਰਵਾਨਿਤ ਸਕੋਪ ਜੋ `*` ਵਿੱਚ ਖਤਮ ਹੁੰਦਾ ਹੈ ਇੱਕ ਲੋੜੀਂਦੇ ਸਕੋਪ ਨਾਲ ਮੇਲ ਖਾਂਦਾ ਹੈ ਜੋ ਸਟਾਰ ਤੋਂ ਪਹਿਲਾਂ ਅਗੇਤਰ ਨਾਲ ਸ਼ੁਰੂ ਹੁੰਦਾ ਹੈ। `read:*` `read:compression` ਨਾਲ ਮੇਲ ਖਾਂਦਾ ਹੈ।
+- ਹਰ ਦੂਜੀ ਦਿੱਤੀ ਗਈ ਸਕੋਪ ਸਿਰਫ਼ ਇੱਕੋ ਜਿਹੀ ਲੋੜੀਂਦੀ ਸਤਰ ਨਾਲ ਮੇਲ ਖਾਂਦੀ ਹੈ।
 
-ਜਿਸ key ਦੇ ਸਕੋਪ `["manage"]` ਹਨ, ਉਹ `read:compression` ਲਈ `scopeMatches` ਵਿੱਚ ਫੇਲਦੀ ਹੈ। ਉਹੀ ਕਾਲ `admin`, `mcp:connect`, `read`, ਅਤੇ `write` ਲਈ ਵੀ ਫੇਲਦੀ ਹੈ ਜਦੋਂ ਉਹ ਹੀ ਦੇਣ ਵਾਲੇ ਸਤਰ ਹਨ। MCP ਟੂਲ ਸਕੋਪਾਂ ਵਿੱਚ ਅੰਤਿਮ `*` ਤੋਂ ਇਲਾਵਾ ਕੋਈ ਪ੍ਰਾਧਾਨਕ੍ਰਮ ਨਹੀਂ ਹੈ।
+ਇੱਕ ਕੁੰਜੀ ਜਿਸਦਾ ਸਕੋਪ `["manage"]` ਹੈ `read:compression` ਲਈ `scopeMatches` ਫੇਲ ਹੋ ਜਾਂਦਾ ਹੈ। ਉਹੀ ਕਾਲ `admin`, `mcp:connect`, `read`, ਅਤੇ `write` ਲਈ ਫੇਲ ਹੋ ਜਾਂਦੀ ਹੈ ਜਦੋਂ ਇਹ ਸਿਰਫ਼ ਦਿੱਤੀਆਂ ਗਈਆਂ ਸਤਰ ਹੁੰਦੀਆਂ ਹਨ। ਟਰੇਲਿੰਗ `*` ਤੋਂ ਪਰੇ MCP ਟੂਲ ਸਕੋਪਾਂ ਵਿੱਚ ਕੋਈ ਲੜੀ ਨਹੀਂ ਹੈ।
 
-ਲਾਗੂਕਰਨ ਬੰਦ ਰਹਿੰਦਾ ਹੈ ਜਦੋਂ ਤੱਕ `OMNIROUTE_MCP_ENFORCE_SCOPES=true` ਨਹੀਂ ਹੁੰਦਾ (ਡਿਫਾਲਟ `false`)। ਜਦੋਂ ਇਹ ਬੰਦ ਹੁੰਦਾ ਹੈ, `evaluateToolScopes` ਕਾਲ ਨੂੰ ਮਨਜ਼ੂਰ ਕਰਦਾ ਹੈ ਅਤੇ ਕੈਟਾਲਾਗ ਨੂੰ ਛੱਡ ਦਿੰਦਾ ਹੈ। ਜਦੋਂ ਇਹ ਚਾਲੂ ਹੁੰਦਾ ਹੈ, HTTP Bearer key ਦੇ `api_keys.scopes` ਨੂੰ `authInfo` ਵਜੋਂ ਵਰਤਦਾ ਹੈ (ਵੇਖੋ [Per-key HTTP scope binding](#per-key-http-scope-binding-7895))। ਜਦੋਂ ਕੋਈ key ਸਕੋਪ ਹੱਲ ਨਹੀਂ ਲੱਗਦੇ, ਤਾਂ ਦੇਣ ਵਾਲੇ ਸੈੱਟ MCP `_meta` ਤੱਕ ਪਹੁੰਚਦਾ ਹੈ (ਸਿਰਫ਼ HTTP/SSE ਕਾਲਰਾਂ ਲਈ ਮਾਨਿਆ ਜਾਂਦਾ ਹੈ, HTTP ਪ੍ਰਮਾਣੀਕਰਨ ਸੰਦਰਭ ਵਿੱਚ; stdio ਕਾਲਰ ਦਾ `_meta` ਅਣਗਿਣਿਆ ਜਾਂਦਾ ਹੈ ਕਿਉਂਕਿ ਉਸ ਨੂੰ ਕਲਾਇਐਂਟ ਕੰਟਰੋਲ ਕਰਦਾ ਹੈ ਅਤੇ ਇਸ ਵਿੱਚ ਪ੍ਰਤੀ ਕਾਲਰ ਦੀ ਪਛਾਣ ਨਹੀਂ ਹੁੰਦੀ), ਫਿਰ `OMNIROUTE_MCP_SCOPES`।
+ਜਦੋਂ ਤੱਕ `OMNIROUTE_MCP_ENFORCE_SCOPES=true` (ਡਿਫਾਲਟ `false`) ਨਹੀਂ ਹੁੰਦਾ, ਲਾਗੂ ਕਰਨਾ ਬੰਦ ਹੈ। ਜਦੋਂ ਇਹ ਬੰਦ ਹੁੰਦਾ ਹੈ, `evaluateToolScopes` ਕਾਲ ਦੀ ਇਜਾਜ਼ਤ ਦਿੰਦਾ ਹੈ ਅਤੇ ਕੈਟਾਲਾਗ ਨੂੰ ਛੱਡ ਦਿੰਦਾ ਹੈ। ਜਦੋਂ ਇਹ ਚਾਲੂ ਹੁੰਦਾ ਹੈ, HTTP ਬੇਅਰਰ ਕੁੰਜੀ ਦੇ `api_keys.scopes` `authInfo` ਵਜੋਂ ਵਰਤਦਾ ਹੈ ( [ਪਰ-ਕੀ HTTP ਸਕੋਪ ਬਾਈਡਿੰਗ](#per-key-http-scope-binding-7895) ਦੇਖੋ)। ਜਦੋਂ ਕੋਈ ਵੀ ਮੁੱਖ ਸਕੋਪ ਹੱਲ ਨਹੀਂ ਹੁੰਦਾ, ਤਾਂ ਅਨੁਦਾਨ ਸੈੱਟ MCP `_meta` (ਕੇਵਲ HTTP/SSE ਕਾਲਰਾਂ ਲਈ ਸਨਮਾਨਤ, ਇੱਕ HTTP ਪ੍ਰਮਾਣਿਕਤਾ ਸੰਦਰਭ ਦੇ ਅੰਦਰ; ਇੱਕ stdio ਕਾਲਰ ਦੇ `_meta` ਅਣਡਿੱਠ ਕੀਤਾ ਜਾਂਦਾ ਹੈ ਕਿਉਂਕਿ ਕਲਾਇੰਟ ਇਸ ਨੂੰ ਨਿਯੰਤਰਿਤ ਕਰਦਾ ਹੈ ਅਤੇ ਇਹ ਪ੍ਰਤੀ-ਕਾਲਰ ਪਛਾਣ ਨਹੀਂ ਰੱਖਦਾ ਹੈ), ਫਿਰ `OMNIROUTE_MCP_SCOPES`.
 
-#### ਐਕਸੈਸ-ਟੋਕਨ ਸਕੋਪ
+#### ਪਹੁੰਚ-ਟੋਕਨ ਸਕੋਪ
 
-`oma_live_…` ਟੋਕਨ (`src/lib/accessTokens/scopes.ts`) ਆਪਣੇ ਵਿੱਚ `read`, `write`, ਜਾਂ `admin` ਲਿਆਂਦੇ ਹਨ। `scopeSatisfies` ਇੱਕ ਰੈਂਕ ਹੈ: `admin` `write` ਅਤੇ `read` ਦੋਵਾਂ ਨੂੰ ਕਵਰ ਕਰਦਾ ਹੈ, ਅਤੇ `write` `read` ਨੂੰ ਕਵਰ ਕਰਦਾ ਹੈ। ਅਣਜਾਣ ਸਕੋਪ ਕੁਝ ਵੀ ਕਵਰ ਨਹੀਂ ਕਰਦੇ।
+`oma_live_…` ਟੋਕਨ (`src/lib/accessTokens/scopes.ts`) `read`, `write`, ਜਾਂ `admin` ਲੈ ਕੇ ਜਾਂਦੇ ਹਨ। `scopeSatisfies` ਇੱਕ ਰੈਂਕ ਹੈ: `admin` `write` ਅਤੇ `read` ਨੂੰ ਕਵਰ ਕਰਦਾ ਹੈ, ਅਤੇ `write` `read` ਕਵਰ ਕਰਦਾ ਹੈ। ਅਗਿਆਤ ਸਕੋਪ ਕੁਝ ਵੀ ਕਵਰ ਨਹੀਂ ਕਰਦੇ।
 
-`evaluateAccessTokenAuth` (`src/server/authz/accessTokenAuth.ts`) ਉਸ ਰੈਂਕ ਦੀ ਤੁਲਨਾ `inferRequiredScope` (`src/server/authz/accessScopes.ts`) ਨਾਲ ਕਰਦਾ ਹੈ:
+`evaluateAccessTokenAuth` (`src/server/authz/accessTokenAuth.ts`) ਉਸ ਦਰਜੇ ਦੀ `inferRequiredScope` (`src/server/authz/accessScopes.ts`) ਨਾਲ ਤੁਲਨਾ ਕਰਦਾ ਹੈ :
 
-- `GET`, `HEAD`, ਅਤੇ `OPTIONS` ਲਈ `read` ਲੋਡ ਚਾਹੀਦਾ ਹੈ।
-- ਹਰ ਹੋਰ ਵਿਧੀ ਲਈ `write` ਲੋਡ ਚਾਹੀਦਾ ਹੈ।
-- `ADMIN_SCOPE_PREFIXES` ਵਿੱਚ ਸ਼ਾਮਲ ਪਾਥਾਂ ਲਈ ਹਰ ਵਿਧੀ ਲਈ `admin` ਲੋਡ ਚਾਹੀਦਾ ਹੈ। `/api/mcp`
-  ਵੀ ਇਸ ਸੂਚੀ ਵਿੱਚ ਹੈ, ਇਸ ਲਈ `write` ਐਕਸੈੱਸ ਟੋਕਨ ਵੀ MCP HTTP ਸਰਫੇਸ ਨੂੰ ਕਾਲ ਨਹੀਂ ਕਰ ਸਕਦਾ।
-- `ADMIN_MUTATION_PREFIXES` ਵਿੱਚ ਸ਼ਾਮਲ ਪਾਥਾਂ ਲਈ ਸਿਰਫ਼ ਉਤਾਰਨ ਕਾਰਿਆਵਾਂ ਲਈ `admin` ਲੋਡ ਚਾਹੀਦਾ ਹੈ।
-- `ADMIN_MUTATION_EXACT_PATHS` (`/api/settings`,
-  `/api/settings/require-login`) ਵਿੱਚ ਸ਼ਾਮਲ ਪਾਥਾਂ ਲਈ ਸਿਰਫ਼ ਉਤਾਰਨ ਕਾਰਿਆਵਾਂ ਲਈ, ਅਤੇ ਸਿਰਫ਼ ਉਸੇ ਠੀਕ ਪਾਥ 'ਤੇ `admin` ਲੋਡ ਚਾਹੀਦਾ ਹੈ — ਹੋਰ `/api/settings/*` ਉਪ-ਮਾਰਗਾਂ `write` ਰੱਖਦੀਆਂ ਹਨ।
+- `GET`, `HEAD`, ਅਤੇ `OPTIONS` `read` ਲੋੜ ਹੈ।
+- ਹਰ ਦੂਜੇ ਢੰਗ ਲਈ `write` ਦੀ ਲੋੜ ਹੁੰਦੀ ਹੈ।
+- `ADMIN_SCOPE_PREFIXES` ਵਿੱਚ ਮਾਰਗਾਂ ਨੂੰ ਹਰ ਵਿਧੀ ਲਈ `admin` ਲੋੜ ਹੁੰਦੀ ਹੈ। `/api/mcp` ਉਸ ਸੂਚੀ ਵਿੱਚ ਹੈ, ਇਸਲਈ ਇੱਕ `write` ਪਹੁੰਚ ਟੋਕਨ ਅਜੇ ਵੀ MCP HTTP ਸਤਹ ਨੂੰ ਕਾਲ ਨਹੀਂ ਕਰ ਸਕਦਾ ਹੈ।
+- `ADMIN_MUTATION_PREFIXES` ਵਿੱਚ ਮਾਰਗਾਂ ਨੂੰ ਸਿਰਫ ਪਰਿਵਰਤਨ ਲਈ `admin` ਲੋੜ ਹੁੰਦੀ ਹੈ।
+- `ADMIN_MUTATION_EXACT_PATHS` (`/api/settings`, `/api/settings/require-login`) ਵਿੱਚ ਮਾਰਗਾਂ ਨੂੰ ਸਿਰਫ਼ ਮਿਊਟੇਸ਼ਨਾਂ ਲਈ `admin` ਲੋੜ ਹੁੰਦੀ ਹੈ, ਅਤੇ ਸਿਰਫ਼ ਉਸੇ ਸਹੀ ਮਾਰਗ 'ਤੇ — ਹੋਰ `/api/settings/*` ਉਪ-ਮਾਰਗ `write` ਰੱਖਦੇ ਹਨ।
 
-`PATCH /api/keys/{id}` ਇੱਕ ਉਤਾਰਨ ਹੈ ਅਤੇ ਉਸ ਐਡਮਿਨ ਸੂਚੀਆਂ ਵਿੱਚ ਨਹੀਂ ਹੈ, ਇਸ ਲਈ `read` ਟੋਕਨ ਨੂੰ 403 ਮਿਲਦਾ ਹੈ
-`Access token scope 'read' is insufficient; 'write' required.`
-`write` ਜਾਂ `admin` ਐਕਸੈੱਸ ਟੋਕਨ ਉਸ ਮਾਰਗ ਲਈ ਪੂਰਾ ਹੈ। ਡੈਸ਼ਬੋਰਡ JWT, ਲੂਪਬੈਕ CLI ਮਸ਼ੀਨ-ਆਈਡੀ ਟੋਕਨ, ਅਤੇ `manage` ਜਾਂ `admin` ਵਾਲੀ API ਕੀ ਹੋਰ ਬ੍ਰਾਂਚਾਂ ਲਈ ਜਾਂਦੀਆਂ ਹਨ ਅਤੇ ਇਸ ਰੈਂਕ ਦੁਆਰਾ ਸੀਮਿਤ ਨਹੀਂ ਕੀਤੀਆਂ ਜਾਂਦੀਆਂ।
+`PATCH /api/keys/{id}` ਇੱਕ ਪਰਿਵਰਤਨ ਹੈ ਅਤੇ ਉਹਨਾਂ ਪ੍ਰਬੰਧਕ ਸੂਚੀਆਂ ਵਿੱਚ ਨਹੀਂ ਹੈ, ਇਸਲਈ ਇੱਕ `read` ਟੋਕਨ 403 `Access token scope 'read' is insufficient; 'write' required.` ਪ੍ਰਾਪਤ ਕਰਦਾ ਹੈ A `write` ਜਾਂ `admin` ਪਹੁੰਚ ਟੋਕਨ ਉਸ ਰੂਟ ਨੂੰ ਸੰਤੁਸ਼ਟ ਕਰਦਾ ਹੈ। ਇੱਕ ਡੈਸ਼ਬੋਰਡ JWT, ਲੂਪਬੈਕ CLI ਮਸ਼ੀਨ-ਆਈਡੀ ਟੋਕਨ, ਅਤੇ `manage` ਜਾਂ `admin` ਨਾਲ ਇੱਕ API ਕੁੰਜੀ ਹੋਰ ਸ਼ਾਖਾਵਾਂ ਲੈਂਦੀ ਹੈ ਅਤੇ ਇਸ ਰੈਂਕ ਦੁਆਰਾ ਸੰਕੁਚਿਤ ਨਹੀਂ ਹੁੰਦੀ ਹੈ।
 
-`/api/mcp` ਲਈ `scopeSatisfies` ਨੂੰ ਪਾਸ ਕਰਨ ਵਾਲਾ ਐਕਸੈੱਸ ਟੋਕਨ ਸਿਰਫ਼ ਪ੍ਰਬੰਧਨ ਦਾ ਦਰਵਾਜਾ ਪਾਸ ਕਰਦਾ ਹੈ। ਟੂਲ ਕਾਲਾਂ ਅਜੇ ਵੀ API ਕੀ ਸਕੋਪਾਂ ਦੇ ਮੁਕਾਬਲੇ `scopeMatches` ਚਲਾਉਂਦੀਆਂ ਹਨ। ਐਕਸੈੱਸ ਟੋਕਨ ਦਾ ਰੈਂਕ `scopeMatches` ਲਈ ਇਨਪੁੱਟ ਨਹੀਂ ਹੈ।
+ਇੱਕ ਐਕਸੈਸ ਟੋਕਨ ਜੋ `/api/mcp` ਲਈ `scopeSatisfies` ਪਾਸ ਕਰਦਾ ਹੈ, ਨੇ ਸਿਰਫ ਪ੍ਰਬੰਧਨ ਗੇਟ ਨੂੰ ਕਲੀਅਰ ਕੀਤਾ ਹੈ। ਟੂਲ ਕਾਲਾਂ ਅਜੇ ਵੀ API-ਕੁੰਜੀ ਸਕੋਪਾਂ ਦੇ ਵਿਰੁੱਧ `scopeMatches` ਚਲਾਉਂਦੀਆਂ ਹਨ। ਐਕਸੈਸ-ਟੋਕਨ ਰੈਂਕ `scopeMatches` ਲਈ ਇੱਕ ਇੰਪੁੱਟ ਨਹੀਂ ਹੈ।
 
-### MCP ਟੂਲ ਸਕੋਪਾਂ
+### MCP ਟੂਲ ਸਕੋਪ
 
-ਸਕੋਪ ਲਾਗੂ ਕਰਨਾ ਸੈਂਦਰ `open-sse/mcp-server/scopeEnforcement.ts` ਵਿੱਚ ਕੇਂਦਰਿਤ ਹੈ।
-ਹਰ ਟੂਲ ਲਈ ਖਾਸ ਸਕੋਪਾਂ ਲੋਡ ਚਾਹੀਦੀਆਂ ਹਨ:
+ਸਕੋਪ ਇਨਫੋਰਸਮੈਂਟ `open-sse/mcp-server/scopeEnforcement.ts` ਵਿੱਚ ਕੇਂਦਰੀਕ੍ਰਿਤ ਹੈ। ਹਰੇਕ ਟੂਲ ਲਈ ਖਾਸ ਸਕੋਪ ਦੀ ਲੋੜ ਹੁੰਦੀ ਹੈ:
 
-| ਸਕੋਪ                  | ਟੂਲਾਂ                                                                                                                                                                       |
+| ਸਕੋਪ                  | ਸੰਦ                                                                                                                                                                         |
 | :-------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `read:health`         | `get_health`, `get_provider_metrics`, `simulate_route`, `explain_route`, `best_combo_for_task`, `db_health_check`                                                           |
 | `read:combos`         | `list_combos`, `get_combo_metrics`, `simulate_route`, `best_combo_for_task`, `test_combo`                                                                                   |
@@ -395,20 +379,22 @@ MCP ਟੂਲ ਕਾਲਾਂ ਕਾਲਰ ਤੋਂ ਸਕੋਪ ਸਤਰੀ�
 | `read:plugins`        | `plugin_list`, `plugin_executions`                                                                                                                                          |
 | `write:plugins`       | `plugin_scan`, `plugin_install`, `plugin_uninstall`, `plugin_activate`, `plugin_deactivate`, `plugin_configure`                                                             |
 | `read:obsidian`       | 13 ਰੀਡ ਟੂਲਜ਼ — `obsidian_list_vault`, `obsidian_read_note`, `obsidian_search_simple`, `obsidian_search_structured`, `obsidian_get_periodic_note`, `obsidian_sync_status`, … |
-| `write:obsidian`      | 9 ਰਾਈਟ ਟੂਲਜ਼ — `obsidian_write_note`, `obsidian_append_note`, `obsidian_patch_note`, `obsidian_move_note`, `obsidian_delete_note`, `obsidian_sync_trigger`, …               |
+| `write:obsidian`      | 9 ਲਿਖਣ ਦੇ ਟੂਲ — `obsidian_write_note`, `obsidian_append_note`, `obsidian_patch_note`, `obsidian_move_note`, `obsidian_delete_note`, `obsidian_sync_trigger`, …              |
 | `read:local-corpus`   | `local_corpus_search`, `local_corpus_read`, `local_corpus_status`                                                                                                           |
 
-ਵਾਇਲਡਕਾਰਡ ਸਕੋਪ ਸਮਰਥਿਤ ਹਨ: `read:*` ਸਾਰੇ ਰੀਡ-ਸਕੋਪ ਦਿੰਦਾ ਹੈ, `*` ਪੂਰੀ ਐਕਸੈੱਸ ਦਿੰਦਾ ਹੈ।
+ਵਾਈਲਡਕਾਰਡ ਸਕੋਪ ਸਮਰਥਿਤ ਹਨ: `read:*` ਸਾਰੇ ਰੀਡ-ਸਕੋਪ ਪ੍ਰਦਾਨ ਕਰਦਾ ਹੈ, `*` ਪੂਰੀ ਪਹੁੰਚ ਪ੍ਰਦਾਨ ਕਰਦਾ ਹੈ।
 
-### `mcp:connect` — ਸੀਮਿਤ ਰੂਟ ਸਮਰੱਥਾ (#7895)
+### `mcp:connect` — ਤੰਗ ਰੂਟ ਸਮਰੱਥਾ (#7895)
 
-ਗੈਰ-loopback ਤੋਂ HTTP/SSE MCP ਟ੍ਰਾਂਸਪੋਰਟ (`/api/mcp/*`) ਤੱਕ ਪਹੁੰਚਣ ਲਈ `/api/mcp/` LOCAL_ONLY carve-out ਲੋੜੀਂਦਾ ਹੈ (ਵੇਖੋ `docs/security/ROUTE_GUARD_TIERS.md`)। ਇਤਿਹਾਸ ਵਿੱਚ ਉਹ carve-out ਸਿਰਫ਼ ਪੂਰੇ `manage`/`admin` ਸਕੋਪ ਵਾਲੀ API key ਹੀ ਸਵੀਕਾਰ ਕਰਦਾ ਸੀ — ਉਹ ਕਾਲਰ ਲਈ ਬਹੁਤ ਵਿਆਪਕ ਸੀ ਜੋ ਸਿਰਫ਼ MCP ਨਾਲ ਗੱਲ ਕਰਨਾ ਚਾਹੁੰਦਾ ਹੈ। `src/shared/constants/managementScopes.ts` ਹੁਣ `MCP_CONNECT_SCOPE = "mcp:connect"` ਨਿਰਯਾਤ ਕਰਦਾ ਹੈ: ਇੱਕ ਵਾਧੂ ਕੀਤਾ, ਸੀਮਿਤ ਸਕੋਪ (`SELF_USAGE_SCOPE` ਵਰਗੇ ਹੀ ਪਹਿਲਾਂ ਹੈ) ਜੋ `src/server/authz/policies/management.ts` ਵਿੱਚ `/api/mcp/` bypass ਨੂੰ ਸਿਰਫ਼ ਪ੍ਰਾਧਾਨਤਾ ਦਿੰਦਾ ਹੈ — ਇਹ ਕੋਈ ਹੋਰ ਮੈਨੇਜਮੈਂਟ-ਰੂਟ ਐਕਸੈੱਸ ਨਹੀਂ ਦਿੰਦਾ ਅਤੇ ਜਾਣਬੁੱਝ ਕੇ `MANAGEMENT_API_KEY_SCOPES` ਤੋਂ ਬਾਹਰ ਰੱਖਿਆ ਗਿਆ ਹੈ। `manage`/`admin` ਵਾਲੀ key ਅਜੇ ਵੀ carve-out ਨੂੰ ਬਦਲੇ ਬਿਨਾ ਪਾਸ ਕਰਦੀ ਹੈ; `mcp:connect` ਰਿਮੋਟ-ਮਾਤਰ MCP ਕਾਲਰਾਂ ਲਈ ਘੱਟ-ਅਧਿਕਾਰ ਵਾਲਾ ਵਿਕਲਪ ਹੈ, ਜਿਸਦੀ ਜਾਂਚ `hasMcpConnectOrManageScope()` ਰਾਹੀਂ ਹੁੰਦੀ ਹੈ।
+ਗੈਰ-ਲੂਪਬੈਕ ਤੋਂ HTTP/SSE MCP ਟ੍ਰਾਂਸਪੋਰਟ (`/api/mcp/*`) ਤੱਕ ਪਹੁੰਚਣ ਲਈ `/api/mcp/` LOCAL_ONLY ਕਾਰਵ-ਆਊਟ ਦੀ ਲੋੜ ਹੁੰਦੀ ਹੈ (ਵੇਖੋ `docs/security/ROUTE_GUARD_TIERS.md`)। ਇਤਿਹਾਸਕ ਤੌਰ 'ਤੇ ਕਿ ਕਾਰਵ-ਆਊਟ ਨੇ ਸਿਰਫ਼ ਇੱਕ ਕਾਲਰ ਲਈ ਇੱਕ ਪੂਰੀ `manage`/`admin` -scope API ਕੁੰਜੀ — ਸਵੀਕਾਰ ਕੀਤਾ ਹੈ ਜਿਸਨੂੰ ਸਿਰਫ਼ MCP ਨਾਲ ਗੱਲ ਕਰਨ ਦੀ ਲੋੜ ਹੈ। `src/shared/constants/managementScopes.ts` ਹੁਣ `MCP_CONNECT_SCOPE = "mcp:connect"` ਨੂੰ ਨਿਰਯਾਤ ਕਰਦਾ ਹੈ: ਇੱਕ ਜੋੜਨ ਵਾਲਾ, ਤੰਗ ਸਕੋਪ ( `SELF_USAGE_SCOPE` ਵਾਂਗ ਹੀ ਪੂਰਵ) ਜੋ `src/server/authz/policies/management.ts` — ਵਿੱਚ ONLY `/api/mcp/` ਬਾਈਪਾਸ ਦਾ ਅਧਿਕਾਰ ਦਿੰਦਾ ਹੈ ਇਹ ਕੋਈ ਹੋਰ ਪ੍ਰਬੰਧਨ-ਰੂਟ ਪਹੁੰਚ ਨਹੀਂ ਦਿੰਦਾ ਹੈ ਅਤੇ ਜਾਣਬੁੱਝ ਕੇ `MANAGEMENT_API_KEY_SCOPES` ਦਾ OUT ਰੱਖਿਆ ਜਾਂਦਾ ਹੈ। `manage`/`admin` ਰੱਖਣ ਵਾਲੀ ਇੱਕ ਕੁੰਜੀ ਅਜੇ ਵੀ ਕਾਰਵ-ਆਊਟ ਨੂੰ ਬਿਨਾਂ ਕਿਸੇ ਬਦਲਾਅ ਦੇ ਪਾਸ ਕਰਦੀ ਹੈ; `mcp:connect` ਰਿਮੋਟ MCP-ਸਿਰਫ ਕਾਲਰਾਂ ਲਈ ਇੱਕ ਘੱਟ-ਅਧਿਕਾਰ ਵਾਲਾ ਵਿਕਲਪ ਹੈ, `hasMcpConnectOrManageScope()` ਦੁਆਰਾ ਜਾਂਚਿਆ ਜਾਂਦਾ ਹੈ।
 
-### ਪ੍ਰਤੀ-ਕੀ HTTP ਸਕੋਪ ਬਾਈਂਡਿੰਗ (#7895)
+### ਪ੍ਰਤੀ-ਕੁੰਜੀ HTTP ਸਕੋਪ ਬਾਈਡਿੰਗ (#7895)
 
-HTTP/SSE ਉੱਤੇ, `open-sse/mcp-server/httpTransport.ts` ਹੁਣ `resolveMcpCallerAuthInfo()` (`open-sse/mcp-server/httpAuthContext.ts`) ਰਾਹੀਂ ਕਾਲਰ ਦੇ ਅਸਲੀ `api_keys.scopes` ਨੂੰ ਹੱਲ ਕਰਦਾ ਹੈ ਅਤੇ ਇਸਨੂੰ MCP SDK ਦੇ `transport.handleRequest(req, { authInfo })` ਨੂੰ ਪਾਸ ਕਰਦਾ ਹੈ, ਤਾਂ ਜੋ `extra.authInfo.scopes` ਹਰ ਟੂਲ ਕਾਲ ਤੱਕ ਪਹੁੰਚਦਾ ਹੈ ਉਹ Bearer key ਦੇ ਆਪਣੇ ਸਕੋਪਜ਼ ਨੂੰ ਦਰਸਾਉਂਦਾ ਹੈ। `scopeEnforcement.ts` ਦਾ `resolveCallerScopeContext()` ਪਹਿਲਾਂ ਹੀ `_meta` ਅਤੇ `OMNIROUTE_MCP_SCOPES` env ਫਾਲਬੈਕ ਨਾਲੋਂ `authInfo` ਨੂੰ ਪਹਿਲ ਦਿੰਦਾ ਸੀ — ਇਹ ਸਿਰਫ਼ ਉਸੇ ਪਹਿਲੇ, ਸਭ ਤੋਂ ਉੱਚ-ਤਰੀਕਾ ਸਰੋਤ ਨੂੰ ਭਰਦਾ ਹੈ, ਜਿਸ ਉੱਤੇ ਪਹਿਲਾਂ HTTP ਰਾਹੀਂ ਕੋਈ ਡਾਟਾ ਨਹੀਂ ਜਾਂਦਾ ਸੀ। ਜਦੋਂ ਕੋਈ API key ਹੱਲ ਨਹੀਂ ਹੁੰਦੀ (ਕੋਈ ਹੈਡਰ ਨਹੀਂ, ਅਵੈਲਡ key), `authInfo` `undefined` ਰਹਿੰਦਾ ਹੈ ਅਤੇ ਹੱਲ ਮੌਜੂਦਾ `meta`/env ਲੜੀ ਵੱਲ ਬਦਲੇ ਬਿਨਾ ਚਲਦਾ ਹੈ। stdio ਵਿੱਚ ਕੋਈ ਪ੍ਰਤੀ-ਕਾਲਰ ਪਛਾਣ ਨਹੀਂ ਹੁੰਦੀ (ਵੇਖੋ `mcpCallerIdentity.ts`) ਅਤੇ ਇਹ ਪ੍ਰਤੀ-ਕੀ ਬਾਈਂਡਿੰਗ ਤੋਂ ਅਸਰਗ੍ਰਸ਼ਿਤ ਨਹੀਂ ਹੁੰਦਾ — ਇਹ `_meta` ਕਦਮ ਨੂੰ ਛੱਡ ਦਿੰਦਾ ਹੈ (`_meta` ਸਿਰਫ਼ HTTP ਪ੍ਰਮਾਣੀਕਰਨ ਸੰਦਰਭ ਅੰਦਰ ਹੀ ਮੰਨਿਆ ਜਾਂਦਾ ਹੈ, #15159) ਅਤੇ ਸਿਰਫ਼ `OMNIROUTE_MCP_SCOPES` env key ਤੋਂ ਹੱਲ ਕਰਦਾ ਹੈ।
+HTTP/SSE ਉੱਤੇ, `open-sse/mcp-server/httpTransport.ts` ਹੁਣ ਕਾਲਰ ਦੇ ਅਸਲੀ `api_keys.scopes` `resolveMcpCallerAuthInfo()` (`open-sse/mcp-server/httpAuthContext.ts`) ਰਾਹੀਂ ਹੱਲ ਕਰਦਾ ਹੈ ਅਤੇ ਇਸਨੂੰ MCP SDK ਦੇ `transport.handleRequest(req, { authInfo })` ਵਿੱਚ ਭੇਜਦਾ ਹੈ, ਇਸਲਈ `extra.authInfo.scopes` ਹਰ ਟੂਲ ਕਾਲ ਤੱਕ ਪਹੁੰਚਣਾ ਬੇਅਰਰ ਕੁੰਜੀ ਦੇ ਆਪਣੇ ਸਕੋਪਾਂ ਨੂੰ ਦਰਸਾਉਂਦਾ ਹੈ। `scopeEnforcement.ts` ਦੇ `resolveCallerScopeContext()` ਨੇ ਪਹਿਲਾਂ ਹੀ `_meta` ਅਤੇ `OMNIROUTE_MCP_SCOPES` env ਫਾਲਬੈਕ — ਤੇ `authInfo` ਤਰਜੀਹ ਦਿੱਤੀ ਹੈ, ਇਹ ਸਿਰਫ ਉਸ ਪਹਿਲੇ, ਉੱਚ-ਪ੍ਰਾਥਮਿਕ ਸਰੋਤ ਨੂੰ ਭਰਦਾ ਹੈ, ਜਿਸ ਨੂੰ ਪਹਿਲਾਂ HTTP ਤੇ ਅਣਗੌਲਿਆ ਗਿਆ ਸੀ। ਜਦੋਂ ਕੋਈ API ਕੁੰਜੀ ਹੱਲ ਨਹੀਂ ਕਰਦੀ (ਕੋਈ ਸਿਰਲੇਖ, ਅਵੈਧ ਕੁੰਜੀ ਨਹੀਂ), `authInfo` `undefined` ਰਹਿੰਦਾ ਹੈ ਅਤੇ ਰੈਜ਼ੋਲਿਊਸ਼ਨ ਮੌਜੂਦਾ `meta`/env ਚੇਨ ਵਿੱਚ ਬਦਲਿਆ ਨਹੀਂ ਜਾਂਦਾ ਹੈ। stdio ਦੀ ਕੋਈ ਪ੍ਰਤੀ-ਕਾਲਰ ਪਛਾਣ ਨਹੀਂ ਹੈ ( `mcpCallerIdentity.ts` ਦੇਖੋ) ਅਤੇ ਪ੍ਰਤੀ-ਕੁੰਜੀ ਬਾਈਡਿੰਗ — ਦੁਆਰਾ ਪ੍ਰਭਾਵਿਤ ਨਹੀਂ ਹੈ ਇਹ `_meta` ਕਦਮ ਨੂੰ ਛੱਡ ਦਿੰਦਾ ਹੈ (`_meta` ਸਿਰਫ ਇੱਕ HTTP ਪ੍ਰਮਾਣਿਕਤਾ ਸੰਦਰਭ, #15159 ਦੇ ਅੰਦਰ ਸਨਮਾਨਿਤ ਕੀਤਾ ਜਾਂਦਾ ਹੈ) ਅਤੇ ਕੇਵਲ `OMNIROUTE_MCP_SCOPES` env ਕੁੰਜੀ ਤੋਂ ਹੱਲ ਹੁੰਦਾ ਹੈ।
 
-**ਸੀਮਿਤ ਸਕੋਪ ਵਾਲੇ HTTP/SSE ਕਾਲਰਾਂ ਲਈ ਲਾਗੂ ਕਰਨ ਦੀ ਪ੍ਰਵੱਤਤਾ `OMNIROUTE_MCP_ENFORCE_SCOPES` ਤੋਂ ਸੁਤੰਤਰ ਹੈ।** `OMNIROUTE_MCP_ENFORCE_SCOPES` ਦਾ ਡਿਫੌਲਟ `false` ਹੋਣਾ ਸਿਰਫ਼ ਲੋਕਲ/stdio ਸਿੰਗਲ-ਓਪਰੇਟਰ ਫਲੋ ਲਈ ਹੀ ਸੁਰੱਖਿਅਤ ਹੈ, ਜਿੱਥੇ ਸਕੋਪ ਦੇ ਮੁਕਾਬਲੇ ਕੋਈ ਪ੍ਰਤੀ-ਕਾਲਰ ਪਛਾਣ ਨਹੀਂ ਹੁੰਦੀ। `open-sse/mcp-server/server.ts::withScopeEnforcement()` ਹਰ ਟੂਲ ਲਈ ਸਕੋਪ ਲਾਗੂ ਕਰਨ ਨੂੰ ਬਿਨਾ ਸ਼ਰਤ ਦੇ ਚਾਲੂ ਕਰਦਾ ਹੈ (`scopeEnforcement.ts` ਵਿੱਚ `shouldForceScopeEnforcement()`) ਜਦੋਂ `resolveCallerScopeContext()` ਨੇ `source === "authInfo"` ਹੱਲ ਕੀਤਾ ਹੋਵੇ (ਅਰਥਾਤ ਇੱਕ ਅਸਲੀ ਪ੍ਰਤੀ-ਕੀ HTTP Authorization ਹੈਡਰ, ਸਿਰਫ਼ HTTP/SSE) ਅਤੇ ਉਹ key ਕੋਲ ਪੂਰੇ `manage`/`admin` ਸਕੋਪ ਨਹੀਂ ਹੈ। ਇਹ ਉਹ ਖਾਲੀ ਬੰਦ ਕਰਦਾ ਹੈ ਜਿੱਥੇ ਸਿਰਫ਼ ਸੀਮਿਤ `mcp:connect` bypass ਸਕੋਪ ਵਾਲੀ key — ਉੱਪਰ ਦੇਖਾਇਆ ਗਿਆ ਹੈ ਕਿ ਇਹ `/api/mcp/` LOCAL_ONLY carve-out ਤੋਂ ਬਾਕੀ ਕੁਝ ਨਹੀਂ ਪ੍ਰਾਧਾਨਤਾ ਦਿੰਦੀ — ਜਦੋਂ ਕੋਈ ਓਪਰੇਟਰ ਰਿਮੋਟ/ਗੈਰ-loopback MCP ਐਕਸੈੱਸ ਚਾਲੂ ਕਰਦਾ, ਤਾਂ ਵੀ ਹਰ MCP ਟੂਲ ਕੋਲ ਬੁਲਾ ਸਕਦੀ ਸੀ, ਸਿਰਫ਼ ਇਸ ਲਈ ਕਿ `OMNIROUTE_MCP_ENFORCE_SCOPES` ਡਿਫੌਲਟ ਰੂਪ ਵਿੱਚ `false` ਆਉਂਦਾ ਹੈ। HTTP ਉੱਤੇ ਪੂਰੀ `manage`/`admin` key, ਅਤੇ ਹਰ stdio/ਲੋਕਲ ਕਾਲਰ, ਮੌਜੂਦਾ `OMNIROUTE_MCP_ENFORCE_SCOPES`-ਅਧੀਨ ਵਿਹਾਰ ਨੂੰ ਬਦਲੇ ਬਿਨਾ ਰੱਖਦੇ ਹਨ।
+**`OMNIROUTE_MCP_ENFORCE_SCOPES` ਦੀ ਪਰਵਾਹ ਕੀਤੇ ਬਿਨਾਂ ਤੰਗ-ਸਕੋਪ ਵਾਲੇ HTTP/SSE ਕਾਲਰਾਂ ਲਈ ਲਾਗੂ ਕਰਨ ਲਈ ਮਜਬੂਰ ਕੀਤਾ ਜਾਂਦਾ ਹੈ।** `OMNIROUTE_MCP_ENFORCE_SCOPES` ਨੂੰ `false` ਲਈ ਡਿਫਾਲਟ ਕਰਨਾ ਸਿਰਫ਼ local/stdio ਸਿੰਗਲ-ਓਪਰੇਟਰ ਪ੍ਰਵਾਹ ਲਈ ਸੁਰੱਖਿਅਤ ਹੈ, ਜਿੱਥੇ ਪ੍ਰਤੀ-ਕਾਲਰ ਪਛਾਣ ਦੀ ਕੋਈ ਗੁੰਜਾਇਸ਼ ਨਹੀਂ ਹੈ। `open-sse/mcp-server/server.ts::withScopeEnforcement()` ਬਿਨਾਂ ਸ਼ਰਤ ( `scopeEnforcement.ts` ਵਿੱਚ `shouldForceScopeEnforcement()` ) 'ਤੇ ਪ੍ਰਤੀ-ਟੂਲ ਸਕੋਪ ਇਨਫੋਰਸਮੈਂਟ ਨੂੰ ਬਦਲ ਦਿੰਦਾ ਹੈ ਜਦੋਂ ਵੀ `resolveCallerScopeContext()` `source === "authInfo"` ਹੱਲ ਕੀਤਾ (ਭਾਵ ਇੱਕ ਅਸਲੀ ਪ੍ਰਤੀ-ਕੁੰਜੀ HTTP ਅਧਿਕਾਰ ਸਿਰਲੇਖ, HTTP/SSE-only) AND ਉਹ ਕੁੰਜੀ ਪੂਰੀ `manage`/`admin` ਸਕੋਪ ਨਹੀਂ ਰੱਖਦੀ ਹੈ। ਇਹ ਉਸ ਪਾੜੇ ਨੂੰ ਬੰਦ ਕਰਦਾ ਹੈ ਜਿੱਥੇ ਇੱਕ ਕੁੰਜੀ ONLY ਦੇ ਤੰਗ `mcp:connect` ਬਾਈਪਾਸ ਸਕੋਪ — ਉੱਪਰ ਦਸਤਾਵੇਜ਼ੀ ਤੌਰ 'ਤੇ ਕੁਝ ਵੀ ਅਧਿਕਾਰਤ ਨਹੀਂ ਕਰਦਾ ਹੈ ਪਰ `/api/mcp/` LOCAL_ONLY ਕਾਰਵ-ਆਊਟ — ਨਹੀਂ ਤਾਂ ਇੱਕ ਵਾਰ ਓਪਰੇਟਰ ਦੁਆਰਾ remote/non-loopback MCP ਪਹੁੰਚ ਨੂੰ ਸਮਰੱਥ ਕਰਨ ਤੋਂ ਬਾਅਦ ਹਰ MCP ਟੂਲ ਦੀ ਮੰਗ ਕਰ ਸਕਦਾ ਹੈ, ਸਿਰਫ਼ ਇਸ ਲਈ ਕਿ `OMNIROUTE_MCP_ENFORCE_SCOPES` ਜਹਾਜ਼ਾਂ ਦੁਆਰਾ ਡਿਜ਼ਾਲਟ `false`. HTTP ਉੱਤੇ ਇੱਕ ਪੂਰੀ `manage`/`admin` ਕੁੰਜੀ, ਅਤੇ ਹਰੇਕ stdio/local ਕਾਲਰ, ਮੌਜੂਦਾ `OMNIROUTE_MCP_ENFORCE_SCOPES` -gated ਵਿਵਹਾਰ ਨੂੰ ਬਿਨਾਂ ਕਿਸੇ ਬਦਲਾਅ ਦੇ ਰੱਖੋ।
+
+---
 
 ## ਵਾਤਾਵਰਣ ਵੇਰੀਏਬਲ
 

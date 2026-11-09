@@ -6,7 +6,6 @@
  * fields that third-party Claude-shape providers accept.
  */
 
-import { DEFAULT_THINKING_CLAUDE_SIGNATURE } from "../../config/defaultThinkingSignature.ts";
 import { redactPassthroughThinkingSignatures } from "./passthroughHelpers.ts";
 
 type AnthropicMessage = {
@@ -78,6 +77,6 @@ export function dropForeignServerToolUseBlocks(messages: unknown): unknown {
  * unsigned thinking blocks (#2454, #12917) and foreign `server_tool_use` ids (9router#3685).
  */
 export function sanitizeAnthropicPassthroughHistory(messages: unknown): unknown {
-  const redacted = redactPassthroughThinkingSignatures(messages, DEFAULT_THINKING_CLAUDE_SIGNATURE);
+  const redacted = redactPassthroughThinkingSignatures(messages);
   return dropForeignServerToolUseBlocks(redacted);
 }

@@ -103,6 +103,9 @@ const PATH_AREA_MAP: Array<[string, SkillArea]> = [
 
 const HTTP_METHODS = ["get", "post", "put", "patch", "delete", "head", "options"] as const;
 
+/** OpenAPI extension that keeps an operation out of the generated agent skills. */
+const SKILL_EXCLUDED_EXTENSION = "x-agent-skill-excluded";
+
 // ── Parser ───────────────────────────────────────────────────────────────────
 
 function resolveArea(urlPath: string): SkillArea | null {
@@ -118,6 +121,15 @@ function resolveArea(urlPath: string): SkillArea | null {
   return null;
 }
 
+/** Opt-in routes stay in the API reference without entering the agent-skill surface. */
+function isSkillOperation(operation: unknown): operation is Record<string, any> {
+  return (
+    Boolean(operation) &&
+    typeof operation === "object" &&
+    (operation as Record<string, unknown>)[SKILL_EXCLUDED_EXTENSION] !== true
+  );
+}
+
 function extractOperations(pathsObj: Record<string, any>): OpenapiPath[] {
   const ops: OpenapiPath[] = [];
 
@@ -126,7 +138,7 @@ function extractOperations(pathsObj: Record<string, any>): OpenapiPath[] {
 
     for (const method of HTTP_METHODS) {
       const operation = pathItem[method];
-      if (!operation || typeof operation !== "object") continue;
+      if (!isSkillOperation(operation)) continue;
 
       ops.push({
         method: method.toUpperCase(),

@@ -205,6 +205,8 @@ export default function ComboHeaderActions({ onCreate, onImported }: ComboHeader
       >
         {t("importCombos")}
       </Button>
+      {/* kit-exception: Hidden picker behind the header Import button: the pick opens the confirm modal
+          at once, and a kit FileInput status line would break the Export / Import / Create row. */}
       <input
         ref={fileInputRef}
         type="file"

@@ -141,7 +141,7 @@ function resolveBasePlan(
     const fromHeader = planFromHeader(config, header, combos);
     if (fromHeader) {
       plan = fromHeader; // already tagged "request-header"
-      return applyLossyRequestPolicy(plan, header);
+      return applyLossyRequestPolicy(plan, header, config.stackedPipeline);
     }
   }
 
@@ -171,7 +171,7 @@ function resolveBasePlan(
     plan = withSource(derived, derived.mode === "off" ? "off" : "default");
   }
 
-  return applyLossyRequestPolicy(plan, header);
+  return applyLossyRequestPolicy(plan, header, config.stackedPipeline);
 }
 
 /**

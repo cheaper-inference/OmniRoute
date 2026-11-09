@@ -7,6 +7,8 @@ export interface LiveZoneOptions {
   sessionId?: string;
   variant: unknown;
   ttlMinutes?: number;
+  /** Protect upstream implicit caches: a cold/mismatched prefix is sent unchanged. */
+  preserveRawPrefixOnMiss?: boolean;
 }
 
 interface LiveZoneEntry {
@@ -15,6 +17,8 @@ interface LiveZoneEntry {
   transformedPrefix: unknown[];
   transformedStableFields: Record<string, unknown>;
   stats: CompressionStats | null;
+  /** Sparse, digest-validated raw prefix; large unchanged messages are never retained. */
+  rawPrefixPatches?: Array<{ index: number; value: unknown }>;
   lastAccess: number;
   expiresAt: number;
   bytes: number;
@@ -150,7 +154,8 @@ function makeKey(options: LiveZoneOptions, field: string): string | null {
   const session = options.sessionId?.trim();
   const variant = digest(options.variant);
   if (!principal || !session || !variant) return null;
-  return `${principal}:${session}:${field}:${variant}`;
+  // A raw-prefix baseline must never reuse an older entry that transformed its prefix.
+  return `${principal}:${session}:${field}:${variant}${options.preserveRawPrefixOnMiss ? ":raw-prefix" : ""}`;
 }
 
 function deleteEntry(key: string): void {
@@ -205,6 +210,56 @@ function store(
   });
   totalBytes += bytes;
   prune(now);
+}
+
+/**
+ * A protected prefix never needs a complete in-memory copy. Store per-item
+ * digests and only transformed items, reconstructing unchanged items from the
+ * next request after all digests have been verified. This also works for raw
+ * baselines larger than the 2 MiB entry limit.
+ */
+function storeSparseRawPrefix(ctx: LiveZoneContext, result: CompressionResult): boolean {
+  const items = result.body[ctx.field];
+  if (!Array.isArray(items) || items.length !== ctx.rawItemDigests.length) return false;
+  const patches: Array<{ index: number; value: unknown }> = [];
+  for (let index = 0; index < items.length; index++) {
+    const itemDigest = digest(items[index]);
+    if (!itemDigest) return false;
+    if (itemDigest === ctx.rawItemDigests[index]) continue;
+    const value = cloneValue(items[index]);
+    if (value === null) return false;
+    patches.push({ index, value });
+  }
+  const stats = cloneValue(result.stats);
+  if (result.stats && !stats) return false;
+  const serialized = serialize({ patches, stats });
+  if (serialized === null) return false;
+  const bytes = Buffer.byteLength(serialized, "utf8") + ctx.rawItemDigests.length * 64 + 64;
+  if (bytes > MAX_ENTRY_BYTES) return false;
+
+  deleteEntry(ctx.key);
+  entries.set(ctx.key, {
+    rawItemDigests: ctx.rawItemDigests,
+    rawStableFieldsDigest: ctx.rawStableFieldsDigest,
+    transformedPrefix: [],
+    transformedStableFields: {},
+    stats,
+    rawPrefixPatches: patches,
+    lastAccess: ctx.now,
+    expiresAt: ctx.now + ctx.ttlMs,
+    bytes,
+  });
+  totalBytes += bytes;
+  prune(ctx.now);
+  return true;
+}
+
+/** Store an unmodified first-seen prefix so later turns can compress only newly appended tools. */
+function storeRawPrefix(body: Record<string, unknown>, ctx: LiveZoneContext): CompressionResult {
+  const result: CompressionResult = { body, compressed: false, stats: null };
+  // If even the digest/patch metadata exceeds the cap, still send the raw body.
+  storeSparseRawPrefix(ctx, result);
+  return result;
 }
 
 function hasExactRawPrefix(rawItemDigests: string[], entry: LiveZoneEntry): boolean {
@@ -429,34 +484,80 @@ async function compressLiveToolOutputs(
   return { liveResult, transformedLive };
 }
 
+/** Rebuild only changed tool slots; unchanged source items retain their verified bytes. */
+function restoreFrozenPrefix(rawItems: unknown[], previous: LiveZoneEntry): unknown[] | null {
+  if (rawItems.length < previous.rawItemDigests.length) return null;
+  const frozenPrefix = previous.rawPrefixPatches
+    ? rawItems.slice(0, previous.rawItemDigests.length)
+    : cloneItems(previous.transformedPrefix);
+  if (!frozenPrefix) return null;
+  for (const patch of previous.rawPrefixPatches ?? []) {
+    if (!Number.isInteger(patch.index) || patch.index < 0 || patch.index >= frozenPrefix.length) {
+      return null;
+    }
+    const value = cloneValue(patch.value);
+    if (value === null) return null;
+    frozenPrefix[patch.index] = value;
+  }
+  return frozenPrefix;
+}
+
+/** Keep the last assistant turn as read-only context for new tool outputs. */
+function findLiveContextStart(rawItems: unknown[], frozenItems: number): number {
+  for (let index = frozenItems - 1; index >= 0; index--) {
+    const item = rawItems[index];
+    if (
+      item &&
+      typeof item === "object" &&
+      (item as Record<string, unknown>).role === "assistant"
+    ) {
+      return index;
+    }
+  }
+  return frozenItems;
+}
+
+/** Only sparse patch storage can reject replay; ordinary storage is best effort. */
+function storeReusedLivePrefix(
+  context: LiveZoneContext,
+  previous: LiveZoneEntry,
+  result: CompressionResult
+): boolean {
+  if (entries.get(context.key) !== previous) return true;
+  if (previous.rawPrefixPatches) {
+    return storeSparseRawPrefix({ ...context, now: Date.now() }, result);
+  }
+  store(
+    context.key,
+    context.rawItemDigests,
+    context.rawStableFieldsDigest,
+    result,
+    context.field,
+    Date.now(),
+    context.ttlMs
+  );
+  return true;
+}
+
 async function reuseLiveZoneEntry(
   body: Record<string, unknown>,
   context: LiveZoneContext,
   previous: LiveZoneEntry,
-  compress: (body: Record<string, unknown>) => Promise<CompressionResult>
+  compress: (body: Record<string, unknown>) => Promise<CompressionResult>,
+  preserveRawPrefixOnMiss = false
 ): Promise<CompressionResult> {
+  const fallback = () => (preserveRawPrefixOnMiss ? storeRawPrefix(body, context) : compress(body));
   entries.delete(context.key);
   previous.lastAccess = context.now;
   entries.set(context.key, previous);
 
   const frozenItems = previous.rawItemDigests.length;
   const liveItems = context.rawItems.slice(frozenItems);
-  const frozenPrefix = cloneItems(previous.transformedPrefix);
-  if (!frozenPrefix) return compress(body);
+  const frozenPrefix = restoreFrozenPrefix(context.rawItems, previous);
+  if (!frozenPrefix) return fallback();
   // The latest assistant may already be frozen (including on consecutive/parallel results).
   // Carry its raw tail as engine context, but never replace its cached transformation.
-  let contextStart = frozenItems;
-  for (let index = frozenItems - 1; index >= 0; index--) {
-    const item = context.rawItems[index];
-    if (
-      item &&
-      typeof item === "object" &&
-      (item as Record<string, unknown>).role === "assistant"
-    ) {
-      contextStart = index;
-      break;
-    }
-  }
+  const contextStart = findLiveContextStart(context.rawItems, frozenItems);
   const live = await compressLiveToolOutputs(
     body,
     context.field,
@@ -465,9 +566,13 @@ async function reuseLiveZoneEntry(
     previous.stats,
     compress
   );
-  if (!live) return compress(body);
-  const restoredBody = restoreStableFields(live.liveResult.body, previous.transformedStableFields);
-  if (!restoredBody) return compress(body);
+  if (!live) return fallback();
+  const stableFields = previous.rawPrefixPatches
+    ? pickStableFields(body)
+    : previous.transformedStableFields;
+  if (!stableFields) return fallback();
+  const restoredBody = restoreStableFields(live.liveResult.body, stableFields);
+  if (!restoredBody) return fallback();
   const combinedBody = {
     ...restoredBody,
     [context.field]: [...frozenPrefix, ...live.transformedLive],
@@ -478,16 +583,8 @@ async function reuseLiveZoneEntry(
     frozenItems,
     liveItems.length
   );
-  if (entries.get(context.key) === previous) {
-    store(
-      context.key,
-      context.rawItemDigests,
-      context.rawStableFieldsDigest,
-      combinedResult,
-      context.field,
-      Date.now(),
-      context.ttlMs
-    );
+  if (!storeReusedLivePrefix(context, previous, combinedResult)) {
+    return storeRawPrefix(body, context);
   }
   return combinedResult;
 }
@@ -495,8 +592,10 @@ async function reuseLiveZoneEntry(
 /**
  * Reuses the byte-identical transformed prefix from the previous request in a session. Engines
  * receive the ordered live suffix with frozen turn context; only appended tool outputs are rewritten.
- * Any changed prefix, missing identity,
- * unsupported body shape, serialization failure, or oversized entry fails open to full compression.
+ * For regular live-zone mode, a cold/mismatched prefix falls back to full compression.
+ * With preserveRawPrefixOnMiss enabled, it instead sends the original history unchanged
+ * and uses it as the next stable baseline; only new tool outputs are eligible on a hit.
+ * An explicitly configured global hard budget still takes precedence.
  */
 export async function applyLiveZoneCompression(
   body: Record<string, unknown>,
@@ -506,7 +605,11 @@ export async function applyLiveZoneCompression(
   // A global hard budget needs the complete history to make correct keep/drop decisions.
   if (hasGlobalHardBudget(options.variant)) return compress(body);
   const context = resolveLiveZoneContext(body, options);
-  if (!context) return compress(body);
+  if (!context) {
+    return options.preserveRawPrefixOnMiss
+      ? { body, compressed: false, stats: null }
+      : compress(body);
+  }
   prune(context.now);
   const previous = entries.get(context.key);
 
@@ -515,9 +618,11 @@ export async function applyLiveZoneCompression(
     previous.rawStableFieldsDigest !== context.rawStableFieldsDigest ||
     !hasExactRawPrefix(context.rawItemDigests, previous)
   ) {
-    return compressAndStore(body, context, compress);
+    return options.preserveRawPrefixOnMiss
+      ? storeRawPrefix(body, context)
+      : compressAndStore(body, context, compress);
   }
-  return reuseLiveZoneEntry(body, context, previous, compress);
+  return reuseLiveZoneEntry(body, context, previous, compress, options.preserveRawPrefixOnMiss);
 }
 
 export function resetLiveZoneCache(): void {

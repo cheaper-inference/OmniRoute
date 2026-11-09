@@ -14,7 +14,7 @@ OmniRouteは、ローカルAIルーティング ゲートウェイおよびNext.
 
 コア機能:
 
-- OpenAI 互換のCLI/tools用API surface (377 プロバイダー、156 エクゼキューター モジュール)
+- OpenAI 互換のAPI surface for CLI/tools (381 プロバイダー、159 エクゼキューター モジュール)
 - プロバイダ形式間のRequest/response変換
 - モデル コンボ フォールバック (マルチモデル シーケンス)
 - `compositeTiers`によるランタイム順序付けを備えた構造化コンボ ステップ (`provider + model + connection`)
@@ -405,7 +405,7 @@ Cloud Agents は、統一された DB ベースのタスク ライフサイク�
 - Connection/modelルール結合者: `src/domain/connectionModelRules.ts`
 - モデルの可用性スナップショット: `src/domain/modelAvailability.ts`
 - プロバイダーの有効期限追跡: `src/domain/providerExpiration.ts`
-- クォータキャッシュ: `src/domain/quotaCache.ts`
+- クォータ キャッシュ: `src/domain/quotaCache.ts`。プロバイダーはクォータ ウィンドウを追加および削除します (OpenAI 、一部のプランでは 5 時間のCodexウィンドウを削除しました)。そのため、プロバイダーのアダプターが完了したことを証明する使用状況 (`quotasComplete`、 `src/lib/usage/usageReading.ts`参照) がアカウントのフル ウィンドウ セットになります。以前に知られていたが存在しないウィンドウはキャッシュ内でリタイアされ、 `quota_snapshots`では再起動によってリハイドレートされ (追加されたリタイアメント レコード)、永続化されたCodexクォータ状態とClaudeでリタイアされます。の飽和バケット。部分的な証拠 (応答ヘッダー、古いコピー) は、それが保持するウィンドウのみを更新します。
 - 劣化状態: `src/domain/degradation.ts`
 - 構成監査: `src/domain/configAudit.ts`
 - OmniRoute応答メタデータ ビルダー: `src/domain/omnirouteResponseMeta.ts`

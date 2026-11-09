@@ -160,7 +160,6 @@ type ProviderBatchTestResults = {
 function getConnectionErrorTag(connection, t: ProviderMessageTranslator) {
   if (!connection) return null;
   if (connection.prefixShadowed?.code === "prefix_shadowed") return "prefix_shadowed";
-
   const explicitType = connection.lastErrorType;
   if (explicitType === "runtime_error") return providerText(t, "errorTypeRuntime", "Runtime");
   if (

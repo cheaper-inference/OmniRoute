@@ -244,6 +244,8 @@ export const TRANSITIVE_SPAWN_INFRA_MODULES: Record<string, string> = {
     "execFileSync of fixed OS commands to read the machine id; no request input.",
   "open-sse/utils/kimiDevice.ts":
     "execFileSync('/usr/bin/sw_vers', ['-productVersion']) for the device fingerprint; fixed argv.",
+  "open-sse/executors/geminiLiveTranscribe.ts":
+    "spawn('ffmpeg', FFMPEG_PCM16K_ARGS) module-constant argv (pipe:0 -> pipe:1, -protocol_whitelist pipe), no shell; upload only on stdin; timeout/abort SIGKILL.",
   "open-sse/utils/setupPolyfill.ts":
     "imports worker_threads only to polyfill markAsUncloneable; starts no worker.",
   "src/lib/usage/callLogArtifactWriter.ts":

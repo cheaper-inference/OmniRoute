@@ -1,1 +1,0 @@
-- Release the compression settings saved-status timer on unmount or a newer save, and ignore save completions after the panel has unmounted so they cannot schedule callbacks into a disposed UI.

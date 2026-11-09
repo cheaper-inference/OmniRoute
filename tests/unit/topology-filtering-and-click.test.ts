@@ -22,7 +22,7 @@ test("HomePageClient filters out providers where all connections are deactivated
 
   assert.match(
     homePageClientSrc,
-    /\}, \[providerStats, providerMetrics, providerNodes, providerConnections\]\);/,
+    /\}, \[providerStats, providerMetrics, providerNodes, providerConnections, blockedProviders\]\);/,
     "topologyProviders must depend on providerConnections to reflect switch toggle state changes"
   );
 });

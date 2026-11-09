@@ -46,35 +46,43 @@ az Ön laptopja                           távoli OmniRoute (VPS)
 
 ## Csatlakozás
 
-### A kezelési jelszóval (kezdeti beállítás)
+### A kezelési jelszóval (bootstrap)
 
 ```bash
 omniroute connect 192.168.0.15
 # Kezelési jelszó ehhez: http://192.168.0.15:20128: ********
-# ✔ Csatlakoztatva ehhez: http://192.168.0.15:20128 — környezet: '192.168.0.15' (hatókör: admin)
+# ✔ Csatlakoztatva ehhez: http://192.168.0.15:20128 — „192.168.0.15” kontextus (hatókör: admin)
 ```
 
-A jelszavas folyamat alapértelmezés szerint **admin** tokent hoz létre (mivel Önnél van a jelszó,
-már eleve teljes hozzáféréssel rendelkezik). A hatókört a `--scope` kapcsolóval szűkítheti:
+A jelszavas folyamat alapértelmezés szerint **admin** tokent hoz létre (mivel
+Önnél van a jelszó, így már teljes hozzáféréssel rendelkezik). A hatókör
+szűkítéséhez használja a `--scope` kapcsolót:
 
 ```bash
 omniroute connect 192.168.0.15 --scope write
 ```
 
-Lehetőségek: `--port <p>` (ha a gazdagép nincs porttal megadva), `--name <ctx>` (a környezet neve),
-`--scope read|write|admin`. A teljes URL változtatás nélkül lesz használva:
+Lehetőségek: `--port <p>` (ha a gazdagép nem ad meg portot),
+`--name <ctx>` (kontextus neve), `--scope read|write|admin`. A teljes URL változatlanul
+használható:
 `omniroute connect https://omni.example.com`.
+
+Ha a kiszolgálón engedélyezve van az irányítópult kétfaktoros hitelesítése
+(Settings → Security), a jelszó önmagában nem fogadható el: a CLI ezután bekéri a
+hitelesítő alkalmazásból származó kódot (vagy egy helyreállítási kódot). Nem
+interaktív használat esetén adja meg előre a `--totp <code>` kapcsolóval.
 
 ### Előre létrehozott tokennel
 
-Hozzon létre egy adott hatókörű tokent az irányítópulton (vagy az `omniroute tokens create` paranccsal), majd
-illessze be — nincs szükség jelszóra:
+Hozzon létre hatókörhöz kötött tokent az irányítópulton (vagy a következővel:
+`omniroute tokens create`), majd illessze be — nincs szükség jelszóra:
 
 ```bash
 omniroute connect 192.168.0.15 --key oma_live_xxxxxxxx
 ```
 
-A CLI a `GET /api/cli/whoami` útvonalon ellenőrzi a tokent, majd aktív környezetként menti.
+A CLI a tokent a `GET /api/cli/whoami` használatával ellenőrzi, majd aktív
+kontextusként menti.
 
 ---
 
@@ -409,12 +417,12 @@ omniroute contexts remove 192-168-0-15 --yes   # törli a helyi kontextust (akt�
 
 ## API-végpontok (referencia)
 
-| Metódus | Útvonal               | Hitelesítés       | Hatókör                     |
-| ------- | --------------------- | ----------------- | --------------------------- |
-| POST    | `/api/cli/connect`    | kezelési jelszó   | — (nyilvános, jelszóvédett) |
-| GET     | `/api/cli/whoami`     | hozzáférési token | olvasás                     |
-| GET     | `/api/cli/tokens`     | hozzáférési token | rendszergazdai              |
-| POST    | `/api/cli/tokens`     | hozzáférési token | rendszergazdai              |
-| DELETE  | `/api/cli/tokens/:id` | hozzáférési token | rendszergazdai              |
+| Metódus | Útvonal               | Hitelesítés                  | Hatókör                         |
+| ------- | --------------------- | ---------------------------- | ------------------------------- |
+| POST    | `/api/cli/connect`    | jelszó; 2FA, ha engedélyezve | — (nyilvános, jelszóval védett) |
+| GET     | `/api/cli/whoami`     | hozzáférési token            | olvasás                         |
+| GET     | `/api/cli/tokens`     | hozzáférési token            | adminisztráció                  |
+| POST    | `/api/cli/tokens`     | hozzáférési token            | adminisztráció                  |
+| DELETE  | `/api/cli/tokens/:id` | hozzáférési token            | adminisztráció                  |
 
 A teljes sémákért lásd az [openapi.yaml](../openapi.yaml) fájlt.

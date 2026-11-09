@@ -212,6 +212,23 @@ describe("OmniglyphContextPage", () => {
     expect(container.textContent).toContain("Could not save.");
   });
 
+  it("cancels the saved-status timer when the page unmounts", async () => {
+    vi.useFakeTimers();
+    try {
+      setupFetchMock();
+      const container = await mountPage();
+
+      await click(enableToggle(container));
+      expect(container.textContent).toContain("Saved.");
+      expect(vi.getTimerCount()).toBeGreaterThan(0);
+
+      act(() => roots.pop()?.unmount());
+      expect(vi.getTimerCount()).toBe(0);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it("a timer left by an earlier save does not clear a later save error", async () => {
     vi.useFakeTimers();
     try {

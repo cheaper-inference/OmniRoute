@@ -14,8 +14,8 @@ OmniRoute yra vietinis AI maršruto parinkimo šliuzas ir prietaisų skydelis, s
 
 Pagrindinės galimybės:
 
-- Su OpenAI suderinamas API paviršius, skirtas CLI/tools (377 teikėjai, 156 vykdymo moduliai)
-- Request/response vertimas iš įvairių teikėjų formatų
+- Su OpenAI suderinamas API paviršius, skirtas CLI/tools (381 teikėjas, 159 vykdymo moduliai)
+- Request/response vertimas tarp tiekėjo formatų
 - Atsarginis modelio derinys (kelių modelių seka)
 - Struktūriniai kombinuoti žingsniai (`provider + model + connection`) su vykdymo laiko tvarka pagal `compositeTiers`
 - Atsarginis paskyros lygis (kelios paskyros vienam teikėjui)
@@ -53,7 +53,7 @@ Pagrindinės galimybės:
 - Kombinuota tikslinė telemetrija ir istorinė kombinuota tikslinė būklė per `combo_execution_key` / `combo_step_id`
 - Koreliacija ID (X-Request-Id) sekimui nuo galo iki galo
 - Atitikties audito registravimas su atsisakymu pagal API raktą
-- Eval LLM kokybės užtikrinimo sistema
+- „Eval“ LLM kokybės užtikrinimo sistema
 - Sveikatos prietaisų skydelis su realaus laiko teikėjo grandinės pertraukiklio būsena
 - MCP serveris (110 įrankių) su 3 pernešimais (stdio/SSE/Streamable HTTP)
 - A2A serveris (JSON-RPC 2.0 + SSE) su įgūdžių ir užduočių gyvavimo ciklu
@@ -414,7 +414,7 @@ Dėl taisyklių rinkinio kūrimo ir slenksčio derinimo žr. [`docs/security/GUA
 - Connection/model taisyklių stalius: `src/domain/connectionModelRules.ts`
 - Modelio prieinamumo momentinės nuotraukos: `src/domain/modelAvailability.ts`
 - Teikėjo galiojimo pabaigos stebėjimas: `src/domain/providerExpiration.ts`
-- Kvotos talpykla: `src/domain/quotaCache.ts`
+- Kvotos talpykla: `src/domain/quotaCache.ts`. Teikėjai prideda ir pašalina kvotų langus (kai kuriuose planuose OpenAI atmetė 5 valandų Codex langą), todėl paslaugų teikėjo adapterio naudojimas patvirtina, kad jis yra baigtas (`quotasComplete`, žr. `src/lib/usage/usageReading.ts`) yra visas paskyros langų rinkinys: langas, žinomas anksčiau, bet jame nėra Claude yra pašalintas, talpykloje, atnaujintame įraše (prid. išliko Codex kvotos būsena ir `quota_snapshots` prisotinimo segmentuose. Daliniai įrodymai (atsakymų antraštės, pasenusios kopijos) atnaujina tik turimus langus.
 - Skilimo būsena: `src/domain/degradation.ts`
 - Konfigūracijos auditas: `src/domain/configAudit.ts`
 - OmniRoute atsako metaduomenų kūrimo priemonė: `src/domain/omnirouteResponseMeta.ts`

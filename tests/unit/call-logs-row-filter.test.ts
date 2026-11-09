@@ -114,4 +114,26 @@ test.describe("call-logs rowMatchesFilter unit tests", () => {
     );
     assert.equal(rowMatchesFilter(inFlight, { combo: "1" }), false);
   });
+
+  test("Errors filter keeps a 2xx row with a non-empty error and drops clean or pending rows (#18724)", () => {
+    // A logical stream failure stays a failure even when the upstream HTTP status was 200.
+    const streamFailure = { ...baseRow, status: 200, error: "stream cut" };
+    assert.equal(rowMatchesFilter(streamFailure, { status: "error" }), true);
+    assert.equal(rowMatchesFilter(baseRow, { status: "error" }), false);
+
+    // An in-flight row is pending, never an error.
+    assert.equal(
+      rowMatchesFilter({ ...baseRow, status: 0, active: true }, { status: "error" }),
+      false
+    );
+
+    // A retained attempt row with no HTTP response is a transport error.
+    const transportAttempt = {
+      ...baseRow,
+      status: 0,
+      error: "Upstream transport error",
+      requestType: "upstream_http_attempt",
+    };
+    assert.equal(rowMatchesFilter(transportAttempt, { status: "error" }), true);
+  });
 });
