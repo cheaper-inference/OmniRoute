@@ -29,7 +29,7 @@ import {
 // ── small tables — full snapshot ─────────────────────────────────────────────
 
 describe("migrationRunner/constants — exact small-table snapshots", () => {
-  it("LEGACY_VERSION_SLOT_MIGRATIONS is the 9-entry list, in order", () => {
+  it("LEGACY_VERSION_SLOT_MIGRATIONS is the 16-entry list, in order", () => {
     assert.deepEqual(
       LEGACY_VERSION_SLOT_MIGRATIONS.map((m) => `${m.version}:${m.name}`),
       [
@@ -42,6 +42,13 @@ describe("migrationRunner/constants — exact small-table snapshots", () => {
         "033:add_batch_id_to_call_logs",
         "046:remove_status_from_files",
         "051:remove_status_from_files",
+        "140:ccr_blocks",
+        "141:api_key_cache_default_mode",
+        "142:connection_runtime_state",
+        "176:provider_connection_synced_models_at",
+        "177:xp_action_counts",
+        "178:memory_fts_skip_access_updates",
+        "197:model_capabilities_reasoning_efforts",
       ]
     );
   });
@@ -70,8 +77,42 @@ describe("migrationRunner/constants — exact small-table snapshots", () => {
 // ── large tables — count + shape + spot-checks (corruption guard) ─────────────
 
 describe("migrationRunner/constants — large-table integrity", () => {
-  it("RENAMED_MIGRATION_COMPATIBILITY has 39 well-formed entries", () => {
-    assert.equal(RENAMED_MIGRATION_COMPATIBILITY.length, 39);
+  it("RENAMED_MIGRATION_COMPATIBILITY has 64 well-formed entries", () => {
+    assert.equal(RENAMED_MIGRATION_COMPATIBILITY.length, 64);
+    assert.deepEqual(
+      RENAMED_MIGRATION_COMPATIBILITY.filter((entry) => entry.fromName === "daily_cached_input"),
+      ["206", "213", "214", "215", "217", "218", "223", "224", "225", "226", "228", "229"].map(
+        (fromVersion) => ({
+          fromVersion,
+          fromName: "daily_cached_input",
+          toVersion: "231",
+          toName: "daily_cached_input",
+        })
+      )
+    );
+    assert.deepEqual(
+      RENAMED_MIGRATION_COMPATIBILITY.filter((entry) => entry.fromName === "proxy_payload_traffic"),
+      [
+        "206",
+        "207",
+        "213",
+        "214",
+        "215",
+        "217",
+        "218",
+        "223",
+        "224",
+        "225",
+        "226",
+        "228",
+        "229",
+      ].map((fromVersion) => ({
+        fromVersion,
+        fromName: "proxy_payload_traffic",
+        toVersion: "232",
+        toName: "proxy_payload_traffic",
+      }))
+    );
     for (const e of RENAMED_MIGRATION_COMPATIBILITY) {
       assert.equal(typeof e.fromVersion, "string");
       assert.equal(typeof e.fromName, "string");

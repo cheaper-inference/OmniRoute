@@ -199,39 +199,39 @@ env ইনজেক্ট করে এবং কোনো কনফিগ ন�
 
 ## প্রোটোকল সেটআপ (MCP + A2A)
 
-### MCP সেটআপ (Model Context Protocol)
+### MCP সেটআপ (মডেল প্রসঙ্গ প্রোটোকল)
 
-stdio মোডে MCP ট্রান্সপোর্ট চালু করুন:
+stdio মোডে MCP পরিবহন শুরু করুন:
 
 ```bash
 omniroute --mcp
 ```
 
-প্রস্তাবিত যাচাইকরণ প্রবাহ:
+প্রস্তাবিত বৈধতা প্রবাহ:
 
 ```bash
-# 1. MCP সার্ভার চালু করুন
+# 1. Start MCP server
 omniroute --mcp
 
-# 2. আপনার MCP ক্লায়েন্ট থেকে কল করুন:
-omniroute_get_health        # সিস্টেমের স্বাস্থ্যাবস্থা ফেরত দেওয়া উচিত
-omniroute_list_combos       # সক্রিয় কম্বোগুলো ফেরত দেওয়া উচিত
+# 2. From your MCP client, call:
+omniroute_get_health        # Should return system health
+omniroute_list_combos       # Should return active combos
 
-# 3. অথবা সম্পূর্ণ E2E স্যুট চালান:
+# 3. Or run the full E2E suite:
 npm run test:protocols:e2e
 ```
 
 #### MCP ক্লায়েন্ট কনফিগারেশন
 
-**Claude Code:**
+**Claude কোড:**
 
 ```bash
-claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
 ```
 
 **Cursor / Cline:**
 
-আপনার MCP সেটিংসে যোগ করুন:
+আপনার MCP সেটিংসে যোগ করুন (stdio, কী সহ যাতে কলারের একটি প্রধান থাকে):
 
 ```json
 {
@@ -239,17 +239,24 @@ claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp
     "omniroute": {
       "command": "omniroute",
       "args": ["--mcp"],
-      "env": {}
+      "env": {
+        "OMNIROUTE_API_KEY": "your-key",
+        "OMNIROUTE_BASE_URL": "http://localhost:20128"
+      }
     }
   }
 }
 ```
 
-**সম্পূর্ণ MCP ডকুমেন্টেশন:** [MCP Server README](../../open-sse/mcp-server/README.md) — 110টি টুল, IDE কনফিগ, Python/TS/Go ক্লায়েন্ট।
+অথবা, যখন `mcpTransport` `streamable-http` হয় (এটি `/dashboard/mcp` বা `omniroute mcp enable --transport streamable-http` এর সাথে সেট করুন), ক্লায়েন্টের রিমোট MCP সার্ভার এন্ট্রি `http://localhost:20128/api/mcp/stream` এ নির্দেশ করুন।
 
-### A2A সেটআপ (Agent-to-Agent Protocol)
+কী `Authorization: Bearer <api-key>` হিসাবে ভ্রমণ করে (দূরবর্তী হোস্টের জন্য [MCP সার্ভার → দূরবর্তী অ্যাক্সেস](../frameworks/MCP-SERVER.md#remote-access-manage-scope-bypass) দেখুন; একটি দূরবর্তী কীর জন্য `mcp:connect` এবং এর read/write স্কোপের প্রয়োজন)।
 
-Agent Card যাচাই করুন:
+**সম্পূর্ণ MCP ডকুমেন্টেশন:** [MCP সার্ভার README](../../open-sse/mcp-server/README.md) — 110 সরঞ্জাম, IDE কনফিগারেশন, Python/TS/Go ক্লায়েন্ট। কম্প্রেশন CCR/dedup টুলগুলির জন্য অপারেটর রেফারেন্স (মার্কার, পূর্বশর্ত, প্রতি-টুল স্কোপ, পুনরুদ্ধার পৃষ্ঠা, ডায়াগনস্টিক): [কম্প্রেশন ইঞ্জিন → পূর্বশর্ত / অপারেটর গাইড](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup) ।
+
+### A2A সেটআপ (এজেন্ট থেকে এজেন্ট প্রোটোকল)
+
+এজেন্ট কার্ড যাচাই করুন:
 
 ```bash
 curl http://localhost:20128/.well-known/agent.json
@@ -263,7 +270,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"Give me a short quota summary."}]}}'
 ```
 
-**সম্পূর্ণ A2A ডকুমেন্টেশন:** [A2A Server README](../../src/lib/a2a/README.md) — JSON-RPC 2.0, স্কিল, স্ট্রিমিং, টাস্ক লাইফসাইকেল।
+**সম্পূর্ণ A2A ডকুমেন্টেশন:** [A2A সার্ভার README](../../src/lib/a2a/README.md) — JSON-RPC 2.0, দক্ষতা, স্ট্রিমিং, টাস্ক লাইফসাইকেল।
 
 ---
 
@@ -322,12 +329,12 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ---
 
-## Void Linux (`xbps-src`) টেমপ্লেট
+## void Linux (xbps-src) টেমপ্লেট
 
-Void Linux ব্যবহারকারীরা `xbps-src` ব্যবহার করে একটি নেটিভ প্যাকেজ তৈরি করতে পারেন। এই ব্লকটি `srcpkgs/omniroute/template` হিসেবে সংরক্ষণ করুন:
+Void Linux ব্যবহারকারীদের জন্য, আপনি `xbps-src` ব্যবহার করে একটি নেটিভ প্যাকেজ তৈরি করতে পারেন। এই ব্লকটি `srcpkgs/omniroute/template` হিসাবে সংরক্ষণ করুন:
 
 ```bash
-# 'omniroute'-এর জন্য টেমপ্লেট ফাইল
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -338,7 +345,7 @@ maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# প্রতিটি রিলিজের জন্য চেকসাম পুনরায় তৈরি করুন এভাবে:
+# Regenerate the checksum for each release with:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

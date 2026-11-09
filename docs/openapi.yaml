@@ -1567,6 +1567,9 @@ paths:
         "200":
           description: Chat completion response (or SSE stream)
           headers:
+            X-OmniRoute-Video-Drilldown:
+              description: Up to four comma-separated opaque handles after explicitly consented authenticated video analysis; absent without retained frames. Also available on SSE success responses.
+              schema: { type: string, maxLength: 259 }
             X-OmniRoute-Response-Cost:
               schema:
                 type: string
@@ -2913,6 +2916,137 @@ paths:
           description: Created API key (includes full key value)
         "401":
           description: Authentication required
+
+  /api/keys/import:
+    post:
+      tags: [API Keys]
+      summary: Import a caller-supplied API key without replacing existing keys
+      description: |
+        Uses the same management authentication as POST /api/keys: dashboard session,
+        local CLI credential, manage/admin-scoped API key, or an admin oma_ access token.
+        read/write oma_ tokens are insufficient. When login is disabled, inference-only
+        imports may be anonymous, but importing manage/admin scopes requires a real
+        management credential, including retries against an existing management-scoped key.
+
+        Accepts a 32–256 character ASCII key beginning with sk-, followed only by
+        A–Z, a–z, 0–9, underscore or hyphen. No machine-id or CRC validation is performed.
+        Whitespace is rejected, never trimmed. Configured environment API keys and the
+        internal self-loop credential cannot be imported because they bypass row policy.
+
+        An explicit existing id with the same key hash returns 200 and the existing
+        stored policy without mutation; requested name/policy changes are ignored.
+        An existing id with a different value, or the same value at another id, returns
+        409 without disclosing another id. Without id, a UUID is generated and duplicate
+        values return 409, not 200. New imports return 201. No rekey is performed.
+
+        Identity checks and the complete policy insert run in one synchronous SQLite
+        IMMEDIATE transaction. Uses create-key defaults and scope normalization (adds
+        self:usage and removes duplicates). Unknown fields, including isActive, are
+        ignored just as on create; change active state through the existing PATCH route.
+        No settings, providers, combos or session state is imported. This does not change
+        the operator-only import-json restore permissions. Cloud sync is best-effort and
+        asynchronous for new imports only. Secrets use enc:v1 encryption at rest when
+        storage encryption is configured; otherwise upstream plaintext storage applies.
+        Responses contain only id/name, a masked key and whitelisted stored policy fields,
+        never the full secret, hash, key prefix column or machine identifier.
+      security:
+        - ManagementSessionAuth: []
+        - BearerAuth: []
+        - {}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, key]
+              description: |
+                Policy fields and refinements match createKeySchema. modelAccessMode all
+                requires empty/omitted allowedModels; lease:exclusive requires connections.
+                Without a mode, nonempty allowedModels implies restricted, otherwise all.
+                Omitted combos default to ["combo/*"]; explicit [] denies all combos.
+                Zero/null usage limits mean no cap for that period. Unknown fields ignored.
+              properties:
+                id:
+                  type: string
+                  format: uuid
+                key:
+                  type: string
+                  minLength: 32
+                  maxLength: 256
+                  pattern: '^sk-[A-Za-z0-9_-]+$(?![\s\S])'
+                  writeOnly: true
+                name:
+                  type: string
+                  minLength: 1
+                  maxLength: 200
+                modelAccessMode:
+                  type: string
+                  enum: [all, restricted]
+                allowedModels:
+                  type: array
+                  maxItems: 1000
+                  items: { type: string, minLength: 1 }
+                allowedCombos:
+                  type: array
+                  maxItems: 500
+                  items: { type: string, minLength: 1, maxLength: 200 }
+                allowedConnections:
+                  type: array
+                  minItems: 1
+                  maxItems: 100
+                  items: { type: string, format: uuid }
+                preferredConnections:
+                  type: array
+                  maxItems: 100
+                  description: Ordered preference; must be a subset of allowedConnections when both are set
+                  items: { type: string, format: uuid }
+                scopes:
+                  type: array
+                  maxItems: 32
+                  items: { type: string, minLength: 1, maxLength: 64 }
+                noLog: { type: boolean, default: false }
+                allowUsageCommand: { type: boolean, default: false }
+                usageLimitEnabled: { type: boolean, default: false }
+                dailyUsageLimitUsd:
+                  type: [number, string, "null"]
+                  description: Nonnegative number or numeric string; zero/null clears the cap
+                weeklyUsageLimitUsd:
+                  type: [number, string, "null"]
+                  description: Nonnegative number or numeric string; zero/null clears the cap
+                chaosModeEnabled: { type: boolean, default: false }
+                expiresAt:
+                  type: [string, "null"]
+                  format: date-time
+      responses:
+        "200":
+          description: |
+            Idempotent retry, no mutation. Returns existing id, name, masked key and stored
+            policy (model/connection/combo access, scopes, active/banned/revoked/expiry state,
+            logging, rate/usage/session/IP limits, endpoints, proxy, stream/cache/compression,
+            auto-combo/catalog/forced-model and Codex service policy). Never returns key hash.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ImportedApiKey"
+        "201":
+          description: New fully configured key imported; same masked response fields as 200
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ImportedApiKey"
+        "400":
+          description: Malformed JSON or invalid key, UUID, name or create-policy fields/refinements
+        "401":
+          description: Missing required credential or invalid/expired oma_ access token
+        "403":
+          description: Invalid management API key or insufficient API-key/access-token scope
+        "409":
+          description: ID/value conflict, duplicate value or reserved credential; no other ID disclosed
+        "500":
+          description: Sanitized import/storage failure; transaction rolls back on insertion failure
+        "503":
+          description: Management authentication backend temporarily unavailable
 
   /api/keys/{id}:
     get:
@@ -8150,7 +8284,7 @@ paths:
       x-loopback-only: true
       tags: [System]
       summary: Read a bounded Video Bridge drill-down slice
-      description: Internal loopback/token-authenticated lookup into a short-lived cache isolated by an opaque principal, session, and media reference. It never downloads media or starts a subprocess; start/end and frame count only select already materialized, canonicalized JPEG frames whose dimensions were derived from their bytes. This cache substrate is not yet wired to the transparent Video Bridge request path and does not yet expose multi-resolution selection.
+      description: Internal loopback/token-authenticated raw cache substrate, isolated by an opaque principal, session and media reference. It never downloads media or starts a subprocess. The transparent producer and authenticated public variant consumer use their own shared opaque-handle lifecycle at /api/v1/video-bridge/drilldown; this raw endpoint does not expose multi-resolution selection.
       security: []
       parameters:
         - in: header
@@ -11777,6 +11911,52 @@ paths:
       responses:
         "200":
           description: OK
+  /api/intelligence/overrides:
+    delete:
+      tags:
+        - Intelligence
+      summary: "DELETE intelligence › overrides"
+      description: Removes a `user_override` fitness entry for a model and task category. `model` and `category` come from the query string or a JSON body. Idempotent.
+      parameters:
+        - in: query
+          name: model
+          schema: { type: string }
+        - in: query
+          name: category
+          schema: { type: string }
+      responses:
+        "200":
+          description: Override removed (`deleted` is false when none existed)
+        "400":
+          description: model or category missing
+        "401":
+          description: Management authentication required
+    post:
+      tags:
+        - Intelligence
+      summary: "POST intelligence › overrides"
+      description: Sets a `user_override` fitness score (0..1) for a model and task category and invalidates the in-memory fitness cache.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [model, category, score]
+              additionalProperties: false
+              properties:
+                model: { type: string, minLength: 1 }
+                category:
+                  type: string
+                  enum: [coding, review, planning, analysis, debugging, documentation, default]
+                score: { type: number, minimum: 0, maximum: 1 }
+      responses:
+        "200":
+          description: Override stored
+        "400":
+          description: Invalid request body
+        "401":
+          description: Management authentication required
   /api/intelligence/sync:
     delete:
       tags:
@@ -11796,9 +11976,25 @@ paths:
       tags:
         - Intelligence
       summary: "POST intelligence › sync"
+      description: Triggers an intelligence sync. A body without a source flag runs the Arena ELO sync (`dryRun` previews it without writing); `rebuildTier` rebuilds only the persisted `models_dev_tier` source; `syncArenaElo` forces the Arena sync alongside it.
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                dryRun: { type: boolean }
+                rebuildTier: { type: boolean, default: false }
+                syncArenaElo: { type: boolean, default: false }
       responses:
         "200":
-          description: OK
+          description: Sync completed; `tier` carries `{ upserted, pruned }` when `rebuildTier` was set
+        "400":
+          description: Invalid request body
+        "502":
+          description: The Arena ELO sync failed
   /api/internal/codex-responses-ws:
     post:
       tags:
@@ -15116,16 +15312,36 @@ paths:
       tags:
         - V1 Accounts
       summary: "GET accounts › <id> › limits"
+      description: >
+        Management-only, like `/api/v1/registered-keys`: a dashboard session, the local CLI
+        token, or an API key with `manage`/`admin` scope. Inference-only API keys get 403.
+      security:
+        - BearerAuth: []
+        - ManagementSessionAuth: []
       responses:
         "200":
           description: OK
+        "401":
+          $ref: "#/components/responses/ManagementAuthenticationRequired"
+        "403":
+          $ref: "#/components/responses/ManagementInvalidToken"
     put:
       tags:
         - V1 Accounts
       summary: "PUT accounts › <id> › limits"
+      description: >
+        Management-only, like `/api/v1/registered-keys`: a dashboard session, the local CLI
+        token, or an API key with `manage`/`admin` scope. Inference-only API keys get 403.
+      security:
+        - BearerAuth: []
+        - ManagementSessionAuth: []
       responses:
         "200":
           description: OK
+        "401":
+          $ref: "#/components/responses/ManagementAuthenticationRequired"
+        "403":
+          $ref: "#/components/responses/ManagementInvalidToken"
   /api/v1/agents/credentials:
     get:
       tags:
@@ -15373,9 +15589,19 @@ paths:
       tags:
         - V1 Issues
       summary: "POST issues › report"
+      description: >
+        Management-only, like `/api/v1/registered-keys`: a dashboard session, the local CLI
+        token, or an API key with `manage`/`admin` scope. Inference-only API keys get 403.
+      security:
+        - BearerAuth: []
+        - ManagementSessionAuth: []
       responses:
         "200":
           description: OK
+        "401":
+          $ref: "#/components/responses/ManagementAuthenticationRequired"
+        "403":
+          $ref: "#/components/responses/ManagementInvalidToken"
   /api/v1/management/proxies:
     delete:
       tags:
@@ -15480,16 +15706,36 @@ paths:
       tags:
         - V1 Providers
       summary: "GET providers › <provider> › limits"
+      description: >
+        Management-only, like `/api/v1/registered-keys`: a dashboard session, the local CLI
+        token, or an API key with `manage`/`admin` scope. Inference-only API keys get 403.
+      security:
+        - BearerAuth: []
+        - ManagementSessionAuth: []
       responses:
         "200":
           description: OK
+        "401":
+          $ref: "#/components/responses/ManagementAuthenticationRequired"
+        "403":
+          $ref: "#/components/responses/ManagementInvalidToken"
     put:
       tags:
         - V1 Providers
       summary: "PUT providers › <provider> › limits"
+      description: >
+        Management-only, like `/api/v1/registered-keys`: a dashboard session, the local CLI
+        token, or an API key with `manage`/`admin` scope. Inference-only API keys get 403.
+      security:
+        - BearerAuth: []
+        - ManagementSessionAuth: []
       responses:
         "200":
           description: OK
+        "401":
+          $ref: "#/components/responses/ManagementAuthenticationRequired"
+        "403":
+          $ref: "#/components/responses/ManagementInvalidToken"
   /api/v1/quota-recoveries/{id}:
     parameters:
       - name: id
@@ -15720,20 +15966,102 @@ paths:
         "200":
           description: Model list (same shape as GET /api/v1/models).
   /api/v1/video-bridge/drilldown:
-    delete:
-      tags:
-        - V1 Video-bridge
-      summary: "DELETE video bridge › drilldown"
-      responses:
-        "200":
-          description: OK
     get:
-      tags:
-        - V1 Video-bridge
-      summary: "GET video bridge › drilldown"
+      tags: [System]
+      summary: Read authenticated tenant-bound video frame variants
+      description: Requires explicit remote drill-down operator consent and an authenticated API key. A nonempty API-key endpoint allowlist must include video. Resolves an opaque handle from the x-omniroute-video-drilldown chat response header; never accepts a client principal, raw video or session ID. JSON including Base64 is limited to 32 MiB. Unknown, expired and cross-key handles return indistinguishable 404 responses. Handles are process-local and expire after ten minutes or a restart.
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: query
+          name: handle
+          required: true
+          schema: { type: string, pattern: "^(?:v1\\.[A-Za-z0-9_-]{43}|[0-9a-f]{64})$" }
+        - in: query
+          name: variant
+          schema: { type: string, enum: [preview, standard, detail], default: detail }
+          description: JPEG maximum dimension 320, 640 or 1280 respectively; never upscaled.
+        - in: query
+          name: limit
+          schema: { type: integer, minimum: 1, maximum: 8 }
+          description: Page frame limit; cannot be combined with the legacy frames alias.
+        - in: query
+          name: frames
+          schema: { type: integer, minimum: 1, maximum: 8 }
+          deprecated: true
+        - in: query
+          name: page
+          schema: { type: integer, minimum: 0, default: 0 }
+        - in: query
+          name: start
+          schema: { type: number, minimum: 0 }
+        - in: query
+          name: end
+          schema: { type: number, minimum: 0 }
+          description: Must follow start when both bounds are supplied. Duplicate or unknown query keys are rejected.
       responses:
         "200":
-          description: OK
+          description: No-store page with actual variant derivation metadata and bounded JPEG frames
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [derivation, durationSeconds, frames, hasMore, page, variant]
+                properties:
+                  derivation:
+                    {
+                      type: object,
+                      description: "Content hash, parent hash, policy, version, creation time and actual JPEG resolution.",
+                    }
+                  durationSeconds: { type: number }
+                  focusWindow: { type: object }
+                  frames:
+                    type: array
+                    maxItems: 8
+                    items:
+                      type: object
+                      required: [dataUri, timestampSeconds, width, height]
+                      properties:
+                        dataUri: { type: string }
+                        timestampSeconds: { type: number }
+                        width: { type: integer }
+                        height: { type: integer }
+                  hasMore: { type: boolean }
+                  page: { type: integer, minimum: 0 }
+                  variant: { type: string, enum: [preview, standard, detail] }
+        "400": { description: Invalid or ambiguous query }
+        "401": { description: Authentication required or invalid API key }
+        "403": { description: Remote access disabled or API-key policy denied }
+        "404": { description: "Unknown, expired or cross-key handle" }
+        "413": { description: Serialized response exceeds 32 MiB; request fewer frames }
+        "499": { description: Request cancelled }
+        "503": { description: Temporarily unavailable; sanitized error }
+    delete:
+      tags: [System]
+      summary: Delete an authenticated owner's video drill-down handle
+      description: Idempotent; unknown, expired or cross-key handles remove zero entries. Releases retained frames and accounting for the owner only. Remote operator consent and a valid API key are always required. A nonempty API-key endpoint allowlist must include video.
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: query
+          name: handle
+          required: true
+          schema: { type: string, pattern: "^(?:v1\\.[A-Za-z0-9_-]{43}|[0-9a-f]{64})$" }
+      responses:
+        "200":
+          description: No-store deletion result
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [removed]
+                properties:
+                  removed: { type: integer, minimum: 0, maximum: 1 }
+        "400": { description: Invalid handle or ambiguous query }
+        "401": { description: Authentication required or invalid API key }
+        "403": { description: Remote access disabled or API-key policy denied }
+        "499": { description: Request cancelled }
+        "503": { description: Temporarily unavailable; sanitized error }
   /api/v1/videos/generations:
     get:
       tags:
@@ -16278,6 +16606,169 @@ paths:
         "401": { description: Unauthorized }
         "404": { description: Team not found }
 
+  /api/v1/fal/models:
+    get:
+      x-agent-skill-excluded: true
+      tags: [Models]
+      summary: Discover Fal endpoints or load one endpoint's validated schema
+      security:
+        - BearerAuth: []
+      parameters:
+        - { in: query, name: endpoint_id, schema: { type: string } }
+        - { in: query, name: connection_id, schema: { type: string } }
+        - { in: query, name: q, schema: { type: string } }
+        - { in: query, name: category, schema: { type: string } }
+        - { in: query, name: cursor, schema: { type: string } }
+        - { in: query, name: limit, schema: { type: integer, minimum: 1 } }
+        - { in: query, name: refresh, schema: { type: boolean } }
+      responses:
+        "200": { description: Catalog page or endpoint schema and capabilities }
+        "400": { description: Invalid endpoint or schema }
+        "502": { description: Upstream discovery unavailable or incomplete }
+  /api/v1/fal/run:
+    post:
+      x-agent-skill-excluded: true
+      tags: [Providers]
+      summary: Execute validated native Fal model inputs
+      security:
+        - BearerAuth: []
+      parameters:
+        - {
+            in: header,
+            name: Idempotency-Key,
+            schema: { type: string },
+            description: Stable queue submission key,
+          }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [endpoint_id, input]
+              properties:
+                endpoint_id:
+                  {
+                    type: string,
+                    description: Canonical owner/app/subpath without gateway provider prefix,
+                  }
+                connection_id: { type: string }
+                transport:
+                  {
+                    type: string,
+                    enum: [queue, direct, stream, realtime, http-websocket],
+                    default: queue,
+                  }
+                input: { type: object, additionalProperties: true }
+      responses:
+        "200": { description: Native output and artifacts, or native SSE/realtime events }
+        "202": { description: Persisted queue job receipt with gateway tracking URLs }
+        "400": { description: Invalid inputs or undocumented transport }
+        "401": { description: Missing authentication or Fal credentials }
+        "403": { description: Model, endpoint or connection scope refused }
+        "429": { description: Rate, quota or budget limit }
+        "502":
+          {
+            description: Upstream failure; recover uncertain queue submissions with the same idempotency key,
+          }
+        "504": { description: Upstream wait timed out }
+  /api/v1/fal/jobs/{id}:
+    parameters:
+      - { in: path, name: id, required: true, schema: { type: string } }
+    get:
+      x-agent-skill-excluded: true
+      tags: [Providers]
+      summary: Poll a saved Fal job or retrieve its result without resubmission
+      security:
+        - BearerAuth: []
+      parameters:
+        - { in: query, name: result, schema: { type: boolean } }
+        - {
+            in: query,
+            name: artifact,
+            schema: { type: string },
+            description: Authenticated binary file ID; same worker,
+            expires after 10 minutes,
+          }
+      responses:
+        "200":
+          {
+            description: Job status,
+            native output and artifacts,
+            or an authenticated binary download with upstream content type,
+          }
+        "202": { description: Submission outcome is still unknown }
+        "403": { description: Connection is outside the caller's scope }
+        "404": { description: Job not found or not owned by caller }
+    post:
+      x-agent-skill-excluded: true
+      tags: [Providers]
+      summary: Send one authorized invocation to an active Fal realtime or HTTP WebSocket
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [input]
+              additionalProperties: false
+              properties:
+                input: { type: object, additionalProperties: true }
+      responses:
+        "200": { description: Input sent; results arrive on the original native SSE connection }
+        "409": { description: Previous HTTP WebSocket invocation has not ended }
+        "410": { description: WebSocket session expired or belongs to another worker }
+        "429": { description: Rate, quota or budget limit }
+    delete:
+      x-agent-skill-excluded: true
+      tags: [Providers]
+      summary: Cancel a saved Fal job or close its realtime session
+      security:
+        - BearerAuth: []
+      responses:
+        "200": { description: Queued job cancelled or realtime socket closed }
+        "202": { description: Cancellation requested; upstream may still finish }
+        "409": { description: Upstream did not provide cancellation for this job }
+  /api/providers/{id}/fal:
+    parameters:
+      - { in: path, name: id, required: true, schema: { type: string } }
+    get:
+      x-agent-skill-excluded: true
+      tags: [Providers]
+      summary: Search Fal models or load a schema for a managed connection
+      responses:
+        "200": { description: Catalog page or validated endpoint schema }
+    put:
+      x-agent-skill-excluded: true
+      tags: [Providers]
+      summary: Register a validated native Fal endpoint or schema override
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [endpoint_id, openapi]
+              additionalProperties: false
+              properties:
+                endpoint_id: { type: string }
+                openapi: { type: object, additionalProperties: true }
+                metadata: { type: object, additionalProperties: true }
+      responses:
+        "200": { description: Schema validated and saved with native execution path }
+        "400": { description: Invalid registration or input schema }
+    delete:
+      x-agent-skill-excluded: true
+      tags: [Providers]
+      summary: Remove a Fal endpoint override and cached schema
+      parameters:
+        - { in: query, name: endpoint_id, required: true, schema: { type: string } }
+      responses:
+        "200": { description: Cached schema or override removed }
+
 components:
   securitySchemes:
     BearerAuth:
@@ -16406,6 +16897,54 @@ components:
             requestId: 0a1b2c3d-4e5f-6a7b-8c9d-0e1f2a3b4c5d
 
   schemas:
+    ImportedApiKey:
+      type: object
+      additionalProperties: false
+      required: [id, name, key, scopes, modelAccessMode, isActive]
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        key: { type: string, description: Masked key only; never a usable bearer }
+        modelAccessMode: { type: string, enum: [all, restricted] }
+        allowedModels: { type: array, items: { type: string } }
+        blockedModels: { type: array, items: { type: string } }
+        allowedCombos: { type: array, items: { type: string } }
+        allowedConnections: { type: array, items: { type: string } }
+        preferredConnections: { type: array, items: { type: string } }
+        allowedQuotas: { type: array, items: { type: string } }
+        scopes: { type: array, items: { type: string } }
+        noLog: { type: boolean }
+        autoResolve: { type: boolean }
+        isActive: { type: boolean }
+        isBanned: { type: boolean }
+        revokedAt: { type: [string, "null"] }
+        expiresAt: { type: [string, "null"] }
+        accessSchedule: { type: [object, "null"] }
+        maxRequestsPerDay: { type: [integer, "null"] }
+        maxRequestsPerMinute: { type: [integer, "null"] }
+        throttleDelayMs: { type: [integer, "null"] }
+        rateLimits: { type: [array, "null"], items: { type: object } }
+        maxSessions: { type: integer }
+        ipAllowlist:
+          description: Stored IP allowlist representation
+          type: [string, array, "null"]
+          items: { type: string }
+        proxyId: { type: [string, "null"] }
+        allowedEndpoints: { type: array, items: { type: string } }
+        streamDefaultMode: { type: string, enum: [legacy, json] }
+        cacheDefaultMode: { type: string, enum: [legacy, bypass] }
+        codexServiceMode: { type: string, enum: [inherit, default, priority, flex] }
+        disableNonPublicModels: { type: boolean }
+        allowUsageCommand: { type: boolean }
+        usageLimitEnabled: { type: boolean }
+        dailyUsageLimitUsd: { type: [number, "null"] }
+        weeklyUsageLimitUsd: { type: [number, "null"] }
+        chaosModeEnabled: { type: boolean }
+        compressionEnabled: { type: boolean }
+        allowAutoCombos: { type: boolean }
+        allowCcDiscoveryAliases: { type: boolean }
+        catalogScope: { type: string, enum: [all, combos, models] }
+        forcedModel: { type: [string, "null"] }
     CliVersionStatus:
       type: object
       description: >-
