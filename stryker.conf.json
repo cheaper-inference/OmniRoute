@@ -104,6 +104,7 @@
       "tests/unit/valid-empty-stop-dispatch-16072.test.ts",
       "tests/unit/copilot-rejection-cache-15634.test.ts",
       "tests/unit/copilot-learned-catalog-15634.test.ts",
+      "tests/unit/copilot-rejection-version-cache.test.ts",
       "tests/unit/combo-model-lock-pre-dispatch-wait-16319.test.ts",
       "tests/unit/responses-refusal-preservation.test.ts",
       "tests/unit/pre-dispatch-error-route-meta.test.ts",
