@@ -404,7 +404,7 @@ The retrieve tool is currently named `omniroute_ccr_retrieve` (the `omniroute_` 
 
 ### Session lifecycle
 
-Streamable-HTTP sessions idle out and the server reaps them; the idle window is the `MCP_SESSION_IDLE_MS` constant (referenced by name, not a hardcoded value, so this page does not drift when it changes). The symptom of an idle-reaped session is an HTTP 404 with `Unknown Mcp-Session-Id` — the remedy is to reconnect or restart the session, **not** to rotate a key, change a scope, or rename a tool.
+Streamable-HTTP sessions idle out and the server reaps them; the idle window is configured with `OMNIROUTE_MCP_SESSION_IDLE_MS` (milliseconds), with a five-minute fallback when the override is unset, non-numeric, non-integer, or non-positive. The symptom of an idle-reaped session is an HTTP 404 with `Unknown Mcp-Session-Id` — the remedy is to reconnect or restart the session, **not** to rotate a key, change a scope, or rename a tool.
 
 ## API Surface
 
