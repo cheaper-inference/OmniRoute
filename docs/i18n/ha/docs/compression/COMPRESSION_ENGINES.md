@@ -391,7 +391,7 @@ A halin yanzu ana kiran kayan aikin maido da `omniroute_ccr_retrieve` (prefix ɗ
 
 ### Zagayowar rayuwa
 
-Streamable-HTTP zaman mara amfani da uwar garken girbe su; taga mara aiki shine kullun `MCP_SESSION_IDLE_MS` (wanda ake magana da suna, ba ƙima mai ƙima ba, don haka wannan shafin ba ya jujjuya lokacin da ya canza). Alamar zaman girbi mara aiki shine HTTP 404 tare da `Unknown Mcp-Session-Id` — maganin shine sake haɗawa ko sake farawa zaman,** ba** don juya maɓalli, canza iyaka, ko sake suna kayan aiki.
+Streamable-HTTP zaman mara amfani da uwar garken girbe su; an saita taga mara aiki ta hanyar `OMNIROUTE_MCP_SESSION_IDLE_MS` (tsohon mintuna 5; ana magana da suna, ba ƙima mai lamba ba, don haka wannan shafin baya yin shuɗi lokacin da ya canza). Alamar zaman girbi mara aiki shine HTTP 404 tare da `Unknown Mcp-Session-Id` — maganin shine sake haɗawa ko sake farawa zaman,** ba** don juya maɓalli, canza iyaka, ko sake suna kayan aiki.
 
 ## Fuskar API
 

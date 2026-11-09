@@ -7185,7 +7185,31 @@
     "fallbackRetryBackendTitle": "Əvəzleyici təkrar cəhd backendi"
   },
   "settings": {
-    "proxyManagedCoresTab": "İdarə olunan nüvələr",
+    "proxyTraffic": {
+      "persistenceIncomplete": "Bu prosesdə trafikin bir hissəsi yadda saxlanıla bilmədi. Saxlanmış yekunlar natamamdır; server diaqnostikasını yoxlayın.",
+      "title": "OmniRoute faydalı yük trafiki",
+      "description": "Göndərilməyə təqdim edilmiş yükləmə gövdələri və OmniRoute-un oxuduğu endirmə baytları. Şəbəkə/xətt trafiki və ya xidmət təminatçısının hesablaması deyil. Ümumi yekuna ayrıca işarələnmiş birbaşa və aidiyyəti müəyyən edilməmiş trafik daxildir.",
+      "coverageNote": "Ölçmə başladıqdan bəri yığılmış yekunlar. Ölçüsü bilinməyən yükləmələr (axınlar, FormData, Request gövdələri) bayt yekunlarına daxil deyil. Oxunmamış və ya bitməmiş endirmələr natamamdır; uğursuz göndərişlər yükləmənin çatdırıldığını sübut etmir. Nəqliyyat qatının daxili yönləndirmələri/təkrar cəhdləri və ölçmə yolundan kənar nəqliyyatlar ayrıca ölçülmür.",
+      "refresh": "Yenilə",
+      "overall": "Ümumi (müşahidə edilən bütün marşrutlar)",
+      "proxied": "Proksi üzrə ara yekun (birbaşa/aidiyyətsiz trafik olmadan)",
+      "direct": "Birbaşa (proksisiz)",
+      "unattributed": "Aidiyyəti müəyyən edilməmiş dispetçer",
+      "removed": "Silinmiş proksi ({id})",
+      "legacy": "Köhnə/mühitdən təyin edilmiş proksi ({id})",
+      "route": "Marşrut",
+      "upload": "Göndərilməyə təqdim edilmiş yükləmə",
+      "download": "Oxunmuş endirmə",
+      "attempts": "Cəhdlər",
+      "knownUpload": "Ölçüsü məlum yükləmələr / cəhdlər",
+      "completed": "Tam endirmələr / cəhdlər",
+      "failed": "Göndərmə uğursuzluqları",
+      "cancelled": "Ləğv edilmiş endirmələr",
+      "errored": "Endirmə xətaları",
+      "loading": "Faydalı yük trafiki yüklənir…",
+      "empty": "Hələ faydalı yük trafiki ölçülməyib.",
+      "error": "Faydalı yük trafiki yüklənə bilmədi. Yeniləməyə çalışın."
+    },
     "title": "Parametrlər",
     "general": "Ümumi",
     "security": "Təhlükəsizlik",
@@ -9366,7 +9390,8 @@
     "modalityBridgeVideoDrilldownEnabledDesc": "Müvəqqəti JPEG fayllarının saxlanmasına yalnız autentifikasiya olunmuş sorğuda drilldown: true təyin edildikdə icazə verin. Xam videolar heç vaxt saxlanmır.",
     "modalityBridgeVideoDrilldownRemoteEnabled": "Autentifikasiya olunmuş kadrların təfərrüatlarına baxmağa icazə verin",
     "modalityBridgeVideoDrilldownRemoteEnabledDesc": "API açarlarına yalnız öz qeyri-şəffaf identifikatorlarını oxumağa və silməyə icazə verin. Anonim və ya digər açarlar vasitəsilə giriş qadağandır.",
-    "modalityBridgeVideoDrilldownUsage": "Saxlanılan JPEG faylları / baytlar"
+    "modalityBridgeVideoDrilldownUsage": "Saxlanılan JPEG faylları / baytlar",
+    "proxyManagedCoresTab": "İdarə olunan nüvələr"
   },
   "contextRtk": {
     "title": "RTK Mühərriki",
@@ -11743,21 +11768,6 @@
     "daysAgo": "{days} gün əvvəl",
     "entries": "Qeydlər",
     "viewSwitcherAria": "Keş görünüşü"
-  },
-  "managedProxy": {
-    "title": "İdarə olunan proksi nüvələri",
-    "description": "Saxlamaq və təyin etmək üçün tunel keçidini fərdi proksinin host sahəsinə yapışdırın. Burada heç bir təyinatı dəyişmədən yerli çıxış JSON tərifini də saxlaya bilərsiniz.",
-    "saveHint": "Saxlama zamanı lazım gələrsə rəsmi nüvə doğrulanır və aktivləşdirmədən əvvəl yerli konfiqurasiya yoxlanılır. Mənbələr şifrələmə tələb edir. Önizləmə zamanı quraşdırma, avtomatik başlatma və ya şəffaf proksi dəyişiklikləri edilmir.",
-    "saveActivate": "Saxla və aktivləşdir",
-    "core": "Nüvə",
-    "selectCore": "Nüvə seçin",
-    "name": "Ad",
-    "source": "Mənbə keçidi və ya yerli çıxış JSON-u",
-    "start": "Başlat",
-    "stop": "Dayandır",
-    "loadError": "İdarə olunan nüvələri yükləmək mümkün olmadı",
-    "operationError": "İdarə olunan nüvə əməliyyatı uğursuz oldu",
-    "state": "{state, select, not_installed {Quraşdırılmayıb} stopped {Dayandırılıb} starting {Başladılır} running {İşləyir} stopping {Dayandırılır} error {Xəta} other {Naməlum}}"
   },
   "proxyConfigModal": {
     "managedCore": "Proksi nüvəsi",
@@ -14744,6 +14754,8 @@
     "usdUsageQuotaDescription": "Lokal USD xərci konfiqurasiya edilmiş gündəlik və ya həftəlik kvotaya çatdıqdan sonra bu açarı 400 API xətası ilə bloklayır.",
     "dailyQuotaUsd": "Gündəlik kvota (USD)",
     "weeklyQuotaUsd": "Həftəlik kvota (USD)",
+    "fiveHourQuotaUsd": "5 saatlıq kvota (USD)",
+    "fiveHourQuotaHint": "Sürüşən pəncərə: hər sorğunun xərci 5 saat hesablanır, sonra azad olur.",
     "quotaWindowDescription": "Həftəlik kvota mövcud olduqda keşlənmiş Claude həftəlik sıfırlanmasını izləyir; əks halda, 7 günlük sürüşən pəncərəyə keçir. Gündəlik kvota Fortaleza təqvim günündən istifadə edir.",
     "apiKeyUsdQuota": "API açarı USD kvotası",
     "apiKeyUsdQuotaDescription": "Aktiv olduqda, @@om-usage gündəlik kvota, həftəlik kvota, gündəlik xərc və həftəlik xərci USD ilə qaytarır. Həftəlik mövcud olduqda keşlənmiş Claude sıfırlanmasını izləyir.",
@@ -16183,5 +16195,20 @@
     "recoveryHelp": "__MISSING__",
     "streamIncomplete": "__MISSING__",
     "streamError": "__MISSING__"
+  },
+  "managedProxy": {
+    "title": "İdarə olunan proksi nüvələri",
+    "description": "Saxlamaq və təyin etmək üçün tunel keçidini fərdi proksinin host sahəsinə yapışdırın. Burada heç bir təyinatı dəyişmədən yerli çıxış JSON tərifini də saxlaya bilərsiniz.",
+    "saveHint": "Saxlama zamanı lazım gələrsə rəsmi nüvə doğrulanır və aktivləşdirmədən əvvəl yerli konfiqurasiya yoxlanılır. Mənbələr şifrələmə tələb edir. Önizləmə zamanı quraşdırma, avtomatik başlatma və ya şəffaf proksi dəyişiklikləri edilmir.",
+    "saveActivate": "Saxla və aktivləşdir",
+    "core": "Nüvə",
+    "selectCore": "Nüvə seçin",
+    "name": "Ad",
+    "source": "Mənbə keçidi və ya yerli çıxış JSON-u",
+    "start": "Başlat",
+    "stop": "Dayandır",
+    "loadError": "İdarə olunan nüvələri yükləmək mümkün olmadı",
+    "operationError": "İdarə olunan nüvə əməliyyatı uğursuz oldu",
+    "state": "{state, select, not_installed {Quraşdırılmayıb} stopped {Dayandırılıb} starting {Başladılır} running {İşləyir} stopping {Dayandırılır} error {Xəta} other {Naməlum}}"
   }
 }

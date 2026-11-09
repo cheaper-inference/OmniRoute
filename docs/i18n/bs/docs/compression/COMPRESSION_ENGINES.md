@@ -326,7 +326,7 @@ Alat za dohvaćanje se trenutno zove `omniroute_ccr_retrieve` (prefiks `omnirout
 
 ### Životni ciklus sesije
 
-Streamable-HTTP sesije ne rade i server ih koristi; prozor mirovanja je `MCP_SESSION_IDLE_MS` konstanta (navedena imenom, a ne tvrdokodiranom vrijednošću, tako da se ova stranica ne pomjera kada se promijeni). Simptom neaktivne sesije je HTTP 404 sa `Unknown Mcp-Session-Id` — a lijek je ponovno povezivanje ili ponovno pokretanje sesije,** ne** za rotiranje ključa, promjenu opsega ili preimenovanje alata.
+Streamable-HTTP sesije ne rade i server ih koristi; prozor mirovanja je postavljen pomoću `OMNIROUTE_MCP_SESSION_IDLE_MS` (podrazumevano 5 minuta; referencirano po imenu, a ne čvrsto kodiranom vrednošću, tako da se ova stranica ne pomera kada se promeni). Simptom neaktivne sesije je HTTP 404 sa `Unknown Mcp-Session-Id` — a lijek je ponovno povezivanje ili ponovno pokretanje sesije,** ne** za rotiranje ključa, promjenu opsega ili preimenovanje alata.
 
 ## API površina
 

@@ -7108,7 +7108,31 @@
     "fallbackRetryBackendTitle": "Reservert gjenntaksbackend"
   },
   "settings": {
-    "proxyManagedCoresTab": "Administrerte kjerner",
+    "proxyTraffic": {
+      "persistenceIncomplete": "Noe trafikk kunne ikke lagres i denne prosessen. De lagrede totalene er ufullstendige; sjekk serverdiagnostikken.",
+      "title": "OmniRoute-nyttelasttrafikk",
+      "description": "Opplastingsinnhold levert til sending og nedlastingsbyte lest av OmniRoute. Ikke nettverkstrafikk på forbindelsen eller leverandørens fakturering. Totalen inkluderer separat merket direkte trafikk og trafikk uten tilordning.",
+      "coverageNote": "Akkumulerte totaler siden målingen startet. Opplastinger med ukjent størrelse (strømmer, FormData, Request-innhold) er ikke med i bytetotalene. Uleste eller uferdige nedlastinger er ufullstendige; mislykkede sendinger beviser ikke at opplastingen ble levert. Interne omdirigeringer/nye forsøk i transportlaget og transporter som omgår målingen, måles ikke separat.",
+      "refresh": "Oppdater",
+      "overall": "Totalt (alle observerte ruter)",
+      "proxied": "Proxy-delsum (uten direkte/ikke-tilordnet trafikk)",
+      "direct": "Direkte (uten proxy)",
+      "unattributed": "Dispatcher uten tilordning",
+      "removed": "Fjernet proxy ({id})",
+      "legacy": "Eldre proxy/miljøproxy ({id})",
+      "route": "Rute",
+      "upload": "Opplasting levert til sending",
+      "download": "Lest nedlasting",
+      "attempts": "Forsøk",
+      "knownUpload": "Opplastinger med kjent størrelse / forsøk",
+      "completed": "Fullførte nedlastinger / forsøk",
+      "failed": "Mislykkede sendinger",
+      "cancelled": "Avbrutte nedlastinger",
+      "errored": "Nedlastingsfeil",
+      "loading": "Laster nyttelasttrafikk…",
+      "empty": "Ingen nyttelasttrafikk målt ennå.",
+      "error": "Kunne ikke laste nyttelasttrafikk. Prøv å oppdatere."
+    },
     "title": "Innstillinger",
     "general": "Generelt",
     "security": "Sikkerhet",
@@ -9289,7 +9313,8 @@
     "modalityBridgeVideoDrilldownEnabledDesc": "Tillat midlertidig lagring av JPEG-filer bare når den autentiserte forespørselen også setter drilldown: true. Råvideoer lagres aldri.",
     "modalityBridgeVideoDrilldownRemoteEnabled": "Tillat autentisert detaljvisning av bilderammer",
     "modalityBridgeVideoDrilldownRemoteEnabledDesc": "Tillat API-nøkler å lese og slette bare sine egne ugjennomsiktige referanser. Ingen anonym tilgang eller tilgang på tvers av nøkler.",
-    "modalityBridgeVideoDrilldownUsage": "Lagrede JPEG-filer / byte"
+    "modalityBridgeVideoDrilldownUsage": "Lagrede JPEG-filer / byte",
+    "proxyManagedCoresTab": "Administrerte kjerner"
   },
   "contextRtk": {
     "title": "RTK-motor",
@@ -11666,21 +11691,6 @@
     "daysAgo": "{days}d siden",
     "entries": "Oppføringer",
     "viewSwitcherAria": "Hurtigbuffervisning"
-  },
-  "managedProxy": {
-    "title": "Administrerte mellomtjenerkjerner",
-    "description": "Lim inn en tunnellenke i vertsfeltet for den egendefinerte mellomtjeneren for å lagre og tilordne den. Her kan du også lagre en definisjon av en utgående tilkobling i kjernens eget JSON-format uten å endre noen tilordning.",
-    "saveHint": "Ved lagring verifiseres den offisielle kjernen ved behov, og konfigurasjonen i kjernens eget format kontrolleres før aktivering. Kilder krever kryptering. Ingen installasjon under forhåndsvisning, automatisk oppstart eller endringer av den transparente mellomtjeneren.",
-    "saveActivate": "Lagre og aktiver",
-    "core": "Kjerne",
-    "selectCore": "Velg en kjerne",
-    "name": "Navn",
-    "source": "Kildelenke eller utgående tilkobling i kjernens eget JSON-format",
-    "start": "Start",
-    "stop": "Stopp",
-    "loadError": "Kunne ikke laste inn administrerte kjerner",
-    "operationError": "Operasjonen på den administrerte kjernen mislyktes",
-    "state": "{state, select, not_installed {Ikke installert} stopped {Stoppet} starting {Starter} running {Kjører} stopping {Stopper} error {Feil} other {Ukjent}}"
   },
   "proxyConfigModal": {
     "managedCore": "Mellomtjenerkjerne",
@@ -14667,6 +14677,8 @@
     "usdUsageQuotaDescription": "Blokkerer denne nøkkelen med en 400 API-feil etter at det lokale USD-forbruket når den konfigurerte daglige eller ukentlige kvoten.",
     "dailyQuotaUsd": "Daglig kvote (USD)",
     "weeklyQuotaUsd": "Ukentlig kvote (USD)",
+    "fiveHourQuotaUsd": "5-timers kvote (USD)",
+    "fiveHourQuotaHint": "Glidende vindu: hver forespørsels forbruk teller i 5 timer og frigjøres deretter.",
     "quotaWindowDescription": "Ukentlig kvote følger den bufrede ukentlige tilbakestillingen for Claude når den er tilgjengelig; ellers faller den tilbake til et rullende 7-dagers vindu. Daglig kvote bruker kalenderdagen for Fortaleza.",
     "apiKeyUsdQuota": "API-nøkkel USD-kvote",
     "apiKeyUsdQuotaDescription": "Når aktivert, returnerer @@om-usage daglig kvote, ukentlig kvote, daglig forbruk og ukentlig forbruk i USD. Ukentlig følger den bufrede Claude-tilbakestillingen når den er tilgjengelig.",
@@ -16183,5 +16195,20 @@
     "recoveryHelp": "__MISSING__",
     "streamIncomplete": "__MISSING__",
     "streamError": "__MISSING__"
+  },
+  "managedProxy": {
+    "title": "Administrerte mellomtjenerkjerner",
+    "description": "Lim inn en tunnellenke i vertsfeltet for den egendefinerte mellomtjeneren for å lagre og tilordne den. Her kan du også lagre en definisjon av en utgående tilkobling i kjernens eget JSON-format uten å endre noen tilordning.",
+    "saveHint": "Ved lagring verifiseres den offisielle kjernen ved behov, og konfigurasjonen i kjernens eget format kontrolleres før aktivering. Kilder krever kryptering. Ingen installasjon under forhåndsvisning, automatisk oppstart eller endringer av den transparente mellomtjeneren.",
+    "saveActivate": "Lagre og aktiver",
+    "core": "Kjerne",
+    "selectCore": "Velg en kjerne",
+    "name": "Navn",
+    "source": "Kildelenke eller utgående tilkobling i kjernens eget JSON-format",
+    "start": "Start",
+    "stop": "Stopp",
+    "loadError": "Kunne ikke laste inn administrerte kjerner",
+    "operationError": "Operasjonen på den administrerte kjernen mislyktes",
+    "state": "{state, select, not_installed {Ikke installert} stopped {Stoppet} starting {Starter} running {Kjører} stopping {Stopper} error {Feil} other {Ukjent}}"
   }
 }

@@ -7108,7 +7108,31 @@
     "fallbackRetryBackendTitle": "Backend de reintento alternativo"
   },
   "settings": {
-    "proxyManagedCoresTab": "Núcleos administrados",
+    "proxyTraffic": {
+      "persistenceIncomplete": "Parte del tráfico no pudo guardarse en este proceso. Los totales almacenados están incompletos; revise los diagnósticos del servidor.",
+      "title": "Tráfico de datos útiles de OmniRoute",
+      "description": "Cuerpos de subida entregados para su envío y bytes de descarga leídos por OmniRoute. No es tráfico de red en la conexión ni facturación del proveedor. El total incluye tráfico directo y sin atribución, identificados por separado.",
+      "coverageNote": "Totales acumulados desde el inicio de la medición. Las subidas de tamaño desconocido (flujos, FormData, cuerpos de Request) se excluyen de los totales de bytes. Las descargas no leídas o sin terminar están incompletas; los envíos fallidos no demuestran la entrega de la subida. Las redirecciones/reintentos internos del transporte y los transportes que eluden la medición no se miden por separado.",
+      "refresh": "Actualizar",
+      "overall": "Total (todas las rutas observadas)",
+      "proxied": "Subtotal de proxies (sin tráfico directo/sin atribución)",
+      "direct": "Directo (sin proxy)",
+      "unattributed": "Despachador sin atribución",
+      "removed": "Proxy eliminado ({id})",
+      "legacy": "Proxy heredado/del entorno ({id})",
+      "route": "Ruta",
+      "upload": "Subida entregada para envío",
+      "download": "Descarga leída",
+      "attempts": "Intentos",
+      "knownUpload": "Subidas de tamaño conocido / intentos",
+      "completed": "Descargas completas / intentos",
+      "failed": "Envíos fallidos",
+      "cancelled": "Descargas canceladas",
+      "errored": "Errores de descarga",
+      "loading": "Cargando tráfico de datos útiles…",
+      "empty": "Aún no se ha medido tráfico de datos útiles.",
+      "error": "No se pudo cargar el tráfico de datos útiles. Intente actualizar."
+    },
     "title": "Configuración",
     "general": "generales",
     "security": "Seguridad",
@@ -9289,7 +9313,8 @@
     "modalityBridgeVideoDrilldownEnabledDesc": "Permitir la retención temporal de JPEG solo cuando la solicitud autenticada también indique drilldown: true. El vídeo original nunca se retiene.",
     "modalityBridgeVideoDrilldownRemoteEnabled": "Permitir la consulta autenticada de fotogramas",
     "modalityBridgeVideoDrilldownRemoteEnabledDesc": "Permitir que cada clave de API consulte y elimine únicamente sus propios handles opacos. Sin acceso anónimo ni entre claves.",
-    "modalityBridgeVideoDrilldownUsage": "JPEG retenidos / bytes"
+    "modalityBridgeVideoDrilldownUsage": "JPEG retenidos / bytes",
+    "proxyManagedCoresTab": "Núcleos administrados"
   },
   "contextRtk": {
     "title": "Motor RTK",
@@ -11666,21 +11691,6 @@
     "daysAgo": "hace {days} d",
     "entries": "Entradas",
     "viewSwitcherAria": "Vista de caché"
-  },
-  "managedProxy": {
-    "title": "Núcleos de proxy administrados",
-    "description": "Pegue un enlace de túnel en el campo de host del proxy personalizado para guardarlo y asignarlo. Aquí también puede guardar una definición de conexión saliente en formato JSON nativo sin cambiar ninguna asignación.",
-    "saveHint": "Al guardar, se verifica el núcleo oficial si es necesario y se comprueba la configuración nativa antes de activarla. Las fuentes requieren cifrado. No se realizan instalaciones durante la vista previa, inicios automáticos ni cambios en el proxy transparente.",
-    "saveActivate": "Guardar y activar",
-    "core": "Núcleo",
-    "selectCore": "Seleccione un núcleo",
-    "name": "Nombre",
-    "source": "Enlace de origen o conexión saliente en formato JSON nativo",
-    "start": "Iniciar",
-    "stop": "Detener",
-    "loadError": "No se pudieron cargar los núcleos administrados",
-    "operationError": "Error en la operación del núcleo administrado",
-    "state": "{state, select, not_installed {No instalado} stopped {Detenido} starting {Iniciando} running {En ejecución} stopping {Deteniendo} error {Error} other {Desconocido}}"
   },
   "proxyConfigModal": {
     "managedCore": "Núcleo del proxy",
@@ -14667,6 +14677,8 @@
     "usdUsageQuotaDescription": "Bloquea esta clave con un error 400 de la API cuando su gasto local en USD alcanza la cuota diaria o semanal configurada.",
     "dailyQuotaUsd": "Cuota diaria (USD)",
     "weeklyQuotaUsd": "Cuota semanal (USD)",
+    "fiveHourQuotaUsd": "Cuota de 5 horas (USD)",
+    "fiveHourQuotaHint": "Ventana móvil: el gasto de cada solicitud cuenta durante 5 horas y luego se libera.",
     "quotaWindowDescription": "La cuota semanal sigue el restablecimiento semanal de Claude almacenado en caché cuando está disponible; de lo contrario, utiliza una ventana móvil de 7 días. La cuota diaria utiliza el día natural de Fortaleza.",
     "apiKeyUsdQuota": "Cuota en USD de la clave de API",
     "apiKeyUsdQuotaDescription": "Cuando está habilitado, @@om-usage devuelve la cuota diaria, la cuota semanal, el gasto diario y el gasto semanal en USD. El cálculo semanal sigue el restablecimiento de Claude almacenado en caché cuando está disponible.",
@@ -16183,5 +16195,20 @@
     "recoveryHelp": "__MISSING__",
     "streamIncomplete": "__MISSING__",
     "streamError": "__MISSING__"
+  },
+  "managedProxy": {
+    "title": "Núcleos de proxy administrados",
+    "description": "Pegue un enlace de túnel en el campo de host del proxy personalizado para guardarlo y asignarlo. Aquí también puede guardar una definición de conexión saliente en formato JSON nativo sin cambiar ninguna asignación.",
+    "saveHint": "Al guardar, se verifica el núcleo oficial si es necesario y se comprueba la configuración nativa antes de activarla. Las fuentes requieren cifrado. No se realizan instalaciones durante la vista previa, inicios automáticos ni cambios en el proxy transparente.",
+    "saveActivate": "Guardar y activar",
+    "core": "Núcleo",
+    "selectCore": "Seleccione un núcleo",
+    "name": "Nombre",
+    "source": "Enlace de origen o conexión saliente en formato JSON nativo",
+    "start": "Iniciar",
+    "stop": "Detener",
+    "loadError": "No se pudieron cargar los núcleos administrados",
+    "operationError": "Error en la operación del núcleo administrado",
+    "state": "{state, select, not_installed {No instalado} stopped {Detenido} starting {Iniciando} running {En ejecución} stopping {Deteniendo} error {Error} other {Desconocido}}"
   }
 }

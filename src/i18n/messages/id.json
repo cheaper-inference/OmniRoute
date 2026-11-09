@@ -7108,7 +7108,31 @@
     "fallbackRetryBackendTitle": "Backend percobaan ulang fallback"
   },
   "settings": {
-    "proxyManagedCoresTab": "Inti terkelola",
+    "proxyTraffic": {
+      "persistenceIncomplete": "Sebagian lalu lintas tidak dapat disimpan dalam proses ini. Total tersimpan tidak lengkap; periksa diagnostik server.",
+      "title": "Lalu lintas muatan data OmniRoute",
+      "description": "Isi unggahan yang diserahkan untuk dikirim dan byte unduhan yang dibaca OmniRoute. Bukan lalu lintas jaringan pada sambungan atau tagihan penyedia. Total mencakup lalu lintas langsung dan tanpa atribusi yang diberi label terpisah.",
+      "coverageNote": "Total kumulatif sejak pengukuran dimulai. Unggahan dengan ukuran tidak diketahui (aliran, FormData, isi Request) tidak termasuk dalam total byte. Unduhan yang belum dibaca atau belum selesai tidak lengkap; pengiriman gagal tidak membuktikan unggahan telah diterima. Pengalihan/percobaan ulang internal transport dan transport yang melewati jalur pengukuran tidak diukur secara terpisah.",
+      "refresh": "Segarkan",
+      "overall": "Keseluruhan (semua rute yang diamati)",
+      "proxied": "Subtotal proksi (tanpa lalu lintas langsung/tanpa atribusi)",
+      "direct": "Langsung (tanpa proksi)",
+      "unattributed": "Dispatcher tanpa atribusi",
+      "removed": "Proksi dihapus ({id})",
+      "legacy": "Proksi lama/dari lingkungan ({id})",
+      "route": "Rute",
+      "upload": "Unggahan diserahkan untuk dikirim",
+      "download": "Unduhan yang dibaca",
+      "attempts": "Percobaan",
+      "knownUpload": "Unggahan berukuran diketahui / percobaan",
+      "completed": "Unduhan lengkap / percobaan",
+      "failed": "Pengiriman gagal",
+      "cancelled": "Unduhan dibatalkan",
+      "errored": "Kesalahan unduhan",
+      "loading": "Memuat lalu lintas muatan data…",
+      "empty": "Belum ada lalu lintas muatan data yang diukur.",
+      "error": "Tidak dapat memuat lalu lintas muatan data. Coba segarkan."
+    },
     "title": "Pengaturan",
     "general": "Umum",
     "security": "Keamanan",
@@ -9289,7 +9313,8 @@
     "modalityBridgeVideoDrilldownEnabledDesc": "Izinkan penyimpanan JPEG sementara hanya jika permintaan terautentikasi juga menetapkan drilldown: true. Video mentah tidak pernah disimpan.",
     "modalityBridgeVideoDrilldownRemoteEnabled": "Izinkan penelusuran mendetail frame terautentikasi",
     "modalityBridgeVideoDrilldownRemoteEnabledDesc": "Izinkan kunci API untuk membaca dan menghapus hanya handle buram miliknya sendiri. Tidak ada akses anonim atau lintas-kunci.",
-    "modalityBridgeVideoDrilldownUsage": "JPEG / byte yang disimpan"
+    "modalityBridgeVideoDrilldownUsage": "JPEG / byte yang disimpan",
+    "proxyManagedCoresTab": "Inti terkelola"
   },
   "contextRtk": {
     "title": "Mesin RTK",
@@ -11666,21 +11691,6 @@
     "daysAgo": "{days}h yang lalu",
     "entries": "Entri",
     "viewSwitcherAria": "Tampilan cache"
-  },
-  "managedProxy": {
-    "title": "Inti proxy terkelola",
-    "description": "Tempel tautan terowongan di kolom host proxy kustom untuk menyimpan dan menetapkannya. Di sini Anda juga dapat menyimpan definisi JSON bawaan untuk koneksi keluar tanpa mengubah penetapan apa pun.",
-    "saveHint": "Saat disimpan, inti resmi diverifikasi jika diperlukan dan konfigurasi bawaan diperiksa sebelum aktivasi. Sumber memerlukan enkripsi. Tidak ada instalasi saat pratinjau, mulai otomatis, atau perubahan proxy transparan.",
-    "saveActivate": "Simpan dan aktifkan",
-    "core": "Inti",
-    "selectCore": "Pilih inti",
-    "name": "Nama",
-    "source": "Tautan sumber atau JSON bawaan untuk koneksi keluar",
-    "start": "Mulai",
-    "stop": "Hentikan",
-    "loadError": "Tidak dapat memuat inti terkelola",
-    "operationError": "Operasi inti terkelola gagal",
-    "state": "{state, select, not_installed {Belum diinstal} stopped {Dihentikan} starting {Memulai} running {Berjalan} stopping {Menghentikan} error {Kesalahan} other {Tidak diketahui}}"
   },
   "proxyConfigModal": {
     "managedCore": "Inti proxy",
@@ -14667,6 +14677,8 @@
     "usdUsageQuotaDescription": "Memblokir kunci ini dengan error API 400 setelah pengeluaran USD lokalnya mencapai kuota harian atau mingguan yang dikonfigurasi.",
     "dailyQuotaUsd": "Kuota harian (USD)",
     "weeklyQuotaUsd": "Kuota mingguan (USD)",
+    "fiveHourQuotaUsd": "Kuota 5 jam (USD)",
+    "fiveHourQuotaHint": "Jendela bergulir: biaya setiap permintaan dihitung selama 5 jam, lalu dibebaskan.",
     "quotaWindowDescription": "Kuota mingguan mengikuti reset mingguan Claude yang di-cache jika tersedia; jika tidak, kuota akan beralih ke jendela 7 hari bergulir. Kuota harian menggunakan hari kalender Fortaleza.",
     "apiKeyUsdQuota": "Kuota USD kunci API",
     "apiKeyUsdQuotaDescription": "Saat diaktifkan, @@om-usage mengembalikan kuota harian, kuota mingguan, pengeluaran harian, dan pengeluaran mingguan dalam USD. Mingguan mengikuti reset Claude yang di-cache jika tersedia.",
@@ -16183,5 +16195,20 @@
     "recoveryHelp": "__MISSING__",
     "streamIncomplete": "__MISSING__",
     "streamError": "__MISSING__"
+  },
+  "managedProxy": {
+    "title": "Inti proxy terkelola",
+    "description": "Tempel tautan terowongan di kolom host proxy kustom untuk menyimpan dan menetapkannya. Di sini Anda juga dapat menyimpan definisi JSON bawaan untuk koneksi keluar tanpa mengubah penetapan apa pun.",
+    "saveHint": "Saat disimpan, inti resmi diverifikasi jika diperlukan dan konfigurasi bawaan diperiksa sebelum aktivasi. Sumber memerlukan enkripsi. Tidak ada instalasi saat pratinjau, mulai otomatis, atau perubahan proxy transparan.",
+    "saveActivate": "Simpan dan aktifkan",
+    "core": "Inti",
+    "selectCore": "Pilih inti",
+    "name": "Nama",
+    "source": "Tautan sumber atau JSON bawaan untuk koneksi keluar",
+    "start": "Mulai",
+    "stop": "Hentikan",
+    "loadError": "Tidak dapat memuat inti terkelola",
+    "operationError": "Operasi inti terkelola gagal",
+    "state": "{state, select, not_installed {Belum diinstal} stopped {Dihentikan} starting {Memulai} running {Berjalan} stopping {Menghentikan} error {Kesalahan} other {Tidak diketahui}}"
   }
 }

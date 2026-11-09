@@ -7185,7 +7185,31 @@
     "quotaConnectionRefreshFailed": "Provjera kvote je završena, ali lista računa nije mogla biti osvježena."
   },
   "settings": {
-    "proxyManagedCoresTab": "Upravljane jezgre",
+    "proxyTraffic": {
+      "persistenceIncomplete": "Dio prometa nije mogao biti sačuvan u ovom procesu. Sačuvani zbirni podaci su nepotpuni; provjerite dijagnostiku servera.",
+      "title": "Promet korisnih podataka u OmniRouteu",
+      "description": "Tijela otpremanja predana za slanje i bajtovi preuzimanja koje je OmniRoute pročitao. Ovo nije mrežni promet na vezi niti obračun pružaoca usluge. Ukupni zbir uključuje zasebno označen direktni promet i promet bez utvrđene pripadnosti.",
+      "coverageNote": "Zbirni podaci od početka mjerenja. Otpremanja nepoznate veličine (tokovi, FormData, tijela objekta Request) isključena su iz zbira bajtova. Nepročitana ili nezavršena preuzimanja su nepotpuna; neuspjelo slanje ne dokazuje isporuku otpremanja. Interna preusmjeravanja/ponovni pokušaji transporta i transporti koji zaobilaze mjerenje ne mjere se zasebno.",
+      "refresh": "Osvježi",
+      "overall": "Ukupno (sve posmatrane rute)",
+      "proxied": "Međuzbir za proksije (bez direktnog/nepripisanog prometa)",
+      "direct": "Direktno (bez proksija)",
+      "unattributed": "Dispečer bez utvrđene pripadnosti",
+      "removed": "Uklonjeni proksi ({id})",
+      "legacy": "Naslijeđeni proksi/proksi iz okruženja ({id})",
+      "route": "Ruta",
+      "upload": "Otpremanje predano za slanje",
+      "download": "Pročitano preuzimanje",
+      "attempts": "Pokušaji",
+      "knownUpload": "Otpremanja poznate veličine / pokušaji",
+      "completed": "Završena preuzimanja / pokušaji",
+      "failed": "Neuspjela slanja",
+      "cancelled": "Otkazana preuzimanja",
+      "errored": "Greške pri preuzimanju",
+      "loading": "Učitavanje prometa korisnih podataka…",
+      "empty": "Promet korisnih podataka još nije izmjeren.",
+      "error": "Promet korisnih podataka nije moguće učitati. Pokušajte osvježiti."
+    },
     "title": "Postavke",
     "general": "Opće",
     "security": "Sigurnost",
@@ -9366,7 +9390,8 @@
     "modalityBridgeVideoDrilldownEnabledDesc": "Dozvoli privremeno zadržavanje JPEG datoteka samo kada autentificirani zahtjev također postavlja drilldown: true. Izvorni videozapisi se nikada ne zadržavaju.",
     "modalityBridgeVideoDrilldownRemoteEnabled": "Dozvoli autentificiranu detaljnu analizu kadrova",
     "modalityBridgeVideoDrilldownRemoteEnabledDesc": "Dozvoli API ključevima da čitaju i brišu samo vlastite neprozirne identifikatore. Anonimni pristup ili pristup između različitih ključeva nije dozvoljen.",
-    "modalityBridgeVideoDrilldownUsage": "Zadržane JPEG datoteke / bajtovi"
+    "modalityBridgeVideoDrilldownUsage": "Zadržane JPEG datoteke / bajtovi",
+    "proxyManagedCoresTab": "Upravljane jezgre"
   },
   "contextRtk": {
     "title": "RTK pogon",
@@ -11743,21 +11768,6 @@
     "daysAgo": "prije {days}d",
     "entries": "Unosi",
     "viewSwitcherAria": "Prikaz predmemorije"
-  },
-  "managedProxy": {
-    "title": "Upravljane proxy jezgre",
-    "description": "Zalijepite vezu tunela u polje hosta prilagođenog proxyja da biste ga sačuvali i dodijelili. Ovdje možete sačuvati i definiciju izlazne veze u izvornom JSON formatu bez promjene bilo koje dodjele.",
-    "saveHint": "Pri čuvanju se po potrebi provjerava službena jezgra, a izvorna konfiguracija provjerava se prije aktivacije. Izvori zahtijevaju šifriranje. Nema instalacije tokom pregleda, automatskog pokretanja ni promjena transparentnog proxyja.",
-    "saveActivate": "Sačuvaj i aktiviraj",
-    "core": "Jezgra",
-    "selectCore": "Odaberite jezgru",
-    "name": "Naziv",
-    "source": "Veza izvora ili definicija izlazne veze u izvornom JSON formatu",
-    "start": "Pokreni",
-    "stop": "Zaustavi",
-    "loadError": "Nije moguće učitati upravljane jezgre",
-    "operationError": "Operacija nad upravljanom jezgrom nije uspjela",
-    "state": "{state, select, not_installed {Nije instalirana} stopped {Zaustavljena} starting {Pokretanje} running {Pokrenuta} stopping {Zaustavljanje} error {Greška} other {Nepoznato}}"
   },
   "proxyConfigModal": {
     "managedCore": "Proxy jezgra",
@@ -14744,6 +14754,8 @@
     "usdUsageQuotaDescription": "Blokira ovaj ključ s 400 API greškom nakon što lokalna potrošnja u USD dostigne konfigurisanu dnevnu ili sedmičnu kvotu.",
     "dailyQuotaUsd": "Dnevna kvota (USD)",
     "weeklyQuotaUsd": "Sedmična kvota (USD)",
+    "fiveHourQuotaUsd": "Kvota za 5 sati (USD)",
+    "fiveHourQuotaHint": "Klizni prozor: trošak svakog zahtjeva računa se 5 sati, a zatim se oslobađa.",
     "quotaWindowDescription": "Sedmična kvota prati keširani Claude sedmični reset kada je dostupan; u suprotnom se vraća na rotirajući prozor od 7 dana. Dnevna kvota koristi Fortaleza kalendarski dan.",
     "apiKeyUsdQuota": "USD kvota API ključa",
     "apiKeyUsdQuotaDescription": "Kada je omogućeno, @@om-usage vraća dnevnu kvotu, sedmičnu kvotu, dnevnu potrošnju i sedmičnu potrošnju u USD. Sedmična prati keširani Claude reset kada je dostupan.",
@@ -16183,5 +16195,20 @@
     "recoveryHelp": "__MISSING__",
     "streamIncomplete": "__MISSING__",
     "streamError": "__MISSING__"
+  },
+  "managedProxy": {
+    "title": "Upravljane proxy jezgre",
+    "description": "Zalijepite vezu tunela u polje hosta prilagođenog proxyja da biste ga sačuvali i dodijelili. Ovdje možete sačuvati i definiciju izlazne veze u izvornom JSON formatu bez promjene bilo koje dodjele.",
+    "saveHint": "Pri čuvanju se po potrebi provjerava službena jezgra, a izvorna konfiguracija provjerava se prije aktivacije. Izvori zahtijevaju šifriranje. Nema instalacije tokom pregleda, automatskog pokretanja ni promjena transparentnog proxyja.",
+    "saveActivate": "Sačuvaj i aktiviraj",
+    "core": "Jezgra",
+    "selectCore": "Odaberite jezgru",
+    "name": "Naziv",
+    "source": "Veza izvora ili definicija izlazne veze u izvornom JSON formatu",
+    "start": "Pokreni",
+    "stop": "Zaustavi",
+    "loadError": "Nije moguće učitati upravljane jezgre",
+    "operationError": "Operacija nad upravljanom jezgrom nije uspjela",
+    "state": "{state, select, not_installed {Nije instalirana} stopped {Zaustavljena} starting {Pokretanje} running {Pokrenuta} stopping {Zaustavljanje} error {Greška} other {Nepoznato}}"
   }
 }

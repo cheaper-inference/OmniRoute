@@ -7108,7 +7108,31 @@
     "fallbackRetryBackendTitle": "Backend za ponovna poskuse ob neuspehu"
   },
   "settings": {
-    "proxyManagedCoresTab": "Upravljana jedra",
+    "proxyTraffic": {
+      "persistenceIncomplete": "Dela prometa v tem procesu ni bilo mogoče shraniti. Shranjeni seštevki so nepopolni; preverite diagnostiko strežnika.",
+      "title": "Promet koristnih podatkov OmniRoute",
+      "description": "Vsebine nalaganj, predane za pošiljanje, in bajti prenosov, ki jih je prebral OmniRoute. To ni omrežni promet na povezavi ali obračun ponudnika. Skupni seštevek vključuje ločeno označen neposredni in nepripisani promet.",
+      "coverageNote": "Kumulativni seštevki od začetka merjenja. Nalaganja neznane velikosti (tokovi, FormData, telesa Request) so izključena iz seštevkov bajtov. Neprebrani ali nedokončani prenosi so nepopolni; neuspešna pošiljanja ne dokazujejo dostave nalaganja. Notranje preusmeritve/ponovni poskusi transporta in transporti, ki obidejo merjenje, se ne merijo ločeno.",
+      "refresh": "Osveži",
+      "overall": "Skupaj (vse opazovane poti)",
+      "proxied": "Vmesni seštevek posrednikov (brez neposrednega/nepripisanega prometa)",
+      "direct": "Neposredno (brez posrednika)",
+      "unattributed": "Nepripisan dispečer",
+      "removed": "Odstranjeni posrednik ({id})",
+      "legacy": "Starejši posrednik/posrednik iz okolja ({id})",
+      "route": "Pot",
+      "upload": "Nalaganje, predano za pošiljanje",
+      "download": "Prebrani prenos",
+      "attempts": "Poskusi",
+      "knownUpload": "Nalaganja znane velikosti / poskusi",
+      "completed": "Dokončani prenosi / poskusi",
+      "failed": "Neuspešna pošiljanja",
+      "cancelled": "Preklicani prenosi",
+      "errored": "Napake prenosa",
+      "loading": "Nalaganje prometa koristnih podatkov…",
+      "empty": "Promet koristnih podatkov še ni bil izmerjen.",
+      "error": "Prometa koristnih podatkov ni bilo mogoče naložiti. Poskusite osvežiti."
+    },
     "title": "Nastavitve",
     "general": "Splošno",
     "security": "Varnost",
@@ -9289,7 +9313,8 @@
     "modalityBridgeVideoDrilldownEnabledDesc": "Dovoli začasno hrambo datotek JPEG samo, ko overjena zahteva nastavi tudi drilldown: true. Neobdelani videoposnetki se nikoli ne hranijo.",
     "modalityBridgeVideoDrilldownRemoteEnabled": "Dovoli overjeno podrobno pregledovanje sličic",
     "modalityBridgeVideoDrilldownRemoteEnabledDesc": "Dovoli ključem API, da berejo in brišejo samo lastne neprosojne identifikatorje. Anonimni dostop ali dostop med različnimi ključi ni dovoljen.",
-    "modalityBridgeVideoDrilldownUsage": "Shranjene datoteke JPEG/bajti"
+    "modalityBridgeVideoDrilldownUsage": "Shranjene datoteke JPEG/bajti",
+    "proxyManagedCoresTab": "Upravljana jedra"
   },
   "contextRtk": {
     "title": "Pogon RTK",
@@ -11666,21 +11691,6 @@
     "daysAgo": "pred {days} d",
     "entries": "Vnosi",
     "viewSwitcherAria": "Prikaz predpomnilnika"
-  },
-  "managedProxy": {
-    "title": "Upravljana jedra posredniškega strežnika",
-    "description": "Za shranjevanje in dodelitev prilepite povezavo predora v polje gostitelja posredniškega strežnika po meri. Tukaj lahko shranite tudi izvorno definicijo odhodne povezave JSON, ne da bi spremenili katero koli dodelitev.",
-    "saveHint": "Pri shranjevanju se po potrebi preveri uradno jedro in pred aktiviranjem izvorna konfiguracija. Viri zahtevajo šifriranje. Predogled ne namešča, ne omogoča samodejnega zagona in ne spreminja prosojnega posredniškega strežnika.",
-    "saveActivate": "Shrani in aktiviraj",
-    "core": "Jedro",
-    "selectCore": "Izberite jedro",
-    "name": "Ime",
-    "source": "Povezava vira ali izvorni JSON odhodne povezave",
-    "start": "Zaženi",
-    "stop": "Ustavi",
-    "loadError": "Upravljanih jeder ni bilo mogoče naložiti",
-    "operationError": "Operacija upravljanega jedra ni uspela",
-    "state": "{state, select, not_installed {Ni nameščeno} stopped {Ustavljeno} starting {Se zaganja} running {Deluje} stopping {Se ustavlja} error {Napaka} other {Neznano}}"
   },
   "proxyConfigModal": {
     "managedCore": "Jedro posredniškega strežnika",
@@ -14667,6 +14677,8 @@
     "usdUsageQuotaDescription": "Uporabo tega ključa blokira z napako API 400, ko njegova lokalna poraba v USD doseže nastavljeno dnevno ali tedensko kvoto.",
     "dailyQuotaUsd": "Dnevna kvota (USD)",
     "weeklyQuotaUsd": "Tedenska kvota (USD)",
+    "fiveHourQuotaUsd": "5-urna kvota (USD)",
+    "fiveHourQuotaHint": "Drseče okno: strošek vsake zahteve se šteje 5 ur, nato se sprosti.",
     "quotaWindowDescription": "Tedenska kvota upošteva predpomnjeno tedensko ponastavitev za Claude, ko je ta na voljo; sicer uporabi drseče 7-dnevno obdobje. Dnevna kvota uporablja koledarski dan v Fortalezi.",
     "apiKeyUsdQuota": "Kvota ključa API v USD",
     "apiKeyUsdQuotaDescription": "Ko je omogočeno, @@om-usage vrne dnevno kvoto, tedensko kvoto, dnevno porabo in tedensko porabo v USD. Tedenska kvota upošteva predpomnjeno ponastavitev za Claude, ko je ta na voljo.",
@@ -16183,5 +16195,20 @@
     "recoveryHelp": "__MISSING__",
     "streamIncomplete": "__MISSING__",
     "streamError": "__MISSING__"
+  },
+  "managedProxy": {
+    "title": "Upravljana jedra posredniškega strežnika",
+    "description": "Za shranjevanje in dodelitev prilepite povezavo predora v polje gostitelja posredniškega strežnika po meri. Tukaj lahko shranite tudi izvorno definicijo odhodne povezave JSON, ne da bi spremenili katero koli dodelitev.",
+    "saveHint": "Pri shranjevanju se po potrebi preveri uradno jedro in pred aktiviranjem izvorna konfiguracija. Viri zahtevajo šifriranje. Predogled ne namešča, ne omogoča samodejnega zagona in ne spreminja prosojnega posredniškega strežnika.",
+    "saveActivate": "Shrani in aktiviraj",
+    "core": "Jedro",
+    "selectCore": "Izberite jedro",
+    "name": "Ime",
+    "source": "Povezava vira ali izvorni JSON odhodne povezave",
+    "start": "Zaženi",
+    "stop": "Ustavi",
+    "loadError": "Upravljanih jeder ni bilo mogoče naložiti",
+    "operationError": "Operacija upravljanega jedra ni uspela",
+    "state": "{state, select, not_installed {Ni nameščeno} stopped {Ustavljeno} starting {Se zaganja} running {Deluje} stopping {Se ustavlja} error {Napaka} other {Neznano}}"
   }
 }

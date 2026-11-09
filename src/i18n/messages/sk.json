@@ -7108,7 +7108,31 @@
     "fallbackRetryBackendTitle": "Zálohové rozhranie pre opätovné pokusy"
   },
   "settings": {
-    "proxyManagedCoresTab": "Spravované jadrá",
+    "proxyTraffic": {
+      "persistenceIncomplete": "Časť prevádzky sa v tomto procese nepodarilo uložiť. Uložené súčty sú neúplné; skontrolujte diagnostiku servera.",
+      "title": "Prevádzka užitočných dát OmniRoute",
+      "description": "Telá nahrávania odovzdané na odoslanie a bajty sťahovania prečítané aplikáciou OmniRoute. Nejde o sieťovú prevádzku na linke ani o fakturáciu poskytovateľa. Celkový súčet zahŕňa osobitne označenú priamu a nepriradenú prevádzku.",
+      "coverageNote": "Kumulatívne súčty od začiatku merania. Nahrávania neznámej veľkosti (prúdy, FormData, telá Request) sa nezapočítavajú do súčtov bajtov. Neprečítané alebo nedokončené sťahovania sú neúplné; neúspešné odoslanie nedokazuje doručenie nahrávania. Interné presmerovania/opakované pokusy transportu a transporty obchádzajúce meranie sa nemerajú samostatne.",
+      "refresh": "Obnoviť",
+      "overall": "Spolu (všetky sledované trasy)",
+      "proxied": "Medzisúčet proxy (bez priamej/nepriradenej prevádzky)",
+      "direct": "Priamo (bez proxy)",
+      "unattributed": "Nepriradený dispečer",
+      "removed": "Odstránená proxy ({id})",
+      "legacy": "Staršia proxy/proxy z prostredia ({id})",
+      "route": "Trasa",
+      "upload": "Nahrávanie odovzdané na odoslanie",
+      "download": "Prečítané sťahovanie",
+      "attempts": "Pokusy",
+      "knownUpload": "Nahrávania známej veľkosti / pokusy",
+      "completed": "Dokončené sťahovania / pokusy",
+      "failed": "Neúspešné odoslania",
+      "cancelled": "Zrušené sťahovania",
+      "errored": "Chyby sťahovania",
+      "loading": "Načítava sa prevádzka užitočných dát…",
+      "empty": "Zatiaľ sa nezmerala žiadna prevádzka užitočných dát.",
+      "error": "Prevádzku užitočných dát sa nepodarilo načítať. Skúste obnoviť zobrazenie."
+    },
     "title": "Nastavenia",
     "general": "generál",
     "security": "Bezpečnosť",
@@ -9289,7 +9313,8 @@
     "modalityBridgeVideoDrilldownEnabledDesc": "Povoliť dočasné uchovávanie súborov JPEG iba vtedy, keď overená požiadavka zároveň nastaví drilldown: true. Nespracované videá sa nikdy neuchovávajú.",
     "modalityBridgeVideoDrilldownRemoteEnabled": "Povoliť overenú podrobnú analýzu snímok",
     "modalityBridgeVideoDrilldownRemoteEnabledDesc": "Povoliť kľúčom API čítať a odstraňovať iba vlastné nepriehľadné identifikátory. Anonymný prístup ani prístup medzi kľúčmi nie je povolený.",
-    "modalityBridgeVideoDrilldownUsage": "Uchované súbory JPEG / bajty"
+    "modalityBridgeVideoDrilldownUsage": "Uchované súbory JPEG / bajty",
+    "proxyManagedCoresTab": "Spravované jadrá"
   },
   "contextRtk": {
     "title": "RTK Engine",
@@ -11666,21 +11691,6 @@
     "daysAgo": "pred {days}d",
     "entries": "Záznamy",
     "viewSwitcherAria": "Zobrazenie vyrovnávacej pamäte"
-  },
-  "managedProxy": {
-    "title": "Spravované jadrá proxy",
-    "description": "Ak chcete tunel uložiť a priradiť, vložte jeho odkaz do poľa hostiteľa vlastného proxy. Tu môžete uložiť aj natívnu definíciu odchádzajúceho pripojenia vo formáte JSON bez zmeny priradení.",
-    "saveHint": "Pri uložení sa podľa potreby overí oficiálne jadro a pred aktiváciou sa skontroluje natívna konfigurácia. Zdroje vyžadujú šifrovanie. Náhľad nič neinštaluje, nespúšťa automaticky ani nemení transparentné proxy.",
-    "saveActivate": "Uložiť a aktivovať",
-    "core": "Jadro",
-    "selectCore": "Vyberte jadro",
-    "name": "Názov",
-    "source": "Odkaz na zdroj alebo natívny JSON odchádzajúceho pripojenia",
-    "start": "Spustiť",
-    "stop": "Zastaviť",
-    "loadError": "Spravované jadrá sa nepodarilo načítať",
-    "operationError": "Operácia spravovaného jadra zlyhala",
-    "state": "{state, select, not_installed {Nenainštalované} stopped {Zastavené} starting {Spúšťa sa} running {Beží} stopping {Zastavuje sa} error {Chyba} other {Neznáme}}"
   },
   "proxyConfigModal": {
     "managedCore": "Jadro proxy",
@@ -14667,6 +14677,8 @@
     "usdUsageQuotaDescription": "Zablokuje tento kľúč s chybou API 400 po tom, čo jeho lokálne výdavky v USD dosiahnu nakonfigurovanú dennú alebo týždennú kvótu.",
     "dailyQuotaUsd": "Denná kvóta (USD)",
     "weeklyQuotaUsd": "Týždenná kvóta (USD)",
+    "fiveHourQuotaUsd": "5-hodinová kvóta (USD)",
+    "fiveHourQuotaHint": "Kĺzavé okno: útrata každej požiadavky sa počíta 5 hodín, potom sa uvoľní.",
     "quotaWindowDescription": "Týždenná kvóta sa riadi týždenným resetom Claude z vyrovnávacej pamäte, ak je k dispozícii; v opačnom prípade prejde na kĺzavé 7-dňové okno. Denná kvóta používa kalendárny deň Fortaleza.",
     "apiKeyUsdQuota": "Kvóta kľúča API v USD",
     "apiKeyUsdQuotaDescription": "Keď je táto možnosť povolená, @@om-usage vracia dennú kvótu, týždennú kvótu, denné výdavky a týždenné výdavky v USD. Týždenná sa riadi resetom Claude z vyrovnávacej pamäte, ak je k dispozícii.",
@@ -16183,5 +16195,20 @@
     "recoveryHelp": "__MISSING__",
     "streamIncomplete": "__MISSING__",
     "streamError": "__MISSING__"
+  },
+  "managedProxy": {
+    "title": "Spravované jadrá proxy",
+    "description": "Ak chcete tunel uložiť a priradiť, vložte jeho odkaz do poľa hostiteľa vlastného proxy. Tu môžete uložiť aj natívnu definíciu odchádzajúceho pripojenia vo formáte JSON bez zmeny priradení.",
+    "saveHint": "Pri uložení sa podľa potreby overí oficiálne jadro a pred aktiváciou sa skontroluje natívna konfigurácia. Zdroje vyžadujú šifrovanie. Náhľad nič neinštaluje, nespúšťa automaticky ani nemení transparentné proxy.",
+    "saveActivate": "Uložiť a aktivovať",
+    "core": "Jadro",
+    "selectCore": "Vyberte jadro",
+    "name": "Názov",
+    "source": "Odkaz na zdroj alebo natívny JSON odchádzajúceho pripojenia",
+    "start": "Spustiť",
+    "stop": "Zastaviť",
+    "loadError": "Spravované jadrá sa nepodarilo načítať",
+    "operationError": "Operácia spravovaného jadra zlyhala",
+    "state": "{state, select, not_installed {Nenainštalované} stopped {Zastavené} starting {Spúšťa sa} running {Beží} stopping {Zastavuje sa} error {Chyba} other {Neznáme}}"
   }
 }

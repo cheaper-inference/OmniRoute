@@ -7108,7 +7108,31 @@
     "quotaConnectionRefreshFailed": "Àyẹ̀wò ìwọ̀n lílo ti parí, ṣùgbọ́n a kò lè ṣe àtúnṣe àtòjọ àwọn àkọọ́lẹ̀."
   },
   "settings": {
-    "proxyManagedCoresTab": "Àwọn kókó tí a ń ṣàkóso",
+    "proxyTraffic": {
+      "persistenceIncomplete": "A kò lè fi apá kan ìrìnàjò dátà pamọ́ nínú ìlànà yìí. Àwọn àpapọ̀ tí a fi pamọ́ kò pé; ṣàyẹ̀wò ìwádìí àṣìṣe sáfà.",
+      "title": "Ìrìnàjò dátà pàtàkì OmniRoute",
+      "description": "Àkóónú ìgbéga tí a fi sílẹ̀ fún fífiránṣẹ́ àti báìtì ìgbàsílẹ̀ tí OmniRoute kà. Kì í ṣe ìrìnàjò nẹ́tíwọ́ọ̀kì lórí àsopọ̀ tàbí ìṣírò owó olùpèsè. Àpapọ̀ náà ní ìrìnàjò tààrà àti èyí tí a kò mọ ibi tí a yàn sí, tí a fi àmì ọ̀tọ̀ sí.",
+      "coverageNote": "Àwọn àpapọ̀ láti ìgbà tí ìwọ̀n bẹ̀rẹ̀. A kò ka ìgbéga tí a kò mọ ìwọ̀n rẹ̀ (ìṣàn dátà, FormData, àkóónú Request) sínú àpapọ̀ báìtì. Ìgbàsílẹ̀ tí a kò kà tàbí tí kò tíì parí kò pé; fífiránṣẹ́ tí ó kùnà kò jẹ́ ẹ̀rí pé ìgbéga dé ibi tí ó ń lọ. A kò wọn yíyí ọ̀nà/ìgbìyànjú tuntun inú ìgbéjáde àti ìgbéjáde tí ó kọjá ìwọ̀n lọ́tọ̀.",
+      "refresh": "Tún un ṣe",
+      "overall": "Àpapọ̀ (gbogbo ọ̀nà tí a ṣàkíyèsí)",
+      "proxied": "Àpapọ̀ kékeré próksì (láìka tààrà/èyí tí a kò yàn sí)",
+      "direct": "Tààrà (láìsí próksì)",
+      "unattributed": "Olùpín tí a kò yàn sí",
+      "removed": "Próksì tí a yọ kúrò ({id})",
+      "legacy": "Próksì àtijọ́/ti àyíká ({id})",
+      "route": "Ọ̀nà",
+      "upload": "Ìgbéga tí a fi sílẹ̀ fún fífiránṣẹ́",
+      "download": "Ìgbàsílẹ̀ tí a kà",
+      "attempts": "Àwọn ìgbìyànjú",
+      "knownUpload": "Ìgbéga tí a mọ ìwọ̀n rẹ̀ / àwọn ìgbìyànjú",
+      "completed": "Ìgbàsílẹ̀ tí ó parí / àwọn ìgbìyànjú",
+      "failed": "Fífiránṣẹ́ tí ó kùnà",
+      "cancelled": "Ìgbàsílẹ̀ tí a fagilé",
+      "errored": "Àwọn àṣìṣe ìgbàsílẹ̀",
+      "loading": "Ń gbé ìrìnàjò dátà pàtàkì wọlé…",
+      "empty": "A kò tíì wọn ìrìnàjò dátà pàtàkì.",
+      "error": "A kò lè gbé ìrìnàjò dátà pàtàkì wọlé. Gbìyànjú láti tún un ṣe."
+    },
     "title": "Àwọn Ààtò",
     "general": "Gbogbogbòò",
     "security": "Ààbò",
@@ -9289,7 +9313,8 @@
     "modalityBridgeVideoDrilldownEnabledDesc": "Fàyè gba pípa JPEG fún ìgbà díẹ̀ mọ́ nígbà tí ìbéèrè tí a ti fìdí rẹ̀ múlẹ̀ bá tún ṣètò drilldown: true nìkan. A kì í pa àwọn fídíò gidi mọ́ láéláé.",
     "modalityBridgeVideoDrilldownRemoteEnabled": "Fàyè gba ìṣàwárí férémù jinlẹ̀ tí a ti fìdí rẹ̀ múlẹ̀",
     "modalityBridgeVideoDrilldownRemoteEnabledDesc": "Fàyè gba àwọn kọ́kọ́rọ́ API láti ka àti pa àwọn àmì ìdánimọ̀ àìhàn tiwọn nìkan. Kò sí ààyè fún ìwọlé aláìlórúkọ tàbí ìwọlé láti ọ̀dọ̀ kọ́kọ́rọ́ mìíràn.",
-    "modalityBridgeVideoDrilldownUsage": "Àwọn JPEG / báìtì tí a pa mọ́"
+    "modalityBridgeVideoDrilldownUsage": "Àwọn JPEG / báìtì tí a pa mọ́",
+    "proxyManagedCoresTab": "Àwọn kókó tí a ń ṣàkóso"
   },
   "contextRtk": {
     "title": "Ẹ́ńjìnnì RTK",
@@ -11666,21 +11691,6 @@
     "daysAgo": "ọjọ́ {days} sẹ́yìn",
     "entries": "Àwọn Àkọsílẹ̀",
     "viewSwitcherAria": "Ìwò cache"
-  },
-  "managedProxy": {
-    "title": "Àwọn kókó proksi tí a ń ṣàkóso",
-    "description": "Lẹ ìjápọ̀ ọ̀nà abẹ́ sí pápá olùgbàlejò proksi àdáni láti fi pamọ́ kí o sì yàn án. Níhìn-ín, o tún lè fi ìtumọ̀ JSON ìbílẹ̀ fún ìsopọ̀ tó ń jáde pamọ́ láì yí ìyànkankan padà.",
-    "saveHint": "Fífi pamọ́ máa ń jẹ́rìí kókó tí a fọwọ́ sí tí a bá nílò rẹ̀, ó sì ń ṣàyẹ̀wò ìṣètò ìbílẹ̀ ṣáájú mímú ṣiṣẹ́. Àwọn orísun nílò ìfipamọ́ àṣírí. Kò sí fífi sí ẹ̀rọ ní àwòtẹ́lẹ̀, ìbẹ̀rẹ̀ aládàáṣiṣẹ́ tàbí àyípadà proksi tí ń gba ìsopọ̀ kọjá láìfarahàn.",
-    "saveActivate": "Fi pamọ́ kí o sì mú ṣiṣẹ́",
-    "core": "Kókó",
-    "selectCore": "Yan kókó kan",
-    "name": "Orúkọ",
-    "source": "Ìjápọ̀ orísun tàbí JSON ìbílẹ̀ fún ìsopọ̀ tó ń jáde",
-    "start": "Bẹ̀rẹ̀",
-    "stop": "Dá dúró",
-    "loadError": "Kò ṣeé kó àwọn kókó tí a ń ṣàkóso wọlé",
-    "operationError": "Iṣẹ́ kókó tí a ń ṣàkóso kùnà",
-    "state": "{state, select, not_installed {A kò tíì fi sí ẹ̀rọ} stopped {Ti dúró} starting {Ń bẹ̀rẹ̀} running {Ń ṣiṣẹ́} stopping {Ń dúró} error {Àṣìṣe} other {Àìmọ̀}}"
   },
   "proxyConfigModal": {
     "managedCore": "Kókó proksi",
@@ -14667,6 +14677,8 @@
     "usdUsageQuotaDescription": "Yóò dí kọ́kọ́rọ́ yìí pẹ̀lú àṣìṣe API 400 lẹ́yìn tí ìnáwó USD àdúgbò rẹ̀ bá dé ìwọ̀n ojoojúmọ́ tàbí ọ̀sọ̀ọ̀sẹ̀ tí a ṣètò.",
     "dailyQuotaUsd": "Ìwọ̀n ojoojúmọ́ (USD)",
     "weeklyQuotaUsd": "Ìwọ̀n ọ̀sọ̀ọ̀sẹ̀ (USD)",
+    "fiveHourQuotaUsd": "Ìwọ̀n wákàtí 5 (USD)",
+    "fiveHourQuotaHint": "Fèrèsé tí ń yí: a máa ń ka ìnáwó ìbéèrè kọ̀ọ̀kan fún wákàtí 5, lẹ́yìn náà a tú u sílẹ̀.",
     "quotaWindowDescription": "Ìwọ̀n ọ̀sọ̀ọ̀sẹ̀ ń tẹ̀lé àtúntò ọ̀sọ̀ọ̀sẹ̀ Claude tí a fi pamọ́ sínú kaṣe nígbà tó bá wà; bí kò bá sí, yóò lo àkókò ọjọ́ 7 tó ń yípo. Ìwọ̀n ojoojúmọ́ ń lo ọjọ́ kàlẹ́ńdà Fortaleza.",
     "apiKeyUsdQuota": "Ìwọ̀n USD fún kọ́kọ́rọ́ API",
     "apiKeyUsdQuotaDescription": "Nígbà tí a bá mú un ṣiṣẹ́, @@om-usage máa ń dá ìwọ̀n ojoojúmọ́, ìwọ̀n ọ̀sọ̀ọ̀sẹ̀, ìnáwó ojoojúmọ́ àti ìnáwó ọ̀sọ̀ọ̀sẹ̀ padà ní USD. Ìwọ̀n ọ̀sọ̀ọ̀sẹ̀ ń tẹ̀lé àtúntò Claude tí a fi pamọ́ sínú kaṣe nígbà tó bá wà.",
@@ -16183,5 +16195,20 @@
     "recoveryHelp": "Imularada tun lo fifuye atilẹba ati bọtini. Lẹhin ti tun gbejade, mu pada ipari ipari gangan, asopọ, gbigbe ati titẹ sii. Titun iran bẹrẹ kan lọtọ billable ìbéèrè. O to awọn owo-owo 20 ti wa ni ipamọ ni taabu yii.",
     "streamIncomplete": "ṣiṣan naa pari laisi iṣẹlẹ ipari pipe. Ipari ti oke jẹ aimọ.",
     "streamError": "Omi ti o wa ni oke royin aṣiṣe kan. Awọn faili ti o gba wa wa."
+  },
+  "managedProxy": {
+    "title": "Àwọn kókó proksi tí a ń ṣàkóso",
+    "description": "Lẹ ìjápọ̀ ọ̀nà abẹ́ sí pápá olùgbàlejò proksi àdáni láti fi pamọ́ kí o sì yàn án. Níhìn-ín, o tún lè fi ìtumọ̀ JSON ìbílẹ̀ fún ìsopọ̀ tó ń jáde pamọ́ láì yí ìyànkankan padà.",
+    "saveHint": "Fífi pamọ́ máa ń jẹ́rìí kókó tí a fọwọ́ sí tí a bá nílò rẹ̀, ó sì ń ṣàyẹ̀wò ìṣètò ìbílẹ̀ ṣáájú mímú ṣiṣẹ́. Àwọn orísun nílò ìfipamọ́ àṣírí. Kò sí fífi sí ẹ̀rọ ní àwòtẹ́lẹ̀, ìbẹ̀rẹ̀ aládàáṣiṣẹ́ tàbí àyípadà proksi tí ń gba ìsopọ̀ kọjá láìfarahàn.",
+    "saveActivate": "Fi pamọ́ kí o sì mú ṣiṣẹ́",
+    "core": "Kókó",
+    "selectCore": "Yan kókó kan",
+    "name": "Orúkọ",
+    "source": "Ìjápọ̀ orísun tàbí JSON ìbílẹ̀ fún ìsopọ̀ tó ń jáde",
+    "start": "Bẹ̀rẹ̀",
+    "stop": "Dá dúró",
+    "loadError": "Kò ṣeé kó àwọn kókó tí a ń ṣàkóso wọlé",
+    "operationError": "Iṣẹ́ kókó tí a ń ṣàkóso kùnà",
+    "state": "{state, select, not_installed {A kò tíì fi sí ẹ̀rọ} stopped {Ti dúró} starting {Ń bẹ̀rẹ̀} running {Ń ṣiṣẹ́} stopping {Ń dúró} error {Àṣìṣe} other {Àìmọ̀}}"
   }
 }

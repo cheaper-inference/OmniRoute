@@ -7108,7 +7108,31 @@
     "fallbackRetryBackendTitle": "Alternatywny backend ponawiania"
   },
   "settings": {
-    "proxyManagedCoresTab": "Zarządzane rdzenie",
+    "proxyTraffic": {
+      "persistenceIncomplete": "Części ruchu nie udało się zapisać w tym procesie. Zapisane sumy są niepełne; sprawdź diagnostykę serwera.",
+      "title": "Ruch danych użytkowych OmniRoute",
+      "description": "Treści wysyłanych danych przekazane do wysłania i bajty pobierania odczytane przez OmniRoute. Nie jest to ruch sieciowy na łączu ani rozliczenie dostawcy. Suma obejmuje oddzielnie oznaczony ruch bezpośredni i nieprzypisany.",
+      "coverageNote": "Sumy skumulowane od rozpoczęcia pomiaru. Wysyłki o nieznanym rozmiarze (strumienie, FormData, treści Request) są wyłączone z sum bajtów. Nieodczytane lub niezakończone pobrania są niepełne; nieudane wysłania nie dowodzą dostarczenia danych. Wewnętrzne przekierowania/ponowienia warstwy transportowej i transporty omijające pomiar nie są mierzone oddzielnie.",
+      "refresh": "Odśwież",
+      "overall": "Łącznie (wszystkie zaobserwowane trasy)",
+      "proxied": "Suma częściowa proxy (bez ruchu bezpośredniego/nieprzypisanego)",
+      "direct": "Bezpośrednio (bez proxy)",
+      "unattributed": "Nieprzypisany dyspozytor",
+      "removed": "Usunięte proxy ({id})",
+      "legacy": "Starsze proxy/proxy ze środowiska ({id})",
+      "route": "Trasa",
+      "upload": "Dane przekazane do wysłania",
+      "download": "Odczytane pobranie",
+      "attempts": "Próby",
+      "knownUpload": "Wysyłki o znanym rozmiarze / próby",
+      "completed": "Zakończone pobrania / próby",
+      "failed": "Nieudane wysłania",
+      "cancelled": "Anulowane pobrania",
+      "errored": "Błędy pobierania",
+      "loading": "Ładowanie ruchu danych użytkowych…",
+      "empty": "Nie zmierzono jeszcze ruchu danych użytkowych.",
+      "error": "Nie udało się wczytać ruchu danych użytkowych. Spróbuj odświeżyć."
+    },
     "title": "Ustawienia",
     "general": "Ogólne",
     "security": "Bezpieczeństwo",
@@ -9289,7 +9313,8 @@
     "modalityBridgeVideoDrilldownEnabledDesc": "Zezwalaj na tymczasowe przechowywanie plików JPEG tylko wtedy, gdy uwierzytelnione żądanie zawiera również ustawienie drilldown: true. Surowe nagrania wideo nigdy nie są przechowywane.",
     "modalityBridgeVideoDrilldownRemoteEnabled": "Zezwalaj na uwierzytelnione przechodzenie do szczegółów klatek",
     "modalityBridgeVideoDrilldownRemoteEnabledDesc": "Zezwalaj kluczom API na odczytywanie i usuwanie wyłącznie własnych nieprzejrzystych uchwytów. Dostęp anonimowy ani między kluczami nie jest dozwolony.",
-    "modalityBridgeVideoDrilldownUsage": "Przechowywane pliki JPEG / bajty"
+    "modalityBridgeVideoDrilldownUsage": "Przechowywane pliki JPEG / bajty",
+    "proxyManagedCoresTab": "Zarządzane rdzenie"
   },
   "contextRtk": {
     "title": "Silnik RTK",
@@ -11666,21 +11691,6 @@
     "daysAgo": "{days}d temu",
     "entries": "Wpisy",
     "viewSwitcherAria": "Widok pamięci podręcznej"
-  },
-  "managedProxy": {
-    "title": "Zarządzane rdzenie proxy",
-    "description": "Wklej łącze tunelu w polu hosta niestandardowego proxy, aby je zapisać i przypisać. Tutaj możesz również zapisać definicję połączenia wychodzącego w natywnym formacie JSON bez zmiany żadnego przypisania.",
-    "saveHint": "Podczas zapisywania w razie potrzeby weryfikowany jest oficjalny rdzeń, a przed aktywacją sprawdzana jest natywna konfiguracja. Źródła wymagają szyfrowania. Brak instalacji podczas podglądu, automatycznego uruchamiania i zmian w przezroczystym proxy.",
-    "saveActivate": "Zapisz i aktywuj",
-    "core": "Rdzeń",
-    "selectCore": "Wybierz rdzeń",
-    "name": "Nazwa",
-    "source": "Łącze źródłowe lub połączenie wychodzące w natywnym formacie JSON",
-    "start": "Uruchom",
-    "stop": "Zatrzymaj",
-    "loadError": "Nie udało się wczytać zarządzanych rdzeni",
-    "operationError": "Operacja na zarządzanym rdzeniu nie powiodła się",
-    "state": "{state, select, not_installed {Niezainstalowany} stopped {Zatrzymany} starting {Uruchamianie} running {Uruchomiony} stopping {Zatrzymywanie} error {Błąd} other {Nieznany}}"
   },
   "proxyConfigModal": {
     "managedCore": "Rdzeń proxy",
@@ -14667,6 +14677,8 @@
     "usdUsageQuotaDescription": "Blokuje ten klucz błędem API 400, gdy lokalne wydatki w USD osiągną skonfigurowany limit dzienny lub tygodniowy.",
     "dailyQuotaUsd": "Limit dzienny (USD)",
     "weeklyQuotaUsd": "Limit tygodniowy (USD)",
+    "fiveHourQuotaUsd": "Limit 5-godzinny (USD)",
+    "fiveHourQuotaHint": "Okno kroczące: wydatek każdego żądania liczy się przez 5 godzin, a potem się zwalnia.",
     "quotaWindowDescription": "Limit tygodniowy jest zgodny z zapisanym w pamięci podręcznej cotygodniowym resetem Claude, jeśli jest dostępny; w przeciwnym razie przełącza się na ruchome okno 7-dniowe. Limit dzienny korzysta z dnia kalendarzowego Fortaleza.",
     "apiKeyUsdQuota": "Limit klucza API w USD",
     "apiKeyUsdQuotaDescription": "Gdy włączone, @@om-usage zwraca limit dzienny, limit tygodniowy, wydatki dzienne oraz wydatki tygodniowe w USD. Limit tygodniowy jest zgodny z zapisanym w pamięci podręcznej resetem Claude, jeśli jest dostępny.",
@@ -16183,5 +16195,20 @@
     "recoveryHelp": "__MISSING__",
     "streamIncomplete": "__MISSING__",
     "streamError": "__MISSING__"
+  },
+  "managedProxy": {
+    "title": "Zarządzane rdzenie proxy",
+    "description": "Wklej łącze tunelu w polu hosta niestandardowego proxy, aby je zapisać i przypisać. Tutaj możesz również zapisać definicję połączenia wychodzącego w natywnym formacie JSON bez zmiany żadnego przypisania.",
+    "saveHint": "Podczas zapisywania w razie potrzeby weryfikowany jest oficjalny rdzeń, a przed aktywacją sprawdzana jest natywna konfiguracja. Źródła wymagają szyfrowania. Brak instalacji podczas podglądu, automatycznego uruchamiania i zmian w przezroczystym proxy.",
+    "saveActivate": "Zapisz i aktywuj",
+    "core": "Rdzeń",
+    "selectCore": "Wybierz rdzeń",
+    "name": "Nazwa",
+    "source": "Łącze źródłowe lub połączenie wychodzące w natywnym formacie JSON",
+    "start": "Uruchom",
+    "stop": "Zatrzymaj",
+    "loadError": "Nie udało się wczytać zarządzanych rdzeni",
+    "operationError": "Operacja na zarządzanym rdzeniu nie powiodła się",
+    "state": "{state, select, not_installed {Niezainstalowany} stopped {Zatrzymany} starting {Uruchamianie} running {Uruchomiony} stopping {Zatrzymywanie} error {Błąd} other {Nieznany}}"
   }
 }

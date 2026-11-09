@@ -7108,7 +7108,31 @@
     "fallbackRetryBackendTitle": "Fallback-Backend für Wiederholungen"
   },
   "settings": {
-    "proxyManagedCoresTab": "Verwaltete Kerne",
+    "proxyTraffic": {
+      "persistenceIncomplete": "Ein Teil des Datenverkehrs konnte in diesem Prozess nicht gespeichert werden. Die gespeicherten Summen sind unvollständig; prüfen Sie die Serverdiagnose.",
+      "title": "OmniRoute-Nutzdatenverkehr",
+      "description": "Zum Senden übergebene Upload-Inhalte und von OmniRoute gelesene Download-Bytes. Kein Netzwerkverkehr auf der Leitung und keine Anbieterabrechnung. Die Gesamtsumme enthält separat gekennzeichneten direkten und nicht zugeordneten Datenverkehr.",
+      "coverageNote": "Kumulierte Summen seit Beginn der Messung. Uploads unbekannter Größe (Streams, FormData, Request-Inhalte) sind von den Byte-Summen ausgeschlossen. Ungelesene oder nicht abgeschlossene Downloads sind unvollständig; fehlgeschlagene Sendeversuche belegen keine Zustellung des Uploads. Interne Weiterleitungen/Wiederholungen der Transportschicht und Transporte außerhalb des Messpfads werden nicht separat erfasst.",
+      "refresh": "Aktualisieren",
+      "overall": "Gesamt (alle beobachteten Routen)",
+      "proxied": "Proxy-Zwischensumme (ohne direkten/nicht zugeordneten Verkehr)",
+      "direct": "Direkt (ohne Proxy)",
+      "unattributed": "Nicht zugeordneter Dispatcher",
+      "removed": "Entfernter Proxy ({id})",
+      "legacy": "Älterer/Umgebungs-Proxy ({id})",
+      "route": "Route des Datenverkehrs",
+      "upload": "Zum Senden übergebener Upload",
+      "download": "Gelesener Download",
+      "attempts": "Versuche",
+      "knownUpload": "Uploads bekannter Größe / Versuche",
+      "completed": "Abgeschlossene Downloads / Versuche",
+      "failed": "Fehlgeschlagene Sendeversuche",
+      "cancelled": "Abgebrochene Downloads",
+      "errored": "Download-Fehler",
+      "loading": "Nutzdatenverkehr wird geladen…",
+      "empty": "Noch kein Nutzdatenverkehr gemessen.",
+      "error": "Nutzdatenverkehr konnte nicht geladen werden. Versuchen Sie, die Ansicht zu aktualisieren."
+    },
     "title": "Einstellungen",
     "general": "Allgemein",
     "security": "Sicherheit",
@@ -9289,7 +9313,8 @@
     "modalityBridgeVideoDrilldownEnabledDesc": "Die vorübergehende Aufbewahrung von JPEGs nur zulassen, wenn die authentifizierte Anfrage zusätzlich drilldown: true festlegt. Rohvideos werden niemals aufbewahrt.",
     "modalityBridgeVideoDrilldownRemoteEnabled": "Authentifizierten Frame-Drill-down zulassen",
     "modalityBridgeVideoDrilldownRemoteEnabledDesc": "API-Schlüsseln nur erlauben, ihre eigenen undurchsichtigen Handles zu lesen und zu löschen. Kein anonymer oder schlüsselübergreifender Zugriff.",
-    "modalityBridgeVideoDrilldownUsage": "Aufbewahrte JPEGs / Bytes"
+    "modalityBridgeVideoDrilldownUsage": "Aufbewahrte JPEGs / Bytes",
+    "proxyManagedCoresTab": "Verwaltete Kerne"
   },
   "contextRtk": {
     "title": "RTK-Engine",
@@ -11666,21 +11691,6 @@
     "daysAgo": "vor {days}d",
     "entries": "Einträge",
     "viewSwitcherAria": "Cache-Ansicht"
-  },
-  "managedProxy": {
-    "title": "Verwaltete Proxy-Kerne",
-    "description": "Fügen Sie einen Tunnel-Link in das Host-Feld des benutzerdefinierten Proxys ein, um ihn zu speichern und zuzuweisen. Hier können Sie auch eine ausgehende Verbindung im nativen JSON-Format definieren und speichern, ohne eine Zuweisung zu ändern.",
-    "saveHint": "Beim Speichern wird bei Bedarf der offizielle Kern verifiziert und die native Konfiguration vor der Aktivierung geprüft. Quellen müssen verschlüsselt sein. Keine Installation während der Vorschau, kein Autostart und keine Änderungen am transparenten Proxy.",
-    "saveActivate": "Speichern und aktivieren",
-    "core": "Kern",
-    "selectCore": "Kern auswählen",
-    "name": "Name",
-    "source": "Quell-Link oder ausgehende Verbindung im nativen JSON-Format",
-    "start": "Starten",
-    "stop": "Stoppen",
-    "loadError": "Verwaltete Kerne konnten nicht geladen werden",
-    "operationError": "Aktion für den verwalteten Kern fehlgeschlagen",
-    "state": "{state, select, not_installed {Nicht installiert} stopped {Gestoppt} starting {Wird gestartet} running {Läuft} stopping {Wird gestoppt} error {Fehler} other {Unbekannt}}"
   },
   "proxyConfigModal": {
     "managedCore": "Proxy-Kern",
@@ -14667,6 +14677,8 @@
     "usdUsageQuotaDescription": "Blockiert diesen Schlüssel mit einem 400-API-Fehler, nachdem seine lokalen USD-Ausgaben das konfigurierte tägliche oder wöchentliche Kontingent erreichen.",
     "dailyQuotaUsd": "Tägliches Kontingent (USD)",
     "weeklyQuotaUsd": "Wöchentliches Kontingent (USD)",
+    "fiveHourQuotaUsd": "5-Stunden-Kontingent (USD)",
+    "fiveHourQuotaHint": "Gleitendes Fenster: Die Kosten jeder Anfrage zählen 5 Stunden lang und werden dann wieder frei.",
     "quotaWindowDescription": "Das wöchentliche Kontingent folgt dem zwischengespeicherten wöchentlichen Claude-Reset, sofern verfügbar; andernfalls fällt es auf ein rollierendes 7-Tage-Fenster zurück. Das tägliche Kontingent verwendet den Fortaleza-Kalendertag.",
     "apiKeyUsdQuota": "API-Schlüssel-USD-Kontingent",
     "apiKeyUsdQuotaDescription": "Wenn aktiviert, gibt @@om-usage das tägliche Kontingent, das wöchentliche Kontingent, die täglichen Ausgaben und die wöchentlichen Ausgaben in USD zurück. Wöchentlich folgt dem zwischengespeicherten Claude-Reset, sofern verfügbar.",
@@ -16183,5 +16195,20 @@
     "recoveryHelp": "__MISSING__",
     "streamIncomplete": "__MISSING__",
     "streamError": "__MISSING__"
+  },
+  "managedProxy": {
+    "title": "Verwaltete Proxy-Kerne",
+    "description": "Fügen Sie einen Tunnel-Link in das Host-Feld des benutzerdefinierten Proxys ein, um ihn zu speichern und zuzuweisen. Hier können Sie auch eine ausgehende Verbindung im nativen JSON-Format definieren und speichern, ohne eine Zuweisung zu ändern.",
+    "saveHint": "Beim Speichern wird bei Bedarf der offizielle Kern verifiziert und die native Konfiguration vor der Aktivierung geprüft. Quellen müssen verschlüsselt sein. Keine Installation während der Vorschau, kein Autostart und keine Änderungen am transparenten Proxy.",
+    "saveActivate": "Speichern und aktivieren",
+    "core": "Kern",
+    "selectCore": "Kern auswählen",
+    "name": "Name",
+    "source": "Quell-Link oder ausgehende Verbindung im nativen JSON-Format",
+    "start": "Starten",
+    "stop": "Stoppen",
+    "loadError": "Verwaltete Kerne konnten nicht geladen werden",
+    "operationError": "Aktion für den verwalteten Kern fehlgeschlagen",
+    "state": "{state, select, not_installed {Nicht installiert} stopped {Gestoppt} starting {Wird gestartet} running {Läuft} stopping {Wird gestoppt} error {Fehler} other {Unbekannt}}"
   }
 }

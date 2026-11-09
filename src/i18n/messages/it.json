@@ -7185,7 +7185,31 @@
     "fallbackRetryBackendTitle": "Backend di riprova di fallback"
   },
   "settings": {
-    "proxyManagedCoresTab": "Nuclei gestiti",
+    "proxyTraffic": {
+      "persistenceIncomplete": "Parte del traffico non è stata salvata in questo processo. I totali memorizzati sono incompleti; controlla la diagnostica del server.",
+      "title": "Traffico dei dati utili di OmniRoute",
+      "description": "Corpi dei caricamenti affidati all'invio e byte scaricati letti da OmniRoute. Non è traffico di rete sulla connessione né fatturazione del fornitore. Il totale include il traffico diretto e non attribuito, etichettati separatamente.",
+      "coverageNote": "Totali cumulativi dall'inizio della misurazione. I caricamenti di dimensione sconosciuta (flussi, FormData, corpi Request) sono esclusi dai totali dei byte. Gli scaricamenti non letti o non terminati sono incompleti; gli invii falliti non dimostrano la consegna del caricamento. I reindirizzamenti/tentativi interni del trasporto e i trasporti che aggirano la misurazione non vengono misurati separatamente.",
+      "refresh": "Aggiorna",
+      "overall": "Totale (tutti i percorsi osservati)",
+      "proxied": "Subtotale dei proxy (senza traffico diretto/non attribuito)",
+      "direct": "Diretto (senza proxy)",
+      "unattributed": "Dispatcher non attribuito",
+      "removed": "Proxy rimosso ({id})",
+      "legacy": "Proxy precedente/dell'ambiente ({id})",
+      "route": "Percorso",
+      "upload": "Caricamento affidato all'invio",
+      "download": "Scaricamento letto",
+      "attempts": "Tentativi",
+      "knownUpload": "Caricamenti di dimensione nota / tentativi",
+      "completed": "Scaricamenti completi / tentativi",
+      "failed": "Invii falliti",
+      "cancelled": "Scaricamenti annullati",
+      "errored": "Errori di scaricamento",
+      "loading": "Caricamento del traffico dei dati utili…",
+      "empty": "Nessun traffico di dati utili ancora misurato.",
+      "error": "Impossibile caricare il traffico dei dati utili. Prova ad aggiornare."
+    },
     "title": "Impostazioni",
     "general": "Generale",
     "security": "Sicurezza",
@@ -9366,7 +9390,8 @@
     "modalityBridgeVideoDrilldownEnabledDesc": "Consenti la conservazione temporanea dei file JPEG solo quando la richiesta autenticata imposta anche drilldown: true. I video originali non vengono mai conservati.",
     "modalityBridgeVideoDrilldownRemoteEnabled": "Consenti l'analisi dettagliata dei fotogrammi autenticata",
     "modalityBridgeVideoDrilldownRemoteEnabledDesc": "Consenti alle chiavi API di leggere ed eliminare solo i propri handle opachi. Nessun accesso anonimo o tra chiavi diverse.",
-    "modalityBridgeVideoDrilldownUsage": "JPEG conservati / byte"
+    "modalityBridgeVideoDrilldownUsage": "JPEG conservati / byte",
+    "proxyManagedCoresTab": "Nuclei gestiti"
   },
   "contextRtk": {
     "title": "Motore RTK",
@@ -11743,21 +11768,6 @@
     "daysAgo": "{days}g fa",
     "entries": "Voci",
     "viewSwitcherAria": "Vista cache"
-  },
-  "managedProxy": {
-    "title": "Nuclei proxy gestiti",
-    "description": "Incolla un link del tunnel nel campo host del proxy personalizzato per salvarlo e assegnarlo. Qui puoi anche salvare una definizione di connessione in uscita nel formato JSON nativo senza modificare alcuna assegnazione.",
-    "saveHint": "Il salvataggio verifica il nucleo ufficiale, se necessario, e controlla la configurazione nativa prima dell’attivazione. Le fonti richiedono la crittografia. Nessuna installazione durante l’anteprima, nessun avvio automatico e nessuna modifica al proxy trasparente.",
-    "saveActivate": "Salva e attiva",
-    "core": "Nucleo",
-    "selectCore": "Seleziona un nucleo",
-    "name": "Nome",
-    "source": "Link di origine o connessione in uscita nel formato JSON nativo",
-    "start": "Avvia",
-    "stop": "Arresta",
-    "loadError": "Impossibile caricare i nuclei gestiti",
-    "operationError": "Operazione sul nucleo gestito non riuscita",
-    "state": "{state, select, not_installed {Non installato} stopped {Arrestato} starting {Avvio in corso} running {In esecuzione} stopping {Arresto in corso} error {Errore} other {Sconosciuto}}"
   },
   "proxyConfigModal": {
     "managedCore": "Nucleo del proxy",
@@ -14744,6 +14754,8 @@
     "usdUsageQuotaDescription": "Blocca questa chiave con un errore API 400 dopo che la spesa locale in USD raggiunge la quota giornaliera o settimanale configurata.",
     "dailyQuotaUsd": "Quota giornaliera (USD)",
     "weeklyQuotaUsd": "Quota settimanale (USD)",
+    "fiveHourQuotaUsd": "Quota su 5 ore (USD)",
+    "fiveHourQuotaHint": "Finestra mobile: la spesa di ogni richiesta conta per 5 ore, poi si libera.",
     "quotaWindowDescription": "La quota settimanale segue il reset settimanale di Claude memorizzato nella cache, se disponibile; in caso contrario, ricorre a una finestra mobile di 7 giorni. La quota giornaliera utilizza il giorno di calendario di Fortaleza.",
     "apiKeyUsdQuota": "Quota in USD della chiave API",
     "apiKeyUsdQuotaDescription": "Quando abilitato, @@om-usage restituisce quota giornaliera, quota settimanale, spesa giornaliera e spesa settimanale in USD. Quella settimanale segue il reset di Claude memorizzato nella cache, se disponibile.",
@@ -16183,5 +16195,20 @@
     "recoveryHelp": "__MISSING__",
     "streamIncomplete": "__MISSING__",
     "streamError": "__MISSING__"
+  },
+  "managedProxy": {
+    "title": "Nuclei proxy gestiti",
+    "description": "Incolla un link del tunnel nel campo host del proxy personalizzato per salvarlo e assegnarlo. Qui puoi anche salvare una definizione di connessione in uscita nel formato JSON nativo senza modificare alcuna assegnazione.",
+    "saveHint": "Il salvataggio verifica il nucleo ufficiale, se necessario, e controlla la configurazione nativa prima dell’attivazione. Le fonti richiedono la crittografia. Nessuna installazione durante l’anteprima, nessun avvio automatico e nessuna modifica al proxy trasparente.",
+    "saveActivate": "Salva e attiva",
+    "core": "Nucleo",
+    "selectCore": "Seleziona un nucleo",
+    "name": "Nome",
+    "source": "Link di origine o connessione in uscita nel formato JSON nativo",
+    "start": "Avvia",
+    "stop": "Arresta",
+    "loadError": "Impossibile caricare i nuclei gestiti",
+    "operationError": "Operazione sul nucleo gestito non riuscita",
+    "state": "{state, select, not_installed {Non installato} stopped {Arrestato} starting {Avvio in corso} running {In esecuzione} stopping {Arresto in corso} error {Errore} other {Sconosciuto}}"
   }
 }

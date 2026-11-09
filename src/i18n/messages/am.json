@@ -7185,7 +7185,31 @@
     "fallbackRetryBackendTitle": "ፋሎቤክ ረትሪ ቤክ-ኤንድ"
   },
   "settings": {
-    "proxyManagedCoresTab": "የሚተዳደሩ ኮሮች",
+    "proxyTraffic": {
+      "persistenceIncomplete": "በዚህ ሂደት ውስጥ የውሂብ ትራፊኩ አንድ ክፍል ሊቀመጥ አልቻለም። የተቀመጡት ድምሮች ያልተሟሉ ናቸው፤ የአገልጋዩን የምርመራ መረጃ ይመልከቱ።",
+      "title": "የOmniRoute ዋና ውሂብ ትራፊክ",
+      "description": "ለመላክ የቀረቡ የስቀላ ይዘቶች እና OmniRoute ያነበባቸው የማውረድ ባይቶች። ይህ በግንኙነቱ ላይ ያለው የኔትወርክ ትራፊክ ወይም የአቅራቢው የክፍያ ሂሳብ አይደለም። አጠቃላይ ድምሩ በተለየ ምልክት የተገለጹ ቀጥታ ትራፊክን እና ምንጫቸው ያልተመደበ ትራፊክን ያካትታል።",
+      "coverageNote": "መለኪያው ከጀመረበት ጊዜ ጀምሮ የተጠራቀሙ ድምሮች። መጠናቸው ያልታወቀ ስቀላዎች (ፍሰቶች፣ FormData፣ የRequest ይዘቶች) በባይት ድምር ውስጥ አይካተቱም። ያልተነበቡ ወይም ያልተጠናቀቁ ውርዶች ያልተሟሉ ናቸው፤ መላክ አለመሳካቱ ስቀላው መድረሱን አያረጋግጥም። በማጓጓዣው ውስጥ የሚደረጉ አቅጣጫ ለውጦች/ድጋሚ ሙከራዎች እና መለኪያውን የሚያልፉ ማጓጓዣዎች በተናጠል አይለኩም።",
+      "refresh": "አድስ",
+      "overall": "አጠቃላይ (ሁሉም የታዩ መንገዶች)",
+      "proxied": "የፕሮክሲ ንዑስ ድምር (ቀጥታ/ያልተመደበ ትራፊክን ሳይጨምር)",
+      "direct": "ቀጥታ (ያለ ፕሮክሲ)",
+      "unattributed": "ምንጩ ያልተመደበ አስተላላፊ",
+      "removed": "የተወገደ ፕሮክሲ ({id})",
+      "legacy": "የቀድሞ/የአካባቢ ቅንብር ፕሮክሲ ({id})",
+      "route": "መንገድ",
+      "upload": "ለመላክ የቀረበ ስቀላ",
+      "download": "የተነበበ ውርድ",
+      "attempts": "ሙከራዎች",
+      "knownUpload": "መጠናቸው የታወቀ ስቀላዎች / ሙከራዎች",
+      "completed": "የተጠናቀቁ ውርዶች / ሙከራዎች",
+      "failed": "ያልተሳኩ መላኮች",
+      "cancelled": "የተሰረዙ ውርዶች",
+      "errored": "የማውረድ ስህተቶች",
+      "loading": "የዋና ውሂብ ትራፊክ በመጫን ላይ…",
+      "empty": "የዋና ውሂብ ትራፊክ እስካሁን አልተለካም።",
+      "error": "የዋና ውሂብ ትራፊክ ሊጫን አልቻለም። ማደስን ይሞክሩ።"
+    },
     "title": "ቅንብሮች",
     "general": "አጠቃላይ",
     "security": "ደህንነት",
@@ -9366,7 +9390,8 @@
     "modalityBridgeVideoDrilldownEnabledDesc": "የተረጋገጠው ጥያቄ drilldown: true ን ሲያቀናብር ብቻ ጊዜያዊ የJPEG ማቆየትን ይፍቀዱ። ጥሬ ቪዲዮዎች በፍጹም አይቆዩም።",
     "modalityBridgeVideoDrilldownRemoteEnabled": "የተረጋገጠ የፍሬም ዝርዝር እይታን ይፍቀዱ",
     "modalityBridgeVideoDrilldownRemoteEnabledDesc": "የAPI ቁልፎች የራሳቸውን ግልጽ ያልሆኑ መያዣዎች ብቻ እንዲያነቡና እንዲሰርዙ ይፍቀዱ። ማንነት ያልተገለጸ ወይም በተለያዩ ቁልፎች መካከል የሚደረግ መዳረሻ አይፈቀድም።",
-    "modalityBridgeVideoDrilldownUsage": "የተቆዩ JPEGዎች / ባይቶች"
+    "modalityBridgeVideoDrilldownUsage": "የተቆዩ JPEGዎች / ባይቶች",
+    "proxyManagedCoresTab": "የሚተዳደሩ ኮሮች"
   },
   "contextRtk": {
     "title": "RTK ሞተር",
@@ -11743,21 +11768,6 @@
     "daysAgo": "ከ{days} ቀን በፊት",
     "entries": "ግቤቶች",
     "viewSwitcherAria": "የመሸጎጫ እይታ"
-  },
-  "managedProxy": {
-    "title": "የሚተዳደሩ የፕሮክሲ ኮሮች",
-    "description": "ለማስቀመጥ እና ለመመደብ የቱነል አገናኙን በብጁ ፕሮክሲ አስተናጋጅ መስክ ውስጥ ይለጥፉ። እዚህ ማንኛውንም ምደባ ሳይቀይሩ በኮሩ የሚደገፍ የወጪ ግንኙነት JSON ትርጉም ማስቀመጥም ይችላሉ።",
-    "saveHint": "በማስቀመጥ ጊዜ አስፈላጊ ከሆነ ኦፊሴላዊው ኮር ይረጋገጣል፣ ከማንቃት በፊትም በኮሩ የሚደገፈው ውቅር ይመረመራል። ምንጮች ምስጠራ ይፈልጋሉ። በቅድመ እይታ ጊዜ መጫን፣ በራስ-ሰር ማስጀመር ወይም የግልጽ ፕሮክሲ ለውጥ አይከናወንም።",
-    "saveActivate": "አስቀምጥ እና አንቃ",
-    "core": "ኮር",
-    "selectCore": "ኮር ይምረጡ",
-    "name": "ስም",
-    "source": "የምንጭ አገናኝ ወይም በኮሩ የሚደገፍ የወጪ ግንኙነት JSON",
-    "start": "ጀምር",
-    "stop": "አቁም",
-    "loadError": "የሚተዳደሩ ኮሮችን መጫን አልተቻለም",
-    "operationError": "የሚተዳደረው ኮር ክዋኔ አልተሳካም",
-    "state": "{state, select, not_installed {አልተጫነም} stopped {ቆሟል} starting {እየጀመረ ነው} running {እየሠራ ነው} stopping {እየቆመ ነው} error {ስህተት} other {ያልታወቀ}}"
   },
   "proxyConfigModal": {
     "managedCore": "የፕሮክሲ ኮር",
@@ -14744,6 +14754,8 @@
     "usdUsageQuotaDescription": "የዚህ ቁልፍ አካባቢያዊ የUSD ወጪ የተዋቀረው ዕለታዊ ወይም ሳምንታዊ ኮታ ላይ ከደረሰ በኋላ፣ በ400 API ስህተት ያግደዋል።",
     "dailyQuotaUsd": "ዕለታዊ ኮታ (USD)",
     "weeklyQuotaUsd": "ሳምንታዊ ኮታ (USD)",
+    "fiveHourQuotaUsd": "የ5 ሰዓት ኮታ (USD)",
+    "fiveHourQuotaHint": "ተንቀሳቃሽ መስኮት፦ የእያንዳንዱ ጥያቄ ወጪ ለ5 ሰዓታት ይቆጠራል፣ ከዚያ ይለቀቃል።",
     "quotaWindowDescription": "ሳምንታዊ ኮታው ሲገኝ በመሸጎጫ የተያዘውን የClaude ሳምንታዊ ዳግም ማስጀመሪያ ይከተላል፤ ካልሆነ ተንከባላይ የ7 ቀናት ጊዜ መስኮትን ይጠቀማል። ዕለታዊ ኮታው የFortaleza የቀን መቁጠሪያ ቀንን ይጠቀማል።",
     "apiKeyUsdQuota": "የAPI ቁልፍ USD ኮታ",
     "apiKeyUsdQuotaDescription": "ሲነቃ፣ @@om-usage ዕለታዊ ኮታን፣ ሳምንታዊ ኮታን፣ ዕለታዊ ወጪን እና ሳምንታዊ ወጪን በUSD ይመልሳል። ሳምንታዊው ሲገኝ በመሸጎጫ የተያዘውን የClaude ዳግም ማስጀመሪያ ይከተላል።",
@@ -16183,5 +16195,20 @@
     "recoveryHelp": "__MISSING__",
     "streamIncomplete": "__MISSING__",
     "streamError": "__MISSING__"
+  },
+  "managedProxy": {
+    "title": "የሚተዳደሩ የፕሮክሲ ኮሮች",
+    "description": "ለማስቀመጥ እና ለመመደብ የቱነል አገናኙን በብጁ ፕሮክሲ አስተናጋጅ መስክ ውስጥ ይለጥፉ። እዚህ ማንኛውንም ምደባ ሳይቀይሩ በኮሩ የሚደገፍ የወጪ ግንኙነት JSON ትርጉም ማስቀመጥም ይችላሉ።",
+    "saveHint": "በማስቀመጥ ጊዜ አስፈላጊ ከሆነ ኦፊሴላዊው ኮር ይረጋገጣል፣ ከማንቃት በፊትም በኮሩ የሚደገፈው ውቅር ይመረመራል። ምንጮች ምስጠራ ይፈልጋሉ። በቅድመ እይታ ጊዜ መጫን፣ በራስ-ሰር ማስጀመር ወይም የግልጽ ፕሮክሲ ለውጥ አይከናወንም።",
+    "saveActivate": "አስቀምጥ እና አንቃ",
+    "core": "ኮር",
+    "selectCore": "ኮር ይምረጡ",
+    "name": "ስም",
+    "source": "የምንጭ አገናኝ ወይም በኮሩ የሚደገፍ የወጪ ግንኙነት JSON",
+    "start": "ጀምር",
+    "stop": "አቁም",
+    "loadError": "የሚተዳደሩ ኮሮችን መጫን አልተቻለም",
+    "operationError": "የሚተዳደረው ኮር ክዋኔ አልተሳካም",
+    "state": "{state, select, not_installed {አልተጫነም} stopped {ቆሟል} starting {እየጀመረ ነው} running {እየሠራ ነው} stopping {እየቆመ ነው} error {ስህተት} other {ያልታወቀ}}"
   }
 }

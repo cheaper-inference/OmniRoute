@@ -7108,7 +7108,31 @@
     "fallbackRetryBackendTitle": "Visszaterelési újrapróbálkozás háttérrendszere"
   },
   "settings": {
-    "proxyManagedCoresTab": "Felügyelt magok",
+    "proxyTraffic": {
+      "persistenceIncomplete": "A forgalom egy részét nem sikerült menteni ebben a folyamatban. A mentett összesítések hiányosak; ellenőrizze a kiszolgáló diagnosztikáját.",
+      "title": "OmniRoute hasznosadat-forgalom",
+      "description": "Küldésre átadott feltöltési törzsek és az OmniRoute által beolvasott letöltési bájtok. Nem a hálózati kapcsolaton mért forgalom vagy a szolgáltató számlázása. Az összesítés külön megjelölt közvetlen és nem hozzárendelt forgalmat is tartalmaz.",
+      "coverageNote": "A mérés kezdete óta összegzett értékek. Az ismeretlen méretű feltöltések (adatfolyamok, FormData, Request-törzsek) nem szerepelnek a bájtösszegekben. Az olvasatlan vagy befejezetlen letöltések hiányosak; a sikertelen küldés nem bizonyítja a feltöltés kézbesítését. A szállítási réteg belső átirányításait/újrapróbálkozásait és a mérést megkerülő szállításokat nem mérjük külön.",
+      "refresh": "Frissítés",
+      "overall": "Összesen (minden megfigyelt útvonal)",
+      "proxied": "Proxyk részösszege (közvetlen/nem hozzárendelt forgalom nélkül)",
+      "direct": "Közvetlen (proxy nélkül)",
+      "unattributed": "Nem hozzárendelt diszpécser",
+      "removed": "Eltávolított proxy ({id})",
+      "legacy": "Régi/környezeti proxy ({id})",
+      "route": "Útvonal",
+      "upload": "Küldésre átadott feltöltés",
+      "download": "Beolvasott letöltés",
+      "attempts": "Próbálkozások",
+      "knownUpload": "Ismert méretű feltöltések / próbálkozások",
+      "completed": "Befejezett letöltések / próbálkozások",
+      "failed": "Sikertelen küldések",
+      "cancelled": "Megszakított letöltések",
+      "errored": "Letöltési hibák",
+      "loading": "Hasznosadat-forgalom betöltése…",
+      "empty": "Még nem történt hasznosadat-forgalom-mérés.",
+      "error": "Nem sikerült betölteni a hasznosadat-forgalmat. Próbálja meg frissíteni."
+    },
     "title": "Beállítások elemre",
     "general": "tábornok",
     "security": "Biztonság",
@@ -9289,7 +9313,8 @@
     "modalityBridgeVideoDrilldownEnabledDesc": "Az ideiglenes JPEG-megőrzés csak akkor engedélyezett, ha a hitelesített kérés a drilldown: true értéket is beállítja. A nyers videókat soha nem őrizzük meg.",
     "modalityBridgeVideoDrilldownRemoteEnabled": "Hitelesített képkocka-részletezés engedélyezése",
     "modalityBridgeVideoDrilldownRemoteEnabledDesc": "Az API-kulcsok csak a saját átlátszatlan azonosítóikat olvashatják és törölhetik. Névtelen vagy kulcsok közötti hozzáférés nem engedélyezett.",
-    "modalityBridgeVideoDrilldownUsage": "Megőrzött JPEG-ek / bájtok"
+    "modalityBridgeVideoDrilldownUsage": "Megőrzött JPEG-ek / bájtok",
+    "proxyManagedCoresTab": "Felügyelt magok"
   },
   "contextRtk": {
     "title": "RTK-motor",
@@ -11666,21 +11691,6 @@
     "daysAgo": "{days} napja",
     "entries": "Bejegyzések",
     "viewSwitcherAria": "Gyorsítótárnézet"
-  },
-  "managedProxy": {
-    "title": "Felügyelt proxymagok",
-    "description": "Illesszen be egy alagúthivatkozást az egyéni proxy gazdagépmezőjébe a mentéséhez és hozzárendeléséhez. Itt natív JSON-formátumú kimenő kapcsolatdefiníciót is menthet a meglévő hozzárendelések módosítása nélkül.",
-    "saveHint": "Mentéskor szükség esetén ellenőrizzük a hivatalos mag hitelességét, aktiválás előtt pedig a natív konfigurációt. A források titkosítást igényelnek. Előnézet közben nincs telepítés, nincs automatikus indítás és nem változik az átlátszó proxy beállítása.",
-    "saveActivate": "Mentés és aktiválás",
-    "core": "Mag",
-    "selectCore": "Válasszon magot",
-    "name": "Név",
-    "source": "Forráshivatkozás vagy natív JSON-formátumú kimenő kapcsolat",
-    "start": "Indítás",
-    "stop": "Leállítás",
-    "loadError": "Nem sikerült betölteni a felügyelt magokat",
-    "operationError": "A felügyelt mag művelete sikertelen",
-    "state": "{state, select, not_installed {Nincs telepítve} stopped {Leállítva} starting {Indítás alatt} running {Fut} stopping {Leállítás alatt} error {Hiba} other {Ismeretlen}}"
   },
   "proxyConfigModal": {
     "managedCore": "Proxymag",
@@ -14667,6 +14677,8 @@
     "usdUsageQuotaDescription": "Letiltja ezt a kulcsot egy 400-as API-hibával, miután a helyi USD-költése eléri a beállított napi vagy heti kvótát.",
     "dailyQuotaUsd": "Napi kvóta (USD)",
     "weeklyQuotaUsd": "Heti kvóta (USD)",
+    "fiveHourQuotaUsd": "5 órás kvóta (USD)",
+    "fiveHourQuotaHint": "Gördülő ablak: minden kérés költsége 5 órán át számít, utána felszabadul.",
     "quotaWindowDescription": "A heti kvóta a gyorsítótárazott Claude heti visszaállítást követi, ha elérhető; ellenkező esetben egy gördülő 7 napos időszakra vált vissza. A napi kvóta a Fortaleza naptári napot használja.",
     "apiKeyUsdQuota": "API-kulcs USD kvótája",
     "apiKeyUsdQuotaDescription": "Ha engedélyezve van, a(z) @@om-usage visszaadja a napi kvótát, a heti kvótát, a napi költést és a heti költést USD-ben. A heti a gyorsítótárazott Claude visszaállítást követi, ha elérhető.",
@@ -16183,5 +16195,20 @@
     "recoveryHelp": "__MISSING__",
     "streamIncomplete": "__MISSING__",
     "streamError": "__MISSING__"
+  },
+  "managedProxy": {
+    "title": "Felügyelt proxymagok",
+    "description": "Illesszen be egy alagúthivatkozást az egyéni proxy gazdagépmezőjébe a mentéséhez és hozzárendeléséhez. Itt natív JSON-formátumú kimenő kapcsolatdefiníciót is menthet a meglévő hozzárendelések módosítása nélkül.",
+    "saveHint": "Mentéskor szükség esetén ellenőrizzük a hivatalos mag hitelességét, aktiválás előtt pedig a natív konfigurációt. A források titkosítást igényelnek. Előnézet közben nincs telepítés, nincs automatikus indítás és nem változik az átlátszó proxy beállítása.",
+    "saveActivate": "Mentés és aktiválás",
+    "core": "Mag",
+    "selectCore": "Válasszon magot",
+    "name": "Név",
+    "source": "Forráshivatkozás vagy natív JSON-formátumú kimenő kapcsolat",
+    "start": "Indítás",
+    "stop": "Leállítás",
+    "loadError": "Nem sikerült betölteni a felügyelt magokat",
+    "operationError": "A felügyelt mag művelete sikertelen",
+    "state": "{state, select, not_installed {Nincs telepítve} stopped {Leállítva} starting {Indítás alatt} running {Fut} stopping {Leállítás alatt} error {Hiba} other {Ismeretlen}}"
   }
 }

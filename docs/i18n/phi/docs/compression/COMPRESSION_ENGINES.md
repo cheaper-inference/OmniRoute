@@ -379,7 +379,7 @@ Ang retrieve tool ay kasalukuyang pinangalanang `omniroute_ccr_retrieve` (ang `o
 
 ### Siklo ng buhay ng session
 
-Idle out ang mga streamable-HTTP session at inaani sila ng server; ang idle window ay ang `MCP_SESSION_IDLE_MS` constant (na tinutukoy ng pangalan, hindi isang hardcoded na halaga, kaya hindi naaanod ang page na ito kapag nagbago ito). Ang sintomas ng isang idle-reaped session ay isang HTTP 404 na may `Unknown Mcp-Session-Id` — ang remedyo ay upang muling kumonekta o i-restart ang session,** hindi** upang i-rotate ang isang key, baguhin ang isang saklaw, o palitan ang pangalan ng isang tool.
+Idle out ang mga streamable-HTTP session at inaani sila ng server; ang idle window ay itinakda ng `OMNIROUTE_MCP_SESSION_IDLE_MS` (default na 5 minuto; tinutukoy ng pangalan, hindi isang hardcoded na halaga, kaya hindi naaanod ang page na ito kapag nagbago ito). Ang sintomas ng isang idle-reaped session ay isang HTTP 404 na may `Unknown Mcp-Session-Id` — ang remedyo ay upang muling kumonekta o i-restart ang session,** hindi** upang i-rotate ang isang key, baguhin ang isang saklaw, o palitan ang pangalan ng isang tool.
 
 ## Saklaw ng API
 

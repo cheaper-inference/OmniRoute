@@ -7108,7 +7108,31 @@
     "fallbackRetryBackendTitle": "Rezerves atkārtota mēģinājuma aizmugure"
   },
   "settings": {
-    "proxyManagedCoresTab": "Pārvaldīti kodoli",
+    "proxyTraffic": {
+      "persistenceIncomplete": "Daļu datplūsmas šajā procesā neizdevās saglabāt. Saglabātās kopsummas ir nepilnīgas; pārbaudiet servera diagnostiku.",
+      "title": "OmniRoute lietderīgo datu plūsma",
+      "description": "Nosūtīšanai iesniegtais augšupielāžu saturs un OmniRoute nolasītie lejupielāžu baiti. Tā nav tīkla datplūsma savienojumā vai pakalpojuma sniedzēja rēķinu uzskaite. Kopējā summa ietver atsevišķi marķētu tiešo un nepiesaistīto datplūsmu.",
+      "coverageNote": "Uzkrātās kopsummas kopš mērīšanas sākuma. Nezināma lieluma augšupielādes (straumes, FormData, Request saturs) netiek iekļautas baitu kopsummās. Nenolasītas vai nepabeigtas lejupielādes ir nepilnīgas; neveiksmīga nosūtīšana nepierāda augšupielādes piegādi. Transporta slāņa iekšējās pāradresācijas/atkārtotie mēģinājumi un transporti, kas apiet mērīšanu, netiek mērīti atsevišķi.",
+      "refresh": "Atsvaidzināt",
+      "overall": "Kopā (visi novērotie maršruti)",
+      "proxied": "Starpniekserveru starpsumma (bez tiešās/nepiesaistītās datplūsmas)",
+      "direct": "Tieši (bez starpniekservera)",
+      "unattributed": "Nepiesaistīts dispečers",
+      "removed": "Noņemts starpniekserveris ({id})",
+      "legacy": "Mantots/vides starpniekserveris ({id})",
+      "route": "Maršruts",
+      "upload": "Nosūtīšanai iesniegta augšupielāde",
+      "download": "Nolasīta lejupielāde",
+      "attempts": "Mēģinājumi",
+      "knownUpload": "Zināma lieluma augšupielādes / mēģinājumi",
+      "completed": "Pabeigtas lejupielādes / mēģinājumi",
+      "failed": "Neveiksmīgas nosūtīšanas",
+      "cancelled": "Atceltas lejupielādes",
+      "errored": "Lejupielādes kļūdas",
+      "loading": "Ielādē lietderīgo datu plūsmu…",
+      "empty": "Lietderīgo datu plūsma vēl nav mērīta.",
+      "error": "Neizdevās ielādēt lietderīgo datu plūsmu. Mēģiniet atsvaidzināt."
+    },
     "title": "Iestatījumi",
     "general": "Vispārīgi",
     "security": "Drošība",
@@ -9289,7 +9313,8 @@
     "modalityBridgeVideoDrilldownEnabledDesc": "Atļaut īslaicīgu JPEG failu saglabāšanu tikai tad, ja autentificētajā pieprasījumā ir iestatīts arī drilldown: true. Neapstrādātie video nekad netiek saglabāti.",
     "modalityBridgeVideoDrilldownRemoteEnabled": "Atļaut autentificētu kadru detalizētu izpēti",
     "modalityBridgeVideoDrilldownRemoteEnabledDesc": "Atļaut API atslēgām lasīt un dzēst tikai savus necaurspīdīgos identifikatorus. Anonīma piekļuve vai piekļuve ar citu atslēgu nav atļauta.",
-    "modalityBridgeVideoDrilldownUsage": "Saglabātie JPEG faili / baiti"
+    "modalityBridgeVideoDrilldownUsage": "Saglabātie JPEG faili / baiti",
+    "proxyManagedCoresTab": "Pārvaldīti kodoli"
   },
   "contextRtk": {
     "title": "RTK dzinējs",
@@ -11666,21 +11691,6 @@
     "daysAgo": "pirms {days} d.",
     "entries": "Ieraksti",
     "viewSwitcherAria": "Kešatmiņas skats"
-  },
-  "managedProxy": {
-    "title": "Pārvaldīti starpniekservera kodoli",
-    "description": "Ielīmējiet tuneļa saiti pielāgotā starpniekservera resursdatora laukā, lai to saglabātu un piešķirtu. Šeit varat arī saglabāt izejošā savienojuma definīciju kodola sākotnējā JSON formātā, nemainot nevienu piešķīrumu.",
-    "saveHint": "Saglabājot, ja nepieciešams, tiek pārbaudīts oficiālais kodols, un pirms aktivizēšanas tiek pārbaudīta konfigurācija kodola sākotnējā formātā. Avotiem jābūt šifrētiem. Priekšskatījuma laikā nekas netiek instalēts, automātiskā palaišana netiek veikta un caurspīdīgā starpniekservera iestatījumi netiek mainīti.",
-    "saveActivate": "Saglabāt un aktivizēt",
-    "core": "Kodols",
-    "selectCore": "Atlasiet kodolu",
-    "name": "Nosaukums",
-    "source": "Avota saite vai izejošais savienojums kodola sākotnējā JSON formātā",
-    "start": "Palaist",
-    "stop": "Apturēt",
-    "loadError": "Neizdevās ielādēt pārvaldītos kodolus",
-    "operationError": "Pārvaldītā kodola darbība neizdevās",
-    "state": "{state, select, not_installed {Nav instalēts} stopped {Apturēts} starting {Tiek palaists} running {Darbojas} stopping {Tiek apturēts} error {Kļūda} other {Nezināms}}"
   },
   "proxyConfigModal": {
     "managedCore": "Starpniekservera kodols",
@@ -14667,6 +14677,8 @@
     "usdUsageQuotaDescription": "Bloķē šo atslēgu, atgriežot API kļūdu ar kodu 400, kad tās lokālie izdevumi USD sasniedz konfigurēto dienas vai nedēļas kvotu.",
     "dailyQuotaUsd": "Dienas kvota (USD)",
     "weeklyQuotaUsd": "Nedēļas kvota (USD)",
+    "fiveHourQuotaUsd": "5 stundu kvota (USD)",
+    "fiveHourQuotaHint": "Slīdošais logs: katra pieprasījuma izdevumi tiek skaitīti 5 stundas, pēc tam atbrīvoti.",
     "quotaWindowDescription": "Nedēļas kvotas periods atbilst kešotajam Claude iknedēļas atiestatīšanas periodam, ja tas ir pieejams; pretējā gadījumā tiek izmantots slīdošs 7 dienu periods. Dienas kvotai tiek izmantota Fortalezas kalendārā diena.",
     "apiKeyUsdQuota": "API atslēgas USD kvota",
     "apiKeyUsdQuotaDescription": "Ja šī funkcija ir iespējota, @@om-usage atgriež dienas kvotu, nedēļas kvotu, dienas izdevumus un nedēļas izdevumus USD. Nedēļas kvotas periods atbilst kešotajam Claude atiestatīšanas periodam, ja tas ir pieejams.",
@@ -16183,5 +16195,20 @@
     "recoveryHelp": "__MISSING__",
     "streamIncomplete": "__MISSING__",
     "streamError": "__MISSING__"
+  },
+  "managedProxy": {
+    "title": "Pārvaldīti starpniekservera kodoli",
+    "description": "Ielīmējiet tuneļa saiti pielāgotā starpniekservera resursdatora laukā, lai to saglabātu un piešķirtu. Šeit varat arī saglabāt izejošā savienojuma definīciju kodola sākotnējā JSON formātā, nemainot nevienu piešķīrumu.",
+    "saveHint": "Saglabājot, ja nepieciešams, tiek pārbaudīts oficiālais kodols, un pirms aktivizēšanas tiek pārbaudīta konfigurācija kodola sākotnējā formātā. Avotiem jābūt šifrētiem. Priekšskatījuma laikā nekas netiek instalēts, automātiskā palaišana netiek veikta un caurspīdīgā starpniekservera iestatījumi netiek mainīti.",
+    "saveActivate": "Saglabāt un aktivizēt",
+    "core": "Kodols",
+    "selectCore": "Atlasiet kodolu",
+    "name": "Nosaukums",
+    "source": "Avota saite vai izejošais savienojums kodola sākotnējā JSON formātā",
+    "start": "Palaist",
+    "stop": "Apturēt",
+    "loadError": "Neizdevās ielādēt pārvaldītos kodolus",
+    "operationError": "Pārvaldītā kodola darbība neizdevās",
+    "state": "{state, select, not_installed {Nav instalēts} stopped {Apturēts} starting {Tiek palaists} running {Darbojas} stopping {Tiek apturēts} error {Kļūda} other {Nezināms}}"
   }
 }

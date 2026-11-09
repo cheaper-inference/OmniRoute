@@ -7108,7 +7108,31 @@
     "fallbackRetryBackendTitle": "Backend ya jaribio la upandaji"
   },
   "settings": {
-    "proxyManagedCoresTab": "Viini vinavyosimamiwa",
+    "proxyTraffic": {
+      "persistenceIncomplete": "Baadhi ya trafiki haikuweza kuhifadhiwa katika mchakato huu. Jumla zilizohifadhiwa hazijakamilika; angalia taarifa za uchunguzi wa seva.",
+      "title": "Trafiki ya data halisi ya OmniRoute",
+      "description": "Miili ya upakiaji iliyowasilishwa kutumwa na baiti za upakuaji zilizosomwa na OmniRoute. Si trafiki ya mtandao kwenye kiungo wala utozaji wa mtoa huduma. Jumla inajumuisha trafiki ya moja kwa moja na isiyohusishwa na njia, zilizopewa lebo tofauti.",
+      "coverageNote": "Jumla zilizokusanywa tangu kipimo kuanza. Upakiaji wenye ukubwa usiojulikana (mitiririko, FormData, miili ya Request) haujumuishwi katika jumla ya baiti. Upakuaji ambao haujasomwa au haujamalizika haujakamilika; kutuma kulikoshindwa hakuthibitishi kuwa upakiaji umefika. Uelekezaji/majaribio ya kurudia ya ndani ya safu ya usafirishaji na usafirishaji unaopita kando ya kipimo haupimwi kando.",
+      "refresh": "Onyesha upya",
+      "overall": "Jumla (njia zote zilizozingatiwa)",
+      "proxied": "Jumla ndogo ya proksi (bila trafiki ya moja kwa moja/isiyohusishwa)",
+      "direct": "Moja kwa moja (bila proksi)",
+      "unattributed": "Msambazaji asiyehusishwa",
+      "removed": "Proksi iliyoondolewa ({id})",
+      "legacy": "Proksi ya zamani/kutoka mazingira ({id})",
+      "route": "Njia",
+      "upload": "Upakiaji uliowasilishwa kutumwa",
+      "download": "Upakuaji uliosomwa",
+      "attempts": "Majaribio",
+      "knownUpload": "Upakiaji wa ukubwa unaojulikana / majaribio",
+      "completed": "Upakuaji uliokamilika / majaribio",
+      "failed": "Utumaji ulioshindwa",
+      "cancelled": "Upakuaji ulioghairiwa",
+      "errored": "Hitilafu za upakuaji",
+      "loading": "Inapakia trafiki ya data halisi…",
+      "empty": "Hakuna trafiki ya data halisi iliyopimwa bado.",
+      "error": "Haikuweza kupakia trafiki ya data halisi. Jaribu kuonyesha upya."
+    },
     "title": "Mipangilio",
     "general": "Jumla",
     "security": "Usalama",
@@ -9289,7 +9313,8 @@
     "modalityBridgeVideoDrilldownEnabledDesc": "Ruhusu uhifadhi wa muda wa JPEG pale tu ambapo ombi lililothibitishwa pia linaweka drilldown: true. Video ghafi hazihifadhiwi kamwe.",
     "modalityBridgeVideoDrilldownRemoteEnabled": "Ruhusu uchunguzi wa kina wa fremu uliothibitishwa",
     "modalityBridgeVideoDrilldownRemoteEnabledDesc": "Ruhusu funguo za API kusoma na kufuta vishikio vyao fiche pekee. Hakuna ufikiaji bila uthibitishaji au kwa kutumia ufunguo mwingine.",
-    "modalityBridgeVideoDrilldownUsage": "JPEG zilizohifadhiwa / baiti"
+    "modalityBridgeVideoDrilldownUsage": "JPEG zilizohifadhiwa / baiti",
+    "proxyManagedCoresTab": "Viini vinavyosimamiwa"
   },
   "contextRtk": {
     "title": "Injini ya RTK",
@@ -11666,21 +11691,6 @@
     "daysAgo": "{days}d zilizopita",
     "entries": "Maingizo",
     "viewSwitcherAria": "Mwonekano wa kache"
-  },
-  "managedProxy": {
-    "title": "Viini vya proksi vinavyosimamiwa",
-    "description": "Bandika kiungo cha handaki katika sehemu ya seva ya proksi maalumu ili kukihifadhi na kukikabidhi. Hapa unaweza pia kuhifadhi ufafanuzi wa asili wa JSON wa muunganisho unaotoka bila kubadilisha ukabidhi wowote.",
-    "saveHint": "Wakati wa kuhifadhi, kiini rasmi kinathibitishwa ikihitajika na usanidi wa asili hukaguliwa kabla ya kuwezeshwa. Vyanzo vinahitaji usimbaji fiche. Hakuna usakinishaji wakati wa hakiki, kuanza kiotomatiki au mabadiliko ya proksi inayopitisha trafiki bila kuonekana.",
-    "saveActivate": "Hifadhi na uwezeshe",
-    "core": "Kiini",
-    "selectCore": "Chagua kiini",
-    "name": "Jina",
-    "source": "Kiungo cha chanzo au JSON ya asili ya muunganisho unaotoka",
-    "start": "Anzisha",
-    "stop": "Simamisha",
-    "loadError": "Imeshindikana kupakia viini vinavyosimamiwa",
-    "operationError": "Operesheni ya kiini kinachosimamiwa imeshindwa",
-    "state": "{state, select, not_installed {Hakijasakinishwa} stopped {Kimesimamishwa} starting {Kinaanza} running {Kinafanya kazi} stopping {Kinasimama} error {Hitilafu} other {Haijulikani}}"
   },
   "proxyConfigModal": {
     "managedCore": "Kiini cha proksi",
@@ -14667,6 +14677,8 @@
     "usdUsageQuotaDescription": "Huzuia ufunguo huu kwa kosa la API la 400 baada ya matumizi yake ya ndani ya USD kufikia kiwango kilichosanidiwa cha kila siku au kila wiki.",
     "dailyQuotaUsd": "Kiwango cha kila siku (USD)",
     "weeklyQuotaUsd": "Kiwango cha kila wiki (USD)",
+    "fiveHourQuotaUsd": "Kiwango cha saa 5 (USD)",
+    "fiveHourQuotaHint": "Dirisha linalosonga: matumizi ya kila ombi yanahesabiwa kwa saa 5, kisha yanaachiliwa.",
     "quotaWindowDescription": "Kiwango cha kila wiki hufuata uwekaji upya wa kila wiki wa Claude uliohifadhiwa kwenye kache unapopatikana; vinginevyo hurudi kwenye kipindi cha siku 7 kinachoendelea. Kiwango cha kila siku kinatumia siku ya kalenda ya Fortaleza.",
     "apiKeyUsdQuota": "Kiwango cha USD cha ufunguo wa API",
     "apiKeyUsdQuotaDescription": "Inapowezeshwa, @@om-usage inarudisha kiwango cha kila siku, kiwango cha kila wiki, matumizi ya kila siku, na matumizi ya kila wiki katika USD. Kila wiki hufuata uwekaji upya wa Claude uliohifadhiwa kwenye kache unapopatikana.",
@@ -16183,5 +16195,20 @@
     "recoveryHelp": "__MISSING__",
     "streamIncomplete": "__MISSING__",
     "streamError": "__MISSING__"
+  },
+  "managedProxy": {
+    "title": "Viini vya proksi vinavyosimamiwa",
+    "description": "Bandika kiungo cha handaki katika sehemu ya seva ya proksi maalumu ili kukihifadhi na kukikabidhi. Hapa unaweza pia kuhifadhi ufafanuzi wa asili wa JSON wa muunganisho unaotoka bila kubadilisha ukabidhi wowote.",
+    "saveHint": "Wakati wa kuhifadhi, kiini rasmi kinathibitishwa ikihitajika na usanidi wa asili hukaguliwa kabla ya kuwezeshwa. Vyanzo vinahitaji usimbaji fiche. Hakuna usakinishaji wakati wa hakiki, kuanza kiotomatiki au mabadiliko ya proksi inayopitisha trafiki bila kuonekana.",
+    "saveActivate": "Hifadhi na uwezeshe",
+    "core": "Kiini",
+    "selectCore": "Chagua kiini",
+    "name": "Jina",
+    "source": "Kiungo cha chanzo au JSON ya asili ya muunganisho unaotoka",
+    "start": "Anzisha",
+    "stop": "Simamisha",
+    "loadError": "Imeshindikana kupakia viini vinavyosimamiwa",
+    "operationError": "Operesheni ya kiini kinachosimamiwa imeshindwa",
+    "state": "{state, select, not_installed {Hakijasakinishwa} stopped {Kimesimamishwa} starting {Kinaanza} running {Kinafanya kazi} stopping {Kinasimama} error {Hitilafu} other {Haijulikani}}"
   }
 }

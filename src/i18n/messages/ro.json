@@ -7108,7 +7108,31 @@
     "fallbackRetryBackendTitle": "Backend de reîncercare pentru fallback"
   },
   "settings": {
-    "proxyManagedCoresTab": "Nuclee gestionate",
+    "proxyTraffic": {
+      "persistenceIncomplete": "O parte din trafic nu a putut fi salvată în acest proces. Totalurile salvate sunt incomplete; verificați diagnosticul serverului.",
+      "title": "Traficul de date utile OmniRoute",
+      "description": "Corpurile încărcărilor predate pentru trimitere și octeții descărcărilor citiți de OmniRoute. Nu reprezintă traficul de rețea pe conexiune sau facturarea furnizorului. Totalul include traficul direct și neatribuit, etichetate separat.",
+      "coverageNote": "Totaluri cumulative de la începutul măsurării. Încărcările cu dimensiune necunoscută (fluxuri, FormData, corpuri Request) sunt excluse din totalurile de octeți. Descărcările necitite sau neterminate sunt incomplete; trimiterile eșuate nu dovedesc livrarea încărcării. Redirecționările/reîncercările interne ale transportului și transporturile care ocolesc măsurarea nu sunt măsurate separat.",
+      "refresh": "Reîmprospătați",
+      "overall": "Total (toate rutele observate)",
+      "proxied": "Subtotal proxy (fără trafic direct/neatribuit)",
+      "direct": "Direct (fără proxy)",
+      "unattributed": "Dispecer neatribuit",
+      "removed": "Proxy eliminat ({id})",
+      "legacy": "Proxy vechi/din mediu ({id})",
+      "route": "Rută",
+      "upload": "Încărcare predată pentru trimitere",
+      "download": "Descărcare citită",
+      "attempts": "Încercări",
+      "knownUpload": "Încărcări cu dimensiune cunoscută / încercări",
+      "completed": "Descărcări complete / încercări",
+      "failed": "Trimiteri eșuate",
+      "cancelled": "Descărcări anulate",
+      "errored": "Erori de descărcare",
+      "loading": "Se încarcă traficul de date utile…",
+      "empty": "Încă nu s-a măsurat trafic de date utile.",
+      "error": "Traficul de date utile nu a putut fi încărcat. Încercați reîmprospătarea."
+    },
     "title": "Setări",
     "general": "general",
     "security": "Securitate",
@@ -9289,7 +9313,8 @@
     "modalityBridgeVideoDrilldownEnabledDesc": "Permite păstrarea temporară a fișierelor JPEG numai atunci când solicitarea autentificată setează și drilldown: true. Videoclipurile brute nu sunt păstrate niciodată.",
     "modalityBridgeVideoDrilldownRemoteEnabled": "Permite analiza detaliată autentificată a cadrelor",
     "modalityBridgeVideoDrilldownRemoteEnabledDesc": "Permite cheilor API să citească și să șteargă numai propriile identificatoare opace. Fără acces anonim sau între chei.",
-    "modalityBridgeVideoDrilldownUsage": "Fișiere JPEG păstrate / octeți"
+    "modalityBridgeVideoDrilldownUsage": "Fișiere JPEG păstrate / octeți",
+    "proxyManagedCoresTab": "Nuclee gestionate"
   },
   "contextRtk": {
     "title": "Motor RTK",
@@ -11666,21 +11691,6 @@
     "daysAgo": "acum {days}z",
     "entries": "Intrări",
     "viewSwitcherAria": "Vizualizare cache"
-  },
-  "managedProxy": {
-    "title": "Nuclee proxy gestionate",
-    "description": "Lipiți un link de tunel în câmpul gazdei pentru proxy-ul personalizat pentru a-l salva și atribui. Aici puteți salva și o definiție a conexiunii de ieșire în format JSON nativ fără a modifica nicio atribuire.",
-    "saveHint": "La salvare se verifică nucleul oficial, dacă este necesar, și se controlează configurația nativă înainte de activare. Sursele necesită criptare. Nu se efectuează instalări în timpul previzualizării, porniri automate sau modificări ale proxy-ului transparent.",
-    "saveActivate": "Salvați și activați",
-    "core": "Nucleu",
-    "selectCore": "Selectați un nucleu",
-    "name": "Nume",
-    "source": "Link sursă sau conexiune de ieșire în format JSON nativ",
-    "start": "Porniți",
-    "stop": "Opriți",
-    "loadError": "Nu s-au putut încărca nucleele gestionate",
-    "operationError": "Operația asupra nucleului gestionat a eșuat",
-    "state": "{state, select, not_installed {Neinstalat} stopped {Oprit} starting {În curs de pornire} running {În execuție} stopping {În curs de oprire} error {Eroare} other {Necunoscut}}"
   },
   "proxyConfigModal": {
     "managedCore": "Nucleu proxy",
@@ -14667,6 +14677,8 @@
     "usdUsageQuotaDescription": "Blochează această cheie cu o eroare API 400 după ce cheltuielile locale în USD ating cota zilnică sau săptămânală configurată.",
     "dailyQuotaUsd": "Cotă zilnică (USD)",
     "weeklyQuotaUsd": "Cotă săptămânală (USD)",
+    "fiveHourQuotaUsd": "Cotă pe 5 ore (USD)",
+    "fiveHourQuotaHint": "Fereastră glisantă: cheltuiala fiecărei cereri contează timp de 5 ore, apoi se eliberează.",
     "quotaWindowDescription": "Cota săptămânală urmează resetarea săptămânală Claude stocată în cache, când este disponibilă; în caz contrar, revine la o fereastră glisantă de 7 zile. Cota zilnică folosește ziua calendaristică din Fortaleza.",
     "apiKeyUsdQuota": "Cotă USD cheie API",
     "apiKeyUsdQuotaDescription": "Când este activat, @@om-usage returnează cota zilnică, cota săptămânală, cheltuielile zilnice și cheltuielile săptămânale în USD. Cea săptămânală urmează resetarea Claude stocată în cache, când este disponibilă.",
@@ -16183,5 +16195,20 @@
     "recoveryHelp": "__MISSING__",
     "streamIncomplete": "__MISSING__",
     "streamError": "__MISSING__"
+  },
+  "managedProxy": {
+    "title": "Nuclee proxy gestionate",
+    "description": "Lipiți un link de tunel în câmpul gazdei pentru proxy-ul personalizat pentru a-l salva și atribui. Aici puteți salva și o definiție a conexiunii de ieșire în format JSON nativ fără a modifica nicio atribuire.",
+    "saveHint": "La salvare se verifică nucleul oficial, dacă este necesar, și se controlează configurația nativă înainte de activare. Sursele necesită criptare. Nu se efectuează instalări în timpul previzualizării, porniri automate sau modificări ale proxy-ului transparent.",
+    "saveActivate": "Salvați și activați",
+    "core": "Nucleu",
+    "selectCore": "Selectați un nucleu",
+    "name": "Nume",
+    "source": "Link sursă sau conexiune de ieșire în format JSON nativ",
+    "start": "Porniți",
+    "stop": "Opriți",
+    "loadError": "Nu s-au putut încărca nucleele gestionate",
+    "operationError": "Operația asupra nucleului gestionat a eșuat",
+    "state": "{state, select, not_installed {Neinstalat} stopped {Oprit} starting {În curs de pornire} running {În execuție} stopping {În curs de oprire} error {Eroare} other {Necunoscut}}"
   }
 }

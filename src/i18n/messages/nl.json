@@ -7108,7 +7108,31 @@
     "fallbackRetryBackendTitle": "Fallback-back-end voor opnieuw proberen"
   },
   "settings": {
-    "proxyManagedCoresTab": "Beheerde kernen",
+    "proxyTraffic": {
+      "persistenceIncomplete": "Een deel van het verkeer kon in dit proces niet worden opgeslagen. De opgeslagen totalen zijn onvolledig; controleer de serverdiagnostiek.",
+      "title": "OmniRoute-payloadverkeer",
+      "description": "Uploadinhoud aangeboden voor verzending en downloadbytes gelezen door OmniRoute. Geen netwerkverkeer op de verbinding of facturering van de aanbieder. Het totaal bevat afzonderlijk gelabeld direct en niet-toegewezen verkeer.",
+      "coverageNote": "Cumulatieve totalen sinds de start van de meting. Uploads met onbekende grootte (streams, FormData, Request-inhoud) zijn uitgesloten van de bytetotalen. Ongelezen of onafgemaakte downloads zijn onvolledig; mislukte verzendingen bewijzen geen aflevering van de upload. Interne omleidingen/herpogingen van de transportlaag en transporten buiten het meetpad worden niet afzonderlijk gemeten.",
+      "refresh": "Vernieuwen",
+      "overall": "Totaal (alle waargenomen routes)",
+      "proxied": "Proxy-subtotaal (zonder direct/niet-toegewezen verkeer)",
+      "direct": "Direct (zonder proxy)",
+      "unattributed": "Niet-toegewezen dispatcher",
+      "removed": "Verwijderde proxy ({id})",
+      "legacy": "Oude/omgevingsproxy ({id})",
+      "route": "Verkeersroute",
+      "upload": "Upload aangeboden voor verzending",
+      "download": "Gelezen download",
+      "attempts": "Pogingen",
+      "knownUpload": "Uploads met bekende grootte / pogingen",
+      "completed": "Voltooide downloads / pogingen",
+      "failed": "Mislukte verzendingen",
+      "cancelled": "Geannuleerde downloads",
+      "errored": "Downloadfouten",
+      "loading": "Payloadverkeer laden…",
+      "empty": "Nog geen payloadverkeer gemeten.",
+      "error": "Payloadverkeer kon niet worden geladen. Probeer te vernieuwen."
+    },
     "title": "Instellingen",
     "general": "Algemeen",
     "security": "Beveiliging",
@@ -9289,7 +9313,8 @@
     "modalityBridgeVideoDrilldownEnabledDesc": "Sta tijdelijke bewaring van JPEG's alleen toe wanneer het geauthenticeerde verzoek ook drilldown: true instelt. Onbewerkte video's worden nooit bewaard.",
     "modalityBridgeVideoDrilldownRemoteEnabled": "Geauthenticeerde frameanalyse toestaan",
     "modalityBridgeVideoDrilldownRemoteEnabledDesc": "Sta API-sleutels alleen toe hun eigen ondoorzichtige handles te lezen en te verwijderen. Geen anonieme toegang of toegang tussen verschillende sleutels.",
-    "modalityBridgeVideoDrilldownUsage": "Bewaarde JPEG's / bytes"
+    "modalityBridgeVideoDrilldownUsage": "Bewaarde JPEG's / bytes",
+    "proxyManagedCoresTab": "Beheerde kernen"
   },
   "contextRtk": {
     "title": "RTK Engine",
@@ -11666,21 +11691,6 @@
     "daysAgo": "{days}d geleden",
     "entries": "Items",
     "viewSwitcherAria": "Cacheweergave"
-  },
-  "managedProxy": {
-    "title": "Beheerde proxykernen",
-    "description": "Plak een tunnellink in het hostveld van de aangepaste proxy om deze op te slaan en toe te wijzen. Hier kunt u ook een definitie van een uitgaande verbinding in de eigen JSON-indeling van de kern opslaan zonder een toewijzing te wijzigen.",
-    "saveHint": "Bij het opslaan wordt zo nodig de officiële kern geverifieerd en wordt de configuratie in de eigen indeling van de kern vóór activering gecontroleerd. Bronnen vereisen versleuteling. Geen installatie tijdens het voorbeeld, geen automatische start en geen wijzigingen aan de transparante proxy.",
-    "saveActivate": "Opslaan en activeren",
-    "core": "Kern",
-    "selectCore": "Selecteer een kern",
-    "name": "Naam",
-    "source": "Bronlink of uitgaande verbinding in de eigen JSON-indeling van de kern",
-    "start": "Starten",
-    "stop": "Stoppen",
-    "loadError": "Beheerde kernen konden niet worden geladen",
-    "operationError": "Bewerking op de beheerde kern mislukt",
-    "state": "{state, select, not_installed {Niet geïnstalleerd} stopped {Gestopt} starting {Bezig met starten} running {Actief} stopping {Bezig met stoppen} error {Fout} other {Onbekend}}"
   },
   "proxyConfigModal": {
     "managedCore": "Proxykern",
@@ -14667,6 +14677,8 @@
     "usdUsageQuotaDescription": "Blokkeert deze sleutel met een 400 API-fout nadat de lokale USD-uitgaven het geconfigureerde dagelijkse of wekelijkse quotum bereiken.",
     "dailyQuotaUsd": "Dagelijks quotum (USD)",
     "weeklyQuotaUsd": "Wekelijks quotum (USD)",
+    "fiveHourQuotaUsd": "Quotum per 5 uur (USD)",
+    "fiveHourQuotaHint": "Rollend venster: de kosten van elk verzoek tellen 5 uur mee en komen daarna weer vrij.",
     "quotaWindowDescription": "Wekelijks quotum volgt de gecachte wekelijkse reset van Claude indien beschikbaar; anders valt het terug op een voortschrijdend venster van 7 dagen. Dagelijks quotum gebruikt de kalenderdag van Fortaleza.",
     "apiKeyUsdQuota": "USD-quotum voor API-sleutel",
     "apiKeyUsdQuotaDescription": "Indien ingeschakeld, retourneert @@om-usage het dagelijkse quotum, wekelijkse quotum, de dagelijkse uitgaven en de wekelijkse uitgaven in USD. Wekelijks volgt de gecachte Claude-reset indien beschikbaar.",
@@ -16183,5 +16195,20 @@
     "recoveryHelp": "__MISSING__",
     "streamIncomplete": "__MISSING__",
     "streamError": "__MISSING__"
+  },
+  "managedProxy": {
+    "title": "Beheerde proxykernen",
+    "description": "Plak een tunnellink in het hostveld van de aangepaste proxy om deze op te slaan en toe te wijzen. Hier kunt u ook een definitie van een uitgaande verbinding in de eigen JSON-indeling van de kern opslaan zonder een toewijzing te wijzigen.",
+    "saveHint": "Bij het opslaan wordt zo nodig de officiële kern geverifieerd en wordt de configuratie in de eigen indeling van de kern vóór activering gecontroleerd. Bronnen vereisen versleuteling. Geen installatie tijdens het voorbeeld, geen automatische start en geen wijzigingen aan de transparante proxy.",
+    "saveActivate": "Opslaan en activeren",
+    "core": "Kern",
+    "selectCore": "Selecteer een kern",
+    "name": "Naam",
+    "source": "Bronlink of uitgaande verbinding in de eigen JSON-indeling van de kern",
+    "start": "Starten",
+    "stop": "Stoppen",
+    "loadError": "Beheerde kernen konden niet worden geladen",
+    "operationError": "Bewerking op de beheerde kern mislukt",
+    "state": "{state, select, not_installed {Niet geïnstalleerd} stopped {Gestopt} starting {Bezig met starten} running {Actief} stopping {Bezig met stoppen} error {Fout} other {Onbekend}}"
   }
 }

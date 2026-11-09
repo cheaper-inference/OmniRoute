@@ -127,6 +127,27 @@ Automatisk poengsetting velger beste leverandør/modell per forespørsel
 | `src/sse/handlers/chat.ts`                                | Integrasjon: kortslutning for automatisk prefiks |
 | `src/shared/constants/providers.ts`                       | `SYSTEM_PROVIDERS.auto`-systemoppføring          |
 
+## Kontopreferanser for lagrede automatiske kombinasjoner
+
+Intelligent Auto-editoren tilbyr en valgfri** Kontopreferanser** del. Hver tilkobling kan være Foretrukket, Normal (standard), Reserver eller Ekskludert. Flere tilkoblinger kan dele et nivå. Auto velger innenfor det første kvalifiserte nivået, og beholder sin scoring/router oppførsel der; mislykkede forsøk faller gjennom til de resterende konkrete kontoene, foretrukket før normal før reserve. Ekskluderte tilkoblinger brukes aldri av denne kombinasjonen.
+
+Innstillingen er lagret som `config.accountPreferences`, tastet inn av tilkoblingen ID:
+
+```json
+{
+  "accountPreferences": {
+    "connection-a": "preferred",
+    "connection-b": "preferred",
+    "connection-c": "reserve",
+    "connection-d": "excluded"
+  }
+}
+```
+
+Et utelatt eller tomt kart beholder eksisterende ruting. Innstillinger aktiverer ikke deaktiverte tilkoblinger, gir ikke API-nøkkeltilgang, gjenoppretter kvoteblokkerte kandidater eller omgår budsjettsjekker. Hvert forsøk er begrenset til dens konkrete tilkobling, så kontoreservering kan ikke hoppe nivåer bak kombinasjonsruteren. Eksisterende økttilknytning kan beholde en kvalifisert konto; ekskludering av kontoen som er bundet til en naturlig sving, stopper den svingen i stedet for å skifte konto i det stille.
+
+Konfigurerte preferanser bruker den kontobevisste automatiske banen: ubundet kontekstbuffer, smartpipeline, kaos og skyggesnarveier sendes ikke. Spekulativ sikring er deaktivert for disse forespørslene, så reservekontoer kan ikke konkurrere med foretrukne. Andre kombinasjonsstrategier tolker ikke denne innstillingen. Hvis du endrer en kombinasjon fra Auto, beholdes de lagrede innstillingene for en senere bytte tilbake.
+
 ## Kombinasjonsnavn som samsvarer med en reell modell-ID
 
 En kombinasjon der `name` er identisk med en ren modell-ID (f.eks. en kombinasjon med navnet
