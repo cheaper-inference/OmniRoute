@@ -1,0 +1,1 @@
+- **perf(resilience):** The runtime provider profile is built once per settings object and reused, so each request no longer rebuilds about 45 fields and scans process.argv several times.

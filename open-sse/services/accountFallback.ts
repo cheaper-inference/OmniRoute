@@ -592,12 +592,45 @@ export function getProviderProfile(provider: string): ProviderProfile {
   return buildProviderProfile(category);
 }
 
+// getRuntimeProviderProfile runs several times per request. Reuse the profile built for the
+// same settings object (getCachedSettings returns one object per 5 s window, and a settings
+// write evicts it). The test-process flag inside it depends on NODE_ENV, VITEST, argv and
+// execArgv, so those are part of the memo key, compared by identity: no argv scan per call.
+const runtimeProfileMemo = new WeakMap<
+  Record<string, unknown>,
+  {
+    env: string;
+    argv: unknown;
+    execArgv: unknown;
+    oauth?: ProviderProfile;
+    apikey?: ProviderProfile;
+  }
+>();
+
+function memoizedProviderProfile(
+  category: "oauth" | "apikey",
+  settings: Record<string, unknown>
+): ProviderProfile {
+  const env = `${process.env.NODE_ENV}|${process.env.VITEST}`;
+  let entry = runtimeProfileMemo.get(settings);
+  if (
+    !entry ||
+    entry.env !== env ||
+    entry.argv !== process.argv ||
+    entry.execArgv !== process.execArgv
+  ) {
+    entry = { env, argv: process.argv, execArgv: process.execArgv };
+    runtimeProfileMemo.set(settings, entry);
+  }
+  return (entry[category] ??= buildProviderProfile(category, settings));
+}
+
 export async function getRuntimeProviderProfile(provider: string | null | undefined) {
   try {
     const { getCachedSettings } = await import("@/lib/db/readCache");
     const settings = await getCachedSettings();
     const category = getProviderCategory(provider || "");
-    return buildProviderProfile(category, settings);
+    return memoizedProviderProfile(category, settings);
   } catch {
     return getProviderProfile(provider || "");
   }
