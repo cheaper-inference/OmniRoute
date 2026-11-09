@@ -1,4 +1,15 @@
 {
+  "accountPreferences": {
+    "title": "Paskyros nuostatos",
+    "description": "Nustatykite, kurioms paskyroms teikti pirmenybę arba kurias palikti rezerve šiai kombinacijai. Automatinis maršrutizavimas reitinguoja paskyras kiekvienoje pakopoje. Į sąrašą neįtrauktos paskyros laikomos įprastomis. Vis tiek taikomi leidimai, kvotos apribojimai ir esami užklausų susiejimai.",
+    "preferred": "Teikiama pirmenybė",
+    "normal": "Įprasta",
+    "reserve": "Rezervinė",
+    "excluded": "Neįtraukta",
+    "loading": "Įkeliamos paskyros…",
+    "error": "Nepavyko įkelti paskyrų. Norėdami bandyti dar kartą, iš naujo atidarykite redaktorių.",
+    "missing": "Nepasiekiama paskyra ({id})"
+  },
   "codexKeyServiceMode": {
     "title": "Codex paslaugos režimas šiam API raktui",
     "description": "Taikoma Codex užklausoms, įskaitant Codex modelius deriniuose. Priverstiniai režimai turi pirmenybę prieš kliento ir visuotinius nustatymus bei ryšio numatytąsias reikšmes. Kiti teikėjai lieka nepakeisti.",

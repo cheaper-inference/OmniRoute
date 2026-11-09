@@ -1,4 +1,15 @@
 {
+  "accountPreferences": {
+    "title": "Kontopræferencer",
+    "description": "Markér flere konti som foretrukne, eller behold dem som reserve for denne kombination. Automatisk routing rangerer konti inden for hvert niveau. Konti, der ikke er angivet, er normale. Tilladelser, kvotegrænser og eksisterende turtilknytninger gælder stadig.",
+    "preferred": "Foretrukne",
+    "normal": "Normale",
+    "reserve": "Reserve",
+    "excluded": "Udelukkede",
+    "loading": "Indlæser konti…",
+    "error": "Kunne ikke indlæse konti. Åbn editoren igen for at prøve igen.",
+    "missing": "Utilgængelig konto ({id})"
+  },
   "teamCosts": {
     "title": "Teamomkostninger",
     "subtitle": "Administrer delte bløde budgetter og katalogets omkostningsestimater.",

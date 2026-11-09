@@ -1,4 +1,15 @@
 {
+  "accountPreferences": {
+    "title": "Accountvoorkeuren",
+    "description": "Geef meerdere accounts de voorkeur of houd ze achter de hand voor deze routeringsconfiguratie. Automatische routering rangschikt accounts binnen elke categorie. Niet-vermelde accounts zijn normaal. Machtigingen, quot limieten en bestaande beurtkoppelingen blijven van toepassing.",
+    "preferred": "Voorkeur",
+    "normal": "Normaal",
+    "reserve": "Reserve",
+    "excluded": "Uitgesloten",
+    "loading": "Accounts laden…",
+    "error": "Accounts konden niet worden geladen. Open de editor opnieuw om het nog eens te proberen.",
+    "missing": "Niet-beschikbaar account ({id})"
+  },
   "codexKeyServiceMode": {
     "title": "Codex-servicemodus voor deze API-sleutel",
     "description": "Van toepassing op Codex-verzoeken, inclusief Codex-modellen in combinaties. Geforceerde modi overschrijven de client, algemene instellingen en standaardinstellingen voor verbindingen. Andere providers blijven ongewijzigd.",

@@ -1,4 +1,15 @@
 {
+  "accountPreferences": {
+    "title": "Nastavitve računa",
+    "description": "Za to kombinacijo dajte prednost več računom ali jih shranite kot rezervo. Samodejno usmerjanje razvrsti račune znotraj posamezne skupine. Računi, ki niso navedeni, so običajni. Še vedno veljajo dovoljenja, omejitve kvot in obstoječe vezave na poteze.",
+    "preferred": "Prednostni",
+    "normal": "Običajni",
+    "reserve": "Rezervni",
+    "excluded": "Izključeni",
+    "loading": "Nalaganje računov…",
+    "error": "Računov ni bilo mogoče naložiti. Znova odprite urejevalnik in poskusite znova.",
+    "missing": "Nedosegljiv račun ({id})"
+  },
   "codexKeyServiceMode": {
     "title": "Način storitve Codex za ta ključ API",
     "description": "Velja za zahteve Codex, vključno z modeli Codex znotraj kombinacij. Vsiljeni načini preglasijo odjemalca, globalne nastavitve in privzete nastavitve povezave. Drugi ponudniki ostanejo nespremenjeni.",
