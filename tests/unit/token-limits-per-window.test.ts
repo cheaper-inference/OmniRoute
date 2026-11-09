@@ -44,7 +44,7 @@ test("migration 218 preserves counters and reset logs with foreign keys enabled 
     ).run();
     assert.equal(db.pragma("foreign_keys", { simple: true }), 1);
     const migrate = db.transaction(() =>
-      db.exec(fs.readFileSync(path.join(dir, "233_token_limits_lifetime_credit.sql"), "utf8"))
+      db.exec(fs.readFileSync(path.join(dir, "234_token_limits_lifetime_credit.sql"), "utf8"))
     );
     migrate();
     db.prepare(
