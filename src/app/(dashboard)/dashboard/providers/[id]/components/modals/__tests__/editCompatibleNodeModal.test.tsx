@@ -81,7 +81,7 @@ describe("EditCompatibleNodeModal (Phase 1b extraction)", () => {
   }
 
   it("Quota check toggle submits the standard /credits path when switched on", async () => {
-    const onSave = vi.fn(async () => {});
+    const onSave = vi.fn<(data: unknown) => Promise<void>>(async () => {});
     const c = renderModal(
       <EditCompatibleNodeModal
         isOpen
@@ -108,7 +108,7 @@ describe("EditCompatibleNodeModal (Phase 1b extraction)", () => {
   });
 
   it("Quota check reflects the connections' state and can be switched off", async () => {
-    const onSave = vi.fn(async () => {});
+    const onSave = vi.fn<(data: unknown) => Promise<void>>(async () => {});
     const c = renderModal(
       <EditCompatibleNodeModal
         isOpen
