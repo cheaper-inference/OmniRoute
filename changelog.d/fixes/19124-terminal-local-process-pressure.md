@@ -1,0 +1,1 @@
+- **fix(resilience):** Stop combo retries and fallback on process-wide `resource_pressure` / `heap_pressure` 503s, preserving the original retry hint and healthy account affinity. Cancel in-flight hedges and release their delay timers. (#19124 — thanks @aldoeliacim)

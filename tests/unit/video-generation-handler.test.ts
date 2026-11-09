@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import dns from "node:dns";
 import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -8,6 +9,7 @@ process.env.DATA_DIR = mkdtempSync(join(tmpdir(), "omniroute-video-"));
 
 const { handleVideoGeneration } = await import("../../open-sse/handlers/videoGeneration.ts");
 const { VIDEO_PROVIDERS } = await import("../../open-sse/config/videoRegistry.ts");
+const { setPinnedFetchTestOverride } = await import("../../src/shared/network/remoteImageFetch.ts");
 
 function immediateTimeout(callback, _ms, ...args) {
   if (typeof callback === "function") callback(...args);
@@ -440,6 +442,13 @@ test("handleVideoGeneration submits, polls and downloads Runway text-to-video ta
   let pollCount = 0;
 
   globalThis.setTimeout = immediateTimeout;
+  // The result download is SSRF-guarded: resolve the CDN host to a public TEST-NET address
+  // and route the DNS-pinned connection back to this test's fetch mock.
+  const originalLookup = dns.promises.lookup;
+  (dns.promises as { lookup: unknown }).lookup = (async () => [
+    { address: "203.0.113.40", family: 4 },
+  ]) as typeof dns.promises.lookup;
+  setPinnedFetchTestOverride((input, init) => globalThis.fetch(input, init));
   globalThis.fetch = async (url, init = {}) => {
     const target = String(url);
     seen.push({ url: target, init });
@@ -506,6 +515,8 @@ test("handleVideoGeneration submits, polls and downloads Runway text-to-video ta
   } finally {
     globalThis.fetch = originalFetch;
     globalThis.setTimeout = originalSetTimeout;
+    (dns.promises as { lookup: unknown }).lookup = originalLookup;
+    setPinnedFetchTestOverride(undefined);
   }
 });
 

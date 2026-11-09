@@ -33,6 +33,7 @@ import {
 import { resolveTlsOptions } from "../../../scripts/dev/tls-options.mjs";
 import { startDetachedTray, validateTrayOptions } from "../tray/detachedTray.mjs";
 import { resolveTrayPreference } from "../tray/preferences.mjs";
+import { refreshWinAutostartCliPath } from "../tray/autostart.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const _pkg = JSON.parse(readFileSync(join(__dirname, "..", "..", "..", "package.json"), "utf8"));
@@ -157,12 +158,40 @@ export function resolveServeTrayOptions(opts = {}, env = process.env) {
   return { ...opts, tray };
 }
 
+/** The server entry point `runServe` starts: the WebSocket-capable one when present. */
+function resolveServerJs(appDir = APP_DIR) {
+  const serverWsJs = join(appDir, "server-ws.mjs");
+  return existsSync(serverWsJs) ? serverWsJs : join(appDir, "server.js");
+}
+
+/**
+ * #18601: keep a Windows Startup entry pointed at this install after an upgrade.
+ * Only an install that has a server to start: `runServe` exits on a missing one,
+ * and the entry must not be moved off a working install onto it. Exported for tests.
+ */
+export function refreshAutostartEntry({
+  appDir = APP_DIR,
+  platform: os = process.platform,
+  refresh = () => refreshWinAutostartCliPath(),
+} = {}) {
+  if (os !== "win32" || !existsSync(resolveServerJs(appDir))) return false;
+  try {
+    if (!refresh()) return false;
+    console.log("  \x1b[2m↻ Autostart entry updated to launch this install\x1b[0m");
+    return true;
+  } catch {
+    // Autostart is a convenience: never block serve on it.
+    return false;
+  }
+}
+
 export async function runServe(opts = {}) {
   opts = resolveServeTrayOptions(opts);
   const startedAt = performance.now();
 
   const trayOptionError = validateTrayOptions(opts);
   if (trayOptionError) throw new Error(trayOptionError);
+  if (opts.trayWorker !== true) refreshAutostartEntry();
 
   if (opts.tray === true && opts.trayWorker !== true) {
     const port = parsePort(opts.port ?? process.env.PORT ?? "20128", 20128);
@@ -234,8 +263,7 @@ export async function runServe(opts = {}) {
     console.warn(`\x1b[33m  ⚠  ${exposureWarning}\x1b[0m\n`);
   }
 
-  const serverWsJs = join(APP_DIR, "server-ws.mjs");
-  const serverJs = existsSync(serverWsJs) ? serverWsJs : join(APP_DIR, "server.js");
+  const serverJs = resolveServerJs();
 
   if (!existsSync(serverJs)) {
     console.error("\x1b[31m✖ Server not found at:\x1b[0m", serverJs);

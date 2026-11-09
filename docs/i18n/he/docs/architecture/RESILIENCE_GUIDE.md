@@ -61,122 +61,190 @@ OmniRoute יש שלושה מנגנוני חוסן ברורים אך קשורים
 
 מתחת לסף, הספק **לא** נחשב כמתקרר; הצלחה מנקה את החלון. רשומות ברמת החיבור (`provider:connectionId`) שומרות במקום זאת על ה-backoff האקספוננציאלי `minRetryCooldownMs → maxRetryCooldownMs`. עקיפות (Overrides): `OMNIROUTE_PROVIDER_BREAKER_{OAUTH,API_KEY}_{FAILURE_THRESHOLD,FAILURE_WINDOW_MS,COOLDOWN_MS}`. מנגנון הגנה מפני רגרסיה: `tests/unit/provider-cooldown-window-gate.test.ts`.
 
-## 2. קירור חיבור
+## 2. תקופת צינון של חיבור
 
-**תְחוּם:** ספק יחיד connection/account/key.
+**היקף:** חיבור/חשבון/מפתח יחיד של ספק.
 
-**מַטָרָה:** דלג על מפתח רע אחד בזמן שחיבורים אחרים של אותו ספק ממשיכים לשרת.
+**מטרה:** לדלג על מפתח בעייתי אחד, בזמן שחיבורים אחרים של אותו ספק ממשיכים לשרת.
 
 **יישום:**
 
-- סימון לא זמין: `src/sse/services/auth.ts::markAccountUnavailable()`
+- סימון כלא זמין: `src/sse/services/auth.ts::markAccountUnavailable()`
 - בחירה: `getProviderCredentials*` באותו קובץ
-- צינון calc: `open-sse/services/accountFallback.ts::checkFallbackError()`
+- חישוב תקופת הצינון: `open-sse/services/accountFallback.ts::checkFallbackError()`
 - הגדרות: `src/lib/resilience/settings.ts`
 
 **שדות לכל חיבור:**
 
-- חותמת זמן `rateLimitedUntil` — עד שתוקף הקירור יפוג
+- `rateLimitedUntil` — חותמת הזמן שבה תקופת הצינון מסתיימת
 - `testStatus: "unavailable"`
 - `lastError`, `lastErrorType`, `errorCode`
-- `backoffLevel` — מונה גיבוי אקספוננציאלי
+- `backoffLevel` — מונה נסיגות מעריכיות
 
-**צינון ברירת מחדל:**
+**תקופות צינון המוגדרות כברירת מחדל:**
 
-- בסיס OAuth : 5 שניות
-- בסיס מפתח API: 3 שניות
-- API-key 429: מעדיף טקסט לאיפוס `Retry-After`/reset headers/parseable במעלה הזרם
-- גיבוי: `baseCooldownMs * 2 ** failureIndex`
+- בסיס OAuth: 5s
+- בסיס למפתח API: 3s
+- 429 של מפתח API: מעדיף כותרות `Retry-After`/איפוס במעלה הזרם/טקסט איפוס שניתן לניתוח
+- נסיגה: `baseCooldownMs * 2 ** failureIndex`
 
-**עיכוב ניסיון חוזר לכל ספק.** בדף הפרטים של הספק יש א** נסה להשהות שוב** בחר (אוטומטי, 15 שניות עד שעה אחת). זה חוסך `resilienceSettings.providerQuotaOverrides[<providerId>].rateLimitCooldownSeconds` (1–21600, דרך `PATCH /api/resilience`). כאשר שגיאת מגבלת קצב אינה נושאת רמז לניסיון חוזר במעלה הזרם, ערך זה מחליף את ה-backoff המותאם עבור הספק ומאפס `backoffLevel` ל-0 (`open-sse/services/rotationConfig.ts::overrideFor`). קדימות לשגיאה מוגבלת קצב, הגבוהה ביותר תחילה: רמז לניסיון חוזר במעלה הזרם, לאחר מכן לכל חיבור `providerSpecificData.rotationOverrides.rateLimitResetSeconds`, לאחר מכן עיכוב ניסיון חוזר לכל ספק, ולאחר מכן env `OMNIROUTE_ROTATION_RATE_LIMIT_RESET_SECONDS`, ולאחר מכן החזרה בקנה מידה. אוטומטית מסירה את השדה. זה משפיע רק על הסיבה להגבלת התעריף, לעולם לא על מצבים סופניים.
+**השהיית ניסיון חוזר לפי ספק.** בדף פרטי הספק יש תיבת בחירה **Retry delay** (אוטומטי,
+15s עד 1h). היא שומרת את
+`resilienceSettings.providerQuotaOverrides[<providerId>].rateLimitCooldownSeconds`
+(1–21600, באמצעות `PATCH /api/resilience`). כאשר שגיאת הגבלת קצב אינה כוללת
+רמז לניסיון חוזר במעלה הזרם, ערך זה מחליף את הנסיגה המותאמת לפי קנה מידה עבור הספק ומאפס את
+`backoffLevel` ל-0
+(`open-sse/services/rotationConfig.ts::overrideFor`). סדר העדיפויות עבור שגיאת הגבלת קצב, מהגבוה לנמוך: רמז לניסיון חוזר במעלה הזרם, לאחר מכן
+`providerSpecificData.rotationOverrides.rateLimitResetSeconds` ברמת החיבור,
+לאחר מכן השהיית הניסיון החוזר לפי ספק, לאחר מכן
+`OMNIROUTE_ROTATION_RATE_LIMIT_RESET_SECONDS`, ולאחר מכן
+הנסיגה המותאמת לפי קנה מידה. אוטומטי מסיר את השדה. הוא משפיע רק על הסיבה של הגבלת קצב, ולעולם לא על מצבים סופיים.
 
-**שומר נגד רעמים:** מונע כישלונות במקביל מהארכת יתר של הקירור או הגדלה כפולה `backoffLevel`.
+**הגנה מפני עדר מסתער:** מונעת מכשלים מקבילים להאריך יתר על המידה את תקופת הצינון או להגדיל פעמיים את `backoffLevel`.
 
-**מגבלת מקבילות 429 אינן מטפסות בסולם האחורי.** `429` שגופו מדווח על מגבלת במקביל ("יותר מדי בקשות במקביל", "מגבלת במקביל", "מגבלת בקשות מקבילות", GLM `并发数过高`) פירושו שהחשבון בריא אך עמוס. `checkFallbackError()` מחזיר סיבה `concurrency_limited`: נכשל כעת לחיבור הבא, מקרר את זה עבור `CONCURRENCY_LIMIT_COOLDOWN_MS` קבוע (1s) או הרמז לניסיון חוזר במעלה הזרם, השאר `backoffLevel` ללא שינוי והגדר `skipProviderBreaker`. גוף מכסה מפורש עדיין מנצח, כך שגוף שתואם גם דפוס מכסה נשאר כפסק מכסה. זיהוי: `looksLikeConcurrencyLimit()` ב `src/shared/utils/classify429.ts`; פסק דין: `open-sse/services/accountFallback/concurrencyLimit429.ts`. `classify429()` ( `FailureKind` של המפסק) הוא ללא שינוי ועדיין קורא `rate_limit` עבור הגופים הללו.
+**429 של מגבלת מקביליות אינם מטפסים בסולם הנסיגות.** `429` שגוף התגובה שלו מדווח על
+מגבלת מקביליות ("too many concurrent requests", "concurrency limit", "parallel request
+limit", GLM `并发数过高`) פירושו שהחשבון תקין אך עסוק.
+`checkFallbackError()` מחזיר את הסיבה `concurrency_limited`: יש לעבור מיידית לחיבור הבא,
+לצנן את החיבור הנוכחי למשך `CONCURRENCY_LIMIT_COOLDOWN_MS` קבוע (1s) או לפי רמז לניסיון חוזר במעלה הזרם,
+להשאיר את `backoffLevel` ללא שינוי ולהגדיר את `skipProviderBreaker`.
+גוף מפורש של מכסה עדיין גובר, לכן גוף שתואם גם לתבנית מכסה נשאר כפסק דין של מכסה. זיהוי:
+`looksLikeConcurrencyLimit()` ב-`src/shared/utils/classify429.ts`;
+פסק הדין: `open-sse/services/accountFallback/concurrencyLimit429.ts`. `classify429()` (הערך
+`FailureKind` של המפסק) נותר ללא שינוי ועדיין קורא את `rate_limit` עבור גופים אלה.
 
-**דוכני תוכן זרמים לא מצננים את החשבון.** כאשר ה-Content-Stall Watchdog (`open-sse/utils/streamHandler.ts`) מוותר על זרם שלא שלח פלט דגם בזמן, `markAccountUnavailable()` מתעד את השגיאה בחיבור אך לא מגדיר Cooldown: הדוכן שייך לבקשה הזו, לרוב סיבוב חשיבה ארוך ללא פלט עדיין. מפעילים יכולים להצטרף חזרה עם `resilienceSettings.streamStallCooldown.enabled` (ברירת מחדל `false`).
+**עצירות בזרימת התוכן אינן מצננות את החשבון.** כאשר משגיח עצירת התוכן
+(`open-sse/utils/streamHandler.ts`) מוותר על זרם שלא שלח פלט של מודל בזמן שהוקצב, `markAccountUnavailable()` מתעד את השגיאה בחיבור אך אינו מגדיר תקופת צינון: העצירה שייכת לבקשה זו, וברוב המקרים נגרמת מתור חשיבה ארוך שטרם הפיק פלט. מפעילים יכולים להצטרף מחדש באופן יזום באמצעות `resilienceSettings.streamStallCooldown.enabled` (ברירת המחדל היא `false`).
 
-**אות השהיית הסכמה לבחירת חשבון `p2c`.** כל ניסיון שנשלח מתעד את הזמן עד הבית הראשון והתוצאה שלו לכל חיבור (ולכל דגם + של חיבור) בחלון מתגלגל בזיכרון: 20 הדגימות האחרונות תוך 15 דקות (`open-sse/services/connectionLatencyTracker.ts`, מוקלט מ- `safeLogEvents()` ב- `src/sse/handlers/chatHelpers.ts`). כאשר `resilienceSettings.p2cLatency.weight` הוא מעל `0` (טווח 0-20, ברירת המחדל `0` = כבוי), `compareP2CConnections()` ב- `src/sse/services/auth.ts` מוסיף עד `weight` נקודות לכל מועמד של הזוג. חצי מזה מגיע מהשהייה כיחס למועמד המהיר יותר (פי שניים איטי לוקח את החצי המלא) וחצי משיעור השגיאות המתגלגלות. המונח חל רק כאשר לשני המועמדים יש לפחות 3 דגימות, כך שחשבונות חדשים לא ייענשו, והתקרה שלו נשארת מתחת לקנסות החסומים והמכסה. זה לא מוסיף שום מעגל משלו: חשבונות כושלים עדיין מטופלים על ידי שכבות הקירור, הנעילה והמפסק. הגדר אותו עם `PATCH /api/resilience` `{ "p2cLatency": { "weight": 10 } }`.
+**אות השהיה אופציונלי לבחירת חשבון באמצעות `p2c`.** כל ניסיון ששוגר מתעד את הזמן עד לבייט הראשון ואת התוצאה לכל חיבור (ולכל חיבור + מודל) בחלון מתגלגל בזיכרון: 20 הדגימות האחרונות בתוך 15 דקות
+(`open-sse/services/connectionLatencyTracker.ts`, מתועדות מ-`safeLogEvents()` ב-
+`src/sse/handlers/chatHelpers.ts`). כאשר `resilienceSettings.p2cLatency.weight` גדול מ-
+`0`
+(הטווח 0-20, ברירת המחדל `0` = כבוי), `compareP2CConnections()` ב-`src/sse/services/auth.ts` מוסיף עד `weight` נקודות לכל מועמד בזוג. מחצית מהן מגיעה מהשהיה ביחס למועמד המהיר יותר (מהירות איטית פי שניים מקבלת את מלוא המחצית) ומחציתן משיעור השגיאות המתגלגל.
+המונח חל רק כאשר לשני המועמדים יש לפחות 3 דגימות, כך שחשבונות חדשים אינם נענשים, והתקרה שלו נשארת מתחת לעונשים של חסימת מכסה ומכסה שמוצה. הוא אינו מוסיף מעגל משלו: חשבונות נכשלים עדיין מטופלים בשכבות תקופת הצינון, הנעילה והמפסק. הגדירו אותו באמצעות `PATCH /api/resilience` `{ "p2cLatency": { "weight": 10 } }`.
 
-**מסגרות הנמקה מפעילות מחדש את תקציב דוכן התוכן.** מודל חשיבה יכול לחשוב דקות לפני האסימון הגלוי הראשון שלו: Claude מזרים מסגרות `thinking_delta` שטקסט החשיבה שלהן עשוי להיות ריק, וה-Responses API מזרים פריט הגיון אחד אחרי השני. `isReasoningProgressFrame()` (`open-sse/utils/streamReadiness.ts`) מזהה את הפריימים האלה, וכלב השמירה מחדש את התקציב שלו על כל אחד במקום לבטל את התור. הם עדיין לא פלט מודל, כך שסיבוב שמסתיים בהיגיון בלבד עדיין מדווח כריק, וסיבוב שמפסיק להגיב ושולח רק פעימות לב עדיין מעיד על כלב השמירה.
+**מסגרות חשיבה מאתחלות את תקציב עצירת התוכן.** מודל חשיבה עשוי לחשוב במשך
+דקות לפני האסימון הנראה הראשון שלו: Claude מזרים מסגרות `thinking_delta` שטקסט החשיבה שלהן עשוי להיות ריק, ו-Responses API מזרים פריט חשיבה אחד אחרי השני. `isReasoningProgressFrame()` (`open-sse/utils/streamReadiness.ts`) מזהה מסגרות אלה, והמשגיח מאתחל את התקציב שלו בכל אחת מהן במקום לבטל את התור. הן עדיין אינן פלט של המודל, לכן תור שמסתיים בחשיבה בלבד עדיין מדווח כריק, ותור שמפסיק לחשוב ושולח רק פעימות לב עדיין מפעיל את המשגיח.
 
-מסגרות `reasoningContentEvent` בינאריות של Kiro עם חתימה לא ריקה משמרות את פעילות ההיגיון הזו דרך המבצע כדלתא `reasoning_content` ריקה. החתימה לא מועברת. מטא נתונים, מסגרות לא שלמות וחתימות ריקות לא מפעילים מחדש את תקציב התוכן; פסק הזמן העצמאי של הזרם הפעיל וביטול הלקוח עדיין חלים (`open-sse/executors/kiro/reasoning.ts`).
+מסגרות `reasoningContentEvent` בינאריות של Kiro עם חתימה שאינה ריקה משמרות את פעילות החשיבה דרך המבצע בתור דלתא ריקה של `reasoning_content`. החתימה אינה מועברת. מטא-נתונים, מסגרות חלקיות וחתימות ריקות אינם מאתחלים את תקציב התוכן; פסק הזמן העצמאי של הזרם הפעיל וביטול מצד הלקוח עדיין חלים (`open-sse/executors/kiro/reasoning.ts`).
 
-**מצבי טרמינל (התקררות NOT ):**
+**מצבים סופיים (לא תקופות צינון):**
 
-- `banned` — מוגדר על-ידי זיהוי banned-keyword / account-ban (ראה [BAN_DETECTION](../security/BAN_DETECTION.md) ), ועל-ידי שלושה סירובים רצופים במעלה הזרם לכל בקשה (`request_rejected`, למשל Anthropic OAuth 403 "בקשה לא מותרת" — `open-sse/services/requestRejectedStreak.ts`); סירוב בודד רק מצנן את החיבור
-- `expired` (מעברים לטרמינל לאחר נסיונות חוזרות מוגבלות — `EXPIRED_RETRY_MAX = 3` עם גיבוי אקספוננציאלי — כך שגיאות OAuth חולפות יכולות להחלים מעצמן לפני שהחשבון מבוטל לצמיתות)
+- `banned` — מוגדר על ידי זיהוי מילת מפתח אסורה / חסימת חשבון (ראו [BAN_DETECTION](../security/BAN_DETECTION.md)). סירובים במעלה הזרם לכל בקשה (`request_rejected`, למשל OAuth 403 של Anthropic "Request not allowed") לעולם אינם מגדירים אותו: הם נספרים לפי חיבור ומודל ומוציאים את המודל הזה מסבב הבחירה עם תקופת צינון מתארכת המוגבלת ל-`REQUEST_REJECTED_MAX_COOLDOWN_MS` (1 h), או מצננים את החיבור כאשר לא ידוע מודל — `open-sse/services/requestRejectedStreak.ts`
+- `expired` (עובר למצב סופי לאחר מספר ניסיונות חוזרים מוגבל — `EXPIRED_RETRY_MAX = 3` עם נסיגה מעריכית — כדי ששגיאות OAuth זמניות יוכלו להשתקם מעצמן לפני שהחשבון מושבת לצמיתות)
 - `credits_exhausted`
 
-אלה נמשכים עד שהאישורים משתנים או שמפעיל מאפס אותם. אל תדרוס מצבי קצה עם מצב קירור חולף.
+אלה נשמרים עד שהפרטים משתנים או שמפעיל מאפס אותם. אין להחליף מצבים סופיים במצב השהיה זמני.
 
-**התאוששות עצלנית:** כאשר `rateLimitedUntil` עבר, החיבור הופך להיות כשיר שוב. בשימוש מוצלח, `clearAccountError()` מנקה את כל שדות השגיאה.
+**התאוששות עצלה:** כאשר `rateLimitedUntil` חלף, החיבור הופך שוב לזכאי לשימוש. לאחר שימוש מוצלח, `clearAccountError()` מנקה את כל שדות השגיאה.
 
-### קיר שימוש Claude OAuth : איפוס מגבלת ההפעלה + הנתיב בעדיפות נמוכה יותר
+### חומת השימוש ב-Claude OAuth: נתיב בעדיפות נמוכה + איפוס מגבלת הסשן
 
-**תְחוּם:** חיבור אחד של מנוי Claude (OAuth). שתי התכונות הן** הצטרפות לכל חיבור** (ערוך חיבור → Claude section → `lowPriorityMode` / `autoLimitReset` ב- `providerSpecificData`, שניהם כבויים כברירת מחדל) ושיקוף את הפקודות `/low-priority` ו- `/limit-reset` של Claude Code (חוזה חוט שנלכד מקוד Claude 2.1.263).
+**היקף:** חיבור אחד של מנוי Claude (OAuth). שתי התכונות הן **אופציונליות לכל חיבור** (עריכת חיבור → מקטע Claude → `lowPriorityMode` / `autoLimitReset` בתוך `providerSpecificData`, שתיהן מושבתות כברירת מחדל) ומשקפות את הפקודות `/low-priority` ו-`/limit-reset` של Claude Code (חוזה התקשורת נלכד מ-Claude Code 2.1.263).
 
-**יישום:**
+**מימוש:**
 
-- סיווג תגובה של מכונת מצב + : `open-sse/services/claudeLowPriority.ts`
-- אפס לקוח status/claim : `open-sse/services/claudeLimitReset.ts`
-- הוק לביצוע (הזרקת כותרת + אותו חשבון חוזר): `open-sse/executors/base.ts::execute()`
-- התמדה בהצטרפות: `src/lib/providers/requestDefaults.ts::normalizeProviderSpecificData()`
+- מכונת מצבים וסיווג תגובות: `open-sse/services/claudeLowPriority.ts`
+- לקוח סטטוס/תביעה לאיפוס: `open-sse/services/claudeLimitReset.ts`
+- וו למבצע (הזרקת כותרת + ניסיון חוזר באותו חשבון): `open-sse/executors/base.ts::execute()`
+- שמירת ההסכמה: `src/lib/providers/requestDefaults.ts::normalizeProviderSpecificData()`
 
-**לְהַפְעִיל:** קיר השימוש של 5 שעות — a `429` שהכותרות שלו נושאות `anthropic-ratelimit-unified-status: rejected` וכאשר החשבון כשיר, `anthropic-ratelimit-unified-slow-offer: treatment`. שום דבר לא נשלח לפני אותו קיר ראשון 429; פרץ 429 ללא כותרות מאוחדות עובר את נתיב ההתקררות הרגיל.
+**הפעלה:** חומת השימוש של 5 השעות — `429` שהכותרות שלו כוללות
+`anthropic-ratelimit-unified-status: rejected` וכן, כאשר החשבון זכאי,
+`anthropic-ratelimit-unified-slow-offer: treatment`. לא נשלח דבר לפני ה-`429` הראשון של החומה; `429` מתפרץ ללא כותרות מאוחדות עובר בנתיב ההשהיה הרגיל.
 
-**נתיב בעדיפות נמוכה יותר** (`lowPriorityMode`):
+**נתיב בעדיפות נמוכה** (`lowPriorityMode`):
 
-- על הקיר 429 מקבל ההוצאה לפועל את ההצעה ומיד מנסה שוב את** אוֹתוֹ** חשבון עם `anthropic-usage-limit: slow`; הליין נשאר פעיל עד ה- `anthropic-ratelimit-unified-reset` המוכרז (+ 60s grace) וכל בקשה בחלון זה נושאת את הכותרת. ה-429 שיירט אף פעם לא מגיע `handleChatCore`, אז החיבור הוא** לֹא** מכניסים לקירור ואינו מסובב משם.
-- `anthropic-ratelimit-unified-slow-status` על תגובות מאוחרות יותר: `active` / `not_needed` לשמור על הנתיב; `slot_busy` (429) או `529` המתן ל- `anthropic-ratelimit-unified-slow-retry-after` של השרת (20s ברירת מחדל, clamp 5-600s, ± 30% jitter) ונסה שוב, מוגבל על-ידי `anthropic-ratelimit-unified-slow-max-wait` (20 דקות ברירת מחדל, clamp 1 דקה-6 h) — לאחר שהנתיב מסתיים וחסימת קירור-reaccept-off של 10 דקות. ההמתנה מוגבלת בנוסף על ידי מה שנותר מזמן הקצוב של הבקשה להתחלה במעלה הזרם (`resolveFetchStartTimeout`, 10 דקות כברירת מחדל) מינוס מרווח של 5 שניות: ללא מכסה זו, ברירת המחדל של 20 דקות ה-max-wait תאריך ימים את הבקשה והשינה תבוטל באמצע ההמתנה, תופיע קצה `TimeoutError` במקום + `max_wait` מגניב חינני.
-- `weekly_limit` / `budget_exhausted` / `off` / `ineligible`, גלגול של חלון של 5h, או `ineligible` + `anthropic-ratelimit-unified-overage-in-use: true` (שמסיים אותו כ- `extra_usage` בכל סטטוס, מכיוון שהעודף בתשלום מכסה כעת את הקיר) מסיים את הנתיב; לאחר מכן התגובה זורמת לנתיב ההתקררות הרגיל. `budget_exhausted` נזכר עד לאיפוס התקציב שהוכרז (≤ 8 ימים).
-- בדיקת הקיר פועלת לאחר 400 ניסיונות חוזרים מונעים של המבצע עצמו (עריכת הקשר, מהדקים thinking/effort, למידה אוטומטית של param), כך שקיר 429 שמופיע רק באחת מאותן ניסיונות חוזרים עדיין יורט במקום להגיע לנתיב הקירור.
-- המצב הוא בזיכרון לכל חיבור (הפעלה מחדש עולה קיר אחד נוסף 429 כדי לקבל מחדש).
+- ב-`429` של החומה, המבצע מקבל את ההצעה ומנסה מיד שוב באותו
+  חשבון עם `anthropic-usage-limit: slow`; הנתיב נשאר פעיל עד
+  `anthropic-ratelimit-unified-reset` שהוכרז (+ חסד של 60 שניות), וכל בקשה
+  בחלון הזה כוללת את הכותרת. ה-`429` שיורט לעולם אינו מגיע אל `handleChatCore`, ולכן החיבור
+  **אינו** מועבר למצב השהיה ואינו מוחלף.
+- `anthropic-ratelimit-unified-slow-status` בתגובות מאוחרות יותר: `active` / `not_needed`
+  משאירים את הנתיב פעיל; `slot_busy` (`429`) או `529` ממתינים לערך
+  `anthropic-ratelimit-unified-slow-retry-after` של השרת (ברירת מחדל 20 שניות, הגבלה ל-5–600 שניות, עם
+  ריצוד של ±30%) ומנסים שוב, בכפוף ל-`anthropic-ratelimit-unified-slow-max-wait` (ברירת מחדל 20 דקות, הגבלה
+  מדקה עד 6 שעות) — לאחר מכן הנתיב מסתיים וצינון של 10 דקות חוסם קבלה מחדש. זמן
+  ההמתנה מוגבל בנוסף לפי הזמן שנותר עד לתום הזמן הקצוב להתחלת הבקשה מול ספק המקור
+  (`resolveFetchStartTimeout`, ברירת מחדל 10 דקות), פחות מרווח של 5 שניות: ללא הגבלה זו, ברירת המחדל של
+  20 דקות ל-`max-wait` הייתה חורגת מזמן הבקשה, והשינה הייתה נקטעת באמצע ההמתנה ומציגה
+  `TimeoutError` במקום סיום תקין של `max_wait` + צינון.
+- `weekly_limit` / `budget_exhausted` / `off` / `ineligible`, התהפכות של חלון 5 השעות, או
+  `ineligible` + `anthropic-ratelimit-unified-overage-in-use: true` (מה שמסיים אותו כ-`extra_usage`
+  בכל סטטוס, מכיוון שחריגה בתשלום מכסה כעת את החומה) מסיימים את הנתיב; לאחר מכן התגובה
+  עוברת לנתיב ההשהיה הרגיל. `budget_exhausted` נשמר עד לאיפוס התקציב שהוכרז (עד 8 ימים).
+- בדיקת החומה מתבצעת לאחר ניסיונות החזרה הפנימיים של המבצע עצמו, המופעלים בעקבות 400 (עריכת
+  הקשר, הגבלות thinking/effort, לימוד אוטומטי של פרמטרים), כך ש-`429` של חומה שמופיע רק באחד
+  מהניסיונות החוזרים האלה עדיין ייורט במקום להגיע לנתיב ההשהיה.
+- המצב נמצא בזיכרון לכל חיבור (הפעלה מחדש גוררת `429` נוסף של החומה לפני קבלה מחדש).
 
-**איפוס מגבלת הפעלה** (`autoLimitReset`, נוסה לפני הנתיב כששניהם פועלים):
+**איפוס מגבלת הסשן** (`autoLimitReset`, מתבצע לפני הנתיב כאשר שניהם מופעלים):
 
-- `GET https://api.anthropic.com/api/oauth/usage?at_wall=1&skip_spend=1` → `juniper_tide` block; כאשר `arm: "reset"` ו- `available: true`, `POST https://api.anthropic.com/api/organizations/{orgUUID}/reset_rate_limits` עם `{ "program": "juniper_tide" }` (ארגון UUID מ- `providerSpecificData.organizationUUID`, bootstrap fallback).
-- `result: reset|not_limited` → הבקשה נוסתה מחדש במלוא המהירות (ללא כותרת איטית). `already_used` / `not_offered` memoise `next_available_at` (ברירת מחדל לשבוע); כל כשל נסוג 15 דקות. האיפוס מתבצע פעם בשבוע ועדיין נחשב למגבלה השבועית.
+- `GET https://api.anthropic.com/api/oauth/usage?at_wall=1&skip_spend=1` → בלוק
+  `juniper_tide`; כאשר `arm: "reset"` ו-`available: true`,
+  `POST https://api.anthropic.com/api/organizations/{orgUUID}/reset_rate_limits` עם
+  `{ "program": "juniper_tide" }` (מזהה הארגון UUID מתוך
+  `providerSpecificData.organizationUUID`, עם חלופה מתהליך האתחול).
+- `result: reset|not_limited` → הבקשה נשלחת שוב במהירות מלאה (ללא כותרת slow).
+  `already_used` / `not_offered` שומרים בזיכרון את `next_available_at` (ברירת מחדל שבוע אחד);
+  כל כשל גורם להשהיה של 15 דקות. האיפוס מתבצע פעם בשבוע ועדיין נספר במסגרת המגבלה השבועית.
 
-שומרי רגרסיה: `tests/unit/claude-low-priority-mode.test.ts`, `tests/unit/claude-limit-reset.test.ts`, `tests/unit/claude-low-priority-executor.test.ts`.
+בדיקות רגרסיה: `tests/unit/claude-low-priority-mode.test.ts`,
+`tests/unit/claude-limit-reset.test.ts`, `tests/unit/claude-low-priority-executor.test.ts`.
 
-### זיקה להפעלה (#7274)
+### זיקה לסשן (#7274)
 
-**תְחוּם:** הפעלת לקוח אחת (כותרת `X-Session-Id` / `x-codex-session-id` / `x-omniroute-session` ) מוצמדת לחיבור אחד, עבור** כֹּל** ספק.
+**היקף:** סשן לקוח אחד (`X-Session-Id` / `x-codex-session-id` / `x-omniroute-session` header) מוצמד לחיבור אחד, עבור **כל** ספק.
 
-**מַטָרָה:** שמור על סוכן מרובה סיבובים (Claude Code, aider, סוכנים מותאמים אישית) באותו חשבון על פני בקשות, תוך צמצום אובדן הקשר חוצה-חשבונות ו-429s התחלה קרה חוזרת אצל ספקים עם מצב הפעלה לכל חשבון.
+**מטרה:** להשאיר סוכן רב-תורי (Claude Code, aider, סוכנים מותאמים אישית) באותו חשבון לאורך הבקשות, לצמצום אובדן הקשר בין חשבונות והופעות חוזרות של `429` בזמן אתחול קר אצל ספקים עם מצב סשן לכל חשבון.
 
-**יישום:**
+**מימוש:**
 
-- רזולוציית TTL : `src/sse/services/sessionAffinityPin.ts::resolveSessionAffinityTtlMs()`
-- סיכה selection/creation: `src/sse/services/sessionAffinityPin.ts::selectSessionAffinityConnection()`
-- חילוץ כותרות (גנרי, כל ספק): `src/sse/services/auth.ts::extractSessionAffinityKey()`
-- טבלת סיכות מתמשכת: `sessionAccountAffinity` (`src/lib/db/sessionAccountAffinity.ts`)
-- הגדרה: `sessionAffinityTtlMs` ( TTL גלובלי ב-ms, `0` משבית) — `src/lib/db/settings.ts`. שונה מה- Codex-only `codexSessionAffinityTtlMs` על-ידי הגירה `124_generic_session_affinity_ttl.sql`, אשר מעביר כל Codex TTL שהוגדר בעבר כברירת המחדל החדשה.
+- פתרון TTL: `src/sse/services/sessionAffinityPin.ts::resolveSessionAffinityTtlMs()`
+- בחירה/יצירה של הצמדה: `src/sse/services/sessionAffinityPin.ts::selectSessionAffinityConnection()`
+- חילוץ כותרת (גנרי, כל ספק): `src/sse/services/auth.ts::extractSessionAffinityKey()`
+- טבלת הצמדה שנשמרת: `sessionAccountAffinity` (`src/lib/db/sessionAccountAffinity.ts`)
+- הגדרה: `sessionAffinityTtlMs` (TTL גלובלי באלפיות שנייה, `0` משבית) — `src/lib/db/settings.ts`. שונה השם מ-`codexSessionAffinityTtlMs`, שהיה מיועד ל-Codex בלבד, באמצעות ההגירה `124_generic_session_affinity_ttl.sql`, שמעבירה כל TTL של Codex שהוגדר בעבר כברירת המחדל החדשה.
 
-לפני #7274, `resolveSessionAffinityTtlMs()` חילקה ערבות קשה ל- `0` עבור כל ספק מלבד `codex`, כך שלהגדרת TTL (וכותרות הפגישה) לא הייתה השפעה בשום מקום אחר למרות שמנגנון ההצמדה וחילוץ הכותרת כבר היו ספק-אגנוסטיים. התיקון הסיר את ההחזרה המוקדמת הזו; ה- TTL חל כעת באופן אחיד על כל ספק שפעם הוגדר באופן גלובלי מעל `0`.
+לפני #7274, `resolveSessionAffinityTtlMs()` הפסיקה מיד עם `0` עבור כל ספק שאינו
+`codex`, ולכן להגדרת ה-TTL (ולכותרות הסשן) לא הייתה השפעה בשום מקום אחר, אף שמנגנון ההצמדה וחילוץ הכותרות כבר היו בלתי תלויים בספק. התיקון הסיר את ההחזרה המוקדמת; כעת ה-TTL חל באופן אחיד על כל ספק לאחר הגדרה גלובלית לערך גדול מ-`0`.
 
-שלושת הכותרות עם זיקה להפעלה לעולם אינן מועברות במעלה הזרם. מנהלי — בונים כותרות במעלה הזרם משלהם מאפס במקום להעביר כותרות לקוח דרכן, כך שזה נשאר מזהה מתאם פנימי בלבד.
+שלוש כותרות זיקת הסשן לעולם אינן מועברות לספק המקור — המבצעים בונים את כותרות ספק המקור
+שלהם מאפס במקום להעביר כותרות לקוח, ולכן זה נשאר מזהה מתאם פנימי בלבד.
 
-### חכירות בלעדיות לחיבור הפעלה מנוהלת
+### חכירות בלעדיות של חיבורי סשן מנוהלים
 
-**תְחוּם:** HTTP client/session מנוהל פעיל אחד הוא הבעלים של חיבור OmniRoute כשיר אחד.
+**היקף:** לקוח/סשן HTTP מנוהל פעיל אחד מחזיק בחיבור OmniRoute כשיר אחד.
 
-**מַטָרָה:** לספק בעלות חיבור בלעדית עמידה ללקוחות הזקוקים לגדר ניתוב קשה על פני בקשות. זה שונה מזיקה להפעלה, שהיא העדפת המשכיות רכה: חוזה שכירות בלעדי ממשיך במצב מחזור חיים ב- SQLite, אוכף את הייחודיות הגלובלית של בעלים אקטיביים וחיבור אקטיבי, ודוחה הדור מיושן לפני שליחת הספק.
+**מטרה:** לספק בעלות בלעדית מתמשכת על חיבור עבור לקוחות הזקוקים לגדר ניתוב קשיחה
+בין בקשות. הדבר שונה מזיקה לסשן, שהיא העדפה רכה להמשכיות:
+חכירה בלעדית מתמידה את מצב מחזור החיים ב-SQLite, אוכפת ייחודיות גלובלית של בעלים פעילים
+ושל חיבורים פעילים, ודוחה דור מיושן לפני שליחה לספק.
 
-התכונה היא הצטרפות לכל מפתח API. מפתח מנוהל חייב להיות בעל היקף `lease:exclusive` ורשימת `allowedConnections` מפורשת שאינה ריקה. כל לקוח HTTP יכול להשתמש בנקודת הקצה של מחזור החיים; אין צורך בשם לקוח, סוכן משתמש, ספק, שיטת OAuth או דגם. חוזה השכירות הוא הבעלים של חיבור, לא דגם, כך ששינוי דגם שומר על המחייב בעוד שהחיבור נשאר כשיר בדרך כלל. כללי מודל, מכסה, בריאות, צינון ורשימת היתרים רגילים נשארים סמכותיים ועשויים להעביר את אותו דור לחיבור זכאי חינמי אחר.
+התכונה מופעלת לפי מפתח API. למפתח מנוהל חייבת להיות ההרשאה `lease:exclusive` ורשימת
+`allowedConnections` מפורשת שאינה ריקה. כל לקוח HTTP יכול להשתמש בנקודת הקצה של מחזור החיים;
+אין צורך בשם לקוח, ב-user-agent, בספק, בשיטת OAuth או במודל. החכירה מחזיקה בחיבור,
+לא במודל, ולכן שינוי מודל משמר את הקישור כל עוד החיבור נותר כשיר בהתאם לכללים הרגילים.
+כללי המודל, המכסה, התקינות, תקופת הצינון ורשימת ההיתרים הרגילים נותרים מוסמכים ועשויים
+להעביר את אותו דור לחיבור כשיר פנוי אחר.
 
-מחזור החיים הוא `POST /api/v1/session-leases` עם פעולות JSON `acquire`, `renew` ו- `release`. בקשות להסקה מנוהלות מציגות את ערך `X-OmniRoute-Lease-Owner` האטום ואת `X-OmniRoute-Lease-Generation` המדויק. הבעלים משתמש ב- `vlo_` ואחריו 43 תווים base64url; רק SHA-256 Hash שלו מאוחסן. כל גדר שיגור סופית מחייבת גם את מפתח API המאומת ID ואת החיבור הפעיל ID. כותרות בקרת החכירה מוסרות מהיומנים, מתמונות הבקשות שמורות ומכותרות המבצעים במעלה הזרם.
+מחזור החיים הוא `POST /api/v1/session-leases` עם פעולות JSON מסוג `acquire`, `renew` ו-`release`.
+בקשות הסקה מנוהלות מציגות את הערך האטום `X-OmniRoute-Lease-Owner` ואת
+`X-OmniRoute-Lease-Generation` המדויק. הבעלים משתמש ב-`vlo_` ואחריו 43 תווים של base64url;
+רק גיבוב ה-SHA-256 שלו נשמר. כל גדר שליחה סופית מקשרת גם את מזהה מפתח ה-API המאומת ואת מזהה
+החיבור הפעיל. כותרות בקרת החכירה מוסרות מהיומנים, מתצלומי הבקשות הנשמרים ומכותרות
+מבצע ה-upstream.
 
-אם לניתוב רגיל יש מועמדים מנוהלים כשירים אבל כל מועמד פנוי תפוס על ידי חכירה פעילה זרה, OmniRoute מחזירה HTTP `429`, קוד חכירה-קיבולת-לא זמין, מצב המתנה לקיבולת ו- `Retry-After` מוגבל שנגזר מהפקיעה הרלוונטית המוקדם ביותר. זכאות ריקה רגילה אינה טענה על חכירה ושומרת על סמנטיקה של שגיאות הניתוב הקיימת שלה.
+אם לניתוב רגיל יש מועמדים מנוהלים כשירים, אך כל מועמד פנוי תפוס על ידי חכירה פעילה זרה,
+OmniRoute מחזיר HTTP `429`, קוד `lease-capacity-unavailable`, מצב
+`waiting-for-capacity`, ו-`Retry-After` חסום הנגזר מתום התוקף הרלוונטי המוקדם ביותר.
+היעדר זכאות רגיל אינו התמודדות על חכירה ושומר על סמנטיקת שגיאות הניתוב הקיימת.
 
-מנגנונים קשורים נשארים נפרדים:
+המנגנונים הקשורים נותרים נפרדים:
 
-- תפוסת הפעלות OAuth היא הפצה רכה מקומית בתהליך עבור חשבונות OAuth.
-- סמפורות חשבונות מעניקות אישורי התאמה לבקשה ומסתיימות כאשר הבקשה מסתיימת.
-- חוזי שכירות מנוהלים בלעדיים הם בעלות על מחזור חיים עמיד עם גדר דור.
-
----
+- תפוסת סשן OAuth היא הפצה רכה, מקומית לתהליך, עבור חשבונות OAuth.
+- סמפורים של חשבונות מעניקים היתרים למקביליות של בקשות ומסתיימים כאשר בקשה מסתיימת.
+- חכירות סשן מנוהלות בלעדיות הן בעלות מתמשכת של מחזור החיים עם גדר דור.
 
 ## 3. נעילת מודל
 

@@ -6,9 +6,11 @@ import VercelRelayModal from "./VercelRelayModal";
 import DenoRelayModal from "./DenoRelayModal";
 import CloudflareRelayModal from "./CloudflareRelayModal";
 import type { ProxyItem } from "../proxyRegistryTypes";
+import { useNotificationStore } from "@/store/notificationStore";
 
 export default function ProxyPoolTab() {
   const t = useTranslations("settings");
+  const notifySuccess = useNotificationStore((s) => s.success);
   const [vercelModalOpen, setVercelModalOpen] = useState(false);
   const [denoModalOpen, setDenoModalOpen] = useState(false);
   const [cloudflareModalOpen, setCloudflareModalOpen] = useState(false);
@@ -18,11 +20,11 @@ export default function ProxyPoolTab() {
   const showCloudflareRelay = process.env.NEXT_PUBLIC_CLOUDFLARE_RELAY_ENABLED !== "false";
 
   const handleVercelDeployed = (_poolProxyId: string, relayUrl: string) => {
-    alert(`${t("vercelRelaySuccess")}: ${relayUrl}`);
+    notifySuccess(relayUrl, t("vercelRelaySuccess"));
   };
 
   const handleCloudflareDeployed = (_poolProxyId: string, relayUrl: string) => {
-    alert(`${t("cloudflareRelaySuccess")}: ${relayUrl}`);
+    notifySuccess(relayUrl, t("cloudflareRelaySuccess"));
   };
   const handleRedeployRelay = (proxy: ProxyItem) => {
     if (proxy.type === "vercel") setVercelModalOpen(true);

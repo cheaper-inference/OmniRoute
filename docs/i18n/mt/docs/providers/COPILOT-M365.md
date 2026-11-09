@@ -64,39 +64,31 @@ tal-HAR tiddekodifika l-iskadenza tal-JWT u turi kemm fadal żmien qabel jiskadi
 > **Qatt tikkommetti esportazzjoni HAR reali, access token, jew refresh token.** Il-valuri tat-test u
 > tad-dokumentazzjoni għandhom dejjem ikunu placeholders.
 
-## Tul ta’ ħajja u tiġdid tat-token
+## Ħajja tat-token u aġġornament
 
-L-`access_token` għandu ħajja qasira (tipikament **~75 minuta**). Wara li jiskadi, il-fornitur
-jirrapporta żball fil-konnessjoni u jkollok terġa’ taqbad il-kredenzjali.
+L-`access_token` għandu ħajja qasira (tipikament **~75 minuta**). Mingħajr token
+ta’ aġġornament li jista’ jintuża, trid terġa’ taqbad il-kredenzjali wara li jiskadi.
 
-### Tiġdid awtomatiku b’`refreshToken`
+### Aġġornament awtomatiku b’`refreshToken`
 
-Biex tevita li terġa’ taqbadha manwalment, tista’ taħżen refresh token ta’ Microsoft fis-
-**Advanced Settings → providerSpecificData** tal-konnessjoni:
+Fid-djalogu **Żid konnessjoni** jew **Editja l-konnessjoni** tal-fornitur Microsoft 365, iftaħ
+**Settings avvanzati → Token ta’ aġġornament (mhux obbligatorju)**. Pejstja token ta’ aġġornament OAuth ta’ Microsoft għall-ambitu `substrate.office.com/sydney` u ssejvja. Il-qasam tad-dħul ikun moħbi u qatt ma jimtela minn qabel bit-token maħżun. Waqt l-editjar, ħallih vojt biex iżżomm it-token eżistenti; pejstja token ġdid biex tissostitwih.
 
-| Qasam          | Deskrizzjoni                                                                 |
-| -------------- | ---------------------------------------------------------------------------- |
-| `refreshToken` | Refresh token ta’ Microsoft OAuth għall-ambitu `substrate.office.com/sydney` |
-| `tier`         | `individual` (predefinit), `edu`, jew `enterprise`                           |
+Ikseb it-token ta’ aġġornament minn fluss ta’ kodiċi tal-apparat jew ta’ kodiċi ta’ awtorizzazzjoni ta’ Microsoft ikkonfigurat għall-ambitu `substrate.office.com/sydney`; id-dashboard ma jiksbux għalik. Meta jkun ikkonfigurat token ta’ aġġornament, OmniRoute jiċċekkja l-`access_token` qabel it-talbiet u jaġġornah biss meta jkun jeħtieġ aġġornament. Aġġornament b’suċċess jaħżen ukoll it-token ta’ aġġornament rotat, u b’hekk jevita l-ħtieġa li terġa’ taqbad il-kredenzjali manwalment sakemm it-token ta’ aġġornament jibqa’ validu.
 
-Ikseb ir-refresh token minn fluss ta’ device-code jew authorization-code ta’ Microsoft
-bl-ambitu `substrate.office.com/sydney`. Meta `refreshToken` ikun issettjat, OmniRoute
-iġedded minn qabel l-`access_token` qabel kull talba, għalhekk ma jkollokx għalfejn
-terġa’ taqbdu wara kull skadenza ta’ madwar 75 minuta.
-
-Jekk `refreshToken` ma jkunx issettjat, ikollok terġa’ taqbad il-kredenzjali tal-WebSocket manwalment
+Jekk `refreshToken` ma jkunx issettjat, trid terġa’ taqbad manwalment il-kredenzjali tal-WebSocket
 wara kull skadenza.
 
 ### Għażla tal-livell
 
-| Livell       | Alias          | Interfaċċa                     |
-| ------------ | -------------- | ------------------------------ |
-| `individual` | _(predefinit)_ | M365 Copilot għall-konsumaturi |
-| `edu`        | `included`     | M365 Copilot għall-edukazzjoni |
-| `enterprise` | `work`         | M365 Copilot għax-xogħol       |
+| Livell       | Alias       | Interfaċċa                      |
+| ------------ | ----------- | ------------------------------- |
+| `individual` | _(default)_ | Copilot tal-konsumatur ta’ M365 |
+| `edu`        | `included`  | Copilot edukattiv ta’ M365      |
+| `enterprise` | `work`      | Copilot ta’ M365 għax-xogħol    |
 
-Issettja l-livell f’**Advanced Settings → providerSpecificData → tier**. Il-livell jaffettwa
-r-routing ta’ BizChat u l-aċċess għall-mudelli.
+Issettja l-livell f’**Settings avvanzati → Livell ta’ Copilot**. Il-livell jaffettwa
+r-rotta ta’ BizChat u l-aċċess għall-mudelli.
 
 ## Mudell tas-sigurtà
 
@@ -107,25 +99,30 @@ r-routing ta’ BizChat u l-aċċess għall-mudelli.
 
 ## Soluzzjoni tal-problemi
 
-### L-awtentikazzjoni tfalli minnufih
+### L-awtentikazzjoni tfalli immedjatament
 
-- Ivverifika li kkupjajt mill-**URL tal-WebSocket**, mhux minn talba XHR/Fetch. Il-kredenzjali tinsab fil-parametru tal-query `access_token` tal-konnessjoni WebSocket ta’ Chathub — mhux f’header `Authorization: Bearer`.
-- Kun żgur li `chathubPath` jinkludi s-segment sħiħ `<oid>@<tenant>` mill-path tal-URL.
+- Ivverifika li kkupjajt mill-**WebSocket URL**, u mhux minn talba XHR/Fetch. Il-
+  kredenzjali tinsab fil-parametru tal-mistoqsija `access_token` tal-konnessjoni
+  Chathub WebSocket — mhux f’header `Authorization: Bearer`.
+- Kun żgur li `chathubPath` jinkludi s-segment sħiħ `<oid>@<tenant>` mill-mogħdija tal-URL.
 
 ### It-token jiskadi wara madwar 75 minuta
 
-Dan huwa mistenni. Mingħajr `refreshToken`, it-token tal-aċċess ikollu validità qasira. Tista’ jew:
+Dan huwa mistenni. Mingħajr `refreshToken`, it-token tal-aċċess għandu ħajja qasira. Jew:
 
-- Terġa’ taqbad il-kredenzjali minn DevTools, jew
-- Tikkonfigura `refreshToken` f’Advanced Settings għal tiġdid awtomatiku.
+- Erġa’ aqbad il-kredenzjali minn DevTools, jew
+- Ikkonfigura **Settings Avvanzati → Token ta’ aġġornament (mhux obbligatorju)**
+  fid-djalogu Żid jew Editja konnessjoni biex isir aġġornament awtomatiku.
 
-### Test Connection jirnexxi iżda ċ-chat jirritorna 401
+### It-Test tal-Konnessjoni jgħaddi iżda ċ-chat jirritorna 401
 
-It-token jista’ jkun skada bejn il-validazzjoni u l-ewwel talba. Erġa’ aqbad kredenzjali ġdida.
+It-token jista’ jkun skada bejn il-validazzjoni u l-ewwel talba. Erġa’ aqbad
+kredenzjali ġdida.
 
 ### Copilot ma jidhirx fil-lista tal-fornituri
 
-Kun żgur li `copilot-m365-web` huwa attivat f’**Dashboard → Providers**. Il-fornitur jista’ jkun moħbi awtomatikament f’ċerti livelli.
+Kun żgur li `copilot-m365-web` huwa attivat f’**Dashboard → Fornituri**. Il-fornitur
+jista’ jkun moħbi awtomatikament f’xi livelli.
 
 ## Referenzi
 

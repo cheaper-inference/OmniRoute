@@ -11,6 +11,8 @@
  */
 import { buildErrorBody, errorResponse, sanitizeErrorMessage } from "../../utils/error.ts";
 import { DECLARED_FIRST_OUTPUT_WAIT_CAP_MS } from "../comboConfig.ts";
+import { requestMediaRequirements, nonImageMediaFailures } from "./mediaCompatibility.ts";
+import { parseModel } from "../model.ts";
 import {
   COMBO_HEDGE_CANCELLED_REASON,
   COMBO_PER_MODEL_TIMEOUT_REASON,
@@ -189,6 +191,33 @@ async function gateFirstOutput(params: FirstOutputGateParams): Promise<Response>
   return targetTimeoutResponse(modelStr);
 }
 
+/** Reject incompatible media before starting a target timer or provider request. */
+function incompatibleMediaResponse(
+  b: Record<string, unknown>,
+  modelStr: string,
+  target?: SingleModelTarget
+): Response | null {
+  const media = requestMediaRequirements(b);
+  if (Object.values(media).some(Boolean)) {
+    const parsed = parseModel(modelStr);
+    const failures = nonImageMediaFailures(
+      {
+        modelStr,
+        provider: parsed.provider ?? "unknown",
+        providerId: parsed.provider,
+        connectionId: target && "connectionId" in target ? target.connectionId : null,
+      },
+      media
+    );
+    if (failures.length)
+      return errorResponse(
+        400,
+        `Selected model does not support required input: ${failures.join(", ")}`
+      );
+  }
+  return null;
+}
+
 export function buildTargetTimeoutRunner(deps: {
   handleSingleModel: HandleSingleModel;
   comboTargetTimeoutMs: number;
@@ -222,6 +251,10 @@ export function buildTargetTimeoutRunner(deps: {
     modelStr: string,
     target?: SingleModelTarget
   ): Promise<Response> => {
+    // Also cover pipeline stages, nested dispatch and late tool attachments,
+    // which can bypass the ordinary combo candidate prefilter.
+    const incompatible = incompatibleMediaResponse(b, modelStr, target);
+    if (incompatible) return incompatible;
     const resolvedTimeoutMs = await resolveTargetTimeoutMs?.(target);
     const effectiveTimeoutMs =
       typeof resolvedTimeoutMs === "number" && Number.isFinite(resolvedTimeoutMs)

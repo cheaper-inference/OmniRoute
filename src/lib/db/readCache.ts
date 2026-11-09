@@ -105,6 +105,17 @@ export async function getCachedSettings(): Promise<Record<string, unknown>> {
 }
 
 /**
+ * getCachedSettings() plus `savedMaxBodySizeMb`, for the request body limit checks. It shares the
+ * settings cache, so a saved limit applies as soon as updateSettings() invalidates it.
+ */
+export async function getCachedBodySizeSettings(): Promise<Record<string, unknown>> {
+  return settingsCache.load("bodySizeSettings", async () => {
+    const { getSettings, getSavedRequestBodyLimitMb } = await import("@/lib/db/settings");
+    return { ...(await getSettings()), savedMaxBodySizeMb: getSavedRequestBodyLimitMb() };
+  });
+}
+
+/**
  * Cached wrapper for getPricing.
  * Longer TTL since pricing rarely changes mid-session.
  */

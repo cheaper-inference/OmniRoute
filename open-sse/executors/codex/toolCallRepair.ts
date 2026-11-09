@@ -2,6 +2,8 @@
 // function/custom tool call, which upstream rejects. Extracted from codex.ts to keep
 // the executor chokepoint file under the file-size gate (leaf module, no `this` usage).
 
+import { isStrictResponsesToolHistoryEnabled } from "../../translator/helpers/responsesToolHistory.ts";
+
 type ResponsesInputItem = Record<string, unknown>;
 
 const TOOL_CALL_OUTPUT_TYPES = new Set(["function_call_output", "custom_tool_call_output"]);
@@ -13,9 +15,10 @@ function outputTypeForCall(callType: "function_call" | "custom_tool_call"): stri
 /**
  * Mutates `body.input` in place, inserting an empty output item immediately after
  * any `function_call`/`custom_tool_call` item that has no matching output item.
+ * Strict tool-history mode rejects such history instead, so nothing is inserted there.
  */
 export function repairMissingCodexToolCallOutputs(body: Record<string, unknown>): void {
-  if (!Array.isArray(body.input)) return;
+  if (!Array.isArray(body.input) || isStrictResponsesToolHistoryEnabled()) return;
 
   const existingOutputKeys = new Set<string>();
   for (const item of body.input) {

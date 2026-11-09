@@ -24,7 +24,7 @@ test("a 4 vCPU Blacksmith minute counts as two, rounded up per job", () => {
 });
 
 test("2 vCPU counts once, ARM at 0.625, and hosted or unstarted jobs cost nothing", () => {
-  const span = { started_at: at(0), completed_at: at(4) };
+  const span = { runner_name: "blacksmith-x", started_at: at(0), completed_at: at(4) };
   assert.equal(jobMinutes({ ...span, labels: ["blacksmith-2vcpu-ubuntu-2404"] }), 4);
   assert.equal(
     jobMinutes({ ...span, labels: ["blacksmith-4vcpu-ubuntu-2404-arm"] }),
@@ -38,8 +38,26 @@ test("2 vCPU counts once, ARM at 0.625, and hosted or unstarted jobs cost nothin
 });
 
 test("a job still running counts up to now", () => {
-  const job = { labels: ["blacksmith-2vcpu-ubuntu-2404"], started_at: at(0), completed_at: null };
+  const job = {
+    runner_name: "blacksmith-x",
+    labels: ["blacksmith-2vcpu-ubuntu-2404"],
+    started_at: at(0),
+    completed_at: null,
+  };
   assert.equal(jobMinutes(job, Date.parse(at(10))), 10);
+});
+
+test("a job no runner took costs nothing, however long it waited", () => {
+  // Run 41843820512: queued for 13 h on blacksmith-4vcpu with started_at set and no runner.
+  const queued = {
+    status: "queued",
+    runner_name: "",
+    labels: ["blacksmith-4vcpu-ubuntu-2404"],
+    started_at: at(0),
+    completed_at: null,
+  };
+  assert.equal(jobMinutes(queued, Date.parse(at(0)) + 13 * 3600000), 0);
+  assert.equal(jobMinutes({ ...queued, runner_name: null, completed_at: at(30) }), 0);
 });
 
 test("only finished-with-a-result or live runs are fetched, never this run", () => {
