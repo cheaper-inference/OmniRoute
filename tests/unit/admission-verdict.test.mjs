@@ -319,13 +319,11 @@ for (const profile of ["ci", "quality"]) {
         .sort(),
       ids
     );
-    // The exact check name, except on a Mergify queue-draft edit run (ci-mergify-candidate.test.mjs).
+    // Requested candidates keep the required name; unrequested drafts get no PASS receipt.
     const checkName = policy.profiles[profile].checkName;
-    assert.ok(
-      verdict.name.endsWith(`&& '${checkName} (queue-draft edit)' || '${checkName}' }}`),
-      verdict.name
-    );
-    // always(), except a description edit on a Mergify queue draft (ci-mergify-candidate.test.mjs).
+    const unrequestedName = `Admission not requested / ${profile === "ci" ? "CI" : "Quality"}`;
+    assert.ok(verdict.name.endsWith(`&& '${checkName}' || '${unrequestedName}' }}`), verdict.name);
+    // Classification failure still reaches always(); queue description edits remain excluded.
     assert.match(
       verdict.if,
       /^\$\{\{ always\(\) && !\(github\.event_name == 'pull_request' && github\.event\.action == 'edited' && github\.event\.pull_request\.user\.login == 'mergify\[bot\]' && /
