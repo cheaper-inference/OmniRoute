@@ -1,1 +1,0 @@
-- **fix(db):** The scheduled cleanup now removes expired proxy logs, quota snapshots, compression analytics and domain cost history in batches of 10,000 rows. A large backlog no longer holds the event loop and the database write lock in one long statement.

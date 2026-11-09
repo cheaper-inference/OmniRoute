@@ -1,1 +1,0 @@
-- **fix(db):** a database import now waits for a complete safety snapshot and stops if the snapshot fails, even when routine backups are off. Settings writes and combo deletes take their snapshot before the change, so it holds the previous state.

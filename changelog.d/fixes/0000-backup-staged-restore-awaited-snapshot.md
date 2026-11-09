@@ -1,1 +1,0 @@
-- **fix(db):** restoring a database backup now copies the backup to a staged file, checks its size, flushes it to disk and swaps it in with one rename. A full disk or a failed copy no longer leaves the instance with no database file. A new awaited snapshot helper lets destructive operations wait for a complete safety copy.
