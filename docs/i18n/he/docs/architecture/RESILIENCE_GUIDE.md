@@ -248,104 +248,91 @@ OmniRoute מחזיר HTTP `429`, קוד `lease-capacity-unavailable`, מצב
 
 ## 3. נעילת מודל
 
-**תחום:** שלישיית provider + connection + model.
+**תחום:** השלשה של ספק + חיבור + מודל.
 
-**תחום המפתח לפי סטטוס:** הסטטוס הכושל מחליט לאיזה מפתח נעילה תיכתב
+**תחום לפי סטטוס:** הסטטוס שנכשל קובע לאיזה מפתח נעילה נכתבת
 (`resolveLockoutScope()` ב־`open-sse/services/accountFallback/exactModelLock.ts`):
 
-- `429` / `403` / `402` — אות מכסה או זכאות — נועל את **משפחת המכסה**:
+- `429` / `403` / `402` — אות למכסה או לזכאות — נועלים את **משפחת המכסה**:
   עבור codex את כל תחום `codex` / `spark` (כל מודל `gpt-5*` של
-  החיבור), ועבור ספקים אחרים `getQuotaScopedModelForProvider()`.
-- `404` נועל את המודל החשוף (`getModelLockKey()` מצמצם את `not_found`).
-- כל סטטוס אחר — כשלי תעבורה/שרת מסוג `5xx` וכן ה־`502` המסונתז של OmniRoute
-  עצמו מוולידציית איכות — נועל רק את שלישיית ה־provider/connection/model
-  **המדויקת** בלבד. סטרים פגום במודל אחד אינו ראיה לגבי מכסת החשבון;
-  לפני כלל זה, תגובה ריקה אחת ב־`codex/gpt-5.6-luna` הסירה כל מודל
-  `gpt-5*` של אותו חיבור מהניתוב למשך 2–30 דקות (בהסלמה) בעוד שהמכסה
-  שלו לא נפגעה כלל.
-- אפשרות `scope` מפורשת מהקורא תמיד גוברת (Antigravity מעביר `"exact"`).
+  החיבור), ועבור ספקים אחרים את `getQuotaScopedModelForProvider()`.
+- `404` נועל את המודל הבסיסי (`getModelLockKey()` מצמצם את `not_found`).
+- כל סטטוס אחר — כשלי תעבורה/שרת מסוג `5xx` ו־`502` שה־OmniRoute
+  מייצר בעצמו בעקבות אימות איכות — נועל רק את השלשה **המדויקת** של
+  ספק/חיבור/מודל. זרם פגום במודל אחד אינו מעיד על מכסת החשבון; לפני כלל זה,
+  תגובה ריקה אחת ב־`codex/gpt-5.6-luna` הסירה מניתוב כל מודל `gpt-5*` של
+  אותו חיבור למשך 2–30 דקות (בהסלמה), בעוד שהמכסה שלו נותרה ללא שינוי.
+- אפשרות `scope` מפורשת של הקורא תמיד גוברת (Antigravity מעביר `"exact"`).
 
 **מטרה:** להימנע מהשבתת חיבור שלם כאשר רק מודל אחד אינו זמין או מוגבל במכסה.
 
 **דוגמאות:**
 
-- ספקים עם מכסה פר־מודל שמחזירים 429
+- ספקי מכסה לכל מודל שמחזירים 429
 - ספקים מקומיים שמחזירים 404 עבור מודל חסר אחד
-- כשלי הרשאת מצב/מודל ייחודיים לספק (למשל, מצבי Grok)
+- כשלים בהרשאת מצב/מודל הספציפיים לספק (לדוגמה, מצבי Grok)
 
-**יישום:** `open-sse/services/accountFallback.ts` — `lockModel()`, `clearModelLock()`, `getAllModelLockouts()`.
+**מימוש:** `open-sse/services/accountFallback.ts` — `lockModel()`, `clearModelLock()`, `getAllModelLockouts()`.
 
-### לוח המחוונים Model Cooldowns ‏(v3.8.0)
+### לוח בקרה לצינון מודלים (v3.8.0)
 
-ממשק משתמש: הגדרות → Model Cooldowns ‏(`src/app/(dashboard)/dashboard/settings/components/ModelCooldownsCard.tsx`)
+ממשק משתמש: Settings → Model Cooldowns (`src/app/(dashboard)/dashboard/settings/components/ModelCooldownsCard.tsx`)
 
-מציג נעילות פעילות עם: provider, connection, model, reason, expiresAt. מפעילים יכולים להפעיל מחדש מודל באופן ידני מהכרטיס.
+מציג נעילות פעילות עם: ספק, חיבור, מודל, סיבה, expiresAt. מפעילים יכולים להפעיל מחדש מודל באופן ידני מהכרטיס.
 
 **REST API:**
 
-- `GET /api/resilience/model-cooldowns` — רשימת נעילות פעילות
+- `GET /api/resilience/model-cooldowns` — הצגת נעילות פעילות
 - `DELETE /api/resilience/model-cooldowns` — הפעלה מחדש ידנית. גוף: `{provider, connection, model}`. אימות: management.
 
-### מנהל הצינון (Cooldown Manager)
+### מנהל הצינון
 
-ממשק משתמש: ניטור → Cooldown Manager ‏(`src/app/(dashboard)/dashboard/resilience/cooldowns/`).
+ממשק משתמש: Monitoring → Cooldown Manager (`src/app/(dashboard)/dashboard/resilience/cooldowns/`).
 
-עמוד אחד עבור כל חיבור שנמצא מחוץ לניתוב מסיבה חולפת, במקום
-לפתוח כל עמוד ספק בנפרד. הוא מציג צינוני חיבור, נעילות מודל ומצבים
-סופניים (terminal), מנקה אותם פר חיבור, עבור קבוצה נבחרת, או עבור כל החיבורים של ספק,
-ועורך את כללי הצינון המכווננים בתדירות הגבוהה ביותר: `streamStallCooldown.enabled` ואת
-משך הצינון הבסיסי וצעדי ה־backoff המרביים של `connectionCooldown` עבור OAuth / API-key
-(נשמרים דרך `PATCH /api/resilience`). מצבים סופניים (`banned`, `expired`, `credits_exhausted`)
-מוצגים אך לעולם אינם מנוקים כאן.
+דף אחד עבור כל חיבור שאינו מנותב מסיבה זמנית, במקום לפתוח את הדף של כל ספק בנפרד. הוא מציג צינוני חיבורים, נעילות מודלים ומצבים סופיים, מנקה אותם לפי חיבור, עבור בחירה מסוימת או עבור כל החיבורים של ספק, ועורך את כללי הצינון שנעשה בהם השימוש הרב ביותר: `streamStallCooldown.enabled` וצינון הבסיס והשלבים המרביים של הנסיגה האקספוננציאלית עבור `connectionCooldown` של OAuth / API-key (נשמרים באמצעות `PATCH /api/resilience`). מצבים סופיים (`banned`, `expired`, `credits_exhausted`) מוצגים אך לעולם אינם מנוקים כאן.
 
-**REST API** ‏(`src/lib/resilience/cooldownManager.ts`, אימות: management):
+כרטיס **כללי צינון שגיאות** באותו דף עורך את כללי השגיאות של המפעיל
+(`settings.providerErrorRules`) ואת ברירות המחדל הכוללות לכל ספק
+(`settings.providerErrorDefaults`) באמצעות `PATCH /api/settings` — ראו
+"כללים שהוגדרו על ידי המפעיל" תחת §7 כדי להבין כיצד הם מותאמים. משכי הזמן הם ברירת מחדל (ללא צינון מפורש), 30 דקות, שעה, 5 שעות, 24 שעות או ערך מותאם אישית של 1 עד 43,200 דקות (30 יום).
 
-- `GET /api/resilience/cooldowns[?provider=]` — חיבורים עם סטטוס, צינון נותר,
-  רמת backoff, סוג השגיאה האחרון ונעילות מודל (ללא credentials)
+**REST API** (`src/lib/resilience/cooldownManager.ts`, אימות: management):
+
+- `GET /api/resilience/cooldowns[?provider=]` — חיבורים עם סטטוס, זמן הצינון שנותר, רמת נסיגה, סוג השגיאה האחרון ונעילות מודלים (ללא פרטי התחברות)
 - `POST /api/resilience/cooldowns` — גוף `{connectionIds: string[]}` או
   `{all: true, provider?}`; מחזיר `{cleared, unchanged, skippedTerminal, lockoutsCleared}`
 
-### ממשק הגדרות נעילה + שחזור בדעיכת הצלחות (success-decay) ‏(v3.8.23)
+### ממשק הגדרות לנעילת מודלים + התאוששות באמצעות דעיכת הצלחות (v3.8.23)
 
-נעילת מודל עברה מהתנהגות קשיחה הפעילה תמיד לתכונה הניתנת לקונפיגורציה מלאה,
-מבוססת opt-in, עם כרטיס הגדרות משלה ונתיב שחזור המרפא את עצמו.
+נעילת מודלים עברה מהתנהגות קשיחה שתמיד מופעלת ומקודדת ישירות בקוד, לתכונה הניתנת להגדרה מלאה ולהפעלה לפי בחירה, עם כרטיס הגדרות משלה ונתיב התאוששות מתקן-עצמו.
 
-**כרטיס הגדרות:** הגדרות → Model Lockout
-‏(`src/app/(dashboard)/dashboard/settings/components/ModelLockoutCard.tsx`).
-זהו כרטיס **נפרד** מ־`ModelCooldownsCard` שלעיל (שהוא לקריאה בלבד ורק
-_מציג_ נעילות פעילות) — הכרטיס החדש _מקונפג את הפרמטרים_. ברירות המחדל
-נמצאות ב־`DEFAULT_MODEL_LOCKOUT_SETTINGS`
-‏(`src/lib/resilience/modelLockoutSettings.ts`):
+**כרטיס הגדרות:** Settings → Model Lockout
+(`src/app/(dashboard)/dashboard/settings/components/ModelLockoutCard.tsx`).
+הכרטיס הזה **נבדל** מ־`ModelCooldownsCard` לקריאה בלבד שלעיל (שבו רק
+_מוצגות_ נעילות פעילות) — הכרטיס החדש _מגדיר את הפרמטרים_. ברירות המחדל נמצאות ב־`DEFAULT_MODEL_LOCKOUT_SETTINGS`
+(`src/lib/resilience/modelLockoutSettings.ts`):
 
-| הגדרה                   | ברירת מחדל                       | משמעות                                           |
-| ----------------------- | -------------------------------- | ------------------------------------------------ |
-| `enabled`               | `false`                          | מתג ראשי — נעילת מודל **כבויה כברירת מחדל**.     |
-| `errorCodes`            | `[403, 404, 429, 502, 503, 504]` | סטטוסי upstream הנספרים ככשל ברמת מודל.          |
-| `baseCooldownMs`        | `120_000` (120 שניות)            | משך הנעילה ההתחלתי עבור הכשל הראשון.             |
-| `maxCooldownMs`         | `1_800_000` (30 דקות)            | תקרה על הצינון המסלים.                           |
-| `maxBackoffSteps`       | `10`                             | מספר מרבי של צעדי הסלמה ב־backoff מעריכי.        |
-| `useExponentialBackoff` | `true`                           | האם כשלים חוזרים מסלימים את הצינון באופן מעריכי. |
+| הגדרה                   | ברירת מחדל                       | משמעות                                                 |
+| ----------------------- | -------------------------------- | ------------------------------------------------------ |
+| `enabled`               | `false`                          | מתג ראשי — נעילת מודלים **כבויה כברירת מחדל**.         |
+| `errorCodes`            | `[403, 404, 429, 502, 503, 504]` | סטטוסים מהמקור שנחשבים לכשל בתחום המודל.               |
+| `baseCooldownMs`        | `120_000` (120 s)                | משך הנעילה ההתחלתי עבור הכשל הראשון.                   |
+| `maxCooldownMs`         | `1_800_000` (30 min)             | תקרת הצינון לאחר הסלמה.                                |
+| `maxBackoffSteps`       | `10`                             | המספר המרבי של שלבי הסלמה בנסיגה אקספוננציאלית.        |
+| `useExponentialBackoff` | `true`                           | האם כשלים חוזרים מסלימים את הצינון באופן אקספוננציאלי. |
 
-ההגדרות נשמרות דרך מחסן ההגדרות הרגיל ועוברות ולידציה דרך
-סכמת הגדרות ה־resilience; הכרטיס מגביל (clamps) את `baseCooldownMs`/`maxCooldownMs`
+ההגדרות נשמרות דרך מאגר ההגדרות הרגיל ועוברות אימות באמצעות סכמת הגדרות העמידות; הכרטיס מגביל את `baseCooldownMs`/`maxCooldownMs`
 (כאשר `maxCooldownMs ≥ baseCooldownMs`) ואת `maxBackoffSteps`.
 
-**שחזור בדעיכת הצלחות (success-decay):** השחזור **אינו** רק תפוגת טיימר. תגובה
-תקינה מורידה את מונה הכשלים של המודל כך שמודל שהתאושש
-באמצע החלון מפסיק להסלים (ومتנקה) לפני שהטיימר שלו היה פג. בעת יעד combo
-מוצלח, `open-sse/services/combo.ts` קורא ל־`decayModelFailureCount()`
-‏(`open-sse/services/accountFallback.ts`), אשר **מחצה** את ה־`failureCount`
-השמור (`Math.floor(failureCount / 2)`); כאשר הוא מגיע ל־`0` רשומת הנעילה
-נמחקת לחלוטין. המקבילה `recordModelLockoutFailure()`
-מגדילה את המונה (ומסלימה את הצינון) בכשלים בתוך
-חלון ההסלמה. דעיכת הצלחות זו היא בנוסף לתפוגת טיימר רגילה —
-כל אחד משני הנתיבים יכול להפעיל מחדש מודל.
+**התאוששות באמצעות דעיכת הצלחות:** ההתאוששות אינה מבוססת **רק** על פקיעת טיימר. תגובה תקינה מפחיתה בהדרגה את מונה הכשלים של המודל, כך שמודל שהתאושש באמצע חלון הזמן מפסיק להסלים (והנעילה מתנקה) לפני שהטיימר שלו היה פג. ביעד combo שהצליח, `open-sse/services/combo.ts` קורא ל־`decayModelFailureCount()`
+(`open-sse/services/accountFallback.ts`), שמחלק **בחצי** את
+`failureCount` המאוחסן (`Math.floor(failureCount / 2)`); כאשר הוא מגיע ל־`0`, רשומת הנעילה נמחקת לחלוטין. המקבילה `recordModelLockoutFailure()`
+מגדילה את המונה (ומסלימה את הצינון) בכשלים המתרחשים בתוך חלון ההסלמה. דעיכת הצלחות זו מתווספת לפקיעת טיימר רגילה — כל אחד מהמסלולים יכול להפעיל מחדש מודל.
 
-**מצב (State):** הנעילות מוחזקות **בזיכרון** (`Map`s פר־תהליך של
-`ModelLockoutEntry` עם מפתח `provider:connectionId:model`, ונעילות בתחום מדויק עם מפתח
-`provider:connectionId:exact:model`), ואינן נשמרות ב־
-DB — הן אובדות בהפעלה מחדש. ה_הגדרות_ נשמרות; _מצב_
-הנעילה הפעיל הוא חולף.
+**מצב:** נעילות חסימה נשמרות **בזיכרון** (`Map`s לכל תהליך של
+`ModelLockoutEntry`, עם מפתחות לפי `provider:connectionId:model`, ונעילות בהיקף מדויק לפי
+`provider:connectionId:exact:model`), ולא נשמרות
+במסד הנתונים — הן אובדות בעת הפעלה מחדש. _ההגדרות_ נשמרות; _מצב_ נעילת החסימה הפעילה הוא זמני.
 
 ---
 
@@ -524,264 +511,261 @@ quota_exhausted / auth_error / not_found / not_found_local:
 
 ---
 
-## 7. ניסוח מחדש של סטטוס Upstream (שגיאות מכסה המדווחות בסטטוס שגוי)
+## 7. ניסוח מחדש של סטטוס upstream (שגיאות מכסה שדווחו באופן שגוי)
 
-**תחום:** שער upstream יחיד שמדווח על מיצוי מכסה זמני עם סטטוס HTTP שגוי.
+**היקף:** שער upstream אחד שמדווח על מיצוי זמני של המכסה עם סטטוס HTTP שגוי.
 
-**מטרה:** לתקן סטטוס מטעה **לפני** הסיווג, כך שצרכני ה-downstream (מנוע ה-fallback, אגרגציית ה-combo, התגובה הפונה ללקוח) יראו את האופי האמיתי של הכשל כניתן לניסיון חוזר.
+**מטרה:** לתקן סטטוס מטעה **לפני** הסיווג, כדי שצרכנים downstream (מנוע ה-fallback, צבירת ה-combo והתשובה המוצגת ללקוח) יראו את אופייה האמיתי של הכשלת הניתנת לניסיון חוזר.
 
-חלק מהשערים מאותתים על מיצוי מכסה **זמני** עם סטטוס HTTP שאינו ניתן
-לניסיון חוזר. `agentrouter.org` מחזיר `403` (לפעמים `400`) עם גוף תגובה
-בסינית (`用户额度不足` / `额度不足`) במקום ה-`429` הסטנדרטי. לקוחות כמו
-Claude Code מתייחסים ל-`403` כאל שגיאה קבועה ומפסיקים את הסשן, וללא
-התיקון מנוע ה-fallback היה מסווג אותה כ-`AUTH_ERROR` במקום כאירוע מכסה.
+חלק מהשערים מסמנים מיצוי **זמני** של המכסה בסטטוס HTTP שאינו ניתן לניסיון חוזר. `agentrouter.org` מחזיר `403` (ולפעמים `400`) עם גוף בסינית
+(`用户额度不足` / `额度不足`) במקום `429` הסטנדרטי. לקוחות כמו Claude
+Code מתייחסים אל `403` כשגיאה קבועה ומפסיקים את הסשן, וללא תיקון
+מנוע ה-fallback יסווג אותה כ-`AUTH_ERROR` במקום כאירוע מכסה.
 
-**מימוש:**
+**יישום:**
 
-- מרשם (registry) + matcher: `open-sse/config/upstreamStatusRestatement.ts` —
-  רשימת כללים פר-ספק (`{id, fromStatuses, toStatus, textMarkers, excludeMarkers, defaultRetryAfterMs}`),
-  שההתאמה שלה מתבצעת באמצעות `applyStatusRestatement()`.
-- נקודת הקריאה: הבלוק `providerFailure:` ב-`open-sse/handlers/chatCore.ts`
-  (בסביבות שורה 3654), מיד לאחר ש-`parseUpstreamError()` מנתח תגובת
-  upstream עם סטטוס HTTP של שגיאה (`!providerResponse.ok`), ולפני שרץ כל
-  סיווג, כך שכל צרכן downstream רואה את הסטטוס המתוקן. שגיאות המוטמעות
-  בתוך זרם SSE של `200` עוברות בנתיב פרסור-זרם נפרד ומאוחר יותר, ו**אינן**
-  מכוסות על ידי ה-hook הזה כיום — מגבלה ידועה, שעדיין לא נדרשת עבור
-  הסטטוס השגוי של agentrouter (שצץ כסטטוס HTTP של שגיאה).
+- רישום + matcher: `open-sse/config/upstreamStatusRestatement.ts` — רשימת כללים לכל ספק (`{id, fromStatuses, toStatus, textMarkers, excludeMarkers, defaultRetryAfterMs}`), עם התאמה באמצעות `applyStatusRestatement()`.
+- נקודת הקריאה: בלוק `providerFailure:` בתוך `open-sse/handlers/chatCore.ts`
+  (סביב שורה 3654), מיד לאחר ש-`parseUpstreamError()` מנתח תשובת upstream עם סטטוס HTTP של שגיאה (`!providerResponse.ok`), ולפני שרץ סיווג כלשהו, כך שכל צרכן downstream יראה את הסטטוס המתוקן. שגיאות המוטמעות בתוך זרם SSE של `200` עוברות במסלול נפרד ומאוחר יותר של ניתוח הזרם, והן **אינן** מכוסות על ידי ה-hook הזה כיום — מגבלה ידועה שעדיין אינה נדרשת עבור ה-misstatus של agentrouter (שמופיע כסטטוס HTTP של שגיאה).
 - זכאות לניסיון חוזר: `429` נמצא ב-`RETRY_AFTER_ELIGIBLE_STATUSES`
-  (`open-sse/services/combo/unavailableRetryGate.ts`), כך ששגיאה שעברה
-  ניסוח מחדש נושאת חלון ניסיון חוזר אמיתי במקום לצוץ כ-`403` מת.
-- ה-`defaultRetryAfterMs` הסינתטי של `60s` (`upstreamStatusRestatement.ts`)
-  הוא רק מה שהתגובה המנוסחת מחדש אומרת ל**לקוח**; הוא אינו בעצמו משך
-  ה-cooldown/lockout הפנימי של החיבור — זה נקבע בנפרד על ידי המנגנון
-  שמטפל בפועל בשגיאה המנוסחת מחדש (ה-backoff המסלים של Connection
-  Cooldown, §2, בסיס `3s` עבור ספקי API-key; או Model Lockout, §3, עבור
-  ספקי מכסה-פר-מודל כמו agentrouter). הראוטר יכול להפוך זכאי לניסיון
-  חוזר באופן פנימי מוקדם יותר מחלון ה-60s שהוא מפרסם ללקוח — מרווח
-  מכוון, לא באג.
+  (`open-sse/services/combo/unavailableRetryGate.ts`), ולכן שגיאה שנוסח הסטטוס שלה מחדש נושאת חלון ניסיון חוזר אמיתי במקום להופיע כ-`403` מת.
 
-שגיאות קבועות (`无权访问模型` של agentrouter — אין גישה למודל זה) **אף פעם
-לא** מנוסחות מחדש: `excludeMarkers` מטיל וטו על הכלל גם כאשר `textMarkers`
-מותאמים, כך שהשגיאה שומרת על הסטטוס המקורי שלה ושום דבר לא מנסה אותה שוב
-לנצח. כלל סיווג הספק התואם (`agentrouter-model-access-denied`
-ב-`open-sse/config/providerErrorRules.ts`: `reason: "auth_error"`,
-`scope: "model"`, cooldown בסיס מוצהר של `6h`) נשאל על ידי
-`checkFallbackError` (`open-sse/services/accountFallback.ts`) _לפני_
-ה-early-return הגנרי `FORBIDDEN` של קטגוריית apikey, מותנה
-ב-`honorsRuleLockScope(provider)` (#10334 — כרגע בלעדי ל-agentrouter דרך
-רשימת ההיתרים `HONORS_RULE_LOCK_SCOPE_PROVIDERS`
-ב-`providerErrorRules.ts`). ה-cooldown המוצהר של 6h של הכלל זורם הלאה
-כ-`fallbackResult.baseCooldownMs`, אבל הוא עדיין מוזן לנתיב ה-lockout
-הקיים של מכסה-פר-מודל (`lockModelIfPerModelQuota()` /
-`recordModelLockoutFailure()`, ללא שינוי על ידי #10334 פרט למקור
-ה-cooldown): הוא נחתך כלפי מטה ל-`mlSettings.maxCooldownMs` של המפעיל
-(ברירת מחדל `1_800_000ms` / 30 דקות), כמו כל model lockout אחר, ו_סיבת
-ה-lockout השמורה_ נשארת ה-hardcoded הקיים `"forbidden"`, ולא ה-`"auth_error"`
-של הכלל — רק משך ה-cooldown נכבד מקצה לקצה, לא מחרוזת הסיבה. החיבור עצמו
-נשאר פעיל; מודלים אחים על אותו חיבור אינם מושפעים.
+- ה-`60s` הסינתטי של `defaultRetryAfterMs` (`upstreamStatusRestatement.ts`)
+  הוא רק מה שהתשובה שנוסחה מחדש מציגה ל**לקוח**; הוא אינו משך הצינון/הנעילה הפנימי של החיבור עצמו — משך זה נקבע בנפרד על ידי המנגנון שמטפל בפועל בשגיאה שנוסחה מחדש (ה-backoff ההדרגתי של Connection Cooldown, סעיף 2, עם בסיס של `3s` עבור ספקי API-key; או Model Lockout, סעיף 3, עבור ספקים עם מכסה לכל מודל כמו agentrouter). הנתב יכול להפוך לזכאי לניסיון חוזר פנימי מוקדם יותר מחלון ה-60s שהוא מפרסם ללקוח — זו מרווחת ביטחון מכוונת, לא באג.
 
-שגיאות מכסה מנוסחות מחדש (`额度不足`) מגיעות לכלל ספק בפרודקשן
-(`agentrouter-user-quota-exhausted`: `reason: "quota_exhausted"`,
-`scope: "connection"`, ללא cooldown מוצהר משלו — חלה ברירת המחדל של
-ה-backoff המדורג של שכבת ה-persistence). מאז #10334, ה-`scope` על
-`ProviderErrorRuleMatch` **כן** נצרך מקצה לקצה, אבל **רק** עבור ספקים
-ברשימת ההיתרים `HONORS_RULE_LOCK_SCOPE_PROVIDERS` (`providerErrorRules.ts`
-— כיום רק `"agentrouter"`, מותנה דרך `honorsRuleLockScope()`). עבור כל
-ספק אחר, `scope` נשאר אינפורמטיבי, בדיוק כמו לפני #10334.
-`checkFallbackError` חושף את ה-scope של הכלל שהותאם כ-`fallbackResult.ruleScope`;
-`isAgentrouterConnectionQuotaScope()` (`src/sse/services/auth.ts`) הוא
-השומר (guard) המשותף שמאשר ש-`ruleScope` באמת בטוח לכיבוד כאות ברמת
-החיבור כולו ובר-התאוששות עצמית (scope `"connection"`, reason
-`quota_exhausted`, לעולם לא `permanent`, לעולם לא `creditsExhausted` —
-הגנה מפני כלל עתידי שיזווג scope `"connection"` עם מצב חשבון קבוע). שני
-צרכנים קוראים לו:
+שגיאות קבועות (`无权访问模型` של agentrouter — אין גישה למודל זה) **לעולם אינן** עוברות ניסוח מחדש: `excludeMarkers` מבטל את הכלל גם כאשר `textMarkers` תואמים, ולכן השגיאה שומרת על הסטטוס המקורי שלה ושום דבר אינו מנסה אותה שוב לנצח. כלל סיווג הספק התואם
+(`agentrouter-model-access-denied` בתוך `open-sse/config/providerErrorRules.ts`:
+`reason: "auth_error"`, `scope: "model"`, צינון בסיסי מוצהר של `6h`) נבדק על ידי `checkFallbackError` (`open-sse/services/accountFallback.ts`)
+_לפני_ ההחזרה המוקדמת הגנרית של קטגוריית ה-apikey, `FORBIDDEN`, כאשר הדבר מותנה ב-`honorsRuleLockScope(provider)` (#10334 — כיום בלעדי ל-agentrouter באמצעות רשימת ההרשאה `HONORS_RULE_LOCK_SCOPE_PROVIDERS` בתוך
+`providerErrorRules.ts`). הצינון המוצהר של 6h של הכלל עובר דרך `fallbackResult.baseCooldownMs`, אך עדיין מזין את מסלול הנעילה הקיים של מכסה לכל מודל (`lockModelIfPerModelQuota()` /
+`recordModelLockoutFailure()`, ללא שינוי מצד #10334 מלבד מקור הצינון): הוא מוגבל כלפי מטה ל-`mlSettings.maxCooldownMs` של המפעיל (ברירת מחדל `1_800_000ms` / 30 דקות), כמו כל נעילת מודל אחרת, ו_סיבת הנעילה הנשמרת_ נותרת `"forbidden"` המקודדת קשיח בקוד, ולא `"auth_error"` של הכלל — רק משך הצינון מקבל הכרה מקצה לקצה, לא מחרוזת הסיבה. החיבור עצמו נשאר פעיל; מודלים מקבילים באותו חיבור אינם מושפעים.
 
-- **שמירה מתמשכת** (`markAccountUnavailable()`, `src/sse/services/auth.ts`):
-  במקום לעבור לענף הנעילה **לכל מודל** של ספק passthrough
-  (‏agentrouter הוא `passthroughModels: true` ← ‏`hasPerModelQuota()`
-  מחזיר `true`), מוחלת **תקופת צינון זמנית של החיבור** —
+שגיאות מכסה שנוסחו מחדש (`额度不足`) מגיעות לכלל ספק בסביבת production
+(`agentrouter-user-quota-exhausted`: `reason: "quota_exhausted"`, `scope:
+"connection"`, ללא צינון מוצהר משלה — ברירת המחדל של ה-backoff המותאם של שכבת ההתמדה חלה). מאז #10334, השדה `scope` ב-
+`ProviderErrorRuleMatch` נצרך מקצה לקצה, אך **רק** עבור ספקים ברשימת ההרשאה `HONORS_RULE_LOCK_SCOPE_PROVIDERS` (`providerErrorRules.ts` —
+כיום רק `"agentrouter"`, באמצעות `honorsRuleLockScope()`). עבור כל ספק אחר, `scope` נותר אינפורמטיבי, בדיוק כפי שהיה לפני #10334.
+`checkFallbackError` חושף את ה-scope של הכלל התואם דרך `fallbackResult.ruleScope`; הפונקציה `isAgentrouterConnectionQuotaScope()`
+(`src/sse/services/auth.ts`) היא השומר המשותף שמאשר כי `ruleScope` אכן בטוח לכיבוד כאות כלל-חיבורי, המתאושש מעצמו (scope `"connection"`, הסיבה `quota_exhausted`, לעולם לא `permanent`, ולעולם לא `creditsExhausted` — הגנה מפני צימוד עתידי של scope `"connection"` עם מצב חשבון קבוע). שני צרכנים קוראים לה:
+
+- **התמדה** (`markAccountUnavailable()`, `src/sse/services/auth.ts`):
+  במקום לעבור לענף הנעילה **לפי-מודל** של ספק passthrough
+  (agentrouter הוא `passthroughModels: true` → `hasPerModelQuota()`
+  מחזירה `true`), מוחל **צינון זמני של החיבור** —
   `testStatus: "unavailable"` + `rateLimitedUntil`, ולעולם לא סטטוס סופי
   (`credits_exhausted`/`banned`/`expired`) — כך שהחיבור מתאושש מעצמו
-  לאחר שתקופת הצינון חולפת, במקום לדרוש איפוס ידני של פרטי ההזדהות.
-  הפעולה מדולגת עבור חיבורים עם `disableCooling: true` (#2997): ביטול זה
-  מוביל במקום זאת לענף הנעילה לכל מודל (פשרה מתועדת —
-  ראו את הערת הקוד שמעל לענף).
-- **ניתוב קומבו בתוך אותה בקשה** (`applyComboTargetExhaustion()`,
-  `open-sse/services/combo/targetExhaustion.ts`): אותו guard מסמן את
-  החיבור בתוך קבוצת `exhaustedConnections` שבזיכרון, לפי המפתח
-  `${provider}:${connectionId}`. הדבר מדלג רק על יעד שנותר באותה בקשה
-  ושכבר _מכיל בעצמו בדיוק את אותו `connectionId`_ באובייקט היעד שלו
-  (`getExhaustedTargetSkipReason()`,
-  `open-sse/services/combo/comboPredicates.ts`, `if (provider &&
-connectionId)` לפני החיפוש ב-`exhaustedConnections`) — קומבו רגיל של
-  רשימת מודלים, שבו יעדים מקבילים אינם מכילים `connectionId` מוצמד
-  משלהם והוא נפתר רק בכל dispatch מכותרת
-  `X-OmniRoute-Selected-Connection-Id` של התגובה, לעולם אינו תואם למפתח
-  הזה. במקרה הנפוץ הזה, ההגנה האמיתית מפני שימוש חוזר של שלב שנותר
-  בחשבון שזה עתה מוצה אינה ה-Set הזה — אלא שכבת השמירה המתמשכת שלעיל
-  (ה-`rateLimitedUntil` של החיבור נמצא כעת בעתיד), בשילוב עם דיכוי
-  `transientRateLimitedProviders` עבור הכשל על ידי אותו guard
-  (ראו "תכנון דו-שלבי" ואת הערת הקוד בענף
-  `isAgentrouterConnectionQuotaScope` ב-`targetExhaustion.ts`): כאשר
-  ה-Set הזה אינו מסומן, ההתרה הכפויה `allowRateLimitedConnection` של
-  `combo.ts` (`open-sse/services/combo.ts:1005-1013`, `:2734-2738`) אינה
-  מופעלת עבור השלבים הנותרים של הספק, ולכן מסנן `rateLimitedUntil` של
-  בחירת פרטי ההזדהות (`src/sse/services/auth.ts:1238`) מכובד כרגיל,
-  ושלב שנותר בוחר חיבור agentrouter אחר שעדיין כשיר או נכשל משום שאין
-  פרטי הזדהות זמינים — הוא אינו כופה את דרכו חזרה אל החיבור שהענף הזה
-  הכניס זה עתה לתקופת צינון.
+  לאחר שהצינון פג, במקום לדרוש איפוס ידני של פרטי האימות.
+  עבור חיבורים עם `disableCooling: true` (#2997) הצינון מדולג: החרגה זו
+  עוברת במקום זאת לנעילה לפי-מודל (פשרה מתועדת —
+  ראו את הערת הקוד מעל הענף).
+- **ניתוב צירופים באותה בקשה** (`applyComboTargetExhaustion()`,
+  `open-sse/services/combo/targetExhaustion.ts`): אותו שומר מסמן את
+  החיבור בקבוצת `exhaustedConnections` שבזיכרון, שהמפתח שלה הוא
+  `${provider}:${connectionId}`. פעולה זו מדלגת רק על יעד שנותר באותה
+  בקשה, אשר _הוא עצמו כבר מכיל את אותו `connectionId` בדיוק_ באובייקט
+  היעד שלו (`getExhaustedTargetSkipReason()`,
+  `open-sse/services/combo/comboPredicates.ts`, באמצעות `if (provider &&
+connectionId)` לפני החיפוש ב-`exhaustedConnections`) — צירוף רגיל של רשימת
+  מודלים, שבו יעדי האחים אינם מכילים `connectionId` מוצמד משל עצמם והוא
+  נפתר רק בעת כל dispatch מתוך הכותרת
+  `X-OmniRoute-Selected-Connection-Id` של התגובה, לעולם אינו מגיע להתאמת
+  מפתח זו. במקרה הנפוץ הזה, ההגנה בפועל מפני שימוש חוזר בחשבון שזה עתה
+  מוצה על ידי רגל שנותרה אינה הקבוצה הזו — אלא שכבת ההתמדה שלעיל
+  (`rateLimitedUntil` של החיבור נמצא כעת בעתיד), בשילוב עם אותו שומר
+  שמדכא את `transientRateLimitedProviders` עבור הכשל (ראו "תכנון
+  דו-שלבי" ואת הערת הקוד בענף
+  `isAgentrouterConnectionQuotaScope` ב-`targetExhaustion.ts`): מכיוון
+  שהקבוצה נותרת ללא סימון, האישור הכפוי של
+  `allowRateLimitedConnection` ב-`combo.ts`
+  (`open-sse/services/combo.ts:1005-1013`, `:2734-2738`) אינו מופעל עבור
+  הרגליים שנותרו של הספק, ולכן מסנן `rateLimitedUntil` של בחירת פרטי
+  האימות (`src/sse/services/auth.ts:1238`) נאכף כרגיל, ורגל שנותרה תבחר
+  חיבור agentrouter אחר שעדיין כשיר, או תיכשל ללא פרטי אימות זמינים —
+  היא אינה מכריחה את דרכה חזרה אל החיבור שענף זה הכניס לצינון.
 
 ### תכנון דו-שלבי: ניסוח מחדש של הסטטוס, ולאחר מכן סיווג
 
-ניסוח מחדש של הסטטוס (`upstreamStatusRestatement.ts`) וכללי סיווג הספקים
+ניסוח מחדש של הסטטוס (`upstreamStatusRestatement.ts`) וכללי סיווג הספק
 (`open-sse/config/providerErrorRules.ts`,
-`providerRuleRegistry`) הם מאגרים נפרדים ששניהם מבוססים על מזהה הספק
-ועל סמני טקסט, אך הם פועלים במקומות שונים ומשרתים מטרות שונות: הניסוח
-מחדש משכתב את סטטוס ה-HTTP בשלב מוקדם ב-`chatCore.ts`; כללי הסיווג
-בוחרים את ערך ה-`reason` החלופי ואת `scope` הנעילה
+`providerRuleRegistry`) הם מאגרים נפרדים ששניהם משתמשים במזהה הספק
+ובסמני טקסט כמפתחות, אך הם מופעלים במקומות שונים ומשרתים מטרות שונות:
+ניסוח מחדש משנה את סטטוס ה-HTTP בשלב מוקדם ב-`chatCore.ts`;
+כללי הסיווג בוחרים את `reason` החלופי ונועלים את `scope`
 (`model` / `provider` / `connection`) בתוך `checkFallbackError()`
 (`open-sse/services/accountFallback.ts`).
 
-כללי הסיווג רואים את **טקסט** השגיאה המלא (הדרוש להתאמת סמנים בגוף
-כמו `额度不足`) רק עבור ספקים המופיעים ברשימת ההיתרים
-`FULL_TEXT_RULE_PROVIDERS` שב-`providerErrorRules.ts` — כרגע רק
-`"agentrouter"`. עבור כל ספק **קטלוג מובנה** אחר, `checkFallbackError`
-מעביר אל `getProviderErrorRuleMatch` רק את השגיאה המובנית (`{code, type}`),
-המספיקה לכללים המבוססים על כותרת/סטטוס/קוד אך אינה יכולה לראות סמני
-טקסט בגוף. פונקציית העזר `resolveRuleMatchBody()` מבצעת בחירה זו: טקסט
-השגיאה המלא עבור ספקים שברשימת ההיתרים, והשגיאה המובנית בכל מקרה אחר.
-הוספת ספק **מובנה** אל `FULL_TEXT_RULE_PROVIDERS` היא הצטרפות מפורשת
-לכל ספק — היא קיימת כדי שמסלול ברירת המחדל של כל ספק שאינו ברשימה
-יישאר ללא שינוי, בית אחר בית.
+כללי הסיווג רואים רק את **טקסט** השגיאה המלא (הנדרש להתאמת סמנים בגוף
+כמו `额度不足`) עבור ספקים המופיעים ברשימת ההיתרים
+`FULL_TEXT_RULE_PROVIDERS` שב-`providerErrorRules.ts` — נכון לעכשיו רק
+`"agentrouter"`. עבור כל ספק **מובנה בקטלוג** אחר,
+`checkFallbackError` מעביר אל `getProviderErrorRuleMatch` רק את השגיאה
+המובנית (`{code, type}`), שמספיקה לכללים המבוססים על כותרות/סטטוס/קוד,
+אך אינה יכולה לראות סמני טקסט בגוף. פונקציית העזר
+`resolveRuleMatchBody()` מבצעת את הבחירה הזו: טקסט השגיאה המלא עבור
+ספקים ברשימת ההיתרים, והשגיאה המובנית אחרת. הוספת ספק **מובנה**
+ל-`FULL_TEXT_RULE_PROVIDERS` היא הסכמה מפורשת לכל ספק בנפרד — היא קיימת
+כדי שנתיב ברירת המחדל עבור כל ספק שאינו ברשימה יישאר ללא שינוי, בייט
+אחר בייט.
 
-ה-`scope` של כלל (`model` / `provider` / `connection`) הוא הצטרפות נפרדת
-מ-`FULL_TEXT_RULE_PROVIDERS`: ‏`checkFallbackError` רק חושף אותו בתור
-`fallbackResult.ruleScope`, וצרכנים בהמשך התהליך מכבדים אותו כיותר
-מתווית מידע רק עבור ספקים שברשימת ההיתרים
-`HONORS_RULE_LOCK_SCOPE_PROVIDERS` שבאותו קובץ (באמצעות
-`honorsRuleLockScope()` — כיום רק `"agentrouter"`). ראו "שגיאות מכסה
+ה-`scope` של כלל (`model` / `provider` / `connection`) הוא הסכמה נפרדת
+מ-`FULL_TEXT_RULE_PROVIDERS`: `checkFallbackError` חושפת אותו רק בתור
+`fallbackResult.ruleScope`, וצרכנים במורד הזרם מכבדים אותו כמשהו מעבר
+לתווית מידע בלבד עבור ספקים המופיעים ברשימת ההיתרים
+`HONORS_RULE_LOCK_SCOPE_PROVIDERS` באותו קובץ (דרך
+`honorsRuleLockScope()` — כיום רק `"agentrouter"`). ראו את "שגיאות מכסה
 שנוסחו מחדש" לעיל כדי להבין מה התאמה עם `scope: "connection"` עושה
-בפועל לאחר שספק נוסף לרשימת ההיתרים הזו.
+בפועל לאחר שספק נמצא ברשימת ההיתרים הזו.
 
-**#11104 — כללים שהוגדרו על ידי המפעיל עוקפים את שתי רשימות ההיתרים.**
+**#11104 — כללים שהוגדרו על ידי מפעיל עוקפים את שתי רשימות ההיתרים.**
 מפעיל יכול להצהיר בזמן ריצה על כלל לכל ספק באמצעות
 `settings.providerErrorRules`
 (`open-sse/config/providerErrorRules.ts::setOperatorProviderErrorRules`)
-מבלי לערוך קובץ זה. הכפפת כלל של מפעיל ל-
+מבלי לערוך את הקובץ הזה. הגבלת כלל של מפעיל באמצעות
 `FULL_TEXT_RULE_PROVIDERS`/`HONORS_RULE_LOCK_SCOPE_PROVIDERS` — רשימות
-היתרים שנועדו להגן על התנהגות **ברירת המחדל** של כללי הקטלוג המובנים —
-הייתה הופכת את מנגנון ההגדרות לחסר פעולה עבור כל ספק מלבד אלה שכבר
-מופיעים שם, משום שעצם הצהרת הכלל היא כבר הצטרפות מפורשת מצד המפעיל.
-`resolveRuleMatchBody()` ו-`honorsRuleLockScope()` בודקים תחילה את
+היתרים שנועדו להגן על התנהגות ברירת המחדל של כללי ספקים מובנים בקטלוג —
+הייתה הופכת את מנגנון ההגדרות לחסר משמעות עבור כל ספק מלבד אלה שכבר
+מופיעים בהן, מכיוון שהצהרת הכלל היא כבר הסכמה מפורשת של המפעיל.
+גם `resolveRuleMatchBody()` וגם `honorsRuleLockScope()` בודקות תחילה את
 `hasOperatorRuleForProvider()`: ספק עם כלל מפעיל מקבל את טקסט השגיאה
-הגולמי, וה-`scope` שהוצהר עבורו מכובד, בין אם הוא מופיע גם באחת
-מרשימות ההיתרים ובין אם לאו.
+הגולמי, וה-`scope` שהוגדר עבורו מכובד, ללא תלות בשאלה אם הוא מופיע גם
+באחת מרשימות ההיתרים.
 
-**פער ידוע — לעולם לא מתבצעת פנייה אל `providerRuleRegistry` עבור HTTP 400.**
-ענף `BAD_REQUEST` של `checkFallbackError` מסווג סטטוס 400 במלואו
-באמצעות מערכי התבניות שלו (`MODEL_ACCESS_DENIED_PATTERNS`,
-`CONTEXT_OVERFLOW_PATTERNS` וכו' ב-`accountFallback.ts`) ומחזיר תוצאה
-לפני ההגעה לענף `configuredRule`/`getProviderErrorRuleMatch` שמעליו.
-כלל קטלוג מובנה (או כלל מפעיל) עם `status: 400` תקין מבחינה תחבירית,
-אך לעולם לא יופעל. כיום שום כלל קיים אינו מכוון ל-400, ולכן שום דבר
-בסביבת הייצור אינו מושפע — אך כלל 400 עתידי יחייב קודם שינוי בענף זה,
-וזהו שינוי גדול יותר מהוספת כלל (הוא מסווג מחדש את 400 עבור כל ספק
-שכבר מסתמך על ההתנהגות המבוססת על מערכי התבניות), ולכן הוא מחוץ
-לתחום של הוספת כלל לספק יחיד.
+**כללים שהוגדרו על ידי מפעיל** (`OperatorProviderErrorRule`): לכל כלל
+יש `status` אופציונלי ו-`match` אופציונלי (תת-מחרוזת פשוטה, ללא
+רגישות לאותיות רישיות, של טקסט השגיאה, ולעולם לא RegExp, כך שאינו יכול
+לגרום ל-ReDoS), והוא חייב להגדיר לפחות אחד משני השדות. כאשר שניהם
+מוגדרים, הם מחוברים באמצעות AND; שדה שלא הוגדר מתאים לכל דבר, ולכן
+`{match: "insufficient_quota"}` מתאים לכל סטטוס שנושא את הקוד הזה. הכלל
+הראשון שמתאים הוא זה שנבחר. `cooldownMs` מקבל ערך של עד 30 ימים; לכל
+היותר 50 כללים בסך הכול.
 
-### הוספת gateway חדש שמצהיר על מצב quota באופן שגוי
+**ברירות מחדל כלליות** (`settings.providerErrorDefaults`, בהצטרפות יזומה, מוגדרות באמצעות
+`setOperatorProviderErrorDefaults`): `{[provider]: {cooldownMs, scope?, reason?}}`
+כאשר `cooldownMs` נע בין דקה אחת ל־30 ימים. ברירת מחדל חלה רק כאשר לא נמצאה
+התאמה לכלל מפעיל או לכלל בקטלוג המובנה, ורק עבור שגיאות 402, 403, 408,
+429 ושגיאות 5xx. שגיאות במבנה הבקשה (400, 404, 409, 413, 422) ושגיאות 401
+ללא פרטים נוספים ממשיכות לקבל את הטיפול הייעודי שלהן. ללא `reason` מפורש,
+הסיבה נגזרת מהסטטוס, באותו אופן שבו `classifyError` עושה זאת. הצהרה על ברירת
+מחדל נחשבת לכלל מפעיל עבור `hasOperatorRuleForProvider()`, ולכן ה־`scope` שלה
+(ברירת המחדל היא `"connection"`) מכובד. זמן ההשהיה האפקטיבי של ברירת מחדל
+הוא הארוך מבין `cooldownMs` שלה לבין רמז הניסיון החוזר של הספק עצמו
+(`Retry-After`, `x-ratelimit-reset` או רמז לאיפוס בגוף, אותו רמז שהמנוע מכבד
+כאשר ההגדרה "use upstream retry hints" של connection-cooldown מופעלת),
+כך שברירת מחדל יכולה להאריך רמז קצר מהספק, אך לעולם לא לקצר איפוס אמיתי.
+כלל מפעיל מפורש שומר על `cooldownMs` המדויק שלו. לא כלל ולא ברירת מחדל
+עוקפים את מגני connection-cooldown ב־`markAccountUnavailable`: זמן השהיה
+הפעיל והארוך יותר לעולם אינו מתקצר, וסטטוס סופי לעולם אינו נדרס. גלאי הטקסט
+המובנים שרצים מוקדם יותר ב־`checkFallbackError` (מכסת קרדיטים שאזלה, מכסה
+יומית, חשבון שהושבת) עדיין מקבלים עדיפות עבור הביטויים הייעודיים שלהם.
 
-1. רשמו מערך כללים אחד ב-`statusRestatementRegistry`
-   (`open-sse/config/upstreamStatusRestatement.ts`). שמרו את `textMarkers`
-   ספציפיים לספק; לעולם אל תעשו שימוש חוזר בביטויים גנריים באנגלית שמתנגשים עם
-   `CREDITS_EXHAUSTED_SIGNALS` (`open-sse/services/accountFallback.ts`).
-2. באופן אופציונלי, רשמו כללי סיווג ב-
+**פער ידוע — `providerRuleRegistry` לעולם אינו נבדק עבור HTTP 400.**
+הענף `BAD_REQUEST` של `checkFallbackError` מסווג סטטוס 400 לחלוטין באמצעות
+מערכי התבניות שלו (`MODEL_ACCESS_DENIED_PATTERNS`,
+`CONTEXT_OVERFLOW_PATTERNS` וכו' ב־`accountFallback.ts`) ומחזיר תוצאה לפני
+שמגיעים לענף `configuredRule`/`getProviderErrorRuleMatch` שמופיע מעליו.
+כלל קטלוג מובנה (או כלל מפעיל) עם `status: 400` תקין מבחינה תחבירית, אך
+לעולם לא יופעל. כיום אין כלל קיים שמכוון ל־400, ולכן דבר בייצור אינו מושפע —
+אך כלל 400 עתידי ידרוש קודם שינוי בענף הזה, וזהו שינוי גדול יותר מהוספת כלל
+בלבד (הוא מסווג מחדש את 400 עבור כל ספק שכבר מסתמך על התנהגות מערכי
+התבניות), ולכן הוא מחוץ לתחום עבור הוספת כלל לספק יחיד.
+
+### הוספת שער חדש שמציג מכסה באופן שגוי
+
+1. רשמו מערך כללים אחד ב־`statusRestatementRegistry`
+   (`open-sse/config/upstreamStatusRestatement.ts`). השאירו את
+   `textMarkers` ייחודיים לספק; לעולם אל תשתמשו מחדש בביטויים כלליים באנגלית
+   שמתנגשים עם `CREDITS_EXHAUSTED_SIGNALS`
+   (`open-sse/services/accountFallback.ts`).
+2. אופציונלית, רשמו כללי סיווג ב־
    `open-sse/config/providerErrorRules.ts` (`providerRuleRegistry`) כדי לבחור
-   את היקף הנעילה הנכון (`connection` עבור quota ברמת-החשבון כולה, `model` עבור
-   שגיאות ברמת-מודל בודד). שלב זה נכנס לתוקף בפרודקשן רק עבור
-   ספקים שהכללים שלהם זקוקים לטקסט השגיאה המלא (סמני body): הוסיפו את
-   מזהה הספק ל-`FULL_TEXT_RULE_PROVIDERS` באותו הקובץ — אחרת
-   `checkFallbackError` מעביר לכלל תמיד רק את השגיאה המובנית
-   `{code, type}` וכלל המבוסס על טקסט-body לעולם לא יתאים לתעבורה חיה.
-   כללים המתאימים אך ורק על בסיס `status`/`headers` (כמו אלו של Opencode או
-   של Minimax) אינם זקוקים ל-opt-in זה. בנפרד, אם הכלל מצהיר
-   `scope: "connection"` והכוונה היא cooldown אמיתי ברמת-החיבור כולו
-   בתוספת דילוג על combo באותה הבקשה (ולא רק תווית אינפורמטיבית), הוסיפו את
-   מזהה הספק ל-`HONORS_RULE_LOCK_SCOPE_PROVIDERS` באותו הקובץ — זה מה
-   ששולט בצריכה בסגנון `isAgentrouterConnectionQuotaScope()` בתוך
-   `markAccountUnavailable()` (`src/sse/services/auth.ts`) ובתוך
+   את תחום הנעילה הנכון (`connection` עבור מכסה כללית לחשבון, `model` עבור
+   שגיאות ברמת המודל). שלב זה משפיע בייצור רק על ספקים שהכללים שלהם זקוקים
+   לטקסט השגיאה המלא (סמני גוף): הוסיפו את מזהה הספק ל־
+   `FULL_TEXT_RULE_PROVIDERS` באותו קובץ — אחרת
+   `checkFallbackError` מעביר לכלל רק את השגיאה המובנית
+   `{code, type}`, וכלל המבוסס על טקסט הגוף לעולם לא יתאים לתעבורה חיה.
+   כללים שמתאימים אך ורק לפי `status`/`headers` (כמו אלה של Opencode או
+   Minimax) אינם זקוקים להצטרפות זו. בנפרד, אם הכלל מצהיר על
+   `scope: "connection"` והכוונה היא לזמן השהיה אמיתי ברמת החיבור, בתוספת
+   דילוג על צירוף הפעולות באותה בקשה (ולא רק תווית מידע), הוסיפו את מזהה
+   הספק ל־`HONORS_RULE_LOCK_SCOPE_PROVIDERS` באותו קובץ — זהו השער שמפעיל
+   צריכה בסגנון `isAgentrouterConnectionQuotaScope()` בתוך
+   `markAccountUnavailable()` (`src/sse/services/auth.ts`) וב־
    `applyComboTargetExhaustion()`
-   (`open-sse/services/combo/targetExhaustion.ts`); בלעדיו, `scope`
-   עדיין זורם דרך `fallbackResult.ruleScope` אך דבר לא פועל על פיו.
-3. הוסיפו unit tests במתכונת של `tests/unit/upstream-status-restatement.test.ts`
-   ושל `tests/unit/agentrouter-error-rules.test.ts` (כולל שומרי
-   not-permanent / not-creditsExhausted, וגם — אם הספק זקוק לרשימת ההיתר —
-   בדיקה המאמתת ש-`resolveRuleMatchBody()` מחזירה את הטקסט המלא רק עבור
-   אותו הספק).
+   (`open-sse/services/combo/targetExhaustion.ts`); בלעדיו,
+   `scope` עדיין עובר דרך `fallbackResult.ruleScope`, אך דבר אינו פועל
+   לפיו.
+3. הוסיפו בדיקות יחידה המשקפות את
+   `tests/unit/upstream-status-restatement.test.ts`
+   ואת `tests/unit/agentrouter-error-rules.test.ts` (כולל מגני
+   not-permanent / not-creditsExhausted, ואם הספק זקוק לרשימת ההיתרים —
+   בדיקה המאשרת ש־`resolveRuleMatchBody()` מחזיר את הטקסט המלא רק עבור ספק
+   זה).
 
-אין צורך בשינויים ב-`chatCore.ts`, ב-`classifyError` או ב-combo.
+אין צורך בשינויים ב־`chatCore.ts`, ב־`classifyError` או ב־combo.
 
-#### נעילה בדליי egress (#10880)
+#### נעילה לפי דלי יציאה (#10880)
 
-ספקים ב-`EGRESS_BUCKETED_LOCK_PROVIDERS` (משפחת opencode) מטופלים
-כ-upstream מקובץ-IP (השכבה החינמית של opencode מקובצת-IP, ולא
-מקובצת-חשבון — ראו #9611): status-429 שסווג כ-`quota_exhausted`
-**או** `rate_limit_exceeded` מכניס ל-cooldown כל חיבור ממשפחה שברשימת
-ההיתר שכתובת ה-egress IP האחרונה הידועה שלו תואמת לזו של החיבור שנכשל,
-לפני שהרוטציה מספיקה לנסות אותם
-— ובכך נחסכות N-1 קריאות upstream שמובטח שיכשלו (אותה צורה כמו #10460/#10525).
-`rate_limit_exceeded` נכלל בכוונה: בנתיב `markAccountUnavailable`
-הכללים הספציפיים ל-opencode לעולם אינם מתאימים (לא מועברים headers/body
-ל-`checkFallbackError`, ו-opencode אינו ב-`FULL_TEXT_RULE_PROVIDERS`), ולכן 429
-שה-body שלו נושא את טקסט ה-quota של המנוי ("monthly usage limit
-reached") מסווג כ-`quota_exhausted` על ידי ה-fallback של טקסט-quota
-(`buildSubscriptionQuotaFallback`, `accountFallback.ts`; cooldown של שעה) לפני
-שבכלל מגיעים לכלל ה-`status_429` — בעוד ש-429 נטול טקסט-quota (rate
-limiting רגיל) מסווג דרך כלל ה-`status_429` כ-`rate_limit_exceeded`
-ועדיין מכניס את משפחת ה-IP ל-cooldown. עבור ספק שברשימת ההיתר, rate limit
-מקובץ-IP הוא אותו סיגנל כמו quota מוצת. מגבלות בכנות:
+ספקים הנמצאים ב־`EGRESS_BUCKETED_LOCK_PROVIDERS` (משפחת opencode) מטופלים
+כספקים במעלה הזרם המקובצים לפי IP (שכבת החינם של opencode מקובצת לפי IP,
+ולא לפי חשבון — ראו #9611): סטטוס 429 שסווג כ־`quota_exhausted`
+**או** כ־`rate_limit_exceeded` גורם לזמן השהיה עבור כל חיבורי המשפחה
+המורשים שה־IP האחרון הידוע של היציאה שלהם תואם לזה של החיבור שנכשל, לפני
+שהסבב יכול לנסות אותם
+— ובכך נמנעות קריאות N-1 למעלה הזרם שנכשלו בוודאות (באותה תבנית כמו
+#10460/#10525). `rate_limit_exceeded` נכלל בכוונה: בנתיב
+`markAccountUnavailable` הכללים הייחודיים ל־opencode לעולם אינם תואמים
+(לא מועברים כותרות/גוף ל־`checkFallbackError`, ו־opencode אינו נמצא ב־
+`FULL_TEXT_RULE_PROVIDERS`), ולכן 429 שגופו מכיל את טקסט מכסת המינוי
+("monthly usage limit reached") מסווג כ־`quota_exhausted` על ידי חלופת
+טקסט המכסה (`buildSubscriptionQuotaFallback`, `accountFallback.ts`;
+זמן השהיה של שעה) לפני שכלל `status_429` נבדק — בעוד ש־429 ללא טקסט מכסה
+(הגבלת קצב פשוטה) מסווג דרך כלל `status_429` כ־`rate_limit_exceeded`
+ועדיין גורם לזמן השהיה עבור משפחת ה־IP. עבור ספק שנמצא ברשימת ההיתרים,
+הגבלת קצב לפי IP היא אותו אות כמו מכסה שאזלה. מגבלות כנות:
 
-- **מאמץ מרבי**: הנעילה מפענחת את ה-`egress_ip` הידוע האחרון של החיבור
-  מתוך `proxy_logs` (חלון של 24 שעות, סינכרוני, ללא מטמון). מטמון קר
-  (egress IP מעולם לא נחקר) או היעדר שורה ← החיבור הכושל עדיין מצונן על
-  ידי הענף (נרשם כמו היום), רק שאף אח לא ננעל.
-- **לעולם לא סופי**: הצינון הוא חלון מכסה מתחדש
+- **מאמץ מיטבי**: הנעילה פותרת את `egress_ip` האחרון הידוע של החיבור
+  מתוך `proxy_logs` (חלון של 24 שעות, באופן סינכרוני, ללא מטמון). מטמון קר
+  (כתובת ה־IP היוצאת מעולם לא נבדקה) או היעדר שורה → החיבור שנכשל עדיין
+  מקורר על ידי הענף (ומתועד כמו היום), ורק שאין נעילה של אח מקביל.
+- **לעולם לא סופני**: תקופת הצינון היא חלון מכסה מתחדש
   (`testStatus: "unavailable"`); מצב קבוע לעולם אינו נגזר מאות ברמת IP.
-  חיבורי `disableCooling` מדלגים על הענף לחלוטין.
+  חיבורים עם `disableCooling` מדלגים לחלוטין על הענף.
 - **רמת הפירוט של הנעילה משתנה עבור המשפחה שברשימת ההיתרים**: זהו שינוי
-  סקופ, לא רק אופטימיזציית אחים. opencode הוא ספק `passthroughModels`,
-  ולכן לפני הענף הזה 429 יצר נעילה ברמת מודל (per-MODEL); כעת הוא מייצר
-  צינון חיבור — כולל עבור מפעיל שמריץ חיבור יחיד ללא אח בכלל. זוהי רמת
-  הפירוט שטבלת הכללים של opencode כבר מכריזה עליה כנכונה
-  (`scope: "connection"`, `providerErrorRules.ts`), ומעולם לא כובדה עד
-  כה מכיוון ש-opencode אינו נמצא ב-`HONORS_RULE_LOCK_SCOPE_PROVIDERS`.
-  הענף כותב בעצמו את הצינון + `backoffLevel` של החיבור הכושל, בשיקוף של
-  ענף agentrouter שבסקופ החיבור, וחוזר — הבלוק ברמת המודל והנתיב הגנרי
-  שלמטה לעולם אינם מושגים.
-- **קומבו נכלל**: כמו ענף agentrouter, הסקופ מתעלם בכוונה משדרוג-המטה של
-  `persistUnavailableState`/`isCombo` שמתקשר מסוג קומבו מחיל על 429.
-  נעילה ברמת מודל אינה צורה חלשה יותר של הסקופ הזה, היא היחידה השגויה:
-  היא לא אומרת דבר על ה-IP המוצה, ולכן רוטציית הקומבו תמשיך לשרוף קריאה
-  אחת עם כישלון מובטח לכל אח.
-- **בטיחות אחים**: אח שכבר סופי (banned/credits_exhausted) או שכבר נמצא
-  בצינון ארוך יותר לעולם אינו נדרס.
+  היקף, ולא רק אופטימיזציה של אח מקביל. opencode הוא ספק
+  `passthroughModels`, ולכן לפני הענף הזה שגיאת 429 יצרה נעילה לפי MODEL;
+  כעת היא יוצרת תקופת צינון לחיבור — כולל עבור מפעיל שמריץ חיבור יחיד
+  ללא אח מקביל כלל. זו רמת הפירוט שטבלת הכללים של opencode כבר מצהירה
+  כנכונה (`scope: "connection"`,
+  `providerErrorRules.ts`), אך עד כה היא מעולם לא כובדה משום ש־opencode
+  אינו נמצא ב־`HONORS_RULE_LOCK_SCOPE_PROVIDERS`. הענף כותב בעצמו את תקופת
+  הצינון של החיבור שנכשל ואת `backoffLevel`, תוך חיקוי הענף של
+  agentrouter ברמת החיבור, ואז חוזר — החסימה לפי מודל והנתיב הגנרי שמתחת
+  לעולם אינם מגיעים לביצוע.
+- **Combo כלול**: כמו בענף של agentrouter, ההיקף מתעלם במכוון מההנמכה
+  של `persistUnavailableState`/`isCombo` שמבצע קורא Combo עבור 429. נעילה
+  לפי מודל אינה צורה חלשה יותר של היקף זה, אלא היחידה השגויה: היא אינה
+  אומרת דבר על ה־IP שמיצה את המכסה, ולכן הסבב של Combo ימשיך לבזבז קריאה
+  אחת שבוודאות תיכשל עבור כל אח מקביל.
+- **בטיחות אחים מקבילים**: אח מקביל שכבר נמצא במצב סופי
+  (banned/credits_exhausted) או שכבר נמצא בתקופת צינון ארוכה יותר לעולם
+  אינו נדרס.
 - **רשימת היתרים בלעדית**: הרחבת `EGRESS_BUCKETED_LOCK_PROVIDERS` היא
-  החלטה מפורשת של הבעלים; אין חיווט גנרי (תבנית #10334/#10419). שאילתת
-  האחים מקשרת את אותה רשימת היתרים במקום לחזור עליה כליטרל SQL, ולכן
-  הרחבתה נשארת שינוי של שורה אחת.
-- **רוטציית egress IP, בשני הכיוונים**: חלון החיפוש (24 שעות) רחב בהרבה
-  מ-TTL של מטמון ה-egress IP (5 דקות), ולכן "ה-IP הידוע האחרון" הוא
-  היסטוריה, לא מצב נוכחי. אם ה-proxy של חיבור ביצע רוטציה בתוך החלון,
-  הנעילה עלולה **לפספס** IP משותף ממש (ה-IP הרשום הוא החדש,
-  הבלתי-מוצה) — ובאופן סימטרי היא עלולה **לצנן אח שמאז ביצע רוטציה
-  והתרחק** מה-IP המוצה. המקרה השני עולה לאותו אח חלון צינון אחד; שניהם
-  מגבלות מקובלות של מאמץ-מרבי בחיפוש מבוסס-היסטוריה.
-- **עלות**: שתי סריקות חסומות של `proxy_logs` (מסוננות לפי חלון דרך
+  החלטה מפורשת של הבעלים; אין חיבור גנרי (תבנית #10334/#10419). שאילתת
+  האחים המקבילים מקשרת לאותה רשימת היתרים במקום לחזור עליה כליטרל של SQL,
+  כך שהרחבתה נשארת שינוי של שורה אחת.
+- **סבב כתובות IP יוצאות, בשני הכיוונים**: חלון החיפוש (24 שעות) רחב
+  בהרבה מ־TTL של מטמון כתובת ה־IP היוצאת (5 דקות), ולכן "ה־IP האחרון
+  הידוע" הוא היסטוריה, לא המצב הנוכחי. אם ה־proxy של חיבור הסתובב בתוך
+  החלון, הנעילה עשויה **להחמיץ** IP משותף באמת (ה־IP שתועד הוא החדש,
+  שטרם מיצה את המכסה) — ובאופן סימטרי היא עשויה **לקרר אח מקביל שמאז
+  הסתובב הרחק** מה־IP שמיצה את המכסה. המקרה השני עולה לאח המקביל תקופת
+  צינון אחת; שני המקרים הם מגבלות מאמץ מיטבי מקובלות של חיפוש המבוסס על
+  היסטוריה.
+- **עלות**: שתי סריקות מוגבלות של `proxy_logs` (מסוננות לפי חלון באמצעות
   `idx_pl_timestamp`), רק בתדירות של 429. אין אינדקס חדש (מיגרציה 134
-  YAGNI). נמדד על עותק DB של תעבורה אמיתית בגודל בינוני; מופע בתפוקה
-  גבוהה מחזיק באופן יחסי יותר שורות באותו חלון.
-
----
+  YAGNI). נמדד על עותק DB של תעבורה אמיתית בגודל בינוני; מופע בעל קצב
+  עיבוד גבוה מחזיק באופן יחסי יותר שורות באותו חלון.
 
 ## תכונות שרידות נוספות
 

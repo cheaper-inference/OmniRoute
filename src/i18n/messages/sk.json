@@ -1,4 +1,15 @@
 {
+  "accountPreferences": {
+    "title": "Nastavenia účtov",
+    "description": "Uprednostnite viacero účtov alebo ich ponechajte ako rezervu pre túto konfiguráciu smerovania. Automatické smerovanie zoraďuje účty v rámci každej úrovne. Neuvedené účty sú bežné. Povolenia, limity kvót a existujúce priradenia k ťahom naďalej platia.",
+    "preferred": "Uprednostňovaný",
+    "normal": "Bežný",
+    "reserve": "Rezervný",
+    "excluded": "Vylúčený",
+    "loading": "Načítavajú sa účty…",
+    "error": "Účty sa nepodarilo načítať. Ak to chcete skúsiť znova, znovu otvorte editor.",
+    "missing": "Účet nie je dostupný ({id})"
+  },
   "codexKeyServiceMode": {
     "title": "Režim služby Codex pre tento kľúč API",
     "description": "Vzťahuje sa na požiadavky Codex vrátane modelov Codex v kombináciách. Vynútené režimy majú prednosť pred klientom, globálnymi nastaveniami a predvolenými nastaveniami pripojenia. Ostatní poskytovatelia zostávajú nezmenení.",
@@ -7097,6 +7108,31 @@
     "fallbackRetryBackendTitle": "Zálohové rozhranie pre opätovné pokusy"
   },
   "settings": {
+    "proxyTraffic": {
+      "persistenceIncomplete": "Časť prevádzky sa v tomto procese nepodarilo uložiť. Uložené súčty sú neúplné; skontrolujte diagnostiku servera.",
+      "title": "Prevádzka užitočných dát OmniRoute",
+      "description": "Telá nahrávania odovzdané na odoslanie a bajty sťahovania prečítané aplikáciou OmniRoute. Nejde o sieťovú prevádzku na linke ani o fakturáciu poskytovateľa. Celkový súčet zahŕňa osobitne označenú priamu a nepriradenú prevádzku.",
+      "coverageNote": "Kumulatívne súčty od začiatku merania. Nahrávania neznámej veľkosti (prúdy, FormData, telá Request) sa nezapočítavajú do súčtov bajtov. Neprečítané alebo nedokončené sťahovania sú neúplné; neúspešné odoslanie nedokazuje doručenie nahrávania. Interné presmerovania/opakované pokusy transportu a transporty obchádzajúce meranie sa nemerajú samostatne.",
+      "refresh": "Obnoviť",
+      "overall": "Spolu (všetky sledované trasy)",
+      "proxied": "Medzisúčet proxy (bez priamej/nepriradenej prevádzky)",
+      "direct": "Priamo (bez proxy)",
+      "unattributed": "Nepriradený dispečer",
+      "removed": "Odstránená proxy ({id})",
+      "legacy": "Staršia proxy/proxy z prostredia ({id})",
+      "route": "Trasa",
+      "upload": "Nahrávanie odovzdané na odoslanie",
+      "download": "Prečítané sťahovanie",
+      "attempts": "Pokusy",
+      "knownUpload": "Nahrávania známej veľkosti / pokusy",
+      "completed": "Dokončené sťahovania / pokusy",
+      "failed": "Neúspešné odoslania",
+      "cancelled": "Zrušené sťahovania",
+      "errored": "Chyby sťahovania",
+      "loading": "Načítava sa prevádzka užitočných dát…",
+      "empty": "Zatiaľ sa nezmerala žiadna prevádzka užitočných dát.",
+      "error": "Prevádzku užitočných dát sa nepodarilo načítať. Skúste obnoviť zobrazenie."
+    },
     "title": "Nastavenia",
     "general": "generál",
     "security": "Bezpečnosť",
@@ -14636,6 +14672,8 @@
     "usdUsageQuotaDescription": "Zablokuje tento kľúč s chybou API 400 po tom, čo jeho lokálne výdavky v USD dosiahnu nakonfigurovanú dennú alebo týždennú kvótu.",
     "dailyQuotaUsd": "Denná kvóta (USD)",
     "weeklyQuotaUsd": "Týždenná kvóta (USD)",
+    "fiveHourQuotaUsd": "5-hodinová kvóta (USD)",
+    "fiveHourQuotaHint": "Kĺzavé okno: útrata každej požiadavky sa počíta 5 hodín, potom sa uvoľní.",
     "quotaWindowDescription": "Týždenná kvóta sa riadi týždenným resetom Claude z vyrovnávacej pamäte, ak je k dispozícii; v opačnom prípade prejde na kĺzavé 7-dňové okno. Denná kvóta používa kalendárny deň Fortaleza.",
     "apiKeyUsdQuota": "Kvóta kľúča API v USD",
     "apiKeyUsdQuotaDescription": "Keď je táto možnosť povolená, @@om-usage vracia dennú kvótu, týždennú kvótu, denné výdavky a týždenné výdavky v USD. Týždenná sa riadi resetom Claude z vyrovnávacej pamäte, ak je k dispozícii.",
