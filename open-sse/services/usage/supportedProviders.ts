@@ -97,6 +97,8 @@ export const USAGE_SUPPORTED_PROVIDERS: readonly string[] = [
   "qwen-cloud-token-plan",
   // AgentRouter (New-API) console balance quota (consoleApiKey + newApiUserId)
   "agentrouter",
+  // TokenRouter wallet + per-key quota (optional Management Key in consoleApiKey)
+  "tokenrouter",
   // Kilo Code personal USD balance (GET /api/profile/balance, existing OAuth token)
   "kilocode",
   // OpenRouter key limits + account credits (GET /api/v1/key + /api/v1/credits)
@@ -114,4 +116,6 @@ export const USAGE_SUPPORTED_PROVIDERS: readonly string[] = [
   "cpl",
   // Cloudflare Workers AI daily neurons vs the 10k/day free allocation (needs Analytics: Read)
   "cloudflare-ai",
+  // Zed Hosted Models USD credit (optional Orb billing portal link)
+  "zed-hosted",
 ];

@@ -1,7 +1,7 @@
 import React from "react";
 import "@testing-library/jest-dom/vitest";
 import { afterEach, expect, it, vi } from "vitest";
-import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
 import en from "../../src/i18n/messages/en.json";
 import zh from "../../src/i18n/messages/zh-CN.json";
@@ -23,15 +23,17 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-function fixture(failCooldowns = false, malformed = false) {
+function fixture(failCooldowns = false, malformed = false, providerIds: string[] = []) {
   const fetchedAt = new Date().toISOString();
-  const connections = ["available", "blocked", "restricted", "paused", "unknown"].map((id) => ({
-    id,
-    provider: "claude",
-    email: `${id}@example.test`,
-    authType: "oauth",
-    isActive: id !== "paused",
-  }));
+  const connections = ["available", "blocked", "restricted", "paused", "unknown"].map(
+    (id, index) => ({
+      id,
+      provider: providerIds[index] ?? "claude",
+      email: `${id}@example.test`,
+      authType: providerIds[index] ? "apikey" : "oauth",
+      isActive: id !== "paused",
+    })
+  );
   const caches = Object.fromEntries(
     connections.map((c) => [
       c.id,
@@ -192,10 +194,14 @@ it.each(["en", "zh-CN"])(
   }
 );
 
-it("five-minute cache rereads use exactly the two cache GETs; hidden pages do not read", async () => {
+it("rereads quota caches every five seconds, accounts every five minutes, never while hidden", async () => {
   vi.useFakeTimers();
   vi.spyOn(document, "visibilityState", "get").mockReturnValue("visible");
   const requests = fixture();
+  const cacheRequests = () =>
+    requests.filter(
+      (url) => !["/api/resilience/cooldowns", "/api/usage/availability"].includes(url)
+    );
   mount("en");
   await act(async () => {
     await vi.advanceTimersByTimeAsync(0);
@@ -203,22 +209,23 @@ it("five-minute cache rereads use exactly the two cache GETs; hidden pages do no
   expect(document.querySelectorAll("[data-availability]")).toHaveLength(5);
   requests.length = 0;
   await act(async () => {
-    await vi.advanceTimersByTimeAsync(299_000);
+    await vi.advanceTimersByTimeAsync(4999);
   });
-  expect(
-    requests.filter(
-      (url) => !["/api/resilience/cooldowns", "/api/usage/availability"].includes(url)
-    )
-  ).toEqual([]);
+  expect(cacheRequests()).toEqual([]);
+  await act(async () => {
+    await vi.advanceTimersByTimeAsync(1);
+  });
+  expect(cacheRequests()).toEqual(["/api/providers/client", "/api/usage/provider-limits"]);
   requests.length = 0;
   await act(async () => {
-    await vi.advanceTimersByTimeAsync(1000);
+    await vi.advanceTimersByTimeAsync(295_000);
   });
-  expect(
-    requests.filter(
-      (url) => !["/api/resilience/cooldowns", "/api/usage/availability"].includes(url)
-    )
-  ).toEqual(["/api/providers/client", "/api/usage/provider-limits"]);
+  expect(cacheRequests()).toEqual(Array(59).fill("/api/usage/provider-limits"));
+  requests.length = 0;
+  await act(async () => {
+    await vi.advanceTimersByTimeAsync(5000);
+  });
+  expect(cacheRequests()).toEqual(["/api/providers/client", "/api/usage/provider-limits"]);
   vi.spyOn(document, "visibilityState", "get").mockReturnValue("hidden");
   requests.length = 0;
   await act(async () => {
@@ -238,3 +245,18 @@ it.each([false, true])(
     expect(document.querySelector('[data-stat="ok"] .text-2xl')).toHaveTextContent("2");
   }
 );
+
+it("shows Kimi in the provider filter while preserving the moonshot filter value", async () => {
+  fixture(false, false, ["moonshot", "kimi-coding"]);
+  mount("en");
+  const select = await screen.findByRole("combobox", { name: "Filter quota providers" });
+  expect(within(select).getByRole("option", { name: "Kimi", exact: true })).toHaveValue("moonshot");
+  expect(within(select).getByRole("option", { name: "Kimi Coding", exact: true })).toHaveValue(
+    "kimi-coding"
+  );
+
+  fireEvent.change(select, { target: { value: "moonshot" } });
+  await waitFor(() => expect(document.querySelectorAll("[data-account]")).toHaveLength(1));
+  expect(select).toHaveValue("moonshot");
+  expect(document.querySelector("[data-account]")).toHaveAttribute("data-account", "available");
+});

@@ -1,5 +1,6 @@
 "use client";
 
+import { Disclosure, DisclosureContent, DisclosureTrigger } from "@omniroute/ui-kit/disclosure";
 import { useId, useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
@@ -953,14 +954,16 @@ export default function MediaPageClient() {
                 )}
               </div>
               {result.data?.words && (
-                <details className="mt-2">
-                  <summary className="text-xs text-text-muted cursor-pointer hover:text-text-main">
+                <Disclosure className="mt-2">
+                  <DisclosureTrigger>
                     {t("wordTimestamps", { count: result.data.words.length })}
-                  </summary>
-                  <pre className="bg-bg-subtle rounded mt-2 p-3 text-xs text-text-muted overflow-auto max-h-48 custom-scrollbar">
-                    {JSON.stringify(result.data.words, null, 2)}
-                  </pre>
-                </details>
+                  </DisclosureTrigger>
+                  <DisclosureContent keepMounted>
+                    <pre className="bg-bg-subtle rounded mt-2 p-3 text-xs text-text-muted overflow-auto max-h-48 custom-scrollbar">
+                      {JSON.stringify(result.data.words, null, 2)}
+                    </pre>
+                  </DisclosureContent>
+                </Disclosure>
               )}
             </div>
           ) : (
