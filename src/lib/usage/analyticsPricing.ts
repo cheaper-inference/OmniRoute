@@ -240,6 +240,7 @@ export function computeUsageRowCost(
       model,
       serviceTier,
       flatRateAsZero,
+      isAggregated: true,
     })
   );
 }

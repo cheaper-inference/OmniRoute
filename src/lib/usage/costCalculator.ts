@@ -39,6 +39,13 @@ export type CostCalculationOptions = {
    * `provider` to be set.
    */
   flatRateAsZero?: boolean;
+  /**
+   * When true, skip applying the per-request long-context pricing tier.
+   * Aggregated rows (e.g. daily/model totals in usage analytics) sum input tokens
+   * across multiple requests, which would falsely trip the per-request threshold (#19429).
+   */
+  isAggregated?: boolean;
+  skipLongContextTier?: boolean;
 };
 
 /**
@@ -255,7 +262,8 @@ export function computeCostFromPricing(
   // never a cost basis: pricing them would bill the request a second time.
   if (isCreditMeteredProvider(options.provider)) return 0;
   const inputTokens = tokens.input ?? tokens.prompt_tokens ?? tokens.input_tokens ?? 0;
-  const rates = applyLongContextTier(pricing, inputTokens);
+  const skipLongContext = options.isAggregated === true || options.skipLongContextTier === true;
+  const rates = skipLongContext ? pricing : applyLongContextTier(pricing, inputTokens);
   const inputPrice = toNumber(rates.input, 0);
   const cachedPrice = toNumber(rates.cached, inputPrice);
   const outputPrice = toNumber(rates.output, 0);
