@@ -22,6 +22,12 @@ interface InputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "
   inputClassName?: string;
 }
 
+// Kit trailing slot: a decorative suffix wins over a trailing icon name.
+function trailingSlot(suffix: React.ReactNode, trailingIcon?: string): React.ReactNode {
+  if (suffix != null && suffix !== "") return suffix;
+  return trailingIcon ? <Icon name={trailingIcon} size={16} /> : undefined;
+}
+
 const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
   {
     label,
@@ -102,13 +108,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
       aria-describedby={describedBy}
       size={size}
       leadingIcon={icon ? <Icon name={icon} size={16} /> : undefined}
-      trailingIcon={
-        suffix != null && suffix !== "" ? (
-          suffix
-        ) : trailingIcon ? (
-          <Icon name={trailingIcon} size={16} />
-        ) : undefined
-      }
+      trailingIcon={trailingSlot(suffix, trailingIcon)}
       className={inputClassName}
       onKeyDown={handleKeyDown}
       onKeyUp={handleKeyUp}
