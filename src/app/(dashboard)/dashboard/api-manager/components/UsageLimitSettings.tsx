@@ -16,9 +16,6 @@ export function UsageLimitSettings({
   enabled: boolean;
   dailyLimitUsd: string;
   weeklyLimitUsd: string;
-  /** Kept for callers; the switch state is conveyed by the kit Switch itself. */
-  enabledLabel: string;
-  disabledLabel: string;
   onEnabledChange: (enabled: boolean) => void;
   onDailyLimitUsdChange: (value: string) => void;
   onWeeklyLimitUsdChange: (value: string) => void;

@@ -188,6 +188,19 @@ describe("PlaygroundStudio", () => {
     expect(textContents.some((t) => t.includes("tabBuild"))).toBe(true);
   });
 
+  // #18071: below `md` the config pane stacks under the tab content instead of squeezing it.
+  it("stacks the tab content above the config pane below md (#18071)", () => {
+    const el = renderStudio();
+    const aside = el.querySelector("aside");
+    const main = aside?.parentElement;
+    const classes = (main?.className ?? "").split(/\s+/);
+    expect(classes).toContain("flex-col");
+    expect(classes).toContain("md:flex-row");
+    // The tab content keeps the free height of the stacked column (min-h-0 lets it shrink).
+    const content = main?.firstElementChild;
+    expect((content?.className ?? "").split(/\s+/)).toContain("min-h-0");
+  });
+
   it("defaults to Chat tab as active", () => {
     const el = renderStudio();
     const activeTab = el.querySelector("[role='tab'][aria-selected='true']");

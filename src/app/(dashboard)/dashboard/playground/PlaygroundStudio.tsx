@@ -86,9 +86,11 @@ export function PlaygroundStudio() {
       />
 
       {/* Main content area: tab content + config pane */}
-      <div className="flex flex-1 overflow-hidden">
+      {/* Below md the pane stacks under the tab content (#18071): a side column at 390 px
+          left the chat ~100 px wide. */}
+      <div className="flex flex-1 flex-col overflow-hidden md:flex-row">
         {/* Tab content */}
-        <div className="flex-1 overflow-hidden">
+        <div className="min-h-0 flex-1 overflow-hidden">
           {effectiveTab === "chat" && (
             <ChatTab configState={configState} onMetricsUpdate={handleMetricsUpdate} />
           )}

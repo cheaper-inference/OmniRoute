@@ -305,8 +305,6 @@ export default function LimitsTab({
   setWeeklyUsageLimitUsd,
   errors,
 }: LimitsTabProps) {
-  const tc = useTranslations("common");
-
   return (
     <div className="flex flex-col gap-5">
       <TabErrorList errors={errors} />
@@ -341,8 +339,6 @@ export default function LimitsTab({
           enabled={formState.usageLimitEnabled}
           dailyLimitUsd={formState.dailyUsageLimitUsd}
           weeklyLimitUsd={formState.weeklyUsageLimitUsd}
-          enabledLabel={tc("enabled")}
-          disabledLabel={tc("disabled")}
           onEnabledChange={setUsageLimitEnabled}
           onDailyLimitUsdChange={setDailyUsageLimitUsd}
           onWeeklyLimitUsdChange={setWeeklyUsageLimitUsd}
