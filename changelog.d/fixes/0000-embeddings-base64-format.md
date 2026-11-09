@@ -1,1 +1,0 @@
-- **fix(embeddings):** `encoding_format: "base64"` now returns float32 base64 vectors even when the provider only answers with number arrays, so OpenAI Node SDK v4+ clients read correct embeddings.

@@ -1,1 +1,0 @@
-- **perf(sse):** Responses passthrough runs the commentary filter over retained output items only on `response.completed`, not on every event

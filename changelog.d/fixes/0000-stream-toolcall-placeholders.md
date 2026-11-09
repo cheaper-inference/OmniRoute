@@ -1,1 +1,0 @@
-- **fix(sse):** Streamed empty tool-call placeholders no longer reach clients as phantom calls or flip the finish reason to `tool_calls`, and quoted `[Tool call: ...]` text is no longer turned into a real call when the request declares no tools
