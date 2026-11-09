@@ -7906,6 +7906,7 @@
     "systemActor": "प्रणाली",
     "ipAccessControl": "आईपी ​​अभिगम नियंत्रण",
     "ipAccessControlDesc": "विशिष्ट आईपी पते को ब्लॉक करें या अनुमति दें",
+    "ipAccessMode": "एक्सेस मोड",
     "ipModeDisabled": "अक्षम",
     "ipModeBlacklist": "काली सूची",
     "ipModeWhitelist": "श्वेतसूची",

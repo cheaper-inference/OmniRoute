@@ -7906,6 +7906,7 @@
     "systemActor": "სისტემა",
     "ipAccessControl": "IP წვდომის კონტროლი",
     "ipAccessControlDesc": "კონკრეტული IP მისამართების დაბლოკვა ან დაშვება",
+    "ipAccessMode": "წვდომის რეჟიმი",
     "ipModeDisabled": "გამორთულია",
     "ipModeBlacklist": "შავი სია",
     "ipModeWhitelist": "თეთრი სია",
