@@ -396,3 +396,52 @@ export function listExtractionConfigs(): TokenExtractionConfig[] {
 
 /** The shared config map — used by InAppLoginService */
 export const TOKEN_EXTRACTION_CONFIGS = CONFIG_MAP;
+
+// ─── Storage-token validators ───────────────────────────────────────────────
+
+/**
+ * Shortest DeepSeek `userToken` accepted at login harvest. Real tokens are far
+ * longer; if DeepSeek ever shortens them below this, login would never complete,
+ * so keep the threshold in this one place.
+ */
+const DEEPSEEK_USER_TOKEN_MIN_LENGTH = 20;
+
+/**
+ * Before login, chat.deepseek.com writes an anonymous `{"value":null,"__version":"0"}`
+ * placeholder to `localStorage.userToken`. Accept only a JSON wrapper whose `value`
+ * is a long-enough string, or a long-enough raw (non-JSON-object) token.
+ */
+export function isValidDeepSeekUserToken(value: unknown): boolean {
+  if (typeof value !== "string" || value.length === 0) return false;
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(value);
+  } catch {
+    return value.length >= DEEPSEEK_USER_TOKEN_MIN_LENGTH;
+  }
+  if (parsed === null) return false;
+  if (typeof parsed === "object") {
+    const inner = (parsed as { value?: unknown }).value;
+    return typeof inner === "string" && inner.length >= DEEPSEEK_USER_TOKEN_MIN_LENGTH;
+  }
+  return value.length >= DEEPSEEK_USER_TOKEN_MIN_LENGTH;
+}
+
+/** Opt-in validators per provider → localStorage/sessionStorage key. */
+const STORAGE_TOKEN_VALIDATORS: Record<string, Record<string, (value: unknown) => boolean>> = {
+  "deepseek-web": { userToken: isValidDeepSeekUserToken },
+};
+
+/**
+ * Whether a localStorage/sessionStorage value read during login may be stored as
+ * a credential. Without a registered validator any non-empty string is accepted.
+ */
+export function isAcceptableStorageToken(
+  providerId: string,
+  key: string,
+  value: unknown
+): value is string {
+  if (typeof value !== "string" || value.length === 0) return false;
+  const validate = STORAGE_TOKEN_VALIDATORS[providerId]?.[key];
+  return validate ? validate(value) : true;
+}
