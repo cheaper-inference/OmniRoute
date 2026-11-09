@@ -1,1 +1,0 @@
-- **perf(streaming):** long tool-call argument streams on Claude and Responses clients keep far less memory per live stream, because each emitted argument delta no longer holds the whole earlier argument text.

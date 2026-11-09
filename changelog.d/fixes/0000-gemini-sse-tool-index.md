@@ -1,1 +1,0 @@
-- **fix(translator):** parallel tool calls from OpenAI-compatible providers that omit the tool-call index no longer merge into one call with empty arguments on Gemini-format and Antigravity streams.
