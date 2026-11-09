@@ -63,6 +63,18 @@ function toProviderLocalModel(provider: string, model: string | null | undefined
   return value.startsWith(`${provider}/`) ? value.slice(provider.length + 1) : value;
 }
 
+function deliveredImageCount(payload: unknown): number | null {
+  const images = Array.isArray(payload) ? payload : (payload as { data?: unknown[] })?.data;
+  if (!Array.isArray(images)) return null;
+  return images.filter(
+    (image) =>
+      image &&
+      typeof image === "object" &&
+      ((typeof image.url === "string" && image.url.length > 0) ||
+        (typeof image.b64_json === "string" && image.b64_json.length > 0))
+  ).length;
+}
+
 export async function runImageRequestWithAccounting<T>(
   accounting: ImageRequestAccounting,
   attempt: () => Promise<T>
@@ -77,22 +89,13 @@ export async function runImageRequestWithAccounting<T>(
   if ((result as { success?: unknown } | null)?.success === true) {
     const localModel = toProviderLocalModel(accounting.provider, accounting.model);
     const payload = (result as { data?: unknown }).data;
-    const images = Array.isArray(payload) ? payload : (payload as { data?: unknown[] })?.data;
     const bill = {
       ...(await priceMediaRequest({
         provider: accounting.provider,
         model: localModel,
         usage,
         unit: "image",
-        quantity: Array.isArray(images)
-          ? images.filter(
-              (image) =>
-                image &&
-                typeof image === "object" &&
-                ((typeof image.url === "string" && image.url.length > 0) ||
-                  (typeof image.b64_json === "string" && image.b64_json.length > 0))
-            ).length
-          : null,
+        quantity: deliveredImageCount(payload),
       })),
       requestId: generateRequestId(),
     };

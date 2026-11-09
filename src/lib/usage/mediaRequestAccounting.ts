@@ -31,6 +31,22 @@ export interface MediaBill {
 const nonNegative = (value: unknown): value is number =>
   typeof value === "number" && Number.isFinite(value) && value >= 0;
 
+function tokenDetails(value: unknown): Record<string, number | boolean> {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return {};
+  const details = value as Record<string, unknown>;
+  const retained: Record<string, number | boolean> = {};
+  for (const field of [
+    "cached_tokens",
+    "cache_creation_tokens",
+    "cache_write_tokens",
+    "reasoning_tokens",
+  ])
+    if (nonNegative(details[field])) retained[field] = details[field];
+  if (typeof details.cache_creation_in_prompt === "boolean")
+    retained.cache_creation_in_prompt = details.cache_creation_in_prompt;
+  return retained;
+}
+
 /** Keep billing scalars, never transcripts, prompts, image bytes or arbitrary upstream fields. */
 export function normalizeMediaUsage(value: unknown): Record<string, unknown> {
   const source = value && typeof value === "object" ? (value as Record<string, unknown>) : {};
@@ -64,22 +80,46 @@ export function normalizeMediaUsage(value: unknown): Record<string, unknown> {
     "completion_tokens_details",
     "output_tokens_details",
   ]) {
-    const raw = source[key];
-    if (!raw || typeof raw !== "object" || Array.isArray(raw)) continue;
-    const details = raw as Record<string, unknown>;
-    const retained: Record<string, number | boolean> = {};
-    for (const field of [
-      "cached_tokens",
-      "cache_creation_tokens",
-      "cache_write_tokens",
-      "reasoning_tokens",
-    ])
-      if (nonNegative(details[field])) retained[field] = details[field];
-    if (typeof details.cache_creation_in_prompt === "boolean")
-      retained.cache_creation_in_prompt = details.cache_creation_in_prompt;
+    const retained = tokenDetails(source[key]);
     if (Object.keys(retained).length) usage[key] = retained;
   }
   return usage;
+}
+
+function mediaUnitRate(unit: MediaBillingUnit, pricing: Record<string, unknown>): unknown {
+  if (unit === "image") return pricing.output_cost_per_image ?? pricing.input_cost_per_image;
+  if (unit === "second") return pricing.input_cost_per_second ?? pricing.output_cost_per_second;
+  return pricing.input_cost_per_character ?? pricing.output_cost_per_character;
+}
+
+async function applyMediaTariff(
+  bill: MediaBill,
+  provider: string,
+  model: string,
+  pricing: Record<string, unknown>
+): Promise<void> {
+  // Token-priced image APIs can report real token counts as well as images.
+  const hasTokens = [
+    "input",
+    "output",
+    "input_tokens",
+    "output_tokens",
+    "prompt_tokens",
+    "completion_tokens",
+  ].some((key) => nonNegative(bill.usage[key]));
+  const hasTokenPrice = ["input", "output", "input_cost_per_token", "output_cost_per_token"].some(
+    (key) => nonNegative(pricing[key])
+  );
+  if (hasTokens && hasTokenPrice) {
+    const cost = await calculateCostDetailed(provider, model, bill.usage);
+    if (cost.priced && nonNegative(cost.costUsd)) bill.costUsd = cost.costUsd;
+    return;
+  }
+  const rate = mediaUnitRate(bill.unit, pricing);
+  if (bill.quantity !== null && nonNegative(rate) && nonNegative(rate * bill.quantity)) {
+    bill.costUsd = rate * bill.quantity;
+    bill.unitPriceUsd = rate;
+  }
 }
 
 /** Exact provider USD wins. Otherwise snapshot only a tariff with a measured billing dimension. */
@@ -109,36 +149,7 @@ export async function priceMediaRequest(input: {
     for (const key of getPricingLookupModels(input.provider, model)) {
       const pricing = await getPricingForModel(input.provider, key);
       if (!pricing) continue;
-      // Token-priced image APIs can report real token counts as well as images.
-      const hasTokens = [
-        "input",
-        "output",
-        "input_tokens",
-        "output_tokens",
-        "prompt_tokens",
-        "completion_tokens",
-      ].some((key) => nonNegative(usage[key]));
-      const hasTokenPrice = [
-        "input",
-        "output",
-        "input_cost_per_token",
-        "output_cost_per_token",
-      ].some((key) => nonNegative(pricing[key]));
-      if (hasTokens && hasTokenPrice) {
-        const cost = await calculateCostDetailed(input.provider, key, usage);
-        if (cost.priced && nonNegative(cost.costUsd)) bill.costUsd = cost.costUsd;
-        return bill;
-      }
-      const rate =
-        input.unit === "image"
-          ? (pricing.output_cost_per_image ?? pricing.input_cost_per_image)
-          : input.unit === "second"
-            ? (pricing.input_cost_per_second ?? pricing.output_cost_per_second)
-            : (pricing.input_cost_per_character ?? pricing.output_cost_per_character);
-      if (quantity !== null && nonNegative(rate) && nonNegative(rate * quantity)) {
-        bill.costUsd = rate * quantity;
-        bill.unitPriceUsd = rate;
-      }
+      await applyMediaTariff(bill, input.provider, key, pricing);
       return bill;
     }
   } catch {

@@ -138,6 +138,68 @@ test("oversized metadata is cancelled, never retained as an accounting payload",
   assert.equal(await speechUsage(response), null);
 });
 
+test("multi-chunk metadata accepts the exact size limit and ignores invalid token counters", async () => {
+  const json = JSON.stringify({
+    data: {
+      id: "gen-test",
+      total_cost: 0.001,
+      native_tokens_prompt: -1,
+      native_tokens_completion: 1.5,
+    },
+    padding: "",
+  });
+  const bytes = new TextEncoder().encode(
+    json.replace('"padding":""', `"padding":"${"x".repeat(65_536 - json.length)}"`)
+  );
+  assert.equal(bytes.length, 65_536);
+  globalThis.fetch = async () =>
+    new Response(
+      new ReadableStream({
+        start(controller) {
+          controller.enqueue(bytes.slice(0, 30_000));
+          controller.enqueue(bytes.slice(30_000));
+          controller.close();
+        },
+      })
+    );
+  const source = upstream();
+  const response = trackOpenRouterSpeech(
+    source,
+    source,
+    "https://openrouter.ai/api/v1/audio/speech",
+    "test-key"
+  );
+  await response.arrayBuffer();
+  assert.deepEqual(await speechUsage(response), { cost_usd: 0.001 });
+});
+
+test("a non-retryable metadata error cancels its body without another fetch", async () => {
+  let calls = 0;
+  let cancelled = false;
+  globalThis.fetch = async () => {
+    calls++;
+    return new Response(
+      new ReadableStream({
+        cancel() {
+          cancelled = true;
+        },
+      }),
+      { status: 500 }
+    );
+  };
+  const source = upstream();
+  const response = trackOpenRouterSpeech(
+    source,
+    source,
+    "https://openrouter.ai/api/v1/audio/speech",
+    "test-key"
+  );
+  await response.arrayBuffer();
+  assert.equal(await speechUsage(response), null);
+  assert.equal(calls, 1);
+  assert.equal(cancelled, true);
+});
+
 test("late generation records are reconciled without another paid synthesis", async (context) => {
   context.mock.timers.enable({ apis: ["setTimeout"] });
   let calls = 0;

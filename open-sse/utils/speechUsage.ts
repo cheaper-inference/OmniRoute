@@ -29,6 +29,56 @@ function generationUrl(baseUrl: string, id: string): URL | null {
   }
 }
 
+interface GenerationData {
+  id?: unknown;
+  total_cost?: unknown;
+  native_tokens_prompt?: unknown;
+  native_tokens_completion?: unknown;
+}
+
+/** Bound the metadata read independently of the streamed audio payload. */
+async function readGenerationData(response: Response): Promise<GenerationData | null> {
+  const reader = response.body?.getReader();
+  if (!reader) return null;
+  const chunks: Uint8Array[] = [];
+  let size = 0;
+  while (true) {
+    const next = await reader.read();
+    if (next.done) break;
+    size += next.value.byteLength;
+    if (size > 65_536) {
+      await reader.cancel();
+      return null;
+    }
+    chunks.push(next.value);
+  }
+  const bytes = new Uint8Array(size);
+  let offset = 0;
+  for (const chunk of chunks) {
+    bytes.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+  return JSON.parse(new TextDecoder().decode(bytes))?.data;
+}
+
+function generationBillingUsage(
+  data: GenerationData | null,
+  id: string | null
+): Record<string, number> | null {
+  const cost = data?.total_cost;
+  if (data?.id !== id || typeof cost !== "number" || !Number.isFinite(cost) || cost < 0)
+    return null;
+  const usage: Record<string, number> = { cost_usd: cost };
+  for (const [target, source] of [
+    ["input_tokens", data?.native_tokens_prompt],
+    ["output_tokens", data?.native_tokens_completion],
+  ] as const) {
+    if (typeof source === "number" && Number.isSafeInteger(source) && source >= 0)
+      usage[target] = source;
+  }
+  return usage;
+}
+
 async function generationUsage(url: URL, token: string): Promise<Record<string, number> | null> {
   // Only the existing generation is queried. Never retry a paid synthesis, switch
   // providers, or send an EU key to the global endpoint. No credentials/payloads in logs.
@@ -51,46 +101,10 @@ async function generationUsage(url: URL, token: string): Promise<Record<string, 
         await response.body?.cancel();
         return null;
       }
-      const reader = response.body?.getReader();
-      if (!reader) return null;
-      const chunks: Uint8Array[] = [];
-      let size = 0;
-      while (true) {
-        const next = await reader.read();
-        if (next.done) break;
-        size += next.value.byteLength;
-        if (size > 65_536) {
-          await reader.cancel();
-          return null;
-        }
-        chunks.push(next.value);
-      }
-      const bytes = new Uint8Array(size);
-      let offset = 0;
-      for (const chunk of chunks) {
-        bytes.set(chunk, offset);
-        offset += chunk.byteLength;
-      }
-      const data = JSON.parse(new TextDecoder().decode(bytes))?.data;
-      const cost = data?.total_cost;
-      if (data?.id === url.searchParams.get("id") && cost == null) continue;
-      if (
-        data?.id !== url.searchParams.get("id") ||
-        typeof cost !== "number" ||
-        !Number.isFinite(cost) ||
-        cost < 0
-      )
-        return null;
-      const usage: Record<string, number> = { cost_usd: cost };
-      for (const [target, source] of [
-        ["input_tokens", "native_tokens_prompt"],
-        ["output_tokens", "native_tokens_completion"],
-      ]) {
-        const count = data[source];
-        if (typeof count === "number" && Number.isSafeInteger(count) && count >= 0)
-          usage[target] = count;
-      }
-      return usage;
+      const data = await readGenerationData(response);
+      const id = url.searchParams.get("id");
+      if (data?.id === id && data?.total_cost == null) continue;
+      return generationBillingUsage(data, id);
     } catch {
       return null;
     }
