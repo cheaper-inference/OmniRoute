@@ -201,9 +201,14 @@ test("exhausted account is skipped for new sessions and unserved pins move to a 
     generation
   ).text();
   assert.throws(
-    () => claimMuseSession(served, { input: "continue" }, exhausted),
+    () => claimMuseSession(served, { input: "continue" }, [{ id: "account-b" }]),
     (error: { status?: number; message?: string }) =>
       error.status === 503 && /cross-account continuation is forbidden/.test(error.message || "")
+  );
+  // A present owner that is cooling down keeps its session: selection is pinned to it.
+  assert.equal(
+    claimMuseSession(served, { input: "continue" }, exhausted).connectionId,
+    "account-a"
   );
   assert.equal(claimMuseSession(served, { input: "continue" }, flipped).connectionId, "account-a");
 });
