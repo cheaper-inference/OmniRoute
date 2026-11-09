@@ -31,7 +31,7 @@
  *   application entirely.
  */
 
-import { boundedMap } from "../../src/lib/quota/boundedMap.ts";
+import { lruMap } from "../utils/lruMap.ts";
 
 const EMA_ALPHA = 0.25;
 const MIN_SAMPLES = 3;
@@ -49,11 +49,7 @@ type CalibrationBucket = {
 };
 
 const MAX_CALIBRATION_BUCKETS = 1000;
-const buckets = boundedMap<CalibrationBucket>(
-  "estimator-calibration",
-  MAX_CALIBRATION_BUCKETS,
-  "lru"
-);
+const buckets = lruMap<CalibrationBucket>(MAX_CALIBRATION_BUCKETS);
 
 function calibrationDisabled(): boolean {
   const value = process.env.OMNIROUTE_ESTIMATOR_CALIBRATION;

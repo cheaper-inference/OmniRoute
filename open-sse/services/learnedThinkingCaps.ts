@@ -21,7 +21,7 @@
  * a restart may re-learn at the cost of one upstream 400.
  */
 
-import { boundedMap } from "../../src/lib/quota/boundedMap.ts";
+import { lruMap } from "../utils/lruMap.ts";
 
 // Known Gemini thinking-budget ceilings, highest first. 32768 is the pro-tier
 // cap; 24576 is the flash-tier cap (gemini-2.5-flash in MODEL_SPECS); 8192 is a
@@ -39,7 +39,7 @@ const GEMINI_STEPDOWN: readonly number[] = [32768, 24576, 8192];
 export const GEMINI_FALLBACK_THINKING_CAP: number = GEMINI_STEPDOWN[0];
 
 // key: `${provider}:${model}` lowercased → highest budget known to be accepted.
-const learnedCaps = boundedMap<number>("learned-thinking-caps", 1000, "lru");
+const learnedCaps = lruMap<number>(1000);
 
 function buildKey(provider: string | null | undefined, model: string | null | undefined): string {
   const p = typeof provider === "string" ? provider.trim().toLowerCase() : "";

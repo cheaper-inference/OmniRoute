@@ -33,7 +33,7 @@
  * one upstream 4xx.
  */
 
-import { boundedMap } from "../../src/lib/quota/boundedMap.ts";
+import { lruMap } from "../utils/lruMap.ts";
 
 export const REASONING_EFFORT_ORDER: readonly string[] = [
   "none",
@@ -47,7 +47,7 @@ export const REASONING_EFFORT_ORDER: readonly string[] = [
 ];
 
 // key: `${provider}:${model}` lowercased → accepted set.
-const learnedCaps = boundedMap<Set<string>>("learned-reasoning-effort-caps", 1000, "lru");
+const learnedCaps = lruMap<Set<string>>(1000);
 
 function buildKey(provider: string | null | undefined, model: string | null | undefined): string {
   const p = typeof provider === "string" ? provider.trim().toLowerCase() : "";
