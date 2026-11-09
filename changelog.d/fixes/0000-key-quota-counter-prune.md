@@ -1,1 +1,0 @@
-- **fix(db):** Per-key minute quota counters (`api_key_quota_counters`) no longer grow without limit; each new write removes that key's buckets older than the previous minute, which no quota check reads.
