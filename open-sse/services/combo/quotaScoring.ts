@@ -425,6 +425,7 @@ const EXPIRY_FIRST_DEFAULTS = {
 export const EXPIRY_FIRST_ORDERS = ["rate", "deadline"] as const;
 export type ExpiryFirstOrder = (typeof EXPIRY_FIRST_ORDERS)[number];
 
+/** Reads the expiry-first settings (global or a provider override) with their defaults and bounds. */
 export function resolveExpiryFirstConfig(config: Record<string, unknown> | null | undefined) {
   const minHours = finiteNumberOrNull(config?.expiryFirstMinHours);
   const deadlineTieMinutes = finiteNumberOrNull(config?.expiryFirstDeadlineTieMinutes);
@@ -504,20 +505,20 @@ function nominalLongerWindowMs(key: string): number | null {
 /**
  * Time left until a window's reset, and whether that reset already lapsed.
  *
- * A longer window whose reset is in the past comes from a stale quota read: the
- * window has refilled since, so its old fraction no longer applies and its real
- * next reset is one nominal period later. Treating the lapsed reset as "expires
- * now" made a stale account look like the most urgent one and drained it first
- * (two Claude accounts, 2026-11-06/07). A lapsed window of unknown length keeps
- * no deadline. Sessions are handled by the caller (a lapsed session is refilled).
+ * A window whose reset is in the past comes from a stale quota read: the window
+ * has refilled since, so its old fraction no longer applies and its real next
+ * reset is one nominal period later (5h session, 7d weekly, 30d monthly).
+ * Treating the lapsed reset as "expires now" made a stale account look like the
+ * most urgent one and drained it first (two Claude accounts, 2026-11-06/07). A
+ * lapsed window of unknown length keeps no deadline.
  */
 function resolveWindowReset(
   entry: ExpiryWindow,
   nowMs: number
 ): { msLeft: number; lapsed: boolean } {
   const msLeft = msUntilWindowReset(entry.window, nowMs);
-  if (entry.session || !Number.isFinite(msLeft) || msLeft > 0) return { msLeft, lapsed: false };
-  const periodMs = nominalLongerWindowMs(entry.key);
+  if (!Number.isFinite(msLeft) || msLeft > 0) return { msLeft, lapsed: false };
+  const periodMs = entry.session ? RESET_AWARE_SESSION_WINDOW_MS : nominalLongerWindowMs(entry.key);
   if (periodMs === null) return { msLeft: Number.POSITIVE_INFINITY, lapsed: true };
   return { msLeft: msLeft + periodMs * (Math.floor(-msLeft / periodMs) + 1), lapsed: true };
 }
@@ -536,7 +537,8 @@ function resolveUsableAndReset(
     if (window.fractionReported === false && skipUnreported) continue;
     const { msLeft, lapsed } = resolveWindowReset(entry, nowMs);
     const capOnly = session && hasLongerWindow;
-    if (capOnly && msLeft <= 0) continue;
+    // A lapsed session has refilled: inside a longer window it caps nothing.
+    if (capOnly && lapsed) continue;
     // A lapsed longer window has refilled: its stale fraction caps nothing.
     if (window.fractionReported !== false && !lapsed) {
       usable = Math.min(usable, clamp01(1 - (window.percentUsed ?? 0.5)));

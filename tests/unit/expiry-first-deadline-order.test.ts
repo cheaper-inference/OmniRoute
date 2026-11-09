@@ -80,6 +80,41 @@ describe("expiry-first lapsed resets (stale quota reads)", () => {
   });
 });
 
+function sessionOnlyView(remainingPercent: number, resetInHours: number, now: number = NOW) {
+  return {
+    windows: {
+      "session (5h)": {
+        percentUsed: 1 - remainingPercent / 100,
+        resetAt: new Date(now + resetInHours * HOUR).toISOString(),
+      },
+    },
+  };
+}
+
+describe("expiry-first lapsed session-only resets", () => {
+  it("rolls a lapsed session forward instead of ranking it as already expired", () => {
+    // Session reset 1h ago (stale): its next reset is in 4h, later than the other account's 2h.
+    const views = { team: sessionOnlyView(80, -1), max: sessionOnlyView(80, 2) };
+    assert.equal(pick(views), "max");
+    const deadline = resolveExpiryFirstDeadline(
+      sessionOnlyView(80, -1),
+      resolveExpiryFirstConfig(DEADLINE),
+      NOW
+    );
+    assert.equal(deadline?.msUntilDeadline, 4 * HOUR);
+  });
+
+  it("treats a lapsed, stale-empty session as refilled and keeps it eligible", () => {
+    const views = { team: sessionOnlyView(0, -1), max: sessionOnlyView(0, 2) };
+    assert.equal(pick(views), "team");
+    assert.equal(
+      resolveExpiryFirstDeadline(sessionOnlyView(0, -1), resolveExpiryFirstConfig(DEADLINE), NOW)
+        ?.usable,
+      1
+    );
+  });
+});
+
 describe("expiry-first deadline order", () => {
   it("spends the account that resets first even when the other holds more per hour", () => {
     // Rate order: Team 25%/48h = 0.0052/h < Max 100%/160h = 0.0063/h -> Max.
