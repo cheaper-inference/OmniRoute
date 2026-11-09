@@ -2624,6 +2624,49 @@ export async function markAccountUnavailable(
       ? cooldownUntilMs(conn.rateLimitedUntil)
       : NaN;
     if (Number.isFinite(existingCooldownMs) && existingCooldownMs > Date.now()) {
+      // A cooldown only grows: a real upstream reset longer than the stored one (a 5 h quota 429
+      // racing a 5 s transient mark) moves the end out. Backoff level and error fields stay.
+      const longer =
+        !coolingDisabled &&
+        provider !== "codex" &&
+        options.persistUnavailableState !== false &&
+        !hasPerModelFailureScope(
+          provider,
+          model,
+          (conn?.providerSpecificData as Record<string, unknown> | undefined)?.passthroughModels as
+            boolean | undefined,
+          status,
+          errorText
+        ) &&
+        !(await shouldIsolateProbeFailures())
+          ? checkFallbackError(
+              status,
+              errorText,
+              backoffLevel,
+              model,
+              provider,
+              options.headers ?? null,
+              providerProfile || (provider ? await getRuntimeProviderProfile(provider) : null),
+              options.structuredError ?? null,
+              null,
+              await resolveDailyResetForProvider(provider)
+            )
+          : null;
+      if (
+        longer?.usedUpstreamRetryHint &&
+        !longer.permanent &&
+        longer.ruleScope !== "model" &&
+        longer.cooldownMs > existingCooldownMs - Date.now()
+      ) {
+        await updateProviderConnection(connectionId, {
+          rateLimitedUntil: getUnavailableUntil(longer.cooldownMs),
+        });
+        log.info(
+          "AUTH",
+          `${connectionId.slice(0, 8)} cooldown extended to ${Math.ceil(longer.cooldownMs / 1000)}s by a longer upstream reset`
+        );
+        return { shouldFallback: true, cooldownMs: longer.cooldownMs };
+      }
       log.info(
         "AUTH",
         `${connectionId.slice(0, 8)} already marked unavailable (until ${conn?.rateLimitedUntil}), skipping duplicate mark`

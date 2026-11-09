@@ -1,0 +1,1 @@
+- **fix(auth):** a quota 429 with a long upstream reset (for example 5 hours) now extends the account cooldown when a short transient error already set a shorter one, instead of being dropped behind it.
