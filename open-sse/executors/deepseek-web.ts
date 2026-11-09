@@ -79,7 +79,12 @@ export function extractUserToken(credentials: Record<string, unknown>): string |
   // Handle JSON-wrapped tokens (DeepSeek stores token as {"value":"..."})
   try {
     const parsed = JSON.parse(raw);
-    if (typeof parsed?.value === "string") return parsed.value;
+    if (parsed !== null && typeof parsed === "object") {
+      // An empty wrapper (e.g. the anonymous {"value":null} placeholder) is not a
+      // token — never send the raw JSON upstream as a Bearer value.
+      const value = (parsed as { value?: unknown }).value;
+      return typeof value === "string" && value.length > 0 ? value : null;
+    }
   } catch {
     // not JSON, use raw
   }

@@ -1,4 +1,15 @@
 {
+  "accountPreferences": {
+    "title": "Preferenzi tal-kontijiet",
+    "description": "Agħżel diversi kontijiet bħala preferuti jew żommhom bħala riżerva għal din il-konfigurazzjoni tar-rotta. Ir-rotta awtomatika tikklassifika l-kontijiet f’kull kategorija. Il-kontijiet mhux elenkati jitqiesu normali. Il-permessi, il-limiti tal-kwota u r-rabtiet eżistenti mat-turni jibqgħu japplikaw.",
+    "preferred": "Preferut",
+    "normal": "Normali",
+    "reserve": "Riżerva",
+    "excluded": "Eskluż",
+    "loading": "Qed jitgħabbew il-kontijiet…",
+    "error": "Ma setgħux jitgħabbew il-kontijiet. Iftaħ mill-ġdid l-editur biex terġa’ tipprova.",
+    "missing": "Kont mhux disponibbli ({id})"
+  },
   "teamCosts": {
     "title": "Spejjeż tat-tim",
     "subtitle": "Immaniġġja baġits artab maqsuma u stimi tal-ispiża tal-katalgu.",
