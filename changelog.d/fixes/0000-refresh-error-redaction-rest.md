@@ -1,1 +1,0 @@
-- **fix(oauth):** A failed token refresh for Cline, Qoder, CodeBuddy, WorkBuddy, Openference and generic OAuth providers no longer logs the raw OAuth error body, which can echo the refresh token or client secret.
