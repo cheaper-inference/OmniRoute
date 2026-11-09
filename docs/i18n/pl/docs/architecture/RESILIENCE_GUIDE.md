@@ -212,116 +212,111 @@ Powiązane mechanizmy pozostają odrębne:
 - Semafory kont przyznają zezwolenia na współbieżność żądań i kończą się po ukończeniu żądania.
 - Wyłączne zarządzane dzierżawy sesji zapewniają trwałe posiadanie cyklu życia z kontrolą generacji.
 
-## 3. Blokada modelu (Model Lockout)
+## 3. Blokada modelu
 
-**Zakres:** trójka dostawca + połączenie + model.
+**Zakres:** potrójny element: dostawca + połączenie + model.
 
-**Zakres klucza według statusu:** status błędu decyduje, pod jakim kluczem
-zapisywana jest blokada (`resolveLockoutScope()` w
-`open-sse/services/accountFallback/exactModelLock.ts`):
+**Zakres zależny od statusu:** status powodujący błąd określa klucz, pod którym blokada zostanie zapisana
+(`resolveLockoutScope()` w `open-sse/services/accountFallback/exactModelLock.ts`):
 
-- `429` / `403` / `402` — sygnał limitu (quota) lub uprawnień — blokada **rodziny
-  limitów**: dla codex cały zakres `codex` / `spark` (każdy model `gpt-5*` danego
-  połączenia), dla innych dostawców `getQuotaScopedModelForProvider()`.
-- `404` blokuje sam model (`getModelLockKey()` zawęża `not_found`).
-- Każdy inny status — błędy transportowe/serwerowe `5xx` oraz wewnętrzny,
-  syntetyzowany `502` OmniRoute pochodzący z walidacji jakości — blokuje wyłącznie
-  **dokładną** krotkę dostawca/połączenie/model. Wadliwy strumień na jednym modelu
-  nie jest dowodem na wyczerpanie limitu konta; przed wprowadzeniem tej reguły
-  jedna pusta odpowiedź na `codex/gpt-5.6-luna` usuwała z routingu wszystkie modele
-  `gpt-5*` tego połączenia na 2–30 min (rosnąco), podczas gdy jego limit pozostawał
-  nietknięty.
-- Jawnie przekazana przez wywołującego opcja `scope` zawsze ma pierwszeństwo
-  (Antigravity przekazuje `"exact"`).
+- `429` / `403` / `402` — sygnał dotyczący limitu lub uprawnień — blokowana jest **rodzina limitu**:
+  w przypadku codex cały zakres `codex` / `spark` (każdy model `gpt-5*` danego
+  połączenia), a w przypadku innych dostawców `getQuotaScopedModelForProvider()`.
+- `404` blokuje podstawowy model (`getModelLockKey()` zawęża `not_found`).
+- Każdy inny status — błędy transportu/serwera `5xx` oraz wygenerowany przez OmniRoute
+  `502` z walidacji jakości — blokuje wyłącznie **dokładną** kombinację
+  dostawcy/połączenia/modelu. Nieprawidłowy strumień dla jednego modelu nie jest dowodem
+  na problem z limitem konta; przed wprowadzeniem tej reguły jedna pusta odpowiedź dla
+  `codex/gpt-5.6-luna` usuwała każdy model `gpt-5*` tego połączenia z routingu na 2–30 min
+  (z eskalacją), podczas gdy jego limit pozostawał nienaruszony.
+- Jawnie określona opcja `scope` wywołującego ma zawsze pierwszeństwo (Antigravity przekazuje `"exact"`).
 
-**Cel:** uniknięcie wyłączania całego połączenia, gdy niedostępny lub objęty limitem
-jest tylko jeden model.
+**Cel:** uniknięcie wyłączania całego połączenia, gdy niedostępny jest tylko jeden model lub tylko jego limit został wyczerpany.
 
 **Przykłady:**
 
-- Dostawcy z limitami per-model zwracający 429
-- Lokalni dostawcy zwracający 404 dla jednego brakującego modelu
-- Błędy uprawnień do trybów/modeli specyficzne dla dostawcy (np. tryby Groka)
+- Dostawcy z limitami per model zwracający `429`
+- Dostawcy lokalni zwracający `404` dla jednego brakującego modelu
+- Błędy uprawnień specyficzne dla dostawcy dotyczące trybu/modelu (np. tryby Grok)
 
 **Implementacja:** `open-sse/services/accountFallback.ts` — `lockModel()`, `clearModelLock()`, `getAllModelLockouts()`.
 
-### Panel Model Cooldowns (v3.8.0)
+### Panel cooldownów modeli (v3.8.0)
 
-UI: Settings → Model Cooldowns (`src/app/(dashboard)/dashboard/settings/components/ModelCooldownsCard.tsx`)
+Interfejs użytkownika: Ustawienia → Cooldowny modeli (`src/app/(dashboard)/dashboard/settings/components/ModelCooldownsCard.tsx`)
 
-Wyświetla listę aktywnych blokad z polami: provider, connection, model, reason, expiresAt. Operatorzy mogą ręcznie ponownie włączyć model z poziomu karty.
+Wyświetla aktywne blokady wraz z informacjami: dostawca, połączenie, model, przyczyna, expiresAt. Operatorzy mogą ręcznie ponownie włączyć model z poziomu karty.
 
 **REST API:**
 
 - `GET /api/resilience/model-cooldowns` — lista aktywnych blokad
-- `DELETE /api/resilience/model-cooldowns` — ręczne ponowne włączenie. Treść: `{provider, connection, model}`. Uwierzytelnianie: management.
+- `DELETE /api/resilience/model-cooldowns` — ręczne ponowne włączenie. Treść żądania: `{provider, connection, model}`. Uwierzytelnianie: zarządzanie.
 
-### Cooldown Manager
+### Menedżer cooldownów
 
-UI: Monitoring → Cooldown Manager (`src/app/(dashboard)/dashboard/resilience/cooldowns/`).
+Interfejs użytkownika: Monitorowanie → Menedżer cooldownów (`src/app/(dashboard)/dashboard/resilience/cooldowns/`).
 
-Jedna strona dla każdego połączenia, które jest wyłączone z routingu z przyczyny
-przejściowej, zamiast otwierania osobnych stron poszczególnych dostawców. Wyświetla
-cooldowny połączeń, blokady modeli i stany terminalne; pozwala je czyścić dla
-pojedynczego połączenia, dla zaznaczenia lub dla wszystkich połączeń danego
-dostawcy, a także edytować najczęściej dostrajane reguły cooldownów:
-`streamStallCooldown.enabled` oraz bazowy cooldown `connectionCooldown` i maksymalną
-liczbę kroków backoffu dla OAuth / klucza API (zapisywane przez
-`PATCH /api/resilience`). Stany terminalne (`banned`, `expired`, `credits_exhausted`)
-są wymieniane, ale nigdy nie są tutaj czyszczone.
+Jedna strona dla każdego połączenia wyłączonego z routingu z powodu przejściowej przyczyny, zamiast
+otwierania strony każdego dostawcy osobno. Wyświetla cooldowny połączeń, blokady modeli i stany końcowe,
+usuwa je dla pojedynczego połączenia, wybranych połączeń lub wszystkich połączeń danego dostawcy,
+a także edytuje najczęściej dostrajane reguły cooldownów: `streamStallCooldown.enabled` oraz bazowy
+cooldown `connectionCooldown` i maksymalną liczbę kroków narastania opóźnienia dla OAuth / klucza API
+(zapisywane przez `PATCH /api/resilience`). Stany końcowe (`banned`, `expired`, `credits_exhausted`) są
+wyświetlane, ale nigdy nie są tutaj usuwane.
 
-**REST API** (`src/lib/resilience/cooldownManager.ts`, uwierzytelnianie: management):
+Karta **Reguły cooldownów błędów** na tej samej stronie umożliwia edycję reguł błędów operatora
+(`settings.providerErrorRules`) oraz domyślnych reguł ogólnych dla poszczególnych dostawców
+(`settings.providerErrorDefaults`) za pomocą `PATCH /api/settings` — zobacz sekcję „Reguły
+deklarowane przez operatora” w §7, aby dowiedzieć się, jak są dopasowywane. Czas trwania może wynosić:
+Domyślnie (bez jawnego cooldownu), 30 min, 1 h, 5 h, 24 h lub niestandardowo od 1 do 43 200 minut (30 dni).
 
-- `GET /api/resilience/cooldowns[?provider=]` — połączenia ze statusem, pozostałym
-  cooldownem, poziomem backoffu, typem ostatniego błędu i blokadami modeli
-  (bez danych uwierzytelniających)
-- `POST /api/resilience/cooldowns` — treść `{connectionIds: string[]}` lub
+**REST API** (`src/lib/resilience/cooldownManager.ts`, uwierzytelnianie: zarządzanie):
+
+- `GET /api/resilience/cooldowns[?provider=]` — połączenia wraz ze statusem, pozostałym czasem cooldownu,
+  poziomem narastania opóźnienia, typem ostatniego błędu i blokadami modeli (bez danych uwierzytelniających)
+- `POST /api/resilience/cooldowns` — treść żądania `{connectionIds: string[]}` lub
   `{all: true, provider?}`; zwraca `{cleared, unchanged, skippedTerminal, lockoutsCleared}`
 
-### UI ustawień blokady + odzyskiwanie przez tłumienie po sukcesie (v3.8.23)
+### Interfejs ustawień blokady modelu + odzyskiwanie przez zmniejszanie po sukcesach (v3.8.23)
 
-Blokada modelu przeszła z zawsze włączonego, zakodowanego na sztywno zachowania
-do w pełni konfigurowalnej funkcji typu opt-in, z własną kartą ustawień i
-samonaprawiającą się ścieżką odzyskiwania.
+Blokada modelu przeszła z zawsze aktywnego, zakodowanego na stałe zachowania w funkcję w pełni konfigurowalną,
+aktywną opcjonalnie, z własną kartą ustawień i mechanizmem samonaprawczego odzyskiwania.
 
-**Karta ustawień:** Settings → Model Lockout
+**Karta ustawień:** Ustawienia → Blokada modelu
 (`src/app/(dashboard)/dashboard/settings/components/ModelLockoutCard.tsx`).
-Jest to karta **odrębna** od opisanej wyżej, tylko do odczytu karty
-`ModelCooldownsCard` (która jedynie _wyświetla_ aktywne blokady) — nowa karta
-_konfiguruje parametry_. Wartości domyślne znajdują się w
+Różni się ona od wyłącznie do odczytu karty `ModelCooldownsCard` powyżej (która tylko
+_wyświetla_ aktywne blokady) — nowa karta _konfiguruje parametry_. Wartości domyślne znajdują się w
 `DEFAULT_MODEL_LOCKOUT_SETTINGS`
 (`src/lib/resilience/modelLockoutSettings.ts`):
 
-| Ustawienie              | Domyślnie                        | Znaczenie                                                         |
-| ----------------------- | -------------------------------- | ----------------------------------------------------------------- |
-| `enabled`               | `false`                          | Główny przełącznik — blokada modelu jest **domyślnie wyłączona**. |
-| `errorCodes`            | `[403, 404, 429, 502, 503, 504]` | Statusy upstream liczące się jako błąd w zakresie modelu.         |
-| `baseCooldownMs`        | `120_000` (120 s)                | Początkowy czas trwania blokady dla pierwszego błędu.             |
-| `maxCooldownMs`         | `1_800_000` (30 min)             | Górny limit eskalowanego cooldownu.                               |
-| `maxBackoffSteps`       | `10`                             | Maksymalna liczba kroków eskalacji backoffu wykładniczego.        |
-| `useExponentialBackoff` | `true`                           | Czy powtarzające się błędy eskalują cooldown wykładniczo.         |
+| Ustawienie              | Wartość domyślna                 | Znaczenie                                                                |
+| ----------------------- | -------------------------------- | ------------------------------------------------------------------------ |
+| `enabled`               | `false`                          | Przełącznik główny — blokada modelu jest **domyślnie wyłączona**.        |
+| `errorCodes`            | `[403, 404, 429, 502, 503, 504]` | Statusy nadrzędne liczone jako błąd przypisany do modelu.                |
+| `baseCooldownMs`        | `120_000` (120 s)                | Początkowy czas blokady przy pierwszym błędzie.                          |
+| `maxCooldownMs`         | `1_800_000` (30 min)             | Limit eskalowanego cooldownu.                                            |
+| `maxBackoffSteps`       | `10`                             | Maksymalna liczba kroków eskalacji wykładniczego narastania opóźnienia.  |
+| `useExponentialBackoff` | `true`                           | Określa, czy powtarzające się błędy mają wykładniczo zwiększać cooldown. |
 
-Ustawienia są zapisywane przez standardowy magazyn ustawień i walidowane schematem
-ustawień resilience; karta przycina wartości `baseCooldownMs`/`maxCooldownMs`
-(z warunkiem `maxCooldownMs ≥ baseCooldownMs`) oraz `maxBackoffSteps`.
+Ustawienia są zapisywane w zwykłym magazynie ustawień i walidowane za pomocą schematu ustawień odporności;
+karta ogranicza wartości `baseCooldownMs`/`maxCooldownMs`
+(przy czym `maxCooldownMs ≥ baseCooldownMs`) oraz `maxBackoffSteps`.
 
-**Odzyskiwanie przez tłumienie po sukcesie:** odzyskiwanie **nie** polega wyłącznie
-na upływie timera. Poprawna odpowiedź cofa licznik błędów modelu, więc model,
-który odzyskał sprawność w trakcie okna, przestaje eskalować (i zostaje odblokowany),
-zanim jego timer dobiegnie końca. Po udanym trafieniu celu combo
-`open-sse/services/combo.ts` wywołuje `decayModelFailureCount()`
-(`open-sse/services/accountFallback.ts`), która **zmniejsza o połowę** zapisany
-`failureCount` (`Math.floor(failureCount / 2)`); gdy osiągnie `0`, wpis blokady
-jest całkowicie usuwany. Funkcja towarzysząca `recordModelLockoutFailure()`
-zwiększa licznik (i eskaluje cooldown) przy błędach w oknie eskalacji. Tłumienie
-po sukcesie działa dodatkowo obok zwykłego upływu timera — każda z tych ścieżek
-może ponownie włączyć model.
+**Odzyskiwanie przez zmniejszanie po sukcesach:** odzyskiwanie nie polega wyłącznie na wygaśnięciu timera.
+Prawidłowa odpowiedź zmniejsza liczbę błędów modelu, dzięki czemu model, który odzyskał sprawność
+w trakcie trwania okna, przestaje zwiększać poziom eskalacji (i zostaje odblokowany) wcześniej, niż
+upłynąłby jego czas. W przypadku pomyślnego celu kombinacji `open-sse/services/combo.ts` wywołuje
+`decayModelFailureCount()` (`open-sse/services/accountFallback.ts`), które **dzieli** zapisaną wartość
+`failureCount` przez 2 (`Math.floor(failureCount / 2)`); gdy osiągnie ona wartość `0`, wpis blokady
+jest całkowicie usuwany. Odpowiednik `recordModelLockoutFailure()` zwiększa tę wartość (i eskaluje
+cooldown) w przypadku błędów występujących w oknie eskalacji. Zmniejszanie po sukcesach jest dodatkowe
+względem zwykłego wygaśnięcia timera — każda z tych ścieżek może ponownie włączyć model.
 
-**Stan:** blokady są przechowywane **w pamięci** (per-proces, w strukturach `Map`
-zawierających `ModelLockoutEntry` kluczowanych przez `provider:connectionId:model`,
-blokady o zakresie exact przez `provider:connectionId:exact:model`), a nie
-zapisywane w bazie danych — są tracone przy restarcie. _Ustawienia_ są trwałe;
-aktywny _stan_ blokad jest efemeryczny.
+**Stan:** blokady są przechowywane **w pamięci** (w procesie `Map`s
+z wpisami `ModelLockoutEntry`, kluczowanymi za pomocą
+`provider:connectionId:model`, a blokady o dokładnym zakresie za pomocą
+`provider:connectionId:exact:model`), a nie utrwalane w
+bazie danych — są tracone po ponownym uruchomieniu. _Ustawienia_ są utrwalane; aktywny _stan_ blokad jest nietrwały.
 
 ---
 
@@ -493,246 +488,272 @@ Po włączeniu przerwanie watchdoga jest stosowane tylko do aktywnej próby prze
 
 ---
 
-## 7. Korekta statusu upstream (błędnie raportowane błędy limitu)
+## 7. Ponowne ustawienie statusu upstream (błędnie zgłaszane błędy limitu)
 
-**Zakres:** jedna bramka upstream, która raportuje tymczasowe wyczerpanie limitu z błędnym statusem HTTP.
+**Zakres:** jedna brama upstream, która zgłasza tymczasowe wyczerpanie limitu z nieprawidłowym statusem HTTP.
 
-**Cel:** skorygowanie mylącego statusu PRZED klasyfikacją, tak aby odbiorcy downstream (silnik fallback, agregacja combo, odpowiedź kierowana do klienta) widzieli prawdziwy, pozwalający na ponowienie charakter błędu.
+**Cel:** skorygowanie mylącego statusu PRZED klasyfikacją, aby konsumenci niższych warstw (silnik fallbacku, agregacja combo, odpowiedź dla klienta) otrzymali informację o rzeczywistej możliwości ponowienia próby.
 
-Niektóre bramki sygnalizują TYMCZASOWE wyczerpanie limitu statusem HTTP, który nie pozwala na ponowienie. `agentrouter.org` zwraca `403` (czasem `400`) z chińskim komunikatem (`用户额度不足` / `额度不足`) zamiast standardowego `429`. Klienci tacy jak Claude Code traktują `403` jako błąd trwały i przerywają sesję, a bez korekty silnik fallback sklasyfikowałby go jako `AUTH_ERROR` zamiast zdarzenia limitu.
+Niektóre bramy sygnalizują TYMCZASOWE wyczerpanie limitu za pomocą statusu HTTP, który nie pozwala na ponowienie próby. `agentrouter.org` zwraca `403` (czasami `400`) z chińskim tekstem
+(`用户额度不足` / `额度不足`) zamiast standardowego `429`. Klienci tacy jak Claude
+Code traktują `403` jako błąd trwały i przerywają sesję, a bez korekty
+silnik fallbacku sklasyfikowałby go jako `AUTH_ERROR` zamiast zdarzenia
+związanego z limitem.
 
 **Implementacja:**
 
-- Rejestr + dopasowywacz: `open-sse/config/upstreamStatusRestatement.ts` — lista reguł dla poszczególnych dostawców (`{id, fromStatuses, toStatus, textMarkers, excludeMarkers, defaultRetryAfterMs}`), dopasowywana przez `applyStatusRestatement()`.
-- Miejsce wywołania: blok `providerFailure:` w `open-sse/handlers/chatCore.ts` (około linii 3654), zaraz po tym, jak `parseUpstreamError()` przetworzy odpowiedź upstream z błędnym statusem HTTP (`!providerResponse.ok`), a przed uruchomieniem jakiejkolwiek klasyfikacji — dzięki temu każdy odbiorca downstream widzi skorygowany status. Błędy osadzone w strumieniu SSE ze statusem `200` przechodzą osobną, późniejszą ścieżką parsowania strumienia i obecnie **nie** są objęte tym hookiem — to znane ograniczenie, na razie niewymagane dla błędnego statusu agentroutera (który pojawia się jako błędny status HTTP).
-- Możliwość ponowienia: `429` znajduje się w `RETRY_AFTER_ELIGIBLE_STATUSES` (`open-sse/services/combo/unavailableRetryGate.ts`), więc skorygowany błąd niesie ze sobą realne okno ponowienia, zamiast pojawiać się jako martwe `403`.
-- Syntetyczna wartość `60s` `defaultRetryAfterMs` (`upstreamStatusRestatement.ts`) to jedynie to, co skorygowana odpowiedź komunikuje **klientowi**; sama w sobie nie jest wewnętrznym czasem cooldownu/blokady połączenia — tym zarządza osobno mechanizm, który faktycznie obsługuje skorygowany błąd (eskalujący backoff Connection Cooldown, §2, bazowo `3s` dla dostawców z kluczami API; lub Model Lockout, §3, dla dostawców z limitem per model, jak agentrouter). Router może wewnętrznie stać się gotowy do ponowienia wcześniej, niż wynosi 60-sekundowe okno reklamowane klientowi — to celowy margines, nie błąd.
+- Rejestr + dopasowywanie: `open-sse/config/upstreamStatusRestatement.ts` — lista reguł dla poszczególnych dostawców (`{id, fromStatuses, toStatus, textMarkers, excludeMarkers, defaultRetryAfterMs}`), dopasowywana za pomocą `applyStatusRestatement()`.
+- Miejsce wywołania: blok `providerFailure:` w `open-sse/handlers/chatCore.ts`
+  (około wiersza 3654), bezpośrednio po tym, jak `parseUpstreamError()` przeanalizuje odpowiedź upstream ze statusem HTTP wskazującym błąd (`!providerResponse.ok`), a przed uruchomieniem jakiejkolwiek klasyfikacji, dzięki czemu każdy konsument niższej warstwy otrzymuje skorygowany status. Błędy osadzone w strumieniu SSE `200` przechodzą odrębną, późniejszą ścieżkę analizy strumienia i **nie** są obecnie objęte tym punktem integracji — jest to znane ograniczenie, które nie było dotąd potrzebne w przypadku nieprawidłowego statusu agentrouter (który pojawia się jako status HTTP wskazujący błąd).
+- Możliwość ponowienia: `429` znajduje się w `RETRY_AFTER_ELIGIBLE_STATUSES`
+  (`open-sse/services/combo/unavailableRetryGate.ts`), więc błąd z ponownie ustawionym statusem zawiera rzeczywiste okno ponowienia zamiast pojawiać się jako nieaktywne `403`.
+- Syntetyczny `60s` `defaultRetryAfterMs` (`upstreamStatusRestatement.ts`)
+  określa wyłącznie to, co ponownie ustawiona odpowiedź przekazuje **klientowi**; nie jest to wewnętrzny czas schładzania/blokady połączenia — jest on zarządzany oddzielnie przez mechanizm, który faktycznie obsługuje błąd z ponownie ustawionym statusem (narastający backoff funkcji Connection Cooldown, §2, z bazą `3s` dla dostawców korzystających z kluczy API; albo Model Lockout, §3, dla dostawców z limitami per model, takich jak agentrouter). Router może wewnętrznie stać się gotowy do ponowienia wcześniej niż po upływie 60-sekundowego okna reklamowanego klientowi — jest to zamierzony zapas, a nie błąd.
 
-Błędy trwałe (`无权访问模型` agentroutera — brak dostępu do tego modelu) NIGDY nie są korygowane: `excludeMarkers` nakłada weto na regułę nawet wtedy, gdy trafią `textMarkers`, więc błąd zachowuje pierwotny status i nic nie ponawia go w nieskończoność. Pasująca reguła klasyfikacji dostawcy (`agentrouter-model-access-denied` w `open-sse/config/providerErrorRules.ts`: `reason: "auth_error"`, `scope: "model"`, zadeklarowany bazowy cooldown `6h`) jest sprawdzana przez `checkFallbackError` (`open-sse/services/accountFallback.ts`) _przed_ ogólnym wczesnym zwrotem `FORBIDDEN` dla kategorii apikey, warunkowanym przez `honorsRuleLockScope(provider)` (#10334 — obecnie wyłącznie dla agentroutera, za pośrednictwem listy dozwolonych `HONORS_RULE_LOCK_SCOPE_PROVIDERS` w `providerErrorRules.ts`). Zadeklarowany w regule 6-godzinny cooldown przechodzi jako `fallbackResult.baseCooldownMs`, ale nadal zasila istniejącą wcześniej ścieżkę blokady per-model-quota (`lockModelIfPerModelQuota()` / `recordModelLockoutFailure()`, niezmienioną przez #10334 poza źródłem cooldownu): jest przycinany do wartości `mlSettings.maxCooldownMs` operatora (domyślnie `1_800_000ms` / 30 min), jak każda inna blokada modelu, a _utrwalany powód blokady_ pozostaje istniejącym wcześniej, zaszytym na stałe `"forbidden"`, a nie `"auth_error"` z reguły — w całym łańcuchu honorowany jest wyłącznie czas trwania cooldownu, nie ciąg powodu. Samo połączenie pozostaje aktywne; modele siostrzane na tym samym połączeniu nie są dotknięte.
+Błędy trwałe (`无权访问模型` — brak dostępu do tego modelu) NIGDY nie są ponownie ustawiane: `excludeMarkers` unieważnia regułę nawet wtedy, gdy wystąpi dopasowanie `textMarkers`, więc błąd zachowuje swój pierwotny status i nic nie ponawia go w nieskończoność. Odpowiednia reguła klasyfikacji dostawcy
+(`agentrouter-model-access-denied` w `open-sse/config/providerErrorRules.ts`:
+`reason: "auth_error"`, `scope: "model"`, zadeklarowana bazowa blokada `6h`) jest sprawdzana przez `checkFallbackError` (`open-sse/services/accountFallback.ts`)
+_przed_ ogólnym wczesnym zwrotem dla kategorii klucza API `FORBIDDEN`, pod warunkiem
+`honorsRuleLockScope(provider)` (#10334 — obecnie wyłącznie dla agentrouter za pośrednictwem listy dozwolonych `HONORS_RULE_LOCK_SCOPE_PROVIDERS` w
+`providerErrorRules.ts`). Zadeklarowana przez regułę blokada 6h jest przekazywana jako `fallbackResult.baseCooldownMs`, ale nadal trafia do istniejącej ścieżki blokady per model dla limitów (`lockModelIfPerModelQuota()` /
+`recordModelLockoutFailure()`, niezmienionej przez #10334 poza źródłem czasu blokady): jest ograniczana do wartości `mlSettings.maxCooldownMs` operatora
+(domyślnie `1_800_000ms` / 30 min), tak jak każda inna blokada modelu, a
+_zapisana przyczyna blokady_ pozostaje istniejącą, zakodowaną na stałe wartością `"forbidden"`, a nie wartością `"auth_error"` z reguły — kompleksowo honorowany jest wyłącznie czas blokady, nie jej tekstowa przyczyna. Samo połączenie pozostaje aktywne;
+modele siostrzane korzystające z tego samego połączenia nie są objęte zmianą.
 
-Skorygowane błędy limitu (`额度不足`) trafiają na produkcji do reguły dostawcy (`agentrouter-user-quota-exhausted`: `reason: "quota_exhausted"`, `scope: "connection"`, bez własnego zadeklarowanego cooldownu — obowiązuje domyślny skalowany backoff warstwy persystencji). Od #10334 `scope` w `ProviderErrorRuleMatch` JEST konsumowany w całym łańcuchu, ale **wyłącznie** dla dostawców z listy dozwolonych `HONORS_RULE_LOCK_SCOPE_PROVIDERS` (`providerErrorRules.ts` — dziś tylko `"agentrouter"`, warunkowane przez `honorsRuleLockScope()`). Dla każdego innego dostawcy `scope` pozostaje informacyjny, dokładnie tak jak przed #10334. `checkFallbackError` wystawia scope dopasowanej reguły jako `fallbackResult.ruleScope`; `isAgentrouterConnectionQuotaScope()` (`src/sse/services/auth.ts`) to współdzielony strażnik, który potwierdza, że `ruleScope` można rzeczywiście bezpiecznie honorować jako sygnał obejmujący całe połączenie i zdolny do samonaprawy (scope `"connection"`, powód `quota_exhausted`, nigdy `permanent`, nigdy `creditsExhausted` — obrona przed przyszłą regułą łączącą scope `"connection"` z trwałym stanem konta). Wywołują go dwaj odbiorcy:
+Ponownie ustawione błędy limitu (`额度不足`) trafiają w środowisku produkcyjnym do reguły dostawcy
+(`agentrouter-user-quota-exhausted`: `reason: "quota_exhausted"`, `scope:
+"connection"`, bez własnej zadeklarowanej blokady — stosowane jest domyślne skalowane wycofywanie warstwy trwałości). Od czasu #10334 wartość `scope` w
+`ProviderErrorRuleMatch` JEST wykorzystywana kompleksowo, ale **wyłącznie** dla dostawców znajdujących się na liście dozwolonych `HONORS_RULE_LOCK_SCOPE_PROVIDERS` (`providerErrorRules.ts` —
+obecnie tylko `"agentrouter"`, za pośrednictwem `honorsRuleLockScope()`). W przypadku każdego innego dostawcy `scope` pozostaje wyłącznie informacyjny, dokładnie tak jak przed #10334.
+`checkFallbackError` udostępnia zakres dopasowanej reguły jako
+`fallbackResult.ruleScope`; `isAgentrouterConnectionQuotaScope()`
+(`src/sse/services/auth.ts`) to współdzielony mechanizm ochronny, który potwierdza, że
+`ruleScope` jest rzeczywiście bezpieczny do zastosowania jako sygnał obejmujący całe połączenie i umożliwiający samoczynne odzyskanie (zakres `"connection"`, przyczyna `quota_exhausted`, nigdy `permanent` ani `creditsExhausted` — zabezpieczenie przed przyszłym powiązaniem zakresu `"connection"` z trwałym stanem konta). Wywołują go dwaj konsumenci:
 
 - **Trwałość** (`markAccountUnavailable()`, `src/sse/services/auth.ts`):
-  zamiast trafiać do gałęzi blokady **dla poszczególnych modeli**
-  dostawcy przekazującego (agentrouter ma `passthroughModels: true` → `hasPerModelQuota()`
-  zwraca `true`), stosuje **tymczasowy okres karencji połączenia** —
+  zamiast przechodzić do gałęzi blokady **dla każdego modelu** dostawcy passthrough
+  (agentrouter ma `passthroughModels: true` → `hasPerModelQuota()`
+  zwraca `true`), stosuje **tymczasowe schłodzenie połączenia** —
   `testStatus: "unavailable"` + `rateLimitedUntil`, nigdy status końcowy
   (`credits_exhausted`/`banned`/`expired`) — dzięki czemu połączenie samoczynnie
-  odzyskuje sprawność po upływie okresu karencji, bez konieczności ręcznego
-  resetowania poświadczeń. Pomijane dla połączeń z `disableCooling: true`
-  (#2997): ta rezygnacja powoduje zamiast tego przejście do blokady dla
-  poszczególnych modeli (jest to udokumentowany kompromis — zobacz komentarz
-  w kodzie nad tą gałęzią).
+  odzyskuje sprawność po upływie czasu schłodzenia, bez konieczności ręcznego
+  resetowania danych uwierzytelniających.
+  Pomijane dla połączeń z `disableCooling: true` (#2997): ta opcja wyłączenia
+  powoduje przejście do blokady dla każdego modelu (udokumentowany kompromis —
+  zobacz komentarz w kodzie powyżej tej gałęzi).
 - **Routing kombinacji w ramach tego samego żądania** (`applyComboTargetExhaustion()`,
-  `open-sse/services/combo/targetExhaustion.ts`): ten sam warunek ochronny
-  oznacza połączenie w przechowywanym w pamięci zbiorze `exhaustedConnections`,
-  pod kluczem `${provider}:${connectionId}`. Powoduje to pominięcie wyłącznie
-  pozostałego celu Z TEGO SAMEGO ŻĄDANIA, który _sam już zawiera dokładnie ten
-  sam `connectionId`_ we własnym obiekcie celu (`getExhaustedTargetSkipReason()`,
+  `open-sse/services/combo/targetExhaustion.ts`): ten sam warunek oznacza
+  połączenie w zestawie `exhaustedConnections` przechowywanym w pamięci, z kluczem
+  `${provider}:${connectionId}`. Powoduje to pominięcie wyłącznie pozostałego
+  celu SAME-REQUEST, który _sam już zawiera dokładnie ten `connectionId`_ we
+  własnym obiekcie celu (`getExhaustedTargetSkipReason()`,
   `open-sse/services/combo/comboPredicates.ts`, `if (provider &&
-connectionId)` przed wyszukiwaniem w `exhaustedConnections`) — zwykła
-  kombinacja list modeli, w której cele równorzędne nie zawierają własnego
-  przypiętego `connectionId`, a jeden jest rozwiązywany dopiero dla każdego
-  wywołania na podstawie nagłówka `X-OmniRoute-Selected-Connection-Id`
-  odpowiedzi, nigdy nie dopasowuje tego klucza. W tym typowym przypadku
-  rzeczywistym zabezpieczeniem przed ponownym użyciem właśnie wyczerpanego
-  konta przez pozostały etap NIE jest ten zbiór — jest nim opisana wyżej
-  warstwa trwałości (`rateLimitedUntil` połączenia wskazuje teraz przyszłość)
-  w połączeniu z tym samym warunkiem ochronnym blokującym
+connectionId)` przed wyszukaniem w `exhaustedConnections`) — zwykła kombinacja
+  z listą modeli, w której cele sąsiednie nie zawierają własnego przypisanego
+  `connectionId`, a jedno z nich jest rozstrzygane dopiero przy każdym
+  wysłaniu na podstawie nagłówka odpowiedzi
+  `X-OmniRoute-Selected-Connection-Id`, nigdy nie trafi na dopasowanie tego
+  klucza. W tym typowym przypadku rzeczywistą ochroną przed ponownym użyciem
+  właśnie wyczerpanego konta przez pozostałą gałąź NIE jest ten Set — jest nią
+  warstwa trwałości opisana powyżej (`rateLimitedUntil` połączenia wskazuje teraz
+  przyszłość) w połączeniu z tym samym warunkiem, który pomija
   `transientRateLimitedProviders` dla tego błędu (zobacz „Projekt dwuetapowy”
-  oraz komentarz w kodzie dotyczący gałęzi `isAgentrouterConnectionQuotaScope`
-  w `targetExhaustion.ts`): ponieważ ten zbiór pozostaje nieoznaczony,
-  wymuszone zezwolenie `allowRateLimitedConnection` w `combo.ts`
-  (`open-sse/services/combo.ts:1005-1013`, `:2734-2738`) NIE jest aktywowane
-  dla pozostałych etapów dostawcy, więc filtr `rateLimitedUntil` wyboru
-  poświadczeń (`src/sse/services/auth.ts:1238`) jest normalnie przestrzegany,
-  a pozostały etap wybiera inne, nadal dostępne połączenie agentrouter albo
-  kończy się niepowodzeniem z powodu braku dostępnych poświadczeń — nie
-  wymusza ponownego użycia połączenia, dla którego ta gałąź właśnie
-  zastosowała okres karencji.
+  oraz komentarz w kodzie dotyczący gałęzi
+  `isAgentrouterConnectionQuotaScope` w `targetExhaustion.ts`): gdy ten Set
+  pozostaje nieoznaczony, wymuszone zezwolenie `allowRateLimitedConnection`
+  w `combo.ts` (`open-sse/services/combo.ts:1005-1013`, `:2734-2738`) NIE
+  zostaje aktywowane dla pozostałych gałęzi dostawcy, więc filtr
+  `rateLimitedUntil` podczas wyboru danych uwierzytelniających
+  (`src/sse/services/auth.ts:1238`) działa normalnie, a pozostała gałąź wybiera
+  inną, nadal kwalifikującą się połączenie agentrouter albo kończy działanie
+  z powodu braku dostępnych danych uwierzytelniających — nie wymusza ponownego
+  użycia połączenia, które ta gałąź właśnie schłodziła.
 
-### Projekt dwuetapowy: ponowne określenie statusu, a następnie klasyfikacja
+### Projekt dwuetapowy: ponowne sformułowanie statusu, a następnie klasyfikacja
 
-Ponowne określanie statusu (`upstreamStatusRestatement.ts`) i reguły
-klasyfikacji dostawców (`open-sse/config/providerErrorRules.ts`,
-`providerRuleRegistry`) to oddzielne rejestry, które używają jako kluczy
-identyfikatora dostawcy i znaczników tekstowych, ale działają w różnych
-miejscach i służą różnym celom: ponowne określenie statusu wcześnie zmienia
-status HTTP w `chatCore.ts`; reguły klasyfikacji wybierają zastępczy `reason`
-i `scope` blokady (`model` / `provider` / `connection`) wewnątrz
+Ponowne sformułowanie statusu (`upstreamStatusRestatement.ts`) i reguły
+klasyfikacji dostawcy (`open-sse/config/providerErrorRules.ts`,
+`providerRuleRegistry`) to osobne rejestry, które oba korzystają z identyfikatora
+dostawcy i znaczników tekstowych, ale są uruchamiane w różnych miejscach i służą
+różnym celom: ponowne sformułowanie zmienia status HTTP na wczesnym etapie
+w `chatCore.ts`; reguły klasyfikacji wybierają zapasowy `reason` i blokują
+`scope` (`model` / `provider` / `connection`) wewnątrz
 `checkFallbackError()` (`open-sse/services/accountFallback.ts`).
 
 Reguły klasyfikacji widzą pełny **tekst** błędu (potrzebny do dopasowania
-znaczników treści, takich jak `额度不足`) wyłącznie dla dostawców wymienionych
-na liście dozwolonych `FULL_TEXT_RULE_PROVIDERS` w
-`providerErrorRules.ts` — obecnie jest to tylko `"agentrouter"`. Dla każdego
-innego dostawcy z **wbudowanego katalogu** funkcja `checkFallbackError`
-przekazuje do `getProviderErrorRuleMatch` wyłącznie ustrukturyzowany błąd
-(`{code, type}`), co wystarcza w przypadku reguł opartych na
-nagłówku/statusie/kodzie, ale uniemożliwia wykrywanie znaczników w treści.
-Funkcja pomocnicza `resolveRuleMatchBody()` dokonuje tego wyboru: pełny tekst
-błędu dla dostawców z listy dozwolonych, a w pozostałych przypadkach
-ustrukturyzowany błąd. Dodanie **wbudowanego** dostawcy do
-`FULL_TEXT_RULE_PROVIDERS` stanowi jawne włączenie tej funkcji dla konkretnego
-dostawcy — mechanizm ten istnieje po to, aby domyślna ścieżka każdego
-dostawcy spoza listy pozostała niezmieniona bajt w bajt.
+znaczników treści, takich jak `额度不足`) tylko dla dostawców wymienionych
+na liście dozwolonych `FULL_TEXT_RULE_PROVIDERS` w `providerErrorRules.ts` —
+obecnie tylko `"agentrouter"`. Dla każdego innego dostawcy **wbudowanego
+katalogu** `checkFallbackError` przekazuje do `getProviderErrorRuleMatch`
+wyłącznie ustrukturyzowany błąd (`{code, type}`), co wystarcza w przypadku reguł
+opartych na nagłówkach/statusie/kodzie, ale nie pozwala wykrywać znaczników
+w treści odpowiedzi. Pomocnicza funkcja `resolveRuleMatchBody()` wykonuje ten
+wybór: pełny tekst błędu dla dostawców na liście dozwolonych, a w pozostałych
+przypadkach ustrukturyzowany błąd. Dodanie **wbudowanego** dostawcy do
+`FULL_TEXT_RULE_PROVIDERS` jest jawnym wyrażeniem zgody dla konkretnego
+dostawcy — lista istnieje po to, aby domyślna ścieżka dla każdego dostawcy
+nieumieszczonego na tej liście pozostała niezmieniona bajt w bajt.
 
-Wartość `scope` reguły (`model` / `provider` / `connection`) wymaga osobnego
-jawnego włączenia, niezależnego od `FULL_TEXT_RULE_PROVIDERS`:
-`checkFallbackError` udostępnia ją wyłącznie jako
-`fallbackResult.ruleScope`, a dalsze komponenty traktują ją inaczej niż
-etykietę informacyjną tylko w przypadku dostawców znajdujących się na liście
-dozwolonych `HONORS_RULE_LOCK_SCOPE_PROVIDERS` w tym samym pliku
-(kontrolowanej przez `honorsRuleLockScope()` — obecnie jest to tylko
-`"agentrouter"`). Zobacz sekcję „Błędy limitu ze zmienionym statusem” powyżej,
-aby dowiedzieć się, co faktycznie robi dopasowanie `scope: "connection"`, gdy
-dostawca znajduje się na tej liście dozwolonych.
+`scope` reguły (`model` / `provider` / `connection`) jest osobną opcją
+wyrażenia zgody, niezależną od `FULL_TEXT_RULE_PROVIDERS`:
+`checkFallbackError` udostępnia ją wyłącznie jako `fallbackResult.ruleScope`,
+a konsumenci niższych warstw respektują ją jako coś więcej niż etykietę
+informacyjną tylko w przypadku dostawców znajdujących się na liście dozwolonych
+`HONORS_RULE_LOCK_SCOPE_PROVIDERS` w tym samym pliku (kontrolowanej przez
+`honorsRuleLockScope()` — obecnie jest to tylko `"agentrouter"`). Zobacz
+„Ponownie sformułowane błędy limitu” powyżej, aby dowiedzieć się, co faktycznie
+robi dopasowanie `scope: "connection"`, gdy dostawca znajduje się na tej
+liście dozwolonych.
 
-**#11104 — reguły zadeklarowane przez operatora omijają obie listy
-dozwolonych.** Operator może zadeklarować regułę dla konkretnego dostawcy
-w czasie wykonywania za pomocą `settings.providerErrorRules`
-(`open-sse/config/providerErrorRules.ts::setOperatorProviderErrorRules`) bez
-edytowania tego pliku. Uzależnienie reguły operatora od
-`FULL_TEXT_RULE_PROVIDERS`/`HONORS_RULE_LOCK_SCOPE_PROVIDERS` — list
-dozwolonych przeznaczonych do ochrony **domyślnego** zachowania reguł
-wbudowanego katalogu — sprawiłoby, że mechanizm ustawień nie działałby dla
-żadnego dostawcy poza już wymienionymi na tych listach, ponieważ samo
-zadeklarowanie reguły jest już jawną zgodą operatora. Zarówno
-`resolveRuleMatchBody()`, jak i `honorsRuleLockScope()` najpierw sprawdzają
-`hasOperatorRuleForProvider()`: dostawca z regułą operatora otrzymuje surowy
-tekst błędu, a zadeklarowany przez niego `scope` jest respektowany niezależnie
-od tego, czy dostawca znajduje się również na którejkolwiek z list
-dozwolonych.
+**#11104 — reguły zadeklarowane przez operatora omijają obie listy dozwolonych.**
+Operator może zadeklarować regułę dla konkretnego dostawcy w czasie działania
+za pośrednictwem `settings.providerErrorRules`
+(`open-sse/config/providerErrorRules.ts::setOperatorProviderErrorRules`),
+bez edytowania tego pliku. Uzależnienie reguły operatora od
+`FULL_TEXT_RULE_PROVIDERS`/`HONORS_RULE_LOCK_SCOPE_PROVIDERS` — list mających
+chronić **domyślne** zachowanie reguł wbudowanych dostawców katalogu —
+sprawiłoby, że mechanizm ustawień byłby nieaktywny dla każdego dostawcy poza
+tymi już wymienionymi na listach, ponieważ zadeklarowanie reguły jest już
+jawnym wyrażeniem zgody operatora. `resolveRuleMatchBody()` i
+`honorsRuleLockScope()` najpierw sprawdzają `hasOperatorRuleForProvider()`:
+dostawca z regułą operatora otrzymuje surowy tekst błędu, a zadeklarowany
+przez niego `scope` jest respektowany niezależnie od tego, czy dostawca
+występuje na którejkolwiek z list dozwolonych.
+
+**Reguły zadeklarowane przez operatora** (`OperatorProviderErrorRule`): każda
+reguła ma opcjonalne `status` i opcjonalne `match` (zwykły, niewrażliwy na
+wielkość liter podciąg tekstu błędu, nigdy RegExp, dzięki czemu nie może
+powodować ReDoS) i musi ustawiać co najmniej jedno z nich. Gdy ustawione są
+oba, są łączone operatorem AND; pominięte pole pasuje do wszystkiego, więc
+`{match: "insufficient_quota"}` pasuje do dowolnego statusu zawierającego ten
+kod. Wygrywa pierwsza pasująca reguła. `cooldownMs` przyjmuje wartości do
+30 dni; łącznie można zdefiniować najwyżej 50 reguł.
+
+**Domyślne reguły ogólne** (`settings.providerErrorDefaults`, opcjonalne włączenie, ustawiane przez
+`setOperatorProviderErrorDefaults`): `{[provider]: {cooldownMs, scope?, reason?}}`
+z `cooldownMs` od 1 minuty do 30 dni. Domyślna reguła ma zastosowanie tylko wtedy, gdy nie
+została dopasowana żadna reguła operatora ani żadna reguła wbudowanego katalogu, i tylko do
+błędów 402, 403, 408, 429 oraz 5xx. Błędy dotyczące kształtu żądania (400, 404, 409, 413, 422)
+oraz samodzielne błędy 401 zachowują własną obsługę. Jeśli nie podano jawnego `reason`, powód
+jest wyznaczany na podstawie statusu, tak samo jak robi to `classifyError`. Zadeklarowanie
+domyślnej reguły jest traktowane jako reguła operatora przez `hasOperatorRuleForProvider()`,
+więc jej `scope` (domyślnie `"connection"`) jest respektowane. Efektywny czas blokady domyślnej
+reguły jest dłuższą z wartości: jej `cooldownMs` oraz własnej wskazówki dostawcy dotyczącej
+ponowienia (`Retry-After`, `x-ratelimit-reset` lub wskazówki resetowania w treści — tej samej
+wskazówki, którą silnik respektuje, gdy włączone jest ustawienie blokady połączenia
+"use upstream retry hints"), dzięki czemu domyślna reguła może wydłużyć krótką wskazówkę
+dostawcy, ale nigdy nie skróci rzeczywistego czasu resetowania. Jawna reguła operatora zachowuje
+dokładnie swoje `cooldownMs`. Ani reguła, ani domyślna reguła nie omijają zabezpieczeń blokady
+połączenia w `markAccountUnavailable`: aktywna, dłuższa blokada nigdy nie jest skracana, a
+status terminalny nigdy nie jest nadpisywany. Wbudowane detektory tekstu uruchamiane wcześniej
+w `checkFallbackError` (wyczerpane kredyty, dzienny limit, dezaktywowane konto) nadal mają
+pierwszeństwo w przypadku własnych fraz.
 
 **Znana luka — `providerRuleRegistry` nigdy nie jest sprawdzany dla HTTP 400.**
-Gałąź `BAD_REQUEST` funkcji `checkFallbackError` klasyfikuje status 400
-wyłącznie za pomocą własnych tablic wzorców (`MODEL_ACCESS_DENIED_PATTERNS`,
-`CONTEXT_OVERFLOW_PATTERNS` itd. w `accountFallback.ts`) i zwraca wynik przed
-osiągnięciem znajdującej się wyżej gałęzi
-`configuredRule`/`getProviderErrorRuleMatch`. Reguła wbudowanego katalogu
-(lub reguła operatora) ze `status: 400` jest poprawna składniowo, ale nigdy
-nie zostanie uruchomiona. Obecnie żadna istniejąca reguła nie dotyczy 400,
-więc nie ma to wpływu na środowisko produkcyjne — jednak przyszła reguła dla
-400 wymaga najpierw zmiany tej gałęzi, co jest większą modyfikacją niż dodanie
-reguły (powoduje ponowną klasyfikację 400 dla każdego dostawcy, który już
-polega na zachowaniu opartym na tablicach wzorców) i wykracza poza zakres
-dodania reguły dla pojedynczego dostawcy.
+Gałąź `BAD_REQUEST` w `checkFallbackError` klasyfikuje status 400 wyłącznie za pomocą własnych
+tablic wzorców (`MODEL_ACCESS_DENIED_PATTERNS`,
+`CONTEXT_OVERFLOW_PATTERNS` itd. w `accountFallback.ts`) i zwraca wynik, zanim zostanie
+osiągnięta znajdująca się wyżej gałąź `configuredRule`/`getProviderErrorRuleMatch`.
+Wbudowana reguła katalogu (lub reguła operatora) z `status: 400` jest poprawna składniowo, ale
+nigdy nie zadziała. Obecnie żadna istniejąca reguła nie dotyczy 400, więc nie wpływa to na
+działanie produkcyjne — jednak przyszła reguła 400 wymaga najpierw zmodyfikowania tej gałęzi,
+co jest większą zmianą niż dodanie reguły (zmienia klasyfikację 400 dla każdego dostawcy, który
+już polega na zachowaniu opartym na tablicach wzorców) i wykracza poza zakres dodania reguły
+dla jednego dostawcy.
 
-### Dodawanie nowej bramy błędnie raportującej limit przydziału
+### Dodawanie nowej bramy błędnie zgłaszającej limity
 
 1. Zarejestruj jedną tablicę reguł w `statusRestatementRegistry`
-   (`open-sse/config/upstreamStatusRestatement.ts`). Utrzymuj `textMarkers`
-   jako specyficzne dla dostawcy; nigdy nie używaj ponownie ogólnych
-   angielskich fraz, które kolidują z
-   `CREDITS_EXHAUSTED_SIGNALS` (`open-sse/services/accountFallback.ts`).
+   (`open-sse/config/upstreamStatusRestatement.ts`). Zachowaj `textMarkers`
+   specyficzne dla dostawcy; nigdy nie używaj ponownie ogólnych angielskich fraz, które kolidują
+   z `CREDITS_EXHAUSTED_SIGNALS` (`open-sse/services/accountFallback.ts`).
 2. Opcjonalnie zarejestruj reguły klasyfikacji w
-   `open-sse/config/providerErrorRules.ts` (`providerRuleRegistry`), aby wybrać
-   właściwy zakres blokady (`connection` dla limitu przydziału obejmującego
-   całe konto, `model` dla błędów dotyczących konkretnego modelu). Ten krok
-   działa na produkcji tylko w przypadku dostawców, których reguły wymagają
-   pełnego tekstu błędu (znaczników z treści odpowiedzi): dodaj identyfikator
-   dostawcy do `FULL_TEXT_RULE_PROVIDERS` w tym samym pliku — w przeciwnym
-   razie `checkFallbackError` zawsze przekazuje regule wyłącznie
-   ustrukturyzowany błąd `{code, type}`, a reguła oparta na treści odpowiedzi
-   nigdy nie dopasuje rzeczywistego ruchu. Reguły dopasowujące się wyłącznie
-   po `status`/`headers` (jak reguły Opencode czy Minimax) nie wymagają
-   takiego włączenia. Niezależnie od tego, jeśli reguła deklaruje
-   `scope: "connection"`, a celem jest rzeczywiste wyciszenie obejmujące całe
-   połączenie wraz z pominięciem combo w ramach tego samego żądania (a nie
-   tylko etykieta informacyjna), dodaj identyfikator dostawcy do
-   `HONORS_RULE_LOCK_SCOPE_PROVIDERS` w tym samym pliku — to właśnie ten wpis
-   bramkuje wykorzystanie w stylu `isAgentrouterConnectionQuotaScope()` w
+   `open-sse/config/providerErrorRules.ts` (`providerRuleRegistry`), aby wybrać odpowiedni
+   zakres blokady (`connection` dla limitu dotyczącego całego konta, `model` dla błędów
+   dotyczących konkretnego modelu). Ten krok działa w środowisku produkcyjnym wyłącznie dla
+   dostawców, których reguły wymagają pełnego tekstu błędu (znaczników w treści): dodaj
+   identyfikator dostawcy do `FULL_TEXT_RULE_PROVIDERS` w tym samym pliku — w przeciwnym razie
+   `checkFallbackError` przekazuje regule tylko ustrukturyzowany błąd
+   `{code, type}`, a reguła oparta na tekście treści nigdy nie dopasuje się do rzeczywistego
+   ruchu. Reguły dopasowujące wyłącznie na podstawie `status`/`headers` (takie jak reguły
+   Opencode lub Minimax) nie wymagają tego włączenia. Niezależnie od tego, jeśli reguła
+   deklaruje `scope: "connection"` i celem jest rzeczywista blokada obejmująca całe połączenie
+   oraz pomijanie kombinacji w ramach tego samego żądania (a nie tylko etykieta informacyjna),
+   dodaj identyfikator dostawcy do `HONORS_RULE_LOCK_SCOPE_PROVIDERS` w tym samym pliku —
+   właśnie to steruje zużyciem w stylu `isAgentrouterConnectionQuotaScope()` w
    `markAccountUnavailable()` (`src/sse/services/auth.ts`) oraz
    `applyComboTargetExhaustion()`
-   (`open-sse/services/combo/targetExhaustion.ts`); bez niego `scope` nadal
-   przepływa przez `fallbackResult.ruleScope`, ale nic na jego podstawie
-   nie działa.
+   (`open-sse/services/combo/targetExhaustion.ts`); bez tego `scope` nadal przepływa przez
+   `fallbackResult.ruleScope`, ale nic nie podejmuje na jego podstawie działania.
 3. Dodaj testy jednostkowe wzorowane na
-   `tests/unit/upstream-status-restatement.test.ts` oraz
-   `tests/unit/agentrouter-error-rules.test.ts` (w tym zabezpieczenia
-   not-permanent / not-creditsExhausted, a także — jeśli dostawca wymaga
-   listy dozwolonych — test sprawdzający, że `resolveRuleMatchBody()` zwraca
-   pełny tekst tylko dla tego dostawcy).
+   `tests/unit/upstream-status-restatement.test.ts`
+   i `tests/unit/agentrouter-error-rules.test.ts` (w tym zabezpieczenia
+   not-permanent / not-creditsExhausted oraz — jeśli dostawca wymaga listy dozwolonych —
+   test potwierdzający, że `resolveRuleMatchBody()` zwraca pełny tekst tylko dla tego
+   dostawcy).
 
-Nie są wymagane żadne zmiany w `chatCore.ts`, `classifyError` ani combo.
+Nie są potrzebne żadne zmiany w `chatCore.ts`, `classifyError` ani w combo.
 
-#### Blokada kubełkowana według adresu wychodzącego (#10880)
+#### Blokada według segmentów egress (#10880)
 
-Dostawcy w `EGRESS_BUCKETED_LOCK_PROVIDERS` (rodzina opencode) są traktowani
-jako upstream kubełkowany według adresu IP (darmowy poziom opencode jest
-kubełkowany według IP, a nie konta — zobacz #9611): odpowiedź ze statusem 429
-sklasyfikowana jako `quota_exhausted` **lub** `rate_limit_exceeded` wycisza
-każde połączenie z rodziny objętej listą dozwolonych, którego ostatni znany
-wychodzący adres IP pokrywa się z adresem połączenia, które zakończyło się
-niepowodzeniem, zanim rotacja zdąży je wypróbować
-— co pozwala uniknąć N-1 gwarantowanych nieudanych wywołań upstream (ten sam
-schemat co #10460/#10525).
-`rate_limit_exceeded` jest uwzględnione celowo: na ścieżce
-`markAccountUnavailable` reguły specyficzne dla opencode nigdy się nie
-dopasowują (do `checkFallbackError` nie są przekazywane nagłówki ani treść,
-opencode nie znajduje się w `FULL_TEXT_RULE_PROVIDERS`), więc odpowiedź 429,
-której treść zawiera tekst o limicie subskrypcji ("monthly usage limit
-reached"), jest klasyfikowana jako `quota_exhausted` przez zastępczą
-klasyfikację na podstawie tekstu limitu (`buildSubscriptionQuotaFallback`,
-`accountFallback.ts`; 1-godzinne wyciszenie), zanim w ogóle zostanie
-osiągnięta reguła `status_429` — natomiast odpowiedź 429 bez tekstu limitu
-(zwykłe ograniczenie szybkości) jest klasyfikowana przez regułę `status_429`
-jako `rate_limit_exceeded` i nadal wycisza rodzinę IP. Dla dostawcy z listy
-dozwolonych ograniczenie szybkości kubełkowane według IP to ten sam sygnał
-co wyczerpany limit przydziału. Uczciwe ograniczenia:
+Dostawcy znajdujący się w `EGRESS_BUCKETED_LOCK_PROVIDERS` (rodzina opencode) są traktowani
+jako dostawcy upstream z podziałem według adresu IP (darmowy poziom opencode jest dzielony
+według IP, a nie według kont — zob. #9611): status 429 sklasyfikowany jako
+`quota_exhausted` **lub** `rate_limit_exceeded` blokuje każdą dozwoloną rodzinę połączeń,
+której ostatni znany adres IP egress odpowiada adresowi połączenia, na którym wystąpił błąd,
+zanim rotacja będzie mogła ich wypróbować
+— unika to N-1 gwarantowanych niepowodzeń po stronie upstream (ten sam schemat co #10460/#10525).
+`rate_limit_exceeded` jest uwzględniane celowo: na ścieżce `markAccountUnavailable` reguły
+specyficzne dla opencode nigdy nie pasują (do `checkFallbackError` nie są przekazywane
+nagłówki ani treść, a opencode nie znajduje się w `FULL_TEXT_RULE_PROVIDERS`), więc błąd 429,
+którego treść zawiera tekst dotyczący limitu subskrypcji ("monthly usage limit reached"), jest
+klasyfikowany jako `quota_exhausted` przez awaryjną klasyfikację tekstu limitu
+(`buildSubscriptionQuotaFallback`, `accountFallback.ts`; blokada na 1 godzinę), zanim zostanie
+osiągnięta reguła `status_429` — natomiast błąd 429 bez tekstu dotyczącego limitu (zwykłe
+ograniczenie częstotliwości) jest klasyfikowany przez regułę `status_429` jako
+`rate_limit_exceeded` i nadal blokuje rodzinę adresów IP. W przypadku dostawcy znajdującego
+się na liście dozwolonych ograniczenie częstotliwości według IP jest tym samym sygnałem co
+wyczerpany limit. Uczciwe ograniczenia:
 
-- **Best-effort**: blokada odczytuje ostatni znany `egress_ip` połączenia
-  z `proxy_logs` (okno 24h, synchronicznie, bez pamięci podręcznej). Zimna
-  pamięć podręczna (adres IP wyjściowy nigdy nie sondowany) lub brak wiersza →
-  zawodzące połączenie nadal jest schładzane przez gałąź (rejestrowane jak
-  dotychczas), nie jest natomiast blokowany żaden element siostrzany.
-- **Nigdy stan końcowy**: schładzanie jest odnawianym oknem limitu
-  (`testStatus: "unavailable"`); stan trwały nigdy nie jest wyprowadzany
-  z sygnału na poziomie IP. Połączenia z `disableCooling` całkowicie pomijają
-  tę gałąź.
-- **Zmiana granularności blokady dla rodziny z listy dozwolonych**: to jest
-  zmiana zakresu, a nie tylko optymalizacja elementów siostrzanych. opencode
-  jest dostawcą `passthroughModels`, więc przed tą gałęzią odpowiedź 429
-  powodowała blokadę na poziomie MODELU; teraz powoduje schładzanie
-  połączenia — w tym dla operatora korzystającego z pojedynczego połączenia
-  bez żadnego elementu siostrz-anego. To jest granularność, którą tabela reguł
-  opencode już deklaruje jako poprawną (`scope: "connection"`,
-  `providerErrorRules.ts`), dotąd nigdy nie respektowaną, ponieważ opencode
-  nie znajduje się w `HONORS_RULE_LOCK_SCOPE_PROVIDERS`. Gałąź sama zapisuje
-  schładzanie zawodzącego połączenia + `backoffLevel`, odzwierciedlając gałąź
-  agentrouter o zakresie połączenia, i zwraca — blok na poziomie modelu oraz
-  ogólna ścieżka poniżej nigdy nie są osiągane.
-- **Combo uwzględnione**: podobnie jak gałąź agentrouter, zakres celowo
-  ignoruje obniżenie `persistUnavailableState`/`isCombo`, jakie wywołujący
-  combo stosuje do odpowiedzi 429. Blokada na poziomie modelu nie jest słabszą
-  formą tego zakresu — jest niewłaściwą jednostką: nic nie mówi o wyczerpanym
-  adresie IP, więc rotacja combo nadal marnowałaby jedno z góry skazane na
-  niepowodzenie wywołanie na element siostrzany.
-- **Bezpieczeństwo elementów siostrzanych**: element siostrzany już w stanie
-  końcowym (banned/credits_exhausted) lub już w dłuższym schładzaniu nigdy nie
-  jest nadpisywany.
-- **Wyłączna lista dozwolonych**: rozszerzenie `EGRESS_BUCKETED_LOCK_PROVIDERS`
-  jest wyraźną decyzją właściciela; brak generycznego powiązania (wzorzec
-  #10334/#10419). Zapytanie o elementy siostrzane wiąże tę samą listę
-  dozwolonych, zamiast powtarzać ją jako literał SQL, więc jej rozszerzenie
-  pozostaje zmianą jednowierszową.
-- **Rotacja adresu IP wyjściowego, w obu kierunkach**: okno wyszukiwania (24h)
-  jest znacznie szersze niż TTL pamięci podręcznej adresu IP wyjściowego
-  (5 min), więc „ostatni znany adres IP” to historia, a nie bieżący stan.
-  Jeśli proxy połączenia zrotowało w obrębie okna, blokada może **nie
-  wychwycić** faktycznie współdzielonego adresu IP (zarejestrowany adres IP to
-  ten nowy, niewyczerpany) — i symetrycznie może **schłodzić element
-  siostrzany, który od tego czasu zrotował poza wyczerpany adres IP**. Drugi
-  przypadek kosztuje ten element siostrzany jedno okno schładzania; oba są
-  akceptowanymi ograniczeniami typu best-effort wyszukiwania opartego na
-  historii.
-- **Koszt**: dwa ograniczone skany `proxy_logs` (filtrowane oknem za pomocą
-  `idx_pl_timestamp`), tylko z częstotliwością występowania 429. Bez nowego
-  indeksu (migracja 134 YAGNI). Zmierzono na kopii bazy danych z rzeczywistym
-  ruchem o umiarkowanej wielkości; instancja o wysokiej przepustowości
-  przechowuje proporcjonalnie więcej wierszy w tym samym oknie.
-
----
+- **Najlepszy możliwy rezultat**: blokada rozwiązuje ostatni znany adres `egress_ip` połączenia
+  z `proxy_logs` (okno 24-godzinne, synchronicznie, bez pamięci podręcznej). Pusta pamięć podręczna
+  (adres IP wyjściowy nigdy nie był sprawdzany) lub brak wiersza → niesprawne połączenie nadal jest
+  schładzane przez tę gałąź (rejestrowane tak jak dotychczas), blokowane jest jednak tylko ono, bez
+  żadnego połączenia siostrzanego.
+- **Nigdy nie kończy działania**: schładzanie jest odnawialnym oknem limitu
+  (`testStatus: "unavailable"`); stan trwały nigdy nie jest wyprowadzany z sygnału na poziomie adresu IP.
+  Połączenia z `disableCooling` całkowicie pomijają tę gałąź.
+- **Zmiana poziomu blokady dla rodziny objętej allowlistą**: jest to zmiana zakresu, a nie tylko optymalizacja
+  dla połączeń siostrzanych. opencode jest dostawcą `passthroughModels`, więc przed tą gałęzią kod 429
+  powodował blokadę na poziomie MODELU; teraz powoduje schłodzenie połączenia — także w przypadku operatora
+  uruchamiającego pojedyncze połączenie, bez żadnego połączenia siostrzanego. Jest to poziom, który tabela
+  reguł opencode już deklaruje jako poprawny (`scope: "connection"`,
+  `providerErrorRules.ts`), lecz dotąd nigdy nie był respektowany, ponieważ opencode nie znajduje się na liście
+  `HONORS_RULE_LOCK_SCOPE_PROVIDERS`. Gałąź sama zapisuje schłodzenie niesprawnego
+  połączenia oraz jego `backoffLevel`, odwzorowując gałąź agentrouter działającą na poziomie połączenia, po czym
+  zwraca wynik — blokada na poziomie modelu oraz znajdująca się niżej ścieżka ogólna nigdy nie są osiągane.
+- **Uwzględniono kombinacje**: podobnie jak gałąź agentrouter, zakres celowo ignoruje obniżenie
+  `persistUnavailableState`/`isCombo`, które wywołujący typu combo stosuje dla kodu 429. Blokada na poziomie
+  modelu nie jest słabszą formą tego zakresu, lecz niewłaściwą jednostką: nie mówi nic o wyczerpanym adresie IP,
+  więc rotacja combo nadal wykonywałaby jedno gwarantowanie nieudane wywołanie na każde połączenie siostrzane.
+- **Bezpieczeństwo połączeń siostrzanych**: połączenie siostrzane, które już znajduje się w stanie końcowym
+  (banned/credits_exhausted) lub już ma dłuższe schłodzenie, nigdy nie jest nadpisywane.
+- **Wyłączna allowlista**: rozszerzenie `EGRESS_BUCKETED_LOCK_PROVIDERS` jest jawną decyzją właściciela;
+  nie ma tu ogólnego podłączenia (wzorzec #10334/#10419). Zapytanie dotyczące połączeń siostrzanych
+  wiąże tę samą allowlistę zamiast powtarzać ją jako literał SQL, więc jej rozszerzenie nadal wymaga zmiany
+  tylko w jednym wierszu.
+- **Rotacja adresu IP wyjściowego w obu kierunkach**: okno wyszukiwania (24 godziny) jest znacznie
+  szersze niż TTL pamięci podręcznej adresów IP wyjściowych (5 minut), więc „ostatni znany adres IP” oznacza
+  historię, a nie bieżący stan. Jeśli proxy połączenia zmieniło adres w obrębie tego okna, blokada może
+  **nie wykryć** faktycznie współdzielonego adresu IP (zarejestrowany adres to nowy, niewyczerpany adres)
+  — i symetrycznie może **schłodzić połączenie siostrzane, które od tego czasu zmieniło adres**
+  z wyczerpanego adresu IP. Drugi przypadek kosztuje to połączenie jedno okno schładzania; oba są akceptowanymi,
+  najlepszymi możliwymi ograniczeniami wyszukiwania opartego na historii.
+- **Koszt**: dwa ograniczone skanowania `proxy_logs` (filtrowane po oknie za pomocą `idx_pl_timestamp`),
+  wykonywane tylko z częstotliwością występowania kodu 429. Brak nowego indeksu (migracja 134 YAGNI).
+  Pomiar wykonano na kopii bazy danych z rzeczywistym ruchem o umiarkowanym rozmiarze; instancja
+  o dużej przepustowości przechowuje proporcjonalnie więcej wierszy w tym samym oknie.
 
 ## Inne funkcje odporności na awarie
 

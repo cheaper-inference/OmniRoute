@@ -5,6 +5,10 @@ import { resolveChatRequestBody } from "./requestBody";
 import { getComboCredentialAvailability } from "./comboCredentialAvailability.ts";
 import * as chatAdmission from "./chatAdmission.ts";
 import { buildClientRawRequest, resolveDispatchClientRawRequest } from "./chat/clientRawRequest.ts";
+import {
+  comboStalledConnectionIds,
+  type ComboStalledConnections,
+} from "./chat/comboStalledConnections.ts";
 export { buildClientRawRequest, resolveDispatchClientRawRequest };
 import { normalizeReasoningRequest } from "@/shared/reasoning/effortStandardization";
 import { isDetailedLoggingEnabled } from "@/lib/db/detailedLogs";
@@ -1218,6 +1222,8 @@ async function handleChatImplementation(
     // because only this layer knows which connectionId was actually selected.
     const { defer: deferContextOverflowWhenCompressible, exclusions: compressionExclusions } =
       await resolveComboContextOverflowDeferral(log, apiKeyInfo);
+    // Accounts this combo request's per-target timeout abandoned; later targets prefer others.
+    const comboStalledConnections: ComboStalledConnections = new Map();
     const response = await (handleComboChat as any)({
       body,
       combo,
@@ -1298,6 +1304,7 @@ async function handleChatImplementation(
             // entry (trackPendingRequest(false) never runs) — live incident,
             // log id 1784418258231-14961a.
             modelAbortSignal: target?.modelAbortSignal ?? null,
+            comboStalledConnections,
             fallbackAttempts: target?.fallbackAttempts,
           },
           target?.effectiveComboStrategy ?? combo.strategy,
@@ -1542,6 +1549,8 @@ async function handleSingleModelChat(
      * the signal used for the actual dispatch, not left unused.
      */
     modelAbortSignal?: AbortSignal | null;
+    /** Accounts an earlier target of this combo request stalled on (comboStalledConnections.ts). */
+    comboStalledConnections?: ComboStalledConnections | null;
     fallbackAttempts?: number;
   } = {},
   comboStrategy: string | null = null,
@@ -1576,6 +1585,9 @@ async function handleSingleModelChat(
     // down so getKnownContextOverflow's target-aware deferral check can never drift
     // from chatCore's own native-codex-passthrough decision.
     const sNetSourceFormat = detectFormatFromEndpoint(body, clientRawRequest?.endpoint || "");
+    // A combo target redirected here keeps sharing its outer combo request's record.
+    const sNetStalledConnections: ComboStalledConnections =
+      runtimeOptions.comboStalledConnections ?? new Map();
     return handleComboChat({
       body,
       combo: redirectCombo,
@@ -1620,6 +1632,7 @@ async function handleSingleModelChat(
             previousResponseResumed: runtimeOptions.previousResponseResumed,
             // #7360 follow-up — see the primary handleSingleModel closure above.
             modelAbortSignal: target?.modelAbortSignal ?? null,
+            comboStalledConnections: sNetStalledConnections,
             fallbackAttempts: target?.fallbackAttempts,
           },
           resolvedTarget?.effectiveComboStrategy ?? redirectCombo.strategy ?? "priority",
@@ -1792,6 +1805,26 @@ async function handleSingleModelChat(
   let preferredTimeoutOriginal: Response | null = null;
   let preferredFailoverUsed = false;
   const sameAccountTransportRetries = new Map<string, number>();
+  let accountFallbacks = 0;
+  let sameAccountRetries = 0;
+  let routingWaitMs = 0;
+  const accountFallbackReasons: string[] = [];
+  let pendingFallback: { reason: string; previousConnectionId: string } | null = null;
+  let pendingStreamRetryConnectionId: string | null = null;
+  // An intention to rotate is not yet a completed account switch.
+  const noteAccountFallback = (reason: string, previousConnectionId: string): void => {
+    pendingFallback = { reason, previousConnectionId };
+  };
+  const routingTelemetry = () => ({
+    accountFallbacks,
+    accountFallbackReasons,
+    sameAccountRetries,
+    routingWaitMs,
+  });
+  const withRoutingTelemetry = (
+    response: Response,
+    connectionId: string | null | undefined
+  ): Response => withSelectedConnectionHeader(response, connectionId, routingTelemetry());
   const occupancySessionKey =
     runtimeOptions.sessionAffinityKey ?? runtimeOptions.sessionId ?? `request:${randomUUID()}`;
   let initialPreselectedCredentials = runtimeOptions.preselectedCredentials;
@@ -1832,6 +1865,12 @@ async function handleSingleModelChat(
         !runtimeOptions.managedLease
       ) {
         emptyTurnExcluded.add(runtimeOptions.emptyTurnConnectionId);
+      }
+      // A combo per-target timeout abandoned these accounts earlier in this combo request.
+      // Not flag-gated: it only applies once a target timed out, with the same fallback below.
+      if (!hasForcedConnection && !museOwner && !runtimeOptions.managedLease) {
+        const stalled = runtimeOptions.comboStalledConnections;
+        for (const id of comboStalledConnectionIds(stalled, provider)) emptyTurnExcluded.add(id);
       }
       const selectCredentials = (excluded: Set<string>) =>
         getProviderCredentialsWithQuotaPreflight(
@@ -1890,8 +1929,8 @@ async function handleSingleModelChat(
         emptyTurnExcluded.size > excludedConnectionIds.size &&
         (!credentials || "allRateLimited" in credentials || "allExpired" in credentials)
       ) {
-        // Empty turns are stochastic, not account faults. Prefer an allowed sibling,
-        // but a singleton still spends its existing retry on its original account.
+        // Empty turns and combo target timeouts are not account faults. Prefer an allowed
+        // sibling, but a singleton still spends its existing retry on its original account.
         credentials = await selectCredentials(excludedConnectionIds);
       }
       preselectedCredentials = null;
@@ -1919,7 +1958,7 @@ async function handleSingleModelChat(
         !credentials.connectionId
       ) {
         if (preferredTimeoutOriginal) return preferredTimeoutOriginal;
-        if (earlyEofOriginal) return earlyEofOriginal;
+        if (earlyEofOriginal) return withRoutingTelemetry(earlyEofOriginal, null);
         if (!credentials?.allRateLimited && agy.earliestRetryHintAtMs !== null)
           return agyLease.buildAntigravityPoolBusyResponse(agy.earliestRetryHintAtMs);
         if (credentials?.allRateLimited) {
@@ -1952,6 +1991,7 @@ async function handleSingleModelChat(
               return errorResponse(499, "Request aborted");
             }
 
+            routingWaitMs += retryDecision.waitMs;
             requestRetryAttempt += 1;
             requestRetryBudgetLeftMs = Math.max(0, requestRetryBudgetLeftMs - retryDecision.waitMs);
             log.info(
@@ -2016,9 +2056,28 @@ async function handleSingleModelChat(
           excludedConnectionIds.size > 0
             ? Array.from(excludedConnectionIds)[excludedConnectionIds.size - 1]
             : null;
-        return withSelectedConnectionHeader(noCredsRes, lastFailedConnectionId);
+        return withRoutingTelemetry(noCredsRes, lastFailedConnectionId);
       }
 
+      if (pendingFallback !== null) {
+        const candidate = pendingFallback;
+        pendingFallback = null;
+        if (credentials.connectionId !== candidate.previousConnectionId) {
+          accountFallbacks += 1;
+          if (accountFallbackReasons.length < 8) accountFallbackReasons.push(candidate.reason);
+        }
+      }
+      if (pendingStreamRetryConnectionId !== null) {
+        if (credentials.connectionId === pendingStreamRetryConnectionId) {
+          sameAccountRetries += 1;
+        } else {
+          accountFallbacks += 1;
+          if (accountFallbackReasons.length < 8) {
+            accountFallbackReasons.push("empty_content_sibling");
+          }
+        }
+        pendingStreamRetryConnectionId = null;
+      }
       const accountId = credentials.connectionId.slice(0, 8);
       const releaseOAuthSession = credentials.releaseOAuthSession ?? (() => {});
       // Undefined whenever the lease flag is off, which makes every release/hold below a no-op.
@@ -2310,7 +2369,7 @@ async function handleSingleModelChat(
         }
         if (telemetry) telemetry.startPhase("finalize");
         if (telemetry) telemetry.endPhase();
-        const successResponse = withSelectedConnectionHeader(
+        const successResponse = withRoutingTelemetry(
           museOwner ? muse.museRecordOutput(museOwner, result.response) : result.response,
           credentials?.connectionId
         );
@@ -2356,6 +2415,8 @@ async function handleSingleModelChat(
         );
         if (museDelayMs !== null) {
           await new Promise((resolve) => setTimeout(resolve, museDelayMs));
+          sameAccountRetries += 1;
+          routingWaitMs += Math.max(0, museDelayMs);
           continue;
         }
         if (muse.museFailureMarksAccount(result)) {
@@ -2398,7 +2459,7 @@ async function handleSingleModelChat(
       // per-key policy decision — before the fix it even crashed on
       // `result.response.headers` (bare Response) and returned a 500/502.
       if (result.errorCode === "quota_share_blocked") {
-        return withSelectedConnectionHeader(result.response, credentials.connectionId);
+        return withRoutingTelemetry(result.response, credentials.connectionId);
       }
 
       // Missing Cloud Code project assignment is configuration, not a transient failure.
@@ -2406,14 +2467,14 @@ async function handleSingleModelChat(
       // redispatch and repeat bootstrap within the same logical request.
       if (isAntigravityMissingProjectError(provider, result)) {
         markAntigravityMissingCloudCodeProject(credentials.connectionId);
-        return withSelectedConnectionHeader(result.response, credentials.connectionId);
+        return withRoutingTelemetry(result.response, credentials.connectionId);
       }
 
       // A 422 body-deserialization rejection describes THIS request's shape, not the
       // account. Cooling the connection down would make every other client routed to
       // the same (often single) account fail with the stale error for ~1 minute.
       if (isRequestShapeError(result.status, result.error, provider)) {
-        return withSelectedConnectionHeader(result.response, credentials.connectionId);
+        return withRoutingTelemetry(result.response, credentials.connectionId);
       }
 
       const isAntigravityStreamReadinessFailure =
@@ -2462,6 +2523,7 @@ async function handleSingleModelChat(
           !(isCombo && result.errorCode === "empty_content")
         ) {
           streamEarlyEofRetries += 1;
+          pendingStreamRetryConnectionId = credentials.connectionId;
           if (result.errorCode === "empty_content") {
             runtimeOptions.emptyTurnConnectionId = credentials.connectionId;
           }
@@ -2504,14 +2566,19 @@ async function handleSingleModelChat(
         ) {
           // Retry spent and nothing emitted yet: one hop to a sibling (routing only, no mark).
           log.warn("STREAM", `${provider}/${model} early-EOF retry exhausted — trying one sibling`);
-          earlyEofOriginal = withSelectedConnectionHeader(
+          noteAccountFallback("stream_early_eof", credentials.connectionId);
+          earlyEofOriginal = withRoutingTelemetry(
             result.response,
             credentials.connectionId
           );
           excludedConnectionIds.add(credentials.connectionId);
           continue;
         }
-        return withSelectedConnectionHeader(result.response, credentials?.connectionId);
+        return withSelectedConnectionHeader(
+          result.response,
+          credentials?.connectionId,
+          routingTelemetry()
+        );
       }
 
       if (isAntigravityStreamReadinessFailure) {
@@ -2548,6 +2615,7 @@ async function handleSingleModelChat(
               // best-effort: selection also excludes this connection for the current retry.
             }
           }
+          noteAccountFallback("stream_readiness", credentials.connectionId);
           excludedConnectionIds.add(credentials.connectionId);
           lastError = classificationError;
           lastStatus = result.status;
@@ -2555,7 +2623,7 @@ async function handleSingleModelChat(
           requestRetryLastStatus = result.status;
           continue;
         }
-        return withSelectedConnectionHeader(result.response, credentials?.connectionId);
+        return withRoutingTelemetry(result.response, credentials?.connectionId);
       }
 
       const isAntigravityPreResponseTimeout =
@@ -2597,6 +2665,7 @@ async function handleSingleModelChat(
               // best-effort: selection also excludes this connection for the current retry.
             }
           }
+          noteAccountFallback("pre_response_timeout", credentials.connectionId);
           excludedConnectionIds.add(credentials.connectionId);
           lastError = result.error;
           lastStatus = result.status;
@@ -2605,20 +2674,21 @@ async function handleSingleModelChat(
           continue;
         }
 
-        return withSelectedConnectionHeader(result.response, credentials?.connectionId);
+        return withRoutingTelemetry(result.response, credentials?.connectionId);
       }
 
       if (result.errorType === "account_semaphore_capacity") {
         // Local concurrency pressure is not an upstream quota failure. Prefer another
         // account when possible; pinned combo steps fall through to combo orchestration.
         if (hasForcedConnection) {
-          return withSelectedConnectionHeader(result.response, credentials?.connectionId);
+          return withRoutingTelemetry(result.response, credentials?.connectionId);
         }
 
         log.warn(
           "AUTH",
           `Account ${accountId}... at local concurrency cap, trying fallback account`
         );
+        noteAccountFallback("capacity", credentials.connectionId);
         excludedConnectionIds.add(credentials.connectionId);
         lastError = result.error;
         lastStatus = result.status;
@@ -2801,6 +2871,8 @@ async function handleSingleModelChat(
           releaseOAuthSession();
           return errorResponse(499, "Request aborted");
         }
+        sameAccountRetries += 1;
+        routingWaitMs += waitMs;
         preselectedCredentials = credentials;
         continue;
       }
@@ -2887,6 +2959,12 @@ async function handleSingleModelChat(
             // best-effort: selection also excludes this connection for the current retry.
           }
         }
+        noteAccountFallback(
+          typeof result.status === "number" && result.status >= 100 && result.status <= 599
+            ? "http_" + result.status
+            : "upstream_error",
+          credentials.connectionId
+        );
         excludedConnectionIds.add(credentials.connectionId);
         lastError = result.error;
         lastStatus = result.status;
@@ -2905,7 +2983,7 @@ async function handleSingleModelChat(
         breaker._onFailure();
       }
 
-      return withSelectedConnectionHeader(result.response, credentials?.connectionId);
+      return withRoutingTelemetry(result.response, credentials?.connectionId);
     }
   }
 }
