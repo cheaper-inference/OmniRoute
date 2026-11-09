@@ -28,6 +28,7 @@ import {
 } from "./validation/urlHelpers";
 import { toValidationErrorResult } from "./validation/transport";
 import { isCustomJsonProviderData, validateCustomJsonConnection } from "./validation/customJson";
+import { validateOpencodeProvider } from "./validation/opencode";
 import { validateCloudflareAiProvider } from "./validation/cloudflareAi";
 import {
   validateDeepSeekWebProvider,
@@ -489,6 +490,11 @@ export async function validateProviderApiKey({
     : resolveBaseUrl(validationEntry, providerSpecificData);
 
   try {
+    // OpenCode Zen/Go: probe with the discovery identity, never a free-tier chat probe.
+    if (entry.executor === "opencode") {
+      return await validateOpencodeProvider({ provider, apiKey, providerSpecificData, isLocal });
+    }
+
     if (OPENAI_LIKE_FORMATS.has(entry.format)) {
       return await validateOpenAILikeProvider({
         apiKey,

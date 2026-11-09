@@ -58,25 +58,42 @@ function aliasOpenAIToolName(name: unknown, maxLength: number, aliases: ToolName
  * Mutates an OpenAI-compatible request so every function name satisfies a
  * provider's maximum length and `[A-Za-z0-9_-]` character constraints.
  * Returns alias → original entries for response restoration.
+ * Rejects ambiguous aliases before changing any name in the request.
  */
 export function normalizeOpenAIToolNames(body: unknown, maxLength: number): ToolNameAliases {
   const aliases: ToolNameAliases = new Map();
   const root = toRecord(body);
   if (!root || !Number.isInteger(maxLength) || maxLength < 1) return aliases;
 
-  const alias = (name: unknown): unknown => aliasOpenAIToolName(name, maxLength, aliases);
+  const updates: Array<{ target: JsonRecord; name: string }> = [];
+  const claimedNames = new Map<string, { original: string; aliased: boolean }>();
+  const planAlias = (target: JsonRecord): void => {
+    const original = target.name;
+    if (typeof original !== "string") return;
+    const name = aliasOpenAIToolName(original, maxLength, aliases);
+    if (typeof name !== "string") return;
+
+    // Response restoration also falls back to case-insensitive matching. A generated
+    // alias must not shadow another original, including an already valid short name.
+    const key = name.toLowerCase();
+    const aliased = name !== original;
+    const claimed = claimedNames.get(key);
+    if (claimed && claimed.original !== original && (claimed.aliased || aliased)) {
+      throw new Error("Tool names become ambiguous after length normalization.");
+    }
+    if (!claimed || aliased) claimedNames.set(key, { original, aliased });
+    updates.push({ target, name });
+  };
 
   if (Array.isArray(root.tools)) {
     for (const tool of root.tools) {
       const fn = toRecord(toRecord(tool)?.function);
-      if (fn && typeof fn.name === "string") fn.name = alias(fn.name);
+      if (fn) planAlias(fn);
     }
   }
 
   const toolChoiceFunction = toRecord(toRecord(root.tool_choice)?.function);
-  if (toolChoiceFunction && typeof toolChoiceFunction.name === "string") {
-    toolChoiceFunction.name = alias(toolChoiceFunction.name);
-  }
+  if (toolChoiceFunction) planAlias(toolChoiceFunction);
 
   if (Array.isArray(root.messages)) {
     for (const message of root.messages) {
@@ -85,15 +102,14 @@ export function normalizeOpenAIToolNames(body: unknown, maxLength: number): Tool
       if (Array.isArray(msg.tool_calls)) {
         for (const toolCall of msg.tool_calls) {
           const fn = toRecord(toRecord(toolCall)?.function);
-          if (fn && typeof fn.name === "string") fn.name = alias(fn.name);
+          if (fn) planAlias(fn);
         }
       }
-      if (msg.role === "tool" && typeof msg.name === "string") {
-        msg.name = alias(msg.name);
-      }
+      if (msg.role === "tool") planAlias(msg);
     }
   }
 
+  for (const { target, name } of updates) target.name = name;
   return aliases;
 }
 
