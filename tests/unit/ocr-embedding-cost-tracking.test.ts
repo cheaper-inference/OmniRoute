@@ -25,6 +25,7 @@ const analyticsRoute = await import("../../src/app/api/usage/analytics/route.ts"
 const { calculateOcrPageCost } = await import("../../src/lib/usage/ocrCost.ts");
 const { createProviderNode } = await import("../../src/lib/db/providers/nodes.ts");
 const { createCombo } = await import("../../src/lib/db/combos.ts");
+const { transformToOmniRoute, saveSyncedPricing } = await import("../../src/lib/pricingSync.ts");
 const originalFetch = globalThis.fetch;
 
 test.beforeEach(async () => {
@@ -257,6 +258,50 @@ test("OCR pricing validates page counts, preserves free rates, and separates ann
     (await calculateOcrPageCost("mistral", "free-ocr", { pages_processed: 155 })).costUsd,
     0
   );
+});
+
+test("LiteLLM's annotated OCR tariff reaches route billing while operator overrides stay authoritative", async () => {
+  const { key } = await seed("mistral", "mistral-ocr-4-1", { ocr_cost_per_page: 0.004 });
+  saveSyncedPricing(
+    transformToOmniRoute({
+      "mistral-ocr-4-1": {
+        litellm_provider: "mistral",
+        mode: "ocr",
+        annotation_cost_per_page: 0.005,
+      },
+    })
+  );
+  const hits = mockOcr(3);
+  const body = {
+    ...ocrBody,
+    document_annotation_format: {
+      type: "json_schema",
+      json_schema: { name: "synthetic", schema: { type: "object" } },
+    },
+  };
+  const response = await ocrRoute.POST(request("ocr", key.key, body));
+  assert.equal(response.status, 200, await response.clone().text());
+  assert.notEqual(response.headers.get("x-omniroute-response-cost"), null);
+  near(Number(response.headers.get("x-omniroute-response-cost")), 0.015);
+  let rows = await getUsageHistory();
+  assert.equal(rows.length, 1);
+  near(Number(rows[0].billingUnitPriceUsd), 0.005);
+  near(Number(rows[0].calculatedCostUsd), 0.015);
+  let ledger = await settledLedger(key.id);
+  assert.equal(ledger.length, 1);
+  near(Number(ledger[0].amount_usd), 0.015);
+
+  await updatePricing({ mistral: { "mistral-ocr-4-1": { ocr_cost_per_annotated_page: 0.007 } } });
+  const overridden = await ocrRoute.POST(request("ocr", key.key, body));
+  assert.equal(overridden.status, 200, await overridden.clone().text());
+  near(Number(overridden.headers.get("x-omniroute-response-cost")), 0.021);
+  rows = await getUsageHistory();
+  assert.equal(rows.length, 2);
+  assert.deepEqual(rows.map((row) => Number(row.calculatedCostUsd)).sort(), [0.015, 0.021]);
+  ledger = await settledLedger(key.id);
+  assert.equal(ledger.length, 2);
+  assert.deepEqual(ledger.map((row) => Number(row.amount_usd)).sort(), [0.015, 0.021]);
+  assert.equal(hits(), 2, "one synthetic upstream request per OCR call, no retry or double debit");
 });
 
 test("OCR without measured pages never claims free usage and preserves fail-closed limits", async () => {

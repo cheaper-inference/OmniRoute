@@ -63,6 +63,7 @@ interface LiteLLMModelInfo {
   search_unit_cost?: number;
   ocr_cost_per_page?: number;
   ocr_cost_per_annotated_page?: number;
+  annotation_cost_per_page?: number;
 }
 
 interface SyncStatus {
@@ -157,7 +158,10 @@ export function transformToOmniRoute(raw: Record<string, LiteLLMModelInfo>): Pri
     ] as const;
 
     const hasToken = info.input_cost_per_token != null || info.output_cost_per_token != null;
-    const hasNonToken = NON_TOKEN_FIELDS.some((f) => info[f] != null);
+    const annotationRate = info.annotation_cost_per_page;
+    const hasAnnotationRate =
+      typeof annotationRate === "number" && Number.isFinite(annotationRate) && annotationRate >= 0;
+    const hasNonToken = NON_TOKEN_FIELDS.some((f) => info[f] != null) || hasAnnotationRate;
     if (!hasToken && !hasNonToken) continue;
 
     const inputCost = (info.input_cost_per_token || 0) * 1_000_000;
@@ -180,6 +184,10 @@ export function transformToOmniRoute(raw: Record<string, LiteLLMModelInfo>): Pri
     for (const f of NON_TOKEN_FIELDS) {
       const v = info[f];
       if (typeof v === "number" && Number.isFinite(v)) entry[f] = v;
+    }
+    // LiteLLM's upstream spelling differs; retain an explicit canonical value, including zero.
+    if (entry.ocr_cost_per_annotated_page === undefined && hasAnnotationRate) {
+      entry.ocr_cost_per_annotated_page = annotationRate;
     }
 
     // Extract model name (strip provider prefix from key)
