@@ -1,4 +1,15 @@
 {
+  "accountPreferences": {
+    "title": "Konta preferences",
+    "description": "Šai kombinācijai iestatiet, kuriem kontiem dot priekšroku vai kurus paturēt rezervē. Automātiskā maršrutēšana sarindo kontus katrā līmenī. Sarakstā neiekļautie konti ir parasti. Joprojām ir spēkā atļaujas, kvotu ierobežojumi un esošie pieprasījumu piesaistes iestatījumi.",
+    "preferred": "Vēlamais",
+    "normal": "Parasts",
+    "reserve": "Rezerve",
+    "excluded": "Izslēgts",
+    "loading": "Notiek kontu ielāde…",
+    "error": "Neizdevās ielādēt kontus. Lai mēģinātu vēlreiz, atveriet redaktoru atkārtoti.",
+    "missing": "Nepieejams konts ({id})"
+  },
   "teamCosts": {
     "title": "Komandas izmaksas",
     "subtitle": "Pārvaldiet kopīgus mīkstos budžetus un kataloga izmaksu aplēses.",

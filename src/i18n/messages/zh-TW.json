@@ -1,4 +1,15 @@
 {
+  "accountPreferences": {
+    "title": "帳戶偏好設定",
+    "description": "為此路由設定優先使用多個帳戶，或將其保留為備用。自動路由會在每個層級內排列帳戶順序。未列出的帳戶會照常使用。權限、配額限制以及現有的回合綁定仍然適用。",
+    "preferred": "優先",
+    "normal": "一般",
+    "reserve": "備用",
+    "excluded": "排除",
+    "loading": "正在載入帳戶…",
+    "error": "無法載入帳戶。重新開啟編輯器以重試。",
+    "missing": "帳戶無法使用（{id}）"
+  },
   "teamCosts": {
     "title": "團隊成本",
     "subtitle": "管理共用軟預算與目錄成本估算。",

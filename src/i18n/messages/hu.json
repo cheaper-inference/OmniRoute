@@ -1,4 +1,15 @@
 {
+  "accountPreferences": {
+    "title": "Fiókbeállítások",
+    "description": "Több fiókot is előnyben részesíthet, vagy tartalékként tarthat ennél a kombinációnál. Az automatikus útválasztás rangsorolja a fiókokat az egyes kategóriákon belül. A listán nem szereplő fiókok normálként működnek. A jogosultságok, a kvótakorlátok és a meglévő körhöz rendelések továbbra is érvényesek.",
+    "preferred": "Előnyben részesített",
+    "normal": "Normál",
+    "reserve": "Tartalék",
+    "excluded": "Kizárt",
+    "loading": "Fiókok betöltése…",
+    "error": "Nem sikerült betölteni a fiókokat. Az újrapróbálkozáshoz nyissa meg újra a szerkesztőt.",
+    "missing": "Nem elérhető fiók ({id})"
+  },
   "teamCosts": {
     "title": "Csapatköltségek",
     "subtitle": "Kezelje a megosztott lágy költségkereteket és a katalógus szerinti költségbecsléseket.",

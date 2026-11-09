@@ -1,4 +1,15 @@
 {
+  "accountPreferences": {
+    "title": "Nastavenia účtov",
+    "description": "Uprednostnite viacero účtov alebo ich ponechajte ako rezervu pre túto konfiguráciu smerovania. Automatické smerovanie zoraďuje účty v rámci každej úrovne. Neuvedené účty sú bežné. Povolenia, limity kvót a existujúce priradenia k ťahom naďalej platia.",
+    "preferred": "Uprednostňovaný",
+    "normal": "Bežný",
+    "reserve": "Rezervný",
+    "excluded": "Vylúčený",
+    "loading": "Načítavajú sa účty…",
+    "error": "Účty sa nepodarilo načítať. Ak to chcete skúsiť znova, znovu otvorte editor.",
+    "missing": "Účet nie je dostupný ({id})"
+  },
   "teamCosts": {
     "title": "Náklady tímu",
     "subtitle": "Spravujte zdieľané mäkké rozpočty a odhady nákladov z katalógu.",

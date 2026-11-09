@@ -1,4 +1,15 @@
 {
+  "accountPreferences": {
+    "title": "Sainroghanna cuntais",
+    "description": "Tabhair tosaíocht do chuntais iolracha nó coinnigh mar chúltaca iad don chumraíocht seo. Rangaíonn an ródú uathoibríoch na cuntais laistigh de gach sraith. Is gnáthchuntais iad na cuntais nach bhfuil liostaithe. Tá ceadanna, teorainneacha cuóta agus ceangail shealanna atá ann cheana fós i bhfeidhm.",
+    "preferred": "Tosaíochta",
+    "normal": "Gnáth",
+    "reserve": "Cúltaca",
+    "excluded": "Eisiata",
+    "loading": "Cuntais á lódáil…",
+    "error": "Níorbh fhéidir na cuntais a lódáil. Oscail an t-eagarthóir arís chun triail eile a bhaint as.",
+    "missing": "Cuntas neamh-inúsáidte ({id})"
+  },
   "teamCosts": {
     "title": "Costais foirne",
     "subtitle": "Bainistigh buiséid bhog chomhroinnte agus meastacháin chostais an chatalóige.",

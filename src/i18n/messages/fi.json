@@ -1,4 +1,15 @@
 {
+  "accountPreferences": {
+    "title": "Tiliasetukset",
+    "description": "Aseta useita tilejä etusijalle tai pidä niitä varalla tätä yhdistelmää varten. Automaattinen reititys järjestää tilit kussakin ryhmässä. Luettelemattomat tilit ovat tavallisia. Käyttöoikeudet, kiintiörajoitukset ja olemassa olevat vuorosidonnat ovat edelleen voimassa.",
+    "preferred": "Ensisijainen",
+    "normal": "Tavallinen",
+    "reserve": "Varalla",
+    "excluded": "Poissuljettu",
+    "loading": "Ladataan tilejä…",
+    "error": "Tilejä ei voitu ladata. Yritä uudelleen avaamalla editori uudelleen.",
+    "missing": "Tili ei ole käytettävissä ({id})"
+  },
   "teamCosts": {
     "title": "Tiimin kustannukset",
     "subtitle": "Hallitse jaettuja pehmeitä budjetteja ja luettelon kustannusarvioita.",

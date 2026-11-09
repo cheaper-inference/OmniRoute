@@ -1,4 +1,15 @@
 {
+  "accountPreferences": {
+    "title": "Hisob sozlamalari",
+    "description": "Bu yo‘naltirish konfiguratsiyasi uchun bir nechta hisobni afzal ko‘ring yoki ularni zaxirada saqlang. Avtomatik yo‘naltirish har bir toifadagi hisoblarni saralaydi. Ro‘yxatga kiritilmagan hisoblar odatdagidek ishlatiladi. Ruxsatlar, kvota cheklovlari va mavjud so‘rovga biriktirilgan hisoblar baribir amal qiladi.",
+    "preferred": "Afzal",
+    "normal": "Oddiy",
+    "reserve": "Zaxira",
+    "excluded": "Chiqarib tashlangan",
+    "loading": "Hisoblar yuklanmoqda…",
+    "error": "Hisoblarni yuklab bo‘lmadi. Qayta urinish uchun muharrirni qayta oching.",
+    "missing": "Mavjud bo‘lmagan hisob ({id})"
+  },
   "teamCosts": {
     "title": "Jamoa xarajatlari",
     "subtitle": "Umumiy yumshoq byudjetlar va katalog xarajat taxminlarini boshqaring.",

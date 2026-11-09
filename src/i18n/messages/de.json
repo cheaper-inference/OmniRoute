@@ -1,4 +1,15 @@
 {
+  "accountPreferences": {
+    "title": "Account-Präferenzen",
+    "description": "Mehrere Accounts für diese Combo bevorzugen oder als Reserve vorhalten. Auto-Routing bewertet Accounts innerhalb jeder Stufe. Nicht aufgeführte Accounts sind normal. Berechtigungen, Quota-Grenzen und bestehende Gesprächsbindungen gelten weiterhin.",
+    "preferred": "Bevorzugt",
+    "normal": "Normal",
+    "reserve": "Reserve",
+    "excluded": "Ausgeschlossen",
+    "loading": "Accounts werden geladen…",
+    "error": "Accounts konnten nicht geladen werden. Zum erneuten Laden den Editor wieder öffnen.",
+    "missing": "Nicht verfügbarer Account ({id})"
+  },
   "teamCosts": {
     "title": "Team-Kosten",
     "subtitle": "Gemeinsame weiche Budgets und Katalog-Kostenschätzungen verwalten.",

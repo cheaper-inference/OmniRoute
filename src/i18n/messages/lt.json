@@ -1,4 +1,15 @@
 {
+  "accountPreferences": {
+    "title": "Paskyros nuostatos",
+    "description": "Nustatykite, kurioms paskyroms teikti pirmenybę arba kurias palikti rezerve šiai kombinacijai. Automatinis maršrutizavimas reitinguoja paskyras kiekvienoje pakopoje. Į sąrašą neįtrauktos paskyros laikomos įprastomis. Vis tiek taikomi leidimai, kvotos apribojimai ir esami užklausų susiejimai.",
+    "preferred": "Teikiama pirmenybė",
+    "normal": "Įprasta",
+    "reserve": "Rezervinė",
+    "excluded": "Neįtraukta",
+    "loading": "Įkeliamos paskyros…",
+    "error": "Nepavyko įkelti paskyrų. Norėdami bandyti dar kartą, iš naujo atidarykite redaktorių.",
+    "missing": "Nepasiekiama paskyra ({id})"
+  },
   "teamCosts": {
     "title": "Komandos išlaidos",
     "subtitle": "Tvarkykite bendrus minkštuosius biudžetus ir katalogo išlaidų įvertinimus.",

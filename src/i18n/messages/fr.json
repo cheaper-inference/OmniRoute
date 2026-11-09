@@ -1,4 +1,15 @@
 {
+  "accountPreferences": {
+    "title": "Préférences des comptes",
+    "description": "Définissez plusieurs comptes comme prioritaires ou gardez-les en réserve pour cette configuration. Le routage automatique classe les comptes au sein de chaque niveau. Les comptes non répertoriés restent normaux. Les autorisations, les limites de quota et les associations de tour existantes continuent de s’appliquer.",
+    "preferred": "Prioritaire",
+    "normal": "Normal",
+    "reserve": "En réserve",
+    "excluded": "Exclu",
+    "loading": "Chargement des comptes…",
+    "error": "Impossible de charger les comptes. Rouvrez l’éditeur pour réessayer.",
+    "missing": "Compte indisponible ({id})"
+  },
   "teamCosts": {
     "title": "Coûts d'équipe",
     "subtitle": "Gérez les budgets souples partagés et les estimations de coûts du catalogue.",

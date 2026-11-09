@@ -1,4 +1,15 @@
 {
+  "accountPreferences": {
+    "title": "Tùy chọn tài khoản",
+    "description": "Ưu tiên nhiều tài khoản hoặc giữ chúng làm dự phòng cho cấu hình định tuyến này. Định tuyến tự động xếp hạng các tài khoản trong từng nhóm. Các tài khoản không được liệt kê sẽ hoạt động bình thường. Quyền, giới hạn hạn mức và các liên kết tài khoản hiện có với lượt vẫn được áp dụng.",
+    "preferred": "Ưu tiên",
+    "normal": "Thông thường",
+    "reserve": "Dự phòng",
+    "excluded": "Loại trừ",
+    "loading": "Đang tải tài khoản…",
+    "error": "Không thể tải tài khoản. Mở lại trình chỉnh sửa để thử lại.",
+    "missing": "Tài khoản không khả dụng ({id})"
+  },
   "teamCosts": {
     "title": "Chi phí nhóm",
     "subtitle": "Quản lý ngân sách mềm dùng chung và ước tính chi phí theo danh mục.",
