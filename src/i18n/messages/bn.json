@@ -10840,6 +10840,7 @@
       "refreshFailures": "টোকেন রিফ্রেশ ব্যর্থতা সনাক্ত করা হয়েছে",
       "unknown": "স্বাস্থ্য স্থিতি অজানা"
     },
+    "tokenHealthRefreshAll": "সব রিফ্রেশ করুন",
     "tokenHealthRefreshResult": "{refreshed} রিফ্রেশ হয়েছে, {failed} ব্যর্থ, {skipped} বাদ দেওয়া হয়েছে",
     "systemMonitor": {
       "metricsAriaLabel": "সিস্টেম মেট্রিক্স",

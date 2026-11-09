@@ -10763,6 +10763,7 @@
       "refreshFailures": "Nakita ang mga pagkabigo sa pag-refresh ng token",
       "unknown": "Hindi alam ang katayuan ng kalusugan"
     },
+    "tokenHealthRefreshAll": "I-refresh Lahat",
     "tokenHealthRefreshResult": "{refreshed} na-refresh, {failed} nabigo, {skipped} nilaktawan",
     "systemMonitor": {
       "metricsAriaLabel": "Mga Sukat ng Sistema",

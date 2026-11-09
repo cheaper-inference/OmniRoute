@@ -10763,6 +10763,7 @@
       "refreshFailures": "Tokenuppdateringsfel upptäckta",
       "unknown": "Hälsostatus okänd"
     },
+    "tokenHealthRefreshAll": "Uppdatera alla",
     "tokenHealthRefreshResult": "{refreshed} uppdaterade, {failed} misslyckades, {skipped} hoppades över",
     "systemMonitor": {
       "metricsAriaLabel": "Systemmetrik",

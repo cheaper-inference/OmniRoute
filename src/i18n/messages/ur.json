@@ -10763,6 +10763,7 @@
       "refreshFailures": "ٹوکین کی تجدید میں ناکامیاں دریافت ہوئیں",
       "unknown": "صحت کی حیثیت نامعلوم"
     },
+    "tokenHealthRefreshAll": "سب کو ریفریش کریں",
     "tokenHealthRefreshResult": "{refreshed} تازہ کیے گئے, {failed} ناکام, {skipped} چھوڑ دیے گئے",
     "systemMonitor": {
       "metricsAriaLabel": "سسٹم میٹرکس",

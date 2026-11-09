@@ -10840,6 +10840,7 @@
       "refreshFailures": "Token opdateringsfejl registreret",
       "unknown": "Sundhedsstatus ukendt"
     },
+    "tokenHealthRefreshAll": "Opdater alle",
     "tokenHealthRefreshResult": "{refreshed} opdateret, {failed} mislykket, {skipped} udeladt",
     "systemMonitor": {
       "metricsAriaLabel": "Systemmålinger",

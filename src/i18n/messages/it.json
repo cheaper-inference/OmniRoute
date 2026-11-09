@@ -10840,6 +10840,7 @@
       "refreshFailures": "Rilevati errori di aggiornamento del token",
       "unknown": "Stato di salute sconosciuto"
     },
+    "tokenHealthRefreshAll": "Aggiorna tutto",
     "tokenHealthRefreshResult": "{refreshed} aggiornati, {failed} non riusciti, {skipped} saltati",
     "systemMonitor": {
       "metricsAriaLabel": "Metriche di sistema",

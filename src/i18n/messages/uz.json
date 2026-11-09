@@ -10763,6 +10763,7 @@
       "refreshFailures": "Tokenlarni yangilashda xatoliklar aniqlandi",
       "unknown": "Holat noma’lum"
     },
+    "tokenHealthRefreshAll": "Barchasini yangilash",
     "tokenHealthRefreshResult": "{refreshed} yangilandi, {failed} muvaffaqiyatsiz boʻldi, {skipped} tashlab qoldi",
     "systemMonitor": {
       "metricsAriaLabel": "Tizim ko‘rsatkichlari",

@@ -10763,6 +10763,7 @@
       "refreshFailures": "Виявлено помилки оновлення токенів",
       "unknown": "Статус здоров'я невідомий"
     },
+    "tokenHealthRefreshAll": "Оновити все",
     "tokenHealthRefreshResult": "{refreshed} оновлено, {failed} не вдалося, {skipped} пропущено",
     "systemMonitor": {
       "metricsAriaLabel": "Системні метрики",

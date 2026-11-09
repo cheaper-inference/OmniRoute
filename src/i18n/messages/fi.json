@@ -10763,6 +10763,7 @@
       "refreshFailures": "Tokenin uusimisen epäonnistumisia havaittu",
       "unknown": "Terveystila tuntematon"
     },
+    "tokenHealthRefreshAll": "Päivitä kaikki",
     "tokenHealthRefreshResult": "{refreshed} päivitetty, {failed} epäonnistui, {skipped} ohitettu",
     "systemMonitor": {
       "metricsAriaLabel": "Järjestelmän mittarit",

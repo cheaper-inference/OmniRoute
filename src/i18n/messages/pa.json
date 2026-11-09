@@ -10840,6 +10840,7 @@
       "refreshFailures": "ਟੋਕਨ ਰਿਫ੍ਰੈਸ਼ ਅਸਫਲਤਾਵਾਂ ਮਿਲੀਆਂ",
       "unknown": "ਸਿਹਤ ਸਥਿਤੀ ਅਣਜਾਣ ਹੈ"
     },
+    "tokenHealthRefreshAll": "ਸਭ ਨੂੰ ਰਿਫ੍ਰੈਸ਼ ਕਰੋ",
     "tokenHealthRefreshResult": "{refreshed} ਤਾਜ਼ਾ ਕੀਤੇ, {failed} ਅਸਫਲ, {skipped} ਛੱਡੇ",
     "systemMonitor": {
       "metricsAriaLabel": "ਸਿਸਟਮ ਮੈਟ੍ਰਿਕਸ",

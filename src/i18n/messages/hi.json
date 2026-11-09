@@ -10763,6 +10763,7 @@
       "refreshFailures": "टोकन रिफ्रेश विफलताएँ पाई गईं",
       "unknown": "स्वास्थ्य स्थिति अज्ञात"
     },
+    "tokenHealthRefreshAll": "सभी को ताज़ा करें",
     "tokenHealthRefreshResult": "{refreshed} रीफ़्रेश किए गए, {failed} विफल, {skipped} छोड़े गए",
     "systemMonitor": {
       "metricsAriaLabel": "सिस्टम मेट्रिक्स",

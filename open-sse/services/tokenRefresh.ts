@@ -985,13 +985,23 @@ export async function getAllAccessTokens(userInfo, log, opts) {
 
     const claimed = new Set();
     const inFlightGroups = new Set();
+    // Slots parked because every unclaimed connection is behind a held
+    // rotation group; woken when an in-flight refresh releases its group.
+    let parkedSlots: Array<() => void> = [];
+    const wakeParkedSlots = () => {
+      const wake = parkedSlots;
+      parkedSlots = [];
+      for (const resolve of wake) resolve();
+    };
     const worker = async () => {
       while (claimed.size < eligible.length) {
         const i = pickBulkConnection(eligible, claimed, inFlightGroups);
         if (i < 0) {
-          // Every unclaimed connection is behind a held rotation group — wait
-          // for an in-flight sibling to finish before re-checking.
-          await new Promise((resolve) => setImmediate(resolve));
+          // Every unclaimed connection is behind a held rotation group — park
+          // until an in-flight sibling finishes (no busy re-polling: a sibling
+          // refresh can hold its lane for seconds). A held group implies an
+          // in-flight refresh whose `finally` wakes this slot.
+          await new Promise<void>((resolve) => parkedSlots.push(resolve));
           continue;
         }
         claimed.add(i);
@@ -1005,7 +1015,10 @@ export async function getAllAccessTokens(userInfo, log, opts) {
         try {
           await refreshBulkConnection(connection, results, log, opts);
         } finally {
-          if (group) inFlightGroups.delete(group);
+          if (group) {
+            inFlightGroups.delete(group);
+            wakeParkedSlots();
+          }
         }
       }
     };

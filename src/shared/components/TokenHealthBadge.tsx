@@ -38,7 +38,6 @@ const STATUS_MAP = {
 
 export default function TokenHealthBadge() {
   const t = useTranslations("stats");
-  const tUsage = useTranslations("usage");
   const [health, setHealth] = useState(null);
   const [open, setOpen] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -199,7 +198,7 @@ export default function TokenHealthBadge() {
           onClick={handleRefresh}
           disabled={refreshing}
         >
-          {tUsage("refreshAll")}
+          {t("tokenHealthRefreshAll")}
         </Button>
       </PopoverContent>
     </Popover>

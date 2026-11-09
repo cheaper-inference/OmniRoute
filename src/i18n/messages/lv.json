@@ -10763,6 +10763,7 @@
       "refreshFailures": "Konstatētas tokenu atjaunošanas kļūmes",
       "unknown": "Stāvoklis nav zināms"
     },
+    "tokenHealthRefreshAll": "Atjaunināt visu",
     "tokenHealthRefreshResult": "{refreshed} atjaunināti, {failed} neizdevušies, {skipped} izlaisti",
     "systemMonitor": {
       "metricsAriaLabel": "Sistēmas rādītāji",

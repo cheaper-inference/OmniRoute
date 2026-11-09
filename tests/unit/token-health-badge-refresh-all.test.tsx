@@ -72,7 +72,7 @@ describe("TokenHealthBadge — refresh all", () => {
     // looked up on the portal root rather than the render container.
     const portal = document.body.querySelector('[data-slot="popover-content"]');
     const button = Array.from(portal?.querySelectorAll("button") ?? []).find((b) =>
-      b.textContent?.includes("refreshAll")
+      b.textContent?.includes("tokenHealthRefreshAll")
     ) as HTMLButtonElement;
     expect(button).toBeTruthy();
     return button;

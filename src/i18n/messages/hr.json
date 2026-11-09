@@ -10763,6 +10763,7 @@
       "refreshFailures": "Otkriveni su neuspjesi osvježavanja tokena",
       "unknown": "Stanje nije poznato"
     },
+    "tokenHealthRefreshAll": "Osvježi sve",
     "tokenHealthRefreshResult": "{refreshed} osvježeno, {failed} neuspjelo, {skipped} preskočeno",
     "systemMonitor": {
       "metricsAriaLabel": "Metrike sustava",

@@ -766,3 +766,81 @@ test(
     assert.equal((sink.proxy as { port: number }).port, 9471);
   }
 );
+
+test(
+  "bulk token refresh parks idle wave slots instead of spinning while a rotation group is busy",
+  { timeout: 30000 },
+  async () => {
+    const log = createLog();
+
+    // Three claude siblings share the "anthropic-oauth" lane, so the wave runs
+    // them one at a time and two of its three slots sit idle for the whole
+    // wave. Each refresh waits ~300 ms on the network. An idle slot must wait
+    // for the in-flight sibling to finish, not re-poll the event loop with
+    // setImmediate in a tight loop (that burns the CPU the proxy serves
+    // requests on for as long as a sibling refresh lasts — up to the 60 s
+    // lane bound).
+    const connections = Array.from({ length: 3 }, (_, i) => ({
+      provider: "claude",
+      connectionId: `conn-cl${i}`,
+      refreshToken: `rt-cl${i}`,
+      isActive: true,
+    }));
+    assert.equal(rotationGroupFor("claude"), "anthropic-oauth");
+
+    const mockFetch: typeof fetch = (_input, init) =>
+      new Promise((resolve) => {
+        const refreshToken = refreshTokenFromBody(init);
+        setTimeout(
+          () =>
+            resolve(
+              jsonResponse({
+                access_token: `access-${refreshToken}`,
+                refresh_token: `${refreshToken}-next`,
+                expires_in: 900,
+              })
+            ),
+          300
+        );
+      });
+
+    const originalSetImmediate = globalThis.setImmediate;
+    let immediateCalls = 0;
+    const countingSetImmediate = ((...args: Parameters<typeof setImmediate>) => {
+      immediateCalls += 1;
+      return originalSetImmediate(...args);
+    }) as typeof setImmediate;
+
+    let results: Record<string, unknown> | null = null;
+    await withPatchedProperties(
+      (await import("../../open-sse/config/constants.ts")).OAUTH_ENDPOINTS,
+      { anthropic: { token: "https://api.anthropic.test/v1/oauth/token" } },
+      async () => {
+        await withMockedFetch(mockFetch, async () => {
+          globalThis.setImmediate = countingSetImmediate;
+          try {
+            results = (await getAllAccessTokens({ connections }, log)) as Record<string, unknown>;
+          } finally {
+            globalThis.setImmediate = originalSetImmediate;
+          }
+        });
+      }
+    );
+
+    assert.deepEqual(Object.keys(results!).sort(), [
+      "claude:conn-cl0",
+      "claude:conn-cl1",
+      "claude:conn-cl2",
+    ]);
+    for (const key of Object.keys(results!)) {
+      assert.ok(results![key], `${key} refreshed`);
+    }
+    // A spinning slot schedules thousands of immediates over ~900 ms of
+    // serialized network waits; a parked slot schedules none. The bound leaves
+    // room for incidental immediates from the fetch/Response machinery.
+    assert.ok(
+      immediateCalls < 50,
+      `idle wave slots must not busy-poll (setImmediate called ${immediateCalls} times)`
+    );
+  }
+);

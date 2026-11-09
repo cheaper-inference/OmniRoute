@@ -10763,6 +10763,7 @@
       "refreshFailures": "Zistené zlyhania obnovenia tokenu",
       "unknown": "Zdravotný stav neznámy"
     },
+    "tokenHealthRefreshAll": "Obnoviť všetko",
     "tokenHealthRefreshResult": "{refreshed} obnovené, {failed} zlyhalo, {skipped} preskočené",
     "systemMonitor": {
       "metricsAriaLabel": "Systémové metriky",

@@ -10763,6 +10763,7 @@
       "refreshFailures": "Wykryto błędy odświeżania tokenów",
       "unknown": "Stan zdrowia nieznany"
     },
+    "tokenHealthRefreshAll": "Odśwież wszystko",
     "tokenHealthRefreshResult": "{refreshed} odświeżone, {failed} nieudane, {skipped} pominięte",
     "systemMonitor": {
       "metricsAriaLabel": "Metryki systemowe",

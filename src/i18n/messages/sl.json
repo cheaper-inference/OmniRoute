@@ -10763,6 +10763,7 @@
       "refreshFailures": "Zaznane so bile napake pri osveževanju žetonov",
       "unknown": "Stanje ni znano"
     },
+    "tokenHealthRefreshAll": "Osveži vse",
     "tokenHealthRefreshResult": "{refreshed} osveženih, {failed} neuspešnih, {skipped} preskočenih",
     "systemMonitor": {
       "metricsAriaLabel": "Sistemske metrike",

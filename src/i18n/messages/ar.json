@@ -10840,6 +10840,7 @@
       "refreshFailures": "تم الكشف عن فشل في تحديث الرمز",
       "unknown": "حالة الصحة غير معروفة"
     },
+    "tokenHealthRefreshAll": "تحديث الكل",
     "tokenHealthRefreshResult": "{refreshed} تم التحديث، {failed} فشل، {skipped} تم التخطي",
     "systemMonitor": {
       "metricsAriaLabel": "مقاييس النظام",

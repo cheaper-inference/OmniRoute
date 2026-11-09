@@ -10763,6 +10763,7 @@
       "refreshFailures": "Kukosekana kwa ufanisi wa upya token kumegundulika",
       "unknown": "Hali ya afya haijulikani"
     },
+    "tokenHealthRefreshAll": "Onyesha Upya Zote",
     "tokenHealthRefreshResult": "{refreshed} imesasishwa, {failed} imeshindwa, {skipped} imerukwa",
     "systemMonitor": {
       "metricsAriaLabel": "Metriki za Mfumo",
