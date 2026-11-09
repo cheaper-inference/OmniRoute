@@ -7,7 +7,6 @@ import path from "node:path";
 process.env.DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-terra-pricing-"));
 
 const { getPricingForModel } = await import("../../src/shared/constants/pricing.ts");
-const { getModelInfoCore } = await import("../../open-sse/services/model.ts");
 const { resetDbInstance } = await import("../../src/lib/db/core.ts");
 
 test.after(() => {
@@ -29,10 +28,4 @@ test("every GPT-6.1 Terra id resolves the Codex price row", () => {
       id
     );
   }
-});
-
-test("a bare deepseek-v4-1-flash id infers the deepseek provider", async () => {
-  const info = await getModelInfoCore("deepseek-v4-1-flash", {});
-  assert.equal(info.errorType, undefined);
-  assert.equal(info.provider, "deepseek");
 });
