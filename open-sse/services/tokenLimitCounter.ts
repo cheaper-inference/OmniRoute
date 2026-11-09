@@ -42,9 +42,23 @@ const CACHE_TTL_MS = 5_000;
  *
  * Returns the windowed total (>= 0). DB-authoritative point-in-time read.
  */
-export function seedWindowUsageFromHistory(limit: TokenLimit, now = Date.now()): number {
+export function seedWindowUsageFromHistory(
+  limit: TokenLimit,
+  now = Date.now(),
+  recordedBefore?: number
+): number {
   const { periodStartAt } = resetWindowIfElapsed(limit, now);
   const lowerBound = new Date(periodStartAt).toISOString();
+  // Optional exclusive upper bound. recordTokenUsage passes the start of the
+  // request it is recording: that request's own usage_history row (and those of
+  // requests still in flight beside it) is written before the counter increment
+  // runs, so a seed without this bound counts the request twice (#18898).
+  const upperBound =
+    typeof recordedBefore === "number" && Number.isFinite(recordedBefore)
+      ? new Date(recordedBefore).toISOString()
+      : null;
+  const upperClause = upperBound ? " AND timestamp < ?" : "";
+  const bounds = upperBound ? [lowerBound, upperBound] : [lowerBound];
   const db = getDbInstance();
 
   // Canonical billable total = input + max(output, reasoning). tokens_cache_read and
@@ -62,23 +76,23 @@ export function seedWindowUsageFromHistory(limit: TokenLimit, now = Date.now()):
     row = db
       .prepare(
         `SELECT ${tokenSum} FROM usage_history
-         WHERE api_key_id = ? AND model = ? AND timestamp >= ?`
+         WHERE api_key_id = ? AND model = ? AND timestamp >= ?${upperClause}`
       )
-      .get(limit.apiKeyId, limit.scopeValue, lowerBound);
+      .get(limit.apiKeyId, limit.scopeValue, ...bounds);
   } else if (limit.scopeType === "provider") {
     row = db
       .prepare(
         `SELECT ${tokenSum} FROM usage_history
-         WHERE api_key_id = ? AND provider = ? AND timestamp >= ?`
+         WHERE api_key_id = ? AND provider = ? AND timestamp >= ?${upperClause}`
       )
-      .get(limit.apiKeyId, limit.scopeValue, lowerBound);
+      .get(limit.apiKeyId, limit.scopeValue, ...bounds);
   } else {
     row = db
       .prepare(
         `SELECT ${tokenSum} FROM usage_history
-         WHERE api_key_id = ? AND timestamp >= ?`
+         WHERE api_key_id = ? AND timestamp >= ?${upperClause}`
       )
-      .get(limit.apiKeyId, lowerBound);
+      .get(limit.apiKeyId, ...bounds);
   }
 
   const total = row && typeof row === "object" ? (row as { total?: unknown }).total : 0;
@@ -254,12 +268,16 @@ export function checkTokenLimits(
  * @param provider  resolved upstream provider id
  * @param model     resolved model id
  * @param tokens    billable tokens consumed by this request (no-op if <= 0)
+ * @param requestStartedAt epoch-ms the request started. When given, a cold-window
+ *        seed only counts usage_history rows written before it, so the request's
+ *        own row is not counted on top of `tokens`.
  */
 export function recordTokenUsage(
   apiKeyId: string,
   provider: string,
   model: string,
-  tokens: number
+  tokens: number,
+  requestStartedAt?: number
 ): void {
   if (!apiKeyId) return;
   const delta = Number.isFinite(tokens) && tokens > 0 ? Math.floor(tokens) : 0;
@@ -307,7 +325,7 @@ export function recordTokenUsage(
             // running total reflects prior usage already recorded in this window
             // before applying the new delta. Synchronous (better-sqlite3) — safe
             // inside this transaction. Mirrors getCurrentWindowUsage seed-on-miss.
-            const seeded = seedWindowUsageFromHistory(limit, now);
+            const seeded = seedWindowUsageFromHistory(limit, now, requestStartedAt);
             if (seeded > 0) {
               incrementWindowTokens(limit.id, windowStart, seeded);
             }

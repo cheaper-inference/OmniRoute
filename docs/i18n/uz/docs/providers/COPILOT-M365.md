@@ -57,30 +57,32 @@ OmniRoute HAR faylini Chathub WebSocket URL manzili uchun tekshiradi, `access_to
 
 ## Tokenning amal qilish muddati va yangilanishi
 
-`access_token` qisqa muddat amal qiladi (odatda **~75 daqiqa**). Uning muddati tugagach, provayder ulanish xatosi haqida xabar beradi va hisob maʼlumotini qayta olishingiz kerak boʻladi.
+`access_token` qisqa muddat amal qiladi (odatda **~75 daqiqa**). Foydalanish mumkin bo‘lgan yangilash
+tokenisiz, amal qilish muddati tugagach, hisob ma’lumotlarini qayta olishingiz kerak.
 
 ### `refreshToken` yordamida avtomatik yangilash
 
-Qoʻlda qayta olish zaruratidan qochish uchun Microsoft yangilash tokenini ulanishning **Advanced Settings → providerSpecificData** boʻlimida saqlashingiz mumkin:
+Microsoft 365 provayderining **Ulanish qo‘shish** yoki **Ulanishni tahrirlash** dialog oynasida
+**Kengaytirilgan sozlamalar → Yangilash tokeni (ixtiyoriy)** bo‘limini oching. `substrate.office.com/sydney`
+scope uchun Microsoft OAuth yangilash tokenini joylashtiring va saqlang. Kiritilgan qiymat yashiriladi va saqlangan token bilan oldindan to‘ldirilmaydi. Tahrirlashda mavjud tokenni saqlab qolish uchun maydonni bo‘sh qoldiring;
+yangi tokenni almashtirish uchun uni joylashtiring.
 
-| Maydon         | Tavsif                                                                       |
-| -------------- | ---------------------------------------------------------------------------- |
-| `refreshToken` | `substrate.office.com/sydney` doirasi uchun Microsoft OAuth yangilash tokeni |
-| `tier`         | `individual` (standart), `edu` yoki `enterprise`                             |
+Yangilash tokenini `substrate.office.com/sydney` scope bilan Microsoft qurilma kodi yoki avtorizatsiya kodi oqimidan oling; boshqaruv paneli uni siz uchun olmaydi.
+Yangilash tokeni sozlangan bo‘lsa, OmniRoute so‘rovlar yuborishdan oldin `access_token`ni tekshiradi
+va uni faqat yangilash zarur bo‘lgandagina yangilaydi. Muvaffaqiyatli yangilash yangilangan yangilash tokenini ham saqlaydi, bu esa yangilash tokeni amal qilishda davom etar ekan, hisob ma’lumotlarini qo‘lda qayta olish zaruratini bartaraf etadi.
 
-Yangilash tokenini `substrate.office.com/sydney` doirasiga ega Microsoft qurilma kodi yoki avtorizatsiya kodi oqimi orqali oling. `refreshToken` oʻrnatilgan boʻlsa, OmniRoute har bir soʻrovdan oldin `access_token` ni oldindan yangilaydi, shuning uchun har bir ~75 daqiqalik amal qilish muddati tugaganidan keyin hisob maʼlumotini qayta olishingiz shart emas.
-
-Agar `refreshToken` oʻrnatilmagan boʻlsa, har safar amal qilish muddati tugaganidan keyin WebSocket hisob maʼlumotini qoʻlda qayta olishingiz kerak.
+Agar `refreshToken` o‘rnatilmagan bo‘lsa, har bir amal qilish muddati tugagandan keyin WebSocket hisob ma’lumotlarini qo‘lda qayta olishingiz kerak.
 
 ### Darajani tanlash
 
-| Daraja       | Taxallus     | Muhit                             |
+| Daraja       | Taxallus     | Interfeys                         |
 | ------------ | ------------ | --------------------------------- |
-| `individual` | _(standart)_ | Isteʼmolchilar uchun M365 Copilot |
-| `edu`        | `included`   | Taʼlim uchun M365 Copilot         |
+| `individual` | _(standart)_ | Iste’molchilar uchun M365 Copilot |
+| `edu`        | `included`   | Ta’lim uchun M365 Copilot         |
 | `enterprise` | `work`       | Ish uchun M365 Copilot            |
 
-Darajani **Advanced Settings → providerSpecificData → tier** boʻlimida belgilang. Daraja BizChat yoʻnaltirilishi va modellarga kirish imkoniyatiga taʼsir qiladi.
+Darajani **Kengaytirilgan sozlamalar → Copilot darajasi** bo‘limida belgilang. Daraja
+BizChat yo‘naltirilishi va modellardan foydalanish imkoniyatiga ta’sir qiladi.
 
 ## Xavfsizlik modeli
 
@@ -97,28 +99,23 @@ Darajani **Advanced Settings → providerSpecificData → tier** boʻlimida belg
 
 ### Autentifikatsiya darhol muvaffaqiyatsiz tugaydi
 
-- Ma’lumotni XHR/Fetch so‘rovidan emas, **WebSocket URL manzili**dan nusxalaganingizni tekshiring. Hisobga
-  kirish ma’lumoti Chathub WebSocket ulanishining `access_token` so‘rov parametrida
-  joylashgan — `Authorization: Bearer` sarlavhasida emas.
-- `chathubPath` URL yo‘lidagi to‘liq `<oid>@<tenant>` segmentini o‘z ichiga
-  olganiga ishonch hosil qiling.
+- XHR/Fetch so‘rovidan emas, **WebSocket URL** manzilidan nusxa olganingizni tekshiring. Hisob ma’lumotlari Chathub WebSocket ulanishining `access_token` so‘rov parametrida joylashgan — `Authorization: Bearer` sarlavhasida emas.
+- `chathubPath` URL yo‘lidagi to‘liq `<oid>@<tenant>` segmentini o‘z ichiga olganiga ishonch hosil qiling.
 
-### Tokenning amal qilish muddati ~75 daqiqadan keyin tugaydi
+### Token ~75 daqiqadan keyin muddati tugaydi
 
-Bu kutilgan holat. `refreshToken` bo‘lmasa, kirish tokeni qisqa muddat amal qiladi. Quyidagilardan birini bajaring:
+Bu kutilgan holat. `refreshToken` bo‘lmasa, kirish tokenining amal qilish muddati qisqa bo‘ladi. Quyidagilardan birini bajaring:
 
-- DevTools orqali hisobga kirish ma’lumotini qayta yozib oling yoki
-- Avtomatik yangilash uchun Kengaytirilgan sozlamalarda `refreshToken`ni sozlang.
+- DevTools’dan hisob ma’lumotlarini qaytadan oling yoki
+- Avtomatik yangilash uchun Add or Edit connection dialog oynasidagi **Advanced Settings → Refresh token (optional)** sozlamasini konfiguratsiya qiling.
 
-### Ulanishni tekshirish muvaffaqiyatli, ammo chat 401 xatosini qaytaradi
+### Test Connection muvaffaqiyatli o‘tadi, ammo chat 401 qaytaradi
 
-Tokenning amal qilish muddati tekshiruv va birinchi so‘rov oralig‘ida tugagan bo‘lishi mumkin. Yangi
-hisobga kirish ma’lumotini qayta yozib oling.
+Token tekshiruvdan o‘tish va birinchi so‘rov yuborish oralig‘ida muddati tugagan bo‘lishi mumkin. Yangi hisob ma’lumotlarini qaytadan oling.
 
 ### Copilot provayderlar ro‘yxatida ko‘rinmaydi
 
-**Boshqaruv paneli → Provayderlar** bo‘limida `copilot-m365-web` yoqilganiga ishonch hosil qiling. Ayrim
-tariflarda provayder sukut bo‘yicha yashirilgan bo‘lishi mumkin.
+**Dashboard → Providers** bo‘limida `copilot-m365-web` yoqilganiga ishonch hosil qiling. Ayrim tariflarda provayder sukut bo‘yicha yashirilgan bo‘lishi mumkin.
 
 ## Manbalar
 

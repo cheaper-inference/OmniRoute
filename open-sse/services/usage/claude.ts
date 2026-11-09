@@ -24,7 +24,11 @@ import { boundedMap } from "../../../src/lib/quota/boundedMap.ts";
 import { sanitizeErrorMessage } from "../../utils/errorSanitization.ts";
 import { fetchWithConnectionProxy } from "../connectionProxyFetch.ts";
 import { toRecord } from "./scalars.ts";
-import { normalizeClaudeUsageQuotas, type NormalizedClaudeUsageQuotas } from "./claudeQuota.ts";
+import {
+  claudeUsageWindowsComplete,
+  normalizeClaudeUsageQuotas,
+  type NormalizedClaudeUsageQuotas,
+} from "./claudeQuota.ts";
 
 /** Run one usage request through the proxy when an id is present, else directly. */
 async function proxiedOrDirect(
@@ -61,6 +65,8 @@ export interface ClaudeUsageResult {
   extraUsage?: unknown;
   message?: string;
   bootstrap: ClaudeBootstrap | null;
+  /** The payload listed every window the account has (see isCompleteUsageReading). */
+  quotasComplete?: boolean;
   /** Set when the quota is the last known value served during a 429 cooldown. */
   _stale?: boolean;
   _staleSince?: string;
@@ -234,6 +240,8 @@ async function fetchClaudeUsage(
         ...(plan ? { plan } : {}),
         quotas,
         modelQuotas,
+        // The adapter alone knows the wire format: see isCompleteUsageReading.
+        ...(claudeUsageWindowsComplete(data) ? { quotasComplete: true } : {}),
         extraUsage: data.extra_usage ?? null,
         bootstrap,
       };

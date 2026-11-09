@@ -33,37 +33,43 @@ Běžné problémy a jejich řešení pro OmniRoute.
 
 ---
 
-## Podrobné řešení problémů
+## Podrobné řešení potíží
 
 ---
 
 ### Omezení rychlosti u bezplatných poskytovatelů (429 / 400 / 401)
 
-**Příznak**: Při použití `model: "auto"` s bezplatnými poskytovateli nebo poskytovateli bez ověřování (auggie atd.) občas místo odpovědí obdržíte chybu `HTTP 429`, `400` nebo `401`. Po zopakování stejného dotazu o několik okamžiků později požadavky uspějí, ale automatizace (úlohy cron, agenti, skripty) se při prvním selhání přeruší.
+**Příznak**: Při použití `model: "auto"` s bezplatnými poskytovateli bez autentizace (auggie apod.) občas místo odpovědí obdržíte `HTTP 429`, `400` nebo `401`. Po opakování stejného požadavku o chvíli později požadavky uspějí, ale automatizace (úlohy cron, agenti, skripty) selže při prvním pokusu.
 
-**Hlavní příčina**: Kombinují se tři nezávislé režimy selhání:
+**Kořenová příčina**: Kombinují se tři nezávislé režimy selhání:
 
-1. **Omezení rychlosti poskytovatele (`429`)**: Bezplatné úrovně mohou vynucovat kvótu pro určité časové okno. Dávka paralelních volání ji vyčerpá, takže je další požadavek odmítnut, dokud se časové okno neobnoví.
-2. **Nefunkční model v režimu passthrough (`400`/`401`)**: Fondy `auto/*` mohou obsahovat modely passthrough, které jsou zaregistrovány v katalogu, ale nemají platné přihlašovací údaje (→ `401`). Automatický směrovač jeden z nich vyzkouší, selže a chyba se rozšíří dříve, než se aktivuje záložní řešení.
-3. **Zesílení souběžností (`429` při zatížení)**: Když se na `auto` současně obrátí více relací agentů nebo úloh cron, celková četnost požadavků překročí míru, kterou bezplatní poskytovatelé tolerují, takže jsou legitimní volání označena za zneužívající.
+1. **Omezení rychlosti poskytovatele (`429`)**: Bezplatné tarify mohou vynucovat kvótu pro každé časové okno. Náraz paralelních volání ji vyčerpá, takže další požadavek je odmítnut, dokud se okno neresetuje.
+2. **Nefunkční model v režimu passthrough (`400`/`401`)**: Pooly `auto/*` mohou obsahovat passthrough modely, které jsou registrované v katalogu, ale nemají platné přihlašovací údaje (→ `401`). Automatický router jeden z nich zkusí, selže a chyba se před aktivací fallbacku propaguje dál.
+3. **Zesílení souběžnosti (`429` při zatížení)**: Když více relací agentů nebo cron úloh současně narazí na `auto`, souhrnná četnost požadavků překročí toleranci bezplatných poskytovatelů, takže legitimní volání jsou označena jako zneužití.
 
-**Ověřená oprava (nahlášeno komunitou, 2026-08-10)**: upravte tři proměnné prostředí tak, aby rotace, souběžnost a záložní řešení absorbovaly nestabilitu bezplatné úrovně, místo aby kvůli ní došlo k selhání:
+**Ověřená oprava (hlášení komunity, 2026-08-10)**: Nastavte tři proměnné prostředí tak, aby rotace, souběžnost a fallback absorbovaly změny u bezplatné úrovně namísto selhání:
 
 ```bash
-export OMNIROUTE_ROTATE_ON_400=true           # při 400/401 přejít na jiný model nebo k jinému poskytovateli (přeskočí nefunkční modely passthrough)
-export OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT=4   # explicitní limit přijímání náročných požadavků (ve výchozím nastavení nenastaveno: počet požadavků není omezen, viz poznámka níže)
-export OMNIROUTE_CHAT_ADMISSION_QUEUE_MS=20000 # zvýšit omezenou dobu čekání nad výchozí hodnotu RATE_LIMIT_MAX_WAIT_MS pro pomalé upstreamy
+export OMNIROUTE_ROTATE_ON_400=true           # přejít na jiný model/poskytovatele při 400/401 (přeskočí nefunkční passthrough modely)
+export OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT=4   # explicitní limit souběžného spuštění náročných požadavků (ve výchozím nastavení není nastaven: žádný limit počtu požadavků, viz poznámka níže)
+export OMNIROUTE_CHAT_ADMISSION_QUEUE_MS=20000 # prodloužit omezené čekání nad výchozí hodnotu RATE_LIMIT_MAX_WAIT_MS pro pomalé nadřazené služby
 ```
 
-Nastavte je v prostředí procesu OmniRoute (démonu, například prostřednictvím souboru plist nástroje LaunchAgent nebo příkazu `systemctl edit`) a poté OmniRoute restartujte. Příznak rotace má zdaleka největší účinek: změní úplné selhání na transparentní opakování požadavku u funkčního poskytovatele ve fondu.
+Nastavte je v prostředí procesu OmniRoute (démona, například prostřednictvím plist LaunchAgent nebo pomocí `systemctl edit`) a poté OmniRoute restartujte. Příznak rotace je nejúčinnější opatření: převede tvrdé selhání na transparentní opakování požadavku vůči zdravému poskytovateli v poolu.
 
-**Poznámka**: `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` omezuje počet náročných požadavků — požadavků s dlouhým kontextem — spuštěných současně; tento limit představuje přijímací bránu, nikoli omezení rychlosti poskytovatele. **Aktualizace k větvení chyb #503:** tato proměnná již není nastavena ve výchozím nastavení (nyní se uplatní pouze při explicitní konfiguraci, jako výše) — přijímání náročných požadavků je místo toho řízeno automaticky odvozeným bajtovým rozpočtem (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`), který se škáluje podle skutečného paměťového limitu hostitele, takže by v nové instalaci mělo docházet k výrazně menšímu počtu odmítnutí `503 chat_admission_busy`, aniž by bylo nutné tuto proměnnou vůbec nastavovat; její explicitní nastavení zde nadále funguje přesně podle dokumentace. Explicitní přepsání bajtového rozpočtu je omezeno na rozsah 8 MiB–2 GiB. Chyba `413 body_exceeds_budget` není přechodná: zvyšte tento bajtový rozpočet, snižte `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES` nebo zvyšte paměťový limit procesu. Odmítnutí `inflight_bytes_budget` je způsobeno dočasným soupeřením o prostředky a požadavek lze nadále opakovat. Omezení rychlosti pro jednotlivé poskytovatele (`open-sse/services/rateLimitManager.ts`) je samostatně řízeno proměnnými `RATE_LIMIT_MAX_WAIT_MS`, `RATE_LIMIT_MAX_QUEUE_DEPTH` a `RATE_LIMIT_AUTO_ENABLE` — viz `.env.example`.
+**Poznámka**: `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` omezuje počet náročných požadavků — s dlouhým kontextem — spuštěných současně; tento limit je vstupní brána, nikoli omezovač rychlosti poskytovatele. **#503-fanout aktualizace:** tato proměnná se již ve výchozím nastavení nenastavuje (nyní se uplatní pouze při explicitní konfiguraci, jak je uvedeno výše) — vstup náročných požadavků je místo toho řízen automaticky odvozeným rozpočtem bajtů (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`), který se sám přizpůsobuje skutečnému limitu paměti hostitele, takže nové nasazení by mělo zaznamenat výrazně méně odmítnutí `503 chat_admission_busy` i bez nastavení této proměnné; její explicitní nastavení zde však nadále funguje přesně podle dokumentace. Explicitní přepsání rozpočtu bajtů je omezeno na 8 MiB–2 GiB. Chyba `413 body_exceeds_budget` není dočasná: zvyšte tento rozpočet bajtů, snižte `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES` nebo uložený limit těla požadavku, případně zvyšte limit paměti procesu. Omezení `inflight_bytes_budget` je dočasné omezení kvůli souběhu a nadále umožňuje opakování. Omezení rychlosti pro jednotlivé poskytovatele (`open-sse/services/rateLimitManager.ts`) se řídí samostatně pomocí `RATE_LIMIT_MAX_WAIT_MS`, `RATE_LIMIT_MAX_QUEUE_DEPTH` a `RATE_LIMIT_AUTO_ENABLE` — viz `.env.example`.
 
-**Jak ověřit, že oprava funguje**: spusťte agenta nebo úlohu cron dvakrát rychle po sobě a ověřte, že obě spuštění uspějí. Před opravou druhé spuštění obvykle vyvolá chybu `429`/`401`. Po opravě jsou případná selhání transparentně opakována a volání se dokončí. Můžete také použít `curl /monitoring/health` a sledovat pole `rateLimitedUntil` u připojení poskytovatelů a hodnotu `circuitBreakers.providerBreakers[].state` u dotčených poskytovatelů — stav je jedním z `CLOSED`, `DEGRADED`, `OPEN` nebo `HALF_OPEN` (viz `src/shared/utils/circuitBreaker.ts`) a poskytovatel, který opakovaně selhává, přejde ze stavu `CLOSED → DEGRADED → OPEN`, než po uplynutí intervalu obnovení systém propustí zkušební požadavek (`HALF_OPEN`).
+**Poznámka k aktualizaci: uložený limit těla požadavku se nyní vztahuje také na chat.** Limit dříve uložený v Settings > Advanced > Request Body Limit (`maxBodySizeMb`) se nyní vztahuje také na `/v1/chat/completions` a `/v1/responses`. Před touto změnou tyto dvě trasy přijímaly až 50 MB bez ohledu na uloženou hodnotu, takže instalace s nižším uloženým limitem začne odmítat těla chatu, která jej překračují. Instalace, ve které nebyl žádný limit nikdy uložen, si zachovává výchozí limit 50 MB.
 
-**Pokud se chyba 429 stále objevuje**: aktivní účet u daného poskytovatele skutečně vyčerpal svou _kvótu_ (nejde pouze o omezení rychlosti). Přidejte pro stejného poskytovatele druhý účet na řídicím panelu OmniRoute → Providers → Accounts nebo přidejte jiného bezplatného poskytovatele (například `routeway`, `auggie`). Rotace pomáhá pouze s přechodným omezením rychlosti nebo chybami 400/401; úplné vyčerpání kvóty vyžaduje druhé přihlašovací údaje nebo jiného poskytovatele.
+Odmítnutí je HTTP `413` s hodnotou `PAYLOAD_TOO_LARGE` v `error.code` a hodnotou `payload_too_large` v `error.type`. Zpráva uvádí platný limit: `Request body too large. Maximum allowed: 10 MB`, pokud je deklarovaná hodnota `Content-Length` vyšší, nebo `Request body too large for chat completions (max 10 MB).`, pokud jsou skutečně načtené bajty vyšší. Nejde o totéž jako výše uvedené `413 body_exceeds_budget`, které pochází z rozpočtu paměti a toto nastavení jej nemění.
 
-**Pokud se u modelů pro obrazový vstup (`auto/vision`, `bazaarlink/*`) zobrazuje chyba 403**: připojený účet nemá placený tarif zahrnující obrazový vstup nebo klíč API nemá dostatečná oprávnění. Na řídicím panelu poskytovatele ověřte, že rozsah oprávnění klíče zahrnuje obrazový nebo multimodální vstup, případně připojte účet s placeným tarifem a ponechte jej jako cíl pro obrazový vstup.
+Chcete-li limit zvýšit, uložte vyšší hodnotu na `/dashboard/settings/advanced` nebo odešlete `PATCH /api/settings` s `{"maxBodySizeMb": 50}`. Přijímají se hodnoty od 1 do 500 MB, změna se projeví bez restartu a hodnota 50 obnoví předchozí limit chatu. Větší tělo mohou stále zastavit další dva limity: `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES`, pokud je nastaven, také omezuje uložený limit, a anotaci Kubernetes ingress `proxy-body-size` (`50m` v dodávaných manifestech) je nutné pro cokoli nad 50 MB zvýšit samostatně.
+
+**Jak ověřit, že oprava funguje**: Spusťte agenta nebo úlohu cron dvakrát rychle po sobě a ověřte, že oba běhy uspějí. Před opravou druhý běh obvykle skončí chybou `429`/`401`. Po opravě se případná selhání transparentně opakují a volání se dokončí. Můžete také použít `curl /monitoring/health` a sledovat pole `rateLimitedUntil` u připojení poskytovatelů a `circuitBreakers.providerBreakers[].state` u dotčených poskytovatelů — stav je jedním z `CLOSED`, `DEGRADED`, `OPEN` nebo `HALF_OPEN` (viz `src/shared/utils/circuitBreaker.ts`) a poskytovatel, který opakovaně selhává, přejde z `CLOSED → DEGRADED → OPEN`, než resetovací okno umožní průchod testovacímu požadavku (`HALF_OPEN`).
+
+**Pokud stále vidíte 429**: Aktivní účet tohoto poskytovatele skutečně vyčerpal svou _kvótu_ (nikoli pouze rychlostní limit). Přidejte druhý účet pro stejného poskytovatele v řídicím panelu OmniRoute → Providers → Accounts nebo kombinujte jiného bezplatného poskytovatele (např. `routeway`, `auggie`). Rotace pomáhá pouze s dočasnými omezeními rychlosti a chybami 400/401; úplné vyčerpání kvóty vyžaduje druhé přihlašovací údaje nebo jiného poskytovatele.
+
+**Pokud u vizuálních modelů (`auto/vision`, `bazaarlink/*`) vidíte 403**: Připojený účet nemá placený tarif zahrnující vizuální funkce nebo klíč API nemá dostatečná oprávnění. Ověřte na řídicím panelu poskytovatele, že rozsah klíče zahrnuje vizuální/multimodální funkce, nebo připojte účet s placeným tarifem a ponechte jej jako cíl pro vizuální modely.
 
 ---
 

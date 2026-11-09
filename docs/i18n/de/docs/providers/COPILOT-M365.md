@@ -65,38 +65,37 @@ HAR-Import wird das Ablaufdatum des JWT decodiert und die verbleibende Token-Leb
 > **Übertragen Sie niemals einen echten HAR-Export, ein Zugriffstoken oder ein Aktualisierungstoken in ein Repository.** Werte für Tests und
 > Dokumentation müssen immer Platzhalter sein.
 
-## Token-Lebensdauer und Aktualisierung
+## Tokenlebensdauer und Aktualisierung
 
-Das `access_token` ist kurzlebig (normalerweise **~75 Minuten**). Nach Ablauf meldet der Anbieter
-einen Verbindungsfehler, und Sie müssen die Anmeldeinformationen erneut erfassen.
+Das `access_token` ist kurzlebig (typischerweise **~75 Minuten**). Ohne ein nutzbares
+Aktualisierungstoken müssen Sie die Anmeldeinformationen nach Ablauf erneut erfassen.
 
 ### Automatische Aktualisierung mit `refreshToken`
 
-Um eine manuelle Neuerfassung zu vermeiden, können Sie ein Microsoft-Aktualisierungstoken unter
-**Advanced Settings → providerSpecificData** der Verbindung speichern:
+Öffnen Sie im Dialog **Verbindung hinzufügen** oder **Verbindung bearbeiten** des Microsoft-365-Anbieters
+**Erweiterte Einstellungen → Aktualisierungstoken (optional)**. Fügen Sie ein Microsoft-OAuth-Aktualisierungstoken
+für den Bereich `substrate.office.com/sydney` ein und speichern Sie. Die Eingabe wird maskiert und nie
+mit dem gespeicherten Token vorausgefüllt. Lassen Sie das Feld beim Bearbeiten leer, um das vorhandene Token
+beizubehalten; fügen Sie ein neues Token ein, um es zu ersetzen.
 
-| Feld           | Beschreibung                                                                       |
-| -------------- | ---------------------------------------------------------------------------------- |
-| `refreshToken` | Microsoft OAuth-Aktualisierungstoken für den Bereich `substrate.office.com/sydney` |
-| `tier`         | `individual` (Standard), `edu` oder `enterprise`                                   |
-
-Rufen Sie das Aktualisierungstoken über einen Microsoft-Gerätecode- oder Autorisierungscode-Flow
-mit dem Bereich `substrate.office.com/sydney` ab. Wenn `refreshToken` festgelegt ist, aktualisiert OmniRoute
-das `access_token` vor jeder Anfrage vorab, sodass Sie die Anmeldeinformationen nicht
-nach jedem Ablauf nach ~75 Minuten erneut erfassen müssen.
+Beziehen Sie das Aktualisierungstoken aus einem Microsoft-Gerätecode- oder Autorisierungscode-Flow
+mit dem Bereich `substrate.office.com/sydney`; das Dashboard ruft es nicht für Sie ab.
+Wenn ein Aktualisierungstoken konfiguriert ist, überprüft OmniRoute das `access_token` vor Anfragen
+und aktualisiert es nur, wenn eine Aktualisierung erforderlich ist. Eine erfolgreiche Aktualisierung speichert
+auch das rotierte Aktualisierungstoken, sodass eine manuelle erneute Erfassung entfällt, solange das Aktualisierungstoken gültig bleibt.
 
 Wenn `refreshToken` nicht festgelegt ist, müssen Sie die WebSocket-Anmeldeinformationen
 nach jedem Ablauf manuell erneut erfassen.
 
 ### Tarifauswahl
 
-| Tarif        | Alias        | Oberfläche                    |
-| ------------ | ------------ | ----------------------------- |
-| `individual` | _(Standard)_ | M365 Copilot für Privatkunden |
-| `edu`        | `included`   | M365 Copilot für Bildung      |
-| `enterprise` | `work`       | M365 Copilot für Unternehmen  |
+| Tarif        | Alias        | Oberfläche                   |
+| ------------ | ------------ | ---------------------------- |
+| `individual` | _(Standard)_ | Consumer M365 Copilot        |
+| `edu`        | `included`   | M365 Copilot für Bildung     |
+| `enterprise` | `work`       | M365 Copilot für Unternehmen |
 
-Legen Sie den Tarif unter **Advanced Settings → providerSpecificData → tier** fest. Der Tarif beeinflusst
+Legen Sie den Tarif unter **Erweiterte Einstellungen → Copilot-Tarif** fest. Der Tarif beeinflusst
 das BizChat-Routing und den Modellzugriff.
 
 ## Sicherheitsmodell
@@ -114,28 +113,28 @@ das BizChat-Routing und den Modellzugriff.
 
 ### Authentifizierung schlägt sofort fehl
 
-- Vergewissern Sie sich, dass Sie die Anmeldedaten aus der **WebSocket-URL** und nicht aus einer XHR-/Fetch-Anfrage kopiert haben. Die
-  Anmeldedaten befinden sich im Abfrageparameter `access_token` der Chathub-WebSocket-
+- Vergewissern Sie sich, dass Sie die **WebSocket-URL** kopiert haben, nicht aus einer XHR-/Fetch-Anfrage. Das
+  Anmeldedat befindet sich im Abfrageparameter `access_token` der Chathub-WebSocket-
   Verbindung – nicht in einem `Authorization: Bearer`-Header.
-- Stellen Sie sicher, dass `chathubPath` das vollständige Segment `<oid>@<tenant>` aus dem URL-
-  Pfad enthält.
+- Stellen Sie sicher, dass `chathubPath` das vollständige Segment `<oid>@<tenant>` aus dem URL-Pfad enthält.
 
-### Token läuft nach ~75 Minuten ab
+### Token läuft nach ca. 75 Minuten ab
 
-Dies ist das erwartete Verhalten. Ohne ein `refreshToken` ist das Zugriffstoken kurzlebig. Sie können entweder:
+Dies ist erwartetes Verhalten. Ohne ein `refreshToken` ist das Zugriffstoken nur kurzzeitig gültig. Sie können entweder:
 
-- Die Anmeldedaten erneut über DevTools erfassen oder
-- in den erweiterten Einstellungen ein `refreshToken` zur automatischen Aktualisierung konfigurieren.
+- Das Anmeldedat erneut aus den DevTools erfassen oder
+- **Erweiterte Einstellungen → Aktualisierungstoken (optional)** im Dialog zum Hinzufügen oder Bearbeiten einer
+  Verbindung konfigurieren, um die automatische Aktualisierung zu aktivieren.
 
-### Verbindungstest erfolgreich, aber Chat gibt 401 zurück
+### Verbindungstest erfolgreich, aber der Chat gibt 401 zurück
 
-Das Token ist möglicherweise zwischen der Validierung und der ersten Anfrage abgelaufen. Erfassen Sie erneut
-aktuelle Anmeldedaten.
+Das Token ist möglicherweise zwischen der Validierung und der ersten Anfrage abgelaufen. Erfassen Sie ein
+neues Anmeldedat.
 
 ### Copilot wird nicht in der Anbieterliste angezeigt
 
-Stellen Sie sicher, dass `copilot-m365-web` unter **Dashboard → Anbieter** aktiviert ist. Der Anbieter kann
-in einigen Tarifen standardmäßig ausgeblendet sein.
+Stellen Sie sicher, dass `copilot-m365-web` unter **Dashboard → Anbieter** aktiviert ist. Der Anbieter ist in
+manchen Tarifen möglicherweise standardmäßig ausgeblendet.
 
 ## Referenzen
 

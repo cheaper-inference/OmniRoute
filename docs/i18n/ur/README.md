@@ -21,19 +21,19 @@
 
 <div align="center">
 
-## 💰 ~1.62B ٹوکنز / مہینہ تیسرے فریق کے مفت ٹئیرز کے ذریعے
+## 💰 تھرڈ پارٹی مفت درجات میں ماہانہ ~1.62B ٹوکنز
 
 </div>
 
-> **اپنے فراہم کنندہ اکاؤنٹس خود لائیں۔** یہ اندازہ شدہ مجموعہ الگ الگ اہل تیسرے فریق کے مفت ٹئیرز پر مبنی ہے، OmniRoute کی طرف سے کوئی ٹوکن گرانٹ نہیں۔ سائن اپ کریں، جہاں ضرورت ہو اسناد حاصل کریں، اور وہ فراہم کنندگان کنیکٹ کریں جنہیں آپ استعمال کر سکتے ہیں؛ ہر فراہم کنندہ اپنی حدیں، دستیابی اور شرائط کنٹرول کرتا ہے۔
+> **اپنے فراہم کنندہ کے اکاؤنٹس خود لائیں۔** یہ الگ الگ اہل تھرڈ پارٹی مفت درجات کا تخمینی مجموعہ ہے، OmniRoute کی جانب سے ٹوکنز کی کوئی گرانٹ نہیں۔ جہاں ضروری ہو، سائن اپ کریں، اسناد حاصل کریں، اور ان فراہم کنندگان کو منسلک کریں جنہیں آپ استعمال کر سکتے ہیں؛ ہر فراہم کنندہ اپنی حدود، دستیابی اور شرائط کا خود ذمہ دار ہے۔
 >
-> مفت ٹئیرز کو ہاتھ سے اسٹیک کرنا مشکل ہے — درجنوں SDKs، درجنوں ریٹ لمٹس، اور یہ اندازہ نہیں کہ آپ کے پاس اصل میں کتنا ہے۔ OmniRoute **485 مفت ٹئیر اندراجات کو 34 بار بار آنے والی پول کیز** میں کیٹلاگ کرتا ہے اور ٹوکن ہیڈلائن **17 پولز جن کا شائع شدہ مثبت ماہانہ بجٹ ہے، پلس پانچ فی ماڈل Groq کیپس** سے نکالتا ہے، مشترکہ پول کے ذریعے ڈی ڈپلیکیٹڈ۔ کوٹے جو صرف علاقائی شناختی چیک کے بعد کھلتے ہیں (آج: ModelScope) الگ دکھائے جاتے ہیں، +~6M علاقائی شناختی تصدیق کے پیچھے، اور کبھی بھی ہیڈلائن میں شامل نہیں کیے جاتے۔ نتیجہ ڈیش بورڈ پر نظر آتا ہے (`/dashboard/free-tiers`)۔
+> مفت درجات کو ہاتھ سے یکجا کرنا تکلیف دہ ہے — درجنوں SDKs، درجنوں شرحی حدود، اور یہ جاننے کا کوئی طریقہ نہیں کہ حقیقتاً آپ کے پاس کتنا موجود ہے۔ OmniRoute **34 بار بار استعمال ہونے والی پول کیز میں 485 مفت درجے کی اندراجات** کا فہرست بناتا ہے اور ٹوکنز کی سرخی **مثبت ماہانہ بجٹ شائع کرنے والے 17 پولز کے علاوہ فی ماڈل Groq کی پانچ حدود** سے اخذ کرتا ہے، جس میں مشترکہ پولز کو دو بار شمار نہیں کیا جاتا۔ وہ کوٹے جو صرف علاقائی شناخت کی جانچ کے بعد کھلتے ہیں (آج: ModelScope) الگ دکھائے جاتے ہیں، علاقائی شناخت کی تصدیق کے بعد +~6M، اور سرخی میں کبھی شامل نہیں کیے جاتے۔ نتیجہ ڈیش بورڈ (`/dashboard/free-tiers`) پر نمایاں رہتا ہے۔
 
-<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoute مفت ٹئیر بجٹ کارڈ: ~1.62B مفت ٹوکنز فی مہینہ مسلسل، پہلے مہینے میں سائن اپ کریڈٹس کے ساتھ ~2.22B تک، 34 دستاویزی بار بار آنے والی پول کیز سے جو 485 کیٹلاگ شدہ مفت ٹئیر اندراجات کو ایک اینڈ پوائنٹ کے پیچھے کور کرتی ہیں۔ ایماندار پول-ڈی ڈپلیکیٹڈ حساب — ہر مشترکہ پول کو ایک بار گنا گیا، بشمول 17 بار بار آنے والے پولز جن کا شائع شدہ مثبت ماہانہ ٹوکن بجٹ ہے پلس پانچ فی ماڈل Groq کیپس؛ 12 فراہم کنندگان کو شرائط-رسک کیٹلاگ میں "اجتناب کریں" کے طور پر نشان زد کیا گیا ہے تاکہ آپ فیصلہ کریں۔ بجٹ بار میں Mistral 1B، Nara 210M، LLM7 150M، xKiro 150M، Groq 30M (پانچ فی ماڈل کیپس) اور چھوٹے پولز شامل ہیں، پلس پہلے مہینے کے سائن اپ کریڈٹس اور مستقل مفت بغیر ٹوکن کیپ فراہم کنندگان الگ سے ظاہر کیے گئے ہیں تاکہ وہ ہیڈلائن کو کبھی نہ بڑھائیں۔ /dashboard/free-tiers پر لائیو استعمال شدہ/باقی۔"/>
+<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoute مفت درجے کا بجٹ کارڈ: ماہانہ تقریباً 1.62B مفت ٹوکنز مستقل طور پر، سائن اپ کریڈٹس کے ساتھ پہلے ماہ میں زیادہ سے زیادہ تقریباً 2.22B، 34 دستاویزی بار بار استعمال ہونے والی پول کیز سے، جو ایک اینڈ پوائنٹ کے پیچھے 485 فہرست شدہ مفت درجوں کا احاطہ کرتی ہیں۔ دیانت دار، پول کے حساب سے دو بار شمار سے پاک حساب — ہر مشترکہ پول صرف ایک بار شمار کیا گیا ہے، جس میں مثبت ماہانہ ٹوکن بجٹ شائع کرنے والے 17 بار بار استعمال ہونے والے پولز کے علاوہ فی ماڈل Groq کی پانچ حدود شامل ہیں؛ شرائط و خطرات کی فہرست میں 12 فراہم کنندگان سے گریز کی نشان دہی ہے تاکہ فیصلہ آپ خود کریں۔ بجٹ بار میں Mistral 1B، Nara 210M، LLM7 150M، xKiro 150M، Groq 30M (فی ماڈل پانچ حدود) اور چھوٹے پولز کے علاوہ پہلے ماہ کے سائن اپ کریڈٹس اور مستقل طور پر مفت، بغیر ٹوکن حد والے فراہم کنندگان الگ دکھائے جاتے ہیں، تاکہ وہ سرخی کو کبھی مصنوعی طور پر نہ بڑھائیں۔ /dashboard/free-tiers پر لائیو استعمال شدہ/باقی ماندہ مقدار۔"/>
 
-> لائیو `/dashboard/free-tiers` صفحے کا متحرک خلاصہ۔ مکمل طریقہ کار (پول ڈی ڈپلیکیٹ، کریڈٹ ٹئیرز، فراہم کنندہ شرائط): **[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**۔
+> لائیو `/dashboard/free-tiers` صفحے کا متحرک خلاصہ۔ مکمل طریقۂ کار (پول کی تکراری صفائی، کریڈٹ درجات، فراہم کنندہ کی شرائط): **[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**۔
 >
-> <sub>یہ اعداد و شمار ہر دو ہفتے بعد لائیو کیٹلاگ کے خلاف دوبارہ آڈٹ کیے جاتے ہیں اور **دونوں سمتوں میں بدلتے ہیں** — کوئی فراہم کنندہ مفت ٹئیر ختم کرتا ہے تو نمبر کم ہو جاتا ہے؛ نیا شامل ہوتا ہے تو بڑھ جاتا ہے۔ ہم وہی شائع کرتے ہیں جو کیٹلاگ اصل میں حساب کرتا ہے، کبھی بھی گول کر کے بہترین صورت حال نہیں۔</sub>
+> <sub>ان اعداد و شمار کا لائیو کیٹلاگ کے مقابلے میں ہر دو ہفتے بعد دوبارہ جائزہ لیا جاتا ہے اور یہ **دونوں سمتوں میں تبدیل ہوتے ہیں** — کوئی فراہم کنندہ مفت درجہ ختم کرے تو تعداد کم ہو جاتی ہے؛ کوئی نیا شامل ہو تو بڑھ جاتی ہے۔ ہم وہی شائع کرتے ہیں جو کیٹلاگ حقیقتاً شمار کرتا ہے، کبھی اوپر کی طرف گول کیا ہوا بہترین ممکنہ تخمینہ نہیں۔</sub>
 
 <br/>
 
@@ -41,7 +41,7 @@
 
 <h3>
 
-⭐ اگر OMNIROUTE نے آپ کی رقم بچائی اور آپ کا کام آسان بنایا تو ریپو کو اسٹار کریں۔
+⭐ اگر OMNIROUTE نے آپ کے پیسے بچانے اور آپ کا کام آسان بنانے میں مدد کی ہے تو ریپو کو اسٹار کریں۔
 
 </h3>
 
@@ -52,7 +52,7 @@
 
 ### 💬 کمیونٹی میں شامل ہوں
 
-**👋 مینٹینر کو فالو کریں — نئے فراہم کنندگان، ریلیزز اور ٹپس سب سے پہلے پائیں:**
+**👋 مینٹینر کو فالو کریں — نئے فراہم کنندگان، ریلیزز اور تجاویز سب سے پہلے حاصل کریں:**
 
 [![Follow Diego on LinkedIn](https://img.shields.io/badge/Follow_Diego_on-LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/diegosouzapw/)
 [![Follow @diegosouzapw on GitHub](https://img.shields.io/github/followers/diegosouzapw?style=for-the-badge&logo=github&logoColor=white&label=Follow%20on%20GitHub&color=181717)](https://github.com/diegosouzapw)
@@ -63,7 +63,7 @@
 [![WhatsApp Brasil](https://img.shields.io/badge/WhatsApp_Brasil-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)
 [![Website](https://img.shields.io/badge/Website-omniroute.online-blue?logo=google-chrome&logoColor=white)](https://omniroute.online)
 
-**سوالات، فراہم کنندہ ٹپس، روڈ میپ اور سپورٹ → [Discord](https://discord.gg/U47eFqAXCn) · [Telegram](https://t.me/omnirouteOficial) · WhatsApp [🌍 گلوبل](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) / [🇧🇷 برازیل](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) / [پورٹل](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)**
+**سوالات، فراہم کنندہ سے متعلق تجاویز، روڈمیپ اور معاونت → [Discord](https://discord.gg/U47eFqAXCn) · [Telegram](https://t.me/omnirouteOficial) · WhatsApp [🌍 Global](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) / [🇧🇷 Brasil](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) / [Portal](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)**
 
 <br/>
 
@@ -71,7 +71,7 @@
 
 <div align="center">
 
-|                          |        v3.8.50        | **v3.8.51** |      `v3.8.53+`       |
+|                          |        v3.8.50        | **v3.8.51** |      `v3.8.54+`       |
 | ------------------------ | :-------------------: | :---------: | :-------------------: |
 | 🌐 فراہم کنندگان         |          352          |   **358**   |          380          |
 | 🧠 منفرد چیٹ ماڈل IDs    |         1320          |  **1374**   |         1491          |
@@ -224,23 +224,23 @@
 
 <a id="first-run"></a>
 
-## 🆓 انسٹال کریں، ایک فراہم کنندہ سے جڑیں، پھر ایک اینڈ پوائنٹ کے ذریعے روٹ کریں
+## 🆓 انسٹال کریں، کسی فراہم کنندہ سے کنیکٹ کریں، پھر ایک اینڈ پوائنٹ کے ذریعے روٹ کریں
 
 </div>
 
-<img src="./docs/diagrams/works-zero-config.svg" width="100%" alt="تین مراحل: OmniRoute انسٹال اور شروع کریں، اپنی ذاتی اکاؤنٹ یا API key کے ساتھ ایک اہل فراہم کنندہ سے جڑیں، پھر اپنے ٹول کو localhost:20128/v1 پر OmniRoute API key اور model auto کے ساتھ پوائنٹ کریں۔ روٹنگ دستیاب اہل کنکشنز اور فراہم کنندہ کی حدود پر منحصر ہے۔"/>
+<img src="./docs/diagrams/works-zero-config.svg" width="100%" alt="تین مراحل: OmniRoute کو انسٹال اور شروع کریں، اپنے اکاؤنٹ یا API key کے ذریعے کسی اہل فراہم کنندہ سے کنیکٹ کریں، پھر اپنے ٹول کو OmniRoute API key اور model auto کے ساتھ localhost:20128/v1 پر پوائنٹ کریں۔ روٹنگ دستیاب اہل کنکشنز اور فراہم کنندہ کی حدود پر منحصر ہے۔"/>
 
 ```bash
-# فراہم کنندہ سے جڑنے کے بعد، اپنا OmniRoute key Dashboard → Endpoints سے کاپی کریں:
+# کسی فراہم کنندہ سے کنیکٹ کرنے کے بعد، Dashboard → Endpoints سے اپنی OmniRoute key کاپی کریں:
 curl http://localhost:20128/v1/chat/completions \
   -H "Authorization: Bearer YOUR_OMNIROUTE_KEY" \
   -H "Content-Type: application/json" \
   -d '{"model":"auto","messages":[{"role":"user","content":"Hello!"}]}'
 ```
 
-<sub>`auto` کو ایک اہل روٹ کی ضرورت ہے۔ ایک نئی انسٹالیشن میں کوئی اہل keyless ٹارگٹ نہیں ہو سکتا، اور ایک keyless فراہم کنندہ تیسرے فریق کلائنٹس کو مسترد کر سکتا ہے۔ فراہم کنندگان جو `tos: avoid` کے طور پر نشان زد ہیں، بشمول Kiro، کو ڈیفالٹ طور پر خودکار روٹنگ سے خارج کر دیا جاتا ہے؛ اکاؤنٹ کنیکٹ کرنے سے یہ سیٹنگ اوور رائیڈ نہیں ہوتی۔ فراہم کنندہ منتخب کرنے سے پہلے [Free Tiers Guide](docs/getting-started/FREE-TIERS-GUIDE.md) دیکھیں۔</sub>
+<sub>`auto` کے لیے ایک اہل route درکار ہے۔ نئی انسٹالیشن میں کوئی اہل keyless target موجود نہ ہو سکتا ہے، اور کوئی keyless provider third-party clients کو مسترد کر سکتا ہے۔ `tos: avoid` سے نشان زد فراہم کنندگان، بشمول Kiro، بطور ڈیفالٹ خودکار روٹنگ سے خارج رہتے ہیں؛ کسی اکاؤنٹ سے کنیکٹ کرنے سے یہ ترتیب تبدیل نہیں ہوتی۔ کسی فراہم کنندہ کا انتخاب کرنے سے پہلے [Free Tiers Guide](docs/getting-started/FREE-TIERS-GUIDE.md) دیکھیں۔</sub>
 
-<sub>📦 **Python, Node.js, PHP، اور cURL** کے لیے فوری آغاز اسکرپٹس کاپی-پیسٹ کریں → [`examples/quickstart/`](examples/quickstart/)</sub>
+<sub>📦 **Python، Node.js، PHP، اور cURL** کے لیے کاپی پیسٹ quickstart اسکرپٹس → [`examples/quickstart/`](examples/quickstart/)</sub>
 
 <br/>
 
@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="وعدہ — ایک اینڈ پوائنٹ اور 380 فراہم کنندگان۔ خودکار fallback اس وقت تک روٹنگ جاری رکھتا ہے جب تک کوئی اور صحت مند ٹارگٹ دستیاب ہو۔ چھ ستون: 380 فراہم کنندگان کے درمیان مضبوط fallback · اہل ورک لوڈز پر 95% تک ٹوکن بچت · شروع کرنے کے لیے $0، 150+ مفت ٹئیرز اور 53 بار بار/بغیر کلید کے ہمیشہ مفت فراہم کنندگان · ایک کنفیگریشن کے ذریعے 39 CLI/ایجنٹ انٹیگریشنز · OpenAI، Claude، Gemini اور Responses API مطابقت /v1 پر · پروڈکشن کنٹرولز جن میں سرکٹ بریکرز، TLS stealth، MCP 110 ٹولز، A2A، میموری، گارڈ ریلز، ایوالز اور 56,000+ جامد ٹیسٹ ڈیکلریشنز 7,800+ ٹریک شدہ ٹیسٹ فائلز میں شامل ہیں۔"/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="وعدہ — ایک اینڈ پوائنٹ اور 380 فراہم کنندگان۔ خودکار fallback اس وقت تک روٹنگ جاری رکھتا ہے جب تک کوئی دوسرا صحت مند target دستیاب ہو۔ چھ ستون: 380 فراہم کنندگان کے درمیان resilient fallback · اہل workloads پر token savings میں 95% تک · 150+ مفت tiers اور 54 recurring/keyless مفت forever providers کے ساتھ شروع کرنے کے لیے $0 · ایک config کے ذریعے 39 CLI/agent integrations · /v1 پر OpenAI، Claude، Gemini اور Responses API compatibility · circuit breakers، TLS stealth، MCP 110 tools، A2A، memory، guardrails، evals، اور 7,800+ tracked test files میں 56,000+ static test declarations سمیت production controls۔"/>
 
 <br/>
 <br/>
@@ -261,11 +261,11 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/why-pain-fix.svg" width="100%" alt="OmniRoute کیوں — 10 ڈیش بورڈز، مردہ API keys اور اچانک بلز سے جان چھڑائیں۔ دس روزانہ مسائل بمقابلہ حل: کوٹہ بغیر استعمال ختم ہو رہا ہے → سبسکرپشنز کو زیادہ سے زیادہ استعمال کریں؛ ریٹ لمٹس کوڈنگ کے دوران → 4-ٹئیر خودکار fallback (Subscription → API → Cheap → Free)؛ ٹول آؤٹ پٹس ٹوکن جلا رہے ہیں → RTK + Caveman کمپریشن (15–95%)؛ مہنگے APIs → لاگت کے مطابق روٹنگ؛ ہر ٹول کی اپنی سیٹنگ → ایک اینڈ پوائنٹ، ایک ڈیش بورڈ؛ AI بلاکڈ → 3-سطح پراکسی + TLS stealth؛ مردہ keys → 3-سطح لچک (سرکٹ بریکرز، key cooldown، ماڈل لاک آؤٹ)؛ ٹیم ایک سبسکرپشن شیئر کر رہی ہے → key pools کے ساتھ منصفانہ کوٹہ؛ پرامپٹس کسی اور کے کلاؤڈ سے → مقامی ترجیح کے ساتھ AES-256-GCM انکرپٹڈ keys؛ خرچ کی کوئی نگرانی نہیں → لائیو اینالیٹکس (استعمال، کوٹہ، بچت، p95 لیٹنسی)۔"/>
+<img src="./docs/diagrams/why-pain-fix.svg" width="100%" alt="OmniRoute کیوں — 10 dashboards، ناکارہ API keys اور غیر متوقع بلوں کو سنبھالنا بند کریں۔ روزمرہ کی 10 مشکلات بمقابلہ حل: استعمال کیے بغیر quota ختم ہونا → subscriptions سے زیادہ سے زیادہ فائدہ؛ coding کے دوران rate limits → 4-tier auto-fallback (Subscription → API → Cheap → Free)؛ tool outputs کا tokens ضائع کرنا → RTK + Caveman compression (15–95%)؛ مہنگی APIs → cost-optimized routing؛ ہر tool کی اپنی setup → ایک اینڈ پوائنٹ، ایک dashboard؛ AI کا blocked ہونا → 3-level proxy + TLS stealth؛ ناکارہ keys → 3-layer resilience (circuit breakers، key cooldown، model lockout)؛ ایک subscription شیئر کرنے والی ٹیم → fair-share quotas کے ساتھ key pools؛ کسی اور کے cloud سے گزرتے prompts → AES-256-GCM encrypted keys کے ساتھ local-first؛ خرچ کی visibility نہ ہونا → live analytics (usage، quota، savings، p95 latency)۔"/>
 
 <div align="center">
 
-<img src="./docs/diagrams/tier-cascade.svg" width="100%" alt="OmniRoute درخواست کا بہاؤ: آپ کا IDE یا CLI (Claude Code، Cursor، Cline…) ایک مقامی اینڈ پوائنٹ (http://localhost:20128/v1) کو کال کرتا ہے؛ OmniRoute اسمارٹ روٹر (RTK + Caveman کمپریشن، 20 روٹنگ اسٹریٹجیز، سرکٹ بریکرز، TLS stealth، MCP، A2A، گارڈ ریلز) اس وقت تک 4 فراہم کنندہ ٹئیرز میں fallback کر سکتا ہے جب تک کوئی اہل صحت مند ٹارگٹ باقی ہو — ٹئیر 1 سبسکرپشن، ٹئیر 2 API Key، ٹئیر 3 Cheap اور ٹئیر 4 Free۔"/>
+<img src="./docs/diagrams/tier-cascade.svg" width="100%" alt="OmniRoute request flow: آپ کا IDE یا CLI (Claude Code، Cursor، Cline…) ایک مقامی اینڈ پوائنٹ (http://localhost:20128/v1) کو call کرتا ہے؛ OmniRoute Smart Router (RTK + Caveman compression، 20 routing strategies، circuit breakers، TLS stealth، MCP، A2A، guardrails) 4 provider tiers کے درمیان fallback کر سکتا ہے جب تک کوئی اہل صحت مند target موجود رہے — Tier 1 Subscription، Tier 2 API Key، Tier 3 Cheap اور Tier 4 Free۔"/>
 
 </div>
 
@@ -584,7 +584,7 @@ Radar اختیاری ہے اور صرف GET استعمال کرتا ہے۔ OmniR
 
 </div>
 
-> حالیہ جھلکیاں **v3.8.20 → v3.8.53** سے۔ مکمل تاریخ [`CHANGELOG.md`](CHANGELOG.md) میں۔
+> حالیہ جھلکیاں **v3.8.20 → v3.8.54** سے۔ مکمل تاریخ [`CHANGELOG.md`](CHANGELOG.md) میں۔
 
 - **⚖️ `quota-weighted` روٹنگ** — 20ویں کومبو اسٹریٹیجی ختم شدہ اکاؤنٹس کو چھوڑ دیتی ہے، پھر باقی اکاؤنٹس میں بچی ہوئی کوٹا ÷ جاری لوڈ کے تناسب سے انتخاب کرتی ہے، اور موجودہ گفتگو کو پن کیے رکھتی ہے۔ → [آٹو-کومبو](docs/routing/AUTO-COMBO.md)
 - **🧰 ہیڈلیس موڈ** — `omniroute serve --headless` (یا `OMNIROUTE_HEADLESS=1`) صرف `/v1/*` پراکسی انجن چلاتا ہے، ڈیش بورڈ اور صرف ڈیش بورڈ سب سسٹمز بند رہتے ہیں۔ → [ہیڈلیس موڈ](docs/guides/HEADLESS.md)
@@ -692,15 +692,15 @@ omniroute configure codex          # یہ بھی: claude opencode qwen aider goo
 
 <div align="center">
 
-## 🌐 380 اے آئی فراہم کنندگان — 153 کیٹلاگ میں مفت نشان زد
+## 🌐 380 AI فراہم کنندگان — 153 کیٹلاگ میں مفت نشان زدہ
 
 </div>
 
-> **380 رجسٹرڈ فراہم کنندگان** کینونیکل چیٹ، میڈیا، سرچ، لوکل، کلاؤڈ-ایجنٹ اور سسٹم کلیکشنز میں، جن میں سے **153 کے پاس `hasFree: true` ڈسکوری میٹاڈیٹا** ہے۔ چیٹ ماڈل رجسٹری میں **239 فراہم کنندگان / 3,059 منفرد فراہم کنندہ-ماڈل جوڑوں / 1,475 خام ماڈل آئی ڈیز** شامل ہیں؛ الگ مفت-بجٹ کیٹلاگ میں **471 فی-ماڈل قطاریں**، **34 بار بار آنے والے پولز** اور **53 بار بار/بغیر کلید کے ہمیشہ کے لیے مفت فراہم کنندگان** ہیں۔ یہ مختلف ڈینومینیٹرز ڈیزائن کے مطابق ہیں؛ تعریفیں اور پول-ڈی ڈپلیکیشن کیلکولیشنز [فراہم کنندہ ریفرنس](docs/reference/PROVIDER_REFERENCE.md) اور [مفت درجے](docs/reference/FREE_TIERS.md) میں موجود ہیں۔
+> **380 رجسٹرڈ فراہم کنندگان** مستند چیٹ، میڈیا، تلاش، مقامی، کلاؤڈ-ایجنٹ اور سسٹم مجموعوں میں شامل ہیں، جن میں **153 کے پاس `hasFree: true` دریافت کا میٹا ڈیٹا** موجود ہے۔ چیٹ ماڈل رجسٹری میں **239 فراہم کنندگان / 3,059 منفرد provider-model جوڑے / 1,475 خام model IDs** شامل ہیں؛ الگ مفت بجٹ کیٹلاگ میں **471 فی ماڈل قطاریں**، **34 بار بار آنے والے پولز** اور **54 بار بار آنے والے/کلیدی کے بغیر ہمیشہ مفت فراہم کنندگان** شامل ہیں۔ یہ مختلف شمار دانستہ طور پر رکھے گئے ہیں؛ تعریفیں اور پول-ڈی ڈپلی کیٹ کیے گئے حسابات [فراہم کنندگان کا حوالہ](docs/reference/PROVIDER_REFERENCE.md) اور [مفت درجات](docs/reference/FREE_TIERS.md) میں موجود ہیں۔
 
 <div align="center">
 
-### 🏢 ہر بڑا لیب — ایک اینڈ پوائنٹ سے
+### 🏢 ہر بڑا لیب — ایک ہی اینڈ پوائنٹ کے ذریعے
 
 <table>
   <tr>
@@ -729,32 +729,32 @@ omniroute configure codex          # یہ بھی: claude opencode qwen aider goo
   </tr>
 </table>
 
-<sub>…اور 350+ مزید — ہر آئیکن براہ راست ڈیش بورڈ کے فراہم کنندہ کیٹلاگ سے ظاہر ہوتا ہے۔ 📖 [فراہم کنندہ ریفرنس](docs/reference/PROVIDER_REFERENCE.md)</sub>
+<sub>…اور 350+ مزید — ہر آئیکن ڈیش بورڈ کے فراہم کنندگان کے کیٹلاگ سے براہِ راست حل ہوتا ہے۔ 📖 [فراہم کنندگان کا حوالہ](docs/reference/PROVIDER_REFERENCE.md)</sub>
 
 <br/>
 
-### 🆓 ہمیشہ کے لیے مفت — $0، کوئی کارڈ نہیں
+### 🆓 ہمیشہ مفت — $0، کارڈ کے بغیر
 
 <table>
   <tr>
-    <td align="center" width="150"><img src="./public/providers/cli-generic.svg" width="42" alt="OpenCode Zen"/><br/><b>اوپن کوڈ Zen</b><br/><sub>DeepSeek V4، Nemotron 3<br/>کوئی ٹوکن حد نہیں</sub></td>
-    <td align="center" width="150"><img src="./public/providers/cli-generic.svg" width="42" alt="Kilo Code"/><br/><b>Kilo کوڈ</b><br/><sub>آٹو-روٹر، Tencent Hy3<br/>ہمیشہ مفت</sub></td>
-    <td align="center" width="150"><img src="./public/providers/requesty.svg" width="42" alt="Requesty"/><br/><b>Requesty</b><br/><sub>GPT-OSS 120B، Nemotron<br/>ہمیشہ مفت</sub></td>
-    <td align="center" width="150"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/siliconcloud-color.svg" width="42" alt="SiliconFlow"/><br/><b>SiliconFlow</b><br/><sub>DeepSeek V3.2 / R1<br/>مفت درجہ</sub></td>
-    <td align="center" width="150"><img src="./public/providers/zhipu.svg" width="42" alt="Z.AI GLM"/><br/><b>Z.AI GLM</b><br/><sub>GLM-4.7 / 4.5-Flash<br/>ہمیشہ مفت</sub></td>
-    <td align="center" width="150"><img src="./public/providers/baidu.svg" width="42" alt="Baidu ERNIE"/><br/><b>Baidu ERNIE</b><br/><sub>ERNIE 4.0<br/>ہمیشہ مفت</sub></td>
+    <td align="center" width="150"><img src="./public/providers/cli-generic.svg" width="42" alt="OpenCode Zen"/><br/><b>OpenCode Zen</b><br/><sub>DeepSeek V4، Nemotron 3<br/>ٹوکن کی کوئی حد نہیں</sub></td>
+    <td align="center" width="150"><img src="./public/providers/cli-generic.svg" width="42" alt="Kilo Code"/><br/><b>Kilo Code</b><br/><sub>خودکار راؤٹر، Tencent Hy3<br/>ہمیشہ کے لیے مفت</sub></td>
+    <td align="center" width="150"><img src="./public/providers/requesty.svg" width="42" alt="Requesty"/><br/><b>Requesty</b><br/><sub>GPT-OSS 120B، Nemotron<br/>ہمیشہ کے لیے مفت</sub></td>
+    <td align="center" width="150"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/siliconcloud-color.svg" width="42" alt="SiliconFlow"/><br/><b>SiliconFlow</b><br/><sub>DeepSeek V3.2 / R1<br/>مفت درجۂ استعمال</sub></td>
+    <td align="center" width="150"><img src="./public/providers/zhipu.svg" width="42" alt="Z.AI GLM"/><br/><b>Z.AI GLM</b><br/><sub>GLM-4.7 / 4.5-Flash<br/>ہمیشہ کے لیے مفت</sub></td>
+    <td align="center" width="150"><img src="./public/providers/baidu.svg" width="42" alt="Baidu ERNIE"/><br/><b>Baidu ERNIE</b><br/><sub>ERNIE 4.0<br/>ہمیشہ کے لیے مفت</sub></td>
   </tr>
   <tr>
     <td align="center" width="150"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/qoder-color.svg" width="42" alt="Qoder AI"/><br/><b>Qoder AI</b><br/><sub>Qwen3-Max، Kimi-K2<br/>لامحدود مفت</sub></td>
-    <td align="center" width="150"><img src="./public/providers/pollinations.svg" width="42" alt="Pollinations"/><br/><b>Pollinations</b><br/><sub>GPT، Llama، Claude<br/>کوئی کلید درکار نہیں</sub></td>
-    <td align="center" width="150"><img src="./public/providers/cloudflare.svg" width="42" alt="Cloudflare AI"/><br/><b>Cloudflare AI</b><br/><sub>50+ ماڈلز<br/>10K نیورون/دن</sub></td>
-    <td align="center" width="150"><img src="./public/providers/nvidia.svg" width="42" alt="NVIDIA NIM"/><br/><b>NVIDIA NIM</b><br/><sub>GLM، MiniMax<br/>~40 RPM مفت</sub></td>
-    <td align="center" width="150"><img src="./public/providers/cerebras.svg" width="42" alt="Cerebras"/><br/><b>Cerebras</b><br/><sub>GLM 4.7، GPT-OSS<br/>ایک بار $5 کریڈٹ؛ کارڈ درکار ہے</sub></td>
-    <td align="center" width="150"><img src="./public/providers/openrouter.svg" width="42" alt="OpenRouter"/><br/><b>OpenRouter</b><br/><sub>:مفت ماڈلز<br/>+$10 → زیادہ RPM</sub></td>
+    <td align="center" width="150"><img src="./public/providers/pollinations.svg" width="42" alt="Pollinations"/><br/><b>Pollinations</b><br/><sub>GPT، Llama، Claude<br/>کلید درکار نہیں</sub></td>
+    <td align="center" width="150"><img src="./public/providers/cloudflare.svg" width="42" alt="Cloudflare AI"/><br/><b>Cloudflare AI</b><br/><sub>50+ ماڈلز<br/>10K نیورونز فی دن</sub></td>
+    <td align="center" width="150"><img src="./public/providers/nvidia.svg" width="42" alt="NVIDIA NIM"/><br/><b>NVIDIA NIM</b><br/><sub>GLM، MiniMax<br/>تقریباً 40 RPM مفت</sub></td>
+    <td align="center" width="150"><img src="./public/providers/cerebras.svg" width="42" alt="Cerebras"/><br/><b>Cerebras</b><br/><sub>GLM 4.7، GPT-OSS<br/>ایک بار کا $5 کریڈٹ؛ کارڈ درکار ہے</sub></td>
+    <td align="center" width="150"><img src="./public/providers/openrouter.svg" width="42" alt="OpenRouter"/><br/><b>OpenRouter</b><br/><sub>:free ماڈلز<br/>+$10 → زیادہ RPM</sub></td>
   </tr>
 </table>
 
-📖 مکمل مشین ریڈ ایبل کیٹلاگ → [`docs/reference/PROVIDER_REFERENCE.md`](docs/reference/PROVIDER_REFERENCE.md)
+📖 مکمل مشین-قابلِ مطالعہ کیٹلاگ → [`docs/reference/PROVIDER_REFERENCE.md`](docs/reference/PROVIDER_REFERENCE.md)
 
 <br/>
 </div>
@@ -1017,7 +1017,7 @@ omniroute
 ```
 
 > 💡 `npm warn ERESOLVE` یا peer-dep وارننگز نظر آ رہی ہیں؟ [یہ بے ضرر ہیں](docs/guides/TROUBLESHOOTING.md#npm-install-warnings-eresolve--peer--deprecated)۔
-> **npm 11 یا بعد کا ورژن استعمال کر رہے ہیں؟** npm پیکج لائف سائیکل اسکرپٹس کو تب تک بلاک کر سکتا ہے جب تک انہیں اجازت نہ دی جائے۔ OmniRoute کا `postinstall` (`node scripts/build/postinstall.mjs`) اس کی native runtime فائلیں تیار کرنے کے لیے ضروری ہے۔ عالمی طور پر انسٹال کرتے وقت npm کی وارننگ میں نامزد پیکجز کو اجازت دیں۔ OmniRoute 3.8.53 کی جانب سے رپورٹ شدہ پیکج سیٹ کے لیے:
+> **npm 11 یا بعد کا ورژن استعمال کر رہے ہیں؟** npm پیکج لائف سائیکل اسکرپٹس کو تب تک بلاک کر سکتا ہے جب تک انہیں اجازت نہ دی جائے۔ OmniRoute کا `postinstall` (`node scripts/build/postinstall.mjs`) اس کی native runtime فائلیں تیار کرنے کے لیے ضروری ہے۔ عالمی طور پر انسٹال کرتے وقت npm کی وارننگ میں نامزد پیکجز کو اجازت دیں۔ OmniRoute 3.8.54 کی جانب سے رپورٹ شدہ پیکج سیٹ کے لیے:
 >
 > ```bash
 > npm install -g --allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild omniroute
@@ -1296,7 +1296,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 بھی اسے چ�
   <tr><td nowrap><b>رن ٹائم</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>زبان</b></td><td>TypeScript 6.0 — <code>src/</code> اور <code>open-sse/</code> میں <b>100% TypeScript</b> (v2.0 سے کور میں صفر <code>any</code>)</td></tr>
   <tr><td nowrap><b>فریم ورک</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>ڈیٹابیس</b></td><td>better-sqlite3 (SQLite، WAL جرنلنگ) + LowDB (JSON لیگیسی) — 147 ڈومین ماڈیولز، 222 مائیگریشنز</td></tr>
+  <tr><td nowrap><b>ڈیٹابیس</b></td><td>better-sqlite3 (SQLite، WAL جرنلنگ) + LowDB (JSON لیگیسی) — 147 ڈومین ماڈیولز، 225 مائیگریشنز</td></tr>
   <tr><td nowrap><b>میموری</b></td><td>SQLite FTS5 مکمل متن + int8-quantized ویکٹر ایمبیڈنگز، ٹائپ شدہ زوال</td></tr>
   <tr><td nowrap><b>اسکیماز</b></td><td>Zod 4 — MCP ٹول I/O کی توثیق + API معاہدے</td></tr>
   <tr><td nowrap><b>پروٹوکولز</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1320,87 +1320,87 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 بھی اسے چ�
 
 </div>
 
-### 📘 آغازِ استعمال
+### 📘 آغاز
 
 <table>
   <tr><th align="left">دستاویز</th><th align="left">تفصیل</th></tr>
-  <tr><td nowrap><b><a href="docs/guides/USER_GUIDE.md">صارف رہنما</a></b></td><td>فراہم کنندگان، کومبو، CLI انضمام، تعیناتی</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/SETUP_GUIDE.md">سیٹ اپ رہنما</a></b></td><td>مکمل تنصیب کے طریقے، CLI ٹول کنفیگز، پروٹوکول سیٹ اپ، ٹائم آؤٹ کی ٹیوننگ</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/USER_GUIDE.md">صارف رہنما</a></b></td><td>Providers، combos، CLI انضمام، تعیناتی</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/SETUP_GUIDE.md">سیٹ اپ رہنما</a></b></td><td>مکمل تنصیب کے طریقے، CLI ٹول کی تشکیل، پروٹوکول سیٹ اپ، ٹائم آؤٹ کی ترتیب</td></tr>
   <tr><td nowrap><b><a href="docs/reference/CLI-TOOLS.md">CLI ٹولز رہنما</a></b></td><td>Claude Code، Codex، Cursor، Cline، OpenClaw، Kilo، Copilot کے لیے فی ٹول سیٹ اپ</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/REMOTE-MODE.md">ریموٹ موڈ</a></b></td><td>اسکوپ شدہ رسائی ٹوکنز کے ذریعے اپنے لیپ ٹاپ کے CLI سے ریموٹ OmniRoute (VPS) چلائیں</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/CLAUDE-CODE-CONFIGURATION.md">Claude Code کنفیگ</a></b></td><td><code>launch</code> اور فی ماڈل پروفائلز کے ذریعے Claude Code کو OmniRoute (مقامی/ریموٹ) سے منسلک کریں</td></tr>
-  <tr><td nowrap><b><a href="README.md#-quick-start">فوری آغاز</a></b></td><td>3 مراحل: تنصیب → کنکشن → کنفیگریشن</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/REMOTE-MODE.md">ریموٹ موڈ</a></b></td><td>محدود رسائی والے ٹوکنز کے ذریعے اپنے لیپ ٹاپ کے CLI سے ریموٹ OmniRoute (VPS) چلائیں</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/CLAUDE-CODE-CONFIGURATION.md">Claude Code تشکیل</a></b></td><td><code>launch</code> + فی ماڈل پروفائلز کے ذریعے Claude Code کو OmniRoute (مقامی/ریموٹ) سے منسلک کریں</td></tr>
+  <tr><td nowrap><b><a href="README.md#-quick-start">فوری آغاز</a></b></td><td>3 مراحل میں تنصیب → کنیکٹ کریں → تشکیل دیں</td></tr>
 </table>
 
 ### 🔧 آپریشنز اور تعیناتی
 
 <table>
   <tr><th align="left">دستاویز</th><th align="left">تفصیل</th></tr>
-  <tr><td nowrap><b><a href="docs/guides/DOCKER_GUIDE.md">Docker رہنما</a></b></td><td>Docker run، Compose پروفائلز، Caddy HTTPS، ٹنلز، امیج ٹیگز</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/DOCKER_GUIDE.md">Docker رہنما</a></b></td><td>Docker رن، Compose پروفائلز، Caddy HTTPS، ٹنلز، امیج ٹیگز</td></tr>
   <tr><td nowrap><b><a href="contrib/podman/README.md">Podman رہنما</a></b></td><td>Quadlet systemd انضمام، podman-compose، SELinux</td></tr>
   <tr><td nowrap><b><a href="docs/ops/VM_DEPLOYMENT_GUIDE.md">VM تعیناتی</a></b></td><td>مکمل رہنما: VM + nginx + Cloudflare سیٹ اپ</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md">Fly.io تعیناتی</a></b></td><td>مستقل اسٹوریج کے ساتھ Fly.io پر تعیناتی</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md">Fly.io تعیناتی</a></b></td><td>مستقل اسٹوریج کے ساتھ Fly.io پر تعینات کریں</td></tr>
   <tr><td nowrap><b><a href="docs/guides/TERMUX_GUIDE.md">Termux رہنما</a></b></td><td>Termux کے ذریعے Android پر OmniRoute چلائیں</td></tr>
   <tr><td nowrap><b><a href="docs/guides/PWA_GUIDE.md">PWA رہنما</a></b></td><td>Progressive Web App کی تنصیب، کیشنگ، آرکیٹیکچر</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/UNINSTALL.md">ان انسٹال رہنما</a></b></td><td>تمام تنصیب کے طریقوں کے لیے مکمل صفایا</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/ENVIRONMENT.md">ماحولیاتی کنفیگ</a></b></td><td>مکمل <code>.env</code> متغیرات اور حوالہ جات</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/UNINSTALL.md">انسٹالیشن ختم کرنے کا رہنما</a></b></td><td>تنصیب کے تمام طریقوں کے لیے مکمل صفایا</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/ENVIRONMENT.md">ماحولیاتی تشکیل</a></b></td><td>مکمل <code>.env</code> متغیرات اور حوالہ جات</td></tr>
 </table>
 
 ### 🧠 خصوصیات اور آرکیٹیکچر
 
 <table>
   <tr><th align="left">دستاویز</th><th align="left">تفصیل</th></tr>
-  <tr><td nowrap><b><a href="docs/architecture/ARCHITECTURE.md">آرکیٹیکچر</a></b></td><td>سسٹم آرکیٹیکچر، ڈیٹا فلو، اور اندرونی اجزا</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_GUIDE.md">کمپریشن رہنما</a></b></td><td>7 اختیارات والی پائپ لائن: off / lite / standard / aggressive / ultra / RTK / stacked</td></tr>
+  <tr><td nowrap><b><a href="docs/architecture/ARCHITECTURE.md">آرکیٹیکچر</a></b></td><td>سسٹم آرکیٹیکچر، ڈیٹا فلو، اور اندرونی ساخت</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_GUIDE.md">کمپریشن رہنما</a></b></td><td>7 اختیارات کی پائپ لائن: off / lite / standard / aggressive / ultra / RTK / stacked</td></tr>
   <tr><td nowrap><b><a href="docs/compression/RTK_COMPRESSION.md">RTK کمپریشن</a></b></td><td>کمانڈ آؤٹ پٹ کمپریشن، فلٹرز، اعتماد، تصدیق، خام آؤٹ پٹ کی بازیابی</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_ENGINES.md">کمپریشن انجنز</a></b></td><td>Caveman، RTK، stacked پائپ لائنز، ڈیش بورڈ/API/MCP سطحیں</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_RULES_FORMAT.md">کمپریشن قواعد کا فارمیٹ</a></b></td><td>Caveman اور RTK فلٹرز کے لیے JSON rule-pack اسکیماز</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_LANGUAGE_PACKS.md">کمپریشن لینگویج پیکس</a></b></td><td>زبان کی شناخت اور Caveman rule-pack کی تیاری</td></tr>
-  <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">لچک پذیری کا رہنما</a></b></td><td>سرکٹ بریکرز، کول ڈاؤنز، قطار، anti-thundering herd، TLS spoofing</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_ENGINES.md">کمپریشن انجنز</a></b></td><td>Caveman، RTK، stacked پائپ لائنز، dashboard/API/MCP سرفیسز</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_RULES_FORMAT.md">کمپریشن قواعد کا فارمیٹ</a></b></td><td>Caveman اور RTK فلٹرز کے لیے JSON rule-pack اسکیمے</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_LANGUAGE_PACKS.md">کمپریشن لینگویج پیکس</a></b></td><td>زبان کی شناخت اور Caveman rule-pack کی تحریر</td></tr>
+  <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">لچک پذیری کا رہنما</a></b></td><td>Circuit breakers، cooldowns، queue، anti-thundering herd، TLS spoofing</td></tr>
   <tr><td nowrap><b><a href="docs/routing/AUTO-COMBO.md">Auto-Combo انجن</a></b></td><td>16 عوامل پر مبنی اسکورنگ، موڈ پیکس، خود بحالی</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/PROXY_GUIDE.md">پراکسی رہنما</a></b></td><td>3 سطحی پراکسی سسٹم، 1proxy مارکیٹ پلیس، رجسٹری CRUD</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">مفت درجات</a></b></td><td>مرتب ڈائریکٹری: 34 دستاویزی بار بار دستیاب پولز / 485 کیٹلاگ شدہ مفت درجے کے اندراجات</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/FEATURES.md">خصوصیات گیلری</a></b></td><td>اسکرین شاٹس کے ساتھ بصری ڈیش بورڈ ٹور</td></tr>
-  <tr><td nowrap><b><a href="docs/architecture/CODEBASE_DOCUMENTATION.md">کوڈ بیس دستاویزات</a></b></td><td>ابتدائی صارفین کے لیے آسان کوڈ بیس واک تھرو</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/PROXY_GUIDE.md">Proxy رہنما</a></b></td><td>3 سطحی proxy سسٹم، 1proxy marketplace، registry CRUD</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">مفت درجات</a></b></td><td>یکجا ڈائریکٹری: 34 دستاویزی بار بار دستیاب پولز / 485 فہرست شدہ مفت درجے کی اندراجات</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/FEATURES.md">خصوصیات کی گیلری</a></b></td><td>اسکرین شاٹس کے ساتھ بصری dashboard کا جائزہ</td></tr>
+  <tr><td nowrap><b><a href="docs/architecture/CODEBASE_DOCUMENTATION.md">Codebase دستاویزات</a></b></td><td>ابتدائی صارفین کے لیے codebase کی مرحلہ وار وضاحت</td></tr>
 </table>
 
 ### 🤖 پروٹوکولز اور APIs
 
 <table>
   <tr><th align="left">دستاویز</th><th align="left">تفصیل</th></tr>
-  <tr><td nowrap><b><a href="docs/reference/API_REFERENCE.md">API حوالہ</a></b></td><td>مثالوں کے ساتھ تمام اینڈ پوائنٹس</td></tr>
-  <tr><td nowrap><b><a href="docs/openapi.yaml">OpenAPI اسپیک</a></b></td><td>OpenAPI 3.0 کی تفصیلات</td></tr>
-  <tr><td nowrap><b><a href="open-sse/mcp-server/README.md">MCP سرور</a></b></td><td>110 MCP ٹولز، IDE کنفیگز، Python/TS/Go کلائنٹس</td></tr>
-  <tr><td nowrap><b><a href="docs/frameworks/MCP-SERVER.md">MCP سرور رہنما</a></b></td><td>MCP تنصیب، ٹرانسپورٹس، اور ٹول حوالہ</td></tr>
-  <tr><td nowrap><b><a href="src/lib/a2a/README.md">A2A سرور</a></b></td><td>JSON-RPC 2.0 پروٹوکول، مہارتیں، اسٹریمنگ، ٹاسک مینجمنٹ</td></tr>
-  <tr><td nowrap><b><a href="docs/frameworks/A2A-SERVER.md">A2A سرور رہنما</a></b></td><td>A2A ایجنٹ کارڈ، ٹاسکس، مہارتیں، اور اسٹریمنگ</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/API_REFERENCE.md">API حوالہ</a></b></td><td>مثالوں کے ساتھ تمام endpoints</td></tr>
+  <tr><td nowrap><b><a href="docs/openapi.yaml">OpenAPI تفصیلات</a></b></td><td>OpenAPI 3.0 کی تفصیلات</td></tr>
+  <tr><td nowrap><b><a href="open-sse/mcp-server/README.md">MCP Server</a></b></td><td>110 MCP ٹولز، IDE تشکیل، Python/TS/Go کلائنٹس</td></tr>
+  <tr><td nowrap><b><a href="docs/frameworks/MCP-SERVER.md">MCP Server رہنما</a></b></td><td>MCP تنصیب، ٹرانسپورٹس، اور ٹول حوالہ</td></tr>
+  <tr><td nowrap><b><a href="src/lib/a2a/README.md">A2A Server</a></b></td><td>JSON-RPC 2.0 پروٹوکول، مہارتیں، اسٹریمنگ، ٹاسک مینجمنٹ</td></tr>
+  <tr><td nowrap><b><a href="docs/frameworks/A2A-SERVER.md">A2A Server رہنما</a></b></td><td>A2A ایجنٹ کارڈ، ٹاسکس، مہارتیں، اور اسٹریمنگ</td></tr>
 </table>
 
-### 📋 پروجیکٹ اور معیار
+### 📋 منصوبہ اور معیار
 
 <table>
-  <tr><th align="left">دستاویز</th><th align="left">وضاحت</th></tr>
-  <tr><td nowrap><b><a href="CONTRIBUTING.md">شراکت</a></b></td><td>ترقیاتی سیٹ اپ اور رہنما اصول</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/BRANCHING_MODEL.md">برانچنگ اور ریلیز ماڈل</a></b></td><td>PRs کہاں بھیجے جاتے ہیں (<code>release/*</code>)، <code>main</code> اور ٹیگز کا کیا مطلب ہے</td></tr>
-  <tr><td nowrap><b><a href="CHANGELOG.md">تبدیلیوں کا لاگ</a></b></td><td>ہر ورژن کی مکمل ریلیز تاریخ</td></tr>
-  <tr><td nowrap><b><a href="SECURITY.md">سیکیورٹی پالیسی</a></b></td><td>کمزوریوں کی اطلاع دہی اور سیکیورٹی کے طریقۂ کار</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/I18N.md">i18n رہنما</a></b></td><td>67 زبانوں کی معاونت، ترجمے کا طریقۂ کار، RTL</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/RELEASE_CHECKLIST.md">ریلیز چیک لسٹ</a></b></td><td>ریلیز سے قبل توثیق کے مراحل</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/COVERAGE_PLAN.md">کوریج پلان</a></b></td><td>8,400 سے زائد ٹریک شدہ ٹیسٹ فائلوں میں 60,000 سے زائد جامد ٹیسٹ اعلانات کے لیے ٹیسٹ کوریج کی حکمتِ عملی</td></tr>
+  <tr><th align="left">دستاویز</th><th align="left">تفصیل</th></tr>
+  <tr><td nowrap><b><a href="CONTRIBUTING.md">تعاون</a></b></td><td>ترقیاتی سیٹ اپ اور رہنما اصول</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/BRANCHING_MODEL.md">برانچنگ اور ریلیز ماڈل</a></b></td><td>PRs کہاں بھیجے جائیں (<code>release/*</code>)، <code>main</code> اور ٹیگز کا کیا مطلب ہے</td></tr>
+  <tr><td nowrap><b><a href="CHANGELOG.md">تبدیلیوں کا ریکارڈ</a></b></td><td>ہر ورژن کی مکمل ریلیز تاریخ</td></tr>
+  <tr><td nowrap><b><a href="SECURITY.md">سیکیورٹی پالیسی</a></b></td><td>خطرات کی رپورٹنگ اور سیکیورٹی کے طریقہ کار</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/I18N.md">i18n رہنما</a></b></td><td>67 زبانوں کی معاونت، ترجمے کا ورک فلو، RTL</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/RELEASE_CHECKLIST.md">ریلیز چیک لسٹ</a></b></td><td>ریلیز سے پہلے توثیق کے مراحل</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/COVERAGE_PLAN.md">کوریج منصوبہ</a></b></td><td>8,400 سے زیادہ ٹریک کردہ ٹیسٹ فائلوں میں 60,000 سے زیادہ جامد ٹیسٹ اعلانات کے لیے ٹیسٹ کوریج کی حکمتِ عملی</td></tr>
 </table>
 
 <br/>
 
 <div align="center">
 
-# ⭐ نمایاں شراکت کنندگان
+# ⭐ نمایاں معاونین
 
-> OmniRoute ایک پُرجوش اوپن سورس کمیونٹی کے ذریعے تشکیل پاتا ہے۔ ان افراد نے غیر معمولی شراکتیں کی ہیں جو براہِ راست اس منصوبے کے معیار، استحکام اور رسائی کو متاثر کرتی ہیں۔ **شکریہ۔**
+> OmniRoute ایک پُرجوش اوپن سورس کمیونٹی کی کاوش ہے۔ ان افراد نے ایسی غیر معمولی خدمات انجام دی ہیں جن سے پروجیکٹ کے معیار، استحکام اور رسائی پر براہِ راست اثر پڑتا ہے۔ **شکریہ۔**
 
-### ضم شدہ پل ریکوئسٹس کے لحاظ سے بیرونی شراکت کنندگان
+### ضم شدہ پل ریکوئسٹس کے لحاظ سے بیرونی معاونین
 
 <table>
-  <tr><th align="center">درجہ</th><th align="left">شراکت کنندہ</th><th align="center">ضم شدہ PRs</th><th align="right">~تبدیل شدہ سطریں</th></tr>
+  <tr><th align="center">درجہ</th><th align="left">معاون</th><th align="center">ضم شدہ PRs</th><th align="right">~تبدیل شدہ لائنیں</th></tr>
   <tr><td align="center">1</td><td align="left"><a href="https://github.com/maxmad64bis"><b>maxmad64bis</b></a></td><td align="center">418</td><td align="right">25,367,739</td></tr>
   <tr><td align="center">2</td><td align="left"><a href="https://github.com/HouMinXi"><b>HouMinXi</b></a></td><td align="center">295</td><td align="right">13,557,796</td></tr>
   <tr><td align="center">3</td><td align="left"><a href="https://github.com/pacocartones"><b>pacocartones</b></a></td><td align="center">222</td><td align="right">81,551</td></tr>
@@ -1423,9 +1423,9 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 بھی اسے چ�
   <tr><td align="center">19</td><td align="left"><a href="https://github.com/QuangBlue"><b>QuangBlue</b></a></td><td align="center">43</td><td align="right">13,112</td></tr>
 </table>
 
-<sub>مردم شماری 2026-11-03 03:01:19 UTC کو براہِ راست <code>release/v3.8.53</code> ٹِپ <code>05bc048d6c</code> کے ساتھ کی گئی۔ صفحات میں منقسم GitHub GraphQL مردم شماری میں 9,947 ضم شدہ PRs شامل ہیں: 4,130 ریپوزٹری کے مالک کی جانب سے، 240 Dependabot کی جانب سے، 6 دیگر بوٹس/ایپس کی جانب سے، اور <b>883 منفرد شراکت کنندگان کی جانب سے 5,571 بیرونی PRs</b>۔ “تبدیل شدہ سطریں” GitHub کی اضافی اور حذف شدہ سطروں کا مجموعہ ہے اور اس میں تیار کردہ فائلیں، لاک فائلیں، کیٹلاگز، تراجم اور دستاویزات شامل ہیں؛ یہ churn ہے، تحریر کردہ LOC نہیں۔ 53 PRs میں GitHub diff کی تعداد 500,000 سطروں سے زیادہ بتائی گئی ہے (مثلاً #13399، جس میں ایک واحد provider addition کے لیے 2,347 تبدیل شدہ فائلیں درج ہیں)، جس سے اوپر دیے گئے کئی مجموعے بڑھ جاتے ہیں۔ برابر نتائج کو مشترکہ طور پر درجہ دیا گیا ہے۔</sub>
+<sub>مردم شماری 2026-11-03 03:01:19 UTC کو براہِ راست <code>release/v3.8.53</code> ٹِپ <code>05bc048d6c</code> کے ساتھ کی گئی۔ صفحات میں منقسم GitHub GraphQL مردم شماری میں 9,947 ضم شدہ PRs شامل ہیں: ریپوزٹری کے مالک کی جانب سے 4,130، Dependabot کی جانب سے 240، دیگر بوٹس/ایپس کی جانب سے 6، اور <b>883 منفرد معاونین کی جانب سے 5,571 بیرونی PRs</b>۔ “تبدیل شدہ لائنیں” GitHub کی جانب سے شامل کردہ + حذف کردہ لائنیں ہیں اور ان میں تیار کردہ فائلیں، لاک فائلیں، کیٹلاگز، تراجم اور دستاویزات شامل ہیں؛ یہ تبدیلیوں کا حجم ہے، تحریر کردہ LOC نہیں۔ 53 PRs میں GitHub diff کی تعداد 500,000 لائنوں سے زیادہ بتائی گئی ہے (مثلاً #13399، جس میں ایک واحد فراہم کنندہ کے اضافے کے لیے 2,347 تبدیل شدہ فائلیں درج ہیں)، جس سے اوپر دیے گئے کئی مجموعے بڑھ جاتے ہیں۔ برابر درجات کو ایک ساتھ درجہ دیا گیا ہے۔</sub>
 
-### GitHub سے منسوب commits
+### GitHub سے منسوب کمٹس
 
 <table>
   <tr>
@@ -1434,42 +1434,42 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 بھی اسے چ�
         <img src="https://github.com/maxmad64bis.png" width="40" style="border-radius:50%" alt="Dizzle"/><br/>
         <b>Dizzle</b>
       </a><br/>
-      <sub>🥇 GitHub سے منسوب 418 کمٹس</sub>
+      <sub>🥇 GitHub سے منسوب 418 کمِٹ</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/HouMinXi">
         <img src="https://github.com/HouMinXi.png" width="40" style="border-radius:50%" alt="Bob.Hou"/><br/>
         <b>Bob.Hou</b>
       </a><br/>
-      <sub>🥈 GitHub سے منسوب 294 کمٹس</sub>
+      <sub>🥈 GitHub سے منسوب 294 کمِٹ</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/oyi77">
         <img src="https://github.com/oyi77.png" width="40" style="border-radius:50%" alt="Paijo"/><br/>
         <b>Paijo</b>
       </a><br/>
-      <sub>🥉 GitHub سے منسوب 229 کمٹس</sub>
+      <sub>🥉 GitHub سے منسوب 229 کمِٹ</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/pacocartones">
         <img src="https://github.com/pacocartones.png" width="40" style="border-radius:50%" alt="Paco Cartones"/><br/>
         <b>Paco Cartones</b>
       </a><br/>
-      <sub>🏅 GitHub سے منسوب 222 کمٹس</sub>
+      <sub>🏅 GitHub سے منسوب 222 کمِٹ</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/backryun">
         <img src="https://github.com/backryun.png" width="40" style="border-radius:50%" alt="backryun"/><br/>
         <b>backryun</b>
       </a><br/>
-      <sub>🏅 GitHub سے منسوب 202 کمٹس</sub>
+      <sub>🏅 GitHub سے منسوب 202 کمِٹ</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/JxnLexn">
         <img src="https://github.com/JxnLexn.png" width="40" style="border-radius:50%" alt="Jan Leon"/><br/>
         <b>Jan Leon</b>
       </a><br/>
-      <sub>🏅 GitHub سے منسوب 134 کمٹس</sub>
+      <sub>🏅 GitHub سے منسوب 134 کمِٹ</sub>
     </td>
   </tr>
   <tr>
@@ -1478,49 +1478,49 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 بھی اسے چ�
         <img src="https://github.com/RaviTharuma.png" width="40" style="border-radius:50%" alt="Ravi Tharuma"/><br/>
         <b>Ravi Tharuma</b>
       </a><br/>
-      <sub>🏅 GitHub سے منسوب 126 کمٹس</sub>
+      <sub>🏅 GitHub سے منسوب 126 کمِٹ</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/hartmark">
         <img src="https://github.com/hartmark.png" width="40" style="border-radius:50%" alt="Markus Hartung"/><br/>
         <b>Markus Hartung</b>
       </a><br/>
-      <sub>🏅 GitHub سے منسوب 115 کمٹس</sub>
+      <sub>🏅 GitHub سے منسوب 115 کمِٹ</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/rdself">
         <img src="https://github.com/rdself.png" width="40" style="border-radius:50%" alt="Randi"/><br/>
         <b>Randi</b>
       </a><br/>
-      <sub>🏅 GitHub سے منسوب 108 کمٹس</sub>
+      <sub>🏅 GitHub سے منسوب 108 کمِٹ</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/christopher-s">
         <img src="https://github.com/christopher-s.png" width="40" style="border-radius:50%" alt="Chris"/><br/>
         <b>Chris</b>
       </a><br/>
-      <sub>🏅 GitHub سے منسوب 70 کمٹس</sub>
+      <sub>🏅 GitHub سے منسوب 70 کمِٹ</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/jonlwheat2-gif">
         <img src="https://github.com/jonlwheat2-gif.png" width="40" style="border-radius:50%" alt="WebPerson"/><br/>
         <b>WebPerson</b>
       </a><br/>
-      <sub>🏅 GitHub سے منسوب 68 کمٹس</sub>
+      <sub>🏅 GitHub سے منسوب 68 کمِٹ</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/KooshaPari">
         <img src="https://github.com/KooshaPari.png" width="40" style="border-radius:50%" alt="Koosha Paridehpour"/><br/>
         <b>Koosha Paridehpour</b>
       </a><br/>
-      <sub>🏅 GitHub سے منسوب 68 کمٹس</sub>
+      <sub>🏅 GitHub سے منسوب 68 کمِٹ</sub>
     </td>
   </tr>
 </table>
 
-<sub>2026-11-03 02:09:16 UTC پر دوبارہ جانچا گیا: GitHub سے منسوب کمٹس، ریپوزٹری کے Contributors API کی جانب سے <code>release/v3.8.53</code> کی ڈیفالٹ برانچ کے لیے رپورٹ کیے گئے۔ API نے 903 شناختیں واپس کیں (429 صارفین، 2 بوٹس، 472 گمنام)؛ اس جدول میں مینٹینر، بوٹس اور گمنام شناختیں شامل نہیں ہیں اور مقابلے میں برابر نمبروں کو برقرار رکھا گیا ہے۔ یہ اوپر دی گئی merged-PR درجہ بندی اور نیچے دی گئی Git-metadata مردم شماری، دونوں سے الگ ہے۔</sub>
+<sub>2026-11-03 02:09:16 UTC پر دوبارہ جانچا گیا: GitHub سے منسوب کمِٹس، <code>release/v3.8.53</code> ڈیفالٹ برانچ کے لیے repository Contributors API کی جانب سے رپورٹ کیے گئے ہیں۔ API نے 903 شناختیں واپس کیں (429 صارفین، 2 بوٹس، 472 گمنام)؛ اس جدول میں مینٹینر، بوٹس اور گمنام شناختیں شامل نہیں ہیں اور مقابلے میں برابر نمبروں کو برقرار رکھا گیا ہے۔ یہ اوپر دی گئی merged-PR درجہ بندی اور نیچے دی گئی Git-metadata مردم شماری، دونوں سے الگ ہے۔</sub>
 
-> 🙏 ان معاونین کی خصوصیات، بگ فکسز اور انفراسٹرکچر میں بہتریاں اس چیز کا **بنیادی حصہ** ہیں جو OmniRoute کو قابلِ اعتماد اور خصوصیات سے بھرپور بناتی ہیں۔ ہر پل ریکویسٹ، ہر ٹیسٹ کیس اور ہر i18n ترجمہ فائل اہم ہے۔ اوپن سورس انہی جیسے لوگوں کی کاوشوں سے تشکیل پاتا ہے۔
+> 🙏 ان contributors کی خصوصیات، بگ فکسز اور انفراسٹرکچر میں بہتریاں اس امر کا **بنیادی حصہ** ہیں کہ OmniRoute کو قابلِ اعتماد اور خصوصیات سے بھرپور کیا بناتا ہے۔ ہر pull request، ہر test case اور ہر i18n ترجمہ فائل اہم ہے۔ اوپن سورس ان جیسے لوگوں کے ذریعے تشکیل پاتا ہے۔
 
 </div>
 
@@ -1809,7 +1809,7 @@ MIT لائسنس - تفصیلات کے لیے [LICENSE](LICENSE) دیکھیں۔
 
 **[⬆ واپس اوپر جائیں](#-omniroute)** · اوپن سورس AI کمیونٹی کے لیے ❤️ سے تیار کردہ۔
 
-<sub><a href="https://github.com/diegosouzapw">Diego Souza</a> کی جانب سے تخلیق کردہ · OmniRoute v3.8.53 · Node ≥22.22.2 · MIT لائسنس · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub><a href="https://github.com/diegosouzapw">Diego Souza</a> کی جانب سے تخلیق کردہ · OmniRoute v3.8.54 · Node ≥22.22.2 · MIT لائسنس · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- کمیونٹی کے سوال و جواب کے لیے GitHub Discussions فعال ہیں -->

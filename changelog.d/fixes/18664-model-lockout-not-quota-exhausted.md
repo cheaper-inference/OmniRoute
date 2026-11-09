@@ -1,1 +1,0 @@
-- **fix(auth):** a short model lockout on the last healthy account is no longer reported as "all accounts have exhausted their quota" with another account's multi-day reset. When that lockout ends before the earliest quota reset, the request gets a model-scoped 429 with the lockout's retry time, so clients retry in seconds instead of giving up (#18664).

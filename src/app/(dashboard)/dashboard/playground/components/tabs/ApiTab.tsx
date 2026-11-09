@@ -1,6 +1,7 @@
 "use client";
 
 import Icon from "@/shared/components/Icon";
+import { Spinner } from "@/shared/components/Loading";
 
 // src/app/(dashboard)/dashboard/playground/components/tabs/ApiTab.tsx
 // D14: Preserves 100% of the original page.tsx Monaco multi-endpoint editor.
@@ -765,9 +766,7 @@ export default function ApiTab(_props: ApiTabProps) {
                 {responseDuration !== null && (
                   <span className="text-xs text-text-muted">{responseDuration}ms</span>
                 )}
-                {loading && (
-                  <Icon name="progress_activity" size={14} className="text-primary animate-spin" />
-                )}
+                {loading && <Spinner size="xs" />}
               </div>
               <div className="flex items-center gap-1">
                 <Button

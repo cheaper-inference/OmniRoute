@@ -1,0 +1,1 @@
+- **fix(openai):** strip `temperature` and `top_p` on `gpt-6*` models when `reasoning_effort` is omitted, since GPT-6 defaults to reasoning enabled ([#19243](https://github.com/cheaper-inference/OmniRoute/pull/19243), closes [#19240](https://github.com/cheaper-inference/OmniRoute/issues/19240))

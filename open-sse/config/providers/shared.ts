@@ -57,6 +57,11 @@ export interface RegistryModel {
    * public name differs from the ID sent to the upstream service.
    */
   liveCatalogIds?: readonly string[];
+  /**
+   * Reachable only as `<provider>/<id>`: a bare id never infers this provider. For route labels
+   * that reuse a generic word or another vendor's model name.
+   */
+  requiresProviderPrefix?: boolean;
   toolCalling?: boolean;
   supportsReasoning?: boolean;
   /**

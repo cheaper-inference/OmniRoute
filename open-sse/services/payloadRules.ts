@@ -512,6 +512,17 @@ export async function applyConfiguredPayloadRules(
   protocol: string | string[]
 ) {
   const rules = await getPayloadRulesConfig();
+  // The default configuration has no rules. The caller already owns its
+  // isolated per-attempt body, and cloning its entire input/history here would
+  // double peak memory before the provider has even serialized the request.
+  if (
+    rules.default.length === 0 &&
+    rules.defaultRaw.length === 0 &&
+    rules.override.length === 0 &&
+    rules.filter.length === 0
+  ) {
+    return { payload, applied: [] as AppliedPayloadRule[] };
+  }
   return applyPayloadRules(payload, model, protocol, rules);
 }
 

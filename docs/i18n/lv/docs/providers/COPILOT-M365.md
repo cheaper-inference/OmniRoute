@@ -65,38 +65,37 @@ importēšanas laikā tiek dekodēts JWT derīguma termiņš un parādīts atlik
 > **Nekad neiekļaujiet repozitorijā īstu HAR eksportu, piekļuves marķieri vai atsvaidzināšanas marķieri.** Testu un
 > dokumentācijas vērtībām vienmēr jābūt vietturiem.
 
-## Marķiera derīguma laiks un atsvaidzināšana
+## Pilnvaras darbības laiks un atsvaidzināšana
 
-`access_token` ir īslaicīgs (parasti **~75 minūtes**). Pēc derīguma termiņa beigām nodrošinātājs
-ziņo par savienojuma kļūdu, un jums akreditācijas dati ir jāiegūst atkārtoti.
+`access_token` ir īslaicīgs (parasti **~75 minūtes**). Ja nav izmantojama atsvaidzināšanas
+pilnvaras, pēc tās derīguma termiņa beigām pilnvara ir jāiegūst atkārtoti.
 
 ### Automātiska atsvaidzināšana ar `refreshToken`
 
-Lai izvairītos no manuālas atkārtotas iegūšanas, Microsoft atsvaidzināšanas marķieri varat saglabāt savienojuma
-sadaļā **Advanced Settings → providerSpecificData**:
+Microsoft 365 nodrošinātāja dialoglodziņā **Pievienot savienojumu** vai **Rediģēt savienojumu** atveriet
+**Papildu iestatījumi → Atsvaidzināšanas pilnvara (neobligāti)**. Ielīmējiet Microsoft OAuth atsvaidzināšanas pilnvaru
+`substrate.office.com/sydney` tvērumam un saglabājiet. Ievade ir maskēta, un saglabātā pilnvara nekad netiek
+automātiski aizpildīta. Rediģēšanas laikā atstājiet lauku tukšu, lai saglabātu esošo pilnvaru;
+ielīmējiet jaunu pilnvaru, lai to aizstātu.
 
-| Lauks          | Apraksts                                                                          |
-| -------------- | --------------------------------------------------------------------------------- |
-| `refreshToken` | Microsoft OAuth atsvaidzināšanas marķieris tvērumam `substrate.office.com/sydney` |
-| `tier`         | `individual` (noklusējums), `edu` vai `enterprise`                                |
+Iegūstiet atsvaidzināšanas pilnvaru, izmantojot Microsoft ierīces koda vai autorizācijas koda plūsmu,
+kas ierobežota ar `substrate.office.com/sydney` tvērumu; informācijas panelis to neiegūst jūsu vietā.
+Ja ir konfigurēta atsvaidzināšanas pilnvara, OmniRoute pirms pieprasījumu veikšanas pārbauda
+`access_token` un atsvaidzina to tikai tad, kad tas ir nepieciešams. Veiksmīga atsvaidzināšana saglabā arī
+rotēto atsvaidzināšanas pilnvaru, novēršot nepieciešamību to manuāli iegūt atkārtoti, kamēr atsvaidzināšanas pilnvara ir derīga.
 
-Iegūstiet atsvaidzināšanas marķieri no Microsoft ierīces koda vai autorizācijas koda plūsmas,
-kuras tvērums ir `substrate.office.com/sydney`. Ja ir iestatīts `refreshToken`, OmniRoute
-pirms katra pieprasījuma iepriekš atsvaidzina `access_token`, tāpēc tas nav atkārtoti
-jāiegūst pēc katra ~75 minūšu derīguma termiņa beigām.
-
-Ja `refreshToken` nav iestatīts, pēc katra derīguma termiņa beigām WebSocket akreditācijas dati
+Ja `refreshToken` nav iestatīts, pēc katras derīguma termiņa beigām WebSocket pilnvara
 ir jāiegūst atkārtoti manuāli.
 
-### Līmeņa atlase
+### Līmeņa izvēle
 
-| Līmenis      | Aizstājvārds    | Saskarne                              |
-| ------------ | --------------- | ------------------------------------- |
-| `individual` | _(noklusējums)_ | Patērētājiem paredzētais M365 Copilot |
-| `edu`        | `included`      | Izglītībai paredzētais M365 Copilot   |
-| `enterprise` | `work`          | M365 Copilot darbam                   |
+| Līmenis      | Aizstājvārds    | Virsma                  |
+| ------------ | --------------- | ----------------------- |
+| `individual` | _(noklusējuma)_ | Patērētāju M365 Copilot |
+| `edu`        | `included`      | Izglītības M365 Copilot |
+| `enterprise` | `work`          | M365 Copilot darbam     |
 
-Iestatiet līmeni sadaļā **Advanced Settings → providerSpecificData → tier**. Līmenis ietekmē
+Iestatiet līmeni sadaļā **Papildu iestatījumi → Copilot līmenis**. Līmenis ietekmē
 BizChat maršrutēšanu un piekļuvi modeļiem.
 
 ## Drošības modelis
@@ -112,30 +111,25 @@ BizChat maršrutēšanu un piekļuvi modeļiem.
 
 ## Problēmu novēršana
 
-### Autentifikācija nekavējoties neizdodas
+### Autentifikācija neizdodas nekavējoties
 
-- Pārbaudiet, vai datus nokopējāt no **WebSocket URL**, nevis no XHR/Fetch pieprasījuma.
-  Akreditācijas dati atrodas Chathub WebSocket savienojuma `access_token` vaicājuma parametrā,
-  nevis `Authorization: Bearer` galvenē.
-- Pārliecinieties, ka `chathubPath` ietver pilno `<oid>@<tenant>` segmentu no URL
-  ceļa.
+- Pārbaudiet, vai kopējāt no **WebSocket URL**, nevis no XHR/Fetch pieprasījuma. Akreditācijas dati atrodas Chathub WebSocket savienojuma `access_token` vaicājuma parametrā — nevis `Authorization: Bearer` galvenē.
+- Pārliecinieties, ka `chathubPath` ietver pilno `<oid>@<tenant>` segmentu no URL ceļa.
 
-### Pilnvaras derīgums beidzas pēc ~75 minūtēm
+### Pilnvara beidzas pēc aptuveni 75 minūtēm
 
-Tā ir paredzētā darbība. Bez `refreshToken` piekļuves pilnvara ir īslaicīga. Varat:
+Tas ir paredzēts. Bez `refreshToken` piekļuves pilnvaras darbības laiks ir īss. Varat:
 
-- Atkārtoti iegūt akreditācijas datus no DevTools vai
-- Konfigurēt `refreshToken` papildu iestatījumos, lai veiktu automātisku atsvaidzināšanu.
+- Vēlreiz iegūt akreditācijas datus no DevTools, vai
+- Dialogā Add or Edit connection konfigurēt **Papildu iestatījumi → Atsvaidzināšanas pilnvara (neobligāti)**, lai nodrošinātu automātisku atjaunināšanu.
 
-### Savienojuma pārbaude ir sekmīga, bet tērzēšana atgriež 401
+### Savienojuma pārbaude ir veiksmīga, bet tērzēšana atgriež 401
 
-Pilnvaras derīgums, iespējams, beidzās starp validāciju un pirmo pieprasījumu. Atkārtoti iegūstiet
-jaunus akreditācijas datus.
+Iespējams, pilnvaras derīguma termiņš beidzās starp validāciju un pirmo pieprasījumu. Vēlreiz iegūstiet jaunus akreditācijas datus.
 
-### Copilot netiek parādīts nodrošinātāju sarakstā
+### Copilot neparādās nodrošinātāju sarakstā
 
-Pārliecinieties, ka `copilot-m365-web` ir iespējots sadaļā **Informācijas panelis → Nodrošinātāji**. Dažos
-līmeņos nodrošinātājs pēc noklusējuma var būt paslēpts.
+Pārliecinieties, ka **Dashboard → Providers** ir iespējots `copilot-m365-web`. Dažos līmeņos nodrošinātājs pēc noklusējuma var būt paslēpts.
 
 ## Atsauces
 
