@@ -192,6 +192,7 @@ export async function handleVideoGeneration({
   resolvedProvider = null,
   // #16372 — route-injected media sink (owner + public origin) for auth-gated job results.
   mediaSink = undefined,
+  prepareFalInput = null,
   signal = null,
 }) {
   if (signal?.aborted) return abortedVideoResult();
@@ -300,7 +301,16 @@ export async function handleVideoGeneration({
   }
 
   if (providerConfig.format === "fal-ai-video") {
-    return handleFalVideoGeneration({ model, provider, providerConfig, body, credentials, log });
+    return handleFalVideoGeneration({
+      prepareFalInput,
+      model,
+      provider,
+      providerConfig,
+      body,
+      credentials,
+      log,
+      signal,
+    });
   }
 
   if (providerConfig.format === "google-flow") {

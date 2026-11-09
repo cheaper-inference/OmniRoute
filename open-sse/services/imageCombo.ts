@@ -8,6 +8,7 @@
  *
  * #9239
  */
+import type { PrepareFalInput } from "../handlers/fal/compatibility.ts";
 import { getComboByName, getCombos } from "@/lib/db/combos";
 import { resolveComboTargets } from "@omniroute/open-sse/services/combo.ts";
 import { getImageModelEntry, parseImageModel } from "@omniroute/open-sse/config/imageRegistry.ts";
@@ -273,6 +274,7 @@ export async function executeImageCombo(
   comboName: string,
   body: Record<string, unknown>,
   auth: {
+    prepareFalInput?: PrepareFalInput | null;
     request: Request;
     policy: { apiKeyInfo?: { id?: string; name?: string } | null };
     /** GHSA-3w2r: the caller key's scope; omitted = unrestricted (unchanged). */
@@ -307,6 +309,7 @@ export async function executeImageCombo(
         },
         () =>
           handleImageGeneration({
+            prepareFalInput: auth.prepareFalInput,
             body: { ...body, model: target.modelStr },
             credentials,
             log,

@@ -724,6 +724,9 @@ curl -X DELETE http://localhost:20128/api/v1/{omnirouteCatchAll} \
 
 GET accounts › <id> › limits
 
+Management-only, like `/api/v1/registered-keys`: a dashboard session, the local CLI token, or an API key with `manage`/`admin` scope. Inference-only API keys get 403.
+
+
 ```bash
 curl http://localhost:20128/api/v1/accounts/{id}/limits \
   -H "Authorization: Bearer $OMNIROUTE_TOKEN"
@@ -732,6 +735,9 @@ curl http://localhost:20128/api/v1/accounts/{id}/limits \
 ### PUT /api/v1/accounts/{id}/limits
 
 PUT accounts › <id> › limits
+
+Management-only, like `/api/v1/registered-keys`: a dashboard session, the local CLI token, or an API key with `manage`/`admin` scope. Inference-only API keys get 403.
+
 
 ```bash
 curl -X PUT http://localhost:20128/api/v1/accounts/{id}/limits \
@@ -1029,6 +1035,9 @@ curl http://localhost:20128/api/v1/media/{id} \
 
 POST issues › report
 
+Management-only, like `/api/v1/registered-keys`: a dashboard session, the local CLI token, or an API key with `manage`/`admin` scope. Inference-only API keys get 403.
+
+
 ```bash
 curl -X POST http://localhost:20128/api/v1/issues/report \
   -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
@@ -1120,6 +1129,8 @@ curl http://localhost:20128/api/v1/management/proxies/health \
 
 GET me › status
 
+Self-service usage status for the calling API key (also served at /v1/me/status). Authenticate with `Authorization: Bearer <key>` or `x-api-key: <key>`. Requires scope `self:usage`. `accountQuotas` / `accountQuota` are included only with scope `self:account-quota` and are filtered by the key's `sharedQuotaProviders` setting. `listPriceUsd` / `unpricedRequests` in `usage.cost`, `usage.daily` and `usage.weekly` are cached per key for 60 s, so they may lag by up to 60 s.
+
 ```bash
 curl http://localhost:20128/api/v1/me/status \
   -H "Authorization: Bearer $OMNIROUTE_TOKEN"
@@ -1158,6 +1169,9 @@ curl -X POST http://localhost:20128/api/v1/music/generations \
 
 GET providers › <provider> › limits
 
+Management-only, like `/api/v1/registered-keys`: a dashboard session, the local CLI token, or an API key with `manage`/`admin` scope. Inference-only API keys get 403.
+
+
 ```bash
 curl http://localhost:20128/api/v1/providers/{provider}/limits \
   -H "Authorization: Bearer $OMNIROUTE_TOKEN"
@@ -1166,6 +1180,9 @@ curl http://localhost:20128/api/v1/providers/{provider}/limits \
 ### PUT /api/v1/providers/{provider}/limits
 
 PUT providers › <provider> › limits
+
+Management-only, like `/api/v1/registered-keys`: a dashboard session, the local CLI token, or an API key with `manage`/`admin` scope. Inference-only API keys get 403.
+
 
 ```bash
 curl -X PUT http://localhost:20128/api/v1/providers/{provider}/limits \
