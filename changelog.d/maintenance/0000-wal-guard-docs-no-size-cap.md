@@ -1,0 +1,1 @@
+- **docs(db):** The database guide no longer tells operators to set `PRAGMA journal_size_limit` as a "64MB WAL cap". It now says OmniRoute does not set that pragma and that the WAL guard only warns; it is not a disk-size cap.
