@@ -7804,6 +7804,7 @@
     "systemActor": "System",
     "ipAccessControl": "IP-Zugriffskontrolle",
     "ipAccessControlDesc": "Blockieren oder erlauben Sie bestimmte IP-Adressen",
+    "ipAccessMode": "Zugriffsmodus",
     "ipModeDisabled": "Deaktiviert",
     "ipModeBlacklist": "Schwarze Liste",
     "ipModeWhitelist": "Zulassungsliste",

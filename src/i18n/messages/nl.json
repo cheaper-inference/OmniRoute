@@ -7804,6 +7804,7 @@
     "systemActor": "systeem",
     "ipAccessControl": "IP-toegangscontrole",
     "ipAccessControlDesc": "Blokkeer of sta specifieke IP-adressen toe",
+    "ipAccessMode": "Toegangsmodus",
     "ipModeDisabled": "Uitgeschakeld",
     "ipModeBlacklist": "Zwarte lijst",
     "ipModeWhitelist": "Witte lijst",

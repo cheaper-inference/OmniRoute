@@ -7881,6 +7881,7 @@
     "systemActor": "система",
     "ipAccessControl": "IP контрол на достъпа",
     "ipAccessControlDesc": "Блокиране или разрешаване на конкретни IP адреси",
+    "ipAccessMode": "Режим на достъп",
     "ipModeDisabled": "Забранено",
     "ipModeBlacklist": "Черен списък",
     "ipModeWhitelist": "Бял списък",

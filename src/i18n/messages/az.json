@@ -7881,6 +7881,7 @@
     "systemActor": "sistem",
     "ipAccessControl": "IP girişinə nəzarət",
     "ipAccessControlDesc": "Müəyyən IP ünvanlarını bloklayın və ya onlara icazə verin",
+    "ipAccessMode": "Giriş rejimi",
     "ipModeDisabled": "Deaktivdir",
     "ipModeBlacklist": "Qara siyahı",
     "ipModeWhitelist": "Ağ siyahı",

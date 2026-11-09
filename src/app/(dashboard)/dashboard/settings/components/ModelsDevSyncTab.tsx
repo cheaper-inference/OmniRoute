@@ -66,6 +66,12 @@ function formatInterval(hours: number): string {
   return hours === 168 ? "7d" : `${hours}h`;
 }
 
+// One kit slider mark per checkpoint position (0..3), labelled 1h / 6h / 24h / 7d.
+const INTERVAL_MARKS = INTERVAL_CHECKPOINTS.map((hours, position) => ({
+  value: position,
+  label: formatInterval(hours),
+}));
+
 async function fetchSyncStatusData(): Promise<ModelsDevStatus | null> {
   try {
     const res = await fetch("/api/settings/models-dev?action=status");
@@ -295,13 +301,8 @@ export default function ModelsDevSyncTab() {
               onMouseUp={commitDraftInterval}
               onTouchEnd={commitDraftInterval}
               onBlur={commitDraftInterval}
+              marks={INTERVAL_MARKS}
             />
-            <div className="flex justify-between text-xs text-text-muted mt-1">
-              <span>1h</span>
-              <span>6h</span>
-              <span>24h</span>
-              <span>7d</span>
-            </div>
           </div>
         )}
 

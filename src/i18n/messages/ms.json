@@ -7804,6 +7804,7 @@
     "systemActor": "sistem",
     "ipAccessControl": "Kawalan Capaian IP",
     "ipAccessControlDesc": "Sekat atau benarkan alamat IP tertentu",
+    "ipAccessMode": "Mod akses",
     "ipModeDisabled": "Dilumpuhkan",
     "ipModeBlacklist": "Senarai hitam",
     "ipModeWhitelist": "Senarai putih",

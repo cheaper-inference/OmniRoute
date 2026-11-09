@@ -127,6 +127,24 @@ describe("ModelsDevSyncTab interval slider checkpoints", () => {
     expect(getLabel(container)).toBe("24h");
   });
 
+  it("draws the checkpoint ruler as kit slider marks under the track (#18073)", async () => {
+    const container = await render();
+    await waitFor(() => getSlider(container).value === "2", "saved interval to load");
+
+    const marks = Array.from(container.querySelectorAll<HTMLElement>(".ci-slider__mark"));
+    expect(marks.map((mark) => mark.textContent)).toEqual(["1h", "6h", "24h", "7d"]);
+    // One tick per checkpoint position, evenly spread across [0, 3].
+    expect(marks.map((mark) => mark.style.getPropertyValue("--ci-slider-mark-position"))).toEqual([
+      "0",
+      String(1 / 3),
+      String(2 / 3),
+      "1",
+    ]);
+    // The hand-made flex ruler that used to sit under the slider is gone.
+    const sliderRoot = getSlider(container).closest(".ci-slider");
+    expect(sliderRoot?.nextElementSibling?.textContent ?? "").not.toContain("1h6h24h7d");
+  });
+
   it("shows interpolated hours while dragging between checkpoints", async () => {
     const container = await render();
     await waitFor(() => getSlider(container).value === "2", "saved interval to load");

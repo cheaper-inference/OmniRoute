@@ -7804,6 +7804,7 @@
     "systemActor": "córas",
     "ipAccessControl": "Rialú Rochtana IP",
     "ipAccessControlDesc": "Cuir bac ar sheoltaí IP ar leith nó ceadaigh iad",
+    "ipAccessMode": "Mód rochtana",
     "ipModeDisabled": "Díchumasaithe",
     "ipModeBlacklist": "Dúliosta",
     "ipModeWhitelist": "Bánliosta",

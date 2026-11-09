@@ -7804,6 +7804,7 @@
     "systemActor": "ètò",
     "ipAccessControl": "Ìṣàkóso Ààyè-wọlé IP",
     "ipAccessControlDesc": "Dènà tàbí gba àwọn àdírẹ́sì IP pàtó láàyè",
+    "ipAccessMode": "Ipo iwọle",
     "ipModeDisabled": "Kò ṣiṣẹ́",
     "ipModeBlacklist": "Àtòjọ dídènà",
     "ipModeWhitelist": "Àtòjọ Ìfàyègbà",

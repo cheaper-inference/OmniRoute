@@ -7804,6 +7804,7 @@
     "systemActor": "sistem",
     "ipAccessControl": "Nadzor dostopa po naslovih IP",
     "ipAccessControlDesc": "Blokirajte ali dovolite določene naslove IP",
+    "ipAccessMode": "Način dostopa",
     "ipModeDisabled": "Onemogočeno",
     "ipModeBlacklist": "Seznam blokiranih",
     "ipModeWhitelist": "Beli seznam",

@@ -7804,6 +7804,7 @@
     "systemActor": "järjestelmä",
     "ipAccessControl": "IP-pääsynhallinta",
     "ipAccessControlDesc": "Estä tai salli tietyt IP-osoitteet",
+    "ipAccessMode": "Käyttötila",
     "ipModeDisabled": "Ei käytössä",
     "ipModeBlacklist": "Musta lista",
     "ipModeWhitelist": "Valkoinen lista",

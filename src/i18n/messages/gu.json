@@ -7804,6 +7804,7 @@
     "systemActor": "સિસ્ટમ",
     "ipAccessControl": "IP ઍક્સેસ નિયંત્રણ",
     "ipAccessControlDesc": "ચોક્કસ IP સરનામાંને અવરોધો અથવા મંજૂરી આપો",
+    "ipAccessMode": "ઍક્સેસ મોડ",
     "ipModeDisabled": "અક્ષમ",
     "ipModeBlacklist": "બ્લેકલિસ્ટ",
     "ipModeWhitelist": "વ્હાઇટલિસ્ટ",

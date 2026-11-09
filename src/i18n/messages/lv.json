@@ -7804,6 +7804,7 @@
     "systemActor": "sistēma",
     "ipAccessControl": "IP piekļuves kontrole",
     "ipAccessControlDesc": "Bloķēt vai atļaut konkrētas IP adreses",
+    "ipAccessMode": "Piekļuves režīms",
     "ipModeDisabled": "Deaktivizēts",
     "ipModeBlacklist": "Melnais saraksts",
     "ipModeWhitelist": "Baltais saraksts",
