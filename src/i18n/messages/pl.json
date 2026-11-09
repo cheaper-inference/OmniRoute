@@ -1,4 +1,15 @@
 {
+  "accountPreferences": {
+    "title": "Preferencje kont",
+    "description": "Ustaw wiele kont jako preferowane lub rezerwowe dla tej konfiguracji routingu. Automatyczny routing ustala kolejność kont w ramach każdego poziomu. Konta spoza listy pozostają zwykłe. Nadal obowiązują uprawnienia, limity kwot i istniejące przypisania tur.",
+    "preferred": "Preferowane",
+    "normal": "Zwykłe",
+    "reserve": "Rezerwowe",
+    "excluded": "Wykluczone",
+    "loading": "Ładowanie kont…",
+    "error": "Nie udało się wczytać kont. Otwórz ponownie edytor, aby spróbować jeszcze raz.",
+    "missing": "Niedostępne konto ({id})"
+  },
   "codexKeyServiceMode": {
     "title": "Tryb usługi Codex dla tego klucza API",
     "description": "Dotyczy żądań Codex, w tym modeli Codex w kombinacjach. Wymuszone tryby zastępują ustawienia klienta, ustawienia globalne oraz ustawienia domyślne połączenia. Ustawienia innych dostawców pozostają bez zmian.",
