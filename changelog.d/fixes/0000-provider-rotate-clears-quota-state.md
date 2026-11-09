@@ -1,1 +1,0 @@
-- **fix(cli):** `omniroute providers rotate` no longer leaves the old key's exhausted quota pause on the connection, so a freshly rotated key is used again right after the next server start.

@@ -1,1 +1,0 @@
-- **fix(cli):** `omniroute setup-claude` profiles and `omniroute fcc-claude` now size `CLAUDE_CODE_AUTO_COMPACT_WINDOW` to the routed model's real context window (85% of it below 200k, with the window declared) instead of a flat 190000.

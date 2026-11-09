@@ -1,1 +1,0 @@
-- **fix(cli):** `omniroute stop` no longer stops an unrelated process that reuses the pid left in a stale pid file; it signals a pid only when the command line names OmniRoute.
