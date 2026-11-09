@@ -47,8 +47,12 @@ test("Codex account plan diagnostics are off by default and allowlisted when ena
       selectedConnectionPlan: "Plus",
     });
     assert.equal(visible.headers.get("X-OmniRoute-Selected-Connection-Plan"), "plus");
+    const normalized = withSelectedConnectionHeader(new Response("ok"), "c", {
+      selectedConnectionPlan: "Pro Max",
+    });
+    assert.equal(normalized.headers.get("X-OmniRoute-Selected-Connection-Plan"), "promax");
 
-    for (const unsafe of ["custom-internal-secret", "Plus\\r\\nInjected: true", ""]) {
+    for (const unsafe of ["custom-internal-secret", "Plus\r\nInjected: true", ""]) {
       const response = withSelectedConnectionHeader(new Response("ok"), "c", {
         selectedConnectionPlan: unsafe,
       });
