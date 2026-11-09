@@ -78,3 +78,13 @@ test("saving an unrelated setting on an unsaved install does not change the call
   assert.equal(getUserDatabaseSettings().retention.callLogs, 7);
   assert.equal(resolveCallLogRetentionDays(), 7);
 });
+
+test("an unrelated save does not freeze the inherited age: a later env override still applies", () => {
+  core.getDbInstance();
+  updateDatabaseSettings({ backup: { keepLastNBackups: 4 } } as never);
+
+  process.env.CALL_LOG_RETENTION_DAYS = "14";
+
+  assert.equal(resolveCallLogRetentionDays(), 14, "rotation follows the override");
+  assert.equal(getUserDatabaseSettings().retention.callLogs, 14, "display and cleanup follow it");
+});

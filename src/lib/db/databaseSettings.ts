@@ -511,11 +511,17 @@ export function updateDatabaseSettings(
     setDbBackupMaxFiles(nextSettings.backup.keepLastNBackups);
   }
 
+  // The inherited call-log age (CALL_LOG_RETENTION_DAYS or 7) is not a saved choice. Persist it
+  // only when this update sends it or one is already saved, so a later env override still applies.
+  const persistCallLogAge =
+    updates.retention?.callLogs !== undefined || getPersistedCallLogRetentionDays() !== null;
+
   const tx = db.transaction(() => {
     for (const section of DATABASE_SETTINGS_SECTIONS) {
       const sectionValues = nextSettings[section] as Record<string, unknown>;
 
       for (const [key, value] of Object.entries(sectionValues)) {
+        if (section === "retention" && key === "callLogs" && !persistCallLogAge) continue;
         const stored = section === "cache" ? encryptCacheValue(key, value) : value;
         insert.run(
           DATABASE_SETTINGS_NAMESPACE,
