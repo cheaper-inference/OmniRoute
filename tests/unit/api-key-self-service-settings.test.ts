@@ -262,12 +262,12 @@ test("historical self-service migration 218 preserves settings and installs upst
 });
 
 test("historical self-service migration 228 moves to 233 and frees the slot for purge_orphaned_provider_catalogs", async () => {
-  // Builds of the stack shipped the settings table as 228, which release/v3.8.54 assigns to
-  // 228_purge_orphaned_provider_catalogs. Those databases keep their settings and still run
-  // the upstream purge.
+  // The last builds of this PR before the second release/v3.8.54 merge shipped the settings
+  // table as 228, which the release assigns to 228_purge_orphaned_provider_catalogs. Those
+  // databases must keep their settings and still run the upstream 228 purge.
   const db = core.getDbInstance();
   const saved = settingsDb.updateApiKeySelfServiceSettings("historical-228-key", {
-    sharedQuotaProviders: ["claude"],
+    sharedQuotaProviders: ["codex"],
     anthropicRateLimitHeaders: "strip",
   });
   db.exec(`
@@ -275,7 +275,7 @@ test("historical self-service migration 228 moves to 233 and frees the slot for 
     UPDATE _omniroute_migrations SET version = '228'
       WHERE version = '233' AND name = 'api_key_self_service_settings';
     INSERT INTO key_value (namespace, key, value)
-      VALUES ('syncedAvailableModels', 'codex:missing-connection', '[]');
+      VALUES ('syncedAvailableModels', 'openai:historical-228-orphan', '[]');
   `);
   const { runMigrations } = await import("../../src/lib/db/migrationRunner.ts");
   runMigrations(db);
@@ -294,8 +294,10 @@ test("historical self-service migration 228 moves to 233 and frees the slot for 
   );
   assert.equal(
     db
-      .prepare("SELECT 1 FROM key_value WHERE namespace = ? AND key = ?")
-      .get("syncedAvailableModels", "codex:missing-connection"),
+      .prepare(
+        "SELECT 1 FROM key_value WHERE namespace = 'syncedAvailableModels' AND key = 'openai:historical-228-orphan'"
+      )
+      .get(),
     undefined
   );
 });

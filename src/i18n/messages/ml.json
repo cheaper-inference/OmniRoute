@@ -7909,6 +7909,7 @@
     "systemActor": "സിസ്റ്റം",
     "ipAccessControl": "IP ആക്സസ് നിയന്ത്രണം",
     "ipAccessControlDesc": "നിർദ്ദിഷ്ട IP വിലാസങ്ങൾ തടയുക അല്ലെങ്കിൽ അനുവദിക്കുക",
+    "ipAccessMode": "ആക്സസ് മോഡ്",
     "ipModeDisabled": "പ്രവർത്തനരഹിതം",
     "ipModeBlacklist": "ബ്ലാക്ക്ലിസ്റ്റ്",
     "ipModeWhitelist": "വൈറ്റ്ലിസ്റ്റ്",

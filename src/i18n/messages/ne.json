@@ -7909,6 +7909,7 @@
     "systemActor": "प्रणाली",
     "ipAccessControl": "IP पहुँच नियन्त्रण",
     "ipAccessControlDesc": "विशिष्ट IP ठेगानाहरू रोक्नुहोस् वा अनुमति दिनुहोस्",
+    "ipAccessMode": "पहुँच मोड",
     "ipModeDisabled": "असक्षम",
     "ipModeBlacklist": "कालोसूची",
     "ipModeWhitelist": "श्वेतसूची",

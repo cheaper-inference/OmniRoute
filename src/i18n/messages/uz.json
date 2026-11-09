@@ -7909,6 +7909,7 @@
     "systemActor": "tizim",
     "ipAccessControl": "IP orqali kirishni boshqarish",
     "ipAccessControlDesc": "Muayyan IP manzillarni bloklash yoki ularga ruxsat berish",
+    "ipAccessMode": "Kirish rejimi",
     "ipModeDisabled": "Oʻchirilgan",
     "ipModeBlacklist": "Qora roʻyxat",
     "ipModeWhitelist": "Oq roʻyxat",
