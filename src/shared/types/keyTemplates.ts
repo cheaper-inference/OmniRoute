@@ -97,6 +97,7 @@ export interface KeyTemplateKeyPolicy {
   usageLimitEnabled: boolean;
   dailyUsageLimitUsd: number | null;
   weeklyUsageLimitUsd: number | null;
+  fiveHourUsageLimitUsd: number | null;
   chaosModeEnabled: boolean;
   compressionEnabled: boolean;
   allowAutoCombos: boolean;
@@ -357,6 +358,7 @@ export function createDefaultKeyTemplatePolicy(): KeyTemplatePolicy {
       usageLimitEnabled: false,
       dailyUsageLimitUsd: null,
       weeklyUsageLimitUsd: null,
+      fiveHourUsageLimitUsd: null,
       chaosModeEnabled: false,
       compressionEnabled: true,
       allowAutoCombos: true,

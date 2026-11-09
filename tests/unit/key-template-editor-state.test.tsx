@@ -100,4 +100,20 @@ describe("policy editing state", () => {
     expect(result.current.activeIssues.map((issue) => issue.code)).toEqual(["GROUP_INACTIVE"]);
     expect(result.current.formState.groupIds).toEqual(["inactive"]);
   });
+  it("preserves a fractional five-hour budget while another policy setting is edited", async () => {
+    catalogs();
+    const initial = createDefaultClientKeyTemplatePolicy();
+    initial.key.fiveHourUsageLimitUsd = 0.125;
+    const { result } = renderHook(() => {
+      const [policy, setPolicy] = useState(initial);
+      return {
+        policy,
+        editor: useKeyPolicyEditorModel({ policy, onChange: (next) => setPolicy(next) }),
+      };
+    });
+    expect(result.current.editor.formState.fiveHourUsageLimitUsd).toBe("0.125");
+    await act(() => result.current.editor.updateState((state) => ({ ...state, maxSessions: 2 })));
+    expect(result.current.policy.key.fiveHourUsageLimitUsd).toBe(0.125);
+    expect(result.current.policy.key.maxSessions).toBe(2);
+  });
 });

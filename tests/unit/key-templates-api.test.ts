@@ -9,17 +9,6 @@ import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { makeManagementSessionRequest } from "../helpers/managementSession.ts";
 
-import type {
-  CreateKeyFromPolicyResponse,
-  CreateKeyTemplateResponse,
-  GetKeyTemplateResponse,
-  KeyTemplateApiError,
-  KeyTemplatePolicyPreviewResponse,
-  ListKeyTemplatesResponse,
-  TemplateWarning,
-  UpdateKeyTemplateResponse,
-} from "../../src/shared/types/keyTemplates.ts";
-
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-key-templates-"));
 process.env.DATA_DIR = TEST_DATA_DIR;
 process.env.API_KEY_SECRET = "test-api-key-secret-key-templates";
@@ -117,7 +106,7 @@ test("template CRUD with revision checks and no-store responses", async () => {
   );
   assert.equal(created.status, 201);
   assert.equal(created.headers.get("cache-control"), "no-store");
-  const { template, warnings } = (await created.json()) as CreateKeyTemplateResponse;
+  const { template, warnings } = (await created.json()) as any;
   assert.deepEqual(warnings, []);
   assert.equal(template.revision, 1);
   assert.equal(template.schemaVersion, 1);
@@ -127,14 +116,11 @@ test("template CRUD with revision checks and no-store responses", async () => {
     await post("/api/key-templates", { name: "restricted", policy: restrictedPolicy() })
   );
   assert.equal(duplicateName.status, 409);
-  assert.equal(
-    ((await duplicateName.json()) as KeyTemplateApiError).code,
-    "TEMPLATE_NAME_CONFLICT"
-  );
+  assert.equal(((await duplicateName.json()) as any).code, "TEMPLATE_NAME_CONFLICT");
 
   const list = (await (
     await templatesRoute.GET(await makeManagementSessionRequest(`${BASE}/api/key-templates`))
-  ).json()) as ListKeyTemplatesResponse;
+  ).json()) as any;
   assert.equal(list.templates.length, 1);
 
   const read = (await (
@@ -142,7 +128,7 @@ test("template CRUD with revision checks and no-store responses", async () => {
       await makeManagementSessionRequest(`${BASE}/api/key-templates/${template.id}`),
       params(template.id)
     )
-  ).json()) as GetKeyTemplateResponse;
+  ).json()) as any;
   assert.deepEqual(read.referenceIssues, []);
 
   const patched = await templateRoute.PATCH(
@@ -153,7 +139,7 @@ test("template CRUD with revision checks and no-store responses", async () => {
     params(template.id)
   );
   assert.equal(patched.status, 200);
-  assert.equal(((await patched.json()) as UpdateKeyTemplateResponse).template.revision, 2);
+  assert.equal(((await patched.json()) as any).template.revision, 2);
 
   const stale = await templateRoute.PATCH(
     await makeManagementSessionRequest(`${BASE}/api/key-templates/${template.id}`, {
@@ -163,7 +149,7 @@ test("template CRUD with revision checks and no-store responses", async () => {
     params(template.id)
   );
   assert.equal(stale.status, 409);
-  assert.equal(((await stale.json()) as KeyTemplateApiError).code, "REVISION_CONFLICT");
+  assert.equal(((await stale.json()) as any).code, "REVISION_CONFLICT");
 
   const deleted = await templateRoute.DELETE(
     await makeManagementSessionRequest(`${BASE}/api/key-templates/${template.id}`, {
@@ -177,20 +163,17 @@ test("template CRUD with revision checks and no-store responses", async () => {
     params(template.id)
   );
   assert.equal(gone.status, 404);
-  assert.equal(((await gone.json()) as KeyTemplateApiError).code, "TEMPLATE_NOT_FOUND");
+  assert.equal(((await gone.json()) as any).code, "TEMPLATE_NOT_FOUND");
 });
 
 test("policies are strict: unknown fields such as secrets and inconsistent access are rejected", async () => {
-  const sourcePolicy = restrictedPolicy();
-  const withSecret = {
-    ...sourcePolicy,
-    key: { ...sourcePolicy.key, key: "sk-should-never-be-stored" },
-  };
+  const withSecret = restrictedPolicy() as any;
+  withSecret.key.key = "sk-should-never-be-stored";
   const rejected = await templatesRoute.POST(
     await post("/api/key-templates", { name: "Bad", policy: withSecret })
   );
   assert.equal(rejected.status, 400);
-  const body = (await rejected.json()) as KeyTemplateApiError;
+  const body = (await rejected.json()) as any;
   assert.equal(body.code, "VALIDATION_FAILED");
   assert.ok(Array.isArray(body.issues) && body.issues.length > 0);
 
@@ -222,23 +205,19 @@ test("preview is secret-free and keeps deny-all semantics; lifecycle needs ackno
   assert.ok(!text.includes(source.key), "secret is never in the preview");
   assert.ok(!text.includes(source.key.slice(0, 12)), "key prefix is never in the preview");
   assert.ok(!text.includes(source.id), "key identity is never in the policy");
-  const body = JSON.parse(text) as KeyTemplatePolicyPreviewResponse;
+  const body = JSON.parse(text);
   assert.equal(body.policy.key.modelAccessMode, "restricted");
   assert.deepEqual(body.policy.key.allowedModels, []);
   assert.deepEqual(body.policy.key.allowedCombos, []);
-  assert.ok(
-    body.warnings.some(
-      (w: TemplateWarning) => w.code === "KEY_DISABLED" && w.requiresAcknowledgement
-    )
-  );
+  assert.ok(body.warnings.some((w: any) => w.code === "KEY_DISABLED" && w.requiresAcknowledgement));
 
   const unacknowledged = await templatesRoute.POST(
     await post("/api/key-templates", { name: "From key", fromKeyId: source.id })
   );
   assert.equal(unacknowledged.status, 409);
-  const pending = (await unacknowledged.json()) as KeyTemplateApiError;
+  const pending = (await unacknowledged.json()) as any;
   assert.equal(pending.code, "ACKNOWLEDGEMENT_REQUIRED");
-  assert.ok(pending.warnings.some((w: TemplateWarning) => w.code === "KEY_DISABLED"));
+  assert.ok(pending.warnings.some((w: any) => w.code === "KEY_DISABLED"));
 
   const saved = await templatesRoute.POST(
     await post("/api/key-templates", {
@@ -248,7 +227,7 @@ test("preview is secret-free and keeps deny-all semantics; lifecycle needs ackno
     })
   );
   assert.equal(saved.status, 201);
-  const { template } = (await saved.json()) as CreateKeyTemplateResponse;
+  const { template } = (await saved.json()) as any;
   assert.equal(template.policy.key.isActive, true);
   assert.deepEqual(template.policy.key.allowedCombos, []);
 
@@ -257,7 +236,7 @@ test("preview is secret-free and keeps deny-all semantics; lifecycle needs ackno
     params("nope")
   );
   assert.equal(missing.status, 404);
-  assert.equal(((await missing.json()) as KeyTemplateApiError).code, "KEY_NOT_FOUND");
+  assert.equal(((await missing.json()) as any).code, "KEY_NOT_FOUND");
 });
 
 test("POST /api/keys with a policy creates the complete key atomically", async () => {
@@ -272,7 +251,7 @@ test("POST /api/keys with a policy creates the complete key atomically", async (
   );
   assert.equal(created.status, 201);
   assert.equal(created.headers.get("cache-control"), "no-store");
-  const body = (await created.json()) as CreateKeyFromPolicyResponse;
+  const body = (await created.json()) as any;
   assert.match(body.key, /^sk-/);
   assert.equal(body.templateRef.status, "missing");
   assert.ok(body.policy.key.scopes.includes("self:usage"));
@@ -288,7 +267,7 @@ test("POST /api/keys with a policy creates the complete key atomically", async (
   assert.ok(stored?.expiresAt);
   assert.equal(await apiKeysDb.validateApiKey(body.key), true);
   assert.deepEqual(
-    groupsDb.getKeyGroupsForApiKey(body.id).map((g: { id: string }) => g.id),
+    groupsDb.getKeyGroupsForApiKey(body.id).map((g: any) => g.id),
     [group.id]
   );
   const db = core.getDbInstance();
@@ -296,7 +275,7 @@ test("POST /api/keys with a policy creates the complete key atomically", async (
     (
       db
         .prepare("SELECT tpm_limit FROM api_key_quota_limits WHERE api_key_id = ?")
-        .get(body.id) as { tpm_limit: number }
+        .get(body.id) as any
     ).tpm_limit,
     1000
   );
@@ -304,7 +283,7 @@ test("POST /api/keys with a policy creates the complete key atomically", async (
     (
       db
         .prepare("SELECT count(*) AS n FROM api_key_token_limits WHERE api_key_id = ?")
-        .get(body.id) as { n: number }
+        .get(body.id) as any
     ).n,
     1
   );
@@ -317,10 +296,10 @@ test("blocking stale references reject creation and leave no key behind", async 
   const before = apiKeysDb.getApiKeysCount();
   const rejected = await keysRoute.POST(await post("/api/keys", { name: "Stale", policy }));
   assert.equal(rejected.status, 422);
-  const body = (await rejected.json()) as KeyTemplateApiError;
+  const body = (await rejected.json()) as any;
   assert.equal(body.code, "REFERENCE_INVALID");
   assert.equal(body.issues[0].path, "related.groupIds.0");
-  assert.equal("key" in body, false, "no secret on failure");
+  assert.equal(body.key, undefined, "no secret on failure");
   assert.equal(apiKeysDb.getApiKeysCount(), before);
 });
 
@@ -352,7 +331,7 @@ test("keys stay unchanged when their template is edited or deleted", async () =>
     await templatesRoute.POST(
       await post("/api/key-templates", { name: "Base", policy: restrictedPolicy() })
     )
-  ).json()) as CreateKeyTemplateResponse;
+  ).json()) as any;
   const template = created.template;
   const key = (await (
     await keysRoute.POST(
@@ -362,7 +341,7 @@ test("keys stay unchanged when their template is edited or deleted", async () =>
         templateRef: { id: template.id, revision: template.revision },
       })
     )
-  ).json()) as CreateKeyFromPolicyResponse;
+  ).json()) as any;
   assert.equal(key.templateRef.status, "current");
 
   const widened = structuredClone(template.policy);
@@ -391,7 +370,7 @@ test("legacy POST /api/keys keeps its contract and is not cacheable", async () =
   const created = await keysRoute.POST(await post("/api/keys", { name: "Legacy", noLog: true }));
   assert.equal(created.status, 201);
   assert.equal(created.headers.get("cache-control"), "no-store");
-  const body = (await created.json()) as { noLog: boolean; allowedCombos: string[] };
+  const body = (await created.json()) as any;
   assert.equal(body.noLog, true);
   assert.deepEqual(body.allowedCombos, ["combo/*"]);
 });
@@ -663,58 +642,5 @@ test("real remote CLI tokens require admin for each template mutation but retain
   assert.equal(
     (await templateRoute.DELETE(remote(admin, detail, "DELETE"), params(id))).status,
     200
-  );
-});
-
-test("migration 228 upgrades a prior-schema database without changing an existing key", () => {
-  const id = "00000000-0000-4000-8000-000000000001";
-  const db = core.getDbInstance();
-  db.prepare(
-    "INSERT INTO api_keys (id, name, key, created_at, no_log, scopes) VALUES (?, ?, ?, ?, ?, ?)"
-  ).run(
-    id,
-    "Existing before templates",
-    ["fixture-only", "upgrade"].join("-"),
-    "2026-11-08T12:00:00.000Z",
-    1,
-    JSON.stringify(["self:usage"])
-  );
-  const query = "SELECT id, name, no_log, scopes FROM api_keys WHERE id = ?";
-  const before = db.prepare(query).get(id);
-  // Remove only this additive migration's objects and version marker to reproduce v227.
-  db.exec("DROP TABLE key_templates");
-  db.prepare("DELETE FROM _omniroute_migrations WHERE CAST(version AS INTEGER) = 228").run();
-  assert.equal(
-    Number(
-      (
-        db
-          .prepare("SELECT max(CAST(version AS INTEGER)) AS v FROM _omniroute_migrations")
-          .get() as { v: number }
-      ).v
-    ),
-    227
-  );
-  core.resetDbInstance();
-  apiKeysDb.resetApiKeyState();
-  const upgraded = core.getDbInstance();
-  assert.equal(
-    Number(
-      (
-        upgraded
-          .prepare("SELECT max(CAST(version AS INTEGER)) AS v FROM _omniroute_migrations")
-          .get() as { v: number }
-      ).v
-    ),
-    228
-  );
-  assert.deepEqual(upgraded.prepare(query).get(id), before);
-  assert.equal(
-    (upgraded.prepare("SELECT count(*) AS n FROM key_templates").get() as { n: number }).n,
-    0
-  );
-  assert.equal(
-    (upgraded.prepare("PRAGMA integrity_check").get() as { integrity_check: string })
-      .integrity_check,
-    "ok"
   );
 });

@@ -5,9 +5,18 @@ import type { KeyTemplateKeyPolicy } from "../../../shared/types/keyTemplates.ts
 type Row = Record<string, unknown>;
 export type Parsed<T> = { ok: true; value: T } | { ok: false };
 type FieldKind =
-  | "modelAccessMode" | "list" | "combos" | "boolFalse" | "boolTrue"
-  | "schedule" | "rateLimits" | "nullableInt" | "int0"
-  | "nullablePositive" | "nullableString" | "enum";
+  | "modelAccessMode"
+  | "list"
+  | "combos"
+  | "boolFalse"
+  | "boolTrue"
+  | "schedule"
+  | "rateLimits"
+  | "nullableInt"
+  | "int0"
+  | "nullablePositive"
+  | "nullableString"
+  | "enum";
 
 export interface FieldSpec {
   column: string;
@@ -40,27 +49,55 @@ export const API_KEY_POLICY_FIELDS: readonly FieldSpec[] = [
   { column: "scopes", field: "scopes", kind: "list" },
   { column: "proxy_id", field: "proxyId", kind: "nullableString" },
   { column: "allowed_endpoints", field: "allowedEndpoints", kind: "list" },
-  { column: "stream_default_mode", field: "streamDefaultMode", kind: "enum", values: ["legacy", "json"], fallback: "legacy" },
-  { column: "codex_service_mode", field: "codexServiceMode", kind: "enum", values: ["inherit", "default", "priority", "flex"], fallback: "inherit" },
-  { column: "cache_default_mode", field: "cacheDefaultMode", kind: "enum", values: ["legacy", "bypass"], fallback: "legacy" },
+  {
+    column: "stream_default_mode",
+    field: "streamDefaultMode",
+    kind: "enum",
+    values: ["legacy", "json"],
+    fallback: "legacy",
+  },
+  {
+    column: "codex_service_mode",
+    field: "codexServiceMode",
+    kind: "enum",
+    values: ["inherit", "default", "priority", "flex"],
+    fallback: "inherit",
+  },
+  {
+    column: "cache_default_mode",
+    field: "cacheDefaultMode",
+    kind: "enum",
+    values: ["legacy", "bypass"],
+    fallback: "legacy",
+  },
   { column: "disable_non_public_models", field: "disableNonPublicModels", kind: "boolFalse" },
   { column: "allow_usage_command", field: "allowUsageCommand", kind: "boolFalse" },
   { column: "usage_limit_enabled", field: "usageLimitEnabled", kind: "boolFalse" },
   { column: "daily_usage_limit_usd", field: "dailyUsageLimitUsd", kind: "nullablePositive" },
   { column: "weekly_usage_limit_usd", field: "weeklyUsageLimitUsd", kind: "nullablePositive" },
+  { column: "five_hour_usage_limit_usd", field: "fiveHourUsageLimitUsd", kind: "nullablePositive" },
   { column: "chaos_mode_enabled", field: "chaosModeEnabled", kind: "boolFalse" },
   { column: "compression_enabled", field: "compressionEnabled", kind: "boolTrue" },
   { column: "allow_auto_combos", field: "allowAutoCombos", kind: "boolTrue" },
   { column: "allow_cc_discovery_aliases", field: "allowCcDiscoveryAliases", kind: "boolTrue" },
-  { column: "catalog_scope", field: "catalogScope", kind: "enum", values: ["all", "combos", "models"], fallback: "all" },
+  {
+    column: "catalog_scope",
+    field: "catalogScope",
+    kind: "enum",
+    values: ["all", "combos", "models"],
+    fallback: "all",
+  },
   { column: "forced_model", field: "forcedModel", kind: "nullableString" },
 ];
 
 /** JSON decoding leaves already parsed database values intact. */
 function parseJson(value: unknown): Parsed<unknown> {
   if (typeof value !== "string") return { ok: true, value };
-  try { return { ok: true, value: JSON.parse(value) }; }
-  catch { return { ok: false }; }
+  try {
+    return { ok: true, value: JSON.parse(value) };
+  } catch {
+    return { ok: false };
+  }
 }
 
 /** NULL/empty uses the caller's explicit legacy default, not an implicit allow-list. */
@@ -70,7 +107,8 @@ export function strictList(value: unknown, emptyValue: string[]): Parsed<string[
   const parsed = parseJson(typeof value === "string" ? value.trim() : value);
   if (!parsed.ok) return { ok: false };
   if (parsed.value === null) return { ok: true, value: emptyValue };
-  if (!Array.isArray(parsed.value) || !parsed.value.every((entry) => typeof entry === "string")) return { ok: false };
+  if (!Array.isArray(parsed.value) || !parsed.value.every((entry) => typeof entry === "string"))
+    return { ok: false };
   return { ok: true, value: [...(parsed.value as string[])] };
 }
 
@@ -104,12 +142,25 @@ function parseSchedule(raw: unknown): Parsed<unknown> {
   const parsed = parseJson(raw);
   if (!parsed.ok || !parsed.value || typeof parsed.value !== "object") return { ok: false };
   const obj = parsed.value as Row;
-  if (typeof obj.enabled !== "boolean" || typeof obj.from !== "string" ||
-      typeof obj.until !== "string" || typeof obj.tz !== "string" ||
-      !Array.isArray(obj.days) ||
-      !obj.days.every((d) => typeof d === "number" && Number.isInteger(d) && d >= 0 && d <= 6)) return { ok: false };
-  return { ok: true, value: { enabled: obj.enabled, from: obj.from, until: obj.until,
-    days: [...obj.days], tz: obj.tz } };
+  if (
+    typeof obj.enabled !== "boolean" ||
+    typeof obj.from !== "string" ||
+    typeof obj.until !== "string" ||
+    typeof obj.tz !== "string" ||
+    !Array.isArray(obj.days) ||
+    !obj.days.every((d) => typeof d === "number" && Number.isInteger(d) && d >= 0 && d <= 6)
+  )
+    return { ok: false };
+  return {
+    ok: true,
+    value: {
+      enabled: obj.enabled,
+      from: obj.from,
+      until: obj.until,
+      days: [...obj.days],
+      tz: obj.tz,
+    },
+  };
 }
 
 function parseRateLimits(raw: unknown): Parsed<unknown> {
@@ -119,9 +170,20 @@ function parseRateLimits(raw: unknown): Parsed<unknown> {
   if (parsed.value === null) return { ok: true, value: null };
   if (!Array.isArray(parsed.value)) return { ok: false };
   const rules = parsed.value as unknown[];
-  if (!rules.every((rule) => rule !== null && typeof rule === "object" &&
-    typeof (rule as Row).limit === "number" && typeof (rule as Row).window === "number")) return { ok: false };
-  return { ok: true, value: rules.map((rule) => ({ limit: (rule as Row).limit, window: (rule as Row).window })) };
+  if (
+    !rules.every(
+      (rule) =>
+        rule !== null &&
+        typeof rule === "object" &&
+        typeof (rule as Row).limit === "number" &&
+        typeof (rule as Row).window === "number"
+    )
+  )
+    return { ok: false };
+  return {
+    ok: true,
+    value: rules.map((rule) => ({ limit: (rule as Row).limit, window: (rule as Row).window })),
+  };
 }
 
 function parseNullableInt(raw: unknown): Parsed<unknown> {
@@ -160,8 +222,10 @@ const fieldParsers: Record<FieldKind, Parser> = {
     const trimmed = raw.trim();
     return { ok: true, value: trimmed === "" ? null : trimmed };
   },
-  enum: (raw, spec) => ({ ok: true, value: typeof raw === "string" &&
-    (spec.values ?? []).includes(raw) ? raw : spec.fallback }),
+  enum: (raw, spec) => ({
+    ok: true,
+    value: typeof raw === "string" && (spec.values ?? []).includes(raw) ? raw : spec.fallback,
+  }),
 };
 
 /** Decode one persisted field without losing legacy allow/deny or numeric precision. */

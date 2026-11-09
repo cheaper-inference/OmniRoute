@@ -57,6 +57,7 @@ export const keyTemplateKeyPolicySchema = z
     usageLimitEnabled: z.boolean(),
     dailyUsageLimitUsd: z.number().min(0).nullable(),
     weeklyUsageLimitUsd: z.number().min(0).nullable(),
+    fiveHourUsageLimitUsd: z.number().min(0).nullable().default(null),
     chaosModeEnabled: z.boolean(),
     compressionEnabled: z.boolean(),
     allowAutoCombos: z.boolean(),

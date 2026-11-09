@@ -24,8 +24,8 @@ import {
   clearFieldValidationIssues,
 } from "../../src/app/(dashboard)/dashboard/api-manager/keyTemplateReferenceIssues.ts";
 
-const PROJECT_ROOT = join(import.meta.dirname, "../..");
-const API_MANAGER_DIR = join(PROJECT_ROOT, "src/app/(dashboard)/dashboard/api-manager");
+const OVERLAY_ROOT = join(import.meta.dirname, "../..");
+const API_MANAGER_DIR = join(OVERLAY_ROOT, "src/app/(dashboard)/dashboard/api-manager");
 
 const mockT = (key: string, values?: Record<string, unknown>) =>
   values ? `${key}:${JSON.stringify(values)}` : key;
@@ -476,8 +476,8 @@ test("ApiManagerPageClient, modals, and 6-tab editor preserve permanent row acti
 });
 
 test("en.json and pl.json contain all translation keys referenced across Key Templates UI files", () => {
-  const en = JSON.parse(readFileSync(join(PROJECT_ROOT, "src/i18n/messages/en.json"), "utf8"));
-  const pl = JSON.parse(readFileSync(join(PROJECT_ROOT, "src/i18n/messages/pl.json"), "utf8"));
+  const en = JSON.parse(readFileSync(join(OVERLAY_ROOT, "src/i18n/messages/en.json"), "utf8"));
+  const pl = JSON.parse(readFileSync(join(OVERLAY_ROOT, "src/i18n/messages/pl.json"), "utf8"));
 
   const files = [
     join(API_MANAGER_DIR, "ApiManagerPageClient.tsx"),
@@ -538,39 +538,115 @@ test("fractional quota limits and budget warning thresholds survive an untouched
   assert.deepEqual(result.related.domainBudget, policy.related.domainBudget);
 });
 
-
 test("an inactive-group warning follows its own value after another group is deactivated", () => {
   const policy = createDefaultKeyTemplatePolicy();
   policy.related.groupIds = ["A", "B"];
   const state = policyToEditorFormState(policy);
-  const issues: TemplateReferenceIssue[] = [{ path: "related.groupIds.0", code: "GROUP_INACTIVE", value: "A", message: "inactive A", blocking: false }];
-  const active = resolveActiveReferenceIssues(state, issues, { groupIds: new Set(["A", "B"]), inactiveGroupIds: new Set(["B"]) });
-  assert.deepEqual(active.map((issue) => issue.value), ["B"]);
+  const issues: TemplateReferenceIssue[] = [
+    {
+      path: "related.groupIds.0",
+      code: "GROUP_INACTIVE",
+      value: "A",
+      message: "inactive A",
+      blocking: false,
+    },
+  ];
+  const active = resolveActiveReferenceIssues(state, issues, {
+    groupIds: new Set(["A", "B"]),
+    inactiveGroupIds: new Set(["B"]),
+  });
+  assert.deepEqual(
+    active.map((issue) => issue.value),
+    ["B"]
+  );
 });
 
 test("removing a stale compound reference preserves other rows with the same target", () => {
   const policy = createDefaultKeyTemplatePolicy();
-  policy.related.autoCandidateOverrides = ["auto", "auto-fast"].map((autoChannel) => ({ autoChannel, connectionId: "gone", excluded: true }));
-  policy.related.reasoningRules = ["a", "b"].map((name) => ({ name, description: "", scope: "apiKey", comboId: null, connectionId: "gone", modelPattern: null, sourceEffort: "any", requestTags: [], tagMatchMode: "any", effortMode: "inherit", targetEffort: null, targetKind: "keep", targetModel: null, targetComboId: null, budgetAction: "preserve", budgetTokens: null, priority: 0, enabled: true }));
+  policy.related.autoCandidateOverrides = ["auto", "auto-fast"].map((autoChannel) => ({
+    autoChannel,
+    connectionId: "gone",
+    excluded: true,
+  }));
+  policy.related.reasoningRules = ["a", "b"].map((name) => ({
+    name,
+    description: "",
+    scope: "apiKey",
+    comboId: null,
+    connectionId: "gone",
+    modelPattern: null,
+    sourceEffort: "any",
+    requestTags: [],
+    tagMatchMode: "any",
+    effortMode: "inherit",
+    targetEffort: null,
+    targetKind: "keep",
+    targetModel: null,
+    targetComboId: null,
+    budgetAction: "preserve",
+    budgetTokens: null,
+    priority: 0,
+    enabled: true,
+  }));
   const state = policyToEditorFormState(policy);
   const issues: TemplateReferenceIssue[] = [
-    { path: "related.reasoningRules.0.connectionId", code: "REASONING_CONNECTION_NOT_FOUND", value: "gone", message: "first", blocking: true },
-    { path: "related.reasoningRules.1.connectionId", code: "REASONING_CONNECTION_NOT_FOUND", value: "gone", message: "second", blocking: true },
-    { path: "related.autoCandidateOverrides.0.connectionId", code: "CONNECTION_NOT_FOUND", value: "gone", message: "first override", blocking: false },
+    {
+      path: "related.reasoningRules.0.connectionId",
+      code: "REASONING_CONNECTION_NOT_FOUND",
+      value: "gone",
+      message: "first",
+      blocking: true,
+    },
+    {
+      path: "related.reasoningRules.1.connectionId",
+      code: "REASONING_CONNECTION_NOT_FOUND",
+      value: "gone",
+      message: "second",
+      blocking: true,
+    },
+    {
+      path: "related.autoCandidateOverrides.0.connectionId",
+      code: "CONNECTION_NOT_FOUND",
+      value: "gone",
+      message: "first override",
+      blocking: false,
+    },
   ];
   const anchored = anchorReferenceIssues(issues, policy, state);
   const next = removeReferenceTarget(state, anchored[0]);
-  assert.deepEqual(next.reasoningRules.map((rule) => rule.name), ["b"]);
-  assert.equal(removeReferenceTarget(next, anchored[1]).reasoningRules.length, 0, "the second identity survives an index shift");
-  assert.deepEqual(removeReferenceTarget(state, anchored[2]).autoCandidateOverrides.map((row) => row.autoChannel), ["auto-fast"]);
-  assert.equal(JSON.stringify(editorFormStateToPolicy(state)).includes("clientRowId"), false, "client identity never reaches the API policy");
+  assert.deepEqual(
+    next.reasoningRules.map((rule) => rule.name),
+    ["b"]
+  );
+  assert.equal(
+    removeReferenceTarget(next, anchored[1]).reasoningRules.length,
+    0,
+    "the second identity survives an index shift"
+  );
+  assert.deepEqual(
+    removeReferenceTarget(state, anchored[2]).autoCandidateOverrides.map((row) => row.autoChannel),
+    ["auto-fast"]
+  );
+  assert.equal(
+    JSON.stringify(editorFormStateToPolicy(state)).includes("clientRowId"),
+    false,
+    "client identity never reaches the API policy"
+  );
 });
 
 test("stale flat-list cards deduplicate after an earlier index is removed", () => {
   const policy = createDefaultKeyTemplatePolicy();
   policy.key.allowedConnections = ["A", "gone"];
   const state = policyToEditorFormState(policy);
-  const issues: TemplateReferenceIssue[] = [{ path: "key.allowedConnections.1", value: "gone", code: "CONNECTION_NOT_FOUND", message: "gone", blocking: false }];
+  const issues: TemplateReferenceIssue[] = [
+    {
+      path: "key.allowedConnections.1",
+      value: "gone",
+      code: "CONNECTION_NOT_FOUND",
+      message: "gone",
+      blocking: false,
+    },
+  ];
   const anchored = anchorReferenceIssues(issues, policy, state);
   const next = { ...state, selectedConnections: ["gone"] };
   const active = resolveActiveReferenceIssues(next, anchored, { connectionIds: new Set(["A"]) });
@@ -579,8 +655,21 @@ test("stale flat-list cards deduplicate after an earlier index is removed", () =
 });
 
 test("unrelated edits preserve the exact anchored issue array", () => {
-  const issues: TemplateReferenceIssue[] = [{ path: "key.proxyId", value: "gone", code: "PROXY_NOT_FOUND", message: "gone", blocking: true }];
+  const issues: TemplateReferenceIssue[] = [
+    {
+      path: "key.proxyId",
+      value: "gone",
+      code: "PROXY_NOT_FOUND",
+      message: "gone",
+      blocking: true,
+    },
+  ];
   assert.equal(clearFieldValidationIssues(issues), issues);
-  const invalid: TemplateReferenceIssue = { path: "policy.key.maxSessions", code: "INVALID_FIELD", message: "invalid", blocking: true };
+  const invalid: TemplateReferenceIssue = {
+    path: "policy.key.maxSessions",
+    code: "INVALID_FIELD",
+    message: "invalid",
+    blocking: true,
+  };
   assert.deepEqual(clearFieldValidationIssues([...issues, invalid]), issues);
 });

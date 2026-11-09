@@ -13,10 +13,12 @@ test("legacy allow-lists preserve explicit deny-all and restrictive model access
   assert.deepEqual(parse("combos", null), { ok: true, value: ["combo/*"] });
   assert.deepEqual(parse("combos", "[]"), { ok: true, value: [] });
   assert.deepEqual(parse("modelAccessMode", "all", { allowed_models: '["m"]' }), {
-    ok: true, value: "restricted",
+    ok: true,
+    value: "restricted",
   });
   assert.deepEqual(parse("modelAccessMode", "restricted", { allowed_models: "invalid" }), {
-    ok: true, value: "restricted",
+    ok: true,
+    value: "restricted",
   });
   assert.deepEqual(strictList('["m",2]', []), { ok: false });
 });
@@ -27,7 +29,8 @@ test("schedule and rate limits reject unreadable shapes without coercing values"
   assert.deepEqual(parse("schedule", JSON.stringify({ ...schedule, days: [7] })), { ok: false });
   assert.deepEqual(parse("schedule", "null"), { ok: false });
   assert.deepEqual(parse("rateLimits", '[{"limit":1.5,"window":60}]'), {
-    ok: true, value: [{ limit: 1.5, window: 60 }],
+    ok: true,
+    value: [{ limit: 1.5, window: 60 }],
   });
   assert.deepEqual(parse("rateLimits", '[{"limit":"1","window":60}]'), { ok: false });
   assert.deepEqual(parse("rateLimits", ""), { ok: true, value: null });

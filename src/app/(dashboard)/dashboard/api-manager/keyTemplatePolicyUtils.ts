@@ -141,6 +141,7 @@ export function createDefaultKeyTemplatePolicy(): KeyTemplatePolicy {
       usageLimitEnabled: false,
       dailyUsageLimitUsd: null,
       weeklyUsageLimitUsd: null,
+      fiveHourUsageLimitUsd: null,
       chaosModeEnabled: false,
       compressionEnabled: true,
       allowAutoCombos: true,
@@ -229,6 +230,7 @@ export interface PolicyEditorFormState {
   usageLimitEnabled: boolean;
   dailyUsageLimitUsd: string;
   weeklyUsageLimitUsd: string;
+  fiveHourUsageLimitUsd: string;
   allowedQuotas: string[];
   quotaLimitsEnabled: boolean;
   quotaTpmLimit: string;
@@ -516,7 +518,11 @@ function readUsageForm(
   policyInput: KeyTemplatePolicy
 ): Pick<
   PolicyEditorFormState,
-  "usageLimitEnabled" | "dailyUsageLimitUsd" | "weeklyUsageLimitUsd" | "allowedQuotas"
+  | "usageLimitEnabled"
+  | "dailyUsageLimitUsd"
+  | "weeklyUsageLimitUsd"
+  | "fiveHourUsageLimitUsd"
+  | "allowedQuotas"
 > {
   const policy = policyInput;
   const key = policy.key;
@@ -524,6 +530,7 @@ function readUsageForm(
     usageLimitEnabled: key.usageLimitEnabled === true,
     dailyUsageLimitUsd: numberToInputString(key.dailyUsageLimitUsd),
     weeklyUsageLimitUsd: numberToInputString(key.weeklyUsageLimitUsd),
+    fiveHourUsageLimitUsd: numberToInputString(key.fiveHourUsageLimitUsd),
     allowedQuotas: Array.isArray(key.allowedQuotas) ? [...key.allowedQuotas] : [],
   };
 }
@@ -782,12 +789,13 @@ function writeUsagePolicy(
   state: PolicyEditorFormState
 ): Pick<
   KeyTemplatePolicy["key"],
-  "usageLimitEnabled" | "dailyUsageLimitUsd" | "weeklyUsageLimitUsd"
+  "usageLimitEnabled" | "dailyUsageLimitUsd" | "weeklyUsageLimitUsd" | "fiveHourUsageLimitUsd"
 > {
   return {
     usageLimitEnabled: state.usageLimitEnabled,
     dailyUsageLimitUsd: parseOptionalPositiveNumber(state.dailyUsageLimitUsd),
     weeklyUsageLimitUsd: parseOptionalPositiveNumber(state.weeklyUsageLimitUsd),
+    fiveHourUsageLimitUsd: parseOptionalPositiveNumber(state.fiveHourUsageLimitUsd),
   };
 }
 

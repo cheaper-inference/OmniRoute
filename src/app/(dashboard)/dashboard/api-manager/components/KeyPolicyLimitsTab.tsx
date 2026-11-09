@@ -450,11 +450,15 @@ function UsageBudgets() {
         enabled={formState.usageLimitEnabled}
         dailyLimitUsd={formState.dailyUsageLimitUsd}
         weeklyLimitUsd={formState.weeklyUsageLimitUsd}
+        fiveHourLimitUsd={formState.fiveHourUsageLimitUsd}
         enabledLabel={tc("enabled")}
         disabledLabel={tc("disabled")}
         onEnabledChange={(enabled) => updateState((p) => ({ ...p, usageLimitEnabled: enabled }))}
         onDailyLimitUsdChange={(val) => updateState((p) => ({ ...p, dailyUsageLimitUsd: val }))}
         onWeeklyLimitUsdChange={(val) => updateState((p) => ({ ...p, weeklyUsageLimitUsd: val }))}
+        onFiveHourLimitUsdChange={(val) =>
+          updateState((p) => ({ ...p, fiveHourUsageLimitUsd: val }))
+        }
       />
     </div>
   );

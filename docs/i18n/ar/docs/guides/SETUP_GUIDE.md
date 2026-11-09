@@ -198,41 +198,41 @@ omniroute setup-qwen         # ~/.qwen/settings.json + ~/.qwen/.env
 
 ---
 
-## إعداد البروتوكولات (MCP + A2A)
+## إعداد البروتوكول (MCP + A2A)
 
-### إعداد MCP (بروتوكول سياق النموذج)
+### إعداد MCP (بروتوكول السياق النموذجي)
 
-ابدأ نقل MCP في وضع stdio:
+بدء نقل MCP في وضع stdio:
 
 ```bash
 omniroute --mcp
 ```
 
-مسار التحقق الموصى به:
+تدفق التحقق الموصى به:
 
 ```bash
-# 1. ابدأ خادم MCP
+# 1. Start MCP server
 omniroute --mcp
 
-# 2. من عميل MCP الخاص بك، استدعِ:
-omniroute_get_health        # يجب أن يعيد حالة النظام
-omniroute_list_combos       # يجب أن يعيد التركيبات النشطة
+# 2. From your MCP client, call:
+omniroute_get_health        # Should return system health
+omniroute_list_combos       # Should return active combos
 
-# 3. أو شغّل حزمة اختبارات E2E الكاملة:
+# 3. Or run the full E2E suite:
 npm run test:protocols:e2e
 ```
 
-#### تهيئة عميل MCP
+#### تكوين العميل MCP
 
-**Claude Code:**
+**كود Claude :**
 
 ```bash
-claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
 ```
 
 **Cursor / Cline:**
 
-أضف ما يلي إلى إعدادات MCP الخاصة بك:
+أضف إلى إعدادات MCP الخاصة بك (stdio، مع المفتاح بحيث يكون لدى المتصل مدير):
 
 ```json
 {
@@ -240,23 +240,30 @@ claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp
     "omniroute": {
       "command": "omniroute",
       "args": ["--mcp"],
-      "env": {}
+      "env": {
+        "OMNIROUTE_API_KEY": "your-key",
+        "OMNIROUTE_BASE_URL": "http://localhost:20128"
+      }
     }
   }
 }
 ```
 
-**وثائق MCP الكاملة:** [README لخادم MCP](../../open-sse/mcp-server/README.md) — ‏110 أداة، وإعدادات IDE، وعملاء Python/TS/Go.
+أو، عندما يكون `mcpTransport` هو `streamable-http` (اضبطه على `/dashboard/mcp` أو مع `omniroute mcp enable --transport streamable-http`) ، قم بتوجيه إدخال خادم MCP البعيد للعميل إلى `http://localhost:20128/api/mcp/stream`.
+
+ينتقل المفتاح كـ `Authorization: Bearer <api-key>` (راجع [MCP Server → الوصول عن بعد](../frameworks/MCP-SERVER.md#remote-access-manage-scope-bypass) للمضيفين البعيدين؛ يحتاج المفتاح البعيد `mcp:connect` بالإضافة إلى نطاقات read/write الخاصة به).
+
+**وثائق MCP الكاملة:** أدوات [MCP Server README](../../open-sse/mcp-server/README.md) — 110 وتكوينات IDE وعملاء Python/TS/Go. مرجع عامل التشغيل لأدوات CCR/dedup للضغط (العلامات، المتطلبات الأساسية، نطاقات كل أداة، ترقيم صفحات الاسترجاع، التشخيصات): [محركات الضغط → المتطلبات الأساسية / دليل المشغل](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
 
 ### إعداد A2A (بروتوكول وكيل إلى وكيل)
 
-تحقق من بطاقة الوكيل:
+التحقق من بطاقة الوكيل:
 
 ```bash
 curl http://localhost:20128/.well-known/agent.json
 ```
 
-أرسل مهمة:
+إرسال مهمة:
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -264,7 +271,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"Give me a short quota summary."}]}}'
 ```
 
-**وثائق A2A الكاملة:** [README لخادم A2A](../../src/lib/a2a/README.md) — ‏JSON-RPC 2.0، والمهارات، والبث، ودورة حياة المهمة.
+**وثائق A2A الكاملة:** [A2A Server README](../../src/lib/a2a/README.md) — JSON-RPC 2.0، المهارات، التدفق، دورة حياة المهمة.
 
 ---
 
@@ -323,12 +330,12 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ---
 
-## قالب Void Linux‏ (`xbps-src`)
+## قالب Linux (xbps-src) باطل
 
-لمستخدمي Void Linux، يمكنك بناء حزمة أصلية باستخدام `xbps-src`. احفظ هذه الكتلة باسم `srcpkgs/omniroute/template`:
+بالنسبة لمستخدمي Void Linux ، يمكنك إنشاء حزمة أصلية باستخدام `xbps-src`. احفظ هذه الكتلة باسم `srcpkgs/omniroute/template`:
 
 ```bash
-# ملف القالب لـ 'omniroute'
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -339,7 +346,7 @@ maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# أعِد إنشاء المجموع الاختباري لكل إصدار باستخدام:
+# Regenerate the checksum for each release with:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

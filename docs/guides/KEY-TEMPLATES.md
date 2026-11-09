@@ -96,3 +96,7 @@ The key and related configuration are committed atomically. Failure leaves no
 partially configured key. A fresh credential is returned once with `no-store`;
 handle it securely rather than logging the response. Existing legacy create
 payloads remain supported.
+
+### Rolling five-hour budgets
+
+Templates capture and apply the rolling five-hour USD limit as well as daily and weekly limits. Existing version-1 snapshots without this field default to no five-hour limit; editing another setting preserves a configured five-hour limit.

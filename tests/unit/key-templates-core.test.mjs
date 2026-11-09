@@ -45,7 +45,7 @@ function fixture() {
     allowed_endpoints TEXT, allowed_quotas TEXT NOT NULL DEFAULT '[]',
     stream_default_mode TEXT NOT NULL DEFAULT 'legacy', cache_default_mode TEXT NOT NULL DEFAULT 'legacy',
     disable_non_public_models INTEGER NOT NULL DEFAULT 0, allow_usage_command INTEGER NOT NULL DEFAULT 0,
-    usage_limit_enabled INTEGER NOT NULL DEFAULT 0, daily_usage_limit_usd REAL, weekly_usage_limit_usd REAL,
+    usage_limit_enabled INTEGER NOT NULL DEFAULT 0, daily_usage_limit_usd REAL, weekly_usage_limit_usd REAL, five_hour_usage_limit_usd REAL,
     chaos_mode_enabled INTEGER NOT NULL DEFAULT 0, compression_enabled INTEGER NOT NULL DEFAULT 1,
     allow_auto_combos INTEGER NOT NULL DEFAULT 1, allow_cc_discovery_aliases INTEGER NOT NULL DEFAULT 1,
     catalog_scope TEXT NOT NULL DEFAULT 'all', forced_model TEXT
@@ -579,7 +579,7 @@ test("migration, core schema and lazy ensure declare the same key_templates tabl
   assert.ok(table, "core schema declares key_templates");
   assert.equal(norm(table[0]), norm(KEY_TEMPLATES_TABLE_SQL));
   const migrationSource = readFileSync(
-    new URL("../../src/lib/db/migrations/228_key_templates.sql", import.meta.url),
+    new URL("../../src/lib/db/migrations/230_key_templates.sql", import.meta.url),
     "utf8"
   );
   const migrationTable = /CREATE TABLE IF NOT EXISTS key_templates \([\s\S]*?\n\s*\);/.exec(
@@ -595,4 +595,25 @@ test("migration, core schema and lazy ensure declare the same key_templates tabl
     /\{ table: "key_templates", maxRows: 5_000 \}/,
     "critical-table preservation"
   );
+});
+
+test("five-hour USD budgets survive capture, independent creation and recapture", () => {
+  const db = fixture();
+  db.prepare("UPDATE api_keys SET five_hour_usage_limit_usd = ? WHERE id = ?").run(0.125, "src");
+  const captured = snapshotToTemplatePolicy(readKeyPolicyRows(db, "src"), NOW);
+  assert.deepEqual(captured.problems, []);
+  assert.equal(captured.policy.key.fiveHourUsageLimitUsd, 0.125);
+  runImmediate(db, () =>
+    insertKeyPolicyRows(db, identity("five-hour"), templatePolicyToRows(captured.policy, NOW))
+  );
+  const copied = snapshotToTemplatePolicy(readKeyPolicyRows(db, "five-hour"), NOW);
+  assert.deepEqual(copied.problems, []);
+  assert.equal(copied.policy.key.fiveHourUsageLimitUsd, 0.125);
+  db.prepare("UPDATE api_keys SET five_hour_usage_limit_usd = NULL WHERE id = ?").run("src");
+  assert.equal(
+    snapshotToTemplatePolicy(readKeyPolicyRows(db, "five-hour"), NOW).policy.key
+      .fiveHourUsageLimitUsd,
+    0.125
+  );
+  db.close();
 });
