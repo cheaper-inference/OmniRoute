@@ -1,1 +1,0 @@
-- **fix(cli-tools):** the OpenClaw auto-order route now returns the real provider order for signed-in users. It reads combos and circuit-breaker state directly instead of calling its own authenticated API without a credential, which returned an empty order.

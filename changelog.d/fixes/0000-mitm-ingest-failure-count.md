@@ -1,1 +1,0 @@
-- **fix(mitm):** failed Traffic Inspector ingest posts from the AgentBridge proxy are now counted, logged (the first one and every 100th) and shown as `ingestFailures` in the proxy's `stats.json`, so a broken capture path no longer looks like an empty capture.
