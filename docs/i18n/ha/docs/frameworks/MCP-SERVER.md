@@ -19,8 +19,9 @@ omniroute --mcp
 Ko ta hanyar sufurin buɗaɗɗen-sse:
 
 ```bash
-# HTTP streamable transport (port 20130)
-omniroute --dev  # MCP auto-starts on /mcp endpoint
+# Streamable HTTP transport (default port 20128, in-process on the dashboard server)
+# Client endpoint: http://localhost:20128/api/mcp/stream
+# stdio: omniroute --mcp
 ```
 
 Abubuwan jigilar HTTP (`sse` / `streamable-http`, wanda ke aiki a cikin sabar dashboard) an kashe ta tsohuwa kuma a baya ana iya jujjuyawa daga shafin `/dashboard/mcp` kawai. Dangane da v3.8.51 CLI yana da daidaito:
@@ -133,7 +134,7 @@ Dubi [Kanfigareshan Abokin Ciniki na MCP](../guides/SETUP_GUIDE.md#mcp-client-co
 | `omniroute_set_compression_engine`  | `write:compression` | Zaɓi injin mai aiki (off/caveman/rtk/stacked) da ƙarfin Caveman/RTK                                                         |
 | `omniroute_list_compression_combos` | `read:compression`  | Jerin sunayen combos masu matsawa da bututun injin su                                                                       |
 | `omniroute_compression_combo_stats` | `read:compression`  | Ana tattara bayanai ta hanyar haɗakarwa da injin                                                                            |
-| `omniroute_ccr_store`               | `write:compression` | Ajiye abun cikin keɓancewar mai kira a cikin shagon CCR mai iyaka a cikin memori kuma mayar da alamar da bayanin `ccr://`   |
+| `omniroute_ccr_store`               | `write:compression` | Ajiye abun cikin keɓancewar mai kira a cikin shagon CCR mai iyaka a cikin memori kuma mayar da alamar da ma'anar `ccr://`   |
 | `omniroute_ccr_retrieve`            | `read:compression`  | Mai da abun ciki CCR cikakke ko tare da kai, wutsiya, layi, grep, da yanayin ƙididdiga                                      |
 | `omniroute_ccr_inspect`             | `read:compression`  | Bincika metadata CCR mallakar mai kira ba tare da mayar da abun ciki ba                                                     |
 | `omniroute_ccr_list`                | `read:compression`  | Lissafin metadata da aka keɓe don tubalan CCR mallakar mai kira                                                             |
@@ -142,13 +143,13 @@ Dubi [Kanfigareshan Abokin Ciniki na MCP](../guides/SETUP_GUIDE.md#mcp-client-co
 | `omniroute_rtk_discover`            | `read:compression`  | Gano maimaita hayaniyar a cikin samfuran fitarwa RTK                                                                        |
 | `omniroute_rtk_learn`               | `read:compression`  | Ƙirƙirar daftarin tace RTK da za'a iya bita daga samfuran ficewa                                                            |
 
-shigarwar CCR suna cikin ƙwaƙwalwar ajiya kawai kuma suna ɓacewa a sake farawa. Kowane toshe yana iyakance ga 2 MiB, kowane babba zuwa 16 MiB, kuma kantin sayar da kayayyaki na duniya zuwa 64 MiB. Matsakaicin shigarwar zuwa TTL na awa 24 (mafi girman kwanaki bakwai). Cikakken dawo da MCP yana iyakance zuwa 256 KiB; manyan tubalan sun kasance suna samuwa ta hanyar jeri da grep. Ma'ajiya, dawo da, jeri, dubawa, gogewa, da ƙididdiga an ware su ta ingantacciyar maɓalli na API. Rubutun dubawa sun ƙunshi hashes da girman metadata, ba abun ciki ba.
+shigarwar CCR suna amfani da shago mai hawa biyu: matakin ƙwaƙwalwar ajiya mai zafi mai goyan baya, akan lokutan runtime marasa gajimare, ta hanyar SQLite mai ɗorewa (`ccr_blocks`, a kan ta tsohuwa) don haka toshe yana tsira daga korar ko sake farawa har sai TTL ɗinsa ya ƙare — sai dai toshe sama da 512 KB da gajimare masu gudu, waɗanda ke dawwama akan ƙwaƙwalwar ajiya. Kowane toshe yana iyakance zuwa 2 MiB, kowane shugaban makaranta zuwa 16 MiB, kuma kantin sayar da kayayyaki na duniya zuwa 64 MiB. Matsakaicin shigarwar zuwa TTL na awa 24 (mafi girman kwanaki bakwai). Cikakken dawo da MCP yana iyakance zuwa 256 KiB; manyan tubalan sun kasance suna samuwa ta hanyar jeri da grep. Ma'ajiya, dawo da, jeri, dubawa, gogewa, da ƙididdiga an ware su ta ingantacciyar maɓalli na API. Rubutun dubawa sun ƙunshi hashes da girman metadata, ba abun ciki ba. Cikakkun bayanan mai aiki (alamomi guda biyu, abubuwan da ake buƙata na abokin ciniki, `codemode:false`, iyakokin kayan aiki, pagination, da matrix na bincike) suna zaune a cikin [Injin Compression → Prerequisites / jagorar mai aiki](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
 
 `omniroute_compression_status` ya ba da rahoton matsawa bayanin MCP daban a ƙarƙashin `analytics.mcpDescriptionCompression`. Waɗannan ƙididdiga sune ƙididdiga-girman metadata don kwatancen MCP (`tools`, `prompts`, `resources`, da `resourceTemplates`); ba masu bada rasidun amfani ba ne kuma ana yiwa alama da `source: "mcp_metadata_estimate"`.
 
 ### Tace Bishiyar Samun damar MCP (v3.8.0)
 
-Ya bambanta da kayan aikin matsawa da ke sama, OmniRoute ya haɗa da tacewa bayan aiwatarwa wanda ke matsawa** sakamakon kayan aiki** na MCP browser/accessibility kayan aikin kafin a mayar da su zuwa ga wakili. Wannan matattarar ba ita kanta kayan aikin — bane tana gudana a bayyane akan kowane sakamakon kayan aiki wanda ke ƙunshe da kalmar shiga-itace ko rubutu-snapshot (≥ 2000 chars).
+Ya bambanta da kayan aikin matsawa da ke sama, OmniRoute ya haɗa da tacewa bayan aiwatarwa wanda ke matsawa** sakamakon kayan aiki** na MCP browser/accessibility kayan aikin kafin a mayar da su zuwa ga wakili. Wannan matattarar ba ita kanta kayan aiki ba ce — tana gudana a bayyane akan duk wani sakamakon kayan aiki wanda ya ƙunshi verbose accessibility-itace ko rubutu-snapshot rubutu (≥ 2000 chars).
 
 Mahimman halaye:
 

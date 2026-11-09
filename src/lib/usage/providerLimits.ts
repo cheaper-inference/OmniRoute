@@ -1114,7 +1114,9 @@ async function fetchLiveProviderLimitsWithOptions(
       }
 
       // Only the dashboard's on-demand refresh lists credits; background polls keep
-      // their base usage request and never trigger reset-credit activity.
+      // their base usage request and never trigger reset-credit activity. The only
+      // background exception is the opt-in, capped sweep in
+      // src/lib/services/codexResetCreditAutospend.ts, and it runs outside this path.
       if (options.includeResetCredits && conn.provider === "claude" && conn.accessToken) {
         await fetchAndSeedClaudeResetCreditUsage(conn.id, conn.accessToken);
       }

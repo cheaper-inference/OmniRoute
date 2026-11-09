@@ -264,106 +264,109 @@ Gerelateerde mechanismen blijven gescheiden:
 
 ---
 
-## 3. Model Lockout
+## 3. Model-lockout
 
-**Bereik:** provider + connection + model-triple.
+**Bereik:** provider + verbinding + model-drietal.
 
-**Sleutelscope per status:** de falende status bepaalt naar welke sleutel een lockout schrijft
+**Bereik per status:** de status die de fout veroorzaakt, bepaalt naar welke sleutel een lockout wordt geschreven
 (`resolveLockoutScope()` in `open-sse/services/accountFallback/exactModelLock.ts`):
 
 - `429` / `403` / `402` — een quota- of entitlement-signaal — vergrendel de **quota-familie**:
-  voor codex de volledige `codex` / `spark`-scope (elk `gpt-5*`-model van de
-  connection), voor andere providers `getQuotaScopedModelForProvider()`.
-- `404` vergrendelt het kale model (`getModelLockKey()` vernauwt `not_found`).
+  voor codex het volledige bereik `codex` / `spark` (elk `gpt-5*`-model van de
+  verbinding), voor andere providers `getQuotaScopedModelForProvider()`.
+- `404` vergrendelt het kale model (`getModelLockKey()` vernauwt dit tot `not_found`).
 - Elke andere status — `5xx`-transport-/serverfouten en OmniRoute's eigen
-  gesynthetiseerde `502` uit kwaliteitsvalidatie — vergrendelt alleen de **exacte**
-  provider/connection/model-tuple. Een slechte stream op één model is geen bewijs
-  over het quota van het account; vóór deze regel verwijderde één leeg antwoord op
-  `codex/gpt-5.6-luna` elk `gpt-5*`-model van die connection uit de
-  routing voor 2–30 min (escalerend), terwijl het quota onaangetast bleef.
-- De expliciete `scope`-optie van een aanroeper wint altijd (Antigravity geeft `"exact"` door).
+  gesynthetiseerde `502` uit kwaliteitsvalidatie — vergrendelt alleen het **exacte**
+  provider-/verbinding-/model-tupel. Een slechte stream op één model is geen bewijs
+  over het quota van het account; vóór deze regel verwijderde één lege respons op
+  `codex/gpt-5.6-luna` elk `gpt-5*`-model van die verbinding gedurende 2–30 min (oplopend)
+  uit de routering, terwijl het quota onaangeroerd bleef.
+- De expliciete optie `scope` van een aanroeper heeft altijd voorrang (Antigravity geeft `"exact"` door).
 
-**Doel:** voorkomen dat een hele connection wordt uitgeschakeld wanneer slechts één model niet beschikbaar of quota-beperkt is.
+**Doel:** voorkomen dat een volledige verbinding wordt uitgeschakeld wanneer slechts één model niet beschikbaar is of door quota wordt beperkt.
 
 **Voorbeelden:**
 
-- Providers met per-model quota die 429 teruggeven
-- Lokale providers die 404 teruggeven voor één ontbrekend model
-- Providerspecifieke mode-/model-machtigingsfouten (bijv. Grok-modes)
+- Providers met quota per model die 429 retourneren
+- Lokale providers die 404 retourneren voor één ontbrekend model
+- Provider-specifieke fouten met betrekking tot modus-/modelrechten (bijv. Grok-modi)
 
 **Implementatie:** `open-sse/services/accountFallback.ts` — `lockModel()`, `clearModelLock()`, `getAllModelLockouts()`.
 
-### Model Cooldowns-dashboard (v3.8.0)
+### Dashboard voor model-cooldowns (v3.8.0)
 
-UI: Settings → Model Cooldowns (`src/app/(dashboard)/dashboard/settings/components/ModelCooldownsCard.tsx`)
+UI: Instellingen → Model-cooldowns (`src/app/(dashboard)/dashboard/settings/components/ModelCooldownsCard.tsx`)
 
-Toont actieve lockouts met: provider, connection, model, reason, expiresAt. Operators kunnen een model vanuit de kaart handmatig opnieuw inschakelen.
+Toont actieve lockouts met: provider, verbinding, model, reden, expiresAt. Operators kunnen een model handmatig opnieuw inschakelen vanuit de kaart.
 
 **REST API:**
 
 - `GET /api/resilience/model-cooldowns` — actieve lockouts weergeven
-- `DELETE /api/resilience/model-cooldowns` — handmatig opnieuw inschakelen. Body: `{provider, connection, model}`. Auth: management.
+- `DELETE /api/resilience/model-cooldowns` — handmatig opnieuw inschakelen. Body: `{provider, connection, model}`. Auth: beheer.
 
-### Cooldown Manager
+### Cooldownbeheer
 
-UI: Monitoring → Cooldown Manager (`src/app/(dashboard)/dashboard/resilience/cooldowns/`).
+UI: Monitoring → Cooldownbeheer (`src/app/(dashboard)/dashboard/resilience/cooldowns/`).
 
-Eén pagina voor elke connection die om een tijdelijke reden uit de routing is, in plaats van
-elke providerpagina afzonderlijk te openen. De pagina toont connection-cooldowns, model-lockouts
-en terminale toestanden, wist ze per connection, voor een selectie of voor alle connections van
-een provider, en bewerkt de meest afgestemde cooldown-regels: `streamStallCooldown.enabled` en de
-OAuth- / API-key-`connectionCooldown`-basiscooldown en de maximale backoff-stappen (opgeslagen via
-`PATCH /api/resilience`). Terminale toestanden (`banned`, `expired`, `credits_exhausted`) worden
-getoond maar hier nooit gewist.
+Eén pagina voor elke verbinding die om een tijdelijke reden niet wordt gerouteerd, in plaats van
+elke providerpagina afzonderlijk te openen. De pagina toont cooldowns voor verbindingen, modellockouts en terminale
+statussen, wist deze per verbinding, voor een selectie of voor alle verbindingen van een provider,
+en bewerkt de meest gebruikte cooldownregels: `streamStallCooldown.enabled` en de
+basis-cooldown en het maximale aantal backoffstappen van `connectionCooldown` voor OAuth- en API-sleutels (opgeslagen via
+`PATCH /api/resilience`). Terminale statussen (`banned`, `expired`, `credits_exhausted`) worden
+wel weergegeven, maar hier nooit gewist.
 
-**REST API** (`src/lib/resilience/cooldownManager.ts`, auth: management):
+De kaart **Fout-cooldownregels** op dezelfde pagina bewerkt de operatorfoutregels
+(`settings.providerErrorRules`) en de provider-specifieke standaardinstellingen voor alle overige gevallen
+(`settings.providerErrorDefaults`) via `PATCH /api/settings` — zie "Door operators gedeclareerde
+regels" onder §7 voor de manier waarop ze overeenkomen. Duurinstellingen zijn Standaard (geen expliciete cooldown), 30 min,
+1 uur, 5 uur, 24 uur of een aangepaste waarde van 1 tot 43.200 minuten (30 dagen).
 
-- `GET /api/resilience/cooldowns[?provider=]` — connections met status, resterende cooldown,
-  backoff-niveau, laatste fouttype en model-lockouts (geen credentials)
+**REST API** (`src/lib/resilience/cooldownManager.ts`, auth: beheer):
+
+- `GET /api/resilience/cooldowns[?provider=]` — verbindingen met status, resterende cooldown,
+  backoffniveau, type van de laatste fout en modellockouts (geen inloggegevens)
 - `POST /api/resilience/cooldowns` — body `{connectionIds: string[]}` of
   `{all: true, provider?}`; retourneert `{cleared, unchanged, skippedTerminal, lockoutsCleared}`
 
-### UI voor lockout-instellingen + success-decay-herstel (v3.8.23)
+### UI voor lockoutinstellingen + herstel door succesafbouw (v3.8.23)
 
-Model lockout ging van altijd-aan hardcoded gedrag naar een volledig configureerbare,
+Modellockout ging van altijd ingeschakeld, hardcoded gedrag naar een volledig configureerbare,
 opt-in functie met een eigen instellingenkaart en een zelfherstellend herstelpad.
 
-**Instellingenkaart:** Settings → Model Lockout
+**Instellingenkaart:** Instellingen → Modellockout
 (`src/app/(dashboard)/dashboard/settings/components/ModelLockoutCard.tsx`).
-Deze is **onderscheiden** van de alleen-lezen `ModelCooldownsCard` hierboven (die actieve
-lockouts alleen _weergeeft_) — de nieuwe kaart _configureert de parameters_. De standaardwaarden
+Dit is **onderscheiden** van de alleen-lezen `ModelCooldownsCard` hierboven (die alleen
+actieve lockouts _opsomt_) — de nieuwe kaart _configureert de parameters_. Standaardwaarden
 staan in `DEFAULT_MODEL_LOCKOUT_SETTINGS`
 (`src/lib/resilience/modelLockoutSettings.ts`):
 
-| Instelling              | Standaard                        | Betekenis                                                     |
-| ----------------------- | -------------------------------- | ------------------------------------------------------------- |
-| `enabled`               | `false`                          | Hoofdschakelaar — model lockout staat **standaard uit**.      |
-| `errorCodes`            | `[403, 404, 429, 502, 503, 504]` | Upstream-statussen die gelden als een fout op modelniveau.    |
-| `baseCooldownMs`        | `120_000` (120 s)                | Initiële lockout-duur bij de eerste fout.                     |
-| `maxCooldownMs`         | `1_800_000` (30 min)             | Bovengrens voor de geëscaleerde cooldown.                     |
-| `maxBackoffSteps`       | `10`                             | Maximaal aantal escalatiestappen voor exponentiële backoff.   |
-| `useExponentialBackoff` | `true`                           | Of herhaalde fouten de cooldown exponentieel laten escaleren. |
+| Instelling              | Standaardwaarde                  | Betekenis                                                      |
+| ----------------------- | -------------------------------- | -------------------------------------------------------------- |
+| `enabled`               | `false`                          | Hoofdschakelaar — modellockout is **standaard uitgeschakeld**. |
+| `errorCodes`            | `[403, 404, 429, 502, 503, 504]` | Upstream-statussen die tellen als een modelgebonden fout.      |
+| `baseCooldownMs`        | `120_000` (120 s)                | Initiële lockoutduur voor de eerste fout.                      |
+| `maxCooldownMs`         | `1_800_000` (30 min)             | Limiet voor de opgeschaalde cooldown.                          |
+| `maxBackoffSteps`       | `10`                             | Maximaal aantal escalatiestappen met exponentiële backoff.     |
+| `useExponentialBackoff` | `true`                           | Of herhaalde fouten de cooldown exponentieel opschalen.        |
 
-Instellingen worden bewaard via de normale settings store en gevalideerd via het
-schema voor resilience-instellingen; de kaart clampt `baseCooldownMs`/`maxCooldownMs`
+Instellingen worden bewaard via de normale instellingenstore en gevalideerd via het
+schema voor resilience-instellingen; de kaart begrenst `baseCooldownMs`/`maxCooldownMs`
 (met `maxCooldownMs ≥ baseCooldownMs`) en `maxBackoffSteps`.
 
-**Success-decay-herstel:** herstel is **niet** puur het verlopen van de timer. Een
-geslaagd antwoord bouwt de foutenteller van het model weer af, zodat een model dat
-halverwege het venster is hersteld stopt met escaleren (en wordt vrijgegeven) voordat
-zijn timer afloopt. Bij een succesvol combo-target roept `open-sse/services/combo.ts`
-`decayModelFailureCount()` aan (`open-sse/services/accountFallback.ts`), die de opgeslagen
-`failureCount` **halveert** (`Math.floor(failureCount / 2)`); zodra die `0` bereikt,
-wordt de lockout-entry volledig verwijderd. De tegenhanger `recordModelLockoutFailure()`
-verhoogt de teller (en escaleert de cooldown) bij fouten binnen het
-escalatievenster. Deze success-decay komt bovenop het gewone verlopen van de timer —
-beide paden kunnen een model weer inschakelen.
+**Herstel door succesafbouw:** herstel is **niet** uitsluitend het verlopen van een timer. Een gezonde
+respons verlaagt de foutenteller van het model stapsgewijs, zodat een model dat
+halverwege het venster is hersteld, niet verder blijft escaleren (en de lockout wist)
+voordat de timer zou verlopen. Bij een geslaagd combo-doel roept `open-sse/services/combo.ts` `decayModelFailureCount()`
+aan (`open-sse/services/accountFallback.ts`), die de opgeslagen
+`failureCount` **halveert** (`Math.floor(failureCount / 2)`); wanneer deze `0` bereikt, wordt de lockoutvermelding volledig verwijderd. De tegenhanger `recordModelLockoutFailure()` verhoogt de teller (en schaalt de cooldown op) bij fouten binnen het escalatievenster. Deze succesafbouw komt boven op het gewone verlopen van de timer —
+via beide paden kan een model opnieuw worden ingeschakeld.
 
-**Toestand:** lockouts worden **in-memory** vastgehouden (per-process `Map`s van
-`ModelLockoutEntry` met als sleutel `provider:connectionId:model`, exact-scope-vergrendelingen
-met `provider:connectionId:exact:model`) en niet gepersisteerd naar
-de DB — ze gaan verloren bij een herstart. De _instellingen_ worden wel gepersisteerd; de actieve
-lockout-_toestand_ is vluchtig.
+**Status:** lockouts worden **in het geheugen** bijgehouden (`Map`s per proces van
+`ModelLockoutEntry`, gesleuteld op `provider:connectionId:model`; vergrendelingen met
+een exact bereik op `provider:connectionId:exact:model`), en niet opgeslagen in de
+database — ze gaan verloren bij een herstart. De _instellingen_ worden opgeslagen; de
+actieve _lockoutstatus_ is vluchtig.
 
 ---
 
@@ -620,297 +623,316 @@ Indien ingeschakeld, wordt een watchdog-afbreking alleen toegepast op de actieve
 
 ---
 
-## 7. Herschrijving van upstream-status (foutief aangegeven quotafouten)
+## 7. Herformulering van upstream-status (onjuist weergegeven quota-fouten)
 
-**Scope:** één upstream-gateway die tijdelijke quota-uitputting rapporteert met de verkeerde HTTP-status.
+**Scope:** één upstream-gateway die tijdelijke quota-uitputting meldt met de verkeerde HTTP-status.
 
-**Doel:** een misleidende status corrigeren VÓÓR classificatie, zodat downstream-consumers (fallback-engine, combo-aggregatie, de clientgerichte respons) het werkelijke, herhaalbare karakter van de fout zien.
+**Doel:** een misleidende status corrigeren VOORDAT classificatie plaatsvindt, zodat downstream-consumenten (fallback-engine, combo-aggregatie en het clientgerichte antwoord) de werkelijk opnieuw probeerbare aard van de fout zien.
 
-Sommige gateways signaleren TIJDELIJKE quota-uitputting met een niet-herhaalbare
-HTTP-status. `agentrouter.org` retourneert `403` (soms `400`) met een Chinese
-body (`用户额度不足` / `额度不足`) in plaats van de standaard `429`. Clients zoals
-Claude Code behandelen `403` als permanent en breken de sessie af, en zonder
-correctie zou de fallback-engine dit classificeren als `AUTH_ERROR` in plaats
-van een quota-gebeurtenis.
+Sommige gateways signaleren TIJDELIJKE quota-uitputting met een niet-opnieuw-probeerbare HTTP-status. `agentrouter.org` retourneert `403` (soms `400`) met een Chinese body
+(`用户额度不足` / `额度不足`) in plaats van de standaardwaarde `429`. Clients zoals Claude
+Code beschouwen `403` als permanent en breken de sessie af. Zonder correctie zou de fallback-engine de fout classificeren als `AUTH_ERROR` in plaats van als een quota-event.
 
 **Implementatie:**
 
-- Registry + matcher: `open-sse/config/upstreamStatusRestatement.ts` — een
+- Register + matcher: `open-sse/config/upstreamStatusRestatement.ts` — een
   lijst met regels per provider (`{id, fromStatuses, toStatus, textMarkers,
 excludeMarkers, defaultRetryAfterMs}`), gematcht via `applyStatusRestatement()`.
-- Aanroepplek: het `providerFailure:`-blok in `open-sse/handlers/chatCore.ts`
-  (rond regel 3654), direct nadat `parseUpstreamError()` een upstream-respons
-  met een fout-HTTP-status heeft geparseerd (`!providerResponse.ok`), en
-  voordat enige classificatie draait, zodat elke downstream-consumer de
-  gecorrigeerde status ziet. Fouten die ingebed zijn in een `200` SSE-stream
-  volgen een apart, later stream-parsingpad en worden vandaag **niet** gedekt
-  door deze hook — een bekende beperking, nog niet nodig voor de misstatus
-  van agentrouter (die als een fout-HTTP-status naar boven komt).
-- Retry-geschiktheid: `429` staat in `RETRY_AFTER_ELIGIBLE_STATUSES`
-  (`open-sse/services/combo/unavailableRetryGate.ts`), dus een herschreven
-  fout krijgt een echt retry-venster in plaats van als een dode `403` te
-  verschijnen.
+- Aanroeppunt: het blok `providerFailure:` in `open-sse/handlers/chatCore.ts`
+  (rond regel 3654), direct nadat `parseUpstreamError()` een upstream-antwoord
+  met een foutieve HTTP-status heeft geparseerd (`!providerResponse.ok`), en
+  voordat enige classificatie wordt uitgevoerd, zodat elke downstream-consument
+  de gecorrigeerde status ziet. Fouten die zijn ingebed in een `200` SSE-stream
+  volgen een afzonderlijk, later pad voor stream-parsing en vallen vandaag **niet**
+  onder deze hook — een bekende beperking, die voor de misstatus van agentrouter
+  nog niet nodig is (deze verschijnt als een foutieve HTTP-status).
+- Geschiktheid voor opnieuw proberen: `429` staat in
+  `RETRY_AFTER_ELIGIBLE_STATUSES`
+  (`open-sse/services/combo/unavailableRetryGate.ts`), zodat een herformuleerde
+  fout een echte retry-periode bevat in plaats van als een dode `403` naar buiten
+  te komen.
 - De synthetische `60s` `defaultRetryAfterMs` (`upstreamStatusRestatement.ts`)
-  is alleen wat de herschreven respons aan de **client** vertelt; het is niet
-  zelf de interne cooldown-/lockout-duur van de verbinding — die wordt
-  afzonderlijk beheerst door welk mechanisme de herschreven fout daadwerkelijk
-  afhandelt (de escalerende backoff van Connection Cooldown, §2, basis `3s`
-  voor API-sleutel-providers; of Model Lockout, §3, voor
-  per-model-quota-providers zoals agentrouter). De router kan intern eerder
-  in aanmerking komen voor een nieuwe poging dan het venster van 60 s dat hij
-  aan de client adverteert — opzettelijke speling, geen bug.
+  is alleen wat het geherformuleerde antwoord aan de **client** vertelt; dit is
+  niet zelf de interne cooldown-/lockoutduur van de verbinding — die wordt
+  afzonderlijk bepaald door het mechanisme dat de geherformuleerde fout
+  daadwerkelijk afhandelt (Connection Cooldown met oplopende backoff, §2,
+  basiswaarde `3s` voor API-key-providers; of Model Lockout, §3, voor providers
+  met quota per model zoals agentrouter). De router kan intern eerder opnieuw
+  mogen proberen dan het venster van 60s dat aan de client wordt geadverteerd —
+  opzettelijke marge, geen bug.
 
-Permanente fouten (agentrouters `无权访问模型` — geen toegang tot dit model)
-worden NOOIT herschreven: `excludeMarkers` legt een veto tegen de regel, zelfs
-als `textMarkers` raak zijn, zodat de fout zijn oorspronkelijke status behoudt
-en niets hem eindeloos opnieuw probeert. De bijbehorende
-provider-classificatieregel (`agentrouter-model-access-denied` in
-`open-sse/config/providerErrorRules.ts`: `reason: "auth_error"`, `scope:
-"model"`, een gedeclareerde basiscooldown van `6h`) wordt geraadpleegd door
-`checkFallbackError` (`open-sse/services/accountFallback.ts`) _vóór_ de
-generieke `FORBIDDEN` early-return van de apikey-categorie, afgezet met
-`honorsRuleLockScope(provider)` (#10334 — momenteel exclusief voor agentrouter
-via de `HONORS_RULE_LOCK_SCOPE_PROVIDERS`-toelatingslijst in
-`providerErrorRules.ts`). De gedeclareerde cooldown van 6 uur van de regel
-stroomt door als `fallbackResult.baseCooldownMs`, maar voedt nog steeds het
-reeds bestaande per-model-quota-lockoutpad (`lockModelIfPerModelQuota()` /
-`recordModelLockoutFailure()`, ongewijzigd door #10334 behalve de
-cooldown-bron): hij wordt teruggeklemd tot de `mlSettings.maxCooldownMs` van
-de operator (standaard `1_800_000ms` / 30 min), zoals elke andere
-model-lockout, en de _gepersisteerde lockout-reden_ blijft de reeds bestaande
-hardcoded `"forbidden"`, niet de `"auth_error"` van de regel — alleen de
-cooldown-duur wordt end-to-end gehonoreerd, niet de reden-string. De
-verbinding zelf blijft actief; sibling-modellen op dezelfde verbinding worden
-niet geraakt.
+Permanente fouten (`无权访问模型` van agentrouter — geen toegang tot dit model)
+worden NOOIT geherformuleerd: `excludeMarkers` blokkeert de regel zelfs wanneer
+`textMarkers` overeenkomen, zodat de fout zijn oorspronkelijke status behoudt en
+er nooit opnieuw voor wordt geprobeerd. De bijbehorende classificatieregel voor
+providers (`agentrouter-model-access-denied` in `open-sse/config/providerErrorRules.ts`:
+`reason: "auth_error"`, `scope: "model"`, een gedeclareerde basis-cooldown van
+`6h`) wordt geraadpleegd door `checkFallbackError` (`open-sse/services/accountFallback.ts`)
+_vóór_ de generieke vroege return voor de apikey-categorie `FORBIDDEN`, waarbij
+dit wordt aangestuurd door `honorsRuleLockScope(provider)` (#10334 — momenteel
+exclusief voor agentrouter via de allowlist `HONORS_RULE_LOCK_SCOPE_PROVIDERS` in
+`providerErrorRules.ts`). De gedeclareerde cooldown van 6 uur van de regel stroomt
+door als `fallbackResult.baseCooldownMs`, maar wordt nog steeds verwerkt via het
+bestaande lockout-pad per modelquota (`lockModelIfPerModelQuota()` /
+`recordModelLockoutFailure()`, ongewijzigd door #10334 met uitzondering van de
+bron van de cooldown): deze wordt begrensd tot `mlSettings.maxCooldownMs` van de
+operator (standaard `1_800_000ms` / 30 min), net als elke andere model-lockout,
+en de _opgeslagen lockoutreden_ blijft de bestaande hardgecodeerde `"forbidden"`,
+niet de `"auth_error"` van de regel — alleen de cooldownduur wordt end-to-end
+gehonoreerd, niet de redenstring. De verbinding zelf blijft actief;
+zustermodellen op dezelfde verbinding worden niet beïnvloed.
 
-Herschreven quotafouten (`额度不足`) bereiken in productie een provider-regel
+Geherformuleerde quotafouten (`额度不足`) bereiken in productie een providerregel
 (`agentrouter-user-quota-exhausted`: `reason: "quota_exhausted"`, `scope:
-"connection"`, geen eigen gedeclareerde cooldown — de geschaalde
-backoff-standaard van de persistentielaag geldt). Sinds #10334 wordt `scope`
-op `ProviderErrorRuleMatch` WEL end-to-end geconsumeerd, maar **alleen** voor
-providers in de `HONORS_RULE_LOCK_SCOPE_PROVIDERS`-toelatingslijst
-(`providerErrorRules.ts` — vandaag alleen `"agentrouter"`, afgezet via
-`honorsRuleLockScope()`). Voor elke andere provider blijft `scope` louter
-informatief, precies zoals vóór #10334. `checkFallbackError` legt de scope van
-de gematchte regel bloot als `fallbackResult.ruleScope`;
-`isAgentrouterConnectionQuotaScope()` (`src/sse/services/auth.ts`) is de
-gedeelde guard die bevestigt dat een `ruleScope` echt veilig is om te
-honoreren als een verbindingsbreed, zichzelf herstellend signaal (scope
-`"connection"`, reden `quota_exhausted`, nooit `permanent`, nooit
-`creditsExhausted` — een verdediging tegen een toekomstige regel die scope
-`"connection"` paart aan een permanente accounttoestand). Twee consumers
-roepen hem aan:
+"connection"`, zonder eigen gedeclareerde cooldown — de geschaalde standaard-
+backoff van de persistentielaag is van toepassing). Sinds #10334 wordt `scope` op
+`ProviderErrorRuleMatch` end-to-end gebruikt, maar **alleen** voor providers in
+de allowlist `HONORS_RULE_LOCK_SCOPE_PROVIDERS` (`providerErrorRules.ts` —
+vandaag alleen `"agentrouter"`, aangestuurd via `honorsRuleLockScope()`). Voor elke
+andere provider blijft `scope` informatief, precies zoals vóór #10334.
+`checkFallbackError` geeft de scope van de gematchte regel door als
+`fallbackResult.ruleScope`; `isAgentrouterConnectionQuotaScope()`
+(`src/sse/services/auth.ts`) is de gedeelde guard die bevestigt dat een
+`ruleScope` daadwerkelijk veilig kan worden gehonoreerd als een signaal voor de
+hele verbinding dat zichzelf herstelt (scope `"connection"`, reden
+`quota_exhausted`, nooit `permanent`, nooit `creditsExhausted` — een bescherming
+tegen een toekomstige combinatie van scope `"connection"` met een permanente
+accountstatus). Twee consumenten roepen deze aan:
 
 - **Persistentie** (`markAccountUnavailable()`, `src/sse/services/auth.ts`):
-  in plaats van in de **per-model**-lockout-tak van de passthrough-provider
-  terecht te komen (agentrouter is `passthroughModels: true` → `hasPerModelQuota()`
-  retourneert `true`), past het een **tijdelijke connectie-cooldown** toe —
-  `testStatus: "unavailable"` + `rateLimitedUntil`, nooit een terminale status
-  (`credits_exhausted`/`banned`/`expired`) — zodat de connectie zichzelf herstelt
-  zodra de cooldown verstrijkt, in plaats van dat er een handmatige credential-reset
-  nodig is. Overgeslagen voor connecties met `disableCooling: true` (#2997): die
-  opt-out valt juist door naar de per-model-lockout (een gedocumenteerde afweging —
-  zie het codecommentaar boven de tak).
-- **Combo-routering binnen hetzelfde request** (`applyComboTargetExhaustion()`,
+  in plaats van terecht te komen in de **per-model**-vergrendelingsvertakking
+  van de passthrough-provider (agentrouter is `passthroughModels: true` →
+  `hasPerModelQuota()` retourneert `true`), past dit een **tijdelijke
+  verbindingsafkoelperiode** toe — `testStatus: "unavailable"` + `rateLimitedUntil`,
+  nooit een terminale status (`credits_exhausted`/`banned`/`expired`) — zodat de
+  verbinding zichzelf herstelt zodra de afkoelperiode verstrijkt, zonder dat
+  handmatig opnieuw instellen van de credentials nodig is.
+  Overgeslagen voor verbindingen met `disableCooling: true` (#2997): die opt-out
+  valt in plaats daarvan terug op de vergrendeling per model (een gedocumenteerde
+  afweging — zie de codecommentaar boven de vertakking).
+- **Comboroutering binnen hetzelfde verzoek** (`applyComboTargetExhaustion()`,
   `open-sse/services/combo/targetExhaustion.ts`): dezelfde guard markeert de
-  connectie in de in-memory `exhaustedConnections`-set, gesleuteld als
-  `${provider}:${connectionId}`. Hierdoor wordt alleen een resterend
-  SAME-REQUEST-target overgeslagen dat _zelf al exact die `connectionId`_ op zijn
-  eigen target-object draagt (`getExhaustedTargetSkipReason()`,
+  verbinding in de in-memory `exhaustedConnections`-set, met als sleutel
+  `${provider}:${connectionId}`. Dit slaat alleen een resterend doel binnen
+  HETZELFDE VERZOEK over dat _zelf al die exacte `connectionId`_ op zijn eigen
+  doelobject bevat (`getExhaustedTargetSkipReason()`,
   `open-sse/services/combo/comboPredicates.ts`, `if (provider &&
-connectionId)` vóór de `exhaustedConnections`-lookup) — een gewone
-  model-list-combo, waarbij sibling-targets geen eigen vastgepinde `connectionId`
-  dragen en er pas per dispatch een wordt bepaald uit de
-  `X-OmniRoute-Selected-Connection-Id`-header van de response, komt nooit bij die
-  sleutelmatch terecht. Voor dat veelvoorkomende geval is de echte bescherming tegen
-  een resterende leg die het zojuist uitgeputte account hergebruikt, NIET deze Set —
-  het is de persistentielaag hierboven (de `rateLimitedUntil` van de connectie ligt
-  nu in de toekomst) gecombineerd met het feit dat dezezelfde guard
-  `transientRateLimitedProviders` voor de failure onderdrukt (zie
-  "Tweefasenontwerp" en het codecommentaar op de
-  `isAgentrouterConnectionQuotaScope`-tak in `targetExhaustion.ts`): met die Set
-  ongemarkeerd gelaten treedt de force-allow `allowRateLimitedConnection` van
-  `combo.ts` (`open-sse/services/combo.ts:1005-1013`, `:2734-2738`) NIET in werking
-  voor de resterende legs van de provider, zodat het `rateLimitedUntil`-filter van
-  de credential-selectie (`src/sse/services/auth.ts:1238`) normaal wordt
-  gehonoreerd en een resterende leg óf een andere, nog in aanmerking komende
-  agentrouter-connectie kiest, óf faalt zonder beschikbare credentials — hij
-  forceert zich niet terug op de connectie die deze tak zojuist heeft afgekoeld.
+connectionId)` vóór de lookup in `exhaustedConnections`) — een gewone
+  combinatie met een modellijst, waarin sibling-doelen zelf geen vastgezette
+  `connectionId` bevatten en er per dispatch slechts één wordt opgelost aan de
+  hand van de `X-OmniRoute-Selected-Connection-Id`-header van de response,
+  bereikt die sleutelovereenkomst nooit. In dat veelvoorkomende geval is de
+  daadwerkelijke bescherming tegen het opnieuw gebruiken van het zojuist
+  uitgeputte account door een resterende stap NIET deze Set — het is de
+  persistentielaag hierboven (de `rateLimitedUntil` van de verbinding ligt nu
+  in de toekomst), gecombineerd met deze guard die
+  `transientRateLimitedProviders` voor de fout onderdrukt (zie "Ontwerp in twee
+  fasen" en de codecommentaar bij de
+  `isAgentrouterConnectionQuotaScope`-vertakking in `targetExhaustion.ts`): omdat
+  deze Set ongemarkeerd blijft, wordt `combo.ts`'s force-allow
+  `allowRateLimitedConnection` (`open-sse/services/combo.ts:1005-1013`, `:2734-2738`)
+  NIET geactiveerd voor de resterende stappen van de provider, waardoor het
+  `rateLimitedUntil`-filter van de credentialselectie (`src/sse/services/auth.ts:1238`)
+  normaal wordt gerespecteerd en een resterende stap óf een andere, nog steeds
+  in aanmerking komende agentrouter-verbinding kiest óf mislukt omdat er geen
+  credentials beschikbaar zijn — hij forceert zichzelf niet terug naar de
+  verbinding die deze vertakking zojuist heeft afgekoeld.
 
-### Tweefasenontwerp: statusherschrijving, daarna classificatie
+### Ontwerp in twee fasen: statusherformulering, daarna classificatie
 
-Statusherschrijving (`upstreamStatusRestatement.ts`) en
-provider-classificatieregels (`open-sse/config/providerErrorRules.ts`,
-`providerRuleRegistry`) zijn aparte registers die beide sleutelen op provider-id
-en tekstmarkeringen, maar ze draaien op verschillende plekken en dienen
-verschillende doelen: herschrijving herschrijft de HTTP-status vroeg in
-`chatCore.ts`; classificatieregels bepalen de fallback-`reason` en zetten de
-`scope` vast (`model` / `provider` / `connection`) binnen `checkFallbackError()`
+Statusherformulering (`upstreamStatusRestatement.ts`) en
+providerclassificatieregels (`open-sse/config/providerErrorRules.ts`,
+`providerRuleRegistry`) zijn afzonderlijke registers die beide op provider-id
+en tekstmarkeringen indexeren, maar ze worden op verschillende plaatsen
+uitgevoerd en hebben verschillende doelen: de herformulering herschrijft de
+HTTP-status vroeg in `chatCore.ts`; classificatieregels kiezen de
+fallback-`reason` en vergrendelings-`scope`
+(`model` / `provider` / `connection`) binnen `checkFallbackError()`
 (`open-sse/services/accountFallback.ts`).
 
-Classificatieregels zien alleen de volledige fout**tekst** (nodig om
-body-markeringen zoals `额度不足` te matchen) voor providers die in de
-`FULL_TEXT_RULE_PROVIDERS`-allowlist in `providerErrorRules.ts` staan — momenteel
-alleen `"agentrouter"`. Voor elke andere provider uit de **ingebouwde catalogus**
-geeft `checkFallbackError` aan `getProviderErrorRuleMatch` alleen de gestructureerde
-fout (`{code, type}`), wat voldoende is voor regels op basis van
-header/status/code, maar blind is voor body-tekstmarkeringen. De helper
-`resolveRuleMatchBody()` voert deze selectie uit: volledige fouttekst voor
-providers op de allowlist, anders de gestructureerde fout. Het toevoegen van een
-**ingebouwde** provider aan `FULL_TEXT_RULE_PROVIDERS` is een expliciete opt-in per
-provider — dit mechanisme bestaat zodat het standaardpad voor elke provider die
-niet op de lijst staat byte-voor-byte ongewijzigd blijft.
+Classificatieregels zien alleen de volledige **fouttekst** (nodig om
+tekstmarkeringen in de body, zoals `额度不足`, te vinden) voor providers die
+vermeld staan in de `FULL_TEXT_RULE_PROVIDERS`-allowlist in
+`providerErrorRules.ts` — momenteel alleen `"agentrouter"`. Voor elke andere
+**ingebouwde catalogusprovider** geeft `checkFallbackError`
+`getProviderErrorRuleMatch` alleen de gestructureerde fout door
+(`{code, type}`), wat voldoende is voor regels op basis van
+headers/status/code, maar blind is voor tekstmarkeringen in de body.
+De helper `resolveRuleMatchBody()` voert deze selectie uit: volledige fouttekst
+voor providers op de allowlist, anders de gestructureerde fout. Een
+**ingebouwde** provider toevoegen aan `FULL_TEXT_RULE_PROVIDERS` is een
+expliciete opt-in per provider — deze bestaat zodat het standaardpad voor elke
+provider die niet op de lijst staat byte voor byte ongewijzigd blijft.
 
-De `scope` van een regel (`model` / `provider` / `connection`) is een aparte
-opt-in, los van `FULL_TEXT_RULE_PROVIDERS`: `checkFallbackError` brengt deze alleen
-naar boven als `fallbackResult.ruleScope`, en downstream-consumers honoreren hem
-alleen als meer dan een informatief label voor providers in de
-`HONORS_RULE_LOCK_SCOPE_PROVIDERS`-allowlist in hetzelfde bestand (afgezet via
-`honorsRuleLockScope()` — vandaag alleen `"agentrouter"`). Zie "Herschreven
-quotafouten" hierboven voor wat een `scope: "connection"`-match daadwerkelijk doet
-zodra een provider op die allowlist staat.
+De `scope` van een regel (`model` / `provider` / `connection`) is een
+afzonderlijke opt-in ten opzichte van `FULL_TEXT_RULE_PROVIDERS`:
+`checkFallbackError` stelt deze alleen beschikbaar als
+`fallbackResult.ruleScope`, en downstream-consumenten respecteren deze alleen
+als iets anders dan een informatief label voor providers in de
+`HONORS_RULE_LOCK_SCOPE_PROVIDERS`-allowlist in hetzelfde bestand (aangestuurd
+via `honorsRuleLockScope()` — momenteel alleen `"agentrouter"`). Zie
+"Geherformuleerde quotafouten" hierboven voor wat een match met
+`scope: "connection"` daadwerkelijk doet zodra een provider op die allowlist
+staat.
 
-**#11104 — door de operator gedeclareerde regels omzeilen beide allowlists.** Een
-operator kan tijdens runtime een regel per provider declareren via
+**#11104 — door de operator gedeclareerde regels omzeilen beide allowlists.**
+Een operator kan tijdens runtime een regel per provider declareren via
 `settings.providerErrorRules`
-(`open-sse/config/providerErrorRules.ts::setOperatorProviderErrorRules`) zonder dit
-bestand te bewerken. Een operatorregel plaatsen achter
-`FULL_TEXT_RULE_PROVIDERS`/`HONORS_RULE_LOCK_SCOPE_PROVIDERS` — allowlists die
-bedoeld zijn om het **standaard**gedrag van ingebouwde catalogusregels te
-beschermen — zou het instellingenmechanisme werkeloos maken voor elke provider
-behalve degenen die daar al staan, aangezien het declareren van de regel al de
-expliciete opt-in van de operator is. `resolveRuleMatchBody()` en
-`honorsRuleLockScope()` controleren beide eerst `hasOperatorRuleForProvider()`:
-een provider met een operatorregel krijgt de ruwe fouttekst en zijn gedeclareerde
-`scope` wordt gehonoreerd, ongeacht of hij ook in een van beide allowlists
-voorkomt.
+(`open-sse/config/providerErrorRules.ts::setOperatorProviderErrorRules`)
+zonder dit bestand te bewerken. Een operatorregel afhankelijk maken van
+`FULL_TEXT_RULE_PROVIDERS`/`HONORS_RULE_LOCK_SCOPE_PROVIDERS` — allowlists
+die bedoeld zijn om het **standaardgedrag** van ingebouwde catalogusregels te
+beschermen — zou het instellingenmechanisme voor elke provider behalve de
+providers die er al op staan inert maken, aangezien het declareren van de
+regel al de expliciete opt-in van de operator is. Zowel
+`resolveRuleMatchBody()` als `honorsRuleLockScope()` controleert eerst
+`hasOperatorRuleForProvider()`: een provider met een operatorregel krijgt de
+ruwe fouttekst en de gedeclareerde `scope` wordt gerespecteerd, ongeacht of
+de provider ook in een van beide allowlists voorkomt.
 
-**Bekend hiaat — `providerRuleRegistry` wordt nooit geraadpleegd voor HTTP 400.**
-De `BAD_REQUEST`-tak van `checkFallbackError` classificeert status 400 volledig via
-zijn eigen patroonarrays (`MODEL_ACCESS_DENIED_PATTERNS`,
-`CONTEXT_OVERFLOW_PATTERNS`, etc. in `accountFallback.ts`) en retourneert voordat de
-`configuredRule`/`getProviderErrorRuleMatch`-tak erboven wordt bereikt. Een
-ingebouwde catalogusregel (of een operatorregel) met `status: 400` is syntactisch
-geldig maar zal nooit afgaan. Geen enkele bestaande regel richt zich vandaag op
-400, dus er is niets in productie dat geraakt wordt — maar een toekomstige
-400-regel vereist dat deze tak eerst wordt aangepast, wat een grotere wijziging is
-dan het toevoegen van een regel (het herclassificeert 400 voor elke provider die al
-op het patroonarray-gedrag vertrouwt) en buiten scope valt voor het toevoegen van
-een regel voor één provider.
+**Door de operator gedeclareerde regels** (`OperatorProviderErrorRule`): elke
+regel heeft een optionele `status` en een optionele `match` (een gewone,
+hoofdletterongevoelige substring van de fouttekst, nooit een RegExp, zodat
+deze geen ReDoS kan veroorzaken), en moet ten minste een van beide instellen.
+Wanneer beide zijn ingesteld, worden ze met AND gecombineerd; een weggelaten
+veld matcht alles, dus `{match: "insufficient_quota"}` matcht elke status die
+die code bevat. De eerste overeenkomende regel wint. `cooldownMs` accepteert
+maximaal 30 dagen; in totaal zijn maximaal 50 regels toegestaan.
 
-### Een nieuwe gateway toevoegen die quota onjuist weergeeft
+**Allesomvattende standaardwaarden** (`settings.providerErrorDefaults`, opt-in, ingesteld via
+`setOperatorProviderErrorDefaults`): `{[provider]: {cooldownMs, scope?, reason?}}`
+met `cooldownMs` van 1 minuut tot 30 dagen. Een standaardwaarde wordt alleen toegepast
+wanneer geen operatorregel en geen ingebouwde catalogusregel overeenkwam, en alleen voor
+402-, 403-, 408-, 429- en 5xx-fouten. Fouten in de aanvraagvorm (400, 404, 409, 413, 422)
+en kale 401-fouten behouden hun eigen afhandeling. Zonder expliciete `reason` komt de reden
+uit de status, op dezelfde manier als `classifyError` dat doet. Het declareren van een
+standaardwaarde telt als een operatorregel voor `hasOperatorRuleForProvider()`, waardoor de
+`scope` (standaard `"connection"`) wordt gerespecteerd. De effectieve afkoelduur van een
+standaardwaarde is de langste van zijn `cooldownMs` en de eigen retry-hint van de provider
+(`Retry-After`, `x-ratelimit-reset` of een reset-hint in de body, dezelfde hint die de engine
+respecteert wanneer de instelling "upstream retry hints gebruiken" voor connection-cooldown
+is ingeschakeld), zodat een standaardwaarde een korte upstream-hint kan verlengen maar een
+echte reset nooit voortijdig kan afkappen. Een expliciete operatorregel behoudt zijn exacte
+`cooldownMs`. Noch een regel, noch een standaardwaarde omzeilt de
+connection-cooldown-beveiligingen in `markAccountUnavailable`: een actieve, langere
+afkoelperiode wordt nooit verkort en een terminale status wordt nooit overschreven. De
+ingebouwde tekstdetectoren die eerder in `checkFallbackError` worden uitgevoerd (credits
+op, dagquotum, account gedeactiveerd) hebben nog steeds voorrang voor hun eigen zinnen.
 
-1. Registreer één regel-array in `statusRestatementRegistry`
+**Bekende beperking — `providerRuleRegistry` wordt nooit geraadpleegd voor HTTP 400.**
+De `BAD_REQUEST`-tak van `checkFallbackError` classificeert status 400 volledig via zijn
+eigen patroonarrays (`MODEL_ACCESS_DENIED_PATTERNS`,
+`CONTEXT_OVERFLOW_PATTERNS`, enz. in `accountFallback.ts`) en retourneert voordat de
+`configuredRule`/`getProviderErrorRuleMatch`-tak erboven wordt bereikt.
+Een ingebouwde catalogusregel (of een operatorregel) met `status: 400` is syntactisch geldig,
+maar wordt nooit uitgevoerd. Momenteel richt geen bestaande regel zich op 400, dus in
+productie wordt niets beïnvloed — maar voor een toekomstige 400-regel moet eerst deze tak
+worden aangepast. Dat is een grotere wijziging dan het toevoegen van een regel (het
+herclassificeert 400 voor elke provider die al afhankelijk is van het gedrag van de
+patroonarray) en valt buiten de scope van het toevoegen van één providerregel.
+
+### Een nieuwe gateway die quota verkeerd aanduidt toevoegen
+
+1. Registreer één regelarray in `statusRestatementRegistry`
    (`open-sse/config/upstreamStatusRestatement.ts`). Houd `textMarkers`
-   providerspecifiek; hergebruik nooit generieke Engelse frases die
-   overlappen met `CREDITS_EXHAUSTED_SIGNALS`
-   (`open-sse/services/accountFallback.ts`).
+   providerspecifiek; hergebruik nooit generieke Engelse zinnen die botsen met
+   `CREDITS_EXHAUSTED_SIGNALS` (`open-sse/services/accountFallback.ts`).
 2. Registreer optioneel classificatieregels in
-   `open-sse/config/providerErrorRules.ts` (`providerRuleRegistry`) om de
-   juiste lock-scope te kiezen (`connection` voor accountbrede quota,
-   `model` voor per-model fouten). Deze stap is in productie alleen
-   effectief voor providers wiens regels de volledige fouttekst nodig
-   hebben (body-markers): voeg de provider-id toe aan
-   `FULL_TEXT_RULE_PROVIDERS` in hetzelfde bestand — anders geeft
-   `checkFallbackError` de regel uitsluitend de gestructureerde
-   `{code, type}`-fout en zal een body-tekstregel nooit live verkeer
-   matchen. Regels die puur matchen op `status`/`headers` (zoals die van
-   Opencode of Minimax) hebben deze opt-in niet nodig. Voeg daarnaast,
-   als de regel `scope: "connection"` declareert en de bedoeling een
-   daadwerkelijke verbindingsbrede cooldown plus combo-skip binnen
-   hetzelfde verzoek is (niet alleen een informatief label), de
-   provider-id toe aan `HONORS_RULE_LOCK_SCOPE_PROVIDERS` in hetzelfde
-   bestand — dit is wat het gebruik in
-   `isAgentrouterConnectionQuotaScope()`-stijl aanstuurt in
+   `open-sse/config/providerErrorRules.ts` (`providerRuleRegistry`) om de juiste
+   vergrendelingsscope te kiezen (`connection` voor accountbrede quota, `model` voor fouten
+   per model). Deze stap heeft in productie alleen effect voor providers waarvan de regels de
+   volledige fouttekst nodig hebben (body-markeringen): voeg de provider-id toe aan
+   `FULL_TEXT_RULE_PROVIDERS` in hetzelfde bestand — anders geeft `checkFallbackError` de
+   regel alleen de gestructureerde fout `{code, type}` en zal een bodytekstregel nooit
+   live verkeer matchen.
+   Regels die uitsluitend matchen op `status`/`headers` (zoals die van Opencode of Minimax)
+   hebben deze opt-in niet nodig. Als de regel afzonderlijk `scope: "connection"` declareert
+   en het de bedoeling is om een daadwerkelijke connection-brede afkoelperiode plus het
+   overslaan van de combinatie voor dezelfde aanvraag te activeren (niet alleen een
+   informatief label), voeg dan de provider-id toe aan
+   `HONORS_RULE_LOCK_SCOPE_PROVIDERS` in hetzelfde bestand — hiermee wordt het gebruik in
+   de stijl van `isAgentrouterConnectionQuotaScope()` aangestuurd in
    `markAccountUnavailable()` (`src/sse/services/auth.ts`) en
    `applyComboTargetExhaustion()`
-   (`open-sse/services/combo/targetExhaustion.ts`); zonder dit stroomt
-   `scope` nog steeds door via `fallbackResult.ruleScope`, maar niets
-   doet er iets mee.
-3. Voeg unit tests toe naar voorbeeld van
-   `tests/unit/upstream-status-restatement.test.ts` en
-   `tests/unit/agentrouter-error-rules.test.ts` (inclusief de
-   not-permanent / not-creditsExhausted guards, en — als de provider de
-   allowlist nodig heeft — een test die bevestigt dat
-   `resolveRuleMatchBody()` alleen voor die provider de volledige tekst
-   retourneert).
+   (`open-sse/services/combo/targetExhaustion.ts`); zonder deze toevoeging stroomt
+   `scope` nog steeds door `fallbackResult.ruleScope`, maar doet niets er daadwerkelijk
+   iets mee.
+3. Voeg unittests toe die `tests/unit/upstream-status-restatement.test.ts`
+   en `tests/unit/agentrouter-error-rules.test.ts` weerspiegelen (inclusief de
+   `not-permanent`-/`not-creditsExhausted`-controles en — als de provider de allowlist
+   nodig heeft — een test die bevestigt dat `resolveRuleMatchBody()` alleen voor die
+   provider de volledige tekst retourneert).
 
-Er zijn geen wijzigingen aan `chatCore.ts`, `classifyError` of combo nodig.
+Er zijn geen wijzigingen in `chatCore.ts`, `classifyError` of combo nodig.
 
-#### Lock op basis van egress-buckets (#10880)
+#### Op egress-buckets gebaseerde vergrendeling (#10880)
 
-Providers in `EGRESS_BUCKETED_LOCK_PROVIDERS` (opencode-familie) worden
-behandeld als IP-gebucketeerde upstream (de opencode free tier is
-IP-gebucketeerd, niet account-gebucketeerd — zie #9611): een status-429
-die is geclassificeerd als `quota_exhausted` **of** `rate_limit_exceeded`
-koelt elke verbinding uit de allowlist-familie waarvan het laatst bekende
-egress-IP overeenkomt met dat van de falende verbinding af, voordat de
-rotatie ze kan proberen — hiermee worden N-1 gegarandeerd mislukte
-upstream-aanroepen vermeden (dezelfde vorm als #10460/#10525).
-`rate_limit_exceeded` is bewust opgenomen: op het
-`markAccountUnavailable`-pad matchen de opencode-specifieke regels nooit
-(er worden geen headers/body aan `checkFallbackError` doorgegeven,
-opencode staat niet in `FULL_TEXT_RULE_PROVIDERS`), dus wordt een 429
-waarvan de body de abonnementsquota-tekst bevat ("monthly usage limit
-reached") geclassificeerd als `quota_exhausted` door de
-quota-tekst-fallback (`buildSubscriptionQuotaFallback`,
-`accountFallback.ts`; 1 uur cooldown) voordat de `status_429`-regel ooit
-wordt bereikt — terwijl een 429 zonder quota-tekst (gewone rate
-limiting) via de `status_429`-regel classificeert als
-`rate_limit_exceeded` en de IP-familie alsnog afkoelt. Voor een provider
-op de allowlist is een IP-gebucketeerde rate limit hetzelfde signaal als
-een uitgeput quotum. Eerlijke beperkingen:
+Providers in `EGRESS_BUCKETED_LOCK_PROVIDERS` (de opencode-familie) worden behandeld
+als upstream met IP-buckets (de gratis opencode-laag gebruikt IP-buckets, geen
+account-buckets — zie #9611): een status-429 die als `quota_exhausted`
+**of** `rate_limit_exceeded` is geclassificeerd, koelt elke verbinding uit de allowlisted
+familie af waarvan het laatst bekende egress-IP overeenkomt met dat van de falende
+verbinding, voordat de rotatie deze kan proberen
+— waarmee N-1 gegarandeerd mislukte upstream-aanroepen worden voorkomen (dezelfde vorm als #10460/#10525).
+`rate_limit_exceeded` is bewust opgenomen: op het `markAccountUnavailable`-pad matchen de
+opencode-specifieke regels nooit (er worden geen headers/body doorgegeven aan
+`checkFallbackError`, opencode staat niet in `FULL_TEXT_RULE_PROVIDERS`), dus een 429
+waarvan de body de tekst over het abonnementsquota bevat ("monthly usage limit
+reached") wordt door de quota-tekst-fallback (`buildSubscriptionQuotaFallback`, `accountFallback.ts`;
+afkoelduur van 1 uur) als `quota_exhausted` geclassificeerd voordat de
+`status_429`-regel ooit wordt bereikt — terwijl een 429 zonder quota-tekst (eenvoudige
+rate limiting) via de `status_429`-regel als `rate_limit_exceeded` wordt geclassificeerd
+en de IP-familie nog steeds afkoelt. Voor een allowlisted provider is een IP-gebaseerde
+rate limit hetzelfde signaal als een uitgeput quota. Eerlijke limieten:
 
-- **Best-effort**: de lock herleidt het laatst bekende `egress_ip` van de
-  verbinding uit `proxy_logs` (venster van 24 uur, synchroon, geen cache).
-  Koude cache (egress-IP nooit gesondereerd) of geen rij → de falende
-  verbinding wordt nog steeds afgekoeld door de branch (geregistreerd zoals
-  vandaag), alleen wordt er geen sibling vergrendeld.
-- **Nooit terminaal**: de cooldown is een vernieuwend quotumvenster
-  (`testStatus: "unavailable"`); een permanente toestand wordt nooit afgeleid
-  van een signaal op IP-niveau. Verbindingen met `disableCooling` slaan de
-  branch volledig over.
-- **Lockgranulariteit verandert voor de familie op de allowlist**: dit is een
-  scope-wijziging, niet alleen een sibling-optimalisatie. opencode is een
-  `passthroughModels`-provider, dus vóór deze branch produceerde een 429 een
-  per-MODEL lockout; nu produceert die een verbindingscooldown — ook voor een
-  operator die één enkele verbinding draait zonder enige sibling. Dat is de
-  granulariteit die de opencode-regeltabel al als correct declareert
-  (`scope: "connection"`, `providerErrorRules.ts`), tot nu toe nooit nageleefd
-  omdat opencode niet in `HONORS_RULE_LOCK_SCOPE_PROVIDERS` staat. De branch
-  schrijft zelf de cooldown + `backoffLevel` van de falende verbinding, als
-  spiegelbeeld van de connection-scoped agentrouter-branch, en keert terug —
-  het per-model blok en het generieke pad hieronder worden nooit bereikt.
-- **Combo inbegrepen**: net als de agentrouter-branch negeert de scope
-  bewust de `persistUnavailableState`/`isCombo`-downgrade die een
-  combo-aanroeper op een 429 toepast. Een per-model lockout is geen zwakkere
-  vorm van deze scope, het is de verkeerde eenheid: het zegt niets over het
-  uitgeputte IP, dus zou de combo-rotatie per sibling één gegarandeerd
-  mislukte aanroep blijven verbranden.
-- **Sibling-veiligheid**: een sibling die al terminaal is
-  (banned/credits_exhausted) of al in een langere cooldown zit, wordt nooit
-  overschreven.
-- **Exclusieve allowlist**: het verbreden van
-  `EGRESS_BUCKETED_LOCK_PROVIDERS` is een expliciete beslissing van de
-  eigenaar; geen generieke bedrading (patroon #10334/#10419). De
-  sibling-query bindt diezelfde allowlist in plaats van hem als SQL-literal te
-  herhalen, zodat verbreding een wijziging van één regel blijft.
-- **Egress-IP-rotatie, beide richtingen**: het opzoekvenster (24 uur) is veel
-  breder dan de TTL van de egress-IP-cache (5 min), dus "laatst bekende IP" is
-  geschiedenis, geen huidige toestand. Als de proxy van een verbinding binnen
-  het venster is geroteerd, kan de lock een echt gedeeld IP **missen** (het
-  geregistreerde IP is het nieuwe, niet-uitgeputte) — en symmetrisch kan hij
-  een sibling **afkoelen die inmiddels weg is geroteerd** van het uitgeputte
-  IP. Het tweede geval kost die sibling één cooldown-venster; beide zijn
-  geaccepteerde best-effort-beperkingen van een op geschiedenis gebaseerde
-  opzoeking.
+- **Best-effort**: de lock haalt de laatst bekende `egress_ip` van de verbinding
+  op uit `proxy_logs` (venster van 24 uur, synchroon, zonder cache). Een koude
+  cache (`egress_ip` is nooit geprobed) of geen rij → de falende verbinding
+  wordt nog steeds door de branch gekoeld (zoals vandaag vastgelegd), alleen
+  wordt er geen sibling gelockt.
+- **Nooit terminaal**: de cooldown is een vernieuwend quotavenster
+  (`testStatus: "unavailable"`); een permanente status wordt nooit afgeleid van
+  een signaal op IP-niveau. Verbindingen met `disableCooling` slaan de branch
+  volledig over.
+- **De lockgranulariteit verandert voor de allowlisted family**: dit is een
+  scopewijziging, niet alleen een optimalisatie voor siblings. opencode is een
+  `passthroughModels`-provider, dus vóór deze branch veroorzaakte een 429 een
+  lockout per MODEL; nu veroorzaakt die een cooldown voor de verbinding — ook
+  voor een operator die slechts één verbinding gebruikt en helemaal geen sibling
+  heeft. Dat is de granulariteit die de opencode-regeltabel al als correct
+  verklaart (`scope: "connection"`,
+  `providerErrorRules.ts`), maar die tot nu toe nooit werd gerespecteerd omdat
+  opencode niet in `HONORS_RULE_LOCK_SCOPE_PROVIDERS` staat. De branch schrijft
+  zelf de cooldown van de falende verbinding + `backoffLevel`, naar analogie van
+  de connection-scoped agentrouter-branch, en retourneert — het blok per model
+  en het generieke pad hieronder worden nooit bereikt.
+- **Combo inbegrepen**: net als de agentrouter-branch negeert de scope bewust de
+  `persistUnavailableState`/`isCombo`-downgrade die een combo-caller toepast op
+  een 429. Een lockout per model is geen zwakkere vorm van deze scope, maar de
+  verkeerde eenheid: die zegt niets over het uitgeputte IP, waardoor de
+  combo-rotatie per sibling één gegarandeerd mislukte call zou blijven
+  verbruiken.
+- **Sibling-veiligheid**: een sibling die al terminaal is (banned/credits_exhausted)
+  of al een langere cooldown heeft, wordt nooit overschreven.
+- **Exclusieve allowlist**: het uitbreiden van `EGRESS_BUCKETED_LOCK_PROVIDERS` is een
+  expliciete beslissing van de eigenaar; er is geen generieke wiring (pattern #10334/#10419).
+  De sibling-query bindt aan diezelfde allowlist in plaats van deze als een
+  SQL-literal te herhalen, zodat het uitbreiden ervan een wijziging van één
+  regel blijft.
+- **Rotatie van het egress-IP, beide richtingen**: het opzoekvenster (24 uur) is
+  veel ruimer dan de TTL van de egress-IP-cache (5 min), dus "laatst bekende IP"
+  is geschiedenis, niet de huidige status. Als de proxy van een verbinding
+  binnen het venster is geroteerd, kan de lock een werkelijk gedeeld IP
+  **missen** (het vastgelegde IP is het nieuwe, niet-uitgeputte IP) — en
+  symmetrisch kan de lock een sibling afkoelen die inmiddels is
+  **weggeroteerd** van het uitgeputte IP. In het tweede geval kost dit die
+  sibling één cooldownvenster; beide gevallen zijn aanvaarde best-effortbeperkingen
+  van een op geschiedenis gebaseerde lookup.
 - **Kosten**: twee begrensde scans van `proxy_logs` (gefilterd op venster via
-  `idx_pl_timestamp`), alleen met 429-frequentie. Geen nieuwe index (migratie
-  134 YAGNI). Gemeten op een DB-kopie met echt verkeer van gemiddelde omvang;
-  een instantie met hoge doorvoer houdt proportioneel meer rijen in hetzelfde
+  `idx_pl_timestamp`), alleen bij een frequentie van 429. Geen nieuwe index (migration 134
+  YAGNI). Gemeten op een DB-kopie met echt verkeer van gemiddelde omvang; een
+  instance met hoge throughput bevat verhoudingsgewijs meer rijen in hetzelfde
   venster.
-
----
 
 ## Overige resilientiefuncties
 

@@ -113,6 +113,27 @@ handleComboChat（與持久化組合使用相同的引擎）
 | `src/sse/handlers/chat.ts`                                | 整合：自動前綴短路處理           |
 | `src/shared/constants/providers.ts`                       | `SYSTEM_PROVIDERS.auto` 系統項目 |
 
+## 儲存的自動組合的帳戶首選項
+
+智慧型自動編輯器提供了一個可選的**帳戶偏好**部分。每個連線都可以是首選、正常（預設）、保留或排除。多個連接可以共享一個層。自動在第一個符合條件的層中選擇，保留其scoring/router行為；失敗的嘗試會落入剩餘的具體帳戶，優先於正常帳戶，然後再保留。此組合從不使用排除的連線。
+
+此設定儲存為`config.accountPreferences`，由連接ID鍵入：
+
+```json
+{
+  "accountPreferences": {
+    "connection-a": "preferred",
+    "connection-b": "preferred",
+    "connection-c": "reserve",
+    "connection-d": "excluded"
+  }
+}
+```
+
+省略或空的地圖會保留現有的路線。首選項不會啟用已停用的連線、授予 API 金鑰存取權限、復原配額阻止的候選者或繞過預算檢查。每次嘗試都僅限於其特定連接，因此帳戶後備無法跳轉組合路由器後面的層。現有的會話關聯性可能會保留符合條件的帳戶；排除綁定到本機回合的帳戶會停止該回合，而不是默默地更改帳戶。
+
+配置的首選項使用帳戶感知自動路徑：未調度未綁定的上下文快取、智慧管道、混亂和影子快捷方式。這些請求的投機對沖被停用，因此儲備帳戶無法與首選帳戶競爭。其他組合策略不解釋此設定。將組合從「自動」變更為保留已儲存的首選項以供以後切換回來。
+
 ## 與實際模型 ID 相符的組合名稱
 
 `name` 與純模型 ID 完全相同的組合（例如名為 `gpt-5.5` 的組合）是**刻意設計且受支援的模式**，而非錯誤：這是 [#6940](https://github.com/diegosouzapw/OmniRoute/issues/6940) 中所記載，針對各模型 ID 進行提供者備援的機制。由於組合解析會先於純模型 ID 解析進行（`src/sse/services/model.ts` 中的 `getComboForModel()`），因此對純 ID `gpt-5.5` 的請求會透過該組合的目標（例如 `acme-responses/gpt-5.5`、`backup-responses/gpt-5.5`）路由，而不是直接傳送至單一提供者——這重用了為 [#3227/#3233](https://github.com/diegosouzapw/OmniRoute/issues/3227) 建立的「組合優先於重寫」優先順序，並由 `tests/unit/responses-combo-resolution-3227.test.ts` 和 `tests/unit/combo-name-codex-responses-rewrite.test.ts` 進行迴歸測試。

@@ -127,6 +127,27 @@ Il-punteġġ awtomatiku jagħżel l-aħjar fornitur/mudell għal kull talba
 | `src/sse/handlers/chat.ts`                                | Integrazzjoni: terminazzjoni bikrija għall-prefiss auto                         |
 | `src/shared/constants/providers.ts`                       | Entrata tas-sistema `SYSTEM_PROVIDERS.auto`                                     |
 
+## Preferenzi tal-kont għall-combos Auto salvati
+
+L-editur tal-Auto Intelliġenti joffri optional** Preferenzi tal-kont** sezzjoni. Kull konnessjoni tista' tkun Preferuta, Normali (l-inadempjenza), Riżerva, jew Eskluża. Konnessjonijiet multipli jistgħu jaqsmu saff. Auto tagħżel fl-ewwel saff eliġibbli, li żżomm l-imġieba tagħha scoring/router hemmhekk; tentattivi falluti jaqgħu fil-kontijiet konkreti li fadal, preferut qabel in-normal qabel ir-riżerva. Konnessjonijiet esklużi qatt ma jintużaw minn din il-combo.
+
+L-issettjar huwa maħżun bħala `config.accountPreferences`, immarkat b'konnessjoni ID:
+
+```json
+{
+  "accountPreferences": {
+    "connection-a": "preferred",
+    "connection-b": "preferred",
+    "connection-c": "reserve",
+    "connection-d": "excluded"
+  }
+}
+```
+
+Mappa li titħalla barra jew vojta żżomm ir-rotot eżistenti. Il-preferenzi ma jippermettux konnessjonijiet b'diżabbiltà, ma jagħtux aċċess għall-API-key, jirrestawraw kandidati mblukkati bil-kwota, jew jevita l-kontrolli tal-baġit. Kull tentattiv huwa ristrett għall-konnessjoni konkreta tiegħu, għalhekk il-backup tal-kont ma jistax jaqbeż il-livelli wara r-router combo. L-affinità tas-sessjoni eżistenti tista' żżomm kont eliġibbli; eskluż il-kont marbut ma 'dawra nattiva waqfiet li dawran minflok siekta jinbidlu l-kontijiet.
+
+Il-preferenzi kkonfigurati jużaw il-passaġġ Auto konxju tal-kont: context-cache mhux marbut, smart-pipeline, chaos u shadow shortcuts ma jintbagħtux. Il-hedging spekulattiv huwa diżattivat għal dawn it-talbiet sabiex il-kontijiet ta' riżerva ma jkunux jistgħu jiġbru ma' dawk preferuti. Strateġiji oħra combo ma jinterpretawx dan is-setting. Il-bidla ta' combo 'l bogħod minn Auto żżomm il-preferenzi ssejvjati għal bidla aktar tard lura.
+
 ## Ismijiet ta’ Kombinazzjonijiet li Jaqblu ma’ Id ta’ Mudell Reali
 
 Kombinazzjoni li l-`name` tagħha huwa identiku għal id ta’ mudell mhux ikkwalifikat (eż. kombinazzjoni bl-isem

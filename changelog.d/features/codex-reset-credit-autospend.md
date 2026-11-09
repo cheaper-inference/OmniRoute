@@ -1,0 +1,1 @@
+- **feat(codex):** opt-in auto-spend of Codex reset credits that are about to expire, so a banked credit is not silently lost when nobody opens the dashboard before its expiry
