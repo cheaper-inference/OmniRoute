@@ -200,12 +200,60 @@ test("the Button warning variant and Badge tones come from the kit, with no loca
   }
 });
 
+// `--color-accent` / `--color-primary` are the kit's lime (#d8ff00): white on it is ~1.1:1.
+// Solid token = `bg-accent` / `bg-primary` followed by whitespace, a quote or the end —
+// `bg-accent/10`, `bg-accent-light`, `bg-primary/20` are tints and stay out of scope.
+const SOLID_ACCENT = /(?<![\w/:-])bg-(?:accent|primary)(?=[\s"'`]|$)/;
+const WHITE_INK = /(?<![\w/:-])text-white(?=[\s"'`]|$)/;
+
+/**
+ * True when one class literal can render a solid accent background with white ink.
+ *
+ * A template literal is judged per branch: the static part plus at most one string from
+ * each `${…}`. Strings of the SAME expression are alternatives (`${c ? "a" : "b"}` renders
+ * one of them), so they never combine; strings of DIFFERENT expressions can render together,
+ * so every pair across two expressions is checked too (#18079). Two classes are enough for
+ * a violation, so pairs cover every case without enumerating the full product.
+ */
+function pairsAccentWithWhite(literal: string): boolean {
+  const units: string[] = [];
+  if (literal.startsWith("`") && literal.includes("${")) {
+    const stat = literal.replace(/\$\{[^}]*\}/g, " ");
+    const options = [...literal.matchAll(/\$\{[^}]*\}/g)].map(
+      (e) => e[0].match(/"[^"]*"|'[^']*'/g) ?? []
+    );
+    units.push(stat);
+    options.forEach((own, i) => {
+      for (const a of own) {
+        units.push(`${stat} ${a}`);
+        for (const other of options.slice(i + 1)) {
+          for (const b of other) units.push(`${stat} ${a} ${b}`);
+        }
+      }
+    });
+  } else units.push(literal);
+  return units.some((u) => SOLID_ACCENT.test(u) && WHITE_INK.test(u));
+}
+
+test("the accent-ink rule reads template branches, alone and across expressions", () => {
+  const flagged = [
+    '"bg-primary text-white"',
+    '`bg-accent ${big ? "text-white" : ""}`',
+    '`p-2 ${on ? "bg-primary" : "bg-muted"} ${loud ? "text-white" : "text-text-main"}`',
+    "`${a && \"bg-accent\"} gap-1 ${b && 'text-white'}`",
+  ];
+  const clean = [
+    '"bg-primary text-accent-foreground"',
+    '"bg-primary/10 text-white"',
+    '`${on ? "bg-primary text-accent-foreground" : "bg-red-500 text-white"}`',
+    '`p-2 ${on ? "bg-primary" : "text-white"}`',
+    '`${on ? "bg-accent" : ""} ${loud ? "text-text-main" : ""}`',
+  ];
+  for (const literal of flagged) assert.equal(pairsAccentWithWhite(literal), true, literal);
+  for (const literal of clean) assert.equal(pairsAccentWithWhite(literal), false, literal);
+});
+
 test("no class literal pairs a solid bg-accent/bg-primary with text-white (lime needs dark ink)", () => {
-  // `--color-accent` / `--color-primary` are the kit's lime (#d8ff00): white on it is ~1.1:1.
-  // Solid token = `bg-accent` / `bg-primary` followed by whitespace, a quote or the end —
-  // `bg-accent/10`, `bg-accent-light`, `bg-primary/20` are tints and stay out of scope.
-  const SOLID = /(?<![\w/:-])bg-(?:accent|primary)(?=[\s"'`]|$)/;
-  const WHITE = /(?<![\w/:-])text-white(?=[\s"'`]|$)/;
   const LITERAL = /"[^"]*"|'[^'\n]*'|`[^`]*`/g;
   const offenders: string[] = [];
   const walk = (dir: string) => {
@@ -215,19 +263,8 @@ test("no class literal pairs a solid bg-accent/bg-primary with text-white (lime 
       else if (entry.name.endsWith(".tsx")) {
         const src = fs.readFileSync(full, "utf8");
         for (const m of src.matchAll(LITERAL)) {
-          const line = src.slice(0, m.index).split("\n").length;
-          // A template literal is judged per branch: the static part plus ONE `${…}` branch at
-          // a time, so `${cond ? "bg-primary text-accent-foreground" : "bg-red-500 text-white"}`
-          // is fine while `bg-primary ${cond ? "text-white" : ""}` is not.
-          const units: string[] = [];
-          if (m[0].startsWith("`") && m[0].includes("${")) {
-            const stat = m[0].replace(/\$\{[^}]*\}/g, " ");
-            const branches = [...m[0].matchAll(/\$\{[^}]*\}/g)].flatMap(
-              (e) => e[0].match(/"[^"]*"|'[^']*'/g) ?? []
-            );
-            units.push(stat, ...branches.map((b) => `${stat} ${b}`));
-          } else units.push(m[0]);
-          if (units.some((u) => SOLID.test(u) && WHITE.test(u))) {
+          if (pairsAccentWithWhite(m[0])) {
+            const line = src.slice(0, m.index).split("\n").length;
             offenders.push(`${path.relative(ROOT, full)}:${line}`);
           }
         }
