@@ -38,6 +38,34 @@ export function connectionLabel(conn: BankedResetConnection): string {
 
 const SCOPED_PROVIDERS = new Set(["codex", "claude"]);
 
+async function fetchJson(url: string) {
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(String(res.status));
+  return res.json();
+}
+
+/**
+ * Stored settings merged with the defaults, plus the Codex/Claude OAuth connections.
+ * A failed load must surface as an error, never as defaults: the next save PATCHes the
+ * whole object, so defaults shown here would overwrite the stored caps and accounts.
+ */
+async function loadBankedResetAutoApply(): Promise<{
+  settings: BankedResetAutoApplySettings;
+  connections: BankedResetConnection[];
+}> {
+  const [settingsData, providersData] = await Promise.all([
+    fetchJson("/api/settings"),
+    fetchJson("/api/providers"),
+  ]);
+  const connections: BankedResetConnection[] = (providersData?.connections || []).filter(
+    (c: BankedResetConnection) => SCOPED_PROVIDERS.has(c.provider) && c.authType === "oauth"
+  );
+  return {
+    settings: mergeBankedResetAutoApplyClient(settingsData?.bankedResetAutoApply),
+    connections,
+  };
+}
+
 /** Settings + Codex/Claude OAuth connections; `update` PATCHes the full merged object. */
 export function useBankedResetAutoApply() {
   const [settings, setSettings] = useState<BankedResetAutoApplySettings | null>(null);
@@ -52,20 +80,9 @@ export function useBankedResetAutoApply() {
 
   useEffect(() => {
     let cancelled = false;
-    // A failed load must surface as an error, never as defaults: the next save PATCHes the
-    // whole object, so defaults shown here would overwrite the stored caps and accounts.
-    const fetchJson = async (url: string) => {
-      const res = await fetch(url);
-      if (!res.ok) throw new Error(String(res.status));
-      return res.json();
-    };
-    Promise.all([fetchJson("/api/settings"), fetchJson("/api/providers")])
-      .then(([settingsData, providersData]) => {
+    loadBankedResetAutoApply()
+      .then(({ settings: merged, connections: scoped }) => {
         if (cancelled) return;
-        const scoped: BankedResetConnection[] = (providersData?.connections || []).filter(
-          (c: BankedResetConnection) => SCOPED_PROVIDERS.has(c.provider) && c.authType === "oauth"
-        );
-        const merged = mergeBankedResetAutoApplyClient(settingsData?.bankedResetAutoApply);
         settingsRef.current = merged;
         setSettings(merged);
         setConnections(scoped);

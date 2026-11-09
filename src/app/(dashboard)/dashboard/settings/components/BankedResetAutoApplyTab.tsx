@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { RadioGroup, RadioGroupItem } from "@omniroute/ui-kit/radio-group";
 import { Card, InfoTooltip, Toggle } from "@/shared/components";
 import Icon from "@/shared/components/Icon";
 import {
@@ -8,6 +9,7 @@ import {
   BANKED_RESET_LIMITS,
   BANKED_RESET_MODES,
   type BankedResetAccountScope,
+  type BankedResetAutoApplySettings,
   type BankedResetCreditType,
   type BankedResetMode,
 } from "@/shared/constants/bankedResetAutoApply";
@@ -26,6 +28,7 @@ import {
 import {
   connectionLabel,
   useBankedResetAutoApply,
+  type BankedResetConnection,
   type BankedResetSaveStatus,
 } from "./useBankedResetAutoApply";
 
@@ -132,49 +135,161 @@ function SaveStatus({ status }: { status: BankedResetSaveStatus }) {
   return null;
 }
 
-function RadioOption({
-  name,
-  value,
-  checked,
-  disabled,
-  label,
-  help,
-  onSelect,
-}: {
-  name: string;
-  value: string;
-  checked: boolean;
-  disabled: boolean;
-  label: string;
-  help: string;
-  onSelect: () => void;
-}) {
+const POOL_FIELDS: Array<{ key: BankedResetNumberKey; label: string; hint: string }> = [
+  {
+    key: "poolHeadroomPercent",
+    label: "bankedResetAutoApplyPoolHeadroomLabel",
+    hint: "bankedResetAutoApplyPoolHeadroomHint",
+  },
+];
+
+type SectionProps = {
+  settings: BankedResetAutoApplySettings;
+  saving: boolean;
+  update: (patch: Partial<BankedResetAutoApplySettings>) => Promise<void>;
+};
+
+function ModeSection({ settings, saving, update }: SectionProps) {
+  const t = useTranslations("settings");
   return (
-    <label className="flex items-start gap-2 text-sm">
-      <input
-        type="radio"
-        name={name}
-        value={value}
-        checked={checked}
-        disabled={disabled}
-        onChange={onSelect}
-        className="mt-1"
+    <BankedResetSection title={t("bankedResetAutoApplyModeTitle")}>
+      <BankedResetToggleRow
+        label={t("bankedResetAutoApplyEnabledLabel")}
+        help={t("bankedResetAutoApplyEnabledHelp")}
+        checked={settings.enabled}
+        disabled={saving}
+        onChange={(enabled) => void update({ enabled })}
       />
-      <span>
-        <span className="text-text-main">{label}</span>
-        <span className="block text-xs text-text-muted">{help}</span>
-      </span>
-    </label>
+      <RadioGroup
+        aria-label={t("bankedResetAutoApplyModeTitle")}
+        name="banked-reset-auto-apply-mode"
+        value={settings.mode}
+        disabled={saving}
+        onValueChange={(next) => void update({ mode: next as BankedResetMode })}
+      >
+        {BANKED_RESET_MODES.map((mode) => (
+          <RadioGroupItem
+            key={mode}
+            value={mode}
+            label={t(MODE_KEYS[mode].label)}
+            description={t(MODE_KEYS[mode].help)}
+          />
+        ))}
+      </RadioGroup>
+    </BankedResetSection>
   );
 }
 
-export default function BankedResetAutoApplyTab() {
+function CreditTypesSection({ settings, saving, update }: SectionProps) {
   const t = useTranslations("settings");
-  const { settings, connections, loading, saving, status, update } = useBankedResetAutoApply();
+  return (
+    <BankedResetSection
+      title={t("bankedResetAutoApplyCreditTypesTitle")}
+      description={t("bankedResetAutoApplyCreditTypesDesc")}
+    >
+      {CREDIT_TYPE_ROWS.map(({ type, label, help }) => (
+        <BankedResetToggleRow
+          key={type}
+          label={t(label)}
+          help={t(help)}
+          note={
+            type === "claudeSessionReset" ? t("bankedResetAutoApplyClaudeSessionNote") : undefined
+          }
+          checked={settings.creditTypes[type]}
+          disabled={saving}
+          onChange={(checked) =>
+            void update({ creditTypes: { ...settings.creditTypes, [type]: checked } })
+          }
+        />
+      ))}
+    </BankedResetSection>
+  );
+}
 
-  const numberFields = (fields: typeof TIMING_FIELDS) =>
-    settings
-      ? fields.map(({ key, label, hint }) => (
+function ConnectionScopeList({
+  settings,
+  saving,
+  update,
+  connections,
+}: SectionProps & { connections: BankedResetConnection[] }) {
+  const t = useTranslations("settings");
+  if (connections.length === 0) {
+    return <p className="text-sm text-text-muted">{t("bankedResetAutoApplyNoConnections")}</p>;
+  }
+  return (
+    <ul className="flex flex-col gap-1 border-t border-border pt-3">
+      {connections.map((conn) => (
+        <li key={conn.id} className="flex items-center justify-between gap-3 py-1">
+          <span className="min-w-0 truncate text-sm font-mono">
+            {connectionLabel(conn)}
+            <span className="ms-2 font-sans text-xs text-text-muted">{conn.provider}</span>
+          </span>
+          <Toggle
+            checked={isConnectionInScope(settings, conn.id)}
+            disabled={saving}
+            ariaLabel={t("bankedResetAutoApplyConnectionAria", {
+              connection: connectionLabel(conn),
+            })}
+            onChange={(inScope) =>
+              void update({
+                connections: setConnectionInScope(settings, conn.id, inScope),
+              })
+            }
+          />
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function ScopeSection(props: SectionProps & { connections: BankedResetConnection[] }) {
+  const { settings, saving, update } = props;
+  const t = useTranslations("settings");
+  return (
+    <BankedResetSection
+      title={t("bankedResetAutoApplyScopeTitle")}
+      description={t("bankedResetAutoApplyScopeDesc")}
+    >
+      <RadioGroup
+        aria-label={t("bankedResetAutoApplyScopeTitle")}
+        name="banked-reset-auto-apply-scope"
+        value={settings.accountScope}
+        disabled={saving}
+        onValueChange={(next) => void update({ accountScope: next as BankedResetAccountScope })}
+      >
+        {BANKED_RESET_ACCOUNT_SCOPES.map((scope) => (
+          <RadioGroupItem
+            key={scope}
+            value={scope}
+            label={t(SCOPE_KEYS[scope].label)}
+            description={t(SCOPE_KEYS[scope].help)}
+          />
+        ))}
+      </RadioGroup>
+      <ConnectionScopeList {...props} />
+    </BankedResetSection>
+  );
+}
+
+function NumberFieldsSection({
+  settings,
+  saving,
+  update,
+  title,
+  description,
+  fields,
+  gridClassName,
+}: SectionProps & {
+  title: string;
+  description: string;
+  fields: typeof TIMING_FIELDS;
+  gridClassName: string;
+}) {
+  const t = useTranslations("settings");
+  return (
+    <BankedResetSection title={title} description={description}>
+      <div className={`grid gap-3 ${gridClassName}`}>
+        {fields.map(({ key, label, hint }) => (
           <BankedResetNumberField
             key={key}
             label={t(label)}
@@ -184,8 +299,85 @@ export default function BankedResetAutoApplyTab() {
             disabled={saving}
             onCommit={(value) => void update({ [key]: value })}
           />
-        ))
-      : null;
+        ))}
+      </div>
+    </BankedResetSection>
+  );
+}
+
+function ScheduleSection({ settings, saving, update }: SectionProps) {
+  const t = useTranslations("settings");
+  return (
+    <BankedResetSection
+      title={t("bankedResetAutoApplyScheduleTitle")}
+      description={t("bankedResetAutoApplyScheduleDesc")}
+    >
+      <BankedResetToggleRow
+        label={t("bankedResetAutoApplyScheduleEnabledLabel")}
+        checked={settings.schedule.enabled}
+        disabled={saving}
+        onChange={(enabled) => void update({ schedule: { ...settings.schedule, enabled } })}
+      />
+      <div className="grid gap-3 sm:grid-cols-2">
+        <BankedResetNumberField
+          label={t("bankedResetAutoApplyScheduleStartLabel")}
+          value={settings.schedule.startHourUtc}
+          max={BANKED_RESET_LIMITS.hourOfDayMax}
+          disabled={saving || !settings.schedule.enabled}
+          onCommit={(startHourUtc) =>
+            void update({ schedule: { ...settings.schedule, startHourUtc } })
+          }
+        />
+        <BankedResetNumberField
+          label={t("bankedResetAutoApplyScheduleEndLabel")}
+          hint={t("bankedResetAutoApplyScheduleEndHint")}
+          value={settings.schedule.endHourUtc}
+          max={BANKED_RESET_LIMITS.hourOfDayMax}
+          disabled={saving || !settings.schedule.enabled}
+          onCommit={(endHourUtc) => void update({ schedule: { ...settings.schedule, endHourUtc } })}
+        />
+      </div>
+    </BankedResetSection>
+  );
+}
+
+function BankedResetAutoApplyForm(props: SectionProps & { connections: BankedResetConnection[] }) {
+  const t = useTranslations("settings");
+  return (
+    <div className="flex flex-col gap-5">
+      <ModeSection {...props} />
+      <CreditTypesSection {...props} />
+      <ScopeSection {...props} />
+      <NumberFieldsSection
+        {...props}
+        title={t("bankedResetAutoApplyTimingTitle")}
+        description={t("bankedResetAutoApplyTimingDesc")}
+        fields={TIMING_FIELDS}
+        gridClassName="sm:grid-cols-2"
+      />
+      <NumberFieldsSection
+        {...props}
+        title={t("bankedResetAutoApplyPoolTitle")}
+        description={t("bankedResetAutoApplyPoolDesc")}
+        fields={POOL_FIELDS}
+        gridClassName="sm:grid-cols-2"
+      />
+      <NumberFieldsSection
+        {...props}
+        title={t("bankedResetAutoApplyLimitsTitle")}
+        description={t("bankedResetAutoApplyLimitsDesc")}
+        fields={LIMIT_FIELDS}
+        gridClassName="sm:grid-cols-3"
+      />
+      <ScheduleSection {...props} />
+      <BankedResetAutoApplyHistory connections={props.connections} />
+    </div>
+  );
+}
+
+export default function BankedResetAutoApplyTab() {
+  const t = useTranslations("settings");
+  const { settings, connections, loading, saving, status, update } = useBankedResetAutoApply();
 
   return (
     <Card
@@ -208,169 +400,12 @@ export default function BankedResetAutoApplyTab() {
           {t("bankedResetAutoApplyLoadError")}
         </p>
       ) : (
-        <div className="flex flex-col gap-5">
-          <BankedResetSection title={t("bankedResetAutoApplyModeTitle")}>
-            <BankedResetToggleRow
-              label={t("bankedResetAutoApplyEnabledLabel")}
-              help={t("bankedResetAutoApplyEnabledHelp")}
-              checked={settings.enabled}
-              disabled={saving}
-              onChange={(enabled) => void update({ enabled })}
-            />
-            <fieldset className="flex flex-col gap-2" disabled={saving}>
-              <legend className="sr-only">{t("bankedResetAutoApplyModeTitle")}</legend>
-              {BANKED_RESET_MODES.map((mode) => (
-                <RadioOption
-                  key={mode}
-                  name="banked-reset-auto-apply-mode"
-                  value={mode}
-                  checked={settings.mode === mode}
-                  disabled={saving}
-                  label={t(MODE_KEYS[mode].label)}
-                  help={t(MODE_KEYS[mode].help)}
-                  onSelect={() => void update({ mode })}
-                />
-              ))}
-            </fieldset>
-          </BankedResetSection>
-
-          <BankedResetSection
-            title={t("bankedResetAutoApplyCreditTypesTitle")}
-            description={t("bankedResetAutoApplyCreditTypesDesc")}
-          >
-            {CREDIT_TYPE_ROWS.map(({ type, label, help }) => (
-              <BankedResetToggleRow
-                key={type}
-                label={t(label)}
-                help={t(help)}
-                note={
-                  type === "claudeSessionReset"
-                    ? t("bankedResetAutoApplyClaudeSessionNote")
-                    : undefined
-                }
-                checked={settings.creditTypes[type]}
-                disabled={saving}
-                onChange={(checked) =>
-                  void update({ creditTypes: { ...settings.creditTypes, [type]: checked } })
-                }
-              />
-            ))}
-          </BankedResetSection>
-
-          <BankedResetSection
-            title={t("bankedResetAutoApplyScopeTitle")}
-            description={t("bankedResetAutoApplyScopeDesc")}
-          >
-            <fieldset className="flex flex-col gap-2" disabled={saving}>
-              <legend className="sr-only">{t("bankedResetAutoApplyScopeTitle")}</legend>
-              {BANKED_RESET_ACCOUNT_SCOPES.map((scope) => (
-                <RadioOption
-                  key={scope}
-                  name="banked-reset-auto-apply-scope"
-                  value={scope}
-                  checked={settings.accountScope === scope}
-                  disabled={saving}
-                  label={t(SCOPE_KEYS[scope].label)}
-                  help={t(SCOPE_KEYS[scope].help)}
-                  onSelect={() => void update({ accountScope: scope })}
-                />
-              ))}
-            </fieldset>
-            {connections.length === 0 ? (
-              <p className="text-sm text-text-muted">{t("bankedResetAutoApplyNoConnections")}</p>
-            ) : (
-              <ul className="flex flex-col gap-1 border-t border-border pt-3">
-                {connections.map((conn) => (
-                  <li key={conn.id} className="flex items-center justify-between gap-3 py-1">
-                    <span className="min-w-0 truncate text-sm font-mono">
-                      {connectionLabel(conn)}
-                      <span className="ms-2 font-sans text-xs text-text-muted">
-                        {conn.provider}
-                      </span>
-                    </span>
-                    <Toggle
-                      checked={isConnectionInScope(settings, conn.id)}
-                      disabled={saving}
-                      ariaLabel={t("bankedResetAutoApplyConnectionAria", {
-                        connection: connectionLabel(conn),
-                      })}
-                      onChange={(inScope) =>
-                        void update({
-                          connections: setConnectionInScope(settings, conn.id, inScope),
-                        })
-                      }
-                    />
-                  </li>
-                ))}
-              </ul>
-            )}
-          </BankedResetSection>
-
-          <BankedResetSection
-            title={t("bankedResetAutoApplyTimingTitle")}
-            description={t("bankedResetAutoApplyTimingDesc")}
-          >
-            <div className="grid gap-3 sm:grid-cols-2">{numberFields(TIMING_FIELDS)}</div>
-          </BankedResetSection>
-
-          <BankedResetSection
-            title={t("bankedResetAutoApplyPoolTitle")}
-            description={t("bankedResetAutoApplyPoolDesc")}
-          >
-            <div className="grid gap-3 sm:grid-cols-2">
-              <BankedResetNumberField
-                label={t("bankedResetAutoApplyPoolHeadroomLabel")}
-                hint={t("bankedResetAutoApplyPoolHeadroomHint")}
-                value={settings.poolHeadroomPercent}
-                max={BANKED_RESET_NUMBER_MAX.poolHeadroomPercent}
-                disabled={saving}
-                onCommit={(poolHeadroomPercent) => void update({ poolHeadroomPercent })}
-              />
-            </div>
-          </BankedResetSection>
-
-          <BankedResetSection
-            title={t("bankedResetAutoApplyLimitsTitle")}
-            description={t("bankedResetAutoApplyLimitsDesc")}
-          >
-            <div className="grid gap-3 sm:grid-cols-3">{numberFields(LIMIT_FIELDS)}</div>
-          </BankedResetSection>
-
-          <BankedResetSection
-            title={t("bankedResetAutoApplyScheduleTitle")}
-            description={t("bankedResetAutoApplyScheduleDesc")}
-          >
-            <BankedResetToggleRow
-              label={t("bankedResetAutoApplyScheduleEnabledLabel")}
-              checked={settings.schedule.enabled}
-              disabled={saving}
-              onChange={(enabled) => void update({ schedule: { ...settings.schedule, enabled } })}
-            />
-            <div className="grid gap-3 sm:grid-cols-2">
-              <BankedResetNumberField
-                label={t("bankedResetAutoApplyScheduleStartLabel")}
-                value={settings.schedule.startHourUtc}
-                max={BANKED_RESET_LIMITS.hourOfDayMax}
-                disabled={saving || !settings.schedule.enabled}
-                onCommit={(startHourUtc) =>
-                  void update({ schedule: { ...settings.schedule, startHourUtc } })
-                }
-              />
-              <BankedResetNumberField
-                label={t("bankedResetAutoApplyScheduleEndLabel")}
-                hint={t("bankedResetAutoApplyScheduleEndHint")}
-                value={settings.schedule.endHourUtc}
-                max={BANKED_RESET_LIMITS.hourOfDayMax}
-                disabled={saving || !settings.schedule.enabled}
-                onCommit={(endHourUtc) =>
-                  void update({ schedule: { ...settings.schedule, endHourUtc } })
-                }
-              />
-            </div>
-          </BankedResetSection>
-
-          <BankedResetAutoApplyHistory connections={connections} />
-        </div>
+        <BankedResetAutoApplyForm
+          settings={settings}
+          connections={connections}
+          saving={saving}
+          update={update}
+        />
       )}
     </Card>
   );

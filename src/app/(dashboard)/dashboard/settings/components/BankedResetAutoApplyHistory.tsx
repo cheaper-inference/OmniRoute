@@ -2,12 +2,22 @@
 
 import Link from "next/link";
 import { useTranslations } from "next-intl";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@omniroute/ui-kit/table";
 import { Button } from "@/shared/components";
 import { BankedResetSection } from "./BankedResetAutoApplyFields";
 import {
   connectionLabel,
   useBankedResetHistory,
   type BankedResetConnection,
+  type BankedResetHistoryEntry,
 } from "./useBankedResetAutoApply";
 
 const CREDIT_TYPE_KEYS: Record<string, string> = {
@@ -37,6 +47,93 @@ const RESULT_CLASS: Record<string, string> = {
 function formatTime(timestamp: string): string {
   const ms = Date.parse(timestamp);
   return Number.isFinite(ms) ? new Date(ms).toLocaleString() : timestamp;
+}
+
+/** The translated label for a known value, else the raw value, else "-". */
+function translatedOrRaw(
+  t: (key: string) => string,
+  keys: Record<string, string>,
+  value: string | null
+): string {
+  if (value && keys[value]) return t(keys[value]);
+  return value ?? "-";
+}
+
+function HistoryRow({
+  entry,
+  labels,
+}: {
+  entry: BankedResetHistoryEntry;
+  labels: Map<string, string>;
+}) {
+  const t = useTranslations("settings");
+  const account = entry.connectionId ? (labels.get(entry.connectionId) ?? entry.connectionId) : "-";
+  const status = entry.status ?? "";
+  return (
+    <TableRow className="border-b border-border/50 align-top">
+      <TableCell className="py-1.5 pe-3 whitespace-nowrap">{formatTime(entry.timestamp)}</TableCell>
+      <TableCell className="max-w-[14rem] truncate py-1.5 pe-3 font-mono" title={account}>
+        {account}
+      </TableCell>
+      <TableCell className="py-1.5 pe-3">
+        {translatedOrRaw(t, CREDIT_TYPE_KEYS, entry.creditType)}
+      </TableCell>
+      <TableCell className="py-1.5 pe-3">
+        {translatedOrRaw(t, TRIGGER_KEYS, entry.trigger)}
+        {entry.reason ? (
+          <span className="block font-mono text-xs text-text-muted">{entry.reason}</span>
+        ) : null}
+      </TableCell>
+      <TableCell className={`py-1.5 font-medium ${RESULT_CLASS[status] ?? "text-text-muted"}`}>
+        {translatedOrRaw(t, RESULT_KEYS, status || null)}
+      </TableCell>
+    </TableRow>
+  );
+}
+
+function HistoryTable({
+  entries,
+  labels,
+}: {
+  entries: BankedResetHistoryEntry[];
+  labels: Map<string, string>;
+}) {
+  const t = useTranslations("settings");
+  return (
+    <div className="overflow-x-auto">
+      <Table className="w-full text-left text-sm">
+        <TableCaption className="sr-only">{t("bankedResetAutoApplyHistoryTitle")}</TableCaption>
+        <TableHeader>
+          <TableRow className="border-b border-border text-xs text-text-muted">
+            <TableHead scope="col" className="py-1.5 pe-3 font-medium">
+              {t("bankedResetAutoApplyHistoryTime")}
+            </TableHead>
+            <TableHead scope="col" className="py-1.5 pe-3 font-medium">
+              {t("bankedResetAutoApplyHistoryAccount")}
+            </TableHead>
+            <TableHead scope="col" className="py-1.5 pe-3 font-medium">
+              {t("bankedResetAutoApplyHistoryCreditType")}
+            </TableHead>
+            <TableHead scope="col" className="py-1.5 pe-3 font-medium">
+              {t("bankedResetAutoApplyHistoryReason")}
+            </TableHead>
+            <TableHead scope="col" className="py-1.5 font-medium">
+              {t("bankedResetAutoApplyHistoryResult")}
+            </TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {entries.map((entry, index) => (
+            <HistoryRow
+              key={entry.id ?? `${entry.timestamp}-${index}`}
+              entry={entry}
+              labels={labels}
+            />
+          ))}
+        </TableBody>
+      </Table>
+    </div>
+  );
 }
 
 export default function BankedResetAutoApplyHistory({
@@ -85,69 +182,7 @@ export default function BankedResetAutoApplyHistory({
       ) : entries.length === 0 ? (
         <p className="text-sm text-text-muted">{t("bankedResetAutoApplyHistoryEmpty")}</p>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
-            <caption className="sr-only">{t("bankedResetAutoApplyHistoryTitle")}</caption>
-            <thead>
-              <tr className="border-b border-border text-xs text-text-muted">
-                <th scope="col" className="py-1.5 pe-3 font-medium">
-                  {t("bankedResetAutoApplyHistoryTime")}
-                </th>
-                <th scope="col" className="py-1.5 pe-3 font-medium">
-                  {t("bankedResetAutoApplyHistoryAccount")}
-                </th>
-                <th scope="col" className="py-1.5 pe-3 font-medium">
-                  {t("bankedResetAutoApplyHistoryCreditType")}
-                </th>
-                <th scope="col" className="py-1.5 pe-3 font-medium">
-                  {t("bankedResetAutoApplyHistoryReason")}
-                </th>
-                <th scope="col" className="py-1.5 font-medium">
-                  {t("bankedResetAutoApplyHistoryResult")}
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {entries.map((entry, index) => {
-                const account = entry.connectionId
-                  ? (labels.get(entry.connectionId) ?? entry.connectionId)
-                  : "-";
-                const status = entry.status ?? "";
-                return (
-                  <tr
-                    key={entry.id ?? `${entry.timestamp}-${index}`}
-                    className="border-b border-border/50 align-top"
-                  >
-                    <td className="py-1.5 pe-3 whitespace-nowrap">{formatTime(entry.timestamp)}</td>
-                    <td className="max-w-[14rem] truncate py-1.5 pe-3 font-mono" title={account}>
-                      {account}
-                    </td>
-                    <td className="py-1.5 pe-3">
-                      {entry.creditType && CREDIT_TYPE_KEYS[entry.creditType]
-                        ? t(CREDIT_TYPE_KEYS[entry.creditType])
-                        : (entry.creditType ?? "-")}
-                    </td>
-                    <td className="py-1.5 pe-3">
-                      {entry.trigger && TRIGGER_KEYS[entry.trigger]
-                        ? t(TRIGGER_KEYS[entry.trigger])
-                        : (entry.trigger ?? "-")}
-                      {entry.reason ? (
-                        <span className="block font-mono text-xs text-text-muted">
-                          {entry.reason}
-                        </span>
-                      ) : null}
-                    </td>
-                    <td
-                      className={`py-1.5 font-medium ${RESULT_CLASS[status] ?? "text-text-muted"}`}
-                    >
-                      {RESULT_KEYS[status] ? t(RESULT_KEYS[status]) : status || "-"}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+        <HistoryTable entries={entries} labels={labels} />
       )}
     </BankedResetSection>
   );

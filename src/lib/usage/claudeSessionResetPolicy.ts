@@ -47,11 +47,13 @@ import {
   decideBankedReset,
   isBankedResetAccountInScope,
   mergeBankedResetAutoApplySettings,
+  type BankedResetAccountInput,
   type BankedResetPoolMember,
 } from "@/lib/usage/bankedResetPolicy";
 import {
   buildBankedResetPool,
   readBankedResetWindows,
+  type BankedResetAccountWindows,
   type BankedResetQuotaReader,
 } from "@/lib/usage/bankedResetQuota";
 import type { BankedResetAutoApplySettings } from "@/shared/constants/bankedResetAutoApply";
@@ -119,6 +121,68 @@ function isClaimShared(rows: BankedResetAuditRow[], connectionId: string, now: n
   });
 }
 
+/** The walled account as the policy sees it at the 5-hour wall. */
+function walledSessionAccount(
+  connectionId: string,
+  windows: BankedResetAccountWindows,
+  sessionResetAt: ClaudeLimitResetPolicyInput["sessionResetAt"]
+): BankedResetAccountInput {
+  return {
+    id: connectionId,
+    provider: "claude",
+    creditType: CREDIT_TYPE,
+    walled: "session",
+    // The wall's own header is fresher than the cached window.
+    session: {
+      usedPercentage: windows.session?.usedPercentage ?? 100,
+      resetAt: sessionResetAt ?? windows.session?.resetAt ?? null,
+    },
+    weekly: windows.weekly,
+  };
+}
+
+/**
+ * The `redeem` verdict: reserves a cap slot and audits the claim once it settles.
+ * Released once the outcome row is written, or by the executor (`release`) when the
+ * attempt resolved without a claim. Only an attempt that rejects leaves it to expire —
+ * stricter, never looser.
+ */
+function reserveRedeemVerdict(
+  deps: ClaudeSessionResetPolicyDeps,
+  outcome: Omit<BankedResetOutcome, "status" | "reason">,
+  reason: string,
+  now: number
+): ClaudeLimitResetPolicyVerdict {
+  const reservation = reserveBankedResetSlot({
+    connectionId: outcome.connectionId,
+    creditType: CREDIT_TYPE,
+    now,
+  });
+  return {
+    allow: true,
+    onSettled: (attempt) => {
+      try {
+        recordBankedResetOutcome(
+          attempt.reset
+            ? { ...outcome, status: "success", reason }
+            : {
+                ...outcome,
+                // "error": the claim timed out, the network failed or the status was
+                // unexpected — the reset may have been granted, so it counts.
+                status: attempt.outcome === "error" ? "unknown" : "failed",
+                reason: toBankedResetReason(attempt.outcome),
+              },
+          deps.sinks
+        );
+      } finally {
+        releaseBankedResetSlot(reservation);
+      }
+    },
+    // Idempotent (tokens are never reused), so a no-op once onSettled has released it.
+    release: () => releaseBankedResetSlot(reservation),
+  };
+}
+
 async function decideClaudeSessionReset(
   deps: ClaudeSessionResetPolicyDeps,
   input: ClaudeLimitResetPolicyInput
@@ -150,18 +214,7 @@ async function decideClaudeSessionReset(
   const decision = decideBankedReset({
     settings,
     now: input.now,
-    account: {
-      id: connectionId,
-      provider: "claude",
-      creditType: CREDIT_TYPE,
-      walled: "session",
-      // The wall's own header is fresher than the cached window.
-      session: {
-        usedPercentage: windows.session?.usedPercentage ?? 100,
-        resetAt: input.sessionResetAt ?? windows.session?.resetAt ?? null,
-      },
-      weekly: windows.weekly,
-    },
+    account: walledSessionAccount(connectionId, windows, input.sessionResetAt),
     pool,
     history: summarizeBankedResetHistory(rows, {
       connectionId,
@@ -188,37 +241,7 @@ async function decideClaudeSessionReset(
     );
     return { allow: false };
   }
-  // Released once the outcome row is written, or by the executor (`release`) when the
-  // attempt resolved without a claim. Only an attempt that rejects leaves it to expire —
-  // stricter, never looser.
-  const reservation = reserveBankedResetSlot({
-    connectionId,
-    creditType: CREDIT_TYPE,
-    now: input.now,
-  });
-  return {
-    allow: true,
-    onSettled: (attempt) => {
-      try {
-        recordBankedResetOutcome(
-          attempt.reset
-            ? { ...outcome, status: "success", reason: decision.reason }
-            : {
-                ...outcome,
-                // "error": the claim timed out, the network failed or the status was
-                // unexpected — the reset may have been granted, so it counts.
-                status: attempt.outcome === "error" ? "unknown" : "failed",
-                reason: toBankedResetReason(attempt.outcome),
-              },
-          deps.sinks
-        );
-      } finally {
-        releaseBankedResetSlot(reservation);
-      }
-    },
-    // Idempotent (tokens are never reused), so a no-op once onSettled has released it.
-    release: () => releaseBankedResetSlot(reservation),
-  };
+  return reserveRedeemVerdict(deps, outcome, decision.reason, input.now);
 }
 
 /** The policy registered with open-sse. Never throws: any error means "do not claim". */
