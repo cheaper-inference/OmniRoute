@@ -20,6 +20,9 @@ export function rethrowAdmissionError(error: unknown): never {
 }
 
 /** What is left of a queue-wait budget that started at `startedAt`. */
-export function remainingQueueBudgetMs(budgetMs: number, startedAt: number): number {
+export function remainingQueueBudgetMs(budgetMs: number, startedAt: number): number | undefined {
+  // budgetMs 0 is the documented "no queue deadline" sentinel (#14164); returning 0
+  // here would make withRateLimit read it as "budget exhausted" and 503 every request.
+  if (budgetMs <= 0) return undefined;
   return Math.max(0, budgetMs - (Date.now() - startedAt));
 }

@@ -8,6 +8,7 @@ import {
   displayAccount,
   DISPLAY_COLORS,
   DISPLAY_LABELS,
+  isCooldownKind,
   type DisplayAccount,
 } from "./availabilityDisplay";
 import { useHealthText } from "./useHealthText";
@@ -40,7 +41,7 @@ function tooltipMessage(
 
 function TooltipStatus({ account }: { account: DisplayAccount }) {
   const { t, all, format, recovery } = useHealthText();
-  const cooling = account.kind === "cd5" || account.kind === "cdw";
+  const cooling = isCooldownKind(account.kind);
   const thresholdBlocked = account.reasons.some(
     (reason) =>
       reason.type === "quota" && (reason.percent ?? 0) > 0 && Number.isFinite(reason.cutoff)
