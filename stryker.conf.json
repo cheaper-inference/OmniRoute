@@ -559,6 +559,7 @@
       "tests/unit/responses-handler.test.ts",
       "tests/unit/responses-passthrough-openai-compatible.test.ts",
       "tests/unit/retry-after-provenance.test.ts",
+      "tests/unit/routerai-reset-at-and-authoritative-shorten.test.ts",
       "tests/unit/rotation-config-omniroute.test.ts",
       "tests/unit/rotation-config-provider-cooldown.test.ts",
       "tests/unit/route-explainability.test.ts",

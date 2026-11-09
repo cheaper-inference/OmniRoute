@@ -106,9 +106,8 @@ test("non-authoritative hint still never shortens an existing lock (old behavior
 
 // ── CodeRabbit review follow-up (PR #19027) ──────────────────────────────────
 
-const { buildSubscriptionQuotaFallback } = await import(
-  "../../open-sse/services/quotaTextCooldowns.ts"
-);
+const { buildSubscriptionQuotaFallback } =
+  await import("../../open-sse/services/quotaTextCooldowns.ts");
 
 const REVIEW_PROFILE_DISABLED = {
   baseCooldownMs: 125,
@@ -234,4 +233,87 @@ test("subscription-quota import surface: buildSubscriptionQuotaFallback re-expor
   );
   assert.ok(withLocalOnly);
   assert.notEqual(withLocalOnly.usedUpstreamRetryHint, true);
+});
+
+// The quota-family lock layer (lockModel, reached through recordModelLockoutFailure
+// for per-model 402/403/429) must honor the same authoritative-shorten contract as
+// the exact layer above — auth.ts passes the flag through this entry point.
+test("recordModelLockoutFailure: authoritativeBodyReset shortens a longer quota-family lock", () => {
+  evictModelLockoutOverflow();
+  const provider = "routerai-family";
+  const connection = "conn-family";
+  const model = "family-model";
+  const options = { scope: "quota_family" as const };
+
+  accountFallback.recordModelLockoutFailure(
+    provider,
+    connection,
+    model,
+    "credits",
+    402,
+    1000,
+    null,
+    {
+      ...options,
+      exactCooldownMs: 24 * 60 * 60 * 1000,
+    }
+  );
+  assert.ok(getModelLockoutInfo(provider, connection, model)!.remainingMs > 23 * 60 * 60 * 1000);
+
+  accountFallback.recordModelLockoutFailure(
+    provider,
+    connection,
+    model,
+    "credits",
+    402,
+    1000,
+    null,
+    {
+      ...options,
+      exactCooldownMs: 5 * 60 * 1000,
+      authoritativeBodyReset: true,
+    }
+  );
+  const after = getModelLockoutInfo(provider, connection, model);
+  assert.ok(after, "lock must survive shortening");
+  assert.ok(after!.remainingMs < 6 * 60 * 1000, `expected ~5m, got ${after!.remainingMs}`);
+  accountFallback.clearModelLock(provider, connection, model);
+});
+
+test("recordModelLockoutFailure: without authoritativeBodyReset a shorter hint keeps the longer quota-family lock", () => {
+  evictModelLockoutOverflow();
+  const provider = "routerai-family-keep";
+  const connection = "conn-family-keep";
+  const model = "family-model";
+  const options = { scope: "quota_family" as const };
+
+  accountFallback.recordModelLockoutFailure(
+    provider,
+    connection,
+    model,
+    "credits",
+    402,
+    1000,
+    null,
+    {
+      ...options,
+      exactCooldownMs: 60 * 60 * 1000,
+    }
+  );
+  accountFallback.recordModelLockoutFailure(
+    provider,
+    connection,
+    model,
+    "credits",
+    402,
+    1000,
+    null,
+    {
+      ...options,
+      exactCooldownMs: 60 * 1000,
+    }
+  );
+  const info = getModelLockoutInfo(provider, connection, model);
+  assert.ok(info!.remainingMs > 55 * 60 * 1000, "long lock must be preserved");
+  accountFallback.clearModelLock(provider, connection, model);
 });
