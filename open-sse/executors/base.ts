@@ -320,6 +320,30 @@ export type ExecutorExecuteResult =
        */
       upstreamDiagnostic?: Record<string, unknown>;
     };
+/**
+ * Wait before a same-URL retry. Release the discarded response body first, and reject as
+ * soon as the client aborts so a disconnected request never sits out the whole delay.
+ */
+async function waitBeforeRetry(
+  delayMs: number,
+  signal: AbortSignal | null | undefined,
+  discarded: Response
+): Promise<void> {
+  discarded.body?.cancel().catch(() => {});
+  await new Promise<void>((resolve, reject) => {
+    const onAbort = () => {
+      clearTimeout(timer);
+      reject(signal?.reason ?? new DOMException("Aborted", "AbortError"));
+    };
+    const timer = setTimeout(() => {
+      signal?.removeEventListener("abort", onAbort);
+      resolve();
+    }, delayMs);
+    if (signal?.aborted) return onAbort();
+    signal?.addEventListener("abort", onAbort, { once: true });
+  });
+}
+
 export class BaseExecutor {
   provider: string;
   config: ProviderConfig;
@@ -1828,7 +1852,7 @@ export class BaseExecutor {
               "WAF_RETRY",
               `400 content-blocked intra-retry ${wafAttempt}/${BaseExecutor.WAF_RETRY_CONFIG.maxAttempts} on ${url} — waiting ${wafBackoff}ms`
             );
-            await new Promise((resolve) => setTimeout(resolve, wafBackoff));
+            await waitBeforeRetry(wafBackoff, signal, response);
             urlIndex--; // re-run this urlIndex on the next loop iteration
             continue;
           }
@@ -1859,7 +1883,7 @@ export class BaseExecutor {
             "RETRY",
             `429 intra-retry ${attempt}/${BaseExecutor.RETRY_CONFIG.maxAttempts} on ${url} — waiting ${waitMs}ms${hintMs !== null ? " (upstream hint)" : ""}`
           );
-          await new Promise((resolve) => setTimeout(resolve, waitMs));
+          await waitBeforeRetry(waitMs, signal, response);
           urlIndex--; // re-run this urlIndex on the next loop iteration
           continue;
         }
