@@ -1,4 +1,7 @@
 import assert from "node:assert/strict";
+import { mkdtempSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import test from "node:test";
 
 import {
@@ -7,6 +10,23 @@ import {
   parseCodexImageQuotaSnapshot,
   CODEX_IMAGE_QUOTA_REQUEST_HEADER,
 } from "../../open-sse/services/codexImageQuotaTelemetry.ts";
+
+// DATA_DIR must be set before the DB core loads, and the image handler must be imported
+// before a test swaps globalThis.fetch: importing it pulls in open-sse/utils/proxyFetch.ts,
+// which installs its own patched globalThis.fetch at module load and would otherwise
+// replace the test's mock, sending the fixture request to the real Codex backend.
+const previousDataDir = process.env.DATA_DIR;
+const dataDir = mkdtempSync(join(tmpdir(), "omniroute-codex-quota-"));
+process.env.DATA_DIR = dataDir;
+const core = await import("../../src/lib/db/core.ts");
+const { handleImageGeneration } = await import("../../open-sse/handlers/imageGeneration.ts");
+
+test.after(() => {
+  core.resetDbInstance();
+  if (previousDataDir === undefined) delete process.env.DATA_DIR;
+  else process.env.DATA_DIR = previousDataDir;
+  rmSync(dataDir, { recursive: true, force: true });
+});
 
 function quotaHeaders(): Headers {
   return new Headers({
@@ -45,34 +65,45 @@ test("non-admin API keys cannot request provider account quota", () => {
   assert.equal(canExposeCodexImageQuota("codex", requestHeaders, ["admin"]), true);
 
   const response = new Headers();
-  attachCodexImageQuotaHeaders(response, parseCodexImageQuotaSnapshot(quotaHeaders(), "gpt-5.5"), false);
+  attachCodexImageQuotaHeaders(
+    response,
+    parseCodexImageQuotaSnapshot(quotaHeaders(), "gpt-5.5"),
+    false
+  );
   assert.equal(Array.from(response.keys()).length, 0);
 });
 
 test("missing or malformed upstream quota remains absent rather than inventing a balance", () => {
   assert.equal(parseCodexImageQuotaSnapshot(new Headers(), "gpt-5.5"), null);
-  assert.equal(parseCodexImageQuotaSnapshot(new Headers({
-    "x-codex-5h-usage": "NaN", "x-codex-5h-limit": "100",
-  }), "gpt-5.5"), null);
-  assert.equal(parseCodexImageQuotaSnapshot(new Headers({
-    "x-codex-5h-usage": "2", "x-codex-5h-limit": "0",
-  }), "gpt-5.5"), null);
+  assert.equal(
+    parseCodexImageQuotaSnapshot(
+      new Headers({
+        "x-codex-5h-usage": "NaN",
+        "x-codex-5h-limit": "100",
+      }),
+      "gpt-5.5"
+    ),
+    null
+  );
+  assert.equal(
+    parseCodexImageQuotaSnapshot(
+      new Headers({
+        "x-codex-5h-usage": "2",
+        "x-codex-5h-limit": "0",
+      }),
+      "gpt-5.5"
+    ),
+    null
+  );
   const response = new Headers();
   attachCodexImageQuotaHeaders(response, { fiveHourRemainingPercent: Number.NaN }, true);
   assert.equal(response.has("x-omniroute-codex-5h-remaining"), false);
 });
 
 test("single Codex hosted image uses its serving response; fanout omits quota", async () => {
-  const { mkdtempSync, rmSync } = await import("node:fs");
-  const { tmpdir } = await import("node:os");
-  const { join } = await import("node:path");
-  const previousDataDir = process.env.DATA_DIR;
-  const dir = mkdtempSync(join(tmpdir(), "omniroute-codex-quota-"));
   const originalFetch = globalThis.fetch;
-  const core = await import("../../src/lib/db/core.ts");
-  process.env.DATA_DIR = dir;
   const sse =
-    'event: response.output_item.done\ndata: ' +
+    "event: response.output_item.done\ndata: " +
     JSON.stringify({
       type: "response.output_item.done",
       item: { type: "image_generation_call", id: "img_1", status: "completed", result: "YWJj" },
@@ -84,8 +115,6 @@ test("single Codex hosted image uses its serving response; fanout omits quota", 
     return new Response(sse, { status: 200, headers: quotaHeaders() });
   };
   try {
-    const { handleImageGeneration } =
-      await import("../../open-sse/handlers/imageGeneration.ts");
     const credentials = { accessToken: "test-token", connectionId: "private-account-id" };
     const single = await handleImageGeneration({
       body: { model: "codex/gpt-5.6-sol", prompt: "one cat", n: 1 },
@@ -100,14 +129,14 @@ test("single Codex hosted image uses its serving response; fanout omits quota", 
       credentials,
       log: null,
     });
-    assert.equal(parallel.success, true, `fanout Codex image response: ${JSON.stringify(parallel)}`);
+    assert.equal(
+      parallel.success,
+      true,
+      `fanout Codex image response: ${JSON.stringify(parallel)}`
+    );
     assert.equal(parallel.telemetry?.codexQuota, undefined);
     assert.equal(sends, 3);
   } finally {
     globalThis.fetch = originalFetch;
-    core.resetDbInstance();
-    if (previousDataDir === undefined) delete process.env.DATA_DIR;
-    else process.env.DATA_DIR = previousDataDir;
-    rmSync(dir, { recursive: true, force: true });
   }
 });
