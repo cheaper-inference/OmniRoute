@@ -719,6 +719,7 @@ export async function runAutoCleanup(): Promise<{
     xpAuditLog: await cleanupXpAuditLog(),
     compressionRunTelemetry: await cleanupCompressionRunTelemetry(),
     proxyLogs: await cleanupProxyLogs(),
+    ...(await cleanupLeaseAndResetHistory()),
     ccrBlocks: await cleanupCcrBlocks(),
     conversationTurnNodes: await cleanupConversationTurnNodes(),
     agenticConversations: await cleanupAgenticConversations(),
@@ -1062,6 +1063,40 @@ export async function cleanupProxyLogs(): Promise<CleanupResult> {
   }
 
   return result;
+}
+
+/**
+ * Prune lease and provider-reset history older than the call-log retention window.
+ * `ended_at` is NULL while a lease is ACTIVE, so `ended_at < cutoff` never matches a
+ * live lease. A quota window is history once its reset time is past the cutoff.
+ * shortcut: no retention setting of their own; add one if operators ask for it.
+ */
+export async function cleanupLeaseAndResetHistory(): Promise<{
+  exclusiveConnectionLeases: CleanupResult;
+  providerQuotaResetEvents: CleanupResult;
+}> {
+  const cutoffDate = new Date();
+  cutoffDate.setDate(cutoffDate.getDate() - getRetentionSettings().callLogs);
+  const cutoffISO = cutoffDate.toISOString();
+  const targets = [
+    ["exclusiveConnectionLeases", "exclusive_connection_leases", "ended_at"],
+    ["providerQuotaResetEvents", "provider_quota_reset_events", "window_resets_at"],
+  ] as const;
+  const out = {} as Record<(typeof targets)[number][0], CleanupResult>;
+  for (const [key, table, column] of targets) {
+    const result: CleanupResult = { deleted: 0, errors: 0 };
+    try {
+      await deleteFromTableBeforeInBatches({ table, column, cutoff: "iso" }, cutoffISO, {
+        progress: result,
+      });
+      console.log(`[Cleanup] Deleted ${result.deleted} ${table} older than the retention window`);
+    } catch (err: unknown) {
+      console.error(`[Cleanup] Error cleaning ${table}:`, err);
+      result.errors++;
+    }
+    out[key] = result;
+  }
+  return out;
 }
 
 // Post-cleanup space reclamation lives in its own module (#12821, kept out of
