@@ -226,7 +226,8 @@ test("shared set size includes live REGISTRY and retired Designer + Felo + Qwen 
   // MiniMax Code (#17286) registers id "minimax-code" and alias "mmcode" — two
   // more (436 -> 438).
   // Supersonic Labs (#18838) reserves its native provider id (438 -> 439).
-  assert.equal(RESERVED_PREFIX_COUNT, 439);
+  // EmpirioLabs AI (#17209) registers id "empiriolabs" with the same alias (+1: 439 -> 440).
+  assert.equal(RESERVED_PREFIX_COUNT, 440);
   assert.equal(RESERVED_PROVIDER_PREFIXES.has("supersoniclabs"), true);
   assert.equal(RESERVED_PROVIDER_PREFIXES.has("ainetcafe"), true);
   assert.equal(RESERVED_PROVIDER_PREFIXES.has("tokenharbor"), true);
@@ -234,6 +235,7 @@ test("shared set size includes live REGISTRY and retired Designer + Felo + Qwen 
   assert.equal(RESERVED_PROVIDER_PREFIXES.has("gisoo"), true);
   assert.equal(RESERVED_PROVIDER_PREFIXES.has("minimax-code"), true);
   assert.equal(RESERVED_PROVIDER_PREFIXES.has("mmcode"), true);
+  assert.equal(RESERVED_PROVIDER_PREFIXES.has("empiriolabs"), true);
 });
 
 test("notrack-web registry id and alias stay reserved", () => {

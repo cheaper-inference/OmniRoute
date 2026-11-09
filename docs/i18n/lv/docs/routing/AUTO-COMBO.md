@@ -127,6 +127,27 @@ Automātiskā vērtēšana katram pieprasījumam atlasa labāko nodrošinātāju
 | `src/sse/handlers/chat.ts`                                | Integrācija: automātiskā prefiksa priekšlaicīga apstrāde |
 | `src/shared/constants/providers.ts`                       | `SYSTEM_PROVIDERS.auto` sistēmas ieraksts                |
 
+## Konta preferences saglabātajām automātiskajām kombinācijām
+
+Intelligent Auto redaktors piedāvā izvēles iespēju** Konta preferences** sadaļā. Katrs savienojums var būt Vēlamais, Normāls (noklusējums), Rezervēts vai Izslēgts. Vairāki savienojumi var koplietot vienu līmeni. Automātiski atlasa pirmajā piemērotajā līmenī, saglabājot savu scoring/router darbību; neveiksmīgie mēģinājumi attiecas uz atlikušajiem konkrētajiem kontiem, priekšroka tiek dota pirms parastā pirms rezerves. Šī kombinācija nekad neizmanto izslēgtos savienojumus.
+
+Iestatījums tiek saglabāts kā `config.accountPreferences`, ko ievada savienojums ID:
+
+```json
+{
+  "accountPreferences": {
+    "connection-a": "preferred",
+    "connection-b": "preferred",
+    "connection-c": "reserve",
+    "connection-d": "excluded"
+  }
+}
+```
+
+Izlaista vai tukša karte saglabā esošo maršrutēšanu. Preferences neiespējo atspējotus savienojumus, nepiešķir API atslēgas piekļuvi, neatjauno kvotas bloķētos kandidātus vai apiet budžeta pārbaudes. Katrs mēģinājums ir ierobežots ar konkrētu savienojumu, tāpēc konta atkāpšanās nevar pāriet līmeņos aiz kombinētā maršrutētāja. Esošās sesijas intereses var paturēt piemērotu kontu; izslēdzot kontu, kas saistīts ar vietējo pagriezienu, pieturas, kas griežas, nevis klusi maina kontus.
+
+Konfigurētajās preferencēs tiek izmantots kontam atbilstošs automātiskais ceļš: nesaistītā konteksta kešatmiņa, viedais cauruļvads, haosa un ēnu īsceļi netiek nosūtīti. Spekulatīvā riska ierobežošana šiem pieprasījumiem ir atspējota, tāpēc rezerves konti nevar rast vēlamos kontus. Citas kombinētās stratēģijas neinterpretē šo iestatījumu. Kombinācijas maiņa no Automātiskā režīma saglabā saglabātās preferences, lai vēlāk varētu pārslēgties atpakaļ.
+
 ## Kombināciju nosaukumi, kas atbilst reāliem modeļa identifikatoriem
 
 Kombinācija, kuras `name` ir identisks vienkāršam modeļa identifikatoram (piemēram, kombinācija ar nosaukumu `gpt-5.5`), ir **apzināts un atbalstīts modelis**, nevis kļūda: tas ir mehānisms katra modeļa identifikatora pakalpojumu sniedzēja rezerves risinājumam, kas aprakstīts [sadaļā #6940](https://github.com/diegosouzapw/OmniRoute/issues/6940). Tā kā kombinācijas risināšana tiek pārbaudīta pirms vienkārša modeļa identifikatora risināšanas (`getComboForModel()` failā `src/sse/services/model.ts`), pieprasījums vienkāršajam identifikatoram `gpt-5.5` tiek novirzīts caur kombinācijas mērķiem (piemēram, `acme-responses/gpt-5.5`, `backup-responses/gpt-5.5`), nevis tieši uz vienu pakalpojumu sniedzēju — tas atkārto kombinācijas-pirms-pārrakstīšanas prioritāti, kas izveidota [sadaļā #3227/#3233](https://github.com/diegosouzapw/OmniRoute/issues/3227), un to pārbauda regresijas testi `tests/unit/responses-combo-resolution-3227.test.ts` un `tests/unit/combo-name-codex-responses-rewrite.test.ts`.
