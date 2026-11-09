@@ -14,7 +14,7 @@ export const RENAMED_MIGRATION_COMPATIBILITY = [
     // Match the name too: canonical cleanup records must never be rehomed.
     fromVersion: "228",
     fromName: "usage_history_calculated_cost",
-    toVersion: "230",
+    toVersion: "231",
     toName: "usage_history_calculated_cost",
   },
   {
