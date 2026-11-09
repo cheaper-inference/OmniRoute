@@ -633,6 +633,13 @@ export async function registerNodejs(): Promise<void> {
     console.warn("[STARTUP] Could not scan provider-prefix collisions (non-fatal).");
   }
   await warmAdaptiveVirtualLanesIntoRuntime();
+  try {
+    const { warnResilienceEnvOverridesAtBoot } =
+      await import("@/lib/resilience/envOverrideWarning");
+    await warnResilienceEnvOverridesAtBoot();
+  } catch {
+    console.warn("[STARTUP] Could not check resilience env overrides (non-fatal).");
+  }
 
   const [
     { initGracefulShutdown },
