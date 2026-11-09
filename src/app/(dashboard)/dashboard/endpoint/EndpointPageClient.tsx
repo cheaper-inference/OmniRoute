@@ -1486,9 +1486,9 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
           {/* Cloudflare Quick Tunnel */}
           {showCloudflaredTunnel && (
             <div className="border-t border-border/30">
-              <div className="flex items-center gap-3 py-3">
-                <Icon name="cloud_queue" size={18} className="text-warning" />
-                <div className="flex-1 min-w-0">
+              <div className="flex flex-wrap items-center gap-3 py-3">
+                <Icon name="cloud_queue" size={18} className="text-warning shrink-0" />
+                <div className="flex-1 min-w-[12rem]">
                   <span className="text-sm font-medium">
                     {translateOrFallback("cloudflaredTitle", "Cloudflare Quick Tunnel")}
                   </span>
@@ -1558,7 +1558,7 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
               <div
                 role="button"
                 tabIndex={0}
-                className="w-full flex items-center gap-3 py-3 hover:bg-surface/40 transition-colors rounded -mx-1 px-1 text-left cursor-pointer"
+                className="w-full flex flex-wrap items-center gap-3 py-3 hover:bg-surface/40 transition-colors rounded -mx-1 px-1 text-left cursor-pointer"
                 onClick={() => setExpandedTunnel(expandedTunnel === "ts" ? null : "ts")}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") {
@@ -1567,8 +1567,8 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
                   }
                 }}
               >
-                <Icon name="vpn_lock" size={18} className="text-chart-3" />
-                <div className="flex-1 min-w-0">
+                <Icon name="vpn_lock" size={18} className="text-chart-3 shrink-0" />
+                <div className="flex-1 min-w-[12rem]">
                   <div className="flex items-baseline gap-1 flex-wrap">
                     <span className="text-sm font-medium">
                       {translateOrFallback("tailscaleTitle", "Tailscale Funnel")}
@@ -1717,7 +1717,7 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
               <div
                 role="button"
                 tabIndex={0}
-                className="w-full flex items-center gap-3 py-3 hover:bg-surface/40 transition-colors rounded -mx-1 px-1 text-left cursor-pointer"
+                className="w-full flex flex-wrap items-center gap-3 py-3 hover:bg-surface/40 transition-colors rounded -mx-1 px-1 text-left cursor-pointer"
                 onClick={() => setExpandedTunnel(expandedTunnel === "ngrok" ? null : "ngrok")}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") {
@@ -1726,8 +1726,8 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
                   }
                 }}
               >
-                <Icon name="public" size={18} className="text-chart-3" />
-                <div className="flex-1 min-w-0">
+                <Icon name="public" size={18} className="text-chart-3 shrink-0" />
+                <div className="flex-1 min-w-[12rem]">
                   <span className="text-sm font-medium">
                     {translateOrFallback("ngrokTitle", "ngrok Tunnel")}
                   </span>

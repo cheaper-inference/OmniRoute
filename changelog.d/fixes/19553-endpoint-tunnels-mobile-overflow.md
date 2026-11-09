@@ -1,0 +1,1 @@
+- **dashboard:** The Cloudflare, Tailscale, and ngrok tunnel rows in the Tunnels card on `/dashboard/endpoint` now wrap onto multiple lines with a minimum title width floor, preventing button and status badge clipping on narrow mobile viewports.
