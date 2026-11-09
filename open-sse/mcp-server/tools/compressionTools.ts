@@ -8,18 +8,20 @@
  */
 
 import { logToolCall } from "../audit.ts";
-import {
-  getCompressionSettings,
-  updateCompressionSettings,
-} from "../../../src/lib/db/compression.ts";
+// Lazy-loaded: src/lib/db/compression transitively pulls the compression engine
+// chain (lite/stats -> omniglyph, ~47 MB retained). Loaded on first use.
+async function getCompressionDb() {
+  return await import("../../../src/lib/db/compression.ts");
+}
 import { getCompressionAnalyticsSummary } from "../../../src/lib/db/compressionAnalytics.ts";
 import { getCacheStatsSummary } from "../../../src/lib/db/compressionCacheStats.ts";
 import { listCompressionCombos } from "../../../src/lib/db/compressionCombos.ts";
 import type { McpToolExtraLike } from "../scopeEnforcement.ts";
-import {
-  getMcpDescriptionCompressionStats,
-  snapshotMcpDescriptionCompressionStats,
-} from "../descriptionCompressor.ts";
+// Lazy-loaded: descriptionCompressor pulls the caveman compression engine
+// (~47 MB retained via stats -> omniglyph). Loaded on first use.
+async function getDescriptionCompressor() {
+  return await import("../descriptionCompressor.ts");
+}
 
 /**
  * Handle compression_status tool: return current compression config, analytics, and cache stats
@@ -78,10 +80,12 @@ export async function handleCompressionStatus(
 }> {
   const start = Date.now();
   try {
-    const settings = await getCompressionSettings();
-    await snapshotMcpDescriptionCompressionStats();
+    const settings = await (await getCompressionDb()).getCompressionSettings();
+    await (await getDescriptionCompressor()).snapshotMcpDescriptionCompressionStats();
     const analyticsSummary = getCompressionAnalyticsSummary();
-    const mcpDescriptionStats = getMcpDescriptionCompressionStats();
+    const mcpDescriptionStats = (
+      await getDescriptionCompressor()
+    ).getMcpDescriptionCompressionStats();
     const cacheStats = getCacheStatsSummary();
 
     const result = {
@@ -200,7 +204,7 @@ export async function handleCompressionConfigure(
       updates.mcpDescriptionCompressionEnabled = args.mcpDescriptionCompressionEnabled;
     }
 
-    const settings = await updateCompressionSettings(updates);
+    const settings = await (await getCompressionDb()).updateCompressionSettings(updates);
 
     const result = {
       success: true,
@@ -249,23 +253,14 @@ import {
   ccrDeleteInput,
   ccrStatsInput,
 } from "../schemas/tools.ts";
-import {
-  MAX_CCR_MCP_FULL_BYTES,
-  buildCcrReference,
-  deleteCcrBlock,
-  getCcrStoreStats,
-  handleCcrRetrieve,
-  inspectCcrBlock,
-  isCcrStoreRejection,
-  listCcrBlocks,
-  tryStoreBlock,
-} from "../../services/compression/engines/ccr/index.ts";
-import {
-  listRtkCommandSamples,
-  discoverRepeatedNoise,
-  suggestFilter,
-  commandToId,
-} from "../../services/compression/engines/rtk/index.ts";
+// Lazy-loaded CCR engine.
+async function getCcrEngine() {
+  return await import("../../services/compression/engines/ccr/index.ts");
+}
+// Lazy-loaded RTK engine.
+async function getRtkEngine() {
+  return await import("../../services/compression/engines/rtk/index.ts");
+}
 import { resolveCallerScopeContext } from "../scopeEnforcement.ts";
 import { resolveMcpCallerApiKeyId } from "../mcpCallerIdentity.ts";
 
@@ -293,13 +288,13 @@ export async function handleCcrStoreTool(
 ) {
   const start = Date.now();
   const principal = await resolveCcrPrincipal(extra, ["write:compression"]);
-  const result = tryStoreBlock(args.content, principal, {
+  const result = (await getCcrEngine()).tryStoreBlock(args.content, principal, {
     contentType: args.contentType,
     source: "mcp",
     ttlSeconds: args.ttlSeconds,
   });
   const auditInput = buildCcrStoreAuditInput(args);
-  if (isCcrStoreRejection(result)) {
+  if ((await getCcrEngine()).isCcrStoreRejection(result)) {
     const output = { stored: false as const, reason: result.reason };
     await logToolCall(
       "omniroute_ccr_store",
@@ -313,7 +308,7 @@ export async function handleCcrStoreTool(
   }
   const output = {
     stored: true as const,
-    reference: buildCcrReference(result.hash, result.metadata.chars),
+    reference: (await getCcrEngine()).buildCcrReference(result.hash, result.metadata.chars),
     metadata: result.metadata,
   };
   await logToolCall("omniroute_ccr_store", auditInput, output, Date.now() - start, true);
@@ -326,7 +321,7 @@ export async function handleCcrRetrieveTool(
 ) {
   const start = Date.now();
   const principal = await resolveCcrPrincipal(extra, ["read:compression"]);
-  const metadata = inspectCcrBlock(args.hash, principal);
+  const metadata = (await getCcrEngine()).inspectCcrBlock(args.hash, principal);
   if (!metadata) {
     const output = { found: false as const, error: "CCR block not found or expired" };
     await logToolCall(
@@ -339,7 +334,10 @@ export async function handleCcrRetrieveTool(
     );
     return output;
   }
-  if ((!args.mode || args.mode === "full") && metadata.bytes > MAX_CCR_MCP_FULL_BYTES) {
+  if (
+    (!args.mode || args.mode === "full") &&
+    metadata.bytes > (await getCcrEngine()).MAX_CCR_MCP_FULL_BYTES
+  ) {
     const output = {
       found: true as const,
       tooLargeForFull: true as const,
@@ -349,8 +347,9 @@ export async function handleCcrRetrieveTool(
     await logToolCall("omniroute_ccr_retrieve", args, output, Date.now() - start, true);
     return output;
   }
-  const queried = handleCcrRetrieve(args, principal);
-  const refreshedMetadata = inspectCcrBlock(args.hash, principal) ?? metadata;
+  const queried = (await getCcrEngine()).handleCcrRetrieve(args, principal);
+  const refreshedMetadata =
+    (await getCcrEngine()).inspectCcrBlock(args.hash, principal) ?? metadata;
   const output =
     "content" in queried
       ? { found: true as const, metadata: refreshedMetadata, content: queried.content }
@@ -377,9 +376,13 @@ export async function handleCcrInspectTool(
 ) {
   const start = Date.now();
   const principal = await resolveCcrPrincipal(extra, ["read:compression"]);
-  const metadata = inspectCcrBlock(args.hash, principal);
+  const metadata = (await getCcrEngine()).inspectCcrBlock(args.hash, principal);
   const output = metadata
-    ? { found: true as const, reference: buildCcrReference(args.hash, metadata.chars), metadata }
+    ? {
+        found: true as const,
+        reference: (await getCcrEngine()).buildCcrReference(args.hash, metadata.chars),
+        metadata,
+      }
     : { found: false as const };
   await logToolCall("omniroute_ccr_inspect", args, output, Date.now() - start, Boolean(metadata));
   return output;
@@ -391,11 +394,12 @@ export async function handleCcrListTool(
 ) {
   const start = Date.now();
   const principal = await resolveCcrPrincipal(extra, ["read:compression"]);
-  const result = listCcrBlocks(principal, args);
+  const ccr = await getCcrEngine();
+  const result = ccr.listCcrBlocks(principal, args);
   const output = {
     ...result,
     entries: result.entries.map((metadata) => ({
-      reference: buildCcrReference(metadata.hash, metadata.chars),
+      reference: ccr.buildCcrReference(metadata.hash, metadata.chars),
       metadata,
     })),
   };
@@ -409,7 +413,7 @@ export async function handleCcrDeleteTool(
 ) {
   const start = Date.now();
   const principal = await resolveCcrPrincipal(extra, ["write:compression"]);
-  const output = { deleted: deleteCcrBlock(args.hash, principal) };
+  const output = { deleted: (await getCcrEngine()).deleteCcrBlock(args.hash, principal) };
   await logToolCall("omniroute_ccr_delete", args, output, Date.now() - start, true);
   return output;
 }
@@ -420,7 +424,7 @@ export async function handleCcrStatsTool(
 ) {
   const start = Date.now();
   const principal = await resolveCcrPrincipal(extra, ["read:compression"]);
-  const output = getCcrStoreStats(principal);
+  const output = (await getCcrEngine()).getCcrStoreStats(principal);
   await logToolCall("omniroute_ccr_stats", args, output, Date.now() - start, true);
   return output;
 }
@@ -429,7 +433,7 @@ export async function handleSetCompressionEngine(
   args: z.infer<typeof setCompressionEngineInput>
 ): Promise<{ success: boolean; settings: Record<string, unknown> }> {
   const updates: Record<string, unknown> = { enabled: true };
-  const current = await getCompressionSettings();
+  const current = await (await getCompressionDb()).getCompressionSettings();
   if (args.engine) {
     updates.defaultMode = args.engine === "caveman" ? "standard" : args.engine;
     if (args.engine === "off") {
@@ -467,7 +471,7 @@ export async function handleSetCompressionEngine(
       enabled: args.outputMode,
     };
   }
-  const settings = await updateCompressionSettings(updates);
+  const settings = await (await getCompressionDb()).updateCompressionSettings(updates);
   return { success: true, settings: settings as unknown as Record<string, unknown> };
 }
 
@@ -519,10 +523,19 @@ function resolveSampleLimit(limit?: number): number {
 
 export async function handleRtkDiscover(
   args: z.infer<typeof rtkDiscoverInput>
-): Promise<{ sampleCount: number; candidates: ReturnType<typeof discoverRepeatedNoise> }> {
+): Promise<{
+  sampleCount: number;
+  candidates: Awaited<
+    ReturnType<
+      typeof import("../../services/compression/engines/rtk/index.ts").discoverRepeatedNoise
+    >
+  >;
+}> {
   const start = Date.now();
-  const samples = listRtkCommandSamples({ limit: resolveSampleLimit(args.limit) });
-  const candidates = discoverRepeatedNoise(samples);
+  const samples = (await getRtkEngine()).listRtkCommandSamples({
+    limit: resolveSampleLimit(args.limit),
+  });
+  const candidates = (await getRtkEngine()).discoverRepeatedNoise(samples);
   const result = { sampleCount: samples.length, candidates };
   await logToolCall("omniroute_rtk_discover", args, result, Date.now() - start, true);
   return result;
@@ -530,14 +543,21 @@ export async function handleRtkDiscover(
 
 export async function handleRtkLearn(
   args: z.infer<typeof rtkLearnInput>
-): Promise<{ command: string; sampleCount: number; filter: ReturnType<typeof suggestFilter> }> {
+): Promise<{
+  command: string;
+  sampleCount: number;
+  filter: Awaited<
+    ReturnType<typeof import("../../services/compression/engines/rtk/index.ts").suggestFilter>
+  >;
+}> {
   const start = Date.now();
   const command = args.command.trim();
-  const targetId = commandToId(command);
-  const matching = listRtkCommandSamples({ limit: resolveSampleLimit(args.limit) }).filter(
-    (sample) => commandToId(sample.command) === targetId
-  );
-  const filter = suggestFilter(command, matching);
+  const rtk = await getRtkEngine();
+  const targetId = rtk.commandToId(command);
+  const matching = rtk
+    .listRtkCommandSamples({ limit: resolveSampleLimit(args.limit) })
+    .filter((sample) => rtk.commandToId(sample.command) === targetId);
+  const filter = rtk.suggestFilter(command, matching);
   const result = { command, sampleCount: matching.length, filter };
   await logToolCall("omniroute_rtk_learn", args, result, Date.now() - start, true);
   return result;
