@@ -4,9 +4,9 @@
 import React, { act } from "react";
 import { createRoot } from "react-dom/client";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import EmptyConnectionsPlaceholder from "../EmptyConnectionsPlaceholder";
-import ProviderParamFilterSection from "../ProviderParamFilterSection";
-import type { ProviderMessageTranslator } from "../../providerPageHelpers";
+import EmptyConnectionsPlaceholder from "@/app/(dashboard)/dashboard/providers/[id]/components/EmptyConnectionsPlaceholder";
+import ProviderParamFilterSection from "@/app/(dashboard)/dashboard/providers/[id]/components/ProviderParamFilterSection";
+import type { ProviderMessageTranslator } from "@/app/(dashboard)/dashboard/providers/[id]/providerPageHelpers";
 
 const stableTranslate = (key: string) => key;
 vi.mock("next-intl", () => ({
