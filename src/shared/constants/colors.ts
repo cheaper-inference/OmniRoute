@@ -1,149 +1,177 @@
 /**
- * Shared UI constants — Single source of truth for provider, protocol, and status colors.
+ * Shared UI constants — single source of truth for the provider, protocol, proxy-type, level and
+ * status badges drawn by the loggers (RequestLoggerV2, RequestLoggerDetail, ProxyLogger,
+ * ProxyLogDetail) and the conversations list.
  *
- * Previously duplicated in:
- * - RequestLoggerV2.js (PROTOCOL_COLORS, PROVIDER_COLORS, getStatusStyle)
- * - ProxyLogger.js (PROVIDER_COLORS, TYPE_COLORS, LEVEL_COLORS, getStatusStyle)
- * - UsageAnalytics.js (MODEL_COLORS, getModelColor)
+ * Every colour is a kit token, never a literal: a badge is a kit tone, resolved per theme and
+ * palette (Classic / Editions, light / dark) by the CSS variables of `packages/ui-kit/src`.
+ *
+ * - `chart-N` → `--ci-chart-N-ink` text on the opaque `--ci-chart-N-subtle` tint, with the
+ *   `--ci-chart-N` hue as the optional border (the kit pairs them for chips and rows; the ink is
+ *   AA on the tint and on every content surface).
+ * - `success` / `warning` / `danger` / `info` → the kit status ink on its `-bg` tint.
+ * - `neutral` → body text on the muted surface.
+ *
+ * `tests/unit/log-badge-palette-contrast.test.ts` resolves every entry against the kit token
+ * files and fails below 4.5:1, so a hex value or a white-on-brand badge cannot come back.
  */
 
+export type BadgeTone =
+  | "chart-1"
+  | "chart-2"
+  | "chart-3"
+  | "chart-4"
+  | "chart-5"
+  | "chart-6"
+  | "chart-7"
+  | "chart-8"
+  | "success"
+  | "warning"
+  | "danger"
+  | "info"
+  | "neutral";
+
+export interface BadgeColors {
+  tone: BadgeTone;
+  /** Badge background (opaque tint). */
+  bg: string;
+  /** Badge text; also AA on the page background, so an inactive chip can drop the tint. */
+  text: string;
+  /** Border / ring for the active state of a chip. */
+  border: string;
+}
+
+export interface LabeledBadgeColors extends BadgeColors {
+  label: string;
+}
+
+/** CSS-variable colours of a kit tone. */
+export function badgeTone(tone: BadgeTone): BadgeColors {
+  if (tone.startsWith("chart-")) {
+    return {
+      tone,
+      bg: `var(--ci-${tone}-subtle)`,
+      text: `var(--ci-${tone}-ink)`,
+      border: `var(--ci-${tone})`,
+    };
+  }
+  if (tone === "neutral") {
+    return {
+      tone,
+      bg: "var(--ci-color-surface-muted)",
+      text: "var(--ci-color-text)",
+      border: "var(--ci-color-border-strong)",
+    };
+  }
+  return {
+    tone,
+    bg: `var(--ci-color-${tone}-bg)`,
+    text: `var(--ci-color-${tone})`,
+    border: `var(--ci-color-${tone})`,
+  };
+}
+
+function labeled(tone: BadgeTone, label: string): LabeledBadgeColors {
+  return { ...badgeTone(tone), label };
+}
+
+/** Neutral badge for a key with no entry (an unknown provider, proxy type…). */
+export function neutralBadge(label: string): LabeledBadgeColors {
+  return labeled("neutral", label);
+}
+
 // ═══════════════════════════════════════════
-// Provider Colors (used across all logger components)
+// Provider badges (used across all logger components)
 // ═══════════════════════════════════════════
 
-export const PROVIDER_COLORS = {
-  github: { bg: "#6e40c9", text: "#fff", label: "GitHub" },
-  kiro: { bg: "#FF9900", text: "#000", label: "Kiro" },
-  antigravity: { bg: "#4285F4", text: "#fff", label: "AG" },
-  claude: { bg: "#D97757", text: "#fff", label: "Claude" },
-  codex: { bg: "#10A37F", text: "#fff", label: "Codex" },
-  gemini: { bg: "#34A853", text: "#fff", label: "Gemini" },
-  qwen: { bg: "#6366F1", text: "#fff", label: "Qwen" },
-  qoder: { bg: "#EC4899", text: "#fff", label: "Qoder" },
-  fireworks: { bg: "#F97316", text: "#fff", label: "Fireworks" },
-  kimi: { bg: "#06B6D4", text: "#fff", label: "Kimi" },
-  // Dark foreground: #31f889 is a bright green, white text on it fails contrast.
-  cheaperinference: { bg: "#31f889", text: "#04170d", label: "Cheaper Inference" },
+export const PROVIDER_COLORS: Record<string, LabeledBadgeColors> = {
+  github: labeled("chart-3", "GitHub"),
+  kiro: labeled("chart-8", "Kiro"),
+  antigravity: labeled("chart-2", "AG"),
+  claude: labeled("chart-6", "Claude"),
+  codex: labeled("chart-4", "Codex"),
+  gemini: labeled("chart-7", "Gemini"),
+  qwen: labeled("chart-3", "Qwen"),
+  qoder: labeled("chart-5", "Qoder"),
+  fireworks: labeled("chart-6", "Fireworks"),
+  kimi: labeled("chart-7", "Kimi"),
+  cheaperinference: labeled("chart-1", "Cheaper Inference"),
 };
 
 // ═══════════════════════════════════════════
-// Protocol Colors (RequestLoggerV2)
+// Protocol badges (RequestLoggerV2)
 // ═══════════════════════════════════════════
 
-export const PROTOCOL_COLORS = {
-  openai: { bg: "#1A1A2E", text: "#fff", label: "OpenAI-Chat" },
-  "openai-responses": { bg: "#1A1A2E", text: "#fff", label: "OpenAI-Responses" },
-  claude: { bg: "#D97757", text: "#fff", label: "Claude" },
-  gemini: { bg: "#4285F4", text: "#fff", label: "Gemini" },
-  warmup: { bg: "#F59E0B", text: "#000", label: "Warmup" },
-  bypass: { bg: "#6B7280", text: "#fff", label: "Bypass" },
+export const PROTOCOL_COLORS: Record<string, LabeledBadgeColors> = {
+  openai: labeled("neutral", "OpenAI-Chat"),
+  "openai-responses": labeled("neutral", "OpenAI-Responses"),
+  claude: labeled("chart-6", "Claude"),
+  gemini: labeled("chart-2", "Gemini"),
+  warmup: labeled("warning", "Warmup"),
+  bypass: labeled("neutral", "Bypass"),
 };
 
-const PROTOCOL_KEY_ALIASES = {
+const PROTOCOL_KEY_ALIASES: Record<string, string> = {
   "openai-chat": "openai",
   "openai-response": "openai-responses",
 };
 
-function normalizeProtocolKey(protocol) {
+function normalizeProtocolKey(protocol: string): string {
   return PROTOCOL_KEY_ALIASES[protocol] || protocol;
 }
 
 // ═══════════════════════════════════════════
-// Proxy Type Colors (ProxyLogger)
+// Proxy type badges (ProxyLogger)
 // ═══════════════════════════════════════════
 
-export const TYPE_COLORS = {
-  http: { bg: "#3B82F6", text: "#fff", label: "HTTP" },
-  https: { bg: "#10B981", text: "#fff", label: "HTTPS" },
-  socks5: { bg: "#8B5CF6", text: "#fff", label: "SOCKS5" },
+export const TYPE_COLORS: Record<string, LabeledBadgeColors> = {
+  http: labeled("chart-2", "HTTP"),
+  https: labeled("chart-4", "HTTPS"),
+  socks5: labeled("chart-3", "SOCKS5"),
 };
 
 // ═══════════════════════════════════════════
-// Level Colors (ProxyLogger)
+// Level badges (ProxyLogger)
 // ═══════════════════════════════════════════
 
-export const LEVEL_COLORS = {
-  key: { bg: "#F59E0B", text: "#000", label: "Key" },
-  combo: { bg: "#8B5CF6", text: "#fff", label: "Combo" },
-  provider: { bg: "#3B82F6", text: "#fff", label: "Provider" },
-  global: { bg: "#6B7280", text: "#fff", label: "Global" },
-  direct: { bg: "#374151", text: "#9CA3AF", label: "Direct" },
+export const LEVEL_COLORS: Record<string, LabeledBadgeColors> = {
+  key: labeled("warning", "Key"),
+  combo: labeled("chart-3", "Combo"),
+  provider: labeled("chart-2", "Provider"),
+  global: labeled("neutral", "Global"),
+  direct: labeled("neutral", "Direct"),
 };
 
 // ═══════════════════════════════════════════
-// Model Colors (charts/analytics)
+// Status helpers
 // ═══════════════════════════════════════════
 
-export const MODEL_COLORS = [
-  "#D97757",
-  "#60A5FA",
-  "#34D399",
-  "#A78BFA",
-  "#F472B6",
-  "#FBBF24",
-  "#38BDF8",
-  "#FB923C",
-  "#818CF8",
-  "#2DD4BF",
-  "#E879F9",
-  "#F87171",
-  "#4ADE80",
-  "#C084FC",
-  "#FB7185",
-];
-
-/**
- * Get a model color by index (cycles through palette).
- * @param {number} index
- * @returns {string} Hex color
- */
-export function getModelColor(index) {
-  return MODEL_COLORS[index % MODEL_COLORS.length];
+/** Badge colours for an HTTP status code (2xx success, 4xx warning, 5xx danger, 0 = pending). */
+export function getHttpStatusStyle(status: number): BadgeColors {
+  if (status >= 200 && status < 300) return badgeTone("success");
+  if (status >= 400 && status < 500) return badgeTone("warning");
+  if (status >= 500) return badgeTone("danger");
+  if (status === 0) return badgeTone("info");
+  return badgeTone("neutral");
 }
 
-// ═══════════════════════════════════════════
-// Status Styling Helpers
-// ═══════════════════════════════════════════
-
-/**
- * Get badge style for HTTP status codes (RequestLoggerV2).
- * @param {number} status - HTTP status code
- * @returns {{ bg: string, text: string }}
- */
-export function getHttpStatusStyle(status) {
-  if (status >= 200 && status < 300) return { bg: "#059669", text: "#fff" };
-  if (status >= 400 && status < 500) return { bg: "#D97706", text: "#fff" };
-  if (status >= 500) return { bg: "#DC2626", text: "#fff" };
-  if (status === 0) return { bg: "#6366F1", text: "#fff" }; // pending
-  return { bg: "#6B7280", text: "#fff" };
+/** Badge colours for a proxy status string ("success", "error", "timeout"). */
+export function getProxyStatusStyle(status: string): BadgeColors {
+  if (status === "success") return badgeTone("success");
+  if (status === "error") return badgeTone("danger");
+  if (status === "timeout") return badgeTone("warning");
+  return badgeTone("neutral");
 }
 
 /**
- * Get badge style for string-based status (ProxyLogger).
- * @param {string} status - Status string ("success", "error", "timeout")
- * @returns {{ bg: string, text: string }}
+ * Protocol badge for a request, falling back to the provider key and then to a neutral badge
+ * labelled with the upper-cased key.
  */
-export function getProxyStatusStyle(status) {
-  if (status === "success") return { bg: "#059669", text: "#fff" };
-  if (status === "error") return { bg: "#DC2626", text: "#fff" };
-  if (status === "timeout") return { bg: "#D97706", text: "#fff" };
-  return { bg: "#6B7280", text: "#fff" };
-}
-
-/**
- * Get default fallback for a protocol color lookup.
- * @param {string} protocol - Protocol key
- * @param {string} fallbackProvider - Provider key to use as a secondary protocol key
- * @returns {{ bg: string, text: string, label: string }}
- */
-export function getProtocolColor(protocol, fallbackProvider) {
+export function getProtocolColor(protocol: string, fallbackProvider?: string): LabeledBadgeColors {
   const normalized = normalizeProtocolKey(protocol);
   return (
     PROTOCOL_COLORS[normalized] ||
-    PROTOCOL_COLORS[fallbackProvider] || {
-      bg: "#6B7280",
-      text: "#fff",
-      label: (protocol || fallbackProvider || "-").toUpperCase(),
-    }
+    (fallbackProvider ? PROTOCOL_COLORS[fallbackProvider] : undefined) ||
+    neutralBadge((protocol || fallbackProvider || "-").toUpperCase())
   );
 }

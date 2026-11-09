@@ -39,34 +39,34 @@ Studio sa tri kartice koji objedinjuje veb-pretragu, prikupljanje sadržaja sa v
 
 ### Kartica za pretragu
 
-Razvija postojeće `SearchForm` + `ResultsPanel` + `RerankPanel` u karticu:
+Razvija postojeće komponente `SearchForm` + `ResultsPanel` + `RerankPanel` u karticu:
 
 - Upit → rezultati (naslov, URL, isečak, ocena relevantnosti).
-- Metapodaci pružaoca u oknu za konfiguraciju (trošak, kvota, status).
-- Odeljak za rerangiranje: izaberite model za rerangiranje, promenite redosled rezultata, prikažite `positionDelta`.
+- Metapodaci pružaoca u oknu za konfiguraciju (cena, kvota, status).
+- Odeljak za ponovno rangiranje: izbor modela za ponovno rangiranje, promena redosleda rezultata, prikaz `positionDelta`.
 - Prazno stanje sa pozivom na akciju kada nijedan pružalac pretrage nije konfigurisan.
-- Istorija pretrage preko `SearchHistory.tsx`.
+- Istorija pretrage putem `SearchHistory.tsx`.
 - Poziva `POST /v1/search` (postojeća krajnja tačka, bez izmena).
 
-### Kartica za prikupljanje sadržaja
+### Kartica za izdvajanje sadržaja
 
-Nova kartica za izdvajanje sadržaja sa URL-a preko `POST /v1/web/fetch` (napravljeno u planu 05):
+Nova kartica za izdvajanje sadržaja sa URL-a putem `POST /v1/web/fetch` (kreirano u planu 05):
 
-- Unos: URL + prekidač za celu stranicu + birač formata (markdown / tekst / HTML).
-- Slanje → dohvatanje → prikazivanje `ScrapeResult.tsx`.
-- `ScrapeResult` prikazuje pregled markdown sadržaja + prekidač za neobrađeni prikaz.
-- Ograničenje: ako je telo odgovora veće od **256 KB**, korisnički interfejs prikazuje `(skraćeno, prikaži neobrađeno)` i otvara neobrađeni sadržaj u Monaco modalnom prozoru (D21).
-- Panel sa metapodacima: pružalac (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search), kašnjenje, trošak, veličina odgovora, broj veza.
+- Unos: URL + prekidač za celu stranicu + izbor formata (markdown / tekst / HTML).
+- Slanje → preuzimanje → prikaz komponente `ScrapeResult.tsx`.
+- `ScrapeResult` prikazuje pregled markdown sadržaja + prekidač za sirovi prikaz.
+- Ograničenje: ako je telo odgovora veće od **256 KB**, korisnički interfejs prikazuje `(skraćeno, prikaži sirovi sadržaj)` i otvara sirovi sadržaj u Monaco modalnom prozoru (D21).
+- Panel sa metapodacima: pružalac (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), kašnjenje, cena, veličina odgovora, broj veza.
 - Koristi `useScrapeFetch.ts` hook.
 
 ### Kartica za poređenje
 
-Pokreće isti upit/URL preko najviše **4 pružaoca paralelno** (D22):
+Pokreće isti upit/URL paralelno kod najviše **4 pružaoca** (D22):
 
 - Uporedne kolone za svakog pružaoca.
-- Metrike: kašnjenje, trošak, broj rezultata, veličina odgovora.
+- Metrike: kašnjenje, cena, broj rezultata, veličina odgovora.
 - Izračunavanje preklapanja URL-ova za pretragu (broj zajedničkih URL-ova u odnosu na početni rezultat).
-- Poziva `POST /v1/search` (pretraga) ili `POST /v1/web/fetch` (prikupljanje) za svakog pružaoca.
+- Poziva `POST /v1/search` (pretraga) ili `POST /v1/web/fetch` (izdvajanje sadržaja) za svakog pružaoca.
 
 ---
 
@@ -102,9 +102,9 @@ Pokreće isti upit/URL preko najviše **4 pružaoca paralelno** (D22):
 ## Каталог провајдера
 
 `ProviderCatalog.tsx` приказује комплетну листу провајдера из `GET /api/search/providers`
-(проширену у F4 тако да обухвата провајдере за преузимање):
+(проширену у F4 тако да обухвата и провајдере за преузимање):
 
-| `kind` | `"search"` (20 провајдера) или `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search) |
+| `kind` | `"search"` (20 провајдера) или `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
 
 Статус се **одређује у тренутку захтева** провером да ли акредитиви постоје и да ли су
 сви кључеви тренутно у периоду мировања.
@@ -119,18 +119,18 @@ curl / Python / TypeScript исечке за позиве ка `/v1/search` и `
 
 ---
 
-## Измене позадинског система
+## Измене у позадинском систему
 
-За ову функционалност била је потребна само једна измена позадинског система:
+За ову функционалност била је потребна само једна измена у позадинском систему:
 
-### Проширени `GET /api/search/providers`
+### Проширен `GET /api/search/providers`
 
 `src/app/api/search/providers/route.ts` је проширен тако да:
 
-- Укључује свих 6 провајдера за преузимање (`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`) у низ.
+- У низ укључује све добављаче за преузимање (`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`, `parallel-search`).
 - Додаје `kind: "search" | "fetch"` свакој ставци.
 - Додаје `status: "configured" | "missing" | "rate_limited"` изведен из тренутног стања акредитива.
-- Одржава компатибилност уназад — постојећа поља (`id`, `name`, итд.) остају непромењена.
+- Одржава компатибилност са претходним верзијама — постојећа поља (`id`, `name`, итд.) остају непромењена.
 
 ---
 

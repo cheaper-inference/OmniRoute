@@ -33,37 +33,43 @@ Fadhbanna coitianta agus réitigh do OmniRoute.
 
 ---
 
-## Mionfhabhtcheartú
+## Fabhtcheartú Mionsonraithe
 
 ---
 
-### Teorannú Ráta ar Sholáthraithe Saor in Aisce (429 / 400 / 401)
+### Teorannú Rátaí ar Sholáthraithe Saor in Aisce (429 / 400 / 401)
 
-**Siomptóm**: Agus `model: "auto"` á úsáid agat le soláthraithe saor in aisce/gan fíordheimhniú (opencode, auggie, srl.), faigheann tú `HTTP 429`, `400`, nó `401` ó am go chéile in ionad freagraí. Éiríonn leis na hiarratais nuair a bhaintear triail eile as an leid chéanna cúpla nóiméad ina dhiaidh sin, ach teipeann ar uathoibriú (tascanna cron, gníomhairí, scripteanna) ar an gcéad teip.
+**Siomtóm**: Nuair a úsáidtear `model: "auto"` le soláthraithe saor in aisce/gan fíordheimhniú (auggie, srl.), faightear `HTTP 429`, `400`, nó `401` go hamanna in áit freagraí. Éiríonn leis na hiarratais nuair a dhéantar an leid chéanna a athdhéanamh cúpla nóiméad ina dhiaidh sin, ach briseann uathoibriú (jabanna cron, gníomhairí, scripteanna) ar an gcéad teip.
 
-**Bunchúis**: Tagann trí mhodh teipe neamhspleácha le chéile:
+**Bunchúis**: Cruinníonn trí mhodh teipe neamhspleácha le chéile:
 
-1. **Teorainn ráta an tsoláthraí (`429`)**: Is féidir le sraitheanna saor in aisce cuóta in aghaidh na tréimhse a chur i bhfeidhm. Ídíonn ráig glaonna comhthreomhara é, mar sin diúltaítear don chéad iarratas eile go dtí go n-athshocraítear an tréimhse.
-2. **Samhail bhriste sa chur ar aghaidh (`400`/`401`)**: Is féidir samhlacha curtha ar aghaidh ó `opencode` a bheith i linnte `auto/*`, samhlacha atá cláraithe sa chatalóg ach nach bhfuil dintiúir bheo acu (m.sh. `oc/north-mini-code-free` → `401`). Baineann an t-uathródaire triail as ceann amháin, teipeann air, agus leathnaítear an earráid sula gcuirtear an cúltaca i bhfeidhm.
-3. **Aimpliú comhthráthachta (`429` faoi ualach)**: Nuair a bhuaileann roinnt seisiún gníomhaire/cron `auto` ag an am céanna, sáraíonn ráta comhiomlán na n-iarratas an méid is féidir le soláthraithe saor in aisce a sheasamh, mar sin marcáiltear glaonna dlisteanacha mar mhí-úsáid.
+1. **Teorainn ráta an tsoláthraí (`429`)**: Féadfaidh sraitheanna saor in aisce cuóta in aghaidh na fuinneoige a fhorfheidhmiú. Ídíonn pléasctha d'iarratais chomhthreomhara é, agus diúltaítear don chéad iarratas eile go dtí go n-athshocraítear an fhuinneog.
+2. **Múnla briste i passthrough (`400`/`401`)**: Féadfaidh linnte `auto/*` samhlacha passthrough a áireamh atá cláraithe sa chatalóg ach nach bhfuil dintiúir bheo acu (→ `401`). Baineann an ródaire uathoibríoch triail as ceann acu, teipeann air, agus scaiptear an earráid sula dtosaíonn an cúltaca.
+3. **Aimpliú comhthreomhaireachta (`429` faoi ualach)**: Nuair a bhuaileann seisiúin iolracha gníomhairí/cron `auto` ag an am céanna, sáraíonn an ráta comhiomlán iarratas an méid a fhulaingíonn soláthraithe saor in aisce, agus marcáiltear glaonna dlisteanacha mar mhí-úsáideoireacht.
 
-**Réiteach fíoraithe (tuairiscithe ag an bpobal, 2026-08-10)**: coigeartaigh trí athróg timpeallachta ionas go maolóidh rothlú, comhthráthacht agus cúltaca luaineacht na sraithe saor in aisce in ionad teip mar gheall uirthi:
+**Deisiúchán fíoraithe (tuairiscithe ag an bpobal, 2026-08-10)**: tiúin trí athróg timpeallachta ionas go n-ionsúnn rothlú, comhthreomhaireacht agus cúltaca an luaineacht sa tsraith saor in aisce in áit teip a dhéanamh uirthi:
 
 ```bash
-export OMNIROUTE_ROTATE_ON_400=true           # léim chuig samhail/soláthraí eile ar 400/401 (seachnaítear samhlacha briste curtha ar aghaidh)
-export OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT=4   # uasteorainn iontrála shainráite d'iarratais throma (gan socrú de réir réamhshocraithe: gan teorainn ar líon na n-iarratas, féach an nóta thíos)
-export OMNIROUTE_CHAT_ADMISSION_QUEUE_MS=20000 # ardaigh an tréimhse feithimh theoranta thar réamhshocrú RATE_LIMIT_MAX_WAIT_MS do sheirbhísí réamhtheachtacha malla
+export OMNIROUTE_ROTATE_ON_400=true           # léim chuig samhail/soláthraí eile ar 400/401 (scipeáil samhlacha passthrough briste)
+export OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT=4   # uasteorainn iontrála shoiléir le haghaidh iarratas tromshaothair (gan socrú de réir réamhshocraithe: gan teorainn ar líon na n-iarratas, féach an nóta thíos)
+export OMNIROUTE_CHAT_ADMISSION_QUEUE_MS=20000 # méadaigh an fanacht teoranta thar réamhshocrú RATE_LIMIT_MAX_WAIT_MS le haghaidh réamhsruthanna mall
 ```
 
-Socraigh iad seo i dtimpeallacht phróisis OmniRoute (an deamhan, m.sh. tríd an plist LaunchAgent nó `systemctl edit`), ansin atosaigh OmniRoute. Is í an bhratach rothlaithe an luamhán aonair is mó tionchair: athraíonn sí teip chrua ina hathiarracht thrédhearcach i gcoinne soláthraí sláintiúil sa linn.
+Socraigh iad seo i dtimpeallacht phróiseas OmniRoute (an deamhan, mar shampla trí plist LaunchAgent nó `systemctl edit`), ansin atosaigh OmniRoute. Is í an bhratach rothlaithe an luamhán aonair is mó tionchair: athraíonn sí teip chrua ina hathiarracht thrédhearcach i gcoinne soláthraí sláintiúil sa linn.
 
-**Nóta**: Cuireann `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` teorainn leis an líon iarratas trom — iarratais le comhthéacs fada — a ritheann ag an am céanna; geata iontrála is ea an teorainn, ní teorantóir ráta soláthraí. **Nuashonrú #503-fanout:** ní shocraítear an athróg seo de réir réamhshocraithe a thuilleadh (ní bhíonn feidhm aici anois ach amháin nuair a chumraítear go sainráite í, mar atá thuas) — ina áit sin, déantar iontráil iarratas trom a rialú le buiséad beart a dhíorthaítear go huathoibríoch (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`) agus a scálann é féin de réir fhíor-uasteorainn chuimhne an óstaigh, mar sin ba cheart go mbeadh i bhfad níos lú diúltuithe `503 chat_admission_busy` le feiceáil in imscaradh úr gan an athróg seo a shocrú ar chor ar bith; má shocraítear go sainráite anseo í, oibríonn sí fós go díreach mar atá doiciméadaithe. Cuirtear sáruithe sainráite ar an mbuiséad beart faoi cheangal idir 8 MiB–2 GiB. Níl `413 body_exceeds_budget` sealadach: méadaigh an buiséad beart sin, laghdaigh `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES`, nó méadaigh uasteorainn chuimhne an phróisis. Is teannas sealadach é díbirt `inflight_bytes_budget` agus is féidir triail eile a bhaint aisti fós. Rialaítear an teorannú ráta in aghaidh an tsoláthraí (`open-sse/services/rateLimitManager.ts`) ar leithligh le `RATE_LIMIT_MAX_WAIT_MS`, `RATE_LIMIT_MAX_QUEUE_DEPTH`, agus `RATE_LIMIT_AUTO_ENABLE` — féach `.env.example`.
+**Nóta**: Cuireann `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` teorainn le líon na n-iarratas tromshaothair — iarratais le comhthéacs fada — a ritheann ag an am céanna; is geata iontrála an teorainn, ní teorantóir ráta soláthraí. **Nuashonrú #503-fanout:** ní shocraítear an athróg seo de réir réamhshocraithe a thuilleadh (ceanglaítear í anois ach nuair a chumraítear go sainráite í, mar atá thuas) — ina ionad sin, rialaítear iontráil tromshaothair le buiséad beart a dhíorthaítear go huathoibríoch (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`) a scálaíonn é féin ó uasteorainn chuimhne iarbhír an óstaigh, mar sin ba cheart go bhfeicfeadh imscaradh úr i bhfad níos lú diúltuithe `503 chat_admission_busy` gan an athróg seo a shocrú ar chor ar bith; oibríonn í a shocrú go sainráite anseo go díreach mar atá doiciméadaithe. Cuirtear sáruithe buiséid beart sainráite faoi theorainn 8 MiB–2 GiB. Níl `413 body_exceeds_budget` sealadach: méadaigh an buiséad beart sin, laghdaigh `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES` nó teorainn choirp na hiarrata sábháilte, nó méadaigh uasteorainn chuimhne an phróisis. Is coinbhleacht shealadach í `inflight_bytes_budget` a scaoileadh agus is féidir iarracht eile a dhéanamh uirthi. Rialaítear teorannú ráta in aghaidh an tsoláthraí (`open-sse/services/rateLimitManager.ts`) ar leithligh le `RATE_LIMIT_MAX_WAIT_MS`, `RATE_LIMIT_MAX_QUEUE_DEPTH`, agus `RATE_LIMIT_AUTO_ENABLE` — féach `.env.example`.
 
-**Conas a dheimhniú gur oibrigh sé**: rith d'oibreán/cron faoi dhó go tapa i ndiaidh a chéile agus deimhnigh go n-éiríonn leis an dá rith. Roimh an gceartúchán, is gnách go gcaitheann an dara rith `429`/`401`. Tar éis an cheartúcháin, baintear atriail thrédhearcach as teipeanna (más ann dóibh) agus cuirtear an glao i gcrích. Is féidir leat `curl /monitoring/health` a rith freisin agus féachaint ar an réimse `rateLimitedUntil` ar naisc na soláthraithe agus ar `circuitBreakers.providerBreakers[].state` do na soláthraithe lena mbaineann — bíonn an staid ar cheann de `CLOSED`, `DEGRADED`, `OPEN`, nó `HALF_OPEN` (féach `src/shared/utils/circuitBreaker.ts`), agus athróidh soláthraí a leanann de bheith ag teip ó `CLOSED → DEGRADED → OPEN` sula ligfidh an fhuinneog athshocraithe do thaiscéalaí dul tríd (`HALF_OPEN`).
+**Nóta uasghrádaithe: baineann teorainn shábháilte do chorp na hiarrata anois leis an gcomhrá freisin.** Baineann teorainn a sábháladh roimhe seo faoi Settings > Advanced > Request Body Limit (`maxBodySizeMb`) anois le `/v1/chat/completions` agus `/v1/responses` freisin. Roimh an athrú seo ghlac an dá bhealach sin le suas le 50 MB is cuma cén luach a sábháladh, mar sin tosaíonn suiteáil le teorainn shábháilte níos ísle ag diúltú do choirp chomhrá atá níos mó ná sin. Coinníonn suiteáil nár shábháil teorainn riamh an réamhshocrú 50 MB.
 
-**Má fheiceann tú 429 fós**: tá _cuóta_ an chuntais ghníomhaigh don soláthraí sin ídithe i ndáiríre (ní teorainn ráta amháin atá i gceist). Cuir dara cuntas leis don soláthraí céanna i ndeais OmniRoute → Soláthraithe → Cuntais, nó cuir soláthraí saor in aisce eile san áireamh (m.sh. `routeway`, `auggie`). Ní chuidíonn rothlú ach le ráta sealadach/400/401; má tá an cuóta ídithe go hiomlán, tá dintiúr eile nó soláthraí eile ag teastáil.
+Is éard atá sa diúltú ná HTTP `413` agus `error.code` socraithe go `PAYLOAD_TOO_LARGE`, agus `error.type` socraithe go `payload_too_large`. Ainmníonn an teachtaireacht an teorainn atá i bhfeidhm: `Request body too large. Maximum allowed: 10 MB` nuair atá an `Content-Length` dearbhaithe níos mó ná í, nó `Request body too large for chat completions (max 10 MB).` nuair atá na bearta a léadh iarbhír níos mó ná í. Ní hionann sin agus `413 body_exceeds_budget` thuas, a thagann ón mbuiséad cuimhne agus nach n-athraítear leis an socrú seo.
 
-**Má fheiceann tú 403 ar shamhlacha amhairc (`auto/vision`, `bazaarlink/*`)**: níl plean íoctha lena n-áirítear cumais amhairc ag an gcuntas nasctha, nó níl dóthain ceadanna ag an eochair API. Deimhnigh i ndeais an tsoláthraí go bhfuil cumais amhairc/ilmhódacha san áireamh i scóip na heochrach, nó nasc cuntas ar shraith íoctha agus coinnigh mar sprioc amhairc é.
+Chun an teorainn a ardú, sábháil luach níos airde ag `/dashboard/settings/advanced`, nó seol `PATCH /api/settings` le `{"maxBodySizeMb": 50}`. Glactar le luachanna idir 1 agus 500 MB, cuirtear i bhfeidhm iad gan atosú, agus athbhunaíonn 50 an teorainn chomhrá roimhe seo. Is féidir le dhá theorainn eile corp níos mó a stopadh fós: cuireann `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES`, nuair atá sé socraithe, teorainn ar theorainn shábháilte freisin, agus ní mór an nóta tráchta Kubernetes ingress `proxy-body-size` (`50m` sna manifestí a sheoltar) a ardú ar leithligh le haghaidh aon ní os cionn 50 MB.
+
+**Conas a fhíorú gur oibrigh sé**: rith do ghníomhaire/jab cron faoi dhó i ndiaidh a chéile go tapa agus deimhnigh go n-éiríonn leis an dá cheann. Roimh an deisiúchán, caitheann an dara rith `429`/`401` de ghnáth. Tar éis an deisiúcháin, déantar athiarrachtaí ar theipeanna (más ann dóibh) go trédhearcach agus críochnaíonn an glao. Is féidir leat `curl /monitoring/health` a úsáid freisin agus féachaint ar an réimse `rateLimitedUntil` ar na naisc soláthraithe agus ar `circuitBreakers.providerBreakers[].state` do na soláthraithe lena mbaineann — is é ceann de `CLOSED`, `DEGRADED`, `OPEN`, nó `HALF_OPEN` an staid (féach `src/shared/utils/circuitBreaker.ts`), agus aistreoidh soláthraí a leanann de bheith ag teip `CLOSED → DEGRADED → OPEN` sula ligfidh an fhuinneog athshocraithe do thástáil dul tríd (`HALF_OPEN`).
+
+**Má fheiceann tú 429 fós**: tá an cuntas gníomhach don soláthraí sin tar éis a _chuóta_ a ídiú i ndáiríre (ní ráta amháin). Cuir an dara cuntas don soláthraí céanna leis i ndeais OmniRoute → Providers → Accounts, nó measc soláthraí saor in aisce eile isteach (m.sh. `routeway`, `auggie`). Ní chuidíonn rothlú ach le ráta sealadach/400/401; teastaíonn dintiúr eile nó soláthraí eile ó ídiú crua cuóta.
+
+**Má fheiceann tú 403 ar shamhlacha físe (`auto/vision`, `bazaarlink/*`)**: níl plean íoctha ag an gcuntas nasctha a chuimsíonn fís, nó níl dóthain ceadanna ag an eochair API. Deimhnigh i ndeais an tsoláthraí go gcuimsíonn raon feidhme na heochrach fís/ilmhodúlach, nó ceangail cuntas sraithe íoctha agus coinnigh é mar sprioc na físe.
 
 ---
 
@@ -90,11 +96,11 @@ Tagann na rabhaidh ó raonta spleáchas piara atá as dáta i bpacáistí tríú
 
 ---
 
-## Rabhadh faoi Bhlocáil Scripteanna npm install (suiteáil dhomhanda)
+## Rabhadh faoi `npm install-scripts` a bheith Blocáilte (suiteáil dhomhanda)
 
 <a name="npm-install-scripts-blocked-warning-global-install"></a>
 
-Agus `npm install -g omniroute` á rith, blocálann leaganacha níos nuaí de npm (v11+ agus v12+) scripteanna saolré pacáiste de réir réamhshocraithe agus taispeánann siad rabhadh faoi scripteanna suiteála:
+Nuair a ritheann tú `npm install -g omniroute`, blocálann leaganacha níos nuaí de npm (v11+ agus v12+) scripteanna saolré pacáiste de réir réamhshocraithe agus taispeánann siad rabhadh maidir le install-scripts:
 
 ```
 npm warn install-scripts 7 packages had install scripts blocked because they are not covered by allowScripts:
@@ -104,19 +110,19 @@ npm warn install-scripts 7 packages had install scripts blocked because they are
 
 ### An féidir neamhaird a dhéanamh den rabhadh seo?
 
-**Go pointe áirithe, ach ní mholtar é a rith gan scripteanna.** Tá cúltacaí stuama in OmniRoute: mura féidir na ceangail dhúchasacha `better-sqlite3` a lódáil ón mbeart neamhspleách, téann an feidhmchlár siar chuig tiománaithe malartacha amhail `node:sqlite` nó `sql.js` (féach [Réiteach SQLite ag Am Rite](../ops/SQLITE_RUNTIME.md)). Tosóidh an freastalaí fós, ach má ritheann sé ar chúltacaí WASM amhail `sql.js`, díchumasaítear mód WAL (Logáil Réamhscríofa) SQLite agus méadaítear an forchostas cuimhne agus sioncronaithe diosca.
+**Go pointe áirithe, ach ní mholtar é a rith gan scripteanna.** Tá cúltacaí maithe in OmniRoute: mura féidir na ceangail dhúchasacha `better-sqlite3` a lódáil ón mbeart neamhspleách, téann an feidhmchlár i muinín tiománaithe malartacha amhail `node:sqlite` nó `sql.js` (féach [Taifeach Am-Reatha SQLite](../ops/SQLITE_RUNTIME.md)). Tosóidh an freastalaí fós, ach má ritheann sé ar chúltacaí WASM amhail `sql.js`, díchumasaítear mód WAL (Logáil Roimhscríofa) SQLite agus méadaítear an forchostas cuimhne agus sioncronaithe diosca.
 
-### Cé na scripteanna a theastaíonn i ndáiríre?
+### Cé na scripteanna atá riachtanach i ndáiríre?
 
-Níl gach script bhlocáilte riachtanach chun OmniRoute a rith:
+Níl gach script blocáilte riachtanach chun OmniRoute a rith:
 
-- **Riachtanach (`omniroute`, `better-sqlite3`):** Ritheann OmniRoute ó bheart feidhmchláir neamhspleách Next.js (`dist/`). Le linn na suiteála, íoslódálann nó tiomsaíonn npm an tiománaí dúchasach SQLite a bhaineann go sonrach leis an óstríomhaire sa `node_modules/better-sqlite3/` ardleibhéil. Ansin, fíoraíonn script `postinstall` OmniRoute (`scripts/build/postinstall.mjs`) na dénártha sin a bhaineann go sonrach leis an óstríomhaire agus cóipeálann sí isteach i `dist/node_modules/` iad ionas gur féidir leis an bhfreastalaí neamhspleách rochtain a fháil orthu. Má bhlocáiltear script iarsuiteála `omniroute`, fágtar an chéim chóipeála seo ar lár.
-- **Roghnach/trasdultach (`keytar`, `@parcel/watcher`, `@swc/core`, `protobufjs`, `esbuild`):** Is cúntóirí tógála, uirlisí faire, nó fóntais eochairshlabhra córais iad seo. Má cheadaítear iad, seachnaítear rabhaidh tógála, ach ní theastaíonn siad don chroífheidhmiúlacht ródaithe.
-- **Eisiata (`onnxruntime-node`):** Is spleáchas roghnach é seo le haghaidh leabuithe áitiúla IS agus **ní** theastaíonn sé chun OmniRoute a rith. Íoslódálann a script iarsuiteála tuairim is 300MB de shócmhainní CUDA ó NuGet; ná cuir ar an liosta ceadaithe é mura bhfuil sé ar intinn agat go sainráite luasghéarú áitiúil ONNX a úsáid ar chrua-earraí a dtacaítear leo.
+- **Riachtanach (`omniroute`, `better-sqlite3`):** Ritheann OmniRoute ó bheart feidhmchláir neamhspleách Next.js (`dist/`). Le linn na suiteála, íoslódálann nó tiomsaíonn npm tiománaí dúchasach SQLite atá sainiúil don óstríomhaire sa `node_modules/better-sqlite3/` barrleibhéil. Ansin fíoraíonn agus cóipeálann script `postinstall` OmniRoute (`scripts/build/postinstall.mjs`) na comhaid dhénártha seo atá sainiúil don óstríomhaire isteach in `dist/node_modules/` ionas gur féidir leis an bhfreastalaí neamhspleách rochtain a fháil orthu. Má chuirtear bac ar script postinstall `omniroute`, fágtar an chéim chóipeála seo ar lár.
+- **Roghnach/indíreach (`keytar`, `@parcel/watcher`, `@swc/core`, `protobufjs`, `esbuild`):** Is áiseanna tógála, uirlisí faire, nó fóntais eochairshlabhra córais iad seo. Má cheadaítear iad, seachnaítear rabhaidh tógála, ach níl siad riachtanach don bhunfheidhmiúlacht ródaithe.
+- **Eisiata (`onnxruntime-node`):** Spleáchas roghnach é seo le haghaidh leabuithe AI áitiúla agus **níl** sé riachtanach chun OmniRoute a rith. Íoslódálann a script postinstall thart ar 300MB de shócmhainní CUDA ó NuGet; ná cuir ar an liosta ceadaithe é mura bhfuil sé ar intinn agat go sainráite luasghéarú áitiúil ONNX a úsáid ar chrua-earraí a dtacaítear leo.
 
 ### Réiteach molta
 
-Chun na scripteanna suiteála riachtanacha a cheadú le linn suiteála domhanda agus na rabhaidh a cheilt, cuir `--allow-scripts` ar aghaidh le haghaidh OmniRoute agus a spleáchas dúchasach:
+Chun na scripteanna suiteála riachtanacha a cheadú le linn suiteáil dhomhanda agus na rabhaidh a chur faoi chois, tabhair `--allow-scripts` do OmniRoute agus dá spleáchais dhúchasacha:
 
 ```bash
 npm install -g omniroute --allow-scripts=omniroute,better-sqlite3,keytar,@parcel/watcher,@swc/core,protobufjs,esbuild
@@ -131,7 +137,7 @@ npm install -g omniroute
 
 ### Fíoraigh do shuiteáil
 
-Tar éis na suiteála, rith an uirlis dhiagnóiseach ionsuite lena chinntiú go bhfuil na ceangail dhúchasacha agus an timpeallacht rite slán:
+Tar éis na suiteála, rith an uirlis dhiagnóiseach ionsuite lena chinntiú go bhfuil na ceangail dhúchasacha agus an timpeallacht am rite i riocht maith:
 
 ```bash
 omniroute doctor
@@ -839,6 +845,30 @@ air ag tosú sa chúlra agus beidh sé inrochtana nuair a bheidh an bútáil cr�
 
 Féach [`docs/reference/ENVIRONMENT.md`](../reference/ENVIRONMENT.md) chun sonraí iomlána a fháil
 faoi `OMNIROUTE_READY_TIMEOUT_MS`.
+
+---
+
+## saincheisteanna CCR / dedup
+
+Maitrís dhiagnóiseach do na huirlisí comhbhrú CCR (`ccr`) agus `session-dedup`. Le haghaidh tagartha iomlán an oibreora (marcóirí, réamhriachtanais, scóip in aghaidh an uirlis, uimhriú aisghabhála) féach [Compression Engines → Réamhriachtanais / treoir oibreora](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+
+| Siomptóim                                                                                                | Cúis dócha                                                                                                                                        | Fíoraigh                                                                                                                                              | Deisigh                                                                                                                                                                                                                                                                               |
+| -------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **MCP 403** — `403 LOCAL_ONLY`                                                                           | Údar loopback garda bealaigh, ní fabht iompair. Níor shroich aon `Bearer`, nó eochair gan `mcp:connect`/`manage`/`admin`, an bealach `/api/mcp/`. | Bhí ceanntásc no/invalid `Authorization` leis an iarratas.                                                                                            | Seol eochair `Bearer` bhailí. Is féidir le eochair iargúlta `mcp:connect` a choinneáil (údaraíonn an `/api/mcp/` carve-out áitiúil amháin) móide an raon feidhme read/write sonrach a theastaíonn uaidh.                                                                              |
+| **bloc gan aimsiú** — `omniroute_ccr_retrieve` ndiúltóidh an hash                                        | Ní luach 24 heicsidheachúlach é Hash nó rinneadh é a chóipeáil go mícheart, nó chuaigh an bloc in éag cheana féin / díshealbhaíodh é.             | Déan comparáid idir an hash agus an luach 24 heics sa mharcóir `[CCR retrieve hash=…]` ; seiceáil `omniroute_ccr_stats` le haghaidh staid an stórais. | Cóipeáil an hash 24 heics focal ar fhocal ón marcóir. Má tá an bloc imithe i ndáiríre, bhí sé thar a TTL nó níor shroich sé an siopa durable riamh (bloic os cionn 512 KB, agus gach bloc ar am rite scamall, fan cuimhne amháin agus ná mairfidh atosú).                             |
+| **CCR aon-op** — ní dhéantar bloc a chomhbhrú (tagann an téacs ar ais gan athrú)                         | Bloc faoin tairseach comhbhrú, nó tá an t-inneall / mód CCR neamhghníomhach.                                                                      | Seiceáil an comhbhrú gníomhach `strategy`/`enabled` agus an méid bloc vs an tairseach.                                                                | Cumasaigh CCR (nó modh cruachta a ritheann é) agus deimhnigh go bhfuil an bloc mór go leor chun gur fiú é a stóráil. Ní earráid — é no-op is "rud ar bith a chomhbhrú."                                                                                                               |
+| **marcóir dedup** — `[dedup:ref sha=…]` le feiceáil san aschur                                           | **Amharc siar ar intinn** , ní caillteanas nó earráid. `session-dedup` téacs elided seolta cheana féin i seal níos luaithe den seisiún céanna.    | Deimhnigh go bhfuil an téacs céanna le feiceáil níos luaithe sa seisiún.                                                                              | Ná déan aon rud — ná glaoigh ar uirlis agus ná déan iarracht í a athchruthú. Is é an chóip chanónach an chéad chás; ní athscríobhtar an seal reatha riamh, díothaítear é ar chasadh níos déanaí.                                                                                      |
+| **Mód Cóid** uirlisí — `omniroute_ccr_*` as láthair ón treoir `tools[]` / CCR gan instealladh (OpenCode) | Ní fhógraíonn Mód Cód OpenCode (an réamhshocrú) ach uirlisí dúchasacha don mhúnla, ag cur uirlisí MCP i bhfolach ó `tools[]`.                     | Seiceáil iontráil an fhreastalaí OpenCode MCP le haghaidh `codemode`.                                                                                 | Socraigh `codemode: false` ar iontráil an fhreastalaí (a** cliant** socrú) ionas go bhfógraítear na huirlisí MCP. Fanann an treoir CCR retrieve-protocol as: nochtar freastalaí darb ainm `omniroute` `omniroute_omniroute_ccr_retrieve`, agus ní deighilteoir comhoiriúnaithe é `_`. |
+
+Tuilleadh comharthaí:
+
+| Siomptóim                                                                                                        | Cúis dócha                                                                                                                                                                                          | Deisigh                                                                                                                                                                                       |
+| ---------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Insufficient MCP scopes for <tool>. Missing: <scope>.`                                                          | Toradh earráide uirlis MCP (`isError: true`), ní HTTP 403. Níl an scóip riachtanach in eochair an ghlaoiteora.                                                                                      | Cuir leis an raon feidhme ón tábla in aghaidh an uirlis (féach an treoir oibreoir). M.sh. riachtanais `omniroute_ccr_retrieve` `read:compression`.                                            |
+| `Unknown Mcp-Session-Id`                                                                                         | Chuaigh seisiún insruthaithe-HTTP ar ceal agus baineadh amach é (`OMNIROUTE_MCP_SESSION_IDLE_MS`); Freagraíonn an freastalaí HTTP 404.                                                              | Athcheangail nó atosaigh an seisiún — do** nach bhfuil** eochair a rothlú, raon feidhme a athrú, nó uirlis a athainmniú. Ní 401/403.                                                          |
+| `JSON Parse error` / `Unterminated string` i dtoradh uirlis                                                      | téacs uirlis MCP bearrtha thart ar `mcpAccessibility.maxTextChars` (réamhshocraithe `50000`) lár JSON.                                                                                              | Úsáid `mode` paged in ionad lán lom: `mode:"grep"`, `mode:"lines"`, `mode:"head"`, `mode:"tail"`, nó `mode:"stats"`. Riail an ordóg: `chars > 40000` → úsáid `mode`.                          |
+| `Failed to open SSE stream`                                                                                      | Cliant a bhuail an oidhreacht `/api/mcp/sse` singleton cé go bhfuil an iompar `streamable`.                                                                                                         | Pointe an cliant ag `/api/mcp/stream` (an críochphointe insruthaithe) in ionad `/api/mcp/sse`.                                                                                                |
+| **Buille croí stdio marbh** Léiríonn — `mcp-heartbeat.json` `pidAlive: false` cé go bhfuil an t-iompar HTTP suas | Is éard atá sa chomhad buille croí ná stdio fágtha ( stale PID, nó leagan eile); Tá iompróirí HTTP inphróiseála agus tuairiscigh staid ó `getMcpHttpStatus()` ina ionad sin (gan comhad a scríobh). | Gan aon ghníomh — tá an iompar sláintiúil. Is í an fhírinne `httpTransport.online` / `startedAt` `/api/mcp/status`, ní an comhad buille croí. Ná atosaigh an freastalaí ná rothlaigh eochair. |
 
 ---
 

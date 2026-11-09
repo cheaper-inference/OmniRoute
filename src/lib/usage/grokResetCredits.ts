@@ -4,6 +4,7 @@ import {
   fetchAndPersistProviderLimits,
   refreshAndUpdateCredentials,
 } from "@/lib/usage/providerLimits";
+import { releaseGrokCooldownAfterResetCredit } from "@/lib/usage/resetCreditCooldownRelease";
 import { invalidateGrokCliQuotaCache } from "@omniroute/open-sse/services/grokCliQuotaFetcher.ts";
 import {
   consumeGrokResetCredit as consumeGrokResetCreditRpc,
@@ -130,6 +131,12 @@ export async function consumeGrokResetCredit(
     invalidateGrokCliQuotaCache(connectionId);
     const refreshed = await fetchAndPersistProviderLimits(connectionId, "manual", {
       allowRotatingRefresh: true,
+    });
+    // The credit is already spent upstream: a failed local release must not turn it into a 500.
+    await releaseGrokCooldownAfterResetCredit(connectionId, refreshed.usage).catch((error) => {
+      console.warn(
+        `[GrokResetCredits] Cooldown release failed for ${connectionId}: ${sanitizeErrorMessage(error)}`
+      );
     });
     return { outcome, usage: refreshed.usage };
   } catch (error) {

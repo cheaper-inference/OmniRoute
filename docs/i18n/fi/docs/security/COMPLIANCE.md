@@ -11,55 +11,72 @@ OmniRoute tallentaa hallinnolliset toimet, todennustapahtumat, palveluntarjoajie
 
 Toteutus sijaitsee tiedostoissa `src/lib/compliance/index.ts` (T-43 — "Compliance Controls") ja `src/lib/compliance/providerAudit.ts`. Auditointikirjaukset eivät koskaan heitä poikkeusta: virheen ilmetessä kutsu ohitetaan hiljaisesti, jotta auditointilokitus ei voi häiritä varsinaisen pyynnön käsittelyä.
 
-## Mitä lokitetaan
+## Mitä kirjataan
 
 ### Hallinnolliset auditointitapahtumat (`audit_log`)
 
-Jokainen `logAuditEvent({ action, actor, target, details, ... })`-kutsu tuottaa yhden rivin. Toimintomerkkijonot noudattavat mallia `domain.verb` (tai `domain.verb.outcome`). Lähdekoodista vahvistettuja toimintotyyppejä ovat:
+Jokainen kutsu `logAuditEvent({ action, actor, target, details, ... })` tuottaa
+yhden rivin. Toimintomerkkijonot noudattavat
+`domain.verb`- (tai `domain.verb.outcome`-) mallia. Lähdepuussa vahvistetut toimintotyypit
+sisältävät:
 
-| Toiminto                             | Lähde                                   |
-| ------------------------------------ | --------------------------------------- |
-| `auth.login.success`                 | `src/app/api/auth/login/route.ts`       |
-| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.error`                   | `src/app/api/auth/login/route.ts`       |
-| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`       |
-| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`       |
-| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`      |
-| `provider.credentials.created`       | `src/app/api/providers/route.ts`        |
-| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`        |
-| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`      |
-| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts` |
-| `compliance.cleanup`                 | `src/lib/compliance/index.ts`           |
+| Toiminto                             | Lähde                                    |
+| ------------------------------------ | ---------------------------------------- |
+| `auth.login.success`                 | `src/app/api/auth/login/route.ts`        |
+| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.error`                   | `src/app/api/auth/login/route.ts`        |
+| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`        |
+| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`        |
+| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`       |
+| `provider.credentials.created`       | `src/app/api/providers/route.ts`         |
+| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`         |
+| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`       |
+| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts`  |
+| `compliance.cleanup`                 | `src/lib/compliance/index.ts`            |
+| `api_key.auth.touch`                 | `src/server/authz/policies/clientApi.ts` |
 
-Jokainen merkintä tallentaa kentät `action`, `actor` (oletusarvo on `"system"`), `target`, `details`/`metadata` (JSON), `ip_address`, `resource_type`, `status`, `request_id` ja `timestamp`. Arkaluonteiset avaimet (`apiKey`, `accessToken`, `refreshToken`, `password`, kaikki kaavaa `*token`/`*secret`/`*apikey` vastaavat avaimet jne.) peitetään rekursiivisesti arvolla `"[redacted]"` ennen rivin kirjoittamista.
+Kukin merkintä sisältää kentät `action`, `actor` (oletusarvo on `"system"`), `target`,
+`details`/`metadata` (JSON), `ip_address`, `resource_type`, `status`,
+`request_id` ja `timestamp`. Arkaluonteiset avaimet (`apiKey`, `accessToken`,
+`refreshToken`, `password`, kaikki, jotka vastaavat malleja `*token`/`*secret`/`*apikey`,
+jne.) redaktoidaan rekursiivisesti arvoon `"[redacted]"` ennen rivin kirjoittamista.
+
+`api_key.auth.touch` -rivit tallentavat onnistuneet API-avainten metatieto- ja etsintäluvut
+(GET/HEAD), jotka eivät koskaan päädy pyyntölokiin: mikä avain, milloin ja normalisoitu
+polku, yhdistettyinä ja rajoitettuna 1 000 riviin. Avaimet, joilla on `noLog`, sekä ympäristöavain ohitetaan. Kutsujan IP-osoite ja user-agent lisätään vain, kun
+`API_KEY_AUDIT_CLIENT_DETAILS_ENABLED`-ominaisuuslippu on käytössä (oletusarvoisesti
+pois käytöstä).
 
 ### MCP-työkalukutsut (`mcp_tool_audit`)
 
-Jokainen MCP-työkalukutsu kirjoittaa rivin tiedoston `open-sse/mcp-server/audit.ts` kautta. Skeema (tiedostosta `src/lib/db/migrations/002_mcp_a2a_tables.sql`):
+Jokainen MCP-työkalun kutsu kirjoittaa rivin tiedoston
+`open-sse/mcp-server/audit.ts` kautta. Skeema (tiedostosta
+`src/lib/db/migrations/002_mcp_a2a_tables.sql`):
 
-| Sarake           | Huomautukset                                     |
-| ---------------- | ------------------------------------------------ |
-| `id`             | automaattisesti kasvava                          |
-| `tool_name`      | MCP-työkalun tunniste                            |
-| `input_hash`     | syötteen sha256 (hyötykuormaa ei säilytetä)      |
-| `output_summary` | lyhyt, katkaistu yhteenveto                      |
-| `duration_ms`    | kulunut todellinen aika                          |
-| `api_key_id`     | kutsuja (voi olla tyhjä)                         |
-| `success`        | `1` / `0`                                        |
-| `error_code`     | lopullinen virhekoodi epäonnistumisen yhteydessä |
-| `created_at`     | ISO-aikaleima                                    |
+| Sarake           | Huomautukset                                          |
+| ---------------- | ----------------------------------------------------- |
+| `id`             | automaattisesti kasvava                               |
+| `tool_name`      | MCP-työkalun tunniste                                 |
+| `input_hash`     | syötteen sha256-tiiviste (hyötykuormaa ei tallenneta) |
+| `output_summary` | lyhyt, katkaistu yhteenveto                           |
+| `duration_ms`    | kulunut aika                                          |
+| `api_key_id`     | kutsuja (voi olla tyhjä)                              |
+| `success`        | `1` / `0`                                             |
+| `error_code`     | päätevirheen koodi virheen sattuessa                  |
+| `created_at`     | ISO-aikaleima                                         |
 
 ### Pyyntö- ja käyttölokit
 
-Nämä ovat operatiivista telemetriaa (eivät varsinaisesti hallinnollista auditointia), mutta niihin sovelletaan samaa säilytysprosessia:
+Nämä ovat operatiivista telemetriaa (eivät tiukasti ottaen hallinnollista auditointia), mutta
+ne käyttävät samaa säilytysputkea:
 
-- `usage_history` — pyyntökohtainen käyttökooste
-- `call_logs` — täydellinen pyyntökohtainen loki (rivimäärärajoituksen alainen, katso jäljempänä)
-- `proxy_logs` — välityspalvelinliikenteen loki (rivimäärärajoituksen alainen)
-- `request_detail_logs` — vanha yksityiskohtainen pyyntöloki (karsitaan edelleen, jos se on olemassa)
+- `usage_history` — pyyntökohtainen käytön koonti
+- `call_logs` — täydellinen pyyntökohtainen loki (rivirajoituksen alainen, katso jäljempänä)
+- `proxy_logs` — välityspalvelimen liikenneloki (rivirajoituksen alainen)
+- `request_detail_logs` — vanha yksityiskohtainen pyyntöloki (siivotaan edelleen, jos se on olemassa)
 
 ## Tallennusskeema
 

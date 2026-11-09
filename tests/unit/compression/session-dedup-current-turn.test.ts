@@ -70,4 +70,54 @@ describe("session-dedup current turn", () => {
     assert.equal(messages[2].content, FILE);
     assert.match(String(messages[4].content), MARKER);
   });
+
+  it("keeps repeated blocks in a sole current user message intact", () => {
+    const content = `first:\n${FILE}\nsecond:\n${FILE}`;
+    const { result, messages } = apply([{ role: "user", content }]);
+    assert.equal(result.compressed, false);
+    assert.equal(messages[0].content, content);
+  });
+
+  it("keeps repeated blocks in a sole current tool message intact", () => {
+    const content = `first:\n${FILE}\nsecond:\n${FILE}`;
+    const { result, messages } = apply([
+      readCall("c1"),
+      { role: "tool", tool_call_id: "c1", content },
+    ]);
+    assert.equal(result.compressed, false);
+    assert.equal(messages[1].content, content);
+  });
+
+  it("does not rewrite a current-turn near-duplicate message with fuzzy dedup", () => {
+    const textA =
+      "alpha beta gamma delta epsilon zeta eta theta iota kappa lambda mu nu xi omicron pi rho";
+    const textAprime = textA + " sigma";
+    const body = {
+      messages: [
+        { role: "user", content: textA },
+        { role: "assistant", content: "received" },
+        { role: "user", content: textAprime },
+      ],
+      tools: [{ type: "function", function: { name: "omniroute_ccr_retrieve" } }],
+    };
+    const result = sessionDedupEngine.apply(body, {
+      stepConfig: { fuzzy: { enabled: true } },
+      principalId: "p1",
+    });
+    assert.equal(result.compressed, false);
+    const msgs = result.body.messages as Array<{ content: string }>;
+    assert.equal(msgs[2].content, textAprime);
+  });
+
+  it("preserves all messages in a chat without assistant messages", () => {
+    const content1 = `first:\n${FILE}\nsecond:\n${FILE}`;
+    const content2 = `third:\n${FILE}\nfourth:\n${FILE}`;
+    const { result, messages } = apply([
+      { role: "user", content: content1 },
+      { role: "user", content: content2 },
+    ]);
+    assert.equal(result.compressed, false);
+    assert.equal(messages[0].content, content1);
+    assert.equal(messages[1].content, content2);
+  });
 });

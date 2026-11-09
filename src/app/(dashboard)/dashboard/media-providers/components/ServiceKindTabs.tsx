@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { cn } from "@/shared/utils/cn";
+import SegmentedControl from "@/shared/components/SegmentedControl";
 import type { ServiceKind } from "@/shared/constants/providers";
 
 const KIND_ICON: Record<ServiceKind, string> = {
@@ -27,8 +27,7 @@ interface ServiceKindTabsProps {
 
 /**
  * Horizontal tab-strip for switching between provider service kinds
- * (embedding, image, tts, etc.).  Renders as compact pill-style chips,
- * consistent with the MediaProviderKindNav style.
+ * (embedding, image, tts, etc.) — the kit capsule tabs via the SegmentedControl adapter.
  */
 export function ServiceKindTabs({ kinds, activeKind, onSelect, className }: ServiceKindTabsProps) {
   const t = useTranslations("media");
@@ -36,29 +35,17 @@ export function ServiceKindTabs({ kinds, activeKind, onSelect, className }: Serv
   if (kinds.length <= 1) return null;
 
   return (
-    <div className={cn("flex flex-wrap gap-2", className)}>
-      {kinds.map((kind) => {
-        const isActive = kind === activeKind;
-        const label = t(`kinds.${kind}`);
-        const icon = KIND_ICON[kind] ?? "category";
-        return (
-          <button
-            key={kind}
-            type="button"
-            onClick={() => onSelect(kind)}
-            aria-current={isActive ? "page" : undefined}
-            className={cn(
-              "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-medium transition-colors",
-              isActive
-                ? "bg-primary text-white border-primary"
-                : "bg-bg-subtle border-border text-text-muted hover:text-text-primary hover:border-primary/30"
-            )}
-          >
-            <span className="material-symbols-outlined text-[13px] leading-none">{icon}</span>
-            {label}
-          </button>
-        );
-      })}
-    </div>
+    <SegmentedControl
+      aria-label={t("serviceKindsAria")}
+      className={className}
+      size="sm"
+      value={activeKind}
+      onChange={(next) => onSelect(next as ServiceKind)}
+      options={kinds.map((kind) => ({
+        value: kind,
+        label: t(`kinds.${kind}`),
+        icon: KIND_ICON[kind] ?? "category",
+      }))}
+    />
   );
 }

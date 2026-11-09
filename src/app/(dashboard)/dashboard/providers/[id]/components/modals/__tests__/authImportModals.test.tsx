@@ -29,7 +29,9 @@ function renderModal(node: React.ReactElement) {
     act(() => root.unmount());
     container.remove();
   });
-  return container;
+  // The shared Modal is a kit Dialog (Radix) since KEA-7886: its content is portaled to
+  // document.body, so queries start there (the container is a child of body).
+  return document.body;
 }
 
 describe("auth-import modals (Phase 1a extraction)", () => {
@@ -55,11 +57,11 @@ describe("auth-import modals (Phase 1a extraction)", () => {
     const onClose = vi.fn();
     const onSuccess = vi.fn();
     const c = renderModal(<ImportCodexAuthModal onClose={onClose} onSuccess={onSuccess} />);
-    expect(c.querySelector("*")).not.toBeNull();
+    expect(c.querySelector('[role="dialog"]')).not.toBeNull();
   });
 
   it("ImportClaudeAuthModal mounts standalone", () => {
     const c = renderModal(<ImportClaudeAuthModal onClose={vi.fn()} onSuccess={vi.fn()} />);
-    expect(c.querySelector("*")).not.toBeNull();
+    expect(c.querySelector('[role="dialog"]')).not.toBeNull();
   });
 });

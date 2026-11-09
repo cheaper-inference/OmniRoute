@@ -93,7 +93,7 @@ function sanitizeForwardedProto(proto: string | null): "http" | "https" | null {
   return null;
 }
 
-function sanitizeForwardedHost(host: string | null): string | null {
+export function sanitizeForwardedHost(host: string | null): string | null {
   const trimmed = host?.trim();
   if (!trimmed) return null;
   if (/[/\\\s\x00-\x1f\x7f]/.test(trimmed)) return null;

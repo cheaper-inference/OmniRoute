@@ -265,3 +265,36 @@ test("Responses API snapshot text is identified as snapshot and bypasses delta b
   assert.ok(isSnapshotReceived, "should identify done event as snapshot");
   assert.ok(output.includes("HELLO SNAPSHOT"), "output should contain sanitized snapshot text");
 });
+
+test("processToolArgs routes tool call arguments to the processor when enabled", async () => {
+  const received: string[] = [];
+  const transform = createSseTextTransform(
+    (text, field) => {
+      received.push(`${field}:${text}`);
+      return "MUTATED";
+    },
+    undefined,
+    undefined,
+    { processToolArgs: true }
+  );
+  const payload = {
+    choices: [
+      {
+        delta: {
+          tool_calls: [
+            {
+              function: {
+                arguments: JSON.stringify({ command: "find /tmp -name test.txt" }),
+              },
+            },
+          ],
+        },
+      },
+    ],
+  };
+
+  const output = await testTransform(transform, [`data: ${JSON.stringify(payload)}\n\n`]);
+
+  assert.equal(received.length, 1, "tool call arguments must reach the processor when opted in");
+  assert.ok(output.includes("MUTATED"), "processor output must replace tool JSON when opted in");
+});

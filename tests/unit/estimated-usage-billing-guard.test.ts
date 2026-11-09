@@ -6,6 +6,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { CALL_LOG_SETTLE_TIMEOUT_MS } from "../helpers/callLogSettle.ts";
 
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-estimated-usage-"));
 process.env.DATA_DIR = TEST_DATA_DIR;
@@ -82,9 +83,9 @@ async function runChat(apiKeyId: string, stream: boolean, response: () => Respon
 }
 
 async function persistedLog(apiKeyId: string) {
-  const deadline = Date.now() + 15_000;
+  const deadline = Date.now() + CALL_LOG_SETTLE_TIMEOUT_MS;
   for (;;) {
-    await callLogs.waitForCallLogSaves(5_000);
+    await callLogs.waitForCallLogSaves(CALL_LOG_SETTLE_TIMEOUT_MS);
     const rows = (await callLogs.getCallLogs({})) as Array<{ id: string; apiKeyId: string }>;
     const row = rows.find((r) => r.apiKeyId === apiKeyId);
     if (row) return callLogs.getCallLogById(row.id);

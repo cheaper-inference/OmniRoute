@@ -35,8 +35,11 @@ const buildYml = readFileSync(
 // ubuntu-24.04 / ubuntu-24.04-arm boxes docker-publish.yml's `build` job uses)
 // fits a 12288 MB webpack heap for this exact `npm run build`/`build:release`
 // invocation.
-test("build.yml's known-good heap budget is 12288 MB", () => {
-  assert.match(buildYml, /OMNIROUTE_BUILD_MEMORY_MB:\s*"12288"/);
+// #16938 lowered build.yml's hosted webpack build to 10240 MB ("hosted artifact builds run with
+// less memory than the opt-in 64 GB CI build slot", #16169). The docker-publish override below
+// still has to clear the Dockerfile's 6144 MB default, which is the regression this file guards.
+test("build.yml's known-good hosted webpack heap budget is 10240 MB", () => {
+  assert.match(buildYml, /OMNIROUTE_BUILD_MEMORY_MB:\s*"10240"/);
 });
 
 test("every docker-publish.yml build-push-action step raises the V8 heap ceiling past the Dockerfile's 6144 MB default", () => {
@@ -61,8 +64,27 @@ test("every docker-publish.yml build-push-action step raises the V8 heap ceiling
     [],
     `build-args block(s) at index ${JSON.stringify(missing)} never override OMNIROUTE_BUILD_MEMORY_MB, ` +
       `so those docker/build-push-action steps build with the Dockerfile's default ` +
-      `ARG OMNIROUTE_BUILD_MEMORY_MB=6144 heap ceiling instead of the 12288 MB that build.yml already ` +
-      `proves fits the same runner class — this is why every Docker publish on release/v3.8.51 since ` +
+      `ARG OMNIROUTE_BUILD_MEMORY_MB=6144 heap ceiling instead of a budget the hosted runner class is ` +
+      `known to fit (build.yml) — this is why every Docker publish on release/v3.8.51 since ` +
       `2026-09-18 16:58 UTC has died with "JavaScript heap out of memory" inside the webpack production pass`
   );
+});
+
+// Both values are measured, on purpose different: build.yml's native webpack build fits
+// 10240 MB on the hosted runner (run 39151150605), and the same webpack build inside
+// BuildKit publishes at 12288 MB (runs 38904652365, 38907575198, 39010473398). BuildKit
+// adds overhead around the same build, so the Docker heap must never fall below the
+// native floor.
+test("every docker-publish.yml heap override is at or above build.yml's native webpack floor", () => {
+  const floor = Number(buildYml.match(/OMNIROUTE_BUILD_MEMORY_MB:\s*"(\d+)"/)?.[1]);
+  assert.ok(Number.isFinite(floor) && floor > 0, "build.yml declares OMNIROUTE_BUILD_MEMORY_MB");
+  const dockerHeaps = [...workflow.matchAll(/OMNIROUTE_BUILD_MEMORY_MB=(\d+)/g)].map((m) =>
+    Number(m[1])
+  );
+  assert.ok(
+    dockerHeaps.length >= 4,
+    `expected >= 4 docker heap overrides, found ${dockerHeaps.length}`
+  );
+  const below = dockerHeaps.filter((mb) => mb < floor);
+  assert.deepEqual(below, [], `docker heap below the native floor of ${floor} MB`);
 });

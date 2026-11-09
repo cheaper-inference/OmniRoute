@@ -295,15 +295,15 @@ OmniRoute artıq `/v1/ws` təkmilləşdirmə son nöqtəsi vasitəsilə **OpenAI
 
 ---
 
-## 🔑 Sinxronlaşdırma Tokenləri və Konfiqurasiya Paketi _(v3.6.6+)_
+## 🔑 Sinxronizasiya Tokenləri və Konfiqurasiya Paketi _(v3.6.6+)_
 
-Artıq **əhatə dairəsi məhdudlaşdırılmış sinxronlaşdırma tokenləri** vasitəsilə bir neçə cihazdan və xarici operator tərəfindən giriş mümkündür:
+Çoxsaylı cihazlardan və xarici operatorlar tərəfindən giriş artıq **əhatə dairəsi məhdudlaşdırılmış sinxronizasiya tokenləri** vasitəsilə mümkündür:
 
-- **`POST /api/sync/tokens`** — Yeni sinxronlaşdırma tokeni yaradın (əhatə dairəsi məhdudlaşdırılmış, istəyə bağlı etibarlılıq müddəti ilə)
+- **`POST /api/sync/tokens`** — Yeni sinxronizasiya tokeni yaradın (əhatə dairəsi məhdudlaşdırılmış, istəyə bağlı etibarlılıq müddəti ilə)
 - **`DELETE /api/sync/tokens/:id`** — Tokeni ləğv edin
-- **`GET /api/sync/bundle`** — Bütün qeyri-həssas parametrlərin versiyalaşdırılmış və ETag açarlı JSON ani görüntüsünü endirin (parollar gizlədilir)
+- **`GET /api/sync/bundle`** — Konfiqurasiyanın versiyalaşdırılmış və ETag açarlı JSON anlıq surətini endirin (yalnız sinxronizasiya tokeni ilə autentifikasiya olunur). İdarəetmə panelinin parolu kimi autentifikasiya parametrləri çıxarılır, lakin provayder giriş məlumatları və API açarları daxil edilir; buna görə faylı məxfi məlumat kimi qoruyun
 
-Konfiqurasiya paketi `src/lib/sync/bundle.ts` tərəfindən yaradılır. İstehlakçılar bütün faydalı yükü yenidən endirmədən dəyişiklikləri aşkar etmək üçün `ETag` cavab başlığını müqayisə edirlər.
+Konfiqurasiya paketi `src/lib/sync/bundle.ts` tərəfindən yaradılır. İstehlakçılar tam faydalı yükü yenidən endirmədən dəyişiklikləri aşkarlamaq üçün `ETag` cavab başlığını müqayisə edirlər. CLI vasitəsilə `omniroute sync bundle <outPath> --token <syncToken>` (və ya `OMNIROUTE_SYNC_TOKEN`) onu yalnız sahibinin giriş icazəsi olan faylda saxlayır.
 
 ---
 

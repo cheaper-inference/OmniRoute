@@ -33,37 +33,43 @@ Các sự cố thường gặp và giải pháp dành cho OmniRoute.
 
 ---
 
-## Khắc phục sự cố chi tiết
+## Xử lý sự cố chi tiết
 
 ---
 
 ### Giới hạn tốc độ trên các nhà cung cấp miễn phí (429 / 400 / 401)
 
-**Triệu chứng**: Khi dùng `model: "auto"` với các nhà cung cấp miễn phí/không yêu cầu xác thực (opencode, auggie, v.v.), thỉnh thoảng bạn nhận được `HTTP 429`, `400` hoặc `401` thay vì câu trả lời. Các yêu cầu thành công khi thử lại cùng một lời nhắc sau đó ít phút, nhưng quy trình tự động hóa (tác vụ cron, agent, tập lệnh) bị gián đoạn ngay ở lần lỗi đầu tiên.
+**Triệu chứng**: Khi sử dụng `model: "auto"` với các nhà cung cấp miễn phí/không yêu cầu xác thực (auggie, v.v.), đôi khi bạn nhận được `HTTP 429`, `400` hoặc `401` thay vì câu trả lời. Các yêu cầu thành công khi thử lại cùng một lời nhắc ngay sau đó, nhưng tính năng tự động hóa (tác vụ cron, agent, script) bị lỗi ngay lần đầu.
 
-**Nguyên nhân gốc rễ**: Ba kiểu lỗi độc lập cộng dồn với nhau:
+**Nguyên nhân gốc**: Ba chế độ lỗi độc lập kết hợp với nhau:
 
-1. **Giới hạn tốc độ của nhà cung cấp (`429`)**: Các gói miễn phí có thể áp dụng hạn ngạch theo từng khoảng thời gian. Một đợt yêu cầu song song sẽ làm cạn hạn ngạch, vì vậy yêu cầu tiếp theo bị từ chối cho đến khi khoảng thời gian được đặt lại.
-2. **Mô hình bị lỗi trong chế độ chuyển tiếp (`400`/`401`)**: Các nhóm `auto/*` có thể bao gồm các mô hình chuyển tiếp từ `opencode` đã được đăng ký trong danh mục nhưng không có thông tin xác thực đang hoạt động (ví dụ: `oc/north-mini-code-free` → `401`). Bộ định tuyến tự động thử một mô hình, thất bại và truyền lỗi ra ngoài trước khi cơ chế chuyển dự phòng kịp kích hoạt.
-3. **Khuếch đại do xử lý đồng thời (`429` khi tải cao)**: Khi nhiều phiên agent/cron cùng truy cập `auto`, tổng tốc độ yêu cầu vượt quá mức mà các nhà cung cấp miễn phí có thể chịu được, khiến các lệnh gọi hợp lệ bị đánh dấu là lạm dụng.
+1. **Giới hạn tốc độ của nhà cung cấp (`429`)**: Các gói miễn phí có thể áp dụng hạn mức theo từng khoảng thời gian. Một loạt lời gọi song song sẽ dùng hết hạn mức, khiến yêu cầu tiếp theo bị từ chối cho đến khi khoảng thời gian được đặt lại.
+2. **Model bị lỗi trong passthrough (`400`/`401`)**: Các pool `auto/*` có thể bao gồm những model passthrough đã được đăng ký trong danh mục nhưng không có thông tin xác thực đang hoạt động (→ `401`). Bộ định tuyến tự động thử một model, gặp lỗi và lỗi được truyền ra ngoài trước khi cơ chế dự phòng được kích hoạt.
+3. **Khuếch đại đồng thời (`429` khi tải cao)**: Khi nhiều phiên agent/cron cùng lúc gọi `auto`, tổng tốc độ yêu cầu vượt quá mức mà các nhà cung cấp miễn phí có thể chịu, khiến các lời gọi hợp lệ bị đánh dấu là lạm dụng.
 
-**Cách khắc phục đã được xác minh (do cộng đồng báo cáo, 2026-08-10)**: điều chỉnh ba biến môi trường để việc luân chuyển, xử lý đồng thời và chuyển dự phòng hấp thụ các biến động của gói miễn phí thay vì thất bại vì chúng:
+**Cách khắc phục đã được xác minh (do cộng đồng báo cáo, 2026-08-10)**: điều chỉnh ba biến môi trường để cơ chế xoay vòng, tính đồng thời và dự phòng hấp thụ được biến động của gói miễn phí thay vì dừng do lỗi:
 
 ```bash
-export OMNIROUTE_ROTATE_ON_400=true           # chuyển sang mô hình/nhà cung cấp khác khi gặp 400/401 (bỏ qua các mô hình chuyển tiếp bị lỗi)
-export OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT=4   # giới hạn tiếp nhận rõ ràng cho tác vụ nặng (mặc định không được đặt: không giới hạn số lượng yêu cầu, xem ghi chú bên dưới)
-export OMNIROUTE_CHAT_ADMISSION_QUEUE_MS=20000 # tăng thời gian chờ có giới hạn vượt quá giá trị mặc định của RATE_LIMIT_MAX_WAIT_MS cho các dịch vụ thượng nguồn chậm
+export OMNIROUTE_ROTATE_ON_400=true           # chuyển sang model/nhà cung cấp khác khi gặp 400/401 (bỏ qua các model passthrough bị lỗi)
+export OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT=4   # giới hạn tiếp nhận rõ ràng đối với các yêu cầu nặng (mặc định không thiết lập: không giới hạn số lượng yêu cầu, xem lưu ý bên dưới)
+export OMNIROUTE_CHAT_ADMISSION_QUEUE_MS=20000 # tăng thời gian chờ có giới hạn vượt quá mặc định RATE_LIMIT_MAX_WAIT_MS đối với các upstream chậm
 ```
 
-Đặt các biến này trong môi trường tiến trình OmniRoute (daemon, ví dụ thông qua plist LaunchAgent hoặc `systemctl edit`), rồi khởi động lại OmniRoute. Cờ luân chuyển là cơ chế mang lại hiệu quả cao nhất: nó biến một lỗi nghiêm trọng thành một lần thử lại minh bạch với một nhà cung cấp đang hoạt động tốt trong nhóm.
+Thiết lập các biến này trong môi trường của tiến trình OmniRoute (daemon, chẳng hạn thông qua plist của LaunchAgent hoặc `systemctl edit`), sau đó khởi động lại OmniRoute. Cờ xoay vòng là yếu tố mang lại hiệu quả lớn nhất: nó chuyển một lỗi nghiêm trọng thành lần thử lại trong suốt đối với một nhà cung cấp đang hoạt động bình thường trong pool.
 
-**Lưu ý**: `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` giới hạn số lượng yêu cầu nặng — có ngữ cảnh dài — được chạy cùng lúc; giới hạn này là một cổng tiếp nhận, không phải bộ giới hạn tốc độ của nhà cung cấp. **Cập nhật về #503-fanout:** biến này không còn được đặt theo mặc định (giờ đây nó chỉ có hiệu lực khi được cấu hình rõ ràng như ở trên) — thay vào đó, việc tiếp nhận tác vụ nặng được kiểm soát bằng ngân sách byte tự động suy ra (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`) có khả năng tự điều chỉnh theo giới hạn bộ nhớ thực của máy chủ, vì vậy một bản triển khai mới sẽ gặp ít lỗi từ chối `503 chat_admission_busy` hơn đáng kể mà hoàn toàn không cần đặt biến này; việc đặt rõ ràng như ở đây vẫn hoạt động chính xác như đã mô tả. Các giá trị ghi đè ngân sách byte rõ ràng bị giới hạn trong khoảng 8 MiB–2 GiB. Lỗi `413 body_exceeds_budget` không phải là lỗi tạm thời: hãy tăng ngân sách byte đó, giảm `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES` hoặc tăng giới hạn bộ nhớ của tiến trình. Việc loại bỏ yêu cầu do `inflight_bytes_budget` là tình trạng tranh chấp tài nguyên tạm thời và vẫn có thể thử lại. Việc giới hạn tốc độ theo từng nhà cung cấp (`open-sse/services/rateLimitManager.ts`) được quản lý riêng bởi `RATE_LIMIT_MAX_WAIT_MS`, `RATE_LIMIT_MAX_QUEUE_DEPTH` và `RATE_LIMIT_AUTO_ENABLE` — xem `.env.example`.
+**Lưu ý**: `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` giới hạn số yêu cầu nặng — có ngữ cảnh dài — được chạy đồng thời; giới hạn này là một cổng tiếp nhận, không phải bộ giới hạn tốc độ của nhà cung cấp. **Cập nhật #503-fanout:** biến này không còn được thiết lập theo mặc định (hiện chỉ có hiệu lực khi được cấu hình rõ ràng như trên) — việc tiếp nhận yêu cầu nặng thay vào đó được kiểm soát bằng ngân sách byte tự động (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`), tự điều chỉnh dựa trên giới hạn bộ nhớ thực tế của máy chủ. Vì vậy, một bản triển khai mới sẽ có ít lỗi từ chối `503 chat_admission_busy` hơn nhiều mà không cần thiết lập biến này; việc thiết lập rõ ràng biến này tại đây vẫn hoạt động chính xác như tài liệu mô tả. Các giá trị ghi đè ngân sách byte rõ ràng được giới hạn trong khoảng 8 MiB–2 GiB. `413 body_exceeds_budget` không phải lỗi tạm thời: hãy tăng ngân sách byte đó, giảm `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES` hoặc giới hạn nội dung yêu cầu đã lưu, hoặc tăng giới hạn bộ nhớ của tiến trình. Việc loại bỏ yêu cầu do `inflight_bytes_budget` là tình trạng tranh chấp tạm thời và vẫn có thể thử lại. Cơ chế giới hạn tốc độ theo từng nhà cung cấp (`open-sse/services/rateLimitManager.ts`) được điều khiển riêng bởi `RATE_LIMIT_MAX_WAIT_MS`, `RATE_LIMIT_MAX_QUEUE_DEPTH` và `RATE_LIMIT_AUTO_ENABLE` — xem `.env.example`.
 
-**Cách xác minh bản sửa lỗi đã hoạt động**: chạy agent/cron hai lần liên tiếp trong khoảng thời gian ngắn và xác nhận cả hai lần đều thành công. Trước khi sửa, lần chạy thứ hai thường trả về lỗi `429`/`401`. Sau khi sửa, các lỗi (nếu có) sẽ được tự động thử lại và lệnh gọi sẽ hoàn tất. Bạn cũng có thể chạy `curl /monitoring/health` và theo dõi trường `rateLimitedUntil` trên các kết nối nhà cung cấp cũng như `circuitBreakers.providerBreakers[].state` đối với các nhà cung cấp bị ảnh hưởng — trạng thái là một trong các giá trị `CLOSED`, `DEGRADED`, `OPEN` hoặc `HALF_OPEN` (xem `src/shared/utils/circuitBreaker.ts`), và một nhà cung cấp liên tục gặp lỗi sẽ chuyển trạng thái `CLOSED → DEGRADED → OPEN` trước khi khoảng thời gian đặt lại cho phép một yêu cầu thăm dò đi qua (`HALF_OPEN`).
+**Lưu ý nâng cấp: giới hạn nội dung yêu cầu đã lưu hiện cũng áp dụng cho chat.** Giới hạn đã được lưu trước đó trong Settings > Advanced > Request Body Limit (`maxBodySizeMb`) hiện cũng áp dụng cho `/v1/chat/completions` và `/v1/responses`. Trước thay đổi này, hai route đó chấp nhận tối đa 50 MB bất kể giá trị đã lưu, vì vậy một bản cài đặt có giới hạn đã lưu thấp hơn sẽ bắt đầu từ chối nội dung chat vượt quá giới hạn đó. Bản cài đặt chưa từng lưu giới hạn vẫn giữ mặc định 50 MB.
 
-**Nếu bạn vẫn thấy lỗi 429**: tài khoản đang hoạt động của nhà cung cấp đó thực sự đã dùng hết _hạn ngạch_ (không chỉ chạm giới hạn tốc độ). Hãy thêm tài khoản thứ hai cho cùng nhà cung cấp trong bảng điều khiển OmniRoute → Providers → Accounts, hoặc kết hợp thêm một nhà cung cấp miễn phí khác (ví dụ: `routeway`, `auggie`). Việc luân phiên chỉ hữu ích với các lỗi tạm thời về giới hạn tốc độ/400/401; khi hạn ngạch đã cạn hoàn toàn, bạn cần thông tin xác thực thứ hai hoặc một nhà cung cấp khác.
+Lỗi từ chối là HTTP `413`, với `error.code` được đặt thành `PAYLOAD_TOO_LARGE` và `error.type` được đặt thành `payload_too_large`. Thông báo nêu rõ giới hạn đang áp dụng: `Request body too large. Maximum allowed: 10 MB` khi `Content-Length` được khai báo vượt quá giới hạn, hoặc `Request body too large for chat completions (max 10 MB).` khi số byte thực tế đã đọc vượt quá giới hạn. Điều này không giống `413 body_exceeds_budget` ở trên, vốn xuất phát từ ngân sách bộ nhớ và không bị thay đổi bởi thiết lập này.
 
-**Nếu bạn thấy lỗi 403 trên các mô hình thị giác (`auto/vision`, `bazaarlink/*`)**: tài khoản được kết nối không có gói trả phí hỗ trợ tính năng thị giác, hoặc khóa API không có đủ quyền. Hãy xác minh trong bảng điều khiển của nhà cung cấp rằng phạm vi của khóa bao gồm tính năng thị giác/đa phương thức, hoặc kết nối một tài khoản thuộc gói trả phí và tiếp tục dùng tài khoản đó làm đích cho các yêu cầu thị giác.
+Để tăng giới hạn, hãy lưu một giá trị cao hơn tại `/dashboard/settings/advanced`, hoặc gửi `PATCH /api/settings` với `{"maxBodySizeMb": 50}`. Các giá trị từ 1 đến 500 MB được chấp nhận, có hiệu lực mà không cần khởi động lại, và giá trị 50 sẽ khôi phục giới hạn chat trước đây. Hai giới hạn khác vẫn có thể chặn nội dung lớn hơn: `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES`, nếu được thiết lập, cũng giới hạn giá trị đã lưu; ngoài ra, chú thích ingress Kubernetes `proxy-body-size` (`50m` trong các manifest được cung cấp) phải được tăng riêng nếu muốn vượt quá 50 MB.
+
+**Cách xác minh đã hoạt động**: chạy agent/cron hai lần liên tiếp trong thời gian ngắn và xác nhận cả hai lần đều thành công. Trước khi khắc phục, lần chạy thứ hai thường trả về `429`/`401`. Sau khi khắc phục, các lỗi (nếu có) sẽ được tự động thử lại trong suốt và lời gọi sẽ hoàn tất. Bạn cũng có thể dùng `curl /monitoring/health` và theo dõi trường `rateLimitedUntil` trên các kết nối nhà cung cấp cũng như `circuitBreakers.providerBreakers[].state` đối với các nhà cung cấp bị ảnh hưởng — trạng thái là một trong `CLOSED`, `DEGRADED`, `OPEN` hoặc `HALF_OPEN` (xem `src/shared/utils/circuitBreaker.ts`); một nhà cung cấp liên tục gặp lỗi sẽ chuyển từ `CLOSED → DEGRADED → OPEN` trước khi khoảng thời gian đặt lại cho phép một lần kiểm tra đi qua (`HALF_OPEN`).
+
+**Nếu bạn vẫn thấy 429**: tài khoản đang hoạt động của nhà cung cấp đó thực sự đã dùng hết _hạn ngạch_ (không chỉ giới hạn tốc độ). Hãy thêm tài khoản thứ hai cho cùng nhà cung cấp trong bảng điều khiển OmniRoute → Providers → Accounts, hoặc kết hợp thêm một nhà cung cấp miễn phí khác (ví dụ: `routeway`, `auggie`). Cơ chế xoay vòng chỉ giúp xử lý các lỗi tốc độ/400/401 tạm thời; việc đã dùng hết hạn ngạch hoàn toàn cần thông tin xác thực thứ hai hoặc một nhà cung cấp khác.
+
+**Nếu bạn thấy 403 trên các model vision (`auto/vision`, `bazaarlink/*`)**: tài khoản được kết nối không có gói trả phí bao gồm vision, hoặc khóa API không có đủ quyền. Hãy xác minh trong bảng điều khiển của nhà cung cấp rằng phạm vi của khóa bao gồm vision/đa phương thức, hoặc kết nối tài khoản thuộc gói trả phí và giữ tài khoản đó làm đích vision.
 
 ---
 
@@ -94,35 +100,35 @@ Các cảnh báo bắt nguồn từ những phạm vi peer dependency đã lỗi
 
 <a name="npm-install-scripts-blocked-warning-global-install"></a>
 
-Khi chạy `npm install -g omniroute`, các phiên bản npm mới hơn (v11+ và v12+) mặc định chặn các script vòng đời của package và hiển thị cảnh báo install-scripts:
+Khi chạy `npm install -g omniroute`, các phiên bản npm mới hơn (v11+ và v12+) mặc định chặn các tập lệnh vòng đời của gói và hiển thị cảnh báo install-scripts:
 
 ```
-npm warn install-scripts 7 package có script cài đặt bị chặn vì không được allowScripts cho phép:
+npm warn install-scripts 7 packages had install scripts blocked because they are not covered by allowScripts:
   omniroute@<version> (postinstall: node scripts/build/postinstall.mjs)
   keytar, @parcel/watcher, @swc/core, protobufjs, esbuild, onnxruntime-node
 ```
 
 ### Có thể bỏ qua cảnh báo này không?
 
-**Có thể bỏ qua một phần, nhưng không nên chạy mà không có các script.** OmniRoute cung cấp các phương án dự phòng linh hoạt: nếu không thể tải các binding `better-sqlite3` gốc từ bundle độc lập, ứng dụng sẽ chuyển sang các driver thay thế như `node:sqlite` hoặc `sql.js` (xem [Phân giải SQLite trong thời gian chạy](../ops/SQLITE_RUNTIME.md)). Máy chủ vẫn sẽ khởi động, nhưng việc chạy trên các phương án dự phòng WASM như `sql.js` sẽ vô hiệu hóa chế độ WAL (Write-Ahead Logging) của SQLite, đồng thời làm tăng mức sử dụng bộ nhớ và chi phí đồng bộ hóa ổ đĩa.
+**Có thể bỏ qua một phần, nhưng không nên chạy khi không có các tập lệnh này.** OmniRoute có các cơ chế dự phòng an toàn: nếu không thể tải các binding `better-sqlite3` gốc từ gói độc lập, ứng dụng sẽ chuyển sang các trình điều khiển thay thế như `node:sqlite` hoặc `sql.js` (xem [Phân giải môi trường chạy SQLite](../ops/SQLITE_RUNTIME.md)). Máy chủ vẫn sẽ khởi động, nhưng việc chạy trên các cơ chế dự phòng WASM như `sql.js` sẽ vô hiệu hóa chế độ WAL (Write-Ahead Logging) của SQLite và làm tăng mức sử dụng bộ nhớ cũng như chi phí đồng bộ hóa ổ đĩa.
 
-### Những script nào thực sự bắt buộc?
+### Những tập lệnh nào thực sự bắt buộc?
 
-Không phải tất cả các script bị chặn đều cần thiết để chạy OmniRoute:
+Không phải tất cả các tập lệnh bị chặn đều thiết yếu để chạy OmniRoute:
 
-- **Thiết yếu (`omniroute`, `better-sqlite3`):** OmniRoute chạy từ bundle ứng dụng độc lập Next.js (`dist/`). Trong quá trình cài đặt, npm tải xuống hoặc biên dịch driver SQLite gốc dành riêng cho máy chủ trong `node_modules/better-sqlite3/` ở cấp cao nhất. Sau đó, script `postinstall` của OmniRoute (`scripts/build/postinstall.mjs`) xác minh và sao chép các tệp nhị phân dành riêng cho máy chủ này vào `dist/node_modules/` để máy chủ độc lập có thể truy cập chúng. Nếu script postinstall của `omniroute` bị chặn, bước sao chép này sẽ bị bỏ qua.
-- **Tùy chọn/có tính bắc cầu (`keytar`, `@parcel/watcher`, `@swc/core`, `protobufjs`, `esbuild`):** Đây là các trình trợ giúp xây dựng, công cụ theo dõi hoặc tiện ích chuỗi khóa hệ thống. Việc cho phép chúng sẽ ngăn các cảnh báo xây dựng, nhưng chúng không cần thiết đối với chức năng định tuyến cốt lõi.
-- **Bị loại trừ (`onnxruntime-node`):** Đây là một dependency tùy chọn dành cho embedding AI cục bộ và **không** bắt buộc để chạy OmniRoute. Script postinstall của nó tải xuống khoảng 300MB tài nguyên CUDA từ NuGet; không đưa nó vào danh sách cho phép trừ khi bạn chủ động muốn sử dụng khả năng tăng tốc ONNX cục bộ trên phần cứng được hỗ trợ.
+- **Thiết yếu (`omniroute`, `better-sqlite3`):** OmniRoute chạy từ một gói ứng dụng Next.js độc lập (`dist/`). Trong quá trình cài đặt, npm tải xuống hoặc biên dịch trình điều khiển SQLite gốc dành riêng cho máy chủ trong `node_modules/better-sqlite3/` cấp cao nhất. Sau đó, tập lệnh `postinstall` của OmniRoute (`scripts/build/postinstall.mjs`) xác minh và sao chép các tệp nhị phân dành riêng cho máy chủ này vào `dist/node_modules/` để máy chủ độc lập có thể truy cập chúng. Nếu tập lệnh postinstall của `omniroute` bị chặn, bước sao chép này sẽ bị bỏ qua.
+- **Tùy chọn/bắc cầu (`keytar`, `@parcel/watcher`, `@swc/core`, `protobufjs`, `esbuild`):** Đây là các công cụ hỗ trợ xây dựng, công cụ theo dõi hoặc tiện ích quản lý chuỗi khóa hệ thống. Việc cho phép chúng sẽ ngăn các cảnh báo xây dựng, nhưng chúng không bắt buộc đối với chức năng định tuyến cốt lõi.
+- **Bị loại trừ (`onnxruntime-node`):** Đây là một phần phụ thuộc tùy chọn dành cho embedding AI cục bộ và **không** bắt buộc để chạy OmniRoute. Tập lệnh postinstall của nó tải xuống khoảng 300MB tài nguyên CUDA từ NuGet; không đưa nó vào danh sách cho phép trừ khi bạn thực sự có ý định sử dụng tính năng tăng tốc ONNX cục bộ trên phần cứng được hỗ trợ.
 
-### Cách khắc phục được khuyến nghị
+### Cách khắc phục được đề xuất
 
-Để cho phép các script cài đặt bắt buộc trong quá trình cài đặt toàn cục và ẩn cảnh báo, hãy truyền `--allow-scripts` cho OmniRoute và các dependency gốc của nó:
+Để cho phép các tập lệnh cài đặt bắt buộc trong quá trình cài đặt toàn cục và loại bỏ cảnh báo, hãy truyền `--allow-scripts` cho OmniRoute và các phần phụ thuộc gốc của nó:
 
 ```bash
 npm install -g omniroute --allow-scripts=omniroute,better-sqlite3,keytar,@parcel/watcher,@swc/core,protobufjs,esbuild
 ```
 
-Ngoài ra, để cấu hình vĩnh viễn cho tất cả các lần cài đặt toàn cục trong tài khoản người dùng của bạn:
+Ngoài ra, để cấu hình cố định cho tất cả các lần cài đặt toàn cục trên tài khoản người dùng của bạn:
 
 ```bash
 npm config set allow-scripts=omniroute,better-sqlite3,keytar,@parcel/watcher,@swc/core,protobufjs,esbuild --location=user
@@ -131,7 +137,7 @@ npm install -g omniroute
 
 ### Xác minh quá trình cài đặt
 
-Sau khi cài đặt, hãy chạy công cụ chẩn đoán tích hợp để đảm bảo các binding gốc và môi trường thời gian chạy đang hoạt động bình thường:
+Sau khi cài đặt, hãy chạy công cụ chẩn đoán tích hợp để đảm bảo các binding gốc và môi trường chạy hoạt động bình thường:
 
 ```bash
 omniroute doctor
@@ -806,6 +812,30 @@ vẫn tiếp tục khởi động trong nền và sẽ có thể truy cập đư
 
 Xem [`docs/reference/ENVIRONMENT.md`](../reference/ENVIRONMENT.md) để biết đầy đủ
 chi tiết về `OMNIROUTE_READY_TIMEOUT_MS`.
+
+---
+
+## vấn đề CCR / dedup
+
+Ma trận chẩn đoán cho các công cụ nén CCR (`ccr`) và `session-dedup`. Để có tài liệu tham khảo đầy đủ về người vận hành (điểm đánh dấu, điều kiện tiên quyết, phạm vi của mỗi công cụ, phân trang truy xuất), hãy xem [Công cụ nén → Điều kiện tiên quyết / hướng dẫn vận hành](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+
+| Triệu chứng                                                                                                          | Có khả năng gây ra                                                                                                                                                       | Xác minh                                                                                                                                     | Sửa chữa                                                                                                                                                                                                                                                                                |
+| -------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **MCP 403** — `403 LOCAL_ONLY`                                                                                       | Xác thực vòng lặp bảo vệ tuyến đường, không phải lỗi vận chuyển. Không có `Bearer`, hoặc khóa không có `mcp:connect`/`manage`/`admin`, đã đạt được lộ trình `/api/mcp/`. | Yêu cầu mang tiêu đề no/invalid `Authorization`.                                                                                             | Gửi khóa `Bearer` hợp lệ. Một khóa từ xa có thể chứa `mcp:connect` (cho phép khắc `/api/mcp/` chỉ cục bộ) cộng với phạm vi read/write cụ thể mà nó cần.                                                                                                                                 |
+| **khối không tìm thấy** — `omniroute_ccr_retrieve` từ chối hàm băm                                                   | Hash không phải là giá trị 24-hex hoặc bị sao chép sai hoặc khối đã hết hạn/đã bị loại bỏ.                                                                               | So sánh hàm băm với giá trị 24-hex trong điểm đánh dấu `[CCR retrieve hash=…]` ; kiểm tra `omniroute_ccr_stats` để biết trạng thái cửa hàng. | Sao chép nguyên văn hàm băm 24 hex từ điểm đánh dấu. Nếu khối thực sự đã biến mất, nó đã vượt quá TTL hoặc không bao giờ đến được kho lưu trữ lâu bền (các khối trên 512 KB và mọi khối trên thời gian chạy trên đám mây, chỉ tồn tại trong bộ nhớ và không tồn tại khi khởi động lại). |
+| **CCR không hoạt động** — một khối không được nén (văn bản không thay đổi)                                           | Chặn dưới ngưỡng nén hoặc công cụ / chế độ CCR không hoạt động.                                                                                                          | Kiểm tra `strategy`/`enabled` nén hoạt động và kích thước khối so với ngưỡng.                                                                | Kích hoạt CCR (hoặc chế độ xếp chồng chạy nó) và xác nhận khối đủ lớn để có giá trị lưu trữ. No-op không phải là lỗi — mà là "không có gì để nén".                                                                                                                                      |
+| **điểm đánh dấu trùng lặp** — `[dedup:ref sha=…]` xuất hiện ở đầu ra                                                 | **Nhìn lại có chủ ý** , không phải là mất mát hay sai sót. văn bản `session-dedup` elided đã được gửi trong lượt trước đó của cùng một phiên.                            | Xác nhận văn bản tương tự xuất hiện trước đó trong phiên.                                                                                    | Không làm gì — không gọi một công cụ và không cố gắng xây dựng lại nó. Lần xuất hiện đầu tiên là bản sao chuẩn; lượt hiện tại không bao giờ được viết lại, nó sẽ bị trừ ở lượt sau.                                                                                                     |
+| **Chế độ mã** Các công cụ — `omniroute_ccr_*` không có trong hướng dẫn `tools[]` / CCR không được đưa vào (OpenCode) | Chế độ mã OpenCode (mặc định) chỉ quảng cáo các công cụ gốc cho mô hình, ẩn các công cụ MCP khỏi `tools[]`.                                                              | Kiểm tra mục nhập máy chủ OpenCode MCP để tìm `codemode`.                                                                                    | Đặt `codemode: false` trên mục nhập máy chủ (a** khách hàng** setting) để các công cụ MCP được quảng cáo. Hướng dẫn giao thức truy xuất CCR không hoạt động: máy chủ có tên `omniroute` hiển thị `omniroute_omniroute_ccr_retrieve` và `_` không phải là dấu phân cách phù hợp.         |
+
+Thêm triệu chứng:
+
+| Triệu chứng                                                                                                                | Có khả năng gây ra                                                                                                                                                                         | Sửa chữa                                                                                                                                                                                |
+| -------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Insufficient MCP scopes for <tool>. Missing: <scope>.`                                                                    | Kết quả lỗi công cụ MCP (`isError: true`), không phải HTTP 403. Khóa của người gọi thiếu phạm vi được yêu cầu.                                                                             | Thêm phạm vi từ bảng mỗi công cụ (xem hướng dẫn vận hành). Ví dụ `omniroute_ccr_retrieve` cần `read:compression`.                                                                       |
+| `Unknown Mcp-Session-Id`                                                                                                   | Phiên HTTP có thể phát trực tuyến không hoạt động và được thu thập (`OMNIROUTE_MCP_SESSION_IDLE_MS`); máy chủ trả lời HTTP 404.                                                            | Kết nối lại hoặc khởi động lại phiên — làm** không** xoay phím, thay đổi phạm vi hoặc đổi tên công cụ. Nó không phải là 401/403.                                                        |
+| `JSON Parse error` / `Unterminated string` trong kết quả công cụ                                                           | văn bản công cụ MCP được cắt bớt xung quanh `mcpAccessibility.maxTextChars` ( `50000` mặc định) ở giữa JSON.                                                                               | Use a paged `mode` instead of a bare full: `mode:"grep"`, `mode:"lines"`, `mode:"head"`, `mode:"tail"`, or `mode:"stats"`. Rule of thumb: `chars > 40000` → use a `mode`.               |
+| `Failed to open SSE stream`                                                                                                | Khách hàng nhấn `/api/mcp/sse` singleton kế thừa trong khi vận chuyển là `streamable`.                                                                                                     | Trỏ máy khách vào `/api/mcp/stream` (điểm cuối có thể phát trực tuyến) thay vì `/api/mcp/sse`.                                                                                          |
+| **Nhịp tim stdio chết** — `mcp-heartbeat.json` hiển thị `pidAlive: false` trong khi quá trình vận chuyển HTTP đang diễn ra | Tệp nhịp tim là tệp stdio còn sót lại ( PID cũ hoặc phiên bản khác); Thay vào đó, quá trình vận chuyển HTTP đang được xử lý và báo cáo trạng thái từ `getMcpHttpStatus()` (không ghi tệp). | Không có hành động — việc vận chuyển vẫn ổn. Sự thật là `httpTransport.online` / `startedAt` từ `/api/mcp/status`, không phải tệp nhịp tim. Không khởi động lại máy chủ hoặc xoay phím. |
 
 ---
 

@@ -5,24 +5,30 @@
 ---
 
 > **Sandhedskilde:** `src/lib/guardrails/`
-> **Senest opdateret:** 2026-08-29 — v3.8.51 (herkomsten af Video Bridge-transskriptioner deklareres af kalderen,
-> men er endnu ikke verificeret af serveren — præciseret i henhold til #11661)
+> **Sidst opdateret:** 2026-10-17 — v3.8.52 (tilføjet [Dækning og begrænsninger](#coverage-and-limits):
+> hvilke ruter og svarstier hooksne når, de samlede deaktiveringsheadere (#16412), injektionsblokeringstilstand som en obligatorisk grænse (#16413), og hvad der ser et svar før post-call)
 
-Guardrails håndhæver sikkerhed, politikker og indholdstransformationer ved grænsen
-mellem OmniRoute og upstream-udbydere. Hver guardrail kan inspicere (og
-eventuelt afvise, transformere eller annotere) request-payloads (`preCall`) og
-upstream-svar (`postCall`).
+Guardrails håndhæver sikkerheds-, politik- og indholdstransformationer ved grænsen
+mellem OmniRoute og opstrømsudbydere. Hver guardrail kan inspicere (og
+valgfrit afvise, transformere eller annotere) forespørgsels-payloads (`preCall`) og
+opstrømssvar (`postCall`).
 
-Systemet er **fail-open**: Hvis en guardrail kaster en fejl under kørsel, registrerer
-registreringsdatabasen fejlen og fortsætter med den næste guardrail i stedet for at lade
-requesten fejle. Blokering er en eksplicit beslutning (`block: true`), aldrig et uheld.
+Systemet er **fail-open**: Hvis en guardrail kaster en fejl under udførelsen,
+registrerer registret fejlen og fortsætter med næste guardrail i stedet for at
+lade forespørgslen fejle. Blokering er en eksplicit beslutning (`block: true`),
+aldrig et uheld. Den eneste undtagelse er en afbrudt forespørgsel: Når kalderens
+`signal` afbrydes, afviser en kastende guardrail hook-kørslen i stedet for at
+blive sprunget over.
 
-## Indbyggede Guardrails
+Hooksne kører **ikke** på alle ruter eller alle svar. Læs
+[Dækning og begrænsninger](#coverage-and-limits), før du stoler på en guardrail
+som en sikkerhedskontrol.
 
-Registret indlæser automatisk seks guardrails i prioriteret rækkefølge ved import
-(se `registry.ts` → `registerDefaultGuardrails()`):
+## Indbyggede værn
 
-| Prioritet | Navn                | Trin(e)        | Fil                   |
+Registret indlæser automatisk seks autoværn i prioriteret rækkefølge ved import (se `registry.ts` → `registerDefaultGuardrails()`):
+
+| Prioritet | Navn                | Stadie(r)      | Fil                   |
 | --------- | ------------------- | -------------- | --------------------- |
 | `5`       | `vision-bridge`     | `preCall`      | `visionBridge.ts`     |
 | `6`       | `audio-bridge`      | `preCall`      | `audioBridge.ts`      |
@@ -31,487 +37,265 @@ Registret indlæser automatisk seks guardrails i prioriteret rækkefølge ved im
 | `20`      | `prompt-injection`  | `preCall`      | `promptInjection.ts`  |
 | `95`      | `credential-masker` | `pre` + `post` | `credentialMasker.ts` |
 
-Lavere prioritetstal kører **først**.
+Lavere prioritetsnumre kører** først** .
 
 ### Vision Bridge (`visionBridge.ts`) — Modality Bridge PR-1
 
-Opsnapper billedbærende anmodninger rettet mod **ikke-vision modeller** og enten
-omdirigerer hele anmodningen til en vision-kompatibel model eller erstatter billed-
-delene med tekstbeskrivelser produceret af en konfigurerbar vision-model før
-opstrømskaldet. Dette lader tekst-eneste udbydere gennemsigtigt håndtere
-multimodale payloads.
+GLM 5.3-basismodellen og `glm-5.3-{low,high,max}` har eksplicitte `supportsVision:false` registry/spec metadata. GLM 5.3 Flash-varianterne forbliver native-vision-modeller. Claude Codes `/v1/messages` rute går ind i den delte `handleChat` pre-call autoværnkæde** før** Claude-to-OpenAI oversættelse; indlejrede `Read` -værktøjsresultatbilleder skal beskrives eller håndteres, før oversættelsen løfter dem til OpenAI `image_url` indhold (#17069).
 
-Flow:
+Opsnapper billedbærende anmodninger rettet mod** ikke-visionsmodeller** og enten omdirigerer hele anmodningen til en vision-kapabel model eller erstatter billeddelene med tekstbeskrivelser produceret af en konfigurerbar vision-model før opstrømskaldet. Dette gør det muligt for tekstudbydere på en gennemsigtig måde at håndtere multimodale nyttelaster.
 
-1. Spring over, hvis målmodellen allerede understøtter vision (medmindre den vises i
-   den tvungne-bro-liste `isVisionBridgeForcedModel`).
-2. Uddrag billeddele via `extractImageParts(messages)`
-   (`visionBridgeHelpers.ts`), som delegerer til den **forenede medie-
-   detektor** `detectMediaParts()` i `open-sse/utils/mediaParts.ts` — den
-   eneste sandhedskilde, der deles med kombinationskompatibilitetsfilteret.
-   Ekstraktion er tilladt for top-niveau dele af formerne
-   `replaceImageParts` kan splejse tilbage (ekstrakt↔erstat kontrakt): OpenAI
-   `image_url`, Anthropic base64 `source.type:"base64"`, Anthropic URL
-   `source.type:"url"`, og Responses API `input_image`. Indlejrede hits og
-   indikator-eneste former er kombinationsfiltermateriale og ekstraheres aldrig.
-   Spring over, hvis ingen fundet.
-3. Løs runtime-konfiguration via `resolveVisionBridgeRuntimeSettings()`
-   (`src/shared/constants/modalityBridgeDefaults.ts`): nye `modalityBridge*`
-   indstillingsnøgler vinder; ældre `visionBridge*` nøgler forbliver en **enkelt-cyklus
-   fallback** (tilbagerulningsvindue). Spring over før enhver mediegennemgang, når
-   broen er deaktiveret.
-4. Tilstandsselector (`modalityBridgeVisionMode`, se tabel nedenfor) beslutter
-   omdirigering vs. beskrivelse. Omdirigering returnerer `modifiedPayload` med kun `model`
-   byttet, plus meta `{ rerouted, fromModel, toModel, imagesKept }`.
-5. Beskrivelsessti: begræns billeder til `maxImages`, sammensæt den opgavebevidste prompt,
-   konsulter beskrivelsescachen, kald vision-modellen **parallelt**
-   (`Promise.allSettled`), og injicer `[Image N]: <description>` tekstdele i
-   deres sted. En mislykket beskrivelse giver `null`, og den originale billeddel er
-   **bevaret** (#4012) — undtagen på kombinationsbeskrivelsesstien, når hver
-   beskrivelse mislykkedes, hvor en bekræftet ikke-vision opstrøms får en
-   `(utilgængelig — ingen vision-kompatibel udbyder tilsluttet)` stub i stedet (#8430).
-6. Returner `modifiedPayload` + meta (`imagesProcessed`, `descriptions`,
-   `processingTimeMs`, `visionModel`).
+Flyde:
 
-#### Tilstandsselector (`modalityBridgeVisionMode`)
+1. Spring over, hvis målmodellen allerede understøtter syn (medmindre den vises på listen over tvungen bro `isVisionBridgeForcedModel`).
+2. Uddrag billeddele via `extractImageParts(messages)` (`visionBridgeHelpers.ts`), som uddelegerer til** unified media detector** `detectMediaParts()` i `open-sse/utils/mediaParts.ts` — den eneste kilde til sandhed, der deles med combo-kompatibilitetsfilteret. Ekstraktion er godkendt til de former, `replaceImageParts` kan splejse tilbage (uddraget ↔ erstatte kontrakt): OpenAI `image_url`, Anthropic base64 `source.type:"base64"`, Anthropic URL `source.type:"url"` og Responses API `input_image`. Matchende billeder, der er indlejret i Claude Code `tool_result.content` og Responses tool output, udtrækkes også og erstattes på deres oprindelige stier; Former med kun indikator er kombifiltermateriale og udtrækkes ikke. Spring over, hvis ingen findes.
+3. Løs runtime config via `resolveVisionBridgeRuntimeSettings()` (`src/shared/constants/modalityBridgeDefaults.ts`): nye `modalityBridge*` -indstillingsnøgler vinder; ældre `visionBridge*` -nøgler forbliver en** en-cyklus fallback** (tilbageføringsvindue). Spring over før enhver mediegennemgang, når broen er deaktiveret.
+4. Modevælger (`modalityBridgeVisionMode`, se tabel nedenfor) bestemmer omdirigering vs beskrive. Reroute returnerer `modifiedPayload` med kun `model` ombyttet, plus meta `{ rerouted, fromModel, toModel, imagesKept }`.
+5. Beskriv sti: cap billeder ved `maxImages`, komponer den opgavebevidste prompt, se beskriv cachen, ring til visionsmodellen** parallelt** (`Promise.allSettled`), og injicer `[Image N]: <description>` -tekstdele i deres sted. En mislykket beskrivelse giver `null`: det rå billede bevares for unknown/vision-capable mål (#4012), men en** bekræftet direkte mål kun tekst** eller nul-vision combo får en eksplicit `(unavailable — no vision-capable provider connected)` tekststump for hvert ubeskrevet billede, inklusive delvise fejl og billeder ud over describe-call cap (#17069). Den eksisterende alt-mislykkede kombinationsbeskrivelse for fallback forbliver på plads (#8430).
+6. Returner `modifiedPayload` + meta (`imagesProcessed`, `descriptions`, `processingTimeMs`, `visionModel`).
 
-| Tilstand   | Standard | Adfærd                                                                                                                                                                                                                                                                                                  |
-| ---------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `auto`     | ✔        | Ældre heuristik, uberørt (#6640/#7204): ikke-kombinations-/`auto/` modeller omdirigerer til den bedste vision-model, medmindre den originale model allerede har brugbare legitimationsoplysninger (så beskriv); kombinationsmål beskriver altid.                                                        |
-| `describe` |          | Beskriv altid — omdirigeringsblokken springes helt over; brugerens valgte model svarer altid.                                                                                                                                                                                                           |
-| `reroute`  |          | Tving omdirigering: den legitimationsoplysninger-bevarende model-guard omgås. Omdirigerings-**mål** legitimationsoplysninger-guarden gælder stadig — når der ikke findes et brugbart vision-mål, falder anmodningen igennem til beskrivelse, så rå billeder aldrig når en tekst-eneste backend (#8430). |
+#### Tilstandsvælger (`modalityBridgeVisionMode`)
 
-Tvungne tilstande kortslutter **før** auto-heuristikken kører; `auto`-adfærden
-er byte-identisk med pre-PR-1 guardrailen.
+| Mode       | Misligholdelse | Opførsel                                                                                                                                                                                                                                                                            |
+| ---------- | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `auto`     | ✔              | Ældre heuristik, uberørt (#6640/#7204): ikke-combo/`auto/` -modeller omdirigerer til den bedste vision-model, medmindre den originale model allerede har brugbare legitimationsoplysninger (beskriv derefter); combo-mål beskriver altid.                                           |
+| `describe` |                | Beskriv altid — omdirigeringsblokken springes helt over; brugerens valgte model svarer altid.                                                                                                                                                                                       |
+| `reroute`  |                | Tving omdirigering: Bevar-legitimations-modelbeskyttelsen omgås. Omdirigeringen-** mål** credential guard anvender stadig — når der ikke findes et brugbart synsfelt, broen blokerer med en klar fejl i stedet for at beskrive eller sende råbilleder til et mål, der kun er tekst. |
+
+Tvungen tilstande kortslutter** før** den autoheuristiske kører; `auto` adfærd er byte-identisk med pre-PR-1 autoværnet.
+
+#### API-nøgleomfang (`visionBridgeKeyScope.ts`)
+
+Når den kaldendes API nøgle begrænser `allowedConnections`, kvotepuljer (`allowedQuotas`) eller modeller (`allowedModels` / `blockedModels` / `modelAccessMode: "restricted"` / `disableNonPublicModels`), vælger broen kun omdirigering og beskriver modeller, som nøglen kan bruge, på forbindelser nøglen kan bruge. Beskriv-opkaldet går derefter altid gennem OmniRoute -selv-løkken med `x-omniroute-self-loop-key-id` headeren, så den modtagende chatanmodning håndhæver nøglens forbindelse og modelpolitik igen. `enforceApiKeyPolicy()` ærer kun den overskrift sammen med selvløkkebæreren, så den kan kun indsnævre adgangen, og et id, der ikke løser, afvises.
+
+Hvis ingen synsmodel er tilladt for nøglen, a** bekræftet tekst-kun mål** afviser billedanmodningen lokalt med en klar HTTP 400 i stedet for at videresende billedbytes til en invalid upstream (#17069). For mål med ukendt eller indbygget synsevne bevarer beskriv-stien sin tidligere fejl-åben-adfærd (meta `{ skipped: true, reason: "no_permitted_vision_model" }`). Forespørgsler uden nøgle og nøgler uden disse begrænsninger opfører sig nøjagtigt som før.
 
 #### Opgavebevidst beskrivelsesprompt (`modalityBridgeVisionTaskAware`)
 
-Standard **true**. `composeVisionPrompt()` (`visionBridgeHelpers.ts`) tilføjer
-teksten fra den **sidste brugermeddelelse** (afkortet til 500 tegn) til den grundlæggende
-beskrivelsesprompt, der styrer beskrivelsen mod det, brugeren faktisk spurgte om
-(codex-vision-proxy-mønster) og beder vision-modellen om at transskribere synlig
-tekst. Med flaget slået fra — eller ingen brugertekst — bruges den grundlæggende prompt uændret.
+Misligholdelse** ægte** . `composeVisionPrompt()` (`visionBridgeHelpers.ts`) tilføjer teksten til** sidste brugerbesked** (trunkeret til 500 tegn) til den grundlæggende beskrivelsesprompt, der styrer beskrivelsen mod det, brugeren faktisk spurgte (codex-vision-proxy-mønster) og beder visionsmodellen om at transskribere synlig tekst. Med flaget slået fra — eller ingen brugertekst — bruges basisprompten uændret.
 
-Den beskrivende self-loop's egen OpenAI-kompatible anmodning (`callVisionModelSingle()` i `visionBridgeHelpers.ts`) anmoder altid om `image_url.detail: "high"` — ubetinget, for hver kalder/udbyder, ikke styret af noget klientsignal. Sampling med lav detaljegrad forringer OCR-nøjagtigheden for netop den teksttransskriptionsopgave, denne prompt anmoder om, så selve beskrivelseskaldet anmoder altid om høj detaljegrad, uanset hvilket detaljeniveau den oprindelige indgående anmodning brugte. Dette påvirker kun den interne beskrivelsesanmodningskrop; det ændrer ikke, hvordan OmniRoute videresender kalderens egen `image_url.detail` på den primære anmodning — den standard anvendes separat, og kun for registrerede OpenCode-klienter, i `defaultImageDetail()` (`open-sse/handlers/chatCore/upstreamBody.ts`). Anthropic wire-format-grenen af beskrivelses-self-loopen har intet `detail`-felt og påvirkes ikke af nogen af standardindstillingerne.
+Beskriv selvløkkens egen OpenAI-kompatible anmodning (`callVisionModelSingle()` in `visionBridgeHelpers.ts`) anmoder altid om `image_url.detail: "high"` — ubetinget, for hver caller/provider, ikke gated på noget klientsignal. Sampling med lave detaljer forringer OCR nøjagtigheden for præcis den teksttransskriptionsopgave, som denne prompt beder om, så selve describe-kaldet beder altid om høje detaljer, uanset hvilket detaljeringsniveau den oprindelige indgående anmodning brugte. Dette påvirker kun den interne beskrivelsesanmodningsinstans; det ændrer ikke, hvordan OmniRoute videresender den opkaldendes egen `image_url.detail` på den primære anmodning —, at standarden anvendes separat, og kun for detekterede OpenCode klienter, i `defaultImageDetail()` (`open-sse/handlers/chatCore/upstreamBody.ts`). Anthropic wire-format grenen af describe self-loop har intet `detail` felt og er upåvirket af nogen af standarderne.
 
-#### Beskrivelsesoutputbegrænsning (`modalityBridgeVisionMaxChars`)
+#### Beskriv output cap (`modalityBridgeVisionMaxChars`)
 
-| Nøgle                          | Standard | Område              |
-| :----------------------------- | :------- | :------------------ |
-| `modalityBridgeVisionMaxChars` | `0`      | `0` eller 100–50000 |
+| Nøgle                          | Misligholdelse | Rækkevidde          |
+| ------------------------------ | -------------- | ------------------- |
+| `modalityBridgeVisionMaxChars` | `0`            | `0` eller 100-50000 |
 
-`0` (standard) betyder **ingen begrænsning** — beskrivelsen returneret af `callVisionModel()` videresendes uændret, hvilket bevarer den eksisterende adfærd. Enhver værdi i området 100–50000 afkorter beskrivelsen med et `…`-suffiks, før den indsættes som `[Image N]: <description>` (`VisionBridgeGuardrail.preCall()` i `src/lib/guardrails/visionBridge.ts`). Hæv denne for detaljerede OCR-opgaver, hvor den nedstrømsmodel har brug for den fulde transskription; sænk den for at begrænse tokenforbruget på snakkesalige visionsmodeller. Dashboard-feltet findes på Vision-fanens Avancerede panel (`modality-bridge-max-chars` i `ModalityBridgeVisionTab.tsx`) og klemmer enhver værdi mellem 1 og 99 op til 100-grænsen, mens en eksplicit `0` efterlades uberørt — `0` er en gyldig Zod-værdi i sig selv (`z.union([z.literal(0), z.number().int().min(100).max(50000)])`), ikke blot den "ikke-indstillede" standard.
+`0` (standard) betyder** ingen kasket** — beskrivelsen returneret af `callVisionModel()` sendes uændret igennem, hvilket bevarer den eksisterende adfærd. Enhver værdi i intervallet 100-50000 afkorter beskrivelsen med et `…` suffiks, før den splejses tilbage som `[Image N]: <description>` (`VisionBridgeGuardrail.preCall()` i `src/lib/guardrails/visionBridge.ts`). Hæv dette for detaljetunge OCR opgaver, hvor downstream-modellen har brug for den fulde transskription; sænk den til bundet tokenbrug på chatty vision-modeller. Dashboard-feltet findes på Vision-fanens avancerede panel (`modality-bridge-max-chars` in `ModalityBridgeVisionTab.tsx`) og klemmer enhver værdi mellem 1 og 99 op til 100-gulvet, mens det efterlader en eksplicit `0` urørt — `0` er en gyldig Zod værdi i sig selv (`z.union([z.literal(0), z.number().int().min(100).max(50000)])`), ikke blot "unset"-standarden.
 
-#### Beskrivelsescache (`modalityBridge/bridgeCache.ts`)
+#### Beskriv cache (`modalityBridge/bridgeCache.ts`)
 
-In-memory LRU + TTL-cache for beskrivelsesoutput, delt på tværs af processen.
-Nøgle = `sha256(imageRef + composedPrompt + configuredBridgeModel)` med længde-præfiks-indramning (ingen feltgrænsekollisioner). Modelkomponenten er den **konfigurerede** bro-model, ikke den model, der faktisk svarede — `callVisionModel` kan falde tilbage internt, og nøgleinddeling pr. forsøg ville fragmentere cachen. Mislykkede beskrivelser caches aldrig. Indstillinger:
+In-memory LRU + TTL cache til beskrive output, delt i hele processen. Nøgle = `sha256(imageRef + composedPrompt + configuredBridgeModel)` med længde-præfiks-ramme (ingen feltgrænsekollisioner). Modelkomponenten er** konfigureret** bridge-model, ikke den model, der faktisk besvarede — `callVisionModel` kan falde tilbage internt, og indtastning pr. forsøg ville fragmentere cachen. Mislykkede beskrivelser gemmes aldrig i cache. Indstillinger:
 
-| Nøgle                           | Standard | Område  |
-| :------------------------------ | :------- | :------ |
-| `modalityBridgeCacheEnabled`    | `true`   | —       |
-| `modalityBridgeCacheTtlMinutes` | `60`     | 1–1440  |
-| `modalityBridgeCacheMaxEntries` | `200`    | 10–5000 |
+| Nøgle                           | Misligholdelse | Rækkevidde |
+| ------------------------------- | -------------- | ---------- |
+| `modalityBridgeCacheEnabled`    | `true`         | —          |
+| `modalityBridgeCacheTtlMinutes` | `60`           | 1–1440     |
+| `modalityBridgeCacheMaxEntries` | `200`          | 10–5000    |
 
-#### Fjernbillednormalisering (self-loop beskrivelse/base64-hentning)
+#### Fjernbillednormalisering (selv-loop describe/base64 hentning)
 
-Når broen selv henter et **fjernbillede** — Anthropic-beskrivelses-self-kaldet og claude-wire-format base64-konverteringen (`ensureBase64ImagesForClaudeWire`), begge via `fetchRemoteImageAsDataUri()` i `visionBridgeHelpers.ts` — videresendes den resulterende data-URI gennem `normalizeDataUri()` (`open-sse/utils/imageNormalize.ts`), før den indlejres i vision-modelanmodningen. Overdimensionerede billeder nedskaleres til en **2048px lang kant** (svarende til den størrelsesbegrænsning OpenAI/Anthropic allerede anvender server-side), hvilket reducerer upload-bytes/latens uden at ændre, hvad visionsmodellen ser. Størrelsesændring bruger `sharp`, indlæst via dynamisk import: på en platform, hvor dens native binære fil ikke kan indlæses, **kaster `normalizeDataUri()` aldrig en fejl** — den falder tilbage til en videresendelse af de originale bytes, så beskrivelses-/base64-konverteringsstien altid fortsætter med at fungere. Ikke-billedbytes (en hentning, der ikke returnerede et afkodeligt billede) videresendes også uberørt. Denne normalisering er begrænset til billeder, broen henter til sit eget self-kald — den anvendes aldrig på kalderens rå passthrough-payload, i overensstemmelse med princippet om opt-in-only mutation (Hard Rule #20).
+Når broen henter en** fjern** selve billedet — Anthropic beskriver selvopkald og claude-wire-format base64 konvertering (`ensureBase64ImagesForClaudeWire`), begge via `fetchRemoteImageAsDataUri()` i `visionBridgeHelpers.ts` — de resulterende data URI sendes gennem `normalizeDataUri()` (`open-sse/utils/imageNormalize.ts`) før de indlejres i vision-model anmodningen. Overdimensionerede billeder nedskaleres til en** 2048px lang kant** (der matcher størrelsesændringshætten OpenAI/Anthropic anvender allerede server-side), hvilket skærer upload bytes/latency uden at ændre, hvad visionmodellen ser. Ændring af størrelse bruger `sharp`, indlæst via dynamisk import: på en platform, hvor dens oprindelige binære fil ikke kan indlæses, `normalizeDataUri()`** kaster aldrig** — det falder tilbage til en passthrough af de originale bytes, så describe/base64-conversion stien bliver altid ved med at fungere. Ikke-billedbytes (en hentning, der ikke returnerede et afkodebart billede) sendes også urørt igennem. Denne normalisering er beregnet til billeder, som broen henter for sit eget selvopkald — den anvendes aldrig på den, der ringer, ubehandlet, i overensstemmelse med opt-in-only mutationsprincippet (Hard Rule #20).
 
-#### Indstillingsskema + migration
+#### Indstillinger skema + migration
 
-De nye `modalityBridge*`-nøgler er Zod-validerede i `updateSettingsSchema` (`src/shared/validation/settingsSchemas.ts`): `modalityBridgeVisionEnabled`, `modalityBridgeVisionMode`, `modalityBridgeVisionModel`, `modalityBridgeVisionTaskAware`, `modalityBridgeVisionPrompt`, `modalityBridgeVisionTimeout`, `modalityBridgeVisionMaxImages`, `modalityBridgeVisionMaxChars`, `modalityBridgeCache*`-trioen og `modalityBridgeAudio*`-gruppen, der bruges af Audio Bridge. Migration `141_modality_bridge_settings.sql` kopierer eksisterende ældre `visionBridge*`-værdier til de matchende nye nøgler (idempotent, overskriver aldrig en operatør-indstillet `modalityBridge*`-værdi); de ældre nøgler accepteres fortsat som en læse-fallback i én udgivelsescyklus.
+De nye `modalityBridge*` nøgler er Zod-validerede i `updateSettingsSchema` (`src/shared/validation/settingsSchemas.ts`): `modalityBridgeVisionEnabled`, `modalityBridgeVisionMode`, `modalityBridgeVisionModel`, `modalityBridgeVisionTaskAware`, `modalityBridgeVisionPrompt`, `modalityBridgeVisionTimeout`, `modalityBridgeVisionMaxImages`, `modalityBridgeVisionMaxChars`, `modalityBridgeCache*` -trioen og `modalityBridgeAudio*` gruppen, der bruges af Audio Bridge. Migration `141_modality_bridge_settings.sql` kopierer eksisterende ældre `visionBridge*` -værdier til de matchende nye nøgler (idempotent, overskriver aldrig en operatørindstillet `modalityBridge*` værdi); de ældre nøgler forbliver accepteret som en læsbar reserve i én udgivelsescyklus.
 
-#### Gennemsigtighedsheader + statistik
+#### Transparency header + statistik
 
-Beskrivelses-transformerede svar bærer `x-omniroute-modality-bridge: image->text;model=<visionModel>;parts=<n>` (bygget af `buildModalityBridgeHeader()` i `modalityBridge/bridgeStats.ts`, stemplet af `withModalityBridgeHeader()` i `src/sse/handlers/chatHelpers.ts`). Omdirigerede anmodninger får **ingen** header — payload'en var uberørt, og modeludskiftningen er allerede synlig i svartekstens `model`-felt.
+Beskriv-transformerede svar bærer `x-omniroute-modality-bridge: image->text;model=<visionModel>;parts=<n>` (bygget af `buildModalityBridgeHeader()` i `modalityBridge/bridgeStats.ts`, stemplet af `withModalityBridgeHeader()` i `src/sse/handlers/chatHelpers.ts`). Omdirigerede anmodninger får** ingen** header — nyttelasten var uberørt, og modelbyttet er allerede synligt i svarlegemets `model` felt.
 
-`GET /api/modality-bridge/stats` (management-godkendelse, samme niveau som `GET /api/settings`) returnerer de in-memory tællere pr. modalitet `{ attempts, successes, bridged, cacheHits, failures, totalLatencyMs, latencySamples, averageLatencyMs, lastUsedAt }` for `vision`, `audio` og `video`. `averageLatencyMs` bruger `latencySamples`, ikke alle forsøg, som sin nævner; en operation uden timing fabrikerer ikke en nul-millisekunds prøve. `bridged` forbliver det bagudkompatible alias for vellykkede konverteringer; mislykkede forsøg øger den ikke. Tællere nulstilles ved procesgenstart som designet (telemetri, ikke regnskab).
+`GET /api/modality-bridge/stats` (management auth, samme niveau som `GET /api/settings`) returnerer tællerne i hukommelsen pr. modalitet `{ attempts, successes, bridged, cacheHits, failures, totalLatencyMs, latencySamples, averageLatencyMs, lastUsedAt }` for `vision`, `audio` og `video`. `averageLatencyMs` bruger `latencySamples`, ikke alle forsøg, som sin nævner; en operation uden timing fremstiller ikke en nul millisekunders prøve. `bridged` forbliver det bagudkompatible alias for vellykkede konverteringer; mislykkede forsøg øger det ikke. Tællere nulstilles ved procesgenstart ved design (telemetri, ikke regnskab).
 
-#### Dashboard-konfiguration
+#### Dashboard konfiguration
 
-Den dedikerede dashboard-side er
-`/dashboard/settings/modality-bridge`. Dens URL-adresserbare faner `Vision`, `Audio`
-og `Video` bevarer forespørgselsparametre, mens de skifter `tab`-værdien.
-Vision-fanen viser aktivering, tilstand, modelvalg (inklusive den automatiske
-standard), opgavebevidst prompting, avancerede timeout-/billede-/beskrivelseslængde-/cache-
-grænser, runtime-tællere og en beskyttet eksempelanmodning. Audio-fanen er også live: den viser
-aktivering, en STT-kun modelvælger med Auto, timeout-/max-clip-grænser, lydtællere
-og en `input_audio` eksempeltester. Video-fanen er funktionel: den rapporterer
-FFmpeg/ffprobe runtime-tilstanden — en af fire eksplicitte UI-tilstande (`unknown` mens
-proben er i gang eller ikke kunne fuldføres, `restricted` på en ikke-loopback
-dashboard-host, hvor proben springes over på klientsiden, `unavailable` når den er probet
-og bekræftet manglende, eller `available` med FFmpeg/ffprobe-versionerne) — bevarer
-aktiverings-/model-/frame-/video-/timeout-grænser, filtrerer modelvælgeren til vision-kompatible
-modeller og viser videotællere.
+Den dedikerede dashboard-side er `/dashboard/settings/modality-bridge`. Dens URL-adresserbare `Vision`, `Audio` og `Video` faner bevarer forespørgselsparametrene, mens `tab` værdien skiftes. Fanen Vision afslører aktivering, tilstand, modelvalg (inklusive automatisk standard), opgavebevidste prompter, avancerede timeout/image/description-length/cache grænser, runtime-tællere og en beskyttet prøveanmodning. Audio-fanen er også live: den afslører aktivering, en STT-kun modelvælger med Auto, timeout/max-clip grænser, lydtællere og en `input_audio` prøvetest. Video-fanen er funktionel: den rapporterer FFmpeg/ffprobe runtime-tilstanden — en af fire eksplicitte UI tilstande (`unknown` mens sonden er i flyvning eller ikke kunne fuldføre, `restricted` på en non-loopback dashboard-vært — hvor sonden springes over på klientsiden, `unavailable` én gang probet og bekræftet mangler, eller `available` med FFmpeg/ffprobe modellen-versionerne, filtret for at vælge enable/model/frame/video/timeout -modellen) vision-kompatible modeller og eksponerer videotællere.
 
-Det tidligere Vision Bridge-kort under AI-indstillinger er et kompatibilitetslink til den
-nye side; det ejer ikke længere en anden kopi af formularen. Medieudbydere linker også
-Image-to-Text- og Speech-to-Text-arbejdsgange til de tilsvarende Modality
-Bridge-faner uden at fjerne den eksisterende Speech-to-Text playground.
+Det tidligere Vision Bridge-kort under AI indstillinger er et kompatibilitetslink til den nye side; det ejer ikke længere en anden kopi af formularen. Medieudbydere forbinder også billed-til-tekst- og tale-til-tekst-arbejdsgange til de tilsvarende Modality Bridge-faner uden at fjerne den eksisterende tale-til-tekst-legeplads.
 
-**Self-loop adgangsbypass:** når describe-kaldet rutes gennem OmniRoutes
-egen `/v1` self-loop (ikke-standard udbydermodellen), sender underanmodningen
-`x-omniroute-admission-bypass: internal` og godkendes med den løste
-self-loop-legitimationsoplysning — den lokale `sk_omniroute` sentinel i lokal tilstand, eller den
-operatørkonfigurerede `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` miljønøgle (#1350), så
-`REQUIRE_API_KEY=true` implementeringer stadig kan køre describe-kaldet. Bypasset
-respekteres kun for disse præcise legitimationsoplysninger, så eksterne klienter kan ikke
-bruge headeren til at omgå adgang.
+**Self-loop adgangsbypass:** når de beskriver opkaldsruter gennem OmniRoute egen `/v1` selv-sløjfe (ikke-standard udbydermodel), sender underforespørgslen `x-omniroute-admission-bypass: internal` og godkendes med den løste selvsløjfe-legitimation — den lokale `sk_omniroute` vagt i lokal tilstand, eller den operatørkonfigurerede `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` env-nøgle (#1350 deployeringer kan stadig køre `REQUIRE_API_KEY=true` så opkaldet kan køres). Bypasset er kun hædret for de nøjagtige legitimationsoplysninger, så eksterne kunder kan ikke bruge overskriften til at springe optagelse over.
 
-Ældre standardindstillinger findes i `src/shared/constants/visionBridgeDefaults.ts`; de
-nye tilstands-/opgavebevidste/cache-standardindstillinger og indstillingsopløseren findes i
-`src/shared/constants/modalityBridgeDefaults.ts`. Guardrailen eksponerer en
-`deps` konstruktørmulighed, så tests kan injicere falske `getSettings`- og
-`callVisionModel`-implementeringer.
+Ældre standarder lever i `src/shared/constants/visionBridgeDefaults.ts`; de nye mode/task-aware/cache -standardindstillinger og indstillingsresolveren lever i `src/shared/constants/modalityBridgeDefaults.ts`. Autoværnet afslører en `deps` konstruktør-mulighed, så test kan injicere falske `getSettings` og `callVisionModel` -implementeringer.
 
 ### Audio Bridge (`audioBridge.ts`) — Modality Bridge PR-3
 
-Opsnapper lydbærende chatanmodninger, før de når et mål, der ikke er
-kendt for at acceptere lydinput. Den omdirigerer aldrig chatanmodningen: lyddelene
-transskriberes via det eksisterende OpenAI-kompatible multipart-endepunkt, og den
-valgte chatmodel fortsætter med teksttransskriptioner.
+Opsnapper lydbærende chatanmodninger, før de når et mål, der ikke er kendt for at acceptere lydinput. Det omdirigerer aldrig chatanmodningen: lyddele transskriberes gennem det eksisterende OpenAI-kompatible multipart-slutpunkt, og den valgte chatmodel fortsætter med teksttransskriptioner.
 
-Flow:
+Flyde:
 
-1.  Løs `supportsAudio` via `getResolvedModelCapabilities()`. Eksplicit
-    provider-registry metadata vinder, derefter statisk model metadata, derefter synkroniseret
-    `modalities_input`. En erklæret inputliste uden `audio` er `false`; ingen
-    kapacitetsbeviser forbliver `null`. Både `false` og `null` aktiverer den
-    konservative bridge, mens `true` omgår den.
-2.  Løs `modalityBridgeAudio*`-indstillinger og udtræk spliceable top-niveau
-    lyddelene fra hver besked via den delte `detectMediaParts()`-detektor.
-    Understøttede wire shapes er OpenAI `input_audio`, `audio_url` og
-    `source.media_type: "audio/*"`. Indlejret lyd detekteres til routing, men ikke
-    fjernes af splice-stien. Arbejdet er begrænset af `modalityBridgeAudioMaxClips`;
-    senere dele forbliver uberørte.
-3.  Respekter en konfigureret `provider/model`, eller lad `selectAudioBridgeModel()` gennemgå
-    `AUDIO_TRANSCRIPTION_PROVIDERS` i stabil katalogrækkefølge og vælge den første
-    model med en brugbar aktiv provider-legitimationsoplysning.
-4.  `callAudioTranscription()` konverterer base64/data-URI-lyd til en multipart
-    `file`, eller downloader en fjern `audio_url` via den offentlige outbound
-    guard med DNS-pinning og en 25 MB grænse. Den POSTer derefter filen og den
-    valgte model til den lokale `/v1/audio/transcriptions` self-loop, godkendt med
-    `resolveSelfLoopBearer()`. Den eksisterende transskriptionsrute udfører normal
-    legitimationsopslags, cooldown-/rate-limit-håndtering og provider-dispatch.
-5.  Succesfulde kald erstatter deres dele med `[Audio N]: <transcript>`. Kald
-    kører med `Promise.allSettled`: en individuel fejl bevarer den originale
-    lyddel (#4012 kontrakt). Hvis hvert kald fejler, og målet er bevist
-    `supportsAudio === false`, bliver delene
-    `[Audio N]: (unavailable — no STT provider connected)` (#8430 kontrakt). For
-    et ukendt mål (`null`) forbliver et resultat med alle fejl uberørt. Et bevist
-    tekst-kun mål uden brugbar STT-legitimationsoplysning modtager den samme eksplicitte
-    stub uden at foretage et netværkskald.
+1. Løs `supportsAudio` til `getResolvedModelCapabilities()`. Eksplicitte udbyder-registreringsmetadata vinder, derefter statiske modelmetadata og derefter synkroniseret `modalities_input`. En erklæret inputliste uden `audio` er `false`; ingen kapacitetsbevis er tilbage `null`. Både `false` og `null` aktiverer den konservative bro, mens `true` omgår den.
+2. Løs `modalityBridgeAudio*` -indstillinger og udtræk splejsbare lyddele på øverste niveau fra hver besked gennem den delte `detectMediaParts()` detektor. Understøttede ledningsformer er OpenAI `input_audio`, `audio_url` og `source.media_type: "audio/*"`. Indlejret lyd detekteres til routing, men fjernes ikke af splejsningsstien. Arbejdet er begrænset af `modalityBridgeAudioMaxClips`; senere dele forbliver urørt.
+3. Ændr en konfigureret `provider/model`, eller lad `selectAudioBridgeModel()` gå `AUDIO_TRANSCRIPTION_PROVIDERS` i stabil katalogrækkefølge, og vælg den første model med en brugbar aktiv udbyder legitimation.
+4. `callAudioTranscription()` konverterer base64/data-URI lyd til en `file` med flere dele eller downloader en fjern- `audio_url` gennem den offentlige kun udgående vagt med DNS pinning og en 25 MB bundet. Den POSTs derefter filen og den valgte model til den lokale `/v1/audio/transcriptions` -selvløkke, godkendt med `resolveSelfLoopBearer()`. Den eksisterende transkriptionsrute udfører normalt legitimationsopslag, cooldown/rate-limit håndtering og udbyderafsendelse.
+5. Succesfulde opkald erstatter deres dele med `[Audio N]: <transcript>`. Opkald kører med `Promise.allSettled`: en individuel fejl bevarer den originale lyddel (#4012 kontrakt). Hvis hvert opkald mislykkes, og målet er bevist `supportsAudio === false`, bliver delene `[Audio N]: (unavailable — no STT provider connected)` (#8430 contract). For et ukendt mål (`null`) forbliver et resultat med alle fejl uberørt. Et dokumenteret tekst-kun mål uden brugbare STT legitimationsoplysninger modtager den samme eksplicitte stub uden at foretage et netværksopkald.
 
-Succesfulde transskriptioner bruger den procesdækkende Modality Bridge LRU/TTL-cache.
-Nøglen kombinerer lydreferencen, den stabile `audio-transcription` operationsetiket
-og den valgte STT-model; fejl caches aldrig. Lydforsøg opdaterer de delte
-`bridged`, `cacheHits`, `failures` og `lastUsedAt` tællere.
-Transformerede svar bærer
-`x-omniroute-modality-bridge: audio->text;model=<sttModel>;parts=<n>`; uberørte
-anmodninger modtager ikke et Audio Bridge-segment.
+Vellykkede transskriptioner bruger den procesdækkende Modality Bridge LRU/TTL cache. Tasten kombinerer lydreferencen, den stabile `audio-transcription` driftsetikette og den valgte STT model; fejl gemmes aldrig i cachen. Lydforsøg opdaterer de delte `bridged`, `cacheHits`, `failures` og `lastUsedAt` tællere. Transformerede svar bærer `x-omniroute-modality-bridge: audio->text;model=<sttModel>;parts=<n>`; uberørte anmodninger modtager ikke et Audio Bridge-segment.
 
-Runtime-indstillinger er DB-understøttede og Zod-validerede:
+Kørselsindstillinger er DB-støttede og Zod-validerede:
 
-| Nøgle                         | Standard | Område            |
-| :---------------------------- | :------- | :---------------- |
-| `modalityBridgeAudioEnabled`  | `true`   | —                 |
-| `modalityBridgeAudioModel`    | `""`     | Auto eller STT ID |
-| `modalityBridgeAudioTimeout`  | `60000`  | 1000–300000       |
-| `modalityBridgeAudioMaxClips` | `3`      | 1–10              |
+| Nøgle                         | Misligholdelse | Rækkevidde        |
+| ----------------------------- | -------------- | ----------------- |
+| `modalityBridgeAudioEnabled`  | `true`         | —                 |
+| `modalityBridgeAudioModel`    | `""`           | Auto eller STT ID |
+| `modalityBridgeAudioTimeout`  | `60000`        | 1000–300000       |
+| `modalityBridgeAudioMaxClips` | `3`            | 1–10              |
 
-Den delte cache forbliver kontrolleret af `modalityBridgeCacheEnabled`,
-`modalityBridgeCacheTtlMinutes` og `modalityBridgeCacheMaxEntries`.
+Den delte cache forbliver styret af `modalityBridgeCacheEnabled`, `modalityBridgeCacheTtlMinutes` og `modalityBridgeCacheMaxEntries`.
 
 ### Video Bridge (`videoBridge.ts`, `videoBridgePipeline.ts`)
 
-Opsnapper video-dele på topniveau i Chat Completions `messages` og Responses API `input`, før et mål uden kendt indbygget videounderstøttelse kaldes.
-Understøttede former er `input_video`, `video_url`, `video_source`, HTTPS-URL'er,
-og `data:video/*;base64,...` data-URI'er. Almindelige filnavne i tekst behandles
-ikke som video.
+Opsnapper videodele på øverste niveau i Chat Completions `messages` og Responses API `input` før et mål uden kendt indbygget videounderstøttelse kaldes. Understøttede former er `input_video`, `video_url`, `video_source`, HTTPS URLs og `data:video/*;base64,...` data URIs. Almindelige filnavne i tekst behandles ikke som video.
 
-`VideoBridgeGuardrail.preCall` (`videoBridge.ts`) ejer anmodningsgennemgang,
-kapacitets-/politik-tjekket, aggregering pr. anmodning og svar-payload'en.
-Arbejde pr. video – erhvervelse, hele-resultat-cachen, beskrivelse af en billedsekvens
-(som fletter enhver opkalds-erklæret lydtransskription), og metrics/abort/oprydning pr. forsøg –
-er skjult bag `processVideoPart` i `videoBridgePipeline.ts`, kaldt én gang pr. videodel
-inde i `preCall`'s loop.
-Dette modul definerer også de eksplicitte portgrænser `VideoMediaBrokerPort`
-(anskaffelse af bytes og udtrækning af samplede billeder), `VideoAudioTranscriptionPort`
-(fletning af en opkalds-erklæret lydtransskription med de samplede billedtekster) og
-`VideoDrilldownPort` (grænsen for billed-drilldown-persistens; endnu ikke forbundet
-til `processVideoPart` – kun den separate `/api/modality-bridge/video/drilldown`-rute
-skriver drilldown-poster i dag).
+`VideoBridgeGuardrail.preCall` (`videoBridge.ts`) ejer anmodningsgennemgang, capability/policy -kontrollen, aggregering pr. anmodning og svarnyttelasten. Per video arbejde — erhvervelse, hele-resultat cachen, der beskriver en rammesekvens (som fusionerer enhver opkalds-erklæret lydtransskription), og per-forsøg metrics/abort/cleanup — er skjult bag `processVideoPart` i `videoBridgePipeline.ts`, kaldet én gang pr. videodel inde i `preCall` loop. Dette modul definerer også de eksplicitte portgrænser `VideoMediaBrokerPort` (indhentning af bytes og udtrækning af samplede rammer), `VideoAudioTranscriptionPort` (sammensmeltning af et opkalds-erklæret lydudskrift med de samplede billedtekster) og `VideoDrilldownPort` (den gamle råbutiksform). Produktion STT og frame retention er sammensat omkring den beskrivende port gennem `createVideoSttAdapter` og `createVideoDrilldownAdapter`; sidstnævnte bruger den delte livscyklus med uigennemsigtigt håndtag.
 
-Den offentlige `/v1`-anmodningssti importerer eller påkalder aldrig en underproces.
-Fjernvideoer downloades under en grænse på 50 MiB; inline base64-videoer har en
-konservativ grænse på 36 MiB afkodet pr. video, så model/beskeder/indramnings-kuverten
-kan forblive inden for den offentlige JSON-anmodningsadgangsgrænse på 50 MiB.
-Inline længde- og afkodet-størrelsesestimater kontrolleres før allokering. HTTPS er
-påkrævet på den oprindelige fjern-URL og hver omdirigering, ved brug af den eksisterende
-kun-offentlige udgående guard med DNS-pinning. Bytesene krydser derefter den nøjagtige interne
-`POST /api/modality-bridge/video/extract`-brokergrænse. Denne rute er både
-`LOCAL_ONLY` og `SPAWN_CAPABLE`, accepterer kun en pr. proces autentificeret,
-betroet-loopback-anmodning og accepterer aldrig en URL, filsystemsti, eksekverbar
-eller argumentliste. API'ens body-size pipeline og handlerens inkrementelle body-læser
-håndhæver uafhængigt en 50 MiB broker-inputgrænse. Dens begrænsede kø kører
-én udtrækning ad gangen, tillader fire ventende job og begrænser ventende input til
-100 MiB.
+Den offentlige `/v1` -anmodningssti importerer eller påkalder aldrig en underproces. Fjernvideoer downloades under en 50 MiB -grænse; inline base64-videoer har en konservativ 36 MiB afkodet per-video cap, så model/messages/framing konvolutten kan forblive inden for den offentlige JSON anmodningsadgangsgrænse på 50 MiB. Inline længde og afkodede størrelse estimater kontrolleres før allokering. HTTPS er påkrævet på den oprindelige eksterne URL og hver omdirigering, ved at bruge den eksisterende udgående vagt, der kun er offentligt tilgængelig, med DNS pinning. Bytene krydser derefter den nøjagtige interne `POST /api/modality-bridge/video/extract` mæglergrænse. Denne rute er både `LOCAL_ONLY` og `SPAWN_CAPABLE`, accepterer kun en per-proces autentificeret, betroet loopback-anmodning og accepterer aldrig en URL, filsystemsti, eksekverbar eller argumentliste. API -rørledningen i kropsstørrelse og handlerens inkrementelle kropslæser håndhæver uafhængigt et mæglerindgangsloft på 50 MiB. Dens afgrænsede kø kører én udtrækning ad gangen, tillader fire afventende job og begrænser afventende input ved 100 MiB.
 
-Inde i brokeren læser `ffprobe` en privat lokal fil; den faste format-tilladelsesliste
-udelukker afspilningsliste- og manifestformater. For tilladte MOV-familie-containere
-forbliver eksterne MOV-datareferencer deaktiveret som standard, og den
-faste kommando vælger ikke at bruge dem. Både `ffprobe` og `ffmpeg` bruger
-`file`-only protokol-hvidlisten, én tråd, faste argument-arrays, ingen shell,
-og eksekverbare filer løst fra `PATH`. Vedhæftede billed-cover-streams er ikke
-afspilbare kandidater. Alle afspilbare streams skal opfylde grænserne, og en
-eksplicit standardstream foretrækkes før den deterministiske laveste-indeks-fallback.
-Videoer er begrænset til 600 sekunder, 8.192 pixels pr. dimension og
-33.554.432 kilde-pixels. FFmpeg sampler 1-16 midtpunkt JPEG-billeder, skalerer ned
-den lange kant til højst 1.024 pixels uden at opskalere mindre input, og
-modtager aldrig en URL. Sampling er `uniform` som standard. De valgfrie
-`scene_aware` og eksperimentelle `segment_aware` politikker udfører et yderligere
-fast FFmpeg-pas over den allerede validerede lokale stream, vælger afgrænsede
-`showinfo`-scene-tidsstempler og falder deterministisk tilbage til de samme
-uniforme midtpunkter ved detektorfejl, timeout, fejlformateret output eller et
-tomt kandidatsæt. Segment-aware-tilstand allokerer midtpunktsprøver proportionalt
-med de validerede sceneintervaller; segment-aware-evidens og fallback-adfærd er
-beskrevet nedenfor. Den hårde 16-billeders grænse anvendes efter valg i enhver politik.
-Når en scene-aware-anmodning kun har et et-billedes budget, bruger den det uniforme
-midtpunkt af det aktive fuld-video- eller fokusvindue og rapporterer `policyEffective: uniform`:
-et enkelt valgt scenebillede kan ikke bevare begge tidsmæssige ender. En opkalder kan
-eventuelt angive et endeligt fokusvindue (`start`/`end` sekunder); grænserne klemmes
-til mediets varighed, omvendte eller ikke-endelige vinduer afvises, og alle samplingpolitikker
-udføres kun inden for det normaliserede interval. Det resulterende vindue er inkluderet
-i samplingmetadata og i det ikke-betroede beskrivelsespræfiks, så downstream-modeller
-kan skelne et fokuseret uddrag fra den fulde tidslinje.
+Inde i mægleren læser `ffprobe` en privat lokal fil; Tilladelseslisten med fast format udelukker playliste- og manifestformater. For tilladte MOV-familiebeholdere forbliver eksterne MOV -datareferencer deaktiveret som standard, og den faste kommando tilmelder sig dem ikke. Både `ffprobe` og `ffmpeg` bruger `file` -only -protokolhvidlisten, én tråd, faste argumentarrays, ingen shell og eksekverbare filer løst fra `PATH`. Forsidestreams med vedhæftede billeder er ikke spilbare kandidater. Alle spilbare streams skal opfylde grænserne, og en eksplicit standardstream foretrækkes før det deterministiske laveste indeks faldback. Videoer er begrænset til 600 sekunder, 8.192 pixels pr. dimension og 33.554.432 kildepixels. FFmpeg sampler 1-16 midtpunkts JPEG rammer, nedskalerer den lange kant til højst 1.024 pixels uden at opskalere mindre input og modtager aldrig en URL. Sampling er `uniform` som standard. De valgfri `scene_aware` og eksperimentelle `segment_aware` politikker udfører en yderligere fast FFmpeg passage over den allerede validerede lokale strøm, vælger afgrænsede `showinfo` scenetidsstempler og falder deterministisk tilbage til de samme ensartede midtpunkter på detektorfejl, timeout, forkert udformet output eller et tomt kandidatsæt. Segment-bevidst tilstand allokerer midtpunktsprøver proportionalt med de validerede sceneintervaller; segmentbevidst evidens og fallback-adfærd er detaljeret nedenfor. Den hårde 16-ramme hætte påføres efter valg i hver politik. Når en scenebevidst anmodning kun har et budget på ét billede, bruger den det ensartede midtpunkt af det aktive fuldvideo- eller fokusvindue og rapporterer `policyEffective: uniform`: en enkelt valgt sceneramme kan ikke bevare begge tidsmæssige ender. En opkalder kan eventuelt give et endeligt fokusvindue (`start`/`end` sekunder); grænser er fastspændt til medievarigheden, omvendte eller ikke-endelige vinduer afvises, og alle samplingspolitikker udføres kun inden for det normaliserede interval. Det resulterende vindue er inkluderet i stikprøvemetadata og i det upålidelige beskrivelsespræfiks, så downstream-modeller kan skelne et fokuseret uddrag fra den fulde tidslinje.
 
-Semantisk billedtekstfokus er en separat, eksplicit indstilling. Standard `full`-analysetilstanden
-bevarer den eksisterende billedprompt og videresender aldrig anmodningstekst til billedtekstmodellen.
-I `focused`-tilstand læser broen kun den seneste ikke-tomme bruger-forfattede `text`/`input_text`
-fra den samme Chat- eller Responses-container, normaliserer den til NFC, kollapser
-kontroltegn og mellemrum og begrænser den til 500 Unicode-kodepunkter. Et tomt resultat
-falder tilbage til den nøjagtige `full`-prompt. Et brugbart hint serialiseres som JSON
-i en dedikeret ikke-betroet-brugerkontekstblok og må kun prioritere observerbare detaljer;
-det kan ikke tilsidesætte den separate advarsel mod at følge instruktioner, der er synlige
-eller hørbare i mediet. Tekstuelt fokus udleder aldrig `start`/`end` eller ændrer den tidsmæssige sampler.
+Semantisk billedtekstfokus er en separat, eksplicit indstilling. Standard `full` -analysetilstanden bevarer den eksisterende rammeprompt og videresender aldrig anmodningstekst til billedtekstmodellen. I `focused` tilstand læser broen kun den seneste ikke-tomme bruger-autoriserede `text`/`input_text` fra den samme chat- eller svarbeholder, normaliserer den til NFC, kollapser kontroltegn og mellemrum og begrænser den til 500 Unicode-kodepunkter. Et tomt resultat falder tilbage til den nøjagtige `full` prompt. Et brugbart hint serialiseres som JSON i en dedikeret untrusted-user-context-blok og må kun prioritere observerbare detaljer; den kan ikke tilsidesætte den separate advarsel mod at følge instruktioner, der er synlige eller hørbare i mediet. Tekstfokus udleder aldrig `start`/`end` eller ændrer den tidsmæssige sampler.
 
-#### FU-07 strukturel segmentevidens
+#### FU-07 strukturelt segment bevis
 
-`segment_aware` bruger et afgrænset foranalysepas over den allerede validerede
-lokale videostream. Den faste filterkæde skalerer først til højst 320 pixels bred,
-registrerer sceneskift og frosne intervaller, og sampler derefter med 1 billede pr. sekund
-for sløring, gennemsnitlig luma og rumlig/tidsmæssig information. Passet er
-begrænset til 600 strukturelle prøver, én FFmpeg/filtertråd, de samme
-`file`-only protokol- og container-tilladelseslister, en 1 MiB proces-outputgrænse
-og højst 30 sekunder inden for brokerens delte abort/deadline. Det accepterer aldrig
-en kommando, et filter, en sti eller en URL fra anmodningen.
+`segment_aware` bruger et afgrænset præanalysepass over den allerede validerede lokale videostream. Den faste filterkæde skalerer først til højst 320 pixels bred, registrerer sceneændringer og frosne intervaller, og sampler derefter med 1 billede pr. sekund for sløring, gennemsnitlig luma og spatial/temporal information. Passet er begrænset til 600 strukturelle prøver, én FFmpeg/filter tråd, den samme `file` -only -protokol og containertilladelseslister, en 1 MiB proces-output bundet, og højst 30 sekunder inde i mæglerens delte abort/deadline. Den accepterer aldrig en kommando, filter, sti eller URL fra anmodningen.
 
-De strukturelle værdier er deterministisk sampling-evidens, ikke semantisk videoforståelse. De udleder ikke subjekter, handlinger, billedtekster, tale eller brugerintention. Scene- og frysegrænser danner segmenter; frysedækning, sløring, eksponering, rumlig detalje og tidsmæssig ændring påvirker kun, hvordan det eksisterende budget på 1-16 billeder allokeres. Et fuldt frosset segment er begrænset til ét billede, mens ikke-frosne segmenter konkurrerer om det resterende budget. Når grænserne overstiger antallet af billeder, bevares en ensartet tidslinjedækning, så hurtige tidlige klip ikke kan skjule et langt efterfølgende segment. Scene-grænser inden for frysegrænsens 1-sekunds analyseopløsning samles.
+De strukturelle værdier er deterministisk prøveudtagningsbevis, ikke semantisk videoforståelse. De udleder ikke emner, handlinger, billedtekster, tale eller brugerhensigt. Scene- og frysegrænser danner segmenter; fastfrysning af dækning, sløring, eksponering, rumlige detaljer og tidsmæssige ændringer påvirker kun, hvordan det eksisterende budget på 1-16 billeder fordeles. Et fuldt frosset segment er begrænset til én frame, mens ikke-frosne segmenter konkurrerer om det resterende budget. Når grænserne er større end rammer, bevares ensartet tidslinjedækning, så hurtige tidlige klip ikke kan skjule et langt bagende segment. Scenegrænser inden for 1-sekunds analyseopløsning af en frysegrænse er sammensmeltet.
 
-Manglende filtre, fejlformuleret/tom evidens, en detektorfejl eller den afgrænsede foranalyse-timeout fejler åbent til den nøjagtige ensartede midtpunkts-politik. En kalder-afbrydelse eller mægler-deadline fejler ikke åbent: den afslutter den igangværende underproces, forhindrer senere billedudtrækning, og det private midlertidige træ fjernes i `finally`.
+Manglende filtre, malformed/empty -beviser, en detektorfejl eller den afgrænsede timeout før analyse er åben for den nøjagtige ensartede midtpunktspolitik. En opkaldsafbrydelse eller en mægler-deadline svigter ikke åben: den afslutter underprocessen under flyvningen, forhindrer senere udtrækning af rammer, og det private midlertidige træ fjernes i `finally`.
 
-`scripts/perf/video-bridge-fu07-eval.ts` genererer deterministiske, ægte FFmpeg-fixtures til besparelser på billedtekstkald efter deduplikering, budgetallokering for tæt bevægelse, slørings-/eksponerings-/SI-TI-evidens, hurtige klip med en lang hale og falske positiver ved gradvis fading. Den registrerer 'wall time' før analyse og, hvor `/usr/bin/time` er tilgængelig, underproces-CPU og peak RSS. Dens kvalitetskontroller er kun strukturelle orakler. Den reelle billedtekstmodelkvalitet forbliver `HOLD`, fordi denne testramme ikke har et autoriseret endepunkt eller en fastlåst bedømmer. Monetære besparelser forbliver også `HOLD`, medmindre `--caption-cost-per-call-usd` leverer et eksplicit positivt estimat pr. kald; scriptet fabrikerer aldrig nogen af resultaterne.
+`scripts/perf/video-bridge-fu07-eval.ts` genererer deterministiske reelle FFmpeg armaturer til post-dedup billedtekst-opkald besparelser, tæt-motion budget allokering, blur/exposure/SI-TI beviser, hurtige nedskæringer med en lang hale, og gradvis-fade falske positiver. Den registrerer vægtid før analyse og, hvor `/usr/bin/time` er tilgængelig, underordnet CPU og peak RSS. Dens kvalitetstjek er kun strukturelle orakler. Ægte billedtekst-modelkvalitet forbliver `HOLD`, fordi denne sele ikke har noget autoriseret slutpunkt eller frossen dommer. Monetære besparelser forbliver også `HOLD` medmindre `--caption-cost-per-call-usd` leverer et eksplicit positivt skøn pr. opkald; scriptet fremstiller aldrig nogen af resultaterne.
 
-Hver ramme er begrænset til 4 MiB, alle rå rammer tilsammen til 23 MiB, og den serialiserede mæglerrespons til 32 MiB. En privat midlertidig mappe fjernes i `finally`. OmniRoute bundter ikke FFmpeg og accepterer ikke en brugerdefineret eksekverbar sti. Før billedtekstning anvender broen en konservativ visuel deduplikeringspass: hver JPEG reduceres til en 16×16 gråtonebuffer og sammenlignes kun med den sidst bevarede ramme. For et anmodet billedtekstbudget over én ramme leverer udtrækningen en afgrænset kandidatpulje på op til det dobbelte af budgettet og aldrig mere end 16 rammer. Den anmodede grænse anvendes først efter deduplikering, hvor de første og sidste udvalgte kandidater bevares under den endelige udtynding, når budgettet er mindst to. Den versionerede `grayscale-16x16-mean-cells-v2` politik bruger den største af den gennemsnitlige luma-delta og forholdet mellem miniatureceller, hvis normaliserede delta er mindst 0,05. Duplikatgrænsen er den konstante 0,04, valgt for forudsigelighed snarere end eksponeret som en runtime-indstilling. Dette sekundære høj-kontrast signal bevarer små bevægelser og synlige tekstændringer, som en kun-gennemsnitlig sammenligning kan skjule. Komparator- eller dekoderfejl fejler åbent og bevarer dækningen. Output-metadata adskiller udtrukne kandidater, succesfuldt anvendte rammer og visuelt droppede dubletter.
+Hver frame er begrænset til 4 MiB, alle rå frames tilsammen til 23 MiB, og det serialiserede mæglersvar til 32 MiB. En privat midlertidig mappe er fjernet i `finally`. OmniRoute bundter ikke FFmpeg og accepterer ikke en brugerdefineret eksekverbar sti. Før tekstning anvender broen et konservativt visuelt deduplikeringspas: hver JPEG reduceres til en 16 × 16 gråtonebuffer og sammenlignes kun med den sidst bevarede ramme. For et anmodet billedtekstbudget over én frame, leverer udtræk en afgrænset kandidatpulje på op til det dobbelte af budgettet og aldrig mere end 16 frames. Det anmodede loft anvendes kun efter deduplikering, med de første og sidste udvalgte kandidater bevaret under den endelige udtynding, når budgettet er på mindst to. Den versionerede `grayscale-16x16-mean-cells-v2` politik bruger den største af middel luma delta og forholdet mellem thumbnail celler, hvis normaliserede delta er mindst 0,05. Duplikattærsklen er konstanten 0,04, valgt for forudsigelighed i stedet for at blive eksponeret som en runtime-indstilling. Dette sekundære højkontrastsignal bevarer små bevægelser og synlige tekstændringer, som en gennemsnitlig sammenligning kan skjule. Komparator- eller dekoderfejl svigter åben og holder dækningen. Outputmetadata adskiller udtrukne kandidater, anvendte frames med succes og visuelle dubletter, der er droppet.
 
-En eksplicit markeret videodel kan anmode om et tidsstemplet kontaktark. Broen bygger højst et 4-kolonners, 16-rammers JPEG-gitter. Hver 512-pixel celle brænder sit kildetidsstempel ind i et høj-kontrast bundbånd, mens de samme tidsstempler forbliver i tekstuel metadata til downstream-association og revision. Den komplette JPEG forbliver begrænset til 32 MiB. Hvis `sharp` ikke kan afkode eller sammensætte gitteret, falder broen tilbage til de individuelle JPEG-rammer; en klientafbrydelse forplanter sig stadig gennem arkoperationen.
+En eksplicit markeret videodel kan anmode om et tidsstemplet kontaktark. Broen bygger højst et 4-søjlet, 16-ramme JPEG gitter. Hver celle på 512 pixel brænder sit kildetidsstempel ind i et bundbånd med høj kontrast, mens de samme tidsstempler forbliver i tekstmæssige metadata til downstream-tilknytning og revision. Den komplette JPEG forbliver begrænset til 32 MiB. Hvis `sharp` ikke kan afkode eller sammensætte gitteret, falder broen tilbage til de individuelle JPEG rammer; en klientafbrydelse forplanter sig stadig gennem arkoperationen.
 
-Promoverings-evidens er bevidst adskilt fra den syntetiske kompositions-mikrobenchmark. `scripts/perf/video-bridge-contact-sheet-eval.ts` definerer en skema-versioneret A/B-testramme for ægte OpenAI-kompatible visionsmodeller. Den måler udbyder-rapporterede tokens, end-to-end 'wall latency' (inklusive arkkomposition), antal modelkald og manifest-defineret faktaretention. Rå modelresponser skrives ikke til rapporten; kun SHA-256 digests og matchede fakta-ID'er bevares. Testrammen foretager ingen netværks- eller betalte modelkald, medmindre `--execute-real` er sendt, og `--model`, `OMNIROUTE_BASE_URL` og `OMNIROUTE_API_KEY` er konfigureret. Uden den eksplicitte reelle kørsel forbliver dens maskinlæsbare dom `HOLD`; syntetiske payload-/kaldtællingsmålinger alene er ikke promoverings-evidens.
+Promoveringsbeviser er bevidst adskilt fra mikrobenchmark for syntetisk sammensætning. `scripts/perf/video-bridge-contact-sheet-eval.ts` definerer en skemaversioneret A/B -sele til ægte OpenAI-kompatible vision-modeller. Det måler udbyder-rapporterede tokens, ende-til-ende væg-latens (inklusive arksammensætning), antal modelopkald og manifest-defineret faktaopbevaring. Råmodelsvar skrives ikke til rapporten; kun SHA-256 digests og matchede fakta IDs bevares. Selen foretager intet netværk eller betalingsmodelopkald, medmindre `--execute-real` er bestået og `--model`, `OMNIROUTE_BASE_URL` og `OMNIROUTE_API_KEY` er konfigureret. Uden den eksplicitte rigtige kørsel forbliver dens maskinlæsbare dom `HOLD`; syntetiske payload/call-count målinger alene er ikke reklamebeviser.
 
-Kaldere kan vedhæfte en valgfri `transcript.cues`-array til en understøttet videodel, når de allerede besidder justeret tekst. Hver cue skal indeholde `text`, et endeligt `start`/`end`-interval inden for den undersøgte varighed og en godkendt `source` (`client`, `embedded` eller `audio-bridge`); `confidence` er som standard `1` og skal forblive mellem `0` og `1`. Nøjagtige duplikat-cues kollapses. OmniRoute starter aldrig transskription fra disse metadata: validerede cues kopieres ind i det beskrevne resultat med kilde, konfidens og interval, og gengives som upålidelige observationer sammen med rammebilledteksterne. Ugyldig, uden for rækkevidde eller proveniens-fri tekst afvises snarere end at blive blandet ind i billedtekststrømmen. Feltet `source` er i øjeblikket kalder-deklareret, ikke server-verificeret: OmniRoute håndhæver, at værdien er en af de tre tilladte strenge, men bekræfter endnu ikke kryptografisk, at en `embedded` eller `audio-bridge` etiket faktisk kom fra en server-ejet udtrækning. Behandl `source` som et upålideligt hint, indtil denne verifikation er på plads; byg ikke autorisationsbeslutninger på det.
+Opkaldere kan vedhæfte et valgfrit `transcript.cues` array til en understøttet videodel, når de allerede har tilpasset tekst. Hver stikord skal have `text`, et begrænset `start`/`end` -interval inden for den probede varighed og en hvidlistet `source` (`client`, `embedded` eller `audio-bridge`); `confidence` er standard til `1` og skal forblive mellem `0` og `1`. Nøjagtige duplikerede signaler er kollapset. OmniRoute starter aldrig transskription fra disse metadata: validerede signaler kopieres til det beskrevne resultat med kilde, konfidens og interval og gengives som upålidelige observationer sammen med billedteksterne. Ugyldig, uden for rækkevidde eller herkomstfri tekst afvises i stedet for at blive blandet ind i billedtekststrømmen. Begge forespørgselstekst-transskriptionskanaler normaliserer leveret herkomst til `client`, inklusive selvhævdende `embedded` eller `audio-bridge` etiketter. Kun en serverejet adapter kan tildele disse betroede etiketter gennem argumentet `trustedSource`, der kun er kode; et request JSON felt kan ikke nå dette argument. Transskriptionstekst forbliver upålideligt medieafledt indhold, uanset dets herkomst, og må aldrig afgøre autorisation.
 
-En avanceret kalder kan levere et allerede-autoriseret `audioTranscript`-spor
-for den samme video. Fusionssømmen kører visuelle og lydmæssige observationer under
-én deadline og abortsignal, ordner dem på en fælles tidslinje, kollapser
-nøjagtige dubletter og rapporterer et delresultat, når kun den ene side lykkes.
-En ugyldig `audioTranscript` degraderer til det delresultat – den visuelle
-beskrivelse bevares, og lydgrenen registrerer en renset fejlkode –
-i stedet for at lade hele videoen fejle. Tilgængelighed pr. gren, det delvise flag
-og de rensede fejlkoder bevares i det beskrevne resultat, i
-guardrail-metadata (`audioFusionRuns`/`audioFusionPartials`/
-`audioFusionFailureCodes`), i result-cache-metadata og i bridge-
-fusions-tællerne. Standard Video Bridge-stien påkalder ikke tale-til-tekst
-eller downloader en anden mediekopi; uden det eksplicitte spor forbliver den
-kun video.
+En avanceret opkalder kan levere et `audioTranscript` -spor til den samme video; den behandles som klient-leveret tekst, ikke bevis for servertransskription. Fusionssømmen kører visuelle og lydobservationer under én deadline og afbryde signal, bestiller dem på en fælles tidslinje, kollapser nøjagtige dubletter og rapporterer et delvist resultat, når kun den ene side lykkes. En ugyldig `audioTranscript` forringer det delvise resultat — den visuelle beskrivelse bevares, og lydgrenen registrerer en desinficeret fejlkode — i stedet for at fejle hele videoen. Tilgængelighed pr. branche, det partielle flag og de desinficerede fejlkoder bevares i det beskrevne resultat, i autoværnsmetadataene (`audioFusionRuns`/`audioFusionPartials`/ `audioFusionFailureCodes`), i resultat-cache-metadataene og i brofusionstællerne. Standard Video Bridge-stien kalder ikke tale-til-tekst eller downloader ikke en anden mediekopi; uden det eksplicitte spor forbliver det kun video.
 
-**Bevaring af transskription (#12150 P1).** Dette gælder automatisk, når
-Video Bridge (som selv er opt-in) gengiver en transskriptions-cue – der er intet separat
-bevaringsflag. Når en anmodning gengiver en transskriptions-cue (en kalder-deklareret
-`transcript` eller en fuseret `audioTranscript`), markerer guardrail den
-`videoBridgeObserved` og producerer en redigeret skygge af videobeskrivelsen –
-en identisk gengivelse, hvor hver cues fritekstkrop erstattes af
-`[redacted-video-transcript]`, bygget ved at erstatte det strukturerede cue-felt,
-før strengen samles (aldrig ved at parse den flade tekst, så intet cue-indhold –
-adversarialt eller almindeligt, inklusive kroppe, der indeholder `]` som
-`[inaudible]`/`[music]` – kan overleve). Den vedvarende call-log-anmodningskrop udskifter
-hver video-afledte tekstdel med den redigerede skygge, matchet af indholds-
-lighed; `fullText`-ankeret genlæses fra den færdige pre-call guardrail-
-payload, så matchet stadig lykkes efter senere kæde-guardrails (PII- og
-legitimationsoplysninger-maskerne, prioriteter 10/95) omskriver beskrivelsesteksten på plads, og
-efter system-prompt/handoff/hukommelses-injektion omformer meddelelsesarrayet.
-Kroppen, der sendes opstrøms til modellen, er uændret. En observeret anmodning udfylder heller
-ikke holdbar hukommelse (både anmodnings- og svar-afledt ekstraktion springes over),
-så modellens eget svar kan ikke gentage transskriptionstekst i hukommelsen.
+**Transskriptionsretention (#12150 P1).** Dette gælder automatisk, når Video Bridge (selv opt-in) gengiver en transskriptions-cue — der er ikke noget separat tilbageholdelsesflag. Når en anmodning gengiver et hvilket som helst transskriptionssignal (en opkalds-erklæret `transcript` eller en fusioneret `audioTranscript`), markerer autoværnet det `videoBridgeObserved` og producerer en redigeret skygge af videobeskrivelsen — en identisk gengivelse, hvor hver stikords friteksttekst erstattes af `[redacted-video-transcript]`, bygget ved at erstatte det parassemblerede felt før den strukturerede streng (cuvering) fladtrykt tekst, så intet cue-indhold — modstridende eller almindeligt, inklusive kroppe, der indeholder `]` såsom `[inaudible]`/`[music]` — kan overleve). Den vedvarende opkaldslog-anmodningstekst udskifter hver videoafledt tekstdel med den redigerede skygge, matchet af indholdslighed; `fullText` ankeret genlæses fra den færdige pre-call autoværn nyttelast, så matchen lykkes stadig efter senere kæde autoværn ( PII og credential maskererne, priorities 10/95) omskriver beskrivelsesteksten på plads og efter system-prompt/handoff/memory injektion omformer meddelelsesarrayet. Kroppen sendt opstrøms til modellen er uændret. En observeret anmodning udfylder heller ikke nogen holdbar hukommelse (både anmodnings- og svarafledt udtrækning springes over), så modellens eget svar kan ikke ekko transskriptionstekst ind i hukommelsen.
 
-**Rå videofelter (#12430).** Når broen er aktiveret, og indbygget videounderstøttelse er ukendt eller mangler, aktiverer definerede `transcript`/`audioTranscript`-felter også `videoBridgeObserved`, selv hvis beskrivelsen fejler, eller grænsen `maxVideos` nås. `null` og tomme strenge tæller med; manglende felter og metadata uden relation til video gør ikke. Gemte kopier skjuler disse felter eller udelader anmodningen, og caches/Memory springes over. Data til udbyderen forbliver uændrede.
+**Rå videofelter (#12430).** Når broen er aktiveret, og native video-understøttelse er ukendt eller fraværende, aktiverer definerede `transcript`/`audioTranscript` -felter også `videoBridgeObserved`, selv efter beskrivelsesfejl eller en `maxVideos` grænse. `null` og tomme strenge tæller; fraværende felter og ikke-video-metadata gør det ikke. Beholdte kopier redigerer disse felter eller udelader anmodningen, og caches/Memory omgås.
 
-Yderligere bevarede kopier bruger det samme observerede-anmodningssignal. Det rå
-pre-guardrail klient-anmodningssnapshot, in-memory afventende anmodning og tidligt
-afviste-anmodningslog erstatter strukturelt transskriptionsfelter i videodele;
-strengprompter syntetiseret af pipeline-stadier og kontekst-overlevering redigeres
-ved den vedvarende-anmodningskrops-sink. Den vedvarende `video_content_removed`-markør
-får `previous_response_id`-fortsættelsen til at fejle lukket i stedet for at rekonstruere
-tekst, der bevidst blev kasseret. Hvis en observeret anmodning mister sin
-delvise redigeringsskygge før logning, eller endda en af flere videoskygger
-ikke matcher efter senere anmodningsmutationer, udelades den bevarede anmodningskrop
-helt i stedet for at bevare en delvist redigeret transskription.
+På disse fallback-stier bliver gyldige opkaldssignaler understøttede `text`/`input_text` -dele i stedet for ikke-standardudbyderfelter. Begge spor, der er leveret af anmodningen, forbliver upålidelige `client` observationer, med en eksplicit advarsel om, at videoen ikke blev beskrevet, og tidsstempler ikke blev verificeret mod medierne. De eksisterende 256-cue/64-KiB total- og per-cue-budgetter gælder på tværs af de to spor sammen; tidsstempler skal passe til mæglerens 600 sekunders loft og eventuelt medfølgende fokusvindue. Ugyldige spor kasseres, ikke videresendes som vilkårlig tekst; en gyldig søskende kan stadig bruges, medmindre deres samlede budget overskrides. Null/empty felter tilføjer ingen tekst. Ingen mediehentning eller transskription tilføjes af denne reserve. Transskriptionsudvidelsesfelter fjernes fra reservevideobæreren og dens `video_url`/`source` -objekter. Tilladelseslisten for OpenAI -ledninger forbliver streng; ukendte indfødte videoudbydere forbliver tilgængelige, og kendte tekstmål bevarer sikre markører. Strukturerede redaktionsskygger beskytter den vedhæftede transskriptionstekst, mens den oprindelige opkaldsejede anmodning forbliver uændret. Native-understøttede mål og handicappede broer bevarer deres eksisterende bypass-adfærd.
 
-For en observeret anmodning kan et modelsvar citere enhver del af
-transskriptionen uden en struktureret cue-grænse. Dens vedvarende call-log
-`responseBody` erstattes derfor af en udeladelsesmarkør; den detaljerede
-pipeline-artefakt (som kan inkludere opstrøms/klientkroppe og stream-chunks)
-bevares ikke. Semantiske, idempotens- og ræsonnements-replay-caches omgår
-læsninger og skrivninger for den anmodning. Udbyderanmodningen og klient-synlige
-svar forbliver uændrede. Tidlige keepalive-bytes drænes fra den midlertidige
-buffer, når den detaljerede artefakt udelades. Kiros fejlformede EventStream-
-advarsel rapporterer kun payload-byte-antallet, aldrig dets indhold eller JSON-
-parserens rå fejl.
-Dette hævder ikke, at hver urelateret udbyder/plugin-diagnostik er blevet
-revideret; den bredere bevarede-sink-gennemgang spores i #11658.
+Yderligere bevarede kopier bruger det samme observerede anmodningssignal. Det rå pre-guardrail-klient-anmodnings-øjebliksbillede, afventende anmodning i hukommelsen og tidligt afvist-anmodningslog erstatter strukturelt transskriptionsfelter i videodele; strengprompts syntetiseret af pipelinestadier og kontekstoverdragelse redigeres ved persisted-request-body-vasken. Den vedvarende `video_content_removed` markør gør, at `previous_response_id` fortsættelse ikke lukkes i stedet for at rekonstruere tekst, der med vilje blev kasseret. Hvis en observeret anmodning mister sin per-part redaktionsskygge før logning, eller endda en af flere videoskygger ikke matcher efter senere anmodningsmutationer, udelades den bibeholdte anmodningstekst helt i stedet for at bibeholde en delvist redigeret transskription.
 
-Den interne `/api/modality-bridge/video/drilldown`-livscyklus er et separat,
-loopback/token-autentificeret cache-substrat. Hver operation kræver også et
-kanonisk uigennemsigtigt hoved-ID. Før en produktionskalder aktiveres, skal den
-udlede det ID fra den autentificerede lejer og må aldrig videresende en
-klientvalgt værdi. Cache-nøgler binder det hoved til kanoniske session- og
-video-reference-ID'er, gemmer kun deres SHA-256-afledte nøgler og omfatter både læsninger
-og sletning til det samme hoved. Cachen gemmer højst 16 afledte JPEG-
-rammer pr. post, udløber dem efter ti minutter og understøtter begrænsede
-`start`/`end`-læsninger eller eksplicit sessionssletning.
+For en observeret anmodning kan et modelsvar citere enhver del af transskriptionen uden en struktureret stikordsgrænse. Dens vedvarende opkaldslog `responseBody` erstattes derfor af en udeladelsesmarkør; den detaljerede rørledningsartefakt (som kan omfatte upstream/client kroppe og strømstykker) bibeholdes ikke. Semantisk, idempotens og ræsonnement-replay caches omgår læsninger og skrivninger for den anmodning. Udbyderanmodningen og det klientsynlige svar forbliver uændret. Tidlige keepalive bytes drænes fra den midlertidige buffer, når den detaljerede artefakt udelades. Kiro misdannede EventStream -advarsel rapporterer kun antallet af nyttelastbyte, aldrig indholdet eller JSON -parserens rå fejl. Dette hævder ikke, at enhver ikke-relateret provider/plugin -diagnostik er blevet auditeret; det bredere retained-sweep spores i #11658.
 
-Hvert hoved er begrænset til 16 poster og 64 MiB kanoniske JPEG-data. Disse
-grænser er uafhængige af det globale loft på 64 poster/256 MiB: hovedkvotetryk
-fortrænger kun det pågældende hoveds mindst nyligt anvendte poster, før global
-LRU-fortrængning overvejes. Udløbne poster fjernes fra både hoved- og
-global regnskabsføring ved cache-aktivitet, mens annullering og valideringsfejl
-ikke forpligter en delvis udskiftning.
+Den interne `/api/modality-bridge/video/drilldown` livscyklus er et separat loopback/token-authenticated -cache-substrat. Hver operation kræver også en kanonisk uigennemsigtig principal ID. Før en produktionsopkalder aktiveres, skal den udlede den ID fra den godkendte lejer og må aldrig videresende en klientvalgt værdi. Cachenøgler binder den principal til kanonisk session og videoreference IDs, gemmer kun deres SHA-256-derived nøgler og omfavner både læsninger og sletning til den samme principal. Cachen gemmer højst 16 afledte JPEG rammer pr. indtastning, udløber dem efter ti minutter og understøtter afgrænsede `start`/`end` -læsninger eller eksplicit sessionssletning.
 
-Cachen afviser ikke-kanonisk Base64, overskydende polstring, ikke-JPEG-medier, fejlformede eller
-afkortede JPEG'er og JPEG'er, der producerer en advarsel under en begrænset fuld-billed `sharp`-
-afkodning. Den genkoder hvert accepteret billede som en kanonisk JPEG, udleder bredde og højde
-fra de afkodede bytes i stedet for at stole på kalderfelter og kasserer eventuelle efterfølgende
-polyglot-bytes i stedet for at bevare dem. Kun den begrænsede kanoniske komprimerede buffer
-opkræves begge kvoter. JSON-wiregrænsen inkluderer Base64-overhead for det 32 MiB
-afkodede-input-loft. Hver
-gemt afledning registrerer sit validerede JPEG-format/opløsning, samplingpolitik,
-afledningsversion, oprettelsestid, serverberegnet indholds-hash og hashed forældrereference
-plus den betroede kalderes forældre-indholds-hash. Annullering kontrolleres
-mellem asynkrone afkodnings-/hash-faser før den atomare cache-commit.
+Hver principal er begrænset til 16 poster og 64 MiB kanoniske JPEG data. Disse grænser er uafhængige af det globale 64-entry/256 MiB loft: hovedkvotepres fjerner kun den pågældende rektors mindst nyligt brugte poster før global LRU udsættelse. Udløbne poster fejes fra både hoved- og globalt regnskab for cacheaktivitet, mens annullering og valideringsfejl ikke begår en delvis erstatning.
 
-Denne tranche forbinder endnu ikke en produktionsproducent til ruten og tilbyder ikke valg af varianter med flere opløsninger. Den transparente Video Bridge-anmodningssti medfører derfor intet ekstra arbejde, mens lejerbundet principal-afledning og den fulde FU-08 multi-opløsningslivscyklus forbliver eksplicit opfølgningsarbejde snarere end dokumenteret som komplet adfærd.
+Cachen afviser ikke-kanonisk Base64, overskydende polstring, ikke-JPEG-medier, misformede eller trunkerede JPEGs og JPEGs, der producerer en advarsel under en afgrænset fuld-billede `sharp` afkodning. Det genkoder hvert accepteret billede som en kanonisk JPEG, udleder bredde og højde fra de afkodede bytes i stedet for at stole på opkaldsfelter, og kasserer eventuelle efterfølgende polyglot-bytes i stedet for at beholde dem. Kun den afgrænsede kanoniske komprimerede buffer debiteres begge kvoter. JSON -ledningsgrænsen inkluderer Base64-overhead til loftet med 32 MiB afkodet input. Hver lagret afledning registrerer dens validerede JPEG format/resolution, samplingspolitik, afledningsversion, oprettelsestid, server-beregnet indholds-hash og hash-forælderreference plus den betroede opkalders overordnede-indhold-hash. Annullering kontrolleres mellem asynkrone decode/hash faser før den atomare cache-commit.
 
-Billeder tekstes sekventielt med den konfigurerede Video-model. En tom Video-tilsidesættelse arver Vision-indstillingen; hvis begge er tomme, vælger Vision-auto-routeren den effektive syns-kompatible model. Vellykkede tekster erstatter den originale del med et stabilt `[Video description:` præfiks, der også markerer teksten som en upålidelig medieafledt observation og fortæller downstream-modeller ikke at følge instruktioner fundet i mediet. Cache-nøgler for billedtekster inkluderer JPEG-bytes, prompt, tidsstempel og effektiv model; kun vellykkede tekster caches. Cache-poster bevarer den faktiske vellykkede producentmodel, inklusive en fallback-model; broen rapporterer `mixed`, når forskellige billeder blev produceret af forskellige modeller. Et cache-hit genbruger den producentidentitet i stedet for at ommærke den som den anmodede routingplan. Hele-video-resultatcachen er nøglet på hver input, der ændrer outputtet — prompt, effektiv model, samplingpolitik, billedtælling, semantisk analysemodus, SHA-256 fingeraftrykket af det normaliserede fokus-hint, fokusvindue, `transcript`, `audioTranscript` og kontaktark-flaget — så ændring af nogen af disse dimensioner er et cache-miss, aldrig en forældet genbrug. Den visuelle dedup-politikversion, tærskel og begrænsede antal kandidatbilleder er også eksplicitte i resultat-cache-nøglen og metadata; en politikændring kan derfor ikke genbruge en forældet hele-video-beskrivelse. Resultat-cache v4 metadata bevarer tilstanden og fingeraftrykket, aldrig den rå brugeropgave. Guardrail-metadata rapporterer både de anmodede og effektive analysemodi; en anmodet `focused` modus uden brugbar brugertekst rapporteres som effektivt `full`.
+Produktionsproducenten genbruger kun allerede afledte mæglerrammer efter vellykket visuel analyse, uden yderligere video download/extraction. Det kræver operatør `modalityBridgeVideoDrilldownEnabled=true`, streng per-part `drilldown: true` og en autentificeret API-nøgle record ID. Klient-erklærede principal/session værdier etablerer aldrig ejerskab. Uden alle tre betingelser hash, ændrer størrelsen eller bibeholder den ikke yderligere rammer. Retentionsfejl bevarer den brugbare visuelle respons. Samtykkede anmodninger omgår hele videoresultatcachen, så cachelagrede resultater afspiller aldrig håndtag igen.
 
-Guardrailen udtrækker hver understøttet videodel, men beskriver ikke mere end `modalityBridgeVideoMaxVideos`. For et mål, der er bevist at have `supportsVideo === false`, bliver mislykkede og over-grænsen-videoer eksplicitte sikre tekstmarkører, så ingen rå video overlever. Når kapaciteten er ukendt, forbliver disse dele uberørte. Mål med `supportsVideo === true` omgår broen. Klientanmodningens afbrydelsessignal forplanter sig gennem download, brokerkø, underprocesser og billedtekstkald; afbrydelser stopper mellem videoer og fejler aldrig åbent til rå medier.
+Succesfulde JSON og SSE -svar afslører højst fire uigennemsigtige håndtag i den afgrænsede `x-omniroute-video-drilldown` header. Autoriseret browseroprindelse kan læse den overskrift uden at udvide CORS oprindelsespolitikken. Nye håndtag bruger `v1.<32-byte random base64url token>`, og registreringsdatabasen beholder kun deres SHA-256 hash. reader/header parseren accepterer også ældre 64-hex-tokens. Den godkendte offentlige forbruger er `GET /api/v1/video-bridge/drilldown?handle=...`, uafhængigt gated af `modalityBridgeVideoDrilldownRemoteEnabled=true`. Eksplicit vedvarende falsk tilbagekalder adgang, selv når den gamle `OMNIROUTE_VIDEO_BRIDGE_DRILLDOWN_REMOTE_ENABLED` env fallback er aktiveret. Produktionsfastholdelse har den analoge gamle `OMNIROUTE_VIDEO_BRIDGE_DRILLDOWN_ENABLED` faldback. Begge fallbacks er som standard slået fra.
 
-Runtime-indstillinger er DB-baserede og Zod-validerede:
+Forbrugeren henter ejerskab fra den autentificerede nøgle og anvender nøglepolitik: både GET og DELETE tilhører `video` endepunktskategorien, inklusive `/v1` og `/api/v1` aliasserne. Nøgler med en ikke-tom slutpunkttilladelsesliste skal indeholde `video`; ubegrænsede nøgler forbliver kompatible. Forbrugeren returnerer den samme 404 for ukendt, udløbet og en anden nøgles håndtag. Den accepterer `variant=preview|standard|detail` (maksimal JPEG dimension 320/640/1280, aldrig opskaleret), `limit=1..8` (eller det gamle `frames` alias, aldrig begge), nul-baseret `page` og valgfri `start`/`end` -fokussekunder. Duplikerede forespørgselsnøgler og vinduer med omvendt fokusering afvises. Hver returnerede variant har en hash af dets faktiske indhold og faktiske opløsningsmetadata, knyttet til den bevarede kilde. Varianter er afledt ved læsning snarere end gemt som ekstra bevarede kopier. JSON responset, inklusive Base64/envelope, er begrænset til 32 MiB; en overdimensioneret side returnerer 413 og klienten skal anmode om færre rammer. Læser annullering af tjek omkring hver ændring af størrelsen og kontrollerer håndtagets gyldighed igen før returnering. `DELETE` af ejeren er idempotent; sletning eller TTL udløb frigiver den bevarede kilde og brugsregnskab.
 
-| Nøgle                               | Standard    | Område / adfærd                                                                                        |
-| :---------------------------------- | :---------- | :----------------------------------------------------------------------------------------------------- |
-| `modalityBridgeVideoEnabled`        | `false`     | Valgfri runtime, tilvalg                                                                               |
-| `modalityBridgeVideoAnalysisMode`   | `"full"`    | `full` bevarer generiske billedtekster; `focused` bruger afgrænset, upålidelig seneste-brugerkontekst  |
-| `modalityBridgeVideoModel`          | `""`        | Arver Vision Bridge-modellen                                                                           |
-| `modalityBridgeVideoFrameCount`     | `8`         | 1–16                                                                                                   |
-| `modalityBridgeVideoSamplingPolicy` | `"uniform"` | `uniform`, `scene_aware` eller proportional `segment_aware`; detektorfejl falder tilbage til `uniform` |
-| `modalityBridgeVideoMaxVideos`      | `1`         | 1–4                                                                                                    |
-| `modalityBridgeVideoTimeout`        | `120000`    | 1000–120000 ms                                                                                         |
+Det delte lager er proceslokalt: håndtagene udløber ved genstart og kan ikke overføres mellem uafhængige OmniRoute processer. Ledelsesstatistik afslører kun effektiv opbevaring/fjernpolitik og aggregeret bibeholdt entries/bytes, aldrig medier, referencer, principielle IDs eller håndtag. Panelet Videoindstillinger viser disse værdier og kan fortsætte med begge samtykkeskift. Denne implementeringsdokumentation er ikke bevis for live-implementering eller forfremmelse; accept af den rigtige model spores separat.
 
-Ældre vedvarende Video-timeoutværdier over 120 sekunder begrænses til broker-deadline; nye indstillingsskrivninger over denne grænse afvises. `GET /api/modality-bridge/video/runtime` kræver betroet stemplet loopback-lokalitet før autentificering eller runtime-sondering, og kræver derefter management-autentificering. Den returnerer kun `available`, sanerede FFmpeg/ffprobe-versioner og en fast årsag, når runtime er utilgængelig. Det interne udtrækspunkt er ikke en offentlig upload-API: kømætning returnerer `503` plus `Retry-After`, en opkaldsafbrydelse returnerer `499`, og den faste broker-deadline returnerer `504`. Konverterede svar tilføjer `video->text;model=<visionModel>;parts=<videos>` til den centrale `x-omniroute-modality-bridge` header uden at fjerne Vision- eller Audio-segmenter.
+Frames er undertekster sekventielt med den konfigurerede videomodel. En tom videotilsidesættelse arver indstillingen Vision; hvis begge er tomme, vælger Vision auto-routeren den effektive vision-kompatible model. Vellykkede billedtekster erstatter den originale del med et stabilt `[Video description:` præfiks, der også markerer teksten som en upålidelig medieafledt observation og fortæller downstream-modeller om ikke at følge instruktionerne i medierne. Frame-caption cache-nøgler inkluderer JPEG bytes, prompt, tidsstempel og effektiv model; kun vellykkede billedtekster cachelagres. Cache-indtastninger bevarer den faktiske succesrige producentmodel, inklusive en reservemodel; broen rapporterer `mixed` når forskellige rammer blev produceret af forskellige modeller. Et cachehit genbruger denne producentidentitet i stedet for at ommærke den som den anmodede routingplan. Hele videoresultatcachen indtastes på hvert input, der ændrer output- — prompten, effektive model, samplingpolitik, antal billeder, semantisk analysetilstand, SHA-256 fingeraftrykket for det normaliserede fokustip, fokusvindue, `transcript`, `audioTranscript` og kontaktark-flaget —, så det er en gammeldags glip af at ændre nogen af disse dimensioner. Den visuelle dedup-politikversion, tærskel og afgrænsede kandidatramme-antal er også eksplicitte i resultat-cache-nøglen og metadata; en politikændring kan derfor ikke genbruge en forældet helvideobeskrivelse. Result-cache v4 metadata bevarer tilstanden og fingeraftrykket, aldrig den rå brugeropgave. Guardrail-metadata rapporterer både de ønskede og effektive analysetilstande; en anmodet `focused` tilstand uden brugbar brugertekst rapporteres som effektivt `full`.
 
-### PII-maskering (`piiMasker.ts`)
+Autoværnet udtrækker alle understøttede videodele, men beskriver ikke mere end `modalityBridgeVideoMaxVideos`. For et mål, der har vist sig at have `supportsVideo === false`, bliver mislykkede og overbegrænsede videoer eksplicitte sikre tekstmarkører, så ingen rå video overlever. Når kapaciteten er ukendt, beholder disse dele deres videobærer; enhver reservetransskription følger den afgrænsede tekstkonvertering ovenfor. Mål med `supportsVideo === true` omgår broen. Klientanmodningsafbrydelsessignalet forplanter sig gennem download, mæglerkø, underprocesser og billedtekstopkald; afbryder stop mellem videoer og fejler aldrig åben for rå medier.
 
-Kører på **begge** stadier.
+Kørselsindstillinger er DB-støttede og Zod-validerede:
 
-- **`preCall`** kloner payloadet, gennemgår `system`, `messages`, `input` og `prompt` (inklusive almindelige streng-elementer), og anvender `processPII()` (fra `@/shared/utils/inputSanitizer`) på strengfelter `content`/`text`. Når `PII_REDACTION_ENABLED=true`, redigeres detekteret PII i det udgående payload. Dette er uafhængigt af `INPUT_SANITIZER_MODE` (som kun styrer prompt-injektionspolitikken). Når redigering er slået fra, registrerer kaldet detektionstællinger uden at omskrive indhold.
-- **`postCall`** dybde-kloner svaret, kører `sanitizePIIResponse()` plus Responses-API-form-maskeren (`maskResponsesOutput` — dækker `output_text` og `output[].content[].text`). Hvis der sker nogen redigering, erstatter det modificerede svar det originale.
+| Nøgle                               | Misligholdelse | Rækkevidde / adfærd                                                                                    |
+| ----------------------------------- | -------------- | ------------------------------------------------------------------------------------------------------ |
+| `modalityBridgeVideoEnabled`        | `false`        | Valgfri køretid, opt-in                                                                                |
+| `modalityBridgeVideoAnalysisMode`   | `"full"`       | `full` bevarer generiske billedtekster; `focused` bruger afgrænset, upålidelig seneste brugerkontekst  |
+| `modalityBridgeVideoModel`          | `""`           | Arv Vision Bridge-modellen                                                                             |
+| `modalityBridgeVideoFrameCount`     | `8`            | 1–16                                                                                                   |
+| `modalityBridgeVideoSamplingPolicy` | `"uniform"`    | `uniform`, `scene_aware` eller proportional `segment_aware`; detektorfejl falder tilbage til `uniform` |
+| `modalityBridgeVideoMaxVideos`      | `1`            | 1–4                                                                                                    |
+| `modalityBridgeVideoTimeout`        | `120000`       | 1000–120000 ms                                                                                         |
 
-Guardrailen blokerer aldrig; den annoterer kun (`meta.detections`, `meta.redacted`) eller omskriver.
+Ældre vedvarende videotimeoutværdier over 120 sekunder er fastholdt til mæglerens deadline; nye indstillinger skriver over, at grænsen afvises. `GET /api/modality-bridge/video/runtime` kræver betroet stemplet loopback-lokalitet før godkendelse eller runtime-probing, og kræver derefter administrationsgodkendelse. Det returnerer kun `available`, desinficerede FFmpeg/ffprobe versioner og en fast årsag, når kørselstiden ikke er tilgængelig. Det interne ekstraktionsslutpunkt er ikke et offentligt upload API: kømætning returnerer `503` plus `Retry-After`, en opkaldsafbrydelse returnerer `499`, og den faste mæglerdeadline returnerer `504`. Konverterede svar tilføjer `video->text;model=<visionModel>;parts=<videos>` til den centrale `x-omniroute-modality-bridge` header uden at fjerne Vision- eller Audio-segmenter.
 
-### Prompt-injektion (`promptInjection.ts`)
+### PII Masker (`piiMasker.ts`)
 
-Registrerer fjendtlige strukturer i brugerleveret indhold og håndhæver den konfigurerede politik. Adfærden styres af miljøvariabler og konstruktørmuligheder:
+Kører videre** begge** etaper.
 
-| Indstilling       | Miljøvariabel                                                                                         | Standard | Effekt                                                                                                                                                                                               |
-| ----------------- | ----------------------------------------------------------------------------------------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Aktiveret         | `INPUT_SANITIZER_ENABLED`                                                                             | `true`   | Når `false`, kortslutter guardrail.                                                                                                                                                                  |
-| Tilstand          | `INJECTION_GUARD_MODE` / `INPUT_SANITIZER_MODE`                                                       | `warn`   | Injektionspolitik: `block`, `warn` eller `log`. (`redact` accepteres for bagudkompatibilitet, men fjerner **ikke** injektionstekst; anmodning om PII-omskrivning styres af `PII_REDACTION_ENABLED`.) |
-| Blokeringstærskel | `blockThreshold` option / `INPUT_SANITIZER_BLOCK_THRESHOLD` (alias `INJECTION_GUARD_BLOCK_THRESHOLD`) | `high`   | Minimum alvorlighedsgrad krævet for at blokere. Medium er kun observerende som standard.                                                                                                             |
+- **`preCall`** kloner nyttelasten, går `system`, `messages`, `input` og `prompt` (inklusive almindelige strengelementer) og anvender `processPII()` (fra `@/shared/utils/inputSanitizer`) til streng `content`/`text` felter. Når `PII_REDACTION_ENABLED=true`, bliver detekteret PII redigeret i den udgående nyttelast. Dette er uafhængigt af `INPUT_SANITIZER_MODE` (som kun kontrollerer prompt-injection policy). Når redigering er slået fra, tæller registreringen af opkaldsposter uden omskrivning af indhold.
+- **`postCall`** dybkloner svaret, kører `sanitizePIIResponse()` plus Responses-API-shape-maskeren (`maskResponsesOutput` — dækker `output_text` og `output[].content[].text`). Hvis der sker en redigering, erstatter det ændrede svar originalen.
 
-**Tilstandsprioritet** (`getMode`): kalder `options.mode` →
-`INJECTION_GUARD_MODE` **DB feature-flag tilsidesættelse** (Dashboard →
-Indstillinger → Feature Flags) → `INJECTION_GUARD_MODE` env →
-`INPUT_SANITIZER_MODE` env → `warn`. En dashboard-tilsidesættelse vinder derfor
-over miljøvariablerne, så Feature Flags UI'en styrer den kørende guard live (ingen
-genstart). DB-læsningen er fejlsikker: hvis den fejler, falder guarden tilbage
-til den miljøbaserede adfærd, og når ingen tilsidesættelse er indstillet, er
-adfærden identisk med miljø-kun-opløsning.
+Autoværnet blokerer aldrig; den annoterer kun (`meta.detections`, `meta.redacted`) eller omskriver.
+
+#### Per-type valg, brugerdefinerede mønstre og detektionstællere
+
+**Dashboard → Indstillinger → Sikkerhed → PII maskering** vælger _hvad_ er maskeret. Den slår ikke maskering til: det er stadig `PII_REDACTION_ENABLED` (anmodning) og `PII_RESPONSE_SANITIZATION` (svar + SSE), begge deaktiveret som standard.
+
+- **Valg af type pr** — de indbyggede id'er er angivet i `src/shared/constants/piiTypes.ts` (`PII_BUILTIN_TYPES`). Frakoblet betyder hver type (adfærden før denne indstilling eksisterede). Anmodningsmotorens `ssn_us` mønster kortlægges til `ssn`. Skabeloner (Minimal, Standard, Financial, Brazilian, USA, GDPR, POPIA, Full) udfylder kun afkrydsningsfelterne i UI.
+- **GDPR og POPIA identifikatorer** — tolv indbyggede id'er, der dækker EU og sydafrikanske personlige identifikatorer (tabel nedenfor). Deres regexes, validatorer og jurisdiktionstags lever i én tabel, `src/shared/utils/piiPatterns.ts`, som både response sanitizer (`src/lib/piiSanitizer.ts`) og request-maskeren (`src/shared/utils/inputSanitizer.ts`) bruger. Et match redigeres kun, når dets validator accepterer det; et blot løb af cifre er aldrig nok. En operatør, der gemte en indsnævret markering, før disse id'er eksisterede, bevarer den adfærd, den havde, indtil de nye id'er er afkrydset.
+- **Brugerdefinerede mønstre** — op til 20 regex- eller jokertegnmønstre (`*` = op til 64 ikke-mellemrumstegn, `?` = en). Kampe bliver `[CUSTOM_REDACTED]`. Hvert mønster går gennem `compilePiiCustomPattern()` (`src/shared/utils/piiCustomPatterns.ts`): højst 500 tegn, flag begrænset til `g i m s u`, skal kompilere, skal passere `safe-regex` (katastrofisk tilbagesporing), og må ikke matche en tom streng eller en redaktionspladsholder. Et mønster, der fejler, afvises, når det gemmes og testes, og en lagret række, der fejler, springes over under kørsel i stedet for at blive kompileret. Brugerdefinerede mønstre kører kun, mens maskering er aktiveret.
+- **Detektionstællere** — pr. type tæller (aldrig matchede værdier), opbevares i hukommelsen og nulstilles ved genstart (`src/lib/pii/piiDetectionStats.ts`). De øges kun, mens maskering er aktiveret.
+
+Indstillingerne findes i `key_value` tabellen (navneområde `pii_settings`, `src/lib/db/piiSettings.ts`) og læses gennem en 1 s cache. API:
+
+| Metode | Sti                      | Formål                                                            |
+| ------ | ------------------------ | ----------------------------------------------------------------- |
+| `GET`  | `/api/settings/pii`      | Flagtilstand, `enabledTypes`, `customPatterns`, detektionstællere |
+| `PUT`  | `/api/settings/pii`      | Erstat `enabledTypes` (`null` = all) and/or `customPatterns`      |
+| `POST` | `/api/settings/pii/test` | Tørkør ét mønster mod en prøve på højst 8 KB; intet er gemt       |
+
+Alle tre kræver administrationsgodkendelse og validerer kroppen med Zod (`src/shared/validation/schemas/piiSettings.ts`). Med login deaktiveret (`requireLogin=false`) er `GET` og testslutpunktet åbne, men `PUT` har stadig brug for en dashboard-session, en `manage` -scope API nøgle, et `oma_` adgangstoken med skriveomfang eller højere eller CLI tokenet eller intern-service-token sendt fra loopback.
+
+#### GDPR (EU) og POPIA (Sydafrika) identifikatorer
+
+| Id                  | Identifikator            | Validering                                                                                        |
+| ------------------- | ------------------------ | ------------------------------------------------------------------------------------------------- |
+| `iban`              | IBAN                     | Kendt land, nøjagtig længde for det land, ISO 13616 MOD-97-10                                     |
+| `eu_vat`            | EU VAT nummer            | Kendt medlemsland-præfiks og denne stats talformat (ingen VIES opslag)                            |
+| `es_dni_nie`        | Spansk DNI / NIE         | Kontrolbogstav (værdi mod 23); NIE er `X/Y/Z` + 7 cifre                                           |
+| `it_codice_fiscale` | Italiensk Codice Fiscale | Kontrolbogstav fra odd/even positionstabellerne                                                   |
+| `pl_pesel`          | polsk PESEL              | Vægtet kontrolsum og en kodet fødselsdato, der eksisterer                                         |
+| `nl_bsn`            | hollandsk BSN            | 11-proof (vægte 9..2, -1)                                                                         |
+| `de_steuer_id`      | Tysk Steuer-ID           | ISO 7064 Mod 11,10 plus cifferstrukturreglerne (ingen indledende 0)                               |
+| `se_personnummer`   | svensk personnummer      | Luhn over de sidste ti cifre og en plausibel fødselsdato (10 eller 12 cifre)                      |
+| `za_id`             | Sydafrikansk ID nummer   | Luhn over alle 13 cifre, gyldig fødsel month/day, statsborgerskab ciffer 0 eller 1                |
+| `za_phone`          | Sydafrikansk telefon     | `+27` / `27` -præfiks eller den nationale `0..` form skrevet med et mellemrum eller en bindestreg |
+| `za_vat`            | Sydafrikansk VAT nummer  | 10 cifre starter med `4`** og** "VAT" / "BTW" i de 48 tegn før                                    |
+| `za_tax_ref`        | Sydafrikansk skatteref.  | 10 cifre starter `0`-`3`, Luhn,** og** "skat" / "SARS" i de 48 tegn før                           |
+
+Fordi formaterne med kun cifre kolliderer med ordrenumre, build-numre og tidsstempler, har de svageste (`za_vat`, `za_tax_ref`) brug for nøgleordet cue, og et blottet ti-cifret `0..` -nummer behandles ikke som et sydafrikansk telefonnummer. Mellemrum IBANs (`GB29 NWBK ...`) matches ikke. På streaming-stien bliver stikordet kun slået op inde i den aktuelle del. Id'erne ligger foran de generiske telefonmønstre, så en valideret identifikator beholder sin egen pladsholder (`[IBAN_REDACTED]`, `[NL_BSN_REDACTED]`, ...). Skabelonerne `gdpr` og `popia` vælger henholdsvis EU og sydafrikanske id'er. Maskering i sig selv forbliver opt-in (Hard Rule #20): intet her ændrer standarden for feature-flag.
+
+### Hurtig injektion (`promptInjection.ts`)
+
+Registrerer modstridende strukturer i brugerleveret indhold og håndhæver den konfigurerede politik. Adfærd er drevet af miljøvariabler og konstruktørmuligheder:
+
+| Indstilling  | Env var                                                                                               | Misligholdelse | Effekt                                                                                                                                                                                                  |
+| ------------ | ----------------------------------------------------------------------------------------------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Aktiveret    | `INPUT_SANITIZER_ENABLED`                                                                             | `true`         | Når `false`, autoværn kortslutter.                                                                                                                                                                      |
+| Mode         | `INJECTION_GUARD_MODE` / `INPUT_SANITIZER_MODE`                                                       | `warn`         | Injektionspolitik: `block`, `warn` eller `log`. (`redact` er accepteret for back-compat, men gør det** ikke** stribe indsprøjtning tekst; anmodning PII omskrivning styres af `PII_REDACTION_ENABLED`.) |
+| Blok tærskel | `blockThreshold` option / `INPUT_SANITIZER_BLOCK_THRESHOLD` (alias `INJECTION_GUARD_BLOCK_THRESHOLD`) | `high`         | Minimum sværhedsgrad påkrævet for at blokere. Medium er som standard kun observation.                                                                                                                   |
+
+**Mode forrang** (`getMode`): ringer op `options.mode` → `INJECTION_GUARD_MODE`**DB feature-flag tilsidesættelse** (Dashboard → Indstillinger → Funktionsflag) → `INJECTION_GUARD_MODE` env → `INPUT_SANITIZER_MODE` env → `warn`. En dashboard-tilsidesættelse vinder derfor over env vars, så Feature Flags UI styrer running guard live (ingen genstart). DB læsningen er fejlsikker: hvis den fejler, falder vagten tilbage til den env-baserede adfærd, og når der ikke er indstillet nogen tilsidesættelse, er adfærd identisk med env-only-opløsning.
 
 Detektionskilder:
 
-1.  `sanitizeRequest()` fra `@/shared/utils/inputSanitizer` (fælles detektorsæt
-    brugt andre steder i pipelinen).
-2.  Indbygget `DEFAULT_GUARD_PATTERNS` (i øjeblikket `system_override_inline` og
-    `markdown_system_block`, begge med `high` alvorlighedsgrad).
-3.  Valgfrie `customPatterns` sendt via konstruktøropioner (strenge, regex
-    eller `{ name, pattern, severity }` poster).
+1. `sanitizeRequest()` fra `@/shared/utils/inputSanitizer` (delt detektorsæt, der bruges andre steder i rørledningen).
+2. Indbygget `DEFAULT_GUARD_PATTERNS` (i øjeblikket `system_override_inline` og `markdown_system_block`, begge `high` sværhedsgrad).
+3. Valgfri `customPatterns` videregivet via konstruktørindstillinger (strenge, regex eller `{ name, pattern, severity }` poster).
 
-Når `mode === "block"` **og** mindst én detektion opfylder
-alvorlighedstærsklen, returnerer `preCall` `{ block: true, message: "Request
-rejected: suspicious content detected" }`. I `warn`/`log`-tilstande logger
-guardrail'en, men tillader kaldet. Den delte hjælpefunktion
-`evaluatePromptInjection()` eksporteres også til kaldere, der skal evaluere
-prompter uden at gå gennem registret.
+Når `mode === "block"`** og** mindst én detektion opfylder sværhedsgradsgrænsen, `preCall` returnerer `{ block: true, message: "Request rejected: suspicious content detected" }`. I `warn`/`log` -tilstande logger autoværnet, men tillader opkaldet. Den delte hjælper `evaluatePromptInjection()` eksporteres også til opkaldere, der har brug for at evaluere prompter uden at gå gennem registreringsdatabasen.
 
-**Scanningsgrænse (v3.8.20):** detektoren inspicerer kun de **første 16 KB** af
-samlet prompttekst — `MAX_INJECTION_SCAN_BYTES = 16 * 1024` (16 384 bytes) i
-`src/shared/utils/inputSanitizer.ts`. Både `detectInjection()` og
-`evaluatePromptInjection()` `slice(0, MAX_INJECTION_SCAN_BYTES)` før
-mønsterløkken køres. Injektionsdirektiver sidder nær toppen af et input, så
-dette begrænser regex CPU/GC på payloads på flere hundrede KB uden at svække
-detektionen (jf. #3932, #4041).
+**Scan bundet (v3.8.20):** detektoren inspicerer kun** første 16 KB** af sammenføjet prompttekst — `MAX_INJECTION_SCAN_BYTES = 16 * 1024` (16 384 bytes) i `src/shared/utils/inputSanitizer.ts`. Både `detectInjection()` og `evaluatePromptInjection()` `slice(0, MAX_INJECTION_SCAN_BYTES)` før du kører mønsterløkken. Injektionsdirektiver sidder nær toppen af en input, så dette begrænser regex CPU/GC på multi-hundrede KB nyttelast uden at svække detektion (jf. #3932, #4041).
 
-### Legitimationsmaskering (`credentialMasker.ts`)
+### Credential Masker (`credentialMasker.ts`)
 
-Kører på **begge** stadier, sidst i standardkæden (prioritet `95`). Redigerer
-velkendte API-nøgle-/hemmelige token-mønstre fra den udgående payload
-(meddelelsesindhold, værktøjskaldsargumenter, værktøjsresultater) **og**
-udbyderens svar, så en legitimationsoplysning, der er indsat i en prompt (eller
-gentaget af et værktøjsresultat), ikke lækkes til den opstrøms udbyder eller
-tilbage til klienten.
+Kører videre** begge** trin, sidst i standardkæden (prioritet `95`). Redagerer velkendte API-nøgle/hemmelige token-mønstre fra den udgående nyttelast (meddelelsesindhold, værktøjskaldsargumenter, værktøjsresultater)** og** udbyderens svar, så en legitimation indsat i en prompt (eller gentaget af et værktøjsresultat) lækkes ikke til opstrømsudbyderen eller tilbage til klienten.
 
-- **Kun tilvalg**, samme konvention som PII-redigering (Hard Rule
-  #20-tilgrænsende): deaktiveret medmindre
-  `settings.credentialRedactionEnabled === true` **eller**
-  `CREDENTIAL_REDACTION_ENABLED=true`. Når den er slået fra, er guardrail'en
-  en no-op — den blokerer aldrig og omskriver aldrig.
-- `redactCredentials()` gennemgår hele payload-/svartræet (`walkValue()`,
-  prototype-pollution-sikker, cyklus-sikker via `WeakSet`) og erstatter match
-  med en `[REDACTED:<type>]` pladsholder, idet kun de grene, der faktisk
-  ændrede sig, klones.
-- `CREDENTIAL_PATTERNS` dækker LLM-udbydernøgler (OpenAI, OpenAI-proj,
-  Anthropic, Google, Hugging Face, Replicate), VCS/SaaS-tokens (GitHub,
-  Slack, Linear, Notion, npm, Postman, Discord), betalingsnøgler (Stripe,
-  Square), cloud-nøgler (AWS access key, Twilio, SendGrid, Mailgun), private
-  nøgler / JWT'er, forbindelsesstrenge med legitimationsoplysninger
-  (`mongodb://user:pass@...`, osv.), og et generisk
-  `Authorization`/`x-api-key`/`api-key`/`apikey` header-værdi-mønster.
-  Header-formede nøgler (`authorization`, `x-api-key`, `api-key`, `apikey`)
-  redigeres strukturelt (kun værdi, skemaprefiks som `Bearer `/`Basic `
-  bevares) snarere end via den generiske tekst-regex.
-- Guardrail'en blokerer aldrig; den omskriver kun (`modifiedPayload` /
-  `modifiedResponse`) og annoterer (`meta.credentialsRedacted`, `meta.count`).
+- **Kun tilmelding** , samme konvention som PII -redaktion (hård regel #20-adjacent): deaktiveret, medmindre `settings.credentialRedactionEnabled === true`** eller** `CREDENTIAL_REDACTION_ENABLED=true`. Med det slukket er autoværnet en no-op — det aldrig blokerer og aldrig omskriver.
+- `redactCredentials()` går gennem det fulde payload/response træ (`walkValue()`, prototype-pollution-safe, cycle-safe via `WeakSet`) og erstatter matches med en `[REDACTED:<type>]` pladsholder og kloner kun de grene, der faktisk ændrede sig.
+- `CREDENTIAL_PATTERNS` covers LLM provider keys (OpenAI, OpenAI-proj, Anthropic, Google, Hugging Face, Replicate), VCS/SaaS tokens (GitHub, Slack, Linear, Notion, npm, Postman, Discord), payment keys (Stripe, Square), cloud keys (AWS access key, Twilio, SendGrid, Mailgun), private keys / JWTs, credential-bearing connection strings (`mongodb://user:pass@...`, etc.), and a generic `Authorization`/`x-api-key`/`api-key`/`apikey` header-value pattern. Header-shaped keys (`authorization`, `x-api-key`, `api-key`, `apikey`) are redacted structurally (value only, scheme prefix like `Bearer `/`Basic ` preserved) rather than via the generic text regex.
+- Autoværnet blokerer aldrig; den omskriver kun (`modifiedPayload` / `modifiedResponse`) og annoterer (`meta.credentialsRedacted`, `meta.count`).
 
-Regressionsguard: `tests/unit/credential-masker-guardrail.test.ts`.
+Regressionsvagt: `tests/unit/credential-masker-guardrail.test.ts`.
 
 ## Basiskontrakt (`base.ts`)
 
@@ -529,10 +313,10 @@ class BaseGuardrail {
 }
 
 interface GuardrailResult<TValue = unknown> {
-  block?: boolean; // true afbryder kæden
+  block?: boolean; // true kortslutter kæden
   message?: string; // vises ved blokering
   meta?: Record<string, unknown> | null;
-  modifiedPayload?: TValue; // returneres af preCall for at omskrive anmodningen
+  modifiedPayload?: TValue; // returneres af preCall for at omskrive forespørgslen
   modifiedResponse?: TValue; // returneres af postCall for at omskrive svaret
 }
 
@@ -552,107 +336,184 @@ interface GuardrailContext {
 }
 ```
 
-En guardrail signalerer "ingen ændring" ved at returnere enten `void`, `{}` eller
-`{ block: false }`. Returnering af en `modifiedPayload`/`modifiedResponse` erstatter
-den værdi, der løber gennem kæden til efterfølgende guardrails.
-`signal?: AbortSignal` viderefører kalderens livscyklus til guardrails. En afbrudt anmodning er den bevidste fail-open-undtagelse: mediebroer stopper arbejdet og rydder op uden at gendanne rå medier til et mål, som med sikkerhed ikke understøtter dem.
+Et guardrail signalerer »ingen ændring« ved at returnere enten `void`, `{}` eller
+`{ block: false }`. Returneres en `modifiedPayload`/`modifiedResponse`, erstattes
+den værdi, der flyder gennem kæden, for efterfølgende guardrails.
+`signal?: AbortSignal` fører kalderens livscyklus ind i guardrails. Et afbrudt request er den bevidste fail-open-undtagelse: mediebroer stopper arbejdet og rydder op uden at gendanne rå medier til et mål, der vides ikke at understøtte dem.
 
-## Register (`registry.ts`)
+## Registrering (`registry.ts`)
 
 Singletonen `guardrailRegistry` eksponerer:
 
-- `register(guardrail)` — tilføjer en guardrail (eller erstatter efter normaliseret navn) og
-  sorterer igen efter stigende `priority`.
+- `register(guardrail)` — tilføjer (eller erstatter efter normaliseret navn) et guardrail og
+  omsorterer efter stigende `priority`.
 - `clear()` / `list()` — administrative hjælpefunktioner.
-- `runPreCallHooks(payload, context)` — gennemløber aktive guardrails, fører
+- `runPreCallHooks(payload, context)` — itererer aktive guardrails, fører
   payloaden gennem `modifiedPayload` og stopper ved den første `block: true`.
-- `runPostCallHooks(response, context)` — samme forløb på svarsiden.
-- `resetGuardrailsForTests({ registerDefaults })` — rydder tilstanden og
-  genregistrerer eventuelt standarderne for ren testisolering.
+- `runPostCallHooks(response, context)` — samme flow på svardsiden.
+- `resetGuardrailsForTests({ registerDefaults })` — rydder tilstanden og genregistrerer
+  eventuelt standarderne for ren testisolering.
 
 Begge kørselsfunktioner returnerer `{ blocked, payload|response, results, guardrail?, message? }`,
-hvor `results` er et array af `GuardrailExecutionResult`-poster, som indeholder
-felterne `blocked`, `skipped`, `modified`, `error` og `meta` for hver guardrail,
-hvilket er nyttigt til sporing.
+hvor `results` er et array af `GuardrailExecutionResult`-poster, der indeholder
+felterne `blocked`, `skipped`, `modified`, `error` og `meta` pr. guardrail –
+nyttige til sporing.
 
-### Deaktivering af guardrails pr. anmodning
+### Deaktivering af guardrails pr. forespørgsel
 
 `resolveDisabledGuardrails({ apiKeyInfo, body, headers })` samler en
-duplikatfri liste over guardrail-navne, som skal springes over for den aktuelle
-anmodning. Kilder (alle valgfrie, alle flettes):
+deduplikeret liste over guardrail-navne, der skal springes over for den aktuelle
+forespørgsel. Der er fem kanaler, som læses i denne rækkefølge og flettes til én liste
+(første forekomst vinder ved deduplikering):
 
-- `apiKeyInfo.disabledGuardrails`
-- `disabledGuardrails` i anmodningens body (på øverste niveau)
-- `metadata.disabledGuardrails` i anmodningens body
-- Headeren `x-omniroute-disabled-guardrails` (eller den ældre
-  `x-disabled-guardrails`)
+1. `apiKeyInfo.disabledGuardrails`
+2. Forespørgselsbody `disabledGuardrails` (øverste niveau)
+3. Forespørgselsbody `metadata.disabledGuardrails` (kun når `metadata` er et objekt)
+4. Headeren `x-omniroute-disabled-guardrails`
+5. Ældre header `x-disabled-guardrails`
 
-Værdier kan være arrays af strenge eller en kommasepareret streng; navne
-normaliseres til kebab-case med små bogstaver (`pii_masker` → `pii-masker`). Resultatet
-videregives via `context.disabledGuardrails` til registret, som springer
-matchende guardrails over (`skipped: true` i `results`).
+Alle fem kanaler flettes, herunder de to headere: Sender man både
+`x-omniroute-disabled-guardrails` og `x-disabled-guardrails`, springes unionen af
+deres lister over, og en tom moderne header skjuler ikke længere den ældre
+([#16412](https://github.com/diegosouzapw/OmniRoute/issues/16412), rettet i
+[#16805](https://github.com/diegosouzapw/OmniRoute/pull/16805)).
+
+Værdier kan være arrays af strenge eller en kommasepareret streng; navne trimmes
+og normaliseres til kebab-case med små bogstaver (`pii_masker` → `pii-masker`), og tomme
+poster udelades. Resultatet sendes via `context.disabledGuardrails`
+til registreringen, som springer matchende guardrails over (`skipped: true` i `results`).
+
+Deaktiveringslisten påvirker kun **registreringen**. Prompt-injection-tilstanden `block` er
+en obligatorisk grænse: injection-guard-middlewaren
+(`src/middleware/promptInjectionGuard.ts`) kalder `evaluatePromptInjection()`
+uden nogen kalderstyret deaktiveringsliste (det døde
+`resolveDisabledGuardrails({ body })`-kald, den tidligere foretog, blev fjernet i
+[#16934](https://github.com/diegosouzapw/OmniRoute/pull/16934)), så en forespørgsel,
+der deaktiverer `prompt-injection`, afvises stadig i `block`-tilstand. Dette er
+by design. Deaktiveringskanalerne er kalderstyrede (forespørgselsbody,
+metadata, headere), og en kalder må ikke kunne slå en sikkerhedskontrol fra,
+som operatøren har sat
+([#16413](https://github.com/diegosouzapw/OmniRoute/issues/16413)). Header-unionen
+fra [#16412](https://github.com/diegosouzapw/OmniRoute/issues/16412)
+ændrer kun, hvilke registrerings-guardrails der springes over; den lader ikke en klient
+omgå middlewaren. Obligatoriske guardrail-politikker pr. nøgle og pr. gruppe
+spores i v4-RFC'en [#16417](https://github.com/diegosouzapw/OmniRoute/issues/16417).
+Se [Dækning og begrænsninger](#coverage-and-limits).
 
 ## Udførelsesrækkefølge
 
-For hver anmodning, der går gennem `src/sse/handlers/chat.ts` og
-`open-sse/handlers/chatCore.ts`:
+For hver forespørgsel, der løber gennem `src/sse/handlers/chat.ts` og
+`open-sse/handlers/chatCore.ts` (chat-familiens ruter anført under
+[Dækning og begrænsninger](#coverage-and-limits)):
 
-1. `resolveDisabledGuardrails(...)` opbygger listen over elementer, der skal springes over, ud fra API-nøglen, body
-   og headers.
+1. `resolveDisabledGuardrails(...)` opbygger spring-over-listen ud fra API-nøgle,
+   body og headere.
 2. `guardrailRegistry.runPreCallHooks(body, ctx)` kører guardrails i stigende
    prioritetsrækkefølge:
    - Deaktiverede guardrails registreres som `skipped`.
-   - Hver guardrails `preCall` kan omskrive payloaden via `modifiedPayload`.
-   - Den første `block: true` afbryder kæden, og handleren returnerer
-     et afvisningssvar fra den pågældende guardrail.
-3. Den (potentielt omskrevne) payload sendes videre til kombinationsrouting og upstream-
-   videresendelse.
-4. Når svaret er samlet, kører `guardrailRegistry.runPostCallHooks(...)`
-   den samme kæde på svaret. `block: true` her kasserer upstream-
-   svaret.
+   - Hvert guardrails `preCall` kan omskrive payloaden via `modifiedPayload`.
+   - Den første `block: true` kortslutter kæden, og handleren returnerer
+     et guardrail-afvisningssvar.
+3. Den (potentielt omskrevne) payload flyder videre ind i combo-routing og
+   upstream-dispatch.
+4. **Kun non-streaming:** Efter at svaret er samlet, kører
+   `guardrailRegistry.runPostCallHooks(...)` den samme kæde på svaret.
+   `block: true` her dropper upstream-svaret og returnerer HTTP 400. Streamede
+   svar springer dette trin helt over.
 
-Guardrails, der udløser fejl, registreres med `error: <message>` og logges via
-`logger.warn`, men kæden fortsætter — den er bevidst designet til at være fail-open.
+Guardrails, der kaster en fejl, registreres med `error: <message>` og logges via
+`logger.warn`, men kæden fortsætter — fail-open efter design.
+
+## Dækning og begrænsninger
+
+Guardrail-registret er kun kablet ind i chat-pipelinen. Disse begrænsninger er
+fastlåst af `tests/unit/guardrail-pipeline-wiring-characterization.test.ts` og
+`tests/unit/guardrail-pipeline-characterization.test.ts`; opdater disse tests
+bevidst, når adfærden ændrer sig.
+
+### Hvor hooksene kører
+
+| Hook / kontrol                      | Kører på                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `runPreCallHooks`                   | Forespørgsler håndteret af `handleChat` (`src/sse/handlers/chat.ts`): `/v1/chat/completions`, `/v1/completions`, `/v1/messages`, `/v1/responses` (og `/v1/responses/*`), `/v1/relay/chat/completions`, `/v1/providers/{provider}/chat/completions`, `/v1/api/chat`, `/v1/antigravity`, `/v1beta/models/*` og Telegram-chat-proxien. Også dashboardets test-endpoint `/api/guardrails/test`. En pre-call-blok returnerer HTTP 400. |
+| `runPostCallHooks`                  | Kun **non-streaming**-chatsvar (`open-sse/handlers/chatCore/nonStreamingResponse.ts`). Streamede svar når den aldrig.                                                                                                                                                                                                                                                                                                             |
+| Streaming-PII                       | `createPiiSseTransform` (`src/lib/streamingPiiTransform.ts`), pipet ind i `streamingPipeline.ts`, når `PII_RESPONSE_SANITIZATION` er slået til. Det er ikke et guardrail, så deaktiveringskanalerne påvirker det ikke.                                                                                                                                                                                                            |
+| Injection-guard-middleware (legacy) | Hver prompt-bærende `/v1`-rute, inklusive chat-familien (se [rutedækning](#injection-guard-route-coverage--red-team-phase-8--block-d)). Kun prompt injection.                                                                                                                                                                                                                                                                     |
+
+### Hvad der ikke er dækket
+
+- **Medie-, embeddings- og dataruter** (`/v1/images/*`, `/v1/embeddings`,
+  `/v1/audio/*`, `/v1/videos/generations`, `/v1/music/generations`,
+  `/v1/rerank`, `/v1/search`, `/v1/moderations`) når aldrig registret. Ingen
+  PII-maskering, maskering af legitimationsoplysninger eller modality bridge
+  kører der. Deres eneste kontrol er den ældre injection-guard-middleware.
+- **Streamede svar** får ingen post-call-guardrails: ingen `pii-masker`- eller
+  `credential-masker`-post-call og ingen post-call-blok. Kun streaming-PII-
+  transformationen gælder (når `PII_RESPONSE_SANITIZATION` er slået til). En
+  legitimationsoplysning, der sendes tilbage i et streamet svar, bliver ikke
+  maskeret.
+- **Deaktiveringskanaler vs. middlewaren (efter design):** Middlewaren evaluerer
+  prompt injection med sit eget kald til `evaluatePromptInjection()`, uden at
+  videregive nogen kalderstyret deaktiveringsliste. `block`-tilstand er en
+  obligatorisk grænse, som kalderstyrede deaktiveringer ikke kan omgå, inklusive
+  på chat-familiens ruter
+  ([#16413](https://github.com/diegosouzapw/OmniRoute/issues/16413)). At
+  deaktivere `prompt-injection` springer kun registrets guardrail over.
+
+### Hvad der ser et svar før post-call
+
+På non-streaming-stien er rækkefølgen: hukommelsesekstraktion → indbygget
+værktøjsudførelse → post-call-guardrails → post-call-blok-afslutning → lagring
+i den semantiske cache.
+
+- **Hukommelsesekstraktion** og **værktøjsudførelse** ser svaret, før post-call-guardrails kan omskrive eller blokere det. Siden
+  [#16401](https://github.com/diegosouzapw/OmniRoute/pull/16401) kører
+  hukommelsesekstraktion den ekstraherede tekst gennem `sanitizePII`, når
+  `PII_RESPONSE_SANITIZATION` er slået til (både streaming og non-streaming), men et
+  svar, som post-call senere blokerer, er stadig blevet tilbudt til hukommelse og
+  værktøjer.
+- **Den semantiske cache** gemmer svaret efter post-call, så den gemmer det
+  omskrevne svar, og et blokeret svar caches aldrig. Cache-poster er
+  nøglet pr. API-nøgle.
 
 ## Konfiguration
 
 Miljøvariabler, der læses af de indbyggede guardrails:
 
-| Variabel                              | Bruges af                 | Effekt                                                                                                           |
-| ------------------------------------- | ------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| `INPUT_SANITIZER_ENABLED`             | `prompt-injection`        | Angiv `false` for at deaktivere detektering fuldstændigt.                                                        |
-| `INPUT_SANITIZER_MODE`                | `prompt-injection`        | Injektionspolitik: `warn`, `block` eller `log`. Den ældre værdi `redact` omskriver ikke injektionstekst.         |
-| `INJECTION_GUARD_MODE`                | `prompt-injection`        | Tilstand for injektionsbeskyttelsen; også et DB-feature-flag, der **tilsidesætter** miljøvariablerne (DB > ENV). |
-| `INPUT_SANITIZER_BLOCK_THRESHOLD`     | `prompt-injection`        | Den laveste alvorlighedsgrad, som `MODE=block` afviser: `high` (standard), `medium` eller `low`.                 |
-| `INJECTION_GUARD_BLOCK_THRESHOLD`     | `prompt-injection`        | Ældre alias for `INPUT_SANITIZER_BLOCK_THRESHOLD`.                                                               |
-| `PII_REDACTION_ENABLED`               | `pii-masker`              | Når værdien er `true`, redigeres PII i anmodningen (uafhængigt af injektionstilstanden).                         |
-| `PII_RESPONSE_SANITIZATION` / `_MODE` | `pii-masker` (downstream) | Styrer maskeringsadfærden på svarsiden.                                                                          |
+| Variabel                              | Bruges af                | Effekt                                                                                                     |
+| ------------------------------------- | ------------------------ | ---------------------------------------------------------------------------------------------------------- |
+| `INPUT_SANITIZER_ENABLED`             | `prompt-injection`       | Angiv `false` for at deaktivere detektion helt.                                                            |
+| `INPUT_SANITIZER_MODE`                | `prompt-injection`       | Injektionspolitik: `warn`, `block` eller `log`. Den ældre værdi `redact` omskriver ikke injektionsteksten. |
+| `INJECTION_GUARD_MODE`                | `prompt-injection`       | Tilstand for injektionsvagten; også et DB-feature-flag, der **tilsidesætter** miljøvariablerne (DB > ENV). |
+| `INPUT_SANITIZER_BLOCK_THRESHOLD`     | `prompt-injection`       | Minimumsalvorlighedsgrad, som `MODE=block` afviser: `high` (standard), `medium` eller `low`.               |
+| `INJECTION_GUARD_BLOCK_THRESHOLD`     | `prompt-injection`       | Ældre alias for `INPUT_SANITIZER_BLOCK_THRESHOLD`.                                                         |
+| `PII_REDACTION_ENABLED`               | `pii-masker`             | Når `true`, maskeres PII i forespørgslen (uafhængigt af injektionstilstand).                               |
+| `PII_RESPONSE_SANITIZATION` / `_MODE` | `pii-masker` (nedstrøms) | Styrer maskeringens adfærd på svardelen.                                                                   |
 
-Modality Bridge-guardrails læser kørselskonfigurationen fra det DB-understøttede
-indstillingslager (`getSettings()`), ikke fra miljøvariabler. Visions primære nøgler er
-`modalityBridgeVisionEnabled`, `modalityBridgeVisionMode`,
-`modalityBridgeVisionModel`, `modalityBridgeVisionTaskAware`,
-`modalityBridgeVisionPrompt`, `modalityBridgeVisionTimeout`,
-`modalityBridgeVisionMaxImages`, `modalityBridgeVisionMaxChars`,
-`modalityBridgeCacheEnabled`, `modalityBridgeCacheTtlMinutes` og
-`modalityBridgeCacheMaxEntries`. De ældre
-`visionBridge*`-nøgler accepteres kun som det dokumenterede læsefallback i én cyklus;
-dashboardet skriver med de primære nøgler. Standardværdier og fallback-
-resolveren findes i `src/shared/constants/modalityBridgeDefaults.ts`, mens ældre
-konstanter er bevaret i `src/shared/constants/visionBridgeDefaults.ts`.
+Modality Bridge-guardrails læser runtime-konfigurationen fra det
+DB-understøttede indstillingslager (`getSettings()`), ikke fra miljøvariabler.
+Visions primære nøgler er `modalityBridgeVisionEnabled`,
+`modalityBridgeVisionMode`, `modalityBridgeVisionModel`,
+`modalityBridgeVisionTaskAware`, `modalityBridgeVisionPrompt`,
+`modalityBridgeVisionTimeout`, `modalityBridgeVisionMaxImages`,
+`modalityBridgeVisionMaxChars`, `modalityBridgeCacheEnabled`,
+`modalityBridgeCacheTtlMinutes` og `modalityBridgeCacheMaxEntries`. De ældre
+`visionBridge*`-nøgler accepteres kun som den dokumenterede fallback-læsning i
+én cyklus; skrivninger fra dashboardet bruger de primære nøgler. Standardværdier
+og fallback-resolveren findes i `src/shared/constants/modalityBridgeDefaults.ts`,
+mens de ældre konstanter er bevaret i `src/shared/constants/visionBridgeDefaults.ts`.
 
-Lyd bruger `modalityBridgeAudioEnabled`, `modalityBridgeAudioModel`,
+Audio bruger `modalityBridgeAudioEnabled`, `modalityBridgeAudioModel`,
 `modalityBridgeAudioTimeout` og `modalityBridgeAudioMaxClips` samt de delte
-`modalityBridgeCache*`-indstillinger. Lyd har intet fallback til ældre nøgler, da disse
-nøgler blev introduceret med Modality Bridge-skemaet.
+`modalityBridgeCache*`-indstillinger. Audio har ingen fallback til ældre nøgler,
+da disse nøgler blev introduceret sammen med Modality Bridge-skemaet.
 
 Video bruger `modalityBridgeVideoEnabled`, `modalityBridgeVideoAnalysisMode`,
-`modalityBridgeVideoModel`,
-`modalityBridgeVideoFrameCount`, `modalityBridgeVideoSamplingPolicy`,
-`modalityBridgeVideoMaxVideos` og
+`modalityBridgeVideoModel`, `modalityBridgeVideoFrameCount`,
+`modalityBridgeVideoSamplingPolicy`, `modalityBridgeVideoMaxVideos` og
 `modalityBridgeVideoTimeout` samt de delte `modalityBridgeCache*`-indstillinger.
-Funktionen er som standard deaktiveret, fordi FFmpeg/ffprobe er valgfrie driftsmæssige
-afhængigheder, og billedtekstning af frames øger latenstid og modelomkostninger.
+Det er deaktiveret som standard, fordi FFmpeg/ffprobe er valgfrie operationelle
+afhængigheder, og frame-billedtekstning tilføjer latenstid og modelomkostninger.
 
 ## Tilpassede guardrails
 
@@ -677,41 +538,41 @@ guardrailRegistry.register(new BudgetGuardrail());
 
 Trin:
 
-1. Opret `src/lib/guardrails/myGuardrail.ts`, som udvider `BaseGuardrail`.
-2. Implementer `preCall` og/eller `postCall`.
-3. Registrer enten ved importtidspunktet (tilføj fra `registerDefaultGuardrails`), eller
-   kald `guardrailRegistry.register(...)` under kørsel — registreringsdatabasen erstatter
-   enhver tidligere guardrail med det samme normaliserede navn.
-4. Tilføj test under `tests/unit/` (eksisterende eksempler:
+1. Opret `src/lib/guardrails/myGuardrail.ts`, der udvider `BaseGuardrail`.
+2. Implementér `preCall` og/eller `postCall`.
+3. Registrér enten ved importtidspunktet (push fra `registerDefaultGuardrails`)
+   eller kald `guardrailRegistry.register(...)` ved kørsel — registeret
+   erstatter enhver tidligere guardrail med samme normaliserede navn.
+4. Tilføj tests under `tests/unit/` (eksisterende eksempler:
    `tests/unit/guardrails-registry.test.ts`,
    `tests/unit/prompt-injection-guard.test.ts`,
    `tests/unit/guardrails/visionBridge.test.ts`).
 
-## Test
+## Testning
 
-Brug `resetGuardrailsForTests()` mellem test for at starte fra en kendt tilstand.
-Angiv `{ registerDefaults: false }` for at starte med en tom registreringsdatabase og
-kun registrere de guardrails, der testes. Vision Bridge accepterer dependency
-injection (`deps.getSettings`, `deps.callVisionModel`); Audio Bridge eksponerer de
-tilsvarende integrationspunkter for indstillinger, funktionalitet, valg af STT-model,
-kontrol af legitimationsoplysninger og transskription. Test kan derfor afprøve begge
-forløb uden adgang til database eller netværk.
+Brug `resetGuardrailsForTests()` mellem tests for at starte fra en kendt tilstand.
+Angiv `{ registerDefaults: false }` for at starte med et tomt register og
+kun registrere de guardrails, der testes. Vision Bridge understøtter dependency
+injection (`deps.getSettings`, `deps.callVisionModel`); Audio Bridge eksponerer
+tilsvarende afkoblingspunkter for indstillinger, kapabiliteter, valg af
+STT-model, kontrol af legitimationsoplysninger og transskription. Tests kan
+derfor afprøve begge flows uden adgang til DB eller netværk.
 
 ## Se også
 
 - `src/lib/guardrails/` — implementering
-- `src/shared/utils/inputSanitizer.ts` — fælles detektor, som driver
-  beskyttelse mod prompt-injektion og maskering af personhenførbare oplysninger
-- `src/shared/constants/visionBridgeDefaults.ts` — standarder for Vision Bridge og
-  modelliste for tvungen bridge
-- `src/shared/constants/modalityBridgeDefaults.ts` — fælles standarder for kørsel af Vision/Audio
-- `docs/architecture/RESILIENCE_GUIDE.md` — ortogonalt lag (circuit breaker, nedkølingsperioder)
+- `src/shared/utils/inputSanitizer.ts` — delt detektor, der ligger til grund for
+  prompt-injektionsbeskyttelse og PII-maskering
+- `src/shared/constants/visionBridgeDefaults.ts` — standardværdier for Vision Bridge
+  og model-liste for tvungen bridge
+- `src/shared/constants/modalityBridgeDefaults.ts` — delte standardværdier for Vision/Audio ved kørsel
+- `docs/architecture/RESILIENCE_GUIDE.md` — ortogonalt lag (circuit breaker, cooldown-perioder)
 - `docs/reference/ENVIRONMENT.md` — komplet reference til miljøvariabler
 
-## Rutedækning og red-team for injektionsbeskyttelsen (Fase 8 · Blok D)
+## Dækning af injection-guard-ruter & red-team (fase 8 · blok D)
 
-Injektionsbeskyttelsen (`createInjectionGuard` / `withInjectionGuard`) dækker alle ruter,
-der accepterer brugerprompter. Den respekterer `INJECTION_GUARD_MODE` (standardværdien `warn` = kun logning;
+Injection-guard'en (`createInjectionGuard` / `withInjectionGuard`) dækker alle ruter,
+der accepterer bruger-prompter. Den respekterer `INJECTION_GUARD_MODE` (standard `warn` = kun logning;
 `block` = returnerer HTTP 400 `SECURITY_001`).
 
 | Type                 | Ruter                                                                                                                                                | Standardtilstand |
@@ -722,24 +583,25 @@ der accepterer brugerprompter. Den respekterer `INJECTION_GUARD_MODE` (standardv
 
 Tekstudtrækning (`extractMessageContents`) dækker `messages`/`input`/`prompt`/`query`+`documents`/`instructions`/`system`.
 
-**Red-team (hver nat, `nightly-llm-security.yml`):** promptfoo validerer, at hver rute blokerer
-OWASP-LLM-korpuset i `INJECTION_GUARD_MODE=block`; garak kører prober (springes over uden hemmelighed).
-`moderations` er inkluderet for konsistens — operatører i blokeringstilstand kan undtage den via
-`resolveDisabledGuardrails`.
+**Red-team (natligt, `nightly-llm-security.yml`):** promptfoo validerer, at hver rute blokerer
+OWASP-LLM-korpusset i `INJECTION_GUARD_MODE=block`; garak kører probes (springes over uden secret).
+`moderations` er inkluderet for konsistens. Blok-tilstand er en obligatorisk grænse: `evaluatePromptInjection()`
+ignorerer den deaktiveringsliste pr. forespørgsel, som middlewaren videregiver til den, så `disabledGuardrails` fritager
+**ikke** en rute fra den ([#16413](https://github.com/diegosouzapw/OmniRoute/issues/16413)).
 
 Det natlige workflow (`.github/workflows/nightly-llm-security.yml`, cron + manuel
-igangsættelse) har to jobs:
+udløsning) har to jobs:
 
 - **`promptfoo-guard` (blokerende)** — kører `promptfoo eval -c promptfooconfig.yaml`
-  med `INJECTION_GUARD_MODE=block`. Hver adversarial test (f.eks. "ignore all
-  previous instructions…", jailbreaks i DAN-stil) kontrollerer, at svaret indeholder
-  `error.code === "SECURITY_001"`, dvs. at beskyttelsen faktisk afviste anmodningen.
-- **`garak` (vejledende)** — kører garak `--probes promptinject,dan,leakreplay`
+  med `INJECTION_GUARD_MODE=block`. Hvert adversarisk tilfælde (f.eks. "ignore all
+  previous instructions…", DAN-lignende jailbreaks) verificerer, at svaret indeholder
+  `error.code === "SECURITY_001"`, dvs. at guard'en faktisk afviste forespørgslen.
+- **`garak` (rådgivende)** — kører garak `--probes promptinject,dan,leakreplay`
   mod en lokal OmniRoute-instans (`http://localhost:20128/v1`). Betinget af en
-  udbyderhemmelighed (`PROMPTFOO_PROVIDER_KEY`); springes elegant over og har suffikset
-  `|| true`, så jobbet rapporterer uden at få CI til at fejle.
+  provider-secret (`PROMPTFOO_PROVIDER_KEY`); springes elegant over og har suffikset
+  `|| true`, så den rapporterer uden at lade CI fejle.
 
-Dækningen af hjælpefunktionen til beskyttelse (`createInjectionGuard` / `withInjectionGuard`)
-omfatter alle promptbærende `/v1`-ruter; prompttekst hentes fra
+Dækningen af guard-hjælperen (`createInjectionGuard` / `withInjectionGuard`)
+omfatter hver eneste prompt-bærende `/v1`-rute; prompt-teksten hentes fra
 `messages`/`input`/`prompt`/`query`+`documents`/`instructions`/`system` af
 `extractMessageContents()` i `src/shared/utils/inputSanitizer.ts`.

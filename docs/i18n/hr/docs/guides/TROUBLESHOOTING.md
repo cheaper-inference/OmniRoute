@@ -33,37 +33,43 @@ Uobičajeni problemi i rješenja za OmniRoute.
 
 ---
 
-## Detaljno rješavanje problema
+## Detaljno otklanjanje poteškoća
 
 ---
 
-### Ograničavanje brzine kod besplatnih pružatelja (429 / 400 / 401)
+### Ograničavanje brzine kod besplatnih pružatelja usluga (429 / 400 / 401)
 
-**Simptom**: Kada upotrebljavate `model: "auto"` s besplatnim pružateljima ili pružateljima koji ne zahtijevaju autentifikaciju (opencode, auggie itd.), povremeno dobivate `HTTP 429`, `400` ili `401` umjesto odgovora. Zahtjevi uspijevaju kada nekoliko trenutaka poslije ponovno pošaljete isti upit, ali automatizacija (cron zadaci, agenti, skripte) prekida se pri prvom neuspjehu.
+**Simptom**: Kada koristite `model: "auto"` s besplatnim pružateljima usluga bez autentifikacije (auggie itd.), povremeno dobivate `HTTP 429`, `400` ili `401` umjesto odgovora. Zahtjevi uspijevaju kada se isti upit ponovi nekoliko trenutaka kasnije, ali automatizacija (cron poslovi, agenti, skripte) prekida se pri prvom neuspjehu.
 
-**Glavni uzrok**: Kombiniraju se tri neovisna načina nastanka pogreške:
+**Uzrok**: Tri se neovisna načina neuspjeha međusobno nadovezuju:
 
-1. **Ograničenje brzine pružatelja (`429`)**: Besplatne razine mogu nametnuti kvotu po vremenskom intervalu. Niz paralelnih poziva iscrpljuje je, pa se sljedeći zahtjev odbija dok se interval ne poništi.
-2. **Neispravan model u izravnom prosljeđivanju (`400`/`401`)**: Skupovi `auto/*` mogu uključivati modele za izravno prosljeđivanje iz `opencode` koji su registrirani u katalogu, ali nemaju aktivne vjerodajnice (npr. `oc/north-mini-code-free` → `401`). Automatski usmjerivač isproba jedan, ne uspije, a pogreška se proslijedi prije nego što se aktivira zamjenska opcija.
-3. **Pojačavanje zbog istodobnosti (`429` pod opterećenjem)**: Kada više sesija agenta ili cron zadatka istodobno pristupi opciji `auto`, ukupna brzina zahtjeva premašuje ono što besplatni pružatelji mogu podnijeti, pa se legitimni pozivi označavaju kao zloupotreba.
+1. **Ograničenje brzine pružatelja usluge (`429`)**: Besplatni planovi mogu primjenjivati kvotu po vremenskom prozoru. Nagli niz paralelnih poziva iscrpi je, pa se sljedeći zahtjev odbija dok se prozor ne resetira.
+2. **Neispravan model u passthroughu (`400`/`401`)**: Skupovi `auto/*` mogu uključivati passthrough modele koji su registrirani u katalogu, ali nemaju važeće vjerodajnice (→ `401`). Automatski usmjerivač pokušava upotrijebiti jedan od njih, ne uspijeva i prosljeđuje pogrešku prije nego što se aktivira rezervna opcija.
+3. **Pojačavanje konkurentnosti (`429` pod opterećenjem)**: Kada više agentnih/cron sesija istodobno pristupi `auto` opciji, ukupna brzina zahtjeva premašuje ono što besplatni pružatelji mogu podnijeti, pa se legitimni pozivi označavaju kao zloupotreba.
 
-**Provjereno rješenje (prema izvješćima zajednice, 2026-08-10)**: prilagodite tri varijable okruženja kako bi rotacija, istodobnost i zamjenske opcije apsorbirale nestabilnost besplatne razine umjesto da se zbog nje prekine izvršavanje:
+**Provjereno rješenje (prijavljeno u zajednici, 2026-08-10)**: podesite tri varijable okruženja tako da rotacija, konkurentnost i rezervna opcija apsorbiraju promjene na besplatnom planu umjesto da ih prekinu:
 
 ```bash
-export OMNIROUTE_ROTATE_ON_400=true           # prijeđi na drugi model/pružatelja pri 400/401 (preskače neispravne modele za izravno prosljeđivanje)
-export OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT=4   # izričito ograničenje prihvata zahtjevnih zahtjeva (prema zadanim postavkama nije postavljeno: nema ograničenja broja zahtjeva, pogledajte napomenu u nastavku)
-export OMNIROUTE_CHAT_ADMISSION_QUEUE_MS=20000 # povećaj ograničeno čekanje iznad zadane vrijednosti RATE_LIMIT_MAX_WAIT_MS za spore nadređene servise
+export OMNIROUTE_ROTATE_ON_400=true           # prijeđi na drugi model/pružatelja usluge kod 400/401 (preskače neispravne passthrough modele)
+export OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT=4   # izričito ograničenje istodobnog prihvata zahtjevnih zahtjeva (zadano nije postavljeno: nema ograničenja broja zahtjeva, pogledajte napomenu u nastavku)
+export OMNIROUTE_CHAT_ADMISSION_QUEUE_MS=20000 # produlji ograničeno čekanje iznad zadane vrijednosti RATE_LIMIT_MAX_WAIT_MS za spore uzvodne usluge
 ```
 
-Postavite ih u okruženju procesa OmniRoute (daemon, npr. putem LaunchAgent plist datoteke ili naredbe `systemctl edit`), a zatim ponovno pokrenite OmniRoute. Oznaka rotacije pojedinačna je poluga s najvećim učinkom: pretvara potpuni neuspjeh u transparentan ponovni pokušaj kod ispravnog pružatelja iz skupa.
+Postavite ih u okruženju procesa OmniRoute (demona, npr. putem LaunchAgent plist datoteke ili `systemctl edit`), a zatim ponovno pokrenite OmniRoute. Zastavica rotacije ima najveći pojedinačni učinak: pretvara kritičnu pogrešku u transparentni ponovni pokušaj prema ispravnom pružatelju usluge u skupu.
 
-**Napomena**: `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` ograničava broj zahtjevnih zahtjeva — onih s dugim kontekstom — koji se izvršavaju istodobno; to je ograničenje ulaz za prihvat, a ne ograničivač brzine pružatelja. **Ažuriranje #503-fanout:** ova varijabla više nije postavljena prema zadanim postavkama (sada se primjenjuje samo kada je izričito konfigurirana, kao iznad) — prihvat zahtjevnih zahtjeva umjesto toga kontrolira automatski izveden proračun bajtova (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`) koji se sam prilagođava stvarnom memorijskom ograničenju računala, pa bi nova implementacija trebala imati znatno manje odbijanja `503 chat_admission_busy` bez ikakvog postavljanja ove varijable; njezino izričito postavljanje ovdje i dalje radi točno kako je dokumentirano. Izričita nadjačavanja proračuna bajtova ograničena su na 8 MiB–2 GiB. Pogreška `413 body_exceeds_budget` nije privremena: povećajte taj proračun bajtova, smanjite `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES` ili povećajte ograničenje memorije procesa. Odbacivanje `inflight_bytes_budget` privremeno je zagušenje i zahtjev se i dalje može ponovno pokušati izvršiti. Ograničavanjem brzine po pružatelju (`open-sse/services/rateLimitManager.ts`) zasebno upravljaju `RATE_LIMIT_MAX_WAIT_MS`, `RATE_LIMIT_MAX_QUEUE_DEPTH` i `RATE_LIMIT_AUTO_ENABLE` — pogledajte `.env.example`.
+**Napomena**: `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` ograničava koliko zahtjevnih — zahtjeva s dugim kontekstom — može istodobno biti pokrenuto; ograničenje je ulazna prepreka, a ne ograničivač brzine pružatelja usluge. **Ažuriranje za #503-fanout:** ova se varijabla više ne postavlja prema zadanim postavkama (sada se primjenjuje samo kada je izričito konfigurirana, kao što je gore navedeno) — prihvat zahtjevnih zahtjeva umjesto toga ograničava automatski izvedeni proračun bajtova (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`) koji se sam skalira prema stvarnom ograničenju memorije glavnog računala, pa bi nova instalacija trebala imati znatno manje odbijanja `503 chat_admission_busy` bez ikakvog postavljanja ove varijable; njezino izričito postavljanje i dalje funkcionira točno kako je dokumentirano. Izričita nadjačavanja proračuna bajtova ograničena su na 8 MiB–2 GiB. `413 body_exceeds_budget` nije privremen: povećajte taj proračun bajtova, smanjite `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES` ili spremljeno ograničenje tijela zahtjeva ili povećajte memorijsko ograničenje procesa. Odbacivanje `inflight_bytes_budget` privremena je konkurencija i i dalje se može ponovno pokušati. Ograničavanje brzine po pružatelju usluge (`open-sse/services/rateLimitManager.ts`) zasebno se upravlja varijablama `RATE_LIMIT_MAX_WAIT_MS`, `RATE_LIMIT_MAX_QUEUE_DEPTH` i `RATE_LIMIT_AUTO_ENABLE` — pogledajte `.env.example`.
 
-**Kako provjeriti radi li**: pokrenite svoj agent/cron dvaput u kratkom razmaku i potvrdite da su oba pokretanja uspješna. Prije ispravka drugo pokretanje obično vraća pogrešku `429`/`401`. Nakon ispravka neuspjeli pokušaji (ako ih bude) automatski se ponovno izvršavaju i poziv se dovršava. Također možete pokrenuti `curl /monitoring/health` i pratiti polje `rateLimitedUntil` na vezama s pružateljima te `circuitBreakers.providerBreakers[].state` za pogođene pružatelje — stanje može biti `CLOSED`, `DEGRADED`, `OPEN` ili `HALF_OPEN` (pogledajte `src/shared/utils/circuitBreaker.ts`), a pružatelj kod kojeg se neuspjesi nastavljaju prijeći će iz `CLOSED → DEGRADED → OPEN` prije nego što vremenski okvir za ponovno postavljanje omogući probni zahtjev (`HALF_OPEN`).
+**Napomena o nadogradnji: spremljeno ograničenje tijela zahtjeva sada se primjenjuje i na chat.** Ograničenje spremljeno ranije pod Postavke > Napredno > Ograničenje tijela zahtjeva (`maxBodySizeMb`) sada se primjenjuje i na `/v1/chat/completions` i `/v1/responses`. Prije ove promjene te su dvije rute prihvaćale do 50 MB bez obzira na spremljenu vrijednost, pa instalacija s nižim spremljenim ograničenjem počinje odbijati chat tijela veća od te vrijednosti. Instalacija koja nikada nije spremila ograničenje zadržava zadanu vrijednost od 50 MB.
 
-**Ako i dalje vidite 429**: aktivni račun tog pružatelja doista je iscrpio svoju _kvotu_ (ne samo ograničenje brzine zahtjeva). Dodajte drugi račun za istog pružatelja na nadzornoj ploči OmniRoute → Providers → Accounts ili uključite drugog besplatnog pružatelja (npr. `routeway`, `auggie`). Rotacija pomaže samo kod privremenih ograničenja brzine i pogrešaka 400/401; potpuno iscrpljivanje kvote zahtijeva druge vjerodajnice ili drugog pružatelja.
+Odbijanje je HTTP `413`, pri čemu je `error.code` postavljen na `PAYLOAD_TOO_LARGE`, a `error.type` na `payload_too_large`. Poruka navodi ograničenje koje je na snazi: `Request body too large. Maximum allowed: 10 MB` kada je deklarirani `Content-Length` veći od njega ili `Request body too large for chat completions (max 10 MB).` kada su stvarno pročitani bajtovi veći od njega. To nije isto što i `413 body_exceeds_budget` iznad, koji potječe iz memorijskog proračuna i na njega ova postavka ne utječe.
 
-**Ako vidite 403 na modelima za računalni vid (`auto/vision`, `bazaarlink/*`)**: povezani račun nema plaćeni plan koji uključuje računalni vid ili API ključ nema dostatne dozvole. Na nadzornoj ploči pružatelja provjerite uključuje li opseg ključa računalni vid/multimodalne mogućnosti ili povežite račun s plaćenom tarifom i zadržite ga kao odredište za računalni vid.
+Za povećanje ograničenja spremite veću vrijednost na `/dashboard/settings/advanced` ili pošaljite `PATCH /api/settings` s `{"maxBodySizeMb": 50}`. Prihvaćaju se vrijednosti od 1 do 500 MB, primjenjuju se bez ponovnog pokretanja, a vrijednost 50 vraća prethodno ograničenje chata. Dva druga ograničenja i dalje mogu zaustaviti veće tijelo: `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES`, kada je postavljen, također ograničava spremljenu vrijednost, a Kubernetesova ingress napomena `proxy-body-size` (`50m` u isporučenim manifestima) mora se zasebno povećati za sve iznad 50 MB.
+
+**Kako provjeriti je li rješenje djelovalo**: pokrenite agenta/cron dvaput u kratkom razmaku i potvrdite da oba pokretanja uspijevaju. Prije rješenja drugo pokretanje obično izbacuje `429`/`401`. Nakon rješenja neuspjesi se, ako ih ima, transparentno ponovno pokušavaju, a poziv se dovršava. Možete i pozvati `curl /monitoring/health` te pratiti polje `rateLimitedUntil` na vezama pružatelja usluge i `circuitBreakers.providerBreakers[].state` za pogođene pružatelje usluge — stanje je jedno od `CLOSED`, `DEGRADED`, `OPEN` ili `HALF_OPEN` (pogledajte `src/shared/utils/circuitBreaker.ts`), a pružatelj usluge koji se neprestano neuspješno odaziva prijeći će iz `CLOSED → DEGRADED → OPEN` prije nego što prozor resetiranja propusti probu (`HALF_OPEN`).
+
+**Ako i dalje vidite 429**: aktivni račun tog pružatelja usluge doista je iscrpio svoju _kvotu_ (ne samo ograničenje brzine). Dodajte drugi račun za istog pružatelja usluge na nadzornu ploču OmniRoutea → Providers → Accounts ili uključite drugog besplatnog pružatelja usluge (npr. `routeway`, `auggie`). Rotacija pomaže samo kod privremenih ograničenja brzine i pogrešaka 400/401; potpuno iscrpljena kvota zahtijeva druge vjerodajnice ili drugog pružatelja usluge.
+
+**Ako vidite 403 na modelima za vid (`auto/vision`, `bazaarlink/*`)**: povezani račun nema plaćeni plan koji uključuje vid ili API ključ nema dovoljne dozvole. Na nadzornoj ploči pružatelja usluge provjerite uključuje li opseg ključa vid/multimodalne mogućnosti ili povežite račun s plaćenim planom i zadržite ga kao odredište za vid.
 
 ---
 
@@ -94,7 +100,7 @@ Upozorenja proizlaze iz zastarjelih raspona peer ovisnosti u paketima trećih st
 
 <a name="npm-install-scripts-blocked-warning-global-install"></a>
 
-Prilikom pokretanja `npm install -g omniroute`, novije verzije npm-a (v11+ i v12+) prema zadanim postavkama blokiraju skripte životnog ciklusa paketa i prikazuju upozorenje o instalacijskim skriptama:
+Prilikom pokretanja naredbe `npm install -g omniroute`, novije verzije npm-a (v11+ i v12+) prema zadanim postavkama blokiraju skripte životnog ciklusa paketa i prikazuju upozorenje o instalacijskim skriptama:
 
 ```
 npm warn install-scripts 7 packages had install scripts blocked because they are not covered by allowScripts:
@@ -104,25 +110,25 @@ npm warn install-scripts 7 packages had install scripts blocked because they are
 
 ### Može li se ovo upozorenje zanemariti?
 
-**Djelomično, ali pokretanje bez skripti nije preporučljivo.** OmniRoute uključuje pouzdane pričuvne mogućnosti: ako se nativne poveznice `better-sqlite3` ne mogu učitati iz samostalnog paketa, aplikacija prelazi na alternativne upravljačke programe kao što su `node:sqlite` ili `sql.js` (pogledajte [Razrješavanje SQLite okruženja za izvođenje](../ops/SQLITE_RUNTIME.md)). Poslužitelj će se i dalje pokrenuti, ali upotreba pričuvnih WASM rješenja kao što je `sql.js` onemogućuje način rada SQLite WAL (Write-Ahead Logging) te povećava memorijske zahtjeve i opterećenje zbog sinkronizacije diska.
+**Djelomično, ali pokretanje bez skripti nije preporučljivo.** OmniRoute uključuje pouzdane zamjenske opcije: ako se nativna povezivanja za `better-sqlite3` ne mogu učitati iz samostalnog paketa, aplikacija prelazi na alternativne upravljačke programe kao što su `node:sqlite` ili `sql.js` (pogledajte [Odabir SQLite izvođenja](../ops/SQLITE_RUNTIME.md)). Poslužitelj će se i dalje pokrenuti, ali upotreba zamjenskih WASM rješenja kao što je `sql.js` onemogućuje SQLite WAL način rada (zapisivanje unaprijed, engl. Write-Ahead Logging) te povećava opterećenje memorije i sinkronizacije diska.
 
-### Koje su skripte doista potrebne?
+### Koje su skripte zapravo potrebne?
 
 Nisu sve blokirane skripte nužne za pokretanje OmniRoutea:
 
-- **Nužne (`omniroute`, `better-sqlite3`):** OmniRoute se pokreće iz samostalnog paketa aplikacije Next.js (`dist/`). Tijekom instalacije npm preuzima ili kompilira nativni SQLite upravljački program specifičan za računalo u `node_modules/better-sqlite3/` najviše razine. OmniRouteova skripta `postinstall` (`scripts/build/postinstall.mjs`) zatim provjerava i kopira te binarne datoteke specifične za računalo u `dist/node_modules/` kako bi im samostalni poslužitelj mogao pristupiti. Ako je OmniRouteova skripta `postinstall` blokirana, ovaj se korak kopiranja preskače.
-- **Neobavezne/prijelazne (`keytar`, `@parcel/watcher`, `@swc/core`, `protobufjs`, `esbuild`):** To su pomoćni alati za izgradnju, alati za nadzor promjena ili uslužni programi za sistemski privjesak ključeva. Njihovo dopuštanje sprječava upozorenja pri izgradnji, ali nisu potrebni za osnovnu funkcionalnost usmjeravanja.
-- **Isključena (`onnxruntime-node`):** Neobavezna ovisnost za lokalna AI ugrađivanja i **nije** potrebna za pokretanje OmniRoutea. Njezina skripta `postinstall` preuzima približno 300 MB CUDA resursa s NuGeta; nemojte je uključiti u popis dopuštenih osim ako izričito namjeravate upotrebljavati lokalno ONNX ubrzanje na podržanom hardveru.
+- **Nužne (`omniroute`, `better-sqlite3`):** OmniRoute se pokreće iz samostalnog aplikacijskog paketa Next.js (`dist/`). Tijekom instalacije npm preuzima ili kompilira nativni SQLite upravljački program specifičan za glavno računalo u vršnom direktoriju `node_modules/better-sqlite3/`. OmniRouteova skripta `postinstall` (`scripts/build/postinstall.mjs`) zatim provjerava i kopira te binarne datoteke specifične za glavno računalo u `dist/node_modules/` kako bi im samostalni poslužitelj mogao pristupiti. Ako je OmniRouteova skripta `postinstall` blokirana, ovaj se korak kopiranja preskače.
+- **Neobavezne/tranzitivne (`keytar`, `@parcel/watcher`, `@swc/core`, `protobufjs`, `esbuild`):** To su pomoćni alati za izgradnju, alati za nadzor ili uslužni programi za sistemski privjesak ključeva. Njihovo dopuštanje sprječava upozorenja pri izgradnji, ali nisu potrebni za osnovnu funkcionalnost usmjeravanja.
+- **Isključena (`onnxruntime-node`):** Neobavezna ovisnost za lokalna ugrađivanja umjetne inteligencije koja **nije** potrebna za rad OmniRoutea. Njezina skripta `postinstall` preuzima približno 300 MB CUDA resursa s NuGeta; nemojte je uključivati u popis dopuštenih osim ako izričito namjeravate upotrebljavati lokalno ONNX ubrzanje na podržanom hardveru.
 
 ### Preporučeno rješenje
 
-Kako biste tijekom globalne instalacije dopustili potrebne instalacijske skripte i utišali upozorenja, proslijedite `--allow-scripts` za OmniRoute i njegove nativne ovisnosti:
+Kako biste tijekom globalne instalacije dopustili potrebne instalacijske skripte i uklonili upozorenja, proslijedite `--allow-scripts` za OmniRoute i njegove nativne ovisnosti:
 
 ```bash
 npm install -g omniroute --allow-scripts=omniroute,better-sqlite3,keytar,@parcel/watcher,@swc/core,protobufjs,esbuild
 ```
 
-Alternativno, kako biste to trajno konfigurirali za sve globalne instalacije na svojem korisničkom računu:
+Umjesto toga, kako biste ovo trajno konfigurirali za sve globalne instalacije na svojem korisničkom računu:
 
 ```bash
 npm config set allow-scripts=omniroute,better-sqlite3,keytar,@parcel/watcher,@swc/core,protobufjs,esbuild --location=user
@@ -131,7 +137,7 @@ npm install -g omniroute
 
 ### Provjerite svoju instalaciju
 
-Nakon instalacije pokrenite ugrađeni dijagnostički alat kako biste provjerili ispravnost nativnih poveznica i okruženja za izvođenje:
+Nakon instalacije pokrenite ugrađeni dijagnostički alat kako biste provjerili ispravnost nativnih povezivanja i okruženja za izvođenje:
 
 ```bash
 omniroute doctor
@@ -839,6 +845,30 @@ omniroute serve --ready-timeout 180000
 Zadana vrijednost iznosi 60 000 ms (60 s). Upozorenje je samo informativno; poslužitelj se nastavlja pokretati u pozadini i bit će dostupan nakon dovršetka pokretanja.
 
 Potpune pojedinosti o `OMNIROUTE_READY_TIMEOUT_MS` potražite u dokumentu [`docs/reference/ENVIRONMENT.md`](../reference/ENVIRONMENT.md).
+
+---
+
+## problemi CCR / dedupiranja
+
+Dijagnostička matrica za kompresijske CCR (`ccr`) i `session-dedup` alate. Za punu referencu operatera (oznake, preduvjeti, opseg po alatu, paginacija za dohvaćanje) pogledajte [Motori kompresije → Preduvjeti / vodič za operatera](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+
+| Simptom                                                                                                        | Vjerojatni uzrok                                                                                                                                               | Potvrdi                                                                                                                      | Popraviti                                                                                                                                                                                                                                                                           |
+| -------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **MCP 403** — `403 LOCAL_ONLY`                                                                                 | Route-guard povratna autentifikacija, a ne greška u transportu. Nijedan `Bearer` ili ključ bez `mcp:connect`/`manage`/`admin` nije stigao do `/api/mcp/` rute. | Zahtjev je nosio no/invalid `Authorization` zaglavlje.                                                                       | Pošalji važeći `Bearer` ključ. Daljinski ključ može držati `mcp:connect` (ovlašćuje `/api/mcp/` samo lokalno izdvajanje) plus specifični opseg read/write koji mu je potreban.                                                                                                      |
+| **blok nije pronađen** — `omniroute_ccr_retrieve` odbija hash                                                  | Hash nije 24-hex vrijednost ili je krivo kopiran ili je blok već istekao/izbačen.                                                                              | Usporedite hash s 24-hex vrijednošću u `[CCR retrieve hash=…]` markeru; provjerite `omniroute_ccr_stats` za stanje trgovine. | Kopirajte 24-hex hash doslovce s markera. Ako je blok doista nestao, prošao je TTL ili nikad nije stigao do trajnog spremišta (blokovi preko 512 KB i svaki blok u vremenu izvođenja u oblaku ostaju samo u memoriji i ne preživljavaju ponovno pokretanje).                        |
+| **CCR no-op** — blok nije komprimiran (tekst se vraća nepromijenjen)                                           | Blok ispod praga kompresije ili je CCR motor/način neaktivan.                                                                                                  | Provjerite aktivnu kompresiju `strategy`/`enabled` i veličinu bloka u odnosu na prag.                                        | Omogućite CCR (ili složeni način rada koji ga pokreće) i potvrdite da je blok dovoljno velik da ga vrijedi pohraniti. No-op nije greška — to je "nema čega za komprimirati."                                                                                                        |
+| **dedup marker** — `[dedup:ref sha=…]` pojavljuje se u izlazu                                                  | **Namjerni pogled unatrag** , a ne gubitak ili greška. `session-dedup` elidirani tekst već poslan u ranijem krugu iste sesije.                                 | Potvrdite da se isti tekst pojavljuje ranije u sesiji.                                                                       | Ne činite ništa — nemojte zvati alat i ne pokušavajte ga rekonstruirati. Prva pojava je kanonska kopija; trenutni potez se nikada ne prepisuje, dedupira se na kasnijem potezu.                                                                                                     |
+| **Način kodiranja** — `omniroute_ccr_*` alati nedostaju u `tools[]` / CCR instrukcija nije umetnuta (OpenCode) | OpenCode Code Mode (zadani) reklamira samo izvorne alate za model, skrivajući MCP alate od `tools[]`.                                                          | Provjerite unos OpenCode MCP poslužitelja za `codemode`.                                                                     | Postavite `codemode: false` na unos poslužitelja (a** klijent** postavka) pa se MCP alati reklamiraju. Instrukcija CCR protokola za dohvaćanje ostaje isključena: poslužitelj pod nazivom `omniroute` izlaže `omniroute_omniroute_ccr_retrieve`, a `_` nije odgovarajući separator. |
+
+Više simptoma:
+
+| Simptom                                                                                                        | Vjerojatni uzrok                                                                                                                                                                     | Popraviti                                                                                                                                                                                     |
+| -------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Insufficient MCP scopes for <tool>. Missing: <scope>.`                                                        | Rezultat pogreške MCP alata (`isError: true`), a ne HTTP 403. Ključu pozivatelja nedostaje potreban opseg.                                                                           | Dodajte opseg iz tablice po alatima (pogledajte vodič za rukovatelja). Npr. `omniroute_ccr_retrieve` treba `read:compression`.                                                                |
+| `Unknown Mcp-Session-Id`                                                                                       | Streamable-HTTP sesija je prekinuta i požnjeta (`OMNIROUTE_MCP_SESSION_IDLE_MS`); poslužitelj odgovara HTTP 404.                                                                     | Ponovno povežite ili ponovno pokrenite sesiju — do** ne** rotirajte ključ, promijenite opseg ili preimenujte alat. To nije 401/403.                                                           |
+| `JSON Parse error` / `Unterminated string` u rezultatu alata                                                   | tekst alata MCP isječen oko `mcpAccessibility.maxTextChars` (zadano `50000`) sredinom JSON-a.                                                                                        | Koristite stranični `mode` umjesto potpunog: `mode:"grep"`, `mode:"lines"`, `mode:"head"`, `mode:"tail"` ili `mode:"stats"`. Praktično pravilo: `chars > 40000` → koristite `mode`.           |
+| `Failed to open SSE stream`                                                                                    | Klijent je pogodio naslijeđeni `/api/mcp/sse` singleton dok je prijenos `streamable`.                                                                                                | Usmjerite klijenta na `/api/mcp/stream` (streabilnu krajnju točku) umjesto na `/api/mcp/sse`.                                                                                                 |
+| **Mrtav stdio otkucaj srca** — `mcp-heartbeat.json` prikazuje `pidAlive: false` dok je HTTP transport podignut | Heartbeat datoteka je stdio ostatak (ustajali PID ili druga verzija); HTTP prijenosi su u tijeku i umjesto toga izvješćuju o stanju iz `getMcpHttpStatus()` (nema pisanja datoteke). | Nema radnje — transport je zdrav. Istina je `httpTransport.online` / `startedAt` iz `/api/mcp/status`, a ne datoteke otkucaja srca. Nemojte ponovno pokretati poslužitelj ili rotirati ključ. |
 
 ---
 

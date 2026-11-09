@@ -122,7 +122,7 @@ function activeProfileSelect(container: HTMLElement) {
 }
 
 function contextEditingToggle(container: HTMLElement) {
-  return container.querySelector('button[role="switch"]') as HTMLButtonElement;
+  return container.querySelector('[role="switch"]') as HTMLButtonElement;
 }
 
 // Answers the held PUTs in the order they went out, including any sent while answering.

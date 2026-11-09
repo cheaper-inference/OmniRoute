@@ -1,1 +1,0 @@
-- **fix(proxy):** Prefer a selector member no sibling selector serves when switching ([#16379](https://github.com/diegosouzapw/OmniRoute/pull/16379)) — thanks @maxmad64bis

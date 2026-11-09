@@ -23,7 +23,7 @@ export default function ClaudeConnectionFields(props: ClaudeConnectionFieldsProp
   const t = useTranslations("providers");
 
   return (
-    <div className="flex flex-col gap-4 rounded-lg border border-border/50 bg-surface/20 p-4">
+    <div className="flex flex-col gap-4 rounded-lg border border-border bg-bg-subtle p-4">
       <Toggle
         checked={props.values.blockExtraUsage}
         onChange={(checked) => props.onChange({ blockExtraUsage: checked })}

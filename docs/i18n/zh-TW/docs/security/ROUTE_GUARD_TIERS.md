@@ -10,153 +10,211 @@
 
 ## 層級
 
-### 第 1 級 — LOCAL_ONLY
+### 第 1 層 — LOCAL_ONLY
 
-**強制執行方式：** `isLocalOnlyPath(path)` → 回環主機檢查  
-**繞過方式：** 預設無法繞過。若請求攜帶具有 `manage` 範圍的有效 API 金鑰，則對 `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` 中的路徑提供有限的例外（請參閱[管理範圍例外](#manage-scope-carve-out)）。
+**強制執行者：** `isLocalOnlyPath(path)` → 迴路主機檢查
+**繞過方式：** 預設無。僅當請求帶有具備 `manage` 範圍的
+有效 API 金鑰時，`LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES`
+中的路徑才有狹窄例外（參見 [Manage 範圍例外](#manage-scope-carve-out)）。
 
-這些路由會產生子程序或執行執行階段程式碼。若將它們暴露於非回環流量，取得有效 JWT 的攻擊者（例如透過 Cloudflared/Ngrok 通道）便能觸發程序產生——這是一類已知的 CVE（[GHSA-fhh6-4qxv-rpqj](https://github.com/advisories/GHSA-fhh6-4qxv-rpqj)）。
+這些路由會產生子程序或執行執行時期程式碼。將它們暴露給
+非迴路流量，會讓取得有效 JWT 的攻擊者（例如
+透過 Cloudflared/Ngrok 隧道）觸發程序產生——這是一種已知的 CVE
+類別（[GHSA-fhh6-4qxv-rpqj](https://github.com/advisories/GHSA-fhh6-4qxv-rpqj)）。
 
-**GHSA-fhh6-4qxv-rpqj 的含義（攻擊類型）：** 管理／代理伺服器公開了一個可啟動子程序（`npm install`、`node`、瀏覽器、代理伺服器、`git`、`tar` 等）的端點。若可從主機外部存取該端點——例如操作人員將 OmniRoute 放在 nginx/Cloudflare/Tailscale 通道後方，而 JWT 外洩或驗證設定錯誤——攻擊者便可將「呼叫 API」轉變為「在主機上執行命令」（遠端程式碼執行）。OmniRoute 會在每個可產生程序的路由上，**無條件地在任何驗證檢查之前強制執行回環主機檢查**，以封鎖此類攻擊：即使權杖透過通道外洩，仍無法存取程序產生功能。
+**GHSA-fhh6-4qxv-rpqj 是什麼（攻擊類別）：** 管理/代理伺服器
+暴露了一個會啟動子程序的端點（`npm install`、`node`、瀏覽器、
+代理、`git`、`tar`……）。如果該端點可從主機外部連線——因為
+維運者將 OmniRoute 放在 nginx/Cloudflare/Tailscale 隧道後方且 JWT
+外洩，或驗證設定錯誤——攻擊者就能將「呼叫 API」變成「在主機上
+執行命令」（遠端程式碼執行）。OmniRoute 透過在每個
+可產生程序的路由上，**於任何驗證檢查之前無條件強制執行迴路主機檢查**，
+來封堵此問題：即使權杖經由隧道外洩，仍然無法觸及程序產生。
 
-**完整的 LOCAL_ONLY 集合。** 權威來源為 `src/server/authz/routeGuard.ts` 中的 `LOCAL_ONLY_API_PREFIXES` / `LOCAL_ONLY_API_PATTERNS`；下表反映目前狀態。`check-route-guard-membership` 閘道會列舉可產生程序之前綴下的每個 `route.ts`，若其中任何路由未歸類為僅限本機，CI 就會失敗。
+**完整的 LOCAL_ONLY 集合。** 權威來源是
+`src/server/authz/routeGuard.ts` 中的
+`LOCAL_ONLY_API_PREFIXES` / `LOCAL_ONLY_API_PATTERNS`；下表反映目前狀態。
+`check-route-guard-membership` 閘道會列舉可產生程序前綴下的
+每個 `route.ts`，若有任何一個未被分類為 local-only，就會使 CI 失敗。
 
-| 前綴 / 模式                                                                                              | 僅限本機的原因                                                                        |
-| -------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
-| `/api/mcp/`                                                                                              | MCP 伺服器 — 產生 stdio 橋接器及 SSE 處理常式                                         |
-| `/api/cli-tools/runtime/`                                                                                | CLI 工具執行階段 — 執行任意外掛程式碼                                                 |
-| `/api/cli-tools/{omp,letta,grok-build,forge,jcode,qwen}-settings`                                        | 各工具的設定寫入器，可存取主機上的工具二進位檔／設定                                  |
-| `/api/cli-tools/{claude,cline,codewhale,codex,crush,deepseek-tui,droid,kilo,openclaw,pi,smelt}-settings` | 與上述六個同類項目相同的 `getCliRuntimeStatus()` 程序產生行為 (GHSA-35fw-cv32-2373)   |
-| `/api/cli-tools/{all-statuses,status,detect}`                                                            | CLI 清單探測 — 針對每項工具產生 `command -v` / `--version` 程序 (GHSA-35fw-cv32-2373) |
-| `/api/cli-tools/antigravity-mitm`                                                                        | Antigravity MITM 代理控制（產生／設定系統代理）                                       |
-| `/api/modality-bridge/video/`                                                                            | 嚴格限制為受信任回送介面的 Video Bridge 執行階段探測與內部擷取橋接                    |
-| `/api/services/`                                                                                         | 內嵌服務（9Router / CLIProxy / Bifrost / Mux / Dario）— `npm install` + 產生程序      |
-| `/dashboard/providers/services/`                                                                         | 至內嵌服務 UI 的反向代理                                                              |
-| `/api/tunnels/cloudflared`                                                                               | 安裝／產生 cloudflared 二進位檔                                                       |
-| `/api/tunnels/tailscale/{install,enable,disable,login,start-daemon}`                                     | 在主機上安裝／控制 tailscaled                                                         |
-| `/api/copilot/`                                                                                          | 未經驗證的 LLM 驅動程式 — 預設僅限 CLI                                                |
-| `/api/tools/agent-bridge/`                                                                               | AgentBridge — 產生 MITM 伺服器並修改 DNS                                              |
-| `/api/tools/traffic-inspector/`                                                                          | Traffic Inspector — http-proxy 接聽器與系統代理                                       |
-| `/api/settings/mitm`                                                                                     | 啟用 MITM 攔截（系統層級的代理狀態）                                                  |
-| `/api/issue-agent/`                                                                                      | 問題代理程式 — 針對儲存庫產生本機工具程序                                             |
-| `/api/plugins/`, `/api/plugins`                                                                          | 外掛程式 — 透過 `worker_threads` + `child_process` 載入／執行                         |
-| `/api/middleware/`                                                                                       | 使用者中介軟體 — 在處理程序內載入／執行操作者程式碼                                   |
-| `/api/system/version`                                                                                    | 自動更新（僅 POST；GET/HEAD/OPTIONS 除外）— 產生 `git checkout` + `npm install` 程序  |
-| `/api/db-backups/exportAll`                                                                              | 產生 `tar` 程序以建立匯出封存檔                                                       |
-| `/api/local/`                                                                                            | 一鍵式本機啟動器（目前為 Redis）— 產生 podman/docker 程序                             |
-| `/api/headroom/start`, `/api/headroom/stop`                                                              | Headroom 代理生命週期 — 產生 python CLI 程序／向 PID 傳送訊號                         |
-| `/api/jobs`, `/api/jobs/`                                                                                | 作業執行器控制 — 執行排定的主機端工作                                                 |
-| `/api/oauth/cursor/auto-import`                                                                          | 匯入認證資料前執行 `execFile("which", ["cursor"])`                                    |
-| `/api/oauth/kiro/auto-import`                                                                            | 從主機讀取 Kiro CLI 認證檔案                                                          |
-| `/api/skills/collect/`                                                                                   | 技能收集 — 偵測／安裝本機工具                                                         |
-| `/api/skills/install`, `/api/skills/executions`                                                          | 技能處理常式註冊與執行 — 可觸及沙箱容器的產生程序 (GHSA-jx89)                         |
-| `/api/discovery/`                                                                                        | 本機網路／提供者探索探測                                                              |
-| `/api/vnc-session` (`VNC_ROUTE_PREFIX`)                                                                  | 啟動有頭瀏覽器 + VNC 工作階段，以進行互動式登入                                       |
-| `/api/acp/agents`                                                                                        | ACP — 探索並啟動本機 CLI 代理程式二進位檔                                             |
-| `/api/resilience/connections`                                                                            | 每個帳戶的韌性 JSON（冷卻、斷路器、鎖定）。儀表板 HTML 並非僅限本機存取。             |
-| `/api/providers/cursor/agent-availability`                                                               | 儀表板安裝提示檢查 — 啟動 `cursor-agent status --format json`                         |
-| `/api/providers/{id}/login`（正規表示式）                                                                | 啟動有頭 Playwright Chromium，以進行 Web Cookie 登入                                  |
-| `/api/providers/volcengine-plan/connect`（正規表示式）                                                   | 手動有頭流程 + 以工作階段為基礎的手機號碼／簡訊自動登入（啟動 Playwright）            |
-| `/api/providers/{id}/refresh-cursor`（正規表示式）                                                       | 手動續訂 Cursor 工作階段 — 觸發 `cursor-agent`                                        |
-| `/api/providers/{id}/chatgpt-web-codex-doctor`（正規表示式）                                             | 診斷本機 Codex CLI 安裝（啟動該二進位檔）                                             |
+| 前綴 / 模式                                                                                              | 僅限本機的原因                                                                      |
+| -------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| `/api/mcp/`                                                                                              | MCP 伺服器 — 產生 stdio 橋接器 + SSE 處理器                                         |
+| `/api/cli-tools/runtime/`                                                                                | CLI 工具執行時期 — 執行任意外掛程式碼                                               |
+| `/api/cli-tools/{omp,letta,grok-build,forge,jcode,qwen}-settings`                                        | 各工具的設定寫入器，可能修改主機上的工具二進位檔/組態                               |
+| `/api/cli-tools/{claude,cline,codewhale,codex,crush,deepseek-tui,droid,kilo,openclaw,pi,smelt}-settings` | 與上述六個同類項目相同的 `getCliRuntimeStatus()` 產生程序行為 (GHSA-35fw-cv32-2373) |
+| `/api/cli-tools/{all-statuses,status,detect}`                                                            | CLI 清查探測 — 對每個工具產生 `command -v` / `--version` 程序 (GHSA-35fw-cv32-2373) |
+| `/api/cli-tools/antigravity-mitm`                                                                        | Antigravity MITM 代理控制（產生/指向系統代理）                                      |
+| `/api/modality-bridge/video/`                                                                            | 嚴格限定受信任 loopback 的 Video Bridge 執行時期探測與內部擷取橋接                  |
+| `/api/services/`                                                                                         | 內嵌服務 (9Router / CLIProxy / Bifrost / Mux / Dario) — `npm install` + 產生程序    |
+| `/dashboard/providers/services/`                                                                         | 反向代理至內嵌服務 UI                                                               |
+| `/api/tunnels/cloudflared`                                                                               | 安裝/產生 cloudflared 二進位檔                                                      |
+| `/api/tunnels/tailscale/{install,enable,disable,login,start-daemon}`                                     | 安裝/控制主機上的 tailscaled                                                        |
+| `/api/copilot/`                                                                                          | 未經驗證的 LLM 驅動程式 — 預設僅限 CLI                                              |
+| `/api/tools/agent-bridge/`                                                                               | AgentBridge — 產生 MITM 伺服器 + 修改 DNS                                           |
+| `/api/tools/traffic-inspector/`                                                                          | Traffic Inspector — http-proxy 監聽器 + 系統代理                                    |
+| `/api/settings/mitm`                                                                                     | 啟用 MITM 攔截（系統層級代理狀態）                                                  |
+| `/api/issue-agent/`                                                                                      | Issue 代理程式 — 針對儲存庫產生本機工具                                             |
+| `/api/plugins/`, `/api/plugins`                                                                          | 外掛 — 透過 `worker_threads` + `child_process` 載入/執行                            |
+| `/api/middleware/`                                                                                       | 使用者中介軟體 — 在程序內載入/執行操作者程式碼                                      |
+| `/api/system/version`                                                                                    | 自動更新（僅 POST；GET/HEAD/OPTIONS 除外）— 產生 `git checkout` + `npm install`     |
+| `/api/db-backups/exportAll`                                                                              | 產生 `tar` 以建立匯出封存檔                                                         |
+| `/api/local/`                                                                                            | 一鍵本機啟動器（目前為 Redis）— 產生 podman/docker                                  |
+| `/api/headroom/start`, `/api/headroom/stop`                                                              | Headroom 代理生命週期 — 產生 python CLI / 發送訊號給 PID                            |
+| `/api/jobs`, `/api/jobs/`                                                                                | 工作執行器控制 — 執行排程的主機端工作                                               |
+| `/api/oauth/cursor/auto-import`                                                                          | 匯入憑證前執行 `execFile("which", ["cursor"])`                                      |
+| `/api/oauth/kiro/auto-import`                                                                            | 讀取主機上的 Kiro CLI 憑證檔案                                                      |
+| `/api/skills/collect/`                                                                                   | 技能收集 — 偵測/安裝本機工具                                                        |
+| `/api/skills/install`、`/api/skills/executions`                                                          | Skill 處理常式註冊 + 執行 — 可觸及沙箱容器產生(GHSA-jx89)                           |
+| `/api/discovery/`                                                                                        | 本地網路/提供者探索探測                                                             |
+| `/api/vnc-session`(`VNC_ROUTE_PREFIX`)                                                                   | 產生有頭瀏覽器 + VNC 工作階段,用於互動式登入                                        |
+| `/api/acp/agents`                                                                                        | ACP — 探索並產生本地 CLI 代理程式二進位檔                                           |
+| `/api/resilience/connections`                                                                            | 每帳號韌性 JSON(冷卻、斷路器、鎖定)。儀表板 HTML 並非僅限本地。                     |
+| `/api/providers/cursor/agent-availability`                                                               | 儀表板安裝提示檢查 — 產生 `cursor-agent status --format json`                       |
+| `/api/providers/{id}/login`(regex)                                                                       | 啟動有頭 Playwright Chromium 進行 web-cookie 登入                                   |
+| `/api/providers/volcengine-plan/connect`(regex)                                                          | 手動有頭流程 + 基於工作階段的電話/簡訊自動登入(產生 Playwright)                     |
+| `/api/providers/{id}/refresh-cursor`(regex)                                                              | 手動 Cursor 工作階段續期 — 觸發 `cursor-agent`                                      |
+| `/api/providers/{id}/chatgpt-web-codex-doctor`(regex)                                                    | 診斷本地 Codex CLI 安裝(產生該二進位檔)                                             |
 
-**違規時的回應：** `403 LOCAL_ONLY`
+**違規時的回應:** `403 LOCAL_ONLY`
 
-#### 管理範圍例外
+#### Manage 範圍例外(carve-out)
 
-部分 LOCAL_ONLY 路徑亦可從非回送位址存取，但前提是且僅限於
-請求攜帶 `Authorization: Bearer <api-key>`，且其
-中繼資料包含 `manage` 範圍（或 `admin`）。此例外透過
-`LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` 針對各路徑明確管控，因此
-任何新增 LOCAL_ONLY 路徑的預設值仍是嚴格限制為回送位址。未經驗證的
-請求及使用非管理金鑰的請求仍會遭到拒絕，並回傳
-`403 LOCAL_ONLY`。
+若且唯若請求帶有 `Authorization: Bearer <api-key>`,且其詮釋資料(metadata)包含
+`manage` 範圍(或 `admin`),LOCAL_ONLY 路徑的子集才可以從非 loopback 存取。
+此例外透過 `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` 明確地按路徑逐一管控,
+因此任何新增 LOCAL_ONLY 路徑的預設行為仍維持嚴格 loopback。未驗證的
+請求以及持有非 manage 金鑰的請求仍會以 `403 LOCAL_ONLY` 拒絕。
 
-目前唯一可略過限制的前綴是 `/api/mcp/`。`/api/cli-tools/runtime/` 和
-`/api/services/` 被刻意排除，因為它們可啟動任意
-子程序（`npm install`、`node`），而這正是
-LOCAL_ONLY 層級旨在防止的 CVE 類型。
+目前唯一可繞過的前綴是 `/api/mcp/`。`/api/cli-tools/runtime/` 和
+`/api/services/` 被刻意排除,因為它們可以產生任意
+子處理程序(`npm install`、`node`),而這正是 LOCAL_ONLY 層級
+存在所要防範的 CVE 類型。
 
-**#7895 — `mcp:connect` 狹義範圍：** `/api/mcp/` 例外亦接受
-具有狹義 `mcp:connect` 範圍的 Bearer 金鑰
-（`src/shared/constants/managementScopes.ts::MCP_CONNECT_SCOPE`），並透過
-`src/server/authz/policies/management.ts` 中的 `hasMcpConnectOrManageScope()` 進行檢查。
-此範圍僅限於 `/api/mcp/` — `mcp:connect` 不會授予對任何其他
-管理路由的權限（包括未來可能新增的任何其他 LOCAL_ONLY 略過前綴），且它被刻意排除在
-`MANAGEMENT_API_KEY_SCOPES` 之外。具有 `manage`/`admin` 的金鑰仍可
-與之前完全相同地通過此例外；`mcp:connect` 則是權限較低的替代方案，
-適用於不應需要廣泛管理存取權的遠端 MCP 專用呼叫端。
+**#7895 — `mcp:connect` 窄化範圍:** `/api/mcp/` 的例外也接受
+持有窄化 `mcp:connect` 範圍的 Bearer 金鑰
+(`src/shared/constants/managementScopes.ts::MCP_CONNECT_SCOPE`),
+並透過 `src/server/authz/policies/management.ts` 中的
+`hasMcpConnectOrManageScope()` 進行檢查。
+這僅限於 `/api/mcp/` — `mcp:connect` 不會授予任何其他
+管理路由的權限(包括任何其他 LOCAL_ONLY 繞過前綴,即使未來新增亦然),
+且刻意排除在 `MANAGEMENT_API_KEY_SCOPES` 之外。持有 `manage`/`admin`
+的金鑰仍會如以往一樣通過例外;`mcp:connect` 是為僅需遠端 MCP
+呼叫、不應需要廣泛管理存取權的呼叫方所提供的較低權限替代方案。
 
-| 請求                                             | 路徑                       | 結果             |
-| ------------------------------------------------ | -------------------------- | ---------------- |
-| 非回送位址，無 Bearer                            | `/api/mcp/*`               | 403 LOCAL_ONLY   |
-| 非回送位址，Bearer 具有 `manage` 範圍            | `/api/mcp/*`               | 允許             |
-| 非回送位址，Bearer 具有 `mcp:connect` 範圍       | `/api/mcp/*`               | 允許             |
-| 非回送位址，Bearer 不具有 `manage`/`mcp:connect` | `/api/mcp/*`               | 403 LOCAL_ONLY   |
-| 非回送位址，Bearer 具有 `mcp:connect` 範圍       | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY   |
-| 非回送位址，Bearer 具有 `manage` 範圍            | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY   |
-| 回送位址，無論有無 Bearer                        | 任何 LOCAL_ONLY            | 允許（通過閘門） |
+| 請求                                             | 路徑                       | 結果           |
+| ------------------------------------------------ | -------------------------- | -------------- |
+| 非 loopback,無 Bearer                            | `/api/mcp/*`               | 403 LOCAL_ONLY |
+| 非 loopback,Bearer 具有 `manage` 範圍            | `/api/mcp/*`               | 允許           |
+| 非 loopback,Bearer 具有 `mcp:connect` 範圍       | `/api/mcp/*`               | 允許           |
+| 非 loopback,Bearer 不具有 `manage`/`mcp:connect` | `/api/mcp/*`               | 403 LOCAL_ONLY |
+| 非 loopback,Bearer 具有 `mcp:connect` 範圍       | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY |
+| 非 loopback,Bearer 具有 `manage` 範圍            | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY |
+| Loopback,任意/無 Bearer                          | 任何 LOCAL_ONLY            | 允許(閘道通過) |
 
-#### 操作者指引與稽核
+#### 營運者指引與稽核
 
-如果您在反向 Proxy 或通道（nginx、Caddy、Cloudflare
-Tunnel、Tailscale、Ngrok）後方執行 OmniRoute，回送位址檢查仍會保護上述
-可啟動程序的路由 — 客戶端位址不是回送位址的請求會
-在**執行驗證之前**遭到拒絕並回傳 `403 LOCAL_ONLY`，因此即使 JWT 洩漏，也無法觸發程序啟動。
-操作者仍須履行兩項責任：
+如果你將 OmniRoute 部署在反向代理或隧道(nginx、Caddy、Cloudflare
+Tunnel、Tailscale、Ngrok)之後,loopback 檢查仍會保護上述
+可產生子處理程序的路由 — 用戶端位址為非 loopback 的請求會在**驗證執行之前**
+以 `403 LOCAL_ONLY` 拒絕,因此外洩的 JWT 無法觸及產生(spawn)行為。營運者仍有
+兩項責任:
 
-- **請勿透過將客戶端 IP 偽造為回送位址來「修正」403。** 設定
+- **不要透過將用戶端 IP 偽造為 loopback 來「修復」403。** 設定
   `X-Forwarded-For: 127.0.0.1`，或使用會將來源位址改寫為
-  回送位址的 Proxy，會重新開啟此層級原本封堵的 RCE 類型。請透過
-  Proxy 公開儀表板／API — 絕不可公開可啟動程序的路由。
-- **將管理範圍例外維持在最小程度。** 只有 `/api/mcp/` 可略過限制，且
-  僅限使用具有 `manage` 範圍的 API 金鑰。`SPAWN_CAPABLE_PREFIXES` 絕不可
-  加入略過清單 — zod 結構描述會拒絕它們，且
-  `isLocalOnlyBypassableByManageScope` 會在執行階段拒絕它們（縱深防禦），
-  這正是儀表板中「無法設為可略過」的含義。`/api/providers/` 下具有動態區段
-  和靜態路徑的可啟動程序路由（例如 `/login`、
-  `/refresh-cursor`），由
-  `src/shared/constants/spawnCapablePrefixes.ts` 中以正規表示式為基礎的
-  `SPAWN_CAPABLE_PATTERNS` /
-  `SPAWN_CAPABLE_PATTERN_ANCESTORS` 配套機制涵蓋，而不是由扁平的
-  `SPAWN_CAPABLE_PREFIXES` 陣列涵蓋 — 該扁平陣列必須涵蓋
-  整個 `/api/providers/` 前綴才能捕捉這些路由，這會過度擴大限制範圍，
-  影響遠端儀表板合理用於提供者 CRUD 的路由樹。
+  loopback 的代理，會恰好重新開啟此層級所封閉的 RCE 類別漏洞。透過代理公開
+  dashboard/API — 絕不要公開具備 spawn 能力的路由。
+- **將 manage-scope 繞過範圍保持在最小。** 只有 `/api/mcp/` 可被繞過，且
+  僅限使用 `manage` 範圍的 API 金鑰。`SPAWN_CAPABLE_PREFIXES` 永遠無法被
+  加入繞過清單 — zod schema 會拒絕它們，且
+  `isLocalOnlyBypassableByManageScope` 會在執行期拒絕它們（縱深防禦），
+  這就是儀表板所說的「無法被設為可繞過」。同一個拒絕清單也包含幾個
+  不會 spawn、但同樣絕不能被遠端存取的 LOCAL_ONLY 路由 —
+  `/api/oauth/kiro/auto-import`（讀取主機本地的 Kiro 憑證檔案）、
+  `/api/discovery/` 與 `/api/issue-agent/`。執行期快照載入器
+  也會從儲存的設定列中捨棄此類項目，而舊版 JSON 匯入
+  （`/api/settings/import-json`）絕不會寫入繞過金鑰。每個
+  `LOCAL_ONLY_API_PREFIXES` 項目必須在拒絕清單中，或經審查確認
+  符合繞過資格（`tests/unit/authz/local-only-bypass-spawn-denylist.test.ts`）。`/api/providers/`
+  下的動態區段與靜態路徑 spawn 能力路由（例如 `/login`、
+  `/refresh-cursor`）由
+  `src/shared/constants/spawnCapablePrefixes.ts` 中基於正規表示式的
+  `SPAWN_CAPABLE_PATTERNS` / `SPAWN_CAPABLE_PATTERN_ANCESTORS` 配套機制涵蓋，
+  而非扁平的 `SPAWN_CAPABLE_PREFIXES` 陣列 — 扁平陣列必須涵蓋
+  整個 `/api/providers/` 前綴才能攔截它們，這會過度擴大遠端儀表板
+  正當用於 provider CRUD 的路由樹範圍。
 
-**存取稽核** — 若要驗證沒有任何來自主機外部的存取正觸及這些路由：
+**稽核存取** — 驗證沒有主機外的來源觸及這些路由：
 
-- 開啟 `/dashboard/settings/security` 上的 **授權清單**：它會顯示即時的 LOCAL_ONLY 前綴清單、哪些前綴可被略過，以及編譯時期所定義、具程序啟動能力（「不可設為可略過」）的集合。
-- 在反向代理／存取日誌中，搜尋上述前綴與非回送用戶端位址同時出現的記錄。任何此類請求若傳回 `200` 而非 `403 LOCAL_ONLY`，就表示代理正在遮蔽真實用戶端 IP——請修正代理設定。
-- OmniRoute 日誌中針對這些路徑記錄的 `403 LOCAL_ONLY`，表示防護機制正按預期運作，並非應予隱藏的錯誤。
+- 開啟 `/dashboard/settings/security` 上的 **Authorization Inventory**（授權清單）：它會呈現
+  即時的 LOCAL_ONLY 前綴清單、哪些前綴可繞過，以及編譯期的
+  spawn 能力（「無法被設為可繞過」）集合。
+- 在您的反向代理／存取日誌中 grep 上述前綴搭配
+  非 loopback 用戶端位址的記錄。任何此類命中若回傳 `200` 而非
+  `403 LOCAL_ONLY`，表示代理正在遮蔽真實用戶端 IP — 請修正代理設定。
+- OmniRoute 日誌中針對這些路徑之一的 `403 LOCAL_ONLY` 是防護機制
+  如預期運作的表現，而非需要壓制的錯誤。
 
-### 第 2 層 — ALWAYS_PROTECTED
+#### 具備呼叫端探測閘門的遠端可達路由
 
-**強制執行者：** `isAlwaysProtectedPath(path)` → 略過 `requireLogin=false` 的繞過機制
-**繞過方式：** `requireLogin=false` 時亦無法繞過；一律需要 JWT
+某些路由必須保持可從遠端儀表板存取，但會為本地呼叫端執行主機端探測
+（`which <binary>`、`<binary> --version`、`tailscale status --json`）。
+它們對 `GET` 而言並非 LOCAL_ONLY；相反地，處理常式會以
+`getRequestPeerLocality()`（`src/shared/utils/apiAuth.ts`）讀取受信任的對端判定，
+並僅對 `loopback` / `lan` 呼叫端執行探測。`remote` 呼叫端會收到以
+非 spawn 來源（持久化狀態、設定、fs 檢查）建構的相同回應結構，並標記為 `probed: false`。
 
-這些路由具有破壞性或不可逆性。若在「無密碼」安裝中允許存取這些路由，將代表相同 LAN 上的任何人都能清除資料庫或終止伺服器程序。
+| 路由                                                             | 遠端呼叫端會略過的探測                                            |
+| ---------------------------------------------------------------- | ----------------------------------------------------------------- |
+| `POST /api/providers/{id}/test`, `/api/providers/test-batch`     | CLI 執行期探測（`allowLocalRuntimeProbe`）與 CLI 備援 spawn       |
+| `GET /api/headroom/status`                                       | `which headroom` 與 python `--version` 探測                       |
+| `GET /api/tunnels/tailscale`, `GET /api/tunnels/tailscale/check` | `which tailscale`、`tailscale status/funnel --json`、`which brew` |
+| `GET /api/tunnels/cloudflared`（GET 豁免於 LOCAL_ONLY）          | `which cloudflared` PATH 查詢                                     |
 
-| 路徑                                      | 原因                                           |
-| ----------------------------------------- | ---------------------------------------------- |
-| `/api/shutdown`                           | 終止伺服器程序                                 |
-| `/api/settings/database`                  | 資料庫匯出、匯入及清除                         |
-| `/api/db-backups`                         | 完整資料庫備份封存檔存取                       |
-| `/api/settings/export-json`               | 匯出完整設定資料（包括機密資訊）               |
-| `/api/settings/import-json`               | 取代完整設定資料                               |
-| `/api/providers/health-autopilot/actions` | 執行自動駕駛修復動作                           |
-| `/api/settings/obsidian`                  | 為任何儲存庫根目錄簽發可重複使用的 WebDAV 憑證 |
+會探測主機的新讀取路由應遵循相同模式，或直接歸類為
+LOCAL_ONLY。
+
+### 層級 2 — ALWAYS_PROTECTED
+
+**強制執行者：** `isAlwaysProtectedPath(path)` → 略過 `requireLogin=false` 繞過
+**繞過：** 當 `requireLogin=false` 時無任何繞過；永遠需要 JWT
+
+這些路由具破壞性或不可逆。在「無密碼」
+安裝中允許它們，意味著同一 LAN 上的任何人都能清除資料庫或終止
+伺服器程序。
+
+| 路徑                                      | 原因                                            |
+| ----------------------------------------- | ----------------------------------------------- |
+| `/api/shutdown`                           | 終止伺服器程序                                  |
+| `/api/settings/database`                  | 資料庫匯出、匯入與清除                          |
+| `/api/db-backups`                         | 完整資料庫備份封存存取                          |
+| `/api/settings/export-json`               | 匯出完整設定 blob（含密鑰）                     |
+| `/api/settings/import-json`               | 取代完整設定 blob                               |
+| `/api/providers/health-autopilot/actions` | 執行 autopilot 修復動作                         |
+| `/api/settings/obsidian`                  | 為任何 vault 根目錄簽發可重複使用的 WebDAV 憑證 |
+| `/api/relay/tokens`                       | 簽發、列出、編輯與撤銷 relay 權杖               |
+| `/api/cli-tools/apply`                    | 改寫操作者的主機 CLI 設定                       |
+| `/api/cli-tools/guide-settings`           | 寫入指南驅動的 CLI 設定檔                       |
+| `/api/cli-tools/hermes-agent-settings`    | 寫入 Hermes agent 設定                          |
+| `/api/cli-tools/backups`                  | 還原與刪除 CLI 設定備份                         |
+| `/api/log-export`                         | 將呼叫日誌傳送至設定的目的地                    |
+| `/api/restart`                            | 重新啟動伺服器程序                              |
 
 **違規時的回應：** `401 Authentication required`
 
-`/api/settings/obsidian` 涵蓋其 `/webdav` 子路徑：`POST` 會將 WebDAV 檔案服務——由自訂 Node 層在 Next.js 之前提供，因此位於此管線之外——指向呼叫者選擇的根目錄，並回傳新簽發的 Basic 憑證；`DELETE` 會輪替這些憑證，而父層的 `POST` 則會儲存 Obsidian REST API 權杖。GHSA-62vw 僅遮蔽了 `GET` 所揭露的密碼；憑證簽發功能仍位於失效時開放的層級（GHSA-7pq4-8pvv-rx7r）。`enableObsidianVaultSync()` 還會拒絕本身即為資料目錄、位於資料目錄內，或包含資料目錄的儲存庫。
+`/api/settings/obsidian` 涵蓋其 `/webdav` 子路由：`POST` 會將 WebDAV 檔案服務——由 Next.js 之前的自訂 Node 層提供，位於此管線之外——指向呼叫者選擇的根目錄，並回傳新產生的 Basic 憑證；`DELETE` 會輪換這些憑證，而父層 `POST` 則儲存 Obsidian REST API token。GHSA-62vw 僅遮罩了 `GET` 的密碼外洩；簽發仍處於 fail-open 層級（GHSA-7pq4-8pvv-rx7r）。`enableObsidianVaultSync()` 還會額外拒絕本身即為資料目錄、位於資料目錄內部、或包含資料目錄的 vault。
 
-### 全新安裝的啟動設定僅限回送連線——依據真實對等端，而非 `Host`
+#### 憑證匯出與還原僅限操作員
 
-若未設定管理密碼（且沒有 `INITIAL_PASSWORD`），`src/shared/utils/apiAuth.ts` 中的 `isAuthRequired()` **僅對回送對等端**保持匿名啟動設定開放。是否為回送連線會依序根據下列受信任的對等端訊號判定：以權杖標記的真實 TCP 對等端（`PEER_IP_HEADER` + `VIA_PROXY_HEADER`，即原則所看到的內容）、管線自身的 `AUTHZ_HEADER_PEER_LOCALITY` 判定結果（即路由處理常式所看到的內容，僅在已設定 `OMNIROUTE_PEER_STAMP_TOKEN` 時才受信任），或直接呼叫者的真實 socket 對等端。系統絕不參考 `Host` / `nextUrl.hostname`，而且第一次寫入密碼（`POST /api/settings/require-login`）也受相同限制，而非向所有網路對等端開放（GHSA-7pq4-8pvv-rx7r）。`managementPolicy` 會明確向下傳遞其自身的 `peerContext` 判定結果，因此原始（剝除前）請求的標頭絕不會影響此判定。
+上述層級僅決定是否需要_某種_憑證。下載已儲存憑證的路由會在處理程序中加入第二道檢查：`GET /api/settings/export-json`（解密的提供者連線與原始 API 金鑰）、`GET /api/db-backups/export`（SQLite 檔案）以及 `GET /api/db-backups/exportAll`（完整封存）會呼叫 `requireOperatorCredential()`（`src/lib/api/operatorCredential.ts`）。它接受儀表板工作階段、本機 CLI 主體，或已停用登入的執行個體，並對任何範圍的 API 金鑰（包括 `manage` 與 `admin`）以及 `oma_` 存取權杖回應 `403`。對應的破壞性操作也維持相同邊界：`POST /api/db-backups/import`（上傳 `.sqlite`，包括 `dryRun=true` 在內）、`POST /api/db-backups`（依 id 還原已儲存的備份）以及 `POST /api/settings/import-json`（舊版 JSON 還原）會取代線上資料庫或整組設定／連線／API 金鑰，因此機器憑證同樣無法觸發這些操作。銷毀還原點也維持相同邊界：`DELETE /api/db-backups`（清理——保留最新 N 個／刪除早於 D 天的備份）以及 `PATCH /api/db-backups`（保留設定），因為持久化的保留設定正是 `cleanupDbBackups()` 在每次自動備份後所套用的內容（`src/lib/db/backup.ts`），所以能夠儲存 `keepLatest: 1` 的機器憑證將會在下一次快照時清除所有備份。列出與建立備份（`GET`/`PUT /api/db-backups`）則維持一般的管理驗證。同步權杖簽發（`POST /api/sync/tokens`）使用相同的輔助函式，並額外接受受信任的 loopback 內部服務權杖。
 
-### 第 3 層 — MANAGEMENT（預設）
+### 全新安裝的啟動引導僅限 loopback——依據真實對等端，而非 `Host`
 
-所有其他管理路由。除非設定了 `requireLogin=false`，否則皆需驗證身分。CLI 權杖可用於驗證這些路由（回送連線 + 有效的 HMAC）。
+在未設定管理密碼（且無 `INITIAL_PASSWORD`）的情況下，`src/shared/utils/apiAuth.ts` 中的 `isAuthRequired()` **僅對 loopback 對等端**保持匿名啟動引導開放。loopback 的判定依序採用受信任的對等端訊號：經權杖戳記的真實 TCP 對等端（`PEER_IP_HEADER` + `VIA_PROXY_HEADER`，即政策所見）、管線自身的 `AUTHZ_HEADER_PEER_LOCALITY` 判定（即路由處理程序所見，僅在設定 `OMNIROUTE_PEER_STAMP_TOKEN` 時才受信任），或針對直接呼叫者的真實 socket 對等端。絕不參考 `Host`／`nextUrl.hostname`，而首次密碼寫入（`POST /api/settings/require-login`）也受相同約束，而非對所有網路對等端開放（GHSA-7pq4-8pvv-rx7r）。`managementPolicy` 會明確向下傳遞其自身的 `peerContext` 判定，因此原始（移除前）請求的標頭絕不會決定此判定。
+
+### 層級 3——管理（預設）
+
+所有其他管理路由。除非設定 `requireLogin=false`，否則需要驗證。CLI 權杖可驗證這些路由（loopback + 有效的 HMAC）。
 
 ## 評估順序
 

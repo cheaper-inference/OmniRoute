@@ -38,34 +38,34 @@ De `TrafficBuffer` (`src/mitm/inspector/buffer.ts`) is een gedeelde ringbuffer i
 
 ---
 
-## §2 Vastleggingsmodi
+## §2 Vastlegmodi
 
-Traffic Inspector ondersteunt **5 gelijktijdige vastleggingsbronnen**. Elke bron kan onafhankelijk worden in- en uitgeschakeld. Het veld `source` van elke `InterceptedRequest` (`src/mitm/inspector/types.ts`) is `"agent-bridge"`, `"custom-host"`, `"http-proxy"`, `"system-proxy"` of `"tproxy"`.
+Traffic Inspector ondersteunt **5 gelijktijdige vastlegbronnen**. Elke bron kan onafhankelijk worden in- en uitgeschakeld. Het veld `source` van elke `InterceptedRequest` (`src/mitm/inspector/types.ts`) is `"agent-bridge"`, `"custom-host"`, `"http-proxy"`, `"system-proxy"` of `"tproxy"`.
 
 ### Modus 1 — AgentBridge (standaard, altijd ingeschakeld)
 
 **Bron:** AgentBridge-handlers (`src/mitm/handlers/base.ts`)
 **Mechanisme:** Elke aanroep van `intercept()` in `MitmHandlerBase` roept vóór het doorsturen `hookBufferStart()` aan en na voltooiing `hookBufferUpdate()`. Geen extra configuratie — werkt zodra AgentBridge actief is.
 **Bereik:** De 9 IDE-agents die in AgentBridge zijn geconfigureerd
-**Opmerking:** Het veld `source` in `InterceptedRequest` = `"agent-bridge"`
+**Opmerking:** veld `source` in `InterceptedRequest` = `"agent-bridge"`
 
 ### Modus 2 — Aangepaste hosts (DNS-omleiding)
 
-**Bron:** Door de gebruiker gedefinieerde lijst met hosts (tabel `inspector_custom_hosts`)
-**Mechanisme:** Wanneer een host via de gebruikersinterface wordt toegevoegd, wordt `127.0.0.1 <host>` aan `/etc/hosts` toegevoegd (vereist sudo). De bestaande MITM-server van AgentBridge (poort 443) genereert dynamisch een SNI-certificaat voor de nieuwe host.
-**Bereik:** Elke toepassing die de toegevoegde host gebruikt — geen configuratiewijziging in de toepassing nodig
+**Bron:** Door de gebruiker gedefinieerde hostlijst (tabel `inspector_custom_hosts`)
+**Mechanisme:** Als via de UI een host wordt toegevoegd, wordt `127.0.0.1 <host>` aan `/etc/hosts` toegevoegd (vereist sudo). De bestaande MITM-server van AgentBridge (poort 443) genereert dynamisch een SNI-certificaat voor de nieuwe host.
+**Bereik:** Elke toepassing die de toegevoegde host gebruikt — geen configuratiewijziging van de toepassing nodig
 **Opmerking:** `source` = `"custom-host"`
 
-Voorbeelden van gebruiksscenario's:
+Voorbeelden van toepassingen:
 
-- `api.openai.com` monitoren vanuit Python-scripts
+- `api.openai.com` vanuit Python-scripts monitoren
 - Problemen met `my-internal-llm.company.com` opsporen
-- Verkeer vastleggen van mobiele apparaten in hetzelfde netwerk (via ARP-spoofing — geavanceerd)
+- Verkeer vastleggen van mobiele apparaten op hetzelfde netwerk (via ARP-spoofing — geavanceerd)
 
 ### Modus 3 — HTTP_PROXY-listener (poort 8080)
 
 **Bron:** Toepassingen die de omgevingsvariabelen `HTTP_PROXY`/`HTTPS_PROXY` gebruiken
-**Mechanisme:** Secundaire listener op poort 8080 (`src/mitm/inspector/httpProxyServer.ts`) die als een standaard expliciete HTTP/HTTPS-proxy fungeert. Accepteert `CONNECT`-tunnels (HTTPS) en directe HTTP-verzoeken.
+**Mechanisme:** Secundaire listener op poort 8080 (`src/mitm/inspector/httpProxyServer.ts`) die als standaard expliciete HTTP/HTTPS-proxy fungeert. Accepteert `CONNECT`-tunnels (HTTPS) en directe HTTP-verzoeken.
 **Bereik:** Elke toepassing die de omgevingsvariabele `HTTP_PROXY` respecteert — geen DNS-wijziging, geen sudo
 **Opmerking:** `source` = `"http-proxy"`
 
@@ -73,14 +73,14 @@ Voorbeelden van gebruiksscenario's:
 # Snel verkeer voor één opdracht vastleggen:
 HTTPS_PROXY=http://127.0.0.1:8080 curl https://api.openai.com/v1/models
 
-# Verkeer permanent vastleggen in een shellsessie:
+# Permanent vastleggen binnen een shellsessie:
 export HTTP_PROXY=http://127.0.0.1:8080
 export HTTPS_PROXY=http://127.0.0.1:8080
 ```
 
-**TLS-beperking:** HTTPS-`CONNECT`-tunnels worden alleen als metadata vastgelegd (host, poort, timing) — de TLS-inhoud wordt standaard niet ontsleuteld. Schakel de optie "HTTPS ontsleutelen in proxymodus" in (opt-in, vereist dat het AgentBridge-certificaat wordt vertrouwd) om de volledige inhoud te inspecteren.
+**TLS-beperking:** HTTPS verloopt via een gewone `CONNECT`-tunnel: de listener stuurt de versleutelde bytes ongewijzigd door en registreert alleen metagegevens (host, poort, timing). HTTPS wordt nooit ontsleuteld en er is geen instelling waarmee ontsleuteling voor deze modus kan worden ingeschakeld. Leid de host via Modus 1 (AgentBridge), Modus 2 (Aangepaste hosts) of Modus 5 (TPROXY-ontsleuteling) om HTTPS-inhoud vast te leggen.
 
-**Poortconflict:** Als poort 8080 in gebruik is, retourneert AgentBridge een 409 met een gestructureerde foutmelding. Wijzig de poort via de omgevingsvariabele `INSPECTOR_HTTP_PROXY_PORT`.
+**Poortconflict:** Als poort 8080 in gebruik is, retourneert AgentBridge een 409 met een gestructureerde fout. Wijzig de poort via de omgevingsvariabele `INSPECTOR_HTTP_PROXY_PORT`.
 
 ### Modus 4 — Systeembrede proxy (geavanceerd, opt-in)
 
@@ -96,30 +96,30 @@ export HTTPS_PROXY=http://127.0.0.1:8080
 **Veiligheidsmechanismen:**
 
 - Timer voor automatisch uitschakelen (standaard 30 min., configureerbaar via `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES`)
-- De vorige status van de systeemproxy wordt in de database opgeslagen en bij het terugdraaien hersteld
+- De vorige status van de systeemproxy wordt in de database opgeslagen en bij terugdraaien hersteld
 - Het dashboard toont de melding "Systeemproxy terugdraaien" als de gebruiker weg navigeert terwijl deze actief is
-- De gebruikersinterface toont de badge `⚠ Geavanceerd` en een expliciet bevestigingsselectievakje
+- De UI toont de badge `⚠ Geavanceerd` + een expliciet bevestigingsvakje
 
 ### Modus 5 — Transparante TPROXY-ontsleuteling (Linux, root, opt-in)
 
-**Bron:** Kernel-TPROXY + beleidsroutering (`src/mitm/tproxy/`)
-**Mechanisme:** Markeert nieuwe lokale uitgaande TCP-verbindingen naar een doelpoort (standaard `443`) in `mangle OUTPUT`, waarna een `ip rule` de gemarkeerde pakketten omleidt voor lokale aflevering en het `TPROXY`-doel van `mangle PREROUTING` ze overdraagt aan een transparante (**IP_TRANSPARENT**) listener (standaardpoort `8443`). De listener beëindigt TLS met een leaf-certificaat dat **op aanvraag per SNI-hostnaam** door een dynamische CA wordt uitgegeven, legt de ontsleutelde uitwisseling vast en stuurt het verzoek opnieuw versleuteld door naar de oorspronkelijke bestemming.
-**Bereik:** **Willekeurige** doelhosts op de doelpoort — geen spoofing via `/etc/hosts`, geen omgevingsvariabele `HTTP_PROXY`, geen systeembrede wijziging van de proxy. Het onderschepte proces hoeft niet anders te worden geconfigureerd, maar moet de dynamische CA wel vertrouwen.
+**Bron:** TPROXY in de kernel + beleidsgebaseerde routering (`src/mitm/tproxy/`)
+**Mechanisme:** Markeert nieuwe lokale uitgaande TCP-verbindingen naar een doelpoort (standaard `443`) in `mangle OUTPUT`; een `ip rule` leidt de gemarkeerde pakketten om naar lokale aflevering en het `TPROXY`-doel van `mangle PREROUTING` geeft ze door aan een transparante (**IP_TRANSPARENT**) listener (standaardpoort `8443`). De listener beëindigt TLS met een leaf-certificaat dat **op aanvraag per SNI-hostnaam** door een dynamische CA wordt uitgegeven, legt de ontsleutelde uitwisseling vast en stuurt het opnieuw versleutelde verzoek door naar de oorspronkelijke bestemming.
+**Bereik:** **Willekeurige** doelhosts op de doelpoort — geen spoofing van `/etc/hosts`, geen omgevingsvariabele `HTTP_PROXY`, geen systeembrede proxywijziging. Het onderschepte proces hoeft niet anders te worden geconfigureerd, maar moet de dynamische CA wel vertrouwen.
 **Opmerking:** `source` = `"tproxy"`
 
-**Vereisten:** Alleen Linux (**IP_TRANSPARENT** is uitsluitend beschikbaar op Linux), de capability **CAP_NET_ADMIN** (root) en een native N-API-addon dat met een C-toolchain moet worden gebouwd (`npm run build:native:tproxy`). Wanneer dit niet beschikbaar is, wordt de schakelaar op het dashboard uitgeschakeld met de tooltip "TPROXY-ontsleuteling vereist Linux + root + het native addon". De firewallregels worden transactioneel toegepast/teruggedraaid (een crash laat nooit een `mangle`-regel achter) en worden bij het opnieuw opstarten gewist. Een op SO_MARK gebaseerde anti-loop voorkomt dat de opnieuw versleutelde doorstuurverbinding van de proxy zelf opnieuw wordt onderschept.
+**Vereisten:** Alleen Linux (**IP_TRANSPARENT** is uitsluitend beschikbaar op Linux), de mogelijkheid **CAP_NET_ADMIN** (root) en een native N-API-addon die met een C-toolchain moet worden gebouwd (`npm run build:native:tproxy`). Als deze niet beschikbaar zijn, is de schakelaar op het dashboard uitgeschakeld met de tooltip "TPROXY-ontsleuteling vereist Linux + root + de native addon". De firewallregels worden transactioneel toegepast/teruggedraaid (een crash laat nooit een `mangle`-regel achter) en worden bij het opnieuw opstarten gewist. Een op SO_MARK gebaseerd anti-lusmechanisme voorkomt dat de opnieuw versleutelde doorgifte van de proxy opnieuw wordt onderschept.
 
-Dit is een omvangrijk subsysteem met een eigen, specifieke beheerdershandleiding — zie `docs/security/MITM-TPROXY-DECRYPT.md` (git; niet gecompileerd in `/docs`) voor het volledige firewallrecept, de dynamische CA per SNI + het installatieprogramma voor de trust store, de uitsluitend lokale route, details over anti-loop en het configuratieschema. De schakelaar wordt aangestuurd via `GET / POST / DELETE /api/tools/agent-bridge/tproxy` (opmerking: de route bevindt zich onder het AgentBridge-voorvoegsel, niet onder het Traffic Inspector-voorvoegsel).
+Dit is een omvangrijk subsysteem met een eigen, specifieke beheerdershandleiding — zie `docs/security/MITM-TPROXY-DECRYPT.md` (git; niet gecompileerd naar `/docs`) voor het volledige firewallrecept, de dynamische CA per SNI + het installatieprogramma voor de vertrouwensopslag, de uitsluitend lokale route, details over het anti-lusmechanisme en het configuratieschema. De schakelaar wordt aangestuurd via `GET / POST / DELETE /api/tools/agent-bridge/tproxy` (opmerking: de route valt onder het AgentBridge-voorvoegsel, niet onder het Traffic Inspector-voorvoegsel).
 
-### Vergelijking van vastleggingsmodi
+### Vergelijking van vastlegmodi
 
-| Modus                   | Configuratie                     |            Sudo?             | Bereik                         | Opmerkingen                                                                                                                              |
-| ----------------------- | -------------------------------- | :--------------------------: | ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| 1. AgentBridge          | Automatisch                      | Eenmalig (certificaat+hosts) | 9 IDE-agents                   | Standaard ingeschakeld                                                                                                                   |
-| 2. Aangepaste hosts     | Invoer per host                  |      Ja (hosts-bestand)      | Elke app die die host gebruikt | Opgeslagen in DB                                                                                                                         |
-| 3. HTTP_PROXY           | `export HTTPS_PROXY=...`         |             Nee              | Apps die env respecteren       | Poort 8080, standaard geen TLS-ontsleuteling                                                                                             |
-| 4. Systeembreed         | Schakelen + bevestigen           |              Ja              | Alle apps op de machine        | Automatisch uitschakelen na 30 min                                                                                                       |
-| 5. TPROXY-ontsleuteling | Schakelen (Linux + native addon) |  Ja (root + CA-installatie)  | Elke host op de doelpoort      | Ontsleutelt willekeurige hosts; standaard uitgeschakeld — zie `docs/security/MITM-TPROXY-DECRYPT.md` (git; niet gecompileerd in `/docs`) |
+| Modus               | Configuratie                      |            Sudo?             | Bereik                           | Opmerkingen                                                                                                                              |
+| ------------------- | --------------------------------- | :--------------------------: | -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| 1. AgentBridge      | Automatisch                       | Eenmalig (certificaat+hosts) | 9 IDE-agents                     | Standaard ingeschakeld                                                                                                                   |
+| 2. Custom Hosts     | Invoer per host                   |      Ja (hosts-bestand)      | Elke app die die host gebruikt   | Opgeslagen in DB                                                                                                                         |
+| 3. HTTP_PROXY       | `export HTTPS_PROXY=...`          |             Nee              | Apps die de omgeving respecteren | Poort 8080; HTTPS wordt via CONNECT getunneld (alleen metadata, nooit ontsleuteld)                                                       |
+| 4. Systeembreed     | Schakelaar + bevestiging          |              Ja              | Alle apps op de machine          | Automatisch uitschakelen na 30 min                                                                                                       |
+| 5. TPROXY-decryptie | Schakelaar (Linux + native addon) |  Ja (root + CA-installatie)  | Elke host op de doelpoort        | Ontsleutelt willekeurige hosts; standaard uitgeschakeld — zie `docs/security/MITM-TPROXY-DECRYPT.md` (git; niet gecompileerd in `/docs`) |
 
 ---
 
@@ -343,29 +343,29 @@ Exporteer via `GET /api/tools/traffic-inspector/sessions/{id}/export.har` of de 
 
 ## §6 Beveiliging
 
-Traffic Inspector toont **al het onderschepte HTTPS-verkeer**, inclusief autorisatieheaders en aanvraagbody's. De volgende beveiligingsmaatregelen zijn van kracht:
+Traffic Inspector toont **al het onderschepte HTTPS-verkeer**, inclusief autorisatieheaders en requestbody's. De volgende beveiligingsmaatregelen zijn geïmplementeerd:
 
-| Maatregel                       | Details                                                                                                                                                                                                                 |
-| ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **LOCAL_ONLY**                  | Alle routes en het WebSocket-eindpunt zijn uitsluitend toegankelijk via loopback (afgedwongen in `routeGuard.ts` vóór authenticatie)                                                                                    |
-| **Maskering van geheimen**      | De lineaire scanner `maskSecret()` anonimiseert RFC 6750 Bearer-aanmeldgegevens, providerspecifieke sleutels en lange ondoorzichtige tokens vóór `TrafficBuffer.push()`                                                 |
-| **Limiet voor bodygrootte**     | Body's > `INSPECTOR_MAX_BODY_KB` (standaard 1024 KB) worden afgekapt met de melding `"(afgekapt voor betere prestaties)"`                                                                                               |
-| **Opschoning van headers**      | Namen worden omgezet naar kleine letters; framing-, hop-by-hop- en proxyauthenticatieheaders worden verwijderd; cookies worden volledig geanonimiseerd; waarden van aanmeldgegevens worden verwerkt door `maskSecret()` |
-| **CSP**                         | Strikt Content Security Policy op Traffic Inspector-pagina's om XSS via geïnjecteerde antwoordbody's te voorkomen                                                                                                       |
-| **Standaard geen persistentie** | De `TrafficBuffer` bevindt zich in het geheugen en gaat verloren wanneer de server opnieuw wordt gestart. Sessies worden alleen opgeslagen wanneer ze expliciet worden opgenomen                                        |
+| Maatregel                       | Details                                                                                                                                                                                                  |
+| ------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **LOCAL_ONLY**                  | Alle routes en het WebSocket-endpoint zijn uitsluitend toegankelijk via loopback (afgedwongen in `routeGuard.ts` vóór authenticatie)                                                                     |
+| **Maskering van geheimen**      | De lineaire `maskSecret()`-scanner maskeert RFC 6750 Bearer-referenties, providerspecifieke sleutels en lange ondoorzichtige tokens vóór `TrafficBuffer.push()`                                          |
+| **Limiet voor bodygrootte**     | Body's > `INSPECTOR_MAX_BODY_KB` (standaard 1024 KB) worden afgekapt met de melding `"(afgekapt om prestatieredenen)"`                                                                                   |
+| **Headeropschoning**            | Namen worden omgezet naar kleine letters; framing-, hop-by-hop- en proxy-auth-headers worden verwijderd; cookies worden volledig gemaskeerd; waarden van referenties worden verwerkt door `maskSecret()` |
+| **CSP**                         | Strikt Content Security Policy-beleid op Traffic Inspector-pagina's om XSS via geïnjecteerde responsebody's te voorkomen                                                                                 |
+| **Standaard geen persistentie** | De `TrafficBuffer` bevindt zich in het geheugen en gaat verloren wanneer de server opnieuw wordt gestart. Sessies worden alleen opgeslagen wanneer ze expliciet worden opgenomen                         |
 
 ### Toegepaste harde regels
 
 | Regel                             | Toepassing                                                                             |
 | --------------------------------- | -------------------------------------------------------------------------------------- |
-| **#12** `sanitizeErrorMessage`    | Alle HTTP-foutreacties van Traffic Inspector-routes worden opgeschoond                 |
+| **#12** `sanitizeErrorMessage`    | Alle HTTP-foutresponses van Traffic Inspector-routes worden opgeschoond                |
 | **#15 + #17** `isLocalOnlyPath()` | `/api/tools/traffic-inspector/` is LOCAL_ONLY + SPAWN_CAPABLE (systeemproxyopdrachten) |
 
 ### Bekende beperkingen
 
-- **Systeembrede proxymodus** beïnvloedt alle toepassingen op de machine, waaronder VPN-clients en SSO. Gebruik deze modus altijd met de timer voor automatisch uitschakelen. Gebruik deze modus niet op gedeelde machines.
-- **HTTPS via CONNECT-tunnel**: Modus 3 (HTTP_PROXY) legt voor HTTPS-bestemmingen alleen tunnelmetadata vast, tenzij TLS-onderschepping is ingeschakeld. Dit is zo ontworpen — transparante vastlegging zonder dat het AgentBridge-certificaat wordt vertrouwd, zou de TLS-verificatie voor die apps verbreken.
-- **Hardgecodeerde tekenreeksen in sommige componenten**: Sommige UI-componenten (F7/F8) bevatten een klein aantal hardgecodeerde tekenreeksen waarvoor nog geen i18n-sleutels beschikbaar zijn. Deze zijn als bekende beperking gedocumenteerd in het i18n-hiatenrapport; ze worden in een volgende aanpassingsronde gemigreerd. De betreffende tekenreeksen zijn decoratieve UI-labels waarvoor geen vertaling nodig is voor functioneel gebruik.
+- **Systeembrede proxymodus** is van invloed op alle applicaties op de machine, inclusief VPN-clients en SSO. Gebruik deze modus altijd met de timer voor automatische uitschakeling. Gebruik deze modus niet op gedeelde machines.
+- **HTTPS via CONNECT-tunnel**: Modus 3 (HTTP_PROXY) legt voor HTTPS-bestemmingen alleen tunnelmetadata vast en ontsleutelt deze nooit. Dit is zo ontworpen: voor ontsleuteling zou elke client een MITM-certificaat moeten vertrouwen, daarom houdt de listener HTTPS end-to-end versleuteld. Gebruik AgentBridge, Custom Hosts of TPROXY-ontsleuteling wanneer u HTTPS-body's nodig hebt.
+- **Hardgecodeerde tekenreeksen in sommige componenten**: Sommige UI-componenten (F7/F8) bevatten een klein aantal hardgecodeerde tekenreeksen die nog niet door i18n-sleutels worden gedekt. Deze zijn in het i18n-hiaatrapport gedocumenteerd als een bekende beperking; ze worden tijdens een volgende aanpassingsronde gemigreerd. De betreffende tekenreeksen zijn decoratieve UI-labels waarvoor geen vertaling nodig is voor functioneel gebruik.
 
 ---
 
@@ -446,9 +446,9 @@ Basispad: `/api/tools/traffic-inspector/`
 
 ### WebSocket
 
-| Methode | Pad   | Beschrijving                                                                                              |
-| ------- | ----- | --------------------------------------------------------------------------------------------------------- |
-| GET     | `/ws` | Live WebSocket-stream. Verzendt `snapshot` bij verbinding en daarna `new`/`update`/`clear`-gebeurtenissen |
+| Methode | Pad   | Beschrijving                                                                                                   |
+| ------- | ----- | -------------------------------------------------------------------------------------------------------------- |
+| GET     | `/ws` | Live WebSocket-stream. Verstuurt `snapshot` bij verbinding en vervolgens `new`/`update`/`clear`-gebeurtenissen |
 
 ### Exporteren
 
@@ -465,16 +465,15 @@ Basispad: `/api/tools/traffic-inspector/`
 | DELETE  | `/hosts/{host}` | Host verwijderen                                  |
 | PATCH   | `/hosts/{host}` | `enabled` in- of uitschakelen                     |
 
-### Opnamemodi
+### Vastlegmodi
 
-| Methode | Pad                            | Beschrijving                                                                                                 |
-| ------- | ------------------------------ | ------------------------------------------------------------------------------------------------------------ |
-| GET     | `/capture-modes`               | Status van de AgentBridge-/aangepaste-hosts-/HTTP_PROXY-/systeemproxymodi en de schakeloptie `tls-intercept` |
-| POST    | `/capture-modes/http-proxy`    | HTTP_PROXY-listener starten/stoppen (`{action: "start"\|"stop"}`)                                            |
-| POST    | `/capture-modes/system-proxy`  | Systeembrede proxy toepassen/terugzetten (`{action: "apply"\|"revert"}`)                                     |
-| POST    | `/capture-modes/tls-intercept` | Ontsleuteling van HTTPS-inhoud in proxymodus in- of uitschakelen (`{enabled: boolean}`)                      |
+| Methode | Pad                           | Beschrijving                                                                  |
+| ------- | ----------------------------- | ----------------------------------------------------------------------------- |
+| GET     | `/capture-modes`              | Status van de modi AgentBridge / aangepaste hosts / HTTP_PROXY / systeemproxy |
+| POST    | `/capture-modes/http-proxy`   | HTTP_PROXY-listener starten/stoppen (`{action: "start"\|"stop"}`)             |
+| POST    | `/capture-modes/system-proxy` | Systeembrede proxy toepassen/terugdraaien (`{action: "apply"\|"revert"}`)     |
 
-> **TPROXY-ontsleuteling** (opnamemodus 5) wordt aangestuurd via een **afzonderlijke** route onder het
+> **TPROXY-ontsleuteling** (vastlegmodus 5) wordt aangestuurd via een **afzonderlijke** route onder het
 > AgentBridge-voorvoegsel — `GET / POST / DELETE /api/tools/agent-bridge/tproxy` — en niet
 > onder `/api/tools/traffic-inspector/`. Zie
 > `docs/security/MITM-TPROXY-DECRYPT.md` (git; niet gecompileerd in `/docs`).
@@ -492,8 +491,8 @@ Basispad: `/api/tools/traffic-inspector/`
 
 ### Interne invoer (D4-terugvaloptie)
 
-| Methode | Pad                | Beschrijving                                                                                                                |
-| ------- | ------------------ | --------------------------------------------------------------------------------------------------------------------------- |
-| POST    | `/internal/ingest` | Accepteert onderschepte aanvragen uit het doorvoerpad van `server.cjs`; vereist de header `INSPECTOR_INTERNAL_INGEST_TOKEN` |
+| Methode | Pad                | Beschrijving                                                                                                              |
+| ------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------- |
+| POST    | `/internal/ingest` | Accepteert onderschepte aanvraag van het doorvoerpad in `server.cjs`; vereist de header `INSPECTOR_INTERNAL_INGEST_TOKEN` |
 
 Volledige OpenAPI-schema's: `docs/openapi.yaml` → tag `Traffic Inspector`.

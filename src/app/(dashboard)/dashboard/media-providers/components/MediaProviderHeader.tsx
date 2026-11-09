@@ -2,6 +2,9 @@
 
 import Link from "next/link";
 import { useTranslations } from "next-intl";
+import { PageHeader } from "@omniroute/ui-kit/page-header";
+import Badge from "@/shared/components/Badge";
+import Icon from "@/shared/components/Icon";
 import ProviderIcon from "@/shared/components/ProviderIcon";
 
 interface MediaProviderHeaderProps {
@@ -26,50 +29,57 @@ export default function MediaProviderHeader({
   backHref,
 }: MediaProviderHeaderProps) {
   const t = useTranslations("media");
+  const tc = useTranslations("common");
 
   return (
-    <div className="flex flex-col gap-3">
-      <Link
-        href={backHref}
-        className="inline-flex items-center gap-1.5 text-sm text-text-muted hover:text-text-primary transition-colors w-fit"
-      >
-        <span className="material-symbols-outlined text-[16px]">arrow_back</span>
-        {t("backToProviders")}
-      </Link>
-
-      <div className="flex items-start gap-4">
-        <div
-          className="size-12 rounded-xl flex items-center justify-center shrink-0"
-          style={{ backgroundColor: `${providerColor ?? "#64748b"}20` }}
+    <PageHeader
+      compact
+      breadcrumbs={
+        <Link
+          href={backHref}
+          className="inline-flex items-center gap-1.5 text-sm text-text-muted hover:text-text-main transition-colors w-fit"
         >
-          <ProviderIcon providerId={providerId} size={32} type="color" />
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 flex-wrap">
-            <h1 className="text-xl font-semibold">{providerName}</h1>
-            <span className="text-xs px-2 py-0.5 rounded-full bg-bg-subtle border border-border text-text-muted">
-              {kindLabel}
-            </span>
-            {hasFree && (
-              <span className="text-xs px-2 py-0.5 rounded-full bg-green-500/10 border border-green-500/20 text-green-600 dark:text-green-400">
-                Free
-              </span>
+          <Icon name="arrow_back" size={16} />
+          {t("backToProviders")}
+        </Link>
+      }
+      eyebrow={
+        <span className="flex flex-wrap items-center gap-2">
+          <Badge>{kindLabel}</Badge>
+          {hasFree && <Badge variant="success">{tc("free")}</Badge>}
+        </span>
+      }
+      title={
+        <span className="inline-flex items-center gap-3">
+          {/* Brand tint behind the provider logo (provider data colour, not a theme token). */}
+          <span
+            className="size-10 rounded-lg flex items-center justify-center shrink-0"
+            style={{ backgroundColor: `${providerColor ?? "#64748b"}20` }}
+            aria-hidden="true"
+          >
+            <ProviderIcon providerId={providerId} size={28} type="color" />
+          </span>
+          {providerName}
+        </span>
+      }
+      description={
+        freeNote || website ? (
+          <>
+            {freeNote && <span className="block">{freeNote}</span>}
+            {website && (
+              <a
+                href={website}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-xs text-primary hover:underline mt-1"
+              >
+                <Icon name="open_in_new" size={13} />
+                {website}
+              </a>
             )}
-          </div>
-          {freeNote && <p className="text-sm text-text-muted mt-1">{freeNote}</p>}
-          {website && (
-            <a
-              href={website}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 text-xs text-primary hover:underline mt-1"
-            >
-              <span className="material-symbols-outlined text-[13px]">open_in_new</span>
-              {website}
-            </a>
-          )}
-        </div>
-      </div>
-    </div>
+          </>
+        ) : undefined
+      }
+    />
   );
 }

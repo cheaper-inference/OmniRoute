@@ -39,31 +39,37 @@
 
 ### በነፃ አቅራቢዎች ላይ የጥያቄ መጠን ገደብ (429 / 400 / 401)
 
-**ምልክት**፦ `model: "auto"`ን ከነፃ/ማረጋገጫ ከማይጠይቁ አቅራቢዎች (opencode, auggie, ወዘተ) ጋር ሲጠቀሙ፣ ከመልሶች ይልቅ አልፎ አልፎ `HTTP 429`፣ `400` ወይም `401` ያገኛሉ። ተመሳሳዩን መጠየቂያ ከጥቂት ጊዜ በኋላ እንደገና ሲሞክሩ ጥያቄዎቹ ይሳካሉ፣ ነገር ግን አውቶሜሽን (cron ስራዎች፣ ወኪሎች፣ ስክሪፕቶች) በመጀመሪያው ውድቀት ይቋረጣል።
+**ምልክት**፦ ከነፃ/ማረጋገጫ የማያስፈልጋቸው አቅራቢዎች (auggie ወዘተ) ጋር `model: "auto"` ሲጠቀሙ፣ መልስ ከማግኘት ይልቅ አልፎ አልፎ `HTTP 429`፣ `400` ወይም `401` ያጋጥማል። ተመሳሳይ ጥያቄ ከጥቂት ጊዜ በኋላ እንደገና ሲላክ ጥያቄዎቹ ይሳካሉ፣ ነገር ግን አውቶሜሽን (cron jobs፣ agents፣ scripts) በመጀመሪያው ውድቀት ይቋረጣል።
 
-**ዋና መንስኤ**፦ ሦስት እርስ በርሳቸው ገለልተኛ የውድቀት ዓይነቶች ተደራርበው ይከሰታሉ፦
+**ዋና ምክንያት**፦ ሦስት ከእርስ በርስ የማይመሳሰሉ የውድቀት ሁኔታዎች ተደራርበዋል፦
 
-1. **የአቅራቢ የጥያቄ መጠን ገደብ (`429`)**፦ ነፃ ደረጃዎች በእያንዳንዱ የጊዜ መስኮት የኮታ ገደብ ሊያስፈጽሙ ይችላሉ። ብዙ ትይዩ ጥሪዎች በአንድ ጊዜ ሲላኩ ኮታውን ያሟጥጣሉ፤ ስለዚህ የጊዜ መስኮቱ ዳግም እስኪጀመር ድረስ ቀጣዩ ጥያቄ ውድቅ ይደረጋል።
-2. **በቀጥታ ማሳለፊያ ውስጥ የተበላሸ ሞዴል (`400`/`401`)**፦ `auto/*` ስብስቦች በካታሎጉ ውስጥ የተመዘገቡ ነገር ግን ንቁ የመግቢያ ማረጋገጫ የሌላቸውን የ`opencode` ቀጥታ ማሳለፊያ ሞዴሎች ሊያካትቱ ይችላሉ (ለምሳሌ `oc/north-mini-code-free` → `401`)። ራስ-ሰር ራውተሩ አንዱን ይሞክራል፣ ይወድቃል፣ እና ወደ አማራጭ መቀየሩ ከመጀመሩ በፊት ስህተቱ ወደ ላይ ይተላለፋል።
-3. **የትይዩነት ማጉላት (ጫና ሲኖር `429`)**፦ በርካታ የወኪል/cron ክፍለ ጊዜዎች `auto`ን በአንድ ጊዜ ሲጠቀሙ፣ ጠቅላላ የጥያቄ መጠኑ ነፃ አቅራቢዎች ሊቋቋሙት ከሚችሉት ይበልጣል፤ በዚህም ምክንያት ትክክለኛ ጥሪዎች እንደ አላግባብ አጠቃቀም ምልክት ይደረግባቸዋል።
+1. **የአቅራቢ የጥያቄ መጠን ገደብ (`429`)**፦ ነፃ ደረጃዎች በእያንዳንዱ የጊዜ መስኮት የአጠቃቀም ኮታ ሊጥሉ ይችላሉ። በአንድ ጊዜ የሚላኩ ብዙ ጥሪዎች ይህን ኮታ ሲያሟጥጡ፣ መስኮቱ እስኪታደስ ድረስ ቀጣዩ ጥያቄ ውድቅ ይሆናል።
+2. **በpassthrough ውስጥ ያለ የተበላሸ ሞዴል (`400`/`401`)**፦ `auto/*` ገንዳዎች በካታሎግ ውስጥ የተመዘገቡ ነገር ግን ትክክለኛ የሆኑ የማረጋገጫ መረጃዎች የሌላቸው passthrough ሞዴሎችን (→ `401`) ሊያካትቱ ይችላሉ። የauto-router አንዱን ለመጠቀም ይሞክራል፣ ይሳነዋል፣ ከዚያም fallback ከመነሳቱ በፊት ስህተቱ ይተላለፋል።
+3. **የተመሳሳይነት መጨመር (`429` በጫና ስር)**፦ ብዙ agent/cron ክፍለ ጊዜዎች በአንድ ጊዜ `auto` ላይ ሲደርሱ፣ የተጠቃለለው የጥያቄ መጠን ነፃ አቅራቢዎች ሊቀበሉት ከሚችሉት በላይ ይሆናል። በዚህም ሕጋዊ ጥሪዎች እንደ አላግባብ አጠቃቀም ይቆጠራሉ።
 
-**የተረጋገጠ መፍትሔ (በማህበረሰቡ የተዘገበ፣ 2026-08-10)**፦ ማዞር፣ ትይዩነት እና ወደ አማራጭ መቀየር በነፃው ደረጃ ላይ ያለውን መለዋወጥ ከውድቀት ይልቅ እንዲቋቋሙ ሦስት የአካባቢ ተለዋዋጮችን ያስተካክሉ፦
+**የተረጋገጠ መፍትሔ (በማኅበረሰቡ የተዘገበ፣ 2026-08-10)**፦ የነፃ ደረጃ መለዋወጥን ከመቋረጥ ይልቅ እንዲቋቋም ሽግግር፣ ተመሳሳይነት እና fallback እንዲወስዱ ሦስት የአካባቢ ተለዋዋጮችን ያስተካክሉ፦
 
 ```bash
-export OMNIROUTE_ROTATE_ON_400=true           # በ400/401 ጊዜ ወደ ሌላ ሞዴል/አቅራቢ ይዝለሉ (የተበላሹ የቀጥታ ማሳለፊያ ሞዴሎችን ይዘላል)
-export OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT=4   # ለከባድ ስራዎች ግልጽ ከፍተኛ የመቀበያ ገደብ (በነባሪ አልተዋቀረም፦ የጥያቄ ብዛት ገደብ የለም፣ ከታች ያለውን ማስታወሻ ይመልከቱ)
-export OMNIROUTE_CHAT_ADMISSION_QUEUE_MS=20000 # ለዝግተኛ የላይኛው ፍሰት አቅራቢዎች የተገደበውን መጠበቂያ ከRATE_LIMIT_MAX_WAIT_MS ነባሪ በላይ ያሳድጉ
+export OMNIROUTE_ROTATE_ON_400=true           # በ400/401 ላይ ወደ ሌላ ሞዴል/አቅራቢ ይለወጡ (የተበላሹ passthrough ሞዴሎችን ይዝለሉ)
+export OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT=4   # ግልጽ የከባድ ጥያቄዎች መግቢያ ጣሪያ (በነባሪ አልተዘጋጀም፦ የጥያቄ ብዛት ገደብ የለም፣ ከታች ያለውን ማስታወሻ ይመልከቱ)
+export OMNIROUTE_CHAT_ADMISSION_QUEUE_MS=20000 # የተወሰነውን የመጠበቂያ ጊዜ ከRATE_LIMIT_MAX_WAIT_MS ነባሪ ዋጋ በላይ ያሳድጉ፣ ለዘገዩ upstream አቅራቢዎች
 ```
 
-እነዚህን በOmniRoute የሂደት አካባቢ ውስጥ (daemon፣ ለምሳሌ በLaunchAgent plist ወይም `systemctl edit`) ያዋቅሩ፣ ከዚያ OmniRouteን ዳግም ያስጀምሩ። የማዞሪያ ጠቋሚው ከሁሉ የበለጠ ተጽዕኖ ያለው መቆጣጠሪያ ነው፦ ከባድ ውድቀትን በስብስቡ ውስጥ ባለ ጤናማ አቅራቢ ላይ ወደሚደረግ ግልጽነት ያለው ዳግም ሙከራ ይቀይረዋል።
+እነዚህን በOmniRoute ሂደት አካባቢ (daemon፣ ለምሳሌ በLaunchAgent plist ወይም `systemctl edit`) ያስቀምጡ፣ ከዚያም OmniRouteን እንደገና ያስጀምሩ። የሽግግር ባንዲራው ከሁሉ የበለጠ ተፅዕኖ ያለው መሣሪያ ነው፦ ጠንካራ ውድቀትን ወደ ጤናማ አቅራቢ ግልጽ ባልሆነ መልኩ ወደሚደረግ እንደገና ሙከራ ይቀይራል።
 
-**ማስታወሻ**፦ `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` ምን ያህል ከባድ — ረጅም አውድ ያላቸው — ጥያቄዎች በአንድ ጊዜ እንደሚሰሩ ይገድባል፤ ገደቡ የመቀበያ በር እንጂ የአቅራቢ የጥያቄ መጠን ገዳቢ አይደለም። **#503-fanout ማሻሻያ፦** ይህ var ከአሁን በኋላ በነባሪ አይዋቀርም (አሁን የሚተገበረው ከላይ እንደተገለጸው በግልጽ ሲዋቀር ብቻ ነው) — በምትኩ የከባድ ስራዎች መቀበያ ከአስተናጋጁ ትክክለኛ የማህደረ ትውስታ ገደብ ጋር ራሱን በሚመጥን፣ በራስ-ሰር በሚወጣ የባይት በጀት (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`) ይገደባል፤ ስለዚህ አዲስ ጭነት ይህን var ምንም ሳያዋቅር በጣም ያነሱ `503 chat_admission_busy` ውድቅ ማድረጎችን ማየት ይገባዋል፤ እዚህ በግልጽ ማዋቀሩ አሁንም በሰነዱ እንደተገለጸው በትክክል ይሰራል። ግልጽ የባይት በጀት ለውጦች ከ8 MiB–2 GiB ባለው ክልል ውስጥ ይገደባሉ። `413 body_exceeds_budget` ጊዜያዊ አይደለም፦ ያንን የባይት በጀት ያሳድጉ፣ `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES`ን ይቀንሱ፣ ወይም የሂደቱን የማህደረ ትውስታ ገደብ ያሳድጉ። የ`inflight_bytes_budget` ጫና መቀነስ ጊዜያዊ የሀብት ፉክክር ሲሆን እንደገና ሊሞከር ይችላል። በእያንዳንዱ አቅራቢ ላይ ያለው የጥያቄ መጠን ገደብ (`open-sse/services/rateLimitManager.ts`) በተናጠል በ`RATE_LIMIT_MAX_WAIT_MS`፣ `RATE_LIMIT_MAX_QUEUE_DEPTH` እና `RATE_LIMIT_AUTO_ENABLE` ይተዳደራል — `.env.example`ን ይመልከቱ።
+**ማስታወሻ**፦ `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` በአንድ ጊዜ ሊሠሩ የሚችሉ ከባድ — ረጅም አውድ ያላቸው — ጥያቄዎችን ብዛት ይገድባል፤ ይህ ገደብ የመግቢያ መቆጣጠሪያ እንጂ የአቅራቢ የጥያቄ መጠን መገደቢያ አይደለም። **#503-fanout ማሻሻያ**፦ ይህ ተለዋዋጭ ከአሁን በኋላ በነባሪ አይዘጋጅም (አሁን እንደ ከላይ በግልጽ ሲዋቀር ብቻ ይሠራል) — የከባድ ጥያቄ መግቢያ በራስ-ሰር በሚወሰን የባይት በጀት (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`) ይቆጣጠራል፤ ይህም ከአስተናጋጁ ትክክለኛ የማስታወሻ ጣሪያ ጋር ተመጣጥኖ ራሱን ያስተካክላል። ስለዚህ አዲስ ጭነት ይህን ተለዋዋጭ ሳያዘጋጅ እጅግ ያነሱ `503 chat_admission_busy` ውድቀቶችን ማየት አለበት፤ እዚህ በግልጽ ማዘጋጀቱ ግን በሰነዱ ላይ እንደተገለጸው በትክክል ይሠራል። ግልጽ የባይት በጀት ማስተካከያዎች ከ8 MiB–2 GiB ጋር ይገደባሉ። `413 body_exceeds_budget` ጊዜያዊ አይደለም፦ ያንን የባይት በጀት ያሳድጉ፣ `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES` ወይም የተቀመጠውን የጥያቄ አካል ገደብ ያሳንሱ፣ ወይም የሂደቱን የማስታወሻ ጣሪያ ያሳድጉ። `inflight_bytes_budget` shed ጊዜያዊ የውድድር ጫና ሲሆን እንደገና ሊሞከር ይችላል። በእያንዳንዱ አቅራቢ ላይ የሚደረገው የጥያቄ መጠን መገደብ (`open-sse/services/rateLimitManager.ts`) በተናጠል በ`RATE_LIMIT_MAX_WAIT_MS`፣ `RATE_LIMIT_MAX_QUEUE_DEPTH` እና `RATE_LIMIT_AUTO_ENABLE` ይቆጣጠራል — `.env.example`ን ይመልከቱ።
 
-**መስራቱን እንዴት ማረጋገጥ እንደሚቻል**፦ agent/cronዎን በፈጣን ቅደም ተከተል ሁለት ጊዜ ያስኪዱትና ሁለቱም በተሳካ ሁኔታ መጠናቀቃቸውን ያረጋግጡ። ከማስተካከያው በፊት፣ ሁለተኛው ማስኬድ በተለምዶ `429`/`401` ስህተት ይፈጥራል። ከማስተካከያው በኋላ፣ ውድቀቶች (ካሉ) ተጠቃሚው ሳያስተውል እንደገና ይሞከራሉ፣ ጥሪውም ይጠናቀቃል። እንዲሁም `curl /monitoring/health` በማስኬድ በአቅራቢ ግንኙነቶች ላይ ያለውን `rateLimitedUntil` መስክ እና ለተጎዱት አቅራቢዎች `circuitBreakers.providerBreakers[].state`ን መከታተል ይችላሉ — ሁኔታው ከ`CLOSED`፣ `DEGRADED`፣ `OPEN` ወይም `HALF_OPEN` አንዱ ነው (`src/shared/utils/circuitBreaker.ts`ን ይመልከቱ)፤ ደጋግሞ የሚወድቅ አቅራቢ፣ ዳግም ማስጀመሪያ ጊዜው የሙከራ ጥሪን እስኪፈቅድ (`HALF_OPEN`) ድረስ፣ ከ`CLOSED → DEGRADED → OPEN` ይሸጋገራል።
+**የማሻሻያ ማስታወሻ፦ የተቀመጠ የጥያቄ አካል ገደብ አሁን በchat ላይም ይተገበራል።** ከዚህ በፊት Settings > Advanced > Request Body Limit (`maxBodySizeMb`) ስር የተቀመጠ ገደብ አሁን በ`/v1/chat/completions` እና `/v1/responses` ላይም ይተገበራል። ይህ ለውጥ ከመደረጉ በፊት እነዚህ ሁለት መንገዶች የተቀመጠው ነገር ምንም ቢሆን እስከ 50 MB ይቀበሉ ነበር፤ ስለዚህ ዝቅተኛ የተቀመጠ ገደብ ያለው ጭነት ከዚያ በላይ የሆኑ የchat አካላትን መቀበል ይጀምራል። በፍጹም ገደብ ያላስቀመጠ ጭነት የ50 MB ነባሪ ዋጋውን ይጠብቃል።
 
-**አሁንም 429 ካዩ**፦ ለዚያ አቅራቢ ገቢር የሆነው መለያ _ኮታውን_ በእውነት አሟጧል (የጥያቄ ፍጥነት ገደቡን ብቻ አይደለም)። በOmniRoute ዳሽቦርድ → Providers → Accounts ውስጥ ለተመሳሳዩ አቅራቢ ሁለተኛ መለያ ያክሉ፣ ወይም ሌላ ነፃ አቅራቢን (ለምሳሌ `routeway`፣ `auggie`) ይቀላቅሉ። ማዞር የሚረዳው ጊዜያዊ የጥያቄ ፍጥነት/400/401 ስህተቶችን ለመቋቋም ብቻ ነው፤ የኮታ ሙሉ በሙሉ መሟጠጥ ሁለተኛ ማረጋገጫ ወይም የተለየ አቅራቢ ይፈልጋል።
+ውድቅ ሲደረግ HTTP `413` ይሆናል፣ `error.code` ደግሞ `PAYLOAD_TOO_LARGE` እና `error.type` `payload_too_large` ይሆናሉ። መልዕክቱ ተፈጻሚ የሆነውን ገደብ ይጠቅሳል፦ የተገለጸው `Content-Length` ከገደቡ በላይ ሲሆን `Request body too large. Maximum allowed: 10 MB`፣ በትክክል የተነበቡት ባይቶች ከገደቡ በላይ ሲሆኑ ደግሞ `Request body too large for chat completions (max 10 MB).` ይሆናል። ይህ ከላይ ካለው `413 body_exceeds_budget` ጋር አንድ አይደለም፤ ያ የሚመነጨው ከማስታወሻ በጀት ሲሆን በዚህ ቅንብር አይለወጥም።
 
-**በምስል ሞዴሎች (`auto/vision`፣ `bazaarlink/*`) ላይ 403 ካዩ**፦ የተገናኘው መለያ ምስልን የሚያካትት የሚከፈልበት ዕቅድ የለውም፣ ወይም API keyው በቂ ፈቃዶች የሉትም። በአቅራቢው ዳሽቦርድ ውስጥ የkeyው ወሰን ምስል/መልቲሞዳልን እንደሚያካትት ያረጋግጡ፣ ወይም የሚከፈልበት ደረጃ ያለው መለያ ያገናኙና የምስል መድረሻ አድርገው ያቆዩት።
+ገደቡን ለማሳደግ በ`/dashboard/settings/advanced` ላይ ከፍ ያለ ዋጋ ያስቀምጡ፣ ወይም `PATCH /api/settings`ን `{"maxBodySizeMb": 50}` ጋር ይላኩ። ከ1 እስከ 500 MB ያሉ ዋጋዎች ይቀበላሉ፣ ዳግም ማስጀመር ሳያስፈልግ ይተገበራል፣ እና 50 የቀድሞውን የchat ገደብ ይመልሳል። ሁለት ሌሎች ገደቦች አሁንም ትልቅ አካልን ሊያቆሙ ይችላሉ፦ `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES` ከተዘጋጀ የተቀመጠውን ገደብም ይገድባል፣ እና የKubernetes ingress ማብራሪያ `proxy-body-size` (በተላኩት manifests ውስጥ `50m`) ከ50 MB በላይ ላለ ነገር በተናጠል መጨመር አለበት።
+
+**እንደሠራ እንዴት እንደሚረጋገጥ**፦ agent/cronዎን በፍጥነት ሁለት ጊዜ ያስኪዱና ሁለቱም እንደተሳኩ ያረጋግጡ። ከመፍትሔው በፊት ሁለተኛው ሩጫ ብዙውን ጊዜ `429`/`401` ይጥል ነበር። ከመፍትሔው በኋላ የሚፈጠሩ ውድቀቶች (ካሉ) በግልጽ ሳይታወቅ እንደገና ይሞከራሉ፣ ጥሪውም ይጠናቀቃል። እንዲሁም `curl /monitoring/health` ማድረግ እና በአቅራቢ ግንኙነቶች ላይ ያለውን `rateLimitedUntil` መስክ እንዲሁም ለተጎዱት አቅራቢዎች `circuitBreakers.providerBreakers[].state` መከታተል ይችላሉ — ሁኔታው ከ`CLOSED`፣ `DEGRADED`፣ `OPEN` ወይም `HALF_OPEN` አንዱ ነው (`src/shared/utils/circuitBreaker.ts`ን ይመልከቱ)። ያለማቋረጥ የሚወድቅ አቅራቢ የሙከራ ጥያቄ በመልሶ ማቋቋሚያ መስኮቱ እስኪፈቀድ ድረስ `CLOSED → DEGRADED → OPEN` ይሆናል፣ ከዚያም (`HALF_OPEN`) ይሆናል።
+
+**አሁንም 429 ካዩ**፦ ለዚያ አቅራቢ የሚሠራው መለያ በእርግጥ _ኮታውን_ አሟጥጧል (የጥያቄ መጠን ብቻ አይደለም)። በOmniRoute dashboard → Providers → Accounts ውስጥ ለተመሳሳይ አቅራቢ ሁለተኛ መለያ ያክሉ፣ ወይም ሌላ ነፃ አቅራቢ (ለምሳሌ `routeway`፣ `auggie`) ያካትቱ። ሽግግር የሚረዳው በጊዜያዊ የጥያቄ መጠን/400/401 ችግር ላይ ብቻ ነው፤ ኮታ ሙሉ በሙሉ ካለቀ ግን ሁለተኛ ማረጋገጫ መረጃ ወይም የተለየ አቅራቢ ያስፈልጋል።
+
+**በvision ሞዴሎች (`auto/vision`፣ `bazaarlink/*`) ላይ 403 ካዩ**፦ የተገናኘው መለያ visionን የሚያካትት የክፍያ ዕቅድ የለውም፣ ወይም API keyው በቂ ፈቃዶች የሉትም። በአቅራቢው dashboard ውስጥ የkey ወሰን vision/multimodalን እንደሚያካትት ያረጋግጡ፣ ወይም የክፍያ ደረጃ ያለውን መለያ ያገናኙና የvision ዒላማ አድርገው ያስቀምጡ።
 
 ---
 
@@ -90,33 +96,33 @@ npm install -g omniroute --legacy-peer-deps
 
 ---
 
-## የታገዱ npm install-scripts ማስጠንቀቂያ (ዓለም አቀፍ ጭነት)
+## npm install-scripts የመታገድ ማስጠንቀቂያ (ዓለም አቀፍ ጭነት)
 
 <a name="npm-install-scripts-blocked-warning-global-install"></a>
 
-`npm install -g omniroute` ሲያስኬዱ፣ አዳዲስ የ npm ስሪቶች (v11+ እና v12+) የፓኬጅ lifecycle scriptsን በነባሪነት ያግዳሉ፣ እንዲሁም የ install-scripts ማስጠንቀቂያ ያሳያሉ፦
+`npm install -g omniroute`ን ሲያስኬዱ፣ አዲሶቹ የnpm ስሪቶች (v11+ እና v12+) የጥቅል የሕይወት ዑደት ስክሪፕቶችን በነባሪነት በማገድ የinstall-scripts ማስጠንቀቂያ ያሳያሉ፦
 
 ```
-npm warn install-scripts 7 packages had install scripts blocked because they are not covered by allowScripts:
+npm warn install-scripts 7 ጥቅሎች በallowScripts ውስጥ ስላልተካተቱ የመጫኛ ስክሪፕቶቻቸው ታግደዋል፦
   omniroute@<version> (postinstall: node scripts/build/postinstall.mjs)
   keytar, @parcel/watcher, @swc/core, protobufjs, esbuild, onnxruntime-node
 ```
 
 ### ይህን ማስጠንቀቂያ ችላ ማለት ይቻላል?
 
-**በከፊል፣ ነገር ግን scripts ሳይኖሩ ማስኬድ አይመከርም።** OmniRoute ችግርን በሰላም የሚቋቋሙ አማራጮችን ያካትታል፦ native `better-sqlite3` bindings ከ standalone bundle መጫን ካልቻሉ፣ መተግበሪያው እንደ `node:sqlite` ወይም `sql.js` ያሉ አማራጭ driversን ይጠቀማል ([የ SQLite Runtime መፍትሔ](../ops/SQLITE_RUNTIME.md)ን ይመልከቱ)። server አሁንም ይጀምራል፣ ነገር ግን እንደ `sql.js` ባሉ የ WASM አማራጮች ላይ ማስኬድ የ SQLite WAL (Write-Ahead Logging) ሁነታን ያሰናክላል፣ እንዲሁም የማህደረ ትውስታ እና የ disk-sync ተጨማሪ ወጪን ይጨምራል።
+**በከፊል ይቻላል፣ ነገር ግን ያለ ስክሪፕቶች ማስኬድ አይመከርም።** OmniRoute ችግርን በለሆሳስ የሚቋቋሙ አማራጭ ዘዴዎችን ያካትታል፦ ቤተኛ የ`better-sqlite3` ማያያዣዎች ከብቻውን ከሚሠራው ጥቅል መጫን ካልቻሉ፣ መተግበሪያው እንደ `node:sqlite` ወይም `sql.js` ባሉ አማራጭ ነጂዎች ይቀጥላል ([የSQLite የአሂድ ጊዜ መፍትሔ](../ops/SQLITE_RUNTIME.md)ን ይመልከቱ)። አገልጋዩ አሁንም ይጀምራል፣ ነገር ግን እንደ `sql.js` ባሉ የWASM አማራጭ ዘዴዎች ላይ ማስኬድ የSQLite WAL (Write-Ahead Logging) ሁነታን ያሰናክላል፣ እንዲሁም የማህደረ ትውስታ እና የዲስክ ማመሳሰል ተጨማሪ ወጪን ይጨምራል።
 
-### በእርግጥ የሚያስፈልጉት scripts የትኞቹ ናቸው?
+### በእርግጥ የሚያስፈልጉት የትኞቹ ስክሪፕቶች ናቸው?
 
-ሁሉም የታገዱ scripts OmniRouteን ለማስኬድ አስፈላጊ አይደሉም፦
+የታገዱት ስክሪፕቶች በሙሉ OmniRouteን ለማስኬድ አስፈላጊ አይደሉም፦
 
-- **አስፈላጊ (`omniroute`፣ `better-sqlite3`)፦** OmniRoute ከ Next.js standalone application bundle (`dist/`) ይሠራል። በጭነት ጊዜ፣ npm ከ host ጋር የሚስማማውን native SQLite driver ወደ ከፍተኛ ደረጃው `node_modules/better-sqlite3/` ያወርዳል ወይም ያጠናቅራል። ከዚያም የ OmniRoute `postinstall` script (`scripts/build/postinstall.mjs`) እነዚህን ከ host ጋር የሚስማሙ binaries ያረጋግጣል እና standalone server ሊደርስባቸው እንዲችል ወደ `dist/node_modules/` ይቀዳቸዋል። የ `omniroute` postinstall script ከታገደ፣ ይህ የመቅዳት ደረጃ ይዘለላል።
-- **አማራጭ/ተዘዋዋሪ (`keytar`፣ `@parcel/watcher`፣ `@swc/core`፣ `protobufjs`፣ `esbuild`)፦** እነዚህ የ build ረዳቶች፣ watcher መሣሪያዎች ወይም የስርዓት keychain መገልገያዎች ናቸው። መፍቀድ የ build ማስጠንቀቂያዎችን ይከላከላል፣ ነገር ግን ለዋናው የ routing ተግባር አያስፈልጉም።
-- **የተገለለ (`onnxruntime-node`)፦** ለአካባቢያዊ AI embeddings አማራጭ dependency ሲሆን OmniRoute እንዲሠራ **አያስፈልግም**። የእሱ postinstall script ከ NuGet ወደ ~300MB የሚሆኑ የ CUDA ግብዓቶችን ያወርዳል፤ በሚደገፍ hardware ላይ አካባቢያዊ ONNX accelerationን ለመጠቀም በግልጽ ካላሰቡ በ allow-list ውስጥ አያካትቱት።
+- **አስፈላጊ (`omniroute`፣ `better-sqlite3`)፦** OmniRoute ከNext.js ብቻውን የሚሠራ የመተግበሪያ ጥቅል (`dist/`) ውስጥ ይሠራል። በጭነት ወቅት npm ከአስተናጋጁ ጋር የሚዛመደውን ቤተኛ የSQLite ነጂ ከከፍተኛ ደረጃው `node_modules/better-sqlite3/` ውስጥ ያወርዳል ወይም ያጠናቅራል። ከዚያም የOmniRoute `postinstall` ስክሪፕት (`scripts/build/postinstall.mjs`) ብቻውን የሚሠራው አገልጋይ ሊደርስባቸው እንዲችል እነዚህን ከአስተናጋጁ ጋር የሚዛመዱ ሁለትዮሽ ፋይሎች አረጋግጦ ወደ `dist/node_modules/` ይቀዳል። የ`omniroute` postinstall ስክሪፕት ከታገደ፣ ይህ የመቅዳት ደረጃ ይዘለላል።
+- **አማራጭ/ተዘዋዋሪ (`keytar`፣ `@parcel/watcher`፣ `@swc/core`፣ `protobufjs`፣ `esbuild`)፦** እነዚህ የግንባታ አጋዦች፣ የክትትል መሣሪያዎች ወይም የስርዓት ቁልፍ ማከማቻ መገልገያዎች ናቸው። እንዲሠሩ መፍቀድ የግንባታ ማስጠንቀቂያዎችን ይከላከላል፣ ነገር ግን ለዋናው የማዞሪያ ተግባር አያስፈልጉም።
+- **የተገለለ (`onnxruntime-node`)፦** ለአካባቢያዊ የAI ውክልናዎች የሚያገለግል አማራጭ ጥገኝነት ሲሆን OmniRoute እንዲሠራ **አያስፈልግም**። የእሱ postinstall ስክሪፕት ከNuGet በግምት 300MB የCUDA ሀብቶችን ያወርዳል፤ በሚደገፍ ሃርድዌር ላይ አካባቢያዊ የONNX ማፋጠንን ለመጠቀም በግልጽ ካላሰቡ በስተቀር በፍቃድ ዝርዝሩ ውስጥ አያካትቱት።
 
 ### የሚመከር መፍትሔ
 
-በዓለም አቀፍ ጭነት ወቅት አስፈላጊዎቹን install scripts ለመፍቀድ እና ማስጠንቀቂያዎችን ለማስቀረት፣ ለ OmniRoute እና ለ native dependenciesዎቹ `--allow-scripts`ን ያስተላልፉ፦
+በዓለም አቀፍ ጭነት ወቅት አስፈላጊዎቹን የመጫኛ ስክሪፕቶች ለመፍቀድ እና ማስጠንቀቂያዎቹን ለማጥፋት፣ ለOmniRoute እና ለቤተኛ ጥገኞቹ `--allow-scripts`ን ያስተላልፉ፦
 
 ```bash
 npm install -g omniroute --allow-scripts=omniroute,better-sqlite3,keytar,@parcel/watcher,@swc/core,protobufjs,esbuild
@@ -131,7 +137,7 @@ npm install -g omniroute
 
 ### ጭነትዎን ያረጋግጡ
 
-ከጭነት በኋላ native bindings እና runtime environment ጤናማ መሆናቸውን ለማረጋገጥ አብሮገነብ diagnostic toolን ያስኪዱ፦
+ከጭነቱ በኋላ፣ ቤተኛ ማያያዣዎች እና የአሂድ ጊዜ አካባቢው ጤናማ መሆናቸውን ለማረጋገጥ አብሮ የተካተተውን የምርመራ መሣሪያ ያስኪዱ፦
 
 ```bash
 omniroute doctor
@@ -806,6 +812,30 @@ omniroute serve --ready-timeout 180000
 
 ስለ `OMNIROUTE_READY_TIMEOUT_MS` ሙሉ ዝርዝሮችን ለማግኘት
 [`docs/reference/ENVIRONMENT.md`](../reference/ENVIRONMENT.md)ን ይመልከቱ።
+
+---
+
+## CCR / deup ጉዳዮች
+
+የምርመራ ማትሪክስ ለጨመቁ CCR (`ccr`) እና `session-dedup` መሳሪያዎች። ለሙሉ ኦፕሬተር ማመሳከሪያ (ማርከሮች፣ ቅድመ ሁኔታዎች፣ በእያንዳንዱ መሳሪያ ወሰን፣ የመልሶ ማግኛ ድህረ ገጽ) [የCompression Engines → ቅድመ ሁኔታዎች/ኦፕሬተር መመሪያን](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup) ይመልከቱ።
+
+| ምልክት                                                                               | መንስኤ ሊሆን ይችላል።                                                                                                                          | አረጋግጥ                                                                                                      | አስተካክል።                                                                                                                                                                                                            |
+| ---------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **MCP 403** — `403 LOCAL_ONLY`                                                     | የመንገድ ጠባቂ loopback auth፣ የትራንስፖርት ስህተት አይደለም። ምንም `Bearer`፣ ወይም `mcp:connect`/`manage`/`admin` የሌለው ቁልፍ፣ ወደ `/api/mcp/` መንገድ ላይ አልደረሰም። | ጥያቄው no/invalid `Authorization` ራስጌ ይዞ ነበር።                                                                | ትክክለኛ `Bearer` ቁልፍ ይላኩ። የርቀት ቁልፍ `mcp:connect` ይይዛል (የ `/api/mcp/` የአካባቢ-ብቻ ቀረጻን ይፈቅዳል) እና የሚፈልገውን የተወሰነ read/write ወሰን።                                                                                           |
+| **ብሎክ አልተገኘም።** — `omniroute_ccr_retrieve` ሃሽውን ውድቅ ያደርጋል                          | Hash ባለ 24-ሄክስ እሴት አይደለም ወይም በስህተት ተቀድቷል፣ ወይም እገዳው አስቀድሞ ጊዜው አልፎበታል/ተባርሯል።                                                              | ሃሽውን በ `[CCR retrieve hash=…]` ማርከር ውስጥ ካለው ባለ 24-ሄክስ እሴት ጋር ያወዳድሩ። ለሱቅ ሁኔታ `omniroute_ccr_stats` ን ያረጋግጡ። | ባለ 24-ሄክስ ሃሽን ከጠቋሚው በቃል ይቅዱ። እገዳው በትክክል ከጠፋ፣ TTL አልፏል ወይም ዘላቂው መደብር ላይ ፈጽሞ አልደረሰም (ከ512 KB በላይ ያግዳል፣ እና በደመና አሂድ ጊዜ ላይ ያሉ እገዳዎች፣ ማህደረ ትውስታ-ብቻ ይቆዩ እና ዳግም ማስጀመር አይድኑ)።                                              |
+| **CCR ምንም-op** — ብሎክ አልተጨመቀም (ጽሑፉ ሳይለወጥ ተመልሶ ይመጣል)                                 | ከመጨመቂያው ገደብ በታች አግድ፣ ወይም CCR ሞተር/ሞድ እንቅስቃሴ-አልባ ነው።                                                                                      | የነቃውን መጭመቂያ `strategy`/`enabled` እና የማገጃውን መጠን ከጣራው አንፃር ያረጋግጡ።                                            | CCR (ወይም እሱን የሚያሄደው የተቆለለ ሁነታ) ያንቁ እና እገዳው ለማከማቸት በቂ መጠን ያለው መሆኑን ያረጋግጡ። ኖ-op ስህተት አይደለም — "ምንም የሚጨምቀው ነገር የለም" ነው።                                                                                                |
+| **የተቀነሰ ምልክት ማድረጊያ** — `[dedup:ref sha=…]` በውጤቱ ውስጥ ይታያል                           | **ሆን ተብሎ ወደ ኋላ መመልከት** , ኪሳራ ወይም ስህተት አይደለም. `session-dedup` የተሸፈነ ጽሑፍ አስቀድሞ በተመሳሳዩ ክፍለ ጊዜ ተራ ውስጥ ተልኳል።                                 | በክፍለ-ጊዜው ውስጥ ቀደም ብሎ ተመሳሳይ ጽሑፍ መገኘቱን ያረጋግጡ።                                                                 | ምንም ነገር አታድርጉ — መሳሪያን አትጥራ እና እንደገና ለመገንባት አትሞክር. የመጀመሪያው ክስተት ቀኖናዊ ቅጂ ነው; የአሁኑ መታጠፊያ በፍፁም አይጻፍም, በኋላ ላይ ተቀናሽ ይደረጋል.                                                                                               |
+| **ኮድ ሁነታ** — `omniroute_ccr_*` መሳሪያዎች ከ `tools[]` የሉም / CCR መመሪያ አልተወጋም (OpenCode) | OpenCode Code Mode (ነባሪው) ለሞዴሉ ቤተኛ መሳሪያዎችን ብቻ ያስተዋውቃል፣ MCP መሳሪያዎችን ከ `tools[]` ይደብቃል።                                                   | ለ `codemode` የ OpenCode MCP አገልጋይ ግቤትን ያረጋግጡ።                                                              | በአገልጋዩ መግቢያ ላይ `codemode: false` አዘጋጅ (ሀ** ደንበኛ** መቼት) ስለዚህ የ MCP መሳሪያዎች ማስታወቂያ ይደረጋሉ። የ CCR ሰርስሮ-ፕሮቶኮል መመሪያው እንደጠፋ ይቆያል `omniroute` የሚባል አገልጋይ `omniroute_omniroute_ccr_retrieve` ያጋልጣል፣ እና `_` ተዛማጅ መለያየት አይደለም። |
+
+ተጨማሪ ምልክቶች፡-
+
+| ምልክት                                                                                     | መንስኤ ሊሆን ይችላል።                                                                                                                           | አስተካክል።                                                                                                                                             |
+| ---------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Insufficient MCP scopes for <tool>. Missing: <scope>.`                                  | የ MCP መሣሪያ ስህተት ውጤት (`isError: true`)፣ HTTP አይደለም 403. የደዋይ ቁልፍ የሚፈለገውን ወሰን ይጎድለዋል።                                                      | ከመሳሪያው ሠንጠረዥ ውስጥ ወሰን ይጨምሩ (የኦፕሬተር መመሪያውን ይመልከቱ)። ለምሳሌ `omniroute_ccr_retrieve` `read:compression` ያስፈልገዋል።                                          |
+| `Unknown Mcp-Session-Id`                                                                 | ሊለቀቅ የሚችል-ኤችቲቲፒ ክፍለ ጊዜ ስራ ፈትቶ ተሰብስቧል (`OMNIROUTE_MCP_SESSION_IDLE_MS`); አገልጋዩ HTTP 404 ይመልሳል።                                            | እንደገና ያገናኙት ወይም ክፍለ ጊዜውን እንደገና ያስጀምሩ — do** አይደለም** ቁልፉን አሽከርክር፣ ወሰን ቀይር ወይም መሳሪያን እንደገና መሰየም። 401/403. አይደለም                                       |
+| `JSON Parse error` / `Unterminated string` በመሳሪያ ውጤት ውስጥ                                 | MCP መሳሪያ ጽሑፍ በ `mcpAccessibility.maxTextChars` ዙሪያ የተቀነጨበ (ነባሪ `50000`) መካከለኛ-JSON።                                                      | በባዶ ሙላት ፋንታ ፔጅድ `mode` ተጠቀም `mode:"grep"`, `mode:"lines"`, `mode:"head"`, `mode:"tail"`, ወይም `mode:"stats"`. የጣት ህግ `chars > 40000` → `mode` ተጠቀም።  |
+| `Failed to open SSE stream`                                                              | መጓጓዣው `streamable` እያለ ደንበኛ `/api/mcp/sse` ነጠላቶን ውርስ መታ።                                                                                 | ከ `/api/mcp/sse` ይልቅ ደንበኛውን በ `/api/mcp/stream` (የሚለቀቅ የመጨረሻ ነጥብ) ያመልክቱ።                                                                            |
+| **የሞተ ስቴዲዮ የልብ ምት** — `mcp-heartbeat.json` `pidAlive: false` የሚያሳየው HTTP ትራንስፖርት እያለ ነው። | የልብ ምት ፋይል የ stdio የተረፈ ነው ( የቆየ PID, ወይም የተለየ ስሪት); HTTP መጓጓዣዎች በሂደት ላይ ናቸው እና በምትኩ ከ `getMcpHttpStatus()` ሁኔታን ሪፖርት ያደርጋሉ (ፋይል አይፃፍም)። | ምንም እርምጃ — መጓጓዣው ጤናማ ነው። እውነታው `httpTransport.online` / `startedAt` ከ `/api/mcp/status` እንጂ የልብ ምት ፋይል አይደለም። አገልጋዩን እንደገና አያስጀምሩት ወይም ቁልፍ አያሽከርክሩ። |
 
 ---
 

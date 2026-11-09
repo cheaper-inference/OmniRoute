@@ -1,4 +1,15 @@
 {
+  "accountPreferences": {
+    "title": "Konto eelistused",
+    "description": "Eelista selle kombinatsiooni jaoks mitut kontot või hoia neid varuks. Automaatne marsruutimine järjestab kontod igas tasemes. Loetlemata kontod on tavapärased. Endiselt kehtivad õigused, kvoodipiirangud ja olemasolevad vooruseosed.",
+    "preferred": "Eelistatud",
+    "normal": "Tavaline",
+    "reserve": "Varuks",
+    "excluded": "Välistatud",
+    "loading": "Kontode laadimine…",
+    "error": "Kontosid ei saanud laadida. Uuesti proovimiseks avage redaktor uuesti.",
+    "missing": "Konto pole saadaval ({id})"
+  },
   "codexKeyServiceMode": {
     "title": "Codexi teenuserežiim selle API-võtme jaoks",
     "description": "Kehtib Codexi päringutele, sealhulgas kombinatsioonides sisalduvatele Codexi mudelitele. Sundrežiimid alistavad kliendi, globaalsed sätted ja ühenduse vaikeseaded. Teiste teenusepakkujate sätted ei muutu.",
@@ -25,8 +36,10 @@
     "confirm": "Kas olete kindel?",
     "refresh": "Värskenda",
     "close": "Sulge",
+    "dialogTitleFallback": "Dialoog",
     "previousPage": "Eelmine leht",
     "nextPage": "Järgmine leht",
+    "pagination": "Lehekülgjaotus",
     "capsLockOn": "Suurtähelukk on sisse lülitatud",
     "dismissNotification": "Sulge teavitus",
     "toggleColumns": "Kuva või peida veerud",
@@ -182,6 +195,7 @@
     "combos": "Kombinatsioonid",
     "noModelsFound": "Mudeleid ei leitud",
     "clear": "Tühjenda",
+    "clearFilters": "Tühjenda filtrid",
     "done": "Valmis",
     "selectAll": "Vali kõik",
     "unselectAll": "Tühista kõik valikud",
@@ -781,6 +795,13 @@
     "batchDetailWindow": "Kontekstiaken",
     "batchDetailCreated": "Loodud",
     "providerTopologyEmpty": "Ühtegi teenusepakkujat pole veel ühendatud",
+    "topologyModels": "Mudelid",
+    "topologyModelsOn": "Sees",
+    "topologyModelsOnHint": "Näita aktiivsete või hiljutiste päringutega mudeleid",
+    "topologyModelsAuto": "Automaatne",
+    "topologyModelsAutoHint": "Näita ainult pooleli oleva päringuga mudeleid",
+    "topologyModelsOff": "Väljas",
+    "topologyModelsOffHint": "Peida mudelisõlmed",
     "badgeToastUnlocked": "Märk on avatud!",
     "batchListSearchPlaceholder": "Otsi ID, lõpp-punkti või mudeli järgi…",
     "batchListDeleteAllCompletedTitle": "Kustuta kõik lõpetatud pakktööd",
@@ -913,6 +934,8 @@
     "batchListTitle": "Paketid",
     "batchListCount": "{count} paketti",
     "batchListRemovingCompleted": "Eemaldamine…",
+    "batchListRemoveCompletedPartial": "Eemaldati suur hulk pakette. Ülejäänute kustutamiseks klõpsake uuesti.",
+    "batchListRemoveCompletedFailed": "Pakettide eemaldamisel ilmnes viga.",
     "batchListRemoveCompleted": "Eemalda lõpetatud",
     "batchListTableStatus": "Olek",
     "batchListTableId": "ID",
@@ -951,6 +974,12 @@
     "batchListRefreshing": "Värskendamine…",
     "batchListRefresh": "Värskenda",
     "uploadFileModalRemove": "Eemalda",
+    "fileInputChoose": "Vali fail",
+    "fileInputChooseMultiple": "Vali failid",
+    "fileInputEmpty": "Faili pole valitud",
+    "fileInputSelectedCount": "{count, plural, one {# fail valitud} other {# faili valitud}}",
+    "fileDropLabel": "Lohista fail siia või vali fail",
+    "fileDropLabelMultiple": "Lohista failid siia või vali failid",
     "uploadFileModalUploading": "Üleslaadimine…",
     "wizardInputReading": "Faili lugemine…",
     "wizardInputReady": "Valmis",
@@ -998,7 +1027,10 @@
     "batchFileUsedByCount": "Kasutusel {count, plural, one {# pakktöötluses} other {# pakktöötluses}}",
     "batchFilePreview": "Eelvaade",
     "batchFilePreviewTruncated": "Kuvatakse esimesed {shown} rida (kokku {total} rida)",
-    "batchFileDownloadFull": "Laadi alla kogu fail"
+    "batchFileDownloadFull": "Laadi alla kogu fail",
+    "tokensPageTitle": "Tokenid",
+    "tokensPageDescription": "Saada tokeneid API-võtmete vahel, jaga kutsekoode ja ühenda kogukonnaservereid.",
+    "tokensServerUrlLabel": "Serveri URL"
   },
   "disabled": "Keelatud",
   "featureFlagOmnirouteEmergencyFallbackDescription": "Suunake ammendunud eelarvega päringud tasuta hädaolukorra varupakkuja/-mudeli juurde.",
@@ -1017,6 +1049,14 @@
   "featureFlagBatchAndFileAutoCleanupEnabledDescription": "Luba automaatsel puhastusel kustutada lõplikus olekus (lõpetatud/ebaõnnestunud/tühistatud/aegunud) Batch API tööd, mis on vanemad kui OMNIROUTE_BATCH_RETENTION_DAYS, koos nende reapõhiste kontrollpunktidega, ning kustutada oma expires_at tähtaja ületanud üleslaaditud failide BLOB-sisu. Vaikimisi väljas: kõik olemasolevad paigaldused säilitavad neid andmeid täpselt nagu varem, kuni operaator selle funktsiooni sisse lülitab. Operaatori käivitatavat marsruuti DELETE /api/v1/batches/delete-completed see valik ei mõjuta — tegemist on eraldiseisva ja tingimusteta avaliku API lepinguga.",
   "featureFlagXaiOauthLiveModelDiscoveryDescription": "Hangi xai-oauth ühenduste reaalajas xAI mudelikataloog aadressilt https://api.x.ai/v1/models, kasutades OAuthi kandjaluba, mitte fikseeritud staatilist algandmestikku. Vaikimisi väljas: xai-oauth jätkab staatilise algandmestiku muutmata kujul pakkumist. Mis tahes lahendamistõrke korral kasutatakse mudelite avastamisel algandmestikku.",
   "featureFlagDbHealthcheckStartupDeferredEnabledDescription": "Käivita andmebaasi terviklikkuse ja seisundi kontroll pärast seda, kui server on hakanud päringuid vastu võtma, selle asemel et käivitamist kontrolli lõpulejõudmiseni blokeerida. Vaikimisi väljas: käivitamine blokeeritakse kontrolli ajaks täpselt nagu enne seda muudatust, nii et rikutud andmebaas tuvastatakse endiselt enne esimese päringu teenindamist.",
+  "featureFlagCatalogMirrorRefinementsEnabledDescription": "Täpsusta claude/ tuvastamist ja functional-gateway peegeldusi lõpp-punktil /v1/models. Vaikimisi väljas: mõlemad peegeldusetapid toimivad täpselt nagu varem. Sisselülitatuna hõlmavad claude/ tuvastuspeegeldused ka loetletud arutluspõhise pingutuse variante (-low/-medium/-high/-xhigh), jätavad vahele sisseehitatud auto/* ID-d, mida päringutee ei saa materialiseerida, ning juba loetletud aliase; functional-gateway peegeldused jätavad vahele kombinatsioonid ja OmniRoute’i sünteesitud ID-d (claude/, no-think/), võtavad omaniku väljast owned_by, ei kasuta omanikku kunagi tema enda lüüsina, jätavad vahele blockedProvidersis keelatud lüüsid ja mudelid, mis ei kuulu lüüsi autoriteetsesse aktiivsesse kataloogi.",
+  "featureFlagOpencodePublishedCatalogRoutingEnabledDescription": "Lase OpenCode Zeni ja OpenCode Go mudelitel, millel pole selgesõnaliselt määratud registri lõpp-punkti, võtta oma päringuliides (Responses @ai-sdk/openai jaoks, Messages @ai-sdk/anthropic jaoks) avaldatud models.opencode.ai kataloogist, mida loetakse taustal iga 6 tunni järel. Vaikimisi välja lülitatud: lõpp-punkt määratakse registri heuristika põhjal täpselt nagu varem ja kataloogi ei laadita kunagi alla.",
+  "featureFlagOpencodeV2ClientFingerprintEnabledDescription": "Saada OpenCode Zen/Go päringutes OpenCode v2 CLI-kliendi sõrmejälg: opencode/latest/<2.x>/cli User-Agent ja x-opencode-client cli ning tasuta paketi päringutes v2 seansipäised, v2 CLI read/shell-tööriistaskeemid ja mitte tool_choice \"none\". Vaikimisi välja lülitatud: iga OpenCode'i päringu praegune identiteet, päised ja keha jäävad muutmata.",
+  "featureFlagComboEmptyPoolNoEligibleTargetsEnabledDescription": "Kui automaatse kombinatsiooni kandidaatide kogum on juba enne tööriistakutse eelfiltri käivitamist tühi (kõik sihtmärgid jäetakse ooteaegade, lukustuste või ammendumise tõttu vahele), tagasta pärandkäitumise 400 „No target supports tool calling“ capability_mismatch asemel 503 no_eligible_targets. Vaikimisi välja lülitatud: tühja kogumi korral säilib pärandkäitumise 400.",
+  "featureFlagModelEndpointCapabilityGateEnabledDescription": "Jõusta usaldusväärsed mudeli lõpp-punktide sildid (teenusepakkuja kataloogis deklareeritud, erimudeli ID põhjal tuletatud või operaatori määratud): lükka HTTP 400 vastusega enne edastamist tagasi päring, mis saadeti lõpp-punktile, mida mudel ei teeninda, teedel /v1/chat/completions, /v1/embeddings, /v1/rerank, /v1/images/generations, /v1/videos/generations, /v1/music/generations ja /v1/audio/*; peida mudelid, mille sildistatud lõpp-punktidel puudub OmniRoute'i adapter, teelt /v1/models; ning vasta selliste mudelite juhtpaneeli mudelitestile koodiga 422. Vaikimisi väljas: lõpp-punktide sildid jäävad informatiivseks ja päringud edastatakse täpselt nagu varem.",
+  "featureFlagModelsDevEffortTiersEnabledDescription": "Kasuta models.dev-i avaldatud arutluspingutuse tasemeid, kui neid pole määratud ei operaatori alistusega ega teenusepakkujate registris, säilitades ainult teadaolevad pingutustasemed, ning käsitle tühja deklareeritud tasemete loendit kui „tasemed puuduvad“. Vaikimisi välja lülitatud: mudelikataloog ja tuvastatud pingutustasemed jäävad täpselt endiseks.",
+  "featureFlagAutoRequestResolvedCapabilitiesDescription": "Võimaldab auto/* päringutel koostada kandidaatide kogumi lahendatud mudelivõimekuste (nägemine, arutlemine, mõtlemine) ja täheldatud kvaliteediskooridega, mis loetakse ühe hulgilugemisega. Vaikimisi väljas: kandidaatide kaalud päringu ajal jäävad täpselt samaks nagu varem. Sees: need signaalid lähevad hetktõmmise kaaludesse, nii et kandidaatide kaalud ja valik võivad muutuda.",
+  "featureFlagCredentialHealthRetestAutoDisabledDescription": "Luba mandaatide seisundi kontrollil uuesti testida ühendusi, mille lüüs ise välja lülitas (iga ühendust kõige rohkem kord 6 tunni jooksul, 5 ühendust kontrolli kohta), ja lülitada ühendus uuesti sisse, kui kordustest õnnestub. Vaikimisi väljas: sellised ühendused jäävad väljalülitatuks, kuni operaator sekkub. Operaatori poolt keelatud ja jäädavalt blokeeritud ühendusi ei testita kunagi uuesti.",
   "sidebar": {
     "home": "Avaleht",
     "dashboard": "Juhtpaneel",
@@ -1076,17 +1116,8 @@
     "serverDisconnectedMsg": "Puhverserver on peatatud või taaskäivitub.",
     "expandSidebar": "Laienda külgriba",
     "collapseSidebar": "Ahenda külgriba",
-    "themes": "Teemad",
-    "presetColors": "Populaarsed värvid",
     "createTheme": "Loo teema",
     "chooseColor": "Vali üks värv",
-    "themeCoral": "Korallpunane",
-    "themeBlue": "Sinine",
-    "themeRed": "Punane",
-    "themeGreen": "Roheline",
-    "themeViolet": "Violetne",
-    "themeOrange": "Oranž",
-    "themeCyan": "Tsüaan",
     "cliToolsShort": "Tööriistad",
     "cache": "Vahemälu",
     "cacheShort": "Vahemälu",
@@ -1094,12 +1125,10 @@
     "themeSystem": "Teemasüsteem",
     "whitelabelingDesc": "Oma kaubamärgiga kohandamise kirjeldus",
     "switchThemes": "Vaheta teemasid",
-    "themeAccentDesc": "Teema aktsentvärvi kirjeldus",
     "uploadFavicon": "Laadi favicon üles",
     "themeDark": "Tume teema",
     "customLogoDesc": "Kohandatud logo kirjeldus",
     "sidebarVisibilityToggle": "Külgriba nähtavuse lüliti",
-    "themeAccent": "Teema aktsentvärv",
     "resetFavicon": "Lähtesta favicon",
     "whitelabeling": "Oma kaubamärgiga kohandamine",
     "darkMode": "Tume režiim",
@@ -1113,10 +1142,8 @@
     "customLogo": "Kohandatud logo",
     "appearance": "Välimus",
     "themeSelectionAria": "Teema valimise ARIA",
-    "themeCreate": "Loo teema",
     "customFaviconDesc": "Kohandatud saidiikooni kirjeldus",
     "logoPreview": "Logo eelvaade",
-    "themeCustom": "Kohandatud teema",
     "hideHealthLogsDesc": "Seisundilogide peitmise kirjeldus",
     "faviconPreview": "Saidiikooni eelvaade",
     "changelog": "Muudatuste logi",
@@ -1343,7 +1370,9 @@
       "open": "ava",
       "close": "sulge"
     },
-    "noResults": "Tulemusi pole"
+    "noResults": "Tulemusi pole",
+    "costsTeams": "Tiimid",
+    "costsTeamsSubtitle": "Tiimide kuluallikad"
   },
   "webhooks": {
     "title": "Veebihaagid",
@@ -1476,7 +1505,11 @@
       "chatIdPlaceholder": "-100123456789 või @channelname",
       "chatIdHint": "Vestluse/kanali kordumatu numbriline identifikaator või avalik kasutajanimi.",
       "tutorial": "Telegrami webhooki seadistamine:"
-    }
+    },
+    "copy": "Kopeeri",
+    "copied": "Kopeeritud!",
+    "expandDetails": "Kuva üksikasjad",
+    "collapseDetails": "Peida üksikasjad"
   },
   "compliance": {
     "auditTitle": "Audit",
@@ -1588,22 +1621,16 @@
     "mcpMetricCalls24h": "Kutsed (24 h)",
     "mcpMetricSuccessRate": "Õnnestumismäär",
     "mcpMetricAvgDuration": "Keskmine kestus",
-    "mcpMetricTopTool": "Enim kasutatud tööriist"
-  },
-  "themesPage": {
-    "title": "Teemad",
-    "description": "Valige valmisteema või looge ühe värvi põhjal enda oma",
-    "presetColors": "Populaarsed värvid",
-    "customTheme": "Kohandatud teema",
-    "customThemeDesc": "Klõpsake nuppu „Loo teema“ ja valige üks värv",
-    "createTheme": "Loo teema",
-    "activePreset": "Aktiivne teema"
+    "mcpMetricTopTool": "Enim kasutatud tööriist",
+    "dismissError": "Sulge veateade"
   },
   "header": {
     "logout": "Logi välja",
     "quickNavigation": "Kiirnavigeerimine",
     "quickNavigationTitle": "Kiirnavigeerimine (⌘K / Ctrl+K)",
     "openQuickNavigation": "Ava kiirnavigeerimine",
+    "openMenu": "Ava menüü",
+    "products": "Keaki tooted",
     "switchToLightMode": "Lülitu heledale režiimile",
     "switchToDarkMode": "Lülitu tumedale režiimile",
     "language": "Keel",
@@ -1631,8 +1658,6 @@
     "anthropicCompatible": "Anthropicuga ühilduv",
     "media": "Meedia",
     "mediaDescription": "Loo pilte, videoid ja muusikat",
-    "themes": "Kujundusteemad",
-    "themesDescription": "Vali kogu juhtpaneelile värviteema",
     "costsDescription": "Jälgi kulutusi, analüüsi trende ja halda oma AI-eelarvet kõigi teenusepakkujate lõikes",
     "cacheDescription": "Jälgi teenusepakkujate promptide vahemälu tõhusust ja kohalike semantiliste vastuste taaskasutust.",
     "limitsDescription": "Seadista päringusageduse piirangud ja kvoodid API-võtme ning teenusepakkuja kaupa",
@@ -1704,7 +1729,8 @@
     "settingsAdvancedDescription": "Täpsemad andmekoormuse reeglid, päringupiirangud ja puhverserveri API sätted",
     "mitmProxyDescription": "Seadista MITM-puhverserveri sätted liikluse kontrollimiseks ja silumiseks",
     "oneProxyDescription": "Seadista 1Proxy sätted täpsema puhverserveriahela jaoks",
-    "omniSkillsDescription": "Installi ja halda liivakastioskusi viipade ning tööriistade automaatseks käivitamiseks"
+    "omniSkillsDescription": "Installi ja halda liivakastioskusi viipade ning tööriistade automaatseks käivitamiseks",
+    "teamsDescription": "Tiimi kulude hinnangud ja jagatud pehmed eelarved"
   },
   "cloudSyncStatus": {
     "synced": "Sünkroonitud",
@@ -1924,7 +1950,23 @@
     "readinessStep3": "Kopeeri oma lõpp-punkt",
     "readinessStep4": "Saada testpäring",
     "readinessContinue": "Jätka seadistamist",
-    "readinessDismiss": "Jäta praegu vahele"
+    "readinessDismiss": "Jäta praegu vahele",
+    "unpricedUsageTitle": "{count, plural, one {# mudel} other {# mudelit}} millel on hiljutine kasutus, kuid hinnakirja pole seadistatud",
+    "unpricedUsageFailClosed": "{keys, plural, one {# API-võti, millel on kasutuslimiit} other {# API-võtit, millel on kasutuslimiit}} kasutasid neid mudeleid viimase 8 päeva jooksul. Kui see kasutus jääb võtme päevase või nädalase akna sisse, loetakse võti limiidi ületatuks ja selle päringud blokeeritakse (UNPRICED_USAGE_BUDGET_POLICY=fail_closed).",
+    "unpricedUsageCountAsZero": "See kasutus arvestatakse per‑võtme kasutuslimiitide puhul kui $0 (UNPRICED_USAGE_BUDGET_POLICY=count_as_zero).",
+    "unpricedUsageModelStats": "{requests, plural, one {# päring} other {# päringut}}, {keys, plural, one {# piiratud võti} other {# piiratud võtit}}",
+    "unpricedUsageMore": "…ja veel {count}",
+    "unpricedUsageConfigure": "Määra hinnad",
+    "unpricedUsageDismiss": "Sulge",
+    "systemMetricsTitle": "System metrics",
+    "systemMetricsActive": "Monitoring active",
+    "systemMetricsLoading": "Loading...",
+    "systemMetricsCpu": "CPU",
+    "systemMetricsMemory": "Memory",
+    "systemMetricsHost": "VPS / Host",
+    "systemMetricsCpuCount": "{count} vCPUs • {platform}",
+    "systemMetricsProcessCpu": "OmniRoute (process)",
+    "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
     "title": "Analüütika",
@@ -2470,6 +2512,9 @@
     "emptyFilterClear": "Tühjenda filtrid",
     "disableNonPublicModels": "Keela mitteavalikud mudelid",
     "disableNonPublicModelsDesc": "Lükka tagasi päringud mudelitele, mida pole tuvastatud või mis pole teenusepakkuja kataloogis avalikuks märgitud",
+    "forcedModel": "Sunnitud mudel",
+    "forcedModelDesc": "Suunab iga selle võtmega tehtud vestluspäringu sellele mudelile või kombole, olenemata sellest, millist mudelit klient küsib (või kui ta ühtegi ei saada). Võtme mudeli-, kombo- ja eelarvepiirangud kehtivad endiselt.",
+    "forcedModelPlaceholder": "Pole sunnitud: kasuta mudelit, mida klient küsib",
     "normalKeysSection": "Tavavõtmed",
     "quotaKeysSection": "Kvoodivõtmed",
     "bypassProviderQuota": "Eira teenusepakkuja kvoodi katkestuspiiranguid",
@@ -2483,7 +2528,12 @@
     "onlySelectedConnections": "Ainult valitud ühendused",
     "selectAtLeastOneConnection": "Vali vähemalt üks ühendus või suvand „Kõik ühendused“.",
     "allConnectionsDesc": "See võti võib kasutada mis tahes aktiivset ühendust.",
-    "restrictedToConnections": "Piiratud {count, plural, one {# ühendusega} other {# ühendusega}}."
+    "restrictedToConnections": "Piiratud {count, plural, one {# ühendusega} other {# ühendusega}}.",
+    "preferredConnections": "Eelistatud ühendused",
+    "preferredConnectionsDesc": "Võtmepõhine prioriteedijärjestus. Kui eelistatud ühendus pole saadaval, liigub suunamine järgmisele sobivale.",
+    "preferredConnectionsNone": "Eelistust pole määratud — kasutatakse vaikimisi suunamisstrateegiat.",
+    "preferredConnectionsClear": "Tühjenda",
+    "removeSelection": "Eemalda {name}"
   },
   "auditLog": {
     "title": "Auditilogi",
@@ -2595,7 +2645,9 @@
     "imageToTextBridgeCta": "Seadista pilt→tekst-sild Modality Bridge’i seadetes",
     "sttBridgeCta": "Seadista kõne→teksti sild Modality Bridge’i seadetes",
     "existingConnection": "Olemasolev ühendus",
-    "openrouterSttDescription": "OpenRouteri kõnest tekstiks mudelid kasutavad teie seadistatud OpenRouteri ühendust. Eraldi autentimisandmeid pole vaja."
+    "openrouterSttDescription": "OpenRouteri kõnest tekstiks mudelid kasutavad teie seadistatud OpenRouteri ühendust. Eraldi autentimisandmeid pole vaja.",
+    "modalityTabsAria": "Meediatüüp",
+    "serviceKindsAria": "Teenuse tüüp"
   },
   "search": {
     "searchQuery": "Otsingupäring",
@@ -2951,6 +3003,14 @@
     "openClawManualConfiguration": "Open Claw – käsitsi seadistamine",
     "clineManualConfiguration": "Cline'i käsitsi seadistamine",
     "kiloManualConfiguration": "Kilo Code'i käsitsi seadistamine",
+    "piManualConfiguration": "Pi – käsitsi seadistamine",
+    "piConfigInvalidTitle": "Pi models.json on loetamatu",
+    "piOmnirouteConfigured": "OmniRoute on konfigureeritud Pi kohandatud pakkujana",
+    "piModelHelp": "Pi ei tuvasta kohandatud lõpp-punktide mudeleid automaatselt. — teie valitud mudel kirjutatakse models.json -sse selgesõnaliselt.",
+    "piManualConfigTitle": "Või muutke ~/.pi/agent/models.json käsitsi",
+    "piManualConfigSample": "'{\n  \"providers\": {\n    \"omniroute\": {\n      \"baseUrl\": \"http://127.0.0.1:20128/v1\",\n      \"api\": \"openai-completions\",\n      \"apiKey\": \"sk_omniroute\",\n      \"models\": [\n        { \"id\": \"auto/best-coding\", \"name\": \"OmniRoute best-coding\" }\n      ]\n    }\n  }\n}'",
+    "piManualConfigHint": "Seejärel käivitage Pi ja valige omniroute'i pakkuja. Seadistage PI_CODING_AGENT_DIR kogu agendikataloogi teisaldamiseks.",
+    "piUnownedNote": "See kirje lisati väljaspool OmniRoute (nt pi-gui kohandatud lõpp-punktid). Taotlemine võtab selle vastu; Reset eemaldab ainult OmniRoute kirjutatud kirjed.",
     "whenToUseLabel": "Millal kasutada",
     "openToolDocs": "Ava tööriista dokumentatsioon",
     "toolUseCases": {
@@ -2970,6 +3030,7 @@
       "amp": "Kasuta, kui soovid Ampi lühikäskudel põhinevaid töövooge, kuid vajad siiski OmniRoute'i aliaste ja marsruutimisreeglite jõustamist.",
       "hermes": "Kasuta, kui vajad kiirete ülesannete jaoks kerget terminalipõhist AI-assistenti.",
       "hermes-agent": "Kasuta, kui vajad Hermes Agenti (looja: Nousresearch), mille vaike-, delegeerimis-, nägemis- ja abimudelid suunatakse OmniRoute'i kaudu.",
+      "whycodes": "Kasuta, kui soovid WhyCodesi üldotstarbelise autonoomse CLI-agendina (TUI, nimelised agendid, mälu, swarm), mis on suunatud OmniRoute'ile.",
       "custom": "Kasuta kohandatud tööriistalahenduste või üldiste OpenAI-ga ühilduvate konfiguratsioonide jaoks."
     },
     "toolDescriptions": {
@@ -2979,6 +3040,7 @@
       "grok-build": "xAI Grok Build TUI programmeerimisagent kohandatud teenusepakkuja toega",
       "droid": "Factory Droid AI-assistent",
       "openclaw": "Open Claw AI-assistent",
+      "openclaude": "OpenClaude programmeerimisagendi CLI OpenAI-ühilduva teenusepakkuja toega",
       "cline": "Cline AI programmeerimisassistendi CLI",
       "kilo": "Kilo Code AI-assistendi CLI",
       "qwen": "Alibaba Qwen Code CLI",
@@ -3009,7 +3071,9 @@
       "prime-agent": "Prime Agent — isetäiustuv RLM-i programmeerimisraamistik OpenAI-ga ühilduvate teenusepakkujate toega",
       "warp": "Warp AI-terminal kohandatud teenusepakkuja toega",
       "agent-deck": "Agent Deck mitme agendi orkestreerija",
-      "5dive": "5dive — isemajutatud programmeerimisagentide kogum; üks autentimisprofiil suunab nad kõik OmniRoute'i"
+      "5dive": "5dive — isemajutatud programmeerimisagentide kogum; üks autentimisprofiil suunab nad kõik OmniRoute'i",
+      "whycodes": "WhyCodes autonoomne CLI-agent OpenAI-ühilduva baas-URL-iga",
+      "zed": "Zedi koodiredaktor — sisseehitatud agent OpenAI-ga ühilduva teenusepakkuja kaudu"
     },
     "guides": {
       "cursor": {
@@ -3240,6 +3304,9 @@
     "copilotReloadInstruction": "Seejärel laadige VS Code uuesti ja määrake sisestusviibas API-võti.",
     "wireApiChatCompletions": "Vestluse lõpuleviimised (/chat/completions)",
     "wireApiResponses": "Vastuste API (/responses)",
+    "codexModelCatalog": "Näita OmniRoute'i mudeleid Codexi /model valijas",
+    "codexModelCatalogHint": "Kirjutab ~/.codex/omniroute-models.json paigaldatud Codexi enda mudelikataloogist (umbes 60 KB mudeli kohta). Rakenda uuesti pärast Codexi uuendamist.",
+    "codexCatalogWarning": "Codexi /model valijat ei uuendatud: OmniRoute ei saanud paigaldatud Codexi mudelikataloogi lugeda.",
     "cliproxyapiActionFailed": "Toiming nurjus",
     "cliproxyapiActionSucceeded": "Toiming õnnestus",
     "cliproxyapiCheckUpdates": "Kontrolli värskendusi",
@@ -3262,7 +3329,19 @@
     "cliproxyapiUnknown": "Tundmatu",
     "cliproxyapiUpdate": "Värskenda",
     "cliproxyapiUpdateAvailable": "Saadaval on värskendus: v{current} → v{latest}",
-    "cliproxyapiVersion": "Versioon"
+    "cliproxyapiVersion": "Versioon",
+    "piInstallTitle": "Installige Pi kodeerimisagent",
+    "piInstallInstructions": "Installige Pi CLI, seejärel naaske siia, et ühendada see OmniRoute.",
+    "piInstallCommand": "npm install -g --ignore-scripts @earendil-works/pi-coding-agent",
+    "piEndpoint": "OmniRoute URL",
+    "piEndpointHelp": "Kasutage URL mis on kättesaadavad masinast, kus töötab Pi. OpenAI-ga ühilduv /v1 lõpp-punkt lisatakse automaatselt.",
+    "piManualMergeHint": "Ainult eelvaade. Ühendage see providers.omniroute kirje models.json -ga, nii et teie teised pakkujad ja seaded jäävad puutumata.",
+    "removeMapping": "Eemalda vastendus",
+    "customUrl": "Kohandatud URL",
+    "customEndpointAria": "Kohandatud lõpppunkt",
+    "useDefaultKey": "Kasuta OmniRoute vaikimisi võtit",
+    "mainModelAria": "Peamine mudel",
+    "manualConfigTitle": "Grok Build käsitsi seadistamine"
   },
   "modelCatalog": {
     "title": "Mudelid ja kombod",
@@ -3326,6 +3405,18 @@
     "maxMembersPlaceholder": "nt 10",
     "testSelected": "Testi valitud ({count})",
     "testAllFiltered": "Testi kõiki filtreerituid ({count})",
+    "visibility": "Nähtavus",
+    "allVisibility": "Nähtavad ja peidetud",
+    "visibleOnly": "Nähtavad",
+    "hiddenOnly": "Peidetud",
+    "visibleColumn": "Nähtav",
+    "hideModel": "Peida {name} /v1/models loendist",
+    "showModel": "Näita {name} /v1/models loendis",
+    "hiddenBadge": "Peidetud",
+    "hideFiltered": "Peida filtreeritud ({count})",
+    "showFiltered": "Näita filtreeritud ({count})",
+    "visibilityCounts": "{visible} nähtavat · {hidden} peidetud · {total} kokku",
+    "visibilityUpdateFailed": "Mudeli nähtavuse uuendamine ebaõnnestus",
     "cancel": "Tühista",
     "clearResults": "Tühjenda tulemused",
     "testing": "Testimine...",
@@ -3381,12 +3472,53 @@
     "httpError": "Päring ebaõnnestus HTTP-staatusega {status}",
     "testFailedNoDetail": "Test ebaõnnestus ilma veateateta",
     "additionalCapabilities": "Täiendavad võimekused: {list}",
-    "comboRefMember": "Kombinatsioon → {name}"
+    "comboRefMember": "Kombinatsioon → {name}",
+    "keyAccessButton": "API-võtme juurdepääs",
+    "allowedInKeys": "Lubatud: {count, plural, one {# võtmes} other {# võtmes}}",
+    "keysLoading": "API-võtmete laadimine…",
+    "keysRetry": "Proovi võtmete laadimist uuesti",
+    "accessViaPattern": "{pattern} kaudu",
+    "accessBlocked": "Blokeeritud mustriga {pattern}",
+    "editKeyAccess": "Muuda võtme juurdepääsu",
+    "toggleKeyAccess": "Luba {item} võtmel {name}",
+    "resultNetworkError": "Määramine ebaõnnestus",
+    "resultWouldEmptyModels": "Jätaks selle võtme ilma lubatud mudeliteta — muuda selle asemel võtme juurdepääsu",
+    "resultWouldEmptyCombos": "Jätaks selle võtme ilma lubatud kombodeta — muuda selle asemel võtme juurdepääsu",
+    "keyUpdatePending": "{name} on veel uuendamisel. Proovi hetke pärast uuesti.",
+    "assignToKeys": "Määra API-võtmetele…",
+    "assignApply": "Rakenda muudatused",
+    "assignComplete": "API-võtme juurdepääs uuendatud",
+    "assignFailed": "Mõne API-võtme uuendamine ebaõnnestus",
+    "assignNoChanges": "Ühtegi API-võtme juurdepääsu ei muudetud",
+    "selectedAccessItems": "Valitud üksusi: {count}",
+    "assignExcludedCombos": "{count, plural, one {# valitud komborida pole mudel ja jäetakse siin vahele} other {# valitud komborida pole mudelid ja jäetakse siin vahele}}. Määra kombod vahekaardilt Combos.",
+    "assignActionAdd": "Lisa",
+    "assignActionRemove": "Eemalda",
+    "searchKeys": "Otsi API-võtmeid",
+    "selectApiKey": "Vali API-võti {name}",
+    "allModelsAccess": "Kõik mudelid",
+    "allCombosAccess": "Kõik kombinatsioonid",
+    "modelAccessCount": "Mudelid: {count}",
+    "comboAccessCount": "Kombinatsioonid: {count}",
+    "keyInactive": "Mitteaktiivne",
+    "keyBanned": "Blokeeritud",
+    "keyRevoked": "Tühistatud",
+    "switchRestrictedConfirm": "Lülita see võti piiratud juurdepääsule: lubatakse ainult valitud üksused",
+    "removeNoChangeHint": "See võti lubab kõike; valitud üksuste eemaldamine ei muuda midagi",
+    "removeStaysAllowedHint": "Sellel võtmel endiselt lubatud mustrite {patterns} kaudu",
+    "resultChanged": "Muudetud",
+    "resultUnchanged": "Muutusi pole",
+    "resultSkipped": "Vahele jäetud",
+    "resultNeedsSwitch": "Vajab piiratud juurdepääsule lülitamist"
   },
   "combos": {
     "title": "Kombinatsioonid",
     "description": "Loo kaalutud marsruutimise ja varuvalikute toega mudelikombinatsioone",
     "autoCatalogTitle": "Automaatse marsruutimise kataloog",
+    "autoTosLoadError": "Teenustingimuste reegleid ei saanud laadida. Enne nende muutmist proovige uuesti.",
+    "autoTosSaveError": "Teenustingimuste reegleid ei saanud salvestada. Kuvatakse endiselt eelmine säte. Proovige uuesti.",
+    "autoTosIncludeLabel": "Kaasa auto-valikusse pakkujad märkega ToS: avoid",
+    "autoTosDescription": "Vaikimisi välja lülitatud. Kehtib kõigile auto-kombinatsioonidele, mitte ainult ühele kontole. Pakkuja ühendamine seda valikut ei lülita sisse.",
     "autoCatalogTemplateCount": "{count} malli",
     "autoCatalogDescription": "Sisseehitatud auto/* kombinatsioonid, mis määratakse dünaamiliselt ühendatud teenusepakkujate põhjal. Kasuta mudeli väljal ükskõik millist neist ID-dest — seadistamine pole vajalik.",
     "autoCatalogExpand": "Laienda automaatse marsruutimise kataloogi",
@@ -3401,6 +3533,19 @@
     "autoComboTestTruncated": "Testitud {tested} {total} elavat kandidaati (kõrgeimad kaalud esimesena).",
     "controlCenter": "Kontrollikeskus",
     "createCombo": "Loo kombinatsioon",
+    "exportCombos": "Ekspordi",
+    "exportCombosFailed": "Kombinatsioonide eksportimine ebaõnnestus",
+    "importCombos": "Impordi",
+    "importCombosTitle": "Impordi kombinatsioonid",
+    "importCombosInvalidFile": "See fail ei ole kehtiv kombinatsioonide eksport.",
+    "importCombosSummary": "Kombinatsioone failis: {total} ({fresh} uut, {conflicting} juba olemasoleva nimega).",
+    "importCombosMergeHint": "Ühendamine säilitab kõik olemasolevad kombinatsioonid ja jätab vahele need, mille nimi on juba olemas. Ühendusi ja mandaate ei impordita kunagi.",
+    "importCombosReplaceHint": "Asenda kõik kustutab teie olemasolevad kombinatsioonid ({current}) ja impordib nende asemel faili. Seda ei saa tagasi võtta.",
+    "importCombosMerge": "Ühenda",
+    "importCombosReplace": "Asenda kõik",
+    "importCombosDone": "Imporditud kombinatsioone: {created}. Vahele jäetud: {skipped}.",
+    "importCombosFailed": "Kombinatsioonide importimine ebaõnnestus",
+    "importCombosWarnings": "Imporditud hoiatustega",
     "editCombo": "Muuda kombinatsiooni",
     "deleteCombo": "Kustuta kombinatsioon",
     "noModels": "Mudeleid pole",
@@ -3431,6 +3576,12 @@
     "errorUpdating": "Viga kombinatsiooni värskendamisel",
     "errorDeleting": "Kombinatsiooni kustutamisel tekkis viga",
     "testFailed": "Testpäring ebaõnnestus",
+    "removeErrorModels": "Kustuta {count} ebaõnnestunud mudel(it)",
+    "removingErrorModels": "Eemaldamine…",
+    "errorModelsRemoved": "Kombinatsioonist eemaldati {count} ebaõnnestunud mudel(it)",
+    "noErrorModelsFound": "Selle kombinatsiooni enda sammude seas ei leitud ebaõnnestunud mudeleid",
+    "cannotRemoveAllModels": "Kombinatsioonist ei saa kõiki mudeleid eemaldada",
+    "removeErrorModelsConfirm": "Kas eemaldada {count} ebaõnnestunud mudel(it) kombinatsioonist „{name}“? Ajalõppe ja kiiruspiiranguid ei arvestata.",
     "failedToggle": "Kombinatsiooni oleku muutmine ebaõnnestus",
     "testResults": "Testitulemused — {name}",
     "resolvedBy": "Lahendaja:",
@@ -3498,7 +3649,12 @@
     "moveUp": "Liiguta üles",
     "moveDown": "Liiguta alla",
     "removeModel": "Eemalda",
+    "testStep": "Testi seda mudelit",
+    "testStepRunning": "Testimine…",
+    "testStepNotTestable": "Testida saab ainult ühe mudeliga samme",
     "saving": "Salvestamine...",
+    "liveAccountLabel": "tegu: {id}",
+    "liveAccountTooltip": "Konto: {id}",
     "liveNoProviders": "Ühtegi teenusepakkujat pole veel tuvastatud.",
     "liveFleetDataHint": "Pargi andmed saabuvad reaalajas kombinatsioonisündmuste kaudu.",
     "liveActiveCount": "Aktiivsed ({count})",
@@ -3539,6 +3695,7 @@
     "playgroundNoCombosYet": "Ühtegi kombot pole veel seadistatud.",
     "playgroundCreateFirst": "Looge esmalt kombo",
     "weighted": "Kaalutud",
+    "weightPercent": "Kaal (%)",
     "leastUsed": "Vähim kasutatud",
     "costOpt": "Kuluoptimeeritud",
     "strategyGuideTitle": "Kuidas seda strateegiat kasutada",
@@ -3700,6 +3857,7 @@
     "builderGlobalAccountCount": "{count, plural, one {# konto} other {# kontot}}",
     "builderGlobalAdded": "Lisatud",
     "builderGlobalAdd": "Lisa",
+    "clearSearch": "Tühjenda otsing",
     "manualModel": "Käsitsi lisatav mudel",
     "manualModelInvalid": "Sisestage mudel kujul provider/model.",
     "manualModelUnknownProvider": "Tundmatu teenusepakkuja prefiks.",
@@ -3916,6 +4074,7 @@
     "builderComboRefStep": "Lisa kombo viide",
     "builderPinnedAccount": "Fikseeritud konto",
     "builderLegacyEntry": "Pärandkirje",
+    "builderStaleModel": "Pole reaalajas kataloogis",
     "reviewName": "Nimi",
     "reviewStrategy": "Strateegia",
     "reviewSteps": "Sammud",
@@ -3953,6 +4112,10 @@
     "responseValidationMinLength": "Sisu minimaalne pikkus (tähemärkides)",
     "responseValidationJsonPaths": "JSONPathi kontrollid",
     "responseValidationAddCheck": "+ Lisa kontroll",
+    "responseValidationRemoveCheck": "Eemalda kontroll",
+    "responseValidationPath": "JSON-i tee",
+    "responseValidationCondition": "Tingimus",
+    "responseValidationValue": "Eeldatav väärtus",
     "agentFeaturesSystemMessageOverride": "Alista süsteemisõnum",
     "agentFeaturesSystemMessagePlaceholder": "Oled asjatundlik assistent...",
     "agentFeaturesSystemMessageHint": "Agentide süsteemisõnumi alistus",
@@ -3994,7 +4157,8 @@
     "duplicateAutoComboSnapshotMsg": "See salvestab hetkel ühendatud ja sellele mallile vastavad teenusepakkujad/mudelid redigeeritavasse kombinatsiooni.",
     "duplicateAutoComboFailedPrefix": "Automaatse kombinatsiooni dubleerimine ebaõnnestus:",
     "duplicateAutoComboUnknownError": "Tundmatu viga",
-    "duplicateAutoComboTitle": "Loo automaatsest kombinatsioonist {name} staatiline kombinatsioon"
+    "duplicateAutoComboTitle": "Loo automaatsest kombinatsioonist {name} staatiline kombinatsioon",
+    "fallbackSummary": "{rate}% palvastest kasutas tagasilükkumist, keskmiselt hüljati igaühes ~{skips} sihtpunkti"
   },
   "costs": {
     "title": "Kulud",
@@ -4090,6 +4254,9 @@
     "showingTopCostRows": "Kuvatud sobivaid ridu: {shown}/{total} (50 esimest)."
   },
   "endpoint": {
+    "cloudUploadDestination": "Pilvesünkroonimise sihtkoht (mitte kohalike varukoopiate jaoks):",
+    "cloudUploadWarning": "Uutel paigaldustel on pilvesünkroonimine vaikimisi välja lülitatud. Selle sisselülitamine laadib teenusepakkujate API-võtmed, OAuthi juurdepääsu- ja värskendustõendid, OmniRoute API-võtmed ning seadistuse ülaltoodud sihtkohta nüüd ja tulevastel sünkroonimistel. See on eraldi jaotise Salvestusruum kohalikest varukoopiatest. Lülitage see sisse ainult siis, kui usaldate seda serverit.",
+    "cloudUploadConsent": "Mõistan seda ja luban oma autentimisandmed sellesse sihtkohta üles laadida.",
     "title": "API otspunkt",
     "subtitle": "Kasutage enamiku SDK-de ja tööriistadega OpenAI-ga ühilduvat otspunkti.",
     "testEndpoint": "Testi otspunkti →",
@@ -4769,7 +4936,15 @@
     },
     "totalEntries": "Kirjeid kokku",
     "type": "Tüüp",
-    "memoryEnabled": "Mälu lubatud"
+    "memoryEnabled": "Mälu lubatud",
+    "qdrantTutorialTitle": "Kiirõpetus: mälu Qdrantiga",
+    "qdrantTutorialIntro": "Qdrant salvestab vektorid ja metabandmed meeldetulemuste jaoks, et võimaldada asjakohase konteksti hankimist. See ei komprimeeri siltu otseselt; kokkuhoiud on kaudsed, kuna vältitakse päringuga seotud mitteasjakohase konteksti kasutamist.",
+    "qdrantTutorialStep1": "Kaitske serverit HTTPS-i ja API- Võtmega enne tootmisel kasutamist.",
+    "qdrantTutorialStep2": "Sisestage host, port, kollektsioon ja mudel formaadis pakkuja/mudel kasutades konfigureeritud krediiti.",
+    "qdrantTutorialStep3": "Kogumi dimensioon peab vastama mudeli genereeritavale dimensioonile. Olemasolev 2048-dimensiooniline kogum ei aktsepteeri 1536-dimensioonilisi sissevõtteid.",
+    "qdrantTutorialStep4": "Salvesta, testi ühendus ja käita otsitesti. Luba Qdrant alles seejärel.",
+    "qdrantTutorialCode": "PUT /collections/my_memory\n'{'\n  \"vectors\": '{' \"size\": '<model-dimension>', \"distance\": \"Cosine\" '}'\n'}'",
+    "qdrantTutorialCredits": "Krediidi: Rafa Martins — rafacpti@gmail.com"
   },
   "skills": {
     "title": "Oskused",
@@ -5168,6 +5343,10 @@
       "disableAutoScroll": "Keela automaatne kerimine",
       "enableAutoScroll": "Luba automaatne kerimine",
       "autoScroll": "Automaatne kerimine",
+      "pauseLogs": "Peatage värskendused",
+      "resumeLogs": "Jätkake värskendusi",
+      "paused": "Peatatud",
+      "scanLimited": "Skaneerimise limiit on täis",
       "entryCount": "{count, plural, one {# kirje} other {# kirjet}}",
       "lastHour": "Viimane 1 h",
       "updatedAt": "Värskendatud {time}",
@@ -5265,9 +5444,13 @@
         "skipped": "juba seadistatud",
         "failed": "nurjus"
       }
-    }
+    },
+    "stepProgress": "Seadistamise edenemine"
   },
   "providers": {
+    "tosAvoidNoticeTitle": "See pakkuja on vaikimisi auto-valikust välja jäetud",
+    "tosAvoidNoticeDescription": "Tema teenustingimuste olek on märgitud avoid. Konto ühendamine neid reegleid ei muuda. Enne kõigi auto-kombinatsioonide jaoks üldise nõusoleku andmist vaadake pakkuja tingimused üle.",
+    "tosAvoidNoticeAction": "Vaata auto reegleid",
     "codexReleaseCooldown": "Clear local cooldown",
     "codexReleaseCooldownHint": "Allow this Codex account to be tried again. Does not redeem a reset credit or change upstream limits.",
     "codexReleasingCooldown": "Clearing…",
@@ -5303,6 +5486,27 @@
     "importFromFileDownloadTemplate": "Laadi alla CSV-mall",
     "importFromFileMoreErrors": "+{count} veel",
     "importFromFileSchemaHint": "CSV veerud on positsioonipõhised: provider, name, apiKey, baseUrl (valikuline), priority (valikuline). Veerg provider peab sisaldama olemasoleva hallatava teenusepakkuja ID-d või juba registreeritud OpenAI/Anthropic-ühilduva sõlme ID-d — see import ei loo uusi otspunktisõlmi.",
+    "importOAuthExport": "Impordi OAuth-eksport",
+    "oauthExportTitle": "Impordi kontohalduri eksport",
+    "oauthExportDescription": "Laadi üles kontohaldurist pärit lihttekstina eksport (nt Antigravity Manageri cloud-accounts eksport). Tokenid värskendatakse serveris ja igast kontost saab OAuth-ühendus — duplikaadid värskendatakse kohapeal.",
+    "oauthExportProviderLabel": "Teenusepakkuja",
+    "oauthExportChoose": "Vali fail",
+    "oauthExportFileAria": "Kontoekspordi JSON-fail",
+    "oauthExportSchemaHint": "Aktsepteeritakse: dokument \"accounts\" massiiviga, lihtne massiiv või üksik kirje. Tokenid võivad olla pesastatud token-objektis või otse kirjel.",
+    "oauthExportDetected": "Tuvastatud kontosid: {count}",
+    "oauthExportSelectAll": "Vali kõik kontod",
+    "oauthExportSelectAccount": "Vali konto {index}",
+    "oauthExportColEmail": "E-post",
+    "oauthExportColProvider": "Teenusepakkuja",
+    "oauthExportColRefresh": "Värskendustoken",
+    "oauthExportNoEmail": "(e-post puudub)",
+    "oauthExportYes": "jah",
+    "oauthExportNo": "ei",
+    "oauthExportImporting": "Importimine…",
+    "oauthExportImport": "Impordi kontod ({count})",
+    "oauthExportResult": "Imporditud {imported}/{total} — {failed} ebaõnnestus",
+    "oauthExportParseError": "Sellest failist ei õnnestunud ühtegi kontot lugeda.",
+    "oauthExportUnknownError": "tundmatu viga",
     "adaptaTutorial": {
       "title": "Adapta Webiga ühenduse loomine",
       "introPrefix": "Adapta kasutab autentimiseks teenust Clerk. Tõend",
@@ -5359,6 +5563,12 @@
     "reorderByAvailabilityTitle": "Järjesta ühendused saadavuse järgi",
     "reorderByAvailabilityError": "Ühenduste järjestamine saadavuse järgi ebaõnnestus",
     "distributeProxies": "Jaota puhverserverid",
+    "clearAccountProxies": "Eemalda kontode puhverserverid",
+    "clearAccountProxyAssignments": "Eemalda määrangud",
+    "clearAccountProxiesConfirm": "Kas eemaldada selle teenusepakkuja kõigilt {count} kontolt individuaalsed puhverserveri määrangud, sealhulgas keelatud kontodelt? Salvestatud puhverserverid ning teenusepakkuja/globaalsed määrangud säilitatakse. Kontod pärivad taas teenusepakkuja/globaalsed puhverserveri sätted.",
+    "accountProxiesCleared": "Kontode puhverserveri määrangud on eemaldatud.",
+    "clearAccountProxiesPartial": "{count} konto(de) täielik lähtestamine nurjus. Kuvatud määranguid on värskendatud; võite uuesti proovida.",
+    "clearAccountProxiesError": "Kontode puhverserverite lähtestamine või nende oleku värskendamine nurjus. Laadige leht uuesti ja proovige veel kord.",
     "distributing": "Jaotamine...",
     "selectedCount": "{count, plural, one {# valitud} other {# valitud}}",
     "accountsCount": "{count, plural, one {# konto} other {# kontot}}",
@@ -5480,6 +5690,9 @@
     "baseUrlLabel": "Baas-URL",
     "apiTypeLabel": "API tüüp",
     "prefixHint": "Kohustuslik. Mudelinimede kordumatu eesliide.",
+    "providerIdSuffixLabel": "Pakkuja ID järelliide",
+    "providerIdSuffixHint": "Valikuline. Lisatakse pakkuja ID-le juhusliku asemel (ainult tähed, numbrid, -, _ ja .). Juhusliku ID jaoks jätke tühjaks. Hiljem muuta ei saa.",
+    "providerIdConflict": "Selle ID-ga pakkuja on juba olemas. Valige teine ID järelliide.",
     "nameHint": "Kohustuslik. Selle sõlme kasutajasõbralik nimetus.",
     "baseUrlHint": "Kohustuslik. Teenusepakkuja API baas-URL.",
     "iconUrlLabel": "Ikooni URL",
@@ -5520,6 +5733,7 @@
     "filterError": "Viga",
     "filterBanned": "Blokeeritud",
     "filterCreditsExhausted": "Krediit on otsas",
+    "filterVerificationRequired": "Vajab kinnitamist",
     "accountSearchPlaceholder": "Otsi kontosid…",
     "noFilteredConnections": "Ükski ühendus ei vasta praegusele filtrile.",
     "failedSetAlias": "Aliase määramine ebaõnnestus",
@@ -5544,6 +5758,7 @@
     "allModelsAlreadyImported": "Kõik mudelid on juba imporditud",
     "noNewModelsToImport": "Uusi imporditavaid mudeleid pole — kõik mudelid on juba registris või kohandatud mudelite loendis",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
+    "discoveryDegradedStatus": "Mudeli avastamine ebaõnnestus {time}",
     "skippingExistingModels": "Jäetakse vahele {count} olemasolevat mudelit",
     "autoSync": "Automaatne sünkroonimine",
     "autoSyncShort": "Sünkrooni",
@@ -5561,6 +5776,10 @@
     "autoSyncTooltip": "Värskenda mudelite loendit vaikimisi automaatselt iga 6 tunni järel (seadistatav muutuja MODEL_SYNC_INTERVAL_HOURS kaudu)",
     "autoSyncEnabled": "Automaatne sünkroonimine on lubatud — mudeleid värskendatakse perioodiliselt",
     "autoSyncDisabled": "Automaatne sünkroonimine on keelatud",
+    "autoSyncLastSynced": "Viimati sünkroonitud: {time}",
+    "autoSyncNeverSynced": "Pole kunagi sünkroonitud",
+    "autoSyncImmediateFailed": "Automaatne sünkroonimine on lubatud, kuid mudelite kohene värskendamine nurjus",
+    "autoSyncImmediatePartialFailure": "Automaatne sünkroonimine on lubatud, kuid mõne mudeli kohene värskendamine nurjus",
     "autoSyncToggleFailed": "Automaatse sünkroonimise lülitamine nurjus",
     "autoSyncPartialFailure": "Mõne ühenduse automaatset sünkroonimist värskendati, kuid mitte kõigi",
     "clearAllModels": "Kustuta kõik mudelid",
@@ -5698,12 +5917,32 @@
     "perKeyProxyEnabledTitle": "Selle teenusepakkuja jaoks on võtmepõhine puhverserveri määramine lubatud",
     "perKeyProxyDisabledTitle": "Selle teenusepakkuja jaoks on võtmepõhine puhverserveri määramine keelatud",
     "autoPriority": "Automaatne: {priority}",
+    "copyConnectionId": "Kopeeri ühenduse ID. Saada see päringu päises {header}, et siduda päring selle kontoga.",
+    "connectionIdCopied": "Kopeeritud",
+    "connectionPinTip": "Vihje: päringu sidumiseks ühe kontoga saada selle ühenduse ID päringu päises {header} (kopeerimiseks klõpsa ühenduse ID-sildil). Seotud kontot kasutatakse ainuisikuliselt; kui see on jahtumisperioodil või kvoot on otsas, lähevad päringud teistele kontodele.",
     "proxy": "Puhverserver",
     "retestAuthentication": "Kontrolli autentimist uuesti",
     "retest": "Testi uuesti",
+    "pingNow": {
+      "label": "Pingi kohe",
+      "title": "Saada kohe üks väike päring, et selle konto kvooti aken algaks. Kulutab kvooti; ei muuda Auto-Pingi.",
+      "completed": "Ping on lõpetatud.",
+      "busy": "Selle konto jaoks on ping juba käimas.",
+      "inactive": "Aktiveeri see konto enne pingimist.",
+      "unavailable": "Konto või teenusepakkuja pole praegu saadaval; päringut ei saadetud.",
+      "noModel": "Pingimiseks pole mudelit saadaval; päringut ei saadetud.",
+      "authFailed": "Autentimine nurjus. Ühenda see konto uuesti.",
+      "quotaUnavailable": "Kvoot pole saadaval; päringut ei saadetud.",
+      "quotaExhausted": "Kvoot on ammendatud; päringut ei saadetud.",
+      "notCompleted": "Teenusepakkuja ei lõpetanud pingi.",
+      "timeout": "Pingi ajalõpp; see võis siiski kohale jõuda. Kontrolli enne uuesti proovimist kvooti.",
+      "failed": "Ping nurjus."
+    },
     "disableConnection": "Keela ühendus",
     "enableConnection": "Luba ühendus",
     "reauthenticateConnection": "Autendi see ühendus uuesti",
+    "verifyAccount": "Kinnita konto",
+    "verifyAccountHint": "Google nõuab selle konto kinnitamist. Ava link, vii kontroll lõpule ja proovi uuesti.",
     "proxyConfig": "Puhverserveri seadistus",
     "aliasExistsAlert": "Alias „{alias}” on juba olemas. Kasuta teist mudelit või muuda olemasolevat aliast.",
     "aliasInputPlaceholder": "aliase nimi",
@@ -5738,6 +5977,7 @@
     "contextWindowOverridePlaceholder": "nt 131072",
     "contextWindowOverrideHint": "Määra käsitsi selle mudeli tegelik kontekstiaken (tokenites), kui teenusepakkuja esitab selle kohta valeinfo. See on automaatselt tuvastatud ja kataloogi väärtuste suhtes ülimuslik ning takistab kombineeritud marsruutimisel mudeli väljajätmist.",
     "contextWindowOverrideInvalid": "Kontekstiakna alistus peab olema positiivne täisarvuline tokenite arv",
+    "maxOutputTokenOverrideInvalid": "Väljundtokenite maksimaalse arvu alistus peab olema positiivne täisarvuline tokenite arv",
     "visionCapableLabel": "Pildivõimekusega",
     "visionCapableHint": "Märgi see mudel käsitsi pildivõimekusega mudeliks, kui teenusepakkuja tuvastusmetaandmed ei kajasta pildisisendi modaalsust (levinud isehostitud või kohalike taustsüsteemide puhul).",
     "compatParamFiltersLabel": "Parameetrifiltrid",
@@ -5779,6 +6019,25 @@
     "ccAliasAddModelButton": "Lisa alistus",
     "ccAliasLoadError": "Tuvastusaliase seadete laadimine nurjus: {error}",
     "ccAliasSaveError": "Tuvastusaliase seadistuse salvestamine nurjus: {error}",
+    "cliVersionSectionTitle": "Reklaamitud CLI kliendiversioon",
+    "cliVersionEffectiveLabel": "Hetkel reklaamitud",
+    "cliVersionSourceLabel": "Lahendatud: {source}",
+    "cliVersionPinnedLabel": "Jäädvustatud vaikeseade: {pinned}",
+    "cliVersionSourceSettings": "armatuurlaua alistamine",
+    "cliVersionSourceEnv": "keskkonna muutuja",
+    "cliVersionSourceDiscovered": "automaatselt avastatud uusim väljalase",
+    "cliVersionSourceDefault": "jäädvustatud vaikeseade",
+    "cliVersionInputLabel": "Alista versioon",
+    "cliVersionInputPlaceholder": "Alista versioon; tühi tühjendab",
+    "cliVersionSaveButton": "Salvesta",
+    "cliVersionResetButton": "Lähtestage vaikeseadetele",
+    "cliVersionLoadError": "CLI versiooni seadete laadimine ebaõnnestus: {error}",
+    "cliVersionSaveError": "CLI versiooni salvestamine ebaõnnestus: {error}",
+    "cliVersionLoadFailed": "Praeguse CLI versiooni seadeid ei saanud laadida.",
+    "cliVersionHintClaude": "Anthropic loob uuemad Claude'i mudelid Claude Code'i kliendiversioonil, mida ta näeb. See on versioon, OmniRoute reklaamib iga inimtekkeliste päringutega.",
+    "cliVersionCaveatClaude": "Arvelduse hoiatus: arveldusversioon on '<version>'.'<build-revision>' ja järgu versioon on eraldi jäädvustatud konstant. Reklaam 2.1.260 teatab 2.1.260.1e2, mida päris 2.1.260 binaar ei saada.",
+    "cliVersionHintCodex": "OpenAI loob Codex kliendiversiooni uuemad mudelid, mida ta näeb, näiteks tõrketeade: 'gpt-6-astra' mudel nõuab Codex uuemat versiooni.",
+    "cliVersionCaveatCodex": "Järeldus hoiatus: teie enda helistaja teatatud versioon ületab endiselt CODEX_CLIENT_VERSION env var, kuid see alistamine ületab mõlemat, kuna see on operaatori selge eesmärk.",
     "compatUpstreamHeadersLabel": "Teenusepakkujale saadetavad lisapäised",
     "compatUpstreamHeadersHint": "Kõrgete õigustega seade — usaldustase on sama mis teenusepakkuja API-pääsuandmete muutmisel; seda tohivad kasutada ainult usaldusväärsed administraatorid. Liidetakse pärast seda, kui OmniRoute lisab teenusepakkuja API-võtme põhjal autentimisteabe. Kui kohandatud päisel on sama nimi mis olemasoleval päisel (nt Authorization), asendab teie väärtus automaatselt loodud päise täielikult (sh Bearer-loa) — teenusepakkuja näeb ainult teie sisestatud väärtust, mitte seadetes olevat võtit. Vale konfiguratsioon võib põhjustada 401-vea või rikkuda teenusepakkuja autentimise. Üks rida iga päise kohta (nt täiendav Authentication mõne lüüsi jaoks). Eelvaate kuvamiseks liigutage kursor väärtuse kohale või viige sellele fookus. Salvestatakse fookuse kaotamisel, paneelist väljaspool klõpsamisel või selle paneeli sulgemisel.",
     "compatUpstreamHeaderName": "Päise nimi",
@@ -5790,6 +6049,7 @@
     "perModelQuotaDescription": "Kui see on lubatud, lukustavad vead 429/404 ainult konkreetse mudeli, mitte kogu ühendust. Kasutage seda mudelipõhiste kiiruspiirangutega pakkujate puhul (nt ModelScope).",
     "importFreeModelsOnlyLabel": "Impordi ainult tasuta mudelid",
     "importFreeModelsOnlyHint": "Kui see on lubatud, imporditakse ainult selle pakkuja tasuta mudelid. Tasulised mudelid jäetakse vahele.",
+    "importFreeModelsOnlyCompatibleHint": "Kui see on lubatud, imporditakse ainult mudelid, mille selle lõpp-punkti /models loend märgib tasuta mudeliks (:free id, tasuta lipp või nullhinnad). Tasulised mudelid ja hinnaandmeteta mudelid jäetakse vahele.",
     "perModelQuotaToggle": "Mudelipõhise kvoodi lüliti",
     "modelId": "Mudeli ID",
     "customModelPlaceholder": "nt gpt-4.5-turbo",
@@ -5848,6 +6108,53 @@
     "applyClaudeAuthLocal": "Rakenda autentimisandmed",
     "exportClaudeAuthFile": "Ekspordi autentimisandmed",
     "importClaudeAuth": "Impordi autentimisandmed",
+    "importAgyAuth": "Impordi autentimisandmed",
+    "agyImportTitle": "Ühendage Antigravity (Google Cloud Code)",
+    "agyImportTabLocal": "1 - Klõpsake Local CLI",
+    "agyImportTabSingle": "Faili / Kleebi märk",
+    "agyImportTabBulk": "Hulgiimport",
+    "agyImportLocalHeading": "Tuvastage aktiivne seanss automaatselt",
+    "agyImportLocalIntro": "Tuvastab aktiivse Google Cloud Code / Antigravity CLI sisselogimise aadressilt:",
+    "agyImportLocalSourceEnv": "AGY_TOKEN_FILE keskkonnamuutuja poolt nimetatud märgifail",
+    "agyImportLocalSourceKeyring": "Linux Secret Service / võtmehoidja (service=gemini, user=antigravity)",
+    "agyImportLocalSourceCli": "Kohalikud CLI märgiprofiilid (~/.gemini/antigravity-cli/)",
+    "agyImportLocalNote": "Pole vaja brauseri sisselogimist, hüpikakent ega käsitsi OAuth -koodi kopeerimist. Token jääb OmniRoute sse isegi siis, kui logite CLI välja.",
+    "agyImportLocalOverwrite": "Asenda/värskenda olemasolev ühendus, kui see on juba imporditud",
+    "agyImportLocalSubmit": "Import kohalikust Antigravity",
+    "agyImportLocalNotFound": "Kohalikku Antigravity CLI sisselogimist ei tuvastatud.",
+    "agyImportLocalCreated": "Antigravity konto on kohalikust seansist ühendatud.",
+    "agyImportLocalRefreshed": "Kohalik Antigravity ühendus värskendatud.",
+    "agyImportLocalFailed": "Kohaliku Antigravity seansi ühendamine ebaõnnestus",
+    "agyImportInvalidToken": "Kehtetu märgivorming (puudub access_token või refresh_token)",
+    "agyImportParseFileFailed": "Faili ei saanud sõeluda kui JSON",
+    "agyImportParsePasteFailed": "Kleebitud sisu ei saanud sõeluda kui JSON",
+    "agyImportDuplicate": "Konto on juba olemas. Selle ülekirjutamiseks märkige \"Asenda olemasolev\".",
+    "agyImportFailed": "Antigravity mandaatide importimine ebaõnnestus",
+    "agyImportSuccess": "Antigravity konto imporditud.",
+    "agyImportInvalidJson": "Kehtetu JSON",
+    "agyImportAccountN": "Konto #{index}",
+    "agyImportNoValidEntries": "Importimiseks pole kehtivaid kirjeid",
+    "agyImportBulkFailed": "Hulgiimport ebaõnnestus",
+    "agyImportBulkSuccess": "Imporditud Antigravity kontod: {count}",
+    "agyImportBulkRunFailed": "Hulgiimportimise käivitamine ebaõnnestus",
+    "agyImportUploadFile": "Laadi fail üles",
+    "agyImportPasteJson": "Kleepige JSON",
+    "agyImportFileHint": "Valige antigravity-oauth-token fail või eksporditud märgi JSON fail",
+    "agyImportValidToken": "Tuvastati kehtiv tunnus:",
+    "agyImportConnectionName": "Ühenduse nimi (valikuline)",
+    "agyImportConnectionNamePlaceholder": "nt töökonto",
+    "agyImportEmailLabel": "E-post (valikuline alistamine)",
+    "agyImportReplaceSingle": "Kui e-kiri on juba olemas, asendage olemasolev ühendus",
+    "agyImportSubmitSingle": "Impordi konto",
+    "agyImportUploadFiles": "Failide üleslaadimine",
+    "agyImportPasteJsonArray": "Kleebi JSON massiiv",
+    "agyImportBulkFileHint": "Valige üks või mitu JSON märgifaili",
+    "agyImportStaged": "Lavastatud failid: {count}",
+    "agyImportValid": "Kehtiv",
+    "agyImportResults": "Impordi tulemused:",
+    "agyImportResultsSummary": "Õnnestus: {success} · Ebaõnnestunud: {failed} · Kokku: {total}",
+    "agyImportReplaceBulk": "Asendage olemasolevad ühendused e-posti vastel",
+    "agyImportSubmitBulk": "Impordi kõik",
     "claudeApplyModalTitle": "Rakenda kohalikule Claude Code'ile",
     "claudeApplyTargetLabel": "Sihttee",
     "claudeApplyBackupLabel": "Varukoopiad",
@@ -5985,6 +6292,10 @@
     "hideEmails": "Peida kõik e-posti aadressid",
     "a": "A",
     "accountConcurrencyCapHint": "Maksimaalne samaaegsete päringute arv, mida see ühendus või konto suudab töödelda. Tellimuskontod lubavad tavaliselt vaid mõnda päringut (1–3) — piiri ületamine põhjustab 429-vigu ja ooteaegu. Vaikeväärtuse kasutamiseks jätke tühjaks.",
+    "aiCreditsLimit": "AI Credits limiit arveldusperioodi kohta",
+    "aiCreditsLimitPlaceholder": "Kohalik limiit puudub",
+    "aiCreditsLimitHint": "Jätab selle ühenduse vahele, kui GitHubi teatatud AI Credits jõuavad selle väärtuseni, ja marsruutimine liigub teie teistele ühendustele. Tühi lülitab selle välja; 0 jätab alati vahele. Puuduv või aegunud kasutuslugem ei blokeeri kunagi — see ei ole garanteeritud kululagi.",
+    "aiCreditsLimitInvalid": "AI Credits limiit peab olema mittenegatiivne arv või tühi, et see välja lülitada.",
     "accountConcurrencyCapLabel": "Konto samaaegsete päringute piirang",
     "accountIdHint": "Mõned teenusepakkujad (nt Cloudflare Workers AI) nõuavad seda lisaks API-tokenile.",
     "accountIdLabel": "Konto ID",
@@ -5996,10 +6307,10 @@
     "apiFormatLabel": "API-vormingu silt",
     "apiKeyOptionalHint": "Jätke tühjaks, kui teie kohalik seadistus või teenusepakkuja ei nõua autentimist.",
     "apiKeyOptionalLabel": "API-võti (valikuline)",
-    "apiRegionChina": "API piirkond: Hiina",
-    "apiRegionHint": "API piirkonna vihje",
-    "apiRegionInternational": "API piirkond: rahvusvaheline",
-    "apiRegionLabel": "API piirkonna silt",
+    "apiRegionChina": "Mandri-Hiina",
+    "apiRegionHint": "Valige lõpp-punkti piirkond, mida kasutatakse API juurdepääsuks ja kvoodi jälgimiseks.",
+    "apiRegionInternational": "Rahvusvaheline",
+    "apiRegionLabel": "API piirkond",
     "apikey": "API-võti",
     "audio": "Heli",
     "audioProvidersHeading": "Heliteenuste pakkujate pealkiri",
@@ -6020,8 +6331,28 @@
     "claudeLowPriorityModeDescription": "Kui see konto jõuab oma 5-tunnise kasutuslimiidini ja Anthropic pakub madalama prioriteediga riba, aktsepteerib OmniRoute seda ja saadab jätkuvalt päringuid päisega anthropic-usage-limit: slow kuni aken lähtestub, selle asemel et ühendust jahutada. Nädalane limiit kehtib endiselt ja vastused võivad oodata vaba mahtuvuse järele.",
     "claudeAutoLimitResetLabel": "Lähtesta sessioonilimiit automaatselt (üks kord nädalas)",
     "claudeAutoLimitResetDescription": "Kui see konto jõuab oma 5-tunnise kasutuslimiidini ja sessioonilimiidi lähtestamine on saadaval, kasutab OmniRoute selle automaatselt ära ning proovib täiskiirusel uuesti. Kasutab konto ühekordset nädalast lähtestamist ja see arvestatakse endiselt nädalasesse limiiti.",
+    "codexPaidCreditsShort": "Extra credits",
+    "codexPaidCreditsToggleTitle": "Allow paid Codex credits after subscription quota runs out (additional charges may apply)",
+    "codexPaidCreditsEnabled": "Codex paid credits enabled (additional charges may apply)",
+    "codexPaidCreditsDisabled": "Codex paid credits disabled",
+    "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
+    "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
+    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
+    "quotaRefreshCurrent": "Värskenda praegust kvooti",
+    "quotaRefreshCurrentHint": "Pärib selle konto praeguse kvoodi ilma lähtestuskrediiti kulutamata.",
+    "quotaRefreshing": "Kvoodi kontrollimine…",
+    "quotaRefreshFresh": "Kvoot on kontrollitud. Konto saadavuse määrab server.",
+    "quotaRefreshFailed": "Kvoodi kontrollimine ebaõnnestus. Varasemad andmed jäid muutmata.",
+    "quotaRefreshStale": "Server tagastas vanad kvoodiandmed. See ei ole uus vaatlus.",
+    "quotaRefreshPartial": "Saadaval on ainult osa kvoodiandmetest.",
+    "quotaWindowUnavailable": "Kvoot ajavahemikule {window} pole saadaval",
+    "quotaConnectionRefreshFailed": "Kvoodi kontrollimine lõppes, kuid kontode loendit ei saanud värskendada.",
     "disableCoolingDescription": "Jäta ajutine ooteaeg vahele, et see ühendus jääks kasutatavaks ka pärast taastatavaid vigu (lõppolekud, nagu blokeeritud või aegunud, kehtivad endiselt).",
     "disableCoolingLabel": "Keela selle ühenduse ooteaeg",
+    "keepMidConversationSystemDescription": "Jätke vestluse keskel saadetud süsteemisõnumid sõnumiloendisse selle asemel, et teisaldada need kõrgeima taseme süsteemiviipale, nii et viipade vahemälu liigub pidevalt üle pöörde. Luba ainult siis, kui see ülesvoolu aktsepteerib sõnumite sees rolli \"süsteem\" (muidu vastab 400).",
+    "keepMidConversationSystemLabel": "Hoidke vestluse keskel olevad süsteemisõnumid paigas",
+    "requireUserLastMessageDescription": "Ülesvoolude puhul, mis keelduvad assistendi eeltäitmisest: enne saatmist langetage abimehe pöörded (tööriista_kasutamata). Mudel võib taastada oma eelmise vastuse.",
+    "requireUserLastMessageLabel": "Nõua, et vestlus lõppeks kasutaja sõnumiga",
     "bulkPasteAdded": "{count, plural, one {Lisati 1 võti} other {Lisati # võtit}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {1 duplikaat jäeti vahele} other {# duplikaati jäeti vahele}}",
     "bulkPasteHint": "Kleepige igale reale üks API-võti. Tühje ridu eiratakse ja duplikaatvõtmed jäetakse vahele.",
@@ -6058,6 +6389,8 @@
     "newApiUserIdLabel": "New-API kasutaja ID",
     "newApiUserIdPlaceholder": "nt 12345",
     "newApiUserIdHint": "AgentRouteri New-Api-User päise väärtus, mida kasutatakse koos konsooli API-võtmega kvoodijäägi hankimiseks.",
+    "tokenrouterManagementKeyLabel": "Haldusvõti (valikuline)",
+    "tokenrouterManagementKeyHint": "Kontovõti TokenRouteri juhtpaneelilt (Settings → Management Key). Kasutatakse ainult kvoodi ja saldo lugemiseks, mitte kunagi päringuteks. Salvestatud võtit ei kuvata; selle säilitamiseks jätke väli tühjaks.",
     "newApiAggregatorToggleLabel": "Agregaatori lüüs",
     "newApiAggregatorToggleHint": "Luba New-API / One-API / Sub2API agregaatorisõlmede saldo tuvastamine. Juhtpaneel kuvab saldomärgi ja kvoodi eelkontrolliga marsruutimine jätab ammendunud kontod vahele.",
     "newApiAggregatorConsoleApiKeyHint": "Süsteemi juurdepääsutõend agregaatori /api/user/self lõpp-punkti jaoks. See ei ole marsruutimise API-võti.",
@@ -6071,6 +6404,8 @@
     "customUserAgentLabel": "Kohandatud User Agenti silt",
     "huggingfaceBillToHint": "Valikuline. Teie Hugging Face arvelduskonto identifikaator, mis saadetakse kulude omistamiseks päisena X-HF-Bill-To.",
     "huggingfaceBillToLabel": "Hugging Face Bill-To konto",
+    "commandCodeZdrLabel": "Nõua andmete nullsäilitamist (ZDR)",
+    "commandCodeZdrHint": "Saadab x-cmd-zdr: 1 iga selle API-võtmega tehtud päringuga. Mudelid ilma ZDR-toega upstreamita ei pruugi olla saadaval.",
     "databricksBaseUrlHint": "Databricksi baas-URL-i vihje",
     "defaultThinkingStrengthHint": "Kasutatakse siis, kui päringus pole arutluskäigu põhjalikkust määratud.",
     "defaultThinkingStrengthLabel": "Arutluskäigu vaikimisi põhjalikkus",
@@ -6117,6 +6452,9 @@
     "localProviders": "Kohalikud pakkujad",
     "maxConcurrentWholeNumberError": "Maksimaalse samaaegsuse täisarvuviga",
     "m365TierLabel": "Copiloti tasand",
+    "m365RefreshTokenLabel": "Värskenda tunnus (valikuline)",
+    "m365RefreshTokenHint": "Kasutatakse Microsoft 365 juurdepääsuloa automaatseks värskendamiseks.",
+    "m365RefreshTokenEditHint": "Olemasoleva märgi säilitamiseks jätke tühjaks. Selle asendamiseks kleepige uus märk.",
     "m365TierHint": "Valige, millist Microsoft 365 Copiloti liidest see ühendus kasutab. Individuaalne valik kasutab vaikimisi tarbijatele mõeldud BizChati; Hariduse ja Ettevõtte (töö) valikud kasutavad vastava rentniku liideseid.",
     "m365TierIndividualOption": "Individuaalne (vaikimisi)",
     "m365TierEduOption": "Haridus",
@@ -6181,6 +6519,16 @@
     "supportedEndpointEmbeddings": "Manustused",
     "supportedEndpointImages": "Pildid",
     "supportedEndpointsLabel": "Toetatud otspunktid",
+    "endpointCapabilitiesEdit": "Muuda mudeli lõpp-punkte",
+    "endpointCapabilitiesReset": "Lähtesta tuvastatud väärtustele",
+    "endpointCapabilitiesDefaulted": "Eeldatud",
+    "endpointCapabilitiesDeclared": "Deklareeritud",
+    "endpointCapabilitiesInferred": "Tuletatud",
+    "endpointCapabilitiesOperator": "Käsitsi määratud",
+    "endpointCapabilitiesSave": "Salvesta lõpp-punktid",
+    "endpointCapabilitiesSaveFailed": "Mudeli lõpp-punktide uuendamine ebaõnnestus",
+    "endpointCapabilitiesResetFailed": "Mudeli lõpp-punktide lähtestamine ebaõnnestus",
+    "endpointCapabilitiesNoAdapter": "Selle lõpp-punkti jaoks puudub teenusepakkuja adapter",
     "tagGroupHint": "Sildirühma vihje",
     "tagGroupLabel": "Sildirühma silt",
     "tagGroupPlaceholder": "Sildirühma kohatäide",
@@ -6463,6 +6811,7 @@
       "monsterapi": "Hangi API-võti aadressilt monsterapi.ai",
       "moonshot": "Ühenda Kimi API-võtmega.",
       "morph": "Tasuta pakett: 250K krediiti kuus, $0",
+      "apmix": "Ühenda Apmix API võtmega saidilt apmix.ai/dashboard — üks tellimus, palju mudeleid.",
       "nanogpt": "Ühenda NanoGPT API-võtmega.",
       "nebius": "Registreerumisel API testimiseks ~$1 proovikrediiti",
       "nlpcloud": "NLP Cloud kasutab OpenAI chat/completionsi asemel omanduslikku vestlusroboti API-t. OmniRoute kohandab OpenAI sõnumid sisendiks, kontekstiks ja ajalooks ning pakub toetatud vestlusrobotimudelite kohalikku kataloogi.",
@@ -6551,7 +6900,7 @@
       "claude": "Ühenda Claude Code olemasoleva OAuthi voo kaudu.",
       "cline": "Ühenda Cline olemasoleva OAuthi voo kaudu.",
       "cursor": "Ühenda Cursor IDE olemasoleva OAuthi voo kaudu.",
-      "cursor-api": "Ühenda Cursor kasutaja API-võtmega (crsr_...) aadressilt cursor.com/dashboard/api; IDE-seanssi pole vaja.",
+      "cursor-api": "Ühendage Cursor kasutaja API-võtmega (crsr_... või grok_...) lehelt cursor.com/dashboard/api; IDE-seanssi pole vaja.",
       "github": "Ühenda GitHub Copilot olemasoleva OAuthi voo kaudu.",
       "gitlab-duo": "OAuthi rakendus ulatustega ai_features + read_user. Seadista selles OmniRoute'i eksemplaris GITLAB_DUO_OAUTH_CLIENT_ID ja soovi korral GITLAB_DUO_OAUTH_CLIENT_SECRET.",
       "kilocode": "Ühenda Kilo Code olemasoleva OAuthi voo kaudu.",
@@ -6559,8 +6908,7 @@
       "kiro": "Tasuta pakett: 50 krediiti kuus (~25K–100K tokenit). ⚠️ Kiro kasutustingimused keelavad kolmanda osapoole puhverserveri või rakenduskesta kasutamise.",
       "codex": "Ühenda OpenAI Codex olemasoleva OAuth-vooga.",
       "qwen": "Ühenda Qwen Code olemasoleva OAuth-vooga.",
-      "github-models": "Loo aadressil github.com/settings/tokens GitHub PAT õigusega „models: read”",
-      "apmix": "Ühenda Apmix API võtmega saidilt apmix.ai/dashboard — üks tellimus, palju mudeleid."
+      "github-models": "Loo aadressil github.com/settings/tokens GitHub PAT õigusega „models: read”"
     },
     "passthroughModelsDescription": "{provider} aktsepteerib teenusepakkuja omavormingus mudeli-ID-sid. Impordi need lehelt /models või lisa marsruutimiseks kohandatud ID-d.",
     "bedrockModelsDescription": "Amazon Bedrocki mudelid on seotud AWS-i piirkonnaga. Impordi need lehelt /models või lisa valitud piirkonnas lubatud Bedrocki mudelite ID-d.",
@@ -6653,6 +7001,11 @@
     "anonymousFallbackEnabled": "Teenusepakkuja {provider} anonüümne varurežiim on lubatud",
     "anonymousFallbackDisabled": "Teenusepakkuja {provider} anonüümne varurežiim on keelatud — ammendunud ühenduste korral jäetakse see teenusepakkuja vahele",
     "anonymousFallbackUpdateFailed": "Anonüümse varurežiimi seadistuse värskendamine nurjus",
+    "retryDelayTitle": "Kordusviivitus",
+    "retryDelayDesc": "Kui kaua ühendus pärast kiiruspiirangu viga puhkab, kui teenusepakkuja ei ütle, millal uuesti proovida. Automaatne režiim kasutab sisseehitatud ooteaega; teenusepakkuja saadetud lähtestamisaeg on alati ülimuslik.",
+    "retryDelayAuto": "Automaatne",
+    "retryDelaySaved": "Kordusviivitus salvestatud",
+    "retryDelayUpdateFailed": "Kordusviivituse värskendamine ebaõnnestus",
     "batchDeleteFailed": "Hulgikustutamine nurjus",
     "batchDeleteNetworkError": "Hulgikustutamisel tekkis võrguviga",
     "batchUpdateFailed": "Hulgvärskendamine nurjus",
@@ -6733,15 +7086,53 @@
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
     "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
-    "codexPaidCreditsShort": "Extra credits",
-    "codexPaidCreditsToggleTitle": "Allow paid Codex credits after subscription quota runs out (additional charges may apply)",
-    "codexPaidCreditsEnabled": "Codex paid credits enabled (additional charges may apply)",
-    "codexPaidCreditsDisabled": "Codex paid credits disabled",
-    "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
-    "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
-    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled."
+    "usedInComboTooltip": "Kasutusel {count} kombos: {combos}",
+    "openComboTooltip": "Ava Kombod — kasutab {combo}",
+    "claudeCodeRoutingTitle": "Ülesvoogu asuvate vahendite marsruutimine Claude Code liikluse jaoks",
+    "routingNative": "Natiivne",
+    "routingFallback": "Varulang",
+    "rerank": "Uuestindamine",
+    "video": "Video",
+    "markFreeTierTitle": "Märgi tasuta tasemeks (näidatakse isegi siis, kui maksmisemodellide peitmine on sisse lülitatud)",
+    "codexTunnelTitle": "Codex tööriista ühendus",
+    "codexTunnelDescription": "Sild jääksRange rangelt väljumisele. Kohalikud tööriistad käivitatakse endiselt ainult Codexi poolt, selle liivakasti ja heakspanga poliitika all.",
+    "tunnelIdLabel": "Sildi ID",
+    "tunnelRuntimeKeyLabel": "Sildi käibeaegne võti",
+    "tunnelRuntimeKeyPlaceholder": "Käibeaegne võti",
+    "tunnelRuntimeKeyHint": "Salvestatud krüpteeritult koos küpsisega ega kirjuta kunagi päevikutesse.",
+    "tunnelRuntimeKeyNewLabel": "Uus sildi käibeaegne võti",
+    "tunnelRuntimeKeyNewHint": "Sisesta ainult värskete küpsiste juures. Väärtus salvestatakse krüpteeritult.",
+    "chatgptConnectorLabel": "ChatGPT kohandatud ühendus",
+    "doctorChecking": "Kontrollitakse olekut…",
+    "doctorCheck": "Kontrolli arsti olekut",
+    "fallbackRetryBackendTitle": "Tagamiste katsetuste tagatagasi tugi"
   },
   "settings": {
+    "proxyTraffic": {
+      "persistenceIncomplete": "Osa liiklusest ei õnnestunud selles protsessis salvestada. Salvestatud kogusummad on puudulikud; kontrollige serveri diagnostikat.",
+      "title": "OmniRoute'i kasulike andmete liiklus",
+      "description": "Saatmiseks edastatud üleslaadimissisud ja OmniRoute'i loetud allalaadimisbaidid. See ei ole võrguliiklus ühendusel ega teenusepakkuja arveldus. Kogusumma sisaldab eraldi märgistatud otsest ja seostamata liiklust.",
+      "coverageNote": "Kumulatiivsed summad mõõtmise algusest. Teadmata suurusega üleslaadimised (vood, FormData, Request-sisud) ei kuulu baidisummadesse. Lugemata või lõpetamata allalaadimised on puudulikud; nurjunud saatmised ei tõenda üleslaadimise kohalejõudmist. Transpordikihi sisemisi ümbersuunamisi/korduskatseid ja mõõtmist vältivaid transporte eraldi ei mõõdeta.",
+      "refresh": "Värskenda",
+      "overall": "Kokku (kõik vaadeldud marsruudid)",
+      "proxied": "Puhverserverite vahesumma (ilma otsese/seostamata liikluseta)",
+      "direct": "Otse (puhverserverita)",
+      "unattributed": "Seostamata dispetšer",
+      "removed": "Eemaldatud puhverserver ({id})",
+      "legacy": "Pärand-/keskkonnapuhverserver ({id})",
+      "route": "Marsruut",
+      "upload": "Saatmiseks edastatud üleslaadimine",
+      "download": "Loetud allalaadimine",
+      "attempts": "Katsed",
+      "knownUpload": "Teadaoleva suurusega üleslaadimised / katsed",
+      "completed": "Lõpetatud allalaadimised / katsed",
+      "failed": "Nurjunud saatmised",
+      "cancelled": "Tühistatud allalaadimised",
+      "errored": "Allalaadimisvead",
+      "loading": "Kasulike andmete liikluse laadimine…",
+      "empty": "Kasulike andmete liiklust pole veel mõõdetud.",
+      "error": "Kasulike andmete liiklust ei õnnestunud laadida. Proovige värskendada."
+    },
     "title": "Seaded",
     "general": "Üldine",
     "security": "Turvalisus",
@@ -6823,6 +7214,7 @@
     "proxySubTabsAria": "Puhverserveri jaotised",
     "requestBodyLimitTitle": "Päringu keha mahupiirang",
     "requestBodyLimitDescription": "Maksimaalne API päringuandmete maht, mis võetakse vastu enne päringu keha sõelumist. Spetsiaalsetel üleslaadimismarsruutidel säilib vähemalt nende sisseehitatud 100 MB piirang.",
+    "requestBodyLimitChatHint": "Chat Completions ja Responses võtavad vastu kuni 50 MB, kuni salvestad siin piirangu. Salvestatud piirang kehtib ka neile, olenemata sellest, kas see on väiksem või suurem.",
     "requestBodyLimitInputLabel": "Päringu keha mahupiirang MB-des",
     "requestBodyLimitEmptyError": "Sisestage piirang MB-des",
     "requestBodyLimitWholeNumberError": "Kasutage täisarvu",
@@ -6973,6 +7365,8 @@
     "enableThinking": "Luba mõtlemine",
     "maxThinkingTokens": "Maksimaalne mõtlemistookenite arv",
     "enableProxy": "Luba puhverserver",
+    "defaultNewConnectionProxyEnabled": "Luba puhverserver uute ühenduste puhul vaikimisi",
+    "defaultNewConnectionProxyEnabledDesc": "Määrab uute teenusepakkuja kontode algse puhverserveri oleku, kui pole sõnaselgelt teisiti valitud. Olemasolevad ühendused ei muutu. Marsruutimine sõltub üldsätetest ja puhverserveri seadistusest. Iga kontot saab hiljem muuta.",
     "perKeyProxyEnabled": "Luba puhverserveri määramine võtme kaupa",
     "perKeyProxyEnabledDesc": "Kui see on lubatud, saab iga teenusepakkuja ühendus kasutada oma puhverserveri määrangut",
     "proxyUrl": "Puhverserveri URL",
@@ -7008,6 +7402,13 @@
     "themeLight": "Hele",
     "themeDark": "Tume",
     "themeSystem": "Süsteem",
+    "paletteTitle": "Värvipalett",
+    "paletteDesc": "Editions on vaikimisi välimus. Classic toob tagasi varasema laimirohelise aktsentvärvi.",
+    "paletteSelectionAria": "Värvipaleti valik",
+    "paletteEditions": "Editions",
+    "paletteEditionsDesc": "Soojad neutraaltoonid vasekarva aktsendiga",
+    "paletteClassic": "Classic",
+    "paletteClassicDesc": "Külmad neutraaltoonid laimirohelise aktsendiga",
     "endpointTunnelVisibility": "Lõpp-punkti tunneli nähtavus",
     "endpointTunnelVisibilityDesc": "Peida tunneli juhtelemendid lõpp-punkti lehelt tunneli olekut muutmata.",
     "showCloudflareTunnel": "Cloudflare'i kiirtunnel",
@@ -7035,16 +7436,6 @@
     "settingsSidebarDesc": "Valige, milliseid külgriba üksusi kuvada. Põhifunktsioonide valimisel jäävad täiustatud tööriistad otsinguga leitavaks.",
     "hideHealthLogs": "Peida tervisekontrolli logid",
     "hideHealthLogsDesc": "Kui see on sisse lülitatud, jäetakse [HealthCheck] sõnumid serverikonsoolis kuvamata",
-    "themeAccent": "Teema värv",
-    "themeAccentDesc": "Valige eelmääratud värv või looge ühe värviga oma teema",
-    "themeCreate": "Loo teema",
-    "themeCustom": "Kohandatud teema",
-    "themeBlue": "Sinine",
-    "themeRed": "Punane",
-    "themeGreen": "Roheline",
-    "themeViolet": "Violetne",
-    "themeOrange": "Oranž",
-    "themeCyan": "Tsüaan",
     "whitelabeling": "Bränding",
     "whitelabelingDesc": "Kohandage rakenduse nime ja logo",
     "appName": "Rakenduse nimi",
@@ -7089,6 +7480,8 @@
         "NEEDS_CORE_NOT_CONFIGURED": "Sellel tellimusel on sõlmi, mis vajavad kohalikku puhverserverituuma (SS/VMess/Trojan/VLESS); neid ei marsruudita enne, kui konfigureerite kohaliku tuuma SOCKS5 lõpp-punkti.",
         "NO_USABLE_NODES": "Tellimus ei tagastanud ühtegi kasutatavat sõlme (http/https/socks5 või kohaliku tuuma lõpp-punktiga sõlmed).",
         "SELECTOR_SWITCH_FAILED": "Puhversüdamiku juhtkõne ebaõnnestus; eelmine marsruut jääb aktiivseks. Kontrollige juht-URL-i ja saladust, seejärel värskendage.",
+        "SELECTOR_EARLY_NO_CONTROL": "Kontrolli-URL puudub",
+        "SELECTOR_EARLY_UNMAPPED": "Sobiv tellimus puudub",
         "CORE_CONFIG_NOT_GENERATED": "The local-core config was not generated; the adopted file is unchanged. Check the path and refresh.",
         "CORE_CONFIG_NOT_APPLIED": "Genereeritud põhikonfiguratsioon ei suutnud vastuvõetud faili asendada; selle asemel jäeti kõrvalolev koopia alles.",
         "CORE_RELOAD_UNDECLARED": "No reload channel is declared for the replaced core config. Declare one: a control URL on a compatible core, the OMNIROUTE_PROXY_CORE_RELOAD_COMMAND variable as a JSON argument array, or the value external for an outside observer.",
@@ -7120,6 +7513,7 @@
       "createSubscription": "Loo tellimus",
       "loading": "Laadimine…",
       "noSubscriptions": "Tellimusi pole veel. Alustamiseks klõpsake nuppu „Lisa tellimus“.",
+      "earlySkipsSinceRestart": "Valija vahelejätmised alates viimasest taaskäivitusest",
       "statusOk": "OK",
       "statusError": "Viga",
       "statusEmpty": "Tühi",
@@ -7182,7 +7576,7 @@
       "nextSwitchNow": "Nüüd",
       "coreConfigPath": "Core config file",
       "coreConfigPathPlaceholder": "/var/lib/omniroute/sing-box/config.json",
-      "coreConfigPathDesc": "Absolute .json path (lowercase extension). Empty = no generation. Each sync writes '<path>'.generated beside the adopted file, never into it.",
+      "coreConfigPathDesc": "Absolute .json path for sing-box, or .yaml/.yml for Mihomo (lowercase extension). Empty = no generation. Each sync writes '<path>'.generated beside the adopted file, never into it.",
       "lastSwitchKind": "Switch reason",
       "switchKind": {
         "ip_quota_429": "quota",
@@ -7193,7 +7587,8 @@
       "coreReloadAppliedBy": "Applied by: {mode}",
       "coreBinaryPath": "Põhibinaari tee",
       "coreBinaryPathPlaceholder": "/usr/bin/sing-box",
-      "coreBinaryPathHelp": "Valikuline: kontrollib genereeritud faili põhibinaariga enne vastuvõetud faili asendamist. Jäta tühjaks, et kirjutada edasi selle kõrvale. Puuduv kataloog luuakse."
+      "coreBinaryPathHelp": "Valikuline: kontrollib genereeritud faili põhibinaariga enne vastuvõetud faili asendamist. Jäta tühjaks, et kirjutada edasi selle kõrvale. Puuduv kataloog luuakse.",
+      "urlFeedlessHint": "Jäta tühjaks ainult valiku tellimuse jaoks: määra allpool kontroll-URL-i, ühtegi RSS-voogu ei laadita, värskendata ega seota."
     },
     "bulkHealthcheck": "Hulgiviisiline seisundikontroll",
     "bulkHealthcheckDesc": "Testige kõiki seadistatud puhverservereid siht-URL-iga, et teha kindlaks, millised neist töötavad.",
@@ -7627,6 +8022,11 @@
     "pricingShowingProviders": "Kuvatakse {visible}/{total}",
     "pricingFilteredFrom": "(filtreeritud {count} hulgast)",
     "pricingShowMoreProviders": "Kuva veel {count} ({remaining} jäänud)",
+    "pricingView": "Vaade",
+    "pricingViewByProvider": "Pakkuja järgi",
+    "pricingViewCompare": "Võrdle mudeleid",
+    "pricingUnpriced": "Hinnastamata",
+    "pricingCompareEmpty": "Ühtegi mudelit ei paku rohkem kui üks neist teenusepakkujatest. Otsige mudelit, et näha üksikuid pakkumisi.",
     "modelOverridesTitle": "Mudeli alistused",
     "modelOverridesDesc": "Alista marsruutimisel ja päringute vormindamisel kasutatavad teenusepakkuja/mudeli võimalused. Sihtmärgid kasutavad sama teenusepakkuja/mudeli vormingut nagu kombinatsioonid.",
     "searchModelOverrideTargets": "Otsi teenusepakkujat/mudelit...",
@@ -7634,6 +8034,7 @@
     "configured": "seadistatud",
     "none": "Puudub",
     "modelOverrideValuePlaceholder": "Arvväärtus",
+    "modelOverrideKey": "Alistusvõti",
     "modelOverrideReasoningEffortsPlaceholder": "Komadega eraldatud ingliskeelsed väärtused, nt low, medium, high",
     "addKeyValue": "Lisa võtme-väärtuse paar",
     "noModelOverrides": "Selle mudeli jaoks pole alistusi seadistatud.",
@@ -7682,7 +8083,6 @@
     "customPricingNote": "Saate konkreetsete mudelite vaikehinnastuse asendada. Kohandatud hinnastust eelistatakse automaatselt tuvastatud hinnastusele.",
     "editPricing": "Muuda hinnastust",
     "viewFullDetails": "Kuva täielikud üksikasjad",
-    "themeCoral": "Korall",
     "adaptiveVolumeRouting": "Kohanduv mahupõhine marsruutimine",
     "adaptiveVolumeRoutingDesc": "Skaleerib ühendusi dünaamiliselt andmemahu ja läbilaskevõime koormuse põhjal.",
     "lkgpToggleTitle": "Viimane teadaolev toimiv teenusepakkuja (LKGP)",
@@ -7777,6 +8177,8 @@
     "compressionDesc": "Vähenda tokenite kasutust, tihendades viibad enne nende saatmist teenusepakkujatele",
     "autoCombosTitle": "Automaatsed kombinatsioonid",
     "autoCombosDesc": "Luba sellel võtmel kasutada sisseehitatud auto/* kombinatsioone, mis valivad mudeli automaatselt kõigi seadistatud teenusepakkujate seast",
+    "ccDiscoveryAliasesTitle": "Claude Code'i avastusaliased",
+    "ccDiscoveryAliasesDesc": "Avalda claude/... ühilduvuspeeglid mudelitele ja kombodele, millele see võti juba ligi pääseb",
     "compressionGuidanceFullGuideLink": "Põhjalik tihendamisjuhend",
     "compressionGuidanceShow": "Üksikasjad",
     "compressionGuidanceHide": "Peida üksikasjad",
@@ -8110,6 +8512,9 @@
     "storageIntegrityCheck": "Tervikluse kontroll",
     "storageIntegrityOk": "✓ OK",
     "storageIntegrityError": "✗ Viga",
+    "storageIntegrityLastCheck": "Viimati kontrollitud {date}",
+    "storageIntegrityRunCheck": "Käivita terviklikkuse kontroll",
+    "storageIntegrityCheckFailed": "Terviklikkuse kontroll ebaõnnestus",
     "storageUsageTokenBuffer": "Kasutuse tokenipuhver",
     "storageUsageTokenBufferDesc": "Teatatud kasutusele lisatavad täiendavad tokenid süsteemiviiba lisakulu arvestamiseks.",
     "storageUsageTokenBufferHint": "Pakkuja töötlemata tokeniarvude esitamiseks määrake väärtuseks 0. Vaikimisi: 2000.",
@@ -8147,6 +8552,7 @@
     "compressionAdaptivePolicyPercentage": "Protsent kontekstiaknast",
     "compressionAdaptivePolicyAbsolute": "Absoluutne tokenite eelarve",
     "compressionOutputStylesDescription": "Lisage vastuse vormimist suunavaid juhiseid ilma teenusepakkuja väljundit ümber kirjutamata. Kombineerige vabalt.",
+    "compressionOutputStylesPreviewNote": "Taotlus sisestab ainult ühe keele: tuvastatud keele, muul juhul esimese paketi. Ülaltoodud plokid on pakipõhised variandid, mitte kombineeritud süstimine.",
     "mcpAccessibilityDescription": "Piiritleb MCP-tööriistade väljundite ulatuse (eraldi hoidlas).",
     "compressionStylesTileSummary": "Säästetud {tokens, number} sõnet · {runs, plural, one {# stiliseeritud käituskord} other {# stiliseeritud käituskorda}}",
     "compressionStylesTileEmpty": "Stiliseeritud käitusi veel pole.",
@@ -8228,6 +8634,14 @@
       "terse-cjk": {
         "label": "Napp CJK (文言)",
         "description": "Ülinapp klassikalise hiina keele stiil (saadaval ainult hiina keele jaoks)."
+      },
+      "antislop-ui": {
+        "label": "Antislop UI-filter",
+        "description": "Eesmärgipõhiselt kontrollitud visuaalid: ei mingeid üldisi gradiente, mallipaigutusi ega surnud juhtelemente."
+      },
+      "antislop-copy": {
+        "label": "Antislop teksti- ja inimfilter",
+        "description": "Aus tekst ja reeglid inimeste jaoks: ilma tehisintellekti jälgedeta, WCAG AA kontrast, klaviatuur, olekud, mobiilne ümberpaigutus."
       }
     },
     "resilienceWaitForCooldown": "Oota jahtumisaja lõppu",
@@ -8312,6 +8726,38 @@
     "codexAutoPingWarning": "Iga ping kulutab väikese koguse tegelikku Codexi kvooti. Vaikimisi on see välja lülitatud — lubage ainult ühenduste jaoks, mida aktiivselt kasutate.",
     "codexAutoPingSaveError": "Codexi automaatse pingimise sätte uuendamine nurjus",
     "codexAutoPingToggleAria": "Lülita Codexi kvoodi automaatne pingimine ühenduse {connection} jaoks sisse või välja",
+    "codexWakeups": {
+      "title": "Ajastatud äratused",
+      "desc": "Saadab valitud kontodele ajakava järgi pingi, et nende kvoodiaken algaks siis, kui soovite. Iga käivitus kulutab veidi päris Codexi kvooti.",
+      "name": "Nimi",
+      "accounts": "Kontod",
+      "scheduleKind": "Ajakava",
+      "daily": "Iga päev kindlal kellaajal",
+      "interval": "Iga N minuti järel",
+      "time": "Kellaaeg",
+      "timezone": "Ajavöönd",
+      "days": "Päevad",
+      "minutes": "Intervall minutites (5–10080)",
+      "add": "Lisa äratus",
+      "runNow": "Käivita kohe",
+      "delete": "Kustuta",
+      "toggleAria": "Luba äratus {name}",
+      "everyMinutes": "Iga {minutes} min järel",
+      "dailyAt": "{days} kell {time} ({timezone})",
+      "nextRun": "Järgmine käivitus: {time}",
+      "lastRun": "Viimane käivitus: {status}",
+      "saveError": "Äratust ei õnnestunud salvestada. Kontrollige nime, kontosid ja ajakava.",
+      "actionError": "Toiming ebaõnnestus. Proovige hetke pärast uuesti.",
+      "runStarted": "Käivitus algas.",
+      "status": {
+        "running": "käimas",
+        "succeeded": "õnnestus",
+        "failed": "ebaõnnestus",
+        "skipped": "vahele jäetud",
+        "partial": "osaliselt õnnestunud",
+        "interrupted": "katkestatud"
+      }
+    },
     "codexFastTierTierLabel": "Teenusetase",
     "codexFastTierTierPriority": "Prioriteetne",
     "codexFastTierTierFlex": "Paindlik",
@@ -8683,6 +9129,9 @@
     "cliproxyapiPort": "Port",
     "qdrantHost": "Host",
     "qdrantCollection": "Kogumik",
+    "catalogVisibilityHint": "Peidetud mudelite ID-sid saab endiselt kutsuda samade juurdepääsuõigustega.",
+    "exposeCombosOnly": "Näita /v1/models loendis ainult kombinatsioone",
+    "exposeCombosOnlyDesc": "Kliendid, kes avastavad mudeleid automaatselt, näevad teie kombinatsioone (ja auto/*, kui need pole peidetud) toorete teenusepakkuja mudelite asemel. Selgesõnalised provider/model ID-d suunatakse endiselt edasi.",
     "catalogScopeTitle": "Models API loend",
     "catalogScopeDesc": "Mida GET /v1/models selle võtme kohta avaldab. Loendi kitsendamine ei muuda kunagi seda, milliseid mudeleid võti saab kutsuda.",
     "catalogScopeAll": "Mõlemad",
@@ -8789,7 +9238,82 @@
     "resilienceTokenRefreshScopeProvider": "Pakkuja (kõik kontod jagavad ühte piirajat)",
     "resilienceTokenRefreshScopeConnection": "Ühendus (igal kontol on oma katkesti)",
     "resilienceTokenRefreshThreshold": "Tõrgete arv enne peatamist",
-    "resilienceTokenRefreshCooldown": "Paus pärast käivitumist"
+    "resilienceTokenRefreshCooldown": "Paus pärast käivitumist",
+    "mfaTitle": "Kaheastmeline autentimine",
+    "mfaDesc": "Nõua lisaks paroolile autentimisrakenduse koodi, et logida armatuurlauale sisse või ühendada CLI.",
+    "mfaScanQr": "Skannige see QR-kood oma autentimisrakendusega (või sisestage seadistusvõti käsitsi) ja tippige seejärel kuvatav 6-kohaline kood.",
+    "mfaManualKey": "Seadistusvõti",
+    "mfaCodeLabel": "Kinnituskood",
+    "mfaBackupCodesTitle": "Salvestage oma taastekoodid",
+    "mfaBackupCodesDesc": "Iga kood logib teid ühe korra sisse, kui kaotate juurdepääsu autentimisrakendusele. Neid ei kuvata uuesti.",
+    "mfaBackupCodesRemaining": "Järelejäänud taastekoodid: {count}",
+    "mfaDisableDesc": "Kaheastmelise autentimise väljalülitamiseks sisestage oma parool ja kehtiv kood (või taastekood).",
+    "mfaRecoveryHint": "Kaotatud seadme taastamine: käivitage server sättega OMNIROUTE_DISABLE_MFA=true ja logige sisse otse hostist.",
+    "mfaRecoverySwitchActive": "OMNIROUTE_DISABLE_MFA on määratud: sellest hostist sisselogimised jätavad teise teguri vahele. Eemaldage see, kui olete taas sees.",
+    "piiMasking": {
+      "title": "Isikuandmete maskeerimine",
+      "description": "Valige, milliseid isikuandmeid maskeeritakse, ja lisage oma mustrid. Maskeerimine on välja lülitatud, kuni lülitate sisse allpool näidatud funktsioonilipud.",
+      "requestFlag": "Päringute maskeerimine",
+      "responseFlag": "Vastuste puhastamine",
+      "templates": "Mallid",
+      "template": {
+        "minimal": "Minimaalne",
+        "standard": "Tavaline",
+        "financial": "Finants",
+        "brazilian": "Brasiilia",
+        "usa": "USA",
+        "full": "Täielik",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (Lõuna-Aafrika)"
+      },
+      "builtinTypes": "Sisseehitatud tüübid",
+      "types": {
+        "email": "E-posti aadressid",
+        "phone_us": "USA telefoninumbrid",
+        "phone_br": "Brasiilia telefoninumbrid",
+        "ssn": "USA sotsiaalkindlustusnumbrid",
+        "credit_card": "Krediitkaardi numbrid",
+        "cpf": "CPF (Brasiilia maksukohustuslase number)",
+        "cnpj": "CNPJ (Brasiilia ettevõtte number)",
+        "ip_address": "IPv4-aadressid",
+        "ipv6_address": "IPv6-aadressid",
+        "aws_key": "AWS-i juurdepääsuvõtmed",
+        "api_key_generic": "API-võtmed ja tokenid",
+        "iban": "IBAN pangakonto numbrid",
+        "eu_vat": "EU VAT numbrid",
+        "es_dni_nie": "hispaania DNI / NIE",
+        "it_codice_fiscale": "Itaalia Codice Fiscale",
+        "pl_pesel": "Poola PESEL",
+        "nl_bsn": "Hollandi BSN",
+        "de_steuer_id": "Saksa Steuer-ID",
+        "se_personnummer": "Rootsi personalinumber",
+        "za_id": "Lõuna-Aafrika ID numbrid",
+        "za_phone": "Lõuna-Aafrika telefoninumbrid",
+        "za_vat": "Lõuna-Aafrika VAT numbrid",
+        "za_tax_ref": "Lõuna-Aafrika maksuviited"
+      },
+      "customPatterns": "Kohandatud mustrid",
+      "customPatternsDesc": "Vasted asendatakse tekstiga [CUSTOM_REDACTED]. Kuni {max} mustrit. Katastroofilise tagasiotsingu ohuga mustrid lükatakse tagasi.",
+      "typeRegex": "Regulaaravaldis",
+      "typeWildcard": "Metamärk (* ja ?)",
+      "pattern": "Muster",
+      "flags": "Lipud (i, m, s, u)",
+      "sampleText": "Näidistekst mustri testimiseks",
+      "test": "Testi",
+      "testMatches": "Vasteid: {count}",
+      "testFailed": "Muster lükati tagasi: {message}",
+      "add": "Lisa muster",
+      "saved": "Salvestatud",
+      "saveFailed": "Salvestamine ebaõnnestus: {message}",
+      "statsTitle": "Tuvastused alates taaskäivitusest",
+      "statsEmpty": "Tuvastusi veel pole.",
+      "statsRequest": "Päringud"
+    },
+    "modalityBridgeVideoDrilldownEnabled": "Säilita tuletatud videokaadrid",
+    "modalityBridgeVideoDrilldownEnabledDesc": "Luba ajutine JPEG-failide säilitamine ainult siis, kui autenditud päring määrab ka drilldown: true. Toorvideoid ei säilitata kunagi.",
+    "modalityBridgeVideoDrilldownRemoteEnabled": "Luba autenditud kaadrite üksikasjalik vaatamine",
+    "modalityBridgeVideoDrilldownRemoteEnabledDesc": "Luba API-võtmetel lugeda ja kustutada ainult neile kuuluvaid läbipaistmatuid pidemeid. Anonüümne ega võtmeülene juurdepääs pole lubatud.",
+    "modalityBridgeVideoDrilldownUsage": "Säilitatud JPEG-failid / baidid"
   },
   "contextRtk": {
     "title": "RTK Engine",
@@ -8873,7 +9397,8 @@
     "tomlTestPassed": "Läbitud",
     "tomlTestFailed": "Ebaõnnestunud",
     "tomlImportError": "RTK TOML-faili töötlemine nurjus.",
-    "tomlFileReadError": "Valitud TOML-faili lugemine nurjus."
+    "tomlFileReadError": "Valitud TOML-faili lugemine nurjus.",
+    "viewMode": "Kuvarežiim"
   },
   "compressionEngineConfig": {
     "loading": "Laadimine…",
@@ -9095,7 +9620,8 @@
     "languagePacksList": "Keelepaketid: {packs}",
     "dragToReorder": "Lohista etapi järjekorra muutmiseks",
     "engine": "Mootor",
-    "intensity": "Intensiivsus"
+    "intensity": "Intensiivsus",
+    "compressionOverride": "Pakkimise alistus"
   },
   "compressionStudio": {
     "noRun": "Tihenduskäitust pole saadaval.",
@@ -9155,7 +9681,8 @@
     "encoderWinner": "võitja: {winner}",
     "encoder": "kodeerija",
     "bytes": "baiti",
-    "tokensCl100k": "tokenit (cl100k)"
+    "tokensCl100k": "tokenit (cl100k)",
+    "studioViews": "Studio vaated"
   },
   "omniglyph": {
     "preview": "Eelvaade",
@@ -9361,7 +9888,9 @@
     "tooltipMinLength": "Sellest lühemaid sõnumeid ei tihendata. Väiksem = rohkem tihendamist.",
     "tooltipMinSavings": "Tihenda ainult siis, kui see säästab vähemalt nii palju tokeneid.",
     "ultraSettings": "Ultraseaded",
-    "ultraSettingsDesc": "SLM-il põhinev semantiline tihendamine"
+    "ultraSettingsDesc": "SLM-il põhinev semantiline tihendamine",
+    "defaultLanguage": "Vaikekeel",
+    "viewMode": "Kuvarežiim"
   },
   "translator": {
     "title": "Tõlkija",
@@ -9673,6 +10202,9 @@
     "streamTransformFailed": "Voo teisendamine nurjus"
   },
   "usage": {
+    "healthExtraUsageBypass": "Kvoot on ammendunud; lisakasutus on lubatud, seega teenus jätkub.",
+    "healthPaidCreditsBypass": "Kvoot on ammendunud; saadaolevad tasulised krediidid võimaldavad teenust jätkata.",
+    "healthFilteringBypass": "Kvoot on ammendunud; kohalik kvoodifiltreerimine on välja lülitatud, seega teenus jätkub.",
     "title": "Kasutus",
     "grokExtraUsageCredits": "Täiendavad kasutuskrediidid",
     "grokAutoTopUp": "Automaatne saldo täiendamine",
@@ -9836,6 +10368,8 @@
     "notAvailableSymbol": "-",
     "providerLimits": "Teenusepakkuja piirangud",
     "noProviders": "Ühtegi teenusepakkujat pole ühendatud",
+    "quotaAuthRequired": "Autentimine on nõutav – logige juhtpaneelile sisse",
+    "quotaAuthRequiredHint": "Teenusepakkujate ühendusi ei saanud laadida, kuna juhtpaneeli seanss puudub või on aegunud. Kvoodipiirangute nägemiseks logige sisse ja värskendage lehte.",
     "connectProvidersForQuota": "Looge OAuth-protokolli kaudu ühendus teenusepakkujatega, et jälgida oma API kvoodipiiranguid ja kasutust.",
     "accountsCount": "{count, plural, one {# konto} other {# kontot}}",
     "filteredFromCount": "(filtreeritud koguarvust {count})",
@@ -9847,6 +10381,9 @@
     "hideQuotaRow": "Peida see kvoodirida",
     "showQuotaRow": "Kuva see kvoodirida",
     "hiddenQuotaRowsLabel": "Peidetud:",
+    "quotaSpeedTitle": "Selle konto hiljutine dekodeerimiskiirus (viimased {count} edukat päringut)",
+    "quotaSpeedLine": "{model}: {avg} tok/s keskm. · viimane {last} · TTFT {ttft}s (n={samples})",
+    "quotaSpeedLineNoTtft": "{model}: {avg} tok/s keskm. · viimane {last} (n={samples})",
     "quotaVisibilityUpdateFailed": "Kvoodi nähtavuse värskendamine ebaõnnestus",
     "account": "Konto",
     "modelQuotas": "Mudelite kvoodid",
@@ -9882,9 +10419,6 @@
     "tierLite": "Lite",
     "tierUnknown": "Tundmatu",
     "statTotal": "Kokku",
-    "statCritical": "Kriitiline",
-    "statAlert": "Hoiatus",
-    "statHealthy": "Korras",
     "filterPurchaseTypeLabel": "Tüüp",
     "filterTierLabel": "Tase",
     "purchaseAll": "Kõik",
@@ -9892,6 +10426,7 @@
     "purchaseOauthFree": "Tasuta OAuth",
     "purchaseApiKey": "API-võti",
     "creditsLabel": "Krediidid",
+    "aiCreditsUsed": "Kasutatud {count} AI Credits",
     "creditBalanceHint": "Järelejäänud saldo",
     "unlimitedLabel": "Piiramatu",
     "refreshing": "Värskendatakse",
@@ -10123,10 +10658,64 @@
     "lastRefreshed": "Viimati värskendatud",
     "providerQuota": "Teenusepakkuja kvoot",
     "providerQuotaHomeHint": "Ühendatud kontode reaalajas olek",
+    "claudeResetCreditDefaultTitle": "Claude'i limiidi lähtestamine",
+    "confirmRedeemClaudeResetCredit": "Lunastamine lähtestab kohe kohaldatavad Claude'i kasutuslimiidid ja kulutab selle krediidi jäädavalt.",
+    "claudeResetCreditsModalTitle": "Claude'i lähtestuskrediidid",
+    "claudeResetCreditsModalExplainer": "Selle konto saadaolevad Claude'i lähtestuskrediidid ja iganädalased seansilähtestused.",
     "codexPaidCreditsLabel": "Paid Codex credits",
     "codexPaidCreditsAvailable": "Available (balance not reported)",
     "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
-    "codexPaidCreditsUnlimited": "Unlimited"
+    "codexPaidCreditsUnlimited": "Unlimited",
+    "healthAccountHint": "Põhineb viimastel vaatlustel, mitte reaalajas kontrollil. Üksikasjade jaoks valige konto.",
+    "healthRecovery": "Eeldatav taastumine",
+    "healthAvailable": "Saadaval",
+    "healthRestricted": "Osaliselt piiratud",
+    "healthUnavailable": "Pole saadaval",
+    "healthPeakHourProtection": "Tipptunni kaitse",
+    "healthCooldown": "Ooteaeg",
+    "healthQuotaExhausted": "Kvoot on ammendatud",
+    "healthOverview": "Ülevaade",
+    "layoutFull": "Täielik",
+    "layoutCompact": "Kompaktne",
+    "healthQuotaError": "Kvoodi lugemine nurjus",
+    "healthNoRuntime": "Tööolek pole saadaval",
+    "healthPreviousSnapshot": "Viimane värskendus nurjus; kuvatakse eelmine tulemus",
+    "healthPreviousFailure": "Viimane päring nurjus; ooteaeg lõppes",
+    "healthAwaitingSync": "Lähtestusaeg on möödunud; oodatakse sünkroonimist",
+    "healthVerdictUnavailable": "Saadavuse kontroll pole saadaval; kuvatakse ainult kvooditasemed",
+    "healthSummaryFailed": "Oleku kokkuvõtte lugemine nurjus; mudelilukud võivad puududa",
+    "healthRuntimeObserved": "Olek uuendatud {time}",
+    "healthQuotaObserved": "Kvoot vaadeldud {time}",
+    "healthOldestQuota": "Vanim kvooditõmmis: {time}",
+    "healthRecoveryUnknown": "Taastumisaeg teadmata",
+    "healthDetailsHint": "Üksikasjade ja toimingute vaatamiseks klõpsake",
+    "healthFiveHour": "5 tundi",
+    "healthOverall": "Üldine",
+    "healthAction": "Vajab sekkumist",
+    "healthTitle": "Kontode saadavus",
+    "healthDrag": "Lohista pakkujate järjestamiseks",
+    "healthDragPosition": "{provider}, {count, plural, one {asukoht {position, number} / #} other {asukoht {position, number} / #}}",
+    "healthResetOrder": "Taasta vaikejärjestus",
+    "healthPool": "{name} kogum",
+    "healthOtherPool": "Sama konto · {pool}: {status} ({remaining} alles)",
+    "healthIncluded": "{count, plural, one {Sisaldab # osaliselt piiratud kontot} other {Sisaldab # osaliselt piiratud kontot}}",
+    "healthBannerUnavailable": "{count, plural, one {# konto on ajutiselt kasutamatu} other {# kontot on ajutiselt kasutamatud}}",
+    "healthBannerAvailable": "{count, plural, one {# konto on kasutatav} other {Kõik # kontot on kasutatavad}}",
+    "healthLegendHide": "Peida legend",
+    "healthLegendShow": "Näita legendi",
+    "healthLegendOk": "Täisosa = allesjäänud kvoot; poolläbipaistev = kasutatud.",
+    "healthLegendCooldown": "Ajavahemiku {window} kvoot on otsas. Täisosa = oodatud aeg; poolläbipaistev = järelejäänud ooteaeg.",
+    "healthLegendAction": "Volitus aegunud või konto blokeeritud; ootamine ei aita.",
+    "healthLegendPartial": "Endiselt kasutatav. Kollane ülaosa = mudel või kogum on piiratud.",
+    "healthWaited": "Oodatud: {percent}",
+    "healthWait": "Veel {duration} (taastub {time})",
+    "healthFastest": "Varaseim taastumine {duration} pärast",
+    "healthRatio": "{available, plural, one {# / {active, number} kasutatav} other {# / {active, number} kasutatavad}}",
+    "healthCd5": "5 tundi · Ooteaeg",
+    "healthCdw": "Nädalane · Ooteaeg",
+    "healthRecentSuccessBypass": "Marsruutimine lubab seda kontot, sest päring õnnestus hiljuti.",
+    "healthPurchasedBalanceBypass": "Ostetud saldo võimaldab jätkata pärast kaasatud kvoodi ammendumist.",
+    "healthCutoffAtRequest": "Reaalajas kvoodilävendeid kontrollitakse päringu marsruutimisel."
   },
   "modals": {
     "waitingAuth": "Autoriseerimise ootel",
@@ -10351,7 +10940,11 @@
     "deleteAndRelaunch": "Kustutage",
     "settingsJson": "settings.json",
     "fromDataDir": "andmekataloogist",
-    "relaunchApp": "Käivitage OmniRoute’i töölauarakendus uuesti"
+    "relaunchApp": "Käivitage OmniRoute’i töölauarakendus uuesti",
+    "mfaPrompt": "Sisestage kood oma autentimisrakendusest",
+    "mfaCodeLabel": "Kinnituskood",
+    "mfaCodePlaceholder": "6-kohaline kood või taastekood",
+    "mfaBackupCodeHint": "Kaotasite seadme? Sisestage selle asemel üks oma taastekoodidest."
   },
   "landing": {
     "brandName": "OmniRoute",
@@ -10913,7 +11506,8 @@
       "message": "Sõnum",
       "error": "Viga",
       "completion": "Lõpetamine"
-    }
+    },
+    "statusFilter": "Olek"
   },
   "templateNames": {
     "simple-chat": "Lihtne vestlus",
@@ -11094,7 +11688,8 @@
     "minutesAgo": "{minutes} min tagasi",
     "hoursAgo": "{hours} t tagasi",
     "daysAgo": "{days} p tagasi",
-    "entries": "Kirjed"
+    "entries": "Kirjed",
+    "viewSwitcherAria": "Vahemälu vaade"
   },
   "proxyConfigModal": {
     "levelGlobal": "Globaalne",
@@ -11207,9 +11802,37 @@
     "gitlabDuoSetupMessage": "GitLab Duo OAuth pole seadistatud. Registreerige OAuthi rakendus aadressil {applicationsUrl}, kasutades ümbersuunamise URI-d {redirectUri} ja ulatusi „{scopes}”, seejärel määrake {clientIdEnv} (ja soovi korral {clientSecretEnv}) ning taaskäivitage.",
     "gitlabDuoSetupDescription": "Kui rakendus on registreeritud ja selle OmniRoute’i eksemplari keskkonnamuutujad määratud, klõpsake OAuthiga sisselogimise alustamiseks nuppu Jätka.",
     "continue": "Jätka",
+    "copilotPolicyTitle": "Eksperimentaalne pakkuja: poliitika olek on mitmetähenduslik",
+    "copilotPolicyLine1": "OmniRoute loob ühenduse saidi api.githubcopilot.com kaudu, mida GitHub ei ole avaldanud üldise kolmanda osapoole järeldusena API. See integreerimine on eksperimentaalne ja võib muutuda ilma ette teatamata.",
+    "copilotPolicyLine2": "Ühendada võib ainult teie enda GitHub konto. Ärge kunagi jagage mandaate, ühendage kontosid ega proovige ületada oma plaani limiite.",
+    "copilotPolicyLine3": "Tasuta ja üliõpilaspaketi kasutajad saavad ainult automaatset mudelivalikut. Teie Copilot plaani tingimused ja kasutuspiirangud jäävad teie vastutusele.",
+    "copilotPolicyAcknowledge": "Ma saan aru, ühendage",
     "tabPasteSetupToken": "Seadistusluba",
     "claudeSetupTokenDescription": "Käivitage terminalis `claude setup-token` ja kleepige selle väljastatud luba. See kehtib ühe aasta ja sellel puudub värskendusluba. OmniRoute saadab enne salvestamist Anthropicule ühe testpäringu.",
-    "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
+    "claudeSetupTokenPlaceholder": "sk-ant-oat01-...",
+    "tabPasteRefreshToken": "Värskenda märki",
+    "antigravityRefreshTokenDescription": "Kleepige oma Google OAuth värskendusmärk Antigravity jaoks. OmniRoute kinnitab ja vahetab selle enne salvestamist.",
+    "antigravityRefreshTokenPlaceholder": "1//...",
+    "m365Title": "Microsoft 365 Copiloti sisselogimine",
+    "m365UrlExpiredHint": "Alusta uut katset, kui see aegub enne, kui jõuad lõpetada.",
+    "m365UrlExpires": "See autoriseerimise URL aegub kell",
+    "m365AuthUrlCopyHint": "Vali kogu autoriseerimise URL ja kopeeri see klahvikombinatsiooniga Ctrl+C (Mac-arvutis Command+C) või kasuta brauseri kopeerimismenüüd. Kleebi see tühjale vahekaardile alles pärast Preserve log sisselülitamist.",
+    "m365AuthUrlLabel": "Autoriseerimise URL (kopeeri ettevalmistatud vahekaardile)",
+    "m365StepNavigate": "Kopeeri allolev autoriseerimise URL ja kleebi see ettevalmistatud vahekaardi aadressiribale, seejärel vajuta sisselogimiseks Enter.",
+    "m365StepPrepare": "Uue katse loomiseks valmista Microsofti sisselogimine ette.",
+    "m365StepOpen": "Ava alloleva lingi abil oma brauseris tühi vahekaart. Ära veel Microsofti lehele mine.",
+    "m365StepNetwork": "Ava sellel tühjal vahekaardil DevTools → Network ja lülita enne lehele minekut sisse Preserve log. Hoia DevTools avatuna.",
+    "m365StepCopy": "Pärast sisselogimist leia jaotisest Network päring aadressile https://login.microsoftonline.com/common/oauth2/nativeclient ja kopeeri selle täielik Request URL. Ära kopeeri aadressiribalt lõplikku wrongplace URL-i.",
+    "m365PrivateUrlHint": "Päringu URL sisaldab ühekordset mandaati. Kleebi see ainult siia; ära seda kunagi jaga ega logidesse lisa.",
+    "m365Prepare": "Valmista Microsofti sisselogimine ette",
+    "m365Preparing": "Sisselogimise ettevalmistamine…",
+    "m365OpenSignIn": "Ava tühi vahekaart",
+    "m365CallbackLabel": "nativeclient päringu täielik Request URL",
+    "m365Connecting": "Ühenduse loomine…",
+    "m365NewAttempt": "Alusta uut katset",
+    "m365PrepareError": "Microsofti sisselogimist ei saanud ette valmistada. Proovi uuesti.",
+    "m365ExchangeError": "Microsofti sisselogimist ei saanud lõpule viia. Alusta uut katset.",
+    "m365InvalidCallback": "Kleebi selle katse täielik nativeclient Request URL, mis sisaldab üht code-parameetrit ja sellele vastavat state-parameetrit. Ainult koode ja wrongplace URL-e ei aktsepteerita."
   },
   "cursorAuthModal": {
     "title": "Ühenda Cursor",
@@ -11282,6 +11905,7 @@
     "tableHealth": "Seisund (24 h)",
     "tableUsage": "Kasutus",
     "tableActions": "Toimingud",
+    "moreActions": "Rohkem toiminguid",
     "test": "Testi",
     "edit": "Muuda",
     "delete": "Kustuta",
@@ -11361,7 +11985,7 @@
     "bulkImportNoValidEntries": "Ühtegi sobivat kirjet ei leitud. Kontrolli vormingut ja proovi uuesti.",
     "bulkImportSuccess": "Importimine lõpetatud: {created} loodud, {updated} värskendatud, {failed} nurjus",
     "bulkImportErrorLine": "Rida {line}: {reason}",
-    "bulkImportMaxExceeded": "Ühe impordiga saab importida kuni 100 puhverserverit",
+    "bulkImportMaxExceeded": "Ühe impordiga saab importida kuni {max} puhverserverit",
     "bulkImportPreview": "Eelvaade",
     "clearAssignment": "(eemalda määrang)",
     "bulkProxyAssignment": "Puhverserverite hulgimääramine",
@@ -11422,6 +12046,7 @@
     "poolSetAsideKindIpQuota429": "IP päringupiirang (429)",
     "poolSetAsideKindSlow": "aeglased vastused",
     "poolSetAsideKindGeoBlocked": "regiooniblokeeritud (403/451)",
+    "poolSetAsideKindOperatorReported": "operaatori poolt teatatud häire",
     "poolSetAsideUntil": "Tagasi rotatsioonis {endsAt}",
     "poolSetAsideRepeat": "Kõrvale pandud {count, plural, one {# kord} other {# korda}}",
     "poolUnknownAddress": "Tundmatu aadress",
@@ -11531,7 +12156,6 @@
     "exportCodeTitle": "Ekspordi kood",
     "exportShort": "Ekspordi",
     "noStateToExport": "Eksportimiseks pole mänguvälja olekut saadaval.",
-    "closeExportModal": "Sulge eksportimise dialoog",
     "close": "Sulge",
     "exportRealKeyWarning": "Turvahoiatus: eksportimine blokeeriti — väljundis tuvastati tegelik API-võti. Lähtesta oma API-võti ja proovi uuesti.",
     "placeholderHintPrefix": "Asenda",
@@ -11644,7 +12268,8 @@
       "nextButton": "Edasi",
       "runButton": "Käivita",
       "promptPlaceholder": "Sisesta sõnum… (saatmiseks Enter, reavahetuseks Shift+Enter)"
-    }
+    },
+    "playgroundTabs": "Playground-režiimid"
   },
   "miniPlayground": {
     "endpoint": "Otspunkt",
@@ -11715,7 +12340,8 @@
     "assistant": "Assistent",
     "errorLabel": "Viga",
     "requestFailed": "Päring nurjus",
-    "stop": "Peata"
+    "stop": "Peata",
+    "messageInputAria": "Sõnum"
   },
   "requestLogger": {
     "recording": "Salvestamine",
@@ -11809,7 +12435,9 @@
       "failedTitle": "Kõik {count} katset ebaõnnestusid",
       "failed": "ebaõnnestunud",
       "pinnedTitle": "Mudel valiti kontekstivahemälu seansi kinnistamise abil",
-      "pinned": "seansile kinnistatud"
+      "pinned": "seansile kinnistatud",
+      "recoveredAttemptsTitle": "Päring taastus {count} katsega",
+      "latestOutcomeFailed": "Viimase päringu tulemus ebaõnnestus"
     },
     "attempts": "katsed",
     "detail": {
@@ -11902,8 +12530,29 @@
       "resilienceRotations": "{count} konto vahetust",
       "resilienceRetried": "Tühja käiku korrati",
       "resilienceContinued": "Jätkati voo keskelt",
-      "resilienceRecovered": "Taastatud vastupidavustoiminguga"
-    }
+      "resilienceRecovered": "Taastatud vastupidavustoiminguga",
+      "conversationContext": "Vestluse kontekst",
+      "goToBottom": "Mine lõppu",
+      "liveRefreshOn": "Reaalajas värskendamine: sees",
+      "liveRefreshOff": "Reaalajas värskendamine: väljas",
+      "liveRefresh": "Reaalajas värskendamine",
+      "continuesFromParent": "jätkub ülemüksusest",
+      "continuesFrom": "Jätkub üksusest {id}",
+      "viewConversation": "Kuva vestlus",
+      "openConversation": "Ava vestlus {id}",
+      "omittedHttpAttempts": "{count} HTTP saatmist ei säilitatud",
+      "noHttpResponse": "HTTP vastust ei täheldatud",
+      "transportError": "Transpordiviga"
+    },
+    "tableLabel": "Päringulogid",
+    "throughputPostFirstToken": "Pärast esimest tokenit",
+    "throughputEndToEnd": "Otsast lõpuni",
+    "throughputRate": "{value} tokenit/sek",
+    "throughputExplanation": "Mõlemad kiirused kasutavad suuremat väljundi- ja arutlustokenite arvu. Esimese tokeni järgne kiirus jätab kehtiva TTFT välja; vastasel juhul kasutab see kogu kestust. Otsast-lõpuni kiirus kasutab alati kogu kestust. Puhverdatud vastusel võib olla kõrge puhanguline tarnimiskiirus, ilma et mudeli genereerimine oleks kiirem.",
+    "omittedHttpAttempts": "{count} HTTP saatmist ei säilitatud",
+    "upstreamStatus": "Ülesvoolu server {status}",
+    "noHttpResponse": "HTTP vastust ei täheldatud",
+    "transportError": "Transpordiviga"
   },
   "proxyLogger": {
     "filterAll": "Kõik",
@@ -11948,7 +12597,9 @@
     "colServedBy": "Teenindab",
     "filterTraffic": "Liiklus",
     "filterTests": "Testid",
-    "filterSource": "Allikas"
+    "filterSource": "Allikas",
+    "tableLabel": "Puhverserveri logid",
+    "sortLogs": "Sordi logisid"
   },
   "endpointOptions": {
     "speech": "Kõne",
@@ -12033,7 +12684,8 @@
     "statusExhausted": "AMMENDATUD",
     "statusAlerting": "HOIATUS",
     "statusError": "VIGA",
-    "moreSuffix": "+{count} veel"
+    "moreSuffix": "+{count} veel",
+    "feedFilterLabel": "Filtreeri sündmusi"
   },
   "quotaShare": {
     "weightPercent": "Kaal %",
@@ -12200,7 +12852,10 @@
     "ungroupedTitle": "Rühmitamata",
     "ungroupedHint": "Need kogumid ei ole määratud ühelegi teadaolevale rühmale. Kogumi päris rühma teisaldamiseks muuda kogumit.",
     "removeFailed": "Seda kogumit ei õnnestunud eemaldada.",
-    "dismiss": "Sulge"
+    "dismiss": "Sulge",
+    "allocationsHeading": "Jaotused",
+    "wizardRemoveDimension": "Eemalda dimensioon",
+    "wizardRemoveKey": "Eemalda võti"
   },
   "plugins": {
     "title": "Pistikprogrammid",
@@ -12358,7 +13013,8 @@
       "settingsUpdateFailed": "Seadete uuendamine nurjus",
       "serviceRevealApiKey": "{actor} kuvas üksuse {target} API-võtme",
       "genericEvent": "{actor} {target}"
-    }
+    },
+    "dismissError": "Sulge veateade"
   },
   "agentBridge": {
     "title": "AgentBridge",
@@ -12491,7 +13147,21 @@
       "goNow": "Ava kohe",
       "message": "MITM Proxy asub nüüd jaotises AgentBridge.",
       "title": "See leht on teisaldatud"
-    }
+    },
+    "dnsOn": "DNS sees",
+    "dnsOff": "DNS väljas",
+    "showServerSettings": "Kuva serveri seaded",
+    "hideServerSettings": "Peida serveri seaded",
+    "upstreamCaTesting": "Testimine…",
+    "removeMapping": "Eemalda vastendus",
+    "mappingSourcePlaceholder": "nt gemini-3.6-flash-medium või * kõigi vastendamata mudelite jaoks",
+    "mappingWildcardHint": "Kasuta lähteväärtusena märki *, et suunata kõik ilma selgesõnalise vastenduseta mudelid teenuse OmniRoute kaudu valitud sihtkohta. Täpsed lähtevasted on märgi * suhtes alati ülimuslikud.",
+    "wizardDetectingModels": "Kinni püütud liiklusest mudelite tuvastamine...",
+    "wizardDetectedModels": "Kinni püütud liiklusest leiti {count, plural, one {# mudel} other {# mudelit}}. Vali mudelid, mille soovid lisada:",
+    "wizardSelectedModels": "Valitud on {count, plural, one {# mudel} other {# mudelit}}. Järgmisel kuval saad need vastendada OmniRoute'i mudelitega.",
+    "wizardAddModels": "Lisa {count, plural, one {# mudel} other {# mudelit}}",
+    "wizardNoModelsDetected": "Ühtegi mudelit pole veel tuvastatud. Tee agendiga {agent} päring ja käivita seejärel viisard uuesti, et mudelid liiklusest automaatselt tuvastada.",
+    "wizardNoModelsHint": "Või sulge see viisard ja lisa vastendused agendikaardil käsitsi."
   },
   "providerStats": {
     "unknownError": "Tundmatu viga",
@@ -12521,7 +13191,12 @@
     "avgTtft": "Keskmine TTFT",
     "avgTotal": "Keskmine koguaeg",
     "requestTelemetry": "Päringute telemeetria",
-    "requestTelemetryDescription": "7-etapilise töötluskonveieri jaotus (viimased 5 minutit)"
+    "requestTelemetryDescription": "7-etapilise töötluskonveieri jaotus (viimased 5 minutit)",
+    "title": "Teenusepakkujate statistika",
+    "description": "Liiklus, latentsus ja edukusmäärad teenusepakkujate ning mudelite kaupa",
+    "combo": "Kombinatsioon",
+    "toggleModels": "Kuva teenusepakkuja {provider} mudelid",
+    "windowSince": "Alates {date}"
   },
   "relay": {
     "title": "Serverivabad releeproksid",
@@ -12682,7 +13357,18 @@
     "noRequestBody": "Päringu keha puudub.",
     "noResponseBody": "Vastuse keha puudub.",
     "formatted": "Vormindatud",
-    "raw": "Toorandmed"
+    "raw": "Toorandmed",
+    "requestCount": "{count, plural, one {# päring} other {# päringut}}",
+    "expandList": "Laienda loendit",
+    "collapseList": "Ahenda loend",
+    "snippetLanguage": "Koodilõigu keel",
+    "headersTable": "Päised",
+    "showSecrets": "Kuva salajased väärtused",
+    "maskSecrets": "Maski salajased väärtused",
+    "llmNotAvailable": "Selle päringu LLM-metaandmed pole saadaval.",
+    "llmStreamYes": "jah (SSE)",
+    "llmStreamNo": "ei",
+    "llmTotalTokens": "Kokku: {count} tokenit"
   },
   "cliCommon": {
     "companion": {
@@ -12787,7 +13473,6 @@
     }
   },
   "cliCode": {
-    "pageTitle": "CLI-koodid",
     "pageSubtitle": "OmniRoute'ile suunatud kooditööriistad",
     "searchPlaceholder": "Otsi CLI-d…",
     "filterDetectionLabel": "Tuvastamine",
@@ -12797,7 +13482,8 @@
     "detectionNotFound": "Ei leitud",
     "baseUrlAll": "Kõik",
     "baseUrlFull": "Täielik",
-    "baseUrlPartial": "Osaline"
+    "baseUrlPartial": "Osaline",
+    "title": "KLI kood"
   },
   "cliAgents": {
     "pageTitle": "CLI-agendid",
@@ -13141,7 +13827,8 @@
     "colReliabilityHelp": "Nende kutsete osakaal viimase 24 tunni jooksul, millele see teenusepakkuja tegelikult vastas. Kriips tähendab, et määra arvutamiseks oli liiklust liiga vähe.",
     "reliabilitySample": "Viimase {hours} tunni jooksul õnnestus {successes} kutset {requests}-st",
     "reliabilityTooFew": "Viimase {hours} tunni jooksul ainult {requests} kutset — määra arvutamiseks liiga vähe",
-    "reliabilityNoTraffic": "Viimase 24 tunni jooksul pole kutseid registreeritud"
+    "reliabilityNoTraffic": "Viimase 24 tunni jooksul pole kutseid registreeritud",
+    "categoryFilter": "Ülesande kategooria"
   },
   "discovery": {
     "title": "Teenusepakkujate avastamine",
@@ -13166,7 +13853,11 @@
     "method": "Meetod",
     "auth": "Autentimine",
     "feasibility": "Teostatavus",
-    "models": "Mudelid"
+    "models": "Mudelid",
+    "provider": "Teenusepakkuja",
+    "status": "Olek",
+    "endpoint": "Otspunkt",
+    "actions": "Toimingud"
   },
   "noAuthProvider": {
     "title": "Autentimine pole nõutav",
@@ -13215,7 +13906,8 @@
     "ownProxy": "Oma puhverserver",
     "freeTierPause": "Mudel {model} on pausil (429), tagasi {time}",
     "freeTierPauseProvider": "Pausil (429), tagasi {time}",
-    "freeTierPauseNote": "Protsessisisene paus selles instantsis"
+    "freeTierPauseNote": "Protsessisisene paus selles instantsis",
+    "proxyType": "Puhverserveri tüüp"
   },
   "gamification": {
     "leaderboardScopes": {
@@ -13388,7 +14080,10 @@
         "description": "Peidetud saavutus ootab...",
         "criteria": "Selle märgi avamiseks täida peidetud saavutus."
       }
-    }
+    },
+    "leaderboardTitle": "Edetabel",
+    "leaderboardDescription": "Teie API-võtmete edetabelikohad ja saavutused",
+    "badgeLocked": "Lukustatud"
   },
   "featureFlags": {
     "title": "Funktsioonilipud",
@@ -13446,7 +14141,9 @@
       "disabled": "Keelatud",
       "dual": "Mõlemad",
       "alias": "Alias",
-      "canonical": "Kanooniline"
+      "canonical": "Kanooniline",
+      "fail_closed": "Blokeeri (fail_closed)",
+      "count_as_zero": "Arvesta $0‑ks (count_as_zero)"
     },
     "definitions": {
       "REQUIRE_API_KEY": {
@@ -13593,6 +14290,290 @@
       "PROTECTED_PRIORITY_INFRA_502_ENABLED": {
         "label": "Kaitstud prioriteediga taristu peatamised kui 502",
         "description": "Vasta 503 asemel 502-ga, kui ainult kvoodipõhise varuvariandiga prioriteetne sihtmärk peatab combo põhjusel, mis pole tõendatavalt kvoodiga seotud: teenusepakkuja avatud kaitselüliti või prognoosiv latentsuse tõttu vahelejätmine."
+      },
+      "AUTH_LOG_INCLUDE_ACCOUNT_ID": {
+        "label": "Logi konto ID-d",
+        "description": "Kaasa konto eesliide AUTH logirindadesse (nt \"Kasutatakse '<provider>' kontot: abc12345...\"). Vaikimisi keelustatud, et konto identifikaatorid jääks jagatud/mitme tenanti protsessilogidest varjatud. Sõltumatu Debug režiimist; Debug režiimi lülitamine seda ei avalda."
+      },
+      "OMNIROUTE_OIDC_DISABLE_PASSWORD_LOGIN": {
+        "label": "Keela parooliga sisselogimine OIDC puhul",
+        "description": "Kui OIDC on lubatud, keela parooliga sisselogimine, et kasutajad saaksid autentida ainult OIDC ühekordse sisselogimise (Single Sign-On) kaudu. Kui see on välja lülitatud (vaikimisi), on saadaval nii parooliga sisselogimine kui ka OIDC."
+      },
+      "AUDIO_REMOTE_PROVIDER_NODES": {
+        "label": "Audioteenuse pakkujate kaugsõlmed",
+        "description": "Luba marsruutidel /v1/audio/* kasutada OpenAI-ga ühilduvaid teenusepakkuja sõlmi, mida majutatakse väljaspool localhosti. Vaikimisi välja lülitatud — heli suunamine kaughosti muudab väljundidentiteeti ja peab olema operaatori selgesõnaline otsus. Loopback-sõlmed on alati lubatud ning see säte neid ei mõjuta."
+      },
+      "RERANK_REMOTE_PROVIDER_NODES": {
+        "label": "Rerank-teenuse pakkujate kaugsõlmed",
+        "description": "Luba päringul POST /v1/rerank (ja mälumootori rerank-sammul, mis kutsub seda välja loopbacki kaudu) kasutada OpenAI-ga ühilduvaid teenusepakkuja sõlmi, mida majutatakse väljaspool localhosti — LAN-seadet või Tailscale'i partnerseadet (peer), kus töötab TEI, Infinity, vLLM jne. Vaikimisi välja lülitatud — suunamine kaughosti muudab väljundidentiteeti ja peab olema operaatori selgesõnaline otsus. Loopback-sõlmed on alati lubatud ning see säte neid ei mõjuta. Kaugsõlmed peavad vastama ka teenusepakkuja väljund-URL-i reeglitele."
+      },
+      "NETWORK_ROTATION_SHARED_EGRESS_GUARD": {
+        "label": "Võrgurotatsiooni jagatud väljundi kaitse",
+        "description": "Kui mitme konto rotatsioonitäituri puhul ilmneb võrgutõrge (ajalõpp, ühendusest keeldumine/lähtestamine) ja tõrkunud kontol puudub eraldatud proksi, rakenda lühike jahtumisaeg ning jäta ülejäänud päringu vältel teised proksita kontod vahele, selle asemel et kõiki uuesti proovida. Vaikimisi sisse lülitatud (turvaline: väljund-IP ei muutu, vähendab vaid latentsust/jahtumisaja riski jagatud väljundiga kontodel). Lülita välja, et taastada kohene edasikandumine esimese proksita erandi ilmnemisel."
+      },
+      "PROXY_SKIP_RECENTLY_FAILED": {
+        "label": "Jäta hiljuti tõrkunud proksid vahele",
+        "description": "Proksikogumid ja opencode'i kontopõhine rotatsioon peatavad äsja tõrkunud proksi uuesti pakkumise (tagasilükatud TCP-test või selle kaudu saadud 429) protsessipõhiseks perioodiks, mis kahekordistub iga kordusega kuni piirmäärani. Proksi olekut ei salvestata; iga kõrvalejäetud kandidaadi puhul jääb valik samaks. Vaikimisi sees: valikujärjekord on täpselt tavapärane rotatsioon ainult juhul, kui PROXY_SKIP_RECENTLY_FAILED=false."
+      },
+      "PROXY_POOL_SHARED_EGRESS_ORDER": {
+        "label": "Jagatud väljundiaadressiga kogumi järjekord",
+        "description": "Teenusepakkujate puhul, kelle kvooti arvestatakse väljundiaadressi põhiselt, paigutatakse hiljuti tagasilükatud liikme täheldatud väljundiaadressi jagav kogumiliige vahetult tervete liikmete järele. Mõjutab ainult järjekorda, ei välistata kunagi. Vajab parameetrit PROXY_SKIP_RECENTLY_FAILED, mis tekitab loetava tagasilükkamissignaali. Vaikimisi väljas: valikujärjekord on täpselt tavapärane rotatsioon."
+      },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "Mudeli ulatusega kvootidest keeldumised",
+        "description": "Rakendage opencode kvoot 429 ainult sellele mudelile, mis seda tabas, nii et sama väljapääs jätkab teiste mudelite teenindamist ja tühjendage see ainult siis, kui see mudel õnnestub. Tarbijad, kellel pole mudelit (basseini pööramine, parkimine ja taasesitus, administraatori nähtavus, valija päästik, tervisekontroll), näevad seda endiselt. Vajab PROXY_SKIP_RECENTLY_FAILED, mis tekitab keeldumise. Vaikimisi väljas: ühe mudeli kvoot 429 jätab iga mudeli väljapääsu kõrvale."
+      },
+      "PROXY_STRICT_POST_REPLAY_ENABLED": {
+        "label": "Puhverserveri toomine: range POST kordus",
+        "description": "Mitte-idempotentse päringu (POST, PUT, PATCH, DELETE) korral saatke pärast transporditõrget (värske pesa, puhverserveri varud, algne varu) uuesti ainult siis, kui viga tõestab, et midagi ei saadetud: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH või ühenduse ajalõpp. Pistikupesa viga pärast kirjutamist võib tähendada, et ülesvoolu aktsepteeris päringu, nii et uuesti saatmine võib genereerida ja selle kaks korda arveldada. Vaikimisi väljas: taasesitav keha saadetakse kord uuesti mis tahes transpordivea korral, mis taastab ka aegunud ühendatud sokli."
+      },
+      "ROTATION_ATTRIBUTION": {
+        "label": "Rotatsiooni omistamise logimine",
+        "description": "Opencode'i rotatsioon salvestab, milline konto päringut teenindas või vahele jäeti (ainult maskeeritud ID-d, mitte kunagi täielikud konto ID-d) ning seob proksilogi kirjed vastava päringuga, võimaldades operaatoril eristada vahelejäänud kontosid kasutamata kontodest. Vaikimisi väljas: täiendavaid logiridu ega lisaveergusid ei kirjutata."
+      },
+      "PROXY_POOL_EGRESS_OBSERVATION": {
+        "label": "Proksikogumi väljundite vaatlus",
+        "description": "Kuvab juhtpaneelil proksikogumi all, mitu täheldatud väljund-IP-d selle liikmeid viimase 24 h jooksul teenindas, mitu ühendust neid kasutas ning milline oli suurim tuvastatud ühenduste arv ühe IP taga. Ainult loetav, arvutatakse proksilogist, ei kasutata kunagi marsruutimiseks. Vaikimisi väljas: kogumi redaktor on muutmata ja vaatlusmarsruut tagastab null."
+      },
+      "PROXY_OPERATOR_EGRESS_ENABLED": {
+        "label": "Proksioperaatori väljund",
+        "description": "Võtab vastu operaatori saadetud kuupäevastatud vaadeldud aadresse kogumiliikme kohta ja liidab need kuvamiseks ning kogumi järjestamiseks žurnaalist loetuga. Vaikimisi väljas: push-marsruut tagastab 404 ja kogumi lugemised toimivad täpselt nagu varem."
+      },
+      "OPENCODE_RESPONSES_STALL_ROTATION": {
+        "label": "OpenCode Responses seiskumisel roteerimine",
+        "description": "OpenCode'i täituri puhul jälgige voogesitatud Responses-vastuse keha esimest baiti (aken: RESPONSES_FIRST_BYTE_TIMEOUT_MS, vaikimisi 15000). 2xx Responses-voogu, mis jääb pärast selle akna möödumist vaikseks, käsitletakse seiskununa: kontole määratakse jahtumisaeg ja päring roteeritakse ühe korra järgmisele kontole; teine seiskumine ebaõnnestub kohe. Vaikimisi väljas: seiskunud vood säilitavad senise ootamise kuni voo valmisoleku aegumiseni."
+      },
+      "OPENCODE_USER_BLOCKED_ROTATION": {
+        "label": "OpenCode user_blocked roteerimine",
+        "description": "OpenCode'i täituri puhul, kui ülemteenus vastab koodiga 403 või 451 koos user_blocked-keeldumisega (mitte geoblokeering ega Cloudflare'i sõrmejälje tagasilükkamine), määrake tagasilükatud kontole jahtumisaeg ja roteerige päringu kohta kuni üks kord järgmisele kontole; teine tagasilükkamine tagastatakse muutmata kujul ilma õnnestumismärgita. Vaikimisi väljas: ülemteenuse kasutajablokeeringust möödaroteerimine võib näida kõrvalehoidmisena ja levitada märgistust kogu kontopargis, mistõttu tagastatakse keeldumine muutmata kujul, välja arvatud juhul, kui operaator on seda eraldi lubanud."
+      },
+      "OPENCODE_TRANSIENT_FAILOVER_BACKOFF": {
+        "label": "OpenCode'i ajutise tõrkesiirde tagasitõmbumine",
+        "description": "OpenCode'i mitme konto roteerimisel tehke enne järgmisele kontole saatmist paus, kui kaks järjestikust katset ebaõnnestusid ülemteenuse ajutise veaga (5xx või tühi 400 tagasilükkamine). Paus algab 1,5 sekundist, kahekordistub iga järgmise järjestikuse ebaõnnestumise korral, on piiratud 6 sekundiga pausi kohta ja 10 sekundiga päringu kohta, jääb kliendi ühenduse katkemisel vahele ning ebaõnnestunud vastuse keha vabastatakse enne ootamist. Vaikimisi väljas: tõrkesiire toimub kohe."
+      },
+      "FLUSH_EMPTY_RETRY_ENABLED": {
+        "label": "Tühja vooru väljastamise korduskatse",
+        "description": "Tõlgitud voogedastusvoorudes, kui ülemteenuse voor ei sisalda kasutatavat sisu (ainult arutluskäigu lõpetus või null väärtuslikku tükki), tehke piiratud arv korduskatseid tavapärase mandaaditee kaudu (kuni `STREAM_RECOVERY.EMPTY_TURN_RETRY_MAX`), enne kui kliendile midagi väljastatakse. Vaikimisi väljas: tühjad voorud säilitavad praeguse käitumise (tühi 200 või tühja sisuga 502)."
+      },
+      "EMPTY_STREAM_SIBLING_RECOVERY_ENABLED": {
+        "label": "Tühja voo sõsartaastamine",
+        "description": "Claude/Codexi voogedastus: pärast esimest elutsükli sündmust kontrollige lühidalt (kuni 1 s / 64 KiB) kasutatava väljundi olemasolu; voog, mis lõpeb ilma sisuta, muutub empty_content-tõrkeks, mis kulutab olemasoleva piiratud korduskatse teisel sobival ühendusel (ilma jahtumisaja ja mudeli lukustuseta), ning round-robin-kombod lõpetavad uuestiproovimise kohe, kui klient ühenduse katkestab. Samuti käsitleb kontrolli käigus olekuid refusal, pause_turn ja model_context_window_exceeded legitiimsete tühjade lõppolekutena. Vaikimisi väljas: valmisolek, tühja sisu käsitlemine ja kombode korduskatsed jäävad täpselt samaks nagu varem."
+      },
+      "STREAM_LATE_OUTPUT_PROBE_ENABLED": {
+        "label": "Voo hilise väljundi sond",
+        "description": "Voogesituse väljundi sond: pärast esimest 64 edastatud andmetükki jätka esimese nähtava väljundi tuvastamiseks proovivõttu sagedusega üks andmetükk 16-st, nii et hilja algav väljund märgib voo endiselt väljundit edastatuks. Üksik 5xx pärast seda punkti jääb seejärel päringupõhiseks, selle asemel et salvestada ainult mudeli lukustus, ja firstOutputMs tagasitäidetakse praeguse proovivõtuvahemiku esimese väljundtükiga. Vaikimisi väljas: kontrollitakse ainult esimesi 64 edastatud andmetükki, täpselt nagu varem."
+      },
+      "OPENCODE_RATE_LIMITED_429_EARLY_STOP": {
+        "label": "OpenCode päringupiiranguga 429 varajane peatamine",
+        "description": "OpenCode'i mitme konto rotatsiooni puhul peata kontolaine esimese 429 juures, mis on klassifitseeritud tegelikuks päringupiiranguks (töödeldav Retry-After päis või päringukeha, mis nimetab kiiruse/kasutuse piirangut), ning tagasta see ülemvoo 429 muutmata kujul (olek, keha, Retry-After ja kvoodipäised), selle asemel et proovida kõiki ülejäänud kontosid. Klassifitseerimata 429-koodid jätkavad roteerumist. Vaikimisi väljas: tasuta paketil kehtib piirang väljuva IP kohta (#9611), seega iga 429 roteerub järgmisele kontole ning ammendunud laine tagastab viimase ülemvoo 429."
+      },
+      "OPENCODE_PARK_AND_RESUME": {
+        "label": "OpenCode 429 parkimine ja jätkamine",
+        "description": "OpenCode'i mitme konto rotatsiooni puhul pargi päring pärast korduvaid ajutisi 429-vastuseid (või värsket kogumi ülekoormuse tähist) koos elutuksega, seejärel korda ühte piiratud etappi kuni 3 järjestikuse kontoga, selle asemel et levitada päringut korraga kogu kontopargile. Vaikimisi väljas: iga 429 roteerub järgmisele kontole täpselt nagu varem."
+      },
+      "STREAM_READINESS_STALL_RETRY": {
+        "label": "Voo valmisoleku seiskumise korduskatse",
+        "description": "Voogesitusega vestluspäringute puhul, kui esimene ülemvoo keha seiskub enne kasutatava sündmuse tekitamist, tee samal marsruutimisteel üks piiratud korduskatse sama valmisolekueelarvega ja ilma konto karistuseta. Vaikimisi väljas: seiskunud esimese keha korral nurjub päring ilma korduskatsmeta."
+      },
+      "OPENCODE_POOL_RESELECT": {
+        "label": "OpenCode 429 kogumi uuestivalimine",
+        "description": "OpenCode'i mitme konto rotatsiooni puhul, kui saadi 429 väljundpõhiselt piiratud teenusepakkujalt ilma proksita kontol ümbritsevas kogumikontekstis, küsi ühenduste kogumilt järgmise katse jaoks teist liiget, selle asemel et proovida uuesti sama väljuvat aadressi. Järjestab, ei välista kunagi: ammendunud kogum säilitab praeguse käitumise. Vaikimisi väljas: iga 429 roteerub järgmisele kontole täpselt nagu varem."
+      },
+      "OPENCODE_FREE_TIER_EGRESS_PROBE": {
+        "label": "OpenCode vabatasemeline väljapääsusond",
+        "description": "Kui OpenCode täitja puhul vastatakse puhverserveri päringule 403 või 451 FreeTierError ja vaadeldavate tööriistade korduskatse ebaõnnestus või ei rakendunud, saatke päring üks kord teise puhverserveri kaudu (teine konto puhverserver või muu kogumi liige, mitte kunagi otseühendus). Ainult siis, kui see sond vastab 200, jäetakse esimene väljapääs puhverserveri keeldumise mällu kõrvale ja sondi vastus teenindatakse; kui mõlemad keelduvad, tagastatakse algne keeldumine ja midagi ei salvestata. Sama keeldumise tekst katab lipuga märgitud väljumise IP ja tagasilükatud taotluse kuju, nii et sond eristab neid tõendite abil. Vaikimisi väljas: keeldumine tagastatakse muutmata kujul."
+      },
+      "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
+        "label": "OpenCode v2 kliendi sõrmejälg",
+        "description": "Saada OpenCode v2 CLI kliendi sõrmejälg OpenCode Zen/Go päringutel (#16571): User-Agent opencode/latest/<2.x>/cli ja x-opencode-client cli, kliendi User-Agent säilitatakse ainult siis, kui tegemist on 2.x OpenCode kliendiga, piiratud tasuta taseme päringutel puudub x-opencode-request, seanss peegeldatakse päistesse x-opencode-session-id/x-session-affinity/x-session-id, lisatud kohatäitetööriistadel kasutatakse v2 CLI read/shell skeeme ning tool_choice väärtusega \"none\" eemaldatakse. Vaikimisi väljas: iga OpenCode päring säilitab praeguse identiteedi, päised ja keha bait-baidilt."
+      },
+      "OPENCODE_ZEN_EGRESS_IP_LOCK_ENABLED": {
+        "label": "OpenCode Zen egress-IP lukustus",
+        "description": "Lisa OpenCode Zen (opencode-zen) vaikimisi egress-IP lukustusperekonda, nii et 429 ühel Zen-ühendusel jahutab maha ka kõik sama egress-IP-d jagavad Zen-sõsarühendused. Vaikimisi väljas: Zen on võtmestatud ja iga ühendus jahtub eraldi, täpselt nagu varem. Sõnaselge OMNIROUTE_EGRESS_IP_LOCK_PROVIDERS väärtus on alati selle lipu suhtes ülimuslik."
+      },
+      "OPENCODE_FULL_TEXT_ERROR_RULES_ENABLED": {
+        "label": "OpenCode'i täisteksti veareeglid",
+        "description": "Luba sisseehitatud OpenCode'i veareeglitel (opencode-zen, opencode-go, opencode-cli) sobituda ülemteenuse täieliku veatekstiga, nii et vastuse keha markerid nagu organization_quota_exceeded või \"monthly usage limit reached\" liigitavad 429 kvoodi ammendumiseks koos ühendusepõhise lukuga. Vaikimisi väljas: need reeglid näevad ainult struktureeritud veakoodi ja selline 429 jääb lühiajaliseks päringupiiranguks, täpselt nagu varem."
+      },
+      "CLOUDFLARE_AI_FULL_TEXT_ERROR_RULES_ENABLED": {
+        "label": "Cloudflare Workers AI täisteksti veareeglid",
+        "description": "Luba sisseehitatud Cloudflare Workers AI veareeglil sobituda ülemteenuse täieliku veatekstiga, nii et 429 \"daily free allocation\" keha liigitatakse kvoodi ammendumiseks, mitte lühiajaliseks päringupiiranguks. Vaikimisi väljas: reegel näeb ainult struktureeritud veakoodi, täpselt nagu varem."
+      },
+      "CAPABILITY_FILTER_ENABLED": {
+        "label": "Võimekuste filter",
+        "description": "Lükka päringud enne väljasaatmist tagasi, kui sihtmudelil puuduvad nõutavad võimekused (vision, tools, structured output, context window). Kaitseb otseseid ühe pakkuja päringuid, mis mööduvad combo-kihi ühilduvusfiltrist."
+      },
+      "USAGE_LIMIT_IGNORE_UNPRICED": {
+        "label": "Eira hinnastamata kasutust USD kvootides",
+        "description": "Arvesta võtmepõhistes USD kasutuskvootides hinnata mudelite kasutust väärtusena $0 selle asemel, et käsitleda kvooti ületatuna. Vaikimisi välja lülitatud: hinnastamata mudel või marsruutimisalias võib varjata tegelikke kulusid, mistõttu kvoot tõrkub suletuks."
+      },
+      "RADAR_ENABLED": {
+        "label": "Radar",
+        "description": "Luba OmniRoute Radari moodul (kataloogivoo vaated ja sünkroonimine). Vaikimisi välja lülitatud; lubamine avab vaid kasutajaliidese – andmete sünkroonimine jääb eraldi sisselülitatavaks."
+      },
+      "MODEL_ENDPOINT_CAPABILITY_GATE_ENABLED": {
+        "label": "Mudeli lõpp-punkti võimekuse lüüs",
+        "description": "Jõusta usaldusväärsed mudeli lõpp-punkti sildid (pakkuja kataloogi deklareeritud, spetsiaalsest mudeli ID-st tuletatud või administraatori määratud): lükka päring, mis on saadetud lõpp-punkti, mida mudel ei teeninda, enne väljasaatmist tagasi koodiga HTTP 400 otspunktides /v1/chat/completions, /v1/embeddings, /v1/rerank, /v1/images/generations, /v1/videos/generations, /v1/music/generations ja /v1/audio/*; peida otspunktist /v1/models mudelid, mille sildistatud lõpp-punktidel puudub OmniRoute adapter; ja vasta selliste mudelite puhul juhtpaneeli mudelitestile koodiga 422. Vaikimisi välja lülitatud: lõpp-punkti sildid jäävad informatiivseks ja päringud edastatakse täpselt nagu varem."
+      },
+      "UNIVERSAL_CONTEXT_HANDOFF_ENABLED": {
+        "label": "Universaalne konteksti üleandmine",
+        "description": "Genereeri ja lisa vestluse kokkuvõtteid, kui kombineeritud marsruutimine vahetab mudeleid. Keela, et käsitleda mudelivahetusi eraldiseisvalt ja vältida taustal toimuvaid üleandmispäringuid kõigi olemasolevate ja tulevaste kombinatsioonide puhul."
+      },
+      "REASONING_REPLAY_ENABLED": {
+        "label": "Arutluskäigu taasesitus",
+        "description": "Puhverda ja taasesita mudeli arutluskäiku mitmevoorulistes vestlustes. Keela, et peatada arutluskäigu salvestamine ja uuesti lisamine."
+      },
+      "OMNIROUTE_CODEX_APP_SERVER_ENABLED": {
+        "label": "Codex App-Serveri transport",
+        "description": "Luba Codexil kasutada kohalikku app-serveri WebSocket JSON-RPC transporti (codexTransport=app-server). Väljalülitatuna langevad app-serveri valinud ühendused tagasi Codexi muudele transpordiviisidele."
+      },
+      "EXPOSE_CC_DISCOVERY_ALIASES": {
+        "label": "Claude Code avastusaliased",
+        "description": "Avaldada claude/'<provider>'/'<model>' peegli-ID-d /v1/models otsepinnas, et Claude Code värava mudelite avastus näitaks mitme-Claude mudeleid. Hoiatus: globaalselt lubamisel kaksikustab kataloogikandeid kõigi klientide jaoks."
+      },
+      "NO_THINKING_ALIAS_ENABLED": {
+        "label": "No-Thinking mudeliliased",
+        "description": "Pealülitus no-think/'<provider>'/'<model>' värava aliaste jaoks. Sisse (vaikimisi): /v1/models avaldab iga sobiva mõtlemisvõimega Claude mudeli jaoks variandi ilma mõtlemiseta, ja no-think/ ID, mis saadetakse taotluses, lahendatakse tagasi tegeliku mudelini, kust on mõtlemis välja lülitatud. Väljas: variante ei avaldata ja no-think/ ID käsitletakse nagu iganaine tundmatu mudeli ID. Iga mudeli individuaalne ModelSpec.noThinkingAlias lubamine/keelamine kehtib, kuni see on sisse."
+      },
+      "OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS": {
+        "label": "Keela mõtlemistaseme variandid",
+        "description": "Keela mõtlemistaseme variantide (nt -low, -medium, -high) genereerimine kataloogis /v1/models."
+      },
+      "OMNIROUTE_CHAT_VIRTUAL_LANES": {
+        "label": "Adaptiivsed virtuaalsed vastuvõturajad",
+        "description": "Luba rentnikupõhised adaptiivsed virtuaalsed vastuvõturajad teenusepakkuja edastusele (#9654): ühe rentniku koormuspuhang ei põhjusta enam teisele 503-viga. Keskkonnamuutuja OMNIROUTE_CHAT_VIRTUAL_LANES on selle juhtpaneeli alistuse suhtes ülimuslik; muudatused jõustuvad serveri taaskäivitamisel."
+      },
+      "EXPOSE_FUNCTIONAL_GATEWAY_MIRRORS": {
+        "label": "Funktsionaalsed värava peeglid",
+        "description": "Avaldada '<gateway-alias>'/'<model>' peegli-ID-d /v1/models otsepinnas mudelitele, kelle kanoniline omanik pole aktiivseid kredentiaale, kuid läbipääsu väravaga, kus on aktiivsed kredensiaalid, suunatakse. Hoiatus: globaalselt lubamisel lisab kataloogikandeid kõigi klientide jaoks."
+      },
+      "NEWAPI_AGGREGATOR_BALANCE": {
+        "label": "New-API agregaatori saldo",
+        "description": "Luba saldo tuvastamine New-API / One-API / Sub2API agregaatoriga ühilduvate sõlmede jaoks. Kui see on lubatud, teatavad seatud agregaatorilipuga ühilduvad sõlmed oma saldost juhtpaneelil ja kvoodi eelkontrolli marsruutimisel."
+      },
+      "SEARCH_STATS_HIDE_DELETED_CONNECTIONS": {
+        "label": "Peida kustutatud otsinguühendused",
+        "description": "Otsingu statistikas ja hiljutistes otsingutes arvestatakse ainult teenusepakkujaid, kellel on endiselt aktiivne ühendus (võtmeta pakkujad, nagu duckduckgo-free, lähevad alati arvesse). Väljalülitatuna säilitatakse iga talletatud otsingurida koos pakkuja ID-ga."
+      },
+      "FREE_BADGE_REQUIRES_PROVIDER_FREE_TIER": {
+        "label": "Range Free-märgis",
+        "description": "Juhtpaneeli pakkujate lehed: kuva märgis „Free“ ainult signaalide puhul, mida pakkuja toetab — eirab kuvatava nime heuristikat, mitte-tõeväärtuslikke free-välju ja järelliiteid :free registreeritud pakkujatel, kellel puudub dokumenteeritud tasuta pakett. Väljalülitatuna säilib senine märgise reegel."
+      },
+      "COMBO_EMPTY_POOL_NO_ELIGIBLE_TARGETS_ENABLED": {
+        "label": "Auto Combo: tühi kogum vastab koodiga 503",
+        "description": "Kui auto combo kandidaatide kogum on enne tööriistakutsete eelfiltri käivitamist juba tühi (kõik sihtmärgid jäetakse jahtumisperioodide, lukustuste või ammendumise tõttu vahele), vastatakse 503 no_eligible_targets varasema 400 \"No target supports tool calling\" capability_mismatch asemel. Vaikimisi väljas: tühi kogum säilitab varasema 400."
+      },
+      "MISTRAL_AMBIGUOUS_401_SOFT_LOCKOUT": {
+        "label": "Mistral kahtlusrikas 401 pehme lukustus",
+        "description": "Tühi Mistral 401 ('{\"detail\":\"Unauthorized\"}', ilma selge autentimissignaalita) on bajtolidentne tühistatud võtmega ja kuormatud kvoodiga. Lubamisel jahutab selline 401 ühenduse asemel, et pakkuda seda aegunud, kuni 3 korda tunni jooksul; järgmine lukustab ikkagi aegununa, mistõttu tühistatud võti kontvergeerub. Vaikimisi väljas: iga tühi Mistral 401 lukustab ühenduse aegununa, nagu varem."
+      },
+      "BATCH_AND_FILE_AUTO_CLEANUP_ENABLED": {
+        "label": "Pakettide ja failide automaatne puhastus",
+        "description": "Lubab automaatsel puhastusel kustutada lõppolekus (completed/failed/cancelled/expired) Batch API tööd, mis on vanemad kui OMNIROUTE_BATCH_RETENTION_DAYS, koos nende realepõhiste kontrollpunktidega ning tühjendada üleslaaditud failide BLOB-sisu pärast nende expires_at aega. Vaikimisi väljas: iga olemasolev paigaldus säilitab need andmed täpselt nagu varem, kuni operaator selle funktsiooni lubab. Operaatori käivitatud marsruuti DELETE /api/v1/batches/delete-completed see kummalgi juhul ei mõjuta – see on eraldiseisev, tingimusteta avalik API-leping."
+      },
+      "ANTIGRAVITY_ACCOUNT_LEASE_ENABLED": {
+        "label": "Antigravity konto rent",
+        "description": "Reserveerib valitud Antigravity konto selle valinud päringu voogedastuse elutsükli ajaks, nii et samaaegne korduskatse või mandaatide üleandmine ei saaks uuesti valida kontot, mis on juba pooleliolevale voole määratud. Broneeringu ulatus on piiratud paariga (connection, callable upstream model), seega saab üks konto teenindada endiselt kahte erinevat mudelit korraga. Kui kõik sobilikud kontod on selle mudeli jaoks juba välja renditud, tagastab päring hõivatud kontole kuhjumise asemel struktureeritud vastuse 503 POOL_BUSY koos piiratud Retry-After päisega. Vaikimisi väljas: kontode valik jääb täpselt samaks nagu varem ja broneeringuid ei tehta."
+      },
+      "COMBO_AUTO_PRUNE_STALE_STEPS": {
+        "label": "Aegunud kombosammude automaatne kärpimine",
+        "description": "Pärast mudelite edukat sünkroonimist autoriteetse reaalajas kataloogiga eemaldab kombosammud, mis on seotud mudelitega, mida kataloog enam ei loetle, luues iga eemaldatud sammu kohta ühe auditikande. Ei kärbi kunagi ebaõnnestunud, halvenenud või ainult tasuta sünkroonimise korral ega tühjenda kombot kunagi täielikult. Vaikimisi väljas: aegunud sammud ainult märgistatakse."
+      },
+      "CLAUDE_OAUTH_SUMMARIZED_THINKING_UNREDACTED": {
+        "label": "Claude OAuthi kokkuvõtlik mõtlemine",
+        "description": "Võimaldab Claude OAuthi päringul, mis küsib loetavat mõtlemist (thinking.display \"summarized\"), loobuda Anthropicu beetast redact-thinking-2026-02-12, mis muidu paneb Anthropicu tagastama tühje, ainult allkirjaga mõtlemisplokke. Vaikimisi väljas: see beeta on osa Claude Code'i OAuthi võrgutaseme sõrmejäljest (wire fingerprint), mistõttu OAuth-päringud jätavad selle muutmata. API-võtmega Claude'i päringud toetavad kokkuvõtlikku mõtlemist juba ilma selle liputa; OMNIROUTE_REDACT_THINKING=false jõuab OAuthi samuti ainult siis, kui see lipp on sees."
+      },
+      "KIRO_TOOL_CALL_REPAIR_ENABLED": {
+        "label": "Kiro tööriistakutse parandus",
+        "description": "Kui voogedastatav Kiro vastus väljastab enne mis tahes nähtavat väljundit vigase tool_call ümbrise (puudub input.name või input.arguments), suru see maha ja saada päring parandava juhisega uuesti, selle asemel et lõpetada voor veateatega invalid_kiro_tool_call. Uuestiproovimine maksab ühe täiendava Kiro päringu; teine nurjumine lõpetab vooru veateatega kiro_tool_call_repair_retry_failed. Vaikimisi sees. Määra väärtuseks false, et voor nurjuks kohe esimese vigase ümbrise korral."
+      },
+      "MODELS_DEV_EFFORT_TIERS_ENABLED": {
+        "label": "models.dev jõupingutustasemed",
+        "description": "Kasuta models.dev avaldatud arutlusjõupingutuse tasemeid (piiratud teadaoleva jõupingutuste sõnavaraga), kui ei operaatori ülekirjutus ega teenusepakkuja register neid ei deklareeri, ning käsitle deklareeritud tühja tasemete loendit väärtusena \"tasemeid pole\" /v1/models välja effort_tiers ja kombineeritud tasemete ühisosades. Vaikimisi väljas: effort_tiers ja lahendatud supportedThinkingEfforts jäävad täpselt samaks nagu varem."
+      },
+      "LMARENA_SYNTHESIZED_CX_ENABLED": {
+        "label": "Arena sünteesitud cx-telemeetria",
+        "description": "Lisa sünteesitud programmiline cx-kliendisuhtluse blob (väärtus, mille arena.ai ise saadab lehe puhul, kus suhtlust pole salvestatud) igale Arena (lmarena) create-evaluation päringule, millel puudub operaatori määratud providerSpecificData.cx. Vaikimisi väljas: väli cx on Arena automatiseerimisvastane signaal, mistõttu OmniRoute edastab ainult väärtuse, mille operaator hõivas tegelikust brauseriseansist (providerSpecificData.cx), ning vastasel juhul ei saada üldse cx-i. Teenusepakkuja poolel tõestamata kasu; luba ainult siis, kui Arena hakkab ilma cx-ita päringuid tagasi lükkama."
+      },
+      "NATIVE_CODEX_REACTIVE_COMPACTION_ENABLED": {
+        "label": "Natiivse Codexi reaktiivne tihendamine",
+        "description": "Luba reaktiivsetel (lävepõhistel) ja viimase abinõu konteksti tihendamise läbimistel kirjutada ümber ka natiivseid Codexi läbipääsuajalugusid (POST /v1/responses teenusepakkujale codex), kui need ületavad kontekstieelarve, kasutades Responses input[] adapterit. Vaikimisi väljas: natiivsed Codexi ajalood kuuluvad Codexi kliendile ja tihendamine ei kirjuta neid kunagi ümber; liiga suured päringud ei läbi kontekstieelarve kontrolli täpselt nagu varem. Nõuab, et globaalne tihendus oleks sisse lülitatud ja mudel poleks välistatud."
+      },
+      "QUOTA_WINDOW_BOUNDED_PARK": {
+        "label": "Kvoodiaken: arvesta piiratud parkimist",
+        "description": "Luba aknapõhisel kvoodireeglil (kontovalikul kasutatavad seansi-/nädalaläved) arvestada piiratud ammendumise parkimist: kui piiratud parkimise tähtaeg on möödas või vahemällu salvestatud kvoodivaatlus on vanem kui parkimise ülempiir, lõpetab aken konto välistamise kuni uue kvoodi hankimiseni. Vaikimisi väljas: vahemällu salvestatud aken blokeerib edasi oma viimati teatatud protsendi põhjal kuni oma lähtestusajani."
+      },
+      "IMAGE_GENERATION_LONG_JOBS": {
+        "label": "Piltide genereerimine: pikad tööd",
+        "description": "OpenAI-ühilduva piltide genereerimise puhul: kasuta ühenduse ajalõppu (providerSpecificData.timeoutMs), muidu keskset ülesvoolu toomise ajalõppu (FETCH_TIMEOUT_MS, seejärel REQUEST_TIMEOUT_MS, vaikimisi 600 s) fikseeritud 120 s pildieelarve asemel; lõpeta kutsuja tühistatud päring koodiga 499; ning luba Playgroundil võtta pikki pilditöid vastu SSE-voona koos keepalive-signaalidega. Vaikimisi väljas: rakendub fikseeritud eelarve ja kutsujapoolset tühistamist edasi ei kanta. Vastuse keha lugemist hõlmav tähtaeg on alati aktiivne."
+      },
+      "CATALOG_MIRROR_REFINEMENTS_ENABLED": {
+        "label": "Kataloogipeegelduste täiustused",
+        "description": "Täpsusta claude/ tuvastuse ja funktsionaalse lüüsi (functional-gateway) peegeldusi teekonnal /v1/models. Vaikimisi väljas: mõlemad peegelduskäigud käituvad täpselt nagu varem. Sees: claude/ tuvastuspeegeldused hõlmavad ka loetletud reasoning-effort variante (-low/-medium/-high/-xhigh), jätavad vahele sisseehitatud auto/* id-d, mida päringutee ei suuda materialiseerida, ja jätavad vahele juba loetletud aliase; funktsionaalse lüüsi peegeldused jätavad vahele kombinatsioonid ja OmniRoute'i sünteesitud id-d (claude/, no-think/), võtavad omaniku väljalt owned_by, ei kasuta kunagi omanikku tema enda lüüsina ning jätavad vahele loendis blockedProviders keelatud lüüsid ja mudelid väljaspool lüüsi autoriteetset reaalajas kataloogi."
+      },
+      "PROXY_HEALTH_BLOCKED_RESETS_STREAK": {
+        "label": "Puhverserveri tervis: keeldumine lähtestab tõrkejada",
+        "description": "Puhverserveri tervisekontrollis lase sihtmärgi tagasilükatud kontrollpäringul (401/403/429: puhverserver edastas, sihtkoht lükkas selle väljuva IP tagasi) lähtestada puhverserveri järjestikuste tõrgete jada, sarnaselt vastatud kontrollpäringule. Vaikimisi väljas: keeldumine jääb neutraalseks ja säilitab jada (#10654). Kood 5xx jääb mõlemal juhul ebaselgeks ning keeldumine ei eemalda, keela ega taasaktiveeri puhverserverit kunagi."
+      },
+      "GROK_SUBSCRIPTION_IMAGES_ENABLED": {
+        "label": "Groki tellimuse pildid",
+        "description": "Registreeri xai-oauth (xao) ja grok-cli pildimarsruudid ning kaardista OpenAI kvaliteet high/hd väärtusele xAI medium. Vaikimisi väljas: API-võtmega xAI pilditee jääb olemasoleva OpenAI-ühilduva päringu juurde ja tellimusmarsruute ei registreerita."
+      },
+      "XAI_OAUTH_LIVE_MODEL_DISCOVERY": {
+        "label": "xAI OAuth reaalajas mudelituvastus",
+        "description": "Hangi xai-oauth ühenduste jaoks reaalajas xAI mudelikataloog aadressilt https://api.x.ai/v1/models, kasutades OAuthi bearer-tokenit, mitte külmutatud staatilisi algandmeid. Vaikimisi sees. Määra lipu väärtuseks false, et jätkata staatiliste algandmete serveerimist. HTTP tõrgete korral pöördutakse tuvastusmarsruudil tagasi algandmete juurde; lipu hankija ise HTTP-päringuid ei tee."
+      },
+      "ANTHROPIC_COMPATIBLE_MID_CONVERSATION_SYSTEM": {
+        "label": "Anthropic-ühilduvad vestlussisesed süsteemivoorud",
+        "description": "Tavalistel anthropic-compatible-* releedel (claude → claude otseedastus) hoia vestlussisesed role:system voorud massiivis messages[], selle asemel et tõsta need ülataseme parameetrisse system, tagades vahemällu salvestatud viiba eesliite stabiilsuse üle voorude. Kehtib ainult siis, kui klient ise saatis parameetri mid-conversation-system-2026-04-07 anthropic-beta (edastatakse ülesvoolu muutmata kujul). Vaikimisi väljas: iga süsteemivoor tõstetakse ülatasemele täpselt nagu varem, kuna releed, mis beetat ei toeta, lükkavad role:system sõnumid tagasi veaga 400."
+      },
+      "DB_HEALTHCHECK_STARTUP_DEFERRED_ENABLED": {
+        "label": "DB tervisekontroll: lükka käivitusskannimine edasi",
+        "description": "Käivita andmebaasi käivitusaegne terviklikkuse/tervise kontroll pärast seda, kui server hakkab päringuid vastu võtma (funktsiooni setImmediate kaudu), selle asemel et blokeerida käivitumist kuni selle lõpuleviimiseni. Vaikimisi väljas: käivitumine blokeerub kontrolli ajaks täpselt nagu enne muudatust #13717, nii et rikutud andmebaas tuvastatakse ikkagi enne esimese päringu teenindamist. Sees: käivitumine naaseb kohe ning kontroll (nüüd piiratud/lehekülgedeks jaotatud ja tõelise failipõhise andmebaasi puhul eraldatud tühistatavasse alamprotsessi) käivitatakse vahetult pärast seda."
+      },
+      "OPENCODE_PUBLISHED_CATALOG_ROUTING_ENABLED": {
+        "label": "OpenCode'i avaldatud kataloogi marsruutimine",
+        "description": "Luba ilma selgesõnalise registri lõpp-punktita OpenCode Zen ja OpenCode Go mudelitel võtta oma päringupind (Responses paketile @ai-sdk/openai, Messages paketile @ai-sdk/anthropic) avaldatud models.opencode.ai kataloogist, mida loetakse taustal iga 6 tunni järel. Vaikimisi väljas: lõpp-punkt pärineb registri heuristikast täpselt nagu varem ja kataloogi ei pärita kunagi."
+      },
+      "AUTO_REQUEST_RESOLVED_CAPABILITIES": {
+        "label": "Automaatsed päringud: lahendatud võimekuste kaalud",
+        "description": "Luba auto/* päringutel (resolveModelOrError ja automaatse marsruutimise ümbris) koostada kandidaatide kogum koos lahendatud mudeli võimekustega (vision, reasoning, thinking) ja täheldatud kvaliteediskooridega, mida loetakse ühe hulgipäringuna nagu kataloogi /v1/models. Vaikimisi väljas: päringuaegsed hetktõmmise kaalud jäävad täpselt samaks nagu varem (võimekused lahendatakse nõudmisel ega mõjuta kaalusid). Sees: need signaalid toidavad hetktõmmise kaalusid, mistõttu kandidaatide kaalud ja seega ka valik võivad muutuda."
+      },
+      "AUTO_COMBO_KEYLESS_TRANSPORT_GATE": {
+        "label": "Auto-Combo: Võtmetu transpordi värav",
+        "description": "Hoidke võtmetuid (autentimata) pakkujaid, kelle transport vajab kohalikku brauserit (browserBacked) või kohalikult paigaldatud CLI-d (isLocalCli), auto/* kandidaatide kogust välja, et ripub oleku liige ei saaks auto taotlust per-target ajalimiidi (#17036) saamiseni seisma jätta. Väärtus on vaikimisi välja: iga autentimata pakkuja, kellel on emuleeritud tööriistade kõned, jääb kogusse täpselt varasema kujul. Otse '<alias>'/'<model>' kõned toimivad mõlemal juhul."
+      },
+      "CODEBUDDY_CN_INLINE_REASONING": {
+        "label": "CodeBuddy CN: Sissepõhi mõtlemise korduslugemine",
+        "description": "Koodibuddy-cn mõttefunktsioonide mudelite puhul (DeepSeek-V4 / Kimi-K2 perekonnad, mis vajavad mõtlemise korduslugemist), sisestage iga korduslugemine assistendi reasoning_content nähtava '<thought>' plokkina sõnumisisu ette, et see jääks alles väravasse, mis eemaldab reasoning_content väli (#13632). Väärtus on vaikimisi välja: codebuddy-cn taotlused saadetakse muutmata; reasoning_content väli ise hoitakse alati alles."
+      },
+      "PROVIDER_SAFETY_STOPS_TERMINAL": {
+        "label": "Teenusepakkuja turvapeatused: lõplik",
+        "description": "Käsitle selgesõnalist teenusepakkuja turvapeatust (misalignment_policy_violation, content_policy_violation või täpne pärandkeeldumine 'blocked by our safety systems' sildiga provider_safety_rejection) lõpliku, päringupõhise keeldumisena: selle kood säilitatakse läbi HTTP, Responses, WebSocketi ja lõpuleviidud voo vigade ning kombo peatub selle juures teiste sihtmärkide uuesti proovimise asemel, tühistades lubatud paralleelsed päringud (#17049). Vaikimisi väljas: need vead säilitavad oma senise käsitluse ja kombo marsruutimist ei muudeta."
+      },
+      "CREDENTIAL_HEALTH_RETEST_AUTO_DISABLED": {
+        "label": "Mandaatide tervis: testi automaatselt väljalülitatud ühendusi uuesti",
+        "description": "Luba mandaatide tervisekontrollil testida uuesti ühendusi, mille lüüs ise välja lülitas (märgitud kui autoDisabledAt; maksimaalselt kord 6 h jooksul igaühe kohta ja 5 kontrolli kohta), ning lülitada ühendus uuesti sisse, kui selle kordustest õnnestub (#16190). Vaikimisi väljas: väljalülitatud ühendused jäävad väljalülitatuks, kuni operaator need uuesti lubab või uuesti testib, täpselt nagu varem. Operaatori keelatud ühendusi ja pärast püsivat blokeerimist väljalülitatud ühendusi ei testita kunagi uuesti."
+      },
+      "CREDENTIAL_GATE_AUTH_DIAGNOSES_ONLY": {
+        "label": "Mandaatide värav: ainult autentimisdiagnostika",
+        "description": "Kitsenda kombo mandaatide väravat nii, et vahemällu salvestatud ebaõnnestunud mandaadikontroll blokeerib ühenduse ainult siis, kui selle diagnoos kinnitab vigaseid mandaate (upstream_auth_error, auth_missing, token_expired, token_refresh_failed, reauth_required, account_deactivated, auth_required). Määramatuid tõrkeid (aegumised, päringupiirangud, katkestused, toetamata kontrollid ja tüübita plaanuri vead) käsitletakse sellisel juhul teadmatutena ning ühendus jätkab liikluse vastuvõtmist. Vaikimisi väljas: mis tahes vahemällu salvestatud kontrolli viga blokeerib ühenduse vahemälu TTL-i ajaks (5 minutit)."
+      },
+      "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
+        "label": "Kombo: peatu sisupoliitika keeldumisel",
+        "description": "Kui kombo sihtmärk vastab täpse sisupoliitika keeldumisega (kood või tüüp cyber_policy / content_policy_violation), peata kombo ja tagasta see keeldumine isegi siis, kui ülejäänud sihtmärgid on erinevad mudelid, selle asemel et liikuda järgmise sihtmärgi juurde. Vaikimisi väljas: keeldumine ei vii kunagi kontot jahtumisperioodile ega rakenda teenusepakkuja kaitselülitit ning kombo liigub oma järgmise sihtmärgi juurde täpselt nagu varem."
+      },
+      "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
+        "label": "Vastused: hoida elus ainult transpordi ajal",
+        "description": "Saatke vastused ellujäämiseks tühja reana response.in_progress sündmuse asemel, nii et sünteetiline hetktõmmis ei saa kunagi asendada tegelikku vastust ametlikus SDK. Tühi rida ei edasta SSE sündmust, seega ei lähtestata kliendi valvekoera, mis lähtestab ainult sündmuste korral, pika vaikse faasi ajal. Vaikimisi väljas: taimerid saadavad spetsifikatsiooniga kehtiva response.in_progress sündmuse."
+      },
+      "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
+        "label": "Jahtumisaja korduskatse: jäta 403/410 keeldumised vahele",
+        "description": "Kui kõik kontod on jahtumisolekus ning esimesena lõppeva jahtumisaja põhjustas 403 (juurdepääsust keeldutud) või 410 (kadunud), tagasta see keeldumine kohe, selle asemel et jahtumisaeg ära oodata ja päring uuesti saata; uuenev agentrouter ühendusepõhise kvoodi 403 talletatakse seejärel koodiga errorCode 429, et see jääks uuesti proovitavaks. Vaikimisi väljas: ainult 401 jätab ootamise vahele ja iga keeldumine talletatakse staatusega, millega see saabus."
+      },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Hinnastamata kasutuse eelarvepoliitika",
+        "description": "Kuidas per‑võtme päevased või nädalased USD‑limiidid käsitlevad edukat kasutust, mille teenusepakkujal või mudelil puudub hinnakirje. fail_closed (vaikimisi) märgib akna ületatuks, nii et tundmatu kulu ei pääse kunagi kõva limiidi alt läbi. count_as_zero arvestab selle kasutuse $0‑ks ja jätkab hinnastatud kulude piirangute rakendamist. Hinnastamata mudelid kuvatakse igal juhul juhtpaneeli avalehel."
       }
     }
   },
@@ -13629,6 +14610,7 @@
     "latency": "Latentsus",
     "quota": "Kvoot",
     "rangeWindow": "Ajavahemik: {range}",
+    "timeRange": "Ajavahemik",
     "runtimeHealthBlend": "käitusaja ja seisundi koondnäitaja",
     "averageResponseTime": "keskmine reageerimisaeg",
     "worstQuota": "Halvim kvoodiseis",
@@ -13690,6 +14672,8 @@
     "usdUsageQuotaDescription": "Blokeerib selle võtme API veakoodiga 400, kui selle kohalikud USD-kulud jõuavad seadistatud päeva- või nädalakvoodini.",
     "dailyQuotaUsd": "Päevakvoot (USD)",
     "weeklyQuotaUsd": "Nädalakvoot (USD)",
+    "fiveHourQuotaUsd": "5 tunni kvoot (USD)",
+    "fiveHourQuotaHint": "Libisev aken: iga päringu kulu loetakse 5 tundi, seejärel see vabaneb.",
     "quotaWindowDescription": "Nädalakvoot järgib võimaluse korral vahemällu salvestatud Claude’i iganädalast lähtestamist; muul juhul kasutatakse liikuvat 7-päevast ajavahemikku. Päevakvoot kasutab Fortaleza kalendripäeva.",
     "apiKeyUsdQuota": "API-võtme USD-kvoot",
     "apiKeyUsdQuotaDescription": "Kui see on lubatud, tagastab @@om-usage päevakvoodi, nädalakvoodi, päevakulu ja nädalakulu USA dollarites. Nädalakvoot järgib võimaluse korral vahemällu salvestatud Claude’i lähtestamist.",
@@ -13759,7 +14743,11 @@
       "ok": "Üldiselt lubavad tingimused"
     },
     "allProviders": "Kõik pakkujad",
-    "noApiKeyRequired": "API-võtit pole vaja"
+    "noApiKeyRequired": "API-võtit pole vaja",
+    "searchPlaceholder": "Otsi mudelit, pakkujat…",
+    "searchAria": "Otsi tasuta mudeleid",
+    "filterProviderAria": "Filtri pakkujate järgi",
+    "keylessOnly": "Vain võtmeta"
   },
   "providerHealthAutopilot": {
     "title": "Pakkujate töökindluse autopiloot",
@@ -13830,7 +14818,11 @@
     "learnMore": "Lisateave",
     "changelogLoadFailed": "Muudatuste logi ei õnnestunud laadida. Proovige hiljem uuesti.",
     "retry": "Proovi uuesti",
-    "viewFullHistory": "Vaata täielikku ajalugu GitHubis"
+    "viewFullHistory": "Vaata täielikku ajalugu GitHubis",
+    "title": "Uudised ja muudatuste logi",
+    "description": "OmniRoute'i meeskonna teadaanded ja uusimad väljalaskemärkmed",
+    "viewLabel": "Vaata",
+    "loadingNews": "Teadaannete laadimine..."
   },
   "reasoningRouting": {
     "editor": {
@@ -14232,7 +15224,8 @@
       "never": "-",
       "failureCount": "Tõrgete arv",
       "retryAfterMs": "Korduskatse pärast (ms)",
-      "lastFailureKind": "Viimase tõrke liik"
+      "lastFailureKind": "Viimase tõrke liik",
+      "lastClose": "Viimane sulgemishind"
     },
     "empty": {
       "title": "Ühendusi pole",
@@ -14283,6 +15276,63 @@
       "save": "Salvesta reeglid",
       "saved": "Jahtumisreeglid salvestatud",
       "saveFailed": "Jahtumisreegleid ei õnnestunud salvestada"
+    },
+    "errorRules": {
+      "title": "Vigade jahtumisreeglid",
+      "subtitle": "Tuvasta teenusepakkuja vead HTTP-oleku, veateksti või mõlema järgi ja vali, mida ja kui kauaks peatada. Need reeglid käivad enne sisseehitatud reegleid.",
+      "rulesHeading": "Reeglid",
+      "rulesEmpty": "Reegleid veel pole.",
+      "addRule": "Lisa reegel",
+      "provider": "Teenusepakkuja",
+      "providerPlaceholder": "nt openai",
+      "status": "HTTP-olek",
+      "statusPlaceholder": "Mis tahes",
+      "match": "Veatekst sisaldab",
+      "matchPlaceholder": "Mis tahes tekst",
+      "matchHint": "Kehtib esimene sobiv reegel. Veatekst on tavaline tekst, suur- ja väiketähti ei eristata, ning see pole regulaaravaldis. Tühi väli sobib kõigega.",
+      "scope": "Peata",
+      "scopes": {
+        "connection": "See ühendus",
+        "model": "Ainult see mudel",
+        "provider": "Kogu teenusepakkuja"
+      },
+      "reason": "Põhjus",
+      "reasonAuto": "Automaatne",
+      "reasons": {
+        "quota_exhausted": "Kvoot ammendatud",
+        "rate_limit_exceeded": "Päringupiirang ületatud",
+        "auth_error": "Autentimisviga",
+        "model_capacity": "Mudel ülekoormatud",
+        "server_error": "Serveri viga",
+        "unknown": "Muu"
+      },
+      "duration": "Kestus",
+      "durations": {
+        "auto": "Vaikimisi",
+        "30m": "30 minutit",
+        "1h": "1 tund",
+        "5h": "5 tundi",
+        "24h": "24 tundi",
+        "custom": "Kohandatud"
+      },
+      "customMinutes": "Minutid (1 kuni 43200)",
+      "remove": "Eemalda",
+      "defaultsHeading": "Vaikeväärtus sobimatute tõrgete jaoks",
+      "defaultsHint": "Valikuline, teenusepakkuja kaupa. Kehtib ainult siis, kui ükski reegel ei sobi veaga 402, 403, 408, 429 või 5xx. Päringuvigu, nagu 400, see kunagi ei mõjuta.",
+      "defaultsEmpty": "Vaikeväärtust pole. Sobimatud vead säilitavad sisseehitatud käitumise.",
+      "addDefault": "Lisa vaikeväärtus",
+      "errors": {
+        "provider": "Sisesta teenusepakkuja.",
+        "condition": "Määra HTTP-olek, veatekst või mõlemad.",
+        "status": "Kasuta olekut vahemikus 100–599.",
+        "duration": "Sisesta 1 kuni 43200 minutit.",
+        "duplicateDefault": "Sellel teenusepakkujal on juba vaikeväärtus.",
+        "tooMany": "Kõige rohkem 50 reeglit."
+      },
+      "save": "Salvesta veareeglid",
+      "saved": "Veareeglid salvestatud",
+      "saveFailed": "Veareegleid ei õnnestunud salvestada",
+      "loadFailed": "Veareegleid ei õnnestunud laadida"
     },
     "list": {
       "title": "Marsruutimisest väljas olevad ühendused",
@@ -14380,7 +15430,9 @@
       "circuitBreakerState": "Teenusepakkuja kaitselüliti olek",
       "lastUpdate": "Viimane uuendus: {timestamp}",
       "uptimeMinutes": "{minutes} min",
-      "uptimeHoursMinutes": "{hours} h {minutes} min"
+      "uptimeHoursMinutes": "{hours} h {minutes} min",
+      "breakerClosed": "Suletud",
+      "breakerNotClosed": "Avatud või poolavatud"
     },
     "statusPages": {
       "400": {
@@ -14455,6 +15507,9 @@
         "primaryAction": "Hoolduse üksikasjad",
         "secondaryAction": "Süsteemi olek"
       }
+    },
+    "miniapp": {
+      "askAnything": "Küsi mida tahes…"
     }
   },
   "kiroAuthModal": {
@@ -14488,7 +15543,10 @@
     "importing": "Importimine...",
     "apiKeyPlaceholder": "Kleepige oma {providerLabel} API-võti...",
     "apiKeyStoredDescription": "Salvestatakse krüpteeritult pikaajalise esitaja mandaadina. Värskendamisvoog puudub.",
-    "apiKeyRegionDescription": "Võtme AWS-i piirkond (vaikimisi: us-east-1)",
+    "apiKeyRegionAuto": "Automaatne tuvastamine (soovitatav)",
+    "apiKeyRegionUsEast1": "USA ida (Põhja-Virginia)",
+    "apiKeyRegionEuCentral1": "Euroopa (Frankfurt)",
+    "apiKeyRegionAutoDescription": "Automaatne tuvastamine proovib esmalt USA ida, seejärel Euroopa (Frankfurt) piirkonda ja salvestab piirkonna, kus võti töötab.",
     "validating": "Valideerimine...",
     "validateAndSaveApiKey": "Valideeri ja salvesta API-võti",
     "errorAutoDetect": "Luba ei õnnestunud automaatselt tuvastada",
@@ -14548,7 +15606,10 @@
     "distributeProxies": {
       "distributing": "Puhverserverite jaotamine...",
       "complete": "Valmis",
-      "defaultLabel": "Jaota puhverserverid"
+      "defaultLabel": "Jaota puhverserverid",
+      "confirmMessage": "Kas määrata salvestatud puhverserverid selle rühma igale kontole? See asendab olemasolevad kontode määrangud ja lubab puhverserveri kaudu marsruutimise, sealhulgas keelatud kontode puhul.",
+      "confirmDistribute": "Jaota puhverserverid",
+      "cancel": "Loobu"
     }
   },
   "providerTest": {
@@ -14606,6 +15667,7 @@
     "upstreamStatus": "Ülesvoolu olek",
     "noResponse": "Ei vastata",
     "egressIp": "Väljaminev IP",
+    "egressIpFamily": "IPv{version}",
     "headersAfter": "Päised pärast",
     "firstChunkAfter": "Esimene tükk pärast",
     "servedBy": "Teenindab",
@@ -14639,7 +15701,20 @@
     "mcp": "MCP",
     "mcpTool": "MCP tool",
     "scope": "Scope",
-    "apiKey": "API key"
+    "apiKey": "API key",
+    "visibleCount": "{visible} nähtavat / kokku {total}",
+    "modeLabel": "Vaaterežiim",
+    "jumpToNow": "Liigu praegusele ajale; joon PRAEGU lähtestatakse asukohale {position}%",
+    "laneReuse": "Rea taaskasutus",
+    "laneReuseLabel": "Rea taaskasutuse ajavahemik (minutites)",
+    "laneReuseHint": "Sama vestluse ID-ga päringud jäävad ajaskaalal samale reale, kui nende vahe on väiksem kui määratud arv minuteid.",
+    "laneReuseUnit": "min",
+    "autoRefresh": "Automaatne värskendamine",
+    "autoRefreshLabel": "Automaatse värskendamise intervall (sekundites)",
+    "autoRefreshHint": "Kui sageli laadib ajaskaala päringute loendi serverist uuesti.",
+    "autoRefreshUnit": "s",
+    "zoomOut": "Vähenda",
+    "zoomIn": "Suurenda"
   },
   "metadata": {
     "compressionTitle": "Tihendamine",
@@ -14843,6 +15918,83 @@
     "dismissAriaLabel": "Sulge"
   },
   "featureFlagOmnirouteDisableThinkingLevelVariantsDescription": "Keela mõtlemistaseme variantide (nt -low, -medium, -high) loomine /v1/models kataloogis.",
+  "teamCosts": {
+    "title": "Tiimi kulud",
+    "subtitle": "Hallake jagatud pehmeid eelarveid ja kataloogi kuluhinnanguid.",
+    "refresh": "Värskenda",
+    "create": "Loo tiim",
+    "edit": "Muuda tiimi",
+    "archive": "Arhiveeri",
+    "selectTeam": "Tiimid",
+    "searchTeams": "Otsi tiime",
+    "statusFilter": "Tiimi olek",
+    "active": "Aktiivne",
+    "archived": "Arhiveeritud · ainult lugemiseks",
+    "allTeams": "Kõik tiimid",
+    "noTeams": "Sobivaid tiime pole.",
+    "selectHint": "Kulude nägemiseks looge või valige tiim.",
+    "loading": "Tiimi kulusid laaditakse…",
+    "budgetTitle": "Praegune pehme eelarve",
+    "budgetSubtitle": "Edukas kinnitatud kasutus · libisev aken · aruande kuupäevadest sõltumatu",
+    "archivedBudget": "Arhiveeritud: eelarve jõustamine on mitteaktiivne. Ajaloolised aruanded jäävad kättesaadavaks.",
+    "unlimited": "Piiramatu – jagatud pehmet eelarvet pole seadistatud.",
+    "budgetUnavailable": "Eelarve olek pole saadaval. Uuesti proovimiseks värskendage.",
+    "used": "Edukas kasutus",
+    "maximum": "Eelarve maksimum",
+    "remaining": "Teadaolev jääk",
+    "resets": "Lähtestatakse",
+    "unpricedBudget": "Osal edukal kasutusel on hind teadmata. Teadaolev summa on mittetäielik; eelarve jõustamine käsitleb seda akent ületatuna.",
+    "overBudget": "Eelarve saavutatud või ületatud · {amount} üle",
+    "reportTitle": "Kasutusaruanne",
+    "reportSubtitle": "Kõik katsed · kataloogi hinnang USD-s, mitte arve · terved UTC kuupäevad",
+    "reportPeriod": "Aruande periood",
+    "day1": "1 päev",
+    "day7": "7 päeva",
+    "day30": "30 päeva",
+    "allTime": "Kogu aeg",
+    "reportSpend": "Aruande hinnangulised kulud",
+    "requests": "Päringud",
+    "assignedKeys": "Määratud võtmed",
+    "unpricedReport": "See aruanne sisaldab teadmata hindu. Hinnangulised kulud on mittetäielikud.",
+    "breakdown": "Kulu API võtme kaupa",
+    "noUsage": "Selles aruande perioodis kasutust pole.",
+    "keyName": "API võtme nimi",
+    "tokens": "Sisend- + väljundmärgid",
+    "unnamedKey": "Nimetu või kustutatud võti",
+    "unpriced": "Tundmatu hind",
+    "members": "Liikmesus",
+    "memberSubtitle": "Liikmesuse muutmine jätab ajaloolised kulud algsesse tiimi.",
+    "searchKeys": "Otsi võtmeid või praeguseid omanikke",
+    "chooseKey": "Valige API võti",
+    "unassigned": "Määramata",
+    "ownership": "Praegune arveldustiim: {team}",
+    "assign": "Määra",
+    "remove": "Eemalda",
+    "noMembers": "Praegusi liikmeid pole. Ajalooline kasutus võib endiselt eelarvesse lugeda.",
+    "assignedAt": "Määratud {date} (UTC)",
+    "name": "Tiimi nimi",
+    "description": "Kirjeldus",
+    "enableBudget": "Luba jagatud pehme eelarve",
+    "amount": "Eelarve summa (USD)",
+    "duration": "Libisev eelarveaken",
+    "cancel": "Tühista",
+    "save": "Salvesta",
+    "confirm": "Kinnita",
+    "transferTitle": "Kinnitage võtme üleandmine",
+    "transferMessage": "Kas teisaldada see võti tiimist „{source}” tiimi „{destination}”? Ajaloolised kulud jäävad algsesse tiimi.",
+    "removeTitle": "Eemalda võtme määramine",
+    "removeMessage": "Kas eemaldada see võti tiimist „{team}”? Ajaloolised kulud jäävad sellesse tiimi.",
+    "archiveTitle": "Arhiveeri tiim",
+    "archiveMessage": "Kas arhiveerida „{team}”? Kõik praegused seosed suletakse ja eelarve jõustamine peatub. Ajaloolised aruanded jäävad kättesaadavaks.",
+    "invalidName": "Sisestage nimi (1–200 märki) ja kuni 2000 märgi pikkune kirjeldus.",
+    "invalidAmount": "Sisestage lõplik eelarve summa, mis on suurem kui null.",
+    "unauthorized": "Jätkamiseks logige sisse haldusarmatuurlauale.",
+    "forbidden": "Teil pole luba tiime hallata. Teie sisend on säilitatud.",
+    "notFound": "Seda tiimi või määramist enam pole.",
+    "conflict": "Määramine või tiim muutus. Värskendage ja kinnitage enne uuesti proovimist praegune omand.",
+    "failed": "Päring ebaõnnestus. Teie sisend on säilitatud; proovige uuesti.",
+    "partialBudget": "Mõned säilitatud päevakorvid kattuvad akna piiriga ja neid ei saa täpselt jaotada. Kuvatud kulu on mittetäielik; allesjäänud ruum pole saadaval. Olemasolev pehme eelarve poliitika ei muutu."
+  },
   "connectionTest": {
     "title": "Testsõnum",
     "description": "Saada selle konto kaudu üks tegelik päring. See kasutab vähesel määral kvooti ja võib olenevalt teenusepakkujast käivitada kasutusperioodi.",
@@ -14864,5 +16016,179 @@
     "saveMessage": "Salvesta sõnum",
     "defaultModel": "Vaikimisi testmudel",
     "defaultModelHint": "Selle konto puhul kasutavad seda automaatselt nupud „Testi sõnumit“. Salvestatakse koos ühendusega; ühtegi sõnumit ei saadeta."
+  },
+  "providerTransfer": {
+    "open": "Valikuline ülekanne",
+    "title": "Teenusepakkujate valikuline ülekanne",
+    "description": "Teisalda valitud teenusepakkuja kontod (ja nende kasutatavad kohandatud teenusepakkuja sõlmed) teise OmniRoute'i paigaldusse. Fail pitseeritakse paroolifraasiga ja import ei kustuta kunagi midagi.",
+    "exportTab": "Ekspordi",
+    "importTab": "Impordi",
+    "searchPlaceholder": "Otsi kontosid…",
+    "selectAll": "Vali kõik",
+    "clearSelection": "Tühjenda",
+    "selectedCount": "Valitud: {count}",
+    "noAccounts": "Sobivaid teenusepakkuja kontosid pole.",
+    "loadFailed": "Teenusepakkuja kontosid ei õnnestunud laadida.",
+    "passphrase": "Paroolifraas",
+    "passphraseConfirm": "Kinnita paroolifraas",
+    "passphraseHint": "Vähemalt {min} märki. Seda ei salvestata kunagi; ilma selleta faili avada ei saa.",
+    "passphraseMismatch": "Paroolifraasid ei ühti.",
+    "oauthWarning": "Refresh-tokeneid vahetavad OAuth-kontod võivad ühes paigalduses lakata töötamast, kui teine need uuendab.",
+    "acknowledge": "Mõistan, et see fail sisaldab valitud kontode API-võtmeid ja tokeneid selle paroolifraasiga pitseerituna.",
+    "exportButton": "Ekspordi valitud",
+    "exportDone": "Eksporditud kontosid: {count}.",
+    "exportFailed": "Eksport ebaõnnestus.",
+    "chooseFile": "Vali ülekandefail",
+    "invalidFile": "See ei ole OmniRoute'i teenusepakkujate ülekandefail.",
+    "previewButton": "Eelvaade",
+    "previewFailed": "Ülekandefaili ei õnnestunud lugeda.",
+    "summary": "Failis on {connections} kontot ja {nodes} teenusepakkuja sõlme. Midagi ei kustutata.",
+    "statusNew": "Uus",
+    "statusIdentical": "Identne",
+    "statusConflict": "Konflikt",
+    "statusUnsupported": "Pole toetatud",
+    "actionAdd": "Lisa",
+    "actionSkip": "Jäta vahele",
+    "actionReplace": "Asenda",
+    "providerNode": "Teenusepakkuja sõlm",
+    "importButton": "Impordi",
+    "importFailed": "Import ebaõnnestus.",
+    "importSuccess": "Imporditi {connections} kontot ja {nodes} teenusepakkuja sõlme; vahele jäeti {skipped}."
+  },
+  "conversations": {
+    "title": "Jutud",
+    "countSummary": "{total, plural, one {# jutud} other {# jutud}} 2 või rohkem käigu",
+    "autoRefreshTitle": "Kuidas sageli taastub see nimekiri serverilt.",
+    "autoRefresh": "Automaatne uuendamine",
+    "loading": "Jutude laadimine...",
+    "colConversation": "Vestlus",
+    "colTurns": "Voorad",
+    "colContinuation": "Jatkus",
+    "colLastModel": "Viimane mudel",
+    "colProvider": "Teenusepakkija",
+    "colStatus": "Staatus",
+    "colLastSeen": "Viimati nähtud",
+    "drawerTitle": "Vestlus",
+    "prevConversation": "Eelmine vestlus",
+    "nextConversation": "Järgmine vestlus",
+    "gotoLatestRequest": "Mine viimasele taotlusele",
+    "goToBottom": "Mine lõppu",
+    "statusInProgress": "Käib",
+    "continuationGenuineTitle": "Viimane käik kasutas previous_response_id-i ja see lahendati serveril",
+    "continuationBadge": "jätkamine",
+    "stalledTitle": "Viimane käik ei lõppnud peatusega ja midagi pole jätkunud 5+ minutit",
+    "stalledBadge": "seisaku olekus",
+    "noTurns": "Selle vestluse jaoks pole käike registreeritud."
+  },
+  "logExport": {
+    "startFromCurrentPosition": "Alusta praegusest asukohast (jäta olemasolevad logid vahele)",
+    "pageTitle": "Logi eksport",
+    "pageSubtitle": "Selle kaudu saadetakse Logid-sa ohtu kogu ajakiri pidevalt välise analüütika andmebaasi.",
+    "addDestination": "Lisa sihtkoht",
+    "scheduleTitle": "Aegloend",
+    "cronLabel": "Cron",
+    "notScheduled": "pole kavas",
+    "lastScheduledRun": "Viimane kavasolev täitumine",
+    "lastRunSummary": "{startedAt} — {status}, {rows} rida",
+    "never": "pole kunagi",
+    "highWaterMark": "Kogukonverentside andmekirja tase",
+    "rowPrefix": "rida {id}",
+    "noDestinations": "Ekspordi sihtkohti puudub",
+    "noDestinationsHint": "Lisa sihtkoht, et alustada kõnelogide saatmist iga tundine ajakava järgi.",
+    "errLoadStatus": "Ekspordi seisundi laadimine ebaõnnestus",
+    "errSaveDestination": "Sihtkoha salvestamine ebaõnnestus",
+    "msgDestinationSaved": "Sihtkoht on salvestatud.",
+    "errConnectionTest": "Ühenduse test ebaõnnestus",
+    "msgRunInFlight": "Selle sihtkoha käivitamine on juba käimas; mitmekordset saatmist ei toimunud.",
+    "errExportRun": "Ekspordi käivitamine ebaõnnestus",
+    "errUpdateDestination": "Sihtkoha uuendus ebaõnnestus",
+    "errDeleteDestination": "Sihtkoha kustutamine ebaõnnestus",
+    "deleteTitle": "Kustuta sihtkoht",
+    "deleteConfirm": "Kustutada \"{name}\"? Selle ekspordi kursor kustutatakse samuti, nii et selle uuesti lisamine algab vanimast salveeritud väljakutse logist.",
+    "statusDisabled": "Kehtetu",
+    "statusFailing": "Ebaõnnestuv",
+    "statusHealthy": "Terve",
+    "statusNotRunYet": "Pole veel käivitatud",
+    "typeNotInstalled": "Tüüp pole paigaldatud",
+    "metaLine": "Viimati käivitatud {lastRun} · eksportitud {exported} rida · {pending} ootel · kursor {cursor}",
+    "btnTest": "Test",
+    "btnRunNow": "Käivita kohe",
+    "btnDisable": "Keela sisse",
+    "btnEnable": "Luba",
+    "btnEdit": "Muuda",
+    "btnDelete": "Kustuta"
+  },
+  "cliproxyHealth": {
+    "cardTitle": "CLIProxyAPI kontod",
+    "cardSubtitle": "Lõpp-toiminguse seisund autentimise haldus API-st",
+    "btnRefresh": "Värskenda",
+    "listAria": "CLIProxyAPI konto seisund",
+    "noAccounts": "CLIProxyAPI kontosid ei leitud.",
+    "loading": "Kontode seisundit laaditakse…",
+    "stateReady": "Konto tervis",
+    "stateDisabled": "CLIProxyAPI pole installitud",
+    "stateMissingKey": "Haldavõtmis pole konfiguratsioneeritud",
+    "stateUnreachable": "Halday API ei ole saadaval",
+    "stateUnauthorized": "Haldavõti lühidati",
+    "stateUnsupported": "See CLIProxyAPI versioon ei paljasta konto tervist",
+    "stateInvalidResponse": "Halday API tagastas toetamata vastuse"
+  },
+  "darioPanel": {
+    "title": "Claude kontod",
+    "description": "Autentige Dario oma Claude Pro/Max tellimusega. Liiklus arvestatakse teie tellimuse poolga. Vähemalt üks konto on vajalik enne, kui Dario suudab taotlusi suunata (seni kuni /health raporteerib hägustatud olekut).",
+    "noAccounts": "Ühtegi kontot pole veel konfigurereitud.",
+    "importTitle": "Impordi OmniRoutest",
+    "importDescription": "Kasuta olemasoleva OmniRoute Claude-ühenduse OAuth-tokenisid uuesti selle asemel, et sisse logida — vahelejääb brauseri kinnitusetapp täielikult.",
+    "importPendingTooltip": "Olema aktiivne, kui OmniRoutest on olemas Claude-ühendus.",
+    "btnImport": "Impordi",
+    "btnImporting": "Importitakse…",
+    "aliasPlaceholder": "aliäsitus (valikuline)",
+    "btnStartLogin": "Käivita sisselogimine",
+    "btnStarting": "Käivitatakse…",
+    "btnCompleteLogin": "Lõpeta sisselogimine",
+    "btnCompleting": "Lõpetatakse…",
+    "codePlaceholder": "koodi#olek või tase kood",
+    "noticeImported": "Importitud konto kui \"{alias}\" — Dario taaskäivitas selle tuvastamiseks.",
+    "noticeAdded": "Konto \"{alias}\" lisatud.",
+    "expiresInHours": "kehtib ~{hours} tundi",
+    "expiresInMinutes": "kehtib ~{minutes} minutit",
+    "expiresAt": "aegub {date}",
+    "scopes": "{count, plural, one {# ala} other {# alad}}",
+    "btnRemove": "Eemalda",
+    "btnRefresh": "Värse",
+    "loginStep1": "1. Ava see URL brauseris ja luba ligipääs kontole <mono>{alias}</mono>:",
+    "pendingExpires": "Ootejärjekus olev sisselogimine aegub {time}",
+    "loginStep2": "2. Liimige kood, mille Anthropic kuvab:"
+  },
+  "miniapp": {
+    "title": "OmniRoute Mini App",
+    "errTelegramOnly": "Selle lehe tuleb avada Telegrami Mini Appis.",
+    "greeting": "👋 Tere, {name}! Sada sõnumit OmniRoute värava kaudu vestlema.",
+    "greetingFallbackName": "sina",
+    "errNoReply": "⚠️ Väravalt ei ole vastust.",
+    "btnSend": "Saada"
+  },
+  "falNative": {
+    "title": "Fal natiivmudelid",
+    "description": "Leia otspunkt, laadi selle skeem ja käivita see dokumenteeritud sisenditega. Järjekorra olek ja natiivne voogedastus jäävad eraldi.",
+    "connectionRequired": "Lisa esmalt ühendus Fal API-võtmega.",
+    "category": "Kategooria",
+    "endpoint": "Otspunkti ID",
+    "reasoning": "Arutluse seadistus",
+    "input": "JSON-sisend natiivvormingus (massiivide elementide järjekord säilib)",
+    "transport": "Edastusviis",
+    "run": "Käivita mudel",
+    "job": "Salvestatud töö ID",
+    "register": "Registreeri otspunkt või asenda skeem",
+    "schema": "OpenAPI 3 skeem",
+    "download": "Laadi väljundfail alla",
+    "newGeneration": "__MISSING__",
+    "submissionUnknown": "__MISSING__",
+    "recover": "__MISSING__",
+    "recoveryRecord": "__MISSING__",
+    "recoveryMismatch": "__MISSING__",
+    "recoveryHelp": "__MISSING__",
+    "streamIncomplete": "__MISSING__",
+    "streamError": "__MISSING__"
   }
 }

@@ -1,6 +1,8 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
+import { Sheet, SheetContent, SheetTitle } from "@omniroute/ui-kit/sheet";
+import Button from "@/shared/components/Button";
 import { StatusDot } from "@/shared/components/flow/StatusDot";
 import { orchStateColor, type OrchNode, type OrchState } from "../model/orchestrationTypes";
 import { useDrawerDetail } from "./useDrawerDetail";
@@ -56,7 +58,7 @@ function isHttpUrl(url: string | undefined): url is string {
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="mb-4">
-      <div className="text-[10px] font-semibold uppercase text-muted mb-1">{title}</div>
+      <div className="text-[10px] font-semibold uppercase text-text-muted mb-1">{title}</div>
       {children}
     </div>
   );
@@ -69,7 +71,7 @@ function Timeline({ node, detail }: { node: OrchNode; detail: unknown }) {
       <ol className="text-xs flex flex-col gap-1.5">
         {(t?.activities ?? []).map((a) => (
           <li key={a.id} className="flex gap-2">
-            <code className="text-[9px] shrink-0 text-muted">{a.type}</code>
+            <code className="text-[9px] shrink-0 text-text-muted">{a.type}</code>
             <span className="break-words">{a.content}</span>
           </li>
         ))}
@@ -82,7 +84,7 @@ function Timeline({ node, detail }: { node: OrchNode; detail: unknown }) {
       <ol className="text-xs flex flex-col gap-1">
         {(t?.events ?? []).map((e, i) => (
           <li key={i}>
-            <code className="text-[9px] text-muted mr-1">{e.state}</code>
+            <code className="text-[9px] text-text-muted mr-1">{e.state}</code>
             {e.message ?? e.timestamp}
           </li>
         ))}
@@ -128,17 +130,28 @@ function DrawerHeader({
         pulse={state === "running"}
       />
       <div className="min-w-0">
-        <div className="text-sm font-semibold truncate">{node.label}</div>
-        <div className="text-[10px] text-muted">
+        <SheetTitle className="text-sm font-semibold truncate">{node.label}</SheetTitle>
+        <div className="text-[10px] text-text-muted">
           {node.source} · {t(STATE_KEY[state])}
         </div>
       </div>
-      <button className="ml-auto text-muted" onClick={copyTrace} aria-label={t("copyTrace")}>
-        ⧉
-      </button>
-      <button className="text-muted" onClick={onClose} aria-label={t("drawerClose")}>
-        ✕
-      </button>
+      <Button
+        variant="ghost"
+        size="icon"
+        icon="content_copy"
+        className="ml-auto"
+        onClick={copyTrace}
+        aria-label={t("copyTrace")}
+        title={t("copyTrace")}
+      />
+      <Button
+        variant="ghost"
+        size="icon"
+        icon="close"
+        onClick={onClose}
+        aria-label={t("drawerClose")}
+        title={t("drawerClose")}
+      />
     </div>
   );
 }
@@ -200,7 +213,7 @@ function DrawerBanners({
           {t(errorKind === "detail" ? "detailFailed" : "actionFailed", { error })}
         </div>
       )}
-      {isLoading && <div className="text-xs text-muted mb-3">…</div>}
+      {isLoading && <div className="text-xs text-text-muted mb-3">…</div>}
     </>
   );
 }
@@ -289,9 +302,9 @@ function DrawerMemory({ a2a, t }: { a2a: A2ATask | null; t: Translate }) {
       <ul className="text-xs flex flex-col gap-1.5">
         {hits.map((h) => (
           <li key={h.id}>
-            <code className="text-[9px] text-muted mr-1">{h.type}</code>
+            <code className="text-[9px] text-text-muted mr-1">{h.type}</code>
             <span className="font-medium">{h.key}</span>
-            <div className="text-[10px] text-muted break-words">{h.snippet}</div>
+            <div className="text-[10px] text-text-muted break-words">{h.snippet}</div>
           </li>
         ))}
       </ul>
@@ -366,14 +379,15 @@ function RepeatButton({
     })();
   });
   return (
-    <button
-      className="text-xs rounded border border-border px-2 py-1 disabled:opacity-50"
+    <Button
+      variant="outline"
+      size="sm"
       onClick={onClick}
       disabled={!canRepeat}
       title={canRepeat || busy ? undefined : t("repeatUnavailable")}
     >
       {confirming ? t("repeatConfirm") : t("actionRepeat")}
-    </button>
+    </Button>
   );
 }
 
@@ -414,22 +428,20 @@ function DrawerActions({
     <Section title={t("drawerActions")}>
       <div className="flex gap-2">
         {canApprove && (
-          <button
-            className="text-xs rounded border border-success px-2 py-1 disabled:opacity-50"
+          <Button
+            variant="outline"
+            size="sm"
+            className="border-success text-success"
             onClick={() => run(approve)}
             disabled={busy}
           >
             {t("actionApprove")}
-          </button>
+          </Button>
         )}
         {canCancel && (
-          <button
-            className="text-xs rounded border border-error px-2 py-1 disabled:opacity-50"
-            onClick={() => run(cancel)}
-            disabled={busy}
-          >
+          <Button variant="danger" size="sm" onClick={() => run(cancel)} disabled={busy}>
             {t("actionCancel")}
-          </button>
+          </Button>
         )}
         {showRepeat && (
           <RepeatButton
@@ -444,19 +456,6 @@ function DrawerActions({
       </div>
     </Section>
   );
-}
-
-/** Closes the drawer on Escape while `node` is set. Rebinds by id, not by object
- * identity, so a fresh `node` reference for the same task (e.g. a refetch) does not
- * tear down and re-add the listener. */
-function useCloseOnEscape(node: OrchNode | null, onClose: () => void) {
-  const nodeId = node?.id ?? null;
-  useEffect(() => {
-    if (!nodeId) return;
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [nodeId, onClose]);
 }
 
 /**
@@ -507,7 +506,6 @@ export function OrchestrationDrawer({
     cancel,
     repeat,
   } = useDrawerDetail(node);
-  useCloseOnEscape(node, onClose);
   const { toast, showToast } = useDrawerToast();
 
   if (!node) return null;
@@ -517,12 +515,19 @@ export function OrchestrationDrawer({
     node.source === "cloud-agent" || node.source === "a2a" || node.source === "conductor";
 
   return (
-    <>
-      <div className="fixed inset-0 bg-black/20 z-30" onClick={onClose} aria-hidden />
-      <aside
-        className="fixed right-0 top-0 h-full w-[380px] max-w-full bg-surface border-l border-border z-40 overflow-y-auto p-4"
-        role="dialog"
-        aria-label={node.label}
+    // Kit Sheet (Radix Dialog): overlay click and Escape close it, focus is trapped while open
+    // and returns to the canvas node afterwards.
+    <Sheet
+      open
+      onOpenChange={(open) => {
+        if (!open) onClose();
+      }}
+    >
+      <SheetContent
+        side="right"
+        showClose={false}
+        aria-describedby={undefined}
+        className="w-[380px] max-w-full overflow-y-auto p-4"
       >
         <DrawerHeader
           node={node}
@@ -561,7 +566,7 @@ export function OrchestrationDrawer({
           onToast={showToast}
           t={t}
         />
-      </aside>
-    </>
+      </SheetContent>
+    </Sheet>
   );
 }

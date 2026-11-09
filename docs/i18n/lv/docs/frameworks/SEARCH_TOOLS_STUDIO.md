@@ -40,30 +40,30 @@ Studio ar trim cilnēm, kas apvieno meklēšanu tīmeklī, tīmekļa satura izg�
 
 Pārveido esošo `SearchForm` + `ResultsPanel` + `RerankPanel` par cilni:
 
-- Vaicājums → rezultāti (virsraksts, URL, fragments, atbilstības rādītājs).
+- Vaicājums → rezultāti (virsraksts, URL, fragments, atbilstības vērtējums).
 - Pakalpojumu sniedzēja metadati konfigurācijas rūtī (izmaksas, kvota, statuss).
 - Pārkārtošanas sadaļa: izvēlieties pārkārtošanas modeli, mainiet rezultātu secību, parādiet `positionDelta`.
-- Tukšs stāvoklis ar aicinājumu rīkoties, ja nav konfigurēts neviens meklēšanas pakalpojumu sniedzējs.
+- Tukšais stāvoklis ar aicinājumu uz darbību, ja nav konfigurēts neviens meklēšanas pakalpojumu sniedzējs.
 - Meklēšanas vēsture, izmantojot `SearchHistory.tsx`.
-- Izsauc `POST /v1/search` (esošs galapunkts, bez izmaiņām).
+- Izsauc `POST /v1/search` (esošais galapunkts, bez izmaiņām).
 
 ### Satura izgūšanas cilne
 
 Jauna cilne satura izgūšanai no URL, izmantojot `POST /v1/web/fetch` (izveidots 05. plānā):
 
-- Ievade: URL + visas lapas slēdzis + formāta atlasītājs (Markdown / teksts / HTML).
-- Iesniegšana → izgūšana → `ScrapeResult.tsx` attēlošana.
-- `ScrapeResult` attēlo Markdown priekšskatījumu un neapstrādātā satura slēdzi.
-- Ierobežojums: ja atbildes pamatteksts pārsniedz **256 KB**, lietotāja saskarne parāda `(saīsināts, skatīt neapstrādāto saturu)` un atver neapstrādāto saturu Monaco modālajā logā (D21).
-- Metadatu panelis: pakalpojumu sniedzējs (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search), latentums, izmaksas, atbildes lielums, saišu skaits.
+- Ievade: URL + pilnas lapas pārslēgs + formāta atlasītājs (markdown / teksts / HTML).
+- Iesniegšana → izgūšana → `ScrapeResult.tsx` atveidošana.
+- `ScrapeResult` atveido markdown priekšskatījumu un neapstrādātā satura pārslēgu.
+- Ierobežojums: ja atbildes pamatteksts pārsniedz **256 KB**, lietotāja saskarnē tiek parādīts `(saīsināts, skatīt neapstrādāto saturu)`, un neapstrādātais saturs tiek atvērts Monaco modālajā logā (D21).
+- Metadatu panelis: pakalpojumu sniedzējs (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), latentums, izmaksas, atbildes lielums, saišu skaits.
 - Izmanto `useScrapeFetch.ts` āķi.
 
 ### Salīdzināšanas cilne
 
-Palaiž vienu un to pašu vaicājumu/URL paralēli līdz pat **4 pakalpojumu sniedzējiem** (D22):
+Izpilda vienu un to pašu vaicājumu/URL paralēli līdz pat **4 pakalpojumu sniedzējiem** (D22):
 
-- Katram pakalpojumu sniedzējam paredzētas līdzās izvietotas kolonnas.
-- Metrikas: latentums, izmaksas, rezultātu skaits, atbildes lielums.
+- Katram pakalpojumu sniedzējam blakus izvietotas kolonnas.
+- Rādītāji: latentums, izmaksas, rezultātu skaits, atbildes lielums.
 - URL pārklāšanās aprēķins meklēšanai (kopīgo URL skaits salīdzinājumā ar sākotnējo rezultātu).
 - Katram pakalpojumu sniedzējam izsauc `POST /v1/search` (meklēšana) vai `POST /v1/web/fetch` (satura izgūšana).
 
@@ -98,14 +98,14 @@ Palaiž vienu un to pašu vaicājumu/URL paralēli līdz pat **4 pakalpojumu sni
 
 ---
 
-## Nodrošinātāju katalogs
+## Pakalpojumu sniedzēju katalogs
 
-`ProviderCatalog.tsx` parāda pilnu nodrošinātāju sarakstu no `GET /api/search/providers`
-(paplašināts F4, lai iekļautu satura iegūšanas nodrošinātājus):
+`ProviderCatalog.tsx` parāda pilnu pakalpojumu sniedzēju sarakstu no `GET /api/search/providers`
+(F4 paplašināts, iekļaujot arī izgūšanas pakalpojumu sniedzējus):
 
-| `kind` | `"search"` (20 nodrošinātāji) vai `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search) |
+| `kind` | `"search"` (20 pakalpojumu sniedzēji) vai `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
 
-Statuss tiek **noteikts pieprasījuma laikā**, pārbaudot, vai akreditācijas dati pastāv un vai
+Statuss tiek **noteikts pieprasījuma izpildes laikā**, pārbaudot, vai pastāv akreditācijas dati un vai
 visām atslēgām pašlaik ir nogaidīšanas periods.
 
 ---
@@ -120,16 +120,16 @@ API atslēgas vietturis vienmēr ir `$OMNIROUTE_API_KEY` (D11, koplietots ar Pla
 
 ## Aizmugursistēmas izmaiņas
 
-Šai funkcionalitātei bija nepieciešama tikai viena aizmugursistēmas izmaiņa:
+Šai funkcijai bija nepieciešama tikai viena aizmugursistēmas izmaiņa:
 
 ### Paplašināts `GET /api/search/providers`
 
 `src/app/api/search/providers/route.ts` tika paplašināts, lai:
 
-- Masīvā iekļautu visus 6 satura iegūšanas nodrošinātājus (`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`).
+- Masīvā iekļautu visus ielādes nodrošinātājus (`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`, `parallel-search`).
 - Katram vienumam pievienotu `kind: "search" | "fetch"`.
-- Pievienotu `status: "configured" | "missing" | "rate_limited"`, kas iegūts no akreditācijas datu pašreizējā stāvokļa.
-- Saglabātu atpakaļsaderību — esošie lauki (`id`, `name` utt.) nav mainīti.
+- Pievienotu `status: "configured" | "missing" | "rate_limited"`, kas iegūts no pašreizējā akreditācijas datu stāvokļa.
+- Saglabātu atpakaļsaderību — esošie lauki (`id`, `name` utt.) paliek nemainīti.
 
 ---
 

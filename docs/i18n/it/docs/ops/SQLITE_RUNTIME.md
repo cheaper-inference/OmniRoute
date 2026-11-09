@@ -4,18 +4,18 @@
 
 ---
 
-OmniRoute risolve il proprio driver SQLite all'avvio tramite una catena di fallback in 5 passaggi:
+OmniRoute determina il proprio driver SQLite all'avvio tramite una catena di fallback in 5 passaggi:
 
 1. **`better-sqlite3` incluso** (tramite `dependencies` in `package.json`)
-   — il più veloce, binario nativo, installato da `npm install` quando sono presenti gli strumenti di compilazione.
+   — il più veloce, con binario nativo, installato da `npm install` quando sono presenti gli strumenti di compilazione.
 
-2. **`better-sqlite3` installato a runtime** (in `~/.omniroute/runtime/`)
-   — installato in modo differito alla prima esecuzione **OPPURE** da `scripts/build/postinstall.mjs → scripts/postinstall.mjs`.
-   Convalida i magic byte del file nativo `.node` (ELF / Mach-O / PE) prima del caricamento
-   per proteggersi da binari corrotti o destinati alla piattaforma sbagliata.
+2. **`better-sqlite3` installato in fase di esecuzione** (in `~/.omniroute/runtime/`)
+   — installato in modo differito al primo avvio **OPPURE** da `scripts/build/postinstall.mjs → scripts/postinstall.mjs`.
+   Convalida i byte magici del file nativo `.node` (ELF / Mach-O / PE) prima del caricamento
+   per proteggersi da binari danneggiati o destinati alla piattaforma errata.
 
 3. **`node:sqlite`** (libreria standard di Node ≥22.5) — non richiede una compilazione nativa; viene utilizzato quando
-   entrambi i percorsi di better-sqlite3 falliscono. Set di funzionalità limitato.
+   entrambi i percorsi di better-sqlite3 non funzionano. Insieme di funzionalità limitato.
 
 4. **`sql.js`** (WASM) — fallback finale. Funziona ovunque, ma è più lento
    e scrive i dati a intervalli anziché in modo sincrono.
@@ -24,28 +24,28 @@ OmniRoute risolve il proprio driver SQLite all'avvio tramite una catena di fallb
 
 - **EBUSY su Windows**: `npm install -g omniroute@latest` può non riuscire se il file
   `better_sqlite3.node` della versione precedente è bloccato da un processo in esecuzione. L'installazione
-  a runtime in `~/.omniroute/runtime/` evita la cache npm globale.
+  in fase di esecuzione in `~/.omniroute/runtime/` evita la cache npm globale.
 - **Assenza di strumenti di compilazione**: alcuni ambienti (Windows aziendale senza VS Build
   Tools, immagini Docker minimali) non possono compilare `better-sqlite3`. Il programma di installazione
-  a runtime recupera un binario precompilato dal registro npm; i driver di fallback
-  garantiscono che OmniRoute possa comunque avviarsi anche se l'operazione non riesce.
+  in fase di esecuzione recupera un binario precompilato dal registro npm; i driver di fallback
+  garantiscono che OmniRoute possa comunque avviarsi anche in caso di errore.
 - **Sistemi isolati dalla rete**: se il registro npm non è raggiungibile, `node:sqlite`
   o `sql.js` garantiscono le funzionalità di base.
 
-## Convalida dei magic byte
+## Convalida dei byte magici
 
-Prima di caricare un file `.node` installato a runtime, OmniRoute legge i primi 8
-byte e li confronta con i magic byte noti delle piattaforme:
+Prima di caricare un file `.node` installato in fase di esecuzione, OmniRoute legge i primi 8
+byte e li confronta con i valori magici noti delle piattaforme:
 
-| Piattaforma            | Byte (hex)    | Etichetta   |
-| ---------------------- | ------------- | ----------- |
-| Linux                  | `7F 45 4C 46` | `elf`       |
-| macOS 64 bit BE        | `FE ED FA CF` | `macho`     |
-| macOS 64 bit LE        | `CF FA ED FE` | `macho-le`  |
-| macOS fat (universale) | `CA FE BA BE` | `macho-fat` |
-| Windows                | `4D 5A` (MZ)  | `pe`        |
+| Piattaforma            | Byte (esadecimali) | Etichetta   |
+| ---------------------- | ------------------ | ----------- |
+| Linux                  | `7F 45 4C 46`      | `elf`       |
+| macOS a 64 bit BE      | `FE ED FA CF`      | `macho`     |
+| macOS a 64 bit LE      | `CF FA ED FE`      | `macho-le`  |
+| macOS fat (universale) | `CA FE BA BE`      | `macho-fat` |
+| Windows                | `4D 5A` (MZ)       | `pe`        |
 
-Un magic byte non corrispondente → il file viene ignorato e il fallback prosegue al passaggio successivo.
+Un valore magico non corrispondente → il file viene ignorato e il fallback prosegue con il passaggio successivo.
 
 ## Verifica del driver attivo
 
@@ -60,36 +60,56 @@ const info = getDriverInfo();
 ## Controllo manuale
 
 ```bash
-# Ignora il riscaldamento post-installazione (per installazioni CI rapide)
+# Ignora il riscaldamento postinstallazione (per installazioni CI rapide)
 OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute
 
-# Forza la reinstallazione di better-sqlite3 a runtime
+# Forza la reinstallazione di better-sqlite3 in fase di esecuzione
 rm -rf ~/.omniroute/runtime
 omniroute  # verrà reinstallato al prossimo avvio
 
-# Verifica quale driver è attivo
+# Controlla quale driver è attivo
 omniroute config db-info  # (se il comando CLI esiste)
 ```
+
+## Diagnosi dei blocchi sincroni
+
+Con `better-sqlite3`, impostare `OMNIROUTE_SQLITE_SLOW_MS=200` prima dell'avvio per abilitare
+la misurazione dei tempi dell'adattatore sincrono. Per impostazione predefinita è disabilitata. Un'operazione completata che richiede
+almeno il numero specificato di millisecondi genera un avviso `[SQLITE-SLOW]`, al massimo una volta ogni
+dieci secondi per ciascun adattatore. L'avviso contiene solo il driver, la classe dell'operazione
+(`prepare`, `get`, `all`, `run`, `exec`, `pragma`, transazione o manutenzione) e
+i millisecondi trascorsi: nessun SQL, binding, riga, percorso o testo di eccezione.
+
+Si tratta di uno strumento diagnostico, non di un timeout o di un'ottimizzazione delle query. Non può segnalare
+un'operazione che non termina mai, distinguere il lavoro della CPU dalle attese del disco, identificare
+l'SQL esatto o osservare le operazioni eseguite tramite l'handle diretto del driver.
+La durata del backup asincrono è deliberatamente esclusa; gli altri driver SQLite non sono
+strumentati da questa funzionalità opzionale. La disattivazione della variabile ripristina l'adattatore originale
+senza wrapper per la misurazione dei tempi. Non vengono modificati né lo schema del database né la configurazione memorizzata.
+
+L'avviso di ritardo di `/healthz` indica il picco dell'event loop dal campionamento precedente,
+non la media dell'intero ciclo di vita. Correlare i relativi timestamp con gli avvisi delle operazioni lente
+e con le metriche dell'host e dello storage prima di attribuire un blocco a SQLite o a un guasto del disco.
 
 ## Riferimenti
 
 Implementazione:
 
-- `bin/cli/runtime/magicBytes.mjs` — funzioni di supporto per la convalida dei magic byte dei binari
-- `bin/cli/runtime/sqliteRuntime.mjs` — risolutore a runtime in 5 passaggi + programma di installazione differita
-- `bin/cli/runtime/index.mjs` — orchestratore di avvio (`warmUpRuntimes()`)
-- `scripts/postinstall.mjs` — hook npm successivo all'installazione (riscaldamento non bloccante)
+- `bin/cli/runtime/magicBytes.mjs` — funzioni di supporto per la convalida dei byte magici dei binari
+- `bin/cli/runtime/sqliteRuntime.mjs` — risolutore in fase di esecuzione in 5 passaggi + programma di installazione differito
+- `bin/cli/runtime/index.mjs` — orchestratore dell'avvio (`warmUpRuntimes()`)
+- `scripts/postinstall.mjs` — hook npm di post-installazione (riscaldamento non irreversibile in caso di errore)
 - `src/lib/db/core.ts` — esportazioni di `ensureDbInitialized()` / `getDriverInfo()`
 
 ## Topologia a singolo writer (HA non supportata)
 
-La catena di fallback dei driver descritta sopra viene comunque eseguita in **un solo processo**. Con SQLite
-predefinito, OmniRoute è un sistema a **singolo writer**:
+La catena di fallback dei driver descritta sopra viene comunque eseguita in **un unico processo**. Per impostazione predefinita, SQLite
+in OmniRoute utilizza **un singolo writer**:
 
-- Non collegare due repliche di OmniRoute allo stesso file `storage.sqlite`.
-- Un riavvio del container, un deployment Recreate, un OOM kill o un riavvio dovuto a HEALTHCHECK interrompe
+- Non collegare due repliche OmniRoute allo stesso file `storage.sqlite`.
+- Il riavvio di un container, un deployment Recreate, una terminazione per OOM o un riavvio dovuto a HEALTHCHECK interrompe
   ogni sessione SSE in corso. Nel percorso standard non è previsto alcun drenaggio delle sessioni.
-- Una verifica di liveness dell'orchestratore che considera una risposta lenta di `/healthz` come un arresto anomalo terminerà l'unica
-  replica. Preferire una verifica di liveness TCP + una verifica di readiness HTTP su `/healthz`. Consultare la
+- Una verifica di liveness dell'orchestratore che considera morto un endpoint `/healthz` lento terminerà l'unica
+  replica. Preferire una verifica di liveness TCP + una verifica di readiness HTTP su `/healthz`. Consultare
   [Guida Docker — disponibilità](../guides/DOCKER_GUIDE.md#availability-default-sqlite-is-single-replica)
-  e i [consigli per le probe Kubernetes](./MONITORING_GUIDE.md#kubernetes-probe-recommendations).
+  e [raccomandazioni per le probe Kubernetes](./MONITORING_GUIDE.md#kubernetes-probe-recommendations).

@@ -37,10 +37,29 @@ export interface AudioProvider {
   format?: string;
   supportedFormats?: string[];
   async?: boolean;
+  /**
+   * Voice sent by the OpenAI-compatible speech path when the request omits `voice`.
+   * Absent means the OpenAI stock default ("alloy").
+   */
+  defaultVoice?: string;
+  /**
+   * The adapter can only run the models listed in `models` (e.g. Gemini Live's
+   * BidiGenerateContent socket), not every model the provider tags with this
+   * endpoint. Endpoint-adapter evidence (#16929) is then scoped per model.
+   */
+  modelScoped?: boolean;
   models: AudioModel[];
 }
 
 export const AUDIO_TRANSCRIPTION_PROVIDERS: Record<string, AudioProvider> = {
+  "grok-cli": {
+    id: "grok-cli",
+    baseUrl: "https://api.x.ai/v1/stt",
+    authType: "oauth",
+    authHeader: "bearer",
+    format: "grok-stt",
+    models: [{ id: "grok-voice-transcribe-2.0", name: "Grok Voice Transcribe 2.0 (OAuth)" }],
+  },
   vertex: {
     id: "vertex",
     baseUrl: "https://us-central1-aiplatform.googleapis.com/v1",
@@ -62,6 +81,18 @@ export const AUDIO_TRANSCRIPTION_PROVIDERS: Record<string, AudioProvider> = {
     models: [
       { id: "whisper-1", name: "Whisper 1" },
       { id: "gpt-4o-transcription", name: "GPT-4o Transcription" },
+    ],
+  },
+
+  mistral: {
+    id: "mistral",
+    baseUrl: "https://api.mistral.ai/v1/audio/transcriptions",
+    authType: "apikey",
+    authHeader: "bearer",
+    models: [
+      { id: "voxtral-mini-latest", name: "Voxtral Mini Transcribe 2" },
+      { id: "voxtral-mini-2602", name: "Voxtral Mini Transcribe 2" },
+      { id: "voxtral-mini-transcribe-3", name: "Voxtral Mini Transcribe 3" },
     ],
   },
 
@@ -182,7 +213,10 @@ export const AUDIO_TRANSCRIPTION_PROVIDERS: Record<string, AudioProvider> = {
 
   huggingface: {
     id: "huggingface",
-    baseUrl: "https://api-inference.huggingface.co/models",
+    // HF retired api-inference.huggingface.co; ASR now routes through
+    // router.huggingface.co with the hf-inference provider pinned in the path
+    // (same convention as the image entry in imageRegistryData.ts).
+    baseUrl: "https://router.huggingface.co/hf-inference/models",
     authType: "apikey",
     authHeader: "bearer",
     format: "huggingface-asr",
@@ -268,6 +302,13 @@ export const AUDIO_TRANSCRIPTION_PROVIDERS: Record<string, AudioProvider> = {
       { id: "gpt-4o-transcription", name: "GPT-4o Transcription" },
     ],
   },
+  nan: {
+    id: "nan",
+    baseUrl: "https://api.nan.builders/v1/audio/transcriptions",
+    authType: "apikey",
+    authHeader: "bearer",
+    models: [{ id: "whisper", name: "Whisper" }],
+  },
   syntx: {
     id: "syntx",
     alias: "stx",
@@ -276,6 +317,21 @@ export const AUDIO_TRANSCRIPTION_PROVIDERS: Record<string, AudioProvider> = {
     authHeader: "bearer",
     format: "syntx-audio",
     models: toSyntxTranscriptionModels(),
+  },
+  // Kept last on purpose: the audio/video bridges auto-pick the FIRST catalog
+  // model with usable credentials (selectAudioBridgeModel), so a Gemini key must
+  // not pre-empt the established STT providers' auto-selection order.
+  gemini: {
+    id: "gemini",
+    baseUrl:
+      "wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContent",
+    authType: "apikey",
+    authHeader: "x-goog-api-key",
+    format: "gemini-live",
+    // Only Live-capable models run over BidiGenerateContent; other Gemini models
+    // tagged audio-transcriptions keep having no adapter (#16929).
+    modelScoped: true,
+    models: [{ id: "gemini-3.5-transcribe-live", name: "Gemini 3.5 Transcribe Live" }],
   },
 };
 
@@ -304,6 +360,14 @@ export const AUDIO_TRANSLATION_PROVIDERS: Record<string, AudioProvider> = {
 };
 
 export const AUDIO_SPEECH_PROVIDERS: Record<string, AudioProvider> = {
+  "grok-cli": {
+    id: "grok-cli",
+    baseUrl: "https://api.x.ai/v1/tts",
+    authType: "oauth",
+    authHeader: "bearer",
+    format: "grok-tts",
+    models: [{ id: "grok-tts", name: "Grok Text to Speech (OAuth)" }],
+  },
   google: {
     id: "google",
     credentialProviderId: "gemini",
@@ -315,6 +379,8 @@ export const AUDIO_SPEECH_PROVIDERS: Record<string, AudioProvider> = {
       { id: "gemini-3.1-flash-tts-preview", name: "Gemini 3.1 Flash TTS" },
       { id: "gemini-2.5-flash-preview-tts", name: "Gemini 2.5 Flash TTS" },
       { id: "gemini-2.5-pro-preview-tts", name: "Gemini 2.5 Pro TTS" },
+      { id: "gemini-3.8-flash-tts", name: "Gemini 3.8 Flash TTS" },
+      { id: "gemini-3.8-flash-lite-tts", name: "Gemini 3.8 Flash-Lite TTS" },
     ],
   },
   vertex: {
@@ -327,6 +393,8 @@ export const AUDIO_SPEECH_PROVIDERS: Record<string, AudioProvider> = {
       { id: "gemini-3.1-flash-tts-preview", name: "Gemini 3.1 Flash TTS (Vertex)" },
       { id: "gemini-2.5-flash-preview-tts", name: "Gemini 2.5 Flash TTS (Vertex)" },
       { id: "gemini-2.5-pro-preview-tts", name: "Gemini 2.5 Pro TTS (Vertex)" },
+      { id: "gemini-3.8-flash-tts", name: "Gemini 3.8 Flash TTS (Vertex)" },
+      { id: "gemini-3.8-flash-lite-tts", name: "Gemini 3.8 Flash-Lite TTS (Vertex)" },
     ],
   },
 
@@ -341,6 +409,10 @@ export const AUDIO_SPEECH_PROVIDERS: Record<string, AudioProvider> = {
       { id: "gpt-4o-mini-tts", name: "GPT-4o Mini TTS" },
     ],
   },
+
+  // Mistral is deliberately absent. Its /v1/audio/speech takes `voice_id` and answers
+  // JSON `{ "audio_data": "<base64>" }`, while the default path below sends `voice` and
+  // streams the body back as audio. Listing it needs a dedicated format handler.
 
   hyperbolic: {
     id: "hyperbolic",
@@ -404,7 +476,10 @@ export const AUDIO_SPEECH_PROVIDERS: Record<string, AudioProvider> = {
 
   huggingface: {
     id: "huggingface",
-    baseUrl: "https://api-inference.huggingface.co/models",
+    // HF retired api-inference.huggingface.co; TTS now routes through
+    // router.huggingface.co with the hf-inference provider pinned in the path
+    // (same convention as the image entry in imageRegistryData.ts).
+    baseUrl: "https://router.huggingface.co/hf-inference/models",
     authType: "apikey",
     authHeader: "bearer",
     format: "huggingface-tts",
@@ -440,6 +515,20 @@ export const AUDIO_SPEECH_PROVIDERS: Record<string, AudioProvider> = {
     authHeader: "none",
     format: "openai",
     models: [{ id: "qwen3-tts", name: "Qwen3 TTS" }],
+  },
+
+  // Qwen Cloud Token Plan — DashScope SpeechSynthesizer (JSON → inline base64 or an
+  // expiring audio URL). The host follows the connection's region (Singapore/Beijing).
+  "qwen-cloud-token-plan": {
+    id: "qwen-cloud-token-plan",
+    alias: "qct",
+    baseUrl:
+      "https://token-plan.ap-southeast-1.maas.aliyuncs.com/api/v1/services/audio/tts/SpeechSynthesizer",
+    authType: "apikey",
+    authHeader: "bearer",
+    format: "dashscope-tts",
+    supportedFormats: ["mp3"],
+    models: [{ id: "qwen-audio-3.0-tts-plus", name: "Qwen Audio 3.0 TTS Plus" }],
   },
 
   // ── Cloud TTS Providers (#248) ────────────────────────────────────────────
@@ -608,6 +697,17 @@ export const AUDIO_SPEECH_PROVIDERS: Record<string, AudioProvider> = {
       { id: "tts-1-hd", name: "TTS 1 HD" },
       { id: "tts-1", name: "TTS 1" },
     ],
+  },
+
+  // Kokoro has no OpenAI stock voices, so a request without `voice` must not fall
+  // back to "alloy" — defaultVoice supplies a Kokoro voice id instead.
+  nan: {
+    id: "nan",
+    baseUrl: "https://api.nan.builders/v1/audio/speech",
+    authType: "apikey",
+    authHeader: "bearer",
+    defaultVoice: "af_heart",
+    models: [{ id: "kokoro", name: "Kokoro" }],
   },
 
   // UC (uncensored.com) voice synthesis over its dedicated TTS WebSocket. Auth is

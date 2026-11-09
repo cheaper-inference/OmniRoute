@@ -38,6 +38,7 @@ test("next config exposes standalone build settings and canonical rewrites", asy
     "@lobehub/icons",
     "fumadocs-ui",
     "fumadocs-core",
+    "@omniroute/ui-kit",
   ]);
   // #6062: `ws` and its native masking helpers must stay external so the
   // copilot-m365-web executor keeps a working WebSocket masking path at runtime

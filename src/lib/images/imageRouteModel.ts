@@ -21,6 +21,10 @@ import { getComboByName, getCombos } from "@/lib/db/combos";
 import { getCachedProviderNodes } from "@/lib/db/readCache";
 import { assertMicrosoftDesignerWebProviderAvailable } from "@/shared/constants/designerWebRetirement";
 import { assertCommonChatGptWebModelAvailable } from "@/shared/constants/chatgptWebRetirement";
+import {
+  fetchUntrustedRemoteImage,
+  type RemoteImageFetchOptions,
+} from "@/shared/network/remoteImageFetch";
 
 /**
  * Rewrite a `prefix/model` custom image model to its internal `<nodeId>/<model>` form.
@@ -117,6 +121,9 @@ interface ParsedImageEditInput {
 
 export const MAX_CODEX_IMAGE_EDIT_BYTES = 20 * 1024 * 1024;
 export const MAX_CODEX_IMAGE_EDIT_REFERENCES = 8;
+// GPT Image models use the dedicated Images edits API and allow up to 16 inputs;
+// keep the legacy hosted Responses tool bound at eight until independently verified.
+export const MAX_CODEX_GPT_IMAGE_EDIT_REFERENCES = 16;
 export const MAX_CODEX_IMAGE_EDIT_TOTAL_BYTES = 20 * 1024 * 1024;
 
 const CODEX_IMAGE_MIME_MAGIC: Readonly<Record<string, (bytes: Buffer) => boolean>> = {
@@ -199,11 +206,88 @@ export function parseDataUrl(value: unknown): { bytes: Buffer; mime: string } | 
   }
 }
 
+const REMOTE_IMAGE_EDIT_MIME_MAGIC: Readonly<Record<string, (bytes: Buffer) => boolean>> = {
+  ...CODEX_IMAGE_MIME_MAGIC,
+  "image/gif": (bytes) => bytes.length >= 6 && bytes.subarray(0, 4).toString("ascii") === "GIF8",
+};
+
+function isRemoteImageUrl(value: unknown): value is string {
+  return typeof value === "string" && /^https?:\/\//i.test(value.trim());
+}
+
+/** Test seams and cancellation forwarded to the SSRF-hardened fetcher. */
+export type RemoteImageEditFetchOptions = Pick<
+  RemoteImageFetchOptions,
+  "fetchImpl" | "lookup" | "signal" | "timeoutMs"
+>;
+
+/**
+ * Download one caller-supplied http(s) reference as a data URL, or null when it cannot be
+ * used. The MIME type comes from the magic bytes, never from the remote `content-type`.
+ */
+async function fetchRemoteImageEditReference(
+  url: string,
+  options: RemoteImageEditFetchOptions
+): Promise<string | null> {
+  try {
+    const { buffer } = await fetchUntrustedRemoteImage(url.trim(), {
+      ...options,
+      maxBytes: MAX_CODEX_IMAGE_EDIT_BYTES,
+    });
+    const mime = Object.entries(REMOTE_IMAGE_EDIT_MIME_MAGIC).find(([, matches]) =>
+      matches(buffer)
+    )?.[0];
+    return mime ? `data:${mime};base64,${buffer.toString("base64")}` : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Replace public http(s) references in a JSON edit body (`image: "https://..."`,
+ * `image: ["https://..."]`, `images: [{ image_url | url: "https://..." }]`,
+ * `images: ["https://..."]`) with data URLs so `extractImageEditInputFromJson` can parse
+ * them. Fetches go through `fetchUntrustedRemoteImage` (public-only guard, pinned DNS,
+ * checked redirects, bounded body). References that cannot be fetched are left in place,
+ * so the route still reports them as invalid instead of silently dropping them.
+ */
+export async function resolveRemoteImageEditReferences(
+  body: Record<string, unknown>,
+  options: RemoteImageEditFetchOptions = {}
+): Promise<Record<string, unknown>> {
+  const imageList = Array.isArray(body.image) ? body.image : null;
+  const imagesList = Array.isArray(body.images) ? body.images : null;
+  const referenceCount =
+    (imageList?.length ?? (body.image !== undefined ? 1 : 0)) + (imagesList?.length ?? 0);
+  // Over-limit sets are rejected by the route anyway; do not fetch anything for them.
+  if (referenceCount > MAX_CODEX_GPT_IMAGE_EDIT_REFERENCES) return body;
+
+  const resolve = async (value: unknown): Promise<unknown> =>
+    isRemoteImageUrl(value)
+      ? ((await fetchRemoteImageEditReference(value, options)) ?? value)
+      : value;
+  const resolveEntry = async (entry: unknown): Promise<unknown> => {
+    if (!entry || typeof entry !== "object" || Array.isArray(entry)) return resolve(entry);
+    const e = entry as Record<string, unknown>;
+    // Same precedence as `extractImageEditInputFromJson` (`image_url ?? url`).
+    const key = e.image_url != null ? "image_url" : e.url != null ? "url" : null;
+    return key ? { ...e, [key]: await resolve(e[key]) } : entry;
+  };
+
+  const next: Record<string, unknown> = { ...body };
+  if (imageList) next.image = await Promise.all(imageList.map(resolve));
+  else if (body.image !== undefined) next.image = await resolve(body.image);
+  if (imagesList) next.images = await Promise.all(imagesList.map(resolveEntry));
+  return next;
+}
+
 /**
  * Extract an OpenAI-compatible image-edit payload from a JSON body. Some clients send
  * edit input as JSON with data-URL images instead of multipart/form-data; accept the
- * common shapes (`image: "data:..."`, `images: [{ image_url: "data:..." }]` or
- * `images: ["data:..."]`) and surface the same fields the multipart reader produces.
+ * common shapes (`image: "data:..."`, `image: ["data:..."]`,
+ * `images: [{ image_url: "data:..." }]` or `images: ["data:..."]`) and surface the same
+ * fields the multipart reader produces. Remote http(s) references must be resolved first
+ * with `resolveRemoteImageEditReferences`.
  */
 export function extractImageEditInputFromJson(body: unknown): ParsedImageEditInput {
   const obj = (body && typeof body === "object" ? body : {}) as Record<string, unknown>;
@@ -215,7 +299,9 @@ export function extractImageEditInputFromJson(body: unknown): ParsedImageEditInp
   const responseFormat = str(obj.response_format);
 
   const candidates: unknown[] = [];
-  if (obj.image !== undefined) candidates.push(obj.image);
+  // `image` may be one reference or an array of references; count each one separately.
+  if (Array.isArray(obj.image)) candidates.push(...obj.image);
+  else if (obj.image !== undefined) candidates.push(obj.image);
   const images = obj.images;
   if (Array.isArray(images)) {
     for (const entry of images) {

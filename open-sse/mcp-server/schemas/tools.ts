@@ -293,7 +293,7 @@ export const checkQuotaOutput = z.object({
       connectionId: z.string(),
       quotaUsed: z.number(),
       quotaTotal: z.number().nullable(),
-      percentRemaining: z.number(),
+      percentRemaining: z.number().nullable(),
       resetAt: z.string().nullable(),
       tokenStatus: z.enum(["valid", "expiring", "expired", "refreshing"]),
     })
@@ -313,7 +313,7 @@ export const checkQuotaOutput = z.object({
 export const checkQuotaTool: McpToolDefinition<typeof checkQuotaInput, typeof checkQuotaOutput> = {
   name: "omniroute_check_quota",
   description:
-    "Checks the remaining API quota for one or all providers. Returns quota used/total, percentage remaining, reset time, and token health status.",
+    "Checks the remaining API quota for one or all providers. Returns quota used/total, percentage remaining (null when no quota signal is available for a connection), reset time, and token health status.",
   inputSchema: checkQuotaInput,
   outputSchema: checkQuotaOutput,
   scopes: ["read:quota"],
@@ -333,7 +333,12 @@ export const routeRequestInput = z.object({
       })
     )
     .describe("Chat messages in OpenAI format"),
-  combo: z.string().optional().describe("Specific combo to route through"),
+  combo: z
+    .string()
+    .trim()
+    .min(1)
+    .optional()
+    .describe("Optional combo name or ID; takes precedence over model during routing"),
   budget: z.number().optional().describe("Maximum cost in USD for this request"),
   role: z
     .enum(["coding", "review", "planning", "analysis"])
@@ -533,6 +538,7 @@ export const webFetchInput = z.object({
       "context7",
       "nimble-search",
       "anysearch-search",
+      "parallel-search",
     ])
     .optional()
     .describe(

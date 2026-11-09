@@ -6,11 +6,33 @@ import {
 } from "./reasoningSuffix.ts";
 
 type RecordValue = Record<string, unknown>;
+type WireEffort = string | number;
+const NORMALIZED_EFFORTS = new Set<string>([...EFFORT_ORDER, "minimal", "persistent", "disabled"]);
+
 function asRecord(value: unknown): RecordValue {
   return value && typeof value === "object" && !Array.isArray(value) ? (value as RecordValue) : {};
 }
-function effort(value: unknown): string | undefined {
-  return typeof value === "string" ? value.trim().toLowerCase() || undefined : undefined;
+
+/** Preserve the Responses control without forwarding Chat-only stream options. */
+export function normalizeCodexSummaryStreamOptions(body: RecordValue): void {
+  const delivery = asRecord(body.stream_options).reasoning_summary_delivery;
+  if (typeof delivery === "string" && delivery.length > 0) {
+    body.stream_options = { reasoning_summary_delivery: delivery };
+  } else {
+    delete body.stream_options;
+  }
+}
+
+function effort(value: unknown): WireEffort | undefined {
+  // Codex's request serializer emits custom u64 budgets as JSON numbers. Keep
+  // the exactly representable JS subset, including zero, without coercion.
+  if (typeof value === "number") {
+    return Number.isSafeInteger(value) && value >= 0 ? value : undefined;
+  }
+  if (typeof value !== "string" || !value.trim()) return undefined;
+  const normalized = value.trim().toLowerCase();
+  // Retain known-tier normalization, but do not change model-defined spellings.
+  return NORMALIZED_EFFORTS.has(normalized) ? normalized : value;
 }
 
 /**
@@ -34,7 +56,8 @@ function legacyEffortCap(model: string): EffortLevel | null {
   return MAX_EFFORT_BY_MODEL[model] ?? getCodexAliasEffortCap(model);
 }
 
-function clampEffort(model: string, requested: string): string {
+function clampEffort(model: string, requested: WireEffort): WireEffort {
+  if (typeof requested === "number") return requested;
   const max = legacyEffortCap(model);
   if (!max) return requested;
   const reqIdx = EFFORT_ORDER.indexOf(requested as EffortLevel);
@@ -47,18 +70,20 @@ function clampEffort(model: string, requested: string): string {
 }
 
 /**
- * The Codex Responses API accepts only `effort` and `summary` inside `reasoning`.
- * Client ecosystems send OpenRouter-style keys (`enabled`, `max_tokens`, `exclude`, ...)
- * that the upstream rejects with HTTP 400 "Unknown parameter: 'reasoning.<key>'", so the
- * object is whitelisted before it reaches the wire (#13643). Runs even when no effort was
- * resolved, because the client's original object is forwarded unchanged in that case.
+ * Preserve the Responses reasoning fields intentionally forwarded by this adapter.
+ * The official Codex client emits context: "all_turns" for Responses Lite.
+ * Ref: openai/codex@83086188ae0614bd882818ff1aa23f3194962012
+ * codex-rs/core/src/client.rs:934-951.
+ * Forward explicit caller values; this does not assert support on every backend
+ * model or mode. Leave value validation to the upstream backend.
+ * Strip OpenRouter-only siblings such as enabled, max_tokens, and exclude.
  */
 function whitelistWireReasoning(body: RecordValue): void {
   const wire = body.reasoning;
   if (!wire || typeof wire !== "object" || Array.isArray(wire)) return;
   const record = wire as RecordValue;
   for (const key of Object.keys(record)) {
-    if (key !== "effort" && key !== "summary") delete record[key];
+    if (key !== "effort" && key !== "summary" && key !== "context") delete record[key];
   }
   if (Object.keys(record).length === 0) delete body.reasoning;
 }
@@ -80,7 +105,7 @@ export function applyCodexReasoningSelection(
   whitelistWireReasoning(body);
 }
 
-type CatalogSplit = { baseModel: string; effort: string | null | undefined };
+type CatalogSplit = { baseModel: string; effort: WireEffort | null | undefined };
 
 /** The model id and suffix effort: a discovered catalog id is used verbatim (no re-parse). */
 function splitRequestedModel(
@@ -103,15 +128,15 @@ function fallbackEffort(
   metadata: RecordValue,
   connectionDefault: string | undefined,
   allowDefaults: boolean
-): string | undefined {
+): WireEffort | undefined {
   if (reasoning.enabled === false) return "none";
   if (!allowDefaults) return undefined;
-  return connectionDefault || effort(metadata.defaultThinkingEffort) || "medium";
+  return effort(connectionDefault) ?? effort(metadata.defaultThinkingEffort) ?? "medium";
 }
 
 /**
  * The caller's own effort choice. Chat→Responses translation normalizes canonical max to
- * xhigh, so for catalog-backed Codex models in passthrough mode the original choice is
+ * xhigh, so for Codex models in passthrough mode the original choice is
  * restored; explicit thinking-budget policies still own the translated value in other modes.
  */
 function requestedEffort(
@@ -119,11 +144,12 @@ function requestedEffort(
   reasoning: RecordValue,
   body: RecordValue,
   restoreOriginal: boolean
-): string | undefined {
+): WireEffort | undefined {
   if (restoreOriginal && Object.hasOwn(metadata, "requestedThinkingEffort")) {
-    return effort(metadata.requestedThinkingEffort);
+    const originalEffort = effort(metadata.requestedThinkingEffort);
+    if (originalEffort !== undefined) return originalEffort;
   }
-  return effort(reasoning.effort) || effort(body.reasoning_effort);
+  return effort(reasoning.effort) ?? effort(body.reasoning_effort);
 }
 
 function selectCodexReasoning(
@@ -141,13 +167,13 @@ function selectCodexReasoning(
   const split = splitRequestedModel(metadata, requestedModel, hasCatalog);
   if (split.effort) body.model = split.baseModel;
   const reasoning = asRecord(body.reasoning);
-  const requested = requestedEffort(metadata, reasoning, body, hasCatalog && allowDefaults);
+  const requested = requestedEffort(metadata, reasoning, body, allowDefaults);
   const selected =
-    effort(forcedEffort) ||
-    split.effort ||
-    requested ||
+    effort(forcedEffort) ??
+    split.effort ??
+    requested ??
     fallbackEffort(reasoning, metadata, connectionDefault, allowDefaults);
-  if (!selected) return;
+  if (selected === undefined || selected === null) return;
   // New catalog values pass through verbatim, including upstream validation errors.
   // Only the old built-in Ultra aliases retain their historical Max wire mapping.
   const resolved = hasCatalog ? selected : clampEffort(split.baseModel, selected);

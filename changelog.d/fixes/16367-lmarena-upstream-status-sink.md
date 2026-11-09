@@ -1,1 +1,0 @@
-- **fix(sse):** an LMArena response at status 400 or above now sets that sink's upstream status instead of looking like a transport failure ([#16367](https://github.com/diegosouzapw/OmniRoute/pull/16367)) — thanks @maxmad64bis

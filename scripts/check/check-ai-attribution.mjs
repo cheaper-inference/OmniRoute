@@ -69,11 +69,13 @@ const AI_EMAIL_RE =
 /**
  * GitHub's Dependabot co-authors its own dependency-bump commits. It is a first-party dependency
  * bot, not an AI assistant, and it does not hide the real author, so the maintainer exempted it
- * (2026-09-29, v3.8.51 release). Matched on BOTH the exact name and its exact noreply address, so
- * no other `[bot]` account (or a look-alike name) can ride on this exemption.
+ * (2026-09-29, v3.8.51 release). Matched on BOTH the exact name and one of its two exact addresses
+ * (the noreply co-author address, and `support@github.com` from the `Signed-off-by` Dependabot
+ * writes on its bump commits since 2026-10), so no other `[bot]` account (or a look-alike name)
+ * can ride on this exemption.
  */
 const DEPENDABOT_TRAILER_RE =
-  /^dependabot\[bot\]\s*<49699333\+dependabot\[bot\]@users\.noreply\.github\.com>$/i;
+  /^dependabot\[bot\]\s*<(?:49699333\+dependabot\[bot\]@users\.noreply\.github\.com|support@github\.com)>$/i;
 
 /** Footers / trailers that advertise AI generation. */
 const AI_FOOTER_RE =

@@ -1,1 +1,0 @@
-- **fix(executors):** make `registerLazyExecutor` HMR-safe so hot-reload no longer double-registers executors ([#15792](https://github.com/diegosouzapw/OmniRoute/pull/15792)) — thanks @Junior-HJ

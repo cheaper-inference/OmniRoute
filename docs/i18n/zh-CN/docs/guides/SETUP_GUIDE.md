@@ -140,32 +140,32 @@ omniroute providers validate
 
 ### 1) 连接提供者并创建 API 密钥
 
-1. 打开控制面板 → `Providers`，并连接至少一个提供者（使用 OAuth 或 API 密钥）。
-2. 打开控制面板 → `Endpoints`，并创建一个 API 密钥。
-3. （可选）打开控制面板 → `Combos`，并设置回退链。
+1. 打开仪表板 → `Providers`，并连接至少一个提供者（OAuth 或 API 密钥）。
+2. 打开仪表板 → `Endpoints`，并创建一个 API 密钥。
+3. （可选）打开仪表板 → `Combos`，并设置你的回退链。
 
 ### 2) 配置你的编码工具
 
 ```txt
-Base URL: http://localhost:20128/v1
-API Key:  [从 Endpoint 页面复制]
-Model:    if/qwen3.8-max-preview（或任意提供者/模型前缀）
+基础 URL: http://localhost:20128/v1
+API 密钥:  [从 Endpoint 页面复制]
+模型:      if/qwen3.8-max-preview（或任意提供者/模型前缀）
 ```
 
 如果你的编辑器无法发送 `Authorization: Bearer ...`，请改用包含令牌的兼容基础地址：
 
 ```txt
-Base URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/
-Models URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/models
-Chat URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/chat/completions
-Ollama Tags URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/api/tags
+基础 URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/
+模型 URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/models
+聊天 URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/chat/completions
+Ollama 标签 URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/api/tags
 ```
 
-支持 Claude Code、Codex CLI、Cursor、Cline、OpenClaw、OpenCode 以及兼容 OpenAI 的 SDK。
+适用于 Claude Code、Codex CLI、Cursor、Cline、OpenClaw、OpenCode 和兼容 OpenAI 的 SDK。
 
 #### 使用 `setup-*` 自动配置
 
-无需手动粘贴基础 URL 和密钥，让 OmniRoute 根据实时模型目录写入每个工具自己的配置。每个工具对应一条命令：
+无需手动粘贴基础 URL 和密钥，可让 OmniRoute 根据实时模型目录写入每个工具自己的配置。每个工具使用一条命令：
 
 ```bash
 omniroute setup-codex        # ~/.codex/<name>.config.toml 配置文件
@@ -177,24 +177,25 @@ omniroute setup-continue     # ~/.continue/config.yaml（Continue / cn）
 omniroute setup-cursor       # 输出 Cursor 的应用内操作步骤
 omniroute setup-roo          # Roo Code 导入 + autoImport 指针
 omniroute setup-crush        # ~/.config/crush/crush.json
+omniroute setup-zed          # ~/.config/zed/settings.json（openai_compatible）
 omniroute setup-goose        # ~/.config/goose/config.yaml
 omniroute setup-aider        # ~/.aider.conf.yml
 omniroute setup-qwen         # ~/.qwen/settings.json + ~/.qwen/.env
 ```
 
-每条命令都接受 `--remote <url> --api-key <key>`，用于配置本地工具以连接**远程** OmniRoute，并支持使用 `--dry-run` 进行预览。若要在注入正确环境变量的情况下启动 CLI，且完全不写入任何配置，请使用通用启动器 `omniroute run <target>`（claude、codex、aider、goose、opencode、qwen、gemini）；旧版的各工具专用启动器 `omniroute launch`（Claude Code）和 `omniroute launch-codex`（Codex）仍然可用。
+每条命令都接受 `--remote <url> --api-key <key>`，用于配置本地工具以连接**远程** OmniRoute；还支持使用 `--dry-run` 进行预览。若要在注入正确环境变量的情况下启动 CLI，同时完全不写入任何配置，请使用通用启动器 `omniroute run <target>`（claude、codex、aider、goose、opencode、qwen、gemini）；旧版的各工具专用启动器 `omniroute launch`（Claude Code）和 `omniroute launch-codex`（Codex）仍然可用。
 
-如需查看完整表格（包括每条命令写入的内容、所有标志、本地与远程模式，以及基础 URL 的 `/v1` 约定），请参阅 **[CLI 集成](./CLI-INTEGRATIONS.md)**。
+有关完整表格（每条命令写入的内容、所有标志、本地与远程模式、基础 URL 的 `/v1` 约定），请参阅 **[CLI 集成](./CLI-INTEGRATIONS.md)**。
 
 有关各工具的详细配置（Claude Code、Codex CLI、Cursor、Cline、OpenClaw、Kilo Code、Copilot 等），请参阅专门的 **[CLI 工具指南](../reference/CLI-TOOLS.md)**。
 
 ---
 
-## 协议设置（MCP + A2A）
+## 协议设置 (MCP + A2A)
 
-### MCP 设置（模型上下文协议）
+### MCP设置（模型上下文协议）
 
-以 stdio 模式启动 MCP 传输：
+以 stdio 模式启动MCP传输：
 
 ```bash
 omniroute --mcp
@@ -203,28 +204,28 @@ omniroute --mcp
 推荐的验证流程：
 
 ```bash
-# 1. 启动 MCP 服务器
+# 1. Start MCP server
 omniroute --mcp
 
-# 2. 从你的 MCP 客户端调用：
-omniroute_get_health        # 应返回系统健康状态
-omniroute_list_combos       # 应返回活动的组合
+# 2. From your MCP client, call:
+omniroute_get_health        # Should return system health
+omniroute_list_combos       # Should return active combos
 
-# 3. 或运行完整的端到端测试套件：
+# 3. Or run the full E2E suite:
 npm run test:protocols:e2e
 ```
 
-#### MCP 客户端配置
+#### MCP客户端配置
 
-**Claude Code：**
+**Claude代码：**
 
 ```bash
-claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
 ```
 
-**Cursor / Cline：**
+**Cursor / Cline:**
 
-添加到你的 MCP 设置中：
+添加到您的MCP设置（stdio，带有密钥，以便调用者拥有主体）：
 
 ```json
 {
@@ -232,17 +233,24 @@ claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp
     "omniroute": {
       "command": "omniroute",
       "args": ["--mcp"],
-      "env": {}
+      "env": {
+        "OMNIROUTE_API_KEY": "your-key",
+        "OMNIROUTE_BASE_URL": "http://localhost:20128"
+      }
     }
   }
 }
 ```
 
-**完整的 MCP 文档：** [MCP 服务器 README](../../open-sse/mcp-server/README.md) — 110 个工具、IDE 配置以及 Python/TS/Go 客户端。
+或者，当`mcpTransport`为`streamable-http` （在`/dashboard/mcp`上设置或使用`omniroute mcp enable --transport streamable-http`进行设置）时，将客户端的远程MCP服务器条目指向`http://localhost:20128/api/mcp/stream`。
 
-### A2A 设置（智能体间协议）
+密钥作为`Authorization: Bearer <api-key>`传输（请参阅[MCP服务器→远程主机的远程访问](../frameworks/MCP-SERVER.md#remote-access-manage-scope-bypass)；远程密钥需要`mcp:connect`及其read/write范围）。
 
-验证 Agent Card：
+**完整的MCP文档：** [MCP服务器README](../../open-sse/mcp-server/README.md) — 110 工具、 IDE配置、 Python/TS/Go客户端。压缩CCR/dedup工具的操作员参考（标记、先决条件、每个工具范围、检索分页、诊断）：[压缩引擎→先决条件/操作员指南](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup)。
+
+### A2A设置（代理到代理协议）
+
+验证代理卡：
 
 ```bash
 curl http://localhost:20128/.well-known/agent.json
@@ -256,7 +264,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"Give me a short quota summary."}]}}'
 ```
 
-**完整的 A2A 文档：** [A2A 服务器 README](../../src/lib/a2a/README.md) — JSON-RPC 2.0、技能、流式传输和任务生命周期。
+**完整的A2A文档：** [A2A服务器README](../../src/lib/a2a/README.md) — JSON-RPC 2.0，技能，流媒体，任务生命周期。
 
 ---
 
@@ -315,23 +323,23 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ---
 
-## Void Linux (xbps-src) 模板
+## 作废Linux (xbps-src) 模板
 
-对于 Void Linux 用户，可以使用 `xbps-src` 构建原生软件包。将以下代码块保存为 `srcpkgs/omniroute/template`：
+对于 Void Linux用户，您可以使用`xbps-src`构建原生包。将此块保存为`srcpkgs/omniroute/template`：
 
 ```bash
-# 'omniroute' 的模板文件
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
 hostmakedepends="nodejs python3 make"
 depends="openssl"
-short_desc="支持多个 LLM 提供者智能路由的通用 AI 网关"
+short_desc="Universal AI gateway with smart routing for multiple LLM providers"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# 每个版本发布时使用以下命令重新生成校验和：
+# Regenerate the checksum for each release with:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

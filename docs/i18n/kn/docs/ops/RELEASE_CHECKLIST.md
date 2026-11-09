@@ -112,162 +112,162 @@ E2E matrix ಅನ್ನು ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಬಿಟ�
 
 ## ವಿವರವಾದ ಪರಿಶೀಲನಾಪಟ್ಟಿ
 
-### ಬಿಡುಗಡೆಗೆ ಮೊದಲು
+### ಬಿಡುಗಡೆಗೆ ಮುನ್ನ
 
-- [ ] ಈ releaseಗೆ ಗುರಿಪಡಿಸಿದ ಎಲ್ಲಾ PRಗಳನ್ನು `release/vX.Y.0` ಗೆ merge ಮಾಡಲಾಗಿದೆ
-- [ ] ಈ versionಗೆ ಸಂಬಂಧಿಸಿದ ಎಲ್ಲಾ open Linear/issue items ಅನ್ನು ಮುಚ್ಚಲಾಗಿದೆ ಅಥವಾ ಮುಂದಿನ milestoneಗೆ ಮುಂದೂಡಲಾಗಿದೆ
-- [ ] `release/vX.Y.0` branchನಲ್ಲಿ CI ಹಸಿರು ಸ್ಥಿತಿಯಲ್ಲಿದೆ
-- [ ] codeನಲ್ಲಿ `TODO(release)` markers ಇಲ್ಲ: `grep -r "TODO(release)" src/ open-sse/`
-- [ ] Docker base image ನವೀಕೃತವಾಗಿದೆ (ಪ್ರಸ್ತುತ `node:24.15.0-trixie-slim`)
+- [ ] ಈ ಬಿಡುಗಡೆಗೆ ಗುರಿಪಡಿಸಿದ ಎಲ್ಲಾ PRಗಳು `release/vX.Y.0` ಗೆ ವಿಲೀನಗೊಂಡಿವೆ
+- [ ] ಈ ಆವೃತ್ತಿಗಾಗಿ ತೆರೆದಿರುವ ಎಲ್ಲಾ Linear/ಸಮಸ್ಯೆ ಅಂಶಗಳನ್ನು ಮುಚ್ಚಲಾಗಿದೆ ಅಥವಾ ಮುಂದಿನ ಮೈಲಿಗಲ್ಲಿಗೆ ಮುಂದೂಡಲಾಗಿದೆ
+- [ ] `release/vX.Y.0` ಶಾಖೆಯಲ್ಲಿ CI ಹಸಿರು ಸ್ಥಿತಿಯಲ್ಲಿದೆ
+- [ ] ಕೋಡ್ನಲ್ಲಿ `TODO(release)` ಗುರುತುಗಳಿಲ್ಲ: `grep -r "TODO(release)" src/ open-sse/`
+- [ ] Docker ಮೂಲ ಇಮೇಜ್ ನವೀಕೃತವಾಗಿದೆ (ಪ್ರಸ್ತುತ `node:24.15.0-trixie-slim`)
 
-### Version ಮತ್ತು Changelog
+### ಆವೃತ್ತಿ ಮತ್ತು ಬದಲಾವಣೆಗಳ ಪಟ್ಟಿ
 
-- [ ] `/version-bump-cc <patch|minor|major>` ಅನ್ನು ಚಲಾಯಿಸಿ (Claude Code skill)
-  - `package.json`, `electron/package.json` ಅನ್ನು bump ಮಾಡುತ್ತದೆ
-  - ಕೊನೆಯ tagನಿಂದಾದ git commits ಆಧರಿಸಿ `CHANGELOG.md` ಅನ್ನು ಮರುರಚಿಸುತ್ತದೆ
-  - README.md badges ಅನ್ನು ನವೀಕರಿಸುತ್ತದೆ
-- [ ] CHANGELOG.md ಅನ್ನು ಕೈಯಾರೆ ಪರಿಶೀಲಿಸಿ ಮತ್ತು ಅಗತ್ಯವಿದ್ದರೆ commit messages ಅನ್ನು ಸ್ವಚ್ಛಗೊಳಿಸಿ
-- [ ] `CHANGELOG.md` ನ ಇತ್ತೀಚಿನ semver section, `package.json` versionಗೆ ಸಮವಾಗಿದೆ ಎಂದು ಖಚಿತಪಡಿಸಿಕೊಳ್ಳಿ
-- [ ] ಮುಂಬರುವ ಕೆಲಸಕ್ಕಾಗಿ `## [Unreleased]` ಅನ್ನು ಮೊದಲ changelog section ಆಗಿಯೇ ಇರಿಸಿ
-- [ ] `docs/openapi.yaml` ಅನ್ನು ನವೀಕರಿಸಿ → `info.version`, `package.json` versionಗೆ ಸಮವಾಗಿರಬೇಕು
+- [ ] `/version-bump-cc <patch|minor|major>` ಅನ್ನು ಚಲಾಯಿಸಿ (Claude Code ಕೌಶಲ್ಯ)
+  - `package.json`, `electron/package.json` ಆವೃತ್ತಿಗಳನ್ನು ಹೆಚ್ಚಿಸುತ್ತದೆ
+  - ಕೊನೆಯ ಟ್ಯಾಗ್ನ ನಂತರದ git ಕಮಿಟ್ಗಳಿಂದ `CHANGELOG.md` ಅನ್ನು ಮರುರಚಿಸುತ್ತದೆ
+  - README.md ಬ್ಯಾಡ್ಜ್ಗಳನ್ನು ನವೀಕರಿಸುತ್ತದೆ
+- [ ] CHANGELOG.md ಅನ್ನು ಕೈಯಾರೆ ಪರಿಶೀಲಿಸಿ ಮತ್ತು ಅಗತ್ಯವಿದ್ದರೆ ಕಮಿಟ್ ಸಂದೇಶಗಳನ್ನು ಸ್ವಚ್ಛಗೊಳಿಸಿ
+- [ ] `CHANGELOG.md` ನಲ್ಲಿನ ಇತ್ತೀಚಿನ semver ವಿಭಾಗವು `package.json` ಆವೃತ್ತಿಗೆ ಸಮನಾಗಿದೆ ಎಂಬುದನ್ನು ಖಚಿತಪಡಿಸಿಕೊಳ್ಳಿ
+- [ ] ಮುಂಬರುವ ಕೆಲಸಕ್ಕಾಗಿ `## [Unreleased]` ಅನ್ನು ಬದಲಾವಣೆಗಳ ಪಟ್ಟಿಯ ಮೊದಲ ವಿಭಾಗವಾಗಿಯೇ ಇರಿಸಿ
+- [ ] `docs/openapi.yaml` ಅನ್ನು ನವೀಕರಿಸಿ → `info.version` ಎಂಬುದು `package.json` ಆವೃತ್ತಿಗೆ ಸಮನಾಗಿರಬೇಕು
 
-### Code ಗುಣಮಟ್ಟ
+### ಕೋಡ್ ಗುಣಮಟ್ಟ
 
-- [ ] `npm run lint` — 0 errors (warnings ಮೊದಲೇ ಅಸ್ತಿತ್ವದಲ್ಲಿವೆ)
-- [ ] `npm run typecheck:core` — ಸ್ವಚ್ಛ
-- [ ] `npm run typecheck:noimplicit:core` — ಸ್ವಚ್ಛ (strict)
-- [ ] `npm run check:cycles` — circular deps ಇಲ್ಲ
-- [ ] `npm run check:any-budget:t11` — budgetನೊಳಗೆ
-- [ ] `npm run check:route-validation:t06` — ಸ್ವಚ್ಛ
-- [ ] `npm run check:node-runtime` — ಬೆಂಬಲಿತ runtime ಕನಿಷ್ಠ ಮಿತಿ ಪೂರೈಸಲಾಗಿದೆ (`>=22.22.2 <23`, `>=24.0.0 <27`, `src/shared/utils/nodeRuntimeSupport.ts` ನಲ್ಲಿನ `SUPPORTED_NODE_RANGE` ಪ್ರಕಾರ; `package.json` ನ `engines` ಜೊತೆಗೆ ಹೊಂದಿಸಲಾಗಿದೆ)
+- [ ] `npm run lint` — 0 ದೋಷಗಳು (ಎಚ್ಚರಿಕೆಗಳು ಮೊದಲೇ ಅಸ್ತಿತ್ವದಲ್ಲಿವೆ)
+- [ ] `npm run typecheck:core` — ದೋಷರಹಿತ
+- [ ] `npm run typecheck:noimplicit:core` — ದೋಷರಹಿತ (ಕಟ್ಟುನಿಟ್ಟಾದ)
+- [ ] `npm run check:cycles:ratchet` — ಸ್ಥಿರಗೊಳಿಸಿದ `metrics.cycles` ಗರಿಷ್ಠ ಮಿತಿಯೊಳಗೆ (`check:cycles` ಮಾತ್ರ ಚಲಾಯಿಸಿದರೆ ಯಾವುದೇ ಚಕ್ರಕ್ಕೆ 1 ಸ್ಥಿತಿಯೊಂದಿಗೆ ನಿರ್ಗಮಿಸುತ್ತದೆ, #15281)
+- [ ] `npm run check:any-budget:t11` — ಬಜೆಟ್ನೊಳಗೆ
+- [ ] `npm run check:route-validation:t06` — ದೋಷರಹಿತ
+- [ ] `npm run check:node-runtime` — ಬೆಂಬಲಿತ ರನ್ಟೈಮ್ ಕನಿಷ್ಠ ಮಿತಿ ಪೂರೈಸಲಾಗಿದೆ (`>=22.22.2 <23`, `>=24.0.0 <27`, `src/shared/utils/nodeRuntimeSupport.ts` ನಲ್ಲಿನ `SUPPORTED_NODE_RANGE` ಪ್ರಕಾರ; `package.json` ನ `engines` ಜೊತೆಗೆ ಹೊಂದಿಸಲಾಗಿದೆ)
 
 ### ಪರೀಕ್ಷೆ
 
 - [ ] `npm run test:unit` — ಉತ್ತೀರ್ಣ
-- [ ] `npm run test:vitest` — ಉತ್ತೀರ್ಣ (MCP server, autoCombo, cache)
-- [ ] `npm run test:coverage` — gate 60/60/60/60 ಪೂರೈಸಲಾಗಿದೆ (statements/lines/functions/branches)
-- [ ] `npm run test:integration` — ಉತ್ತೀರ್ಣ (ಬದಲಾವಣೆಗಳು DB / handlers ಅನ್ನು ಸ್ಪರ್ಶಿಸಿದರೆ)
-- [ ] `npm run test:combo:matrix` — ಉತ್ತೀರ್ಣ (combo strategy matrix: ಎಲ್ಲಾ 19 public routing strategiesಗಳ selection decisions ಅನ್ನು deterministic ಆಗಿ ಸಾಬೀತುಪಡಿಸುತ್ತದೆ; combo routing, strategy resolution ಅಥವಾ fallback logic ಅನ್ನು ಸ್ಪರ್ಶಿಸುವಾಗ ಚಲಾಯಿಸಿ)
-- [ ] `RUN_COMBO_LIVE=1 npm run test:combo:live` — **ಐಚ್ಛಿಕ/ಕೈಯಾರೆ** (gate ಹೊಂದಿರುವ real-upstream smoke; VPS `root@192.168.0.15` ನಿಂದ read-only DB snapshot ಅನ್ನು ಪಡೆಯುತ್ತದೆ; ನೈಜ providers ಅನ್ನು ಸಂಪರ್ಕಿಸುತ್ತದೆ, credits ಖರ್ಚಾಗುತ್ತವೆ; CI ನಲ್ಲಿ ಎಂದಿಗೂ ಚಲಿಸುವುದಿಲ್ಲ; gate ಇಲ್ಲದೆ ಸ್ವಚ್ಛವಾಗಿ skip ಆಗುತ್ತದೆ)
-- [ ] `npm run test:combo:live:vps` — **ಐಚ್ಛಿಕ/ಕೈಯಾರೆ** (Phase-3 VPS live smoke: plain Node ESM ಮೂಲಕ live `.15` server ವಿರುದ್ಧ 7 HTTP scenarios; `ssh root@192.168.0.15` ಅಗತ್ಯವಿದೆ; `__live_test__*` combos ಅನ್ನು ಮಾತ್ರ ರಚಿಸುತ್ತದೆ/ಅಳಿಸುತ್ತದೆ; ನೈಜ providers ಅನ್ನು ಸಂಪರ್ಕಿಸುತ್ತದೆ; CI ನಲ್ಲಿ ಎಂದಿಗೂ ಚಲಿಸುವುದಿಲ್ಲ)
+- [ ] `npm run test:vitest` — ಉತ್ತೀರ್ಣ (MCP ಸರ್ವರ್, autoCombo, ಕ್ಯಾಶ್)
+- [ ] `npm run test:coverage` — 60/60/60/60 ಗೇಟ್ ಪೂರೈಸಲಾಗಿದೆ (ಸ್ಟೇಟ್ಮೆಂಟ್ಗಳು/ಸಾಲುಗಳು/ಫಂಕ್ಷನ್ಗಳು/ಶಾಖೆಗಳು)
+- [ ] `npm run test:integration` — ಉತ್ತೀರ್ಣ (ಬದಲಾವಣೆಗಳು DB / ಹ್ಯಾಂಡ್ಲರ್ಗಳನ್ನು ಸ್ಪರ್ಶಿಸಿದರೆ)
+- [ ] `npm run test:combo:matrix` — ಉತ್ತೀರ್ಣ (ಕಾಂಬೊ ತಂತ್ರ ಮ್ಯಾಟ್ರಿಕ್ಸ್: ಎಲ್ಲಾ 19 ಸಾರ್ವಜನಿಕ ರೌಟಿಂಗ್ ತಂತ್ರಗಳ ಆಯ್ಕೆ ನಿರ್ಧಾರಗಳನ್ನು ನಿರ್ಣಾಯಕವಾಗಿ ಸಾಬೀತುಪಡಿಸುತ್ತದೆ; ಕಾಂಬೊ ರೌಟಿಂಗ್, ತಂತ್ರ ಪರಿಹಾರ ಅಥವಾ ಫಾಲ್ಬ್ಯಾಕ್ ತರ್ಕವನ್ನು ಬದಲಾಯಿಸುವಾಗ ಚಲಾಯಿಸಿ)
+- [ ] `RUN_COMBO_LIVE=1 npm run test:combo:live` — **ಐಚ್ಛಿಕ/ಕೈಯಾರೆ** (ಗೇಟ್ ಮಾಡಲಾದ ನೈಜ ಅಪ್ಸ್ಟ್ರೀಮ್ ಸ್ಮೋಕ್ ಪರೀಕ್ಷೆ; VPS `root@192.168.0.15` ನಿಂದ ಓದಲು-ಮಾತ್ರವಾದ DB ಸ್ನ್ಯಾಪ್ಶಾಟ್ ಅನ್ನು ಪಡೆಯುತ್ತದೆ; ನೈಜ ಪೂರೈಕೆದಾರರನ್ನು ಸಂಪರ್ಕಿಸುತ್ತದೆ, ಕ್ರೆಡಿಟ್ಗಳನ್ನು ಬಳಸುತ್ತದೆ; CI ನಲ್ಲಿ ಎಂದಿಗೂ ಚಲಿಸುವುದಿಲ್ಲ; ಗೇಟ್ ಇಲ್ಲದೆ ಸಮಸ್ಯೆಯಿಲ್ಲದೆ ಬಿಟ್ಟುಬಿಡುತ್ತದೆ)
+- [ ] `npm run test:combo:live:vps` — **ಐಚ್ಛಿಕ/ಕೈಯಾರೆ** (ಹಂತ-3 VPS ಲೈವ್ ಸ್ಮೋಕ್ ಪರೀಕ್ಷೆ: ಸರಳ Node ESM ಮೂಲಕ ಲೈವ್ `.15` ಸರ್ವರ್ ವಿರುದ್ಧ 7 HTTP ಸನ್ನಿವೇಶಗಳು; `ssh root@192.168.0.15` ಅಗತ್ಯವಿದೆ; `__live_test__*` ಕಾಂಬೊಗಳನ್ನು ಮಾತ್ರ ರಚಿಸುತ್ತದೆ/ಅಳಿಸುತ್ತದೆ; ನೈಜ ಪೂರೈಕೆದಾರರನ್ನು ಸಂಪರ್ಕಿಸುತ್ತದೆ; CI ನಲ್ಲಿ ಎಂದಿಗೂ ಚಲಿಸುವುದಿಲ್ಲ)
 - [ ] `npm run test:e2e` — ಉತ್ತೀರ್ಣ (UI ಬದಲಾವಣೆಗಳು)
 - [ ] `npm run test:protocols:e2e` — ಉತ್ತೀರ್ಣ (MCP/A2A ಬದಲಾವಣೆಗಳು)
 - [ ] `npm run test:ecosystem` — ಉತ್ತೀರ್ಣ
 
-### Hooks (Husky ಮೂಲಕ ಮೌಲ್ಯೀಕರಿಸಲಾಗಿದೆ)
+### ಹುಕ್ಗಳು (Husky ಮೂಲಕ ಮೌಲ್ಯೀಕರಿಸಲಾಗಿದೆ)
 
-Husky hooks `.husky/` ನಲ್ಲಿ ಇರುತ್ತವೆ ಮತ್ತು git operations ಸಮಯದಲ್ಲಿ ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಚಲಿಸುತ್ತವೆ.
+Husky ಹುಕ್ಗಳು `.husky/` ನಲ್ಲಿವೆ ಮತ್ತು git ಕಾರ್ಯಾಚರಣೆಗಳ ಸಮಯದಲ್ಲಿ ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಚಲಿಸುತ್ತವೆ.
 
 - **pre-commit:** `npx lint-staged + node scripts/check/check-docs-sync.mjs + npm run check:any-budget:t11`
-- **pre-push:** ವೇಗವಾದ deterministic gates — `npm run check:any-budget:t11 && npm run check:tracked-artifacts` (2026-06-13 ರಂದು ಸಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ). ಉದ್ದೇಶಪೂರ್ವಕವಾಗಿ `test:unit` ಅನ್ನು ಹೊರತುಪಡಿಸುತ್ತದೆ (ನಿಧಾನ; CI `test-unit` job ಮೂಲಕ ಒಳಗೊಳ್ಳಲಾಗಿದೆ).
-  - release branches ಅನ್ನು push ಮಾಡುವ ಮೊದಲು `npm run test:unit` ಅನ್ನು ಕೈಯಾರೆ ಚಲಾಯಿಸಿ.
+- **pre-push:** ವೇಗವಾದ ನಿರ್ಣಾಯಕ ಗೇಟ್ಗಳು — `npm run check:any-budget:t11 && npm run check:tracked-artifacts` (2026-06-13 ರಂದು ಸಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ). ಉದ್ದೇಶಪೂರ್ವಕವಾಗಿ `test:unit` ಅನ್ನು ಹೊರಗಿಡುತ್ತದೆ (ನಿಧಾನ; CI `test-unit` ಕೆಲಸವು ಇದನ್ನು ಒಳಗೊಳ್ಳುತ್ತದೆ).
+  - ಬಿಡುಗಡೆ ಶಾಖೆಗಳನ್ನು ಪುಷ್ ಮಾಡುವ ಮೊದಲು `npm run test:unit` ಅನ್ನು ಕೈಯಾರೆ ಚಲಾಯಿಸಿ.
 
-Hook ವಿಫಲವಾದರೆ: ಮೂಲ ಸಮಸ್ಯೆಯನ್ನು ಸರಿಪಡಿಸಿ, `--no-verify` ಬಳಸಿ bypass ಮಾಡಬೇಡಿ.
+ಹುಕ್ ವಿಫಲವಾದರೆ: ಮೂಲ ಸಮಸ್ಯೆಯನ್ನು ಸರಿಪಡಿಸಿ, `--no-verify` ಬಳಸಿ ಅದನ್ನು ತಪ್ಪಿಸಬೇಡಿ.
 
-### Conventional Commits
+### ಸಾಂಪ್ರದಾಯಿಕ ಕಮಿಟ್ಗಳು
 
-Releaseಗೆ ಹೋಗುವ ಎಲ್ಲಾ commits `type(scope): subject` ಸ್ವರೂಪವನ್ನು ಅನುಸರಿಸಬೇಕು.
+ಬಿಡುಗಡೆಗೆ ಸೇರಬೇಕಾದ ಎಲ್ಲಾ ಕಮಿಟ್ಗಳು `type(scope): subject` ಸ್ವರೂಪವನ್ನು ಅನುಸರಿಸಬೇಕು.
 
-**ಮಾನ್ಯ types:** `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `perf`, `style`, `ci`
+**ಮಾನ್ಯ ಪ್ರಕಾರಗಳು:** `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `perf`, `style`, `ci`
 
-**ಮಾನ್ಯ scopes:** `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`, `mcp`, `a2a`, `memory`, `skills`, `cloud-agent`, `guardrails`, `compression`, `auto-combo`, `resilience`, `providers`, `executors`, `translator`, `domain`, `authz`
+**ಮಾನ್ಯ ವ್ಯಾಪ್ತಿಗಳು:** `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`, `mcp`, `a2a`, `memory`, `skills`, `cloud-agent`, `guardrails`, `compression`, `auto-combo`, `resilience`, `providers`, `executors`, `translator`, `domain`, `authz`
 
-Breaking changes: `BREAKING CHANGE:` footer ಅಥವಾ scope ನಂತರ `!` ಸೇರಿಸಿ (ಉದಾ. `feat(api)!: drop /v0`).
+ಬ್ರೇಕಿಂಗ್ ಬದಲಾವಣೆಗಳು: `BREAKING CHANGE:` ಅಡಿಟಿಪ್ಪಣಿ ಅಥವಾ ವ್ಯಾಪ್ತಿಯ ನಂತರ `!` ಸೇರಿಸಿ (ಉದಾ. `feat(api)!: drop /v0`).
 
-### ದಾಖಲೆಗಳು
+### ದಸ್ತಾವೇಜೀಕರಣ
 
-- [ ] `npm run check:docs-sync` ಯಶಸ್ವಿಯಾಗುತ್ತದೆ (pre-commit ಮೂಲಕ ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಚಲಿಸುತ್ತದೆ)
-- [ ] `npm run check:docs-all` ಯಶಸ್ವಿಯಾಗುತ್ತದೆ (ಸಮಗ್ರ ಪರಿಶೀಲನೆ: docs-sync + docs-counts + env-doc-sync + deprecated-versions + doc-links)
-- [ ] `npm run check:env-doc-sync` 0 ನಿರ್ಗಮನ ಸ್ಥಿತಿಯೊಂದಿಗೆ ಮುಕ್ತಾಯಗೊಳ್ಳುತ್ತದೆ — ಕೋಡ್ ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` env ಒಪ್ಪಂದ ಅಖಂಡವಾಗಿದೆ
-- [ ] `npm run check:doc-links` 0 ನಿರ್ಗಮನ ಸ್ಥಿತಿಯೊಂದಿಗೆ ಮುಕ್ತಾಯಗೊಳ್ಳುತ್ತದೆ — ಪುನರ್ರಚನೆಯ ನಂತರ ಯಾವುದೇ ಮುರಿದ ಆಂತರಿಕ markdown ಉಲ್ಲೇಖಗಳಿಲ್ಲ
-- [ ] ಸಂಗ್ರಹಣೆ/runtime ವ್ಯತ್ಯಾಸಗಳಿಗಾಗಿ `docs/architecture/ARCHITECTURE.md` ಪರಿಶೀಲಿಸಲಾಗಿದೆ
-- [ ] env var ಮತ್ತು ಕಾರ್ಯಾಚರಣಾ ವ್ಯತ್ಯಾಸಗಳಿಗಾಗಿ `docs/guides/TROUBLESHOOTING.md` ಪರಿಶೀಲಿಸಲಾಗಿದೆ
-- [ ] `.env.example` ಬದಲಾಗಿದ್ದರೆ: `docs/reference/ENVIRONMENT.md` ನವೀಕರಿಸಲಾಗಿದೆ
+- [ ] `npm run check:docs-sync` ಉತ್ತೀರ್ಣವಾಗುತ್ತದೆ (pre-commit ಮೂಲಕ ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಚಲಿಸುತ್ತದೆ)
+- [ ] `npm run check:docs-all` ಉತ್ತೀರ್ಣವಾಗುತ್ತದೆ (ಒಗ್ಗೂಡಿಸಿದ ಪರೀಕ್ಷೆ: docs-sync + docs-counts + env-doc-sync + deprecated-versions + doc-links)
+- [ ] `npm run check:env-doc-sync` 0 ಸ್ಥಿತಿಯೊಂದಿಗೆ ನಿರ್ಗಮಿಸುತ್ತದೆ — ಕೋಡ್ ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` env ಒಪ್ಪಂದ ಅಕ್ಷುಣ್ಣವಾಗಿದೆ
+- [ ] `npm run check:doc-links` 0 ಸ್ಥಿತಿಯೊಂದಿಗೆ ನಿರ್ಗಮಿಸುತ್ತದೆ — ಮರುರಚನೆಯ ನಂತರ ಯಾವುದೇ ಆಂತರಿಕ markdown ಉಲ್ಲೇಖಗಳು ಮುರಿದಿಲ್ಲ
+- [ ] ಸಂಗ್ರಹಣೆ/ರನ್ಟೈಮ್ ವ್ಯತ್ಯಾಸಗಳಿಗಾಗಿ `docs/architecture/ARCHITECTURE.md` ಅನ್ನು ಪರಿಶೀಲಿಸಲಾಗಿದೆ
+- [ ] env var ಮತ್ತು ಕಾರ್ಯಾಚರಣೆಯ ವ್ಯತ್ಯಾಸಗಳಿಗಾಗಿ `docs/guides/TROUBLESHOOTING.md` ಅನ್ನು ಪರಿಶೀಲಿಸಲಾಗಿದೆ
+- [ ] `.env.example` ಬದಲಾಗಿದ್ದರೆ: `docs/reference/ENVIRONMENT.md` ಅನ್ನು ನವೀಕರಿಸಲಾಗಿದೆ
 - [ ] ಹೊಸ ವೈಶಿಷ್ಟ್ಯವು UI ಹೊಂದಿದ್ದರೆ: `docs/guides/USER_GUIDE.md` ಅದನ್ನು ಉಲ್ಲೇಖಿಸುತ್ತದೆ
-- [ ] ಹೊಸ ವೈಶಿಷ್ಟ್ಯವು API ಹೊಂದಿದ್ದರೆ: `docs/reference/API_REFERENCE.md` + `docs/openapi.yaml` ನವೀಕರಿಸಲಾಗಿದೆ
-- [ ] ಹೊಸ ವೈಶಿಷ್ಟ್ಯವು ಮಾಡ್ಯೂಲ್ ಆಗಿದ್ದರೆ: ಅದಕ್ಕೆ ಮೀಸಲಾದ `docs/<MODULE>.md` ಅಸ್ತಿತ್ವದಲ್ಲಿದೆ
-- [ ] ಇದು ಹೊಂದಾಣಿಕೆ ಮುರಿಯುವ ಬದಲಾವಣೆಯಾಗಿದ್ದರೆ: `docs/guides/TROUBLESHOOTING.md` ನಲ್ಲಿ ವಲಸೆ ಸೂಚನೆ ಇದೆ
+- [ ] ಹೊಸ ವೈಶಿಷ್ಟ್ಯವು API ಹೊಂದಿದ್ದರೆ: `docs/reference/API_REFERENCE.md` + `docs/openapi.yaml` ಅನ್ನು ನವೀಕರಿಸಲಾಗಿದೆ
+- [ ] ಹೊಸ ವೈಶಿಷ್ಟ್ಯವು ಮಾಡ್ಯೂಲ್ ಆಗಿದ್ದರೆ: ಮೀಸಲಾದ `docs/<MODULE>.md` ಅಸ್ತಿತ್ವದಲ್ಲಿದೆ
+- [ ] ಬ್ರೇಕಿಂಗ್ ಬದಲಾವಣೆಯಾಗಿದ್ದರೆ: `docs/guides/TROUBLESHOOTING.md` ವಲಸೆ ಟಿಪ್ಪಣಿಯನ್ನು ಹೊಂದಿದೆ
 
 ### i18n
 
-- [ ] `npm run i18n:check` 0 ನಿರ್ಗಮನ ಸ್ಥಿತಿಯೊಂದಿಗೆ ಮುಕ್ತಾಯಗೊಳ್ಳುತ್ತದೆ — ಅನುವಾದ ಸ್ಥಿತಿ (`.i18n-state.json`) ಮೂಲ ದಸ್ತಾವೇಜುಗಳೊಂದಿಗೆ ಸಿಂಕ್ ಆಗಿದೆ (ಕಟ್ಟುನಿಟ್ಟಿನ ಮೋಡ್ನಲ್ಲಿ ವ್ಯತ್ಯಾಸಗೊಂಡ ಮೂಲಗಳಿಲ್ಲ; ಕೊನೆಯ ಕ್ಷಣದ ದಸ್ತಾವೇಜು ತಿದ್ದುಪಡಿಗಳಿಗೆ ಎಚ್ಚರಿಕೆ-ಮೋಡ್ ಸಲಹೆ ಸ್ವೀಕಾರಾರ್ಹ, ಆದರೆ ಟ್ಯಾಗ್ ಮಾಡುವ ಮೊದಲು ಇದು 0 ಆಗಿರಬೇಕು)
-- [ ] `npm run i18n:check-ui-coverage` 0 ನಿರ್ಗಮನ ಸ್ಥಿತಿಯೊಂದಿಗೆ ಮುಕ್ತಾಯಗೊಳ್ಳುತ್ತದೆ — ಪ್ರತಿಯೊಂದು UI locale 80% ವ್ಯಾಪ್ತಿ ಮಿತಿಯಲ್ಲಿ ಅಥವಾ ಅದಕ್ಕಿಂತ ಮೇಲಿರುತ್ತದೆ
-- [ ] `npm run i18n:sync-ui:dry` ಎಲ್ಲಾ 42 localeಗಳಲ್ಲಿ 0 ಕಾಣೆಯಾದ ಕೀಲಿಗಳನ್ನು ವರದಿ ಮಾಡುತ್ತದೆ
-- [ ] ಮೂಲ ಇಂಗ್ಲಿಷ್ ದಸ್ತಾವೇಜುಗಳು ಬದಲಾಗಿದ್ದರೆ, ಟ್ಯಾಗ್ ಮಾಡುವ ಮೊದಲು `npm run i18n:run` ಚಲಾಯಿಸಿ (`.env` ನಲ್ಲಿ `OMNIROUTE_TRANSLATION_API_KEY` ಅಗತ್ಯವಿದೆ)
-- [ ] ಸಣ್ಣ ಬದಲಾವಣೆಗಳಾಗಿದ್ದರೆ ಅನುವಾದ ಕೊಡುಗೆಗಳನ್ನು ಮುಂದಿನ ಬಿಡುಗಡೆಗೆ ಮುಂದೂಡಬಹುದು (CHANGELOG ನಲ್ಲಿ ದಾಖಲಿಸಿ)
+- [ ] `npm run i18n:check` 0 ಸ್ಥಿತಿಯೊಂದಿಗೆ ನಿರ್ಗಮಿಸುತ್ತದೆ — ಅನುವಾದ ಸ್ಥಿತಿ (`.i18n-state.json`) ಮೂಲ ದಸ್ತಾವೇಜುಗಳೊಂದಿಗೆ ಸಿಂಕ್ ಆಗಿದೆ (ಕಟ್ಟುನಿಟ್ಟಾದ ಮೋಡ್ನಲ್ಲಿ ವ್ಯತ್ಯಾಸಗೊಂಡ ಮೂಲಗಳಿಲ್ಲ; ಕೊನೆಯ ಕ್ಷಣದ ದಸ್ತಾವೇಜು ತಿದ್ದುಪಡಿಗಳಿಗೆ ಎಚ್ಚರಿಕೆ-ಮೋಡ್ ಸಲಹೆ ಸ್ವೀಕಾರಾರ್ಹ, ಆದರೆ ಟ್ಯಾಗ್ ಮಾಡುವ ಮೊದಲು ಇದು 0 ಆಗಿರಬೇಕು)
+- [ ] `npm run i18n:check-ui-coverage` 0 ಸ್ಥಿತಿಯೊಂದಿಗೆ ನಿರ್ಗಮಿಸುತ್ತದೆ — ಪ್ರತಿಯೊಂದು UI ಲೊಕೇಲ್ 80% ವ್ಯಾಪ್ತಿ ಕನಿಷ್ಠ ಮಿತಿಯಲ್ಲಿ ಅಥವಾ ಅದಕ್ಕಿಂತ ಮೇಲಿದೆ
+- [ ] `npm run i18n:sync-ui:dry` ಎಲ್ಲಾ 66 ಗುರಿ ಲೊಕೇಲ್ಗಳಲ್ಲಿ 0 ಕಾಣೆಯಾದ ಕೀಲಿಗಳನ್ನು ವರದಿ ಮಾಡುತ್ತದೆ (`en` ಮೂಲವನ್ನು ಹೊರತುಪಡಿಸಿ ಪ್ರತಿಯೊಂದು ಲೊಕೇಲ್)
+- [ ] ಮೂಲ ಇಂಗ್ಲಿಷ್ ದಸ್ತಾವೇಜುಗಳು ಬದಲಾಗಿದ್ದರೆ, ಟ್ಯಾಗ್ ಮಾಡುವ ಮೊದಲು `npm run i18n:run` ಅನ್ನು ಚಲಾಯಿಸಿ (`.env` ನಲ್ಲಿ `OMNIROUTE_TRANSLATION_API_KEY` ಅಗತ್ಯವಿದೆ)
+- [ ] ಅನುವಾದ ಕೊಡುಗೆಗಳು ಚಿಕ್ಕದಾಗಿದ್ದರೆ ಮುಂದಿನ ಬಿಡುಗಡೆಗೆ ಮುಂದೂಡಬಹುದು (CHANGELOG ನಲ್ಲಿ ಟ್ರ್ಯಾಕ್ ಮಾಡಿ)
 
 ### ಡೇಟಾಬೇಸ್ ವಲಸೆಗಳು
 
 - [ ] `src/lib/db/migrations/` ನಲ್ಲಿ ಹೊಸ ಫೈಲ್ಗಳಿದ್ದರೆ:
-  - [ ] ಪ್ರತಿಯೊಂದು ವಲಸೆಯೂ idempotent ಆಗಿದೆ (`CREATE TABLE IF NOT EXISTS`, ಇತ್ಯಾದಿ)
-  - [ ] ವಲಸೆಗಳನ್ನು transactions ನಲ್ಲಿ ಸುತ್ತುವರಿಯಲಾಗಿದೆ
-  - [ ] ಸರಿಯಾಗಿ ಸಂಖ್ಯೆ ನೀಡಲಾಗಿದೆ (ಅನುಕ್ರಮದಲ್ಲಿ ಯಾವುದೇ ಅಂತರಗಳಿಲ್ಲ)
-- [ ] ಹೊಸ ಸ್ಥಾಪನೆಯಲ್ಲಿ ಪರೀಕ್ಷಿಸಿ: `~/.omniroute/omniroute.db` ಅಳಿಸಿ ಮತ್ತು `npm run dev` ಚಲಾಯಿಸಿ
-- [ ] ಅಸ್ತಿತ್ವದಲ್ಲಿರುವ ಸ್ಥಾಪನೆಯಲ್ಲಿ ಪರೀಕ್ಷಿಸಿ: DB ಬ್ಯಾಕಪ್ ಮಾಡಿ, ವಲಸೆಯನ್ನು ಚಲಾಯಿಸಿ, schema ಪರಿಶೀಲಿಸಿ
-- [ ] ವಲಸೆಯು tables ಅನ್ನು ಪುನಃ ಬರೆಯುವುದಾದರೆ WAL ಫೈಲ್ಗಳನ್ನು (`-wal`, `-shm`) ಸರಿಯಾಗಿ ನಿರ್ವಹಿಸಲಾಗಿದೆ
+  - [ ] ಪ್ರತಿಯೊಂದು ವಲಸೆಯೂ ಪುನರಾವರ್ತಿತವಾಗಿ ಚಲಾಯಿಸಬಹುದಾಗಿದೆ (`CREATE TABLE IF NOT EXISTS`, ಇತ್ಯಾದಿ)
+  - [ ] ವಲಸೆಗಳನ್ನು ಟ್ರಾನ್ಸಾಕ್ಷನ್ಗಳಲ್ಲಿ ಸುತ್ತುವರಿಯಲಾಗಿದೆ
+  - [ ] ಸರಿಯಾಗಿ ಸಂಖ್ಯೆ ನೀಡಲಾಗಿದೆ (ಅನುಕ್ರಮದಲ್ಲಿ ಅಂತರಗಳಿಲ್ಲ)
+- [ ] ಹೊಸ ಸ್ಥಾಪನೆಯಲ್ಲಿ ಪರೀಕ್ಷಿಸಿ: `~/.omniroute/omniroute.db` ಅನ್ನು ಅಳಿಸಿ ಮತ್ತು `npm run dev` ಚಲಾಯಿಸಿ
+- [ ] ಅಸ್ತಿತ್ವದಲ್ಲಿರುವ ಸ್ಥಾಪನೆಯಲ್ಲಿ ಪರೀಕ್ಷಿಸಿ: DB ಬ್ಯಾಕಪ್ ಮಾಡಿ, ವಲಸೆಯನ್ನು ಚಲಾಯಿಸಿ, ಸ್ಕೀಮಾವನ್ನು ಪರಿಶೀಲಿಸಿ
+- [ ] ವಲಸೆಯು ಟೇಬಲ್ಗಳನ್ನು ಮರುಬರೆಯುತ್ತಿದ್ದರೆ WAL ಫೈಲ್ಗಳನ್ನು (`-wal`, `-shm`) ಸರಿಯಾಗಿ ನಿರ್ವಹಿಸಲಾಗಿದೆ
 
-### ಒದಗಿಸುವವರ ಕ್ಯಾಟಲಾಗ್ (Zod-ಮೌಲ್ಯೀಕೃತ)
+### ಪೂರೈಕೆದಾರ ಕ್ಯಾಟಲಾಗ್ (Zod-ಮೌಲ್ಯೀಕರಿಸಿದ)
 
-- [ ] `src/shared/constants/providers.ts` Zod schema ಲೋಡ್ ಸಮಯದಲ್ಲಿ ಮಾನ್ಯವಾಗಿದೆ
-  - [ ] ಎಲ್ಲಾ ಒದಗಿಸುವವರು ಅಗತ್ಯವಿರುವ ಕ್ಷೇತ್ರಗಳನ್ನು (`id`, `label`, `kind`, ಇತ್ಯಾದಿ) ಹೊಂದಿದ್ದಾರೆ
-  - [ ] ಹೊಸ ಉಚಿತ ಒದಗಿಸುವವರಿಗೆ `freeNote` ಒದಗಿಸಲಾಗಿದೆ
-  - [ ] OAuth ಒದಗಿಸುವವರು `src/lib/oauth/constants/oauth.ts` ನಲ್ಲಿ ನೋಂದಾಯಿಸಲಾದ `oauthConfig` ಅನ್ನು ಹೊಂದಿದ್ದಾರೆ
-- [ ] ಹೊಸ ಒದಗಿಸುವವರನ್ನು ಸೇರಿಸಿದ್ದರೆ: `open-sse/executors/` ನಲ್ಲಿ ಅನುಗುಣವಾದ executor ಇದೆ
-- [ ] OpenAI ಅಲ್ಲದ ಸ್ವರೂಪವಾಗಿದ್ದರೆ: `open-sse/translator/` ನಲ್ಲಿ translator ಇದೆ
-- [ ] Models ಅನ್ನು `open-sse/config/providerRegistry.ts` ನಲ್ಲಿ ನೋಂದಾಯಿಸಲಾಗಿದೆ
-- [ ] `tests/unit/` ನಲ್ಲಿರುವ unit tests ಒದಗಿಸುವವರ ವರ್ಗೀಕರಣ ಮತ್ತು routing ಅನ್ನು ಒಳಗೊಳ್ಳುತ್ತವೆ
+- [ ] `src/shared/constants/providers.ts` Zod ಸ್ಕೀಮಾ ಲೋಡ್ ಸಮಯದಲ್ಲಿ ಮಾನ್ಯವಾಗಿದೆ
+  - [ ] ಎಲ್ಲ ಪೂರೈಕೆದಾರರು ಅಗತ್ಯವಿರುವ ಕ್ಷೇತ್ರಗಳನ್ನು (`id`, `label`, `kind`, ಇತ್ಯಾದಿ) ಹೊಂದಿದ್ದಾರೆ
+  - [ ] ಹೊಸ ಉಚಿತ ಪೂರೈಕೆದಾರರಿಗೆ `freeNote` ಒದಗಿಸಲಾಗಿದೆ
+  - [ ] OAuth ಪೂರೈಕೆದಾರರ `oauthConfig` ಅನ್ನು `src/lib/oauth/constants/oauth.ts` ನಲ್ಲಿ ನೋಂದಾಯಿಸಲಾಗಿದೆ
+- [ ] ಹೊಸ ಪೂರೈಕೆದಾರರನ್ನು ಸೇರಿಸಿದ್ದರೆ: `open-sse/executors/` ನಲ್ಲಿ ಅದಕ್ಕೆ ಅನುಗುಣವಾದ ಎಕ್ಸಿಕ್ಯೂಟರ್ ಇದೆ
+- [ ] OpenAI ಅಲ್ಲದ ಸ್ವರೂಪವಾಗಿದ್ದರೆ: `open-sse/translator/` ನಲ್ಲಿ ಪರಿವರ್ತಕ ಇದೆ
+- [ ] ಮಾದರಿಗಳನ್ನು `open-sse/config/providerRegistry.ts` ನಲ್ಲಿ ನೋಂದಾಯಿಸಲಾಗಿದೆ
+- [ ] `tests/unit/` ನಲ್ಲಿನ ಯೂನಿಟ್ ಪರೀಕ್ಷೆಗಳು ಪೂರೈಕೆದಾರರ ವರ್ಗೀಕರಣ ಮತ್ತು ರೂಟಿಂಗ್ ಅನ್ನು ಒಳಗೊಂಡಿವೆ
 
 ### ಡೆಸ್ಕ್ಟಾಪ್ (Electron)
 
 `electron/` ಬದಲಾಗಿದ್ದರೆ:
 
 - [ ] `npm run electron:smoke:packaged` ಯಶಸ್ವಿಯಾಗುತ್ತದೆ
-- [ ] `:win`, `:mac`, `:linux` ಇವುಗಳಲ್ಲಿ ಕನಿಷ್ಠ ಒಂದಕ್ಕಾಗಿ builds ಅನ್ನು ಪರೀಕ್ಷಿಸಲಾಗಿದೆ
-- [ ] Code signing certificates ಅವಧಿ ಮುಗಿದಿಲ್ಲ (signing ಮಾಡುತ್ತಿದ್ದರೆ)
-- [ ] `electron/package.json` version ಮೂಲ `package.json` ಗೆ ಹೊಂದಿಕೆಯಾಗುತ್ತದೆ
-- [ ] `stable` ಗೆ ಬಿಡುಗಡೆ ಮಾಡುತ್ತಿದ್ದರೆ auto-update channel pointer ಅನ್ನು ನವೀಕರಿಸಲಾಗಿದೆ
+- [ ] `:win`, `:mac`, `:linux` ಇವುಗಳಲ್ಲಿ ಕನಿಷ್ಠ ಒಂದಕ್ಕೆ ಬಿಲ್ಡ್ಗಳನ್ನು ಪರೀಕ್ಷಿಸಲಾಗಿದೆ
+- [ ] ಕೋಡ್ ಸಹಿ ಪ್ರಮಾಣಪತ್ರಗಳ ಅವಧಿ ಮುಗಿದಿಲ್ಲ (ಸಹಿ ಮಾಡುತ್ತಿದ್ದರೆ)
+- [ ] `electron/package.json` ಆವೃತ್ತಿಯು ಮೂಲ `package.json` ಆವೃತ್ತಿಗೆ ಹೊಂದಿಕೆಯಾಗುತ್ತದೆ
+- [ ] `stable` ಗೆ ಬಿಡುಗಡೆ ಮಾಡುತ್ತಿದ್ದರೆ ಸ್ವಯಂ-ನವೀಕರಣ ಚಾನಲ್ ಪಾಯಿಂಟರ್ ಅನ್ನು ನವೀಕರಿಸಲಾಗಿದೆ
 
-### Build ವಿನ್ಯಾಸ
+### ಬಿಲ್ಡ್ ವಿನ್ಯಾಸ
 
-ರೆಪೊಸಿಟರಿಯು ಮೂರು ವಿಭಿನ್ನ output directories ಅನ್ನು ಬಳಸುತ್ತದೆ — ಅವುಗಳನ್ನು ಎಂದಿಗೂ ಗೊಂದಲಗೊಳಿಸಬೇಡಿ:
+ರೆಪೊಸಿಟರಿಯು ಮೂರು ಪ್ರತ್ಯೇಕ ಔಟ್ಪುಟ್ ಡೈರೆಕ್ಟರಿಗಳನ್ನು ಬಳಸುತ್ತದೆ — ಅವುಗಳನ್ನು ಎಂದಿಗೂ ಮಿಶ್ರಗೊಳಿಸಬೇಡಿ:
 
-| ಡೈರೆಕ್ಟರಿ | ಉದ್ದೇಶ                                                          | ಟ್ರ್ಯಾಕ್ ಮಾಡಲಾಗಿದೆಯೇ? |
-| --------- | --------------------------------------------------------------- | --------------------- |
-| `src/`    | ಅಪ್ಲಿಕೇಶನ್ ಮೂಲ (TypeScript / TSX)                               | ಹೌದು                  |
-| `.build/` | Build ಮಧ್ಯಂತರಗಳು — `next build` output (`distDir`)              | ಇಲ್ಲ (gitignored)     |
-| `dist/`   | ವಿತರಿಸಬಹುದಾದ npm bundle — `assembleStandalone` ಮೂಲಕ ಜೋಡಿಸಲಾಗಿದೆ | ಇಲ್ಲ (gitignored)     |
+| ಡೈರೆಕ್ಟರಿ | ಉದ್ದೇಶ                                                         | ಟ್ರ್ಯಾಕ್ ಮಾಡಲಾಗಿದೆಯೇ? |
+| --------- | -------------------------------------------------------------- | --------------------- |
+| `src/`    | ಅಪ್ಲಿಕೇಶನ್ ಮೂಲ (TypeScript / TSX)                              | ಹೌದು                  |
+| `.build/` | ಬಿಲ್ಡ್ ಮಧ್ಯಂತರಗಳು — `next build` ಔಟ್ಪುಟ್ (`distDir`)           | ಇಲ್ಲ (gitignored)     |
+| `dist/`   | ವಿತರಿಸಬಹುದಾದ npm ಬಂಡಲ್ — `assembleStandalone` ಮೂಲಕ ಜೋಡಿಸಲಾಗಿದೆ | ಇಲ್ಲ (gitignored)     |
 
-> **ನಿರ್ವಾಹಕರ ಸೂಚನೆ:** ದೂರಸ್ಥ VPS image ಡೈರೆಕ್ಟರಿಯು `/usr/lib/node_modules/omniroute/app/` ಆಗಿಯೇ ಉಳಿಯುತ್ತದೆ.
-> **ರೆಪೊಸಿಟರಿಯೊಳಗಿನ** build output ಮಾತ್ರ ಸ್ಥಳಾಂತರಗೊಂಡಿದೆ (`app/` → `dist/`). Deploy skills
-> `dist/` ನ ವಿಷಯಗಳನ್ನು ದೂರಸ್ಥ `app/` dir ಗೆ rsync ಮಾಡುತ್ತವೆ — ಯಾವುದೇ VPS path ಬದಲಾವಣೆಗಳು ಅಗತ್ಯವಿಲ್ಲ.
+> **ಆಪರೇಟರ್ ಟಿಪ್ಪಣಿ:** ರಿಮೋಟ್ VPS ಇಮೇಜ್ ಡೈರೆಕ್ಟರಿಯು `/usr/lib/node_modules/omniroute/app/` ಆಗಿಯೇ ಉಳಿಯುತ್ತದೆ.
+> **ರೆಪೊ ಒಳಗಿನ** ಬಿಲ್ಡ್ ಔಟ್ಪುಟ್ ಮಾತ್ರ ಸ್ಥಳಾಂತರಗೊಂಡಿದೆ (`app/` → `dist/`). ಡಿಪ್ಲಾಯ್ ಸ್ಕಿಲ್ಗಳು
+> `dist/` ವಿಷಯಗಳನ್ನು ರಿಮೋಟ್ `app/` ಡೈರೆಕ್ಟರಿಗೆ rsync ಮಾಡುತ್ತವೆ — VPS ಪಥಗಳಲ್ಲಿ ಯಾವುದೇ ಬದಲಾವಣೆ ಅಗತ್ಯವಿಲ್ಲ.
 
-**ಏಕ-build ಹರಿವು:**
+**ಏಕ-ಬಿಲ್ಡ್ ಹರಿವು:**
 
 ```
 npm run build:release
   └─ rm -rf .build dist          (ಸ್ವಚ್ಛಗೊಳಿಸುವಿಕೆ)
   └─ next build → .build/next/   (ಮಧ್ಯಂತರಗಳು)
   └─ assembleStandalone          (standalone + static + public + natives ಅನ್ನು dist/ ಗೆ ನಕಲಿಸುತ್ತದೆ)
-  └─ writes dist/BUILD_SHA       (HEAD sentinel ಅನ್ನು ಬರೆಯುತ್ತದೆ)
+  └─ writes dist/BUILD_SHA       (HEAD ಸೆಂಟಿನೆಲ್)
 ```
 
-Deploy ಗಾಗಿ `npm run build` ಚಲಾಯಿಸಿ ನಂತರ ಪ್ರತ್ಯೇಕವಾಗಿ `npm run build:cli` ಚಲಾಯಿಸಬೇಡಿ — ಒಂದೇ command ನಲ್ಲಿ ಸ್ವಚ್ಛ ಮರುನಿರ್ಮಾಣ + sentinel ಮಾಡುವ
+ಡಿಪ್ಲಾಯ್ಗಾಗಿ `npm run build` ಚಲಾಯಿಸಿ ನಂತರ ಪ್ರತ್ಯೇಕವಾಗಿ `npm run build:cli` ಚಲಾಯಿಸಬೇಡಿ — ಒಂದೇ ಕಮಾಂಡ್ನಲ್ಲಿ ಸ್ವಚ್ಛ ಮರುಬಿಲ್ಡ್ + ಸೆಂಟಿನೆಲ್ ಮಾಡುವ
 `npm run build:release` ಅನ್ನು ಬಳಸಿ.
 
-### Artifact ಮೌಲ್ಯೀಕರಣ
+### ಆರ್ಟಿಫ್ಯಾಕ್ಟ್ ಮೌಲ್ಯೀಕರಣ
 
 - [ ] `npm run build:release` ಯಶಸ್ವಿಯಾಗುತ್ತದೆ ಮತ್ತು `dist/BUILD_SHA` == `git rev-parse --short HEAD`
-- [ ] `npm run check:pack-artifact` ಸ್ವಚ್ಛವಾಗಿದೆ — `app.__qa_backup`, `scripts/scratch`, `package-lock.json`, ಅಥವಾ ಇತರ ಸ್ಥಳೀಯ ಅವಶೇಷಗಳಿಲ್ಲ
-- [ ] Build ನಂತರ `dist/server.js` ಅಸ್ತಿತ್ವದಲ್ಲಿದೆ
-- [ ] ಐಚ್ಛಿಕ ಸ್ಥಳೀಯ packaged-runtime smoke: `npm run dev:candidate -- build` ನಂತರ `npm run dev:candidate -- validate` ಪ್ರತ್ಯೇಕಿಸಿದ `DATA_DIR` ನಲ್ಲಿ packed tarball ಅನ್ನು boot ಮಾಡುತ್ತದೆ ಮತ್ತು `/api/health` + `/v1/models` ಅನ್ನು ಪರಿಶೀಲಿಸುತ್ತದೆ ([Contribution Golden Path](CONTRIBUTION_GOLDEN_PATH.md#local-candidate-loop) ನೋಡಿ)
+- [ ] `npm run check:pack-artifact` ಸ್ವಚ್ಛವಾಗಿದೆ — `app.__qa_backup`, `scripts/scratch`, `package-lock.json`, ಅಥವಾ ಇತರ ಯಾವುದೇ ಸ್ಥಳೀಯ ಅವಶೇಷಗಳಿಲ್ಲ
+- [ ] ಬಿಲ್ಡ್ ನಂತರ `dist/server.js` ಅಸ್ತಿತ್ವದಲ್ಲಿದೆ
+- [ ] ಐಚ್ಛಿಕ ಸ್ಥಳೀಯ ಪ್ಯಾಕೇಜ್ಡ್-ರನ್ಟೈಮ್ ಸ್ಮೋಕ್ ಪರೀಕ್ಷೆ: `npm run dev:candidate -- build` ನಂತರ `npm run dev:candidate -- validate` ಪ್ರತ್ಯೇಕಿಸಲಾದ `DATA_DIR` ನಲ್ಲಿ ಪ್ಯಾಕ್ ಮಾಡಿದ tarball ಅನ್ನು ಬೂಟ್ ಮಾಡಿ `/api/health` + `/v1/models` ಅನ್ನು ಪರಿಶೀಲಿಸುತ್ತದೆ ([ಕೊಡುಗೆಯ ಗೋಲ್ಡನ್ ಪಾಥ್](CONTRIBUTION_GOLDEN_PATH.md#local-candidate-loop) ನೋಡಿ)
 
 ### ಟ್ಯಾಗಿಂಗ್ ಮತ್ತು ಬಿಡುಗಡೆ
 
-- [ ] `/generate-release-cc` (Claude Code skill) ಚಲಾಯಿಸಿ:
-  - `vX.Y.Z` tag ರಚಿಸುತ್ತದೆ
-  - Tag ಮತ್ತು branch ಅನ್ನು push ಮಾಡುತ್ತದೆ
-  - Changelog body ಜೊತೆಗೆ GitHub Release ತೆರೆಯುತ್ತದೆ
-  - Electron installers ಅನ್ನು ಲಗತ್ತಿಸುತ್ತದೆ (build ಮಾಡಿದ್ದರೆ)
+- [ ] `/generate-release-cc` ಅನ್ನು ಚಲಾಯಿಸಿ (Claude Code ಸ್ಕಿಲ್):
+  - `vX.Y.Z` ಟ್ಯಾಗ್ ಅನ್ನು ರಚಿಸುತ್ತದೆ
+  - ಟ್ಯಾಗ್ ಮತ್ತು ಬ್ರಾಂಚ್ ಅನ್ನು ಪುಶ್ ಮಾಡುತ್ತದೆ
+  - ಚೇಂಜ್ಲಾಗ್ ವಿಷಯದೊಂದಿಗೆ GitHub Release ಅನ್ನು ತೆರೆಯುತ್ತದೆ
+  - Electron ಇನ್ಸ್ಟಾಲರ್ಗಳನ್ನು ಲಗತ್ತಿಸುತ್ತದೆ (ಬಿಲ್ಡ್ ಮಾಡಿದ್ದರೆ)
 - [ ] ಅಥವಾ ಕೈಯಾರೆ:
   ```bash
   git tag -a vX.Y.Z -m "Release vX.Y.Z"
@@ -275,46 +275,46 @@ Deploy ಗಾಗಿ `npm run build` ಚಲಾಯಿಸಿ ನಂತರ ಪ್ರ
   gh release create vX.Y.Z --notes-from-tag
   ```
 
-### ನಿಯೋಜನೆ
+### ಡಿಪ್ಲಾಯ್
 
-Deploy skills ಹಗುರವಾದ rsync ಹರಿವನ್ನು ಬಳಸುತ್ತವೆ — `npm pack` ಇಲ್ಲ, `npm i -g` ಇಲ್ಲ:
+ಡಿಪ್ಲಾಯ್ ಸ್ಕಿಲ್ಗಳು ಹಗುರವಾದ rsync ಹರಿವನ್ನು ಬಳಸುತ್ತವೆ — `npm pack` ಇಲ್ಲ, `npm i -g` ಇಲ್ಲ:
 
-- [ ] ಗುರಿಗೆ ಹೊಂದಿಕೆಯಾಗುವ deploy skill ಅನ್ನು ಬಳಸಿ:
+- [ ] ಗುರಿಗೆ ಹೊಂದುವ ಡಿಪ್ಲಾಯ್ ಸ್ಕಿಲ್ ಅನ್ನು ಬಳಸಿ:
   - `/deploy-vps-local-cc` — ಸ್ಥಳೀಯ VPS (192.168.0.15)
   - `/deploy-vps-akamai-cc` — Akamai VPS (69.164.221.35)
   - `/deploy-vps-both-cc` — ಎರಡೂ
-- [ ] ನಿಯೋಜಿಸುವ ಮೊದಲು, `dist/BUILD_SHA` == `git rev-parse --short HEAD` ಎಂದು ದೃಢೀಕರಿಸಿ
-- [ ] `node_modules` ನೈಜವಾಗಿರುವಲ್ಲಿ build ಚಲಾಯಿಸಬೇಕು (ಮುಖ್ಯ checkout ಅಥವಾ `npm ci` ಚಲಾಯಿಸಿದ worktree — symlink ಮಾಡಲಾದ worktree ಅಲ್ಲ)
-- [ ] ನಿಯೋಜಿಸಲಾದ instance ಅನ್ನು smoke test ಮಾಡಿ:
-  - `/dashboard/health` ತೆರೆಯಿರಿ → version string releaseಗೆ ಹೊಂದಿಕೆಯಾಗುತ್ತದೆಯೇ ಎಂದು ಪರಿಶೀಲಿಸಿ
-  - ತಿಳಿದಿರುವ provider ವಿರುದ್ಧ `/v1/chat/completions` request ಅನ್ನು ಚಲಾಯಿಸಿ
-  - `/api/monitoring/health`, `CLOSED` circuit breakers ಅನ್ನು ಹಿಂದಿರುಗಿಸುತ್ತದೆ ಎಂದು ಪರಿಶೀಲಿಸಿ
-  - MCP transports ಪ್ರತಿಕ್ರಿಯಿಸುತ್ತವೆ ಎಂದು ದೃಢೀಕರಿಸಿ (`/mcp` HTTP, `/mcp-sse` SSE)
+- [ ] ಡಿಪ್ಲಾಯ್ ಮಾಡುವ ಮೊದಲು, `dist/BUILD_SHA` == `git rev-parse --short HEAD` ಎಂಬುದನ್ನು ಖಚಿತಪಡಿಸಿ
+- [ ] `node_modules` ನೈಜವಾಗಿರುವ ಸ್ಥಳದಲ್ಲೇ ಬಿಲ್ಡ್ ಚಲಾಯಿಸಬೇಕು (ಮುಖ್ಯ ಚೆಕ್ಔಟ್ ಅಥವಾ `npm ci` ಚಲಾಯಿಸಿದ worktree — ಸಿಂಬಾಲಿಕ್ ಲಿಂಕ್ ಮಾಡಿದ worktree ಅಲ್ಲ)
+- [ ] ಡಿಪ್ಲಾಯ್ ಮಾಡಿದ ಇನ್ಸ್ಟನ್ಸ್ನ ಸ್ಮೋಕ್ ಪರೀಕ್ಷೆ ಮಾಡಿ:
+  - `/dashboard/health` ತೆರೆಯಿರಿ → ಆವೃತ್ತಿ ಸ್ಟ್ರಿಂಗ್ ಬಿಡುಗಡೆಗೆ ಹೊಂದಿಕೆಯಾಗುತ್ತದೆಯೇ ಎಂದು ಪರಿಶೀಲಿಸಿ
+  - ಪರಿಚಿತ ಪೂರೈಕೆದಾರರ ವಿರುದ್ಧ `/v1/chat/completions` ವಿನಂತಿಯನ್ನು ಚಲಾಯಿಸಿ
+  - `/api/monitoring/health` `CLOSED` ಸರ್ಕ್ಯೂಟ್ ಬ್ರೇಕರ್ಗಳನ್ನು ಹಿಂದಿರುಗಿಸುತ್ತದೆ ಎಂಬುದನ್ನು ಪರಿಶೀಲಿಸಿ
+  - MCP ಟ್ರಾನ್ಸ್ಪೋರ್ಟ್ಗಳು ಪ್ರತಿಕ್ರಿಯಿಸುತ್ತವೆ ಎಂಬುದನ್ನು ಖಚಿತಪಡಿಸಿ (`/mcp` HTTP, `/mcp-sse` SSE)
 
-### ಬಿಡುಗಡೆ ನಂತರ
+### ಬಿಡುಗಡೆಯ ನಂತರ
 
-- [ ] `/capture-release-evidences-cc` ಅನ್ನು ಚಲಾಯಿಸಿ (Claude Code skill)
-  - ಹೊಸ ವೈಶಿಷ್ಟ್ಯಗಳ WebP screenshots/recordings ಅನ್ನು ಸೆರೆಹಿಡಿಯುತ್ತದೆ
-  - ಅವುಗಳನ್ನು release notes / blog postಗೆ ಲಗತ್ತಿಸುತ್ತದೆ
-- [ ] release announcementನೊಂದಿಗೆ GitHub Discussions / Discord ಅನ್ನು ನವೀಕರಿಸಿ
-- [ ] ಮುಂದಿನ versionಗಾಗಿ milestone ತೆರೆಯಿರಿ
-- [ ] ನಿರ್ಣಾಯಕವಾಗಿದ್ದರೆ: in-app bannerಗಾಗಿ discussion ಅನ್ನು pin ಮಾಡಿ ಅಥವಾ `news.json` ನಲ್ಲಿ post ಮಾಡಿ
+- [ ] `/capture-release-evidences-cc` ಅನ್ನು ಚಲಾಯಿಸಿ (Claude Code ಸ್ಕಿಲ್)
+  - ಹೊಸ ವೈಶಿಷ್ಟ್ಯಗಳ WebP ಸ್ಕ್ರೀನ್ಶಾಟ್ಗಳು/ರೆಕಾರ್ಡಿಂಗ್ಗಳನ್ನು ಸೆರೆಹಿಡಿಯುತ್ತದೆ
+  - ಬಿಡುಗಡೆ ಟಿಪ್ಪಣಿಗಳು / ಬ್ಲಾಗ್ ಪೋಸ್ಟ್ಗೆ ಲಗತ್ತಿಸುತ್ತದೆ
+- [ ] ಬಿಡುಗಡೆ ಪ್ರಕಟಣೆಯೊಂದಿಗೆ GitHub Discussions / Discord ಅನ್ನು ನವೀಕರಿಸಿ
+- [ ] ಮುಂದಿನ ಆವೃತ್ತಿಗಾಗಿ ಮೈಲಿಗಲ್ಲನ್ನು ತೆರೆಯಿರಿ
+- [ ] ಗಂಭೀರವಾಗಿದ್ದರೆ: ಚರ್ಚೆಯನ್ನು ಪಿನ್ ಮಾಡಿ ಅಥವಾ ಅಪ್ಲಿಕೇಶನ್ನೊಳಗಿನ ಬ್ಯಾನರ್ಗಾಗಿ `news.json` ನಲ್ಲಿ ಪೋಸ್ಟ್ ಮಾಡಿ
 
-### Radar ಸಾರ್ವಜನಿಕ-ಬಿಡುಗಡೆ gate
+### Radar ಸಾರ್ವಜನಿಕ-ಬಿಡುಗಡೆ ಗೇಟ್
 
-Radar announcement ಅನ್ನು ಉದ್ದೇಶಪೂರ್ವಕವಾಗಿ `active: false` ನೊಂದಿಗೆ commit ಮಾಡಲಾಗಿದೆ. ಕೆಳಗಿನ ಪ್ರತಿಯೊಂದು ಅಂಶಕ್ಕೂ ಪುರಾವೆ ದೊರೆತ ನಂತರ activation ಒಂದು ಪ್ರತ್ಯೇಕ
-ಬದಲಾವಣೆಯಾಗಿರುತ್ತದೆ:
+Radar ಪ್ರಕಟಣೆಯನ್ನು ಉದ್ದೇಶಪೂರ್ವಕವಾಗಿ `active: false` ಜೊತೆಗೆ ಕಮಿಟ್ ಮಾಡಲಾಗಿದೆ. ಕೆಳಗಿನ ಪ್ರತಿಯೊಂದು ಅಂಶಕ್ಕೂ ಸಾಕ್ಷ್ಯ ದೊರೆತ ನಂತರವೇ ಸಕ್ರಿಯಗೊಳಿಸುವಿಕೆಯನ್ನು ಪ್ರತ್ಯೇಕ
+ಬದಲಾವಣೆಯಾಗಿ ಮಾಡಬೇಕು:
 
-- [ ] ಎಲ್ಲಾ stacked Radar PRs merge ಆಗಿವೆ ಮತ್ತು release-tip CI ಹಸಿರಾಗಿದೆ
-- [ ] `RADAR_ENABLED` ಅನ್ನು ಇನ್ನೂ ಪೂರ್ವನಿಯೋಜಿತವಾಗಿ off ಆಗಿಯೇ ಇರಿಸಿ OSS Radar routes ಅನ್ನು deploy ಮಾಡಿ ಮತ್ತು smoke test ಮಾಡಿ
-- [ ] ಹೆಸರಿಸಲಾದ Radar hostನಲ್ಲಿ `GET /planos`, `/termos`, `/privacidade`, ಮತ್ತು `/reembolso` ಅನ್ನು smoke test ಮಾಡಿ
-- [ ] ಖಾಸಗಿ serviceನಲ್ಲಿ operator identity/contact/address ಮತ್ತು owner ಅನುಮೋದಿಸಿದ legal review ಅನ್ನು ದಾಖಲಿಸಿ
-- [ ] test modeನಲ್ಲಿ ಮಾತ್ರ Stripe Checkout ಮತ್ತು signed webhook ಅನ್ನು ಪರೀಕ್ಷಿಸಿ
-- [ ] ಅನುಮೋದಿತ sender/domainನೊಂದಿಗೆ ಒಂದು encrypted transactional-email delivery ಅನ್ನು ಪರೀಕ್ಷಿಸಿ
-- [ ] backup restore ಮತ್ತು ಮೇಲ್ವಿಚಾರಣೆಯಲ್ಲಿರುವ, budget ಮಿತಿಗೊಳಿಸಿದ ಒಂದು research run ಅನ್ನು ಸಾಬೀತುಪಡಿಸಿ
-- [ ] donation evidence ಅನ್ನು ಸ್ವೀಕರಿಸುವ ಮೊದಲು BRL/PIX review policy ಅನ್ನು ಅನುಮೋದಿಸಿ
-- [ ] ಹಿಂದಿನ gates ಪೂರ್ಣಗೊಂಡ ನಂತರವೇ public Checkout ಅನ್ನು enable ಮಾಡಿ, ನಂತರ ಹೊಸ `news.json` ID ಅನ್ನು activate ಮಾಡಿ
-- [ ] Home banner ಸ್ಥಳೀಕರಿಸಿದ copy ಅನ್ನು ಬಳಸುತ್ತದೆ ಮತ್ತು ಹಳೆಯ ID ಒಂದನ್ನು dismiss ಮಾಡಿದ ನಂತರ ಹೊಸ ID ಮತ್ತೆ ಕಾಣಿಸಿಕೊಳ್ಳುತ್ತದೆ ಎಂದು ಪರಿಶೀಲಿಸಿ
+- [ ] ಸ್ಟ್ಯಾಕ್ ಮಾಡಲಾದ ಎಲ್ಲಾ Radar PRಗಳನ್ನು ವಿಲೀನಗೊಳಿಸಲಾಗಿದೆ ಮತ್ತು release-tip CI ಹಸಿರಾಗಿದೆ
+- [ ] `RADAR_ENABLED` ಪೂರ್ವನಿಯೋಜಿತವಾಗಿ ಇನ್ನೂ ಆಫ್ ಆಗಿರುವಾಗಲೇ OSS Radar ರೂಟ್ಗಳನ್ನು ಡಿಪ್ಲಾಯ್ ಮಾಡಿ ಸ್ಮೋಕ್ ಪರೀಕ್ಷೆ ನಡೆಸಿ
+- [ ] ಹೆಸರಿಸಲಾದ Radar ಹೋಸ್ಟ್ನಲ್ಲಿ `GET /planos`, `/termos`, `/privacidade`, ಮತ್ತು `/reembolso` ಅನ್ನು ಸ್ಮೋಕ್ ಪರೀಕ್ಷೆ ಮಾಡಿ
+- [ ] ಖಾಸಗಿ ಸೇವೆಯಲ್ಲಿ ಆಪರೇಟರ್ನ ಗುರುತು/ಸಂಪರ್ಕ/ವಿಳಾಸ ಮತ್ತು ಮಾಲೀಕರು ಅನುಮೋದಿಸಿದ ಕಾನೂನು ಪರಿಶೀಲನೆಯನ್ನು ದಾಖಲಿಸಿ
+- [ ] ಪರೀಕ್ಷಾ ಮೋಡ್ನಲ್ಲಿ ಮಾತ್ರ Stripe Checkout ಮತ್ತು ಸಹಿ ಮಾಡಿದ webhook ಅನ್ನು ಪರೀಕ್ಷಿಸಿ
+- [ ] ಅನುಮೋದಿತ ಕಳುಹಿಸುವವರು/ಡೊಮೇನ್ನೊಂದಿಗೆ ಒಂದು ಎನ್ಕ್ರಿಪ್ಟ್ ಮಾಡಿದ ವಹಿವಾಟು-ಇಮೇಲ್ ವಿತರಣೆಯನ್ನು ಪರೀಕ್ಷಿಸಿ
+- [ ] ಬ್ಯಾಕಪ್ ಮರುಸ್ಥಾಪನೆ ಮತ್ತು ಮೇಲ್ವಿಚಾರಣೆಯಲ್ಲಿರುವ, ಬಜೆಟ್-ಮಿತಿಯ ಒಂದು ಸಂಶೋಧನಾ ರನ್ ಅನ್ನು ಸಾಬೀತುಪಡಿಸಿ
+- [ ] ದೇಣಿಗೆ ಪುರಾವೆಯನ್ನು ಸ್ವೀಕರಿಸುವ ಮೊದಲು BRL/PIX ಪರಿಶೀಲನಾ ನೀತಿಯನ್ನು ಅನುಮೋದಿಸಿ
+- [ ] ಹಿಂದಿನ ಗೇಟ್ಗಳನ್ನು ಪೂರ್ಣಗೊಳಿಸಿದ ನಂತರವೇ ಸಾರ್ವಜನಿಕ Checkout ಅನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿ, ನಂತರ ಹೊಸ `news.json` ID ಅನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿ
+- [ ] Home ಬ್ಯಾನರ್ ಸ್ಥಳೀಕರಿಸಿದ ಪಠ್ಯವನ್ನು ಬಳಸುತ್ತದೆ ಮತ್ತು ಹಳೆಯ ID ಅನ್ನು ವಜಾಗೊಳಿಸಿದ ನಂತರ ಹೊಸ ID ಮತ್ತೆ ಕಾಣಿಸಿಕೊಳ್ಳುತ್ತದೆ ಎಂಬುದನ್ನು ಪರಿಶೀಲಿಸಿ
 
 ## ಎಂಬೆಡೆಡ್ ಸರ್ವೀಸ್ಗಳ ಸ್ಮೋಕ್ ಪರೀಕ್ಷೆ (v3.8.4+)
 
@@ -385,107 +385,111 @@ Radar announcement ಅನ್ನು ಉದ್ದೇಶಪೂರ್ವಕವಾಗ
 
 ---
 
-## 3.9.0 LTS ಕಟ್ (3.8.58 ರಲ್ಲಿ ಪೂರ್ವಾಭ್ಯಾಸ ಮಾಡಲಾಗಿದೆ)
+## 3.9.0 LTS ಕಟ್ (3.8.58ರಲ್ಲಿ ಪೂರ್ವಾಭ್ಯಾಸ ಮಾಡಲಾಗಿದೆ)
 
-v3.8.59 ನಂತರದ ಆವೃತ್ತಿ 3.9.0 ಆಗಿದ್ದು, ಅದರ ಟಿಪ್ ಎರಡು ದೀರ್ಘಕಾಲೀನ ಬ್ರಾಂಚ್ಗಳಾಗಿ ವಿಭಜನೆಯಾಗುತ್ತದೆ:
-`stable/v3` (v3 LTS ಲೈನ್, npm `latest`) ಮತ್ತು `develop` (v4, 4.0.0 ಗೆ ಹೆಚ್ಚಿಸಲಾಗಿದೆ, npm
-`nightly`). ಬ್ರಾಂಚ್/ಚಾನೆಲ್ ಮಾದರಿ, ಫಾರ್ವರ್ಡ್-ಪೋರ್ಟ್ ಮತ್ತು ಲೇಬಲ್ಗಳು
-[RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md) ನಲ್ಲಿವೆ; ಯೋಜನೆಯು [ROADMAP](../../ROADMAP.md) (ಹಂತ 3) ನಲ್ಲಿದೆ. ಕಟ್ ಒಮ್ಮೆ ಮಾತ್ರ ನಡೆಯುತ್ತದೆ;
+v3.8.59 ನಂತರದ ಮುಂದಿನ ಆವೃತ್ತಿ 3.9.0 ಆಗಿದ್ದು, ಅದರ ತುದಿಯು ದೀರ್ಘಕಾಲ ಉಳಿಯುವ ಎರಡು ಶಾಖೆಗಳಾಗುತ್ತದೆ:
+`stable/v3` (v3 LTS ಲೈನ್, npm `latest`) ಮತ್ತು `develop` (v4, 4.0.0ಗೆ ಹೆಚ್ಚಿಸಲಾಗಿದೆ, npm
+`nightly`). ಶಾಖೆ/ಚಾನೆಲ್ ಮಾದರಿ, ಫಾರ್ವರ್ಡ್-ಪೋರ್ಟ್ ಮತ್ತು ಲೇಬಲ್ಗಳು
+[RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md)ನಲ್ಲಿವೆ; ಯೋಜನೆಯು [ROADMAP](../../ROADMAP.md)ನಲ್ಲಿ (ಹಂತ 3) ಇದೆ. ಕಟ್ ಒಮ್ಮೆ ಮಾತ್ರ ನಡೆಯುತ್ತದೆ;
 3.8.58 ಅದನ್ನು ಫೋರ್ಕ್ನಲ್ಲಿ ಆರಂಭದಿಂದ ಅಂತ್ಯದವರೆಗೆ ಪೂರ್ವಾಭ್ಯಾಸ ಮಾಡುತ್ತದೆ ಮತ್ತು 3.8.59
-[GO/NO-GO ಪರಿಶೀಲನಾಪಟ್ಟಿ](./LTS_GO_NO_GO.md) ಯೊಂದಿಗೆ ಮುಕ್ತಾಯಗೊಳ್ಳುತ್ತದೆ.
+[GO/NO-GO ಪರಿಶೀಲನಾಪಟ್ಟಿ](./LTS_GO_NO_GO.md)ಯೊಂದಿಗೆ ಮುಕ್ತಾಯಗೊಳ್ಳುತ್ತದೆ.
 
-### ಡ್ರೈ-ರನ್ (ಓದಲು ಮಾತ್ರ, ಯಾವಾಗ ಬೇಕಾದರೂ ಸುರಕ್ಷಿತ)
+### ಡ್ರೈ-ರನ್ (ಓದಲು ಮಾತ್ರ, ಯಾವುದೇ ಸಮಯದಲ್ಲೂ ಸುರಕ್ಷಿತ)
 
 ```bash
-npm run release:dry-run-lts-cut                       # ನೈಜ ಕಟ್: HEAD ನಿಂದ 3.9.0, ಹಿಂದಿನ ಟ್ಯಾಗ್ v3.8.59
-npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # ಮೂಲ ಕಮಿಟ್ ಅನ್ನು ನಿಗದಿಪಡಿಸಿ
+npm run release:dry-run-lts-cut                       # ನಿಜವಾದ ಕಟ್: HEADನಿಂದ 3.9.0, ಹಿಂದಿನ ಟ್ಯಾಗ್ v3.8.59
+npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # ಮೂಲ ಕಮಿಟ್ ಅನ್ನು ಪಿನ್ ಮಾಡಿ
 ```
 
-`scripts/release/dry-run-lts-cut.mjs` ಏನನ್ನೂ ಕಾರ್ಯಗತಗೊಳಿಸುವುದಿಲ್ಲ: ಅದು git ಮತ್ತು `gh` ಅನ್ನು ಓದಿ
-ಸಂಪೂರ್ಣ ಅನುಕ್ರಮವನ್ನು ಮುದ್ರಿಸುತ್ತದೆ — ಪೂರ್ವಷರತ್ತುಗಳು (ಮೂಲವು ರೆಸಾಲ್ವ್ ಆಗುತ್ತದೆ, ಹಿಂದಿನ ಟ್ಯಾಗ್ ಅಸ್ತಿತ್ವದಲ್ಲಿದೆ, `package.json`
-ಗುರಿ ಆವೃತ್ತಿಯಲ್ಲಿದೆ, ಒಂದು `release-freeze` ಇಶ್ಯೂ ತೆರೆದಿದೆ, ಅಸ್ತಿತ್ವದಲ್ಲಿರುವ ರಿಲೀಸ್ ಬ್ರಾಂಚ್ನಲ್ಲಿ
-ತೆರೆದ `Release branch not green` ಇಶ್ಯೂ ಇಲ್ಲ — ಅಸ್ತಿತ್ವದಲ್ಲಿಲ್ಲದ ಬ್ರಾಂಚ್ `?` ಅಜ್ಞಾತ ಎಂದು ವರದಿ ಮಾಡುತ್ತದೆ,
-ಎಂದಿಗೂ ಗ್ರೀನ್ ಎಂದು ಅಲ್ಲ — Mergify `release` ಕ್ಯೂ ಕಾನ್ಫಿಗರ್ ಆಗಿದೆ (G11: `queue_rules`, `checks_timeout`,
-ಲೇಬಲ್ `queue`), `release/*` ರೂಲ್ಸೆಟ್ ಇನ್ನೂ ಅಳಿಸುವಿಕೆ ಮತ್ತು ಫೋರ್ಸ್-ಪುಷ್ ಅನ್ನು ನಿರ್ಬಂಧಿಸುತ್ತದೆ ಮತ್ತು
-`stable/v3` ಹಾಗೂ `develop` ಇನ್ನೂ ಅಸ್ತಿತ್ವದಲ್ಲಿಲ್ಲ), ಎರಡು ಬ್ರಾಂಚ್ ಹಂತಗಳು, ಯಾವ ಸುಪ್ತ ವರ್ಕ್ಫ್ಲೋ
-ಟ್ರಿಗರ್ಗಳು ಮತ್ತು `if:` ಷರತ್ತುಗಳು ಸತ್ಯವಾಗುತ್ತವೆ (ಮತ್ತು ಯಾವವು ರೆಪೊಸಿಟರಿ ವೇರಿಯಬಲ್ನಿಂದ ಗೇಟ್ ಆಗಿಯೇ
-ಉಳಿಯುತ್ತವೆ ಅಥವಾ ಅಧಿಕೃತ ರೆಪೊಸಿಟರಿಗೆ ನಿಗದಿಯಾಗಿವೆ), ನಿರೀಕ್ಷಿತ dist-tag ಗಳು (`latest` → 3.9.0,
-`next` ಮತ್ತು `nightly` ಖಾಲಿ) ಹಾಗೂ ರೋಲ್ಬ್ಯಾಕ್. ಎಕ್ಸಿಟ್ `0` = `RESULT: READY`, `1` = ನಿರ್ಬಂಧಿಸುವ
-ಪೂರ್ವಷರತ್ತು ವಿಫಲವಾಗಿದೆ (`✗`), `2` = ಬಳಕೆಯ ದೋಷ. `--advisory <id,...>` ಒಂದು ಪರಿಶೀಲನೆಯನ್ನು
-ಮರೆಮಾಡದೆ ಎಚ್ಚರಿಕೆಗೆ (`!`) ಇಳಿಸುತ್ತದೆ.
+`scripts/release/dry-run-lts-cut.mjs` ಯಾವುದನ್ನೂ ಕಾರ್ಯಗತಗೊಳಿಸುವುದಿಲ್ಲ: ಅದು git ಮತ್ತು `gh` ಅನ್ನು ಓದಿ
+ಸಂಪೂರ್ಣ ಅನುಕ್ರಮವನ್ನು ಮುದ್ರಿಸುತ್ತದೆ — ಪೂರ್ವಷರತ್ತುಗಳು (ಮೂಲವು ರೆಸಾಲ್ವ್ ಆಗುತ್ತದೆ, ಮೂಲ ರೆಪೊಸಿಟರಿಯು ಸಂಪೂರ್ಣ ಇತಿಹಾಸವನ್ನು ಹೊಂದಿದೆ —
+ಶ್ಯಾಲೋ ಕ್ಲೋನ್ `stable/v3` ಅನ್ನು ಪುಶ್ ಮಾಡಲು ಸಾಧ್ಯವಿಲ್ಲ, ಮೊದಲ
+ಗ್ರಾಫ್ಟ್ ಮಾಡಿದ ಪೇರೆಂಟ್ನಲ್ಲಿ ಸ್ವೀಕರಿಸುವ ಪಾರ್ಶ್ವವು ಪ್ಯಾಕ್ ಅನ್ನು ತಿರಸ್ಕರಿಸುತ್ತದೆ, ಆದ್ದರಿಂದ ಸಂಪೂರ್ಣ ಕ್ಲೋನ್ನಿಂದ ಕಟ್ ಮಾಡಿ ಅಥವಾ ಮೊದಲು
+`git fetch --unshallow origin` ಚಲಾಯಿಸಿ — ಹಿಂದಿನ
+ಟ್ಯಾಗ್ ಅಸ್ತಿತ್ವದಲ್ಲಿದೆ, `package.json` ಗುರಿ ಆವೃತ್ತಿಯಾಗಿದೆ, `release-freeze` ಇಶ್ಯೂ ತೆರೆದಿದೆ, ಅಸ್ತಿತ್ವದಲ್ಲಿರುವ ಬಿಡುಗಡೆ ಶಾಖೆಯಲ್ಲಿ
+ತೆರೆದಿರುವ `Release branch not green` ಇಶ್ಯೂ ಇಲ್ಲ —
+ಅಸ್ತಿತ್ವದಲ್ಲಿಲ್ಲದ ಶಾಖೆಯು `?` ಅಜ್ಞಾತ ಎಂದು ವರದಿ ಮಾಡುತ್ತದೆ, ಎಂದಿಗೂ
+ಹಸಿರು ಎಂದು ಅಲ್ಲ — Mergify `release` ಕ್ಯೂ ಅನ್ನು ಕಾನ್ಫಿಗರ್ ಮಾಡಲಾಗಿದೆ (G11: `queue_rules`, `checks_timeout`,
+ಲೇಬಲ್ `queue`), `release/*` ರೂಲ್ಸೆಟ್ ಇನ್ನೂ ಅಳಿಸುವಿಕೆ ಮತ್ತು ಫೋರ್ಸ್-ಪುಶ್ ಅನ್ನು ನಿರ್ಬಂಧಿಸುತ್ತದೆ ಮತ್ತು
+`stable/v3` ಹಾಗೂ `develop` ಇನ್ನೂ ಅಸ್ತಿತ್ವದಲ್ಲಿಲ್ಲ), ಎರಡು ಶಾಖೆಯ ಹಂತಗಳು, ಯಾವ ನಿಷ್ಕ್ರಿಯ-ವರ್ಕ್ಫ್ಲೋ
+ಟ್ರಿಗರ್ಗಳು ಮತ್ತು `if:` ಷರತ್ತುಗಳು ಸತ್ಯವಾಗುತ್ತವೆ (ಮತ್ತು ಯಾವುವು ರೆಪೊಸಿಟರಿ ವೇರಿಯಬಲ್ನಿಂದ ಇನ್ನೂ ಗೇಟ್ ಆಗಿರುತ್ತವೆ ಅಥವಾ
+ಕ್ಯಾನಾನಿಕಲ್ ರೆಪೊಸಿಟರಿಗೆ ಪಿನ್ ಆಗಿರುತ್ತವೆ), ನಿರೀಕ್ಷಿತ dist-tags (`latest` → 3.9.0, `next` ಮತ್ತು
+`nightly` ಖಾಲಿ) ಮತ್ತು ರೋಲ್ಬ್ಯಾಕ್. ನಿರ್ಗಮನ `0` = `RESULT: READY`, `1` = ನಿರ್ಬಂಧಿಸುವ ಪೂರ್ವಷರತ್ತು
+ವಿಫಲವಾಗಿದೆ (`✗`), `2` = ಬಳಕೆ ದೋಷ. `--advisory <id,...>` ಪರಿಶೀಲನೆಯನ್ನು ಮರೆಮಾಡದೆಯೇ ಎಚ್ಚರಿಕೆಗೆ (`!`)
+ಇಳಿಸುತ್ತದೆ.
 
-3.9.0 ರಿಲೀಸ್ ಫ್ರೀಜ್ ಇನ್ನೂ ತೆರೆದಿರುವಾಗಲೇ ನೈಜ ಕಟ್ನ ಡ್ರೈ-ರನ್ ಅನ್ನು ಚಲಾಯಿಸಿ — ಟ್ಯಾಗ್ನ ನಂತರ ಮತ್ತು
-ಹಂತ 12c ಫ್ರೀಜ್ ಅನ್ನು ತೆಗೆದುಹಾಕುವ ಮೊದಲು ಬ್ರಾಂಚ್ಗಳನ್ನು ರಚಿಸಲಾಗುತ್ತದೆ.
+3.9.0 ಬಿಡುಗಡೆ ಫ್ರೀಜ್ ಇನ್ನೂ ತೆರೆದಿರುವಾಗಲೇ ನಿಜವಾದ ಕಟ್ನ ಡ್ರೈ-ರನ್ ಅನ್ನು ಚಲಾಯಿಸಿ — ಟ್ಯಾಗ್ ನಂತರ ಮತ್ತು ಹಂತ 12c
+ಫ್ರೀಜ್ ಅನ್ನು ತೆರವುಗೊಳಿಸುವ ಮೊದಲು ಶಾಖೆಗಳನ್ನು ರಚಿಸಲಾಗುತ್ತದೆ.
 
 ### 3.8.58 ಪೂರ್ವಾಭ್ಯಾಸ (ಫೋರ್ಕ್ನಲ್ಲಿ ಮಾತ್ರ)
 
 ```bash
-# 1. ಪೂರ್ವಾಭ್ಯಾಸದ ಪ್ಯಾರಾಮೀಟರ್ಗಳೊಂದಿಗೆ ಪ್ರಸ್ತುತ ಟಿಪ್ನಲ್ಲಿ ಡ್ರೈ-ರನ್ ಮಾಡಿ
+# 1. ಪೂರ್ವಾಭ್ಯಾಸದ ಪ್ಯಾರಾಮೀಟರ್ಗಳೊಂದಿಗೆ ಪ್ರಸ್ತುತ ತುದಿಯಲ್ಲಿ ಡ್ರೈ-ರನ್ ಮಾಡಿ
 npm run release:dry-run-lts-cut -- --target-version 3.8.58 --previous-tag v3.8.57 \
   --advisory freeze,base-green
 
-# 2. FORK ರಿಮೋಟ್ ವಿರುದ್ಧ ಕಾರ್ಯಗತಗೊಳಿಸಿ (origin ಅಥವಾ ಅಧಿಕೃತ ರೆಪೊಸಿಟರಿಯ URL ಹೊಂದಿರುವ ಯಾವುದೇ
-#    ರಿಮೋಟ್ ಅನ್ನು ನಿರಾಕರಿಸಲಾಗುತ್ತದೆ; ಪ್ರತಿಯೊಂದು ಹಂತವೂ ಟರ್ಮಿನಲ್ನಲ್ಲಿ ದೃಢೀಕರಣವನ್ನು ಕೇಳುತ್ತದೆ)
+# 2. FORK ರಿಮೋಟ್ ವಿರುದ್ಧ ಕಾರ್ಯಗತಗೊಳಿಸಿ (origin ಅಥವಾ ಕ್ಯಾನಾನಿಕಲ್
+#    ರೆಪೊಸಿಟರಿಯ URL ಹೊಂದಿರುವ ಯಾವುದೇ ರಿಮೋಟ್ ಅನ್ನು ನಿರಾಕರಿಸಲಾಗುತ್ತದೆ; ಪ್ರತಿಯೊಂದು ಹಂತವೂ ಟರ್ಮಿನಲ್ನಲ್ಲಿ ದೃಢೀಕರಣವನ್ನು ಕೇಳುತ್ತದೆ)
 git remote add rehearsal https://github.com/<you>/OmniRoute.git
 node scripts/release/dry-run-lts-cut.mjs --execute --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 
-# 3. ಫೋರ್ಕ್ನಲ್ಲಿ ಸುಪ್ತ ವರ್ಕ್ಫ್ಲೋಗಳನ್ನು ಪ್ರಯೋಗಿಸಿ (ಡ್ರೈ-ರನ್ ಅಧಿಕೃತ-ರೆಪೊಸಿಟರಿ ಪಿನ್ ಅನ್ನು
-#    ವರದಿ ಮಾಡುವಲ್ಲಿ workflow_dispatch), ನಂತರ ರೋಲ್ಬ್ಯಾಕ್ ಮಾಡಿ
+# 3. ಫೋರ್ಕ್ನಲ್ಲಿ ನಿಷ್ಕ್ರಿಯ ವರ್ಕ್ಫ್ಲೋಗಳನ್ನು ಪ್ರಯೋಗಿಸಿ (ಡ್ರೈ-ರನ್
+#    ಕ್ಯಾನಾನಿಕಲ್-ರೆಪೊಸಿಟರಿ ಪಿನ್ ಅನ್ನು ವರದಿ ಮಾಡುವಲ್ಲಿ workflow_dispatch), ನಂತರ ರೋಲ್ಬ್ಯಾಕ್ ಮಾಡಿ
 node scripts/release/dry-run-lts-cut.mjs --execute --rollback --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 ```
 
-develop ಬಂಪ್ ಕಮಿಟ್ ಅನ್ನು git ಪ್ಲಂಬಿಂಗ್ನೊಂದಿಗೆ ನಿರ್ಮಿಸಲಾಗುತ್ತದೆ (ಯಾವುದೇ ವರ್ಕಿಂಗ್ ಟ್ರೀಗೆ ಸ್ಪರ್ಶಿಸಲಾಗುವುದಿಲ್ಲ) ಮತ್ತು
+develop ಬಂಪ್ ಕಮಿಟ್ ಅನ್ನು git ಪ್ಲಂಬಿಂಗ್ನೊಂದಿಗೆ ನಿರ್ಮಿಸಲಾಗುತ್ತದೆ (ಯಾವುದೇ ವರ್ಕಿಂಗ್ ಟ್ರೀಯನ್ನು ಸ್ಪರ್ಶಿಸುವುದಿಲ್ಲ) ಮತ್ತು
 ಸೈಕಲ್-ಓಪನ್ ಕಮಿಟ್ನಂತೆಯೇ ಅದೇ ಐದು ಫೈಲ್ಗಳನ್ನು ಬಂಪ್ ಮಾಡುತ್ತದೆ: `package.json`, `open-sse/package.json`,
 `electron/package.json`, `package-lock.json` ಮತ್ತು `docs/openapi.yaml`. `[4.0.0]`
-CHANGELOG ವಿಭಾಗ ಮತ್ತು ಅದರ i18n ಪ್ರತಿಬಿಂಬಗಳನ್ನು ನಂತರ `develop` ನಲ್ಲಿ, ಅದರ ಮೊದಲ PR ಗಿಂತ ಮೊದಲು
-ತೆರೆಯಲಾಗುತ್ತದೆ. ಸ್ಕ್ರಿಪ್ಟ್ npm dist-tag ಗಳನ್ನು ಎಂದಿಗೂ ಬದಲಾಯಿಸುವುದಿಲ್ಲ — ಅವುಗಳನ್ನು ಸ್ಕ್ರ್ಯಾಚ್ ಪ್ಯಾಕೇಜ್ನಲ್ಲಿ ಪೂರ್ವಾಭ್ಯಾಸ ಮಾಡಿ.
+CHANGELOG ವಿಭಾಗ ಮತ್ತು ಅದರ i18n ಮಿರರ್ಗಳನ್ನು ನಂತರ `develop`ನಲ್ಲಿ, ಅದರ ಮೊದಲ
+PRಗೂ ಮೊದಲು ತೆರೆಯಲಾಗುತ್ತದೆ. ಸ್ಕ್ರಿಪ್ಟ್ ಎಂದಿಗೂ npm dist-tags ಅನ್ನು ಬದಲಿಸುವುದಿಲ್ಲ — ಅವುಗಳನ್ನು ಸ್ಕ್ರ್ಯಾಚ್ ಪ್ಯಾಕೇಜ್ನಲ್ಲಿ ಪೂರ್ವಾಭ್ಯಾಸ ಮಾಡಿ.
 
 ### PR ಪೂರ್ವವೀಕ್ಷಣೆ ಆರ್ಟಿಫ್ಯಾಕ್ಟ್ (ಒಮ್ಮೆ ನಿರ್ಮಿಸಿ, ಅದೇ ಬೈಟ್ಗಳನ್ನು ಪ್ರಮೋಟ್ ಮಾಡಿ)
 
-`.github/workflows/preview-artifact.yml` ಒಂದು PR ಹೆಡ್ನಿಂದ ಒಂದೇ ಪ್ರೊಡಕ್ಷನ್ ಟಾರ್ಬಾಲ್ ಅನ್ನು ನಿರ್ಮಿಸುತ್ತದೆ ಮತ್ತು
-ಅದೇ ನಿಖರವಾದ ಬಿಲ್ಡ್ ಅನ್ನು ಮೌಲ್ಯೀಕರಿಸುತ್ತದೆ (#8084 ಸ್ಲೈಸ್ (a)). ಒಂದೇ-ರೆಪೊಸಿಟರಿಯ PR ಗಳು ಮಾತ್ರ; ಯಾವುದನ್ನೂ ಪ್ರಕಟಿಸಲಾಗುವುದಿಲ್ಲ.
+`.github/workflows/preview-artifact.yml` PR ಹೆಡ್ನಿಂದ ಒಂದು ಪ್ರೊಡಕ್ಷನ್ ಟಾರ್ಬಾಲ್ ಅನ್ನು ನಿರ್ಮಿಸುತ್ತದೆ ಮತ್ತು
+ಅದೇ ನಿಖರವಾದ ಬಿಲ್ಡ್ ಅನ್ನು ಮೌಲ್ಯೀಕರಿಸುತ್ತದೆ (#8084 ಭಾಗ (a)). ಒಂದೇ ರೆಪೊಸಿಟರಿಯ PRಗಳು ಮಾತ್ರ; ಯಾವುದನ್ನೂ ಪ್ರಕಟಿಸಲಾಗುವುದಿಲ್ಲ.
 
 ```bash
-gh workflow run preview-artifact.yml -f pr_number=<N>   # ಅಥವಾ `preview-artifact` ಲೇಬಲ್ ಅನ್ನು ಸೇರಿಸಿ
+gh workflow run preview-artifact.yml -f pr_number=<N>   # ಅಥವಾ `preview-artifact` ಲೇಬಲ್ ಸೇರಿಸಿ
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
 gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
 npm install -g ./omniroute-*.tgz                          # ಪೂರ್ವವೀಕ್ಷಣೆ ಇನ್ಸ್ಟಾಲ್
 ```
 
-ರನ್ `npm ci`, `npm run build:release`, `npm run check:pack-artifact` ಅನ್ನು ನಡೆಸಿ, ಟಾರ್ಬಾಲ್ ಅನ್ನು ಪ್ಯಾಕ್ ಮಾಡುತ್ತದೆ,
-`npm run check:pack-boot` ಅನ್ನು (ನಕಲಿ ಸೀಕ್ರೆಟ್ಗಳು, ಅಲ್ಪಕಾಲಿಕ ಡೇಟಾ ಡೈರೆಕ್ಟರಿ) ಚಲಾಯಿಸಿ, ಮರು-ಪ್ಯಾಕ್ ಮಾಡುತ್ತದೆ ಮತ್ತು
-ಡೈಜೆಸ್ಟ್ ಒಂದೇ ಆಗಿರದಿದ್ದರೆ ವಿಫಲಗೊಳ್ಳುತ್ತದೆ; ನಂತರ `artifact-identity.json` ಅನ್ನು (ಹೆಡ್ SHA, ಬೇಸ್
-SHA, ಲಾಕ್ಫೈಲ್ ಹ್ಯಾಶ್, ಪ್ಲಾಟ್ಫಾರ್ಮ್, ಆರ್ಕ್, node ABI, ಬಂಡ್ಲರ್, ಬಿಲ್ಡ್ ನೀತಿ —
-`scripts/release/artifact-identity.mjs`) ದಾಖಲಿಸಿ, ಪ್ರತ್ಯೇಕ ಜಾಬ್ನಲ್ಲಿ ಟಾರ್ಬಾಲ್ಗೆ ದೃಢೀಕರಣ ನೀಡುತ್ತದೆ. ಪೂರ್ವವೀಕ್ಷಣೆಯನ್ನು
-ಪ್ರಮೋಟ್ ಮಾಡುವುದು ಎಂದರೆ ಆ ಟಾರ್ಬಾಲ್ ಅನ್ನು ಇನ್ಸ್ಟಾಲ್ ಮಾಡುವುದು: ಮೂಲದಿಂದ ಎಂದಿಗೂ ಮರುನಿರ್ಮಿಸಬೇಡಿ.
+ಈ ರನ್ `npm ci`, `npm run build:release`, `npm run check:pack-artifact` ಅನ್ನು ನಿರ್ವಹಿಸಿ, ಟಾರ್ಬಾಲ್ ಅನ್ನು ಪ್ಯಾಕ್ ಮಾಡುತ್ತದೆ,
+`npm run check:pack-boot` ಅನ್ನು ಚಲಾಯಿಸುತ್ತದೆ (ನಕಲಿ ಸೀಕ್ರೆಟ್ಗಳು, ತಾತ್ಕಾಲಿಕ ಡೇಟಾ ಡೈರೆಕ್ಟರಿ), ಮರು-ಪ್ಯಾಕ್ ಮಾಡುತ್ತದೆ ಮತ್ತು
+ಡೈಜೆಸ್ಟ್ ಒಂದೇ ಆಗಿರದಿದ್ದರೆ ವಿಫಲಗೊಳ್ಳುತ್ತದೆ; ನಂತರ `artifact-identity.json` (ಹೆಡ್ SHA, ಬೇಸ್
+SHA, ಲಾಕ್ಫೈಲ್ ಹ್ಯಾಶ್, ಪ್ಲಾಟ್ಫಾರ್ಮ್, ಆರ್ಕಿಟೆಕ್ಚರ್, node ABI, ಬಂಡ್ಲರ್, ಬಿಲ್ಡ್ ನೀತಿ —
+`scripts/release/artifact-identity.mjs`) ಅನ್ನು ದಾಖಲಿಸಿ, ಪ್ರತ್ಯೇಕ ಜಾಬ್ನಲ್ಲಿ ಟಾರ್ಬಾಲ್ಗೆ ದೃಢೀಕರಣ ನೀಡುತ್ತದೆ. ಪೂರ್ವವೀಕ್ಷಣೆಯನ್ನು ಪ್ರಮೋಟ್ ಮಾಡುವುದು
+ಎಂದರೆ ಆ ಟಾರ್ಬಾಲ್ ಅನ್ನು ಇನ್ಸ್ಟಾಲ್ ಮಾಡುವುದು: ಮೂಲದಿಂದ ಎಂದಿಗೂ ಮರುನಿರ್ಮಿಸಬೇಡಿ.
 
 ### ಕಟ್ (3.9.0, GO ನಂತರ)
 
-1. GO ಅನ್ನು [LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md) ನಲ್ಲಿ ದಾಖಲಿಸಲಾಗಿದೆ.
-2. `npm run release:dry-run-lts-cut -- --from v3.9.0` ಎಂಬುದು `RESULT: READY` ಅನ್ನು ಮುದ್ರಿಸುತ್ತದೆ.
-3. ಡ್ರೈ-ರನ್ ಮುದ್ರಿಸುವ ಕಮಾಂಡ್ಗಳೊಂದಿಗೆ `origin` ನಲ್ಲಿ ಬ್ರಾಂಚ್ಗಳನ್ನು ಕೈಯಾರೆ ರಚಿಸಿ — ಸ್ಕ್ರಿಪ್ಟ್
-   `origin` ಗೆ ಪುಷ್ ಮಾಡಲು ನಿರಾಕರಿಸುತ್ತದೆ. ಪರಿಶೀಲಿಸಲಾದ develop ಕಮಿಟ್ ಅನ್ನು ಮರುಬಳಕೆ ಮಾಡಲು, ಮೊದಲು ನಿಮ್ಮ ಫೋರ್ಕ್ ವಿರುದ್ಧ
-   3.9.0 ಟಿಪ್ನಲ್ಲಿ `--execute` ಪೂರ್ವಾಭ್ಯಾಸವನ್ನು ಚಲಾಯಿಸಿ; ಅದು ಎರಡೂ SHA ಗಳನ್ನು ಮುದ್ರಿಸುತ್ತದೆ ಮತ್ತು
-   ಅದೇ ಕಮಿಟ್ಗಳನ್ನು ಪುಷ್ ಮಾಡಬಹುದು:
+1. GO ಅನ್ನು [LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md)ನಲ್ಲಿ ದಾಖಲಿಸಲಾಗಿದೆ.
+2. `npm run release:dry-run-lts-cut -- --from v3.9.0` `RESULT: READY` ಅನ್ನು ಮುದ್ರಿಸುತ್ತದೆ.
+3. ಡ್ರೈ-ರನ್ ಮುದ್ರಿಸುವ ಕಮಾಂಡ್ಗಳೊಂದಿಗೆ `origin`ನಲ್ಲಿ ಶಾಖೆಗಳನ್ನು ಕೈಯಾರೆ ರಚಿಸಿ —
+   ಸ್ಕ್ರಿಪ್ಟ್ `origin`ಗೆ ಪುಶ್ ಮಾಡಲು ನಿರಾಕರಿಸುತ್ತದೆ. ಪರಿಶೀಲಿಸಲಾದ develop ಕಮಿಟ್ ಅನ್ನು ಮರುಬಳಕೆ ಮಾಡಲು, ಮೊದಲು ನಿಮ್ಮ ಫೋರ್ಕ್ ವಿರುದ್ಧ
+   3.9.0 ತುದಿಯಲ್ಲಿ `--execute` ಪೂರ್ವಾಭ್ಯಾಸವನ್ನು ಚಲಾಯಿಸಿ; ಅದು ಎರಡೂ SHAಗಳನ್ನು ಮುದ್ರಿಸುತ್ತದೆ ಮತ್ತು
+   ಅದೇ ಕಮಿಟ್ಗಳನ್ನು ಪುಶ್ ಮಾಡಬಹುದು:
 
    ```bash
    git push origin <stable-sha>:refs/heads/stable/v3 <develop-sha>:refs/heads/develop
    ```
 
-4. ಮೊದಲ PR ಲ್ಯಾಂಡ್ ಆಗುವ ಮೊದಲು `stable/v3` ಮತ್ತು `develop` ಅನ್ನು ರಕ್ಷಿಸಿ (ರೂಲ್ಸೆಟ್ಗಳು + ಮರ್ಜ್ ಕ್ಯೂ).
-5. ಬ್ರಾಂಚ್ ಅಸ್ತಿತ್ವದ ಆಧಾರದ ಮೇಲೆ ಸುಪ್ತ ವರ್ಕ್ಫ್ಲೋಗಳು ಸಕ್ರಿಯಗೊಳ್ಳುತ್ತವೆ: `forward-port.yml` (`stable/v3` ಗೆ
-   ಪುಷ್), `validate-stable-pr.yml` (`stable/v3` ಗೆ PR ಗಳು) ಮತ್ತು `nightly-v4-build.yml`
-   (`develop` ಅನ್ನು ನಿರ್ಮಿಸುತ್ತದೆ). ಗೋ-ಲೈವ್ಗೆ ಮೊದಲು, `secrets.FORWARD_PORT_TOKEN` ರೆಪೊಸಿಟರಿ ಸೀಕ್ರೆಟ್ ಅನ್ನು ಹೊಂದಿಸಿ
-   (ಇದರಿಂದ ಫಾರ್ವರ್ಡ್-ಪೋರ್ಟ್ PR ಗಳಲ್ಲಿ CI ಚಲಿಸುತ್ತದೆ); ಮಾಲೀಕರು ರೆಪೊಸಿಟರಿ ವೇರಿಯಬಲ್
-   `vars.NIGHTLY_PUBLISH` ಅನ್ನು `true` ಗೆ ಹೊಂದಿಸುವವರೆಗೆ ಮತ್ತು npm Trusted Publishing
-   `nightly-v4-build.yml` ಅನ್ನು ಸ್ವೀಕರಿಸುವವರೆಗೆ ನೈಟ್ಲಿ ಪ್ರಕಟಣೆ ಆಫ್ ಆಗಿಯೇ ಇರುತ್ತದೆ. ಚಾನೆಲ್ ರೆಸಲ್ಯೂಶನ್
-   `scripts/release/dist-tag.mjs` ಆಗಿದ್ದು, `npm-publish.yml` ಬಳಸುವ ಅದೇ ರೆಸಾಲ್ವರ್ ಆಗಿದೆ.
-6. ಚಾನೆಲ್ಗಳನ್ನು ಪರಿಶೀಲಿಸಿ: `npm view omniroute dist-tags --json` ಎಂಬುದು `latest` = 3.9.0 ಅನ್ನು ತೋರಿಸುತ್ತದೆ ಮತ್ತು
-   v4 ಪ್ರಕಟಿಸುವವರೆಗೆ `next` / `nightly` ಇರುವುದಿಲ್ಲ.
-7. ಅಗತ್ಯವಿದ್ದರೆ ರೋಲ್ಬ್ಯಾಕ್ ಮಾಡಿ: `git push origin --delete refs/heads/stable/v3 refs/heads/develop`
+4. ಮೊದಲ PR ವಿಲೀನಗೊಳ್ಳುವ ಮೊದಲು `stable/v3` ಮತ್ತು `develop` ಅನ್ನು ಸಂರಕ್ಷಿಸಿ (ನಿಯಮಸಮೂಹಗಳು + ವಿಲೀನ ಸರತಿ).
+5. ನಿಷ್ಕ್ರಿಯ ವರ್ಕ್ಫ್ಲೋಗಳು ಶಾಖೆಯ ಅಸ್ತಿತ್ವದ ಆಧಾರದ ಮೇಲೆ ಸಕ್ರಿಯಗೊಳ್ಳುತ್ತವೆ: `forward-port.yml` (`stable/v3` ಗೆ ಪುಶ್),
+   `validate-stable-pr.yml` (`stable/v3` ಗೆ PRಗಳು) ಮತ್ತು `nightly-v4-build.yml`
+   (`develop` ಅನ್ನು ಬಿಲ್ಡ್ ಮಾಡುತ್ತದೆ). ಲೈವ್ ಮಾಡುವ ಮೊದಲು, `secrets.FORWARD_PORT_TOKEN` ರೆಪೊಸಿಟರಿ ಸೀಕ್ರೆಟ್ ಅನ್ನು ಹೊಂದಿಸಿ (ಇದರಿಂದ
+   ಫಾರ್ವರ್ಡ್-ಪೋರ್ಟ್ PRಗಳಲ್ಲಿ CI ರನ್ ಆಗುತ್ತದೆ); ಮಾಲೀಕರು `vars.NIGHTLY_PUBLISH` ರೆಪೊಸಿಟರಿ
+   ವೇರಿಯೇಬಲ್ ಅನ್ನು `true` ಗೆ ಹೊಂದಿಸುವವರೆಗೆ ಮತ್ತು npm Trusted Publishing
+   `nightly-v4-build.yml` ಅನ್ನು ಅಂಗೀಕರಿಸುವವರೆಗೆ ರಾತ್ರಿಯ ಪ್ರಕಟಣೆ ನಿಷ್ಕ್ರಿಯವಾಗಿಯೇ ಇರುತ್ತದೆ. ಚಾನೆಲ್ ನಿರ್ಧಾರಕವು `scripts/release/dist-tag.mjs` ಆಗಿದ್ದು,
+   `npm-publish.yml` ಬಳಸುವ ಅದೇ ನಿರ್ಧಾರಕವಾಗಿದೆ.
+6. ಚಾನೆಲ್ಗಳನ್ನು ಪರಿಶೀಲಿಸಿ: `npm view omniroute dist-tags --json` ನಲ್ಲಿ `latest` = 3.9.0 ಎಂದು ತೋರಿಸಬೇಕು ಮತ್ತು
+   v4 ಪ್ರಕಟವಾಗುವವರೆಗೆ `next` / `nightly` ಇರಬಾರದು.
+7. ಅಗತ್ಯವಿದ್ದರೆ ಹಿಂದಕ್ಕೆ ಹಿಂತಿರುಗಿಸಲು: `git push origin --delete refs/heads/stable/v3 refs/heads/develop`
    ಮತ್ತು `npm dist-tag add omniroute@3.8.59 latest`.
 
 ---

@@ -6,7 +6,28 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-const { jsonLength } = await import("../../open-sse/utils/jsonSize.ts");
+const { jsonLength, jsonLengthStrippingBase64DataUris } =
+  await import("../../open-sse/utils/jsonSize.ts");
+
+test("nested containers preserve omissions, sparse slots, and base64 stripping", () => {
+  const image = "data:image/png;base64,QUJD";
+  const shared = { image, missing: undefined, text: "keep" };
+  const value = { items: [shared, , undefined, { nested: [shared] }], empty: {} };
+  const expected = {
+    items: [{ image: "", text: "keep" }, null, null, { nested: [{ image: "", text: "keep" }] }],
+    empty: {},
+  };
+  assert.equal(jsonLength(value), JSON.stringify(value).length);
+  assert.equal(jsonLengthStrippingBase64DataUris(value), JSON.stringify(expected).length);
+  assert.equal(shared.image, image);
+});
+
+test("mixed array/object cycles throw in both counting modes", () => {
+  const array: unknown[] = [];
+  array.push({ child: array });
+  assert.throws(() => jsonLength(array), /circular/i);
+  assert.throws(() => jsonLengthStrippingBase64DataUris(array), /circular/i);
+});
 
 const exact = (value: unknown, label?: string) => {
   const expected = JSON.stringify(value);

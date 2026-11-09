@@ -23,6 +23,7 @@ import {
 } from "@/lib/providers/claudeExtraUsage";
 import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
 import { isApiKeyRevealEnabled, maskStoredApiKey } from "@/lib/apiKeyExposure";
+import { reconcileMaskedExtraApiKeys } from "@/shared/utils/apiKeyMask";
 import { cleanupProviderModelsAfterConnectionDelete } from "@/lib/db/models";
 import { canUpdateProviderApiKey } from "@/shared/providers/webSessionCredentials";
 import {
@@ -43,6 +44,8 @@ import {
 import { rejectRetiredCommonChatGptWebProvider } from "@/lib/providers/chatgptWebRetirementResponse";
 import { chatGptWebStorageStateFromCookieHeader } from "@omniroute/open-sse/utils/chatgptWebExecutorAdapter.ts";
 import { applyOperatorActivationIntent } from "@/lib/providers/operatorDisable";
+import { parseM365RefreshToken } from "@/lib/providers/m365RefreshToken";
+import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error.ts";
 
 function normalizeCodexLimitPolicy(
   incoming: unknown,
@@ -93,7 +96,8 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     delete result.idToken;
     if (result.providerSpecificData) {
       result.providerSpecificData = sanitizeProviderSpecificDataForResponse(
-        result.providerSpecificData
+        result.providerSpecificData,
+        { revealKeys }
       );
     }
 
@@ -162,7 +166,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
       perKeyProxyEnabled,
       quotaVisible,
       projectId,
-      providerSpecificData: incomingPsd,
+      providerSpecificData: rawIncomingPsd,
       rateLimitOverrides,
     } = body;
 
@@ -173,7 +177,31 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     const retirementResponse = rejectRetiredCommonChatGptWebProvider(existing.provider);
     if (retirementResponse) return retirementResponse;
 
+    const m365Token = parseM365RefreshToken(existing.provider, rawIncomingPsd);
+    if (!m365Token.success) {
+      return NextResponse.json(
+        {
+          error: {
+            message: sanitizeErrorMessage("Invalid request"),
+            details: [
+              {
+                field: "providerSpecificData.refreshToken",
+                message: sanitizeErrorMessage("Refresh token must be a bounded plaintext string"),
+              },
+            ],
+          },
+        },
+        { status: 400 }
+      );
+    }
+    const incomingPsd = rawIncomingPsd ? { ...rawIncomingPsd } : rawIncomingPsd;
+    if (existing.provider === "copilot-m365-web" && incomingPsd) {
+      // Blank/missing input must not overwrite a legacy nested fallback during the merge.
+      delete incomingPsd.refreshToken;
+    }
+
     const updateData: Record<string, any> = {};
+    if (m365Token.data.refreshToken) updateData.refreshToken = m365Token.data.refreshToken;
     if (name !== undefined) updateData.name = name;
     if (priority !== undefined) updateData.priority = priority;
     if (globalPriority !== undefined) updateData.globalPriority = globalPriority;
@@ -284,7 +312,18 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
         existing.providerSpecificData && typeof existing.providerSpecificData === "object"
           ? existing.providerSpecificData
           : {};
+      // The GET routes hand the client masked `extraApiKeys` placeholders (same mask as
+      // apiKey). Map them back to the stored tokens — and drop orphans — before merging,
+      // so a placeholder never reaches the database. The health-reset check below reads
+      // the resolved list.
+      if ("extraApiKeys" in incomingPsd) {
+        incomingPsd.extraApiKeys = reconcileMaskedExtraApiKeys(
+          incomingPsd.extraApiKeys,
+          (existingPsd as Record<string, unknown>).extraApiKeys
+        );
+      }
       const mergedPsd = { ...existingPsd, ...incomingPsd };
+      if (m365Token.data.refreshToken) delete mergedPsd.refreshToken;
       delete mergedPsd.validationId;
       delete mergedPsd.runtimeKey;
 

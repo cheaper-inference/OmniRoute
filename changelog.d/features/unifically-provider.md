@@ -1,1 +1,0 @@
-- **feat(providers):** Added Unifically as an OpenAI-compatible API-key gateway (`https://api.unifically.com/v1`), with live model discovery via `passthroughModels`. Discovery is scoped to `/v1/models?category=llm`, because the same catalog also lists image, video and audio models that run through a separate async task API and are not chat-completion targets.

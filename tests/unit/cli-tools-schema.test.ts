@@ -13,6 +13,8 @@ test("CLI_TOOLS registry contains all expected tools including rebuilt Qwen Code
   // grok-build added — xAI Grok Build TUI coding agent (ported from upstream decolua/9router#2571).
   // prime-agent added by #11166 (PrimeIntellect-ai/prime-agent, agent category).
   // 5dive added by #11578 (5dive-ai/5dive agent fleets, agent category).
+  // zed added — Zed editor's built-in agent via an OpenAI-compatible provider (setup-zed).
+  // openclaude added — OpenClaude (Gitlawb/openclaude) guide card, code category.
   const expected = [
     "claude",
     "codex",
@@ -50,6 +52,9 @@ test("CLI_TOOLS registry contains all expected tools including rebuilt Qwen Code
     "zcode",
     "prime-agent",
     "5dive",
+    "zed",
+    "whycodes",
+    "openclaude",
   ];
   for (const id of expected) {
     assert.ok(id in CLI_TOOLS, `Missing tool: ${id}`);

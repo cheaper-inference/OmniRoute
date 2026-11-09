@@ -298,13 +298,13 @@ Pagrindinės veikimo ypatybės:
 
 ## 🔑 Sinchronizavimo prieigos raktai ir konfigūracijos paketas _(v3.6.6+)_
 
-Prieiga iš kelių įrenginių ir išoriniams operatoriams dabar galima naudojant **ribotos aprėpties sinchronizavimo prieigos raktus**:
+Prieiga iš kelių įrenginių ir išoriniams operatoriams dabar galima naudojant **apribotos apimties sinchronizavimo prieigos raktus**:
 
-- **`POST /api/sync/tokens`** — Išduoda naują sinchronizavimo prieigos raktą (ribotos aprėpties, su pasirenkamu galiojimo laiku)
+- **`POST /api/sync/tokens`** — Išduoda naują sinchronizavimo prieigos raktą (apribotos apimties, su pasirenkamu galiojimo terminu)
 - **`DELETE /api/sync/tokens/:id`** — Atšaukia prieigos raktą
-- **`GET /api/sync/bundle`** — Atsisiunčia versijuotą visų neskelbtinų nuostatų JSON momentinę kopiją su `ETag` raktu (slaptažodžiai paslėpti)
+- **`GET /api/sync/bundle`** — Atsiunčia versijuotą, pagal ETag identifikuojamą konfigūracijos JSON momentinę kopiją (autentifikuojama tik sinchronizavimo prieigos raktu). Autentifikavimo nustatymai, pvz., valdymo skydelio slaptažodis, pašalinami, tačiau teikėjų prisijungimo duomenys ir API raktai įtraukiami, todėl failą laikykite slaptu
 
-Konfigūracijos paketą sukuria `src/lib/sync/bundle.ts`. Klientai lygina `ETag` atsako antraštę, kad aptiktų pakeitimus iš naujo neatsisiųsdami viso turinio.
+Konfigūracijos paketą sukuria `src/lib/sync/bundle.ts`. Klientai lygina `ETag` atsako antraštę, kad aptiktų pakeitimus iš naujo neatsisiųsdami viso turinio. Naudojant CLI, `omniroute sync bundle <outPath> --token <syncToken>` (arba `OMNIROUTE_SYNC_TOKEN`) išsaugo jį faile, kurį gali pasiekti tik savininkas.
 
 ---
 

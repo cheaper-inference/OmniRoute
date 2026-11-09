@@ -38,6 +38,7 @@ const {
   lockModelIfPerModelQuota,
   isModelLocked,
   getModelLockoutInfo,
+  clearAllModelLockouts,
   hasPerModelQuota,
   getProviderProfile,
   recordModelLockoutFailure,
@@ -1631,6 +1632,10 @@ async function resetStorage10460() {
   core.resetDbInstance();
   fs.rmSync(TEST_DATA_DIR_10460, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   fs.mkdirSync(TEST_DATA_DIR_10460, { recursive: true });
+  // The in-memory model-lock map outlives the DB reset, and an unpinned combo
+  // target now resolves locks across connections (#16551) — without this, a lock
+  // seeded by an earlier test in this block pre-empts the next test's dispatch.
+  clearAllModelLockouts();
 }
 
 async function seedConn10460(provider: string): Promise<string> {

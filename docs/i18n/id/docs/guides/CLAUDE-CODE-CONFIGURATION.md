@@ -25,38 +25,39 @@ omniroute launch --profile glm52  # Claude Code menggunakan glm/glm-5.2 melalui 
 
 ---
 
-## Cara Claude Code terhubung ke gateway
+## Bagaimana Kode Claude terhubung ke gateway
 
-Claude Code berkomunikasi dengan **Anthropic Messages API** dan diarahkan ke endpoint
-khusus melalui variabel lingkungan (tidak memiliki flag `--base-url`):
+Kode Claude berbicara tentang**Anthropic Pesan API** dan diarahkan ke titik akhir khusus dengan variabel lingkungan (tidak memiliki tanda `--base-url` ):
 
-| Variabel                                     | Tujuan                                                                                          |
-| -------------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| `ANTHROPIC_BASE_URL`                         | URL root gateway (Claude Code menambahkan `/v1/messages`). **Tanpa akhiran `/v1`.**             |
-| `ANTHROPIC_AUTH_TOKEN`                       | Dikirim sebagai `Authorization: Bearer …` — gunakan token akses / kunci API OmniRoute Anda      |
-| `ANTHROPIC_API_KEY`                          | Alternatif: dikirim sebagai `x-api-key`. Jika keduanya diatur, `ANTHROPIC_AUTH_TOKEN` digunakan |
-| `ANTHROPIC_MODEL`                            | Memaksa model tertentu (menggantikan pilihan default `/model`)                                  |
-| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → pemilih bawaan `/model` mencantumkan model `claude*`/`anthropic*` dari `/v1/models`       |
-| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | Membatasi token keluaran per respons (misalnya `65536`)                                         |
-| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | Ambang batas token untuk pemadatan otomatis                                                     |
+| Variabel                                     | Tujuan                                                                                         |
+| -------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `ANTHROPIC_BASE_URL`                         | Root gateway URL ( Kode Claude ditambahkan `/v1/messages`).** Tidak ada akhiran `/v1`.**       |
+| `ANTHROPIC_AUTH_TOKEN`                       | Dikirim sebagai `Authorization: Bearer …` — menggunakan token akses OmniRoute / kunci API Anda |
+| `ANTHROPIC_API_KEY`                          | Alternatif: dikirim sebagai `x-api-key`. Jika keduanya disetel, `ANTHROPIC_AUTH_TOKEN` menang  |
+| `ANTHROPIC_MODEL`                            | Paksa model tertentu (mengganti default pemilih `/model` )                                     |
+| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → pemilih `/model` asli mencantumkan model `claude*`/`anthropic*` dari `/v1/models`        |
+| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | Batasi token keluaran per respons (misalnya `65536`)                                           |
+| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | Ambang batas token untuk pemadatan otomatis                                                    |
 
-> Variabel lingkungan dibaca **sekali saat dimulai** — mulai ulang Claude Code setelah mengubahnya.
+> Env vars dibaca** sekali saat startup** — restart Kode Claude setelah mengubahnya.
 
-`omniroute launch` mengatur semuanya untuk Anda: perintah ini menentukan URL dasar + token
-dari konteks aktif (sehingga `omniroute connect <vps>` lalu `omniroute launch`
-langsung berfungsi), memeriksa kesehatan server, dan menjalankan `claude` melalui exec.
+Untuk kredensial yang berputar dan bukan string tetap, setel `apiKeyHelper` di `~/.claude/settings.json` ke perintah yang mencetak kredensial saat ini ke stdout. Claude Code menyimpan outputnya dalam cache selama lima menit secara default (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` menimpanya) dan mengirimkan nilai dalam `Authorization: Bearer` dan `x-api-key`. Skrip harus mencetak kredensial dan tidak ada yang lain — spanduk di sampingnya gagal membantu di v2.1.227 +.
+
+Beginilah cara kerja Entra ID SSO : `scripts/cli/omniroute-sso.mjs token` mencetak token akses Entra berumur pendek yang diverifikasi OmniRoute alih-alih kunci API. Lihat [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md).
+
+`omniroute launch` menyetel semua ini untuk Anda: ia menyelesaikan token URL + dasar dari konteks aktif (jadi `omniroute connect <vps>` lalu `omniroute launch` berfungsi), memeriksa kesehatan server, dan mengeksekusi `claude`.
 
 ---
 
-## Alias penemuan — tampilkan model non-Claude di pemilih `/model`
+## Alias discovery — menampilkan model non-Claude di pemilih `/model`
 
-Penemuan model gateway Claude Code hanya mencantumkan id yang diawali dengan `claude`
-atau `anthropic`, sehingga dengan `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`, pemilih
-bawaan `/model` biasanya **hanya** menampilkan model Claude/Anthropic milik OmniRoute —
-`kimi/kimi-k2.6` atau `glm/glm-5.2` tidak pernah muncul, meskipun peruteannya berfungsi dengan baik.
+Discovery model gateway Claude Code hanya mencantumkan id yang diawali dengan `claude`
+atau `anthropic`, sehingga dengan `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` pemilih
+`/model` bawaan biasanya menampilkan **hanya** model Claude/Anthropic milik OmniRoute —
+`kimi/kimi-k2.6` atau `glm/glm-5.2` tidak pernah muncul, meskipun routing-nya berfungsi dengan baik.
 
-OmniRoute dapat mencerminkan model apa pun yang diaktifkan (dan kombinasi) di bawah id `claude/…`
-agar lolos dari filter tersebut dan muncul di pemilih:
+OmniRoute dapat mencerminkan (mirror) model apa pun yang diaktifkan (beserta combo) di bawah id `claude/…`
+sehingga lolos filter tersebut dan muncul di pemilih:
 
 ```
 kimi/kimi-k2.6            →  claude/kimi/kimi-k2.6      "Kimi K2.6 (OmniRoute)"
@@ -64,39 +65,47 @@ glm/glm-5.2              →  claude/glm/glm-5.2         "GLM 5.2 (OmniRoute)"
 <combo "custo-otimizado"> →  claude/combo/custo-otimizado
 ```
 
-Saat Anda memilih salah satunya di Claude Code, OmniRoute menghapus pembungkus `claude/`
-dan mengembalikannya ke id asli sebelum melakukan perutean — id `claude/<real-claude-model>`
-asli (penyedia OAuth Claude yang sebenarnya) selalu dibiarkan tanpa perubahan.
+Saat Anda memilih salah satu dari ini di Claude Code, OmniRoute melepaskan bungkus `claude/`
+kembali ke id aslinya sebelum routing — id `claude/<real-claude-model>` yang asli
+(provider Claude OAuth sebenarnya) selalu dibiarkan utuh.
 
-**Fitur ini dinonaktifkan secara default** dan dikendalikan oleh pengaturan tiga tingkat (yang paling spesifik
-diprioritaskan), sehingga OmniRoute biasa tidak pernah menggandakan katalognya untuk klien yang tidak menggunakan
-Claude Code:
+Secara default hanya id dasar yang dicerminkan. Dengan feature flag opt-in
+`CATALOG_MIRROR_REFINEMENTS_ENABLED` yang aktif, varian reasoning-effort yang
+sudah tercantum di katalog (mis. `codex/gpt-6-sol-high`) dicerminkan seperti id
+lainnya, sehingga Claude Code dapat memilih level effort secara eksplisit, dan id `auto/*`
+bawaan yang tidak dapat diwujudkan oleh jalur request tidak dicerminkan. Apakah varian effort
+dicantumkan sama sekali tetap diatur oleh `OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS` —
+cermin tidak pernah menambahkan varian yang tidak dimiliki katalog dasar.
 
-| Tingkat  | Lokasi                                                                        |
-| -------- | ----------------------------------------------------------------------------- |
-| Model    | Halaman detail penyedia → pengalih "Expose in Claude Code" per model          |
-| Penyedia | Halaman detail penyedia → pengalih tingkat penyedia (mencakup semua modelnya) |
-| Global   | Settings → Feature Flags → `EXPOSE_CC_DISCOVERY_ALIASES` (default nonaktif)   |
+**Fitur ini nonaktif secara default** dan dikendalikan oleh gerbang tiga tingkat (yang paling
+spesifik menang), sehingga OmniRoute biasa tidak pernah menggandakan katalognya untuk klien yang tidak
+menggunakan Claude Code:
 
-Variabel lingkungan `EXPOSE_CC_DISCOVERY_ALIASES` memaksa tingkat global agar aktif
-dan lebih diprioritaskan daripada penggantian melalui dasbor (layar Feature Flags menampilkan
-catatan "active via environment variable" saat ini terjadi). Pengalih per penyedia dan
-per model menyempurnakan pengaturan tersebut — misalnya, global nonaktif + penyedia Kimi aktif akan menampilkan
-hanya model Kimi.
+| Tingkat  | Di mana                                                                     |
+| -------- | --------------------------------------------------------------------------- |
+| Model    | Halaman detail provider → toggle "Expose in Claude Code" per model          |
+| Provider | Halaman detail provider → toggle tingkat provider (mencakup semua modelnya) |
+| Global   | Settings → Feature Flags → `EXPOSE_CC_DISCOVERY_ALIASES` (default nonaktif) |
 
-> ⚠️ **Ketidakcocokan jendela pada model non-Claude.** Claude Code mengasumsikan jendela konteks
-> 200K untuk setiap id yang tidak dikenali (Claude Code tidak dapat membaca jendela sebenarnya dari
-> `/v1/models`). Untuk model dengan jendela yang lebih besar (misalnya 256K milik Kimi K2), atur
-> `CLAUDE_CODE_AUTO_COMPACT_WINDOW` ke nilai di bawah jendela sebenarnya milik model agar
-> pemadatan otomatis tidak dijalankan terlalu dini. Profil yang dibuat di atas telah
-> melakukan pengaturan ini untuk setiap model.
+Variabel lingkungan `EXPOSE_CC_DISCOVERY_ALIASES` memaksa tingkat global aktif
+dan lebih diutamakan daripada override dashboard (layar Feature Flags menampilkan
+catatan "active via environment variable" saat itu terjadi). Toggle per-provider dan
+per-model menyempurnakan dari sana — mis. global nonaktif + provider Kimi aktif hanya menampilkan
+model milik Kimi.
+
+> ⚠️ **Ketidakcocokan window pada model non-Claude.** Claude Code mengasumsikan context
+> window 200K untuk id apa pun yang tidak dikenalinya (ia tidak dapat membaca window asli dari
+> `/v1/models`). Untuk model dengan window lebih besar (mis. 256K milik Kimi K2), atur
+> `CLAUDE_CODE_AUTO_COMPACT_WINDOW` ke nilai di bawah window asli model tersebut agar
+> auto-compaction tidak terpicu sebelum waktunya. Profil yang dihasilkan di atas sudah
+> melakukan ini per model.
 
 ---
 
 ## Blok onboarding di dasbor
 
-Kartu alat Claude (**Dasbor → CLI Code**) menampilkan fragmen `settings.json` yang tepat
-untuk instans ini, di sebelah tombol info alias penemuan, lengkap dengan tombol salin:
+Kartu alat Claude (**Dasbor → Kode CLI**) merender fragmen `settings.json` yang tepat
+untuk instans ini, di sebelah tombol info alias penemuan, dengan tombol salin:
 
 ```jsonc
 {
@@ -108,18 +117,32 @@ untuk instans ini, di sebelah tombol info alias penemuan, lengkap dengan tombol 
 }
 ```
 
-URL dasar adalah URL yang dihasilkan oleh kartu tersebut (termasuk penggantian khusus yang Anda masukkan), dan sudah
-dinormalisasi — tanpa sufiks `/v1` dan tanpa garis miring penutup. **Kunci tidak pernah ditampilkan**: blok tersebut menyediakan
-placeholder, sehingga tangkapan layar atau cuplikan yang ditempel tidak dapat membocorkannya. Tempelkan kunci Anda untuk menggantinya.
+URL dasar adalah URL yang ditentukan oleh kartu (termasuk penggantian khusus yang Anda masukkan), dan sudah
+dinormalisasi — tanpa akhiran `/v1` dan tanpa garis miring di akhir. **Kunci tidak pernah dirender**: blok ini menggunakan
+placeholder, sehingga tangkapan layar atau cuplikan yang ditempel tidak dapat membocorkan kunci. Tempelkan kunci Anda untuk menggantinya.
 
-Tambahkan `CLAUDE_CODE_AUTO_COMPACT_WINDOW` di bawah blok `env` yang sama untuk setiap model yang jendela
-konteks sebenarnya bukan 200K — Claude Code mengasumsikan 200K untuk setiap id yang tidak dikenali, sehingga
-pemadatan otomatis akan dijalankan pada titik yang salah (lihat peringatan di bagian sebelumnya).
+Tambahkan `CLAUDE_CODE_AUTO_COMPACT_WINDOW` di bawah blok `env` yang sama untuk model apa pun yang jendela
+konteks sebenarnya bukan 200K — Claude Code mengasumsikan 200K untuk setiap id yang tidak dikenalnya, sehingga
+pemadatan otomatis akan dipicu pada titik yang salah (lihat peringatan di bagian sebelumnya).
 Penyusun cuplikan juga menerima nilai tersebut, sehingga pemanggil yang mengetahui ukuran jendela model target
 dapat menghasilkannya secara langsung.
 
 Sumber: `src/shared/services/claudeCliConfig.ts::buildClaudeDiscoverySettingsSnippet` (penyusun
-murni, diuji dengan pengujian unit) yang ditampilkan oleh `ClaudeGatewayOnboardingBlock`.
+murni, diuji dengan pengujian unit) yang dirender oleh `ClaudeGatewayOnboardingBlock`.
+
+### Sematkan satu akun (opsional)
+
+Untuk mengirim setiap permintaan Claude Code melalui satu akun penyedia tertentu, tambahkan header
+`x-omniroute-connection` melalui `ANTHROPIC_CUSTOM_HEADERS` dalam blok `env` yang sama:
+
+```jsonc
+"ANTHROPIC_CUSTOM_HEADERS": "x-omniroute-connection: <connection id>"
+```
+
+Salin id dari chip `xxxxxxxx…` pada baris koneksi di halaman penyedia. Penyematan hanya
+berlaku untuk id model tunggal (`provider/model`), bukan untuk kombinasi. Lihat
+[Penyematan akun per permintaan](../reference/API_REFERENCE.md#account-pinning-per-request) untuk
+perilaku fallback yang tepat.
 
 ---
 

@@ -27,6 +27,12 @@
  */
 
 import type { SyncedAvailableModelInput } from "@/lib/db/models/synced";
+import {
+  readConsoleApiResponse,
+  record,
+  stringField,
+  type ConsoleApiResult,
+} from "./volcengineConsoleResponse";
 
 type JsonRecord = Record<string, unknown>;
 
@@ -44,20 +50,6 @@ const AGENT_PLAN_REFERER =
   "https://console.volcengine.com/ark/region:cn-beijing/subscription/agent-plan";
 const CODING_PLAN_REFERER =
   "https://console.volcengine.com/ark/region:cn-beijing/subscription/coding-plan";
-
-function stringField(value: unknown): string {
-  return typeof value === "string" ? value.trim() : "";
-}
-function record(value: unknown): JsonRecord {
-  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
-}
-
-interface ConsoleApiResult {
-  ok: boolean;
-  status: number;
-  json: JsonRecord;
-  error: string | null;
-}
 
 /**
  * Hit the Volcano console API directly via undici, BYPASSING OmniRoute's
@@ -85,22 +77,7 @@ async function callConsoleApiDirect(
     },
     body: JSON.stringify(payload),
   });
-  const text = await response.text();
-  let json: JsonRecord = {};
-  try {
-    json = record(JSON.parse(text));
-  } catch {
-    // Non-JSON console failures are reported through `error` below.
-  }
-  const meta = record(json.ResponseMetadata);
-  const err = record(meta.Error);
-  const message = stringField(err.Message);
-  return {
-    ok: response.ok && !message,
-    status: response.status,
-    json,
-    error: message || (response.ok ? null : text.slice(0, 200)),
-  };
+  return readConsoleApiResponse(response);
 }
 
 async function detectPlan(

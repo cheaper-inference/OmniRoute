@@ -6,44 +6,44 @@
 
 Furnizorii Web Cookie permit OmniRoute să utilizeze un serviciu AI prin sesiunea existentă din browser, în locul unei chei API. Aceștia sunt utili atunci când aveți deja acces la un serviciu prin site-ul său web și doriți ca OmniRoute să utilizeze aceeași sesiune autentificată.
 
-Spre deosebire de furnizorii care folosesc chei API, furnizorii Web Cookie se autentifică folosind credențialele pe care browserul le trimite către site-ul web.
+Spre deosebire de furnizorii bazați pe chei API, furnizorii Web Cookie se autentifică folosind datele de autentificare pe care browserul le trimite site-ului web.
 
 ---
 
 # Înainte de a începe
 
-> **Important:** Copiați întotdeauna credențialele dintr-o **solicitare de rețea activă**, **nu** din spațiul de stocare a cookie-urilor din browser.
+> **Important:** Copiați întotdeauna datele de autentificare dintr-o **solicitare de rețea activă**, **nu** din spațiul de stocare pentru cookie-uri al browserului.
 
 Multe probleme de autentificare sunt cauzate de copierea cookie-urilor din locul greșit.
 
-## NU copiați din spațiul de stocare a cookie-urilor
+## NU copiați din spațiul de stocare pentru cookie-uri
 
 Majoritatea browserelor afișează cookie-urile stocate prin:
 
 ```
-DevTools
-→ Application (sau Storage)
-→ Cookies
+Instrumente pentru dezvoltatori
+→ Aplicație (sau Stocare)
+→ Cookie-uri
 ```
 
 Deși aceste cookie-uri par corecte, ele pot fi:
 
 - învechite
 - incomplete
-- lipsite de cookie-uri care sunt trimise numai în solicitările autentificate
+- lipsite de cookie-uri trimise numai în solicitările autentificate
 
 Utilizarea acestor valori poate cauza erori de autentificare, chiar dacă ele par valide.
 
 ## Copiați dintr-o solicitare activă
 
-În schimb, utilizați cookie-urile dintr-o solicitare reușită:
+În schimb, utilizați cookie-urile dintr-o solicitare efectuată cu succes:
 
 ```
-DevTools
-→ Network
+Instrumente pentru dezvoltatori
+→ Rețea
 → Reîmprospătați pagina
-→ Deschideți o solicitare de chat sau conversație
-→ Request Headers
+→ Deschideți o solicitare de chat sau de conversație
+→ Antetele solicitării
 → Cookie
 ```
 
@@ -57,30 +57,30 @@ Pentru majoritatea furnizorilor Web Cookie, aceasta este valoarea care trebuie l
 
 Procesul de configurare este același pentru majoritatea furnizorilor Web Cookie.
 
-1. Conectați-vă la site-ul web al furnizorului.
-2. Deschideți instrumentele pentru dezvoltatori ale browserului.
-3. Deschideți fila **Network**.
+1. Autentificați-vă pe site-ul web al furnizorului.
+2. Deschideți Instrumentele pentru dezvoltatori ale browserului.
+3. Deschideți fila **Rețea**.
 4. Reîmprospătați pagina.
-5. Deschideți o solicitare autentificată de chat sau conversație.
-6. Copiați credențialele de autentificare necesare.
+5. Deschideți o solicitare autentificată de chat sau de conversație.
+6. Copiați datele de autentificare necesare.
 7. Deschideți OmniRoute.
-8. Accesați **Providers → Add Provider**.
+8. Accesați **Furnizori → Adăugați un furnizor**.
 9. Selectați furnizorul Web Cookie.
-10. Lipiți credențialele.
-11. Faceți clic pe **Test Connection**.
+10. Lipiți datele de autentificare.
+11. Faceți clic pe **Testați conexiunea**.
 12. Salvați furnizorul.
 
-Credențialele exacte necesare depind de furnizor.
+Datele de autentificare exacte necesare depind de furnizor.
 
 ---
 
-# Formatele credențialelor furnizorilor
+# Formatele datelor de autentificare ale furnizorilor
 
-Diferite site-uri web stochează autentificarea în moduri diferite. Unele necesită numai cookie-uri, în timp ce altele pot necesita anteturi sau tokenuri suplimentare.
+Diferite site-uri web stochează autentificarea în moduri diferite. Unele necesită numai cookie-uri, în timp ce altele pot necesita antete sau tokenuri suplimentare.
 
-| Furnizor                        | Formatul credențialelor               | Ghidul furnizorului              |
+| Furnizor                        | Formatul datelor de autentificare     | Ghidul furnizorului              |
 | ------------------------------- | ------------------------------------- | -------------------------------- |
-| Claude Web                      | Antetul complet al solicitării Cookie | `docs/providers/CLAUDE_WEB.md`   |
+| Claude Web                      | Antetul complet Cookie al solicitării | `docs/providers/CLAUDE_WEB.md`   |
 | ChatGPT Web (Codex)             | Antetul Cookie complet                | `docs/providers/CHATGPT_WEB.md`  |
 | Gemini Web                      | _(de verificat)_                      |                                  |
 | Copilot Web                     | _(de verificat)_                      | `docs/providers/COPILOT-M365.md` |
@@ -88,69 +88,69 @@ Diferite site-uri web stochează autentificarea în moduri diferite. Unele neces
 | Grok Web                        | _(de verificat)_                      |                                  |
 | ...                             | ...                                   | ...                              |
 
-> Actualizați acest tabel pe măsură ce sunt adăugați noi furnizori Web Cookie sau când furnizorii existenți își modifică cerințele de autentificare.
+> Actualizați acest tabel pe măsură ce sunt adăugați noi furnizori Web Cookie sau furnizorii existenți își modifică cerințele de autentificare.
 
 ## NoTrack (notrack-web)
 
-NoTrack ([notrack.ai](https://notrack.ai)) este o platformă gratuită de chat pentru consumatori, care nu necesită înregistrare — sesiunea este creată anonim la prima vizită și persistă prin intermediul a trei module cookie: `uid`, `si_usr_id` și `si_ses_id`. OmniRoute intermediază același endpoint `/api/dispatch` printr-un singur identificator de model (`notrack-c`, alias `ntw`).
+NoTrack ([notrack.ai](https://notrack.ai)) este o platformă gratuită de chat pentru consumatori, care nu necesită înregistrare — sesiunea este creată anonim la prima vizită și persistă prin intermediul a trei cookie-uri: `uid`, `si_usr_id` și `si_ses_id`. OmniRoute intermediază același endpoint `/api/dispatch` printr-un singur ID de model (`notrack-c`, alias `ntw`).
 
 ### Pași pentru conectare
 
-1. Deschideți [notrack.ai](https://notrack.ai) în browser și permiteți setarea modulului cookie pentru sesiunea anonimă.
-2. Deschideți **DevTools → Network**, reîmprospătați pagina și faceți clic pe orice solicitare `/api`.
-3. În **Request Headers**, copiați valoarea completă a antetului `Cookie`.
-4. În OmniRoute, accesați **Providers → Add Provider → NoTrack Web (Free)**.
-5. Lipiți șirul cookie în câmpul `apiKey` și apăsați pe **Save**.
+1. Deschideți [notrack.ai](https://notrack.ai) în browser și permiteți setarea cookie-ului pentru sesiunea anonimă.
+2. Deschideți **Instrumente pentru dezvoltatori → Rețea**, reîmprospătați pagina și faceți clic pe orice solicitare `/api`.
+3. În **Antetele solicitării**, copiați valoarea completă a antetului `Cookie`.
+4. În OmniRoute, accesați **Furnizori → Adăugați un furnizor → NoTrack Web (Gratuit)**.
+5. Lipiți șirul cookie în câmpul `apiKey` și apăsați **Salvați**.
 
-OmniRoute extrage `uid`, `si_usr_id` și `si_ses_id` din șirul lipit și reconstruiește un antet `Cookie` curat, care conține numai acele perechi — plus `nt_session` (tokenul `ntk_…` setat pentru conturile autentificate), atunci când este prezent. Dacă lipsește oricare dintre cele trei valori, șirul brut lipit este redirecționat fără modificări, astfel încât operatorii să poată experimenta cu formate alternative.
+OmniRoute extrage `uid`, `si_usr_id` și `si_ses_id` din șirul lipit și reconstruiește un antet `Cookie` curat, care conține doar acele perechi — plus `nt_session` (tokenul `ntk_…` setat pentru conturile autentificate), atunci când este prezent. Dacă lipsește oricare dintre cele trei, șirul brut lipit este transmis fără modificări, astfel încât operatorii să poată experimenta cu formate alternative.
 
-### Identificatori de model
+### ID-uri de model
 
-| Identificator de model | Nume afișat | Note                                                           |
-| ---------------------- | ----------- | -------------------------------------------------------------- |
-| `notrack-c`            | NoTrack C   | Implicit — modelul de distribuire din amonte `C`.              |
-| `C`                    | NoTrack C   | Alias pentru `notrack-c` (cod brut de distribuire din amonte). |
-| `notrack`              | NoTrack C   | Alias pentru `notrack-c`.                                      |
-| `ntw`                  | NoTrack C   | Alias scurt pentru `notrack-c`.                                |
+| ID model    | Nume afișat | Note                                                           |
+| ----------- | ----------- | -------------------------------------------------------------- |
+| `notrack-c` | NoTrack C   | Implicit — modelul de distribuire din amonte `C`.              |
+| `C`         | NoTrack C   | Alias pentru `notrack-c` (cod brut de distribuire din amonte). |
+| `notrack`   | NoTrack C   | Alias pentru `notrack-c`.                                      |
+| `ntw`       | NoTrack C   | Alias scurt pentru `notrack-c`.                                |
 
-Toți cei patru identificatori de model sunt mapați la același model de distribuire din amonte (`C`).
+Toate cele patru ID-uri de model sunt mapate la același model de distribuire din amonte (`C`).
 
 ### Opțiuni pentru solicitare
 
 Executorul acceptă următoarele câmpuri opționale în corpul solicitării:
 
-| Câmp din corp         | Valoare implicită | Scop                                                                                                 |
-| --------------------- | ----------------- | ---------------------------------------------------------------------------------------------------- |
-| `notrack_mode`        | `usual`           | Mod de distribuire (șir în format liber; serviciul din amonte acceptă `usual`, …)                    |
-| `notrack_max_turns`   | `6`               | Numărul de interacțiuni interne pe care serviciul din amonte le poate efectua înainte de a răspunde. |
-| `notrack_chat_id`     | `null`            | Reia un chat existent din amonte (omiteți pentru un chat nou).                                       |
-| `notrack_attachments` | `[]`              | Matrice transmisă direct, conținând descriptorii atașamentelor din amonte.                           |
-| `notrack_regenerate`  | `false`           | Setați la `true` pentru a solicita regenerarea răspunsului pentru interacțiunea anterioară.          |
+| Câmp din corp         | Valoare implicită | Scop                                                                                         |
+| --------------------- | ----------------- | -------------------------------------------------------------------------------------------- |
+| `notrack_mode`        | `usual`           | Mod de distribuire (șir în format liber; serviciul din amonte acceptă `usual`, …)            |
+| `notrack_max_turns`   | `6`               | Numărul de pași interni pe care serviciul din amonte îi poate efectua înainte de a răspunde. |
+| `notrack_chat_id`     | `null`            | Reluați un chat existent din amonte (omiteți pentru un chat nou).                            |
+| `notrack_attachments` | `[]`              | Matrice transmisă direct, cu descriptorii atașamentelor din amonte.                          |
+| `notrack_regenerate`  | `false`           | Setați la `true` pentru a solicita regenerarea răspunsului pentru pasul anterior.            |
 
-### Capacități
+### Capabilități
 
 - Completări de chat **cu streaming și fără streaming**.
-- **Apelarea instrumentelor** — setați `tools: [...]` în solicitare; executorul le serializează într-un contract de tip plic pentru apelarea instrumentelor și interpretează răspunsurile modelului înapoi în formatul OpenAI `tool_calls`.
-- **`response_format`** — sunt acceptate `json_object` și `json_schema`. Executorul extrage primul obiect JSON din răspunsul modelului și îl serializează într-un șir înainte de a-l returna.
-- **Indiciu privind raționamentul** — executorul emite un delta `reasoning` atunci când serviciul din amonte trimite un eveniment `thinking`.
+- **Apelarea instrumentelor** — setați `tools: [...]` în solicitare; executorul le serializează într-un contract de tip plic pentru apelarea instrumentelor și parsează răspunsurile modelului înapoi în formatul OpenAI `tool_calls`.
+- **`response_format`** — sunt acceptate `json_object` și `json_schema`. Executorul extrage primul obiect JSON din răspunsul modelului și îl convertește într-un șir înainte de a-l returna.
+- **Indiciu de raționament** — executorul emite un delta `reasoning` atunci când serviciul din amonte trimite un eveniment `thinking`.
 
 ### Limitări
 
-- Serviciul din amonte impune cote de utilizare anonimă — când acestea sunt depășite, executorul returnează o eroare 429 cu un mesaj ușor de înțeles.
-- Toți identificatorii de model sunt rezolvați la același model de distribuire din amonte; nu există posibilitatea de comutare între modele.
-- Executorul nu apelează endpointul `/api/chats` al serviciului din amonte, astfel încât istoricul chatului / sesiunile nu sunt gestionate automat. Utilizați `notrack_chat_id` pentru a relua un chat existent din amonte.
+- Serviciul din amonte impune cote de utilizare anonimă — atunci când acestea sunt depășite, executorul returnează o eroare 429 cu un mesaj ușor de înțeles.
+- Toate ID-urile de model sunt rezolvate la același model de distribuire din amonte; nu există posibilitatea de comutare între modele.
+- Executorul nu apelează endpointul `/api/chats` al serviciului din amonte, astfel încât istoricul chatului/sesiunile nu sunt gestionate automat. Utilizați `notrack_chat_id` pentru a relua un chat existent din amonte.
 
 ---
 
-# Ce pot și ce nu pot face furnizorii Web Cookie
+# Ce pot și ce nu pot face furnizorii bazați pe cookie-uri web
 
-Furnizorii Web Cookie reutilizează interfața de chat a unui site web. Aceștia **nu** oferă aceleași capacități ca API-urile oficiale.
+Furnizorii bazați pe cookie-uri web reutilizează interfața de chat a unui site web. Aceștia **nu** oferă aceleași capabilități ca API-urile oficiale.
 
 ## Funcționalități acceptate
 
 - Autentificarea folosind sesiunea existentă din browser
 - Accesarea modelelor disponibile prin contul dvs.
-- Transmiterea în flux a răspunsurilor conversației
+- Redarea în flux a răspunsurilor conversației
 - Nu este necesară nicio cheie API
 
 ## Funcționalități neacceptate
@@ -158,20 +158,20 @@ Furnizorii Web Cookie reutilizează interfața de chat a unui site web. Aceștia
 - Apelarea funcțiilor
 - Apelarea instrumentelor
 - Editarea automată a fișierelor
-- Fluxurile de lucru de tip agent în IDE
+- Fluxurile de lucru IDE bazate pe agenți
 - Funcționalitățile disponibile exclusiv prin API
 
-Acesta este comportamentul așteptat și **nu** reprezintă o eroare.
+Acesta este comportamentul așteptat și **nu** este o eroare.
 
-Dacă aveți nevoie de executarea instrumentelor, editarea automată a fișierelor sau alte fluxuri de lucru de tip agent, utilizați un **furnizor cu cheie API** în locul unui furnizor Web Cookie.
+Dacă aveți nevoie de executarea instrumentelor, editarea automată a fișierelor sau alte fluxuri de lucru bazate pe agenți, utilizați un **furnizor cu cheie API** în locul unui furnizor Web Cookie.
 
 ---
 
-# Avertisment privind validarea
+# Limitarea validării
 
-O operațiune **Test Connection** reușită sau validarea cu succes a cookie-urilor confirmă doar faptul că datele de autentificare furnizate par să aibă formatul așteptat.
+O **Testare a conexiunii** reușită sau validarea cu succes a cookie-urilor verifică doar dacă datele de autentificare furnizate par să aibă formatul așteptat.
 
-Până la rezolvarea problemei #7857, o validare reușită **nu garantează** că furnizorul va efectua autentificarea cu succes.
+Până la rezolvarea problemei #7857, o validare reușită **nu garantează** că furnizorul se va autentifica cu succes.
 
 Dacă autentificarea eșuează în continuare, verificați dacă ați copiat datele de autentificare dintr-o solicitare de rețea activă, nu din spațiul de stocare a cookie-urilor din browser.
 
@@ -184,16 +184,16 @@ Dacă autentificarea eșuează în continuare, verificați dacă ați copiat dat
 Verificați dacă datele de autentificare au fost copiate din:
 
 ```
-Rețea
-→ Antetele solicitării
+Network
+→ Request Headers
 → Cookie
 ```
 
 și **nu** din:
 
 ```
-Aplicație
-→ Cookie-uri
+Application
+→ Cookies
 ```
 
 ---
@@ -202,15 +202,15 @@ Aplicație
 
 Unii furnizori includ cookie-uri care sunt trimise numai în timpul solicitărilor autentificate.
 
-Copiați din nou datele de autentificare dintr-o solicitare de rețea nouă, după deschiderea cu succes a unei conversații.
+Copiați din nou datele de autentificare dintr-o solicitare de rețea nouă, după ce ați deschis cu succes o conversație.
 
 ---
 
-## Sesiune expirată
+## Sesiunea a expirat
 
-Furnizorii Web Cookie utilizează sesiunea dvs. existentă din browser.
+Furnizorii Web Cookie utilizează sesiunea existentă din browser.
 
-Dacă sesiunea din browser expiră sau vă deconectați, trebuie să copiați un nou set de date de autentificare. Pentru a automatiza reînnoirea cookie-urilor pentru furnizorii web acceptați, consultați instrumentul complementar [Extensia de sincronizare a sesiunii din browser](../guides/SESSION-SYNC-EXTENSION.md).
+Dacă sesiunea din browser expiră sau vă deconectați, trebuie să copiați un nou set de date de autentificare. Pentru a automatiza reînnoirea cookie-urilor pentru furnizorii web acceptați, consultați instrumentul complementar [Browser Session Sync Extension](../guides/SESSION-SYNC-EXTENSION.md).
 
 ---
 
@@ -222,9 +222,26 @@ Copiați din nou datele de autentificare dintr-o solicitare autentificată nouă
 
 ---
 
+## ChatGPT Web eșuează cu „Unsupported ChatGPT integrity dependency”
+
+```
+[502] ChatGPT Web first-party bridge module failed to load:
+pageerror: Unsupported ChatGPT integrity dependency: DD
+```
+
+Datele de autentificare sunt corecte — eroarea provine de la punte, nu de la sesiune. chatgpt.com atribuie
+ID-urile modulelor la fiecare implementare, iar puntea fixa anterior ID-ul componentei auxiliare Sentinel pe care o instanțiază, astfel încât o
+recompilare a chatgpt.com care a redenumit componenta auxiliară a întrerupt fiecare interacțiune, deși cookie-ul a rămas valid. Reautorizarea
+conexiunii nu poate remedia problema.
+
+Versiunile care rezolvă modulul prin propriul runtime al paginii nu fixează niciun ID și nu întâmpină această problemă. Dacă vedeți
+eroarea, actualizați OmniRoute și executați din nou verificarea conexiunii.
+
+---
+
 # Exemplu de furnizor
 
-Pentru un ghid complet specific furnizorului, consultați:
+Pentru un ghid complet dedicat unui anumit furnizor, consultați:
 
 - **Claude Web** — `docs/providers/CLAUDE_WEB.md`
 
@@ -237,5 +254,5 @@ Ghidul Claude Web prezintă procesul complet de configurare pentru un furnizor W
 - Copiați datele de autentificare dintr-o solicitare autentificată nouă.
 - Evitați reutilizarea cookie-urilor vechi.
 - Mențineți activă sesiunea din browser în timp ce utilizați furnizori Web Cookie.
-- Tratați cookie-urile copiate drept date de autentificare sensibile.
-- Utilizați furnizori cu cheie API atunci când aveți nevoie de apelarea funcțiilor sau de fluxuri de lucru de tip agent.
+- Tratați cookie-urile copiate ca date de autentificare sensibile.
+- Utilizați furnizori cu cheie API atunci când aveți nevoie de apelarea funcțiilor sau de fluxuri de lucru bazate pe agenți.

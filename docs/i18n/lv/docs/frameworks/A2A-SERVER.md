@@ -47,7 +47,7 @@ A2A funkciju kontrolē iestatījuma **Endpoints → A2A** slēdzis; pēc noklus�
 
 ### `message/send` — Sinhrona izpilde
 
-Nosūta ziņojumu konkrētai prasmei un gaida pilnu atbildi.
+Nosūta ziņojumu prasmei un gaida pilnu atbildi.
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -65,6 +65,10 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+Prasmei `smart-routing` lauks `metadata.combo` ir nepārprotama `metadata.model` pārrakstīšana vārtejas pieprasījumam; tas tiek nosūtīts kā faktiskais `model`, nevis kā ignorēts `x-combo` JSON lauks. Joprojām tiek piemērota vārtejas parastā API atslēgas un katra mērķa autorizācija. Nederīga vai tukša kombinācija tiek noraidīta.
+
+Rezultātā ir pieejami `requested_combo` (izsaucēja nolūks), `dispatched_model` (faktiskais vārtejas pieprasījums), `response_model` (vārtejas atbilde) un `confirmed_combo`. Pēdējā lauka vērtība ir `null`, ja vien vārteja nepārprotami neidentificē kombināciju. A2A lēmumu žurnālos izpilde tiek attiecināta tikai uz apstiprinātu kombināciju, neapstiprinātu pieprasījumu saglabājot kā `requestedCombo`.
+
 **Atbilde:**
 
 ```json
@@ -76,22 +80,15 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
@@ -99,7 +96,7 @@ curl -X POST http://localhost:20128/a2a \
 
 ### `message/stream` — SSE straumēšana
 
-Darbojas tāpat kā `message/send`, bet atgriež Server-Sent Events reālā laika straumēšanai.
+Darbojas tāpat kā `message/send`, bet reāllaika straumēšanai atgriež servera sūtītus notikumus.
 
 ```bash
 curl -N -X POST http://localhost:20128/a2a \
@@ -126,7 +123,7 @@ data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","s
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"completed"},"metadata":{...}}}
 ```
 
-### `tasks/get` — Uzdevuma stāvokļa vaicājums
+### `tasks/get` — Uzdevuma statusa vaicājums
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -148,84 +145,92 @@ curl -X POST http://localhost:20128/a2a \
 
 ## Pieejamās prasmes
 
-OmniRoute piedāvā 6 A2A prasmes, kas savienotas ar `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Katrs prasmju modulis atrodas mapē `src/lib/a2a/skills/`.
+OmniRoute atklāj 6 A2A prasmes, kas pievienotas `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Katrs prasmju modulis atrodas `src/lib/a2a/skills/`.
 
-| Prasme                          | ID                   | Apraksts                                                                                                                                              | Birkas                              | Piemēri                                                |
-| :------------------------------ | :------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------- | :---------------------------------- | :----------------------------------------------------- |
-| Viedā maršrutēšana              | `smart-routing`      | Maršrutē uzvedni caur optimālo pakalpojumu sniedzēju/kombināciju, izmantojot OmniRoute kombināciju programmu un vērtēšanu                             | maršrutēšana, pakalpojumu sniedzēji | "Maršrutēt šo uzvedni, izmantojot labāko modeli"       |
-| Kvotu pārvaldība                | `quota-management`   | Sniedz informāciju par katra pakalpojumu sniedzēja kvotas stāvokli un palīdz izsaucējiem izlemt, kad ierobežot ātrumu vai pārslēgties                 | kvota, pakalpojumu sniedzēji        | "Pārbaudīt anthropic kvotu"                            |
-| Pakalpojumu sniedzēju atklāšana | `provider-discovery` | Uzskaita instalētos pakalpojumu sniedzējus ar iespējām, bezmaksas līmeņa indikatoriem un OAuth statusu                                                | pakalpojumu sniedzēji, atklāšana    | "Kādi pakalpojumu sniedzēji ir pieejami?"              |
-| Izmaksu analīze                 | `cost-analysis`      | Aprēķina pieprasījuma/konversācijas izmaksas, ņemot vērā katalogu un neseno lietojumu                                                                 | izmaksas, lietojums                 | "Aprēķināt šīs konversācijas izmaksas"                 |
-| Veselības pārskats              | `health-report`      | Apkopo katra pakalpojumu sniedzēja ķēdes pārtraucēja, gaidīšanas perioda un bloķēšanas stāvokli                                                       | veselība, noturība                  | "Parādīt visu pakalpojumu sniedzēju veselības statusu" |
-| Iespēju uzskaitījums            | `list-capabilities`  | Atgriež pilnu 45 ierakstu Agent Skills katalogu (23 API + 21 CLI + 1 config) kā Markdown tabulu ar neapstrādātiem SKILL.md URL konteksta ievietošanai | katalogs, atklāšana, prasmes        | "Uzskaitīt visas OmniRoute iespējas"                   |
+| Prasme                          | ID                   | Apraksts                                                                                                                                                                | Tagi                                | Piemēri                                               |
+| :------------------------------ | :------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :---------------------------------- | :---------------------------------------------------- |
+| Viedā maršrutēšana              | `smart-routing`      | Maršrutē uzvedni caur optimālo provider/combo, izmantojot OmniRoute kombinēto dzinēju + punktu skaitu                                                                   | maršrutēšana, pakalpojumu sniedzēji | "Maršrutējiet šo uzvedni, izmantojot labāko modeli"   |
+| Kvotu pārvaldība                | `quota-management`   | Ziņo par pakalpojumu sniedzēja kvotas stāvokli, palīdz zvanītājiem izlemt, kad throttle/switch                                                                          | kvota, nodrošinātāji                | “Pārbaudīt antropisko dzīvnieku kvotu”                |
+| Pakalpojumu sniedzēja atklāšana | `provider-discovery` | Uzskaita instalētos pakalpojumu sniedzējus ar iespējām, bezmaksas līmeņa karodziņiem, OAuth statusu                                                                     | pakalpojumu sniedzēji, atklāšana    | "Kādi pakalpojumu sniedzēji ir pieejami?"             |
+| Izmaksu analīze                 | `cost-analysis`      | Aprēķinātas request/conversation izmaksas, ņemot vērā kataloga + neseno lietošanu                                                                                       | izmaksas, izmantošana               | "Aptuvenās izmaksas par šo sarunu"                    |
+| Pārskats par veselību           | `health-report`      | Agregāti ķēdes pārtraucējs, dzesēšana, bloķēšanas stāvoklis katram pakalpojumu sniedzējam                                                                               | veselība, izturība                  | "Rādīt visu pakalpojumu sniedzēju veselības stāvokli" |
+| Saraksta iespējas               | `list-capabilities`  | Atgriež pilnu 45 ierakstu aģentu prasmju katalogu (23 API + 21 CLI + 1 konfigurācija) kā cenu samazināšanas tabulu ar neapstrādātu SKILL.md URLs konteksta ievadīšanai. | katalogs, atklājums, prasmes        | "Uzskaitiet visas OmniRoute iespējas"                 |
 
-> Agent Card ir jāuztur saskaņota ar aktuālo 352 pakalpojumu sniedzēju katalogu; pakalpojumu sniedzēju skaits un bezmaksas/bez autentifikācijas metadati tiek iegūti no izpildlaika reģistra.
+> Aģenta kartei jābūt saskaņotai ar tiešsaistes 381 pakalpojumu sniedzēju katalogu; nodrošinātāju skaits un free/no-auth metadati tiek iegūti no izpildlaika reģistra.
 
-### `list-capabilities` prasmes detalizēts apraksts
+### `list-capabilities` Skill Detail
 
-Prasme `list-capabilities` ir īpaši noderīga ārējiem aģentiem, kuriem pirms API izsaukumu nosūtīšanas jānoskaidro, ko OmniRoute nodrošina. Tā atgriež strukturētu Markdown tabulas artefaktu:
+`list-capabilities` prasme ir īpaši noderīga ārējiem aģentiem, kuriem pirms API zvanu nosūtīšanas ir jāatklāj, ko OmniRoute atklāj. Tas atgriež strukturētu atzīmju tabulas artefaktu:
 
 ```
-| ID | Nosaukums | Kategorija | Joma | Galapunkti/komandas | Neapstrādāts URL |
+| ID | Name | Category | Area | Endpoints/Commands | Raw URL |
 | --- | --- | --- | --- | --- | --- |
-| omni-auth | Autentifikācija un sesijas | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
+| omni-auth | Auth & Sessions | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
 ...
 ```
 
-Katrā rindā ir kolonna `rawUrl`, lai aģenti varētu nekavējoties izgūt pilnu SKILL.md. Lauks `metadata.totalSkills` atspoguļo kataloga lielumu (šobrīd 45). Implementācija: `src/lib/a2a/skills/listCapabilities.ts`. Skatiet arī [AGENT-SKILLS.md](./AGENT-SKILLS.md).
+Katrā rindā ir `rawUrl` kolonna, lai aģenti varētu nekavējoties izgūt pilnu SKILL.md. `metadata.totalSkills` lauks atspoguļo kataloga izmēru (šodien 45). Īstenošana: `src/lib/a2a/skills/listCapabilities.ts`. Skatīt arī [AGENT-SKILLS.md](./AGENT-SKILLS.md).
 
 ---
 
-## REST API (papildu)
+## REST API (palīgsistēma)
 
-JSON-RPC galapunkts `/a2a` ir oficiālais A2A ieejas punkts. Tālāk minētie REST galapunkti nodrošina papildu piekļuvi informācijas paneļiem un ārējiem rīkiem:
+JSON-RPC galapunkts `/a2a` ir kanoniskais A2A ieejas punkts. Tālāk norādītie REST galapunkti nodrošina papildu piekļuvi informācijas paneļiem un ārējiem rīkiem.
 
-| Endpoint                     | Method | Description                                                       | Auth                                           |
-| :--------------------------- | :----- | :---------------------------------------------------------------- | :--------------------------------------------- |
-| `/api/a2a/status`            | GET    | Servera stāvoklis, reģistrētās prasmes                            | (publiski)                                     |
-| `/api/a2a/tasks`             | GET    | Uzdevumu saraksts ar filtriem                                     | administrācijas                                |
-| `/api/a2a/tasks/[id]`        | GET    | Uzdevuma iegūšana pēc ID                                          | administrācijas                                |
-| `/api/a2a/tasks/[id]/cancel` | POST   | Pašreizējā uzdevuma atcelšana                                     | administrācijas                                |
-| `/.well-known/agent.json`    | GET    | Aģenta karte (A2A atklāšana)                                      | (publiski, kešots 3600s)                       |
-| `/api/a2a/tasks`             | POST   | Ienākošā deleģēšana uz OmniConductor klasteri (Conductor PRD RF5) | Bearer pret `OMNIROUTE_API_KEY` + `a2aEnabled` |
+| Galapunkts                   | Metode | Apraksts                                                     | Auth                                                                                                          |
+| :--------------------------- | :----- | :----------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------ |
+| `/api/a2a/status`            | GET    | Servera statuss, reģistrētas prasmes                         | (publisks)                                                                                                    |
+| `/api/a2a/tasks`             | GET    | Uzskaitiet uzdevumus ar filtriem                             | vadība vai API taustiņš (skatīt zemāk)                                                                        |
+| `/api/a2a/tasks/[id]`        | GET    | Saņemt uzdevumu, izmantojot ID                               | vadība vai API taustiņš (skatīt zemāk)                                                                        |
+| `/api/a2a/tasks/[id]/cancel` | POST   | Atcelt izpildes uzdevumu                                     | vadība vai API taustiņš (skatīt zemāk)                                                                        |
+| `/.well-known/agent.json`    | GET    | Aģenta karte (A2A discovery)                                 | (publisks, kešatmiņā saglabāts 3600s)                                                                         |
+| `/api/a2a/tasks`             | POST   | Ienākošā delegācija OmniConductor flotei (diriģents PRD RF5) | tas pats, kas `GET`, plus `OMNIROUTE_API_KEY` ja iestatīts, kamēr `REQUIRE_API_KEY` ir izslēgts; `a2aEnabled` |
 
-**Ienākošā Conductor deleģēšana (`POST /api/a2a/tasks`):** ārējie A2A aģenti deleģē kodēšanas darbus OmniConductor klasterim, izmantojot OmniRoute. Pieprasījuma ķermenis: `{ skill: "conductor" | "conductor-cli-<profile>", messages: [{role, content}], metadata: { conductor: { repo: { url, base_ref? }, mode?, cli?, model? } } }` — deleģējamas ir tikai Conductor klastera prasmes (tās, kas norādītas Aģenta kartē); lauka `metadata.conductor.repo.url` vērtība ir obligāta (klasteris strādā ar Git repozitorijiem). Maršruts tiek pārveidots uz centra `POST /v1/tasks`, izmantojot servera puses `CONDUCTOR_ORCHESTRATOR_TOKEN` (rezerves variantā `CONDUCTOR_HUB_TOKEN`), un atgriež `201 { conductor_task_id, state: "submitted" }`; uzdevumu stāvokļi tiek nodoti atpakaļ caur SSE→A2A spoguļojumu (RF1) un ir pieejami, izmantojot `GET /api/a2a/tasks?skill=conductor`.
+Tas, kurš nokļūst `/api/a2a/tasks*` maršrutos, ir atkarīgs no pieteikšanās un API atslēgas iestatījumiem:
+
+- `requireLogin=true` (noklusējums): starpprogrammatūra pieļauj tikai pārvaldības akreditācijas datus (informācijas paneļa sesija, `manage` -scope API atslēga, `oma_` piekļuves pilnvara) un `OMNIROUTE_API_KEY`. Vienkārša secinājuma atslēga iegūst `403`. `Authorization` galvenē starpprogrammatūra izmanto tikai `OMNIROUTE_API_KEY` kā `Bearer <key>`; tukša atslēga vai cilne pēc `Bearer` iegūst `401`.
+- `requireLogin=false` vai cilpas logs pirms ieslēgšanas: ar `REQUIRE_API_KEY=true` tiek pieņemta jebkura derīga OmniRoute API atslēga vai pārvaldības akreditācijas dati, un anonīmie zvanītāji saņem `401`; ar `REQUIRE_API_KEY` off maršruti ir atvērti.
+- `POST /api/a2a/tasks` papildus pieprasa `OMNIROUTE_API_KEY` `Authorization` galvenē, ja šis mainīgais ir iestatīts un `REQUIRE_API_KEY` ir izslēgts. Citas galvenes, piemēram, `x-api-key`, tur netiek ņemtas vērā. Izslēdzot pieteikšanos vai pirms ieslēgšanas, atslēga tiek nodota ar `Bearer` prefiksu vai bez tā; ar pieteikšanos tikai `Bearer <key>` tiek pāri starpprogrammatūrai.
+
+Ja ir nepieciešami akreditācijas dati, `read` -scope `oma_` pilnvara darbojas tikai `GET`.
+
+**Ienākošo vadītāju delegācija (`POST /api/a2a/tasks`):** ārējie A2A aģenti deleģē kodēšanas darbu OmniConductor flotei, izmantojot OmniRoute. Korpuss: tikai `{ skill: "conductor" | "conductor-cli-<profile>", messages: [{role, content}], metadata: { conductor: { repo: { url, base_ref? }, mode?, cli?, model? } } }` — Diriģentu flotes prasmes (tās, kas norādītas aģenta kartē) ir deleģējamas; Nepieciešams `metadata.conductor.repo.url` (flote darbojas ar git repo). Maršruts pārvēršas par centrmezgla `POST /v1/tasks`, izmantojot servera puses `CONDUCTOR_ORCHESTRATOR_TOKEN` (atkāpšanās `CONDUCTOR_HUB_TOKEN`), un atgriež `201 { conductor_task_id, state: "submitted" }`; uzdevuma stāvokļi plūst atpakaļ caur SSE→A2A spoguli (RF1) un ir redzami caur `GET /api/a2a/tasks?skill=conductor`.
 
 ---
 
-## Jauna prasmes pievienošana
+## Jaunas prasmes pievienošana
 
-1. **Izveidojiet prasmēs failu:** `src/lib/a2a/skills/<your-skill>.ts`
+1. **Izveidojiet prasmju failu:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   Eksportējiet asinhronu funkciju `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Ievērojiet esošo prasmēs struktūru, piemēram, `smartRouting.ts`.
+   Eksportējiet asinhrono funkciju `(task: A2ATask, caller?: A2ACallerContext) => Promise<{ artifacts, metadata }>`. Sekojiet esošo prasmju formai, piemēram, `smartRouting.ts`. Ja prasme atgriežas OmniRoute izmantojot HTTP, izveidojiet galvenes ar `buildSelfLoopHeaders(caller)` no `src/lib/a2a/selfLoopAuth.ts`, lai izsaukums tiktu izpildīts ar A2A zvanītāja atslēgu, nevis `OMNIROUTE_API_KEY`, un nododiet `redirect: "error"` uz `fetch`, lai novirzīšana nekad nesaņemtu atslēgu. Palīgs veido tikai galvenes; katra prasme nosaka pašu novirzīšanas politiku. Tas izmet `UnsafeSelfLoopTargetError` nevis pievieno atslēgu, ja atrisinātais bāzes URL ir vienkāršs http ārpus privātā tīkla (atgriezeniskā cilpa, konteinera vai pakalpojuma nosaukums un privātās adreses ir labi) vai tajā ir akreditācijas dati, tāpēc prasmēm, kas norīt noraidītos zvanus, šī kļūda ir jāatmet.
 
-2. **Reģistrējiet izpildītāju:** failā `src/lib/a2a/taskExecution.ts` pievienojiet ierakstu objektā `A2A_SKILL_HANDLERS`:
+2. **Reģistra apstrādātājs:** `src/lib/a2a/taskExecution.ts`, pievienojiet ierakstu `A2A_SKILL_HANDLERS`:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...esošās prasmēs
-     "your-skill": async (task) => {
+     // ...existing skills
+     "your-skill": async (task, caller) => {
        const skillModule = await import("./skills/yourSkill");
-       return skillModule.executeYourSkill(task);
+       return skillModule.executeYourSkill(task, caller);
      },
    };
    ```
 
-3. **Izpaužiet Aģenta kartē:** failā `src/app/.well-known/agent.json/route.ts` pievienojiet masīva `skills` beigās jaunu elementu:
+3. **Atklāt aģenta kartē:** `src/lib/a2a/agentCardMetadata.ts` (kopīgos ar `/.well-known/agent.json` un `/.well-known/agent-card.json`), pievienojiet `skills` masīvam:
 
    ```json
    {
      "id": "your-skill",
-     "name": "Jūsu prasme",
-     "description": "Īss, uz nodomu vērsts apraksts",
+     "name": "Your Skill",
+     "description": "Brief, intent-focused description",
      "tags": ["routing", "quota"],
-     "examples": ["Parauga dabiskvalodas izsaukums"]
+     "examples": ["Sample natural-language invocation"]
    }
    ```
 
-4. **Rakstiet testus:** `tests/unit/a2a-<your-skill>.test.ts`. Aptveriet gan veiksmīgo, gan kļūdoscenāriju.
+4. **Rakstiet testus:** `tests/unit/a2a-<your-skill>.test.ts`. Cover happy path + error path.
 
-5. **Nodokumentējiet** jauno prasmi šī dokumenta tabulā `Pieejamās prasmēs`.
+5. **Dokuments** jaunā prasme šī faila `Available Skills` tabulā.
 
 ---
 
@@ -264,7 +269,7 @@ submitted → working → completed
 
 ## Integrācijas piemēri
 
-### Python (requests)
+### Python (pieprasījumi)
 
 ```python
 import requests
@@ -283,7 +288,7 @@ print(result["artifacts"][0]["content"])
 print(result["metadata"]["routing_explanation"])
 ```
 
-### TypeScript (fetch)
+### TypeScript (atnest)
 
 ```typescript
 const resp = await fetch("http://localhost:20128/a2a", {

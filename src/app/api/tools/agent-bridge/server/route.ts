@@ -7,8 +7,13 @@
  */
 import { AgentBridgeServerActionSchema } from "@/shared/schemas/agentBridge";
 import { getCachedPassword, setCachedPassword } from "@/mitm/manager";
-import { installCertResult, installCaCert, checkCertInstalled } from "@/mitm/cert/install";
-import { generateCert } from "@/mitm/cert/generate";
+import {
+  installCertResult,
+  installCaCert,
+  checkCertInstalled,
+  uninstallCert,
+} from "@/mitm/cert/install";
+import { isRegenerateFailure, regenerateActiveMitmCert } from "@/mitm/cert/regenerate";
 import { resolveActiveCertPath } from "@/mitm/cert/activeCert";
 import { resolveMitmDataDir } from "@/mitm/dataDir";
 import {
@@ -143,8 +148,19 @@ export async function POST(request: Request): Promise<Response> {
     }
 
     if (action === "regenerate-cert") {
-      const result = await generateCert();
-      return Response.json({ ok: true, certPath: result.cert });
+      // Same implementation as POST /cert/regenerate: never flips the cert
+      // model (a fresh install used to get a legacy leaf here) and rotates
+      // the root CA under the root-CA model.
+      const { getMitmStatus } = await import("@/mitm/manager.runtime");
+      const { running } = await getMitmStatus();
+      const result = await regenerateActiveMitmCert(
+        { sudoPassword, running },
+        { checkCertInstalled, uninstallCert, isSudoPasswordRequired: isMitmSudoPasswordRequired }
+      );
+      if (isRegenerateFailure(result)) {
+        return createErrorResponse({ status: result.status, message: result.message });
+      }
+      return Response.json(result);
     }
 
     return createErrorResponse({ status: 400, message: "Unknown action" });

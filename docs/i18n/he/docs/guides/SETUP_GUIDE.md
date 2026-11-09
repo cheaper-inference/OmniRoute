@@ -140,7 +140,7 @@ omniroute providers validate
 
 ### 1) חיבור ספקים ויצירת מפתח API
 
-1. פתחו את לוח הבקרה → `Providers` וחברו לפחות ספק אחד (OAuth או מפתח API).
+1. פתחו את לוח הבקרה → `Providers` וחברו ספק אחד לפחות (OAuth או מפתח API).
 2. פתחו את לוח הבקרה → `Endpoints` וצרו מפתח API.
 3. (אופציונלי) פתחו את לוח הבקרה → `Combos` והגדירו את שרשרת הגיבוי שלכם.
 
@@ -149,10 +149,10 @@ omniroute providers validate
 ```txt
 כתובת URL בסיסית: http://localhost:20128/v1
 מפתח API:          [העתיקו מדף ה-Endpoint]
-מודל:              if/qwen3.8-max-preview (או כל קידומת ספק/מודל)
+מודל:              if/qwen3.8-max-preview (או כל קידומת provider/model)
 ```
 
-אם העורך שלכם אינו יכול לשלוח `Authorization: Bearer ...`, השתמשו במקום זאת בכתובת הבסיס התואמת הכוללת את האסימון:
+אם העורך שלכם אינו יכול לשלוח `Authorization: Bearer ...`, השתמשו במקום זאת בכתובת הבסיס התואמת הכוללת טוקן:
 
 ```txt
 כתובת URL בסיסית: http://localhost:20128/api/v1/vscode/YOUR_KEY/
@@ -161,77 +161,78 @@ omniroute providers validate
 כתובת URL לתגיות Ollama: http://localhost:20128/api/v1/vscode/YOUR_KEY/api/tags
 ```
 
-עובד עם Claude Code, Codex CLI, Cursor, Cline, OpenClaw, OpenCode וערכות SDK תואמות OpenAI.
+פועל עם Claude Code, Codex CLI, Cursor, Cline, OpenClaw, OpenCode וערכות SDK תואמות OpenAI.
 
 #### הגדרה אוטומטית באמצעות `setup-*`
 
-במקום להדביק ידנית את כתובת הבסיס ואת המפתח, אפשרו ל-OmniRoute לכתוב את התצורה
-הייעודית של כל כלי מתוך קטלוג המודלים הפעיל. פקודה אחת לכל כלי:
+במקום להדביק ידנית את כתובת הבסיס ואת המפתח, אפשרו ל-OmniRoute לכתוב את קובץ התצורה
+הייחודי של כל כלי מתוך קטלוג המודלים הפעיל. פקודה אחת לכל כלי:
 
 ```bash
-omniroute setup-codex        # פרופילים תחת ~/.codex/<name>.config.toml
+omniroute setup-codex        # פרופילים ב-~/.codex/<name>.config.toml
 omniroute setup-claude       # ~/.claude/profiles/<name>/settings.json
 omniroute setup-opencode     # ~/.config/opencode/opencode.json (תואם OpenAI)
-omniroute setup-cline        # הגדרות Cline CLI והרחבת VS Code
+omniroute setup-cline        # הגדרות Cline CLI ותוסף VS Code
 omniroute setup-kilo         # Kilo Code
 omniroute setup-continue     # ~/.continue/config.yaml (Continue / cn)
-omniroute setup-cursor       # מציג את שלבי ההגדרה בתוך Cursor
+omniroute setup-cursor       # מדפיס את שלבי ההגדרה בתוך Cursor
 omniroute setup-roo          # ייבוא ל-Roo Code ומצביע autoImport
 omniroute setup-crush        # ~/.config/crush/crush.json
+omniroute setup-zed          # ~/.config/zed/settings.json (openai_compatible)
 omniroute setup-goose        # ~/.config/goose/config.yaml
 omniroute setup-aider        # ~/.aider.conf.yml
 omniroute setup-qwen         # ~/.qwen/settings.json + ~/.qwen/.env
 ```
 
-כל פקודה מקבלת `--remote <url> --api-key <key>` כדי להגדיר כלי מקומי מול
-OmniRoute **מרוחק**, וכן `--dry-run` לתצוגה מקדימה. כדי להפעיל CLI עם משתני
-הסביבה המתאימים מוזרקים, מבלי לכתוב תצורה כלל, השתמשו במפעיל הכללי
+כל פקודה מקבלת את `--remote <url> --api-key <key>` כדי להגדיר כלי מקומי מול OmniRoute
+**מרוחק**, וכן את `--dry-run` לתצוגה מקדימה. כדי להפעיל CLI עם משתני הסביבה המתאימים
+מוזרקים, מבלי לכתוב כלל קובץ תצורה, השתמשו במפעיל הכללי
 `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini);
 המפעילים הישנים הייעודיים לכל כלי, `omniroute launch` (Claude Code) ו-
 `omniroute launch-codex` (Codex), עדיין זמינים.
 
-לטבלה המלאה (מה כל פקודה כותבת, כל הדגלים, מקומי לעומת מרוחק ומוסכמות `/v1`
-לכתובת URL בסיסית), ראו **[שילובי CLI](./CLI-INTEGRATIONS.md)**.
+לטבלה המלאה (מה כל פקודה כותבת, כל הדגלים, מקומי לעומת מרוחק, והמוסכמות של
+`/v1` בכתובת הבסיס), ראו **[שילובי CLI](./CLI-INTEGRATIONS.md)**.
 
-להגדרות מפורטות עבור כל כלי (Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot ועוד), ראו את **[המדריך לכלי CLI](../reference/CLI-TOOLS.md)** הייעודי.
+להגדרה מפורטת עבור כל כלי בנפרד (Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot ועוד), ראו את **[המדריך לכלי CLI](../reference/CLI-TOOLS.md)** הייעודי.
 
 ---
 
-## הגדרת פרוטוקולים (MCP + A2A)
+## הגדרת פרוטוקול (MCP + A2A)
 
-### הגדרת MCP (Model Context Protocol)
+### הגדרת MCP (פרוטוקול הקשר דגם)
 
-הפעילו את תעבורת MCP במצב stdio:
+התחל העברת MCP במצב stdio:
 
 ```bash
 omniroute --mcp
 ```
 
-תהליך האימות המומלץ:
+זרימת אימות מומלצת:
 
 ```bash
-# 1. הפעילו את שרת MCP
+# 1. Start MCP server
 omniroute --mcp
 
-# 2. מלקוח ה-MCP שלכם, קראו לפקודות:
-omniroute_get_health        # אמור להחזיר את תקינות המערכת
-omniroute_list_combos       # אמור להחזיר שילובים פעילים
+# 2. From your MCP client, call:
+omniroute_get_health        # Should return system health
+omniroute_list_combos       # Should return active combos
 
-# 3. לחלופין, הפעילו את חבילת בדיקות E2E המלאה:
+# 3. Or run the full E2E suite:
 npm run test:protocols:e2e
 ```
 
-#### הגדרת לקוח MCP
+#### תצורת לקוח MCP
 
-**Claude Code:**
+**קוד Claude :**
 
 ```bash
-claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
 ```
 
 **Cursor / Cline:**
 
-הוסיפו להגדרות ה-MCP שלכם:
+הוסף להגדרות MCP שלך (stdio, עם המפתח כך שלמתקשר תהיה מנהלת):
 
 ```json
 {
@@ -239,23 +240,30 @@ claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp
     "omniroute": {
       "command": "omniroute",
       "args": ["--mcp"],
-      "env": {}
+      "env": {
+        "OMNIROUTE_API_KEY": "your-key",
+        "OMNIROUTE_BASE_URL": "http://localhost:20128"
+      }
     }
   }
 }
 ```
 
-**תיעוד MCP מלא:** [README של שרת MCP](../../open-sse/mcp-server/README.md) — 110 כלים, הגדרות IDE ולקוחות Python/TS/Go.
+לחלופין, כאשר `mcpTransport` הוא `streamable-http` (הגדר אותו על `/dashboard/mcp` או עם `omniroute mcp enable --transport streamable-http`), כוון את כניסת שרת MCP המרוחק של הלקוח אל `http://localhost:20128/api/mcp/stream`.
 
-### הגדרת A2A (פרוטוקול סוכן-לסוכן)
+המפתח עובר כ- `Authorization: Bearer <api-key>` (ראה [MCP Server → גישה מרחוק](../frameworks/MCP-SERVER.md#remote-access-manage-scope-bypass) למארחים מרוחקים; מפתח מרוחק צריך `mcp:connect` בתוספת היקפי read/write שלו).
 
-אמתו את כרטיס הסוכן:
+**תיעוד מלא MCP :** [MCP Server README](../../open-sse/mcp-server/README.md) — 110 כלים, IDE configs, Python/TS/Go clients. הפניה למפעיל עבור כלי הדחיסה CCR/dedup (סממנים, דרישות מוקדמות, היקפי לכל כלי, עימוד אחזור, אבחון): [מנועי דחיסה → דרישות מוקדמות / מדריך למפעיל](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+
+### הגדרת A2A (פרוטוקול סוכן לסוכן)
+
+אמת את כרטיס הסוכן:
 
 ```bash
 curl http://localhost:20128/.well-known/agent.json
 ```
 
-שלחו משימה:
+שלח משימה:
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -263,7 +271,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"Give me a short quota summary."}]}}'
 ```
 
-**תיעוד A2A מלא:** [README של שרת A2A](../../src/lib/a2a/README.md) — JSON-RPC 2.0, מיומנויות, הזרמה ומחזור חיי משימה.
+**תיעוד מלא A2A :** [שרת A2A README](../../src/lib/a2a/README.md) — JSON-RPC 2.0, מיומנויות, סטרימינג, מחזור חיים של משימות.
 
 ---
 
@@ -322,12 +330,12 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ---
 
-## תבנית Void Linux ‏(xbps-src)
+## בטל תבנית Linux (xbps-src).
 
-משתמשי Void Linux יכולים לבנות חבילה מקורית באמצעות `xbps-src`. שמרו בלוק זה בתור `srcpkgs/omniroute/template`:
+עבור משתמשי Void Linux, אתה יכול לבנות חבילה מקורית באמצעות `xbps-src`. שמור את הבלוק הזה בתור `srcpkgs/omniroute/template`:
 
 ```bash
-# קובץ תבנית עבור 'omniroute'
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -338,7 +346,7 @@ maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# צרו מחדש את סכום הביקורת עבור כל גרסה באמצעות:
+# Regenerate the checksum for each release with:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

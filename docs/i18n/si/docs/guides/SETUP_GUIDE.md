@@ -138,21 +138,21 @@ omniroute providers validate
 
 ## CLI මෙවලම් වින්යාසය
 
-### 1) සැපයුම්කරුවන් සම්බන්ධ කර API යතුරක් සාදන්න
+### 1) සපයන්නන් සම්බන්ධ කර API යතුරක් සාදන්න
 
-1. Dashboard → `Providers` විවෘත කර අවම වශයෙන් එක් සැපයුම්කරුවෙකු හෝ සම්බන්ධ කරන්න (OAuth හෝ API යතුර).
-2. Dashboard → `Endpoints` විවෘත කර API යතුරක් සාදන්න.
-3. (විකල්ප) Dashboard → `Combos` විවෘත කර ඔබේ විකල්ප දාමය සකසන්න.
+1. උපකරණ පුවරුව → `Providers` විවෘත කර අවම වශයෙන් එක් සපයන්නෙකු හෝ සම්බන්ධ කරන්න (OAuth හෝ API යතුරක්).
+2. උපකරණ පුවරුව → `Endpoints` විවෘත කර API යතුරක් සාදන්න.
+3. (විකල්ප) උපකරණ පුවරුව → `Combos` විවෘත කර ඔබේ විකල්ප දාමය සකසන්න.
 
-### 2) ඔබේ කේතකරණ මෙවලම යොමු කරන්න
+### 2) ඔබේ කේතීකරණ මෙවලම යොමු කරන්න
 
 ```txt
 මූලික URL: http://localhost:20128/v1
 API යතුර:  [Endpoint පිටුවෙන් පිටපත් කරන්න]
-මාදිලිය:    if/qwen3.8-max-preview (හෝ ඕනෑම සැපයුම්කරු/මාදිලි උපසර්ගයක්)
+මාදිලිය:   if/qwen3.8-max-preview (හෝ ඕනෑම සපයන්නා/මාදිලි උපසර්ගයක්)
 ```
 
-ඔබේ සංස්කාරකයට `Authorization: Bearer ...` යැවිය නොහැකි නම්, ඒ වෙනුවට ටෝකනගත අනුකූලතා මූලික URL එක භාවිත කරන්න:
+ඔබේ සංස්කාරකයට `Authorization: Bearer ...` යැවිය නොහැකි නම්, ඒ වෙනුවට ටෝකනගත කළ අනුකූලතා මූලික ලිපිනය භාවිත කරන්න:
 
 ```txt
 මූලික URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/
@@ -165,7 +165,8 @@ Claude Code, Codex CLI, Cursor, Cline, OpenClaw, OpenCode සහ OpenAI-අන�
 
 #### `setup-*` සමඟ ස්වයංක්රීයව වින්යාස කරන්න
 
-මූලික URL එක සහ යතුර අතින් ඇලවීම වෙනුවට, සජීවී මාදිලි නාමාවලියෙන් එක් එක් මෙවලම සඳහා එයටම අදාළ වින්යාසය ලිවීමට OmniRoute වෙත ඉඩ දෙන්න. එක් මෙවලමකට එක් විධානයක්:
+මූලික URL එක සහ යතුර අතින් ඇලවීම වෙනුවට, සජීවී මාදිලි නාමාවලියෙන් එක් එක් මෙවලමෙහි
+ස්වකීය වින්යාසය ලිවීමට OmniRoute හට ඉඩ දෙන්න. එක් මෙවලමකට එක් විධානයක්:
 
 ```bash
 omniroute setup-codex        # ~/.codex/<name>.config.toml පැතිකඩ
@@ -177,54 +178,60 @@ omniroute setup-continue     # ~/.continue/config.yaml (Continue / cn)
 omniroute setup-cursor       # Cursor යෙදුම තුළ සිදු කළ යුතු පියවර මුද්රණය කරයි
 omniroute setup-roo          # Roo Code ආයාතය + autoImport දර්ශකය
 omniroute setup-crush        # ~/.config/crush/crush.json
+omniroute setup-zed          # ~/.config/zed/settings.json (openai_compatible)
 omniroute setup-goose        # ~/.config/goose/config.yaml
 omniroute setup-aider        # ~/.aider.conf.yml
 omniroute setup-qwen         # ~/.qwen/settings.json + ~/.qwen/.env
 ```
 
-**දුරස්ථ** OmniRoute එකකට එරෙහිව දේශීය මෙවලමක් වින්යාස කිරීමට ඒ සෑම එකක්ම `--remote <url> --api-key <key>` පිළිගන්නා අතර, පෙරදසුනක් සඳහා `--dry-run` ද පිළිගනී. නිවැරදි env අගයන් ඇතුළත් කර, කිසිදු වින්යාසයක් නොලියා CLI එකක් දියත් කිරීමට සාමාන්ය දියත්කරණය වන `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini) භාවිත කරන්න; පැරණි එක් එක් මෙවලමට වෙන් වූ දියත්කරණ වන `omniroute launch` (Claude Code) සහ `omniroute launch-codex` (Codex) තවදුරටත් ලබා ගත හැක.
+දේශීය මෙවලමක් **දුරස්ථ** OmniRoute එකකට එරෙහිව වින්යාස කිරීම සඳහා සෑම විධානයක්ම `--remote <url> --api-key <key>` පිළිගන්නා අතර, පෙරදසුනක් සඳහා `--dry-run` ද පිළිගනී. නිවැරදි
+පරිසර විචල්ය ඇතුළත් කර, කිසිදු වින්යාසයක් නොලියා CLI එකක් දියත් කිරීමට, සාමාන්ය දියත්කය වන
+`omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini) භාවිත කරන්න;
+පැරණි, එක් එක් මෙවලමට වෙන්වූ `omniroute launch` (Claude Code) සහ
+`omniroute launch-codex` (Codex) දියත්කයන් තවමත් ලබා ගත හැක.
 
-සම්පූර්ණ වගුව සඳහා (එක් එක් විධානය ලියන දේ, සියලුම ධජ, දේශීය හා දුරස්ථ භාවිතය, මූලික-URL `/v1` සම්මුති), **[CLI ඒකාබද්ධ කිරීම්](./CLI-INTEGRATIONS.md)** බලන්න.
+සම්පූර්ණ වගුව සඳහා (එක් එක් විධානය ලියන්නේ කුමක්ද, සියලු සලකුණු, දේශීය හා දුරස්ථ වෙනස්කම්, මූලික-URL
+`/v1` සම්මුතීන්), **[CLI ඒකාබද්ධ කිරීම්](./CLI-INTEGRATIONS.md)** බලන්න.
 
-එක් එක් මෙවලම සඳහා සවිස්තරාත්මක වින්යාසය (Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot සහ තවත් දෑ) සඳහා, කැපවූ **[CLI මෙවලම් මාර්ගෝපදේශය](../reference/CLI-TOOLS.md)** බලන්න.
+එක් එක් මෙවලම සඳහා සවිස්තරාත්මක වින්යාසය (Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot සහ තවත්) සඳහා, වෙන් කළ **[CLI මෙවලම් මාර්ගෝපදේශය](../reference/CLI-TOOLS.md)** බලන්න.
 
 ---
 
-## ප්රොටෝකෝල සැකසුම (MCP + A2A)
+## ප්‍රොටෝකෝල සැකසුම (MCP + A2A)
 
-### MCP සැකසුම (Model Context Protocol)
+### MCP සැකසුම (ආදර්ශ සන්දර්භ ප්‍රොටෝකෝලය)
 
-stdio ප්රකාරයෙන් MCP ප්රවාහනය ආරම්භ කරන්න:
+stdio මාදිලියේ MCP ප්‍රවාහනය ආරම්භ කරන්න:
 
 ```bash
 omniroute --mcp
 ```
 
-නිර්දේශිත වලංගුකරණ ප්රවාහය:
+නිර්දේශිත වලංගුකරණ ප්‍රවාහය:
 
 ```bash
-# 1. MCP සේවාදායකය ආරම්භ කරන්න
+# 1. Start MCP server
 omniroute --mcp
 
-# 2. ඔබේ MCP සේවාලාභියා වෙතින්, පහත ඒවා අමතන්න:
-omniroute_get_health        # පද්ධතියේ සෞඛ්ය තත්ත්වය ආපසු ලබා දිය යුතුය
-omniroute_list_combos       # සක්රිය combos ආපසු ලබා දිය යුතුය
+# 2. From your MCP client, call:
+omniroute_get_health        # Should return system health
+omniroute_list_combos       # Should return active combos
 
-# 3. නැතහොත් සම්පූර්ණ E2E කට්ටලය ධාවනය කරන්න:
+# 3. Or run the full E2E suite:
 npm run test:protocols:e2e
 ```
 
-#### MCP සේවාලාභී වින්යාසය
+#### MCP Client Configuration
 
-**Claude Code:**
+**Claude කේතය:**
 
 ```bash
-claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
 ```
 
 **Cursor / Cline:**
 
-ඔබේ MCP සැකසුම්වලට එක් කරන්න:
+ඔබගේ MCP සැකසීම් වෙත එක් කරන්න (stdio, යතුර සමඟින් ඇමතුම්කරුට ප්‍රධානය):
 
 ```json
 {
@@ -232,17 +239,24 @@ claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp
     "omniroute": {
       "command": "omniroute",
       "args": ["--mcp"],
-      "env": {}
+      "env": {
+        "OMNIROUTE_API_KEY": "your-key",
+        "OMNIROUTE_BASE_URL": "http://localhost:20128"
+      }
     }
   }
 }
 ```
 
-**සම්පූර්ණ MCP ලේඛනගත කිරීම:** [MCP Server README](../../open-sse/mcp-server/README.md) — මෙවලම් 110ක්, IDE වින්යාස, Python/TS/Go සේවාලාභීන්.
+නැතහොත්, `mcpTransport` `streamable-http` වන විට (එය `/dashboard/mcp` හෝ `omniroute mcp enable --transport streamable-http` සමඟ සකසන්න), සේවාලාභියාගේ දුරස්ථ MCP සේවාදායක ප්‍රවේශය `http://localhost:20128/api/mcp/stream` වෙත යොමු කරන්න.
 
-### A2A සැකසුම (Agent-to-Agent Protocol)
+යතුර `Authorization: Bearer <api-key>` ලෙස ගමන් කරයි (බලන්න [MCP Server → දුරස්ථ ධාරක සඳහා දුරස්ථ ප්‍රවේශය](../frameworks/MCP-SERVER.md#remote-access-manage-scope-bypass) ; දුරස්ථ යතුරකට `mcp:connect` සහ එහි read/write විෂය පථයන් අවශ්‍ය වේ).
 
-Agent Card එක සත්යාපනය කරන්න:
+**සම්පූර්ණ MCP ලියකියවිලි:** [MCP සේවාදායකය README](../../open-sse/mcp-server/README.md) — 110 මෙවලම්, IDE configs, Python/TS/Go සේවාදායකයින්. සම්පීඩන CCR/dedup මෙවලම් සඳහා ක්‍රියාකරු යොමු කිරීම (සලකුණු, පූර්ව අවශ්‍යතා, එක් මෙවලමක් සඳහා විෂය පථයන්, නැවත ලබා ගැනීමේ පිටුකරණය, රෝග විනිශ්චය): [සම්පීඩන එන්ජින් → පූර්වාවශ්‍යතා / ක්‍රියාකරු මාර්ගෝපදේශය](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+
+### A2A සැකසුම (නියෝජිත සිට නියෝජිත ප්‍රොටෝකෝලය)
+
+නියෝජිත කාඩ්පත තහවුරු කරන්න:
 
 ```bash
 curl http://localhost:20128/.well-known/agent.json
@@ -256,7 +270,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"Give me a short quota summary."}]}}'
 ```
 
-**සම්පූර්ණ A2A ලේඛනගත කිරීම:** [A2A Server README](../../src/lib/a2a/README.md) — JSON-RPC 2.0, කුසලතා, ප්රවාහනය, කාර්ය ජීවන චක්රය.
+**සම්පූර්ණ A2A ලියකියවිලි:** [A2A සේවාදායකය README](../../src/lib/a2a/README.md) — JSON-RPC 2.0, කුසලතා, ප්‍රවාහය, කාර්ය ජීවන චක්‍රය.
 
 ---
 
@@ -315,23 +329,23 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ---
 
-## Void Linux (xbps-src) අච්චුව
+## Void Linux (xbps-src) සැකිල්ල
 
-Void Linux පරිශීලකයින්ට `xbps-src` භාවිතයෙන් ස්වදේශීය පැකේජයක් ගොඩනැගිය හැක. මෙම කොටස `srcpkgs/omniroute/template` ලෙස සුරකින්න:
+Void Linux භාවිතා කරන්නන් සඳහා, ඔබට `xbps-src` භාවිතයෙන් ස්වදේශීය පැකේජයක් සෑදිය හැක. මෙම කොටස `srcpkgs/omniroute/template` ලෙස සුරකින්න:
 
 ```bash
-# 'omniroute' සඳහා අච්චු ගොනුව
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
 hostmakedepends="nodejs python3 make"
 depends="openssl"
-short_desc="බහු LLM සපයන්නන් සඳහා බුද්ධිමත් මාර්ගගත කිරීම සහිත විශ්වීය AI ද්වාරය"
+short_desc="Universal AI gateway with smart routing for multiple LLM providers"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# සෑම නිකුතුවක් සඳහාම පහත විධානයෙන් checksum නැවත ජනනය කරන්න:
+# Regenerate the checksum for each release with:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

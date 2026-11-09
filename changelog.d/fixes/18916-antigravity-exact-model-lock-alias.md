@@ -1,0 +1,1 @@
+- **fix(antigravity):** Exact-model cooldowns now use one key across Antigravity display and wire model ids, so a locked model cannot be retried straight away under another alias. Gemini 3.7 Flash tiers share one exact cooldown, even on accounts that list them as separate models ([#18916](https://github.com/cheaper-inference/OmniRoute/pull/18916)) — thanks @Bl0ck154

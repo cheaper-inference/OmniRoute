@@ -141,10 +141,10 @@ omniroute providers validate
 ### 1) प्रदायकहरू जडान गर्नुहोस् र API कुञ्जी सिर्जना गर्नुहोस्
 
 1. Dashboard → `Providers` खोल्नुहोस् र कम्तीमा एउटा प्रदायक (OAuth वा API कुञ्जी) जडान गर्नुहोस्।
-2. Dashboard → `Endpoints` खोल्नुहोस् र API कुञ्जी सिर्जना गर्नुहोस्।
+2. Dashboard → `Endpoints` खोल्नुहोस् र एउटा API कुञ्जी सिर्जना गर्नुहोस्।
 3. (वैकल्पिक) Dashboard → `Combos` खोल्नुहोस् र आफ्नो फलब्याक शृङ्खला सेट गर्नुहोस्।
 
-### 2) आफ्नो कोडिङ उपकरणलाई लक्षित गराउनुहोस्
+### 2) आफ्नो कोडिङ उपकरणलाई निर्देशित गर्नुहोस्
 
 ```txt
 आधार URL: http://localhost:20128/v1
@@ -156,51 +156,52 @@ API कुञ्जी:  [Endpoint पृष्ठबाट प्रतिल�
 
 ```txt
 आधार URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/
-मोडेलहरूको URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/models
+मोडेलहरू URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/models
 च्याट URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/chat/completions
-Ollama ट्याग URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/api/tags
+Ollama ट्यागहरू URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/api/tags
 ```
 
-Claude Code, Codex CLI, Cursor, Cline, OpenClaw, OpenCode, र OpenAI-सङ्गत SDK हरूसँग काम गर्छ।
+Claude Code, Codex CLI, Cursor, Cline, OpenClaw, OpenCode, र OpenAI-अनुकूल SDK हरूसँग काम गर्छ।
 
 #### `setup-*` मार्फत स्वतः कन्फिगर गर्नुहोस्
 
 आधार URL र कुञ्जी हातैले टाँस्नुको सट्टा, OmniRoute लाई प्रत्यक्ष मोडेल क्याटलगबाट प्रत्येक उपकरणको
-आफ्नै कन्फिग लेख्न दिनुहोस्। प्रत्येक उपकरणका लागि एउटा कमान्ड:
+आफ्नै कन्फिग लेख्न दिनुहोस्। प्रत्येक उपकरणका लागि एउटा आदेश:
 
 ```bash
 omniroute setup-codex        # ~/.codex/<name>.config.toml प्रोफाइलहरू
 omniroute setup-claude       # ~/.claude/profiles/<name>/settings.json
-omniroute setup-opencode     # ~/.config/opencode/opencode.json (openai-सङ्गत)
+omniroute setup-opencode     # ~/.config/opencode/opencode.json (openai-अनुकूल)
 omniroute setup-cline        # Cline CLI + VS Code एक्सटेन्सन सेटिङहरू
 omniroute setup-kilo         # Kilo Code
 omniroute setup-continue     # ~/.continue/config.yaml (Continue / cn)
-omniroute setup-cursor       # Cursor का इन-एप चरणहरू प्रिन्ट गर्छ
-omniroute setup-roo          # Roo Code आयात + autoImport सूचक
+omniroute setup-cursor       # Cursor का एपभित्रका चरणहरू प्रिन्ट गर्छ
+omniroute setup-roo          # Roo Code आयात + autoImport पोइन्टर
 omniroute setup-crush        # ~/.config/crush/crush.json
+omniroute setup-zed          # ~/.config/zed/settings.json (openai_compatible)
 omniroute setup-goose        # ~/.config/goose/config.yaml
 omniroute setup-aider        # ~/.aider.conf.yml
 omniroute setup-qwen         # ~/.qwen/settings.json + ~/.qwen/.env
 ```
 
-स्थानीय उपकरणलाई **रिमोट** OmniRoute सँग कन्फिगर गर्न प्रत्येकले `--remote <url> --api-key <key>` स्वीकार गर्छ,
-साथै पूर्वावलोकनका लागि `--dry-run`। सही env इन्जेक्ट गरेर र कुनै पनि कन्फिग नलेखी CLI सुरु गर्न,
-सामान्य लन्चर `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini) प्रयोग गर्नुहोस्;
+**रिमोट** OmniRoute विरुद्ध स्थानीय उपकरण कन्फिगर गर्न प्रत्येकले `--remote <url> --api-key <key>` स्वीकार गर्छ,
+साथै पूर्वावलोकनका लागि `--dry-run` पनि स्वीकार गर्छ। सही env इन्जेक्ट गरी र कुनै पनि कन्फिग नलेखी CLI सुरु गर्न,
+जेनेरिक लन्चर `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini) प्रयोग गर्नुहोस्;
 पुराना प्रति-उपकरण लन्चरहरू `omniroute launch` (Claude Code) र
-`omniroute launch-codex` (Codex) पनि उपलब्ध छन्।
+`omniroute launch-codex` (Codex) अझै उपलब्ध छन्।
 
-पूर्ण तालिकाका लागि (प्रत्येक कमान्डले के लेख्छ, हरेक फ्ल्याग, स्थानीय बनाम रिमोट, आधार-URL
+पूर्ण तालिकाका लागि (प्रत्येक आदेशले के लेख्छ, सबै फ्ल्याग, स्थानीय बनाम रिमोट, आधार-URL
 `/v1` परम्पराहरू), **[CLI एकीकरणहरू](./CLI-INTEGRATIONS.md)** हेर्नुहोस्।
 
-प्रति-उपकरण विस्तृत कन्फिगरेसनका लागि (Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot, र थप), समर्पित **[CLI उपकरण मार्गदर्शिका](../reference/CLI-TOOLS.md)** हेर्नुहोस्।
+प्रत्येक उपकरणको विस्तृत कन्फिगरेसनका लागि (Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot, र थप), समर्पित **[CLI उपकरण मार्गदर्शिका](../reference/CLI-TOOLS.md)** हेर्नुहोस्।
 
 ---
 
 ## प्रोटोकल सेटअप (MCP + A2A)
 
-### MCP सेटअप (मोडेल कन्टेक्स्ट प्रोटोकल)
+### MCP सेटअप (मोडेल सन्दर्भ प्रोटोकल)
 
-stdio मोडमा MCP ट्रान्सपोर्ट सुरु गर्नुहोस्:
+stdio मोडमा MCP यातायात सुरु गर्नुहोस्:
 
 ```bash
 omniroute --mcp
@@ -209,28 +210,28 @@ omniroute --mcp
 सिफारिस गरिएको प्रमाणीकरण प्रवाह:
 
 ```bash
-# 1. MCP सर्भर सुरु गर्नुहोस्
+# 1. Start MCP server
 omniroute --mcp
 
-# 2. आफ्नो MCP क्लाइन्टबाट, यी कल गर्नुहोस्:
-omniroute_get_health        # प्रणालीको स्वास्थ्य स्थिति फर्काउनुपर्छ
-omniroute_list_combos       # सक्रिय कम्बोहरू फर्काउनुपर्छ
+# 2. From your MCP client, call:
+omniroute_get_health        # Should return system health
+omniroute_list_combos       # Should return active combos
 
-# 3. वा पूर्ण E2E सुइट चलाउनुहोस्:
+# 3. Or run the full E2E suite:
 npm run test:protocols:e2e
 ```
 
-#### MCP क्लाइन्ट कन्फिगरेसन
+#### MCP ग्राहक कन्फिगरेसन
 
-**Claude Code:**
+**Claude कोड:**
 
 ```bash
-claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
 ```
 
 **Cursor / Cline:**
 
-आफ्नो MCP सेटिङहरूमा थप्नुहोस्:
+आफ्नो MCP सेटिङहरूमा थप्नुहोस् (stdio, साँचोको साथ ताकि कलरको प्रिन्सिपल छ):
 
 ```json
 {
@@ -238,23 +239,30 @@ claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp
     "omniroute": {
       "command": "omniroute",
       "args": ["--mcp"],
-      "env": {}
+      "env": {
+        "OMNIROUTE_API_KEY": "your-key",
+        "OMNIROUTE_BASE_URL": "http://localhost:20128"
+      }
     }
   }
 }
 ```
 
-**पूर्ण MCP दस्तावेजीकरण:** [MCP सर्भर README](../../open-sse/mcp-server/README.md) — 110 उपकरणहरू, IDE कन्फिगहरू, Python/TS/Go क्लाइन्टहरू।
+वा, जब `mcpTransport` `streamable-http` हुन्छ (यसलाई `/dashboard/mcp` मा वा `omniroute mcp enable --transport streamable-http` सँग सेट गर्नुहोस्), ग्राहकको रिमोट MCP सर्भर प्रविष्टिलाई `http://localhost:20128/api/mcp/stream` मा देखाउनुहोस्।
 
-### A2A सेटअप (एजेन्ट-टु-एजेन्ट प्रोटोकल)
+कुञ्जीले `Authorization: Bearer <api-key>` को रूपमा यात्रा गर्दछ (रिमोट होस्टहरूको लागि [MCP सर्भर → रिमोट पहुँच](../frameworks/MCP-SERVER.md#remote-access-manage-scope-bypass) हेर्नुहोस्; रिमोट कुञ्जीलाई `mcp:connect` र यसको read/write स्कोपहरू चाहिन्छ)।
 
-Agent Card प्रमाणित गर्नुहोस्:
+**पूर्ण MCP कागजात:** [MCP सर्भर README](../../open-sse/mcp-server/README.md) — 110 उपकरणहरू, IDE कन्फिगहरू, Python/TS/Go ग्राहकहरू। कम्प्रेसन CCR/dedup उपकरणहरूका लागि अपरेटर सन्दर्भ (मार्करहरू, आवश्यकताहरू, प्रति-उपकरण स्कोपहरू, पुन: प्राप्ति पृष्ठांकन, निदान): [कम्प्रेसन इन्जिनहरू → पूर्वाधारहरू / अपरेटर गाइड](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup) ।
+
+### A2A सेटअप (एजेन्ट-टू-एजेन्ट प्रोटोकल)
+
+एजेन्ट कार्ड प्रमाणित गर्नुहोस्:
 
 ```bash
 curl http://localhost:20128/.well-known/agent.json
 ```
 
-एउटा कार्य पठाउनुहोस्:
+कार्य पठाउनुहोस्:
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -262,7 +270,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"Give me a short quota summary."}]}}'
 ```
 
-**पूर्ण A2A दस्तावेजीकरण:** [A2A सर्भर README](../../src/lib/a2a/README.md) — JSON-RPC 2.0, सीपहरू, स्ट्रिमिङ, कार्य जीवनचक्र।
+**पूर्ण A2A कागजात:** [A2A सर्भर README](../../src/lib/a2a/README.md) — JSON-RPC 2.0, कौशल, स्ट्रिमिङ, कार्य जीवनचक्र।
 
 ---
 
@@ -321,12 +329,12 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ---
 
-## Void Linux (`xbps-src`) टेम्प्लेट
+## शून्य Linux (xbps-src) टेम्प्लेट
 
-Void Linux प्रयोगकर्ताहरूले `xbps-src` प्रयोग गरेर नेटिभ प्याकेज निर्माण गर्न सक्छन्। यो ब्लकलाई `srcpkgs/omniroute/template` को रूपमा सुरक्षित गर्नुहोस्:
+Void Linux प्रयोगकर्ताहरूका लागि, तपाईंले `xbps-src` प्रयोग गरेर नेटिभ प्याकेज निर्माण गर्न सक्नुहुन्छ। यो ब्लक `srcpkgs/omniroute/template` को रूपमा बचत गर्नुहोस्:
 
 ```bash
-# 'omniroute' का लागि टेम्प्लेट फाइल
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -337,7 +345,7 @@ maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# प्रत्येक रिलिजका लागि यसरी चेकसम पुनः उत्पन्न गर्नुहोस्:
+# Regenerate the checksum for each release with:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

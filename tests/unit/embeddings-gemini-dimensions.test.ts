@@ -8,13 +8,21 @@ process.env.DATA_DIR = mkdtempSync(join(tmpdir(), "omniroute-embeddings-gemini-d
 
 const { handleEmbedding } = await import("../../open-sse/handlers/embeddings.ts");
 
-// Ported from upstream decolua/9router#1366 (author @nguyenha935).
-// Gemini embedding models can return 3072 dimensions by default. OpenAI-compatible
-// clients may request a smaller embedding (e.g. 1536 for pgvector schemas) via the
-// `dimensions` field. The Gemini native API uses `outputDimensionality` instead;
-// Google's OpenAI-compatibility shim does not document the `dimensions` translation,
-// so OmniRoute must forward `outputDimensionality` alongside `dimensions` for Gemini
-// embedding requests to guarantee the requested vector size lands at the model.
+// Regression guard for diegosouzapw/OmniRoute#17158.
+//
+// Gemini embedding models return 3072 dimensions by default. OpenAI-compatible clients
+// may request a smaller vector (e.g. 768 for pgvector's 2000-dim HNSW limit) via the
+// `dimensions` field. The Gemini TEXT path posts to Google's OpenAI-compatible endpoint
+// (https://generativelanguage.googleapis.com/v1beta/openai/embeddings — see the `gemini`
+// entry in open-sse/config/embeddingRegistry.ts), and that endpoint honors `dimensions`
+// on its own while REJECTING the extra field:
+//   400 INVALID_ARGUMENT: Invalid JSON payload received. Unknown name
+//   "outputDimensionality": Cannot find field.
+// So injecting `outputDimensionality` there made every sized Gemini embedding fail and
+// left only the default 3072-dim output reachable. The native embedContent/batchEmbedContents
+// transport maps `dimensions` to snake_case `output_dimensionality` itself
+// (embeddingStructuredInput.ts::geminiRequestExtras), so buildUpstreamBody must forward
+// `dimensions` untouched and never inject `outputDimensionality` for Gemini.
 
 function captureFetch(captured: { body?: Record<string, unknown> }) {
   return async (_url: unknown, options: { headers?: unknown; body?: unknown } = {}) => {
@@ -29,7 +37,7 @@ function captureFetch(captured: { body?: Record<string, unknown> }) {
   };
 }
 
-test("handleEmbedding forwards Gemini dimensions as outputDimensionality (single input)", async () => {
+test("handleEmbedding forwards Gemini dimensions without injecting outputDimensionality (single input)", async () => {
   const originalFetch = globalThis.fetch;
   const captured: { body?: Record<string, unknown> } = {};
   globalThis.fetch = captureFetch(captured) as typeof fetch;
@@ -46,17 +54,20 @@ test("handleEmbedding forwards Gemini dimensions as outputDimensionality (single
     });
 
     assert.equal(result.success, true);
-    // OpenAI-style `dimensions` must still be forwarded (back-compat).
+    // Google's OpenAI-compatible endpoint honors `dimensions` on its own.
     assert.equal(captured.body?.dimensions, 1536);
-    // Gemini-native `outputDimensionality` must also be present so the upstream
-    // returns the requested vector size regardless of the OpenAI-shim behavior.
-    assert.equal(captured.body?.outputDimensionality, 1536);
+    // ...and rejects the camelCase Gemini-native field with 400 "Unknown name".
+    assert.equal(
+      "outputDimensionality" in (captured.body || {}),
+      false,
+      "outputDimensionality must not be injected into the OpenAI-compatible Gemini request"
+    );
   } finally {
     globalThis.fetch = originalFetch;
   }
 });
 
-test("handleEmbedding forwards Gemini dimensions as outputDimensionality (batch input)", async () => {
+test("handleEmbedding forwards Gemini dimensions without injecting outputDimensionality (batch input)", async () => {
   const originalFetch = globalThis.fetch;
   const captured: { body?: Record<string, unknown> } = {};
   globalThis.fetch = captureFetch(captured) as typeof fetch;
@@ -74,7 +85,11 @@ test("handleEmbedding forwards Gemini dimensions as outputDimensionality (batch 
 
     assert.equal(result.success, true);
     assert.equal(captured.body?.dimensions, 1536);
-    assert.equal(captured.body?.outputDimensionality, 1536);
+    assert.equal(
+      "outputDimensionality" in (captured.body || {}),
+      false,
+      "batch Gemini requests must not carry outputDimensionality either"
+    );
   } finally {
     globalThis.fetch = originalFetch;
   }

@@ -298,13 +298,13 @@ Najważniejsze zachowania:
 
 ## 🔑 Tokeny synchronizacji i pakiet konfiguracji _(v3.6.6+)_
 
-Dostęp z wielu urządzeń i dla operatorów zewnętrznych jest teraz możliwy za pośrednictwem **tokenów synchronizacji o określonym zakresie**:
+Dostęp z wielu urządzeń oraz dostęp dla operatorów zewnętrznych jest teraz możliwy za pomocą **tokenów synchronizacji o określonym zakresie**:
 
 - **`POST /api/sync/tokens`** — Wydaje nowy token synchronizacji (o określonym zakresie, z opcjonalnym terminem wygaśnięcia)
 - **`DELETE /api/sync/tokens/:id`** — Unieważnia token
-- **`GET /api/sync/bundle`** — Pobiera wersjonowaną migawkę JSON wszystkich ustawień niewrażliwych, identyfikowaną za pomocą ETag (hasła są maskowane)
+- **`GET /api/sync/bundle`** — Pobiera wersjonowany zrzut konfiguracji w formacie JSON, identyfikowany za pomocą ETag (uwierzytelnianie wyłącznie tokenem synchronizacji). Ustawienia uwierzytelniania, takie jak hasło panelu, są usuwane, ale dane uwierzytelniające dostawców i klucze API są uwzględniane, dlatego plik należy traktować jako poufny
 
-Pakiet konfiguracji jest tworzony przez `src/lib/sync/bundle.ts`. Klienci porównują nagłówek odpowiedzi `ETag`, aby wykrywać zmiany bez ponownego pobierania całej zawartości.
+Pakiet konfiguracji jest tworzony przez `src/lib/sync/bundle.ts`. Klienci porównują nagłówek odpowiedzi `ETag`, aby wykrywać zmiany bez ponownego pobierania całego ładunku. W interfejsie CLI polecenie `omniroute sync bundle <outPath> --token <syncToken>` (lub `OMNIROUTE_SYNC_TOKEN`) zapisuje go w pliku dostępnym wyłącznie dla właściciela.
 
 ---
 

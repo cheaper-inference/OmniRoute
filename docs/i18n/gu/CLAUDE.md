@@ -11,17 +11,18 @@
 PII શીખ). તેને સંપૂર્ણ વાંચો; પ્રોજેક્ટના નિયમો અહીં ફરીથી ઉમેરશો નહીં. નીચેની દરેક બાબત ફક્ત
 Claude Code પર લાગુ પડે છે — `AGENTS.md`માં પહેલેથી નિર્ધારિત નિયમોના સંચાલનાત્મક સુધારા.
 
-## Worktree અલગીકરણ — Claude Codeની વિશિષ્ટતાઓ
+## Worktree અલગતા — Claude Code વિશિષ્ટ બાબતો
 
-સંપૂર્ણ ફરજિયાત worktree પ્રોટોકોલ (આધાર શાખાની પુષ્ટિ, `.claude/worktrees/` પ્રમાણભૂત
-પાથ, `cp -al` node_modules, દૂર કરવાના નિયમો) `AGENTS.md` → Git Workflow → "Worktree
-isolation"માં છે. Claude-Code-વિશિષ્ટ મુદ્દાઓ:
+સંપૂર્ણ ફરજિયાત worktree પ્રોટોકોલ (base-branch પુષ્ટિકરણ, `.claude/worktrees/` કેનોનિકલ
+પાથ, `cp -al` node_modules, teardown નિયમો)
+[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) માં છે (`AGENTS.md` →
+Git વર્કફ્લો → "Worktree અલગતા" માં સારાંશિત). Claude-Code-વિશિષ્ટ મુદ્દા:
 
-- જો સંચાલકે તમને આધાર શાખા પહેલેથી ન જણાવી હોય, તો `AskUserQuestion` દ્વારા તેની પુષ્ટિ કરો
-  (કડક નિયમ #19).
-- મૂળ `EnterWorktree` ટૂલને પ્રાધાન્ય આપો — તે પહેલેથી જ `.claude/worktrees/`
-  (પ્રમાણભૂત પાથ) હેઠળ worktree બનાવે છે. દસ્તાવેજીકૃત `git
-worktree add` કમાન્ડ વડે worktree બનાવો, પછી તેના `path` સાથે `EnterWorktree`ને કૉલ કરો.
+- `AskUserQuestion` (હાર્ડ નિયમ #19) દ્વારા ઓપરેટર સાથે બેઝ બ્રાંચની પુષ્ટિ કરો, સિવાય કે
+  તેમણે પહેલેથી જ તમને જણાવ્યું હોય.
+- નેટિવ `EnterWorktree` ટૂલને પ્રાથમિકતા આપો — તે પહેલેથી જ
+  `.claude/worktrees/` (કેનોનિકલ પાથ) હેઠળ worktrees બનાવે છે. દસ્તાવેજીકૃત `git
+worktree add` કમાન્ડ વડે worktree બનાવો, પછી તેના `path` સાથે `EnterWorktree` કૉલ કરો.
 
 ## ક્રોસ-સેશન સુરક્ષા — Claude Codeની વિશિષ્ટતાઓ
 

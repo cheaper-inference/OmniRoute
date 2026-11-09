@@ -69,12 +69,17 @@ function emptyStreak(): StreakData {
   };
 }
 
+/** Stored counters are day counts: finite, integral and never negative. */
+function toDayCount(value: unknown): number {
+  return typeof value === "number" && Number.isFinite(value) ? Math.max(0, Math.floor(value)) : 0;
+}
+
 function parseStreakJson(raw: string): StreakData {
   try {
     const parsed = JSON.parse(raw) as Partial<StreakData>;
     return {
-      currentStreak: typeof parsed.currentStreak === "number" ? parsed.currentStreak : 0,
-      longestStreak: typeof parsed.longestStreak === "number" ? parsed.longestStreak : 0,
+      currentStreak: toDayCount(parsed.currentStreak),
+      longestStreak: toDayCount(parsed.longestStreak),
       lastActiveDate: typeof parsed.lastActiveDate === "string" ? parsed.lastActiveDate : "",
       streakStartDate: typeof parsed.streakStartDate === "string" ? parsed.streakStartDate : "",
     };
@@ -96,6 +101,11 @@ function parseStreakJson(raw: string): StreakData {
  * console.log(streak.currentStreak); // 7
  */
 export async function getStreak(apiKeyId: string): Promise<StreakData> {
+  return readStreak(apiKeyId);
+}
+
+/** Synchronous read, so advanceStreak's read-modify-write has no await between them. */
+function readStreak(apiKeyId: string): StreakData {
   if (isBuildPhase || isCloud) return emptyStreak();
 
   const db = getDbInstance() as unknown as DbLike;
@@ -193,7 +203,8 @@ export async function advanceStreak(apiKeyId: string): Promise<StreakAdvance> {
 
   const db = getDbInstance() as unknown as DbLike;
   const today = todayUtc();
-  const streak = await getStreak(apiKeyId);
+  // No await between this read and the write below: concurrent calls must not both extend.
+  const streak = readStreak(apiKeyId);
 
   // Already counted today
   if (streak.lastActiveDate === today) {

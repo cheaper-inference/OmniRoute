@@ -63,7 +63,8 @@ test("providers without a published TOKEN quota never inflate the headline", () 
 
 test("kilo free models carry the train-on-prompts warning", () => {
   const rows = byProvider("kilo-gateway");
-  assert.ok(rows.length >= 13, "kilo catalog should track the live free list");
+  // 12 since #17028 dropped openrouter/auto-beta, which Kilo prices as variable (-1), not free.
+  assert.ok(rows.length >= 12, "kilo catalog should track the live free list");
   // Kilo's public catalog reports mayTrainOnYourPrompts: true on every free
   // model. The privacy cost belongs next to the quota, not hidden.
   assert.ok(

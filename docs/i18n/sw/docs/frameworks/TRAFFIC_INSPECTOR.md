@@ -38,35 +38,35 @@ Traffic Inspector ni kitatuzi kilichojengewa ndani cha trafiki ya HTTPS cha Omni
 
 ---
 
-## §2 Modi za kunasa
+## §2 Hali za kunasa
 
-Traffic Inspector inatumia **vyanzo 5 vya kunasa kwa wakati mmoja**. Kila kimoja kinaweza kuwashwa au kuzimwa kivyake. Sehemu ya `source` kwenye kila `InterceptedRequest` (`src/mitm/inspector/types.ts`) ni mojawapo ya `"agent-bridge"`, `"custom-host"`, `"http-proxy"`, `"system-proxy"`, au `"tproxy"`.
+Traffic Inspector inasaidia **vyanzo 5 vya kunasa kwa wakati mmoja**. Kila kimoja kinaweza kuwashwa au kuzimwa kivyake. Sehemu ya `source` kwenye kila `InterceptedRequest` (`src/mitm/inspector/types.ts`) ni mojawapo ya `"agent-bridge"`, `"custom-host"`, `"http-proxy"`, `"system-proxy"`, au `"tproxy"`.
 
-### Modi ya 1 — AgentBridge (chaguo-msingi, imewashwa kila wakati)
+### Hali ya 1 — AgentBridge (chaguo-msingi, huwashwa kila wakati)
 
 **Chanzo:** Vishughulikiaji vya AgentBridge (`src/mitm/handlers/base.ts`)
-**Utaratibu:** Kila mwito wa `intercept()` katika `MitmHandlerBase` huita `hookBufferStart()` kabla ya kusambaza na `hookBufferUpdate()` unapokamilika. Hakuna usanidi wa ziada — hufanya kazi mara tu AgentBridge inapoendeshwa.
-**Ufikivu:** Ajenti 9 za IDE zilizosanidiwa katika AgentBridge
+**Utaratibu:** Kila mwito wa `intercept()` katika `MitmHandlerBase` huita `hookBufferStart()` kabla ya kusambaza na `hookBufferUpdate()` unapokamilika. Hakuna usanidi wa ziada — hufanya kazi mara tu AgentBridge inapoanza kufanya kazi.
+**Ufikivu:** Mawakala 9 wa IDE waliosanidiwa katika AgentBridge
 **Kumbuka:** Sehemu ya `source` katika `InterceptedRequest` = `"agent-bridge"`
 
-### Modi ya 2 — Vipangishi Maalumu (uelekezaji upya wa DNS)
+### Hali ya 2 — Vipangishi Maalum (uelekezaji upya wa DNS)
 
 **Chanzo:** Orodha ya vipangishi iliyofafanuliwa na mtumiaji (jedwali la `inspector_custom_hosts`)
-**Utaratibu:** Kuongeza kipangishi kupitia UI huongeza `127.0.0.1 <host>` kwenye `/etc/hosts` (inahitaji sudo). Seva iliyopo ya MITM ya AgentBridge (mlango 443) hutengeneza cheti cha SNI kwa njia inayobadilika kwa ajili ya kipangishi kipya.
-**Ufikivu:** Programu yoyote inayotumia kipangishi kilichoongezwa — hakuna haja ya kubadilisha usanidi wa programu
+**Utaratibu:** Kuongeza kipangishi kupitia UI huongeza `127.0.0.1 <host>` kwenye `/etc/hosts` (inahitaji sudo). Seva iliyopo ya MITM ya AgentBridge (mlango 443) hutengeneza cheti cha SNI kwa njia ya moja kwa moja kwa ajili ya kipangishi kipya.
+**Ufikivu:** Programu yoyote inayotumia kipangishi kilichoongezwa — hakuna mabadiliko ya usanidi wa programu yanayohitajika
 **Kumbuka:** `source` = `"custom-host"`
 
 Mifano ya matumizi:
 
-- Kufuatilia `api.openai.com` kutoka kwenye hati za Python
-- Kutatua hitilafu za `my-internal-llm.company.com`
-- Kunasa trafiki kutoka kwenye vifaa vya mkononi vilivyo kwenye mtandao huohuo (kupitia ughushi wa ARP — kiwango cha juu)
+- Fuatilia `api.openai.com` kutoka kwenye hati za Python
+- Tatua hitilafu za `my-internal-llm.company.com`
+- Nasa trafiki kutoka kwenye vifaa vya mkononi vilivyo kwenye mtandao huohuo (kupitia uigaji wa ARP — kiwango cha juu)
 
-### Modi ya 3 — Kisikilizaji cha HTTP_PROXY (mlango 8080)
+### Hali ya 3 — Kisikilizaji cha HTTP_PROXY (mlango 8080)
 
-**Chanzo:** Programu zinazotumia vigeu vya mazingira vya `HTTP_PROXY`/`HTTPS_PROXY`
-**Utaratibu:** Kisikilizaji cha pili kwenye mlango 8080 (`src/mitm/inspector/httpProxyServer.ts`) kinachofanya kazi kama proksi ya kawaida na ya moja kwa moja ya HTTP/HTTPS. Hukubali vichuguu vya `CONNECT` (HTTPS) na maombi ya moja kwa moja ya HTTP.
-**Ufikivu:** Programu yoyote inayoheshimu mazingira ya `HTTP_PROXY` — hakuna mabadiliko ya DNS, hakuna sudo
+**Chanzo:** Programu zinazotumia vigezo vya mazingira vya `HTTP_PROXY`/`HTTPS_PROXY`
+**Utaratibu:** Kisikilizaji cha pili kwenye mlango 8080 (`src/mitm/inspector/httpProxyServer.ts`) kinachofanya kazi kama proksi ya kawaida ya wazi ya HTTP/HTTPS. Hukubali mahandaki ya `CONNECT` (HTTPS) na maombi ya moja kwa moja ya HTTP.
+**Ufikivu:** Programu yoyote inayoheshimu kigezo cha mazingira cha `HTTP_PROXY` — hakuna mabadiliko ya DNS, hakuna sudo
 **Kumbuka:** `source` = `"http-proxy"`
 
 ```bash
@@ -78,14 +78,14 @@ export HTTP_PROXY=http://127.0.0.1:8080
 export HTTPS_PROXY=http://127.0.0.1:8080
 ```
 
-**Kizuizi cha TLS:** Vichuguu vya HTTPS `CONNECT` hunaswa kama metadata pekee (kipangishi, mlango, muda) — maudhui ya TLS hayasimbuliwi kwa chaguo-msingi. Washa kigeuzi cha "Simbua HTTPS katika modi ya proksi" (hiari, kinahitaji cheti cha AgentBridge kiwe kinaaminika) ili kukagua maudhui kikamilifu.
+**Kizuizi cha TLS:** HTTPS hupitia handaki la kawaida la `CONNECT`: kisikilizaji husambaza baiti zilizosimbwa kwa njia fiche bila kuzibadilisha na hurekodi metadata pekee (kipangishi, mlango, muda). Kamwe hakisimbui HTTPS, na hakuna mpangilio unaowasha usimbuaji kwa hali hii. Ili kunasa miili ya HTTPS, elekeza kipangishi kupitia Hali ya 1 (AgentBridge), Hali ya 2 (Vipangishi Maalum) au Hali ya 5 (usimbuaji wa TPROXY).
 
-**Mgongano wa mlango:** Ikiwa mlango 8080 unatumika, AgentBridge hurejesha 409 pamoja na hitilafu iliyopangwa. Badilisha mlango kupitia kigeu cha mazingira cha `INSPECTOR_HTTP_PROXY_PORT`.
+**Mgongano wa mlango:** Ikiwa mlango 8080 unatumika, AgentBridge hurejesha 409 pamoja na hitilafu yenye muundo. Badilisha mlango kupitia kigezo cha mazingira cha `INSPECTOR_HTTP_PROXY_PORT`.
 
-### Modi ya 4 — Proksi ya mfumo mzima (kiwango cha juu, hiari)
+### Hali ya 4 — Proksi ya mfumo mzima (kiwango cha juu, ya hiari)
 
 **Chanzo:** Mipangilio ya proksi ya kiwango cha OS (hutumika kwa programu zote kwenye mashine)
-**Utaratibu:** Hutumia API za OS kuelekeza trafiki yote ya HTTP/HTTPS kupitia kisikilizaji cha HTTP_PROXY:
+**Utaratibu:** Hutumia API za OS kuelekeza upya trafiki yote ya HTTP/HTTPS kupitia kisikilizaji cha HTTP_PROXY:
 
 - **macOS:** `networksetup -setwebproxy / -setsecurewebproxy`
 - **Linux:** `gsettings set org.gnome.system.proxy` + `/etc/environment`
@@ -93,33 +93,33 @@ export HTTPS_PROXY=http://127.0.0.1:8080
   **Ufikivu:** Kila programu kwenye mashine inayoheshimu mipangilio ya proksi ya mfumo
   **Kumbuka:** `source` = `"system-proxy"`
 
-**Mbinu za usalama:**
+**Taratibu za usalama:**
 
 - Kipima muda cha kuzima kiotomatiki (chaguo-msingi ni dakika 30, kinaweza kusanidiwa kupitia `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES`)
-- Hali ya awali ya proksi ya mfumo huhifadhiwa katika DB na kurejeshwa wakati wa kutengua
-- Dashibodi huonyesha ujumbe wa "Inarejesha proksi ya mfumo" ikiwa mtumiaji ataondoka huku ikiwa imewashwa
-- UI huonyesha beji ya `⚠ Kiwango cha juu` + kisanduku tiki cha uthibitisho wa wazi
+- Hali ya awali ya proksi ya mfumo huhifadhiwa kwenye DB na kurejeshwa wakati wa kutengua
+- Dashibodi huonyesha kidokezo cha "Inatengua proksi ya mfumo" ikiwa mtumiaji anaondoka kwenye ukurasa wakati proksi inatumika
+- UI huonyesha beji ya `⚠ Kiwango cha juu` pamoja na kisanduku cha kuteua cha uthibitisho wa wazi
 
-### Modi ya 5 — Usimbuaji wazi wa TPROXY (Linux, root, hiari)
+### Hali ya 5 — Usimbuaji wazi wa TPROXY (Linux, root, ya hiari)
 
-**Chanzo:** TPROXY ya kiini + uelekezaji wa sera (`src/mitm/tproxy/`)
-**Utaratibu:** Huweka alama kwenye miunganisho mipya ya ndani ya TCP inayotoka kwenda kwenye mlango lengwa (chaguo-msingi `443`) katika `mangle OUTPUT`, `ip rule` huelekeza upya pakiti zilizowekewa alama kwenye uwasilishaji wa ndani, na lengo la `TPROXY` la `mangle PREROUTING` huzikabidhi kwa kisikilizaji wazi (**IP_TRANSPARENT**) (mlango chaguo-msingi `8443`). Kisikilizaji hukatisha TLS kwa kutumia cheti cha mwisho kilichotolewa **kwa kila jina la kipangishi cha SNI inapohitajika** na CA inayobadilika, hunasa ubadilishanaji uliosimbuliwa, na kusambaza ombi lililosimbwa upya kwenda kwenye lengwa asili.
-**Ufikivu:** Vipangishi **vyovyote** lengwa kwenye mlango lengwa — hakuna ughushi wa `/etc/hosts`, hakuna mazingira ya `HTTP_PROXY`, wala mabadiliko ya proksi ya mfumo mzima. Mchakato unaonaswa hauhitaji mabadiliko ya usanidi, lakini lazima uiamini CA inayobadilika.
+**Chanzo:** TPROXY ya kernel + uelekezaji kwa sera (`src/mitm/tproxy/`)
+**Utaratibu:** Huweka alama kwenye miunganisho mipya ya ndani ya TCP inayotoka kwenda kwenye mlango lengwa (chaguo-msingi `443`) katika `mangle OUTPUT`, `ip rule` huelekeza upya pakiti zilizowekewa alama kwenye uwasilishaji wa ndani, na lengo la `TPROXY` la `mangle PREROUTING` huzikabidhi kwa kisikilizaji wazi (**IP_TRANSPARENT**) (mlango chaguo-msingi `8443`). Kisikilizaji huhitimisha TLS kwa cheti cha mwisho kilichotolewa **kwa kila jina la kipangishi la SNI pale kinapohitajika** na CA inayobadilika, hunasa mawasiliano yaliyosimbuliwa, na kusambaza ombi likiwa limesimbwa upya kwenda kwenye kituo asili.
+**Ufikivu:** Vipangishi lengwa **vyovyote** kwenye mlango lengwa — hakuna uigaji wa `/etc/hosts`, hakuna kigezo cha mazingira cha `HTTP_PROXY`, hakuna ubadilishaji wa proksi ya mfumo mzima. Mchakato unaonaswa hauhitaji mabadiliko ya usanidi, lakini lazima uamini CA inayobadilika.
 **Kumbuka:** `source` = `"tproxy"`
 
-**Mahitaji:** Linux pekee (**IP_TRANSPARENT** inapatikana kwenye Linux pekee), uwezo wa **CAP_NET_ADMIN** (root), na nyongeza asilia ya N-API ambayo lazima ijengwe kwa zana za C (`npm run build:native:tproxy`). Ikiwa haipatikani, kigeuzi cha dashibodi huzimwa pamoja na kidokezo "Usimbuaji wa TPROXY unahitaji Linux + root + nyongeza asilia". Kanuni za ngome-mtandao hutumika/hutenguliwa kikamilifu kama muamala (kuvurugika hakuwahi kuacha kanuni ya `mangle`) na huondolewa wakati wa kuwasha upya. Kinga dhidi ya mzunguko inayotumia SO_MARK huzuia usambazaji uliosimbwa upya wa proksi yenyewe kunaswa tena.
+**Mahitaji:** Linux pekee (**IP_TRANSPARENT** inapatikana kwenye Linux pekee), uwezo wa **CAP_NET_ADMIN** (root), na programu-jalizi asilia ya N-API ambayo lazima ijengwe kwa zana za C (`npm run build:native:tproxy`). Isipopatikana, kitufe cha dashibodi huzimwa pamoja na kidokezo "Usimbuaji wa TPROXY unahitaji Linux + root + programu-jalizi asilia". Kanuni za ngome-mtandao hutumika/hutenguliwa kama muamala mmoja (hitilafu ya ghafla kamwe haiwachi kanuni ya `mangle` nyuma) na huondolewa wakati wa kuwasha upya. Kinga dhidi ya kitanzi inayotegemea SO_MARK huzuia usambazaji wa proksi yenyewe uliosimbwa upya usinaswe tena.
 
-Huu ni mfumo mkubwa wenye mwongozo wake maalumu wa waendeshaji — tazama `docs/security/MITM-TPROXY-DECRYPT.md` (git; haujakusanywa ndani ya `/docs`) kwa maelekezo kamili ya ngome-mtandao, CA inayobadilika kwa kila SNI + kisakinishaji cha hifadhi ya uaminifu, njia ya ndani pekee, maelezo ya kuzuia mzunguko, na skema ya usanidi. Kigeuzi huendeshwa na `GET / POST / DELETE /api/tools/agent-bridge/tproxy` (kumbuka: njia hiyo ipo chini ya kiambishi awali cha AgentBridge, si kiambishi awali cha Traffic Inspector).
+Huu ni mfumo mkubwa wenye mwongozo wake maalum wa waendeshaji — angalia `docs/security/MITM-TPROXY-DECRYPT.md` (git; haujajumuishwa katika `/docs`) kwa mapishi kamili ya ngome-mtandao, CA inayobadilika kwa kila SNI + kisakinishaji cha hifadhi ya uaminifu, njia ya ndani pekee, maelezo ya kuzuia kitanzi, na schema ya usanidi. Kitufe hudhibitiwa na `GET / POST / DELETE /api/tools/agent-bridge/tproxy` (kumbuka: njia hiyo iko chini ya kiambishi awali cha AgentBridge, si kiambishi awali cha Traffic Inspector).
 
-### Ulinganisho wa modi za kunasa
+### Ulinganisho wa hali za kunasa
 
-| Hali                         | Usanidi                      |               Sudo?               | Ufikivu                              | Maelezo                                                                                                                                      |
-| ---------------------------- | ---------------------------- | :-------------------------------: | ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1. AgentBridge               | Otomatiki                    |      Mara moja (cheti+hosts)      | Ajenti 9 za IDE                      | Huwashwa kwa chaguo-msingi                                                                                                                   |
-| 2. Hosts Maalum              | Ingizo kwa kila host         |      Ndiyo (faili la hosts)       | Programu yoyote inayotumia host hiyo | Huhifadhiwa kwenye DB                                                                                                                        |
-| 3. HTTP_PROXY                | `export HTTPS_PROXY=...`     |              Hapana               | Programu zinazotii env               | Port 8080, hakuna usimbuaji fiche wa TLS kwa chaguo-msingi                                                                                   |
-| 4. Mfumo mzima               | Geuza + thibitisha           |               Ndiyo               | Programu zote kwenye mashine         | Hujizima kiotomatiki baada ya dakika 30                                                                                                      |
-| 5. Usimbuaji fiche wa TPROXY | Geuza (Linux + native addon) | Ndiyo (root + usakinishaji wa CA) | Host yoyote kwenye port lengwa       | Husimbua fiche host zozote; imezimwa kwa chaguo-msingi — angalia `docs/security/MITM-TPROXY-DECRYPT.md` (git; haijajumuishwa kwenye `/docs`) |
+| Hali              | Usanidi                      |               Sudo?               | Ufikiaji                             | Maelezo                                                                                                                                |
+| ----------------- | ---------------------------- | :-------------------------------: | ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------- |
+| 1. AgentBridge    | Kiotomatiki                  |      Mara moja (cert+hosts)       | Mawakala 9 wa IDE                    | Imewashwa kwa chaguo-msingi                                                                                                            |
+| 2. Custom Hosts   | Ingizo kwa kila host         |      Ndiyo (faili la hosts)       | Programu yoyote inayotumia host hiyo | Imehifadhiwa katika DB                                                                                                                 |
+| 3. HTTP_PROXY     | `export HTTPS_PROXY=...`     |              Hapana               | Programu zinazoheshimu env           | Port 8080; HTTPS hupitishwa kupitia handaki la CONNECT (metadata pekee, kamwe haisimbuliwi)                                            |
+| 4. System-wide    | Geuza + thibitisha           |               Ndiyo               | Programu zote kwenye mashine         | Hujizima kiotomatiki baada ya dakika 30                                                                                                |
+| 5. TPROXY decrypt | Geuza (Linux + native addon) | Ndiyo (root + usakinishaji wa CA) | Host yoyote kwenye port lengwa       | Husimbua hosts zozote; imezimwa kwa chaguo-msingi — tazama `docs/security/MITM-TPROXY-DECRYPT.md` (git; haijajumuishwa katika `/docs`) |
 
 ---
 
@@ -340,29 +340,29 @@ Hamisha kupitia `GET /api/tools/traffic-inspector/sessions/{id}/export.har` au k
 
 ## §6 Usalama
 
-Traffic Inspector huonyesha **trafiki yote ya HTTPS iliyonaswa**, ikijumuisha vichwa vya uidhinishaji na miili ya maombi. Vidhibiti vifuatavyo vimewekwa:
+Traffic Inspector huonyesha **trafiki yote ya HTTPS iliyonaswa**, ikiwemo vichwa vya uidhinishaji na miili ya maombi. Vidhibiti vifuatavyo vimewekwa:
 
-| Kidhibiti                             | Maelezo                                                                                                                                                                                                    |
-| ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **LOCAL_ONLY**                        | Njia zote na sehemu ya mwisho ya WebSocket zinapatikana kupitia loopback pekee (inatekelezwa katika `routeGuard.ts` kabla ya uthibitishaji)                                                                |
-| **Ufichaji wa siri**                  | Kichanganuzi sambamba cha `maskSecret()` huficha vitambulisho vya Bearer vya RFC 6750, funguo zenye viambishi awali vya watoa huduma na tokeni ndefu zisizoeleweka kabla ya `TrafficBuffer.push()`         |
-| **Kikomo cha ukubwa wa mwili**        | Miili > `INSPECTOR_MAX_BODY_KB` (chaguo-msingi 1024 KB) hukatwa kwa arifa ya `"(imekatwa kwa ajili ya utendaji)"`                                                                                          |
-| **Usafishaji wa vichwa**              | Majina hubadilishwa kuwa herufi ndogo; vichwa vya uundaji fremu/hop-by-hop na vya uthibitishaji wa proksi huondolewa; vidakuzi hufichwa kikamilifu; thamani za vitambulisho hukabidhiwa kwa `maskSecret()` |
-| **CSP**                               | Sera kali ya Usalama wa Maudhui kwenye kurasa za Traffic Inspector ili kuzuia XSS kupitia miili ya majibu iliyoingizwa                                                                                     |
-| **Hakuna uhifadhi kwa chaguo-msingi** | `TrafficBuffer` huhifadhiwa kwenye kumbukumbu ya muda na hupotea seva inapoanzishwa upya. Vipindi huhifadhiwa tu vinaporekodiwa kwa uwazi                                                                  |
+| Kidhibiti                             | Maelezo                                                                                                                                                                                                |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **LOCAL_ONLY**                        | Njia zote na sehemu ya mwisho ya WebSocket zinapatikana kupitia loopback pekee (inatekelezwa katika `routeGuard.ts` kabla ya uthibitishaji)                                                            |
+| **Ufichaji wa siri**                  | Kichanganuzi cha mstari `maskSecret()` huficha vitambulisho vya Bearer vya RFC 6750, funguo zenye viambishi awali vya watoa huduma na tokeni ndefu zisizoeleweka kabla ya `TrafficBuffer.push()`       |
+| **Kikomo cha ukubwa wa mwili**        | Miili > `INSPECTOR_MAX_BODY_KB` (chaguo-msingi ni KB 1024) hupunguzwa na kuwekewa ilani ya `"(truncated for performance)"`                                                                             |
+| **Usafishaji wa vichwa**              | Majina hubadilishwa kuwa herufi ndogo; vichwa vya uundaji fremu/hop-by-hop na uthibitishaji wa proksi huondolewa; vidakuzi hufichwa kikamilifu; thamani za vitambulisho hukabidhiwa kwa `maskSecret()` |
+| **CSP**                               | Sera kali ya Usalama wa Maudhui kwenye kurasa za Traffic Inspector ili kuzuia XSS kupitia miili ya majibu iliyoingizwa                                                                                 |
+| **Hakuna uhifadhi kwa chaguo-msingi** | `TrafficBuffer` huhifadhiwa kwenye kumbukumbu na hupotea seva inapoanzishwa upya. Vipindi huhifadhiwa tu vinaporekodiwa kwa njia ya wazi                                                               |
 
-### Kanuni Madhubuti zinazotumika
+### Kanuni thabiti zinazotumika
 
 | Kanuni                            | Matumizi                                                                                |
 | --------------------------------- | --------------------------------------------------------------------------------------- |
 | **#12** `sanitizeErrorMessage`    | Majibu yote ya hitilafu za HTTP kutoka kwenye njia za Traffic Inspector husafishwa      |
 | **#15 + #17** `isLocalOnlyPath()` | `/api/tools/traffic-inspector/` ni LOCAL_ONLY + SPAWN_CAPABLE (amri za proksi ya mfumo) |
 
-### Vizuizi vinavyojulikana
+### Vikwazo vinavyojulikana
 
-- **Hali ya proksi ya mfumo mzima** huathiri programu zote kwenye mashine, ikijumuisha viteja vya VPN na SSO. Daima itumie pamoja na kipima muda cha kujizima kiotomatiki. Usiitumie kwenye mashine zinazotumiwa kwa pamoja.
-- **HTTPS ya handaki la CONNECT**: Hali ya 3 (HTTP_PROXY) hunasa metadata ya handaki pekee kwa vituo lengwa vya HTTPS isipokuwa udukuzi wa TLS umewashwa. Hii ni kwa makusudi — kunasa kwa uwazi bila cheti cha AgentBridge kuaminiwa kungevuruga uthibitishaji wa TLS kwa programu hizo.
-- **Mifuatano iliyowekwa moja kwa moja katika baadhi ya vijenzi**: Baadhi ya vijenzi vya UI (F7/F8) vina idadi ndogo ya mifuatano iliyowekwa moja kwa moja ambayo bado haijajumuishwa katika funguo za i18n. Hii imeandikwa kama Kizuizi Kinachojulikana katika ripoti ya mapengo ya i18n; itahamishwa katika awamu inayofuata. Mifuatano iliyoathiriwa ni lebo za mapambo za UI ambazo hazihitaji tafsiri kwa matumizi ya kiutendaji.
+- **Hali ya proksi ya mfumo mzima** huathiri programu zote kwenye mashine, ikiwemo viteja vya VPN na SSO. Itumie kila mara pamoja na kipima muda cha kujizima kiotomatiki. Usiitumie kwenye mashine zinazotumiwa kwa pamoja.
+- **HTTPS ya handaki la CONNECT**: Hali ya 3 (HTTP_PROXY) hunasa metadata ya handaki pekee kwa maeneo lengwa ya HTTPS na kamwe haiisimbui. Hii ni kwa makusudi — usimbuaji ungehitaji kila kiteja kuamini cheti cha MITM, kwa hivyo kisikilizaji huweka HTTPS ikiwa imesimbwa kutoka mwanzo hadi mwisho. Tumia AgentBridge, Custom Hosts au usimbuaji wa TPROXY unapohitaji miili ya HTTPS.
+- **Mifuatano iliyowekwa moja kwa moja katika baadhi ya vijenzi**: Baadhi ya vijenzi vya UI (F7/F8) vina idadi ndogo ya mifuatano iliyowekwa moja kwa moja ambayo bado haijajumuishwa katika funguo za i18n. Hii imeandikwa kama Kizuizi Kinachojulikana katika ripoti ya mapengo ya i18n; itahamishwa katika hatua inayofuata. Mifuatano iliyoathiriwa ni lebo za mapambo za UI ambazo hazihitaji tafsiri kwa matumizi ya kiutendaji.
 
 ---
 
@@ -425,11 +425,11 @@ Baferi inapofikia `INSPECTOR_BUFFER_SIZE` (chaguo-msingi ni 1000), maingizo mapy
 
 ---
 
-## §8 Rejeleo la API
+## §8 Marejeleo ya API
 
 Njia zote ni `LOCAL_ONLY` (loopback pekee) na `SPAWN_CAPABLE` (amri za proksi ya mfumo). Angalia `src/server/authz/routeGuard.ts`.
 
-Njia msingi: `/api/tools/traffic-inspector/`
+Njia ya msingi: `/api/tools/traffic-inspector/`
 
 ### Usimamizi wa maombi
 
@@ -437,7 +437,7 @@ Njia msingi: `/api/tools/traffic-inspector/`
 | ------ | --------------------------- | -------------------------------------------------------------------------------------------- |
 | GET    | `/requests`                 | Orodhesha maombi (yanaweza kuchujwa: `?profile=llm&host=&agent=&status=&source=&sessionId=`) |
 | GET    | `/requests/{id}`            | Maelezo ya ombi moja                                                                         |
-| DELETE | `/requests`                 | Futa baferi ya kumbukumbu                                                                    |
+| DELETE | `/requests`                 | Futa bafa ya kumbukumbu                                                                      |
 | POST   | `/requests/{id}/replay`     | Tekeleza tena ombi lilelile kupitia kipanga-njia cha OmniRoute                               |
 | PUT    | `/requests/{id}/annotation` | Hifadhi au sasisha dokezo kwenye ombi                                                        |
 
@@ -462,19 +462,18 @@ Njia msingi: `/api/tools/traffic-inspector/`
 | DELETE | `/hosts/{host}` | Ondoa mpangishi                                      |
 | PATCH  | `/hosts/{host}` | Badilisha hali ya `enabled`                          |
 
-### Modi za kunasa
+### Hali za kunasa
 
-| Mbinu | Njia                           | Maelezo                                                                                                                    |
-| ----- | ------------------------------ | -------------------------------------------------------------------------------------------------------------------------- |
-| GET   | `/capture-modes`               | Hali ya modi za AgentBridge / wapangishi maalum / HTTP_PROXY / proksi ya mfumo pamoja na kibadilishaji cha `tls-intercept` |
-| POST  | `/capture-modes/http-proxy`    | Anzisha/simamisha kisikilizaji cha HTTP_PROXY (`{action: "start"\|"stop"}`)                                                |
-| POST  | `/capture-modes/system-proxy`  | Tumia/rejesha proksi ya mfumo mzima (`{action: "apply"\|"revert"}`)                                                        |
-| POST  | `/capture-modes/tls-intercept` | Washa au zima usimbuaji fiche wa mwili wa HTTPS katika modi ya proksi (`{enabled: boolean}`)                               |
+| Mbinu | Njia                          | Maelezo                                                                     |
+| ----- | ----------------------------- | --------------------------------------------------------------------------- |
+| GET   | `/capture-modes`              | Hali za AgentBridge / wapangishi maalum / HTTP_PROXY / proksi ya mfumo      |
+| POST  | `/capture-modes/http-proxy`   | Anzisha/simamisha kisikilizaji cha HTTP_PROXY (`{action: "start"\|"stop"}`) |
+| POST  | `/capture-modes/system-proxy` | Tekeleza/tengua proksi ya mfumo mzima (`{action: "apply"\|"revert"}`)       |
 
-> **Usimbuaji fiche wa TPROXY** (modi ya kunasa ya 5) huendeshwa na njia **tofauti** chini ya
+> **Usimbuaji wa TPROXY** (hali ya kunasa ya 5) unaendeshwa na njia **tofauti** chini ya
 > kiambishi awali cha AgentBridge — `GET / POST / DELETE /api/tools/agent-bridge/tproxy` — si
 > chini ya `/api/tools/traffic-inspector/`. Angalia
-> `docs/security/MITM-TPROXY-DECRYPT.md` (git; haijakusanywa ndani ya `/docs`).
+> `docs/security/MITM-TPROXY-DECRYPT.md` (git; haijajumuishwa katika `/docs`).
 
 ### Vipindi
 
@@ -483,14 +482,14 @@ Njia msingi: `/api/tools/traffic-inspector/`
 | POST   | `/sessions`                 | Anza kurekodi (`{name?: string}`)                                         |
 | PATCH  | `/sessions/{id}`            | Simamisha au badilisha jina (`{action: "stop"\|"rename", name?: string}`) |
 | GET    | `/sessions`                 | Orodhesha vipindi vyote vilivyohifadhiwa                                  |
-| GET    | `/sessions/{id}`            | Muhtasari wa kipindi (maombi yote)                                        |
+| GET    | `/sessions/{id}`            | Taswira ya kipindi (maombi yote)                                          |
 | DELETE | `/sessions/{id}`            | Futa kipindi                                                              |
 | GET    | `/sessions/{id}/export.har` | Hamisha kipindi kama HAR 1.2                                              |
 
 ### Uingizaji wa ndani (mbadala wa D4)
 
-| Mbinu | Njia               | Maelezo                                                                                                                         |
-| ----- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------- |
-| POST  | `/internal/ingest` | Hupokea ombi lililonaswa kutoka kwenye njia ya kupitisha ya `server.cjs`; huhitaji kichwa cha `INSPECTOR_INTERNAL_INGEST_TOKEN` |
+| Mbinu | Njia               | Maelezo                                                                                                                          |
+| ----- | ------------------ | -------------------------------------------------------------------------------------------------------------------------------- |
+| POST  | `/internal/ingest` | Hupokea ombi lililonaswa kutoka kwenye njia ya upitishaji ya `server.cjs`; huhitaji kichwa cha `INSPECTOR_INTERNAL_INGEST_TOKEN` |
 
-Skimu kamili za OpenAPI: `docs/openapi.yaml` → lebo `Traffic Inspector`.
+Skima kamili za OpenAPI: `docs/openapi.yaml` → lebo `Traffic Inspector`.

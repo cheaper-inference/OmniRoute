@@ -11,5 +11,11 @@ export async function generateMetadata() {
 
 export default async function TrafficInspectorPage() {
   const t = await getTranslations("sidebar");
-  return <TrafficInspectorPageClient title={t("trafficInspector")} subtitle={t("trafficInspectorSubtitle")} purpose={t("trafficInspectorPurpose")} />;
+  return (
+    <TrafficInspectorPageClient
+      title={t("trafficInspector")}
+      subtitle={t("trafficInspectorSubtitle")}
+      purpose={t("trafficInspectorPurpose")}
+    />
+  );
 }

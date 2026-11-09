@@ -34,6 +34,15 @@ on:
 permissions:
   contents: read
 
+# One run per ref at a time. The push guard below is a 5-second tag lookup whose
+# verdict is identical for every push on the same branch, yet without a concurrency
+# group each of the ~10 pushes/hour on the active release branch queued its own
+# hosted run (20 queued on 2026-10-17 against the account's concurrent-job limit).
+# The newest push supersedes the older ones; a `release` event carries its own ref.
+concurrency:
+  group: lock-released-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   # ─────────────────────────────────────────────────────────────────────────
   # Job 1 — Lock the release branch when a Release is published.

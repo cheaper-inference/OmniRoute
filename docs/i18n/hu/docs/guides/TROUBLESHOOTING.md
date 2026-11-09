@@ -37,33 +37,39 @@ Az OmniRoute gyakori problémái és azok megoldásai.
 
 ---
 
-### Kérésgyakoriság-korlátozás ingyenes szolgáltatóknál (429 / 400 / 401)
+### Sebességkorlátozás ingyenes szolgáltatóknál (429 / 400 / 401)
 
-**Tünet**: Amikor a `model: "auto"` beállítást ingyenes vagy hitelesítést nem igénylő szolgáltatókkal (opencode, auggie stb.) használod, időnként válasz helyett `HTTP 429`, `400` vagy `401` hibát kapsz. Ha néhány pillanattal később ugyanazzal a bemenettel újrapróbálkozol, a kérések sikeresek, de az automatizálás (cron-feladatok, ügynökök, szkriptek) már az első hibánál megszakad.
+**Tünet**: A `model: "auto"` használatakor ingyenes/hitelesítés nélküli szolgáltatókkal (auggie stb.) időszakosan `HTTP 429`, `400` vagy `401` választ kap válaszok helyett. Ugyanazon kérés néhány pillanattal későbbi újrapróbálásakor a kérések sikeresek, az automatizálás (cron-feladatok, ügynökök, szkriptek) azonban már az első hibánál megszakad.
 
-**Kiváltó ok**: Három egymástól független hibamód hatása adódik össze:
+**Gyökérok**: Három egymástól független hibamód erősíti egymást:
 
-1. **Szolgáltatói kérésgyakoriság-korlát (`429`)**: Az ingyenes csomagok időablakonkénti kvótát írhatnak elő. A párhuzamos hívások hirtelen megugrása kimeríti ezt, ezért a következő kérést a rendszer az időablak visszaállásáig elutasítja.
-2. **Hibás modell közvetlen átadáskor (`400`/`401`)**: Az `auto/*` készletek tartalmazhatnak olyan, közvetlenül átadott modelleket az `opencode` szolgáltatótól, amelyek regisztrálva vannak a katalógusban, de nem rendelkeznek működő hitelesítő adatokkal (például `oc/north-mini-code-free` → `401`). Az automatikus útválasztó megpróbálja használni az egyiket, az sikertelen lesz, és a hiba még a tartalékútvonal aktiválása előtt továbbterjed.
-3. **A párhuzamosság felerősítő hatása (`429` terhelés alatt)**: Amikor több ügynök- vagy cron-munkamenet éri el egyszerre az `auto` útvonalat, az összesített kérési gyakoriság meghaladja az ingyenes szolgáltatók által tolerált szintet, ezért a rendszer a szabályos hívásokat is visszaélésszerűként jelöli meg.
+1. **Szolgáltatói sebességkorlátozás (`429`)**: Az ingyenes csomagok ablakonkénti kvótát érvényesíthetnek. A párhuzamos hívások rohama kimeríti ezt, ezért a következő kérést a rendszer elutasítja az ablak visszaállításáig.
+2. **Hibás modell passthrough módban (`400`/`401`)**: Az `auto/*` poolok tartalmazhatnak olyan passthrough modelleket, amelyek szerepelnek a katalógusban, de nem rendelkeznek élő hitelesítő adatokkal (→ `401`). Az automatikus útválasztó megpróbálja használni az egyiket, hibát kap, és a hiba továbbterjed, mielőtt a fallback aktiválódna.
+3. **Párhuzamosság felerősödése (`429` terhelés alatt)**: Amikor egyszerre több ügynök-/cron-munkamenet éri el az `auto` értéket, az összesített kérési sebesség meghaladja azt, amit az ingyenes szolgáltatók tolerálnak, ezért a szabályos hívásokat visszaélésszerűként jelölik meg.
 
-**Ellenőrzött javítás (közösségi jelentés alapján, 2026-08-10)**: hangolj be három környezeti változót, hogy a rotáció, a párhuzamosság és a tartalékútvonal kezelje az ingyenes csomagok ingadozásait ahelyett, hogy a folyamat hibával leállna:
+**Ellenőrzött javítás (közösségi jelentés, 2026-08-10)**: Hangoljon három környezeti változót úgy, hogy a rotáció, a párhuzamosság és a fallback kezelje az ingyenes csomag ingadozásait ahelyett, hogy a rendszer leállna miattuk:
 
 ```bash
-export OMNIROUTE_ROTATE_ON_400=true           # 400/401 esetén váltás másik modellre/szolgáltatóra (kihagyja a hibás, közvetlenül átadott modelleket)
-export OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT=4   # explicit felső befogadási korlát a nagy erőforrás-igényű kérésekhez (alapértelmezetten nincs beállítva: nincs kérésszámkorlát, lásd az alábbi megjegyzést)
-export OMNIROUTE_CHAT_ADMISSION_QUEUE_MS=20000 # a korlátozott várakozás növelése a RATE_LIMIT_MAX_WAIT_MS alapértelmezésén túl a lassú upstream szolgáltatásokhoz
+export OMNIROUTE_ROTATE_ON_400=true           # váltás másik modellre/szolgáltatóra 400/401 esetén (átugorja a hibás passthrough modelleket)
+export OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT=4   # explicit, nagy terhelésű kérésekre vonatkozó párhuzamossági felső határ (alapértelmezés szerint nincs beállítva: nincs kérésszám-korlát, lásd az alábbi megjegyzést)
+export OMNIROUTE_CHAT_ADMISSION_QUEUE_MS=20000 # a korlátozott várakozást a lassú upstream-ekhez tartozó RATE_LIMIT_MAX_WAIT_MS alapértelmezése fölé emeli
 ```
 
-Állítsd be ezeket az OmniRoute-folyamat környezetében (a démonnál, például a LaunchAgent plist fájlon vagy a `systemctl edit` parancson keresztül), majd indítsd újra az OmniRoute-ot. A rotációs jelző önmagában a leghatékonyabb beállítás: a végleges hibát átlátható újrapróbálkozássá alakítja a készlet egyik megfelelően működő szolgáltatójánál.
+Állítsa be ezeket az OmniRoute folyamatkörnyezetében (a démonnál, például a LaunchAgent plistjén vagy a `systemctl edit` használatával), majd indítsa újra az OmniRoute-ot. A rotációs kapcsoló biztosítja a legnagyobb hatást: a végleges hibát átlátható újrapróbálássá alakítja egy egészséges szolgáltató ellen a poolban.
 
-**Megjegyzés**: Az `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` korlátozza, hogy egyszerre hány nagy erőforrás-igényű — hosszú kontextusú — kérés futhat; ez a korlát egy befogadási kapu, nem pedig szolgáltatói kérésgyakoriság-korlátozó. **#503-fanout frissítés:** ez a változó alapértelmezetten már nincs beállítva (mostantól csak explicit konfigurálás esetén lép érvénybe, ahogyan fent látható) — a nagy erőforrás-igényű kérések befogadását ehelyett egy automatikusan meghatározott bájtkeret (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`) szabályozza, amely a gazdagép tényleges memóriakorlátjához igazodik. Emiatt egy friss telepítésnek jóval kevesebb `503 chat_admission_busy` elutasítást kell produkálnia anélkül, hogy ezt a változót egyáltalán be kellene állítani; az itt látható explicit beállítás továbbra is pontosan a dokumentált módon működik. Az explicit bájtkeret-felülbírálások 8 MiB és 2 GiB közé korlátozódnak. A `413 body_exceeds_budget` nem átmeneti hiba: növeld ezt a bájtkeretet, csökkentsd az `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES` értékét, vagy növeld a folyamat memóriakorlátját. Az `inflight_bytes_budget` miatti tehermentesítés átmeneti erőforrás-versengést jelez, ezért továbbra is érdemes újrapróbálkozni. A szolgáltatónkénti kérésgyakoriság-korlátozást (`open-sse/services/rateLimitManager.ts`) külön a `RATE_LIMIT_MAX_WAIT_MS`, a `RATE_LIMIT_MAX_QUEUE_DEPTH` és a `RATE_LIMIT_AUTO_ENABLE` szabályozza — lásd: `.env.example`.
+**Megjegyzés**: Az `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` azt korlátozza, hogy egyszerre hány nagy terhelésű — hosszú kontextusú — kérés futhat; ez a korlát egy engedélyezési kapu, nem szolgáltatói sebességkorlátozó. **#503-fanout frissítés:** ezt a változót a rendszer már nem állítja be alapértelmezés szerint (mostantól csak akkor érvényesül, ha explicit módon be van állítva, a fentiek szerint) — a nagy terhelésű kérések engedélyezését ehelyett egy automatikusan meghatározott bájtkorlát (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`) szabályozza, amely a gazdagép tényleges memóriakorlátja alapján skálázza önmagát, így egy új telepítésnek ennek a változónak a beállítása nélkül is jóval kevesebb `503 chat_admission_busy` elutasítást kell tapasztalnia; az itt explicit beállított érték továbbra is pontosan a dokumentációban leírtak szerint működik. Az explicit bájtkorlát-felülírások 8 MiB–2 GiB közé vannak szorítva. A `413 body_exceeds_budget` nem átmeneti hiba: növelje ezt a bájtkorlátot, csökkentse az `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES` vagy a mentett kérés törzsének korlátját, illetve növelje a folyamat memóriakorlátját. Az `inflight_bytes_budget` miatti elengedés átmeneti versengés, ezért továbbra is újrapróbálható. A szolgáltatónkénti sebességkorlátozást (`open-sse/services/rateLimitManager.ts`) külön a `RATE_LIMIT_MAX_WAIT_MS`, a `RATE_LIMIT_MAX_QUEUE_DEPTH` és a `RATE_LIMIT_AUTO_ENABLE` szabályozza — lásd a `.env.example` fájlt.
 
-**Hogyan ellenőrizhető, hogy működött-e**: futtasd gyors egymásutánban kétszer az agentet/cron feladatot, és ellenőrizd, hogy mindkettő sikeresen lefut-e. A javítás előtt a második futtatás jellemzően `429`/`401` hibát ad. A javítás után a hibás kérések újrapróbálása (ha van ilyen) automatikusan, észrevétlenül történik, és a hívás befejeződik. A `curl /monitoring/health` paranccsal is lekérdezheted az állapotot, és figyelheted a szolgáltatói kapcsolatok `rateLimitedUntil` mezőjét, valamint a `circuitBreakers.providerBreakers[].state` értékét az érintett szolgáltatóknál — az állapot a következők egyike lehet: `CLOSED`, `DEGRADED`, `OPEN` vagy `HALF_OPEN` (lásd: `src/shared/utils/circuitBreaker.ts`), és egy folyamatosan hibázó szolgáltató állapota `CLOSED → DEGRADED → OPEN` sorrendben változik, mielőtt a visszaállítási időablak engedélyezne egy próbakérést (`HALF_OPEN`).
+**Frissítési megjegyzés: a mentett kéréstörzs-korlát mostantól a csevegésre is vonatkozik.** A korábban a Settings > Advanced > Request Body Limit (`maxBodySizeMb`) alatt mentett korlát mostantól a `/v1/chat/completions` és a `/v1/responses` végpontokra is vonatkozik. A módosítás előtt ez a két útvonal a mentett értéktől függetlenül legfeljebb 50 MB-ot fogadott el, ezért egy alacsonyabb mentett korláttal rendelkező telepítés mostantól elutasítja az annál nagyobb csevegési törzseket. Az a telepítés, amelyben soha nem mentettek korlátot, megtartja az 50 MB-os alapértelmezést.
 
-**Ha továbbra is 429-et látsz**: az adott szolgáltató aktív fiókja valóban kimerítette a _kvótáját_ (nem csupán az időszakos sebességkorlátot érte el). Adj hozzá egy második fiókot ugyanahhoz a szolgáltatóhoz az OmniRoute irányítópultján a Providers → Accounts menüpontban, vagy vonj be egy másik ingyenes szolgáltatót (például `routeway`, `auggie`). A rotáció csak az átmeneti sebességkorlátozási/400/401 hibák esetén segít; a kvóta teljes kimerüléséhez második hitelesítő adat vagy másik szolgáltató szükséges.
+Az elutasítás HTTP `413` válasz, amelyben az `error.code` értéke `PAYLOAD_TOO_LARGE`, az `error.type` értéke pedig `payload_too_large`. Az üzenet megnevezi az érvényes korlátot: `Request body too large. Maximum allowed: 10 MB`, ha a deklarált `Content-Length` meghaladja azt, vagy `Request body too large for chat completions (max 10 MB).`, ha a ténylegesen beolvasott bájtok száma haladja meg. Ez nem azonos a fent említett `413 body_exceeds_budget` hibával, amely a memóriakeretből ered, és amelyet ez a beállítás nem módosít.
 
-**Ha 403-at látsz a vision modelleknél (`auto/vision`, `bazaarlink/*`)**: a csatlakoztatott fiókhoz nem tartozik vision funkciót tartalmazó fizetős csomag, vagy az API-kulcs nem rendelkezik elegendő jogosultsággal. Ellenőrizd a szolgáltató irányítópultján, hogy a kulcs hatóköre tartalmazza-e a vision/multimodális funkciókat, vagy csatlakoztass egy fizetős csomaggal rendelkező fiókot, és tartsd meg azt vision célfiókként.
+A korlát növeléséhez mentsen magasabb értéket itt: `/dashboard/settings/advanced`, vagy küldje el a `PATCH /api/settings` kérést ezzel: `{"maxBodySizeMb": 50}`. Az 1–500 MB közötti értékeket a rendszer elfogadja, a módosítás újraindítás nélkül érvénybe lép, az 50 pedig visszaállítja a korábbi csevegési korlátot. Két másik korlát továbbra is megakadályozhatja a nagyobb törzs fogadását: az `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES`, ha be van állítva, szintén korlátozza a mentett értéket, a Kubernetes ingress `proxy-body-size` annotációját (`50m` a mellékelt manifestekben) pedig külön meg kell emelni az 50 MB feletti értékekhez.
+
+**A működés ellenőrzése**: futtassa le ügynökét/cron-feladatát gyors egymásutánban kétszer, és ellenőrizze, hogy mindkettő sikeres-e. A javítás előtt a második futtatás jellemzően `429`/`401` hibát dobott. A javítás után a hibákat — ha előfordulnak — a rendszer átláthatóan újrapróbálja, és a hívás befejeződik. A `curl /monitoring/health` paranccsal is ellenőrizheti a működést, valamint figyelheti a szolgáltatói kapcsolatok `rateLimitedUntil` mezőjét és az érintett szolgáltatók `circuitBreakers.providerBreakers[].state` értékét — az állapotok egyike a következőknek: `CLOSED`, `DEGRADED`, `OPEN` vagy `HALF_OPEN` (lásd: `src/shared/utils/circuitBreaker.ts`); a folyamatosan hibázó szolgáltató a visszaállítási ablak előtt `CLOSED → DEGRADED → OPEN` állapotokon halad át, majd egy próba számára lehetővé válik a továbblépés (`HALF_OPEN`).
+
+**Ha továbbra is 429-es hibát lát**: az adott szolgáltató aktív fiókja valóban kimerítette a _kvótáját_ (nem csupán a sebességkorlátot). Adjon hozzá egy második fiókot ugyanahhoz a szolgáltatóhoz az OmniRoute irányítópultján: Providers → Accounts, vagy vegyítsen be egy másik ingyenes szolgáltatót (például `routeway`, `auggie`). A rotáció csak az átmeneti sebesség-/400-/401-hibákon segít; a kvóta végleges kimerüléséhez második hitelesítő adat vagy másik szolgáltató szükséges.
+
+**Ha 403-as hibát lát vision modellek (`auto/vision`, `bazaarlink/*`) esetén**: a csatlakoztatott fiók nem rendelkezik a vision funkciót tartalmazó fizetős csomaggal, vagy az API-kulcs nem rendelkezik elegendő jogosultsággal. Ellenőrizze a szolgáltatói irányítópultban, hogy a kulcs hatóköre tartalmazza-e a vision/multimodal funkciót, vagy csatlakoztasson fizetős csomaggal rendelkező fiókot, és hagyja azt a vision céljaként.
 
 ---
 
@@ -90,39 +96,39 @@ A figyelmeztetéseket olyan, külső féltől származó csomagok elavult peerf�
 
 ---
 
-## Blokkolt npm telepítési szkriptekre vonatkozó figyelmeztetés (globális telepítés)
+## Blokkolt npm install-szkriptekre vonatkozó figyelmeztetés (globális telepítés)
 
 <a name="npm-install-scripts-blocked-warning-global-install"></a>
 
-Az `npm install -g omniroute` futtatásakor az újabb npm-verziók (v11+ és v12+) alapértelmezés szerint blokkolják a csomagok életciklus-szkriptjeit, és a telepítési szkriptekre vonatkozó figyelmeztetést jelenítenek meg:
+Az `npm install -g omniroute` futtatásakor az npm újabb verziói (v11+ és v12+) alapértelmezés szerint blokkolják a csomagok életciklus-szkriptjeit, és az install-szkriptekre vonatkozó figyelmeztetést jelenítenek meg:
 
 ```
-npm warn install-scripts 7 csomag telepítési szkriptjei blokkolva lettek, mert nem szerepelnek az allowScripts beállításban:
+npm warn install-scripts 7 packages had install scripts blocked because they are not covered by allowScripts:
   omniroute@<version> (postinstall: node scripts/build/postinstall.mjs)
   keytar, @parcel/watcher, @swc/core, protobufjs, esbuild, onnxruntime-node
 ```
 
 ### Figyelmen kívül hagyható ez a figyelmeztetés?
 
-**Részben, de a szkriptek nélküli futtatás nem ajánlott.** Az OmniRoute szabályosan kezelt tartalék megoldásokat tartalmaz: ha a natív `better-sqlite3` kötések nem tölthetők be az önálló csomagból, az alkalmazás alternatív illesztőprogramokra, például a `node:sqlite` vagy a `sql.js` használatára tér át (lásd: [SQLite futásidejű feloldása](../ops/SQLITE_RUNTIME.md)). A kiszolgáló továbbra is elindul, de a WASM-alapú tartalék megoldások, például a `sql.js` használata letiltja az SQLite WAL (Write-Ahead Logging) módját, valamint növeli a memóriahasználatot és a lemezszinkronizálás többletterhelését.
+**Részben igen, de a szkriptek nélküli futtatás nem ajánlott.** Az OmniRoute biztonságos tartalékmegoldásokat tartalmaz: ha a natív `better-sqlite3` kötések nem tölthetők be az önálló csomagból, az alkalmazás alternatív illesztőprogramokra, például a `node:sqlite` vagy a `sql.js` használatára áll át (lásd: [SQLite futtatókörnyezet feloldása](../ops/SQLITE_RUNTIME.md)). A kiszolgáló továbbra is elindul, de a WASM-alapú tartalékmegoldások, például a `sql.js` használata letiltja az SQLite WAL (Write-Ahead Logging, előreíró naplózás) módját, és növeli a memóriahasználatot, valamint a lemezszinkronizálás többletterhelését.
 
 ### Mely szkriptek szükségesek ténylegesen?
 
-Nem minden blokkolt szkript nélkülözhetetlen az OmniRoute futtatásához:
+Nem minden blokkolt szkript elengedhetetlen az OmniRoute futtatásához:
 
-- **Nélkülözhetetlen (`omniroute`, `better-sqlite3`):** Az OmniRoute egy önálló Next.js-alkalmazáscsomagból (`dist/`) fut. A telepítés során az npm letölti vagy lefordítja a gazdagépre jellemző natív SQLite-illesztőprogramot a legfelső szintű `node_modules/better-sqlite3/` könyvtárban. Ezután az OmniRoute `postinstall` szkriptje (`scripts/build/postinstall.mjs`) ellenőrzi és a `dist/node_modules/` könyvtárba másolja ezeket a gazdagépre jellemző binárisokat, hogy az önálló kiszolgáló hozzáférhessen hozzájuk. Ha az `omniroute` postinstall szkriptje blokkolva van, ez a másolási lépés kimarad.
-- **Opcionális/tranzitív (`keytar`, `@parcel/watcher`, `@swc/core`, `protobufjs`, `esbuild`):** Ezek buildelési segédprogramok, fájlváltozás-figyelő eszközök vagy rendszerkulcstartó-segédprogramok. Engedélyezésük megakadályozza a buildelési figyelmeztetéseket, de az alapvető útválasztási funkciókhoz nem szükségesek.
-- **Kizárt (`onnxruntime-node`):** Opcionális függőség helyi MI-beágyazásokhoz, és **nem** szükséges az OmniRoute futtatásához. A postinstall szkriptje körülbelül 300 MB méretű CUDA-erőforrást tölt le a NuGet szolgáltatásból; ne vegye fel az engedélyezési listára, hacsak nem kíván kifejezetten helyi ONNX-gyorsítást használni támogatott hardveren.
+- **Elengedhetetlen (`omniroute`, `better-sqlite3`):** Az OmniRoute egy önálló Next.js-alkalmazáscsomagból (`dist/`) fut. A telepítés során az npm letölti vagy lefordítja a gazdarendszerhez tartozó natív SQLite-illesztőprogramot a legfelső szintű `node_modules/better-sqlite3/` könyvtárban. Az OmniRoute `postinstall` szkriptje (`scripts/build/postinstall.mjs`) ezután ellenőrzi és a `dist/node_modules/` könyvtárba másolja ezeket a gazdarendszer-specifikus bináris fájlokat, hogy az önálló kiszolgáló hozzáférhessen hozzájuk. Ha az `omniroute` postinstall szkriptje blokkolva van, ez a másolási lépés kimarad.
+- **Opcionális/tranzitív (`keytar`, `@parcel/watcher`, `@swc/core`, `protobufjs`, `esbuild`):** Ezek fordítási segédeszközök, fájlfigyelő eszközök vagy rendszerkulcstár-segédprogramok. Engedélyezésük megszünteti a fordítási figyelmeztetéseket, de az alapvető útválasztási funkciókhoz nem szükségesek.
+- **Kizárt (`onnxruntime-node`):** Ez a helyi MI-beágyazások opcionális függősége, és **nem** szükséges az OmniRoute futtatásához. A postinstall szkriptje körülbelül 300 MB-nyi CUDA-erőforrást tölt le a NuGet szolgáltatásból; ne vegye fel az engedélyezési listára, hacsak nem kíván kifejezetten helyi ONNX-gyorsítást használni támogatott hardveren.
 
 ### Ajánlott megoldás
 
-A szükséges telepítési szkriptek globális telepítés során történő engedélyezéséhez és a figyelmeztetések elrejtéséhez adja át az `--allow-scripts` kapcsolót az OmniRoute és natív függőségei számára:
+A szükséges telepítési szkriptek globális telepítés közbeni engedélyezéséhez és a figyelmeztetések megszüntetéséhez adja meg a `--allow-scripts` kapcsolót az OmniRoute és natív függőségei számára:
 
 ```bash
 npm install -g omniroute --allow-scripts=omniroute,better-sqlite3,keytar,@parcel/watcher,@swc/core,protobufjs,esbuild
 ```
 
-Másik lehetőségként, ha ezt véglegesen szeretné beállítani a felhasználói fiókjához tartozó összes globális telepítéshez:
+Másik lehetőségként ezt tartósan is beállíthatja a felhasználói fiókja alatt végzett összes globális telepítéshez:
 
 ```bash
 npm config set allow-scripts=omniroute,better-sqlite3,keytar,@parcel/watcher,@swc/core,protobufjs,esbuild --location=user
@@ -131,7 +137,7 @@ npm install -g omniroute
 
 ### A telepítés ellenőrzése
 
-A telepítés után futtassa a beépített diagnosztikai eszközt annak ellenőrzéséhez, hogy a natív kötések és a futtatókörnyezet megfelelő állapotban vannak-e:
+A telepítés után futtassa a beépített diagnosztikai eszközt annak ellenőrzéséhez, hogy a natív kötések és a futtatókörnyezet megfelelően működnek-e:
 
 ```bash
 omniroute doctor
@@ -853,6 +859,30 @@ omniroute serve --ready-timeout 180000
 Az alapértelmezett érték 60 000 ms (60 s). A figyelmeztetés csupán tájékoztató jellegű; a kiszolgáló a háttérben folytatja az indulást, és a rendszerindítás befejezése után elérhetővé válik.
 
 Az `OMNIROUTE_READY_TIMEOUT_MS` teljes körű ismertetését lásd a [`docs/reference/ENVIRONMENT.md`](../reference/ENVIRONMENT.md) dokumentumban.
+
+---
+
+## CCR / dedup problémák
+
+Diagnosztikai mátrix a tömörítési CCR (`ccr`) és `session-dedup` eszközökhöz. A teljes kezelői referenciát (jelölők, előfeltételek, szerszámonkénti hatókör, visszakeresés oldalszámozása) lásd: [Compression Engines → Előfeltételek / Kezelési útmutató](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+
+| Tünet                                                                                                           | Valószínű oka                                                                                                                                                     | Ellenőrizze                                                                                                                            | Fix                                                                                                                                                                                                                                                                             |
+| --------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **MCP 403** — `403 LOCAL_ONLY`                                                                                  | Route Guard loopback hitelesítés, nem szállítási hiba. Nem `Bearer`, vagy `mcp:connect`/`manage`/`admin` nélküli kulcs nem érte el a `/api/mcp/` útvonalat.       | A kérés no/invalid `Authorization` fejlécet tartalmazott.                                                                              | Érvényes `Bearer` kulcsot küldjön. Egy távoli kulcs tartalmazhatja `mcp:connect` (engedélyezi a `/api/mcp/` helyi kivágását), valamint a szükséges speciális read/write hatókört.                                                                                               |
+| **blokk nem található** — `omniroute_ccr_retrieve` elutasítja a hash-t                                          | A hash nem 24 hexadecimális érték, vagy rosszul másolták, vagy a blokk már lejárt / ki lett ürítve.                                                               | Hasonlítsa össze a hash-t a `[CCR retrieve hash=…]` marker 24-hex értékével; ellenőrizze `omniroute_ccr_stats` ben az üzlet állapotát. | Másolja ki szó szerint a 24 hexadecimális hash-t a jelölőből. Ha a blokk valóban eltűnt, akkor túllépte TTL értékét, vagy soha nem érte el a tartós tárolót (512 KB feletti blokkok és felhőalapú futásidőben minden blokk csak memória marad, és nem éli túl az újraindítást). |
+| **CCR no-op** — egy blokk nincs tömörítve (a szöveg változatlan formában jön vissza)                            | Blokkolás a kompressziós küszöb alatt, vagy a CCR motor/mód inaktív.                                                                                              | Ellenőrizze az aktív tömörítést `strategy`/`enabled` és a blokk méretét a küszöbérték függvényében.                                    | Engedélyezze CCR (vagy egy halmozott módot, amely futtatja), és ellenőrizze, hogy a blokk elég nagy-e ahhoz, hogy érdemes tárolni. A no-op nem hiba — hanem "nincs mit tömöríteni".                                                                                             |
+| **dedup marker** — `[dedup:ref sha=…]` jelenik meg a kimenetben                                                 | **Szándékos visszatekintés** , nem veszteség vagy hiba. `session-dedup` elided szöveg, amelyet már elküldtek ugyanannak a munkamenetnek egy korábbi fordulójában. | Győződjön meg arról, hogy ugyanaz a szöveg jelenik meg korábban a munkamenetben.                                                       | Ne csinálj semmit — ne hívj eszközt és ne próbáld meg rekonstruálni. Az első előfordulás a kánoni másolat; az aktuális kört soha nem írják át, hanem egy későbbi körben dedupálják.                                                                                             |
+| **Kód mód** — `omniroute_ccr_*` eszközök hiányoznak `tools[]` / CCR utasításból nincs befecskendezve (OpenCode) | OpenCode Code Mode (az alapértelmezett) csak a natív eszközöket hirdeti a modellnek, elrejti MCP eszközöket `tools[]` elől.                                       | Ellenőrizze a OpenCode MCP szerver `codemode` bejegyzését.                                                                             | Állítsa be `codemode: false` a szerverbejegyzésben (a** ügyfél** beállítás) így a MCP eszközöket hirdetik. A CCR retrieve-protocol utasítás kikapcsolva marad: a `omniroute` nevű kiszolgáló felfedi `omniroute_omniroute_ccr_retrieve`, és `_` nem egy illesztett elválasztó.  |
+
+További tünetek:
+
+| Tünet                                                                                                            | Valószínű oka                                                                                                                                                              | Fix                                                                                                                                                                                              |
+| ---------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `Insufficient MCP scopes for <tool>. Missing: <scope>.`                                                          | A MCP eszközhiba eredménye (`isError: true`), nem pedig a HTTP 403. A hívó kulcsának nincs megfelelő hatóköre.                                                             | Adja hozzá a hatókört a szerszámonkénti táblázatból (lásd a kezelői útmutatót). Pl. `omniroute_ccr_retrieve` nak `read:compression`.                                                             |
+| `Unknown Mcp-Session-Id`                                                                                         | A streamelhető HTTP-munkamenet tétlen volt, és megtörtént (`OMNIROUTE_MCP_SESSION_IDLE_MS`); a szerver HTTP 404-et válaszol.                                               | Csatlakoztassa újra vagy indítsa újra a — do munkamenetet** nem** kulcs elforgatása, hatókör módosítása vagy eszköz átnevezése. Ez nem 401/403.                                                  |
+| `JSON Parse error` / `Unterminated string` egy eszközeredményben                                                 | MCP eszközszöveg `mcpAccessibility.maxTextChars` (alapértelmezett `50000`) mid-JSON köré vágva.                                                                            | Használjon lapozott `mode` a csupasz teljes helyett: `mode:"grep"`, `mode:"lines"`, `mode:"head"`, `mode:"tail"` vagy `mode:"stats"`. Ökölszabály: `chars > 40000` → használj `mode`.            |
+| `Failed to open SSE stream`                                                                                      | Az ügyfél elérte a régi `/api/mcp/sse` singletont, míg a szállítás `streamable`.                                                                                           | Irányítsa az ügyfelet `/api/mcp/stream` (az adatfolyam-végpontra) `/api/mcp/sse` helyett.                                                                                                        |
+| **Halott stdio szívverés** — `mcp-heartbeat.json` `pidAlive: false` -t mutatja, miközben a HTTP transzport aktív | A szívverés fájl egy stdio-maradék (elévült PID vagy egy másik verzió); HTTP átvitel folyamatban van, és helyette `getMcpHttpStatus()` állapotát jelenti (nincs fájlírás). | Nincs intézkedés — a közlekedés egészséges. Az igazság `httpTransport.online` / `startedAt` `/api/mcp/status` ből, nem a szívverés fájl. Ne indítsa újra a szervert és ne forgassa el a kulcsot. |
 
 ---
 

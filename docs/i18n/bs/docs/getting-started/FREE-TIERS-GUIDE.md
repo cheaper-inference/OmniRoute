@@ -18,41 +18,40 @@ OmniRoute **objedinjuje** konfigurirane veze u jednu krajnju tačku. I dalje se 
 
 ## Reprezentativni pružaoci besplatnog pristupa
 
-### Obnavljajući pristup, pristup bez ključa ili neograničeni pristup
+### Obnovljivi pristup, pristup bez ključa ili pristup bez ograničenja
 
-Ovi pružaoci u pregledanom katalogu nude besplatan pristup koji se obnavlja, ne zahtijeva ključ ili nema ograničenje. „Neograničen” znači da nema objavljenog ograničenja broja tokena; ograničenja brzine, istovremenih zahtjeva, računa, regije i pravila i dalje se mogu primjenjivati:
+Ovi pružaoci u revidiranom katalogu imaju obnovljivu, besplatnu opciju pristupa bez ključa ili bez ograničenja. „Bez ograničenja” znači da nema objavljenog ograničenja broja tokena; ograničenja brzine, konkurentnosti, računa, regije i pravila i dalje se mogu primjenjivati:
 
-| Pružalac          | Modeli                                                                               | Kvota                                                                                                                                    | Način povezivanja                                                                                                     |
-| ----------------- | ------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
-| **Kiro AI**       | Claude Sonnet 4.5, Haiku 4.5, DeepSeek V3.2 i drugi                                  | Pregledani katalog procjenjuje zajednički mjesečni fond od 25K tokena                                                                    | OAuth/tok računa; Uslovi korištenja označeni su kao `avoid` u katalogu                                                |
-| **OpenCode Free** | Trenutni skup `*-free` modela u registru pružalaca                                   | Bez ključa; nema objavljenog ograničenja broja tokena                                                                                    | Nisu potrebni pristupni podaci pružaoca; Uslovi korištenja označeni su kao `avoid`                                    |
-| **Pollinations**  | Trenutni skup modela bez ključa; neki raniji modeli su ukinuti ili zahtijevaju ključ | Bez ključa; nema objavljenog ograničenja broja tokena                                                                                    | Za modele bez ključa nisu potrebni pristupni podaci pružaoca                                                          |
-| **Logfare**       | kimi-k3, deepseek-v4-pro, glm-5.2, gpt-5.6-luna, minimax-m3 i drugi                  | Besplatan API ključ (bez ograničenja brzine, bez kartice); **svaki zahtjev se bilježi** radi istraživanja (odjava na logfare.ai/consent) | Trenutno dobijanje ključa na logfare.ai/register; Uslovi korištenja/privatnost na logfare.ai/tos i logfare.ai/privacy |
-| **Cloudflare AI** | Katalog Workers AI                                                                   | Pregledani fond procjenjuje ~30M tokena mjesečno na osnovu objavljenih jedinica korištenja                                               | Cloudflare račun i API pristupni podaci                                                                               |
-| **Gemini**        | Porodica Gemini Flash                                                                | Promjenjiva ograničenja brzine prema projektu/modelu; u istaknutoj ponudi nije uključena fiksna mjesečna dodjela tokena                  | API ključ za Google AI Studio; provjerite aktivna ograničenja projekta                                                |
-| **Groq**          | Modeli Llama, GPT-OSS i Qwen                                                         | Pregledani fond procjenjuje ~15M tokena mjesečno                                                                                         | Groq API ključ; primjenjuju se ograničenja brzine                                                                     |
+| Pružalac          | Modeli                                                                               | Kvota                                                                                                                                                  | Kako se povezati                                                                             |
+| ----------------- | ------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------- |
+| **Kiro AI**       | Claude Sonnet 4.5, Haiku 4.5, DeepSeek V3.2 i drugi                                  | Revidirani katalog procjenjuje zajednički mjesečni fond od 25K tokena                                                                                  | OAuth/tok računa; ToS je u katalogu označen sa `avoid`                                       |
+| **Pollinations**  | Trenutni skup modela bez ključa; neki raniji modeli su ukinuti ili zahtijevaju ključ | Bez ključa; nema objavljenog ograničenja broja tokena                                                                                                  | Za modele bez ključa nisu potrebni pristupni podaci pružaoca                                 |
+| **Logfare**       | kimi-k3, deepseek-v4-pro, glm-5.2, gpt-5.6-luna, minimax-m3 i drugi                  | Besplatan API ključ (bez ograničenja brzine i bez kartice); **svaki zahtjev se evidentira** u istraživačke svrhe (isključite to na logfare.ai/consent) | Trenutni ključ na logfare.ai/register; ToS/privatnost na logfare.ai/tos i logfare.ai/privacy |
+| **Cloudflare AI** | Katalog Workers AI                                                                   | Revidirani fond procjenjuje ~30M tokena mjesečno na osnovu objavljenih jedinica korištenja                                                             | Cloudflare račun i API pristupni podaci                                                      |
+| **Gemini**        | Porodica Gemini Flash                                                                | Promjenjiva ograničenja brzine po projektu/modelu; u sažetak nije uključena fiksna mjesečna dodjela tokena                                             | API ključ usluge Google AI Studio; provjerite aktivna ograničenja projekta                   |
+| **Groq**          | Modeli Llama, GPT-OSS i Qwen                                                         | Revidirani fond procjenjuje ~15M tokena mjesečno                                                                                                       | Groq API ključ; primjenjuju se ograničenja brzine                                            |
 
 ### Početne dodjele i krediti specifični za pružaoce
 
-Ovi pružaoci nude početne dodjele ili promotivne kredite, u skladu sa svojim pravilima podobnosti. Prema provjeri od 2026-10-08, [cijene usluge Cerebras](https://www.cerebras.ai/pricing) zahtijevaju način plaćanja za jednokratni kredit od $5 koji ističe nakon 30 dana; to nije obnavljajuća kvota tokena. [Ograničenja brzine za Gemini](https://ai.google.dev/gemini-api/docs/rate-limits) razlikuju se prema projektu, modelu i nivou, pa se ne pretvaraju u zagarantovanu mjesečnu dodjelu tokena.
+Ovi pružaoci nude početne dodjele ili promotivne kredite, u skladu sa svojim pravilima o podobnosti. Prema provjeri od 2026-10-08, [Cerebras cijene](https://www.cerebras.ai/pricing) zahtijevaju način plaćanja za jednokratni kredit od $5 koji ističe nakon 30 dana; to nije obnovljiva kvota tokena. [Gemini ograničenja brzine](https://ai.google.dev/gemini-api/docs/rate-limits) razlikuju se prema projektu, modelu i nivou, pa se ne pretvaraju u zagarantovanu mjesečnu dodjelu tokena.
 
-| Pružalac      | Besplatni krediti                                                        | Modeli                          | Kako ih dobiti                                                       |
-| ------------- | ------------------------------------------------------------------------ | ------------------------------- | -------------------------------------------------------------------- |
-| **Cerebras**  | Jednokratni promotivni kredit od $5; ističe nakon 30 dana                | Trenutni katalog za inferenciju | Račun i važeći način plaćanja                                        |
-| **DeepSeek**  | 5M besplatnih tokena                                                     | DeepSeek V4                     | Registrujte se na platform.deepseek.com                              |
-| **LongCat**   | Jednokratna dodjela od 10M tokena                                        | LongCat 2.0                     | API ključ + KYC; plaćanje prema potrošnji nakon iskorištenja dodjele |
-| **Vertex AI** | Početni kredit od $300 predstavljen kao ~300M tokena u budžetskom modelu | Gemini i partnerski modeli      | Google Cloud račun; primjenjuju se pravila naplate i podobnosti      |
+| Pružalac      | Besplatni krediti                                                      | Modeli                          | Kako dobiti                                                     |
+| ------------- | ---------------------------------------------------------------------- | ------------------------------- | --------------------------------------------------------------- |
+| **Cerebras**  | Jednokratni promotivni kredit od $5; ističe nakon 30 dana              | Trenutni katalog za inferenciju | Račun i važeći način plaćanja                                   |
+| **DeepSeek**  | 5M besplatnih tokena                                                   | DeepSeek V4                     | Registrujte se na platform.deepseek.com                         |
+| **LongCat**   | Jednokratna dodjela od 10M tokena                                      | LongCat 2.0                     | API ključ + KYC; plaćanje prema potrošnji nakon dodjele         |
+| **Vertex AI** | Početni kredit od $300, predstavljen kao ~300M tokena u modelu budžeta | Gemini i partnerski modeli      | Google Cloud račun; primjenjuju se pravila naplate i podobnosti |
 
 ### Drugi ograničeni pristup
 
-Ovi pružaoci imaju **besplatne nivoe** sa specifičnim ograničenjima:
+Ovi pružaoci imaju **besplatne nivoe** s određenim ograničenjima:
 
-| Pružalac                   | Besplatno ograničenje                                                                                  | Modeli                                   | Najpogodnije za |
-| -------------------------- | ------------------------------------------------------------------------------------------------------ | ---------------------------------------- | --------------- |
-| **GitHub Models**          | Procjena pregledanog zajedničkog fonda iznosi ~18M tokena mjesečno                                     | Procjenu širokog raspona modela          |
-| **Hugging Face**           | Mali obnavljajući mjesečni fond                                                                        | Eksperimente i raznovrsnost modela       |
-| **OpenRouter free models** | Zajednički fond ograničen brojem zahtjeva; opcionalna jednokratna dopuna povećava obnavljajuću dodjelu | Širok katalog rezervnih opcija           |
-| **AI Horde**               | Kapacitet zajednice bez ključa; dostupnost se razlikuje                                                | Oportunističku distribuiranu inferenciju |
+| Pružalac                        | Besplatno ograničenje                                                                                  | Modeli                                   | Najbolje za |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------ | ---------------------------------------- | ----------- |
+| **GitHub Models**               | Procijenjeni zajednički revidirani fond od ~18M tokena mjesečno                                        | Procjena širokog raspona modela          |
+| **Hugging Face**                | Mali obnovljivi mjesečni fond                                                                          | Eksperimenti i raznovrsnost modela       |
+| **OpenRouter besplatni modeli** | Zajednički fond s ograničenim brojem zahtjeva; opcionalna jednokratna dopuna povećava obnovljivu kvotu | Širok rezervni katalog                   |
+| **AI Horde**                    | Kapacitet zajednice bez ključa; dostupnost varira                                                      | Oportunistička distribuirana inferencija |
 
 ---
 

@@ -10,16 +10,16 @@
 
 ## Nhà cung cấp là gì?
 
-Hãy hình dung nhà cung cấp giống như một **nhà mạng di động**. Cũng như bạn cần nhà mạng để thực hiện cuộc gọi, bạn cần một nhà cung cấp AI để sử dụng các mô hình AI. OmniRoute giống như một chiếc điện thoại hoạt động với **tất cả nhà mạng** — bạn có thể tự động chuyển đổi giữa các nhà cung cấp.
+Hãy hình dung nhà cung cấp giống như một **nhà mạng di động**. Cũng như bạn cần nhà mạng để thực hiện cuộc gọi, bạn cần nhà cung cấp AI để sử dụng các mô hình AI. OmniRoute giống như một chiếc điện thoại hoạt động với **mọi nhà mạng** — bạn có thể tự động chuyển đổi giữa các nhà cung cấp.
 
 ### Các loại nhà cung cấp
 
-| Loại           | Mô tả                             | Ví dụ                             | Chi phí                        |
-| -------------- | --------------------------------- | --------------------------------- | ------------------------------ |
-| **Miễn phí**   | Không yêu cầu thanh toán          | Kiro, OpenCode Free, Pollinations | $0                             |
-| **Khóa API**   | Bạn cần có khóa API               | OpenAI, Anthropic, Google         | Trả phí theo mức sử dụng       |
-| **OAuth**      | Đăng nhập bằng tài khoản          | Claude Code, GitHub Copilot       | Gói đăng ký                    |
-| **Cookie web** | Sử dụng phiên trình duyệt của bạn | ChatGPT Web (Codex), Gemini Web   | $0 (sử dụng tài khoản của bạn) |
+| Loại           | Mô tả                     | Ví dụ                           | Chi phí                        |
+| -------------- | ------------------------- | ------------------------------- | ------------------------------ |
+| **Miễn phí**   | Không cần thanh toán      | Kiro, Pollinations              | $0                             |
+| **Khóa API**   | Bạn cần có khóa API       | OpenAI, Anthropic, Google       | Thanh toán theo mức sử dụng    |
+| **OAuth**      | Đăng nhập bằng tài khoản  | Claude Code, GitHub Copilot     | Phí đăng ký                    |
+| **Cookie web** | Sử dụng phiên trình duyệt | ChatGPT Web (Codex), Gemini Web | $0 (sử dụng tài khoản của bạn) |
 
 ### Nhà cung cấp sử dụng cookie web
 
@@ -30,15 +30,9 @@ Xem **[WEB-COOKIE-GUIDE.md](./WEB-COOKIE-GUIDE.md)** để biết hướng dẫn
 
 ### Thiết lập nhà cung cấp miễn phí tùy chọn trong lần chạy đầu tiên
 
-Trình hướng dẫn lần chạy đầu tiên cung cấp một thẻ **Thiết lập nhà cung cấp miễn phí** rõ ràng. Trình hướng dẫn lấy danh sách
-đủ điều kiện hiện tại từ sổ đăng ký nhà cung cấp không cần xác thực của OmniRoute, sau đó cho phép bạn xem lại và bỏ chọn từng
-nhà cung cấp trước khi xác nhận. OmniRoute hiển thị thông báo cảnh báo của nhà cung cấp và liên kết đến trang web của họ
-để bạn có thể xem trước các điều khoản, quyền riêng tư, tính khả dụng và giới hạn tốc độ của bên thứ ba.
+Trình hướng dẫn trong lần chạy đầu tiên cung cấp một thẻ **Thiết lập nhà cung cấp miễn phí** rõ ràng. Trình hướng dẫn lấy danh sách đủ điều kiện hiện tại từ sổ đăng ký nhà cung cấp không yêu cầu xác thực của OmniRoute, sau đó cho phép bạn xem lại và bỏ chọn từng nhà cung cấp trước khi xác nhận. OmniRoute hiển thị thông báo lưu ý của nhà cung cấp và liên kết đến trang web của họ để bạn có thể xem trước các điều khoản, chính sách quyền riêng tư, tình trạng khả dụng và giới hạn tốc độ của bên thứ ba.
 
-Thao tác này là tùy chọn: việc hoàn tất trình hướng dẫn sẽ không bao giờ âm thầm tạo các kết nối nhà cung cấp miễn phí.
-Trình hướng dẫn chỉ tạo những nhà cung cấp vẫn còn thiếu, giữ nguyên các kết nối hiện có đã được tùy chỉnh
-và báo cáo riêng từng nhà cung cấp đã tạo, đã được cấu hình và bị lỗi. Bạn có thể
-thử lại một cách an toàn chỉ đối với những mục bị lỗi sau khi nhận được kết quả một phần.
+Hành động này là tùy chọn: việc hoàn tất trình hướng dẫn không bao giờ âm thầm tạo kết nối với các nhà cung cấp miễn phí. Trình hướng dẫn chỉ tạo những nhà cung cấp vẫn còn thiếu, giữ nguyên các kết nối hiện có đã được tùy chỉnh, đồng thời báo cáo riêng từng nhà cung cấp đã tạo, đã cấu hình và bị lỗi. Sau khi nhận được kết quả một phần, bạn có thể thử lại một cách an toàn chỉ với những nhà cung cấp bị lỗi.
 
 ### Tùy chọn A: Nhà cung cấp miễn phí (Không cần thẻ tín dụng)
 
@@ -46,10 +40,9 @@ thử lại một cách an toàn chỉ đối với những mục bị lỗi sau
 2. Đi tới **Nhà cung cấp** → **Thêm nhà cung cấp**
 3. Chọn một trong các nhà cung cấp miễn phí sau:
    - **Kiro AI** — Các mô hình Claude miễn phí (không cần xác thực)
-   - **OpenCode Free** — Các mô hình GPT miễn phí (không cần xác thực)
    - **Pollinations** — GPT-5, Claude, Gemini miễn phí (không cần khóa)
    - **LongCat** — 10M token miễn phí (cấp một lần, yêu cầu tài khoản + KYC)
-   - **Cloudflare AI** — Hơn 50 mô hình, 10K neuron/ngày
+   - **Cloudflare AI** — Hơn 50 mô hình, 10K nơ-ron/ngày
    - **MLX Gemma 26B** — Mô hình Apple Silicon cục bộ (~38.5 token/giây, ~15.9GB RAM)
    - **MLX Qwen 3.8 27B** — Mô hình Apple Silicon cục bộ (~9.1 token/giây, ~13.1GB RAM)
 4. Nhấp vào **Kết nối**
@@ -81,7 +74,7 @@ thử lại một cách an toàn chỉ đối với những mục bị lỗi sau
 
 ### Tùy chọn D: Các mô hình MLX cục bộ (Apple Silicon)
 
-Đối với máy Mac Apple Silicon có bộ nhớ hợp nhất, OmniRoute hỗ trợ kết nối với các mô hình MLX cục bộ chạy qua `mlx-lm.server` như những nhà cung cấp cục bộ thông thường tương thích với OpenAI.
+Đối với máy Mac Apple Silicon có bộ nhớ hợp nhất, OmniRoute hỗ trợ kết nối với các mô hình MLX cục bộ chạy qua `mlx-lm.server` dưới dạng các nhà cung cấp cục bộ thông thường tương thích với OpenAI.
 
 #### Điều kiện tiên quyết
 
@@ -101,13 +94,13 @@ thử lại một cách an toàn chỉ đối với những mục bị lỗi sau
    uv pip install mlx-lm
    ```
 
-2. **Khởi động các máy chủ MLX theo cách thủ công** (trong các cửa sổ dòng lệnh riêng biệt):
+2. **Khởi động thủ công các máy chủ MLX** (trong các cửa sổ terminal riêng biệt):
 
    ```bash
-   # Cửa sổ dòng lệnh 1: Gemma 4 26B A4B IT-QAT (cổng 11435)
+   # Terminal 1: Gemma 4 26B A4B IT-QAT (cổng 11435)
    uv run mlx_lm.server --model mlx-community/gemma-4-26B-A4B-it-qat-q4_0-mlx-aligned --port 11435 --host 127.0.0.1
 
-   # Cửa sổ dòng lệnh 2: Qwen 3.8 27B MLX Mixed (cổng 11436)
+   # Terminal 2: Qwen 3.8 27B MLX Mixed (cổng 11436)
    uv run mlx_lm.server --model maglun/Qwen3.8-27B-MLX-Mixed-3.80bpw --port 11436 --host 127.0.0.1
    ```
 
@@ -129,10 +122,10 @@ thử lại một cách an toàn chỉ đối với những mục bị lỗi sau
 
 #### Quản lý bộ nhớ
 
-**Quan trọng**: Với bộ nhớ hợp nhất 24GB, mỗi lần chỉ có thể chạy **một mô hình MLX lớn**.
+**Quan trọng**: Với 24GB bộ nhớ hợp nhất, mỗi lần chỉ có thể chạy **một mô hình MLX lớn**.
 
-- Gemma 26B: mức sử dụng bộ nhớ cao nhất ~15.9GB
-- Qwen 3.8 27B: mức sử dụng bộ nhớ cao nhất ~13.1GB
+- Gemma 26B: mức sử dụng bộ nhớ tối đa ~15.9GB
+- Qwen 3.8 27B: mức sử dụng bộ nhớ tối đa ~13.1GB
 
 Bạn phải quản lý việc này theo cách thủ công:
 
@@ -152,20 +145,20 @@ curl -X POST http://localhost:20128/v1/chat/completions \
   -H "Content-Type: application/json" \
   -d '{
     "model": "mlx-gemma/gemma-4-26b",
-    "messages": [{"role": "user", "content": "2+2 bằng bao nhiêu? Hãy sử dụng công cụ máy tính."}],
-    "tools": [{"type": "function", "function": {"name": "calculator", "description": "Tính toán", "parameters": {"type": "object", "properties": {"expression": {"type": "string"}}, "required": ["expression"]}}}]
+    "messages": [{"role": "user", "content": "What is 2+2? Use the calculator tool."}],
+    "tools": [{"type": "function", "function": {"name": "calculator", "description": "Calculate", "parameters": {"type": "object", "properties": {"expression": {"type": "string"}}, "required": ["expression"]}}}]
   }'
 ```
 
 #### Khắc phục sự cố
 
-| Sự cố                   | Giải pháp                                                                               |
-| ----------------------- | --------------------------------------------------------------------------------------- |
-| Máy chủ không khởi động | Kiểm tra `uv run mlx_lm.server --help` và xác minh ID mô hình                           |
-| Hết bộ nhớ              | Đảm bảo chỉ có một mô hình đang chạy; đóng các ứng dụng khác; kiểm tra Activity Monitor |
-| Kết nối bị từ chối      | Xác minh máy chủ đang chạy trên đúng cổng (11435/11436)                                 |
-| Phản hồi chậm           | Yêu cầu đầu tiên tải mô hình vào bộ nhớ (~30-60 giây); các yêu cầu tiếp theo sẽ nhanh   |
-| Gọi công cụ thất bại    | Đảm bảo mô hình hỗ trợ công cụ; kiểm tra nhật ký OmniRoute để tìm lỗi dịch              |
+| Sự cố                        | Giải pháp                                                                               |
+| ---------------------------- | --------------------------------------------------------------------------------------- |
+| Máy chủ không khởi động      | Kiểm tra `uv run mlx_lm.server --help` và xác minh ID mô hình                           |
+| Hết bộ nhớ                   | Đảm bảo chỉ có một mô hình đang chạy; đóng các ứng dụng khác; kiểm tra Activity Monitor |
+| Kết nối bị từ chối           | Xác minh máy chủ đang chạy trên đúng cổng (11435/11436)                                 |
+| Phản hồi chậm                | Yêu cầu đầu tiên tải mô hình vào bộ nhớ (~30-60 giây); các yêu cầu tiếp theo sẽ nhanh   |
+| Gọi công cụ không thành công | Đảm bảo mô hình hỗ trợ công cụ; kiểm tra nhật ký OmniRoute để tìm lỗi chuyển đổi        |
 
 ---
 
@@ -176,14 +169,13 @@ Các nhà cung cấp này cho phép **truy cập miễn phí** mà không cần 
 | Nhà cung cấp      | Hạn mức miễn phí        | Mô hình                                  | Cách kết nối       |
 | ----------------- | ----------------------- | ---------------------------------------- | ------------------ |
 | **Kiro AI**       | 50 tín dụng/tháng       | Claude Sonnet 4.5, Haiku 4.5, Opus 4.6   | Không cần xác thực |
-| **OpenCode Free** | Không giới hạn          | GPT-4o, Claude, Gemini                   | Không cần xác thực |
 | **Pollinations**  | Không cần khóa          | GPT-5, Claude, Gemini, DeepSeek, Llama 4 | Không cần xác thực |
-| **LongCat**       | 10M một lần             | LongCat-2.0                              | Khóa API + KYC     |
-| **Cloudflare AI** | 10K nơ-ron/ngày         | Hơn 50 mô hình                           | Không cần xác thực |
+| **LongCat**       | 10M dùng một lần        | LongCat-2.0                              | Khóa API + KYC     |
+| **Cloudflare AI** | 10K neuron/ngày         | Hơn 50 mô hình                           | Không cần xác thực |
 | **NVIDIA NIM**    | ~40 RPM                 | 129 mô hình                              | Cần khóa API       |
 | **Cerebras**      | $5 tín dụng khi đăng ký | GLM 4.7, GPT-OSS 120B                    | Khóa API + thẻ     |
 
-**Mẹo**: Kết nối nhiều nhà cung cấp miễn phí để có **AI miễn phí không giới hạn** với khả năng tự động chuyển đổi dự phòng!
+**Mẹo**: Kết nối nhiều nhà cung cấp miễn phí để có **AI miễn phí không giới hạn** với tính năng tự động chuyển sang nhà cung cấp dự phòng!
 
 ---
 
@@ -241,19 +233,19 @@ Nhà cung cấp của bạn hiện đã được kết nối. Bạn có thể s�
 OmniRoute hoạt động hiệu quả nhất với **nhiều nhà cung cấp**. Điều này mang lại cho bạn:
 
 - **Tự động chuyển đổi dự phòng** — Nếu một nhà cung cấp gặp lỗi, OmniRoute sẽ thử nhà cung cấp tiếp theo
-- **Tối ưu hóa chi phí** — OmniRoute chọn nhà cung cấp rẻ nhất cho từng yêu cầu
-- **Tối ưu hóa tốc độ** — OmniRoute chọn nhà cung cấp nhanh nhất cho từng yêu cầu
+- **Tối ưu hóa chi phí** — OmniRoute chọn nhà cung cấp có chi phí thấp nhất cho mỗi yêu cầu
+- **Tối ưu hóa tốc độ** — OmniRoute chọn nhà cung cấp nhanh nhất cho mỗi yêu cầu
 - **Tối ưu hóa chất lượng** — OmniRoute chọn nhà cung cấp tốt nhất cho từng tác vụ
 
 ### Thiết lập được đề xuất
 
 Kết nối ít nhất **3 nhà cung cấp** để có trải nghiệm tốt nhất:
 
-1. **Một nhà cung cấp miễn phí** (Kiro, OpenCode Free hoặc Pollinations) — Luôn sẵn dùng
-2. **Một nhà cung cấp nhanh** (Groq, Cerebras) — Cho phản hồi nhanh
-3. **Một nhà cung cấp chất lượng cao** (OpenAI, Anthropic, Google) — Cho các tác vụ phức tạp
+1. **Một nhà cung cấp miễn phí** (Kiro hoặc Pollinations) — Luôn sẵn sàng
+2. **Một nhà cung cấp tốc độ cao** (Groq, Cerebras) — Dành cho các phản hồi nhanh
+3. **Một nhà cung cấp chất lượng cao** (OpenAI, Anthropic, Google) — Dành cho các tác vụ phức tạp
 
-Sau đó, sử dụng `model: "auto"` và OmniRoute sẽ tự động chọn nhà cung cấp tốt nhất cho từng yêu cầu.
+Sau đó, sử dụng `model: "auto"` và OmniRoute sẽ tự động chọn nhà cung cấp phù hợp nhất cho mỗi yêu cầu.
 
 ---
 
@@ -335,15 +327,15 @@ và thời gian chờ có thể cấu hình là các cải tiến riêng biệt;
 
 ### "Tôi có cần trả phí để sử dụng OmniRoute không?"
 
-**Không!** OmniRoute miễn phí và có mã nguồn mở. Bạn có thể sử dụng các nhà cung cấp miễn phí (Kiro, OpenCode Free, Pollinations) mà không phải trả bất kỳ khoản phí nào. Bạn chỉ phải trả phí nếu chọn sử dụng các nhà cung cấp trả phí.
+**Không!** OmniRoute miễn phí và có mã nguồn mở. Bạn có thể sử dụng các nhà cung cấp miễn phí (Kiro, Pollinations) mà không phải trả bất kỳ khoản phí nào. Bạn chỉ phải trả phí nếu chọn sử dụng các nhà cung cấp có tính phí.
 
 ### "Tôi nên bắt đầu với nhà cung cấp nào?"
 
-Hãy bắt đầu với **Kiro AI** — dịch vụ này miễn phí, không yêu cầu khóa API và cho phép bạn truy cập các mô hình Claude. Sau đó, hãy thêm các nhà cung cấp khác khi cần.
+Hãy bắt đầu với **Kiro AI** — dịch vụ này miễn phí, không yêu cầu API key và cho phép bạn truy cập các mô hình Claude. Sau đó, hãy thêm các nhà cung cấp khác khi cần.
 
 ### "Tôi có thể sử dụng nhiều nhà cung cấp cùng lúc không?"
 
-**Có!** Đó chính là mục đích của OmniRoute. Hãy kết nối nhiều nhà cung cấp và sử dụng `model: "auto"` để OmniRoute chọn nhà cung cấp tốt nhất cho từng yêu cầu.
+**Có!** Đó chính là mục đích của OmniRoute. Hãy kết nối nhiều nhà cung cấp và sử dụng `model: "auto"` để OmniRoute chọn nhà cung cấp phù hợp nhất cho từng yêu cầu.
 
 ### "Điều gì xảy ra nếu một nhà cung cấp ngừng hoạt động?"
 
@@ -351,11 +343,11 @@ OmniRoute tự động bỏ qua các nhà cung cấp gặp lỗi và thử nhà 
 
 ### "Làm cách nào để ngắt kết nối một nhà cung cấp?"
 
-Đi tới Nhà cung cấp → nhấp vào nhà cung cấp → nhấp vào **Ngắt kết nối**.
+Đi tới Providers → nhấp vào nhà cung cấp → nhấp vào **Disconnect**.
 
-### "Tôi có thể sử dụng các khóa API hiện có của mình không?"
+### "Tôi có thể sử dụng các API key hiện có của mình không?"
 
-**Có!** Nếu bạn đã có khóa API cho OpenAI, Anthropic, Google, v.v., bạn có thể sử dụng chúng trong OmniRoute. Chỉ cần dán các khóa đó khi kết nối nhà cung cấp.
+**Có!** Nếu bạn đã có API key cho OpenAI, Anthropic, Google, v.v., bạn có thể sử dụng chúng trong OmniRoute. Chỉ cần dán chúng khi kết nối nhà cung cấp.
 
 ---
 

@@ -3,7 +3,7 @@ import {
   MODEL_SUPPORTED_ENDPOINT_VALUES,
   normalizeModelSupportedEndpoints,
 } from "@/shared/constants/modelSupportedEndpoints";
-import { providerAllowsOptionalApiKey } from "@/shared/constants/providers";
+import { providerAllowsOptionalApiKey, resolveProviderId } from "@/shared/constants/providers";
 import { validateProviderSpecificData } from "@/shared/validation/providerSpecificData";
 import {
   isReservedProviderPrefix,
@@ -19,6 +19,7 @@ import {
   customHeadersSchema,
 } from "./misc.ts";
 import { isValidProviderIconUrl } from "@/shared/validation/iconUrl";
+import { THINKING_REPLAY_MODES } from "@/shared/constants/modelCompat";
 import {
   MODEL_CONCURRENCY_MAX_CAP,
   MODEL_CONCURRENCY_MAX_KEY_LENGTH,
@@ -89,6 +90,7 @@ const ENCRYPTED_ENVELOPE_PREFIX = "enc:v1:";
 export const createProviderSchema = z
   .object({
     provider: z.string().min(1).max(100),
+    proxyEnabled: z.boolean().optional(),
     apiKey: z.string().max(MAX_PROVIDER_CREDENTIAL_LENGTH).optional(),
     name: z.string().min(1).max(200),
     priority: z.number().int().min(1).max(100).optional(),
@@ -105,7 +107,7 @@ export const createProviderSchema = z
   })
   .superRefine((data, ctx) => {
     const apiKey = typeof data.apiKey === "string" ? data.apiKey.trim() : "";
-    const catalogAllowsOptionalKey = providerAllowsOptionalApiKey(data.provider);
+    const catalogAllowsOptionalKey = providerAllowsOptionalApiKey(resolveProviderId(data.provider));
     if (data.allowNoCredential === true && !catalogAllowsOptionalKey) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
@@ -293,6 +295,7 @@ export const providerModelMutationSchema = z.object({
     .array(z.enum(MODEL_SUPPORTED_ENDPOINT_VALUES))
     .transform(normalizeModelSupportedEndpoints)
     .default(["chat"]),
+  endpointCapabilitySource: z.enum(["declared", "inferred", "defaulted", "operator"]).optional(),
   // #2905: optional per-model wire format override for custom models (e.g. a
   // custom opencode-go model that must use the Anthropic Messages shape).
   targetFormat: z
@@ -316,6 +319,10 @@ export const providerModelMutationSchema = z.object({
   // the same flag flows through `getCustomVisionCapabilityFields()` in the /v1/models
   // catalog. `null` clears a manual override back to the id-based heuristic.
   supportsVision: z.boolean().nullable().optional(),
+  // #18739: per-node thinking-replay contract persisted on the modelCompatOverrides
+  // entry (see open-sse/translator/helpers/thinkingReplayMode.ts). `null` unsets it
+  // back to the default provider-derived handling.
+  thinkingReplay: z.enum(THINKING_REPLAY_MODES).nullable().optional(),
   dimensions: z.number().int().positive().nullable().optional(),
   supportedInputTypes: z.array(z.string()).optional(),
   modelType: z.enum(["chat", "embedding", "image", "rerank"]).optional(),
@@ -359,6 +366,21 @@ export const removeModelAliasSchema = z.object({
   from: z.string().trim().min(1),
 });
 
+// Optional custom suffix for a compatible node's generated id
+// (`openai-compatible-<apiType>-<suffix>` / `anthropic-compatible[-cc]-<suffix>`); blank
+// keeps the random UUID. Restricted charset (no path/URL metacharacters) because the id
+// flows into URLs, logs, usage rows and combo targets.
+const providerIdSuffixSchema = z
+  .string()
+  .trim()
+  .max(64, "Provider ID suffix must be at most 64 characters")
+  .regex(
+    /^(?:[A-Za-z0-9][A-Za-z0-9_.-]*)?$/,
+    "Provider ID suffix can only contain letters, numbers, -, _ and . and must start with a letter or number"
+  )
+  .optional()
+  .nullable();
+
 export const createProviderNodeSchema = z
   .object({
     // #6874: name/prefix are required in general, but a `preset` (e.g.
@@ -393,9 +415,23 @@ export const createProviderNodeSchema = z
     customHeaders: customHeadersSchema,
     dailyQuotaResetTimezone: dailyQuotaResetTimezoneSchema,
     dailyQuotaResetHour: dailyQuotaResetHourSchema,
+    providerIdSuffix: providerIdSuffixSchema,
   })
   .superRefine((value, ctx) => {
     const nodeType = value.type || "openai-compatible";
+    if (
+      nodeType === "anthropic-compatible" &&
+      value.compatMode !== "cc" &&
+      /^cc-/i.test(value.providerIdSuffix || "")
+    ) {
+      // `anthropic-compatible-cc-` is the Claude Code compatible marker: a plain
+      // anthropic node with this suffix would be detected as CC-compatible at runtime.
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Provider ID suffix cannot start with "cc-" for Anthropic compatible nodes',
+        path: ["providerIdSuffix"],
+      });
+    }
     const normalizedPrefix = value.prefix?.trim();
     if (normalizedPrefix && isReservedProviderPrefix(normalizedPrefix)) {
       // Validate caller-supplied prefixes before preset handling. Presets may
@@ -772,6 +808,8 @@ export const validateProviderApiKeySchema = z
     runtimeKey: z.string().trim().max(65_536).optional(),
     tunnelId: z.string().trim().max(128).optional(),
     connectorName: z.string().trim().max(200).optional(),
+    // Command Code per-connection Zero Data Retention: probe with `x-cmd-zdr: 1`.
+    zdrEnabled: z.boolean().optional(),
   })
   .superRefine((data, ctx) => {
     if (data.provider === "google-pse-search" && !data.cx) {

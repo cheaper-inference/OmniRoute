@@ -1,1 +1,0 @@
-- fix(guardrails): protect raw video transcript fields in retained request logs when description fails or the video limit leaves a part untouched, while preserving the live provider payload (#12430).

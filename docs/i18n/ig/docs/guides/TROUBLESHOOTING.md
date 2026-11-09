@@ -33,39 +33,43 @@ Nsogbu ndị a na-ahụkarị na ihe ngwọta ha maka OmniRoute.
 
 ---
 
-## Nchọpụta Nsogbu Zuru Ezu
+## Nchọpụta Nsogbu zuru ezu
 
 ---
 
-### Ịmachi Ọnụego na Ndị Na-eweta Ọrụ Efu (429 / 400 / 401)
+### Mmachi Ọnụego n’aka Ndị Na-enye Ọrụ efu (429 / 400 / 401)
 
-**Mgbaàmà**: Mgbe ị na-eji `model: "auto"` na ndị na-eweta ọrụ efu/ndị na-achọghị nkwenye njirimara (opencode, auggie, wdg.), ị na-enweta `HTTP 429`, `400`, ma ọ bụ `401` mgbe ụfọdụ kama nzaghachi. Arịrịọ ndị ahụ na-aga nke ọma mgbe a nwara otu prompt ahụ ọzọ obere oge ka e mesịrị, mana akpaaka (ọrụ cron, agents, scripts) na-akwụsị na ọdịda mbụ.
+**Mgbaàmà**: Mgbe ị na-eji `model: "auto"` na ndị na-enye ọrụ efu/enweghị nkwenye (auggie, wdg.), mgbe ụfọdụ ị na-enweta `HTTP 429`, `400`, ma ọ bụ `401` kama azịza. Arịrịọ ndị ahụ na-aga nke ọma mgbe a nwara otu ngwa ahụ ọzọ obere oge gachara, mana akpaaka (ọrụ cron, agents, scripts) na-adaba na njehie mbụ.
 
-**Isi ihe kpatara ya**: Ụdị ọdịda atọ dị iche iche na-agbakọta:
+**Ihe kpatara ya**: Ụdị ọdịda atọ nọọrọ onwe ha na-agbakọta:
 
-1. **Oke ọnụego onye na-eweta ọrụ (`429`)**: Ọkwa efu nwere ike ịmanye okeọrụ n'ime oge a kara aka. Ọtụtụ oku emere n'otu oge na-emeju oke ahụ, ya mere a na-ajụ arịrịọ na-esote ruo mgbe windo oge ahụ malitegharịrị.
-2. **Model mebiri emebi na passthrough (`400`/`401`)**: Pool `auto/*` nwere ike ịgụnye model passthrough sitere na `opencode` ndị edebanyere na katalọgụ mana enweghị ozi njirimara na-arụ ọrụ (dịka `oc/north-mini-code-free` → `401`). Auto-router na-anwale otu, ọ daa, a na-ebufe njehie ahụ tupu fallback amalite.
-3. **Mmụba sitere na concurrency (`429` n'okpuru ibu ọrụ)**: Mgbe ọtụtụ session agent/cron na-akpọ `auto` n'otu oge, mkpokọta ọnụego arịrịọ na-agafe ihe ndị na-eweta ọrụ efu nwere ike ịnagide, ya mere a na-akara oku ziri ezi dịka nke na-emegbu usoro ahụ.
+1. **Mmachi ọnụego onye na-enye ọrụ (`429`)**: Ọkwa efu nwere ike itinye oke ọnụ ọgụgụ arịrịọ n’ime oge a kapịrị ọnụ. Oku ndị na-aga n’otu oge na-eji oke ahụ agwụ, ya mere a na-ajụ arịrịọ ọzọ ruo mgbe oge ahụ malitegharịrị.
+2. **Model mebiri emebi na passthrough (`400`/`401`)**: Ọdọ mmiri `auto/*` nwere ike ịgụnye ụdị passthrough ndị edebanyere aha na katalọgụ mana enweghị nzere na-arụ ọrụ (→ `401`). Auto-router na-anwale otu n’ime ha, ọ daa, njehie ahụ agafee tupu fallback amalite.
+3. **Mmụba concurrency (`429` n’okpuru ibu)**: Mgbe ọtụtụ nnọkọ agent/cron kụrụ `auto` n’otu oge, ọnụego arịrịọ jikọtara ọnụ gafere ihe ndị na-enye ọrụ efu na-anabata, ya mere a na-akpọ oku ziri ezi dị ka mmegbu.
 
-**Ndozi akwadoro (obodo ndị ọrụ kọrọ ya, 2026-08-10)**: hazie environment variables atọ ka rotation, concurrency, na fallback nwee ike ịnagide mgbanwe na ọgba aghara nke ọkwa efu kama ịkwụsị n'ihi ya:
+**Ndozi a kwadoro (obodo kọrọ ya, 2026-08-10)**: Hazie mgbanwe gburugburu atọ ndị a ka ntụgharị, concurrency, na fallback wee nagide mgbanwe nke ọkwa efu kama ịkwụsị n’ihi ya:
 
 ```bash
-export OMNIROUTE_ROTATE_ON_400=true           # gafee na model/onye na-eweta ọrụ ọzọ mgbe 400/401 mere (na-amafe model passthrough ndị mebiri emebi)
-export OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT=4   # oke nnabata heavyweight akọwapụtara (anaghị edobe ya na ndabara: enweghị oke ọnụọgụ arịrịọ, lee ndetu n'okpuru)
-export OMNIROUTE_CHAT_ADMISSION_QUEUE_MS=20000 # bulie oge nchere amachiri ka ọ gafee ndabara RATE_LIMIT_MAX_WAIT_MS maka upstream ndị na-adịghị ngwa
+export OMNIROUTE_ROTATE_ON_400=true           # gaa n’ụdị/onye na-enye ọrụ ọzọ mgbe 400/401 gasịrị (na-awụpụ ụdị passthrough ndị mebiri emebi)
+export OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT=4   # oke nnabata doro anya maka arịrịọ dị arọ (a naghị edo ya na ndabara: enweghị oke ọnụ ọgụgụ arịrịọ, lee ndetu dị n’okpuru)
+export OMNIROUTE_CHAT_ADMISSION_QUEUE_MS=20000 # bulie oge nchere a kpara ókè gafere ndabara RATE_LIMIT_MAX_WAIT_MS maka ndị upstream dị nwayọ
 ```
 
-Tọọ ihe ndị a na environment nke process OmniRoute (daemon ahụ, dịka site na LaunchAgent plist ma ọ bụ `systemctl edit`), wee malitegharịa OmniRoute. Flag rotation bụ otu ihe kacha nwee mmetụta: ọ na-agbanwe ọdịda siri ike ka ọ bụrụ nnwale ọzọ a na-eme n'ụzọ doro anya megide onye na-eweta ọrụ dị mma nọ na pool ahụ.
+Tinye ndị a na gburugburu usoro OmniRoute (daemon ahụ, dịka site na LaunchAgent plist ma ọ bụ `systemctl edit`), wee malitegharịa OmniRoute. Ọkọlọtọ ntụgharị bụ ihe na-akacha enye uru: ọ na-agbanwe ọdịda siri ike ka ọ bụrụ nnwale doro anya ọzọ megide onye na-enye ọrụ dị mma n’ime ọdọ mmiri ahụ.
 
-**Ndetu**: `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` na-amachi ọnụọgụ arịrịọ heavyweight — ndị nwere ogologo context — nwere ike ịrụ ọrụ n'otu oge; oke ahụ bụ ọnụ ụzọ nnabata, ọ bụghị ihe na-amachi ọnụego onye na-eweta ọrụ. **Mmelite #503-fanout:** anaghịzi edobe var a na ndabara (ugbu a, ọ na-arụ ọrụ naanị mgbe ahaziri ya kpọmkwem, dịka e gosiri n'elu) — kama nke ahụ, a na-achịkwa nnabata heavyweight site na byte budget ewepụtara na-akpaghị aka (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`) nke na-agbanwe nha ya dabere na ezigbo oke memory nke host, ya mere deployment ọhụrụ kwesịrị ịhụ ajụjụ `503 chat_admission_busy` ole na ole karịa n'etinyeghị var a ma ọlị; idebe ya kpọmkwem ebe a ka na-arụ ọrụ kpọmkwem dịka e dere na documentation. Override byte-budget akọwapụtara na-amachi onwe ha n'etiti 8 MiB–2 GiB. `413 body_exceeds_budget` abụghị ihe na-adịru nwa oge: bulie byte budget ahụ, belata `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES`, ma ọ bụ bulie oke memory nke process ahụ. Mwepụ `inflight_bytes_budget` bụ asọmpi akụnụba na-adịru nwa oge, a ka nwekwara ike ịnwa ya ọzọ. A na-achịkwa mmachi ọnụego nke onye na-eweta ọrụ ọ bụla (`open-sse/services/rateLimitManager.ts`) iche site na `RATE_LIMIT_MAX_WAIT_MS`, `RATE_LIMIT_MAX_QUEUE_DEPTH`, na `RATE_LIMIT_AUTO_ENABLE` — lee `.env.example`.
+**Ndetu**: `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` na-egbochi ọnụọgụ arịrịọ dị arọ — ndị nwere context ogologo — nwere ike ịgba ọsọ n’otu oge; oke a bụ ọnụ ụzọ nnabata, ọ bụghị onye na-achịkwa ọnụego onye na-enye ọrụ. **Mmelite #503-fanout:** a naghị edo var a ọzọ na ndabara (ọ na-arụ ọrụ naanị mgbe a haziri ya nke ọma, dịka n’elu) — kama, mmefu arịrịọ dị arọ na-eji mmefu byte nke a na-emepụta na-akpaghị aka (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`) nke na-agbanwe onwe ya dabere n’oke ebe nchekwa nke host ahụ n’eziokwu, ya mere deployment ọhụrụ kwesịrị ịhụ mbelata dị ukwuu na ọjụjụ `503 chat_admission_busy` n’enweghị ịtọ var a ma ọlị; ịtọ ya nke ọma ebe a ka na-arụ ọrụ kpọmkwem dịka akwụkwọ a si kọwaa. Mgbanwe mmefu byte doro anya na-ejedebe na 8 MiB–2 GiB. `413 body_exceeds_budget` abụghị ihe na-adịru nwa oge: bulie mmefu byte ahụ, belata `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES` ma ọ bụ oke ahụ echekwara maka request body, ma ọ bụ bulie oke ebe nchekwa usoro ahụ. Mbelata `inflight_bytes_budget` bụ esemokwu nwa oge, ọ ka nwekwara ike ịnwale ọzọ. Mmachi ọnụego nke onye na-enye ọrụ ọ bụla (`open-sse/services/rateLimitManager.ts`) na-achịkwa ya iche site na `RATE_LIMIT_MAX_WAIT_MS`, `RATE_LIMIT_MAX_QUEUE_DEPTH`, na `RATE_LIMIT_AUTO_ENABLE` — lee `.env.example`.
 
-**Otu esi achọpụta na ọ rụrụ ọrụ**: mee ka agent/cron gị gbaa ọsọ ugboro abụọ n’usoro ngwa ngwa ma chọpụta na ha abụọ gara nke ọma. Tupu ndozi ahụ, ọsọ nke abụọ na-ewepụtakarị `429`/`401`. Mgbe ndozi ahụ gasịrị, a na-anwale ọdịda (ọ bụrụ na e nwere nke ọ bụla) ọzọ n’enweghị ihe onye ọrụ ga-ahụ, oku ahụ wee gwụchaa. Ị nwekwara ike iji `curl /monitoring/health` wee leba anya n’oghere `rateLimitedUntil` dị na njikọ ndị na-eweta ọrụ yana `circuitBreakers.providerBreakers[].state` maka ndị na-eweta ọrụ metụtara — ọnọdụ ahụ bụ otu n’ime `CLOSED`, `DEGRADED`, `OPEN`, ma ọ bụ `HALF_OPEN` (lee `src/shared/utils/circuitBreaker.ts`), onye na-eweta ọrụ nke na-anọgide na-ada ga-agbanwe site na `CLOSED → DEGRADED → OPEN` tupu oge nrụgharị ahụ ekwe ka nnwale gafee (`HALF_OPEN`).
+**Ndetu maka nkwalite: oke request body echekwara na-emetụtakwa chat ugbu a.** Oke echekwara na mbụ n’okpuru Settings > Advanced > Request Body Limit (`maxBodySizeMb`) na-emetụtakwa `/v1/chat/completions` na `/v1/responses` ugbu a. Tupu mgbanwe a, ụzọ abụọ ndị a na-anabata ihe ruru 50 MB n’agbanyeghị ihe echekwara, ya mere nrụnye nwere oke echekwara dị ala ga-amalite ịjụ chat bodies gafere ya. Nrụnye nke na-echekwabeghị oke ọ bụla na-edobe ndabara 50 MB.
 
-**Ọ bụrụ na ị ka na-ahụ 429**: akaụntụ na-arụ ọrụ maka onye na-eweta ọrụ ahụ agwụla _quota_ ya n’ezie (ọ bụghị naanị oke ọsọ arịrịọ). Tinye akaụntụ nke abụọ maka otu onye na-eweta ọrụ ahụ na dashboard OmniRoute → Ndị na-eweta ọrụ → Akaụntụ, ma ọ bụ tinye onye ọzọ na-eweta ọrụ n’efu (dịka `routeway`, `auggie`). Ịtụgharị akaụntụ na-enyere naanị aka maka nsogbu nwa oge nke oke ọsọ/400/401; mgbe _quota_ gwụchara kpamkpam, a chọrọ credential nke abụọ ma ọ bụ onye na-eweta ọrụ ọzọ.
+Ọjụjụ ahụ bụ HTTP `413` nke `error.code` ya bụ `PAYLOAD_TOO_LARGE` na `error.type` ya bụ `payload_too_large`. Ozi ahụ na-akpọ aha oke dị na-arụ ọrụ: `Request body too large. Maximum allowed: 10 MB` mgbe `Content-Length` ekwuputara karịrị ya, ma ọ bụ `Request body too large for chat completions (max 10 MB).` mgbe byte ndị a gụrụ n’eziokwu karịrị ya. Nke a abụghị otu ihe na `413 body_exceeds_budget` dị n’elu, nke sitere na mmefu ebe nchekwa, setting a anaghị agbanwekwa ya.
 
-**Ọ bụrụ na ị hụ 403 na ụdị vision (`auto/vision`, `bazaarlink/*`)**: akaụntụ ejikọrọ enweghị atụmatụ akwụ ụgwọ nke gụnyere vision, ma ọ bụ API key ahụ enweghị ikikere zuru ezu. Nyochaa na dashboard onye na-eweta ọrụ na scope nke key ahụ gụnyere vision/multimodal, ma ọ bụ jikọọ akaụntụ nke atụmatụ akwụ ụgwọ ma debe ya dịka ebe a na-eziga arịrịọ vision.
+Iji bulie oke ahụ, chekwaa uru dị elu na `/dashboard/settings/advanced`, ma ọ bụ zipu `PATCH /api/settings` na `{"maxBodySizeMb": 50}`. A na-anabata uru site na 1 ruo 500 MB, ọ na-arụ ọrụ n’enweghị ịmalitegharịa, 50 na-eweghachite oke chat gara aga. Oke abụọ ọzọ ka nwere ike ịkwụsị body buru ibu: `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES`, mgbe edoziri ya, na-ejikwa oke echekwara; annotation Kubernetes ingress `proxy-body-size` (`50m` na manifests e zipụrụ) kwesịkwara ịkwalite iche maka ihe ọ bụla gafere 50 MB.
 
----
+**Otu esi enyocha na ọ rụrụ ọrụ**: gbaa agent/cron gị ugboro abụọ n’usoro ngwa ngwa ma kwado na ha abụọ gara nke ọma. Tupu ndozi ahụ, ọsọ nke abụọ na-atụkarị `429`/`401`. Mgbe ndozi ahụ gasịrị, a ga-anwale ọdịda ọ bụla (ọ bụrụ na ọ dị) ọzọ n’enweghị ihe onye ọrụ hụrụ, oku ahụ agwụkwa nke ọma. Ị nwekwara ike ịgba `curl /monitoring/health` ma lelee mpaghara `rateLimitedUntil` dị na njikọ ndị na-enye ọrụ yana `circuitBreakers.providerBreakers[].state` maka ndị na-enye ọrụ metụtara — steeti ahụ bụ otu n’ime `CLOSED`, `DEGRADED`, `OPEN`, ma ọ bụ `HALF_OPEN` (lee `src/shared/utils/circuitBreaker.ts`), onye na-enye ọrụ nke na-aga n’ihu ida ga-agbanwe `CLOSED → DEGRADED → OPEN` tupu windo nrụpụta ekwe ka probe gafee (`HALF_OPEN`).
+
+**Ọ bụrụ na ị ka na-ahụ 429**: akaụntụ na-arụ ọrụ maka onye na-enye ọrụ ahụ ejirila _quota_ ya n’ezie (ọ bụghị naanị rate). Tinye akaụntụ nke abụọ maka otu onye na-enye ọrụ ahụ na dashboard OmniRoute → Providers → Accounts, ma ọ bụ jikọta onye na-enye ọrụ efu ọzọ (dịka `routeway`, `auggie`). Ntughari na-enyere naanị n’ọnọdụ rate/400/401 na-adịru nwa oge; quota agwụla kpamkpam chọrọ nzere nke abụọ ma ọ bụ onye na-enye ọrụ ọzọ.
+
+**Ọ bụrụ na ị hụ 403 na ụdị vision (`auto/vision`, `bazaarlink/*`)**: akaụntụ ejikọrọ enweghị atụmatụ akwụ ụgwọ nke gụnyere vision, ma ọ bụ igodo API enweghị ikike zuru ezu. Nyochaa na dashboard onye na-enye ọrụ ahụ na oke igodo ahụ gụnyere vision/multimodal, ma ọ bụ jikọọ akaụntụ ọkwa akwụ ụgwọ ma debe ya dịka ebumnuche vision.
 
 ## Ịdọ aka ná ntị npm install (ERESOLVE / peer / deprecated)
 
@@ -90,39 +94,39 @@ npm install -g omniroute --legacy-peer-deps
 
 ---
 
-## Ịdọ aka ná ntị na-egosi na egbochiri npm install-scripts (nrụnye global)
+## Ịdọ aka ná ntị gbasara npm install-scripts Egbochiri (nrụnye zuru ụwa ọnụ)
 
 <a name="npm-install-scripts-blocked-warning-global-install"></a>
 
-Mgbe ị na-agba `npm install -g omniroute`, ụdị npm ndị ọhụrụ (v11+ na v12+) na-egbochi package lifecycle scripts na ndabara ma gosipụta ịdọ aka ná ntị install-scripts:
+Mgbe ị na-agba `npm install -g omniroute`, ụdị npm ndị ọhụrụ (v11+ na v12+) na-egbochi skript usoro ndụ ngwugwu na ndabara ma gosipụta ịdọ aka ná ntị gbasara install-scripts:
 
 ```
-npm warn install-scripts Egbochiri install scripts nke ngwugwu 7 n'ihi na allowScripts anaghị ekpuchi ha:
+npm warn install-scripts E gbochiri skript nrụnye nke ngwugwu 7 n'ihi na allowScripts anaghị ekpuchi ha:
   omniroute@<version> (postinstall: node scripts/build/postinstall.mjs)
   keytar, @parcel/watcher, @swc/core, protobufjs, esbuild, onnxruntime-node
 ```
 
 ### Enwere ike ileghara ịdọ aka ná ntị a anya?
 
-**N'akụkụ ụfọdụ, mana a naghị atụ aro ka e jiri ya rụọ ọrụ na-enweghị scripts.** OmniRoute nwere fallback ndị na-arụ ọrụ nke ọma: ọ bụrụ na enweghị ike ibunye binding native `better-sqlite3` site na standalone bundle, ngwa ahụ ga-eji driver ndị ọzọ dịka `node:sqlite` ma ọ bụ `sql.js` (lee [Mkpebi SQLite Runtime](../ops/SQLITE_RUNTIME.md)). Server ahụ ka ga-amalite, mana iji WASM fallback dịka `sql.js` arụ ọrụ na-eme ka ọnọdụ SQLite WAL (Write-Ahead Logging) kwụsị ma na-abawanye ibu ebe nchekwa na disk-sync.
+**N'akụkụ ụfọdụ, mana a naghị akwado ịgba ya na-enweghị skript.** OmniRoute nwere usoro ndabere na-arụ ọrụ nke ọma: ọ bụrụ na enweghị ike ibunye njikọ `better-sqlite3` nke sistemụ site na ngwugwu standalone ahụ, ngwa ahụ ga-eji draịva ndị ọzọ dịka `node:sqlite` ma ọ bụ `sql.js` dị ka usoro ndabere (lee [Mkpebi SQLite Runtime](../ops/SQLITE_RUNTIME.md)). Sava ahụ ka ga-amalite, mana iji usoro ndabere WASM dịka `sql.js` na-eme ka ọnọdụ SQLite WAL (Write-Ahead Logging) ghara ịrụ ọrụ ma na-abawanye ojiji ebe nchekwa na ibu ọrụ mmekọrịta diski.
 
-### Kedu scripts ndị dị mkpa n'ezie?
+### Olee skript ndị a chọrọ n'ezie?
 
-Ọ bụghị scripts niile e gbochiri dị mkpa iji mee ka OmniRoute rụọ ọrụ:
+Ọ bụghị skript niile egbochiri ka dị mkpa maka ịgba OmniRoute:
 
-- **Ndị dị mkpa (`omniroute`, `better-sqlite3`):** OmniRoute na-arụ ọrụ site na Next.js standalone application bundle (`dist/`). N'oge nrụnye, npm na-ebudata ma ọ bụ na-achịkọta native SQLite driver nke dabara na host n'ime `node_modules/better-sqlite3/` nke ọkwa kachasị elu. Script `postinstall` nke OmniRoute (`scripts/build/postinstall.mjs`) na-enyochazị ma na-edepụta binary ndị a dabara na host n'ime `dist/node_modules/` ka standalone server nwee ike ịnweta ha. Ọ bụrụ na egbochie postinstall script nke `omniroute`, a ga-awụpụ nzọụkwụ ndegharị a.
-- **Ndị nhọrọ/transitive (`keytar`, `@parcel/watcher`, `@swc/core`, `protobufjs`, `esbuild`):** Ndị a bụ ngwa enyemaka maka build, ngwa watcher, ma ọ bụ ngwa system keychain. Ikwe ka ha rụọ ọrụ na-egbochi ịdọ aka ná ntị build, mana ha adịghị mkpa maka ọrụ routing ndị bụ isi.
-- **Nke ewepụrụ (`onnxruntime-node`):** Ọ bụ dependency nhọrọ maka local AI embeddings, ọ **dịghịkwa** mkpa ka OmniRoute rụọ ọrụ. Postinstall script ya na-ebudata akụ CUDA ruru ihe dịka 300MB site na NuGet; etinyela ya na allow-list ma ọ bụrụ na i bughị n'obi iji local ONNX acceleration na hardware a na-akwado.
+- **Ndị dị mkpa (`omniroute`, `better-sqlite3`):** OmniRoute na-arụ ọrụ site na ngwugwu ngwa Next.js standalone (`dist/`). N'oge nrụnye, npm na-ebudata ma ọ bụ na-achịkọta draịva SQLite nke sistemụ nke kwekọrọ na host n'ime `node_modules/better-sqlite3/` nke dị n'ọkwa kachasị elu. Skript `postinstall` nke OmniRoute (`scripts/build/postinstall.mjs`) na-enyocha ma na-edepụtaghachi faịlụ binary ndị a kwekọrọ na host n'ime `dist/node_modules/` ka sava standalone nwee ike ịnweta ha. Ọ bụrụ na egbochie skript postinstall nke `omniroute`, a ga-amafere usoro idetuo a.
+- **Ndị nhọrọ/ndabere sitere n'ụzọ ọzọ (`keytar`, `@parcel/watcher`, `@swc/core`, `protobufjs`, `esbuild`):** Ndị a bụ ngwa enyemaka maka build, ngwa nlekota, ma ọ bụ ngwa keychain nke sistemụ. Ikwe ka ha rụọ ọrụ na-egbochi ịdọ aka ná ntị build, mana a chọghị ha maka ọrụ bụ isi nke routing.
+- **Nke ewepụrụ (`onnxruntime-node`):** Nke a bụ dependency nhọrọ maka embeddings AI nke mpaghara ma **ọ bụghị** ihe achọrọ iji mee ka OmniRoute rụọ ọrụ. Skript postinstall ya na-ebudata ihe CUDA ruru ~300MB site na NuGet; etinyela ya na allow-list ma ọ bụrụ na i bughị n'obi kpọmkwem iji ngwangwa ONNX nke mpaghara na hardware akwadoro.
 
-### Ndozi a tụrụ aro
+### Ndozi akwadoro
 
-Iji kwe ka install scripts ndị dị mkpa rụọ ọrụ n'oge nrụnye global ma mechie ịdọ aka ná ntị, nyefee `--allow-scripts` maka OmniRoute na native dependencies ya:
+Iji kwe ka skript nrụnye ndị achọrọ rụọ ọrụ n'oge nrụnye zuru ụwa ọnụ ma kwụsị ịdọ aka ná ntị, tinye `--allow-scripts` maka OmniRoute na dependencies sistemụ ya:
 
 ```bash
 npm install -g omniroute --allow-scripts=omniroute,better-sqlite3,keytar,@parcel/watcher,@swc/core,protobufjs,esbuild
 ```
 
-N'aka nke ọzọ, iji hazie nke a ka ọ dịgide maka nrụnye global niile na akaụntụ onye ọrụ gị:
+N'aka nke ọzọ, iji hazie nke a ka ọ na-adịgide adịgide maka nrụnye zuru ụwa ọnụ niile n'akaụntụ onye ọrụ gị:
 
 ```bash
 npm config set allow-scripts=omniroute,better-sqlite3,keytar,@parcel/watcher,@swc/core,protobufjs,esbuild --location=user
@@ -131,7 +135,7 @@ npm install -g omniroute
 
 ### Nyochaa nrụnye gị
 
-Mgbe nrụnye gasịrị, gbaa ngwa diagnostic arụnyere n'ime ya iji hụ na native bindings na gburugburu runtime dị mma:
+Mgbe nrụnye gasịrị, gbaa ngwa nchọpụta nsogbu arụnyere n'ime ya iji hụ na njikọ sistemụ na gburugburu runtime dị mma:
 
 ```bash
 omniroute doctor
@@ -835,6 +839,30 @@ na-aga n'ihu ịmalite n'azụ ma a ga-enwe ike iru ya ozugbo mmalite zuru ezu.
 
 Lee [`docs/reference/ENVIRONMENT.md`](../reference/ENVIRONMENT.md) maka nkọwa
 zuru ezu banyere `OMNIROUTE_READY_TIMEOUT_MS`.
+
+---
+
+## CCR / dedup nsogbu
+
+Matriks nyocha maka mkpakọ CCR (`ccr`) na ngwaọrụ `session-dedup`. Maka nrụtụ aka onye ọrụ zuru oke (akara akara, ihe achọrọ, oghere nke ngwaọrụ ọ bụla, pagination eweghachi) hụ [Compression Engines → Prerequisites / onye ọrụ ntuziaka](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+
+| Mgbaàmà                                                                                            | O yikarịrị ka ọ kpatara ya                                                                                                               | Nyochaa                                                                                                           | Idozi                                                                                                                                                                                                                                                             |
+| -------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **MCP 403** — `403 LOCAL_ONLY`                                                                     | auth-eche nche ụzọ, ọ bụghị ahụhụ njem. Ọ dịghị `Bearer`, ma ọ bụ igodo na-enweghị `mcp:connect`/`manage`/`admin`, ruru ụzọ `/api/mcp/`. | Arịrịọ ahụ bu nkụnye eji isi mee no/invalid `Authorization`.                                                      | Zipu igodo `Bearer` bara uru. Igodo dịpụrụ adịpụ nwere ike ijide `mcp:connect` (na-akwado `/api/mcp/` mpaghara naanị-ịkpụpụta) gbakwunyere oghere read/write ọ chọrọ.                                                                                             |
+| **achọtaghị ngọngọ** — `omniroute_ccr_retrieve` na-ajụ hash                                        | Hash abụghị uru hex 24 ma ọ bụ depụtaghachiri ya na-ezighi ezi, ma ọ bụ ihe mgbochi ahụ emebiela / chụpụrụ ya.                           | Tulee hash megide uru 24-hex na akara `[CCR retrieve hash=…]` ; lelee `omniroute_ccr_stats` maka steeti ụlọ ahịa. | Detuo verbatim hash 24-hex site na akara. Ọ bụrụ na ngọngọ ahụ apụọla n'ezie, ọ gafere TTL ya ma ọ bụ ruo na ụlọ ahịa na-adịgide adịgide (ihe mgbochi karịrị 512 KB, na ngọngọ ọ bụla na oge igwe ojii, nọrọ ebe nchekwa naanị ma ghara ịlanarị mmalite mmalite). |
+| **CCR -op** — a naghị ejikọta ngọngọ (ederede na-abịaghachi na-agbanweghị agbanwe)                 | Mgbochi n'okpuru ọnụ ụzọ mkpakọ, ma ọ bụ CCR engine / mode adịghị arụ ọrụ.                                                               | Lelee mkpakọ `strategy`/`enabled` na-arụ ọrụ yana nha ngọngọ vs ọnụ ụzọ.                                          | Kwado CCR (ma ọ bụ ọnọdụ akpọkọtara na-agba ya) wee gosi na ngọngọ ahụ buru ibu nke ọma iji chekwaa ya. A no-op abụghị njehie — ọ bụghị "ihe ọ bụla iji mpikota onu."                                                                                             |
+| **ndep marker** — `[dedup:ref sha=…]` na-egosi na mmepụta                                          | **Nlecha anya azụ** , ọ bụghị mfu ma ọ bụ njehie. `session-dedup` elided ederede ezigarala n'oge mbụ nke otu nnọkọ ahụ.                  | Kwenye na otu ederede pụtara na mbụ na nnọkọ.                                                                     | Emela ihe ọ bụla — akpọla ngwá ọrụ ma ghara ịnwa ịrụgharị ya. Ihe mbụ mere bụ akwụkwọ nsọ; A naghị edegharị ntụgharị nke ugbu a, a na-ewepụ ya na ntụgharị ọzọ.                                                                                                   |
+| **Usoro koodu** Ngwa — `omniroute_ccr_*` adịghị na ntụziaka `tools[]` / CCR adịghị agba (OpenCode) | Usoro koodu OpenCode (nke ndabara) na-akpọsa naanị ngwaọrụ ala na ụdị ahụ, na-ezobe ngwaọrụ MCP na `tools[]`.                            | Lelee ntinye nkesa OpenCode MCP maka `codemode`.                                                                  | Tọọ `codemode: false` na ntinye nkesa (a** onye ahịa** ntọala) ya mere a na-akpọsa ngwá ọrụ MCP. Ntuziaka CCR retrieve-protocol akwụsịghị: ihe nkesa aha ya bụ `omniroute` na-ekpughe `omniroute_omniroute_ccr_retrieve`, na `_` abụghị ihe nkesa dabara na ya.   |
+
+Mgbaàmà ndị ọzọ:
+
+| Mgbaàmà                                                                                              | O yikarịrị ka ọ kpatara ya                                                                                                                                                         | Idozi                                                                                                                                                                               |
+| ---------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Insufficient MCP scopes for <tool>. Missing: <scope>.`                                              | Nsonaazụ njehie ngwá ọrụ MCP (`isError: true`), ọ bụghị HTTP 403. Igodo onye na-akpọ oku enweghị oke achọrọ.                                                                       | Tinye oghere site na tebụl otu ngwaọrụ (lee ntuziaka onye ọrụ). Dịka `omniroute_ccr_retrieve` chọrọ `read:compression`.                                                             |
+| `Unknown Mcp-Session-Id`                                                                             | Streamable-HTTP nnọkọ agwụla agwụ wee weta ya (`OMNIROUTE_MCP_SESSION_IDLE_MS`); ihe nkesa na-aza HTTP 404.                                                                        | Jikọọ ma ọ bụ malitegharịa oge — eme** ọ bụghị** tụgharịa igodo, gbanwee oghere, ma ọ bụ nyegharịa ngwaọrụ aha. Ọ bụghị 401/403.                                                    |
+| `JSON Parse error` / `Unterminated string` na nsonaazụ ngwaọrụ                                       | ederede ngwá ọrụ MCP ebibiri gburugburu `mcpAccessibility.maxTextChars` (ndabara `50000`) etiti-JSON.                                                                              | Jiri paged `mode` kama iju ihe efu: `mode:"grep"`, `mode:"lines"`, `mode:"head"`, `mode:"tail"`, ma ọ bụ `mode:"stats"`. Iwu nke isi mkpịsị aka: `chars > 40000` → jiri `mode`.     |
+| `Failed to open SSE stream`                                                                          | Onye ahịa kụrụ `/api/mcp/sse` singleton nketa mgbe njem ahụ bụ `streamable`.                                                                                                       | Tụtụ onye ahịa aka na `/api/mcp/stream` (ebe njedebe a na-ebugharị) kama `/api/mcp/sse`.                                                                                            |
+| **Ọkụ obi stdio nwụrụ anwụ** — `mcp-heartbeat.json` na-egosi `pidAlive: false` mgbe njem HTTP dị elu | Faịlụ nkụta obi bụ ihe fọdụrụ stdio (stale PID, ma ọ bụ ụdị dị iche); Transportgbọ njem HTTP na-arụ ọrụ wee kọwapụta steeti site na `getMcpHttpStatus()` kama (enweghị ide faịlụ). | Ọ dịghị omume — njem ahụ dị mma. Eziokwu bụ `httpTransport.online` / `startedAt` sitere na `/api/mcp/status`, ọ bụghị faịlụ nkụta obi. Ebidokwala ihe nkesa ma ọ bụ tụgharịa igodo. |
 
 ---
 

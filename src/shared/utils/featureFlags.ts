@@ -4,6 +4,7 @@ import {
   type FeatureFlagDefinition,
 } from "@/shared/constants/featureFlagDefinitions";
 import { registerFeatureFlagResolver } from "@/shared/utils/featureFlagResolverBridge";
+import { isRequireApiKeyValueEnabled } from "@/shared/utils/requireApiKeyValue.mjs";
 
 /**
  * Resolve the effective value of a feature flag.
@@ -40,9 +41,14 @@ export function resolveAllFeatureFlags(): Array<{
   key: string;
   effectiveValue: string;
   source: "db" | "env" | "default";
+  configuredSource?: "db" | "env" | "default";
+  sourceKey?: string;
   definition: FeatureFlagDefinition;
 }> {
   return FEATURE_FLAG_DEFINITIONS.map((definition) => {
+    if (definition.key === "UNPRICED_USAGE_BUDGET_POLICY") {
+      return { key: definition.key, ...resolveUnpricedUsageBudgetPolicy(), definition };
+    }
     const dbOverride = getFeatureFlagOverride(definition.key);
     if (dbOverride !== undefined) {
       return { key: definition.key, effectiveValue: dbOverride, source: "db", definition };
@@ -61,9 +67,14 @@ export function resolveAllFeatureFlags(): Array<{
 }
 
 // Backward-compatible wrappers
+/**
+ * REQUIRE_API_KEY ignores case and surrounding whitespace, unlike the generic
+ * `isFeatureFlagEnabled`, so the gate agrees with the startup exposure warnings
+ * that read the same value (see requireApiKeyValue.mjs).
+ */
 export function isRequireApiKeyEnabled(): boolean {
   try {
-    return isFeatureFlagEnabled("REQUIRE_API_KEY");
+    return isRequireApiKeyValueEnabled(resolveFeatureFlag("REQUIRE_API_KEY"));
   } catch (error) {
     console.error(
       "[featureFlags] Failed to resolve REQUIRE_API_KEY, defaulting to required:",
@@ -138,6 +149,59 @@ export function getModelsCatalogPrefixMode(): ModelsCatalogPrefixMode {
   return "dual";
 }
 
+export type UnpricedUsageBudgetPolicy = "fail_closed" | "count_as_zero";
+
+/** Runtime policy and provenance; inherited DB values are not enum overrides. */
+export function resolveUnpricedUsageBudgetPolicy(): {
+  effectiveValue: UnpricedUsageBudgetPolicy;
+  source: "db" | "env" | "default";
+  configuredSource: "db" | "env" | "default";
+  sourceKey: string;
+} {
+  const key = "UNPRICED_USAGE_BUDGET_POLICY";
+  const dbPolicy = getFeatureFlagOverride(key);
+  const explicitPolicy = dbPolicy ?? (process.env[key] || undefined);
+  if (explicitPolicy !== undefined) {
+    const source = dbPolicy !== undefined ? "db" : "env";
+    return {
+      effectiveValue: explicitPolicy === "count_as_zero" ? "count_as_zero" : "fail_closed",
+      source,
+      configuredSource: source,
+      sourceKey: key,
+    };
+  }
+  const sourceKey = "USAGE_LIMIT_IGNORE_UNPRICED";
+  const effectiveValue = isFeatureFlagEnabled(sourceKey) ? "count_as_zero" : "fail_closed";
+  const source =
+    getFeatureFlagOverride(sourceKey) !== undefined
+      ? "db"
+      : process.env[sourceKey]
+        ? "env"
+        : "default";
+  return { effectiveValue, source, configuredSource: "default", sourceKey };
+}
+
+/**
+ * How per-key USD limits treat usage that has no pricing row (#12341).
+ *
+ * Fail-safe closed: an unreadable flag store or an unknown value keeps the
+ * default `fail_closed` behavior, so a hard budget cap is never silently
+ * relaxed. An explicit enum (DB before env) takes precedence over the upstream
+ * USAGE_LIMIT_IGNORE_UNPRICED opt-out; the boolean is consulted only when no
+ * enum was configured. An invalid explicit enum must not fall through to it.
+ */
+export function getUnpricedUsageBudgetPolicy(): UnpricedUsageBudgetPolicy {
+  try {
+    return resolveUnpricedUsageBudgetPolicy().effectiveValue;
+  } catch (error) {
+    console.error(
+      "[featureFlags] Failed to resolve UNPRICED_USAGE_BUDGET_POLICY, defaulting to fail_closed:",
+      error instanceof Error ? error.message : error
+    );
+    return "fail_closed";
+  }
+}
+
 /**
  * No-thinking gateway alias master switch (`no-think/<provider>/<model>`).
  *
@@ -165,6 +229,38 @@ export function isDisableThinkingLevelVariantsEnabled(): boolean {
   } catch (error) {
     console.error(
       "[featureFlags] Failed to resolve OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS, defaulting to disabled:",
+      error instanceof Error ? error.message : error
+    );
+    return false;
+  }
+}
+
+/**
+ * Catalog mirror refinements (claude/ discovery + functional-gateway mirrors).
+ * Opt-in; an unreadable flag store keeps the historical mirror behavior (fail-safe off).
+ */
+export function isCatalogMirrorRefinementsEnabled(): boolean {
+  try {
+    return isFeatureFlagEnabled("CATALOG_MIRROR_REFINEMENTS_ENABLED");
+  } catch (error) {
+    console.error(
+      "[featureFlags] Failed to resolve CATALOG_MIRROR_REFINEMENTS_ENABLED, defaulting to disabled:",
+      error instanceof Error ? error.message : error
+    );
+    return false;
+  }
+}
+
+/**
+ * models.dev effort-tier fallback (#15944). Fail closed: an unreadable flag store keeps the
+ * previous catalog/resolver behavior (no synced fallback, empty list = unknown).
+ */
+export function isModelsDevEffortTiersEnabled(): boolean {
+  try {
+    return isFeatureFlagEnabled("MODELS_DEV_EFFORT_TIERS_ENABLED");
+  } catch (error) {
+    console.error(
+      "[featureFlags] Failed to resolve MODELS_DEV_EFFORT_TIERS_ENABLED, defaulting to disabled:",
       error instanceof Error ? error.message : error
     );
     return false;
@@ -227,6 +323,23 @@ export function isProxyPoolSharedEgressOrderEnabled(): boolean {
   } catch (error) {
     console.error(
       "[featureFlags] Failed to resolve PROXY_POOL_SHARED_EGRESS_ORDER, defaulting to disabled:",
+      error instanceof Error ? error.message : error
+    );
+    return false;
+  }
+}
+
+/**
+ * Model-scoped quota refusals on opencode (opt-in, default off): a quota 429 sets the egress aside
+ * only for the model that hit it. Fail-closed: an unreadable flag store keeps the whole-egress
+ * set-aside.
+ */
+export function isProxyRefusalModelScopeEnabled(): boolean {
+  try {
+    return isFeatureFlagEnabled("PROXY_REFUSAL_MODEL_SCOPE");
+  } catch (error) {
+    console.error(
+      "[featureFlags] Failed to resolve PROXY_REFUSAL_MODEL_SCOPE, defaulting to disabled:",
       error instanceof Error ? error.message : error
     );
     return false;
@@ -300,23 +413,6 @@ export function isProxyHealthBlockedResetsStreakEnabled(): boolean {
 }
 
 /**
- * OpenCode Responses first-byte stall rotation (#13484). Opt-in: when off, the stream
- * readiness timeout stays the only bound on a stalled Responses stream.
- * Fail closed: an unreadable flag store keeps the pre-flag behavior (disabled).
- */
-export function isOpencodeResponsesStallRotationEnabled(): boolean {
-  try {
-    return isFeatureFlagEnabled("OPENCODE_RESPONSES_STALL_ROTATION");
-  } catch (error) {
-    console.error(
-      "[featureFlags] Failed to resolve OPENCODE_RESPONSES_STALL_ROTATION, defaulting to disabled:",
-      error instanceof Error ? error.message : error
-    );
-    return false;
-  }
-}
-
-/**
  * OpenCode user_blocked 403/451 bounded rotation (#13498). Opt-in: when off, the refusal is
  * returned unchanged exactly as before.
  * Fail closed: an unreadable flag store keeps the pre-flag behavior (disabled).
@@ -344,23 +440,6 @@ export function isOpencodeTransientFailoverBackoffEnabled(): boolean {
   } catch (error) {
     console.error(
       "[featureFlags] Failed to resolve OPENCODE_TRANSIENT_FAILOVER_BACKOFF, defaulting to disabled:",
-      error instanceof Error ? error.message : error
-    );
-    return false;
-  }
-}
-
-/**
- * Mistral bare-401 bounded soft lockout (#13609). Opt-in: when off, a bare Mistral 401 parks
- * the connection as expired exactly as before.
- * Fail closed: an unreadable flag store keeps the pre-flag behavior (disabled).
- */
-export function isMistralAmbiguous401SoftLockoutEnabled(): boolean {
-  try {
-    return isFeatureFlagEnabled("MISTRAL_AMBIGUOUS_401_SOFT_LOCKOUT");
-  } catch (error) {
-    console.error(
-      "[featureFlags] Failed to resolve MISTRAL_AMBIGUOUS_401_SOFT_LOCKOUT, defaulting to disabled:",
       error instanceof Error ? error.message : error
     );
     return false;
@@ -422,23 +501,6 @@ export function isOpencodeParkAndResumeEnabled(): boolean {
 }
 
 /**
- * Stream readiness stall retry. Opt-in: when off, a stalled first body fails
- * the request without a retry. Fail closed: an unreadable flag store keeps
- * the pre-flag behavior (disabled).
- */
-export function isStreamReadinessStallRetryEnabled(): boolean {
-  try {
-    return isFeatureFlagEnabled("STREAM_READINESS_STALL_RETRY");
-  } catch (error) {
-    console.error(
-      "[featureFlags] Failed to resolve STREAM_READINESS_STALL_RETRY, defaulting to disabled:",
-      error instanceof Error ? error.message : error
-    );
-    return false;
-  }
-}
-
-/**
  * OpenCode 429 pool re-selection. Opt-in: when off, every 429 rotates to the
  * next account exactly as before. When on, a 429 from an egress-bucketed
  * provider on a proxy-less account under an ambient pool context asks the
@@ -452,6 +514,53 @@ export function isOpencodePoolReselectEnabled(): boolean {
   } catch (error) {
     console.error(
       "[featureFlags] Failed to resolve OPENCODE_POOL_RESELECT, defaulting to disabled:",
+      error instanceof Error ? error.message : error
+    );
+    return false;
+  }
+}
+
+/** OPENCODE_FREE_TIER_EGRESS_PROBE (default off): probe one other proxy after a FreeTierError. */
+export function isOpencodeFreeTierEgressProbeEnabled(): boolean {
+  try {
+    return isFeatureFlagEnabled("OPENCODE_FREE_TIER_EGRESS_PROBE");
+  } catch (error) {
+    console.error(
+      "[featureFlags] Failed to resolve OPENCODE_FREE_TIER_EGRESS_PROBE, defaulting to disabled:",
+      error instanceof Error ? error.message : error
+    );
+    return false;
+  }
+}
+
+/**
+ * #16798 — OpenCode Zen/Go models without an explicit registry endpoint take their
+ * request surface from the published models.opencode.ai catalog. Off by default; any
+ * resolution error keeps the registry behavior.
+ */
+export function isOpencodePublishedCatalogRoutingEnabled(): boolean {
+  try {
+    return isFeatureFlagEnabled("OPENCODE_PUBLISHED_CATALOG_ROUTING_ENABLED");
+  } catch (error) {
+    console.error(
+      "[featureFlags] Failed to resolve OPENCODE_PUBLISHED_CATALOG_ROUTING_ENABLED, defaulting to disabled:",
+      error instanceof Error ? error.message : error
+    );
+    return false;
+  }
+}
+
+/**
+ * OpenCode v2 client fingerprint (#16571). Opt-in: when off, every OpenCode request keeps
+ * the current identity headers and free-tier body byte for byte. Fail closed: an
+ * unreadable flag store keeps the pre-flag behavior (disabled).
+ */
+export function isOpencodeV2ClientFingerprintEnabled(): boolean {
+  try {
+    return isFeatureFlagEnabled("OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED");
+  } catch (error) {
+    console.error(
+      "[featureFlags] Failed to resolve OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED, defaulting to disabled:",
       error instanceof Error ? error.message : error
     );
     return false;
@@ -484,6 +593,73 @@ export function isDbHealthcheckStartupDeferredEnabled(): boolean {
   } catch (error) {
     console.error(
       "[featureFlags] Failed to resolve DB_HEALTHCHECK_STARTUP_DEFERRED_ENABLED, defaulting to disabled:",
+      error instanceof Error ? error.message : error
+    );
+    return false;
+  }
+}
+
+/**
+ * Resolved-capability scoring inputs on the auto/* request path (#16419). Opt-in:
+ * off keeps capabilities resolved on demand, so they never reach the snapshot
+ * weights and candidate weights stay identical to the pre-flag behavior.
+ * Fail closed: an unreadable flag store keeps the pre-flag behavior (disabled).
+ */
+export function isAutoRequestResolvedCapabilitiesEnabled(): boolean {
+  try {
+    return isFeatureFlagEnabled("AUTO_REQUEST_RESOLVED_CAPABILITIES");
+  } catch (error) {
+    console.error(
+      "[featureFlags] Failed to resolve AUTO_REQUEST_RESOLVED_CAPABILITIES, defaulting to disabled:",
+      error instanceof Error ? error.message : error
+    );
+    return false;
+  }
+}
+/**
+ * Quota window bounded park (#17000). Opt-in: off keeps the per-window threshold
+ * blocking on the cached percentage until the window's own reset time.
+ * Fail closed: an unreadable flag store keeps the pre-flag behavior (disabled).
+ */
+export function isQuotaWindowBoundedParkEnabled(): boolean {
+  try {
+    return isFeatureFlagEnabled("QUOTA_WINDOW_BOUNDED_PARK");
+  } catch (error) {
+    console.error(
+      "[featureFlags] Failed to resolve QUOTA_WINDOW_BOUNDED_PARK, defaulting to disabled:",
+      error instanceof Error ? error.message : error
+    );
+    return false;
+  }
+}
+/**
+ * Image generation long jobs (#16260). Opt-in: off keeps the fixed image fetch budget, no
+ * caller cancellation (499) and no Playground SSE wrapping.
+ * Fail closed: an unreadable flag store keeps the pre-flag behavior (disabled).
+ */
+export function isImageGenerationLongJobsEnabled(): boolean {
+  try {
+    return isFeatureFlagEnabled("IMAGE_GENERATION_LONG_JOBS");
+  } catch (error) {
+    console.error(
+      "[featureFlags] Failed to resolve IMAGE_GENERATION_LONG_JOBS, defaulting to disabled:",
+      error instanceof Error ? error.message : error
+    );
+    return false;
+  }
+}
+
+/**
+ * Fal native gateway (#18849). Opt-in: off keeps the /v1/fal routes unavailable and every Fal
+ * compatibility request on its established shape.
+ * Fail closed: an unreadable flag store keeps the pre-flag behavior (disabled).
+ */
+export function isFalNativeEnabled(): boolean {
+  try {
+    return isFeatureFlagEnabled("FAL_NATIVE_ENABLED");
+  } catch (error) {
+    console.error(
+      "[featureFlags] Failed to resolve FAL_NATIVE_ENABLED, defaulting to disabled:",
       error instanceof Error ? error.message : error
     );
     return false;

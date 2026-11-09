@@ -1,3 +1,8 @@
+import {
+  observeProviderHttpSend,
+  selectHttpResponse,
+  type HttpAttemptSelection,
+} from "../utils/providerHttpAttempts.ts";
 import { HTTP_STATUS, FETCH_TIMEOUT_MS } from "../config/constants.ts";
 import { getApiKeyCodexServiceTier } from "../../src/lib/providers/codexApiKeyServiceMode";
 import { resolveProviderUserAgentOverride } from "./providerUserAgentOverride.ts";
@@ -36,7 +41,11 @@ import {
 } from "../services/openrouterFreeWindow.ts";
 import { gateOutboundRequest } from "../services/wafRateLimit.ts";
 import { ClaudeUsageLimitGuard } from "./claudeUsageLimit.ts";
-import { shouldSkipIntraRetryFor429 } from "./rateLimitIntraRetry.ts";
+import {
+  INTRA_RETRY_MAX_HINT_MS,
+  readRateLimitRetryHintMs,
+  shouldSkipIntraRetryFor429,
+} from "./rateLimitIntraRetry.ts";
 import type { PoolConfig } from "../services/sessionPool/types.ts";
 import type { Session } from "../services/sessionPool/session.ts";
 import { SessionPool } from "../services/sessionPool/sessionPool.ts";
@@ -50,6 +59,7 @@ import {
   runWithOnPersist,
   getRefreshLeadMs,
   isUnrecoverableRefreshError,
+  NO_REFRESH_NEEDED,
 } from "../services/tokenRefresh.ts";
 import type { ProviderRequestDefaults } from "../services/providerRequestDefaults.ts";
 import { signRequestBody } from "../services/claudeCodeCCH.ts";
@@ -63,6 +73,7 @@ import {
   modelSupportsContext1mBeta,
 } from "../services/claudeCodeCompatible.ts";
 import { getClaudeCodeCompatibleRequestDefaults } from "@/lib/providers/requestDefaults";
+import { parseTokenExpiryMs } from "@/lib/tokenHealthCheckExpiry";
 import {
   cloakThirdPartyToolNames,
   remapToolNamesInRequest,
@@ -76,7 +87,12 @@ import {
   fixToolAdjacency,
   stripTrailingAssistantOrphanToolUse,
   stripTrailingAssistantForProvider,
+  stripTrailingAssistantInputForProvider,
 } from "../services/contextManager.ts";
+import {
+  requiresUserLastMessage,
+  stripTrailingAssistantTurns,
+} from "../services/assistantPrefill.ts";
 import { randomUUID } from "node:crypto";
 import {
   getClaudeCodeVersion,
@@ -94,6 +110,8 @@ import {
   stripProxyToolPrefix,
 } from "./claudeIdentity.ts";
 import { withForcedResponsesUpstream } from "./forceResponsesUpstream.ts";
+import { finalizeClaudeThinkingOptions } from "./claudeThinkingOptions.ts";
+import { detachClaudeCodeRewriteTargets } from "./claudeOauthBodyIsolation.ts";
 import {
   mergeUpstreamExtraHeaders,
   setUserAgentHeader,
@@ -105,6 +123,7 @@ import { applyPeerTraceHeader } from "@/shared/resilience/peerRouting";
 import { applyClineProtocolHeaders } from "@/shared/utils/clineAuth";
 import { isProbeContext } from "@/shared/utils/probeOrigin";
 import { assertDispatchUrlAllowed, dispatchGuarded } from "./dispatchPin.ts";
+import { dispatchWithGzipBody } from "./base/gzipRequestBody.ts";
 // Header helpers extracted to a pure leaf; re-exported for external importers
 // (executors + tests) that import them from "./base.ts".
 export {
@@ -126,8 +145,14 @@ import { assertValidationCredentials, validationFetch } from "./base/validationD
 import type { ProviderCredentials, StrictValidationDispatch } from "./base/validationDispatch.ts";
 export type { ProviderCredentials, StrictValidationDispatch } from "./base/validationDispatch.ts";
 import { applyReasoningEffortRecovery } from "./base/reasoningEffortRecovery.ts";
+import { applyMaxTokensRecovery } from "./base/maxTokensRecovery.ts";
+import {
+  clampTopLevelMaxTokens,
+  getLearnedMaxTokensCap,
+} from "../services/learnedMaxTokensCaps.ts";
 import { applyFieldDowngradeRecovery } from "./base/fieldDowngradeRecovery.ts";
 import { applyAdvisorUndecryptableRecovery } from "./base/advisorRecovery.ts";
+import { stripRedactThinkingBetaForVisibleThinking } from "./base/redactThinkingBeta.ts";
 
 function parseSerializedBody(bodyString: string): unknown {
   try {
@@ -224,11 +249,7 @@ export type CountTokensInput = {
   signal?: AbortSignal | null;
 };
 
-import {
-  hasActiveClaudeThinking,
-  readNestedThinkingBudget,
-  clampNestedThinkingBudget,
-} from "../utils/thinkingBudget.ts";
+import { readNestedThinkingBudget, clampNestedThinkingBudget } from "../utils/thinkingBudget.ts";
 
 /**
  * Strip the OmniRoute provider prefix from tool model fields (e.g.
@@ -285,6 +306,7 @@ export type ExecutorExecuteResult =
   | Response
   | {
       response: Response;
+      upstreamHttpSelection?: HttpAttemptSelection | null;
       url?: string;
       headers?: Record<string, string>;
       transformedBody?: unknown;
@@ -309,6 +331,15 @@ export class BaseExecutor {
   constructor(provider: string, config: ProviderConfig) {
     this.provider = provider;
     this.config = config;
+  }
+
+  /** Provider-specific wire transport, after validation and serialization. */
+  protected dispatchRequest(
+    url: string,
+    init: RequestInit,
+    credentials: ProviderCredentials
+  ): Promise<Response> {
+    return dispatchGuarded(this.provider, url, init, credentials);
   }
 
   getProvider() {
@@ -552,7 +583,12 @@ export class BaseExecutor {
       const cloned = { ...body } as Record<string, unknown>;
 
       if (Array.isArray(cloned.input)) {
-        cloned.input = sanitizeResponsesInputItems(cloned.input, false);
+        // #17834: native openai-compatible Responses passthrough keeps assistant commentary
+        // history, like the native Codex path (#3107). Other bodies keep the default drop.
+        cloned.input = sanitizeResponsesInputItems(cloned.input, false, {
+          dropInternalAssistantMessages:
+            cloned._nativeOpenAICompatibleResponsesPassthrough !== true,
+        });
       }
 
       if (Array.isArray(cloned.tools)) {
@@ -605,6 +641,15 @@ export class BaseExecutor {
     delayMs: 1500,
     backoffMultiplier: 2,
   };
+  /**
+   * Equal jitter for intra-URL retry backoff: returns a value in [base/2, base].
+   * Spreads concurrent retries over time so parallel requests hitting the same
+   * upstream throttle don't retry in lockstep (thundering herd). `random` is
+   * injectable for deterministic tests.
+   */
+  static jitterRetryDelayMs(baseMs: number, random: () => number = Math.random): number {
+    return Math.round(baseMs * (0.5 + random() * 0.5));
+  }
   // Timeout for receiving the initial upstream response headers. Once the response
   // starts streaming, STREAM_IDLE_TIMEOUT_MS / Undici bodyTimeout handle stalls.
   static FETCH_START_TIMEOUT_MS = FETCH_TIMEOUT_MS;
@@ -620,8 +665,9 @@ export class BaseExecutor {
   }
 
   needsRefresh(credentials?: ProviderCredentials | null) {
-    if (!credentials?.expiresAt) return false;
-    const expiresAtMs = new Date(credentials.expiresAt).getTime();
+    // Numeric epochs (s/ms, incl. the TEXT-column string form) and ISO; 0 = unknown.
+    const expiresAtMs = parseTokenExpiryMs(credentials?.expiresAt);
+    if (expiresAtMs <= 0) return false;
     // Use the provider-specific lead time (REFRESH_LEAD_MS) so rotating-token
     // providers like Codex refresh proactively far ahead of expiry. Keeping the
     // refresh_token "warm" prevents Auth0 from marking it as stale and revoking
@@ -710,6 +756,7 @@ export class BaseExecutor {
     }
   }
 
+  /** Dispatch a validated provider request through its recovery loop and transport hook. */
   async execute(input: ExecuteInput): Promise<ExecutorExecuteResult> {
     const {
       model,
@@ -763,7 +810,10 @@ export class BaseExecutor {
           this.refreshCredentials(credentials, log || null)
         );
 
-        if (refreshed && !proactivePersistRan) {
+        // API-key connections (no refresh token) answer with the shared
+        // NO_REFRESH_NEEDED sentinel: nothing was attempted, so there is
+        // nothing to classify, spread or warn about — keep the credentials.
+        if (refreshed && refreshed !== NO_REFRESH_NEEDED && !proactivePersistRan) {
           // ─────────────────────────────────────────────────────────────────────
           // ⚠️ SOURCE OF TRUTH — do not flip the proactive path back to
           //    "persist expired+inactive". Ask the operator first.
@@ -840,8 +890,9 @@ export class BaseExecutor {
     // later retry URLs (bounded per URL); also recorded via recordLearnedThinkingCap.
     let thinkingBudgetClampedMax: number | null = null;
     let reasoningEffortClamped = false; // reasoning_effort 4xx clamp-and-retry below.
+    let maxTokensCeilingRecovered = false; // max_tokens ceiling 400 clamp-and-retry below.
     let advisorResultsReplaced = false;
-    const applyCopilotIdentityFallback = createCopilotIdentityFallback(this.provider, log);
+    const copilotIdentity = createCopilotIdentityFallback(this.provider, log);
 
     for (let urlIndex = 0; urlIndex < fallbackCount; urlIndex++) {
       const requestCredentials = withForcedResponsesUpstream(
@@ -901,6 +952,15 @@ export class BaseExecutor {
         model,
         log
       );
+      // Learned max_tokens ceiling (recorded from an earlier 400 advertising
+      // one): pre-clamp with zero extra round-trips. No-op when nothing was
+      // learned for this provider/model.
+      {
+        const learnedMaxTokensCap = getLearnedMaxTokensCap(this.provider, model);
+        if (learnedMaxTokensCap !== null) {
+          clampTopLevelMaxTokens(transformedBody, learnedMaxTokensCap);
+        }
+      }
       if (this.provider === "groq") {
         transformedBody = stripGroqUnsupportedFields(
           transformedBody as Record<string, unknown>,
@@ -917,6 +977,21 @@ export class BaseExecutor {
       }
       if (advisorResultsReplaced) {
         transformedBody = replaceRedactedAdvisorResults(transformedBody).body;
+      }
+      // Fields an upstream already rejected with a 400 in this execute() stay stripped
+      // on a re-run or fallback URL; strippedFields blocks a second strip-and-retry.
+      if (strippedFields.size > 0 && transformedBody && typeof transformedBody === "object") {
+        const record = transformedBody as Record<string, unknown>;
+        const msgFields = [...strippedFields].filter((f) => f.startsWith("messages.*."));
+        for (const f of strippedFields) if (!f.startsWith("messages.*.")) delete record[f];
+        if (msgFields.length > 0 && Array.isArray(record.messages)) {
+          record.messages = record.messages.map((m) => {
+            if (!m || typeof m !== "object") return m;
+            const copy = { ...(m as Record<string, unknown>) };
+            for (const f of msgFields) delete copy[f.slice("messages.*.".length)];
+            return copy;
+          });
+        }
       }
 
       // Re-synchronize skills beta with the finalized transformed body (#14200):
@@ -944,6 +1019,7 @@ export class BaseExecutor {
       }
 
       try {
+        /** Bound connection startup while using the provider-specific wire transport. */
         const fetchWithStartTimeout = async (requestUrl: string, requestOptions: RequestInit) => {
           // GHSA-4f49: guard here (not only next to the first buildUrl) so retries
           // and fallback URLs are validated too, before any bytes leave the host.
@@ -977,7 +1053,22 @@ export class BaseExecutor {
               this.provider,
               model,
               requestCredentials,
-              (url, init) => dispatchGuarded(this.provider, url, init, requestCredentials)
+              (url, init) =>
+                dispatchWithGzipBody(this.provider, url, init, (gzipUrl, gzipInit) =>
+                  observeProviderHttpSend(
+                    {
+                      provider: this.provider,
+                      model:
+                        typeof (serializedBody as Record<string, unknown> | null)?.model ===
+                        "string"
+                          ? String((serializedBody as Record<string, unknown>).model)
+                          : model,
+                      connectionId: requestCredentials?.connectionId ?? null,
+                      endpoint: "unknown",
+                    },
+                    () => this.dispatchRequest(gzipUrl, gzipInit, requestCredentials)
+                  )
+                )
             )(requestUrl, optionsWithSignal);
           } finally {
             if (timeoutId) clearTimeout(timeoutId);
@@ -1006,7 +1097,7 @@ export class BaseExecutor {
           transformedBody !== null
         ) {
           const tb = transformedBody as Record<string, unknown>;
-
+          detachClaudeCodeRewriteTargets(tb);
           stripProxyToolPrefix(tb);
           remapToolNamesInRequest(tb);
           // Cloak third-party tool names + sanitize invalid tool schemas so
@@ -1143,14 +1234,12 @@ export class BaseExecutor {
             }
           }
 
-          // Real CLI always pairs context_management with thinking. Mirror
-          // that invariant so long sessions don't accumulate thinking blocks
-          // toward the context cap.
-          if (hasActiveClaudeThinking(tb) && !tb.context_management) {
-            tb.context_management = {
-              edits: [{ type: "clear_thinking_20251015", keep: "all" }],
-            };
-          }
+          finalizeClaudeThinkingOptions(
+            tb,
+            this.provider,
+            getClaudeCodeCompatibleRequestDefaults(requestCredentials?.providerSpecificData)
+              .summarizeThinking === true
+          );
 
           const seed = activeCredentials?.accessToken || activeCredentials?.apiKey || "anon";
           const psd = activeCredentials?.providerSpecificData as
@@ -1291,8 +1380,13 @@ export class BaseExecutor {
             mergeCcHeaders(headers, ccHeaders);
             if (usesCcWireImage(this.provider) && usesClaudeCodeProtocol) {
               delete headers["Authorization"];
+              // Keep the rotated key buildHeaders set (selectedKeyId names it); a second
+              // resolveEffectiveKey() call would advance the rotator.
               headers["x-api-key"] =
-                activeCredentials?.apiKey || activeCredentials?.accessToken || "";
+                headers["x-api-key"] ||
+                activeCredentials?.apiKey ||
+                activeCredentials?.accessToken ||
+                "";
             }
             delete headers["X-Stainless-Helper-Method"];
             applyStainlessHeaders(headers, { arch: stainlessArch(), os: stainlessOS() });
@@ -1345,13 +1439,17 @@ export class BaseExecutor {
         // user message. Both are idempotent on clean histories.
         {
           const tb = transformedBody as Record<string, unknown>;
+          if (Array.isArray(tb?.input)) {
+            tb.input = stripTrailingAssistantInputForProvider(tb.input, this.provider);
+          }
           if (Array.isArray(tb?.messages)) {
             const fixed = fixToolPairs(tb.messages as Record<string, unknown>[]);
             // fixToolAdjacency enforces Claude's strict adjacency rule
             // (tool_result must be in immediately next message).
             // Only apply for Claude/Claude-compatible — OpenAI allows results
             // spread across multiple subsequent messages.
-            const isClaude = this.provider === "claude" || usesClaudeCodeProtocol;
+            const isClaude =
+              this.provider === "claude" || this.provider === "anthropic" || usesClaudeCodeProtocol;
             // For Claude, fixToolAdjacency may strip tool_use blocks whose
             // tool_result isn't in the next message; re-run fixToolPairs to
             // drop any tool_result orphaned by that strip (discussion #2410).
@@ -1361,6 +1459,19 @@ export class BaseExecutor {
             // trailing text-only assistant turn with 400. Strip here so combo
             // failover does not burn the next account on the same body.
             tb.messages = stripTrailingAssistantForProvider(stripped, this.provider);
+            // Per-connection opt-in for relays that ban assistant prefill.
+            if (requiresUserLastMessage(requestCredentials?.providerSpecificData)) {
+              const userLast = stripTrailingAssistantTurns(tb.messages as JsonRecord[]);
+              tb.messages = userLast.messages;
+              if (userLast.removedTurns > 0 || userLast.noUserTurn) {
+                log?.info?.(
+                  "PREFILL",
+                  userLast.noUserTurn
+                    ? "requireUserLastMessage: no user turn to end on — forwarded unchanged"
+                    : `requireUserLastMessage: dropped ${userLast.removedTurns} trailing assistant turn(s)`
+                );
+              }
+            }
           }
         }
 
@@ -1371,7 +1482,7 @@ export class BaseExecutor {
         // at this final dispatch point — the single chokepoint every Claude
         // routing mode (grouped/raw/combo) and the native passthrough share,
         // before fingerprinting and CCH signing serialize the body.
-        if (this.provider === "claude" || usesClaudeCodeProtocol) {
+        if (this.provider === "claude" || this.provider === "anthropic" || usesClaudeCodeProtocol) {
           finalizeClaudeBodyConstraints(transformedBody as Record<string, unknown>);
         }
 
@@ -1401,16 +1512,27 @@ export class BaseExecutor {
           );
         }
 
+        // Explicit `thinking.display: "summarized"` must not be blanked by redact-thinking.
+        // Claude OAuth keeps its fingerprint beta unless the default-off
+        // CLAUDE_OAUTH_SUMMARIZED_THINKING_UNREDACTED flag is on.
+        stripRedactThinkingBetaForVisibleThinking(headers, transformedBody, clientHeaders, {
+          connectionOptedIn: ccRequestDefaults.redactThinking === true,
+          claudeOAuth: this.provider === "claude" && hasClaudeOAuthToken,
+        });
         stripInternalBodyFields(transformedBody);
-        let bodyString = JSON.stringify(transformedBody);
 
         const shouldFingerprint =
           isCliCompatEnabled(fingerprintProvider) ||
           (this.provider === "claude" && (isClaudeCodeClient || hasClaudeOAuthToken));
+        let bodyString: string;
         if (shouldFingerprint) {
+          // Serialize once: applyFingerprint produces the body string itself — an
+          // eager stringify here would be a full multi-MB allocation, read never.
           const fingerprinted = applyFingerprint(fingerprintProvider, headers, transformedBody);
           finalHeaders = fingerprinted.headers;
           bodyString = fingerprinted.bodyString;
+        } else {
+          bodyString = JSON.stringify(transformedBody);
         }
 
         // CCH signing — replaces the cch=00000 placeholder in the billing
@@ -1460,6 +1582,7 @@ export class BaseExecutor {
             });
           }
         }
+        copilotIdentity.pin(finalHeaders);
         const fetchOptions: RequestInit = {
           method: "POST",
           headers: finalHeaders,
@@ -1490,13 +1613,14 @@ export class BaseExecutor {
           correctFromRateLimitHeaders(openrouterFreeWindowAccountKey, response.headers);
         }
 
-        ({ response, finalHeaders } = await applyCopilotIdentityFallback({
+        ({ response, finalHeaders } = await copilotIdentity.apply({
           response,
           url,
           fetchOptions,
           clientHeaders,
           fetchWithStartTimeout,
         }));
+        fetchOptions.headers = finalHeaders; // later recoveries reuse fetchOptions
 
         // Context Editing 400-fallback for Claude-compatible relays.
         if (
@@ -1605,6 +1729,34 @@ export class BaseExecutor {
           transformedBody = recovery.body;
         }
 
+        // max_tokens ceiling 400 clamp-and-retry — the third learned-cap
+        // recovery: parse the upstream-advertised ceiling ("expected a value
+        // <= N"), clamp (squeezing a Claude-style thinking budget to keep
+        // budget_tokens < max_tokens), record it process-wide for the
+        // proactive pre-clamp above, and retry the same URL once.
+        if (
+          (response.status === HTTP_STATUS.BAD_REQUEST ||
+            response.status === HTTP_STATUS.UNPROCESSABLE_ENTITY) &&
+          !maxTokensCeilingRecovered &&
+          transformedBody &&
+          typeof transformedBody === "object"
+        ) {
+          const recovery = await applyMaxTokensRecovery({
+            response,
+            url,
+            provider: this.provider,
+            model,
+            body: transformedBody,
+            fetchOptions,
+            fetchFn: fetchWithStartTimeout,
+            serializeBody: serializeRetryBody,
+            log,
+          });
+          if (recovery.attempted) maxTokensCeilingRecovered = true;
+          response = recovery.response;
+          transformedBody = recovery.body;
+        }
+
         // Generic reactive 400 field-downgrade; each field is stripped at most once.
         response = await applyFieldDowngradeRecovery({
           response,
@@ -1668,9 +1820,10 @@ export class BaseExecutor {
           if (/content[_-]blocked/i.test(wafErrText)) {
             retryAttemptsByUrl[urlIndex] = (retryAttemptsByUrl[urlIndex] ?? 0) + 1;
             const wafAttempt = retryAttemptsByUrl[urlIndex];
-            const wafBackoff =
+            const wafBackoff = BaseExecutor.jitterRetryDelayMs(
               BaseExecutor.WAF_RETRY_CONFIG.delayMs *
-              Math.pow(BaseExecutor.WAF_RETRY_CONFIG.backoffMultiplier, wafAttempt - 1);
+                Math.pow(BaseExecutor.WAF_RETRY_CONFIG.backoffMultiplier, wafAttempt - 1)
+            );
             log?.debug?.(
               "WAF_RETRY",
               `400 content-blocked intra-retry ${wafAttempt}/${BaseExecutor.WAF_RETRY_CONFIG.maxAttempts} on ${url} — waiting ${wafBackoff}ms`
@@ -1693,11 +1846,20 @@ export class BaseExecutor {
         ) {
           retryAttemptsByUrl[urlIndex] = (retryAttemptsByUrl[urlIndex] ?? 0) + 1;
           const attempt = retryAttemptsByUrl[urlIndex];
+          // Honor the upstream retry hint (Retry-After header / body) when it
+          // sits inside the intra-retry window — the skip guard above already
+          // dropped anything larger, so the wait is bounded by
+          // INTRA_RETRY_MAX_HINT_MS. Without a hint, jitter the fixed delay.
+          const hintMs = await readRateLimitRetryHintMs(response);
+          const waitMs =
+            hintMs !== null && hintMs <= INTRA_RETRY_MAX_HINT_MS
+              ? hintMs
+              : BaseExecutor.jitterRetryDelayMs(BaseExecutor.RETRY_CONFIG.delayMs);
           log?.debug?.(
             "RETRY",
-            `429 intra-retry ${attempt}/${BaseExecutor.RETRY_CONFIG.maxAttempts} on ${url} — waiting ${BaseExecutor.RETRY_CONFIG.delayMs}ms`
+            `429 intra-retry ${attempt}/${BaseExecutor.RETRY_CONFIG.maxAttempts} on ${url} — waiting ${waitMs}ms${hintMs !== null ? " (upstream hint)" : ""}`
           );
-          await new Promise((resolve) => setTimeout(resolve, BaseExecutor.RETRY_CONFIG.delayMs));
+          await new Promise((resolve) => setTimeout(resolve, waitMs));
           urlIndex--; // re-run this urlIndex on the next loop iteration
           continue;
         }
@@ -1715,6 +1877,7 @@ export class BaseExecutor {
 
         return {
           response,
+          upstreamHttpSelection: selectHttpResponse(response),
           url,
           headers: finalHeaders,
           transformedBody: serializedBody,

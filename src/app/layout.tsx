@@ -1,7 +1,7 @@
 import "./globals.css";
 import { ThemeProvider } from "@/shared/components/ThemeProvider";
 import { NextIntlClientProvider } from "next-intl";
-import { getMessages, getLocale, getTranslations } from "next-intl/server";
+import { getMessages, getLocale } from "next-intl/server";
 import { RTL_LOCALES } from "@/i18n/config";
 import { normalizeComplianceEventTypes } from "@/i18n/request";
 import { pickMessages } from "@/i18n/pickMessages";
@@ -10,10 +10,19 @@ import { getRootLayoutSettings } from "@/lib/db/rootLayoutSettings";
 import type { Viewport } from "next";
 import { PwaRegister } from "@/shared/components/PwaRegister";
 import { LocaleAutoDetect } from "@/shared/components/LocaleAutoDetect";
+import { HIDDEN_TAB_REVEAL_SCRIPT } from "@/shared/utils/hiddenTabReveal";
 import { BasePathNetworkProvider } from "@/shared/components/BasePathNetworkProvider";
+import { PWA_THEME_COLORS } from "@/shared/constants/pwaThemeColors";
+import { EDITIONS_APPEARANCE_VALUE } from "@/shared/constants/appearancePalette";
+import { THEME_BOOT_SCRIPT } from "@/shared/utils/themeBootScript";
 
 export const viewport: Viewport = {
-  themeColor: "#0b0f1a",
+  // Page background of the default (Editions) palette per colour scheme (pwaThemeColors.ts).
+  // THEME_BOOT_SCRIPT and the theme store rewrite these tags to the stored palette and mode.
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: PWA_THEME_COLORS.light },
+    { media: "(prefers-color-scheme: dark)", color: PWA_THEME_COLORS.dark },
+  ],
   viewportFit: "cover",
 };
 
@@ -51,7 +60,6 @@ export async function generateMetadata() {
 
 export default async function RootLayout({ children }) {
   const locale = await getLocale();
-  const t = await getTranslations("sidebar");
   // Serialize ONLY the public-surface namespaces into the flight payload.
   // The full merged catalog is ~664 KB across 132 namespaces and used to be
   // embedded in every rendered page (757-865 KB HTML even for /login and
@@ -65,8 +73,19 @@ export default async function RootLayout({ children }) {
   const isRtl = RTL_LOCALES.includes(locale as (typeof RTL_LOCALES)[number]);
 
   return (
-    <html lang={locale} dir={isRtl ? "rtl" : "ltr"} suppressHydrationWarning>
+    // `data-ci-appearance="editions"` is the default palette (the kit's Editions look), rendered
+    // by the server so the first paint has it even without JS; THEME_BOOT_SCRIPT removes it for
+    // a visitor who chose Classic, before paint.
+    <html
+      lang={locale}
+      dir={isRtl ? "rtl" : "ltr"}
+      className="ci-theme"
+      data-ci-appearance={EDITIONS_APPEARANCE_VALUE}
+      suppressHydrationWarning
+    >
       <head>
+        {/* #16245: seed React's $RT so Suspense reveals while the tab is hidden. */}
+        <script dangerouslySetInnerHTML={{ __html: HIDDEN_TAB_REVEAL_SCRIPT }} />
         {/* Pre-hydration cleanup: browser extensions (Bitdefender's
             bis_skin_checked, Grammarly's data-gr-ext-installed, LanguageTool's
             data-lt-installed, etc.) inject attributes into the DOM after SSR
@@ -99,9 +118,6 @@ export default async function RootLayout({ children }) {
             `,
           }}
         />
-        {/* Material Symbols icon font is self-hosted via globals.css
-            (@import "material-symbols/outlined.css") so icons render even when
-            the Google Fonts CDN is unreachable (#3695). */}
         <script
           dangerouslySetInnerHTML={{
             __html: `
@@ -126,27 +142,16 @@ export default async function RootLayout({ children }) {
                   };
                 }
               }
-              try {
-                const stored = localStorage.getItem('theme');
-                const parsed = stored ? JSON.parse(stored) : null;
-                const theme = parsed?.state?.theme || 'system';
-                if (theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-                  document.documentElement.classList.add('dark');
-                } else {
-                  document.documentElement.classList.remove('dark');
-                }
-              } catch (e) {}
             `,
           }}
         />
+        {/* Theme + palette before paint (light/dark and Editions/Classic from the persisted
+            `theme` store), so the first frame already has the stored look. */}
+        <script dangerouslySetInnerHTML={{ __html: THEME_BOOT_SCRIPT }} />
       </head>
+      {/* No skip link here: its #main-content target exists only in the dashboard shell, which
+          renders its own skip link as the first tab stop (F4). */}
       <body className="font-sans antialiased" suppressHydrationWarning>
-        <a
-          href="#main-content"
-          className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:px-4 focus:py-2 focus:bg-[#6366f1] focus:text-white focus:rounded-lg focus:text-sm focus:font-semibold focus:shadow-lg"
-        >
-          {t("skipToContent")}
-        </a>
         <NextIntlClientProvider locale={locale} messages={messages}>
           <BasePathNetworkProvider>
             <PwaRegister />

@@ -8,13 +8,18 @@
 
 **Barcha loyiha qoidalari [`AGENTS.md`](AGENTS.md) faylida joylashgan** — har bir AI yordamchisi uchun yagona haqiqat manbai (arxitektura, kelishuvlar, testlash, sifat nazorati bosqichlari, git ish jarayoni, 23 ta qatʼiy qoida, PII bo‘yicha o‘rganilgan saboqlar). Uni to‘liq o‘qing; loyiha qoidalarini bu yerga qayta qo‘shmang. Quyidagilarning barchasi FAQAT Claude Code uchun amal qiladi — bular `AGENTS.md` faylida allaqachon belgilangan qoidalarning operatsion aniqlashtirishlaridir.
 
-## Worktree izolyatsiyasi — Claude Code xususiyatlari
+## Worktree izolyatsiyasi — Claude Code'ga xos jihatlar
 
-To‘liq majburiy worktree protokoli (asosiy branch’ni tasdiqlash, `.claude/worktrees/` kanonik yo‘li, `cp -al` node_modules, tozalash qoidalari) `AGENTS.md` → Git Workflow → "Worktree isolation" bo‘limida keltirilgan. Claude Code’ga xos jihatlar:
+Toʻliq majburiy worktree protokoli (bazaviy branch tasdigʻi, `.claude/worktrees/` kanonik
+yoʻli, `cp -al` node_modules, teardown qoidalari)
+[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) faylida keltirilgan (`AGENTS.md` →
+Git Workflow → "Worktree isolation" boʻlimida qisqacha bayon etilgan). Claude Code'ga xos jihatlar:
 
-- Agar operator asosiy branch’ni avval aytmagan bo‘lsa, uni `AskUserQuestion` orqali tasdiqlang (qatʼiy qoida #19).
-- Mahalliy `EnterWorktree` vositasini afzal ko‘ring — u worktree’larni allaqachon `.claude/worktrees/` (kanonik yo‘l) ostida yaratadi. Worktree’ni hujjatlashtirilgan `git
-worktree add` buyrug‘i bilan yarating, so‘ng uning `path` qiymati bilan `EnterWorktree` vositasini chaqiring.
+- Bazaviy branchni operator bilan `AskUserQuestion` orqali tasdiqlang (Qattiq qoida №19), agar ular
+  allaqachon aytib bermagan boʻlsa.
+- Mahalliy `EnterWorktree` vositasini afzal koʻring — u worktree'larni allaqachon
+  `.claude/worktrees/` ostida yaratadi (kanonik yoʻl). Worktree'ni hujjatlashtirilgan `git
+worktree add` buyrugʻi bilan yarating, soʻng `EnterWorktree`ni uning `path` qiymati bilan chaqiring.
 
 ## Sessiyalararo xavfsizlik — Claude Code xususiyatlari
 

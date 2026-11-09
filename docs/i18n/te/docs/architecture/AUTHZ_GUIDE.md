@@ -13,147 +13,206 @@ OmniRoute ప్రతి API అభ్యర్థనను నియంత్�
 
 > మూలం: [diagrams/authz-pipeline.mmd](../diagrams/authz-pipeline.mmd)
 
-## రెండు Auth మోడ్లు
+## 2 రకాల Auth మోడ్లు
 
-### 1. API కీ (Bearer)
+### 1. API Key (Bearer)
 
-OpenAI/Anthropic/Gemini-అనుకూల క్లయింట్ APIల కోసం, అలాగే కీకి `manage` స్కోప్ ఉన్నప్పుడు కొన్ని నిర్వహణ రూట్ల కోసం ఉపయోగించబడుతుంది.
+OpenAI/Anthropic/Gemini-అనుకూల క్లయెంట్ APIలు మరియు keyకి `manage` scope ఉన్నప్పుడు కొన్ని నిర్వహణ మార్గాల కోసం ఉపయోగించబడుతుంది.
 
 ```
 Authorization: Bearer <api-key>
 ```
 
-`src/sse/services/auth.ts`లోని `isValidApiKey()` / `extractApiKey()` ద్వారా ధృవీకరించబడి, `src/shared/utils/apiAuth.ts` ద్వారా మళ్లీ ఎగుమతి చేయబడుతుంది. ధృవీకరణ సాధనం `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` env varలను నిరంతర passthrough కీలుగా కూడా అంగీకరిస్తుంది (సమస్య #1350).
+`src/sse/services/auth.ts` లోని `isValidApiKey()` / `extractApiKey()` ద్వారా ధృవీకరించబడుతుంది మరియు `src/shared/utils/apiAuth.ts` ద్వారా మళ్లీ ఎగుమతి చేయబడుతుంది. `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` env varsను persistent passthrough keysగా validator అంగీకరిస్తుంది (issue #1350).
 
-### 2. డ్యాష్బోర్డ్ సెషన్ (auth_token కుకీ)
+### 2. Dashboard Session (auth_token cookie)
 
-డ్యాష్బోర్డ్ పేజీలు మరియు అడ్మిన్ కార్యకలాపాల కోసం.
+Dashboard పేజీలు మరియు admin కార్యకలాపాల కోసం.
 
 ```
 Cookie: auth_token=<JWT signed with JWT_SECRET>
 ```
 
-JWT ధృవీకరించబడి **మరియు** `authenticated: true`ను కలిగి ఉన్నప్పుడు మాత్రమే కుకీ ఒక సెషన్ అవుతుంది
-(`src/shared/utils/dashboardSessionToken.ts` → `verifyDashboardSessionToken`). కుకీని
-ఉపయోగించే ప్రతి భాగం (డ్యాష్బోర్డ్ రూట్ గార్డ్ (`isDashboardSessionAuthenticated()`), authz పైప్లైన్ రిఫ్రెష్, WebSocket హ్యాండ్షేక్, లైవ్
-సర్వర్, `/api/settings/require-login`, `/api/auth/status`) ఆ సహాయక ఫంక్షన్ ద్వారానే వెళ్తుంది.
-`JWT_SECRET`తో సంతకం చేయబడిన ఇతర JWTలు కూడా ఉన్నాయి — కీ హోల్డర్ల కోసం Cursor CLI passthrough
-`iss "omniroute" / aud "cursor-cli"` టోకెన్లను మింట్ చేస్తుంది — మరియు అవి ఎప్పటికీ సెషన్లు కావు
+JWT ధృవీకరించబడిన **మరియు** `authenticated: true` కలిగి ఉన్నప్పుడు మాత్రమే cookie ఒక session అవుతుంది
+(`src/shared/utils/dashboardSessionToken.ts` → `verifyDashboardSessionToken`). Cookieని వినియోగించే ప్రతి consumer (dashboard route guard (`isDashboardSessionAuthenticated()`), authz pipeline refresh, WebSocket handshake, live
+server, `/api/settings/require-login`, `/api/auth/status`) ఈ helper ద్వారా వెళ్తుంది.
+`JWT_SECRET`తో సంతకం చేయబడిన ఇతర JWTలు కూడా ఉన్నాయి — key holders కోసం Cursor CLI passthrough
+`iss "omniroute" / aud "cursor-cli"` tokensను mint చేస్తుంది — మరియు అవి ఎప్పుడూ sessions కావు
 (#13298).
 
-`src/shared/utils/apiAuth.ts`లోని `isDashboardSessionAuthenticated()` ద్వారా ధృవీకరించబడుతుంది. JWT యొక్క 30 రోజుల జీవితకాలంలో 7 రోజుల కంటే తక్కువ సమయం మిగిలి ఉన్నప్పుడు పైప్లైన్ దాన్ని స్వయంచాలకంగా రిఫ్రెష్ చేస్తుంది.
+`src/shared/utils/apiAuth.ts` లోని `isDashboardSessionAuthenticated()` ద్వారా ధృవీకరించబడుతుంది. 30-రోజుల lifetimeలో ఇంకా 7 రోజుల కంటే తక్కువ సమయం మిగిలి ఉన్నప్పుడు pipeline JWTని స్వయంచాలకంగా refresh చేస్తుంది.
 
-ప్రతి మింటర్ `mintDashboardSessionToken` (జారీ సమయం `iat` మరియు ID `jti`) ద్వారా వెళ్తుంది కాబట్టి, ఒక సెషన్ దాని 30 రోజులు పూర్తికాకముందే కూడా ముగియవచ్చు; ధృవీకరణ సాధనం రెండు సెట్టింగ్లను తనిఖీ చేస్తుంది: `sessionsValidAfter` — పాస్వర్డ్ మార్చినప్పుడు ఇది సెట్ చేయబడుతుంది, తద్వారా దానికి ముందు జారీ చేసిన ప్రతి సెషన్ ధృవీకరణను ఆపేస్తుంది (పాస్వర్డ్ మార్చిన బ్రౌజర్కు తాజా కుకీ లభిస్తుంది), మరియు `revokedDashboardSessions` — `POST /api/auth/logout` సైన్-అవుట్ చేసిన సెషన్ యొక్క `jti`ని దీనికి జోడిస్తుంది. పాత విడుదల ద్వారా మింట్ చేయబడిన సెషన్లలో ఈ రెండు క్లెయిమ్లూ ఉండవు మరియు మొదటి పాస్వర్డ్ మార్పు వరకు అవి చెల్లుబాటులో ఉంటాయి. సెట్టింగ్లను చదవడం సాధ్యం కాకపోతే, సెషన్ విశ్వసించబడదు.
+ప్రతి minter `mintDashboardSessionToken` ద్వారా వెళ్తుంది (`iat` అనే issue time మరియు `jti` అనే idతో), అలాగే verifier రెండు settingsను తనిఖీ చేస్తుంది కాబట్టి, session దాని 30 రోజులు పూర్తికాకముందే కూడా ముగియవచ్చు: `sessionsValidAfter`ను password మార్పు ద్వారా సెట్ చేస్తారు, అందువల్ల దానికి ముందు జారీ చేయబడిన ప్రతి session ధృవీకరణను ఆపివేస్తుంది (password మార్చిన browserకి కొత్త cookie లభిస్తుంది), అలాగే sign-out చేసిన session యొక్క `jti`ను `POST /api/auth/logout` జోడించే `revokedDashboardSessions`. పాత release ద్వారా mint చేయబడిన sessionsలో ఈ రెండు claims ఉండవు మరియు మొదటి password మార్పు వరకు చెల్లుబాటులో ఉంటాయి. Settingsను చదవలేకపోతే, sessionను నమ్మరు.
 
-కొన్ని నిర్వహణ రూట్లు **ఏదో ఒక** మోడ్ను అంగీకరిస్తాయి: కుకీ లేదా API కీకి `manage` (లేదా `admin`) స్కోప్ ఉన్నప్పుడు `Bearer <key>`. v3.8లో జోడించిన "API కాల్స్ ద్వారా కాన్ఫిగర్ చేయగల" వర్క్ఫ్లోను ఇది సాధ్యం చేస్తుంది.
+కొన్ని నిర్వహణ మార్గాలు **ఏదైనా ఒక** modeను అంగీకరిస్తాయి: API keyకి `manage` (లేదా `admin`) scope ఉన్నప్పుడు cookie లేదా `Bearer <key>`. v3.8లో జోడించబడిన "configurable via API calls" workflowను ఇది ప్రారంభిస్తుంది.
 
-#### ఐచ్ఛిక OIDC లాగిన్ గేట్ (#6973)
+#### ఐచ్ఛిక OIDC login gate (#6973)
 
-డ్యాష్బోర్డ్ అడ్మిన్ లాగిన్, డిఫాల్ట్ పాస్వర్డ్ లాగిన్తో పాటు **opt-in** OIDC (OpenID Connect) ఫ్లోకు కూడా మద్దతిస్తుంది — పాస్వర్డ్ లాగిన్ ఎప్పటికీ తొలగించబడదు, దానికి అదనంగా మాత్రమే ఇది అందించబడుతుంది:
+Dashboard admin login, default password loginతో పాటు opt-in OIDC (OpenID Connect) flowకు కూడా మద్దతు ఇస్తుంది
+— password login ఎప్పుడూ తొలగించబడదు, కేవలం అదనంగా అందించబడుతుంది:
 
 - `settings.oidcEnabled === true` **మరియు** `oidcIssuer` /
-  `oidcClientId` / `oidcClientSecret` అన్నీ కాన్ఫిగర్ చేయబడితే తప్ప (Settings → Auth) ఇది నిలిపివేయబడి ఉంటుంది.
-  లేకపోతే `GET /api/auth/oidc/login` `400`ను తిరిగి ఇస్తుంది.
-- `GET /api/auth/oidc/login`, issuer యొక్క
-  `/.well-known/openid-configuration` నుండి `authorization_endpoint`ను కనుగొంటుంది (
-  `<issuer>/authorize`ను fallbackగా ఉపయోగిస్తుంది), ఇన్కమింగ్ అభ్యర్థన నుండి
-  (`x-forwarded-proto`ను పరిగణనలోకి తీసుకుని) రీడైరెక్ట్ URIని రూపొందిస్తుంది, అలాగే `httpOnly` `oidc_state` కుకీలో నిల్వ చేసిన యాదృచ్ఛిక `state`తో IdPకి రీడైరెక్ట్ చేస్తుంది.
-- `GET /api/auth/oidc/callback`, `state`ను ధృవీకరించి, authorization
-  కోడ్ను మార్పిడి చేస్తుంది మరియు issuer యొక్క JWKS ద్వారా ID టోకెన్ సంతకాన్ని
-  (`jose` యొక్క `createRemoteJWKSet`, ప్రతి JWKS URIకి cache చేయబడుతుంది) `issuer`/`audience`
-  తనిఖీలతో ధృవీకరిస్తుంది. ఐచ్ఛిక `oidcAllowedSubjects` allowlist, టోకెన్ యొక్క
-  `sub` క్లెయిమ్ లేదా దాని `email` క్లెయిమ్తో సరిపోల్చుతుంది — `email_verified === true` అయినప్పుడు మాత్రమే email క్లెయిమ్ పరిగణించబడుతుంది, కాబట్టి IdP వద్ద ధృవీకరించని email ఎప్పటికీ
-  గేట్ను దాటలేదు.
-- విజయవంతమైనప్పుడు, పాస్వర్డ్ లాగిన్ జారీ చేసే **సరిగ్గా అదే** 30 రోజుల `auth_token` JWTని
-  (`src/app/api/auth/login/route.ts`) మింట్ చేస్తుంది, కాబట్టి మిగిలిన
-  డ్యాష్బోర్డ్ సెషన్ పైప్లైన్ (ఆటో-రిఫ్రెష్, కుకీ ఫ్లాగ్లు) మారదు —
-  OIDC కుకీ ఎలా మింట్ చేయబడుతుందో మాత్రమే భర్తీ చేస్తుంది, అది మంజూరు చేసే అనుమతులను కాదు.
+  `oidcClientId` / `oidcClientSecret` అన్నీ కాన్ఫిగర్ చేయబడినప్పుడే (Settings → Auth) ప్రారంభించబడుతుంది. లేకపోతే
+  `GET /api/auth/oidc/login` `400`ను అందిస్తుంది.
+- `GET /api/auth/oidc/login`, issuer యొక్క `/.well-known/openid-configuration` నుండి
+  `authorization_endpoint`ను కనుగొంటుంది (`<issuer>/authorize`కు fallback అవుతుంది), వచ్చిన అభ్యర్థన ఆధారంగా
+  (`x-forwarded-proto`ను పరిగణనలోకి తీసుకుని) redirect URIని నిర్మిస్తుంది, మరియు యాదృచ్ఛికమైన `state`ను
+  `httpOnly` `oidc_state` కుకీలో నిల్వ చేసి, IdPకు redirect చేస్తుంది.
+- `GET /api/auth/oidc/callback`, `state`ను ధృవీకరించి, authorization codeను మార్పిడి చేసి, issuer యొక్క JWKS
+  (`jose` యొక్క `createRemoteJWKSet`, JWKS URIకి ఒక్కసారి cache చేయబడుతుంది) ద్వారా ID token యొక్క సంతకాన్ని
+  `issuer`/`audience` తనిఖీలతో ధృవీకరిస్తుంది. Dashboard ప్రవేశానికి ఖాళీ కాని `oidcAllowedSubjects` జాబితా,
+  `oidcAdmissionClaim` విధానం లేదా రెండూ అవసరం. `email_verified === true` ఉన్నప్పుడే subject జాబితా
+  `sub` లేదా `email`తో సరిపోలుతుంది. ఐచ్ఛిక claim విధానం, డాట్లతో వేరు చేసిన ID-token claim మార్గాన్ని
+  (ఉదాహరణకు, `realm_access.roles`) మరియు అంగీకరించబడిన విలువల arrayను తీసుకుంటుంది; పరిష్కరించబడిన claim
+  strings యొక్క array అయి, అంగీకరించబడిన విలువలలో కనీసం ఒకదాన్ని కలిగి ఉండాలి. రెండు విధానాలు కాన్ఫిగర్
+  చేయబడితే, రెండూ విజయవంతం కావాలి. లేని లేదా తప్పుగా రూపొందిన claimsను సురక్షిత వైఫల్యంగా పరిగణిస్తారు,
+  మరియు ఏ విధానమూ లేకపోతే callback లాగిన్ను నిరాకరిస్తుంది (`not_configured`). ఇప్పటికే ఉన్న
+  subject-only కాన్ఫిగరేషన్లు మార్పు లేకుండా కొనసాగుతాయి.
+- Keycloak సాధారణంగా realm rolesను access tokensలో మ్యాప్ చేస్తుంది; అవి ID tokensలో తప్పనిసరిగా ఉండకపోవచ్చు.
+  `admin` realm roleను అవసరం చేయడానికి, ఈ client కోసం `realm_access.roles`ను దాని **ID token**లో చేర్చే
+  protocol mapperను కాన్ఫిగర్ చేసి, ఆపై `oidcAdmissionClaim`ను
+  `{ "path": "realm_access.roles", "values": ["admin"] }`గా సెట్ చేయండి.
+  role-only admissionను ప్రారంభించే ముందు ఈ client కోసం వాస్తవ ID-token claimను తనిఖీ చేయండి; అప్లికేషన్
+  access-token rolesను చదవదు. IdP వైపు token నిరాకరణ దీనికి అదనంగా సహాయపడవచ్చు, కానీ ఈ అప్లికేషన్-వైపు
+  తనిఖీకి ప్రత్యామ్నాయం కాదు.
+- విజయవంతమైనప్పుడు, పాస్వర్డ్ లాగిన్ జారీ చేసే అదే **ఖచ్చితమైన** 30-రోజుల `auth_token` JWTని
+  (`src/app/api/auth/login/route.ts`) రూపొందిస్తుంది. అందువల్ల మిగిలిన dashboard session pipeline
+  (ఆటో-రిఫ్రెష్, కుకీ flags) మారదు — కుకీ ఎలా రూపొందించబడుతుందో మాత్రమే OIDC మార్చుతుంది, అది ఏమి
+  అనుమతిస్తుందో కాదు. IdP roles/groupsలో మార్పులు ఇప్పటికే ఉన్న OmniRoute sessionsను చెల్లనివిగా చేయవు;
+  logout, పాస్వర్డ్ మార్పు లేదా session గడువు ముగియడం వాటి జీవితకాలాన్ని ఇప్పటికీ నిర్ణయిస్తాయి.
+- ప్రతి `oidc*` setting (`oidcEnabled`, `oidcDisablePasswordLogin`,
+  `oidcIssuer`, `oidcClientId`, `oidcClientSecret`, `oidcAllowedSubjects`,
+  `oidcAdmissionClaim`, `oidcRedirectPath`, `oidcScopes`) `SECURITY_IMPACTING_SETTINGS_KEYS`లో ఉంది
+  (`src/shared/constants/securityImpactingSettings.ts`): `PATCH /api/settings`, bodyలో management
+  passwordను `currentPassword`గా పంపకపోతే `400 PASSWORD_REQUIRED`ను అందిస్తుంది (తప్పు password అయితే
+  `401 PASSWORD_MISMATCH`). `oidcDisablePasswordLogin`, పాస్వర్డ్ _లాగిన్_ను (`POST /api/auth/login`)
+  నిరాకరిస్తుంది, కానీ నిల్వ చేసిన password hashను ఉంచుతుంది; re-auth ఇప్పటికీ దానితో
+  `currentPassword`ను తనిఖీ చేస్తుంది.
+- `corsOrigins` మరియు `bruteForceProtection` కూడా `SECURITY_IMPACTING_SETTINGS_KEYS`లో ఉన్నాయి:
+  వీటిలో ఏదైనా సడలించడం login రక్షణలను బలహీనపరుస్తుంది. అందువల్ల ఇవి కూడా అదే
+  `currentPassword` re-authను కోరుతాయి (Security tab దాన్ని అడుగుతుంది), మరియు JSON import వీటిని
+  తొలగిస్తుంది.
+- ప్రతి security-policy key — `SECURITY_IMPACTING_SETTINGS_KEYS`లోని entries, ప్రతి `oidc*` key మరియు
+  dashboard session state — `PATCH /api/settings`లో **operator-only**గా ఉంటుంది: manage-scoped API key
+  లేదా `oma_` access token సరైన `currentPassword` పంపినప్పటికీ `403`తో నిరాకరించబడుతుంది, మరియు ఈ
+  నిరాకరణ `settings.update_failed`గా, `reason: OPERATOR_REQUIRED`తో audit చేయబడుతుంది
+  (`src/lib/api/operatorCredential.ts`లోని `requireOperatorCredential()`). సాధారణ settings
+  (theme, display preferences) `manage` key లేదా `admin` access tokenకు ఇప్పటికీ వ్రాయదగినవే.
+  `/api/settings` స్వయానిదైన ప్రతి mutationకు (మరియు `/api/settings/require-login`కు కూడా)
+  `admin` access-token scope అవసరం (`src/server/authz/accessScopes.ts`లోని
+  `ADMIN_MUTATION_EXACT_PATHS`, exact-path match); `GET` మాత్రం `read`గానే ఉంటుంది, అలాగే ఇతర
+  `/api/settings/*` sub-routes (proxies, combo defaults, model aliases, compression, purges…) method-inferred
+  `write` scopeనే కొనసాగిస్తాయి.
+- `POST /api/settings/import-json` ఆ re-authను దాటవేస్తుంది. అందువల్ల వ్రాయడానికి ముందు
+  `IMPORT_STRIPPED_SETTINGS_KEYS`లోని (అదే file) ప్రతి keyని తొలగిస్తుంది: password మరియు
+  `currentPassword`, ప్రతి `SECURITY_IMPACTING_SETTINGS_KEYS` entry, అలాగే dashboard session state
+  (`sessionsValidAfter`, `revokedDashboardSessions`). కాబట్టి పాత backupను import చేయడం ద్వారా password
+  మార్పు లేదా sign-out ఇప్పటికే ముగించిన sessionను మళ్లీ సజీవం చేయలేరు.
+
+#### ఐచ్ఛిక TOTP రెండు-దశల లాగిన్ (#16619)
+
+Settings → Security నుంచి నమోదు చేయబడుతుంది; operator దీన్ని
+ఆన్ చేసే వరకు ఆఫ్లో ఉంటుంది (`src/server/auth/dashboardMfa.ts`).
+
+- **ఇది కవర్ చేసేవి:** పాస్వర్డ్ లాగిన్ (`POST /api/auth/login`, దీనికి ఆ తర్వాత
+  `POST /api/auth/mfa/verify` అవసరం) మరియు `omniroute connect` (`POST /api/cli/connect`,
+  ఇది పాస్వర్డ్-మాత్రమే మార్పిడిని తిరస్కరించి, కోడ్ను `totp`గా స్వీకరిస్తుంది).
+- **ఇది కవర్ చేయనివి:** OIDC / SSO సైన్-ఇన్ (`/api/auth/oidc/callback`) OmniRoute TOTP
+  ను అడగదు. ఇది గుర్తింపు ప్రదాత యొక్క స్వంత రెండో కారకంపై ఆధారపడుతుంది, కాబట్టి OIDC
+  ప్రారంభించబడితే IdPలో MFAను అమలు చేయండి.
+- **రికవరీ** (పరికరం పోయినప్పుడు, రికవరీ కోడ్లు ఏవీ మిగలనప్పుడు లేదా ఉదాహరణకు
+  `STORAGE_ENCRYPTION_KEY` మారిన తర్వాత ఇకపై ధృవీకరించలేని కారకం ఉన్నప్పుడు):
+  1. `OMNIROUTE_DISABLE_MFA=true`తో సర్వర్ను పునఃప్రారంభించండి.
+  2. హోస్ట్లోనే (లూప్బ్యాక్ పీర్ మరియు లూప్బ్యాక్ `Host`, ఉదాహరణకు
+     `http://localhost:20128`) పాస్వర్డ్తో సైన్ ఇన్ చేయండి. ఆ మూలానికి మాత్రమే రెండో
+     కారకం దాటవేయబడుతుంది; మిగతా ప్రతి మూలానికి ఇప్పటికీ కోడ్ అవసరం.
+  3. Settings → Security → Disableలో పాస్వర్డ్ను నమోదు చేసి, కోడ్ను ఖాళీగా ఉంచండి. `POST /api/auth/mfa/disable` వేరియబుల్ సెట్ చేయబడి, అభ్యర్థన హోస్ట్ నుంచి వచ్చినప్పుడు మాత్రమే `code` లేకుండా బాడీని అంగీకరిస్తుంది; దీనికి ఇప్పటికీ డ్యాష్బోర్డ్ సెషన్ మరియు ప్రస్తుత పాస్వర్డ్ అవసరం, అలాగే ఇది `auth.mfa.disabled`గా `secondFactor: "recovery_switch"`తో ఆడిట్ చేయబడుతుంది.
+  4. `OMNIROUTE_DISABLE_MFA`ను అన్సెట్ చేసి, పునఃప్రారంభించండి; అవసరమైతే మళ్లీ నమోదు చేయండి.
 
 ## రూట్ క్లాసులు
 
-`src/server/authz/types.ts` మూడు క్లాసులను నిర్వచిస్తుంది; నిర్ణయాత్మకంగా వర్గీకరించలేని ఏ రూట్ అయినా డిఫాల్ట్గా `MANAGEMENT`కు వెళుతుంది.
+`src/server/authz/types.ts` మూడు తరగతులను నిర్వచిస్తుంది; నిర్ణయాత్మకంగా వర్గీకరించలేని ఏదైనా మార్గం తిరిగి `MANAGEMENT` కి వస్తుంది.
 
-| క్లాస్       | వివరణ                                                                                                                                                         | అవసరమైన ప్రమాణీకరణ                                                         |
-| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
-| `PUBLIC`     | స్పష్టంగా సురక్షితమైన రూట్లు — లాగిన్, లాగౌట్, స్థితి, ప్రారంభీకరణ, ఆరోగ్య తనిఖీ, ఆన్బోర్డింగ్ బూట్స్ట్రాప్.                                                  | ఏదీ లేదు                                                                   |
-| `CLIENT_API` | మోడల్ను అందించే ఎండ్పాయింట్లు — `/api/v1/*`, `/api/v1beta/*`, అలాగే అలియాస్లు `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | ప్రభావవంతమైన `REQUIRE_API_KEY` ఫీచర్ ఫ్లాగ్ ప్రారంభించబడినప్పుడు Bearer కీ |
-| `MANAGEMENT` | డ్యాష్బోర్డ్ పేజీలు, సెట్టింగ్లు, ప్రొవైడర్లు, కీలు, అడ్మిన్ మరియు డయాగ్నస్టిక్స్ ఎండ్పాయింట్లు.                                                              | డ్యాష్బోర్డ్ సెషన్ లేదా `manage` స్కోప్తో Bearer                           |
+| తరగతి        | వివరణ                                                                                                                                                             | ప్రమాణీకరణ అవసరం                                                         |
+| ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| `PUBLIC`     | స్పష్టంగా సురక్షితమైన మార్గాలు — లాగిన్, లాగ్అవుట్, స్థితి, ఆరోగ్యం, ఆన్బోర్డింగ్ బూట్స్ట్రాప్.                                                                   | ఏదీ లేదు                                                                 |
+| `CLIENT_API` | మోడల్-సర్వింగ్ ముగింపు పాయింట్లు — `/api/v1/*`, `/api/v1beta/*`, ప్లస్ మారుపేర్లు `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | సమర్థవంతమైన `REQUIRE_API_KEY` ఫీచర్ ఫ్లాగ్ ప్రారంభించబడినప్పుడు బేరర్ కీ |
+| `MANAGEMENT` | డాష్బోర్డ్ పేజీలు, సెట్టింగ్లు, ప్రొవైడర్లు, కీలు, అడ్మిన్ మరియు డయాగ్నస్టిక్స్ ఎండ్ పాయింట్లు.                                                                   | `manage` స్కోప్తో డాష్బోర్డ్ సెషన్ OR బేరర్                              |
+
+కొన్ని `MANAGEMENT` చర్యలు** ఆపరేటర్-మాత్రమే** : `manage` కీ సరిపోదు. నిల్వ చేయబడిన ఆధారాలను ఎగుమతి చేయడం (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), ప్రత్యక్ష డేటాపై బ్యాకప్ను పునరుద్ధరించడం (`POST /api/db-backups/import` సహా `dryRun=true`, `POST /api/settings/import-json` ద్వారా `POST /api/db-backups` పునరుద్ధరణ ), పునరుద్ధరణ పాయింట్లను నాశనం చేయడం (`DELETE /api/db-backups` క్లీనప్ మరియు `PATCH /api/db-backups`, ఎందుకంటే ప్రతి సెషన్ని నిలుపుదల చేయడం, ప్రతి స్వయంచాలక CLI రన్ తర్వాత డాష్బోర్డ్ని నడపడం అవసరం) విషయం, లేదా లాగిన్ నిలిపివేయబడింది. సమకాలీకరణ టోకెన్ (`POST /api/sync/tokens`) జారీ చేయడం మరియు `admin` CLI యాక్సెస్ టోకెన్ (`POST /api/cli/tokens`)ని ముద్రించడం కోసం డాష్బోర్డ్ సెషన్ లేదా ప్రతి లాగిన్ మోడ్లో స్థానిక CLI సబ్జెక్ట్ అవసరం. ఏదైనా స్కోప్ యొక్క API కీలు మరియు `oma_` యాక్సెస్ టోకెన్లు ఆపరేటర్ ఆధారాలు కావు: అవి అవసరమైనప్పుడు `403` పొందుతాయి. చెక్ `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`)లో నివసిస్తుంది. లాగిన్ సెట్టింగులను మార్చడం ఆపరేటర్-మాత్రమే కూడా: `POST /api/settings/require-login` (నిర్వహణ పాస్వర్డ్ను సెట్ చేయండి / `requireLogin` టోగుల్ చేయండి) పాస్వర్డ్ ఉన్న తర్వాత ఆ ఆధారాలను మాత్రమే అంగీకరిస్తుంది — మొదటి-రన్ బూట్స్ట్రాప్ విండో (ఇంకా పాస్వర్డ్ లేదు) మారదు — మరియు డాష్బోర్డ్ సెషన్ తప్పక `currentPassword` పంపాలి, పాస్వర్డ్ను భర్తీ చేయడానికి లేదా `settings.update_failed` `403`. స్థానిక CLI మరియు లాగిన్ డిసేబుల్తో ఉన్న ఉదాహరణ రికవరీ మార్గాన్ని ఉంచుతుంది మరియు అది లేకుండా పాస్వర్డ్ను సెట్ చేయవచ్చు, ఎందుకంటే రెండూ డేటా డైరెక్టరీని కలిగి ఉన్న హోస్ట్కు కట్టుబడి ఉంటాయి.
 
 ## పైప్లైన్
 
 ```
-వచ్చే అభ్యర్థన → src/proxy.ts
-  → src/server/authz/pipeline.tsలో runAuthzPipeline()
-    1. విశ్వసనీయ అంతర్గత హెడర్లను తొలగించండి (x-omniroute-auth-*, x-omniroute-route-class)
-    2. అభ్యర్థన idని రూపొందించి, classifyRoute() ద్వారా రూట్ను వర్గీకరించండి
-    3. pathname == "/" అయితే → /dashboardకు మళ్లించండి
-    4. డ్రెయినింగ్లో ఉంటే (సజావైన షట్డౌన్) మరియు /api/* అయితే → 503
-    5. GET కాని /api/* అయితే → checkBodySize() గార్డ్
-    6. OPTIONS అయితే → CORS ప్రీఫ్లైట్ 204
-    7. options.enforce == false అయితే → route-class హెడర్లతో యథాతథంగా పంపండి
-    8. లేకపోతే: POLICIES[routeClass].evaluate(ctx)
-       - అనుమతిస్తే  → x-omniroute-auth-{kind,id,label,scopes} ముద్రించండి → NextResponse.next()
-       - తిరస్కరిస్తే → correlation_idతో JSON లోపం (డ్యాష్బోర్డ్ పేజీలు → 302 /login)
+Incoming request → src/proxy.ts
+  → runAuthzPipeline() in src/server/authz/pipeline.ts
+    1. Strip trusted internal headers (x-omniroute-auth-*, x-omniroute-route-class)
+    2. Generate request id, classify route via classifyRoute()
+    3. If pathname == "/" → redirect /dashboard
+    4. If draining (graceful shutdown) and /api/* → 503
+    5. If non-GET /api/* → checkBodySize() guard
+    6. If OPTIONS → CORS preflight 204
+    7. If options.enforce == false → pass-through with route-class headers
+    8. Otherwise: POLICIES[routeClass].evaluate(ctx)
+       - allow  → stamp x-omniroute-auth-{kind,id,label,scopes} → NextResponse.next()
+       - reject → JSON error w/ correlation_id (dashboard pages → 302 /login)
 ```
 
-విశ్వసనీయ అంతర్గత హెడర్లు (`src/server/authz/headers.ts`లో నిర్వచించబడినవి) వర్గీకరణకు ముందు **వచ్చే అభ్యర్థనల నుండి తొలగించబడతాయి** — ఒక సబ్జెక్ట్లా నటించడానికి క్లయింట్లు `x-omniroute-auth-*`ను ముందుగానే నింపలేరు.
+విశ్వసనీయ అంతర్గత శీర్షికలు ( `src/server/authz/headers.ts` లో నిర్వచించబడ్డాయి).** ఇన్కమింగ్ అభ్యర్థనల నుండి తీసివేయబడింది** వర్గీకరణకు ముందు — క్లయింట్లు ఒక సబ్జెక్ట్గా నటించడానికి `x-omniroute-auth-*` ప్రీ-పాపులేట్ చేయలేరు.
 
-### పాలసీ ఒప్పందాలు
+### విధాన ఒప్పందాలు
 
-ప్రతి రూట్ క్లాస్కు `src/server/authz/policies/`లో ఒక పాలసీ ఉంటుంది:
+ప్రతి రూట్ క్లాస్ `src/server/authz/policies/` లో ఒక విధానాన్ని కలిగి ఉంటుంది:
 
-- **`publicPolicy`** (`policies/public.ts`) — ఎల్లప్పుడూ `allow({ kind: "anonymous", id: "anonymous" })`ను అందిస్తుంది.
-- **`clientApiPolicy`** (`policies/clientApi.ts`) — Bearerను సంగ్రహించి, `validateApiKey()` ద్వారా ధ్రువీకరిస్తుంది. ప్రభావవంతమైన `REQUIRE_API_KEY` ఫీచర్ ఫ్లాగ్ నిలిపివేయబడినప్పుడు మాత్రమే అనామక యాక్సెస్కు అనుమతిస్తుంది. ప్రభావవంతమైన ఫ్లాగ్ `isRequireApiKeyEnabled()` (`DB ఫీచర్ ఫ్లాగ్ ఓవర్రైడ్ > process.env.REQUIRE_API_KEY > డిఫాల్ట్`) ద్వారా పరిష్కరించబడుతుంది; కాబట్టి డ్యాష్బోర్డ్ ఫీచర్ ఫ్లాగ్లు మరియు ఎన్విరాన్మెంట్ వేరియబుల్స్ `/api/v1/*`, `/api/v1beta/*`, మరియు అలియాస్లను స్థిరంగా నియంత్రిస్తాయి; రిజాల్వర్ వైఫల్యాలు యాక్సెస్ను నిరాకరిస్తాయి. క్లయింట్ API రూట్లపై డ్యాష్బోర్డ్-సెషన్ అభ్యర్థనలను అనుమతిస్తుంది (డ్యాష్బోర్డ్ మోడల్ కేటలాగ్ ఉపయోగించే `/api/v1/models`తో సహా).
-- **`managementPolicy`** (`policies/management.ts`) — డ్యాష్బోర్డ్ సెషన్ను, అంతర్గత మోడల్-సింక్ అభ్యర్థనలను (`/api/providers/[name]/(sync-models|models)`తో సరిపోల్చబడినవి) అంగీకరిస్తుంది, లేదా `isAuthRequired()` falseను అందిస్తే పూర్తిగా దాటవేస్తుంది. Bearer టోకెన్ ఉన్నప్పటికీ అది చెల్లనప్పుడు 403 (`AUTH_001`)ను, లేకపోతే 401ను అందిస్తుంది. ఏ ప్రమాణీకరణ శాఖకు ముందైనా రూట్-గార్డ్ స్థాయిలను (LOCAL_ONLY / ALWAYS_PROTECTED) కూడా అమలు చేస్తుంది — [రూట్ గార్డ్ స్థాయిలు](../security/ROUTE_GUARD_TIERS.md) చూడండి. `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES`లోని LOCAL_ONLY పాత్లను (ప్రస్తుతం: `/api/mcp/`) Bearer కీ `manage` స్కోప్ను కలిగి ఉన్నప్పుడు లూప్బ్యాక్ కాని చిరునామా నుండి యాక్సెస్ చేయవచ్చు; స్కోప్తో సంబంధం లేకుండా మిగతా LOCAL_ONLY పాత్లన్నీ ఖచ్చితంగా లూప్బ్యాక్కే పరిమితమవుతాయి.
+- **`publicPolicy`** (`policies/public.ts`) — ఎల్లప్పుడూ `allow({ kind: "anonymous", id: "anonymous" })` ని అందిస్తుంది.
+- **`clientApiPolicy`** (`policies/clientApi.ts`) — ఎక్స్ట్రాక్ట్స్ బేరర్, `validateApiKey()` ద్వారా చెల్లుబాటు అవుతుంది. ప్రభావవంతమైన `REQUIRE_API_KEY` ఫీచర్ ఫ్లాగ్ నిలిపివేయబడినప్పుడు మాత్రమే అనామకులకు వస్తుంది. ప్రభావవంతమైన ఫ్లాగ్ `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`) ద్వారా పరిష్కరించబడుతుంది కాబట్టి డాష్బోర్డ్ ఫీచర్ ఫ్లాగ్లు మరియు ఎన్విరాన్మెంట్ వేరియబుల్స్ `/api/v1/*`, `/api/v1beta/*` మరియు మారుపేర్లను స్థిరంగా నియంత్రిస్తాయి; పరిష్కర్త వైఫల్యాలు విఫలమవుతాయి. క్లయింట్ API మార్గాల్లో డాష్బోర్డ్-సెషన్ అభ్యర్థనలను అనుమతిస్తుంది (డ్యాష్బోర్డ్ మోడల్ కేటలాగ్ ద్వారా ఉపయోగించబడుతుంది `/api/v1/models` తో సహా). Entra ID SSO ప్రారంభించబడినప్పుడు, నిర్మాణాత్మకంగా Entra టోకెన్ అయిన బేరర్ (మూడు base64url విభాగాలు, `RS*` alg, `kid`) SSO శాఖ ద్వారా నిర్వహించబడుతుంది.** ముందు** `validateApiKey()` మరియు దాని తీర్పు తుది — ఇది API-కీ మార్గం లేదా అనామక బ్రాంచ్కి దిగజారదు, కాబట్టి గుర్తింపు ప్రదాత అంతరాయం ఓపెన్ యాక్సెస్గా మారదు. స్టాటిక్ API కీలు ప్రభావితం కావు. [ఎంట్రా ID SSO](../security/ENTRA_SSO.md) చూడండి.
+- **`managementPolicy`** (`policies/management.ts`) — డాష్బోర్డ్ సెషన్, అంతర్గత మోడల్-సమకాలీకరణ అభ్యర్థనలను ( `/api/providers/[name]/(sync-models|models)` కి వ్యతిరేకంగా సరిపోల్చింది) అంగీకరిస్తుంది లేదా `isAuthRequired()` తప్పు అని తిరిగి ఇస్తే పూర్తిగా దాటవేస్తుంది. బేరర్ టోకెన్ ఉన్నప్పటికీ చెల్లదు, 401 లేకపోతే 403 (`AUTH_001`)ని అందిస్తుంది. ఏదైనా auth బ్రాంచ్ — ముందు రూట్-గార్డ్ టైర్లను (LOCAL_ONLY / ALWAYS_PROTECTED) అమలు చేస్తుంది, [రూట్ గార్డ్ టైర్లను](../security/ROUTE_GUARD_TIERS.md) చూడండి. బేరర్ కీ `manage` స్కోప్ను కలిగి ఉన్నప్పుడు `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (ఈనాడు: `/api/mcp/`)లోని LOCAL_ONLY మార్గాలు నాన్-లూప్బ్యాక్ నుండి యాక్సెస్ చేయబడవచ్చు; స్కోప్తో సంబంధం లేకుండా అన్ని ఇతర LOCAL_ONLY మార్గాలు కఠినమైన-లూప్బ్యాక్గా ఉంటాయి.
 
-విజయవంతమైన పాలసీ `kind ∈ { client_api_key, dashboard_session, management_key, anonymous }`తో `AuthSubject`ను అందిస్తుంది. దిగువస్థాయి హ్యాండ్లర్లు ప్రమాణీకరణ లాజిక్ను మళ్లీ అమలు చేయడానికి బదులుగా, `src/server/authz/assertAuth.ts`లోని `assertAuth(request, "CLIENT_API")` ద్వారా దాన్ని చదవవచ్చు.
+విజయవంతమైన పాలసీ `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }` తో `AuthSubject` ని అందిస్తుంది. డౌన్స్ట్రీమ్ హ్యాండ్లర్లు ప్రామాణీకరణ తర్కాన్ని మళ్లీ అమలు చేయడానికి బదులుగా `src/server/authz/assertAuth.ts` లో `assertAuth(request, "CLIENT_API")` ద్వారా చదవగలరు.
 
 ## పబ్లిక్ రూట్ల జాబితా
 
 `src/shared/constants/publicApiRoutes.ts` అనేది స్పష్టమైన అనుమతి జాబితా:
 
-ఈ జాబితా **ఆకృతి** ఆధారంగా విభజించబడింది, అలాగే ఈ విభజన అత్యంత కీలకమైనది (GHSA-74g9-q8f6-793h): ఒక ప్రిఫిక్స్ను
-`startsWith()` ఉపయోగించి సరిపోల్చుతారు, కాబట్టి దాని ప్రారంభ అక్షరాలను పంచుకునే ప్రతి సమీప పాత్తో కూడా అది సరిపోలుతుంది.
-`/api/usage/om-usage`ను ప్రిఫిక్స్గా ఉంచడం వల్ల `/api/usage/om-usage<anything>` పబ్లిక్గా గుర్తించబడింది, అలాగే Next దాన్ని
-`/api/usage/[connectionId]`కు పరిష్కరిస్తుంది — ఇది స్వంత ఆథెంటికేషన్ లేని హ్యాండ్లర్.
+జాబితా విభజించబడింది** ఆకారం** , మరియు స్ప్లిట్ లోడ్-బేరింగ్ (GHSA-74g9-q8f6-793h): ఒక ఉపసర్గ `startsWith()` తో సరిపోలుతుంది, కాబట్టి ఇది దాని ప్రముఖ పాత్రలను పంచుకునే ప్రతి ప్రక్కనే ఉన్న మార్గానికి కూడా సరిపోతుంది. `/api/usage/om-usage` ఉపసర్గగా `/api/usage/om-usage<anything>` PUBLIC గా గుర్తించబడింది మరియు తదుపరిది `/api/usage/[connectionId]` — హ్యాండ్లర్ని దాని స్వంత ప్రమాణీకరణ లేకుండా పరిష్కరిస్తుంది.
 
 ```ts
-// నిజమైన సబ్ట్రీలు. ప్రతి ఎంట్రీ తప్పనిసరిగా "/"తో ముగియాలి (యూనిట్ టెస్ట్ ద్వారా నిర్ధారించబడుతుంది).
+// Genuine subtrees. Every entry MUST end in "/" (asserted by a unit test).
 PUBLIC_API_ROUTE_PREFIXES = [
   "/api/auth/oidc/",
-  "/api/v1/", // classifyలో CLIENT_APIగా పరిగణించబడుతుంది, "ఆథెంటికేషన్ అవసరం లేని పబ్లిక్"గా కాదు
+  "/api/v1/", // treated as CLIENT_API in classify, not as "no-auth public"
   "/api/oauth/",
   "/api/codex/connect/",
   "/api/telegram/",
   "/api/cursor-cli/",
 ];
 
-// ఒకే రూట్లు, ఖచ్చితంగా సరిపోల్చబడతాయి (చివరలో స్లాష్ ఉన్నా లేకపోయినా).
+// Single routes, matched EXACTLY (with or without a trailing slash).
 PUBLIC_API_ROUTES_EXACT = new Set([
   "/api/auth/login",
   "/api/auth/logout",
   "/api/auth/status",
-  "/api/init",
+  "/api/auth/mfa/verify", // login step 2 for opt-in TOTP; needs the MFA-pending cookie
   "/api/sync/bundle",
   "/api/cli/connect",
   "/api/usage/om-usage",
   "/api/skills/collect/chaos",
 ]);
 
-// CORS మూల పరిమితి సడలింపు కూడా వర్తించే, చదవడానికి మాత్రమే ఉద్దేశించిన ఒకే రూట్లు.
+// Read-only single routes that also take the CORS origin relaxation.
 PUBLIC_READONLY_CORS_API_ROUTES = [
   "/api/health/ping",
   "/api/monitoring/health",
   "/api/settings/require-login",
 ];
 
-// CORS సడలింపు లేని, చదవడానికి మాత్రమే ఉద్దేశించిన ఒకే రూట్.
+// Read-only single route WITHOUT the CORS relaxation.
 PUBLIC_READONLY_API_ROUTES_EXACT = new Set(["/api/health"]);
 
 PUBLIC_READONLY_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 ```
 
-చదవడానికి మాత్రమే ఉద్దేశించిన రూట్లు సురక్షితమైన మెథడ్లకు **మాత్రమే** పబ్లిక్గా ఉంటాయి. గమనిక: `classifyRoute()` పబ్లిక్ ఫాల్-త్రూ నుండి `/api/v1/*` మరియు `/api/v1beta/*`ను మినహాయిస్తుంది — Bearer కీ పాలసీ ఇప్పటికీ వర్తించేలా అవి ఎల్లప్పుడూ `CLIENT_API`గానే ఉంటాయి.
+చదవడానికి మాత్రమే మార్గాలు పబ్లిక్** మాత్రమే** సురక్షితమైన పద్ధతుల కోసం. గమనిక: `classifyRoute()` PUBLIC ఫాల్-త్రూ — నుండి `/api/v1/*` మరియు `/api/v1beta/*` మినహాయించింది, అవి ఎల్లప్పుడూ `CLIENT_API` కాబట్టి బేరర్-కీ విధానం ఇప్పటికీ వర్తిస్తుంది.
 
 ## కొత్త రూట్ను జోడించడం
 
@@ -228,15 +287,15 @@ API కీలు `scopes` శ్రేణిని కలిగి ఉంటా�
 (`src/lib/accessTokens/scopes.ts`) ద్వారా ర్యాంక్ చేయబడతాయి. ఈ ర్యాంక్
 యాక్సెస్-టోకెన్ క్రెడెన్షియల్కు మాత్రమే వర్తిస్తుంది. [మేనేజ్మెంట్ ప్రామాణీకరణ](../guides/MANAGEMENT-AUTH.md) చూడండి.
 
-## ప్రమాణీకరణ అవసరం టాగుల్
+## ప్రమాణీకరణ టోగుల్ అవసరం
 
-`src/shared/utils/apiAuth.ts`లోని `isAuthRequired()`, ఒక అభ్యర్థన కోసం **ఏదైనా** ప్రమాణీకరణ అమలు చేయాలా వద్దా అని నిర్ణయిస్తుంది:
+అని `src/shared/utils/apiAuth.ts` లో`isAuthRequired()` నిర్ణయిస్తుంది** ఏదైనా** అభ్యర్థన కోసం auth అమలు చేయబడుతుంది:
 
-- `settings.requireLogin === false` → ప్రమాణీకరణ ప్రపంచవ్యాప్తంగా నిలిపివేయబడుతుంది.
-- పాస్వర్డ్ కాన్ఫిగర్ చేయబడకపోవడం **మరియు** `INITIAL_PASSWORD` env var లేకపోవడం → బూట్స్ట్రాప్ మోడ్ ఆన్బోర్డింగ్ విజార్డ్ మరియు లూప్బ్యాక్ అభ్యర్థనలను అనుమతిస్తుంది, కానీ నెట్వర్క్కు బహిర్గతమైన అభ్యర్థనలకు ఇప్పటికీ క్రెడెన్షియల్స్ అవసరం.
-- ఏదైనా DB ఎర్రర్ → యాక్సెస్ను నిరాకరిస్తుంది (డిఫాల్ట్గా సురక్షితం).
+- `settings.requireLogin === false` → auth ప్రపంచవ్యాప్తంగా నిలిపివేయబడింది, ఎల్లప్పుడూ-రక్షిత శ్రేణి ( [రూట్ గార్డ్ టైర్లను](../security/ROUTE_GUARD_TIERS.md) చూడండి) మరియు అది అంగీకరించే క్రెడెన్షియల్ను అందజేసే కాల్లు తప్ప, లాగిన్పై ఉన్న అదే క్రెడెన్షియల్ అవసరం: సింక్ టోకెన్లను జారీ చేయడం, `manage` API CLI టోకెన్లను రూపొందించడం, /`admin` స్కోప్తో సృష్టించడం ఒక కీకి ఆ పరిధిని మంజూరు చేయడం లేదా అటువంటి కీని పునరుత్పత్తి చేయడం లేదా బహిర్గతం చేయడం ( `src/lib/api/requireManagementAuth.ts` లో`requireCredentialForManagementScopedKey()` ). అనుమితి-మాత్రమే కీలు తెరిచి ఉంటాయి. రక్షిత ఫీచర్ ఫ్లాగ్ను వ్రాయడం (`REQUIRE_API_KEY`, ఇతర భద్రతా ఫ్లాగ్లు మరియు [ఫీచర్ ఫ్లాగ్లలో](../reference/FEATURE_FLAGS.md#rest-api) జాబితా చేయబడిన SSRF / TLS / MCP-స్కోప్ / శాండ్బాక్స్ ఫ్లాగ్లు) మరియు PII మాస్కింగ్ సెట్టింగ్లను (`PUT /api/settings/pii`) సేవ్ చేయడం కూడా క్రెడెన్షియల్ అవసరం.
+- పాస్వర్డ్ కాన్ఫిగర్ చేయబడలేదు** మరియు** `INITIAL_PASSWORD` env var → బూట్స్ట్రాప్ మోడ్ ఆన్బోర్డింగ్ విజార్డ్ మరియు లూప్బ్యాక్ అభ్యర్థనలను అనుమతిస్తుంది, అయితే బహిర్గతమైన నెట్వర్క్ అభ్యర్థనలకు ఇప్పటికీ ఆధారాలు అవసరం. మినహాయింపు: రక్షిత ఫీచర్ ఫ్లాగ్ను వ్రాయడం మరియు PII మాస్కింగ్ సెట్టింగ్లను సేవ్ చేయడం (`PUT /api/settings/pii`) లూప్బ్యాక్ నుండి కూడా క్రెడెన్షియల్ అవసరం, కాబట్టి అక్కడ లూప్బ్యాక్ సరిపోదు.
+- ఏదైనా DB లోపం → మూసివేయబడితే విఫలమవుతుంది (సెక్యూర్-బై-డిఫాల్ట్).
 
-క్లయింట్ API కీ అమలు, నేరుగా `process.env.REQUIRE_API_KEY`ను చదవకుండా, `src/shared/utils/featureFlags.ts`లోని `isRequireApiKeyEnabled()`ను ఉపయోగిస్తుంది. డిప్లాయ్ చేసిన ఇన్స్టాన్స్లకు ఇది ముఖ్యమైనది: Dashboard → Feature Flagsలో `REQUIRE_API_KEY`ను టాగుల్ చేయడం DB ఓవర్రైడ్ను నిల్వ చేస్తుంది మరియు ఈ సహాయకాన్ని పంచుకునే `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` మరియు ఇతర క్లయింట్-API ప్రమాణీకరణ తనిఖీలపై వెంటనే ప్రభావం చూపుతుంది. ఫీచర్ ఫ్లాగ్ స్టోర్ను చదవలేకపోతే, క్లయింట్ API ప్రమాణీకరణ యాక్సెస్ను నిరాకరించి కీని తప్పనిసరి చేస్తుంది.
+క్లయింట్ API కీ ఎన్ఫోర్స్మెంట్ `src/shared/utils/featureFlags.ts` లో `isRequireApiKeyEnabled()` ఉపయోగిస్తుంది, డైరెక్ట్ `process.env.REQUIRE_API_KEY` రీడ్ కాదు. అమలు చేయబడిన ఉదాహరణలకు ఇది ముఖ్యమైనది: డాష్బోర్డ్ → ఫీచర్ ఫ్లాగ్లలో `REQUIRE_API_KEY` టోగుల్ చేయడం DB ఓవర్రైడ్ను నిల్వ చేస్తుంది మరియు వెంటనే `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*`, మరియు ఈ సహాయ తనిఖీలను భాగస్వామ్యం చేసే ఇతర క్లయింట్-API ప్రమాణీకరణ తనిఖీలను ప్రభావితం చేస్తుంది. ఫీచర్ ఫ్లాగ్ స్టోర్ని చదవలేకపోతే, క్లయింట్ API auth మూసివేయబడితే విఫలమవుతుంది మరియు కీ అవసరం.
 
 ## బ్రేకింగ్ మార్పు — v3.8.0
 
@@ -254,23 +313,23 @@ API కీలు `scopes` శ్రేణిని కలిగి ఉంటా�
 
 ## డీబగ్గింగ్
 
-పైప్లైన్ ఎల్లప్పుడూ ప్రతిస్పందనలకు వీటిని జోడిస్తుంది:
+పైప్లైన్ ఎల్లప్పుడూ దీనితో ప్రతిస్పందనలను స్టాంప్ చేస్తుంది:
 
 ```
-x-request-id:               <సహసంబంధ ఐడి, లోప ప్రతిస్పందనల్లో తిరిగి పంపబడుతుంది>
+x-request-id:               <correlation id, echoed in error bodies>
 x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 ```
 
-ప్రమాణీకరించిన అభ్యర్థనల కోసం అప్స్ట్రీమ్ (హ్యాండ్లర్ వైపు) అభ్యర్థన హెడర్లలో ఇవి కూడా ఉంటాయి:
+ప్రామాణీకరించబడిన అభ్యర్థనల కోసం అప్స్ట్రీమ్ (హ్యాండ్లర్-సైడ్) అభ్యర్థన శీర్షికలు కూడా ఉన్నాయి:
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<చివరి-4> | "dashboard" | "anonymous"
-x-omniroute-auth-label:     (ఐచ్ఛికం)
-x-omniroute-auth-scopes:    కామాలతో వేరు చేసిన జాబితా
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<last-4> | "dashboard" | "anonymous" | <entra-oid>
+x-omniroute-auth-label:     (optional)
+x-omniroute-auth-scopes:    comma-separated list
 ```
 
-హ్యాండ్లర్లలో `assertAuth(req, expectedClass)`ను ఉపయోగించండి — మిడిల్వేర్ను దాటవేసినట్లయితే, ఇది `AUTHZ_NOT_INITIALIZED` కోడ్తో `AuthzAssertionError`ను విసురుతుంది (పరీక్షల్లో కాన్ఫిగరేషన్ రిగ్రెషన్లను గుర్తించడానికి ఉపయోగకరం).
+మిడిల్వేర్ బైపాస్ చేయబడితే (పరీక్షలలో కాన్ఫిగరేషన్ `AUTHZ_NOT_INITIALIZED` క్యాచ్ చేయడంలో సహాయపడుతుంది) హ్యాండ్లర్స్ — లోపల `assertAuth(req, expectedClass)` `AuthzAssertionError`.
 
 ## వీటిని కూడా చూడండి
 

@@ -1,6 +1,8 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import Button from "./Button";
+import Icon from "./Icon";
 import useJsonTreeExpandStore, { useJsonTreeExpandLevel } from "@/store/jsonTreeExpandStore";
 
 interface JsonTreeExpandControlsProps {
@@ -17,53 +19,54 @@ export function JsonTreeExpandControls({ sectionId }: JsonTreeExpandControlsProp
   const level = useJsonTreeExpandLevel(sectionId);
   const { collapseAll, collapseOneLevel, expandOneLevel, expandAll } = useJsonTreeExpandStore();
 
-  const buttonClass =
-    "p-1 rounded hover:bg-bg-subtle text-text-muted hover:text-text-primary transition-colors";
-
   return (
     <div className="flex items-center gap-0.5">
-      <button
-        type="button"
+      <Button
+        variant="ghost"
+        size="icon-sm"
         onClick={() => collapseAll(sectionId)}
         title={t("collapseAllLevels")}
         aria-label={t("collapseAllLevels")}
-        className={buttonClass}
+        className="size-6 min-h-6 text-text-muted"
       >
-        <span className="material-symbols-outlined text-[16px]">collapse_all</span>
-      </button>
-      <button
-        type="button"
+        <Icon name="collapse_all" size={16} />
+      </Button>
+      <Button
+        variant="ghost"
+        size="icon-sm"
         onClick={() => collapseOneLevel(sectionId)}
         title={t("collapseOneLevel")}
         aria-label={t("collapseOneLevel")}
-        className={buttonClass}
+        className="size-6 min-h-6 text-text-muted"
       >
-        <span className="material-symbols-outlined text-[16px]">remove</span>
-      </button>
+        <Icon name="remove" size={16} />
+      </Button>
       <span
         className="min-w-[1.5em] text-center text-[11px] font-mono text-text-muted tabular-nums"
         title={t("currentExpandLevel")}
       >
         {level}
       </span>
-      <button
-        type="button"
+      <Button
+        variant="ghost"
+        size="icon-sm"
         onClick={() => expandOneLevel(sectionId)}
         title={t("expandOneLevel")}
         aria-label={t("expandOneLevel")}
-        className={buttonClass}
+        className="size-6 min-h-6 text-text-muted"
       >
-        <span className="material-symbols-outlined text-[16px]">add</span>
-      </button>
-      <button
-        type="button"
+        <Icon name="add" size={16} />
+      </Button>
+      <Button
+        variant="ghost"
+        size="icon-sm"
         onClick={() => expandAll(sectionId)}
         title={t("expandAllLevels")}
         aria-label={t("expandAllLevels")}
-        className={buttonClass}
+        className="size-6 min-h-6 text-text-muted"
       >
-        <span className="material-symbols-outlined text-[16px]">expand_all</span>
-      </button>
+        <Icon name="expand_all" size={16} />
+      </Button>
     </div>
   );
 }

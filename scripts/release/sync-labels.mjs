@@ -27,7 +27,7 @@ import { load as parseYaml } from "js-yaml";
 
 const execFileAsync = promisify(execFile);
 
-export const DEFAULT_REPO = "diegosouzapw/OmniRoute";
+export const DEFAULT_REPO = "cheaper-inference/OmniRoute";
 export const DEFAULT_FILE = ".github/labels.yml";
 const MAX_DESCRIPTION = 100; // GitHub's limit for label descriptions
 const COLOR_RE = /^[0-9a-f]{6}$/;

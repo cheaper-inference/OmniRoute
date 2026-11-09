@@ -1,1 +1,0 @@
-- **fix(logs):** Bound the CLI logs route to a tail read so large log files no longer stall served requests ([#16386](https://github.com/diegosouzapw/OmniRoute/pull/16386)) — thanks @maxmad64bis

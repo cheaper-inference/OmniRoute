@@ -3,6 +3,12 @@ import {
   getProviderConnections,
   updateProviderConnection,
 } from "@/models";
+import {
+  readConsoleApiResponse,
+  record,
+  stringField,
+  type ConsoleApiResult,
+} from "./volcengineConsoleResponse";
 
 type JsonRecord = Record<string, unknown>;
 
@@ -36,20 +42,7 @@ const PLAN_CONFIG = {
 
 type PlanKind = keyof typeof PLAN_CONFIG;
 
-export interface ConsoleApiResult {
-  ok: boolean;
-  status: number;
-  json: JsonRecord;
-  error: string | null;
-}
-
-export function stringField(value: unknown): string {
-  return typeof value === "string" ? value.trim() : "";
-}
-
-export function record(value: unknown): JsonRecord {
-  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
-}
+export type { ConsoleApiResult } from "./volcengineConsoleResponse";
 
 function buildCookieHeader(credentials: JsonRecord): string {
   const rawCookie = stringField(credentials.volcConsoleCookie);
@@ -90,22 +83,7 @@ export async function callConsoleApi(
     },
     body: JSON.stringify(payload),
   });
-  const text = await response.text();
-  let json: JsonRecord = {};
-  try {
-    json = record(JSON.parse(text));
-  } catch {
-    // Non-JSON console failures are reported through `error` below.
-  }
-  const meta = record(json.ResponseMetadata);
-  const err = record(meta.Error);
-  const message = stringField(err.Message);
-  return {
-    ok: response.ok && !message,
-    status: response.status,
-    json,
-    error: message || (response.ok ? null : text.slice(0, 200)),
-  };
+  return readConsoleApiResponse(response);
 }
 
 export async function detectPlan(
@@ -125,7 +103,9 @@ export async function detectPlan(
       return { available: false, usage: {}, error: "No active Coding Plan quota windows" };
     }
   } else if (kind === "agent") {
-    const hasFiveHour = Boolean(usage.AFPFiveHour && Object.keys(record(usage.AFPFiveHour)).length > 0);
+    const hasFiveHour = Boolean(
+      usage.AFPFiveHour && Object.keys(record(usage.AFPFiveHour)).length > 0
+    );
     const hasWeekly = Boolean(usage.AFPWeekly && Object.keys(record(usage.AFPWeekly)).length > 0);
     if (!hasFiveHour && !hasWeekly) {
       return { available: false, usage: {}, error: "No active Agent Plan quota windows" };
@@ -251,7 +231,10 @@ export function findTargetConnection(
   if (nameMatched) return nameMatched;
 
   // 4. Safe adoption for single connection scenario under matching provider (e.g. user-named 'main')
-  if (allConnections.length === 1 && stringField(allConnections[0].provider) === criteria.provider) {
+  if (
+    allConnections.length === 1 &&
+    stringField(allConnections[0].provider) === criteria.provider
+  ) {
     return allConnections[0];
   }
 

@@ -10,35 +10,30 @@
 
 ## การติดตั้ง
 
-OmniRoute MCP มีมาให้ในตัว เริ่มใช้งานด้วย:
+OmniRoute MCP มีอยู่แล้วภายใน เริ่มต้นด้วย:
 
 ```bash
 omniroute --mcp
 ```
 
-หรือผ่าน transport แบบ open-sse:
+หรือผ่านการขนส่งแบบ open-sse:
 
 ```bash
-# transport แบบ HTTP streamable (พอร์ต 20130)
-omniroute --dev  # MCP เริ่มทำงานโดยอัตโนมัติที่ endpoint /mcp
+# Streamable HTTP transport (default port 20128, in-process on the dashboard server)
+# Client endpoint: http://localhost:20128/api/mcp/stream
+# stdio: omniroute --mcp
 ```
 
-transport แบบ HTTP (`sse` / `streamable-http` ซึ่งให้บริการภายในโปรเซสโดยเซิร์ฟเวอร์แดชบอร์ด) จะ
-ปิดอยู่โดยค่าเริ่มต้น และก่อนหน้านี้สามารถเปิดหรือปิดได้จากหน้า `/dashboard/mcp` เท่านั้น ตั้งแต่ v3.8.51
-เป็นต้นมา CLI มีความสามารถเทียบเท่ากันแล้ว:
+การขนส่ง HTTP (`sse` / `streamable-http` ที่ให้บริการโดยเซิร์ฟเวอร์แดชบอร์ด) จะถูกปิดโดยค่าเริ่มต้น และก่อนหน้านี้สามารถสลับได้จากหน้า `/dashboard/mcp` เท่านั้น ตั้งแต่เวอร์ชัน 3.8.51 CLI มีความเท่าเทียมกัน:
 
 ```bash
-omniroute mcp status                                  # สถานะ enabled/online, transport และจำนวนเครื่องมือ
+omniroute mcp status                                  # enabled/online, transport, tool count
 omniroute mcp enable [--transport stdio|sse|streamable-http]
 omniroute mcp disable
-omniroute mcp restart                                 # รีเซ็ตเซสชัน sse/streamable-http ที่กำลังทำงาน
+omniroute mcp restart                                 # resets active sse/streamable-http sessions
 ```
 
-`mcp enable`/`mcp disable` ส่งคำขอ PATCH ไปยังการตั้งค่า `mcpEnabled` เดียวกัน (และอาจรวมถึง `mcpTransport`)
-ที่แดชบอร์ดใช้เปิดหรือปิดผ่าน `/api/settings` ส่วน `mcp restart` จะเรียก `POST /api/mcp/restart`: โดยจะยุติ
-เซสชัน `sse`/`streamable-http` ที่กำลังทำงาน เพื่อให้คำขอถัดไปเริ่มต้นใหม่ได้อย่างเรียบร้อย ส่งคืน
-`409` หาก MCP ถูกปิดใช้งาน และ `501` สำหรับ transport แบบ `stdio` (ไคลเอนต์ stdio เป็นเจ้าของ
-โปรเซสย่อยของตนเอง จึงไม่มี handle ภายในโปรเซสสำหรับเริ่มการทำงานใหม่)
+`mcp enable`/`mcp disable` PATCH เดียวกัน `mcpEnabled` (และเป็นทางเลือก `mcpTransport`) การตั้งค่าแดชบอร์ดสลับผ่าน `/api/settings` `mcp restart` เรียก `POST /api/mcp/restart`: มันจะทำลายเซสชัน `sse`/`streamable-http` ที่ใช้งานอยู่ ดังนั้นคำขอถัดไปจะเริ่มต้นใหม่ได้อย่างหมดจด ส่งคืน `409` หาก MCP ถูกปิดใช้งาน และ `501` สำหรับการขนส่ง `stdio` (ไคลเอ็นต์ stdio เป็นเจ้าของกระบวนการย่อยของตนเอง — ไม่มีตัวจัดการในกระบวนการที่จะรีสตาร์ท)
 
 ## Transport
 
@@ -71,6 +66,16 @@ curl -i \
 ```
 
 คีย์ที่ไม่มี scope `manage` (หรือไม่มี Bearer) จะได้รับ `403 LOCAL_ONLY` ส่วน prefix ที่อยู่ในระดับเดียวกันอย่าง `/api/cli-tools/runtime/*` ถูกกำหนดโดยเจตนาให้ไม่สามารถข้ามข้อจำกัดนี้ได้ — ดู [ระดับ Route Guard — ข้อยกเว้นสำหรับ scope แบบ manage](../security/ROUTE_GUARD_TIERS.md#manage-scope-carve-out)
+
+### การตรวจสอบ Origin
+
+หลังการยืนยันตัวตน ทุกคำขอที่ไปยัง `/api/mcp/*` — ทั้ง transport และเส้นทางจัดการอย่าง `status`, `tools`, `audit`, `restart` — จะถูกตรวจสอบเฮดเดอร์ `Origin` ไม่ว่าผู้เรียกจะเป็นใคร (API key, โทเคน CLI, เซสชัน dashboard หรือ loopback แบบไม่ระบุตัวตนเมื่อปิดการล็อกอิน) นี่คือการป้องกัน DNS rebinding ที่ข้อกำหนด MCP Streamable HTTP บังคับ
+
+- **ไม่มีเฮดเดอร์ `Origin`** → อนุญาต OmniRoute CLI, SDK และไคลเอนต์ IDE ไม่ส่งเฮดเดอร์นี้
+- **`Origin` ที่อนุญาต** → `localhost` / `127.0.0.1` / `[::1]` บนพอร์ตใดก็ได้ หรือ origin สาธารณะของ OmniRoute เอง: `OMNIROUTE_PUBLIC_BASE_URL` / `NEXT_PUBLIC_BASE_URL` / `NEXT_PUBLIC_APP_URL`, origin ที่ reverse proxy ที่เชื่อถือได้ส่งต่อมา (`OMNIROUTE_TRUST_PROXY` เฉพาะเมื่อไม่ได้ตั้ง base URL) หรือโฮสต์ IP แบบ loopback/LAN ที่เข้าถึงโดยตรง เฮดเดอร์ `Host` เพียงอย่างเดียวไม่มีทางทำให้ origin ใดเชื่อถือได้
+- **`Origin` อื่นใด รวมถึง `null`** → `403` พร้อมเนื้อหาข้อผิดพลาด JSON-RPC: `id: null`, `error.code: -32000`, `error.data.code: "INVALID_ORIGIN"` เซสชัน dashboard ที่แสดงโทเคน CSRF ที่ถูกต้องยังคงได้รับอนุญาต เช่นเดียวกับการเขียนอื่นๆ ของ dashboard
+
+ไคลเอนต์ MCP บนเบราว์เซอร์ที่ให้บริการหลัง reverse proxy ต้องตั้ง `OMNIROUTE_PUBLIC_BASE_URL` และไม่มีรายการอนุญาตสำหรับ origin อื่น คำขอ preflight ของ CORS (`OPTIONS`) ไม่ถูกตรวจ Origin แต่คำขอที่ตามมาจะถูกตรวจ
 
 ## การกำหนดค่า IDE
 
@@ -123,53 +128,40 @@ Cursor, Cline และไคลเอนต์ MCP ที่เข้ากั�
 
 ## เครื่องมือบีบอัด (13)
 
-| เครื่องมือ                          | ขอบเขตสิทธิ์        | คำอธิบาย                                                                                                                  |
-| :---------------------------------- | :------------------ | :------------------------------------------------------------------------------------------------------------------------ |
-| `omniroute_compression_status`      | `read:compression`  | การตั้งค่าการบีบอัด สรุปการวิเคราะห์ และสถิติที่คำนึงถึงแคช (รวมเมทาดาทา `analytics.mcpDescriptionCompression`)           |
-| `omniroute_compression_configure`   | `write:compression` | กำหนดค่าโหมดการบีบอัด เกณฑ์ อัตราส่วนเป้าหมาย การคงพรอมต์ระบบไว้ และการเปิด/ปิดการบีบอัดคำอธิบาย MCP                      |
-| `omniroute_set_compression_engine`  | `write:compression` | เลือกเอนจินที่ใช้งานอยู่ (off/caveman/rtk/stacked) และระดับความเข้มของ Caveman/RTK                                        |
-| `omniroute_list_compression_combos` | `read:compression`  | แสดงรายการคอมโบการบีบอัดที่มีชื่อและไปป์ไลน์เอนจินของแต่ละคอมโบ                                                           |
-| `omniroute_compression_combo_stats` | `read:compression`  | การวิเคราะห์ที่จัดกลุ่มตามคอมโบการบีบอัดและเอนจิน                                                                         |
-| `omniroute_ccr_store`               | `write:compression` | จัดเก็บเนื้อหาที่แยกตามผู้เรียกไว้ในที่เก็บ CCR ในหน่วยความจำซึ่งมีขนาดจำกัด และส่งคืนเครื่องหมายพร้อมการอ้างอิง `ccr://` |
-| `omniroute_ccr_retrieve`            | `read:compression`  | เรียกคืนเนื้อหา CCR แบบเต็ม หรือด้วยโหมดส่วนต้น ส่วนท้าย บรรทัด grep และสถิติ                                             |
-| `omniroute_ccr_inspect`             | `read:compression`  | ตรวจสอบเมทาดาทา CCR ที่ผู้เรียกเป็นเจ้าของโดยไม่ส่งคืนเนื้อหา                                                             |
-| `omniroute_ccr_list`                | `read:compression`  | แสดงรายการเมทาดาทาแบบแบ่งหน้าสำหรับบล็อก CCR ที่ผู้เรียกเป็นเจ้าของ                                                       |
-| `omniroute_ccr_delete`              | `write:compression` | ลบบล็อก CCR ที่ผู้เรียกเป็นเจ้าของ                                                                                        |
-| `omniroute_ccr_stats`               | `read:compression`  | รายงานการใช้หน่วยความจำที่จำกัดขอบเขตตามผู้เรียก ตัวนับวงจรชีวิต และขีดจำกัดของที่เก็บ                                    |
-| `omniroute_rtk_discover`            | `read:compression`  | ค้นหาสัญญาณรบกวนที่เกิดซ้ำในตัวอย่างเอาต์พุต RTK ที่เลือกเข้าร่วม                                                         |
-| `omniroute_rtk_learn`               | `read:compression`  | สร้างร่างตัวกรอง RTK ที่ตรวจทานได้จากตัวอย่างที่เลือกเข้าร่วม                                                             |
+| เครื่องมือ                          | ขอบเขต              | คำอธิบาย                                                                                                            |
+| :---------------------------------- | :------------------ | :------------------------------------------------------------------------------------------------------------------ |
+| `omniroute_compression_status`      | `read:compression`  | การตั้งค่าการบีบอัด สรุปการวิเคราะห์ และสถิติการรับรู้แคช (รวมถึงข้อมูลเมตา `analytics.mcpDescriptionCompression` ) |
+| `omniroute_compression_configure`   | `write:compression` | กำหนดค่าโหมดการบีบอัด ขีดจำกัด อัตราส่วนเป้าหมาย การเก็บรักษาพร้อมท์ระบบ การสลับการบีบอัดคำอธิบาย MCP               |
+| `omniroute_set_compression_engine`  | `write:compression` | เลือกความเข้มของเอ็นจิ้นที่ใช้งานอยู่ (off/caveman/rtk/stacked) และ Caveman/RTK                                     |
+| `omniroute_list_compression_combos` | `read:compression`  | แสดงรายการคอมโบการบีบอัดที่มีชื่อและไปป์ไลน์ของเครื่องยนต์                                                          |
+| `omniroute_compression_combo_stats` | `read:compression`  | การวิเคราะห์จัดกลุ่มตามคอมโบการบีบอัดและเอ็นจิ้น                                                                    |
+| `omniroute_ccr_store`               | `write:compression` | จัดเก็บเนื้อหาที่แยกผู้โทรไว้ในที่เก็บ CCR ในหน่วยความจำที่มีขอบเขต และส่งคืนเครื่องหมายพร้อมการอ้างอิง `ccr://`    |
+| `omniroute_ccr_retrieve`            | `read:compression`  | ดึงเนื้อหา CCR แบบเต็มหรือด้วยโหมด head, tail, lines, grep และ stats                                                |
+| `omniroute_ccr_inspect`             | `read:compression`  | ตรวจสอบข้อมูลเมตา CCR ของผู้โทรโดยไม่ต้องส่งคืนเนื้อหา                                                              |
+| `omniroute_ccr_list`                | `read:compression`  | แสดงรายการข้อมูลเมตาที่มีการแบ่งหน้าสำหรับบล็อก CCR ที่ผู้โทรเป็นเจ้าของ                                            |
+| `omniroute_ccr_delete`              | `write:compression` | ลบบล็อก CCR ของผู้โทร                                                                                               |
+| `omniroute_ccr_stats`               | `read:compression`  | รายงานการใช้หน่วยความจำในขอบเขตของผู้โทร ตัวนับวงจรการใช้งาน และขีดจำกัดของร้านค้า                                  |
+| `omniroute_rtk_discover`            | `read:compression`  | ค้นพบสัญญาณรบกวนที่เกิดขึ้นซ้ำๆ ในตัวอย่างเอาต์พุต RTK ที่เลือกใช้                                                  |
+| `omniroute_rtk_learn`               | `read:compression`  | สร้างแบบร่างตัวกรอง RTK ที่ตรวจสอบได้จากตัวอย่างที่เลือกใช้                                                         |
 
-รายการ CCR จะอยู่ในหน่วยความจำเท่านั้นและหายไปเมื่อรีสตาร์ต แต่ละบล็อกจำกัดไว้ที่ 2 MiB แต่ละ
-ตัวตนหลักจำกัดไว้ที่ 16 MiB และที่เก็บส่วนกลางจำกัดไว้ที่ 64 MiB โดยค่าเริ่มต้น รายการจะมี TTL 24 ชั่วโมง (สูงสุด
-เจ็ดวัน) การเรียกคืนผ่าน MCP แบบเต็มจำกัดไว้ที่ 256 KiB ส่วนบล็อกที่ใหญ่กว่ายังคงเข้าถึงได้ผ่าน
-โหมดช่วงและ grep การจัดเก็บ การเรียกคืน การแสดงรายการ การตรวจสอบ การลบ และสถิติจะถูกแยกตาม
-ตัวตนหลักของ API key ที่ผ่านการตรวจสอบสิทธิ์แล้ว บันทึกการตรวจสอบมีเฉพาะแฮชและเมทาดาทาขนาด โดยไม่มีเนื้อหา
+รายการ CCR ใช้ร้านค้าสองระดับ: ระดับในหน่วยความจำแบบ hot ที่ได้รับการสนับสนุน บนรันไทม์ที่ไม่ใช่บนคลาวด์ในเครื่อง โดยระดับ SQLite ที่คงทน (`ccr_blocks` เปิดตามค่าเริ่มต้น) ดังนั้นบล็อกจะคงอยู่จากการถูกไล่ออกหรือรีสตาร์ทจนกว่า TTL ของมันจะหมด — ยกเว้นบล็อกที่มากกว่า 512 KB และรันไทม์บนคลาวด์ ซึ่งคงอยู่เฉพาะหน่วยความจำเท่านั้น แต่ละบล็อกถูกจำกัดไว้ที่ 2 MiB แต่ละบล็อกหลักอยู่ที่ 16 MiB และร้านค้าส่วนกลางอยู่ที่ 64 MiB รายการมีค่าเริ่มต้นเป็น TTL 24 ชั่วโมง (สูงสุดเจ็ดวัน) การดึงข้อมูล MCP ทั้งหมดถูกจำกัดไว้ที่ 256 KiB; บล็อกขนาดใหญ่ยังคงใช้งานได้ผ่านโหมด ranged และ grep การจัดเก็บ การเรียกค้น การลงรายการ การตรวจสอบ การลบ และสถิติจะถูกแยกโดยหลักการของคีย์ API ที่ผ่านการรับรองความถูกต้อง บันทึกการตรวจสอบประกอบด้วยแฮชและข้อมูลเมตาของขนาด ไม่มีเนื้อหา รายละเอียดที่ผู้ปฏิบัติงานต้องเผชิญ (เครื่องหมายสองตัว, ข้อกำหนดเบื้องต้นของไคลเอ็นต์, `codemode:false`, ขอบเขตต่อเครื่องมือ, การแบ่งหน้า และเมทริกซ์การวินิจฉัย) อยู่ใน [Compression Engines → ข้อกำหนดเบื้องต้น / คู่มือผู้ปฏิบัติงาน](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup)
 
-`omniroute_compression_status` รายงานการบีบอัดคำอธิบาย MCP แยกต่างหากภายใต้
-`analytics.mcpDescriptionCompression` ค่าเหล่านี้เป็นค่าประมาณขนาดเมตาดาต้าสำหรับคำอธิบาย MCP ที่สามารถแสดงรายการได้
-(`tools`, `prompts`, `resources` และ `resourceTemplates`) ไม่ใช่ข้อมูลการใช้งานที่ได้รับจากผู้ให้บริการ
-และมีการกำกับด้วย `source: "mcp_metadata_estimate"`
+`omniroute_compression_status` รายงานการบีบอัดคำอธิบาย MCP แยกกันภายใต้ `analytics.mcpDescriptionCompression` ค่าเหล่านั้นคือการประมาณขนาดข้อมูลเมตาสำหรับคำอธิบายที่แสดงรายการได้ MCP (`tools`, `prompts`, `resources` และ `resourceTemplates`) ไม่ใช่ใบเสร็จการใช้งานของผู้ให้บริการและทำเครื่องหมายด้วย `source: "mcp_metadata_estimate"`
 
-### ตัวกรองโครงสร้างการช่วยการเข้าถึง MCP (v3.8.0)
+### ตัวกรองแผนผังการเข้าถึง MCP (v3.8.0)
 
-นอกเหนือจากเครื่องมือบีบอัดข้างต้น OmniRoute ยังมีตัวกรองหลังการดำเนินการที่
-บีบอัด **ผลลัพธ์ของเครื่องมือ** จากเครื่องมือเบราว์เซอร์/การช่วยการเข้าถึงของ MCP ก่อนส่งกลับไปยัง
-เอเจนต์ ตัวกรองนี้ไม่ใช่เครื่องมือ — โดยจะทำงานอย่างโปร่งใสกับผลลัพธ์ของเครื่องมือใดๆ ที่มี
-ข้อความโครงสร้างการช่วยการเข้าถึงหรือสแนปช็อตเบราว์เซอร์ที่มีรายละเอียดมาก (≥2000 อักขระ)
+แยกจากเครื่องมือบีบอัดด้านบน OmniRoute มีตัวกรองหลังการดำเนินการที่บีบอัดไฟล์** ผลลัพธ์ของเครื่องมือ** ของเครื่องมือ MCP browser/accessibility ก่อนที่จะส่งคืนให้กับเอเจนต์ ตัวกรองนี้ไม่ใช่เครื่องมือ — มันทำงานอย่างโปร่งใสในผลลัพธ์ของเครื่องมือใด ๆ ที่มีแผนผังการเข้าถึงแบบละเอียดหรือข้อความสแนปชอตของเบราว์เซอร์ (≥ 2000 ตัวอักษร)
 
-ลักษณะการทำงานหลัก:
+พฤติกรรมที่สำคัญ:
 
-- ยุบบรรทัดพี่น้องที่ซ้ำกันต่อเนื่องกัน ≥30 บรรทัดให้เป็นสรุปส่วนต้น + ส่วนท้าย
-- รักษาจุดยึด `[ref=eXX]` ที่ Playwright/computer-use ต้องใช้
-- ตัดข้อความที่มีขนาดใหญ่เกินไป (>50,000 อักขระ) แบบบังคับ พร้อมคำแนะนำในการนำทาง
-- การประหยัดที่คาดไว้: **60–80%** สำหรับเพย์โหลดสแนปช็อตเบราว์เซอร์
+- ยุบบรรทัดพี่น้องที่ซ้ำกัน ≥ 30 บรรทัดติดต่อกันลงในข้อมูลสรุป head + tail
+- รักษาจุดยึด `[ref=eXX]` ที่ต้องการโดย Playwright/computer-use
+- ตัดทอนข้อความขนาดใหญ่ (> 50,000 ตัวอักษร) พร้อมคำใบ้การนำทาง
+- ประหยัดที่คาดหวัง:** 60–80%** บนเพย์โหลดสแน็ปช็อตของเบราว์เซอร์
 
-การกำหนดค่า: `compression.mcpAccessibility` ในการตั้งค่าส่วนกลาง (การย้ายข้อมูล 056)
-การใช้งานจริง: `open-sse/services/compression/engines/mcpAccessibility/`
-เอกสารฉบับเต็ม: [กลไกการบีบอัด — ตัวกรองโครงสร้างการช่วยการเข้าถึง MCP](../compression/COMPRESSION_ENGINES.md#mcp-accessibility-tree-filter)
+การกำหนดค่า: `compression.mcpAccessibility` ในการตั้งค่าส่วนกลาง (การโยกย้าย 056) การใช้งาน: `open-sse/services/compression/engines/mcpAccessibility/`. เอกสารฉบับเต็ม: [เครื่องมือบีบอัด — MCP Accessibility Tree Filter](../compression/COMPRESSION_ENGINES.md#mcp-accessibility-tree-filter)
 
-ดู [กลไกการบีบอัด](../compression/COMPRESSION_ENGINES.md) และ [การบีบอัด RTK](../compression/RTK_COMPRESSION.md) สำหรับ
-โมเดลการบีบอัดขณะรันไทม์ที่อยู่เบื้องหลังเครื่องมือเหล่านี้
+ดู [เครื่องมือการบีบอัด](../compression/COMPRESSION_ENGINES.md) และ [การบีบอัด RTK](../compression/RTK_COMPRESSION.md) สำหรับโมเดลการบีบอัดรันไทม์เบื้องหลังเครื่องมือเหล่านี้
 
 ## เครื่องมือ 1Proxy (3)
 
@@ -289,180 +281,119 @@ Guardrail **ก่อน** ที่จะไปถึงเลเยอร์�
 
 ---
 
-## การยืนยันตัวตนและขอบเขตสิทธิ์
+## การรับรองความถูกต้องและขอบเขต
 
-การเรียกใช้เครื่องมือ MCP จะอ่านสตริงขอบเขตสิทธิ์จากผู้เรียก การตรวจสอบดังกล่าวเป็นหนึ่งในเนมสเปซอิสระสามแบบ การผ่านตัวตรวจสอบหนึ่งไม่ได้หมายความว่าจะผ่านตัวตรวจสอบอื่นด้วย กฎต่าง ๆ อยู่ที่ [เนมสเปซขอบเขตสิทธิ์สามแบบ](#three-scope-namespaces)
-แค็ตตาล็อกเครื่องมืออยู่ที่ [ขอบเขตสิทธิ์ของเครื่องมือ MCP](#mcp-tool-scopes)
+เครื่องมือ MCP เรียกสตริงขอบเขตการอ่านจากผู้เรียก การตรวจสอบนั้นเป็นหนึ่งในสามเนมสเปซอิสระ การส่งบอลจากตัวตรวจสอบตัวหนึ่งไม่ใช่การส่งผ่านจากตัวตรวจสอบตัวอื่น กฎคือ [เนมสเปซขอบเขตสามรายการ](#three-scope-namespaces) แค็ตตาล็อกเครื่องมือคือ [ขอบเขตเครื่องมือ MCP](#mcp-tool-scopes)
 
-### เนมสเปซขอบเขตสิทธิ์สามแบบ
+### เนมสเปซขอบเขตสามรายการ
 
-`manage` บน API key, `read:compression` บนเครื่องมือ MCP และ `read` บน access token แบบ
-`oma_live_…` เป็นสิทธิ์ที่แตกต่างกันสามแบบ ผู้เรียกที่ส่ง access token ขอบเขตสิทธิ์ `read`
-ไปยัง route การจัดการที่มีการแก้ไขข้อมูลจะได้รับ HTTP 403
-`Access token scope 'read' is insufficient; 'write' required.`
-ลำดับสิทธิ์ดังกล่าวคือ `scopeSatisfies` ซึ่งจะไม่ตรวจสอบตาราง MCP และตัวจับคู่ MCP
-ก็จะไม่ตรวจสอบลำดับสิทธิ์นี้เช่นกัน
+`manage` บนคีย์ API, `read:compression` บนเครื่องมือ MCP และ `read` บนโทเค็นการเข้าถึง `oma_live_…` ถือเป็นสิทธิ์ที่แตกต่างกันสามแบบ ผู้โทรที่ส่งโทเค็นการเข้าถึง `read` ไปยังเส้นทางการจัดการที่กลายพันธุ์จะได้รับ HTTP 403 `Access token scope 'read' is insufficient; 'write' required.` อันดับนั้นคือ `scopeSatisfies` มันไม่ได้อ่านตาราง MCP และผู้จับคู่ MCP ก็ไม่อ่าน
 
-| เนมสเปซ                       | ข้อมูลประจำตัว                                                                        | ตัวตรวจสอบ                    | การผ่านอนุญาตให้                                                  |
-| :---------------------------- | :------------------------------------------------------------------------------------ | :---------------------------- | :---------------------------------------------------------------- |
-| การจัดการ API key             | `api_keys.scopes`                                                                     | `hasManageScope`              | เข้าถึง REST สำหรับการจัดการด้วย Bearer key นั้น                  |
-| สิทธิ์เพิ่มเติมของ API key    | อาร์เรย์เดียวกัน โดยใช้สตริงหนึ่งค่าที่ตรงกันทุกประการ                                | helper ที่ระบุชื่อไว้ด้านล่าง | ใช้ได้เฉพาะความสามารถนั้นเท่านั้น                                 |
-| ขอบเขตสิทธิ์ของเครื่องมือ MCP | อาร์เรย์เดียวกัน มิฉะนั้นใช้ `_meta` ของ MCP และหากไม่มีให้ใช้ `OMNIROUTE_MCP_SCOPES` | `scopeMatches`                | ใช้เครื่องมือนั้นเมื่อเปิดการบังคับใช้ขอบเขตสิทธิ์                |
-| Access token                  | `oma_live_…`                                                                          | `scopeSatisfies`              | เข้าถึง route การจัดการที่ method และ path ต้องการลำดับสิทธิ์นั้น |
+| เนมสเปซ              | หนังสือรับรอง                                                                              | ตัวตรวจสอบ                   | บัตรผ่านช่วยให้                                       |
+| :------------------- | :----------------------------------------------------------------------------------------- | :--------------------------- | :---------------------------------------------------- |
+| การจัดการคีย์ API    | `api_keys.scopes`                                                                          | `hasManageScope`             | การจัดการ REST สำหรับคีย์ Bearer นั้น                 |
+| สารเติมแต่งคีย์ API  | อาร์เรย์เดียวกัน หนึ่งสตริงที่ตรงกันทุกประการ                                              | ผู้ช่วยที่มีชื่ออยู่ด้านล่าง | ความสามารถอันเดียวเท่านั้น                            |
+| ขอบเขตเครื่องมือ MCP | อาร์เรย์เดียวกัน มิฉะนั้น MCP `_meta` (HTTP/SSE เท่านั้น) อย่างอื่น `OMNIROUTE_MCP_SCOPES` | `scopeMatches`               | เครื่องมือนั้น เมื่อเปิดการบังคับใช้แล้ว              |
+| โทเค็นการเข้าถึง     | `oma_live_…`                                                                               | `scopeSatisfies`             | เส้นทางการจัดการที่วิธีการและเส้นทางต้องการอันดับนั้น |
 
-การออกข้อมูลประจำตัวแต่ละประเภทอธิบายไว้ใน
-[การยืนยันตัวตนสำหรับการจัดการ](../guides/MANAGEMENT-AUTH.md)
+การสร้างข้อมูลรับรองแต่ละรายการจะครอบคลุมอยู่ใน [Management Authentication](../guides/MANAGEMENT-AUTH.md)
 
-#### ขอบเขตสิทธิ์ของ API key
+#### ขอบเขตคีย์ API
 
-อาร์เรย์ `api_keys.scopes` หนึ่งรายการรองรับงานสองประเภท โดยใช้ฟังก์ชันที่แตกต่างกัน
+อาร์เรย์ `api_keys.scopes` หนึ่งตัวฟีดสองงาน พวกเขาใช้ฟังก์ชั่นที่แตกต่างกัน
 
-**REST สำหรับการจัดการ** `manage` และ `admin` เป็นสมาชิกของ
-`MANAGEMENT_API_KEY_SCOPES` (`src/shared/constants/managementScopes.ts`)
-`hasManageScope` เป็นตัวอนุญาต route การจัดการสำหรับ key นั้น โดย `admin`
-สามารถใช้จัดการผ่าน route เหล่านั้นได้ คำว่า `admin` ในที่นี้ไม่ใช่
-ลำดับสิทธิ์ของ access token และไม่ได้ขยายเป็นขอบเขตสิทธิ์ของเครื่องมือ MCP
+**การบริหาร REST** `manage` และ `admin` เป็นสมาชิกของ `MANAGEMENT_API_KEY_SCOPES` (`src/shared/constants/managementScopes.ts`) `hasManageScope` คือสิ่งที่อนุญาตเส้นทางการจัดการสำหรับคีย์นั้น `admin` มีความสามารถในการจัดการบนเส้นทางเหล่านั้น คำว่า `admin` ในที่นี้ไม่ใช่อันดับของโทเค็นการเข้าถึง และไม่ได้ขยายไปสู่ขอบเขตเครื่องมือ MCP
 
-**สตริงสิทธิ์เพิ่มเติม** แต่ละรายการใช้การทดสอบว่าเป็นสมาชิกที่ตรงกันทุกประการ และแต่ละรายการยังคง
-อยู่นอก `MANAGEMENT_API_KEY_SCOPES`
+**สตริงการบวก** แต่ละรายการเป็นแบบทดสอบความเป็นสมาชิกที่แน่นอน และแต่ละรายการจะอยู่นอก `MANAGEMENT_API_KEY_SCOPES`
 
-| ขอบเขตสิทธิ์                   | การผ่านอนุญาตให้                                                                                                                                                               |
-| :----------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `mcp:connect`                  | ใช้เฉพาะข้อยกเว้น LOCAL_ONLY สำหรับ `/api/mcp/` ที่ไม่ได้มาจาก loopback (`hasMcpConnectOrManageScope`) เท่านั้น key ที่มี `manage` หรือ `admin` ยังคงผ่านข้อยกเว้นดังกล่าว     |
-| `self:usage`                   | เรียก `GET /api/v1/me/status` สำหรับ key นี้ (`src/app/api/v1/me/status/route.ts`) โดย `POST /api/keys` จะเพิ่มขอบเขตสิทธิ์นี้ขณะสร้าง (`normalizeSelfServiceScopesForCreate`) |
-| `self:account-quota`           | แสดงโควตาบัญชี upstream ภายใน payload สถานะนั้น (`src/lib/usage/apiKeySelfService.ts`) โดย route สถานะยังคงต้องใช้ `self:usage`                                                |
-| `policy:bypass-provider-quota` | การเรียก inference ของ key นี้จะข้ามนโยบายโควตาของ provider (`hasProviderQuotaBypassScope` ใน `src/sse/handlers/chat.ts`)                                                      |
+| ขอบเขต                         | บัตรผ่านช่วยให้                                                                                                                                               |
+| :----------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `mcp:connect`                  | non-loopback `/api/mcp/` LOCAL_ONLY แกะสลักเท่านั้น (`hasMcpConnectOrManageScope`) คีย์ที่มี `manage` หรือ `admin` ยังคงผ่านการแกะสลักนั้น                    |
+| `self:usage`                   | `GET /api/v1/me/status` สำหรับคีย์นี้ (`src/app/api/v1/me/status/route.ts`) `POST /api/keys` เพิ่มขอบเขตนี้ในการสร้าง (`normalizeSelfServiceScopesForCreate`) |
+| `self:account-quota`           | โควต้าบัญชีอัปสตรีมภายในเพย์โหลดสถานะนั้น (`src/lib/usage/apiKeySelfService.ts`) เส้นทางสถานะยังคงต้องการ `self:usage`                                        |
+| `policy:bypass-provider-quota` | การเรียกอนุมานของคีย์นี้จะข้ามนโยบายโควต้าของผู้ให้บริการ (`hasProviderQuotaBypassScope` ใน `src/sse/handlers/chat.ts`)                                       |
 
 #### การจับคู่
 
-แค็ตตาล็อกคือตารางภายใต้ [ขอบเขตสิทธิ์ของเครื่องมือ MCP](#mcp-tool-scopes) อย่าถือว่า
-`MCP_SCOPE_LIST` ใน `src/shared/constants/mcpScopes.ts` เป็นแค็ตตาล็อกดังกล่าว
-เพราะรายการนี้เป็นเพียงชุดย่อยดั้งเดิมที่มีการกำหนด type เครื่องมือที่เพิ่มในภายหลังประกาศขอบเขตสิทธิ์เพิ่มเติมไว้ข้าง ๆ รายการนี้
-(`read:notion`, `read:skills`, `read:local-corpus` และรายการอื่น ๆ ในตาราง)
+แค็ตตาล็อกเป็นตารางภายใต้ [ขอบเขตเครื่องมือ MCP](#mcp-tool-scopes) อย่าถือว่า `MCP_SCOPE_LIST` ใน `src/shared/constants/mcpScopes.ts` เป็นแค็ตตาล็อกนั้น เนื่องจากเป็นเซ็ตย่อยที่พิมพ์ต้นฉบับ เครื่องมือต่อมาจะประกาศขอบเขตเพิ่มเติมข้างๆ (`read:notion`, `read:skills`, `read:local-corpus` และส่วนที่เหลือของตาราง)
 
-`evaluateToolScopes` ใน `open-sse/mcp-server/scopeEnforcement.ts` อนุญาตการเรียก
-เมื่อทุกขอบเขตสิทธิ์ที่จำเป็นตรงกับขอบเขตสิทธิ์ที่ได้รับอย่างน้อยหนึ่งรายการ:
+`evaluateToolScopes` ใน `open-sse/mcp-server/scopeEnforcement.ts` อนุญาตให้โทรเมื่อทุกขอบเขตที่ต้องการตรงกับขอบเขตที่ได้รับบางส่วน:
 
-- `*` ตรงกับทุกขอบเขตสิทธิ์ที่จำเป็น
-- ขอบเขตสิทธิ์ที่ได้รับซึ่งลงท้ายด้วย `*` จะตรงกับขอบเขตสิทธิ์ที่จำเป็นซึ่งขึ้นต้นด้วย
-  prefix ที่อยู่ก่อนเครื่องหมายดอกจัน `read:*` ตรงกับ `read:compression`
-- ขอบเขตสิทธิ์อื่นทุกค่าที่ได้รับจะตรงกับสตริงขอบเขตสิทธิ์ที่จำเป็นซึ่งเหมือนกันทุกประการเท่านั้น
+- `*` ตรงกับทุกขอบเขตที่จำเป็น
+- ขอบเขตที่กำหนดซึ่งลงท้ายด้วย `*` ตรงกับขอบเขตที่กำหนดซึ่งขึ้นต้นด้วยคำนำหน้าก่อนติดดาว `read:*` ตรง `read:compression`
+- ขอบเขตที่ได้รับอื่นๆ ทุกรายการจะตรงกับสตริงที่จำเป็นที่เหมือนกันเท่านั้น
 
-key ที่มีขอบเขตสิทธิ์เป็น `["manage"]` จะไม่ผ่าน `scopeMatches` สำหรับ `read:compression`
-การเรียกเดียวกันจะไม่ผ่านเช่นกันสำหรับ `admin`, `mcp:connect`, `read` และ `write` เมื่อค่าเหล่านั้น
-เป็นสตริงสิทธิ์เพียงค่าเดียวที่ได้รับ ไม่มีลำดับชั้นระหว่างขอบเขตสิทธิ์ของเครื่องมือ MCP
-นอกเหนือจาก `*` ที่ท้ายสตริง
+คีย์ที่มีขอบเขตเป็น `["manage"]` ล้มเหลว `scopeMatches` สำหรับ `read:compression` การเรียกเดียวกันนี้ล้มเหลวสำหรับ `admin`, `mcp:connect`, `read` และ `write` เมื่อสิ่งเหล่านั้นเป็นสตริงที่ได้รับเพียงสตริงเดียว ไม่มีลำดับชั้นในขอบเขตเครื่องมือ MCP นอกเหนือจากส่วนท้าย `*`
 
-การบังคับใช้จะปิดอยู่ เว้นแต่ `OMNIROUTE_MCP_ENFORCE_SCOPES=true` (ค่าเริ่มต้นคือ
-`false`) ขณะที่ปิดอยู่ `evaluateToolScopes` จะอนุญาตการเรียกและข้าม
-แค็ตตาล็อก ขณะที่เปิดอยู่ HTTP จะใช้ `api_keys.scopes` ของ Bearer key เป็น
-`authInfo` (ดู [การผูกขอบเขตสิทธิ์ HTTP แยกตาม key](#per-key-http-scope-binding-7895))
-เมื่อไม่สามารถระบุขอบเขตสิทธิ์ของ key ได้ ชุดสิทธิ์ที่ได้รับจะไล่ไปใช้ `_meta` ของ MCP และจากนั้น
-ใช้ `OMNIROUTE_MCP_SCOPES`
+การบังคับใช้ปิดอยู่เว้นแต่ `OMNIROUTE_MCP_ENFORCE_SCOPES=true` (ค่าเริ่มต้น `false`) ขณะที่ปิดอยู่ `evaluateToolScopes` จะอนุญาตการโทรและข้ามแค็ตตาล็อก ในขณะที่เปิดอยู่ HTTP จะใช้ `api_keys.scopes` ของคีย์ Bearer เป็น `authInfo` (โปรดดู [การเชื่อมโยงขอบเขต HTTP ของคีย์ต่อคีย์](#per-key-http-scope-binding-7895) ) เมื่อไม่มีการแก้ไขขอบเขตคีย์ ชุดที่ได้รับจะตกเป็นของ MCP `_meta` (ให้เกียรติเฉพาะสำหรับผู้โทร HTTP/SSE ภายในบริบทการตรวจสอบสิทธิ์ HTTP ส่วน `_meta` ของผู้โทร stdio จะถูกละเว้นเนื่องจากไคลเอ็นต์ควบคุมมัน และไม่มีการระบุตัวตนต่อผู้โทร) จากนั้น `OMNIROUTE_MCP_SCOPES`
 
-#### ขอบเขตสิทธิ์ของ access token
+#### ขอบเขตโทเค็นการเข้าถึง
 
-token แบบ `oma_live_…` (`src/lib/accessTokens/scopes.ts`) มี `read`, `write`
-หรือ `admin` โดย `scopeSatisfies` เป็นลำดับสิทธิ์: `admin` ครอบคลุม `write` และ `read` และ
-`write` ครอบคลุม `read` ขอบเขตสิทธิ์ที่ไม่รู้จักไม่ครอบคลุมสิ่งใด
+โทเค็น `oma_live_…` (`src/lib/accessTokens/scopes.ts`) มี `read`, `write` หรือ `admin` `scopeSatisfies` อยู่ในอันดับ: `admin` ครอบคลุม `write` และ `read` และ `write` ครอบคลุม `read` ขอบเขตที่ไม่รู้จักไม่ครอบคลุมอะไรเลย
 
-`evaluateAccessTokenAuth` (`src/server/authz/accessTokenAuth.ts`) เปรียบเทียบ
-ลำดับสิทธิ์ดังกล่าวกับ `inferRequiredScope` (`src/server/authz/accessScopes.ts`):
+`evaluateAccessTokenAuth` (`src/server/authz/accessTokenAuth.ts`) เปรียบเทียบอันดับนั้นกับ `inferRequiredScope` (`src/server/authz/accessScopes.ts`):
 
-- `GET`, `HEAD` และ `OPTIONS` ต้องใช้ `read`
-- method อื่นทั้งหมดต้องใช้ `write`
-- path ใน `ADMIN_SCOPE_PREFIXES` ต้องใช้ `admin` สำหรับทุก method โดย `/api/mcp`
-  อยู่ในรายการดังกล่าว ดังนั้น access token ที่มี `write` จึงยังไม่สามารถเรียกใช้พื้นผิว HTTP ของ MCP ได้
-- path ใน `ADMIN_MUTATION_PREFIXES` ต้องใช้ `admin` เฉพาะสำหรับการแก้ไขข้อมูลเท่านั้น
+- `GET`, `HEAD` และ `OPTIONS` ต้องการ `read`
+- ทุกวิธีอื่น ๆ ต้องใช้ `write`
+- เส้นทางใน `ADMIN_SCOPE_PREFIXES` ต้องใช้ `admin` สำหรับทุกวิธี `/api/mcp` อยู่ในรายการนั้น ดังนั้นโทเค็นการเข้าถึง `write` ยังคงไม่สามารถเรียกพื้นผิว MCP HTTP ได้
+- เส้นทางใน `ADMIN_MUTATION_PREFIXES` ต้องใช้ `admin` สำหรับการกลายพันธุ์เท่านั้น
+- เส้นทางใน `ADMIN_MUTATION_EXACT_PATHS` (`/api/settings`, `/api/settings/require-login`) ต้องการ `admin` สำหรับการกลายพันธุ์เท่านั้น และเฉพาะบนเส้นทางที่แน่นอนนั้น — เส้นทางย่อย `/api/settings/*` อื่น ๆ เก็บไว้ `write`
 
-`PATCH /api/keys/{id}` เป็นการแก้ไขข้อมูลและไม่ได้อยู่ในรายการผู้ดูแลระบบเหล่านั้น ดังนั้นโทเค็น `read` จึงได้รับ 403
-`Access token scope 'read' is insufficient; 'write' required.`
-โทเค็นการเข้าถึงแบบ `write` หรือ `admin` สามารถผ่านเส้นทางนั้นได้ ส่วน JWT ของแดชบอร์ด, โทเค็น machine-id ของ loopback CLI และ API key ที่มี `manage` หรือ `admin` จะใช้เงื่อนไขสาขาอื่น และไม่ถูกจำกัดด้วยลำดับระดับนี้
+`PATCH /api/keys/{id}` เป็นการเปลี่ยนแปลงและไม่ได้อยู่ในรายชื่อผู้ดูแลระบบ ดังนั้นโทเค็น `read` ได้รับ 403 `Access token scope 'read' is insufficient; 'write' required.` โทเค็นการเข้าถึง `write` หรือ `admin` เป็นไปตามเส้นทางนั้น แดชบอร์ด JWT โทเค็นรหัสเครื่องจักร CLI แบบวนกลับ และคีย์ API ที่มี `manage` หรือ `admin` ใช้สาขาอื่นและไม่ได้จำกัดให้แคบลงตามอันดับนี้
 
-โทเค็นการเข้าถึงที่ผ่าน `scopeSatisfies` สำหรับ `/api/mcp` ถือว่าผ่านเฉพาะด่านการจัดการเท่านั้น การเรียกใช้เครื่องมือยังคงเรียก `scopeMatches` เพื่อตรวจสอบกับขอบเขตของ API key ลำดับระดับของโทเค็นการเข้าถึงไม่ได้เป็นอินพุตของ `scopeMatches`
+โทเค็นการเข้าถึงที่ส่งผ่าน `scopeSatisfies` สำหรับ `/api/mcp` ได้ล้างประตูการจัดการเท่านั้น การเรียกเครื่องมือยังคงทำงาน `scopeMatches` กับขอบเขตคีย์ API อันดับโทเค็นการเข้าถึงไม่ใช่อินพุตของ `scopeMatches`
 
-### ขอบเขตของเครื่องมือ MCP
+### ขอบเขตเครื่องมือ MCP
 
-การบังคับใช้ขอบเขตถูกรวมศูนย์ไว้ที่ `open-sse/mcp-server/scopeEnforcement.ts`
-แต่ละเครื่องมือต้องใช้ขอบเขตเฉพาะดังนี้:
+การบังคับใช้ขอบเขตเป็นศูนย์กลางใน `open-sse/mcp-server/scopeEnforcement.ts` เครื่องมือแต่ละอย่างต้องมีขอบเขตเฉพาะ:
 
-| ขอบเขต                | เครื่องมือ                                                                                                                                                                              |
-| :-------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `read:health`         | `get_health`, `get_provider_metrics`, `simulate_route`, `explain_route`, `best_combo_for_task`, `db_health_check`                                                                       |
-| `read:combos`         | `list_combos`, `get_combo_metrics`, `simulate_route`, `best_combo_for_task`, `test_combo`                                                                                               |
-| `write:combos`        | `switch_combo`, `set_routing_strategy`                                                                                                                                                  |
-| `read:quota`          | `check_quota`                                                                                                                                                                           |
-| `read:usage`          | `cost_report`, `get_session_snapshot`, `explain_route`                                                                                                                                  |
-| `read:models`         | `list_models_catalog`                                                                                                                                                                   |
-| `execute:completions` | `route_request`, `test_combo`                                                                                                                                                           |
-| `execute:search`      | `web_search`, `x_search`, `web_fetch`                                                                                                                                                   |
-| `write:budget`        | `set_budget_guard`                                                                                                                                                                      |
-| `write:resilience`    | `set_resilience_profile`, `db_health_check`                                                                                                                                             |
-| `pricing:write`       | `sync_pricing`                                                                                                                                                                          |
-| `read:cache`          | `cache_stats`                                                                                                                                                                           |
-| `write:cache`         | `cache_flush`                                                                                                                                                                           |
-| `read:compression`    | `compression_status`, `list_compression_combos`, `compression_combo_stats`                                                                                                              |
-| `write:compression`   | `compression_configure`, `set_compression_engine`                                                                                                                                       |
-| `read:proxies`        | `oneproxy_fetch`, `oneproxy_rotate`, `oneproxy_stats`                                                                                                                                   |
-| `read:notion`         | `notion_search`, `notion_get_page`, `notion_list_block_children`, `notion_query_database`, `notion_get_database`                                                                        |
-| `write:notion`        | `notion_append_blocks`                                                                                                                                                                  |
-| `read:memory`         | `memory_search`                                                                                                                                                                         |
-| `write:memory`        | `memory_add`, `memory_clear`                                                                                                                                                            |
-| `read:skills`         | `skills_list`, `skills_executions`                                                                                                                                                      |
-| `write:skills`        | `skills_enable`                                                                                                                                                                         |
-| `execute:skills`      | `skills_execute`                                                                                                                                                                        |
-| `read:catalog`        | `agent_skills_list`, `agent_skills_get`, `agent_skills_coverage`                                                                                                                        |
-| `read:tools`          | `omniroute_tool_search`                                                                                                                                                                 |
-| `read:radar`          | `omniroute_radar_catalog`                                                                                                                                                               |
-| `read:gamification`   | `gamification_profile`, `gamification_rank`, `gamification_leaderboard`, `gamification_badges`, `gamification_servers`, `gamification_anomalies`                                        |
-| `write:gamification`  | `gamification_invite`, `gamification_transfer`                                                                                                                                          |
-| `read:plugins`        | `plugin_list`, `plugin_executions`                                                                                                                                                      |
-| `write:plugins`       | `plugin_scan`, `plugin_install`, `plugin_uninstall`, `plugin_activate`, `plugin_deactivate`, `plugin_configure`                                                                         |
-| `read:obsidian`       | เครื่องมืออ่าน 13 รายการ — `obsidian_list_vault`, `obsidian_read_note`, `obsidian_search_simple`, `obsidian_search_structured`, `obsidian_get_periodic_note`, `obsidian_sync_status`, … |
-| `write:obsidian`      | เครื่องมือเขียน 9 รายการ — `obsidian_write_note`, `obsidian_append_note`, `obsidian_patch_note`, `obsidian_move_note`, `obsidian_delete_note`, `obsidian_sync_trigger`, …               |
-| `read:local-corpus`   | `local_corpus_search`, `local_corpus_read`, `local_corpus_status`                                                                                                                       |
+| ขอบเขต                | เครื่องมือ                                                                                                                                                                       |
+| :-------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `read:health`         | `get_health`, `get_provider_metrics`, `simulate_route`, `explain_route`, `best_combo_for_task`, `db_health_check`                                                                |
+| `read:combos`         | `list_combos`, `get_combo_metrics`, `simulate_route`, `best_combo_for_task`, `test_combo`                                                                                        |
+| `write:combos`        | `switch_combo`, `set_routing_strategy`                                                                                                                                           |
+| `read:quota`          | `check_quota`                                                                                                                                                                    |
+| `read:usage`          | `cost_report`, `get_session_snapshot`, `explain_route`                                                                                                                           |
+| `read:models`         | `list_models_catalog`                                                                                                                                                            |
+| `execute:completions` | `route_request`, `test_combo`                                                                                                                                                    |
+| `execute:search`      | `web_search`, `x_search`, `web_fetch`                                                                                                                                            |
+| `write:budget`        | `set_budget_guard`                                                                                                                                                               |
+| `write:resilience`    | `set_resilience_profile`, `db_health_check`                                                                                                                                      |
+| `pricing:write`       | `sync_pricing`                                                                                                                                                                   |
+| `read:cache`          | `cache_stats`                                                                                                                                                                    |
+| `write:cache`         | `cache_flush`                                                                                                                                                                    |
+| `read:compression`    | `compression_status`, `list_compression_combos`, `compression_combo_stats`                                                                                                       |
+| `write:compression`   | `compression_configure`, `set_compression_engine`                                                                                                                                |
+| `read:proxies`        | `oneproxy_fetch`, `oneproxy_rotate`, `oneproxy_stats`                                                                                                                            |
+| `read:notion`         | `notion_search`, `notion_get_page`, `notion_list_block_children`, `notion_query_database`, `notion_get_database`                                                                 |
+| `write:notion`        | `notion_append_blocks`                                                                                                                                                           |
+| `read:memory`         | `memory_search`                                                                                                                                                                  |
+| `write:memory`        | `memory_add`, `memory_clear`                                                                                                                                                     |
+| `read:skills`         | `skills_list`, `skills_executions`                                                                                                                                               |
+| `write:skills`        | `skills_enable`                                                                                                                                                                  |
+| `execute:skills`      | `skills_execute`                                                                                                                                                                 |
+| `read:catalog`        | `agent_skills_list`, `agent_skills_get`, `agent_skills_coverage`                                                                                                                 |
+| `read:tools`          | `omniroute_tool_search`                                                                                                                                                          |
+| `read:radar`          | `omniroute_radar_catalog`                                                                                                                                                        |
+| `read:gamification`   | `gamification_profile`, `gamification_rank`, `gamification_leaderboard`, `gamification_badges`, `gamification_servers`, `gamification_anomalies`                                 |
+| `write:gamification`  | `gamification_invite`, `gamification_transfer`                                                                                                                                   |
+| `read:plugins`        | `plugin_list`, `plugin_executions`                                                                                                                                               |
+| `write:plugins`       | `plugin_scan`, `plugin_install`, `plugin_uninstall`, `plugin_activate`, `plugin_deactivate`, `plugin_configure`                                                                  |
+| `read:obsidian`       | 13 อ่านเครื่องมือ — `obsidian_list_vault`, `obsidian_read_note`, `obsidian_search_simple`, `obsidian_search_structured`, `obsidian_get_periodic_note`, `obsidian_sync_status`, … |
+| `write:obsidian`      | 9 เครื่องมือการเขียน — `obsidian_write_note`, `obsidian_append_note`, `obsidian_patch_note`, `obsidian_move_note`, `obsidian_delete_note`, `obsidian_sync_trigger`, …            |
+| `read:local-corpus`   | `local_corpus_search`, `local_corpus_read`, `local_corpus_status`                                                                                                                |
 
-รองรับสโคปแบบไวลด์การ์ด: `read:*` ให้สิทธิ์แก่สโคปการอ่านทั้งหมด ส่วน `*` ให้สิทธิ์เข้าถึงทั้งหมด
+รองรับขอบเขต Wildcard: `read:*` ให้สิทธิ์ขอบเขตการอ่านทั้งหมด, `*` ให้สิทธิ์การเข้าถึงแบบเต็ม
 
-### `mcp:connect` — ความสามารถแบบจำกัดสำหรับเส้นทาง (#7895)
+### `mcp:connect` — ความสามารถในเส้นทางแคบ (#7895)
 
-การเข้าถึงทรานสปอร์ต HTTP/SSE MCP (`/api/mcp/*`) จากที่อยู่ที่ไม่ใช่ลูปแบ็กจำเป็นต้องใช้
-ข้อยกเว้น LOCAL_ONLY สำหรับ `/api/mcp/` (ดู `docs/security/ROUTE_GUARD_TIERS.md`) ในอดีต
-ข้อยกเว้นนี้ยอมรับเฉพาะ API key ที่มีสโคป `manage`/`admin` แบบเต็มเท่านั้น ซึ่งกว้างเกินไปสำหรับ
-ผู้เรียกที่ต้องการเพียงสื่อสารกับ MCP ขณะนี้ `src/shared/constants/managementScopes.ts`
-ส่งออก `MCP_CONNECT_SCOPE = "mcp:connect"` ซึ่งเป็นสโคปแบบจำกัดที่เพิ่มเข้ามา (ตามแนวทางเดียวกับ
-`SELF_USAGE_SCOPE`) และอนุญาตเฉพาะการข้ามข้อจำกัดของ `/api/mcp/` ใน
-`src/server/authz/policies/management.ts` เท่านั้น โดยไม่ให้สิทธิ์เข้าถึงเส้นทางการจัดการอื่นใด
-และตั้งใจไม่นำไปรวมไว้ใน `MANAGEMENT_API_KEY_SCOPES` คีย์ที่มี `manage`/`admin`
-ยังคงผ่านข้อยกเว้นได้เช่นเดิม ส่วน `mcp:connect` เป็นทางเลือกที่มีสิทธิ์ต่ำกว่าสำหรับ
-ผู้เรียกจากระยะไกลที่ใช้เฉพาะ MCP โดยตรวจสอบผ่าน `hasMcpConnectOrManageScope()`
+การเข้าถึง HTTP/SSE MCP Transport (`/api/mcp/*`) จาก non-loopback ต้องใช้ `/api/mcp/` LOCAL_ONLY carve-out (ดู `docs/security/ROUTE_GUARD_TIERS.md`) ในอดีตนั้นการแกะสลักออกนั้นยอมรับเฉพาะ `manage`/`admin` -scope API key — แบบเต็มที่กว้างเกินไปสำหรับผู้โทรที่ต้องการพูดเท่านั้น MCP ตอนนี้ `src/shared/constants/managementScopes.ts` ส่งออก `MCP_CONNECT_SCOPE = "mcp:connect"`: ขอบเขตเพิ่มเติมที่แคบ (แบบอย่างเดียวกับ `SELF_USAGE_SCOPE`) ที่อนุญาต ONLY `/api/mcp/` บายพาสใน `src/server/authz/policies/management.ts` — มันไม่ให้สิทธิ์การเข้าถึงเส้นทางการจัดการอื่น ๆ และจงใจเก็บ OUT ของ `MANAGEMENT_API_KEY_SCOPES` การถือกุญแจ `manage`/`admin` ยังคงผ่านการแกะสลักไม่เปลี่ยนแปลง `mcp:connect` เป็นทางเลือกที่มีสิทธิพิเศษต่ำกว่าสำหรับผู้โทร MCP ระยะไกลเท่านั้น ตรวจสอบผ่าน `hasMcpConnectOrManageScope()`
 
-### การผูกสโคป HTTP แยกตามคีย์ (#7895)
+### การเชื่อมโยงขอบเขต HTTP ต่อคีย์ (#7895)
 
-เมื่อใช้งานผ่าน HTTP/SSE ขณะนี้ `open-sse/mcp-server/httpTransport.ts` จะแก้ไขค่า
-`api_keys.scopes` ที่แท้จริงของผู้เรียกผ่าน `resolveMcpCallerAuthInfo()` (`open-sse/mcp-server/httpAuthContext.ts`)
-และส่งค่านั้นไปยัง `transport.handleRequest(req, { authInfo })` ของ MCP SDK เพื่อให้
-`extra.authInfo.scopes` ที่ส่งถึงการเรียกเครื่องมือแต่ละครั้งสะท้อนสโคปของ Bearer key นั้นเอง
-`resolveCallerScopeContext()` ของ `scopeEnforcement.ts` ให้ความสำคัญกับ `authInfo` ก่อน
-`_meta` และค่าทดแทนจากตัวแปรสภาพแวดล้อม `OMNIROUTE_MCP_SCOPES` อยู่แล้ว การเปลี่ยนแปลงนี้เพียงเติมข้อมูลให้กับ
-แหล่งข้อมูลแรกที่มีลำดับความสำคัญสูงสุด ซึ่งก่อนหน้านี้ไม่ได้รับข้อมูลผ่าน HTTP เมื่อไม่สามารถแก้ไข API key ได้
-(ไม่มีส่วนหัวหรือคีย์ไม่ถูกต้อง) `authInfo` จะยังคงเป็น `undefined` และการแก้ไขค่าจะย้อนกลับไปใช้
-สายโซ่ `meta`/ตัวแปรสภาพแวดล้อมที่มีอยู่โดยไม่เปลี่ยนแปลง stdio ไม่มีข้อมูลระบุตัวตนแยกตามผู้เรียก (ดู
-`mcpCallerIdentity.ts`) และไม่ได้รับผลกระทบ โดยยังคงใช้สายโซ่ค่าทดแทน `_meta`/ตัวแปรสภาพแวดล้อมต่อไป
+เหนือ HTTP/SSE ตอนนี้ `open-sse/mcp-server/httpTransport.ts` แก้ไข `api_keys.scopes` จริงของผู้โทรผ่าน `resolveMcpCallerAuthInfo()` (`open-sse/mcp-server/httpAuthContext.ts`) และส่งต่อไปยัง MCP SDK ของ `transport.handleRequest(req, { authInfo })` ดังนั้น `extra.authInfo.scopes` เข้าถึงการเรียกใช้เครื่องมือแต่ละครั้งจะสะท้อนถึงขอบเขตของ Bearer key `scopeEnforcement.ts` ของ `resolveCallerScopeContext()` จัดลำดับความสำคัญ `authInfo` มากกว่า `_meta` และ `OMNIROUTE_MCP_SCOPES` env fallback — สิ่งนี้จะเติมเฉพาะแหล่งที่มาแรกที่มีลำดับความสำคัญสูงสุดเท่านั้น ซึ่งก่อนหน้านี้ไม่ได้ฟีดผ่าน HTTP เมื่อไม่มีคีย์ API ได้รับการแก้ไข (ไม่มีส่วนหัว คีย์ที่ไม่ถูกต้อง) `authInfo` จะยังคง `undefined` และการแก้ไขจะตกไปสู่ห่วงโซ่ `meta`/env ที่มีอยู่ไม่เปลี่ยนแปลง stdio ไม่มีตัวตนต่อผู้โทร (ดู `mcpCallerIdentity.ts`) และไม่ได้รับผลกระทบจากการเชื่อมโยงต่อคีย์ — โดยจะข้ามขั้นตอน `_meta` (`_meta` ได้รับเกียรติเฉพาะในบริบท HTTP auth #15159) และแก้ไขได้จากคีย์ `OMNIROUTE_MCP_SCOPES` env เพียงอย่างเดียว
 
-**ระบบจะบังคับใช้สโคปสำหรับผู้เรียก HTTP/SSE ที่มีสโคปแบบจำกัด ไม่ว่าค่า
-`OMNIROUTE_MCP_ENFORCE_SCOPES` จะเป็นอย่างไรก็ตาม** การที่ `OMNIROUTE_MCP_ENFORCE_SCOPES` มีค่าเริ่มต้นเป็น `false`
-ปลอดภัยเฉพาะสำหรับโฟลว์ผู้ดำเนินการรายเดียวแบบ local/stdio ซึ่งไม่มีข้อมูลระบุตัวตนแยกตามผู้เรียกให้ใช้กำหนด
-ขอบเขตสิทธิ์ `open-sse/mcp-server/server.ts::withScopeEnforcement()` จะเปิดใช้การบังคับใช้สโคป
-แยกตามเครื่องมือโดยไม่มีเงื่อนไข (`shouldForceScopeEnforcement()` ใน `scopeEnforcement.ts`)
-เมื่อใดก็ตามที่ `resolveCallerScopeContext()` แก้ไขค่าได้เป็น
-`source === "authInfo"` (กล่าวคือ ส่วนหัว HTTP Authorization ที่ผูกกับคีย์จริง ซึ่งใช้กับ HTTP/SSE เท่านั้น) และ
-คีย์นั้นไม่มีสโคป `manage`/`admin` แบบเต็ม การดำเนินการนี้อุดช่องโหว่ที่คีย์ซึ่งมีเพียง
-สโคปข้อยกเว้นแบบจำกัด `mcp:connect` — ซึ่งอธิบายไว้ข้างต้นว่าไม่อนุญาตสิ่งใดนอกจากข้อยกเว้น
-LOCAL_ONLY สำหรับ `/api/mcp/` — อาจเรียกใช้เครื่องมือ MCP ทุกตัวได้เมื่อผู้ดำเนินการ
-เปิดใช้การเข้าถึง MCP จากระยะไกล/ที่ไม่ใช่ลูปแบ็ก เพียงเพราะ `OMNIROUTE_MCP_ENFORCE_SCOPES` ถูกจัดส่งมาโดยมี
-ค่าเริ่มต้นเป็น `false` คีย์ที่มี `manage`/`admin` แบบเต็มผ่าน HTTP และผู้เรียกแบบ stdio/local ทุกประเภท ยังคง
-ใช้พฤติกรรมเดิมที่ควบคุมโดย `OMNIROUTE_MCP_ENFORCE_SCOPES` โดยไม่เปลี่ยนแปลง
+**การบังคับใช้จะบังคับใช้สำหรับผู้เรียก HTTP/SSE ที่มีขอบเขตแคบ โดยไม่คำนึงถึง `OMNIROUTE_MCP_ENFORCE_SCOPES`** `OMNIROUTE_MCP_ENFORCE_SCOPES` ที่ใช้ค่าเริ่มต้นเป็น `false` จะปลอดภัยสำหรับโฟลว์โอเปอเรเตอร์เดี่ยว local/stdio เท่านั้น โดยที่ไม่มีการระบุตัวตนต่อผู้โทรที่จะกำหนดขอบเขต `open-sse/mcp-server/server.ts::withScopeEnforcement()` เปลี่ยนการบังคับใช้ขอบเขตต่อเครื่องมือโดยไม่มีเงื่อนไข (`shouldForceScopeEnforcement()` ใน `scopeEnforcement.ts`) เมื่อใดก็ตามที่ `resolveCallerScopeContext()` แก้ไข `source === "authInfo"` (เช่นส่วนหัวการอนุญาต HTTP ต่อคีย์จริง HTTP/SSE-only) AND คีย์นั้นไม่ได้เก็บขอบเขต `manage`/`admin` แบบเต็ม วิธีนี้จะปิดช่องว่างที่การถือคีย์ ONLY ขอบเขตการบายพาส `mcp:connect` ที่แคบ — ที่บันทึกไว้ข้างต้นเป็นการไม่ให้สิทธิ์ใดๆ ยกเว้น `/api/mcp/` LOCAL_ONLY ที่แยกออกมา — สามารถเรียกใช้เครื่องมือ MCP ทุกอันได้เมื่อผู้ดำเนินการเปิดใช้งานการเข้าถึง remote/non-loopback MCP เพียงเพราะ `OMNIROUTE_MCP_ENFORCE_SCOPES` จัดส่ง `false` ตามค่าเริ่มต้น คีย์ `manage`/`admin` แบบเต็มบน HTTP และผู้เรียก stdio/local ทุกคน คงพฤติกรรมของ `OMNIROUTE_MCP_ENFORCE_SCOPES` -gated ที่มีอยู่ไว้ไม่เปลี่ยนแปลง
 
 ---
 

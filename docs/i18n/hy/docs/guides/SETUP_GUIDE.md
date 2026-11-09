@@ -140,91 +140,92 @@ omniroute providers validate
 
 ### 1) Միացրեք մատակարարները և ստեղծեք API բանալի
 
-1. Բացեք Dashboard → `Providers` և միացրեք առնվազն մեկ մատակարար (OAuth կամ API բանալի):
-2. Բացեք Dashboard → `Endpoints` և ստեղծեք API բանալի:
-3. (Ընտրովի) Բացեք Dashboard → `Combos` և սահմանեք ձեր պահուստային շղթան:
+1. Բացեք Dashboard → `Providers` և միացրեք առնվազն մեկ մատակարար (OAuth-ի կամ API բանալու միջոցով)։
+2. Բացեք Dashboard → `Endpoints` և ստեղծեք API բանալի։
+3. (Ըստ ցանկության) Բացեք Dashboard → `Combos` և սահմանեք պահուստային անցումների ձեր շղթան։
 
 ### 2) Կարգավորեք ձեր ծրագրավորման գործիքը
 
 ```txt
-Base URL: http://localhost:20128/v1
-API Key:  [copy from Endpoint page]
-Model:    if/qwen3.8-max-preview (or any provider/model prefix)
+Հիմնական URL: http://localhost:20128/v1
+API բանալի:   [պատճենեք Endpoint էջից]
+Մոդել:        if/qwen3.8-max-preview (կամ մատակարարի/մոդելի ցանկացած նախածանց)
 ```
 
-Եթե ձեր խմբագրիչը չի կարող ուղարկել `Authorization: Bearer ...`, դրա փոխարեն օգտագործեք թոքեն պարունակող համատեղելիության բազային հասցեն.
+Եթե ձեր խմբագրիչը չի կարող ուղարկել `Authorization: Bearer ...`, փոխարենն օգտագործեք թոքեն պարունակող համատեղելիության հիմնական հասցեն․
 
 ```txt
-Base URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/
-Models URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/models
-Chat URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/chat/completions
+Հիմնական URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/
+Մոդելների URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/models
+Զրույցի URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/chat/completions
 Ollama Tags URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/api/tags
 ```
 
-Աշխատում է Claude Code-ի, Codex CLI-ի, Cursor-ի, Cline-ի, OpenClaw-ի, OpenCode-ի և OpenAI-ի հետ համատեղելի SDK-ների հետ:
+Աշխատում է Claude Code-ի, Codex CLI-ի, Cursor-ի, Cline-ի, OpenClaw-ի, OpenCode-ի և OpenAI-ի հետ համատեղելի SDK-ների հետ։
 
-#### Ավտոմատ կազմաձևում `setup-*`-ի միջոցով
+#### Ինքնաշխատ կազմաձևում `setup-*`-ի միջոցով
 
-Բազային URL-ը և բանալին ձեռքով տեղադրելու փոխարեն թույլ տվեք OmniRoute-ին ընթացիկ մոդելների կատալոգի հիման վրա գրել յուրաքանչյուր գործիքի սեփական կազմաձևը: Յուրաքանչյուր գործիքի համար՝ մեկ հրաման.
+Հիմնական URL-ն և բանալին ձեռքով տեղադրելու փոխարեն թույլ տվեք OmniRoute-ին ընթացիկ մոդելների կատալոգից ստեղծել յուրաքանչյուր գործիքի սեփական կազմաձևը։ Յուրաքանչյուր գործիքի համար՝ մեկ հրաման․
 
 ```bash
 omniroute setup-codex        # ~/.codex/<name>.config.toml պրոֆիլներ
 omniroute setup-claude       # ~/.claude/profiles/<name>/settings.json
-omniroute setup-opencode     # ~/.config/opencode/opencode.json (openai-ի հետ համատեղելի)
-omniroute setup-cline        # Cline CLI-ի և VS Code ընդլայնման կարգավորումներ
+omniroute setup-opencode     # ~/.config/opencode/opencode.json (OpenAI-ի հետ համատեղելի)
+omniroute setup-cline        # Cline CLI + VS Code ընդլայնման կարգավորումներ
 omniroute setup-kilo         # Kilo Code
 omniroute setup-continue     # ~/.continue/config.yaml (Continue / cn)
-omniroute setup-cursor       # ցուցադրում է Cursor-ի ներծրագրային քայլերը
-omniroute setup-roo          # Roo Code-ի ներմուծում և autoImport ցուցիչ
+omniroute setup-cursor       # ցուցադրում է Cursor-ի ներկառուցված քայլերը
+omniroute setup-roo          # Roo Code ներմուծում + autoImport ցուցիչ
 omniroute setup-crush        # ~/.config/crush/crush.json
+omniroute setup-zed          # ~/.config/zed/settings.json (openai_compatible)
 omniroute setup-goose        # ~/.config/goose/config.yaml
 omniroute setup-aider        # ~/.aider.conf.yml
 omniroute setup-qwen         # ~/.qwen/settings.json + ~/.qwen/.env
 ```
 
-Յուրաքանչյուրն ընդունում է `--remote <url> --api-key <key>`՝ տեղային գործիքը **հեռավար** OmniRoute-ի հետ աշխատելու համար կազմաձևելու նպատակով, ինչպես նաև `--dry-run`՝ նախադիտման համար: CLI-ն ճիշտ ներդրված միջավայրով և առանց որևէ կազմաձև գրելու գործարկելու համար օգտագործեք ընդհանուր գործարկիչը՝ `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini): Նախկին՝ առանձին գործիքների համար նախատեսված `omniroute launch` (Claude Code) և `omniroute launch-codex` (Codex) գործարկիչները շարունակում են հասանելի լինել:
+Յուրաքանչյուրն ընդունում է `--remote <url> --api-key <key>`՝ տեղական գործիքը **հեռակա** OmniRoute-ի հետ աշխատելու համար կազմաձևելու նպատակով, ինչպես նաև `--dry-run`՝ նախադիտման համար։ CLI-ն ճիշտ ներդրված միջավայրի փոփոխականներով և առանց որևէ կազմաձև գրելու գործարկելու համար օգտագործեք ընդհանուր գործարկիչը՝ `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini)։ Նախկին՝ առանձին գործիքների գործարկիչները՝ `omniroute launch` (Claude Code) և `omniroute launch-codex` (Codex), շարունակում են հասանելի մնալ։
 
-Ամբողջական աղյուսակի համար (թե յուրաքանչյուր հրաման ինչ է գրում, բոլոր դրոշները, տեղային և հեռավար տարբերակները, բազային URL-ի `/v1` համաձայնությունները) տե՛ս **[CLI ինտեգրումներ](./CLI-INTEGRATIONS.md)**:
+Ամբողջական աղյուսակի համար (ինչ է գրում յուրաքանչյուր հրաման, բոլոր դրոշակները, տեղական և հեռակա տարբերակները, հիմնական URL-ի `/v1` կանոնները) տե՛ս **[CLI ինտեգրումներ](./CLI-INTEGRATIONS.md)**։
 
-Յուրաքանչյուր գործիքի մանրամասն կազմաձևման համար (Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot և այլն) տե՛ս հատուկ **[CLI գործիքների ուղեցույցը](../reference/CLI-TOOLS.md)**:
+Յուրաքանչյուր գործիքի մանրամասն կազմաձևման համար (Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot և այլն) տե՛ս առանձին **[CLI գործիքների ուղեցույցը](../reference/CLI-TOOLS.md)**։
 
 ---
 
-## Արձանագրությունների կարգավորում (MCP + A2A)
+## Արձանագրության կարգավորում (MCP + A2A)
 
-### MCP-ի կարգավորում (Model Context Protocol)
+### MCP Setup (Model Context Protocol)
 
-Գործարկեք MCP փոխադրումը stdio ռեժիմով.
+Սկսեք MCP տրանսպորտը stdio ռեժիմում.
 
 ```bash
 omniroute --mcp
 ```
 
-Առաջարկվող վավերացման ընթացքը.
+Առաջարկվող վավերացման հոսք.
 
 ```bash
-# 1. Գործարկեք MCP սերվերը
+# 1. Start MCP server
 omniroute --mcp
 
-# 2. Ձեր MCP հաճախորդից կանչեք՝
-omniroute_get_health        # Պետք է վերադարձնի համակարգի առողջական վիճակը
-omniroute_list_combos       # Պետք է վերադարձնի ակտիվ համակցությունները
+# 2. From your MCP client, call:
+omniroute_get_health        # Should return system health
+omniroute_list_combos       # Should return active combos
 
-# 3. Կամ գործարկեք ամբողջական E2E թեստային փաթեթը՝
+# 3. Or run the full E2E suite:
 npm run test:protocols:e2e
 ```
 
-#### MCP հաճախորդի կազմաձևում
+#### MCP Client Configuration
 
-**Claude Code:**
+**Claude Կոդ:**
 
 ```bash
-claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
 ```
 
 **Cursor / Cline:**
 
-Ավելացրեք ձեր MCP կարգավորումներին.
+Ավելացրեք ձեր MCP կարգավորումներին (stdio, ստեղնով, որպեսզի զանգահարողն ունենա հիմնական տնօրեն).
 
 ```json
 {
@@ -232,23 +233,30 @@ claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp
     "omniroute": {
       "command": "omniroute",
       "args": ["--mcp"],
-      "env": {}
+      "env": {
+        "OMNIROUTE_API_KEY": "your-key",
+        "OMNIROUTE_BASE_URL": "http://localhost:20128"
+      }
     }
   }
 }
 ```
 
-**MCP-ի ամբողջական փաստաթղթեր:** [MCP սերվերի README](../../open-sse/mcp-server/README.md) — 110 գործիք, IDE կազմաձևեր, Python/TS/Go հաճախորդներ:
+Կամ, երբ `mcpTransport` `streamable-http` է (այն սահմանեք `/dashboard/mcp` կամ `omniroute mcp enable --transport streamable-http` վրա), ուղղեք հաճախորդի հեռավոր MCP սերվերի մուտքագրումը `http://localhost:20128/api/mcp/stream` վրա:
 
-### A2A-ի կարգավորում (գործակալից գործակալ արձանագրություն)
+Բանալին շարժվում է որպես `Authorization: Bearer <api-key>` (տե՛ս [MCP Server → Հեռակա մուտքի հնարավորություն](../frameworks/MCP-SERVER.md#remote-access-manage-scope-bypass) հեռավոր հոսթերների համար. հեռակառավարվող ստեղնին անհրաժեշտ է `mcp:connect` և դրա read/write շրջանակները):
 
-Ստուգեք Agent Card-ը.
+**Ամբողջական MCP փաստաթղթերը.** [MCP սերվեր README](../../open-sse/mcp-server/README.md) — 110 գործիքներ, IDE կազմաձևեր, Python/TS/Go հաճախորդներ: Օպերատորի տեղեկանք սեղմման CCR/dedup գործիքների համար (մարկերներ, նախադրյալներ, յուրաքանչյուր գործիքի շրջանակներ, որոնման էջավորում, ախտորոշում). [Կոմպրեսիոն շարժիչներ → Նախադրյալներ / օպերատորի ուղեցույց](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup) :
+
+### A2A կարգավորում (գործակալից գործակալի արձանագրություն)
+
+Ստուգեք գործակալի քարտը.
 
 ```bash
 curl http://localhost:20128/.well-known/agent.json
 ```
 
-Ուղարկեք առաջադրանք.
+Ուղարկել առաջադրանք.
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -256,7 +264,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"Give me a short quota summary."}]}}'
 ```
 
-**A2A-ի ամբողջական փաստաթղթեր:** [A2A սերվերի README](../../src/lib/a2a/README.md) — JSON-RPC 2.0, հմտություններ, հոսքային փոխանցում, առաջադրանքի կենսափուլ:
+**Ամբողջական A2A փաստաթղթերը.** [A2A սերվեր README](../../src/lib/a2a/README.md) — JSON-RPC 2.0, հմտություններ, հոսք, առաջադրանքի կյանքի ցիկլ:
 
 ---
 
@@ -315,12 +323,12 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ---
 
-## Void Linux-ի (xbps-src) ձևանմուշ
+## Void Linux (xbps-src) Կաղապար
 
-Void Linux-ի օգտատերերը կարող են ստեղծել բնիկ փաթեթ՝ օգտագործելով `xbps-src`-ը։ Պահպանեք այս բլոկը որպես `srcpkgs/omniroute/template`.
+Void Linux օգտատերերի համար դուք կարող եք ստեղծել բնիկ փաթեթ՝ օգտագործելով `xbps-src`: Պահպանեք այս բլոկը որպես `srcpkgs/omniroute/template`.
 
 ```bash
-# «omniroute»-ի ձևանմուշի ֆայլ
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -331,7 +339,7 @@ maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# Յուրաքանչյուր թողարկման համար վերստեղծեք ստուգիչ գումարը հետևյալ կերպ.
+# Regenerate the checksum for each release with:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

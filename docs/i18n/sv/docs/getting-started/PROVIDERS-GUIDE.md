@@ -10,54 +10,53 @@
 
 ## Vad är en leverantör?
 
-Tänk på en leverantör som en **mobiloperatör**. Precis som du behöver en mobiloperatör för att ringa behöver du en AI-leverantör för att använda AI-modeller. OmniRoute är som en telefon som fungerar med **alla operatörer** — du kan växla automatiskt mellan dem.
+Tänk på en leverantör som en **mobiloperatör**. Precis som du behöver en mobiloperatör för att ringa samtal behöver du en AI-leverantör för att använda AI-modeller. OmniRoute är som en telefon som fungerar med **alla operatörer** – du kan växla automatiskt mellan dem.
 
 ### Typer av leverantörer
 
-| Typ            | Vad det är                    | Exempel                           | Kostnad                  |
-| -------------- | ----------------------------- | --------------------------------- | ------------------------ |
-| **Gratis**     | Ingen betalning krävs         | Kiro, OpenCode Free, Pollinations | $0                       |
-| **API-nyckel** | Du behöver en API-nyckel      | OpenAI, Anthropic, Google         | Betala efter användning  |
-| **OAuth**      | Logga in med ditt konto       | Claude Code, GitHub Copilot       | Prenumeration            |
-| **Webbkaka**   | Använder din webbläsarsession | ChatGPT Web (Codex), Gemini Web   | $0 (använder ditt konto) |
+| Typ            | Vad det är                    | Exempel                         | Kostnad                  |
+| -------------- | ----------------------------- | ------------------------------- | ------------------------ |
+| **Gratis**     | Ingen betalning krävs         | Kiro, Pollinations              | $0                       |
+| **API-nyckel** | Du behöver en API-nyckel      | OpenAI, Anthropic, Google       | Betala efter användning  |
+| **OAuth**      | Logga in med ditt konto       | Claude Code, GitHub Copilot     | Prenumeration            |
+| **Webbkaka**   | Använder din webbläsarsession | ChatGPT Web (Codex), Gemini Web | $0 (använder ditt konto) |
 
 ### Leverantörer med webbkakor
 
-Se **[WEB-COOKIE-GUIDE.md](./WEB-COOKIE-GUIDE.md)** för allmänna konfigurationsinstruktioner, begränsningar, felsökning och leverantörsspecifik vägledning för autentisering.
+Se **[WEB-COOKIE-GUIDE.md](./WEB-COOKIE-GUIDE.md)** för allmänna konfigurationsanvisningar, begränsningar, felsökning och leverantörsspecifik vägledning för autentisering.
 ---
 
 ## Snabbstart: Anslut din första leverantör
 
-### Valfri konfiguration av gratisleverantörer vid första starten
+### Valfri konfiguration av kostnadsfria leverantörer vid första körningen
 
-Guiden vid första starten innehåller ett särskilt kort för att **Konfigurera gratisleverantörer**. Den hämtar den aktuella
-listan över kvalificerade leverantörer från OmniRoutes register över leverantörer som inte kräver autentisering och låter dig sedan granska och avmarkera varje
+Guiden för den första körningen erbjuder ett uttryckligt kort för att **Konfigurera kostnadsfria leverantörer**. Den hämtar den aktuella
+listan över kvalificerade leverantörer från OmniRoutes register över leverantörer utan autentisering och låter dig sedan granska och avmarkera varje
 leverantör innan du bekräftar. OmniRoute visar leverantörens varningsmeddelande och en länk till dess webbplats
-så att du först kan granska tredje parts villkor, integritet, tillgänglighet och hastighetsbegränsningar.
+så att du först kan granska tredje partens villkor, integritetspolicy, tillgänglighet och hastighetsbegränsningar.
 
-Den här åtgärden är valfri: när du slutför guiden skapas aldrig anslutningar till gratisleverantörer utan att du informeras.
-Endast leverantörer som fortfarande saknas skapas, medan befintliga anpassade anslutningar
-lämnas orörda. Skapade, redan konfigurerade och misslyckade leverantörer rapporteras individuellt. Efter ett delvis lyckat resultat kan du
-utan risk försöka igen enbart för de misslyckade leverantörerna.
+Den här åtgärden är valfri: när du slutför guiden skapas aldrig anslutningar till kostnadsfria leverantörer utan ditt medgivande.
+Endast leverantörer som fortfarande saknas skapas, befintliga anpassade anslutningar
+lämnas orörda och skapade, redan konfigurerade och misslyckade leverantörer rapporteras individuellt. Efter ett delvis lyckat resultat kan du
+säkert försöka igen enbart för de leverantörer som misslyckades.
 
-### Alternativ A: Gratisleverantör (inget kreditkort)
+### Alternativ A: Kostnadsfri leverantör (inget kreditkort)
 
 1. Öppna kontrollpanelen på `http://localhost:20128`
 2. Gå till **Leverantörer** → **Lägg till leverantör**
-3. Välj någon av dessa gratisleverantörer:
+3. Välj en av dessa kostnadsfria leverantörer:
    - **Kiro AI** — Kostnadsfria Claude-modeller (ingen autentisering krävs)
-   - **OpenCode Free** — Kostnadsfria GPT-modeller (ingen autentisering krävs)
-   - **Pollinations** — Kostnadsfria GPT-5, Claude och Gemini (ingen nyckel krävs)
-   - **LongCat** — 10 miljoner tokens utan kostnad (engångstilldelning, kräver konto + KYC)
-   - **Cloudflare AI** — Fler än 50 modeller, 10 000 neuroner/dag
-   - **MLX Gemma 26B** — Lokal Apple Silicon-modell (~38.5 tokens/s, ~15.9GB RAM)
-   - **MLX Qwen 3.8 27B** — Lokal Apple Silicon-modell (~9.1 tokens/s, ~13.1GB RAM)
+   - **Pollinations** — Kostnadsfria GPT-5-, Claude- och Gemini-modeller (ingen nyckel krävs)
+   - **LongCat** — 10 miljoner kostnadsfria token (engångstilldelning, kräver konto + KYC)
+   - **Cloudflare AI** — Över 50 modeller, 10 000 neuroner/dag
+   - **MLX Gemma 26B** — Lokal Apple Silicon-modell (~38,5 token/s, ~15,9 GB RAM)
+   - **MLX Qwen 3.8 27B** — Lokal Apple Silicon-modell (~9,1 token/s, ~13,1 GB RAM)
 4. Klicka på **Anslut**
-5. Klart! Nu har du kostnadsfri tillgång till AI.
+5. Klart! Du har nu kostnadsfri åtkomst till AI.
 
 ### Alternativ B: Leverantör med API-nyckel (betald)
 
-1. Skaffa en API-nyckel från leverantörens webbplats:
+1. Hämta en API-nyckel från leverantörens webbplats:
    - **OpenAI**: https://platform.openai.com/api-keys
    - **Anthropic**: https://console.anthropic.com/
    - **Google**: https://aistudio.google.com/apikey
@@ -68,24 +67,24 @@ utan risk försöka igen enbart för de misslyckade leverantörerna.
 4. Välj din leverantör
 5. Klistra in din API-nyckel
 6. Klicka på **Anslut**
-7. Klart! Nu har du tillgång till den leverantörens modeller.
+7. Klart! Du har nu åtkomst till den leverantörens modeller.
 
-### Alternativ C: OAuth-leverantör (prenumeration)
+### Alternativ C: OAuth-leverantör (abonnemang)
 
 1. Öppna kontrollpanelen på `http://localhost:20128`
 2. Gå till **Leverantörer** → **Lägg till leverantör**
 3. Välj din leverantör (t.ex. Claude Code eller GitHub Copilot)
 4. Klicka på **Anslut med OAuth**
 5. Logga in med ditt konto
-6. Klart! Nu har du tillgång till modellerna i din prenumeration.
+6. Klart! Du har nu åtkomst till modellerna i ditt abonnemang.
 
 ### Alternativ D: Lokala MLX-modeller (Apple Silicon)
 
-På Apple Silicon-Mac-datorer med enhetligt minne stöder OmniRoute anslutning till lokala MLX-modeller som körs via `mlx-lm.server` som vanliga OpenAI-kompatibla lokala leverantörer.
+För Mac-datorer med Apple Silicon och enhetligt minne stöder OmniRoute anslutning till lokala MLX-modeller som körs via `mlx-lm.server` som vanliga OpenAI-kompatibla lokala leverantörer.
 
 #### Förutsättningar
 
-- **Apple Silicon-Mac** (M1/M2/M3/M4) med minst 24GB enhetligt minne rekommenderas
+- **Mac med Apple Silicon** (M1/M2/M3/M4) med minst 24 GB enhetligt minne rekommenderas
 - Pakethanteraren **uv**: `curl -LsSf https://astral.sh/uv/install.sh | sh`
 - **mlx-lm**: `uv pip install mlx-lm`
 
@@ -111,7 +110,7 @@ På Apple Silicon-Mac-datorer med enhetligt minne stöder OmniRoute anslutning t
    uv run mlx_lm.server --model maglun/Qwen3.8-27B-MLX-Mixed-3.80bpw --port 11436 --host 127.0.0.1
    ```
 
-3. **Anslut i OmniRoutes kontrollpanel**:
+3. **Anslut i OmniRoute-kontrollpanelen**:
    - Gå till **Leverantörer** → **Lägg till leverantör**
    - Välj **MLX Gemma 26B** eller **MLX Qwen 3.8 27B**
    - Klicka på **Anslut** (ingen API-nyckel krävs)
@@ -129,10 +128,10 @@ På Apple Silicon-Mac-datorer med enhetligt minne stöder OmniRoute anslutning t
 
 #### Minneshantering
 
-**Viktigt**: Med 24GB enhetligt minne kan endast **en stor MLX-modell köras åt gången**.
+**Viktigt**: Med 24 GB enhetligt minne kan endast **en stor MLX-modell köras åt gången**.
 
-- Gemma 26B: ~15.9GB maximal minnesanvändning
-- Qwen 3.8 27B: ~13.1GB maximal minnesanvändning
+- Gemma 26B: ~15,9 GB maximal minnesanvändning
+- Qwen 3.8 27B: ~13,1 GB maximal minnesanvändning
 
 Du måste hantera detta manuellt:
 
@@ -152,20 +151,20 @@ curl -X POST http://localhost:20128/v1/chat/completions \
   -H "Content-Type: application/json" \
   -d '{
     "model": "mlx-gemma/gemma-4-26b",
-    "messages": [{"role": "user", "content": "Vad är 2+2? Använd kalkylatorverktyget."}],
-    "tools": [{"type": "function", "function": {"name": "calculator", "description": "Beräkna", "parameters": {"type": "object", "properties": {"expression": {"type": "string"}}, "required": ["expression"]}}}]
+    "messages": [{"role": "user", "content": "What is 2+2? Use the calculator tool."}],
+    "tools": [{"type": "function", "function": {"name": "calculator", "description": "Calculate", "parameters": {"type": "object", "properties": {"expression": {"type": "string"}}, "required": ["expression"]}}}]
   }'
 ```
 
 #### Felsökning
 
-| Problem                  | Lösning                                                                                       |
-| ------------------------ | --------------------------------------------------------------------------------------------- |
-| Servern startar inte     | Kontrollera `uv run mlx_lm.server --help` och verifiera modell-ID:n                           |
-| Slut på minne            | Se till att endast en modell körs; stäng andra appar; kontrollera Aktivitetskontroll          |
-| Anslutningen nekades     | Kontrollera att servern körs på rätt port (11435/11436)                                       |
-| Långsamma svar           | Den första begäran läser in modellen i minnet (~30–60 s); efterföljande begäranden går snabbt |
-| Verktygsanrop misslyckas | Se till att modellen stöder verktyg; kontrollera OmniRoute-loggarna efter översättningsfel    |
+| Problem                  | Lösning                                                                                            |
+| ------------------------ | -------------------------------------------------------------------------------------------------- |
+| Servern startar inte     | Kontrollera `uv run mlx_lm.server --help` och verifiera modell-ID:n                                |
+| Slut på minne            | Säkerställ att endast en modell körs; stäng andra appar; kontrollera Aktivitetskontroll            |
+| Anslutningen nekades     | Kontrollera att servern körs på rätt port (11435/11436)                                            |
+| Långsamma svar           | Den första förfrågan läser in modellen i minnet (~30–60 s); efterföljande förfrågningar går snabbt |
+| Verktygsanrop misslyckas | Säkerställ att modellen stöder verktyg; kontrollera OmniRoute-loggarna efter översättningsfel      |
 
 ---
 
@@ -176,7 +175,6 @@ Dessa leverantörer erbjuder **kostnadsfri åtkomst** utan kreditkort:
 | Leverantör        | Kostnadsfri kvot         | Modeller                                 | Så ansluter du            |
 | ----------------- | ------------------------ | ---------------------------------------- | ------------------------- |
 | **Kiro AI**       | 50 krediter/månad        | Claude Sonnet 4.5, Haiku 4.5, Opus 4.6   | Ingen autentisering krävs |
-| **OpenCode Free** | Obegränsat               | GPT-4o, Claude, Gemini                   | Ingen autentisering krävs |
 | **Pollinations**  | Ingen nyckel krävs       | GPT-5, Claude, Gemini, DeepSeek, Llama 4 | Ingen autentisering krävs |
 | **LongCat**       | 10M vid ett tillfälle    | LongCat-2.0                              | API-nyckel + KYC          |
 | **Cloudflare AI** | 10K neuroner/dag         | Över 50 modeller                         | Ingen autentisering krävs |
@@ -240,7 +238,7 @@ Din leverantör är nu ansluten. Du kan använda den med `model: "auto"` eller a
 
 OmniRoute fungerar bäst med **flera leverantörer**. Det ger dig:
 
-- **Automatisk reservväxling** — Om en leverantör misslyckas provar OmniRoute nästa
+- **Automatisk reservlösning** — Om en leverantör misslyckas provar OmniRoute nästa
 - **Kostnadsoptimering** — OmniRoute väljer den billigaste leverantören för varje förfrågan
 - **Hastighetsoptimering** — OmniRoute väljer den snabbaste leverantören för varje förfrågan
 - **Kvalitetsoptimering** — OmniRoute väljer den bästa leverantören för varje uppgift
@@ -249,11 +247,11 @@ OmniRoute fungerar bäst med **flera leverantörer**. Det ger dig:
 
 Anslut minst **3 leverantörer** för bästa möjliga upplevelse:
 
-1. **En kostnadsfri leverantör** (Kiro, OpenCode Free eller Pollinations) — Alltid tillgänglig
+1. **En kostnadsfri leverantör** (Kiro eller Pollinations) — Alltid tillgänglig
 2. **En snabb leverantör** (Groq, Cerebras) — För snabba svar
 3. **En kvalitetsleverantör** (OpenAI, Anthropic, Google) — För komplexa uppgifter
 
-Använd sedan `model: "auto"` så väljer OmniRoute automatiskt den bästa för varje förfrågan.
+Använd sedan `model: "auto"` så väljer OmniRoute automatiskt den bästa leverantören för varje förfrågan.
 
 ---
 
@@ -335,11 +333,11 @@ och en konfigurerbar timeout är separata förbättringar; detta beteende utlova
 
 ### "Måste jag betala för att använda OmniRoute?"
 
-**Nej!** OmniRoute är kostnadsfritt och har öppen källkod. Du kan använda kostnadsfria leverantörer (Kiro, OpenCode Free, Pollinations) utan att betala någonting. Du betalar endast om du väljer att använda betalleverantörer.
+**Nej!** OmniRoute är kostnadsfritt och har öppen källkod. Du kan använda kostnadsfria leverantörer (Kiro, Pollinations) utan att betala något. Du betalar endast om du väljer att använda avgiftsbelagda leverantörer.
 
 ### "Vilken leverantör bör jag börja med?"
 
-Börja med **Kiro AI** — den är kostnadsfri, kräver ingen API-nyckel och ger dig tillgång till Claude-modeller. Lägg sedan till fler leverantörer efter behov.
+Börja med **Kiro AI** – det är kostnadsfritt, kräver ingen API-nyckel och ger dig tillgång till Claude-modeller. Lägg sedan till fler leverantörer efter behov.
 
 ### "Kan jag använda flera leverantörer samtidigt?"
 
@@ -347,11 +345,11 @@ Börja med **Kiro AI** — den är kostnadsfri, kräver ingen API-nyckel och ger
 
 ### "Vad händer om en leverantör slutar fungera?"
 
-OmniRoute hoppar automatiskt över leverantörer som inte fungerar och provar nästa. Du behöver inte göra någonting.
+OmniRoute hoppar automatiskt över leverantörer som inte fungerar och provar nästa. Du behöver inte göra något.
 
 ### "Hur kopplar jag från en leverantör?"
 
-Gå till Leverantörer → klicka på leverantören → klicka på **Koppla från**.
+Gå till Providers → klicka på leverantören → klicka på **Disconnect**.
 
 ### "Kan jag använda mina befintliga API-nycklar?"
 

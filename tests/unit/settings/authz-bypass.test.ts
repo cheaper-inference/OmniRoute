@@ -353,3 +353,107 @@ test("Defence-in-depth: even if a malformed snapshot lists /api/cli-tools/runtim
 
   assert.equal(routeGuard.isLocalOnlyBypassableByManageScope("/api/cli-tools/runtime/foo"), false);
 });
+
+// ─── Host-credential read: /api/oauth/kiro/auto-import is never bypassable ─
+//
+// The Kiro auto-import route reads host-local credential files (kiro-cli
+// SQLite, ~/.aws/sso/cache, Kiro profile.json). It is LOCAL_ONLY, but until it
+// sat in the non-bypassable set an operator-configured manage-scope bypass list
+// could expose it to a remote manage-scoped key. All three layers must refuse
+// it — the exact path AND any broader entry that would cover it.
+
+const KIRO_AUTO_IMPORT = "/api/oauth/kiro/auto-import";
+
+for (const candidate of [KIRO_AUTO_IMPORT, "/api/oauth/kiro/"]) {
+  test(`PATCH with ${candidate} in bypass list → 400 BYPASS_PREFIX_NOT_ALLOWED + snapshot unchanged`, async () => {
+    process.env.JWT_SECRET = "test-jwt-secret-authz-bypass";
+    process.env.INITIAL_PASSWORD = "initial-pass-kiro";
+    await settingsDb.updateSettings({ requireLogin: true });
+    const { ensurePersistentManagementPasswordHash } =
+      await import("../../../src/lib/auth/managementPassword.ts");
+    await ensurePersistentManagementPasswordHash({ source: "test.bootstrap" });
+    const seeded = await settingsDb.getSettings();
+    await runtime.applyRuntimeSettings(seeded);
+    const snapshotBefore = runtime.getAuthzBypassSnapshot();
+
+    const response = await settingsRoute.PATCH(
+      await makeManagementSessionRequest("http://localhost/api/settings", {
+        method: "PATCH",
+        body: {
+          localOnlyManageScopeBypassPrefixes: ["/api/mcp/", candidate],
+          currentPassword: "initial-pass-kiro",
+        },
+      })
+    );
+
+    assert.equal(response.status, 400);
+    const body = (await response.json()) as {
+      error: { details?: Array<{ field: string; message: string }> };
+    };
+    const offending = body.error.details?.find((d) =>
+      d.message.includes("BYPASS_PREFIX_NOT_ALLOWED")
+    );
+    assert.ok(offending, `expected BYPASS_PREFIX_NOT_ALLOWED in details: ${JSON.stringify(body)}`);
+
+    const settings = await settingsDb.getSettings();
+    assert.deepEqual(settings.localOnlyManageScopeBypassPrefixes, ["/api/mcp/"]);
+    assert.deepEqual(runtime.getAuthzBypassSnapshot().prefixes, snapshotBefore.prefixes);
+  });
+}
+
+test("stored bypass list naming the Kiro auto-import route (or a parent of it) is neutralized by normalization", async () => {
+  await runtime.applyRuntimeSettings({
+    localOnlyManageScopeBypassEnabled: true,
+    localOnlyManageScopeBypassPrefixes: ["/api/mcp/", KIRO_AUTO_IMPORT, "/api/oauth/kiro/"],
+  });
+  assert.deepEqual(runtime.getAuthzBypassSnapshot().prefixes, ["/api/mcp/"]);
+  assert.equal(routeGuard.isLocalOnlyBypassableByManageScope(KIRO_AUTO_IMPORT), false);
+});
+
+test("manage-scoped key from non-loopback cannot reach the Kiro auto-import route via the bypass list → 403 LOCAL_ONLY", async () => {
+  process.env.JWT_SECRET = "test-jwt-secret-authz-bypass";
+  process.env.INITIAL_PASSWORD = "initial-pass-kiro-req";
+  await mockSettings({ requireLogin: true });
+  const managePolicy = await import("../../../src/server/authz/policies/management.ts");
+  const created = await apiKeysDb.createApiKey("kiro-mgmt", "machine-kiro", ["manage"]);
+  const headers = new Headers({ authorization: `Bearer ${created.key}` });
+
+  // Control: the same key IS granted the default /api/mcp/ bypass, so the
+  // refusal below is the deny-list's doing, not a broken key/fixture.
+  const control = await managePolicy.managementPolicy.evaluate(nonLoopbackCtx(headers));
+  assert.equal(control.allow, true);
+
+  // Through the production settings pipeline (normalization layer).
+  await runtime.applyRuntimeSettings(
+    {
+      localOnlyManageScopeBypassEnabled: true,
+      localOnlyManageScopeBypassPrefixes: ["/api/mcp/", KIRO_AUTO_IMPORT],
+    },
+    { force: true }
+  );
+  const viaSettings = await managePolicy.managementPolicy.evaluate(
+    nonLoopbackCtx(headers, KIRO_AUTO_IMPORT)
+  );
+  assert.equal(viaSettings.allow, false);
+  if (!viaSettings.allow) {
+    assert.equal(viaSettings.status, 403);
+    assert.equal(viaSettings.code, "LOCAL_ONLY");
+  }
+
+  // A snapshot writer that skips normalization: the request-time predicate
+  // must still refuse, for the exact path and for a covering parent entry.
+  const store = globalThis as unknown as Record<string, unknown>;
+  store.__omniroute_authzBypass_config__ = {
+    enabled: true,
+    prefixes: ["/api/mcp/", KIRO_AUTO_IMPORT, "/api/oauth/kiro/"],
+  };
+  assert.equal(routeGuard.isLocalOnlyBypassableByManageScope(KIRO_AUTO_IMPORT), false);
+  const viaRawSnapshot = await managePolicy.managementPolicy.evaluate(
+    nonLoopbackCtx(headers, KIRO_AUTO_IMPORT)
+  );
+  assert.equal(viaRawSnapshot.allow, false);
+  if (!viaRawSnapshot.allow) {
+    assert.equal(viaRawSnapshot.status, 403);
+    assert.equal(viaRawSnapshot.code, "LOCAL_ONLY");
+  }
+});

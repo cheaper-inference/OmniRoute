@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
-import { regenerateApiKey } from "@/lib/db/apiKeys";
-import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
+import { getApiKeyById, regenerateApiKey } from "@/lib/db/apiKeys";
+import {
+  requireCredentialForManagementScopedKey,
+  requireManagementAuth,
+} from "@/lib/api/requireManagementAuth";
 import * as log from "@/sse/utils/logger";
 
 /**
@@ -18,6 +21,10 @@ export async function POST(request, { params }) {
     if (!id) {
       return NextResponse.json({ error: "Missing key ID" }, { status: 400 });
     }
+
+    const existing = await getApiKeyById(id);
+    const scopeAuthError = await requireCredentialForManagementScopedKey(request, existing?.scopes);
+    if (scopeAuthError) return scopeAuthError;
 
     const result = await regenerateApiKey(id);
     if (!result) {

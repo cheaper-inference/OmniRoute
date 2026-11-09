@@ -37,33 +37,39 @@ Dažnos „OmniRoute“ problemos ir jų sprendimai.
 
 ---
 
-### Nemokamų teikėjų užklausų dažnio ribojimas (429 / 400 / 401)
+### Užklausų dažnio ribojimas nemokamuose teikėjuose (429 / 400 / 401)
 
-**Požymis**: naudojant `model: "auto"` su nemokamais teikėjais arba teikėjais, kuriems nereikia autentifikavimo (opencode, auggie ir kt.), vietoje atsakymų kartais gaunate `HTTP 429`, `400` arba `401`. Po kelių akimirkų pakartojus tą pačią užklausą, ji įvykdoma sėkmingai, tačiau automatizavimas (cron užduotys, agentai, scenarijai) nutrūksta po pirmosios klaidos.
+**Požymis**: Naudojant `model: "auto"` su nemokamais / autentifikavimo nereikalaujančiais teikėjais (auggie ir kt.), vietoje atsakymų protarpiais gaunate `HTTP 429`, `400` arba `401`. Pakartojus tą pačią užklausą po kelių akimirkų, ji sėkmingai įvykdoma, tačiau automatizavimas (cron užduotys, agentai, scenarijai) nutrūksta dėl pirmosios klaidos.
 
-**Pagrindinė priežastis**: susideda trys nepriklausomi gedimų režimai:
+**Pagrindinė priežastis**: susideda trys nepriklausomi gedimo scenarijai:
 
-1. **Teikėjo užklausų dažnio limitas (`429`)**: nemokamuose planuose gali būti taikoma kvota kiekvienam laiko intervalui. Lygiagrečių iškvietimų pliūpsnis ją išnaudoja, todėl kita užklausa atmetama, kol intervalas nustatomas iš naujo.
-2. **Neveikiantis modelis tiesioginio perdavimo režimu (`400`/`401`)**: `auto/*` telkiniuose gali būti `opencode` tiesioginio perdavimo modelių, kurie užregistruoti kataloge, bet neturi galiojančių prisijungimo duomenų (pvz., `oc/north-mini-code-free` → `401`). Automatinis maršruto parinkiklis išbando vieną iš jų, patiria klaidą, o klaida perduodama toliau dar prieš suveikiant atsarginiam perjungimui.
-3. **Lygiagretumo sustiprinimas (`429` esant apkrovai)**: kai kelios agentų ar cron sesijos vienu metu naudoja `auto`, bendras užklausų dažnis viršija nemokamų teikėjų toleruojamą lygį, todėl teisėti iškvietimai pažymimi kaip piktnaudžiavimas.
+1. **Teikėjo dažnio ribojimas (`429`)**: nemokami planai gali taikyti vieno laikotarpio kvotą. Lygiagrečių iškvietimų pliūpsnis ją išnaudoja, todėl kita užklausa atmetama, kol laikotarpis bus iš naujo nustatytas.
+2. **Sugedęs modelis peradresavimo režime (`400`/`401`)**: `auto/*` telkiniuose gali būti peradresavimo modelių, kurie kataloge registruoti, tačiau neturi galiojančių kredencialų (→ `401`). Automatinis maršrutizatorius bando tokį modelį, nesėkmingai baigia bandymą, o klaida perduodama toliau, kol suveikia atsarginis variantas.
+3. **Lygiagretumo sustiprėjimas (`429` esant apkrovai)**: kai keli agento / cron seansai vienu metu kreipiasi į `auto`, bendras užklausų dažnis viršija nemokamų teikėjų toleruojamą lygį, todėl teisėtos užklausos pažymimos kaip piktnaudžiavimas.
 
-**Patvirtintas sprendimas (bendruomenės pranešimas, 2026-08-10)**: sureguliuokite tris aplinkos kintamuosius, kad rotacija, lygiagretumas ir atsarginis perjungimas suvaldytų nemokamo plano nepastovumą, užuot dėl jo sustoję:
+**Patvirtintas sprendimas (bendruomenės pranešimas, 2026-08-10)**: sureguliuokite tris aplinkos kintamuosius, kad rotacija, lygiagretumas ir atsarginis veikimas suvaldytų nemokamo plano svyravimus, o ne dėl jų nutrūktų:
 
 ```bash
-export OMNIROUTE_ROTATE_ON_400=true           # gavus 400/401, pereiti prie kito modelio ar teikėjo (praleidžiami neveikiantys tiesioginio perdavimo modeliai)
-export OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT=4   # aiški vienu metu priimamų didelės apkrovos užklausų riba (pagal numatytuosius nustatymus nenustatyta: užklausų skaičius neribojamas, žr. pastabą toliau)
-export OMNIROUTE_CHAT_ADMISSION_QUEUE_MS=20000 # riboto laukimo trukmę padidinti virš numatytosios RATE_LIMIT_MAX_WAIT_MS reikšmės, skirtos lėtoms išorinėms paslaugoms
+export OMNIROUTE_ROTATE_ON_400=true           # pereiti prie kito modelio / teikėjo įvykus 400/401 (praleidžiami sugedę peradresavimo modeliai)
+export OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT=4   # aiški intensyvių užklausų priėmimo riba (pagal numatytuosius nustatymus nenustatyta: užklausų skaičius neribojamas, žr. toliau pateiktą pastabą)
+export OMNIROUTE_CHAT_ADMISSION_QUEUE_MS=20000 # pailginti riboto laukimo laiką, viršijantį lėtiems aukštesnio lygio teikėjams taikomą RATE_LIMIT_MAX_WAIT_MS numatytąją reikšmę
 ```
 
-Nustatykite juos OmniRoute proceso aplinkoje (demono, pvz., per LaunchAgent plist arba `systemctl edit`), tada iš naujo paleiskite OmniRoute. Rotacijos vėliavėlė yra vienintelė didžiausią poveikį daranti priemonė: ji kritinę klaidą paverčia skaidriu pakartotiniu bandymu naudojant veikiantį telkinio teikėją.
+Nustatykite juos OmniRoute proceso aplinkoje (demone, pvz., per LaunchAgent plist arba `systemctl edit`), tada iš naujo paleiskite OmniRoute. Rotacijos vėliavėlė yra veiksmingiausia priemonė: ji paverčia kritinę klaidą skaidriu pakartotiniu bandymu su veikiančiu telkinio teikėju.
 
-**Pastaba**: `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` riboja, kiek didelės apkrovos — ilgo konteksto — užklausų vykdoma vienu metu; ši riba yra priėmimo vartai, o ne teikėjo užklausų dažnio ribotuvas. **#503 išsišakojimo naujinys:** pagal numatytuosius nustatymus šis kintamasis nebėra nustatomas (dabar jis taikomas tik tada, kai aiškiai sukonfigūruotas, kaip parodyta pirmiau) — vietoje to didelės apkrovos užklausų priėmimą riboja automatiškai nustatomas baitų biudžetas (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`), prisitaikantis prie faktinės pagrindinio kompiuterio atminties ribos, todėl naujai įdiegtoje sistemoje turėtų būti gerokai mažiau `503 chat_admission_busy` atmetimų net ir visai nenustačius šio kintamojo; aiškiai jį nustačius čia, jis vis tiek veikia tiksliai taip, kaip aprašyta dokumentacijoje. Aiškiai nurodytos baitų biudžeto reikšmės apribojamos iki 8 MiB–2 GiB intervalo. `413 body_exceeds_budget` nėra laikina klaida: padidinkite šį baitų biudžetą, sumažinkite `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES` arba padidinkite proceso atminties ribą. `inflight_bytes_budget` apkrovos atmetimas reiškia laikiną išteklių konkurenciją, todėl užklausą galima bandyti kartoti. Kiekvieno teikėjo užklausų dažnio ribojimas (`open-sse/services/rateLimitManager.ts`) atskirai valdomas naudojant `RATE_LIMIT_MAX_WAIT_MS`, `RATE_LIMIT_MAX_QUEUE_DEPTH` ir `RATE_LIMIT_AUTO_ENABLE` — žr. `.env.example`.
+**Pastaba**: `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` riboja vienu metu vykdomų intensyvių — ilgo konteksto — užklausų skaičių; ši riba yra priėmimo vartai, o ne teikėjo dažnio ribotuvas. **#503-fanout atnaujinimas:** šis kintamasis pagal numatytuosius nustatymus nebenurodomas (dabar jis taikomas tik aiškiai sukonfigūravus, kaip nurodyta pirmiau) — intensyvių užklausų priėmimas dabar kontroliuojamas automatiškai nustatomu baitų biudžetu (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`), kuris pats prisitaiko prie tikrosios pagrindinio kompiuterio atminties ribos, todėl naujai įdiegta sistema turėtų daug rečiau atmesti užklausas su `503 chat_admission_busy` ir šio kintamojo apskritai nereikalauti; aiškiai jį nustačius, jis vis tiek veikia tiksliai taip, kaip aprašyta. Aiškiai nustatytos baitų biudžeto reikšmės apribojamos iki 8 MiB–2 GiB. `413 body_exceeds_budget` nėra laikina klaida: padidinkite šį baitų biudžetą, sumažinkite `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES` arba išsaugotą užklausos kūno limitą, arba padidinkite proceso atminties ribą. `inflight_bytes_budget` sukeltas atmetimas reiškia laikiną konkurenciją dėl išteklių ir išlieka tinkamas pakartoti. Atskirą kiekvieno teikėjo dažnio ribojimą (`open-sse/services/rateLimitManager.ts`) valdo `RATE_LIMIT_MAX_WAIT_MS`, `RATE_LIMIT_MAX_QUEUE_DEPTH` ir `RATE_LIMIT_AUTO_ENABLE` — žr. `.env.example`.
 
-**Kaip patikrinti, ar tai suveikė**: paleiskite savo agentą / cron užduotį du kartus iš eilės per trumpą laiką ir įsitikinkite, kad abu paleidimai sėkmingi. Prieš pataisymą antrasis paleidimas paprastai pateikdavo `429` / `401` klaidą. Po pataisymo nesėkmingi bandymai (jei tokių yra) skaidriai kartojami ir iškvietimas užbaigiamas. Taip pat galite vykdyti `curl /monitoring/health` ir stebėti teikėjų ryšių lauką `rateLimitedUntil` bei paveiktų teikėjų `circuitBreakers.providerBreakers[].state` — būsena gali būti `CLOSED`, `DEGRADED`, `OPEN` arba `HALF_OPEN` (žr. `src/shared/utils/circuitBreaker.ts`), o teikėjo, kuriam vis nepavyksta įvykdyti užklausų, būsena pasikeis `CLOSED → DEGRADED → OPEN`, kol pasibaigus atkūrimo laikotarpiui bus leista atlikti bandomąją užklausą (`HALF_OPEN`).
+**Atnaujinimo pastaba: išsaugotas užklausos kūno limitas dabar taikomas ir pokalbiams.** Anksčiau skiltyje Settings > Advanced > Request Body Limit (`maxBodySizeMb`) išsaugotas limitas dabar taip pat taikomas `/v1/chat/completions` ir `/v1/responses`. Iki šio pakeitimo šie du maršrutai priimdavo iki 50 MB, nepaisant išsaugotos reikšmės, todėl įdiegta sistema, kurioje nustatytas mažesnis limitas, pradės atmesti pokalbių kūnus, viršijančius šį limitą. Jei limitas niekada nebuvo išsaugotas, išlieka numatytoji 50 MB reikšmė.
 
-**Jei vis dar matote 429**: aktyvi tos teikėjo paskyra iš tiesų išnaudojo savo _kvotą_ (tai ne vien užklausų dažnio apribojimas). Pridėkite antrą to paties teikėjo paskyrą „OmniRoute“ valdymo skydelyje → „Providers“ → „Accounts“ arba įtraukite kitą nemokamą teikėją (pvz., `routeway`, `auggie`). Rotacija padeda tik esant laikiniems užklausų dažnio apribojimams arba 400 / 401 klaidoms; visiškai išnaudojus kvotą reikia antrų prisijungimo duomenų arba kito teikėjo.
+Atmetimas yra HTTP `413`, kai `error.code` nustatytas į `PAYLOAD_TOO_LARGE`, o `error.type` — į `payload_too_large`. Pranešime nurodomas taikomas limitas: `Request body too large. Maximum allowed: 10 MB`, kai deklaruotas `Content-Length` jį viršija, arba `Request body too large for chat completions (max 10 MB).`, kai faktiškai perskaityti baitai jį viršija. Tai nėra tas pats, kas pirmiau aprašyta `413 body_exceeds_budget`, kuri kyla dėl atminties biudžeto ir kurios šis nustatymas nekeičia.
 
-**Jei naudojant vaizdo modelius (`auto/vision`, `bazaarlink/*`) rodoma 403 klaida**: prijungta paskyra neturi mokamo plano, į kurį įtrauktas vaizdų apdorojimas, arba API raktui nesuteikta pakankamai teisių. Teikėjo valdymo skydelyje patikrinkite, ar rakto aprėptis apima vaizdų apdorojimą / daugiarūšį veikimą, arba prijunkite mokamo lygio paskyrą ir palikite ją kaip vaizdų apdorojimo tikslinę paskyrą.
+Norėdami padidinti limitą, išsaugokite didesnę reikšmę adresu `/dashboard/settings/advanced` arba siųskite `PATCH /api/settings` su `{"maxBodySizeMb": 50}`. Priimamos reikšmės nuo 1 iki 500 MB, pakeitimas pradedamas taikyti be pakartotinio paleidimo, o reikšmė 50 grąžina ankstesnį pokalbių limitą. Didesnį kūną vis dar gali sustabdyti dar du limitai: kai nustatytas `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES`, jis taip pat apriboja išsaugotą limitą, o Kubernetes įėjimo anotaciją `proxy-body-size` (`50m` pateiktuose manifestuose) reikia atskirai padidinti, jei dydis viršija 50 MB.
+
+**Kaip patikrinti, ar tai suveikė**: greitai paeiliui paleiskite agentą / cron užduotį du kartus ir patvirtinkite, kad abu paleidimai sėkmingi. Prieš pataisymą antrasis paleidimas paprastai sukeldavo `429` / `401`. Po pataisymo klaidos, jei jų pasitaiko, skaidriai pakartojamos, o iškvietimas užbaigiamas. Taip pat galite vykdyti `curl /monitoring/health` ir stebėti teikėjų jungčių lauką `rateLimitedUntil` bei paveiktų teikėjų `circuitBreakers.providerBreakers[].state` — būsena yra viena iš `CLOSED`, `DEGRADED`, `OPEN` arba `HALF_OPEN` (žr. `src/shared/utils/circuitBreaker.ts`), o nuolat sutrikimus patiriantis teikėjas, prieš leidžiant patikros užklausai praeiti per atkūrimo laikotarpį, pereis iš `CLOSED → DEGRADED → OPEN` į `HALF_OPEN`.
+
+**Jei vis dar matote 429**: aktyvi to teikėjo paskyra iš tikrųjų išnaudojo savo _kvotą_ (ne tik dažnio limitą). OmniRoute skydelyje → Providers → Accounts pridėkite antrą to paties teikėjo paskyrą arba įtraukite kitą nemokamą teikėją (pvz., `routeway`, `auggie`). Rotacija padeda tik esant laikiniems dažnio / 400 / 401 sutrikimams; visiškai išnaudotai kvotai reikia antro kredencialo arba kito teikėjo.
+
+**Jei matote 403 su vaizdo modeliais (`auto/vision`, `bazaarlink/*`)**: prijungta paskyra neturi mokamo plano, kuriame įtrauktas vaizdas, arba API raktas neturi pakankamų teisių. Teikėjo skydelyje patikrinkite, ar rakto apimtis apima vaizdą / daugiarūšį režimą, arba prijunkite mokamo lygio paskyrą ir palikite ją kaip vaizdo modelių paskirties paskyrą.
 
 ---
 
@@ -90,39 +96,39 @@ npm install -g omniroute --legacy-peer-deps
 
 ---
 
-## Įspėjimas apie užblokuotus `npm` diegimo scenarijus (visuotinis diegimas)
+## Įspėjimas apie užblokuotus npm diegimo scenarijus (visuotinis diegimas)
 
 <a name="npm-install-scripts-blocked-warning-global-install"></a>
 
-Vykdant `npm install -g omniroute`, naujesnės `npm` versijos (v11+ ir v12+) pagal numatytąsias nuostatas blokuoja paketo gyvavimo ciklo scenarijus ir rodo įspėjimą apie diegimo scenarijus:
+Vykdant `npm install -g omniroute`, naujesnės npm versijos (v11+ ir v12+) pagal numatytuosius nustatymus blokuoja paketų gyvavimo ciklo scenarijus ir pateikia įspėjimą apie diegimo scenarijus:
 
 ```
-npm warn install-scripts 7 paketų diegimo scenarijai buvo užblokuoti, nes jų neapima allowScripts:
+npm warn install-scripts 7 paketų diegimo scenarijai buvo užblokuoti, nes jie neįtraukti į allowScripts:
   omniroute@<version> (postinstall: node scripts/build/postinstall.mjs)
   keytar, @parcel/watcher, @swc/core, protobufjs, esbuild, onnxruntime-node
 ```
 
 ### Ar galima nepaisyti šio įspėjimo?
 
-**Iš dalies, tačiau vykdyti be scenarijų nerekomenduojama.** „OmniRoute“ turi patikimus atsarginius mechanizmus: jei savųjų `better-sqlite3` sąsajų nepavyksta įkelti iš autonominio paketo, programa naudoja alternatyvias tvarkykles, pvz., `node:sqlite` arba `sql.js` (žr. [SQLite vykdymo aplinkos parinkimą](../ops/SQLITE_RUNTIME.md)). Serveris vis tiek bus paleistas, tačiau naudojant WASM atsarginius sprendimus, pvz., `sql.js`, išjungiamas SQLite WAL (išankstinio įrašymo žurnalo) režimas ir padidėja atminties bei disko sinchronizavimo sąnaudos.
+**Iš dalies, tačiau nerekomenduojama vykdyti be scenarijų.** OmniRoute turi atsarginius sprendimus, leidžiančius tęsti darbą: jei savųjų `better-sqlite3` susiejimų nepavyksta įkelti iš autonominio rinkinio, programa naudoja alternatyvias tvarkykles, pvz., `node:sqlite` arba `sql.js` (žr. [SQLite vykdymo aplinkos parinkimas](../ops/SQLITE_RUNTIME.md)). Serveris vis tiek bus paleistas, tačiau naudojant WASM pagrįstus atsarginius sprendimus, pvz., `sql.js`, išjungiamas SQLite WAL (išankstinio įrašymo žurnalo) režimas ir padidėja atminties bei disko sinchronizavimo sąnaudos.
 
 ### Kurie scenarijai iš tikrųjų būtini?
 
-Ne visi užblokuoti scenarijai yra būtini „OmniRoute“ veikimui:
+Ne visi užblokuoti scenarijai yra būtini OmniRoute veikimui:
 
-- **Būtini (`omniroute`, `better-sqlite3`):** „OmniRoute“ vykdoma iš autonominio Next.js programos paketo (`dist/`). Diegimo metu `npm` atsisiunčia arba sukompiliuoja pagrindinei sistemai skirtą savąją SQLite tvarkyklę aukščiausiojo lygio kataloge `node_modules/better-sqlite3/`. Tada „OmniRoute“ scenarijus `postinstall` (`scripts/build/postinstall.mjs`) patikrina ir nukopijuoja šiuos pagrindinei sistemai skirtus dvejetainius failus į `dist/node_modules/`, kad autonominis serveris galėtų juos pasiekti. Jei `omniroute` scenarijus `postinstall` užblokuotas, šis kopijavimo veiksmas praleidžiamas.
-- **Pasirenkami / tranzityviniai (`keytar`, `@parcel/watcher`, `@swc/core`, `protobufjs`, `esbuild`):** Tai pagalbiniai komponavimo įrankiai, failų stebėjimo priemonės arba sistemos raktinės paslaugų programos. Leidus juos vykdyti, komponavimo įspėjimų nebelieka, tačiau pagrindinėms maršruto parinkimo funkcijoms jie nebūtini.
-- **Neįtrauktinas (`onnxruntime-node`):** Tai pasirenkama vietinių DI įterpinių priklausomybė, kuri **nėra** būtina „OmniRoute“ veikimui. Jos scenarijus `postinstall` iš „NuGet“ atsisiunčia apie 300 MB CUDA išteklių; neįtraukite jos į leidžiamų elementų sąrašą, nebent aiškiai ketinate naudoti vietinį ONNX spartinimą palaikomoje aparatinėje įrangoje.
+- **Būtini (`omniroute`, `better-sqlite3`):** OmniRoute vykdoma iš autonominio Next.js programos rinkinio (`dist/`). Diegimo metu npm atsisiunčia arba sukompiliuoja pagrindinei sistemai pritaikytą savąją SQLite tvarkyklę aukščiausio lygio kataloge `node_modules/better-sqlite3/`. Tada OmniRoute scenarijus `postinstall` (`scripts/build/postinstall.mjs`) patikrina ir nukopijuoja šiuos konkrečiai sistemai pritaikytus dvejetainius failus į `dist/node_modules/`, kad autonominis serveris galėtų juos pasiekti. Jei `omniroute` scenarijus `postinstall` užblokuotas, šis kopijavimo veiksmas praleidžiamas.
+- **Pasirenkami / tranzityviniai (`keytar`, `@parcel/watcher`, `@swc/core`, `protobufjs`, `esbuild`):** Tai kompiliavimo pagalbinės priemonės, pakeitimų stebėjimo įrankiai arba sistemos raktinės priemonės. Leidus juos vykdyti, kompiliavimo įspėjimų nebelieka, tačiau jie nėra būtini pagrindinėms maršruto parinkimo funkcijoms.
+- **Neįtraukiamas (`onnxruntime-node`):** Tai pasirenkamoji vietinių DI įterpinių priklausomybė, kuri **nėra** būtina OmniRoute veikimui. Jos scenarijus `postinstall` iš NuGet atsisiunčia apie 300 MB CUDA išteklių; neįtraukite jos į leidžiamų elementų sąrašą, nebent aiškiai ketinate naudoti vietinį ONNX spartinimą palaikomoje aparatinėje įrangoje.
 
 ### Rekomenduojamas sprendimas
 
-Kad visuotinio diegimo metu būtų leidžiami būtini diegimo scenarijai ir neberodomi įspėjimai, „OmniRoute“ bei jos savosioms priklausomybėms perduokite `--allow-scripts`:
+Kad visuotinio diegimo metu būtų leidžiami reikalingi diegimo scenarijai ir nebūtų rodomi įspėjimai, nurodykite `--allow-scripts`, skirtą OmniRoute ir jos savosioms priklausomybėms:
 
 ```bash
 npm install -g omniroute --allow-scripts=omniroute,better-sqlite3,keytar,@parcel/watcher,@swc/core,protobufjs,esbuild
 ```
 
-Arba, norėdami tai visam laikui sukonfigūruoti visiems savo naudotojo paskyros visuotiniams diegimams:
+Arba, jei norite tai visam laikui sukonfigūruoti visiems visuotiniams diegimams savo naudotojo paskyroje:
 
 ```bash
 npm config set allow-scripts=omniroute,better-sqlite3,keytar,@parcel/watcher,@swc/core,protobufjs,esbuild --location=user
@@ -131,7 +137,7 @@ npm install -g omniroute
 
 ### Patikrinkite diegimą
 
-Įdiegę paleiskite integruotą diagnostikos įrankį ir įsitikinkite, kad savosios sąsajos bei vykdymo aplinka veikia tinkamai:
+Įdiegę paleiskite integruotą diagnostikos įrankį, kad įsitikintumėte, jog savieji susiejimai ir vykdymo aplinka veikia tinkamai:
 
 ```bash
 omniroute doctor
@@ -841,6 +847,30 @@ toliau paleidžiamas fone ir bus pasiekiamas, kai paleidimas bus baigtas.
 
 Išsamią informaciją apie `OMNIROUTE_READY_TIMEOUT_MS` žr.
 [`docs/reference/ENVIRONMENT.md`](../reference/ENVIRONMENT.md).
+
+---
+
+## CCR / dedup problemos
+
+Suspaudimo CCR (`ccr`) ir `session-dedup` įrankių diagnostinė matrica. Išsamią operatoriaus informaciją (žymeklius, būtinąsias sąlygas, kiekvieno įrankio taikymo sritį, paieškos puslapius) rasite [Kompresijos varikliai → Būtinos sąlygos / operatoriaus vadovas](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+
+| Simptomas                                                                                            | Tikėtina priežastis                                                                                                                                            | Patvirtinti                                                                                                                             | Pataisyti                                                                                                                                                                                                                                                                         |
+| ---------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **MCP 403** — `403 LOCAL_ONLY`                                                                       | Maršruto apsaugos kilpos autentifikavimas, o ne transporto klaida. Joks `Bearer` arba raktas be `mcp:connect`/`manage`/`admin` nepasiekė `/api/mcp/` maršruto. | Užklausoje buvo no/invalid `Authorization` antraštė.                                                                                    | Siųsti galiojantį `Bearer` raktą. Nuotolinis raktas gali turėti `mcp:connect` (įgalioja `/api/mcp/` tik vietinį iškirpimą) ir tam tikrą read/write sritį, kurios jam reikia.                                                                                                      |
+| **blokas nerastas** — `omniroute_ccr_retrieve` atmeta maišą                                          | Maiša nėra 24 šešioliktainė vertė arba buvo nukopijuotas neteisingai, arba blokas jau pasibaigęs / buvo iškeldintas.                                           | Palyginkite maišą su 24 šešioliktaine reikšme `[CCR retrieve hash=…]` žymeklyje; Patikrinkite `omniroute_ccr_stats` parduotuvės būseną. | Pažodžiui nukopijuokite 24 šešioliktainę maišą iš žymeklio. Jei bloko tikrai nebėra, jis praėjo TTL arba niekada nepasiekė ilgalaikės parduotuvės (blokai, didesni nei 512 KB, ir kiekvienas debesies vykdymo laiko blokas lieka tik atmintis ir neišgyvena iš naujo).            |
+| **CCR no-op** — blokas nesuspaustas (tekstas grįžta nepakitęs)                                       | Blokuokite žemiau suspaudimo slenksčio arba CCR variklis / režimas neaktyvus.                                                                                  | Patikrinkite aktyvų suspaudimą `strategy`/`enabled` ir bloko dydį, palyginti su slenksčiu.                                              | Įgalinkite CCR (arba jį paleidžiantį sukrautą režimą) ir patvirtinkite, kad blokas pakankamai didelis, kad jį būtų verta saugoti. „No-op“ nėra klaida — tai „nėra ko suspausti“.                                                                                                  |
+| **dedup žymeklis** — `[dedup:ref sha=…]` pasirodo išvestyje                                          | **Tyčinis žvilgsnis atgal** , o ne praradimas ar klaida. `session-dedup` elided tekstas jau išsiųstas ankstesniame tos pačios sesijos eigoje.                  | Patvirtinkite, kad sesijos pradžioje rodomas tas pats tekstas.                                                                          | Nieko nedaryti — neskambinkite įrankiu ir nebandykite jo rekonstruoti. Pirmasis įvykis yra kanoninė kopija; dabartinis posūkis niekada neperrašomas, jis pašalinamas vėlesniame posūkyje.                                                                                         |
+| **Kodo režimas** — `omniroute_ccr_*` įrankių nėra `tools[]` / CCR instrukcijoje neįleisti (OpenCode) | OpenCode kodo režimas (numatytasis) modeliui reklamuoja tik vietinius įrankius, paslėpdamas MCP įrankius nuo `tools[]`.                                        | Patikrinkite OpenCode MCP serverio įrašą `codemode`.                                                                                    | Serverio įraše nustatykite `codemode: false` (a** klientas** nustatymas), todėl reklamuojami MCP įrankiai. CCR nuskaitymo protokolo instrukcija lieka išjungta: serveris, pavadintas `omniroute` atskleidžia `omniroute_omniroute_ccr_retrieve`, o `_` nėra suderintas skyriklis. |
+
+Daugiau simptomų:
+
+| Simptomas                                                                                                         | Tikėtina priežastis                                                                                                                                                           | Pataisyti                                                                                                                                                                        |
+| ----------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Insufficient MCP scopes for <tool>. Missing: <scope>.`                                                           | MCP įrankio klaidos rezultatas (`isError: true`), o ne HTTP 403. Skambintojo raktui trūksta reikiamos apimties.                                                               | Pridėkite taikymo sritį iš kiekvieno įrankio lentelės (žr. naudotojo vadovą). Pvz., `omniroute_ccr_retrieve` reikia `read:compression`.                                          |
+| `Unknown Mcp-Session-Id`                                                                                          | Streamable-HTTP sesija buvo išjungta ir baigta (`OMNIROUTE_MCP_SESSION_IDLE_MS`); serveris atsako HTTP 404.                                                                   | Iš naujo prijunkite arba paleiskite seansą — do** ne** pasukite raktą, pakeiskite taikymo sritį arba pervardykite įrankį. Tai ne 401/403.                                        |
+| `JSON Parse error` / `Unterminated string` įrankio rezultate                                                      | MCP įrankio tekstas iškirptas aplink `mcpAccessibility.maxTextChars` (numatytasis `50000`) mid-JSON.                                                                          | Naudokite puslapiuotą `mode` o ne pilną: `mode:"grep"`, `mode:"lines"`, `mode:"head"`, `mode:"tail"` arba `mode:"stats"`. Nykščio taisyklė: `chars > 40000` → naudokite `mode`.  |
+| `Failed to open SSE stream`                                                                                       | Klientas pateko į senąjį `/api/mcp/sse` singletoną, o transportavimas buvo `streamable`.                                                                                      | Nukreipkite klientą į `/api/mcp/stream` (transliuojamą galinį tašką), o ne į `/api/mcp/sse`.                                                                                     |
+| **Negyvas stdio širdies plakimas** — `mcp-heartbeat.json` rodo `pidAlive: false`, kai HTTP transportavimas veikia | Širdies plakimo failas yra stdio likutis (pasenęs PID arba kita versija); HTTP transportavimas yra procese ir praneša apie būseną iš `getMcpHttpStatus()` (nerašomas failas). | Jokių veiksmų — transportas sveikas. Tiesa yra `httpTransport.online` / `startedAt` iš `/api/mcp/status`, o ne širdies plakimo failas. Neperkraukite serverio ir nesukite rakto. |
 
 ---
 

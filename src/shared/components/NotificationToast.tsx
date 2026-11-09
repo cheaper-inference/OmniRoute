@@ -1,24 +1,20 @@
 "use client";
 
 /**
- * NotificationToast — FASE-07 UX & Microinteractions
+ * NotificationToast — bridges the notification store into the kit Toaster (KEA-7886).
  *
- * Global toast notification component. Renders notifications from the
- * notificationStore as stacked toasts in the top-right corner.
+ * The store API (`success/error/warning/info/addNotification/removeNotification/
+ * clearAll`) is unchanged; every store entry is mirrored once into a kit toast
+ * (id `oi-<id>`) and dismissed when it leaves the store. Roles come from the kit:
+ * `role="alert"` (assertive) for errors, `role="status"` (polite) otherwise.
  *
- * Usage: Add <NotificationToast /> to your root layout.
+ * Usage: Add <NotificationToast /> to your root layout (DashboardLayout does).
  */
 
-import { useNotificationStore } from "@/store/notificationStore";
-import { useEffect, useState } from "react";
+import { useEffect, useRef } from "react";
 import { useTranslations } from "next-intl";
-
-const ICONS = {
-  success: "✓",
-  error: "✕",
-  warning: "⚠",
-  info: "ℹ",
-};
+import { Toaster, dismissToast, toast } from "@omniroute/ui-kit/toast";
+import { useNotificationStore } from "@/store/notificationStore";
 
 /**
  * Coerce a toast title/message to a string. `message`/`title` are typed as
@@ -42,167 +38,86 @@ export function toToastText(value: unknown): string {
   return String(value);
 }
 
-const BG_DARK = "rgba(30, 30, 30, 0.95)";
+const VARIANT = {
+  success: "success",
+  error: "error",
+  warning: "warning",
+  info: "info",
+} as const;
 
-const COLORS = {
-  success: {
-    bg: BG_DARK,
-    border: "rgba(16, 185, 129, 0.6)",
-    icon: "#10b981",
-  },
-  error: {
-    bg: BG_DARK,
-    border: "rgba(239, 68, 68, 0.6)",
-    icon: "#ef4444",
-  },
-  warning: {
-    bg: BG_DARK,
-    border: "rgba(245, 158, 11, 0.6)",
-    icon: "#fbbf24",
-  },
-  info: {
-    bg: BG_DARK,
-    border: "rgba(59, 130, 246, 0.6)",
-    icon: "#3b82f6",
-  },
-};
+// While a modal is open, Radix hides everything outside it from assistive tech
+// (`aria-hidden`), sparing only elements that already carry `aria-live` when the dialog
+// opens. The kit Toaster root has none (pendência do kit: it should be a live region
+// itself), so a toast raised under a Modal would be hidden. Once the Toaster portals its
+// root (one render after mount, hence the observer), mark it as a polite live region, and
+// keep it out of `aria-hidden` when a dialog that opened in the same render already hid it.
+// Each toast keeps its own `role="alert"` / `role="status"`.
+const TOASTER_SELECTOR = '[data-slot="toaster"]';
 
-function Toast({ notification, onDismiss }) {
+function useToasterLiveRegion() {
+  useEffect(() => {
+    let rootObserver: MutationObserver | null = null;
+    const expose = (root: Element) => {
+      if (root.getAttribute("aria-hidden") === "true") root.removeAttribute("aria-hidden");
+    };
+    const mark = () => {
+      const root = document.querySelector(TOASTER_SELECTOR);
+      if (!root) return false;
+      if (!root.hasAttribute("aria-live")) root.setAttribute("aria-live", "polite");
+      expose(root);
+      rootObserver = new MutationObserver(() => expose(root));
+      rootObserver.observe(root, { attributes: true, attributeFilter: ["aria-hidden"] });
+      return true;
+    };
+    if (mark()) return () => rootObserver?.disconnect();
+    const bodyObserver = new MutationObserver(() => {
+      if (mark()) bodyObserver.disconnect();
+    });
+    bodyObserver.observe(document.body, { childList: true });
+    return () => {
+      bodyObserver.disconnect();
+      rootObserver?.disconnect();
+    };
+  }, []);
+}
+
+function NotificationBridge() {
   const t = useTranslations("common");
-  const [isExiting, setIsExiting] = useState(false);
+  const notifications = useNotificationStore((s) => s.notifications);
+  const shown = useRef(new Set<number>());
+  useToasterLiveRegion();
 
-  const handleDismiss = () => {
-    setIsExiting(true);
-    setTimeout(() => onDismiss(notification.id), 200);
-  };
+  useEffect(() => {
+    const live = new Set(notifications.map((n) => n.id));
+    for (const n of notifications) {
+      if (shown.current.has(n.id)) continue;
+      shown.current.add(n.id);
+      const title = toToastText(n.title) || toToastText(n.message);
+      const description = n.title ? toToastText(n.message) : undefined;
+      toast(title, {
+        id: `oi-${n.id}`,
+        description,
+        variant: VARIANT[n.type] ?? "info",
+        duration: n.duration > 0 ? n.duration : Number.POSITIVE_INFINITY,
+        action: n.onClick ? { label: t("open"), onClick: n.onClick } : undefined,
+      });
+    }
+    for (const id of shown.current) {
+      if (!live.has(id)) {
+        dismissToast(`oi-${id}`);
+        shown.current.delete(id);
+      }
+    }
+  }, [notifications, t]);
 
-  const color = COLORS[notification.type] || COLORS.info;
-  const textColors = {
-    title: "var(--text-primary, #fff)",
-    message: "var(--text-secondary, #ccc)",
-  };
-
-  return (
-    <div
-      role="alert"
-      aria-live="polite"
-      onClick={notification.onClick}
-      style={{
-        display: "flex",
-        alignItems: "flex-start",
-        gap: "12px",
-        padding: "14px 16px",
-        borderRadius: "10px",
-        backgroundColor: color.bg,
-        border: `1px solid ${color.border}`,
-        backdropFilter: "blur(12px)",
-        boxShadow: "0 8px 32px rgba(0,0,0,0.2)",
-        minWidth: "320px",
-        maxWidth: "420px",
-        cursor: notification.onClick ? "pointer" : "default",
-        animation: isExiting ? "toastOut 0.2s ease-in forwards" : "toastIn 0.3s ease-out forwards",
-        transition: "all 0.2s ease",
-      }}
-    >
-      <span
-        style={{
-          fontSize: "18px",
-          color: color.icon,
-          fontWeight: "bold",
-          lineHeight: 1,
-          marginTop: "2px",
-        }}
-      >
-        {ICONS[notification.type]}
-      </span>
-      <div style={{ flex: 1, minWidth: 0 }}>
-        {notification.title && (
-          <div
-            style={{
-              fontWeight: 600,
-              fontSize: "14px",
-              color: textColors.title,
-              marginBottom: "2px",
-            }}
-          >
-            {toToastText(notification.title)}
-          </div>
-        )}
-        <div
-          style={{
-            fontSize: "13px",
-            color: textColors.message,
-            lineHeight: 1.4,
-          }}
-        >
-          {toToastText(notification.message)}
-        </div>
-      </div>
-      {notification.dismissible && (
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            handleDismiss();
-          }}
-          aria-label={t("dismissNotification")}
-          style={{
-            background: "none",
-            border: "none",
-            cursor: "pointer",
-            color: "var(--text-secondary, #999)",
-            fontSize: "16px",
-            padding: "0 2px",
-            lineHeight: 1,
-            opacity: 0.6,
-            transition: "opacity 0.15s",
-          }}
-          onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.opacity = "1")}
-          onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.opacity = "0.6")}
-        >
-          ×
-        </button>
-      )}
-    </div>
-  );
+  return null;
 }
 
 export default function NotificationToast() {
-  const { notifications, removeNotification } = useNotificationStore();
-
-  if (notifications.length === 0) return null;
-
   return (
     <>
-      <style>{`
-        @keyframes toastIn {
-          from { opacity: 0; transform: translateX(100%) scale(0.95); }
-          to   { opacity: 1; transform: translateX(0) scale(1); }
-        }
-        @keyframes toastOut {
-          from { opacity: 1; transform: translateX(0) scale(1); }
-          to   { opacity: 0; transform: translateX(100%) scale(0.95); }
-        }
-      `}</style>
-      <div
-        aria-live="polite"
-        aria-atomic="false"
-        style={{
-          position: "fixed",
-          top: "20px",
-          right: "20px",
-          zIndex: 9999,
-          display: "flex",
-          flexDirection: "column",
-          gap: "10px",
-          pointerEvents: "none",
-        }}
-      >
-        {notifications.map((n) => (
-          <div key={n.id} style={{ pointerEvents: "auto" }}>
-            <Toast notification={n} onDismiss={removeNotification} />
-          </div>
-        ))}
-      </div>
+      <Toaster position="top-right" />
+      <NotificationBridge />
     </>
   );
 }

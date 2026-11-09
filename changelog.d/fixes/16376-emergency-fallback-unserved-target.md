@@ -1,1 +1,0 @@
-- **fix(sse):** skip the emergency fallback redirect when its target is missing from the live catalog ([#16376](https://github.com/diegosouzapw/OmniRoute/pull/16376)) — thanks @maxmad64bis

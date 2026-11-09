@@ -116,31 +116,40 @@ Fältet `region` får standardvärdet `us-east-1` om det utelämnas.
 
 ---
 
-## Importflöde för API-nyckel
+## Importflöde för API-nycklar
 
-Autentisering med API-nyckel är avsedd för långlivade bearer-autentiseringsuppgifter för Kiro/AWS CodeWhisperer. Den
-använder inte OAuth-uppdatering och undviker därför ogiltigförklaring av delade OIDC-sessioner.
+Autentisering med API-nyckel är avsedd för långlivade bearer-autentiseringsuppgifter för Kiro / AWS CodeWhisperer. Den använder
+inte OAuth-uppdatering och undviker därför att delade OIDC-sessioner ogiltigförklaras.
 
-### Dashboard
+### Instrumentpanel
 
-1. Öppna **Dashboard -> Providers -> Kiro**.
-2. Välj **API Key**.
-3. Klistra in API-nyckeln och valfri AWS-region (`us-east-1` som standard).
-4. OmniRoute validerar nyckeln och sparar anslutningen.
+1. Öppna **Instrumentpanel -> Leverantörer -> Kiro**.
+2. Välj **API-nyckel**.
+3. Klistra in API-nyckeln och välj AWS-region: **Identifiera automatiskt** (standard), **USA, östra
+   (Norra Virginia)** eller **Europa (Frankfurt)**.
+4. OmniRoute validerar nyckeln och sparar anslutningen låst till den region där
+   nyckeln fungerar.
 
 ### API
 
 ```bash
 curl -X POST http://localhost:20128/api/oauth/kiro/api-key \
   -H "Content-Type: application/json" \
-  -d '{"apiKey": "kiro_or_codewhisperer_key", "region": "us-east-1"}'
+  -d '{"apiKey": "kiro_or_codewhisperer_key", "region": "auto"}'
 ```
+
+`region` accepterar `auto` (standard), `us-east-1` eller `eu-central-1`; alla andra värden
+avvisas med HTTP 400.
 
 ### Internt kontrakt
 
-API-routen validerar nyckeln genom att anropa `KiroService.validateApiKey()`, som
-använder `ListAvailableProfiles` mot CodeWhisperer-/Amazon Q-endpointen för den angivna regionen
-och hämtar ett `profileArn`.
+API-rutten validerar nyckeln genom att anropa `KiroService.validateApiKey()`, som
+anropar `GET https://q.<region>.amazonaws.com/ListAvailableModels?origin=AI_EDITOR`
+(API-nyckelslutledningen använder Amazon Q-gränssnittet) med en tidsgräns på 10 s per region. I
+läget `auto` provar den `us-east-1` och därefter `eu-central-1`, och lagrar den första regionen
+som accepterar nyckeln. Om en nyckel avvisas i samtliga kandidatregioner misslyckas importen med
+HTTP 400. Därefter anropas `ListAvailableProfiles` enligt bästa förmåga för att identifiera ett valfritt
+`profileArn` (AWS nekar detta för de flesta API-nycklar).
 
 Den sparade anslutningen använder:
 
@@ -157,8 +166,11 @@ Den sparade anslutningen använder:
 
 Vid körning skickar `KiroExecutor.buildHeaders()` nyckeln som
 `Authorization: Bearer <key>` och lägger till `tokentype: API_KEY`. Kvot-/profilanrop
-använder samma markör så att AWS behandlar bearer-token som en långlivad API-nyckel i stället för
-en OIDC-token eller åtkomsttoken för social inloggning.
+använder samma markör så att AWS behandlar bearer-autentiseringsuppgiften som en långlivad API-nyckel i stället för
+en OIDC- eller social åtkomsttoken. `KiroExecutor.execute()` skickar API-nyckelslutledning endast
+till `https://q.<region>.amazonaws.com/generateAssistantResponse` — inklusive `us-east-1`
+— eftersom Kiro IDE-gatewayen avvisar `TokenType=API_KEY` och
+`codewhisperer.us-east-1` avvisar API-nyttolaster som en ogiltig begärandetext (HTTP 400).
 
 ---
 

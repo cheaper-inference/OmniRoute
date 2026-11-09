@@ -182,11 +182,11 @@ test("retired provider-neutral Gemini 3.5 tiers keep resolvable capability floor
   assert.equal(retiredLow.contextWindow, null, "retired low tier fabricates no context window");
 });
 
-test("Antigravity Gemini 3.7 tier IDs share the Flash capability profile", () => {
+test("Antigravity Gemini 3.8 tier IDs share the Flash capability profile", () => {
   for (const modelId of [
-    "gemini-3.7-flash-high",
-    "gemini-3.7-flash-medium",
-    "gemini-3.7-flash-low",
+    "gemini-3.8-flash-high",
+    "gemini-3.8-flash-medium",
+    "gemini-3.8-flash-low",
   ]) {
     const spec = MODEL_SPECS[modelId];
     assert.ok(spec, `missing exact MODEL_SPECS entry for ${modelId}`);
@@ -203,7 +203,9 @@ test("GPT OSS and DeepSeek Reasoner models support tool calling", () => {
   // GPT OSS models should not be blocked by the heuristic
   assert.equal(modelCapabilities.supportsToolCalling("fake-provider/gpt-oss-120b"), true);
   assert.equal(modelCapabilities.supportsToolCalling("gpt-oss-120b"), true);
-  assert.equal(modelCapabilities.supportsToolCalling("nvidia/openai/gpt-oss-120b"), false); // in registry
+  // A registry entry that pins toolCalling: false still wins over the heuristic. The NVIDIA
+  // gpt-oss-120b entry that used to anchor this was retired (#18418).
+  assert.equal(modelCapabilities.supportsToolCalling("ddgw/tinfoil/gpt-oss-120b"), false); // in registry
 
   // DeepSeek Reasoner supports tool calling
   assert.equal(modelCapabilities.supportsToolCalling("deepseek-reasoner"), true);

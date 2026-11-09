@@ -2,6 +2,17 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@omniroute/ui-kit/table";
+import Button from "@/shared/components/Button";
+import Icon from "@/shared/components/Icon";
+import Input from "@/shared/components/Input";
 import { ModelSelectorModal } from "./ModelSelectorModal";
 
 export interface MappingRow {
@@ -53,100 +64,85 @@ export function ModelMappingTable({ agentId, mappings, onSave }: ModelMappingTab
   return (
     <div className="flex flex-col gap-3">
       {rows.length === 0 ? (
-        <div className="rounded-lg border border-border/40 bg-surface/30 px-4 py-6 text-center">
-          <p className="text-xs text-text-muted mb-3">
+        <div className="rounded-control border border-border bg-bg-subtle px-4 py-6 text-center">
+          <p className="mb-3 text-xs text-text-muted">
             {t("noMappingsDesc") ||
               "No model mappings configured yet. Add mappings to route agent requests through OmniRoute."}
           </p>
-          <button
-            type="button"
-            onClick={addMapping}
-            className="inline-flex items-center gap-1.5 rounded-lg bg-primary/10 text-primary px-3 py-1.5 text-xs font-medium hover:bg-primary/20 transition-colors"
-          >
-            <span className="material-symbols-outlined text-[14px]">add</span>
+          <Button size="sm" variant="secondary" icon="add" onClick={addMapping}>
             {t("addMapping") || "Add mapping"}
-          </button>
+          </Button>
         </div>
       ) : (
         <>
-          <div className="rounded-lg border border-border/40 overflow-hidden bg-surface">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-border/40 bg-surface/60">
-                  <th className="px-3 py-2 text-left text-xs font-medium text-text-muted">
-                    {t("sourceModel") || "Source model (agent native)"}
-                  </th>
-                  <th className="px-3 py-2 text-left text-xs font-medium text-text-muted">
-                    {t("targetModel") || "Target model (OmniRoute)"}
-                  </th>
-                  <th className="px-3 py-2 w-12"></th>
-                </tr>
-              </thead>
-              <tbody>
-                {rows.map((row, i) => (
-                  <tr key={i} className="border-b border-border/20 last:border-0">
-                    <td className="px-3 py-2">
-                      <input
-                        type="text"
-                        value={row.source}
-                        onChange={(e) => updateSource(i, e.target.value)}
-                        placeholder="e.g., gemini-3.6-flash-medium, or * for all unmapped"
-                        className="w-full rounded border border-border/40 bg-card px-2 py-1 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-primary/50"
-                      />
-                    </td>
-                    <td className="px-3 py-2">
-                      <button
-                        type="button"
-                        onClick={() => setSelectorOpen(i)}
-                        className="inline-flex items-center gap-1.5 rounded-lg border border-border/40 bg-card px-2.5 py-1 text-xs hover:bg-surface transition-colors font-mono w-full justify-between"
-                      >
-                        {row.target || (
-                          <span className="text-text-muted italic">
-                            {t("selectModel") || "Select…"}
-                          </span>
-                        )}
-                        <span className="material-symbols-outlined text-[12px] text-text-muted">
-                          expand_more
+          <Table className="text-sm" scrollbarLabel={t("modelMappingsLabel")}>
+            <TableHeader>
+              <TableRow>
+                <TableHead>{t("sourceModel") || "Source model (agent native)"}</TableHead>
+                <TableHead>{t("targetModel") || "Target model (OmniRoute)"}</TableHead>
+                <TableHead className="w-12">
+                  <span className="sr-only">{t("removeMapping")}</span>
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {rows.map((row, i) => (
+                <TableRow key={i}>
+                  <TableCell>
+                    <Input
+                      type="text"
+                      value={row.source}
+                      onChange={(e) => updateSource(i, e.target.value)}
+                      aria-label={t("sourceModel") || "Source model (agent native)"}
+                      placeholder={t("mappingSourcePlaceholder")}
+                      inputClassName="font-mono text-xs"
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      fullWidth
+                      className="justify-between font-mono"
+                      aria-label={`${t("targetModel") || "Target model (OmniRoute)"}: ${row.target || t("selectModel") || "Select…"}`}
+                      onClick={() => setSelectorOpen(i)}
+                    >
+                      {row.target || (
+                        <span className="text-text-muted italic">
+                          {t("selectModel") || "Select…"}
                         </span>
-                      </button>
-                    </td>
-                    <td className="px-3 py-2">
-                      <button
-                        type="button"
-                        onClick={() => removeMapping(i)}
-                        className="text-text-muted hover:text-red-500 transition-colors"
-                        aria-label="Remove mapping"
-                      >
-                        <span className="material-symbols-outlined text-[16px]">delete</span>
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <p className="text-xs text-text-muted">
-            Use * as the source to route every model without an explicit mapping through OmniRoute
-            to the selected target. Exact source matches always win over *.
-          </p>
+                      )}
+                      <Icon name="expand_more" size={12} className="text-text-muted" />
+                    </Button>
+                  </TableCell>
+                  <TableCell>
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
+                      icon="delete"
+                      onClick={() => removeMapping(i)}
+                      aria-label={t("removeMapping")}
+                    />
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+          <p className="text-xs text-text-muted">{t("mappingWildcardHint")}</p>
 
-          <div className="flex justify-between items-center">
-            <button
-              type="button"
-              onClick={addMapping}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-border/40 bg-card px-3 py-1.5 text-xs font-medium hover:bg-surface transition-colors"
-            >
-              <span className="material-symbols-outlined text-[14px]">add</span>
+          <div className="flex items-center justify-between">
+            <Button size="sm" variant="outline" icon="add" onClick={addMapping}>
               {t("addMapping") || "Add mapping"}
-            </button>
-            <button
-              type="button"
+            </Button>
+            <Button
+              size="sm"
+              variant="secondary"
+              icon="save"
               onClick={handleSave}
               disabled={saving}
-              className="rounded-lg bg-primary/10 text-primary px-4 py-1.5 text-sm font-medium hover:bg-primary/20 transition-colors disabled:opacity-50"
             >
               {saving ? t("saving") || "Saving…" : t("saveMappings") || "Save mappings"}
-            </button>
+            </Button>
           </div>
         </>
       )}

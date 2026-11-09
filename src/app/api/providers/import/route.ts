@@ -27,6 +27,7 @@ import {
 import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
 import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error";
 import { validateProviderApiKey } from "@/lib/providers/validation";
+import { getRequestPeerLocality } from "@/shared/utils/apiAuth";
 import { getProxyForLevel } from "@/lib/db/settings";
 import { resolveProxyForProvider } from "@/lib/db/proxies";
 import { runWithProxyContext } from "@omniroute/open-sse/utils/proxyFetch.ts";
@@ -81,7 +82,8 @@ function isKnownImportProvider(provider: string): boolean {
 
 async function importOneEntry(
   entry: ImportEntry,
-  validateKeys: boolean
+  validateKeys: boolean,
+  allowLocalSpawn: boolean
 ): Promise<{ created: Record<string, unknown> } | { error: string }> {
   // Reject unknown providers per-row, preserving the partial-failure contract of /bulk.
   if (!isKnownImportProvider(entry.provider)) {
@@ -110,6 +112,8 @@ async function importOneEntry(
         provider: entry.provider,
         apiKey: entry.apiKey,
         providerSpecificData: providerSpecificData || undefined,
+        // S-01 (#15159, #15766 shape): devin CLI-spawn fallback is loopback/LAN-only.
+        allowLocalSpawn,
       })
     );
     testStatus = probe?.valid ? "active" : "failed";
@@ -225,7 +229,12 @@ export async function POST(request: Request) {
   for (let i = 0; i < resolvedEntries.length; i++) {
     const entry = resolvedEntries[i];
     try {
-      const result = await importOneEntry(entry, !!validateKeys);
+      const result = await importOneEntry(
+        entry,
+        !!validateKeys,
+        // S-01 (#15159, #15766 shape): devin CLI-spawn fallback is loopback/LAN-only.
+        getRequestPeerLocality(request) !== "remote"
+      );
       if ("error" in result) {
         errors.push({
           index: i,

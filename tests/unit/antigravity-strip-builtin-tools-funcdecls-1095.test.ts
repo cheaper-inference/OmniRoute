@@ -19,7 +19,12 @@ function declaredToolNames(result: { request: { tools?: EnvelopeTool[] } }): str
 
 const CREDS = { projectId: "proj-1" } as never;
 
-test("Antigravity envelope strips built-in tool names mixed with custom functionDeclarations (#1095)", () => {
+// #16567 refined the #1095 guard: the v1internal 400 fires on a NATIVE grounding
+// entry (`{ googleSearch: {} }`) mixed with functionDeclarations. A google_search
+// declared next to other callable functions is no longer promoted to native
+// grounding on the Antigravity path, so it stays a plain callable declaration and
+// the request carries no native entry at all.
+test("Antigravity mixed google_search + custom tool sends no native grounding next to functionDeclarations (#1095, #16567)", () => {
   const result = openaiToAntigravityRequest(
     "gemini-2.5-pro",
     {
@@ -39,14 +44,14 @@ test("Antigravity envelope strips built-in tool names mixed with custom function
     CREDS
   );
 
-  const names = declaredToolNames(result);
-  // Built-in tool name must be gone from functionDeclarations...
+  const tools = (result.request.tools ?? []) as Array<EnvelopeTool & { googleSearch?: unknown }>;
+  // The 400 trigger — native grounding mixed with declarations — must be absent...
   assert.ok(
-    !names.includes("google_search") && !names.includes("googleSearch"),
-    `expected built-in tool name stripped, got ${JSON.stringify(names)}`
+    !tools.some((tool) => tool.googleSearch !== undefined),
+    `expected no native googleSearch next to functionDeclarations, got ${JSON.stringify(tools)}`
   );
-  // ...while the custom declaration survives.
-  assert.ok(names.includes("read_file"), `expected custom tool kept, got ${JSON.stringify(names)}`);
+  // ...while both declarations stay callable.
+  assert.deepEqual(declaredToolNames(result).sort(), ["google_search", "read_file"]);
   // toolConfig stays set because custom declarations remain.
   assert.deepEqual(result.request.toolConfig, {
     functionCallingConfig: { mode: "VALIDATED" },

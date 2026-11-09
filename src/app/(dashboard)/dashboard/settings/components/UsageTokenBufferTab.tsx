@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Button, Card } from "@/shared/components";
+import { Button, Card, Input } from "@/shared/components";
+import Icon from "@/shared/components/Icon";
 
 export default function UsageTokenBufferTab() {
   const t = useTranslations("settings");
@@ -65,10 +66,8 @@ export default function UsageTokenBufferTab() {
   return (
     <Card>
       <div className="flex items-center gap-3 mb-4">
-        <div className="p-2 rounded-lg bg-sky-500/10 text-sky-500">
-          <span className="material-symbols-outlined text-[20px]" aria-hidden="true">
-            pin
-          </span>
+        <div className="p-2 rounded-lg bg-bg-subtle text-text-muted">
+          <Icon name="pin" size={20} />
         </div>
         <div>
           <h3 className="text-lg font-semibold">{t("storageUsageTokenBuffer")}</h3>
@@ -77,8 +76,9 @@ export default function UsageTokenBufferTab() {
       </div>
 
       <div className="flex flex-wrap items-center gap-3">
-        <input
+        <Input
           type="number"
+          aria-label={t("storageUsageTokenBuffer")}
           min={0}
           max={50000}
           value={bufferInput}
@@ -86,7 +86,7 @@ export default function UsageTokenBufferTab() {
           onKeyDown={(e) => {
             if (e.key === "Enter") void updateUsageTokenBuffer();
           }}
-          className="h-10 w-36 rounded-lg border border-border bg-surface px-3 text-sm text-text-main focus:outline-none focus:border-primary"
+          className="w-36 shrink-0"
           disabled={loading}
         />
         <Button

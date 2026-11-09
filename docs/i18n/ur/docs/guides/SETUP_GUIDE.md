@@ -140,11 +140,11 @@ omniroute providers validate
 
 ### 1) فراہم کنندگان کو منسلک کریں اور API کلید بنائیں
 
-1. Dashboard → `Providers` کھولیں اور کم از کم ایک فراہم کنندہ منسلک کریں (OAuth یا API کلید)۔
-2. Dashboard → `Endpoints` کھولیں اور ایک API کلید بنائیں۔
-3. (اختیاری) Dashboard → `Combos` کھولیں اور اپنی فال بیک چین مقرر کریں۔
+1. Dashboard کھولیں → `Providers` پر جائیں اور کم از کم ایک فراہم کنندہ (OAuth یا API کلید) منسلک کریں۔
+2. Dashboard کھولیں → `Endpoints` پر جائیں اور ایک API کلید بنائیں۔
+3. (اختیاری) Dashboard کھولیں → `Combos` پر جائیں اور اپنی فال بیک چین مرتب کریں۔
 
-### 2) اپنے کوڈنگ ٹول کو ہدف کی طرف متوجہ کریں
+### 2) اپنے کوڈنگ ٹول کو مربوط کریں
 
 ```txt
 بنیادی URL: http://localhost:20128/v1
@@ -152,20 +152,21 @@ API کلید:  [Endpoint صفحے سے کاپی کریں]
 ماڈل:    if/qwen3.8-max-preview (یا کوئی بھی provider/model سابقہ)
 ```
 
-اگر آپ کا ایڈیٹر `Authorization: Bearer ...` نہیں بھیج سکتا تو اس کے بجائے ٹوکن پر مبنی مطابقتی بنیاد استعمال کریں:
+اگر آپ کا ایڈیٹر `Authorization: Bearer ...` نہیں بھیج سکتا، تو اس کے بجائے ٹوکن پر مبنی مطابقتی بنیادی URL استعمال کریں:
 
 ```txt
 بنیادی URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/
 ماڈلز کا URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/models
-چیٹ کا URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/chat/completions
-Ollama ٹیگز کا URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/api/tags
+چیٹ URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/chat/completions
+Ollama ٹیگز URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/api/tags
 ```
 
 Claude Code، Codex CLI، Cursor، Cline، OpenClaw، OpenCode، اور OpenAI سے مطابقت رکھنے والی SDKs کے ساتھ کام کرتا ہے۔
 
-#### `setup-*` کے ذریعے خودکار کنفیگریشن
+#### `setup-*` کے ساتھ خودکار کنفیگریشن
 
-بنیادی URL اور کلید کو دستی طور پر پیسٹ کرنے کے بجائے، OmniRoute کو لائیو ماڈل کیٹلاگ سے ہر ٹول کی اپنی کنفیگ لکھنے دیں۔ ہر ٹول کے لیے ایک کمانڈ:
+بنیادی URL اور کلید کو دستی طور پر پیسٹ کرنے کے بجائے، OmniRoute کو لائیو ماڈل کیٹلاگ سے ہر ٹول کی
+اپنی کنفیگ لکھنے دیں۔ ہر ٹول کے لیے ایک کمانڈ:
 
 ```bash
 omniroute setup-codex        # ~/.codex/<name>.config.toml پروفائلز
@@ -174,17 +175,23 @@ omniroute setup-opencode     # ~/.config/opencode/opencode.json (OpenAI سے م�
 omniroute setup-cline        # Cline CLI + VS Code ایکسٹینشن کی ترتیبات
 omniroute setup-kilo         # Kilo Code
 omniroute setup-continue     # ~/.continue/config.yaml (Continue / cn)
-omniroute setup-cursor       # Cursor کے اندرونِ ایپ مراحل پرنٹ کرتا ہے
+omniroute setup-cursor       # Cursor کے اندر موجود مراحل پرنٹ کرتا ہے
 omniroute setup-roo          # Roo Code درآمد + autoImport پوائنٹر
 omniroute setup-crush        # ~/.config/crush/crush.json
+omniroute setup-zed          # ~/.config/zed/settings.json (openai_compatible)
 omniroute setup-goose        # ~/.config/goose/config.yaml
 omniroute setup-aider        # ~/.aider.conf.yml
 omniroute setup-qwen         # ~/.qwen/settings.json + ~/.qwen/.env
 ```
 
-مقامی ٹول کو **ریموٹ** OmniRoute کے لیے کنفیگر کرنے کی خاطر ہر کمانڈ `--remote <url> --api-key <key>` قبول کرتی ہے، نیز پیش منظر دیکھنے کے لیے `--dry-run` بھی۔ درست env شامل کر کے اور کوئی کنفیگ لکھے بغیر CLI چلانے کے لیے عمومی لانچر `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini) استعمال کریں؛ پرانے فی ٹول لانچرز `omniroute launch` (Claude Code) اور `omniroute launch-codex` (Codex) بدستور دستیاب ہیں۔
+ہر کمانڈ ایک مقامی ٹول کو **ریموٹ** OmniRoute کے مطابق کنفیگر کرنے کے لیے `--remote <url> --api-key <key>`،
+اور پیش منظر دیکھنے کے لیے `--dry-run` قبول کرتی ہے۔ درست env شامل کرکے اور کوئی کنفیگ لکھے بغیر CLI
+چلانے کے لیے عمومی لانچر `omniroute run <target>` (claude، codex، aider، goose، opencode، qwen، gemini)
+استعمال کریں؛ پرانے، ہر ٹول کے لیے مخصوص لانچرز `omniroute launch` (Claude Code) اور
+`omniroute launch-codex` (Codex) بدستور دستیاب ہیں۔
 
-مکمل جدول (ہر کمانڈ کیا لکھتی ہے، تمام فلیگز، مقامی بمقابلہ ریموٹ، بنیادی URL کے `/v1` اصول) کے لیے **[CLI انٹیگریشنز](./CLI-INTEGRATIONS.md)** دیکھیں۔
+مکمل جدول کے لیے (ہر کمانڈ کیا لکھتی ہے، تمام فلیگز، مقامی بمقابلہ ریموٹ، بنیادی URL
+`/v1` کے اصول)، **[CLI انٹیگریشنز](./CLI-INTEGRATIONS.md)** دیکھیں۔
 
 ہر ٹول کی تفصیلی کنفیگریشن (Claude Code، Codex CLI، Cursor، Cline، OpenClaw، Kilo Code، Copilot، اور مزید) کے لیے مخصوص **[CLI ٹولز گائیڈ](../reference/CLI-TOOLS.md)** دیکھیں۔
 
@@ -192,7 +199,7 @@ omniroute setup-qwen         # ~/.qwen/settings.json + ~/.qwen/.env
 
 ## پروٹوکول سیٹ اپ (MCP + A2A)
 
-### MCP سیٹ اپ (Model Context Protocol)
+### MCP سیٹ اپ (ماڈل سیاق و سباق پروٹوکول)
 
 stdio موڈ میں MCP ٹرانسپورٹ شروع کریں:
 
@@ -200,31 +207,31 @@ stdio موڈ میں MCP ٹرانسپورٹ شروع کریں:
 omniroute --mcp
 ```
 
-تجویز کردہ توثیقی عمل:
+تجویز کردہ توثیق کا بہاؤ:
 
 ```bash
-# 1. MCP سرور شروع کریں
+# 1. Start MCP server
 omniroute --mcp
 
-# 2. اپنے MCP کلائنٹ سے یہ کال کریں:
-omniroute_get_health        # اسے سسٹم کی صحت واپس کرنی چاہیے
-omniroute_list_combos       # اسے فعال combos واپس کرنے چاہییں
+# 2. From your MCP client, call:
+omniroute_get_health        # Should return system health
+omniroute_list_combos       # Should return active combos
 
-# 3. یا مکمل E2E سوٹ چلائیں:
+# 3. Or run the full E2E suite:
 npm run test:protocols:e2e
 ```
 
-#### MCP کلائنٹ کی کنفیگریشن
+#### MCP کلائنٹ کنفیگریشن
 
-**Claude Code:**
+**Claude کوڈ:**
 
 ```bash
-claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
 ```
 
 **Cursor / Cline:**
 
-اپنی MCP ترتیبات میں شامل کریں:
+اپنی MCP سیٹنگز میں شامل کریں (stdio، کلید کے ساتھ تاکہ کال کرنے والے کے پاس پرنسپل ہو):
 
 ```json
 {
@@ -232,23 +239,30 @@ claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp
     "omniroute": {
       "command": "omniroute",
       "args": ["--mcp"],
-      "env": {}
+      "env": {
+        "OMNIROUTE_API_KEY": "your-key",
+        "OMNIROUTE_BASE_URL": "http://localhost:20128"
+      }
     }
   }
 }
 ```
 
-**MCP کی مکمل دستاویزات:** [MCP سرور README](../../open-sse/mcp-server/README.md) — 110 ٹولز، IDE کنفیگز، Python/TS/Go کلائنٹس۔
+یا، جب `mcpTransport` `streamable-http` ہو (اسے `/dashboard/mcp` پر سیٹ کریں یا `omniroute mcp enable --transport streamable-http` کے ساتھ)، کلائنٹ کے ریموٹ MCP سرور کے اندراج کو `http://localhost:20128/api/mcp/stream` پر اشارہ کریں۔
 
-### A2A سیٹ اپ (Agent-to-Agent Protocol)
+کلید `Authorization: Bearer <api-key>` کے طور پر سفر کرتی ہے (دیکھیں [MCP سرور → دور دراز کے میزبانوں کے لیے ریموٹ رسائی](../frameworks/MCP-SERVER.md#remote-access-manage-scope-bypass) ؛ ایک ریموٹ کلید کو `mcp:connect` کے علاوہ اس کے read/write اسکوپس کی ضرورت ہوتی ہے)۔
 
-Agent Card کی توثیق کریں:
+**مکمل MCP دستاویزات:** [MCP سرور README](../../open-sse/mcp-server/README.md) — 110 ٹولز، IDE کنفیگرز، Python/TS/Go کلائنٹس۔ کمپریشن CCR/dedup ٹولز کے لیے آپریٹر کا حوالہ (مارکر، ضروری شرائط، فی ٹول اسکوپس، بازیافت صفحہ بندی، تشخیص): [کمپریشن انجنز → شرطیں / آپریٹر گائیڈ](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup) ۔
+
+### A2A سیٹ اپ (ایجنٹ سے ایجنٹ پروٹوکول)
+
+ایجنٹ کارڈ کی تصدیق کریں:
 
 ```bash
 curl http://localhost:20128/.well-known/agent.json
 ```
 
-ایک ٹاسک بھیجیں:
+ایک کام بھیجیں:
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -256,7 +270,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"Give me a short quota summary."}]}}'
 ```
 
-**A2A کی مکمل دستاویزات:** [A2A سرور README](../../src/lib/a2a/README.md) — JSON-RPC 2.0، مہارتیں، اسٹریمنگ، ٹاسک لائف سائیکل۔
+**مکمل A2A دستاویزات:** [A2A سرور README](../../src/lib/a2a/README.md) — JSON-RPC 2.0، مہارت، سلسلہ بندی، ٹاسک لائف سائیکل۔
 
 ---
 
@@ -315,12 +329,12 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ---
 
-## Void Linux (`xbps-src`) ٹیمپلیٹ
+## باطل Linux (xbps-src) ٹیمپلیٹ
 
-Void Linux کے صارفین `xbps-src` استعمال کرکے ایک مقامی پیکیج بنا سکتے ہیں۔ اس بلاک کو `srcpkgs/omniroute/template` کے طور پر محفوظ کریں:
+Void Linux صارفین کے لیے، آپ `xbps-src` کا استعمال کرتے ہوئے ایک مقامی پیکیج بنا سکتے ہیں۔ اس بلاک کو بطور `srcpkgs/omniroute/template` محفوظ کریں:
 
 ```bash
-# 'omniroute' کے لیے ٹیمپلیٹ فائل
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -331,7 +345,7 @@ maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# ہر ریلیز کے لیے checksum کو اس کے ذریعے دوبارہ بنائیں:
+# Regenerate the checksum for each release with:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

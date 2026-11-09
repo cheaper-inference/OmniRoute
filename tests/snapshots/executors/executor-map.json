@@ -440,6 +440,16 @@
       "configSource": "maxai",
       "provider": "maxai"
     },
+    "minimax-code": {
+      "className": "MinimaxCodeExecutor",
+      "configSource": "<custom-config>",
+      "provider": "minimax-code"
+    },
+    "mmcode": {
+      "className": "MinimaxCodeExecutor",
+      "configSource": "<custom-config>",
+      "provider": "minimax-code"
+    },
     "moonshot": {
       "className": "MoonshotExecutor",
       "configSource": "moonshot",
@@ -489,11 +499,6 @@
       "className": "OneMinAiExecutor",
       "configSource": "oneminai",
       "provider": "oneminai"
-    },
-    "opencode": {
-      "className": "OpencodeExecutor",
-      "configSource": "opencode-zen",
-      "provider": "opencode-zen"
     },
     "opencode-go": {
       "className": "OpencodeExecutor",
@@ -706,6 +711,6 @@
       "provider": "zai-web"
     }
   },
-  "keyCount": 141,
+  "keyCount": 142,
   "sharedInstances": []
 }

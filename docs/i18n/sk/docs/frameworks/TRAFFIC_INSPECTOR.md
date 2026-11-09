@@ -40,7 +40,7 @@ Traffic Inspector je vstavaný nástroj OmniRoute na ladenie prenosov HTTPS — 
 
 ## §2 Režimy zachytávania
 
-Traffic Inspector podporuje **5 súčasných zdrojov zachytávania**. Každý možno nezávisle zapnúť alebo vypnúť. Pole `source` v každom objekte `InterceptedRequest` (`src/mitm/inspector/types.ts`) má jednu z hodnôt `"agent-bridge"`, `"custom-host"`, `"http-proxy"`, `"system-proxy"` alebo `"tproxy"`.
+Traffic Inspector podporuje **5 súbežných zdrojov zachytávania**. Každý z nich možno zapínať a vypínať nezávisle. Pole `source` každého objektu `InterceptedRequest` (`src/mitm/inspector/types.ts`) má jednu z hodnôt `"agent-bridge"`, `"custom-host"`, `"http-proxy"`, `"system-proxy"` alebo `"tproxy"`.
 
 ### Režim 1 — AgentBridge (predvolený, vždy zapnutý)
 
@@ -49,23 +49,23 @@ Traffic Inspector podporuje **5 súčasných zdrojov zachytávania**. Každý mo
 **Dosah:** 9 agentov IDE nakonfigurovaných v AgentBridge
 **Poznámka:** Pole `source` v `InterceptedRequest` = `"agent-bridge"`
 
-### Režim 2 — Vlastné hostiteľské názvy (presmerovanie DNS)
+### Režim 2 — Vlastní hostitelia (presmerovanie DNS)
 
-**Zdroj:** Používateľom definovaný zoznam hostiteľských názvov (tabuľka `inspector_custom_hosts`)
-**Mechanizmus:** Pridaním hostiteľského názvu cez používateľské rozhranie sa do `/etc/hosts` pridá `127.0.0.1 <host>` (vyžaduje sudo). Existujúci server MITM služby AgentBridge (port 443) dynamicky vygeneruje certifikát SNI pre nový hostiteľský názov.
-**Dosah:** Ľubovoľná aplikácia používajúca pridaný hostiteľský názov — bez potreby zmeny konfigurácie aplikácie
+**Zdroj:** Používateľom definovaný zoznam hostiteľov (tabuľka `inspector_custom_hosts`)
+**Mechanizmus:** Pridaním hostiteľa cez používateľské rozhranie sa do `/etc/hosts` pridá `127.0.0.1 <host>` (vyžaduje sudo). Existujúci server MITM AgentBridge (port 443) dynamicky vygeneruje certifikát SNI pre nového hostiteľa.
+**Dosah:** Ľubovoľná aplikácia používajúca pridaného hostiteľa — nie je potrebná žiadna zmena konfigurácie aplikácie
 **Poznámka:** `source` = `"custom-host"`
 
 Príklady použitia:
 
-- Monitorovanie `api.openai.com` zo skriptov Pythonu
+- Monitorovanie `api.openai.com` zo skriptov Python
 - Ladenie `my-internal-llm.company.com`
-- Zachytávanie prevádzky z mobilných zariadení v rovnakej sieti (pomocou podvrhnutia ARP — pokročilé)
+- Zachytávanie prevádzky z mobilných zariadení v rovnakej sieti (prostredníctvom podvrhnutia ARP — pokročilé)
 
-### Režim 3 — Poslucháč HTTP_PROXY (port 8080)
+### Režim 3 — Listener HTTP_PROXY (port 8080)
 
 **Zdroj:** Aplikácie používajúce premenné prostredia `HTTP_PROXY`/`HTTPS_PROXY`
-**Mechanizmus:** Sekundárny poslucháč na porte 8080 (`src/mitm/inspector/httpProxyServer.ts`), ktorý funguje ako štandardný explicitný HTTP/HTTPS proxy server. Prijíma tunely `CONNECT` (HTTPS) aj priame požiadavky HTTP.
+**Mechanizmus:** Sekundárny listener na porte 8080 (`src/mitm/inspector/httpProxyServer.ts`), ktorý funguje ako štandardný explicitný proxy server HTTP/HTTPS. Prijíma tunely `CONNECT` (HTTPS) a priame požiadavky HTTP.
 **Dosah:** Ľubovoľná aplikácia, ktorá rešpektuje premennú prostredia `HTTP_PROXY` — bez zmeny DNS a bez sudo
 **Poznámka:** `source` = `"http-proxy"`
 
@@ -78,48 +78,48 @@ export HTTP_PROXY=http://127.0.0.1:8080
 export HTTPS_PROXY=http://127.0.0.1:8080
 ```
 
-**Obmedzenie TLS:** Tunely HTTPS `CONNECT` sa predvolene zachytávajú iba ako metadáta (hostiteľský názov, port, časovanie) — telo TLS sa nedešifruje. Ak chcete kontrolovať celé telo, zapnite prepínač „Dešifrovať HTTPS v režime proxy“ (voliteľné, vyžaduje, aby bol certifikát AgentBridge dôveryhodný).
+**Obmedzenie TLS:** HTTPS prechádza cez obyčajný tunel `CONNECT`: listener prenáša šifrované bajty bez zmeny a zaznamenáva iba metadáta (hostiteľ, port, časovanie). Prevádzku HTTPS nikdy nedešifruje a pre tento režim neexistuje nastavenie, ktoré by dešifrovanie zaplo. Ak chcete zachytávať telá HTTPS, smerujte hostiteľa cez režim 1 (AgentBridge), režim 2 (Vlastní hostitelia) alebo režim 5 (dešifrovanie TPROXY).
 
 **Konflikt portov:** Ak sa port 8080 používa, AgentBridge vráti stav 409 so štruktúrovanou chybou. Port zmeňte prostredníctvom premennej prostredia `INSPECTOR_HTTP_PROXY_PORT`.
 
-### Režim 4 — Celosystémový proxy server (pokročilé, voliteľné)
+### Režim 4 — Systémový proxy server (pokročilé, voliteľné)
 
-**Zdroj:** Nastavenia proxy servera na úrovni operačného systému (vzťahujú sa na všetky aplikácie v počítači)
-**Mechanizmus:** Pomocou rozhraní API operačného systému presmeruje všetku prevádzku HTTP/HTTPS cez poslucháč HTTP_PROXY:
+**Zdroj:** Nastavenia proxy servera na úrovni operačného systému (vzťahujú sa na všetky aplikácie v zariadení)
+**Mechanizmus:** Pomocou rozhraní API operačného systému presmeruje všetku prevádzku HTTP/HTTPS cez listener HTTP_PROXY:
 
 - **macOS:** `networksetup -setwebproxy / -setsecurewebproxy`
 - **Linux:** `gsettings set org.gnome.system.proxy` + `/etc/environment`
 - **Windows:** `netsh winhttp set proxy 127.0.0.1:8080`
-  **Dosah:** Každá aplikácia v počítači, ktorá rešpektuje systémové nastavenia proxy servera
+  **Dosah:** Každá aplikácia v zariadení, ktorá rešpektuje systémové nastavenia proxy servera
   **Poznámka:** `source` = `"system-proxy"`
 
 **Bezpečnostné mechanizmy:**
 
-- Časovač automatického vypnutia (predvolene 30 minút, konfigurovateľný pomocou `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES`)
+- Časovač automatického vypnutia (predvolene 30 minút, konfigurovateľné prostredníctvom `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES`)
 - Predchádzajúci stav systémového proxy servera sa uloží do databázy a pri návrate sa obnoví
-- Ak používateľ počas aktívneho režimu prejde preč, ovládací panel zobrazí výzvu „Obnovuje sa systémový proxy server“
-- Používateľské rozhranie zobrazuje odznak `⚠ Pokročilé` + explicitné začiarkavacie políčko na potvrdenie
+- Ak používateľ opustí stránku, kým je proxy server aktívny, ovládací panel zobrazí výzvu „Obnovuje sa systémový proxy server“
+- Používateľské rozhranie zobrazuje odznak `⚠ Pokročilé` a explicitné potvrdzovacie začiarkavacie políčko
 
 ### Režim 5 — Transparentné dešifrovanie TPROXY (Linux, root, voliteľné)
 
-**Zdroj:** TPROXY jadra + smerovanie na základe politík (`src/mitm/tproxy/`)
-**Mechanizmus:** Označí nové lokálne odchádzajúce pripojenia TCP smerujúce na cieľový port (predvolene `443`) v reťazci `mangle OUTPUT`, pravidlo `ip rule` presmeruje označené pakety na lokálne doručenie a cieľ `TPROXY` v reťazci `mangle PREROUTING` ich odovzdá transparentnému poslucháču (**IP_TRANSPARENT**) (predvolený port `8443`). Poslucháč ukončí TLS pomocou koncového certifikátu, ktorý dynamická certifikačná autorita vydá **na požiadanie pre každý hostiteľský názov SNI**, zachytí dešifrovanú komunikáciu a požiadavku preposiela opätovne zašifrovanú do pôvodného cieľa.
-**Dosah:** **Ľubovoľné** cieľové hostiteľské názvy na cieľovom porte — bez podvrhnutia `/etc/hosts`, bez premennej prostredia `HTTP_PROXY` a bez zmeny celosystémového proxy servera. Zachytávaný proces nevyžaduje žiadnu zmenu konfigurácie, musí však dôverovať dynamickej certifikačnej autorite.
+**Zdroj:** TPROXY jadra + smerovanie založené na pravidlách (`src/mitm/tproxy/`)
+**Mechanizmus:** Označí nové lokálne odchádzajúce pripojenia TCP k cieľovému portu (predvolene `443`) v `mangle OUTPUT`, pravidlo `ip rule` presmeruje označené pakety na lokálne doručenie a cieľ `TPROXY` v `mangle PREROUTING` ich odovzdá transparentnému listeneru (**IP_TRANSPARENT**) (predvolený port `8443`). Listener ukončí TLS pomocou koncového certifikátu, ktorý dynamická certifikačná autorita vystaví **na požiadanie pre každý názov hostiteľa SNI**, zachytí dešifrovanú komunikáciu a požiadavku po opätovnom zašifrovaní prepošle do pôvodného cieľa.
+**Dosah:** **Ľubovoľní** cieľoví hostitelia na cieľovom porte — bez podvrhnutia `/etc/hosts`, bez premennej prostredia `HTTP_PROXY` a bez úpravy systémového proxy servera. Zachytávaný proces nevyžaduje žiadnu zmenu konfigurácie, musí však dôverovať dynamickej certifikačnej autorite.
 **Poznámka:** `source` = `"tproxy"`
 
-**Požiadavky:** Iba Linux (**IP_TRANSPARENT** je dostupné iba v Linuxe), oprávnenie **CAP_NET_ADMIN** (root) a natívny doplnok N-API, ktorý sa musí zostaviť pomocou nástrojového reťazca jazyka C (`npm run build:native:tproxy`). Ak táto funkcia nie je dostupná, prepínač na ovládacom paneli je deaktivovaný a zobrazí sa popis „Dešifrovanie TPROXY vyžaduje Linux + root + natívny doplnok“. Pravidlá firewallu sa aplikujú a vracajú späť transakčne (zlyhanie nikdy nezanechá pravidlo `mangle`) a pri reštarte sa vymažú. Mechanizmus proti slučkám založený na SO_MARK zabraňuje opätovnému zachyteniu vlastného, znova zašifrovaného preposielania proxy servera.
+**Požiadavky:** Iba Linux (**IP_TRANSPARENT** je k dispozícii iba v systéme Linux), oprávnenie **CAP_NET_ADMIN** (root) a natívny doplnok N-API, ktorý sa musí zostaviť pomocou sady nástrojov jazyka C (`npm run build:native:tproxy`). Ak nie sú tieto požiadavky splnené, prepínač na ovládacom paneli je zakázaný a zobrazuje sa opis „Dešifrovanie TPROXY vyžaduje Linux + root + natívny doplnok“. Pravidlá brány firewall sa aplikujú a vracajú späť transakčne (zlyhanie nikdy nezanechá pravidlo `mangle`) a pri reštarte sa vymažú. Ochrana proti slučkám založená na SO_MARK zabraňuje opätovnému zachyteniu vlastného preposielania proxy servera po opätovnom zašifrovaní.
 
-Ide o rozsiahly podsystém s vlastnou samostatnou príručkou pre operátorov — úplný postup konfigurácie firewallu, dynamickú certifikačnú autoritu pre jednotlivé SNI + inštalátor dôveryhodného úložiska, iba lokálnu trasu, podrobnosti o mechanizme proti slučkám a konfiguračnú schému nájdete v `docs/security/MITM-TPROXY-DECRYPT.md` (git; nekompiluje sa do `/docs`). Prepínač je ovládaný prostredníctvom `GET / POST / DELETE /api/tools/agent-bridge/tproxy` (poznámka: trasa sa nachádza pod prefixom AgentBridge, nie pod prefixom Traffic Inspector).
+Ide o rozsiahly subsystém s vlastnou špecializovanou príručkou pre operátorov — úplný postup konfigurácie brány firewall, dynamickú certifikačnú autoritu pre jednotlivé SNI a inštalátor úložiska dôveryhodných certifikátov, iba lokálnu trasu, podrobnosti ochrany proti slučkám a konfiguračnú schému nájdete v `docs/security/MITM-TPROXY-DECRYPT.md` (git; nekompiluje sa do `/docs`). Prepínač ovládajú `GET / POST / DELETE /api/tools/agent-bridge/tproxy` (poznámka: trasa sa nachádza pod prefixom AgentBridge, nie pod prefixom Traffic Inspector).
 
 ### Porovnanie režimov zachytávania
 
-| Režim                  | Nastavenie                         |           Sudo?            | Dosah                                     | Poznámky                                                                                                                           |
-| ---------------------- | ---------------------------------- | :------------------------: | ----------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| 1. AgentBridge         | Automatické                        |   Raz (certifikát+hosts)   | 9 agentov IDE                             | Predvolene zapnuté                                                                                                                 |
-| 2. Vlastné hosty       | Zadanie pre každý host             |     Áno (súbor hosts)      | Akákoľvek aplikácia používajúca daný host | Uložené v DB                                                                                                                       |
-| 3. HTTP_PROXY          | `export HTTPS_PROXY=...`           |            Nie             | Aplikácie rešpektujúce prostredie         | Port 8080, predvolene bez dešifrovania TLS                                                                                         |
-| 4. Celý systém         | Prepínač + potvrdenie              |            Áno             | Všetky aplikácie v počítači               | Automatické vypnutie po 30 minútach                                                                                                |
-| 5. Dešifrovanie TPROXY | Prepínač (Linux + natívny doplnok) | Áno (root + inštalácia CA) | Akýkoľvek host na cieľovom porte          | Dešifruje ľubovoľné hosty; predvolene vypnuté — pozrite si `docs/security/MITM-TPROXY-DECRYPT.md` (git; nekompiluje sa do `/docs`) |
+| Režim                  | Nastavenie                         |           Sudo?            | Dosah                                 | Poznámky                                                                                                                           |
+| ---------------------- | ---------------------------------- | :------------------------: | ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| 1. AgentBridge         | Automatické                        |   Raz (certifikát+hosts)   | 9 agentov IDE                         | Predvolene zapnuté                                                                                                                 |
+| 2. Vlastné hosty       | Zadanie pre každý host             |     Áno (súbor hosts)      | Každá aplikácia používajúca daný host | Uložené v DB                                                                                                                       |
+| 3. HTTP_PROXY          | `export HTTPS_PROXY=...`           |            Nie             | Aplikácie rešpektujúce prostredie     | Port 8080; HTTPS je tunelované cez CONNECT (iba metadáta, nikdy sa nedešifruje)                                                    |
+| 4. Celosystémový       | Prepínač + potvrdenie              |            Áno             | Všetky aplikácie v počítači           | Automaticky sa vypne o 30 minút                                                                                                    |
+| 5. Dešifrovanie TPROXY | Prepínač (Linux + natívny doplnok) | Áno (root + inštalácia CA) | Ľubovoľný host na cieľovom porte      | Dešifruje ľubovoľné hosty; predvolene vypnuté — pozrite si `docs/security/MITM-TPROXY-DECRYPT.md` (git; nekompiluje sa do `/docs`) |
 
 ---
 
@@ -338,31 +338,31 @@ Exportujte prostredníctvom `GET /api/tools/traffic-inspector/sessions/{id}/expo
 
 ---
 
-## §6 Zabezpečenie
+## §6 Bezpečnosť
 
-Traffic Inspector zobrazuje **všetku zachytenú komunikáciu HTTPS** vrátane autorizačných hlavičiek a tiel požiadaviek. Zavedené sú nasledujúce ochranné opatrenia:
+Traffic Inspector zobrazuje **všetku zachytenú komunikáciu HTTPS** vrátane autorizačných hlavičiek a tiel požiadaviek. Zavedené sú nasledujúce kontrolné mechanizmy:
 
-| Opatrenie                       | Podrobnosti                                                                                                                                                                                               |
-| ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **LOCAL_ONLY**                  | Všetky trasy a koncový bod WebSocket sú dostupné iba cez loopback (vynucuje sa v `routeGuard.ts` pred autentifikáciou)                                                                                    |
-| **Maskovanie tajných údajov**   | Lineárny skener `maskSecret()` pred volaním `TrafficBuffer.push()` odstráni prihlasovacie údaje Bearer podľa RFC 6750, kľúče s prefixom poskytovateľa a dlhé nepriehľadné tokeny                          |
-| **Limit veľkosti tela**         | Telá väčšie ako `INSPECTOR_MAX_BODY_KB` (predvolene 1024 KB) sa skrátia s upozornením `„(skrátené z dôvodu výkonu)“`                                                                                      |
-| **Sanitizácia hlavičiek**       | Názvy sa prevedú na malé písmená; hlavičky rámcovania/hop-by-hop a autentifikácie proxy sa odstránia; súbory cookie sa úplne začiernia; hodnoty prihlasovacích údajov sa odovzdajú funkcii `maskSecret()` |
-| **CSP**                         | Striktné zásady Content Security Policy na stránkach Traffic Inspector zabraňujú útokom XSS prostredníctvom vložených tiel odpovedí                                                                       |
-| **Predvolene bez perzistencie** | `TrafficBuffer` sa uchováva v pamäti a pri reštartovaní servera sa stratí. Relácie sa ukladajú trvalo iba vtedy, keď sa explicitne nahrávajú                                                              |
+| Kontrolný mechanizmus         | Podrobnosti                                                                                                                                                                                      |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **LOCAL_ONLY**                | Všetky trasy a koncový bod WebSocket sú dostupné iba cez rozhranie loopback (vynucuje sa v `routeGuard.ts` pred autentifikáciou)                                                                 |
+| **Maskovanie tajných údajov** | Lineárny skener `maskSecret()` rediguje prihlasovacie údaje Bearer podľa RFC 6750, kľúče s prefixom poskytovateľa a dlhé nepriehľadné tokeny pred volaním `TrafficBuffer.push()`                 |
+| **Limit veľkosti tela**       | Telá väčšie ako `INSPECTOR_MAX_BODY_KB` (predvolená hodnota 1024 KB) sa skrátia a doplnia upozornením `"(skrátené z dôvodu výkonu)"`                                                             |
+| **Sanitizácia hlavičiek**     | Názvy sa konvertujú na malé písmená; hlavičky rámcovania, hop-by-hop a autentifikácie proxy sa odstránia; súbory cookie sa úplne redigujú; hodnoty prihlasovacích údajov spracuje `maskSecret()` |
+| **CSP**                       | Striktná politika Content Security Policy na stránkach Traffic Inspector zabraňuje XSS prostredníctvom vložených tiel odpovedí                                                                   |
+| **Predvolene bez ukladania**  | `TrafficBuffer` sa uchováva v pamäti a pri reštarte servera sa stratí. Relácie sa uložia iba vtedy, keď sa ich zaznamenávanie výslovne spustí                                                    |
 
-### Uplatnené pevné pravidlá
+### Uplatňované pevné pravidlá
 
-| Pravidlo                          | Použitie                                                                                          |
-| --------------------------------- | ------------------------------------------------------------------------------------------------- |
-| **#12** `sanitizeErrorMessage`    | Všetky chybové odpovede HTTP z trás Traffic Inspector sa sanitizujú                               |
-| **#15 + #17** `isLocalOnlyPath()` | `/api/tools/traffic-inspector/` je LOCAL_ONLY + SPAWN_CAPABLE (príkazy systémového proxy servera) |
+| Pravidlo                          | Uplatnenie                                                                              |
+| --------------------------------- | --------------------------------------------------------------------------------------- |
+| **#12** `sanitizeErrorMessage`    | Všetky chybové odpovede HTTP z trás Traffic Inspector sa sanitizujú                     |
+| **#15 + #17** `isLocalOnlyPath()` | `/api/tools/traffic-inspector/` je LOCAL_ONLY + SPAWN_CAPABLE (systémové príkazy proxy) |
 
 ### Známe obmedzenia
 
-- **Režim celosystémového proxy servera** ovplyvňuje všetky aplikácie v zariadení vrátane klientov VPN a SSO. Vždy ho používajte s časovačom automatického vypnutia. Nepoužívajte ho na zdieľaných zariadeniach.
-- **HTTPS cez tunel CONNECT**: Režim 3 (HTTP_PROXY) zachytáva iba metadáta tunela pre cieľové servery HTTPS, pokiaľ nie je povolené zachytávanie TLS. Je to zámerné — transparentné zachytávanie bez dôveryhodného certifikátu AgentBridge by v týchto aplikáciách narušilo overovanie TLS.
-- **Reťazce napevno zadané v niektorých komponentoch**: Niektoré komponenty používateľského rozhrania (F7/F8) obsahujú malý počet reťazcov zadaných napevno, ktoré zatiaľ nie sú pokryté kľúčmi i18n. V správe o nedostatkoch i18n sú zdokumentované ako známe obmedzenie; migrované budú v nasledujúcej fáze. Dotknuté reťazce sú dekoratívne označenia používateľského rozhrania, ktoré na funkčné používanie nevyžadujú preklad.
+- **Režim systémového proxy** ovplyvňuje všetky aplikácie v zariadení vrátane klientov VPN a SSO. Vždy ho používajte s časovačom automatického vypnutia. Nepoužívajte ho na zdieľaných zariadeniach.
+- **HTTPS cez tunel CONNECT**: Režim 3 (HTTP_PROXY) zachytáva pre cieľové adresy HTTPS iba metadáta tunela a nikdy ich nedešifruje. Je to zámerné — dešifrovanie by vyžadovalo, aby každý klient dôveroval certifikátu MITM, preto prijímač zachováva koncové šifrovanie HTTPS. Ak potrebujete telá HTTPS, použite AgentBridge, Custom Hosts alebo dešifrovanie TPROXY.
+- **Pevne zadané reťazce v niektorých komponentoch**: Niektoré komponenty používateľského rozhrania (F7/F8) obsahujú malý počet pevne zadaných reťazcov, ktoré zatiaľ nie sú pokryté kľúčmi i18n. V správe o nedostatkoch i18n sú zdokumentované ako známe obmedzenie; migrované budú v ďalšej fáze. Dotknuté reťazce sú dekoratívne označenia používateľského rozhrania, ktoré na funkčné používanie nevyžadujú preklad.
 
 ---
 
@@ -425,27 +425,27 @@ Keď vyrovnávacia pamäť dosiahne veľkosť `INSPECTOR_BUFFER_SIZE` (predvolen
 
 ---
 
-## §8 Referenčná príručka API
+## §8 Referencia API
 
-Všetky trasy sú `LOCAL_ONLY` (dostupné iba cez loopback) a `SPAWN_CAPABLE` (príkazy systémového proxy servera). Pozrite si `src/server/authz/routeGuard.ts`.
+Všetky trasy sú `LOCAL_ONLY` (iba pre loopback) a `SPAWN_CAPABLE` (systémové proxy príkazy). Pozrite si `src/server/authz/routeGuard.ts`.
 
 Základná cesta: `/api/tools/traffic-inspector/`
 
 ### Správa požiadaviek
 
-| Metóda | Cesta                       | Popis                                                                                    |
-| ------ | --------------------------- | ---------------------------------------------------------------------------------------- |
-| GET    | `/requests`                 | Zoznam požiadaviek (filtrovanie: `?profile=llm&host=&agent=&status=&source=&sessionId=`) |
-| GET    | `/requests/{id}`            | Podrobnosti jednej požiadavky                                                            |
-| DELETE | `/requests`                 | Vymazanie vyrovnávacej pamäte v pamäti                                                   |
-| POST   | `/requests/{id}/replay`     | Opätovné vykonanie rovnakej požiadavky prostredníctvom smerovača OmniRoute               |
-| PUT    | `/requests/{id}/annotation` | Uloženie alebo aktualizácia poznámky k požiadavke                                        |
+| Metóda | Cesta                       | Popis                                                                                      |
+| ------ | --------------------------- | ------------------------------------------------------------------------------------------ |
+| GET    | `/requests`                 | Zoznam požiadaviek (filtrovateľný: `?profile=llm&host=&agent=&status=&source=&sessionId=`) |
+| GET    | `/requests/{id}`            | Podrobnosti jednej požiadavky                                                              |
+| DELETE | `/requests`                 | Vymazanie vyrovnávacej pamäte v pamäti                                                     |
+| POST   | `/requests/{id}/replay`     | Opätovné vykonanie rovnakej požiadavky prostredníctvom smerovača OmniRoute                 |
+| PUT    | `/requests/{id}/annotation` | Uloženie alebo aktualizácia poznámky k požiadavke                                          |
 
 ### WebSocket
 
-| Metóda | Cesta | Popis                                                                                          |
-| ------ | ----- | ---------------------------------------------------------------------------------------------- |
-| GET    | `/ws` | Živý stream WebSocketu. Pri pripojení odošle `snapshot`, potom udalosti `new`/`update`/`clear` |
+| Metóda | Cesta | Popis                                                                                        |
+| ------ | ----- | -------------------------------------------------------------------------------------------- |
+| GET    | `/ws` | Živý stream WebSocket. Po pripojení odošle `snapshot`, potom udalosti `new`/`update`/`clear` |
 
 ### Export
 
@@ -460,21 +460,20 @@ Základná cesta: `/api/tools/traffic-inspector/`
 | GET    | `/hosts`        | Zoznam vlastných hostiteľov                          |
 | POST   | `/hosts`        | Pridanie hostiteľa (automaticky upraví `/etc/hosts`) |
 | DELETE | `/hosts/{host}` | Odstránenie hostiteľa                                |
-| PATCH  | `/hosts/{host}` | Prepnutie `enabled`                                  |
+| PATCH  | `/hosts/{host}` | Prepnutie hodnoty `enabled`                          |
 
 ### Režimy zachytávania
 
-| Metóda | Cesta                          | Popis                                                                                                               |
-| ------ | ------------------------------ | ------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/capture-modes`               | Stav režimov AgentBridge / vlastných hostiteľov / HTTP_PROXY / systémového proxy servera + prepínač `tls-intercept` |
-| POST   | `/capture-modes/http-proxy`    | Spustenie/zastavenie poslucháča HTTP_PROXY (`{action: "start"\|"stop"}`)                                            |
-| POST   | `/capture-modes/system-proxy`  | Použitie/obnovenie systémového proxy servera (`{action: "apply"\|"revert"}`)                                        |
-| POST   | `/capture-modes/tls-intercept` | Prepnutie dešifrovania tela HTTPS v režime proxy servera (`{enabled: boolean}`)                                     |
+| Metóda | Cesta                         | Popis                                                                            |
+| ------ | ----------------------------- | -------------------------------------------------------------------------------- |
+| GET    | `/capture-modes`              | Stav režimov AgentBridge / vlastných hostiteľov / HTTP_PROXY / systémového proxy |
+| POST   | `/capture-modes/http-proxy`   | Spustenie/zastavenie listenera HTTP_PROXY (`{action: "start"\|"stop"}`)          |
+| POST   | `/capture-modes/system-proxy` | Použitie/zrušenie systémového proxy (`{action: "apply"\|"revert"}`)              |
 
-> **Dešifrovanie TPROXY** (režim zachytávania 5) sa ovláda prostredníctvom **samostatnej** trasy pod
-> predponou AgentBridge — `GET / POST / DELETE /api/tools/agent-bridge/tproxy` — nie
+> **Dešifrovanie TPROXY** (režim zachytávania 5) sa ovláda **samostatnou** trasou pod
+> prefixom AgentBridge — `GET / POST / DELETE /api/tools/agent-bridge/tproxy` — nie
 > pod `/api/tools/traffic-inspector/`. Pozrite si
-> `docs/security/MITM-TPROXY-DECRYPT.md` (git; nie je skompilované do `/docs`).
+> `docs/security/MITM-TPROXY-DECRYPT.md` (git; nie je skompilovaný do `/docs`).
 
 ### Relácie
 
@@ -487,7 +486,7 @@ Základná cesta: `/api/tools/traffic-inspector/`
 | DELETE | `/sessions/{id}`            | Odstránenie relácie                                                         |
 | GET    | `/sessions/{id}/export.har` | Export relácie ako HAR 1.2                                                  |
 
-### Interný príjem (záložné riešenie D4)
+### Interný príjem (záložný mechanizmus D4)
 
 | Metóda | Cesta              | Popis                                                                                                              |
 | ------ | ------------------ | ------------------------------------------------------------------------------------------------------------------ |

@@ -31,21 +31,22 @@
 
 ## LTS 支援期間（v3.9.x）
 
-3.8.59 之後的下一個版本是 **3.9.0**，此版本將在
-`stable/v3` 分支上開啟長期支援線（請參閱 [`ROADMAP.md`](ROADMAP.md) →「Phase 3 — v3.9.0 LTS」）。
+3.8.59 之後的下一個版本是 **3.9.0**，此版本會在
+`stable/v3` 分支上開啟長期支援產品線（請參閱 [`ROADMAP.md`](ROADMAP.md) →「Phase 3 — v3.9.0 LTS」）。
 
 - **`stable/v3` 會接收的內容：**錯誤修正、安全性修補程式及提供者更新。新
-  功能會進入 v4 頻道；LTS 支援線以穩定性為優先。在整個 v4 週期期間，`npm install omniroute`
-  （`latest` dist-tag）會維持在 v3。
-- **支援期間長度：**`<T-GAP-3: owner decision pending — see ROADMAP.md>`。v4.0 GA 之後
-  （即 `latest` 切換至 v4 時）的支援期間長度**尚未決定**；維護者公布後將更新此
-  區段。在此之前，請勿假設結束日期。
-- **回報 LTS 支援線中的漏洞：**使用與其他版本相同的管道 —
+  功能會進入 v4 頻道；LTS 產品線會優先考量穩定性。在整個 v4 週期中，`npm install omniroute`
+  （`latest` dist-tag）都會維持在 v3。
+- **支援期間：**`stable/v3` 會在 **3.9.0 發布後的 12 個月內，或 v4.0.0 以 `latest` 發布後的
+  90 天內，持續接收安全性修正與重大迴歸問題修正——
+  以較晚者為準**。最終的結束日期會在 3.9.0 發布時記錄於其版本資訊及
+  [`ROADMAP.md`](ROADMAP.md) 中。
+- **回報 LTS 產品線中的漏洞：**使用與其他版本相同的管道——
   私密的 [GitHub Security Advisory](https://github.com/diegosouzapw/OmniRoute/security/advisories/new)，
-  絕不可建立公開 issue。請註明您測試的版本（例如 `3.9.2`）；修正會套用至
+  絕不可使用公開 issue。請註明您測試的版本（例如 `3.9.2`）；修正會套用至
   `stable/v3`，並向前移植至 v4。
-- **LTS 分支建立時的安全性基準：**經測量的掃描器狀態、路由防護及
-  公開憑證驗證記錄於
+- **LTS 發布時的安全性基準：**經量測的掃描器狀態、路由防護及
+  公開憑證證明會記錄於
   [`docs/security/LTS_SECURITY_BASELINE.md`](docs/security/LTS_SECURITY_BASELINE.md)。
 
 ---

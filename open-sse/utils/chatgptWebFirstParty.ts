@@ -25,7 +25,8 @@ export interface ChatGptWebFirstPartyRequest {
 export type ChatGptWebUiSelection =
   | {
       kind: "picker";
-      modelLabel: "GPT-5.6 Sol" | "GPT-5.5";
+      /** Model family radio in the first-party picker, not the upstream slug. */
+      modelLabel: "GPT-6 Sol" | "GPT-5.6 Sol" | "GPT-5.5";
       effortIndex: 0 | 1 | 2 | 3 | 4;
     }
   | {
@@ -408,33 +409,79 @@ async function discoverFirstPartyModule(page: Page): Promise<FirstPartyModuleRes
   });
 }
 
+/** Keep only first-party chunk URLs, deduplicated and in page order. */
+function integrityCandidateChunkUrls(candidateAssetUrls: readonly string[]): string[] {
+  const accepted: string[] = [];
+  for (const candidate of candidateAssetUrls) {
+    try {
+      const url = requireChatGptAssetUrl(candidate);
+      if (!accepted.includes(url)) accepted.push(url);
+    } catch {
+      continue;
+    }
+  }
+  return accepted;
+}
+
+/**
+ * Resolve ChatGPT's Sentinel integrity module through the page's own Rspack runtime.
+ *
+ * The integrity factory is a webpack-style `(module, exports, require)` function whose
+ * `require` resolves minified module ids. Those ids are assigned per deployment: the uuid
+ * helper this factory calls already moved from `TI` to `DD`, and the module moved to a
+ * different chunk with it. Hand-instantiating the factory against a pinned id map
+ * therefore breaks on any chatgpt.com rebuild that reshuffles the module graph.
+ *
+ * The runtime chunk instead exports `__webpack_require__` with every loaded chunk's modules
+ * registered, so requiring the module through it executes ChatGPT's own code with ChatGPT's
+ * own ids — no id is pinned here and the factory's dependencies are never stubbed.
+ *
+ * Resolution stays lazy on purpose: the bridge module must not use top-level await, because
+ * the installer's `script.onload` check runs before a module script's pending top-level
+ * await settles and would reject a bridge that is in fact initializing.
+ *
+ * Expects `names` (the discovered contract) and `importChunk(url)` in scope.
+ */
+export function buildChatGptWebIntegrityResolutionSource(
+  candidateAssetUrls: readonly string[]
+): string {
+  const chunkUrlsLiteral = JSON.stringify(integrityCandidateChunkUrls(candidateAssetUrls));
+  return [
+    `const integrityChunkUrls = ${chunkUrlsLiteral};`,
+    `const loadIntegrityModule = async () => {`,
+    `for (const url of integrityChunkUrls) {`,
+    `let namespace;`,
+    `try { namespace = await importChunk(url); } catch { continue; }`,
+    `const runtimeRequire = namespace?.__webpack_require__;`,
+    `if (typeof runtimeRequire !== "function") continue;`,
+    `let integrityModule;`,
+    `try { integrityModule = runtimeRequire(names.resolveIntegrityModule); } catch { integrityModule = undefined; }`,
+    `if (integrityModule) return integrityModule;`,
+    `}`,
+    `throw new Error("ChatGPT integrity module " + names.resolveIntegrityModule + " is not registered in the page runtime (" + integrityChunkUrls.length + " chunks loaded)");`,
+    `};`,
+    `const resolveIntegrity = async proof => {`,
+    `const integrityModule = await loadIntegrityModule();`,
+    `const handler = integrityModule[names.resolveIntegrity];`,
+    `if (typeof handler !== "function") throw new Error("ChatGPT integrity resolver is unavailable");`,
+    `return handler(proof);`,
+    `};`,
+  ].join("");
+}
+
 function buildBridgeModuleSource(
   assetUrl: string,
-  contract: ChatGptWebFirstPartyModuleContract
+  contract: ChatGptWebFirstPartyModuleContract,
+  candidateAssetUrls: readonly string[] = []
 ): string {
   const urlLiteral = JSON.stringify(requireChatGptAssetUrl(assetUrl));
   const contractLiteral = JSON.stringify(contract);
   const keyLiteral = JSON.stringify(FIRST_PARTY_BRIDGE_KEY);
   if (contract.resolveIntegrity && contract.resolveIntegrityModule) {
     return [
-      `import * as upstream from ${urlLiteral};`,
       `const names = ${contractLiteral};`,
-      `const modules = upstream.__webpack_modules__;`,
-      `const factory = modules?.[names.resolveIntegrityModule];`,
-      `if (typeof factory !== "function") throw new Error("ChatGPT integrity module factory is unavailable");`,
-      `const exports = {};`,
-      `const requireShim = id => {`,
-      `if (id === "TI") return { a: () => crypto.randomUUID() };`,
-      `throw new Error("Unsupported ChatGPT integrity dependency: " + id);`,
-      `};`,
-      `requireShim.d = (target, definitions) => {`,
-      `for (const [name, getter] of Object.entries(definitions)) {`,
-      `Object.defineProperty(target, name, { enumerable: true, get: getter });`,
-      `}`,
-      `};`,
-      `factory({}, exports, requireShim);`,
-      `const resolveIntegrity = exports[names.resolveIntegrity];`,
-      `if (typeof resolveIntegrity !== "function") throw new Error("ChatGPT integrity resolver is unavailable");`,
+      `const importChunk = url => import(url);`,
+      buildChatGptWebIntegrityResolutionSource(candidateAssetUrls),
       `const sessionPromise = fetch("/api/auth/session", { credentials: "include" }).then(async response => {`,
       `if (!response.ok) throw new Error("ChatGPT browser session is unavailable");`,
       `return response.json();`,
@@ -554,7 +601,13 @@ async function ensureFirstPartyBridge(page: Page): Promise<void> {
   if (ready) return;
 
   const { assetUrl, contract } = await discoverFirstPartyModule(page);
-  const moduleSource = buildBridgeModuleSource(assetUrl, contract);
+  // The integrity module is required through the page's own runtime, so whichever chunk
+  // exposes `__webpack_require__` has to travel with the bridge source.
+  const candidateAssetUrls =
+    contract.resolveIntegrity && contract.resolveIntegrityModule
+      ? await collectPageAssetCandidates(page)
+      : [];
+  const moduleSource = buildBridgeModuleSource(assetUrl, contract, candidateAssetUrls);
   const collected = collectBridgeFailureSignals(page, assetUrl);
   try {
     await page.evaluate(
@@ -615,11 +668,49 @@ async function ensureFirstPartyBridge(page: Page): Promise<void> {
   }
 }
 
-function directModel(selection: ChatGptWebUiSelection): { model: string; reason: boolean } {
+/**
+ * Picker family → upstream `/f/conversation` slug. ChatGPT names the family in
+ * the UI (Sol / Astra) but the conversation slug is version-only, and the Pro
+ * lane is a distinct `-pro` model rather than a higher effort on the base one.
+ */
+const PICKER_FAMILY_SLUGS = {
+  "GPT-6 Sol": "gpt-6",
+  "GPT-5.6 Sol": "gpt-5-6",
+  "GPT-5.5": "gpt-5-5",
+} as const satisfies Record<
+  Extract<ChatGptWebUiSelection, { kind: "picker" }>["modelLabel"],
+  string
+>;
+
+/** Ability-slider positions 1-3: Medium, High and Extra High. */
+const PICKER_THINKING_EFFORT = { 1: "standard", 2: "extended", 3: "max" } as const;
+
+type ChatGptWebThinkingEffort = "standard" | "extended" | "max";
+
+interface ChatGptWebConversationMode {
+  model: string;
+  /** Free accounts only: the Think toggle travels as a system hint, not an effort. */
+  reason: boolean;
+  thinkingEffort?: ChatGptWebThinkingEffort;
+}
+
+function directModel(selection: ChatGptWebUiSelection): ChatGptWebConversationMode {
   if (selection.kind === "free") return { model: "auto", reason: selection.thinkEnabled };
-  const base = selection.modelLabel === "GPT-5.6 Sol" ? "gpt-5-6" : "gpt-5-5";
-  if (selection.effortIndex === 4) return { model: `${base}-pro`, reason: false };
-  return { model: base, reason: selection.effortIndex > 0 };
+  const family = PICKER_FAMILY_SLUGS[selection.modelLabel];
+  if (selection.effortIndex === 4) {
+    // The Pro lane is its own model; captured GPT-5.5 Pro keeps the extended depth.
+    return {
+      model: `${family}-pro`,
+      reason: false,
+      thinkingEffort: family === "gpt-5-5" ? "extended" : "standard",
+    };
+  }
+  if (selection.effortIndex === 0) return { model: family, reason: false };
+  return {
+    model: `${family}-thinking`,
+    reason: false,
+    thinkingEffort: PICKER_THINKING_EFFORT[selection.effortIndex],
+  };
 }
 
 async function registerAttachments(
@@ -630,6 +721,11 @@ async function registerAttachments(
   return page.evaluate(
     async ({ abortKey, attachments: metadata, bridgeKey, requestId }) => {
       const root = globalThis as typeof globalThis & Record<string, unknown>;
+      // The request-scoped abort controller is needed even for text-only turns.
+      const abortStore = (root[abortKey] ??= {}) as Record<string, AbortController>;
+      const controller = new AbortController();
+      abortStore[requestId] = controller;
+      if (metadata.length === 0) return [];
       const bridge = root[bridgeKey] as {
         requestClient?: {
           safePost(path: string, options: JsonRecord): Promise<unknown>;
@@ -638,9 +734,6 @@ async function registerAttachments(
       if (typeof bridge?.requestClient?.safePost !== "function") {
         throw new Error("ChatGPT Web first-party request client is unavailable");
       }
-      const abortStore = (root[abortKey] ??= {}) as Record<string, AbortController>;
-      const controller = new AbortController();
-      abortStore[requestId] = controller;
       const registered: BrowserRegisteredAttachment[] = [];
       for (const attachment of metadata) {
         const useCase = attachment.kind === "image" ? "multimodal" : "my_files";
@@ -750,6 +843,7 @@ async function processRegisteredAttachments(
 ): Promise<void> {
   await page.evaluate(
     async ({ abortKey, bridgeKey, registered, requestId }) => {
+      if (registered.length === 0) return;
       const root = globalThis as typeof globalThis & Record<string, unknown>;
       const bridge = root[bridgeKey] as {
         requestClient?: { safePost(path: string, options: JsonRecord): Promise<unknown> };
@@ -854,6 +948,9 @@ async function storeConversationDraft(
           ],
           parent_message_id: "client-created-root",
           model: mode.model,
+          // The ability slider travels as its own field; `system_hints` carries
+          // only Free's Think toggle. Positions 1-3 are held in PICKER_THINKING_EFFORT.
+          ...(mode.thinkingEffort ? { thinking_effort: mode.thinkingEffort } : {}),
           timezone_offset_min: new Date().getTimezoneOffset(),
           timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
           history_and_training_disabled: true,
@@ -1029,6 +1126,13 @@ async function readConversationResponse(page: Page, requestId: string): Promise<
             throw new Error("ChatGPT Web conversation response exceeded the size limit");
           }
           chunks.push(decoder.decode(value, { stream: true }));
+          // Settle as soon as a complete client tool envelope is available. This
+          // function is serialized into the browser page, so the boundary detector
+          // stays self-contained instead of closing over a module-level constant.
+          if (/(?:<|\\u003c)\\?\/tool(?:>|\\u003e)/i.test(chunks.join(""))) {
+            await reader.cancel().catch(() => {});
+            return chunks.join("");
+          }
         }
         chunks.push(decoder.decode());
       } finally {
@@ -1057,6 +1161,11 @@ async function processAndSubmit(
   const browserRegistered = browserConversationAttachments(registered);
   await processRegisteredAttachments(page, requestId, browserRegistered);
   await storeConversationDraft(page, input, requestId, browserRegistered);
+  // Re-verify (and if needed re-inject) the bridge right before signing: the SPA
+  // can navigate between the initial handshake and this point, which wipes the
+  // bridge from `window`. storeConversationHeaders() still throws when the bridge
+  // is incomplete, so an unsigned request is never sent.
+  await ensureFirstPartyBridge(page);
   await storeConversationHeaders(page, requestId);
   await submitConversationRequest(page, requestId);
   return readConversationResponse(page, requestId);

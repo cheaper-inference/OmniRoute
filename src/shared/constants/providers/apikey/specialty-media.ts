@@ -348,7 +348,7 @@ export const APIKEY_PROVIDERS_SPECIALTY = {
     subscriptionRisk: true,
     riskNoticeVariant: "oauth",
     authHint:
-      "Paste a Cursor user API key (crsr_...) from cursor.com/dashboard/api. OmniRoute exchanges it for a session token on demand; no IDE or cursor-agent install is needed. Usage bills to the Cursor plan that owns the key.",
+      "Paste a Cursor user API key (crsr_... or grok_...) from cursor.com/dashboard/api. OmniRoute exchanges it for a session token on demand; no IDE or cursor-agent install is needed. Usage bills to the Cursor plan that owns the key.",
     apiHint:
       "Same agent protocol and model catalog as the Cursor IDE provider. The Cursor CLI can also be pointed at /api/cursor-cli on this instance and authenticated with an OmniRoute API key.",
   },

@@ -1,7 +1,14 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Button, Card, ConfirmModal, EmptyState, Loading } from "@/shared/components";
+import { useTranslations } from "next-intl";
+import { Alert } from "@omniroute/ui-kit/alert";
+import { PageHeader } from "@omniroute/ui-kit/page-header";
+import Button from "@/shared/components/Button";
+import Card from "@/shared/components/Card";
+import EmptyState from "@/shared/components/EmptyState";
+import Loading from "@/shared/components/Loading";
+import { ConfirmModal } from "@/shared/components/Modal";
 import { DestinationCard } from "./components/DestinationCard";
 import { DestinationFormModal } from "./components/DestinationFormModal";
 import type { LogExportDestination, LogExportStatus, LogExportTypeDescriptor } from "./types";
@@ -36,9 +43,11 @@ function errorText(payload: ApiErrorPayload | undefined, fallback: string): stri
 }
 
 export function LogExportPageClient() {
+  const t = useTranslations("logExport");
   const [status, setStatus] = useState<LogExportStatus | null>(null);
   const [types, setTypes] = useState<LogExportTypeDescriptor[]>([]);
   const [loading, setLoading] = useState(true);
+  const tc = useTranslations("common");
   const [feedback, setFeedback] = useState<Feedback>(null);
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<LogExportDestination | null>(null);
@@ -56,18 +65,18 @@ export function LogExportPageClient() {
       ]);
       const statusData = await statusRes.json().catch(() => ({}));
       const typesData = await typesRes.json().catch(() => ({}));
-      if (!statusRes.ok) throw new Error(errorText(statusData, "Failed to load export status"));
+      if (!statusRes.ok) throw new Error(errorText(statusData, t("errLoadStatus")));
       setStatus(statusData as LogExportStatus);
       setTypes(Array.isArray(typesData.types) ? typesData.types : []);
     } catch (err) {
       setFeedback({
         type: "error",
-        message: err instanceof Error ? err.message : "Failed to load export status",
+        message: err instanceof Error ? err.message : t("errLoadStatus"),
       });
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     void (async () => {
@@ -88,13 +97,13 @@ export function LogExportPageClient() {
         body: JSON.stringify(editing ? { ...payload, type: undefined } : payload),
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(errorText(data, "Failed to save destination"));
+      if (!res.ok) throw new Error(errorText(data, t("errSaveDestination")));
       setFormOpen(false);
       setEditing(null);
-      setFeedback({ type: "success", message: "Destination saved." });
+      setFeedback({ type: "success", message: t("msgDestinationSaved") });
       await load();
     } catch (err) {
-      setFormError(err instanceof Error ? err.message : "Failed to save destination");
+      setFormError(err instanceof Error ? err.message : t("errSaveDestination"));
     } finally {
       setSaving(false);
     }
@@ -110,12 +119,12 @@ export function LogExportPageClient() {
       const data = await res.json().catch(() => ({}));
       setFeedback({
         type: data.ok ? "success" : "error",
-        message: data.detail || errorText(data, "Connection test failed"),
+        message: data.detail || errorText(data, t("errConnectionTest")),
       });
     } catch (err) {
       setFeedback({
         type: "error",
-        message: err instanceof Error ? err.message : "Connection test failed",
+        message: err instanceof Error ? err.message : t("errConnectionTest"),
       });
     } finally {
       setBusy(null);
@@ -130,22 +139,22 @@ export function LogExportPageClient() {
         method: "POST",
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(errorText(data, "Export run failed"));
+      if (!res.ok) throw new Error(errorText(data, t("errExportRun")));
       const result = data.result;
       let message: string;
       if (result?.skipped) {
-        message = "A run for this destination is already in flight; nothing was sent twice.";
+        message = t("msgRunInFlight");
       } else if (result?.success) {
         message = `Exported ${result.exported} rows in ${result.batches} batch(es). ${result.pendingAfterRun} still pending.`;
       } else {
-        message = result?.error || "Export run failed";
+        message = result?.error || t("errExportRun");
       }
       setFeedback({ type: result?.success ? "success" : "error", message });
       await load();
     } catch (err) {
       setFeedback({
         type: "error",
-        message: err instanceof Error ? err.message : "Export run failed",
+        message: err instanceof Error ? err.message : t("errExportRun"),
       });
     } finally {
       setBusy(null);
@@ -161,12 +170,12 @@ export function LogExportPageClient() {
         body: JSON.stringify({ enabled: !destination.enabled }),
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(errorText(data, "Failed to update destination"));
+      if (!res.ok) throw new Error(errorText(data, t("errUpdateDestination")));
       await load();
     } catch (err) {
       setFeedback({
         type: "error",
-        message: err instanceof Error ? err.message : "Failed to update destination",
+        message: err instanceof Error ? err.message : t("errUpdateDestination"),
       });
     } finally {
       setBusy(null);
@@ -181,13 +190,13 @@ export function LogExportPageClient() {
         method: "DELETE",
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(errorText(data, "Failed to delete destination"));
+      if (!res.ok) throw new Error(errorText(data, t("errDeleteDestination")));
       setDeleteTarget(null);
       await load();
     } catch (err) {
       setFeedback({
         type: "error",
-        message: err instanceof Error ? err.message : "Failed to delete destination",
+        message: err instanceof Error ? err.message : t("errDeleteDestination"),
       });
     } finally {
       setDeleting(false);
@@ -201,52 +210,52 @@ export function LogExportPageClient() {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 className="text-lg font-semibold text-text-main">Log export</h1>
-          <p className="text-xs text-text-muted">
-            Continuously ship the call logs from the Logs tab to an external analytics store.
-          </p>
-        </div>
-        <Button
-          icon="add"
-          onClick={() => {
-            setEditing(null);
-            setFormError(null);
-            setFormOpen(true);
-          }}
-        >
-          Add destination
-        </Button>
-      </div>
+      <PageHeader
+        compact
+        title={t("pageTitle")}
+        description={t("pageSubtitle")}
+        actions={
+          <Button
+            icon="add"
+            onClick={() => {
+              setEditing(null);
+              setFormError(null);
+              setFormOpen(true);
+            }}
+          >
+            {t("addDestination")}
+          </Button>
+        }
+      />
 
       {feedback ? (
-        <p
-          className={
-            feedback.type === "success"
-              ? "rounded-control bg-green-500/10 p-2 text-xs text-green-600 dark:text-green-400"
-              : "rounded-control bg-red-500/10 p-2 text-xs text-red-600 dark:text-red-400"
-          }
-        >
-          {feedback.message}
-        </p>
+        <Alert
+          variant={feedback.type === "success" ? "success" : "critical"}
+          description={feedback.message}
+          dismissLabel={tc("dismissNotification")}
+          onDismiss={() => setFeedback(null)}
+        />
       ) : null}
 
-      <Card padding="sm" title="Schedule">
+      <Card padding="sm" title={t("scheduleTitle")}>
         <div className="grid gap-3 text-xs text-text-muted sm:grid-cols-3">
           <div>
-            <span className="block text-text-main">Cron</span>
-            {status?.job?.cron ?? "not scheduled"} ({status?.job?.timezone ?? "UTC"})
+            <span className="block text-text-main">{t("cronLabel")}</span>
+            {status?.job?.cron ?? t("notScheduled")} ({status?.job?.timezone ?? "UTC"})
           </div>
           <div>
-            <span className="block text-text-main">Last scheduled run</span>
+            <span className="block text-text-main">{t("lastScheduledRun")}</span>
             {lastRun
-              ? `${new Date(lastRun.startedAt).toLocaleString()} — ${lastRun.status}, ${lastRun.recordsAffected} rows`
-              : "never"}
+              ? t("lastRunSummary", {
+                  startedAt: new Date(lastRun.startedAt).toLocaleString(),
+                  status: lastRun.status,
+                  rows: lastRun.recordsAffected,
+                })
+              : t("never")}
           </div>
           <div>
-            <span className="block text-text-main">Call logs high-water mark</span>
-            row {status?.maxCallLogRowId ?? 0}
+            <span className="block text-text-main">{t("highWaterMark")}</span>
+            {t("rowPrefix", { id: status?.maxCallLogRowId ?? 0 })}
           </div>
         </div>
       </Card>
@@ -254,8 +263,8 @@ export function LogExportPageClient() {
       {destinations.length === 0 ? (
         <EmptyState
           icon="cloud_upload"
-          title="No export destinations"
-          description="Add a destination to start shipping call logs on the hourly schedule."
+          title={t("noDestinations")}
+          description={t("noDestinationsHint")}
         />
       ) : (
         <div className="flex flex-col gap-3">
@@ -297,8 +306,8 @@ export function LogExportPageClient() {
         onConfirm={handleDelete}
         loading={deleting}
         variant="danger"
-        title="Delete destination"
-        message={`Delete "${deleteTarget?.name ?? ""}"? Its export cursor is removed too, so re-adding it starts from the oldest retained call log.`}
+        title={t("deleteTitle")}
+        message={t("deleteConfirm", { name: deleteTarget?.name ?? "" })}
       />
     </div>
   );

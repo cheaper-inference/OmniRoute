@@ -36,16 +36,17 @@ Etter 3.8.59 er neste versjon **3.9.0**, som åpner linjen for langsiktig støtt
 
 - **Hva `stable/v3` mottar:** feilrettinger, sikkerhetsoppdateringer og leverandøroppdateringer. Nye
   funksjoner går til v4-kanalen; LTS-linjen prioriterer stabilitet. `npm install omniroute`
-  (`latest`-distribusjonstaggen) forblir på v3 gjennom hele v4-syklusen.
-- **Periodens varighet:** `<T-GAP-3: eierens beslutning avventes — se ROADMAP.md>`. Lengden på
-  perioden etter v4.0 GA (når `latest` bytter til v4) er **ikke bestemt ennå**. Denne
-  delen oppdateres når vedlikeholderen kunngjør den. Frem til da må du ikke anta noen sluttdato.
-- **Rapportering av en sårbarhet i LTS-linjen:** samme kanal som for alle andre versjoner —
-  en privat [GitHub Security Advisory](https://github.com/diegosouzapw/OmniRoute/security/advisories/new),
-  aldri en offentlig sak. Oppgi hvilken versjon du testet (for eksempel `3.9.2`); rettelser legges inn i
+  (`latest`-dist-taggen) forblir på v3 gjennom hele v4-syklusen.
+- **Periodens varighet:** `stable/v3` mottar **sikkerhetsrettinger og rettinger av kritiske regresjoner i
+  12 måneder etter lanseringen av 3.9.0, eller til 90 dager etter at v4.0.0 publiseres som `latest` —
+  avhengig av hva som inntreffer sist**. Sluttdatoen som følger av dette, registreres i versjonsmerknadene for 3.9.0 og i
+  [`ROADMAP.md`](ROADMAP.md) når lanseringen finner sted.
+- **Rapportering av et sikkerhetsproblem i LTS-linjen:** samme kanal som for alle andre versjoner —
+  en privat [GitHub-sikkerhetsrapport](https://github.com/diegosouzapw/OmniRoute/security/advisories/new),
+  aldri en offentlig sak. Oppgi hvilken versjon du testet (for eksempel `3.9.2`); rettinger legges inn på
   `stable/v3` og videreføres til v4.
-- **Sikkerhetsgrunnlag ved etablering av LTS-linjen:** målt skannerstatus, rutebeskyttelse og
-  dokumentasjon for offentlig legitimasjon er registrert i
+- **Sikkerhetsgrunnlag ved LTS-lanseringen:** målt skannertilstand, rutevern og
+  dokumentasjon for offentlig legitimasjon registreres i
   [`docs/security/LTS_SECURITY_BASELINE.md`](docs/security/LTS_SECURITY_BASELINE.md).
 
 ---

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { Card, Input, Toggle } from "@/shared/components";
+import Icon from "@/shared/components/Icon";
 import { useTranslations } from "next-intl";
 
 type RoutingSettings = {
@@ -108,6 +109,7 @@ function AccountRoundRobinSection({ t, busy, settings, setSettings, run }: Secti
         </div>
         <Toggle
           checked={accountRoundRobin}
+          ariaLabel={t("accountRoundRobin")}
           disabled={busy}
           onChange={() =>
             run(async () => {
@@ -130,6 +132,7 @@ function AccountRoundRobinSection({ t, busy, settings, setSettings, run }: Secti
           </div>
           <Input
             type="number"
+            aria-label={t("stickyLimit")}
             min={1}
             max={1000}
             disabled={busy}
@@ -169,6 +172,7 @@ function ComboRoundRobinSection({ t, busy, settings, setSettings, run }: Section
         </div>
         <Toggle
           checked={comboRoundRobin}
+          ariaLabel={t("comboRoundRobin")}
           disabled={busy}
           onChange={() =>
             run(async () => {
@@ -190,6 +194,7 @@ function ComboRoundRobinSection({ t, busy, settings, setSettings, run }: Section
           </div>
           <Input
             type="number"
+            aria-label={t("comboStickyLimit")}
             min={1}
             max={1000}
             disabled={busy}
@@ -260,10 +265,8 @@ export default function RoutingStrategyCard() {
   return (
     <Card>
       <div className="flex items-center gap-3 mb-4">
-        <div className="p-2 rounded-lg bg-blue-500/10 text-blue-500 shrink-0">
-          <span className="material-symbols-outlined text-[20px]" aria-hidden="true">
-            route
-          </span>
+        <div className="p-2 rounded-lg bg-bg-subtle text-text-muted shrink-0">
+          <Icon name="route" size={20} />
         </div>
         <div>
           <h3 className="text-base sm:text-lg font-semibold">{t("routingStrategyTitle")}</h3>

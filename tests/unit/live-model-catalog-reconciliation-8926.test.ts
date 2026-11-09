@@ -13,8 +13,11 @@ process.env.API_KEY_SECRET = process.env.API_KEY_SECRET || "live-catalog-8926-te
 const core = await import("../../src/lib/db/core.ts");
 const { addCustomModel, replaceSyncedAvailableModelsForConnection } =
   await import("../../src/lib/db/models.ts");
-const { getActiveSyncedCatalog, getAllActiveSyncedModels } =
-  await import("../../src/lib/db/models/activeSyncedCatalog.ts");
+const {
+  getActiveSyncedCatalog,
+  getAllActiveSyncedModels,
+  reconcileProvidersWithActiveSyncedCatalog,
+} = await import("../../src/lib/db/models/activeSyncedCatalog.ts");
 const { isRegisteredProviderEffortVariant } =
   await import("../../open-sse/utils/registeredEffortVariants.ts");
 
@@ -97,6 +100,118 @@ test("#8926: explicit provider/model rejects a stale static model before upstrea
     /active live catalog/i,
     "the explicit route should report live-catalog unavailability"
   );
+});
+
+test("reconcile accepts a live model with matching canonical or alias provider prefix", async () => {
+  const { reconcileProvidersWithActiveSyncedCatalog } =
+    await import("../../src/lib/db/models/activeSyncedCatalog.ts");
+  for (const requested of [`github/${LIVE_MODEL}`, `gh/${LIVE_MODEL}`]) {
+    const result = await reconcileProvidersWithActiveSyncedCatalog([PROVIDER], requested);
+    assert.deepEqual(result.providers, [PROVIDER], requested);
+    assert.deepEqual(result.excludedProviders, [], requested);
+  }
+});
+
+test("Antigravity Gemini 3.7 display tiers match the shared live -tiered wire id", async () => {
+  await seedProviderCatalog("antigravity", "antigravity-3.7-shared-tier", [
+    "gemini-3.7-flash-tiered",
+  ]);
+  for (const tier of ["low", "medium", "high"]) {
+    const requested = `gemini-3.7-flash-${tier}`;
+    const result = await reconcileProvidersWithActiveSyncedCatalog(["antigravity"], requested);
+    assert.deepEqual(result.providers, ["antigravity"], requested);
+    assert.deepEqual(result.excludedProviders, [], requested);
+  }
+
+  const qualified = await reconcileProvidersWithActiveSyncedCatalog(
+    ["antigravity"],
+    "agy/gemini-3.7-flash-high"
+  );
+  assert.deepEqual(qualified.providers, ["antigravity"]);
+
+  const invented = await reconcileProvidersWithActiveSyncedCatalog(
+    ["antigravity"],
+    "gemini-3.7-flash-ultra"
+  );
+  assert.deepEqual(invented.providers, [], "unregistered tiers must still be rejected");
+  assert.deepEqual(invented.excludedProviders, ["antigravity"]);
+});
+
+test("reconcile accepts agy/antigravity sibling prefixes in both directions", async () => {
+  const { reconcileProvidersWithActiveSyncedCatalog } =
+    await import("../../src/lib/db/models/activeSyncedCatalog.ts");
+  const siblingModel = "gemini-3.8-flash-high";
+  await seedProviderCatalog("agy", "agy-sibling-prefix", [siblingModel]);
+  await seedProviderCatalog("antigravity", "antigravity-sibling-prefix", [siblingModel]);
+
+  for (const [provider, requested] of [
+    ["antigravity", `agy/${siblingModel}`],
+    ["agy", `antigravity/${siblingModel}`],
+  ]) {
+    const result = await reconcileProvidersWithActiveSyncedCatalog([provider], requested);
+    assert.deepEqual(result.providers, [provider], requested);
+    assert.deepEqual(result.excludedProviders, [], requested);
+  }
+
+  const unrelated = await reconcileProvidersWithActiveSyncedCatalog(
+    ["antigravity"],
+    `github/${siblingModel}`
+  );
+  assert.deepEqual(unrelated.excludedProviders, ["antigravity"]);
+});
+
+test("reconcile keeps the Cursor auto allowance through a Cursor prefix only", async () => {
+  const { reconcileProvidersWithActiveSyncedCatalog } =
+    await import("../../src/lib/db/models/activeSyncedCatalog.ts");
+  await seedProviderCatalog("cursor", "cursor-auto-prefix", ["cursor-live-only"]);
+
+  for (const requested of ["auto", "cursor/auto", "cu/default", "cu/auto-balance"]) {
+    const result = await reconcileProvidersWithActiveSyncedCatalog(["cursor"], requested);
+    assert.deepEqual(result.providers, ["cursor"], requested);
+    assert.deepEqual(result.excludedProviders, [], requested);
+  }
+
+  for (const requested of ["github/auto", "cursor/auto-ultra"]) {
+    const result = await reconcileProvidersWithActiveSyncedCatalog(["cursor"], requested);
+    assert.deepEqual(result.excludedProviders, ["cursor"], requested);
+  }
+});
+
+test("bare inference honors a registry liveCatalogIds alias, like the explicit route", async () => {
+  const { reconcileProvidersWithActiveSyncedCatalog } =
+    await import("../../src/lib/db/models/activeSyncedCatalog.ts");
+  const declaredVariant = "cursor-grok-4.7-low-256k";
+  await seedProviderCatalog("cursor", "cursor-live-ids", ["grok-4.7"]);
+
+  for (const requested of [declaredVariant, `cu/${declaredVariant}`]) {
+    const reconciled = await reconcileProvidersWithActiveSyncedCatalog(["cursor"], requested);
+    assert.deepEqual(reconciled.providers, ["cursor"], requested);
+    assert.deepEqual(reconciled.excludedProviders, [], requested);
+  }
+
+  const bare = await getModelInfo(declaredVariant);
+  assert.equal(bare.errorType, undefined, bare.errorMessage);
+  assert.equal(bare.provider, "cursor");
+  assert.equal(bare.model, declaredVariant);
+
+  const explicit = await getModelInfo(`cu/${declaredVariant}`);
+  assert.equal(explicit.provider, bare.provider);
+  assert.equal(explicit.model, bare.model);
+});
+
+test("a registry liveCatalogIds alias does not admit a model whose live id is absent", async () => {
+  const { reconcileProvidersWithActiveSyncedCatalog } =
+    await import("../../src/lib/db/models/activeSyncedCatalog.ts");
+  const declaredVariant = "cursor-grok-4.7-low-256k";
+  await seedProviderCatalog("cursor", "cursor-live-ids-absent", ["cursor-live-only"]);
+
+  const reconciled = await reconcileProvidersWithActiveSyncedCatalog(["cursor"], declaredVariant);
+  assert.deepEqual(reconciled.excludedProviders, ["cursor"]);
+
+  const bare = await getModelInfo(declaredVariant);
+  assert.equal(bare.provider, null);
+  assert.equal(bare.errorType, "model_not_found");
+  assert.match(bare.errorMessage, /active live catalog/i);
 });
 
 test("#8926: active alternative provider remains eligible", async () => {
@@ -229,4 +344,40 @@ test("#12866: agy CLI catalog is visible after parseModel folds the prefix to an
     true,
     "antigravity live lookup must union the sibling agy CLI catalog"
   );
+});
+
+test("#16929: batched /v1/models source honors same-id operator endpoints", async () => {
+  const [original] = (await getAllActiveSyncedModels())[PROVIDER] || [];
+  assert.ok(original, "synced row must be visible before operator override");
+
+  const { updateCustomModel } = await import("../../src/lib/db/models.ts");
+  const savedOverride = await updateCustomModel(
+    PROVIDER,
+    LIVE_MODEL,
+    {
+      supportedEndpoints: ["embeddings"],
+    },
+    { createIfMissing: true }
+  );
+  assert.equal(
+    savedOverride?.source,
+    "endpoint-override",
+    "a synced-only model needs an explicit virtual endpoint override"
+  );
+  const [withOverride] = (await getAllActiveSyncedModels())[PROVIDER] || [];
+  assert.deepEqual(withOverride.supportedEndpoints, ["embeddings"]);
+  assert.equal(withOverride.endpointCapabilitySource, "operator");
+
+  // A fresh discovery does not wipe the operator's choice.
+  await replaceSyncedAvailableModelsForConnection(PROVIDER, CONNECTION_ID, [
+    {
+      id: LIVE_MODEL,
+      name: LIVE_MODEL,
+      source: "imported",
+      supportedEndpoints: ["chat"],
+      endpointCapabilitySource: "declared",
+    },
+  ]);
+  const [afterSync] = (await getAllActiveSyncedModels())[PROVIDER] || [];
+  assert.deepEqual(afterSync.supportedEndpoints, ["embeddings"]);
 });

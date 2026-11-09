@@ -16,43 +16,42 @@ OmniRoute **agreguje** nakonfigurovaná připojení do jednoho koncového bodu. 
 
 ---
 
-## Reprezentativní poskytovatelé s bezplatným přístupem
+## Reprezentativní poskytovatelé bezplatného přístupu
 
-### Opakovaný přístup, přístup bez klíče nebo přístup bez omezení
+### Opakovaný přístup, přístup bez klíče nebo přístup bez pevného limitu
 
-Tito poskytovatelé nabízejí v auditovaném katalogu opakovanou, bezklíčovou nebo neomezenou možnost bezplatného přístupu. „Bez omezení“ znamená, že není zveřejněn žádný limit tokenů; i nadále však mohou platit omezení rychlosti, souběžnosti, účtu či regionu a další zásady:
+Tito poskytovatelé nabízejí v auditovaném katalogu opakovaný přístup, přístup bez klíče nebo bez pevného limitu. „Bez pevného limitu“ znamená, že není zveřejněn žádný limit tokenů; stále se však mohou uplatňovat omezení rychlosti, souběžnosti, účtu, regionu a zásad:
 
-| Poskytovatel      | Modely                                                                                      | Kvóta                                                                                                                                            | Jak se připojit                                                                                            |
-| ----------------- | ------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------- |
-| **Kiro AI**       | Claude Sonnet 4.5, Haiku 4.5, DeepSeek V3.2 a další                                         | Auditovaný katalog odhaduje sdílený měsíční fond 25 tisíc tokenů                                                                                 | OAuth/účet; ToS jsou v katalogu označeny jako `avoid`                                                      |
-| **OpenCode Free** | Aktuální sada modelů `*-free` v registru poskytovatelů                                      | Bez klíče; žádný zveřejněný limit tokenů                                                                                                         | Bez přihlašovacích údajů poskytovatele; ToS jsou označeny jako `avoid`                                     |
-| **Pollinations**  | Aktuální sada bezklíčových modelů; některé dřívější modely byly ukončeny nebo vyžadují klíč | Bez klíče; žádný zveřejněný limit tokenů                                                                                                         | Pro bezklíčové modely nejsou potřeba přihlašovací údaje poskytovatele                                      |
-| **Logfare**       | kimi-k3, deepseek-v4-pro, glm-5.2, gpt-5.6-luna, minimax-m3 a další                         | Bezplatný API klíč (bez omezení rychlosti a bez karty); **každý požadavek je zaznamenáván** pro výzkumné účely (odhlášení na logfare.ai/consent) | Okamžitý klíč na logfare.ai/register; ToS a zásady ochrany soukromí na logfare.ai/tos a logfare.ai/privacy |
-| **Cloudflare AI** | Katalog Workers AI                                                                          | Auditovaný fond odhaduje z publikovaných jednotek využití přibližně 30 mil. tokenů měsíčně                                                       | Účet Cloudflare a přihlašovací údaje API                                                                   |
-| **Gemini**        | Řada Gemini Flash                                                                           | Proměnlivá omezení rychlosti podle projektu/modelu; uváděný přehled nezahrnuje pevně stanovený měsíční příděl tokenů                             | API klíč Google AI Studio; zkontrolujte aktivní limity projektu                                            |
-| **Groq**          | Modely Llama, GPT-OSS a Qwen                                                                | Auditovaný fond odhaduje přibližně 15 mil. tokenů měsíčně                                                                                        | API klíč Groq; platí omezení rychlosti                                                                     |
+| Poskytovatel      | Modely                                                                                   | Kvóta                                                                                                                                            | Jak se připojit                                                                                   |
+| ----------------- | ---------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------- |
+| **Kiro AI**       | Claude Sonnet 4.5, Haiku 4.5, DeepSeek V3.2 a další                                      | Auditovaný katalog odhaduje sdílený měsíční fond 25 tisíc tokenů                                                                                 | Postup přes OAuth/účet; podmínky ToS jsou v katalogu označeny jako `avoid`                        |
+| **Pollinations**  | Aktuální sada modelů bez klíče; některé dřívější modely byly ukončeny nebo vyžadují klíč | Bez klíče; žádný zveřejněný limit tokenů                                                                                                         | Pro modely bez klíče nejsou potřeba přihlašovací údaje poskytovatele                              |
+| **Logfare**       | kimi-k3, deepseek-v4-pro, glm-5.2, gpt-5.6-luna, minimax-m3 a další                      | Bezplatný API klíč (bez omezení rychlosti a bez karty); **každý požadavek je zaznamenáván** pro výzkumné účely (odhlášení na logfare.ai/consent) | Okamžitý klíč na logfare.ai/register; ToS/ochrana soukromí na logfare.ai/tos a logfare.ai/privacy |
+| **Cloudflare AI** | Katalog Workers AI                                                                       | Auditovaný fond odhaduje na základě zveřejněných jednotek využití přibližně 30 milionů tokenů měsíčně                                            | Účet Cloudflare a přihlašovací údaje API                                                          |
+| **Gemini**        | Řada Gemini Flash                                                                        | Proměnlivé limity rychlosti podle projektu/modelu; uváděná nabídka nezahrnuje pevně stanovený měsíční příděl tokenů                              | API klíč Google AI Studio; zkontrolujte aktivní limity projektu                                   |
+| **Groq**          | Modely Llama, GPT-OSS a Qwen                                                             | Auditovaný fond odhaduje přibližně 15 milionů tokenů měsíčně                                                                                     | API klíč Groq; platí omezení rychlosti                                                            |
 
-### Registrační granty a kredity specifické pro jednotlivé poskytovatele
+### Registrační příděly a kredity specifické pro poskytovatele
 
-Tito poskytovatelé nabízejí registrační granty nebo propagační kredity, které podléhají jejich pravidlům způsobilosti. Podle ověření k 2026-10-08 vyžaduje [ceník Cerebras](https://www.cerebras.ai/pricing) platební metodu pro získání jednorázového kreditu ve výši 5 $, jehož platnost vyprší po 30 dnech; nejde o opakovanou kvótu tokenů. [Omezení rychlosti Gemini](https://ai.google.dev/gemini-api/docs/rate-limits) se liší podle projektu, modelu a úrovně, takže nejsou převáděna na zaručený měsíční příděl tokenů.
+Tito poskytovatelé nabízejí registrační příděly nebo propagační kredity v souladu se svými pravidly způsobilosti. Podle ověření ze dne 2026-10-08 vyžaduje [ceník Cerebras](https://www.cerebras.ai/pricing) platební metodu pro jednorázový kredit ve výši 5 $, jehož platnost skončí po 30 dnech; nejde o opakovanou kvótu tokenů. [Limity rychlosti Gemini](https://ai.google.dev/gemini-api/docs/rate-limits) se liší podle projektu, modelu a úrovně, a proto nejsou převáděny na garantovaný měsíční příděl tokenů.
 
 | Poskytovatel  | Bezplatné kredity                                                                          | Modely                     | Jak je získat                                              |
 | ------------- | ------------------------------------------------------------------------------------------ | -------------------------- | ---------------------------------------------------------- |
-| **Cerebras**  | Jednorázový propagační kredit ve výši 5 $; vyprší po 30 dnech                              | Aktuální katalog inference | Účet a platná platební metoda                              |
-| **DeepSeek**  | 5 mil. tokenů zdarma                                                                       | DeepSeek V4                | Zaregistrujte se na platform.deepseek.com                  |
-| **LongCat**   | Jednorázový grant 10 mil. tokenů                                                           | LongCat 2.0                | API klíč + KYC; po vyčerpání grantu platba podle využití   |
-| **Vertex AI** | Registrační kredit 300 $, který v rozpočtovém modelu představuje přibližně 300 mil. tokenů | Gemini a partnerské modely | Účet Google Cloud; platí pravidla fakturace a způsobilosti |
+| **Cerebras**  | Jednorázový propagační kredit 5 $; platnost skončí po 30 dnech                             | Aktuální katalog inference | Účet a platná platební metoda                              |
+| **DeepSeek**  | 5 milionů tokenů zdarma                                                                    | DeepSeek V4                | Zaregistrujte se na platform.deepseek.com                  |
+| **LongCat**   | Jednorázový příděl 10 milionů tokenů                                                       | LongCat 2.0                | API klíč + KYC; po vyčerpání přídělu platba podle využití  |
+| **Vertex AI** | Registrační kredit 300 $, v rozpočtovém modelu vyjádřený jako přibližně 300 milionů tokenů | Gemini a partnerské modely | Účet Google Cloud; platí pravidla fakturace a způsobilosti |
 
 ### Další omezený přístup
 
-Tito poskytovatelé mají **bezplatné úrovně** se specifickými limity:
+Tito poskytovatelé nabízejí **bezplatné úrovně** se specifickými limity:
 
-| Poskytovatel               | Bezplatný limit                                                                              | Modely                                | Nejvhodnější pro |
-| -------------------------- | -------------------------------------------------------------------------------------------- | ------------------------------------- | ---------------- |
-| **GitHub Models**          | Odhad auditovaného sdíleného fondu činí přibližně 18 mil. tokenů měsíčně                     | Vyhodnocování široké škály modelů     |
-| **Hugging Face**           | Malý opakovaný měsíční fond                                                                  | Experimenty a rozmanitost modelů      |
-| **OpenRouter free models** | Sdílený fond omezený počtem požadavků; volitelné jednorázové dobití zvyšuje opakovaný příděl | Široký katalog záložních modelů       |
-| **AI Horde**               | Komunitní kapacita bez klíče; dostupnost se liší                                             | Příležitostná distribuovaná inference |
+| Poskytovatel                    | Bezplatný limit                                                                              | Modely                                | Nejvhodnější pro |
+| ------------------------------- | -------------------------------------------------------------------------------------------- | ------------------------------------- | ---------------- |
+| **GitHub Models**               | Auditovaný sdílený fond odhaduje přibližně 18 milionů tokenů měsíčně                         | Vyhodnocování široké škály modelů     |
+| **Hugging Face**                | Malý opakovaný měsíční fond                                                                  | Experimenty a rozmanitost modelů      |
+| **Bezplatné modely OpenRouter** | Sdílený fond omezený počtem požadavků; volitelné jednorázové dobití zvyšuje opakovaný příděl | Široký katalog záložních modelů       |
+| **AI Horde**                    | Komunitní kapacita bez klíče; dostupnost se liší                                             | Příležitostná distribuovaná inference |
 
 ---
 

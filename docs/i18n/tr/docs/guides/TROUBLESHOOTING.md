@@ -37,33 +37,39 @@ OmniRoute için yaygın sorunlar ve çözümleri.
 
 ---
 
-### Ücretsiz Sağlayıcılarda Hız Sınırlama (429 / 400 / 401)
+### Ücretsiz Sağlayıcılarda Hız Sınırlaması (429 / 400 / 401)
 
-**Belirti**: Ücretsiz/kimlik doğrulaması gerektirmeyen sağlayıcılarla (opencode, auggie vb.) `model: "auto"` kullanırken yanıtlar yerine zaman zaman `HTTP 429`, `400` veya `401` alırsınız. Aynı istem kısa süre sonra yeniden denendiğinde istekler başarılı olur, ancak otomasyonlar (cron görevleri, aracılar, betikler) ilk hatada bozulur.
+**Belirti**: Ücretsiz/kimlik doğrulamasız sağlayıcılarla (auggie vb.) `model: "auto"` kullanırken, yanıtlar yerine aralıklı olarak `HTTP 429`, `400` veya `401` alırsınız. Aynı istem birkaç dakika sonra yeniden denendiğinde istekler başarılı olur; ancak otomasyon (cron işleri, aracılar, betikler) ilk hatada çalışmayı durdurur.
 
 **Temel neden**: Birbirinden bağımsız üç hata modu üst üste gelir:
 
-1. **Sağlayıcı hız sınırı (`429`)**: Ücretsiz katmanlar, belirli bir zaman aralığı başına kota uygulayabilir. Paralel çağrı patlaması bu kotayı tüketir; dolayısıyla pencere sıfırlanana kadar sonraki istek reddedilir.
-2. **Doğrudan geçişte bozuk model (`400`/`401`)**: `auto/*` havuzları, `opencode` kaynaklı, katalogda kayıtlı ancak etkin kimlik bilgilerine sahip olmayan doğrudan geçişli modelleri içerebilir (ör. `oc/north-mini-code-free` → `401`). Otomatik yönlendirici bunlardan birini dener, başarısız olur ve geri dönüş devreye girmeden önce hata yayılır.
-3. **Eşzamanlılık yükseltmesi (yük altında `429`)**: Birden fazla aracı/cron oturumu aynı anda `auto` kullandığında toplam istek hızı ücretsiz sağlayıcıların tolere edebileceği düzeyi aşar ve geçerli çağrılar kötüye kullanım olarak işaretlenir.
+1. **Sağlayıcı hız sınırı (`429`)**: Ücretsiz katmanlar, pencere başına kota uygulayabilir. Paralel çağrıların ani artışı bu kotayı tüketir ve sonraki istek, pencere sıfırlanana kadar reddedilir.
+2. **Passthrough'ta bozuk model (`400`/`401`)**: `auto/*` havuzları, katalogda kayıtlı ancak geçerli kimlik bilgileri olmayan passthrough modellerini içerebilir (→ `401`). Otomatik yönlendirici bunlardan birini dener, başarısız olur ve geri dönüş devreye girmeden önce hata yayılır.
+3. **Eşzamanlılık artışı (yük altında `429`)**: Birden fazla aracı/cron oturumu aynı anda `auto` kullandığında, toplam istek hızı ücretsiz sağlayıcıların tolere edebileceği düzeyi aşar ve geçerli çağrılar kötüye kullanım olarak işaretlenir.
 
-**Doğrulanmış çözüm (topluluk tarafından bildirildi, 2026-08-10)**: Ücretsiz katmandaki dalgalanmaların hata vermek yerine rotasyon, eşzamanlılık ve geri dönüş mekanizmaları tarafından karşılanması için üç ortam değişkenini ayarlayın:
+**Doğrulanmış çözüm (topluluk tarafından bildirildi, 2026-08-10)**: Döndürme, eşzamanlılık ve geri dönüş mekanizmalarının ücretsiz katmandaki dalgalanmayı hatayla sonlanmak yerine absorbe etmesi için üç ortam değişkenini ayarlayın:
 
 ```bash
-export OMNIROUTE_ROTATE_ON_400=true           # 400/401 durumunda başka bir modele/sağlayıcıya geç (bozuk doğrudan geçişli modelleri atlar)
-export OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT=4   # açık ağır iş kabul tavanı (varsayılan olarak ayarlanmamıştır: istek sayısı sınırı yoktur, aşağıdaki nota bakın)
-export OMNIROUTE_CHAT_ADMISSION_QUEUE_MS=20000 # sınırlı bekleme süresini yavaş üst sağlayıcılar için RATE_LIMIT_MAX_WAIT_MS varsayılanının üzerine çıkar
+export OMNIROUTE_ROTATE_ON_400=true           # 400/401 durumunda başka bir model/sağlayıcıya geç (bozuk passthrough modellerini atlar)
+export OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT=4   # açık ağır istek kabul sınırı (varsayılan olarak ayarlanmaz: istek sayısı sınırı yoktur, aşağıdaki nota bakın)
+export OMNIROUTE_CHAT_ADMISSION_QUEUE_MS=20000 # yavaş üst akışlar için sınırlı bekleme süresini RATE_LIMIT_MAX_WAIT_MS varsayılanının üzerine çıkar
 ```
 
-Bunları OmniRoute işlem ortamında (daemon'da; ör. LaunchAgent plist veya `systemctl edit` aracılığıyla) ayarlayın, ardından OmniRoute'u yeniden başlatın. Rotasyon bayrağı tek başına en yüksek etkiye sahip ayardır: kesin bir hatayı, havuzdaki sağlıklı bir sağlayıcı üzerinden yapılan şeffaf bir yeniden denemeye dönüştürür.
+Bunları OmniRoute işleminin ortamında (daemon için, örneğin LaunchAgent plist'i veya `systemctl edit` aracılığıyla) ayarlayın ve ardından OmniRoute'u yeniden başlatın. Döndürme bayrağı, en yüksek etkili tek ayardır: kesin bir hatayı, havuzdaki sağlıklı bir sağlayıcıya karşı şeffaf bir yeniden denemeye dönüştürür.
 
-**Not**: `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT`, aynı anda kaç ağır — uzun bağlamlı — isteğin çalışacağını sınırlar; bu sınır bir kabul kapısıdır, sağlayıcı hız sınırlayıcısı değildir. **#503-fanout güncellemesi:** Bu değişken artık varsayılan olarak ayarlanmamaktadır (artık yalnızca yukarıdaki gibi açıkça yapılandırıldığında geçerli olur) — bunun yerine ağır iş kabulü, ana makinenin gerçek bellek sınırına göre kendisini ölçeklendiren, otomatik türetilmiş bir bayt bütçesi (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`) tarafından kontrol edilir. Bu nedenle yeni bir dağıtımda, bu değişken hiç ayarlanmadan çok daha az `503 chat_admission_busy` reddi görülmelidir; değişkeni burada açıkça ayarlamak yine tam olarak belgelendiği şekilde çalışır. Açık bayt bütçesi geçersiz kılmaları 8 MiB–2 GiB aralığıyla sınırlandırılır. `413 body_exceeds_budget` geçici değildir: bu bayt bütçesini artırın, `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES` değerini düşürün veya işlemin bellek sınırını artırın. `inflight_bytes_budget` nedeniyle yük azaltma, geçici bir kaynak çekişmesidir ve yeniden denenebilir. Sağlayıcı başına hız sınırlama (`open-sse/services/rateLimitManager.ts`) ise `RATE_LIMIT_MAX_WAIT_MS`, `RATE_LIMIT_MAX_QUEUE_DEPTH` ve `RATE_LIMIT_AUTO_ENABLE` tarafından ayrı olarak yönetilir — `.env.example` dosyasına bakın.
+**Not**: `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT`, aynı anda çalışabilecek ağır — uzun bağlamlı — isteklerin sayısını sınırlar; bu sınır, sağlayıcı hız sınırlayıcısı değil, istek kabul kapısıdır. **#503-fanout güncellemesi:** bu değişken artık varsayılan olarak ayarlanmaz (yukarıda gösterildiği gibi yalnızca açıkça yapılandırıldığında bağlanır) — bunun yerine ağır istek kabulü, kendisini ana makinenin gerçek bellek sınırına göre ölçeklendiren otomatik türetilmiş bir bayt bütçesi (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`) tarafından denetlenir. Bu nedenle yeni bir kurulumda, bu değişken hiç ayarlanmadan çok daha az `503 chat_admission_busy` reddi görülmelidir; burada açıkça ayarlanması yine belgelerde açıklandığı şekilde çalışır. Açık bayt bütçesi geçersiz kılmaları 8 MiB–2 GiB aralığıyla sınırlandırılır. `413 body_exceeds_budget` geçici değildir: bu bayt bütçesini artırın, `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES` değerini veya kayıtlı istek gövdesi sınırını düşürün ya da işlemin bellek sınırını artırın. `inflight_bytes_budget` nedeniyle isteklerin elenmesi geçici bir çekişmedir ve yeniden denenebilir olmaya devam eder. Sağlayıcı başına hız sınırlaması (`open-sse/services/rateLimitManager.ts`), `RATE_LIMIT_MAX_WAIT_MS`, `RATE_LIMIT_MAX_QUEUE_DEPTH` ve `RATE_LIMIT_AUTO_ENABLE` tarafından ayrı olarak yönetilir — `.env.example` dosyasına bakın.
 
-**Çalıştığını doğrulama**: agent/cron işleminizi art arda iki kez hızlıca çalıştırın ve ikisinin de başarıyla tamamlandığını doğrulayın. Düzeltmeden önce ikinci çalıştırma genellikle `429`/`401` hatası verir. Düzeltmeden sonra hatalar (varsa) şeffaf biçimde yeniden denenir ve çağrı tamamlanır. Ayrıca `curl /monitoring/health` komutunu çalıştırabilir ve sağlayıcı bağlantılarındaki `rateLimitedUntil` alanını ve etkilenen sağlayıcılar için `circuitBreakers.providerBreakers[].state` değerini izleyebilirsiniz — durum `CLOSED`, `DEGRADED`, `OPEN` veya `HALF_OPEN` değerlerinden biridir (bkz. `src/shared/utils/circuitBreaker.ts`) ve hata vermeye devam eden bir sağlayıcı, sıfırlama penceresi bir deneme isteğinin geçmesine izin vermeden önce `CLOSED → DEGRADED → OPEN` durumlarına geçer (`HALF_OPEN`).
+**Yükseltme notu: kayıtlı bir istek gövdesi sınırı artık sohbet için de geçerlidir.** Daha önce Ayarlar > Gelişmiş > İstek Gövdesi Sınırı (`maxBodySizeMb`) altında kaydedilmiş bir sınır artık `/v1/chat/completions` ve `/v1/responses` için de geçerlidir. Bu değişiklikten önce bu iki rota, kaydedilen değer ne olursa olsun 50 MB'a kadar kabul ediyordu; dolayısıyla daha düşük bir kayıtlı sınıra sahip kurulumlar, bu sınırı aşan sohbet gövdelerini reddetmeye başlar. Hiç sınır kaydetmemiş bir kurulumda 50 MB varsayılanı korunur.
 
-**Hâlâ 429 görüyorsanız**: ilgili sağlayıcının etkin hesabı gerçekten _kotasını_ tüketmiştir (yalnızca hız sınırına ulaşmış değildir). OmniRoute kontrol paneli → Providers → Accounts bölümünden aynı sağlayıcı için ikinci bir hesap ekleyin veya başka bir ücretsiz sağlayıcıyı (ör. `routeway`, `auggie`) kullanıma dahil edin. Rotasyon yalnızca geçici hız sınırı/400/401 hatalarında yardımcı olur; kotanın tamamen tükenmesi ikinci bir kimlik bilgisi veya farklı bir sağlayıcı gerektirir.
+Reddetme, `error.code` değeri `PAYLOAD_TOO_LARGE` ve `error.type` değeri `payload_too_large` olan bir HTTP `413` yanıtıdır. Mesaj, geçerli sınırı belirtir: bildirilen `Content-Length` değeri sınırı aştığında `Request body too large. Maximum allowed: 10 MB`; gerçekten okunan baytlar sınırı aştığında ise `Request body too large for chat completions (max 10 MB).` Bu, bellek bütçesinden kaynaklanan ve bu ayarla değişmeyen yukarıdaki `413 body_exceeds_budget` durumuyla aynı değildir.
 
-**Görüntü modellerinde (`auto/vision`, `bazaarlink/*`) 403 görüyorsanız**: bağlı hesabın görüntü özelliğini içeren ücretli bir planı yoktur veya API anahtarının izinleri yetersizdir. Sağlayıcı kontrol panelinde anahtar kapsamının görüntü/multimodal özelliğini içerdiğini doğrulayın veya ücretli katmana sahip bir hesap bağlayıp bunu görüntü hedefi olarak kullanmaya devam edin.
+Sınırı artırmak için `/dashboard/settings/advanced` adresinde daha yüksek bir değer kaydedin veya `{"maxBodySizeMb": 50}` içeren `PATCH /api/settings` isteği gönderin. 1 ile 500 MB arasındaki değerler kabul edilir, değişiklik yeniden başlatma olmadan uygulanır ve 50, önceki sohbet sınırını geri yükler. Daha büyük bir gövdeyi yine de durdurabilecek iki sınır vardır: ayarlanmışsa `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES`, kayıtlı sınırı da sınırlar; ayrıca Kubernetes ingress açıklamasındaki `proxy-body-size` (yayınlanan manifestlerde `50m`), 50 MB'ın üzerindeki değerler için ayrıca artırılmalıdır.
+
+**Çalıştığını doğrulama**: Aracınızı/cron işinizi kısa aralıklarla iki kez çalıştırın ve her ikisinin de başarıyla tamamlandığını doğrulayın. Düzeltmeden önce ikinci çalıştırma genellikle `429`/`401` hatası verir. Düzeltmeden sonra hatalar (varsa) şeffaf biçimde yeniden denenir ve çağrı tamamlanır. Ayrıca `curl /monitoring/health` çalıştırabilir; sağlayıcı bağlantılarındaki `rateLimitedUntil` alanını ve etkilenen sağlayıcılar için `circuitBreakers.providerBreakers[].state` değerini izleyebilirsiniz — durum `CLOSED`, `DEGRADED`, `OPEN` veya `HALF_OPEN` değerlerinden biridir (`src/shared/utils/circuitBreaker.ts` dosyasına bakın) ve sürekli başarısız olan bir sağlayıcı, bir yoklamanın geçmesine izin veren sıfırlama penceresinden önce `CLOSED → DEGRADED → OPEN` durumlarına geçer (`HALF_OPEN`).
+
+**Hâlâ 429 görüyorsanız**: Bu sağlayıcının etkin hesabı, yalnızca hız sınırını değil, gerçekten _kotayı_ tüketmiştir. OmniRoute panosu → Sağlayıcılar → Hesaplar bölümünden aynı sağlayıcı için ikinci bir hesap ekleyin veya başka bir ücretsiz sağlayıcıyı (ör. `routeway`, `auggie`) dahil edin. Döndürme yalnızca geçici hız/400/401 sorunlarına yardımcı olur; kesin kota tükenmesi için ikinci bir kimlik bilgisi veya farklı bir sağlayıcı gerekir.
+
+**Görüntü modellerinde (`auto/vision`, `bazaarlink/*`) 403 görüyorsanız**: Bağlı hesapta görüntü desteğini içeren ücretli plan yoktur veya API anahtarının izinleri yetersizdir. Sağlayıcı panosunda anahtar kapsamının görüntü/çok modlu özellikleri içerdiğini doğrulayın ya da ücretli katman hesabı bağlayıp bunu görüntü hedefi olarak tutun.
 
 ---
 
@@ -90,39 +96,39 @@ Uyarılar, OmniRoute'un denetiminde olmayan üçüncü taraf paketlerdeki günce
 
 ---
 
-## Engellenen npm Kurulum Betikleri Uyarısı (genel kurulum)
+## npm install-scripts Engellendi Uyarısı (global kurulum)
 
 <a name="npm-install-scripts-blocked-warning-global-install"></a>
 
-`npm install -g omniroute` çalıştırılırken yeni npm sürümleri (v11+ ve v12+), paket yaşam döngüsü betiklerini varsayılan olarak engeller ve bir kurulum betikleri uyarısı görüntüler:
+`npm install -g omniroute` çalıştırıldığında, daha yeni npm sürümleri (v11+ ve v12+) paket yaşam döngüsü betiklerini varsayılan olarak engeller ve bir install-scripts uyarısı görüntüler:
 
 ```
-npm warn install-scripts 7 paket, allowScripts kapsamında olmadıkları için kurulum betikleri engellendi:
+npm warn install-scripts 7 packages had install scripts blocked because they are not covered by allowScripts:
   omniroute@<version> (postinstall: node scripts/build/postinstall.mjs)
   keytar, @parcel/watcher, @swc/core, protobufjs, esbuild, onnxruntime-node
 ```
 
 ### Bu uyarı göz ardı edilebilir mi?
 
-**Kısmen, ancak betikler olmadan çalıştırılması önerilmez.** OmniRoute, sorunsuz geri dönüş seçenekleri içerir: yerel `better-sqlite3` bağlamaları bağımsız paketten yüklenemezse uygulama, `node:sqlite` veya `sql.js` gibi alternatif sürücülere geri döner (bkz. [SQLite Çalışma Zamanı Çözümlemesi](../ops/SQLITE_RUNTIME.md)). Sunucu yine de başlatılır ancak `sql.js` gibi WASM geri dönüş seçeneklerinin kullanılması SQLite WAL (Önden Yazmalı Günlükleme) modunu devre dışı bırakır ve bellek ile disk eşitleme yükünü artırır.
+**Kısmen, ancak betikler olmadan çalıştırılması önerilmez.** OmniRoute sorunsuz geri dönüş mekanizmaları içerir: yerel `better-sqlite3` bağlamaları bağımsız paketten yüklenemezse uygulama, `node:sqlite` veya `sql.js` gibi alternatif sürücülere geçer (bkz. [SQLite Çalışma Zamanı Çözümlemesi](../ops/SQLITE_RUNTIME.md)). Sunucu yine de başlatılır, ancak `sql.js` gibi WASM geri dönüşleriyle çalıştırmak SQLite WAL (Önden Yazmalı Günlükleme) modunu devre dışı bırakır ve bellek ile disk eşitleme yükünü artırır.
 
 ### Gerçekte hangi betikler gereklidir?
 
 Engellenen betiklerin tümü OmniRoute'u çalıştırmak için gerekli değildir:
 
-- **Temel (`omniroute`, `better-sqlite3`):** OmniRoute, bir Next.js bağımsız uygulama paketinden (`dist/`) çalışır. Kurulum sırasında npm, ana bilgisayara özgü yerel SQLite sürücüsünü en üst düzey `node_modules/better-sqlite3/` dizinine indirir veya derler. Ardından OmniRoute'un `postinstall` betiği (`scripts/build/postinstall.mjs`), bağımsız sunucunun bunlara erişebilmesi için ana bilgisayara özgü bu ikili dosyaları doğrular ve `dist/node_modules/` dizinine kopyalar. `omniroute` paketinin postinstall betiği engellenirse bu kopyalama adımı atlanır.
-- **İsteğe bağlı/geçişli (`keytar`, `@parcel/watcher`, `@swc/core`, `protobufjs`, `esbuild`):** Bunlar derleme yardımcıları, izleyici araçları veya sistem anahtar zinciri yardımcı programlarıdır. Bunlara izin verilmesi derleme uyarılarını önler ancak temel yönlendirme işlevi için gerekli değildir.
-- **Hariç tutulan (`onnxruntime-node`):** Yerel yapay zekâ gömmeleri için isteğe bağlı bir bağımlılıktır ve OmniRoute'un çalışması için **gerekli değildir**. Bunun postinstall betiği NuGet'ten yaklaşık 300 MB boyutunda CUDA varlığı indirir; desteklenen donanımda yerel ONNX hızlandırmasını açıkça kullanmayı amaçlamıyorsanız bunu izin listesine eklemeyin.
+- **Temel (`omniroute`, `better-sqlite3`):** OmniRoute, bir Next.js bağımsız uygulama paketinden (`dist/`) çalışır. Kurulum sırasında npm, ana sisteme özgü yerel SQLite sürücüsünü üst düzey `node_modules/better-sqlite3/` dizinine indirir veya derler. Ardından OmniRoute'un `postinstall` betiği (`scripts/build/postinstall.mjs`), bağımsız sunucunun bunlara erişebilmesi için ana sisteme özgü bu ikili dosyaları doğrular ve `dist/node_modules/` dizinine kopyalar. `omniroute` paketinin postinstall betiği engellenirse bu kopyalama adımı atlanır.
+- **İsteğe bağlı/geçişli (`keytar`, `@parcel/watcher`, `@swc/core`, `protobufjs`, `esbuild`):** Bunlar derleme yardımcıları, izleme araçları veya sistem anahtarlığı yardımcı programlarıdır. Bunlara izin verilmesi derleme uyarılarını önler, ancak temel yönlendirme işlevi için gerekli değildirler.
+- **Hariç tutulan (`onnxruntime-node`):** Yerel AI gömmeleri için isteğe bağlı bir bağımlılıktır ve OmniRoute'un çalışması için **gerekli değildir**. Bunun postinstall betiği NuGet üzerinden yaklaşık 300 MB boyutunda CUDA varlıkları indirir; desteklenen donanımda yerel ONNX hızlandırmasını kullanmayı açıkça amaçlamıyorsanız bunu izin verilenler listesine eklemeyin.
 
-### Önerilen çözüm
+### Önerilen düzeltme
 
-Genel kurulum sırasında gerekli kurulum betiklerine izin vermek ve uyarıları susturmak için OmniRoute ve yerel bağımlılıkları adına `--allow-scripts` seçeneğini belirtin:
+Global kurulum sırasında gerekli kurulum betiklerine izin vermek ve uyarıları susturmak için OmniRoute ile yerel bağımlılıkları adına `--allow-scripts` seçeneğini iletin:
 
 ```bash
 npm install -g omniroute --allow-scripts=omniroute,better-sqlite3,keytar,@parcel/watcher,@swc/core,protobufjs,esbuild
 ```
 
-Alternatif olarak, bunu kullanıcı hesabınızdaki tüm genel kurulumlar için kalıcı olarak yapılandırmak üzere:
+Alternatif olarak, bunu kullanıcı hesabınızdaki tüm global kurulumlar için kalıcı olarak yapılandırabilirsiniz:
 
 ```bash
 npm config set allow-scripts=omniroute,better-sqlite3,keytar,@parcel/watcher,@swc/core,protobufjs,esbuild --location=user
@@ -131,7 +137,7 @@ npm install -g omniroute
 
 ### Kurulumunuzu doğrulayın
 
-Kurulumdan sonra yerel bağlamaların ve çalışma zamanı ortamının sağlıklı olduğundan emin olmak için yerleşik tanılama aracını çalıştırın:
+Kurulumdan sonra, yerel bağlamaların ve çalışma zamanı ortamının sağlıklı olduğundan emin olmak için yerleşik tanılama aracını çalıştırın:
 
 ```bash
 omniroute doctor
@@ -851,6 +857,30 @@ sunucu arka planda başlatılmaya devam eder ve önyükleme tamamlandığında e
 
 `OMNIROUTE_READY_TIMEOUT_MS` hakkında tüm ayrıntılar için
 [`docs/reference/ENVIRONMENT.md`](../reference/ENVIRONMENT.md) belgesine bakın.
+
+---
+
+## CCR / tekilleştirme sorunları
+
+Sıkıştırma CCR (`ccr`) ve `session-dedup` araçları için tanılama matrisi. Operatör referansının tamamı için (işaretçiler, ön koşullar, araca özel kapsamlar, erişim sayfalandırması) bkz. [Sıkıştırma Motorları → Önkoşullar / operatör kılavuzu](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+
+| Belirti                                                                                                | Muhtemel sebep                                                                                                                                                             | Doğrulamak                                                                                                                             | Düzeltmek                                                                                                                                                                                                                                                                 |
+| ------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **MCP 403** — `403 LOCAL_ONLY`                                                                         | Rota koruması geridöngü kimlik doğrulaması, bir aktarım hatası değil. Hiçbir `Bearer` veya `mcp:connect`/`manage`/`admin` olmayan bir anahtar `/api/mcp/` yoluna ulaşmadı. | İstek no/invalid `Authorization` başlığını taşıyordu.                                                                                  | Geçerli bir `Bearer` anahtarı gönderin. Uzak anahtar, `mcp:connect` (yalnızca `/api/mcp/` yerel olarak ayırma yetkisini verir) ve ihtiyaç duyduğu belirli read/write kapsamını tutabilir.                                                                                 |
+| **blok bulunamadı** — `omniroute_ccr_retrieve` hash'ı reddediyor                                       | Karma 24 onaltılık bir değer değil veya yanlış kopyalanmış ya da bloğun süresi dolmuş/çıkarılmış.                                                                          | Karmayı `[CCR retrieve hash=…]` işaretçisindeki 24-hex değeriyle karşılaştırın; mağaza durumu için `omniroute_ccr_stats` kontrol edin. | İşaretçiden 24-hex karmasını kelimesi kelimesine kopyalayın. Blok gerçekten gitmişse, TTL geçmiştir veya dayanıklı depoya hiç ulaşmamıştır (512 KB üzerindeki bloklar ve bulut çalışma zamanındaki her blok, yalnızca bellekte kalır ve yeniden başlatmadan sağ çıkamaz). |
+| **CCR işlemsiz** — bir blok sıkıştırılmaz (metin değişmeden geri gelir)                                | Sıkıştırma eşiğinin altında bloke edin veya CCR motoru / modu etkin değil.                                                                                                 | Aktif sıkıştırma `strategy`/`enabled` ve blok boyutunun eşiğe göre olup olmadığını kontrol edin.                                       | CCR (veya onu çalıştıran yığılmış modu) etkinleştirin ve bloğun depolanmaya değer olacak kadar büyük olduğunu doğrulayın. İşlem yapılmaması bir hata değildir — "sıkıştırılacak bir şey yok"tur.                                                                          |
+| **tekilleştirme işaretçisi** çıktıda — `[dedup:ref sha=…]` görünüyor                                   | **Kasıtlı geriye bakma** bir kayıp ya da hata değil. `session-dedup` aynı oturumun daha önceki bir aşamasında zaten gönderilmiş olan metni atladı.                         | Aynı metnin oturumun başlarında göründüğünü doğrulayın.                                                                                | Hiçbir şey yapmayın — bir araç çağırmayın ve onu yeniden yapılandırmaya çalışmayın. İlk oluşum kanonik kopyadır; mevcut sıra hiçbir zaman yeniden yazılmaz, daha sonraki bir sırada tekilleştirilir.                                                                      |
+| **Kod Modu** — `omniroute_ccr_*` araçları `tools[]` / CCR talimatında yok, enjekte edilmedi (OpenCode) | OpenCode Kod Modu (varsayılan), MCP araçlarını `tools[]` gizleyerek modele yalnızca yerel araçları tanıtır.                                                                | `codemode` için OpenCode MCP sunucu girişini kontrol edin.                                                                             | Sunucu girişinde `codemode: false` ayarlayın (a** müşteri** ayarı) böylece MCP araçları tanıtılır. CCR alma protokolü talimatı kapalı kalır: `omniroute` adlı bir sunucu `omniroute_omniroute_ccr_retrieve` gösterir ve `_` eşleşen bir ayırıcı değildir.                 |
+
+Daha fazla semptom:
+
+| Belirti                                                                                           | Muhtemel sebep                                                                                                                                                                  | Düzeltmek                                                                                                                                                                                                   |
+| ------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Insufficient MCP scopes for <tool>. Missing: <scope>.`                                           | Bir HTTP 403 değil, bir MCP aracı hatası sonucu (`isError: true`). Arayanın anahtarı gerekli kapsamdan yoksundur.                                                               | Alet başına tablodan kapsamı ekleyin (operatör kılavuzuna bakın). Örneğin `omniroute_ccr_retrieve` `read:compression` ihtiyacı var.                                                                         |
+| `Unknown Mcp-Session-Id`                                                                          | Streamable-HTTP oturumu boşta kaldı ve toplandı (`OMNIROUTE_MCP_SESSION_IDLE_MS`); sunucu HTTP 404'e cevap veriyor.                                                             | — do oturumunu yeniden bağlayın veya yeniden başlatın** Olumsuz** bir anahtarı döndürün, kapsamı değiştirin veya bir aracı yeniden adlandırın. Bu bir 401/403. değil                                        |
+| bir araç sonucunda `JSON Parse error` / `Unterminated string`                                     | MCP aracı metni, JSON'un ortasında `mcpAccessibility.maxTextChars` (varsayılan `50000`) etrafında kırpılır.                                                                     | Çıplak dolu yerine sayfalanmış bir `mode` kullanın: `mode:"grep"`, `mode:"lines"`, `mode:"head"`, `mode:"tail"` veya `mode:"stats"`. Temel kural: `chars > 40000` → `mode` kullanın.                        |
+| `Failed to open SSE stream`                                                                       | Aktarım `streamable` iken istemci eski `/api/mcp/sse` singleton'a ulaştı.                                                                                                       | İstemciyi `/api/mcp/sse` yerine `/api/mcp/stream` (aktarılabilir uç nokta) yönlendirin.                                                                                                                     |
+| **Ölü stdio kalp atışı** — `mcp-heartbeat.json`, HTTP aktarımı açıkken `pidAlive: false` gösterir | Kalp atışı dosyası bir stdio kalıntısıdır (eski PID veya farklı bir sürüm); HTTP aktarımları işlemdedir ve bunun yerine durumu `getMcpHttpStatus()` bildirir (dosya yazma yok). | Hiçbir işlem yapılmadı — ulaşım sağlıklı. Gerçek şu ki, kalp atışı dosyası değil, `/api/mcp/status` gelen `httpTransport.online` / `startedAt`. Sunucuyu yeniden başlatmayın veya bir anahtarı döndürmeyin. |
 
 ---
 

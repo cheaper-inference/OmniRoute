@@ -11,11 +11,13 @@
 import { saveCallLog } from "@/lib/usageDb";
 import { sanitizeErrorMessage } from "../../utils/error.ts";
 import { formatSearchProviderFailure } from "./providerFailure.ts";
+import { fetchWithCheckedRedirects, isRegistryEndpoint } from "./redirectGuard.ts";
 import { HTTP_STATUS } from "../../config/constants.ts";
 import { isSubscriptionQuotaText } from "../../services/quotaTextCooldowns.ts";
 import type { SearchProviderConfig } from "../../config/searchRegistry.ts";
 import type { SearchResult } from "../search.ts";
 import {
+  computeSearchCostUsd,
   isReportedCostTrusted,
   recordReportedErrorCost,
   resolveSearchUsage,
@@ -241,7 +243,13 @@ export async function executeProviderFetch(
 
   try {
     const response = await fetchWithSearchProxy(proxy, () =>
-      fetch(url, { ...init, signal: controller.signal })
+      fetchWithCheckedRedirects(
+        url,
+        { ...init, signal: controller.signal },
+        config.id,
+        // The fixed registry origin keeps the pooled dispatcher on the first hop.
+        !isRegistryEndpoint(url, config.baseUrl)
+      )
     );
     clearTimeout(timer);
 
@@ -311,7 +319,13 @@ export async function executeProviderFetch(
         query,
         results,
         answer: null,
-        usage: resolveSearchUsage(config, data, costTrusted, log),
+        usage: resolveSearchUsage(
+          config,
+          data,
+          costTrusted,
+          log,
+          computeSearchCostUsd(config, init.body, normalized.results.length)
+        ),
         metrics: {
           response_time_ms: duration,
           upstream_latency_ms: duration,

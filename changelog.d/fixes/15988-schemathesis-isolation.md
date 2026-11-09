@@ -1,1 +1,0 @@
-- fix(ci): isolate nightly Schemathesis runtime state and block fuzzing when the server is unavailable or its port is already occupied (#15988)
