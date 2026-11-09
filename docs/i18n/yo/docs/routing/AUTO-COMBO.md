@@ -127,6 +127,27 @@ handleComboChat (ẹ́ńjìnnì kan náà bí àwọn combo tí a ti tọ́jú)
 | `src/sse/handlers/chat.ts`                                | Ìṣọ̀kan: ọ̀nà-kúkúrú ìṣáájú aifọwọ́yí          |
 | `src/shared/constants/providers.ts`                       | Àkọsílẹ̀ ètò `SYSTEM_PROVIDERS.auto`         |
 
+## Awọn ayanfẹ akọọlẹ fun awọn akojọpọ aifọwọyi
+
+Olootu Aifọwọyi ni oye nfunni ni iyan** Awọn ayanfẹ akọọlẹ** apakan. Asopọ kọọkan le jẹ Ti o fẹ, Deede (aiyipada), Ifipamọ, tabi Yasọtọ. Ọpọ awọn isopọ le pin ipele kan. Aifọwọyi yan laarin ipele akọkọ ti o yẹ, ni idaduro ihuwasi scoring/router rẹ nibẹ; awọn igbiyanju ti kuna lati ṣubu si awọn akọọlẹ nja ti o ku, ti o fẹ ṣaaju deede ṣaaju ifiṣura. Awọn asopọ ti o yọkuro ko jẹ lilo nipasẹ konbo yii rara.
+
+Eto naa wa ni ipamọ bi `config.accountPreferences`, ti a fi bọtini pamọ nipasẹ asopọ ID:
+
+```json
+{
+  "accountPreferences": {
+    "connection-a": "preferred",
+    "connection-b": "preferred",
+    "connection-c": "reserve",
+    "connection-d": "excluded"
+  }
+}
+```
+
+Maapu ti a yọkuro tabi ofo ni idaduro ipa ọna ti o wa tẹlẹ. Awọn ayanfẹ ko mu awọn asopọ alaabo ṣiṣẹ, funni ni iraye si bọtini API, mu pada awọn oludije idinamọ ipin, tabi awọn sọwedowo isuna fori. Igbiyanju kọọkan jẹ ihamọ si asopọ nja rẹ, nitorinaa idapada akọọlẹ ko le fo awọn ipele lẹhin olulana konbo. Ibaṣepọ igba ti o wa tẹlẹ le ṣe idaduro akọọlẹ ti o yẹ; laisi iwe apamọ ti o so mọ ibi titan abinibi ti o duro ti o yipada dipo ipalọlọ yiyipada awọn akọọlẹ.
+
+Awọn ayanfẹ ti a tunto lo ipa ọna aifọwọyi-mọ akọọlẹ: kaṣe ọrọ-ọrọ ti a ko sopọ, opo gigun ti epo, rudurudu ati awọn ọna abuja ojiji ko firanṣẹ. Hejii akiyesi jẹ alaabo fun awọn ibeere wọnyi nitorinaa awọn akọọlẹ ifipamọ ko le di awọn ti o fẹ. Awọn ilana konbo miiran ko tumọ eto yii. Yiyipada konbo kuro ni Aifọwọyi ntọju awọn ayanfẹ ti o fipamọ fun iyipada nigbamii.
+
 ## Àwọn Orúkọ Combo Tó Bá Ìdánimọ̀ Àwòṣe Gidi Mu
 
 Combo kan tí `name` rẹ̀ bá ìdánimọ̀ àwòṣe lásán mu pátápátá (fún àpẹẹrẹ, combo tí orúkọ rẹ̀ jẹ́

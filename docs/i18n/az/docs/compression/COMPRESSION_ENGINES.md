@@ -394,7 +394,7 @@ Axtarış aləti hazırda `omniroute_ccr_retrieve` adlanır ( `omniroute_` prefi
 
 ### Sessiyanın həyat dövrü
 
-Streamable-HTTP seansları boş qalır və server onları yığır; boş pəncərə `MCP_SESSION_IDLE_MS` sabitidir (sabit kodlaşdırılmış dəyər deyil, adla istinad edilir, ona görə də bu səhifə dəyişdikdə sürüşmür). Boş qalan sessiyanın simptomu `Unknown Mcp-Session-Id` — ilə HTTP 404-dür, çarə sessiyanı yenidən qoşmaq və ya yenidən başlatmaqdır,** yox** düyməni fırlatmaq, əhatə dairəsini dəyişdirmək və ya alətin adını dəyişmək üçün.
+Streamable-HTTP seansları boş qalır və server onları yığır; boş pəncərə `OMNIROUTE_MCP_SESSION_IDLE_MS` tərəfindən təyin edilir (defolt 5 dəqiqə; adla istinad edilir, sabit kodlaşdırılmış dəyər deyil, ona görə də bu səhifə dəyişdikdə sürüşmür). Boş qalan sessiyanın simptomu `Unknown Mcp-Session-Id` — ilə HTTP 404-dür, çarə sessiyanı yenidən qoşmaq və ya yenidən başlatmaqdır,** yox** düyməni fırlatmaq, əhatə dairəsini dəyişdirmək və ya alətin adını dəyişmək üçün.
 
 ## API interfeysi
 
