@@ -12,12 +12,13 @@
  * Auth rejection is NOT handled here and must stay in the caller: it depends on
  * live per-request state (dashboard cookie, API key) and must never be cached.
  */
-import { createHmac } from "node:crypto";
+import { createHash, createHmac } from "node:crypto";
 
 import { after } from "next/server";
 import { getCopilotRejectionCatalogVersion } from "@omniroute/open-sse/services/copilotModelRejections.ts";
 
 import { getModelCatalogCacheVersion as getDatabaseCatalogVersion } from "@/lib/db/readCache";
+import { isSyntheticApiKeyId } from "@/shared/constants/apiKeyIdentities";
 import { extractApiKey } from "@/sse/services/auth";
 import { buildErrorBody } from "@omniroute/open-sse/utils/error";
 
@@ -41,6 +42,53 @@ export function fingerprintCatalogAuthKey(apiKey: string): string {
 }
 
 /** The body is kept as UTF-8 bytes so a cache hit never re-encodes the catalog string. */
+/**
+ * Every API-key field the catalog build reads (`keyMeta.<field>` in the catalog*.ts
+ * sources; a test scans for new ones). Keys equal in all of them, and in group
+ * membership, get an identical catalog, so they can share one cache entry.
+ */
+export const CATALOG_KEY_SIGNATURE_FIELDS = [
+  "allowAutoCombos",
+  "allowCcDiscoveryAliases",
+  "allowedCombos",
+  "allowedModels",
+  "allowedQuotas",
+  "blockedModels",
+  "catalogScope",
+  "disableNonPublicModels",
+  "forcedModel",
+  "modelAccessMode",
+] as const;
+
+/**
+ * Cache identity of the caller: a digest of its effective catalog permissions, so equal
+ * keys share an entry. Env-key, self-loop and unknown keys, and any lookup failure, keep
+ * a per-key fingerprint — sharing is only for database keys whose permissions we read.
+ * Auth is already enforced by the caller; this only picks which cached body to replay.
+ */
+async function catalogKeyIdentity(request: Request): Promise<string> {
+  const apiKey = extractApiKey(request) || "";
+  if (!apiKey) return "";
+  try {
+    const { getApiKeyMetadata } = await import("@/lib/db/apiKeys");
+    const meta = await getApiKeyMetadata(apiKey);
+    if (!meta || isSyntheticApiKeyId(meta.id)) return fingerprintCatalogAuthKey(apiKey);
+    const { getKeyGroupsForApiKey } = await import("@/lib/db/apiKeyGroups");
+    const fields = CATALOG_KEY_SIGNATURE_FIELDS.map((field) => {
+      const value = (meta as unknown as Record<string, unknown>)[field];
+      return Array.isArray(value) ? [...value].sort() : (value ?? null);
+    });
+    const groups = getKeyGroupsForApiKey(meta.id, true)
+      .map((group) => group.id)
+      .sort();
+    return `perm-${createHash("sha256")
+      .update(JSON.stringify([fields, groups]))
+      .digest("hex")}`;
+  } catch {
+    return fingerprintCatalogAuthKey(apiKey);
+  }
+}
+
 export type CachedCatalog = {
   body: Buffer;
   headers: Record<string, string>;
@@ -283,10 +331,13 @@ const catalogInFlight = new Map<string, InFlightBuild>();
 
 let _catalogBuilderRuns = 0;
 
-function buildCatalogCacheKey(request: Request, catalogSettings?: CatalogCacheOptions): string {
+function buildCatalogCacheKey(
+  request: Request,
+  catalogSettings?: CatalogCacheOptions,
+  identity = fingerprintCatalogAuthKey(extractApiKey(request) || "")
+): string {
   const url = new URL(request.url);
   const prefix = url.searchParams.get("prefix") || "";
-  const apiKey = extractApiKey(request) || "";
   const isCodex = isCodexModelCatalogClient(request) ? "1" : "0";
   const configuredOnly = url.searchParams.get("configuredOnly") === "true" ? "1" : "0";
   const hideAuto = catalogSettings?.hideAutoCombos ? "1" : "0";
@@ -296,7 +347,7 @@ function buildCatalogCacheKey(request: Request, catalogSettings?: CatalogCacheOp
   // (the public /v1/models default) stays byte-identical.
   const reveal = catalogSettings?.revealHidden ? "|reveal" : "";
   const combosOnly = catalogSettings?.exposeCombosOnly ? "|combosOnly" : "";
-  return `${prefix}|${isCodex}|${fingerprintCatalogAuthKey(apiKey)}|${configuredOnly}|${hideAuto}|${hideNoThink}|${page}${reveal}${combosOnly}`;
+  return `${prefix}|${isCodex}|${identity}|${configuredOnly}|${hideAuto}|${hideNoThink}|${page}${reveal}${combosOnly}`;
 }
 
 // Tracks the model-catalog cache version (src/lib/db/readCache.ts) as of the last
@@ -538,9 +589,21 @@ export async function resolveCachedCatalogResponse(
   catalogSettings?: CatalogCacheOptions
 ): Promise<Response> {
   const { corsHeaders, diagnosticHeaders } = headerSources;
-  dropCatalogCacheIfStateChanged();
-
-  const cacheKey = buildCatalogCacheKey(request, catalogSettings);
+  // The identity lookup awaits. A permission write during it moves the generation, and the
+  // identity may then describe pre-write state: look it up again until the generation holds,
+  // so nothing awaits between the generation check and the cache read. After 5 moves fall
+  // back to the per-key fingerprint, which needs no await.
+  let cacheKey: string | undefined;
+  for (let attempt = 0; attempt < 5 && !cacheKey; attempt++) {
+    dropCatalogCacheIfStateChanged();
+    const generation = getModelCatalogCacheVersion();
+    const key = buildCatalogCacheKey(request, catalogSettings, await catalogKeyIdentity(request));
+    if (generation === getModelCatalogCacheVersion()) cacheKey = key;
+  }
+  if (!cacheKey) {
+    dropCatalogCacheIfStateChanged();
+    cacheKey = buildCatalogCacheKey(request, catalogSettings);
+  }
   const now = Date.now();
   const staleWindowMs =
     catalogSettings?.getStaleWhileRevalidateMs?.() ?? CATALOG_STALE_WHILE_REVALIDATE_MS;
