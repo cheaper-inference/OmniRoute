@@ -8,7 +8,9 @@ const MAX_INTERNAL_UPSTREAM_START_TIMEOUT_MS = 15_000;
  * Resolve a request-scoped upstream response-start cap for trusted loopback/internal callers.
  * The hint is deliberately ignored for ordinary API clients even when they know the header name.
  */
-export function resolveInternalUpstreamStartTimeoutMs(request: Request | null | undefined): number | undefined {
+export function resolveInternalUpstreamStartTimeoutMs(
+  request: Request | null | undefined
+): number | undefined {
   if (!request || !isInternalAdmissionBypass(request)) return undefined;
   const raw = request.headers.get(INTERNAL_UPSTREAM_START_TIMEOUT_HEADER)?.trim() ?? "";
   if (!/^\d+$/.test(raw)) return undefined;
