@@ -136,15 +136,15 @@ Settings → Security වෙතින් ලියාපදිංචි කර�
 
 ## මාර්ග පන්ති
 
-`src/server/authz/types.ts` පන්ති තුනක් අර්ථ දක්වයි; තීරණාත්මකව වර්ගීකරණය කළ නොහැකි ඕනෑම මාර්ගයක් `MANAGEMENT` වෙත ආපසු වැටේ.
+`src/server/authz/types.ts` පන්ති තුනක් නිර්වචනය කරයි; නිශ්චිතව වර්ගීකරණය කළ නොහැකි ඕනෑම මාර්ගයක් `MANAGEMENT` වෙත ආපසු වැටේ.
 
-| පන්තිය       | විස්තරය                                                                                                                                             | සත්‍යාපනය අවශ්‍ය වේ                                           |
-| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
-| `PUBLIC`     | පැහැදිලිවම ආරක්ෂිත මාර්ග — පිවිසීම, පිටවීම, තත්ත්වය, ආරම්භය, සෞඛ්‍යය, ඔන්බෝඩින් බූට්ස්ට්‍රැප්.                                                      | නැත                                                           |
-| `CLIENT_API` | ආකෘති-සේවා endpoints — `/api/v1/*`, `/api/v1beta/*`, සහ අන්වර්ථ නාම `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | ඵලදායී `REQUIRE_API_KEY` විශේෂාංග ධජය සක්‍රිය විට Bearer යතුර |
-| `MANAGEMENT` | ඩෑෂ්බෝඩ් පිටු, සැකසුම්, සපයන්නන්, යතුරු, පරිපාලක සහ රෝග විනිශ්චය endpoints.                                                                         | ඩෑෂ්බෝඩ් සැසිය හෝ `manage` විෂය පථය සහිත Bearer               |
+| පන්තිය       | විස්තරය                                                                                                                                            | සත්‍යාපනය අවශ්‍යයි                                               |
+| ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| `PUBLIC`     | පැහැදිලිවම ආරක්ෂිත මාර්ග — පුරනය, පිටවීම, තත්ත්‍වය, සෞඛ්‍යය, ඇතුල්වීමේ බූට්ස්ට්‍රැප්.                                                              | කිසිවක් නැත                                                      |
+| `CLIENT_API` | ආදර්ශ-සේවා අන්ත ලක්ෂ්‍ය — `/api/v1/*`, `/api/v1beta/*`, සහ අන්වර්ථ `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | ඵලදායි `REQUIRE_API_KEY` විශේෂාංග ධජය සබල කර ඇති විට දරන්නා යතුර |
+| `MANAGEMENT` | උපකරණ පුවරු පිටු, සැකසීම්, සපයන්නන්, යතුරු, පරිපාලක සහ රෝග විනිශ්චය අන්ත ලක්ෂ්‍ය.                                                                  | `manage` විෂය පථය සහිත උපකරණ පුවරු සැසිය OR දරන්නා               |
 
-`MANAGEMENT` ක්‍රියා කිහිපයක් **ක්‍රියාකරු-පමණක්** වේ: `manage` යතුරක් ප්‍රමාණවත් නොවේ. ගබඩා කළ අක්තපත්‍ර නිර්යාත කිරීම (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), දැනට පවතින දත්ත මත උපස්ථයක් ප්‍රත්‍යාස්ථාපනය කිරීම (`dryRun=true` ඇතුළුව `POST /api/db-backups/import`, id අනුව `POST /api/db-backups` ප්‍රත්‍යාස්ථාපනය, `POST /api/settings/import-json`), ප්‍රත්‍යාස්ථාපන ලක්ෂ්‍ය විනාශ කිරීම (`DELETE /api/db-backups` පිරිසිදු කිරීම, සහ `PATCH /api/db-backups` — එය ස්ථාවර කරන රඳවා ගැනීම සෑම උපස්ථයකින් පසු ස්වයංක්‍රීය කප්පාදුව පාලනය කරන නිසා) ඩෑෂ්බෝඩ් සැසියක්, දේශීය CLI විෂයක්, හෝ පිවිසුම අක්‍රිය කිරීමක් අවශ්‍ය කරයි. සමමුහුර්තකරණ ටෝකනයක් නිකුත් කිරීම (`POST /api/sync/tokens`) සහ `admin` CLI ප්‍රවේශ ටෝකනයක් ටංකනය කිරීම (`POST /api/cli/tokens`) සෑම පිවිසුම් ප්‍රකාරයකම ඩෑෂ්බෝඩ් සැසියක් හෝ දේශීය CLI විෂයක් අවශ්‍ය කරයි. ඕනෑම විෂය පථයක API යතුරු සහ `oma_` ප්‍රවේශ ටෝකන මෙහෙයුම්කරු අක්තපත්‍ර නොවේ: එකක් අවශ්‍ය වන විට ඒවාට `403` ලැබේ. පරීක්ෂාව `src/lib/api/operatorCredential.ts` හි ඇත (`resolveOperatorCredential()` / `requireOperatorCredential()`). පිවිසුම් සැකසුම් වෙනස් කිරීමද ක්‍රියාකරු-පමණකි: `POST /api/settings/require-login` (කළමනාකරණ මුරපදය සකසන / `requireLogin` මාරු කරන) මුරපදයක් පවතින විට පමණක් එම අක්තපත්‍ර පිළිගනී — පළමු-ධාවන ආරම්භක කවුළුව (තවම මුරපදයක් නැත) වෙනස් නොවේ — සහ ඩෑෂ්බෝඩ් සැසියක් මුරපදය ප්‍රතිස්ථාපනය කිරීමට `currentPassword` යැවිය යුතුය (එය නැති හෝ වැරදි නම් `403`, `settings.update_failed` ලෙස විගණනය කෙරේ). දේශීය CLI සහ පිවිසුම අක්‍රිය කළ අවස්ථාව ප්‍රතිසාධන මාර්ගය තබා ගන්නා අතර, දෙකම දත්ත නාමාවලිය හිමි සත්කාරකයට බැඳී ඇති නිසා, එය නොමැතිව මුරපදයක් සැකසිය හැක.
+`MANAGEMENT` ක්‍රියා කිහිපයක් වේ** ක්රියාකරු-පමණි** : `manage` යතුරක් මදි. ගබඩා කර ඇති අක්තපත්‍ර අපනයනය කිරීම (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), සජීවී දත්ත හරහා උපස්ථයක් ප්‍රතිසාධනය කිරීම (`POST /api/db-backups/import` ඇතුළුව `dryRun=true`, `POST /api/db-backups` id මගින් ප්‍රතිසාධනය කිරීම, `POST /api/settings/import-json`), ප්‍රතිස්ථාපන ලක්ෂ්‍ය විනාශ කිරීම (`DELETE /api/db-backups` පිරිසිදු කිරීම සහ `PATCH /api/db-backups` එය රඳවා තබා ගැනීම සෑම විටම ස්වයංක්‍රීය CLI සැසියකින් පසු එය පවත්වාගෙන යාම, dash පුවරුවක් ධාවනය කිරීම අවශ්‍ය වන බැවින් විෂය, හෝ පුරනය වීම අබල කර ඇත. සමමුහුර්ත ටෝකනයක් (`POST /api/sync/tokens`) නිකුත් කිරීම සහ `admin` CLI ප්‍රවේශ ටෝකනයක් (`POST /api/cli/tokens`) සකස් කිරීම සඳහා උපකරණ පුවරු සැසියක් හෝ සෑම පිවිසුම් මාදිලියකම දේශීය CLI විෂය අවශ්‍ය වේ. ඕනෑම විෂය පථයක API යතුරු සහ `oma_` ප්‍රවේශ ටෝකන ක්‍රියාකරු අක්තපත්‍ර නොවේ: ඒවා අවශ්‍ය විටෙක `403` ලබා ගනී. චෙක්පත `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`) හි ජීවත් වේ. පිවිසුම් සැකසීම් වෙනස් කිරීම ක්‍රියාකරුට පමණක් ද වේ: `POST /api/settings/require-login` (කළමනාකරණ මුරපදය සකසන්න / `requireLogin` ටොගල් කරන්න) එම අක්තපත්‍ර පමණක් පිළිගන්නේ මුරපදයක් පවතින විට — පළමු ධාවන බූට්ස්ට්‍රැප් කවුළුව (තවමත් මුරපදයක් නොමැත) — නොවෙනස්ව පවතින අතර ඩෑෂ්බෝඩ් සැසියකින් එය `currentPassword` යැවිය යුතු අතර මුරපදය ප්‍රතිස්ථාපනය කිරීමට හෝ වැරදී ඇති විට `settings.update_failed` `403` දේශීය CLI සහ පුරනය වීම අක්‍රිය කර ඇති අවස්ථාවක් ප්‍රතිසාධන මාර්ගය තබා ගන්නා අතර එය නොමැතිව මුරපදයක් සැකසිය හැක, මන්ද දෙකම දත්ත නාමාවලිය හිමි ධාරකයට බැඳී ඇත.
 
 ## පයිප්ලයින්
 
@@ -178,51 +178,47 @@ Settings → Security වෙතින් ලියාපදිංචි කර�
 
 ## පොදු මාර්ග ලැයිස්තුව
 
-`src/shared/constants/publicApiRoutes.ts` යනු පැහැදිලිව නිර්වචනය කළ අවසර ලැයිස්තුවකි:
+`src/shared/constants/publicApiRoutes.ts` යනු පැහැදිලි අවසර ලැයිස්තුවයි:
 
-මෙම ලැයිස්තුව **හැඩය** අනුව කොටස් කර ඇති අතර, මෙම වෙන් කිරීම ඉතා වැදගත් වේ (GHSA-74g9-q8f6-793h): prefix එකක්
-`startsWith()` සමඟ ගැළපෙන බැවින්, එය ආරම්භක අක්ෂර එකම වන සෑම යාබද මාර්ගයකටම ගැළපේ.
-`/api/usage/om-usage` prefix එකක් ලෙස `/api/usage/om-usage<anything>` PUBLIC ලෙස සලකන අතර, Next එය
-`/api/usage/[connectionId]` වෙත විසඳයි — එය තමන්ටම authentication නොමැති handler එකකි.
+ලැයිස්තුව බෙදී ඇත** හැඩය** , සහ බෙදීම බර දරයි (GHSA-74g9-q8f6-793h): උපසර්ගයක් `startsWith()` සමඟ ගැලපේ, එබැවින් එය එහි ප්‍රමුඛ අක්ෂර බෙදා ගන්නා සෑම යාබද මාර්ගයකටම ගැලපේ. `/api/usage/om-usage` උපසර්ගයක් ලෙස `/api/usage/om-usage<anything>` PUBLIC ලෙස සලකුණු කර ඇති අතර, මීලඟට තමන්ගේම සත්‍යාපනයක් නොමැති හසුරුවන්නක් `/api/usage/[connectionId]` — ලෙස විසඳයි.
 
 ```ts
-// සැබෑ උප-ගස්. සෑම entry එකක්ම "/" න් අවසන් විය යුතුය (unit test එකකින් තහවුරු කරයි).
+// Genuine subtrees. Every entry MUST end in "/" (asserted by a unit test).
 PUBLIC_API_ROUTE_PREFIXES = [
   "/api/auth/oidc/",
-  "/api/v1/", // classify තුළ CLIENT_API ලෙස සලකයි, "no-auth public" ලෙස නොවේ
+  "/api/v1/", // treated as CLIENT_API in classify, not as "no-auth public"
   "/api/oauth/",
   "/api/codex/connect/",
   "/api/telegram/",
   "/api/cursor-cli/",
 ];
 
-// තනි මාර්ග, අවසාන slash එකක් සමඟ හෝ රහිතව, EXACT ලෙස ගැළපේ.
+// Single routes, matched EXACTLY (with or without a trailing slash).
 PUBLIC_API_ROUTES_EXACT = new Set([
   "/api/auth/login",
   "/api/auth/logout",
   "/api/auth/status",
-  "/api/auth/mfa/verify", // opt-in TOTP සඳහා login පියවර 2; MFA-pending cookie අවශ්ය වේ
-  "/api/init",
+  "/api/auth/mfa/verify", // login step 2 for opt-in TOTP; needs the MFA-pending cookie
   "/api/sync/bundle",
   "/api/cli/connect",
   "/api/usage/om-usage",
   "/api/skills/collect/chaos",
 ]);
 
-// CORS origin ලිහිල් කිරීමද ලබාගන්නා, කියවීමට පමණක් සීමා වූ තනි මාර්ග.
+// Read-only single routes that also take the CORS origin relaxation.
 PUBLIC_READONLY_CORS_API_ROUTES = [
   "/api/health/ping",
   "/api/monitoring/health",
   "/api/settings/require-login",
 ];
 
-// CORS ලිහිල් කිරීම නොමැති, කියවීමට පමණක් සීමා වූ තනි මාර්ගය.
+// Read-only single route WITHOUT the CORS relaxation.
 PUBLIC_READONLY_API_ROUTES_EXACT = new Set(["/api/health"]);
 
 PUBLIC_READONLY_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 ```
 
-කියවීමට පමණක් සීමා වූ මාර්ග, ආරක්ෂිත methods සඳහා පමණක් පොදු වේ. සටහන: `classifyRoute()` PUBLIC fall-through වෙතින් `/api/v1/*` සහ `/api/v1beta/*` ඉවත් කරයි — එම මාර්ග සෑමවිටම `CLIENT_API` වන බැවින් Bearer-key ප්රතිපත්තිය තවදුරටත් ක්රියාත්මක වේ.
+කියවීමට පමණක් මාර්ග පොදු වේ** පමණි** ආරක්ෂිත ක්රම සඳහා. සටහන: `classifyRoute()` `/api/v1/*` සහ `/api/v1beta/*` PUBLIC drop-through — වෙතින් බැහැර කරයි, ඒවා සැමවිටම `CLIENT_API` වේ, එබැවින් Bearer-key ප්‍රතිපත්තිය තවමත් අදාළ වේ.
 
 ## නව මාර්ගයක් එක් කිරීම
 
@@ -301,15 +297,15 @@ MCP සත්යාපන තොරතුරු, ඉල්ලීම් පාර
 (`src/lib/accessTokens/scopes.ts`) මගින් ශ්රේණිගත කර ඇත. මෙම ශ්රේණිය අදාළ වන්නේ
 ප්රවේශ-ටෝකන අක්තපත්රයට පමණි. [කළමනාකරණ සත්යාපනය](../guides/MANAGEMENT-AUTH.md) බලන්න.
 
-## Auth අවශ්‍ය ටොගලය
+## Auth Toggle අවශ්‍යයි
 
-`src/shared/utils/apiAuth.ts` හි `isAuthRequired()` මගින් ඕනෑම ඉල්ලීමක් සඳහා **ඕනෑම** සත්‍යාපනයක් බලාත්මක කළ යුතුද යන්න තීරණය කරයි:
+`src/shared/utils/apiAuth.ts` හි`isAuthRequired()` යන්න තීරණය කරයි** ඕනෑම** ඉල්ලීමක් සඳහා auth බලාත්මක කර ඇත:
 
-- `settings.requireLogin === false` → සත්‍යාපනය ගෝලීයව අක්‍රියයි, මුල්-ආරක්ෂිත ස්ථරය ([Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md)) සහ එය පිළිගන්නා අක්තපත්‍රය ලබා දෙන ඇමතුම් හැර — ඒවාට පිවිසුම ක්‍රියාත්මක විට ලෙසම එම අක්තපත්‍රයක් අවශ්‍යයි: සමමුහුර්ත ටෝකන නිකුත් කිරීම, ඕනෑම විෂය පථයකින් CLI ප්‍රවේශ ටෝකන ටංකනය කිරීම, සහ `manage`/`admin` විෂය පථය සහිත API යතුරක් සෑදීම, එම විෂය පථය යතුරකට ලබාදීම, හෝ එවැනි යතුරක් යළි උත්පාදනය කිරීම හෝ හෙළි කිරීම (`src/lib/api/requireManagementAuth.ts` හි `requireCredentialForManagementScopedKey()`). ඇතුළත් කිරීම-පමණක් යතුරු විවෘතව පවතී.
-- මුරපදයක් සකසා නොමැති **සහ** `INITIAL_PASSWORD` පරිසර විචල්‍යක් නොමැති → ආරම්භක මාදිලිය ඔන්බෝඩින් වීසාර්ඩය සහ loopback ඉල්ලීම් ඉඩ දෙයි, නමුත් නිරාවරණය වූ ජාල ඉල්ලීම්වලට තවමත් අක්තපත්‍ර අවශ්‍යයි.
-- ඕනෑම DB දෝෂයක් → අසාර්ථක-වැසීම (ආරක්ෂිත-පෙරනිමිය).
+- `settings.requireLogin === false` → auth ගෝලීය වශයෙන් අබල කර ඇත, සෑම විටම-ආරක්ෂිත ස්ථරය ( [මාර්ග ආරක්ෂක ටියර්](../security/ROUTE_GUARD_TIERS.md) බලන්න) සහ එය පිළිගන්නා අක්තපත්‍රයක් ලබා දෙන ඇමතුම් හැර, ප්‍රවිෂ්ට වීමේදී සමාන අක්තපත්‍රයක් අවශ්‍ය වේ: සමමුහුර්ත ටෝකන නිකුත් කිරීම, ඕනෑම විෂය පථයකින් CLI ප්‍රවේශ ටෝකන සකස් කිරීම, API `manage` යතුරු නිර්මාණය, සහ යතුරකට එම විෂය පථය ලබා දීම හෝ එවැනි යතුරක් නැවත උත්පාදනය කිරීම හෝ හෙළිදරව් කිරීම (`requireCredentialForManagementScopedKey()` `src/lib/api/requireManagementAuth.ts` `admin`. අනුමාන-පමණක් යතුරු විවෘතව පවතී. ආරක්ෂිත විශේෂාංග ධජයක් ලිවීම (`REQUIRE_API_KEY`, අනෙකුත් ආරක්ෂක කොඩි, සහ [විශේෂාංග කොඩිවල](../reference/FEATURE_FLAGS.md#rest-api) ලැයිස්තුගත කර ඇති SSRF / TLS / MCP-scope / sandbox කොඩි) සහ PII ආවරණ සැකසුම් සුරැකීම (`PUT /api/settings/pii`) ද අක්තපත්‍රයක් අවශ්‍ය වේ.
+- මුරපදයක් වින්‍යාස කර නැත** සහ** `INITIAL_PASSWORD` env var → bootstrap ප්‍රකාරය onboarding wizard සහ loopback ඉල්ලීම් වලට ඉඩ සලසයි, නමුත් නිරාවරණය වූ ජාල ඉල්ලීම් සඳහා තවමත් අක්තපත්‍ර අවශ්‍ය වේ. ව්‍යතිරේකය: ආරක්ෂිත විශේෂාංග ධජයක් ලිවීමට සහ PII ආවරණ සැකසුම් සුරැකීමට (`PUT /api/settings/pii`) loopback වෙතින් වුවද අක්තපත්‍රයක් අවශ්‍ය වේ, එබැවින් loopback එයම ප්‍රමාණවත් නොවේ.
+- ඕනෑම DB දෝෂයක් → වසා දැමීම අසාර්ථක වේ (සුරක්ෂිතව පෙරනිමියෙන්).
 
-Client API යතුරු බලාත්මක කිරීම `src/shared/utils/featureFlags.ts` හි `isRequireApiKeyEnabled()` භාවිතා කරයි, සෘජු `process.env.REQUIRE_API_KEY` කියවීමක් නොවේ. මෙය යෙදවූ උදාහරණ සඳහා වැදගත්ය: ඩෑෂ්බෝඩ් → Feature Flags හි `REQUIRE_API_KEY` ටොගල් කිරීම DB අභිබවා යාමක් ගබඩා කර `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` සහ මෙම උපයෝගිතාව බෙදාගන්නා අනෙකුත් client-API සත්‍යාපන පරීක්ෂා වලට වහාම බලපායි. විශේෂාංග ධජ ගබඩාව කියවිය නොහැකි නම්, client API සත්‍යාපනය අසාර්ථක-වැසෙන අතර යතුරක් අවශ්‍ය කරයි.
+සේවාලාභී API යතුර බලාත්මක කිරීම සෘජු `process.env.REQUIRE_API_KEY` කියවීමක් නොව `src/shared/utils/featureFlags.ts` හි `isRequireApiKeyEnabled()` භාවිතා කරයි. යොදවා ඇති අවස්ථා සඳහා මෙය වැදගත් වේ: උපකරණ පුවරුවේ `REQUIRE_API_KEY` ටොගල් කිරීම විශේෂාංග කොඩි → අභිබවා යාමක් ගබඩා කරන අතර `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*`, සහ වෙනත් සේවාලාභී-API සත්‍යාපන පරීක්‍ෂණ බෙදාහදා ගැනීම DB වහාම බලපායි. විශේෂාංග ධජ ගබඩාව කියවිය නොහැකි නම්, සේවාදායක API auth වසා දැමීමට අසමත් වන අතර යතුරක් අවශ්‍ය වේ.
 
 ## පසුගාමී අනුකූලතාව බිඳ දමන වෙනස — v3.8.0
 

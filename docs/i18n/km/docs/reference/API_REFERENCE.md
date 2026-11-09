@@ -343,20 +343,24 @@ Content-Type: application/json
 
 `n` ត្រឡប់រូបភាព `n` នៅក្នុង `data[]`។ អ្នកផ្តល់សេវាដែល API ខាងលើរបស់ពួកគេត្រឡប់រូបភាពមួយក្នុងមួយការហៅ
 (Black Forest Labs, Stability AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik,
-NVIDIA NIM, Cloudflare Workers AI) នឹងទទួលការហៅទៅ API ខាងលើដាច់ដោយឡែក `n` ដង ដោយមានការហៅកំពុងដំណើរការក្នុងពេលតែមួយអតិបរមា 4។ `seed` ថេរត្រូវបានបន្ថែមតាមលិបិក្រមនៃការហៅ (`seed`, `seed + 1`, …) ដូច្នេះរូបភាពនឹងខុសគ្នា ប៉ុន្តែនៅតែអាចបង្កើតឡើងវិញបានដដែល។ `n` មានកម្រិតអតិបរមា 10។ សំណើទាំងមូលនឹងបរាជ័យ ប្រសិនបើការហៅណាមួយបរាជ័យ។ បញ្ជីទម្រង់ fan-out គឺ `SINGLE_IMAGE_FANOUT_FORMATS` នៅក្នុង
+NVIDIA NIM, Cloudflare Workers AI) នឹងធ្វើការហៅ API ខាងលើដាច់ដោយឡែកចំនួន `n` ដង ដោយមានការហៅកំពុងដំណើរការជាអតិបរមា 4 ក្នុងពេលតែមួយ។ `seed` ដែលកំណត់ជាក់លាក់នឹងត្រូវបន្ថែមតាមលំដាប់សន្ទស្សន៍នៃការហៅ (`seed`, `seed + 1`, …) ដូច្នេះរូបភាពនឹងខុសគ្នា ប៉ុន្តែនៅតែអាចបង្កើតឡើងវិញបានដដែល។ `n` មានកម្រិតអតិបរមា 10។ សំណើទាំងមូលនឹងបរាជ័យ ប្រសិនបើការហៅណាមួយបរាជ័យ។ បញ្ជីទម្រង់ fan-out គឺ `SINGLE_IMAGE_FANOUT_FORMATS` នៅក្នុង
 `open-sse/handlers/imageGeneration/fanOut.ts`។
 
-ZenMux ប្រើការតភ្ជាប់ API-key ដែលមានស្រាប់ឡើងវិញ ហើយទទួលយកបុព្វបទ `zenmux/` ឬ `zm/`៖
+ZenMux ប្រើការតភ្ជាប់ API-key ដែលមានស្រាប់ឡើងវិញ និងទទួលយកបុព្វបទ `zenmux/` ឬ `zm/`៖
 
-- `zenmux/openai/gpt-image-2` ប្រើ ZenMux's OpenAI Images API។ ជម្រើសរួមមាន `size`,
+- `zenmux/openai/gpt-image-2` ប្រើ OpenAI Images API របស់ ZenMux។ ជម្រើសរួមមាន `size`,
   `quality`, `n`, `output_format`, `output_compression`, `background`, និង `response_format`។
-- អ្នកបោះពុម្ពផ្សាយផ្សេងទៀត ដូចជា `zm/meta/muse-image-1.0` ប្រើចំណុចបញ្ចប់ `:predict` របស់ Vertex AI។ `n` ផ្គូផ្គងទៅនឹង `sampleCount`, `aspect_ratio` ទៅនឹង `aspectRatio`, និង `image_size`
-  (`1K`, `2K`, `4K`) ទៅនឹង `sampleImageSize`។ `size` ជាភីកសែលផ្តល់តែសមាមាត្ររូបភាពប៉ុណ្ណោះ មិនធានាទំហំភីកសែលឡើយ។ សមាមាត្រ គុណភាពបង្ហាញ និងចំនួនដែលគាំទ្រ អាស្រ័យលើម៉ូដែលនីមួយៗ។
-- `zm/inclusionai/ming-image-0.1-design` ជ្រើសរើសទំហំដោយខ្លួនឯង។ សូមលុប `size`,
-  `aspect_ratio`, និង `image_size` ចេញ; ការកំណត់តម្លៃជាក់លាក់នឹងត្រឡប់ HTTP 400។ អាចស្នើ PNG, JPEG និង WebP បានដោយប្រើ `output_format`។
+- អ្នកបោះពុម្ពផ្សាយផ្សេងទៀត ដូចជា `zm/meta/muse-image-1.0` ប្រើ endpoint `:predict` របស់ ZenMux Vertex AI។ `n` ត្រូវបានផ្គូផ្គងទៅ `sampleCount`, `aspect_ratio` ទៅ `aspectRatio`, និង `image_size`
+  (`1K`, `2K`, `4K`) ទៅ `sampleImageSize`។ `size` ជា pixel ផ្តល់តែសមាមាត្ររូបភាពប៉ុណ្ណោះ មិនធានាទំហំជា pixel ទេ។ សមាមាត្រ គុណភាពបង្ហាញ និងចំនួនដែលគាំទ្រ អាចខុសគ្នាតាមម៉ូដែល។
+- `zm/inclusionai/ming-image-0.1-design` ជ្រើសរើសទំហំដោយខ្លួនឯង។ កុំដាក់ `size`,
+  `aspect_ratio`, និង `image_size`; ការដាក់តម្លៃជាក់លាក់នឹងត្រឡប់ HTTP 400។ អាចស្នើសុំ PNG, JPEG និង WebP ដោយប្រើ `output_format`។
 
-ការរួមបញ្ចូលនេះគាំទ្រការបង្កើតរូបភាពពីអត្ថបទ មិនមែនការកែសម្រួលរូបភាពយោងទេ។ លទ្ធផលពី Vertex ត្រូវបានធ្វើឱ្យមានទម្រង់ស្តង់ដារទៅជា `data[].b64_json`; `response_format: "url"` នឹងត្រឡប់ URL HTTPS ពី API ខាងលើ ឬ data URL ដែលមាន base64 នៅពេលអាចប្រើបានតែទិន្នន័យបៃត៍រូបភាពប៉ុណ្ណោះ។ លទ្ធផលទទេ/ត្រូវបានត្រង នឹងត្រឡប់កំហុស ជំនួសឱ្យការឆ្លើយតបជោគជ័យដែលទទេ។ ការចូលប្រើម៉ូដែលអាស្រ័យលើគណនី ZenMux។ សូមមើល [ZenMux's Vertex API](https://docs.zenmux.ai/api/vertexai/generate-images) និង
+ការរួមបញ្ចូលនេះគាំទ្រការបង្កើតរូបភាពពីអត្ថបទ មិនមែនការកែសម្រួលរូបភាពយោងទេ។ លទ្ធផល Vertex ត្រូវបានធ្វើឱ្យមានទម្រង់ស្តង់ដារទៅជា `data[].b64_json`; `response_format: "url"` នឹងត្រឡប់ URL HTTPS ពី upstream ឬ data URL ដែលមាន base64 នៅពេលមានតែ bytes រូបភាពប៉ុណ្ណោះ។ លទ្ធផលទទេ/ត្រូវបានត្រង នឹងត្រឡប់កំហុស ជំនួសឱ្យជោគជ័យដែលគ្មានទិន្នន័យ។ ការចូលប្រើម៉ូដែលអាស្រ័យលើគណនី ZenMux។ សូមមើល [Vertex API របស់ ZenMux](https://docs.zenmux.ai/api/vertexai/generate-images) និង
 [OpenAI Images API](https://docs.zenmux.ai/api/openai/generate-an-image)។
+
+ការតភ្ជាប់ចូល Microsoft 365 Copilot បម្រើ `copilot-m365-web/m365-copilot-image`
+តាមរយៈឧបករណ៍រូបភាពដែលមានស្រាប់របស់ Copilot៖ ការបង្វិល Copilot មួយដងក្នុងមួយរូបភាព (`n` 1–4), `size` កំណត់ទិសដៅតែប៉ុណ្ណោះ ហើយរូបភាពត្រូវបានត្រឡប់មកជាបញ្ចូលក្នុងលទ្ធផល (`b64_json` ឬ data URL សម្រាប់
+`response_format: "url"` )។ សូមមើល [Microsoft 365 Copilot](../providers/COPILOT-M365.md#image-generation)។
 
 ```bash
 # រាយម៉ូដែលរូបភាពទាំងអស់
@@ -799,58 +803,59 @@ POST /v1/providers/{provider}/images/generations
 
 ## API ស្វែងរក
 
-អរូបីភាពរបស់អ្នកផ្តល់សេវា Web/ស្វែងរក (Tavily, Brave, Exa, Serper ជាដើម)។
+អ abstraction របស់អ្នកផ្តល់សេវា Web/ស្វែងរក (Tavily, Brave, Exa, Serper និងផ្សេងៗទៀត)។
 
-| Method | Path                   | Description                                                                                                         |
-| ------ | ---------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/v1/search`           | រាយបញ្ជីអ្នកផ្តល់សេវាស្វែងរកដែលបានកំណត់រចនាសម្ព័ន្ធ + សមត្ថភាព                                                      |
-| POST   | `/v1/search`           | ដំណើរការសំណួរស្វែងរក — តួត្រូវបានផ្ទៀងផ្ទាត់ដោយ `v1SearchSchema` និងគាំទ្រការរក្សាទុកឃ្លាំងសម្ងាត់/ការរួមបញ្ចូលសំណើ |
-| GET    | `/v1/search/analytics` | ស្ថិតិការចូលមើល/រយៈពេលឆ្លើយតប/ឃ្លាំងសម្ងាត់ តាមអ្នកផ្តល់សេវា                                                        |
+| Method | Path                   | Description                                                                                                             |
+| ------ | ---------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/v1/search`           | រាយអ្នកផ្តល់សេវាស្វែងរកដែលបានកំណត់រចនាសម្ព័ន្ធ + សមត្ថភាព                                                               |
+| POST   | `/v1/search`           | ដំណើរការសំណួរស្វែងរក — តួអត្ថបទត្រូវបានផ្ទៀងផ្ទាត់ដោយ `v1SearchSchema` និងគាំទ្រការរក្សាទុកក្នុង cache/ការរួមបញ្ចូលសំណើ |
+| GET    | `/v1/search/analytics` | ស្ថិតិ hit/latency/cache តាមអ្នកផ្តល់សេវា                                                                               |
 
-**ការផ្ទៀងផ្ទាត់:** កូនសោ API ប្រភេទ Bearer (`extractApiKey` + `isValidApiKey`)។ គោលការណ៍ស្វែងរកត្រូវបានអនុវត្តតាមរយៈ `enforceApiKeyPolicy`។
+**ការផ្ទៀងផ្ទាត់:** Bearer API key (`extractApiKey` + `isValidApiKey`)។ គោលការណ៍ស្វែងរកត្រូវបានអនុវត្តតាមរយៈ `enforceApiKeyPolicy`។
+
+**ការជ្រើសរើសដោយស្វ័យប្រវត្តិ:** ប្រសិនបើគ្មាន `provider` អ្នកផ្តល់សេវាដែលមានតម្លៃថោកបំផុត និងមានការតភ្ជាប់ដែលបានកំណត់រចនាសម្ព័ន្ធ នឹងដំណើរការមុន ហើយអ្នកផ្តល់សេវាដែលមានតម្លៃថោកបន្ទាប់ នឹងធ្វើជាជម្រើសបម្រុងនៅពេលបរាជ័យ។ អ្នកផ្តល់សេវាឥតគិតថ្លៃសម្រាប់ប្រើជាជម្រើសចុងក្រោយ (`duckduckgo-free`) នឹងត្រូវបានប្រើតែពេលគ្មានអ្វីផ្សេងត្រូវបានកំណត់រចនាសម្ព័ន្ធប៉ុណ្ណោះ។ SearXNG ដែលបង្ហោះដោយខ្លួនឯង នឹងរាប់ថាត្រូវបានកំណត់រចនាសម្ព័ន្ធ នៅពេលការតភ្ជាប់របស់វារក្សាទុក `baseUrl` ពិតប្រាកដ (មិនមែន catalog default `http://localhost:8888/search` ទេ)៖ បន្ទាប់មកវានឹងត្រូវបានចាត់ថ្នាក់ជាអ្នកផ្តល់សេវាតម្លៃ $0 នៅមុខអ្នកផ្តល់សេវាដែលប្រើ key ហើយអ្នកផ្តល់សេវាដែលប្រើ key មានតម្លៃថោកបំផុតនឹងធ្វើជាជម្រើសបម្រុង រួមទាំងនៅពេល SearXNG ឆ្លើយតបដោយ 400, 401, 403 ឬ 404។ `baseUrl` ដែលមិនមែនជា URL `http(s)` ត្រឹមត្រូវ ឬចង្អុលទៅអាសយដ្ឋាន cloud-metadata នឹងមិនរាប់បញ្ចូលទេ។ ការតភ្ជាប់ SearXNG ដែលរក្សាទុក token នឹងត្រូវបានចាត់ថ្នាក់តាមរបៀបនេះ តែនៅលើ `https://` ឬ loopback `http://` ប៉ុណ្ណោះ។ នៅលើ remote plain `http://` វានឹងមិនធ្វើជាជម្រើសបម្រុងឡើយ ហើយនៅតែជាជម្រើសចុងក្រោយ ដោយប្រើតែពេលគ្មានអ្នកផ្តល់សេវាផ្សេងទៀតត្រូវបានកំណត់រចនាសម្ព័ន្ធ ឬនៅពេលត្រូវបានស្នើសុំតាមឈ្មោះប៉ុណ្ណោះ ដូច្នេះវានឹងផ្ញើ token ជាអក្សរមិនបានអ៊ិនគ្រីបនៅក្នុងករណីទាំងពីរនោះ។
 
 ### `provider_options` របស់ Exa និង Tavily
 
-Exa និង Tavily អានវាលជាក់លាក់របស់អ្នកផ្តល់សេវាពីថង់ដែលមាន namespace៖
+Exa និង Tavily អានវាលជាក់លាក់របស់អ្នកផ្តល់សេវាពី bag ដែលមាន namespace៖
 `provider_options.exa` (ឬ `provider_options["exa-search"]`) និង `provider_options.tavily`
-(ឬ `provider_options["tavily-search"]`)។ មានតែគន្លឹះខាងក្រោមប៉ុណ្ណោះដែលត្រូវបានបញ្ជូនបន្ត។ គន្លឹះនីមួយៗ
-ត្រូវបានពិនិត្យទល់នឹងស្គីម៉ា Zod ផ្ទាល់ខ្លួនរបស់វានៅក្នុង
-`open-sse/handlers/search/providerOptionsPassthrough.ts` ហើយគន្លឹះដែលមានប្រភេទមិនត្រឹមត្រូវត្រូវបានលុបចោល។ គន្លឹះផ្សេងទៀតណាមួយត្រូវបានមិនអើពើ រួមទាំង auth, base URL,
-`stream` និង `outputSchema`។ គន្លឹះរាបស្មើដែលអ្នកផ្តល់សេវាផ្សេងទៀតប្រើ (`cx`, `depth`, ...) នៅតែដំណើរការដូចមុន។
+(ឬ `provider_options["tavily-search"]`)។ មានតែ key ខាងក្រោមប៉ុណ្ណោះដែលត្រូវបានបញ្ជូនបន្ត។ Key នីមួយៗត្រូវបានពិនិត្យធៀបនឹង schema Zod របស់វា ក្នុង `open-sse/handlers/search/providerOptionsPassthrough.ts`
+ហើយ key ដែលមានប្រភេទមិនត្រឹមត្រូវ នឹងត្រូវបានដកចេញ។ Key ផ្សេងទៀតទាំងអស់នឹងត្រូវបានមិនអើពើ រួមទាំង auth, base URL,
+`stream` និង `outputSchema`។ Key រាបស្មើដែលអ្នកផ្តល់សេវាផ្សេងទៀតប្រើ (`cx`, `depth`, ...) នៅតែដំណើរការដូចមុន។
 
-| Provider | Top-level fields                                                                                                                                                                                                                                                                                                                                                          | Nested                                                                                                                                         |
-| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| Exa      | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (តម្លៃ primitive រាបស្មើ), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                      | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` ត្រូវបានបញ្ចូលលើតម្លៃលំនាំដើម `{ text: true, highlights: true }` |
-| Tavily   | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                              |
+| Provider | Top-level fields                                                                                                                                                                                                                                                                                                                                                          | Nested                                                                                                                               |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| Exa      | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (flat primitives), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                              | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` រួមបញ្ចូលលើ default `{ text: true, highlights: true }` |
+| Tavily   | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                    |
 
-វាលទូទៅតែងតែមានអាទិភាព៖ `query`, `max_results`, `filters` (ដែន), `country` និងប្រធានបទដែលបានដកស្រង់ពី `search_type`។ នៅលើ Exa, `search_type: "news"` រក្សា `category: "news"`។
-Tavily ក៏ទទួលយក `search_type: "finance"` (`topic: "finance"`) ផងដែរ។
+វាលទូទៅតែងតែមានអាទិភាព៖ `query`, `max_results`, `filters` (domains), `country` និង
+ប្រធានបទដែលបានដកស្រង់ពី `search_type`។ នៅលើ Exa, `search_type: "news"` នឹងរក្សា
+`category: "news"`។ Tavily ក៏ទទួលយក `search_type: "finance"` (`topic: "finance"`) ផងដែរ។
 
-ថ្លៃស្វែងរក Firecrawl ត្រូវបានកត់ត្រាតាមប្លុកនីមួយៗដែលចាប់ផ្តើមមានលទ្ធផល 10 ដែលបានត្រឡប់មកវិញ ក្នុងតម្លៃ $0.002 (2
-ក្រេឌីត) ក្នុងមួយប្លុក ហើយយ៉ាងហោចណាស់មួយប្លុកក្នុងមួយការហៅ
+តម្លៃស្វែងរករបស់ Firecrawl ត្រូវបានកត់ត្រាតាមប្លុកនីមួយៗដែលបានចាប់ផ្តើម មានលទ្ធផល 10 ដែលបានបញ្ជូនត្រឡប់មកវិញ ក្នុងតម្លៃ $0.002 (2
+credits) ក្នុងមួយប្លុក ហើយការហៅមួយដងត្រូវមានយ៉ាងហោចណាស់មួយប្លុក
 ([ការចេញវិក្កយបត្រ Firecrawl](https://docs.firecrawl.dev/billing))៖ លទ្ធផល 11 មានតម្លៃ $0.004។
 
-`time_range` ទូទៅឥឡូវនេះត្រូវបានបញ្ជូនទៅអ្នកផ្តល់សេវាទាំងពីរ៖ Exa ទទួល `startPublishedDate` (ត្រាពេលវេលា ISO)
-ហើយ Tavily ទទួល `start_date` (`YYYY-MM-DD`)។ កាលបរិច្ឆេទជាក់លាក់មួយនៅក្នុង `provider_options`
+`time_range` ទូទៅ ឥឡូវនេះត្រូវបានបញ្ជូនទៅអ្នកផ្តល់សេវាទាំងពីរ៖ Exa ទទួល `startPublishedDate` (ISO
+timestamp) ហើយ Tavily ទទួល `start_date` (`YYYY-MM-DD`)។ កាលបរិច្ឆេទជាក់លាក់នៅក្នុង `provider_options`
 នឹងជំនួសកាលបរិច្ឆេទដែលបានផ្គូផ្គង។
 
-លទ្ធផល Exa រក្សាទុក `id`, `highlights` (រាល់ highlight ទាំងអស់ មិនមែនតែទីមួយដែលប្រើជា
+លទ្ធផល Exa រក្សាទុក `id`, `highlights` (រាល់ highlight ទាំងអស់ មិនមែនតែ highlight ដំបូងដែលប្រើជា
 `snippet` ទេ), `highlight_scores`, `summary`, `subpages`, `entities` និង `extras` នៅក្នុង
 `provider_raw`។ លទ្ធផល Tavily រក្សាទុក `images` និង `favicon`។
 
-ថ្លៃស្វែងរក Linkup ត្រូវបានកត់ត្រា $0.005 សម្រាប់ `depth` `fast` និង `standard` និង $0.05 សម្រាប់
-`deep` ([តម្លៃ Linkup](https://docs.linkup.so/pages/documentation/development/pricing))
-មិនថា `depth` មកពី `provider_options` ឬការកំណត់របស់ការតភ្ជាប់នោះទេ។
+តម្លៃស្វែងរករបស់ Linkup ត្រូវបានកត់ត្រា $0.005 សម្រាប់ `depth` `fast` និង `standard` ហើយ $0.05 សម្រាប់
+`deep` ([តម្លៃ Linkup](https://docs.linkup.so/pages/documentation/development/pricing)) មិនថា `depth` មកពី `provider_options` ឬការកំណត់របស់ការតភ្ជាប់ទេ។
 
-Exa `type: "lite"` (Exa 3.0) ទទួលយកសំណុំវាលតូចជាង ហើយបដិសេធសំណើទាំងមូល
-នៅពេលមានវាលផ្សេងទៀតណាមួយត្រូវបានកំណត់។ សម្រាប់ lite, `additionalQueries`, `systemPrompt` និងគ្រប់គន្លឹះ
-`contents` ទាំងអស់ លើកលែងតែ `text` និង `highlights` ត្រូវបានលុបចោលមុនពេលហៅ។ `subpages`,
-`subpageTarget`, `highlights.numSentences` និង `highlights.highlightsPerUrl` ដែលលែងប្រើ
-មិនត្រូវបានបញ្ជូនបន្តទៀតឡើយ។
+Exa `type: "lite"` (Exa 3.0) ទទួលយកសំណុំវាលតូចជាង ហើយបដិសេធសំណើទាំងមូល នៅពេលមានវាលផ្សេងទៀតណាមួយត្រូវបានកំណត់។ សម្រាប់ lite, `additionalQueries`, `systemPrompt` និងគ្រប់ key ក្នុង `contents` លើកលែងតែ `text` និង `highlights` នឹងត្រូវបានដកចេញ មុនពេលហៅ។ `subpages`, `subpageTarget`, `highlights.numSentences` និង `highlights.highlightsPerUrl` ដែលបានលែងប្រើ នឹងមិនត្រូវបានបញ្ជូនបន្តទៀតឡើយ។
 
-ការគណនាថ្លៃគឺជាបញ្ជីឈ្មោះរាបស្មើ `costPerQuery` លើកលែងតែ Exa ដែលអនុវត្តតាមតម្លៃផ្ទាល់ខ្លួនរបស់ Exa៖ $0.007 ក្នុងមួយការហៅសម្រាប់ `auto` (និង `fast` ចាស់) ឬ $0.004 សម្រាប់ `lite` (និង `instant` ចាស់) ដែលគ្របដណ្តប់លទ្ធផល 10; $0.001 សម្រាប់លទ្ធផលបន្ថែមនីមួយៗ; និង $0.001 ក្នុងមួយលទ្ធផលដែលបានត្រឡប់មកវិញ នៅពេលកំណត់ `contents.summary`។ Tavily ត្រូវបានកត់ត្រា 1 ក្រេឌីត ($0.008) សម្រាប់ `search_depth` `basic`, `fast` និង `ultra-fast` និង 2 ក្រេឌីត ($0.016) សម្រាប់ `advanced`
-([ក្រេឌីត API របស់ Tavily](https://docs.tavily.com/documentation/api-credits))។ ការហៅដែលមាន
-`auto_parameters: true` ហើយ Tavily ដំឡើងទៅ advanced នៅតែត្រូវបានកត់ត្រា 1 ក្រេឌីត។
+ការគណនាតម្លៃគឺប្រើបញ្ជីឈ្មោះថ្លៃថេរ `costPerQuery` លើកលែងតែ Exa ដែលអនុវត្តតាម
+តម្លៃផ្ទាល់ខ្លួនរបស់ Exa៖ $0.007 ក្នុងមួយការហៅ សម្រាប់ `auto` (និង `fast` ជំនាន់ចាស់) ឬ $0.004 សម្រាប់ `lite` (និង
+`instant` ជំនាន់ចាស់) ដែលគ្របដណ្តប់លទ្ធផល 10; $0.001 សម្រាប់លទ្ធផលបន្ថែមនីមួយៗ; និង $0.001 ក្នុងមួយ
+លទ្ធផលដែលបានបញ្ជូនត្រឡប់មក នៅពេលកំណត់ `contents.summary`។ Tavily ត្រូវបានកត់ត្រាជា 1 ឥណទាន ($0.008) សម្រាប់
+`search_depth` `basic`, `fast` និង `ultra-fast` ហើយ 2 ឥណទាន ($0.016) សម្រាប់ `advanced`
+([ឥណទាន API របស់ Tavily](https://docs.tavily.com/documentation/api-credits))។ ការហៅដែលមាន
+`auto_parameters: true` ហើយ Tavily បានដំឡើងទៅជា advanced ក៏នៅតែត្រូវបានកត់ត្រាជា 1 ឥណទានដែរ។
 
 ---
 
@@ -1179,48 +1184,47 @@ https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-cred
 
 ## ផ្ទាំងគ្រប់គ្រង និងការគ្រប់គ្រង
 
-ផ្លូវការគ្រប់គ្រង (`/api/*` លើកលែងតែការផ្ទៀងផ្ទាត់សាធារណៈ/ការចូលប្រព័ន្ធ) **មិនត្រូវបានអនុញ្ញាត** ដោយ API keys សម្រាប់ការសន្និដ្ឋានធម្មតាទេ។ គ្រួសារព័ត៌មានសម្ងាត់ វិសាលភាព និងឧទាហរណ៍ curl៖
-[ការផ្ទៀងផ្ទាត់ការគ្រប់គ្រង](../guides/MANAGEMENT-AUTH.md)។
+ផ្លូវគ្រប់គ្រង (`/api/*` លើកលែងតែការផ្ទៀងផ្ទាត់អត្តសញ្ញាណសាធារណៈ/ការចូល) **មិនត្រូវបានអនុញ្ញាត** ដោយ API keys សម្រាប់ inference ធម្មតាទេ។ គ្រួសារព័ត៌មានសម្ងាត់ វិសាលភាព និងឧទាហរណ៍ curl៖
+[ការផ្ទៀងផ្ទាត់អត្តសញ្ញាណសម្រាប់ការគ្រប់គ្រង](../guides/MANAGEMENT-AUTH.md)។
 
-### ការផ្ទៀងផ្ទាត់
+### ការផ្ទៀងផ្ទាត់អត្តសញ្ញាណ
 
-| Endpoint                      | Method   | Description                                                                                                                                                                                                                                                                                                                   |
-| ----------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/auth/login`             | POST     | ចូលប្រព័ន្ធ                                                                                                                                                                                                                                                                                                                   |
-| `/api/auth/logout`            | POST     | ចាកចេញពីប្រព័ន្ធ                                                                                                                                                                                                                                                                                                              |
-| `/api/settings/require-login` | GET/POST | ស្ថានភាពការចូលប្រព័ន្ធ (GET ជាសាធារណៈ)។ POST កំណត់ពាក្យសម្ងាត់ / បិទបើកការចូលប្រព័ន្ធ៖ អនុវត្តបានតែសម្រាប់ប្រតិបត្តិករ នៅពេលមានពាក្យសម្ងាត់រួចហើយ (សម័យផ្ទាំងគ្រប់គ្រង, CLI មូលដ្ឋាន ឬការចូលប្រព័ន្ធត្រូវបានបិទ — API keys និង token `oma_` ទទួលបាន `403`); សម័យផ្ទាំងគ្រប់គ្រងផ្ញើ `currentPassword` ដើម្បីជំនួសពាក្យសម្ងាត់ |
+| Endpoint                      | Method   | Description                                                                                                                                                                                                                                                                                           |
+| ----------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/auth/login`             | POST     | ចូលប្រើ                                                                                                                                                                                                                                                                                               |
+| `/api/auth/logout`            | POST     | ចាកចេញ                                                                                                                                                                                                                                                                                                |
+| `/api/settings/require-login` | GET/POST | ស្ថានភាពការចូលប្រើ (GET ជាសាធារណៈ)។ POST កំណត់ពាក្យសម្ងាត់ / បិទបើកការចូលប្រើ៖ អនុញ្ញាតតែប្រតិបត្តិករប៉ុណ្ណោះ នៅពេលមានពាក្យសម្ងាត់ (សម័យផ្ទាំងគ្រប់គ្រង, CLI មូលដ្ឋាន ឬការបិទការចូលប្រើ — API keys និង token `oma_` ទទួលបាន `403`); សម័យផ្ទាំងគ្រប់គ្រងផ្ញើ `currentPassword` ដើម្បីជំនួសពាក្យសម្ងាត់ |
 
-### ការគ្រប់គ្រងអ្នកផ្តល់សេវា
+### ការគ្រប់គ្រង Provider
 
-| Endpoint                                | Method                    | Description                                                                                                                                                                                          |
-| --------------------------------------- | ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/providers`                        | GET/POST                  | រាយបញ្ជី / បង្កើតអ្នកផ្តល់សេវា                                                                                                                                                                       |
-| `/api/providers/[id]`                   | GET/PUT/DELETE            | គ្រប់គ្រងអ្នកផ្តល់សេវា                                                                                                                                                                               |
-| `/api/providers/[id]/test`              | POST                      | សាកល្បងការតភ្ជាប់អ្នកផ្តល់សេវា                                                                                                                                                                       |
-| `/api/providers/[id]/models`            | GET                       | រាយបញ្ជីម៉ូដែលរបស់អ្នកផ្តល់សេវា                                                                                                                                                                      |
-| `/api/providers/validate`               | POST                      | ផ្ទៀងផ្ទាត់ការកំណត់រចនាសម្ព័ន្ធអ្នកផ្តល់សេវា                                                                                                                                                         |
-| `/api/providers/bulk`                   | POST                      | បន្ថែម API keys ជាបាច់សម្រាប់អ្នកផ្តល់សេវា មួយ                                                                                                                                                       |
-| `/api/providers/import`                 | POST                      | នាំចូលបញ្ជីអ្នកផ្តល់សេវាដែលមានប្រភេទចម្រុះពីឯកសារ CSV/JSON ដែលបានញែក (#6836); លទ្ធផលបរាជ័យមួយផ្នែកតាមជួរ                                                                                             |
-| `/api/provider-nodes*`                  | Various                   | ការគ្រប់គ្រងថ្នាំងអ្នកផ្តល់សេវា                                                                                                                                                                      |
-| `/api/provider-models`                  | GET/POST/PUT/PATCH/DELETE | ម៉ូដែលផ្ទាល់ខ្លួន និងការបដិសេធតាមម៉ូដែល (បន្ថែម, ធ្វើបច្ចុប្បន្នភាព, លាក់/បង្ហាញ, លុប)                                                                                                               |
-| `/api/provider-models/validate-and-add` | POST                      | ការចុះឈ្មោះម៉ូដែលផ្ទាល់ខ្លួនដោយអនុវត្តការផ្ទៀងផ្ទាត់ការតភ្ជាប់យ៉ាងតឹងរឹងតាមជម្រើស និងមានលក្ខណៈអាតូមិក ដែលបានផ្ទៀងផ្ទាត់ដោយការគ្រប់គ្រង; សូមមើល [ការផ្ទៀងផ្ទាត់ម៉ូដែល](../guides/MODEL-VALIDATION.md) |
+| Endpoint                                | Method                    | Description                                                                                                                                                                                                         |
+| --------------------------------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/providers`                        | GET/POST                  | រាយបញ្ជី / បង្កើត provider                                                                                                                                                                                          |
+| `/api/providers/[id]`                   | GET/PUT/DELETE            | គ្រប់គ្រង provider                                                                                                                                                                                                  |
+| `/api/providers/[id]/test`              | POST                      | សាកល្បងការតភ្ជាប់ទៅ provider                                                                                                                                                                                        |
+| `/api/providers/[id]/models`            | GET                       | រាយបញ្ជីម៉ូដែលរបស់ provider                                                                                                                                                                                         |
+| `/api/providers/validate`               | POST                      | ផ្ទៀងផ្ទាត់ការកំណត់រចនាសម្ព័ន្ធ provider                                                                                                                                                                            |
+| `/api/providers/bulk`                   | POST                      | បន្ថែម API keys ជាបណ្ដុំសម្រាប់ provider មួយ                                                                                                                                                                        |
+| `/api/providers/import`                 | POST                      | នាំចូល LIST នៃ provider ចម្រុះពីឯកសារ CSV/JSON ដែលបានញែក (#6836); លទ្ធផលបរាជ័យដោយផ្នែកសម្រាប់មួយជួរ                                                                                                                 |
+| `/api/provider-nodes*`                  | Various                   | ការគ្រប់គ្រង node របស់ provider                                                                                                                                                                                     |
+| `/api/provider-models`                  | GET/POST/PUT/PATCH/DELETE | ម៉ូដែលផ្ទាល់ខ្លួន និងការបដិសេធតម្លៃតាមម៉ូដែល (បន្ថែម, ធ្វើបច្ចុប្បន្នភាព, លាក់/បង្ហាញ, លុប)                                                                                                                         |
+| `/api/provider-models/validate-and-add` | POST                      | ការផ្ទៀងផ្ទាត់ការតភ្ជាប់តឹងរឹងដែលត្រូវបានជ្រើសរើស និងការចុះបញ្ជីម៉ូដែលផ្ទាល់ខ្លួនជាអាតូមិក ដោយតម្រូវឱ្យមានការផ្ទៀងផ្ទាត់អត្តសញ្ញាណសម្រាប់ការគ្រប់គ្រង; សូមមើល [ការផ្ទៀងផ្ទាត់ម៉ូដែល](../guides/MODEL-VALIDATION.md) |
 
 សម្រាប់ម៉ូដែលដែលបានធ្វើសមកាលកម្ម/នាំចូល `PUT /api/provider-models` ទទួលយក `provider`, `modelId` និង
-`maxOutputTokenOverride`៖ ចំនួនគត់វិជ្ជមានកំណត់ពិដាន token លទ្ធផលដោយដៃ ហើយ `null`
-លុបវាចេញ ដើម្បីស្ដារតម្លៃលំនាំដើម។ `GET /api/provider-models?provider=<provider>` ត្រឡប់តម្លៃទាំងនេះ
-នៅក្នុង `modelOutputOverrides` រួមទាំងម៉ូដែលដែលគ្មានជួរម៉ូដែលផ្ទាល់ខ្លួន។ ការបដិសេធនេះប្រើសមត្ថភាព
-`max_output_tokens` ពេលដំណើរការ ហើយនៅតែរក្សាទុកបន្ទាប់ពីធ្វើសមកាលកម្មម៉ូដែលឡើងវិញ។ ទំព័រអ្នកផ្តល់សេវាដែលឆបគ្នាជាមួយ OpenAI
-ផ្តល់ការគ្រប់គ្រងកែសម្រួល/លុបដូចគ្នា ហើយសម្គាល់ម៉ូដែលដែលមានការគាំទ្ររូបភាពច្បាស់លាស់។
+`maxOutputTokenOverride`៖ ចំនួនគត់វិជ្ជមានកំណត់កម្រិត token លទ្ធផលដោយដៃ ហើយ `null`
+លុបការកំណត់នេះ ដើម្បីស្ដារតម្លៃលំនាំដើម។ `GET /api/provider-models?provider=<provider>` បង្ហាញតម្លៃទាំងនេះក្នុង
+`modelOutputOverrides` រួមទាំងម៉ូដែលដែលមិនមានជួរម៉ូដែលផ្ទាល់ខ្លួន។ ការបដិសេធតម្លៃនេះប្រើសមត្ថភាព `max_output_tokens` ពេលដំណើរការ
+ហើយនៅតែរក្សាទុកបន្ទាប់ពីធ្វើសមកាលកម្មម៉ូដែលឡើងវិញ។ ទំព័រ provider ដែលឆបគ្នាជាមួយ OpenAI ផ្តល់ការគ្រប់គ្រងកែសម្រួល/លុបដូចគ្នា ហើយសម្គាល់ម៉ូដែលដែលមានការគាំទ្ររូបភាពច្បាស់លាស់។
 
-នៅលើថ្នាំងអ្នកផ្តល់សេវាដែលឆបគ្នា ផ្លូវសរសេរ (`POST`, `PUT`, `PATCH`, `DELETE` និង
-`/api/provider-models/validate-and-add`) រក្សាទុកលេខសម្គាល់ម៉ូដែលជាលេខសម្គាល់ upstream ដើម៖ លេខសម្គាល់មួយ
-ដែលបានបិទភ្ជាប់ពីបញ្ជីដែលមានបុព្វបទ នឹងមានជង់បុព្វបទផ្ទាល់ខ្លួនរបស់ថ្នាំងដែលនៅខាងមុខត្រូវបានបង្រួម ហើយ
-ការឆ្លើយតបនឹងបង្ហាញលេខសម្គាល់ដែលបានរក្សាទុក។ លេខសម្គាល់ដែលមានសញ្ញា slash របស់អ្នកផ្តល់សេវា Canonical (ឧ. `nvidia/nemotron-…`) ត្រូវបាន
-រក្សាទុកតាមដើម។ `/v1/models` មិនដែលបញ្ចេញលេខសម្គាល់ដែលមានជង់ `<prefix>/<prefix>/<model>` ទេ។
+នៅលើ node របស់ provider ដែលឆបគ្នា ផ្លូវសរសេរ (`POST`, `PUT`, `PATCH`, `DELETE` និង
+`/api/provider-models/validate-and-add`) រក្សាទុក model id ជា id ដើមពី upstream៖ id
+ដែលបានបិទភ្ជាប់ពីបញ្ជីដែលមាន prefix នឹងត្រូវបង្រួម prefix ដើមៗដែលជាស្រទាប់ជាប់គ្នារបស់ node នោះ ហើយ
+ការឆ្លើយតបនឹងបង្ហាញ id ដែលបានរក្សាទុក។ id ដែលមានសញ្ញា slash របស់ provider canonical (ឧ. `nvidia/nemotron-…`) ត្រូវបាន
+រក្សាទុកដូចដើម។ `/v1/models` មិនដែលបញ្ចេញ id ដែលមានទម្រង់ជាជាន់ៗ `<prefix>/<prefix>/<model>` ទេ។
 
-ថ្នាំង Custom Chat Completions សម្របការបិទការគិតដោយច្បាស់លាស់ទៅនឹង backend ខាងលើ។ ការធ្វើតេស្តការតភ្ជាប់ដោយជោគជ័យ នឹងជ្រើសរើសការគ្រប់គ្រង chat-template ដោយស្វ័យប្រវត្តិសម្រាប់ model ID ជាក់លាក់នីមួយៗ ដែលធាតុ `/models` របស់វាបង្ហាញតម្លៃ `owned_by` ដែលត្រូវបានទទួលស្គាល់៖ `vllm`, `sglang`, ឬ `llamacpp`។ Wrapper ដែលត្រូវគ្នាជាមួយ OpenAI ដោយមានតម្លាភាព អាចរក្សាធាតុ model ដើមនៅក្នុង object `openai` ដែលជាប់ខាងក្នុង។ ការរកឃើញនឹងបន្តតាម envelope ប្រភេទនេះរហូតដល់បីជាន់។ Model ដែលខ្វះ ownership មិនស្គាល់ ownership ឬមាន ownership ផ្ទុយគ្នា នឹងបន្តប្រើឥរិយាបថ OpenAI ធម្មតា។ ការរកឃើញប្រើសំណើ catalog ដែលមានស្រាប់ឡើងវិញ មិនបង្កើត completion tokens ណាមួយទេ ហើយនឹងត្រូវបានធ្វើឱ្យមិនមានសុពលភាព នៅពេល endpoint នៃការតភ្ជាប់ផ្លាស់ប្តូរ។
+ថ្នាំង Custom Chat Completions សម្របសម្រួលការបិទការគិតដោយច្បាស់លាស់ទៅនឹង backend ខាងលើ។ ការធ្វើតេស្តការតភ្ជាប់ដែលជោគជ័យ នឹងជ្រើសរើសការគ្រប់គ្រង chat-template ដោយស្វ័យប្រវត្តិសម្រាប់ model ID នីមួយៗដែលត្រឹមត្រូវជាក់លាក់ ហើយដែលធាតុ `/models` របស់វាបញ្ជាក់ថា `owned_by` មានតម្លៃដែលបានទទួលស្គាល់៖ `vllm`, `sglang`, ឬ `llamacpp`។ Wrapper ដែលត្រូវគ្នាជាមួយ OpenAI និងមានភាពថ្លា អាចរក្សាទុកធាតុ model ដើមនៅក្នុង object `openai` ដែលជាប់ខាងក្នុង។ ការរកឃើញនឹងបន្តតាម envelope ប្រភេទនេះរហូតដល់បីជាន់។ Models ដែលខ្វះ ownership មិនស្គាល់ ownership ឬមាន ownership ប៉ះទង្គិចគ្នា នឹងបន្តប្រើឥរិយាបថ OpenAI ធម្មតា។ ការរកឃើញប្រើសំណើ catalog ដែលមានស្រាប់ឡើងវិញ មិនបង្កើត completion tokens ឡើយ ហើយនឹងត្រូវចាត់ទុកជាមិនមានសុពលភាព នៅពេល endpoint នៃការតភ្ជាប់ត្រូវបានផ្លាស់ប្តូរ។
 
-ដើម្បីកំណត់ឥរិយាបថសម្រាប់ backend ដែលមិនបង្ហាញ metadata នោះ សូមប្រើ API ធ្វើបច្ចុប្បន្នភាព provider មួយផ្នែកដែលមានស្រាប់៖
+ដើម្បីកំណត់ឥរិយាបថសម្រាប់ backend ដែលមិនបង្ហាញ metadata នេះ សូមប្រើ API សម្រាប់ធ្វើបច្ចុប្បន្នភាព provider មួយផ្នែកដែលមានស្រាប់៖
 
 ```json
 {
@@ -1230,90 +1234,90 @@ https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-cred
 }
 ```
 
-ផ្ញើ body នោះជាមួយ `PUT /api/providers/<connection-id>`។ នៅលើការតភ្ជាប់នោះ កម្រិតការគិតជាក់លាក់ `none` នឹងត្រូវបានផ្ញើជា `chat_template_kwargs.thinking=false` និង `chat_template_kwargs.enable_thinking=false`។ តម្លៃ template ដើមដែលបានកំណត់យ៉ាងច្បាស់ នឹងនៅតែមានអាទិភាព លើកលែងតែច្បាប់ការគិតនៅខាង server បង្ខំឱ្យប្រើកម្រិតណាមួយ។ ការកំណត់នេះអនុវត្តតែពេលការតភ្ជាប់ OpenAI-compatible ផ្ទាល់ខ្លួន បញ្ជូន body របស់ Chat Completions ប៉ុណ្ណោះ។ សំណើ Responses និង provider ធម្មតា នឹងរក្សាទម្រង់សំណើដើមរបស់វា។ កំណត់ `reasoningControl` ទៅជា `openai` ដើម្បីបង្ខំឱ្យបញ្ជូន `reasoning_effort` របស់ OpenAI ធម្មតាបន្ត ឬលុបវាចេញ/កំណត់ទៅជា `null` ដើម្បីប្រើការរកឃើញដោយស្វ័យប្រវត្តិ។
+ផ្ញើ body នោះជាមួយ `PUT /api/providers/<connection-id>`។ នៅលើការតភ្ជាប់នោះ កម្រិត reasoning ជាក់លាក់ `none` នឹងត្រូវផ្ញើជា `chat_template_kwargs.thinking=false` និង `chat_template_kwargs.enable_thinking=false`។ តម្លៃ native template ដែលបានកំណត់យ៉ាងច្បាស់ នឹងនៅតែមានអាទិភាព លុះត្រាតែច្បាប់ reasoning ខាង server បង្ខំឱ្យប្រើ effort មួយ។ ការកំណត់នេះអនុវត្តតែពេល custom OpenAI-compatible connection បញ្ជូន Chat Completions body ប៉ុណ្ណោះ។ សំណើ Responses និង providers ធម្មតា នឹងបន្តរក្សាទម្រង់សំណើដើមរបស់ពួកវា។ កំណត់ `reasoningControl` ទៅជា `openai` ដើម្បីបង្ខំឱ្យបញ្ជូន `reasoning_effort` តាម OpenAI ធម្មតា ឬលុបវាចេញ/កំណត់វាទៅជា `null` ដើម្បីប្រើការរកឃើញដោយស្វ័យប្រវត្តិ។
 
-សំណើ classifier ក្នុង auto-mode របស់ Claude Code នឹងកំណត់ native thinking ជាបិទតាមលំនាំដើម នៅពេលវាមិនមានការគ្រប់គ្រងការគិតជាក់លាក់។ ការរកឃើញប្រើ system marker របស់ classifier ក្នុងសំណើទម្រង់ Claude មិនមែនឈ្មោះ model ឬដែនកំណត់ completion ទេ។ ការគ្រប់គ្រងក្នុង body ដោយច្បាស់លាស់, headers របស់ effort/thinking ដែលបានគាំទ្រ, routing rules និង model effort ដែលបានដោះស្រាយ នឹងរក្សាអាទិភាពដែលមានស្រាប់។ ដំណាក់កាល classifier ទាំងពីរ នឹងរក្សា prompts, ដែនកំណត់ completion, stop sequences និង verdict អនុញ្ញាតពិតប្រាកដពី upstream របស់វា។ ដំណាក់កាលទីពីរ នៅតែអាចបង្កើត reasoning ដែលអាចមើលឃើញតាមសំណើរបស់វា ជាអត្ថបទធម្មតា។
+សំណើ classifier សម្រាប់ auto-mode របស់ Claude Code នឹងបិទ native thinking ជាលំនាំដើម នៅពេលវាមិនមានការគ្រប់គ្រង reasoning ជាក់លាក់។ ការរកឃើញប្រើ system marker របស់ classifier នៅក្នុងសំណើទម្រង់ Claude មិនមែនប្រើឈ្មោះ model ឬដែនកំណត់ completion ទេ។ ការគ្រប់គ្រងក្នុង body ជាក់លាក់, headers សម្រាប់ effort/thinking ដែលបានគាំទ្រ, ច្បាប់ routing និង model effort ដែលបានដោះស្រាយ នឹងរក្សាអាទិភាពដែលមានស្រាប់របស់ពួកវា។ ដំណាក់កាល classifier ទាំងពីរ នឹងរក្សា prompts, ដែនកំណត់ completion, stop sequences និងសេចក្តីសម្រេច permission ពិតប្រាកដពី upstream របស់ពួកវា។ ដំណាក់កាលទីពីរ ក៏នៅតែអាចបង្កើត reasoning ដែលមើលឃើញតាមការស្នើសុំរបស់វា ជាអត្ថបទធម្មតាបានដែរ។
 
 ### លំហូរ OAuth
 
-| Endpoint                         | Method | Description                    |
-| -------------------------------- | ------ | ------------------------------ |
-| `/api/oauth/[provider]/[action]` | ផ្សេងៗ | OAuth ជាក់លាក់សម្រាប់ provider |
+| Endpoint                         | Method  | Description                    |
+| -------------------------------- | ------- | ------------------------------ |
+| `/api/oauth/[provider]/[action]` | Various | OAuth ជាក់លាក់សម្រាប់ provider |
 
-### ការបញ្ជូន & ការកំណត់រចនាសម្ព័ន្ធ
+### Routing និង Config
 
-| Endpoint              | Method   | Description                               |
-| --------------------- | -------- | ----------------------------------------- |
-| `/api/models`         | GET/PUT  | បញ្ជី model / ការធ្វើបច្ចុប្បន្នភាព alias |
-| `/api/models/alias`   | GET/POST | Alias របស់ model                          |
-| `/api/models/catalog` | GET      | Model ទាំងអស់តាម provider + ប្រភេទ        |
-| `/api/combos*`        | ផ្សេងៗ   | ការគ្រប់គ្រង Combo                        |
-| `/api/keys*`          | ផ្សេងៗ   | ការគ្រប់គ្រង API key                      |
-| `/api/pricing`        | GET      | តម្លៃ model                               |
+| Endpoint              | Method   | Description                        |
+| --------------------- | -------- | ---------------------------------- |
+| `/api/models`         | GET/PUT  | បញ្ជី model / បច្ចុប្បន្នភាព alias |
+| `/api/models/alias`   | GET/POST | Model aliases                      |
+| `/api/models/catalog` | GET      | Models ទាំងអស់តាម provider + type  |
+| `/api/combos*`        | Various  | ការគ្រប់គ្រង Combo                 |
+| `/api/keys*`          | Various  | ការគ្រប់គ្រង API key               |
+| `/api/pricing`        | GET      | តម្លៃ Model                        |
 
 #### ប្រភពដើមនៃដែនកំណត់ model
 
-`GET /api/models?withLimits=1` (ក៏អាចជា `true` បានដែរ; `0`/`false` ឬការលុបវាចេញ នឹងរក្សា payload លំនាំដើមមិនឱ្យផ្លាស់ប្តូរ) នឹងបន្ថែម `contextWindow`, `maxInputTokens`, `maxOutputTokens` និង object `capsSource` ទៅក្នុងជួរ model នីមួយៗ។ `capsSource` បញ្ជាក់ឈ្មោះច្បាប់ដែលបានផ្គត់ផ្គង់ដែនកំណត់នីមួយៗ ដូច្នេះដែនកំណត់ដែលគួរឱ្យភ្ញាក់ផ្អើល (ឧទាហរណ៍ 128k លើ model 1M) អាចតាមដានទៅប្រភពដើមរបស់វា។ តម្លៃដែលបានដោះស្រាយ គឺជាតម្លៃដូចគ្នាដែល routing ប្រើ។ flag នេះគ្រាន់តែបន្ថែម fields ហើយមិនដែលផ្លាស់ប្តូរតម្លៃណាមួយឡើយ។ តម្លៃ `withLimits` ផ្សេងទៀតទាំងអស់ នឹងត្រូវបានបដិសេធដោយ `400`។
+`GET /api/models?withLimits=1` (ក៏មាន `true` ផងដែរ។ `0`/`false` ឬការមិនបញ្ចូលវា នឹងរក្សា payload លំនាំដើមដោយមិនផ្លាស់ប្តូរ) នឹងបន្ថែម `contextWindow`, `maxInputTokens`, `maxOutputTokens` និង object `capsSource` ទៅក្នុងជួរដេក model នីមួយៗ។ `capsSource` បញ្ជាក់ច្បាប់ដែលបានផ្គត់ផ្គង់ដែនកំណត់នីមួយៗ ដូច្នេះដែនកំណត់ដែលគួរឱ្យភ្ញាក់ផ្អើល (ឧទាហរណ៍ 128k លើ model 1M) អាចតាមដានត្រឡប់ទៅប្រភពដើមរបស់វា។ តម្លៃដែលបានដោះស្រាយ គឺជាតម្លៃដូចគ្នាដែល routing ប្រើ។ flag នេះគ្រាន់តែបន្ថែម fields ហើយមិនដែលផ្លាស់ប្តូរតម្លៃណាមួយឡើយ។ តម្លៃ `withLimits` ផ្សេងទៀតទាំងអស់ នឹងត្រូវបដិសេធដោយ `400`។
 
-| តម្លៃ `capsSource`                           | ប្រភព                                                                     |
+| `capsSource` value                           | Origin                                                                    |
 | -------------------------------------------- | ------------------------------------------------------------------------- |
 | `override:context`                           | ការបដិសេធ context-window ដែលបានរក្សាទុក (`model_context_overrides`)       |
 | `override:max_input` / `override:max_output` | ការបដិសេធសមត្ថភាព `max_input_tokens` / `max_output_tokens` ដែលបានរក្សាទុក |
-| `static-authoritative:<provider>/<model>`    | តារាង context-window static ដែលមានអាទិភាព                                 |
+| `static-authoritative:<provider>/<model>`    | តារាង context-window static ដែលមានសិទ្ធិអាទិភាព                           |
 | `synced:<provider>/<model>`                  | ជួរសមត្ថភាពដែលបានធ្វើសមកាលកម្មពី models.dev                               |
-| `registry:<provider>/<model>`                | ធាតុក្នុងបញ្ជីឈ្មោះរបស់ provider                                          |
-| `spec:<model>`                               | លក្ខណៈបច្ចេកទេស static របស់ model                                         |
-| បុព្វបទ `effort-base:`                       | ជួរដែលបានខ្ចីពី model មូលដ្ឋាននៃ variant ដែលមានបន្ថែម effort              |
-| `none`                                       | គ្មានប្រភពណាមួយប្រកាសដែនកំណត់ទេ (តម្លៃគឺ `null`)                          |
+| `registry:<provider>/<model>`                | ធាតុក្នុង provider registry                                               |
+| `spec:<model>`                               | Model spec static                                                         |
+| `effort-base:` prefix                        | ជួរដេកដែលបានខ្ចីពី model មូលដ្ឋាននៃ variant ដែលមានបន្ថែម effort           |
+| `none`                                       | គ្មានប្រភពណាមួយប្រកាសដែនកំណត់នេះទេ (តម្លៃគឺ `null`)                       |
 
 ការអនុវត្ត៖ `getResolvedModelCapabilitiesWithLimitSources()` នៅក្នុង `src/lib/modelCapabilities.ts` និងខ្សែអាទិភាពនៅក្នុង `src/lib/modelCapabilityLimits.ts`។
 
-### ការប្រើប្រាស់ & ការវិភាគទិន្នន័យ
+### ការប្រើប្រាស់ និង Analytics
 
-| Endpoint                         | Method          | Description                                                                                                                                                                                                                                                                                               |
-| -------------------------------- | --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/usage/history`             | GET             | ប្រវត្តិការប្រើប្រាស់                                                                                                                                                                                                                                                                                     |
-| `/api/usage/logs`                | GET             | កំណត់ហេតុការប្រើប្រាស់                                                                                                                                                                                                                                                                                    |
-| `/api/usage/request-logs`        | GET             | កំណត់ហេតុកម្រិតសំណើ                                                                                                                                                                                                                                                                                       |
-| `/api/usage/[connectionId]`      | GET             | ការប្រើប្រាស់តាមការតភ្ជាប់នីមួយៗ                                                                                                                                                                                                                                                                          |
-| `/api/usage/token-limits`        | GET/POST/DELETE | ថវិកាកំណត់ token តាម API key នីមួយៗ                                                                                                                                                                                                                                                                       |
-| `/api/usage/model-latency-stats` | GET             | សរុប latency បែបរមូរតាមអ្នកផ្តល់សេវា/ម៉ូដែល (មធ្យម/p50/p95/p99, អត្រាជោគជ័យ)；តម្រង៖ `windowHours`/`minSamples`/`maxRows`/`provider`/`model` (#6873)                                                                                                                                                      |
-| `/api/usage/cache-health`        | GET             | សេចក្តីសង្ខេបសុខភាព prompt-cache លើ `call_logs` — សមាមាត្រសរសេរ/អាន, ការចែកចាយទំហំសរសេរ p50/p90/p99, ការប្រមូលផ្តុំការសរសេរច្រើន, ការបែងចែកតាមម៉ូដែល និងលទ្ធផល `healthy`/`degraded`/`thrash`/`no-data`；ប៉ារ៉ាម៉ែត្រសំណួរ `range` (`1h`\|`24h`\|`7d`\|`30d`, លំនាំដើម `24h`) និង `model` ជាជម្រើស (#8827) |
+| Endpoint                         | Method          | Description                                                                                                                                                                                                                                                                                          |
+| -------------------------------- | --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/usage/history`             | GET             | ប្រវត្តិនៃការប្រើប្រាស់                                                                                                                                                                                                                                                                              |
+| `/api/usage/logs`                | GET             | កំណត់ហេតុនៃការប្រើប្រាស់                                                                                                                                                                                                                                                                             |
+| `/api/usage/request-logs`        | GET             | កំណត់ហេតុកម្រិតសំណើ                                                                                                                                                                                                                                                                                  |
+| `/api/usage/[connectionId]`      | GET             | ការប្រើប្រាស់តាមការតភ្ជាប់នីមួយៗ                                                                                                                                                                                                                                                                     |
+| `/api/usage/token-limits`        | GET/POST/DELETE | ថវិកាកំណត់ចំនួន token តាម API key នីមួយៗ                                                                                                                                                                                                                                                             |
+| `/api/usage/model-latency-stats` | GET             | ស្ថិតិសរុបនៃភាពយឺតតាមអ្នកផ្តល់សេវា/ម៉ូដែលនីមួយៗដែលគណនាតាមបង្អួចពេលវេលា (avg/p50/p95/p99, អត្រាជោគជ័យ); តម្រង៖ `windowHours`/`minSamples`/`maxRows`/`provider`/`model` (#6873)                                                                                                                        |
+| `/api/usage/cache-health`        | GET             | សេចក្តីសង្ខេបសុខភាព prompt-cache លើ `call_logs` — សមាមាត្រសរសេរ/អាន, ការបែងចែកទំហំសរសេរ p50/p90/p99, កំហាប់នៃការសរសេរខ្លាំង, ការបែងចែកតាមម៉ូដែល និងលទ្ធផល `healthy`/`degraded`/`thrash`/`no-data`; ប៉ារ៉ាម៉ែត្រសំណួរ `range` (`1h`\|`24h`\|`7d`\|`30d`, លំនាំដើម `24h`) និង `model` ជាជម្រើស (#8827) |
 
 ### សិទ្ធិ API key
 
-`PATCH /api/keys/{id}` ធ្វើបច្ចុប្បន្នភាពសិទ្ធិរបស់ key ដែលមានស្រាប់។ ដូចទៅនឹង route `/api/keys*` ទាំងអស់ វាត្រូវការការអនុញ្ញាតសម្រាប់ការគ្រប់គ្រង (សូមមើល [ការផ្ទៀងផ្ទាត់ការគ្រប់គ្រង](../guides/MANAGEMENT-AUTH.md)) មិនមែន inference key ទេ។ ផ្ញើតែវាលដែលអ្នកចង់ផ្លាស់ប្តូរ។ សំណើដែលមិនមានវាលណាមួយក្នុងចំណោមវាលទាំងនេះ នឹងត្រូវបដិសេធដោយ `No valid fields to update`។ វាលដែលអាចទទួលយកបាន ត្រូវបានកំណត់ដោយ `updateKeyPermissionsSchema` ក្នុង `src/shared/validation/schemas/keys.ts`។
+`PATCH /api/keys/{id}` ធ្វើបច្ចុប្បន្នភាពសិទ្ធិរបស់ key ដែលមានស្រាប់។ ដូចគ្រប់ route `/api/keys*` ទាំងអស់ វាត្រូវការការអនុញ្ញាតសម្រាប់ការគ្រប់គ្រង (មើល [ការផ្ទៀងផ្ទាត់ការគ្រប់គ្រង](../guides/MANAGEMENT-AUTH.md)) មិនមែន inference key ទេ។ ផ្ញើតែ fields ដែលអ្នកចង់ផ្លាស់ប្តូរ; សំណើដែលគ្មាន fields ទាំងនេះត្រូវបានបដិសេធដោយ `No valid fields to update`។ Fields ដែលទទួលយកបានត្រូវបានកំណត់ដោយ `updateKeyPermissionsSchema` ក្នុង `src/shared/validation/schemas/keys.ts`។
 
-| Field                                       | Type                                                              | Notes                                                                                                                     |
-| ------------------------------------------- | ----------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| `name`                                      | ខ្សែអក្សរ, 1-200 តួអក្សរ                                          |                                                                                                                           |
-| `isActive`                                  | ប៊ូលីន                                                            |                                                                                                                           |
-| `isBanned`                                  | ប៊ូលីន                                                            |                                                                                                                           |
-| `expiresAt`                                 | កាលបរិច្ឆេទ-ពេលវេលា ISO 8601 ឬ `null`                             | `null` លុបកាលកំណត់ផុតកំណត់                                                                                                |
-| `modelAccessMode`                           | `all` \| `restricted`                                             | `allowedModels` ត្រូវតែទទេ នៅពេល mode ជា `all`                                                                            |
-| `allowedModels`, `blockedModels`            | អារេនៃខ្សែអក្សរ រហូតដល់ 1000                                      |                                                                                                                           |
-| `allowedCombos`                             | អារេនៃខ្សែអក្សរ រហូតដល់ 500                                       | កំណត់ combos ណាខ្លះដែល key អាចហៅបាន; models ដោយផ្ទាល់ត្រូវបានគ្រប់គ្រងដោយ `modelAccessMode` / `allowedModels`             |
-| `connectionAccessMode`                      | `all` \| `restricted`                                             | `allowedConnections` ត្រូវតែមិនទទេ នៅពេល `restricted` ហើយត្រូវតែទទេ នៅពេល `all`                                           |
-| `allowedConnections`                        | អារេនៃ UUIDs រហូតដល់ 100                                          |                                                                                                                           |
-| `allowAutoCombos`                           | ប៊ូលីន                                                            | `false` បដិសេធសំណើសម្រាប់ models `auto/*` ដោយប្រើ key នេះ; keys ដែលមិនធ្លាប់កំណត់វា នឹងត្រូវបានអនុញ្ញាត                   |
-| `catalogScope`                              | `all` \| `combos` \| `models`                                     | អ្វីដែល `GET /v1/models` រាយសម្រាប់ key នេះ (មានតែ combos, មានតែ models ឬទាំងពីរ); វាមិនផ្លាស់ប្តូរអ្វីដែល key អាចហៅបានទេ |
-| `forcedModel`                               | ខ្សែអក្សររហូតដល់ 300 តួអក្សរ ឬ `null`                             | បញ្ជូនសំណើ chat ទៅកាន់ model/combo នេះ ដោយមានអាទិភាពលើ `X-Route-Model` និង `body.model`; កម្រិតរបស់ key នៅតែអនុវត្ត       |
-| `noLog`, `autoResolve`                      | ប៊ូលីន                                                            |                                                                                                                           |
-| `throttleDelayMs`                           | ចំនួនគត់, 0-300000                                                |                                                                                                                           |
-| `maxSessions`                               | ចំនួនគត់, 0-10000                                                 |                                                                                                                           |
-| `rateLimits`                                | អារេនៃ `{ limit, window }` (ចំនួនគត់វិជ្ជមាន រហូតដល់ 50) ឬ `null` | `null` លុបដែនកំណត់                                                                                                        |
-| `accessSchedule`                            | វត្ថុកាលវិភាគ ឬ `null`                                            | `null` លុបកាលវិភាគ                                                                                                        |
-| `scopes`                                    | អារេនៃខ្សែអក្សរ រហូតដល់ 32                                        |                                                                                                                           |
-| `allowedEndpoints`                          | អារេនៃខ្សែអក្សរ រហូតដល់ 20                                        |                                                                                                                           |
-| `streamDefaultMode`                         | `legacy` \| `json`                                                |                                                                                                                           |
-| `cacheDefaultMode`                          | `legacy` \| `bypass`                                              | សូមមើល [ការបិទ cache តាម key](#per-key-cache-bypass)                                                                      |
-| `compressionEnabled`                        | ប៊ូលីន                                                            |                                                                                                                           |
-| `codexServiceMode`                          | មួយក្នុងចំណោមរបៀបសេវាកម្ម Codex                                   |                                                                                                                           |
-| `disableNonPublicModels`                    | boolean                                                           |                                                                                                                           |
-| `allowUsageCommand`                         | boolean                                                           |                                                                                                                           |
-| `usageLimitEnabled`                         | boolean                                                           |                                                                                                                           |
-| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | number >= 0 or `null`                                             |                                                                                                                           |
-| `chaosModeEnabled`                          | boolean                                                           |                                                                                                                           |
+| វាល                                         | ប្រភេទ                                                             | កំណត់ចំណាំ                                                                                                                |
+| ------------------------------------------- | ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------- |
+| `name`                                      | ខ្សែអក្សរ, 1-200 តួអក្សរ                                           |                                                                                                                           |
+| `isActive`                                  | ប៊ូលីន                                                             |                                                                                                                           |
+| `isBanned`                                  | ប៊ូលីន                                                             |                                                                                                                           |
+| `expiresAt`                                 | កាលបរិច្ឆេទនិងពេលវេលា ISO 8601 ឬ `null`                            | `null` លុបពេលផុតកំណត់                                                                                                     |
+| `modelAccessMode`                           | `all` \| `restricted`                                              | `allowedModels` ត្រូវតែទទេ នៅពេល mode ជា `all`                                                                            |
+| `allowedModels`, `blockedModels`            | អារេនៃខ្សែអក្សរ, រហូតដល់ 1000                                      |                                                                                                                           |
+| `allowedCombos`                             | អារេនៃខ្សែអក្សរ, រហូតដល់ 500                                       | កំណត់ថា key អាចហៅ combos ណាខ្លះបាន; models ដោយផ្ទាល់ ត្រូវបានគ្រប់គ្រងដោយ `modelAccessMode` / `allowedModels`             |
+| `connectionAccessMode`                      | `all` \| `restricted`                                              | `allowedConnections` ត្រូវតែមិនទទេ នៅពេល `restricted` ហើយត្រូវតែទទេ នៅពេល `all`                                           |
+| `allowedConnections`                        | អារេនៃ UUIDs, រហូតដល់ 100                                          |                                                                                                                           |
+| `allowAutoCombos`                           | ប៊ូលីន                                                             | `false` បដិសេធសំណើសុំ models `auto/*` ជាមួយ key នេះ; keys ដែលមិនធ្លាប់កំណត់វា នឹងត្រូវបានអនុញ្ញាត                         |
+| `catalogScope`                              | `all` \| `combos` \| `models`                                      | អ្វីដែល `GET /v1/models` រាយសម្រាប់ key នេះ (មានតែ combos, មានតែ models ឬទាំងពីរ); វាមិនផ្លាស់ប្តូរអ្វីដែល key អាចហៅបានទេ |
+| `forcedModel`                               | ខ្សែអក្សររហូតដល់ 300 តួអក្សរ ឬ `null`                              | បញ្ជូនសំណើ chat ទៅ model/combo នេះ ដោយមានអាទិភាពលើ `X-Route-Model` និង `body.model`; ដែនកំណត់របស់ key នៅតែអនុវត្ត         |
+| `noLog`, `autoResolve`                      | ប៊ូលីន                                                             |                                                                                                                           |
+| `throttleDelayMs`                           | ចំនួនគត់, 0-300000                                                 |                                                                                                                           |
+| `maxSessions`                               | ចំនួនគត់, 0-10000                                                  |                                                                                                                           |
+| `rateLimits`                                | អារេនៃ `{ limit, window }` (ចំនួនគត់វិជ្ជមាន, រហូតដល់ 50) ឬ `null` | `null` លុបដែនកំណត់                                                                                                        |
+| `accessSchedule`                            | វត្ថុកាលវិភាគ ឬ `null`                                             | `null` លុបកាលវិភាគ                                                                                                        |
+| `scopes`                                    | អារេនៃខ្សែអក្សរ, រហូតដល់ 32                                        |                                                                                                                           |
+| `allowedEndpoints`                          | អារេនៃខ្សែអក្សរ, រហូតដល់ 20                                        |                                                                                                                           |
+| `streamDefaultMode`                         | `legacy` \| `json`                                                 |                                                                                                                           |
+| `cacheDefaultMode`                          | `legacy` \| `bypass`                                               | សូមមើល [ការរំលង cache តាម key](#per-key-cache-bypass)                                                                     |
+| `compressionEnabled`                        | ប៊ូលីន                                                             |                                                                                                                           |
+| `codexServiceMode`                          | មួយក្នុងចំណោម modes សេវាកម្ម Codex                                 |                                                                                                                           |
+| `disableNonPublicModels`                    | boolean                                                            |                                                                                                                           |
+| `allowUsageCommand`                         | boolean                                                            |                                                                                                                           |
+| `usageLimitEnabled`                         | boolean                                                            |                                                                                                                           |
+| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | number >= 0 or `null`                                              |                                                                                                                           |
+| `chaosModeEnabled`                          | boolean                                                            |                                                                                                                           |
 
 ```bash
 curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
@@ -1324,78 +1328,107 @@ curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
 
 ### ការកំណត់
 
-| Endpoint                              | Method        | Description                                                                                                                                                                                                                                                                     |
-| ------------------------------------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/settings`                       | GET/PUT/PATCH | ការកំណត់ទូទៅ។ គ្រាប់ចុចគោលការណ៍សុវត្ថិភាព (`requireLogin`, `newPassword`, `oidc*`, `corsOrigins`, `bruteForceProtection`) ត្រូវការ `currentPassword` និងព័ត៌មានសម្គាល់ប្រតិបត្តិករ — API keys និងថូខឹន `oma_` ទទួលបាន `403`; រាល់ការកែប្រែត្រូវការស្កុប `admin` នៃ access-token |
-| `/api/settings/proxy`                 | GET/PUT       | ការកំណត់ប្រូកស៊ីបណ្តាញ                                                                                                                                                                                                                                                          |
-| `/api/settings/proxy/test`            | POST          | សាកល្បងការតភ្ជាប់ប្រូកស៊ី                                                                                                                                                                                                                                                       |
-| `/api/settings/ip-filter`             | GET/PUT       | បញ្ជីអនុញ្ញាត/បញ្ជីទប់ស្កាត់ IP                                                                                                                                                                                                                                                 |
-| `/api/settings/thinking-budget`       | GET/PUT       | របៀបសរសេរឡើងវិញនៃ **សំណើ** សម្រាប់ការគិត/ការវែកញែក (ឆ្លងកាត់ / ដកចេញដោយស្វ័យប្រវត្តិ / ផ្ទាល់ខ្លួន / ប្រែប្រួល)។ ឯករាជ្យពីការបង្ហាប់។ សូមមើល [THINKING_BUDGET.md](../guides/THINKING_BUDGET.md)។                                                                                |
-| `/api/settings/system-prompt`         | GET/PUT       | system prompt សកល                                                                                                                                                                                                                                                               |
-| `/api/settings/compression`           | GET/PUT       | ការកំណត់ការបង្ហាប់សកល                                                                                                                                                                                                                                                           |
-| `/api/settings/purge-request-history` | POST          | សម្អាតជួរកំណត់ហេតុសំណើ និងឯកសារ call-log ក្នុងមូលដ្ឋាន                                                                                                                                                                                                                          |
+| Endpoint                              | Method        | Description                                                                                                                                                                                                                                                                   |
+| ------------------------------------- | ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/settings`                       | GET/PUT/PATCH | ការកំណត់ទូទៅ។ សោគោលនយោបាយសុវត្ថិភាព (`requireLogin`, `newPassword`, `oidc*`, `corsOrigins`, `bruteForceProtection`) ត្រូវការ `currentPassword` និងព័ត៌មានសម្គាល់របស់ប្រតិបត្តិករ — API keys និងថូខិន `oma_` ទទួលបាន `403`; រាល់ការកែប្រែត្រូវការវិសាលភាព access-token `admin` |
+| `/api/settings/proxy`                 | GET/PUT       | ការកំណត់ប្រូកស៊ីបណ្តាញ                                                                                                                                                                                                                                                        |
+| `/api/settings/proxy/test`            | POST          | សាកល្បងការតភ្ជាប់ប្រូកស៊ី                                                                                                                                                                                                                                                     |
+| `/api/settings/ip-filter`             | GET/PUT       | បញ្ជីអនុញ្ញាត/ទប់ស្កាត់ IP                                                                                                                                                                                                                                                    |
+| `/api/settings/thinking-budget`       | GET/PUT       | របៀបសរសេរឡើងវិញ **request** សម្រាប់ការគិត/ការវែកញែក (passthrough / auto-strip / custom / adaptive)។ ឯករាជ្យពីការបង្ហាប់។ សូមមើល [THINKING_BUDGET.md](../guides/THINKING_BUDGET.md)។                                                                                           |
+| `/api/settings/system-prompt`         | GET/PUT       | system prompt សកល                                                                                                                                                                                                                                                             |
+| `/api/settings/compression`           | GET/PUT       | ការកំណត់ការបង្ហាប់សកល                                                                                                                                                                                                                                                         |
+| `/api/settings/purge-request-history` | POST          | សម្អាតជួរទិន្នន័យកំណត់ហេតុសំណើ និងឯកសារស្នាមសល់នៃកំណត់ហេតុការហៅក្នុងមូលដ្ឋាន                                                                                                                                                                                                  |
 
 ### បរិបទ និងការបង្ហាប់
 
 | Endpoint                               | Method         | Description                                                              |
 | -------------------------------------- | -------------- | ------------------------------------------------------------------------ |
-| `/api/compression/preview`             | POST           | មើលជាមុនការបង្ហាប់ off/lite/standard/aggressive/ultra/RTK/stacked        |
+| `/api/compression/preview`             | POST           | មើលជាមុនការបង្ហាប់ប្រភេទ off/lite/standard/aggressive/ultra/RTK/stacked  |
 | `/api/compression/language-packs`      | GET            | រាយបញ្ជីកញ្ចប់ភាសា Caveman ដែលមាន                                        |
 | `/api/compression/rules`               | GET            | រាយបញ្ជីទិន្នន័យមេតារបស់ច្បាប់ Caveman                                   |
-| `/api/context/caveman/config`          | GET/PUT        | ឈ្មោះកាត់សម្រាប់ការកំណត់ជាក់លាក់របស់ Caveman                             |
+| `/api/context/caveman/config`          | GET/PUT        | ឈ្មោះក្លែងក្លាយសម្រាប់ការកំណត់ជាក់លាក់របស់ Caveman                       |
 | `/api/context/rtk/config`              | GET/PUT        | ការកំណត់ជាក់លាក់របស់ RTK រួមទាំងតម្រងផ្ទាល់ខ្លួន និងការរក្សាទុកលទ្ធផលដើម |
 | `/api/context/rtk/filters`             | GET            | កាតាឡុកតម្រង RTK និងការវិនិច្ឆ័យតម្រងផ្ទាល់ខ្លួន                         |
-| `/api/context/rtk/test`                | POST           | ដំណើរការការមើលជាមុន/សាកល្បង RTK លើ payload អត្ថបទ                        |
-| `/api/context/rtk/raw-output/[id]`     | GET            | អានលទ្ធផលដើមដែលបានលាក់ព័ត៌មានសម្ងាត់ និងរក្សាទុកតាម pointer id           |
+| `/api/context/rtk/test`                | POST           | ដំណើរការការមើលជាមុន/សាកល្បង RTK លើបន្ទុកអត្ថបទ                           |
+| `/api/context/rtk/raw-output/[id]`     | GET            | អានលទ្ធផលដើមដែលបានលាក់បាំង និងរក្សាទុក តាមរយៈលេខសម្គាល់ pointer          |
 | `/api/context/combos`                  | GET/POST       | រាយបញ្ជី/បង្កើតបន្សំការបង្ហាប់                                           |
-| `/api/context/combos/[id]`             | GET/PUT/DELETE | ព័ត៌មានលម្អិត/ធ្វើបច្ចុប្បន្នភាព/លុបបន្សំការបង្ហាប់                      |
-| `/api/context/combos/[id]/assignments` | GET/PUT        | ផ្ដល់បន្សំការបង្ហាប់ទៅបន្សំការកំណត់ផ្លូវ                                 |
-| `/api/context/analytics`               | GET            | ឈ្មោះកាត់សម្រាប់វិភាគការបង្ហាប់                                          |
+| `/api/context/combos/[id]`             | GET/PUT/DELETE | លម្អិត/ធ្វើបច្ចុប្បន្នភាព/លុបបន្សំការបង្ហាប់                             |
+| `/api/context/combos/[id]/assignments` | GET/PUT        | កំណត់បន្សំការបង្ហាប់ទៅបន្សំការកំណត់ផ្លូវ                                 |
+| `/api/context/analytics`               | GET            | ឈ្មោះក្លែងក្លាយសម្រាប់ការវិភាគការបង្ហាប់                                 |
 
 ### ការត្រួតពិនិត្យ
 
-| Endpoint                             | Method     | Description                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| ------------------------------------ | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/sessions`                      | GET        | ការតាមដានសម័យដែលសកម្ម                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| `/api/rate-limits`                   | GET        | ដែនកំណត់អត្រាតាមគណនី                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| `/api/monitoring/health`             | GET        | ការត្រួតពិនិត្យសុខភាព + សេចក្ដីសង្ខេបអ្នកផ្ដល់សេវា (`catalogCount`, `configuredCount`, `activeCount`, `monitoredCount`)។ ទិដ្ឋភាពគ្រប់គ្រងរួមមាន `credentialHealth`៖ តម្លៃ scalar របស់ probe-cache, `failedConnections` នៅពេល `failed>0`, និង `staleDbNonOkCount` (ស្ថានភាព `test_status` ដែលជាប់ថេរនៅក្នុង SQLite មិនមែន gauge ទេ)។ សូមមើល [MONITORING_GUIDE.md](../ops/MONITORING_GUIDE.md#credentialhealth-probe-cache-vs-sqlite-test_status)។ |
-| `/api/cache/stats`                   | GET/DELETE | ស្ថិតិឃ្លាំងសម្ងាត់ / សម្អាត                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| `/api/modality-bridge/stats`         | GET        | `attempts` ក្នុងអង្គចងចាំ, ជោគជ័យ/`bridged`, បរាជ័យ, ការចូលប្រើឃ្លាំងសម្ងាត់, `totalLatencyMs`, `latencySamples`, `averageLatencyMs` ដែលគិតតាមចំនួនសំណាក និងពេលវេលាប្រើប្រាស់ចុងក្រោយ (កំណត់ឡើងវិញពេលចាប់ផ្ដើមឡើងវិញ; ត្រូវការការផ្ទៀងផ្ទាត់សិទ្ធិគ្រប់គ្រង)                                                                                                                                                                                      |
-| `/api/modality-bridge/video/runtime` | GET        | ការត្រួតពិនិត្យ trusted-loopback ដ៏តឹងរ៉ឹង មុនពេលការផ្ទៀងផ្ទាត់សិទ្ធិគ្រប់គ្រង/ការស្ទង់; ភាពមាន និងកំណែ FFmpeg/ffprobe ដែលបានសម្អាត (no-store)                                                                                                                                                                                                                                                                                                    |
-| `/api/modality-bridge/video/extract` | POST       | ឧបករណ៍បញ្ជូន byte ខាងក្នុងដែលត្រូវបានផ្ទៀងផ្ទាត់ និង trusted-loopback; បញ្ចូលអតិបរមា 50 MiB, ជួររង់ចាំមានព្រំដែន/លទ្ធផល 32 MiB, `503` សមត្ថភាពពេញ, `499` ការផ្ដាច់, `504` ហួសពេលកំណត់; មិនមែនជា API ផ្ទុកឡើងសាធារណៈទេ                                                                                                                                                                                                                             |
+| Endpoint                             | Method     | Description                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| ------------------------------------ | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/sessions`                      | GET        | ការតាមដានសម័យសកម្ម                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `/api/rate-limits`                   | GET        | ដែនកំណត់អត្រាតាមគណនី                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `/api/monitoring/health`             | GET        | ការត្រួតពិនិត្យសុខភាព + សេចក្តីសង្ខេបអ្នកផ្តល់សេវា (`catalogCount`, `configuredCount`, `activeCount`, `monitoredCount`)។ ទិដ្ឋភាពគ្រប់គ្រងរួមមាន `credentialHealth`៖ តម្លៃសង្ខេបរបស់ឃ្លាំងសម្ងាត់ស្ទង់ពិនិត្យ, `failedConnections` នៅពេល `failed>0`, និង `staleDbNonOkCount` (តម្លៃ `test_status` ដែលជាប់នៅក្នុង SQLite មិនមែនជារង្វាស់ទេ)។ សូមមើល [MONITORING_GUIDE.md](../ops/MONITORING_GUIDE.md#credentialhealth-probe-cache-vs-sqlite-test_status)។ |
+| `/api/cache/stats`                   | GET/DELETE | ស្ថិតិឃ្លាំងសម្ងាត់ / សម្អាតឃ្លាំងសម្ងាត់                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `/api/modality-bridge/stats`         | GET        | `attempts` ក្នុងអង្គចងចាំ, ជោគជ័យ/`bridged`, បរាជ័យ, ការចូលប្រើឃ្លាំងសម្ងាត់, `totalLatencyMs`, `latencySamples`, `averageLatencyMs` ដែលគិតតាមចំនួនគំរូ, និងពេលវេលាប្រើប្រាស់ចុងក្រោយ (កំណត់ឡើងវិញនៅពេលចាប់ផ្តើមឡើងវិញ; ត្រូវការការផ្ទៀងផ្ទាត់សិទ្ធិគ្រប់គ្រង)                                                                                                                                                                                           |
+| `/api/modality-bridge/video/runtime` | GET        | ការត្រួតពិនិត្យ strict trusted-loopback មុនការផ្ទៀងផ្ទាត់សិទ្ធិគ្រប់គ្រង/ការស្ទង់ពិនិត្យ; ភាពមាន និងកំណែ FFmpeg/ffprobe ដែលបានសម្អាត (no-store)                                                                                                                                                                                                                                                                                                          |
+| `/api/modality-bridge/video/extract` | POST       | អ្នកសម្របសម្រួលបៃត៍ខាងក្នុងដែលត្រូវបានផ្ទៀងផ្ទាត់ និង trusted-loopback; ធាតុបញ្ចូល 50 MiB, ជួររង់ចាំមានដែនកំណត់/លទ្ធផល 32 MiB, `503` សមត្ថភាពពេញ, `499` ការផ្តាច់, `504` ផុតកំណត់; មិនមែនជា API ផ្ទុកឡើងសាធារណៈទេ                                                                                                                                                                                                                                        |
+
+### ការពិនិត្យលម្អិតស៊ុមវីដេអូ
+
+`GET /api/v1/video-bridge/drilldown` អាន opaque handle ដែលភ្ជាប់ជាមួយ tenant និងត្រូវបានត្រឡប់មកក្នុង
+`x-omniroute-video-drilldown` បន្ទាប់ពីសំណើ Video Bridge ដែលបានផ្តល់ការយល់ព្រមយ៉ាងច្បាស់លាស់។
+ទាំងការអាន និង `DELETE` តែងតែតម្រូវឱ្យមាន API key ត្រឹមត្រូវ និងសិទ្ធិឯករាជ្យរបស់ operator
+`modalityBridgeVideoDrilldownRemoteEnabled`។ ការរក្សាទុកក្នុង production តម្រូវបន្ថែមឱ្យមាន
+`modalityBridgeVideoDrilldownEnabled` និង `drilldown: true` យ៉ាងតឹងរ៉ឹងសម្រាប់គ្រប់ផ្នែក។
+ប្រសិនបើ key មាន endpoint allowlist ដែលមិនទទេ វាត្រូវតែរួមបញ្ចូល `video` សម្រាប់ទាំង GET និង DELETE
+មិនថាអ្នកហៅប្រើ `/v1` ឬ `/api/v1` ក៏ដោយ។
+
+សំណួរ GET៖ តម្រូវឱ្យមាន `handle`; ជាជម្រើសមាន `variant` (`preview`, `standard`, `detail`),
+`limit` (1–8; `frames` ចាស់អាចប្រើបាន ប៉ុន្តែមិនអាចប្រើរួមជាមួយ `limit`),
+`page` ដែលចាប់ផ្តើមពីសូន្យ និងវិនាទី `start`/`end`។ នៅពេលផ្តល់ព្រំដែន focus ទាំងពីរ
+`end` ត្រូវតែធំជាង `start`។ សោសំណួរដែលស្ទួន/មិនស្គាល់ត្រូវបានបដិសេធ។
+ការឆ្លើយតបដែលជោគជ័យមាន `derivation`, `durationSeconds`, `frames`,
+`hasMore`, `page`, `variant` និង `focusWindow` ជាជម្រើស; JSON ដែលមាន no-store ត្រូវបានកំណត់ត្រឹម
+32 MiB ដោយរាប់បញ្ចូល Base64។ លទ្ធផលដែលធំពេកត្រឡប់ 413; សូមស្នើចំនួន frames តិចជាងនេះ។
+
+`DELETE /api/v1/video-bridge/drilldown?handle=...` ត្រឡប់ `{ "removed": 0|1 }`។
+GET ដែលមាន handle មិនស្គាល់ ផុតកំណត់ និងឆ្លង key ត្រូវបានបង្ហាញជាការឆ្លើយតប 404 ដូចគ្នា;
+DELETE ឆ្លង key មិនអាចលុបធាតុរបស់ម្ចាស់បានទេ។ ការចូលប្រើដែលបានបិទត្រឡប់ 403,
+ការផ្ទៀងផ្ទាត់ដែលខ្វះ/មិនត្រឹមត្រូវត្រឡប់ 401, សំណួរមិនត្រឹមត្រូវត្រឡប់ 400,
+ការលុបចោលត្រឡប់ 499 និងកំហុសបណ្តោះអាសន្នត្រឡប់ 503។
+Handle ត្រូវបានកំណត់ត្រឹមដំណើរការនីមួយៗ ផុតកំណត់បន្ទាប់ពីដប់នាទី និងមិននៅសល់បន្ទាប់ពីចាប់ផ្តើមឡើងវិញទេ។
+Handle ថ្មីប្រើ `v1.` បូកនឹង token Base64URL ចៃដន្យទំហំ 32 បៃ; មានតែ hash របស់ token ប៉ុណ្ណោះដែលត្រូវបានរក្សាទុក។
+Token ចាស់ប្រវែង 64 តួអក្សរ hexadecimal នៅតែអាចអានតាមវេយ្យាករណ៍បាន ដើម្បីភាពឆបគ្នា។
+សូមមើល [គោលការណ៍ការពារ Video Bridge](../security/GUARDRAILS.md#video-bridge-videobridgets-videobridgepipelinets)
+សម្រាប់ព័ត៌មានលម្អិតអំពីការយល់ព្រម កូតា និងការបង្កើត variant។
 
 ### ការបម្រុងទុក និងនាំចេញ/នាំចូល
 
-| Endpoint                    | Method | Description                                                                                |
-| --------------------------- | ------ | ------------------------------------------------------------------------------------------ |
-| `/api/db-backups`           | GET    | រាយបញ្ជីការបម្រុងទុកដែលមាន                                                                 |
-| `/api/db-backups`           | PUT    | បង្កើតការបម្រុងទុកដោយដៃ                                                                    |
-| `/api/db-backups`           | POST   | ស្ដារពីការបម្រុងទុកជាក់លាក់មួយ                                                             |
-| `/api/db-backups`           | PATCH  | រក្សាទុកការកំណត់ការរក្សាទុកការបម្រុងទុក (សម្រាប់ operator ប៉ុណ្ណោះ)                        |
-| `/api/db-backups`           | DELETE | លុបការបម្រុងទុកដែលបានរក្សាទុកលើសពីការកំណត់ការរក្សាទុក (សម្រាប់ operator ប៉ុណ្ណោះ)          |
-| `/api/db-backups/export`    | GET    | ទាញយកមូលដ្ឋានទិន្នន័យជាឯកសារ .sqlite                                                       |
-| `/api/db-backups/import`    | POST   | ផ្ទុកឯកសារ .sqlite ឡើង ដើម្បីជំនួសមូលដ្ឋានទិន្នន័យ (`?dryRun=true` ធ្វើសុពលកម្មតែប៉ុណ្ណោះ) |
-| `/api/db-backups/exportAll` | GET    | ទាញយកការបម្រុងទុកពេញលេញជាបណ្ណសារ .tar.gz                                                   |
+| Endpoint                    | Method | Description                                                                              |
+| --------------------------- | ------ | ---------------------------------------------------------------------------------------- |
+| `/api/db-backups`           | GET    | រាយបញ្ជីការបម្រុងទុកដែលមាន                                                               |
+| `/api/db-backups`           | PUT    | បង្កើតការបម្រុងទុកដោយដៃ                                                                  |
+| `/api/db-backups`           | POST   | ស្តារពីការបម្រុងទុកជាក់លាក់                                                              |
+| `/api/db-backups`           | PATCH  | រក្សាទុកការកំណត់ការរក្សាទុកការបម្រុងទុក (សម្រាប់ operator តែប៉ុណ្ណោះ)                    |
+| `/api/db-backups`           | DELETE | លុបការបម្រុងទុកដែលបានរក្សាទុកឱ្យស្របតាមការកំណត់ការរក្សាទុក (សម្រាប់ operator តែប៉ុណ្ណោះ) |
+| `/api/db-backups/export`    | GET    | ទាញយក database ជាឯកសារ .sqlite                                                           |
+| `/api/db-backups/import`    | POST   | ផ្ទុកឯកសារ .sqlite ឡើង ដើម្បីជំនួស database (`?dryRun=true` ផ្ទៀងផ្ទាត់តែប៉ុណ្ណោះ)       |
+| `/api/db-backups/exportAll` | GET    | ទាញយកការបម្រុងទុកពេញលេញជាបណ្ណសារ .tar.gz                                                 |
 
-`/api/db-backups/export`, `/api/db-backups/exportAll` និង `/api/settings/export-json` ផ្ដល់
-ព័ត៌មានសម្ងាត់ដែលបានរក្សាទុកទាំងអស់ ដូច្នេះវាតម្រូវឱ្យមានសម័យ dashboard ឬ CLI មូលដ្ឋាន (ឬបិទ
-ការចូលប្រើ)។ API keys គ្រប់វិសាលភាព និង access tokens `oma_` នឹងទទួលបាន `403`។ ប្រតិបត្តិការស្ដារមាន
-ព្រំដែនដូចគ្នា៖ `POST /api/db-backups/import` (`dryRun=true` រួមបញ្ចូល), `POST /api/db-backups` (ស្ដារតាម id)
-និង `POST /api/settings/import-json` ជំនួសមូលដ្ឋានទិន្នន័យ ឬការកំណត់ដែលកំពុងប្រើប្រាស់ ដូច្នេះ
-machine credential ក៏នឹងទទួលបាន `403` នៅទីនោះដែរ។ `omniroute sync import` ផ្ញើ credential របស់ CLI មូលដ្ឋាន។ ដូចគ្នានេះផងដែរ
-`DELETE /api/db-backups` (លុបការបម្រុងទុកដែលបានរក្សាទុកលើសពីកំណត់) និង `PATCH /api/db-backups` (ការកំណត់ការរក្សាទុក៖
-តម្លៃដែលបានរក្សាទុកជំរុញការលុបស្វ័យប្រវត្តិបន្ទាប់ពីការបម្រុងទុកនីមួយៗ)។ ការរាយបញ្ជី (`GET`) និងការបង្កើត
-ការបម្រុងទុកដោយដៃ (`PUT`) នៅតែប្រើការផ្ទៀងផ្ទាត់សិទ្ធិគ្រប់គ្រងធម្មតា។
+`/api/db-backups/export`, `/api/db-backups/exportAll` និង `/api/settings/export-json` ផ្តល់
+ព័ត៌មានសម្ងាត់ដែលបានរក្សាទុកទាំងអស់ ដូច្នេះវាតម្រូវឱ្យមាន dashboard session ឬ local CLI (ឬ login
+ត្រូវបានបិទ)។ API keys គ្រប់ scope និង access tokens `oma_` ទទួលបាន `403`។ ការស្តារក៏ស្ថិតក្រោម
+ព្រំដែនដូចគ្នា៖ `POST /api/db-backups/import` (`dryRun=true` រួមបញ្ចូល), `POST /api/db-backups` (ស្តារតាម id)
+និង `POST /api/settings/import-json` ជំនួស database ឬ settings ដែលកំពុងដំណើរការ ដូច្នេះ machine
+credential ក៏ទទួលបាន `403` នៅទីនោះដែរ; `omniroute sync import` ផ្ញើ local CLI credential។ ដូចគ្នានេះ
+អនុវត្តចំពោះ `DELETE /api/db-backups` (លុបការបម្រុងទុកដែលបានរក្សាទុក) និង `PATCH /api/db-backups` (ការកំណត់ការរក្សាទុក៖
+តម្លៃដែលបានរក្សាទុកជំរុញការលុបដោយស្វ័យប្រវត្តិបន្ទាប់ពីការបម្រុងទុកនីមួយៗ)។ ការរាយបញ្ជី (`GET`) និងការបង្កើត
+ការបម្រុងទុកដោយដៃ (`PUT`) នៅតែប្រើការផ្ទៀងផ្ទាត់ការគ្រប់គ្រងធម្មតា។
 
-### សមកាលកម្ម Cloud
+### ការធ្វើសមកាលកម្ម Cloud
 
-| Endpoint               | Method  | Description                  |
-| ---------------------- | ------- | ---------------------------- |
-| `/api/sync/cloud`      | Various | ប្រតិបត្តិការសមកាលកម្ម Cloud |
-| `/api/sync/initialize` | POST    | ចាប់ផ្ដើមសមកាលកម្ម           |
-| `/api/cloud/*`         | Various | ការគ្រប់គ្រង Cloud           |
+| Endpoint               | Method  | Description                      |
+| ---------------------- | ------- | -------------------------------- |
+| `/api/sync/cloud`      | Various | ប្រតិបត្តិការធ្វើសមកាលកម្ម Cloud |
+| `/api/sync/initialize` | POST    | ចាប់ផ្តើមការធ្វើសមកាលកម្ម        |
+| `/api/cloud/*`         | Various | ការគ្រប់គ្រង Cloud               |
 
-### ផ្លូវរូង
+### Tunnel
 
 | Endpoint                   | Method | Description                                                             |
 | -------------------------- | ------ | ----------------------------------------------------------------------- |
@@ -1414,30 +1447,30 @@ machine credential ក៏នឹងទទួលបាន `403` នៅទីនោ
 | `/api/cli-tools/openclaw-settings` | GET    | ស្ថានភាព OpenClaw CLI |
 | `/api/cli-tools/runtime/[toolId]`  | GET    | runtime CLI ទូទៅ      |
 
-ចម្លើយតបរបស់ CLI រួមមាន៖ `installed`, `runnable`, `command`, `commandPath`, `runtimeMode`, `reason`។
+ការឆ្លើយតបរបស់ CLI រួមមាន៖ `installed`, `runnable`, `command`, `commandPath`, `runtimeMode`, `reason`។
 
 ### ភ្នាក់ងារ ACP
 
 | Endpoint          | Method | Description                                                                     |
 | ----------------- | ------ | ------------------------------------------------------------------------------- |
 | `/api/acp/agents` | GET    | រាយបញ្ជីភ្នាក់ងារដែលបានរកឃើញទាំងអស់ (ភ្ជាប់មកជាមួយ + ផ្ទាល់ខ្លួន) ជាមួយស្ថានភាព |
-| `/api/acp/agents` | POST   | បន្ថែមភ្នាក់ងារផ្ទាល់ខ្លួន ឬធ្វើឱ្យឃ្លាំងសម្ងាត់ការរកឃើញស្រស់ឡើងវិញ             |
+| `/api/acp/agents` | POST   | បន្ថែមភ្នាក់ងារផ្ទាល់ខ្លួន ឬធ្វើឱ្យឃ្លាំងសម្ងាត់ការរកឃើញថ្មី                    |
 | `/api/acp/agents` | DELETE | លុបភ្នាក់ងារផ្ទាល់ខ្លួនតាម query param `id`                                     |
 
-ចម្លើយតប GET រួមមាន `agents[]` (id, name, binary, version, installed, protocol, isCustom) និង `summary` (total, installed, notFound, builtIn, custom)។
+ការឆ្លើយតប `GET` រួមមាន `agents[]` (id, name, binary, version, installed, protocol, isCustom) និង `summary` (total, installed, notFound, builtIn, custom)។
 
 ### ភាពធន់ និងដែនកំណត់អត្រា
 
-| Endpoint                          | Method    | Description                                                                                                                                                                                                                                                                                                                                                                                        |
-| --------------------------------- | --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/resilience`                 | GET/PATCH | ទទួល/ធ្វើបច្ចុប្បន្នភាពជួរសំណើ ការរង់ចាំមុនភ្ជាប់ឡើងវិញ ឧបករណ៍បំបែកសៀគ្វីរបស់អ្នកផ្តល់សេវា និងការកំណត់ពេលរង់ចាំ                                                                                                                                                                                                                                                                                    |
-| `/api/resilience/reset`           | POST      | កំណត់ឧបករណ៍បំបែកសៀគ្វីរបស់អ្នកផ្តល់សេវាឡើងវិញ                                                                                                                                                                                                                                                                                                                                                      |
-| `/api/resilience/model-cooldowns` | GET       | រាយបញ្ជីការទប់ស្កាត់សកម្មតាម (អ្នកផ្តល់សេវា, ការតភ្ជាប់, ម៉ូដែល) ដោយតម្រៀបតាមពេលវេលានៅសល់                                                                                                                                                                                                                                                                                                          |
-| `/api/resilience/model-cooldowns` | DELETE    | លុបការទប់ស្កាត់ម៉ូដែល — body `{provider, model}` ឬ `{all: true}` ដើម្បីលុបទាំងអស់                                                                                                                                                                                                                                                                                                                  |
-| `/api/rate-limits`                | GET/POST  | ស្ថានភាពកម្រិតអត្រាតាមគណនី (GET) ឬបើក/បិទការការពារកម្រិតអត្រាសម្រាប់ការតភ្ជាប់ (POST `{connectionId, enabled}`). គាំទ្រផ្លូវសរសេរសម្រាប់ `rateLimitProtection` (មិនដែលកែប្រែតាមរយៈ `PUT /api/providers/[id]`)។ ចំណាំ៖ `enabled: false` បិទការការពារដែលបានកំណត់ជាក់លាក់ ប៉ុន្តែមិនធ្វើឱ្យការតភ្ជាប់ API-key សកម្មចាកចេញពីប្រព័ន្ធសុវត្ថិភាពបើកដោយស្វ័យប្រវត្តិសកល (`autoEnableApiKeyProviders`) ទេ។ |
-| `/api/rate-limit`                 | GET       | ការកំណត់រចនាសម្ព័ន្ធកម្រិតអត្រាសកល (លែងប្រើ; ជាឈ្មោះកាត់ទៅ `/api/rate-limits`)                                                                                                                                                                                                                                                                                                                     |
+| Endpoint                          | Method    | Description                                                                                                                                                                                                                                                                                                                                                                                                 |
+| --------------------------------- | --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/resilience`                 | GET/PATCH | ទទួល/ធ្វើបច្ចុប្បន្នភាពជួរសំណើ ពេលផ្អាកការតភ្ជាប់ ឧបករណ៍បំបែករបស់អ្នកផ្តល់សេវា និងការកំណត់ពេលរង់ចាំ                                                                                                                                                                                                                                                                                                         |
+| `/api/resilience/reset`           | POST      | កំណត់ឧបករណ៍បំបែកសៀគ្វីរបស់អ្នកផ្តល់សេវាឡើងវិញ                                                                                                                                                                                                                                                                                                                                                               |
+| `/api/resilience/model-cooldowns` | GET       | រាយបញ្ជីការទប់ស្កាត់សកម្មតាម (provider, connection, model) និងតម្រៀបតាមពេលវេលានៅសល់                                                                                                                                                                                                                                                                                                                         |
+| `/api/resilience/model-cooldowns` | DELETE    | លុបការទប់ស្កាត់ម៉ូដែល — body `{provider, model}` ឬ `{all: true}` ដើម្បីលុបទាំងអស់                                                                                                                                                                                                                                                                                                                           |
+| `/api/rate-limits`                | GET/POST  | ស្ថានភាពដែនកំណត់អត្រាតាមគណនី (GET) ឬបិទ/បើកការការពារដែនកំណត់អត្រាសម្រាប់ការតភ្ជាប់ (POST `{connectionId, enabled}`). ផ្លូវសរសេរដែលគាំទ្រសម្រាប់ `rateLimitProtection` (មិនដែលត្រូវបានកែប្រែតាមរយៈ `PUT /api/providers/[id]`)។ ចំណាំ៖ `enabled: false` បិទការការពារដែលបានកំណត់ដោយផ្ទាល់ ប៉ុន្តែមិនដកការតភ្ជាប់ active API-key ចេញពីស្រទាប់សុវត្ថិភាពបើកដោយស្វ័យប្រវត្តិសកល (`autoEnableApiKeyProviders`) ទេ។ |
+| `/api/rate-limit`                 | GET       | ការកំណត់រចនាសម្ព័ន្ធដែនកំណត់អត្រាសកល (លែងប្រើហើយ; ជាឈ្មោះក្លែងក្លាយទៅ `/api/rate-limits`)                                                                                                                                                                                                                                                                                                                   |
 
-> រ៉ូត `/api/resilience/*` ទាំងបួនតម្រូវឱ្យមាន **ការផ្ទៀងផ្ទាត់សិទ្ធិគ្រប់គ្រង** (`requireManagementAuth`)។ សូមមើល [Resilience (extended)](#resilience-extended) សម្រាប់ការពន្យល់ពេញលេញអំពីឧបករណ៍បំបែកសៀគ្វីរបស់អ្នកផ្តល់សេវា បើប្រៀបធៀបនឹងការរង់ចាំមុនភ្ជាប់ឡើងវិញ និងការទប់ស្កាត់ម៉ូដែល។
+> ផ្លូវទាំងបួន `/api/resilience/*` តម្រូវឱ្យមាន **ការផ្ទៀងផ្ទាត់ការគ្រប់គ្រង** (`requireManagementAuth`)។ សូមមើល [ភាពធន់ (ពង្រីក)](#resilience-extended) សម្រាប់ការបែងចែកលម្អិតពេញលេញរវាងឧបករណ៍បំបែករបស់អ្នកផ្តល់សេវា ពេលផ្អាកការតភ្ជាប់ និងការទប់ស្កាត់ម៉ូដែល។
 
 ### ការវាយតម្លៃ
 
@@ -1459,26 +1492,26 @@ machine credential ក៏នឹងទទួលបាន `403` នៅទីនោ
 
 ### v1beta (ឆបគ្នាជាមួយ Gemini)
 
-| Endpoint                   | Method | Description                               |
-| -------------------------- | ------ | ----------------------------------------- |
-| `/v1beta/models`           | GET    | រាយបញ្ជីម៉ូដែលជាទម្រង់ Gemini             |
-| `/v1beta/models/{...path}` | POST   | ចំណុចបញ្ចប់ `generateContent` របស់ Gemini |
+| Endpoint                   | Method | Description                          |
+| -------------------------- | ------ | ------------------------------------ |
+| `/v1beta/models`           | GET    | រាយបញ្ជីម៉ូដែលក្នុងទម្រង់ Gemini     |
+| `/v1beta/models/{...path}` | POST   | ចំណុចបញ្ចប់ Gemini `generateContent` |
 
-ចំណុចបញ្ចប់ទាំងនេះធ្វើត្រាប់តាមទម្រង់ API របស់ Gemini សម្រាប់ client ដែលរំពឹងថានឹងមានភាពឆបគ្នាជាមួយ Gemini SDK ដើម។
+ចំណុចបញ្ចប់ទាំងនេះធ្វើត្រាប់តាមទម្រង់ API របស់ Gemini សម្រាប់កម្មវិធី client ដែលរំពឹងថានឹងមានភាពឆបគ្នាជាមួយ Gemini SDK ដើម។
 
 ### API ខាងក្នុង / ប្រព័ន្ធ
 
-| Endpoint                 | Method | Description                                                                     |
-| ------------------------ | ------ | ------------------------------------------------------------------------------- |
-| `/api/init`              | GET    | ការពិនិត្យការចាប់ផ្តើមកម្មវិធី (ប្រើនៅពេលដំណើរការលើកដំបូង)                      |
-| `/api/tags`              | GET    | ស្លាកម៉ូដែលដែលឆបគ្នាជាមួយ Ollama (សម្រាប់ client របស់ Ollama)                   |
-| `/api/restart`           | POST   | ចាប់ផ្តើមការចាប់ផ្តើមម៉ាស៊ីនមេឡើងវិញដោយរលូន                                     |
-| `/api/shutdown`          | POST   | ចាប់ផ្តើមការបិទម៉ាស៊ីនមេដោយរលូន                                                 |
-| `/api/system/env/repair` | POST   | ជួសជុលអថេរបរិស្ថានរបស់អ្នកផ្តល់សេវា OAuth                                       |
-| `/api/system/version`    | GET    | កំណែបច្ចុប្បន្ន/ចុងក្រោយបំផុត ស្ថានភាពបច្ចុប្បន្នភាព និងឆានែលចេញផ្សាយ           |
-| `/api/system/version`    | POST   | ចាប់ផ្តើមការធ្វើបច្ចុប្បន្នភាពដែលយល់ដឹងពីការដាក់ឱ្យប្រើ ទៅកាន់កំណែចុងក្រោយបំផុត |
+| Endpoint                 | Method | Description                                                         |
+| ------------------------ | ------ | ------------------------------------------------------------------- |
+| `/api/init`              | GET    | ចាប់ផ្តើមសេវាធ្វើសមកាលកម្មផ្ទៃខាងក្រោយ (ការផ្ទៀងផ្ទាត់ការគ្រប់គ្រង) |
+| `/api/tags`              | GET    | ស្លាកម៉ូដែលដែលឆបគ្នាជាមួយ Ollama (សម្រាប់ client របស់ Ollama)       |
+| `/api/restart`           | POST   | ចាប់ផ្តើមការចាប់ផ្តើមម៉ាស៊ីនមេឡើងវិញដោយរលូន                         |
+| `/api/shutdown`          | POST   | ចាប់ផ្តើមការបិទម៉ាស៊ីនមេដោយរលូន                                     |
+| `/api/system/env/repair` | POST   | ជួសជុលអថេរបរិស្ថានរបស់អ្នកផ្តល់សេវា OAuth                           |
+| `/api/system/version`    | GET    | កំណែបច្ចុប្បន្ន/ចុងក្រោយ ស្ថានភាពអាប់ដេត និងឆានែលចេញផ្សាយ           |
+| `/api/system/version`    | POST   | ចាប់ផ្តើមការអាប់ដេតដែលយល់ដឹងពីការដាក់ពង្រាយទៅកាន់កំណែចុងក្រោយ       |
 
-> **ចំណាំ៖** ចំណុចបញ្ចប់ទាំងនេះត្រូវបានប្រើខាងក្នុងដោយប្រព័ន្ធ ឬសម្រាប់ភាពឆបគ្នាជាមួយ client របស់ Ollama។ ជាទូទៅ អ្នកប្រើប្រាស់ចុងក្រោយមិនហៅប្រើវាទេ។
+> **ចំណាំ៖** ចំណុចបញ្ចប់ទាំងនេះត្រូវបានប្រើប្រាស់ខាងក្នុងដោយប្រព័ន្ធ ឬសម្រាប់ភាពឆបគ្នាជាមួយម៉ាស៊ីនភ្ញៀវ Ollama។ ជាទូទៅ វាមិនត្រូវបានហៅប្រើដោយអ្នកប្រើប្រាស់ចុងក្រោយទេ។
 
 ### ការជួសជុលបរិស្ថាន OAuth _(v3.6.1+)_
 
@@ -1491,7 +1524,7 @@ Content-Type: application/json
 }
 ```
 
-ជួសជុលអថេរបរិស្ថាន OAuth ដែលបាត់ ឬខូច សម្រាប់ provider ជាក់លាក់មួយ។ ត្រឡប់៖
+ជួសជុលអថេរបរិស្ថាន OAuth ដែលបាត់ ឬខូច សម្រាប់អ្នកផ្តល់សេវាជាក់លាក់មួយ។ ត្រឡប់មកវិញ៖
 
 ```json
 {
@@ -1507,7 +1540,7 @@ Content-Type: application/json
 GET /api/system/version
 ```
 
-ផ្លូវគ្រប់គ្រងដែលអនុញ្ញាតតែពី loopback ប៉ុណ្ណោះ (ត្រូវការសិទ្ធិ admin)។ ត្រឡប់កំណែដែលកំពុងដំណើរការ កំណែដែលបានចេញផ្សាយចុងក្រោយ និងស្ថានភាពធ្វើបច្ចុប្បន្នភាពស្វ័យប្រវត្តិ។ `releaseChannel` និង `channels` គឺជាវាលបន្ថែម (rail 3.8.54)។ `channel` នៅតែរក្សាអត្ថន័យដើមរបស់វា — របៀបដាក់ឱ្យដំណើរការដែលកម្មវិធីធ្វើបច្ចុប្បន្នភាពរបស់ផ្ទាំងគ្រប់គ្រងប្រើ (`npm`, `source` ឬ `docker-compose`)។
+ផ្លូវគ្រប់គ្រងដែលអនុញ្ញាតតែសម្រាប់ loopback (តម្រូវឱ្យមានការផ្ទៀងផ្ទាត់សិទ្ធិអ្នកគ្រប់គ្រង)។ វាត្រឡប់មកវិញនូវកំណែដែលកំពុងដំណើរការ កំណែចុងក្រោយដែលបានចេញផ្សាយ និងស្ថានភាពធ្វើបច្ចុប្បន្នភាពដោយស្វ័យប្រវត្តិ។ `releaseChannel` និង `channels` គឺជាវាលបន្ថែម (rail 3.8.54)។ `channel` នៅតែរក្សាន័យដើមរបស់វា — របៀបដាក់ឱ្យប្រើប្រាស់ដែលកម្មវិធីធ្វើបច្ចុប្បន្នភាពរបស់ផ្ទាំងគ្រប់គ្រងប្រើ (`npm`, `source` ឬ `docker-compose`)។
 
 ```json
 {
@@ -1523,17 +1556,10 @@ GET /api/system/version
 }
 ```
 
-- `releaseChannel` — ឆានែល npm របស់ build ដែលកំពុងដំណើរការ៖ `nightly` សម្រាប់កំណែ `-nightly.*`,
-  `next` សម្រាប់ pre-release ផ្សេងទៀត (`-rc.*`, `-beta.*`, `-alpha.*`), `lts` សម្រាប់កំណែ stable នៃ
-  major ចាស់ជាង `channels.latest`, បើមិនដូច្នោះទេគឺ `latest`។ ប្រើច្បាប់ដូចគ្នានឹង
-  `scripts/release/dist-tag.mjs` ដែលជ្រើស npm dist-tag នៅពេល publish។
-- `channels` — កំណែចុងក្រោយដែលបានចេញផ្សាយរបស់ dist-tag នីមួយៗ ពី `npm view omniroute dist-tags` (មានការបម្រុងទុកទៅ HTTP របស់ registry) ហើយត្រូវបានរក្សាទុកក្នុង cache ដោយប្រើ TTL 10 នាទីដូចគ្នានឹង `latest`។ `latest` មានជានិច្ច
-  (បើគ្មាន នឹងប្រើវាល `latest` បន្ទាប់មក `"unavailable"`); `next`, `nightly` និង `lts` បង្ហាញ
-  តែពេល dist-tag នោះមានប៉ុណ្ណោះ។ សំណើដែលមាន `Cache-Control: no-cache` នឹងធ្វើឱ្យការស្វែងរកទាំងពីរឡើងវិញ។
+- `releaseChannel` — ឆានែល npm របស់ build ដែលកំពុងដំណើរការ៖ `nightly` សម្រាប់កំណែ `-nightly.*`, `next` សម្រាប់កំណែមុនចេញផ្សាយផ្សេងទៀត (`-rc.*`, `-beta.*`, `-alpha.*`), `lts` សម្រាប់កំណែស្ថិរភាពនៃ major ចាស់ជាង `channels.latest` និង `latest` ក្នុងករណីផ្សេងទៀត។ វាអនុវត្តតាមច្បាប់ដូចគ្នានឹង `scripts/release/dist-tag.mjs` ដែលជ្រើសរើស npm dist-tag នៅពេលចេញផ្សាយ។
+- `channels` — ក្បាលដែលបានចេញផ្សាយរបស់ dist-tag នីមួយៗ ពី `npm view omniroute dist-tags` (មានការបម្រុងទុកទៅ HTTP registry) ហើយត្រូវបានរក្សាទុកក្នុង cache ជាមួយ TTL 10 នាទីដូចគ្នានឹង `latest`។ `latest` តែងតែមាន (ប្រសិនបើមិនមាន នឹងត្រឡប់ទៅវាល `latest` បន្ទាប់មក `"unavailable"`); `next`, `nightly` និង `lts` បង្ហាញតែនៅពេល dist-tag នោះមាន។ សំណើ `Cache-Control: no-cache` នឹងធ្វើឱ្យការស្វែងរកទាំងពីរឡើងវិញ។
 
-ម៉ូដែលឆានែល (`latest` = v3 រហូតដល់ 4.0 GA, `next` = rc, `nightly` = build ពី
-`develop`, `lts` = បំណះ v3 បន្ទាប់ពី 4.0 GA) ត្រូវបានពិពណ៌នានៅក្នុង
-`docs/ops/RELEASE_STRATEGY.md`។
+ម៉ូដែលឆានែល (`latest` = v3 រហូតដល់ GA 4.0, `next` = rc, `nightly` = build ពី `develop`, `lts` = បំណែកបច្ចុប្បន្នភាព v3 បន្ទាប់ពី GA 4.0) ត្រូវបានពិពណ៌នានៅក្នុង `docs/ops/RELEASE_STRATEGY.md`។
 
 ---
 

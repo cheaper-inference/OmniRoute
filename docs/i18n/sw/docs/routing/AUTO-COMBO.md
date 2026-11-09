@@ -127,6 +127,27 @@ Uwekaji alama kiotomatiki huchagua mtoa huduma/muundo bora kwa kila ombi
 | `src/sse/handlers/chat.ts`                                | Ujumuishaji: njia ya mkato ya kiambishi awali cha auto     |
 | `src/shared/constants/providers.ts`                       | Ingizo la mfumo la `SYSTEM_PROVIDERS.auto`                 |
 
+## Mapendeleo ya akaunti kwa michanganyiko ya Kiotomatiki iliyohifadhiwa
+
+Kihariri cha Intelligent Auto kinatoa hiari** Mapendeleo ya akaunti** sehemu. Kila muunganisho unaweza kuwa Unaopendelea, Kawaida (chaguo-msingi), Hifadhi, au Kutengwa. Miunganisho mingi inaweza kushiriki kiwango. Huchagua kiotomatiki ndani ya kiwango cha kwanza kinachostahiki, na kubakiza tabia yake scoring/router hapo; majaribio yaliyoshindwa yanaangukia kwenye akaunti madhubuti zilizosalia, zinazopendekezwa kabla ya kawaida kabla ya hifadhi. Miunganisho isiyojumuishwa haitumiwi kamwe na mchanganyiko huu.
+
+Mpangilio umehifadhiwa kama `config.accountPreferences`, umewekwa na unganisho ID:
+
+```json
+{
+  "accountPreferences": {
+    "connection-a": "preferred",
+    "connection-b": "preferred",
+    "connection-c": "reserve",
+    "connection-d": "excluded"
+  }
+}
+```
+
+Ramani iliyoachwa au tupu huhifadhi uelekezaji uliopo. Mapendeleo hayawashi miunganisho iliyozimwa, kutoa ufikiaji wa ufunguo wa API, kurejesha wagombeaji waliozuiwa, au kupita ukaguzi wa bajeti. Kila jaribio limezuiwa kwa muunganisho wake madhubuti, kwa hivyo urejeshaji wa akaunti hauwezi kuruka viwango nyuma ya kipanga njia cha mseto. Uhusiano wa kipindi uliopo unaweza kuhifadhi akaunti inayostahiki; ukiondoa akaunti inayofungamana na zamu ya asili ambayo hugeuka badala ya kubadilisha akaunti kimya kimya.
+
+Mapendeleo yaliyosanidiwa hutumia njia ya kiotomatiki inayotambua akaunti: akiba ya muktadha isiyofungamana, bomba-bomba mahiri, fujo na njia za mkato za vivuli hazijatumwa. Uzio wa kubahatisha umezimwa kwa maombi haya kwa hivyo akaunti za akiba haziwezi kushindana na zile zinazopendelewa. Mikakati mingine ya mchanganyiko haifasiri mpangilio huu. Kubadilisha mchanganyiko kutoka kwa Otomatiki huweka mapendeleo yaliyohifadhiwa kwa urejeshaji wa baadaye.
+
 ## Majina ya Combo Yanayolingana na Kitambulisho Halisi cha Modeli
 
 Combo ambayo `name` yake inafanana kabisa na kitambulisho tupu cha modeli (k.m. combo inayoitwa

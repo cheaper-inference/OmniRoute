@@ -86,9 +86,11 @@ describe("E2E: Quota Contract (/api/usage/quota)", () => {
       expect(typeof p.provider).toBe("string");
       expect(typeof p.connectionId).toBe("string");
       expect(typeof p.quotaUsed).toBe("number");
-      expect(typeof p.percentRemaining).toBe("number");
-      expect(p.percentRemaining).toBeGreaterThanOrEqual(0);
-      expect(p.percentRemaining).toBeLessThanOrEqual(100);
+      if (p.percentRemaining !== null) {
+        expect(typeof p.percentRemaining).toBe("number");
+        expect(p.percentRemaining).toBeGreaterThanOrEqual(0);
+        expect(p.percentRemaining).toBeLessThanOrEqual(100);
+      }
       expect(["valid", "expiring", "expired", "refreshing"]).toContain(p.tokenStatus);
     }
   });

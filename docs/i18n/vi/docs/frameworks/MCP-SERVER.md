@@ -10,29 +10,30 @@
 
 ## Cài đặt
 
-OmniRoute MCP được tích hợp sẵn. Khởi động bằng:
+OmniRoute MCP được tích hợp sẵn. Bắt đầu nó với:
 
 ```bash
 omniroute --mcp
 ```
 
-Hoặc thông qua transport open-sse:
+Hoặc thông qua vận tải open-sse:
 
 ```bash
-# Transport HTTP có khả năng truyền luồng (cổng 20130)
-omniroute --dev  # MCP tự động khởi động tại endpoint /mcp
+# Streamable HTTP transport (default port 20128, in-process on the dashboard server)
+# Client endpoint: http://localhost:20128/api/mcp/stream
+# stdio: omniroute --mcp
 ```
 
-Các transport HTTP (`sse` / `streamable-http`, được máy chủ dashboard phục vụ trong cùng tiến trình) mặc định bị tắt và trước đây chỉ có thể bật/tắt từ trang `/dashboard/mcp`. Kể từ v3.8.51, CLI có chức năng tương đương:
+Việc vận chuyển HTTP (`sse` / `streamable-http`, được máy chủ bảng điều khiển cung cấp trong quá trình) bị tắt theo mặc định và trước đây chỉ có thể chuyển đổi từ trang `/dashboard/mcp`. Kể từ v3.8.51, CLI có tính chẵn lẻ:
 
 ```bash
-omniroute mcp status                                  # trạng thái bật/trực tuyến, transport, số lượng công cụ
+omniroute mcp status                                  # enabled/online, transport, tool count
 omniroute mcp enable [--transport stdio|sse|streamable-http]
 omniroute mcp disable
-omniroute mcp restart                                 # đặt lại các phiên sse/streamable-http đang hoạt động
+omniroute mcp restart                                 # resets active sse/streamable-http sessions
 ```
 
-`mcp enable`/`mcp disable` gửi yêu cầu PATCH đến cùng thiết lập `mcpEnabled` (và tùy chọn `mcpTransport`) mà dashboard bật/tắt thông qua `/api/settings`. `mcp restart` gọi `POST /api/mcp/restart`: thao tác này đóng các phiên `sse`/`streamable-http` đang hoạt động để yêu cầu tiếp theo khởi tạo lại sạch sẽ, trả về `409` nếu MCP bị tắt và `501` đối với transport `stdio` (các máy khách stdio tự quản lý tiến trình con của chúng — không có handle trong tiến trình để khởi động lại).
+`mcp enable`/`mcp disable` PATCH cùng một `mcpEnabled` (và tùy chọn `mcpTransport`) cài đặt bảng điều khiển chuyển đổi thông qua `/api/settings`. `mcp restart` gọi `POST /api/mcp/restart`: nó phá bỏ các phiên `sse`/`streamable-http` đang hoạt động để yêu cầu tiếp theo khởi tạo lại một cách rõ ràng, trả về `409` nếu MCP bị vô hiệu hóa và `501` cho việc vận chuyển `stdio` (máy khách stdio sở hữu quy trình con — của riêng họ và không có trình xử lý nào trong quy trình để khởi động lại).
 
 ## Transport
 
@@ -127,53 +128,40 @@ Cursor, Cline và các máy khách MCP tương thích.
 
 ## Công cụ nén (13)
 
-| Công cụ                             | Phạm vi             | Mô tả                                                                                                                                      |
-| :---------------------------------- | :------------------ | :----------------------------------------------------------------------------------------------------------------------------------------- |
-| `omniroute_compression_status`      | `read:compression`  | Cài đặt nén, bản tóm tắt phân tích và số liệu thống kê có tính đến bộ nhớ đệm (bao gồm siêu dữ liệu `analytics.mcpDescriptionCompression`) |
-| `omniroute_compression_configure`   | `write:compression` | Cấu hình chế độ nén, ngưỡng, tỷ lệ mục tiêu, bảo toàn system prompt và công tắc nén mô tả MCP                                              |
-| `omniroute_set_compression_engine`  | `write:compression` | Chọn engine đang hoạt động (off/caveman/rtk/stacked) và cường độ Caveman/RTK                                                               |
-| `omniroute_list_compression_combos` | `read:compression`  | Liệt kê các tổ hợp nén có tên và pipeline engine của chúng                                                                                 |
-| `omniroute_compression_combo_stats` | `read:compression`  | Dữ liệu phân tích được nhóm theo tổ hợp nén và engine                                                                                      |
-| `omniroute_ccr_store`               | `write:compression` | Lưu nội dung được cô lập theo bên gọi trong kho CCR giới hạn trong bộ nhớ và trả về một dấu mốc cùng tham chiếu `ccr://`                   |
-| `omniroute_ccr_retrieve`            | `read:compression`  | Truy xuất toàn bộ nội dung CCR hoặc bằng các chế độ head, tail, lines, grep và stats                                                       |
-| `omniroute_ccr_inspect`             | `read:compression`  | Kiểm tra siêu dữ liệu CCR thuộc sở hữu của bên gọi mà không trả về nội dung                                                                |
-| `omniroute_ccr_list`                | `read:compression`  | Liệt kê siêu dữ liệu được phân trang cho các khối CCR thuộc sở hữu của bên gọi                                                             |
-| `omniroute_ccr_delete`              | `write:compression` | Xóa một khối CCR thuộc sở hữu của bên gọi                                                                                                  |
-| `omniroute_ccr_stats`               | `read:compression`  | Báo cáo mức sử dụng bộ nhớ theo phạm vi bên gọi, bộ đếm vòng đời và giới hạn kho                                                           |
-| `omniroute_rtk_discover`            | `read:compression`  | Phát hiện nhiễu lặp lại trong các mẫu đầu ra RTK được chủ động cho phép                                                                    |
-| `omniroute_rtk_learn`               | `read:compression`  | Tạo bản nháp bộ lọc RTK có thể xem xét từ các mẫu được chủ động cho phép                                                                   |
+| Dụng cụ                             | Phạm vi             | Sự miêu tả                                                                                                                                         |
+| :---------------------------------- | :------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `omniroute_compression_status`      | `read:compression`  | Cài đặt nén, tóm tắt phân tích và thống kê nhận biết bộ đệm (bao gồm siêu dữ liệu `analytics.mcpDescriptionCompression` )                          |
+| `omniroute_compression_configure`   | `write:compression` | Định cấu hình chế độ nén, ngưỡng, tỷ lệ mục tiêu, bảo toàn lời nhắc hệ thống, chuyển đổi nén mô tả MCP                                             |
+| `omniroute_set_compression_engine`  | `write:compression` | Chọn công cụ hoạt động (off/caveman/rtk/stacked) và cường độ Caveman/RTK                                                                           |
+| `omniroute_list_compression_combos` | `read:compression`  | Liệt kê các tổ hợp nén được đặt tên và đường dẫn động cơ của chúng                                                                                 |
+| `omniroute_compression_combo_stats` | `read:compression`  | Phân tích được nhóm theo tổ hợp nén và công cụ                                                                                                     |
+| `omniroute_ccr_store`               | `write:compression` | Lưu trữ nội dung bị cô lập bởi người gọi trong kho lưu trữ CCR trong bộ nhớ được giới hạn và trả về một điểm đánh dấu cộng với tham chiếu `ccr://` |
+| `omniroute_ccr_retrieve`            | `read:compression`  | Truy xuất nội dung CCR đầy đủ hoặc với các chế độ đầu, đuôi, dòng, grep và thống kê                                                                |
+| `omniroute_ccr_inspect`             | `read:compression`  | Kiểm tra siêu dữ liệu CCR do người gọi sở hữu mà không trả lại nội dung                                                                            |
+| `omniroute_ccr_list`                | `read:compression`  | Liệt kê siêu dữ liệu được phân trang cho các khối CCR do người gọi sở hữu                                                                          |
+| `omniroute_ccr_delete`              | `write:compression` | Xóa khối CCR do người gọi sở hữu                                                                                                                   |
+| `omniroute_ccr_stats`               | `read:compression`  | Báo cáo mức sử dụng bộ nhớ trong phạm vi người gọi, bộ đếm vòng đời và giới hạn lưu trữ                                                            |
+| `omniroute_rtk_discover`            | `read:compression`  | Khám phá tiếng ồn định kỳ trong các mẫu đầu ra RTK chọn tham gia                                                                                   |
+| `omniroute_rtk_learn`               | `read:compression`  | Tạo bản nháp bộ lọc RTK có thể xem lại từ các mẫu chọn tham gia                                                                                    |
 
-Các mục CCR chỉ tồn tại trong bộ nhớ và sẽ biến mất khi khởi động lại. Mỗi khối được giới hạn ở 2 MiB, mỗi
-principal ở 16 MiB và kho toàn cục ở 64 MiB. Theo mặc định, các mục có TTL là 24 giờ (tối đa
-bảy ngày). Việc truy xuất toàn bộ qua MCP được giới hạn ở 256 KiB; các khối lớn hơn vẫn có thể được truy cập thông qua
-chế độ theo phạm vi và grep. Việc lưu trữ, truy xuất, liệt kê, kiểm tra, xóa và thống kê được cô lập theo
-principal của khóa API đã xác thực. Bản ghi kiểm tra chứa hàm băm và siêu dữ liệu kích thước, không bao giờ chứa nội dung.
+Các mục nhập CCR sử dụng cửa hàng hai tầng: một tầng nóng trong bộ nhớ được hỗ trợ, trên các thời gian chạy cục bộ không phải trên đám mây, bởi một tầng SQLite bền vững (`ccr_blocks`, được bật theo mặc định) để một khối tồn tại khi bị trục xuất hoặc khởi động lại cho đến khi TTL của nó hết — ngoại trừ các khối trên 512 KB và thời gian chạy trên đám mây, chỉ tồn tại trong bộ nhớ. Mỗi khối được giới hạn ở 2 MiB, mỗi khối chính ở 16 MiB và kho lưu trữ toàn cầu ở 64 MiB. Các mục nhập mặc định là TTL 24 giờ (tối đa bảy ngày). Việc truy xuất MCP đầy đủ được giới hạn ở 256 KiB; các khối lớn hơn vẫn có sẵn thông qua chế độ range và grep. Việc lưu trữ, truy xuất, liệt kê, kiểm tra, xóa và thống kê được tách biệt bởi hiệu trưởng khóa API được xác thực. Bản ghi kiểm tra chứa siêu dữ liệu băm và kích thước, không bao giờ chứa nội dung. Các chi tiết về người vận hành (hai điểm đánh dấu, điều kiện tiên quyết của máy khách, `codemode:false`, phạm vi mỗi công cụ, phân trang và ma trận chẩn đoán) có trong [Điều kiện tiên quyết / hướng dẫn vận hành của Công cụ nén →](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
 
-`omniroute_compression_status` báo cáo riêng việc nén mô tả MCP trong
-`analytics.mcpDescriptionCompression`. Các giá trị đó là ước tính kích thước siêu dữ liệu cho các mô tả
-có thể liệt kê của MCP (`tools`, `prompts`, `resources` và `resourceTemplates`); chúng không phải là biên nhận mức sử dụng
-của nhà cung cấp và được đánh dấu bằng `source: "mcp_metadata_estimate"`.
+`omniroute_compression_status` báo cáo việc nén mô tả MCP riêng biệt trong `analytics.mcpDescriptionCompression`. Các giá trị đó là ước tính kích thước siêu dữ liệu cho các mô tả có thể liệt kê MCP (`tools`, `prompts`, `resources` và `resourceTemplates`); chúng không phải là biên lai sử dụng của nhà cung cấp và được đánh dấu bằng `source: "mcp_metadata_estimate"`.
 
-### Bộ lọc cây khả năng truy cập MCP (v3.8.0)
+### Bộ lọc cây trợ năng MCP (v3.8.0)
 
-Tách biệt với các công cụ nén ở trên, OmniRoute bao gồm một bộ lọc hậu thực thi giúp
-nén **kết quả công cụ** của các công cụ trình duyệt/khả năng truy cập MCP trước khi chúng được trả về cho
-tác nhân. Bản thân bộ lọc này không phải là một công cụ — nó chạy minh bạch trên mọi kết quả công cụ có chứa
-văn bản dài dòng về cây khả năng truy cập hoặc ảnh chụp nhanh trình duyệt (≥2000 ký tự).
+Khác với các công cụ nén ở trên, OmniRoute bao gồm bộ lọc sau thực thi để nén** kết quả công cụ** của các công cụ MCP browser/accessibility trước khi chúng được trả lại cho đại lý. Bộ lọc này bản thân nó không phải là một công cụ — nó chạy trong suốt trên bất kỳ kết quả công cụ nào có chứa văn bản chi tiết về cây trợ năng hoặc ảnh chụp nhanh trình duyệt (≥ 2000 ký tự).
 
 Các hành vi chính:
 
-- Thu gọn ≥30 dòng đồng cấp lặp lại liên tiếp thành bản tóm tắt phần đầu + phần cuối
-- Giữ nguyên các neo `[ref=eXX]` mà Playwright/tính năng sử dụng máy tính yêu cầu
-- Cắt ngắn bắt buộc văn bản quá khổ (>50.000 ký tự) kèm gợi ý điều hướng
-- Mức tiết kiệm dự kiến: **60–80%** đối với tải trọng ảnh chụp nhanh trình duyệt
+- Thu gọn ≥ 30 dòng anh chị em lặp lại liên tiếp thành phần tóm tắt đuôi +
+- Giữ nguyên các neo `[ref=eXX]` theo yêu cầu của Playwright/computer-use
+- Văn bản quá khổ bị cắt ngắn (> 50.000 ký tự) kèm theo gợi ý điều hướng
+- Tiết kiệm dự kiến:** 60–80%** trên tải trọng ảnh chụp nhanh của trình duyệt
 
-Cấu hình: `compression.mcpAccessibility` trong phần cài đặt chung (di chuyển 056).
-Phần triển khai: `open-sse/services/compression/engines/mcpAccessibility/`.
-Tài liệu đầy đủ: [Công cụ nén — Bộ lọc cây khả năng truy cập MCP](../compression/COMPRESSION_ENGINES.md#mcp-accessibility-tree-filter).
+Cấu hình: `compression.mcpAccessibility` trong cài đặt chung (di chuyển 056). Thực hiện: `open-sse/services/compression/engines/mcpAccessibility/`. Tài liệu đầy đủ: [Bộ lọc cây khả năng truy cập — MCP của Công cụ nén](../compression/COMPRESSION_ENGINES.md#mcp-accessibility-tree-filter).
 
-Xem [Công cụ nén](../compression/COMPRESSION_ENGINES.md) và [Nén RTK](../compression/RTK_COMPRESSION.md) để biết
-mô hình nén thời gian chạy đằng sau các công cụ này.
+Xem [Công cụ nén](../compression/COMPRESSION_ENGINES.md) và [Nén RTK](../compression/RTK_COMPRESSION.md) để biết mô hình nén thời gian chạy đằng sau các công cụ này.
 
 ## Công cụ 1Proxy (3)
 

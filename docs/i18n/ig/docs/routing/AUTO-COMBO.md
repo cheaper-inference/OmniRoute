@@ -127,6 +127,27 @@ Auto-scoring na-ahọrọ provider/model kacha mma maka arịrịọ ọ bụla
 | `src/sse/handlers/chat.ts`                                | Njikọ: auto prefix short-circuit            |
 | `src/shared/constants/providers.ts`                       | Ntinye sistemụ `SYSTEM_PROVIDERS.auto`      |
 
+## Mmasị akaụntụ maka combos akpaaka echekwara
+
+Onye ndezi akpaaka nwere ọgụgụ isi na-enye nhọrọ** Mmasị akaụntụ** ngalaba. Njikọ ọ bụla nwere ike masịrị, Nkịtị (nke ndabara), Nchekwa ma ọ bụ Wepu. Njikọ ọtụtụ nwere ike kesaa ọkwa. Akpaaka na-ahọrọ n'ime ọkwa mbụ tozuru oke, na-ejigide omume scoring/router ya ebe ahụ; mgbalị ndị dara ada na-adaba na akaụntụ ndị fọdụrụnụ, masịrị tupu nkịtị tupu idobere. Ngwakọta anaghị eji njikọ ewepu.
+
+A na-echekwa ntọala ahụ dị ka `config.accountPreferences`, nke ejiri njikọ ID tinye ya:
+
+```json
+{
+  "accountPreferences": {
+    "connection-a": "preferred",
+    "connection-b": "preferred",
+    "connection-c": "reserve",
+    "connection-d": "excluded"
+  }
+}
+```
+
+Maapụ ewepụrụ ma ọ bụ ihe efu na-ejigide ụzọ ụzọ dị adị. Mmasị anaghị enyere njikọ nwere nkwarụ aka, nye ohere igodo API, weghachi ndị chọrọ oke egbochiri, ma ọ bụ gafere nlele mmefu ego. Mgbalị ọ bụla bụ naanị na njikọ ya siri ike, yabụ ọdịda akaụntụ enweghị ike ịwụ elu n'azụ rawụta combo. Mmekọrịta nnọkọ dị adị nwere ike idowe akaụntụ ntozu; ewepu akaụntụ ahụ ejikọta na ntụgharị nwa amaala na-akwụsị na-atụgharị kama ịgbachi nkịtị na-agbanwe akaụntụ.
+
+Mmasị ahaziri ahazi na-eji ụzọ akpaaka maara akaụntụ: enweghị oghere- oghere, smart-pipeline, ọgba aghara na ụzọ mkpirisi onyinyo adịghị ezipụ. Akwụsịla mgbochi ntule maka arịrịọ ndị a, yabụ akaụntụ nchekwa enweghị ike ịgba ọsọ nke ndị ahọrọ. Atụmatụ ngwakọta ndị ọzọ anaghị akọwa ntọala a. Ịgbanwe combo pụọ na akpaaka na-edobe mmasị echekwara maka ngbanwe ọzọ ma emechaa.
+
 ## Aha Combo Ndị Dabara na Ezigbo Model Id
 
 Combo nke `name` ya bụ otu ihe kpọmkwem na model id nkịtị (dịka ọmụmaatụ, combo a kpọrọ

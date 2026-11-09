@@ -127,6 +127,27 @@ Automatische Bewertung wählt pro Anfrage den besten Anbieter/das beste Modell a
 | `src/sse/handlers/chat.ts`                                | Integration: Kurzschlussverarbeitung für automatische Präfixe |
 | `src/shared/constants/providers.ts`                       | `SYSTEM_PROVIDERS.auto`-Systemeintrag                         |
 
+## Kontoeinstellungen für gespeicherte Auto-Combos
+
+Der Intelligent Auto Editor bietet eine optionale Option** Kontoeinstellungen** Abschnitt. Jede Verbindung kann bevorzugt, normal (Standard), reserviert oder ausgeschlossen sein. Mehrere Verbindungen können sich eine Ebene teilen. Wählt automatisch innerhalb der ersten berechtigten Stufe aus und behält dort sein scoring/router Verhalten bei; Fehlversuche fallen auf die verbleibenden konkreten Konten durch, bevorzugt vor normal vor Reserve. Ausgeschlossene Verbindungen werden von dieser Kombination niemals verwendet.
+
+Die Einstellung wird als `config.accountPreferences` gespeichert, verschlüsselt durch die Verbindung ID:
+
+```json
+{
+  "accountPreferences": {
+    "connection-a": "preferred",
+    "connection-b": "preferred",
+    "connection-c": "reserve",
+    "connection-d": "excluded"
+  }
+}
+```
+
+Eine weggelassene oder leere Karte behält die vorhandene Routenführung bei. Die Einstellungen aktivieren keine deaktivierten Verbindungen, gewähren keinen API-Schlüsselzugriff, stellen durch Kontingente blockierte Kandidaten nicht wieder her und umgehen keine Budgetprüfungen. Jeder Versuch ist auf die konkrete Verbindung beschränkt, sodass beim Konto-Fallback keine Stufen hinter dem Combo-Router übersprungen werden können. Bestehende Sitzungsaffinität kann ein berechtigtes Konto behalten; Durch das Ausschließen des an eine native Runde gebundenen Kontos wird diese Runde gestoppt, anstatt die Konten stillschweigend zu ändern.
+
+Konfigurierte Einstellungen verwenden den kontobewussten Auto-Pfad: Ungebundener Kontext-Cache, Smart-Pipeline, Chaos und Schattenverknüpfungen werden nicht gesendet. Die spekulative Absicherung ist für diese Anfragen deaktiviert, sodass Reservekonten nicht mit bevorzugten Konten konkurrieren können. Andere Combo-Strategien interpretieren diese Einstellung nicht. Wenn Sie eine Kombination von „Automatisch“ ändern, bleiben die gespeicherten Einstellungen für einen späteren Wechsel zurück erhalten.
+
 ## Combo-Namen, die einer echten Modell-ID entsprechen
 
 Eine Combo, deren `name` mit einer reinen Modell-ID identisch ist (z. B. eine Combo namens
