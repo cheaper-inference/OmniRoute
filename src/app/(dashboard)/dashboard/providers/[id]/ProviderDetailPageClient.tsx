@@ -531,7 +531,11 @@ export default function ProviderDetailPageClient() {
   } = useAuthFileHandlers({ parseApiErrorMessage, getAttachmentFilename, notify, t });
 
   // Phase 1e: compat-state derivations
-  const compat = useModelCompatState(modelMeta.customModels, modelMeta.modelCompatOverrides);
+  const compat = useModelCompatState(
+    modelMeta.customModels,
+    modelMeta.modelCompatOverrides,
+    providerId
+  );
   // Combo membership for every model on this provider — drives the small
   // "used in combo X" badge behind each model row (#16216).
   const comboUsage = useModelComboUsage(providerId);

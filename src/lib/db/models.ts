@@ -964,6 +964,30 @@ function getCustomModelRow(providerId: string, modelId: string): JsonRecord | nu
   }
 }
 
+type NormalizeFlagSource = {
+  normalizeToolCallId?: unknown;
+  compatByProtocol?: CompatByProtocolMap;
+};
+
+/**
+ * Explicit normalizeToolCallId set on a custom-model row or compat override, if any:
+ * the per-protocol slice wins over the top-level flag; `undefined` means "not set".
+ */
+function readExplicitNormalizeToolCallId(
+  row: NormalizeFlagSource | null | undefined,
+  protocol: string | null
+): boolean | undefined {
+  if (!row) return undefined;
+  const pc = protocol ? row.compatByProtocol?.[protocol as keyof CompatByProtocolMap] : undefined;
+  if (pc && Object.prototype.hasOwnProperty.call(pc, "normalizeToolCallId")) {
+    return Boolean(pc.normalizeToolCallId);
+  }
+  if (Object.prototype.hasOwnProperty.call(row, "normalizeToolCallId")) {
+    return Boolean(row.normalizeToolCallId);
+  }
+  return undefined;
+}
+
 /**
  * Whether the given provider/model has "normalize tool call id" (9-char Mistral-style) enabled.
  * Custom model row wins; otherwise {@link getModelCompatOverrides}.
@@ -982,31 +1006,15 @@ export function getModelNormalizeToolCallId(
   modelId: string,
   sourceFormat?: string | null
 ): boolean {
-  const m = getCustomModelRow(providerId, modelId);
   const protocol = sourceFormat && isCompatProtocolKey(sourceFormat) ? sourceFormat : null;
+  const m = getCustomModelRow(providerId, modelId) as NormalizeFlagSource | null;
+  const fromCustom = readExplicitNormalizeToolCallId(m, protocol);
+  if (fromCustom !== undefined) return fromCustom;
 
-  if (m) {
-    if (protocol) {
-      const pc = (m.compatByProtocol as CompatByProtocolMap | undefined)?.[protocol];
-      if (pc && Object.prototype.hasOwnProperty.call(pc, "normalizeToolCallId")) {
-        return Boolean(pc.normalizeToolCallId);
-      }
-    }
-    if (Object.prototype.hasOwnProperty.call(m, "normalizeToolCallId")) {
-      return Boolean(m.normalizeToolCallId);
-    }
-  }
-
-  const co = readCompatList(providerId).find((e) => e.id === modelId);
-  if (protocol && co?.compatByProtocol?.[protocol]) {
-    const pc = co.compatByProtocol[protocol]!;
-    if (Object.prototype.hasOwnProperty.call(pc, "normalizeToolCallId")) {
-      return Boolean(pc.normalizeToolCallId);
-    }
-  }
-  if (co && Object.prototype.hasOwnProperty.call(co, "normalizeToolCallId")) {
-    return Boolean(co.normalizeToolCallId);
-  }
+  const co = readCompatList(providerId).find((e) => e.id === modelId) as
+    NormalizeFlagSource | undefined;
+  const fromOverride = readExplicitNormalizeToolCallId(co, protocol);
+  if (fromOverride !== undefined) return fromOverride;
 
   return providerId === "mistral";
 }
