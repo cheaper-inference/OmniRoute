@@ -96,11 +96,18 @@ type ToolCallCarrier = {
   choices?: Array<{ message?: Record<string, unknown>; delta?: Record<string, unknown> } | null>;
   content?: Array<{ type?: unknown } | null>;
   output?: Array<{ type?: unknown } | null>;
+  candidates?: Array<{
+    content?: { parts?: Array<{ functionCall?: unknown } | null> } | null;
+  } | null>;
+  type?: unknown;
+  content_block?: { type?: unknown } | null;
+  item?: { type?: unknown } | null;
 };
 
 /**
  * True when a response (or one stream chunk) carries client-visible tool calls: OpenAI
- * `tool_calls` / `function_call`, Claude `tool_use`, Responses `function_call` items.
+ * `tool_calls` / `function_call`, Claude `tool_use` (block or stream start event), Gemini
+ * `functionCall` parts, Responses `function_call` items (body or stream item event).
  * Replaying one from cache would hand back a stale argument list.
  */
 function carriesToolCalls(response: unknown): boolean {
@@ -116,7 +123,21 @@ function carriesToolCalls(response: unknown): boolean {
   const fromOutput = (Array.isArray(r.output) ? r.output : []).some(
     (i) => i?.type === "function_call" || i?.type === "custom_tool_call"
   );
-  return fromChoices || fromBlocks || fromOutput;
+  const fromCandidates = (Array.isArray(r.candidates) ? r.candidates : []).some((c) =>
+    (Array.isArray(c?.content?.parts) ? c.content.parts : []).some((p) => !!p?.functionCall)
+  );
+  const fromClaudeEvent = r.type === "content_block_start" && r.content_block?.type === "tool_use";
+  const fromResponsesEvent =
+    (r.type === "response.output_item.added" || r.type === "response.output_item.done") &&
+    (r.item?.type === "function_call" || r.item?.type === "custom_tool_call");
+  return (
+    fromChoices ||
+    fromBlocks ||
+    fromOutput ||
+    fromCandidates ||
+    fromClaudeEvent ||
+    fromResponsesEvent
+  );
 }
 
 function stringifyValue(val: unknown): string {

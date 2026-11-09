@@ -113,3 +113,43 @@ test("a plain text response is still stored and served", async () => {
   });
   assert.equal(result.hit, true, "text-only responses must remain cacheable");
 });
+
+const OTHER_TOOL_CALL_SHAPES: Array<[string, Record<string, unknown>]> = [
+  [
+    "a Gemini functionCall part",
+    { candidates: [{ content: { parts: [{ functionCall: { name: "f", args: {} } }] } }] },
+  ],
+  [
+    "a Claude content_block_start tool_use event",
+    { type: "content_block_start", content_block: { type: "tool_use", id: "t1", name: "f" } },
+  ],
+  [
+    "a Responses output_item.added function_call event",
+    { type: "response.output_item.added", item: { type: "function_call", name: "f" } },
+  ],
+  [
+    "a Responses output_item.done custom_tool_call event",
+    { type: "response.output_item.done", item: { type: "custom_tool_call", name: "f" } },
+  ],
+];
+
+for (const [label, shape] of OTHER_TOOL_CALL_SHAPES) {
+  test(`${label} is not stored, as a response or as a stream chunk`, async () => {
+    for (const where of ["response", "streamChunks"] as const) {
+      const manager = makeManager();
+      await manager.store({
+        body: { messages: MESSAGES, temperature: 0 },
+        response: where === "response" ? shape : { id: "plain", choices: [] },
+        ...(where === "streamChunks" ? { streamChunks: [shape] } : {}),
+        model: "gpt-4o-mini",
+        provider: "openai",
+      });
+      const result = await manager.lookup({
+        body: { messages: MESSAGES, temperature: 0 },
+        model: "gpt-4o-mini",
+        provider: "openai",
+      });
+      assert.equal(result.hit, false, `${where}: a cached tool call would replay stale arguments`);
+    }
+  });
+}
