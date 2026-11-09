@@ -104,3 +104,30 @@ test("Claude stream: snapshot repeat, snapshot growth and incremental repeats ke
   // repeat is dropped, growth emits only the new tail, "1," twice is incremental (kept).
   assert.deepEqual(emitted, ['{"a":', "1", "1,", "1,", '"b":2}']);
 });
+
+test("Responses stream: emitted deltas from growing snapshots do not pin each snapshot", () => {
+  const SNAPSHOTS = 1500; // 48 B * 1500 * 1501 / 2 = ~54 MB if every snapshot stays pinned
+  const retained = retainedBytes(() => {
+    const state = initState(FORMATS.OPENAI_RESPONSES) as Record<string, unknown>;
+    state.toolSchemas = new Map([["write_file", {}]]);
+    const deltas: string[] = [];
+    const collect = (events: Array<{ data?: { type?: string; delta?: string } }>) => {
+      for (const ev of events || []) {
+        if (ev.data?.type === "response.function_call_arguments.delta") deltas.push(ev.data.delta!);
+      }
+    };
+    collect(openaiToOpenAIResponsesResponse(head, state));
+    // Upstream re-sends the whole argument string on every chunk (a growing snapshot).
+    let snapshot = "";
+    for (let i = 0; i < SNAPSHOTS; i++) {
+      snapshot += fragment(i);
+      collect(openaiToOpenAIResponsesResponse(chunk(snapshot), state));
+    }
+    assert.equal(
+      deltas.join(""),
+      Array.from({ length: SNAPSHOTS }, (_, i) => fragment(i)).join("")
+    );
+    return deltas;
+  });
+  assert.ok(retained < MAX_RETAINED_BYTES, `retained ${retained} bytes for emitted deltas`);
+});
