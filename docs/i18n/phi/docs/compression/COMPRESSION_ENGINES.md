@@ -292,6 +292,95 @@ Ang mga combo ng kompresyon ay mga pinangalanang profile ng kompresyon na maaari
 
 Lokasyon sa Dashboard: `Dashboard -> Context & Cache -> Compression Combos`.
 
+## Mga kinakailangan / gabay ng operator (CCR at session-dedup)
+
+CCR (`ccr`) at `session-dedup` palitan o tanggalin ang text at mag-iwan ng a** pananda** sa likod. Ang seksyong ito ay ang sanggunian ng operator para sa pag-wire ng isang kliyente, pagbabasa ng dalawang marker, at pagkuha o pag-diagnose ng elided na nilalaman. Ang mga mekanika ng bawat makina ay sakop sa itaas; ito ang layer na "paano ko ito papatakbuhin".
+
+### Mga transportasyon at endpoint
+
+Ang MCP server na naglalantad sa mga tool CCR ay maaaring maabot sa tatlong paraan. Ang default na base URL ay `http://localhost:20128` (`OMNIROUTE_BASE_URL`):
+
+| Transportasyon                                | URL / utos                              | Mga Tala                                                                                                                                                     |
+| --------------------------------------------- | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Streamable na HTTP (kliyente, inirerekomenda) | `http://localhost:20128/api/mcp/stream` | Ang endpoint na kasalukuyang kinakausap ng mga kliyente MCP.                                                                                                 |
+| Legacy SSE singleton                          | `http://localhost:20128/api/mcp/sse`    | Mas lumang singleton na transportasyon. Ito** nagsasara** streamable session; gumamit ng mga `streamable-http` client laban sa `/api/mcp/stream`, hindi ito. |
+| stdio                                         | `omniroute --mcp`                       | Para sa IDE MCP config na nagpapalabas ng proseso. Walang `--dev` flag; `omniroute --mcp` ay ang stdio entry point.                                          |
+
+### Mga tier ng storage (kung ano ang makakaligtas sa pag-restart)
+
+CCR ay a** dalawang baitang** tindahan, hindi sa memorya-lamang:
+
+- **Mainit na in-memory tier** — per-block cap 2 MiB, per-principal 16 MiB, global 64 MiB. Default ang mga entry sa isang 24 h TTL (maximum na 7 araw). Ang buong MCP retrieval mula sa memorya ay nililimitahan sa 256 KiB; anumang mas malaki ay maaabot pa rin sa pamamagitan ng ranged / grep mode.
+- **Matibay na tier SQLite** (`ccr_blocks`, `COMPRESSION_CCR_DURABLE_STORE`, naka-on bilang default) ibina-back — ang in-memory na tier upang ang isang bloke ay makaligtas LRU eviction, isang restart, o isang retrieve landing sa ibang pagkakataon. Pinapanatili ng row ang TTL ng bloke, kaya ang isang bloke na lampas sa TTL nito ay nawala mula sa magkabilang tier.
+
+Pinapanatili ng tatlong guwardiya ang matibay na tier bounded — a block ay nananatiling memory-only kapag:
+
+1. tapos na ang block** 512 KB** (`MAX_DURABLE_BLOCK_BYTES`);
+2. ang runtime ay isang cloud runtime (walang lokal na disk);
+3. `COMPRESSION_CCR_DURABLE_STORE=false`.
+
+Kaya't ang "nawala ang block" ay hindi isang blanket restart story: ang isang sub-512 KB block sa isang lokal, hindi cloud runtime ay nakaligtas sa isang pag-restart sa pamamagitan ng matibay na tier hanggang sa maubos TTL nito. Tingnan [ang Environment reference](../reference/ENVIRONMENT.md) para sa variable.
+
+### Ang dalawang marker
+
+| Marker                                | Ibig sabihin                                                                                                                                                  | Ano ang dapat gawin ng modelo                                                                                                                                                                                                                       |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `[CCR retrieve hash=<24hex> chars=N]` | Isang malaking bloke ang nakaimbak na naka-address sa nilalaman.                                                                                              | Tawagan `omniroute_ccr_retrieve` gamit ang** 24-hex hash na kinopya ng verbatim** upang maibalik ang orihinal na teksto.                                                                                                                            |
+| `[dedup:ref sha=…]`                   | `session-dedup` elided text na naipadala na sa naunang turn ng parehong session. Ito ay isang** sinadyang pagbabalik tanaw** , hindi pagkawala o pagkakamali. | Gawin** hindi** tumawag sa anumang tool at gawin** hindi** subukang "muling buuin" ito. Ang unang paglitaw ng teksto ay ang kanonikal na kopya; ang kasalukuyang pagliko ay hindi kailanman muling isinulat, ito ay nababawas sa ibang pagkakataon. |
+
+Ang `[dedup:ref]` look-back ay isang sadyang desisyon sa protocol — walang pre-send na muling pagtatayo. Tratuhin ito bilang "nasa wire na ang eksaktong text na ito sa unang bahagi ng session na ito."
+
+### Mga kinakailangan ng kliyente
+
+- **Susi (stdio):** ang isang stdio caller ay walang dalang pagkakakilanlan sa bawat kahilingan, kaya ito ay nagpapatotoo gamit ang `OMNIROUTE_API_KEY` (nakatakda sa MCP server ng `env`). Kung wala ito ang tumatawag ay hindi nagpapakilala at ang mga tool na nangangailangan ng isang punong-guro ay maaaring bumaba.
+- **`tools[]` ay ang iniksyon precondition.** Ang CCR retrieve-protocol instruction (#8033) ay ini-inject** lamang** kapag napatunayan ng ina-advertise `tools[]` ng kahilingan na talagang maabot ng kliyente ang `omniroute_ccr_retrieve`. Ang tugma ay isang trailing-segment na tugma na nililimitahan ng isang separator (`__`, `.`, `/`, `:`) — hindi kailanman isang bare substring — kaya ang namespaced na pangalan gaya ng `mcp__gateway__omniroute_ccr_retrieve` ay binibilang pa rin. Ang isang absent o hindi tumutugmang `tools[]` ay nangangahulugan na ang pagtuturo ay _hindi_ iniksyon, ayon sa disenyo.
+- **`codemode:false` (mga kliyente OpenCode ).** Nagde-default OpenCode sa Code Mode, na nag-a-advertise lamang ng mga native na tool nito sa modelo at** hindi** ilagay ang MCP tools sa native `tools[]` list. Itakda ang `codemode: false` sa MCP server entry para mai-advertise ang `omniroute_ccr_*` tools. Ito ay isang** kliyente** setting, hindi isang OmniRoute. Hindi pa nito nai-inject ang pagtuturo CCR : pinangalanan OpenCode ang isang tool `<server>_<tool>`, kaya inilalantad ng server na tinatawag na `omniroute` `omniroute_omniroute_ccr_retrieve`, at `_` ay hindi isa sa mga katugmang separator.
+- **Mga principal.** Ang storage at retrieval ay nakahiwalay sa bawat authenticated na principal (bawat API key). Nakikita lamang ng isang susi ang sarili nitong mga bloke.
+
+### Saklaw ng bawat tool
+
+Palaging naka-on ang pagpapatupad ng saklaw para sa mga tumatawag HTTP/SSE na may makitid na saklaw. Ang `omniroute_` CCR tool ay nangangailangan ng:
+
+| Tool                     | Saklaw              |
+| ------------------------ | ------------------- |
+| `omniroute_ccr_store`    | `write:compression` |
+| `omniroute_ccr_delete`   | `write:compression` |
+| `omniroute_ccr_retrieve` | `read:compression`  |
+| `omniroute_ccr_inspect`  | `read:compression`  |
+| `omniroute_ccr_list`     | `read:compression`  |
+| `omniroute_ccr_stats`    | `read:compression`  |
+
+Ang isang nawawalang saklaw ay nagbabalik ng isang** resulta ng error MCP tool** (`isError: true`, hindi isang HTTP 403 — ang `403 LOCAL_ONLY` ay ang hiwalay na loopback route-guard auth): `Error: Insufficient MCP scopes for <tool>. Missing: <scope>.` Ang isang minimal na remote key ay maaaring humawak ng `mcp:connect` (nagpapahintulutan ang `/api/mcp/` local-only carve-out) kasama ang partikular na saklaw read/write na kailangan nito.
+
+### Matrix ng kliyente
+
+| Kliyente          | Transportasyon                                   | Config na gagamitin                                                                                                                                                                                                                                             | nag-advertise `tools[]` ? (→ CCR na pagtuturo ay na-injected)                                                                                                                                                                     |
+| ----------------- | ------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Claude Code       | streamable-http                                  | `claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream`                                                                                                                                                                               | Oo — MCP-capable; tinurok.                                                                                                                                                                                                        |
+| Cursor / Cline    | `stdio`** o** `streamable-http`                  | stdio: `omniroute --mcp` na may `OMNIROUTE_API_KEY` sa `env`; o isang remote MCP entry na tumuturo sa `http://localhost:20128/api/mcp/stream` (tingnan [ang Gabay sa Pag-setup → MCP Client Configuration](../guides/SETUP_GUIDE.md#mcp-client-configuration) ) | Oo — i-advertise ang `omniroute_ccr_*` tools.                                                                                                                                                                                     |
+| OpenCode          | streamable-http                                  | `opencode mcp add omniroute --url http://localhost:20128/api/mcp/stream`, kasama ang `codemode: false`                                                                                                                                                          | Mga tool na ina-advertise lamang gamit ang `codemode: false`; ang pagtuturo ay hindi pa rin nai-inject, dahil `omniroute_omniroute_ccr_retrieve` ay hindi tumutugma (tingnan [ang Client prerequisites](#client-prerequisites) ). |
+| OpenAI-compatible | OpenAI-compatible HTTP (mga pagkumpleto ng chat) | karaniwang kliyente ng pagkumpleto ng chat laban sa endpoint na katugma sa OpenAI                                                                                                                                                                               | **Hindi kailanman** — isang simpleng OpenAI-compatible na tumatawag ay hindi kailanman sinabihan na tawagan ang tool, at ang pagtuturo ay hindi ini-inject.                                                                       |
+
+### Mga limitasyon sa pagkuha at pagination
+
+Ang mga resulta ng teksto MCP tool ay pinuputol sa paligid ng `mcpAccessibility.maxTextChars` (default `50000`). Ang `full` retrieve ng isang block ay nililimitahan sa 256 KiB —** walang unbounded full retrieve** . Kapag malaki ang `chars=N` ng isang bloke, pahinain ito sa halip na hilahin ang buong bagay:
+
+- Panuntunan ng hinlalaki:**`chars > 40000` → gumamit ng `mode`** , hindi kailanman isang hubad na puno.
+- `mode:"grep"` — regex `pattern` na tumugma sa bawat linya, hanggang sa 1,000 tugmang linya (`unique: true` drops repeats), pinakamurang para sa "hanapin ang isang linya na kailangan ko."
+- `mode:"lines"` — isang 1-index na hanay ng linya; nangangailangan ng parehong `start` at `end`.
+- `mode:"head"` / `mode:"tail"` — first/last `n` na mga linya.
+- `mode:"stats"` — line, character, at byte na mga bilang nang walang body.
+
+Gamitin `mode:"lines"` na may `start`/`end` upang maglakad ng mahabang bloke sa mga pahina sa halip na hilingin ang kabuuan nang sabay-sabay.
+
+### Pangalan ng tool
+
+Ang retrieve tool ay kasalukuyang pinangalanang `omniroute_ccr_retrieve` (ang `omniroute_` prefix ay isang may petsang workaround para sa cross-server name collisions). Ang isang mas malinis na bounded-suffix na pangalan ng tool at isang pag-aayos para sa MCP JSON na mga resulta na pinutol sa kalagitnaan ng string ay sinusubaybayan bilang upstream follow-up; ang pahinang ito ay nagdodokumento ng kasalukuyang, ipinadalang gawi lamang.
+
+### Siklo ng buhay ng session
+
+Idle out ang mga streamable-HTTP session at inaani sila ng server; ang idle window ay itinakda ng `OMNIROUTE_MCP_SESSION_IDLE_MS` (default na 5 minuto; tinutukoy ng pangalan, hindi isang hardcoded na halaga, kaya hindi naaanod ang page na ito kapag nagbago ito). Ang sintomas ng isang idle-reaped session ay isang HTTP 404 na may `Unknown Mcp-Session-Id` — ang remedyo ay upang muling kumonekta o i-restart ang session,** hindi** upang i-rotate ang isang key, baguhin ang isang saklaw, o palitan ang pangalan ng isang tool.
+
 ## Saklaw ng API
 
 | Ruta                                   | Layunin                                                                                  |
@@ -373,7 +462,7 @@ mga prefix na sensitibo sa cache, atbp.).
   `engineBreakdown` — hindi ito maipagkaiba sa isang hakbang na nilaktawan. Ang pagkilala sa pagitan ng
   "tumakbo, 0 %" at "nilaktawan" ay mangangailangan ng pagbabago sa breakdown model at ipinagpaliban muna.
 
-## Balidasyon
+## Pagpapatunay
 
 Ang mga nakatutok na gate para sa lugar na ito ay:
 

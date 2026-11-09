@@ -64,6 +64,17 @@ export interface EmbeddingProvider {
    * ready-to-use endpoint.
    */
   nativeInvokeProtocol?: NativeInvokeEmbeddingProtocol;
+  /**
+   * Credential field holding the bearer token, read from the credentials and then
+   * from `providerSpecificData` before `apiKey`/`accessToken`. GitHub Copilot
+   * rejects the raw OAuth token on its embeddings endpoint and needs the
+   * exchange-derived `copilotToken` instead.
+   */
+  tokenField?: "copilotToken";
+  /** Upstream identity headers sent with every request (the Copilot IDE headers). */
+  identityHeaders?: "github-copilot";
+  /** Wrap a bare string `input` into a one-element array (Copilot answers 400 on a string). */
+  requiresArrayInput?: boolean;
 }
 
 export interface EmbeddingProviderNodeRow {
@@ -192,6 +203,25 @@ export const EMBEDDING_PROVIDERS: Record<string, EmbeddingProvider> = {
       { id: "text-embedding-3-small", name: "Text Embedding 3 Small", dimensions: 1536 },
       { id: "text-embedding-3-large", name: "Text Embedding 3 Large", dimensions: 3072 },
       { id: "text-embedding-ada-002", name: "Text Embedding Ada 002", dimensions: 1536 },
+    ],
+  },
+
+  // GitHub Copilot serves embeddings on the same host as its chat API. The
+  // request needs the exchanged copilotToken (refreshed by
+  // src/lib/embeddings/copilotToken.ts) and the chat executor's identity headers.
+  // Copilot's catalog serves text-embedding-3-small and ada-002 only:
+  // text-embedding-3-large answers 400 model_not_supported.
+  github: {
+    id: "github",
+    baseUrl: "https://api.githubcopilot.com/embeddings",
+    authType: "oauth",
+    authHeader: "bearer",
+    tokenField: "copilotToken",
+    identityHeaders: "github-copilot",
+    requiresArrayInput: true,
+    models: [
+      { id: "text-embedding-3-small", name: "Text Embedding 3 Small (GitHub)", dimensions: 1536 },
+      { id: "text-embedding-ada-002", name: "Text Embedding Ada 002 (GitHub)", dimensions: 1536 },
     ],
   },
 
@@ -559,6 +589,7 @@ const EMBEDDING_PROVIDER_ALIASES: Record<string, string> = {
   "lm-studio": "lmstudio",
   llamacpp: "llama-cpp",
   "llama.cpp": "llama-cpp",
+  gh: "github",
 };
 
 /** Family name used by clients; Jina's public SKU is omni-small. */

@@ -77,7 +77,10 @@ import AgentrouterConsoleFields from "./AgentrouterConsoleFields";
 import CommandCodeZdrToggle from "./CommandCodeZdrToggle";
 import { buildProviderValidateRequestBody } from "./providerValidateRequestBody";
 import { getVertexCredentialCopy } from "./vertexCredentialCopy";
-import QuotaScrapingFields, { EMPTY_QUOTA_SCRAPING_FIELDS } from "./QuotaScrapingFields";
+import QuotaScrapingFields, {
+  assignQuotaScrapingProviderData,
+  EMPTY_QUOTA_SCRAPING_FIELDS,
+} from "./QuotaScrapingFields";
 import { useGitHubCreditLimitDraft } from "./GitHubCreditLimitField";
 import ConnectionEmailCard from "./ConnectionEmailCard";
 import GlmTeamQuotaFields, { EMPTY_GLM_TEAM_QUOTA_FIELDS } from "./GlmTeamQuotaFields";
@@ -694,6 +697,10 @@ export default function EditConnectionModal({
           tags: parseRoutingTagsInput(formData.routingTags),
           excludedModels: parseExcludedModelsInput(formData.excludedModels),
         };
+        // zed-hosted is OAuth-only, so its optional billing portal link would
+        // otherwise never reach the API-key branch above. The helper guards per
+        // provider, so other OAuth providers are unaffected.
+        assignQuotaScrapingProviderData(provider, formData, updates.providerSpecificData);
         if (isClaude) {
           Object.assign(updates.providerSpecificData, claudeConnectionFieldPatch(formData));
         }

@@ -37,24 +37,19 @@
 僅當沒有任何早期規則勝出，且已選取具體的提供者連線時，才會評估 `connection` 規則。
 該規則只能變更推理強度與預算。
 
-## 推理強度與預算
+## 努力和預算
 
-`sourceEffort` 接受 `any`、`missing`、`none`、`low`、`medium`、`high`、`xhigh`、`max` 和
-`ultra`。`missing` 表示請求既不包含離散的推理強度，也不包含思考開關或思考預算。
-因此，僅有預算的訊號只會與 `any` 相符。
+`sourceEffort`接受`any`、 `missing`、 `none`、 `low`、 `medium`、 `high`、 `xhigh`、 `max`和`ultra`。 `missing`意味著請求既不包含離散的工作，也不包含思維切換或思維預算。因此，僅預算訊號僅由`any`匹配。
 
-`effortMode` 有三種變體：
+`effortMode`有三種變體：
 
-- `inherit` 保留用戶端的推理強度，同時仍允許變更模型或組合。
-- `default` 僅在沒有明確推理訊號時設定 `targetEffort`。
-- `force` 使用 `targetEffort` 取代離散的推理強度。
+- `inherit`保留了客戶的精力，同時仍允許模型或組合發生變化。
+- `default`僅當不存在明確的推理訊號時才設定`targetEffort` 。
+- `force`用`targetEffort`代替離散工作。
 
-此外，`budgetAction` 可設為 `preserve`、`remove` 或 `set`。`force` 與 `none` 搭配時，會移除
-所有可辨識的推理強度與預算欄位。`none` 與 `set` 同時使用是無效的。
+獨立地， `budgetAction`可以是`preserve`、 `remove`或`set`。 `force`和`none`會刪除所有公認的工作量和預算字段，然後設定`reasoning_effort: "none"`，因為某些提供者會在該字段不存在時開啟思考。拒絕文字`none`的提供者在`open-sse/executors/base/reasoningEffort.ts`中調度時進行調整。命令代碼將其對應到`low`，但回應形請求（沒有`messages` `input` ）除外，它保留`none`。在Cloudflare Workers AI (`cloudflare-ai`) 上，拒絕`none`模型 (gpt-oss, qwen3.8, nemotron-3, glm-4.7-flash) 得到`low`；其他工人AI模型保留`none`。在那裡刪除該欄位不是一個選項，因為缺席的工作會運行模型的預設層。 `none`與`set`一起使用無效。
 
-以已知不相容模型為目標的請求，會在上游呼叫前遭到拒絕。若目標為組合，
-則會移除不相容的項目；若移除後沒有任何項目，請求會回傳狀態碼 `400`。
-未知的功能支援資料會產生警告，但規則仍會保持作用中。
+在上游呼叫之前，針對已知不相容模型的請求將被拒絕。對於組合目標，不相容的條目將被刪除；如果沒有剩餘，則請求返回狀態`400`。未知的能力資料會產生警告並使規則保持活動。
 
 ## 安全性與傳輸
 

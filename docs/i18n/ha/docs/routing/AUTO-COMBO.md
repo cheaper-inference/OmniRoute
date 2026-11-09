@@ -127,6 +127,27 @@ handleComboChat (inji iri ɗaya da na combo da aka adana)
 | `src/sse/handlers/chat.ts`                                | Haɗawa: gajeriyar hanyar prefix na atomatik              |
 | `src/shared/constants/providers.ts`                       | Shigarwar tsarin `SYSTEM_PROVIDERS.auto`                 |
 
+## Zaɓuɓɓukan asusu don ajiyayyun combos ta atomatik
+
+Editan atomatik mai hankali yana ba da zaɓi na zaɓi** Abubuwan da ake so asusu** sashe. Kowace haɗin za a iya Fi so, Na al'ada (tsoho), Ajiye, ko Keɓe. Haɗin kai da yawa na iya raba matakin. Auto yana zaɓar tsakanin matakin farko na cancanta, yana riƙe da halayen scoring/router a can; yunƙurin da suka gaza sun faɗo zuwa sauran asusun kankare, waɗanda aka fi so kafin al'ada kafin ajiya. Wannan haɗakarwa ba ta taɓa amfani da haɗin da ba a haɗa ba.
+
+Ana adana saitin azaman `config.accountPreferences`, an buɗe ta hanyar haɗin ID:
+
+```json
+{
+  "accountPreferences": {
+    "connection-a": "preferred",
+    "connection-b": "preferred",
+    "connection-c": "reserve",
+    "connection-d": "excluded"
+  }
+}
+```
+
+Taswirar da aka tsallake ko babu komai tana riƙe da hanyoyin da ke akwai. Zaɓuɓɓuka ba sa kunna haɗin haɗin da aka kashe, ba da damar maɓalli na API, maido da ƴan takarar da aka katange keɓaɓɓu, ko ketare binciken kasafin kuɗi. Kowane yunƙuri yana iyakance ga haɗin kai na kankare, don haka faɗuwar asusun ba zai iya tsallake matakan bayan na'ura mai ba da hanya tsakanin hanyoyin sadarwa ba. Dangantakar zaman na iya riƙe da asusun da ya cancanta; ban da asusun da ke daure zuwa juyi na asali yana tsayawa wanda ya juya maimakon yin shiru yana canza asusun.
+
+Zaɓuɓɓukan da aka tsara suna amfani da hanyar sane da asusu: ba a aika mahallin mahallin mara iyaka, bututu mai wayo, hargitsi da gajerun hanyoyin inuwa. An kashe shingen hasashe don waɗannan buƙatun don haka ajiyar asusun ba zai iya tseren waɗanda aka fi so ba. Sauran dabarun haɗin gwiwa ba sa fassara wannan saitin. Canza haduwa daga Atomatik yana adana abubuwan da aka ajiye don juyawa baya.
+
 ## Sunayen Combo Masu Daidai da Ainihin Model Id
 
 Combo wanda `name` ɗinsa yake daidai da ainihin model id kai tsaye (misali, combo mai suna

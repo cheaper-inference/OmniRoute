@@ -19,8 +19,9 @@ omniroute --mcp
 Au kupitia usafiri wa wazi-sse:
 
 ```bash
-# HTTP streamable transport (port 20130)
-omniroute --dev  # MCP auto-starts on /mcp endpoint
+# Streamable HTTP transport (default port 20128, in-process on the dashboard server)
+# Client endpoint: http://localhost:20128/api/mcp/stream
+# stdio: omniroute --mcp
 ```
 
 Usafirishaji wa HTTP (`sse` / `streamable-http`, unaotolewa katika mchakato na seva ya dashibodi) umezimwa kwa chaguo-msingi na hapo awali zilikuwa zikigeuzwa kutoka kwa ukurasa `/dashboard/mcp` pekee. Kufikia v3.8.51 CLI ina usawa:
@@ -142,13 +143,13 @@ Tazama [Usanidi wa Mteja MCP](../guides/SETUP_GUIDE.md#mcp-client-configuration)
 | `omniroute_rtk_discover`            | `read:compression`  | Gundua kelele inayojirudia katika sampuli za matokeo ya RTK                                                                                |
 | `omniroute_rtk_learn`               | `read:compression`  | Tengeneza rasimu ya kichujio RTK inayoweza kukaguliwa kutoka kwa sampuli za kuchagua kuingia                                               |
 
-maingizo ya CCR yapo kwenye kumbukumbu pekee na hupotea inapowashwa upya. Kila block ina mipaka ya MiB 2 , kila moja kuu hadi 16 MiB, na duka la kimataifa hadi 64 MiB. Maingizo chaguomsingi ya TTL ya saa 24 (kiwango cha juu cha siku saba). Urejeshaji kamili MCP ni mdogo kwa KiB 256; vizuizi vikubwa husalia vinapatikana kupitia aina mbalimbali na grep. Hifadhi, urejeshaji, uorodheshaji, ukaguzi, ufutaji na takwimu zimetengwa na kielelezo kikuu cha ufunguo wa API. Rekodi za ukaguzi zina heshi na metadata ya ukubwa, kamwe haina maudhui.
+Maingizo ya CCR hutumia duka la viwango viwili: safu ya kumbukumbu ya moto inayoungwa mkono, kwenye nyakati za uendeshaji zisizo za wingu, na kiwango cha kudumu SQLite (`ccr_blocks`, on by default) kwa hivyo kizuizi kinasalia kufukuzwa au kuwashwa upya hadi TTL yake iishe — isipokuwa itazuia zaidi ya 512 KB, kumbukumbu ambayo hukaa kwenye wingu. Kila block ina mipaka ya MiB 2 , kila moja kuu hadi MiB 16 , na duka la kimataifa hadi MiB 64 . Maingizo chaguomsingi ya TTL ya saa 24 (kiwango cha juu cha siku saba). Urejeshaji kamili MCP ni mdogo kwa 256 KiB; vizuizi vikubwa hubaki vinapatikana kupitia aina mbalimbali na grep. Hifadhi, urejeshaji, uorodheshaji, ukaguzi, ufutaji na takwimu zimetengwa na msimbo mkuu uliothibitishwa wa API. Rekodi za ukaguzi zina heshi na metadata ya ukubwa, kamwe haina maudhui. Maelezo yanayomkabili opereta (alama mbili, mahitaji ya mteja, `codemode:false`, upeo wa kila chombo, uwekaji orodha, na matriki ya uchunguzi) huishi katika [Mitambo ya Kugandamiza → Masharti / mwongozo wa opereta](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
 
 `omniroute_compression_status` inaripoti mbano wa maelezo ya MCP kando chini ya `analytics.mcpDescriptionCompression`. Thamani hizo ni makadirio ya ukubwa wa metadata kwa maelezo yanayoorodheshwa ya MCP (`tools`, `prompts`, `resources`, na `resourceTemplates`); si stakabadhi za matumizi ya mtoa huduma na zimewekwa alama `source: "mcp_metadata_estimate"`.
 
 ### MCP Kichujio cha Mti wa Ufikivu (v3.8.0)
 
-Tofauti na zana za ukandamizaji hapo juu, OmniRoute inajumuisha kichujio cha baada ya utekelezaji ambacho kinabana** matokeo ya zana** ya zana za MCP browser/accessibility kabla hazijarejeshwa kwa wakala. Kichujio hiki chenyewe si zana — kinaendesha kwa uwazi kwenye tokeo lolote la zana ambalo lina maandishi ya ufikivu-verbose au maandishi ya picha ya kivinjari (≥ 2000 chars).
+Tofauti na zana za kubana hapo juu, OmniRoute inajumuisha kichujio cha baada ya utekelezaji ambacho kinabana** matokeo ya zana** ya zana za MCP browser/accessibility kabla hazijarejeshwa kwa wakala. Kichujio hiki chenyewe si zana — kinaendesha kwa uwazi kwenye tokeo lolote la zana ambalo lina kitenzi cha ufikivu-mti au maandishi ya muhtasari wa kivinjari (≥ 2000 chars).
 
 Tabia kuu:
 
