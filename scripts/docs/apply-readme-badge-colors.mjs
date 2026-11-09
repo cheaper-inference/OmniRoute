@@ -1,9 +1,11 @@
 #!/usr/bin/env node
 // One-shot, idempotent: paints the eight shields.io badges of the README header group (the star
-// counter and the "Join the community" block) in the Cheaper Inference UI Kit palette, lime on
-// ink (--ci-color-accent / --ci-neutral-950, packages/ui-kit/src/ci-tokens.css), in README.md and
-// every docs/i18n/<locale>/README.md. It rewrites those URLs' query strings and nothing else: no
-// other byte of a file changes, including the alt text, which the mirrors translate.
+// counter and the "Join the community" block) in the kit's Editions palette, OmniRoute's default
+// look: copper on ink (--ci-color-accent / --ci-color-heading of the light block of
+// packages/ui-kit/src/ci-editions.css), in README.md and every docs/i18n/<locale>/README.md.
+// shields.io picks each text color itself (dark on the copper, white on the ink). It rewrites
+// those URLs' query strings and nothing else: no other byte of a file changes, including the alt
+// text, which the mirrors translate.
 //
 //   node scripts/docs/apply-readme-badge-colors.mjs --dry-run          report, write nothing
 //   node scripts/docs/apply-readme-badge-colors.mjs                    README.md and the mirrors
@@ -18,7 +20,7 @@ import { fileURLToPath } from "node:url";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..");
 
-export const KIT_COLORS = { color: "d8ff00", labelColor: "040d10" };
+export const KIT_COLORS = { color: "e5ac82", labelColor: "20211c" };
 
 // style=social draws fixed greys and ignores both colors, so the star counter needs a style that
 // honors them. Flat does not do what social did on its own: draw the GitHub mark and capitalize
