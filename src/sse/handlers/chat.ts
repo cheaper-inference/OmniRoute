@@ -2049,6 +2049,8 @@ async function handleSingleModelChat(
           excludedConnectionIds.size > 0
             ? Array.from(excludedConnectionIds)[excludedConnectionIds.size - 1]
             : null;
+        // No account was selected for this response; don't report a previous attempt's plan.
+        selectedConnectionPlan = null;
         return withRoutingTelemetry(noCredsRes, lastFailedConnectionId);
       }
 
