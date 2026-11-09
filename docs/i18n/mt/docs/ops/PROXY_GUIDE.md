@@ -82,6 +82,18 @@ Anki barra mir-reġjuni mblokkati, il-proxies huma utli għal:
 
 ---
 
+## Stat prokura default għal kontijiet ġodda
+
+Fil** Settings → Proxy → Konfigurazzjoni globali** , uża** Ippermetti proxy awtomatikament għal konnessjonijiet ġodda** biex tagħżel l-istat inizjali tal-prokura tal-kontijiet tal-fornitur li għadhom kif ġew miżjuda.
+
+L-issettjar il-ġdid jikkontrolla l-istat inizjali tal-prokura tal-kontijiet tal-fornitur li għadhom kif ġew miżjuda. Ma tbiddilx il-kontijiet eżistenti jew tissostitwixxi l-iswiċċ tal-prokura globali. Il-valur inizjali tiegħu jippreserva l-imġieba preċedenti. Itfiha darba biex toħloq kontijiet futuri bi proxy diżattivat awtomatikament.
+
+Il-preferenza tinħażen bħala `defaultNewConnectionProxyEnabled` permezz tas-Settings API eżistenti. Huwa default għal `true` meta qatt ma jiġi salvat. L-iffrankar `false` jidħol fis-seħħ għal kontijiet ġodda sussegwenti mingħajr bidu mill-ġdid. `POST /api/providers` jaċċetta `proxyEnabled` boolean strett fakultattiv; `true` jew `false` espliċitu jieħu preċedenza fuq id-default tal-ħolqien. Omissjoni fuq kont duplikat jew OAuth reconnect jippreserva l-istat maħżun ta' dak il-kont. Il-kontijiet individwali xorta jistgħu jiġu attivati jew diżattivati wara.
+
+It-trasferimenti tal-fornituri selettivi jużaw il-mod awtomatiku tal-installazzjoni tad-destinazzjoni għal kontijiet ġodda u jippreservaw il-politika tad-destinazzjoni meta jissostitwixxu l-kontijiet eżistenti. Proxy toggles mhumiex oqsma ta 'trasferiment portabbli. Ir-restawr sħiħ tal-backup u l-migrazzjoni storika JSON/SQL jżommu s-semantika tar-restawr eżistenti tagħhom, inklużi l-valuri tal-kont issejvjati u l-inadempjenzi tal-iskema tal-legat; restawr tas-settings sħiħ jista 'wkoll jirrestawra din il-preferenza.
+
+Din il-preferenza ma tassenjax prokura jew tistabbilixxi li wieħed huwa b'saħħtu jew qed jintuża. Ir-rotot attwali għadu jiddependi fuq is-swiċċ tal-prokura globali u l-konfigurazzjoni tal-prokura applikabbli. Fornituri sintetiċi mingħajr kont persistenti, traffiku OAuth qabel il-ħolqien tal-kont, prokuri environment/system, u netwerking ta 'backends esterni huma barra l-ambitu tiegħu.
+
 ## Sistema ta’ Proxy fuq 4 Livelli
 
 OmniRoute jappoġġja konfigurazzjoni tal-proxy f’**erba’ ambiti indipendenti**, solvuti skont l-ordni ta’ prijorità:
