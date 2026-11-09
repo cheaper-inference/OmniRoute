@@ -226,7 +226,8 @@ test("shared set size includes live REGISTRY and retired Designer + Felo + Qwen 
   // MiniMax Code (#17286) registers id "minimax-code" and alias "mmcode" — two
   // more (436 -> 438).
   // EmpirioLabs AI (#17209) registers id "empiriolabs" with the same alias (+1: 438 -> 439).
-  assert.equal(RESERVED_PREFIX_COUNT, 439);
+  // ParalonCloud registers id "paraloncloud" plus alias "paralon" (+2: 439 -> 441).
+  assert.equal(RESERVED_PREFIX_COUNT, 441);
   assert.equal(RESERVED_PROVIDER_PREFIXES.has("ainetcafe"), true);
   assert.equal(RESERVED_PROVIDER_PREFIXES.has("tokenharbor"), true);
   assert.equal(RESERVED_PROVIDER_PREFIXES.has("runcrate"), true);
