@@ -127,6 +127,27 @@ Pemarkahan automatik memilih penyedia/model terbaik bagi setiap permintaan
 | `src/sse/handlers/chat.ts`                                | Penyepaduan: pintasan awal awalan automatik         |
 | `src/shared/constants/providers.ts`                       | Entri sistem `SYSTEM_PROVIDERS.auto`                |
 
+## Pilihan akaun untuk kombo Auto yang disimpan
+
+Editor Auto Pintar menawarkan pilihan** Pilihan akaun** bahagian. Setiap sambungan boleh Diutamakan, Normal (lalai), Rizab, atau Dikecualikan. Berbilang sambungan boleh berkongsi satu peringkat. Auto memilih dalam peringkat pertama yang layak, mengekalkan tingkah laku scoring/router di sana; percubaan gagal jatuh ke akaun konkrit yang tinggal, diutamakan sebelum biasa sebelum rizab. Sambungan yang dikecualikan tidak pernah digunakan oleh kombo ini.
+
+Tetapan disimpan sebagai `config.accountPreferences`, dikunci oleh sambungan ID:
+
+```json
+{
+  "accountPreferences": {
+    "connection-a": "preferred",
+    "connection-b": "preferred",
+    "connection-c": "reserve",
+    "connection-d": "excluded"
+  }
+}
+```
+
+Peta yang ditinggalkan atau kosong mengekalkan penghalaan sedia ada. Keutamaan tidak mendayakan sambungan yang dilumpuhkan, memberikan akses kunci API, memulihkan calon yang disekat kuota atau memintas semakan belanjawan. Setiap percubaan adalah terhad kepada sambungan konkritnya, jadi sandaran akaun tidak boleh melompat peringkat di belakang penghala kombo. Perkaitan sesi sedia ada mungkin mengekalkan akaun yang layak; mengecualikan akaun terikat kepada pusingan asli, berhenti pusingan itu dan bukannya menukar akaun secara senyap.
+
+Keutamaan yang dikonfigurasikan menggunakan laluan Auto sedar akaun: pintasan cache konteks yang tidak terikat, saluran paip pintar, huru-hara dan bayangan tidak dihantar. Lindung nilai spekulatif dilumpuhkan untuk permintaan ini jadi akaun rizab tidak boleh berlumba dengan akaun pilihan. Strategi kombo lain tidak mentafsir tetapan ini. Menukar kombo dari Auto mengekalkan pilihan yang disimpan untuk pertukaran kemudian kembali.
+
 ## Nama Combo yang Sepadan dengan Id Model Sebenar
 
 Combo yang `name`-nya sama dengan id model biasa (contohnya combo bernama

@@ -11,6 +11,7 @@ import {
   storeGeminiThoughtSignature,
 } from "../../services/geminiThoughtSignatureStore.ts";
 import { splitMarkdownBoundary } from "../helpers/markdownBoundary.ts";
+import { stripGeminiPlaceholderArgs } from "../helpers/geminiPlaceholderArgs.ts";
 import {
   buildClaudeWebSearchBlockEvents,
   toClaudeWebSearchResults,
@@ -239,7 +240,9 @@ export function geminiToClaudeResponse(chunk, state) {
           },
         });
 
-        const argsStr = JSON.stringify(fc.args || {});
+        const argsStr = JSON.stringify(
+          stripGeminiPlaceholderArgs(restoredToolName, fc.args || {}, state.clientTools)
+        );
         results.push({
           type: "content_block_delta",
           index: idx,
