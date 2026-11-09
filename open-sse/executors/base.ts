@@ -53,7 +53,11 @@ import { SessionPool } from "../services/sessionPool/sessionPool.ts";
 import { PoolRegistry } from "../services/sessionPool/poolRegistry.ts";
 import { resolveKeyForRequest } from "../services/apiKeyRotator.ts";
 import type { KeyHealth } from "../services/apiKeyRotator.ts";
-import { getOpenAICompatibleType, isClaudeCodeCompatible } from "../services/provider.ts";
+import {
+  getOpenAICompatibleType,
+  getTargetFormat,
+  isClaudeCodeCompatible,
+} from "../services/provider.ts";
 import { usesCcWireImage } from "../services/ccWireImageBuiltins.ts";
 import { getForcedReasoningEffort } from "../utils/reasoningRuleContext.ts";
 import {
@@ -1462,7 +1466,11 @@ export class BaseExecutor {
             // failover does not burn the next account on the same body.
             tb.messages = stripTrailingAssistantForProvider(stripped, this.provider);
             // Anthropic reads an assistant-last turn as a prefill and 400s on trailing whitespace.
-            if (isClaude) {
+            // Select by the outbound format: generic anthropic-compatible-* relays send it too.
+            if (
+              isClaude ||
+              getTargetFormat(this.provider, requestCredentials?.providerSpecificData) === "claude"
+            ) {
               tb.messages = normalizeClaudeFinalAssistantWhitespace(tb.messages as JsonRecord[]);
             }
             // Per-connection opt-in for relays that ban assistant prefill.
