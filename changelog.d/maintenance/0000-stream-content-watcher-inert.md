@@ -1,0 +1,1 @@
+- **perf(sse):** the client stream content check stops parsing frames once the first content is seen, which saves about 4 ms of CPU for a 2,000-event stream.

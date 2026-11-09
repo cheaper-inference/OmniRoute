@@ -492,7 +492,8 @@ export type StreamContentWatcher = {
   /**
    * True once a terminal frame declared a NORMAL stop (finish_reason "stop",
    * stop_reason "end_turn"/"stop_sequence") — the upstream's own verdict that
-   * the turn is complete, even when no content followed (#16072).
+   * the turn is complete, even when no content followed (#16072). Not updated once
+   * content is seen: the verdict only matters for a stream that carried no content.
    */
   sawNormalStopTerminal: () => boolean;
   /**
@@ -567,13 +568,20 @@ export function createStreamContentWatcher(
 
   return {
     note(text: string): void {
-      if (!text) return;
+      // Once content is proven every reader is satisfied (each tests `!sawContent()` or ORs
+      // it with the other flags), so later frames are not parsed or buffered and the
+      // other flags keep the value they had at that point.
+      if (!text || content) return;
       pending += text;
       for (;;) {
         const boundary = pending.search(/\r?\n\r?\n/);
         if (boundary === -1) break;
         inspect(pending.slice(0, boundary));
         pending = pending.slice(boundary).replace(/^\r?\n\r?\n/, "");
+        if (content) {
+          pending = "";
+          return;
+        }
       }
       if (pending.length > MAX_BUFFERED) {
         inspect(pending);
@@ -581,7 +589,7 @@ export function createStreamContentWatcher(
       }
     },
     finish(): void {
-      inspect(pending);
+      if (!content) inspect(pending);
       pending = "";
     },
     sawContent: () => content,
