@@ -1,5 +1,6 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import {
   FREE_MODEL_BUDGETS,
   computeFreeModelTotals,
@@ -31,10 +32,20 @@ const formerlyMisclassifiedIds = [
 describe("#17028 SiliconFlow pay-as-you-go model protection", () => {
   it("retains honest release catalog counts and never counts SiliconFlow as statically uncapped", () => {
     const totals = computeFreeModelTotals();
-    // 471 → 484: #16325 added 13 onomeo free-catalog rows (one uncapped pool, not steady-monthly).
-    // 484 → 485: #16315 added the Token Harbor free route to its own uncapped pool.
-    // 485 → 484: #18418 drops NVIDIA's retired openai/gpt-oss-120b endpoint.
-    assert.equal(totals.modelCount, 484);
+    // The 484 inherited identities include 13 onomeo rows added by #16325.
+    // Measured 2026-10-28 inventory subtracts five
+    // priced Ollama grants, three retired offers, two AINative grants and ten OpenCode-only offers.
+    // Includes the release base NVIDIA Nemotron 3.5 identity rename.
+    // 464 → 465 on the v3.8.54 base: #16315/#18579 add two sourced Token Harbor :free routes,
+    // and #18418 drops NVIDIA's retired openai/gpt-oss-120b endpoint.
+    // Pin identities as well as the total so unrelated replacement is visible.
+    const identities = FREE_MODEL_BUDGETS.map((row) => `${row.provider}/${row.modelId}`).sort();
+    assert.equal(new Set(identities).size, 465);
+    assert.equal(
+      createHash("sha256").update(identities.join("\n")).digest("hex"),
+      "098c2c2eeed42c3c99ad93ec8e92d0d65146e6db8f66c4c920a2b4b414fe7732"
+    );
+    assert.equal(totals.modelCount, 465);
     assert.equal(totals.poolCount, 34);
     assert.equal(totals.uncappedProviders.includes("siliconflow"), false);
   });

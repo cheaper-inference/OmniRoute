@@ -18,86 +18,133 @@
 
 ## 1. Որտեղ են գտնվում տարրերը
 
-- **Կոմպլեկտ։** `packages/ui-kit/src`-ը վերին հոսքի `src/`-ի բայթ առ բայթ պատճենն է՝
-  `packages/ui-kit/UPSTREAM.md`-ում ամրագրված commit-ի դրությամբ (այնտեղ նաև գրանցված է լիցենզային թույլտվությունը),
-  իսկ `PATCHES.md`-ում թվարկված են տեղային պատչերը (չկան)։ Այն օգտագործվում է որպես ելակետային կոդ՝ առանց build-ի.
-  `next.config.mjs`-ը transpile է անում այն, իսկ `tsconfig.json`-ը `@omniroute/ui-kit` → `packages/ui-kit/src`
-  և `@omniroute/ui-kit/*` → `packages/ui-kit/src/*` համապատասխանեցումներն է սահմանում
-  (`vitest.config.ts`-ը և `vitest.mcp.config.ts`-ը պարունակում են նույն alias-ը)։ Կոմպլեկտի բաղադրիչը ներմուծեք
-  իր ենթուղիով (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…), երբեք՝
-  `@omniroute/ui-kit` barrel-ի միջոցով. barrel-ը յուրաքանչյուր ներմուծողի մեջ է ներքաշում բոլոր բաղադրիչները
-  (ներառյալ ամսաթվի ընտրիչը)։ Կոմպլեկտի ոճաթերթը միացվում է `src/app/globals.css`-ի միջոցով
-  (`@import "../../packages/ui-kit/src/ci-styles.css"`, ամբողջական ոճաթերթը՝ հիմնական `ci-ui.css`-ը և օրինաչափությունների բոլոր ընտանիքները)։
+- **Հավաքածու։** `packages/ui-kit/src`-ը վերին հոսքի `src/`-ի բայթ առ բայթ պատճենն է
+  `packages/ui-kit/UPSTREAM.md`-ում ամրագրված commit-ի դրությամբ (այնտեղ գրանցված է նաև լիցենզային թույլտվությունը),
+  իսկ `PATCHES.md`-ում թվարկված են տեղային պատչերը (չկան)։ Այն օգտագործվում է որպես սկզբնաղբյուր՝ առանց build-ի.
+  `next.config.mjs`-ը տրանսպիլացնում է այն, իսկ `tsconfig.json`-ը քարտեզագրում է `@omniroute/ui-kit` → `packages/ui-kit/src`
+  և `@omniroute/ui-kit/*` → `packages/ui-kit/src/*` (`vitest.config.ts`-ը և `vitest.mcp.config.ts`-ը պարունակում են նույն alias-ը)։
+  Հավաքածուի բաղադրիչը ներմուծեք իր ենթուղով (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…),
+  երբեք՝ `@omniroute/ui-kit` barrel-ի միջոցով. barrel-ը յուրաքանչյուր ներմուծողի մեջ ներառում է բոլոր բաղադրիչները
+  (ներառյալ ամսաթվի ընտրիչը)։ Հավաքածուի ոճաթերթը ներառվում է `src/app/globals.css`-ի միջոցով
+  (`@import "../../packages/ui-kit/src/ci-styles.css"`, ամբողջական ոճաթերթը՝ հիմնական `ci-ui.css`-ը և բոլոր pattern ընտանիքները)։
 - **Թոքեններ։** `packages/ui-kit/src/ci-tokens.css`-ը հայտարարում է `--ci-*` թոքենները, իսկ `src/app/globals.css`-ը
-  դրանք կապում է OmniRoute-ի հին անվանումների հետ (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`,
-  `--table-*`, `--orch-status-*`, `--color-fd-*`), որպեսզի գոյություն ունեցող `var(--color-*)` ընթերցումները և Tailwind-ի
-  օգտակար դասերը շարունակեն աշխատել։ Նոր կոդն օգտագործում է Tailwind-ի օգտակար դասերը (`bg-surface`, `text-text-muted`,
-  `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…) կամ կոմպլեկտի դասերը՝ երբեք hex արժեք
-  (`tests/unit/design-kit-bridge.test.ts`-ը պարտադրում է այս կապը)։ `text-primary`-ն
-  `--text-color-primary`-ի միջոցով լուծվում է որպես `--color-primary-ink`, ուստի հիմնական տեքստը մնում է ընթեռնելի,
-  մինչդեռ `bg-primary`/`border-primary`-ը պահպանում են շեշտադրման մակերեսը. Editions-ում դա կոմպլեկտի
-  `--ci-color-accent-active`-ն է (բաց թեմայում՝ մուգ պղնձագույն `#99562f`, մութ թեմայում՝ պղնձագույն շեշտադրում), իսկ Classic-ում՝
-  lime-800-ը բաց թեմայում և lime շեշտադրումը մութ թեմայում։ Գծապատկերների շարքերն օգտագործում են
-  `--color-chart-1` … `--color-chart-5`։
-- **Թեմաներ։** `<html className="ci-theme">`-ը (`src/app/layout.tsx`) փաստաթուղթը միացնում է կոմպլեկտի թեմային։
-  Նախապատվությունը `light`, `dark` կամ `system` է (`THEME_CONFIG.defaultTheme = "system"`՝
-  `src/shared/constants/appConfig.ts`-ում. `system`-ը հետևում է `prefers-color-scheme`-ին)։ `src/store/themeStore.ts`-ի
-  `applyTheme()`-ը (որի կրկնօրինակը `THEME_BOOT_SCRIPT`-ն է՝ ներկառուցված `src/app/layout.tsx`-ում և գործարկվող
-  hydration-ից առաջ) միաժամանակ սահմանում է `data-theme="dark"|"light"`-ը և միացնում կամ անջատում `<html>`-ի `.dark` դասը։
-  Կոմպլեկտի մութ թոքենների հավաքածուն կապակցված է `data-theme="dark"`-ին (`packages/ui-kit/src/ci-tokens.css`),
-  իսկ OmniRoute-ի սեփական մութ վերագրումները (`globals.css`-ի `.dark` բլոկը) և հին Tailwind `dark:`
-  օգտակար դասերը կապակցված են `.dark` դասին։ Շեշտադրման գույնի նախակարգավորումներ չկան. շեշտադրումը միշտ գալիս է
-  կոմպլեկտից, իսկ ավելի հին build-ից պահպանված նախակարգավորումը հեռացվում է store-ի բեռնման ժամանակ։
-- **Գունապնակներ։** Երկուսն էլ կոմպլեկտից են (`src/shared/constants/appearancePalette.ts`)՝ `editions`՝
-  լռելյայնը, և `classic`։ Editions-ը կոմպլեկտի `data-ci-appearance="editions"` ատրիբուտն է `<html>`-ի վրա, որը
-  `ci-editions.css`-ը (`ci-ui.css`-ի միջոցով ներմուծված) համադրում է `data-theme`-ի հետ, իսկ Classic-ը այդ ատրիբուտի
-  բացակայությունն է։ Արմատային layout-ը server-render է անում ատրիբուտը, ուստի ոչինչ չպահպանած այցելուն (կամ առանց JS-ի)
-  Editions է ստանում յուրաքանչյուր մակերեսի վրա՝ dashboard-ում, login-ում, `/status`-ում, սխալի էջերում, `/docs`-ում և PWA-ում։
-  Ընտրությունը թեմայի կողքին պահպանվում է նույն `theme` store-ում (`palette`, `setPalette()`, `applyPalette()`՝
-  `src/store/themeStore.ts`-ում) և մինչև ցուցադրումը կիրառվում է `THEME_BOOT_SCRIPT`-ի միջոցով
-  (`src/shared/utils/themeBootScript.ts`, ներկառուցված layout-ի `<head>`-ում), որը ատրիբուտը հեռացնում է միայն այն դեպքում,
-  երբ պահպանված գունապնակը `"classic"` է. արմատային layout-ից դուրս գտնվող `src/app/global-error.tsx`-ն այն կիրառում է
-  նույն store-ից։ `data-ci-appearance`-ը մի դրեք որևէ այլ տարրի վրա. կոմպլեկտն այն համադրում է
-  `html:root:has([data-ci-appearance="editions"])`-ով, ուստի մեկ ժառանգ տարրն անգամ ամբողջ փաստաթուղթը կփոխարկի։
-  Editions-ի `data-ci-editions-variant="landing"` տարբերակը մարքեթինգային էջերի համար է, ոչ թե dashboard-ի։
-  Բրաուզերի արտաքին միջերեսը (`viewport.themeColor`, վեբ manifest-ը) չի կարող կարդալ CSS-ը կամ պահպանված ընտրությունը,
-  ուստի հետևում է լռելյայնին. `src/shared/constants/pwaThemeColors.ts`-ի `PWA_THEME_COLORS`-ը Editions-ի
-  `--ci-color-background`-ի (`#f3f1e9` / `#11120f`) միակ արտացոլումն է, որը `ci-editions.css`-ին ամրագրված է
-  `tests/unit/pwa-theme-colors.test.ts`-ով։ Monaco-ն իր գույները կարդում է զոնդից (`monacoKitTheme.ts`).
-  Editions-ի դեպքում զոնդի ընթերցումը մեկ համաժամանակյա անցման համար փոխում է արմատային `data-theme`-ը, քանի որ կոմպլեկտը
-  Editions-ի բաց/մութ տարբերակները որոշում է արմատից։
-- **Բաղադրիչներ (ադապտերներ)։** `src/shared/components/index.tsx`-ը պահպանում է OmniRoute-ի բաղադրիչների API-ն
-  (նույն անունները, լռելյայն արտահանումները և props-երը), իսկ դրա հիմքում գտնվող պարզունակ բաղադրիչները կոմպլեկտի վրա կառուցված
+  դրանք կապում է OmniRoute-ի հին անվանումներին (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`,
+  `--table-*`, `--orch-status-*`, `--color-fd-*`), որպեսզի առկա `var(--color-*)` ընթերցումները և Tailwind-ի
+  utility-ները շարունակեն աշխատել։ Նոր կոդն օգտագործում է Tailwind-ի utility-ները (`bg-surface`, `text-text-muted`,
+  `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…) կամ հավաքածուի class-երը՝ երբեք ոչ hex արժեք
+  (`tests/unit/design-kit-bridge.test.ts`-ը պարտադրում է այդ կապի առկայությունը)։ `text-primary`-ը
+  `--text-color-primary`-ի միջոցով լուծվում է որպես `--color-primary-ink`, ուստի հիմնական տեքստը մնում է
+  ընթեռնելի, մինչդեռ `bg-primary`/`border-primary`-ը պահպանում են շեշտադրման մակերեսը. Editions-ի դեպքում դա
+  հավաքածուի `--ci-color-accent-active`-ն է (բաց ռեժիմում՝ մուգ պղնձագույն `#99562f`, մութ ռեժիմում՝ պղնձագույն
+  շեշտադրում), իսկ Classic-ի դեպքում՝ lime-800 բաց ռեժիմում և lime շեշտադրում մութ ռեժիմում։ Գծապատկերների
+  շարքերն օգտագործում են `--color-chart-1` … `--color-chart-8`, որոնցից յուրաքանչյուրն ունի տեքստի համար անվտանգ
+  `--color-chart-N-ink` և անթափանց `--color-chart-N-subtle` chip-ի երանգ՝ նշանակված հավաքածուի շարքերի
+  հերթականությամբ (`ciChartSeriesOrder`)։
+- **Թեմաներ։** `<html className="ci-theme">`-ը (`src/app/layout.tsx`) փաստաթուղթը ներառում է հավաքածուի թեմայում։
+  Նախընտրությունը `light`, `dark` կամ `system` է (`THEME_CONFIG.defaultTheme = "system"`՝
+  `src/shared/constants/appConfig.ts`-ում. `system`-ը հետևում է `prefers-color-scheme`-ին)։
+  `src/store/themeStore.ts`-ի `applyTheme()`-ը (որի արտացոլված տարբերակը՝ `THEME_BOOT_SCRIPT`-ը, ներկառուցված է
+  `src/app/layout.tsx`-ում և գործարկվում է hydration-ից առաջ) միաժամանակ սահմանում է
+  `data-theme="dark"|"light"`-ը և միացնում կամ անջատում `<html>`-ի `.dark` class-ը։ Հավաքածուի մութ թոքենների
+  բազմությունը կապված է `data-theme="dark"`-ի հետ (`packages/ui-kit/src/ci-tokens.css`), իսկ OmniRoute-ի
+  սեփական մութ override-ները (`globals.css`-ի `.dark` բլոկը) և հին Tailwind `dark:` utility-ները կապված են
+  `.dark` class-ի հետ։ Շեշտադրման գույնի preset-ներ չկան. շեշտադրումը միշտ գալիս է հավաքածուից, իսկ հին build-ից
+  պահպանված preset-ը հեռացվում է store-ի բեռնման ժամանակ։
+- **Ներկապնակներ։** Երկուսն էլ հավաքածուից են (`src/shared/constants/appearancePalette.ts`)՝ `editions`-ը՝
+  լռելյայնը, և `classic`-ը։ Editions-ը հավաքածուի `data-ci-appearance="editions"` attribute-ն է `<html>`-ի վրա,
+  որը `ci-editions.css`-ը (`ci-ui.css`-ի միջոցով ներմուծված) համադրում է `data-theme`-ի հետ. Classic-ը այդ
+  attribute-ի բացակայությունն է։ Արմատային layout-ը server-render է անում attribute-ը, ուստի որևէ բան
+  չպահպանած (կամ JS չունեցող) այցելուն Editions է ստանում բոլոր մակերեսներում՝ dashboard-ում, login-ում,
+  `/status`-ում, սխալի էջերում, `/docs`-ում և PWA-ում։ Ընտրությունը թեմայի կողքին պահպանվում է նույն `theme`
+  store-ում (`palette`, `setPalette()`, `applyPalette()`՝ `src/store/themeStore.ts`-ում) և մինչև առաջին
+  արտապատկերումը կիրառվում է `THEME_BOOT_SCRIPT`-ի միջոցով (`src/shared/utils/themeBootScript.ts`, ներկառուցված
+  layout-ի `<head>`-ում), որը attribute-ը հեռացնում է միայն այն դեպքում, երբ պահպանված ներկապնակը `"classic"` է.
+  `src/app/global-error.tsx`-ը, որը գտնվում է արմատային layout-ից դուրս, այն կիրառում է նույն store-ից։
+  `data-ci-appearance`-ը մի դրեք որևէ այլ տարրի վրա. հավաքածուն այն համադրում է
+  `html:root:has([data-ci-appearance="editions"])`-ով, ուստի մեկ ժառանգ տարրն ամբողջ փաստաթուղթը կփոխարկի։
+  Editions-ի `data-ci-editions-variant="landing"` տարբերակը նախատեսված է մարքեթինգային էջերի, ոչ թե dashboard-ի
+  համար։ Բրաուզերի chrome-ը. սերվերը լռելյայն՝ Editions արժեքը render է անում `viewport.themeColor`-ում
+  (մեկ tag յուրաքանչյուր `prefers-color-scheme`-ի համար) և web manifest-ում՝ `PWA_THEME_COLORS`-ը
+  `src/shared/constants/pwaThemeColors.ts`-ում՝ Editions-ի `--ci-color-background`-ի միակ արտացոլումը
+  (`#f3f1e9` / `#11120f`), որը `tests/unit/pwa-theme-colors.test.ts`-ով ամրագրված է `ci-editions.css`-ին։
+  Այնուհետև գործող `<meta name="theme-color">`-ը հետևում է պահպանված ներկապնակին և ռեժիմին.
+  `THEME_BOOT_SCRIPT`-ը վերագրում է tag-երը մինչև առաջին արտապատկերումը, իսկ theme store-ի գործողությունները դա
+  անում են յուրաքանչյուր փոփոխության ժամանակ (`resolveThemeColor()` / `applyThemeColor()`՝
+  `src/shared/utils/themeColorMeta.ts`-ում, որտեղ `CLASSIC_PAGE_BACKGROUND`-ը կարդացվում է հավաքածուի
+  `ciTokens`-ից)։ Հստակ սահմանված բաց/մութ թեման յուրաքանչյուր tag-ը սահմանում է այդ ռեժիմին, իսկ `system`-ը
+  պահպանում է մեկ գույն յուրաքանչյուր սխեմայի համար։ Manifest-ը մնում է Editions. այն յուրաքանչյուր տեղադրման
+  համար ներբեռնվում է մեկ անգամ՝ առանց նախընտրության։ Monaco-ն իր գույները կարդում է probe-ից
+  (`monacoKitTheme.ts`). Editions-ի դեպքում probe-ի ընթերցումը մեկ համաժամանակյա անցման համար փոխում է արմատային
+  `data-theme`-ը, քանի որ հավաքածուն Editions-ի բաց/մութ տարբերակը որոշում է արմատից։
+- **Բաղադրիչներ (ադապտերներ)։** `src/shared/components/index.tsx`-ը պահպանում է OmniRoute բաղադրիչների API-ն
+  (նույն անունները, լռելյայն export-ները և props-երը), իսկ դրա հիմքում ընկած primitive-ները հավաքածուի շուրջ
   ադապտերներ են՝ ձևեր (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`),
-  վերադիր շերտեր և հետադարձ կապ (`Modal`/`ConfirmModal`, `Tooltip`/`InfoTooltip`, `NotificationToast`, `EmptyState`, `Loading`),
-  կառուցվածք (`Collapsible`, `CollapsibleSection`, `SegmentedControl`, `Breadcrumbs`, `Avatar`) և աղյուսակներ
-  (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`)։ Ադապտերը կոմպլեկտի բաղադրիչը ներմուծում է
-  ենթուղիով և հին props-երը համապատասխանեցնում է դրան. օրինակ՝ `Button variant="primary"`-ը կոմպլեկտի
-  `default` կոճակն է (`--ci-button-primary-*`՝ բաց թեմայում հակադարձ մակերես, իսկ մութ թեմայում՝ շեշտադրումը՝ իր
-  `--ci-color-accent-foreground` տեքստի գույնով), `danger`-ը `destructive` է, իսկ `warning`-ը՝ `outline`՝
-  գումարած `.ci-button--warning` ընդլայնումը։ `globals.css`-ի վերջում (`@layer components`) գտնվող
-  `.ci-button--warning` և `.ci-badge[data-tone]` կանոնները OmniRoute-ի ընդլայնումներն են՝ կոմպլեկտի դասերի վրա։
-  `tests/unit/ui/adapters/*.test.tsx`-ը ամրագրում է յուրաքանչյուր ադապտերը։
-- **Կաղապար։** `src/app/(dashboard)/layout.tsx`-ը render է անում `DashboardLayout`-ը, որն իր հերթին render է անում
-  `src/shared/components/layouts/DashboardShell.tsx`-ը՝ կոմպլեկտի `SidebarProvider` / `Sidebar` /
-  `SidebarInset`-ով (`packages/ui-kit/src/sidebar.tsx`) և OmniRoute-ի նավիգացիոն տրամաբանությամբ՝
-  `src/shared/components/Sidebar.tsx`-ում։ `#main-content`-ին ուղղված «անցնել բովանդակությանը» հղումը առաջին focus ստացող
-  տարրն է։ `src/shared/components/Header.tsx`-ը պարունակում է կոմպլեկտի `SidebarTrigger`-ը (կաղապարի միակ sidebar
-  փոխարկիչը), Keak-ի `ProductSwitcher`-ը և հրամանների գունապնակը բացող տարրը. այն երթուղու վերնագիրը ցուցադրում է միայն այն ժամանակ,
-  երբ `#main-content`-ի ներսում կոմպլեկտի որևէ `PageHeader` (`.ci-page-header`) mount արված չէ, այնպես որ սեփական
-  `PageHeader` ունեցող էջն ունի մեկ `h1`։ `src/shared/components/CommandPalette.tsx`-ը կոմպլեկտի `Dialog` է։
-- **Պատկերակներ։** `<Icon name="material_name">`-ը (`src/shared/components/Icon.tsx`) անունը (էկրաններում օգտագործվող Material Symbols բառապաշարից) `ICON_MAP`-ի (`src/shared/constants/iconMap.ts`) միջոցով համապատասխանեցնում է Lucide գլիֆին։ Material Symbols տառատեսակն ու փաթեթն այլևս չկան․ քարտեզում բացակայող անունը ցուցադրում է չեզոք փոխարինող գլիֆ (`data-icon-missing="true"`) և production միջավայրից դուրս գրանցում է նախազգուշացում վահանակում։ `npm run gen:icon-map`-ը տպում է օգտագործվող այն անունները, որոնք բացակայում են քարտեզից (`tests/unit/icon-map-coverage.test.ts`-ը ձախողվում է Lucide պատկերակ չունեցող ցանկացած անվան դեպքում, իսկ `tests/unit/icon-map-object-values.test.ts`-ը ստուգում է որոնման օբյեկտներում պահվող անունները)։ `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]`-ը բառացի `<span className="material-symbols-outlined">` span-ները վերափոխում է `<Icon>`-ի։
-- **Բրենդ։** `src/shared/components/OmniRouteLogo.tsx`-ը փաթաթում է հավաքածուն․ լռելյայն արտահանումը՝ `OmniRouteLogo`-ն, արտապատկերում է `ProductIcon product="omniroute" variant="glyph"`-ը (ներկառուցված SVG, `basePath`-ի հետ անվտանգ), իսկ `OmniRouteLockup`-ն արտապատկերում է `ProductLockup product="omniroute"`-ը (մատչելի անունը՝ «Keak OmniRoute») կամ, white-label օպերատորների դեպքում, նրանց սեփական `name`/`logoSrc`-ը։ Արտադրանքների փոխարկիչի նպատակակետերը գտնվում են `src/shared/constants/keakProducts.ts`-ում (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`)։ Առանձին էկրանները՝ `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`, `src/app/offline/page.tsx`, `src/app/not-found.tsx` և `src/shared/components/ErrorPageScaffold.tsx`, ցուցադրում են լոգոտիպային համակցությունը, իսկ `tests/unit/brand-pages-static.test.ts`-ը վերահսկում է դա։
+  overlay-ներ և հետադարձ կապ (`Modal`/`ConfirmModal`, `Tooltip`/`InfoTooltip`, `NotificationToast`, `EmptyState`,
+  `Loading`), կառուցվածք (`Collapsible`, `CollapsibleSection`, `SegmentedControl`, `Breadcrumbs`, `Avatar`) և
+  աղյուսակներ (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`)։ Ադապտերը հավաքածուի
+  բաղադրիչը ներմուծում է ենթուղով և հին props-երը քարտեզագրում դրա վրա. օրինակ՝ `Button variant="primary"`-ը
+  հավաքածուի `default` կոճակն է (`--ci-button-primary-*`՝ բաց ռեժիմում հակադարձ մակերեսը, մութ ռեժիմում՝
+  շեշտադրումն իր `--ci-color-accent-foreground` տեքստային գույնով), `danger`-ը `destructive` է, իսկ `warning`-ը՝
+  հավաքածուի `warning` կոճակը։ `Badge`-ի status տարբերակները հավաքածուի երանգներն են, իսկ `<option>` ժառանգ
+  տարրերով `Select`-ը render է անում հավաքածուի `NativeSelect`-ը։
+  `tests/unit/ui/adapters/*.test.tsx`-ը ամրագրում է յուրաքանչյուր ադապտերի վարքը։
+- **Կառուցվածք։** `src/app/(dashboard)/layout.tsx`-ը ցուցադրում է `DashboardLayout`-ը, որն իր հերթին ցուցադրում է
+  `src/shared/components/layouts/DashboardShell.tsx`-ը՝ փաթեթի `SidebarProvider` / `Sidebar` /
+  `SidebarInset` (`packages/ui-kit/src/sidebar.tsx`) բաղադրիչները՝ OmniRoute-ի նավարկման տրամաբանությամբ
+  `src/shared/components/Sidebar.tsx`-ում։ Դեպի `#main-content` տանող «անցնել բովանդակությանը» հղումն առաջին ֆոկուսավորվող
+  տարրն է։ `src/shared/components/Header.tsx`-ը պարունակում է փաթեթի `SidebarTrigger`-ը (կառուցվածքի միակ կողագոտու
+  փոխարկիչը), Keak-ի `ProductSwitcher`-ը և հրամանների գունապնակը բացող տարրը։ Այն երթուղու վերնագիրը ցուցադրում է միայն այն ժամանակ, երբ
+  `#main-content`-ի ներսում փաթեթի որևէ `PageHeader` (`.ci-page-header`) մոնտաժված չէ, ուստի սեփական
+  `PageHeader` ունեցող էջն ունի մեկ `h1`։ `src/shared/components/CommandPalette.tsx`-ը փաթեթի `Dialog` է։
+- **Պատկերակներ։** `<Icon name="material_name">`-ը (`src/shared/components/Icon.tsx`) անունը (էկրաններում
+  օգտագործվող Material Symbols բառապաշարից) `ICON_MAP`-ի (`src/shared/constants/iconMap.ts`) միջոցով համապատասխանեցնում է
+  Lucide պատկերագրի։ Material Symbols տառատեսակն ու փաթեթն այլևս չկան․ քարտեզում բացակայող անվան դեպքում ցուցադրվում է
+  չեզոք տեղապահ պատկերագիր (`data-icon-missing="true"`), իսկ production միջավայրից դուրս կոնսոլում գրանցվում է նախազգուշացում։
+  `npm run gen:icon-map`-ը տպում է օգտագործվող այն անունները, որոնք բացակայում են քարտեզից
+  (`tests/unit/icon-map-coverage.test.ts`-ը ձախողվում է Lucide պատկերակ չունեցող ցանկացած անվան դեպքում,
+  իսկ `tests/unit/icon-map-object-values.test.ts`-ը ներառում է որոնման օբյեկտներում պահվող անունները)։
+  `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]`-ը բառացի
+  `<span className="material-symbols-outlined">` span-երը վերափոխում է `<Icon>`-ի։
+- **Բրենդ։** `src/shared/components/OmniRouteLogo.tsx`-ը փաթեթի համար փաթաթիչ է․ լռելյայն արտահանումը՝ `OmniRouteLogo`-ն,
+  ցուցադրում է `ProductIcon product="omniroute" variant="glyph"`-ը (ներկառուցված SVG, անվտանգ `basePath`-ի համար), իսկ
+  `OmniRouteLockup`-ը ցուցադրում է `ProductLockup product="omniroute"`-ը (հասանելիության անունը՝ «Keak OmniRoute») կամ,
+  սպիտակ պիտակով օպերատորների դեպքում, նրանց սեփական `name`/`logoSrc`-ը։ Ապրանքների փոխարկիչի նպատակակետերը գտնվում են
+  `src/shared/constants/keakProducts.ts`-ում (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`)։ Առանձին
+  էկրանները՝ `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`,
+  `src/app/offline/page.tsx`, `src/app/not-found.tsx` և `src/shared/components/ErrorPageScaffold.tsx`,
+  ցուցադրում են ամբողջական լոգոտիպը, իսկ `tests/unit/brand-pages-static.test.ts`-ը վերահսկում է դա։
 
 ## 2. Կանոններ
 
-1. Նշաններ, երբեք բառացի: Բացառություններ, որոնք դիտավորյալ պահվում են. միշտ մութ վահանակի տերմինալը և `STATUS_HEX` (`src/shared/constants/statusColors.ts`), փաթեթի կարգավիճակի ներկապնակի լուծված վեցանկյուն հայելին այն զանգողների համար, ովքեր բառացի վեցանկյունի կարիք ունեն: Կատեգորիկ գունապնակներն այլևս բացառություն չեն. դրանք օգտագործում են փաթեթի հինգ գծապատկերների նշանները (`--color-chart-1..5`) `src/shared/utils/categoricalPalette.ts` միջոցով, իսկ երթուղային ռազմավարությունների համար՝ `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; ReactFlow եզրերը և նվագախմբային կտավը կարդում են թեմայից տեղյակ `--orch-status-*` փոփոխականները (`src/shared/components/flow/edgeStyles.ts`):
-2. Երբեք մի կարկատեք `packages/ui-kit/src` ձեռքով. համաժամեցեք `scripts/dev/sync-ui-kit.sh <commit>` հետ; pre-commit gate `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) ձախողվում է ցանկացած բայթի վրա, որը տարբերվում է ամրացված վերին հոսքի կատարումից (այն բաց է թողնում նախազգուշացումով, երբ վերընթաց կլոնը՝ `UI_KIT_CLONE` կամ `_references/cheaper-inference-ui-kit`, բացակայում է): Երբ հավաքածուին ինչ-որ բան պակասում է, աշխատեք դրա շուրջը ադապտերում կամ էկրանին և խնդրեք դրա համար:
-3. Հավաքածուի տեքստի լռելյայն նախադրյալներն են անգլերենը (`label = "Loading"`, `loadingLabel = "Loading table"`…) – փոխանցեք թարգմանված տողերը `useTranslations(...)` ից, երբ հավաքածուի բաղադրիչը ներկայացնում է տեքստը:
-4. Tailwind կոմունալ ծառայությունները հաղթում են հանդերձանքի բաղադրիչների դասերին (կոմպլեկտը հայտարարում է `@layer theme, base, components, utilities` և դրա կանոնները գործում են `components` ում) — օգտագործեք կոմունալ ծրագրերը տարածության և դասավորության համար, այլ ոչ թե հավաքածուի բաղադրիչները նորից գունավորելու համար:
-5. Վերնագրեր՝ `.ci-heading` էջերի և հատվածների վերնագրերի համար; `.ci-dashboard-display` միայն մեծ, նոսր ցուցադրվող տեքստի համար, ինչպիսին է սխալի էջի կարգավիճակի կոդը: Երկուսն էլ օգտագործում են Switzer:
-6. `tests/unit/dashboard-kit-sweep.test.ts` պահպանում է հանդերձանքի ընդունումը. `src/app` կամ `src/shared/components` ի տակ նյութական կապի բացվածք չկա; վահանակի ծառում (`src/app/(dashboard)` և `src/shared/components`) չկա հում `<select>`, `<textarea>` կամ `<table>` և չկա ձեռքով գլորված `role="dialog"` թվարկված բացառություններից դուրս ( `Select` ադապտերի բնիկ ճյուղ, `RequestLoggerDetail`); այնտեղ յուրաքանչյուր հում `<button>` կամ `<input>` կարիք ունի `kit-exception:` (պատճառով) պարունակող մեկնաբանություն, որը ավարտվում է առավելագույնը 3 տողով վերևում; ներկապնակի երանգները և `dark:` տարբերակները միայն թեստային ցուցակների ֆայլերում:
-7. Ստուգեք երկու թեմաները և 390 px տեսադաշտը PR ից առաջ (սքրինշոթներ); `tests/e2e/a11y.spec.ts` վազում կացին.
+1. Թոքեններ, ոչ երբեք լիտերալներ։ Նպատակային պահպանված բացառություններն են՝ մշտապես մուգ կոնսոլային տերմինալը և
+   `STATUS_HEX`-ը (`src/shared/constants/statusColors.ts`)՝ kit-ի կարգավիճակների ներկապնակի՝ լուծված hex-արժեքներով
+   հայելին այն կանչողների համար, որոնց անհրաժեշտ է լիտերալ hex։ Կատեգորիական ներկապնակներն այլևս բացառություն չեն․
+   դրանք օգտագործում են kit-ի գծապատկերների ութ թոքենները (`--color-chart-1..8`, ինչպես նաև `-ink`/`-subtle`)՝
+   kit-ի շարքի հերթականությամբ՝
+   `src/shared/utils/categoricalPalette.ts`-ի, իսկ երթուղավորման ռազմավարությունների դեպքում՝
+   `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`-ի միջոցով․ ReactFlow-ի կողերը և նվագախմբավորման
+   կտավը կարդում են թեմային հարմարվող `--orch-status-*` փոփոխականները (`src/shared/components/flow/edgeStyles.ts`)։
+2. Երբեք ձեռքով մի փոփոխեք `packages/ui-kit/src`-ը․ համաժամացրեք `scripts/dev/sync-ui-kit.sh <commit>`-ով․
+   նախնական commit-ի ստուգիչը՝ `npm run check:ui-kit-snapshot` (`.husky/pre-commit`), ձախողվում է ցանկացած բայթի
+   դեպքում, որը տարբերվում է ամրագրված upstream commit-ից (այն զգուշացմամբ բաց է թողնվում, երբ upstream clone-ը՝
+   `UI_KIT_CLONE`-ը կամ `_references/cheaper-inference-ui-kit`-ը, բացակայում է)։ Երբ kit-ում որևէ բան բացակայում է,
+   շրջանցող լուծում կիրառեք ադապտերում կամ էկրանում և խնդրեք upstream-ին այն ավելացնել։
+3. Kit-ի տեքստային լռելյայն արժեքներն անգլերեն են (`label = "Loading"`, `loadingLabel = "Loading table"`…)․ kit-ի
+   բաղադրիչի կողմից տեքստ ցուցադրելիս փոխանցեք `useTranslations(...)`-ից ստացված թարգմանված տողերը։
+4. Tailwind-ի utility դասերը գերակայում են kit-ի բաղադրիչների դասերի նկատմամբ (kit-ը հայտարարում է
+   `@layer theme, base, components, utilities`, իսկ դրա կանոնները գտնվում են `components`-ում)․ տարածությունների
+   և դասավորության համար օգտագործեք utility դասեր, ոչ թե kit-ի բաղադրիչների գույները փոխելու համար։
+5. Վերնագրեր․ էջերի և բաժինների վերնագրերի համար՝ `.ci-heading`, իսկ `.ci-dashboard-display`-ը՝ միայն խոշոր,
+   նոսր ցուցադրվող տեքստի համար, օրինակ՝ սխալի էջի կարգավիճակի կոդը։ Երկուսն էլ օգտագործում են Switzer։
+6. `tests/unit/dashboard-kit-sweep.test.ts`-ը վերահսկում է kit-ի ներդրումը․ `src/app`-ի կամ
+   `src/shared/components`-ի տակ չպետք է լինի Material ligature span, իսկ dashboard-ի ծառում
+   (`src/app/(dashboard)` և `src/shared/components`) չպետք է լինեն անմիջական `<select>`, `<textarea>` կամ `<table>`,
+   ինչպես նաև ձեռքով իրականացված `role="dialog"`՝ թվարկված բացառություններից դուրս (`Select` ադապտերի native ճյուղը,
+   `RequestLoggerDetail`)․ այնտեղ յուրաքանչյուր անմիջական `<button>` կամ `<input>` պետք է ունենա
+   `kit-exception:` պարունակող մեկնաբանություն (պատճառի նշումով), որն ավարտվում է դրանից առավելագույնը 3 տող վերև․
+   ներկապնակի երանգներն ու `dark:` տարբերակները թույլատրվում են միայն թեստում թվարկված ֆայլերում։
+7. PR-ից առաջ ստուգեք երկու թեմաներն էլ և 390 px լայնությամբ viewport-ը (սքրինշոթներով)․
+   `tests/e2e/a11y.spec.ts`-ը գործարկում է axe-ը։
 
 ## 3. Էկրանի ավելացում
 

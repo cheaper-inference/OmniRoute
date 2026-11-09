@@ -1,7 +1,12 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { TYPE_COLORS, LEVEL_COLORS, PROVIDER_COLORS } from "@/shared/constants/colors";
+import {
+  TYPE_COLORS,
+  LEVEL_COLORS,
+  PROVIDER_COLORS,
+  neutralBadge,
+} from "@/shared/constants/colors";
 import {
   formatDuration as formatLatency,
   maskAccount,
@@ -93,17 +98,10 @@ function ObservedLinkField({ label, href, title, short }) {
 }
 
 function StatusBadges({ log, t }) {
-  const typeColor = TYPE_COLORS[log.proxy?.type] || {
-    bg: "#6B7280",
-    text: "#fff",
-    label: log.proxy?.type || "-",
-  };
+  const typeColor = TYPE_COLORS[log.proxy?.type] || neutralBadge(log.proxy?.type || "-");
   const levelColor = LEVEL_COLORS[log.level] || LEVEL_COLORS.direct;
-  const providerColor = PROVIDER_COLORS[log.provider] || {
-    bg: "#374151",
-    text: "#fff",
-    label: (log.provider || "-").toUpperCase(),
-  };
+  const providerColor =
+    PROVIDER_COLORS[log.provider] || neutralBadge((log.provider || "-").toUpperCase());
   return (
     <>
       <div>

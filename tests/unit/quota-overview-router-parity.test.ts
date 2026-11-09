@@ -26,6 +26,11 @@ import { availabilityScopes } from "../../src/lib/usage/availabilityScopes.ts";
 import type { ProviderLimitsCacheEntry } from "../../src/lib/db/providerLimits.ts";
 import * as f from "./quota-overview-router-fixtures.ts";
 
+// Freshness checks must use the same clock as the synthetic quota observations.
+test.beforeEach((t) => {
+  t.mock.timers.enable({ apis: ["Date"], now: f.now });
+});
+
 type Raw = NonNullable<HealthData["raw"]> & {
   syntheticConnectionId?: string;
   modelQuotas?: Record<string, UsageQuota>;
@@ -41,6 +46,8 @@ interface Fixture {
   restricted?: string;
   pool?: string;
   fill?: number;
+  /** Meter value the account must report, i.e. the tightest window percentage. */
+  meter?: number;
   bypass?: string;
   cutoffs?: Record<string, number>;
 }
@@ -144,7 +151,8 @@ const exceptions: Fixture[] = [
     raw: () => extra,
     psd: { blockExtraUsage: false },
     permitted: true,
-    fill: 100,
+    fill: 0,
+    meter: 0,
     bypass: "extraUsage",
   },
   {
@@ -153,7 +161,8 @@ const exceptions: Fixture[] = [
     raw: () => f.codex(0),
     psd: { quotaPreflightEnabled: false, limitPolicy: { enabled: false } },
     permitted: true,
-    fill: 100,
+    fill: 0,
+    meter: 0,
     bypass: "filteringDisabled",
   },
   {
@@ -162,8 +171,29 @@ const exceptions: Fixture[] = [
     raw: () => f.codex(0, null, 80, paid),
     psd: { allowPaidCredits: true },
     permitted: true,
-    fill: 100,
+    fill: 0,
+    meter: 0,
     bypass: "paidCredits",
+  },
+  {
+    name: "Codex paid credits reports the metered window",
+    provider: "codex",
+    raw: () => f.codex(20, null, 80, paid),
+    psd: { allowPaidCredits: true },
+    permitted: true,
+    fill: 20,
+    meter: 20,
+    bypass: "paidCredits",
+  },
+  {
+    name: "Claude extra usage keeps the account meter above a lower scoped window",
+    provider: "claude",
+    raw: () => ({ ...f.claude(50, 0), extraUsage: { is_enabled: true, utilization: 10 } }),
+    psd: { blockExtraUsage: false },
+    permitted: true,
+    fill: 50,
+    meter: 50,
+    bypass: "extraUsage",
   },
 ];
 table.push(...exceptions);
@@ -258,6 +288,7 @@ table.push({
   restricted: "gpt-5.3-codex-spark",
   permitted: true,
   fill: 0,
+  meter: 0,
   bypass: "paidCredits",
 });
 
@@ -268,6 +299,7 @@ table.push({
   psd: { allowPaidCredits: true },
   permitted: true,
   fill: 60,
+  meter: 60,
   bypass: "paidCredits",
 });
 table.push({
@@ -282,8 +314,41 @@ table.push({
   raw: () => f.claude(0),
   psd: { blockExtraUsage: false },
   permitted: true,
-  fill: 100,
+  fill: 0,
+  meter: 0,
   bypass: "extraUsage",
+});
+test("Claude extra usage reports the scoped window when it is the only one", () => {
+  const raw = { ...f.claudeScopedOnly(40), extraUsage: { is_enabled: true, utilization: 10 } };
+  const connection: HealthConnection = {
+    id: "synthetic",
+    provider: "claude",
+    isActive: true,
+    testStatus: "active",
+    providerSpecificData: { blockExtraUsage: false },
+  };
+  const account = buildHealthAccount(
+    connection,
+    { raw, quotas: parseQuotaData("claude", raw) },
+    {},
+    f.now,
+    {
+      availability: buildConnectionQuotaAvailability(
+        connection,
+        { ...raw, fetchedAt: new Date(f.now).toISOString() } as Partial<ProviderLimitsCacheEntry>,
+        f.policy
+      ),
+      availabilityObservedAt: f.now,
+    }
+  );
+  assert.deepEqual(
+    account.cells.map((cell) => [cell.scope, cell.quotaIgnored]),
+    [["scoped", true]]
+  );
+  const view = displayAccount(account, f.now);
+  assert.equal(view.kind, "ok");
+  assert.equal(view.remainingPct, 40);
+  assert.equal(view.fill, 40);
 });
 for (const fixture of table)
   test(fixture.name, async () => {
@@ -352,6 +417,11 @@ for (const fixture of table)
       assert.ok(
         Math.abs(view.fill! - fixture.fill) < 1e-9,
         `fill ${view.fill} must be ${fixture.fill}`
+      );
+    if (fixture.meter !== undefined)
+      assert.ok(
+        Math.abs((view.remainingPct ?? Number.NaN) - fixture.meter) < 1e-9,
+        `meter ${view.remainingPct} must be ${fixture.meter}`
       );
     if (fixture.bypass)
       assert.ok(view.reasons.some((r) => r.type === "quotaBypass" && r.bypass === fixture.bypass));

@@ -3,16 +3,90 @@ import { spawn } from "node:child_process";
 import { once } from "node:events";
 import test from "node:test";
 import { readFileSync } from "node:fs";
+import ts from "typescript";
 import { stopTestProcess } from "../_helpers/stopTestProcess.ts";
+
+function assertPeerStampedServerLaunch(source: string) {
+  const file = ts.createSourceFile(
+    "batch-e2e-rate-limit.test.ts",
+    source,
+    ts.ScriptTarget.Latest,
+    true
+  );
+  const factory = file.statements.find(
+    (node): node is ts.FunctionDeclaration =>
+      ts.isFunctionDeclaration(node) && node.name?.text === "createServerProcess"
+  );
+  assert.ok(factory?.body, "the batch HTTP server factory must exist");
+  const launches: ts.CallExpression[] = [];
+  function visit(node: ts.Node) {
+    if (
+      ts.isCallExpression(node) &&
+      ts.isIdentifier(node.expression) &&
+      node.expression.text === "spawn"
+    ) {
+      launches.push(node);
+    }
+    ts.forEachChild(node, visit);
+  }
+  visit(factory.body);
+  assert.equal(launches.length, 1, "the HTTP server factory must launch exactly one process");
+  const [executable, args, options] = launches[0].arguments;
+  assert.equal(
+    executable?.getText(file),
+    "process.execPath",
+    "the server must use the Node runtime"
+  );
+  assert.ok(args && ts.isArrayLiteralExpression(args), "the server arguments must be explicit");
+  const command = args.elements
+    .slice(-2)
+    .map((node) => (ts.isStringLiteral(node) ? node.text : null));
+  assert.deepEqual(
+    command,
+    ["scripts/dev/run-next.mjs", "dev"],
+    "the server must stamp its loopback peer"
+  );
+  function property(object: ts.Expression | undefined, name: string) {
+    if (!object || !ts.isObjectLiteralExpression(object)) return undefined;
+    const found = object.properties.find(
+      (node): node is ts.PropertyAssignment =>
+        ts.isPropertyAssignment(node) &&
+        (ts.isIdentifier(node.name) || ts.isStringLiteral(node.name)) &&
+        node.name.text === name
+    );
+    return found?.initializer;
+  }
+  const host = property(property(options, "env"), "HOST");
+  assert.ok(host && ts.isStringLiteral(host), "the server host must be explicit");
+  assert.equal(host.text, "127.0.0.1", "the HTTP fixture must remain loopback-only");
+}
 
 test("batch HTTP fixture uses the peer-stamping server entrypoint", () => {
   const source = readFileSync(
     new URL("../integration/batch-e2e-rate-limit.test.ts", import.meta.url),
     "utf8"
   );
-  assert.ok(source.includes('["scripts/dev/run-next.mjs", "dev"]'));
-  assert.ok(!source.includes('["scripts/dev/run-next-playwright.mjs", "dev"]'));
-  assert.ok(source.includes('HOST: "127.0.0.1"'));
+  assertPeerStampedServerLaunch(source);
+});
+
+test("batch launch contract rejects wrong executable, entrypoint and host despite matching comments", () => {
+  const valid = `function createServerProcess() {
+    return spawn(process.execPath, ["--import", "./tests/_helpers/forkedTestWorkers.mjs", "scripts/dev/run-next.mjs", "dev"], { env: { HOST: "127.0.0.1" } });
+  }`;
+  assertPeerStampedServerLaunch(valid);
+  const cases = [
+    valid.replace("spawn(process.execPath", 'spawn("node"'),
+    valid.replace('"scripts/dev/run-next.mjs"', '"scripts/dev/run-next-playwright.mjs"'),
+    valid.replace('"dev"', '"start"'),
+    valid.replace('HOST: "127.0.0.1"', 'HOST: "0.0.0.0"'),
+  ];
+  for (const candidate of cases) {
+    assert.notEqual(candidate, valid, "the negative control must change the actual launch");
+    assert.throws(
+      () => assertPeerStampedServerLaunch(`/* ${valid} */\n${candidate}`),
+      assert.AssertionError
+    );
+  }
 });
 
 test(

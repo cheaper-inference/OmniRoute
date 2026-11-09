@@ -84,9 +84,7 @@ const LIVE_TEXT_POLL_INTERVAL_MS = 1200;
 
 function ProviderBadge({ provider }: { provider: string | null }) {
   if (!provider) return <span className="text-text-muted text-[10px]">—</span>;
-  const style = (PROVIDER_COLORS as Record<string, { bg: string; text: string; label: string }>)[
-    provider
-  ];
+  const style = PROVIDER_COLORS[provider];
   if (!style) {
     return (
       <span className="inline-block px-2 py-0.5 rounded-full text-[9px] font-bold bg-bg-subtle text-text-muted border border-border">
@@ -110,7 +108,7 @@ function StatusBadge({ status }: { status: number | null }) {
   return (
     <span
       className="inline-block px-2 py-0.5 rounded-full text-[9px] font-bold"
-      style={{ backgroundColor: style.bg, color: style.text ?? "#fff" }}
+      style={{ backgroundColor: style.bg, color: style.text }}
     >
       {status}
     </span>

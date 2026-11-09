@@ -2,19 +2,15 @@
 import type { CompressionHeatmap } from "@omniroute/open-sse/services/compression/diffHelper";
 
 /**
- * Converts a saliency score (0–1) to an RGBA background color.
- * Low score (0) → red tint; high score (1) → green tint.
- * Whitespace tokens (score 0.5 in ultra) get a neutral transparent bg.
+ * Maps a saliency score (0–1) onto the kit's diverging ramp, which stays apart for colour-blind
+ * readers and flips with the theme. Removed tokens take the warm side, strongest at the lowest
+ * score; kept tokens take the cool side, strongest at the highest. The ramp is mixed into the
+ * surface because the token text sits on it: 30 % keeps it above 4.5:1 in all four looks.
  */
 function scoreToBackground(score: number, kept: boolean): string {
-  if (!kept) {
-    // Removed token: red tint proportional to how low the score is
-    const intensity = Math.round((1 - score) * 120);
-    return `rgba(${intensity + 135}, 40, 40, 0.35)`;
-  }
-  // Kept token: green tint proportional to score
-  const intensity = Math.round(score * 120);
-  return `rgba(40, ${intensity + 100}, 40, 0.25)`;
+  const band = Math.min(2, Math.floor(score * 3));
+  const step = (kept ? 5 : 1) + band;
+  return `color-mix(in srgb, var(--ci-scale-div-${step}) 30%, transparent)`;
 }
 
 interface SaliencyHeatmapProps {

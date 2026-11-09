@@ -188,10 +188,11 @@ test.describe("API keys flow", () => {
     await expect.poll(() => state.revealCalls).toBe(1);
     await expect.poll(() => readClipboard(page)).toBe("sk-live-1002-demo-secret");
 
-    page.once("dialog", async (dialog) => {
-      await dialog.accept();
-    });
+    // #19066: the delete asks through the kit ConfirmModal, not the native confirm().
     await keyRow.locator("button[title]").last().click({ force: true });
+    const deleteDialog = page.getByRole("alertdialog").filter({ hasText: /delete this api key/i });
+    await expect(deleteDialog).toBeVisible();
+    await deleteDialog.getByRole("button", { name: /^delete$/i }).click();
 
     await expect.poll(() => state.deleteCalls).toBe(1);
     await expect(page.getByText("Team Key")).toHaveCount(0);
