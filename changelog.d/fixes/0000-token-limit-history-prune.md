@@ -1,0 +1,1 @@
+- **fix(token-limits):** Per-key token limits no longer keep one counter row per past window and every window-reset audit row forever; old windows are pruned and the newest 100 reset rows are kept per limit.
