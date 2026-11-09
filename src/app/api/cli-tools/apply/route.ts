@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { createHash } from "node:crypto";
 import { requireCliToolsAuth } from "@/lib/api/requireCliToolsAuth";
 import fs from "node:fs";
 import path from "node:path";
@@ -13,8 +14,12 @@ import {
   privateConfigResponse,
 } from "@/lib/cli-helper/configRequest";
 
+const PLAN_FINGERPRINT_PATTERN = /^p1:[0-9a-f]{32}$/;
+
 const applySchema = configRequestSchema.extend({
   dryRun: z.boolean().optional(),
+  /** `planFingerprint` from a dry run. When set, apply refuses if the plan has moved. */
+  planFingerprint: z.string().regex(PLAN_FINGERPRINT_PATTERN).optional(),
 });
 
 /** The host-side command that does the same job when OmniRoute is containerised. */
@@ -37,6 +42,24 @@ function ensureBackup(configPath: string): string | null {
   return backupPath;
 }
 
+/**
+ * Token for "what this apply would do now": the tool, the target path, the current file
+ * bytes and the redacted config it would write (which carries the merged contribution and
+ * the model roster). Secret-free; an optimistic check, never authorization.
+ */
+function computePlanFingerprint(toolId: string, configPath: string, safeContent: string): string {
+  let current: string;
+  try {
+    current = `file:${readPrivateConfigFile(configPath)}`;
+  } catch (error) {
+    current = (error as NodeJS.ErrnoException).code === "ENOENT" ? "absent" : "unreadable";
+  }
+  const digest = createHash("sha256")
+    .update(JSON.stringify([toolId, configPath, current, safeContent]))
+    .digest("hex");
+  return `p1:${digest.slice(0, 32)}`;
+}
+
 // POST /api/cli-tools/apply - Apply config for a specific tool
 export async function POST(request: Request) {
   const authError = await requireCliToolsAuth(request, { alwaysRequireAuth: true });
@@ -57,7 +80,7 @@ export async function POST(request: Request) {
     if (!parsed.success) {
       return configError(400, "Invalid config request");
     }
-    const { toolId, baseUrl, apiKey, model, dryRun } = parsed.data;
+    const { toolId, baseUrl, apiKey, model, dryRun, planFingerprint } = parsed.data;
     const canonicalToolId = normalizeCliToolId(toolId);
 
     const result = await generateConfig(canonicalToolId, {
@@ -73,17 +96,23 @@ export async function POST(request: Request) {
       );
     }
     const safeContent = redactGeneratedConfig(result.content || "", [apiKey]);
+    const configPath = result.configPath || getCliPrimaryConfigPath(canonicalToolId);
+    const currentFingerprint = computePlanFingerprint(
+      canonicalToolId,
+      configPath || "",
+      safeContent
+    );
 
     if (dryRun) {
       return privateConfigResponse({
         dryRun: true,
         configPath: result.configPath,
         content: safeContent,
+        planFingerprint: currentFingerprint,
         ...(result.migration ? { migration: result.migration } : {}),
       });
     }
 
-    const configPath = result.configPath || getCliPrimaryConfigPath(canonicalToolId);
     if (!configPath) {
       return configError(400, "Unknown CLI tool");
     }
@@ -97,6 +126,20 @@ export async function POST(request: Request) {
     if (refusal) {
       refusal.headers.set("cache-control", "no-store");
       return refusal;
+    }
+
+    // The plan the caller confirmed no longer matches the file or the request: refuse and
+    // answer with the current plan. Nothing awaits between this check and the write below.
+    if (planFingerprint && planFingerprint !== currentFingerprint) {
+      return privateConfigResponse(
+        {
+          error: "The config changed since the preview. Review the current plan and apply again.",
+          configPath,
+          content: safeContent,
+          planFingerprint: currentFingerprint,
+        },
+        409
+      );
     }
 
     const backupPath = ensureBackup(configPath);
