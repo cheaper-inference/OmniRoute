@@ -562,6 +562,7 @@ export function openAIToolsToMcpDefs(tools: OpenAITool[]): McpToolDefinition[] {
   });
 }
 
+/** Encode an AgentRun request with the model fields Cursor uses to select the speed tier. */
 export function encodeAgentRunRequest(input: AgentRunInput): Buffer {
   const conversationId = input.conversationId || crypto.randomUUID();
   const messageId = input.messageId || crypto.randomUUID();
