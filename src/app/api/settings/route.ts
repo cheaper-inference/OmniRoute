@@ -651,6 +651,9 @@ export async function PATCH(request: Request) {
       password,
       [SESSIONS_VALID_AFTER_SETTING]: _sessionsValidAfter,
       [REVOKED_SESSIONS_SETTING]: _revokedSessions,
+      // A JSON import can store an unknown setting named `ignoredKeys`. Only this request's
+      // dropped keys may fill the response field.
+      ignoredKeys: _storedIgnoredKeys,
       ...safeSettings
     } = settings;
     const settingsRevision = await getSettingsRevision();

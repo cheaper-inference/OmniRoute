@@ -89,3 +89,17 @@ test("PATCH names an ignored key that is also a property of Object.prototype", a
   const body = (await response.json()) as Record<string, unknown>;
   assert.deepEqual(body.ignoredKeys, ["constructor", "toString"]);
 });
+
+test("a stored setting named ignoredKeys is not echoed as PATCH response metadata", async () => {
+  // An imported backup can carry an unknown key named `ignoredKeys` (import keeps unknown keys).
+  await settingsDb.updateSettings({ ignoredKeys: ["stale"] });
+  try {
+    const body = await patch({ hidePaidModels: true });
+    assert.equal("ignoredKeys" in body, false, "no key was dropped, so the field is absent");
+  } finally {
+    core
+      .getDbInstance()
+      .prepare("DELETE FROM key_value WHERE namespace = 'settings' AND key = 'ignoredKeys'")
+      .run();
+  }
+});
