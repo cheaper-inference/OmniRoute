@@ -997,8 +997,10 @@ export function createResponsesApiTransformStream(
                 state.completionTimer = null;
                 try {
                   sendCompleted(controller);
-                } catch {
-                  // Stream already torn down; nothing left to complete.
+                } catch (error) {
+                  // flush() and cancel() clear this timer, so a failure here happened on a live
+                  // stream: report it to the client. error() is a no-op on a closed stream.
+                  controller.error(error);
                 }
               }, DEFERRED_COMPLETION_GRACE_MS);
               (state.completionTimer as { unref?: () => void })?.unref?.();

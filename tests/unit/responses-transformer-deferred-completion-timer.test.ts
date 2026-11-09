@@ -108,3 +108,40 @@ test("usage that arrives after the timer flushed does not send a second completi
   }
   assert.equal(s.completed(), 1, "stream end must not add a second completion either");
 });
+
+test("a failure while the grace timer completes the response reaches the client", async () => {
+  mock.timers.enable({ apis: ["setTimeout"] });
+  const logger = {
+    logInput() {},
+    flush() {},
+    logOutput(event: string) {
+      if (event.includes("response.completed")) throw new Error("completion log failed");
+    },
+  };
+  const stream = createResponsesApiTransformStream(logger, 60000);
+  const writer = stream.writable.getWriter();
+  const reader = stream.readable.getReader();
+  try {
+    await writer.write(sse(textChunk));
+    await writer.write(sse(finishChunk));
+    await settle();
+    mock.timers.tick(GRACE_MS);
+    await settle();
+    mock.timers.reset();
+    // Drain what was queued before the failure; the next read must report the error.
+    let outcome = "chunk";
+    for (let i = 0; i < 40 && outcome === "chunk"; i++) {
+      outcome = await Promise.race([
+        reader.read().then(
+          () => "chunk",
+          (error) => String(error)
+        ),
+        new Promise<string>((resolve) => setTimeout(() => resolve("silent"), 200)),
+      ]);
+    }
+    assert.match(outcome, /completion log failed/, "the stream must error, not stay silent");
+  } finally {
+    mock.timers.reset();
+    await writer.abort().catch(() => {});
+  }
+});

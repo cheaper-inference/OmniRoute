@@ -54,3 +54,42 @@ test("live Chat-to-Responses stream completes after 3 s without usage or [DONE]"
     core.resetDbInstance();
   }
 });
+
+test("cancelling the client read clears the grace timer: no completion work runs afterwards", async () => {
+  mock.timers.enable({ apis: ["setTimeout"] });
+  let converted = 0;
+  const stream = createSSEStream({
+    mode: "translate",
+    targetFormat: FORMATS.OPENAI,
+    sourceFormat: FORMATS.OPENAI_RESPONSES,
+    provider: "openai",
+    model: "gpt-test",
+    body: { input: "hi" },
+    reqLogger: {
+      appendConvertedChunk() {
+        converted++;
+      },
+    },
+  });
+  const writer = stream.writable.getWriter();
+  const reader = stream.readable.getReader();
+  const settle = async () => {
+    for (let i = 0; i < 5; i++) await new Promise((r) => setImmediate(r));
+  };
+  try {
+    await writer.write(
+      sse({ ...base, choices: [{ index: 0, delta: { content: "Hi" }, finish_reason: null }] })
+    );
+    await writer.write(sse({ ...base, choices: [{ index: 0, delta: {}, finish_reason: "stop" }] }));
+    await settle();
+    const before = converted;
+    await reader.cancel();
+    mock.timers.tick(3000);
+    await settle();
+    assert.equal(converted, before, "a cancelled stream must not translate or log more events");
+  } finally {
+    mock.timers.reset();
+    await writer.abort().catch(() => {});
+    core.resetDbInstance();
+  }
+});

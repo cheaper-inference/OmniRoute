@@ -1129,6 +1129,9 @@ export function createSSEStream(options: StreamOptions = {}) {
   const multilineSseDataLineNormalizer = createSSEDataLineNormalizer();
 
   const clearIdleTimer = () => {
+    // Every end-of-stream path (flush, cancel, idle timeout, failure abort) calls this, so the
+    // deferred completion must not fire after any of them.
+    clearDeferredCompletionTimer();
     if (idleTimer) {
       clearInterval(idleTimer);
       idleTimer = null;
@@ -2801,8 +2804,11 @@ export function createSSEStream(options: StreamOptions = {}) {
                   []) {
                   emitTranslatedClientItem(controller, item);
                 }
-              } catch {
-                // Stream already closed or errored; nothing left to complete.
+              } catch (error) {
+                console.debug(
+                  `[STREAM] deferred completion flush failed (${model || "unknown"}):`,
+                  error
+                );
               }
             }, 3000);
             deferredCompletionTimer.unref?.();
