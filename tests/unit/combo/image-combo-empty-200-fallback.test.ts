@@ -24,12 +24,16 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 
+import { CALL_LOG_SETTLE_TIMEOUT_MS } from "../../helpers/callLogSettle.ts";
+
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-image-combo-empty-200-"));
 process.env.DATA_DIR = TEST_DATA_DIR;
 process.env.JWT_SECRET = "test-jwt-secret-for-image-combo-empty-200-tests";
 process.env.API_KEY_SECRET = process.env.API_KEY_SECRET || "image-combo-empty-200-test-secret";
 
 const core = await import("@/lib/db/core.ts");
+const { saveCallLog, getCallLogById, waitForCallLogSaves, closeCallLogSaves } =
+  await import("@/lib/usage/callLogs.ts");
 const providersDb = await import("@/lib/db/providers.ts");
 const { createCombo } = await import("@/lib/db/combos");
 const { executeImageCombo } = await import("@omniroute/open-sse/services/imageCombo");
@@ -68,10 +72,23 @@ function createMockAuth() {
 
 async function resetStorage() {
   globalThis.fetch = originalFetch;
+  // Image handlers save call logs in the background, including worker-thread artifacts.
+  // Drain before closing SQLite or removing files the writer can still be using.
+  assert.ok(
+    await waitForCallLogSaves(CALL_LOG_SETTLE_TIMEOUT_MS),
+    "the previous test's call-log saves should finish before storage resets"
+  );
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   fs.mkdirSync(TEST_DATA_DIR, { recursive: true });
 }
+
+test.after(async () => {
+  globalThis.fetch = originalFetch;
+  await closeCallLogSaves(CALL_LOG_SETTLE_TIMEOUT_MS);
+  core.resetDbInstance();
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+});
 
 /** Seed an active openrouter apikey connection so credential resolution succeeds. */
 async function seedOpenRouterConnection() {
@@ -155,6 +172,42 @@ function stubFetchAlwaysValid(hitLog?: Array<{ url: string; model?: string }>) {
     );
   }) as typeof fetch;
 }
+
+test("storage reset waits for background call-log saves before removing files", async (t) => {
+  await resetStorage();
+  let saved = false;
+  const saving = saveCallLog({
+    method: "POST",
+    path: "/v1/images/generations",
+    status: 200,
+    model: "openrouter/openai/gpt-5-image-mini",
+    provider: "openrouter",
+    duration: 1,
+    requestBody: { prompt: "a cat" },
+    responseBody: { data: [{ b64_json: PNG_B64 }] },
+  }).then(() => {
+    saved = true;
+  });
+  let removed = false;
+  const originalRm = fs.rmSync;
+  t.mock.method(fs, "rmSync", (...args: Parameters<typeof fs.rmSync>) => {
+    if (args[0] === TEST_DATA_DIR) {
+      assert.equal(saved, true, "storage was removed while an artifact save was still pending");
+      removed = true;
+    }
+    return originalRm(...args);
+  });
+  try {
+    await resetStorage();
+  } finally {
+    await saving;
+  }
+  assert.equal(removed, true, "the reset should still remove the previous test's files");
+
+  // Reset drains the writer without closing admission for subsequent tests.
+  await saveCallLog({ id: "after-storage-reset", status: 200, model: "test-model" });
+  assert.ok(await getCallLogById("after-storage-reset"));
+});
 
 test("empty 200 from first leg falls back to second leg and second leg image is served", async () => {
   await resetStorage();
