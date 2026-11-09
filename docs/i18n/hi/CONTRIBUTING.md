@@ -8,21 +8,25 @@ Thank you for your interest in contributing! This guide covers everything you ne
 
 ---
 
-## डेवलपमेंट सेटअप
+## विकास सेटअप
 
 ### पूर्वापेक्षाएँ
 
 - **Node.js** `>=22.22.2 <23`, या `>=24.0.0 <27` (अनुशंसित: 24 LTS)
 - **npm** 10+
 
-> **npm v11+ उपयोगकर्ता (Node 24+):** `npm install` के बाद सत्यापित करें कि नेटिव मॉड्यूल इंस्टॉल किए गए हैं:
+> **Node 24 के साथ Windows:** वर्तमान 24 LTS पैच रिलीज़ (कम से कम 24.20.0) का उपयोग करें।
+> पहले की रिलीज़ में `--test-force-exit` द्वारा प्रक्रिया बंद किए जाने पर सफल परीक्षणों के बाद
+> भी प्रक्रिया अचानक समाप्त हो सकती है। Node का [Windows libuv सुधार](https://github.com/nodejs/node/pull/61999) इस
+> रनटाइम क्रैश को ठीक करता है; परीक्षण अभिकथनों और रनर एग्ज़िट जाँचों को सक्षम रखें।
+
+> **npm v11+ उपयोगकर्ता (Node 24+):** `npm install` के बाद सत्यापित करें कि नेटिव मॉड्यूल इंस्टॉल हो गए हैं:
 > `node -e "require('better-sqlite3')"`. यदि यह `MODULE_NOT_FOUND` के साथ विफल होता है,
-> तो `npm approve-scripts better-sqlite3 && npm install` चलाएँ। देखें
-> [समस्या निवारण](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module)।
+> तो `npm approve-scripts better-sqlite3 && npm install` चलाएँ। [समस्या निवारण](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module) देखें।
 
 - **Git**
 
-### क्लोन और इंस्टॉल करें
+### क्लोन और इंस्टॉल
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -30,10 +34,10 @@ cd OmniRoute
 npm install
 ```
 
-### पर्यावरण वेरिएबल
+### पर्यावरण चर
 
 ```bash
-# टेम्पलेट से अपनी .env फ़ाइल बनाएँ
+# टेम्पलेट से अपना .env बनाएँ
 cp .env.example .env
 
 # आवश्यक सीक्रेट जनरेट करें
@@ -41,79 +45,79 @@ echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-डेवलपमेंट के लिए प्रमुख वेरिएबल:
+विकास के लिए प्रमुख चर:
 
-| वेरिएबल                | डेवलपमेंट डिफ़ॉल्ट       | विवरण                    |
-| ---------------------- | ------------------------ | ------------------------ |
-| `PORT`                 | `20128`                  | सर्वर पोर्ट              |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | फ़्रंटएंड के लिए बेस URL |
-| `JWT_SECRET`           | (ऊपर जनरेट करें)         | JWT साइनिंग सीक्रेट      |
-| `INITIAL_PASSWORD`     | `CHANGEME`               | पहले लॉगिन का पासवर्ड    |
-| `APP_LOG_LEVEL`        | `info`                   | लॉग विवरण का स्तर        |
+| चर                     | विकास डिफ़ॉल्ट           | विवरण               |
+| ---------------------- | ------------------------ | ------------------- |
+| `PORT`                 | `20128`                  | सर्वर पोर्ट         |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | फ्रंटएंड का बेस URL |
+| `JWT_SECRET`           | (ऊपर जनरेट करें)         | JWT साइनिंग सीक्रेट |
+| `INITIAL_PASSWORD`     | `CHANGEME`               | पहली लॉगिन पासवर्ड  |
+| `APP_LOG_LEVEL`        | `info`                   | लॉग वर्बोसिटी स्तर  |
 
 ### डैशबोर्ड सेटिंग्स
 
-डैशबोर्ड उन सुविधाओं के लिए UI टॉगल प्रदान करता है जिन्हें पर्यावरण वेरिएबल के माध्यम से भी कॉन्फ़िगर किया जा सकता है:
+डैशबोर्ड उन सुविधाओं के लिए UI टॉगल प्रदान करता है जिन्हें पर्यावरण चरों के माध्यम से भी कॉन्फ़िगर किया जा सकता है:
 
-| सेटिंग का स्थान    | टॉगल            | विवरण                           |
+| सेटिंग स्थान       | टॉगल            | विवरण                           |
 | ------------------ | --------------- | ------------------------------- |
 | सेटिंग्स → उन्नत   | डीबग मोड        | डीबग अनुरोध लॉग सक्षम करें (UI) |
 | सेटिंग्स → सामान्य | साइडबार दृश्यता | साइडबार अनुभाग दिखाएँ/छिपाएँ    |
 
-ये सेटिंग्स डेटाबेस में संग्रहीत होती हैं और पुनः आरंभ करने के बाद भी बनी रहती हैं; सेट किए जाने पर ये env var डिफ़ॉल्ट को ओवरराइड करती हैं।
+ये सेटिंग्स डेटाबेस में संग्रहीत होती हैं और रीस्टार्ट के बाद भी बनी रहती हैं। सेट होने पर, ये env var डिफ़ॉल्ट को ओवरराइड करती हैं।
 
 ### स्थानीय रूप से चलाना
 
 ```bash
-# डेवलपमेंट मोड (हॉट रीलोड)
+# विकास मोड (हॉट रीलोड)
 npm run dev
 
 # प्रोडक्शन बिल्ड
 npm run build    # next build → .build/next/ फिर assembleStandalone → dist/
 npm run start
 
-# योगदानकर्ता परिवर्तनों के लिए तेज़ बैकएंड/API-मात्र कंपाइल
+# योगदानकर्ता परिवर्तनों के लिए तेज़ बैकएंड/API-केवल कंपाइल
 npm run build:contributor
 
-# रिलीज़ बिल्ड (क्लीन रीबिल्ड + HEAD प्रहरी — डिप्लॉय के लिए आवश्यक)
-npm run build:release   # rm -rf .build dist && बिल्ड + dist/BUILD_SHA लिखता है
+# रिलीज़ बिल्ड (क्लीन रीबिल्ड + HEAD सेंटिनल — डिप्लॉय के लिए आवश्यक)
+npm run build:release   # rm -rf .build dist और build + dist/BUILD_SHA लिखता है
 
 # सामान्य पोर्ट कॉन्फ़िगरेशन
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-योगदानकर्ता बिल्ड केवल कंपाइल सत्यापन करता है: यह स्टैंडअलोन
-डिस्ट्रिब्यूशन को असेंबल नहीं करता या वैकल्पिक नेटिव पैकेजिंग एसेट नहीं बनाता। जब आपको
-वितरण-योग्य बंडल को सत्यापित करने की आवश्यकता हो, तो नियमित प्रोडक्शन बिल्ड का उपयोग करें।
+योगदानकर्ता बिल्ड केवल कंपाइल-आधारित सत्यापन करता है: यह स्टैंडअलोन वितरण को असेंबल नहीं करता
+और वैकल्पिक नेटिव पैकेजिंग एसेट्स को बिल्ड नहीं करता। जब आपको शिप किए जाने योग्य बंडल का
+सत्यापन करना हो, तब नियमित प्रोडक्शन बिल्ड का उपयोग करें।
 
-### बिल्ड आउटपुट संरचना
+### बिल्ड आउटपुट लेआउट
 
-| डायरेक्टरी | सामग्री                                                                       | ट्रैक की गई |
-| ---------- | ----------------------------------------------------------------------------- | ----------- |
-| `src/`     | एप्लिकेशन सोर्स (TypeScript / TSX)                                            | हाँ         |
-| `.build/`  | मध्यवर्ती फ़ाइलें — `next build` आउटपुट (gitignored, `distDir = .build/next`) | नहीं        |
-| `dist/`    | वितरण-योग्य बंडल — `assembleStandalone` द्वारा असेंबल किया गया (gitignored)   | नहीं        |
+| डायरेक्टरी | सामग्री                                                                            | ट्रैक की गई |
+| ---------- | ---------------------------------------------------------------------------------- | ----------- |
+| `src/`     | एप्लिकेशन स्रोत (TypeScript / TSX)                                                 | हाँ         |
+| `.build/`  | इंटरमीडिएट — `next build` आउटपुट (gitignored, `distDir = .build/next`)             | नहीं        |
+| `dist/`    | शिप किए जाने योग्य बंडल — `assembleStandalone` द्वारा असेंबल किया गया (gitignored) | नहीं        |
 
-बिल्ड पाइपलाइन एकल पास में चलती है:
+बिल्ड पाइपलाइन एकल पास है:
 
 ```
 npm run build
   └─ next build → .build/next/standalone  (Next.js आउटपुट)
-  └─ assembleStandalone()                 (स्टैंडअलोन + स्टैटिक + पब्लिक + नेटिव एसेट कॉपी करता है)
-       └─ आउटपुट: dist/                   (server.js, .next/static/, public/, node_modules/)
+  └─ assembleStandalone()                 (standalone + static + public + native assets की प्रतिलिपि बनाता है)
+       └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` अतिरिक्त रूप से पहले दोनों डायरेक्टरियों को साफ़ करता है और
-डिप्लॉय अखंडता प्रहरी के रूप में `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) लिखता है।
+`npm run build:release` पहले दोनों डायरेक्टरी को साफ़ करता है और
+`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) को डिप्लॉय इंटीग्रिटी सेंटिनल के रूप में लिखता है।
 
-`npm run build:contributor` केवल-बैकएंड बिल्ड प्रोफ़ाइल का उपयोग करता है। यह बिल्ड के दौरान
+`npm run build:contributor` बैकएंड-केवल बिल्ड प्रोफ़ाइल का उपयोग करता है। यह बिल्ड के दौरान
 डैशबोर्ड UI फ़ाइलों को अस्थायी रूप से स्टब करता है, API रूट हैंडलर बनाए रखता है और बिल्ड के
 बाद मूल फ़ाइलों को पुनर्स्थापित करता है। डैशबोर्ड UI को प्रभावित करने वाले परिवर्तनों या पूर्ण
-रिलीज़ सत्यापन के लिए `npm run build` का उपयोग करें; योगदानकर्ता प्रोफ़ाइल रिलीज़ बिल्ड का प्रतिस्थापन नहीं है।
+रिलीज़ सत्यापन के लिए `npm run build` का उपयोग करें; योगदानकर्ता प्रोफ़ाइल रिलीज़ बिल्ड का विकल्प नहीं है।
 
 > **VPS डिप्लॉय नोट:** रिमोट इमेज डायरेक्टरी `/usr/lib/node_modules/omniroute/app/`
-> अपरिवर्तित है। डिप्लॉय स्किल्स `dist/` की सामग्री को इसमें rsync करती हैं।
-> केवल रिपॉज़िटरी के भीतर बिल्ड आउटपुट पथ बदला है (`app/` → `dist/`)।
+> अपरिवर्तित रहती है। डिप्लॉय स्किल्स `dist/` की सामग्री को इसमें rsync करती हैं।
+> केवल रिपॉज़िटरी के अंदर का बिल्ड आउटपुट पथ बदला है (`app/` → `dist/`)।
 
 डिफ़ॉल्ट URL:
 
@@ -169,84 +173,85 @@ refactor(db): consolidate rate limit tables
 ## परीक्षण चलाना
 
 ```bash
-# सभी परीक्षण (unit + vitest + ecosystem + e2e)
+# सभी परीक्षण (यूनिट + vitest + इकोसिस्टम + e2e)
 npm run test:all
 
 # एकल परीक्षण फ़ाइल (Node.js नेटिव टेस्ट रनर — अधिकांश परीक्षण इसका उपयोग करते हैं)
 node --import tsx/esm --test tests/unit/your-file.test.ts
 
-# केवल आपके परिवर्तन से प्रभावित unit परीक्षण (CI gate, #8084 वाला वही TIA selector)
-npm run test:scoped            # अंतिम commit (या working tree) में हुए परिवर्तन
-npm run test:scoped:staged     # केवल staged परिवर्तन — pre-commit रन के साथ अच्छी तरह काम करता है
-npm run test:scoped:full       # पहले import-graph map को फिर से बनाएँ (फ़ाइलें जोड़ने/स्थानांतरित करने के बाद)
-# Exit 1 + "run the full suite" का अर्थ है कि कोई hub फ़ाइल (tsconfig, package.json, …) या कोई
-# unmapped source बदला है — selector सुरक्षित रूप से विफल होता है, यह कभी चुपचाप छोड़ता नहीं है।
+# केवल आपके बदलाव से प्रभावित यूनिट परीक्षण (CI गेट वाला वही TIA चयनकर्ता, #8084)
+npm run test:scoped            # अंतिम कमिट (या वर्किंग ट्री) में हुए बदलाव
+npm run test:scoped:staged     # केवल स्टेज किए गए बदलाव — प्री-कमिट रन के साथ अच्छी तरह काम करता है
+npm run test:scoped:full       # पहले इम्पोर्ट-ग्राफ़ मैप फिर से बनाएँ (फ़ाइलें जोड़ने/स्थानांतरित करने के बाद)
+# Exit 1 + "पूरा सुइट चलाएँ" का अर्थ है कि कोई हब फ़ाइल (tsconfig, package.json, …) या कोई
+# अमैप्ड स्रोत बदला है — चयनकर्ता सुरक्षित रूप से विफल होता है, यह कभी भी चुपचाप परीक्षणों को नहीं छोड़ता।
 
-# Vitest (MCP server, autoCombo, cache)
+# Vitest (MCP सर्वर, autoCombo, कैश)
 npm run test:vitest
 
 # E2E परीक्षण (Playwright आवश्यक है)
 npm run test:e2e
 
-# Protocol clients E2E (MCP transports, A2A)
+# प्रोटोकॉल क्लाइंट E2E (MCP ट्रांसपोर्ट, A2A)
 npm run test:protocols:e2e
 
-# Ecosystem संगतता परीक्षण
+# इकोसिस्टम संगतता परीक्षण
 npm run test:ecosystem
 
-# Coverage gate: statements/lines/functions/branches का 60%
+# कवरेज गेट: स्टेटमेंट्स/लाइन्स/फ़ंक्शन्स/ब्रांचेज़ के लिए 60%
 npm run test:coverage
 npm run coverage:report
 
-# Lint + format जाँच
+# लिंट + फ़ॉर्मेट जाँच
 npm run lint
 npm run check
 
-# Gated real-upstream combo smoke (VPS पहुँच + वास्तविक provider credits आवश्यक हैं)
-# यह REAL providers को अनुरोध भेजता है — इसमें थोड़ी लागत आती है। CI में यह कभी नहीं चलता। gate के बिना इसे साफ़-सुथरे ढंग से छोड़ दिया जाता है।
-# आवश्यक: ssh root@192.168.0.15 पहुँच (VPS से केवल-पढ़ने योग्य DB snapshot प्राप्त करता है)।
+# गेटेड वास्तविक-अपस्ट्रीम कॉम्बो स्मोक परीक्षण (VPS एक्सेस + वास्तविक प्रोवाइडर क्रेडिट आवश्यक हैं)
+# वास्तविक प्रोवाइडरों को अनुरोध भेजता है — थोड़ी लागत आती है। CI में कभी नहीं चलता। गेट के बिना साफ़ तरीके से स्किप हो जाता है।
+# आवश्यक: ssh root@192.168.0.15 एक्सेस (VPS से केवल-पढ़ने योग्य DB स्नैपशॉट सोर्स करता है)।
 RUN_COMBO_LIVE=1 npm run test:combo:live
 
-# Phase-3 VPS live smoke — सामान्य Node ESM scripts, जो सीधे live .15 server को अनुरोध भेजते हैं।
-# आवश्यक: ssh root@192.168.0.15 पहुँच (combos को SSH sqlite के माध्यम से बनाया/हटाया जाता है)।
-# यह REAL providers को अनुरोध भेजता है (कम लागत)। केवल __live_test__* combos बनाता/हटाता है। CI में यह कभी नहीं चलता।
-# .15 पर REQUIRE_API_KEY=false है, इसलिए API key आवश्यक नहीं है, लेकिन सेट होने पर COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY का पालन करता है।
-npm run test:combo:live:vps              # 7 HTTP परिदृश्य (priority/round-robin/weighted/cost/fusion/auto + health)
-npm run test:combo:live:vps:failover     # एक वास्तविक cross-provider failover परिदृश्य जोड़ता है (कुल 8)
+# चरण-3 VPS लाइव स्मोक परीक्षण — सादे Node ESM स्क्रिप्ट, सीधे लाइव .15 सर्वर को अनुरोध भेजते हैं।
+# आवश्यक: ssh root@192.168.0.15 एक्सेस (कॉम्बो SSH sqlite के माध्यम से बनाए/हटाए जाते हैं)।
+# वास्तविक प्रोवाइडरों को अनुरोध भेजता है (कम लागत)। केवल __live_test__* कॉम्बो बनाता/हटाता है। CI में कभी नहीं चलता।
+# .15 पर REQUIRE_API_KEY=false है, इसलिए API कुंजी की आवश्यकता नहीं है, लेकिन सेट होने पर COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY का सम्मान करता है।
+npm run test:combo:live:vps              # 7 HTTP परिदृश्य (प्राथमिकता/राउंड-रॉबिन/वेटेड/लागत/फ़्यूज़न/ऑटो + स्वास्थ्य)
+npm run test:combo:live:vps:failover     # एक वास्तविक क्रॉस-प्रोवाइडर फ़ेलओवर परिदृश्य जोड़ता है (कुल 8)
 ```
 
-Coverage संबंधी टिप्पणियाँ:
+कवरेज संबंधी टिप्पणियाँ:
 
-- `npm run test:coverage` मुख्य unit test suite की source coverage मापता है, `tests/**` को बाहर रखता है, और `open-sse/**` को शामिल करता है
-- Pull requests में statements/lines/functions/branches के लिए coverage gate **60%+** बनाए रखना आवश्यक है
-- यदि कोई PR `src/`, `open-sse/`, `electron/`, या `bin/` में production code बदलता है, तो उसे उसी PR में automated tests जोड़ने या अपडेट करने होंगे
-- `npm run coverage:report` नवीनतम coverage रन की विस्तृत फ़ाइल-दर-फ़ाइल रिपोर्ट प्रिंट करता है
-- `npm run test:coverage:legacy` ऐतिहासिक तुलना के लिए पुराने metric को बनाए रखता है
-- चरणबद्ध coverage सुधार roadmap के लिए `docs/ops/COVERAGE_PLAN.md` देखें
+- `npm run test:coverage` मुख्य यूनिट टेस्ट सुइट के लिए स्रोत कवरेज मापता है, `tests/**` को बाहर रखता है और `open-sse/**` को शामिल करता है
+- पुल अनुरोधों में स्टेटमेंट्स/लाइन्स/फ़ंक्शन्स/ब्रांचेज़ के लिए कवरेज गेट **60%+** बनाए रखना आवश्यक है
+- यदि कोई PR `src/`, `open-sse/`, `electron/`, या `bin/` में प्रोडक्शन कोड बदलता है, तो उसी PR में स्वचालित परीक्षण जोड़ना या अपडेट करना आवश्यक है
+- `npm run coverage:report` नवीनतम कवरेज रन से विस्तृत फ़ाइल-दर-फ़ाइल रिपोर्ट प्रिंट करता है
+- `npm run test:coverage:legacy` ऐतिहासिक तुलना के लिए पुराने मेट्रिक को संरक्षित रखता है
+- चरणबद्ध कवरेज सुधार रोडमैप के लिए `docs/ops/COVERAGE_PLAN.md` देखें
 
-### Pull Request की आवश्यकताएँ
+### पुल अनुरोध की आवश्यकताएँ
 
-PR खोलने से पहले, अपने परिवर्तनों के लिए केंद्रित loop चलाने हेतु
-[Contribution Golden Path](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) का उपयोग करें। पूर्ण unit suite (4 CI shards), Vitest, **60%+** coverage gate, और
-production build की ज़िम्मेदारी CI की है — इन्हें स्थानीय रूप से चलाने से ऐसी कोई अतिरिक्त जानकारी नहीं मिलती जो PR
-checks पहले से नहीं देंगे, और छोटी मशीनों पर यह host को अत्यधिक व्यस्त कर सकता है (#8084):
+PR खोलने से पहले, आपने जो बदलाव किया है उसके लिए केंद्रित लूप चलाने हेतु
+[योगदान का आदर्श मार्ग](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) का उपयोग करें। पूरा यूनिट सुइट (4 CI शार्ड), Vitest, **60%+** कवरेज गेट और
+प्रोडक्शन बिल्ड CI की ज़िम्मेदारी हैं — उन्हें स्थानीय रूप से चलाने से ऐसी कोई अतिरिक्त जानकारी नहीं मिलती जो PR
+जाँचें पहले से न दें, और छोटी मशीनों पर यह होस्ट को पूरी तरह व्यस्त कर सकता है (#8084):
 
-- अपने परिवर्तन को cover करने वाली test files चलाएँ: `node --import tsx/esm --test tests/unit/<file>.test.ts`
+- अपने बदलाव को कवर करने वाली परीक्षण फ़ाइलें चलाएँ: `node --import tsx/esm --test tests/unit/<file>.test.ts`
 - `npm run lint` चलाएँ
-- production code में परिवर्तन होने पर उसी PR में automated tests शामिल करें या अपडेट करें
-- production code बदलने पर PR विवरण में बदली या जोड़ी गई test files शामिल करें
-- जब project secrets CI में configure किए गए हों, तो PR पर SonarQube परिणाम जाँचें
+- जब भी प्रोडक्शन कोड बदले, उसी PR में स्वचालित परीक्षण शामिल या अपडेट करें
+- `node:test` फ़ाइलों में, प्रत्येक शीर्ष-स्तरीय `await` (जैसे `await import(...)`) को पहले `test()` / `describe()` से पहले रखें: `--test-force-exit` के अंतर्गत, इसके बाद पंजीकृत परीक्षण बिना किसी सूचना के कभी नहीं चल सकते (#18045; `npm run check:test-tla-order` द्वारा लागू)
+- प्रोडक्शन कोड बदलने पर बदली गई या जोड़ी गई परीक्षण फ़ाइलों को PR विवरण में शामिल करें
+- जब प्रोजेक्ट सीक्रेट CI में कॉन्फ़िगर किए गए हों, तो PR पर SonarQube परिणाम जाँचें
 
-वर्तमान परीक्षण स्थिति: **122 unit test files**, जिनमें निम्न शामिल हैं:
+वर्तमान परीक्षण स्थिति: **122 यूनिट टेस्ट फ़ाइलें**, जिनमें निम्न शामिल हैं:
 
-- Provider translators और format conversion
-- Rate limiting, circuit breaker, और resilience
-- Semantic cache, idempotency, और progress tracking
-- Database operations और schema (21 DB modules)
-- OAuth flows और authentication
-- API endpoint validation (Zod v4)
-- MCP server tools और scope enforcement
-- Memory और Skills systems
+- प्रोवाइडर ट्रांसलेटर और फ़ॉर्मेट रूपांतरण
+- रेट लिमिटिंग, सर्किट ब्रेकर और लचीलापन
+- सिमेंटिक कैश, आइडेम्पोटेंसी और प्रगति ट्रैकिंग
+- डेटाबेस ऑपरेशन और स्कीमा (21 DB मॉड्यूल)
+- OAuth फ़्लो और प्रमाणीकरण
+- API एंडपॉइंट सत्यापन (Zod v4)
+- MCP सर्वर टूल और स्कोप प्रवर्तन
+- मेमोरी और Skills सिस्टम
 
 ---
 

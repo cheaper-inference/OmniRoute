@@ -114,6 +114,11 @@
       "disposition": "separately-invoked"
     },
     {
+      "name": "check:build-typecheck",
+      "command": "node scripts/check/check-build-typecheck.mjs",
+      "disposition": "separately-invoked"
+    },
+    {
       "name": "check:db-rules",
       "command": "node scripts/check/check-db-rules.mjs",
       "disposition": "separately-invoked"
@@ -389,6 +394,11 @@
       "disposition": "separately-invoked"
     },
     {
+      "name": "check:test-tla-order",
+      "command": "node scripts/check/check-test-tla-order.mjs",
+      "disposition": "separately-invoked"
+    },
+    {
       "name": "check:test-masking",
       "command": "node scripts/check/check-test-masking.mjs",
       "disposition": "separately-invoked"
@@ -560,7 +570,7 @@
     },
     {
       "name": "test:e2e",
-      "command": "node scripts/dev/run-playwright-tests.mjs test tests/e2e/*.spec.ts",
+      "command": "node scripts/dev/run-playwright-tests.mjs",
       "disposition": "separately-invoked"
     },
     {
@@ -591,6 +601,11 @@
     {
       "name": "test:mutation",
       "command": "stryker run",
+      "disposition": "separately-invoked"
+    },
+    {
+      "name": "test:opencode:smoke",
+      "command": "node scripts/test/opencode-chatgpt-web-smoke.mjs",
       "disposition": "separately-invoked"
     },
     {
@@ -694,6 +709,11 @@
       "disposition": "separately-invoked"
     },
     {
+      "name": "typecheck:build",
+      "command": "tsc --pretty false -p tsconfig.build.json",
+      "disposition": "separately-invoked"
+    },
+    {
       "name": "typecheck:noimplicit:core",
       "command": "tsc --pretty false -p tsconfig.typecheck-noimplicit-core.json",
       "disposition": "separately-invoked"
@@ -706,6 +726,11 @@
     {
       "name": "check:ui-kit-snapshot",
       "command": "node scripts/check/check-ui-kit-snapshot.mjs",
+      "disposition": "separately-invoked"
+    },
+    {
+      "name": "check:ui-kit-upstream",
+      "command": "node scripts/check/check-ui-kit-upstream.mjs",
       "disposition": "separately-invoked"
     },
     {
@@ -798,6 +823,7 @@
         "check:known-symbols",
         "check:route-guard-membership",
         "check:test-discovery",
+        "check:test-tla-order",
         "check:test-masking",
         "check:duplication",
         "check:cycles:ratchet",
@@ -827,6 +853,7 @@
         "check:known-symbols",
         "check:route-guard-membership",
         "check:test-discovery",
+        "check:test-tla-order",
         "check:test-masking"
       ]
     }

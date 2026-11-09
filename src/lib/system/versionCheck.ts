@@ -128,6 +128,15 @@ function createCachedLookup<T>(defaultLookup: () => Promise<T | null>) {
 export { normalizeVersion, isNewer } from "./versionCompare";
 
 /**
+ * Operator opt-out for every update check: the CLI exit notice (`bin/omniroute.mjs`) and the
+ * dashboard's `GET /api/system/version` lookup. Same semantics as the CLI — any non-empty
+ * value of `OMNIROUTE_NO_UPDATE_NOTIFIER` (including "0") disables the check.
+ */
+export function isUpdateCheckDisabled(env: NodeJS.ProcessEnv = process.env): boolean {
+  return Boolean(env.OMNIROUTE_NO_UPDATE_NOTIFIER);
+}
+
+/**
  * Latest published version via the `npm` CLI (fast when npm is on PATH, e.g. source installs).
  *
  * `execFn` is injectable for tests (same pattern as the CLI's own

@@ -14,6 +14,8 @@ interface FeatureFlagCardProps {
     enumValues?: string[] | null;
     effectiveValue: string;
     source: "db" | "env" | "default";
+    configuredSource?: "db" | "env" | "default";
+    sourceKey?: string;
     requiresRestart: boolean;
     warningLevel?: "info" | "caution" | "danger";
   };
@@ -181,9 +183,12 @@ export default function FeatureFlagCard({
           <Badge variant={source.tone} size="sm" className="font-mono">
             {source.label}
           </Badge>
+          {flag.sourceKey && flag.sourceKey !== flag.key && (
+            <span className="font-mono text-xs text-text-muted">{flag.sourceKey}</span>
+          )}
         </div>
 
-        {flag.source === "db" && (
+        {(flag.configuredSource ?? flag.source) === "db" && (
           <Button
             variant="ghost"
             size="sm"

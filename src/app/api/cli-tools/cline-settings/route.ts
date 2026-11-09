@@ -26,7 +26,8 @@ const SECRETS_PATH = path.join(CLINE_DATA_DIR, "secrets.json");
 // Ported from upstream decolua/9router@6c10edf8: tolerate JSONC (trailing
 // commas) and return null on any parse error so the dashboard renders
 // "installed but not configured" instead of a 500 misread as "not installed".
-const readGlobalState = async () => readJsoncConfig(GLOBAL_STATE_PATH);
+const readGlobalState = async () =>
+  readJsoncConfig<Record<string, unknown>>(GLOBAL_STATE_PATH);
 
 // Read secrets.json (same JSONC-tolerant behaviour; defaults to {} for compat).
 const readSecrets = async () => readJsoncConfig<Record<string, unknown>>(SECRETS_PATH, {});

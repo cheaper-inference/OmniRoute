@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useTranslations } from "next-intl";
 import { PageHeader } from "@omniroute/ui-kit/page-header";
 import Icon from "@/shared/components/Icon";
+import { Spinner } from "@/shared/components/Loading";
 import Button from "@/shared/components/Button";
 import Card from "@/shared/components/Card";
 import EmptyState from "@/shared/components/EmptyState";
@@ -11,11 +12,13 @@ import Input from "@/shared/components/Input";
 import { SkillsConceptCard } from "@/shared/components/SkillsConceptCard";
 import { cn } from "@/shared/utils/cn";
 import { matchesSearch } from "@/shared/utils/turkishText";
+import { useConfirmDialog } from "@/shared/hooks/useConfirmDialog";
 import { CoverageBar } from "./components/CoverageBar";
 import { McpA2aLinksBar } from "./components/McpA2aLinksBar";
 import { SkillCard } from "./components/SkillCard";
 import { SkillPreviewPane } from "./components/SkillPreviewPane";
 import type { AgentSkill, SkillCoverage } from "@/lib/agentSkills/types";
+import type { JSX } from "react";
 
 type FilterCategory = "all" | "api" | "cli" | "config";
 
@@ -58,6 +61,7 @@ function CoverageBarSkeleton(): JSX.Element {
 export function AgentSkillsPageClient(): JSX.Element {
   const t = useTranslations("agentSkills");
   const tSidebar = useTranslations("sidebar");
+  const { requestConfirm, confirmDialog } = useConfirmDialog();
 
   // State
   const [catalog, setCatalog] = useState<AgentSkill[]>([]);
@@ -149,7 +153,7 @@ export function AgentSkillsPageClient(): JSX.Element {
 
   // ── Generate missing skills ───────────────────────────────────────────────
   const handleGenerate = useCallback(async () => {
-    const confirmed = window.confirm(t("regenerateConfirm"));
+    const confirmed = await requestConfirm({ message: t("regenerateConfirm"), variant: "primary" });
     if (!confirmed) return;
     setGeneratingSkills(true);
     try {
@@ -171,7 +175,7 @@ export function AgentSkillsPageClient(): JSX.Element {
     } finally {
       setGeneratingSkills(false);
     }
-  }, [t]);
+  }, [t, requestConfirm]);
 
   // ── Filtering + search ────────────────────────────────────────────────────
   const localizedCatalog = useMemo(
@@ -236,11 +240,11 @@ export function AgentSkillsPageClient(): JSX.Element {
                 className="gap-1.5 border-primary/30 bg-primary/10 text-xs text-primary hover:bg-primary/15"
                 data-testid="generate-button"
               >
-                <Icon
-                  name={generatingSkills ? "refresh" : "auto_fix_high"}
-                  size={14}
-                  className={generatingSkills ? "animate-spin" : undefined}
-                />
+                {generatingSkills ? (
+                  <Spinner decorative size="xs" />
+                ) : (
+                  <Icon name="auto_fix_high" size={14} />
+                )}
                 {generatingSkills ? t("regenerateRunning") : t("generateButton")}
               </Button>
             )}
@@ -322,6 +326,7 @@ export function AgentSkillsPageClient(): JSX.Element {
           />
         </div>
       </div>
+      {confirmDialog}
     </div>
   );
 }

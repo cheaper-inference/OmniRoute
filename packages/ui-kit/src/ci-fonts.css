@@ -1,0 +1,15 @@
+/* Switzer by Indian Type Foundry. Fontshare Free Font License: fonts/FFL.txt. */
+@font-face {
+  font-family: "Switzer";
+  src: url("./fonts/Switzer-Variable.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Switzer";
+  src: url("./fonts/Switzer-VariableItalic.woff2") format("woff2");
+  font-style: italic;
+  font-weight: 100 900;
+  font-display: swap;
+}

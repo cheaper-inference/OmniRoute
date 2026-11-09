@@ -1,0 +1,200 @@
+name: UI Kit upstream watch
+
+# The CI UI Kit is a vendored snapshot (packages/ui-kit, pinned in UPSTREAM.md), so nothing tells
+# the team when Keak ships a new release: 0.0.66 sat in the tree while 0.0.76 was out. Once a day
+# this compares the pinned version with the newest `v*` tag upstream. While we are behind it keeps
+# ONE sync PR open against the highest release/vX.Y.Z branch (scripts/ci/ui-kit-sync-pr.sh). It
+# never merges: every kit release still needs a visual check on the local VPS. When no PR can be
+# opened (frozen release, no PR token, a maintainer closed it) ONE tracking issue says what to do.
+#
+# Secrets:
+#   UI_KIT_READ_TOKEN     read-only token for the private keak-ai/cheaper-inference-ui-kit. When the
+#                         check can't read upstream it reports "unknown": the run stays green but
+#                         warns, and keeps ONE issue open until a later run can read upstream again.
+#   UI_KIT_SYNC_PR_TOKEN  fine-grained token on this repository (Contents and Pull requests: write).
+#                         This repository doesn't let GITHUB_TOKEN create PRs, and a PR it opened
+#                         wouldn't trigger CI. Without this token only the branch is pushed.
+
+on:
+  schedule:
+    - cron: "17 9 * * *" # daily 09:17 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ui-kit-upstream-watch
+  cancel-in-progress: true
+
+jobs:
+  watch:
+    if: ${{ github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute' }}
+    name: Compare the pinned kit with the latest upstream release
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write # push chore/ui-kit-sync-latest
+      issues: write # the tracking issues
+      pull-requests: write # read the sync PR's state; opening it uses UI_KIT_SYNC_PR_TOKEN
+    steps:
+      - name: Resolve the target release branch
+        id: base
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          BASE=$(gh api "repos/$GITHUB_REPOSITORY/branches" --paginate --jq '.[].name' \
+            | grep -E '^release/v[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -1)
+          [ -n "$BASE" ] || { echo "no release/vX.Y.Z branch" >&2; exit 1; }
+          FREEZES=$(gh issue list --repo "$GITHUB_REPOSITORY" --label release-freeze --state open \
+            --json title --jq '.[].title')
+          # Titles read "release-freeze: v3.8.52 in progress"; v3.8.5 must not match v3.8.52.
+          VERSION="${BASE#release/}"
+          if printf '%s\n' "$FREEZES" | grep -qE "release-freeze: ${VERSION//./\\.}([^0-9.]|$)"; then
+            FROZEN=true
+          else
+            FROZEN=false
+          fi
+          RED=$(gh issue list --repo "$GITHUB_REPOSITORY" --state open \
+            --search "Release branch not green: $BASE in:title" --json number --jq '.[0].number // empty')
+          {
+            echo "branch=$BASE"
+            echo "frozen=$FROZEN"
+            echo "red=$RED"
+          } >> "$GITHUB_OUTPUT"
+          echo "target $BASE (frozen=$FROZEN, base-red=${RED:-none})"
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ steps.base.outputs.branch }}
+          persist-credentials: false
+      - name: Check upstream
+        id: check
+        env:
+          UI_KIT_READ_TOKEN: ${{ secrets.UI_KIT_READ_TOKEN }}
+        run: |
+          set -euo pipefail
+          node scripts/check/check-ui-kit-upstream.mjs --json > ui-kit-upstream.json
+          cat ui-kit-upstream.json
+          echo "state=$(node -p "require('./ui-kit-upstream.json').state")" >> "$GITHUB_OUTPUT"
+      - name: Warn about and track an unreadable upstream
+        env:
+          GH_TOKEN: ${{ github.token }}
+          STATE: ${{ steps.check.outputs.state }}
+        run: |
+          set -euo pipefail
+          if [ "$STATE" = "unknown" ]; then
+            DETAIL=$(node -p "require('./ui-kit-upstream.json').detail")
+            echo "::warning title=UI Kit upstream watch::$DETAIL"
+            echo "**UI Kit upstream watch:** state is \`unknown\`, so new kit releases aren't being tracked. $DETAIL" >> "$GITHUB_STEP_SUMMARY"
+          fi
+          # Triage may prefix an issue title ("fix: ..."), so match the end of the title. `in:title`
+          # is a looser phrase search, so it can't decide this on its own. No `|| echo ""` here: a
+          # failed lookup has to fail the step, not look like "no issue open" and open a duplicate.
+          NO_TOKEN_TITLE="UI Kit upstream watch can't run: UI_KIT_READ_TOKEN isn't set"
+          UNREADABLE_TITLE="UI Kit upstream watch can't read upstream"
+          OPEN=$(gh issue list --repo "$GITHUB_REPOSITORY" --state open \
+            --search "in:title \"UI Kit upstream watch can't\"" --limit 100 --json number,title \
+            | jq -r --arg a "$NO_TOKEN_TITLE" --arg b "$UNREADABLE_TITLE" \
+              '.[] | select((.title | endswith($a)) or (.title | endswith($b))) | .number')
+          if [ "$STATE" != "unknown" ]; then
+            for NUMBER in $OPEN; do
+              gh issue close "$NUMBER" --repo "$GITHUB_REPOSITORY" --reason completed \
+                --comment "The watch can read upstream again (state: $STATE)."
+            done
+          elif [ -n "$OPEN" ]; then
+            echo "Already tracked in: $(echo "$OPEN" | sed 's/^/#/' | paste -sd ' ' -)" >> "$GITHUB_STEP_SUMMARY"
+          else
+            REASON=$(node -p "require('./ui-kit-upstream.json').reason")
+            REPO=$(node -p "require('./ui-kit-upstream.json').repo")
+            # Only a token that really is unset gets the title that says so.
+            TITLE="$UNREADABLE_TITLE"
+            if [ "$REASON" = "no-token" ]; then TITLE="$NO_TOKEN_TITLE"; fi
+            {
+              echo "$DETAIL"
+              echo
+              echo "Until this is fixed, nothing opens when \`$REPO\` gets a new release. \`npm run check:ui-kit-upstream\` still works locally with your git credentials."
+              echo
+              echo "The watch needs a read-only token for that repo in the \`UI_KIT_READ_TOKEN\` secret. This issue closes itself on the next run that can read upstream."
+              echo
+              echo "Run: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+            } > access-body.md
+            gh issue create --repo "$GITHUB_REPOSITORY" --title "$TITLE" --body-file access-body.md
+          fi
+      - name: Open or update the sync PR
+        id: sync
+        if: ${{ steps.check.outputs.state == 'behind' && steps.base.outputs.frozen == 'false' }}
+        env:
+          GH_TOKEN: ${{ secrets.UI_KIT_SYNC_PR_TOKEN || github.token }}
+          HAS_PR_TOKEN: ${{ secrets.UI_KIT_SYNC_PR_TOKEN != '' }}
+          KIT_TOKEN: ${{ secrets.UI_KIT_READ_TOKEN }}
+          BASE: ${{ steps.base.outputs.branch }}
+          BASE_RED_ISSUE: ${{ steps.base.outputs.red }}
+        run: |
+          set -euo pipefail
+          gh auth setup-git
+          REPO="$GITHUB_REPOSITORY"
+          LATEST_VERSION=$(node -p "require('./ui-kit-upstream.json').latest.version")
+          LATEST_COMMIT=$(node -p "require('./ui-kit-upstream.json').latest.commit")
+          PINNED_COMMIT=$(node -p "require('./ui-kit-upstream.json').pinned.commit")
+          export REPO LATEST_VERSION LATEST_COMMIT PINNED_COMMIT
+          scripts/ci/ui-kit-sync-pr.sh
+      - name: Open, update or close the tracking issue
+        # Not on an empty state: a failed check says nothing about the pin, so it can't close the issue.
+        if: ${{ !cancelled() && (steps.check.outputs.state == 'behind' || steps.check.outputs.state == 'up-to-date') }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          STATE: ${{ steps.check.outputs.state }}
+          FROZEN: ${{ steps.base.outputs.frozen }}
+          BASE: ${{ steps.base.outputs.branch }}
+          DECISION: ${{ steps.sync.outputs.decision }}
+          BRANCH: ${{ steps.sync.outputs.branch }}
+          PR_URL: ${{ steps.sync.outputs.pr_url }}
+        run: |
+          set -euo pipefail
+          TITLE="UI kit: a newer upstream release is available"
+          # Triage may prefix an issue title, so match the end of it, as the step above does.
+          EXISTING=$(gh issue list --repo "$GITHUB_REPOSITORY" --state open \
+            --search "in:title \"$TITLE\"" --limit 100 --json number,title \
+            | jq -r --arg title "$TITLE" '[.[] | select(.title | endswith($title))][0].number // empty')
+          if [ "$STATE" = "behind" ] && [ -z "$PR_URL" ]; then
+            PINNED=$(node -p "require('./ui-kit-upstream.json').pinned.version")
+            LATEST=$(node -p "require('./ui-kit-upstream.json').latest.version")
+            {
+              echo "The vendored kit is pinned at \`$PINNED\`; upstream released \`v$LATEST\`."
+              echo
+              if [ "$FROZEN" = "true" ]; then
+                echo "No sync PR was opened because \`$BASE\` is frozen."
+              elif [ "$DECISION" = "branch-only" ]; then
+                echo "\`$BRANCH\` is pushed with the sync, but no PR was opened: the \`UI_KIT_SYNC_PR_TOKEN\` secret isn't set. Open it from that branch against \`$BASE\`."
+              elif [ "$DECISION" = "hand-edited" ]; then
+                echo "The open sync PR on \`$BRANCH\` has commits pushed by hand, so the watch won't overwrite them with this release. Update that PR, or close it to let the watch open a new one."
+              elif [ "$DECISION" = "declined" ]; then
+                echo "The sync PR for this version was closed without merging, so it stays closed until a newer release."
+              else
+                echo "The sync step didn't finish; see $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID."
+              fi
+              echo
+              echo "To sync by hand from the main checkout:"
+              echo
+              echo '```'
+              echo 'git -C _references/cheaper-inference-ui-kit fetch --tags'
+              echo 'scripts/dev/sync-ui-kit.sh latest'
+              echo '```'
+              echo
+              echo "Then run the kit guards (\`tests/unit/*kit*\`, \`design-kit-bridge\`, \`ui-kit-snapshot-gate\`) and the dashboard typecheck."
+            } > body.md
+            # Edited in place: this runs daily, so a comment per run would only be noise.
+            if [ -n "$EXISTING" ]; then
+              gh issue edit "$EXISTING" --repo "$GITHUB_REPOSITORY" --body-file body.md
+            else
+              gh issue create --repo "$GITHUB_REPOSITORY" --title "$TITLE" --body-file body.md
+            fi
+          elif [ -n "$EXISTING" ]; then
+            if [ -n "$PR_URL" ]; then
+              COMMENT="The sync is now tracked in $PR_URL."
+            else
+              COMMENT="The pinned kit matches the latest upstream release."
+            fi
+            gh issue close "$EXISTING" --repo "$GITHUB_REPOSITORY" --reason completed --comment "$COMMENT"
+          fi

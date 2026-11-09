@@ -1,8 +1,9 @@
 // @vitest-environment jsdom
 /**
  * F4 (KEA-7886, review M-4): render tests for widgets the F4 sweep moved onto the kit adapters —
- * MaintenanceBanner, CloudSyncStatus, MitmProxyTab. Each must render without Material ligatures,
- * with token colours and the adapter controls.
+ * MaintenanceBanner, CloudSyncStatus. Each must render without Material ligatures, with token
+ * colours and the adapter controls. (The orphan settings MitmProxyTab was deleted in F5-A / P2 —
+ * the live screen is /dashboard/system/mitm-proxy.)
  */
 import React from "react";
 import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
@@ -67,64 +68,4 @@ describe("CloudSyncStatus", () => {
     act(() => fireEvent.click(button));
     expect(push).toHaveBeenCalledWith("/dashboard/endpoint");
   });
-});
-
-describe("MitmProxyTab", () => {
-  it(
-    "renders labelled adapter fields, kit badges and a kit table for the target routes",
-    { timeout: 30_000 },
-    async () => {
-      // The kit Table watches its scroll container.
-      vi.stubGlobal(
-        "ResizeObserver",
-        class {
-          observe() {}
-          unobserve() {}
-          disconnect() {}
-        }
-      );
-      vi.stubGlobal(
-        "fetch",
-        vi.fn(async () =>
-          json({
-            running: true,
-            pid: 4242,
-            dnsConfigured: true,
-            certExists: false,
-            hasCachedPassword: false,
-            port: 443,
-            targets: [
-              {
-                id: "t1",
-                name: "Copilot",
-                targetHost: "api.example.com",
-                targetPort: 443,
-                localPort: 8443,
-                endpoints: ["/v1/chat"],
-                enabled: true,
-              },
-            ],
-            stats: {
-              startedAt: null,
-              totalRequests: 3,
-              interceptedRequests: 2,
-              activeConnections: 1,
-              lastInterceptAt: null,
-            },
-          })
-        )
-      );
-      const { default: MitmProxyTab } =
-        await import("@/app/(dashboard)/dashboard/settings/components/MitmProxyTab");
-      const { container } = render(<MitmProxyTab />);
-      await screen.findByText("Copilot");
-      expect(screen.getByLabelText("port")).toBeTruthy();
-      expect(screen.getByLabelText("apiKey").getAttribute("type")).toBe("password");
-      expect(container.querySelector("table.ci-table")).not.toBeNull();
-      expect(screen.getByRole("button", { name: /stop/ }).className).toContain("ci-button");
-      expect(container.querySelectorAll(".ci-badge").length).toBeGreaterThan(2);
-      expect(container.querySelector(".material-symbols-outlined")).toBeNull();
-      expect(container.innerHTML).not.toMatch(/(emerald|amber|red)-\d/);
-    }
-  );
 });

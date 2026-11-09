@@ -29,6 +29,20 @@ function partsText(value: unknown): string {
     .join("");
 }
 
+function splitContentParts(parts: unknown[]): { text: string; thinking: string } {
+  let text = "";
+  let thinking = "";
+  for (const part of parts) {
+    if (!isRecord(part)) continue;
+    if (part.type === "text" && typeof part.text === "string") {
+      text += part.text;
+    } else if (part.type === "thinking") {
+      thinking += partsText(part.thinking);
+    }
+  }
+  return { text, thinking };
+}
+
 /** Normalize one `delta` object. Returns true when it was changed. */
 export function normalizeArrayContentDelta(delta: JsonRecord): boolean {
   // Cloudflare Workers AI sometimes streams a digit as a JSON number (`"content": 7`). Keep it as
@@ -41,16 +55,7 @@ export function normalizeArrayContentDelta(delta: JsonRecord): boolean {
   }
   if (!Array.isArray(delta.content)) return false;
 
-  let text = "";
-  let thinking = "";
-  for (const part of delta.content) {
-    if (!isRecord(part)) continue;
-    if (part.type === "text" && typeof part.text === "string") {
-      text += part.text;
-    } else if (part.type === "thinking") {
-      thinking += partsText(part.thinking);
-    }
-  }
+  const { text, thinking } = splitContentParts(delta.content);
 
   if (text) delta.content = text;
   else delete delta.content;

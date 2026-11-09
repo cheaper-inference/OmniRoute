@@ -1,4 +1,4 @@
-import { CORS_HEADERS, handleCorsOptions } from "@/shared/utils/cors";
+import { CORS_HEADERS, credentialRejectionHeaders, handleCorsOptions } from "@/shared/utils/cors";
 import { getBatch, updateBatch } from "@/lib/db/batches";
 import { NextResponse } from "next/server";
 import {
@@ -25,7 +25,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   if (scope.apiKey && !scope.apiKeyId) {
     return NextResponse.json(buildErrorBody(401, "Invalid API key"), {
       status: 401,
-      headers: CORS_HEADERS,
+      headers: credentialRejectionHeaders(request),
     });
   }
 

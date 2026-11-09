@@ -31,6 +31,8 @@ import type { resolveComboSetupConfig } from "../comboConfig.ts";
 import { orderTargetsByEvalScores } from "../evalRouting.ts";
 import { parseModel } from "../model.ts";
 import { getRemainingCooldownMs, isProviderInCooldown } from "../providerCooldownTracker.ts";
+import { orderAccountPreferences } from "./accountPreferences.ts";
+import { parseAutoConfig } from "./autoConfig.ts";
 import {
   classifyTask,
   getConversationCacheKey,
@@ -53,6 +55,7 @@ import {
 } from "./comboStructure.ts";
 import { applyContextRequirements } from "./contextRequirements.ts";
 import { recordComboFailure } from "./failureTracker.ts";
+import { scopeHandoffSessionId } from "./handoffSessionScope.ts";
 import {
   buildAllTargetsCoolingDownResponse,
   buildEmptyComboTargetsPayload,
@@ -404,6 +407,8 @@ async function dispatchSmartPipeline(
 ): Promise<Response | null> {
   const { body, combo, strategy, config, settings, signal, log } = deps;
   if (!getStrategyTraits(strategy).smartPipeline) return null;
+  // The smart pipeline dispatches model strings, not concrete accounts.
+  if (Object.keys(parseAutoConfig(combo, []).accountPreferences).length > 0) return null;
   const autoParsed = parseAutoPrefix(combo.name);
   const autoVariant = autoParsed.valid ? autoParsed.variant : undefined;
   if (autoVariant !== "smart" && !config.pipeline_enabled) return null;
@@ -478,6 +483,7 @@ async function orderByStrategy(
       resilienceSettings: deps.resilienceSettings,
       log,
       buildAutoCandidates: deps.buildAutoCandidates,
+      apiKeyAllowedConnections: deps.apiKeyAllowedConnections,
     });
     if ("earlyResponse" in autoResult) return { earlyResponse: autoResult.earlyResponse };
     return {
@@ -596,7 +602,7 @@ async function applyContinuityFilters(
     if (exhaustion) {
       // Match handleComboChat: only track failures under context-cache protection pins.
       const effectiveSessionId: string | null = combo.context_cache_protection
-        ? (relayOptions?.sessionId ?? null)
+        ? scopeHandoffSessionId(relayOptions?.sessionId, relayOptions?.apiKeyId)
         : null;
       recordComboFailure(effectiveSessionId, combo.name);
       return {
@@ -622,7 +628,7 @@ async function applyContinuityFilters(
   orderedTargets = applyContextRequirements(orderedTargets, config.contextRequirements, log);
   if (orderedTargets.length === 0 && preContextTargets.length > 0) {
     const effectiveSessionId: string | null = combo.context_cache_protection
-      ? (relayOptions?.sessionId ?? null)
+      ? scopeHandoffSessionId(relayOptions?.sessionId, relayOptions?.apiKeyId)
       : null;
     recordComboFailure(effectiveSessionId, combo.name);
     const { message, diagnostics } = buildEmptyComboTargetsPayload(
@@ -792,7 +798,9 @@ function buildWeightedExhaustionResponse(
     `Weighted selection: every target excluded before dispatch — ${formatPreDispatchExclusions(exclusions)}`
   );
   recordComboFailure(
-    deps.combo.context_cache_protection ? (deps.relayOptions?.sessionId ?? null) : null,
+    deps.combo.context_cache_protection
+      ? scopeHandoffSessionId(deps.relayOptions?.sessionId, deps.relayOptions?.apiKeyId)
+      : null,
     deps.combo.name
   );
   return coolingDown;
@@ -922,6 +930,14 @@ export async function resolveComboTargetPipeline(
     continuity.sticky.stuck,
     autoUsedExplicitRouter
   );
+
+  if (strategy === "auto") {
+    orderedTargets = orderAccountPreferences(
+      orderedTargets,
+      parseAutoConfig(combo, orderedTargets).accountPreferences,
+      continuity.sticky.stuck
+    );
+  }
 
   quotaShareRelease = transferInflightReservation(
     traits.inflightReservation,

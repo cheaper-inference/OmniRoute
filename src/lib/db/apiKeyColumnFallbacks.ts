@@ -14,6 +14,7 @@ export const API_KEY_COLUMN_FALLBACKS = [
   { name: "allowed_combos", definition: "allowed_combos TEXT" },
   { name: "no_log", definition: "no_log INTEGER NOT NULL DEFAULT 0" },
   { name: "allowed_connections", definition: "allowed_connections TEXT" },
+  { name: "preferred_connections", definition: "preferred_connections TEXT" },
   { name: "auto_resolve", definition: "auto_resolve INTEGER NOT NULL DEFAULT 0" },
   { name: "is_active", definition: "is_active INTEGER NOT NULL DEFAULT 1" },
   { name: "access_schedule", definition: "access_schedule TEXT" },
@@ -56,6 +57,10 @@ export const API_KEY_COLUMN_FALLBACKS = [
     definition: "weekly_usage_limit_usd REAL",
   },
   {
+    name: "five_hour_usage_limit_usd",
+    definition: "five_hour_usage_limit_usd REAL",
+  },
+  {
     name: "chaos_mode_enabled",
     definition: "chaos_mode_enabled INTEGER NOT NULL DEFAULT 0",
   },
@@ -66,6 +71,10 @@ export const API_KEY_COLUMN_FALLBACKS = [
   {
     name: "allow_auto_combos",
     definition: "allow_auto_combos INTEGER NOT NULL DEFAULT 1",
+  },
+  {
+    name: "allow_cc_discovery_aliases",
+    definition: "allow_cc_discovery_aliases INTEGER NOT NULL DEFAULT 1",
   },
   {
     name: "catalog_scope",

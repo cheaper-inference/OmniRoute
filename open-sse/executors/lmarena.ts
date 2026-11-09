@@ -15,7 +15,7 @@ import { readLMArenaCookie, reconstructLMArenaCookie } from "./lmarena/cookie.ts
 import { sanitizeLMArenaError } from "./lmarena/error.ts";
 import {
   LMARENA_STREAM_URL,
-  LMARENA_USER_AGENT,
+  lmarenaUserAgent,
   buildLmarenaBrowserHeaders,
   markLMArenaCatalogModelDead,
   normalizeLMArenaModelsForCatalog,
@@ -43,7 +43,7 @@ export {
   pickLMArenaModelId,
   parseArenaSSE,
   markLMArenaCatalogModelDead,
-  LMARENA_USER_AGENT,
+  lmarenaUserAgent,
 };
 export { clearLMArenaDeadCatalogModels } from "./lmarena/models.ts";
 export type { LMArenaModelMetadata };

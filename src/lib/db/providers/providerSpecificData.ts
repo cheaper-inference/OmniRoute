@@ -21,7 +21,8 @@ export function normalizeConnectionProviderSpecificData(
   if (provider !== "codex") return withExpiry;
 
   if (isMetadata(providerSpecificData) && isMetadata(existingProviderSpecificData)) {
-    for (const key of ["limitPolicy", "quotaPreflightEnabled"] as const) {
+    // Operator controls a fresh OAuth payload never carries: keep them across re-login.
+    for (const key of ["limitPolicy", "quotaPreflightEnabled", "allowPaidCredits"] as const) {
       if (
         !Object.hasOwn(providerSpecificData, key) &&
         Object.hasOwn(existingProviderSpecificData, key)

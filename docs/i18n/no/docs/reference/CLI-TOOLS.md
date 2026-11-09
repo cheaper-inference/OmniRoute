@@ -6,15 +6,15 @@
 
 Sist oppdatert: 2026-08-23
 
-OmniRoute integreres med tre kategorier CLI-verktøy fordelt på tre dedikerte dashboardsider:
+OmniRoute integreres med tre kategorier av CLI verktøy spredt over tre dedikerte dashbordsider:
 
-| Side            | Rute                    | Konsept                                                                     | Antall        |
-| --------------- | ----------------------- | --------------------------------------------------------------------------- | ------------- |
-| **CLI-koder**   | `/dashboard/cli-code`   | Kodeverktøy du kobler til OmniRoute (Klient → CLI → OmniRoute → Leverandør) | 26            |
-| **CLI-agenter** | `/dashboard/cli-agents` | Autonome agenter du kobler til OmniRoute (samme flyt, bredere omfang)       | 10            |
-| **ACP-agenter** | `/dashboard/acp-agents` | CLI-er som OmniRoute starter som backend via stdio/ACP (omvendt flyt)       | se registeret |
+| Side            | Rute                    | Konsept                                                                   | Telle         |
+| --------------- | ----------------------- | ------------------------------------------------------------------------- | ------------- |
+| **CLI -kodene** | `/dashboard/cli-code`   | Kodeverktøy du peker på OmniRoute (klient → CLI → OmniRoute → leverandør) | 26            |
+| **CLI agenter** | `/dashboard/cli-agents` | Autonome agenter du peker på OmniRoute (samme flyt, bredere omfang)       | 11            |
+| **ACP agenter** | `/dashboard/acp-agents` | CLIs som OmniRoute gyter som backend via stdio/ACP (omvendt flyt)         | se registeret |
 
-Eldre ruter omdirigeres via 308: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
+Eldre ruter omdirigerer via 308: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
 
 ---
 
@@ -43,9 +43,9 @@ ACP-agenter (omvendt oppstartsflyt):
 
 ---
 
-## Automatisk konfigurasjon med `setup-*`
+## Autokonfigurer med `setup-*`
 
-Du trenger ikke å skrive konfigurasjonen for hvert verktøy manuelt. OmniRoute leveres med en `setup-*`-kommando for hvert støttet CLI-verktøy. Kommandoen leser den **aktive** modellkatalogen fra en kjørende OmniRoute-instans (lokal eller ekstern) og skriver verktøyets egen konfigurasjon på maskinen din:
+Du trenger ikke å skrive hver verktøys konfigurasjon for hånd. OmniRoute sender en `setup-*` -kommando per støttet CLI som leser** bo** modellkatalog fra en kjørende OmniRoute (lokal eller ekstern) og skriver verktøyets egen konfigurasjon på maskinen din:
 
 ```bash
 omniroute setup-codex        omniroute setup-claude       omniroute setup-opencode
@@ -53,23 +53,18 @@ omniroute setup-cline        omniroute setup-kilo         omniroute setup-contin
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
 omniroute setup-5dive        omniroute setup-zed
+omniroute setup-whycodes
 ```
 
-Alle godtar `--remote <url> --api-key <key>` (konfigurer et lokalt verktøy mot en ekstern OmniRoute-instans), `--dry-run` (forhåndsvis uten å skrive) og `--port`. Verktøy uten automatisk modelloppdagelse (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive) bruker `--model <id>` (og `--yes` for ikke-interaktive kjøringer). `setup-5dive` er den eneste oppskriften som ikke skriver under `$HOME`: Den konfigurerer en flåte med 5dive-agenter ved å skrive en roteid autentiseringsprofil på flåteverten. Derfor starter den seg selv på nytt gjennom `sudo` og har ingen egen ekstern modus. Hvis du vil starte et CLI-verktøy med riktige miljøvariabler injisert uten å skrive noen konfigurasjon, bruker du den generiske oppstarteren `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini — mål og aliaser kommer fra `bin/cli/cli-manifest.mjs`). De eldre verktøyspesifikke oppstarterne `omniroute launch` (Claude Code) og `omniroute launch-codex` (Codex) er fortsatt tilgjengelige. Gemini CLI kan bare startes: Det er et mål for `omniroute run`, men har ingen `setup-*`/`configure`-oppskrift.
+Hver godtar `--remote <url> --api-key <key>` (konfigurer et lokalt verktøy mot en ekstern OmniRoute), `--dry-run` (forhåndsvisning uten å skrive) og `--port`. Verktøy uten automatisk oppdagelse av modellen (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive, WhyCodes) tar `--model <id>` (og `--yes` for ikke-interaktive løp). `setup-5dive` er den ene oppskriften som ikke skriver under `$HOME`: den konfigurerer en 5dive-agentflåte ved å skrive en root-eid autentiseringsprofil på flåteverten, slik at den kjører på nytt gjennom `sudo` og har ingen egen ekstern modus. For å starte en CLI med riktig env injisert og ingen konfig skrevet i det hele tatt, bruk den generiske `omniroute run <target>` starteren (claude, codex, aider, goose, opencode, qwen, gemini, whycodes — mål og aliaser kommer fra `bin/cli/cli-manifest.mjs`); de eldre lanseringene per verktøy `omniroute launch` (Claude Code) og `omniroute launch-codex` (Codex) forblir tilgjengelige. Gemini CLI er kun for lansering: det er et `omniroute run` mål, men har ingen `setup-*`/`configure` -oppskrift.
 
-> **Fullstendig referanse:** Hovedtabellen — hva hver kommando skriver, alle flagg,
-> lokalt kontra eksternt og hvilke verktøy som krever et `/v1`-suffiks — finnes i
-> **[CLI-integrasjoner](../guides/CLI-INTEGRATIONS.md)**.
+> **Full referanse:** mastertabellen – hva hver kommando skriver, hvert flagg, lokal kontra ekstern, og hvilke verktøy som vil ha et `/v1` suffiks – lever i** [CLI -integrasjoner](../guides/CLI-INTEGRATIONS.md)** .
 
-### Kjøre disse inne i en container
+### Kjører disse inne i en container
 
-En `setup-*`-kommando som kjøres inne i OmniRoute-containeren, skriver til containerens egen hjemmekatalog. Ingen CLI-verktøy på verten leser denne katalogen, og den forsvinner sammen med containeren. OmniRoute oppdager dette og avslutter med `2` og instruksjoner i stedet for å skrive. Det finnes to støttede løsninger — installer CLI-verktøyet på verten og bruk `omniroute connect` mot containeren, eller bind-monter konfigurasjonskatalogene og angi `CLI_CONFIG_HOME` (`host`-profilen i Compose). Alle `setup-*`-kommandoer, i tillegg til `omniroute configure` og `omniroute config set`, godtar `--allow-container-write` når hensikten faktisk er å konfigurere containerens egne CLI-verktøy. `OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true` gjør det samme for serveren. Se
-[Docker-veiledning → Konfigurere CLI-verktøy på verten](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker).
+En `setup-*` kommando utført inne i OmniRoute beholderen skriver inn i beholderens eget hjem, som ingen vert CLI leser og som forsvinner med beholderen. OmniRoute oppdager det og avslutter `2` med instruksjoner i stedet for å skrive. To støttede veier fremover – installer CLI på verten og `omniroute connect` til containeren, eller bind-monter konfigurasjonsdirene og sett `CLI_CONFIG_HOME` (compose `host` profilen). Hver `setup-*` kommando, pluss `omniroute configure` og `omniroute config set`, aksepterer `--allow-container-write` når konfigurering av containerens egen CLIs er det du egentlig mente; `OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true` gjør det samme for serveren. Se [Docker veiledningen → Konfigurere verts CLI verktøy](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker).
 
-Kontrollpanelets **apply-endepunkt** (`POST /api/cli-tools/apply`) håndhever det samme vernet: I en container vil en skriveoperasjon med et mål som ikke er bind-montert fra verten, svare med **`422`**, `containerEphemeralTarget: true`, en trygg feilmelding og — for verktøyene som har en oppskrift for verten (claude, codex, opencode, cline, kilo, continue) — en `hostSetupCommand` (f.eks. `omniroute setup-opencode`) som skal kjøres på verten i stedet. Ingenting blir skrevet. `dryRun: true` fungerer fortsatt i containermodus og returnerer en maskert forhåndsvisning samt målbanen uten å berøre disken. Innholdet i forhåndsvisningen er ikke en konfigurasjon med legitimasjon som kan kopieres eller importeres. Bruk de opprinnelige inndataene for verktøy, basis-URL, API-nøkkel og modell på verten, eller bruk den angitte oppsettskommandoen på vertssiden. Se [Sikkerhet for CLI-konfigurasjon](../security/CLI-CONFIGURATION.md)
-for forhåndsvisningshodet og forespørselskontrakten. Denne virkemåten er tilsiktet og beskyttet mot regresjoner av
-`tests/unit/api/cli-tools/apply-container-guard.test.ts` — aldri «fiks» en 422
-ved å fjerne vernet.
+Dashbordets** bruke endepunkt** (`POST /api/cli-tools/apply`) håndhever samme vakt: i en container svarer en skriving hvis mål ikke er bind-montert fra verten**`422`** med `containerEphemeralTarget: true`, den sikre feilteksten og — for verktøyene med en vertsoppskrift (claude, codex, opencode, cline, kilo, continue) — en `hostSetupCommand` (f.eks. `omniroute setup-opencode`) for å kjøre på verten i stedet; ingenting er skrevet. `dryRun: true` fortsetter å jobbe i containermodus og returnerer en redigert forhåndsvisning av + målbanen uten å berøre disken. Forhåndsvisningsinnhold er ikke en legitimasjonsbærende konfigurasjon som skal kopieres eller importeres. Bruk med de originale tool/base URL/API key/model inngangene på verten, eller bruk den angitte oppsettkommandoen på vertssiden. Se [CLI -konfigurasjonssikkerhet](../security/CLI-CONFIGURATION.md) for forhåndsvisningstoppen og forespørselskontrakten. Denne oppførselen er tilsiktet og regresjonsbeskyttet av `tests/unit/api/cli-tools/apply-container-guard.test.ts` - aldri "fiks" en 422 ved å fjerne beskyttelsen.
 
 ---
 
@@ -112,59 +107,61 @@ ett grensesnitt uten de andre, gjør at testpakken feiler i stedet for at avvike
 
 ---
 
-## 1. CLI Codes katalog (27 verktøy)
+## 1. CLI Codes katalog (28 verktøy)
 
-Alle verktøyene som vises i `/dashboard/cli-code`. De med `baseUrlSupport: none` kobles til via MITM eller en manuell veiledning i stedet for en egendefinert basis-URL:
+Alle verktøy som vises i `/dashboard/cli-code`. De med `baseUrlSupport: none` er kablet gjennom MITM eller en manuell guide i stedet for en tilpasset base URL:
 
-| id           | navn                    | leverandør             | baseUrlSupport | configType     | acpSpawnable |
-| ------------ | ----------------------- | ---------------------- | -------------- | -------------- | ------------ |
-| claude       | Claude Code             | Anthropic              | full           | env            | true         |
-| codex        | OpenAI Codex CLI        | OpenAI                 | full           | custom         | true         |
-| zcode        | ZCode (GLM Coding Plan) | Z.ai                   | none           | custom         | false        |
-| cline        | Cline                   | OSS (tidl. Claude Dev) | full           | custom         | true         |
-| kilo         | Kilo Code               | Kilo-Org               | full           | custom         | false        |
-| roo          | Roo Code                | Roo (OSS)              | full           | guide          | false        |
-| continue     | Continue                | continue.dev           | full           | guide          | false        |
-| aider        | Aider                   | OSS (P. Gauthier)      | full           | guide          | true         |
-| forge        | ForgeCode               | Antinomy HQ            | full           | custom         | true         |
-| jcode        | jcode                   | 1jehuang (OSS)         | full           | custom         | false        |
-| deepseek-tui | DeepSeek TUI            | Hunter Bown (OSS)      | full           | custom         | false        |
-| codewhale    | CodeWhale               | Hmbown (OSS)           | full           | custom         | false        |
-| opencode     | OpenCode                | Anomaly (tidl. SST)    | full           | guide          | true         |
-| droid        | Factory Droid           | Factory AI             | partial        | guide          | false        |
-| copilot      | GitHub Copilot CLI      | GitHub/MS              | full           | custom         | false        |
-| cursor-cli   | Cursor CLI              | Anysphere              | partial        | guide          | true         |
-| smelt        | Smelt                   | leonardcser (OSS)      | full           | custom         | false        |
-| pi           | Pi (pi-coding-agent)    | M. Zechner (OSS)       | full           | custom         | false        |
-| grok-build   | Grok Build              | xAI                    | full           | custom         | false        |
-| crush        | Crush                   | OSS (Charm)            | full           | custom         | false        |
-| qwen         | Qwen Code               | Alibaba                | full           | guide          | true         |
-| zed          | Zed                     | Zed Industries         | full           | guide          | false        |
-| cursor       | Cursor                  | Anysphere              | none           | guide          | false        |
-| antigravity  | Antigravity             | Google                 | none           | mitm           | false        |
-| hermes       | Hermes                  | Nous Research          | none           | guide          | false        |
-| kiro         | Kiro AI                 | Amazon                 | none           | mitm           | false        |
-| custom       | Egendefinert CLI        | —                      | full           | custom-builder | false        |
+| id              | navn                    | selger                  | baseUrlSupport | configType    | acpSpawnable |
+| --------------- | ----------------------- | ----------------------- | -------------- | ------------- | ------------ |
+| claude          | Claude kode             | Anthropic               | full           | env           | ekte         |
+| kodeks          | OpenAI Codex CLI        | OpenAI                  | full           | skikk         | ekte         |
+| zcode           | ZCode (GLM kodingsplan) | Z.ai                    | ingen          | skikk         | falsk        |
+| kline           | Cline                   | OSS (eks-Claude Dev)    | full           | skikk         | ekte         |
+| kilo            | Kilo kode               | Kilo-Org                | full           | skikk         | falsk        |
+| roo             | Roo kode                | Roo (OSS)               | full           | guide         | falsk        |
+| fortsette       | Fortsette               | continue.dev            | full           | guide         | falsk        |
+| hjelpemann      | Aider                   | OSS (P. Gauthier)       | full           | guide         | ekte         |
+| smi             | ForgeCode               | Antinomy HQ             | full           | skikk         | ekte         |
+| jcode           | jcode                   | 1jehuang (OSS)          | full           | skikk         | falsk        |
+| deepseek-tui    | DeepSeek TUI            | Hunter Bown (OSS)       | full           | skikk         | falsk        |
+| kodehval        | CodeWhale               | Hmbown (OSS)            | full           | skikk         | falsk        |
+| åpen kode       | OpenCode                | Anomali (tidligere SST) | full           | guide         | ekte         |
+| droid           | Fabrikk Droid           | Fabrikk AI              | delvis         | guide         | falsk        |
+| copilot         | GitHub Copilot CLI      | GitHub/MS               | full           | skikk         | falsk        |
+| markør-cli      | Cursor CLI              | Anysfære                | delvis         | guide         | ekte         |
+| smelte          | Smelt                   | leonardcser (OSS)       | full           | skikk         | falsk        |
+| pi              | Pi (pi-kodingsagent)    | M. Zechner (OSS)        | full           | skikk         | falsk        |
+| grok-bygge      | Grok Bygg               | xAI                     | full           | skikk         | falsk        |
+| knuse           | Knus                    | OSS (sjarm)             | full           | skikk         | falsk        |
+| qwen            | Qwen kode               | Alibaba                 | full           | guide         | ekte         |
+| åpen claude     | OpenClaude              | Gitlawb (OSS)           | full           | guide         | falsk        |
+| zed             | Zed                     | Zed Industries          | full           | guide         | falsk        |
+| markøren        | Cursor                  | Anysfære                | ingen          | guide         | falsk        |
+| antigravitasjon | Antigravity             | Google                  | ingen          | mitm          | falsk        |
+| hermes          | Hermes                  | Nous Research           | ingen          | guide         | falsk        |
+| kiro            | Kiro AI                 | Amazon                  | ingen          | mitm          | falsk        |
+| skikk           | Tilpasset CLI           | —                       | full           | spesialbygger | falsk        |
 
-Verktøy med `baseUrlSupport: "partial"` viser merket «⚠ Delvis basis-URL» i kortet på kontrollpanelet.
+Verktøy med `baseUrlSupport: "partial"` viser et merke "⚠ Base URL parcial" i dashbordkortet.
 ---
 
-## 2. Katalog over CLI-agenter (10 verktøy)
+## 2. CLI agentkatalog (11 verktøy)
 
 Autonome agenter som vises i `/dashboard/cli-agents`:
 
-| id           | navn             | leverandør               | baseUrl-støtte | kanStartesViaAcp |
-| ------------ | ---------------- | ------------------------ | -------------- | ---------------- |
-| hermes-agent | Hermes Agent     | Nous Research            | full           | false            |
-| openclaw     | OpenClaw         | OSS (P. Steinberger)     | full           | true             |
-| goose        | Goose            | Block / Linux Foundation | full           | true             |
-| interpreter  | Open Interpreter | OSS                      | full           | true             |
-| warp         | Warp AI          | Warp Inc.                | partial        | true             |
-| agent-deck   | Agent Deck       | asheshgoplani (OSS)      | full           | false            |
-| omp          | Oh My Pi         | OSS                      | full           | true             |
-| letta        | Letta CLI        | Letta                    | full           | false            |
-| prime-agent  | Prime Agent      | Prime Intellect (OSS)    | full           | false            |
-| 5dive        | 5dive            | OSS (5dive-ai)           | full           | false            |
+| id            | navn         | selger                   | baseUrlSupport | acpSpawnable |
+| ------------- | ------------ | ------------------------ | -------------- | ------------ |
+| hermes-agent  | Hermes agent | Nous Research            | full           | falsk        |
+| åpen klo      | OpenClaw     | OSS (P. Steinberger)     | full           | ekte         |
+| gås           | Gås          | Block / Linux Foundation | full           | ekte         |
+| tolk          | Åpne tolk    | OSS                      | full           | ekte         |
+| renning       | Warp AI      | Warp Inc.                | delvis         | ekte         |
+| agent-dekk    | Agent Deck   | asheshgoplani (OSS)      | full           | falsk        |
+| omp           | Å min Pi     | OSS                      | full           | ekte         |
+| letta         | Letta CLI    | Letta                    | full           | falsk        |
+| prime-agent   | Hovedagent   | Prime Intellect (OSS)    | full           | falsk        |
+| 5 dykk        | 5 dykk       | OSS (5dive-ai)           | full           | falsk        |
+| hvorfor-koder | WhyCodes     | Hvorfor Corporation      | full           | falsk        |
 
 ---
 
@@ -223,22 +220,22 @@ interface ToolBatchStatus {
 
 ---
 
-## 6. Innstillingshåndterere for nye verktøy
+## 6. Innstillingsbehandlere for nye verktøy
 
-Nye verktøy med `configType: "custom"` har egne API-ruter for innstillinger:
+Nye verktøy med `configType: "custom"` har dedikerte innstillinger API -ruter:
 
 | Rute                                        | Verktøy                                                                  |
 | ------------------------------------------- | ------------------------------------------------------------------------ |
 | `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                                  |
-| `POST /api/cli-tools/jcode-settings`        | jcode (--base-url-flagg)                                                 |
-| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, eldre løsning)                            |
-| `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, primær + eldre `~/.deepseek`-synkronisering) |
+| `POST /api/cli-tools/jcode-settings`        | jcode (--base-url flagg)                                                 |
+| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, eldre)                                    |
+| `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, primær + eldre `~/.deepseek` synkronisering) |
 | `POST /api/cli-tools/smelt-settings`        | Smelt                                                                    |
-| `POST /api/cli-tools/pi-settings`           | Pi-kodingsagent                                                          |
+| `POST /api/cli-tools/pi-settings`           | Pi-kodemiddel (`~/.pi/agent/models.json`, `providers.omniroute`)         |
 | `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)                    |
-| `POST /api/cli-tools/qwen-settings`         | Qwen Code (`~/.qwen/settings.json` + egen `.env`-nøkkel)                 |
+| `POST /api/cli-tools/qwen-settings`         | Qwen kode (`~/.qwen/settings.json` + dedikert `.env` nøkkel)             |
 
-Alle rutene bruker `sanitizeErrorMessage()` for feilsvar (ufravikelig regel nr. 12).
+Alle ruter bruker `sanitizeErrorMessage()` for feilsvar (hard regel #12).
 
 ---
 
@@ -295,21 +292,21 @@ Fullstendige oversettelser for PT-BR og EN er inkludert. 39 andre lokaliteter fa
 
 ---
 
-## 9. Hurtigstart
+## 9. Rask start
 
-### Trinn 1 — Skaff en OmniRoute API-nøkkel
+### Trinn 1 — Få en OmniRoute API nøkkel
 
-1. Åpne `/dashboard/api-manager` → **Opprett API-nøkkel**
+1. Åpne `/dashboard/api-manager` →** Opprett API nøkkel**
 2. Gi den et navn (f.eks. `cli-tools`) og velg alle tillatelser
-3. Kopier nøkkelen — du trenger den for hvert CLI-verktøy nedenfor
+3. Kopier nøkkelen — du trenger den for hver CLI nedenfor
 
 > Nøkkelen din ser slik ut: `sk-xxxxxxxxxxxxxxxx-xxxxxxxxx`
 
 ---
 
-### Trinn 2 — Installer CLI-verktøy
+### Trinn 2 — Installer CLI -verktøy
 
-Alle npm-baserte verktøy krever Node.js 22.22.2+ eller 24.x:
+Alle npm-baserte verktøy krever Node.js 22.22.2 + eller 24.x:
 
 ```bash
 # Claude Code (Anthropic)
@@ -330,58 +327,57 @@ npm install -g kilocode
 # Qwen Code
 npm install -g @qwen-code/qwen-code
 
-# Google Gemini CLI (kan startes via `omniroute run gemini` → /v1beta-grensesnitt)
+# Google Gemini CLI (launchable via `omniroute run gemini` → /v1beta surface)
 npm install -g @google/gemini-cli
 
 # Aider
 pip install aider-chat
 
 # Smelt
-cargo install smelt  # Rust-basert
+cargo install smelt  # Rust-based
 
-# Pi-kodeagent
-# se https://github.com/zechnerj/pi-coding-agent for installasjon
+# Pi coding agent
+npm install -g --ignore-scripts @earendil-works/pi-coding-agent
 
 # jcode
-# se https://github.com/1jehuang/jcode for installasjon
+# see https://github.com/1jehuang/jcode for install
 ```
 
 ---
 
-### Trinn 3 — Konfigurer via kontrollpanelet
+### Trinn 3 — Konfigurer via Dashboard
 
 1. Gå til `http://localhost:20128/dashboard/cli-code`
 2. Finn verktøyet ditt i rutenettet
 3. Klikk på kortet for å åpne verktøyets detaljside
-4. Velg API-nøkkelen og basis-URL-en din
-5. Klikk på **Bruk konfigurasjon**, eller kopier den manuelle konfigurasjonskoden
+4. Velg din API nøkkel og base URL
+5. Klikk** Bruk Config** eller kopier den manuelle konfigurasjonskodebiten
 
 ---
 
 ### Trinn 4 — Angi globale miljøvariabler
 
 ```bash
-# Universelt OmniRoute-endepunkt
+# OmniRoute Universal Endpoint
 export OPENAI_BASE_URL="http://localhost:20128/v1"
 export OPENAI_API_KEY="sk-your-omniroute-key"
 export ANTHROPIC_BASE_URL="http://localhost:20128"
 export ANTHROPIC_AUTH_TOKEN="sk-your-omniroute-key"
-# Gemini CLI leser GOOGLE_GEMINI_BASE_URL ved ROTEN (SDK-en legger selv til /v1beta/...)
+# Gemini CLI reads GOOGLE_GEMINI_BASE_URL at the ROOT (its SDK appends /v1beta/... itself)
 export GOOGLE_GEMINI_BASE_URL="http://localhost:20128"
 export GEMINI_API_KEY="sk-your-omniroute-key"
 ```
 
-> For en **ekstern server** erstatter du `localhost:20128` med serverens IP-adresse eller domene,
-> f.eks. `http://<your-server-ip>:20128`.
+> For en** ekstern server** erstatt `localhost:20128` med serveren IP eller domene, f.eks. `http://<your-server-ip>:20128`.
 
 ---
 
 ### Trinn 4 — Konfigurer hvert verktøy
 
-#### Claude Code
+#### Claude kode
 
 ```bash
-# Opprett ~/.claude/settings.json:
+# Create ~/.claude/settings.json:
 mkdir -p ~/.claude && cat > ~/.claude/settings.json << EOF
 {
   "env": {
@@ -392,7 +388,7 @@ mkdir -p ~/.claude && cat > ~/.claude/settings.json << EOF
 EOF
 ```
 
-Bruk roten til den enhetlige Anthropic-gatewayen for Claude Code. Ikke legg til `/v1` her.
+Bruk den enhetlige Anthropic -gatewayroten for Claude koden. Ikke legg til `/v1` her.
 
 **Test:** `claude "say hello"`
 
@@ -400,10 +396,7 @@ Bruk roten til den enhetlige Anthropic-gatewayen for Claude Code. Ikke legg til 
 
 #### OpenAI Codex
 
-Moderne Codex (v0.137+) leser bare `~/.codex/config.toml` — den gamle
-`config.yaml` tilhører det eldre npm-CLI-verktøyet og ignoreres uten varsel. API-
-nøkkelen forblir i miljøvariabelen `OMNIROUTE_API_KEY` (`env_key`), aldri
-inne i filen:
+Moderne Codex (v0.137 +) leser bare `~/.codex/config.toml` — den gamle `config.yaml` tilhører den gamle npm CLI og ignoreres stille. API -tasten forblir i miljøvariabelen `OMNIROUTE_API_KEY` (`env_key`), aldri inne i filen:
 
 ```bash
 mkdir -p ~/.codex && cat > ~/.codex/config.toml << EOF
@@ -418,7 +411,7 @@ EOF
 export OMNIROUTE_API_KEY="sk-your-omniroute-key"
 ```
 
-Fullstendig referanse (profiler, `wire_api`, kontekstvinduer): [CODEX-CLI-CONFIGURATION.md](../guides/CODEX-CLI-CONFIGURATION.md).
+Full referanse (profiler, `wire_api`, kontekstvinduer): [CODEX-CLI-CONFIGURATION.md](../guides/CODEX-CLI-CONFIGURATION.md).
 
 **Test:** `codex "what is 2+2?"`
 
@@ -451,14 +444,44 @@ EOF
 
 **Test:** `opencode`
 
-> Bruk `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high`
-> for å sende resonneringsvarianter.
+> Bruk `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high` til å sende tenkevarianter.
 
 ---
 
-#### Cline (CLI eller VS Code)
+#### Pi-kodingsagent
 
-**CLI-modus:**
+Installer den offisielle Pi Coding Agent-pakken med `npm install -g --ignore-scripts @earendil-works/pi-coding-agent`. Pi leser tilpassede leverandører fra `~/.pi/agent/models.json`; sett `PI_CODING_AGENT_DIR` for å flytte hele agentkatalogen. Dashbordet følger den overstyringen. Pi oppdager ikke modeller fra tilpassede endepunkter, så OmniRoute skriver den valgte modellen i `models[]` ved å bruke Pis `openai-completions` API og OmniRoute OpenAI-kompatible `/v1` endepunktet.
+
+I**CLI Verktøy → Pi** , velg et endepunkt, API nøkkel og modell, se gjennom leverandørens forhåndsvisning, og bruk deretter. Forhåndsvisningen er et leverandørfragment: slå sammen `providers.omniroute` med din eksisterende `models.json` når du konfigurerer Pi manuelt slik at andre leverandører og innstillinger forblir intakte.
+
+```json
+{
+  "$schema": "https://pi.dev/schemas/models.schema.json",
+  "providers": {
+    "omniroute": {
+      "baseUrl": "http://localhost:20128/v1",
+      "api": "openai-completions",
+      "apiKey": "sk-your-omniroute-key",
+      "omnirouteManaged": true,
+      "models": [{ "id": "auto/best-coding", "name": "auto/best-coding" }]
+    }
+  }
+}
+```
+
+Pi laster `models.json` på nytt når du åpner `/model`. Test den konfigurerte ruten med leverandør-IDen og modell-IDen du valgte:
+
+```bash
+pi --provider omniroute --model auto/best-coding --print "Reply with a short greeting."
+```
+
+Referanser: [Pi-modeller og tilpassede leverandører](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/models.md), [Pi-miljøvariabler](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/environment-variables.md), [Pi-installasjonsinstruksjoner](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/README.md).
+
+---
+
+#### Cline (CLI eller VS kode)
+
+**CLI modus:**
 
 ```bash
 mkdir -p ~/.cline/data && cat > ~/.cline/data/globalState.json << EOF
@@ -470,22 +493,21 @@ mkdir -p ~/.cline/data && cat > ~/.cline/data/globalState.json << EOF
 EOF
 ```
 
-**VS Code-modus:**
-Innstillinger for Cline-utvidelsen → API-leverandør: `OpenAI Compatible` → Basis-URL: `http://localhost:20128/v1`
+**VS -kodemodus:** Cline utvidelsesinnstillinger → API Leverandør: `OpenAI Compatible` → Base URL: `http://localhost:20128/v1`
 
-Eller bruk OmniRoute-kontrollpanelet → **CLI-verktøy → Cline → Bruk konfigurasjon**.
+Eller bruk OmniRoute -dashbordet →**CLI Verktøy → Cline → Bruk konfig** .
 
 ---
 
-#### KiloCode (CLI eller VS Code)
+#### KiloCode (CLI eller VS kode)
 
-**CLI-modus:**
+**CLI modus:**
 
 ```bash
 kilocode --api-base http://localhost:20128/v1 --api-key sk-your-omniroute-key
 ```
 
-**VS Code-innstillinger:**
+**VS -kodeinnstillinger:**
 
 ```json
 {
@@ -494,11 +516,11 @@ kilocode --api-base http://localhost:20128/v1 --api-key sk-your-omniroute-key
 }
 ```
 
-Eller bruk OmniRoute-kontrollpanelet → **CLI-verktøy → KiloCode → Bruk konfigurasjon**.
+Eller bruk OmniRoute -dashbordet →**CLI Verktøy → KiloCode → Bruk konfig** .
 
 ---
 
-#### Continue (VS Code-utvidelse)
+#### Fortsett (VS Code Extension)
 
 Rediger `~/.continue/config.yaml`:
 
@@ -512,20 +534,20 @@ models:
     default: true
 ```
 
-Start VS Code på nytt etter redigeringen.
+Start VS koden på nytt etter redigering.
 
 ---
 
 #### VS Code Insiders (`chatLanguageModels.json`)
 
-Bruk dette når VS Code Insiders er konfigurert for modeller med egendefinerte endepunkter, og du vil at OmniRoute skal fungere uten et egendefinert topptekstfelt.
+Bruk dette når VS Code Insiders er konfigurert for tilpassede endepunktsmodeller og du vil at OmniRoute skal fungere uten et tilpasset overskriftsfelt.
 
-**Anbefalt plassering:**
+**Anbefalt sted:**
 
 - Linux: `~/.config/Code - Insiders/User/chatLanguageModels.json`
 - Windows: `%APPDATA%/Code - Insiders/User/chatLanguageModels.json`
 
-**Eksempel med det tokeniserte OmniRoute-aliaset:**
+**Eksempel som bruker det tokeniserte OmniRoute -aliaset:**
 
 ```json
 [
@@ -549,27 +571,26 @@ Bruk dette når VS Code Insiders er konfigurert for modeller med egendefinerte e
 
 **Merknader:**
 
-- Erstatt `sk-your-omniroute-key` med en API-nøkkel opprettet i OmniRoute.
-- Feltet `url` skal peke til `/api/v1/vscode/{token}/chat/completions`.
-- Feltet `modelsUrl` skal peke til `/api/v1/vscode/{token}/models`.
-- Foretrekk den vanlige `/v1`-flyten med Bearer-header når klienten støtter egendefinerte headere.
-- Tokener som er innebygd i URL-er, er en kompatibilitetsreserve og kan vises i redigeringsprogrammets logger eller proxy-historikk.
+- Erstatt `sk-your-omniroute-key` med en API nøkkel opprettet i OmniRoute.
+- `url` feltet skal peke til `/api/v1/vscode/{token}/chat/completions`.
+- `modelsUrl` feltet skal peke til `/api/v1/vscode/{token}/models`.
+- Foretrekk den vanlige `/v1` + Bearer-overskriftsflyten når klienten støtter tilpassede overskrifter.
+- URL-innebygde tokens er en kompatibilitetsreserve og kan vises i redaktørlogger eller proxy-historikk.
 
 ---
 
 #### Kiro CLI (Amazon)
 
 ```bash
-# Logg inn på AWS/Kiro-kontoen din:
+# Login to your AWS/Kiro account:
 kiro-cli login
 
-# CLI-verktøyet bruker sin egen autentisering — OmniRoute er ikke nødvendig som backend for selve Kiro CLI.
-# Bruk kiro-cli sammen med OmniRoute for andre verktøy.
+# The CLI uses its own auth — OmniRoute is not needed as backend for Kiro CLI itself.
+# Use kiro-cli alongside OmniRoute for other tools.
 kiro-cli status
 ```
 
-For skrivebordsappen **Kiro IDE** bruker du MITM-endepunktet som eksponeres av OmniRoute
-under `/dashboard/cli-tools → Kiro`.
+For**Kiro IDE** skrivebordsapp, bruk MITM endepunktet som er eksponert av OmniRoute under `/dashboard/cli-tools → Kiro`.
 
 ---
 

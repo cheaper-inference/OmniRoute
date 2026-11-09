@@ -78,15 +78,25 @@ export async function getWsRuntimeConfig(): Promise<WsRuntimeConfig> {
   };
 }
 
+export interface WsHandshakeAuthOptions {
+  /**
+   * Require a valid API key or dashboard session even when the `wsAuth` setting is off.
+   * WebSocket transports that serve inference pass `isRequireApiKeyEnabled()` here so they
+   * honour `REQUIRE_API_KEY` like the HTTP `clientApiPolicy` does.
+   */
+  requireAuth?: boolean;
+}
+
 export async function authorizeWebSocketHandshake(
-  request: Request
+  request: Request,
+  options: WsHandshakeAuthOptions = {}
 ): Promise<WsHandshakeAuthResult> {
   const config = await getWsRuntimeConfig();
   const token = extractWsTokenFromRequest(request);
   const hasCredential = typeof token === "string" && token.length > 0;
   const validApiKey = hasCredential ? await validateApiKey(token) : false;
 
-  if (!config.wsAuth) {
+  if (!config.wsAuth && options.requireAuth !== true) {
     return {
       ...config,
       authorized: true,

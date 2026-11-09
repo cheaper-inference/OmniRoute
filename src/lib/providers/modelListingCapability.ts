@@ -22,9 +22,8 @@ const CURATED_MODEL_ONLY_PROVIDERS = new Set<string>([
   // The clean-room browser integration exposes only model/effort routes
   // observed in the first-party picker. It has no upstream model-list API.
   "chatgpt-web",
-  // CodeBuddy gateways (Tencent CN and intl) publish no model-catalog endpoint;
-  // their registry models are the complete curated lineup.
-  "codebuddy-cn",
+  // CodeBuddy Intl has no verified live model-catalog endpoint; CN discovers
+  // its authenticated, account-specific roster from /v3/config.
   "codebuddy-intl",
 ]);
 
@@ -32,17 +31,31 @@ export function providerUsesCuratedModelsOnly(providerId: string): boolean {
   return CURATED_MODEL_ONLY_PROVIDERS.has(providerId.trim().toLowerCase());
 }
 
+/** Custom-model sources written by a model sync/import rather than typed by the operator. */
+const DISCOVERY_IMPORTED_CUSTOM_SOURCES = new Set<string>(["imported", "api-sync", "auto-sync"]);
+
+/**
+ * True for a custom-model row that a discovery sync imported (not one the operator typed).
+ * A curated-only provider keeps operator rows (#18018) but drops these: it has no upstream
+ * catalog, so an imported row can only be a stale leftover of a retired discovery path (#8451).
+ */
+export function isDiscoveryImportedCustomSource(source: unknown): boolean {
+  const normalized = typeof source === "string" ? source.trim().toLowerCase() : "";
+  return DISCOVERY_IMPORTED_CUSTOM_SOURCES.has(normalized);
+}
+
 /**
  * Providers whose non-empty synced AvailableModels catalog fully replaces the
  * static registry for dashboard / `/v1/models` / Test All listing. Static rows
  * remain offline fallback only when synced is empty.
  *
- * Cursor and Codex inventories are account-specific. Partial-discovery providers
- * retain coverage-style preservation (e.g. command-code uncovered static ids).
+ * Cursor, Codex, and CodeBuddy CN inventories are account-specific.
+ * Partial-discovery providers retain coverage-style preservation (e.g.
+ * command-code uncovered static ids).
  */
 export function providerUsesExclusiveSyncedListing(providerId: string): boolean {
   const id = providerId.trim().toLowerCase();
-  return id === "cursor" || id === "cu" || id === "codex" || id === "cx";
+  return id === "cursor" || id === "cu" || id === "codex" || id === "cx" || id === "codebuddy-cn";
 }
 
 /**

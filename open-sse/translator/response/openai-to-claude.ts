@@ -1,5 +1,6 @@
 import { extractXmlInvokeBlocks } from "../helpers/xmlToolCalls.ts";
 import { register } from "../registry.ts";
+import { mergeCacheCreationFields } from "../../utils/cacheWriteUsage.ts";
 import { FORMATS } from "../formats.ts";
 import { CLAUDE_OAUTH_TOOL_PREFIX } from "../request/openai-to-claude.ts";
 import {
@@ -18,6 +19,7 @@ import { restoreDeclaredToolName } from "../../services/declaredToolCasing.ts";
 import { sanitizeToolId } from "../helpers/schemaCoercion.ts";
 import { splitMarkdownBoundary } from "../helpers/markdownBoundary.ts";
 import { hasDsmlToolCalls, parseDsmlToolCalls } from "../../utils/dsmlToolCalls.ts";
+import { needsDotsParsing, parseDotsToolCalls } from "../../utils/dotsToolCalls.ts";
 import {
   createDirectivePreambleStripper,
   createSystemPreambleStripper,
@@ -28,6 +30,38 @@ import {
   initThinkState,
   processStreamingThinkDelta,
 } from "../../utils/thinkTagParser.ts";
+import {
+  buildClaudeWebSearchBlockEvents,
+  toClaudeWebSearchResults,
+} from "../helpers/claudeServerWebSearch.ts";
+
+// Claude Code WebSearch bridge, emit half. On the Responses→Claude hub, translateResponse
+// accumulated every `web_search_call` / `url_citation` on this same state object; turn
+// them into the Anthropic server_tool_use + web_search_tool_result pairs via the shared
+// emitter. Deferred to the finish handler (not emitted where the call was seen) because
+// the citations arrive with/after the answer text, so only at finish is the full hit list
+// known. Results prefer the call's own `action.sources`, falling back to the message's
+// citations. No-op for every other upstream (nothing was accumulated) and for non-Claude
+// clients (this translator is only reached for a CLAUDE target). Emitted at most once.
+function emitResponsesWebSearch(state, results) {
+  const evidence = state._responsesWebSearchEvidence;
+  if (!evidence || typeof evidence !== "object" || !Array.isArray(evidence.calls)) return;
+  state._responsesWebSearchEvidence = null;
+  const citations = Array.isArray(evidence.citations) ? evidence.citations : [];
+  for (const call of evidence.calls) {
+    const items = Array.isArray(call.items) && call.items.length > 0 ? call.items : citations;
+    const { events, nextIndex } = buildClaudeWebSearchBlockEvents({
+      query: call.query || "",
+      results: toClaudeWebSearchResults(items),
+      startIndex: state.nextBlockIndex,
+      // Deterministic id derived from the upstream call id (the helper would otherwise
+      // generate a time-based one).
+      toolUseId: `srvtoolu_${call.id}`,
+    });
+    results.push(...events);
+    state.nextBlockIndex = nextIndex;
+  }
+}
 
 function normalizeToolName(name: string): string {
   return REVERSE_MAP[name] ?? name;
@@ -314,6 +348,7 @@ function trackUsageFromChunk(chunk, state) {
   );
 
   state.usage = {
+    ...mergeCacheCreationFields(state.usage, chunk.usage),
     input_tokens: inputTokens,
     output_tokens: outputTokens,
   };
@@ -346,6 +381,34 @@ function toClaudeClientUsage(usage) {
   return clientUsage;
 }
 
+type PendingToolCall = { id: string; name: string; args: Record<string, string> };
+
+/**
+ * Pull Dots Studio `<dots_function_call>` blocks out of a text delta, carrying an
+ * unfinished block across chunks in `state._dotsHoldback`.
+ */
+function extractDotsToolCalls(
+  state: { _dotsHoldback?: string; clientTools?: unknown },
+  text: string
+): { content: string; toolCalls: PendingToolCall[] } {
+  const pending = state._dotsHoldback;
+  state._dotsHoldback = undefined;
+  const input = pending ? pending + text : text;
+  if (!needsDotsParsing(input)) return { content: input, toolCalls: [] };
+  const result = parseDotsToolCalls(input, {
+    tools: Array.isArray(state.clientTools) ? state.clientTools : [],
+  });
+  if (result.holdback) state._dotsHoldback = result.holdback;
+  return {
+    content: result.content,
+    toolCalls: result.toolCalls.map((tc) => ({
+      id: tc.id,
+      name: tc.function.name,
+      args: JSON.parse(tc.function.arguments) as Record<string, string>,
+    })),
+  };
+}
+
 // Convert OpenAI stream chunk to Claude format
 export function openaiToClaudeResponse(chunk, state) {
   if (!chunk && !state.pendingClaudeFinishChoice) return flushTruncatedClaudeStream(state);
@@ -376,7 +439,13 @@ export function openaiToClaudeResponse(chunk, state) {
   const choice = chunkChoice || state.pendingClaudeFinishChoice;
   if (!choice) return null;
   if (flushingPendingFinish) state.pendingClaudeFinishChoice = null;
-  const delta = choice.delta;
+  // The deferred choice was already processed on the pass that received it: its
+  // text / reasoning / tool-arg fragments were emitted then, and only the
+  // terminal blocks were held back for the real usage. Re-reading the delta
+  // here replays the trailing fragment a second time, so an OpenAI→Claude
+  // client that concatenates input_json_delta into one JSON string receives the
+  // final fragment twice and fails to parse the tool input.
+  const delta = flushingPendingFinish ? undefined : choice.delta;
   // First chunk - ALWAYS send message_start first
   if (!state.messageStartSent) {
     state.messageStartSent = true;
@@ -390,6 +459,7 @@ export function openaiToClaudeResponse(chunk, state) {
     state._pendingXmlToolCalls = [];
     state._dsmlHoldback = undefined;
     state._xmlInvokeBuffer = "";
+    state._dotsHoldback = undefined;
     state._markdownBuffer = "";
     state._markdownCodeSpanRun = 0;
     state._markdownTrailingBackslash = false;
@@ -568,18 +638,24 @@ export function openaiToClaudeResponse(chunk, state) {
         }));
       }
 
+      // Dots Studio <dots_function_call> markup
+      const { content: dotsContent, toolCalls: dotsToolCalls } = extractDotsToolCalls(
+        state,
+        dsmlContent
+      );
+
       // Check for XML <invoke> blocks that some models emit instead of JSON tool_calls
       const { cleaned, toolCalls: xmlToolCalls } = extractXmlInvokeBlocks(
-        bufferedPrefix + dsmlContent,
+        bufferedPrefix + dotsContent,
         state
       );
 
-      // Accumulate extracted tool calls for emission at finish. DSML and XML
+      // Accumulate extracted tool calls for emission at finish. DSML, Dots, and XML
       // invoke tool calls share the same pending queue and finish emission.
-      if (xmlToolCalls.length > 0 || dsmlToolCalls.length > 0) {
+      if (xmlToolCalls.length > 0 || dsmlToolCalls.length > 0 || dotsToolCalls.length > 0) {
         // Close any ongoing text block before tool calls
         stopTextBlock(state, results);
-        state._pendingXmlToolCalls.push(...xmlToolCalls, ...dsmlToolCalls);
+        state._pendingXmlToolCalls.push(...xmlToolCalls, ...dsmlToolCalls, ...dotsToolCalls);
       }
 
       // Defer any trailing incomplete Markdown boundary token to the next chunk.
@@ -726,15 +802,17 @@ export function openaiToClaudeResponse(chunk, state) {
     // dropped the held text silently — for a single-chunk response whose block
     // never closes, that is the ENTIRE answer replaced by an empty message.
     // Release whatever is still held before the terminal blocks are emitted.
-    // The same goes for an unclosed <invoke>/<tool_call> tag and the DSML holdback:
+    // The same goes for an unclosed <invoke>/<tool_call> tag and the DSML/Dots holdback:
     // no further chunk can complete them, so they were prose and must reach the client.
     const flushedPreamble =
       (state._directiveStripper?.flush?.() ?? "") +
       (state._systemPreambleStripper?.flush?.() ?? "") +
       (state._xmlInvokeBuffer ?? "") +
-      (state._dsmlHoldback ?? "");
+      (state._dsmlHoldback ?? "") +
+      (state._dotsHoldback ?? "");
     state._xmlInvokeBuffer = "";
     state._dsmlHoldback = undefined;
+    state._dotsHoldback = undefined;
     if (flushedPreamble) {
       if (!state.textBlockStarted || state.textBlockClosed) {
         state.textBlockIndex = state.nextBlockIndex++;
@@ -762,7 +840,14 @@ export function openaiToClaudeResponse(chunk, state) {
     // (requestedThinking === false): for `true` and for legacy `undefined` the
     // reasoning already went out as a thinking block above, and synthesizing a
     // text block too would double-expose it.
-    if (!state.textBlockStarted && state._reasoningAccum && state.requestedThinking === false) {
+    if (
+      !state.textBlockStarted &&
+      state._reasoningAccum &&
+      state.requestedThinking === false &&
+      // reasoning-ONLY replies only: a reply with tool calls is not "empty", and turning
+      // its reasoning into visible text leaks it into the transcript (every agent turn).
+      !(state.toolCalls instanceof Map && state.toolCalls.size > 0)
+    ) {
       state.textBlockIndex = state.nextBlockIndex++;
       state.textBlockStarted = true;
       state.textBlockClosed = false;
@@ -779,6 +864,11 @@ export function openaiToClaudeResponse(chunk, state) {
     }
 
     stopTextBlock(state, results);
+
+    // Splice the web-search block pairs in now (see emitResponsesWebSearch above): the
+    // text block is closed, so they take the next indices and stay ahead of the
+    // message_delta/message_stop below.
+    emitResponsesWebSearch(state, results);
 
     for (const [, toolInfo] of state.toolCalls) {
       // A tool call whose name/args never arrived (only an id chunk was seen)
@@ -829,8 +919,17 @@ export function openaiToClaudeResponse(chunk, state) {
       });
     }
 
-    // Override finish_reason to tool_use if XML tool calls were found
-    const overrideFinishReason = xmlToolCalls.length > 0 ? "tool_calls" : choice.finish_reason;
+    // Override finish_reason to tool_calls when tool calls were emitted but the
+    // upstream reported a clean stop (#18270): some OpenAI-compatible upstreams
+    // send finish_reason "stop" together with tool_calls, and the Claude client
+    // stops its agent loop unless stop_reason is "tool_use".
+    const hasEmittedToolCalls =
+      xmlToolCalls.length > 0 || (state.toolCalls instanceof Map && state.toolCalls.size > 0);
+    const overrideFinishReason =
+      hasEmittedToolCalls &&
+      openAIFinishReasonToClaudeStopReason(choice.finish_reason) === "end_turn"
+        ? "tool_calls"
+        : choice.finish_reason;
 
     // Mark finish for later usage injection in stream.js
     state.finishReason = overrideFinishReason;

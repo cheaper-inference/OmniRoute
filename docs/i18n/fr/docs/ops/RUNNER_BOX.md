@@ -28,15 +28,14 @@ Mesures du 2026-10-18 :
 | swap      | 16 GB                              | `omniroute-113-5` s’exécute avec le swap désactivé (`MemorySwapMax=0`), afin qu’un build qui s’emballe soit interrompu lorsqu’il atteint sa limite plutôt que de faire swapper la machine                                                                                                                                                                                                                                                                    |
 | `/tmp`    | **tmpfs de 12 GB = RAM**           | tout ce qui y est stocké occupe de la mémoire ; les résidus sont supprimés après 3 h                                                                                                                                                                                                                                                                                                                                                                         |
 | CPU       | charge de 60 observée sur 32 cœurs | avant l’application des quotas, un build Turbopack (~1166 % de CPU) combiné à une suite de couverture sur la même machine empêchait les autres listeners d’envoyer leurs signaux de vie (`The self-hosted runner lost communication`, #16853)                                                                                                                                                                                                                |
-| runners   | **6 listeners**                    | 4 OmniRoute + OmniHeuris + OmniMind ; `omniroute-113-3/-4/-7/-8` sont désactivés (`systemctl enable --now` permet d’en réactiver un)                                                                                                                                                                                                                                                                                                                         |
+| runners   | **7 listeners** (2026-10-28)       | 5 OmniRoute + OmniHeuris + OmniMind ; `omniroute-113-7` porte aussi `omni-build` ; `omniroute-113-3/-4/-8` ont été supprimés du dépôt (2026-10-28)                                                                                                                                                                                                                                                                                                           |
 
 Les limites se trouvent dans le fichier
 `/etc/systemd/system/actions.runner.<…>.service.d/override.conf` de chaque unité
 (les valeurs précédentes sont conservées dans `override.conf.bak-20261018`) et ont été appliquées
 à chaud avec `systemctl set-property --runtime … MemoryHigh=… MemoryMax=… CPUQuota=…` — sans
 redémarrage, de sorte qu’aucune tâche en cours d’exécution n’a été affectée. Les labels sont modifiés
-à l’aide de l’API des runners
-(`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
+à l’aide de l’API des runners (`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
 `gh api -X POST repos/<repo>/actions/runners/<id>/labels -f 'labels[]=<label>'`), également à chaud.
 
 ## Installer le nettoyeur (une seule fois, sur la machine)
@@ -45,7 +44,7 @@ redémarrage, de sorte qu’aucune tâche en cours d’exécution n’a été af
 scp scripts/ops/runner-janitor.sh root@192.168.0.113:/opt/omniroute-ops/runner-janitor.sh
 ssh root@192.168.0.113 'chmod +x /opt/omniroute-ops/runner-janitor.sh; apt-get install -y lsof'
 # cron (root) : toutes les 30 min, journalisation dans /var/log/runner-janitor.log
-*/30 * * * * MAX_ACTIVE_RUNNERS=6 /opt/omniroute-ops/runner-janitor.sh >> /var/log/runner-janitor.log 2>&1
+*/30 * * * * MAX_ACTIVE_RUNNERS=8 /opt/omniroute-ops/runner-janitor.sh >> /var/log/runner-janitor.log 2>&1
 ```
 
 `lsof` est requis : le nettoyeur vérifie qu'un chemin est inactif à l'aide d'un instantané unique des fichiers ouverts avant de le supprimer ; sans cet outil, il ne supprime rien et l'indique explicitement (code de sortie 1). Testez d'abord toute modification avec `--dry-run` : cette option affiche exactement ce qui serait fait sans rien modifier.
@@ -127,9 +126,9 @@ la fois, uniquement lorsqu'il est inactif**, en effectuant la vérification d'in
   cette limitation.
 - **Moins de listeners, volontairement.** Quatre unités OmniRoute ont été désactivées le
   2026-08-29 — chaque listener supplémentaire est un locataire de plus pour le budget mémoire
-  ci-dessus. Le plafond du janitor est fixé à 6 (`MAX_ACTIVE_RUNNERS=6` dans cron) : il compte
-  chaque `Runner.Listener` sur la machine, et OmniHeuris + OmniMind en ajoutent deux à nos
-  quatre.
+  ci-dessus. Le plafond du janitor est fixé à 8 (`MAX_ACTIVE_RUNNERS=8` dans cron) : il compte
+  chaque `Runner.Listener` sur la machine, et OmniHeuris + OmniMind en ajoutent deux à nos cinq.
+- **Les jobs unit et Vitest restent hébergés.** `ci.yml` envoie ses shards unit et le job Vitest vers `[self-hosted, omni-ci]` uniquement lorsque la variable de dépôt `vars.USE_VPS_TEST_RUNNER` vaut `true`, et seulement pour les exécutions `pull_request` du même dépôt ; les forks, `merge_group` et les push restent sur `ubuntu-latest` (`tests/unit/vps-runner-variable-scope.test.ts`). La variable vaut `false`. Le 2026-10-28, trois listeners `omni-ci` à 4 cœurs ont mis 250–270 s pour `npm ci` et chaque shard unit a atteint la limite de 30 minutes par job, contre ~634 s pour un shard hébergé, avec une charge de 17–24 sur la machine. Les listeners ont été supprimés. Ne réactivez pas la variable sans listeners dimensionnés pour un shard unit.
 - **Ne jamais nettoyer `/tmp` ou `_work` manuellement lorsqu'un runner est occupé.** Une
   vérification suivie d'une suppression avec un intervalle entre les deux est la raison pour
   laquelle un job Build actif a perdu son `_work` le 2026-08-27. Le janitor effectue la
@@ -145,8 +144,7 @@ la fois, uniquement lorsqu'il est inactif**, en effectuant la vérification d'in
 
 ## Voie hébergée (exécuteurs hébergés par GitHub)
 
-Le compte utilise l’offre **Pro** : **40 tâches hébergées simultanées**, partagées entre tous les contrôles de PR,
-tous les workflows déclenchés par un push et la configuration par défaut de CodeQL. Mesures effectuées le 2026-10-18 pendant une
+Le dépôt appartient à l’organisation `cheaper-inference`, sur l’offre **Team** : **60 tâches hébergées simultanées**, partagées entre tous les dépôts de l’organisation, tous les contrôles de PR, tous les workflows déclenchés par un push et la configuration par défaut de CodeQL. Les chiffres ci-dessous ont été mesurés avec l’offre **Pro** (40 tâches hébergées simultanées). Mesures effectuées le 2026-10-18 pendant une
 campagne de fusion (~10 fusions/heure sur `release/v3.8.52`) : **2 500 exécutions de workflows créées en
 24 h**, 44 push vers la branche en 6 h, **106 tâches hébergées en attente** tandis que les contrôles de PR attendaient
 pendant des heures et que les PR étaient fusionnées sans eux. Neuf workflows se déclenchaient à chaque push vers la branche :
