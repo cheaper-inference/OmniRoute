@@ -32,7 +32,8 @@ async function withRoutineBackupsOn<T>(fn: () => Promise<T>): Promise<T> {
   } finally {
     process.argv.splice(0, process.argv.length, ...saved.argv);
     process.execArgv.push(...saved.execArgv);
-    process.env.NODE_ENV = saved.env;
+    if (saved.env === undefined) delete process.env.NODE_ENV;
+    else process.env.NODE_ENV = saved.env;
     process.env.DISABLE_SQLITE_AUTO_BACKUP = "true";
   }
 }
@@ -70,7 +71,11 @@ test("updateSettings: the pre-write snapshot holds the value from before the wri
   });
   await updateSettings({ preWriteProbe: "old" });
 
+  const hadNodeEnv = "NODE_ENV" in process.env;
+  const nodeEnvBefore = process.env.NODE_ENV;
   await withRoutineBackupsOn(() => updateSettings({ preWriteProbe: "new" }));
+  assert.equal("NODE_ENV" in process.env, hadNodeEnv, "NODE_ENV must be restored as it was");
+  assert.equal(process.env.NODE_ENV, nodeEnvBefore);
 
   const row = (await newestSnapshotQuery(
     "SELECT value FROM key_value WHERE namespace = 'settings' AND key = 'preWriteProbe'"
