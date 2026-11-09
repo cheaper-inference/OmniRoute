@@ -3,6 +3,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
+import { CALL_LOG_SETTLE_TIMEOUT_MS } from "../helpers/callLogSettle.ts";
 
 const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), "codex-discovered-reasoning-"));
 process.env.DATA_DIR = dataDir;
@@ -33,7 +34,11 @@ test.before(async () => {
   });
   connectionId = c.id;
 });
-test.after(() => {
+test.after(async () => {
+  const { waitForCallLogSaves, closeCallLogSaves } =
+    await import("../../src/lib/usage/callLogs.ts");
+  assert.equal(await waitForCallLogSaves(CALL_LOG_SETTLE_TIMEOUT_MS), true);
+  await closeCallLogSaves(CALL_LOG_SETTLE_TIMEOUT_MS);
   resetDbInstance();
   fs.rmSync(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 50 });
 });

@@ -136,7 +136,7 @@ function fallbackEffort(
 
 /**
  * The caller's own effort choice. Chat→Responses translation normalizes canonical max to
- * xhigh, so for catalog-backed Codex models in passthrough mode the original choice is
+ * xhigh, so for Codex models in passthrough mode the original choice is
  * restored; explicit thinking-budget policies still own the translated value in other modes.
  */
 function requestedEffort(
@@ -167,7 +167,7 @@ function selectCodexReasoning(
   const split = splitRequestedModel(metadata, requestedModel, hasCatalog);
   if (split.effort) body.model = split.baseModel;
   const reasoning = asRecord(body.reasoning);
-  const requested = requestedEffort(metadata, reasoning, body, hasCatalog && allowDefaults);
+  const requested = requestedEffort(metadata, reasoning, body, allowDefaults);
   const selected =
     effort(forcedEffort) ??
     split.effort ??
