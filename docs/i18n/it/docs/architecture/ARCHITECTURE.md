@@ -8,79 +8,78 @@
 
 _Ultimo aggiornamento: 2026-06-28_
 
-## Riepilogo esecutivo
+## Sintesi
 
-OmniRoute è un gateway e dashboard locale per il routing dell'IA, basato su Next.js.
-Fornisce un singolo endpoint compatibile con OpenAI (`/v1/*`) e instrada il traffico tra più provider upstream con traduzione, fallback, aggiornamento dei token e monitoraggio dell'utilizzo.
+OmniRoute è un gateway di routing AI locale e un dashboard basato su Next.js. Fornisce un singolo endpoint compatibile con OpenAI (`/v1/*`) e instrada il traffico attraverso più provider upstream con traduzione, fallback, aggiornamento dei token e monitoraggio dell'utilizzo.
 
 Funzionalità principali:
 
-- Superficie API compatibile con OpenAI per CLI/strumenti (380 provider, 159 moduli executor)
-- Traduzione di richieste/risposte tra i formati dei provider
-- Fallback di combinazioni di modelli (sequenza multi-modello)
-- Passaggi strutturati delle combinazioni (`provider + model + connection`) con ordinamento a runtime tramite `compositeTiers`
-- Fallback a livello di account (più account per provider)
-- Preflight delle quote e selezione P2C degli account basata sulle quote nel percorso principale della chat
-- Gestione delle connessioni dei provider OAuth e con chiave API (27 moduli di provider OAuth)
-- Generazione di embedding tramite `/v1/embeddings` (18 provider)
-- Generazione di immagini tramite `/v1/images/generations` (oltre 10 provider, oltre 20 modelli)
-- Trascrizione audio tramite `/v1/audio/transcriptions` (18 provider)
+- Superficie API compatibile con OpenAI per CLI/tools (381 provider, 159 moduli esecutori)
+- Traduzione Request/response tra i formati dei fornitori
+- Fallback combinato di modelli (sequenza multi-modello)
+- Passaggi combinati strutturati (`provider + model + connection`) con ordinamento di runtime tramite `compositeTiers`
+- Fallback a livello di account (più account per fornitore)
+- Preflight delle quote e selezione dell'account P2C compatibile con le quote nel percorso della chat principale
+- gestione della connessione del provider di chiavi API OAuth + (27 moduli del provider OAuth )
+- Incorporamento della generazione tramite `/v1/embeddings` (18 fornitori)
+- Generazione di immagini tramite `/v1/images/generations` (10 fornitori +, 20 modelli + )
+- Trascrizione audio tramite `/v1/audio/transcriptions` (18 fornitori)
 - Sintesi vocale tramite `/v1/audio/speech` (24 provider integrati)
 - Generazione video tramite `/v1/videos/generations` (ComfyUI + SD WebUI)
-- Generazione musicale tramite `/v1/music/generations` (ComfyUI)
-- Ricerca web tramite `/v1/search` (20 provider)
-- Moderazione tramite `/v1/moderations`
-- Riordinamento tramite `/v1/rerank`
-- Analisi dei tag di ragionamento (`<think>...</think>`) per i modelli di reasoning
-- Sanitizzazione delle risposte per una compatibilità rigorosa con OpenAI SDK
-- Normalizzazione dei ruoli (developer→system, system→user) per la compatibilità tra provider
+- Generazione di musica tramite `/v1/music/generations` (ComfyUI)
+- Ricerca web tramite `/v1/search` (20 fornitori)
+- Moderazioni tramite `/v1/moderations`
+- Riclassificazione tramite `/v1/rerank`
+- Pensa all'analisi dei tag (`<think>...</think>`) per i modelli di ragionamento
+- Sanificazione della risposta per una rigorosa compatibilità OpenAI SDK
+- Normalizzazione dei ruoli (sistema → dello sviluppatore, utente del sistema →) per la compatibilità tra provider
 - Conversione dell'output strutturato (json_schema → Gemini responseSchema)
-- Persistenza locale di provider, chiavi, alias, combinazioni, impostazioni e prezzi (122 moduli DB)
-- Monitoraggio dell'utilizzo/dei costi e registrazione delle richieste
-- Sincronizzazione cloud opzionale per la sincronizzazione tra più dispositivi e degli stati
-- Allowlist/blocklist degli IP per il controllo degli accessi API
-- Gestione del budget di reasoning (passthrough/automatico/personalizzato/adattivo)
-- Iniezione globale del prompt di sistema
-- Monitoraggio e fingerprinting delle sessioni
-- Rate limiting avanzato per account con profili specifici per provider
-- Pattern circuit breaker per la resilienza dei provider
-- Protezione dal fenomeno thundering herd tramite blocchi mutex
-- Cache di deduplicazione delle richieste basata sulla firma
-- Livello di dominio: regole dei costi, policy di fallback, policy di lockout
-- Context Relay: riepiloghi di passaggio delle sessioni per mantenere la continuità durante la rotazione degli account
-- Persistenza dello stato del dominio (cache write-through SQLite per fallback, budget, lockout e circuit breaker)
-- Motore di policy per la valutazione centralizzata delle richieste (lockout → budget → fallback)
-- Telemetria delle richieste con aggregazione della latenza p50/p95/p99
-- Telemetria dei target delle combinazioni e stato storico dei target delle combinazioni tramite `combo_execution_key` / `combo_step_id`
-- ID di correlazione (X-Request-Id) per il tracing end-to-end
-- Registrazione degli audit di conformità con opt-out per chiave API
-- Framework di valutazione per il controllo qualità degli LLM
-- Dashboard dello stato con stato in tempo reale dei circuit breaker dei provider
-- Server MCP (110 strumenti) con 3 trasporti (stdio/SSE/Streamable HTTP)
-- Server A2A (JSON-RPC 2.0 + SSE) con skill e ciclo di vita delle attività
+- Persistenza locale per provider, chiavi, alias, combo, impostazioni, prezzi (122 moduli DB )
+- monitoraggio Usage/cost e registrazione delle richieste
+- Sincronizzazione cloud opzionale per la sincronizzazione multi-device/state
+- IP allowlist/blocklist per il controllo degli accessi API
+- Pensare alla gestione del budget (passthrough/auto/custom/adaptive)
+- Iniezione rapida del sistema globale
+- Monitoraggio della sessione e rilevamento delle impronte digitali
+- Limitazione tariffaria avanzata per account con profili specifici del fornitore
+- Modello di interruttore automatico per la resilienza del fornitore
+- Protezione gregge antituono con bloccaggio mutex
+- Cache di deduplicazione delle richieste basata su firma
+- Livello del dominio: regole di costo, politica di fallback, politica di blocco
+- Inoltro contesto: riepiloghi di trasferimento delle sessioni per la continuità della rotazione degli account
+- Persistenza dello stato del dominio (cache write-through SQLite per fallback, budget, blocchi, interruttori automatici)
+- Motore di policy per la valutazione centralizzata delle richieste (blocco → budget → fallback)
+- Richiedi telemetria con aggregazione della latenza p50/p95/p99
+- Telemetria del target combinato e salute storica del target combinato tramite `combo_execution_key` / `combo_step_id`
+- Correlazione ID (X-Request-Id) per la traccia end-to-end
+- Registrazione del controllo di conformità con rinuncia per chiave API
+- Quadro di valutazione per la garanzia della qualità LLM
+- Dashboard di integrità con stato dell'interruttore automatico del fornitore in tempo reale
+- MCP Server (110 strumenti) con 3 trasporti (stdio/SSE/Streamable HTTP)
+- A2A Server (JSON-RPC 2.0 + SSE) con competenze e ciclo di vita delle attività
 - Sistema di memoria (estrazione, iniezione, recupero, riepilogo)
-- Sistema di skill (registro, executor, sandbox, skill integrate)
-- Proxy MITM con gestione dei certificati e gestione DNS
-- Middleware di protezione dall'injection dei prompt
-- Pipeline di compressione dei prompt con Caveman, RTK, pipeline impilate, combinazioni di compressione, pacchetti linguistici e analisi
-- Registro ACP (Agent Communication Protocol)
-- Provider OAuth modulari (22 moduli individuali in `src/lib/oauth/providers/`)
-- Script di disinstallazione/disinstallazione completa
-- Azione di riparazione dell'ambiente OAuth
-- Bridge WebSocket per client WS compatibili con OpenAI (`/v1/ws`)
-- Gestione dei token di sincronizzazione (emissione/revoca, download del bundle di configurazione con versione ETag)
-- Preset di provider GLM Thinking (`glmt`) di prima classe
-- Conteggio ibrido dei token (`/messages/count_tokens` lato provider con fallback alla stima)
-- Popolamento automatico degli alias dei modelli (oltre 30 normalizzazioni di dialetti cross-proxy all'avvio)
-- Fetch in uscita sicuro con protezione SSRF, blocco degli URL privati e retry configurabile
-- Retry delle chat consapevole del cooldown con `requestRetry` e `maxRetryIntervalSec` configurabili
-- Validazione dell'ambiente runtime con Zod all'avvio
-- Audit di conformità v2 con paginazione, eventi CRUD dei provider e registrazione delle validazioni bloccate per SSRF
+- Sistema di competenze (registro, esecutore, sandbox, competenze integrate)
+- proxy MITM con gestione dei certificati e gestione DNS
+- Middleware di protezione dell'iniezione rapida
+- Pipeline di compressione rapida con Caveman, RTK, pipeline impilate, combinazioni di compressione, pacchetti linguistici e analisi
+- Registro di sistema ACP (Agent Communication Protocol).
+- Fornitori OAuth modulari (22 moduli individuali sotto `src/lib/oauth/providers/`)
+- script Uninstall/full-uninstall
+- azione di riparazione dell'ambiente OAuth
+- bridge WebSocket per client WS compatibili con OpenAI (`/v1/ws`)
+- Sincronizzazione della gestione dei token (issue/revoke, download del bundle di configurazione con versione ETag)
+- GLM Thinking (`glmt`) preimpostazione fornitore di prima classe
+- Conteggio dei token ibridi ( `/messages/count_tokens` lato provider con fallback di stima)
+- Seeding automatico degli alias del modello (normalizzazioni di dialetti cross-proxy di 30 + all'avvio)
+- Recupero in uscita sicuro con protezione SSRF, blocco URL privato e tentativi configurabili
+- Tentativi di chat sensibili al cooldown con `requestRetry` e `maxRetryIntervalSec` configurabili
+- Convalida dell'ambiente runtime con Zod all'avvio
+- Controllo di conformità v2 con impaginazione, eventi CRUD del provider e registrazione di convalida bloccata da SSRF
 
-Modello runtime principale:
+Modello runtime primario:
 
-- Le route dell'app Next.js in `src/app/api/*` implementano sia le API della dashboard sia le API di compatibilità
-- Un core condiviso per SSE/routing in `src/sse/*` + `open-sse/*` gestisce l'esecuzione dei provider, la traduzione, lo streaming, il fallback e l'utilizzo
+- I percorsi dell'app Next.js sotto `src/app/api/*` implementano sia la dashboard APIs che la compatibilità APIs
+- Un core SSE/routing condiviso in `src/sse/*` + `open-sse/*` gestisce l'esecuzione, la traduzione, lo streaming, il fallback e l'utilizzo del provider
 
 ## Diagrammi di riferimento
 
@@ -372,7 +371,7 @@ Funzionalità chiave:
 
 - **20 strategie di routing** (priorità, ponderato, riempimento prima, round robin, P2C, casuale, meno utilizzato, ottimizzato in termini di costi, sensibile al ripristino, finestra di ripristino, headroom, ponderato in quota, casuale rigoroso,** auto** , lkgp, ottimizzato per il contesto, ottimizzato per la cache, inoltro per il contesto,** fusione** , pipeline) — auto è l'aggiunta principale nella v3.8.0; `fusion` (sintesi giudice + fan-out del pannello, `open-sse/services/fusion.ts`) è nuovo nella v3.8.36.
 - **Punteggio a 16 fattori** : quota, integrità, costo inverso, latenza inversa, adattamento dell'attività e altri dieci. La tabella canonica dei fattori e i relativi pesi predefiniti si trova in [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) — riformularla qui le darebbe un secondo posto in cui potrebbe diventare stantia.
-- **Fabbrica virtuale** materializza combo effimere quando non esiste alcuna combinazione con nome corrispondente, reperendo candidati da connessioni attive e sane dei fornitori.
+- **Fabbrica virtuale** materializza combo effimere quando non esiste alcuna combinazione con nome corrispondente, reperendo candidati da connessioni attive e sane di fornitori.
 - **Prefissi automatici** : `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`, `auto/smart`, `auto/lkgp` — ciascuno supportato da un profilo di peso ottimizzato.
 - **6 pacchetti modalità** : `ship-fast`, `cost-saver`, `quality-first`, `offline-friendly`, `reliability-first` e `chaos-mode` — configurazioni di peso preimpostate richiamabili dal dashboard. (Da non confondere con i prefissi `auto/*` sopra, che sono varianti del tempo di richiesta.)
 
@@ -415,13 +414,13 @@ Lo spazio dei nomi `src/domain/` centralizza le decisioni politiche in modo che 
 - Connection/model regola falegnameria: `src/domain/connectionModelRules.ts`
 - Istantanee della disponibilità del modello: `src/domain/modelAvailability.ts`
 - Monitoraggio della scadenza del fornitore: `src/domain/providerExpiration.ts`
-- Cache delle quote: `src/domain/quotaCache.ts`
+- Cache delle quote: `src/domain/quotaCache.ts`. I provider aggiungono e rimuovono finestre di quota (OpenAI ha eliminato la finestra Codex di 5 ore per alcuni piani), quindi un utilizzo che legge l'adattatore del provider attesta come completo (`quotasComplete`, vedere `src/lib/usage/usageReading.ts`) è il set completo di finestre dell'account: una finestra conosciuta in precedenza ma assente da essa viene ritirata, nella cache, in `quota_snapshots` al riavvio reidrata (un record di ritiro aggiunto), nello stato di quota Codex persistente e nei bucket di saturazione di Claude. Le prove parziali (intestazioni di risposta, copie non aggiornate) aggiornano solo le finestre che trasporta.
 - Stato di degrado: `src/domain/degradation.ts`
 - Controllo della configurazione: `src/domain/configAudit.ts`
 - Generatore di metadati di risposta OmniRoute : `src/domain/omnirouteResponseMeta.ts`
 - Sottosistema di valutazione: lavori di valutazione periodica `src/domain/assessment/` —
 
-### E. Pipeline di autorizzazione
+### E. Condotto di autorizzazione
 
 La pipeline di autorizzazione classifica ogni richiesta in entrata e applica la catena di policy appropriata prima dell'invio.
 

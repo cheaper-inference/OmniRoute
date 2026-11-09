@@ -153,7 +153,7 @@ src/
 | `app/(dashboard)/dashboard/tools/agent-bridge/`                              | AgentBridge डॅशबोर्ड पृष्ठ — सर्व्हर कार्ड, 9 एजंट कार्ड, सेटअप विझार्ड, मॉडेल मॅपिंग, बायपास सूची. i18n PT-BR + EN. `docs/frameworks/AGENTBRIDGE.md` पहा.                                                                                                                                                    |
 | `app/(dashboard)/dashboard/tools/traffic-inspector/`                         | ट्रॅफिक इन्स्पेक्टर डॅशबोर्ड पृष्ठ — DevTools स्प्लिट, 7 तपशील टॅब, 4 कॅप्चर मोड टॉगल, सत्र रेकॉर्डर, संदर्भ रंगीकरण. i18n PT-BR + EN. `docs/frameworks/TRAFFIC_INSPECTOR.md` पहा.                                                                                                                            |
 | `app/(dashboard)/dashboard/activity/`                                        | क्रियाकलाप फीड पृष्ठ (गट बी): `page.tsx` (सर्व्हर) + `ActivityFeedClient.tsx` + `components/{ActivityFeed,ActivityItem,DayHeader,EventTypeFilter}.tsx` — `docs/architecture/MONITORING_SECTIONS.md`                                                                                                           |
-| `app/(dashboard)/dashboard/costs/quota-share/`                               | कोटा शेअरिंग पृष्ठ (गट बी): `QuotaSharePageClient.tsx` + `components/{PoolCard,DimensionBar,AllocationTable,BurnRateChart,QuotaConceptCard,CreatePoolModal,EditAllocationsModal}.tsx` + `hooks/{usePools,usePoolUsage,useLocalStoragePoolMigration}.ts`                                                       |
+| `app/(dashboard)/dashboard/costs/quota-share/`                               | कोटा सामायिकरण पृष्ठ (गट बी): `QuotaSharePageClient.tsx` + `components/{PoolCard,DimensionBar,AllocationTable,BurnRateChart,QuotaConceptCard,CreatePoolModal,EditAllocationsModal}.tsx` + `hooks/{usePools,usePoolUsage,useLocalStoragePoolMigration}.ts`                                                     |
 | `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | प्रदाता योजना कॉन्फिगरेशन पृष्ठ (गट बी): `page.tsx` + `ProviderPlanConfigClient.tsx` — कोटा परिमाण प्रति कनेक्शन ओव्हरराइड                                                                                                                                                                                    |
 | `app/docs/`                                                                  | एम्बेडेड दस्तऐवजीकरण दर्शक ( `docs/*.md` प्रस्तुत करते)                                                                                                                                                                                                                                                       |
 | `app/landing/`                                                               | विपणन लँडिंग पृष्ठ                                                                                                                                                                                                                                                                                            |
@@ -169,7 +169,7 @@ src/
 | ---------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `a2a/`                                   | A2A प्रोटोकॉल कार्य व्यवस्थापक, कौशल्ये (5), प्रवाह                                                                                                                                                                                                                                                             |
 | `acp/`                                   | CLI एजंट नोंदणी (स्थानिक CLI शोध — `docs/frameworks/AGENT_PROTOCOLS_GUIDE.md` पहा)                                                                                                                                                                                                                              |
-| `api/`                                   | शेअर केलेले API मदतनीस (`requireManagementAuth`, प्रमाणीकरण)                                                                                                                                                                                                                                                    |
+| `api/`                                   | सामायिक API मदतनीस (`requireManagementAuth`, प्रमाणीकरण)                                                                                                                                                                                                                                                        |
 | `auth/`                                  | सत्र, पासवर्ड हॅशिंग, टोकन प्रमाणीकरण                                                                                                                                                                                                                                                                           |
 | `batches/`                               | OpenAI बॅचेस API हँडलर                                                                                                                                                                                                                                                                                          |
 | `catalog/`                               | प्रदाता कॅटलॉग Zod प्रमाणीकरण + क्षमता रिझोल्यूशन                                                                                                                                                                                                                                                               |
@@ -201,7 +201,7 @@ src/
 | `webhookDispatcher.ts`                   | HMAC webhook वितरण — `docs/frameworks/WEBHOOKS.md`                                                                                                                                                                                                                                                              |
 | `cloudflaredTunnel.ts`, `ngrokTunnel.ts` | बोगदा व्यवस्थापक — `docs/ops/TUNNELS_GUIDE.md` पहा                                                                                                                                                                                                                                                              |
 | `cloudSync.ts`, `initCloudSync.ts`       | राज्याचे पर्यायी क्लाउड सिंक                                                                                                                                                                                                                                                                                    |
-| `localDb.ts`                             | डीबी मॉड्यूल्ससाठी बॅरल पुन्हा-निर्यात करा (केवळ — री-एक्सपोर्ट नाही)                                                                                                                                                                                                                                           |
+| `localDb.ts`                             | db मॉड्यूल्ससाठी बॅरल पुन्हा-निर्यात करा (फक्त लॉजिक — री-एक्सपोर्ट नाही)                                                                                                                                                                                                                                       |
 | `cacheLayer.ts`, `idempotencyLayer.ts`   | कॅशिंग + idempotency विनंती                                                                                                                                                                                                                                                                                     |
 | (~ आणखी 30 उच्च-स्तरीय फाइल्स)           | विशेष मदतनीस (logEnv, modelsDevSync, piiSanitizer, इ.)                                                                                                                                                                                                                                                          |
 
@@ -242,19 +242,19 @@ src/
 | -------------------------------- | -------------------------------------------------------------------------------------- |
 | `components/`                    | डॅशबोर्ड घटक API: `packages/ui-kit` — अडॅप्टर `docs/architecture/DESIGN_SYSTEM.md` पहा |
 | `constants/iconMap.ts`           | `ICON_MAP`: स्क्रीनद्वारे वापरलेली चिन्हांची नावे → Lucide घटक (`<Icon>`)              |
-| `constants/providers.ts`         | **380 प्रदाता** Zod प्रमाणीकरणासह (सत्याचा स्रोत)                                      |
+| `constants/providers.ts`         | **381 प्रदाता** Zod प्रमाणीकरणासह (सत्याचा स्रोत)                                      |
 | `constants/cliTools.ts`          | बाह्य CLI साधन नोंदणी                                                                  |
-| `constants/routingStrategies.ts` | **20 राउटिंग धोरणे** प्राधान्यक्रमांसह                                                 |
+| `constants/routingStrategies.ts` | **20 राउटिंग रणनीती** प्राधान्यक्रमांसह                                                |
 | `constants/publicApiRoutes.ts`   | वाहक (वि व्यवस्थापन) प्रमाणीकरण आवश्यक असलेले मार्ग                                    |
 | `constants/upstreamHeaders.ts`   | अपस्ट्रीम विनंत्यांसाठी हेडर नाकारण्याची सूची                                          |
-| `validation/schemas.ts`          | ~ 80 Zod स्कीमा ( API करारासाठी सत्याचा एकच स्रोत)                                     |
+| `validation/schemas.ts`          | ~ 80 Zod स्कीमा ( API करारांसाठी सत्याचा एकच स्रोत)                                    |
 | `validation/helpers.ts`          | Zod प्रमाणीकरण मदतनीस (`validateBody`, इ.)                                             |
 | `types/`                         | शेअर केलेले TS प्रकार                                                                  |
 | `contracts/`                     | सार्वजनिक API करार ( `package.json` मध्ये `files:` द्वारे वापरला जातो)                 |
 | `utils/circuitBreaker.ts`        | प्रदाता सर्किट ब्रेकर ( `docs/architecture/RESILIENCE_GUIDE.md` पहा)                   |
 | `utils/apiAuth.ts`               | API की प्रमाणीकरण, व्याप्ती तपासणी                                                     |
 | `utils/fetchTimeout.ts`          | अपस्ट्रीम फेचसाठीTimeout/abort रॅपर्स                                                  |
-| `utils/releaseNotes.ts`          | बंद v2/legacy घोषणा पार्सर, स्थानिकीकरण आणि ID डिसमिस                                  |
+| `utils/releaseNotes.ts`          | बंद v2/legacy घोषणा पार्सर, स्थानिकीकरण आणि ID डिसमिसल                                 |
 
 ---
 
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | बाह्य CLI एकत्रीकरण + अंतर्गत OmniRoute CLI                                            |
 | `I18N.md`                   | i18n आर्किटेक्चर, एक भाषा जोडणे, 67 लोकॅल्स                                            |
 | `UNINSTALL.md`              | विस्थापित चरण साफ करा                                                                  |
-| `PROVIDER_REFERENCE.md`     | **स्वयं-व्युत्पन्न** 380 प्रदात्यांचे कॅटलॉग (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **स्वयं-व्युत्पन्न** 381 प्रदात्यांचे कॅटलॉग (regen: `npm run gen:provider-reference`) |
 
 ### उपप्रणाली खोल-डाव
 

@@ -356,63 +356,63 @@ Model: cc/claude-opus-4-7
 
 ## 🚀 Implementare
 
-### Instalare globală cu npm (recomandat)
+### Instalare globală npm (recomandat)
 
 ```bash
 npm install -g omniroute
 
-# Creează directorul de configurare
+# Create config directory
 mkdir -p ~/.omniroute
 
-# Creează fișierul .env (consultă .env.example)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# Pornește serverul
+# Start server
 omniroute
-# Sau cu un port personalizat:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI-ul încarcă automat `.env` din `~/.omniroute/.env` sau `./.env`.
+CLI încarcă automat `.env` din `~/.omniroute/.env` sau `./.env`. Un `./.env` din directorul de lucru poate seta doar o listă scurtă de chei permise (porturi, `REQUIRE_API_KEY`, setări locale și de culoare); pune totul în `~/.omniroute/.env`. Vezi [contractele de lansare CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
-### Modul bară de sistem
+### Modul tavă
 
-Pornește OmniRoute în bara de sistem:
+Porniți OmniRoute în bara de sistem:
 
 ```bash
 omniroute serve --tray
 ```
 
-Comanda se încheie după ce serverul și pictograma din bara de sistem sunt pregătite.
+Comanda revine după ce serverul și tava sunt gata.
 
-Serverul continuă să ruleze fără terminal.
+Serverul continuă fără terminal.
 
-Modul bară de sistem este compatibil cu macOS, Windows și sesiunile grafice Linux. Modul bară de sistem nu deschide automat panoul de control.
+Modul Tray acceptă sesiuni macOS, Windows și Linux grafic. Modul Tray nu deschide automat tabloul de bord.
 
-Folosește meniul din bara de sistem pentru următoarele acțiuni:
+Utilizați meniul tavă pentru aceste acțiuni:
 
-- Deschide panoul de control.
+- Deschide tabloul de bord.
 - Deschide `/dashboard/logs`.
-- Modifică pornirea automată.
-- Oprește OmniRoute.
+- Schimbați pornirea automată.
+- Opriți OmniRoute.
 
-Nu combina `--tray` cu următoarele opțiuni:
+Nu combinați `--tray` cu aceste opțiuni:
 
 - `--daemon`
 - `--log`
 - `--no-recovery`
 
-Aceste moduri necesită o administrare diferită a proceselor.
+Aceste moduri necesită o proprietate diferită a procesului.
 
-Activează pornirea la următoarea autentificare pe sistem:
+Activați pornirea la următoarea conectare la mașină:
 
 ```bash
 omniroute autostart enable
 ```
 
-Pornirea automată folosește modul bară de sistem pe macOS, Windows și în sesiunile grafice Linux. Sistemele Linux fără interfață grafică folosesc serviciul de utilizator systemd existent.
+Pornirea automată folosește modul tavă în sesiunile macOS, Windows și Linux grafic. Headless Linux utilizează serviciul de utilizator systemd existent.
 
-Dezactivează pornirea la autentificare:
+Dezactivați pornirea la conectare:
 
 ```bash
 omniroute autostart disable
@@ -420,16 +420,16 @@ omniroute autostart disable
 
 ### Dezinstalare
 
-Când nu mai ai nevoie de OmniRoute, punem la dispoziție două scripturi rapide pentru eliminarea completă:
+Când nu mai aveți nevoie OmniRoute, vă oferim două scripturi rapide pentru o eliminare curată:
 
-| Comandă                  | Acțiune                                                                                           |
-| ------------------------ | ------------------------------------------------------------------------------------------------- |
-| `npm run uninstall`      | Elimină aplicația din sistem, dar **păstrează baza de date și configurațiile** în `~/.omniroute`. |
-| `npm run uninstall:full` | Elimină aplicația ȘI **șterge definitiv toate configurațiile, cheile și bazele de date**.         |
+| Comanda                  | Acţiune                                                                                     |
+| ------------------------ | ------------------------------------------------------------------------------------------- |
+| `npm run uninstall`      | Elimină aplicația de sistem dar** vă păstrează DB și configurațiile** în `~/.omniroute`.    |
+| `npm run uninstall:full` | Elimină permanent aplicația AND** șterge toate configurațiile, cheile și bazele de date** . |
 
-> Notă: Pentru a executa aceste comenzi, accesează directorul proiectului OmniRoute (dacă l-ai clonat) și rulează-le. Alternativ, dacă este instalat global, poți executa pur și simplu `npm uninstall -g omniroute`.
+> Notă: Pentru a rula aceste comenzi, navigați la folderul proiectului OmniRoute (dacă l-ați clonat) și rulați-le. Alternativ, dacă este instalat global, puteți pur și simplu să rulați `npm uninstall -g omniroute`.
 
-### Implementare pe VPS
+### VPS Implementare
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -445,25 +445,25 @@ export NEXT_PUBLIC_BASE_URL="http://localhost:20128"
 export API_KEY_SECRET="endpoint-proxy-api-key-secret"
 
 npm run start
-# Sau: pm2 start npm --name omniroute -- start
+# Or: pm2 start npm --name omniroute -- start
 ```
 
-### Implementare cu PM2 (memorie redusă)
+### Implementare PM2 (memorie redusă)
 
-Pentru serverele cu memorie RAM limitată, folosește opțiunea de limitare a memoriei:
+Pentru serverele cu RAM limitat, utilizați opțiunea de limită de memorie:
 
 ```bash
-# Cu o limită de 512MB (implicită)
+# With 512MB limit (default)
 pm2 start npm --name omniroute -- start
 
-# Sau cu o limită de memorie personalizată
+# Or with custom memory limit
 OMNIROUTE_MEMORY_MB=512 pm2 start npm --name omniroute -- start
 
-# Sau folosind ecosystem.config.js
+# Or using ecosystem.config.js
 pm2 start ecosystem.config.js
 ```
 
-Creează `ecosystem.config.js`:
+Creați `ecosystem.config.js`:
 
 ```javascript
 module.exports = {
@@ -488,24 +488,24 @@ module.exports = {
 ### Docker
 
 ```bash
-# Construiește imaginea (implicit = runner-cli cu codex/claude/droid preinstalate)
+# Build image (default = runner-cli with codex/claude/droid preinstalled)
 docker build -t omniroute:cli .
 
-# Mod portabil (recomandat)
+# Portable mode (recommended)
 docker run -d --name omniroute -p 20128:20128 --env-file ./.env -v omniroute-data:/app/data omniroute:cli
 ```
 
-Pentru modul integrat cu gazda, cu binare CLI, consultă secțiunea Docker din documentația principală.
+Pentru modul integrat gazdă cu binare CLI, consultați secțiunea Docker din documentele principale.
 
 ### Void Linux (xbps-src)
 
-Utilizatorii Void Linux pot împacheta și instala OmniRoute în mod nativ folosind cadrul de compilare încrucișată `xbps-src`. Acesta automatizează compilarea autonomă Node.js împreună cu legăturile native `better-sqlite3` necesare.
+Utilizatorii Void Linux pot împacheta și instala OmniRoute în mod nativ folosind cadrul de compilare încrucișată `xbps-src`. Acest lucru automatizează construcția Node.js autonomă împreună cu legăturile native `better-sqlite3` necesare.
 
 <details>
 <summary><b>Vizualizați șablonul xbps-src</b></summary>
 
 ```bash
-# Fișier șablon pentru „omniroute”
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -526,7 +526,7 @@ export npm_config_fund=false
 export npm_config_audit=false
 
 do_build() {
-	# Determină arhitectura procesorului țintă pentru node-gyp
+	# Determine target CPU arch for node-gyp
 	local _gyp_arch
 	case "$XBPS_TARGET_MACHINE" in
 		aarch64*) _gyp_arch=arm64 ;;
@@ -535,29 +535,29 @@ do_build() {
 		*) _gyp_arch=x64 ;;
 	esac
 
-	# 1) Instalează toate dependențele – omite scripturile
+	# 1) Install all deps – skip scripts
 	NODE_ENV=development npm ci --ignore-scripts
 
-	# 2) Construiește pachetul autonom Next.js
+	# 2) Build the Next.js standalone bundle
 	npm run build
 
-	# 3) Copiază resursele statice în pachetul autonom
+	# 3) Copy static assets into standalone
 	cp -r .next/static .next/standalone/.next/static
 	[ -d public ] && cp -r public .next/standalone/public || true
 
-	# 4) Compilează legătura nativă better-sqlite3
+	# 4) Compile better-sqlite3 native binding
 	local _node_gyp=/usr/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js
 	(cd node_modules/better-sqlite3 && node "$_node_gyp" rebuild --arch="$_gyp_arch")
 
-	# 5) Plasează legătura compilată în pachetul autonom
+	# 5) Place the compiled binding into the standalone bundle
 	local _bs3_release=.next/standalone/node_modules/better-sqlite3/build/Release
 	mkdir -p "$_bs3_release"
 	cp node_modules/better-sqlite3/build/Release/better_sqlite3.node "$_bs3_release/"
 
-	# 6) Elimină pachetele sharp specifice arhitecturii
+	# 6) Remove arch-specific sharp bundles
 	rm -rf .next/standalone/node_modules/@img
 
-	# 7) Copiază dependențele de execuție pino omise de analiza statică Next.js:
+	# 7) Copy pino runtime deps omitted by Next.js static analysis:
 	for _mod in pino-abstract-transport split2 process-warning; do
 		cp -r "node_modules/$_mod" .next/standalone/node_modules/
 	done
@@ -571,7 +571,7 @@ do_install() {
 	vmkdir usr/lib/omniroute/.next
 	vcopy .next/standalone/. usr/lib/omniroute/.next/standalone
 
-	# Împiedică eliminarea directoarelor goale ale routerului aplicației Next.js de către mecanismul post-instalare
+	# Prevent removal of empty Next.js app router dirs by the post-install hook
 	for _d in \
 		.next/standalone/.next/server/app/dashboard \
 		.next/standalone/.next/server/app/dashboard/settings \
@@ -599,30 +599,30 @@ post_install() {
 
 ### Variabile de mediu
 
-| Variabilă                               | Valoare implicită                    | Descriere                                                                                                                                                                                                    |
-| --------------------------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `JWT_SECRET`                            | `omniroute-default-secret-change-me` | Secret pentru semnarea JWT (**modificați-l în producție**)                                                                                                                                                   |
-| `INITIAL_PASSWORD`                      | `CHANGEME`                           | Parola pentru prima autentificare                                                                                                                                                                            |
-| `DATA_DIR`                              | `~/.omniroute`                       | Director de date (bază de date, utilizare, jurnale)                                                                                                                                                          |
-| `PORT`                                  | valoarea implicită a cadrului        | Portul serviciului (`20128` în exemple)                                                                                                                                                                      |
-| `HOSTNAME`                              | valoarea implicită a cadrului        | Gazda de ascultare (valoarea implicită pentru Docker este `0.0.0.0`)                                                                                                                                         |
-| `NODE_ENV`                              | valoarea implicită a mediului        | Setați la `production` pentru implementare                                                                                                                                                                   |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`             | URL-ul de bază public afișat în panoul de control și expus serverului (înlocuiește vechiul `BASE_URL`)                                                                                                       |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`              | URL-ul de bază al punctului final pentru sincronizarea în cloud (înlocuiește vechiul `CLOUD_URL`)                                                                                                            |
-| `API_KEY_SECRET`                        | `endpoint-proxy-api-key-secret`      | Secret HMAC pentru cheile API generate                                                                                                                                                                       |
-| `REQUIRE_API_KEY`                       | `false`                              | Impune o cheie API Bearer pentru `/v1/*`                                                                                                                                                                     |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                              | Permite utilizatorilor autentificați ai panoului de control să afișeze la cerere valorile complete ale cheilor API stocate                                                                                   |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                 | Intervalul de reîmprospătare pe server pentru datele memorate în cache privind limitele furnizorilor; butoanele de reîmprospătare din interfața de utilizare declanșează în continuare sincronizarea manuală |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                              | Dezactivează instantaneele SQLite automate înainte de scriere/importare/restaurare; copiile de siguranță manuale funcționează în continuare                                                                  |
-| `APP_LOG_TO_FILE`                       | `true`                               | Activează scrierea pe disc a jurnalelor aplicației și de audit                                                                                                                                               |
-| `AUTH_COOKIE_SECURE`                    | `false`                              | Impune atributul `Secure` pentru cookie-ul de autentificare (în spatele unui proxy invers HTTPS)                                                                                                             |
-| `CLOUDFLARED_BIN`                       | nesetat                              | Utilizează un binar `cloudflared` existent în locul descărcării gestionate                                                                                                                                   |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                              | Transportul pentru tunelurile rapide gestionate (`http2`, `quic` sau `auto`)                                                                                                                                 |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                                | Limita heap-ului Node.js în MB                                                                                                                                                                               |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                 | Numărul maxim de intrări în memoria cache pentru prompturi                                                                                                                                                   |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                | Numărul maxim de intrări în memoria cache semantică                                                                                                                                                          |
+| Variabilă                               | Implicit                 | Descriere                                                                                                                                                                          |
+| --------------------------------------- | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `JWT_SECRET`                            | _(generat automat)_      | JWT semnare secret — generat automat la prima rulare și a persistat în `server.env`; setați-l în mod explicit când directorul de date este efemer                                  |
+| `INITIAL_PASSWORD`                      | _(dezactivat)_           | Prima parolă de conectare. Instalările npm/source încep cu `CHANGEME`: înlocuiți-l. Dezactivat: expert de onboarding                                                               |
+| `DATA_DIR`                              | `~/.omniroute`           | Director de date (db, utilizare, jurnale)                                                                                                                                          |
+| `PORT`                                  | cadru implicit           | Port de serviciu (`20128` în exemple)                                                                                                                                              |
+| `HOSTNAME`                              | cadru implicit           | Leagă gazdă (Docker este implicit la `0.0.0.0`)                                                                                                                                    |
+| `NODE_ENV`                              | implicit de rulare       | Setați `production` pentru implementare                                                                                                                                            |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128` | Baza publică URL a apărut pe tabloul de bord și a fost expusă serverului (înlocuiește vechiul `BASE_URL`)                                                                          |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`  | URL de bază pentru punctul final de sincronizare în cloud (înlocuiește vechiul `CLOUD_URL`)                                                                                        |
+| `API_KEY_SECRET`                        | _(generat automat)_      | secret HMAC pentru cheile API generate — generat automat la prima rulare și persistat la `server.env`                                                                              |
+| `REQUIRE_API_KEY`                       | `false`                  | Aplicați cheia Bearer API pe `/v1/*`                                                                                                                                               |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                  | Permiteți utilizatorilor de tablou de bord autentificați să dezvăluie valorile cheilor API stocate complete, la cerere                                                             |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                     | cadență de reîmprospătare la nivelul serverului pentru datele din cache ale Limitelor furnizorului; butoanele de reîmprospătare UI declanșează în continuare sincronizarea manuală |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                  | Dezactivați instantaneele automate SQLite înainte de writes/import/restore; backup-urile manuale încă funcționează                                                                 |
+| `APP_LOG_TO_FILE`                       | `true`                   | Activează înregistrarea aplicației și a jurnalului de audit pe disc                                                                                                                |
+| `AUTH_COOKIE_SECURE`                    | `false`                  | Forțați cookie-ul de autentificare `Secure` (în spatele proxy-ului invers HTTPS )                                                                                                  |
+| `CLOUDFLARED_BIN`                       | dezinstalat              | Utilizați un binar `cloudflared` existent în loc de descărcare gestionată                                                                                                          |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                  | Transport pentru tuneluri rapide gestionate (`http2`, `quic` sau `auto`)                                                                                                           |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                    | limita heap Node.js în MB                                                                                                                                                          |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                     | Numărul maxim de intrări în cache prompte                                                                                                                                          |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                    | Numărul maxim de intrări semantice în cache                                                                                                                                        |
 
-Pentru referința completă a variabilelor de mediu, consultați [README](../README.md).
+Pentru referința completă a variabilei de mediu, consultați [README](../README.md).
 
 ---
 

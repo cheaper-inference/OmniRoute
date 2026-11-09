@@ -276,6 +276,95 @@ Tổ hợp nén là các cấu hình nén có tên có thể được gán cho c
 
 Vị trí trên Dashboard: `Dashboard -> Context & Cache -> Compression Combos`.
 
+## Điều kiện tiên quyết/hướng dẫn vận hành (CCR & session-dedup)
+
+CCR (`ccr`) và `session-dedup` thay thế hoặc loại bỏ văn bản và để lại một** điểm đánh dấu** phía sau. Phần này là tài liệu tham khảo của nhà điều hành để kết nối máy khách, đọc hai điểm đánh dấu và truy xuất hoặc chẩn đoán nội dung được chọn lọc. Cơ học của từng động cơ được đề cập ở trên; đây là lớp "làm cách nào để chạy nó".
+
+### Vận chuyển & điểm cuối
+
+Có thể truy cập máy chủ MCP hiển thị các công cụ CCR theo ba cách. URL cơ sở mặc định là `http://localhost:20128` (`OMNIROUTE_BASE_URL`):
+
+| Chuyên chở                                                 | URL /lệnh                               | Ghi chú                                                                                                                                                           |
+| ---------------------------------------------------------- | --------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| HTTP có thể phát trực tuyến (khách hàng, được khuyến nghị) | `http://localhost:20128/api/mcp/stream` | Điểm cuối mà khách hàng MCP hiện tại nói chuyện.                                                                                                                  |
+| Di sản SSE singleton                                       | `http://localhost:20128/api/mcp/sse`    | Vận chuyển đơn lẻ cũ hơn. Nó** đóng cửa** phiên có thể phát trực tuyến; sử dụng ứng dụng khách `streamable-http` chống lại `/api/mcp/stream`, không phải cái này. |
+| phòng thu âm                                               | `omniroute --mcp`                       | Đối với cấu hình IDE MCP sẽ tạo ra quy trình. Không có cờ `--dev` ; `omniroute --mcp` là điểm vào stdio.                                                          |
+
+### Các tầng lưu trữ (những gì còn sót lại sau khi khởi động lại)
+
+CCR là một** hai tầng** lưu trữ, không chỉ trong bộ nhớ:
+
+- **Cấp nóng trong bộ nhớ** — giới hạn mỗi khối 2 MiB, mỗi gốc 16 MiB, 64 MiB toàn cầu. Các mục nhập mặc định là 24 giờ TTL (tối đa 7 ngày). Việc truy xuất MCP đầy đủ từ bộ nhớ bị giới hạn ở mức 256 KiB; mọi thứ lớn hơn vẫn có thể truy cập được thông qua chế độ ranged/grep.
+- **Cấp SQLite bền bỉ** (`ccr_blocks`, `COMPRESSION_CCR_DURABLE_STORE`, bật theo mặc định) — sao lưu tầng trong bộ nhớ để một khối tồn tại sau khi bị trục xuất LRU, khởi động lại hoặc truy xuất trên một phiên bản khác. Hàng giữ TTL của khối, do đó, một khối vượt qua TTL của nó sẽ bị loại khỏi cả hai tầng.
+
+Ba người bảo vệ giữ cho lớp — được giới hạn bền vững một khối chỉ tồn tại trong bộ nhớ khi:
+
+1. khối đã kết thúc** 512 KB** (`MAX_DURABLE_BLOCK_BYTES`);
+2. thời gian chạy là thời gian chạy trên đám mây (không có đĩa cục bộ);
+3. `COMPRESSION_CCR_DURABLE_STORE=false`.
+
+Vì vậy, "khối biến mất" không phải là một câu chuyện khởi động lại toàn diện: khối sub-512 KB trên thời gian chạy cục bộ, không có đám mây sẽ tồn tại sau khi khởi động lại thông qua cấp độ bền cho đến khi hết TTL. Xem [Tài liệu tham khảo môi trường](../reference/ENVIRONMENT.md) để biết biến.
+
+### Hai điểm đánh dấu
+
+| Điểm đánh dấu                         | Nghĩa                                                                                                                                                | Người mẫu nên làm gì                                                                                                                                                                                 |
+| ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `[CCR retrieve hash=<24hex> chars=N]` | Một khối lớn được lưu trữ theo địa chỉ nội dung.                                                                                                     | Gọi `omniroute_ccr_retrieve` bằng** Băm 24-hex được sao chép nguyên văn** để lấy lại văn bản gốc.                                                                                                    |
+| `[dedup:ref sha=…]`                   | văn bản `session-dedup` elided đã được gửi trong lượt trước đó của cùng một phiên. Đây là một** cố ý nhìn lại** , không phải là mất mát hay sai sót. | LÀM** không** gọi bất kỳ công cụ nào và làm** không** cố gắng "tái tạo" nó. Lần xuất hiện đầu tiên của văn bản là bản kinh điển; lượt hiện tại không bao giờ được viết lại, nó sẽ bị trừ ở lượt sau. |
+
+Việc xem lại `[dedup:ref]` là một quyết định giao thức có chủ ý — không có sự tái cấu trúc trước khi gửi. Hãy coi nó như "văn bản chính xác này đã có trên mạng trước đó trong phiên này."
+
+### Điều kiện tiên quyết của khách hàng
+
+- **Chìa khóa (stdio):** người gọi stdio không mang danh tính theo yêu cầu, do đó, nó xác thực bằng `OMNIROUTE_API_KEY` (được đặt trong `env` của máy chủ MCP ). Nếu không có nó, người gọi sẽ ẩn danh và các công cụ yêu cầu hiệu trưởng có thể bị suy giảm.
+- **`tools[]` là điều kiện tiên quyết để tiêm.** Lệnh truy xuất giao thức CCR (#8033) được đưa vào** chỉ một** khi `tools[]` được quảng cáo của yêu cầu chứng minh rằng khách hàng thực sự có thể tiếp cận `omniroute_ccr_retrieve`. Trận đấu là một trận đấu phân đoạn cuối được giới hạn bởi một dấu phân cách (`__`, `.`, `/`, `:`) — không bao giờ là một chuỗi con trần — nên một tên được đặt tên như `mcp__gateway__omniroute_ccr_retrieve` vẫn được tính. `tools[]` vắng mặt hoặc không khớp có nghĩa là lệnh không được đưa vào theo thiết kế.
+- **`codemode:false` (máy khách OpenCode ).** OpenCode mặc định ở Chế độ mã, chế độ này chỉ quảng cáo các công cụ gốc của nó cho mô hình và** không** đưa các công cụ MCP vào danh sách `tools[]` gốc. Đặt `codemode: false` trên mục nhập máy chủ MCP để các công cụ `omniroute_ccr_*` được quảng cáo. Đây là một** khách hàng** cài đặt, không phải là OmniRoute. Nó chưa nhận được hướng dẫn CCR : OpenCode đặt tên cho một công cụ `<server>_<tool>`, do đó, một máy chủ có tên `omniroute` hiển thị `omniroute_omniroute_ccr_retrieve` và `_` không phải là một trong những dấu phân cách phù hợp.
+- **Hiệu trưởng.** Việc lưu trữ và truy xuất được cách ly theo từng hiệu trưởng được xác thực (mỗi khóa API ). Một khóa chỉ nhìn thấy các khối của chính nó.
+
+### Phạm vi cho mỗi công cụ
+
+Việc thực thi phạm vi luôn được áp dụng đối với người gọi HTTP/SSE ở phạm vi hẹp. Các công cụ `omniroute_` CCR yêu cầu:
+
+| Dụng cụ                  | phạm vi             |
+| ------------------------ | ------------------- |
+| `omniroute_ccr_store`    | `write:compression` |
+| `omniroute_ccr_delete`   | `write:compression` |
+| `omniroute_ccr_retrieve` | `read:compression`  |
+| `omniroute_ccr_inspect`  | `read:compression`  |
+| `omniroute_ccr_list`     | `read:compression`  |
+| `omniroute_ccr_stats`    | `read:compression`  |
+
+Một phạm vi bị thiếu sẽ trả về một** kết quả lỗi công cụ MCP** (`isError: true`, không phải HTTP 403 — `403 LOCAL_ONLY` là xác thực bảo vệ tuyến đường vòng lặp riêng biệt): `Error: Insufficient MCP scopes for <tool>. Missing: <scope>.` Một khóa từ xa tối thiểu có thể giữ `mcp:connect` (cho phép khắc `/api/mcp/` chỉ cục bộ) cộng với phạm vi read/write cụ thể mà nó cần.
+
+### Ma trận khách hàng
+
+| Khách hàng         | Chuyên chở                                          | Cấu hình để sử dụng                                                                                                                                                                                                                             | `tools[]` được quảng cáo? ( lệnh → CCR được chèn)                                                                                                                                                        |
+| ------------------ | --------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Claude             | có thể phát trực tuyến-http                         | `claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream`                                                                                                                                                               | Có — MCP có khả năng; được tiêm.                                                                                                                                                                         |
+| Cursor / Cline     | `stdio`** hoặc** `streamable-http`                  | stdio: `omniroute --mcp` với `OMNIROUTE_API_KEY` trong `env`; hoặc một mục MCP từ xa trỏ vào `http://localhost:20128/api/mcp/stream` (xem [Hướng dẫn thiết lập → MCP Client Configuration](../guides/SETUP_GUIDE.md#mcp-client-configuration) ) | Có — quảng cáo các công cụ `omniroute_ccr_*`.                                                                                                                                                            |
+| OpenCode           | có thể phát trực tuyến-http                         | `opencode mcp add omniroute --url http://localhost:20128/api/mcp/stream`, cộng với `codemode: false`                                                                                                                                            | Công cụ chỉ được quảng cáo với `codemode: false`; hướng dẫn vẫn chưa được đưa vào, vì `omniroute_omniroute_ccr_retrieve` không khớp (xem [Điều kiện tiên quyết của khách hàng](#client-prerequisites) ). |
+| Tương thích OpenAI | HTTP tương thích với OpenAI (hoàn thành trò chuyện) | ứng dụng khách hoàn thành trò chuyện tiêu chuẩn dựa trên điểm cuối tương thích với OpenAI                                                                                                                                                       | **Không bao giờ** — người gọi tương thích với OpenAI đơn giản không bao giờ được yêu cầu gọi công cụ và hướng dẫn không được đưa vào.                                                                    |
+
+### Giới hạn truy xuất và phân trang
+
+kết quả văn bản của công cụ MCP được cắt bớt xung quanh `mcpAccessibility.maxTextChars` ( `50000` mặc định). Truy xuất `full` của một khối được giới hạn ở 256 KiB —** không có truy xuất đầy đủ không giới hạn** . Khi `chars=N` của một khối lớn, hãy phân trang nó thay vì kéo toàn bộ nội dung:
+
+- Quy tắc ngón tay cái:**`chars > 40000` → sử dụng `mode`** , không bao giờ đầy đủ.
+- `mode:"grep"` — Regex `pattern` khớp từng dòng, tối đa 1.000 dòng khớp (`unique: true` giảm lặp lại), rẻ nhất để "tìm một dòng tôi cần".
+- `mode:"lines"` — một phạm vi dòng có 1 chỉ mục; cần cả `start` và `end`.
+- `mode:"head"` / `mode:"tail"` — first/last `n`.
+- số dòng, ký tự và byte `mode:"stats"` — không có phần thân.
+
+Sử dụng `mode:"lines"` với `start`/`end` để đi qua một khối dài trong các trang thay vì yêu cầu toàn bộ nội dung cùng một lúc.
+
+### Đặt tên công cụ
+
+Công cụ truy xuất hiện được đặt tên là `omniroute_ccr_retrieve` (tiền tố `omniroute_` là giải pháp thay thế lỗi thời cho xung đột tên giữa các máy chủ). Tên công cụ có hậu tố giới hạn rõ ràng hơn và bản sửa lỗi cho các kết quả MCP JSON bị cắt ở giữa chuỗi được theo dõi dưới dạng phần tiếp theo ngược dòng; trang này chỉ ghi lại hành vi hiện tại, được vận chuyển.
+
+### Vòng đời phiên
+
+Các phiên HTTP có thể phát trực tuyến không hoạt động và máy chủ sẽ thu thập chúng; cửa sổ nhàn rỗi là hằng số `MCP_SESSION_IDLE_MS` (được tham chiếu theo tên, không phải giá trị được mã hóa cứng, vì vậy trang này không bị trôi khi thay đổi). Triệu chứng của phiên không hoạt động là HTTP 404 với `Unknown Mcp-Session-Id` — biện pháp khắc phục là kết nối lại hoặc khởi động lại phiên,** không** để xoay một phím, thay đổi phạm vi hoặc đổi tên một công cụ.
+
 ## Bề mặt API
 
 | Tuyến                                  | Mục đích                                                   |

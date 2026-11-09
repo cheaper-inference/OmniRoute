@@ -242,7 +242,7 @@ src/
 | -------------------------------- | ------------------------------------------------------------------------------------------------------ |
 | `components/`                    | Sehemu ya Dashibodi API: adapta juu ya `packages/ui-kit` — tazama `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: majina ya ikoni yanayotumiwa na skrini → vipengele vya Lucide (`<Icon>`)                   |
-| `constants/providers.ts`         | **380 watoa huduma** na uthibitisho wa Zod (chanzo cha ukweli)                                         |
+| `constants/providers.ts`         | **381 watoa huduma** na uthibitisho wa Zod (chanzo cha ukweli)                                         |
 | `constants/cliTools.ts`          | Usajili wa zana za CLI za nje                                                                          |
 | `constants/routingStrategies.ts` | **Mikakati 20 ya uelekezaji** na vipaumbele                                                            |
 | `constants/publicApiRoutes.ts`   | Njia zinazohitaji Bearer (dhidi ya usimamizi) auth                                                     |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Miunganisho ya CLI ya nje + OmniRoute CLI ya ndani                                             |
 | `I18N.md`                   | i18n usanifu, kuongeza lugha, 67 locales                                                       |
 | `UNINSTALL.md`              | Safisha hatua za kufuta                                                                        |
-| `PROVIDER_REFERENCE.md`     | **Imetolewa kiotomatiki** orodha ya watoa huduma 380 (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Imetolewa kiotomatiki** orodha ya watoa huduma 381 (regen: `npm run gen:provider-reference`) |
 
 ### Mfumo mdogo wa kupiga mbizi
 
@@ -433,7 +433,7 @@ open-sse/
 | `AUTHZ_GUIDE.md`                             | Bomba la uidhinishaji (`classify` → `policies` → `enforce`)                                        |
 | `RESILIENCE_GUIDE.md`                        | Kivunja mzunguko + cooldown + mtindo wa kufuli                                                     |
 | `docs/security/STEALTH_GUIDE.md` (git pekee) | alama za vidole za TLS (JA3/JA4), Claude Code CCH, MITM cert                                       |
-| `AUTO-COMBO.md`                              | Injini ya Mchanganyiko otomatiki (ufungaji wa sababu 16, vifurushi 6 vya hali, kiwanda pepe)       |
+| `AUTO-COMBO.md`                              | Injini ya Mchanganyiko Otomatiki (ufungaji wa sababu 16, vifurushi 6 vya hali, kiwanda pepe)       |
 
 ### Mfinyazo
 

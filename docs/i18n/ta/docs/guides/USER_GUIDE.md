@@ -358,82 +358,82 @@ API விசை: [கட்டுப்பாட்டுப் பலகைய
 
 ---
 
-## 🚀 நிறுவல்
+## 🚀 வரிசைப்படுத்தல்
 
 ### உலகளாவிய npm நிறுவல் (பரிந்துரைக்கப்படுகிறது)
 
 ```bash
 npm install -g omniroute
 
-# உள்ளமைவு கோப்பகத்தை உருவாக்கவும்
+# Create config directory
 mkdir -p ~/.omniroute
 
-# .env கோப்பை உருவாக்கவும் (.env.example-ஐப் பார்க்கவும்)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# சேவையகத்தைத் தொடங்கவும்
+# Start server
 omniroute
-# அல்லது தனிப்பயன் போர்ட்டுடன்:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI ஆனது `~/.omniroute/.env` அல்லது `./.env`-இலிருந்து `.env`-ஐத் தானாக ஏற்றும்.
+CLI தானாகவே `~/.omniroute/.env` அல்லது `./.env` இலிருந்து `.env` ஏற்றுகிறது. வேலை செய்யும் கோப்பகத்தில் ஒரு `./.env` விசைகளின் குறுகிய அனுமதிப் பட்டியலை மட்டுமே அமைக்கலாம் (போர்ட்கள், `REQUIRE_API_KEY`, லோகேல் மற்றும் வண்ண அமைப்புகள்); மற்ற அனைத்தையும் `~/.omniroute/.env` இல் வைக்கவும். [CLI வெளியீட்டு ஒப்பந்தங்களைப்](CLI-LAUNCH-CONTRACTS.md#working-directory-env) பார்க்கவும்.
 
 ### தட்டு முறை
 
-கணினித் தட்டில் OmniRoute-ஐத் தொடங்கவும்:
+கணினி தட்டில் OmniRoute தொடங்கவும்:
 
 ```bash
 omniroute serve --tray
 ```
 
-சேவையகமும் தட்டும் தயாரானதும் கட்டளை நிறைவடையும்.
+சர்வர் மற்றும் தட்டு தயாரான பிறகு கட்டளை திரும்பும்.
 
-முனையம் இல்லாமலும் சேவையகம் தொடர்ந்து இயங்கும்.
+டெர்மினல் இல்லாமல் சர்வர் தொடர்கிறது.
 
-தட்டு முறை macOS, Windows மற்றும் வரைகலை Linux அமர்வுகளை ஆதரிக்கிறது. தட்டு முறை கட்டுப்பாட்டுப் பலகையைத் தானாகத் திறக்காது.
+தட்டு முறை macOS, Windows, மற்றும் வரைகலை Linux அமர்வுகளை ஆதரிக்கிறது. தட்டு பயன்முறை டாஷ்போர்டை தானாக திறக்காது.
 
-பின்வரும் செயல்களுக்கு தட்டு மெனுவைப் பயன்படுத்தவும்:
+இந்த செயல்களுக்கு தட்டு மெனுவைப் பயன்படுத்தவும்:
 
-- கட்டுப்பாட்டுப் பலகையைத் திறக்கவும்.
-- `/dashboard/logs`-ஐத் திறக்கவும்.
+- டாஷ்போர்டைத் திறக்கவும்.
+- `/dashboard/logs` திறக்கவும்.
 - தானியங்கு தொடக்கத்தை மாற்றவும்.
-- OmniRoute-ஐ நிறுத்தவும்.
+- OmniRoute நிறுத்துங்கள்.
 
-பின்வரும் விருப்பங்களுடன் `--tray`-ஐ இணைத்துப் பயன்படுத்த வேண்டாம்:
+இந்த விருப்பங்களுடன் `--tray` இணைக்க வேண்டாம்:
 
 - `--daemon`
 - `--log`
 - `--no-recovery`
 
-இந்த முறைகளுக்கு வேறுபட்ட செயல்முறை உரிமை தேவைப்படுகிறது.
+இந்த முறைகளுக்கு வெவ்வேறு செயல்முறை உரிமை தேவை.
 
-அடுத்த கணினி உள்நுழைவின்போது தொடங்குவதை இயக்கவும்:
+அடுத்த இயந்திர உள்நுழைவில் தொடக்கத்தை இயக்கவும்:
 
 ```bash
 omniroute autostart enable
 ```
 
-தானியங்கு தொடக்கம் macOS, Windows மற்றும் வரைகலை Linux அமர்வுகளில் தட்டு முறையைப் பயன்படுத்தும். திரையற்ற Linux ஏற்கனவே உள்ள systemd பயனர் சேவையைப் பயன்படுத்தும்.
+தானியங்கு-தொடக்கம் macOS, Windows, மற்றும் வரைகலை Linux அமர்வுகளில் தட்டு பயன்முறையைப் பயன்படுத்துகிறது. Headless Linux ஏற்கனவே உள்ள systemd பயனர் சேவையைப் பயன்படுத்துகிறது.
 
-உள்நுழையும்போது தொடங்குவதை முடக்கவும்:
+உள்நுழைவில் தொடக்கத்தை முடக்கு:
 
 ```bash
 omniroute autostart disable
 ```
 
-### நிறுவல் நீக்கம்
+### நிறுவல் நீக்குகிறது
 
-OmniRoute இனி தேவையில்லாதபோது, முழுமையாக அகற்றுவதற்கு இரண்டு விரைவான ஸ்கிரிப்ட்களை வழங்குகிறோம்:
+உங்களுக்கு இனி OmniRoute தேவைப்படாதபோது, சுத்தமான அகற்றுதலுக்கு இரண்டு விரைவான ஸ்கிரிப்ட்களை வழங்குகிறோம்:
 
-| கட்டளை                   | செயல்                                                                                                     |
-| ------------------------ | --------------------------------------------------------------------------------------------------------- |
-| `npm run uninstall`      | கணினிச் செயலியை அகற்றும், ஆனால் `~/.omniroute`-இல் உள்ள **உங்கள் DB மற்றும் உள்ளமைவுகளைத் தக்கவைக்கும்**. |
-| `npm run uninstall:full` | செயலியை அகற்றுவதுடன் **அனைத்து உள்ளமைவுகள், விசைகள் மற்றும் தரவுத்தளங்களை நிரந்தரமாக அழிக்கும்**.         |
+| கட்டளை                   | செயல்                                                                                                       |
+| ------------------------ | ----------------------------------------------------------------------------------------------------------- |
+| `npm run uninstall`      | கணினி பயன்பாட்டை நீக்குகிறது ஆனால்** உங்கள் DB மற்றும் கட்டமைப்புகளை வைத்திருக்கிறது** `~/.omniroute` இல்.  |
+| `npm run uninstall:full` | AND பயன்பாட்டை நிரந்தரமாக நீக்குகிறது** அனைத்து கட்டமைப்புகள், விசைகள் மற்றும் தரவுத்தளங்களை அழிக்கிறது** . |
 
-> குறிப்பு: இந்தக் கட்டளைகளை இயக்க, OmniRoute திட்டக் கோப்பகத்திற்குச் சென்று (அதை clone செய்திருந்தால்) அவற்றை இயக்கவும். மாற்றாக, உலகளாவிய முறையில் நிறுவியிருந்தால், `npm uninstall -g omniroute` என்பதை மட்டும் இயக்கலாம்.
+> குறிப்பு: இந்த கட்டளைகளை இயக்க, OmniRoute திட்ட கோப்புறைக்கு செல்லவும் (நீங்கள் அதை குளோன் செய்தால்) அவற்றை இயக்கவும். மாற்றாக, உலகளவில் நிறுவப்பட்டிருந்தால், நீங்கள் `npm uninstall -g omniroute` இயக்கலாம்.
 
-### VPS நிறுவல்
+### VPS வரிசைப்படுத்தல்
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -449,25 +449,25 @@ export NEXT_PUBLIC_BASE_URL="http://localhost:20128"
 export API_KEY_SECRET="endpoint-proxy-api-key-secret"
 
 npm run start
-# அல்லது: pm2 start npm --name omniroute -- start
+# Or: pm2 start npm --name omniroute -- start
 ```
 
-### PM2 நிறுவல் (குறைந்த நினைவகம்)
+### PM2 வரிசைப்படுத்தல் (குறைந்த நினைவகம்)
 
-குறைந்த RAM கொண்ட சேவையகங்களுக்கு, நினைவக வரம்பு விருப்பத்தைப் பயன்படுத்தவும்:
+வரையறுக்கப்பட்ட RAM கொண்ட சேவையகங்களுக்கு, நினைவக வரம்பு விருப்பத்தைப் பயன்படுத்தவும்:
 
 ```bash
-# 512MB வரம்புடன் (இயல்புநிலை)
+# With 512MB limit (default)
 pm2 start npm --name omniroute -- start
 
-# அல்லது தனிப்பயன் நினைவக வரம்புடன்
+# Or with custom memory limit
 OMNIROUTE_MEMORY_MB=512 pm2 start npm --name omniroute -- start
 
-# அல்லது ecosystem.config.js-ஐப் பயன்படுத்தி
+# Or using ecosystem.config.js
 pm2 start ecosystem.config.js
 ```
 
-`ecosystem.config.js`-ஐ உருவாக்கவும்:
+`ecosystem.config.js` உருவாக்கவும்:
 
 ```javascript
 module.exports = {
@@ -492,24 +492,24 @@ module.exports = {
 ### Docker
 
 ```bash
-# படிமத்தை உருவாக்கவும் (இயல்புநிலை = codex/claude/droid முன்பே நிறுவப்பட்ட runner-cli)
+# Build image (default = runner-cli with codex/claude/droid preinstalled)
 docker build -t omniroute:cli .
 
-# எடுத்துச் செல்லக்கூடிய முறை (பரிந்துரைக்கப்படுகிறது)
+# Portable mode (recommended)
 docker run -d --name omniroute -p 20128:20128 --env-file ./.env -v omniroute-data:/app/data omniroute:cli
 ```
 
-CLI பைனரிகளுடன் ஹோஸ்ட்-ஒருங்கிணைந்த முறைக்கு, முதன்மை ஆவணங்களில் உள்ள Docker பகுதியைப் பார்க்கவும்.
+CLI பைனரிகளுடன் ஹோஸ்ட்-ஒருங்கிணைந்த பயன்முறைக்கு, முக்கிய ஆவணத்தில் Docker பகுதியைப் பார்க்கவும்.
 
-### Void Linux (xbps-src)
+### வெற்றிடமான Linux (xbps-src)
 
-Void Linux பயனர்கள் `xbps-src` குறுக்குத் தொகுப்பு கட்டமைப்பைப் பயன்படுத்தி OmniRoute-ஐ இயல்பாகத் தொகுப்பாக்கி நிறுவலாம். இது தேவையான `better-sqlite3` இயல்புநிலை பிணைப்புகளுடன் Node.js தனித்தியங்கும் உருவாக்கத்தையும் தானியங்குபடுத்துகிறது.
+வெற்றிடமான Linux பயனர்கள் `xbps-src` குறுக்கு-தொகுப்பு கட்டமைப்பைப் பயன்படுத்தி OmniRoute தொகுத்து நிறுவலாம். இது தேவையான `better-sqlite3` நேட்டிவ் பைண்டிங்குகளுடன் Node.js ஸ்டாண்டலோன் கட்டமைப்பை தானியக்கமாக்குகிறது.
 
 <details>
-<summary><b>xbps-src வார்ப்புருவைக் காண்க</b></summary>
+<summary><b>xbps-src டெம்ப்ளேட்டைப் பார்க்கவும்</b></summary>
 
 ```bash
-# 'omniroute'-க்கான வார்ப்புருக் கோப்பு
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -530,7 +530,7 @@ export npm_config_fund=false
 export npm_config_audit=false
 
 do_build() {
-	# node-gyp-க்கான இலக்கு CPU கட்டமைப்பைத் தீர்மானிக்கவும்
+	# Determine target CPU arch for node-gyp
 	local _gyp_arch
 	case "$XBPS_TARGET_MACHINE" in
 		aarch64*) _gyp_arch=arm64 ;;
@@ -539,29 +539,29 @@ do_build() {
 		*) _gyp_arch=x64 ;;
 	esac
 
-	# 1) அனைத்து சார்புகளையும் நிறுவவும் – ஸ்கிரிப்ட்களைத் தவிர்க்கவும்
+	# 1) Install all deps – skip scripts
 	NODE_ENV=development npm ci --ignore-scripts
 
-	# 2) Next.js தனித்தியங்கும் தொகுப்பை உருவாக்கவும்
+	# 2) Build the Next.js standalone bundle
 	npm run build
 
-	# 3) நிலையான வளங்களைத் தனித்தியங்கும் தொகுப்புக்குள் நகலெடுக்கவும்
+	# 3) Copy static assets into standalone
 	cp -r .next/static .next/standalone/.next/static
 	[ -d public ] && cp -r public .next/standalone/public || true
 
-	# 4) better-sqlite3 இயல்புநிலை பிணைப்பைத் தொகுக்கவும்
+	# 4) Compile better-sqlite3 native binding
 	local _node_gyp=/usr/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js
 	(cd node_modules/better-sqlite3 && node "$_node_gyp" rebuild --arch="$_gyp_arch")
 
-	# 5) தொகுக்கப்பட்ட பிணைப்பைத் தனித்தியங்கும் தொகுப்புக்குள் வைக்கவும்
+	# 5) Place the compiled binding into the standalone bundle
 	local _bs3_release=.next/standalone/node_modules/better-sqlite3/build/Release
 	mkdir -p "$_bs3_release"
 	cp node_modules/better-sqlite3/build/Release/better_sqlite3.node "$_bs3_release/"
 
-	# 6) கட்டமைப்பு சார்ந்த sharp தொகுப்புகளை அகற்றவும்
+	# 6) Remove arch-specific sharp bundles
 	rm -rf .next/standalone/node_modules/@img
 
-	# 7) Next.js நிலையான பகுப்பாய்வால் விடுபட்ட pino இயக்கநேரச் சார்புகளை நகலெடுக்கவும்:
+	# 7) Copy pino runtime deps omitted by Next.js static analysis:
 	for _mod in pino-abstract-transport split2 process-warning; do
 		cp -r "node_modules/$_mod" .next/standalone/node_modules/
 	done
@@ -575,7 +575,7 @@ do_install() {
 	vmkdir usr/lib/omniroute/.next
 	vcopy .next/standalone/. usr/lib/omniroute/.next/standalone
 
-	# நிறுவலுக்குப் பிந்தைய hook மூலம் காலியான Next.js பயன்பாட்டு router அடைவுகள் அகற்றப்படுவதைத் தடுக்கவும்
+	# Prevent removal of empty Next.js app router dirs by the post-install hook
 	for _d in \
 		.next/standalone/.next/server/app/dashboard \
 		.next/standalone/.next/server/app/dashboard/settings \
@@ -601,32 +601,32 @@ post_install() {
 
 </details>
 
-### சூழல் மாறிகள்
+### சுற்றுச்சூழல் மாறிகள்
 
-| மாறி                                    | இயல்புநிலை                           | விளக்கம்                                                                                                                                               |
-| --------------------------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `JWT_SECRET`                            | `omniroute-default-secret-change-me` | JWT கையொப்பமிடும் ரகசியம் (**உற்பத்திச் சூழலில் மாற்றவும்**)                                                                                           |
-| `INITIAL_PASSWORD`                      | `CHANGEME`                           | முதல் உள்நுழைவுக்கான கடவுச்சொல்                                                                                                                        |
-| `DATA_DIR`                              | `~/.omniroute`                       | தரவுக் கோப்பகம் (தரவுத்தளம், பயன்பாடு, பதிவுகள்)                                                                                                       |
-| `PORT`                                  | கட்டமைப்பின் இயல்புநிலை              | சேவை போர்ட் (எடுத்துக்காட்டுகளில் `20128`)                                                                                                             |
-| `HOSTNAME`                              | கட்டமைப்பின் இயல்புநிலை              | பிணைப்பு ஹோஸ்ட் (Docker-இன் இயல்புநிலை `0.0.0.0`)                                                                                                      |
-| `NODE_ENV`                              | இயக்கநேர இயல்புநிலை                  | வரிசைப்படுத்தலுக்கு `production` என அமைக்கவும்                                                                                                         |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`             | முகப்புப்பலகையில் காட்டப்பட்டு சேவையகத்திற்கும் வெளிப்படுத்தப்படும் பொது அடிப்படை URL (மரபார்ந்த `BASE_URL`-ஐ மாற்றுகிறது)                             |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`              | கிளவுட் ஒத்திசைவு முனைப்புள்ளியின் அடிப்படை URL (மரபார்ந்த `CLOUD_URL`-ஐ மாற்றுகிறது)                                                                  |
-| `API_KEY_SECRET`                        | `endpoint-proxy-api-key-secret`      | உருவாக்கப்பட்ட API விசைகளுக்கான HMAC ரகசியம்                                                                                                           |
-| `REQUIRE_API_KEY`                       | `false`                              | `/v1/*`-இல் Bearer API விசையைச் செயல்படுத்திக் கட்டாயப்படுத்தும்                                                                                       |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                              | அங்கீகரிக்கப்பட்ட முகப்புப்பலகைப் பயனர்கள் கோரிக்கையின் பேரில் சேமிக்கப்பட்ட முழு API விசை மதிப்புகளைப் பார்க்க அனுமதிக்கும்                           |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                 | தற்காலிகச் சேமிப்பிலுள்ள வழங்குநர் வரம்புத் தரவுக்கான சேவையகப் புதுப்பிப்பு இடைவெளி; UI புதுப்பிப்புப் பொத்தான்கள் இன்னும் கைமுறை ஒத்திசைவைத் தூண்டும் |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                              | எழுதுதல்/இறக்குமதி/மீட்டமைப்புக்கு முன் தானியங்கு SQLite நகலெடுப்புகளை முடக்கும்; கைமுறை காப்புப்பிரதிகள் தொடர்ந்து செயல்படும்                         |
-| `APP_LOG_TO_FILE`                       | `true`                               | பயன்பாட்டு மற்றும் தணிக்கைப் பதிவு வெளியீட்டை வட்டில் சேமிக்கச் செயல்படுத்தும்                                                                         |
-| `AUTH_COOKIE_SECURE`                    | `false`                              | `Secure` அங்கீகார குக்கியை கட்டாயப்படுத்தும் (HTTPS ரிவர்ஸ் ப்ராக்ஸிக்குப் பின்னால்)                                                                   |
-| `CLOUDFLARED_BIN`                       | அமைக்கப்படவில்லை                     | நிர்வகிக்கப்பட்ட பதிவிறக்கத்திற்குப் பதிலாக ஏற்கனவே உள்ள `cloudflared` பைனரியைப் பயன்படுத்தும்                                                         |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                              | நிர்வகிக்கப்பட்ட Quick Tunnels-க்கான போக்குவரத்து (`http2`, `quic`, அல்லது `auto`)                                                                     |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                                | MB-இல் Node.js ஹீப் வரம்பு                                                                                                                             |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                 | ப்ராம்ப்ட் தற்காலிகச் சேமிப்பின் அதிகபட்ச உள்ளீடுகள்                                                                                                   |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                | அர்த்தவியல் தற்காலிகச் சேமிப்பின் அதிகபட்ச உள்ளீடுகள்                                                                                                  |
+| மாறி                                    | இயல்புநிலை               | விளக்கம்                                                                                                                                                        |
+| --------------------------------------- | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `JWT_SECRET`                            | _(தானாக உருவாக்கப்பட்ட)_ | JWT கையொப்பமிடும் இரகசிய — முதல் ஓட்டத்தில் தானாக உருவாக்கப்பட்டு `server.env` க்கு நீடித்தது; தரவு அடைவு இடைக்காலமாக இருக்கும்போது அதை வெளிப்படையாக அமைக்கவும் |
+| `INITIAL_PASSWORD`                      | _(அமைக்கப்படாதது)_       | முதல் உள்நுழைவு கடவுச்சொல். npm/source நிறுவல்கள் `CHANGEME` உடன் தொடங்குகின்றன: அதை மாற்றவும். அமைக்கப்படவில்லை: ஆன்போர்டிங் வழிகாட்டி                         |
+| `DATA_DIR`                              | `~/.omniroute`           | தரவு கோப்பகம் (db, பயன்பாடு, பதிவுகள்)                                                                                                                          |
+| `PORT`                                  | கட்டமைப்பு இயல்புநிலை    | சேவை துறைமுகம் (உதாரணங்களில்`20128` )                                                                                                                           |
+| `HOSTNAME`                              | கட்டமைப்பு இயல்புநிலை    | ஹோஸ்ட்டை பிணைக்கவும் (Docker இயல்புநிலை `0.0.0.0` க்கு)                                                                                                         |
+| `NODE_ENV`                              | இயக்க நேர இயல்புநிலை     | வரிசைப்படுத்த `production` அமைக்கவும்                                                                                                                           |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128` | பொது அடிப்படை URL டாஷ்போர்டில் தோன்றி சேவையகத்திற்கு வெளிப்பட்டது (மரபு `BASE_URL` மாற்றுகிறது)                                                                 |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`  | கிளவுட் ஒத்திசைவு இறுதிப்புள்ளி அடிப்படை URL (மரபு `CLOUD_URL` ஐ மாற்றுகிறது)                                                                                   |
+| `API_KEY_SECRET`                        | _(தானாக உருவாக்கப்பட்ட)_ | உருவாக்கப்பட்ட API விசைகளுக்கான HMAC ரகசியம் — முதல் இயக்கத்தில் தானாக உருவாக்கப்பட்டு `server.env` வரை நீடித்தது                                               |
+| `REQUIRE_API_KEY`                       | `false`                  | `/v1/*` இல் Bearer API விசையைச் செயல்படுத்தவும்                                                                                                                 |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                  | அங்கீகரிக்கப்பட்ட டாஷ்போர்டு பயனர்கள் தேவைக்கேற்ப முழு சேமிக்கப்பட்ட API முக்கிய மதிப்புகளை வெளிப்படுத்த அனுமதிக்கவும்                                          |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                     | தற்காலிகச் சேமிப்பு வழங்குநர் வரம்புகள் தரவிற்கான சேவையகப் பக்க புதுப்பிப்பு கேடன்ஸ்; UI புதுப்பிப்பு பொத்தான்கள் இன்னும் கைமுறை ஒத்திசைவைத் தூண்டுகின்றன       |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                  | writes/import/restore க்கு முன் தானியங்கி SQLite ஸ்னாப்ஷாட்களை முடக்கு ; கைமுறை காப்புப்பிரதிகள் இன்னும் வேலை செய்கின்றன                                        |
+| `APP_LOG_TO_FILE`                       | `true`                   | பயன்பாடு மற்றும் தணிக்கை பதிவு வெளியீட்டை வட்டுக்கு இயக்குகிறது                                                                                                 |
+| `AUTH_COOKIE_SECURE`                    | `false`                  | `Secure` auth குக்கீயை கட்டாயப்படுத்தவும் ( HTTPS ரிவர்ஸ் ப்ராக்ஸிக்கு பின்னால்)                                                                                |
+| `CLOUDFLARED_BIN`                       | அமைக்கப்படவில்லை         | நிர்வகிக்கப்பட்ட பதிவிறக்கத்திற்குப் பதிலாக ஏற்கனவே உள்ள `cloudflared` பைனரியைப் பயன்படுத்தவும்                                                                 |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                  | நிர்வகிக்கப்படும் விரைவு சுரங்கங்களுக்கான போக்குவரத்து (`http2`, `quic`, அல்லது `auto`)                                                                         |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                    | MB இல்Node.js குவியல் வரம்பு                                                                                                                                    |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                     | அதிகபட்ச உடனடி கேச் உள்ளீடுகள்                                                                                                                                  |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                    | அதிகபட்ச சொற்பொருள் கேச் உள்ளீடுகள்                                                                                                                             |
 
-முழுமையான சூழல் மாறிக் குறிப்புக்கு, [README](../README.md)-ஐப் பார்க்கவும்.
+முழு சூழல் மாறி குறிப்புக்கு, [README](../README.md) ஐப் பார்க்கவும்.
 
 ---
 

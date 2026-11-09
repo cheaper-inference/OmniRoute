@@ -350,26 +350,26 @@ API કી: [ડૅશબોર્ડમાંથી]
 
 ---
 
-## 🚀 ડિપ્લૉયમેન્ટ
+## 🚀 જમાવટ
 
-### વૈશ્વિક npm ઇન્સ્ટૉલ (ભલામણ કરેલ)
+### વૈશ્વિક એનપીએમ ઇન્સ્ટોલ (ભલામણ કરેલ)
 
 ```bash
 npm install -g omniroute
 
-# કૉન્ફિગ ડિરેક્ટરી બનાવો
+# Create config directory
 mkdir -p ~/.omniroute
 
-# .env ફાઇલ બનાવો (.env.example જુઓ)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# સર્વર શરૂ કરો
+# Start server
 omniroute
-# અથવા કસ્ટમ પોર્ટ સાથે:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI આપમેળે `~/.omniroute/.env` અથવા `./.env`માંથી `.env` લોડ કરે છે.
+CLI આપોઆપ `.env` `~/.omniroute/.env` અથવા `./.env` થી લોડ કરે છે. કાર્યકારી નિર્દેશિકામાં એક `./.env` કીની માત્ર એક ટૂંકી અનુમતિ સૂચિ સેટ કરી શકે છે (પોર્ટ્સ, `REQUIRE_API_KEY`, લોકેલ અને રંગ સેટિંગ્સ); બીજું બધું `~/.omniroute/.env` માં મૂકો. [CLI લોન્ચ કોન્ટ્રાક્ટ](CLI-LAUNCH-CONTRACTS.md#working-directory-env) જુઓ.
 
 ### ટ્રે મોડ
 
@@ -379,53 +379,53 @@ CLI આપમેળે `~/.omniroute/.env` અથવા `./.env`માંથી 
 omniroute serve --tray
 ```
 
-સર્વર અને ટ્રે તૈયાર થયા પછી આ કમાન્ડ પૂર્ણ થાય છે.
+સર્વર અને ટ્રે તૈયાર થયા પછી આદેશ પાછો આવે છે.
 
-સર્વર ટર્મિનલ વિના પણ ચાલુ રહે છે.
+સર્વર ટર્મિનલ વિના ચાલુ રહે છે.
 
-ટ્રે મોડ macOS, Windows અને ગ્રાફિકલ Linux સેશન્સને સપોર્ટ કરે છે. ટ્રે મોડ ડૅશબોર્ડને આપમેળે ખોલતું નથી.
+ટ્રે મોડ macOS, Windows, અને ગ્રાફિકલ Linux સત્રોને સપોર્ટ કરે છે. ટ્રે મોડ આપમેળે ડેશબોર્ડ ખોલતું નથી.
 
 આ ક્રિયાઓ માટે ટ્રે મેનૂનો ઉપયોગ કરો:
 
-- ડૅશબોર્ડ ખોલો.
+- ડેશબોર્ડ ખોલો.
 - `/dashboard/logs` ખોલો.
-- ઑટો-સ્ટાર્ટ બદલો.
-- OmniRoute બંધ કરો.
+- ઓટો-સ્ટાર્ટ બદલો.
+- OmniRoute રોકો.
 
-આ વિકલ્પો સાથે `--tray`ને જોડશો નહીં:
+આ વિકલ્પો સાથે `--tray` જોડશો નહીં:
 
 - `--daemon`
 - `--log`
 - `--no-recovery`
 
-આ મોડ્સ માટે અલગ પ્રોસેસ માલિકીની જરૂર પડે છે.
+આ મોડ્સને અલગ-અલગ પ્રક્રિયાની માલિકીની જરૂર છે.
 
-મશીનમાં આગામી લૉગિન વખતે સ્ટાર્ટઅપ સક્ષમ કરો:
+આગલા મશીન લોગિન પર સ્ટાર્ટઅપને સક્ષમ કરો:
 
 ```bash
 omniroute autostart enable
 ```
 
-ઑટો-સ્ટાર્ટ macOS, Windows અને ગ્રાફિકલ Linux સેશન્સ પર ટ્રે મોડનો ઉપયોગ કરે છે. હેડલેસ Linux હાલની systemd યુઝર સર્વિસનો ઉપયોગ કરે છે.
+ઑટો-સ્ટાર્ટ macOS, Windows અને ગ્રાફિકલ Linux સત્રો પર ટ્રે મોડનો ઉપયોગ કરે છે. હેડલેસ Linux હાલની સિસ્ટમd વપરાશકર્તા સેવાનો ઉપયોગ કરે છે.
 
-લૉગિન વખતે સ્ટાર્ટઅપ અક્ષમ કરો:
+લોગિન પર સ્ટાર્ટઅપને અક્ષમ કરો:
 
 ```bash
 omniroute autostart disable
 ```
 
-### અનઇન્સ્ટૉલ કરવું
+### અનઇન્સ્ટોલ કરી રહ્યું છે
 
-જ્યારે તમને OmniRouteની હવે જરૂર ન હોય, ત્યારે સંપૂર્ણપણે દૂર કરવા માટે અમે બે ઝડપી સ્ક્રિપ્ટ્સ પ્રદાન કરીએ છીએ:
+જ્યારે તમને હવે OmniRoute જરૂર નથી, ત્યારે અમે સ્વચ્છ દૂર કરવા માટે બે ઝડપી સ્ક્રિપ્ટો પ્રદાન કરીએ છીએ:
 
-| કમાન્ડ                   | ક્રિયા                                                                                      |
-| ------------------------ | ------------------------------------------------------------------------------------------- |
-| `npm run uninstall`      | સિસ્ટમ ઍપ દૂર કરે છે, પરંતુ `~/.omniroute`માં **તમારો DB અને કૉન્ફિગરેશન્સ જાળવી રાખે છે**. |
-| `npm run uninstall:full` | ઍપ દૂર કરે છે અને **બધાં કૉન્ફિગરેશન્સ, કીઝ અને ડેટાબેસ કાયમ માટે ભૂંસી નાખે છે**.          |
+| આદેશ                     | ક્રિયા                                                                                     |
+| ------------------------ | ------------------------------------------------------------------------------------------ |
+| `npm run uninstall`      | સિસ્ટમ એપ્લિકેશન દૂર કરે છે પરંતુ** તમારા DB અને રૂપરેખાંકનો રાખે છે** `~/.omniroute` માં  |
+| `npm run uninstall:full` | એપ્લિકેશન AND કાયમ માટે દૂર કરે છે** તમામ રૂપરેખાંકનો, કીઓ અને ડેટાબેસેસ ભૂંસી નાખે છે** . |
 
-> નોંધ: આ કમાન્ડ્સ ચલાવવા માટે OmniRoute પ્રોજેક્ટ ફોલ્ડર પર જાઓ (જો તમે તેને ક્લોન કર્યું હોય) અને તેમને ચલાવો. વૈકલ્પિક રીતે, જો વૈશ્વિક સ્તરે ઇન્સ્ટૉલ કર્યું હોય, તો તમે ફક્ત `npm uninstall -g omniroute` ચલાવી શકો છો.
+> નોંધ: આ આદેશો ચલાવવા માટે, OmniRoute પ્રોજેક્ટ ફોલ્ડર પર નેવિગેટ કરો (જો તમે તેને ક્લોન કર્યું હોય તો) અને તેને ચલાવો. વૈકલ્પિક રીતે, જો વૈશ્વિક સ્તરે ઇન્સ્ટોલ કરેલ હોય, તો તમે ફક્ત `npm uninstall -g omniroute` ચલાવી શકો છો.
 
-### VPS ડિપ્લૉયમેન્ટ
+### VPS જમાવટ
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -441,21 +441,21 @@ export NEXT_PUBLIC_BASE_URL="http://localhost:20128"
 export API_KEY_SECRET="endpoint-proxy-api-key-secret"
 
 npm run start
-# અથવા: pm2 start npm --name omniroute -- start
+# Or: pm2 start npm --name omniroute -- start
 ```
 
-### PM2 ડિપ્લૉયમેન્ટ (ઓછી મેમરી)
+### PM2 જમાવટ (ઓછી મેમરી)
 
-મર્યાદિત RAM ધરાવતા સર્વર્સ માટે મેમરી મર્યાદા વિકલ્પનો ઉપયોગ કરો:
+મર્યાદિત RAM ધરાવતા સર્વર્સ માટે, મેમરી મર્યાદા વિકલ્પનો ઉપયોગ કરો:
 
 ```bash
-# 512MB મર્યાદા સાથે (ડિફૉલ્ટ)
+# With 512MB limit (default)
 pm2 start npm --name omniroute -- start
 
-# અથવા કસ્ટમ મેમરી મર્યાદા સાથે
+# Or with custom memory limit
 OMNIROUTE_MEMORY_MB=512 pm2 start npm --name omniroute -- start
 
-# અથવા ecosystem.config.jsનો ઉપયોગ કરીને
+# Or using ecosystem.config.js
 pm2 start ecosystem.config.js
 ```
 
@@ -484,24 +484,24 @@ module.exports = {
 ### Docker
 
 ```bash
-# ઇમેજ બિલ્ડ કરો (ડિફૉલ્ટ = codex/claude/droid અગાઉથી ઇન્સ્ટૉલ કરેલું runner-cli)
+# Build image (default = runner-cli with codex/claude/droid preinstalled)
 docker build -t omniroute:cli .
 
-# પોર્ટેબલ મોડ (ભલામણ કરેલ)
+# Portable mode (recommended)
 docker run -d --name omniroute -p 20128:20128 --env-file ./.env -v omniroute-data:/app/data omniroute:cli
 ```
 
-CLI બાઇનરીઝ સાથેના હોસ્ટ-એકીકૃત મોડ માટે મુખ્ય દસ્તાવેજોમાં Docker વિભાગ જુઓ.
+CLI દ્વિસંગી સાથે હોસ્ટ-ઇન્ટિગ્રેટેડ મોડ માટે, મુખ્ય દસ્તાવેજમાં Docker વિભાગ જુઓ.
 
-### Void Linux (xbps-src)
+### રદબાતલ Linux (xbps-src)
 
-Void Linux વપરાશકર્તાઓ `xbps-src` ક્રોસ-કમ્પાઇલેશન ફ્રેમવર્કનો ઉપયોગ કરીને OmniRoute ને નેટિવ રીતે પૅકેજ અને ઇન્સ્ટૉલ કરી શકે છે. આ જરૂરી `better-sqlite3` નેટિવ બાઇન્ડિંગ્સની સાથે Node.js સ્ટૅન્ડઅલોન બિલ્ડને સ્વચાલિત કરે છે.
+Void Linux વપરાશકર્તાઓ `xbps-src` ક્રોસ-કમ્પાઇલેશન ફ્રેમવર્કનો ઉપયોગ કરીને OmniRoute પૅકેજ અને ઇન્સ્ટોલ કરી શકે છે. આ જરૂરી `better-sqlite3` નેટિવ બાઈન્ડિંગ્સ સાથે Node.js સ્ટેન્ડઅલોન બિલ્ડને સ્વચાલિત કરે છે.
 
 <details>
 <summary><b>xbps-src ટેમ્પલેટ જુઓ</b></summary>
 
 ```bash
-# 'omniroute' માટેની ટેમ્પલેટ ફાઇલ
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -522,7 +522,7 @@ export npm_config_fund=false
 export npm_config_audit=false
 
 do_build() {
-	# node-gyp માટે લક્ષ્ય CPU આર્કિટેક્ચર નક્કી કરો
+	# Determine target CPU arch for node-gyp
 	local _gyp_arch
 	case "$XBPS_TARGET_MACHINE" in
 		aarch64*) _gyp_arch=arm64 ;;
@@ -531,29 +531,29 @@ do_build() {
 		*) _gyp_arch=x64 ;;
 	esac
 
-	# 1) બધી ડિપેન્ડન્સીઓ ઇન્સ્ટૉલ કરો – સ્ક્રિપ્ટ્સ અવગણો
+	# 1) Install all deps – skip scripts
 	NODE_ENV=development npm ci --ignore-scripts
 
-	# 2) Next.js સ્ટૅન્ડઅલોન બંડલ બિલ્ડ કરો
+	# 2) Build the Next.js standalone bundle
 	npm run build
 
-	# 3) સ્ટૅન્ડઅલોનમાં સ્ટૅટિક ઍસેટ્સ કૉપિ કરો
+	# 3) Copy static assets into standalone
 	cp -r .next/static .next/standalone/.next/static
 	[ -d public ] && cp -r public .next/standalone/public || true
 
-	# 4) better-sqlite3 નેટિવ બાઇન્ડિંગ કમ્પાઇલ કરો
+	# 4) Compile better-sqlite3 native binding
 	local _node_gyp=/usr/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js
 	(cd node_modules/better-sqlite3 && node "$_node_gyp" rebuild --arch="$_gyp_arch")
 
-	# 5) કમ્પાઇલ કરેલું બાઇન્ડિંગ સ્ટૅન્ડઅલોન બંડલમાં મૂકો
+	# 5) Place the compiled binding into the standalone bundle
 	local _bs3_release=.next/standalone/node_modules/better-sqlite3/build/Release
 	mkdir -p "$_bs3_release"
 	cp node_modules/better-sqlite3/build/Release/better_sqlite3.node "$_bs3_release/"
 
-	# 6) આર્કિટેક્ચર-વિશિષ્ટ sharp બંડલ્સ દૂર કરો
+	# 6) Remove arch-specific sharp bundles
 	rm -rf .next/standalone/node_modules/@img
 
-	# 7) Next.js સ્ટૅટિક વિશ્લેષણ દ્વારા છૂટી ગયેલી pino રનટાઇમ ડિપેન્ડન્સીઓ કૉપિ કરો:
+	# 7) Copy pino runtime deps omitted by Next.js static analysis:
 	for _mod in pino-abstract-transport split2 process-warning; do
 		cp -r "node_modules/$_mod" .next/standalone/node_modules/
 	done
@@ -567,7 +567,7 @@ do_install() {
 	vmkdir usr/lib/omniroute/.next
 	vcopy .next/standalone/. usr/lib/omniroute/.next/standalone
 
-	# પોસ્ટ-ઇન્સ્ટૉલ હૂક દ્વારા ખાલી Next.js ઍપ રાઉટર ડિરેક્ટરીઓ દૂર થતી અટકાવો
+	# Prevent removal of empty Next.js app router dirs by the post-install hook
 	for _d in \
 		.next/standalone/.next/server/app/dashboard \
 		.next/standalone/.next/server/app/dashboard/settings \
@@ -593,32 +593,32 @@ post_install() {
 
 </details>
 
-### એન્વાયર્નમેન્ટ વેરિએબલ્સ
+### પર્યાવરણ ચલો
 
-| વેરિએબલ                                 | ડિફૉલ્ટ                              | વર્ણન                                                                                                          |
-| --------------------------------------- | ------------------------------------ | -------------------------------------------------------------------------------------------------------------- |
-| `JWT_SECRET`                            | `omniroute-default-secret-change-me` | JWT સાઇનિંગ સિક્રેટ (**પ્રોડક્શનમાં બદલો**)                                                                    |
-| `INITIAL_PASSWORD`                      | `CHANGEME`                           | પ્રથમ લૉગિનનો પાસવર્ડ                                                                                          |
-| `DATA_DIR`                              | `~/.omniroute`                       | ડેટા ડિરેક્ટરી (db, વપરાશ, લૉગ્સ)                                                                              |
-| `PORT`                                  | ફ્રેમવર્ક ડિફૉલ્ટ                    | સર્વિસ પોર્ટ (ઉદાહરણોમાં `20128`)                                                                              |
-| `HOSTNAME`                              | ફ્રેમવર્ક ડિફૉલ્ટ                    | બાઇન્ડ હોસ્ટ (Docker માટે ડિફૉલ્ટ `0.0.0.0`)                                                                   |
-| `NODE_ENV`                              | રનટાઇમ ડિફૉલ્ટ                       | ડિપ્લૉયમેન્ટ માટે `production` સેટ કરો                                                                         |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`             | ડૅશબોર્ડમાં દર્શાવવામાં આવતું અને સર્વર માટે ઉપલબ્ધ સાર્વજનિક બેઝ URL (જૂના `BASE_URL`ને બદલે છે)              |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`              | ક્લાઉડ સિંક એન્ડપોઇન્ટ બેઝ URL (જૂના `CLOUD_URL`ને બદલે છે)                                                    |
-| `API_KEY_SECRET`                        | `endpoint-proxy-api-key-secret`      | જનરેટ થયેલી API કી માટેનું HMAC સિક્રેટ                                                                        |
-| `REQUIRE_API_KEY`                       | `false`                              | `/v1/*` પર Bearer API કી ફરજિયાત બનાવો                                                                         |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                              | પ્રમાણિત ડૅશબોર્ડ વપરાશકર્તાઓને માંગ પર સંગ્રહિત API કીનાં સંપૂર્ણ મૂલ્યો જોવાની મંજૂરી આપો                    |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                 | કૅશ કરેલા Provider Limits ડેટા માટે સર્વર-સાઇડ રિફ્રેશ અંતરાલ; UI રિફ્રેશ બટનો હજુ પણ મેન્યુઅલ સિંક શરૂ કરે છે |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                              | રાઇટ/ઇમ્પોર્ટ/રિસ્ટોર પહેલાંના ઑટોમેટિક SQLite સ્નૅપશૉટ્સ અક્ષમ કરો; મેન્યુઅલ બૅકઅપ હજી પણ કાર્ય કરે છે        |
-| `APP_LOG_TO_FILE`                       | `true`                               | ડિસ્ક પર ઍપ્લિકેશન અને ઑડિટ લૉગ આઉટપુટ સક્ષમ કરે છે                                                            |
-| `AUTH_COOKIE_SECURE`                    | `false`                              | `Secure` ઑથ કૂકી ફરજિયાત બનાવો (HTTPS રિવર્સ પ્રૉક્સીની પાછળ)                                                  |
-| `CLOUDFLARED_BIN`                       | સેટ કરેલું નથી                       | મેનેજ્ડ ડાઉનલોડને બદલે હાલની `cloudflared` બાઇનરીનો ઉપયોગ કરો                                                  |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                              | મેનેજ્ડ Quick Tunnels માટેનું ટ્રાન્સપોર્ટ (`http2`, `quic`, અથવા `auto`)                                      |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                                | MBમાં Node.js હીપ મર્યાદા                                                                                      |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                 | પ્રૉમ્પ્ટ કૅશ એન્ટ્રીઓની મહત્તમ સંખ્યા                                                                         |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                | સિમેન્ટિક કૅશ એન્ટ્રીઓની મહત્તમ સંખ્યા                                                                         |
+| ચલ                                      | ડિફૉલ્ટ                  | વર્ણન                                                                                                                                                |
+| --------------------------------------- | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `JWT_SECRET`                            | _(ઓટો-જનરેટ)_            | JWT હસ્તાક્ષર ગુપ્ત — પ્રથમ રન પર સ્વતઃ જનરેટ થયું અને `server.env` પર ચાલુ રહે છે; જ્યારે ડેટા ડિરેક્ટરી ક્ષણિક હોય ત્યારે તેને સ્પષ્ટ રીતે સેટ કરો |
+| `INITIAL_PASSWORD`                      | _(અનસેટ)_                | પ્રથમ લોગિન પાસવર્ડ. npm/source ઇન્સ્ટોલ `CHANGEME` થી શરૂ થાય છે: તેને બદલો. અનસેટ: ઓનબોર્ડિંગ વિઝાર્ડ                                              |
+| `DATA_DIR`                              | `~/.omniroute`           | ડેટા ડિરેક્ટરી (ડીબી, ઉપયોગ, લોગ)                                                                                                                    |
+| `PORT`                                  | ફ્રેમવર્ક ડિફૉલ્ટ        | સર્વિસ પોર્ટ (ઉદાહરણોમાં`20128` )                                                                                                                    |
+| `HOSTNAME`                              | ફ્રેમવર્ક ડિફૉલ્ટ        | યજમાનને બાંધો (Docker `0.0.0.0` માટે ડિફોલ્ટ )                                                                                                       |
+| `NODE_ENV`                              | રનટાઇમ ડિફોલ્ટ           | જમાવટ માટે `production` સેટ કરો                                                                                                                      |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128` | સાર્વજનિક આધાર URL ડેશબોર્ડ પર સપાટી પર આવ્યો અને સર્વર સામે આવ્યો (લેગસી `BASE_URL` ને બદલે છે)                                                     |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`  | ક્લાઉડ સિંક એન્ડપોઇન્ટ બેઝ URL (લેગસી `CLOUD_URL` ને બદલે છે)                                                                                        |
+| `API_KEY_SECRET`                        | _(ઓટો-જનરેટ)_            | જનરેટ કરેલ API કી માટેHMAC સિક્રેટ — પ્રથમ રન પર સ્વતઃ જનરેટ થાય છે અને `server.env` પર ચાલુ રહે છે                                                  |
+| `REQUIRE_API_KEY`                       | `false`                  | `/v1/*` પર Bearer API કી લાગુ કરો                                                                                                                    |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                  | અધિકૃત ડેશબોર્ડ વપરાશકર્તાઓને માંગ પર સંપૂર્ણ સંગ્રહિત API કી મૂલ્યો જાહેર કરવાની મંજૂરી આપો                                                         |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                     | કેશ્ડ પ્રદાતા મર્યાદા ડેટા માટે સર્વર-સાઇડ રિફ્રેશ કેડન્સ; UI રિફ્રેશ બટનો હજુ પણ મેન્યુઅલ સિંકને ટ્રિગર કરે છે                                      |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                  | writes/import/restore પહેલા સ્વચાલિત SQLite સ્નેપશોટને અક્ષમ કરો; મેન્યુઅલ બેકઅપ હજુ પણ કામ કરે છે                                                   |
+| `APP_LOG_TO_FILE`                       | `true`                   | ડિસ્ક પર એપ્લિકેશન અને ઓડિટ લોગ આઉટપુટને સક્ષમ કરે છે                                                                                                |
+| `AUTH_COOKIE_SECURE`                    | `false`                  | `Secure` auth કૂકી પર દબાણ કરો ( HTTPS રિવર્સ પ્રોક્સી પાછળ)                                                                                         |
+| `CLOUDFLARED_BIN`                       | અનસેટ                    | સંચાલિત ડાઉનલોડને બદલે હાલની `cloudflared` બાઈનરીનો ઉપયોગ કરો                                                                                        |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                  | વ્યવસ્થાપિત ક્વિક ટનલ (`http2`, `quic`, અથવા `auto`) માટે પરિવહન                                                                                     |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                    | MB માંNode.js હીપ મર્યાદા                                                                                                                            |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                     | મહત્તમ પ્રોમ્પ્ટ કેશ એન્ટ્રીઓ                                                                                                                        |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                    | મહત્તમ સિમેન્ટીક કેશ એન્ટ્રીઓ                                                                                                                        |
 
-એન્વાયરમેન્ટ વેરિએબલ્સના સંપૂર્ણ સંદર્ભ માટે, [README](../README.md) જુઓ.
+સંપૂર્ણ પર્યાવરણ ચલ સંદર્ભ માટે, [README](../README.md) જુઓ.
 
 ---
 

@@ -340,82 +340,82 @@ API キー: [ダッシュボードから取得]
 
 ---
 
-## 🚀 デプロイ
+## 🚀展開
 
-### グローバル npm インストール（推奨）
+### グローバル npm インストール (推奨)
 
 ```bash
 npm install -g omniroute
 
-# 設定ディレクトリを作成
+# Create config directory
 mkdir -p ~/.omniroute
 
-# .env ファイルを作成（.env.example を参照）
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# サーバーを起動
+# Start server
 omniroute
-# またはカスタムポートを指定:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI は `~/.omniroute/.env` または `./.env` から `.env` を自動的に読み込みます。
+CLI 、 `~/.omniroute/.env`または`./.env`から`.env`自動的にロードします。作業ディレクトリ内の`./.env`は、キーの短い許可リスト (ポート、 `REQUIRE_API_KEY`、ロケール、および色の設定) のみを設定できます。他のすべてを`~/.omniroute/.env`に入れます。 [CLI起動コントラクト」](CLI-LAUNCH-CONTRACTS.md#working-directory-env)を参照してください。
 
 ### トレイモード
 
-OmniRoute をシステムトレイで起動します:
+システム トレイでOmniRoute起動します。
 
 ```bash
 omniroute serve --tray
 ```
 
-このコマンドは、サーバーとトレイの準備が完了すると終了します。
+サーバーとトレイの準備が完了すると、コマンドが返されます。
 
-サーバーはターミナルなしで動作を継続します。
+サーバーは端末なしでも継続します。
 
-トレイモードは macOS、Windows、およびグラフィカルな Linux セッションをサポートします。トレイモードではダッシュボードは自動的に開きません。
+トレイ モードはmacOS、 Windows、およびグラフィカルLinuxセッションをサポートします。トレイ モードでは、ダッシュボードが自動的に開きません。
 
-トレイメニューから次の操作を実行できます:
+次の操作にはトレイ メニューを使用します。
 
-- ダッシュボードを開く。
-- `/dashboard/logs` を開く。
-- 自動起動の設定を変更する。
-- OmniRoute を停止する。
+- ダッシュボードを開きます。
+- `/dashboard/logs`を開きます。
+- 自動起動を変更します。
+- OmniRouteを停止します。
 
-`--tray` を次のオプションと併用しないでください:
+`--tray`次のオプションと組み合わせないでください。
 
 - `--daemon`
 - `--log`
 - `--no-recovery`
 
-これらのモードでは、異なるプロセス所有方式が必要です。
+これらのモードでは、異なるプロセス所有権が必要です。
 
-次回のマシンへのログイン時に起動するよう有効化します:
+次回のマシンログイン時の起動を有効にします。
 
 ```bash
 omniroute autostart enable
 ```
 
-自動起動では、macOS、Windows、およびグラフィカルな Linux セッションでトレイモードが使用されます。ヘッドレス Linux では、既存の systemd ユーザーサービスが使用されます。
+自動開始はmacOS、 Windows、およびグラフィカルLinuxセッションでトレイ モードを使用します。ヘッドレスLinuxは既存の systemd ユーザー サービスを使用します。
 
-ログイン時の起動を無効化します:
+ログイン時の起動を無効にします。
 
 ```bash
 omniroute autostart disable
 ```
 
-### アンインストール
+### アンインストールする
 
-OmniRoute が不要になった場合、クリーンに削除するための簡単なスクリプトを 2 つ用意しています:
+OmniRouteが必要なくなった場合は、クリーンに削除するための 2 つの簡単なスクリプトが提供されています。
 
-| コマンド                 | 操作                                                                                  |
-| ------------------------ | ------------------------------------------------------------------------------------- |
-| `npm run uninstall`      | システムアプリを削除しますが、`~/.omniroute` 内の**データベースと設定は保持します**。 |
-| `npm run uninstall:full` | アプリを削除し、さらに**すべての設定、キー、データベースを完全に消去します**。        |
+| 指示                     | アクション                                                                  |
+| ------------------------ | --------------------------------------------------------------------------- |
+| `npm run uninstall`      | システムアプリを削除しますが、** DBと設定を保持します**`~/.omniroute`で。   |
+| `npm run uninstall:full` | アプリAND完全に削除します**すべての設定、キー、データベースを消去します**。 |
 
-> 注: これらのコマンドを実行するには、OmniRoute プロジェクトフォルダー（クローンした場合）に移動してから実行してください。または、グローバルにインストールした場合は、`npm uninstall -g omniroute` を実行するだけです。
+> 注: これらのコマンドを実行するには、 OmniRouteプロジェクト フォルダー (クローンを作成した場合) に移動して実行します。あるいは、グローバルにインストールされている場合は、単に`npm uninstall -g omniroute`を実行することもできます。
 
-### VPS デプロイ
+### VPS展開
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -431,25 +431,25 @@ export NEXT_PUBLIC_BASE_URL="http://localhost:20128"
 export API_KEY_SECRET="endpoint-proxy-api-key-secret"
 
 npm run start
-# または: pm2 start npm --name omniroute -- start
+# Or: pm2 start npm --name omniroute -- start
 ```
 
-### PM2 デプロイ（低メモリ）
+### PM2デプロイメント (低メモリ)
 
-RAM が限られているサーバーでは、メモリ制限オプションを使用してください:
+RAMが制限されているサーバーの場合は、メモリ制限オプションを使用します。
 
 ```bash
-# 512MB の制限を指定（デフォルト）
+# With 512MB limit (default)
 pm2 start npm --name omniroute -- start
 
-# またはカスタムメモリ制限を指定
+# Or with custom memory limit
 OMNIROUTE_MEMORY_MB=512 pm2 start npm --name omniroute -- start
 
-# または ecosystem.config.js を使用
+# Or using ecosystem.config.js
 pm2 start ecosystem.config.js
 ```
 
-`ecosystem.config.js` を作成します:
+`ecosystem.config.js`を作成します。
 
 ```javascript
 module.exports = {
@@ -474,24 +474,24 @@ module.exports = {
 ### Docker
 
 ```bash
-# イメージをビルド（デフォルト = codex/claude/droid がプリインストールされた runner-cli）
+# Build image (default = runner-cli with codex/claude/droid preinstalled)
 docker build -t omniroute:cli .
 
-# ポータブルモード（推奨）
+# Portable mode (recommended)
 docker run -d --name omniroute -p 20128:20128 --env-file ./.env -v omniroute-data:/app/data omniroute:cli
 ```
 
-CLI バイナリを使用するホスト統合モードについては、メインドキュメントの Docker セクションを参照してください。
+CLIバイナリを使用したホスト統合モードについては、メイン ドキュメントのDockerセクションを参照してください。
 
-### Void Linux (xbps-src)
+### ボイドLinux (xbps-src)
 
-Void Linux ユーザーは、`xbps-src` クロスコンパイルフレームワークを使用して、OmniRoute をネイティブにパッケージ化してインストールできます。これにより、Node.js のスタンドアロンビルドと、必要な `better-sqlite3` ネイティブバインディングが自動的に処理されます。
+Void Linuxユーザーは、 `xbps-src`クロスコンパイル フレームワークを使用して、 OmniRouteネイティブにパッケージ化してインストールできます。これにより、必要な`better-sqlite3`ネイティブ バインディングとともにNode.jsスタンドアロン ビルドが自動化されます。
 
 <details>
-<summary><b>xbps-src テンプレートを表示</b></summary>
+<summary><b>xbps-src テンプレートを表示する</b></summary>
 
 ```bash
-# 'omniroute' 用テンプレートファイル
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -512,7 +512,7 @@ export npm_config_fund=false
 export npm_config_audit=false
 
 do_build() {
-	# node-gyp のターゲット CPU アーキテクチャを判定
+	# Determine target CPU arch for node-gyp
 	local _gyp_arch
 	case "$XBPS_TARGET_MACHINE" in
 		aarch64*) _gyp_arch=arm64 ;;
@@ -521,29 +521,29 @@ do_build() {
 		*) _gyp_arch=x64 ;;
 	esac
 
-	# 1) すべての依存関係をインストール – スクリプトはスキップ
+	# 1) Install all deps – skip scripts
 	NODE_ENV=development npm ci --ignore-scripts
 
-	# 2) Next.js スタンドアロンバンドルをビルド
+	# 2) Build the Next.js standalone bundle
 	npm run build
 
-	# 3) 静的アセットをスタンドアロンにコピー
+	# 3) Copy static assets into standalone
 	cp -r .next/static .next/standalone/.next/static
 	[ -d public ] && cp -r public .next/standalone/public || true
 
-	# 4) better-sqlite3 ネイティブバインディングをコンパイル
+	# 4) Compile better-sqlite3 native binding
 	local _node_gyp=/usr/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js
 	(cd node_modules/better-sqlite3 && node "$_node_gyp" rebuild --arch="$_gyp_arch")
 
-	# 5) コンパイル済みバインディングをスタンドアロンバンドルに配置
+	# 5) Place the compiled binding into the standalone bundle
 	local _bs3_release=.next/standalone/node_modules/better-sqlite3/build/Release
 	mkdir -p "$_bs3_release"
 	cp node_modules/better-sqlite3/build/Release/better_sqlite3.node "$_bs3_release/"
 
-	# 6) アーキテクチャ固有の sharp バンドルを削除
+	# 6) Remove arch-specific sharp bundles
 	rm -rf .next/standalone/node_modules/@img
 
-	# 7) Next.js の静的解析で省略された pino のランタイム依存関係をコピー:
+	# 7) Copy pino runtime deps omitted by Next.js static analysis:
 	for _mod in pino-abstract-transport split2 process-warning; do
 		cp -r "node_modules/$_mod" .next/standalone/node_modules/
 	done
@@ -557,7 +557,7 @@ do_install() {
 	vmkdir usr/lib/omniroute/.next
 	vcopy .next/standalone/. usr/lib/omniroute/.next/standalone
 
-	# インストール後フックによって空の Next.js App Router ディレクトリが削除されるのを防止
+	# Prevent removal of empty Next.js app router dirs by the post-install hook
 	for _d in \
 		.next/standalone/.next/server/app/dashboard \
 		.next/standalone/.next/server/app/dashboard/settings \
@@ -585,30 +585,30 @@ post_install() {
 
 ### 環境変数
 
-| 変数                                    | デフォルト                           | 説明                                                                                                        |
-| --------------------------------------- | ------------------------------------ | ----------------------------------------------------------------------------------------------------------- |
-| `JWT_SECRET`                            | `omniroute-default-secret-change-me` | JWT 署名用シークレット（**本番環境では変更してください**）                                                  |
-| `INITIAL_PASSWORD`                      | `CHANGEME`                           | 初回ログイン用パスワード                                                                                    |
-| `DATA_DIR`                              | `~/.omniroute`                       | データディレクトリ（データベース、使用状況、ログ）                                                          |
-| `PORT`                                  | フレームワークのデフォルト           | サービスポート（例では `20128`）                                                                            |
-| `HOSTNAME`                              | フレームワークのデフォルト           | バインド先ホスト（Docker のデフォルトは `0.0.0.0`）                                                         |
-| `NODE_ENV`                              | ランタイムのデフォルト               | デプロイ時には `production` に設定                                                                          |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`             | ダッシュボードに表示され、サーバーにも公開される公開ベース URL（従来の `BASE_URL` を置き換え）              |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`              | クラウド同期エンドポイントのベース URL（従来の `CLOUD_URL` を置き換え）                                     |
-| `API_KEY_SECRET`                        | `endpoint-proxy-api-key-secret`      | 生成される API キー用の HMAC シークレット                                                                   |
-| `REQUIRE_API_KEY`                       | `false`                              | `/v1/*` で Bearer API キーを必須にする                                                                      |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                              | 認証済みのダッシュボードユーザーが、保存されている API キーの完全な値をオンデマンドで表示できるようにする   |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                 | キャッシュされたプロバイダー制限データのサーバー側更新間隔。UI の更新ボタンでは引き続き手動同期が実行される |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                              | 書き込み、インポート、復元前の SQLite 自動スナップショットを無効化する。手動バックアップは引き続き利用可能  |
-| `APP_LOG_TO_FILE`                       | `true`                               | アプリケーションログと監査ログのディスクへの出力を有効にする                                                |
-| `AUTH_COOKIE_SECURE`                    | `false`                              | `Secure` 認証 Cookie を強制する（HTTPS リバースプロキシの背後で使用）                                       |
-| `CLOUDFLARED_BIN`                       | 未設定                               | 管理対象としてダウンロードする代わりに、既存の `cloudflared` バイナリを使用する                             |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                              | 管理対象の Quick Tunnels 用トランスポート（`http2`、`quic`、または `auto`）                                 |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                                | Node.js のヒープ上限（MB）                                                                                  |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                 | プロンプトキャッシュの最大エントリ数                                                                        |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                | セマンティックキャッシュの最大エントリ数                                                                    |
+| 変数                                    | デフォルト                 | 説明                                                                                                                              |
+| --------------------------------------- | -------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `JWT_SECRET`                            | _(自動生成)_               | JWT署名シークレット—最初の実行時に自動生成され、 `server.env`に保持されます。データディレクトリが一時的な場合は明示的に設定します |
+| `INITIAL_PASSWORD`                      | _(未設定)_                 | 初回ログインパスワード。 npm/sourceインストールは`CHANGEME`で始まります。それを置き換えます。未設定: オンボーディング ウィザード  |
+| `DATA_DIR`                              | `~/.omniroute`             | データディレクトリ (データベース、使用状況、ログ)                                                                                 |
+| `PORT`                                  | フレームワークのデフォルト | サービスポート (例では`20128` )                                                                                                   |
+| `HOSTNAME`                              | フレームワークのデフォルト | バインドホスト (Dockerデフォルトは`0.0.0.0`)                                                                                      |
+| `NODE_ENV`                              | 実行時のデフォルト         | デプロイ用に`production`を設定する                                                                                                |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`   | パブリックベースURLダッシュボードに表示され、サーバーに公開されます (従来の`BASE_URL`を置き換えます)                              |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`    | クラウド同期エンドポイント ベースURL (従来の`CLOUD_URL`を置き換える)                                                              |
+| `API_KEY_SECRET`                        | _(自動生成)_               | 生成されたAPIキーのHMACシークレット—最初の実行時に自動生成され、 `server.env`に保持されます                                       |
+| `REQUIRE_API_KEY`                       | `false`                    | `/v1/*`に Bearer APIキーを強制する                                                                                                |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                    | 認証されたダッシュボード ユーザーが、保存されている完全なAPIキー値をオンデマンドで公開できるようにする                            |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                       | キャッシュされたプロバイダー制限データのサーバー側の更新頻度。 UI更新ボタンは依然として手動同期をトリガーします                   |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                    | writes/import/restoreの前に自動SQLiteスナップショットを無効にします。手動バックアップは引き続き機能します                         |
+| `APP_LOG_TO_FILE`                       | `true`                     | アプリケーションと監査ログのディスクへの出力を有効にします。                                                                      |
+| `AUTH_COOKIE_SECURE`                    | `false`                    | `Secure`認証 Cookie を強制する ( HTTPSリバース プロキシの背後)                                                                    |
+| `CLOUDFLARED_BIN`                       | 設定を解除する             | 管理されたダウンロードの代わりに既存の`cloudflared`バイナリを使用する                                                             |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                    | 管理されたクイック トンネルのトランスポート (`http2`、 `quic`、または`auto`)                                                      |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                      | MBのNode.jsヒープ制限                                                                                                             |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                       | プロンプト キャッシュ エントリの最大数                                                                                            |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                      | セマンティック キャッシュ エントリの最大数                                                                                        |
 
-環境変数の完全なリファレンスについては、[README](../README.md) を参照してください。
+環境変数の完全なリファレンスについては、 [README](../README.md)参照してください。
 
 ---
 
@@ -1284,36 +1284,36 @@ OmniRoute はクラウドコーディングエージェント（**OpenAI Codex C
 
 ---
 
-## 🛠️ プログラムによる管理
+## 🛠️プログラマティック管理
 
-**`manage` スコープを持つ Bearer キー**を使用して、すべての OmniRoute リソース（プロバイダー、コンボ、キー、設定）を HTTP 経由で管理できます。
+すべてのOmniRouteリソース (プロバイダー、コンボ、キー、設定) をHTTP経由で管理できます。** `manage`スコープのベアラー キー**。
 
-キーは **ダッシュボード → API Keys → New Key → Scope: manage** から生成し、次のように使用します。
+でキーを生成します**ダッシュボード→ APIキー→新しいキー→スコープ: 管理**、 それから：
 
 ```bash
-# プロバイダーを一覧表示
+# List providers
 curl http://localhost:20128/api/providers \
   -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY"
 
-# プロバイダー接続を追加
+# Add a provider connection
 curl -X POST http://localhost:20128/api/providers \
   -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY" \
   -H "Content-Type: application/json" \
   -d '{ "provider": "openai", "apiKey": "sk-...", "name": "main" }'
 
-# コンボを作成
+# Create a combo
 curl -X POST http://localhost:20128/api/combos \
   -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY" \
   -H "Content-Type: application/json" \
   -d '{ "name": "premium", "strategy": "priority", "models": [{ "model": "cc/claude-opus-4-7" }, { "model": "glm/glm-5.1" }] }'
 
-# API キーを一覧表示／作成
+# List/create API keys
 curl http://localhost:20128/api/keys -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY"
 curl -X POST http://localhost:20128/api/keys -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY" \
   -d '{ "name": "ci-bot", "scopes": ["chat"] }'
 ```
 
-エンドポイントの完全な一覧とリクエスト／レスポンスのスキーマについては、[API_REFERENCE.md](../reference/API_REFERENCE.md) を参照してください。
+完全なエンドポイント カタログとrequest/responseスキーマについては、 [API_REFERENCE.md](../reference/API_REFERENCE.md)を参照してください。
 
 ---
 

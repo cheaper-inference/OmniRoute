@@ -242,7 +242,7 @@ src/
 | -------------------------------- | --------------------------------------------------------------------------------------------------- |
 | `components/`                    | Irányítópult komponens API: `packages/ui-kit` adapterek — lásd `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: a képernyők által használt ikonnevek → Lucide összetevők (`<Icon>`)                     |
-| `constants/providers.ts`         | **380 szolgáltató** Zod érvényesítéssel (az igazság forrása)                                        |
+| `constants/providers.ts`         | **381 szolgáltató** Zod érvényesítéssel (az igazság forrása)                                        |
 | `constants/cliTools.ts`          | Külső CLI eszköznyilvántartás                                                                       |
 | `constants/routingStrategies.ts` | **20 útválasztási stratégia** prioritásokkal                                                        |
 | `constants/publicApiRoutes.ts`   | Útvonalak, amelyek hordozó hitelesítést igényelnek (vs menedzsment)                                 |
@@ -391,7 +391,7 @@ open-sse/
 
 ---
 
-## `docs/` — Nyilvános dokumentáció (7 gyökérfájl, + 17 alkönyvtár)
+## `docs/` — Nyilvános dokumentáció (7 gyökérfájl + 17 aldirs)
 
 ### Legfelső szintű útmutatók
 
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Külső CLI integrációk + Belső OmniRoute CLI                                                     |
 | `I18N.md`                   | i18n architektúra, nyelv hozzáadása, 67 terület                                                 |
 | `UNINSTALL.md`              | Tiszta eltávolítási lépések                                                                     |
-| `PROVIDER_REFERENCE.md`     | **Automatikusan generált** 380 szolgáltató katalógusa (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Automatikusan generált** 381 szolgáltató katalógusa (regen: `npm run gen:provider-reference`) |
 
 ### Alrendszer mély merülések
 

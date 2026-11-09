@@ -296,6 +296,95 @@ Siqish kombinatsiyalari — marshrutlash kombinatsiyalariga tayinlanishi mumkin 
 
 Boshqaruv panelidagi joylashuvi: `Dashboard -> Context & Cache -> Compression Combos`.
 
+## Old shartlar / operator qo'llanmasi (CCR & session-dedup)
+
+CCR (`ccr`) va `session-dedup` matnni almashtiradi yoki siljitadi va a qoldiradi** marker** orqasida. Ushbu bo'lim mijozni ulash, ikkita markerni o'qish va ko'rsatilgan tarkibni olish yoki diagnostika qilish uchun operator ma'lumotnomasidir. Har bir dvigatelning mexanikasi yuqorida yoritilgan; bu "qanday ishga tushiraman" qatlami.
+
+### Transport va oxirgi nuqtalar
+
+CCR vositalarini ochadigan MCP serveriga uchta yo'l bilan kirish mumkin. Standart URL bazasi `http://localhost:20128` (`OMNIROUTE_BASE_URL`):
+
+| Transport                            | URL / buyruq                            | Eslatmalar                                                                                                                                   |
+| ------------------------------------ | --------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| Oqimli HTTP (mijoz, tavsiya etiladi) | `http://localhost:20128/api/mcp/stream` | Hozirgi MCP mijozlari bilan gaplashadigan oxirgi nuqta.                                                                                      |
+| Eski SSE singleton                   | `http://localhost:20128/api/mcp/sse`    | Qadimgi singleton transporti. Bu** yopiladi** oqimli seanslar; `streamable-http` mijozlaridan `/api/mcp/stream` qarshi foydalaning, bu emas. |
+| stdio                                | `omniroute --mcp`                       | Jarayonni keltirib chiqaradigan IDE MCP konfiguratsiyasi uchun. `--dev` bayrog'i yo'q; `omniroute --mcp` - stdio kirish nuqtasi.             |
+
+### Saqlash darajalari (qayta ishga tushirilganda omon qoladi)
+
+CCR - a** ikki bosqichli** do'kon, faqat xotirada emas:
+
+- **Issiq xotira darajasi** — bosh blok uchun 2 MiB, boshiga 16 MiB, global 64 MiB. Yozuvlar standart 24 soat TTL (maksimal 7 kun). Xotiradan to'liq MCP olish 256 KiB bilan cheklangan; har qanday kattaroq narsaga diapazonli/grep rejimlari orqali erishish mumkin.
+- **Bardoshli SQLite darajasi** (`ccr_blocks`, `COMPRESSION_CCR_DURABLE_STORE`, sukut boʻyicha yoqilgan) — xotiradagi sathni qoʻllab-quvvatlaydi, shuning uchun blok LRU koʻchirilishi, qayta ishga tushirilishi yoki boshqa nusxada qoʻnishi mumkin boʻlmaganda omon qoladi. Qator blokning TTL saqlaydi, shuning uchun uning TTL dan o‘tgan blok ikkala sathdan ham o‘chib ketadi.
+
+Uchta qo'riqchi bardoshli darajani chegaralangan — a blok xotirada qoladi - faqat quyidagi hollarda:
+
+1. blok tugadi** 512 KB** (`MAX_DURABLE_BLOCK_BYTES`);
+2. ish vaqti bulutli ish vaqti (mahalliy disk yo'q);
+3. `COMPRESSION_CCR_DURABLE_STORE=false`.
+
+Shunday qilib, "blok yo'qoldi" qayta ishga tushirish hikoyasi emas: mahalliy, bulutli bo'lmagan ish vaqtidagi sub-512 KB bloki TTL tugaguniga qadar chidamli qatlam orqali qayta ishga tushirilganda omon qoladi. O'zgaruvchi uchun [Atrof-muhit ma'lumotnomasiga](../reference/ENVIRONMENT.md) qarang.
+
+### Ikkita belgi
+
+| Marker                                | Ma'nosi                                                                                                                                             | Model nima qilishi kerak                                                                                                                                                                                                                    |
+| ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `[CCR retrieve hash=<24hex> chars=N]` | Katta blok kontent-manzilli saqlangan.                                                                                                              | bilan `omniroute_ccr_retrieve` ga qo'ng'iroq qiling** 24-hex xesh so'zma-so'z ko'chirildi** asl matnni qaytarish uchun.                                                                                                                     |
+| `[dedup:ref sha=…]`                   | `session-dedup` elided matn allaqachon xuddi shu seansning oldingi navbatida yuborilgan. Bu a** qasddan orqaga qarash** , yo'qotish yoki xato emas. | Do** emas** har qanday vositani chaqiring va bajaring** emas** uni "qayta qurishga" harakat qiling. Matnning birinchi paydo bo'lishi kanonik nusxadir; joriy navbat hech qachon qayta yozilmaydi, u keyingi burilishda deduktsiya qilinadi. |
+
+`[dedup:ref]` orqaga qarash - bu ataylab qabul qilingan protokol qarori — oldindan yuborish rekonstruksiyasi yo'q. Buni "aynan ushbu matn ushbu sessiyada avvalroq simda bo'lgan" deb hisoblang.
+
+### Mijoz uchun zaruriy shartlar
+
+- **Kalit (stdio):** stdio qo'ng'iroq qiluvchisi har bir so'rov identifikatoriga ega emas, shuning uchun u `OMNIROUTE_API_KEY` bilan autentifikatsiya qiladi ( MCP serverining `env` ga o'rnatilgan). Busiz qo'ng'iroq qiluvchi anonim bo'lib qoladi va direktor talab qiladigan vositalar yomonlashishi mumkin.
+- **`tools[]` - inyeksiyaning old sharti.** CCR retrieve-protocol ko'rsatmasi (#8033) kiritiladi** faqat** so'rovning e'lon qilingan `tools[]` mijozning `omniroute_ccr_retrieve` erishishi mumkinligini isbotlaganida. Moslik ajratuvchi (`__`, `.`, `/`, `:`) — hech qachon yalang'och pastki qator — bilan chegaralangan so'nggi segment mosligidir, shuning uchun `mcp__gateway__omniroute_ccr_retrieve` kabi nomlar oralig'idagi nom hali ham hisobga olinadi. Yo'q yoki mos kelmaydigan `tools[]` ko'rsatma dizayn bo'yicha kiritilmaganligini bildiradi.
+- **`codemode:false` (OpenCode mijozlari).** OpenCode sukut bo'yicha Kod rejimiga o'rnatiladi, bu modelga faqat o'zining mahalliy vositalarini reklama qiladi va** qilmaydi** MCP vositalarini mahalliy `tools[]` ro'yxatiga qo'ying. MCP server yozuviga `codemode: false` o'rnating, shuning uchun `omniroute_ccr_*` vositalari reklama qilinadi. Bu a** mijoz** sozlash, OmniRoute emas. U hali CCR ko'rsatmasini kiritmaydi: OpenCode asbobni `<server>_<tool>` deb nomlaydi, shuning uchun `omniroute` deb nomlangan server `omniroute_omniroute_ccr_retrieve` ochib beradi va `_` mos ajratuvchilardan biri emas.
+- **Direktorlar.** Saqlash va olish autentifikatsiya qilingan asosiy (har bir API kaliti uchun) uchun ajratilgan. Kalit faqat o'z bloklarini ko'radi.
+
+### Har bir asbob uchun doiralar
+
+Dar doiradagi HTTP/SSE qo‘ng‘iroq qiluvchilar uchun amal qilish doirasi doimo yoniq. `omniroute_` CCR asboblari quyidagilarni talab qiladi:
+
+| Asbob                    | Qo'llash doirasi    |
+| ------------------------ | ------------------- |
+| `omniroute_ccr_store`    | `write:compression` |
+| `omniroute_ccr_delete`   | `write:compression` |
+| `omniroute_ccr_retrieve` | `read:compression`  |
+| `omniroute_ccr_inspect`  | `read:compression`  |
+| `omniroute_ccr_list`     | `read:compression`  |
+| `omniroute_ccr_stats`    | `read:compression`  |
+
+Yo'qolgan qamrov a ni qaytaradi**MCP vositasi xatosi natijasi** (`isError: true`, HTTP 403 — emas, `403 LOCAL_ONLY` alohida orqaga qaytish marshruti qo‘riqlash authidir): `Error: Insufficient MCP scopes for <tool>. Missing: <scope>.` Minimal masofaviy kalit `mcp:connect` (faqat `/api/mcp/` mahalliy o‘yib chiqarishga ruxsat beradi) va unga kerak bo‘lgan maxsus read/write doirasini ushlab turishi mumkin.
+
+### Mijoz matritsasi
+
+| Mijoz                   | Transport                          | Foydalanish uchun konfiguratsiya                                                                                                                                                                                                                                               | `tools[]` reklama qilinganmi? (→ CCR ko'rsatmasi kiritilgan)                                                                                                                                                      |
+| ----------------------- | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Claude kodi             | oqimli-http                        | `claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream`                                                                                                                                                                                              | Ha — MCP-qobiliyati; in'ektsiya qilingan.                                                                                                                                                                         |
+| Cursor / Cline          | `stdio`** yoki** `streamable-http` | stdio: `env` dagi `OMNIROUTE_API_KEY` bilan `omniroute --mcp` ; yoki `http://localhost:20128/api/mcp/stream` ga ishora qiluvchi masofaviy MCP yozuvi (qarang: [→ MCP mijoz konfiguratsiyasini sozlash bo‘yicha qo‘llanma](../guides/SETUP_GUIDE.md#mcp-client-configuration) ) | Ha — `omniroute_ccr_*` vositalarini reklama qiling.                                                                                                                                                               |
+| OpenCode                | oqimli-http                        | `opencode mcp add omniroute --url http://localhost:20128/api/mcp/stream`, plus `codemode: false`                                                                                                                                                                               | Faqat `codemode: false` bilan reklama qilingan asboblar; ko'rsatma hali ham kiritilmagan, chunki `omniroute_omniroute_ccr_retrieve` mos kelmaydi ( [mijoz uchun zarur shartlarga](#client-prerequisites) qarang). |
+| OpenAI bilan mos keladi | OpenAI-mos HTTP (chat yakunlari)   | OpenAI-mos keladigan so'nggi nuqtaga qarshi standart chat-to'ldirish mijozi                                                                                                                                                                                                    | **Hech qachon** — oddiy OpenAI-ga mos keladigan qo'ng'iroq qiluvchiga hech qachon asbobga qo'ng'iroq qilish aytilmaydi va ko'rsatma kiritilmaydi.                                                                 |
+
+### Qidiruv cheklovlari va sahifalash
+
+MCP vositasi matn natijalari `mcpAccessibility.maxTextChars` atrofida kesiladi (standart `50000`). Blokni `full` olish 256 KiB — bilan cheklangan** cheksiz to'liq olish yo'q** . Blokning `chars=N` katta bo'lsa, hamma narsani tortib olish o'rniga uni sahifalang:
+
+- Asosiy qoida:**`chars > 40000` → `mode` dan foydalaning** , hech qachon yalang'och to'la.
+- `mode:"grep"` — regex `pattern` satr satrga mos keladi, 1000 tagacha mos keladigan satrlar (`unique: true` tomchilar takrorlanadi), "menga kerak bo'lgan bitta qatorni toping" uchun eng arzon.
+- `mode:"lines"` — 1-indekslangan qator diapazoni; `start` ham, `end` kerak.
+- `mode:"head"` / `mode:"tail"` — first/last `n` chiziqlari.
+- `mode:"stats"` — satr, belgi va bayt sonini tanasiz.
+
+Bir vaqtning o'zida hamma narsani so'rash o'rniga, sahifalar bo'ylab uzoq masofani bosib o'tish uchun `start`/`end` bilan `mode:"lines"` foydalaning.
+
+### Asbobga nom berish
+
+Qayta tiklash vositasi hozirda `omniroute_ccr_retrieve` deb nomlangan ( `omniroute_` prefiksi serverlar o'rtasidagi nomlar to'qnashuvi uchun sanalangan vaqtinchalik yechimdir). Tozaroq chegaralangan qo'shimchali asbob nomi va MCP JSON natijalari uchun tuzatish o'rta qatorning kesilgan qismi yuqori oqim kuzatuvi sifatida kuzatiladi; bu sahifa faqat joriy, yuborilgan xatti-harakatni hujjatlashtiradi.
+
+### Seansning hayot aylanishi
+
+Streamable-HTTP seanslari ishlamay qoladi va server ularni yig'adi; bo'sh turgan oyna `MCP_SESSION_IDLE_MS` doimiysi (qattiq kodlangan qiymat emas, nomi bilan ko'rsatilgan, shuning uchun u o'zgarganda bu sahifa siljimaydi). Bekor qilingan seansning alomati HTTP 404 bilan `Unknown Mcp-Session-Id` — bo'lib, chora seansni qayta ulash yoki qayta boshlashdir,** emas** tugmani aylantirish, doirani o'zgartirish yoki asbob nomini o'zgartirish uchun.
+
 ## API interfeysi
 
 | Marshrut                               | Maqsad                                                                             |
@@ -366,9 +455,9 @@ prefikslar va hokazo).
 - **Caveman til paketlari `de` / `fr` / `ja` qisman toʻliq.** Ular `context` + `filler` + `structural` qoidalari bilan taqdim etiladi, ammo `dedup` / `ultra` paketlari mavjud emas, shu sababli bu tillar uchun `ultra` intensivligi `full` dan kuchliroq emas (ular faqat oʻz qoidalaridan foydalanadi — xorijiy matnni buzishi mumkin boʻlgan inglizcha `dedup`/`ultra` qoidalariga yashirin qaytish mavjud emas). `en` / `es` / `id` / `pt-BR` toʻliq. Qisman toʻliq paketlar uchun `dedup.json` + `ultra.json` hissalari mamnuniyat bilan qabul qilinadi.
 - **Ketma-ket telemetriya faqat siqishni amalga oshirgan enginelarni koʻrsatadi.** Engine ishga tushgan, ammo 0 % tejashni taʼminlagan ketma-ket pipeline bosqichi `stats:null` qaytaradi va shu sababli `engineBreakdown` ichida koʻrinmaydi — uni oʻtkazib yuborilgan bosqichdan ajratib boʻlmaydi. “Ishga tushdi, 0 %” holatini “oʻtkazib yuborildi” holatidan ajratish breakdown modelini oʻzgartirishni talab qiladi va keyinga qoldirilgan.
 
-## Validatsiya
+## Tasdiqlash
 
-Ushbu soha uchun asosiy testlar quyidagilar:
+Ushbu hudud uchun yo'naltirilgan eshiklar:
 
 ```bash
 node --import tsx/esm --test tests/unit/compression/rtk-*.test.ts tests/unit/compression/pipeline-integration.test.ts tests/unit/compression/context-compression-api.test.ts

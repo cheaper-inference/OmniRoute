@@ -10,77 +10,76 @@ _Nazadnje posodobljeno: 2026-06-28_
 
 ## Povzetek
 
-OmniRoute je lokalni prehod in nadzorna plošča za usmerjanje AI, zgrajena na Next.js.
-Zagotavlja eno samo z OpenAI združljivo končno točko (`/v1/*`) ter usmerja promet med več ponudniki upstream z uporabo prevajanja, nadomestnega delovanja, osveževanja žetonov in sledenja uporabi.
+OmniRoute je lokalni usmerjevalni prehod AI in nadzorna plošča, zgrajena na Next.js. Zagotavlja eno končno točko, združljivo z OpenAI (`/v1/*`), in usmerja promet prek več ponudnikov navzgor s prevajanjem, nadomestnim delovanjem, osveževanjem žetonov in sledenjem uporabi.
 
-Glavne zmogljivosti:
+Osnovne zmogljivosti:
 
-- Z OpenAI združljiv API za CLI/orodja (380 ponudnikov, 159 modulov izvajalnikov)
-- Prevajanje zahtev in odgovorov med formati ponudnikov
-- Nadomestno delovanje kombinacije modelov (zaporedje več modelov)
-- Strukturirani koraki kombinacije (`provider + model + connection`) z razvrščanjem med izvajanjem prek `compositeTiers`
-- Nadomestno delovanje na ravni računa (več računov na ponudnika)
-- Predhodno preverjanje kvote in izbira računa P2C, upoštevajoča kvoto, v glavni poti klepeta
-- Upravljanje povezav ponudnikov OAuth in API-ključev (27 modulov ponudnikov OAuth)
-- Ustvarjanje vdelav prek `/v1/embeddings` (18 ponudnikov)
-- Ustvarjanje slik prek `/v1/images/generations` (10+ ponudnikov, 20+ modelov)
-- Prepisovanje zvoka prek `/v1/audio/transcriptions` (18 ponudnikov)
+- Površina API združljiva z OpenAI, za CLI/tools (381 ponudnikov, 159 izvajalskih modulov)
+- prevod Request/response med formati ponudnika
+- Nadomestni kombinirani model (zaporedje več modelov)
+- Strukturirani kombinirani koraki (`provider + model + connection`) z vrstnim redom med izvajanjem `compositeTiers`
+- Nadomestni način na ravni računa (več računov na ponudnika)
+- Kvota pred tiskom in izbira računa P2C glede na kvote v glavni poti klepeta
+- OAuth + API-key upravljanje povezav ponudnika (27 modulov ponudnika OAuth )
+- Generiranje vdelave preko `/v1/embeddings` (18 ponudnikov)
+- Generiranje slike prek `/v1/images/generations` (10 ponudnikov +, 20 modelov + )
+- Prepis zvoka preko `/v1/audio/transcriptions` (18 ponudnikov)
 - Pretvorba besedila v govor prek `/v1/audio/speech` (24 vgrajenih ponudnikov)
-- Ustvarjanje videoposnetkov prek `/v1/videos/generations` (ComfyUI + SD WebUI)
-- Ustvarjanje glasbe prek `/v1/music/generations` (ComfyUI)
-- Spletno iskanje prek `/v1/search` (20 ponudnikov)
-- Moderiranje prek `/v1/moderations`
-- Ponovno razvrščanje prek `/v1/rerank`
-- Razčlenjevanje oznak za razmišljanje (`<think>...</think>`) za modele sklepanja
-- Sanitizacija odgovorov za strogo združljivost z OpenAI SDK
-- Normalizacija vlog (developer→system, system→user) za združljivost med ponudniki
-- Pretvorba strukturiranega izhoda (json_schema → Gemini responseSchema)
-- Lokalna obstojnost ponudnikov, ključev, vzdevkov, kombinacij, nastavitev in cen (122 modulov DB)
-- Sledenje uporabi/stroškom in beleženje zahtev
-- Izbirna sinhronizacija v oblaku za sinhronizacijo med napravami/stanj
-- Seznam dovoljenih/blokiranih IP-naslovov za nadzor dostopa do API-ja
-- Upravljanje proračuna za razmišljanje (passthrough/auto/custom/adaptive)
-- Vstavljanje globalnega sistemskega poziva
-- Sledenje sej in izdelava prstnih odtisov
-- Izboljšano omejevanje hitrosti za posamezne račune s profili, značilnimi za ponudnika
-- Vzorec odklopnika za odpornost ponudnikov
-- Zaščita pred stampedom zahtev z zaklepanjem mutex
+- Generiranje videa prek `/v1/videos/generations` (ComfyUI + SD WebUI)
+- Generiranje glasbe prek `/v1/music/generations` (ComfyUI)
+- Spletno iskanje preko `/v1/search` (20 ponudnikov)
+- Moderacije prek `/v1/moderations`
+- Prerazvrščanje prek `/v1/rerank`
+- Razčlenjevanje oznake razmišljanja (`<think>...</think>`) za modele razmišljanja
+- Odzivna sanacija za strogo združljivost OpenAI SDK
+- Normalizacija vloge (sistem razvijalec →, uporabnik sistema →) za združljivost med ponudniki
+- Strukturirana izhodna pretvorba (json_schema → Gemini responseSchema)
+- Lokalna obstojnost za ponudnike, ključe, vzdevke, kombinacije, nastavitve, cene (122 modulov DB )
+- Usage/cost sledenje in beleženje zahtev
+- Izbirna sinhronizacija v oblaku za sinhronizacijo multi-device/state
+- IP allowlist/blocklist za nadzor dostopa API
+- Razmišljanje o upravljanju proračuna (passthrough/auto/custom/adaptive)
+- Globalna sistemska takojšnja injekcija
+- Sledenje seji in prstni odtis
+- Izboljšano omejevanje stopnje na račun s profili, specifičnimi za ponudnika
+- Vzorec odklopnika za odpornost ponudnika
+- Zaščita črede proti grmenju z zaklepanjem mutexa
 - Predpomnilnik za deduplikacijo zahtev na podlagi podpisa
-- Domenska plast: pravila stroškov, politika nadomestnega delovanja, politika zaklepanja
-- Context Relay: povzetki za predajo sej, ki ohranjajo kontinuiteto pri rotaciji računov
-- Obstojnost domenskega stanja (predpomnilnik SQLite z neposrednim zapisovanjem za nadomestna delovanja, proračune, zaklepanja in odklopnike)
-- Mehanizem pravil za centralizirano vrednotenje zahtev (zaklepanje → proračun → nadomestno delovanje)
-- Telemetrija zahtev z združevanjem zakasnitev p50/p95/p99
-- Telemetrija ciljev kombinacij in zgodovinsko stanje ciljev kombinacij prek `combo_execution_key` / `combo_step_id`
-- ID korelacije (X-Request-Id) za sledenje od začetka do konca
-- Beleženje revizij skladnosti z možnostjo izključitve za posamezen API-ključ
-- Ocenjevalno ogrodje za zagotavljanje kakovosti LLM
-- Nadzorna plošča zdravja s stanjem odklopnikov ponudnikov v realnem času
-- Strežnik MCP (110 orodij) s 3 transporti (stdio/SSE/Streamable HTTP)
-- Strežnik A2A (JSON-RPC 2.0 + SSE) z zmožnostmi in življenjskim ciklom opravil
-- Sistem pomnilnika (ekstrakcija, vstavljanje, pridobivanje, povzemanje)
-- Sistem veščin (register, izvajalnik, peskovnik, vgrajene veščine)
-- Posrednik MITM z upravljanjem potrdil in obravnavo DNS
-- Vmesna programska oprema za zaščito pred vbrizgavanjem pozivov
-- Cevovod za stiskanje pozivov s Caveman, RTK, zloženimi cevovodi, kombinacijami stiskanja, jezikovnimi paketi in analitiko
-- Register ACP (Agent Communication Protocol)
-- Modularni ponudniki OAuth (22 posameznih modulov v `src/lib/oauth/providers/`)
-- Skripte za odstranitev in popolno odstranitev
-- Dejanja za popravilo okolja OAuth
-- Most WebSocket za z OpenAI združljive odjemalce WS (`/v1/ws`)
-- Upravljanje žetonov za sinhronizacijo (izdajanje/preklic, prenos konfiguracijskega svežnja z različicami ETag)
-- Prvovrstna prednastavitev ponudnika GLM Thinking (`glmt`)
-- Hibridno štetje žetonov (na strani ponudnika `/messages/count_tokens` z nadomestnim ocenjevanjem)
-- Samodejno začetno nastavljanje vzdevkov modelov (30+ normalizacij narečij med posredniki ob zagonu)
-- Varno pridobivanje izhodnih podatkov z zaščito SSRF, blokiranjem zasebnih URL-jev in nastavljivim ponovnim poskusom
-- Ponovni poskusi klepeta, ki upoštevajo čas ohlajanja, z nastavljivima `requestRetry` in `maxRetryIntervalSec`
+- Domenska plast: stroškovna pravila, rezervna politika, politika zaklepanja
+- Context Relay: povzetki predaje seje za kontinuiteto rotacije računa
+- Vztrajnost stanja domene (zapisni predpomnilnik SQLite za nadomestne vrednosti, proračune, zaklepe, odklopnike)
+- Mehanizem pravilnika za centralizirano vrednotenje zahtev (lockout → budget → backback)
+- Zahtevajte telemetrijo z združevanjem zakasnitev p50/p95/p99
+- Telemetrija kombiniranega cilja in zgodovinsko zdravje kombiniranega cilja prek `combo_execution_key` / `combo_step_id`
+- Korelacija ID (X-Request-Id) za sledenje od konca do konca
+- Beleženje revizije skladnosti z zavrnitvijo na ključ API
+- Ogrodje Eval za zagotavljanje kakovosti LLM
+- Zdravstvena nadzorna plošča s stanjem odklopnika ponudnika v realnem času
+- MCP strežnik (110 orodij) s 3 transporti (stdio/SSE/Streamable HTTP)
+- strežnik A2A (JSON-RPC 2.0 + SSE) z življenjskim ciklom spretnosti in opravil
+- Pomnilniški sistem (ekstrakcija, vbrizgavanje, iskanje, povzemanje)
+- Sistem veščin (register, izvajalec, peskovnik, vgrajene veščine)
+- MITM proxy z upravljanjem potrdil in obdelavo DNS
+- Vmesna programska oprema Prompt Injection Guard
+- Prompt stiskalni cevovod z Caveman, RTK, zloženimi cevovodi, kompresijskimi kombinacijami, jezikovnimi paketi in analitiko
+- register ACP (Agent Communication Protocol).
+- Modularni ponudniki OAuth (22 posameznih modulov pod `src/lib/oauth/providers/`)
+- Uninstall/full-uninstall skripte
+- akcija popravljanja okolja OAuth
+- most WebSocket za odjemalce WS, združljive z OpenAI (`/v1/ws`)
+- Upravljanje žetonov sinhronizacije (issue/revoke, prenos konfiguracijskega svežnja z različico ETag)
+- GLM Thinking (`glmt`) prednastavitev prvovrstnega ponudnika
+- Hibridno štetje žetonov ( `/messages/count_tokens` na strani ponudnika z rezervno oceno)
+- Samodejno sejanje vzdevka modela (30 + navzkrižnih normalizacij narečja proxy ob zagonu)
+- Varno izhodno pridobivanje z zaščito SSRF, zasebnim blokiranjem URL in nastavljivim ponovnim poskusom
+- Ponovni poskusi klepeta z zaznavanjem ohlajanja z nastavljivima `requestRetry` in `maxRetryIntervalSec`
 - Preverjanje izvajalnega okolja z Zod ob zagonu
-- Revizija skladnosti v2 s paginacijo, dogodki CRUD ponudnikov in beleženjem preverjanj, blokiranih zaradi SSRF
+- Revizija skladnosti v2 s paginacijo, dogodki CRUD ponudnika in beleženjem preverjanja, ki ga blokira SSRF
 
-Primarni izvajalni model:
+Primarni model izvajalnega okolja:
 
-- Poti aplikacije Next.js v `src/app/api/*` izvajajo API-je nadzorne plošče in API-je za združljivost
-- Skupno jedro SSE/usmerjanja v `src/sse/*` + `open-sse/*` obravnava izvajanje ponudnikov, prevajanje, pretakanje, nadomestno delovanje in uporabo
+- Poti aplikacij Next.js pod `src/app/api/*` izvajajo APIs nadzorne plošče in združljivost APIs
+- Jedro SSE/routing v skupni rabi v `src/sse/*` + `open-sse/*` obravnava ponudnikovo izvajanje, prevajanje, pretakanje, nadomestno delovanje in uporabo
 
 ## Referenčni diagrami
 
@@ -415,7 +414,7 @@ Imenski prostor `src/domain/` centralizira odločitve politike, tako da upravlja
 - združevalec pravil Connection/model : `src/domain/connectionModelRules.ts`
 - Posnetki razpoložljivosti modela: `src/domain/modelAvailability.ts`
 - Sledenje poteku veljavnosti ponudnika: `src/domain/providerExpiration.ts`
-- Predpomnilnik kvote: `src/domain/quotaCache.ts`
+- Predpomnilnik kvote: `src/domain/quotaCache.ts`. Ponudniki dodajajo in odstranjujejo kvotna okna (OpenAI je opustil 5-urno okno Codex za nekatere načrte), tako da branje uporabe ponudnikovega vmesnika potrdi kot popolno (`quotasComplete`, glejte `src/lib/usage/usageReading.ts`) je celoten nabor oken računa: okno, ki je bilo prej znano, a ga ni, je umaknjeno, v predpomnilniku, v `quota_snapshots` se rehidrira ponovni zagon (priložen zapis o upokojitvi), v obstoječem stanje kvote Codex in v vedrih nasičenosti Claude. Delni dokazi (glave odgovorov, zastarele kopije) posodobijo samo okna, ki jih nosijo.
 - Stanje razgradnje: `src/domain/degradation.ts`
 - Revizija konfiguracije: `src/domain/configAudit.ts`
 - Graditelj metapodatkov odziva OmniRoute : `src/domain/omnirouteResponseMeta.ts`
@@ -455,7 +454,7 @@ Več ponudnikov pošilja namenske module odpornosti in prikrite module, ki se na
 - motor Antigravity 429: `open-sse/services/antigravity429Engine.ts` (zasuka identiteto, počisti glave odgovorov, poganja sledenje credits/version prek `antigravityCredits.ts`, `antigravityHeaderScrub.ts`, `antigravityHeaders.ts`, `antigravityIdentity.ts`, `antigravityVersion.ts`)
 - Antigravity 429 guard: `open-sse/services/antigravity429Guard.ts` (proračun na zahtevo 429 navzgor v vseh gostiteljih, `ANTIGRAVITY_MAX_429_ATTEMPTS`; na identično ponovno pošiljanje zavrnjenega telesa se odgovori lokalno; `src/sse/handlers/chat.ts` ne zažene znova takšne zahteve prek ponovnega poskusa, ki se zaveda ohlajanja)
 - Politika kvot ModelScope : `open-sse/services/modelscopePolicy.ts`
-- koda Claude CCH (rokovanje kanala združljivosti): `open-sse/services/claudeCodeCCH.ts`, plus `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`, `claudeCodeToolRemapper.ts`
+- koda Claude CCH (rokovanje združljivostnega kanala): `open-sse/services/claudeCodeCCH.ts`, plus `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`, `claudeCodeToolRemapper.ts`
 - Oblikovanje prstnega odtisa kode Claude : `open-sse/services/claudeCodeFingerprint.ts`
 - Claude Zakrivanje kode: `open-sse/services/claudeCodeObfuscation.ts`
 

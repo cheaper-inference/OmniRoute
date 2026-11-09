@@ -10,77 +10,76 @@ _Son güncelleme: 2026-06-28_
 
 ## Yönetici Özeti
 
-OmniRoute, Next.js üzerine kurulmuş yerel bir yapay zekâ yönlendirme ağ geçidi ve kontrol panelidir.
-Tek bir OpenAI uyumlu uç nokta (`/v1/*`) sağlar ve trafiği çeviri, geri dönüş, belirteç yenileme ve kullanım takibi özellikleriyle birden fazla üst sağlayıcı arasında yönlendirir.
+OmniRoute Next.js üzerine kurulu yerel bir AI yönlendirme ağ geçidi ve kontrol panelidir. OpenAI uyumlu tek bir uç nokta (`/v1/*`) sağlar ve çeviri, geri dönüş, belirteç yenileme ve kullanım izleme özellikleriyle trafiği birden fazla yukarı akış sağlayıcısına yönlendirir.
 
-Temel yetenekler:
+Çekirdek yetenekler:
 
-- CLI/araçlar için OpenAI uyumlu API yüzeyi (380 sağlayıcı, 159 yürütücü modülü)
-- Sağlayıcı biçimleri arasında istek/yanıt çevirisi
-- Model birleşimi geri dönüşü (çok modelli sıra)
-- Yapılandırılmış birleşim adımları (`provider + model + connection`) ve `compositeTiers` ile çalışma zamanında sıralama
-- Hesap düzeyinde geri dönüş (sağlayıcı başına birden çok hesap)
-- Ana sohbet yolunda kota ön kontrolü ve kotadan haberdar P2C hesap seçimi
-- OAuth + API anahtarlı sağlayıcı bağlantı yönetimi (27 OAuth sağlayıcı modülü)
-- `/v1/embeddings` aracılığıyla gömme oluşturma (18 sağlayıcı)
-- `/v1/images/generations` aracılığıyla görüntü oluşturma (10’dan fazla sağlayıcı, 20’den fazla model)
+- CLI/tools için OpenAI uyumlu API yüzeyi (381 sağlayıcı, 159 yürütücü modül)
+- sağlayıcı formatları arasında Request/response çevirisi
+- Model birleşimi geri dönüşü (çoklu model sırası)
+- `compositeTiers` tarafından çalışma zamanı sıralamasıyla yapılandırılmış birleşik adımlar (`provider + model + connection`)
+- Hesap düzeyinde geri dönüş (sağlayıcı başına çoklu hesap)
+- Ana sohbet yolunda kota ön kontrolü ve kotaya duyarlı P2C hesabı seçimi
+- OAuth + API anahtarı sağlayıcı bağlantı yönetimi (27 OAuth sağlayıcı modülü)
+- `/v1/embeddings` aracılığıyla oluşturma oluşturma (18 sağlayıcı)
+- `/v1/images/generations` aracılığıyla görüntü oluşturma (10 + sağlayıcısı, 20 + modeli)
 - `/v1/audio/transcriptions` aracılığıyla ses transkripsiyonu (18 sağlayıcı)
-- `/v1/audio/speech` aracılığıyla metinden sese dönüştürme (yerleşik 24 sağlayıcı)
+- `/v1/audio/speech` aracılığıyla metinden konuşmaya (24 yerleşik sağlayıcı)
 - `/v1/videos/generations` aracılığıyla video oluşturma (ComfyUI + SD WebUI)
-- `/v1/music/generations` aracılığıyla müzik oluşturma (ComfyUI)
+- `/v1/music/generations` (ComfyUI) aracılığıyla müzik üretimi
 - `/v1/search` aracılığıyla web araması (20 sağlayıcı)
-- `/v1/moderations` aracılığıyla moderasyon
+- `/v1/moderations` aracılığıyla denetimler
 - `/v1/rerank` aracılığıyla yeniden sıralama
-- Akıl yürütme modelleri için Think etiketi ayrıştırma (`<think>...</think>`)
-- Katı OpenAI SDK uyumluluğu için yanıt temizleme
-- Sağlayıcılar arası uyumluluk için rol normalleştirme (developer→system, system→user)
-- Yapılandırılmış çıktı dönüştürme (json_schema → Gemini responseSchema)
-- Sağlayıcılar, anahtarlar, takma adlar, birleşimler, ayarlar ve fiyatlandırma için yerel kalıcılık (122 DB modülü)
-- Kullanım/maliyet takibi ve istek günlüğü
-- Çoklu cihaz/durum eşitlemesi için isteğe bağlı bulut eşitlemesi
-- API erişim denetimi için IP izin listesi/engelleme listesi
-- Akıl yürütme bütçesi yönetimi (passthrough/auto/custom/adaptive)
-- Genel sistem istemi ekleme
-- Oturum takibi ve parmak izi oluşturma
-- Sağlayıcıya özgü profillerle hesap başına gelişmiş hız sınırlama
-- Sağlayıcı dayanıklılığı için devre kesici deseni
-- Mutex kilitlemeyle ani yük sürüsü koruması
+- Akıl yürütme modelleri için etiket ayrıştırmayı (`<think>...</think>`) düşünün
+- Sıkı OpenAI SDK uyumluluğu için yanıt sterilizasyonu
+- Sağlayıcılar arası uyumluluk için rol normalleştirme (geliştirici → sistemi, sistem → kullanıcısı)
+- Yapılandırılmış çıktı dönüşümü (json_schema → Gemini responseSchema)
+- Sağlayıcılar, anahtarlar, takma adlar, kombinasyonlar, ayarlar ve fiyatlandırma için yerel kalıcılık (122 DB modülü)
+- Usage/cost izleme ve istek günlüğü oluşturma
+- multi-device/state senkronizasyonu için isteğe bağlı bulut senkronizasyonu
+- API erişim kontrolü için IP allowlist/blocklist
+- Bütçe yönetimini düşünmek (passthrough/auto/custom/adaptive)
+- Küresel sistem istemi enjeksiyonu
+- Oturum izleme ve parmak izi alma
+- Sağlayıcıya özel profillerle hesap başına geliştirilmiş oran sınırlaması
+- Sağlayıcı esnekliği için devre kesici düzeni
+- Mutex kilitleme ile gök gürültüsüne karşı sürü koruması
 - İmza tabanlı istek tekilleştirme önbelleği
-- Etki alanı katmanı: maliyet kuralları, geri dönüş ilkesi, kilitleme ilkesi
-- Context Relay: hesap döndürme sürekliliği için oturum devri özetleri
-- Etki alanı durumu kalıcılığı (geri dönüşler, bütçeler, kilitlenmeler ve devre kesiciler için SQLite write-through önbelleği)
-- Merkezi istek değerlendirmesi için ilke motoru (kilitlenme → bütçe → geri dönüş)
-- p50/p95/p99 gecikme toplamasıyla istek telemetrisi
-- `combo_execution_key` / `combo_step_id` aracılığıyla birleşim hedefi telemetrisi ve geçmiş birleşim hedefi durumu
-- Uçtan uca izleme için korelasyon kimliği (X-Request-Id)
-- API anahtarı başına devre dışı bırakma seçeneğiyle uyumluluk denetimi günlüğü
-- LLM kalite güvencesi için değerlendirme çerçevesi
-- Gerçek zamanlı sağlayıcı devre kesici durumuna sahip sistem durumu kontrol paneli
-- 3 aktarım yöntemiyle MCP Sunucusu (110 araç) (stdio/SSE/Streamable HTTP)
-- Beceriler ve görev yaşam döngüsüne sahip A2A Sunucusu (JSON-RPC 2.0 + SSE)
-- Bellek sistemi (çıkarma, ekleme, erişim, özetleme)
-- Yetenekler sistemi (kayıt defteri, yürütücü, korumalı alan, yerleşik yetenekler)
-- Sertifika yönetimi ve DNS işleme özellikli MITM proxy
-- İstemci enjeksiyonu koruma ara yazılımı
-- Caveman, RTK, yığılmış ardışık düzenler, sıkıştırma birleşimleri, dil paketleri ve analitik özelliklerine sahip istemci sıkıştırma ardışık düzeni
-- ACP (Agent Communication Protocol) kayıt defteri
-- Modüler OAuth sağlayıcıları (`src/lib/oauth/providers/` altında 22 ayrı modül)
-- Kaldırma/tam kaldırma betikleri
-- OAuth ortam onarım eylemi
+- Etki alanı katmanı: maliyet kuralları, geri dönüş politikası, kilitleme politikası
+- Bağlam Aktarımı: hesap rotasyonunun sürekliliği için oturum aktarım özetleri
+- Etki alanı durumu kalıcılığı (geri dönüşler, bütçeler, kilitlemeler, devre kesiciler için SQLite yazma önbelleği)
+- Merkezi istek değerlendirmesi için politika motoru (kilitleme → bütçesi → geri dönüşü)
+- p50/p95/p99 gecikme toplamayla telemetri isteği
+- `combo_execution_key` / `combo_step_id` aracılığıyla birleşik hedef telemetrisi ve tarihsel birleşik hedef sağlığı
+- Uçtan uca izleme için korelasyon ID (X-Request-Id)
+- API anahtarı başına devre dışı bırakma özelliğiyle uyumluluk denetiminin günlüğe kaydedilmesi
+- LLM kalite güvencesi için Eval çerçevesi
+- Gerçek zamanlı sağlayıcı devre kesici durumunu gösteren sağlık kontrol paneli
+- 3 aktarımlı MCP Sunucusu (110 araç) (stdio/SSE/Streamable HTTP)
+- Becerilere ve görev yaşam döngüsüne sahip A2A Sunucusu (JSON-RPC 2.0 + SSE)
+- Bellek sistemi (çıkarma, enjeksiyon, geri alma, özetleme)
+- Beceri sistemi (kayıt defteri, yürütücü, korumalı alan, yerleşik beceriler)
+- Sertifika yönetimi ve DNS yönetimi ile MITM proxy'si
+- Hızlı enjeksiyon koruması ara yazılımı
+- Caveman, RTK, yığılmış işlem hatları, sıkıştırma kombinasyonları, dil paketleri ve analitik ile hızlı sıkıştırma ardışık düzeni
+- ACP (Ajan İletişim Protokolü) kaydı
+- Modüler OAuth sağlayıcıları ( `src/lib/oauth/providers/` kapsamında 22 ayrı modül)
+- Uninstall/full-uninstall komut dosyaları
+- OAuth çevre onarım eylemi
 - OpenAI uyumlu WS istemcileri için WebSocket köprüsü (`/v1/ws`)
-- Eşitleme belirteci yönetimi (verme/iptal etme, ETag sürümlü yapılandırma paketi indirme)
-- Birinci sınıf sağlayıcı ön ayarı olarak GLM Thinking (`glmt`)
-- Hibrit belirteç sayımı (sağlayıcı tarafı `/messages/count_tokens` ve tahmin tabanlı geri dönüş)
-- Model takma adlarının otomatik olarak ekilmesi (başlangıçta proxy’ler arası 30’dan fazla lehçe normalleştirmesi)
-- SSRF koruması, özel URL engelleme ve yapılandırılabilir yeniden denemeyle güvenli dışa dönük getirme
-- Yapılandırılabilir `requestRetry` ve `maxRetryIntervalSec` ile soğuma süresini dikkate alan sohbet yeniden denemeleri
+- Senkronizasyon belirteci yönetimi (issue/revoke, ETag sürümüne sahip yapılandırma paketi indirme)
+- GLM Thinking (`glmt`) birinci sınıf sağlayıcı ön ayarı
+- Hibrit jeton sayımı (tahmin geri dönüşü ile sağlayıcı tarafı `/messages/count_tokens` )
+- Model takma adı otomatik tohumlama (başlangıçta 30 + çapraz proxy lehçesi normalleştirmesi)
+- SSRF koruması, özel URL engelleme ve yapılandırılabilir yeniden deneme özellikleriyle güvenli giden arama
+- Yapılandırılabilir `requestRetry` ve `maxRetryIntervalSec` ile bekleme süresine duyarlı sohbet yeniden denemeleri
 - Başlangıçta Zod ile çalışma zamanı ortamı doğrulaması
-- Sayfalandırma, sağlayıcı CRUD olayları ve SSRF engelleme doğrulama günlüğü içeren uyumluluk denetimi v2
+- Sayfalandırma, sağlayıcı CRUD etkinlikleri ve SSRF tarafından engellenen doğrulama günlük kaydı ile uyumluluk denetimi v2
 
 Birincil çalışma zamanı modeli:
 
-- `src/app/api/*` altındaki Next.js uygulama rotaları hem kontrol paneli API’lerini hem de uyumluluk API’lerini uygular
-- `src/sse/*` + `open-sse/*` içindeki paylaşılan SSE/yönlendirme çekirdeği; sağlayıcı yürütme, çeviri, akış, geri dönüş ve kullanımı yönetir
+- `src/app/api/*` altındaki Next.js uygulama rotaları, hem kontrol paneli APIs hem de APIs uyumluluğunu uygular
+- `src/sse/*` + `open-sse/*` paylaşılan bir SSE/routing çekirdeği, sağlayıcı yürütme, çeviri, akış, geri dönüş ve kullanımı yönetir
 
 ## Referans Diyagramları
 
@@ -416,7 +415,7 @@ Kural kümesi yazma ve eşik ayarlama için bkz [`docs/security/GUARDRAILS.md`](
 - Connection/model kural birleştiricisi: `src/domain/connectionModelRules.ts`
 - Model kullanılabilirliği anlık görüntüleri: `src/domain/modelAvailability.ts`
 - Sağlayıcı son kullanma tarihi takibi: `src/domain/providerExpiration.ts`
-- Kota önbelleği: `src/domain/quotaCache.ts`
+- Kota önbelleği: `src/domain/quotaCache.ts`. Sağlayıcılar kota pencereleri ekler ve kaldırır (OpenAI bazı planlar için 5 saatlik Codex penceresini düşürdü), dolayısıyla sağlayıcının bağdaştırıcısını okuyan bir kullanım (`quotasComplete`, bkz. `src/lib/usage/usageReading.ts`) hesabın tam pencere kümesidir: daha önce bilinen ancak orada bulunmayan bir pencere kullanımdan kaldırılır, önbellekte, `quota_snapshots` yeniden başlatma (eklenmiş bir kullanımdan kaldırma kaydı), kalıcı Codex kota durumunda ve Claude doygunluk paketlerinde yeniden nemlendirilir. Kısmi kanıtlar (yanıt başlıkları, eski kopyalar) yalnızca taşıdığı pencereleri günceller.
 - Bozunma durumu: `src/domain/degradation.ts`
 - Yapılandırma denetimi: `src/domain/configAudit.ts`
 - OmniRoute yanıtı meta veri oluşturucusu: `src/domain/omnirouteResponseMeta.ts`
@@ -434,7 +433,7 @@ Yetkilendirme hattı, gelen her isteği sınıflandırır ve gönderilmeden önc
 - İddia yardımcısı: `src/server/authz/assertAuth.ts`
 - Talep bağlamı: `src/server/authz/context.ts`
 
-Genel ve yönetim yolları zorlu bir sınırdır: agent/cooldown APIs ve sağlayıcı mutasyonları, yönetim kimlik doğrulaması gerektirir (eksikse HTTP 401).
+Genel ve yönetim yolları zorlu bir sınırdır: agent/cooldown APIs ve sağlayıcı mutasyonları yönetim kimlik doğrulaması gerektirir (eksikse HTTP 401).
 
 Rota sınıflandırma kurallarının tamamı için [`docs/architecture/AUTHZ_GUIDE.md`](./AUTHZ_GUIDE.md) bakın.
 

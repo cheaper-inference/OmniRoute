@@ -337,82 +337,82 @@ codex "your prompt"
 
 ---
 
-## 🚀 استقرار
+## استقرار 🚀
 
-### نصب سراسری npm (توصیهشده)
+### نصب جهانی npm (توصیه می شود)
 
 ```bash
 npm install -g omniroute
 
-# ایجاد پوشهٔ پیکربندی
+# Create config directory
 mkdir -p ~/.omniroute
 
-# ایجاد فایل .env (به .env.example مراجعه کنید)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# راهاندازی سرور
+# Start server
 omniroute
-# یا با درگاه سفارشی:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI بهطور خودکار `.env` را از `~/.omniroute/.env` یا `./.env` بارگذاری میکند.
+CLI به طور خودکار `.env` از `~/.omniroute/.env` یا `./.env` بارگیری می کند. یک `./.env` در دایرکتوری کاری ممکن است فقط یک لیست مجاز کوتاه از کلیدها (پورت ها، `REQUIRE_API_KEY`، محلی و تنظیمات رنگ) را تنظیم کند. بقیه چیزها را در `~/.omniroute/.env` قرار دهید. به [قراردادهای راه اندازی CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env) مراجعه کنید.
 
-### حالت سینی سیستم
+### حالت سینی
 
-OmniRoute را در سینی سیستم اجرا کنید:
+OmniRoute در سینی سیستم شروع کنید:
 
 ```bash
 omniroute serve --tray
 ```
 
-پس از آمادهشدن سرور و سینی سیستم، فرمان خاتمه مییابد.
+این فرمان پس از آماده شدن سرور و سینی باز می گردد.
 
-سرور بدون ترمینال به کار خود ادامه میدهد.
+سرور بدون ترمینال ادامه می دهد.
 
-حالت سینی سیستم از macOS، Windows و نشستهای گرافیکی Linux پشتیبانی میکند. حالت سینی سیستم داشبورد را بهطور خودکار باز نمیکند.
+حالت سینی از جلسات macOS، Windows و گرافیکی Linux پشتیبانی می کند. حالت سینی داشبورد را به طور خودکار باز نمی کند.
 
-برای انجام اقدامات زیر از منوی سینی سیستم استفاده کنید:
+از منوی سینی برای این اقدامات استفاده کنید:
 
-- بازکردن داشبورد.
-- بازکردن `/dashboard/logs`.
-- تغییر راهاندازی خودکار.
+- داشبورد را باز کنید.
+- `/dashboard/logs` را باز کنید.
+- شروع خودکار را تغییر دهید.
 - توقف OmniRoute.
 
-از `--tray` همراه با گزینههای زیر استفاده نکنید:
+`--tray` با این گزینه ها ترکیب نکنید:
 
 - `--daemon`
 - `--log`
 - `--no-recovery`
 
-این حالتها به مالکیت فرایند متفاوتی نیاز دارند.
+این حالت ها به مالکیت فرآیند متفاوتی نیاز دارند.
 
-راهاندازی در ورود بعدی به سیستم را فعال کنید:
+راه اندازی را در ورود به دستگاه بعدی فعال کنید:
 
 ```bash
 omniroute autostart enable
 ```
 
-راهاندازی خودکار در macOS، Windows و نشستهای گرافیکی Linux از حالت سینی سیستم استفاده میکند. Linux بدون رابط گرافیکی از سرویس کاربری systemd موجود استفاده میکند.
+شروع خودکار از حالت سینی در جلسات macOS، Windows و گرافیکی Linux استفاده می کند. Headless Linux از سرویس کاربر systemd موجود استفاده می کند.
 
-راهاندازی در هنگام ورود را غیرفعال کنید:
+غیرفعال کردن راه اندازی در هنگام ورود:
 
 ```bash
 omniroute autostart disable
 ```
 
-### حذف نصب
+### در حال حذف نصب
 
-هنگامی که دیگر به OmniRoute نیاز ندارید، دو اسکریپت سریع برای حذف کامل ارائه میکنیم:
+هنگامی که دیگر OmniRoute نیاز ندارید، ما دو اسکریپت سریع را برای حذف تمیز ارائه می دهیم:
 
-| فرمان                    | عملکرد                                                                                             |
-| ------------------------ | -------------------------------------------------------------------------------------------------- |
-| `npm run uninstall`      | برنامهٔ سیستم را حذف میکند، اما **پایگاه داده و پیکربندیهای شما** را در `~/.omniroute` نگه میدارد. |
-| `npm run uninstall:full` | برنامه را حذف میکند و همچنین **تمام پیکربندیها، کلیدها و پایگاههای داده را برای همیشه پاک میکند**. |
+| فرمان                    | اقدام                                                                                      |
+| ------------------------ | ------------------------------------------------------------------------------------------ |
+| `npm run uninstall`      | برنامه سیستم را حذف می کند اما** DB و تنظیمات شما را حفظ می کند** در `~/.omniroute`.       |
+| `npm run uninstall:full` | برنامه AND برای همیشه حذف می کند** تمام تنظیمات، کلیدها و پایگاه داده ها را پاک می کند** . |
 
-> نکته: برای اجرای این فرمانها، به پوشهٔ پروژهٔ OmniRoute بروید (اگر آن را کلون کردهاید) و فرمانها را اجرا کنید. در غیر این صورت، اگر بهصورت سراسری نصب شده است، میتوانید بهسادگی `npm uninstall -g omniroute` را اجرا کنید.
+> توجه: برای اجرای این دستورات، به پوشه پروژه OmniRoute (اگر آن را شبیه سازی کرده اید) بروید و آنها را اجرا کنید. از طرف دیگر، اگر به صورت سراسری نصب شده باشد، می توانید به سادگی `npm uninstall -g omniroute` را اجرا کنید.
 
-### استقرار روی VPS
+### استقرار VPS
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -428,25 +428,25 @@ export NEXT_PUBLIC_BASE_URL="http://localhost:20128"
 export API_KEY_SECRET="endpoint-proxy-api-key-secret"
 
 npm run start
-# یا: pm2 start npm --name omniroute -- start
+# Or: pm2 start npm --name omniroute -- start
 ```
 
-### استقرار با PM2 (حافظهٔ کم)
+### استقرار PM2 (حافظه کم)
 
-برای سرورهایی با RAM محدود، از گزینهٔ محدودیت حافظه استفاده کنید:
+برای سرورهایی با RAM محدود، از گزینه محدودیت حافظه استفاده کنید:
 
 ```bash
-# با محدودیت 512MB (پیشفرض)
+# With 512MB limit (default)
 pm2 start npm --name omniroute -- start
 
-# یا با محدودیت حافظهٔ سفارشی
+# Or with custom memory limit
 OMNIROUTE_MEMORY_MB=512 pm2 start npm --name omniroute -- start
 
-# یا با استفاده از ecosystem.config.js
+# Or using ecosystem.config.js
 pm2 start ecosystem.config.js
 ```
 
-فایل `ecosystem.config.js` را ایجاد کنید:
+`ecosystem.config.js` را ایجاد کنید:
 
 ```javascript
 module.exports = {
@@ -471,24 +471,24 @@ module.exports = {
 ### Docker
 
 ```bash
-# ساخت ایمیج (پیشفرض = runner-cli با codex/claude/droid ازپیشنصبشده)
+# Build image (default = runner-cli with codex/claude/droid preinstalled)
 docker build -t omniroute:cli .
 
-# حالت قابلحمل (توصیهشده)
+# Portable mode (recommended)
 docker run -d --name omniroute -p 20128:20128 --env-file ./.env -v omniroute-data:/app/data omniroute:cli
 ```
 
-برای حالت یکپارچه با میزبان و دارای فایلهای اجرایی CLI، به بخش Docker در مستندات اصلی مراجعه کنید.
+برای حالت یکپارچه میزبان با باینریهای CLI ، بخش Docker را در اسناد اصلی ببینید.
 
-### Void Linux (xbps-src)
+### Linux خالی (xbps-src)
 
-کاربران Void Linux میتوانند OmniRoute را با استفاده از چارچوب کامپایل متقابل `xbps-src` بهصورت بومی بستهبندی و نصب کنند. این چارچوب، ساخت مستقل Node.js را همراه با بایندینگهای بومی موردنیاز `better-sqlite3` خودکار میکند.
+کاربران Void Linux می توانند OmniRoute به صورت بومی با استفاده از چارچوب کامپایل متقابل `xbps-src` بسته بندی و نصب کنند. این کار ساخت مستقل Node.js را به همراه اتصالات بومی `better-sqlite3` به صورت خودکار انجام می دهد.
 
 <details>
 <summary><b>مشاهده قالب xbps-src</b></summary>
 
 ```bash
-# فایل قالب برای 'omniroute'
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -509,7 +509,7 @@ export npm_config_fund=false
 export npm_config_audit=false
 
 do_build() {
-	# تعیین معماری CPU هدف برای node-gyp
+	# Determine target CPU arch for node-gyp
 	local _gyp_arch
 	case "$XBPS_TARGET_MACHINE" in
 		aarch64*) _gyp_arch=arm64 ;;
@@ -518,29 +518,29 @@ do_build() {
 		*) _gyp_arch=x64 ;;
 	esac
 
-	# 1) نصب تمام وابستگیها – بدون اجرای اسکریپتها
+	# 1) Install all deps – skip scripts
 	NODE_ENV=development npm ci --ignore-scripts
 
-	# 2) ساخت بسته مستقل Next.js
+	# 2) Build the Next.js standalone bundle
 	npm run build
 
-	# 3) کپیکردن داراییهای ایستا در بسته مستقل
+	# 3) Copy static assets into standalone
 	cp -r .next/static .next/standalone/.next/static
 	[ -d public ] && cp -r public .next/standalone/public || true
 
-	# 4) کامپایل بایندینگ بومی better-sqlite3
+	# 4) Compile better-sqlite3 native binding
 	local _node_gyp=/usr/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js
 	(cd node_modules/better-sqlite3 && node "$_node_gyp" rebuild --arch="$_gyp_arch")
 
-	# 5) قراردادن بایندینگ کامپایلشده در بسته مستقل
+	# 5) Place the compiled binding into the standalone bundle
 	local _bs3_release=.next/standalone/node_modules/better-sqlite3/build/Release
 	mkdir -p "$_bs3_release"
 	cp node_modules/better-sqlite3/build/Release/better_sqlite3.node "$_bs3_release/"
 
-	# 6) حذف بستههای sharp مختص معماری
+	# 6) Remove arch-specific sharp bundles
 	rm -rf .next/standalone/node_modules/@img
 
-	# 7) کپیکردن وابستگیهای زمان اجرای pino که توسط تحلیل ایستای Next.js حذف شدهاند:
+	# 7) Copy pino runtime deps omitted by Next.js static analysis:
 	for _mod in pino-abstract-transport split2 process-warning; do
 		cp -r "node_modules/$_mod" .next/standalone/node_modules/
 	done
@@ -554,7 +554,7 @@ do_install() {
 	vmkdir usr/lib/omniroute/.next
 	vcopy .next/standalone/. usr/lib/omniroute/.next/standalone
 
-	# جلوگیری از حذف دایرکتوریهای خالی مسیریاب برنامه Next.js توسط هوک پس از نصب
+	# Prevent removal of empty Next.js app router dirs by the post-install hook
 	for _d in \
 		.next/standalone/.next/server/app/dashboard \
 		.next/standalone/.next/server/app/dashboard/settings \
@@ -582,30 +582,30 @@ post_install() {
 
 ### متغیرهای محیطی
 
-| متغیر                                   | مقدار پیشفرض                         | توضیحات                                                                                                                                  |
-| --------------------------------------- | ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| `JWT_SECRET`                            | `omniroute-default-secret-change-me` | کلید محرمانه امضای JWT (**در محیط عملیاتی تغییر دهید**)                                                                                  |
-| `INITIAL_PASSWORD`                      | `CHANGEME`                           | رمز عبور اولین ورود                                                                                                                      |
-| `DATA_DIR`                              | `~/.omniroute`                       | دایرکتوری دادهها (پایگاه داده، میزان استفاده، گزارشها)                                                                                   |
-| `PORT`                                  | پیشفرض چارچوب                        | درگاه سرویس (`20128` در مثالها)                                                                                                          |
-| `HOSTNAME`                              | پیشفرض چارچوب                        | میزبان اتصال (مقدار پیشفرض Docker برابر با `0.0.0.0` است)                                                                                |
-| `NODE_ENV`                              | پیشفرض زمان اجرا                     | برای استقرار روی `production` تنظیم کنید                                                                                                 |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`             | URL پایه عمومی که در داشبورد نمایش داده شده و در اختیار سرور قرار میگیرد (جایگزین `BASE_URL` قدیمی)                                      |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`              | URL پایه نقطه پایانی همگامسازی ابری (جایگزین `CLOUD_URL` قدیمی)                                                                          |
-| `API_KEY_SECRET`                        | `endpoint-proxy-api-key-secret`      | کلید محرمانه HMAC برای کلیدهای API تولیدشده                                                                                              |
-| `REQUIRE_API_KEY`                       | `false`                              | الزام کلید API از نوع Bearer برای `/v1/*`                                                                                                |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                              | اجازه به کاربران احراز هویتشده داشبورد برای نمایش مقادیر کامل کلیدهای API ذخیرهشده در صورت درخواست                                       |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                 | تناوب بهروزرسانی سمت سرور برای دادههای ذخیرهشده محدودیتهای ارائهدهنده؛ دکمههای تازهسازی رابط کاربری همچنان همگامسازی دستی را آغاز میکنند |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                              | غیرفعالسازی اسنپشاتهای خودکار SQLite پیش از نوشتن/درونریزی/بازیابی؛ پشتیبانگیری دستی همچنان کار میکند                                    |
-| `APP_LOG_TO_FILE`                       | `true`                               | خروجی گزارشهای برنامه و ممیزی روی دیسک را فعال میکند                                                                                     |
-| `AUTH_COOKIE_SECURE`                    | `false`                              | اجبار ویژگی `Secure` برای کوکی احراز هویت (پشت پراکسی معکوس HTTPS)                                                                       |
-| `CLOUDFLARED_BIN`                       | تنظیمنشده                            | استفاده از باینری موجود `cloudflared` بهجای دانلود مدیریتشده                                                                             |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                              | روش انتقال برای Quick Tunnels مدیریتشده (`http2`، `quic` یا `auto`)                                                                      |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                                | محدودیت حافظه heap در Node.js بر حسب MB                                                                                                  |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                 | حداکثر تعداد ورودیهای کش پرامپت                                                                                                          |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                | حداکثر تعداد ورودیهای کش معنایی                                                                                                          |
+| متغیر                                   | پیش فرض                  | توضیحات                                                                                                                                           |
+| --------------------------------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `JWT_SECRET`                            | _(تولید خودکار)_         | امضای JWT مخفی — به طور خودکار در اولین اجرا تولید شد و تا `server.env` ادامه یافت. زمانی که دایرکتوری داده زودگذر است، آن را به صراحت تنظیم کنید |
+| `INITIAL_PASSWORD`                      | _(تنظیم نشده)_           | اولین رمز ورود به سیستم نصب npm/source با `CHANGEME` شروع می شود: آن را جایگزین کنید. تنظیم نشده: جادوگر سوار شدن                                 |
+| `DATA_DIR`                              | `~/.omniroute`           | فهرست داده ها (db، استفاده، گزارش ها)                                                                                                             |
+| `PORT`                                  | پیش فرض چارچوب           | پورت سرویس (در مثالها `20128` )                                                                                                                   |
+| `HOSTNAME`                              | پیش فرض چارچوب           | اتصال میزبان (Docker پیش فرض به `0.0.0.0` است)                                                                                                    |
+| `NODE_ENV`                              | پیش فرض زمان اجرا        | `production` برای استقرار تنظیم کنید                                                                                                              |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128` | پایه عمومی URL روی داشبورد ظاهر شد و در معرض سرور قرار گرفت (جایگزین `BASE_URL` قدیمی)                                                            |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`  | پایه نقطه پایانی همگام سازی ابری URL (جایگزین `CLOUD_URL` قدیمی می شود)                                                                           |
+| `API_KEY_SECRET`                        | _(تولید خودکار)_         | رمز HMAC برای کلیدهای API تولید شده — به طور خودکار در اولین اجرا تولید شد و تا `server.env` ادامه یافت                                           |
+| `REQUIRE_API_KEY`                       | `false`                  | اجرای کلید API حامل در `/v1/*`                                                                                                                    |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                  | به کاربران داشبورد تأیید شده اجازه دهید مقادیر کامل کلید API ذخیره شده را در صورت تقاضا آشکار کنند                                                |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                     | سرعت بهروزرسانی سمت سرور برای دادههای محدودیتهای ارائهدهنده حافظه پنهان؛ دکمه های تازه سازی UI همچنان همگام سازی دستی را فعال می کنند             |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                  | غیرفعال کردن snapshot های خودکار SQLite قبل از writes/import/restore. پشتیبان گیری دستی هنوز کار می کند                                           |
+| `APP_LOG_TO_FILE`                       | `true`                   | خروجی گزارش برنامه و ممیزی را روی دیسک فعال می کند                                                                                                |
+| `AUTH_COOKIE_SECURE`                    | `false`                  | اجبار کوکی تأیید `Secure` (پشت پراکسی معکوس HTTPS )                                                                                               |
+| `CLOUDFLARED_BIN`                       | تنظیم نشده               | به جای دانلود مدیریت شده از یک باینری `cloudflared` موجود استفاده کنید                                                                            |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                  | حمل و نقل برای تونل های سریع مدیریت شده (`http2`، `quic`، یا `auto`)                                                                              |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                    | حد پشته Node.js در MB                                                                                                                             |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                     | حداکثر ورودی های حافظه پنهان                                                                                                                      |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                    | حداکثر ورودی های کش معنایی                                                                                                                        |
 
-برای مرجع کامل متغیرهای محیطی، به [README](../README.md) مراجعه کنید.
+برای مرجع کامل متغیر محیطی، [README](../README.md) را ببینید.
 
 ---
 

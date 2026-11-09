@@ -198,7 +198,7 @@ src/
 | `promptCache/`                           | เบรกพอยต์แคชพร้อมท์สไตล์ Anthropic                                                                                                                                                                                                                                                                                            |
 | `skills/`                                | กรอบทักษะ (ตลาด + ในตัว + SkillsSH) — ดู `docs/frameworks/SKILLS.md`                                                                                                                                                                                                                                                          |
 | `playground/`                            | ผู้ช่วยที่ใช้ร่วมกันของ Playground Studio: `codeExport.ts` (ตัวสร้าง curl/Python/TS ), `promptImprover.ts` (ตัวสร้าง meta-prompt), `streamMetrics.ts` (บริสุทธิ์ TTFT/TPS), `types.ts` (ตารางราคา) — ดู `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                                |
-| `webhookDispatcher.ts`                   | HMAC การจัดส่ง webhook — ดู `docs/frameworks/WEBHOOKS.md`                                                                                                                                                                                                                                                                     |
+| `webhookDispatcher.ts`                   | HMAC webhook การจัดส่ง — ดู `docs/frameworks/WEBHOOKS.md`                                                                                                                                                                                                                                                                     |
 | `cloudflaredTunnel.ts`, `ngrokTunnel.ts` | ผู้จัดการอุโมงค์ — ดู `docs/ops/TUNNELS_GUIDE.md`                                                                                                                                                                                                                                                                             |
 | `cloudSync.ts`, `initCloudSync.ts`       | การซิงค์สถานะคลาวด์เสริม                                                                                                                                                                                                                                                                                                      |
 | `localDb.ts`                             | ส่งออกบาร์เรลอีกครั้งสำหรับโมดูล db (ไม่มีลอจิกส่งออกซ้ำ — เท่านั้น)                                                                                                                                                                                                                                                          |
@@ -242,19 +242,19 @@ src/
 | -------------------------------- | ------------------------------------------------------------------------------------------------ |
 | `components/`                    | ส่วนประกอบแดชบอร์ด API: อะแดปเตอร์บน `packages/ui-kit` — ดู `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: ชื่อไอคอนที่ใช้โดยหน้าจอ → ส่วนประกอบ Lucide (`<Icon>`)                              |
-| `constants/providers.ts`         | **ผู้ให้บริการ 380 ราย** ด้วยการตรวจสอบ Zod (แหล่งที่มาของความจริง)                              |
+| `constants/providers.ts`         | **ผู้ให้บริการ 381 ราย** ด้วยการตรวจสอบ Zod (แหล่งที่มาของความจริง)                              |
 | `constants/cliTools.ts`          | รีจิสทรีเครื่องมือ CLI ภายนอก                                                                    |
 | `constants/routingStrategies.ts` | **20 กลยุทธ์การกำหนดเส้นทาง** มีลำดับความสำคัญ                                                   |
 | `constants/publicApiRoutes.ts`   | เส้นทางที่ต้องมีการตรวจสอบสิทธิ์ผู้ถือ (เทียบกับการจัดการ)                                       |
 | `constants/upstreamHeaders.ts`   | รายการส่วนหัวที่ปฏิเสธสำหรับคำขออัปสตรีม                                                         |
-| `validation/schemas.ts`          | ~ 80 Zod schema (แหล่งความจริงเดียวสำหรับสัญญา API )                                             |
+| `validation/schemas.ts`          | ~ 80 Zod schema (แหล่งความจริงแหล่งเดียวสำหรับสัญญา API )                                        |
 | `validation/helpers.ts`          | ตัวช่วยตรวจสอบ Zod (`validateBody` ฯลฯ )                                                         |
 | `types/`                         | ประเภท TS ที่ใช้ร่วมกัน                                                                          |
 | `contracts/`                     | สัญญา API สาธารณะ (ใช้โดย `files:` ใน `package.json`)                                            |
 | `utils/circuitBreaker.ts`        | เซอร์กิตเบรกเกอร์ของผู้ให้บริการ (ดู `docs/architecture/RESILIENCE_GUIDE.md`)                    |
 | `utils/apiAuth.ts`               | การตรวจสอบคีย์API การตรวจสอบขอบเขต                                                               |
 | `utils/fetchTimeout.ts`          | wrappers Timeout/abort สำหรับการดึงข้อมูลอัปสตรีม                                                |
-| `utils/releaseNotes.ts`          | ตัวแยกวิเคราะห์ประกาศ v2/legacy แบบปิด การแปลเป็นภาษาท้องถิ่น และการเลิกใช้ ID                   |
+| `utils/releaseNotes.ts`          | ตัวแยกวิเคราะห์ประกาศ v2/legacy แบบปิด การแปลเป็นภาษาท้องถิ่น และการยกเลิก ID                    |
 
 ---
 
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | การรวม CLI ภายนอก + ภายใน OmniRoute CLI                                                        |
 | `I18N.md`                   | สถาปัตยกรรม i18n เพิ่มภาษา 67 ภาษา                                                             |
 | `UNINSTALL.md`              | ล้างขั้นตอนการถอนการติดตั้ง                                                                    |
-| `PROVIDER_REFERENCE.md`     | **สร้างอัตโนมัติ** แค็ตตาล็อกของผู้ให้บริการ 380 ราย (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **สร้างอัตโนมัติ** แค็ตตาล็อกของผู้ให้บริการ 381 ราย (regen: `npm run gen:provider-reference`) |
 
 ### เจาะลึกระบบย่อย
 

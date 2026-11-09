@@ -307,6 +307,95 @@ Sıxılma kombinasiyaları marşrutlaşdırma kombinasiyalarına təyin edilə b
 
 İdarə panelindəki yeri: `İdarə paneli -> Kontekst və keş -> Sıxılma kombinasiyaları`.
 
+## İlkin şərtlər / operator təlimatı (CCR & session-dedup)
+
+CCR (`ccr`) və `session-dedup` mətni əvəz edir və ya silir və tərk edir a** marker** arxada. Bu bölmə müştəriyə naqil çəkmək, iki markeri oxumaq və örtülmüş məzmunu əldə etmək və ya diaqnostika etmək üçün operator istinadıdır. Hər bir mühərrikin mexanikası yuxarıda əhatə olunmuşdur; bu "necə işlədirəm" təbəqəsidir.
+
+### Nəqliyyatlar və son nöqtələr
+
+CCR alətlərini ifşa edən MCP serverinə üç yolla çatmaq olar. Defolt əsas URL `http://localhost:20128` (`OMNIROUTE_BASE_URL`):
+
+| Nəqliyyat                                        | URL / əmr                               | Qeydlər                                                                                                                                                 |
+| ------------------------------------------------ | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Yayım edilə bilən HTTP (müştəri, tövsiyə olunur) | `http://localhost:20128/api/mcp/stream` | Mövcud MCP müştərilərinin danışdıqları son nöqtə.                                                                                                       |
+| Legacy SSE singleton                             | `http://localhost:20128/api/mcp/sse`    | Köhnə singleton nəqliyyatı. Bu** bağlayır** axın edilə bilən seanslar; `streamable-http` müştərilərini `/api/mcp/stream` qarşı istifadə edin, bu deyil. |
+| stdio                                            | `omniroute --mcp`                       | Prosesi doğuran IDE MCP konfiqurasiyası üçün. `--dev` bayrağı yoxdur; `omniroute --mcp` stdio giriş nöqtəsidir.                                         |
+
+### Yaddaş səviyyələri (yenidən başladıqdan sonra sağ qalan)
+
+CCR a** iki qatlı** mağaza, yalnız yaddaşda deyil:
+
+- **İsti yaddaşdaxili səviyyə** — hər blok üçün qapaq 2 MiB, hər əsas üzrə 16 MiB, qlobal 64 MiB. Girişlər standart olaraq 24 saat TTL (maksimum 7 gün). Yaddaşdan tam MCP axtarışı 256 KiB ilə məhdudlaşır; Menzilli / grep rejimləri vasitəsilə daha böyük hər hansı bir şey əldə edilə bilər.
+- **Davamlı SQLite səviyyəsi** (`ccr_blocks`, `COMPRESSION_CCR_DURABLE_STORE`, defolt olaraq aktivdir) — yaddaşdaxili pilləni dəstəkləyir, beləliklə blok LRU çıxarılmasından, yenidən işə salınmadan və ya başqa nüsxədə bərpa enişindən sağ qalsın. Sətir blokun TTL saxlayır, ona görə də TTL dən keçən blok hər iki səviyyədən ayrılır.
+
+Üç mühafizəçi dayanıqlı səviyyəni məhdudlaşdıran — blokunu yalnız aşağıdakı hallarda yaddaşda saxlayır:
+
+1. blok bitdi** 512 KB** (`MAX_DURABLE_BLOCK_BYTES`);
+2. iş vaxtı bulud işləmə vaxtıdır (yerli disk yoxdur);
+3. `COMPRESSION_CCR_DURABLE_STORE=false`.
+
+Beləliklə, "blok itdi" ümumi yenidən başladın hekayəsi deyil: yerli, buludsuz işləmə müddətindəki sub-512 KB bloku TTL bitənə qədər dayanıqlı səviyyə vasitəsilə yenidən başlamağa davam edir. Dəyişən üçün [Ətraf Mühit arayışına](../reference/ENVIRONMENT.md) baxın.
+
+### İki marker
+
+| Marker                                | Mənası                                                                                                                                        | Model nə etməlidir                                                                                                                                                                                    |
+| ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `[CCR retrieve hash=<24hex> chars=N]` | Böyük bir blok məzmun ünvanlı saxlanıldı.                                                                                                     | ilə `omniroute_ccr_retrieve` zəng edin** 24 hex hex hərfi kopyalandı** orijinal mətni geri almaq üçün.                                                                                                |
+| `[dedup:ref sha=…]`                   | `session-dedup` elided mətn artıq eyni sessiyanın əvvəlki növbəsində göndərilmişdir. Bu bir** qəsdən geriyə baxmaq** , itki və ya səhv deyil. | Et** yox** istənilən alətə zəng edin və edin** yox** onu "yenidən qurmağa" çalışın. Mətnin ilk təkrarlanması kanonik surətdir; cari növbə heç vaxt yenidən yazılmır, sonrakı döngədə deupsiya edilir. |
+
+Bu `[dedup:ref]` geri baxış qəsdən protokol qərar — heç bir əvvəlcədən göndərmə yenidən qurulması var. Bunu "bu dəqiq mətn bu sessiyada əvvəllər teldə idi" kimi qəbul edin.
+
+### Müştəri ilkin şərtləri
+
+- **Açar (stdio):** stdio zəng edən şəxs hər sorğu üçün şəxsiyyət daşımır, ona görə də o, `OMNIROUTE_API_KEY` ilə autentifikasiya edir ( MCP serverinin `env` də təyin olunur). Onsuz zəng edən şəxs anonimdir və direktor tələb edən alətlər pisləşə bilər.
+- **`tools[]` inyeksiya üçün ilkin şərtdir.** CCR retrieve-protocol təlimatı (#8033) yeridilir** yalnız** sorğunun elan edilmiş `tools[]` müştərinin həqiqətən `omniroute_ccr_retrieve` çata biləcəyini sübut etdikdə. Uyğunluq ayırıcı (`__`, `.`, `/`, `:`) ilə məhdudlaşan arxa seqment uyğunluğudur — heç vaxt çılpaq alt sətir — buna görə də `mcp__gateway__omniroute_ccr_retrieve` kimi ad boşluqlu ad hələ də sayılır. Qeyri-uyğun və ya uyğun olmayan `tools[]` o deməkdir ki, təlimat dizayna görə yeridilməyib.
+- **`codemode:false` (OpenCode müştəriləri).** OpenCode defolt olaraq Kod Rejiminə uyğun olaraq modelə yalnız yerli alətlərini reklam edir və** etmir** MCP alətlərini yerli `tools[]` siyahısına qoyun. MCP server girişində `codemode: false` təyin edin ki, `omniroute_ccr_*` alətləri reklam olunsun. Bu a** müştəri** qəbulu, bir OmniRoute bir deyil. O, hələ CCR təlimatını daxil etmir: OpenCode aləti `<server>_<tool>` adlandırır, ona görə də `omniroute` adlı server `omniroute_omniroute_ccr_retrieve` ifşa edir və `_` uyğun separatorlardan biri deyil.
+- **Direktorlar.** Saxlama və axtarış autentifikasiya edilmiş əsas üzrə ( API açarına görə) təcrid olunur. Açar yalnız öz bloklarını görür.
+
+### Alət üçün əhatə dairəsi
+
+Dar əhatəli HTTP/SSE zəng edənlər üçün əhatə dairəsinin tətbiqi həmişə aktivdir. `omniroute_` CCR alətləri tələb edir:
+
+| Alət                     | Əhatə dairəsi       |
+| ------------------------ | ------------------- |
+| `omniroute_ccr_store`    | `write:compression` |
+| `omniroute_ccr_delete`   | `write:compression` |
+| `omniroute_ccr_retrieve` | `read:compression`  |
+| `omniroute_ccr_inspect`  | `read:compression`  |
+| `omniroute_ccr_list`     | `read:compression`  |
+| `omniroute_ccr_stats`    | `read:compression`  |
+
+Çatışmayan əhatə dairəsi a qaytarır**MCP aləti xətası nəticəsi** (`isError: true`, HTTP 403 — deyil, `403 LOCAL_ONLY` ayrıca geri dönmə marşrutu qoruyucu auth-dur): `Error: Insufficient MCP scopes for <tool>. Missing: <scope>.` Minimal uzaqdan idarəetmə açarı `mcp:connect` (yalnız `/api/mcp/` yerli kəsilməsinə icazə verir) və ona lazım olan xüsusi read/write əhatəsini saxlaya bilər.
+
+### Müştəri matrisi
+
+| Müştəri           | Nəqliyyat                              | İstifadə etmək üçün konfiqurasiya                                                                                                                                                                                                                        | `tools[]` reklam olunur? (→ CCR təlimatı yeridildi)                                                                                                                                             |
+| ----------------- | -------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Claude kodu       | axın edilə bilən-http                  | `claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream`                                                                                                                                                                        | Bəli — MCP qabiliyyəti; enjekte edilir.                                                                                                                                                         |
+| Cursor / Cline    | `stdio`** və ya** `streamable-http`    | stdio: `env` ilə `OMNIROUTE_API_KEY` ilə `omniroute --mcp` ; və ya `http://localhost:20128/api/mcp/stream` yə işarə edən uzaq MCP girişi (bax. [Quraşdırma Bələdçisi → MCP Müştəri Konfiqurasiyası](../guides/SETUP_GUIDE.md#mcp-client-configuration) ) | Bəli — `omniroute_ccr_*` alətlərini reklam edin.                                                                                                                                                |
+| OpenCode          | axın edilə bilən-http                  | `opencode mcp add omniroute --url http://localhost:20128/api/mcp/stream`, plus `codemode: false`                                                                                                                                                         | Yalnız `codemode: false` ilə reklam edilən alətlər; təlimat hələ də yeridilməyib, çünki `omniroute_omniroute_ccr_retrieve` uyğun gəlmir (bax [Müştəri ilkin şərtləri](#client-prerequisites) ). |
+| OpenAI-a uyğundur | OpenAI uyğun HTTP (chat tamamlamaları) | OpenAI uyğun son nöqtəyə qarşı standart söhbət tamamlama müştərisi                                                                                                                                                                                       | **Heç vaxt** — adi OpenAI-a uyğun gələn zəng edənə heç vaxt alətə zəng etmək deyilmir və təlimat vurulmur.                                                                                      |
+
+### Axtarış limitləri və səhifələşdirmə
+
+MCP alətinin mətn nəticələri `mcpAccessibility.maxTextChars` ətrafında kəsilir (defolt `50000`). Blokun `full` axtarışı 256 KiB — ilə məhdudlaşır** heç bir məhdudiyyətsiz tam bərpa yoxdur** . Blokun `chars=N` böyük olduqda, hər şeyi çəkmək əvəzinə onu səhifələyin:
+
+- Əsas qayda:**`chars > 40000` → `mode` istifadə edin** , heç vaxt çılpaq dolu.
+- `mode:"grep"` — regex `pattern` sətir-sətir, 1000-ə qədər uyğun sətir (`unique: true` düşmə təkrarlanır), "lazım olan bir xətti tap" üçün ən ucuzdur.
+- `mode:"lines"` — 1 indeksli xətt diapazonu; həm `start`, həm də `end` lazımdır.
+- `mode:"head"` / `mode:"tail"` — first/last `n` xətləri.
+- `mode:"stats"` — sətri, simvolu və bayt sayları gövdəsiz.
+
+Hər şeyi bir anda tələb etməkdənsə, səhifələrdə uzun bir blok gəzmək üçün `start`/`end` ilə `mode:"lines"` istifadə edin.
+
+### Alətin adlandırılması
+
+Axtarış aləti hazırda `omniroute_ccr_retrieve` adlanır ( `omniroute_` prefiksi serverlər arası adların toqquşması üçün tarixi keçmiş həll yoludur). Daha təmiz məhdudlaşdırılmış şəkilçi alət adı və MCP JSON nəticələri üçün düzəliş, kəsilmiş orta sətir yuxarı axın izləmələri kimi izlənilir; bu səhifə yalnız cari, göndərilmiş davranışı sənədləşdirir.
+
+### Sessiyanın həyat dövrü
+
+Streamable-HTTP seansları boş qalır və server onları yığır; boş pəncərə `MCP_SESSION_IDLE_MS` sabitidir (sabit kodlaşdırılmış dəyər deyil, adla istinad edilir, ona görə də bu səhifə dəyişdikdə sürüşmür). Boş qalan sessiyanın simptomu `Unknown Mcp-Session-Id` — ilə HTTP 404-dür, çarə sessiyanı yenidən qoşmaq və ya yenidən başlatmaqdır,** yox** düyməni fırlatmaq, əhatə dairəsini dəyişdirmək və ya alətin adını dəyişmək üçün.
+
 ## API interfeysi
 
 | Marşrut                                | Məqsəd                                                                         |
@@ -392,9 +481,9 @@ qiymətləndirmələr, keşə həssas prefikslər və s.).
   fərqləndirilə bilmir. "İşə düşdü, 0 %" ilə "ötürüldü" hallarını fərqləndirmək üçün
   breakdown modelində dəyişiklik tələb olunur və bu, sonraya saxlanılıb.
 
-## Yoxlama
+## Doğrulama
 
-Bu sahə üzrə hədəflənmiş yoxlama mərhələləri bunlardır:
+Bu sahə üçün diqqət mərkəzində olan qapılar:
 
 ```bash
 node --import tsx/esm --test tests/unit/compression/rtk-*.test.ts tests/unit/compression/pipeline-integration.test.ts tests/unit/compression/context-compression-api.test.ts

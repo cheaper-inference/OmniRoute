@@ -353,46 +353,46 @@ Mô hình: cc/claude-opus-4-7
 
 ---
 
-## 🚀 Triển khai
+## 🚀
 
-### Cài đặt npm toàn cục (Khuyến nghị)
+### Cài đặt npm toàn cầu (Được khuyến nghị)
 
 ```bash
 npm install -g omniroute
 
-# Tạo thư mục cấu hình
+# Create config directory
 mkdir -p ~/.omniroute
 
-# Tạo tệp .env (xem .env.example)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# Khởi động máy chủ
+# Start server
 omniroute
-# Hoặc với cổng tùy chỉnh:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI tự động tải `.env` từ `~/.omniroute/.env` hoặc `./.env`.
+CLI tự động tải `.env` từ `~/.omniroute/.env` hoặc `./.env`. Một `./.env` trong thư mục làm việc chỉ có thể đặt một danh sách ngắn các khóa được phép (cài đặt cổng, `REQUIRE_API_KEY`, ngôn ngữ và màu sắc); đặt mọi thứ khác vào `~/.omniroute/.env`. Xem [hợp đồng ra mắt CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
-### Chế độ khay hệ thống
+### Chế độ khay
 
-Khởi động OmniRoute trong khay hệ thống:
+Bắt đầu OmniRoute trong khay hệ thống:
 
 ```bash
 omniroute serve --tray
 ```
 
-Lệnh sẽ kết thúc sau khi máy chủ và khay hệ thống sẵn sàng.
+Lệnh trả về sau khi máy chủ và khay đã sẵn sàng.
 
-Máy chủ tiếp tục chạy mà không cần cửa sổ dòng lệnh.
+Máy chủ tiếp tục mà không cần thiết bị đầu cuối.
 
-Chế độ khay hệ thống hỗ trợ macOS, Windows và các phiên Linux có giao diện đồ họa. Chế độ khay hệ thống không tự động mở bảng điều khiển.
+Chế độ khay hỗ trợ các phiên macOS, Windows và Linux đồ họa. Chế độ khay không tự động mở bảng điều khiển.
 
-Sử dụng menu khay hệ thống cho các thao tác sau:
+Sử dụng menu khay cho những hành động sau:
 
 - Mở bảng điều khiển.
 - Mở `/dashboard/logs`.
-- Thay đổi chế độ tự động khởi động.
+- Thay đổi tự động khởi động.
 - Dừng OmniRoute.
 
 Không kết hợp `--tray` với các tùy chọn sau:
@@ -401,17 +401,17 @@ Không kết hợp `--tray` với các tùy chọn sau:
 - `--log`
 - `--no-recovery`
 
-Các chế độ này yêu cầu quyền sở hữu tiến trình khác nhau.
+Các chế độ này yêu cầu quyền sở hữu quy trình khác nhau.
 
-Bật khởi động cùng hệ thống vào lần đăng nhập máy tính tiếp theo:
+Cho phép khởi động ở lần đăng nhập máy tiếp theo:
 
 ```bash
 omniroute autostart enable
 ```
 
-Tính năng tự động khởi động sử dụng chế độ khay hệ thống trên macOS, Windows và các phiên Linux có giao diện đồ họa. Linux không có giao diện đồ họa sử dụng dịch vụ người dùng systemd hiện có.
+Tự động khởi động sử dụng chế độ khay trên các phiên macOS, Windows và Linux đồ họa. Linux không đầu sử dụng dịch vụ người dùng systemd hiện có.
 
-Tắt khởi động cùng hệ thống khi đăng nhập:
+Vô hiệu hóa khởi động khi đăng nhập:
 
 ```bash
 omniroute autostart disable
@@ -419,16 +419,16 @@ omniroute autostart disable
 
 ### Gỡ cài đặt
 
-Khi không còn cần OmniRoute, chúng tôi cung cấp hai tập lệnh nhanh để gỡ bỏ sạch sẽ:
+Khi bạn không cần OmniRoute nữa, chúng tôi cung cấp hai tập lệnh nhanh để xóa sạch:
 
-| Lệnh                     | Hành động                                                                                           |
-| ------------------------ | --------------------------------------------------------------------------------------------------- |
-| `npm run uninstall`      | Gỡ ứng dụng khỏi hệ thống nhưng **giữ lại cơ sở dữ liệu và cấu hình của bạn** trong `~/.omniroute`. |
-| `npm run uninstall:full` | Gỡ ứng dụng VÀ **xóa vĩnh viễn tất cả cấu hình, khóa và cơ sở dữ liệu**.                            |
+| Yêu cầu                  | Hoạt động                                                                        |
+| ------------------------ | -------------------------------------------------------------------------------- |
+| `npm run uninstall`      | Xóa ứng dụng hệ thống nhưng** giữ DB và cấu hình của bạn** trong `~/.omniroute`. |
+| `npm run uninstall:full` | Xóa ứng dụng AND vĩnh viễn** xóa tất cả cấu hình, khóa và cơ sở dữ liệu** .      |
 
-> Lưu ý: Để chạy các lệnh này, hãy chuyển đến thư mục dự án OmniRoute (nếu bạn đã sao chép kho lưu trữ) rồi chạy chúng. Ngoài ra, nếu đã cài đặt toàn cục, bạn chỉ cần chạy `npm uninstall -g omniroute`.
+> Lưu ý: Để chạy các lệnh này, hãy điều hướng đến thư mục dự án OmniRoute (nếu bạn đã sao chép nó) và chạy chúng. Ngoài ra, nếu được cài đặt trên toàn cầu, bạn chỉ cần chạy `npm uninstall -g omniroute`.
 
-### Triển khai trên VPS
+### VPS
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -444,21 +444,21 @@ export NEXT_PUBLIC_BASE_URL="http://localhost:20128"
 export API_KEY_SECRET="endpoint-proxy-api-key-secret"
 
 npm run start
-# Hoặc: pm2 start npm --name omniroute -- start
+# Or: pm2 start npm --name omniroute -- start
 ```
 
-### Triển khai bằng PM2 (Bộ nhớ thấp)
+### Triển khai PM2 (Bộ nhớ thấp)
 
-Đối với máy chủ có RAM hạn chế, hãy sử dụng tùy chọn giới hạn bộ nhớ:
+Đối với các máy chủ có giới hạn RAM, hãy sử dụng tùy chọn giới hạn bộ nhớ:
 
 ```bash
-# Với giới hạn 512MB (mặc định)
+# With 512MB limit (default)
 pm2 start npm --name omniroute -- start
 
-# Hoặc với giới hạn bộ nhớ tùy chỉnh
+# Or with custom memory limit
 OMNIROUTE_MEMORY_MB=512 pm2 start npm --name omniroute -- start
 
-# Hoặc sử dụng ecosystem.config.js
+# Or using ecosystem.config.js
 pm2 start ecosystem.config.js
 ```
 
@@ -487,24 +487,24 @@ module.exports = {
 ### Docker
 
 ```bash
-# Xây dựng image (mặc định = runner-cli với codex/claude/droid được cài đặt sẵn)
+# Build image (default = runner-cli with codex/claude/droid preinstalled)
 docker build -t omniroute:cli .
 
-# Chế độ di động (khuyến nghị)
+# Portable mode (recommended)
 docker run -d --name omniroute -p 20128:20128 --env-file ./.env -v omniroute-data:/app/data omniroute:cli
 ```
 
-Đối với chế độ tích hợp với máy chủ có các tệp nhị phân CLI, hãy xem phần Docker trong tài liệu chính.
+Để biết chế độ tích hợp máy chủ với các tệp nhị phân CLI, hãy xem phần Docker trong tài liệu chính.
 
-### Void Linux (xbps-src)
+### Linux vô hiệu (xbps-src)
 
-Người dùng Void Linux có thể đóng gói và cài đặt OmniRoute theo cách nguyên bản bằng framework biên dịch chéo `xbps-src`. Quy trình này tự động hóa việc xây dựng bản độc lập Node.js cùng với các liên kết native `better-sqlite3` bắt buộc.
+Người dùng Void Linux có thể đóng gói và cài đặt OmniRoute nguyên bản bằng cách sử dụng khung biên dịch chéo `xbps-src`. Điều này tự động hóa bản dựng độc lập Node.js cùng với các ràng buộc gốc `better-sqlite3` cần thiết.
 
 <details>
-<summary><b>Xem template xbps-src</b></summary>
+<summary><b>Xem mẫu xbps-src</b></summary>
 
 ```bash
-# Tệp template cho 'omniroute'
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -525,7 +525,7 @@ export npm_config_fund=false
 export npm_config_audit=false
 
 do_build() {
-	# Xác định kiến trúc CPU đích cho node-gyp
+	# Determine target CPU arch for node-gyp
 	local _gyp_arch
 	case "$XBPS_TARGET_MACHINE" in
 		aarch64*) _gyp_arch=arm64 ;;
@@ -534,29 +534,29 @@ do_build() {
 		*) _gyp_arch=x64 ;;
 	esac
 
-	# 1) Cài đặt tất cả dependency – bỏ qua script
+	# 1) Install all deps – skip scripts
 	NODE_ENV=development npm ci --ignore-scripts
 
-	# 2) Xây dựng gói độc lập Next.js
+	# 2) Build the Next.js standalone bundle
 	npm run build
 
-	# 3) Sao chép tài nguyên tĩnh vào gói độc lập
+	# 3) Copy static assets into standalone
 	cp -r .next/static .next/standalone/.next/static
 	[ -d public ] && cp -r public .next/standalone/public || true
 
-	# 4) Biên dịch liên kết native better-sqlite3
+	# 4) Compile better-sqlite3 native binding
 	local _node_gyp=/usr/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js
 	(cd node_modules/better-sqlite3 && node "$_node_gyp" rebuild --arch="$_gyp_arch")
 
-	# 5) Đặt liên kết đã biên dịch vào gói độc lập
+	# 5) Place the compiled binding into the standalone bundle
 	local _bs3_release=.next/standalone/node_modules/better-sqlite3/build/Release
 	mkdir -p "$_bs3_release"
 	cp node_modules/better-sqlite3/build/Release/better_sqlite3.node "$_bs3_release/"
 
-	# 6) Xóa các gói sharp dành riêng cho từng kiến trúc
+	# 6) Remove arch-specific sharp bundles
 	rm -rf .next/standalone/node_modules/@img
 
-	# 7) Sao chép các dependency runtime của pino bị quá trình phân tích tĩnh Next.js bỏ sót:
+	# 7) Copy pino runtime deps omitted by Next.js static analysis:
 	for _mod in pino-abstract-transport split2 process-warning; do
 		cp -r "node_modules/$_mod" .next/standalone/node_modules/
 	done
@@ -570,7 +570,7 @@ do_install() {
 	vmkdir usr/lib/omniroute/.next
 	vcopy .next/standalone/. usr/lib/omniroute/.next/standalone
 
-	# Ngăn hook sau cài đặt xóa các thư mục app router Next.js trống
+	# Prevent removal of empty Next.js app router dirs by the post-install hook
 	for _d in \
 		.next/standalone/.next/server/app/dashboard \
 		.next/standalone/.next/server/app/dashboard/settings \
@@ -598,30 +598,30 @@ post_install() {
 
 ### Biến môi trường
 
-| Biến                                    | Mặc định                             | Mô tả                                                                                                                              |
-| --------------------------------------- | ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------- |
-| `JWT_SECRET`                            | `omniroute-default-secret-change-me` | Khóa bí mật dùng để ký JWT (**phải thay đổi trong môi trường production**)                                                         |
-| `INITIAL_PASSWORD`                      | `CHANGEME`                           | Mật khẩu đăng nhập lần đầu                                                                                                         |
-| `DATA_DIR`                              | `~/.omniroute`                       | Thư mục dữ liệu (cơ sở dữ liệu, mức sử dụng, nhật ký)                                                                              |
-| `PORT`                                  | mặc định của framework               | Cổng dịch vụ (`20128` trong các ví dụ)                                                                                             |
-| `HOSTNAME`                              | mặc định của framework               | Máy chủ để liên kết (Docker mặc định là `0.0.0.0`)                                                                                 |
-| `NODE_ENV`                              | mặc định của runtime                 | Đặt thành `production` khi triển khai                                                                                              |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`             | URL cơ sở công khai được cung cấp cho bảng điều khiển và máy chủ (thay thế `BASE_URL` cũ)                                          |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`              | URL cơ sở của điểm cuối đồng bộ đám mây (thay thế `CLOUD_URL` cũ)                                                                  |
-| `API_KEY_SECRET`                        | `endpoint-proxy-api-key-secret`      | Khóa bí mật HMAC dành cho các khóa API được tạo                                                                                    |
-| `REQUIRE_API_KEY`                       | `false`                              | Bắt buộc sử dụng khóa API Bearer trên `/v1/*`                                                                                      |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                              | Cho phép người dùng bảng điều khiển đã xác thực xem toàn bộ giá trị khóa API được lưu trữ khi có yêu cầu                           |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                 | Chu kỳ làm mới phía máy chủ cho dữ liệu Giới hạn Nhà cung cấp được lưu đệm; các nút làm mới trên UI vẫn kích hoạt đồng bộ thủ công |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                              | Tắt ảnh chụp nhanh SQLite tự động trước khi ghi/nhập/khôi phục; sao lưu thủ công vẫn hoạt động                                     |
-| `APP_LOG_TO_FILE`                       | `true`                               | Bật ghi nhật ký ứng dụng và nhật ký kiểm tra vào ổ đĩa                                                                             |
-| `AUTH_COOKIE_SECURE`                    | `false`                              | Bắt buộc cookie xác thực có thuộc tính `Secure` (khi đặt sau proxy ngược HTTPS)                                                    |
-| `CLOUDFLARED_BIN`                       | chưa đặt                             | Sử dụng tệp nhị phân `cloudflared` hiện có thay vì tải xuống bản được quản lý                                                      |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                              | Giao thức truyền tải cho Quick Tunnels được quản lý (`http2`, `quic` hoặc `auto`)                                                  |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                                | Giới hạn heap của Node.js tính bằng MB                                                                                             |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                 | Số mục tối đa trong bộ nhớ đệm prompt                                                                                              |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                | Số mục tối đa trong bộ nhớ đệm ngữ nghĩa                                                                                           |
+| Biến                                    | Mặc định                 | Sự miêu tả                                                                                                                                      |
+| --------------------------------------- | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `JWT_SECRET`                            | _(được tạo tự động)_     | bí mật ký tên JWT — được tạo tự động trong lần chạy đầu tiên và tồn tại ở `server.env`; đặt nó một cách rõ ràng khi thư mục dữ liệu là tạm thời |
+| `INITIAL_PASSWORD`                      | _(chưa đặt)_             | Mật khẩu đăng nhập đầu tiên. cài đặt npm/source bắt đầu bằng `CHANGEME`: thay thế nó. Chưa đặt: trình hướng dẫn giới thiệu                      |
+| `DATA_DIR`                              | `~/.omniroute`           | Thư mục dữ liệu (db, cách sử dụng, nhật ký)                                                                                                     |
+| `PORT`                                  | mặc định khung           | Cổng dịch vụ (`20128` trong ví dụ)                                                                                                              |
+| `HOSTNAME`                              | mặc định khung           | Liên kết máy chủ (Docker mặc định là `0.0.0.0`)                                                                                                 |
+| `NODE_ENV`                              | mặc định thời gian chạy  | Đặt `production` để triển khai                                                                                                                  |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128` | Cơ sở công khai URL hiển thị trên bảng điều khiển và hiển thị với máy chủ (thay thế `BASE_URL` cũ)                                              |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`  | Cơ sở điểm cuối đồng bộ hóa đám mây URL (thay thế `CLOUD_URL` cũ)                                                                               |
+| `API_KEY_SECRET`                        | _(được tạo tự động)_     | bí mật HMAC cho các khóa API được tạo — được tạo tự động trong lần chạy đầu tiên và tồn tại đến `server.env`                                    |
+| `REQUIRE_API_KEY`                       | `false`                  | Thực thi khóa API Bearer trên `/v1/*`                                                                                                           |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                  | Cho phép người dùng bảng điều khiển được xác thực tiết lộ đầy đủ các giá trị khóa API được lưu trữ theo yêu cầu                                 |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                     | Nhịp làm mới phía máy chủ cho dữ liệu Giới hạn nhà cung cấp được lưu trong bộ nhớ đệm; nút làm mới UI vẫn kích hoạt đồng bộ hóa thủ công        |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                  | Vô hiệu hóa ảnh chụp nhanh SQLite tự động trước writes/import/restore; sao lưu thủ công vẫn hoạt động                                           |
+| `APP_LOG_TO_FILE`                       | `true`                   | Cho phép xuất nhật ký ứng dụng và kiểm tra vào đĩa                                                                                              |
+| `AUTH_COOKIE_SECURE`                    | `false`                  | Buộc cookie xác thực `Secure` (đằng sau proxy ngược HTTPS )                                                                                     |
+| `CLOUDFLARED_BIN`                       | bỏ đặt                   | Sử dụng tệp nhị phân `cloudflared` hiện có thay vì tải xuống được quản lý                                                                       |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                  | Vận chuyển cho Đường hầm nhanh được quản lý (`http2`, `quic` hoặc `auto`)                                                                       |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                    | giới hạn đống Node.js trong MB                                                                                                                  |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                     | Mục nhập bộ nhớ đệm nhắc nhở tối đa                                                                                                             |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                    | Các mục bộ nhớ đệm ngữ nghĩa tối đa                                                                                                             |
 
-Để xem tài liệu tham khảo đầy đủ về các biến môi trường, hãy xem [README](../README.md).
+Để biết tham chiếu đầy đủ về biến môi trường, hãy xem [README](../README.md).
 
 ---
 

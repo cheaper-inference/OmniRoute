@@ -352,82 +352,82 @@ Model: cc/claude-opus-4-7
 
 ---
 
-## 🚀 Juurutamine
+## 🚀 juurutamine
 
-### Globaalne npm-paigaldus (soovitatav)
+### Globaalne npm installimine (soovitatav)
 
 ```bash
 npm install -g omniroute
 
-# Loo konfiguratsioonikataloog
+# Create config directory
 mkdir -p ~/.omniroute
 
-# Loo .env fail (vaata .env.example)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# Käivita server
+# Start server
 omniroute
-# Või kohandatud pordiga:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI laadib automaatselt faili `.env` asukohast `~/.omniroute/.env` või `./.env`.
+CLI laadib `.env` automaatselt `~/.omniroute/.env` või `./.env`. Töökataloogis olev `./.env` võib määrata vaid lühikese lubatud võtmete loendi (pordid, `REQUIRE_API_KEY`, lokaadi ja värvi sätted); pane kõik muu `~/.omniroute/.env` sse. Vaadake [CLI käivituslepinguid](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
-### Salveraadi (tray) režiim
+### Salve režiim
 
-Käivita OmniRoute süsteemi salveraadis:
+Käivitage OmniRoute süsteemses salves:
 
 ```bash
 omniroute serve --tray
 ```
 
-Käsk tagastab väljundi pärast serveri ja salveraadi valmimist.
+Käsk naaseb pärast seda, kui server ja salv on valmis.
 
-Server jätkab töötamist ka pärast terminali sulgemist.
+Server jätkab ilma terminalita.
 
-Salveraadi režiim toetab macOS-i, Windowsi ja graafilisi Linuxi seansse. Salveraadi režiim ei ava juhtpaneeli automaatselt.
+Salve režiim toetab macOS, Windows ja graafilisi Linux seansse. Salverežiim ei ava armatuurlauda automaatselt.
 
-Kasuta salveraadi menüüd järgmiste toimingute jaoks:
+Kasutage salve menüüd järgmiste toimingute tegemiseks.
 
-- Ava juhtpaneel.
-- Ava `/dashboard/logs`.
-- Muuda automaatkäivitust.
-- Peata OmniRoute.
+- Avage armatuurlaud.
+- Avage `/dashboard/logs`.
+- Muuda automaatset käivitust.
+- Lõpeta OmniRoute.
 
-Ei tohi kombineerida `--tray` võtit järgmistega:
+Ärge kombineerige `--tray` järgmiste valikutega:
 
 - `--daemon`
 - `--log`
 - `--no-recovery`
 
-Need režiimid vajavad erinevat protsessi omandiõigust.
+Need režiimid nõuavad erinevat protsessi omandiõigust.
 
-Lubage käivitamine järgmisel masinasse sisselogimisel:
+Luba käivitamine järgmisel masina sisselogimisel:
 
 ```bash
 omniroute autostart enable
 ```
 
-Automaatkäivitus kasutab salveraadi režiimi macOS-il, Windowsil ja graafilistes Linuxi seanssides. Kasutajaliideseta (headless) Linux kasutab olemasolevat systemd kasutajateenust.
+Automaatkäivitus kasutab macOS, Windows ja graafilise Linux seanssidel salverežiimi. Peata Linux kasutab olemasolevat systemd kasutajateenust.
 
-Sisselogimisel käivitamise keelamine:
+Keela käivitamine sisselogimisel:
 
 ```bash
 omniroute autostart disable
 ```
 
-### Eemaldamine
+### Desinstallimine
 
-Kui OmniRoute't ei ole enam vaja, pakume kahte kiiret skripti puhtaks eemaldamiseks:
+Kui te OmniRoute enam ei vaja, pakume puhtaks eemaldamiseks kahte kiiret skripti:
 
-| Käsk                     | Tegevus                                                                                         |
-| ------------------------ | ----------------------------------------------------------------------------------------------- |
-| `npm run uninstall`      | Eemaldab süsteemirakenduse, kuid **säilitab teie andmebaasi ja seaded** kaustas `~/.omniroute`. |
-| `npm run uninstall:full` | Eemaldab rakenduse JA **kustutab jäädavalt kõik seaded, võtmed ja andmebaasid**.                |
+| Käsk                     | Tegevus                                                                                       |
+| ------------------------ | --------------------------------------------------------------------------------------------- |
+| `npm run uninstall`      | Eemaldab süsteemirakenduse, kuid** säilitab teie DB ja konfiguratsioonid** `~/.omniroute`.    |
+| `npm run uninstall:full` | Eemaldab rakenduse AND jäädavalt** kustutab kõik konfiguratsioonid, võtmed ja andmebaasid** . |
 
-> Märkus: nende käskude käivitamiseks liikuge OmniRoute projekti kausta (kui kloonisite selle) ja käivitage need seal. Kui rakendus on paigaldatud globaalselt, võite lihtsalt käivitada `npm uninstall -g omniroute`.
+> Märkus. Nende käskude käivitamiseks liikuge OmniRoute projekti kausta (kui te selle kloonisite) ja käivitage need. Teise võimalusena, kui see on globaalselt installitud, võite lihtsalt käivitada `npm uninstall -g omniroute`.
 
-### VPS-i juurutamine
+### VPS juurutamine
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -443,25 +443,25 @@ export NEXT_PUBLIC_BASE_URL="http://localhost:20128"
 export API_KEY_SECRET="endpoint-proxy-api-key-secret"
 
 npm run start
-# Või: pm2 start npm --name omniroute -- start
+# Or: pm2 start npm --name omniroute -- start
 ```
 
-### PM2 juurutamine (väikese mäluga)
+### PM2 juurutamine (vähe mälu)
 
-Piiratud RAM-i mahuga serverite jaoks kasutage mälupiirangu valikut:
+Piiratud RAM ga serverite puhul kasutage mälupiirangu valikut:
 
 ```bash
-# 512 MB piiranguga (vaikimisi)
+# With 512MB limit (default)
 pm2 start npm --name omniroute -- start
 
-# Või kohandatud mälupiiranguga
+# Or with custom memory limit
 OMNIROUTE_MEMORY_MB=512 pm2 start npm --name omniroute -- start
 
-# Või kasutades ecosystem.config.js
+# Or using ecosystem.config.js
 pm2 start ecosystem.config.js
 ```
 
-Loo fail `ecosystem.config.js`:
+Loo `ecosystem.config.js`:
 
 ```javascript
 module.exports = {
@@ -486,24 +486,24 @@ module.exports = {
 ### Docker
 
 ```bash
-# Ehita image (vaikimisi = runner-cli koos eelnevalt paigaldatud codex/claude/droid-iga)
+# Build image (default = runner-cli with codex/claude/droid preinstalled)
 docker build -t omniroute:cli .
 
-# Portatiivne režiim (soovitatav)
+# Portable mode (recommended)
 docker run -d --name omniroute -p 20128:20128 --env-file ./.env -v omniroute-data:/app/data omniroute:cli
 ```
 
-Hostiga integreeritud režiimi kohta CLI binaaridega vaata Dockeri jaotist peamises dokumentatsioonis.
+Hostiga integreeritud režiimi CLI binaarfailidega vaadake peamiste dokumentide jaotisest Docker.
 
-### Void Linux (xbps-src)
+### Kehtetu Linux (xbps-src)
 
-Void Linuxi kasutajad saavad paketeerida ja paigaldada OmniRoute'i loomulikul viisil, kasutades `xbps-src` risttõlkimise raamistikku. See automatiseerib Node.js iseseisva (standalone) ehituse koos vajalike `better-sqlite3` natiivsete seostustega (bindings).
+Kehtetu Linux kasutajad saavad OmniRoute natiivselt pakendada ja installida, kasutades `xbps-src` ristkompileerimise raamistikku. See automatiseerib Node.js eraldiseisva koostamise koos vajalike `better-sqlite3` natiivsete sidemetega.
 
 <details>
-<summary><b>Vaata xbps-src malli</b></summary>
+<summary><b>Vaadake xbps-src malli</b></summary>
 
 ```bash
-# Malli fail 'omniroute' jaoks
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -524,7 +524,7 @@ export npm_config_fund=false
 export npm_config_audit=false
 
 do_build() {
-	# Määra sihtprotsessori arhitektuur node-gyp jaoks
+	# Determine target CPU arch for node-gyp
 	local _gyp_arch
 	case "$XBPS_TARGET_MACHINE" in
 		aarch64*) _gyp_arch=arm64 ;;
@@ -533,29 +533,29 @@ do_build() {
 		*) _gyp_arch=x64 ;;
 	esac
 
-	# 1) Paigalda kõik sõltuvused – jäta skriptid vahele
+	# 1) Install all deps – skip scripts
 	NODE_ENV=development npm ci --ignore-scripts
 
-	# 2) Ehita Next.js iseseisev pakett
+	# 2) Build the Next.js standalone bundle
 	npm run build
 
-	# 3) Kopeeri staatilised failid iseseisvasse paketti
+	# 3) Copy static assets into standalone
 	cp -r .next/static .next/standalone/.next/static
 	[ -d public ] && cp -r public .next/standalone/public || true
 
-	# 4) Kompileeri better-sqlite3 natiivne seostus
+	# 4) Compile better-sqlite3 native binding
 	local _node_gyp=/usr/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js
 	(cd node_modules/better-sqlite3 && node "$_node_gyp" rebuild --arch="$_gyp_arch")
 
-	# 5) Paiguta kompileeritud seostus iseseisvasse paketti
+	# 5) Place the compiled binding into the standalone bundle
 	local _bs3_release=.next/standalone/node_modules/better-sqlite3/build/Release
 	mkdir -p "$_bs3_release"
 	cp node_modules/better-sqlite3/build/Release/better_sqlite3.node "$_bs3_release/"
 
-	# 6) Eemalda arhitektuurispetsiifilised sharp paketid
+	# 6) Remove arch-specific sharp bundles
 	rm -rf .next/standalone/node_modules/@img
 
-	# 7) Kopeeri pino käitusaja sõltuvused, mille Next.js'i staatiline analüüs vahele jättis:
+	# 7) Copy pino runtime deps omitted by Next.js static analysis:
 	for _mod in pino-abstract-transport split2 process-warning; do
 		cp -r "node_modules/$_mod" .next/standalone/node_modules/
 	done
@@ -569,7 +569,7 @@ do_install() {
 	vmkdir usr/lib/omniroute/.next
 	vcopy .next/standalone/. usr/lib/omniroute/.next/standalone
 
-	# Väldi tühjade Next.js app router kataloogide eemaldamist paigaldusjärgse hoogi (hook) poolt
+	# Prevent removal of empty Next.js app router dirs by the post-install hook
 	for _d in \
 		.next/standalone/.next/server/app/dashboard \
 		.next/standalone/.next/server/app/dashboard/settings \
@@ -597,30 +597,30 @@ post_install() {
 
 ### Keskkonnamuutujad
 
-| Muutuja                                 | Vaikeväärtus                         | Kirjeldus                                                                                                                                                        |
-| --------------------------------------- | ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `JWT_SECRET`                            | `omniroute-default-secret-change-me` | JWT allkirjastamise saladus (**muutke tootmiskeskkonnas**)                                                                                                       |
-| `INITIAL_PASSWORD`                      | `CHANGEME`                           | Esimese sisselogimise parool                                                                                                                                     |
-| `DATA_DIR`                              | `~/.omniroute`                       | Andmekataloog (andmebaas, kasutus, logid)                                                                                                                        |
-| `PORT`                                  | raamistiku vaikeväärtus              | Teenuse port (näidetes `20128`)                                                                                                                                  |
-| `HOSTNAME`                              | raamistiku vaikeväärtus              | Sidumise host (Dockeri vaikeväärtus on `0.0.0.0`)                                                                                                                |
-| `NODE_ENV`                              | käitusaja vaikeväärtus               | Määra `production` juurutamiseks                                                                                                                                 |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`             | Avalik baas-URL, mida näidatakse juhtpaneelis ja mis avaldatakse serverile (asendab vana `BASE_URL`)                                                             |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`              | Pilvesünkroonimise lõpp-punkti baas-URL (asendab vana `CLOUD_URL`)                                                                                               |
-| `API_KEY_SECRET`                        | `endpoint-proxy-api-key-secret`      | HMAC saladus loodud API võtmete jaoks                                                                                                                            |
-| `REQUIRE_API_KEY`                       | `false`                              | Nõua Bearer API võtit teel `/v1/*`                                                                                                                               |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                              | Luba autenditud juhtpaneeli kasutajatel nõudmisel näidata salvestatud API võtme täisväärtusi                                                                     |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                 | Serveripoolne värskendamise sagedus vahemällu salvestatud Provider Limits andmete jaoks; kasutajaliidese värskendusnupud käivitavad ikkagi käsitsi sünkroonimise |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                              | Keela automaatsed SQLite hetktõmmised enne kirjutamist/importi/taastamist; käsitsi varundamine töötab jätkuvalt                                                  |
-| `APP_LOG_TO_FILE`                       | `true`                               | Lubab rakenduse ja auditilogide väljundi kettale                                                                                                                 |
-| `AUTH_COOKIE_SECURE`                    | `false`                              | Sunni `Secure` autentimisküpsis (HTTPS pöördproksi taga)                                                                                                         |
-| `CLOUDFLARED_BIN`                       | määramata                            | Kasuta olemasolevat `cloudflared` binaari halduva allalaadimise asemel                                                                                           |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                              | Transport hallatavatele Quick Tunnels'idele (`http2`, `quic` või `auto`)                                                                                         |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                                | Node.js hunniku (heap) piirang MB-des                                                                                                                            |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                 | Vahemälu (prompt cache) kirjete maksimaalne arv                                                                                                                  |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                | Semantilise vahemälu kirjete maksimaalne arv                                                                                                                     |
+| Muutuv                                  | Vaikimisi                     | Kirjeldus                                                                                                                                                              |
+| --------------------------------------- | ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `JWT_SECRET`                            | _(automaatselt genereeritud)_ | JWT allkirjastamise salajane — genereeriti automaatselt esimesel käivitamisel ja jäi alles `server.env`; määrake see selgesõnaliselt, kui andmekataloog on lühiajaline |
+| `INITIAL_PASSWORD`                      | _(määramata)_                 | Esimene sisselogimisparool. npm/source installid algavad tähega `CHANGEME`: asendage see. Määramata: liitumisviisard                                                   |
+| `DATA_DIR`                              | `~/.omniroute`                | Andmekataloog (db, kasutus, logid)                                                                                                                                     |
+| `PORT`                                  | raamistiku vaikeseade         | Teenindusport (näidetes `20128` )                                                                                                                                      |
+| `HOSTNAME`                              | raamistiku vaikeseade         | Seo host (Docker vaikimisi `0.0.0.0`)                                                                                                                                  |
+| `NODE_ENV`                              | käitusaja vaikeseade          | Määra juurutamiseks `production`                                                                                                                                       |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`      | Avalik baas URL ilmus armatuurlauale ja avalikustati serverisse (asendab pärand `BASE_URL`)                                                                            |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`       | Pilvesünkroonimise lõpp-punkti baas URL (asendab pärand `CLOUD_URL`)                                                                                                   |
+| `API_KEY_SECRET`                        | _(automaatselt genereeritud)_ | HMAC saladus loodud API võtmete jaoks — genereeriti automaatselt esimesel käivitamisel ja säilis `server.env`-s                                                        |
+| `REQUIRE_API_KEY`                       | `false`                       | Jõusta kandja API klahv `/v1/*`                                                                                                                                        |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                       | Lubage autentitud armatuurlaua kasutajatel nõudmisel avaldada täielikud salvestatud API võtmeväärtused                                                                 |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                          | Serveripoolne värskendussagedus vahemällu salvestatud teenusepakkuja piirangute andmete jaoks; UI värskendusnupud käivitavad endiselt käsitsi sünkroonimise            |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                       | Keela automaatsed SQLite hetktõmmised enne writes/import/restore; käsitsi varukoopiad töötavad endiselt                                                                |
+| `APP_LOG_TO_FILE`                       | `true`                        | Lubab rakenduse ja auditi logi väljundi kettale                                                                                                                        |
+| `AUTH_COOKIE_SECURE`                    | `false`                       | Sundima `Secure` autentimise küpsisefail ( HTTPS vastupidise puhverserveri taga)                                                                                       |
+| `CLOUDFLARED_BIN`                       | määramata                     | Kasutage hallatud allalaadimise asemel olemasolevat `cloudflared` binaarfaili                                                                                          |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                       | Hallatud kiirtunnelite transport (`http2`, `quic` või `auto`)                                                                                                          |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                         | Node.js hunniku limiit MB                                                                                                                                              |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                          | Maksimaalsed viipade vahemälu kirjed                                                                                                                                   |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                         | Maksimaalne semantilise vahemälu kirje                                                                                                                                 |
 
-Täieliku keskkonnamuutujate loendi leiate [README](../README.md) failist.
+Täieliku keskkonnamuutuja viite saamiseks vaadake [README](../README.md).
 
 ---
 

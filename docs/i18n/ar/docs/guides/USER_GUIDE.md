@@ -341,65 +341,65 @@ codex "your prompt"
 
 ---
 
-## 🚀 النشر
+## نشر 🚀
 
-### التثبيت العام عبر npm (موصى به)
+### تثبيت npm عالمي (مستحسن)
 
 ```bash
 npm install -g omniroute
 
-# إنشاء دليل الإعدادات
+# Create config directory
 mkdir -p ~/.omniroute
 
-# إنشاء ملف .env (راجع .env.example)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# بدء تشغيل الخادم
+# Start server
 omniroute
-# أو باستخدام منفذ مخصص:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-تحمّل CLI ملف `.env` تلقائيًا من `~/.omniroute/.env` أو `./.env`.
+يقوم CLI تلقائيًا بتحميل `.env` من `~/.omniroute/.env` أو `./.env`. قد يقوم `./.env` في دليل العمل بتعيين قائمة مسموحة قصيرة فقط من المفاتيح (المنافذ، و `REQUIRE_API_KEY`، والإعدادات المحلية والألوان)؛ ضع كل شيء آخر في `~/.omniroute/.env`. انظر [عقود إطلاق CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
-### وضع صينية النظام
+### وضع الدرج
 
-شغّل OmniRoute في صينية النظام:
+ابدأ OmniRoute في علبة النظام:
 
 ```bash
 omniroute serve --tray
 ```
 
-ينتهي الأمر بعد أن يصبح الخادم وصينية النظام جاهزين.
+يعود الأمر بعد أن يصبح الخادم والدرج جاهزين.
 
-يستمر الخادم في العمل من دون الطرفية.
+يستمر الخادم بدون المحطة.
 
-يدعم وضع صينية النظام macOS وWindows وجلسات Linux الرسومية. لا يفتح وضع صينية النظام لوحة التحكم تلقائيًا.
+يدعم وضع الدرج جلسات macOS و Windows و Linux الرسومية. وضع الدرج لا يفتح لوحة المعلومات تلقائيًا.
 
-استخدم قائمة صينية النظام لتنفيذ الإجراءات التالية:
+استخدم قائمة الدرج لتنفيذ هذه الإجراءات:
 
-- فتح لوحة التحكم.
-- فتح `/dashboard/logs`.
-- تغيير إعداد التشغيل التلقائي.
-- إيقاف OmniRoute.
+- افتح لوحة القيادة.
+- افتح `/dashboard/logs`.
+- تغيير التشغيل التلقائي.
+- توقف OmniRoute.
 
-لا تستخدم `--tray` مع الخيارات التالية:
+لا تجمع `--tray` مع هذه الخيارات:
 
 - `--daemon`
 - `--log`
 - `--no-recovery`
 
-تتطلب هذه الأوضاع ملكية مختلفة للعملية.
+تتطلب هذه الأوضاع ملكية عملية مختلفة.
 
-فعّل التشغيل عند تسجيل الدخول التالي إلى الجهاز:
+تمكين بدء التشغيل عند تسجيل الدخول التالي للجهاز:
 
 ```bash
 omniroute autostart enable
 ```
 
-يستخدم التشغيل التلقائي وضع صينية النظام على macOS وWindows وجلسات Linux الرسومية. يستخدم Linux دون واجهة رسومية خدمة مستخدم systemd الحالية.
+يستخدم التشغيل التلقائي وضع الدرج في جلسات macOS و Windows و Linux الرسومية. يستخدم Headless Linux خدمة مستخدم systemd الموجودة.
 
-عطّل التشغيل عند تسجيل الدخول:
+تعطيل بدء التشغيل عند تسجيل الدخول:
 
 ```bash
 omniroute autostart disable
@@ -407,16 +407,16 @@ omniroute autostart disable
 
 ### إلغاء التثبيت
 
-عندما لا تعود بحاجة إلى OmniRoute، نوفر نصَّيْن برمجيَّيْن سريعين للإزالة النظيفة:
+عندما لم تعد بحاجة إلى OmniRoute، فإننا نقدم نصين سريعين للإزالة النظيفة:
 
-| الأمر                    | الإجراء                                                                       |
-| ------------------------ | ----------------------------------------------------------------------------- |
-| `npm run uninstall`      | يزيل تطبيق النظام، لكنه **يحتفظ بقاعدة بياناتك وإعداداتك** في `~/.omniroute`. |
-| `npm run uninstall:full` | يزيل التطبيق **ويمحو نهائيًا جميع الإعدادات والمفاتيح وقواعد البيانات**.      |
+| يأمر                     | فعل                                                                             |
+| ------------------------ | ------------------------------------------------------------------------------- |
+| `npm run uninstall`      | يزيل تطبيق النظام ولكن** يحافظ على DB والتكوينات الخاصة بك** في `~/.omniroute`. |
+| `npm run uninstall:full` | إزالة التطبيق AND نهائيا** يمحو جميع التكوينات والمفاتيح وقواعد البيانات** .    |
 
-> ملاحظة: لتشغيل هذه الأوامر، انتقل إلى مجلد مشروع OmniRoute (إذا كنت قد استنسخته) ثم شغّلها. بدلاً من ذلك، إذا كان مثبتًا بشكل عام، فيمكنك ببساطة تشغيل `npm uninstall -g omniroute`.
+> ملاحظة: لتشغيل هذه الأوامر، انتقل إلى مجلد مشروع OmniRoute (إذا قمت باستنساخه) وقم بتشغيلها. وبدلاً من ذلك، إذا تم تثبيته عالميًا، يمكنك ببساطة تشغيل `npm uninstall -g omniroute`.
 
-### النشر على VPS
+### نشر VPS
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -432,25 +432,25 @@ export NEXT_PUBLIC_BASE_URL="http://localhost:20128"
 export API_KEY_SECRET="endpoint-proxy-api-key-secret"
 
 npm run start
-# أو: pm2 start npm --name omniroute -- start
+# Or: pm2 start npm --name omniroute -- start
 ```
 
-### النشر باستخدام PM2 (ذاكرة منخفضة)
+### نشر PM2 (ذاكرة منخفضة)
 
-بالنسبة إلى الخوادم ذات ذاكرة RAM المحدودة، استخدم خيار حد الذاكرة:
+بالنسبة للخوادم ذات RAM المحدودة، استخدم خيار حد الذاكرة:
 
 ```bash
-# بحدّ 512MB (الافتراضي)
+# With 512MB limit (default)
 pm2 start npm --name omniroute -- start
 
-# أو بحد ذاكرة مخصص
+# Or with custom memory limit
 OMNIROUTE_MEMORY_MB=512 pm2 start npm --name omniroute -- start
 
-# أو باستخدام ecosystem.config.js
+# Or using ecosystem.config.js
 pm2 start ecosystem.config.js
 ```
 
-أنشئ `ecosystem.config.js`:
+إنشاء `ecosystem.config.js`:
 
 ```javascript
 module.exports = {
@@ -475,24 +475,24 @@ module.exports = {
 ### Docker
 
 ```bash
-# بناء الصورة (الافتراضي = runner-cli مع codex/claude/droid مثبتة مسبقًا)
+# Build image (default = runner-cli with codex/claude/droid preinstalled)
 docker build -t omniroute:cli .
 
-# الوضع المحمول (موصى به)
+# Portable mode (recommended)
 docker run -d --name omniroute -p 20128:20128 --env-file ./.env -v omniroute-data:/app/data omniroute:cli
 ```
 
-للوضع المتكامل مع المضيف الذي يتضمن ملفات CLI التنفيذية، راجع قسم Docker في الوثائق الرئيسية.
+بالنسبة للوضع المدمج مع المضيف مع ثنائيات CLI ، راجع قسم Docker في المستندات الرئيسية.
 
-### Void Linux (xbps-src)
+### باطلة Linux (xbps-src)
 
-يمكن لمستخدمي Void Linux تحزيم OmniRoute وتثبيته بشكل أصلي باستخدام إطار عمل الترجمة المتقاطعة `xbps-src`. يؤدي ذلك إلى أتمتة بناء الإصدار المستقل من Node.js إلى جانب روابط `better-sqlite3` الأصلية المطلوبة.
+يمكن لمستخدمي Void Linux حزم وتثبيت OmniRoute محليًا باستخدام إطار عمل التحويل البرمجي `xbps-src`. يؤدي هذا إلى أتمتة إنشاء Node.js المستقل جنبًا إلى جنب مع روابط `better-sqlite3` الأصلية المطلوبة.
 
 <details>
 <summary><b>عرض قالب xbps-src</b></summary>
 
 ```bash
-# ملف القالب الخاص بـ 'omniroute'
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -513,7 +513,7 @@ export npm_config_fund=false
 export npm_config_audit=false
 
 do_build() {
-	# تحديد معمارية وحدة المعالجة المركزية المستهدفة لـ node-gyp
+	# Determine target CPU arch for node-gyp
 	local _gyp_arch
 	case "$XBPS_TARGET_MACHINE" in
 		aarch64*) _gyp_arch=arm64 ;;
@@ -522,29 +522,29 @@ do_build() {
 		*) _gyp_arch=x64 ;;
 	esac
 
-	# 1) تثبيت جميع التبعيات – مع تخطي البرامج النصية
+	# 1) Install all deps – skip scripts
 	NODE_ENV=development npm ci --ignore-scripts
 
-	# 2) بناء حزمة Next.js المستقلة
+	# 2) Build the Next.js standalone bundle
 	npm run build
 
-	# 3) نسخ الأصول الثابتة إلى الحزمة المستقلة
+	# 3) Copy static assets into standalone
 	cp -r .next/static .next/standalone/.next/static
 	[ -d public ] && cp -r public .next/standalone/public || true
 
-	# 4) ترجمة الرابط الأصلي لـ better-sqlite3
+	# 4) Compile better-sqlite3 native binding
 	local _node_gyp=/usr/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js
 	(cd node_modules/better-sqlite3 && node "$_node_gyp" rebuild --arch="$_gyp_arch")
 
-	# 5) وضع الرابط المترجم داخل الحزمة المستقلة
+	# 5) Place the compiled binding into the standalone bundle
 	local _bs3_release=.next/standalone/node_modules/better-sqlite3/build/Release
 	mkdir -p "$_bs3_release"
 	cp node_modules/better-sqlite3/build/Release/better_sqlite3.node "$_bs3_release/"
 
-	# 6) إزالة حزم sharp الخاصة بالمعمارية
+	# 6) Remove arch-specific sharp bundles
 	rm -rf .next/standalone/node_modules/@img
 
-	# 7) نسخ تبعيات وقت تشغيل pino التي أغفلها التحليل الثابت لـ Next.js:
+	# 7) Copy pino runtime deps omitted by Next.js static analysis:
 	for _mod in pino-abstract-transport split2 process-warning; do
 		cp -r "node_modules/$_mod" .next/standalone/node_modules/
 	done
@@ -558,7 +558,7 @@ do_install() {
 	vmkdir usr/lib/omniroute/.next
 	vcopy .next/standalone/. usr/lib/omniroute/.next/standalone
 
-	# منع خطاف ما بعد التثبيت من إزالة أدلة موجّه تطبيق Next.js الفارغة
+	# Prevent removal of empty Next.js app router dirs by the post-install hook
 	for _d in \
 		.next/standalone/.next/server/app/dashboard \
 		.next/standalone/.next/server/app/dashboard/settings \
@@ -586,30 +586,30 @@ post_install() {
 
 ### متغيرات البيئة
 
-| المتغير                                 | القيمة الافتراضية                    | الوصف                                                                                                              |
-| --------------------------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------ |
-| `JWT_SECRET`                            | `omniroute-default-secret-change-me` | سر توقيع JWT (**يجب تغييره في بيئة الإنتاج**)                                                                      |
-| `INITIAL_PASSWORD`                      | `CHANGEME`                           | كلمة مرور تسجيل الدخول الأول                                                                                       |
-| `DATA_DIR`                              | `~/.omniroute`                       | دليل البيانات (قاعدة البيانات، والاستخدام، والسجلات)                                                               |
-| `PORT`                                  | القيمة الافتراضية لإطار العمل        | منفذ الخدمة (`20128` في الأمثلة)                                                                                   |
-| `HOSTNAME`                              | القيمة الافتراضية لإطار العمل        | المضيف الذي يتم الارتباط به (يستخدم Docker القيمة `0.0.0.0` افتراضيًا)                                             |
-| `NODE_ENV`                              | القيمة الافتراضية لبيئة التشغيل      | اضبطه على `production` عند النشر                                                                                   |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`             | عنوان URL الأساسي العام الذي يظهر في لوحة المعلومات ويُتاح للخادم (يحل محل `BASE_URL` القديم)                      |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`              | عنوان URL الأساسي لنقطة نهاية المزامنة السحابية (يحل محل `CLOUD_URL` القديم)                                       |
-| `API_KEY_SECRET`                        | `endpoint-proxy-api-key-secret`      | سر HMAC لمفاتيح API المُنشأة                                                                                       |
-| `REQUIRE_API_KEY`                       | `false`                              | فرض استخدام مفتاح API من نوع Bearer على `/v1/*`                                                                    |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                              | السماح لمستخدمي لوحة المعلومات المصادَق عليهم بإظهار القيم الكاملة لمفاتيح API المخزنة عند الطلب                   |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                 | وتيرة تحديث بيانات حدود المزوّد المخزنة مؤقتًا من جانب الخادم؛ تظل أزرار التحديث في الواجهة تشغّل المزامنة اليدوية |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                              | تعطيل لقطات SQLite التلقائية قبل الكتابة/الاستيراد/الاستعادة؛ تظل النسخ الاحتياطية اليدوية متاحة                   |
-| `APP_LOG_TO_FILE`                       | `true`                               | تمكين إخراج سجلات التطبيق والتدقيق إلى القرص                                                                       |
-| `AUTH_COOKIE_SECURE`                    | `false`                              | فرض سمة `Secure` على ملف تعريف ارتباط المصادقة (خلف وكيل عكسي يستخدم HTTPS)                                        |
-| `CLOUDFLARED_BIN`                       | غير معيّن                            | استخدام ملف `cloudflared` ثنائي موجود بدلًا من التنزيل المُدار                                                     |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                              | بروتوكول النقل للأنفاق السريعة المُدارة (`http2` أو `quic` أو `auto`)                                              |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                                | حد ذاكرة الكومة لـ Node.js بالميغابايت                                                                             |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                 | الحد الأقصى لعدد إدخالات ذاكرة التخزين المؤقت للمطالبات                                                            |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                | الحد الأقصى لعدد إدخالات ذاكرة التخزين المؤقت الدلالية                                                             |
+| عامل                                    | تقصير                    | وصف                                                                                                                                              |
+| --------------------------------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `JWT_SECRET`                            | _(تم إنشاؤه تلقائيًا)_   | توقيع JWT السري — الذي تم إنشاؤه تلقائيًا عند التشغيل لأول مرة واستمر في `server.env`؛ قم بتعيينه بشكل صريح عندما يكون دليل البيانات سريع الزوال |
+| `INITIAL_PASSWORD`                      | _(غير محدد)_             | كلمة المرور الأولى لتسجيل الدخول. تبدأ عمليات تثبيت npm/source بـ `CHANGEME`: استبدلها. غير محدد: معالج الإعداد                                  |
+| `DATA_DIR`                              | `~/.omniroute`           | دليل البيانات (ديسيبل، الاستخدام، السجلات)                                                                                                       |
+| `PORT`                                  | الإطار الافتراضي         | منفذ الخدمة (`20128` في الأمثلة)                                                                                                                 |
+| `HOSTNAME`                              | الإطار الافتراضي         | ربط المضيف (Docker الافتراضي هو `0.0.0.0`)                                                                                                       |
+| `NODE_ENV`                              | وقت التشغيل الافتراضي    | قم بتعيين `production` للنشر                                                                                                                     |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128` | ظهرت قاعدة URL العامة على لوحة المعلومات وتم عرضها على الخادم (تحل محل `BASE_URL` القديم)                                                        |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`  | قاعدة نقطة نهاية المزامنة السحابية URL (تحل محل `CLOUD_URL` القديم)                                                                              |
+| `API_KEY_SECRET`                        | _(تم إنشاؤه تلقائيًا)_   | سر HMAC لمفاتيح API التي تم إنشاؤها، تم إنشاء — تلقائيًا عند التشغيل لأول مرة واستمر في `server.env`                                             |
+| `REQUIRE_API_KEY`                       | `false`                  | فرض مفتاح Bearer API على `/v1/*`                                                                                                                 |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                  | السماح لمستخدمي لوحة المعلومات المصادق عليهم بالكشف عن قيم مفتاح API المخزنة بالكامل عند الطلب                                                   |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                     | إيقاع التحديث من جانب الخادم لبيانات حدود الموفر المخزنة مؤقتًا؛ لا تزال أزرار تحديث UI تؤدي إلى المزامنة اليدوية                                |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                  | تعطيل لقطات SQLite التلقائية قبل writes/import/restore؛ النسخ الاحتياطية اليدوية لا تزال تعمل                                                    |
+| `APP_LOG_TO_FILE`                       | `true`                   | تمكين إخراج سجل التطبيق والتدقيق إلى القرص                                                                                                       |
+| `AUTH_COOKIE_SECURE`                    | `false`                  | فرض ملف تعريف الارتباط `Secure` auth (خلف الوكيل العكسي HTTPS )                                                                                  |
+| `CLOUDFLARED_BIN`                       | غير محدد                 | استخدم ملف `cloudflared` الثنائي الحالي بدلاً من التنزيل المُدار                                                                                 |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                  | نقل الأنفاق السريعة المُدارة (`http2` أو `quic` أو `auto`)                                                                                       |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                    | حد الكومة Node.js في MB                                                                                                                          |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                     | الحد الأقصى لإدخالات ذاكرة التخزين المؤقت السريعة                                                                                                |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                    | الحد الأقصى لإدخالات ذاكرة التخزين المؤقت الدلالية                                                                                               |
 
-للاطلاع على المرجع الكامل لمتغيرات البيئة، راجع [README](../README.md).
+للحصول على مرجع متغير البيئة الكامل، راجع [README](../README.md).
 
 ---
 

@@ -8,79 +8,78 @@
 
 _Son yenilənmə: 2026-06-28_
 
-## İcra xülasəsi
+## İcra Xülasəsi
 
-OmniRoute Next.js üzərində qurulmuş lokal süni intellekt marşrutlaşdırma şlüzü və idarə panelidir.
-O, vahid OpenAI-uyğun son nöqtə (`/v1/*`) təqdim edir və trafiki tərcümə, ehtiyat keçid, token yeniləmə və istifadə izləməsi ilə çoxsaylı yuxarı axın provayderləri arasında yönləndirir.
+OmniRoute Next.js üzərində qurulmuş yerli AI marşrutlaşdırma şlüzü və idarə panelidir. O, tək OpenAI-a uyğun son nöqtəni (`/v1/*`) təmin edir və tərcümə, geri qaytarma, işarənin yenilənməsi və istifadənin izlənməsi ilə çoxsaylı yuxarı provayderlər üzrə trafiki yönləndirir.
 
 Əsas imkanlar:
 
-- CLI/alətlər üçün OpenAI-uyğun API səthi (380 provayder, 159 icra modulu)
-- Provayder formatları arasında sorğu/cavab tərcüməsi
-- Model kombinasiyası üzrə ehtiyat keçid (çoxmodellli ardıcıllıq)
-- Strukturlaşdırılmış kombinasiya addımları (`provider + model + connection`) və `compositeTiers` vasitəsilə icra zamanı sıralama
-- Hesab səviyyəsində ehtiyat keçid (hər provayder üçün çoxsaylı hesab)
-- Əsas çat yolunda kvota üzrə ilkin yoxlama və kvotadan xəbərdar P2C hesab seçimi
-- OAuth və API açarı ilə provayder bağlantılarının idarə edilməsi (27 OAuth provayder modulu)
-- `/v1/embeddings` vasitəsilə embedding yaradılması (18 provayder)
-- `/v1/images/generations` vasitəsilə təsvir yaradılması (10-dan çox provayder, 20-dən çox model)
-- `/v1/audio/transcriptions` vasitəsilə audionun transkripsiyası (18 provayder)
-- `/v1/audio/speech` vasitəsilə mətndən nitqə çevirmə (24 daxili provayder)
-- `/v1/videos/generations` vasitəsilə video yaradılması (ComfyUI + SD WebUI)
-- `/v1/music/generations` vasitəsilə musiqi yaradılması (ComfyUI)
-- `/v1/search` vasitəsilə veb axtarışı (20 provayder)
+- CLI/tools üçün OpenAI uyğun API səthi (381 provayder, 159 icraçı modul)
+- provayder formatları arasında Request/response tərcüməsi
+- Model kombinasiyası (çox model ardıcıllığı)
+- Strukturlaşdırılmış kombinasiya addımları (`provider + model + connection`) `compositeTiers` tərəfindən iş vaxtı sifarişi ilə
+- Hesab səviyyəsində geri dönüş (bir provayder üçün çox hesab)
+- Əsas söhbət yolunda kvota əvvəlcədən uçuş və kvotadan xəbərdar P2C hesabı seçimi
+- OAuth + API-açar provayder bağlantısı idarəetməsi (27 OAuth provayder modulu)
+- `/v1/embeddings` vasitəsilə yerləşdirmə generasiyası (18 provayder)
+- `/v1/images/generations` vasitəsilə görüntünün yaradılması (10 + provayder, 20 + model)
+- `/v1/audio/transcriptions` vasitəsilə audio transkripsiya (18 provayder)
+- `/v1/audio/speech` vasitəsilə mətndən nitqə (24 daxili provayder)
+- `/v1/videos/generations` (ComfyUI + SD WebUI) vasitəsilə videonun yaradılması
+- `/v1/music/generations` (ComfyUI) vasitəsilə musiqi nəsli
+- `/v1/search` vasitəsilə internet axtarışı (20 provayder)
 - `/v1/moderations` vasitəsilə moderasiya
 - `/v1/rerank` vasitəsilə yenidən sıralama
-- Düşünmə modelləri üçün think teqlərinin (`<think>...</think>`) təhlili
-- OpenAI SDK ilə sərt uyğunluq üçün cavabların sanitarlaşdırılması
-- Provayderlərarası uyğunluq üçün rolların normallaşdırılması (developer→system, system→user)
-- Strukturlaşdırılmış çıxışın çevrilməsi (`json_schema → Gemini responseSchema`)
-- Provayderlərin, açarların, ləqəblərin, kombinasiyaların, parametrlərin və qiymətlərin lokal saxlanması (122 DB modulu)
-- İstifadə/xərc izləməsi və sorğuların jurnallaşdırılması
-- Çoxcihazlı/vəziyyət sinxronizasiyası üçün ixtiyari bulud sinxronizasiyası
-- API girişinə nəzarət üçün IP icazə siyahısı/blok siyahısı
-- Düşünmə büdcəsinin idarə edilməsi (passthrough/auto/custom/adaptive)
-- Qlobal sistem promptunun əlavə edilməsi
-- Sessiyaların izlənməsi və barmaq izinin yaradılması
-- Provayderə xas profillərlə hər hesab üzrə təkmilləşdirilmiş sürət məhdudlaşdırması
-- Provayderlərin dayanıqlılığı üçün circuit breaker nümunəsi
-- Mutex kilidləməsi ilə eyni vaxtlı kəskin yüklənmədən qorunma
-- İmza əsaslı sorğu deduplikasiyası keşləmə mexanizmi
-- Domen qatı: xərc qaydaları, ehtiyat keçid siyasəti, bloklama siyasəti
-- Context Relay: hesab rotasiyası zamanı davamlılıq üçün sessiya ötürmə xülasələri
-- Domen vəziyyətinin saxlanması (ehtiyat keçidlər, büdcələr, bloklamalar və circuit breaker-lər üçün SQLite write-through keşi)
-- Mərkəzləşdirilmiş sorğu qiymətləndirməsi üçün siyasət mühərriki (bloklama → büdcə → ehtiyat keçid)
-- p50/p95/p99 gecikmə aqreqasiyası ilə sorğu telemetriyası
-- `combo_execution_key` / `combo_step_id` vasitəsilə kombinasiya hədəfi telemetriyası və tarixi kombinasiya hədəfinin vəziyyəti
-- Ucdan-uca izləmə üçün korrelyasiya identifikatoru (X-Request-Id)
-- Hər API açarı üzrə imtina seçimi ilə uyğunluq auditinin jurnallaşdırılması
-- LLM keyfiyyət təminatı üçün qiymətləndirmə infrastrukturu
-- Provayderlərin circuit breaker vəziyyətinin real vaxtda göstərildiyi sağlamlıq idarə paneli
-- 3 nəqliyyat vasitəsi ilə MCP Server (110 alət) (stdio/SSE/Streamable HTTP)
-- Bacarıqlar və tapşırıq həyat dövrü ilə A2A Server (JSON-RPC 2.0 + SSE)
-- Yaddaş sistemi (çıxarış, əlavə etmə, axtarış, xülasələşdirmə)
+- Düşüncə modelləri üçün etiketin təhlilini (`<think>...</think>`) düşünün
+- Ciddi OpenAI SDK uyğunluğu üçün cavab sanitarizasiyası
+- Provayderlər arası uyğunluq üçün rolun normallaşdırılması (developer → sistemi, sistem → istifadəçisi)
+- Strukturlaşdırılmış çıxış çevrilməsi (json_schema → Gemini responseSchema)
+- Provayderlər, açarlar, ləqəblər, kombinlər, parametrlər, qiymətlər üçün yerli davamlılıq (122 DB modulu)
+- Usage/cost izləmə və sorğu qeydi
+- multi-device/state sinxronizasiyası üçün əlavə bulud sinxronizasiyası
+- API giriş nəzarəti üçün IP allowlist/blocklist
+- Düşünən büdcə idarəçiliyi (passthrough/auto/custom/adaptive)
+- Qlobal sistem tez inyeksiya
+- Sessiya izləmə və barmaq izi
+- Provayderə məxsus profillərlə hesab başına artırılmış tarif məhdudiyyəti
+- Provayderin davamlılığı üçün dövrə açarı nümunəsi
+- Muteks kilidləmə ilə ildırımdan qorunma
+- İmza əsaslı sorğu təkmilləşdirmə keşi
+- Domen təbəqəsi: xərc qaydaları, ehtiyat siyasəti, bloklama siyasəti
+- Kontekst ötürülməsi: hesabın fırlanmasının davamlılığı üçün sessiyanın ötürülməsi xülasələri
+- Domen vəziyyətinin davamlılığı (qaytarmalar, büdcələr, blokajlar, elektrik açarları üçün SQLite yazma keşi)
+- Mərkəzləşdirilmiş sorğunun qiymətləndirilməsi üçün siyasət mühərriki (lockout → büdcə → backback)
+- p50/p95/p99 gecikmə aqreqasiyası ilə telemetriya tələb edin
+- Kombo hədəf telemetriyası və `combo_execution_key` / `combo_step_id` vasitəsilə tarixi birləşmiş hədəf sağlamlığı
+- Başdan sona izləmə üçün korrelyasiya ID (X-Request-Id).
+- Hər API açarından imtina ilə uyğunluq auditinin qeydiyyatı
+- LLM keyfiyyət təminatı üçün qiymətləndirmə çərçivəsi
+- Real vaxt rejimində provayderin elektrik açarı statusu olan sağlamlıq tablosu
+- 3 daşıma ilə MCP Server (110 alət) (stdio/SSE/Streamable HTTP)
+- A2A Server (JSON-RPC 2.0 + SSE) bacarıqları və tapşırıq ömrü ilə
+- Yaddaş sistemi (çıxarma, inyeksiya, axtarış, ümumiləşdirmə)
 - Bacarıqlar sistemi (reyestr, icraçı, sandbox, daxili bacarıqlar)
-- Sertifikatların idarə edilməsi və DNS emalı ilə MITM proksisi
-- Prompt injection-dan qorunma middleware-i
-- Caveman, RTK, yığılmış pipeline-lar, sıxılma kombinasiyaları, dil paketləri və analitika ilə prompt sıxlaşdırma pipeline-ı
-- ACP (Agent Communication Protocol) reyestri
-- Modul OAuth provayderləri (`src/lib/oauth/providers/` altında 22 ayrıca modul)
-- Silmə/tam silmə skriptləri
-- OAuth mühitinin bərpası əməliyyatı
-- OpenAI-uyğun WS klientləri üçün WebSocket körpüsü (`/v1/ws`)
-- Sinxronizasiya tokenlərinin idarə edilməsi (verilmə/ləğv etmə, ETag-versiyalı konfiqurasiya paketinin endirilməsi)
-- Birinci dərəcəli provayder preset-i kimi GLM Thinking (`glmt`)
-- Hibrid token hesablanması (provayder tərəfində `/messages/count_tokens` və qiymətləndirmə ehtiyatı)
-- Model ləqəblərinin avtomatik ilkin yaradılması (başlanğıc zamanı 30-dan çox proxy-lərarası dialekt normallaşdırması)
-- SSRF qoruması, şəxsi URL-lərin bloklanması və konfiqurasiya edilə bilən təkrar cəhdlərlə təhlükəsiz xarici sorğu
-- Konfiqurasiya edilə bilən `requestRetry` və `maxRetryIntervalSec` ilə cooldown-dan xəbərdar çat təkrar cəhdləri
-- Başlanğıc zamanı Zod ilə icra mühitinin yoxlanılması
-- Səhifələndirmə, provayder CRUD hadisələri və SSRF ilə bloklanmış yoxlama jurnallaşdırması ilə uyğunluq auditi v2
+- sertifikat idarəetməsi və DNS idarəsi ilə MITM proxy
+- Tez injection mühafizəsi ara proqram
+- Caveman, RTK, yığılmış boru kəmərləri, sıxılma kombinləri, dil paketləri və analitika ilə operativ sıxılma boru kəməri
+- ACP (Agent Əlaqə Protokolu) reyestri
+- Modul OAuth provayderləri ( `src/lib/oauth/providers/` altında 22 fərdi modul)
+- Uninstall/full-uninstall skriptləri
+- OAuth ətraf mühitin təmiri aksiyası
+- OpenAI uyğun WS müştəriləri üçün WebSocket körpüsü (`/v1/ws`)
+- Sinxronizasiya nişanının idarə edilməsi (issue/revoke, ETag versiyalı konfiqurasiya paketinin endirilməsi)
+- GLM Thinking (`glmt`) birinci dərəcəli provayderin əvvəlcədən təyini
+- Hibrid token hesablanması (təxminən geri qaytarma ilə təminatçı tərəfi `/messages/count_tokens` )
+- Model ləqəbinin avtomatik əkilməsi (başlanğıcda 30 + cross-proxy dialekt normallaşdırmaları)
+- SSRF mühafizəsi, şəxsi URL bloklaması və konfiqurasiya edilə bilən təkrar cəhd ilə təhlükəsiz çıxış gətirmə
+- Konfiqurasiya edilə bilən `requestRetry` və `maxRetryIntervalSec` ilə soyutma müddətindən xəbərdar söhbət yenidən cəhd edir
+- Başlanğıcda Zod ilə iş mühitinin yoxlanılması
+- Səhifələmə, provayder CRUD hadisələri və SSRF tərəfindən bloklanmış doğrulama qeydi ilə uyğunluq auditi v2
 
-Əsas icra modeli:
+Əsas iş vaxtı modeli:
 
-- `src/app/api/*` altındakı Next.js tətbiq marşrutları həm idarə paneli API-lərini, həm də uyğunluq API-lərini həyata keçirir
-- `src/sse/*` + `open-sse/*` daxilindəki ümumi SSE/marşrutlaşdırma nüvəsi provayderlərin icrasını, tərcüməni, axınla ötürməni, ehtiyat keçidi və istifadəni idarə edir
+- `src/app/api/*` altında Next.js tətbiq marşrutları həm tablosuna APIs, həm də uyğunluq APIs tətbiq edir
+- `src/sse/*` + `open-sse/*` -də paylaşılan SSE/routing nüvəsi provayderin icrası, tərcüməsi, yayımı, geri qaytarılması və istifadəsini idarə edir
 
 ## İstinad Diaqramları
 
@@ -414,7 +413,7 @@ Qaydalar toplusunun yaradılması və həddi tənzimləmək üçün [`docs/secur
 - Connection/model qayda qovşağı: `src/domain/connectionModelRules.ts`
 - Modelin mövcudluğu anlıq görüntüləri: `src/domain/modelAvailability.ts`
 - Provayderin istifadə müddətinin izlənməsi: `src/domain/providerExpiration.ts`
-- Kvota keşi: `src/domain/quotaCache.ts`
+- Kvota keşi: `src/domain/quotaCache.ts`. Provayderlər kvota pəncərələrini əlavə edir və silir (OpenAI bəzi planlar üçün 5 saatlıq Codex pəncərəsini buraxdı), buna görə də provayderin adapterini oxuyan istifadə tam olduğunu təsdiq edir (`quotasComplete`, bax `src/lib/usage/usageReading.ts`) hesabın tam pəncərə dəstidir: əvvəllər məlum olan, lakin orada olmayan pəncərə işdən çıxarılıb, keşdə, rehidrasyonda (rehidrəndə) davamlı Codex kvota vəziyyəti və `quota_snapshots` Claude s doyma vedrələrində. Qismən sübut (cavab başlıqları, köhnə nüsxələr) yalnız daşıdığı pəncərələri yeniləyir.
 - Deqradasiya vəziyyəti: `src/domain/degradation.ts`
 - Konfiqurasiya auditi: `src/domain/configAudit.ts`
 - OmniRoute cavab metadata qurucusu: `src/domain/omnirouteResponseMeta.ts`

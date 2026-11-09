@@ -340,65 +340,65 @@ Model: cc/claude-opus-4-7
 
 ---
 
-## 🚀 Dağıtım
+## 🚀 Dağıtımı
 
 ### Global npm kurulumu (Önerilen)
 
 ```bash
 npm install -g omniroute
 
-# Yapılandırma dizinini oluşturun
+# Create config directory
 mkdir -p ~/.omniroute
 
-# .env dosyasını oluşturun (.env.example dosyasına bakın)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# Sunucuyu başlatın
+# Start server
 omniroute
-# Veya özel bir port ile:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI, `.env` dosyasını `~/.omniroute/.env` veya `./.env` konumundan otomatik olarak yükler.
+CLI `.env` `~/.omniroute/.env` veya `./.env` otomatik olarak yükler. Çalışma dizinindeki bir `./.env` anahtarların (bağlantı noktaları, `REQUIRE_API_KEY`, yerel ayar ve renk ayarları) yalnızca kısa bir izin verilenler listesini ayarlayabilir; geri kalan her şeyi `~/.omniroute/.env` koyun. [CLI lansman sözleşmelerine](CLI-LAUNCH-CONTRACTS.md#working-directory-env) bakın.
 
-### Sistem tepsisi modu
+### Tepsi modu
 
-OmniRoute'u sistem tepsisinde başlatın:
+Sistem tepsisinde OmniRoute başlatın:
 
 ```bash
 omniroute serve --tray
 ```
 
-Komut, sunucu ve sistem tepsisi hazır olduktan sonra tamamlanır.
+Komut, sunucu ve tepsi hazır olduktan sonra geri döner.
 
-Sunucu, terminal olmadan çalışmaya devam eder.
+Sunucu terminal olmadan devam eder.
 
-Sistem tepsisi modu macOS, Windows ve grafiksel Linux oturumlarını destekler. Sistem tepsisi modu kontrol panelini otomatik olarak açmaz.
+Tepsi modu macOS, Windows ve grafiksel Linux oturumlarını destekler. Tepsi modu kontrol panelini otomatik olarak açmaz.
 
-Şu işlemler için sistem tepsisi menüsünü kullanın:
+Şu işlemler için tepsi menüsünü kullanın:
 
-- Kontrol panelini açma.
-- `/dashboard/logs` sayfasını açma.
-- Otomatik başlatma ayarını değiştirme.
-- OmniRoute'u durdurma.
+- Kontrol panelini açın.
+- `/dashboard/logs` açın.
+- Otomatik başlatmayı değiştirin.
+- OmniRoute durdur.
 
-`--tray` seçeneğini şu seçeneklerle birlikte kullanmayın:
+`--tray` şu seçeneklerle birleştirmeyin:
 
 - `--daemon`
 - `--log`
 - `--no-recovery`
 
-Bu modlar farklı işlem sahipliği gerektirir.
+Bu modlar farklı süreç sahipliği gerektirir.
 
-Bir sonraki makine oturum açılışında başlatmayı etkinleştirin:
+Bir sonraki makine oturum açma işleminde başlatmayı etkinleştirin:
 
 ```bash
 omniroute autostart enable
 ```
 
-Otomatik başlatma, macOS, Windows ve grafiksel Linux oturumlarında sistem tepsisi modunu kullanır. Başsız Linux, mevcut systemd kullanıcı hizmetini kullanır.
+Otomatik başlatma macOS, Windows ve grafiksel Linux oturumlarında tepsi modunu kullanır. Başsız Linux mevcut systemd kullanıcı hizmetini kullanır.
 
-Oturum açılışında başlatmayı devre dışı bırakın:
+Oturum açma sırasında başlatmayı devre dışı bırakın:
 
 ```bash
 omniroute autostart disable
@@ -406,14 +406,14 @@ omniroute autostart disable
 
 ### Kaldırma
 
-OmniRoute'a artık ihtiyacınız kalmadığında, temiz bir kaldırma işlemi için iki hızlı betik sunuyoruz:
+Artık OmniRoute ihtiyacınız kalmadığında, temiz bir kaldırma işlemi için iki hızlı komut dosyası sunuyoruz:
 
-| Komut                    | İşlem                                                                                                        |
-| ------------------------ | ------------------------------------------------------------------------------------------------------------ |
-| `npm run uninstall`      | Sistem uygulamasını kaldırır ancak `~/.omniroute` içindeki **veritabanınızı ve yapılandırmalarınızı korur**. |
-| `npm run uninstall:full` | Uygulamayı kaldırır VE **tüm yapılandırmaları, anahtarları ve veritabanlarını kalıcı olarak siler**.         |
+| Emretmek                 | Aksiyon                                                                                                   |
+| ------------------------ | --------------------------------------------------------------------------------------------------------- |
+| `npm run uninstall`      | Sistem uygulamasını kaldırır ancak** DB ve konfigürasyonlarınızı korur** `~/.omniroute`.                  |
+| `npm run uninstall:full` | AND uygulamasını kalıcı olarak kaldırır** tüm konfigürasyonları, anahtarları ve veritabanlarını siler** . |
 
-> Not: Bu komutları çalıştırmak için OmniRoute proje klasörüne gidin (projeyi klonladıysanız) ve komutları çalıştırın. Alternatif olarak, global olarak kurduysanız yalnızca `npm uninstall -g omniroute` komutunu çalıştırabilirsiniz.
+> Not: Bu komutları çalıştırmak için OmniRoute proje klasörüne gidin (klonladıysanız) ve çalıştırın. Alternatif olarak, genel olarak kuruluysa `npm uninstall -g omniroute` komutunu çalıştırabilirsiniz.
 
 ### VPS Dağıtımı
 
@@ -431,25 +431,25 @@ export NEXT_PUBLIC_BASE_URL="http://localhost:20128"
 export API_KEY_SECRET="endpoint-proxy-api-key-secret"
 
 npm run start
-# Veya: pm2 start npm --name omniroute -- start
+# Or: pm2 start npm --name omniroute -- start
 ```
 
 ### PM2 Dağıtımı (Düşük Bellek)
 
-Sınırlı RAM'e sahip sunucular için bellek sınırı seçeneğini kullanın:
+Sınırlı RAM sahip sunucular için bellek sınırı seçeneğini kullanın:
 
 ```bash
-# 512MB sınırıyla (varsayılan)
+# With 512MB limit (default)
 pm2 start npm --name omniroute -- start
 
-# Veya özel bir bellek sınırıyla
+# Or with custom memory limit
 OMNIROUTE_MEMORY_MB=512 pm2 start npm --name omniroute -- start
 
-# Veya ecosystem.config.js kullanarak
+# Or using ecosystem.config.js
 pm2 start ecosystem.config.js
 ```
 
-`ecosystem.config.js` dosyasını oluşturun:
+`ecosystem.config.js` oluştur:
 
 ```javascript
 module.exports = {
@@ -474,24 +474,24 @@ module.exports = {
 ### Docker
 
 ```bash
-# İmajı derleyin (varsayılan = codex/claude/droid önceden yüklenmiş runner-cli)
+# Build image (default = runner-cli with codex/claude/droid preinstalled)
 docker build -t omniroute:cli .
 
-# Taşınabilir mod (önerilen)
+# Portable mode (recommended)
 docker run -d --name omniroute -p 20128:20128 --env-file ./.env -v omniroute-data:/app/data omniroute:cli
 ```
 
-CLI ikili dosyalarıyla ana sistemle entegre mod için ana belgelerdeki Docker bölümüne bakın.
+CLI ikili dosyalarıyla ana makineyle tümleşik mod için ana belgelerdeki Docker bölümüne bakın.
 
-### Void Linux (xbps-src)
+### Geçersiz Linux (xbps-src)
 
-Void Linux kullanıcıları, `xbps-src` çapraz derleme çerçevesini kullanarak OmniRoute'u yerel olarak paketleyip kurabilir. Bu işlem, gerekli `better-sqlite3` yerel bağlamalarıyla birlikte bağımsız Node.js derlemesini otomatikleştirir.
+Void Linux kullanıcıları, `xbps-src` çapraz derleme çerçevesini kullanarak OmniRoute yerel olarak paketleyebilir ve yükleyebilir. Bu, gerekli `better-sqlite3` yerel bağlamalarıyla birlikte Node.js bağımsız yapısını otomatikleştirir.
 
 <details>
 <summary><b>xbps-src şablonunu görüntüle</b></summary>
 
 ```bash
-# 'omniroute' için şablon dosyası
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -512,7 +512,7 @@ export npm_config_fund=false
 export npm_config_audit=false
 
 do_build() {
-	# node-gyp için hedef CPU mimarisini belirle
+	# Determine target CPU arch for node-gyp
 	local _gyp_arch
 	case "$XBPS_TARGET_MACHINE" in
 		aarch64*) _gyp_arch=arm64 ;;
@@ -521,29 +521,29 @@ do_build() {
 		*) _gyp_arch=x64 ;;
 	esac
 
-	# 1) Tüm bağımlılıkları kur – betikleri atla
+	# 1) Install all deps – skip scripts
 	NODE_ENV=development npm ci --ignore-scripts
 
-	# 2) Bağımsız Next.js paketini derle
+	# 2) Build the Next.js standalone bundle
 	npm run build
 
-	# 3) Statik varlıkları bağımsız pakete kopyala
+	# 3) Copy static assets into standalone
 	cp -r .next/static .next/standalone/.next/static
 	[ -d public ] && cp -r public .next/standalone/public || true
 
-	# 4) better-sqlite3 yerel bağlamasını derle
+	# 4) Compile better-sqlite3 native binding
 	local _node_gyp=/usr/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js
 	(cd node_modules/better-sqlite3 && node "$_node_gyp" rebuild --arch="$_gyp_arch")
 
-	# 5) Derlenen bağlamayı bağımsız pakete yerleştir
+	# 5) Place the compiled binding into the standalone bundle
 	local _bs3_release=.next/standalone/node_modules/better-sqlite3/build/Release
 	mkdir -p "$_bs3_release"
 	cp node_modules/better-sqlite3/build/Release/better_sqlite3.node "$_bs3_release/"
 
-	# 6) Mimariye özgü sharp paketlerini kaldır
+	# 6) Remove arch-specific sharp bundles
 	rm -rf .next/standalone/node_modules/@img
 
-	# 7) Next.js statik analizinin dahil etmediği pino çalışma zamanı bağımlılıklarını kopyala:
+	# 7) Copy pino runtime deps omitted by Next.js static analysis:
 	for _mod in pino-abstract-transport split2 process-warning; do
 		cp -r "node_modules/$_mod" .next/standalone/node_modules/
 	done
@@ -557,7 +557,7 @@ do_install() {
 	vmkdir usr/lib/omniroute/.next
 	vcopy .next/standalone/. usr/lib/omniroute/.next/standalone
 
-	# Boş Next.js uygulama yönlendiricisi dizinlerinin kurulum sonrası kancası tarafından kaldırılmasını önle
+	# Prevent removal of empty Next.js app router dirs by the post-install hook
 	for _d in \
 		.next/standalone/.next/server/app/dashboard \
 		.next/standalone/.next/server/app/dashboard/settings \
@@ -585,30 +585,30 @@ post_install() {
 
 ### Ortam Değişkenleri
 
-| Değişken                                | Varsayılan                           | Açıklama                                                                                                                                                           |
-| --------------------------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `JWT_SECRET`                            | `omniroute-default-secret-change-me` | JWT imzalama gizli anahtarı (**üretim ortamında değiştirin**)                                                                                                      |
-| `INITIAL_PASSWORD`                      | `CHANGEME`                           | İlk oturum açma parolası                                                                                                                                           |
-| `DATA_DIR`                              | `~/.omniroute`                       | Veri dizini (veritabanı, kullanım verileri, günlükler)                                                                                                             |
-| `PORT`                                  | framework varsayılanı                | Hizmet portu (örneklerde `20128`)                                                                                                                                  |
-| `HOSTNAME`                              | framework varsayılanı                | Bağlanılacak ana makine (Docker varsayılan olarak `0.0.0.0` kullanır)                                                                                              |
-| `NODE_ENV`                              | çalışma zamanı varsayılanı           | Dağıtım için `production` olarak ayarlayın                                                                                                                         |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`             | Kontrol panelinde gösterilen ve sunucuya sağlanan genel temel URL (eski `BASE_URL` değişkeninin yerini alır)                                                       |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`              | Bulut eşitleme uç noktasının temel URL'si (eski `CLOUD_URL` değişkeninin yerini alır)                                                                              |
-| `API_KEY_SECRET`                        | `endpoint-proxy-api-key-secret`      | Oluşturulan API anahtarları için HMAC gizli anahtarı                                                                                                               |
-| `REQUIRE_API_KEY`                       | `false`                              | `/v1/*` üzerinde Bearer API anahtarını zorunlu kılar                                                                                                               |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                              | Kimliği doğrulanmış kontrol paneli kullanıcılarının, saklanan API anahtarlarının tam değerlerini isteğe bağlı görmesini sağlar                                     |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                 | Önbelleğe alınmış Sağlayıcı Limitleri verilerinin sunucu tarafında yenilenme sıklığı; kullanıcı arayüzündeki yenileme düğmeleri manuel eşitlemeyi yine de tetikler |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                              | Yazma/içe aktarma/geri yükleme öncesindeki otomatik SQLite anlık görüntülerini devre dışı bırakır; manuel yedeklemeler çalışmaya devam eder                        |
-| `APP_LOG_TO_FILE`                       | `true`                               | Uygulama ve denetim günlüğü çıktısının diske yazılmasını etkinleştirir                                                                                             |
-| `AUTH_COOKIE_SECURE`                    | `false`                              | `Secure` kimlik doğrulama çerezini zorunlu kılar (HTTPS ters proxy arkasında)                                                                                      |
-| `CLOUDFLARED_BIN`                       | ayarlanmamış                         | Yönetilen indirme yerine mevcut bir `cloudflared` ikili dosyasını kullanır                                                                                         |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                              | Yönetilen Hızlı Tüneller için aktarım protokolü (`http2`, `quic` veya `auto`)                                                                                      |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                                | MB cinsinden Node.js yığın bellek sınırı                                                                                                                           |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                 | İstem önbelleğindeki azami girdi sayısı                                                                                                                            |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                | Anlamsal önbellekteki azami girdi sayısı                                                                                                                           |
+| Değişken                                | Varsayılan                      | Tanım                                                                                                                                           |
+| --------------------------------------- | ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `JWT_SECRET`                            | _(otomatik olarak oluşturulan)_ | JWT imzalama sırrı — ilk çalıştırmada otomatik olarak oluşturulur ve `server.env` kalıcı olur; veri dizini geçici olduğunda açıkça ayarlayın    |
+| `INITIAL_PASSWORD`                      | _(ayarlanmadı)_                 | İlk giriş şifresi. npm/source kurulumları `CHANGEME` ile başlar: değiştirin. Ayarlanmadı: katılım sihirbazı                                     |
+| `DATA_DIR`                              | `~/.omniroute`                  | Veri dizini (db, kullanım, günlükler)                                                                                                           |
+| `PORT`                                  | çerçeve varsayılanı             | Servis portu (örneklerde `20128` )                                                                                                              |
+| `HOSTNAME`                              | çerçeve varsayılanı             | Ana makineyi bağlayın (Docker varsayılan olarak `0.0.0.0`)                                                                                      |
+| `NODE_ENV`                              | çalışma zamanı varsayılanı      | Dağıtım için `production` ayarlayın                                                                                                             |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`        | Genel taban URL kontrol paneline çıktı ve sunucuya sunuldu (eski `BASE_URL` yerini aldı)                                                        |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`         | Bulut senkronizasyonu uç noktası tabanı URL (eski `CLOUD_URL` yerine geçer)                                                                     |
+| `API_KEY_SECRET`                        | _(otomatik olarak oluşturulan)_ | oluşturulan API anahtarları için HMAC sırrı — ilk çalıştırmada otomatik olarak oluşturulur ve `server.env` kalıcı olur                          |
+| `REQUIRE_API_KEY`                       | `false`                         | `/v1/*` Taşıyıcı API anahtarını zorunlu kıl                                                                                                     |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                         | Kimliği doğrulanmış kontrol paneli kullanıcılarının talep üzerine depolanan API anahtar değerlerinin tamamını ortaya çıkarmasına izin ver       |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                            | Önbelleğe alınan Sağlayıcı Sınırları verileri için sunucu tarafı yenileme temposu; UI yenileme düğmeleri hala manuel senkronizasyonu tetikliyor |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                         | writes/import/restore önce otomatik SQLite anlık görüntülerini devre dışı bırakın; manuel yedeklemeler hala çalışıyor                           |
+| `APP_LOG_TO_FILE`                       | `true`                          | Diske uygulama ve denetim günlüğü çıktısını etkinleştirir                                                                                       |
+| `AUTH_COOKIE_SECURE`                    | `false`                         | `Secure` kimlik doğrulama çerezini zorla ( HTTPS ters proxy'nin arkasında)                                                                      |
+| `CLOUDFLARED_BIN`                       | ayarlanmamış                    | Yönetilen indirme yerine mevcut `cloudflared` ikili programını kullanın                                                                         |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                         | Yönetilen Hızlı Tüneller için aktarım (`http2`, `quic` veya `auto`)                                                                             |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                           | MBNode.js yığın sınırı                                                                                                                          |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                            | Maksimum istem önbellek girişleri                                                                                                               |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                           | Maksimum anlamsal önbellek girişi                                                                                                               |
 
-Ortam değişkenlerinin tam listesi için [README](../README.md) dosyasına bakın.
+Ortam değişkeni referansının tamamı için [README](../README.md) bakın.
 
 ---
 

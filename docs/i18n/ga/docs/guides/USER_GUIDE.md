@@ -348,63 +348,63 @@ Samhail: cc/claude-opus-4-7
 
 ## 🚀 Imscaradh
 
-### npm suiteáil domhain (Molta)
+### Suiteáil npm domhanda (Molta)
 
 ```bash
 npm install -g omniroute
 
-# Cruthaigh eolaire cumraíochta
+# Create config directory
 mkdir -p ~/.omniroute
 
-# Cruthaigh comhad .env (féach .env.example)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# Tosaigh an freastalaí
+# Start server
 omniroute
-# Nó le port saincheaptha:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-Lódann an CLI `.env` go huathoibríoch ó `~/.omniroute/.env` nó `./.env`.
+Lódálann an CLI `.env` go huathoibríoch ó `~/.omniroute/.env` nó `./.env`. Ní féidir le `./.env` san eolaire oibre ach liosta ceadaithe gearr eochracha a shocrú (socruithe poirt, `REQUIRE_API_KEY`, locale agus dath); cuir gach rud eile i `~/.omniroute/.env`. Féach [conarthaí seolta CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
-### Mód trá
+### Mód tráidire
 
-Tosaigh OmniRoute sa tray córais:
+Tosaigh OmniRoute sa tráidire córais:
 
 ```bash
 omniroute serve --tray
 ```
 
-Filleann an t-ordú tar éis don fhreastalaí agus don tray a bheith réidh.
+Filleann an t-ordú nuair a bhíonn an freastalaí agus an tráidire réidh.
 
-Leanann an freastalaí ar aghaidh gan an teirminéal.
+Leanann an freastalaí gan an teirminéal.
 
-Tacaíonn an mód tray le macOS, Windows, agus seisiúin Linux grafaiciúla. Ní oscailtear an deais go huathoibríoch i mód tray.
+Tacaíonn modh tráidire le seisiúin macOS, Windows, agus Linux grafacha. Ní osclaíonn mód an tráidire an painéal go huathoibríoch.
 
-Bain úsáid as an roghchlár tray le haghaidh na ngníomhartha seo:
+Úsáid roghchlár an tráidire do na gníomhartha seo:
 
-- Oscail an deais.
+- Oscail an painéal.
 - Oscail `/dashboard/logs`.
-- Athraigh tosú uathoibríoch.
+- Athraigh uath-tús.
 - Stop OmniRoute.
 
-Ná cuir `--tray` leis na roghanna seo:
+Ná comhcheangail `--tray` leis na roghanna seo:
 
 - `--daemon`
 - `--log`
 - `--no-recovery`
 
-Tá na modhanna seo ag teastáil ó sheilbh éagsúla próiseálaí.
+Éilíonn na modhanna seo úinéireacht próisis éagsúla.
 
-Cumas tosú ag an chéad logáil isteach ar an meaisín eile:
+Cumasaigh am tosaithe ag an gcéad logáil isteach meaisín eile:
 
 ```bash
 omniroute autostart enable
 ```
 
-Úsáideann an tosú uathoibríoch mód tray ar macOS, Windows, agus seisiúin Linux grafaiciúla. Úsáideann Linux ceanntaisc an tseirbhís úsáideora systemd atá ann cheana féin.
+Úsáideann Auto-tús mód tráidire ar sheisiúin macOS, Windows, agus Linux grafacha. Úsáideann Linux Headless an tseirbhís úsáideora systemd atá ann cheana féin.
 
-Díchumasigh tosú ag logáil isteach:
+Díchumasaigh am tosaithe ag logáil isteach:
 
 ```bash
 omniroute autostart disable
@@ -412,16 +412,16 @@ omniroute autostart disable
 
 ### Díshuiteáil
 
-Nuair nach bhfuil OmniRoute de dhíth ort a thuilleadh, cuirimid dhá script tapa ar fáil le haghaidh baint ghlan:
+Nuair nach bhfuil OmniRoute ag teastáil uait a thuilleadh, cuirimid dhá script thapa ar fáil chun é a bhaint glan:
 
-| Ordú                     | Gníomh                                                                                              |
-| ------------------------ | --------------------------------------------------------------------------------------------------- |
-| `npm run uninstall`      | Baineann an app córais ach **coinníonn sé do bhunachar sonraí agus cumraíochtaí** i `~/.omniroute`. |
-| `npm run uninstall:full` | Baineann an app AGUS scriostar go buan **gach cumraíocht, eochracha, agus bunachar sonraí**.        |
+| Ordú                     | Gníomh                                                                                            |
+| ------------------------ | ------------------------------------------------------------------------------------------------- |
+| `npm run uninstall`      | Bain an app córais ach** Coinníonn do DB agus cumraíochtaí** i `~/.omniroute`.                    |
+| `npm run uninstall:full` | Baintear an AND app go buan** scriosann sé gach cumraíocht, eochracha, agus bunachair shonraí** . |
 
-> Nóta: Le haghaidh na n-orduithe seo, téigh go dtí an fillteán tionscadail OmniRoute (más ghearraigh tú é) agus rith iad. Ar an mbealach eile, má tá sé suiteáilte go domhain, is féidir leat `npm uninstall -g omniroute` a rith go simplí.
+> Nóta: Chun na horduithe seo a rith, déan nascleanúint chuig an bhfillteán tionscadail OmniRoute (má chlónáil tú é) agus rith iad. Nó, má tá tú suiteáilte go domhanda, is féidir leat `npm uninstall -g omniroute`.
 
-### Imscaradh VPS
+### VPS Imscaradh
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -437,21 +437,21 @@ export NEXT_PUBLIC_BASE_URL="http://localhost:20128"
 export API_KEY_SECRET="endpoint-proxy-api-key-secret"
 
 npm run start
-# Nó: pm2 start npm --name omniroute -- start
+# Or: pm2 start npm --name omniroute -- start
 ```
 
 ### Imscaradh PM2 (Cuimhne Íseal)
 
-Do fhreastalaithe le RAM teoranta, bain úsáid as an rogha teorainn cuimhne:
+Maidir le freastalaithe le RAM teoranta , úsáid an rogha teorainn chuimhne:
 
 ```bash
-# Le teorainn 512MB (réamhshocrú)
+# With 512MB limit (default)
 pm2 start npm --name omniroute -- start
 
-# Nó le teorainn cuimhne saincheaptha
+# Or with custom memory limit
 OMNIROUTE_MEMORY_MB=512 pm2 start npm --name omniroute -- start
 
-# Nó ag úsáid ecosystem.config.js
+# Or using ecosystem.config.js
 pm2 start ecosystem.config.js
 ```
 
@@ -480,24 +480,24 @@ module.exports = {
 ### Docker
 
 ```bash
-# Tóg íomhá (réamhshocrú = runner-cli le codex/claude/droid suiteáilte roimh ré)
+# Build image (default = runner-cli with codex/claude/droid preinstalled)
 docker build -t omniroute:cli .
 
-# Mód iniompartha (molta)
+# Portable mode (recommended)
 docker run -d --name omniroute -p 20128:20128 --env-file ./.env -v omniroute-data:/app/data omniroute:cli
 ```
 
-Le haghaidh mód comhtháthaithe óstach le binréidh CLI, féach an rannán Docker sa phríomhcháipéisíocht.
+Le haghaidh mód óstach-chomhtháite le binaries CLI, féach an roinn Docker sna príomhdhoiciméid.
 
-### Void Linux (xbps-src)
+### Folús Linux (xbps-src)
 
-Is féidir le húsáideoirí Void Linux OmniRoute a phacáistiú agus a shuiteáil go dúchasach ag baint úsáide as an chreat traschomhshóite `xbps-src`. Léiríonn sé seo an t-ábhar stand-alone Node.js in éineacht le ceangail dhúchasacha `better-sqlite3" atá de dhíth.
+Is féidir le húsáideoirí neamhní Linux OmniRoute a phacáistiú agus a shuiteáil go dúchais ag baint úsáide as an gcreat tras-thiomsaithe `xbps-src`. Déanann sé seo an tógáil neamhspleách Node.js a uathoibriú mar aon leis na ceangail dhúchasacha `better-sqlite3` riachtanacha.
 
 <details>
-<summary><b>Féach samhail xbps-src</b></summary>
+<summary><b>Féach ar an teimpléad xbps-src</b></summary>
 
 ```bash
-# Comhad samhail le haghaidh 'omniroute'
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -518,7 +518,7 @@ export npm_config_fund=false
 export npm_config_audit=false
 
 do_build() {
-	# DéanCumh anailís ar cuspóir CPU le haghaidh node-gyp
+	# Determine target CPU arch for node-gyp
 	local _gyp_arch
 	case "$XBPS_TARGET_MACHINE" in
 		aarch64*) _gyp_arch=arm64 ;;
@@ -527,29 +527,29 @@ do_build() {
 		*) _gyp_arch=x64 ;;
 	esac
 
-	# 1) Suiteáil gach spleáchadh – scipeáil scripteanna
+	# 1) Install all deps – skip scripts
 	NODE_ENV=development npm ci --ignore-scripts
 
-	# 2) Tóg an bunchlár Next.js stand-alone
+	# 2) Build the Next.js standalone bundle
 	npm run build
 
-	# 3) Cóipeáil sócmhainní statacha isteach sa stand-alone
+	# 3) Copy static assets into standalone
 	cp -r .next/static .next/standalone/.next/static
 	[ -d public ] && cp -r public .next/standalone/public || true
 
-	# 4) Tiomsaigh ceangal dúchasach better-sqlite3
+	# 4) Compile better-sqlite3 native binding
 	local _node_gyp=/usr/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js
 	(cd node_modules/better-sqlite3 && node "$_node_gyp" rebuild --arch="$_gyp_arch")
 
-	# 5) Cuir an ceangal tiomsaithe sa bhundíol stand-alone
+	# 5) Place the compiled binding into the standalone bundle
 	local _bs3_release=.next/standalone/node_modules/better-sqlite3/build/Release
 	mkdir -p "$_bs3_release"
 	cp node_modules/better-sqlite3/build/Release/better_sqlite3.node "$_bs3_release/"
 
-	# 6) Bain pacáistí sharp ar aon chuspóir
-	rm -rf .next/steamline/node_modules/@img
+	# 6) Remove arch-specific sharp bundles
+	rm -rf .next/standalone/node_modules/@img
 
-	# 7) Cóipeáil spleáchanna rithime pino nach bhfuil san anailís statach Next.js:
+	# 7) Copy pino runtime deps omitted by Next.js static analysis:
 	for _mod in pino-abstract-transport split2 process-warning; do
 		cp -r "node_modules/$_mod" .next/standalone/node_modules/
 	done
@@ -563,7 +563,7 @@ do_install() {
 	vmkdir usr/lib/omniroute/.next
 	vcopy .next/standalone/. usr/lib/omniroute/.next/standalone
 
-	# Cosc ar bhaint folaíteacha eolaire rautaire app Next.js ag an hook post-suiteáil
+	# Prevent removal of empty Next.js app router dirs by the post-install hook
 	for _d in \
 		.next/standalone/.next/server/app/dashboard \
 		.next/standalone/.next/server/app/dashboard/settings \
@@ -589,32 +589,32 @@ post_install() {
 
 </details>
 
-### Athróga Timpeallachta
+### Athróga Comhshaoil
 
-| Athróg                                  | Réamhshocrú                          | Cur Síos                                                                                                                                          |
-| --------------------------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `JWT_SECRET`                            | `omniroute-default-secret-change-me` | Rúndacht síniú JWT (**athrú i bhforbairt**)                                                                                                       |
-| `INITIAL_PASSWORD`                      | `CHANGEME`                           | Pasfhocal logála isteach den chéad uair                                                                                                           |
-| `DATA_DIR`                              | `~/.omniroute`                       | Eolaire sonraí (bunachar sonraí, úsáid, logaí)                                                                                                    |
-| `PORT`                                  | réamhshocrú fréamhchórais            | Port seirbhíse (`20128` san fholláin                                                                                                              |
-| `HOSTNAME`                              | réamhshocrú fréamhchórais            | Ceangal óstach (réamhshocrú Docker `0.0.0.0`)                                                                                                     |
-| `NODE_ENV`                              | réamhshocrú rithime                  | Socraigh `production` le haghaidh imscartha                                                                                                       |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`             | URL bonn poiblí a thaispeántar don deais agus a nochtar don fhreastalaí (athraíonn `BASE_URL` seanmhod)                                           |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`              | URL bonn críochphointe sioncronú scamall (athraíonn `CLOUD_URL` seanmhod)                                                                         |
-| `API_KEY_SECRET`                        | `endpoint-proxy-api-key-secret`      | Rúndacht HMAC le haghaidh eochracha API ginte                                                                                                     |
-| `REQUIRE_API_KEY`                       | `false`                              | Éileamh eochair API Bearer ar `/v1/*`                                                                                                             |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                              | Ceadaigh d'úsáideoirí deise deimhnithe na luachanna iomlán eochair API stóráilte a nochtadh ar éileamh                                            |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                 | Rith tuisceana freastalaí le haghaidh sonraí Teorainneacha Soláthraí stóráilte; cuirfidh cnaipí athnuachana an deais fós sioncronú láimhe ar siúl |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                              | Díchumasigh ceapacha SQLite uathoibríoch roimh scríbh/Iompórtáil/athchóiriú; oibríonn cóipeanna cúltaca láimhe fós                                |
-| `APP_LOG_TO_FILE`                       | `true`                               | Cumasaigh aschur logaí iarratais agus iniúchta ar diosca                                                                                          |
-| `AUTH_COOKIE_SECURE`                    | `false`                              | Fórsaigh fíorordú `Secure` (taobh thiar de seirbhíse frithbheochana HTTPS)                                                                        |
-| `CLOUDFLARED_BIN`                       | gan socraigh                         | Úsáid bineár `cloudflared` atá ann cheana in ionad íoslódáil bhainistithe                                                                         |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                              | Iompar le haghaidh Tunnealla Tapa Bainistithe (`http2`, `quic`, nó `auto`)                                                                        |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                                | Teorainn cuimhne Node.js i MB                                                                                                                     |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                 | Méid uasta iontrálacha taisce luaslaíochta                                                                                                        |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                | Méid uasta iontrálacha taisce séimeantacha                                                                                                        |
+| Athróg                                  | Réamhshocrú              | Cur síos                                                                                                                                                        |
+| --------------------------------------- | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `JWT_SECRET`                            | _(uathghinte)_           | JWT síniú rúnda — uathghinte ar an gcéad rith agus fós ag `server.env`; socraigh go sonrach é nuair atá an t-eolaire sonraí gearrthéarmach                      |
+| `INITIAL_PASSWORD`                      | _(díshuiteáil)_          | An chéad phasfhocal logáil isteach. Tosaíonn npm/source installs le `CHANGEME`: cuir ina ionad. Unset: draoi bordála                                            |
+| `DATA_DIR`                              | `~/.omniroute`           | Eolaire sonraí (db, úsáid, logaí)                                                                                                                               |
+| `PORT`                                  | réamhshocraithe creata   | Port seirbhíse (`20128` i samplaí)                                                                                                                              |
+| `HOSTNAME`                              | réamhshocraithe creata   | Ceangail óstach (Docker réamhshocraithe le `0.0.0.0`)                                                                                                           |
+| `NODE_ENV`                              | réamhshocraithe am rite  | Socraigh `production` le haghaidh imscaradh                                                                                                                     |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128` | Dromchla poiblí URL ar an deais agus nochtaithe don fhreastalaí (a ionadaíonn oidhreacht `BASE_URL`)                                                            |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`  | bonn críochphointe scamall sioncronaithe URL (a ionadaíonn oidhreacht `CLOUD_URL`)                                                                              |
+| `API_KEY_SECRET`                        | _(uathghinte)_           | rún HMAC le haghaidh eochracha API ginte — uathghinte ar an gcéad rith agus lean sé go `server.env`                                                             |
+| `REQUIRE_API_KEY`                       | `false`                  | Íosluchtaigh eochair Iompróir API ar `/v1/*`                                                                                                                    |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                  | Ceadaigh d’úsáideoirí fíordheimhnithe ar an deais eochairluachanna API stóráilte iomlána a nochtadh ar éileamh                                                  |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                     | Dúnta athnuachana ar thaobh an fhreastalaí le haghaidh sonraí i dtaisce maidir le Teorainneacha Soláthraí; Spreagann cnaipí athnuachana UI sioncronú láimhe fós |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                  | Díchumasaigh seatanna uathoibríocha SQLite roimh writes/import/restore; cúltacaí láimhe fós ag obair                                                            |
+| `APP_LOG_TO_FILE`                       | `true`                   | Cumasaíonn sé aschur logála feidhmchláir agus iniúchta chuig diosca                                                                                             |
+| `AUTH_COOKIE_SECURE`                    | `false`                  | Force `Secure` auth fianán (ar chúl seachfhreastalaí HTTPS )                                                                                                    |
+| `CLOUDFLARED_BIN`                       | neamhshuite              | Bain úsáid as dénártha `cloudflared` atá ann cheana féin in ionad íoslódáil bainistithe                                                                         |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                  | Iompar do Tholláin Mhearbhainistithe (`http2`, `quic`, nó `auto`)                                                                                               |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                    | teorainn carn Node.js i MB                                                                                                                                      |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                     | Uasmhéid iontrálacha taisce pras                                                                                                                                |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                    | Uasmhéid iontrálacha taisce shéimeantacha                                                                                                                       |
 
-Le haghaidh an tagarmharc iomlán athróga timpeallachta, féach an [README](../README.md).
+Le haghaidh tagartha iomlán an athróg timpeallachta, féach an [README](../README.md).
 
 ---
 

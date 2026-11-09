@@ -10,20 +10,19 @@ _Terakhir diperbarui: 2026-06-28_
 
 ## Ringkasan Eksekutif
 
-OmniRoute adalah gateway perutean AI lokal dan dasbor yang dibangun dengan Next.js.
-OmniRoute menyediakan satu endpoint yang kompatibel dengan OpenAI (`/v1/*`) dan merutekan lalu lintas di antara beberapa penyedia upstream dengan penerjemahan, fallback, penyegaran token, dan pelacakan penggunaan.
+OmniRoute adalah gateway perutean dan dasbor AI lokal yang dibangun di atas Next.js. Ini menyediakan satu titik akhir yang kompatibel dengan OpenAI (`/v1/*`) dan merutekan lalu lintas di beberapa penyedia upstream dengan terjemahan, fallback, penyegaran token, dan pelacakan penggunaan.
 
-Kemampuan utama:
+Kemampuan inti:
 
-- Permukaan API yang kompatibel dengan OpenAI untuk CLI/alatan (380 penyedia, 159 modul executor)
-- Penerjemahan request/response di antara format penyedia
-- Fallback kombinasi model (urutan multi-model)
-- Langkah kombinasi terstruktur (`provider + model + connection`) dengan pengurutan runtime berdasarkan `compositeTiers`
-- Fallback tingkat akun (multi-akun per penyedia)
-- Pemeriksaan awal kuota dan pemilihan akun P2C yang mempertimbangkan kuota pada jalur chat utama
-- Manajemen koneksi penyedia OAuth + API key (27 modul penyedia OAuth)
-- Pembuatan embedding melalui `/v1/embeddings` (18 penyedia)
-- Pembuatan gambar melalui `/v1/images/generations` (10+ penyedia, 20+ model)
+- Permukaan API yang kompatibel dengan OpenAI untuk CLI/tools (381 penyedia, 159 modul pelaksana)
+- terjemahan Request/response lintas format penyedia
+- Penggantian kombo model (urutan multi-model)
+- Langkah kombo terstruktur (`provider + model + connection`) dengan pengurutan waktu proses berdasarkan `compositeTiers`
+- Penggantian tingkat akun (multi-akun per penyedia)
+- Pilihan akun P2C pra-penerbangan dan kuota-sadar kuota di jalur obrolan utama
+- OAuth + Manajemen koneksi penyedia kunci API (27 modul penyedia OAuth )
+- Menanamkan generasi melalui `/v1/embeddings` (18 penyedia)
+- Pembuatan gambar melalui `/v1/images/generations` (10 penyedia +, 20 model + )
 - Transkripsi audio melalui `/v1/audio/transcriptions` (18 penyedia)
 - Text-to-speech melalui `/v1/audio/speech` (24 penyedia bawaan)
 - Pembuatan video melalui `/v1/videos/generations` (ComfyUI + SD WebUI)
@@ -31,56 +30,56 @@ Kemampuan utama:
 - Pencarian web melalui `/v1/search` (20 penyedia)
 - Moderasi melalui `/v1/moderations`
 - Pemeringkatan ulang melalui `/v1/rerank`
-- Penguraian tag pemikiran (`<think>...</think>`) untuk model penalaran
-- Sanitasi response untuk kompatibilitas ketat dengan OpenAI SDK
-- Normalisasi peran (developer→system, system→user) untuk kompatibilitas lintas penyedia
-- Konversi output terstruktur (json_schema → Gemini responseSchema)
-- Persistensi lokal untuk penyedia, key, alias, kombinasi, pengaturan, dan harga (122 modul DB)
-- Pelacakan penggunaan/biaya dan pencatatan request
-- Sinkronisasi cloud opsional untuk sinkronisasi multi-perangkat/state
-- Daftar izinkan/tolak IP untuk kontrol akses API
-- Manajemen anggaran pemikiran (passthrough/auto/custom/adaptive)
-- Injeksi system prompt global
-- Pelacakan sesi dan fingerprinting
-- Pembatasan laju yang ditingkatkan per akun dengan profil khusus penyedia
-- Pola circuit breaker untuk ketahanan penyedia
-- Perlindungan anti-thundering herd dengan penguncian mutex
-- Cache deduplikasi request berbasis signature
+- Pikirkan penguraian tag (`<think>...</think>`) untuk model penalaran
+- Sanitasi respons untuk kompatibilitas OpenAI SDK yang ketat
+- Normalisasi peran (pengembang sistem →, pengguna sistem →) untuk kompatibilitas lintas penyedia
+- Konversi keluaran terstruktur (json_schema → Gemini responseSchema)
+- Persistensi lokal untuk penyedia, kunci, alias, kombo, pengaturan, harga (122 modul DB )
+- pelacakan Usage/cost dan pencatatan permintaan
+- Sinkronisasi cloud opsional untuk sinkronisasi multi-device/state
+- IP allowlist/blocklist untuk kontrol akses API
+- Berpikir manajemen anggaran (passthrough/auto/custom/adaptive)
+- Injeksi cepat sistem global
+- Pelacakan sesi dan sidik jari
+- Pembatasan tarif yang ditingkatkan per akun dengan profil khusus penyedia
+- Pola pemutus sirkuit untuk ketahanan penyedia layanan
+- Perlindungan kawanan anti-guntur dengan penguncian mutex
+- Cache deduplikasi permintaan berbasis tanda tangan
 - Lapisan domain: aturan biaya, kebijakan fallback, kebijakan lockout
-- Context Relay: ringkasan serah terima sesi untuk kesinambungan rotasi akun
-- Persistensi state domain (cache write-through SQLite untuk fallback, anggaran, lockout, dan circuit breaker)
-- Mesin kebijakan untuk evaluasi request terpusat (lockout → anggaran → fallback)
-- Telemetri request dengan agregasi latensi p50/p95/p99
-- Telemetri target kombinasi dan kesehatan historis target kombinasi melalui `combo_execution_key` / `combo_step_id`
-- Correlation ID (X-Request-Id) untuk pelacakan menyeluruh
-- Pencatatan audit kepatuhan dengan opsi opt-out per API key
-- Framework evaluasi untuk jaminan kualitas LLM
-- Dasbor kesehatan dengan status circuit breaker penyedia secara real-time
-- MCP Server (110 alat) dengan 3 transportasi (stdio/SSE/Streamable HTTP)
-- A2A Server (JSON-RPC 2.0 + SSE) dengan skills dan siklus hidup task
-- Sistem memori (ekstraksi, injeksi, pengambilan, peringkasan)
-- Sistem skills (registry, executor, sandbox, skills bawaan)
-- Proxy MITM dengan manajemen sertifikat dan penanganan DNS
-- Middleware perlindungan terhadap injeksi prompt
-- Pipeline kompresi prompt dengan Caveman, RTK, pipeline bertumpuk, kombinasi kompresi, paket bahasa, dan analitik
-- Registry ACP (Agent Communication Protocol)
+- Relay Konteks: ringkasan serah terima sesi untuk kontinuitas rotasi akun
+- Persistensi status domain (SQLite write-through cache untuk fallback, anggaran, penguncian, pemutus sirkuit)
+- Mesin kebijakan untuk evaluasi permintaan terpusat (lockout → budget → fallback)
+- Minta telemetri dengan agregasi latensi p50/p95/p99
+- Telemetri target kombo dan kesehatan target kombo historis melalui `combo_execution_key` / `combo_step_id`
+- Korelasi ID (X-Request-Id) untuk penelusuran ujung ke ujung
+- Pencatatan audit kepatuhan dengan opt-out per kunci API
+- Kerangka evaluasi untuk jaminan kualitas LLM
+- Dasbor kesehatan dengan status pemutus sirkuit penyedia waktu nyata
+- MCP Server (110 alat) dengan 3 transport (stdio/SSE/Streamable HTTP)
+- A2A Server (JSON-RPC 2.0 + SSE) dengan keterampilan dan siklus hidup tugas
+- Sistem memori (ekstraksi, injeksi, pengambilan, ringkasan)
+- Sistem keterampilan (registrasi, eksekutor, kotak pasir, keterampilan bawaan)
+- proksi MITM dengan manajemen sertifikat dan penanganan DNS
+- Middleware pelindung injeksi yang cepat
+- Pipeline kompresi cepat dengan Caveman, RTK, pipeline bertumpuk, kombo kompresi, paket bahasa, dan analitik
+- ACP (Agen Protokol Komunikasi) registri
 - Penyedia OAuth modular (22 modul individual di bawah `src/lib/oauth/providers/`)
-- Skrip uninstall/full-uninstall
-- Aksi perbaikan environment OAuth
-- Bridge WebSocket untuk klien WS yang kompatibel dengan OpenAI (`/v1/ws`)
-- Manajemen token sinkronisasi (terbitkan/cabut, unduhan bundle konfigurasi berversi ETag)
-- GLM Thinking (`glmt`) sebagai preset penyedia kelas utama
-- Penghitungan token hibrida (`/messages/count_tokens` di sisi penyedia dengan fallback estimasi)
-- Seeding otomatis alias model (30+ normalisasi dialek lintas proxy saat startup)
-- Fetch outbound yang aman dengan perlindungan SSRF, pemblokiran URL privat, dan retry yang dapat dikonfigurasi
-- Retry chat yang mempertimbangkan cooldown dengan `requestRetry` dan `maxRetryIntervalSec` yang dapat dikonfigurasi
-- Validasi environment runtime dengan Zod saat startup
-- Audit kepatuhan v2 dengan pagination, event CRUD penyedia, dan pencatatan validasi yang diblokir SSRF
+- skrip Uninstall/full-uninstall
+- tindakan perbaikan lingkungan OAuth
+- jembatan WebSocket untuk klien WS yang kompatibel dengan OpenAI (`/v1/ws`)
+- Manajemen token sinkronisasi (issue/revoke, unduhan bundel konfigurasi berversi ETag)
+- GLM Thinking (`glmt`) preset penyedia kelas satu
+- Penghitungan token hibrid ( `/messages/count_tokens` sisi penyedia dengan estimasi fallback)
+- Model alias penyemaian otomatis (30 + normalisasi dialek lintas-proksi saat startup)
+- Pengambilan keluar yang aman dengan SSRF guard, pemblokiran URL pribadi, dan percobaan ulang yang dapat dikonfigurasi
+- Percobaan ulang obrolan yang sadar masa cooldown dengan `requestRetry` dan `maxRetryIntervalSec` yang dapat dikonfigurasi
+- Validasi lingkungan runtime dengan Zod saat startup
+- Audit kepatuhan v2 dengan penomoran halaman, peristiwa CRUD penyedia, dan pencatatan validasi yang diblokir SSRF
 
-Model runtime utama:
+Model waktu proses utama:
 
-- App Next.js dengan route di bawah `src/app/api/*` mengimplementasikan API dasbor dan API kompatibilitas
-- Core SSE/perutean bersama di `src/sse/*` + `open-sse/*` menangani eksekusi penyedia, penerjemahan, streaming, fallback, dan penggunaan
+- rute aplikasi Next.js di bawah `src/app/api/*` mengimplementasikan dasbor APIs dan kompatibilitas APIs
+- Inti SSE/routing bersama di `src/sse/*` + `open-sse/*` menangani eksekusi penyedia, terjemahan, streaming, fallback, dan penggunaan
 
 ## Diagram Referensi
 
@@ -370,9 +369,9 @@ Kombo Otomatis secara dinamis menilai dan memilih target perutean pada waktu per
 
 Kemampuan utama:
 
-- **20 strategi perutean** (prioritas, berbobot, isi terlebih dahulu, round-robin, P2C, acak, paling jarang digunakan, dioptimalkan biaya, sadar-reset, jendela-reset, ruang kepala, tertimbang kuota, acak-ketat,** mobil** , lkgp, dioptimalkan konteks, dioptimalkan cache, relai konteks,** fusi** , pipeline) — auto adalah tambahan judul di v3.8.0; `fusion` (sintesis juri + fan-out panel, `open-sse/services/fusion.ts`) baru di v3.8.36.
+- **20 strategi perutean** (prioritas, berbobot, isi terlebih dahulu, round-robin, P2C, acak, paling jarang digunakan, dioptimalkan biaya, sadar-reset, jendela-reset, ruang kepala, berbobot kuota, acak-ketat,** mobil** , lkgp, dioptimalkan konteks, dioptimalkan cache, relai konteks,** fusi** , pipeline) — auto adalah tambahan judul di v3.8.0; `fusion` (sintesis juri + fan-out panel, `open-sse/services/fusion.ts`) baru di v3.8.36.
 - **penilaian 16 faktor** : kuota, kesehatan, biaya terbalik, latensi terbalik, kesesuaian tugas, dan sepuluh lainnya. Tabel kanonik faktor-faktor dan bobot defaultnya berada di [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) —, menyatakannya kembali di sini akan menjadikannya tabel kedua yang akan menjadi basi.
-- **Pabrik maya** mewujudkan kombo sementara ketika tidak ada kombo bernama yang cocok, mengambil kandidat dari koneksi penyedia aktif yang sehat.
+- **Pabrik maya** mewujudkan kombo sementara ketika tidak ada kombo bernama yang cocok, mencari kandidat dari koneksi penyedia aktif yang sehat.
 - **Awalan otomatis** : `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`, `auto/smart`, `auto/lkgp` — masing-masing didukung oleh profil bobot yang disetel.
 - **6 paket mode** : `ship-fast`, `cost-saver`, `quality-first`, `offline-friendly`, `reliability-first` dan `chaos-mode` — konfigurasi bobot preset yang dapat dipanggil dari dasbor. (Jangan bingung dengan awalan `auto/*` di atas, yang merupakan varian waktu permintaan.)
 
@@ -393,7 +392,7 @@ Untuk penyediaan per agen dan spesifikasi OAuth, lihat [`docs/frameworks/CLOUD_A
 
 ### C.Pagar Pembatas
 
-Modul pagar pembatas adalah lapisan middleware hot-reload yang memeriksa permintaan dan respons untuk PII, injeksi cepat, dan konten penglihatan tidak aman. Pelanggaran menyebabkan hubungan pendek permintaan dengan HTTP** 503** ditambah kode kesalahan terstruktur, memungkinkan penelepon hilir untuk mencoba lagi atau membuat cabang.
+Modul pagar pembatas adalah lapisan middleware hot-reload yang memeriksa permintaan dan respons untuk PII, injeksi cepat, dan konten penglihatan tidak aman. Pelanggaran menyebabkan hubungan arus pendek permintaan dengan HTTP** 503** ditambah kode kesalahan terstruktur, memungkinkan penelepon hilir untuk mencoba lagi atau membuat cabang.
 
 - Akar modul: `src/lib/guardrails/` (`base.ts`, `registry.ts`, `piiMasker.ts`, `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`)
 - Hot reload: registri mengawasi perubahan konfigurasi dan membangun kembali rantai di tempatnya
@@ -415,7 +414,7 @@ Namespace `src/domain/` memusatkan keputusan kebijakan sehingga penangan rute ti
 - penggabung aturan Connection/model : `src/domain/connectionModelRules.ts`
 - Cuplikan ketersediaan model: `src/domain/modelAvailability.ts`
 - Pelacakan kedaluwarsa penyedia: `src/domain/providerExpiration.ts`
-- Cache kuota: `src/domain/quotaCache.ts`
+- Cache kuota: `src/domain/quotaCache.ts`. Penyedia menambah dan menghapus jendela kuota (OpenAI menghapus jendela Codex 5 jam untuk beberapa paket), jadi pembacaan penggunaan yang dibuktikan oleh adaptor penyedia sebagai selesai (`quotasComplete`, lihat `src/lib/usage/usageReading.ts`) adalah kumpulan jendela lengkap akun: jendela yang diketahui sebelumnya tetapi tidak ada di dalamnya akan dihentikan, di cache, di `quota_snapshots` restart rehydrates (catatan penghentian yang ditambahkan), dalam status kuota Codex yang bertahan dan di ember saturasi Claude. Bukti parsial (header respons, salinan basi) hanya memperbarui jendela yang dibawanya.
 - Keadaan degradasi: `src/domain/degradation.ts`
 - Audit konfigurasi: `src/domain/configAudit.ts`
 - pembuat metadata respons OmniRoute : `src/domain/omnirouteResponseMeta.ts`
@@ -439,7 +438,7 @@ Untuk aturan klasifikasi rute selengkapnya, lihat [`docs/architecture/AUTHZ_GUID
 
 ### F. Alur Kerja FSM dan Router Sadar Tugas
 
-Router yang digerakkan oleh mesin dengan kondisi terbatas yang berlapis di atas pilihan kombo untuk mengarahkan lalu lintas berdasarkan tahap alur kerja yang terdeteksi (perencanaan, pelaksanaan, peninjauan) dan afinitas tugas latar belakang.
+Router yang digerakkan oleh mesin dengan status terbatas yang berlapis di atas pilihan kombo untuk mengarahkan lalu lintas berdasarkan tahap alur kerja yang terdeteksi (perencanaan, pelaksanaan, peninjauan) dan afinitas tugas latar belakang.
 
 - Alur kerja FSM: `open-sse/services/workflowFSM.ts`
 - Router yang sadar tugas: `open-sse/services/taskAwareRouter.ts`

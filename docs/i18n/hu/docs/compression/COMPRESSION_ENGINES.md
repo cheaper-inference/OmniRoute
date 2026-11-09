@@ -307,6 +307,95 @@ A tömörítési kombinációk elnevezett tömörítési profilok, amelyek útv�
 
 Irányítópult-felület: `Dashboard -> Context & Cache -> Compression Combos`.
 
+## Előfeltételek / kezelői útmutató (CCR & session-dedup)
+
+CCR (`ccr`) és `session-dedup` lecseréli vagy megszünteti a szöveget, és hagyja a a** jelző** mögött. Ez a szakasz a kezelői referencia a kliens bekötéséhez, a két jelölő leolvasásához és az elidézett tartalom lekéréséhez vagy diagnosztizálásához. Az egyes motorok mechanikáját fentebb tárgyaltuk; ez a "hogyan futtassam" réteg.
+
+### Szállítások és végpontok
+
+A CCR eszközöket megjelenítő MCP szervert háromféleképpen lehet elérni. Az alapértelmezett URL alapérték a `http://localhost:20128` (`OMNIROUTE_BASE_URL`):
+
+| Szállítás                            | URL / parancs                           | Megjegyzések                                                                                                                                    |
+| ------------------------------------ | --------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| Streamálható HTTP (kliens, ajánlott) | `http://localhost:20128/api/mcp/stream` | A végpont, amellyel a jelenlegi MCP ügyfelek beszélnek.                                                                                         |
+| Legacy SSE singleton                 | `http://localhost:20128/api/mcp/sse`    | Régebbi egyszemélyes szállítás. Azt** bezár** streamelhető munkamenetek; `streamable-http` klienseket használj `/api/mcp/stream` ellen, ne ezt. |
+| stdio                                | `omniroute --mcp`                       | IDE MCP konfigurációhoz, amely elindítja a folyamatot. Nincs `--dev` zászló; `omniroute --mcp` az stdio belépési pontja.                        |
+
+### Tárolási szintek (ami túléli az újraindítást)
+
+CCR egy** kétszintű** bolt, nem csak a memóriában:
+
+- **Forró memóriaszint** — blokkonkénti sapka 2 MiB, főként 16 MiB, globális 64 MiB. A bejegyzések alapértelmezett értéke 24 órás TTL (maximum 7 nap). A memóriából való teljes MCP lehívás korlátja 256 KiB; minden nagyobb még mindig elérhető a ranged / grep módokon keresztül.
+- **Tartós SQLite szint** (`ccr_blocks`, `COMPRESSION_CCR_DURABLE_STORE`, alapértelmezés szerint be van kapcsolva) — támogatja a memórián belüli réteget, így a blokk túléli LRU kilakoltatást, újraindítást vagy egy másik példányon történő visszakeresést. A sor megtartja a blokk TTL, így a TTL előtti blokk mindkét szintről eltűnik.
+
+Három védőburkolat tartja a tartós réteget behatárolva — egy blokk csak a memóriában marad, ha:
+
+1. vége a blokknak** 512 KB** (`MAX_DURABLE_BLOCK_BYTES`);
+2. a futási környezet felhő futási környezet (nincs helyi lemez);
+3. `COMPRESSION_CCR_DURABLE_STORE=false`.
+
+Tehát az „eltűnt blokk” nem egy általános újraindítási történet: a sub-512 KB blokk egy helyi, nem felhőalapú futási környezetben túléli az újraindítást a tartós rétegen keresztül, amíg TTL ki nem fogy. Lásd [a környezeti hivatkozást](../reference/ENVIRONMENT.md) a változóhoz.
+
+### A két jelző
+
+| Jelző                                 | Jelentése                                                                                                                                                                | Mit kell tennie a modellnek                                                                                                                                                                                   |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `[CCR retrieve hash=<24hex> chars=N]` | Egy nagy blokkot tartalom-címzetten tároltak.                                                                                                                            | Hívja `omniroute_ccr_retrieve` a** 24 hexadecimális hash szó szerint másolva** hogy visszakapja az eredeti szöveget.                                                                                          |
+| `[dedup:ref sha=…]`                   | `session-dedup` elided szöveg, amelyet már elküldtek ugyanannak a munkamenetnek egy korábbi fordulójában. Ez egy** szándékos visszatekintés** , nem veszteség vagy hiba. | Tedd** nem** hívjon bármilyen eszközt és tegye** nem** próbálja meg "rekonstruálni". A szöveg első előfordulása a kanonikus másolat; az aktuális kört soha nem írják át, hanem egy későbbi körben dedupálják. |
+
+A `[dedup:ref]` visszatekintés szándékos protokoll döntés — nincs küldés előtti rekonstrukció. Tekintse úgy, hogy "ez a pontos szöveg már korábban is megjelent ebben a munkamenetben".
+
+### Ügyfél előfeltételei
+
+- **Kulcs (stdio):** az stdio hívó nem hordoz kérésenkénti identitást, ezért `OMNIROUTE_API_KEY` hitelesít (a MCP szerver `env` van beállítva). Enélkül a hívó névtelen, és az igazgatót igénylő eszközök leromolhatnak.
+- **`tools[]` a befecskendezés előfeltétele.** A CCR retrieve-protocol utasítás (#8033) be van fecskendezve** csak** amikor a kérés hirdetett `tools[]` bizonyítja, hogy az ügyfél valóban elérheti `omniroute_ccr_retrieve`. Az egyezés egy zárószegmenses egyezés, amelyet elválasztó (`__`, `.`, `/`, `:`) határol. — soha nem csupasz — részkarakterlánc, így a névteres név, például `mcp__gateway__omniroute_ccr_retrieve` továbbra is számít. A hiányzó vagy nem egyező `tools[]` azt jelenti, hogy az utasítás _nincs_ befecskendezve.
+- **`codemode:false` (OpenCode ügyfelek).** OpenCode alapértelmezett kódmódja, amely csak a natív eszközeit hirdeti a modellnek és** nem** tegye MCP eszközöket a natív `tools[]` listára. Állítsa be `codemode: false` a MCP szerverbejegyzésben, hogy a `omniroute_ccr_*` eszközök megjelenjenek. Ez a** ügyfél** beállítás, nem egy OmniRoute. Még nem kapja meg a CCR utasítást: OpenCode egy eszközt `<server>_<tool>` néven nevez el, így a `omniroute` nevű szerver felfedi `omniroute_omniroute_ccr_retrieve`, és `_` nem tartozik az illesztett elválasztók közé.
+- **igazgatók.** A tárolás és a visszakeresés hitelesített főként ( API kulcsonként) elkülönítve történik. Egy kulcs csak a saját blokkjait látja.
+
+### Hatókör szerszámonként
+
+A hatókör érvényesítése mindig be van kapcsolva a szűk hatókörű HTTP/SSE hívóknál. A `omniroute_` CCR eszközök a következőket igénylik:
+
+| Eszköz                   | Hatály              |
+| ------------------------ | ------------------- |
+| `omniroute_ccr_store`    | `write:compression` |
+| `omniroute_ccr_delete`   | `write:compression` |
+| `omniroute_ccr_retrieve` | `read:compression`  |
+| `omniroute_ccr_inspect`  | `read:compression`  |
+| `omniroute_ccr_list`     | `read:compression`  |
+| `omniroute_ccr_stats`    | `read:compression`  |
+
+A hiányzó hatókör egy**MCP szerszámhiba eredménye** (`isError: true`, nem egy HTTP 403 — a `403 LOCAL_ONLY` a külön visszacsatolásos útvonalőrző hitelesítés): `Error: Insufficient MCP scopes for <tool>. Missing: <scope>.` Egy minimális távoli kulcsban tárolható `mcp:connect` (engedélyezi a `/api/mcp/` csak helyi kivágást), valamint a szükséges read/write hatókör.
+
+### Kliens mátrix
+
+| Ügyfél              | Szállítás                                      | Konfig a használathoz                                                                                                                                                                                                                                     | `tools[]` hirdetett? (→ CCR utasítás beadva)                                                                                                                                               |
+| ------------------- | ---------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Claude kód          | streamelhető-http                              | `claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream`                                                                                                                                                                         | Igen — MCP-képes; befecskendezve.                                                                                                                                                          |
+| Cursor / Cline      | `stdio`** vagy** `streamable-http`             | stdio: `omniroute --mcp` `OMNIROUTE_API_KEY` a `env`; vagy egy távoli MCP -bejegyzés, amely `http://localhost:20128/api/mcp/stream` re mutat (lásd: [Telepítési útmutató → MCP Client Configuration](../guides/SETUP_GUIDE.md#mcp-client-configuration) ) | Igen — reklámozza a `omniroute_ccr_*` eszközöket.                                                                                                                                          |
+| OpenCode            | streamelhető-http                              | `opencode mcp add omniroute --url http://localhost:20128/api/mcp/stream`, plusz `codemode: false`                                                                                                                                                         | Csak `codemode: false` hirdetett eszközök; az utasítás még mindig nincs beadva, mert `omniroute_omniroute_ccr_retrieve` nem egyezik (lásd [Kliens előfeltételek](#client-prerequisites) ). |
+| OpenAI kompatibilis | OpenAI-kompatibilis HTTP (csevegés befejezése) | szabványos csevegés-kiegészítő kliens az OpenAI-kompatibilis végponttal szemben                                                                                                                                                                           | **Soha** — egy sima OpenAI-kompatibilis hívónak soha nem mondják, hogy hívja az eszközt, és az utasítást sem adják be.                                                                     |
+
+### Visszakeresési korlátok és oldalszámozás
+
+MCP eszköz szöveges eredményei `mcpAccessibility.maxTextChars` körül vannak vágva (alapértelmezett `50000`). Egy blokk `full` lekérésének felső határa 256 KiB —** nincs korlátlan teljes visszakeresés** . Ha egy blokk `chars=N` nagy, lapozd át ahelyett, hogy az egészet kihúznád:
+
+- Ökölszabály:**`chars > 40000` → használj `mode`** , soha egy csupasz tele.
+- `mode:"grep"` — regex `pattern` soronként egyeztetve, legfeljebb 1000 egyező sor (`unique: true` drops ismétlődik), a legolcsóbb a "találja meg azt a sort, amelyre szükségem van".
+- `mode:"lines"` — egy 1 indexű vonaltartomány; `start` és `end` is kell.
+- `mode:"head"` / `mode:"tail"` — first/last `n` sorok.
+- `mode:"stats"` — sorok, karakterek és bájtok a törzs nélkül számítanak.
+
+Használja `mode:"lines"` `start`/`end` -vel, hogy hosszú blokkot haladjon végig az oldalakon, ahelyett, hogy egyszerre kérné le az egészet.
+
+### Eszköz elnevezés
+
+A visszakereső eszköz neve jelenleg `omniroute_ccr_retrieve` (a `omniroute_` előtag a kiszolgálók közötti névütközések dátumozott megoldása). Egy tisztább korlátos utótagú eszköznév és egy javítás MCP JSON eredmények csonkolt középső karakterláncához a rendszer felfelé irányuló követésként követi nyomon; ez az oldal csak az aktuális, szállított viselkedést dokumentálja.
+
+### A munkamenet életciklusa
+
+A streamelhető HTTP-munkamenetek tétlenül működnek, és a szerver lekéri őket; az üresjárati ablak a `MCP_SESSION_IDLE_MS` konstans (névvel hivatkozva, nem kódolt értékkel, így ez az oldal nem sodródik, ha változik). A tétlenül learatott munkamenet tünete egy HTTP 404 `Unknown Mcp-Session-Id` — -vel, a megoldás a munkamenet újracsatlakozása vagy újraindítása,** nem** kulcs forgatásához, hatókör módosításához vagy eszköz átnevezéséhez.
+
 ## API-felület
 
 | Útvonal                                | Cél                                                                               |
@@ -377,7 +466,7 @@ előtagok stb.).
 
 ## Érvényesítés
 
-Az ehhez a területhez tartozó kiemelt ellenőrzések a következők:
+Ennek a területnek a fókuszált kapui a következők:
 
 ```bash
 node --import tsx/esm --test tests/unit/compression/rtk-*.test.ts tests/unit/compression/pipeline-integration.test.ts tests/unit/compression/context-compression-api.test.ts

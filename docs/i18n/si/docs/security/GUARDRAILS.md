@@ -15,660 +15,278 @@ Guardrails විසින් OmniRoute සහ upstream providers අතර ම�
 
 Hooks සෑම route එකකදීම හෝ සෑම response එකකදීම ක්රියාත්මක **නොවේ**. Guardrail එකක් ආරක්ෂක පාලනයක් ලෙස විශ්වාසයට ගැනීමට පෙර [ආවරණය සහ සීමාවන්](#coverage-and-limits) කියවන්න.
 
-## අන්තර්ගත ආරක්ෂණ
+## ඉදිකරන ලද ආරක්ෂක වැටවල්
 
-ආනයනය කරන අවස්ථාවේදී registry එක priority අනුපිළිවෙළට ආරක්ෂණ හයක් ස්වයංක්රීයව load කරයි
-(`registry.ts` → `registerDefaultGuardrails()` බලන්න):
+රෙජිස්ට්‍රිය ආයාත කිරීමේදී ප්‍රමුඛතා අනුපිළිවෙලට ආරක්ෂක වැටවල් හයක් ස්වයංක්‍රීයව පටවයි ( `registry.ts` → `registerDefaultGuardrails()` බලන්න):
 
-| Priority | Name                | Stage(s)       | File                  |
-| -------- | ------------------- | -------------- | --------------------- |
-| `5`      | `vision-bridge`     | `preCall`      | `visionBridge.ts`     |
-| `6`      | `audio-bridge`      | `preCall`      | `audioBridge.ts`      |
-| `7`      | `video-bridge`      | `preCall`      | `videoBridge.ts`      |
-| `10`     | `pii-masker`        | `pre` + `post` | `piiMasker.ts`        |
-| `20`     | `prompt-injection`  | `preCall`      | `promptInjection.ts`  |
-| `95`     | `credential-masker` | `pre` + `post` | `credentialMasker.ts` |
+| ප්රමුඛත්වය | නම                  | අදියර(ය)       | ගොනුව                 |
+| ---------- | ------------------- | -------------- | --------------------- |
+| `5`        | `vision-bridge`     | `preCall`      | `visionBridge.ts`     |
+| `6`        | `audio-bridge`      | `preCall`      | `audioBridge.ts`      |
+| `7`        | `video-bridge`      | `preCall`      | `videoBridge.ts`      |
+| `10`       | `pii-masker`        | `pre` + `post` | `piiMasker.ts`        |
+| `20`       | `prompt-injection`  | `preCall`      | `promptInjection.ts`  |
+| `95`       | `credential-masker` | `pre` + `post` | `credentialMasker.ts` |
 
-අඩු priority අංක සහිත ඒවා **පළමුව** ක්රියාත්මක වේ.
+අඩු ප්‍රමුඛතා අංක ධාවනය වේ** පළමුව** .
 
 ### Vision Bridge (`visionBridge.ts`) — Modality Bridge PR-1
 
-GLM 5.3 මූලික model එකට සහ `glm-5.3-{low,high,max}` වෙත පැහැදිලි
-`supportsVision:false` registry/spec metadata ඇත. GLM 5.3 Flash variants
-native-vision models ලෙස පවතී. Claude Code හි `/v1/messages` route එක
-Claude-to-OpenAI පරිවර්තනයට පෙර, හවුල්
-`handleChat` pre-call guardrail chain එකට ඇතුළු වේ; එබැවින් nested
-`Read` tool-result images OpenAI `image_url` content බවට පරිවර්තනය වීමට පෙර
-විස්තර කළ යුතු හෝ වෙනත් ආකාරයකින් හසුරුවිය යුතුය (#17069).
+GLM 5.3 මූලික ආකෘතිය සහ `glm-5.3-{low,high,max}` හි පැහැදිලි `supportsVision:false` registry/spec පාරදත්ත ඇත. GLM 5.3 ෆ්ලෑෂ් ප්‍රභේද ස්වදේශීය දෘෂ්ඨි ආකෘති ලෙස පවතී. Claude කේතයේ `/v1/messages` මාර්ගය හවුල් `handleChat` පෙර ඇමතුම් ආරක්ෂක දාමයට ඇතුල් වේ** පෙර** Claude-to-OpenAI පරිවර්තනය; nested `Read` මෙවලම්-ප්‍රතිඵල රූප පරිවර්තනයෙන් OpenAI `image_url` අන්තර්ගතයට (#17069) ඔසවන්නට පෙර ඒවා විස්තර කිරීම හෝ හැසිරවීම කළ යුතුය.
 
-**vision නොසපයන models** වෙත යොමු කර ඇති image-bearing requests අතුරුග්රහණය කර,
-සම්පූර්ණ request එක vision-capable model එකකට නැවත යොමු කරයි හෝ upstream call එකට පෙර
-configurable vision model එකක් මඟින් නිපදවන text descriptions සමඟ image parts
-ප්රතිස්ථාපනය කරයි. මෙය text-only providers හට multimodal payloads
-පාරදෘශ්යව හැසිරවීමට ඉඩ සලසයි.
+ඉලක්ක කරගත් රූප සහිත ඉල්ලීම් වලට බාධා කරයි** දැක්ම නොවන ආකෘති** සහ එක්කෝ සම්පූර්ණ ඉල්ලීම දර්ශන හැකියාව ඇති ආකෘතියක් වෙත නැවත හරවා යැවීම හෝ උඩුගත ඇමතුමට පෙර වින්‍යාසගත කළ හැකි දර්ශන ආකෘතියක් මඟින් නිෂ්පාදනය කරන ලද පෙළ විස්තර සමඟ රූප කොටස් ප්‍රතිස්ථාපනය කරයි. මෙය පෙළ-පමණක් සපයන්නන්ට බහුමාධ්‍ය ගෙවීම් විනිවිදභාවයෙන් හැසිරවීමට ඉඩ සලසයි.
 
 ප්රවාහය:
 
-1. ඉලක්ක model එක දැනටමත් vision සඳහා සහාය දක්වන්නේ නම් skip කරයි
-   (එය බලහත්කාර bridge ලැයිස්තුව `isVisionBridgeForcedModel` තුළ පෙනී සිටින්නේ නම්
-   හැර).
-2. `extractImageParts(messages)` හරහා image parts උපුටා ගනී
-   (`visionBridgeHelpers.ts`), එය **ඒකාබද්ධ media detector** එක වන
-   `open-sse/utils/mediaParts.ts` හි `detectMediaParts()` වෙත delegation කරයි —
-   combo compatibility filter සමඟ බෙදාගන්නා එකම සත්ය මූලාශ්රය මෙයයි.
-   උපුටා ගැනීම, `replaceImageParts` හට නැවත splice කළ හැකි shapes වෙත පමණක්
-   allowlist කර ඇත (extract↔replace contract): OpenAI `image_url`,
-   Anthropic base64 `source.type:"base64"`, Anthropic URL `source.type:"url"`,
-   සහ Responses API `input_image`. Claude Code
-   `tool_result.content` සහ Responses tool outputs තුළ nested වී ඇති matching
-   images ද ඒවායේ මුල් paths වලින් උපුටා ගෙන ප්රතිස්ථාපනය කරයි; indicator-only
-   shapes combo-filter material වන අතර උපුටා නොගනී.
-   කිසිවක් හමු නොවන්නේ නම් skip කරයි.
-3. `resolveVisionBridgeRuntimeSettings()` හරහා runtime config විසඳයි
-   (`src/shared/constants/modalityBridgeDefaults.ts`): නව `modalityBridge*`
-   settings keys ප්රමුඛ වන අතර; legacy `visionBridge*` keys
-   **එක් cycle එකක fallback** එකක් ලෙස පවතී (rollback window). bridge එක
-   disabled නම් media traversal එකකට පෙරම skip කරයි.
-4. Mode selector (`modalityBridgeVisionMode`, පහත වගුව බලන්න) reroute ද
-   describe ද යන්න තීරණය කරයි. Reroute මඟින් `model` පමණක් මාරු කළ
-   `modifiedPayload` එකක් සහ `{ rerouted, fromModel, toModel, imagesKept }`
-   meta එකක් ආපසු ලබා දෙයි.
-5. Describe path: `maxImages` මඟින් images සීමා කර, task-aware prompt එක
-   සකස් කර, describe cache එක පරීක්ෂා කර, vision model එකට **සමාන්තරව**
-   (`Promise.allSettled`) call කර, ඒවා තිබූ ස්ථානයේ
-   `[Image N]: <description>` text parts ඇතුළත් කරයි. Describe එකක් අසාර්ථක වූ විට
-   `null` ලැබේ: unknown/vision-capable targets සඳහා raw image එක
-   සංරක්ෂණය කරයි (#4012), නමුත් **තහවුරු කළ text-only direct target** එකකට
-   හෝ zero-vision combo එකකට, describe නොකළ සෑම image එකක් සඳහාම, describe-call cap
-   ඉක්මවන images සහ partial failures ඇතුළුව, පැහැදිලි
-   `(unavailable — no vision-capable provider connected)` text stub එකක් ලබා දෙයි
-   (#17069). සියල්ල අසාර්ථක වූ combo describe fallback එක දැනටමත් පවතී (#8430).
-6. `modifiedPayload` + meta (`imagesProcessed`, `descriptions`,
-   `processingTimeMs`, `visionModel`) ආපසු ලබා දෙයි.
+1. ඉලක්ක ආකෘතිය දැනටමත් දර්ශනයට සහය දක්වන්නේ නම් මඟ හරින්න (එය බලහත්කාර-පාලම ලැයිස්තුවේ දිස්වන්නේ නම් මිස `isVisionBridgeForcedModel`).
+2. වෙත පැවරෙන `extractImageParts(messages)` (`visionBridgeHelpers.ts`) හරහා රූප කොටස් උපුටා ගන්න** ඒකාබද්ධ මාධ්‍ය අනාවරකය** `detectMediaParts()` `open-sse/utils/mediaParts.ts` හි — සංයුක්ත අනුකූලතා පෙරහන සමඟ බෙදාගත් සත්‍යයේ තනි මූලාශ්‍රය. නිස්සාරණය `replaceImageParts` ආපසු බෙදිය හැකි හැඩතලවලට ලැයිස්තුගත කර ඇත (උපුරණය ↔ කොන්ත්‍රාත්තුව ප්‍රතිස්ථාපනය කරයි): OpenAI `image_url`, Anthropic base64 `source.type:"base64"`, Anthropic URL `source.type:"url"`, සහ ප්‍රතිචාර API `input_image`. Claude කේත `tool_result.content` සහ ප්‍රතිචාර මෙවලම් ප්‍රතිදානයන් තුළ කැදලි ගැළපෙන අනුරූප ද උකහා ගෙන ඒවායේ මුල් මාර්ගයෙන් ප්‍රතිස්ථාපනය කරනු ලැබේ; දර්ශක-පමණක් හැඩතල සංයෝජන-පෙරහන ද්‍රව්‍ය වන අතර ඒවා නිස්සාරණය නොකෙරේ. කිසිවක් සොයාගත නොහැකි නම් මඟ හරින්න.
+3. `resolveVisionBridgeRuntimeSettings()` (`src/shared/constants/modalityBridgeDefaults.ts`) හරහා ධාවන කාල වින්‍යාසය විසඳන්න: නව `modalityBridge*` සැකසුම් යතුරු දිනා ගනී; ලෙගසි `visionBridge*` යතුරු පවතී a** එක්-චක්‍ර පසුබෑමක්** (ආපසු හැරීමේ කවුළුව). පාලම අබල කර ඇති විට ඕනෑම මාධ්‍ය ගමනකට පෙර මඟ හරින්න.
+4. මාදිලි තේරීම (`modalityBridgeVisionMode`, පහත වගුව බලන්න) reroute vs විස්තර කිරීම තීරණය කරයි. Reroute `modifiedPayload` පමණක් `model` මාරු කර, සහ meta `{ rerouted, fromModel, toModel, imagesKept }` සමඟ ආපසු ලබා දෙයි.
+5. මාර්ගය විස්තර කරන්න: `maxImages` හි කැප් පින්තූර, කාර්ය-දැනුවත් විමසුම රචනා කරන්න, විස්තර හැඹිලිය බලන්න, දර්ශන ආකෘතිය අමතන්න** සමාන්තරව** (`Promise.allSettled`), සහ ඒවායේ ස්ථානයේ `[Image N]: <description>` පෙළ කොටස් එන්නත් කරන්න. අසාර්ථක විස්තරයක් අස්වැන්න `null`: අමු රූපය unknown/vision-capable ඉලක්ක (#4012) සඳහා සංරක්ෂණය කර ඇත, නමුත් a** තහවුරු කරන ලද පෙළ-පමණක් සෘජු ඉලක්කය** හෝ zero-vision combo හට විස්තර නොකරන ලද සෑම රූපයක් සඳහාම පැහැදිලි `(unavailable — no vision-capable provider connected)` පෙළ අංකුරයක් ලැබේ, අර්ධ අසාර්ථක වීම් සහ විස්තර-ඇමතුම් තොප්පිය (#17069) ඉක්මවා ඇති රූප ඇතුළුව. පවතින සියලුම අසාර්ථක සංයෝජනය විස්තර කරන ලද පසුබැසීම (#8430) ස්ථානයේ පවතී.
+6. `modifiedPayload` + meta (`imagesProcessed`, `descriptions`, `processingTimeMs`, `visionModel`) ආපසු දෙන්න.
 
-#### Mode selector (`modalityBridgeVisionMode`)
+#### මාදිලි තේරීම්කාරකය (`modalityBridgeVisionMode`)
 
-| Mode       | Default | Behavior                                                                                                                                                                                                                                                                                          |
-| ---------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `auto`     | ✔       | පැරණි heuristic එක, වෙනසක් නොමැතිව (#6640/#7204): non-combo/`auto/` models මුල් model එකට භාවිත කළ හැකි credentials දැනටමත් තිබේ නම් (එවිට describe කරයි) හැර, හොඳම vision model වෙත reroute කරයි; combo targets සෑම විටම describe කරයි.                                                          |
-| `describe` |         | සෑම විටම describe කරයි — reroute block එක සම්පූර්ණයෙන්ම skip කරයි; පරිශීලකයා තෝරාගත් model එක සෑම විටම පිළිතුරු සපයයි.                                                                                                                                                                            |
-| `reroute`  |         | Reroute බලහත්කාරයෙන් සිදු කරයි: keep-credentialed-model guard එක bypass කරයි. Reroute-**target** credential guard එක තවමත් අදාළ වේ — භාවිත කළ හැකි vision target එකක් නොමැති විට, bridge එක පැහැදිලි දෝෂයක් සමඟ අවහිර කරයි; describe කිරීම හෝ raw images text-only target එකකට යැවීම සිදු නොකරයි. |
+| මාදිලිය    | පෙරනිමිය | හැසිරීම                                                                                                                                                                                                                                                                          |
+| ---------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `auto`     | ✔        | Legacy heuristic, untouched (#6640/#7204): non-combo/`auto/` models reroute to the best vision model unless the original model already has usable credentials (then describe); combo targets always describe.                                                                    |
+| `describe` |          | සෑම විටම — විස්තර කරන්න නැවත මාර්ග අවහිර කිරීම සම්පූර්ණයෙන්ම මඟ හැරී ඇත; පරිශීලකයා තෝරාගත් ආකෘතිය සෑම විටම පිළිතුරු දෙයි.                                                                                                                                                        |
+| `reroute`  |          | බලහත්කාරයෙන් ආපසු හරවා යවන්න: තබා ගැනීමේ අක්තපත්‍ර සහිත-ආදර්ශ ආරක්ෂකය මඟ හැර ඇත. නැවත මාර්ගය -** ඉලක්කය** අක්තපත්‍ර ආරක්ෂකය තවමත් — භාවිතා කළ හැකි දර්ශන ඉලක්කයක් නොමැති විට අදාළ වේ, පාලම විස්තර කිරීමට හෝ අමු රූප පෙළ පමණක් ඉලක්ක වෙත යැවීමට වඩා පැහැදිලි දෝෂයකින් අවහිර කරයි. |
 
-බලහත්කාර modes, auto heuristic එක ක්රියාත්මක වීමට පෙරම එය short-circuit කරයි;
-`auto` හැසිරීම PR-1ට පෙර guardrail එකට byte-identical වේ.
+බලහත්කාර මාදිලි කෙටි-පරිපථය** පෙර** ස්වයංක්‍රීය හූරිස්ටික් ධාවනය; `auto` හැසිරීම pre-PR-1 guardrail ට බයිට සමාන වේ.
 
-#### API-key scope (`visionBridgeKeyScope.ts`)
+#### API-යතුරු විෂය පථය (`visionBridgeKeyScope.ts`)
 
-අමතන්නාගේ API යතුර `allowedConnections`, quota pool
-(`allowedQuotas`) හෝ model (`allowedModels` / `blockedModels` /
-`modelAccessMode: "restricted"` / `disableNonPublicModels`) සීමා කරන විට, bridge එක
-තෝරා ගන්නේ යතුරට භාවිත කළ හැකි connections මත, යතුරට භාවිත කළ හැකි reroute සහ
-describe models පමණි. එවිට describe call එක සැමවිටම
-`x-omniroute-self-loop-key-id` header සමඟ OmniRoute self-loop හරහා යන බැවින්,
-ලැබෙන chat request එක එම යතුරේ connection සහ model ප්රතිපත්තිය නැවතත් බලගන්වයි.
-`enforceApiKeyPolicy()` එම header එක සැලකිල්ලට ගන්නේ self-loop bearer එක සමඟ පමණක්
-වන බැවින්, එයට කළ හැක්කේ ප්රවේශය තවදුරටත් සීමා කිරීම පමණි. resolve නොවන id එකක්
-ප්රතික්ෂේප කරනු ලැබේ.
+අමතන්නාගේ API යතුර `allowedConnections`, කෝටා සංචිත (`allowedQuotas`) හෝ ආකෘති (`allowedModels` / `blockedModels` / `modelAccessMode: "restricted"` / `disableNonPublicModels`) සීමා කරන විට, පාලම යතුර භාවිතා කළ හැකි සම්බන්ධතා මත යතුර භාවිතා කළ හැකි ආකෘතීන් සහ විස්තර කරන්නේ නැවත මාර්ග තෝරා ගැනීම පමණි. පසුව විස්තර කරන ඇමතුම සෑම විටම `x-omniroute-self-loop-key-id` ශීර්ෂය සමඟින් OmniRoute self-loop හරහා ගමන් කරයි, එබැවින් ලැබෙන කතාබස් ඉල්ලීම එම යතුරේ සම්බන්ධතාවය සහ ආදර්ශ ප්‍රතිපත්තිය නැවත බලාත්මක කරයි. `enforceApiKeyPolicy()` ස්වයං-ලූප් දරන්නා සමඟ පමණක් එම ශීර්ෂයට ගරු කරයි, එබැවින් එයට ප්‍රවේශය පටු කළ හැකි අතර, විසඳා නොගත් හැඳුනුම්පතක් ප්‍රතික්ෂේප කරනු ලැබේ.
 
-යතුර සඳහා vision model එකක්වත් අවසර ලත් එකක් නොමැති නම්, **තහවුරු කළ
-text-only target** එකක් image request එක upstream එකට යැවීම වෙනුවට පැහැදිලි HTTP
-400 එකක් සමඟ locally ප්රතික්ෂේප කරයි (#17069). Unknown හෝ native vision
-capability සහිත targets සඳහා describe path එක පෙර fail-open හැසිරීමම තබා ගනී
-(meta `{ skipped: true, reason: "no_permitted_vision_model" }`). යතුරක් නොමැති
-requests සහ මෙම සීමා නොමැති keys පෙර මෙන්ම ක්රියා කරයි.
+යතුර සඳහා දර්ශන ආකෘතියක් අවසර නොදේ නම්, a** තහවුරු කරන ලද පෙළ-පමණක් ඉලක්කය** පින්තූර බයිට් අකාර්යක්ෂම උඩු ප්‍රවාහයකට යොමු කරනවා වෙනුවට පැහැදිලි HTTP 400 සමඟ දේශීයව රූප ඉල්ලීම ප්‍රතික්ෂේප කරයි (#17069). නොදන්නා හෝ ස්වදේශීය දර්ශන හැකියාව සහිත ඉලක්ක සඳහා, විස්තර කිරීමේ මාර්ගය එහි පෙර අසාර්ථක-විවෘත හැසිරීම (meta `{ skipped: true, reason: "no_permitted_vision_model" }`) රඳවා ගනී. යතුරක් නොමැති ඉල්ලීම් සහ මෙම සීමාවන් නොමැති යතුරු පෙර පරිදිම හැසිරේ.
 
-#### Task-aware describe prompt (`modalityBridgeVisionTaskAware`)
+#### කාර්ය-දැනුවත් විස්තර විමසුම (`modalityBridgeVisionTaskAware`)
 
-පෙරනිමි අගය **true** වේ. `composeVisionPrompt()` (`visionBridgeHelpers.ts`)
-මූලික describe prompt එකට **අවසන් user message** එකේ පෙළ (අක්ෂර 500කට සීමා කර)
-එක් කරයි. මෙය පරිශීලකයා සැබවින්ම ඉල්ලා ඇති දේ වෙත විස්තරය යොමු කරයි
-(codex-vision-proxy pattern) සහ පෙනෙන පෙළ transcribe කරන ලෙස vision model එකෙන්
-ඉල්ලා සිටී. Flag එක off කළ විට — හෝ user text නොමැති විට — මූලික prompt එක
-වෙනස් නොකර භාවිත කරයි.
+පෙරනිමිය** ඇත්ත** . `composeVisionPrompt()` (`visionBridgeHelpers.ts`) හි පාඨය එකතු කරයි** අවසාන පරිශීලක පණිවිඩය** (අකුරු 500 ට කපා ඇත) පාදක විස්තර ප්‍රේරණය විස්තර කරයි, පරිශීලකයා ඇත්ත වශයෙන්ම අසන දේ දෙසට විස්තරය මෙහෙයවයි (codex-vision-proxy රටාව) සහ දෘශ්‍ය පෙළ පිටපත් කිරීමට දර්ශන ආකෘතියෙන් ඉල්ලා සිටී. ෆ්ලෑග් ඕෆ් — හෝ පරිශීලක පෙළ — නොමැතිව මූලික විමසුම නොවෙනස්ව භාවිතා වේ.
 
-Describe self-loop එකේම OpenAI-compatible request එක
-(`visionBridgeHelpers.ts` හි `callVisionModelSingle()`) සැමවිටම
-`image_url.detail: "high"` ඉල්ලා සිටී — කිසිදු caller/provider කෙනෙකු සඳහා
-කොන්දේසිගත නොව, සෑම විටම. අඩු-detail sampling මඟින් මෙම prompt එක ඉල්ලා සිටින
-නිශ්චිත text-transcription task එකේ OCR නිරවද්යතාව අඩු වන බැවින්, මුල් inbound
-request එකේ භාවිත කළ detail මට්ටම කුමක් වුවත් describe call එකම සැමවිටම high
-detail ඉල්ලා සිටී. මෙය බලපාන්නේ අභ්යන්තර describe request body එකට පමණි;
-ප්රධාන request එකේ caller ගේම `image_url.detail` OmniRoute forward කරන ආකාරය
-එය වෙනස් නොකරයි — එම පෙරනිමිය වෙනම, හඳුනාගත් OpenCode clients සඳහා පමණක්
-`defaultImageDetail()` (`open-sse/handlers/chatCore/upstreamBody.ts`) තුළ යෙදේ.
-Describe self-loop හි Anthropic wire-format branch එකේ `detail` field එකක්
-නොමැති බැවින්, එයට මෙම පෙරනිමි දෙකෙන් කිසිවක් බලපාන්නේ නැත.
+විස්තර කරන ස්වයං-ලූපයේම OpenAI-අනුකූල ඉල්ලීම ( `visionBridgeHelpers.ts` හි`callVisionModelSingle()` ) සෑම විටම `image_url.detail: "high"` — කොන්දේසි විරහිතව, සෑම caller/provider සඳහාම, කිසිදු සේවාදායක සංඥාවක් මත තබා නොමැත. අඩු-විස්තර නියැදීම මෙම ප්‍රේරකය ඉල්ලා සිටින අකුරු-පිටපත් කිරීමේ කාර්යය සඳහා OCR නිරවද්‍යතාවය පිරිහීමට ලක් කරයි, එම නිසා විස්තර කරන ඇමතුමම මුල් ඇතුල්වීමේ ඉල්ලීම භාවිතා කළ විස්තර මට්ටම නොසලකා සෑම විටම ඉහළ විස්තර ඉල්ලා සිටී. මෙය බලපාන්නේ අභ්‍යන්තර විස්තර ඉල්ලීම් ශරීරයට පමණි; එය OmniRoute විසින් ඇමතුම්කරුගේම `image_url.detail` ප්‍රාථමික ඉල්ලීම — මත පෙරනිමිය වෙන වෙනම යොදන ආකාරය වෙනස් නොවේ, සහ `defaultImageDetail()` (`open-sse/handlers/chatCore/upstreamBody.ts`) හි හඳුනා ගත් OpenCode සේවාලාභීන් සඳහා පමණි. විස්තර කරන ස්වයං-ලූපයේ Anthropic වයර්-ආකෘති ශාඛාවට `detail` ක්ෂේත්‍රයක් නොමැති අතර පෙරනිමියෙන් බල නොපායි.
 
-#### Describe output cap (`modalityBridgeVisionMaxChars`)
+#### ප්‍රතිදාන කැප් (`modalityBridgeVisionMaxChars`) විස්තර කරන්න
 
-| Key                            | Default | Range            |
-| ------------------------------ | ------- | ---------------- |
-| `modalityBridgeVisionMaxChars` | `0`     | `0` හෝ 100–50000 |
+| යතුර                           | පෙරනිමිය | පරාසය            |
+| ------------------------------ | -------- | ---------------- |
+| `modalityBridgeVisionMaxChars` | `0`      | `0` හෝ 100-50000 |
 
-`0` (පෙරනිමි අගය) යනු **සීමාවක් නොමැති බවයි** — `callVisionModel()` මඟින් ආපසු
-ලබා දෙන description එක වෙනස් නොකර pass through කරයි. එමඟින් පවතින හැසිරීම
-සුරැකේ. 100–50000 පරාසයේ ඕනෑම අගයක් description එක `…` suffix එකක් සමඟ truncate
-කර, එය `[Image N]: <description>` ලෙස නැවත ඇතුළත් කිරීමට පෙර යොදයි
-(`src/lib/guardrails/visionBridge.ts` හි `VisionBridgeGuardrail.preCall()`). Downstream
-model එකට සම්පූර්ණ transcription එක අවශ්ය වන detail-heavy OCR tasks සඳහා මෙය
-වැඩි කරන්න; බොහෝ දේ කියන vision models මත token භාවිතය සීමා කිරීමට මෙය අඩු
-කරන්න. Dashboard field එක Vision tab එකේ Advanced panel එකේ ඇත
-(`ModalityBridgeVisionTab.tsx` හි `modality-bridge-max-chars`). එය 1 සහ 99 අතර
-ඕනෑම අගයක් 100 floor එක දක්වා ඉහළට clamp කරන අතර, explicit `0` එක නොවෙනස්ව
-තබා ගනී — `0` යනු තමන්ගේම වලංගු Zod අගයකි
-(`z.union([z.literal(0), z.number().int().min(100).max(50000)])`), හුදෙක්
-"unset" පෙරනිමියක් නොවේ.
+`0` (පෙරනිමි) යන්නෙන් අදහස් වේ** තොප්පිය නැත** — `callVisionModel()` මඟින් ආපසු ලබා දෙන විස්තරය පවතින හැසිරීම් ආරක්ෂා කරමින් වෙනස් නොකළ හරහා යවනු ලැබේ. 100-50000 පරාසයේ ඕනෑම අගයක් `[Image N]: <description>` ලෙස නැවත බෙදීමට පෙර `…` උපසර්ගයක් සමඟ විස්තරය කප්පාදු කරයි ( `src/lib/guardrails/visionBridge.ts` හි`VisionBridgeGuardrail.preCall()` ). පහළ ආකෘතියට සම්පූර්ණ පිටපත් කිරීම අවශ්‍ය වන විට විස්තර-බර OCR කාර්යයන් සඳහා මෙය ඔසවන්න; chatty vision මාදිලිවල බන්ධිත සංකේත භාවිතයට එය අඩු කරන්න. උපකරණ පුවරු ක්ෂේත්‍රය විෂන් ටැබයේ උසස් පැනලය මත ජීවත් වන අතර (`modality-bridge-max-chars` හි `ModalityBridgeVisionTab.tsx`) සහ 1 සහ 99 අතර ඕනෑම අගයක් 100 මහල දක්වා තද කරන අතර පැහැදිලි `0` ස්පර්ශ නොකළ — `0` යනු එහිම වලංගු Zod අගයකි (`z.union([z.literal(0), z.number().int().min(100).max(50000)])`), එය නිකම්ම "නොසැකීම" නොවේ.
 
-#### Describe cache (`modalityBridge/bridgeCache.ts`)
+#### හැඹිලිය විස්තර කරන්න (`modalityBridge/bridgeCache.ts`)
 
-Describe outputs සඳහා process-wide ලෙස හවුල් වන in-memory LRU + TTL cache එකකි.
-Key එක = length-prefix framing සහිත
-`sha256(imageRef + composedPrompt + configuredBridgeModel)` (එමඟින් field-boundary
-collisions නොමැත). Model component එක වන්නේ ඇත්ත වශයෙන් පිළිතුරු දුන් model එක
-නොව, **configured** bridge model එකයි —
-`callVisionModel` අභ්යන්තරව fallback විය හැකි බැවින්, එක් එක් attempt එක අනුව
-key සෑදීමෙන් cache එක කොටස්වලට බෙදී යනු ඇත. අසාර්ථක describes කිසිවිටෙක cache
-කරන්නේ නැත. Settings:
+ප්‍රතිදානයන් විස්තර කිරීම සඳහා මතකයේ ඇති LRU + TTL හැඹිලිය, ක්‍රියාවලිය පුරා බෙදා ඇත. දිග-උපසර්ග රාමු සහිත යතුරු = `sha256(imageRef + composedPrompt + configuredBridgeModel)` (ක්ෂේත්‍ර-මායිම් ගැටීම් නොමැත). ආදර්ශ සංරචකය වේ** වින්යාසගත කර ඇත** පාලම් ආකෘතිය, ඇත්ත වශයෙන්ම — `callVisionModel` පිළිතුරු දුන් ආකෘතිය නොව අභ්‍යන්තරව ආපසු හැරවිය හැකි අතර, එක් උත්සාහයකට යතුරු කිරීම හැඹිලිය ඛණ්ඩනය කරනු ඇත. අසාර්ථක විස්තර කිසිවිටක හැඹිලිගත නොවේ. සැකසීම්:
 
-| Key                             | Default | Range   |
-| ------------------------------- | ------- | ------- |
-| `modalityBridgeCacheEnabled`    | `true`  | —       |
-| `modalityBridgeCacheTtlMinutes` | `60`    | 1–1440  |
-| `modalityBridgeCacheMaxEntries` | `200`   | 10–5000 |
+| යතුර                            | පෙරනිමිය | පරාසය   |
+| ------------------------------- | -------- | ------- |
+| `modalityBridgeCacheEnabled`    | `true`   | —       |
+| `modalityBridgeCacheTtlMinutes` | `60`     | 1–1440  |
+| `modalityBridgeCacheMaxEntries` | `200`    | 10–5000 |
 
-#### Remote image normalization (self-loop describe/base64 fetch)
+#### දුරස්ථ රූප සාමාන්‍යකරණය (ස්වයං-ලූප් describe/base64 ලබා ගැනීම)
 
-Bridge එක **remote** image එකක් තමන් විසින්ම fetch කරන විට — Anthropic describe
-self-call එක සහ claude-wire-format base64 conversion එක
-(`ensureBase64ImagesForClaudeWire`) යන දෙකම
-`visionBridgeHelpers.ts` හි `fetchRemoteImageAsDataUri()` හරහා — ලැබෙන data URI එක
-vision-model request එකට embed කිරීමට පෙර `normalizeDataUri()`
-(`open-sse/utils/imageNormalize.ts`) හරහා යවනු ලැබේ. විශාල images
-**2048px දිගු edge** දක්වා downscale කරනු ලැබේ (OpenAI/Anthropic දැනටමත්
-server-side යොදන resize cap එකට සමානයි). එමඟින් vision model එක දකින දේ
-වෙනස් නොකර upload bytes/latency අඩු කරයි. Resizing සඳහා dynamic import හරහා
-`sharp` load කරයි: එහි native binary එක load වීමට අසමත් වන platform එකකදී,
-`normalizeDataUri()` **කිසිවිටෙක throw නොකරයි** — එය මුල් bytes passthrough
-කරයි. එබැවින් describe/base64-conversion path එක සැමවිටම ක්රියා කරයි.
-Non-image bytes (decodable image එකක් ආපසු නොදුන් fetch එකක්) ද වෙනස් නොකර
-passthrough කරයි. මෙම normalization යෙදෙන්නේ bridge එක තමන්ගේ self-call එක
-සඳහා fetch කරන images සඳහා පමණි — opt-in-only mutation principle (Hard Rule #20)
-සමඟ අනුකූලව caller ගේ raw passthrough payload එකට එය කිසිවිටෙක යොදන්නේ නැත.
+පාලම ගෙන එන විට a** දුරස්ථ** රූපයම — Anthropic ස්වයං-ඇමතුම සහ claude-wire-format base64 පරිවර්තනය (`ensureBase64ImagesForClaudeWire`) විස්තර කරයි, `visionBridgeHelpers.ts` — හි `fetchRemoteImageAsDataUri()` හරහා යන දෙකම, ප්‍රතිඵලයක් ලෙස ලැබෙන දත්ත URI `normalizeDataUri()` (`open-sse/utils/imageNormalize.ts`) හරහා දර්ශනය-ආදර්ශ ඉල්ලීමට ඇතුළත් කිරීමට පෙර ලබා දෙයි. විශාල කළ පින්තූර a දක්වා පහත හෙලනු ලැබේ** 2048px දිගු දාරය** (ප්‍රතිප්‍රමාණ කැප් OpenAI/Anthropic ගැලපීම දැනටමත් සේවාදායක පැත්ත යොදයි), එය දර්ශන ආකෘතිය දකින දේ වෙනස් නොකර උඩුගත කිරීම් bytes/latency කපා දමයි. ප්‍රතිප්‍රමාණය කිරීම ගතික ආයාත හරහා පූරණය කරන ලද `sharp` භාවිතා කරයි: එහි ස්වදේශික ද්විමය පූරණය කිරීමට අසමත් වන වේදිකාවක් මත, `normalizeDataUri()`** කවදාවත් විසි කරන්නේ නැහැ** — එය මුල් බයිට් වල ගමන් මාර්ගයකට ආපසු වැටේ, එබැවින් describe/base64-conversion මාර්ගය සැමවිටම ක්‍රියා කරයි. රූප-නොවන බයිට් (විකේතනය කළ හැකි රූපයක් ආපසු නොදුන් ලබා ගැනීමක්) ද ස්පර්ශයකින් තොරව යවනු ලැබේ. මෙම සාමාන්‍යකරණය පාලම විසින් එහි ස්වයං-ඇමතුම — සඳහා ලබා ගන්නා රූප සඳහා විෂය පථය වන අතර එය කිසි විටෙක ඇමතුම්කරුගේ raw passthrough payload සඳහා යොදන්නේ නැත, තේරීමට පමණක් විකෘති මූලධර්මයට (Hard Rule #20) අනුකූල වේ.
 
-#### Settings schema + migration
+#### සැකසුම් ක්‍රම + සංක්‍රමණය
 
-නව `modalityBridge*` යතුරු `updateSettingsSchema` තුළ Zod මගින් වලංගු කෙරේ
-(`src/shared/validation/settingsSchemas.ts`): `modalityBridgeVisionEnabled`,
-`modalityBridgeVisionMode`, `modalityBridgeVisionModel`,
-`modalityBridgeVisionTaskAware`, `modalityBridgeVisionPrompt`,
-`modalityBridgeVisionTimeout`, `modalityBridgeVisionMaxImages`,
-`modalityBridgeVisionMaxChars`, `modalityBridgeCache*` ත්රිත්වය සහ
-Audio Bridge විසින් භාවිත කරන `modalityBridgeAudio*` සමූහය. Migration
-`141_modality_bridge_settings.sql` දැනට පවතින පැරණි
-`visionBridge*` අගයන් ගැළපෙන නව යතුරු වෙත පිටපත් කරයි (idempotent වන අතර,
-ක්රියාකරු විසින් සකසා ඇති `modalityBridge*` අගයක් කිසිවිටෙක උඩින් ලියන්නේ
-නැත); පැරණි යතුරු එක් release cycle එකක් සඳහා කියවීමේ fallback එකක් ලෙස
-තවදුරටත් පිළිගැනේ.
+නව `modalityBridge*` යතුරු `updateSettingsSchema` (`src/shared/validation/settingsSchemas.ts`) හි Zod-වලංගු කර ඇත: `modalityBridgeVisionEnabled`, `modalityBridgeVisionMode`, `modalityBridgeVisionModel`, `modalityBridgeVisionTaskAware`, `modalityBridgeVisionPrompt`, `modalityBridgeVisionTimeout`, `modalityBridgeVisionMaxImages`, `modalityBridgeVisionMaxChars`, `modalityBridgeCache*` trio, සහ Audio Bridge විසින් භාවිතා කරන `modalityBridgeAudio*` සමූහය. සංක්‍රමණය `141_modality_bridge_settings.sql` පවතින ලෙගසි `visionBridge*` අගයන් ගැළපෙන නව යතුරු වෙත පිටපත් කරයි (idempotent, කිසි විටෙකත් ක්‍රියාකරු-සකසන `modalityBridge*` අගයක් උඩින් ලියන්නේ නැත); ලෙගසි යතුරු එක් නිකුතු චක්‍රයක් සඳහා කියවීමේ පසුබෑමක් ලෙස පිළිගැනේ.
 
-#### පාරදෘශ්යතා ශීර්ෂකය + සංඛ්යාලේඛන
+#### විනිවිද ශීර්ෂය + සංඛ්‍යාලේඛන
 
-Describe-transformed ප්රතිචාරවල
-`x-omniroute-modality-bridge: image->text;model=<visionModel>;parts=<n>`
-අඩංගු වේ (`modalityBridge/bridgeStats.ts` හි `buildModalityBridgeHeader()`
-මගින් සාදන ලද අතර, `src/sse/handlers/chatHelpers.ts` හි
-`withModalityBridgeHeader()` මගින් එක් කරයි). නැවත මාර්ගගත කළ ඉල්ලීම්වලට
-**ශීර්ෂකයක් නොමැත** — payload එක වෙනස් කර නොමැති අතර, model මාරුව
-ප්රතිචාර body හි `model` ක්ෂේත්රයෙන් දැනටමත් පෙනේ.
+විස්තර කරන්න-පරිවර්තනය කරන ලද ප්‍රතිචාර `x-omniroute-modality-bridge: image->text;model=<visionModel>;parts=<n>` දරයි ( `modalityBridge/bridgeStats.ts` හි `buildModalityBridgeHeader()` මගින් ගොඩනගා ඇත, `src/sse/handlers/chatHelpers.ts` හි `withModalityBridgeHeader()` මගින් මුද්‍රා කර ඇත). ආපසු හරවා යැවූ ඉල්ලීම් ලැබේ** නැත** ශීර්ෂකය — ගෙවීම් භාරය ස්පර්ශ නොකළ අතර ආදර්ශ swap දැනටමත් ප්‍රතිචාර සිරුරේ `model` ක්ෂේත්‍රයේ දෘශ්‍යමාන වේ.
 
-`GET /api/modality-bridge/stats` (management auth, `GET /api/settings` හා
-එකම tier) මඟින් `vision`, `audio` සහ `video` සඳහා මතකයේ පවතින එක් එක්
-modality counters
-`{ attempts, successes, bridged, cacheHits, failures, totalLatencyMs,
-latencySamples, averageLatencyMs, lastUsedAt }` ලබා දෙයි.
-`averageLatencyMs` හි denominator ලෙස සියලු attempts නොව
-`latencySamples` භාවිත වේ; timing නොමැති operation එකක් ශුන්ය
-මිලි-තත්පර sample එකක් කෘත්රිමව සාදන්නේ නැත. සාර්ථක conversions සඳහා
-පසුගාමී-අනුකූල alias එක ලෙස `bridged` තවදුරටත් පවතී; අසාර්ථක attempts
-එය වැඩි නොකරයි. Process එක restart වූ විට counters reset වේ
-(නිර්මාණාත්මකව telemetry මිස accounting නොවේ).
+`GET /api/modality-bridge/stats` (කළමනාකරණ auth, `GET /api/settings` ට සමාන ස්ථරය ) `vision`, `audio`, සහ `video` සඳහා මතකයේ එක් මාදිලියේ කවුන්ටර `{ attempts, successes, bridged, cacheHits, failures, totalLatencyMs, latencySamples, averageLatencyMs, lastUsedAt }` ආපසු ලබා දෙයි. `averageLatencyMs` එහි හරය ලෙස `latencySamples` භාවිතා කරයි, සියලු උත්සාහයන් නොවේ; කාල නිර්ණය නොමැතිව මෙහෙයුමක් ශුන්‍ය මිලි තත්පර නියැදියක් නිපදවන්නේ නැත. `bridged` සාර්ථක පරිවර්තන සඳහා පසුගාමී-අනුකූල අන්වර්ථය ලෙස පවතී; අසාර්ථක උත්සාහයන් එය වැඩි නොකරයි. සැලසුම් මඟින් ක්‍රියාවලිය නැවත ආරම්භ කිරීමේදී කවුන්ටර යළි සකසයි (ටෙලිමෙට්‍රි, ගිණුම්කරණය නොවේ).
 
-#### Dashboard වින්යාසය
+#### උපකරණ පුවරු වින්‍යාසය
 
-විශේෂිත dashboard පිටුව
-`/dashboard/settings/modality-bridge` වේ. URL-addressable වන `Vision`,
-`Audio` සහ `Video` tabs, `tab` අගය මාරු කරන විට query parameters
-සුරකිති. Vision tab මඟින් enablement, mode, model තේරීම
-(automatic default එකද ඇතුළුව), task-aware prompting, උසස්
-timeout/image/description-length/cache limits, runtime
-counters සහ ආරක්ෂිත sample request එකක් ඉදිරිපත් කරයි. Audio tab ද
-ක්රියාත්මක වන අතර: enablement, Auto සමඟ STT-only model picker එකක්,
-timeout/max-clip limits, audio counters සහ `input_audio` sample test එකක්
-ඉදිරිපත් කරයි. Video tab ක්රියාකාරී වේ: එය FFmpeg/ffprobe runtime
-තත්ත්වය වාර්තා කරයි — පැහැදිලි UI states හතරෙන් එකක්
-(`unknown`, probe එක සිදුවෙමින් පවතින විට හෝ සම්පූර්ණ කළ නොහැකි වූ විට,
-probe එක client-side ලෙස මඟහරින non-loopback dashboard host එකක
-`restricted`, probe කර නොමැති බව තහවුරු කළ පසු `unavailable`, හෝ
-FFmpeg/ffprobe versions සමඟ `available`) — enable/model/frame/video/timeout
-limits සුරකියි, model picker එක vision-capable models වෙත සීමා කරයි,
-සහ video counters ඉදිරිපත් කරයි.
+කැපවූ උපකරණ පුවරු පිටුව `/dashboard/settings/modality-bridge` වේ. එහි URL ලිපිනයට යොමු කළ හැකි `Vision`, `Audio`, සහ `Video` ටැබ් `tab` අගය මාරු කරන අතරතුර විමසුම් පරාමිති ආරක්ෂා කරයි. Vision පටිත්ත මඟින් සක්‍රීය කිරීම, මාදිලිය, ආකෘති තේරීම (ස්වයංක්‍රීය පෙරනිමිය ඇතුළුව), කාර්ය-දැනුවත් ප්‍රේරණය, උසස් timeout/image/description-length/cache සීමාවන්, ධාවන කාල කවුන්ටර සහ ආරක්‍ෂිත නියැදි ඉල්ලීමක් නිරාවරණය කරයි. ශ්‍රව්‍ය පටිත්ත ද සජීවී ය: එය සක්‍රීය කිරීම, ස්වයංක්‍රීය, timeout/max-clip සීමාවන්, ශ්‍රව්‍ය කවුන්ටර, සහ `input_audio` නියැදි පරීක්ෂණයක් සහිත STT-පමණක් මාදිලි පිකර් නිරාවරණය කරයි. වීඩියෝ පටිත්ත ක්‍රියාකාරී වේ: එය FFmpeg/ffprobe ධාවන කාල තත්ත්‍වය — පැහැදිලි UI තත්ත්‍ව හතරෙන් එකක් වාර්තා කරයි (`unknown` පරීක්‍ෂණය පියාසර කරන විට හෝ සම්පූර්ණ කිරීමට නොහැකි වූ විට, ලූප්බැක් නොවන උපකරණ පුවරුවේ ධාරකයක `restricted`, ගවේෂණ සේවාදායක පැත්ත මඟ හැර ඇත, `unavailable` එක් වරක් පරීක්‍ෂා කර තහවුරු කර ඇත, හෝ `available` per FFmpeg/ffprobe අනුවාදයන් — enable/model/frame/video/timeout කරයි, දෘෂ්‍ය හැකියාව ඇති මාදිලි වෙත මාදිලි පිකර් පෙරහන් කරයි, සහ වීඩියෝ කවුන්ටර නිරාවරණය කරයි.
 
-AI settings යටතේ තිබූ පැරණි Vision Bridge card එක නව පිටුවට
-compatibility link එකකි; එය තවදුරටත් form එකේ දෙවන පිටපතක් පාලනය නොකරයි.
-Media Providers දැනට පවතින Speech-to-Text playground එක ඉවත් නොකර,
-Image-to-Text සහ Speech-to-Text workflows අදාළ Modality Bridge tabs වෙත
-සම්බන්ධ කරයි.
+AI සැකසීම් යටතේ ඇති හිටපු Vision Bridge කාඩ්පත නව පිටුවට ගැළපෙන සබැඳියකි; එය තවදුරටත් පෝරමයේ දෙවන පිටපතක් හිමි නොවේ. මාධ්‍ය සපයන්නන් දැනට පවතින කථනයෙන් පෙළ ක්‍රීඩා පිටිය ඉවත් නොකර අනුරූප Modality Bridge ටැබ් වෙත Image-to-Text සහ Speech-to-Text කාර්ය ප්‍රවාහ සම්බන්ධ කරයි.
 
-**Self-loop admission bypass:** describe call එක OmniRoute හිම
-`/v1` self-loop එක හරහා routes වන විට (non-standard provider model),
-sub-request එක `x-omniroute-admission-bypass: internal` යවයි සහ
-resolved self-loop credential මගින් authenticate කරයි — local mode හි
-local `sk_omniroute` sentinel එක හෝ operator-configured
-`OMNIROUTE_API_KEY` / `ROUTER_API_KEY` env key (#1350) භාවිත කරයි. එබැවින්
-`REQUIRE_API_KEY=true` deployments හටද describe call එක ක්රියාත්මක කළ හැක.
-එම bypass එක පිළිගනු ලබන්නේ ඒ නිශ්චිත credentials සඳහා පමණක් බැවින්,
-external clients හට admission මඟහැරීමට මෙම header එක භාවිත කළ නොහැක.
+**ස්වයං-ලූප් ඇතුළත් වීමේ මඟ හැරීම:** OmniRoute ගේම `/v1` self-loop (සම්මත නොවන සැපයුම්කරු ආකෘතිය) හරහා ඇමතුම් මාර්ග විස්තර කරන විට, උප-ඉල්ලීම `x-omniroute-admission-bypass: internal` යවන අතර නිරාකරණය කරන ලද ස්වයං-ලූප් අක්තපත්‍ර — සමඟ සත්‍යාපනය කරනු ලැබේ දේශීය මාදිලියේ දේශීය `sk_omniroute` සෙන්ටිනල්,#1350 ක්‍රියාකරු-වින්‍යාස කර ඇති `OMNIROUTE_API_KEY` / `ROUTER_API_KEY`. `REQUIRE_API_KEY=true` තවමත් විස්තර ඇමතුම ධාවනය කළ හැක. බයිපාස් ගෞරව කරනු ලබන්නේ එම නිවැරදි අක්තපත්‍ර සඳහා පමණි, එබැවින් බාහිර සේවාදායකයින්ට ඇතුළත් වීම මඟ හැරීමට ශීර්ෂකය භාවිතා කළ නොහැක.
 
-Legacy defaults `src/shared/constants/visionBridgeDefaults.ts` හි
-පවතින අතර, නව mode/task-aware/cache defaults සහ settings resolver
-`src/shared/constants/modalityBridgeDefaults.ts` හි පවතී. Guardrail මඟින්
-`deps` constructor option එකක් ඉදිරිපත් කරන බැවින්, tests සඳහා ව්යාජ
-`getSettings` සහ `callVisionModel` implementations inject කළ හැක.
+Legacy defaults live in `src/shared/constants/visionBridgeDefaults.ts`; නව mode/task-aware/cache පෙරනිමි සහ සැකසුම් නිරාකරණය `src/shared/constants/modalityBridgeDefaults.ts` හි සජීවී වේ. Guardrail මගින් `deps` කන්ස්ට්‍රක්ටර් විකල්පයක් හෙළිදරව් කරයි, එබැවින් පරීක්ෂණ මගින් ව්‍යාජ `getSettings` සහ `callVisionModel` ක්‍රියාත්මක කිරීම් එන්නත් කළ හැක.
 
-### Audio Bridge (`audioBridge.ts`) — Modality Bridge PR-3
+### ශ්‍රව්‍ය පාලම (`audioBridge.ts`) — මොඩලිටි පාලම PR-3
 
-Audio අඩංගු chat requests, audio input පිළිගන්නා බවට දැන නොමැති target එකක්
-වෙත ළඟා වීමට පෙර intercept කරයි. එය chat request එක කිසිවිටෙක reroute
-නොකරයි: audio parts පවතින OpenAI-compatible multipart endpoint එක හරහා
-transcribe කර, තෝරාගත් chat model එක text transcripts සමඟ දිගටම
-ක්රියා කරයි.
+ශ්‍රව්‍ය ආදානය පිළිගැනීමට නොදන්නා ඉලක්කයකට ළඟා වීමට පෙර ශ්‍රව්‍ය දරණ කතාබස් ඉල්ලීම්වලට බාධා කරයි. එය කිසිවිටෙක කතාබස් ඉල්ලීම නැවත හරවා නොයයි: ශ්‍රව්‍ය කොටස් දැනට පවතින OpenAI-අනුකූල බහුපාර්ශ්වික අන්ත ලක්ෂ්‍යය හරහා පිටපත් කරනු ලබන අතර තෝරාගත් කතාබස් ආකෘතිය පෙළ පිටපත් සමඟ දිගටම පවතී.
 
 ප්රවාහය:
 
-1. `supportsAudio` සඳහා `getResolvedModelCapabilities()` හරහා අගය නිර්ණය කරන්න. පැහැදිලි provider-registry metadata පළමුව බලපාන අතර, ඉන්පසු static model metadata සහ අවසානයේ synchronized `modalities_input` බලපායි. ප්රකාශිත input ලැයිස්තුවක `audio` නොමැති නම් අගය `false` වේ; හැකියාව පිළිබඳ කිසිදු සාක්ෂියක් නොමැති නම් `null` වේ. `false` සහ `null` දෙකම conservative bridge එක සක්රීය කරන අතර, `true` එය මඟහරියි.
-2. `modalityBridgeAudio*` සැකසුම් සඳහා අගයන් නිර්ණය කර, shared `detectMediaParts()` detector හරහා සෑම පණිවිඩයකින්ම splice කළ හැකි ඉහළම මට්ටමේ audio කොටස් උපුටා ගන්න. සහාය දක්වන wire shapes වන්නේ OpenAI `input_audio`, `audio_url`, සහ `source.media_type: "audio/*"` ය. routing සඳහා nested audio හඳුනාගත්තද, splice path මඟින් එය ඉවත් නොකෙරේ. කාර්යය `modalityBridgeAudioMaxClips` මඟින් සීමා කෙරේ; පසුව ඇති කොටස් නොවෙනස්ව තබයි.
-3. වින්යාස කළ `provider/model` එකකට ප්රමුඛත්වය දෙන්න, නැතහොත් `selectAudioBridgeModel()` හට `AUDIO_TRANSCRIPTION_PROVIDERS` ස්ථාවර catalog අනුපිළිවෙළින් පරීක්ෂා කර, භාවිත කළ හැකි සක්රීය provider credential එකක් සහිත පළමු model එක තෝරා ගැනීමට ඉඩ දෙන්න.
-4. `callAudioTranscription()` මඟින් base64/data-URI audio එක multipart `file` එකක් බවට පරිවර්තනය කරයි, නැතහොත් DNS pinning සහ 25 MB සීමාවක් සහිත public-only outbound guard හරහා දුරස්ථ `audio_url` එක බාගත කරයි. ඉන්පසු එය file එක සහ තෝරාගත් model එක local `/v1/audio/transcriptions` self-loop වෙත POST කරයි; authentication සඳහා `resolveSelfLoopBearer()` භාවිතා කරයි. පවතින transcription route එක සාමාන්ය credential lookup, cooldown/rate-limit handling සහ provider dispatch සිදු කරයි.
-5. සාර්ථක calls මඟින් ඒවායේ කොටස් `[Audio N]: <transcript>` ලෙස ප්රතිස්ථාපනය කරයි. Calls `Promise.allSettled` සමඟ ක්රියාත්මක වේ: තනි failure එකක් එම මුල් audio කොටසම තබා ගනී (#4012 contract). සියලු calls අසාර්ථක වී target එකට `supportsAudio === false` බව ඔප්පු වී ඇත්නම්, කොටස් `[Audio N]: (unavailable — no STT provider connected)` බවට පත් වේ (#8430 contract). නොදන්නා target එකක් (`null`) සඳහා සියලු calls අසාර්ථක වුවද ප්රතිඵලය නොවෙනස්ව පවතී. භාවිත කළ හැකි STT credential එකක් නොමැති බවට ඔප්පු වූ text-only target එකකට network call එකක් සිදු නොකර එම explicit stub එකම ලැබේ.
+1. `getResolvedModelCapabilities()` හරහා `supportsAudio` විසඳන්න. පැහැදිලි සැපයුම්කරු-රෙජිස්ට්‍රි පාර-දත්ත ජයග්‍රහණය කරයි, පසුව ස්ථිතික ආකෘති පාරදත්ත, පසුව සමමුහුර්ත කළ `modalities_input`. `audio` නොමැතිව ප්‍රකාශිත ආදාන ලැයිස්තුවක් `false` වේ; කිසිදු හැකියාවක් සාක්ෂි ඉතිරිව නැත `null`. `false` සහ `null` යන දෙකම ගතානුගතික පාලම සක්‍රීය කරන අතර `true` එය මග හරියි.
+2. `modalityBridgeAudio*` සැකසුම් විසඳා බෙදාගත් `detectMediaParts()` අනාවරකය හරහා සෑම පණිවිඩයකින්ම බෙදිය හැකි ඉහළ මට්ටමේ ශ්‍රව්‍ය කොටස් උපුටා ගන්න. සහාය දක්වන වයර් හැඩතල වන්නේ OpenAI `input_audio`, `audio_url` සහ `source.media_type: "audio/*"`. මාර්ගගත කිරීම සඳහා නෙස්ටඩ් ශ්‍රව්‍ය අනාවරණය කර ඇති නමුත් ස්ප්ලයිස් මාර්ගයෙන් ඉවත් නොකෙරේ. කාර්යය `modalityBridgeAudioMaxClips` මගින් සීමා කර ඇත; පසු කොටස් නොනැසී පවතී.
+3. වින්‍යාස කළ `provider/model` ගරු කරන්න, නැතහොත් `selectAudioBridgeModel()` හට `AUDIO_TRANSCRIPTION_PROVIDERS` ස්ථායී නාමාවලි අනුපිළිවෙලින් ඇවිදීමට ඉඩ දී භාවිත කළ හැකි ක්‍රියාකාරී සැපයුම්කරු අක්තපත්‍රයක් සහිත පළමු ආකෘතිය තෝරන්න.
+4. `callAudioTranscription()` base64/data-URI ශ්‍රව්‍ය බහුපාර්ශ්වික `file` බවට පරිවර්තනය කරයි, නැතහොත් DNS pinning සහ 25 MB බන්ධනය සහිත මහජන-පමණක් පිටතට යන ආරක්ෂකය හරහා දුරස්ථ `audio_url` බාගත කරයි. එය පසුව `resolveSelfLoopBearer()` සමඟ සත්‍යාපනය කරන ලද ගොනුව සහ තෝරාගත් ආකෘතිය දේශීය `/v1/audio/transcriptions` ස්වයං-ලූපයට POSTs. පවතින පිටපත් කිරීමේ මාර්ගය සාමාන්‍ය අක්තපත්‍ර බැලීම, cooldown/rate-limit හැසිරවීම සහ සැපයුම්කරු යැවීම සිදු කරයි.
+5. සාර්ථක ඇමතුම් ඔවුන්ගේ කොටස් `[Audio N]: <transcript>` සමඟ ප්‍රතිස්ථාපනය කරයි. ඇමතුම් `Promise.allSettled` සමඟ ක්‍රියාත්මක වේ : තනි පුද්ගල අසාර්ථක වීමක් එම මුල් ශ්‍රව්‍ය කොටස (#4012 ගිවිසුම) ආරක්ෂා කරයි. සෑම ඇමතුමක්ම අසාර්ථක වුවහොත් සහ ඉලක්කය `supportsAudio === false` ඔප්පු වුවහොත්, කොටස් `[Audio N]: (unavailable — no STT provider connected)` (#8430 ගිවිසුම) බවට පත්වේ. නොදන්නා ඉලක්කයක් සඳහා (`null`), සියලු අසාර්ථක ප්‍රතිඵලයක් නොනැසී පවතී. භාවිත කළ හැකි STT අක්තපත්‍ර නොමැති ඔප්පු කළ පෙළ-පමණක් ඉලක්කයක් ජාල ඇමතුමක් නිකුත් නොකර එකම පැහැදිලි අංකුර ලබා ගනී.
 
-සාර්ථක transcripts process-wide Modality Bridge LRU/TTL cache එක භාවිතා කරයි. key එක audio reference එක, ස්ථාවර `audio-transcription` operation label එක සහ තෝරාගත් STT model එක ඒකාබද්ධ කරයි; failures කිසිවිටෙක cache නොකෙරේ. Audio attempts මඟින් shared `bridged`, `cacheHits`, `failures` සහ `lastUsedAt` counters යාවත්කාලීන කරයි. පරිවර්තනය කළ responses තුළ `x-omniroute-modality-bridge: audio->text;model=<sttModel>;parts=<n>` අඩංගු වේ; නොවෙනස් requests සඳහා Audio Bridge segment එකක් එක් නොකෙරේ.
+සාර්ථක පිටපත් ක්‍රියාවලි-පුළුල් Modality Bridge LRU/TTL හැඹිලිය භාවිතා කරයි. යතුර ශ්‍රව්‍ය යොමු, ස්ථාවර `audio-transcription` මෙහෙයුම් ලේබලය සහ තෝරාගත් STT ආකෘතිය ඒකාබද්ධ කරයි; අසාර්ථකත්වය කිසි විටෙකත් හැඹිලිගත නොවේ. ශ්‍රව්‍ය උත්සාහයන් බෙදාගත් `bridged`, `cacheHits`, `failures`, සහ `lastUsedAt` කවුන්ටර යාවත්කාලීන කරයි. පරිවර්තනය කරන ලද ප්‍රතිචාර `x-omniroute-modality-bridge: audio->text;model=<sttModel>;parts=<n>` දරයි; ස්පර්ශ නොකළ ඉල්ලීම් සඳහා ශ්‍රව්‍ය පාලම් අංශයක් නොලැබේ.
 
-Runtime settings DB-backed වන අතර Zod මඟින් validate කරනු ලැබේ:
+ධාවන කාල සැකසීම් DB-ආපසු සහ Zod වලංගු වේ:
 
-| Key                           | Default | Range          |
-| ----------------------------- | ------- | -------------- |
-| `modalityBridgeAudioEnabled`  | `true`  | —              |
-| `modalityBridgeAudioModel`    | `""`    | Auto හෝ STT ID |
-| `modalityBridgeAudioTimeout`  | `60000` | 1000–300000    |
-| `modalityBridgeAudioMaxClips` | `3`     | 1–10           |
+| යතුර                          | පෙරනිමිය | පරාසය                 |
+| ----------------------------- | -------- | --------------------- |
+| `modalityBridgeAudioEnabled`  | `true`   | —                     |
+| `modalityBridgeAudioModel`    | `""`     | ස්වයංක්‍රීය හෝ STT ID |
+| `modalityBridgeAudioTimeout`  | `60000`  | 1000–300000           |
+| `modalityBridgeAudioMaxClips` | `3`      | 1–10                  |
 
-Shared cache එක `modalityBridgeCacheEnabled`, `modalityBridgeCacheTtlMinutes` සහ `modalityBridgeCacheMaxEntries` මඟින් පාලනය වේ.
+බෙදාගත් හැඹිලිය `modalityBridgeCacheEnabled`, `modalityBridgeCacheTtlMinutes`, සහ `modalityBridgeCacheMaxEntries` මගින් පාලනය වේ.
 
-### Video Bridge (`videoBridge.ts`, `videoBridgePipeline.ts`)
+### වීඩියෝ පාලම (`videoBridge.ts`, `videoBridgePipeline.ts`)
 
-Native video support එක පිළිබඳ දැනුමක් නොමැති target එකක් ඇමතීමට පෙර, Chat Completions `messages` සහ Responses API `input` තුළ ඇති ඉහළම මට්ටමේ video කොටස් intercept කරයි. සහාය දක්වන shapes වන්නේ `input_video`, `video_url`, `video_source`, HTTPS URLs සහ `data:video/*;base64,...` data URIs ය. සාමාන්ය text තුළ ඇති filenames video ලෙස සලකනු නොලැබේ.
+දන්නා දේශීය වීඩියෝ සහාය නොමැතිව ඉලක්කයක් හැඳින්වීමට පෙර කතාබස් සම්පූර්ණ කිරීම් `messages` සහ ප්‍රතිචාර API `input` හි ඉහළ මට්ටමේ වීඩියෝ කොටස් බාධා කරයි. සහාය දක්වන හැඩතල වන්නේ `input_video`, `video_url`, `video_source`, HTTPS URLs, සහ `data:video/*;base64,...` දත්ත URIs. පෙළෙහි ඇති සරල ගොනු නාම වීඩියෝ ලෙස සලකන්නේ නැත.
 
-`VideoBridgeGuardrail.preCall` (`videoBridge.ts`) request traversal, capability/policy check, එක් request එකකට අදාළ aggregation සහ response payload හිමිකර ගනී. එක් video එකකට අදාළ acquisition, whole-result cache, frame sequence එක විස්තර කිරීම (caller විසින් ප්රකාශ කළ audio transcript එකක් තිබේ නම් එයද ඒකාබද්ධ කරමින්), සහ එක් attempt එකකට අදාළ metrics/abort/cleanup යන කාර්යයන් `videoBridgePipeline.ts` හි ඇති `processVideoPart` පිටුපස සඟවා ඇති අතර, `preCall` හි loop එක තුළ සෑම video කොටසකටම එක් වරක් එය කැඳවයි. එම module එක පැහැදිලි port සීමාද නිර්වචනය කරයි: `VideoMediaBrokerPort` (bytes ලබාගැනීම සහ sampled frames උපුටා ගැනීම), `VideoAudioTranscriptionPort` (caller විසින් ප්රකාශ කළ audio transcript එක sampled captions සමඟ ඒකාබද්ධ කිරීම) සහ `VideoDrilldownPort` (frame drill-down persistence boundary එක; එය තවමත් `processVideoPart` වෙත සම්බන්ධ කර නොමැති අතර, අද drill-down entries ලියන්නේ වෙනම `/api/modality-bridge/video/drilldown` route එක පමණි).
+`VideoBridgeGuardrail.preCall` (`videoBridge.ts`) සතුව ඉල්ලීම් ගමන් කිරීම, capability/policy චෙක්පත, එක් ඉල්ලීමකට එකතු කිරීම සහ ප්‍රතිචාර ගෙවීමේ භාරය හිමි වේ. එක්-වීඩියෝ වැඩ — අත්පත් කර ගැනීම, සම්පූර්ණ ප්‍රතිඵල හැඹිලිය, රාමු අනුපිළිවෙලක් විස්තර කරයි (ඕනෑම ඇමතුම්කරු විසින් ප්‍රකාශ කරන ලද ශ්‍රව්‍ය පිටපතක් ඒකාබද්ධ කරයි), සහ එක් උත්සාහයක metrics/abort/cleanup — `videoBridgePipeline.ts` හි `processVideoPart` පිටුපස සැඟවී ඇත, `preCall` ගේ ලූපය තුළ එක් වීඩියෝ කොටසකට වරක් හැඳින්වේ. එම මොඩියුලය පැහැදිලි තොට මායිම් `VideoMediaBrokerPort` (බයිට් ලබා ගැනීම සහ සාම්පල රාමු උපුටා ගැනීම), `VideoAudioTranscriptionPort` (නියැදි සිරස්තල සමඟ ඇමතුම්කරු විසින් ප්‍රකාශ කරන ලද ශ්‍රව්‍ය පිටපතක් ඒකාබද්ධ කිරීම) සහ `VideoDrilldownPort` (පරම්පරාගත අමු-වෙළඳසැලේ හැඩය) ද නිර්වචනය කරයි. නිෂ්පාදන STT සහ රාමු රඳවා ගැනීම `createVideoSttAdapter` සහ `createVideoDrilldownAdapter` හරහා විස්තර කරන වරාය වටා සම්පාදනය කර ඇත; දෙවැන්න හවුල් පාරාන්ධ-හැන්ඩ්ල් ජීවන චක්‍රය භාවිතා කරයි.
 
-Public `/v1` request path එක කිසිවිටෙක subprocess එකක් import හෝ invoke නොකරයි. Remote videos 50 MiB සීමාවක් යටතේ බාගත කෙරේ; inline base64 videos සඳහා decoded එක් video එකකට conservative 36 MiB සීමාවක් යොදා ගනී, එවිට model/messages/framing envelope එක 50 MiB public JSON request admission limit එක තුළ පවතී. Inline length සහ decoded-size estimates allocation කිරීමට පෙර පරීක්ෂා කෙරේ. ආරම්භක remote URL එකටත් සෑම redirect එකකටමත් HTTPS අවශ්ය වන අතර, DNS pinning සහිත පවතින public-only outbound guard එක භාවිතා කරයි. ඉන්පසු bytes නිශ්චිත අභ්යන්තර `POST /api/modality-bridge/video/extract` broker boundary එක හරහා යවනු ලැබේ. එම route එක `LOCAL_ONLY` සහ `SPAWN_CAPABLE` දෙකම වන අතර, එක් process එකකට සීමා වූ authenticated, trusted-loopback request එකක් පමණක් පිළිගනී; URL එකක්, filesystem path එකක්, executable එකක් හෝ argument list එකක් කිසිවිටෙක පිළිගන්නේ නැත. API body-size pipeline එක සහ handler හි incremental body reader එක ස්වාධීනව 50 MiB broker input cap එක ක්රියාත්මක කරයි. එහි bounded queue එක වරකට එක් extraction එකක් සිදු කරයි, pending jobs හතරකට ඉඩ දෙයි, සහ pending input 100 MiB දක්වා සීමා කරයි.
+පොදු `/v1` ඉල්ලීම් මාර්ගය කිසිවිටෙක උපක්‍රියාවලියක් ආයාත නොකරයි හෝ ආයාචනය නොකරයි. දුරස්ථ වීඩියෝ 50 MiB සීමාවක් යටතේ බාගත කර ඇත; inline base64 වීඩියෝ වල ගතානුගතික 36 MiB විකේතනය කරන ලද එක් වීඩියෝ ආවරණයක් ඇති බැවින් model/messages/framing ලියුම් කවරය 50 MiB හි පොදු JSON ඉල්ලීම් ඇතුළත් වීමේ සීමාව තුළ පැවතිය හැක. වෙන් කිරීමට පෙර පේළිගත දිග සහ විකේතනය කළ ප්‍රමාණයේ ඇස්තමේන්තු පරීක්ෂා කරනු ලැබේ. ආරම්භක දුරස්ථ URL සහ සෑම යළි-යොමුවීමකදීම HTTPS අවශ්‍ය වේ, DNS පින් කිරීම සමඟ පවතින පොදු-පමණක් පිටතට යන ආරක්ෂකය භාවිතා කරයි. බයිට පසුව නියම අභ්‍යන්තර `POST /api/modality-bridge/video/extract` තැරැව්කාර සීමාව ඉක්මවා යයි. එම මාර්ගය `LOCAL_ONLY` සහ `SPAWN_CAPABLE` යන දෙකම වේ, එක් ක්‍රියාවලියකට සත්‍යාපනය කරන ලද, විශ්වාසදායක-ලූප්බැක් ඉල්ලීමක් පමණක් පිළිගන්නා අතර, කිසිවිටෙක URL, ගොනු පද්ධති මාර්ගයක්, ක්‍රියාත්මක කළ හැකි, හෝ තර්ක ලැයිස්තුවක් පිළිගන්නේ නැත. API ශරීර ප්‍රමාණයේ නල මාර්ගය සහ හසුරුවන්නාගේ වර්ධක ශරීර කියවනය ස්වාධීනව 50 MiB තැරැව්කාර ආදාන ආවරණයක් බලාත්මක කරයි. එහි සීමා වූ පෝලිම වරකට එක් නිස්සාරණයක් ධාවනය කරයි, පොරොත්තු රැකියා හතරකට ඉඩ සලසයි, සහ 100 MiB හි පොරොත්තු ආදානය සීමා කරයි.
 
-බ්රෝකර් එක තුළ, `ffprobe` පුද්ගලික දේශීය ගොනුවක් කියවයි; ස්ථාවර ආකෘති අවසර ලැයිස්තුවෙන් playlist සහ manifest ආකෘති බැහැර කරයි. අවසරලත් MOV-පවුලේ container සඳහා, බාහිර MOV දත්ත යොමු පෙරනිමියෙන් අක්රීයව පවතින අතර, ස්ථාවර විධානය ඒවාට අවසර නොදෙයි. `ffprobe` සහ `ffmpeg` දෙකම `file`-පමණක් protocol whitelist එක, එක් thread එකක්, ස්ථාවර argument array, shell නොමැති ක්රියාත්මක කිරීම, සහ `PATH` වෙතින් විසඳන executables භාවිත කරයි. Attached-picture cover streams වාදනය කළ හැකි candidates නොවේ. වාදනය කළ හැකි සියලු streams සීමාවන් සපුරාලිය යුතු අතර, deterministic අඩුම-index fallback එකට පෙර පැහැදිලි default stream එකට ප්රමුඛත්වය දෙනු ලැබේ. වීඩියෝ තත්පර 600කට, එක් මානයකට pixels 8,192කට, සහ මූලාශ්ර pixels 33,554,432කට සීමා වේ. FFmpeg මධ්ය ලක්ෂ්ය JPEG frames 1–16ක් sample කරයි, කුඩා input විශාල නොකර දිගු දාරය උපරිම pixels 1,024කට අඩු කරයි, සහ කිසිවිටෙක URL එකක් ලබා නොගනී. Sampling පෙරනිමියෙන් `uniform` වේ. විකල්ප `scene_aware` සහ පරීක්ෂණාත්මක `segment_aware` policies මඟින් දැනටමත් වලංගු කර ඇති දේශීය stream එක මත අමතර ස්ථාවර FFmpeg pass එකක් සිදු කර, සීමා කළ `showinfo` scene timestamps තෝරා ගනී; detector අසමත් වීම, timeout, විකෘති output, හෝ හිස් candidate set එකකදී deterministic ලෙස එම `uniform` මධ්ය ලක්ෂ්ය වෙත fallback වේ. Segment-aware mode මඟින් වලංගු කළ scene intervals අනුව midpoint samples සමානුපාතිකව වෙන් කරයි; segment-aware evidence සහ fallback හැසිරීම පහත විස්තර කර ඇත. දෘඩ 16-frame සීමාව සෑම policy එකකදීම selection කිරීමෙන් පසුව යොදනු ලැබේ. Scene-aware request එකකට එක්-frame budget එකක් පමණක් ඇති විට, එය සක්රීය සම්පූර්ණ වීඩියෝ හෝ focus window එකේ uniform midpoint භාවිත කර `policyEffective: uniform` වාර්තා කරයි: තනිව තෝරාගත් scene frame එකකට කාලානුක්රමික අන්ත දෙකම ආරක්ෂා කළ නොහැක. Caller කෙනෙකුට විකල්ප වශයෙන් සීමිත focus window එකක් (`start`/`end` seconds) සැපයිය හැක; bounds media duration එකට clamp කරනු ලැබේ, ප්රතිලෝම හෝ non-finite windows ප්රතික්ෂේප කරනු ලැබේ, සහ සියලු sampling policies සාමාන්යකරණය කළ interval එක තුළ පමණක් ක්රියාත්මක වේ. ලැබෙන window එක sampling metadata තුළත්, untrusted description prefix තුළත් ඇතුළත් වන බැවින්, downstream models හට focused excerpt එකක් සහ සම්පූර්ණ timeline එකක් අතර වෙනස හඳුනාගත හැක.
+තැරැව්කරු තුළ, `ffprobe` පුද්ගලික දේශීය ගොනුවක් කියවයි; ස්ථාවර ආකෘතිය අවසර ලැයිස්තුව ධාවන ලැයිස්තුව සහ මැනිෆෙස්ට් ආකෘති බැහැර කරයි. අවසර ලත් MOV-පවුලේ බහාලුම් සඳහා, බාහිර MOV දත්ත යොමු පෙරනිමියෙන් අක්‍රියව පවතින අතර, ස්ථාවර විධානය ඒවාට ඇතුළත් නොවේ. `ffprobe` සහ `ffmpeg` යන දෙකම `file` -only ප්‍රොටෝකෝලය සුදු ලැයිස්තුව, එක් නූල්, ස්ථාවර තර්ක අරා, කවච නොමැති, සහ `PATH` වෙතින් විසඳා ඇති ක්‍රියාත්මක කළ හැකි භාවිතා කරයි. අමුණා ඇති පින්තූර ආවරණ ප්‍රවාහයන් වාදනය කළ හැකි අපේක්ෂකයින් නොවේ. සියලුම වාදනය කළ හැකි ප්‍රවාහයන් සීමාවන් සපුරාලිය යුතු අතර, නිර්ණායක අඩුම-දර්ශක පසුබැසීමට පෙර පැහැදිලි පෙරනිමි ප්‍රවාහයක් වඩාත් කැමති වේ. වීඩියෝ තත්පර 600කට, මානයකට පික්සල 8,192කට සහ මූලාශ්‍ර පික්සල 33,554,432කට සීමා වේ. FFmpeg සාම්පල 1-16 මධ්‍ය ලක්ෂ්‍ය JPEG රාමු, කුඩා ආදාන ඉහළ නැංවීමකින් තොරව දිගු දාරය උපරිම වශයෙන් පික්සල 1,024 දක්වා පරිමාණය කරන අතර කිසි විටෙකත් URL නොලැබේ. නියැදීම පෙරනිමියෙන් `uniform` වේ. විකල්ප `scene_aware` සහ පර්යේෂණාත්මක `segment_aware` ප්‍රතිපත්ති මඟින් දැනටමත් වලංගු කර ඇති දේශීය ප්‍රවාහය හරහා එක් අමතර ස්ථාවර FFmpeg සමත්වීමක් සිදු කරයි, සීමා සහිත `showinfo` දර්ශන කාල මුද්‍රා තෝරන්න, සහ අනාවරක අසමත් වීම, කල් ඉකුත්වීම, වැරදි ප්‍රතිදානය හෝ හිස් අපේක්ෂක කට්ටලයක් මත එකම ඒකාකාර මධ්‍ය ලක්ෂ්‍යයන් වෙත නියත වශයෙන්ම ආපසු වැටේ. ඛණ්ඩ-දැනුවත් මාදිලිය වලංගු දර්ශන කාල පරතරයන්ට සමානුපාතිකව මධ්‍ය ලක්ෂ්‍ය සාම්පල වෙන් කරයි; කොටස-දැනුවත් සාක්ෂි සහ පසුබැසීමේ හැසිරීම පහත විස්තර කෙරේ. සෑම ප්‍රතිපත්තියකම තේරීමෙන් පසු දෘඩ රාමු 16 තොප්පිය යොදනු ලැබේ. දර්ශන-දැනුවත් ඉල්ලීමකට ඇත්තේ එක් රාමු අයවැයක් පමණක් වන විට, එය ක්‍රියාකාරී පූර්ණ-වීඩියෝවේ හෝ නාභිගත කවුළුවේ ඒකාකාර මධ්‍ය ලක්ෂ්‍යය භාවිතා කර `policyEffective: uniform` වාර්තා කරයි : තෝරාගත් තනි දර්ශන රාමුවකට තාවකාලික අන්ත දෙකම සුරැකිය නොහැක. අමතන්නෙකුට විකල්ප වශයෙන් සීමිත නාභිගත කිරීමේ කවුළුවක් සැපයිය හැකිය (`start`/`end` තත්පර); මායිම් මාධ්‍ය කාලසීමාවට තද කර ඇත, ප්‍රතිලෝම හෝ පරිමිත නොවන කවුළු ප්‍රතික්ෂේප කරනු ලැබේ, සහ සියලුම නියැදීම් ප්‍රතිපත්ති සාමාන්‍යකරණය කරන ලද පරතරය තුළ පමණක් සිදු කෙරේ. ප්‍රතිඵලයක් ලෙස ලැබෙන කවුළුව නියැදි පාර-දත්ත තුළ සහ විශ්වාස නොකළ විස්තර උපසර්ගය තුළ ඇතුළත් කර ඇති බැවින් පහළ මාදිලිවලට නාභිගත උද්ධෘතයක් සම්පූර්ණ කාලරේඛාවෙන් වෙන්කර හඳුනාගත හැකිය.
 
-Semantic caption focus යනු වෙනම, පැහැදිලි setting එකකි. පෙරනිමි `full` analysis mode මඟින් පවතින frame prompt එක ආරක්ෂා කරන අතර request text එක caption model වෙත කිසිවිටෙක යොමු නොකරයි. `focused` mode තුළ, bridge එක එම Chat හෝ Responses container එකෙන් නවතම හිස් නොවන user-authored `text`/`input_text` පමණක් කියවා, එය NFC වෙත normalize කර, control characters සහ whitespace එකට සංකෝචනය කර, Unicode code points 500කට සීමා කරයි. හිස් ප්රතිඵලයක් ලැබුණහොත්, හරියටම `full` prompt වෙත fallback වේ. භාවිත කළ හැකි hint එකක් dedicated untrusted-user-context block එකක JSON ලෙස serialize කරනු ලබන අතර, එයට observable details සඳහා පමණක් ප්රමුඛත්වය දිය හැක; media තුළ දෘශ්ය හෝ ශ්රව්ය ලෙස පෙනෙන උපදෙස් අනුගමනය නොකළ යුතුය යන වෙනම අනතුරු ඇඟවීම එයට override කළ නොහැක. Textual focus මඟින් `start`/`end` අනුමාන නොකරන අතර temporal sampler එක වෙනස් නොකරයි.
+අර්ථකථන සිරස්තල නාභිගත කිරීම යනු වෙනම, පැහැදිලි සැකසුමකි. පෙරනිමි `full` විශ්ලේෂණ මාදිලිය පවතින රාමු විමසුම ආරක්ෂා කරන අතර කිසිවිටක ඉල්ලීම් පෙළ සිරස්තල ආකෘතියට යොමු නොකරයි. `focused` ප්‍රකාරයේදී, පාලම එකම Chat හෝ Responses කන්ටේනරයෙන් නවතම හිස්-නොවන පරිශීලක-කර්තෘ `text`/`input_text` පමණක් කියවයි, එය NFC වෙත සාමාන්‍යකරණය කරයි, පාලන අක්ෂර සහ සුදු අවකාශය බිඳ දමයි, සහ යුනිකෝඩ් කේත ලක්ෂ්‍ය 500කට සීමා කරයි. හිස් ප්‍රතිඵලයක් නැවත නියම `full` ප්‍රේරකයට වැටේ. භාවිත කළ හැකි ඉඟියක් කැප වූ විශ්වාස නොකළ-පරිශීලක-සන්දර්භ කොටසක JSON ලෙස අනුක්‍රමික කර ඇති අතර නිරීක්ෂණය කළ හැකි තොරතුරුවලට පමණක් ප්‍රමුඛත්වය දිය හැකිය; මාධ්‍යයේ දෘශ්‍යමාන හෝ ශ්‍රවණය කළ හැකි උපදෙස් අනුගමනය කිරීමට එරෙහිව වෙන වෙනම අනතුරු ඇඟවීම එයට ප්‍රතික්ෂේප කළ නොහැක. පාඨමය අවධානය කිසිවිටෙක `start`/`end` අනුමාන නොකරයි හෝ තාවකාලික නියැදිය වෙනස් නොකරයි.
 
-#### FU-07 ව්යුහාත්මක segment සාක්ෂි
+#### FU-07 ව්‍යුහාත්මක කොටස සාක්ෂි
 
-`segment_aware` මඟින් දැනටමත් වලංගු කර ඇති දේශීය video stream එක මත සීමා කළ pre-analysis pass එකක් භාවිත කරයි. ස්ථාවර filter chain එක පළමුව උපරිම පළල pixels 320කට scale කර, scene changes සහ frozen intervals හඳුනාගෙන, පසුව blur, average luma, සහ spatial/temporal information සඳහා තත්පරයකට frame 1ක් ලෙස sample කරයි. මෙම pass එක structural samples 600කට, එක් FFmpeg/filter thread එකකට, එම `file`-පමණක් protocol සහ container allowlists සඳහා, process-output සීමාව 1 MiBකට, සහ broker හි shared abort/deadline ඇතුළත උපරිම තත්පර 30කට සීමා වේ. එය request එකෙන් command, filter, path, හෝ URL කිසිවක් පිළිගන්නේ නැත.
+`segment_aware` දැනටමත් වලංගු දේශීය වීඩියෝ ප්‍රවාහය හරහා එක් සීමා සහිත පූර්ව විශ්ලේෂණ අවසර පත්‍රයක් භාවිතා කරයි. ස්ථාවර පෙරහන් දාමය පළමුව පික්සල 320ක් පළලින් පරිමාණය කරයි, දර්ශන වෙනස්වීම් සහ ශීත කළ කාල අන්තරයන් හඳුනා ගනී, පසුව බොඳවීම, සාමාන්‍ය ලුමා සහ spatial/temporal තොරතුරු සඳහා තත්පරයට රාමු 1 බැගින් සාම්පල ලබා ගනී. අවසර පත්‍රය ව්‍යුහාත්මක සාම්පල 600කට, FFmpeg/filter නූල් එකකට, එකම `file` -only ප්‍රොටෝකෝලය සහ බහාලුම් අවසර ලැයිස්තුවකට, 1 MiB ක්‍රියාවලි-ප්‍රතිදානයකට බැඳී ඇති අතර, තැරැව්කරුගේ හවුල් abort/deadline. ඇතුළත උපරිම වශයෙන් තත්පර 30ක් එය කිසිවිටක ඉල්ලීමකින් විධානයක්, පෙරහනක්, මාර්ගයක් හෝ URL පිළිගන්නේ නැත.
 
-ව්යුහාත්මක අගයන් deterministic sampling evidence වන අතර semantic video understanding නොවේ. ඒවා subjects, actions, captions, speech, හෝ user intent අනුමාන නොකරයි. Scene සහ freeze boundaries segments සාදයි; freeze coverage, blur, exposure, spatial detail, සහ temporal change බලපාන්නේ පවතින 1–16 frame budget එක වෙන් කරන ආකාරයට පමණි. සම්පූර්ණයෙන් frozen segment එකක් එක් frame එකකට සීමා කරන අතර, non-frozen segments ඉතිරි budget සඳහා තරග කරයි. Boundaries ගණන frames ගණන ඉක්මවන විට, වේගවත් මුල් cuts මඟින් දිගු අවසාන segment එකක් සැඟවිය නොහැකි වන පරිදි uniform timeline coverage ආරක්ෂා කරයි. Freeze boundary එකක 1-second analysis resolution ඇතුළත ඇති scene boundaries එකට ඒකාබද්ධ කරනු ලැබේ.
+ව්‍යුහාත්මක අගයන් යනු නියතිවාදී නියැදි සාක්ෂි මිස අර්ථකථන වීඩියෝ අවබෝධය නොවේ. ඔවුන් විෂයයන්, ක්‍රියා, සිරස්තල, කථනය හෝ පරිශීලක අභිප්‍රාය අනුමාන නොකරයි. දර්ශනය සහ කැටි මායිම් කොටස් සාදයි; කැටි ආවරණය, නොපැහැදිලි, නිරාවරණය, අවකාශීය විස්තර සහ තාවකාලික වෙනස්වීම් බලපාන්නේ පවතින රාමු 1-16 අයවැය වෙන් කරන ආකාරය පමණි. සම්පූර්ණ ශීත කළ කොටස එක් රාමුවකට සීමා කර ඇති අතර, ශීත කළ නොවන කොටස් ඉතිරි අයවැය සඳහා තරඟ කරයි. මායිම් රාමු සංඛ්‍යාව ඉක්මවා ගිය විට, ඒකාකාර කාලරාමු ආවරණයක් රඳවා තබා ගන්නා බැවින් වේගවත් මුල් කප්පාදුවලට දිගු පසුපස ඛණ්ඩයක් සැඟවිය නොහැක. අධිශීත මායිමක තත්පර 1 විශ්ලේෂණ විභේදනය තුළ දර්ශන මායිම් එකලස් කර ඇත.
 
-Filters නොමැති වීම, විකෘති/හිස් evidence, detector දෝෂයක්, හෝ සීමා කළ pre-analysis timeout එකක් නිශ්චිත uniform midpoint policy වෙත fail open වේ. Caller abort එකක් හෝ broker deadline එකක් fail open නොවේ: එය ක්රියාත්මක වෙමින් පවතින subprocess එක අවසන් කර, පසුව frame extraction වැළැක්වීමෙන්, private temporary tree එක `finally` තුළ ඉවත් කරයි.
+අස්ථානගත වූ පෙරහන්, malformed/empty සාක්ෂි, අනාවරක දෝෂයක් හෝ සීමා වූ පූර්ව විශ්ලේෂණ කල් ඉකුත්වීම නිශ්චිත ඒකාකාර මධ්‍ය ලක්ෂ්‍ය ප්‍රතිපත්තියට විවෘත නොවේ. ඇමතුම් ගබ්සා කිරීම හෝ තැරැව්කාර කාලසීමාව විවෘත නොවේ: එය පියාසර උපක්‍රියාවලිය අවසන් කරයි, පසුව රාමු නිස්සාරණය වළක්වයි, සහ පුද්ගලික තාවකාලික ගස `finally` වලින් ඉවත් කරනු ලැබේ.
 
-`scripts/perf/video-bridge-fu07-eval.ts` මඟින් post-dedup caption-call savings, dense-motion budget allocation, blur/exposure/SI-TI evidence, දිගු tail එකක් සහිත rapid cuts, සහ gradual-fade false positives සඳහා deterministic real FFmpeg fixtures ජනනය කරයි. එය pre-analysis wall time වාර්තා කරන අතර, `/usr/bin/time` ලබා ගත හැකි විට child CPU සහ peak RSS ද වාර්තා කරයි. එහි quality checks structural oracles පමණි. මෙම harness එකට authorized endpoint එකක් හෝ frozen judge එකක් නොමැති බැවින්, සැබෑ caption-model quality තවමත් `HOLD` වේ. `--caption-cost-per-call-usd` මඟින් පැහැදිලි ධනාත්මක එක්-call estimate එකක් සපයන්නේ නැතිනම්, monetary savings ද `HOLD` ලෙස පවතී; script එක කිසිදු ප්රතිඵලයක් කෘත්රිමව නිපදවන්නේ නැත.
+`scripts/perf/video-bridge-fu07-eval.ts` විසින් පශ්චාත්-ඩෙඩප් කැප්ෂන්-ඇමතුම් ඉතුරුම්, ඝන-චලන අයවැය වෙන් කිරීම, blur/exposure/SI-TI සාක්ෂි, දිගු වලිගයක් සහිත වේගවත් කැපීම් සහ ක්‍රමානුකූලව මැකී යන ව්‍යාජ ධනාත්මක සඳහා තීරණාත්මක සැබෑ FFmpeg සවිකිරීම් ජනනය කරයි. එය පූර්ව විශ්ලේෂණ බිත්ති කාලය සහ, `/usr/bin/time` ලබා ගත හැකි, ළමා CPU සහ උපරිම RSS වාර්තා කරයි. එහි තත්ත්ව පරීක්ෂාවන් ව්‍යුහාත්මක ඔරකල් පමණි. මෙම පටිවලට බලයලත් අන්ත ලක්ෂ්‍යයක් හෝ ශීත කළ විනිශ්චයක් නොමැති නිසා සැබෑ සිරස්තල-ආකෘති ගුණත්වය `HOLD` ලෙස පවතී. `--caption-cost-per-call-usd` එක් ඇමතුමකට පැහැදිලි ධනාත්මක ඇස්තමේන්තුවක් සපයන්නේ නම් මිස මුදල් ඉතුරුම් `HOLD` ලෙස පවතී. තිර රචනය කිසි විටෙකත් ප්‍රතිඵලයක් නිර්මාණය නොකරයි.
 
-සෑම රාමුවක්ම 4 MiBකට සීමා වන අතර, සියලුම raw රාමු එකතුව 23 MiBකටත්,
-serialized broker ප්රතිචාරය 32 MiBකටත් සීමා වේ. පුද්ගලික තාවකාලික
-නාමාවලියක් `finally` තුළ ඉවත් කරනු ලැබේ. OmniRoute FFmpeg ඇතුළත් කර
-නොදෙන අතර අභිරුචි executable මාර්ගයක්ද පිළිගන්නේ නැත. captioning කිරීමට
-පෙර, bridge එක සංරක්ෂණාත්මක දෘශ්ය deduplication පියවරක් යොදයි: සෑම JPEG
-එකක්ම 16×16 grayscale buffer එකකට අඩු කර, රඳවාගෙන ඇති අවසන් රාමුව සමඟ
-පමණක් සසඳනු ලැබේ. ඉල්ලා ඇති caption budget එක රාමුවකට වඩා වැඩි නම්,
-extraction මඟින් එම budget එක මෙන් දෙගුණයක් දක්වා වූ, එහෙත් රාමු 16කට
-වඩා නොවැඩි, සීමා කළ candidate pool එකක් සපයයි. ඉල්ලා ඇති cap එක
-deduplication කිරීමෙන් පසුව පමණක් යොදන අතර, budget එක අවම වශයෙන් දෙකක්
-වන විට අවසන් thinning කිරීමේදී පළමු සහ අවසන් තෝරාගත් candidates
-රඳවා ගනී. අනුවාදගත
-`grayscale-16x16-mean-cells-v2` ප්රතිපත්තිය mean luma delta එක සහ
-normalized delta එක අවම වශයෙන් 0.05ක් වන thumbnail cells අනුපාතය යන
-දෙකෙන් විශාල අගය භාවිත කරයි. duplicate threshold එක 0.04 යන
-ස්ථිර අගය වන අතර, එය runtime setting එකක් ලෙස නිරාවරණය කිරීම වෙනුවට
-පුරෝකථනය කළ හැකි බව සඳහා තෝරාගෙන ඇත. මෙම ද්විතීයික
-high-contrast signal එක mean-only comparison එකකට සැඟවිය හැකි කුඩා
-චලනය සහ පෙනෙන-පෙළ වෙනස්කම් රඳවා ගනී. Comparator හෝ decoder දෝෂ
-fail open වී coverage එක රඳවා ගනී. Output metadata මඟින් extracted
-candidates, සාර්ථකව භාවිත කළ frames, සහ ඉවත් කළ visual duplicates
-වෙන් වෙන්ව දක්වයි.
+සෑම රාමුවක්ම MiB 4 කටද, සියලු අමු රාමු 23 MiB දක්වාද, අනුක්‍රමික තැරැව්කරු ප්‍රතිචාරය 32 MiB දක්වාද සීමා වේ. පුද්ගලික තාවකාලික නාමාවලියක් `finally` වලින් ඉවත් කරනු ලැබේ. OmniRoute FFmpeg බණ්ඩල් නොකරන අතර අභිරුචි ක්‍රියාත්මක කළ හැකි මාර්ගයක් පිළිගන්නේ නැත. සිරස්තල දැමීමට පෙර, පාලම ගතානුගතික දෘශ්‍ය අඩුකිරීමේ අවසර පත්‍රයක් යොදයි: සෑම JPEG ක්ම 16 × 16 අළු පරිමාණ බෆරයක් දක්වා අඩු කර ඇති අතර එය රඳවා තබා ඇති අවසාන රාමුව සමඟ පමණක් සංසන්දනය කෙරේ. එක් රාමුවකට ඉහලින් ඉල්ලන ලද සිරස්තල අයවැයක් සඳහා, නිස්සාරණය අයවැයෙන් දෙගුණයක් දක්වා සීමා වූ අපේක්ෂක සංචිතයක් සපයන අතර රාමු 16කට වඩා වැඩි නොවේ. ඉල්ලුම් කරන ලද තොප්පිය යොදනු ලබන්නේ අඩුකිරීමෙන් පසුව පමණි, අයවැය අවම වශයෙන් දෙකක් වන විට අවසාන තුනී කිරීමේදී පළමු සහ අවසාන තෝරාගත් අපේක්ෂකයන් සංරක්ෂණය කෙරේ. අනුවාදිත `grayscale-16x16-mean-cells-v2` ප්‍රතිපත්තිය සාමාන්‍ය ලුමා ඩෙල්ටාවේ විශාල ප්‍රමාණය සහ සාමාන්‍යකරණය කළ ඩෙල්ටාව අවම වශයෙන් 0.05ක් වන සිඟිති රූ සෛලවල අනුපාතය භාවිතා කරයි. අනුපිටපත් එළිපත්ත යනු නියත 0.04, ධාවන කාල සැකසුම ලෙස නිරාවරණය වීමට වඩා අනාවැකි සඳහා තෝරාගෙන ඇත. මෙම ද්විතියික අධි-විපරීත සංඥාව කුඩා චලිතය සහ මධ්‍යස්ථ-පමණක් සැසඳීමකින් සැඟවිය හැකි දෘශ්‍ය-පෙළ වෙනස්කම් ආරක්ෂා කරයි. සංසන්දක හෝ විකේතක දෝෂ විවෘතව තබා ගැනීමට අසමත් වේ. ප්‍රතිදාන පාර-දත්ත උපුටා ගත් අපේක්ෂකයින්, සාර්ථකව භාවිතා කළ රාමු සහ දෘශ්‍ය අනුපිටපත් පහත හෙළයි.
 
-පැහැදිලිව සලකුණු කළ video part එකකට timestamp සහිත contact sheet එකක්
-ඉල්ලා සිටිය හැක. bridge එක උපරිම වශයෙන් columns 4ක් සහ frames 16ක්
-සහිත JPEG grid එකක් සාදයි. සෑම 512-pixel cell එකක්ම එහි source
-timestamp එක high-contrast පහළ band එකකට burn කරන අතර, downstream
-association සහ audit සඳහා එම timestamps textual metadata තුළද
-රඳවා ගනී. සම්පූර්ණ JPEG එක 32 MiB සීමාව තුළ පවතී. `sharp` හට grid එක
-decode කිරීමට හෝ compose කිරීමට නොහැකි නම්, bridge එක individual JPEG
-frames වෙත fallback වේ; client abort එක තවදුරටත් sheet operation
-හරහා propagate වේ.
+පැහැදිලිව සලකුණු කරන ලද වීඩියෝ කොටසක් වේලා මුද්‍රා තැබූ සම්බන්ධතා පත්‍රයක් ඉල්ලා සිටිය හැක. පාලම උපරිම වශයෙන් 4-තීරු, 16-රාමු JPEG ජාලයක් ගොඩනඟයි. සෑම පික්සල් 512 සෛලයක්ම එහි ප්‍රභව වේලා මුද්‍රාව ඉහළ ප්‍රතිවිරෝධතා පහළ කලාපයකට පුළුස්සා දමන අතර, එම වේලා මුද්‍රා පහළ ප්‍රවාහ ආශ්‍රය සහ විගණනය සඳහා පාඨමය පාර-දත්ත තුළ පවතී. සම්පූර්ණ JPEG සීමාව 32 MiB ලෙස පවතී. `sharp` හට ජාලකය විකේතනය කිරීමට හෝ රචනා කිරීමට නොහැකි නම්, පාලම නැවත එක් එක් JPEG රාමු වෙත වැටේ; සේවාලාභී ගබ්සාව තවමත් පත්‍ර ක්‍රියාකාරිත්වය හරහා ප්‍රචාරණය කරයි.
 
-Promotion evidence එක synthetic composition microbenchmark එකෙන්
-හිතාමතාම වෙන් කර ඇත. `scripts/perf/video-bridge-contact-sheet-eval.ts`
-මඟින් සැබෑ OpenAI-compatible vision models සඳහා schema-versioned A/B
-harness එකක් නිර්වචනය කරයි. එය provider-reported tokens,
-end-to-end wall latency (sheet composition ද ඇතුළුව), model-call count,
-සහ manifest-defined fact retention මනිනු ලබයි. Raw model responses
-report එකට ලියා නොදමන අතර, රඳවා ගන්නේ SHA-256 digests සහ matched fact
-IDs පමණි. `--execute-real` යොදවා, `--model`, `OMNIROUTE_BASE_URL`, සහ
-`OMNIROUTE_API_KEY` වින්යාස කර ඇති විට පමණක් harness එක network හෝ
-ගෙවීම් සහිත model call එකක් සිදු කරයි. එම පැහැදිලි real run එක නොමැති
-විට, එහි machine-readable verdict එක `HOLD` ලෙස පවතී; synthetic
-payload/call-count measurements පමණක් promotion evidence නොවේ.
+ප්‍රවර්ධන සාක්ෂි කෘත්‍රිම සංයුතිය ක්ෂුද්‍ර තලයෙන් හිතාමතාම වෙන් කර ඇත. `scripts/perf/video-bridge-contact-sheet-eval.ts` නියම OpenAI-අනුකූල දර්ශන ආකෘති සඳහා schema-versioned A/B පටි නිර්වචනය කරයි. එය සපයන්නා-වාර්තා කරන ලද ටෝකන, අන්තයේ සිට අවසානය දක්වා බිත්ති ප්‍රමාදය (පත්‍ර සංයුතිය ඇතුළුව), ආදර්ශ-ඇමතුම් ගණන සහ ප්‍රකාශිත-නිර්වචනය කළ කරුණු රඳවා තබා ගැනීම මැන බලයි. අමු ආදර්ශ ප්‍රතිචාර වාර්තාවට ලියා නැත; SHA-256 digests සහ ගැලපෙන fact IDs පමණක් රඳවා ඇත. `--execute-real` සම්මත කර `--model`, `OMNIROUTE_BASE_URL`, සහ `OMNIROUTE_API_KEY` වින්‍යාස කර ඇත්නම් මිස පටි ජාලයක් හෝ ගෙවූ මාදිලි ඇමතුමක් සිදු නොකරයි. එම පැහැදිලි සැබෑ ධාවනය නොමැතිව, එහි යන්ත්‍රයෙන් කියවිය හැකි තීන්දුව `HOLD` පවතී; කෘතිම payload/call-count මිනුම් පමණක් ප්‍රවර්ධන සාක්ෂි නොවේ.
 
-සමපාත වූ පෙළ දැනටමත් සතු නම්, callers හට supported video part එකකට
-විකල්ප `transcript.cues` array එකක් එක් කළ හැක. සෑම cue එකක්ම `text`,
-probed duration තුළ පවතින finite `start`/`end` interval එකක්, සහ
-whitelisted `source` (`client`, `embedded`, හෝ `audio-bridge`) රැගෙන
-යා යුතුය; `confidence` හි පෙරනිමි අගය `1` වන අතර එය `0` සහ `1` අතර
-පවතින්නට යුතුය. සම්පූර්ණයෙන්ම සමාන cues එකට ඒකාබද්ධ කරනු ලැබේ.
-OmniRoute කිසි විටෙකත් මෙම metadata මඟින් transcription ආරම්භ
-නොකරයි: validate කළ cues, source, confidence, සහ interval සමඟ
-විස්තර කළ result එකට පිටපත් කර, frame captions අසල untrusted
-observations ලෙස render කරයි. අවලංගු, සීමාවෙන් පිටත, හෝ provenance
-නොමැති පෙළ caption stream එකට මිශ්ර කිරීම වෙනුවට ප්රතික්ෂේප කරයි.
-Request-body transcript channels දෙකම සපයන provenance `client` ලෙස
-normalize කරයි; self-asserted `embedded` හෝ `audio-bridge` labels ද
-ඊට ඇතුළත් වේ. එම trusted labels පවරිය හැක්කේ code-only
-`trustedSource` argument එක හරහා server-owned adapter එකකට පමණි;
-request JSON field එකකට එම argument වෙත ළඟා විය නොහැක. Transcript
-text එකේ provenance කුමක් වුවත් එය untrusted media-derived content
-ලෙසම පවතින අතර, authorization තීරණය කිරීමට කිසි විටෙකත් භාවිත නොකළ
-යුතුය.
+ඇමතුම්කරුවන්ට දැනටමත් පෙළගැස්වූ පෙළ ඇති විට සහාය දක්වන වීඩියෝ කොටසකට විකල්ප `transcript.cues` අරාවක් ඇමිණිය හැක. සෑම ඉඟියක්ම `text`, පරිමිත කාල සීමාව තුළ සීමිත `start`/`end` පරතරයක් සහ සුදු ලැයිස්තුගත කළ `source` (`client`, `embedded`, හෝ `audio-bridge`) රැගෙන යා යුතුය ; `confidence` `1` වෙත පෙරනිමි වන අතර `0` සහ `1` අතර පැවතිය යුතුය. නිශ්චිත අනුපිටපත් ඉඟි හකුළයි. OmniRoute කිසිවිටෙක මෙම පාර-දත්තෙන් පිටපත් කිරීම ආරම්භ නොකරයි: වලංගු කරන ලද ඉඟි විස්තර කරන ලද ප්‍රතිඵලයට මූලාශ්‍රය, විශ්වාසය සහ අන්තරය සමඟ පිටපත් කර රාමු සිරස්තල සමඟ විශ්වාස නොකළ නිරීක්ෂණ ලෙස ලබා දේ. සිරස්තල ප්‍රවාහයට මිශ්‍ර කරනවාට වඩා වලංගු නොවන, පරාසයෙන් පිටත, හෝ ප්‍රභව රහිත පෙළ ප්‍රතික්ෂේප කෙරේ. ඉල්ලීම්-ශරීර පිටපත් නාලිකා දෙකම ස්වයං-උත්සාහගත `embedded` හෝ `audio-bridge` ලේබල ඇතුළුව, `client` වෙත සපයන ලද ප්‍රභවය සාමාන්‍යකරණය කරයි. කේත-පමණක් `trustedSource` තර්කය හරහා එම විශ්වාසනීය ලේබල පැවරිය හැක්කේ සේවාදායකය සතු ඇඩැප්ටරයකට පමණි; ඉල්ලීමක් JSON ක්ෂේත්‍රයට එම තර්කයට ළඟා විය නොහැක. පිටපත් පෙළ එහි ප්‍රභවය කුමක් වුවත්, විශ්වාස නොකළ මාධ්‍ය-ව්‍යුත්පන්න අන්තර්ගතය ලෙස පවතින අතර, කිසිවිටක අවසරය තීරණය නොකළ යුතුය.
 
-උසස් caller කෙනෙකුට එම video එක සඳහා `audioTranscript` track එකක්
-සැපයිය හැක; එය server transcription සඳහා සාක්ෂියක් නොව client-provided
-text ලෙස සලකනු ලැබේ. Fusion seam එක එකම deadline සහ abort signal
-යටතේ visual සහ audio observations ක්රියාත්මක කර, ඒවා common timeline
-එකක් මත අනුපිළිවෙලට සකසා, සම්පූර්ණයෙන් සමාන duplicates එකට ඒකාබද්ධ
-කර, එක් පැත්තක් පමණක් සාර්ථක වූ විට partial result එකක් වාර්තා කරයි.
-අවලංගු `audioTranscript` එකක් එම partial result වෙත degrade වේ —
-visual description එක රඳවාගෙන audio branch එක sanitized failure code
-එකක් වාර්තා කරයි — සම්පූර්ණ video එක අසාර්ථක කරනවා වෙනුවට. Per-branch
-availability, partial flag එක, සහ sanitized failure codes විස්තර කළ
-result එකේ, guardrail metadata
-(`audioFusionRuns`/`audioFusionPartials`/`audioFusionFailureCodes`) තුළ,
-result-cache metadata තුළ, සහ bridge fusion counters තුළ රඳවා ගනී.
-පෙරනිමි Video Bridge path එක speech-to-text invoke කිරීමක් හෝ දෙවන
-media copy එකක් download කිරීමක් සිදු නොකරයි; එම පැහැදිලි track එක
-නොමැති විට එය video-only ලෙස පවතී.
+උසස් ඇමතුම්කරුවෙකු එම වීඩියෝව සඳහා `audioTranscript` ධාවන පථයක් සැපයිය හැකිය; එය සේවාදායකයා විසින් සපයන ලද පෙළ ලෙස සලකනු ලැබේ, සේවාදායක පිටපත් කිරීමේ සාක්ෂියක් නොවේ. විලයන මැහුම් එක් කාල සීමාවක් යටතේ දෘශ්‍ය සහ ශ්‍රව්‍ය නිරීක්ෂණ ධාවනය කර සංඥාව ගබ්සා කරයි, ඒවා පොදු කාලරාමුවක් මත ඇණවුම් කරයි, නිශ්චිත අනුපිටපත් කඩා දමයි, සහ එක් පැත්තක් පමණක් සාර්ථක වූ විට අර්ධ ප්‍රතිඵලයක් වාර්තා කරයි. වලංගු නොවන `audioTranscript` එම අර්ධ ප්‍රතිඵලය — ට පිරිහෙන අතර දෘශ්‍ය විස්තරය තබා ඇති අතර ශ්‍රව්‍ය ශාඛාව සම්පූර්ණ වීඩියෝවම අසාර්ථක වීම වෙනුවට — සනීපාරක්ෂක අසාර්ථක කේතයක් වාර්තා කරයි. එක් ශාඛාවකට ලබා ගත හැකි බව, අර්ධ ධජය සහ සනීපාරක්‍ෂක අසාර්ථක කේත විස්තර කරන ලද ප්‍රතිඵලය තුළ, ගාර්ඩ්‍රේල් පාරදත්ත (`audioFusionRuns`/`audioFusionPartials`/ `audioFusionFailureCodes`), ප්‍රතිඵල-හැඹිලි පාරදත්ත තුළ සහ පාලම් විලයන කවුන්ටරවල සංරක්ෂණය කර ඇත. පෙරනිමි වීඩියෝ පාලම් මාර්ගය කථනයෙන් පෙළට ආරාධනා කිරීම හෝ දෙවන මාධ්‍ය පිටපතක් බාගත නොකරයි; එම පැහැදිලි ධාවන පථයකින් තොරව, එය වීඩියෝ-පමණක් පවතී.
 
-**Transcript retention (#12150 P1).** මෙය ස්වයංක්රීයව ක්රියාත්මක වන්නේ
-Video Bridge (එයද opt-in වේ) transcript cue එකක් render කරන සෑම අවස්ථාවකමය —
-වෙනම retention flag එකක් නොමැත. Request එකක් transcript cue එකක් (caller විසින්
-ප්රකාශ කළ `transcript` එකක් හෝ ඒකාබද්ධ කළ `audioTranscript` එකක්) render කරන
-විට, guardrail එක එය `videoBridgeObserved` ලෙස සලකුණු කර වීඩියෝ විස්තරයේ
-redacted shadow එකක් නිපදවයි — සෑම cue එකකම free-text body එක
-`[redacted-video-transcript]` මගින් ප්රතිස්ථාපනය කළ සමාන rendering එකක් ලෙස,
-string එක assemble කිරීමට පෙර structured cue field එක substitute කිරීමෙන්
-සාදනු ලබන අතර (flattened text එක parse කිරීමෙන් කිසිවිටෙක නොවේ; එබැවින්
-adversarial හෝ සාමාන්ය ඕනෑම cue content එකක් — `]` අඩංගු bodies වන
-`[inaudible]`/`[music]` ඇතුළුව — ඉතිරි විය නොහැක). Persist කරන call-log request
-body එක content equality මගින් ගැළපෙන සෑම video-derived text part එකක්ම එම
-redacted shadow එකෙන් ප්රතිස්ථාපනය කරයි; `fullText` anchor එක call-යට පෙර
-නිම කළ guardrail payload එකෙන් නැවත කියවනු ලබන බැවින්, පසුව chain guardrails
-(PII සහ credential maskers, priorities 10/95) description text එක එම ස්ථානයේම
-නැවත ලිවීමෙන් පසුවත්, system-prompt/handoff/memory injection මගින් message
-array එකේ හැඩය වෙනස් කළ පසුවත්, match එක සාර්ථක වේ. Model එක වෙත upstream
-යවන body එක වෙනස් නොවේ. Observed request එකක් durable Memory එකක්ද පුරවන්නේ
-නැත (request- සහ response-derived extraction දෙකම මඟ හරිනු ලැබේ), එබැවින්
-model එකේම reply එකට transcript text එක Memory වෙත echo කළ නොහැක.
+**පිටපත් රඳවා තබා ගැනීම (#12150 P1).** වීඩියෝ පාලම (තමන් විසින්ම තෝරා ගැනීම) — පිටපතක් ලබා දෙන විට වෙනම රඳවා ගැනීමේ ධජයක් නොමැති විට මෙය ස්වයංක්‍රීයව අදාළ වේ. ඉල්ලීමක් කිසියම් පිටපතක් ඉඟියක් (ඇමතුම්කරු විසින් ප්‍රකාශ කරන ලද `transcript` හෝ ෆියුස් කළ `audioTranscript`) ලබා දෙන විට, ආරක්ෂක වැට එය `videoBridgeObserved` ලෙස සලකුණු කර, වීඩියෝ විස්තරයේ — හි නැවත සකස් කරන ලද සෙවනැල්ලක් නිපදවයි, එහි සෑම ඉඟියකම නිදහස්-පෙළ ශරීරයක් `[redacted-video-transcript]` ක්ෂේත්‍රය මඟින් ප්‍රතිස්ථාපනය කරනු ලැබේ. එකලස් කරන ලදී (කිසිවිටෙක සමතලා කළ පෙළ විග්‍රහ කිරීමෙන් නොවේ, එබැවින් `[inaudible]`/`[music]` — වැනි `]` අඩංගු ශරීර ඇතුළුව — විරුද්ධවාදී හෝ සාමාන්‍ය ඉඟි අන්තර්ගතයක් නොනැසී පැවතිය නොහැක). දිගටම පවතින ඇමතුම්-ලොග් ඉල්ලීම් අන්තර්ගතය අන්තර්ගත සමානාත්මතාවයෙන් ගැළපෙන, නැවත සකස් කරන ලද සෙවනැල්ල සඳහා එක් එක් වීඩියෝ-ව්‍යුත්පන්න පෙළ කොටසක් මාරු කරයි; `fullText` නැංගුරම නිමි පෙර-ඇමතුම් ගාඩ්රේල් පේලෝඩ් එකෙන් නැවත කියවා ඇත, එබැවින් පසුව දාම ආරක්ෂක වැටවල් ( PII සහ අක්තපත්‍ර ආවරණ, ප්‍රමුඛතා 10/95) විස්තර පෙළ නැවත ලිවීමෙන් පසුව සහ system-prompt/handoff/memory එන්නත් කිරීමෙන් පසු පණිවිඩ අරාව නැවත සකස් කිරීමෙන් පසුව තරගය තවමත් සාර්ථක වේ. ආකෘතියට උඩුගං බලා යවන ලද ශරීරය නොවෙනස්ව පවතී. නිරීක්ෂණය කරන ලද ඉල්ලීමක් කල් පවතින මතකයක් ද ජනනය නොකරයි (ඉල්ලීම- සහ ප්‍රතිචාර-ව්‍යුත්පන්න නිස්සාරණය යන දෙකම මඟ හරිනු ලැබේ), එබැවින් ආකෘතියේ පිළිතුරට පිටපත් පෙළ මතකයට ප්‍රතිරාවය කළ නොහැක.
 
-**Raw video fields (#12430).** Bridge එක සක්රීය කර ඇති විටත් native video
-support එක නොදන්නා හෝ නොමැති විටත්, නිර්වචනය කර ඇති `transcript`/
-`audioTranscript` fields `videoBridgeObserved` සක්රීය කරයි — description
-අසාර්ථක වීමෙන් හෝ `maxVideos` සීමාවකින් පසුව වුවද. `null` සහ හිස් strings
-ගණනය වේ; නොමැති fields සහ video නොවන metadata ගණනය නොවේ. රඳවාගත් copies
-මෙම fields redact කරයි හෝ request එක ඉවත් කරයි, caches/Memory මඟ හරිනු ලැබේ.
+**අමු වීඩියෝ ක්ෂේත්‍ර (#12430).** පාලම සක්‍රීය කර ඇති විට සහ ස්වදේශීය වීඩියෝ සහාය නොදන්නා විට හෝ නොමැති විට, විස්තරය අසාර්ථක වීමෙන් හෝ `maxVideos` සීමාවකින් පසුව පවා, අර්ථ දක්වා ඇති `transcript`/`audioTranscript` ක්ෂේත්‍ර `videoBridgeObserved` සක්‍රිය කරයි. `null` සහ හිස් නූල් ගණන්; නොමැති ක්ෂේත්‍ර සහ වීඩියෝ නොවන පාරදත්ත එසේ නොවේ. රඳවා ගත් පිටපත් මෙම ක්ෂේත්‍ර නැවත සකස් කිරීම හෝ ඉල්ලීම මඟහරියි, සහ caches/Memory මඟ හැරේ.
 
-මෙම fallback paths මත, වලංගු caller cues nonstandard provider fields වෙනුවට
-සහාය දක්වන `text`/`input_text` parts බවට පත්වේ. Request මගින් සපයන tracks
-දෙකම විශ්වාස නොකළ යුතු `client` observations ලෙස පවතින අතර, video එක
-describe කර නොමැති බවත් timestamps media එකට එරෙහිව verify කර නොමැති බවත්
-පැහැදිලි warning එකක් සමඟය. පවතින 256-cue/64-KiB total සහ per-cue budgets
-tracks දෙක පුරා එකට අදාළ වේ; timestamps broker හි 600-second ceiling එකටත්
-සපයා ඇති focus window එකටත් ගැළපිය යුතුය. වලංගු නොවන tracks ඉවත දමනු ලැබේ,
-අත්තනෝමතික text ලෙස forward නොකරයි; ඒවායේ ඒකාබද්ධ budget එක ඉක්මවා නොයන්නේ
-නම් වලංගු sibling එකක් තවමත් භාවිත කළ හැක. Null/empty fields කිසිදු text
-එකතු නොකරයි. මෙම fallback එකෙන් media fetch හෝ transcription එකක් එකතු
-නොවේ. Transcript extension fields fallback video carrier එකෙන් සහ එහි
-`video_url`/`source` objects වලින් ඉවත් කරනු ලැබේ. OpenAI wire allowlist එක
-දැඩිව පවතී; unknown-native video carriers තවමත් ලබාගත හැකි අතර known
-text-only targets ආරක්ෂිත markers තබා ගනී. Structured redaction shadows
-එකතු කළ transcript text ආරක්ෂා කරන අතර, මුල් caller-owned request එක වෙනස්
-නොවේ. Native-supported targets සහ disabled bridges ඔවුන්ගේ පවතින bypass
-behavior එක තබා ගනී.
+එම පසුබැසීමේ මාර්ගවල, වලංගු ඇමතුම් ඉඟි සම්මත නොවන සැපයුම් ක්ෂේත්‍රවලට වඩා සහාය දක්වන `text`/`input_text` කොටස් බවට පත්වේ. ඉල්ලීම්-සැපයූ පීලි දෙකම විශ්වාස නොකළ `client` නිරීක්ෂණ ලෙස පවතී, වීඩියෝව විස්තර කර නොමැති බවට සහ වේලා මුද්දර මාධ්‍යයට එරෙහිව සත්‍යාපනය කර නොමැති බවට පැහැදිලි අනතුරු ඇඟවීමක් ඇත. පවතින 256-cue/64-KiB මුළු සහ එක්-කියු අයවැය එක්ව ධාවන පථ දෙක හරහා අදාළ වේ; වේලා මුද්දර තැරැව්කරුගේ තත්පර 600 සිවිලිමට සහ සපයන ලද ඕනෑම නාභිගත කවුළුවකට ගැලපේ. අවලංගු පීලි ඉවත දමනු ලැබේ, අත්තනෝමතික පෙළ ලෙස යොමු නොකෙරේ; ඔවුන්ගේ ඒකාබද්ධ අයවැය ඉක්මවා ඇත්නම් මිස වලංගු සහෝදරයෙකු තවමත් භාවිතා කළ හැක. Null/empty ක්ෂේත්‍ර කිසිදු පෙළක් එක් නොකරයි. මෙම පසුබැසීම මගින් මාධ්‍ය ලබා ගැනීමක් හෝ පිටපත් කිරීමක් එක් නොකෙරේ. පිටපත් විස්තාරණ ක්ෂේත්‍ර ෆෝල්බැක් වීඩියෝ වාහකයෙන් සහ එහි `video_url`/`source` වස්තුවලින් ඉවත් කෙරේ. OpenAI වයර් අවසර ලැයිස්තුව දැඩිව පවතී; නොදන්නා-ස්වදේශීය වීඩියෝ වාහකයන් පවතින අතර දන්නා පෙළ-පමණක් ඉලක්ක ආරක්ෂිත සලකුණු තබා ගනී. ව්‍යුහගත ප්‍රතිනිර්මාණ සෙවනැලි අමුණා ඇති පිටපත් පෙළ ආරක්ෂා කරන අතර මුල් ඇමතුම්කරු සතු ඉල්ලීම නොවෙනස්ව පවතී. ස්වදේශික ආධාරක ඉලක්ක සහ ආබාධිත පාලම් ඔවුන්ගේ පවතින බයිපාස් හැසිරීම රඳවා තබා ගනී.
 
-අමතර retained copies එකම observed-request signal එක භාවිත කරයි. Raw
-pre-guardrail client-request snapshot එක, in-memory pending request එක සහ
-early rejected-request log එක video parts තුළ ඇති transcript fields
-structurally replace කරයි; pipeline stages සහ context handoff මගින්
-සංස්ලේෂණය කරන string prompts persisted-request-body sink එකේදී redact කරනු
-ලැබේ. Persist කරන `video_content_removed` marker එක
-`previous_response_id` continuation එක fail closed කරවයි; එමගින් හිතාමතා
-ඉවත දැමූ text එක නැවත reconstruct කිරීම වළක්වයි. Observed request එකක
-per-part redaction shadow එක logging කිරීමට පෙර නැති වුවහොත්, හෝ පසුව සිදු වූ
-request mutations පසු video shadows කිහිපයකින් එකක් හෝ match වීමට අසමත්
-වුවහොත්, අර්ධ වශයෙන් redacted transcript එකක් රඳවා තබනවා වෙනුවට retained
-request body එක සම්පූර්ණයෙන්ම ඉවත් කරනු ලැබේ.
+අමතර රඳවා ගත් පිටපත් එකම නිරීක්ෂිත ඉල්ලීම් සංඥාව භාවිතා කරයි. raw pre-guardrail client-request snapshot, in-memory pending request, සහ ඉක්මනින් ප්‍රතික්ෂේප කරන ලද-ඉල්ලීම් ලොගය වීඩියෝ කොටස්වල පිටපත් ක්ෂේත්‍ර ව්‍යුහාත්මකව ප්‍රතිස්ථාපනය කරයි; නල මාර්ග අවධීන් සහ සන්දර්භය භාර දීම මගින් සංස්ලේෂණය කරන ලද තන්තු විමසුම් දිගටම පවතින-ඉල්ලීම-බොඩි සින්ක්හිදී නැවත සකස් කරනු ලැබේ. දිගටම පවතින `video_content_removed` සලකුණ හිතාමතාම ඉවත දැමූ පෙළ ප්‍රතිනිර්මාණය කරනවා වෙනුවට `previous_response_id` අඛණ්ඩව අසාර්ථක කරයි. නිරීක්ෂණය කරන ලද ඉල්ලීමක් ලොග් වීමට පෙර එහි එක් කොටසකට නැවත සකස් කිරීමේ සෙවනැල්ල නැති වුවහොත් හෝ පසුව ඉල්ලීම් විකෘති කිරීමෙන් පසුව වීඩියෝ සෙවනැලි කිහිපයකින් එකක්වත් ගැළපීමට අපොහොසත් වුවහොත්, අර්ධ වශයෙන් ප්‍රතිනිර්මාණය කරන ලද පිටපතක් රඳවා තබා ගැනීම වෙනුවට රඳවා ගත් ඉල්ලීම් අන්තර්ගතය සම්පූර්ණයෙන්ම ඉවත් කරනු ලැබේ.
 
-Observed request එකක් සඳහා, model response එකක් structured cue boundary එකකින්
-තොරව transcript එකේ ඕනෑම කොටසක් quote කළ හැක. එබැවින් එහි persisted
-call-log `responseBody` එක omission marker එකකින් ප්රතිස්ථාපනය කරනු ලැබේ;
-detailed pipeline artifact එක (upstream/client bodies සහ stream chunks ඇතුළත්
-විය හැකි) රඳවා නොගනී. Semantic, idempotency සහ reasoning-replay caches එම
-request එක සඳහා reads සහ writes දෙකම bypass කරයි. Provider request එක සහ
-client-visible response එක වෙනස් නොවේ. Detailed artifact එක ඉවත් කරන විට
-early keepalive bytes temporary buffer එකෙන් drain කරනු ලැබේ. Kiro හි
-malformed EventStream warning එක වාර්තා කරන්නේ payload byte count එක පමණක්
-වන අතර, එහි contents හෝ JSON parser හි raw error එක කිසිවිටෙක වාර්තා නොකරයි.
-සම්බන්ධයක් නොමැති සෑම provider/plugin diagnostic එකක්ම audit කර ඇති බව මෙයින්
-ප්රකාශ නොවේ; පුළුල් retained-sink sweep එක #11658 යටතේ track කරනු ලැබේ.
+නිරීක්ෂිත ඉල්ලීමක් සඳහා, ආකෘති ප්‍රතිචාරයක් ව්‍යුහගත ඉඟි සීමාවකින් තොරව පිටපතේ ඕනෑම කොටසක් උපුටා දැක්විය හැක. එහි ස්ථීර ඇමතුම්-ලොග් `responseBody` එම නිසා අතපසු කිරීමේ සලකුණකින් ප්‍රතිස්ථාපනය වේ; සවිස්තරාත්මක නල මාර්ග කෞතුක වස්තුව ( upstream/client ශරීර සහ ප්‍රවාහ කුට්ටි ඇතුළත් විය හැක) රඳවා නොමැත. Semantic, idempotency, සහ reasoning-replay caches bypass the reads and writes for that request. සපයන්නාගේ ඉල්ලීම සහ සේවාලාභියාට පෙනෙන ප්‍රතිචාරය නොවෙනස්ව පවතී. සවිස්තරාත්මක කෞතුක වස්තු ඉවත් කළ විට තාවකාලික බෆරයෙන් මුල් තබා ගැනීමේ බයිට් ඉවත් වේ. Kiro's malformed EventStream අනතුරු ඇඟවීම වාර්තා කරන්නේ ගෙවීම් බයිට් ගණන පමණක් වන අතර, කිසිවිටෙක එහි අන්තර්ගතය හෝ JSON විග්‍රහයේ අමු දෝෂය නොවේ. මෙය අසම්බන්ධිත සෑම provider/plugin රෝග විනිශ්චයක්ම විගණනය කර ඇති බව නොකියයි; පුළුල් රඳවාගත්-සින්ක් ස්වීප් #11658 හි නිරීක්ෂණය කෙරේ.
 
-අභ්යන්තර `/api/modality-bridge/video/drilldown` lifecycle එක වෙනම,
-loopback/token-authenticated cache substrate එකකි. සෑම operation එකකටම
-canonical opaque principal ID එකක්ද අවශ්ය වේ. Production caller එකක්
-සක්රීය කිරීමට පෙර, එය authenticated tenant එකෙන් එම ID එක derive කළ යුතු
-අතර client-selected value එකක් කිසිවිටෙක forward නොකළ යුතුය. Cache keys එම
-principal එක canonical session සහ video-reference IDs වෙත bind කර, ඒවායේ
-SHA-256-derived keys පමණක් ගබඩා කරයි; reads සහ deletion දෙකම එම principal
-එකේ scope එකට සීමා කරයි. Cache එක entry එකකට derived JPEG frames උපරිම 16ක්
-ගබඩා කර, මිනිත්තු දහයකට පසු ඒවා expire කරයි, සහ සීමා කළ `start`/`end`
-reads හෝ explicit session deletion සඳහා සහාය දක්වයි.
+අභ්‍යන්තර `/api/modality-bridge/video/drilldown` ජීවන චක්‍රය වෙනම, loopback/token-authenticated හැඹිලි උපස්ථරයකි. සෑම මෙහෙයුමකටම කැනොනිකල් පාරාන්ධ ප්‍රධාන ID අවශ්‍ය වේ. නිෂ්පාදන ඇමතුම්කරුවෙකු සක්‍රීය කිරීමට පෙර, එය සත්‍යාපනය කළ කුලී නිවැසියාගෙන් එම ID ව්‍යුත්පන්න කළ යුතු අතර සේවාදායකයා-තෝරාගත් අගයක් කිසිවිටෙක යොමු නොකළ යුතුය. හැඹිලි යතුරු එම ප්‍රධානය කැනොනිකල් සැසියට සහ වීඩියෝ-යොමු IDs වෙත බන්ධනය කරයි, ඒවායේ SHA-256-derived යතුරු පමණක් ගබඩා කරයි, සහ එකම ප්‍රින්සිපල් වෙත කියවීම් සහ මකා දැමීම යන දෙකම විෂය පථය කරයි. හැඹිලිය එක් ප්‍රවේශයකට ව්‍යුත්පන්න JPEG රාමු 16ක් ගබඩා කරයි, මිනිත්තු දහයකට පසු ඒවා කල් ඉකුත් වේ, සහ සීමා කළ `start`/`end` කියවීම් හෝ පැහැදිලි සැසි මකාදැමීම සඳහා සහය දක්වයි.
 
-සෑම principal එකකටම entries 16ක් සහ canonical JPEG data 64 MiBක් දක්වා
-පමණක් සීමා වේ. එම සීමා global 64-entry/256 MiB ceiling එකෙන් ස්වාධීන වේ:
-principal quota pressure ඇති විට global LRU eviction සලකා බැලීමට පෙර එම
-principal එකේ least-recently-used entries පමණක් evict කරයි. Cache activity
-අතරතුර expired entries principal සහ global accounting දෙකෙන්ම sweep කරනු
-ලැබේ; cancellation සහ validation failure මඟින් partial replacement එකක්
-commit නොකරයි.
+එක් එක් විදුහල්පති ඇතුළත් කිරීම් 16 කට සහ කැනොනිකල් JPEG දත්ත 64 MiB වලට සීමා වේ. එම සීමාවන් ගෝලීය 64-entry/256 MiB සීමාවෙන් ස්වාධීන වේ: ප්‍රධාන කෝටා පීඩනය ඉවත් කරන්නේ ගෝලීය LRU නෙරපා හැරීමට පෙර විදුහල්පතිගේ අවම වශයෙන්-මෑතකදී භාවිතා කළ ඇතුළත් කිරීම් සලකා බැලීම පමණි. කල් ඉකුත් වූ ඇතුළත් කිරීම් හැඹිලි ක්‍රියාකාරකම් මත ප්‍රධාන සහ ගෝලීය ගිණුම්කරණයෙන් අතුගා දමනු ලබන අතර, අවලංගු කිරීම සහ වලංගු කිරීමේ අසාර්ථකත්වය අර්ධ ප්‍රතිස්ථාපනයක් සිදු නොකරයි.
 
-කැෂය non-canonical Base64, අතිරික්ත padding, JPEG නොවන මාධ්ය, විකෘති හෝ අසම්පූර්ණ JPEG, සහ සීමා කළ පූර්ණ-රූප `sharp` decode කිරීමකදී අනතුරු ඇඟවීමක් ජනනය කරන JPEG ප්රතික්ෂේප කරයි. පිළිගත් සෑම රූපයක්ම canonical JPEG ලෙස නැවත encode කරයි, caller fields විශ්වාස කිරීම වෙනුවට decoded bytes වලින් පළල සහ උස ලබා ගනී, සහ රඳවා තබා ගැනීම වෙනුවට පසුපස ඇති polyglot bytes සියල්ල ඉවත් කරයි. Quotas දෙකටම ගණනය කරන්නේ සීමා කළ canonical compressed buffer එක පමණි. 32 MiB decoded-input ceiling සඳහා JSON wire limit එකට Base64 overhead ද ඇතුළත් වේ. සෑම stored derivation එකක්ම එහි validate කළ JPEG format/resolution, sampling policy, derivation version, creation time, server විසින් ගණනය කළ content hash, සහ hashed parent reference එක සමඟ trusted callerගේ parent-content hash එකද සටහන් කරයි. Atomic cache commit කිරීමට පෙර asynchronous decode/hash අදියර අතර cancellation පරීක්ෂා කරයි.
+හැඹිලිය කැනොනිකල් නොවන Base64, අතිරික්ත පිරවුම්, JPEG නොවන මාධ්‍ය, විකෘති වූ හෝ කපා හරින ලද JPEGs, සහ සීමා කරන ලද පූර්ණ-පින්තූර `sharp` විකේතනයකදී අනතුරු ඇඟවීමක් නිකුත් කරන JPEGs ප්‍රතික්ෂේප කරයි. එය පිළිගත් සෑම රූපයක්ම කැනොනිකල් JPEG ලෙස නැවත-කේතනය කරයි, ඇමතුම් ක්ෂේත්‍ර විශ්වාස කරනවා වෙනුවට විකේතනය කරන ලද බයිට් වලින් පළල සහ උස ලබා ගනී, සහ ඒවා රඳවා තබා ගැනීමට වඩා පසුපසින් ඇති බහුභාෂා බයිට් ඉවත දමයි. සීමා සහිත කැනොනිකල් සම්පීඩිත බෆරය පමණක් කෝටා දෙකටම අය කෙරේ. JSON වයර් සීමාවට 32 MiB විකේතනය කරන ලද ආදාන සිවිලිම සඳහා Base64 උඩින් ඇතුළත් වේ. සෑම ගබඩා කළ ව්‍යුත්පන්නයක්ම එහි වලංගු JPEG format/resolution, නියැදි ප්‍රතිපත්තිය, ව්‍යුත්පන්න අනුවාදය, නිර්මාණ කාලය, සේවාදායක-පරිගණක අන්තර්ගත හැෂ්, සහ හැෂ් මාපිය යොමු සහ විශ්වාසවන්ත ඇමතුම්කරුගේ මාපිය-අන්තර්ගත හෑෂ් වාර්තා කරයි. පරමාණුක හැඹිලි කැපවීමට පෙර අසමමුහුර්ත decode/hash අදියර අතර අවලංගු කිරීම පරීක්ෂා කෙරේ.
 
-මෙම tranche එක production producer එකක් route එකට සම්බන්ධ නොකරන අතර multi-resolution variant selection ද සපයන්නේ නැත. එබැවින් transparent Video Bridge request path එකට අමතර කාර්යයක් නොපැවරෙන අතර, tenant-bound principal derivation සහ සම්පූර්ණ FU-08 multi-resolution lifecycle යන දෙකම සම්පූර්ණ කළ හැසිරීමක් ලෙස ලේඛනගත නොකර, පැහැදිලි follow-up වැඩ ලෙස තවමත් පවතී.
+නිෂ්පාදන නිෂ්පාදකයා විසින් දැනටමත් ව්‍යුත්පන්න කර ඇති තැරැව්කාර රාමු නැවත භාවිතා කරන්නේ සාර්ථක දෘශ්‍ය විශ්ලේෂණයකින් පසුව පමණි, දෙවන වීඩියෝ download/extraction. එයට ක්‍රියාකරු `modalityBridgeVideoDrilldownEnabled=true`, දැඩි එක්-කොටස `drilldown: true`, සහ සත්‍යාපිත API-key වාර්තා ID අවශ්‍ය වේ. සේවාලාභියා විසින් ප්‍රකාශ කරන ලද principal/session අගයන් කිසිවිටෙක හිමිකාරිත්වය ස්ථාපිත නොකරයි. කොන්දේසි තුනම නොමැතිව එය අතිරේක රාමු හැෂ් කිරීම, ප්‍රමාණය වෙනස් කිරීම හෝ රඳවා නොගනී. රඳවා තබා ගැනීමේ අසාර්ථකත්වය භාවිතා කළ හැකි දෘශ්‍ය ප්‍රතිචාරය ආරක්ෂා කරයි. එකඟ වූ ඉල්ලීම් සම්පූර්ණ-වීඩියෝ ප්‍රතිඵල හැඹිලිය මඟ හරින බැවින් හැඹිලිගත ප්‍රතිඵල කිසිවිටෙක නැවත ධාවනය නොවේ.
 
-Frames වින්යාස කළ Video model එක සමඟ අනුක්රමිකව caption කරනු ලැබේ. හිස් Video override එක Vision setting එක උරුම කර ගනී; දෙකම හිස් නම්, Vision auto-router එක effective vision-capable model එක තෝරයි. සාර්ථක captions මුල් part එක ස්ථාවර `[Video description:` prefix එකකින් ප්රතිස්ථාපනය කරයි. එම prefix එක text එක විශ්වාස නොකළ යුතු media-derived observation එකක් ලෙසද සලකුණු කරන අතර, media තුළ සොයාගත් instructions අනුගමනය නොකරන ලෙස downstream models වෙත දන්වයි. Frame-caption cache keys තුළ JPEG bytes, prompt, timestamp, සහ effective model ඇතුළත් වේ; cache කරන්නේ සාර්ථක captions පමණි. Cache entries සැබෑ සාර්ථක producer model එක රඳවා ගනී; fallback model එකක් වුවද එයට ඇතුළත් වේ. විවිධ frames විවිධ models මගින් නිෂ්පාදනය කර ඇත්නම් bridge එක `mixed` වාර්තා කරයි. Cache hit එකක් එම producer identity එක නැවත භාවිත කරන අතර එය ඉල්ලා සිටි routing plan එක ලෙස නැවත label නොකරයි. සම්පූර්ණ video result cache එක output එක වෙනස් කරන සෑම input එකක් මතම key කර ඇත — prompt, effective model, sampling policy, frame count, semantic analysis mode, normalized focus hint හි SHA-256 fingerprint එක, focus window, `transcript`, `audioTranscript`, සහ contact-sheet flag — එබැවින් එම dimensions වලින් කිසිවක් වෙනස් කිරීම cache miss එකක් වන අතර, කිසිවිටෙක stale reuse එකක් නොවේ. Visual dedup policy version, threshold, සහ bounded candidate-frame count ද result-cache key සහ metadata තුළ පැහැදිලිව ඇතුළත් වේ; එබැවින් policy වෙනසකට stale whole-video description එකක් නැවත භාවිත කළ නොහැක. Result-cache v4 metadata mode සහ fingerprint රඳවා ගන්නා නමුත් raw user task එක කිසිවිටෙක රඳවා නොගනී. Guardrail metadata මඟින් requested සහ effective analysis modes දෙකම වාර්තා කරයි; භාවිත කළ හැකි user text නොමැති requested `focused` mode එකක් effectively `full` ලෙස වාර්තා කරයි.
+සාර්ථක JSON සහ SSE ප්‍රතිචාර මායිම් කරන ලද `x-omniroute-video-drilldown` ශීර්ෂයේ ඇති පාරාන්ධ හසුරු හතරක් නිරාවරණය කරයි. CORS මූලාරම්භ ප්‍රතිපත්තිය පුළුල් නොකර බලයලත් බ්‍රවුසර මූලාරම්භයන්ට එම ශීර්ෂකය කියවිය හැක. නව හැන්ඩ්ල් `v1.<32-byte random base64url token>` භාවිතා කරයි, සහ රෙජිස්ට්‍රිය ඔවුන්ගේ SHA-256 හැෂ් පමණක් රඳවා ගනී. reader/header විග්‍රහකය ද උරුම 64-හෙක්ස් ටෝකන පිළිගනී. සත්‍යාපිත පොදු පාරිභෝගිකයා `GET /api/v1/video-bridge/drilldown?handle=...` වේ, ස්වාධීනව `modalityBridgeVideoDrilldownRemoteEnabled=true` විසින් දොරටු වේ. ලෙගසි `OMNIROUTE_VIDEO_BRIDGE_DRILLDOWN_REMOTE_ENABLED` env Fallback සක්‍රීය කර ඇති විට පවා පැහැදිලි දිගටම පවතින අසත්‍ය ප්‍රවේශය අවලංගු කරයි. නිෂ්පාදන රඳවා ගැනීමට සමාන උරුමය `OMNIROUTE_VIDEO_BRIDGE_DRILLDOWN_ENABLED` පසුබෑමක් ඇත. වැටීම් දෙකම පෙරනිමියෙන් ක්‍රියාවිරහිතයි.
 
-Guardrail එක සහාය දක්වන සෑම video part එකක්ම extract කරන නමුත් `modalityBridgeVideoMaxVideos` ගණනට වඩා විස්තර නොකරයි. `supportsVideo === false` බව සනාථ කළ target එකක් සඳහා, failed සහ over-limit videos explicit safe text markers බවට පත් කර raw video කිසිවක් ඉතිරි නොකරයි. Capability එක නොදන්නා විට, එම parts තම video carrier එක රඳවා ගනී; ඕනෑම fallback transcript එකක් ඉහත bounded text conversion එක අනුගමනය කරයි. `supportsVideo === true` සහිත targets bridge එක මඟ හරී. Client request abort signal එක download, broker queue, subprocesses, සහ caption calls හරහා propagate වේ; aborts videos අතර නවතින අතර raw media වෙත fail open වන්නේ කිසිවිටෙක නොවේ.
+පාරිභෝගිකයා සත්‍යාපනය කළ යතුරෙන් හිමිකාරිත්වය ලබා ගන්නා අතර ප්‍රධාන ප්‍රතිපත්තිය අදාළ කරයි: GET සහ DELETE යන දෙකම `/v1` සහ `/api/v1` අන්වර්ථ ඇතුළුව `video` අන්ත ලක්ෂ්‍ය කාණ්ඩයට අයත් වේ. හිස් නොවන අන්ත ලක්ෂ්‍ය අවසර ලැයිස්තුවක් සහිත යතුරුවල `video` ඇතුළත් විය යුතුය; සීමා නොකළ යතුරු අනුකූලව පවතී. පාරිභෝගිකයා නොදන්නා, කල් ඉකුත් වූ සහ වෙනත් යතුරක හැසිරවීම් සඳහා එම 404 ආපසු ලබා දෙයි. එය `variant=preview|standard|detail` (උපරිම JPEG මානය 320/640/1280, කිසි විටෙක ඉහළට නොයනු ඇත), `limit=1..8` (හෝ ලෙගසි `frames` අන්වර්ථය, කිසි විටෙකත් දෙකම නොවේ), ශුන්‍ය පදනම් වූ `page`, සහ විකල්ප `start`/`end` නාභිගත තත්පර පිළිගනී. අනුපිටපත් විමසුම් යතුරු සහ ප්‍රතිලෝම නාභිගත කවුළු ප්‍රතික්ෂේප වේ. සෑම ආපසු ප්‍රභේදයකටම එහි සත්‍ය අන්තර්ගතයේ හෑෂ් සහ සත්‍ය විභේදන පාර-දත්ත, රඳවා ගත් ප්‍රභවයට සම්බන්ධ කර ඇත. අමතර රඳවා ගත් පිටපත් ලෙස ගබඩා කරනවාට වඩා කියවීමේදී ප්‍රභේද ව්‍යුත්පන්න වේ. Base64/envelope ඇතුළුව JSON ප්‍රතිචාරය 32 MiB ට සීමා කර ඇත; විශාල පිටුවක් 413 ලබා දෙන අතර සේවාදායකයා අඩු රාමු ඉල්ලා සිටිය යුතුය. ආපසු පැමිණීමට පෙර එක් එක් ප්‍රමාණය වෙනස් කිරීම සහ හසුරුවල වලංගුභාවය නැවත පරීක්ෂා කිරීම වටා චෙක්පත් අවලංගු කිරීම කියවා බලයි. හිමිකරු විසින් `DELETE` idempotent වේ; මකාදැමීම හෝ TTL කල් ඉකුත්වීම රඳවාගත් මූලාශ්‍රය සහ භාවිත ගිණුම්කරණය මුදාහරියි.
 
-Runtime settings DB-backed වන අතර Zod-validated වේ:
+හවුල් ගබඩාව ක්‍රියාවලි-දේශීය වේ: හැන්ඩ්ල් නැවත ආරම්භයේදී කල් ඉකුත් වන අතර ස්වාධීන OmniRoute ක්‍රියාවලි අතර මාරු කළ නොහැක. කළමනාකරණ සංඛ්‍යාලේඛන මගින් ඵලදායි රඳවාගැනීම්/දුරස්ථ ප්‍රතිපත්තියක් හෙළිදරව් කරන අතර සමස්ථ රඳවාගත් entries/bytes පමණක්, කිසිවිටෙක මාධ්‍ය, යොමු කිරීම්, ප්‍රධාන IDs හෝ හැසිරවීම් නොවේ. වීඩියෝ සිටුවම් පැනලය එම අගයන් පෙන්වන අතර කැමැත්ත ස්විච දෙකම පැවතිය හැක. මෙම ක්‍රියාත්මක කිරීමේ ලියකියවිලි සජීවී යෙදවීම හෝ ප්‍රවර්ධන සාක්ෂි නොවේ; සැබෑ මාදිලියේ පිළිගැනීම වෙන වෙනම නිරීක්ෂණය කරනු ලැබේ.
 
-| Key                                 | Default     | Range / behavior                                                                                         |
+වින්‍යාස කළ වීඩියෝ ආකෘතිය සමඟ රාමු අනුක්‍රමිකව සිරස්තල කර ඇත. හිස් වීඩියෝ අභිබවා යාමක් විෂන් සැකසුම උරුම කරයි; දෙකම හිස් නම්, Vision ස්වයංක්‍රීය රවුටරය ඵලදායි දර්ශන හැකියාව ඇති ආකෘතිය තෝරා ගනී. සාර්ථක සිරස්තල මුල් කොටස ස්ථායී `[Video description:` උපසර්ගයක් සමඟ ප්‍රතිස්ථාපනය කරන අතර එය පාඨය විශ්වාස නොකළ මාධ්‍ය ව්‍යුත්පන්න නිරීක්‍ෂණයක් ලෙස සලකුණු කරන අතර මාධ්‍යයේ ඇති උපදෙස් අනුගමනය නොකරන ලෙස පහළ මාදිලිවලට කියයි. Frame-caption cache keys JPEG bytes, prompt, timestamp, and effective model; සාර්ථක සිරස්තල පමණක් හැඹිලිගත කර ඇත. හැඹිලි ඇතුළත් කිරීම් ෆෝල්බැක් ආකෘතියක් ඇතුළුව සැබෑ සාර්ථක නිෂ්පාදක මාදිලිය රඳවා තබා ගනී; විවිධ මාදිලි මගින් විවිධ රාමු නිපදවන විට පාලම `mixed` වාර්තා කරයි. හැඹිලි පහරක් එම නිෂ්පාදක අනන්‍යතාවය ඉල්ලා සිටින මාර්ගගත කිරීමේ සැලැස්ම ලෙස නැවත ලේබල් කිරීම වෙනුවට නැවත භාවිත කරයි. ප්‍රතිදාන — ප්‍රොම්ප්ට්, ඵලදායි ආකෘතිය, නියැදි ප්‍රතිපත්තිය, රාමු ගණන, අර්ථ විශ්ලේෂණ මාදිලිය, සාමාන්‍යකරණය වූ නාභිගත ඉඟියේ SHA-256 ඇඟිලි සලකුණ, නාභිගත කවුළුව, `transcript`, `audioTranscript`, සහ සම්බන්ධතා පත්‍ර ධජය — වෙනස් කරන සෑම ආදානයකටම සම්පූර්ණ-වීඩියෝ ප්‍රතිඵල හැඹිලිය යතුරු කර ඇත. දෘශ්‍ය ප්‍රතිපත්ති අනුවාදය, එළිපත්ත සහ සීමා වූ අපේක්ෂක රාමු ගණන ප්‍රතිඵල-හැඹිලි යතුර සහ පාර-දත්ත තුළ ද පැහැදිලි වේ; ප්‍රතිපත්තිමය වෙනසක් නිසා පරණ වූ සම්පූර්ණ වීඩියෝ විස්තරයක් නැවත භාවිත කළ නොහැක. ප්‍රතිඵල-හැඹිලි v4 පාර-දත්ත මාදිලිය සහ ඇඟිලි සලකුණ තබා ගනී, කිසි විටෙකත් අමු පරිශීලක කාර්යය නොවේ. Guardrail පාරදත්ත ඉල්ලන ලද සහ ඵලදායී විශ්ලේෂණ ක්‍රම දෙකම වාර්තා කරයි; භාවිතා කළ හැකි පරිශීලක පාඨයක් නොමැතිව ඉල්ලා සිටින `focused` මාදිලිය ඵලදායී ලෙස `full` ලෙස වාර්තා වේ.
+
+Guardrail මඟින් සහය දක්වන සෑම වීඩියෝ කොටසක්ම උපුටා ගන්නා නමුත් `modalityBridgeVideoMaxVideos` ට වඩා විස්තර නොකරයි. `supportsVideo === false` ඇති බවට ඔප්පු කර ඇති ඉලක්කයක් සඳහා, අසාර්ථක වූ සහ සීමාව ඉක්මවා ඇති වීඩියෝ පැහැදිලි ආරක්ෂිත පෙළ සලකුණු බවට පත් වන නිසා කිසිදු අමු වීඩියෝවක් නොනැසී පවතී. හැකියාව නොදන්නා විට, එම කොටස් ඔවුන්ගේ වීඩියෝ වාහකය රඳවා තබා ගනී; ඕනෑම පසුබැසීමේ පිටපතක් ඉහත සීමා කළ පෙළ පරිවර්තනය අනුගමනය කරයි. `supportsVideo === true` සමඟ ඉලක්ක පාලම මඟ හරියි. සේවාලාභියාගේ ඉල්ලීම අත්හිටුවීමේ සංඥාව බාගත කිරීම, තැරැව්කාර පෝලිම, උපක්‍රියාවලි සහ සිරස්තල ඇමතුම් හරහා ප්‍රචාරණය කරයි; ගබ්සා කිරීම් වීඩියෝ අතර නතර වන අතර කිසි විටෙක අමු මාධ්‍යයට විවෘත නොවේ.
+
+ධාවන කාල සැකසීම් DB-ආපසු සහ Zod වලංගු වේ:
+
+| යතුර                                | පෙරනිමිය    | පරාසය / හැසිරීම                                                                                          |
 | ----------------------------------- | ----------- | -------------------------------------------------------------------------------------------------------- |
-| `modalityBridgeVideoEnabled`        | `false`     | Optional runtime, opt-in                                                                                 |
-| `modalityBridgeVideoAnalysisMode`   | `"full"`    | `full` generic captions රඳවා ගනී; `focused` සීමා කළ, විශ්වාස නොකළ latest-user context භාවිත කරයි         |
-| `modalityBridgeVideoModel`          | `""`        | Vision Bridge model එක උරුම කර ගනී                                                                       |
+| `modalityBridgeVideoEnabled`        | `false`     | විකල්ප ධාවන කාලය, තේරීම                                                                                  |
+| `modalityBridgeVideoAnalysisMode`   | `"full"`    | `full` සාමාන්‍ය සිරස්තල ආරක්ෂා කරයි; `focused` සීමා සහිත, විශ්වාස නොකළ නවතම පරිශීලක සන්දර්භය භාවිතා කරයි |
+| `modalityBridgeVideoModel`          | `""`        | Vision Bridge ආකෘතිය උරුම කර ගන්න                                                                        |
 | `modalityBridgeVideoFrameCount`     | `8`         | 1–16                                                                                                     |
-| `modalityBridgeVideoSamplingPolicy` | `"uniform"` | `uniform`, `scene_aware`, හෝ proportional `segment_aware`; detector failure එක `uniform` වෙත fallback වේ |
+| `modalityBridgeVideoSamplingPolicy` | `"uniform"` | `uniform`, `scene_aware`, හෝ සමානුපාතික `segment_aware`; අනාවරක අසමත් වීම නැවත `uniform` වෙත වැටේ        |
 | `modalityBridgeVideoMaxVideos`      | `1`         | 1–4                                                                                                      |
-| `modalityBridgeVideoTimeout`        | `120000`    | 1000–120000 ms                                                                                           |
+| `modalityBridgeVideoTimeout`        | `120000`    | 1000-120000 ms                                                                                           |
 
-තත්පර 120 ඉක්මවන legacy persisted Video timeout values broker deadline එකට clamp කරනු ලැබේ; එම සීමාව ඉක්මවන නව settings writes ප්රතික්ෂේප කරනු ලැබේ. `GET /api/modality-bridge/video/runtime` සඳහා authentication හෝ runtime probing කිරීමට පෙර trusted stamped loopback locality අවශ්ය වන අතර, ඉන්පසු management auth අවශ්ය වේ. එය ලබා දෙන්නේ `available`, sanitized FFmpeg/ffprobe versions, සහ runtime එක unavailable වූ විට භාවිත කරන ස්ථාවර reason එක පමණි. Internal extraction endpoint එක public upload API එකක් නොවේ: queue saturation මඟින් `503` සහ `Retry-After` යවයි, caller disconnect එකක් `499` යවයි, සහ ස්ථාවර broker deadline එක `504` යවයි. Converted responses මධ්යම `x-omniroute-modality-bridge` header එකට `video->text;model=<visionModel>;parts=<videos>` එක් කරන නමුත් Vision හෝ Audio segments ඉවත් නොකරයි.
+Legacy persisted තත්පර 120 ට වැඩි වීඩියෝ කල් ඉකුත්වීමේ අගයන් තැරැව්කාර කාලසීමාවට තද කර ඇත; එම සීමාවට ඉහලින් ලියන නව සැකසුම් ප්‍රතික්ෂේප වේ. `GET /api/modality-bridge/video/runtime` සත්‍යාපනයට හෝ ධාවන කාල පරීක්‍ෂණයට පෙර විශ්වාසනීය මුද්දර සහිත loopback ප්‍රදේශය අවශ්‍ය වේ, පසුව කළමනාකරණ සත්‍යාපනය අවශ්‍ය වේ. එය ආපසු ලබා දෙන්නේ `available`, සනීපාරක්ෂක කළ FFmpeg/ffprobe අනුවාද සහ ධාවන කාලය නොමැති විට ස්ථිර හේතුවක් පමණි. අභ්‍යන්තර නිස්සාරණ අන්ත ලක්ෂ්‍යය පොදු උඩුගත කිරීමක් නොවේ API: පෝලිම් සන්තෘප්තිය `503` සහ `Retry-After` ලබා දෙයි, ඇමතුමක් විසන්ධි කරන්නෙකු `499` ආපසු ලබා දෙයි, සහ ස්ථාවර තැරැව්කරු අවසාන දිනය `504` ලබා දෙයි. පරිවර්තනය කරන ලද ප්‍රතිචාර මගින් විෂන් හෝ ශ්‍රව්‍ය කොටස් ඉවත් නොකර මධ්‍යම `x-omniroute-modality-bridge` ශීර්ෂයට `video->text;model=<visionModel>;parts=<videos>` එක් කරයි.
 
 ### PII Masker (`piiMasker.ts`)
 
-අදියර **දෙකෙහිම** ක්රියාත්මක වේ.
+ක්රියාත්මක වේ** දෙකම** අදියර.
 
-- **`preCall`** payload එක clone කර, `system`, `messages`, `input`, සහ
-  `prompt` හරහා (සාමාන්ය string items ද ඇතුළුව) ගමන් කර, string
-  `content`/`text` fields සඳහා
-  `@/shared/utils/inputSanitizer` වෙතින් ලැබෙන `processPII()` යොදයි.
-  `PII_REDACTION_ENABLED=true` වූ විට, හඳුනාගත් PII outbound payload තුළ
-  redacted කරයි. මෙය `INPUT_SANITIZER_MODE` වෙතින් ස්වාධීන වේ (එය
-  prompt-injection policy පමණක් පාලනය කරයි). Redaction අක්රිය විට, content
-  නැවත ලිවීමකින් තොරව detection counts සටහන් කරයි.
-- **`postCall`** response එක deep-clone කර, `sanitizePIIResponse()` සහ
-  Responses-API හැඩයේ masker එක (`maskResponsesOutput` —
-  `output_text` සහ `output[].content[].text` ආවරණය කරයි) ක්රියාත්මක කරයි.
-  කිසියම් redaction එකක් සිදු වුවහොත්, වෙනස් කළ response එක මුල් response එක
-  වෙනුවට යොදයි.
+- **`preCall`** ගෙවීමේ බර ක්ලෝන කරයි, `system`, `messages`, `input`, සහ `prompt` (සරල තන්තු අයිතම ඇතුළුව), සහ `processPII()` ( `@/shared/utils/inputSanitizer` සිට ) string `content`/`text` ක්ෂේත්‍රවලට යොදයි. `PII_REDACTION_ENABLED=true` විට, අනාවරණය කරගත් PII පිටතට යන ගෙවීමේදී නැවත සකස් කරනු ලැබේ. මෙය `INPUT_SANITIZER_MODE` වලින් ස්වායත්ත වේ (ඉක්මන් එන්නත් ප්‍රතිපත්තිය පමණක් පාලනය කරයි). නැවත සකස් කිරීම ක්‍රියාවිරහිත වූ විට, අන්තර්ගතය නැවත ලිවීමකින් තොරව ඇමතුම් වාර්තා හඳුනාගැනීම් ගණන් කරයි.
+- **`postCall`** ප්‍රතිචාරය ගැඹුරින් ක්ලෝන කරයි, `sanitizePIIResponse()` සහ ප්‍රතිචාර-API හැඩැති ආවරණ (`maskResponsesOutput` — `output_text` සහ `output[].content[].text` ආවරණය කරයි). කිසියම් අඩු කිරීමක් සිදු වුවහොත්, නවීකරණය කරන ලද ප්‍රතිචාරය මුල් පිටපත ප්‍රතිස්ථාපනය කරයි.
 
-Guardrail එක කිසි විටෙක block නොකරයි; එය annotations පමණක් එක් කරයි
-(`meta.detections`, `meta.redacted`) හෝ නැවත ලියයි.
+ආරක්ෂක වැට කිසි විටෙකත් අවහිර නොවේ; එය විවරණ (`meta.detections`, `meta.redacted`) හෝ නැවත ලියයි.
 
-#### එක් වර්ගයකට තේරීම, අභිරුචි patterns සහ detection counters
+#### එක්-වර්ගය තේරීම, අභිරුචි රටා සහ හඳුනාගැනීමේ කවුන්ටර
 
-**Dashboard → Settings → Security → PII masking** මඟින් mask කළ යුතු දේ
-තෝරයි. එය masking ක්රියාත්මක නොකරයි: එය තවමත්
-`PII_REDACTION_ENABLED` (request) සහ `PII_RESPONSE_SANITIZATION`
-(response + SSE) මඟින් පාලනය වේ; දෙකම පෙරනිමියෙන් අක්රියය.
+**උපකරණ පුවරුව → සැකසීම් → ආරක්ෂාව → PII ආවරණ** වසන ලද_දේ_තෝරා ගනී. එය මාස්ක් කිරීම ක්‍රියාත්මක නොකරයි: එය තවමත් `PII_REDACTION_ENABLED` (ඉල්ලීම) සහ `PII_RESPONSE_SANITIZATION` (ප්‍රතිචාර + SSE), පෙරනිමියෙන් ක්‍රියා විරහිත වේ.
 
-- **Per-type selection** — built-in ids
-  `src/shared/constants/piiTypes.ts` (`PII_BUILTIN_TYPES`) තුළ ලැයිස්තුගත කර
-  ඇත. නොසකසා තිබීමෙන් සියලු වර්ග අදහස් වේ (මෙම setting එක පැමිණීමට පෙර තිබූ
-  හැසිරීම). Request engine හි `ssn_us` pattern එක `ssn` වෙත map වේ.
-  Templates (Minimal, Standard, Financial, Brazilian, USA, GDPR, POPIA, Full)
-  UI හි checkboxes පමණක් පුරවයි.
-- **GDPR සහ POPIA identifiers** — EU සහ දකුණු අප්රිකානු පුද්ගලික
-  identifiers ආවරණය කරන built-in ids දොළහක් ඇත (පහත වගුව). ඒවායේ regexes,
-  validators සහ jurisdiction tags එක් වගුවක,
-  `src/shared/utils/piiPatterns.ts`, තිබෙන අතර response sanitizer එක
-  (`src/lib/piiSanitizer.ts`) සහ request masker එක
-  (`src/shared/utils/inputSanitizer.ts`) දෙකම එය භාවිත කරයි. Match එකක්
-  redacted කරන්නේ එහි validator එක එය පිළිගත් විට පමණි; හිස් digits
-  අනුක්රමයක් කිසි විටෙක ප්රමාණවත් නොවේ. මෙම ids පැමිණීමට පෙර සීමා කළ
-  selection එකක් save කළ operator කෙනෙකුට, නව ids තෝරන තුරු තිබූ හැසිරීමම
-  පවතී.
-- **Custom patterns** — regex හෝ wildcard patterns 20ක් දක්වා (`*` = උපරිම
-  whitespace නොවන characters 64ක්, `?` = එකක්). Matches
-  `[CUSTOM_REDACTED]` බවට පත්වේ. සෑම pattern එකක්ම
-  `compilePiiCustomPattern()` (`src/shared/utils/piiCustomPatterns.ts`)
-  හරහා යයි: උපරිම characters 500ක්, flags `g i m s u` වෙත පමණක් සීමා විය
-  යුතුය, compile විය යුතුය, `safe-regex` පරීක්ෂාව (catastrophic
-  backtracking) සමත් විය යුතුය, සහ empty string එකකට හෝ redaction
-  placeholder එකකට match නොවිය යුතුය. අසමත් pattern එකක් save කරන විට සහ
-  test කරන විට ප්රතික්ෂේප කරයි; අසමත් වන stored row එකක් compile කිරීම වෙනුවට
-  runtime හි skip කරයි. Custom patterns ක්රියාත්මක වන්නේ masking on විට
-  පමණි.
-- **Detection counters** — එක් එක් වර්ගයට අදාළ counts (කිසි විටෙක matched
-  values නොවේ), memory තුළ තබාගෙන restart එකකදී reset කරයි
-  (`src/lib/pii/piiDetectionStats.ts`). ඒවා වැඩි වන්නේ masking on විට
-  පමණි.
+- **එක් වර්ගයේ තේරීම** — ගොඩනඟන ලද ids `src/shared/constants/piiTypes.ts` (`PII_BUILTIN_TYPES`) හි ලැයිස්තුගත කර ඇත. නොසැකසීම යනු සෑම වර්ගයකම (මෙම සැකසීමට පෙර පැවති හැසිරීම) යන්නයි. ඉල්ලීම් එන්ජිමේ `ssn_us` රටාව `ssn` වෙත සිතියම්ගත කරයි. සැකිලි (අවම, සම්මත, මූල්‍ය, බ්‍රසීලියානු, USA, GDPR, POPIA, සම්පූර්ණ) UI හි පිරික්සුම් කොටු පමණක් පුරවන්න.
+- **GDPR සහ POPIA හඳුනාගැනීම්** EU සහ දකුණු අප්‍රිකානු පුද්ගලික හැඳුනුම්කාරක ආවරණය වන — දොළොස් ID (පහත වගුව). ඔවුන්ගේ regexes, Validators සහ අධිකරණ බලය ටැග් එක වගුවක ජීවත් වේ, `src/shared/utils/piiPatterns.ts`, ප්‍රතිචාර සනීපාරක්ෂක (`src/lib/piiSanitizer.ts`) සහ ඉල්ලීම් ආවරණ (`src/shared/utils/inputSanitizer.ts`) යන දෙකම පරිභෝජනය කරයි. ගැලපීමක් නැවත සකස් කරනු ලබන්නේ එහි වලංගුකරු එය පිළිගත් විට පමණි; ඉලක්කම්වල හිස් ධාවනය කිසි විටෙකත් ප්‍රමාණවත් නොවේ. මෙම හැඳුනුම්පත් පැවතීමට පෙර පටු තේරීමක් සුරකින ලද ක්‍රියාකරුවෙකු නව හැඳුනුම්පත් සලකුණු කරන තෙක් එහි පැවති හැසිරීම තබා ගනී.
+- **අභිරුචි රටා** — 20 දක්වා regex හෝ Wildcard රටා (`*` = 64-සුදු අවකාශ නොවන අක්ෂර, `?` = එකක් දක්වා). තරඟ `[CUSTOM_REDACTED]` බවට පත් වේ. සෑම රටාවක්ම `compilePiiCustomPattern()` (`src/shared/utils/piiCustomPatterns.ts`) හරහා යයි: උපරිම වශයෙන් අක්ෂර 500ක්, `g i m s u` වලට සීමා වූ කොඩි, සම්පාදනය කළ යුතුය, `safe-regex` සමත් විය යුතුය (ව්‍යසනකාරී පසුබැසීම) සහ හිස් තන්තුවකට හෝ නැවත සකස් කිරීමේ ස්ථාන රඳවනයකට නොගැලපේ. අසමත් වන රටාවක් සුරැකීමේදී සහ පරීක්ෂා කිරීමේදී ප්‍රතික්ෂේප කරනු ලබන අතර, අසමත් වන ගබඩා කර ඇති පේළියක් සම්පාදනය කරනවා වෙනුවට ධාවන වේලාවේදී මඟ හරිනු ලැබේ. අභිරුචි රටා ධාවනය වන්නේ මාස්ක් කිරීම ක්‍රියාත්මක වන විට පමණි.
+- **හඳුනාගැනීමේ කවුන්ටර** — per-type ගණන් (කවදාවත් නොගැලපෙන අගයන්), මතකයේ රඳවා ඇති අතර නැවත ආරම්භ කිරීමේදී යළි පිහිටුවන්න (`src/lib/pii/piiDetectionStats.ts`). මාස්ක් කිරීම ක්‍රියාත්මක වන විට පමණක් ඒවා වැඩි වේ.
 
-Settings `key_value` table එකේ (namespace `pii_settings`,
-`src/lib/db/piiSettings.ts`) තබා ඇති අතර, 1 s cache එකක් හරහා කියවනු ලැබේ.
-API:
+සැකසීම් `key_value` වගුවේ (නාම අවකාශය `pii_settings`, `src/lib/db/piiSettings.ts`) සජීවී වන අතර 1 s හැඹිලියක් හරහා කියවනු ලැබේ. API:
 
-| Method | Path                     | Purpose                                                                    |
-| ------ | ------------------------ | -------------------------------------------------------------------------- |
-| `GET`  | `/api/settings/pii`      | Flag state, `enabledTypes`, `customPatterns`, detection counters           |
-| `PUT`  | `/api/settings/pii`      | `enabledTypes` (`null` = all) සහ/හෝ `customPatterns` ප්රතිස්ථාපනය කිරීම    |
-| `POST` | `/api/settings/pii/test` | උපරිම 8 KB sample එකකට එක් pattern එකක් dry-run කිරීම; කිසිවක් ගබඩා නොකෙරේ |
+| ක්රමය  | මාර්ගය                   | අරමුණ                                                                   |
+| ------ | ------------------------ | ----------------------------------------------------------------------- |
+| `GET`  | `/api/settings/pii`      | කොඩි තත්ත්වය, `enabledTypes`, `customPatterns`, හඳුනාගැනීමේ කවුන්ටර     |
+| `PUT`  | `/api/settings/pii`      | `enabledTypes` (`null` = all) and/or `customPatterns` ආදේශ කරන්න        |
+| `POST` | `/api/settings/pii/test` | 8 KB නියැදියකට එරෙහිව එක් රටාවක් වියලි ධාවනය කරන්න; කිසිවක් ගබඩා කර නැත |
 
-මේ තුනටම management auth අවශ්ය වන අතර, body එක Zod මඟින් validate කරයි
-(`src/shared/validation/schemas/piiSettings.ts`).
+තුනටම කළමනාකාරිත්වය අවශ්‍ය වන අතර Zod (`src/shared/validation/schemas/piiSettings.ts`) සමඟ ශරීරය වලංගු කිරීම. පුරනය වීම අබල කර ඇති (`requireLogin=false`) `GET` සහ පරීක්ෂණ අන්ත ලක්ෂ්‍යය විවෘතව ඇත, නමුත් `PUT` තවමත් උපකරණ පුවරු සැසියක්, `manage` -scope API යතුරක්, ලිවීමේ විෂය පථය හෝ ඊට වැඩි `oma_` ප්‍රවේශ ටෝකනයක් හෝ loopback වෙතින් එවන ලද CLI ටෝකනය හෝ අභ්‍යන්තර සේවා ටෝකනය අවශ්‍ය වේ.
 
-#### GDPR (EU) සහ POPIA (දකුණු අප්රිකාව) identifiers
+#### GDPR (EU) සහ POPIA (දකුණු අප්‍රිකාව) හඳුනාගැනීම්
 
-| Id                  | Identifier               | Validation                                                                         |
-| ------------------- | ------------------------ | ---------------------------------------------------------------------------------- |
-| `iban`              | IBAN                     | දන්නා රටක්, එම රටට නිශ්චිත exact length එක, ISO 13616 MOD-97-10                    |
-| `eu_vat`            | EU VAT number            | දන්නා member-state prefix එක සහ එම ප්රාන්තයේ number format එක (VIES lookup නොමැත)  |
-| `es_dni_nie`        | Spanish DNI / NIE        | Control letter (value mod 23); NIE යනු `X/Y/Z` + digits 7කි                        |
-| `it_codice_fiscale` | Italian Codice Fiscale   | odd/even position tables වෙතින් ලැබෙන control letter                               |
-| `pl_pesel`          | Polish PESEL             | Weighted checksum එක සහ පවතින encoded birth date එක                                |
-| `nl_bsn`            | Dutch BSN                | 11-proof (weights 9..2, -1)                                                        |
-| `de_steuer_id`      | German Steuer-ID         | ISO 7064 Mod 11,10 සහ digit-structure rules (ආරම්භක 0 නොමැත)                       |
-| `se_personnummer`   | Swedish personnummer     | අවසන් digits දහය මත Luhn සහ plausibly valid birth date එකක් (digits 10 හෝ 12)      |
-| `za_id`             | South African ID number  | digits 13ම මත Luhn, valid birth month/day, citizenship digit 0 හෝ 1                |
-| `za_phone`          | South African phone      | `+27` / `27` prefix එක, හෝ space හෝ hyphen සමඟ ලියූ national `0..` form එක         |
-| `za_vat`            | South African VAT number | `4` න් ආරම්භ වන digits 10ක් **සහ** පෙර characters 48 තුළ "VAT" / "BTW"             |
-| `za_tax_ref`        | South African tax ref.   | `0`-`3` න් ආරම්භ වන digits 10ක්, Luhn, **සහ** පෙර characters 48 තුළ "tax" / "SARS" |
+| හැඳුනුම්පත          | හඳුනාගැනීම                | වලංගුකරණය                                                                       |
+| ------------------- | ------------------------- | ------------------------------------------------------------------------------- |
+| `iban`              | IBAN                      | දන්නා රට, එම රට සඳහා නිශ්චිත දිග, ISO 13616 MOD-97-10                           |
+| `eu_vat`            | EU VAT අංකය               | දන්නා සාමාජික-රාජ්‍ය උපසර්ගය සහ එම ප්‍රාන්තයේ අංක ආකෘතිය ( VIES සෙවීමක් නැත)    |
+| `es_dni_nie`        | ස්පාඤ්ඤ DNI / NIE         | පාලන ලිපිය (අගය mod 23); NIE යනු `X/Y/Z` + ඉලක්කම් 7කි                          |
+| `it_codice_fiscale` | ඉතාලි කෝඩිස් ෆිස්කේල්     | odd/even පිහිටුම් වගු වලින් පාලන ලිපිය                                          |
+| `pl_pesel`          | පෝලන්ත PESEL              | බර කළ චෙක්සම් සහ පවතින සංකේතාත්මක උපන් දිනයක්                                   |
+| `nl_bsn`            | ලන්දේසි BSN               | 11-සාක්ෂි (බර 9..2, -1)                                                         |
+| `de_steuer_id`      | ජර්මානු ස්ටීවර්-ID        | ISO 7064 Mod 11,10 සහ ඉලක්කම්-ව්‍යුහය රීති (0 ප්‍රමුඛ නැත)                      |
+| `se_personnummer`   | ස්වීඩන් පුද්ගල අංකය       | අවසාන ඉලක්කම් දහය සහ පිළිගත හැකි උපන්දිනයක් (ඉලක්කම් 10 හෝ 12) මත Luhn          |
+| `za_id`             | දකුණු අප්‍රිකානු ID අංකය  | සියලුම ඉලක්කම් 13 ට වැඩි Luhn, වලංගු උපත් month/day, පුරවැසිභාවය ඉලක්කම් 0 හෝ 1 |
+| `za_phone`          | දකුණු අප්‍රිකානු දුරකථනය  | `+27` / `27` උපසර්ගය, හෝ ජාතික `0..` පෝරමය අවකාශයක් හෝ යටි ඉරකින් ලියා ඇත       |
+| `za_vat`            | දකුණු අප්‍රිකානු VAT අංකය | `4` වලින් ආරම්භ වන ඉලක්කම් 10** සහ** පෙර අක්ෂර 48 න් "VAT" / "BTW"              |
+| `za_tax_ref`        | දකුණු අප්‍රිකානු බදු ref. | `0` ආරම්භ වන ඉලක්කම් 10 -`3`, Luhn,** සහ** "බදු" / "SARS" පෙර අක්ෂර 48 කින්     |
 
-ඉලක්කම් පමණක් අඩංගු ආකෘති ඇණවුම් අංක, build අංක සහ වේලා මුද්රා සමඟ ගැටෙන බැවින්, දුර්වලම ඒවාට (`za_vat`, `za_tax_ref`) keyword cue එක අවශ්ය වන අතර, හිස් දස-ඉලක්කම් `0..` අංකයක් දකුණු අප්රිකානු දුරකථන අංකයක් ලෙස සලකනු නොලැබේ.
-හිස්තැන් සහිත IBAN (`GB29 NWBK ...`) ගැළපෙන්නේ නැත. Streaming path එකේදී cue එක සොයන්නේ වත්මන් chunk එක තුළ පමණි. IDs සාමාන්ය දුරකථන රටා වලට ඉදිරියෙන් තබා ඇති බැවින්, වලංගු කළ identifier එක තමන්ගේම placeholder එක තබා ගනී
-(`[IBAN_REDACTED]`, `[NL_BSN_REDACTED]`, ...). `gdpr` සහ `popia` templates මඟින් පිළිවෙළින් EU සහ දකුණු අප්රිකානු IDs තෝරා ගනී. Masking එක opt-in ලෙසම පවතී
-(Hard Rule #20): මෙහි කිසිවක් feature-flag default එක වෙනස් නොකරයි.
+සංඛ්‍යා-පමණක් ආකෘති ඇණවුම් අංක සමඟ ගැටෙන නිසා, අංක සහ වේලා මුද්‍රා ගොඩනඟන බැවින්, දුර්වලම ඒවාට (`za_vat`, `za_tax_ref`) මූල පදය අවශ්‍ය වන අතර ඉලක්කම් දහයේ `0..` අංකයක් දකුණු අප්‍රිකානු දුරකථන අංකයක් ලෙස නොසලකයි. පරතරය සහිත IBANs (`GB29 NWBK ...`) නොගැලපේ. ප්‍රවාහ මාර්ගයේ ඉඟිය වත්මන් කොටස තුළ පමණක් ඉහළට බලයි. ids සාමාන්‍ය දුරකථන රටා වලට වඩා ඉදිරියෙන් පිහිටා ඇත, එබැවින් වලංගු හැඳුනුම්කාරකයක් තමන්ගේම තැන් දරණුවක් තබා ගනී (`[IBAN_REDACTED]`, `[NL_BSN_REDACTED]`, ...). `gdpr` සහ `popia` සැකිලි පිළිවෙලින් EU සහ දකුණු අප්‍රිකානු id තෝරා ගනී. මාස්ක් කිරීම ප්‍රවේශය තුළ පවතී (දෘඪ රීතිය #20): මෙහි කිසිවක් විශේෂාංග-ධජ පෙරනිමියක් වෙනස් නොකරයි.
 
-### Prompt Injection (`promptInjection.ts`)
+### ඉක්මන් එන්නත් කිරීම (`promptInjection.ts`)
 
-පරිශීලකයා සපයන අන්තර්ගතයේ විරුද්ධවාදී ව්යුහ හඳුනාගෙන, සකසා ඇති ප්රතිපත්තිය බලාත්මක කරයි. හැසිරීම environment variables සහ constructor options මඟින් පාලනය වේ:
+පරිශීලක-සපයා ඇති අන්තර්ගතයේ විරුද්ධවාදී ව්‍යුහයන් හඳුනාගෙන වින්‍යාස කළ ප්‍රතිපත්තිය බලාත්මක කරයි. හැසිරීම පරිසර විචල්‍යයන් සහ ඉදිකිරීම් විකල්ප මගින් මෙහෙයවනු ලැබේ:
 
-| Setting         | Env var                                                                                               | Default | Effect                                                                                                                                                                              |
-| --------------- | ----------------------------------------------------------------------------------------------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Enabled         | `INPUT_SANITIZER_ENABLED`                                                                             | `true`  | `false` වූ විට guardrail එක වහාම අවසන් වේ.                                                                                                                                          |
-| Mode            | `INJECTION_GUARD_MODE` / `INPUT_SANITIZER_MODE`                                                       | `warn`  | Injection policy: `block`, `warn`, හෝ `log`. (`redact` back-compat සඳහා පිළිගන්නා නමුත් injection text ඉවත් නොකරයි; request PII rewrite එක `PII_REDACTION_ENABLED` මඟින් පාලනය වේ.) |
-| Block threshold | `blockThreshold` option / `INPUT_SANITIZER_BLOCK_THRESHOLD` (alias `INJECTION_GUARD_BLOCK_THRESHOLD`) | `high`  | block කිරීමට අවශ්ය අවම severity මට්ටම. Default එකේදී Medium මට්ටම observe-only වේ.                                                                                                  |
+| සැකසීම       | Env var                                                                                                       | පෙරනිමිය | බලපෑම                                                                                                                                                                                         |
+| ------------ | ------------------------------------------------------------------------------------------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| සබල කර ඇත    | `INPUT_SANITIZER_ENABLED`                                                                                     | `true`   | විට `false`, ආරක්ෂක කෙටි-පරිපථ.                                                                                                                                                               |
+| මාදිලිය      | `INJECTION_GUARD_MODE` / `INPUT_SANITIZER_MODE`                                                               | `warn`   | එන්නත් ප්‍රතිපත්තිය: `block`, `warn`, හෝ `log`. (`redact` back-compat සඳහා පිළිගනු ලබන නමුත් එසේ කරයි** නැත** තීරු එන්නත් පෙළ; ඉල්ලීම PII නැවත ලිවීම `PII_REDACTION_ENABLED` මගින් පාලනය වේ.) |
+| වාරණ එළිපත්ත | `blockThreshold` විකල්පය / `INPUT_SANITIZER_BLOCK_THRESHOLD` (අන්වර්ථ නාමය `INJECTION_GUARD_BLOCK_THRESHOLD`) | `high`   | අවහිර කිරීමට අවශ්ය අවම බරපතලකම. මධ්‍යම යනු පෙරනිමියෙන් නිරීක්ෂණය කිරීමට පමණි.                                                                                                                 |
 
-**Mode precedence** (`getMode`): caller `options.mode` →
-`INJECTION_GUARD_MODE` **DB feature-flag override** (Dashboard → Settings →
-Feature Flags) → `INJECTION_GUARD_MODE` env → `INPUT_SANITIZER_MODE` env →
-`warn`. එබැවින් dashboard override එක env vars අභිබවා යන අතර, Feature
-Flags UI මඟින් ධාවනය වන guard එක live ලෙස පාලනය කරයි (restart එකක් අවශ්ය නොවේ). DB කියවීම fail-safe වේ:
-එය දෝෂයකට ලක් වුවහොත්, guard එක env මත පදනම් වූ හැසිරීමට ආපසු යන අතර, override එකක් සකසා නොමැති විට හැසිරීම env-only resolution එකට සමාන වේ.
+**මාදිලියේ ප්රමුඛත්වය** (`getMode`): අමතන්නා `options.mode` → `INJECTION_GUARD_MODE`**DB විශේෂාංග-ධජය අභිබවා යාම** (උපකරණ පුවරුව → සැකසීම් → විශේෂාංග කොඩි) → `INJECTION_GUARD_MODE` env → `INPUT_SANITIZER_MODE` env → `warn`. උපකරණ පුවරුව ප්‍රතික්‍ෂේප කිරීම නිසා env vars ජය ගනී, එබැවින් විශේෂාංග කොඩි UI ධාවනය වන ආරක්ෂකයා සජීවීව පාලනය කරයි (නැවත ආරම්භ කිරීම නැත). DB කියවීම අසාර්ථකයි-ආරක්ෂිතයි: එය දෝෂ සහිත නම්, ආරක්ෂකයා env-පාදක හැසිරීම වෙත ආපසු වැටෙන අතර, අභිබවා යාමක් සකසා නොමැති විට හැසිරීම env-only resolution වලට සමාන වේ.
 
-හඳුනාගැනීමේ මූලාශ්ර:
+හඳුනාගැනීමේ මූලාශ්‍ර:
 
-1. `@/shared/utils/inputSanitizer` වෙතින් `sanitizeRequest()` (pipeline එකේ වෙනත් ස්ථානවලද භාවිත වන shared detector set එක).
-2. Built-in `DEFAULT_GUARD_PATTERNS` (`system_override_inline` සහ `markdown_system_block` යන දෙකම දැනට `high` severity වේ).
-3. Constructor options හරහා ලබාදෙන විකල්ප `customPatterns` (strings, regex, හෝ `{ name, pattern, severity }` records).
+1. `@/shared/utils/inputSanitizer` සිට `sanitizeRequest()` (නල මාර්ගයේ වෙනත් තැනක භාවිතා කරන ලද හවුල් අනාවරක කට්ටලය).
+2. බිල්ට්-ඉන් `DEFAULT_GUARD_PATTERNS` (දැනට `system_override_inline` සහ `markdown_system_block`, දෙකම `high` බරපතලකම).
+3. විකල්ප `customPatterns` කන්ස්ට්‍රක්ටර් විකල්ප (තන්තු, regex, හෝ `{ name, pattern, severity }` වාර්තා) හරහා සම්මත විය.
 
-`mode === "block"` සහ අවම වශයෙන් එක් detection එකක් severity threshold එක සපුරාලන විට, `preCall` මඟින් `{ block: true, message: "Request rejected:
-suspicious content detected" }` ආපසු ලබා දෙයි. `warn`/`log` modes වලදී guardrail එක log කරන නමුත් call එකට ඉඩ දෙයි. Registry එක හරහා නොගොස් prompts ඇගයීමට අවශ්ය callers සඳහා shared helper `evaluatePromptInjection()` ද export කර ඇත.
+විට `mode === "block"`** සහ** අවම වශයෙන් එක් අනාවරණයක් බරපතලකමේ සීමාව සපුරාලයි, `preCall` ආපසු `{ block: true, message: "Request rejected: suspicious content detected" }`. `warn`/`log` මාතයන් තුළ ආරක්ෂක වැට ලොග් වන නමුත් ඇමතුමට ඉඩ දෙයි. හවුල් උපකාරක `evaluatePromptInjection()` රෙජිස්ට්‍රිය හරහා නොගොස් විමසීම් ඇගයීමට අවශ්‍ය ඇමතුම්කරුවන් සඳහා ද අපනයනය කෙරේ.
 
-**Scan bound (v3.8.20):** detector එක එක් කළ prompt text එකේ **පළමු 16 KB** පමණක් පරීක්ෂා කරයි — `src/shared/utils/inputSanitizer.ts` තුළ
-`MAX_INJECTION_SCAN_BYTES = 16 * 1024` (16 384 bytes) වේ. Pattern loop එක ධාවනය කිරීමට පෙර `detectInjection()` සහ
-`evaluatePromptInjection()` දෙකම `slice(0, MAX_INJECTION_SCAN_BYTES)` සිදු කරයි. Injection directives input එකේ ඉහළ ආසන්නයේ ඇති බැවින්, මෙය multi-hundred-KB payloads වල regex CPU/GC සීමා කරන්නේ detection දුර්වල නොකරමිනි (cf.
-#3932, #4041).
+**ස්කෑන් බැඳී (v3.8.20):** අනාවරකය පමණක් පරීක්ෂා කරයි** පළමු 16 KB** `src/shared/utils/inputSanitizer.ts` හි සම්බන්ධ වූ ක්ෂණික පෙළ — `MAX_INJECTION_SCAN_BYTES = 16 * 1024` (බයිට් 16 384) . රටා ලූපය ධාවනය කිරීමට පෙර `detectInjection()` සහ `evaluatePromptInjection()` `slice(0, MAX_INJECTION_SCAN_BYTES)` දෙකම. එන්නත් විධානයන් ආදානයක මුදුනට ආසන්නයේ පිහිටා ඇත, එබැවින් මෙය හඳුනාගැනීම දුර්වල නොකර බහු-සියය-KB පැටවුම් මත regex CPU/GC සීමා කරයි (cf. #3932, #4041).
 
-### Credential Masker (`credentialMasker.ts`)
+### අක්තපත්‍ර වෙස් මුහුණ (`credentialMasker.ts`)
 
-Default chain එකේ අවසන් ස්ථානයේ (priority `95`) stages **දෙකෙහිම** ක්රියා කරයි. Outbound payload එකේ (message content, tool-call arguments, tool results) **සහ** provider response එකේ ඇති ප්රසිද්ධ API-key / secret-token රටා redact කරයි. එබැවින් prompt එකකට අලවා ඇති credential එකක් (හෝ tool result එකකින් නැවත ලබා දුන් credential එකක්) upstream provider වෙත හෝ client වෙත කාන්දු නොවේ.
+ක්රියාත්මක වේ** දෙකම** අදියර, පෙරනිමි දාමයේ අවසන් (ප්රමුඛත්වය `95`). පිටතට යන පේලෝඩ් වෙතින් සුප්‍රසිද්ධ API-යතුර / රහස්-ටෝකන් රටා නැවත සකස් කරයි (පණිවිඩ අන්තර්ගතය, මෙවලම්-ඇමතුම් තර්ක, මෙවලම් ප්‍රතිඵල)** සහ** සපයන්නාගේ ප්‍රතිචාරය, එබැවින් ප්‍රේරකයකට ඇලවූ අක්තපත්‍රයක් (හෝ මෙවලම් ප්‍රතිඵලයක් මගින් ආපසු ප්‍රතිරාවය කරන ලද) ඉහළ ධාරාව සපයන්නා වෙත හෝ නැවත සේවාලාභියා වෙත කාන්දු නොවේ.
 
-- **Opt-in පමණි**, PII redaction හා සමාන convention එකක් (Hard Rule #20-adjacent):
-  `settings.credentialRedactionEnabled === true` **හෝ**
-  `CREDENTIAL_REDACTION_ENABLED=true` වූ විට පමණක් සක්රිය වේ. එය අක්රිය නම් guardrail එක no-op එකක් වේ —
-  කිසිවිටෙක block නොකරන අතර කිසිවිටෙක rewrite නොකරයි.
-- `redactCredentials()` සම්පූර්ණ payload/response tree එක හරහා ගමන් කරයි (`walkValue()`,
-  prototype-pollution-safe, `WeakSet` හරහා cycle-safe) සහ matches `[REDACTED:<type>]` placeholder එකකින් ප්රතිස්ථාපනය කරයි. වෙනස් වූ branches පමණක් clone කරයි.
-- `CREDENTIAL_PATTERNS` තුළ LLM provider keys (OpenAI, OpenAI-proj,
-  Anthropic, Google, Hugging Face, Replicate), VCS/SaaS tokens (GitHub, Slack, Linear, Notion, npm, Postman, Discord), payment keys (Stripe, Square), cloud
-  keys (AWS access key, Twilio, SendGrid, Mailgun), private keys / JWTs,
-  credential-bearing connection strings (`mongodb://user:pass@...`, ආදිය), සහ සාමාන්ය
-  `Authorization`/`x-api-key`/`api-key`/`apikey` header-value
-  pattern එක ආවරණය කරයි. Header-හැඩැති keys (`authorization`, `x-api-key`, `api-key`,
-  `apikey`) generic text regex එක හරහා නොව, ව්යුහාත්මකව (value එක පමණක්, `Bearer `/`Basic ` වැනි
-  scheme prefix එක තබාගෙන) redact කරයි.
-- Guardrail එක කිසිවිටෙක block නොකරයි; එය rewrite පමණක් සිදු කරයි (`modifiedPayload` /
-  `modifiedResponse`) සහ annotations එක් කරයි (`meta.credentialsRedacted`, `meta.count`).
+- **තෝරා ගැනීම පමණි** , PII redaction වැනි සම්මුතිය (දෘඪ රීතිය #20- යාබද): `settings.credentialRedactionEnabled === true` නම් මිස අබල කර ඇත** හෝ** `CREDENTIAL_REDACTION_ENABLED=true` එය ක්‍රියා විරහිත වීමත් සමඟ, ආරක්ෂක වැට කිසිවිටක අවහිර නොකරන සහ නැවත ලියන්නේ නැති — වේ.
+- `redactCredentials()` සම්පූර්ණ payload/response ගස (`walkValue()`, මූලාකෘති-දූෂණය-ආරක්ෂිත, `WeakSet` හරහා චක්‍රය-ආරක්ෂිත) ඇවිදිමින් සහ තරඟ `[REDACTED:<type>]` ස්ථාන රඳවනයක් සමඟ ප්‍රතිස්ථාපනය කරයි, ඇත්ත වශයෙන්ම වෙනස් වූ අතු පමණක් ක්ලෝන කරයි.
+- `CREDENTIAL_PATTERNS` LLM සපයන්නාගේ යතුරු ආවරණය කරයි (OpenAI, OpenAI-proj, Anthropic, Google, වැළඳගැනීමේ මුහුණ, අනුකරණය), VCS/SaaS ටෝකන (GitHub, Slack, රේඛීය, Notion, npm, Postman, Discord), ගෙවීම් යතුරු,AWS යතුරු Twilio, SendGrid, Mailgun), පුද්ගලික යතුරු / JWTs, අක්තපත්‍ර සහිත සම්බන්ධතා තන්තු (`mongodb://user:pass@...`, ආදිය), සහ සාමාන්‍ය `Authorization`/`x-api-key`/`api-key`/`apikey` ශීර්ෂ-අගය රටා. ශීර්ෂක හැඩැති යතුරු (`authorization`, `x-api-key`, `api-key`, `apikey`) සාමාන්‍ය පෙළ regex හරහා නොව ව්‍යුහාත්මකව (වටිනාකම පමණි, `Bearer `/`Basic ` සංරක්ෂණය කර ඇති යෝජනා ක්‍රම උපසර්ගය) නැවත සකස් කර ඇත.
+- ආරක්ෂක වැට කිසි විටෙකත් අවහිර නොවේ; එය නැවත ලියන්නේ (`modifiedPayload` / `modifiedResponse`) සහ විවරණ (`meta.credentialsRedacted`, `meta.count`) පමණි.
 
-ප්රතිගමන ආරක්ෂණය: `tests/unit/credential-masker-guardrail.test.ts`.
+ප්‍රතිගාමී ආරක්ෂකයා: `tests/unit/credential-masker-guardrail.test.ts`.
 
 ## මූලික ගිවිසුම (`base.ts`)
 

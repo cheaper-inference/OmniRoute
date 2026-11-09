@@ -354,82 +354,82 @@ Malli: cc/claude-opus-4-7
 
 ---
 
-## 🚀 Käyttöönotto
+## 🚀 käyttöönotto
 
 ### Globaali npm-asennus (suositus)
 
 ```bash
 npm install -g omniroute
 
-# Luo määrityshakemisto
+# Create config directory
 mkdir -p ~/.omniroute
 
-# Luo .env-tiedosto (katso .env.example)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# Käynnistä palvelin
+# Start server
 omniroute
-# Tai mukautetulla portilla:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI lataa `.env`-tiedoston automaattisesti sijainnista `~/.omniroute/.env` tai `./.env`.
+CLI lataa `.env` automaattisesti `~/.omniroute/.env` tai `./.env`. Työhakemiston `./.env` voi asettaa vain lyhyen sallittujen näppäinluettelon (portit, `REQUIRE_API_KEY`, alue- ja väriasetukset); laita kaikki muu `~/.omniroute/.env`. Katso [CLI käynnistyssopimukset](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
-### Ilmoitusaluetila
+### Lokerotila
 
-Käynnistä OmniRoute järjestelmän ilmoitusalueella:
+Käynnistä OmniRoute ilmaisinalueella:
 
 ```bash
 omniroute serve --tray
 ```
 
-Komento päättyy, kun palvelin ja ilmoitusaluekuvake ovat valmiina.
+Komento palaa, kun palvelin ja lokero ovat valmiita.
 
-Palvelin jatkaa toimintaansa ilman päätettä.
+Palvelin jatkaa ilman päätettä.
 
-Ilmoitusaluetilaa tuetaan macOS:ssä, Windowsissa ja graafisissa Linux-istunnoissa. Ilmoitusaluetila ei avaa hallintapaneelia automaattisesti.
+Lokerotila tukee macOS, Windows ja graafisia Linux istuntoja. Lokerotila ei avaa kojelautaa automaattisesti.
 
-Käytä ilmoitusaluevalikkoa seuraaviin toimintoihin:
+Käytä lokerovalikkoa näihin toimiin:
 
-- Avaa hallintapaneeli.
+- Avaa kojelauta.
 - Avaa `/dashboard/logs`.
-- Muuta automaattisen käynnistyksen asetusta.
-- Pysäytä OmniRoute.
+- Muuta automaattista käynnistystä.
+- Lopeta OmniRoute.
 
-Älä käytä valitsinta `--tray` yhdessä seuraavien valitsimien kanssa:
+Älä yhdistä `--tray` näiden vaihtoehtojen kanssa:
 
 - `--daemon`
 - `--log`
 - `--no-recovery`
 
-Nämä tilat edellyttävät erilaista prosessin omistajuutta.
+Nämä tilat edellyttävät erilaista prosessiomistusta.
 
-Ota käynnistys käyttöön koneen seuraavan sisäänkirjautumisen yhteydessä:
+Ota käynnistys käyttöön seuraavan koneen sisäänkirjautumisen yhteydessä:
 
 ```bash
 omniroute autostart enable
 ```
 
-Automaattinen käynnistys käyttää ilmoitusaluetilaa macOS:ssä, Windowsissa ja graafisissa Linux-istunnoissa. Graafista käyttöliittymää vailla oleva Linux käyttää olemassa olevaa systemd-käyttäjäpalvelua.
+Automaattinen käynnistys käyttää lokerotilaa macOS, Windows ja graafisissa Linux istunnoissa. Headless Linux käyttää olemassa olevaa systemd-käyttäjäpalvelua.
 
-Poista sisäänkirjautumisen yhteydessä tapahtuva käynnistys käytöstä:
+Poista käynnistys käytöstä kirjautumisen yhteydessä:
 
 ```bash
 omniroute autostart disable
 ```
 
-### Asennuksen poistaminen
+### Poistetaan
 
-Kun et enää tarvitse OmniRoutea, tarjoamme kaksi nopeaa komentosarjaa siistiä poistamista varten:
+Kun et enää tarvitse OmniRoute, tarjoamme kaksi nopeaa skriptiä puhtaaseen poistoon:
 
-| Komento                  | Toiminto                                                                                                      |
-| ------------------------ | ------------------------------------------------------------------------------------------------------------- |
-| `npm run uninstall`      | Poistaa järjestelmäsovelluksen, mutta **säilyttää tietokantasi ja määrityksesi** hakemistossa `~/.omniroute`. |
-| `npm run uninstall:full` | Poistaa sovelluksen JA **hävittää kaikki määritykset, avaimet ja tietokannat pysyvästi**.                     |
+| Komento                  | Toiminta                                                                                   |
+| ------------------------ | ------------------------------------------------------------------------------------------ |
+| `npm run uninstall`      | Poistaa järjestelmäsovelluksen, mutta** säilyttää DB ja kokoonpanosi** `~/.omniroute` ssä. |
+| `npm run uninstall:full` | Poistaa sovelluksen AND pysyvästi** poistaa kaikki kokoonpanot, avaimet ja tietokannat** . |
 
-> Huomautus: Suorita nämä komennot siirtymällä OmniRoute-projektikansioon (jos kloonasit sen) ja suorittamalla ne siellä. Jos asensit sen globaalisti, voit vaihtoehtoisesti suorittaa komennon `npm uninstall -g omniroute`.
+> Huomautus: Suorita nämä komennot siirtymällä OmniRoute -projektikansioon (jos kloonasit sen) ja suorittamalla ne. Vaihtoehtoisesti voit suorittaa `npm uninstall -g omniroute`, jos se on asennettu maailmanlaajuisesti.
 
-### VPS-käyttöönotto
+### VPS käyttöönotto
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -445,21 +445,21 @@ export NEXT_PUBLIC_BASE_URL="http://localhost:20128"
 export API_KEY_SECRET="endpoint-proxy-api-key-secret"
 
 npm run start
-# Tai: pm2 start npm --name omniroute -- start
+# Or: pm2 start npm --name omniroute -- start
 ```
 
-### PM2-käyttöönotto (vähäinen muistinkäyttö)
+### PM2 -käyttöönotto (vähän muistia)
 
-Käytä muistirajoitusvalintaa palvelimilla, joilla on rajallisesti RAM-muistia:
+Jos palvelimissa on rajoitettu RAM, käytä muistirajoitusvaihtoehtoa:
 
 ```bash
-# 512MB:n rajoituksella (oletus)
+# With 512MB limit (default)
 pm2 start npm --name omniroute -- start
 
-# Tai mukautetulla muistirajoituksella
+# Or with custom memory limit
 OMNIROUTE_MEMORY_MB=512 pm2 start npm --name omniroute -- start
 
-# Tai käyttämällä tiedostoa ecosystem.config.js
+# Or using ecosystem.config.js
 pm2 start ecosystem.config.js
 ```
 
@@ -488,30 +488,30 @@ module.exports = {
 ### Docker
 
 ```bash
-# Koosta levykuva (oletus = runner-cli, jossa codex/claude/droid on esiasennettu)
+# Build image (default = runner-cli with codex/claude/droid preinstalled)
 docker build -t omniroute:cli .
 
-# Siirrettävä tila (suositus)
+# Portable mode (recommended)
 docker run -d --name omniroute -p 20128:20128 --env-file ./.env -v omniroute-data:/app/data omniroute:cli
 ```
 
-Katso CLI-binäärit sisältävää isäntäjärjestelmään integroitua tilaa koskevat tiedot päädokumentaation Docker-osiosta.
+Katso isäntäintegroitu tila CLI binäärien kanssa pääasiakirjojen Docker osiosta.
 
 ### Void Linux (xbps-src)
 
-Void Linuxin käyttäjät voivat paketoida ja asentaa OmniRouten natiivisti käyttämällä `xbps-src`-ristiinkäännöskehystä. Tämä automatisoi itsenäisen Node.js-koontiversion luomisen sekä tarvittavat natiivit `better-sqlite3`-sidokset.
+Void Linux -käyttäjät voivat pakata ja asentaa OmniRoute natiivisti `xbps-src` -ristikäännöskehyksen avulla. Tämä automatisoi Node.js itsenäisen koontiversion sekä tarvittavat `better-sqlite3` -natiivisidokset.
 
 <details>
-<summary><b>Näytä xbps-src-mallipohja</b></summary>
+<summary><b>Näytä xbps-src-malli</b></summary>
 
 ```bash
-# Mallipohjatiedosto paketille 'omniroute'
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
 hostmakedepends="nodejs python3 make"
 depends="openssl"
-short_desc="Yleiskäyttöinen tekoäly-yhdyskäytävä älykkäällä reitityksellä useille LLM-palveluntarjoajille"
+short_desc="Universal AI gateway with smart routing for multiple LLM providers"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
@@ -526,7 +526,7 @@ export npm_config_fund=false
 export npm_config_audit=false
 
 do_build() {
-	# Määritä node-gypin kohdesuoritinarkkitehtuuri
+	# Determine target CPU arch for node-gyp
 	local _gyp_arch
 	case "$XBPS_TARGET_MACHINE" in
 		aarch64*) _gyp_arch=arm64 ;;
@@ -535,29 +535,29 @@ do_build() {
 		*) _gyp_arch=x64 ;;
 	esac
 
-	# 1) Asenna kaikki riippuvuudet – ohita komentosarjat
+	# 1) Install all deps – skip scripts
 	NODE_ENV=development npm ci --ignore-scripts
 
-	# 2) Kokoa itsenäinen Next.js-paketti
+	# 2) Build the Next.js standalone bundle
 	npm run build
 
-	# 3) Kopioi staattiset resurssit itsenäiseen pakettiin
+	# 3) Copy static assets into standalone
 	cp -r .next/static .next/standalone/.next/static
 	[ -d public ] && cp -r public .next/standalone/public || true
 
-	# 4) Käännä better-sqlite3:n natiivi sidos
+	# 4) Compile better-sqlite3 native binding
 	local _node_gyp=/usr/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js
 	(cd node_modules/better-sqlite3 && node "$_node_gyp" rebuild --arch="$_gyp_arch")
 
-	# 5) Sijoita käännetty sidos itsenäiseen pakettiin
+	# 5) Place the compiled binding into the standalone bundle
 	local _bs3_release=.next/standalone/node_modules/better-sqlite3/build/Release
 	mkdir -p "$_bs3_release"
 	cp node_modules/better-sqlite3/build/Release/better_sqlite3.node "$_bs3_release/"
 
-	# 6) Poista arkkitehtuurikohtaiset sharp-paketit
+	# 6) Remove arch-specific sharp bundles
 	rm -rf .next/standalone/node_modules/@img
 
-	# 7) Kopioi Next.js:n staattisen analyysin ohittamat pinon suorituksenaikaiset riippuvuudet:
+	# 7) Copy pino runtime deps omitted by Next.js static analysis:
 	for _mod in pino-abstract-transport split2 process-warning; do
 		cp -r "node_modules/$_mod" .next/standalone/node_modules/
 	done
@@ -571,7 +571,7 @@ do_install() {
 	vmkdir usr/lib/omniroute/.next
 	vcopy .next/standalone/. usr/lib/omniroute/.next/standalone
 
-	# Estä asennuksen jälkeistä käsittelijää poistamasta tyhjiä Next.js-sovellusreitittimen hakemistoja
+	# Prevent removal of empty Next.js app router dirs by the post-install hook
 	for _d in \
 		.next/standalone/.next/server/app/dashboard \
 		.next/standalone/.next/server/app/dashboard/settings \
@@ -599,30 +599,30 @@ post_install() {
 
 ### Ympäristömuuttujat
 
-| Muuttuja                                | Oletusarvo                           | Kuvaus                                                                                                                                                              |
-| --------------------------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `JWT_SECRET`                            | `omniroute-default-secret-change-me` | JWT-allekirjoituksen salaisuus (**vaihda tuotantoympäristössä**)                                                                                                    |
-| `INITIAL_PASSWORD`                      | `CHANGEME`                           | Ensimmäisen kirjautumisen salasana                                                                                                                                  |
-| `DATA_DIR`                              | `~/.omniroute`                       | Datahakemisto (tietokanta, käyttötilastot, lokit)                                                                                                                   |
-| `PORT`                                  | kehyksen oletusarvo                  | Palvelun portti (esimerkeissä `20128`)                                                                                                                              |
-| `HOSTNAME`                              | kehyksen oletusarvo                  | Kuunteluosoite (Dockerin oletusarvo on `0.0.0.0`)                                                                                                                   |
-| `NODE_ENV`                              | ajonaikainen oletusarvo              | Aseta käyttöönottoa varten arvoksi `production`                                                                                                                     |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`             | Koontinäytössä näkyvä ja palvelimelle välitettävä julkinen perus-URL (korvaa vanhan `BASE_URL`-muuttujan)                                                           |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`              | Pilvisynkronoinnin päätepisteen perus-URL (korvaa vanhan `CLOUD_URL`-muuttujan)                                                                                     |
-| `API_KEY_SECRET`                        | `endpoint-proxy-api-key-secret`      | Luotujen API-avainten HMAC-salaisuus                                                                                                                                |
-| `REQUIRE_API_KEY`                       | `false`                              | Vaadi Bearer API -avain reitillä `/v1/*`                                                                                                                            |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                              | Salli todennettujen koontinäytön käyttäjien näyttää tallennettujen API-avainten täydet arvot pyynnöstä                                                              |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                 | Välimuistiin tallennettujen palveluntarjoajarajojen palvelinpuolen päivitysväli; käyttöliittymän päivityspainikkeet käynnistävät edelleen manuaalisen synkronoinnin |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                              | Poista automaattiset SQLite-tilannevedokset käytöstä ennen kirjoitusta, tuontia tai palautusta; manuaaliset varmuuskopiot toimivat edelleen                         |
-| `APP_LOG_TO_FILE`                       | `true`                               | Ottaa käyttöön sovellus- ja auditointilokien kirjoittamisen levylle                                                                                                 |
-| `AUTH_COOKIE_SECURE`                    | `false`                              | Pakota todennusevästeen `Secure`-asetus (HTTPS-käänteisvälityspalvelimen takana)                                                                                    |
-| `CLOUDFLARED_BIN`                       | ei asetettu                          | Käytä olemassa olevaa `cloudflared`-binääriä hallitun latauksen sijaan                                                                                              |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                              | Hallittujen Quick Tunnels -tunneleiden siirtoprotokolla (`http2`, `quic` tai `auto`)                                                                                |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                                | Node.js-keon enimmäiskoko megatavuina                                                                                                                               |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                 | Kehotevälimuistin merkintöjen enimmäismäärä                                                                                                                         |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                | Semanttisen välimuistin merkintöjen enimmäismäärä                                                                                                                   |
+| Muuttuva                                | Oletus                    | Kuvaus                                                                                                                                                               |
+| --------------------------------------- | ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `JWT_SECRET`                            | _(automaattisesti luotu)_ | JWT allekirjoitussalaisuus — luotiin automaattisesti ensimmäisellä kerralla ja säilyi `server.env`:ssä; aseta se nimenomaisesti, kun tietohakemisto on lyhytaikainen |
+| `INITIAL_PASSWORD`                      | _(unset)_                 | Ensimmäinen kirjautumissalasana. npm/source -asennukset alkavat `CHANGEME`:llä: vaihda se. Unset: ohjattu käyttöönottotoiminto                                       |
+| `DATA_DIR`                              | `~/.omniroute`            | Tietohakemisto (db, käyttö, lokit)                                                                                                                                   |
+| `PORT`                                  | kehyksen oletusarvo       | Huoltoportti (`20128` esimerkeissä)                                                                                                                                  |
+| `HOSTNAME`                              | kehyksen oletusarvo       | Sido isäntä (Docker oletuksena `0.0.0.0`)                                                                                                                            |
+| `NODE_ENV`                              | ajonaikainen oletusarvo   | Aseta `production` käyttöönottoa varten                                                                                                                              |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`  | Julkinen perus- URL nousi kojelautaan ja paljastettiin palvelimelle (korvaa vanhan `BASE_URL` n)                                                                     |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`   | Pilvisynkronoinnin päätepisteen perusta URL (korvaa vanhan `CLOUD_URL`)                                                                                              |
+| `API_KEY_SECRET`                        | _(automaattisesti luotu)_ | HMAC salaisuus luoduille API avaimille — luotiin automaattisesti ensimmäisellä kerralla ja säilyi `server.env` ssä                                                   |
+| `REQUIRE_API_KEY`                       | `false`                   | Pakota Bearer API -näppäin `/v1/*`:ssä                                                                                                                               |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                   | Salli todennettujen kojelautakäyttäjien paljastaa kaikki tallennetut API -avainarvot pyynnöstä                                                                       |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                      | Palvelinpuolen päivitystiheys välimuistissa oleville palveluntarjoajan rajoitustiedoille; UI päivityspainikkeet laukaisevat silti manuaalisen synkronoinnin          |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                   | Poista käytöstä automaattiset SQLite -tilanteet ennen writes/import/restore:tä; Manuaalinen varmuuskopiointi toimii edelleen                                         |
+| `APP_LOG_TO_FILE`                       | `true`                    | Sallii sovellusten ja tarkastuslokien tulostuksen levylle                                                                                                            |
+| `AUTH_COOKIE_SECURE`                    | `false`                   | Pakota `Secure` -todennuseväste ( HTTPS -käänteisen välityspalvelimen takana)                                                                                        |
+| `CLOUDFLARED_BIN`                       | pois päältä               | Käytä olemassa olevaa `cloudflared` binaaria hallitun latauksen sijaan                                                                                               |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                   | Kuljetus hallituille pikatunneleille (`http2`, `quic` tai `auto`)                                                                                                    |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                     | Node.js keon raja MB ssä                                                                                                                                             |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                      | Maksimi välimuistin kehotteet                                                                                                                                        |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                     | Enintään semanttinen välimuisti                                                                                                                                      |
 
-Täydellinen ympäristömuuttujien luettelo on [README-tiedostossa](../README.md).
+Täydellinen ympäristömuuttujaviittaus on kohdassa [README](../README.md).
 
 ---
 

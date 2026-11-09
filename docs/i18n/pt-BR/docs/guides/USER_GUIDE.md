@@ -353,47 +353,47 @@ Modelo: cc/claude-opus-4-7
 
 ---
 
-## 🚀 Implantação
+## Implantação 🚀
 
-### Instalação global via npm (Recomendado)
+### Instalação global do npm (recomendado)
 
 ```bash
 npm install -g omniroute
 
-# Criar o diretório de configuração
+# Create config directory
 mkdir -p ~/.omniroute
 
-# Criar o arquivo .env (consulte .env.example)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# Iniciar o servidor
+# Start server
 omniroute
-# Ou com uma porta personalizada:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-A CLI carrega automaticamente o `.env` de `~/.omniroute/.env` ou `./.env`.
+O CLI carrega automaticamente `.env` de `~/.omniroute/.env` ou `./.env`. Um `./.env` no diretório de trabalho pode definir apenas uma pequena lista de chaves permitidas (portas, `REQUIRE_API_KEY`, configurações de localidade e cores); coloque todo o resto em `~/.omniroute/.env`. Consulte [os contratos de lançamento CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
-### Modo de bandeja
+### Modo bandeja
 
-Inicie o OmniRoute na bandeja do sistema:
+Inicie OmniRoute na bandeja do sistema:
 
 ```bash
 omniroute serve --tray
 ```
 
-O comando retorna depois que o servidor e a bandeja estiverem prontos.
+O comando retorna depois que o servidor e a bandeja estão prontos.
 
-O servidor continua em execução sem o terminal.
+O servidor continua sem o terminal.
 
-O modo de bandeja é compatível com macOS, Windows e sessões gráficas do Linux. O modo de bandeja não abre o painel automaticamente.
+O modo bandeja suporta sessões macOS, Windows e Linux gráficas. O modo bandeja não abre o painel automaticamente.
 
 Use o menu da bandeja para estas ações:
 
-- Abrir o painel.
-- Abrir `/dashboard/logs`.
-- Alterar a inicialização automática.
-- Parar o OmniRoute.
+- Abra o painel.
+- Abra `/dashboard/logs`.
+- Altere o início automático.
+- Pare OmniRoute.
 
 Não combine `--tray` com estas opções:
 
@@ -401,7 +401,7 @@ Não combine `--tray` com estas opções:
 - `--log`
 - `--no-recovery`
 
-Esses modos exigem diferentes formas de gerenciamento do processo.
+Esses modos exigem propriedade de processo diferente.
 
 Habilite a inicialização no próximo login da máquina:
 
@@ -409,26 +409,26 @@ Habilite a inicialização no próximo login da máquina:
 omniroute autostart enable
 ```
 
-A inicialização automática usa o modo de bandeja no macOS, no Windows e em sessões gráficas do Linux. O Linux sem interface gráfica usa o serviço de usuário systemd existente.
+A inicialização automática usa o modo bandeja em sessões macOS, Windows e gráficas Linux. Headless Linux usa o serviço de usuário systemd existente.
 
-Desabilite a inicialização ao fazer login:
+Desative a inicialização no login:
 
 ```bash
 omniroute autostart disable
 ```
 
-### Desinstalação
+### Desinstalando
 
-Quando você não precisar mais do OmniRoute, disponibilizamos dois scripts rápidos para uma remoção limpa:
+Quando você não precisar mais OmniRoute, fornecemos dois scripts rápidos para uma remoção limpa:
 
-| Comando                  | Ação                                                                                                      |
-| ------------------------ | --------------------------------------------------------------------------------------------------------- |
-| `npm run uninstall`      | Remove o aplicativo do sistema, mas **mantém seu banco de dados e suas configurações** em `~/.omniroute`. |
-| `npm run uninstall:full` | Remove o aplicativo E **apaga permanentemente todas as configurações, chaves e bancos de dados**.         |
+| Comando                  | Ação                                                                                                 |
+| ------------------------ | ---------------------------------------------------------------------------------------------------- |
+| `npm run uninstall`      | Remove o aplicativo do sistema, mas** mantém seu DB e configurações** em `~/.omniroute`.             |
+| `npm run uninstall:full` | Remove o aplicativo AND permanentemente** apaga todas as configurações, chaves e bancos de dados** . |
 
-> Observação: para executar esses comandos, acesse a pasta do projeto OmniRoute (caso você o tenha clonado) e execute-os. Como alternativa, se ele tiver sido instalado globalmente, basta executar `npm uninstall -g omniroute`.
+> Nota: Para executar esses comandos, navegue até a pasta do projeto OmniRoute (se você o clonou) e execute-os. Alternativamente, se instalado globalmente, você pode simplesmente executar `npm uninstall -g omniroute`.
 
-### Implantação em VPS
+### Implantação VPS
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -444,21 +444,21 @@ export NEXT_PUBLIC_BASE_URL="http://localhost:20128"
 export API_KEY_SECRET="endpoint-proxy-api-key-secret"
 
 npm run start
-# Ou: pm2 start npm --name omniroute -- start
+# Or: pm2 start npm --name omniroute -- start
 ```
 
-### Implantação com PM2 (Pouca memória)
+### Implantação PM2 (pouca memória)
 
-Para servidores com RAM limitada, use a opção de limite de memória:
+Para servidores com RAM limitado, use a opção de limite de memória:
 
 ```bash
-# Com limite de 512MB (padrão)
+# With 512MB limit (default)
 pm2 start npm --name omniroute -- start
 
-# Ou com limite de memória personalizado
+# Or with custom memory limit
 OMNIROUTE_MEMORY_MB=512 pm2 start npm --name omniroute -- start
 
-# Ou usando ecosystem.config.js
+# Or using ecosystem.config.js
 pm2 start ecosystem.config.js
 ```
 
@@ -487,24 +487,24 @@ module.exports = {
 ### Docker
 
 ```bash
-# Criar a imagem (padrão = runner-cli com codex/claude/droid pré-instalados)
+# Build image (default = runner-cli with codex/claude/droid preinstalled)
 docker build -t omniroute:cli .
 
-# Modo portátil (recomendado)
+# Portable mode (recommended)
 docker run -d --name omniroute -p 20128:20128 --env-file ./.env -v omniroute-data:/app/data omniroute:cli
 ```
 
-Para o modo integrado ao host com binários da CLI, consulte a seção sobre Docker na documentação principal.
+Para o modo integrado ao host com binários CLI, consulte a seção Docker na documentação principal.
 
-### Void Linux (xbps-src)
+### Linux nulo (xbps-src)
 
-Os usuários do Void Linux podem empacotar e instalar o OmniRoute nativamente usando o framework de compilação cruzada `xbps-src`. Isso automatiza a compilação independente do Node.js junto com os bindings nativos necessários do `better-sqlite3`.
+Os usuários do Void Linux podem empacotar e instalar OmniRoute nativamente usando a estrutura de compilação cruzada `xbps-src`. Isso automatiza a construção autônoma Node.js junto com as ligações nativas `better-sqlite3` necessárias.
 
 <details>
-<summary><b>Ver template do xbps-src</b></summary>
+<summary><b>Ver modelo xbps-src</b></summary>
 
 ```bash
-# Arquivo de template para 'omniroute'
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -525,7 +525,7 @@ export npm_config_fund=false
 export npm_config_audit=false
 
 do_build() {
-	# Determina a arquitetura de CPU de destino para o node-gyp
+	# Determine target CPU arch for node-gyp
 	local _gyp_arch
 	case "$XBPS_TARGET_MACHINE" in
 		aarch64*) _gyp_arch=arm64 ;;
@@ -534,29 +534,29 @@ do_build() {
 		*) _gyp_arch=x64 ;;
 	esac
 
-	# 1) Instala todas as dependências – ignora os scripts
+	# 1) Install all deps – skip scripts
 	NODE_ENV=development npm ci --ignore-scripts
 
-	# 2) Compila o pacote independente do Next.js
+	# 2) Build the Next.js standalone bundle
 	npm run build
 
-	# 3) Copia os recursos estáticos para o pacote independente
+	# 3) Copy static assets into standalone
 	cp -r .next/static .next/standalone/.next/static
 	[ -d public ] && cp -r public .next/standalone/public || true
 
-	# 4) Compila o binding nativo do better-sqlite3
+	# 4) Compile better-sqlite3 native binding
 	local _node_gyp=/usr/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js
 	(cd node_modules/better-sqlite3 && node "$_node_gyp" rebuild --arch="$_gyp_arch")
 
-	# 5) Coloca o binding compilado no pacote independente
+	# 5) Place the compiled binding into the standalone bundle
 	local _bs3_release=.next/standalone/node_modules/better-sqlite3/build/Release
 	mkdir -p "$_bs3_release"
 	cp node_modules/better-sqlite3/build/Release/better_sqlite3.node "$_bs3_release/"
 
-	# 6) Remove os pacotes do sharp específicos da arquitetura
+	# 6) Remove arch-specific sharp bundles
 	rm -rf .next/standalone/node_modules/@img
 
-	# 7) Copia as dependências de runtime do pino omitidas pela análise estática do Next.js:
+	# 7) Copy pino runtime deps omitted by Next.js static analysis:
 	for _mod in pino-abstract-transport split2 process-warning; do
 		cp -r "node_modules/$_mod" .next/standalone/node_modules/
 	done
@@ -570,7 +570,7 @@ do_install() {
 	vmkdir usr/lib/omniroute/.next
 	vcopy .next/standalone/. usr/lib/omniroute/.next/standalone
 
-	# Impede que os diretórios vazios do roteador de aplicativos do Next.js sejam removidos pelo hook de pós-instalação
+	# Prevent removal of empty Next.js app router dirs by the post-install hook
 	for _d in \
 		.next/standalone/.next/server/app/dashboard \
 		.next/standalone/.next/server/app/dashboard/settings \
@@ -598,30 +598,30 @@ post_install() {
 
 ### Variáveis de ambiente
 
-| Variável                                | Padrão                               | Descrição                                                                                                                                        |
-| --------------------------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `JWT_SECRET`                            | `omniroute-default-secret-change-me` | Segredo de assinatura JWT (**altere em produção**)                                                                                               |
-| `INITIAL_PASSWORD`                      | `CHANGEME`                           | Senha do primeiro login                                                                                                                          |
-| `DATA_DIR`                              | `~/.omniroute`                       | Diretório de dados (banco de dados, uso, logs)                                                                                                   |
-| `PORT`                                  | padrão do framework                  | Porta do serviço (`20128` nos exemplos)                                                                                                          |
-| `HOSTNAME`                              | padrão do framework                  | Host de vinculação (o Docker usa `0.0.0.0` por padrão)                                                                                           |
-| `NODE_ENV`                              | padrão do ambiente de execução       | Defina como `production` para implantação                                                                                                        |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`             | URL base pública exibida no painel e disponibilizada ao servidor (substitui a variável legada `BASE_URL`)                                        |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`              | URL base do endpoint de sincronização com a nuvem (substitui a variável legada `CLOUD_URL`)                                                      |
-| `API_KEY_SECRET`                        | `endpoint-proxy-api-key-secret`      | Segredo HMAC para chaves de API geradas                                                                                                          |
-| `REQUIRE_API_KEY`                       | `false`                              | Exige uma chave de API Bearer em `/v1/*`                                                                                                         |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                              | Permite que usuários autenticados do painel revelem, sob demanda, os valores completos das chaves de API armazenadas                             |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                 | Frequência de atualização no servidor para dados em cache de limites dos provedores; os botões da interface ainda acionam a sincronização manual |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                              | Desabilita snapshots automáticos do SQLite antes de gravações/importações/restaurações; backups manuais continuam funcionando                    |
-| `APP_LOG_TO_FILE`                       | `true`                               | Habilita a gravação em disco dos logs do aplicativo e de auditoria                                                                               |
-| `AUTH_COOKIE_SECURE`                    | `false`                              | Força o cookie de autenticação `Secure` (atrás de um proxy reverso HTTPS)                                                                        |
-| `CLOUDFLARED_BIN`                       | não definido                         | Usa um binário `cloudflared` existente em vez do download gerenciado                                                                             |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                              | Transporte para Quick Tunnels gerenciados (`http2`, `quic` ou `auto`)                                                                            |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                                | Limite de heap do Node.js em MB                                                                                                                  |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                 | Número máximo de entradas no cache de prompts                                                                                                    |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                | Número máximo de entradas no cache semântico                                                                                                     |
+| Variável                                | Padrão                      | Descrição                                                                                                                                                             |
+| --------------------------------------- | --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `JWT_SECRET`                            | _(gerado automaticamente)_  | segredo de assinatura JWT — gerado automaticamente na primeira execução e persistido em `server.env`; defina-o explicitamente quando o diretório de dados for efêmero |
+| `INITIAL_PASSWORD`                      | _(desativado)_              | Primeira senha de login. As instalações npm/source começam com `CHANGEME`: substitua-o. Não definido: assistente de integração                                        |
+| `DATA_DIR`                              | `~/.omniroute`              | Diretório de dados (banco de dados, uso, logs)                                                                                                                        |
+| `PORT`                                  | padrão da estrutura         | Porta de serviço (`20128` nos exemplos)                                                                                                                               |
+| `HOSTNAME`                              | padrão da estrutura         | Vincular host (o padrão Docker é `0.0.0.0`)                                                                                                                           |
+| `NODE_ENV`                              | padrão de tempo de execução | Definir `production` para implantação                                                                                                                                 |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`    | Base pública URL exibida no painel e exposta ao servidor (substitui o legado `BASE_URL`)                                                                              |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`     | Base de endpoint de sincronização em nuvem URL (substitui `CLOUD_URL` herdado)                                                                                        |
+| `API_KEY_SECRET`                        | _(gerado automaticamente)_  | segredo HMAC para chaves API geradas — gerado automaticamente na primeira execução e persistido no `server.env`                                                       |
+| `REQUIRE_API_KEY`                       | `false`                     | Aplicar chave API do portador no `/v1/*`                                                                                                                              |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                     | Permitir que usuários autenticados do painel revelem valores-chave API completos armazenados sob demanda                                                              |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                        | Cadência de atualização do lado do servidor para dados armazenados em cache do Provider Limits; Os botões de atualização UI ainda acionam a sincronização manual      |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                     | Desative os snapshots automáticos SQLite antes writes/import/restore; backups manuais ainda funcionam                                                                 |
+| `APP_LOG_TO_FILE`                       | `true`                      | Ativa a saída de aplicativos e logs de auditoria para disco                                                                                                           |
+| `AUTH_COOKIE_SECURE`                    | `false`                     | Forçar cookie de autenticação `Secure` (atrás do proxy reverso HTTPS )                                                                                                |
+| `CLOUDFLARED_BIN`                       | desarmar                    | Use um binário `cloudflared` existente em vez de download gerenciado                                                                                                  |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                     | Transporte para Quick Tunnels gerenciados (`http2`, `quic` ou `auto`)                                                                                                 |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                       | limite de heap Node.js em MB                                                                                                                                          |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                        | Máximo de entradas de cache de prompt                                                                                                                                 |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                       | Máximo de entradas de cache semântico                                                                                                                                 |
 
-Para consultar a referência completa das variáveis de ambiente, consulte o [README](../README.md).
+Para obter a referência completa da variável de ambiente, consulte [README](../README.md).
 
 ---
 

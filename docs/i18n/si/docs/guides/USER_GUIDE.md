@@ -358,44 +358,44 @@ API යතුර: [උපකරණ පුවරුවෙන්]
 
 ## 🚀 යෙදවීම
 
-### ගෝලීය npm ස්ථාපනය (නිර්දේශිතයි)
+### ගෝලීය npm ස්ථාපනය (නිර්දේශිත)
 
 ```bash
 npm install -g omniroute
 
-# වින්යාස නාමාවලිය සාදන්න
+# Create config directory
 mkdir -p ~/.omniroute
 
-# .env ගොනුව සාදන්න (.env.example බලන්න)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# සේවාදායකය ආරම්භ කරන්න
+# Start server
 omniroute
-# නැතහොත් අභිරුචි පෝට් එකක් සමඟ:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI විසින් `~/.omniroute/.env` හෝ `./.env` වෙතින් `.env` ස්වයංක්රීයව පූරණය කරයි.
+CLI ස්වයංක්‍රීයව `~/.omniroute/.env` හෝ `./.env` වෙතින් `.env` පූරණය කරයි. වැඩ කරන නාමාවලියෙහි ඇති `./.env` මඟින් යතුරු වල කෙටි අවසර ලැයිස්තුවක් පමණක් සැකසිය හැක (වරාය, `REQUIRE_API_KEY`, පෙදෙසි සහ වර්ණ සැකසුම්); අනිත් ඔක්කොම දාන්න `~/.omniroute/.env`. [CLI දියත් කිරීමේ ගිවිසුම්](CLI-LAUNCH-CONTRACTS.md#working-directory-env) බලන්න.
 
-### පද්ධති තැටි ප්රකාරය
+### තැටි මාදිලිය
 
-පද්ධති තැටිය තුළ OmniRoute ආරම්භ කරන්න:
+පද්ධති තැටියේ OmniRoute ආරම්භ කරන්න:
 
 ```bash
 omniroute serve --tray
 ```
 
-සේවාදායකය සහ පද්ධති තැටිය සූදානම් වූ පසු විධානය අවසන් වේ.
+සේවාදායකය සහ තැටිය සූදානම් වූ පසු විධානය නැවත පැමිණේ.
 
-ටර්මිනලය නොමැතිව සේවාදායකය දිගටම ක්රියාත්මක වේ.
+ටර්මිනලය නොමැතිව සේවාදායකය දිගටම පවතී.
 
-පද්ධති තැටි ප්රකාරය macOS, Windows සහ චිත්රක Linux සැසි සඳහා සහාය දක්වයි. පද්ධති තැටි ප්රකාරය උපකරණ පුවරුව ස්වයංක්රීයව විවෘත නොකරයි.
+තැටි මාදිලිය macOS, Windows, සහ චිත්‍රක Linux සැසි සඳහා සහය දක්වයි. තැටි මාදිලිය උපකරණ පුවරුව ස්වයංක්‍රීයව විවෘත නොවේ.
 
-මෙම ක්රියා සඳහා පද්ධති තැටි මෙනුව භාවිත කරන්න:
+මෙම ක්‍රියා සඳහා තැටි මෙනුව භාවිතා කරන්න:
 
 - උපකරණ පුවරුව විවෘත කරන්න.
 - `/dashboard/logs` විවෘත කරන්න.
-- ස්වයංක්රීය ආරම්භය වෙනස් කරන්න.
+- ස්වයංක්‍රීය ආරම්භය වෙනස් කරන්න.
 - OmniRoute නවත්වන්න.
 
 මෙම විකල්ප සමඟ `--tray` ඒකාබද්ධ නොකරන්න:
@@ -404,17 +404,17 @@ omniroute serve --tray
 - `--log`
 - `--no-recovery`
 
-මෙම ප්රකාර සඳහා වෙනස් ක්රියාවලි හිමිකාරිත්වයක් අවශ්ය වේ.
+මෙම මාතයන් සඳහා විවිධ ක්‍රියාවලි හිමිකාරිත්වය අවශ්‍ය වේ.
 
-යන්ත්රයට ඊළඟ වර පිවිසීමේදී ආරම්භ වීම සක්රීය කරන්න:
+ඊළඟ යන්ත්‍ර පිවිසුමේදී ආරම්භය සබල කරන්න:
 
 ```bash
 omniroute autostart enable
 ```
 
-ස්වයංක්රීය ආරම්භය macOS, Windows සහ චිත්රක Linux සැසිවලදී පද්ධති තැටි ප්රකාරය භාවිත කරයි. තිර රහිත Linux විසින් පවතින systemd පරිශීලක සේවාව භාවිත කරයි.
+ස්වයංක්‍රීය ආරම්භය macOS, Windows, සහ චිත්‍රක Linux සැසිවල තැටි මාදිලිය භාවිතා කරයි. Headless Linux දැනට පවතින systemd පරිශීලක සේවාව භාවිතා කරයි.
 
-පිවිසීමේදී ආරම්භ වීම අක්රීය කරන්න:
+පුරනය වීමේදී ආරම්භය අක්‍රිය කරන්න:
 
 ```bash
 omniroute autostart disable
@@ -422,14 +422,14 @@ omniroute autostart disable
 
 ### අස්ථාපනය කිරීම
 
-ඔබට තවදුරටත් OmniRoute අවශ්ය නොවන විට, පිරිසිදු ඉවත් කිරීමක් සඳහා අපි ඉක්මන් ස්ක්රිප්ට් දෙකක් සපයන්නෙමු:
+ඔබට තවදුරටත් OmniRoute අවශ්‍ය නොවන විට, අපි පිරිසිදු ඉවත් කිරීමක් සඳහා ඉක්මන් ස්ක්‍රිප්ට් දෙකක් සපයන්නෙමු:
 
-| විධානය                   | ක්රියාව                                                                           |
-| ------------------------ | --------------------------------------------------------------------------------- |
-| `npm run uninstall`      | පද්ධති යෙදුම ඉවත් කරන නමුත් `~/.omniroute` තුළ ඇති **ඔබේ DB සහ වින්යාස තබා ගනී**. |
-| `npm run uninstall:full` | යෙදුම ඉවත් කර **සියලු වින්යාස, යතුරු සහ දත්ත සමුදා ස්ථිරව මකා දමයි**.             |
+| විධානය                   | ක්‍රියාව                                                                              |
+| ------------------------ | ------------------------------------------------------------------------------------- |
+| `npm run uninstall`      | පද්ධති යෙදුම ඉවත් කරයි නමුත්** ඔබගේ DB සහ වින්‍යාසයන් තබා ගනී** `~/.omniroute` වලින්. |
+| `npm run uninstall:full` | AND යෙදුම ස්ථිරවම ඉවත් කරයි** සියලුම වින්‍යාසයන්, යතුරු සහ දත්ත සමුදායන් මකා දමයි** . |
 
-> සටහන: මෙම විධාන ක්රියාත්මක කිරීමට, OmniRoute ව්යාපෘති ෆෝල්ඩරය වෙත ගොස් (ඔබ එය ක්ලෝන කර ඇත්නම්) ඒවා ක්රියාත්මක කරන්න. විකල්පයක් ලෙස, එය ගෝලීයව ස්ථාපනය කර ඇත්නම්, ඔබට සරලව `npm uninstall -g omniroute` ක්රියාත්මක කළ හැක.
+> සටහන: මෙම විධානයන් ක්‍රියාත්මක කිරීමට, OmniRoute ව්‍යාපෘති ෆෝල්ඩරය වෙත සංචාලනය කරන්න (ඔබ එය ක්ලෝන කර ඇත්නම්) ඒවා ක්‍රියාත්මක කරන්න. විකල්පයක් ලෙස, ගෝලීය වශයෙන් ස්ථාපනය කර ඇත්නම්, ඔබට සරලව `npm uninstall -g omniroute` ධාවනය කළ හැක.
 
 ### VPS යෙදවීම
 
@@ -447,21 +447,21 @@ export NEXT_PUBLIC_BASE_URL="http://localhost:20128"
 export API_KEY_SECRET="endpoint-proxy-api-key-secret"
 
 npm run start
-# නැතහොත්: pm2 start npm --name omniroute -- start
+# Or: pm2 start npm --name omniroute -- start
 ```
 
 ### PM2 යෙදවීම (අඩු මතකය)
 
-සීමිත RAM සහිත සේවාදායක සඳහා, මතක සීමා විකල්පය භාවිත කරන්න:
+සීමිත RAM සහිත සේවාදායකයන් සඳහා, මතක සීමාව විකල්පය භාවිතා කරන්න:
 
 ```bash
-# 512MB සීමාවක් සමඟ (පෙරනිමි)
+# With 512MB limit (default)
 pm2 start npm --name omniroute -- start
 
-# නැතහොත් අභිරුචි මතක සීමාවක් සමඟ
+# Or with custom memory limit
 OMNIROUTE_MEMORY_MB=512 pm2 start npm --name omniroute -- start
 
-# නැතහොත් ecosystem.config.js භාවිතයෙන්
+# Or using ecosystem.config.js
 pm2 start ecosystem.config.js
 ```
 
@@ -490,24 +490,24 @@ module.exports = {
 ### Docker
 
 ```bash
-# රූපය ගොඩනඟන්න (පෙරනිමිය = codex/claude/droid පෙර ස්ථාපිත runner-cli)
+# Build image (default = runner-cli with codex/claude/droid preinstalled)
 docker build -t omniroute:cli .
 
-# අතේ ගෙන යා හැකි ප්රකාරය (නිර්දේශිතයි)
+# Portable mode (recommended)
 docker run -d --name omniroute -p 20128:20128 --env-file ./.env -v omniroute-data:/app/data omniroute:cli
 ```
 
-CLI ද්විමය ගොනු සහිත ධාරක-ඒකාබද්ධ ප්රකාරය සඳහා, ප්රධාන ලේඛනවල Docker කොටස බලන්න.
+CLI ද්විමය සමඟ ධාරක-ඒකාබද්ධ මාදිලිය සඳහා, ප්‍රධාන ලේඛනවල Docker කොටස බලන්න.
 
-### Void Linux (xbps-src)
+### හිස් Linux (xbps-src)
 
-Void Linux පරිශීලකයින්ට `xbps-src` හරස්-සම්පාදන රාමුව භාවිතයෙන් OmniRoute ස්වදේශීයව පැකේජ කර ස්ථාපනය කළ හැක. මෙය අවශ්ය `better-sqlite3` ස්වදේශීය බැඳීම් සමඟ Node.js ස්වාධීන ගොඩනැගීම ස්වයංක්රීය කරයි.
+Void Linux පරිශීලකයින්ට `xbps-src` හරස් සම්පාදන රාමුව භාවිතයෙන් OmniRoute දේශීයව ඇසුරුම් කර ස්ථාපනය කළ හැකිය. මෙය අවශ්‍ය `better-sqlite3` ස්වදේශීය බන්ධන සමඟ Node.js ස්වාධීන ගොඩනැගීම ස්වයංක්‍රීය කරයි.
 
 <details>
-<summary><b>xbps-src අච්චුව බලන්න</b></summary>
+<summary><b>Xbps-src අච්චුව බලන්න</b></summary>
 
 ```bash
-# 'omniroute' සඳහා අච්චු ගොනුව
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -528,7 +528,7 @@ export npm_config_fund=false
 export npm_config_audit=false
 
 do_build() {
-	# node-gyp සඳහා ඉලක්ක CPU ගෘහනිර්මාණය තීරණය කරන්න
+	# Determine target CPU arch for node-gyp
 	local _gyp_arch
 	case "$XBPS_TARGET_MACHINE" in
 		aarch64*) _gyp_arch=arm64 ;;
@@ -537,29 +537,29 @@ do_build() {
 		*) _gyp_arch=x64 ;;
 	esac
 
-	# 1) සියලු පරායත්තතා ස්ථාපනය කරන්න – ස්ක්රිප්ට් මඟ හරින්න
+	# 1) Install all deps – skip scripts
 	NODE_ENV=development npm ci --ignore-scripts
 
-	# 2) Next.js ස්වාධීන බණ්ඩලය ගොඩනඟන්න
+	# 2) Build the Next.js standalone bundle
 	npm run build
 
-	# 3) ස්ථිතික සම්පත් ස්වාධීන බණ්ඩලයට පිටපත් කරන්න
+	# 3) Copy static assets into standalone
 	cp -r .next/static .next/standalone/.next/static
 	[ -d public ] && cp -r public .next/standalone/public || true
 
-	# 4) better-sqlite3 ස්වදේශීය බැඳීම සම්පාදනය කරන්න
+	# 4) Compile better-sqlite3 native binding
 	local _node_gyp=/usr/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js
 	(cd node_modules/better-sqlite3 && node "$_node_gyp" rebuild --arch="$_gyp_arch")
 
-	# 5) සම්පාදිත බැඳීම ස්වාධීන බණ්ඩලය තුළ තබන්න
+	# 5) Place the compiled binding into the standalone bundle
 	local _bs3_release=.next/standalone/node_modules/better-sqlite3/build/Release
 	mkdir -p "$_bs3_release"
 	cp node_modules/better-sqlite3/build/Release/better_sqlite3.node "$_bs3_release/"
 
-	# 6) ගෘහනිර්මාණයට විශේෂිත sharp බණ්ඩල ඉවත් කරන්න
+	# 6) Remove arch-specific sharp bundles
 	rm -rf .next/standalone/node_modules/@img
 
-	# 7) Next.js ස්ථිතික විශ්ලේෂණයෙන් මඟහැරුණු pino ධාවනකාල පරායත්තතා පිටපත් කරන්න:
+	# 7) Copy pino runtime deps omitted by Next.js static analysis:
 	for _mod in pino-abstract-transport split2 process-warning; do
 		cp -r "node_modules/$_mod" .next/standalone/node_modules/
 	done
@@ -573,7 +573,7 @@ do_install() {
 	vmkdir usr/lib/omniroute/.next
 	vcopy .next/standalone/. usr/lib/omniroute/.next/standalone
 
-	# පසු-ස්ථාපන hook එක මඟින් හිස් Next.js app router නාමාවලි ඉවත් කිරීම වළක්වන්න
+	# Prevent removal of empty Next.js app router dirs by the post-install hook
 	for _d in \
 		.next/standalone/.next/server/app/dashboard \
 		.next/standalone/.next/server/app/dashboard/settings \
@@ -599,32 +599,32 @@ post_install() {
 
 </details>
 
-### පරිසර විචල්යයන්
+### පාරිසරික විචල්යයන්
 
-| විචල්යය                                 | පෙරනිමිය                             | විස්තරය                                                                                                                                          |
-| --------------------------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `JWT_SECRET`                            | `omniroute-default-secret-change-me` | JWT අත්සන් කිරීමේ රහස (**නිෂ්පාදන පරිසරයේදී වෙනස් කරන්න**)                                                                                       |
-| `INITIAL_PASSWORD`                      | `CHANGEME`                           | පළමු පිවිසුම් මුරපදය                                                                                                                             |
-| `DATA_DIR`                              | `~/.omniroute`                       | දත්ත නාමාවලිය (දත්ත සමුදාය, භාවිතය, ලොග්)                                                                                                        |
-| `PORT`                                  | රාමුවේ පෙරනිමිය                      | සේවා පෝට් එක (උදාහරණවල `20128`)                                                                                                                  |
-| `HOSTNAME`                              | රාමුවේ පෙරනිමිය                      | බැඳීම් සත්කාරකය (Docker පෙරනිමිය `0.0.0.0`)                                                                                                      |
-| `NODE_ENV`                              | ධාවනකාල පෙරනිමිය                     | යෙදවීම සඳහා `production` ලෙස සකසන්න                                                                                                              |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`             | උපකරණ පුවරුවට පෙන්වන සහ සේවාදායකයට නිරාවරණය කරන පොදු මූලික URL එක (පැරණි `BASE_URL` ප්රතිස්ථාපනය කරයි)                                           |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`              | ක්ලවුඩ් සමමුහුර්තකරණ අන්ත ලක්ෂ්යයේ මූලික URL එක (පැරණි `CLOUD_URL` ප්රතිස්ථාපනය කරයි)                                                            |
-| `API_KEY_SECRET`                        | `endpoint-proxy-api-key-secret`      | ජනනය කරන API යතුරු සඳහා HMAC රහස                                                                                                                 |
-| `REQUIRE_API_KEY`                       | `false`                              | `/v1/*` මත Bearer API යතුර බලාත්මක කරන්න                                                                                                         |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                              | සත්යාපිත උපකරණ පුවරු පරිශීලකයන්ට ඉල්ලීම මත ගබඩා කර ඇති සම්පූර්ණ API යතුරු අගයන් හෙළි කිරීමට ඉඩ දෙන්න                                             |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                 | හැඹිලිගත Provider Limits දත්ත සඳහා සේවාදායක පාර්ශ්වීය නැවුම් කිරීමේ කාලාවර්තය; UI නැවුම් කිරීමේ බොත්තම් තවමත් අතින් සමමුහුර්ත කිරීමක් ආරම්භ කරයි |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                              | ලිවීම්/ආයාත/ප්රතිසාධනයට පෙර ස්වයංක්රීය SQLite ස්නැප්ෂොට් අක්රිය කරන්න; අතින් කරන උපස්ථ තවමත් ක්රියා කරයි                                         |
-| `APP_LOG_TO_FILE`                       | `true`                               | යෙදුම් සහ විගණන ලොග් ප්රතිදානය තැටියට ලිවීම සක්රීය කරයි                                                                                          |
-| `AUTH_COOKIE_SECURE`                    | `false`                              | `Secure` සත්යාපන කුකිය බල කරන්න (HTTPS ප්රතිලෝම ප්රොක්සියක් පිටුපස)                                                                              |
-| `CLOUDFLARED_BIN`                       | සකසා නැත                             | කළමනාකරණය කළ බාගැනීම වෙනුවට පවතින `cloudflared` ද්විමය ගොනුවක් භාවිත කරන්න                                                                       |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                              | කළමනාකරණය කළ Quick Tunnels සඳහා ප්රවාහනය (`http2`, `quic`, හෝ `auto`)                                                                            |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                                | MB වලින් Node.js හීප් සීමාව                                                                                                                      |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                 | ප්රොම්ප්ට් හැඹිලියේ උපරිම ඇතුළත් කිරීම් සංඛ්යාව                                                                                                  |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                | අර්ථමය හැඹිලියේ උපරිම ඇතුළත් කිරීම් සංඛ්යාව                                                                                                      |
+| විචල්ය                                  | පෙරනිමිය                 | විස්තරය                                                                                                                                       |
+| --------------------------------------- | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| `JWT_SECRET`                            | _(ස්වයං-උත්පාදනය)_       | JWT අත්සන් කිරීමේ රහස් — පළමු ධාවනයේදී ස්වයංක්‍රීයව උත්පාදනය කර `server.env` දක්වා පැවතුනි; දත්ත නාමාවලිය තාවකාලික වන විට එය පැහැදිලිව සකසන්න |
+| `INITIAL_PASSWORD`                      | _(නොසකසා ඇත)_            | පළමු පිවිසුම් මුරපදය. npm/source ස්ථාපනය `CHANGEME` සමඟ ආරම්භ කරන්න: එය ප්‍රතිස්ථාපනය කරන්න. සකස් නොකළ: ඇතුල්වීමේ විශාරදයා                    |
+| `DATA_DIR`                              | `~/.omniroute`           | දත්ත නාමාවලිය (db, භාවිතය, ලඝු-සටහන්)                                                                                                         |
+| `PORT`                                  | රාමුව පෙරනිමිය           | සේවා වරාය (උදාහරණ ලෙස `20128` )                                                                                                               |
+| `HOSTNAME`                              | රාමුව පෙරනිමිය           | ධාරකය බඳින්න (Docker පෙරනිමි `0.0.0.0` වෙත)                                                                                                   |
+| `NODE_ENV`                              | ධාවන කාල පෙරනිමිය        | යෙදවීම සඳහා `production` සකසන්න                                                                                                               |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128` | පොදු පදනම URL උපකරණ පුවරුවට මතු වී සේවාදායකයට නිරාවරණය විය (පරම්පරාගත `BASE_URL` ප්‍රතිස්ථාපනය කරයි)                                          |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`  | වලාකුළු සමමුහුර්ත අන්ත ලක්ෂ්‍ය පාදය URL (පරම්පරාගත `CLOUD_URL` ප්‍රතිස්ථාපනය කරයි)                                                            |
+| `API_KEY_SECRET`                        | _(ස්වයං-උත්පාදනය)_       | ජනනය කරන ලද API යතුරු සඳහාHMAC රහස — පළමු ධාවනයේදී ස්වයංක්‍රීයව උත්පාදනය කර `server.env` දක්වා පැවතුනි                                        |
+| `REQUIRE_API_KEY`                       | `false`                  | `/v1/*` මත Bearer API යතුර බලාත්මක කරන්න                                                                                                      |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                  | ඉල්ලුම මත සම්පූර්ණ ගබඩා කර ඇති API ප්‍රධාන අගයන් හෙළි කිරීමට සත්‍යාපිත උපකරණ පුවරු පරිශීලකයින්ට ඉඩ දෙන්න                                      |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                     | හැඹිලිගත සැපයුම්කරු සීමා දත්ත සඳහා සේවාදායක පැත්තේ refresh cadence; UI refresh බොත්තම් තවමත් අතින් සමමුහුර්ත කිරීම අවුලුවයි                   |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                  | writes/import/restore ට පෙර ස්වයංක්‍රීය SQLite ස්නැප්ෂොට් අක්‍රිය කරන්න ; අතින් උපස්ථ තවමත් ක්‍රියා කරයි                                      |
+| `APP_LOG_TO_FILE`                       | `true`                   | තැටියට යෙදුම් සහ විගණන ලොග් ප්‍රතිදානය සබල කරයි                                                                                               |
+| `AUTH_COOKIE_SECURE`                    | `false`                  | `Secure` auth කුකියට බල කරන්න ( HTTPS ප්‍රතිලෝම ප්‍රොක්සි පිටුපස)                                                                             |
+| `CLOUDFLARED_BIN`                       | සකස් නොකළ                | කළමනාකරණය කළ බාගත කිරීම වෙනුවට පවතින `cloudflared` ද්විමය භාවිතා කරන්න                                                                        |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                  | කළමනාකරණය කරන ලද ඉක්මන් උමං සඳහා ප්‍රවාහනය (`http2`, `quic`, හෝ `auto`)                                                                       |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                    | Node.js ගොඩ සීමාව MB වලින්                                                                                                                    |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                     | උපරිම ක්ෂණික හැඹිලි ඇතුළත් කිරීම්                                                                                                             |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                    | උපරිම අර්ථකථන හැඹිලි ඇතුළත් කිරීම්                                                                                                            |
 
-සම්පූර්ණ පරිසර විචල්ය යොමුව සඳහා [README](../README.md) බලන්න.
+සම්පූර්ණ පරිසර විචල්‍ය යොමුව සඳහා, [README](../README.md) බලන්න.
 
 ---
 

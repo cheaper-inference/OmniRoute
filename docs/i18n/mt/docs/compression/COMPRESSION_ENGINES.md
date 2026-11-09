@@ -305,6 +305,95 @@ Il-kombinazzjonijiet ta' kompressjoni huma profili ta' kompressjoni msemmija li 
 
 Post fid-dashboard: `Dashboard -> Context & Cache -> Compression Combos`.
 
+## Prerekwiżiti / gwida għall-operatur (CCR & session-dedup)
+
+CCR (`ccr`) u `session-dedup` jissostitwixxu jew elide test u jħallu a** markatur** wara. Din it-taqsima hija r-referenza tal-operatur għall-wajers ta 'klijent, il-qari taż-żewġ markaturi, u l-irkupru jew id-dijanjosi tal-kontenut elided. Mekkaniċi ta 'kull magna huma koperti hawn fuq; dan huwa s-saff "kif nista' nmexxiha".
+
+### Trasporti u endpoints
+
+Is-server MCP li jesponi l-għodod CCR jista 'jintlaħaq tliet modi. Il-bażi default URL hija `http://localhost:20128` (`OMNIROUTE_BASE_URL`):
+
+| Trasport                               | URL / kmand                             | Noti                                                                                                                                    |
+| -------------------------------------- | --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| HTTP Streamable (klijent, rakkomandat) | `http://localhost:20128/api/mcp/stream` | L-endpoint attwali MCP klijenti jitkellmu miegħu.                                                                                       |
+| Legacy SSE singleton                   | `http://localhost:20128/api/mcp/sse`    | Trasport singleton anzjani. Huwa** jagħlaq** sessjonijiet streamable; uża `streamable-http` clients kontra `/api/mcp/stream`, mhux dan. |
+| stdio                                  | `omniroute --mcp`                       | Għal IDE MCP config li tbid il-proċess. M'hemm l-ebda bandiera `--dev` ; `omniroute --mcp` huwa l-punt tad-dħul stdio.                  |
+
+### Saffi tal-ħażna (dak li jibqa' ħaj minn bidu mill-ġdid)
+
+CCR hija a** żewġ saffi** maħżen, mhux fil-memorja biss:
+
+- **Saff sħun fil-memorja** — per-block cap 2 MiB, per-principal 16 MiB, global 64 MiB. L-iskrizzjonijiet default għal 24 h TTL (massimu 7 ijiem). L-irkupru sħiħ MCP mill-memorja huwa limitat għal 256 KiB; xi ħaġa akbar għadha tintlaħaq permezz tal-modi ranged / grep.
+- **Saff SQLite durabbli** (`ccr_blocks`, `COMPRESSION_CCR_DURABLE_STORE`, on by default) — jappoġġa l-livell fil-memorja sabiex blokka tibqa 'ħajja żgumbrament LRU, restart, jew irkuprar inżul f'istanza oħra. Ir-ringiela żżomm iż- TTL tal-blokk , għalhekk blokk li jgħaddi TTL tiegħu jkun marret miż-żewġ saffi.
+
+Tliet gwardji jżommu s-saff dejjiemi marbut — blokka tibqa' memorja biss meta:
+
+1. il-blokk spiċċa** 512 KB** (`MAX_DURABLE_BLOCK_BYTES`);
+2. ir-runtime huwa sħaba runtime (l-ebda disk lokali);
+3. `COMPRESSION_CCR_DURABLE_STORE=false`.
+
+Allura "il-blokk sparixxa" mhix storja ta' bidu mill-ġdid kutra: blokka sub-512 KB fuq runtime lokali, mhux sħaba tibqa' ħaj minn bidu mill-ġdid permezz tal-livell durabbli sakemm jispiċċa TTL tagħha. Ara [referenza għall-Ambjent](../reference/ENVIRONMENT.md) għall-varjabbli.
+
+### Iż-żewġ markaturi
+
+| Marker                                | Tifsira                                                                                                                                           | X'għandu jagħmel il-mudell                                                                                                                                                                                      |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `[CCR retrieve hash=<24hex> chars=N]` | Blokk kbir kien maħżun kontenut indirizzat.                                                                                                       | Ċempel `omniroute_ccr_retrieve` mal-** 24-hex hash ikkupjat verbatim** biex tikseb it-test oriġinali lura.                                                                                                      |
+| `[dedup:ref sha=…]`                   | `session-dedup` elided test diġà mibgħut f'dawra aktar kmieni tal-istess sessjoni. Din hija an** ħarsa intenzjonata lura** , mhux telf jew żball. | Do** le** sejħa kwalunkwe għodda u tagħmel** le** ipprova "jibni mill-ġdid". L-ewwel okkorrenza tat-test hija l-kopja kanonika; id-dawra attwali qatt ma tinkiteb mill-ġdid, hija deduppata f'dawra aktar tard. |
+
+Il-ħarsa lura `[dedup:ref]` hija deċiżjoni deliberata ta' protokoll — m'hemm l-ebda rikostruzzjoni minn qabel. Ittrattaha bħala "dan it-test eżatt kien diġà fuq il-wajer aktar kmieni f'din is-sessjoni."
+
+### Prerekwiżiti tal-klijenti
+
+- **Ċavetta (stdio):** min iċempel stdio ma jġorr l-ebda identità għal kull talba, għalhekk jawtentika `OMNIROUTE_API_KEY` (settjat fil- `env` tas-server MCP ). Mingħajrha min iċempel huwa anonimu u għodod li jeħtieġu prinċipali jistgħu jiddegradaw.
+- **`tools[]` hija l-prekundizzjoni tal-injezzjoni.** L-istruzzjoni CCR retrieve-protocol (#8033) hija injettata** biss** meta l- `tools[]` reklamat tat-talba jipprova li l-klijent jista 'attwalment jilħaq `omniroute_ccr_retrieve`. It-taqbila hija taqbila ta' segment ta' wara mdawra b'separatur (`__`, `.`, `/`, `:`) — qatt ma substring vojta — għalhekk isem spazjat bl-isem bħal `mcp__gateway__omniroute_ccr_retrieve` għadu jgħodd. `tools[]` assenti jew li ma jaqbilx ifisser li l-istruzzjoni hija _mhux_ injettata, bid-disinn.
+- **`codemode:false` ( klijenti OpenCode ).** OpenCode default għall-Modalità tal-Kodiċi, li tirreklama biss l-għodod indiġeni tagħha lill-mudell u** ma** poġġi għodod MCP fuq il-lista nattiva `tools[]`. Issettja `codemode: false` fuq id-dħul tas-server MCP sabiex l-għodod `omniroute_ccr_*` jiġu reklamati. Din hija a** klijent** setting, mhux OmniRoute wahda. L-istruzzjoni CCR għadha ma tiġix injettata: OpenCode issemmi għodda `<server>_<tool>`, għalhekk server imsejjaħ `omniroute` jesponi `omniroute_omniroute_ccr_retrieve`, u `_` mhuwiex wieħed mis-separaturi mqabbla.
+- **Prinċipali.** Il-ħażna u l-irkupru huma iżolati għal kull prinċipal awtentikat (għal kull ċavetta API ). Ċavetta tara l-blokki tagħha stess biss.
+
+### Ambiti għal kull għodda
+
+L-infurzar tal-ambitu huwa dejjem mixgħul għal min iċempel HTTP/SSE b'ambitu dejjaq. L-għodod CCR `omniroute_` jeħtieġu:
+
+| Għodda                   | Ambitu              |
+| ------------------------ | ------------------- |
+| `omniroute_ccr_store`    | `write:compression` |
+| `omniroute_ccr_delete`   | `write:compression` |
+| `omniroute_ccr_retrieve` | `read:compression`  |
+| `omniroute_ccr_inspect`  | `read:compression`  |
+| `omniroute_ccr_list`     | `read:compression`  |
+| `omniroute_ccr_stats`    | `read:compression`  |
+
+Ambitu nieqes jirritorna an**MCP tool error result** (`isError: true`, mhux HTTP 403 — iż- `403 LOCAL_ONLY` hija l-awth separata tal-loopback route-guard): `Error: Insufficient MCP scopes for <tool>. Missing: <scope>.` Ċavetta remota minima tista 'żżomm `mcp:connect` (jawtorizza l- `/api/mcp/` local-only carve-out) flimkien mal-ambitu read/write speċifiku li teħtieġ.
+
+### Matriċi tal-klijenti
+
+| Klijent                | Trasport                                        | Konfigurazzjoni biex tuża                                                                                                                                                                                                                               | `tools[]` reklamata? (struzzjoni → CCR injettata)                                                                                                                                                    |
+| ---------------------- | ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Claude Code            | streamable-http                                 | `claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream`                                                                                                                                                                       | Iva — MCP-kapaci; injettat.                                                                                                                                                                          |
+| Cursor / Cline         | `stdio`** jew** `streamable-http`               | stdio: `omniroute --mcp` with `OMNIROUTE_API_KEY` in `env`; jew daħla MCP remota li tipponta lejn `http://localhost:20128/api/mcp/stream` (ara [Gwida ta' Setup → MCP Konfigurazzjoni tal-Klijent](../guides/SETUP_GUIDE.md#mcp-client-configuration) ) | Iva — jirreklama l-għodda `omniroute_ccr_*`.                                                                                                                                                         |
+| OpenCode               | streamable-http                                 | `opencode mcp add omniroute --url http://localhost:20128/api/mcp/stream`, flimkien ma `codemode: false`                                                                                                                                                 | Għodod reklamati biss bi `codemode: false`; l-istruzzjoni għadha mhix injettata, minħabba li `omniroute_omniroute_ccr_retrieve` ma taqbilx (ara [Prerekwiżiti tal-Klijent](#client-prerequisites) ). |
+| Kompatibbli ma' OpenAI | HTTP kompatibbli mal-OpenAI (kompleti taċ-chat) | klijent standard ta 'chat-completions kontra l-endpoint kompatibbli ma' OpenAI                                                                                                                                                                          | **Qatt** — sejjieħ sempliċi kompatibbli mal-OpenAI qatt ma jingħad li jsejjaħ l-għodda, u l-istruzzjoni ma tiġix injettata.                                                                          |
+
+### Limiti ta' rkupru u paġinazzjoni
+
+Ir-riżultati tat-test tal-għodda MCP huma maqtugħin madwar `mcpAccessibility.maxTextChars` (default `50000`). A `full` retrieve ta 'blokk huwa limitat għal 256 KiB —** m'hemm l-ebda irkupru sħiħ bla limitu** . Meta `chars=N` ta 'blokk ikun kbir, iċċempjaha minflok tiġbed il-ħaġa sħiħa:
+
+- Regola ġenerali:**`chars > 40000` → uża `mode`** , qatt ma vojta sħiħa.
+- `mode:"grep"` — regex `pattern` imqabbla linja b'linja, sa 1,000 linja li jaqblu (`unique: true` drops repeats), l-irħas għal "sib il-linja waħda li għandi bżonn."
+- `mode:"lines"` — firxa linja indiċjata 1; jeħtieġ kemm `start` kif ukoll `end`.
+- `mode:"head"` / `mode:"tail"` — first/last `n` lines.
+- `mode:"stats"` — linja, karattru, u l-għadd tal-byte mingħajr il-korp.
+
+Uża `mode:"lines"` ma `start`/`end` biex timxi blokka twila fil-paġni aktar milli titlob il-ħaġa sħiħa f'daqqa.
+
+### Ismijiet tal-għodda
+
+L-għodda tal-irkuprar bħalissa hija msejħa `omniroute_ccr_retrieve` (il-prefiss `omniroute_` huwa soluzzjoni datata għall-ħabtiet tal-ismijiet bejn is-server). Isem ta' għodda b'suffiss limitat aktar nadif u soluzzjoni għal riżultati MCP JSON maqtugħin f'nofs is-sekwenza huma ssorveljati bħala segwitu upstream; din il-paġna tiddokumenta l-imġieba kurrenti, mibgħuta biss.
+
+### Ċiklu tal-ħajja tas-sessjoni
+
+Sessjonijiet Streamable-HTTP idle out u s-server jaħsadhom; it-tieqa idle hija l-kostanti `MCP_SESSION_IDLE_MS` (referenzjata bl-isem, mhux valur hardcoded, għalhekk din il-paġna ma tgħaddix meta tinbidel). Is-sintomu ta' sessjoni idle-reaped huwa HTTP 404 `Unknown Mcp-Session-Id` — ir-rimedju huwa li terġa' tgħaqqad jew terġa' tibda s-sessjoni,** le** biex iddawwar ċavetta, tibdel ambitu, jew tibdel isem għodda.
+
 ## Interfaċċa tal-API
 
 | Rotta                                  | Għan                                                                              |
@@ -393,7 +482,7 @@ sensittivi għall-cache, eċċ.).
 
 ## Validazzjoni
 
-Il-bibien iffokati għal dan il-qasam huma:
+Il-gradi ffukati għal din iż-żona huma:
 
 ```bash
 node --import tsx/esm --test tests/unit/compression/rtk-*.test.ts tests/unit/compression/pipeline-integration.test.ts tests/unit/compression/context-compression-api.test.ts

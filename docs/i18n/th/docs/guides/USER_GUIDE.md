@@ -352,82 +352,82 @@ API Key: [จากแดชบอร์ด]
 
 ---
 
-## 🚀 การปรับใช้
+## การปรับใช้🚀
 
-### การติดตั้ง npm แบบส่วนกลาง (แนะนำ)
+### การติดตั้ง npm ทั่วโลก (แนะนำ)
 
 ```bash
 npm install -g omniroute
 
-# สร้างไดเรกทอรีการกำหนดค่า
+# Create config directory
 mkdir -p ~/.omniroute
 
-# สร้างไฟล์ .env (ดู .env.example)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# เริ่มต้นเซิร์ฟเวอร์
+# Start server
 omniroute
-# หรือใช้พอร์ตที่กำหนดเอง:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI จะโหลด `.env` จาก `~/.omniroute/.env` หรือ `./.env` โดยอัตโนมัติ
+CLI จะโหลด `.env` จาก `~/.omniroute/.env` หรือ `./.env` โดยอัตโนมัติ `./.env` ในไดเร็กทอรีการทำงานอาจตั้งค่าเฉพาะรายการคีย์ที่อนุญาตสั้นๆ เท่านั้น (การตั้งค่าพอร์ต, `REQUIRE_API_KEY`, ภาษา และสี) ใส่ทุกอย่างอื่นใน `~/.omniroute/.env` ดู [สัญญาการเปิดตัว CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env)
 
-### โหมดถาดระบบ
+### โหมดถาด
 
-เริ่มต้น OmniRoute ในถาดระบบ:
+เริ่ม OmniRoute ในถาดระบบ:
 
 ```bash
 omniroute serve --tray
 ```
 
-คำสั่งจะสิ้นสุดการทำงานหลังจากเซิร์ฟเวอร์และถาดระบบพร้อมใช้งานแล้ว
+คำสั่งส่งคืนหลังจากเซิร์ฟเวอร์และถาดพร้อม
 
-เซิร์ฟเวอร์จะทำงานต่อไปโดยไม่ต้องเปิดเทอร์มินัลไว้
+เซิร์ฟเวอร์ดำเนินการต่อโดยไม่มีเทอร์มินัล
 
-โหมดถาดระบบรองรับ macOS, Windows และเซสชัน Linux แบบกราฟิก โหมดถาดระบบจะไม่เปิดแดชบอร์ดโดยอัตโนมัติ
+โหมดถาดรองรับเซสชัน macOS, Windows และ Linux แบบกราฟิก โหมดถาดไม่เปิดแดชบอร์ดโดยอัตโนมัติ
 
-ใช้เมนูถาดระบบเพื่อดำเนินการต่อไปนี้:
+ใช้เมนูถาดสำหรับการดำเนินการเหล่านี้:
 
 - เปิดแดชบอร์ด
 - เปิด `/dashboard/logs`
-- เปลี่ยนการตั้งค่าเริ่มต้นอัตโนมัติ
-- หยุด OmniRoute
+- เปลี่ยนการเริ่มต้นอัตโนมัติ
+- หยุด OmniRoute.
 
-อย่าใช้ `--tray` ร่วมกับตัวเลือกต่อไปนี้:
+อย่ารวม `--tray` กับตัวเลือกเหล่านี้:
 
 - `--daemon`
 - `--log`
 - `--no-recovery`
 
-โหมดเหล่านี้ต้องใช้การเป็นเจ้าของโปรเซสที่แตกต่างกัน
+โหมดเหล่านี้ต้องการความเป็นเจ้าของกระบวนการที่แตกต่างกัน
 
-เปิดใช้งานการเริ่มต้นระบบเมื่อเข้าสู่ระบบเครื่องครั้งถัดไป:
+เปิดใช้งานการเริ่มต้นในการเข้าสู่ระบบเครื่องถัดไป:
 
 ```bash
 omniroute autostart enable
 ```
 
-การเริ่มต้นอัตโนมัติจะใช้โหมดถาดระบบบน macOS, Windows และเซสชัน Linux แบบกราฟิก ส่วน Linux แบบไม่มีส่วนติดต่อกราฟิกจะใช้บริการผู้ใช้ systemd ที่มีอยู่
+การเริ่มต้นอัตโนมัติใช้โหมดถาดในเซสชัน macOS, Windows และ Linux แบบกราฟิก Headless Linux ใช้บริการผู้ใช้ systemd ที่มีอยู่
 
-ปิดใช้งานการเริ่มต้นระบบเมื่อเข้าสู่ระบบ:
+ปิดการใช้งานการเริ่มต้นเมื่อเข้าสู่ระบบ:
 
 ```bash
 omniroute autostart disable
 ```
 
-### การถอนการติดตั้ง
+### กำลังถอนการติดตั้ง
 
-เมื่อคุณไม่ต้องการใช้ OmniRoute อีกต่อไป เรามีสคริปต์ด่วนสองรายการสำหรับการลบออกอย่างหมดจด:
+เมื่อคุณไม่ต้องการ OmniRoute อีกต่อไป เรามีสคริปต์สั้นๆ สองสคริปต์สำหรับการลบออกทั้งหมด:
 
-| คำสั่ง                   | การดำเนินการ                                                             |
-| ------------------------ | ------------------------------------------------------------------------ |
-| `npm run uninstall`      | ลบแอประบบ แต่ **เก็บฐานข้อมูลและการกำหนดค่าของคุณไว้** ใน `~/.omniroute` |
-| `npm run uninstall:full` | ลบแอป และ **ลบการกำหนดค่า คีย์ และฐานข้อมูลทั้งหมดอย่างถาวร**            |
+| สั่งการ                  | การกระทำ                                                           |
+| ------------------------ | ------------------------------------------------------------------ |
+| `npm run uninstall`      | ลบแอประบบแต่** เก็บ DB และการกำหนดค่าของคุณไว้** ใน `~/.omniroute` |
+| `npm run uninstall:full` | ลบแอป AND อย่างถาวร** ลบการกำหนดค่า คีย์ และฐานข้อมูลทั้งหมด** .   |
 
-> หมายเหตุ: หากต้องการเรียกใช้คำสั่งเหล่านี้ ให้ไปยังโฟลเดอร์โปรเจกต์ OmniRoute (หากคุณโคลนโปรเจกต์ไว้) แล้วเรียกใช้คำสั่งดังกล่าว หรือหากติดตั้งแบบส่วนกลาง คุณสามารถเรียกใช้ `npm uninstall -g omniroute` ได้โดยตรง
+> หมายเหตุ: หากต้องการรันคำสั่งเหล่านี้ ให้ไปที่โฟลเดอร์โปรเจ็กต์ OmniRoute (หากคุณโคลนไว้) และรันคำสั่งเหล่านั้น หรือหากติดตั้งแบบโกลบอล คุณก็เรียกใช้ `npm uninstall -g omniroute` ได้เลย
 
-### การปรับใช้บน VPS
+### การปรับใช้VPS
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -443,21 +443,21 @@ export NEXT_PUBLIC_BASE_URL="http://localhost:20128"
 export API_KEY_SECRET="endpoint-proxy-api-key-secret"
 
 npm run start
-# หรือ: pm2 start npm --name omniroute -- start
+# Or: pm2 start npm --name omniroute -- start
 ```
 
-### การปรับใช้ด้วย PM2 (หน่วยความจำน้อย)
+### การปรับใช้PM2 (หน่วยความจำต่ำ)
 
-สำหรับเซิร์ฟเวอร์ที่มี RAM จำกัด ให้ใช้ตัวเลือกจำกัดหน่วยความจำ:
+สำหรับเซิร์ฟเวอร์ที่มี RAM แบบจำกัด ให้ใช้อ็อพชันขีดจำกัดหน่วยความจำ:
 
 ```bash
-# พร้อมขีดจำกัด 512MB (ค่าเริ่มต้น)
+# With 512MB limit (default)
 pm2 start npm --name omniroute -- start
 
-# หรือใช้ขีดจำกัดหน่วยความจำที่กำหนดเอง
+# Or with custom memory limit
 OMNIROUTE_MEMORY_MB=512 pm2 start npm --name omniroute -- start
 
-# หรือใช้ ecosystem.config.js
+# Or using ecosystem.config.js
 pm2 start ecosystem.config.js
 ```
 
@@ -486,24 +486,24 @@ module.exports = {
 ### Docker
 
 ```bash
-# สร้างอิมเมจ (ค่าเริ่มต้น = runner-cli ที่ติดตั้ง codex/claude/droid ไว้ล่วงหน้า)
+# Build image (default = runner-cli with codex/claude/droid preinstalled)
 docker build -t omniroute:cli .
 
-# โหมดพกพา (แนะนำ)
+# Portable mode (recommended)
 docker run -d --name omniroute -p 20128:20128 --env-file ./.env -v omniroute-data:/app/data omniroute:cli
 ```
 
-สำหรับโหมดที่ผสานรวมกับโฮสต์พร้อมไบนารี CLI โปรดดูส่วน Docker ในเอกสารหลัก
+สำหรับโหมดรวมโฮสต์ที่มีไบนารี CLI โปรดดูส่วน Docker ในเอกสารหลัก
 
-### Void Linux (xbps-src)
+### โมฆะ Linux (xbps-src)
 
-ผู้ใช้ Void Linux สามารถจัดแพ็กเกจและติดตั้ง OmniRoute แบบเนทีฟได้โดยใช้เฟรมเวิร์กการคอมไพล์ข้ามแพลตฟอร์ม `xbps-src` ซึ่งจะทำให้การสร้าง Node.js แบบสแตนด์อโลนพร้อมกับไบนารีไบน์ดิงแบบเนทีฟของ `better-sqlite3` ที่จำเป็นเป็นไปโดยอัตโนมัติ
+ผู้ใช้ Void Linux สามารถจัดทำแพ็คเกจและติดตั้ง OmniRoute แบบเนทิฟได้โดยใช้เฟรมเวิร์กการคอมไพล์ข้าม `xbps-src` สิ่งนี้จะทำให้การสร้าง Node.js แบบสแตนด์อโลนเป็นแบบอัตโนมัติพร้อมกับการผูกเนทิฟ `better-sqlite3` ที่จำเป็น
 
 <details>
 <summary><b>ดูเทมเพลต xbps-src</b></summary>
 
 ```bash
-# ไฟล์เทมเพลตสำหรับ 'omniroute'
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -524,7 +524,7 @@ export npm_config_fund=false
 export npm_config_audit=false
 
 do_build() {
-	# กำหนดสถาปัตยกรรม CPU เป้าหมายสำหรับ node-gyp
+	# Determine target CPU arch for node-gyp
 	local _gyp_arch
 	case "$XBPS_TARGET_MACHINE" in
 		aarch64*) _gyp_arch=arm64 ;;
@@ -533,29 +533,29 @@ do_build() {
 		*) _gyp_arch=x64 ;;
 	esac
 
-	# 1) ติดตั้งการขึ้นต่อกันทั้งหมด – ข้ามสคริปต์
+	# 1) Install all deps – skip scripts
 	NODE_ENV=development npm ci --ignore-scripts
 
-	# 2) สร้างบันเดิล Next.js แบบสแตนด์อโลน
+	# 2) Build the Next.js standalone bundle
 	npm run build
 
-	# 3) คัดลอกแอสเซ็ตแบบสแตติกไปยังสแตนด์อโลน
+	# 3) Copy static assets into standalone
 	cp -r .next/static .next/standalone/.next/static
 	[ -d public ] && cp -r public .next/standalone/public || true
 
-	# 4) คอมไพล์ไบนารีไบน์ดิงแบบเนทีฟของ better-sqlite3
+	# 4) Compile better-sqlite3 native binding
 	local _node_gyp=/usr/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js
 	(cd node_modules/better-sqlite3 && node "$_node_gyp" rebuild --arch="$_gyp_arch")
 
-	# 5) วางไบนารีไบน์ดิงที่คอมไพล์แล้วลงในบันเดิลสแตนด์อโลน
+	# 5) Place the compiled binding into the standalone bundle
 	local _bs3_release=.next/standalone/node_modules/better-sqlite3/build/Release
 	mkdir -p "$_bs3_release"
 	cp node_modules/better-sqlite3/build/Release/better_sqlite3.node "$_bs3_release/"
 
-	# 6) ลบบันเดิล sharp ที่เจาะจงตามสถาปัตยกรรม
+	# 6) Remove arch-specific sharp bundles
 	rm -rf .next/standalone/node_modules/@img
 
-	# 7) คัดลอกการขึ้นต่อกันขณะรันไทม์ของ pino ที่การวิเคราะห์แบบสแตติกของ Next.js ไม่ได้นำมารวมไว้:
+	# 7) Copy pino runtime deps omitted by Next.js static analysis:
 	for _mod in pino-abstract-transport split2 process-warning; do
 		cp -r "node_modules/$_mod" .next/standalone/node_modules/
 	done
@@ -569,7 +569,7 @@ do_install() {
 	vmkdir usr/lib/omniroute/.next
 	vcopy .next/standalone/. usr/lib/omniroute/.next/standalone
 
-	# ป้องกันไม่ให้ฮุกหลังการติดตั้งลบไดเรกทอรีเราเตอร์แอป Next.js ที่ว่างเปล่า
+	# Prevent removal of empty Next.js app router dirs by the post-install hook
 	for _d in \
 		.next/standalone/.next/server/app/dashboard \
 		.next/standalone/.next/server/app/dashboard/settings \
@@ -597,30 +597,30 @@ post_install() {
 
 ### ตัวแปรสภาพแวดล้อม
 
-| ตัวแปร                                  | ค่าเริ่มต้น                          | คำอธิบาย                                                                                                            |
-| --------------------------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------- |
-| `JWT_SECRET`                            | `omniroute-default-secret-change-me` | คีย์ลับสำหรับลงนาม JWT (**ต้องเปลี่ยนในระบบที่ใช้งานจริง**)                                                         |
-| `INITIAL_PASSWORD`                      | `CHANGEME`                           | รหัสผ่านสำหรับการเข้าสู่ระบบครั้งแรก                                                                                |
-| `DATA_DIR`                              | `~/.omniroute`                       | ไดเรกทอรีข้อมูล (ฐานข้อมูล ข้อมูลการใช้งาน และบันทึกเหตุการณ์)                                                      |
-| `PORT`                                  | ค่าเริ่มต้นของเฟรมเวิร์ก             | พอร์ตของบริการ (`20128` ในตัวอย่าง)                                                                                 |
-| `HOSTNAME`                              | ค่าเริ่มต้นของเฟรมเวิร์ก             | โฮสต์ที่ใช้รับการเชื่อมต่อ (Docker ใช้ค่าเริ่มต้นเป็น `0.0.0.0`)                                                    |
-| `NODE_ENV`                              | ค่าเริ่มต้นของรันไทม์                | ตั้งค่าเป็น `production` สำหรับการนำไปใช้งาน                                                                        |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`             | URL ฐานแบบสาธารณะที่แสดงต่อแดชบอร์ดและเปิดให้เซิร์ฟเวอร์ใช้งาน (ใช้แทน `BASE_URL` แบบเดิม)                          |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`              | URL ฐานของปลายทางการซิงค์กับคลาวด์ (ใช้แทน `CLOUD_URL` แบบเดิม)                                                     |
-| `API_KEY_SECRET`                        | `endpoint-proxy-api-key-secret`      | คีย์ลับ HMAC สำหรับคีย์ API ที่สร้างขึ้น                                                                            |
-| `REQUIRE_API_KEY`                       | `false`                              | บังคับใช้คีย์ API แบบ Bearer กับ `/v1/*`                                                                            |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                              | อนุญาตให้ผู้ใช้แดชบอร์ดที่ผ่านการยืนยันตัวตนเปิดดูค่าคีย์ API ที่จัดเก็บไว้แบบเต็มได้ตามต้องการ                     |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                 | ความถี่ในการรีเฟรชข้อมูล Provider Limits ที่แคชไว้จากฝั่งเซิร์ฟเวอร์ ปุ่มรีเฟรชใน UI ยังคงเรียกใช้การซิงค์ด้วยตนเอง |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                              | ปิดใช้สแนปช็อต SQLite อัตโนมัติก่อนการเขียน/นำเข้า/กู้คืน โดยการสำรองข้อมูลด้วยตนเองยังคงใช้งานได้                  |
-| `APP_LOG_TO_FILE`                       | `true`                               | เปิดใช้การบันทึกเหตุการณ์ของแอปพลิเคชันและการตรวจสอบลงดิสก์                                                         |
-| `AUTH_COOKIE_SECURE`                    | `false`                              | บังคับใช้คุกกี้การยืนยันตัวตนแบบ `Secure` (เมื่ออยู่หลังพร็อกซีย้อนกลับ HTTPS)                                      |
-| `CLOUDFLARED_BIN`                       | ไม่ได้ตั้งค่า                        | ใช้ไบนารี `cloudflared` ที่มีอยู่แทนการดาวน์โหลดที่มีการจัดการ                                                      |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                              | การขนส่งสำหรับ Quick Tunnels ที่มีการจัดการ (`http2`, `quic` หรือ `auto`)                                           |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                                | ขีดจำกัดฮีปของ Node.js หน่วยเป็น MB                                                                                 |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                 | จำนวนรายการสูงสุดในแคชพรอมต์                                                                                        |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                | จำนวนรายการสูงสุดในแคชเชิงความหมาย                                                                                  |
+| ตัวแปร                                  | ค่าเริ่มต้น              | คำอธิบาย                                                                                                                                        |
+| --------------------------------------- | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `JWT_SECRET`                            | _(สร้างอัตโนมัติ)_       | ความลับในการลงนาม JWT — สร้างขึ้นโดยอัตโนมัติในการรันครั้งแรกและคงอยู่เป็น `server.env`; ตั้งค่าอย่างชัดเจนเมื่อไดเร็กทอรีข้อมูลเป็นแบบชั่วคราว |
+| `INITIAL_PASSWORD`                      | _(ไม่ได้ตั้งค่า)_        | รหัสผ่านเข้าสู่ระบบครั้งแรก การติดตั้ง npm/source เริ่มต้นด้วย `CHANGEME`: แทนที่มัน ยกเลิกการตั้งค่า: วิซาร์ดการเริ่มต้นใช้งาน                 |
+| `DATA_DIR`                              | `~/.omniroute`           | ไดเร็กทอรีข้อมูล (db, การใช้งาน, บันทึก)                                                                                                        |
+| `PORT`                                  | ค่าเริ่มต้นของกรอบงาน    | พอร์ตบริการ (`20128` ในตัวอย่าง)                                                                                                                |
+| `HOSTNAME`                              | ค่าเริ่มต้นของกรอบงาน    | ผูกโฮสต์ (Docker มีค่าเริ่มต้นเป็น `0.0.0.0`)                                                                                                   |
+| `NODE_ENV`                              | ค่าเริ่มต้นรันไทม์       | ตั้งค่า `production` สำหรับการปรับใช้                                                                                                           |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128` | URL ฐานสาธารณะปรากฏบนแดชบอร์ดและเปิดเผยต่อเซิร์ฟเวอร์ (แทนที่ `BASE_URL` เดิม)                                                                  |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`  | URL ฐานปลายทางการซิงค์บนคลาวด์ (แทนที่ `CLOUD_URL` เดิม)                                                                                        |
+| `API_KEY_SECRET`                        | _(สร้างอัตโนมัติ)_       | ความลับ HMAC สำหรับคีย์ API ที่สร้างขึ้น — สร้างขึ้นโดยอัตโนมัติในการรันครั้งแรกและคงอยู่ที่ `server.env`                                       |
+| `REQUIRE_API_KEY`                       | `false`                  | บังคับใช้คีย์ Bearer API บน `/v1/*`                                                                                                             |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                  | อนุญาตให้ผู้ใช้แดชบอร์ดที่ได้รับการรับรองความถูกต้องเปิดเผยค่าคีย์ API ที่เก็บไว้ทั้งหมดตามความต้องการ                                          |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                     | จังหวะการรีเฟรชฝั่งเซิร์ฟเวอร์สำหรับข้อมูลขีดจำกัดผู้ให้บริการที่แคชไว้ ปุ่มรีเฟรช UI ยังคงทริกเกอร์การซิงค์ด้วยตนเอง                           |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                  | ปิดการใช้งานสแน็ปช็อต SQLite อัตโนมัติก่อน writes/import/restore; การสำรองข้อมูลด้วยตนเองยังคงใช้งานได้                                         |
+| `APP_LOG_TO_FILE`                       | `true`                   | เปิดใช้งานเอาต์พุตบันทึกแอปพลิเคชันและการตรวจสอบไปยังดิสก์                                                                                      |
+| `AUTH_COOKIE_SECURE`                    | `false`                  | บังคับใช้คุกกี้ `Secure` auth (หลังพร็อกซีย้อนกลับ HTTPS )                                                                                      |
+| `CLOUDFLARED_BIN`                       | ไม่ได้ตั้งค่า            | ใช้ไบนารี `cloudflared` ที่มีอยู่แทนการดาวน์โหลดที่มีการจัดการ                                                                                  |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                  | การขนส่งสำหรับ Quick Tunnels ที่มีการจัดการ (`http2`, `quic` หรือ `auto`)                                                                       |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                    | ขีดจำกัดฮีป Node.js ใน MB                                                                                                                       |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                     | รายการแคชพร้อมท์สูงสุด                                                                                                                          |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                    | รายการแคชความหมายสูงสุด                                                                                                                         |
 
-สำหรับข้อมูลอ้างอิงตัวแปรสภาพแวดล้อมทั้งหมด โปรดดู [README](../README.md)
+สำหรับการอ้างอิงตัวแปรสภาพแวดล้อมแบบเต็ม โปรดดูที่ [README](../README.md)
 
 ---
 

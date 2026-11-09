@@ -444,146 +444,104 @@ server/
 
 ---
 
-## 4. `open-sse/` — סביבת העבודה של מנוע הסטרימינג
+## 4. אזור עבודה של מנוע סטרימינג `open-sse/` —
 
-סביבת עבודה נפרדת של npm, שמפורסמת בשם `@omniroute/open-sse`. אחראית על עיבוד
-בקשות, executors, מתרגמים, שירותים, transformer, ושרת MCP.
+סביבת עבודה נפרדת npm שפורסם כ- `@omniroute/open-sse`. בעלת עיבוד בקשות, מבצעים, מתרגמים, שירותים, שנאי ושרת MCP.
 
 ```
 open-sse/
-├── index.ts                ייצואים ציבוריים
-├── package.json            מניפסט סביבת העבודה
+├── index.ts                Public exports
+├── package.json            Workspace manifest
 ├── tsconfig.json
 ├── types.d.ts
-├── config/                 רישומי ספקים, פרופילי כותרות, זהות, …
-├── handlers/               מטפלי בקשות (צ׳אט, embeddings, אודיו, תמונה, …)
-├── executors/              159 מודולי executor של ספקים (מחלקות executor ועוזרים לכל ספק)
-├── translator/             המרת פורמטים (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
-├── transformer/            ממיר זרמים בין Responses API ל־Chat Completions
-├── services/               יותר מ־80 מודולי שירות (שילובים, fallback, מכסות, זהות, …)
-├── utils/                  עוזרי סטרימינג, לקוח TLS, AWS SigV4, אחזור דרך proxy, …
-└── mcp-server/             שרת MCP (3 תעבורות, 33 היקפים, 110 כלים)
+├── config/                 Provider registries, header profiles, identity, …
+├── handlers/               Request handlers (chat, embeddings, audio, image, …)
+├── executors/              159 provider executor modules (executor classes + per-provider helpers)
+├── translator/             Format conversion (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
+├── transformer/            Responses API ↔ Chat Completions stream transformer
+├── services/               80+ service modules (combos, fallback, quotas, identity, …)
+├── utils/                  Streaming helpers, TLS client, AWS SigV4, proxy fetch, …
+└── mcp-server/             MCP server (3 transports, 33 scopes, 110 tools)
 ```
 
 ### 4.1 `open-sse/handlers/`
 
-| Handler                 | Purpose                                                                     |
-| ----------------------- | --------------------------------------------------------------------------- |
-| `chatCore.ts`           | צינור עיבוד הצ׳אט הראשי (מטמון, הגבלת קצב, ניתוב שילובים, שיגור ל־executor) |
-| `responsesHandler.ts`   | נקודת הכניסה של OpenAI Responses API                                        |
-| `embeddings.ts`         | Embeddings                                                                  |
-| `imageGeneration.ts`    | יצירת תמונות                                                                |
-| `audioSpeech.ts`        | המרת טקסט לדיבור                                                            |
-| `audioTranscription.ts` | המרת דיבור לטקסט                                                            |
-| `videoGeneration.ts`    | יצירת וידאו                                                                 |
-| `musicGeneration.ts`    | יצירת מוזיקה                                                                |
-| `rerank.ts`             | דירוג מחדש                                                                  |
-| `moderations.ts`        | ניהול תוכן                                                                  |
-| `search.ts`             | חיפוש באינטרנט                                                              |
-| `sseParser.ts`          | מנתח אירועי SSE                                                             |
-| `usageExtractor.ts`     | חילוץ ספירות אסימונים מזרמים במעלה הזרם                                     |
-| `responseSanitizer.ts`  | הסרת רעשים ספציפיים לספק                                                    |
-| `responseTranslator.ts` | חיבור בין תגובת הספק לשכבת התרגום                                           |
+| מטפל                    | מַטָרָה                                                       |
+| ----------------------- | ------------------------------------------------------------- |
+| `chatCore.ts`           | צינור הצ'אט הראשי (מטמון, מגבלת קצב, ניתוב משולב, שיגור מבצע) |
+| `responsesHandler.ts`   | OpenAI תגובות API נקודת כניסה                                 |
+| `embeddings.ts`         | הטבעות                                                        |
+| `imageGeneration.ts`    | יצירת תמונות                                                  |
+| `audioSpeech.ts`        | טקסט לדיבור                                                   |
+| `audioTranscription.ts` | דיבור לטקסט                                                   |
+| `videoGeneration.ts`    | יצירת וידאו                                                   |
+| `musicGeneration.ts`    | דור מוזיקה                                                    |
+| `rerank.ts`             | דירוג מחדש                                                    |
+| `moderations.ts`        | מְתִינוּת                                                     |
+| `search.ts`             | חיפוש באינטרנט                                                |
+| `sseParser.ts`          | מנתח אירועי SSE                                               |
+| `usageExtractor.ts`     | משוך ספירת אסימונים מתוך זרמים במעלה הזרם                     |
+| `responseSanitizer.ts`  | רעש ספציפי לספק רצועה                                         |
+| `responseTranslator.ts` | הדבק בין תגובת הספק לשכבת המתרגם                              |
 
 ### 4.2 `open-sse/executors/`
 
-159 מודולי executor ברמה העליונה (`*.ts` ללא `base.ts`, `index.ts` ובדיקות — הספירה
-`npm run check:docs-counts` מודדת). כל מחלקת executor מרחיבה את `BaseExecutor` (`base.ts`),
-ישירות או דרך `DefaultExecutor` או executor אחר; המודולים הנותרים הם עוזרים לכל ספק
-(סכמות כלים, מתאמי fetch/TTS, ומטפלי חריגות). ה־executors כוללים:
+159 מודולי ביצוע ברמה העליונה (`*.ts` מינוס `base.ts`, `index.ts` ובדיקות — ספירת `npm run check:docs-counts` מודד). כל מחלקה executor משתרעת על `BaseExecutor` (`base.ts`), ישירות או דרך `DefaultExecutor` או executor אחר; המודולים הנותרים הם עוזרים לכל ספק (סכימות כלים, מתאמי fetch/TTS, מטפלי מוזרויות). המבצעים כוללים:
 
-`antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`,
-`chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`,
-`muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`,
-`pollinations`, `qoder`, `vertex`, `devin-desktop`, וכן `claudeIdentity.ts`
-(עוזר זהות משותף) ו־`index.ts` (רישום).
+`antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `qoder`, `vertex`, `devin-desktop` `muse-spark-web` `claudeIdentity.ts` `index.ts` (רישום).
 
-> הערה: ספקים שאינם מופיעים כאן מקבלים שירות דרך `default.ts`, באמצעות executor גנרי
-> תואם OpenAI. הקטלוג המלא של הספקים (380 ספקים) נמצא ב־
-> `src/shared/constants/providers.ts`.
+> הערה: ספקים שאינם רשומים כאן מוגשת על ידי `default.ts` באמצעות ה-executor הגנרי תואם OpenAI. קטלוג הספקים המלא (381 ספקים) חי ב- `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`
 
-תרגום במבנה hub-and-spoke (OpenAI הוא ה־hub).
+תרגום רכז ודיבור (OpenAI הוא הרכז).
 
-- **9 מתרגמי בקשות** (`translator/request/`):
-  `antigravity-to-openai`, `claude-to-gemini`, `claude-to-openai`,
-  `gemini-to-openai`, `openai-responses`, `openai-to-claude`,
-  `openai-to-cursor`, `openai-to-gemini`, `openai-to-kiro`.
-- **9 מתרגמי תגובות** (`translator/response/`):
-  `claude-to-openai`, `cursor-to-openai`, `gemini-to-claude`, `gemini-to-openai`,
-  `kiro-to-openai`, `openai-responses`, `openai-to-antigravity`, `openai-to-claude`.
-- **9 עוזרים** (`translator/helpers/`):
-  `claudeHelper`, `geminiHelper`, `geminiToolsSanitizer`, `maxTokensHelper`,
-  `openaiHelper`, `responsesApiHelper`, `schemaCoercion`, `toolCallHelper`, וכן
-  בדיקות לעוזרים.
-- **עוזרי תמונות** (`translator/image/sizeMapper.ts`).
-- ברמה העליונה: `bootstrap.ts`, `formats.ts`, `registry.ts`, `index.ts`.
+- **9 מתרגמי בקשות** (`translator/request/`): `antigravity-to-openai`, `claude-to-gemini`, `claude-to-openai`, `gemini-to-openai`, `openai-responses`, `openai-to-claude`, `openai-to-cursor`, `openai-to-gemini`, `openai-to-kiro`.
+- **9 מתרגמי תגובה** (`translator/response/`): `claude-to-openai`, `cursor-to-openai`, `gemini-to-claude`, `gemini-to-openai`, `kiro-to-openai`, `openai-responses`, `openai-to-antigravity`, `openai-to-claude`.
+- **9 עוזרים** (`translator/helpers/`): `claudeHelper`, `geminiHelper`, `geminiToolsSanitizer`, `maxTokensHelper`, `openaiHelper`, `responsesApiHelper`, `schemaCoercion`, `toolCallHelper`, פלוס בדיקות עוזר.
+- **עוזרי תמונה** (`translator/image/sizeMapper.ts`).
+- רמה עליונה: `bootstrap.ts`, `formats.ts`, `registry.ts`, `index.ts`.
 
 ### 4.4 `open-sse/transformer/`
 
-- `responsesTransformer.ts` — ממיר המבוסס על `TransformStream` בין Responses API ל־Chat
-  Completions (בשימוש ב־catch-all של נתיב `responses/`).
+- `responsesTransformer.ts` — `TransformStream` -based תגובות API ↔ ממיר צ'אט השלמות (בשימוש ב-catch-all של מסלול `responses/` ).
 
 ### 4.5 `open-sse/services/`
 
-נקודות עיקריות (הרשימה המלאה נמצאת תחת `open-sse/services/`):
+דגשים (רשימה מלאה תחת `open-sse/services/`):
 
-| תחום             | קבצים                                                                                                                                                                                                                                                    |
-| ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| ניתוב Combo      | `combo.ts` (20 אסטרטגיות), `comboConfig.ts`, `comboMetrics.ts`, `comboManifestMetrics.ts`, `comboAgentMiddleware.ts`                                                                                                                                     |
-| מנוע Auto Combo  | `autoCombo/` — `engine.ts`, `scoring.ts`, `taskFitness.ts`, `virtualFactory.ts`, `modePacks.ts`, `autoPrefix.ts`, `persistence.ts`, `providerDiversity.ts`, `providerRegistryAccessor.ts`, `routerStrategy.ts`, `selfHealing.ts`, `index.ts`             |
-| עמידות           | `accountFallback.ts` (השהיה + נעילה), `errorClassifier.ts`, `requestRejectedStreak.ts`, `emergencyFallback.ts`, `rateLimitManager.ts`, `rateLimitSemaphore.ts`, `accountSemaphore.ts`, `accountSelector.ts`                                              |
-| מכסות            | `quotaMonitor.ts`, `quotaPreflight.ts`, `bailianQuotaFetcher.ts`, `codexQuotaFetcher.ts`, `deepseekQuotaFetcher.ts`, `openrouterQuotaFetcher.ts`, `openrouterFreeWindow.ts`, `llmgatewayQuotaFetcher.ts`, `crofUsageFetcher.ts`, `antigravityCredits.ts` |
-| שמירה במטמון     | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                            |
-| תבונת ניתוב      | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                             |
-| טיפול במודלים    | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                              |
-| דחיסה            | `compression/` — חיווט מלא של מנוע הדחיסה                                                                                                                                                                                                                |
-| אסימונים + הפעלה | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts`        |
-| רמה / מניפסט     | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                            |
-| IP / רשת         | `ipFilter.ts`, `webSearchFallback.ts`                                                                                                                                                                                                                    |
-| אצוות            | `batchProcessor.ts`                                                                                                                                                                                                                                      |
-| שימוש            | `usage.ts`                                                                                                                                                                                                                                               |
+| דְאָגָה                 | קבצים                                                                                                                                                                                                                                                    |
+| ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ניתוב משולב             | `combo.ts` (20 אסטרטגיות), `comboConfig.ts`, `comboMetrics.ts`, `comboManifestMetrics.ts`, `comboAgentMiddleware.ts`                                                                                                                                     |
+| מנוע קומבו אוטומטי      | `autoCombo/` — `engine.ts`, `scoring.ts`, `taskFitness.ts`, `virtualFactory.ts`, `modePacks.ts`, `autoPrefix.ts`, `persistence.ts`, `providerDiversity.ts`, `providerRegistryAccessor.ts`, `routerStrategy.ts`, `selfHealing.ts`, `index.ts`             |
+| כּוֹשֵׁר הִתאוֹשְׁשׁוּת | `accountFallback.ts` (נעילת + של התקררות), `errorClassifier.ts`, `requestRejectedStreak.ts`, `emergencyFallback.ts`, `rateLimitManager.ts`, `rateLimitSemaphore.ts`, `accountSemaphore.ts`, `accountSelector.ts`                                         |
+| מכסות                   | `quotaMonitor.ts`, `quotaPreflight.ts`, `bailianQuotaFetcher.ts`, `codexQuotaFetcher.ts`, `deepseekQuotaFetcher.ts`, `openrouterQuotaFetcher.ts`, `openrouterFreeWindow.ts`, `llmgatewayQuotaFetcher.ts`, `crofUsageFetcher.ts`, `antigravityCredits.ts` |
+| שמירה במטמון            | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                            |
+| ניתוב מודיעין           | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                             |
+| טיפול בדגם              | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                              |
+| דְחִיסָה                | חיווט מנוע דחיסה מלא `compression/` —                                                                                                                                                                                                                    |
+| סשן + אסימון            | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts`        |
+| שכבה / מניפסט           | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                            |
+| IP / רשת                | `ipFilter.ts`, `webSearchFallback.ts`                                                                                                                                                                                                                    |
+| אצוות                   | `batchProcessor.ts`                                                                                                                                                                                                                                      |
+| נוֹהָג                  | `usage.ts`                                                                                                                                                                                                                                               |
 
 ### 4.6 `open-sse/mcp-server/`
 
-- **110 כלים ייחודיים** מחוברים ב־`server.ts` (45 קנוניים ב־`schemas/tools.ts` +
-  מודולי זיכרון, כישורים, כישורי GitHub, מאגר, גיימיפיקציה, תוספים, Notion, Obsidian,
-  קורפוס מקומי ודחיסה — האיחוד נספר באמצעות `countUniqueMcpTools`).
-- **3 תעבורות**: stdio, HTTP Streamable, SSE.
-- **33 תחומים** נאכפים בזמן ריצה — רשימת הבסיס נמצאת ב־`src/shared/constants/mcpScopes.ts`, והקבוצה המלאה היא האיחוד של התחומים המוצהרים על ידי כל מודול כלי.
-- טבלת ביקורת: `mcp_tool_audit` (מאוכלסת על ידי `audit.ts`).
-- קבצים: `server.ts`, `index.ts`, `httpTransport.ts`, `audit.ts`, `scopeEnforcement.ts`,
-  `runtimeHeartbeat.ts`, `descriptionCompressor.ts`, `schemas/{tools, a2a, audit, index}.ts`,
-  `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts`,
-  וכן בדיקות תחת `__tests__/`.
-- ראו [MCP-SERVER.md](../frameworks/MCP-SERVER.md) לקבלת קטלוג הכלים המלא.
+- **110 כלים ייחודיים** חווט ב- `server.ts` (45 קנוניים בזיכרון `schemas/tools.ts` +, skills, GitHub-skills, pool, gamification, plugin, Notion, Obsidian, local-corpus and compression union — union counted by `countUniqueMcpTools`).
+- **3 הובלות** : stdio, HTTP Streamable, SSE.
+- **33 היקפים** נאכף בזמן ריצה — base list ב- `src/shared/constants/mcpScopes.ts`, הסט המלא הוא האיחוד של ההיקפים המוצהרים על ידי כל מודול כלי.
+- טבלת ביקורת: `mcp_tool_audit` (מאוכלסת ב- `audit.ts`).
+- קבצים: `server.ts`, `index.ts`, `httpTransport.ts`, `audit.ts`, `scopeEnforcement.ts`, `runtimeHeartbeat.ts`, `descriptionCompressor.ts`, `schemas/{tools, a2a, audit, index}.ts`, `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts`, בתוספת בדיקות תחת `__tests__/`.
+- ראה [MCP-SERVER.md](../frameworks/MCP-SERVER.md) לקטלוג הכלים המלא.
 
 ### 4.7 `open-sse/config/`
 
-רשמי ספקים (`providerRegistry.ts`, `providerModels.ts`,
-`providerHeaderProfiles.ts`), רשמי מודלים לפי פורמט (`audioRegistry.ts`,
-`embeddingRegistry.ts`, `imageRegistry.ts`, `moderationRegistry.ts`,
-`musicRegistry.ts`, `rerankRegistry.ts`, `searchRegistry.ts`, `videoRegistry.ts`),
-עזרי זהות (`codexIdentity.ts`, `codexInstructions.ts`,
-`anthropicHeaders.ts`, `antigravityUpstream.ts`, `antigravityModelAliases.ts`,
-`cliFingerprints.ts`, `toolCloaking.ts`, `defaultThinkingSignature.ts`),
-עזרי אישורים (`credentialLoader.ts`, `codexClient.ts`), ומתאמי ענן
-(`azureAi.ts`, `bedrock.ts`, `datarobot.ts`, `glmProvider.ts`,
-`maritalk.ts`, `oci.ts`, `petals.ts`, `runway.ts`, `sap.ts`, `watsonx.ts`,
-`ollamaModels.ts`, `errorConfig.ts`, `constants.ts`, `registryUtils.ts`).
+Provider registries (`providerRegistry.ts`, `providerModels.ts`, `providerHeaderProfiles.ts`), per-format model registries (`audioRegistry.ts`, `embeddingRegistry.ts`, `imageRegistry.ts`, `moderationRegistry.ts`, `musicRegistry.ts`, `rerankRegistry.ts`, `searchRegistry.ts`, `videoRegistry.ts`), identity helpers (`codexIdentity.ts`, `codexInstructions.ts`, `anthropicHeaders.ts`, `antigravityUpstream.ts`, `antigravityModelAliases.ts`, `cliFingerprints.ts`, `toolCloaking.ts`, `defaultThinkingSignature.ts`), credential helpers (`credentialLoader.ts`, `codexClient.ts`), and cloud adapters (`azureAi.ts`, `bedrock.ts`, `datarobot.ts`, `glmProvider.ts`, `maritalk.ts`, `oci.ts`, `petals.ts`, `runway.ts`, `sap.ts`, `watsonx.ts`, `ollamaModels.ts`, `errorConfig.ts`, `constants.ts`, `registryUtils.ts`).
 
 ### 4.8 `open-sse/utils/`
 
-פרימיטיבים להזרמה ועוזרים לספקים: `stream.ts`, `streamHandler.ts`,
-`streamHelpers.ts`, `streamPayloadCollector.ts`, `streamReadiness.ts`,
-`sseHeartbeat.ts`, `proxyFetch.ts`, `proxyDispatcher.ts`, `tlsClient.ts`,
-`networkProxy.ts`, `awsSigV4.ts`, `cacheControlPolicy.ts`,
-`cursorChecksum.ts`, `cursorAgentProtobuf.ts`, `cursorVersionDetector.ts`,
-`comfyuiClient.ts`, `kieTask.ts`, `bypassHandler.ts`, `aiSdkCompat.ts`,
-`thinkTagParser.ts`, `urlSanitize.ts`, `usageTracking.ts`, `requestLogger.ts`,
-`progressTracker.ts`, `cors.ts`, `error.ts`, `logger.ts`, `sleep.ts`,
-`ollamaTransform.ts`.
+זרימה פרימיטיבים ועוזרים ספקים: `stream.ts`, `streamHandler.ts`, `streamHelpers.ts`, `streamPayloadCollector.ts`, `streamReadiness.ts`, `sseHeartbeat.ts`, `proxyFetch.ts`, `proxyDispatcher.ts`, `tlsClient.ts`, `awsSigV4.ts`, `networkProxy.ts`, `cursorAgentProtobuf.ts`, `cacheControlPolicy.ts`, `cursorChecksum.ts`, `cursorVersionDetector.ts`, `comfyuiClient.ts`, `kieTask.ts`, `bypassHandler.ts`, `aiSdkCompat.ts`, `thinkTagParser.ts`, `urlSanitize.ts`, zq, zq `usageTracking.ts`, `requestLogger.ts`, `progressTracker.ts`, `cors.ts`, `error.ts`, `logger.ts`, `sleep.ts`, `ollamaTransform.ts`.
 
 ---
 

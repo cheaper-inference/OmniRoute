@@ -354,28 +354,28 @@ Model: cc/claude-opus-4-7
 
 ---
 
-## 🚀 Nasazení
+## Nasazení 🚀
 
-### Globální instalace přes npm (doporučeno)
+### Globální instalace npm (doporučeno)
 
 ```bash
 npm install -g omniroute
 
-# Vytvoření konfiguračního adresáře
+# Create config directory
 mkdir -p ~/.omniroute
 
-# Vytvoření souboru .env (viz .env.example)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# Spuštění serveru
+# Start server
 omniroute
-# Nebo s vlastním portem:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI automaticky načítá `.env` z `~/.omniroute/.env` nebo `./.env`.
+CLI automaticky načte `.env` z `~/.omniroute/.env` nebo `./.env`. `./.env` v pracovním adresáři může nastavit pouze krátký seznam povolených klíčů (porty, `REQUIRE_API_KEY`, národní prostředí a nastavení barev); vše ostatní vložte do `~/.omniroute/.env`. Viz [smlouvy na uvedení CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
-### Režim systémové lišty
+### Režim zásobníku
 
 Spusťte OmniRoute v systémové liště:
 
@@ -383,53 +383,53 @@ Spusťte OmniRoute v systémové liště:
 omniroute serve --tray
 ```
 
-Příkaz skončí, jakmile jsou server a systémová lišta připraveny.
+Příkaz se vrátí poté, co jsou server a zásobník připraveny.
 
-Server pokračuje v provozu bez terminálu.
+Server pokračuje bez terminálu.
 
-Režim systémové lišty podporuje macOS, Windows a grafická linuxová prostředí. Řídicí panel se v tomto režimu neotevírá automaticky.
+Režim zásobníku podporuje relace macOS, Windows a grafické Linux. Režim zásobníku neotevře palubní desku automaticky.
 
-Pomocí nabídky v systémové liště můžete provádět následující akce:
+Použijte nabídku zásobníku pro tyto akce:
 
-- Otevřít řídicí panel.
-- Otevřít `/dashboard/logs`.
-- Změnit automatické spouštění.
-- Zastavit OmniRoute.
+- Otevřete palubní desku.
+- Otevřete `/dashboard/logs`.
+- Změňte automatické spouštění.
+- Stop OmniRoute.
 
-Nekombinujte `--tray` s následujícími možnostmi:
+Nekombinujte `--tray` s těmito možnostmi:
 
 - `--daemon`
 - `--log`
 - `--no-recovery`
 
-Tyto režimy vyžadují odlišnou správu procesů.
+Tyto režimy vyžadují různé vlastnictví procesu.
 
-Povolte spuštění při příštím přihlášení k počítači:
+Povolit spuštění při příštím přihlášení počítače:
 
 ```bash
 omniroute autostart enable
 ```
 
-Automatické spouštění používá režim systémové lišty v macOS, Windows a grafických linuxových prostředích. Bezobslužný Linux používá stávající uživatelskou službu systemd.
+Automatické spuštění používá režim zásobníku u relací macOS, Windows a grafického Linux. Headless Linux využívá stávající uživatelskou službu systemd.
 
-Zakažte spouštění při přihlášení:
+Zakázat spouštění při přihlášení:
 
 ```bash
 omniroute autostart disable
 ```
 
-### Odinstalace
+### Odinstalování
 
-Pokud už OmniRoute nepotřebujete, nabízíme dva rychlé skripty pro čisté odebrání:
+Když již nepotřebujete OmniRoute, nabízíme dva rychlé skripty pro čisté odstranění:
 
 | Příkaz                   | Akce                                                                                  |
 | ------------------------ | ------------------------------------------------------------------------------------- |
-| `npm run uninstall`      | Odebere systémovou aplikaci, ale **ponechá databázi a konfigurace** v `~/.omniroute`. |
-| `npm run uninstall:full` | Odebere aplikaci A zároveň trvale **vymaže všechny konfigurace, klíče a databáze**.   |
+| `npm run uninstall`      | Odebere systémovou aplikaci, ale** uchovává vaše DB a konfigurace** v `~/.omniroute`. |
+| `npm run uninstall:full` | Trvale odstraní aplikaci AND** vymaže všechny konfigurace, klíče a databáze** .       |
 
-> Poznámka: Chcete-li tyto příkazy spustit, přejděte do složky projektu OmniRoute (pokud jste jej naklonovali) a spusťte je. Pokud jste jej nainstalovali globálně, můžete jednoduše spustit `npm uninstall -g omniroute`.
+> Poznámka: Chcete-li tyto příkazy spustit, přejděte do složky projektu OmniRoute (pokud jste ji naklonovali) a spusťte je. Případně, pokud je globálně nainstalován, můžete jednoduše spustit `npm uninstall -g omniroute`.
 
-### Nasazení na VPS
+### Nasazení VPS
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -445,25 +445,25 @@ export NEXT_PUBLIC_BASE_URL="http://localhost:20128"
 export API_KEY_SECRET="endpoint-proxy-api-key-secret"
 
 npm run start
-# Nebo: pm2 start npm --name omniroute -- start
+# Or: pm2 start npm --name omniroute -- start
 ```
 
-### Nasazení pomocí PM2 (nízká spotřeba paměti)
+### Nasazení PM2 (málo paměti)
 
-U serverů s omezenou pamětí RAM použijte možnost omezení paměti:
+Pro servery s omezeným RAM použijte možnost limit paměti:
 
 ```bash
-# S limitem 512 MB (výchozí)
+# With 512MB limit (default)
 pm2 start npm --name omniroute -- start
 
-# Nebo s vlastním limitem paměti
+# Or with custom memory limit
 OMNIROUTE_MEMORY_MB=512 pm2 start npm --name omniroute -- start
 
-# Nebo pomocí ecosystem.config.js
+# Or using ecosystem.config.js
 pm2 start ecosystem.config.js
 ```
 
-Vytvořte `ecosystem.config.js`:
+Vytvořit `ecosystem.config.js`:
 
 ```javascript
 module.exports = {
@@ -488,24 +488,24 @@ module.exports = {
 ### Docker
 
 ```bash
-# Sestavení obrazu (výchozí = runner-cli s předinstalovanými codex/claude/droid)
+# Build image (default = runner-cli with codex/claude/droid preinstalled)
 docker build -t omniroute:cli .
 
-# Přenosný režim (doporučeno)
+# Portable mode (recommended)
 docker run -d --name omniroute -p 20128:20128 --env-file ./.env -v omniroute-data:/app/data omniroute:cli
 ```
 
-Informace o režimu integrovaném s hostitelem a binárními soubory CLI naleznete v části o Dockeru v hlavní dokumentaci.
+Informace o režimu integrovaném do hostitele s binárními soubory CLI naleznete v části Docker v hlavních dokumentech.
 
 ### Void Linux (xbps-src)
 
-Uživatelé Void Linuxu mohou OmniRoute sestavit do balíčku a nativně nainstalovat pomocí frameworku `xbps-src` pro křížovou kompilaci. Ten automatizuje samostatné sestavení Node.js společně s požadovanými nativními vazbami `better-sqlite3`.
+Uživatelé Void Linux mohou zabalit a nainstalovat OmniRoute nativně pomocí rámce křížové kompilace `xbps-src`. To automatizuje samostatné sestavení Node.js spolu s požadovanými nativními vazbami `better-sqlite3`.
 
 <details>
 <summary><b>Zobrazit šablonu xbps-src</b></summary>
 
 ```bash
-# Soubor šablony pro „omniroute“
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -526,7 +526,7 @@ export npm_config_fund=false
 export npm_config_audit=false
 
 do_build() {
-	# Určení cílové architektury CPU pro node-gyp
+	# Determine target CPU arch for node-gyp
 	local _gyp_arch
 	case "$XBPS_TARGET_MACHINE" in
 		aarch64*) _gyp_arch=arm64 ;;
@@ -535,29 +535,29 @@ do_build() {
 		*) _gyp_arch=x64 ;;
 	esac
 
-	# 1) Instalace všech závislostí – bez spouštění skriptů
+	# 1) Install all deps – skip scripts
 	NODE_ENV=development npm ci --ignore-scripts
 
-	# 2) Sestavení samostatného balíčku Next.js
+	# 2) Build the Next.js standalone bundle
 	npm run build
 
-	# 3) Zkopírování statických prostředků do samostatného balíčku
+	# 3) Copy static assets into standalone
 	cp -r .next/static .next/standalone/.next/static
 	[ -d public ] && cp -r public .next/standalone/public || true
 
-	# 4) Kompilace nativní vazby better-sqlite3
+	# 4) Compile better-sqlite3 native binding
 	local _node_gyp=/usr/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js
 	(cd node_modules/better-sqlite3 && node "$_node_gyp" rebuild --arch="$_gyp_arch")
 
-	# 5) Umístění zkompilované vazby do samostatného balíčku
+	# 5) Place the compiled binding into the standalone bundle
 	local _bs3_release=.next/standalone/node_modules/better-sqlite3/build/Release
 	mkdir -p "$_bs3_release"
 	cp node_modules/better-sqlite3/build/Release/better_sqlite3.node "$_bs3_release/"
 
-	# 6) Odstranění balíčků sharp specifických pro jednotlivé architektury
+	# 6) Remove arch-specific sharp bundles
 	rm -rf .next/standalone/node_modules/@img
 
-	# 7) Zkopírování běhových závislostí pino vynechaných statickou analýzou Next.js:
+	# 7) Copy pino runtime deps omitted by Next.js static analysis:
 	for _mod in pino-abstract-transport split2 process-warning; do
 		cp -r "node_modules/$_mod" .next/standalone/node_modules/
 	done
@@ -571,7 +571,7 @@ do_install() {
 	vmkdir usr/lib/omniroute/.next
 	vcopy .next/standalone/. usr/lib/omniroute/.next/standalone
 
-	# Zabránění odstranění prázdných adresářů směrovače aplikace Next.js hookem po instalaci
+	# Prevent removal of empty Next.js app router dirs by the post-install hook
 	for _d in \
 		.next/standalone/.next/server/app/dashboard \
 		.next/standalone/.next/server/app/dashboard/settings \
@@ -599,30 +599,30 @@ post_install() {
 
 ### Proměnné prostředí
 
-| Proměnná                                | Výchozí hodnota                      | Popis                                                                                                                                                        |
-| --------------------------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `JWT_SECRET`                            | `omniroute-default-secret-change-me` | Tajný klíč pro podepisování JWT (**v produkčním prostředí změňte**)                                                                                          |
-| `INITIAL_PASSWORD`                      | `CHANGEME`                           | Heslo pro první přihlášení                                                                                                                                   |
-| `DATA_DIR`                              | `~/.omniroute`                       | Datový adresář (databáze, využití, protokoly)                                                                                                                |
-| `PORT`                                  | výchozí hodnota frameworku           | Port služby (`20128` v příkladech)                                                                                                                           |
-| `HOSTNAME`                              | výchozí hodnota frameworku           | Hostitel, na kterého se služba naváže (Docker ve výchozím nastavení používá `0.0.0.0`)                                                                       |
-| `NODE_ENV`                              | výchozí hodnota běhového prostředí   | Pro nasazení nastavte `production`                                                                                                                           |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`             | Veřejná základní adresa URL zpřístupněná řídicímu panelu a serveru (nahrazuje zastaralou proměnnou `BASE_URL`)                                               |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`              | Základní adresa URL koncového bodu cloudové synchronizace (nahrazuje zastaralou proměnnou `CLOUD_URL`)                                                       |
-| `API_KEY_SECRET`                        | `endpoint-proxy-api-key-secret`      | Tajný klíč HMAC pro generované klíče API                                                                                                                     |
-| `REQUIRE_API_KEY`                       | `false`                              | Vynutí klíč API typu Bearer pro `/v1/*`                                                                                                                      |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                              | Umožní ověřeným uživatelům řídicího panelu na vyžádání zobrazit úplné hodnoty uložených klíčů API                                                            |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                 | Interval obnovování dat limitů poskytovatelů uložených v mezipaměti na straně serveru; tlačítka v uživatelském rozhraní nadále spouštějí ruční synchronizaci |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                              | Zakáže automatické snímky SQLite před zápisem, importem či obnovením; ruční zálohování zůstane funkční                                                       |
-| `APP_LOG_TO_FILE`                       | `true`                               | Povolí ukládání výstupu aplikačních a auditních protokolů na disk                                                                                            |
-| `AUTH_COOKIE_SECURE`                    | `false`                              | Vynutí atribut `Secure` u ověřovacího cookie (za reverzním proxy HTTPS)                                                                                      |
-| `CLOUDFLARED_BIN`                       | nenastaveno                          | Použije existující binární soubor `cloudflared` namísto spravovaného stahování                                                                               |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                              | Transport pro spravované rychlé tunely (`http2`, `quic` nebo `auto`)                                                                                         |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                                | Limit haldy Node.js v MB                                                                                                                                     |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                 | Maximální počet položek v mezipaměti promptů                                                                                                                 |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                | Maximální počet položek v sémantické mezipaměti                                                                                                              |
+| Variabilní                              | Výchozí                      | Popis                                                                                                                                                       |
+| --------------------------------------- | ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `JWT_SECRET`                            | _(automaticky vygenerováno)_ | tajné podepisování JWT — automaticky vygenerováno při prvním spuštění a přetrvává do `server.env`; nastavte jej explicitně, když je datový adresář pomíjivý |
+| `INITIAL_PASSWORD`                      | _(nenastaveno)_              | První přihlašovací heslo. instalace npm/source začínají na `CHANGEME`: nahraďte jej. Nenastaveno: průvodce pro přihlášení                                   |
+| `DATA_DIR`                              | `~/.omniroute`               | Datový adresář (db, využití, protokoly)                                                                                                                     |
+| `PORT`                                  | výchozí nastavení rámce      | Servisní port (v příkladech `20128` )                                                                                                                       |
+| `HOSTNAME`                              | výchozí nastavení rámce      | Svázat hostitele (Docker výchozí `0.0.0.0`)                                                                                                                 |
+| `NODE_ENV`                              | výchozí runtime              | Nastavte `production` pro nasazení                                                                                                                          |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`     | Veřejná základna URL se objevila na řídicím panelu a byla vystavena serveru (nahrazuje starší `BASE_URL`)                                                   |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`      | Cloud synchronizace koncového bodu základní URL (nahrazuje starší `CLOUD_URL`)                                                                              |
+| `API_KEY_SECRET`                        | _(automaticky vygenerováno)_ | HMAC secret pro vygenerované klíče API — se automaticky vygenerovalo při prvním spuštění a zůstalo zachováno do `server.env`                                |
+| `REQUIRE_API_KEY`                       | `false`                      | Vynutit Bearer API klíč na `/v1/*`                                                                                                                          |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                      | Umožněte ověřeným uživatelům řídicích panelů na vyžádání odhalit úplné uložené hodnoty klíče API                                                            |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                         | Obnovovací kadence na straně serveru pro data o limitech poskytovatelů uložená v mezipaměti; Tlačítka UI refresh stále spouštějí manuální synchronizaci     |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                      | Zakázat automatické snímky SQLite před writes/import/restore; ruční zálohování stále funguje                                                                |
+| `APP_LOG_TO_FILE`                       | `true`                       | Umožňuje výstup protokolu aplikace a auditu na disk                                                                                                         |
+| `AUTH_COOKIE_SECURE`                    | `false`                      | Vynutit `Secure` auth cookie (za HTTPS reverzní proxy)                                                                                                      |
+| `CLOUDFLARED_BIN`                       | odstaveno                    | Místo řízeného stahování použijte existující binární soubor `cloudflared`                                                                                   |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                      | Přeprava pro spravované rychlé tunely (`http2`, `quic` nebo `auto`)                                                                                         |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                        | limit haldy Node.js v MB                                                                                                                                    |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                         | Maximální počet položek mezipaměti                                                                                                                          |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                        | Maximální počet položek sémantické mezipaměti                                                                                                               |
 
-Úplný přehled proměnných prostředí naleznete v souboru [README](../README.md).
+Úplný odkaz na proměnné prostředí naleznete v souboru [README](../README.md).
 
 ---
 

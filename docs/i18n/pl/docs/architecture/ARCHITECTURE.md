@@ -15,79 +15,78 @@ lastUpdated: 2026-06-28
 
 _Ostatnia aktualizacja: 2026-06-28_
 
-## Podsumowanie
+## Podsumowanie wykonawcze
 
-OmniRoute to lokalna brama routingu AI i panel kontrolny zbudowane na Next.js.
-Udostępnia pojedynczy punkt końcowy zgodny z OpenAI (`/v1/*`) i kieruje ruch do wielu dostawców nadrzędnych, zapewniając translację, mechanizm awaryjnego przełączania, odświeżanie tokenów i śledzenie użycia.
+OmniRoute to lokalna brama routingowa i pulpit nawigacyjny AI zbudowane na Next.js. Zapewnia pojedynczy punkt końcowy zgodny z OpenAI (`/v1/*`) i kieruje ruch do wielu dostawców nadrzędnych z tłumaczeniem, rezerwą, odświeżaniem tokenów i śledzeniem użycia.
 
-Najważniejsze możliwości:
+Podstawowe możliwości:
 
-- Powierzchnia API zgodna z OpenAI dla CLI/narzędzi (380 dostawców, 159 modułów wykonawczych)
-- Translacja żądań/odpowiedzi między formatami dostawców
-- Awaryjne przełączanie kombinacji modeli (sekwencja wielu modeli)
-- Ustrukturyzowane kroki kombinacji (`provider + model + connection`) z kolejnością ustalaną w czasie działania przez `compositeTiers`
-- Awaryjne przełączanie na poziomie konta (wiele kont u jednego dostawcy)
-- Wstępne sprawdzanie limitów oraz wybór konta P2C uwzględniający limity w głównej ścieżce czatu
-- Zarządzanie połączeniami dostawców OAuth i za pomocą kluczy API (27 modułów dostawców OAuth)
-- Generowanie embeddingów przez `/v1/embeddings` (18 dostawców)
-- Generowanie obrazów przez `/v1/images/generations` (10+ dostawców, 20+ modeli)
-- Transkrypcja audio przez `/v1/audio/transcriptions` (18 dostawców)
-- Zamiana tekstu na mowę przez `/v1/audio/speech` (24 wbudowanych dostawców)
-- Generowanie wideo przez `/v1/videos/generations` (ComfyUI + SD WebUI)
-- Generowanie muzyki przez `/v1/music/generations` (ComfyUI)
-- Wyszukiwanie w sieci przez `/v1/search` (20 dostawców)
-- Moderacja przez `/v1/moderations`
-- Ponowne szeregowanie przez `/v1/rerank`
-- Analizowanie znaczników myślenia (`<think>...</think>`) dla modeli rozumujących
-- Oczyszczanie odpowiedzi na potrzeby ścisłej zgodności z OpenAI SDK
-- Normalizacja ról (developer→system, system→user) na potrzeby zgodności między dostawcami
-- Konwersja ustrukturyzowanych danych wyjściowych (json_schema → Gemini responseSchema)
-- Lokalne przechowywanie dostawców, kluczy, aliasów, kombinacji, ustawień i cen (122 moduły DB)
-- Śledzenie użycia/kosztów i rejestrowanie żądań
-- Opcjonalna synchronizacja z chmurą dla synchronizacji wielu urządzeń/stanu
-- Lista dozwolonych/blokowanych adresów IP do kontroli dostępu do API
-- Zarządzanie budżetem myślenia (passthrough/auto/custom/adaptive)
-- Wstrzykiwanie globalnego promptu systemowego
-- Śledzenie sesji i tworzenie odcisków palca
-- Ulepszone ograniczanie liczby żądań dla poszczególnych kont z profilami dostosowanymi do dostawców
-- Wzorzec circuit breaker zwiększający odporność dostawców
-- Ochrona przed lawiną żądań dzięki blokadom mutex
+- Powierzchnia API kompatybilna z OpenAI dla CLI/tools (381 dostawców, 159 modułów wykonawczych)
+- Tłumaczenie Request/response w różnych formatach dostawców
+- Zastępczy zestaw modeli (sekwencja obejmująca wiele modeli)
+- Ustrukturyzowane kroki kombi (`provider + model + connection`) z porządkowaniem czasu wykonania przez `compositeTiers`
+- Rezerwa awaryjna na poziomie konta (wiele kont na dostawcę)
+- Wstępna inspekcja przydziałów i wybór konta P2C uwzględniającego przydziały w głównej ścieżce czatu
+- OAuth + Zarządzanie połączeniami dostawcy kluczy API (27 modułów dostawcy OAuth )
+- Generowanie osadzania poprzez `/v1/embeddings` (18 dostawców)
+- Generowanie obrazu poprzez `/v1/images/generations` (10 dostawców +, 20 modeli + )
+- Transkrypcja audio poprzez `/v1/audio/transcriptions` (18 dostawców)
+- Zamiana tekstu na mowę za pośrednictwem `/v1/audio/speech` (24 wbudowanych dostawców)
+- Generowanie wideo poprzez `/v1/videos/generations` (ComfyUI + SD WebUI)
+- Generowanie muzyki poprzez `/v1/music/generations` (ComfyUI)
+- Wyszukiwanie w Internecie za pośrednictwem `/v1/search` (20 dostawców)
+- Moderacje poprzez `/v1/moderations`
+- Zmiana rankingu poprzez `/v1/rerank`
+- Pomyśl o analizie tagów (`<think>...</think>`) w celu uzyskania modeli rozumowania
+- Odkażanie odpowiedzi w celu zapewnienia ścisłej kompatybilności OpenAI SDK
+- Normalizacja ról (programista systemu →, użytkownik systemu →) w celu zapewnienia kompatybilności między dostawcami
+- Konwersja danych wyjściowych strukturalnych (json_schema → Gemini responseSchema)
+- Lokalna trwałość dostawców, kluczy, aliasów, kombinacji, ustawień, cen (122 modułów DB )
+- śledzenie Usage/cost i rejestrowanie żądań
+- Opcjonalna synchronizacja w chmurze dla synchronizacji multi-device/state
+- IP allowlist/blocklist do kontroli dostępu API
+- Myślenie o zarządzaniu budżetem (passthrough/auto/custom/adaptive)
+- Globalny systemowy zastrzyk natychmiastowy
+- Śledzenie sesji i pobieranie odcisków palców
+- Ulepszone ograniczenie stawek dla konta z profilami specyficznymi dla dostawcy
+- Wzór wyłącznika zapewniający odporność dostawcy
+- Ochrona stada przed piorunami z blokadą mutex
 - Pamięć podręczna deduplikacji żądań oparta na sygnaturach
-- Warstwa domenowa: reguły kosztów, zasady awaryjnego przełączania, zasady blokad
-- Context Relay: podsumowania przekazywane przy zmianie sesji, zapewniające ciągłość podczas rotacji kont
-- Utrwalanie stanu domeny (pamięć podręczna SQLite write-through dla awaryjnego przełączania, budżetów, blokad i circuit breakerów)
-- Silnik zasad do scentralizowanej oceny żądań (blokada → budżet → awaryjne przełączanie)
-- Telemetria żądań z agregacją opóźnień p50/p95/p99
-- Telemetria celów kombinacji i historyczny stan celów kombinacji przez `combo_execution_key` / `combo_step_id`
-- Identyfikator korelacji (X-Request-Id) na potrzeby śledzenia end-to-end
-- Rejestrowanie audytu zgodności z możliwością rezygnacji dla poszczególnych kluczy API
-- Środowisko ewaluacyjne do zapewniania jakości LLM
-- Panel kondycji z aktualnym stanem circuit breakerów dostawców
+- Warstwa domeny: reguły kosztów, zasady rezerwowe, zasady blokad
+- Context Relay: podsumowania przekazania sesji w celu zapewnienia ciągłości rotacji kont
+- Trwałość stanu domeny (pamięć podręczna zapisu SQLite dla rezerw, budżetów, blokad, wyłączników automatycznych)
+- Silnik zasad do scentralizowanej oceny żądań (blokada → budżet → rezerwa)
+- Żądaj telemetrii z agregacją opóźnień p50/p95/p99
+- Telemetria celu kombi i historyczne zdrowie celu kombinacji poprzez `combo_execution_key` / `combo_step_id`
+- Korelacja ID (X-Request-Id) do śledzenia od końca do końca
+- Rejestrowanie audytu zgodności z możliwością rezygnacji dla każdego klucza API
+- Ramy eval dla zapewnienia jakości LLM
+- Pulpit nawigacyjny stanu zdrowia ze statusem wyłącznika dostawcy w czasie rzeczywistym
 - Serwer MCP (110 narzędzi) z 3 transportami (stdio/SSE/Streamable HTTP)
 - Serwer A2A (JSON-RPC 2.0 + SSE) z umiejętnościami i cyklem życia zadań
-- System pamięci (ekstrakcja, wstrzykiwanie, pobieranie, podsumowywanie)
-- System umiejętności (rejestr, wykonawca, piaskownica, wbudowane umiejętności)
-- Proxy MITM z zarządzaniem certyfikatami i obsługą DNS
-- Middleware ochrony przed wstrzykiwaniem promptów
-- Potok kompresji promptów z Caveman, RTK, potokami stosowanymi, kombinacjami kompresji, pakietami językowymi i analizą
-- Rejestr ACP (Agent Communication Protocol)
-- Modułowi dostawcy OAuth (22 indywidualne moduły w `src/lib/oauth/providers/`)
-- Skrypty odinstalowywania/pełnego odinstalowywania
-- Akcja naprawy środowiska OAuth
-- Most WebSocket dla klientów WebSocket zgodnych z OpenAI (`/v1/ws`)
-- Zarządzanie tokenami synchronizacji (wydawanie/unieważnianie, pobieranie pakietu konfiguracji z wersjonowaniem ETag)
-- GLM Thinking (`glmt`) jako pełnoprawny preset dostawcy
-- Hybrydowe zliczanie tokenów (dostawca `/messages/count_tokens` z awaryjnym szacowaniem)
-- Automatyczne inicjowanie aliasów modeli (ponad 30 normalizacji dialektów między proxy podczas uruchamiania)
-- Bezpieczne pobieranie danych z zewnętrznych adresów z ochroną SSRF, blokowaniem prywatnych adresów URL i konfigurowalnymi ponowieniami
-- Ponowienia żądań czatu uwzględniające czas ochładzania z konfigurowalnymi wartościami `requestRetry` i `maxRetryIntervalSec`
-- Walidacja środowiska uruchomieniowego za pomocą Zod podczas uruchamiania
-- Audyt zgodności v2 z paginacją, zdarzeniami CRUD dostawców i rejestrowaniem walidacji zablokowanych przez SSRF
+- System pamięci (ekstrakcja, wstrzykiwanie, odzyskiwanie, podsumowywanie)
+- System umiejętności (rejestr, executor, sandbox, wbudowane umiejętności)
+- MITM proxy z zarządzaniem certyfikatami i obsługą DNS
+- Szybkie oprogramowanie pośrednie chroniące wtrysk
+- Szybki potok kompresji za pomocą Caveman, RTK, potoków skumulowanych, kombinacji kompresji, pakietów językowych i analiz
+- rejestru ACP (protokół komunikacji agenta).
+- Modułowi dostawcy OAuth (22 indywidualne moduły w ramach `src/lib/oauth/providers/`)
+- skrypty Uninstall/full-uninstall
+- akcja naprawy środowiska OAuth
+- most WebSocket dla klientów WS kompatybilnych z OpenAI (`/v1/ws`)
+- Zarządzanie tokenami synchronizacji (issue/revoke, pobieranie pakietu konfiguracyjnego w wersji ETag)
+- GLM Thinking (`glmt`) ustawienie wstępne dostawcy pierwszej klasy
+- Liczenie tokenów hybrydowych ( `/messages/count_tokens` po stronie dostawcy z rezerwą szacunkową)
+- Automatyczne umieszczanie aliasów modelu (30 normalizacji dialektów + przy uruchomieniu)
+- Bezpieczne pobieranie wychodzące z funkcją SSRF Guard, prywatnym blokowaniem URL i konfigurowalną ponowną próbą
+- Ponowne próby czatu uwzględniające czas odnowienia za pomocą konfigurowalnych `requestRetry` i `maxRetryIntervalSec`
+- Sprawdzanie poprawności środowiska wykonawczego za pomocą Zod przy uruchomieniu
+- Audyt zgodności v2 z paginacją, zdarzeniami CRUD dostawcy i rejestrowaniem weryfikacji blokowanym przez SSRF
 
-Główny model uruchomieniowy:
+Podstawowy model środowiska wykonawczego:
 
-- Trasy aplikacji Next.js w `src/app/api/*` implementują zarówno API panelu kontrolnego, jak i API zgodności
-- Wspólny rdzeń SSE/routingu w `src/sse/*` + `open-sse/*` obsługuje wykonywanie operacji u dostawców, translację, strumieniowanie, awaryjne przełączanie i użycie
+- Trasy aplikacji Next.js w `src/app/api/*` implementują zarówno pulpit nawigacyjny APIs, jak i kompatybilność APIs
+- Współdzielony rdzeń SSE/routing w `src/sse/*` + `open-sse/*` obsługuje wykonywanie, tłumaczenie, przesyłanie strumieniowe, rezerwę i użycie przez dostawcę
 
 ## Diagramy referencyjne
 
@@ -375,7 +374,7 @@ Funkcja Auto Combo dynamicznie ocenia i wybiera cele routingu w momencie żądan
 - Deska rozdzielcza: `/dashboard/auto-combo`
 - Telemetria: tabela `auto_combo_decisions` SQLite
 
-Kluczowe możliwości:
+Key capabilities:
 
 - **20 strategii routingu** (priorytet, ważony, pierwsze wypełnienie, działanie okrężne, P2C, losowy, najrzadziej używany, zoptymalizowany pod względem kosztów, uwzględniający resetowanie, okno resetowania, zapas mocy, ważony przydziałem, ściśle losowy,** automatyczny** , lkgp, zoptymalizowany pod kątem kontekstu, zoptymalizowany pod kątem pamięci podręcznej, przekaźnik kontekstowy,** połączenie** , potok) — auto jest głównym dodatkiem w wersji 3.8.0; `fusion` (panelowa synteza + sędzia, `open-sse/services/fusion.ts`) jest nowością w wersji 3.8.36.
 - **Punktacja 16-czynnikowa** : limit, zdrowie, koszt odwrotny, opóźnienie odwrotne, dopasowanie zadań i dziesięć innych. Kanoniczna tabela czynników i ich domyślnych wag znajduje się w [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) — Przekształcenie jej w tym miejscu dałoby jej drugie miejsce do utraty aktualności.
@@ -383,7 +382,7 @@ Kluczowe możliwości:
 - **Automatyczne prefiksy** : `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`, `auto/smart`, `auto/lkgp` — każdy wspierany przez dostrojony profil wagi.
 - **6 pakietów trybów** : `ship-fast`, `cost-saver`, `quality-first`, `offline-friendly`, `reliability-first` i `chaos-mode` — gotowe konfiguracje wag, które można wywołać z pulpitu nawigacyjnego. (Nie mylić z powyższymi przedrostkami `auto/*`, które są wariantami czasu żądania.)
 
-Aby uzyskać pełne szczegóły algorytmiczne (wzory na czynniki, dostrajanie wagi), zobacz [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md).
+Pełne szczegóły algorytmiczne (wzory na czynniki, dostrajanie wagi) można znaleźć w [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md).
 
 ### B. Agenci w chmurze
 
@@ -422,7 +421,7 @@ Przestrzeń nazw `src/domain/` centralizuje decyzje polityczne, dzięki czemu pr
 - łącznik reguł Connection/model : `src/domain/connectionModelRules.ts`
 - Migawki dostępności modelu: `src/domain/modelAvailability.ts`
 - Śledzenie wygaśnięcia dostawcy: `src/domain/providerExpiration.ts`
-- Pamięć podręczna kwot: `src/domain/quotaCache.ts`
+- Pamięć podręczna kwot: `src/domain/quotaCache.ts`. Dostawcy dodają i usuwają okna przydziałów (OpenAI porzucił 5-godzinne okno Codex w przypadku niektórych planów), więc odczyt użycia adaptera dostawcy potwierdza, że został ukończony (`quotasComplete`, zobacz `src/lib/usage/usageReading.ts`) jest ustawionym pełnym oknem konta: znane wcześniej, ale nieobecne w nim okno jest wycofywane, w pamięci podręcznej, w `quota_snapshots` ponowne nawodnienie (dołączony rekord wycofania), w utrwalonym stanie przydziału Codex i w nasyceniu Claude wiadra. Częściowe dowody (nagłówki odpowiedzi, nieaktualne kopie) aktualizują jedynie okna, które zawierają.
 - Stan degradacji: `src/domain/degradation.ts`
 - Audyt konfiguracji: `src/domain/configAudit.ts`
 - Kreator metadanych odpowiedzi OmniRoute : `src/domain/omnirouteResponseMeta.ts`

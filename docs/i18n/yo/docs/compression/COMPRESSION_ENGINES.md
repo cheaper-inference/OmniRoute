@@ -294,6 +294,95 @@ open-sse/services/compression/engines/mcpAccessibility/
 
 Ojú-iṣẹ́ dashboard: `Dashboard -> Context & Cache -> Compression Combos`.
 
+## Awọn ibeere pataki / itọsọna oniṣẹ (CCR & idinku igba)
+
+CCR (`ccr`) ati `session-dedup` rọpo tabi gbe ọrọ kuro ki o fi a** asami** sile. Abala yii jẹ itọkasi onišẹ fun sisopọ alabara soke, kika awọn asami meji, ati gbigba pada tabi ṣe iwadii akoonu ti o parẹ. Mekaniki ti kọọkan engine ti wa ni bo loke; eyi ni "bawo ni MO ṣe nṣiṣẹ" Layer.
+
+### Awọn gbigbe & awọn aaye ipari
+
+Olupin MCP ti o ṣafihan awọn irinṣẹ CCR le de ọdọ awọn ọna mẹta. URL ipilẹ aiyipada jẹ `http://localhost:20128` (`OMNIROUTE_BASE_URL`):
+
+| Gbigbe                            | URL / pipaṣẹ                            | Awọn akọsilẹ                                                                                                                         |
+| --------------------------------- | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| HTTP ṣiṣanwọle (onibara, iṣeduro) | `http://localhost:20128/api/mcp/stream` | Awọn endpoint lọwọlọwọ MCP ibara sọrọ si.                                                                                            |
+| Legacy SSE singleton              | `http://localhost:20128/api/mcp/sse`    | Agbalagba singleton irinna. O** tilekun** awọn akoko ṣiṣan; lo awọn onibara `streamable-http` lodi si `/api/mcp/stream`, kii ṣe eyi. |
+| stdio                             | `omniroute --mcp`                       | Fun IDE MCP konfigi ti o spawn awọn ilana. Ko si asia `--dev` ; `omniroute --mcp` ni aaye titẹsi stdio.                              |
+
+### Awọn ipele ibi ipamọ (kini o ye fun atunbẹrẹ)
+
+CCR ni a** meji-ipele** itaja, kii ṣe ni-iranti-nikan:
+
+- **Gbona ni-iranti ipele** — fun-block fila 2 MiB, fun-akọkọ 16 MiB, agbaye 64 MiB. Awọn titẹ sii aiyipada si 24 h TTL (o pọju awọn ọjọ 7). Imupadabọ MCP ni kikun lati iranti ni 256 KiB; ohunkohun ti o tobi tun le de ọdọ nipasẹ awọn ipo larin / grep.
+- **Tier SQLite ti o tọ** (`ccr_blocks`, `COMPRESSION_CCR_DURABLE_STORE`, titan nipasẹ aiyipada) — ṣe atilẹyin ipele inu-iranti nitori idinamọ kan yege kuro LRU, tun bẹrẹ, tabi ibalẹ gba pada lori apẹẹrẹ miiran. Ilana naa tọju TTL bulọọki, nitorinaa bulọki ti o kọja TTL rẹ lọ kuro ni awọn ipele mejeeji.
+
+Awọn oluso mẹta jẹ ki ipele ti o tọ ni opin — idina kan duro iranti-nikan nigbati:
+
+1. Àkọsílẹ ti pari** 512 KB** (`MAX_DURABLE_BLOCK_BYTES`);
+2. akoko asiko jẹ akoko asiko awọsanma (ko si disk agbegbe);
+3. `COMPRESSION_CCR_DURABLE_STORE=false`.
+
+Nitorinaa “bulọọki naa parẹ” kii ṣe itan atunbẹrẹ ibora: bulọọki sub-512 KB kan lori agbegbe kan, akoko asiko-awọsanma wa laaye lati tun bẹrẹ nipasẹ ipele ti o tọ titi ti TTL rẹ yoo fi pari. Wo [itọkasi Ayika](../reference/ENVIRONMENT.md) fun oniyipada.
+
+### Awọn aami meji
+
+| Aami                                  | Itumo                                                                                                                                     | Kini awoṣe yẹ ki o ṣe                                                                                                                                                                                      |
+| ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `[CCR retrieve hash=<24hex> chars=N]` | Àkọsílẹ nla kan ti wa ni ipamọ akoonu-sisọ.                                                                                               | Pe `omniroute_ccr_retrieve` pẹlu awọn** 24-hex hash dakọ verbatim** lati gba awọn atilẹba ọrọ pada.                                                                                                        |
+| `[dedup:ref sha=…]`                   | `session-dedup` elided ọrọ ti a ti firanṣẹ tẹlẹ ni akoko iṣaaju ti igba kanna. Eyi jẹ ẹya** moomo wo-pada** , kii ṣe pipadanu tabi aṣiṣe. | Ṣe** kii ṣe** pe eyikeyi ọpa ati ki o ṣe** kii ṣe** gbiyanju lati "ṣe atunṣe" rẹ. Iṣẹlẹ akọkọ ti ọrọ naa jẹ ẹda canonical; awọn ti isiyi Tan ti wa ni ko tun kọ, o ti wa ni deduped lori kan nigbamii Tan. |
+
+Wiwo `[dedup:ref]` pada jẹ ipinnu ilana ilana — ko si atunkọ-firanṣẹ tẹlẹ. Ṣe itọju rẹ bi "ọrọ gangan ti wa tẹlẹ lori waya ni iṣaaju ni igba yii."
+
+### Onibara prequisites
+
+- **Bọtini (sitẹdio):** Olupe stdio ko ni idanimọ ibeere-kọọkan, nitorina o jẹri pẹlu `OMNIROUTE_API_KEY` (ti a ṣeto sinu `env` olupin MCP ). Laisi rẹ olupe naa jẹ ailorukọ ati awọn irinṣẹ ti o nilo olori ile-iwe le dinku.
+- **`tools[]` jẹ ipo iṣaaju abẹrẹ.** Ilana imupadabọ CCR (#8033) jẹ itasi** nikan** nigbati `tools[]` ti o polowo ibeere naa fihan pe alabara le de ọdọ `omniroute_ccr_retrieve` nitootọ. Baramu jẹ ibaamu-itọpa ti o ni opin nipasẹ oluyapa (`__`, `.`, `/`, `:`) — rara — substring igboro nitorina orukọ ti o ni aaye gẹgẹbi `mcp__gateway__omniroute_ccr_retrieve` ṣi ka. Ti ko si tabi ti ko baamu `tools[]` tumọ si itọnisọna jẹ _not_ itasi, nipasẹ apẹrẹ.
+- **`codemode:false` (awọn onibara OpenCode ).** OpenCode aiyipada si Ipo koodu, eyiti o ṣe ipolowo awọn irinṣẹ abinibi nikan si awoṣe ati** ko ṣe** fi awọn irinṣẹ MCP sori atokọ `tools[]` abinibi. Ṣeto `codemode: false` lori titẹsi olupin MCP ki awọn irinṣẹ `omniroute_ccr_*` ti wa ni ipolowo. Eyi jẹ a** onibara** eto, kii ṣe ọkan OmniRoute kan. Ko gba itọni CCR itasi sibẹ: OpenCode lorukọ ọpa `<server>_<tool>` kan, nitorinaa olupin ti a npè ni `omniroute` ṣiṣafihan `omniroute_omniroute_ccr_retrieve`, ati pe `_` kii ṣe ọkan ninu awọn iyapa ti o baamu.
+- **Awọn olori ile-iwe.** Ibi ipamọ ati igbapada wa ni iyasọtọ fun ipilẹṣẹ ti o jẹri (fun bọtini API ). Bọtini kan rii awọn bulọọki tirẹ nikan.
+
+### Awọn dopin fun ọpa
+
+Imudaniloju aaye wa nigbagbogbo fun awọn olupe HTTP/SSE ti o ni iwọn-diẹ. Awọn irinṣẹ `omniroute_` CCR nilo:
+
+| Irinṣẹ                   | Ààlà                |
+| ------------------------ | ------------------- |
+| `omniroute_ccr_store`    | `write:compression` |
+| `omniroute_ccr_delete`   | `write:compression` |
+| `omniroute_ccr_retrieve` | `read:compression`  |
+| `omniroute_ccr_inspect`  | `read:compression`  |
+| `omniroute_ccr_list`     | `read:compression`  |
+| `omniroute_ccr_stats`    | `read:compression`  |
+
+A sonu dopin pada ohun** abajade aṣiṣe ọpa MCP** (`isError: true`, kii ṣe HTTP 403 — `403 LOCAL_ONLY` jẹ ọna-iṣọ-ọna loopback lọtọ lọtọ): `Error: Insufficient MCP scopes for <tool>. Missing: <scope>.` Bọtini isakoṣo ti o kere ju le di `mcp:connect` (funni aṣẹ `/api/mcp/` agbegbe-nikan gbejade) pẹlu aaye read/write pato ti o nilo.
+
+### matrix onibara
+
+| Onibara        | Gbigbe                             | Ṣe atunto lati lo                                                                                                                                                                                                                      | `tools[]` polowo? (→ CCR itasi itasi)                                                                                                                                                            |
+| -------------- | ---------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Claude koodu   | ṣiṣanwọle-http                     | `claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream`                                                                                                                                                      | Bẹẹni — MCP-agbara; itasi.                                                                                                                                                                       |
+| Cursor / Cline | `stdio`** tabi** `streamable-http` | stdio: `omniroute --mcp` pẹlu `OMNIROUTE_API_KEY` ninu `env`; tabi titẹsi MCP latọna jijin ti n tọka si `http://localhost:20128/api/mcp/stream` (wo [Eto Eto → MCP Iṣeto Onibara](../guides/SETUP_GUIDE.md#mcp-client-configuration) ) | Bẹẹni — polowo awọn irinṣẹ `omniroute_ccr_*`.                                                                                                                                                    |
+| OpenCode       | ṣiṣanwọle-http                     | `opencode mcp add omniroute --url http://localhost:20128/api/mcp/stream`, pẹlu `codemode: false`                                                                                                                                       | Awọn irinṣẹ ti a polowo pẹlu `codemode: false` nikan; Ilana naa ko tun ni itasi, nitori `omniroute_omniroute_ccr_retrieve` ko baramu (wo [awọn ohun pataki ti alabara](#client-prerequisites) ). |
+| Ṣii-ibaramu    | Ṣii-ibaramu HTTP (iwiregbe pari)   | boṣewa iwiregbe-ipari ose lodi si OpenAI-ibaramu endpoint                                                                                                                                                                              | **Kò** — olupe ti o ni ibaramu OpenAI kan ko sọ fun rara pe ki o pe ohun elo naa, ati pe ko ṣe itasi itọnisọna naa.                                                                              |
+
+### Awọn ifilelẹ igbapada & pagination
+
+Awọn abajade ọrọ irinṣẹ MCP jẹ gige ni ayika `mcpAccessibility.maxTextChars` (aiyipada `50000`). Imupadabọ `full` ti bulọọki kan ni 256 KiB —** ko si unbounded ni kikun gba** . Nigbati `chars=N` bulọọki kan ba tobi, ṣe oju-iwe rẹ dipo fifa gbogbo nkan naa:
+
+- Ofin ti atanpako:**`chars > 40000` → lo kan `mode`** , kò a igboro ni kikun.
+- `mode:"grep"` — regex `pattern` ti o baamu laini nipasẹ laini, to awọn laini ibaamu 1,000 (`unique: true` drops tuns), o kere julọ fun “wa laini kan ti Mo nilo.”
+- `mode:"lines"` — ila ila 1-itọka; nilo mejeeji `start` ati `end`.
+- `mode:"head"` / `mode:"tail"` — first/last `n` ila.
+- `mode:"stats"` — ila, iwa, ati baiti ka lai si ara.
+
+Lo `mode:"lines"` pẹlu `start`/`end` lati rin bulọki gigun ni awọn oju-iwe ju ki o beere gbogbo nkan ni ẹẹkan.
+
+### Iforukọsilẹ irinṣẹ
+
+Ohun elo imupada jẹ orukọ lọwọlọwọ `omniroute_ccr_retrieve` (iṣaaju `omniroute_` jẹ iṣẹ ṣiṣe ti ọjọ kan fun awọn ikọlu orukọ olupin-agbelebu). Orukọ ọpa ti o ni opin-suffix ti o mọ ati atunṣe fun awọn abajade MCP JSON ti a ge ni aarin-okun ni a tọpinpin bi awọn atẹle ti oke; oju-iwe yii ṣe akosile lọwọlọwọ, ihuwasi ti o firanṣẹ nikan.
+
+### Igbesi aye igba
+
+Awọn akoko ṣiṣan-HTTP laišišẹ ati olupin n ṣajọ wọn; ferese ti ko ṣiṣẹ ni igbagbogbo `MCP_SESSION_IDLE_MS` (ti a tọka si nipasẹ orukọ, kii ṣe iye koodu lile, nitorinaa oju-iwe yii ko lọ nigbati o yipada). Awọn aami aisan ti igba ikore laišišẹ jẹ HTTP 404 pẹlu `Unknown Mcp-Session-Id` — atunṣe ni lati tun sopọ tabi tun bẹrẹ igba naa,** kii ṣe** lati yi bọtini kan pada, yi aaye kan pada, tabi tunrukọ ohun elo kan.
+
 ## Ojú API
 
 | Ọ̀nà                                    | Ète                                                                    |
@@ -375,9 +464,9 @@ prefixes tó ní ìfarakanra sí cache, abbl.).
   `engineBreakdown` — kò ṣeé yà á sọ́tọ̀ kúrò nínú ìgbésẹ̀ tí a fò kọjá. Láti lè ṣe ìyàtọ̀
   láàárín “ó ṣiṣẹ́, 0 %” àti “a fò ó kọjá” yóò nílò àyípadà sí breakdown-model, a sì ti sún un síwájú.
 
-## Ìmúdájú
+## Ifọwọsi
 
-Àwọn ìdánilójú pàtàkì fún agbègbè yìí ni:
+Awọn ẹnu-ọna idojukọ fun agbegbe yii ni:
 
 ```bash
 node --import tsx/esm --test tests/unit/compression/rtk-*.test.ts tests/unit/compression/pipeline-integration.test.ts tests/unit/compression/context-compression-api.test.ts

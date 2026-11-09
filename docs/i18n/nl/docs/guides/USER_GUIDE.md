@@ -354,28 +354,28 @@ Model: cc/claude-opus-4-7
 
 ---
 
-## 🚀 Implementatie
+## 🚀 -implementatie
 
-### Globale npm-installatie (aanbevolen)
+### Globale NPM-installatie (aanbevolen)
 
 ```bash
 npm install -g omniroute
 
-# Configuratiemap maken
+# Create config directory
 mkdir -p ~/.omniroute
 
-# .env-bestand maken (zie .env.example)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# Server starten
+# Start server
 omniroute
-# Of met een aangepaste poort:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-De CLI laadt `.env` automatisch uit `~/.omniroute/.env` of `./.env`.
+De CLI laadt automatisch `.env` vanuit `~/.omniroute/.env` of `./.env`. Een `./.env` in de werkmap mag slechts een korte toelatingslijst met sleutels instellen (poorten, `REQUIRE_API_KEY`, landinstelling en kleurinstellingen); zet al het andere in `~/.omniroute/.env`. Zie [CLI lanceringscontracten](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
-### Systeemvakmodus
+### Lademodus
 
 Start OmniRoute in het systeemvak:
 
@@ -383,18 +383,18 @@ Start OmniRoute in het systeemvak:
 omniroute serve --tray
 ```
 
-De opdracht wordt beëindigd nadat de server en het systeemvak gereed zijn.
+De opdracht keert terug nadat de server en lade gereed zijn.
 
-De server blijft actief zonder de terminal.
+De server gaat verder zonder de terminal.
 
-De systeemvakmodus ondersteunt macOS, Windows en grafische Linux-sessies. De systeemvakmodus opent het dashboard niet automatisch.
+Tray-modus ondersteunt macOS, Windows en grafische Linux sessies. In de lademodus wordt het dashboard niet automatisch geopend.
 
-Gebruik het systeemvakmenu voor deze acties:
+Gebruik het lademenu voor deze acties:
 
-- Het dashboard openen.
-- `/dashboard/logs` openen.
-- Automatisch opstarten wijzigen.
-- OmniRoute stoppen.
+- Open het dashboard.
+- Open `/dashboard/logs`.
+- Wijzig automatisch starten.
+- Stop met OmniRoute.
 
 Combineer `--tray` niet met deze opties:
 
@@ -404,15 +404,15 @@ Combineer `--tray` niet met deze opties:
 
 Deze modi vereisen verschillend proceseigenaarschap.
 
-Automatisch opstarten bij de volgende aanmelding op de computer inschakelen:
+Opstarten inschakelen bij de volgende machine-login:
 
 ```bash
 omniroute autostart enable
 ```
 
-Automatisch opstarten gebruikt de systeemvakmodus op macOS, Windows en in grafische Linux-sessies. Headless Linux gebruikt de bestaande systemd-gebruikersservice.
+Automatisch starten gebruikt de lademodus op macOS, Windows en grafische Linux sessies. Headless Linux maakt gebruik van de bestaande systemd gebruikersservice.
 
-Automatisch opstarten bij aanmelding uitschakelen:
+Opstarten uitschakelen bij inloggen:
 
 ```bash
 omniroute autostart disable
@@ -420,16 +420,16 @@ omniroute autostart disable
 
 ### Verwijderen
 
-Wanneer je OmniRoute niet meer nodig hebt, bieden we twee snelle scripts voor een schone verwijdering:
+Als je OmniRoute niet langer nodig hebt, bieden we twee snelle scripts voor een schone verwijdering:
 
-| Opdracht                 | Actie                                                                                      |
-| ------------------------ | ------------------------------------------------------------------------------------------ |
-| `npm run uninstall`      | Verwijdert de systeemapp, maar **bewaart je database en configuraties** in `~/.omniroute`. |
-| `npm run uninstall:full` | Verwijdert de app EN **wist alle configuraties, sleutels en databases permanent**.         |
+| Commando                 | Actie                                                                                |
+| ------------------------ | ------------------------------------------------------------------------------------ |
+| `npm run uninstall`      | Verwijdert de systeem-app maar** behoudt uw DB en configuraties** in `~/.omniroute`. |
+| `npm run uninstall:full` | Verwijdert de app AND permanent** wist alle configuraties, sleutels en databases** . |
 
-> Opmerking: om deze opdrachten uit te voeren, ga je naar de OmniRoute-projectmap (als je deze hebt gekloond) en voer je ze daar uit. Als OmniRoute globaal is geïnstalleerd, kun je ook eenvoudig `npm uninstall -g omniroute` uitvoeren.
+> Opmerking: Om deze opdrachten uit te voeren, navigeert u naar de OmniRoute -projectmap (als u deze hebt gekloond) en voert u ze uit. Als alternatief kunt u, indien globaal geïnstalleerd, eenvoudigweg `npm uninstall -g omniroute` uitvoeren.
 
-### VPS-implementatie
+### VPS -implementatie
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -445,21 +445,21 @@ export NEXT_PUBLIC_BASE_URL="http://localhost:20128"
 export API_KEY_SECRET="endpoint-proxy-api-key-secret"
 
 npm run start
-# Of: pm2 start npm --name omniroute -- start
+# Or: pm2 start npm --name omniroute -- start
 ```
 
-### PM2-implementatie (weinig geheugen)
+### PM2 -implementatie (weinig geheugen)
 
-Gebruik voor servers met beperkt RAM de optie voor een geheugenlimiet:
+Voor servers met beperkte RAM gebruikt u de geheugenlimietoptie:
 
 ```bash
-# Met een limiet van 512 MB (standaard)
+# With 512MB limit (default)
 pm2 start npm --name omniroute -- start
 
-# Of met een aangepaste geheugenlimiet
+# Or with custom memory limit
 OMNIROUTE_MEMORY_MB=512 pm2 start npm --name omniroute -- start
 
-# Of met ecosystem.config.js
+# Or using ecosystem.config.js
 pm2 start ecosystem.config.js
 ```
 
@@ -488,24 +488,24 @@ module.exports = {
 ### Docker
 
 ```bash
-# Image bouwen (standaard = runner-cli met codex/claude/droid vooraf geïnstalleerd)
+# Build image (default = runner-cli with codex/claude/droid preinstalled)
 docker build -t omniroute:cli .
 
-# Draagbare modus (aanbevolen)
+# Portable mode (recommended)
 docker run -d --name omniroute -p 20128:20128 --env-file ./.env -v omniroute-data:/app/data omniroute:cli
 ```
 
-Zie voor de met de host geïntegreerde modus met CLI-binaire bestanden het Docker-gedeelte in de hoofddocumentatie.
+Voor de host-geïntegreerde modus met CLI binaire bestanden, zie de Docker sectie in de hoofddocumentatie.
 
-### Void Linux (xbps-src)
+### Linux ongeldig maken (xbps-src)
 
-Gebruikers van Void Linux kunnen OmniRoute systeemeigen verpakken en installeren met behulp van het crosscompilatieframework `xbps-src`. Hiermee wordt de zelfstandige Node.js-build geautomatiseerd, samen met de vereiste systeemeigen `better-sqlite3`-bindings.
+Ongeldige Linux gebruikers kunnen OmniRoute native verpakken en installeren met behulp van het `xbps-src` cross-compilatieframework. Dit automatiseert de Node.js standalone build samen met de vereiste `better-sqlite3` native bindingen.
 
 <details>
-<summary><b>xbps-src-sjabloon bekijken</b></summary>
+<summary><b>Bekijk de xbps-src-sjabloon</b></summary>
 
 ```bash
-# Sjabloonbestand voor 'omniroute'
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -526,7 +526,7 @@ export npm_config_fund=false
 export npm_config_audit=false
 
 do_build() {
-	# Bepaal de doel-CPU-architectuur voor node-gyp
+	# Determine target CPU arch for node-gyp
 	local _gyp_arch
 	case "$XBPS_TARGET_MACHINE" in
 		aarch64*) _gyp_arch=arm64 ;;
@@ -535,29 +535,29 @@ do_build() {
 		*) _gyp_arch=x64 ;;
 	esac
 
-	# 1) Installeer alle afhankelijkheden – sla scripts over
+	# 1) Install all deps – skip scripts
 	NODE_ENV=development npm ci --ignore-scripts
 
-	# 2) Bouw de zelfstandige Next.js-bundel
+	# 2) Build the Next.js standalone bundle
 	npm run build
 
-	# 3) Kopieer statische assets naar de zelfstandige bundel
+	# 3) Copy static assets into standalone
 	cp -r .next/static .next/standalone/.next/static
 	[ -d public ] && cp -r public .next/standalone/public || true
 
-	# 4) Compileer de systeemeigen better-sqlite3-binding
+	# 4) Compile better-sqlite3 native binding
 	local _node_gyp=/usr/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js
 	(cd node_modules/better-sqlite3 && node "$_node_gyp" rebuild --arch="$_gyp_arch")
 
-	# 5) Plaats de gecompileerde binding in de zelfstandige bundel
+	# 5) Place the compiled binding into the standalone bundle
 	local _bs3_release=.next/standalone/node_modules/better-sqlite3/build/Release
 	mkdir -p "$_bs3_release"
 	cp node_modules/better-sqlite3/build/Release/better_sqlite3.node "$_bs3_release/"
 
-	# 6) Verwijder architectuurspecifieke sharp-bundels
+	# 6) Remove arch-specific sharp bundles
 	rm -rf .next/standalone/node_modules/@img
 
-	# 7) Kopieer pino-runtimeafhankelijkheden die zijn weggelaten door de statische analyse van Next.js:
+	# 7) Copy pino runtime deps omitted by Next.js static analysis:
 	for _mod in pino-abstract-transport split2 process-warning; do
 		cp -r "node_modules/$_mod" .next/standalone/node_modules/
 	done
@@ -571,7 +571,7 @@ do_install() {
 	vmkdir usr/lib/omniroute/.next
 	vcopy .next/standalone/. usr/lib/omniroute/.next/standalone
 
-	# Voorkom dat lege Next.js-app-routermappen door de post-install-hook worden verwijderd
+	# Prevent removal of empty Next.js app router dirs by the post-install hook
 	for _d in \
 		.next/standalone/.next/server/app/dashboard \
 		.next/standalone/.next/server/app/dashboard/settings \
@@ -599,30 +599,30 @@ post_install() {
 
 ### Omgevingsvariabelen
 
-| Variabele                               | Standaardwaarde                      | Beschrijving                                                                                                                           |
-| --------------------------------------- | ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------- |
-| `JWT_SECRET`                            | `omniroute-default-secret-change-me` | Geheim voor JWT-ondertekening (**wijzig dit in productie**)                                                                            |
-| `INITIAL_PASSWORD`                      | `CHANGEME`                           | Wachtwoord voor de eerste aanmelding                                                                                                   |
-| `DATA_DIR`                              | `~/.omniroute`                       | Gegevensmap (database, gebruik, logboeken)                                                                                             |
-| `PORT`                                  | standaardwaarde van framework        | Servicepoort (`20128` in voorbeelden)                                                                                                  |
-| `HOSTNAME`                              | standaardwaarde van framework        | Bindingshost (Docker gebruikt standaard `0.0.0.0`)                                                                                     |
-| `NODE_ENV`                              | standaardwaarde van runtime          | Stel voor implementatie in op `production`                                                                                             |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`             | Openbare basis-URL die beschikbaar is voor het dashboard en de server (vervangt de verouderde `BASE_URL`)                              |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`              | Basis-URL van het cloudsynchronisatie-eindpunt (vervangt de verouderde `CLOUD_URL`)                                                    |
-| `API_KEY_SECRET`                        | `endpoint-proxy-api-key-secret`      | HMAC-geheim voor gegenereerde API-sleutels                                                                                             |
-| `REQUIRE_API_KEY`                       | `false`                              | Bearer-API-sleutel verplicht stellen voor `/v1/*`                                                                                      |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                              | Geverifieerde dashboardgebruikers toestaan om op verzoek volledige opgeslagen API-sleutelwaarden weer te geven                         |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                 | Vernieuwingsinterval aan serverzijde voor gecachte Provider Limits-gegevens; UI-knoppen activeren handmatige synchronisatie nog steeds |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                              | Automatische SQLite-snapshots vóór schrijf-, import- en herstelacties uitschakelen; handmatige back-ups blijven werken                 |
-| `APP_LOG_TO_FILE`                       | `true`                               | Schakelt uitvoer van applicatie- en auditlogboeken naar schijf in                                                                      |
-| `AUTH_COOKIE_SECURE`                    | `false`                              | `Secure`-authenticatiecookie afdwingen (achter een HTTPS-reverseproxy)                                                                 |
-| `CLOUDFLARED_BIN`                       | niet ingesteld                       | Een bestaand `cloudflared`-binair bestand gebruiken in plaats van een beheerde download                                                |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                              | Transport voor beheerde Quick Tunnels (`http2`, `quic` of `auto`)                                                                      |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                                | Node.js-heaplimiet in MB                                                                                                               |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                 | Maximaal aantal vermeldingen in de promptcache                                                                                         |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                | Maximaal aantal vermeldingen in de semantische cache                                                                                   |
+| Variabel                                | Standaard                   | Beschrijving                                                                                                                                                         |
+| --------------------------------------- | --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `JWT_SECRET`                            | _(automatisch gegenereerd)_ | JWT ondertekeningsgeheim — automatisch gegenereerd bij de eerste run en voortgezet in `server.env`; stel dit expliciet in als de gegevensmap kortstondig is          |
+| `INITIAL_PASSWORD`                      | _(uitgeschakeld)_           | Eerste inlogwachtwoord. npm/source installaties beginnen met `CHANGEME`: vervang het. Niet ingesteld: introductiewizard                                              |
+| `DATA_DIR`                              | `~/.omniroute`              | Gegevensmap (db, gebruik, logs)                                                                                                                                      |
+| `PORT`                                  | raamwerk standaard          | Servicepoort (`20128` in voorbeelden)                                                                                                                                |
+| `HOSTNAME`                              | raamwerk standaard          | Bind host (Docker is standaard `0.0.0.0`)                                                                                                                            |
+| `NODE_ENV`                              | runtime-standaard           | Stel `production` in voor implementatie                                                                                                                              |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`    | Publieke basis URL verscheen op het dashboard en werd zichtbaar op de server (vervangt de oudere `BASE_URL`)                                                         |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`     | Cloud-synchronisatie-eindpunt basis URL (vervangt verouderde `CLOUD_URL`)                                                                                            |
+| `API_KEY_SECRET`                        | _(automatisch gegenereerd)_ | HMAC geheim voor gegenereerde API sleutels — wordt automatisch gegenereerd bij de eerste keer uitvoeren en blijft bestaan in `server.env`                            |
+| `REQUIRE_API_KEY`                       | `false`                     | Bearer API sleutel afdwingen op `/v1/*`                                                                                                                              |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                     | Sta geauthenticeerde dashboardgebruikers toe om op verzoek de volledige opgeslagen API sleutelwaarden te onthullen                                                   |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                        | Verversingsfrequentie aan de serverzijde voor in de cache opgeslagen Provider Limits-gegevens; UI vernieuwingsknoppen activeren nog steeds handmatige synchronisatie |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                     | Schakel automatische SQLite snapshots vóór writes/import/restore uit; handmatige back-ups werken nog steeds                                                          |
+| `APP_LOG_TO_FILE`                       | `true`                      | Maakt uitvoer van applicatie- en auditlogboeken naar schijf mogelijk                                                                                                 |
+| `AUTH_COOKIE_SECURE`                    | `false`                     | Forceer `Secure` auth cookie (achter HTTPS reverse proxy)                                                                                                            |
+| `CLOUDFLARED_BIN`                       | uitgeschakeld               | Gebruik een bestaand binair `cloudflared` -bestand in plaats van een beheerde download                                                                               |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                     | Transport voor beheerde Quick Tunnels (`http2`, `quic` of `auto`)                                                                                                    |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                       | Node.js -heaplimiet in MB                                                                                                                                            |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                        | Max. promptcache-items                                                                                                                                               |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                       | Max. semantische cache-items                                                                                                                                         |
 
-Zie de [README](../README.md) voor het volledige overzicht van omgevingsvariabelen.
+Voor de volledige referentie van de omgevingsvariabele, zie [README](../README.md).
 
 ---
 
