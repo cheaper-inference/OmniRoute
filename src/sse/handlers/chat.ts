@@ -5,6 +5,10 @@ import { resolveChatRequestBody } from "./requestBody";
 import { getComboCredentialAvailability } from "./comboCredentialAvailability.ts";
 import * as chatAdmission from "./chatAdmission.ts";
 import { buildClientRawRequest, resolveDispatchClientRawRequest } from "./chat/clientRawRequest.ts";
+import {
+  comboStalledConnectionIds,
+  type ComboStalledConnections,
+} from "./chat/comboStalledConnections.ts";
 export { buildClientRawRequest, resolveDispatchClientRawRequest };
 import { normalizeReasoningRequest } from "@/shared/reasoning/effortStandardization";
 import { isDetailedLoggingEnabled } from "@/lib/db/detailedLogs";
@@ -1217,6 +1221,8 @@ async function handleChatImplementation(
     // because only this layer knows which connectionId was actually selected.
     const { defer: deferContextOverflowWhenCompressible, exclusions: compressionExclusions } =
       await resolveComboContextOverflowDeferral(log, apiKeyInfo);
+    // Accounts this combo request's per-target timeout abandoned; later targets prefer others.
+    const comboStalledConnections: ComboStalledConnections = new Map();
     const response = await (handleComboChat as any)({
       body,
       combo,
@@ -1297,6 +1303,7 @@ async function handleChatImplementation(
             // entry (trackPendingRequest(false) never runs) — live incident,
             // log id 1784418258231-14961a.
             modelAbortSignal: target?.modelAbortSignal ?? null,
+            comboStalledConnections,
             fallbackAttempts: target?.fallbackAttempts,
           },
           target?.effectiveComboStrategy ?? combo.strategy,
@@ -1541,6 +1548,8 @@ async function handleSingleModelChat(
      * the signal used for the actual dispatch, not left unused.
      */
     modelAbortSignal?: AbortSignal | null;
+    /** Accounts an earlier target of this combo request stalled on (comboStalledConnections.ts). */
+    comboStalledConnections?: ComboStalledConnections | null;
     fallbackAttempts?: number;
   } = {},
   comboStrategy: string | null = null,
@@ -1575,6 +1584,9 @@ async function handleSingleModelChat(
     // down so getKnownContextOverflow's target-aware deferral check can never drift
     // from chatCore's own native-codex-passthrough decision.
     const sNetSourceFormat = detectFormatFromEndpoint(body, clientRawRequest?.endpoint || "");
+    // A combo target redirected here keeps sharing its outer combo request's record.
+    const sNetStalledConnections: ComboStalledConnections =
+      runtimeOptions.comboStalledConnections ?? new Map();
     return handleComboChat({
       body,
       combo: redirectCombo,
@@ -1619,6 +1631,7 @@ async function handleSingleModelChat(
             previousResponseResumed: runtimeOptions.previousResponseResumed,
             // #7360 follow-up — see the primary handleSingleModel closure above.
             modelAbortSignal: target?.modelAbortSignal ?? null,
+            comboStalledConnections: sNetStalledConnections,
             fallbackAttempts: target?.fallbackAttempts,
           },
           resolvedTarget?.effectiveComboStrategy ?? redirectCombo.strategy ?? "priority",
@@ -1848,6 +1861,12 @@ async function handleSingleModelChat(
       ) {
         emptyTurnExcluded.add(runtimeOptions.emptyTurnConnectionId);
       }
+      // A combo per-target timeout abandoned these accounts earlier in this combo request.
+      // Not flag-gated: it only applies once a target timed out, with the same fallback below.
+      if (!hasForcedConnection && !museOwner && !runtimeOptions.managedLease) {
+        const stalled = runtimeOptions.comboStalledConnections;
+        for (const id of comboStalledConnectionIds(stalled, provider)) emptyTurnExcluded.add(id);
+      }
       const selectCredentials = (excluded: Set<string>) =>
         getProviderCredentialsWithQuotaPreflight(
           provider,
@@ -1905,8 +1924,8 @@ async function handleSingleModelChat(
         emptyTurnExcluded.size > excludedConnectionIds.size &&
         (!credentials || "allRateLimited" in credentials || "allExpired" in credentials)
       ) {
-        // Empty turns are stochastic, not account faults. Prefer an allowed sibling,
-        // but a singleton still spends its existing retry on its original account.
+        // Empty turns and combo target timeouts are not account faults. Prefer an allowed
+        // sibling, but a singleton still spends its existing retry on its original account.
         credentials = await selectCredentials(excludedConnectionIds);
       }
       preselectedCredentials = null;

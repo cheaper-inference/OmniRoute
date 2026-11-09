@@ -44,25 +44,25 @@
 
 | 字段               | 类型    | 来源                                                       |
 | ------------------ | ------- | ---------------------------------------------------------- |
-| `id`               | string  | 记录时生成的 UUID                                          |
-| `apiKeyId`         | string  | 发起请求的 API 密钥                                        |
-| `provider`         | string  | 提供者 ID（openai、anthropic 等）                          |
-| `model`            | string  | 模型 ID（gpt-5、claude-opus-4-6 等）                       |
-| `comboId`          | string? | 如果通过组合路由，则为组合 ID                              |
-| `promptTokens`     | number  | 来自上游响应                                               |
-| `completionTokens` | number  | 来自上游响应                                               |
-| `cachedTokens`     | number  | 缓存命中令牌（Anthropic 提示词缓存等）                     |
-| `totalTokens`      | number  | 提示词令牌 + 补全令牌                                      |
-| `costUsd`          | number  | 根据定价数据计算                                           |
-| `latencyMs`        | number  | 端到端请求持续时间                                         |
-| `status`           | enum    | `success`、`error`、`rate_limited`、`timeout`、`cancelled` |
-| `errorClass`       | string? | status != success 时的错误类别                             |
-| `timestamp`        | string  | ISO 8601 UTC                                               |
-| `metadata`         | object  | 插件注入的自定义数据                                       |
+| `id`               | 字符串  | 记录时生成的 UUID                                          |
+| `apiKeyId`         | 字符串  | 发起请求的 API 密钥                                        |
+| `provider`         | 字符串  | 提供者 ID（openai、anthropic 等）                          |
+| `model`            | 字符串  | 模型 ID（gpt-5、claude-opus-4-6 等）                       |
+| `comboId`          | 字符串? | 如果通过组合路由，则为组合 ID                              |
+| `promptTokens`     | 数值    | 来自上游响应                                               |
+| `completionTokens` | 数值    | 来自上游响应                                               |
+| `cachedTokens`     | 数值    | 缓存命中的 token 数（Anthropic 提示词缓存等）              |
+| `totalTokens`      | 数值    | 提示词 + 补全                                              |
+| `costUsd`          | 数值    | 根据定价数据计算                                           |
+| `latencyMs`        | 数值    | 端到端请求耗时                                             |
+| `status`           | 枚举    | `success`、`error`、`rate_limited`、`timeout`、`cancelled` |
+| `errorClass`       | 字符串? | 状态不为 success 时的错误类别                              |
+| `timestamp`        | 字符串  | ISO 8601 UTC                                               |
+| `metadata`         | 对象    | 插件注入的自定义数据                                       |
 
-### 令牌的来源
+### Token 的来源
 
-令牌是在**响应处理器**中从上游提供者的响应里提取的：
+Token 数在**响应处理程序**中从上游提供者的响应中提取：
 
 ```ts
 // 来自 open-sse/handlers/chatCore.ts
@@ -74,15 +74,45 @@ const usage = response.usage || {
 };
 ```
 
-对于不返回用量数据的提供者（例如某些 Web Cookie 提供者），OmniRoute 会使用 `~4 chars per token` 启发式规则**估算**令牌数（请参阅 `open-sse/services/autoCombo/pipelineRouter.ts`）。
+对于不返回用量的提供者（某些基于 Web Cookie 的提供者），OmniRoute 使用 `~4 chars per token` 启发式规则来**估算** token 数（参见 `open-sse/services/autoCombo/pipelineRouter.ts`）。
 
-### 缓存令牌
+### 缓存 Token
 
-OmniRoute 会将 `cached_tokens` 与 `prompt_tokens` 分开跟踪，原因如下：
+OmniRoute 将 `cached_tokens` 与 `prompt_tokens` 分开跟踪，原因如下：
 
-- Anthropic 提示词缓存对缓存令牌收取较低的费率（正常费率的 10%）
-- 某些提供者会返回 `cache_read_input_tokens`，这类令牌应采用不同的定价方式
-- 分析数据可以显示**缓存命中率** = `cached_tokens / prompt_tokens`
+- Anthropic 提示词缓存对缓存 token 按较低费率收费（正常费率的 10%）
+- 某些提供者返回的 `cache_read_input_tokens` 应按不同价格计费
+- 分析功能可以显示**缓存命中率** = `cached_tokens / prompt_tokens`
+
+### 缓存写入层级诊断
+
+分析仪表板的提示词缓存健康面板会区分提供者报告的
+5 分钟和 1 小时缓存写入。Anthropic 的
+`usage.cache_creation.ephemeral_5m_input_tokens` 和
+`usage.cache_creation.ephemeral_1h_input_tokens` 会在流式及
+非流式用量转换过程中保留，并随调用日志摘要一起存储。合并的
+缓存写入总量不会再次计入这些分组。
+
+仅有合并写入计数的调用（包括旧记录），其层级为未知。
+部分细分数据中未分配的剩余量仍标记为未知；无效或
+相互冲突的计数会被标记，而不是被静默分配到某个 TTL。请求侧的
+TTL 标记不能作为计费层级的依据。
+
+面板中 API 等价的写入费用估算仅涵盖已报告且有定价的层级，而非
+整个请求。对于原生 Claude/Anthropic 模型定价，5 分钟写入采用
+输入费率的 1.25 倍，1 小时写入采用输入费率的 2 倍。缺失的
+定价表示不可用，而不是零。每次记录新调用时都会保存价格；
+历史记录不会重新定价。因此，订阅账户可能具有
+API 等价费用估算，但并不会产生相应金额的现金支出或消耗相应的订阅
+配额。现有的配额、预算和提供者精确费用计算保持不变。
+
+这些诊断使用现有的有界缓存健康摘要和调用日志
+保留机制。它们不会改变请求 TTL 默认值、路由或账户选择。
+在向提供者发送请求的边界处捕获客户端请求的 TTL 与实际出站 TTL 的工作
+暂缓实施；此面板报告的是回执中的层级，而非实际出站 TTL。
+
+实现：`src/lib/usage/cacheWriteEstimate.ts`、
+`src/lib/usage/cacheHealth.ts` 和 `open-sse/utils/cacheWriteUsage.ts`。
 
 ---
 
@@ -123,39 +153,39 @@ curl -X POST http://localhost:20128/api/pricing/sync
 
 ## 日期范围聚合
 
-`usageAnalytics.ts` 模块根据原始使用情况数据计算仪表板组件。它支持 7 种时间范围：
+`usageAnalytics.ts` 模块根据原始使用数据计算仪表板组件。它支持 7 种时间范围：
 
-| 范围     | 时间窗口                | 使用场景           |
-| -------- | ----------------------- | ------------------ |
-| `1d`     | 最近 24 小时            | 检测每小时成本峰值 |
-| `7d`     | 最近 7 天               | 每周审查           |
-| `30d`    | 最近 30 天              | 月度计费           |
-| `90d`    | 最近 90 天              | 季度分析           |
-| `ytd`    | 自当年 1 月 1 日起      | 年度预算跟踪       |
-| `all`    | 全部时间                | 全生命周期统计     |
-| `custom` | 用户定义的开始/结束时间 | 审计、临时查询     |
+| 范围     | 时间窗口           | 用例               |
+| -------- | ------------------ | ------------------ |
+| `1d`     | 过去 24 小时       | 检测每小时费用突增 |
+| `7d`     | 过去 7 天          | 每周回顾           |
+| `30d`    | 过去 30 天         | 月度计费           |
+| `90d`    | 过去 90 天         | 季度分析           |
+| `ytd`    | 自当年 1 月 1 日起 | 年度预算跟踪       |
+| `all`    | 所有时间           | 累计统计           |
+| `custom` | 用户自定义起止时间 | 审计、临时查询     |
 
 ### 计算的仪表板组件
 
 对于任意日期范围，分析层都会计算：
 
-| 组件              | 描述                                 |
-| ----------------- | ------------------------------------ |
-| **摘要卡片**      | 请求总数、总成本、token 总数、成功率 |
-| **每日趋势图**    | 每日成本和 token 数量，按模型堆叠    |
-| **活动热力图**    | 小时 × 星期几网格，颜色 = 请求数量   |
-| **模型明细**      | 按模型统计成本的饼图                 |
-| **提供者明细**    | 按提供者统计请求数量的条形图         |
-| **热门 API 密钥** | 按成本排名前 10 的密钥表格           |
-| **错误分析**      | 随时间变化的错误率、主要错误类别     |
+| 组件                    | 描述                                  |
+| ----------------------- | ------------------------------------- |
+| **摘要卡片**            | 总请求数、总费用、总 token 数、成功率 |
+| **每日趋势图**          | 每日费用和 token 数，按模型堆叠       |
+| **活动热力图**          | 小时 × 星期几网格，颜色表示请求数     |
+| **模型明细**            | 按模型划分费用的饼图                  |
+| **提供者明细**          | 按提供者划分请求数的条形图            |
+| **费用最高的 API 密钥** | 按费用排名前 10 的密钥表              |
+| **错误分析**            | 错误率随时间的变化、最常见的错误类别  |
 
-### 编程方式访问
+### 编程访问
 
 ````ts
 import { computeAnalytics } from "@/lib/usageAnalytics";
 
 const analytics = await computeAnalytics(
-  history,              // 使用情况历史记录
+  history,              // 使用历史记录
   "7d",                 // 时间范围："1d" | "7d" | "30d" | "90d" | "ytd" | "all" | "custom"
   connectionMap,        // 提供者连接映射（connectionId → 账户名称）
   {
@@ -169,12 +199,12 @@ console.log(analytics.byModel[0]);           // { model, cost, requests, promptT
 
 ---
 
-## 配额强制执行
+## 配额执行
 
-每个 API 密钥的配额在两个位置强制执行：
+每个 API 密钥的配额在两处执行：
 
-1. **软限制**（`quotaWarnAt`）：当使用量超过阈值时在仪表板中显示警告
-2. **硬限制**（`quotaLimit`）：超过限制时拒绝请求并返回 HTTP 429
+1. **软限制**（`quotaWarnAt`）：使用量超过阈值时，在仪表板中显示警告
+2. **硬限制**（`quotaLimit`）：超出限制时，以 HTTP 429 拒绝请求
 
 ### 配置
 
@@ -182,46 +212,46 @@ console.log(analytics.byModel[0]);           // { model, cost, requests, promptT
 // 每个 API 密钥
 await updateApiKey(keyId, {
   quotaWarnAt: 5_00,    // $5.00 — 显示警告
-  quotaLimit: 10_00,    // $10.00 — 硬性停止
+  quotaLimit: 10_00,    // $10.00 — 强制停止
   quotaWindow: "month", // "day" | "week" | "month" | "all"
 });
 ````
 
-### 强制执行流程
+### 执行流程
 
 ```
 请求 ──▶ quotaCheck()
               │
-              ├── 未超过限制？  ──▶ 允许
+              ├── 未超出限制？  ──▶ 允许
               │
-              └── 超过限制？  ──▶ 429 请求过多
-                                   并带有 Retry-After 标头
+              └── 已超出限制？  ──▶ 429 Too Many Requests
+                                   带有 Retry-After 响应头
 ```
 
 ### 配额快照
 
-`quotaSnapshots` 表存储用于趋势分析的**历史配额状态**：
+`quotaSnapshots` 表存储**历史配额状态**，用于趋势分析：
 
 | 字段 | 描述 |
 | ----------- | -------------------------------- | ------ | ------- |
 | `apiKeyId` | 正在跟踪的密钥 |
 | `window` | "day" | "week" | "month" |
-| `used` | 此窗口内已使用的成本（美分） |
-| `limit` | 限制（美分） |
-| `resetAt` | 窗口重置时间 |
-| `createdAt` | 快照生成时间 |
+| `used` | 此时间窗口内已使用的费用（美分） |
+| `limit` | 限额（美分） |
+| `resetAt` | 时间窗口的重置时间 |
+| `createdAt` | 快照的创建时间 |
 
-系统会为成本 > 0 的**每个请求**生成快照，并将其用于：
+**每次请求**产生的费用 > 0 时都会创建快照，用于：
 
 - 在仪表板中呈现配额进度条
 - 显示 30 天配额趋势图
-- 当使用量接近限制时触发警报
+- 在使用量接近限额时触发告警
 
 ---
 
 ## REST API
 
-### 列出使用记录
+### 列出用量记录
 
 ```bash
 GET /api/usage?range=7d&limit=100
@@ -272,12 +302,7 @@ GET /api/usage/analytics?range=7d&groupBy=model
   },
   "models": [
     { "model": "gpt-5", "cost": 8.5, "requests": 1234, "tokens": 4567890 },
-    {
-      "model": "claude-opus-4-6",
-      "cost": 3.84,
-      "requests": 234,
-      "tokens": 234567
-    }
+    { "model": "claude-opus-4-6", "cost": 3.84, "requests": 234, "tokens": 234567 }
   ],
   "daily": [
     { "date": "2026-06-01", "cost": 1.5, "requests": 800 },
@@ -286,11 +311,11 @@ GET /api/usage/analytics?range=7d&groupBy=model
 }
 ```
 
-### 查询使用情况分析
+### 查询用量分析
 
-使用数据通过仪表板或 MCP 工具访问，而不是通过直接的 REST 导出端点访问。可用的分析功能包括：
+用量数据通过仪表板或 MCP 工具访问，而非直接通过 REST 导出端点访问。可用的分析功能：
 
-- **`/api/usage/analytics`** — 聚合使用指标（按模型、提供者、密钥分组）
+- **`/api/usage/analytics`** — 聚合用量指标（按模型、提供者、密钥分组）
 - **`/api/usage/quota`** — 每个 API 密钥的当前配额状态
 - **`/api/usage/history`** — 请求历史日志
 
@@ -298,14 +323,14 @@ GET /api/usage/analytics?range=7d&groupBy=model
 
 ## MCP 工具
 
-两个 MCP 工具向代理公开使用数据（请参阅 `open-sse/mcp-server/tools/`）：
+两个 MCP 工具向智能体提供用量数据（参见 `open-sse/mcp-server/tools/`）：
 
-| 工具                    | 描述                               |
-| ----------------------- | ---------------------------------- |
-| `omniroute_cost_report` | 生成给定时间段内每个密钥的成本报告 |
-| `omniroute_check_quota` | 返回 API 密钥的当前配额状态        |
+| 工具                    | 描述                             |
+| ----------------------- | -------------------------------- |
+| `omniroute_cost_report` | 生成指定时间段内各密钥的费用报告 |
+| `omniroute_check_quota` | 返回 API 密钥的当前配额状态      |
 
-代理调用示例：
+智能体调用示例：
 
 ```json
 {
@@ -318,38 +343,38 @@ GET /api/usage/analytics?range=7d&groupBy=model
 
 ## 保留与清理
 
-每个请求产生的使用情况数据约为 1-10KB。大规模使用时，数据量可能会非常可观。
+每次请求会增加约 1–10KB 的用量数据。在大规模使用时，数据量可能相当可观。
 
 ### 保留设置
 
-使用情况历史记录的保留期限可通过 UI 中的数据库设置或 `/api/settings/database` 进行配置。
+用量历史记录的保留期限可通过 UI 中的数据库设置或 `/api/settings/database` 进行配置。
 
-默认情况下，使用情况历史记录保留 **90 天**。
+默认情况下，用量历史记录保留 **90 天**。
 
 ### 清理
 
 旧记录由 `src/lib/db/cleanup.ts` 清理：
 
 - 由后台 cron 进程触发
-- 删除 `usage_history` 中早于已配置 `usageHistory` 保留期限的记录
+- 删除 `usage_history` 中超过所配置的 `usageHistory` 保留期限的记录
 
 ### 存储空间估算
 
-| 请求速率          | 30 天存储量 | 90 天存储量 |
-| ----------------- | ----------- | ----------- |
-| 100 个请求/天     | ~3MB        | ~9MB        |
-| 1,000 个请求/天   | ~30MB       | ~90MB       |
-| 10,000 个请求/天  | ~300MB      | ~900MB      |
-| 100,000 个请求/天 | ~3GB        | ~9GB        |
+| 请求频率          | 30 天存储空间 | 90 天存储空间 |
+| ----------------- | ------------- | ------------- |
+| 100 次请求/天     | ~3MB          | ~9MB          |
+| 1,000 次请求/天   | ~30MB         | ~90MB         |
+| 10,000 次请求/天  | ~300MB        | ~900MB        |
+| 100,000 次请求/天 | ~3GB          | ~9GB          |
 
-对于流量非常高的情况，请考虑：
+对于极高流量的场景，可考虑：
 
 - 通过数据库设置缩短保留期限
-- 使用 `aggregated_metrics` 而不是原始记录（仅用于分析）
+- 使用 `aggregated_metrics` 代替原始记录（仅用于分析）
 
 ---
 
-## 成本优化技巧
+## 成本优化建议
 
 ### 1. 使用合适的模型
 
@@ -363,10 +388,10 @@ curl -d '{"model":"auto/smart","messages":[...]}'
 
 ### 2. 启用缓存
 
-Anthropic 提示词缓存可为**重复上下文节省 90% 的成本**：
+Anthropic 提示词缓存可节省**重复上下文成本的 90%**：
 
 ```ts
-// 缓存是自动完成的 — 只需包含相同的大型系统提示词
+// 缓存是自动的 — 只需包含相同的大型系统提示词
 const response = await openai.chat({
   model: "claude-sonnet-4-5",
   system: longSystemPrompt, // 将自动缓存
@@ -376,7 +401,7 @@ const response = await openai.chat({
 
 ### 3. 使用压缩
 
-RTK + Caveman 压缩可在**大量使用工具的会话中节省 15-95%**：
+RTK + Caveman 压缩可在**工具密集型会话中节省 15-95% 的成本**：
 
 ```ts
 const config = {
@@ -387,17 +412,17 @@ const config = {
 };
 ```
 
-### 4. 设置每个密钥的配额
+### 4. 为每个密钥设置配额
 
-始终设置 `quotaLimit`，以防止成本失控：
+务必设置 `quotaLimit`，防止成本失控：
 
 ```ts
-await updateApiKey(keyId, { quotaLimit: 10_00 }); // 每月上限为 $10
+await updateApiKey(keyId, { quotaLimit: 10_00 }); // 每月上限为 10 美元
 ```
 
-### 5. 审查使用量最高的用户
+### 5. 审查高消耗使用方
 
-使用仪表板或 **`/api/usage/analytics`** 按 API 密钥分组并按成本排序：
+使用仪表板或 **`/api/usage/analytics`** 按 API 密钥分组，并按成本排序：
 
 ```bash
 GET /api/usage/analytics?groupBy=apiKey
@@ -405,31 +430,31 @@ GET /api/usage/analytics?groupBy=apiKey
 
 ---
 
-## 故障排除
+## 故障排查
 
 ### “成本高于预期”
 
-1. 检查 **`/api/usage/analytics?groupBy=model`** — 找出成本高昂的模型
-2. 检查 **`/api/usage/analytics?groupBy=apiKey`** — 找出使用量大的用户
-3. 验证定价数据是否为最新：`POST /api/pricing/sync`
+1. 检查 **`/api/usage/analytics?groupBy=model`** — 找出成本高的模型
+2. 检查 **`/api/usage/analytics?groupBy=apiKey`** — 找出高消耗使用方
+3. 确认定价数据已更新：`POST /api/pricing/sync`
 
 ### “记录缺失”
 
-- 检查 Dashboard → Database → Cleanup 下的数据库保留设置 — 旧记录会由定期清理任务（`src/lib/db/cleanup.ts`）删除
-- 检查 `src/lib/db/usage*.ts` 中是否存在错误 — 数据库写入失败会被记录，但不会显示给用户
-- 验证请求是否确实到达 `chatCore` — 检查组合路由
+- 检查仪表板 → 数据库 → 清理中的数据库保留设置 — 定期清理任务会删除旧记录（`src/lib/db/cleanup.ts`）
+- 检查 `src/lib/db/usage*.ts` 中的错误 — 数据库写入失败会记录到日志中，但不会对外显示
+- 确认请求确实到达了 `chatCore` — 检查组合路由
 
 ### “配额未生效”
 
 - 检查密钥的 `quotaLimit` 设置
-- 验证 `quotaWindow` 是否设置正确
-- 查找 `quotaSnapshots` 记录 — 每个请求都应创建一条记录
+- 确认 `quotaWindow` 设置正确
+- 查找 `quotaSnapshots` 记录 — 每次请求都应创建这些记录
 
 ---
 
 ## 另请参阅
 
-- [DATABASE_GUIDE.md](../ops/DATABASE_GUIDE.md) — 使用情况表的架构
+- [DATABASE_GUIDE.md](../ops/DATABASE_GUIDE.md) — 用量表的结构
 - [ENVIRONMENT.md](../reference/ENVIRONMENT.md#18-pricing-sync) — 定价同步环境变量
 - [AUTO-COMBO.md](../routing/AUTO-COMBO.md) — `auto/fast`、`auto/cheap` 如何降低成本
 - [API_REFERENCE.md](../reference/API_REFERENCE.md) — 完整的 `/api/usage/*` 参考文档

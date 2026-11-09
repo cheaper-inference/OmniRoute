@@ -390,7 +390,7 @@ De ophaaltool heet momenteel `omniroute_ccr_retrieve` (het voorvoegsel `omnirout
 
 ### Sessielevenscyclus
 
-Streamable-HTTP-sessies vallen uit en de server plukt ze; het inactieve venster is de `MCP_SESSION_IDLE_MS` constante (waarnaar wordt verwezen met de naam, geen hardgecodeerde waarde, zodat deze pagina niet afwijkt als deze verandert). Het symptoom van een inactieve sessie is een HTTP 404 met `Unknown Mcp-Session-Id` — De remedie is om opnieuw verbinding te maken of de sessie opnieuw te starten,** niet** om een sleutel te draaien, een bereik te wijzigen of een gereedschap te hernoemen.
+Streamable-HTTP-sessies vallen uit en de server plukt ze; het inactieve venster wordt ingesteld door `OMNIROUTE_MCP_SESSION_IDLE_MS` (standaard 5 minuten; er wordt verwezen met de naam, geen hardgecodeerde waarde, dus deze pagina wijkt niet af als deze verandert). Het symptoom van een inactieve sessie is een HTTP 404 met `Unknown Mcp-Session-Id` — De remedie is om opnieuw verbinding te maken of de sessie opnieuw te starten,** niet** om een sleutel te draaien, een bereik te wijzigen of een gereedschap te hernoemen.
 
 ## API-oppervlak
 
