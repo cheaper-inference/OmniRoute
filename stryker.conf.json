@@ -231,6 +231,7 @@
       "tests/unit/auth-ollama-cloud-per-model-403-3027.test.ts",
       "tests/unit/auth-passthrough-per-model-402-12242.test.ts",
       "tests/unit/auth-terminal-status.test.ts",
+      "tests/unit/self-hosted-backoff-cap.test.ts",
       "tests/unit/authz/cliproxy-management-compat-authz.test.ts",
       "tests/unit/authz/credential-export-always-protected.test.ts",
       "tests/unit/authz/discovery-routes-local-only.test.ts",
