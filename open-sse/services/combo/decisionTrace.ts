@@ -110,10 +110,15 @@ export interface ComboTrace {
   decisions: ComboTraceEntry[];
   autoEvaluation: AutoEvaluationTrace | null;
   terminal: { status: number | null; errorClass: string | null } | null;
+  /** Set when events were dropped because the trace reached MAX_EVENTS_PER_TRACE. */
+  truncated?: true;
 }
 
 const TRACE_TTL_MS = 30 * 60 * 1000;
 const MAX_TRACES = 2000;
+// One invocation records at most this many decisions and, separately, Auto transitions; a long
+// retry loop over a large pool cannot grow a single trace without limit. The oldest events stay.
+const MAX_EVENTS_PER_TRACE = 512;
 const traces = new Map<string, ComboTrace>();
 let forceAutoEvaluationWriteFailureForTests = false;
 
@@ -195,6 +200,11 @@ export function recordAutoEvaluationTransition(
     ) {
       return;
     }
+    if (evaluation.transitions.length >= MAX_EVENTS_PER_TRACE) {
+      const trace = traces.get(invocationId);
+      if (trace) trace.truncated = true;
+      return;
+    }
     evaluation.transitions.push({ ...transition, ts: Date.now() });
   });
 }
@@ -246,6 +256,10 @@ export function recordComboDecision(
     log.warn(
       `unknown combo skip reason ${String(entry.reason)} (decision recorded without a reason; allowlist: ${COMBO_SKIP_REASONS.join(", ")})`
     );
+  }
+  if (trace.decisions.length >= MAX_EVENTS_PER_TRACE) {
+    trace.truncated = true;
+    return;
   }
   trace.decisions.push({
     step: entry.step,
@@ -312,6 +326,10 @@ export function finalizeComboTrace(
   const decided = new Set(trace.decisions.map((d) => d.step));
   for (const t of orderedTargets) {
     if (!decided.has(t.executionKey)) {
+      if (trace.decisions.length >= MAX_EVENTS_PER_TRACE) {
+        trace.truncated = true;
+        break;
+      }
       trace.decisions.push({
         step: t.executionKey,
         target: t.modelStr,
