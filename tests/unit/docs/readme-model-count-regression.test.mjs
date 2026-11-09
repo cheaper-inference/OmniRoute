@@ -4,9 +4,6 @@ import test from "node:test";
 import { managedCountChecks, planDocumentCounts } from "../../../scripts/docs/lib/count-sync.mjs";
 
 test("canonical English claims reject four stale model numbers before any write", () => {
-  const registry = JSON.parse(
-    fs.readFileSync(new URL("../../../scripts/docs/lib/count-claims.json", import.meta.url), "utf8")
-  );
   const fixture = JSON.parse(
     fs.readFileSync(
       new URL("../../fixtures/docs/readme-model-claims.json", import.meta.url),
@@ -14,16 +11,9 @@ test("canonical English claims reject four stale model numbers before any write"
     )
   );
   const row = fixture.rows.find((item) => item.path === "README.md");
-  const original = registry.documents.find((doc) => doc.path === row.path);
-  const doc = {
-    ...original,
-    groups: original.groups.filter(
-      (group) =>
-        (group.claims.some((claim) => claim.fact === "catalogMarkedFree") &&
-          group.claims.some((claim) => claim.fact === "catalogEntries")) ||
-        group.parts[0].startsWith("| 🧠")
-    ),
-  };
+  assert.equal(fixture.version, 2);
+  assert.ok(row.countDocument, "historical text retains its own numeric bindings");
+  const doc = structuredClone(row.countDocument);
   // Expected counts are derived from a small independent catalog, never a
   // production baseline or the historical snapshot's aggregate numbers.
   const namespaces = new Map([

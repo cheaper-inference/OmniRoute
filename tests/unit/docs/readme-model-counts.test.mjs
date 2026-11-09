@@ -10,9 +10,6 @@ import {
 } from "../../../scripts/docs/lib/count-sync.mjs";
 import { contentHash } from "../../../scripts/docs/lib/count-state.mjs";
 
-const registry = JSON.parse(
-  fs.readFileSync(new URL("../../../scripts/docs/lib/count-claims.json", import.meta.url), "utf8")
-);
 const fixture = JSON.parse(
   fs.readFileSync(new URL("../../fixtures/docs/readme-model-claims.json", import.meta.url), "utf8")
 );
@@ -23,19 +20,12 @@ const inventory = () => [
   { id: "empty", modelIds: [] },
 ];
 const modelFacts = () => factsModule.measureChatModelCounts(inventory());
+// Text and bindings belong to the same historical fixture. Live documentation
+// is checked separately by check:docs-counts against the current registry.
 const selectedDoc = (path) => {
-  const row = registry.documents.find((doc) => doc.path === path);
-  assert.ok(row, `registered ${path}`);
-  const isolated = structuredClone(row);
-  return {
-    ...isolated,
-    groups: isolated.groups.filter(
-      (group) =>
-        (group.claims.some((claim) => claim.fact === "catalogMarkedFree") &&
-          group.claims.some((claim) => claim.fact === "catalogEntries")) ||
-        group.parts[0].startsWith("| 🧠")
-    ),
-  };
+  const row = fixture.rows.find((item) => item.path === path);
+  assert.ok(row?.countDocument, `historical bindings for ${path}`);
+  return structuredClone(row.countDocument);
 };
 const miniRegistry = (paths) => ({
   version: 1,
@@ -66,6 +56,7 @@ test("model facts distinguish namespaces pairs raw IDs and duplicate declared ro
 });
 
 test("all 67 real README claim fixtures update four numbers and preserve every other byte", () => {
+  assert.equal(fixture.version, 2);
   assert.equal(fixture.rows.length, 67);
   const paths = fixture.rows.map((row) => row.path);
   validateCountRegistry(miniRegistry(paths));
@@ -131,7 +122,7 @@ test("grouped integer formats are explicit preserve digit script and reject malf
 
 test("missing mirrored bindings missing facts and ambiguous claims fail closed", () => {
   const paths = ["README.md", "docs/i18n/pt-BR/README.md"];
-  const untouchedRegistry = JSON.stringify(registry);
+  const untouchedRegistry = JSON.stringify(fixture);
   const input = miniRegistry(paths);
   const target = input.documents[1];
   // Missing semantic binding must stay structurally valid.
@@ -141,7 +132,7 @@ test("missing mirrored bindings missing facts and ambiguous claims fail closed",
   const malformed = miniRegistry(paths);
   malformed.documents[1].groups.find((group) => group.parts[0].startsWith("| 🧠")).claims.pop();
   assert.throws(() => validateCountRegistry(malformed), /COUNT_REGISTRY_GROUP/);
-  assert.equal(JSON.stringify(registry), untouchedRegistry);
+  assert.equal(JSON.stringify(fixture), untouchedRegistry);
   const missingFact = miniRegistry(paths);
   const row = fixture.rows.find((item) => item.path === paths[0]);
   assert.throws(
@@ -163,7 +154,7 @@ test("missing mirrored bindings missing facts and ambiguous claims fail closed",
     .find((group) => group.claims.some((claim) => claim.fact === "chatNamespaces"))
     .claims.filter((claim) => claim.fact !== "chatNamespaces");
   assert.throws(() => validateCountRegistry(removed), /MODEL_BINDINGS/);
-  assert.equal(JSON.stringify(registry), untouchedRegistry);
+  assert.equal(JSON.stringify(fixture), untouchedRegistry);
   assert.doesNotThrow(() => validateCountRegistry(miniRegistry(paths)));
 });
 

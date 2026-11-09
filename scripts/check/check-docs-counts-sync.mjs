@@ -254,8 +254,9 @@ function readCodeFacts() {
     'console.log("@@"+JSON.stringify({freeSteady:t.steadyRecurringTokens,entries:t.perModel.length,',
     "freeFirst:t.firstMonthRealisticTokens,freeGated:t.gatedRecurringTokens,",
     "freePools:t.poolCount,engines:ENGINE_IDS.length,",
-    "...chatModels,cliTotal:metadata.cliTotal,cliCode:metadata.cliCode,cliAgent:metadata.cliAgent,",
-    "mcpTools:metadata.mcpTools,mcpScopes:metadata.mcpScopes,providers:measured.providers,freeForever:measured.freeForever,catalogMarkedFree:measured.catalogMarkedFree,",
+    // Preserve the complete shared fact contract, including formatted budget units.
+    "...chatModels,...measured,cliTotal:metadata.cliTotal,cliCode:metadata.cliCode,cliAgent:metadata.cliAgent,",
+    "mcpTools:metadata.mcpTools,mcpScopes:metadata.mcpScopes,",
     "modePacks:Object.keys(MODE_PACKS),catalogDate:__cat,sortBy:__sb,intelligentKeys:__ik,",
     "hardStop:FREE_MODEL_BUDGETS.filter(e=>e.hardStopGuaranteed===true).length,",
     "trainsOnPrompts:FREE_MODEL_BUDGETS.filter(e=>e.trainsOnPrompts===true).length,",

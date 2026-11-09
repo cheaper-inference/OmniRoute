@@ -19,6 +19,8 @@ const GROUPED_FORMATS = Object.freeze({
   "grouped-comma": ",",
   "grouped-dot": ".",
   "grouped-space": " ",
+  "grouped-nbsp": "\u00a0",
+  "grouped-narrow-nbsp": "\u202f",
 });
 const DECIMAL_FACTS = new Set(["steadyBillions", "firstBillions", "gatedMillions"]);
 const NUMBER = "([\\p{Nd}]+(?:[.,][\\p{Nd}]+)*)";
@@ -161,7 +163,9 @@ export function planDocumentCounts(doc, content, facts) {
       .map((part, slot) => {
         if (slot === group.parts.length - 1) return literal(part);
         const claim = group.claims.find((row) => row.slot === slot);
-        const number = claim?.format === "grouped-space" ? "([\\p{Nd}]+(?: [\\p{Nd}]+)*)" : NUMBER;
+        const separator = GROUPED_FORMATS[claim?.format];
+        const number =
+          separator && /\s/u.test(separator) ? `([\\p{Nd}]+(?:${separator}[\\p{Nd}]+)*)` : NUMBER;
         return literal(part) + number;
       })
       .join("");
