@@ -226,7 +226,10 @@ export const AUDIO_TRANSCRIPTION_PROVIDERS: Record<string, AudioProvider> = {
 
   huggingface: {
     id: "huggingface",
-    baseUrl: "https://api-inference.huggingface.co/models",
+    // HF retired api-inference.huggingface.co; ASR now routes through
+    // router.huggingface.co with the hf-inference provider pinned in the path
+    // (same convention as the image entry in imageRegistryData.ts).
+    baseUrl: "https://router.huggingface.co/hf-inference/models",
     authType: "apikey",
     authHeader: "bearer",
     format: "huggingface-asr",
@@ -486,7 +489,10 @@ export const AUDIO_SPEECH_PROVIDERS: Record<string, AudioProvider> = {
 
   huggingface: {
     id: "huggingface",
-    baseUrl: "https://api-inference.huggingface.co/models",
+    // HF retired api-inference.huggingface.co; TTS now routes through
+    // router.huggingface.co with the hf-inference provider pinned in the path
+    // (same convention as the image entry in imageRegistryData.ts).
+    baseUrl: "https://router.huggingface.co/hf-inference/models",
     authType: "apikey",
     authHeader: "bearer",
     format: "huggingface-tts",

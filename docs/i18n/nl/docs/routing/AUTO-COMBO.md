@@ -128,6 +128,27 @@ Automatische scoring selecteert per request de beste provider/het beste model
 | `src/sse/handlers/chat.ts`                                | Integratie: kortsluiting voor het automatische voorvoegsel |
 | `src/shared/constants/providers.ts`                       | Systeemvermelding `SYSTEM_PROVIDERS.auto`                  |
 
+## Accountvoorkeuren voor opgeslagen automatische combo's
+
+De Intelligent Auto-editor biedt een optionele** Accountvoorkeuren** sectie. Elke verbinding kan Voorkeur, Normaal (standaard), Reserve of Uitgesloten zijn. Meerdere verbindingen kunnen een laag delen. Automatische selectie binnen het eerste in aanmerking komende niveau, waarbij het scoring/router gedrag daar behouden blijft; mislukte pogingen sijpelen door naar de resterende concrete rekeningen, die de voorkeur verdienen boven normaal boven reserve. Uitgesloten verbindingen worden door deze combo nooit gebruikt.
+
+De instelling wordt opgeslagen als `config.accountPreferences`, ingetoetst door verbinding ID:
+
+```json
+{
+  "accountPreferences": {
+    "connection-a": "preferred",
+    "connection-b": "preferred",
+    "connection-c": "reserve",
+    "connection-d": "excluded"
+  }
+}
+```
+
+Een weggelaten of lege kaart behoudt de bestaande route. Voorkeuren schakelen geen uitgeschakelde verbindingen in, verlenen geen API-sleuteltoegang, herstellen door quota geblokkeerde kandidaten of omzeilen budgetcontroles. Elke poging is beperkt tot de concrete verbinding, dus account fallback kan niet tussen niveaus achter de combo-router springen. Bestaande sessieaffiniteit kan een in aanmerking komend account behouden; het uitsluiten van het account dat aan een native beurt is gebonden, stopt die beurt in plaats van stil van account te wisselen.
+
+Geconfigureerde voorkeuren gebruiken het accountbewuste automatische pad: ongebonden contextcache, slimme pijplijn, chaos en schaduwsnelkoppelingen worden niet verzonden. Speculatieve hedging is uitgeschakeld voor deze verzoeken, zodat reserverekeningen niet kunnen racen met voorkeursrekeningen. Andere combostrategieën interpreteren deze instelling niet. Als u een combo buiten Auto wijzigt, blijven de opgeslagen voorkeuren behouden zodat u later terug kunt schakelen.
+
 ## Combonamen die overeenkomen met een echte model-id
 
 Een combo waarvan de `name` identiek is aan een kale model-id (bijvoorbeeld een combo met de naam

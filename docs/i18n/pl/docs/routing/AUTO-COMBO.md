@@ -130,6 +130,27 @@ Automatyczna ocena wybiera najlepszego dostawcę/model dla każdego żądania
 | `src/sse/handlers/chat.ts`                                | Integracja: skrócona ścieżka dla prefiksu auto     |
 | `src/shared/constants/providers.ts`                       | Wpis systemowy `SYSTEM_PROVIDERS.auto`             |
 
+## Preferencje konta dotyczące zapisanych kombinacji automatycznych
+
+Edytor Intelligent Auto oferuje opcję** Preferencje konta** sekcja. Każde połączenie może być Preferowane, Normalne (domyślne), Rezerwowe lub Wykluczone. Wiele połączeń może współdzielić warstwę. Automatycznie wybiera pierwszy kwalifikujący się poziom, zachowując tam swoje zachowanie scoring/router ; nieudane próby przechodzą na pozostałe konkretne konta, preferowane przed normalnymi przed rezerwowymi. Wykluczone połączenia nigdy nie są używane przez tę kombinację.
+
+Ustawienie jest przechowywane jako `config.accountPreferences`, wprowadzane przez połączenie ID:
+
+```json
+{
+  "accountPreferences": {
+    "connection-a": "preferred",
+    "connection-b": "preferred",
+    "connection-c": "reserve",
+    "connection-d": "excluded"
+  }
+}
+```
+
+Pominięta lub pusta mapa zachowuje istniejące trasy. Preferencje nie umożliwiają wyłączonych połączeń, nie zapewniają dostępu do klucza API, nie przywracają kandydatów z zablokowanymi przydziałami ani nie omijają kontroli budżetu. Każda próba jest ograniczona do konkretnego połączenia, więc rezerwowe konto nie może przeskakiwać poziomów za routerem combo. Istniejące powinowactwo sesji może zachować kwalifikujące się konto; wykluczenie konta powiązanego z natywną turą zatrzymuje tę turę zamiast cichej zmiany kont.
+
+Skonfigurowane preferencje wykorzystują ścieżkę automatyczną uwzględniającą konto: niepowiązana pamięć podręczna kontekstu, skróty inteligentnego potoku, chaosu i cienia nie są wysyłane. Zabezpieczenie spekulacyjne jest wyłączone dla tych żądań, więc konta rezerwowe nie mogą ścigać się z kontami preferowanymi. Inne strategie kombinowane nie interpretują tego ustawienia. Zmiana kombinacji z automatycznej powoduje zachowanie zapisanych preferencji do późniejszego przełączenia.
+
 ## Nazwy kombinacji odpowiadające rzeczywistemu identyfikatorowi modelu
 
 Kombinacja, której `name` jest identyczna z samym identyfikatorem modelu (np. kombinacja o nazwie

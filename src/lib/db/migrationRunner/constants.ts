@@ -166,6 +166,80 @@ export const RENAMED_MIGRATION_COMPATIBILITY = [
     toVersion: "081",
     toName: "inspector_custom_hosts",
   },
+  // Vacate feature slot 215 before Team history is rehomed there.
+  {
+    // Published cache reporting used slots now owned by canonical release migrations.
+    fromVersion: "206",
+    fromName: "daily_cached_input",
+    toVersion: "231",
+    toName: "daily_cached_input",
+  },
+  {
+    fromVersion: "213",
+    fromName: "daily_cached_input",
+    toVersion: "231",
+    toName: "daily_cached_input",
+  },
+  {
+    fromVersion: "214",
+    fromName: "daily_cached_input",
+    toVersion: "231",
+    toName: "daily_cached_input",
+  },
+  {
+    fromVersion: "215",
+    fromName: "daily_cached_input",
+    toVersion: "231",
+    toName: "daily_cached_input",
+  },
+  {
+    fromVersion: "217",
+    fromName: "daily_cached_input",
+    toVersion: "231",
+    toName: "daily_cached_input",
+  },
+  {
+    fromVersion: "218",
+    fromName: "daily_cached_input",
+    toVersion: "231",
+    toName: "daily_cached_input",
+  },
+  {
+    fromVersion: "223",
+    fromName: "daily_cached_input",
+    toVersion: "231",
+    toName: "daily_cached_input",
+  },
+  {
+    fromVersion: "224",
+    fromName: "daily_cached_input",
+    toVersion: "231",
+    toName: "daily_cached_input",
+  },
+  {
+    fromVersion: "225",
+    fromName: "daily_cached_input",
+    toVersion: "231",
+    toName: "daily_cached_input",
+  },
+  {
+    fromVersion: "226",
+    fromName: "daily_cached_input",
+    toVersion: "231",
+    toName: "daily_cached_input",
+  },
+  {
+    fromVersion: "228",
+    fromName: "daily_cached_input",
+    toVersion: "231",
+    toName: "daily_cached_input",
+  },
+  {
+    fromVersion: "229",
+    fromName: "daily_cached_input",
+    toVersion: "231",
+    toName: "daily_cached_input",
+  },
   // PR #10409 circulated through these draft slots before the current release
   // claimed them. The name guard is mandatory: canonical migrations using the
   // same numbers must never be rehomed as Team state.
