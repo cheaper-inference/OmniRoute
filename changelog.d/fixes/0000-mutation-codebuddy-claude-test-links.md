@@ -1,0 +1,1 @@
+- Include the existing CodeBuddy request-illegal and Claude Code tool-preservation regression tests in Stryker's explicit test selection so their coverage contributes to the account-fallback and memory/skills-injection mutation targets.

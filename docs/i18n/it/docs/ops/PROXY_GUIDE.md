@@ -10,20 +10,20 @@ OmniRoute include un sistema completo di gestione dei proxy che consente di inst
 
 ---
 
-## Indice
+## Sommario
 
-- [Perché usare i proxy?](#perché-usare-i-proxy)
-- [Panoramica dell'architettura](#panoramica-dellarchitettura)
-- [Sistema proxy a 4 livelli](#sistema-proxy-a-4-livelli)
-- [Registro dei proxy (CRUD)](#registro-dei-proxy-crud)
-- [Marketplace gratuito 1proxy](#marketplace-gratuito-1proxy)
-- [Rotazione dei proxy](#rotazione-dei-proxy)
-- [Anti-rilevamento e modalità stealth](#anti-rilevamento-e-modalità-stealth)
-- [Modalità proxy upstream](#modalità-proxy-upstream)
-- [Interfaccia della dashboard](#interfaccia-della-dashboard)
-- [Riferimento API](#riferimento-api)
-- [Variabili d'ambiente](#variabili-dambiente)
-- [Risoluzione dei problemi](#risoluzione-dei-problemi)
+- [Perché utilizzare i proxy?](#why-use-proxies)
+- [Panoramica dell'architettura](#architecture-overview)
+- [Sistema proxy a 4 livelli](#4-level-proxy-system)
+- [Registro dei proxy (CRUD)](#proxy-registry-crud)
+- [1mercato gratuito proxy](#1proxy-free-proxy-marketplace)
+- [Rotazione per procura](#proxy-rotation)
+- [Anti-rilevamento e azione furtiva](#anti-detection--stealth)
+- [Modalità proxy upstream](#upstream-proxy-modes)
+- [Cruscotto UI](#dashboard-ui)
+- [Riferimento API](#api-reference)
+- [Variabili d'ambiente](#environment-variables)
+- [Risoluzione dei problemi](#troubleshooting)
 
 ---
 
@@ -80,6 +80,18 @@ Anche al di fuori delle regioni soggette a blocchi, i proxy sono utili per:
 | **DB 1proxy**          | `src/lib/db/oneproxy.ts`                     | Persistenza del marketplace di proxy gratuiti                         |
 
 ---
+
+## Stato proxy predefinito per i nuovi account
+
+In** Impostazioni → Proxy → Configurazione globale** , utilizzo** Abilita il proxy per impostazione predefinita per le nuove connessioni** per scegliere lo stato proxy iniziale degli account fornitore appena aggiunti.
+
+La nuova impostazione controlla lo stato proxy iniziale degli account provider appena aggiunti. Non modifica gli account esistenti né sostituisce il passaggio proxy globale. Il suo valore iniziale preserva il comportamento precedente. Disattivalo una volta per creare account futuri con proxy disabilitato per impostazione predefinita.
+
+La preferenza viene memorizzata come `defaultNewConnectionProxyEnabled` tramite le Impostazioni API esistenti. Il valore predefinito è `true` quando non viene mai salvato. Il salvataggio `false` ha effetto per i nuovi account successivi senza riavvio. `POST /api/providers` accetta un booleano rigoroso opzionale `proxyEnabled`; uno `true` o `false` esplicito ha la precedenza sull'impostazione predefinita di creazione. L'omissione su un account duplicato o la riconnessione OAuth preserva lo stato memorizzato dell'account. I singoli account possono comunque essere abilitati o disabilitati in seguito.
+
+I trasferimenti selettivi del provider utilizzano l'impostazione predefinita dell'installazione di destinazione per i nuovi account e preservano i criteri di destinazione quando si sostituiscono gli account esistenti. I commutatori proxy non sono campi di trasferimento portatili. Il ripristino completo del backup e la migrazione storica JSON/SQL mantengono la semantica di ripristino esistente, inclusi i valori dell'account salvati e le impostazioni predefinite dello schema legacy; anche un ripristino completo delle impostazioni può ripristinare questa preferenza.
+
+Questa preferenza non assegna una delega né stabilisce che uno sia sano o in uso. Il routing effettivo dipende ancora dallo switch proxy globale e dalla configurazione proxy applicabile. I provider sintetici senza un account persistente, il traffico OAuth prima della creazione dell'account, i proxy environment/system e la rete di backend esterni non rientrano nel suo ambito.
 
 ## Sistema proxy a 4 livelli
 
@@ -379,17 +391,17 @@ OmniRoute non si limita a instradare il traffico attraverso un proxy, ma fa in m
 
 Utilizza `wreq-js` per generare impronte digitali TLS simili a quelle dei browser, aggirando i sistemi di rilevamento dei bot che segnalano gli handshake TLS non provenienti da browser.
 
-### Corrispondenza dell'impronta digitale della CLI
+### Corrispondenza delle impronte digitali CLI
 
-L'**interruttore dell'impronta digitale della CLI** (`Impostazioni → Sicurezza`) riordina le intestazioni HTTP e i campi del corpo JSON affinché corrispondano esattamente alla firma dei binari CLI nativi (Claude Code, Codex, ecc.). Questa funzionalità opera **in aggiunta al** proxy:
+IL **Attiva/disattiva impronta digitale CLI** (`Settings → Security`) riordina le intestazioni HTTP e i campi del corpo JSON in modo che corrispondano alla firma esatta dei binari CLI nativi ( codice Claude, Codex, ecc.). Funziona **sopra** la procura:
 
 ```
-Il tuo IP (bloccato) → IP del proxy (USA) → API del provider
-                        + spoofing TLS
-                        + impronta digitale CLI
+Your IP (blocked) → Proxy IP (US) → Provider API
+                    + TLS spoof
+                    + CLI fingerprint
 ```
 
-In questo modo ottieni simultaneamente sia il **mascheramento dell'IP** sia l'**autenticità delle richieste**.
+Ottieni entrambi **Mascheramento IP** E **richiedere l'autenticità** contemporaneamente.
 
 ### Conservazione dell'IP del proxy
 

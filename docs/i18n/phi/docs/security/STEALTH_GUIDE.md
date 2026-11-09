@@ -218,7 +218,7 @@ Nangangailangan ang lahat ng MITM endpoint ng management auth (`requireCliToolsA
 
 ---
 
-## Ino-override ng User-Agent — env vars (`.env.example` seksyon 12)
+## Mga Override ng User-Agent — mga env var (`.env.example` seksyon 12)
 
 | Variable            | Default                                       |
 | ------------------- | --------------------------------------------- |
@@ -229,7 +229,7 @@ Nangangailangan ang lahat ng MITM endpoint ng management auth (`requireCliToolsA
 | `QODER_USER_AGENT`  | `Qoder-Cli`                                   |
 | `CURSOR_USER_AGENT` | `Cursor/3.4`                                  |
 
-Naubos ng `open-sse/executors/base.ts::buildHeaders()` sa pamamagitan ng dynamic na paghahanap.** Bump ito kapag naglabas ang mga provider ng mga bagong bersyon CLI** — stale UA string ay nagsisimula nang tanggihan bilang mga hindi napapanahong kliyente.
+Ginagamit ng `open-sse/executors/base.ts::buildHeaders()` sa pamamagitan ng dinamikong lookup. **I-update ang mga ito kapag naglalabas ang mga provider ng mga bagong bersyon ng CLI** — ang mga lumang UA string ay nagsisimulang tanggihan bilang mga lipas na client.
 
 ## Mga Toggle ng CLI Compatibility Mode (`.env.example` seksyon 13)
 

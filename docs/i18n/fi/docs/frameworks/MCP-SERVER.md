@@ -10,35 +10,30 @@
 
 ## Asennus
 
-OmniRoute MCP on sisäänrakennettu. Käynnistä se näin:
+OmniRoute MCP on sisäänrakennettu. Aloita se:
 
 ```bash
 omniroute --mcp
 ```
 
-Tai open-sse-siirtoprotokollan kautta:
+Tai open-sse-kuljetuksella:
 
 ```bash
-# HTTP streamable -siirtoprotokolla (portti 20130)
-omniroute --dev  # MCP käynnistyy automaattisesti /mcp-päätepisteessä
+# Streamable HTTP transport (default port 20128, in-process on the dashboard server)
+# Client endpoint: http://localhost:20128/api/mcp/stream
+# stdio: omniroute --mcp
 ```
 
-HTTP-siirtoprotokollat (`sse` / `streamable-http`, joita palvelin tarjoaa prosessin sisällä) ovat
-oletuksena pois päältä ja olivat aiemmin kytkettävissä päälle vain `/dashboard/mcp`-sivulta. Versiosta v3.8.51 alkaen
-CLI:llä on vastaavat toiminnot:
+HTTP -siirrot (`sse` / `streamable-http`, kojelaudan palvelin palvelee prosessin aikana) ovat oletuksena pois päältä, ja ne olivat aiemmin vaihdettavissa vain `/dashboard/mcp` sivulta. V3.8.51:stä lähtien CLI llä on pariteetti:
 
 ```bash
-omniroute mcp status                                  # käytössä/online, siirtoprotokolla, työkalujen määrä
+omniroute mcp status                                  # enabled/online, transport, tool count
 omniroute mcp enable [--transport stdio|sse|streamable-http]
 omniroute mcp disable
-omniroute mcp restart                                 # nollaa aktiiviset sse/streamable-http-istunnot
+omniroute mcp restart                                 # resets active sse/streamable-http sessions
 ```
 
-`mcp enable`/`mcp disable` PATCHaa saman `mcpEnabled` (ja valinnaisesti `mcpTransport`) -asetuksen,
-jonka hallintapaneeli vaihtaa `/api/settings`-kautta. `mcp restart` kutsuu `POST /api/mcp/restart`: se purkaa
-aktiiviset `sse`/`streamable-http`-istunnot, jotta seuraava pyyntö alustetaan puhtaasti, palauttaa
-`409`, jos MCP on poissa käytöstä, ja `501` `stdio`-siirtoprotokollalle (stdio-asiakkaat hallitsevat omaa
-aliprosessiaan – prosessin sisällä ei ole kahvaa uudelleenkäynnistykseen).
+`mcp enable`/`mcp disable` PATCH sama `mcpEnabled` (ja valinnaisesti `mcpTransport`) kojelaudan asetus vaihtuu `/api/settings` kautta. `mcp restart` kutsuu `POST /api/mcp/restart`:a: se purkaa aktiiviset `sse`/`streamable-http` -istunnot, jotta seuraava pyyntö alustetaan uudelleen puhtaasti, palauttaa `409` jos MCP on poistettu käytöstä, ja `501` `stdio` -siirrolle (stdio-asiakkaat omistavat oman aliprosessinsa — ei ole prosessin sisäistä kahvaa uudelleenkäynnistystä varten).
 
 ## Siirtoprotokollat
 
@@ -107,14 +102,14 @@ Katso [MCP-asiakaskokoonpano](../guides/SETUP_GUIDE.md#mcp-client-configuration)
 | `omniroute_x_search`            | `execute:search`      | Hae X:stä xAI/SuperGrokin kautta tai valitse `xquik-search` Xquik API -tuloksia varten. Vaatii tunnistetiedot valitulle taustaohjelmalle. |
 | `omniroute_web_fetch`           | `execute:search`      | Hae verkkosisältöä määritettyjen hakupalveluntarjoajien kautta                                                                            |
 
-## Edistyneet työkalut (11) — Vaihe 2
+## Lisätyökalut (11) — -vaihe 2
 
 | Työkalu                            | Laajuudet                            | Kuvaus                                                                                                                            |
 | :--------------------------------- | :----------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------- |
 | `omniroute_simulate_route`         | `read:health`, `read:combos`         | Kuiva-ajo reitityssimulaatio varapuun kanssa                                                                                      |
 | `omniroute_set_budget_guard`       | `write:budget`                       | Istunnon budjetti heikennys-/esto-/hälytystoiminnolla                                                                             |
 | `omniroute_set_routing_strategy`   | `write:combos`                       | Päivitä yhdistelmästrategia ajon aikana (prioriteetti/painotettu/auto/jne.)                                                       |
-| `omniroute_set_resilience_profile` | `write:resilience`                   | Käytä `aggressiivista` / `tasapainoista` / `konservatiivista` joustavuuden esiasetusta                                            |
+| `omniroute_set_resilience_profile` | `write:resilience`                   | Käytä `aggressive` / `balanced` / `conservative` joustavuuden esiasetusta                                                         |
 | `omniroute_test_combo`             | `execute:completions`, `read:combos` | Jokaisen palveluntarjoajan reaaliaikainen testaus yhdistelmässä käyttäen todellista ylävirran kutsua                              |
 | `omniroute_get_provider_metrics`   | `read:health`                        | Palveluntarjoajakohtaiset mittarit p50/p95/p99 viiveellä ja katkaisijan tilalla                                                   |
 | `omniroute_best_combo_for_task`    | `read:combos`, `read:health`         | Suosittele yhdistelmää tehtävätyypin mukaan budjetti-/viiverajoituksilla                                                          |
@@ -132,42 +127,40 @@ Katso [MCP-asiakaskokoonpano](../guides/SETUP_GUIDE.md#mcp-client-configuration)
 
 ## Pakkaustyökalut (13)
 
-| Työkalu                             | Laajuudet           | Kuvaus                                                                                                                               |
-| :---------------------------------- | :------------------ | :----------------------------------------------------------------------------------------------------------------------------------- |
-| `omniroute_compression_status`      | `read:compression`  | Pakkausasetukset, analytiikan yhteenveto ja välimuistitietoiset tilastot (sisältää `analytics.mcpDescriptionCompression`-metatiedot) |
-| `omniroute_compression_configure`   | `write:compression` | Määritä pakkaustila, kynnysarvo, tavoitesuhde, järjestelmäkehotteen säilytys, MCP-kuvauksen pakkauksen kytkin                        |
-| `omniroute_set_compression_engine`  | `write:compression` | Valitse aktiivinen moottori (pois päältä/caveman/rtk/stacked) ja Caveman/RTK-intensiteetti                                           |
-| `omniroute_list_compression_combos` | `read:compression`  | Listaa nimetyt pakkausyhdistelmät ja niiden moottoriputket                                                                           |
-| `omniroute_compression_combo_stats` | `read:compression`  | Analytiikka ryhmiteltynä pakkausyhdistelmän ja moottorin mukaan                                                                      |
-| `omniroute_ccr_store`               | `write:compression` | Tallenna kutsujakohtainen sisältö rajattuun muistissa olevaan CCR-varastoon ja palauta merkki sekä `ccr://`-viittaus                 |
-| `omniroute_ccr_retrieve`            | `read:compression`  | Hae CCR-sisältö kokonaan tai head-, tail-, lines-, grep- ja stats-tiloilla                                                           |
-| `omniroute_ccr_inspect`             | `read:compression`  | Tarkasta kutsujan omistamat CCR-metatiedot palauttamatta sisältöä                                                                    |
-| `omniroute_ccr_list`                | `read:compression`  | Listaa sivutetut metatiedot kutsujan omistamille CCR-lohkoille                                                                       |
-| `omniroute_ccr_delete`              | `write:compression` | Poista kutsujan omistama CCR-lohko                                                                                                   |
-| `omniroute_ccr_stats`               | `read:compression`  | Raportoi kutsujakohtainen muistin käyttö, elinkaarilaskurit ja tallennusrajat                                                        |
-| `omniroute_rtk_discover`            | `read:compression`  | Löydä toistuvaa kohinaa opt-in RTK-tulosesimerkeistä                                                                                 |
-| `omniroute_rtk_learn`               | `read:compression`  | Luo tarkistettava RTK-suodatinluonnos opt-in-näytteistä                                                                              |
+| Työkalu                             | Soveltamisalat      | Kuvaus                                                                                                                                |
+| :---------------------------------- | :------------------ | :------------------------------------------------------------------------------------------------------------------------------------ |
+| `omniroute_compression_status`      | `read:compression`  | Pakkausasetukset, analytiikkayhteenveto ja välimuistin tietoiset tilastot (sisältää `analytics.mcpDescriptionCompression` metatiedot) |
+| `omniroute_compression_configure`   | `write:compression` | Määritä pakkaustila, kynnys, tavoitesuhde, järjestelmäkehotteinen säilytys, MCP -kuvauksen pakkauskytkin                              |
+| `omniroute_set_compression_engine`  | `write:compression` | Valitse aktiivinen moottori (off/caveman/rtk/stacked) ja Caveman/RTK -intensiteetti                                                   |
+| `omniroute_list_compression_combos` | `read:compression`  | Listaa nimetyt pakkausyhdistelmät ja niiden moottorin putkistot                                                                       |
+| `omniroute_compression_combo_stats` | `read:compression`  | Analyysi ryhmitelty pakkausyhdistelmän ja moottorin mukaan                                                                            |
+| `omniroute_ccr_store`               | `write:compression` | Tallenna soittaja-eristetty sisältö rajoitettuun muistiin CCR säilöön ja palauta merkki sekä `ccr://` -viite                          |
+| `omniroute_ccr_retrieve`            | `read:compression`  | Hae CCR -sisältö kokonaan tai head-, tail-, lines-, grep- ja tilastotiloilla                                                          |
+| `omniroute_ccr_inspect`             | `read:compression`  | Tarkista soittajan omistamat CCR -metatiedot palauttamatta sisältöä                                                                   |
+| `omniroute_ccr_list`                | `read:compression`  | Luettele soittajan omistamien CCR lohkojen sivutut metatiedot                                                                         |
+| `omniroute_ccr_delete`              | `write:compression` | Poista soittajan omistama CCR esto                                                                                                    |
+| `omniroute_ccr_stats`               | `read:compression`  | Ilmoita soittajan laajuinen muistin käyttö, elinkaarilaskurit ja varastorajat                                                         |
+| `omniroute_rtk_discover`            | `read:compression`  | Löydä toistuva kohina opt-in RTK -lähtönäytteissä                                                                                     |
+| `omniroute_rtk_learn`               | `read:compression`  | Luo tarkistettava RTK suodatinluonnos valinnaisista näytteistä                                                                        |
 
-CCR-merkinnät ovat vain muistissa ja katoavat uudelleenkäynnistyksen yhteydessä. Jokainen lohko on rajoitettu 2 MiB:iin, jokainen pääkäyttäjä 16 MiB:iin ja globaali tallennustila 64 MiB:iin. Merkintöjen oletus-TTL on 24 tuntia (enintään seitsemän päivää). Täysi MCP-haku on rajoitettu 256 KiB:iin; suuremmat lohkot ovat edelleen saatavilla alueellisten ja grep-tilojen kautta. Tallennus, haku, listaus, tarkastus, poisto ja tilastot on eristetty todennetun API-avaimen pääkäyttäjän toimesta. Tarkastustietueet sisältävät tiivisteitä ja kokometatietoja, ei koskaan sisältöä.
+CCR -merkinnät käyttävät kaksitasoista varastoa: kuumaa muistitasoa, jota tukee paikallisissa ei-pilvikäyttöajoissa kestävä SQLite -taso (`ccr_blocks`, oletuksena päällä), joten lohko selviää häätöstä tai uudelleenkäynnistyksestä, kunnes sen TTL loppuu —, paitsi lohkot, jotka ovat yli 512:n ajonaikaisen KB :n pilvimuistia. Jokainen lohko on rajoitettu 2 MiB, kukin pääasiallinen 16 MiB ja globaali myymälä 64 MiB. Merkintöjen oletusarvo on 24 tunnin TTL (enintään seitsemän päivää). Täysi MCP haku on rajoitettu 256 KiB:iin; Suuremmat lohkot ovat käytettävissä ranged- ja grep-tilojen kautta. Tallennus, haku, luettelointi, tarkastus, poistaminen ja tilastot erotetaan todennettujen API-avainpäämiesten avulla. Tarkastustietueet sisältävät tiiviste- ja kokometatietoja, eivät koskaan sisältöä. Käyttäjää koskevat tiedot (kaksi merkintää, asiakkaan edellytykset, `codemode:false`, työkalukohtaiset laajuudet, sivutus ja diagnostiikkamatriisi) ovat saatavilla [Compression Engines → Edellytykset / käyttäjän opas](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
 
-`omniroute_compression_status` raportoi MCP-kuvausten pakkauksen erikseen kohdassa `analytics.mcpDescriptionCompression`. Nämä arvot ovat MCP:n listattavien kuvausten (`tools`, `prompts`, `resources` ja `resourceTemplates`) metatietojen kokonaisarvioita; ne eivät ole palveluntarjoajan käyttökuitteja ja ne on merkitty tunnisteella `source: "mcp_metadata_estimate"`.
+`omniroute_compression_status` raportoi MCP -kuvauksen pakkauksen erikseen kohdassa `analytics.mcpDescriptionCompression`. Nämä arvot ovat metatietojen kokoarvioita MCP listattavissa oleville kuvauksille (`tools`, `prompts`, `resources` ja `resourceTemplates`); ne eivät ole palveluntarjoajan käyttökuitteja, ja ne on merkitty `source: "mcp_metadata_estimate"` llä.
 
-### MCP-saavutettavuuspuun suodatin (v3.8.0)
+### MCP Accessibility Tree Filter (v3.8.0)
 
-Edellä mainituista pakkaustyökaluista erillään OmniRoute sisältää suorituksen jälkeisen suodattimen, joka pakkaa MCP-selain-/saavutettavuustyökalujen **työkalutulokset** ennen niiden palauttamista agentille. Tämä suodatin ei itsessään ole työkalu – se toimii läpinäkyvästi kaikissa työkalutuloksissa, jotka sisältävät yksityiskohtaista saavutettavuuspuu- tai selainkuvatekstiä (≥2000 merkkiä).
+Yllä olevista pakkaustyökaluista erillään OmniRoute sisältää suorituksen jälkeisen suodattimen, joka pakkaa** työkalun tulokset** MCP browser/accessibility -työkaluista ennen kuin ne palautetaan agentille. Tämä suodatin ei itsessään ole työkalu — se toimii läpinäkyvästi kaikissa työkalutuloksissa, jotka sisältävät monisanaista saavutettavuuspuuta tai selaimen tilannekuvatekstiä (≥ 2000 merkkiä).
 
-Keskeiset ominaisuudet:
+Tärkeimmät käytökset:
 
-- Tiivistää ≥30 peräkkäistä toistuvaa sisarlinjaa alku- ja loppuyhteenvedoksi
-- Säilyttää `[ref=eXX]`-ankkurit, jotka Playwright/tietokonekäyttö edellyttää
-- Katkaisee ylisuuren tekstin (>50 000 merkkiä) jyrkästi navigointivihjeellä
-- Odotetut säästöt: **60–80 %** selaimen tilannekuvien kuormituksessa
+- Tiivistää ≥ 30 peräkkäistä toistuvaa sisarusriviä päähän + tail yhteenveto
+- Säilyttää Playwright/computer-use:n vaatimat `[ref=eXX]` -ankkurit
+- Katkaisee kovaa ylimitoitettua tekstiä (> 50 000 merkkiä) navigointivihjeellä
+- Odotetut säästöt:** 60–80 %** selaimen tilannekuvan hyötykuormissa
 
-Konfiguraatio: `compression.mcpAccessibility` globaaleissa asetuksissa (migraatio 056).
-Toteutus: `open-sse/services/compression/engines/mcpAccessibility/`.
-Täydelliset dokumentit: [Pakkausmoottorit — MCP-saavutettavuuspuun suodatin](../compression/COMPRESSION_ENGIINES.md#mcp-accessibility-tree-filter).
+Kokoonpano: `compression.mcpAccessibility` yleisissä asetuksissa (migration 056). Toteutus: `open-sse/services/compression/engines/mcpAccessibility/`. Täydelliset asiakirjat: [Compression Engines — MCP Accessibility Tree Filter](../compression/COMPRESSION_ENGINES.md#mcp-accessibility-tree-filter).
 
-Katso [Pakkausmoottorit](../compression/COMPRESSION_ENGIINES.md) ja [RTK-pakkaus](../compression/RTK_COMPRESSION.md) näiden työkalujen taustalla olevasta ajonaikaisesta pakkausmallista.
+Katso [Compression Engines](../compression/COMPRESSION_ENGINES.md) ja [RTK Compression](../compression/RTK_COMPRESSION.md) näiden työkalujen taustalla oleva ajonaikainen pakkausmalli.
 
 ## 1Proxy-työkalut (3)
 
@@ -503,7 +496,7 @@ Käytä kojelautaa tai `/api/mcp/audit` ja `/api/mcp/audit/stats` REST-päätepi
 | `open-sse/mcp-server/audit.ts`                                           | Työkalukutsujen auditointiloki (`mcp_tool_audit`)                              |
 | `open-sse/mcp-server/runtimeHeartbeat.ts`                                | stdio-sykkeen kirjoittaja (`mcp-heartbeat.json`)                               |
 | `open-sse/mcp-server/descriptionCompressor.ts`                           | Kuvausten pakkaus työkalu- / kehotus- / resurssirekistereille                  |
-| `open-sse/mcp-server/schemas/tools.ts`                                   | Zod-skeemat + työkalurekisteri (MCP_TOOLS, 45 merkintää)                       |
+| `open-sse/mcp-server/schemas/tools.ts`                                   | Zod -skeemat + -työkalurekisteri (`MCP_TOOLS`, 45 merkintää)                   |
 | `open-sse/mcp-server/tools/advancedTools.ts`                             | Vaiheen 2 + välimuistin + 1proxy-työkalujen käsittelijät                       |
 | `open-sse/mcp-server/tools/compressionTools.ts`                          | Pakkaustyökalujen käsittelijät                                                 |
 | `open-sse/mcp-server/tools/memoryTools.ts`                               | Muistityökalujen määrittelyt (3 työkalua)                                      |

@@ -877,13 +877,7 @@ un visas `contents` atslēgas, izņemot `text` un `highlights`. Novecojušie
 `subpages`, `subpageTarget`, `highlights.numSentences` un `highlights.highlightsPerUrl` vairs netiek
 pārsūtīti.
 
-Izmaksu uzskaite izmanto plakano reģistra vērtību `costPerQuery`, izņemot Exa, kas ievēro Exa
-pašu cenu struktūru: $0.007 par izsaukumu režīmam `auto` (un mantotajam `fast`) vai $0.004 režīmam `lite`
-(un mantotajam `instant`), aptverot 10 rezultātus; $0.001 par katru nākamo rezultātu; un $0.001 par
-katru atgriezto rezultātu, ja ir iestatīts `contents.summary`. Tavily tiek reģistrēts ar 1 kredītu ($0.008), ja
-`search_depth` ir `basic`, `fast` vai `ultra-fast`, un ar 2 kredītiem ($0.016), ja tas ir `advanced`
-([Tavily API kredīti](https://docs.tavily.com/documentation/api-credits)). Izsaukums ar
-`auto_parameters: true`, kura rezultātā Tavily pārslēdzas uz advanced, joprojām tiek reģistrēts ar 1 kredītu.
+Exa: USD 0,007 par zvanu `auto` (un mantotā `fast`) vai USD 0,004 par `lite` (un mantoto `instant`), aptverot 10 rezultātus; 0,001 USD par katru nākamo rezultātu; un USD 0,001 par katru atgriezto rezultātu, ja ir iestatīts `contents.summary`. Tavily ir reģistrēts ar 1 kredītu ($ 0,008) par `search_depth` `basic`, `fast` un `ultra-fast` un par 2 kredītiem ($ 0,016) par `advanced` ( [Tavily API credits](https://docs.tavily.com/documentation/api-credits) ). Zvans ar `auto_parameters: true`, ko Tavily jaunina uz uzlaboto, joprojām tiek ierakstīts 1 kredīta apmērā.
 
 ---
 
@@ -1193,6 +1187,8 @@ X-OmniRoute-No-Cache: true
 
 ---
 
+<a id="cliproxyapi-management-compatibility"></a>
+
 ## CLIProxyAPI pārvaldības saderība
 
 OmniRoute atbild uz trim [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI)
@@ -1207,20 +1203,11 @@ apkalpoti vietnē `/v0/management/*` un `/api/v0/management/*`.
 | POST   | `/v0/management/api-call`    | Ķermenis `{ auth_index, method, url, header?, data? }`. Nosūta vienu atļauto pieprasījumu ar konta marķieri un atgriež `{ status_code, body }` |
 | POST   | `/v0/management/reset-quota` | Ķermenis `{ auth_index }`. Notīra viena konta savienojuma gaidīšanas periodu, modeļu bloķējumus un Codex tvēruma gaidīšanas periodus           |
 
-- `auth_index` ir OmniRoute savienojuma ID. `provider` ir `claude` vai `codex` (tikai OAuth
-  savienojumiem; `anthropic` API atslēgas nodrošinātājs netiek uzrādīts). Codex gadījumā
-  `id_token.chatgpt_account_id` ir saglabātais darbvietas ID, bet `plan_type` — saglabātais plāns.
+- `auth_index` ir OmniRoute savienojuma ID. `provider` ir `claude` vai `codex` (tikai OAuth savienojumi; API atslēgas nodrošinātājs `anthropic` nav sarakstā). Codex gadījumā `id_token.chatgpt_account_id` ir saglabātais darbvietas ID un `plan_type` ir saglabātais plāns.
 - `api-call` nav vispārīgs starpniekserveris. Tas pieņem tikai Claude `GET
-https://api.anthropic.com/api/oauth/usage` un Codex `GET https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits` un
-  `POST .../wham/rate-limit-reset-credits/consume`, katru tikai atbilstošā
-  nodrošinātāja kontam. Jebkurš cits pieprasījums atgriež `403`, nesazinoties ar augšupējo pakalpojumu. Izsaucēja
-  `Authorization` galvene (tostarp `$TOKEN$` vietturis) tiek ignorēta: OmniRoute ievieto
-  savienojuma piekļuves marķieri, vispirms to atsvaidzinot, ja tas ir tuvu derīguma beigām, un pārsūta tikai
-  atļautās galvenes (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`;
-  `Accept`, `Content-Type`). Ja `Chatgpt-Account-Id` nav norādīts, pēc noklusējuma tiek izmantots saglabātais darbvietas ID.
-  Pieprasījumiem iestājas noildze pēc 15 sekundēm, un tie izmanto savienojuma starpniekserveri.
-- `reset-quota` nemaina gala stāvokļus (`banned`, `expired`, `credits_exhausted`). Nezināms
-  `auth_index` atgriež `404`.
+https://api.anthropic.com/api/oauth/usage` un Codex `GET
+https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits` un `POST .../wham/rate-limit-reset-credits/consume`, katru tikai atbilstošā nodrošinātāja kontam. Viss cits atgriež `403`, nesazinoties ar augšupējo pakalpojumu. Izsaucēja `Authorization` galvene (ieskaitot vietturi `$TOKEN$`) tiek ignorēta: OmniRoute ievieto savienojuma piekļuves marķieri, vispirms atjaunojot to, ja tuvojas derīguma beigas, un pārsūta tikai atļautās galvenes (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`; `Accept`, `Content-Type`). Trūkstošai `Chatgpt-Account-Id` noklusējums ir saglabātais darbvietas ID. Ja pirmā augšupējā atbilde ir `401`, tas atjauno vienreiz un atkārto tikai tad, ja piekļuves marķieris mainās. Katram augšupējam mēģinājumam ir 15 sekunžu taimauts, un tas izmanto savienojuma starpniekserveri.
+- `reset-quota` nemaina galīgos stāvokļus (banned, expired, credits_exhausted). Nezināms `auth_index` atgriež `404`.
 
 **Autentifikācija:** informācijas paneļa sesija vai API atslēga ar `manage` tvērumu — nepieciešama pat tad, ja pieteikšanās ir atspējota
 (šie ceļi atrodas `ALWAYS_PROTECTED_API_PATHS`). Atslēgas, kas paredzētas tikai secināšanai, saņem `403`. Avots:
@@ -1967,17 +1954,17 @@ Persistenta sarunu/faktu atmiņas krātuve, kas ierobežota ar API atslēgu / se
 
 OmniRoute ietver iegultu Model Context Protocol serveri ar 3 transportiem (stdio, SSE, streamable-http) un tvēruma ierobežotiem rīkiem. Tālāk norādītie paneļa galapunkti nolasa statusa/audita datus un starpnieko HTTP transportiem.
 
-| Metode | Ceļš                   | Apraksts                                                                                                                  |                      |
-| ------ | ---------------------- | ------------------------------------------------------------------------------------------------------------------------- | -------------------- |
-| GET    | `/api/mcp/status`      | Sirdsdarbības signāls, transports, tiešsaistes statuss, pēdējais izsaukums, populārākie rīki, 24 stundu veiksmes rādītājs |
-| GET    | `/api/mcp/tools`       | MCP rīku saraksts ar `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints`                            |
-| GET    | `/api/mcp/sse`         | Atvērt SSE straumi SSE transportam (atgriež `503`, ja MCP ir atspējots vai transports neatbilst)                          |
-| POST   | `/api/mcp/sse`         | Nosūtīt JSON-RPC ietvaru SSE transportā                                                                                   |
-| GET    | `/api/mcp/stream`      | Atvērt Streamable HTTP transporta SSE pusi (servera iniciētiem ziņojumiem)                                                |
-| POST   | `/api/mcp/stream`      | Nosūtīt JSON-RPC ietvaru Streamable HTTP transportā                                                                       |
-| DELETE | `/api/mcp/stream`      | Beigt Streamable HTTP sesiju                                                                                              |
-| GET    | `/api/mcp/audit`       | Vaicāt audita žurnālu — `?limit=`, `?offset=`, `?tool=`, `?success=true                                                   | false`, `?apiKeyId=` |
-| GET    | `/api/mcp/audit/stats` | Apkopotā audita statistika (kopskaiti, veiksmes rādītājs, vidējais ilgums, populārākie rīki)                              |
+| Metode | Ceļš                   | Apraksts                                                                                                                                          |
+| ------ | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/mcp/status`      | Sirdsdarbības signāls, transports, tiešsaistes statuss, pēdējais izsaukums, populārākie rīki, 24 stundu veiksmes rādītājs                         |
+| GET    | `/api/mcp/tools`       | MCP rīku saraksts ar `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints`                                                    |
+| GET    | `/api/mcp/sse`         | Atvērt SSE straumi SSE transportam (atgriež `503`, ja MCP ir atspējots vai transports neatbilst)                                                  |
+| POST   | `/api/mcp/sse`         | Nosūtīt JSON-RPC ietvaru SSE transportā                                                                                                           |
+| GET    | `/api/mcp/stream`      | Atvērt Streamable HTTP transporta SSE pusi (servera iniciētiem ziņojumiem)                                                                        |
+| POST   | `/api/mcp/stream`      | Nosūtīt JSON-RPC ietvaru Streamable HTTP transportā                                                                                               |
+| DELETE | `/api/mcp/stream`      | Beigt Streamable HTTP sesiju                                                                                                                      |
+| GET    | `/api/mcp/audit`       | Vaicāt audita žurnālu — `?limit=`, `?offset=`, `?tool=`, `?success=true                                                   \| false`, `?apiKeyId=` |
+| GET    | `/api/mcp/audit/stats` | Apkopotā audita statistika (kopskaiti, veiksmes rādītājs, vidējais ilgums, populārākie rīki)                                                      |
 
 **Autentifikācija:** `sse`/`stream` transporti izmanto MCP specifisko autentifikācijas saskarni (Bearer API atslēga ar `mcp` tvērumu); `status`/`tools`/`audit*` maršruti ir nolasāmi no paneļa (nav nepieciešama papildu autentifikācija, izņemot piekļuvi paneļa resursdatoram).
 

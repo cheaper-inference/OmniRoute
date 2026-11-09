@@ -4,99 +4,105 @@
 
 ---
 
-> **מקור האמת:** סביבת עבודה `electron/`** עודכן לאחרונה:** 2026-06-28 — v3.8.40
+> **מקור האמת:** סביבת העבודה `electron/`
+> **עודכן לאחרונה:** 2026-06-28 — v3.8.40
 
-OmniRoute שולחת אפליקציית שולחן עבודה חוצת פלטפורמות (Windows / macOS / Linux) הבנויה על**Electron 41** +** בונה אלקטרונים 26.10** . אפליקציית שולחן העבודה מולידה את השרת העצמאי של Next.js כתהליך צאצא, מפנה אליו את ה- `BrowserWindow` ומוסיפה מגש מערכת, עדכון אוטומטי, גשר IPC ו-Zo-config אתחול סודי.
+OmniRoute כוללת יישום שולחני חוצה־פלטפורמות (Windows / macOS / Linux), המבוסס על
+**Electron 41** + **electron-builder 26.10**. היישום השולחני מפעיל את השרת העצמאי של Next.js
+כתהליך צאצא, מפנה אליו `BrowserWindow`, ומוסיף מגש מערכת, עדכון אוטומטי, גשר IPC ואתחול
+ללא הגדרות של סודות.
 
-## אַדְרִיכָלוּת
+## ארכיטקטורה
 
 ```
 ┌──────────────────────────────────────────────┐
-│ Electron main process (electron/main.js)     │
-│ ├─ Single-instance lock                       │
-│ ├─ Child process: Next.js standalone server  │
-│ │   (spawned with Electron's Node runtime)   │
+│ התהליך הראשי של Electron (electron/main.js)  │
+│ ├─ נעילת מופע יחיד                          │
+│ ├─ תהליך צאצא: השרת העצמאי של Next.js       │
+│ │   (מופעל באמצעות סביבת Node של Electron)  │
 │ ├─ BrowserWindow → http://localhost:PORT     │
-│ ├─ System tray + context menu                │
-│ ├─ Auto-update via electron-updater          │
-│ ├─ Content Security Policy (session headers) │
-│ └─ Secret bootstrap (JWT / API_KEY_SECRET)   │
+│ ├─ מגש מערכת + תפריט הקשר                   │
+│ ├─ עדכון אוטומטי באמצעות electron-updater   │
+│ ├─ מדיניות אבטחת תוכן (כותרות הפעלה)        │
+│ └─ אתחול סודות (JWT / API_KEY_SECRET)        │
 └──────────────────────────────────────────────┘
-            ↕ IPC bridge (electron/preload.js)
+            ↕ גשר IPC (electron/preload.js)
 ┌──────────────────────────────────────────────┐
-│ Renderer (Next.js dashboard)                  │
+│ רכיב התצוגה (לוח הבקרה של Next.js)           │
 │   window.electronAPI.* (contextIsolation)     │
 └──────────────────────────────────────────────┘
 ```
 
 ## גרסאות
 
-אושר מ- `electron/package.json`:
+אומתו מתוך `electron/package.json`:
 
-| חֲבִילָה           | גִרְסָה                                                           |
-| ------------------ | ----------------------------------------------------------------- |
-| `electron`         | `^43.4.1`                                                         |
-| `electron-builder` | `^26.15.3`                                                        |
-| `electron-updater` | `^6.8.9`                                                          |
-| `better-sqlite3`   | root `^13.0.2` (Node-API בונה מראש של — ללא בנייה מחדש Electron ) |
-| גרסת האפליקציה     | `3.8.0`                                                           |
-| מזהה אפליקציה      | `online.omniroute.desktop`                                        |
-| שם המוצר           | `OmniRoute`                                                       |
+| חבילה              | גרסה                                                                         |
+| ------------------ | ---------------------------------------------------------------------------- |
+| `electron`         | `^43.4.1`                                                                    |
+| `electron-builder` | `^26.15.3`                                                                   |
+| `electron-updater` | `^6.8.9`                                                                     |
+| `better-sqlite3`   | שורש `^13.0.2` (בנייה מוכנה מראש של Node-API — ללא בנייה מחדש עבור Electron) |
+| גרסת היישום        | `3.8.0`                                                                      |
+| מזהה היישום        | `online.omniroute.desktop`                                                   |
+| שם המוצר           | `OmniRoute`                                                                  |
 
-## סקריפטים (root `package.json`)
+## סקריפטים (`package.json` בשורש)
 
-| תַסרִיט                           | מַטָרָה                                                         |
-| --------------------------------- | --------------------------------------------------------------- |
-| `npm run electron:dev`            | מתחיל `npm run dev` + מחכה ל- `localhost:20128` + משיק Electron |
-| `npm run electron:build`          | בונה Next.js ואז מריץ `electron-builder` עבור OS הנוכחי         |
-| `npm run electron:build:win`      | בונה Windows NSIS מתקין + נייד (x64)                            |
-| `npm run electron:build:mac`      | בונה macOS DMG (Intel + Apple Silicon)                          |
-| `npm run electron:build:linux`    | בונה Linux AppImage + DEB (x64 + arm64)                         |
-| `npm run electron:smoke:packaged` | משיק בינארי ארוז ומגשש `/login` עבור HTTP 200, ואז נכבה         |
+| סקריפט                            | מטרה                                                                           |
+| --------------------------------- | ------------------------------------------------------------------------------ |
+| `npm run electron:dev`            | מפעיל את `npm run dev` + ממתין ל־`localhost:20128` + מפעיל את Electron         |
+| `npm run electron:build`          | בונה את Next.js ולאחר מכן מריץ את `electron-builder` עבור מערכת ההפעלה הנוכחית |
+| `npm run electron:build:win`      | בונה מתקין NSIS עבור Windows + גרסה ניידת (x64)                                |
+| `npm run electron:build:mac`      | בונה DMG עבור macOS‏ (Intel + Apple Silicon)                                   |
+| `npm run electron:build:linux`    | בונה AppImage + DEB עבור Linux‏ (x64 + arm64)                                  |
+| `npm run electron:smoke:packaged` | מפעיל את קובץ ההרצה הארוז ובודק ש־`/login` מחזיר HTTP 200, ולאחר מכן מכבה אותו |
 
 סביבת העבודה `electron/` חושפת גם:
 
-- `npm run prepare:bundle` — מפעיל את `scripts/build/prepare-electron-standalone.mjs`
-- `npm run build:mac-x64` / `build:mac-arm64` — יחיד-קשת macOS בונה
-- `npm run pack` — ספריית בנייה בלבד לבדיקות מקומיות (ללא התקנה)
+- `npm run prepare:bundle` — מריץ את `scripts/build/prepare-electron-standalone.mjs`
+- `npm run build:mac-x64` / `build:mac-arm64` — בניות macOS לארכיטקטורה יחידה
+- `npm run pack` — בניית תיקייה בלבד לצורך בדיקות מקומיות (ללא מתקין)
 
 ## חבילות זמן ריצה אופציונליות
 
-בניית שולחן עבודה יכולה לפרסם ארכיונים אופציונליים של זמן ריצה לצד המתקינים שלהם. מטען השרת המותקן מכיל `optional-packs.index.json` (תחת `resources/app` ב- Windows ו- Linux). לערך `browser-runtime`, קרא `packs[].tarball` והורד** שם הקובץ המדויק מאותה מהדורה** . שמות הארכיון כוללים תקציר SHA-256 ; מבנים שונים יכולים לדרוש ארכיונים שונים. השאר את שם הקובץ שהורדת ללא שינוי.
+בניות שולחן עבודה יכולות לפרסם ארכיוני זמן ריצה אופציונליים לצד המתקינים שלהן. תוכן השרת המותקן כולל `optional-packs.index.json` (תחת `resources/app` ב־Windows וב־Linux). עבור הרשומה `browser-runtime`, קראו את `packs[].tarball` והורידו **בדיוק את שם הקובץ הזה מאותה גרסה**. שמות הארכיונים כוללים גיבוב SHA-256; בניות שונות עשויות לדרוש ארכיונים שונים. שמרו את שם הקובץ שהורד ללא שינוי.
 
-העתק את האינדקס של האפליקציה המותקנת ואת הארכיון שנבחר לספרייה אחת, ולאחר מכן השתמש ב- CLI מאותה מהדורה:
+העתיקו את האינדקס של היישום המותקן ואת הארכיון שנבחר לתיקייה אחת, ואז השתמשו ב־CLI מאותה גרסה:
 
 ```bash
 omniroute packs list --source /path/to/packs
 omniroute packs install browser-runtime --source /path/to/packs
 ```
 
-`packs list` מציג מצב התקנה ואימות, לא את שם קובץ הארכיון. האינדקס המצורף בוחר את הארכיון. ההתקנה מאמתת את סכום בדיקת הארכיון שלה לפני חילוץ ואת סכומי בדיקת החבילה שלה לפני החלפת חבילה מותקנת. זה קורא קבצים מקומיים; זה לא מוריד ארכיונים חסרים. הפעל מחדש את האפליקציה לאחר ההתקנה. אם לגרסה אין נכס תואם, החבילה האופציונלית אינה זמינה דרך הנכסים של אותה גרסה.
+`packs list` מציג מצב התקנה ואימות, לא את שם קובץ הארכיון. האינדקס הכלול בוחר את הארכיון. ההתקנה בודקת את סכום הביקורת של הארכיון לפני החילוץ ואת סכומי הביקורת של החבילות לפני החלפת חבילה מותקנת. היא קוראת קבצים מקומיים; אינה מורידה ארכיונים חסרים. הפעילו מחדש את היישום לאחר ההתקנה. אם לגרסה אין נכס תואם, החבילה האופציונלית אינה זמינה דרך נכסי אותה גרסה.
 
-## פריסת ספרייה
+## מבנה התיקיות
 
 ```
 electron/
-├── package.json              # Electron deps + electron-builder config
-├── main.js                   # Main process (24 KB — see annotations below)
-├── preload.js                # contextBridge IPC bridge
-├── types.d.ts                # AppInfo / ServerStatus / ElectronAPI types
-├── README.md                 # In-workspace notes
+├── package.json              # תלויות Electron + תצורת electron-builder
+├── main.js                   # התהליך הראשי (24 KB — ראו הערות להלן)
+├── preload.js                # גשר IPC באמצעות contextBridge
+├── types.d.ts                # טיפוסי AppInfo / ServerStatus / ElectronAPI
+├── README.md                 # הערות בתוך סביבת העבודה
 ├── assets/                   # icon.png, icon.ico, icon.icns, tray-icon.png
-└── dist-electron/            # electron-builder output (gitignored)
+└── dist-electron/            # פלט של electron-builder (לא במעקב של git)
 
 scripts/
 ├── build/
-│   └── prepare-electron-standalone.mjs   # Stages .next/electron-standalone bundle
+│   └── prepare-electron-standalone.mjs   # מכין את חבילת .next/electron-standalone
 └── dev/
-    └── smoke-electron-packaged.mjs       # Post-build smoke test
+    └── smoke-electron-packaged.mjs       # בדיקת עשן לאחר הבנייה
 ```
 
-גם `main.js` וגם `preload.js` הם** קבצי CommonJS `.js`** , לא TypeScript. ההקלדות בצד המעבד חיים ב- `electron/types.d.ts`.
+גם `main.js` וגם `preload.js` הם **קובצי CommonJS מסוג `.js`**, ולא TypeScript. הגדרות
+הטיפוסים בצד המרנדר נמצאות ב-`electron/types.d.ts`.
 
 ## גשר IPC (`preload.js`)
 
-הטעינה המוקדמת חושפת API ברשימת הלבנים ב- `window.electronAPI` באמצעות `contextBridge` עם `contextIsolation: true` ו- `nodeIntegration: false`.
+סקריפט ה-preload חושף API מרשימה מורשית ב-`window.electronAPI` באמצעות `contextBridge`,
+כאשר `contextIsolation: true` ו-`nodeIntegration: false`.
 
 ```javascript
 const VALID_CHANNELS = {
@@ -115,113 +121,129 @@ const VALID_CHANNELS = {
 };
 ```
 
-שיטות חשופות:
+המתודות החשופות:
 
-| קריאת מעבד                                                        | סוּג                  |
-| ----------------------------------------------------------------- | --------------------- |
-| `getAppInfo()` → `{ name, version, platform, isDev, port }`       | לִקְרוֹא              |
-| `openExternal(url)`                                               | לִקְרוֹא              |
-| `getDataDir()`                                                    | לִקְרוֹא              |
-| `restartServer()`                                                 | לִקְרוֹא              |
-| `getAppVersion()`                                                 | לִקְרוֹא              |
-| `checkForUpdates()` / `downloadUpdate()` / `installUpdate()`      | לִקְרוֹא              |
-| `minimizeWindow()` / `maximizeWindow()` / `closeWindow()`         | לִשְׁלוֹחַ            |
-| `onServerStatus(cb)` / `onPortChanged(cb)` / `onUpdateStatus(cb)` | לקבל (מחזיר את הפוסל) |
+| קריאה מהמרנדר                                                     | סוג                            |
+| ----------------------------------------------------------------- | ------------------------------ |
+| `getAppInfo()` → `{ name, version, platform, isDev, port }`       | invoke                         |
+| `openExternal(url)`                                               | invoke                         |
+| `getDataDir()`                                                    | invoke                         |
+| `restartServer()`                                                 | invoke                         |
+| `getAppVersion()`                                                 | invoke                         |
+| `checkForUpdates()` / `downloadUpdate()` / `installUpdate()`      | invoke                         |
+| `minimizeWindow()` / `maximizeWindow()` / `closeWindow()`         | send                           |
+| `onServerStatus(cb)` / `onPortChanged(cb)` / `onUpdateStatus(cb)` | receive (מחזיר פונקציית ניקוי) |
 
-העוזרים המקבלים מחזירים א** פונקציית סילוק** במקום להסתמך על `removeAllListeners` — זה מונע הצטברות מאזינים כאשר רכיבי React עולים מחדש.
+פונקציות העזר לקבלת אירועים מחזירות **פונקציית ניקוי** במקום להסתמך על
+`removeAllListeners` — כך נמנעת הצטברות של מאזינים כאשר רכיבי React נטענים מחדש.
 
-## מחזור חיי שרת
+## מחזור חיי השרת
 
-`main.js` מולידה את החבילה העצמאית Next.js ישירות עם זמן הריצה של הצומת Electron כדי למנוע אי-התאמה של מודול ABI עם מערכת Node:
+`main.js` מפעיל ישירות את חבילת ה-standalone של Next.js באמצעות סביבת הריצה Node של
+Electron, כדי למנוע חוסר התאמה ב-ABI של מודולים מקוריים מול Node של המערכת:
 
 ```js
 spawn(process.execPath, [serverScript], {
   cwd: NEXT_SERVER_PATH,
-  env: { ...serverEnv, PORT, NODE_ENV: "production", ELECTRON_RUN_AS_NODE: "1", NODE_PATH },
+  env: {
+    ...serverEnv,
+    PORT,
+    NODE_ENV: "production",
+    ELECTRON_RUN_AS_NODE: "1",
+    NODE_PATH,
+  },
   stdio: "pipe",
 });
 ```
 
-פַּסִים:
+נקודות עיקריות:
 
-- `waitForServer()` סוקר את ה- URL עד 30 שניות לפני הצגת החלון (ללא מסך ריק בהתחלה קרה).
-- `stdio: "pipe"` לוכד stdout/stderr; ביטויים מוכנים (`Ready` / `listening`) פולטים `server-status: running` על IPC.
-- `before-quit` ממתין עד 5 שניות ל- SIGTERM החינני (מחסום WAL ) ואז שולח SIGKILL.
-- מחליף יציאות במגש (`20128`, `3000`, `8080`) עוצר ומפעיל מחדש את השרת, ואז טוען מחדש את ה- BrowserWindow.
+- `waitForServer()` דוגם את כתובת ה-URL במשך עד 30 שניות לפני הצגת החלון (ללא מסך ריק בהפעלה קרה).
+- `stdio: "pipe"` לוכד את stdout/stderr; ביטויים המציינים מוכנות (`Ready` / `listening`) משדרים `server-status: running` דרך IPC.
+- `before-quit` ממתין עד 5 שניות לסיום תקין באמצעות SIGTERM (נקודת ביקורת של WAL), ולאחר מכן שולח SIGKILL.
+- בורר הפורטים במגש המערכת (`20128`, `3000`, `8080`) עוצר ומפעיל מחדש את השרת, ולאחר מכן טוען מחדש את BrowserWindow.
 
-## רצועת האתחול הסודית בתצורת אפס
+## אתחול סודות ללא תצורה
 
-בהפעלה הראשונה, התהליך הראשי יוצר אוטומטית וממשיך סודות חסרים:
+בהפעלה הראשונה, התהליך הראשי יוצר אוטומטית ושומר סודות חסרים:
 
-| סוֹד                     | מָקוֹר                                                                        |
-| ------------------------ | ----------------------------------------------------------------------------- |
-| `JWT_SECRET`             | `crypto.randomBytes(64).toString("hex")`                                      |
-| `STORAGE_ENCRYPTION_KEY` | `crypto.randomBytes(32).toString("hex")` (מסרב אם כבר קיימים קרדיטים מוצפנים) |
-| `API_KEY_SECRET`         | `crypto.randomBytes(32).toString("hex")`                                      |
+| סוד                      | מקור                                                                            |
+| ------------------------ | ------------------------------------------------------------------------------- |
+| `JWT_SECRET`             | `crypto.randomBytes(64).toString("hex")`                                        |
+| `STORAGE_ENCRYPTION_KEY` | `crypto.randomBytes(32).toString("hex")` (מסרב אם כבר קיימים פרטי גישה מוצפנים) |
+| `API_KEY_SECRET`         | `crypto.randomBytes(32).toString("hex")`                                        |
 
-התמיד `<DATA_DIR>/server.env`. `DATA_DIR` פותר ל:
+הסודות נשמרים ב-`<DATA_DIR>/server.env`. הערך של `DATA_DIR` נקבע כך:
 
 - Windows: `%APPDATA%\omniroute`
 - Linux: `$XDG_CONFIG_HOME/omniroute` או `~/.omniroute`
 - macOS: `~/.omniroute`
 
-## חיפוש קבצי סביבה
+## איתור קובץ הסביבה
 
-לפני יצירת השרת, התהליך הראשי (`getPreferredEnvFilePath()` in `electron/main.js`) בוחר** אֶחָד** קובץ `.env` : הראשון שבהם שקיים.
+לפני הפעלת השרת, התהליך הראשי (`getPreferredEnvFilePath()` בתוך
+`electron/main.js`) בוחר קובץ `.env` **אחד**: הראשון מבין הבאים שקיים.
 
-1. `$DATA_DIR/.env`, כאשר `DATA_DIR` מוגדר בסביבה שאיתה האפליקציה הושקה.
-2. `<resolved DATA_DIR>/.env`, תוך שימוש באותן ברירות מחדל כמו לעיל: `%APPDATA%\omniroute\.env` on Windows, `$XDG_CONFIG_HOME/omniroute/.env` או `~/.omniroute/.env` on Linux ו- macOS.
-3. `.env` במדריך העבודה בתהליך.
+1. `$DATA_DIR/.env`, כאשר `DATA_DIR` מוגדר בסביבה שממנה היישום הופעל.
+2. `<resolved DATA_DIR>/.env`, תוך שימוש באותם ערכי ברירת מחדל שלעיל: `%APPDATA%\omniroute\.env` ב-
+   Windows,‏ `$XDG_CONFIG_HOME/omniroute/.env` או `~/.omniroute/.env` ב-Linux וב-macOS.
+3. `.env` בספריית העבודה של התהליך.
 
-התהליך הראשי קורא רק את הקובץ הזה; מועמדים מאוחרים יותר לא מתמזגים פנימה. סביבת השרת נבנית עם העדיפות הזו (הגבוהה ביותר קודם):
+התהליך הראשי קורא רק את הקובץ הזה; מועמדים מאוחרים יותר אינם ממוזגים. לאחר מכן, סביבת
+השרת נבנית לפי סדר הקדימות הבא (מהגבוה לנמוך):
 
-1. סביבת תהליך Electron (משתנים שעברו בירושה מכל מה שהפעיל את האפליקציה).
-2. קובץ `.env` שנבחר.
-3. `<DATA_DIR>/server.env` (סודות האתחול למעלה).
+1. סביבת התהליך של Electron (משתנים שהתקבלו בירושה מהגורם שהפעיל את היישום).
+2. קובץ ה-`.env` שנבחר.
+3. `<DATA_DIR>/server.env` (סודות האתחול שלעיל).
 
-סביבת התהליך נקלטת כאשר האפליקציה מתחילה, כך שמשתנה מערכת או סביבת משתמש שהוגדר בזמן שהאפליקציה פועלת (כולל בזמן שהיא יושבת במגש לאחר סגירת החלון שלה) לא מגיע לשרת עד שהאפליקציה נסגרת במלואה והפעלה מחדש. עבור כפתורי זמן ריצה כגון `CONTEXT_LENGTH_<PROVIDER>` (ראה [משתני סביבה: אורך הקשר לפי ספק](../reference/ENVIRONMENT.md#per-provider-context-length-context_length_provider) ), העדיפו את קובץ `.env` ולאחר מכן צא לחלוטין (מגש,** לְהַפְסִיק** ) והפעל מחדש.
+סביבת התהליך נלכדת עם הפעלת היישום, ולכן משתנה סביבת מערכת או משתמש שמוגדר בזמן
+שהיישום פועל (לרבות בזמן שהוא נמצא במגש לאחר סגירת החלון שלו) אינו מגיע לשרת עד
+שהיישום נסגר לחלוטין ומופעל מחדש. עבור הגדרות זמן ריצה כגון `CONTEXT_LENGTH_<PROVIDER>` (ראו
+[משתני סביבה: אורך הקשר לכל ספק](../reference/ENVIRONMENT.md#per-provider-context-length-context_length_provider)),
+מומלץ להשתמש בקובץ `.env`, ולאחר מכן לסגור לחלוטין (מגש, **יציאה**) ולהפעיל מחדש.
 
 ## חלון ומגש
 
-- `BrowserWindow`: 1400 × 900 (מינימום 1024 × 700), `backgroundColor: "#0a0a0a"`.
-- macOS: `titleBarStyle: "hiddenInset"`, רמזור ב- `{ x: 16, y: 16 }`.
-- Windows/Linux: שורת כותרת מקורית.
-- לחצן סגירה ממזער למגש; לתפריט המגש יש** פתח OmniRoute** ,** פתח את לוח המחוונים** (דפדפן חיצוני),** יציאת שרת** תפריט משנה,** בדוק אם קיימים עדכונים** ,** לְהַפְסִיק** .
+- `BrowserWindow`:‏ 1400×900 (מינימום 1024×700),‏ `backgroundColor: "#0a0a0a"`.
+- macOS:‏ `titleBarStyle: "hiddenInset"`, רמזור ב-`{ x: 16, y: 16 }`.
+- Windows/Linux: שורת כותרת מקורית של המערכת.
+- לחצן הסגירה ממזער למגש; תפריט המגש כולל **פתיחת OmniRoute**,‏ **פתיחת לוח הבקרה** (בדפדפן חיצוני), תפריט משנה **יציאת השרת**,‏ **בדיקת עדכונים**,‏ **יציאה**.
 
 ## מדיניות אבטחת תוכן
 
-מוגדר דרך `session.defaultSession.webRequest.onHeadersReceived`. הנחיות בולטות:
+מוגדרת באמצעות `session.defaultSession.webRequest.onHeadersReceived`. הנחיות בולטות:
 
-- `frame-ancestors 'none'`, `object-src 'none'`, `child-src 'none'`
+- `frame-ancestors 'none'`,‏ `object-src 'none'`,‏ `child-src 'none'`
 - `connect-src 'self' http://localhost:* http://127.0.0.1:* ws://localhost:* ws://127.0.0.1:* https://*.omniroute.online https://*.omniroute.dev`
-- מצב Dev מוסיף `'unsafe-eval'` ל- `script-src` בלבד
+- מצב פיתוח מוסיף את `'unsafe-eval'` ל-`script-src` בלבד
 
 ## עדכון אוטומטי
 
-משתמש `electron-updater` עם ספק GitHub (`diegosouzapw/OmniRoute`).
+משתמש ב-`electron-updater` עם ספק GitHub‏ (`diegosouzapw/OmniRoute`).
 
-- `autoDownload = false`, `autoInstallOnAppQuit = true`
-- אירועים שהועברו למעבד באמצעות `update-status` IPC: `checking`, `available`, `not-available`, `downloading` (עם `percent`), `downloaded`, `error`
-- `installUpdate()` הורג את השרת ואז קורא `autoUpdater.quitAndInstall()`
-- דילוג במצב פיתוח (`!app.isPackaged`)
+- `autoDownload = false`,‏ `autoInstallOnAppQuit = true`
+- אירועים מועברים למעבד התצוגה דרך IPC מסוג `update-status`:
+  `checking`,‏ `available`,‏ `not-available`,‏ `downloading` (עם `percent`),‏ `downloaded`,‏ `error`
+- `installUpdate()` מפסיקה את השרת ולאחר מכן קוראת ל-`autoUpdater.quitAndInstall()`
+- מדולג במצב פיתוח (`!app.isPackaged`)
 
-## בניית צינור
+## צינור הבנייה
 
-1. `npm run build` → Next.js עצמאי ב- `.next/standalone`.
-2. `prepare-electron-standalone.mjs` → משלב מחדש ל- `.next/electron-standalone` ומשכתב נתיבים מוחלטים בתוך `server.js` + `required-server-files.json` כך שהצרור ניתן למיקום מחדש.
-3. חבילות `electron-builder` `main.js`, `preload.js`, `node_modules` ו- `extraResources: { ../.next/electron-standalone → app }`.
+1. `npm run build` → גרסת standalone של Next.js בתוך `.next/standalone`.
+2. `prepare-electron-standalone.mjs` → מסדר מחדש בתוך `.next/electron-standalone` ומשכתב נתיבים מוחלטים בתוך `server.js` ו-`required-server-files.json`, כך שניתן להעביר את החבילה ממקום למקום.
+3. `electron-builder` אורז את `main.js`, את `preload.js`, את `node_modules` ואת `extraResources: { ../.next/electron-standalone → app }`.
 
-### בנה מטרות
+### יעדי בנייה
 
-| OS      | יעדים                               |
-| ------- | ----------------------------------- |
-| Windows | NSIS מתקין + נייד (x64)             |
-| macOS   | DMG (Intel + arm64, גרירה ליישומים) |
-| Linux   | AppImage + DEB (x64 + arm64)        |
+| מערכת הפעלה | יעדים                                       |
+| ----------- | ------------------------------------------- |
+| Windows     | מתקין NSIS + גרסה ניידת (x64)               |
+| macOS       | DMG ‏(Intel + arm64, גרירה אל Applications) |
+| Linux       | AppImage + DEB ‏(x64 + arm64)               |
 
-הגדרות NSIS : `oneClick: false`, מאפשר למשתמש לבחור את ספריית ההתקנה, יוצר קיצורי דרך לשולחן העבודה ולתפריט התחל.
+הגדרות NSIS:‏ `oneClick: false`, מאפשר למשתמש לבחור את ספריית ההתקנה ויוצר קיצורי דרך בשולחן העבודה ובתפריט ההתחלה.
 
-## בדיקת עשן מבנה ארוז
+## בדיקת עשן לגרסה הארוזה
 
 ```bash
 npm run electron:smoke:packaged
@@ -229,18 +251,18 @@ npm run electron:smoke:packaged
 
 `scripts/dev/smoke-electron-packaged.mjs`:
 
-- מגלה אוטומטית את הבינארי הארוז ב- `electron/dist-electron/` עבור הפלטפורמה הנוכחית.
-- מופעלת עם ספריות `HOME`/`APPDATA`/`XDG_*` מבודדות כך שהיא לא נוגעת בנתוני מפתחים.
-- סקרים `http://127.0.0.1:20128/login` עבור HTTP 200 תוך 45 שניות.
-- שעון stderr/stdout לדפוסים קטלניים (`Cannot find module`, `MODULE_NOT_FOUND`, `ERR_DLOPEN_FAILED`, `Failed to start server` וכו').
-- ממתין 2 שניות של זמן ריצה יציב לאחר מוכנות, ואז מוציא SIGTERM ומחכה שהיציאה תתפנה.
-- ב- CI, מעביר אוטומטית `--no-sandbox --disable-gpu` (ו- `--disable-dev-shm-usage` ב- Linux).
+- מאתר אוטומטית את הקובץ הבינארי הארוז בתוך `electron/dist-electron/` עבור הפלטפורמה הנוכחית.
+- מפעיל עם ספריות `HOME`/`APPDATA`/`XDG_*` מבודדות, כך שלא תהיה גישה לנתוני המפתח.
+- דוגם את `http://127.0.0.1:20128/login` עד לקבלת HTTP 200 בתוך 45 שניות.
+- מנטר את stderr/stdout לאיתור דפוסים קטלניים (`Cannot find module`, `MODULE_NOT_FOUND`, `ERR_DLOPEN_FAILED`, `Failed to start server` וכו').
+- ממתין ל-2 שניות של זמן ריצה יציב לאחר שהמערכת מוכנה, לאחר מכן שולח SIGTERM וממתין לשחרור הפורט.
+- ב-CI, מעביר אוטומטית את `--no-sandbox --disable-gpu` (וגם את `--disable-dev-shm-usage` ב-Linux).
 
-Env עוקף: `ELECTRON_SMOKE_APP_EXECUTABLE`, `ELECTRON_SMOKE_URL`, `ELECTRON_SMOKE_TIMEOUT_MS`, `ELECTRON_SMOKE_SETTLE_MS`, `ELECTRON_SMOKE_DATA_DIR`, `ELECTRON_SMOKE_KEEP_DATA`, `ELECTRON_SMOKE_STREAM_LOGS`.
+דריסות באמצעות משתני סביבה: `ELECTRON_SMOKE_APP_EXECUTABLE`, `ELECTRON_SMOKE_URL`, `ELECTRON_SMOKE_TIMEOUT_MS`, `ELECTRON_SMOKE_SETTLE_MS`, `ELECTRON_SMOKE_DATA_DIR`, `ELECTRON_SMOKE_KEEP_DATA`, `ELECTRON_SMOKE_STREAM_LOGS`.
 
 ## חתימת קוד
 
-`electron/package.json` עושה זאת** לֹא** אישורי חתימה באמצעות חוט ישירות. העבר אותם דרך env vars ל- `electron-builder`:
+`electron/package.json` **אינו** מגדיר ישירות את פרטי ההזדהות לחתימה. יש להעביר אותם אל `electron-builder` באמצעות משתני סביבה:
 
 ### macOS
 
@@ -263,32 +285,32 @@ npm run electron:build:win
 
 ### Linux
 
-חתימת AppImage היא אופציונלית — set `LINUX_GPG_KEY` אם חתימה.
+חתימה על AppImage היא אופציונלית — יש להגדיר את `LINUX_GPG_KEY` אם נדרשת חתימה.
 
-## הֲפָצָה
+## הפצה
 
-חפצים נוחתים `electron/dist-electron/`:
+תוצרי הבנייה נשמרים בתוך `electron/dist-electron/`:
 
 - `OmniRoute.Setup.X.Y.Z.exe`, `OmniRoute X.Y.Z.exe` (Windows)
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-מהדורות מתפרסמות ל- GitHub Releases (`diegosouzapw/OmniRoute`), וזה גם המקום שבו `electron-updater` בודק אם יש גרסאות חדשות.
+הגרסאות מתפרסמות ב-GitHub Releases ‏(`diegosouzapw/OmniRoute`), ושם גם `electron-updater` בודק אם קיימות גרסאות חדשות.
 
 ## פתרון בעיות
 
-| סִימפּטוֹם                                                        | לִקְבּוֹעַ                                                                                                                                        |
-| ----------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Cannot find module 'better-sqlite3'` אחרי Electron גבשושית גדולה | better-sqlite3 v13 ships Node-API prebuilds — מפעיל מחדש `npm install` ב-root ו- `prepare:bundle` (הוא מאמת את ה-prebuild עבור הפלטפורמה הנוכחית) |
-| `ERR_DLOPEN_FAILED` עבור מודול מקורי                              | הרץ מחדש `prepare:bundle` — זה נכשל מהר כאשר ה-Node-API prebuild עבור הפלטפורמה הנוכחית חסר                                                       |
-| החלון מופיע ריק ב- Linux                                          | אשר ששרת Next.js קשור למעשה ל- PORT (בדוק יומני `[Server]` )                                                                                      |
-| דוכני אישור נוטריון macOS                                         | ודא `APPLE_*` vars מיוצאים, לא רק ב- `.env`                                                                                                       |
-| Windows SmartScreen                                               | חתום עם EV cert, או שמשתמשים לוחצים לחיצה ימנית על → "הפעלה בכל זאת"                                                                              |
-| בדיקת עשן נכשלת עם יציאה בשימוש                                   | עצור כל שרת פיתוח מקומי ב-20128 לפני הפעלת `electron:smoke:packaged`                                                                              |
+| תסמין                                                                   | פתרון                                                                                                                                                          |
+| ----------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Cannot find module 'better-sqlite3'` לאחר שדרוג גרסה ראשית של Electron | better-sqlite3 v13 כולל קובצי prebuild של Node-API — יש להריץ מחדש את `npm install` בשורש ואת `prepare:bundle` (הוא מאמת את ה-prebuild עבור הפלטפורמה הנוכחית) |
+| `ERR_DLOPEN_FAILED` עבור מודול מקורי                                    | יש להריץ מחדש את `prepare:bundle` — הוא נכשל מיד כאשר ה-prebuild של Node-API עבור הפלטפורמה הנוכחית חסר                                                        |
+| החלון מופיע ריק ב-Linux                                                 | יש לוודא ששרת Next.js אכן נקשר אל PORT (יש לבדוק את יומני `[Server]`)                                                                                          |
+| תהליך האימות הנוטריוני של macOS נתקע                                    | יש לוודא שמשתני `APPLE_*` מיוצאים, ולא מוגדרים רק בתוך `.env`                                                                                                  |
+| אזהרת Windows SmartScreen                                               | יש לחתום באמצעות אישור EV, או שהמשתמשים ילחצו לחיצה ימנית → "הפעל בכל זאת"                                                                                     |
+| בדיקת העשן נכשלת משום שהפורט נמצא בשימוש                                | יש לעצור כל שרת פיתוח מקומי הפועל בפורט 20128 לפני הרצת `electron:smoke:packaged`                                                                              |
 
-## ראה גם
+## ראו גם
 
 - [SETUP_GUIDE.md](./SETUP_GUIDE.md)
 - [RELEASE_CHECKLIST.md](../ops/RELEASE_CHECKLIST.md)
 - מקור: `electron/main.js`, `electron/preload.js`, `electron/package.json`
-- עוזרים: `scripts/build/prepare-electron-standalone.mjs`, `scripts/dev/smoke-electron-packaged.mjs`
+- כלי עזר: `scripts/build/prepare-electron-standalone.mjs`, `scripts/dev/smoke-electron-packaged.mjs`

@@ -4147,7 +4147,9 @@
     "duplicateAutoComboFailedPrefix": "Falha ao duplicar a combinação automática:",
     "duplicateAutoComboUnknownError": "Erro desconhecido",
     "duplicateAutoComboTitle": "Criar uma combinação estática de {name}",
-    "fallbackSummary": "{rate}% das solicitações usaram fallback, ~{skips} alvos ignorados por cada uma"
+    "fallbackSummary": "{rate}% das solicitações usaram fallback, ~{skips} alvos ignorados por cada uma",
+    "reorderAll": "Reordenar tudo",
+    "reorderAllDescription": "Reordenando todos os combos {count}. As alças de arrastar estão habilitadas."
   },
   "costs": {
     "title": "Custos",
@@ -14255,6 +14257,10 @@
         "label": "Interrupções de infraestrutura com prioridade protegida como 502",
         "description": "Responda com 502 em vez de 503 quando um destino prioritário com fallback apenas por cota interromper o combo por uma causa comprovadamente não relacionada à cota: um disjuntor de provedor aberto ou uma omissão preditiva por latência."
       },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Política de Orçamento de Uso Sem Preço",
+        "description": "Como os limites diários/semanais por chave em USD tratam o uso bem-sucedido cujo provedor/modelo não tem uma linha de precificação. fail_closed (padrão) marca a janela como excedida, de modo que um custo desconhecido nunca ultrapasse um limite rígido. count_as_zero conta esse uso como $0 e continua aplicando o gasto precificado. Modelos sem preço são listados na página inicial do painel de qualquer forma."
+      },
       "AUTH_LOG_INCLUDE_ACCOUNT_ID": {
         "label": "Registrar IDs de Conta",
         "description": "Incluir prefixo da conta nas linhas de log de AUTH (ex.: \"Usando a conta '<provider>': abc12345...'). Desativado por padrão para que identificadores de conta sejam ocultados em logs compartilhados/de múltiplos tenants. Independente do Modo de Depuração; alternar o Modo de Depuração não revela isso."
@@ -14535,9 +14541,9 @@
         "label": "Nova tentativa de cooldown: ignorar recusas 403/410",
         "description": "Quando todas as contas estiverem em cooldown e o cooldown que terminar primeiro tiver sido causado por um 403 (acesso recusado) ou um 410 (removido), retorna essa recusa imediatamente em vez de aguardar o término do cooldown e reenviar a requisição; um 403 de cota com escopo de conexão do agentrouter em renovação é então persistido com errorCode 429 para que continue passível de nova tentativa. Desativado por padrão: apenas um 401 ignora a espera, e cada recusa é persistida com o status com o qual chegou."
       },
-      "UNPRICED_USAGE_BUDGET_POLICY": {
-        "label": "Política de Orçamento de Uso Sem Preço",
-        "description": "Como os limites diários/semanais por chave em USD tratam o uso bem-sucedido cujo provedor/modelo não tem uma linha de precificação. fail_closed (padrão) marca a janela como excedida, de modo que um custo desconhecido nunca ultrapasse um limite rígido. count_as_zero conta esse uso como $0 e continua aplicando o gasto precificado. Modelos sem preço são listados na página inicial do painel de qualquer forma."
+      "COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE": {
+        "description": "Nas estatísticas do cache de compactação, conte uma solicitação compactada para um provedor de cache de prefixo automático (OpenAI, Codex, Azure ou uma conexão personalizada que declara cache de prompt com remoção de marcador) como um acerto de cache estimado mesmo sem marcadores cache_control. A estimativa é um sinal de elegibilidade do cache, não um acerto observado, portanto, a taxa de acerto relatada para esses provedores tende a 100%. Desativado por padrão: apenas uma solicitação que transporta marcadores cache_control para um provedor de cache conta como um acerto estimado, portanto, os provedores de prefixo automático continuam reportando 0.",
+        "label": "Estatísticas de cache de compactação: elegibilidade de prefixo automático"
       }
     }
   },

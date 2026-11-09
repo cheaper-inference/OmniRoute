@@ -14,7 +14,7 @@ rtk -> caveman
 
 Bu sıralama önce gürültülü makine çıktısını sıkıştırır, ardından Caveman'in kalan düz yazıyı yoğunlaştırmasını sağlar.
 
-Üst kaynak RTK, komut çıktısında `%60-90` tasarruf bildirmektedir. README dosyasındaki örnek oturum, `~118,000` standart tokendan `~23,900` RTK tokenına düşerek `%79.7` (`~%80`) tasarruf sağlamaktadır. OmniRoute, Caveman girdi sıkıştırmasıyla birlikte yığınlanmış tasarruf hesaplaması için bu üst kaynak ortalamasını kullanır:
+Üst kaynak RTK, komut çıktısında `60-90%` tasarruf bildirmektedir. README dosyasındaki örnek oturum, `~118,000` standart tokendan `~23,900` RTK tokenına düşerek `79.7%` (`~80%`) tasarruf sağlamaktadır. OmniRoute, Caveman girdi sıkıştırmasıyla birlikte yığınlanmış tasarruf hesaplaması için bu üst kaynak ortalamasını kullanır:
 
 ```txt
 RTK ortalaması:  %80 tasarruf

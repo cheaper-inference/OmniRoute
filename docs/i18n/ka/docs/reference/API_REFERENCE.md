@@ -882,15 +882,7 @@ Exa-ს `type: "lite"` (Exa 3.0) იღებს ველების უფრ
 `subpages`, `subpageTarget`, `highlights.numSentences` და `highlights.highlightsPerUrl` აღარ
 გადაიგზავნება.
 
-ღირებულების აღრიცხვა ეფუძნება ბრტყელ რეესტრს `costPerQuery`, გარდა Exa-სი, რომელიც Exa-ს
-საკუთარ ფასებს მიჰყვება: თითო გამოძახებაზე $0.007 `auto`-სთვის (და ძველი `fast`-ისთვის), ან
-$0.004 `lite`-სთვის (და ძველი `instant`-ისთვის), რაც მოიცავს 10 შედეგს; თითოეული დამატებითი
-შედეგისთვის $0.001; და თითო დაბრუნებული შედეგისთვის $0.001, როდესაც დაყენებულია
-`contents.summary`. Tavily აღირიცხება 1 კრედიტად ($0.008) `search_depth` მნიშვნელობებისთვის
-`basic`, `fast` და `ultra-fast`, ხოლო 2 კრედიტად ($0.016) `advanced`-ისთვის
-([Tavily API-ის კრედიტები](https://docs.tavily.com/documentation/api-credits)). გამოძახება
-`auto_parameters: true`-ით, რომლის დროსაც Tavily ანვითარებს მოთხოვნას advanced-მდე, კვლავ
-1 კრედიტად აღირიცხება.
+Exa: $0,007 თითო ზარზე `auto` (და მემკვიდრეობითი `fast`) ან $0,004 `lite` (და მემკვიდრე `instant`), რომელიც მოიცავს 10 შედეგს; $0,001 ყოველი შემდგომი შედეგისთვის; და $0,001 თითო დაბრუნებულ შედეგზე, როდესაც `contents.summary` დაყენებულია. Tavily აღირიცხება 1 კრედიტით (0,008$) `search_depth` `basic`, `fast` და `ultra-fast`, და 2 კრედიტით (0,016$) `advanced` ( [Tavily API კრედიტები](https://docs.tavily.com/documentation/api-credits) ). ზარი `auto_parameters: true` ით, რომელსაც Tavily განაახლებს გაფართოებულზე, კვლავ ჩაწერილია 1 კრედიტით.
 
 ---
 
@@ -1188,6 +1180,8 @@ X-OmniRoute-No-Cache: true
 
 ---
 
+<a id="cliproxyapi-management-compatibility"></a>
+
 ## CLIProxyAPI-ის მართვის თავსებადობა
 
 OmniRoute პასუხობს სამ [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI)
@@ -1202,20 +1196,11 @@ OmniRoute-ზე და მართვის გასაღებად გა
 | POST   | `/v0/management/api-call`    | სხეული `{ auth_index, method, url, header?, data? }`. აგზავნის ერთ დაშვებულ მოთხოვნას ანგარიშის ტოკენით და აბრუნებს `{ status_code, body }` |
 | POST   | `/v0/management/reset-quota` | სხეული `{ auth_index }`. ასუფთავებს ერთი ანგარიშის კავშირის cooldown-ს, მოდელის lockout-ებსა და Codex-ის scope-ების მიხედვით cooldown-ებს   |
 
-- `auth_index` არის OmniRoute-ის კავშირის id. `provider` არის `claude` ან `codex` (მხოლოდ OAuth
-  კავშირები; `anthropic` API-გასაღების პროვაიდერი ჩამონათვალში არ შედის). Codex-ისთვის
-  `id_token.chatgpt_account_id` არის შენახული workspace id, ხოლო `plan_type` — შენახული გეგმა.
-- `api-call` ზოგადი proxy არ არის. ის იღებს მხოლოდ Claude-ის `GET
-https://api.anthropic.com/api/oauth/usage`-ს და Codex-ის `GET https://chatgpt.com/backend-api/wham/usage`-ს, `GET .../wham/rate-limit-reset-credits`-სა და
-  `POST .../wham/rate-limit-reset-credits/consume`-ს, თითოეულს მხოლოდ შესაბამისი
-  provider-ის ანგარიშისთვის. სხვა ნებისმიერი მოთხოვნა აბრუნებს `403`-ს upstream-თან დაკავშირების გარეშე. გამომძახებლის
-  `Authorization` ჰედერი (`$TOKEN$` placeholder-ის ჩათვლით) იგნორირებულია: OmniRoute
-  ჩასვამს კავშირის access token-ს, საჭიროების შემთხვევაში კი ჯერ განაახლებს მას ვადის
-  ამოწურვამდე ცოტა ხნით ადრე, და გადააგზავნის მხოლოდ დაშვებულ ჰედერებს (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`;
-  `Accept`, `Content-Type`). თუ `Chatgpt-Account-Id` არ არის მითითებული, ნაგულისხმევად გამოიყენება შენახული workspace id.
-  მოთხოვნებს ვადა 15 წამის შემდეგ ეწურება და ისინი იყენებენ კავშირის proxy-ს.
-- `reset-quota` უცვლელად ტოვებს terminal მდგომარეობებს (banned, expired, credits_exhausted). უცნობი
-  `auth_index` აბრუნებს `404`-ს.
+- `auth_index` არის OmniRoute-ის კავშირის id. `provider` არის `claude` ან `codex` (მხოლოდ OAuth კავშირები; API გასაღების პროვაიდერი `anthropic` სიაში არ არის). Codex-ისთვის `id_token.chatgpt_account_id` არის შენახული workspace id, ხოლო `plan_type` — შენახული გეგმა.
+- `api-call` საერთო დანიშნულების პროქსი არ არის. იგი იღებს მხოლოდ Claude-ის `GET
+https://api.anthropic.com/api/oauth/usage`-ს და Codex-ის `GET
+https://chatgpt.com/backend-api/wham/usage`-ს, `GET .../wham/rate-limit-reset-credits`-სა და `POST .../wham/rate-limit-reset-credits/consume`-ს, თითოეულს მხოლოდ შესაბამისი პროვაიდერის ანგარიშისთვის. სხვა ყველაფერი აბრუნებს `403`-ს upstream-თან დაკავშირების გარეშე. გამომძახებლის `Authorization` სათაური (მათ შორის `$TOKEN$` ჩანაცვლების მარკერი) უგულებელყოფილია: OmniRoute ამატებს კავშირის access token-ს, ვადის მოახლოებისას ჯერ აახლებს მას და გადასცემს მხოლოდ დაშვებულ სათაურებს (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`; `Accept`, `Content-Type`). გამოტოვებული `Chatgpt-Account-Id` ნაგულისხმევად იღებს შენახულ workspace id-ს. თუ upstream-ის პირველი პასუხია `401`, იგი ერთხელ აახლებს ტოკენს და მხოლოდ access token-ის შეცვლისას იმეორებს მოთხოვნას. თითო upstream მცდელობას აქვს 15-წამიანი ვადა და იყენებს კავშირის პროქსის.
+- `reset-quota` ტერმინალურ მდგომარეობებს (banned, expired, credits_exhausted) უცვლელს ტოვებს. უცნობი `auth_index` აბრუნებს `404`-ს.
 
 **ავთენტიფიკაცია:** dashboard-ის სესია ან `manage` scope-ით API-გასაღები, რომელიც საჭიროა მაშინაც კი, როცა შესვლა გამორთულია
 (გზები შედის `ALWAYS_PROTECTED_API_PATHS`-ში). მხოლოდ inference-ისთვის განკუთვნილი გასაღებები იღებენ `403`-ს. წყარო:
@@ -1266,16 +1251,16 @@ https://api.anthropic.com/api/oauth/usage`-ს და Codex-ის `GET https://
 კანონიკური პროვაიდერების დახრილი ხაზით გამოყოფილი id-ები (მაგ., `nvidia/nemotron-…`) უცვლელად ინახება. `/v1/models`
 არასოდეს აბრუნებს ერთმანეთზე დაწყობილ `<prefix>/<prefix>/<model>` id-ს.
 
-მორგებული Chat Completions კვანძები აშკარა reasoning-ის უარყოფებს upstream backend-ისთვის ადაპტირებენ.  
-წარმატებული კავშირის ტესტი ავტომატურად ირჩევს chat-template-ის კონტროლებს თითოეული ზუსტი მოდელის ID-სთვის,  
-რომლის `/models` ჩანაწერიც აღიარებულ `owned_by` მნიშვნელობას ადასტურებს: `vllm`, `sglang` ან `llamacpp`.  
-გამჭვირვალე OpenAI-თავსებადი wrapper-ები შესაძლოა თავდაპირველ მოდელის ჩანაწერს ჩადგმულ  
-`openai` ობიექტში ინარჩუნებდნენ; აღმოჩენა მიჰყვება მაქსიმუმ სამ ასეთ envelope-ს. უცნობი,  
-დაკარგული ან ურთიერთსაწინააღმდეგო ownership-ის მქონე მოდელები ჩვეულებრივ OpenAI ქცევას ინარჩუნებენ.  
-აღმოჩენა ხელახლა იყენებს კატალოგის არსებულ მოთხოვნას, completion-ის ტოკენებს არ წარმოქმნის და  
+მორგებული Chat Completions კვანძები აშკარა reasoning-ის უარყოფებს upstream backend-ისთვის ადაპტირებენ.\
+წარმატებული კავშირის ტესტი ავტომატურად ირჩევს chat-template-ის კონტროლებს თითოეული ზუსტი მოდელის ID-სთვის,\
+რომლის `/models` ჩანაწერიც აღიარებულ `owned_by` მნიშვნელობას ადასტურებს: `vllm`, `sglang` ან `llamacpp`.\
+გამჭვირვალე OpenAI-თავსებადი wrapper-ები შესაძლოა თავდაპირველ მოდელის ჩანაწერს ჩადგმულ\
+`openai` ობიექტში ინარჩუნებდნენ; აღმოჩენა მიჰყვება მაქსიმუმ სამ ასეთ envelope-ს. უცნობი,\
+დაკარგული ან ურთიერთსაწინააღმდეგო ownership-ის მქონე მოდელები ჩვეულებრივ OpenAI ქცევას ინარჩუნებენ.\
+აღმოჩენა ხელახლა იყენებს კატალოგის არსებულ მოთხოვნას, completion-ის ტოკენებს არ წარმოქმნის და\
 ინვალიდირდება, როდესაც კავშირის endpoint იცვლება.
 
-იმ backend-ისთვის ქცევის დასაფიქსირებლად, რომელიც ამ მეტამონაცემებს არ ავლენს, გამოიყენეთ არსებული ნაწილობრივი  
+იმ backend-ისთვის ქცევის დასაფიქსირებლად, რომელიც ამ მეტამონაცემებს არ ავლენს, გამოიყენეთ არსებული ნაწილობრივი\
 provider-ის განახლების API:
 
 ```json
@@ -1286,21 +1271,21 @@ provider-ის განახლების API:
 }
 ```
 
-გაგზავნეთ ეს body `PUT /api/providers/<connection-id>`-თან ერთად. ამ კავშირზე reasoning-ის აშკარა  
-ძალისხმევა `none` იგზავნება როგორც `chat_template_kwargs.thinking=false` და  
-`chat_template_kwargs.enable_thinking=false`. აშკარა native template-ის მნიშვნელობები ავტორიტეტული რჩება,  
-თუ server-side reasoning-ის წესი ძალისხმევის დონეს არ აიძულებს. პარამეტრი გამოიყენება მხოლოდ მაშინ, როდესაც  
-მორგებული OpenAI-თავსებადი კავშირი Chat Completions-ის body-ს აგზავნის; Responses-ის მოთხოვნები და ჩვეულებრივი  
-provider-ები თავიანთ native request shape-ს ინარჩუნებენ. ჩვეულებრივი OpenAI-ის  
-`reasoning_effort` passthrough-ის იძულებისთვის დააყენეთ `reasoningControl` მნიშვნელობაზე `openai`,  
+გაგზავნეთ ეს body `PUT /api/providers/<connection-id>`-თან ერთად. ამ კავშირზე reasoning-ის აშკარა\
+ძალისხმევა `none` იგზავნება როგორც `chat_template_kwargs.thinking=false` და\
+`chat_template_kwargs.enable_thinking=false`. აშკარა native template-ის მნიშვნელობები ავტორიტეტული რჩება,\
+თუ server-side reasoning-ის წესი ძალისხმევის დონეს არ აიძულებს. პარამეტრი გამოიყენება მხოლოდ მაშინ, როდესაც\
+მორგებული OpenAI-თავსებადი კავშირი Chat Completions-ის body-ს აგზავნის; Responses-ის მოთხოვნები და ჩვეულებრივი\
+provider-ები თავიანთ native request shape-ს ინარჩუნებენ. ჩვეულებრივი OpenAI-ის\
+`reasoning_effort` passthrough-ის იძულებისთვის დააყენეთ `reasoningControl` მნიშვნელობაზე `openai`,\
 ხოლო ავტომატური აღმოჩენისთვის გამოტოვეთ ან დააყენეთ `null`.
 
-Claude Code-ის auto-mode classifier-ის მოთხოვნებში native thinking ნაგულისხმევად გამორთულია, როდესაც ისინი  
-reasoning-ის აშკარა კონტროლებს არ შეიცავს. აღმოჩენა იყენებს classifier-ის system marker-ს Claude-format-ის  
-მოთხოვნებში და არა მოდელის სახელებს ან completion-ის ლიმიტებს. body-ის აშკარა კონტროლები, მხარდაჭერილი  
-effort/thinking header-ები, routing-ის წესები და გადაწყვეტილი მოდელის effort-ი არსებულ პრიორიტეტს ინარჩუნებს.  
-ორივე classifier-ის ეტაპი ინარჩუნებს თავის prompt-ებს, completion-ის ლიმიტებს, stop sequence-ებს და upstream-ის  
-რეალურ permission verdict-ებს; მეორე ეტაპს კვლავ შეუძლია მოთხოვნილი ხილული reasoning ჩვეულებრივი ტექსტის  
+Claude Code-ის auto-mode classifier-ის მოთხოვნებში native thinking ნაგულისხმევად გამორთულია, როდესაც ისინი\
+reasoning-ის აშკარა კონტროლებს არ შეიცავს. აღმოჩენა იყენებს classifier-ის system marker-ს Claude-format-ის\
+მოთხოვნებში და არა მოდელის სახელებს ან completion-ის ლიმიტებს. body-ის აშკარა კონტროლები, მხარდაჭერილი\
+effort/thinking header-ები, routing-ის წესები და გადაწყვეტილი მოდელის effort-ი არსებულ პრიორიტეტს ინარჩუნებს.\
+ორივე classifier-ის ეტაპი ინარჩუნებს თავის prompt-ებს, completion-ის ლიმიტებს, stop sequence-ებს და upstream-ის\
+რეალურ permission verdict-ებს; მეორე ეტაპს კვლავ შეუძლია მოთხოვნილი ხილული reasoning ჩვეულებრივი ტექსტის\
 სახით წარმოქმნას.
 
 ### OAuth-ის ნაკადები
@@ -1322,11 +1307,11 @@ effort/thinking header-ები, routing-ის წესები და გ�
 
 #### მოდელის ლიმიტის წარმომავლობა
 
-`GET /api/models?withLimits=1` (ასევე `true`; `0`/`false` ან მისი გამოტოვება ნაგულისხმევ  
-payload-ს უცვლელს ტოვებს) ყოველ მოდელის სტრიქონს ამატებს `contextWindow`, `maxInputTokens`, `maxOutputTokens`  
-და `capsSource` ობიექტებს. `capsSource` ასახელებს წესს, რომელმაც თითოეული ლიმიტი მიაწოდა, ამიტომ  
-მოულოდნელი ლიმიტის (მაგალითად, 1M-იან მოდელზე 128k-ის) წარმოშობის მოძიება შესაძლებელია. გადაწყვეტილი  
-მნიშვნელობები იგივეა, რომლებსაც routing იყენებს; ეს flag მხოლოდ ველებს ამატებს და მნიშვნელობას არასდროს  
+`GET /api/models?withLimits=1` (ასევე `true`; `0`/`false` ან მისი გამოტოვება ნაგულისხმევ\
+payload-ს უცვლელს ტოვებს) ყოველ მოდელის სტრიქონს ამატებს `contextWindow`, `maxInputTokens`, `maxOutputTokens`\
+და `capsSource` ობიექტებს. `capsSource` ასახელებს წესს, რომელმაც თითოეული ლიმიტი მიაწოდა, ამიტომ\
+მოულოდნელი ლიმიტის (მაგალითად, 1M-იან მოდელზე 128k-ის) წარმოშობის მოძიება შესაძლებელია. გადაწყვეტილი\
+მნიშვნელობები იგივეა, რომლებსაც routing იყენებს; ეს flag მხოლოდ ველებს ამატებს და მნიშვნელობას არასდროს\
 ცვლის. `withLimits`-ის ნებისმიერი სხვა მნიშვნელობა უარყოფილია `400`-ით.
 
 | `capsSource` value                           | Origin                                                                   |
@@ -1340,7 +1325,7 @@ payload-ს უცვლელს ტოვებს) ყოველ მოდ�
 | `effort-base:` prefix                        | სტრიქონი აღებულია effort-ით სუფიქსიანი ვარიანტის საბაზისო მოდელიდან      |
 | `none`                                       | არცერთი წყარო არ აცხადებს ლიმიტს (მნიშვნელობა არის `null`)               |
 
-იმპლემენტაცია: `getResolvedModelCapabilitiesWithLimitSources()` `src/lib/modelCapabilities.ts`-ში  
+იმპლემენტაცია: `getResolvedModelCapabilitiesWithLimitSources()` `src/lib/modelCapabilities.ts`-ში\
 და პრიორიტეტების ჯაჭვები `src/lib/modelCapabilityLimits.ts`-ში.
 
 ### გამოყენება და ანალიტიკა
@@ -1961,17 +1946,17 @@ curl -X DELETE http://localhost:20128/api/resilience/model-cooldowns \
 
 OmniRoute-ს მოჰყვება ჩაშენებული Model Context Protocol სერვერი 3 ტრანსპორტით (stdio, SSE, streamable-http) და შეზღუდული წვდომის მქონე ხელსაწყოებით. ქვემოთ მოცემული dashboard-ის endpoint-ები კითხულობს სტატუსის/აუდიტის მონაცემებს და პროქსის სახით ემსახურება HTTP ტრანსპორტებს.
 
-| მეთოდი | გზა | აღწერა |
-| ------ | ---------------------- | ------------------------------------------------------------------------------------------------ | -------------------- |
-| GET | `/api/mcp/status` | heartbeat, ტრანსპორტი, ონლაინ-მდგომარეობა, ბოლო გამოძახება, ძირითადი ხელსაწყოები, 24-საათიანი წარმატების მაჩვენებელი |
-| GET | `/api/mcp/tools` | MCP ხელსაწყოების სია `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints` ველებით |
-| GET | `/api/mcp/sse` | SSE ტრანსპორტისთვის SSE ნაკადის გახსნა (აბრუნებს `503`-ს, თუ MCP გამორთულია ან ტრანსპორტი არ ემთხვევა) |
-| POST | `/api/mcp/sse` | JSON-RPC ფრეიმის გაგზავნა SSE ტრანსპორტზე |
-| GET | `/api/mcp/stream` | Streamable HTTP ტრანსპორტის SSE მხარის გახსნა (სერვერის მიერ ინიცირებული შეტყობინებები) |
-| POST | `/api/mcp/stream` | JSON-RPC ფრეიმის გაგზავნა Streamable HTTP ტრანსპორტზე |
-| DELETE | `/api/mcp/stream` | Streamable HTTP სესიის დასრულება |
-| GET | `/api/mcp/audit` | აუდიტის ჟურნალის მოთხოვნა — `?limit=`, `?offset=`, `?tool=`, `?success=true                                | false`, `?apiKeyId=` |
-| GET | `/api/mcp/audit/stats` | აუდიტის აგრეგირებული სტატისტიკა (ჯამები, წარმატების მაჩვენებელი, საშუალო ხანგრძლივობა, ძირითადი ხელსაწყოები) |
+| მეთოდი | გზა                    | აღწერა                                                                                                                             |
+| ------ | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/mcp/status`      | heartbeat, ტრანსპორტი, ონლაინ-მდგომარეობა, ბოლო გამოძახება, ძირითადი ხელსაწყოები, 24-საათიანი წარმატების მაჩვენებელი               |
+| GET    | `/api/mcp/tools`       | MCP ხელსაწყოების სია `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints` ველებით                             |
+| GET    | `/api/mcp/sse`         | SSE ტრანსპორტისთვის SSE ნაკადის გახსნა (აბრუნებს `503`-ს, თუ MCP გამორთულია ან ტრანსპორტი არ ემთხვევა)                             |
+| POST   | `/api/mcp/sse`         | JSON-RPC ფრეიმის გაგზავნა SSE ტრანსპორტზე                                                                                          |
+| GET    | `/api/mcp/stream`      | Streamable HTTP ტრანსპორტის SSE მხარის გახსნა (სერვერის მიერ ინიცირებული შეტყობინებები)                                            |
+| POST   | `/api/mcp/stream`      | JSON-RPC ფრეიმის გაგზავნა Streamable HTTP ტრანსპორტზე                                                                              |
+| DELETE | `/api/mcp/stream`      | Streamable HTTP სესიის დასრულება                                                                                                   |
+| GET    | `/api/mcp/audit`       | აუდიტის ჟურნალის მოთხოვნა — `?limit=`, `?offset=`, `?tool=`, `?success=true                                \| false`, `?apiKeyId=` |
+| GET    | `/api/mcp/audit/stats` | აუდიტის აგრეგირებული სტატისტიკა (ჯამები, წარმატების მაჩვენებელი, საშუალო ხანგრძლივობა, ძირითადი ხელსაწყოები)                       |
 
 **ავტორიზაცია:** `sse`/`stream` ტრანსპორტები იყენებს MCP-ისთვის განკუთვნილ ავტორიზაციის ზედაპირს (Bearer API გასაღები `mcp` scope-ით); `status`/`tools`/`audit*` route-ების წაკითხვა შესაძლებელია dashboard-იდან (დამატებითი ავტორიზაცია საჭირო არ არის dashboard host-თან წვდომის მიღმა).
 

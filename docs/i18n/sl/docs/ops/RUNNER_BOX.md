@@ -12,13 +12,13 @@ webpack Release-Green in opravilom lint; to obremenitev prevzame izmenjalni pros
 Ker se izdelave za zahteve za združitev izvajajo na gostovanih izvajalnikih, je reža za Turbopack večino
 časa nedejavna:
 
-| izvajalnik           | oznaka               | vloga                                                                                                                                                 | `MemoryHigh` / `MemoryMax`                 | `CPUQuota`       |
-| -------------------- | -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------ | ---------------- |
-| `omniroute-113-5`    | `omni-build`         | izdelave s Turbopack: `ci.yml` `Build` (samo push/dispatch), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, nočna izdelava a11y | 56 GB / 60 GB (brez izmenjalnega prostora) | 1600 %           |
-| `omniroute-113-6`    | `omni-release`       | Release-Green (`release-green` + `main-green`), izdelava z webpack                                                                                    | 20 GB / 24 GB (4 GB izmenjalnega prostora) | 800 %            |
-| `omniroute-113-2`    | `omni-light`         | nočna opravila (Schemathesis, promptfoo, garak, k6) in `quality.yml` `lint-guard`                                                                     | 12 GB / 16 GB (4 GB izmenjalnega prostora) | 600 %            |
-| `omniroute-113`      | `omni-light`         | ista gruča kot zgoraj                                                                                                                                 | 8 GB / 12 GB                               | 400 %            |
-| OmniHeuris, OmniMind | (njuna repozitorija) | samo Dependabot (konica 155 MB za vsakega, 2026-10-18)                                                                                                | 4 GB / 6 GB                                | 200 % za vsakega |
+| izvajalnik           | oznaka                          | vloga                                                                                                                                                 | `MemoryHigh` / `MemoryMax`                 | `CPUQuota`       |
+| -------------------- | ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------ | ---------------- |
+| `omniroute-113-5`    | `omni-build`, `omni-build-60gb` | izdelave s Turbopack: `ci.yml` `Build` (samo push/dispatch), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, nočna izdelava a11y | 56 GB / 60 GB (brez izmenjalnega prostora) | 1600 %           |
+| `omniroute-113-6`    | `omni-release`                  | Release-Green (`release-green` + `main-green`), izdelava z webpack                                                                                    | 20 GB / 24 GB (4 GB izmenjalnega prostora) | 800 %            |
+| `omniroute-113-2`    | `omni-light`                    | nočna opravila (Schemathesis, promptfoo, garak, k6) in `quality.yml` `lint-guard`                                                                     | 12 GB / 16 GB (4 GB izmenjalnega prostora) | 600 %            |
+| `omniroute-113`      | `omni-light`                    | ista gruča kot zgoraj                                                                                                                                 | 8 GB / 12 GB                               | 400 %            |
+| OmniHeuris, OmniMind | (njuna repozitorija)            | samo Dependabot (konica 155 MB za vsakega, 2026-10-18)                                                                                                | 4 GB / 6 GB                                | 200 % za vsakega |
 
 Izmerjeno 2026-10-18:
 
@@ -28,13 +28,14 @@ Izmerjeno 2026-10-18:
 | izmenjalni prostor | 16 GB                                | `omniroute-113-5` se izvaja brez izmenjalnega prostora (`MemorySwapMax=0`), zato se podivjana izdelava prekine ob dosegu omejitve, namesto da bi strežnik začel uporabljati izmenjalni prostor                                                                                                                                                                                                                                |
 | `/tmp`             | **12 GB tmpfs = RAM**                | vse, kar je shranjeno tam, zaseda pomnilnik; ostanki se odstranijo po 3 urah                                                                                                                                                                                                                                                                                                                                                  |
 | CPU                | opažena obremenitev 60 pri 32 jedrih | pred uvedbo kvot sta ena izdelava s Turbopack (približno 1166 % CPU) in zbirka testov pokritosti na istem strežniku izrinili signale za preverjanje odzivnosti drugih poslušalcev (`The self-hosted runner lost communication`, #16853)                                                                                                                                                                                       |
-| izvajalniki        | **7 poslušalcev** (2026-10-28)       | 5 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-7` nosi tudi `omni-build`; `omniroute-113-3/-4/-8` so bili izbrisani iz repozitorija (2026-10-28)                                                                                                                                                                                                                                                                         |
+| izvajalniki        | **7 poslušalcev** (2026-10-28)       | 5 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-5` nosi tudi `omni-build-60gb`; `omniroute-113-3/-4/-8` so bili izbrisani iz repozitorija (2026-10-28)                                                                                                                                                                                                                                                                    |
 
 Omejitve so določene v datoteki `/etc/systemd/system/actions.runner.<…>.service.d/override.conf`
 vsake enote (prejšnje vrednosti so shranjene kot `override.conf.bak-20261018`) in so bile uveljavljene
 med delovanjem z ukazom `systemctl set-property --runtime … MemoryHigh=… MemoryMax=… CPUQuota=…` —
 brez ponovnega zagona, zato nobeno izvajajoče se opravilo ni bilo prizadeto. Oznake se prav tako med
-delovanjem spreminjajo prek API-ja za izvajalnike (`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
+delovanjem spreminjajo prek API-ja za izvajalnike
+(`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
 `gh api -X POST repos/<repo>/actions/runners/<id>/labels -f 'labels[]=<label>'`).
 
 ## Namestitev čistilnika (enkratno, na strežniku)
@@ -59,7 +60,7 @@ Privzeti `KillMode=process` izvajalnika pusti procese `Runner.Worker → npm →
 ## Pravila delovanja
 
 - **Hkrati se izvaja samo ena gradnja s Turbopackom — to zagotavlja oznaka.** Vsako opravilo, ki izvaja celoten
-  `next build` s Turbopackom, cilja na `[self-hosted, omni-build]`, to oznako pa ima samo
+  `next build` s Turbopackom, cilja na `[self-hosted, omni-build, omni-build-60gb]`, to oznako pa ima samo
   **`omniroute-113-5`**: `ci.yml` `Build`, `npm-publish.yml` `publish`, `nightly-v4-build`, `preview-artifact`,
   nočna gradnja a11y (#16853) in **amd64** v `docker-publish.yml` (webpack znotraj okolja BuildKit —
   Turbopack se je tam sesul, izvajanje 33253576569). Korak arm64 za Docker ostaja na `ubuntu-24.04-arm`.

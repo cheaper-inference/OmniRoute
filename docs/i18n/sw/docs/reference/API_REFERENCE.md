@@ -830,13 +830,7 @@ wakati sehemu nyingine yoyote imewekwa. Kwa lite, `additionalQueries`, `systemPr
 `contents` isipokuwa `text` na `highlights` huondolewa kabla ya mwito. Zilizoacha kutumika
 `subpages`, `subpageTarget`, `highlights.numSentences` na `highlights.highlightsPerUrl` hazitumwi tena.
 
-Uhasibu wa gharama hutumia rejista tambarare ya `costPerQuery`, isipokuwa kwa Exa, ambayo hufuata
-bei zake yenyewe: $0.007 kwa mwito kwa `auto` (na `fast` ya zamani) au $0.004 kwa `lite` (na `instant` ya
-zamani), ikijumuisha matokeo 10; $0.001 kwa kila matokeo ya ziada; na $0.001 kwa kila matokeo
-yaliyorejeshwa wakati `contents.summary` imewekwa. Tavily hurekodiwa kwa mkopo 1 ($0.008) kwa
-`search_depth` `basic`, `fast` na `ultra-fast`, na mikopo 2 ($0.016) kwa `advanced`
-([Mikopo ya API ya Tavily](https://docs.tavily.com/documentation/api-credits)). Mwito wenye
-`auto_parameters: true` ambao Tavily huupandisha kuwa advanced bado hurekodiwa kwa mkopo 1.
+Exa: $0.007 kwa simu kwa `auto` (na legacy `fast`) au $0.004 kwa `lite` (na urithi `instant`), inayojumuisha matokeo 10; $0.001 kwa kila matokeo zaidi; na $0.001 kwa kila tokeo lililorejeshwa wakati `contents.summary` imewekwa. Tavily imerekodiwa kwa salio 1 ($0.008) kwa `search_depth` `basic`, `fast` na `ultra-fast`, na salio 2 ($0.016) kwa `advanced` ( [mikopo ya Tavily API](https://docs.tavily.com/documentation/api-credits) ). Simu iliyo na `auto_parameters: true` ambayo Tavily inaboresha hadi ya hali ya juu bado inarekodiwa kwa mkopo 1.
 
 ---
 
@@ -1123,6 +1117,8 @@ X-OmniRoute-No-Cache: true
 
 ---
 
+<a id="cliproxyapi-management-compatibility"></a>
+
 ## Utangamano wa Usimamizi wa CLIProxyAPI
 
 OmniRoute hujibu endpointi tatu za usimamizi za [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI) ambazo dashibodi za matumizi huita ili kusoma vikomo vya usajili wa Claude na Codex (kwa mfano chanzo cha vikomo vya matumizi cha `cliproxy` cha T3 Code). Elekeza URL msingi ya mteja kwenye OmniRoute na utumie ufunguo wa API wenye scope ya `manage` kama ufunguo wake wa usimamizi. Njia hizi zinatolewa kwenye `/v0/management/*` na `/api/v0/management/*`.
@@ -1133,9 +1129,11 @@ OmniRoute hujibu endpointi tatu za usimamizi za [CLIProxyAPI](https://github.com
 | POST   | `/v0/management/api-call`    | Mwili `{ auth_index, method, url, header?, data? }`. Hutuma ombi moja lililoruhusiwa kwa kutumia tokeni ya akaunti na kurudisha `{ status_code, body }` |
 | POST   | `/v0/management/reset-quota` | Mwili `{ auth_index }`. Huondoa muda wa kusubiri wa muunganisho, vizuizi vya modeli na muda wa kusubiri wa Codex kwa kila scope wa akaunti moja         |
 
-- `auth_index` ni kitambulisho cha muunganisho cha OmniRoute. `provider` ni `claude` au `codex` (miunganisho ya OAuth pekee; mtoa huduma wa ufunguo wa API wa `anthropic` hajaorodheshwa). Kwa Codex, `id_token.chatgpt_account_id` ni kitambulisho cha nafasi ya kazi kilichohifadhiwa na `plan_type` ni mpango uliohifadhiwa.
-- `api-call` si proksi ya jumla. Inakubali tu Claude `GET https://api.anthropic.com/api/oauth/usage` na Codex `GET https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits` na `POST .../wham/rate-limit-reset-credits/consume`, kila moja ikiwa ni kwa akaunti ya mtoa huduma inayolingana pekee. Kitu kingine chochote hurejesha `403` bila kuwasiliana na upstream. Kichwa cha `Authorization` cha mpigaji (pamoja na kishikilia nafasi cha `$TOKEN$`) hupuuzwa: OmniRoute huingiza tokeni ya ufikiaji ya muunganisho, na kuisasisha kwanza inapokaribia kuisha, kisha hupitisha vichwa vilivyoruhusiwa pekee (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`; `Accept`, `Content-Type`). `Chatgpt-Account-Id` ikikosekana, hutumia chaguo-msingi kitambulisho cha nafasi ya kazi kilichohifadhiwa. Muda wa ombi huisha baada ya sekunde 15 na hutumia proksi ya muunganisho.
-- `reset-quota` huacha hali za mwisho (banned, expired, credits_exhausted) bila kuzibadilisha. `auth_index` isiyojulikana hurejesha `404`.
+- `auth_index` ni connection id ya OmniRoute. `provider` ni `claude` au `codex` (OAuth connection pekee; API-key provider `anthropic` haijaorodheshwa). Kwa Codex, `id_token.chatgpt_account_id` ni workspace id iliyohifadhiwa na `plan_type` ni plan iliyohifadhiwa.
+- `api-call` si proxy ya jumla. Inakubali tu Claude `GET
+https://api.anthropic.com/api/oauth/usage` na Codex `GET
+https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits` na `POST .../wham/rate-limit-reset-credits/consume`, kila moja kwa akaunti ya provider inayolingana pekee. Kitu kingine chochote hurudisha `403` bila kuwasiliana na upstream. Header `Authorization` ya anayepiga mwito (ikiwemo placeholder `$TOKEN$`) hupuuzwa: OmniRoute huingiza access token ya connection, ikii-refresh kwanza ikiwa karibu kuisha muda, na kupitisha header zilizoruhusiwa pekee (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`; `Accept`, `Content-Type`). `Chatgpt-Account-Id` ikikosekana hutumia workspace id iliyohifadhiwa kama chaguo-msingi. Jibu la kwanza la upstream likiwa `401`, hufanya refresh mara moja na kujaribu tena tu ikiwa access token imebadilika. Kila upstream attempt huisha muda baada ya sekunde 15 na hutumia proxy ya connection.
+- `reset-quota` huacha terminal state (banned, expired, credits_exhausted) bila kubadilika. `auth_index` isiyojulikana hurudisha `404`.
 
 **Uthibitishaji:** kipindi cha dashibodi au ufunguo wa API wenye scope ya `manage`, unaohitajika hata wakati kuingia kumezimwa (njia ziko kwenye `ALWAYS_PROTECTED_API_PATHS`). Funguo za inference pekee hupata `403`. Chanzo: `src/lib/cliproxyCompat/managementApi.ts`.
 
@@ -1858,17 +1856,17 @@ Hifadhi ya kumbukumbu ya kudumu ya mazungumzo/ukweli, yenye upeo kwa kila ufungu
 
 OmniRoute hujumuisha seva iliyopachikwa ya Model Context Protocol yenye usafirishaji 3 (stdio, SSE, streamable-http) na zana zenye upeo. Vituo vya dashibodi vilivyo hapa chini husoma data ya hali/ukaguzi na kuwakilisha usafirishaji wa HTTP.
 
-| Method | Path | Description |
-| ------ | ---------------------- | ------------------------------------------------------------------------------------------------ | -------------------- |
-| GET | `/api/mcp/status` | Mapigo ya moyo, usafirishaji, hali ya mtandaoni, mwito wa mwisho, zana kuu, kiwango cha mafanikio cha saa 24 |
-| GET | `/api/mcp/tools` | Orodha ya zana za MCP zilizo na `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints` |
-| GET | `/api/mcp/sse` | Fungua mtiririko wa SSE kwa usafirishaji wa SSE (hurejesha `503` ikiwa MCP imezimwa au kuna kutolingana kwa usafirishaji) |
-| POST | `/api/mcp/sse` | Tuma fremu ya JSON-RPC kwenye usafirishaji wa SSE |
-| GET | `/api/mcp/stream` | Fungua upande wa SSE wa usafirishaji wa Streamable HTTP (ujumbe ulioanzishwa na seva) |
-| POST | `/api/mcp/stream` | Tuma fremu ya JSON-RPC kwenye usafirishaji wa Streamable HTTP |
-| DELETE | `/api/mcp/stream` | Maliza kipindi cha Streamable HTTP |
-| GET | `/api/mcp/audit` | Uliza kumbukumbu ya ukaguzi — `?limit=`, `?offset=`, `?tool=`, `?success=true                                | false`, `?apiKeyId=` |
-| GET | `/api/mcp/audit/stats` | Takwimu zilizojumlishwa za ukaguzi (jumla, kiwango cha mafanikio, muda wa wastani, zana kuu) |
+| Method | Path                   | Description                                                                                                                          |
+| ------ | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| GET    | `/api/mcp/status`      | Mapigo ya moyo, usafirishaji, hali ya mtandaoni, mwito wa mwisho, zana kuu, kiwango cha mafanikio cha saa 24                         |
+| GET    | `/api/mcp/tools`       | Orodha ya zana za MCP zilizo na `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints`                            |
+| GET    | `/api/mcp/sse`         | Fungua mtiririko wa SSE kwa usafirishaji wa SSE (hurejesha `503` ikiwa MCP imezimwa au kuna kutolingana kwa usafirishaji)            |
+| POST   | `/api/mcp/sse`         | Tuma fremu ya JSON-RPC kwenye usafirishaji wa SSE                                                                                    |
+| GET    | `/api/mcp/stream`      | Fungua upande wa SSE wa usafirishaji wa Streamable HTTP (ujumbe ulioanzishwa na seva)                                                |
+| POST   | `/api/mcp/stream`      | Tuma fremu ya JSON-RPC kwenye usafirishaji wa Streamable HTTP                                                                        |
+| DELETE | `/api/mcp/stream`      | Maliza kipindi cha Streamable HTTP                                                                                                   |
+| GET    | `/api/mcp/audit`       | Uliza kumbukumbu ya ukaguzi — `?limit=`, `?offset=`, `?tool=`, `?success=true                                \| false`, `?apiKeyId=` |
+| GET    | `/api/mcp/audit/stats` | Takwimu zilizojumlishwa za ukaguzi (jumla, kiwango cha mafanikio, muda wa wastani, zana kuu)                                         |
 
 **Uthibitishaji:** usafirishaji wa `sse`/`stream` huzingatia kiolesura cha uthibitishaji mahususi cha MCP (ufunguo wa API wa Bearer wenye upeo wa `mcp`); njia za `status`/`tools`/`audit*` zinaweza kusomeka kutoka kwenye dashibodi (hakuna uthibitishaji wa ziada unaohitajika zaidi ya kufikia seva pangishi ya dashibodi).
 

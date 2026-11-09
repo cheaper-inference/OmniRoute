@@ -4224,7 +4224,9 @@
     "duplicateAutoComboFailedPrefix": "Ma rnexxilniex nidduplikaw il-kombinazzjoni awtomatika:",
     "duplicateAutoComboUnknownError": "Żball mhux magħruf",
     "duplicateAutoComboTitle": "Oħloq kombinazzjoni statika minn {name}",
-    "fallbackSummary": "{rate}% tal-bitiet wasslu għal fallback, ċaże mhux medja ~{skips} objettivi salta"
+    "fallbackSummary": "{rate}% tal-bitiet wasslu għal fallback, ċaże mhux medja ~{skips} objettivi salta",
+    "reorderAll": "Ordna mill-ġdid kollha",
+    "reorderAllDescription": "Reordering kollha {count} combos. Il-manki tat-tkaxkir huma attivati."
   },
   "costs": {
     "title": "Spejjeż",
@@ -6358,10 +6360,6 @@
     "hideEmails": "Aħbi l-indirizzi elettroniċi kollha",
     "a": "A",
     "accountConcurrencyCapHint": "L-għadd massimu ta’ talbiet simultanji li din il-konnessjoni jew dan il-kont jista’ jimmaniġġja. Il-kontijiet b’abbonament normalment jippermettu biss ftit (1–3) — jekk taqbeż dan il-limitu jiġu attivati żbalji 429 u perjodi ta’ stennija. Ħalli vojt biex tuża l-valur predefinit.",
-    "aiCreditsLimit": "Limitu ta’ AI Credits għal kull perjodu ta’ kontijiet",
-    "aiCreditsLimitPlaceholder": "L-ebda limitu lokali",
-    "aiCreditsLimitHint": "Jaqbeż din il-konnessjoni meta l-AI Credits irrappurtati minn GitHub jilħqu dan il-valur, biex ir-rotta tmur għall-konnessjonijiet l-oħra tiegħek. Vojt jiddiżattivah; 0 dejjem jaqbiżha. Qari tal-użu nieqes jew skadut qatt ma jimblokka — dan mhuwiex limitu tal-infiq garantit.",
-    "aiCreditsLimitInvalid": "Il-limitu ta’ AI Credits irid ikun numru mhux negattiv, jew vojt biex jiġi diżattivat.",
     "accountConcurrencyCapLabel": "Limitu tal-konkorrenza tal-kont",
     "accountIdHint": "Meħtieġ minn xi fornituri (eż. Cloudflare Workers AI) flimkien mat-token tal-API.",
     "accountIdLabel": "ID tal-kont",
@@ -6455,8 +6453,6 @@
     "newApiUserIdLabel": "ID tal-utent ta’ New-API",
     "newApiUserIdPlaceholder": "eż. 12345",
     "newApiUserIdHint": "Il-valur tal-intestazzjoni AgentRouter New-Api-User, użat flimkien maċ-ċavetta API tal-console biex jinkiseb il-bilanċ tal-kwota.",
-    "tokenrouterManagementKeyLabel": "Ċavetta tal-ġestjoni (mhux obbligatorja)",
-    "tokenrouterManagementKeyHint": "Ċavetta tal-kont mid-dashboard ta’ TokenRouter (Settings → Management Key). Tintuża biss biex jinqraw il-kwota u l-bilanċ, qatt għal talbiet. Iċ-ċavetta salvata ma tintweriex; ħalliha vojta biex iżżommha.",
     "newApiAggregatorToggleLabel": "Gateway tal-aggregatur",
     "newApiAggregatorToggleHint": "Ippermetti l-identifikazzjoni tal-bilanċ għan-nodi aggregaturi New-API / One-API / Sub2API. Id-dashboard se juri l-badge tal-bilanċ u r-routing tal-verifika preliminari tal-kwota se jaqbeż il-kontijiet eżawriti.",
     "newApiAggregatorConsoleApiKeyHint": "Token ta’ Aċċess tas-Sistema għall-endpoint /api/user/self tal-aggregatur. Mhuwiex iċ-ċavetta API tar-routing.",
@@ -6470,8 +6466,6 @@
     "customUserAgentLabel": "Tikketta tal-Aġent tal-Utent Personalizzat",
     "huggingfaceBillToHint": "Mhux obbligatorju. L-identifikatur tal-kont tal-kontijiet Hugging Face tiegħek, mibgħut bħala l-intestatura X-HF-Bill-To għall-attribuzzjoni tal-ispejjeż.",
     "huggingfaceBillToLabel": "Kont Bill-To ta’ Hugging Face",
-    "commandCodeZdrLabel": "Itlob żamma żero tad-data (ZDR)",
-    "commandCodeZdrHint": "Jibgħat x-cmd-zdr: 1 ma' kull talba magħmula b'din iċ-ċavetta API. Mudelli mingħajr upstream ZDR jistgħu ma jkunux disponibbli.",
     "databricksBaseUrlHint": "Ħjiel għall-URL Bażi ta’ Databricks",
     "defaultThinkingStrengthHint": "Jintuża meta talba ma tispeċifikax il-livell ta’ sforz ta’ raġunament.",
     "defaultThinkingStrengthLabel": "Intensità predefinita tal-ħsieb",
@@ -6946,7 +6940,7 @@
       "xai": "Qabbad xAI (Grok) b'ċavetta API.",
       "xiaomi-mimo": "Qabbad Xiaomi MiMo b'ċavetta API.",
       "yi": "Ikseb ċavetta API minn platform.lingyiwanwu.com",
-      "zai": "Ċavetta API minn https://open.bigmodel.cn/usercenter/apikeys",
+      "zai": "Ċavetta API minn https://z.ai/manage-apikey/apikey-list",
       "zenmux": "ZenMux jipprovdi endpoint ta' chat completions kompatibbli ma' OpenAI fuq /api/v1/chat/completions, flimkien ma' interfaċċi tal-protokolli Anthropic Messages (/api/anthropic/v1/messages) u Google Gemini (/api/vertex-ai). OmniRoute juża l-protokoll OpenAI.",
       "galadriel": "Qabbad Galadriel b'ċavetta API.",
       "predibase": "$25 fi krediti ta' prova bla ħlas (validità ta' 30 jum)",
@@ -7067,11 +7061,6 @@
     "anonymousFallbackEnabled": "L-alternattiva anonima ġiet attivata għal {provider}",
     "anonymousFallbackDisabled": "L-alternattiva anonima ġiet diżattivata għal {provider} — meta l-konnessjonijiet jiġu eżawriti, dan il-fornitur se jinqabeż",
     "anonymousFallbackUpdateFailed": "Ma rnexxiex l-aġġornament tal-issettjar tal-alternattiva anonima",
-    "retryDelayTitle": "Dewmien qabel tentattiv ieħor",
-    "retryDelayDesc": "Kemm idum jistrieħ kollegament wara żball ta' limitu tar-rata meta l-fornitur ma jgħidx meta għandu jerġa' jipprova. Il-mod awtomatiku juża l-backoff integrat; il-ħin ta' reset mibgħut mill-fornitur dejjem jirbaħ.",
-    "retryDelayAuto": "Awtomatiku",
-    "retryDelaySaved": "Id-dewmien qabel tentattiv ieħor ġie ssejvjat",
-    "retryDelayUpdateFailed": "Ma rnexxiex jiġi aġġornat id-dewmien qabel tentattiv ieħor",
     "batchDeleteFailed": "It-tħassir f’lott falla",
     "batchDeleteNetworkError": "Żball tan-network waqt it-tħassir f’lott",
     "batchUpdateFailed": "L-aġġornament f’lott falla",
@@ -7171,7 +7160,20 @@
     "chatgptConnectorLabel": "Konnezzjoni ċċattiva ChatGPT",
     "doctorChecking": "Nistaqsi d-dejja…",
     "doctorCheck": "Iċċekkja d-dejja tad-doctor",
-    "fallbackRetryBackendTitle": "Backend ta' ritentattiv fallback"
+    "fallbackRetryBackendTitle": "Backend ta' ritentattiv fallback",
+    "retryDelayTitle": "Dewmien qabel tentattiv ieħor",
+    "retryDelayDesc": "Kemm idum jistrieħ kollegament wara żball ta' limitu tar-rata meta l-fornitur ma jgħidx meta għandu jerġa' jipprova. Il-mod awtomatiku juża l-backoff integrat; il-ħin ta' reset mibgħut mill-fornitur dejjem jirbaħ.",
+    "retryDelayAuto": "Awtomatiku",
+    "retryDelaySaved": "Id-dewmien qabel tentattiv ieħor ġie ssejvjat",
+    "retryDelayUpdateFailed": "Ma rnexxiex jiġi aġġornat id-dewmien qabel tentattiv ieħor",
+    "aiCreditsLimit": "Limitu ta’ AI Credits għal kull perjodu ta’ kontijiet",
+    "aiCreditsLimitPlaceholder": "L-ebda limitu lokali",
+    "aiCreditsLimitHint": "Jaqbeż din il-konnessjoni meta l-AI Credits irrappurtati minn GitHub jilħqu dan il-valur, biex ir-rotta tmur għall-konnessjonijiet l-oħra tiegħek. Vojt jiddiżattivah; 0 dejjem jaqbiżha. Qari tal-użu nieqes jew skadut qatt ma jimblokka — dan mhuwiex limitu tal-infiq garantit.",
+    "aiCreditsLimitInvalid": "Il-limitu ta’ AI Credits irid ikun numru mhux negattiv, jew vojt biex jiġi diżattivat.",
+    "tokenrouterManagementKeyLabel": "Ċavetta tal-ġestjoni (mhux obbligatorja)",
+    "tokenrouterManagementKeyHint": "Ċavetta tal-kont mid-dashboard ta’ TokenRouter (Settings → Management Key). Tintuża biss biex jinqraw il-kwota u l-bilanċ, qatt għal talbiet. Iċ-ċavetta salvata ma tintweriex; ħalliha vojta biex iżżommha.",
+    "commandCodeZdrLabel": "Itlob żamma żero tad-data (ZDR)",
+    "commandCodeZdrHint": "Jibgħat x-cmd-zdr: 1 ma' kull talba magħmula b'din iċ-ċavetta API. Mudelli mingħajr upstream ZDR jistgħu ma jkunux disponibbli."
   },
   "settings": {
     "title": "Issettjar",
@@ -14332,6 +14334,10 @@
         "label": "Waqfiet tal-Infrastruttura bi Prijorità Protetta bħala 502",
         "description": "Wieġeb b’502 minflok 503 meta mira ta’ prijorità b’fallback għall-kwota biss twaqqaf il-combo għal kawża li jista’ jiġi ppruvat li mhijiex relatata mal-kwota: circuit breaker miftuħ tal-fornitur jew qbiż predittiv minħabba l-latenza."
       },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Politika tal-baġit għall-użu mingħajr prezz",
+        "description": "Kif il-limiti USD ta’ kuljum/ta’ kull ġimgħa għal kull ċavetta jitrattaw użu b’suċċess li l-fornitur/mudell tiegħu m’għandux riga ta’ prezz. fail_closed (predefinit) jimmarka l-perjodu bħala mgħaddija mill-limitu, sabiex spiża mhux magħrufa qatt ma tista’ tgħaddi mill-limitu strett. count_as_zero jikkontabilizza dak l-użu bħala $0 u jkompli jissalvagwardja l-ispejjeż b’prezz. Il-mudelli mingħajr prezz huma elenkati fil-paġna ewlenija tad-dashboard f’kull każ."
+      },
       "AUTH_LOG_INCLUDE_ACCOUNT_ID": {
         "label": "Reġistra l-IDs tal-Kontijiet",
         "description": "Inkludi l-prefix tal-kont fil-linji tal-log tal-AUTH (eż. \"Għaddi l-kont ta '<provider>': abc12345...\"). Mitfi b'mod awtomatiku biex l-identifikaturi tal-kontijiet jiġu rrifjutati mill-log ta' proċessi kondiviżi/multi-tenant. Indipendenti minn Debug Mode; il-bidla ta' Debug Mode ma tagħżilx dan."
@@ -14612,9 +14618,9 @@
         "label": "Pruwa mill-Ġdid tal-Cooldown: Aqbeż ir-Rifjuti 403/410",
         "description": "Meta kull kont ikun f'cooldown u l-cooldown li jintemm l-ewwel kien ikkawżat minn 403 (aċċess irrifjutat) jew 410 (m'għadux jeżisti), irritorna dak ir-rifjut minnufih minflok ma tistenna li jintemm il-cooldown u terġa' tibgħat it-talba; 403 ta' kwota b'ambitu ta' konnessjoni ta' agentrouter li qed tiġġedded imbagħad jiġi ppersistit b'errorCode 429 sabiex jibqa' jista' jerġa' jiġi ppruvat. Iddiżattivat b'mod awtomatiku: 401 biss jaqbeż l-istennija, u kull rifjut jiġi ppersistit bl-istatus li jkun wasal bih."
       },
-      "UNPRICED_USAGE_BUDGET_POLICY": {
-        "label": "Politika tal-baġit għall-użu mingħajr prezz",
-        "description": "Kif il-limiti USD ta’ kuljum/ta’ kull ġimgħa għal kull ċavetta jitrattaw użu b’suċċess li l-fornitur/mudell tiegħu m’għandux riga ta’ prezz. fail_closed (predefinit) jimmarka l-perjodu bħala mgħaddija mill-limitu, sabiex spiża mhux magħrufa qatt ma tista’ tgħaddi mill-limitu strett. count_as_zero jikkontabilizza dak l-użu bħala $0 u jkompli jissalvagwardja l-ispejjeż b’prezz. Il-mudelli mingħajr prezz huma elenkati fil-paġna ewlenija tad-dashboard f’kull każ."
+      "COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE": {
+        "description": "Fl-istatistiċi tal-cache tal-kompressjoni, għodd talba kkompressata lil fornitur tal-caching awtomatiku tal-prefiss (OpenAI, Codex, Azure, jew konnessjoni personalizzata li tiddikjara caching fil-pront bi tqaxxir tal-marker) bħala hit cache stmata anki mingħajr markaturi cache_control. L-istima hija sinjal ta' eliġibilità tal-cache, mhux hit osservata, għalhekk ir-rata ta' hit irrappurtata għal dawk il-fornituri tvarja lejn 100%. Mitfi b'mod awtomatiku: talba biss li ġġorr markaturi cache_control lil fornitur tal-caching tgħodd bħala hit stmata, għalhekk il-fornituri tal-prefiss awtomatiku jibqgħu jirrappurtaw 0.",
+        "label": "Compression Cache Stats: Eliġibilità Awtomatika-Prefiss"
       }
     }
   },

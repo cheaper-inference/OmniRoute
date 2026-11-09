@@ -69,6 +69,9 @@ for (const fail of [false, true]) {
     assert.ok(body, "verification step must have an executable shell body");
     const dir = mkdtempSync(path.join(tmpdir(), "omniroute-node-probe-"));
     try {
+      // The extensionless Docker stub uses require; keep its module type local
+      // even when TMPDIR lives beneath an ES-module checkout.
+      writeFileSync(path.join(dir, "package.json"), '{"type":"commonjs"}\n');
       const log = path.join(dir, "calls.jsonl");
       writeFileSync(
         path.join(dir, "docker"),

@@ -4147,7 +4147,9 @@
     "duplicateAutoComboFailedPrefix": "Gagal menduplikasi kombo automatik:",
     "duplicateAutoComboUnknownError": "Ralat tidak diketahui",
     "duplicateAutoComboTitle": "Cipta kombo statik dari {name}",
-    "fallbackSummary": "{rate}% permintaan kembali ke cadangan, purata ~{skips} sasaran dilepaskan setiap satu"
+    "fallbackSummary": "{rate}% permintaan kembali ke cadangan, purata ~{skips} sasaran dilepaskan setiap satu",
+    "reorderAll": "Susun semula semua",
+    "reorderAllDescription": "Menyusun semula semua kombo {count}. Pemegang seret didayakan."
   },
   "costs": {
     "title": "Kos",
@@ -14538,6 +14540,10 @@
       "UNPRICED_USAGE_BUDGET_POLICY": {
         "label": "Dasar Bajet Penggunaan Tanpa Harga",
         "description": "Bagaimana had USD harian/mingguan setiap kunci mengendalikan penggunaan yang berjaya apabila pembekal/model tidak mempunyai baris harga. fail_closed (lalai) menandakan jendela sebagai telah terlampaui, jadi kos yang tidak diketahui tidak akan dapat melepasi had keras. count_as_zero mengira penggunaan itu sebagai $0 dan terus menguatkuasakan perbelanjaan yang mempunyai harga. Model tanpa harga tetap disenaraikan di halaman utama papan pemuka."
+      },
+      "COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE": {
+        "description": "Dalam statistik cache mampatan, kira permintaan termampat kepada pembekal cache awalan automatik (OpenAI, Codex, Azure atau sambungan tersuai yang mengisytiharkan caching segera dengan pelucutan penanda) sebagai anggaran capan cache walaupun tanpa penanda cache_control. Anggaran ialah isyarat kelayakan cache, bukan hit yang diperhatikan, jadi kadar hit yang dilaporkan untuk penyedia tersebut menuju ke arah 100%. Dimatikan secara lalai: hanya permintaan yang membawa penanda cache_control kepada penyedia caching dikira sebagai anggaran hit, jadi penyedia awalan automatik terus melaporkan 0.",
+        "label": "Statistik Cache Mampatan: Kelayakan Awalan Automatik"
       }
     }
   },

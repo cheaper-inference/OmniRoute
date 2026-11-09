@@ -138,6 +138,7 @@ export default function CatalogKeyAccessButton({
         aria-label={t("keyAccessButton")}
         align="end"
         sideOffset={POPOVER_GAP}
+        collisionPadding={POPOVER_GAP}
         className="max-h-80 w-80 overflow-auto p-3 text-left"
         // Focus stays where it was on open, and only focus leaving an element closes the panel:
         // focus arriving from nowhere (a modal mounting elsewhere) is not the user leaving it.

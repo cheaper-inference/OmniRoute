@@ -56,11 +56,11 @@ sest rakendusel on üks konkreetne omadus:
 
 See tähendab iga pinna kohta järgmist, isegi kui `CORS_ALLOW_ALL=true`:
 
-| Pind                                       | Autentimismehhanism        | Metamärgiga CORS-i mõju                                                                                                                                                                                                                                                                                                                                     |
-| ------------------------------------------ | -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Juhtpaneel / HALDUS `/api/*`               | Küpsiseseanss              | Päritolu tagastatakse, kuid **ilma päiseta `Allow-Credentials`** brauser **blokeerib** autenditud vastuse lugemise. Pahatahtlik päritoluülene sait **ei saa lugeda** teie autenditud juhtpaneeli vastuseid ning seansiküpsist ei avalikustata.                                                                                                              |
-| Kliendi API `/v1/*`, `/v1beta/*`           | Bearer- / `x-api-key` päis | Juba **olemuslikult** lubav (`relaxForTokenAuth`): brauserid ei lisa päiseid `Authorization`/`x-api-key` kunagi automaatselt, seega ei saa ründaja leht teie võtit edastada. Peegeldamine kehtib ainult siis, kui esitatud võti on valideeritud; anonüümsed vastused (`REQUIRE_API_KEY=false`) säilitavad lubatud loendi. `CORS_ALLOW_ALL` ei laienda seda. |
-| Avalik kirjutuskaitstud (`/api/health`, …) | Puudub                     | Pole tundlik; metamärk on kahjutu.                                                                                                                                                                                                                                                                                                                          |
+| Pind                                       | Autentimismehhanism        | Metamärgiga CORS-i mõju                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| ------------------------------------------ | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Juhtpaneel / HALDUS `/api/*`               | Küpsiseseanss              | Päritolu tagastatakse, kuid **ilma päiseta `Allow-Credentials`** brauser **blokeerib** autenditud vastuse lugemise. Pahatahtlik päritoluülene sait **ei saa lugeda** teie autenditud juhtpaneeli vastuseid ning seansiküpsist ei avalikustata.                                                                                                                                                                                                                                                                                                                                 |
+| Kliendi API `/v1/*`, `/v1beta/*`           | Bearer- / `x-api-key` päis | Juba **olemuslikult** lubav (`relaxForTokenAuth`): brauserid ei lisa päiseid `Authorization`/`x-api-key` kunagi automaatselt, seega ei saa ründaja leht teie võtit edastada. Leevendatud päritolu peegeldamine nõuab autenditud subjekti (valideeritud API-võtit või valideeritud juhtpaneeli seanssi), mitte pelgalt autentimisandmete päist, ega sisalda kunagi `Access-Control-Allow-Credentials`. Anonüümsed vastused (`REQUIRE_API_KEY=false`) kasutavad seadistatud lubatud päritolude loendit, sealhulgas selgesõnalist sisselülitamist valikuga `CORS_ALLOW_ALL=true`. |
+| Avalik kirjutuskaitstud (`/api/health`, …) | Puudub                     | Pole tundlik; metamärk on kahjutu.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 
 Seega piirdub `CORS_ALLOW_ALL=true` **jääkkokkupuude** järgmisega: (a)
 juba autentimist mittevajavate andmete autentimata päritoluülesed **lugemised** ja (b)
@@ -122,9 +122,7 @@ taaskäivitamiseta.
   neid kunagi automaatselt. CORS ei ole siin sisuline tõke — tõkkeks on API-võti —
   mistõttu on see liides teadlikult liberaalne, et brauseri- ja
   Electroni kliendid saaksid lugeda vastuseid, millele neil on juba õigus.
-  Leevendatud peegeldamine järgib valideeritud võtit, mitte pelgalt päise olemasolu: kui
-  `REQUIRE_API_KEY=false` teenindab päringut anonüümselt, säilitab selle edukas vastus
-  fail-closed lubatud loendi. Autentimise tagasilükkamised (401) jäävad loetavaks, et
+  Leevendatud päritolu peegeldamine nõuab autenditud subjekti (valideeritud API-võtit või valideeritud juhtpaneeli seanssi), mitte pelgalt autentimisandmete päist, ega sisalda kunagi `Access-Control-Allow-Credentials`. Anonüümsed vastused (`REQUIRE_API_KEY=false`) kasutavad seadistatud lubatud päritolude loendit, sealhulgas selgesõnalist sisselülitamist valikuga `CORS_ALLOW_ALL=true`. Autentimise tagasilükkamised (401) jäävad loetavaks, et
   kliendid saaksid kuvada tühistatud või valesti sisestatud võtme (#5242): konveieri enda
   401 säilitab peegeldamise ning marsruut, mis lükkab võtme ise tagasi pärast seda, kui
   konveier teenindas päringut anonüümsena (`/v1/models` ja `/v1beta/models`
@@ -136,8 +134,7 @@ taaskäivitamiseta.
   marsruut kontrollis, ning seda ei seota kunagi päisega
   `Access-Control-Allow-Credentials`; keha on fikseeritud veaümbrik. Haldusmarsruudid
   `/api/v1/` all, mida kaitseb `requireManagementAuth()` (`/api/v1/management/*`,
-  `/api/v1/registered-keys`), peegeldamist ei lisa: `REQUIRE_API_KEY=false` korral ei
-  ole nende 401/403 päritoluüleselt loetav.
+  `/api/v1/registered-keys`), ei kasuta seda autentimisandmete tagasilükkamise erandit: `REQUIRE_API_KEY=false` korral järgivad nende 401/403 vastused seadistatud CORS-i päritolupoliitikat.
 - **Küpsiseseanss (juhtpaneel):** seda kaitseb vaikimisi ligipääsu keelav seadistus **ja**
   päise `Access-Control-Allow-Credentials` puudumine ühisel teel. Ärge lisage
   haldusliidese ega juhtpaneeli päritoluallikaid ühelegi liberaalsele seadistusele; nende puhul peab
@@ -151,8 +148,7 @@ tagastavad WebSocketi transpordid kätluse `Origin` väärtust ise
 OmniRoute töötab käsuga `npm start` / `npm run dev`, sild `/v1/ws` ja
 `/api/v1/ws`, mis voogedastab `/v1/chat/completions`, `/v1/messages` ja
 `/v1/responses` kaadritena. Sild küsib otsust aadressilt `/api/v1/ws?handshake=1` ja
-keeldub ühendust uuendamast, kui see marsruut kontrolli ei teinud. Kätlus võetakse
-vastu, kui:
+keeldub ühendust uuendamast, kui see marsruut kontrolli ei teinud. Autentimisnõuded kehtivad endiselt eraldi. Päritolu kontroll õnnestub, kui:
 
 - sellel puudub `Origin` päis (Codex CLI, SDK-d ja muud mitte-brauseri kliendid);
 - `Origin` on lubatud ülaltoodud lubatud loendiga (`CORS_ALLOWED_ORIGINS`, seadistus

@@ -56,11 +56,11 @@ disebabkan satu fakta pelaksanaan yang nyata:
 
 Maksudnya bagi setiap permukaan, walaupun dengan `CORS_ALLOW_ALL=true`:
 
-| Permukaan                           | Mekanisme pengesahan           | Kesan CORS kad bebas                                                                                                                                                                                                                                                                                                                                                                                        |
-| ----------------------------------- | ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Papan Pemuka / PENGURUSAN `/api/*`  | Sesi kuki                      | Origin dipantulkan, tetapi **tanpa `Allow-Credentials`**, pelayar **menyekat** pembacaan yang menggunakan bukti kelayakan. Laman silang origin berniat jahat **tidak boleh membaca** respons papan pemuka anda yang telah disahkan, dan kuki sesi tidak didedahkan.                                                                                                                                         |
-| API Klien `/v1/*`, `/v1beta/*`      | Pengepala Bearer / `x-api-key` | Sudah bersifat permisif **secara reka bentuk** (`relaxForTokenAuth`): pelayar tidak pernah melampirkan `Authorization`/`x-api-key` secara automatik, maka halaman penyerang tidak boleh membekalkan kunci anda. Pantulan hanya digunakan apabila kunci yang dikemukakan telah disahkan; respons tanpa nama (`REQUIRE_API_KEY=false`) mengekalkan senarai benar. `CORS_ALLOW_ALL` tidak meluaskan akses ini. |
-| Awam baca sahaja (`/api/health`, …) | Tiada                          | Tidak sensitif; kad bebas tidak memudaratkan.                                                                                                                                                                                                                                                                                                                                                               |
+| Permukaan                           | Mekanisme pengesahan           | Kesan CORS kad bebas                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| ----------------------------------- | ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Papan Pemuka / PENGURUSAN `/api/*`  | Sesi kuki                      | Origin dipantulkan, tetapi **tanpa `Allow-Credentials`**, pelayar **menyekat** pembacaan yang menggunakan bukti kelayakan. Laman silang origin berniat jahat **tidak boleh membaca** respons papan pemuka anda yang telah disahkan, dan kuki sesi tidak didedahkan.                                                                                                                                                                                                                                                                                                                                                                                                  |
+| API Klien `/v1/*`, `/v1beta/*`      | Pengepala Bearer / `x-api-key` | Sudah bersifat permisif **secara reka bentuk** (`relaxForTokenAuth`): pelayar tidak pernah melampirkan `Authorization`/`x-api-key` secara automatik, maka halaman penyerang tidak boleh membekalkan kunci anda. Pantulan asal dengan peraturan yang dilonggarkan memerlukan subjek yang telah disahkan identitinya (kunci API yang telah disahkan atau sesi papan pemuka yang telah disahkan), bukan sekadar pengepala kelayakan, dan tidak pernah menyertakan `Access-Control-Allow-Credentials`. Respons tanpa nama (`REQUIRE_API_KEY=false`) menggunakan senarai asal dibenarkan yang dikonfigurasikan, termasuk pengaktifan nyata melalui `CORS_ALLOW_ALL=true`. |
+| Awam baca sahaja (`/api/health`, …) | Tiada                          | Tidak sensitif; kad bebas tidak memudaratkan.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
 
 Jadi, pendedahan **baki** daripada `CORS_ALLOW_ALL=true` terhad kepada: (a)
 **pembacaan** silang origin tanpa bukti kelayakan terhadap data yang sememangnya tidak memerlukan pengesahan, dan (b)
@@ -122,9 +122,7 @@ memulakan semula.
   secara automatik. CORS bukan penghalang yang bermakna di sini — kunci API ialah
   penghalangnya — sebab itulah permukaan tersebut sengaja dibuat permisif supaya klien pelayar dan
   Electron boleh membaca respons yang sememangnya mereka berhak terima.
-  Pantulan yang dilonggarkan mengikut kunci yang telah disahkan, bukan sekadar kehadiran
-  pengepala: apabila `REQUIRE_API_KEY=false` melayan permintaan secara tanpa nama,
-  respons yang berjaya mengekalkan senarai benar fail-closed. Penolakan pengesahan (401)
+  Pantulan asal dengan peraturan yang dilonggarkan memerlukan subjek yang telah disahkan identitinya (kunci API yang telah disahkan atau sesi papan pemuka yang telah disahkan), bukan sekadar pengepala kelayakan, dan tidak pernah menyertakan `Access-Control-Allow-Credentials`. Respons tanpa nama (`REQUIRE_API_KEY=false`) menggunakan senarai asal dibenarkan yang dikonfigurasikan, termasuk pengaktifan nyata melalui `CORS_ALLOW_ALL=true`. Penolakan pengesahan (401)
   kekal boleh dibaca supaya klien dapat memaparkan kunci yang dibatalkan atau tersalah
   taip (#5242): 401 milik saluran paip itu sendiri mengekalkan pantulan, dan laluan yang
   menolak kunci itu sendiri selepas saluran paip melayannya sebagai tanpa nama
@@ -136,9 +134,7 @@ memulakan semula.
   `auth_token`), bukan oleh yang mana satu disemak oleh laluan, dan tidak pernah
   dipasangkan dengan `Access-Control-Allow-Credentials`; badannya ialah sampul ralat
   yang tetap. Laluan pengurusan di bawah `/api/v1/` yang dikawal oleh
-  `requireManagementAuth()` (`/api/v1/management/*`, `/api/v1/registered-keys`) tidak
-  menambah pantulan: dengan `REQUIRE_API_KEY=false`, 401/403 laluan tersebut tidak boleh
-  dibaca merentas origin.
+  `requireManagementAuth()` (`/api/v1/management/*`, `/api/v1/registered-keys`) tidak menggunakan pengecualian penolakan kelayakan ini: dengan `REQUIRE_API_KEY=false`, respons 401/403 mereka mengikut dasar asal CORS yang dikonfigurasikan.
 - **Sesi kuki (papan pemuka):** dilindungi oleh lalai tutup-jika-gagal **dan**
   oleh ketiadaan `Access-Control-Allow-Credentials` pada laluan dikongsi. Jangan
   masukkan origin pengurusan/papan pemuka dalam sebarang konfigurasi permisif; origin tersebut mesti kekal
@@ -153,7 +149,7 @@ OmniRoute dijalankan melalui `npm start` / `npm run dev`, jambatan `/v1/ws` dan
 `/api/v1/ws`, yang menstrim `/v1/chat/completions`, `/v1/messages` dan
 `/v1/responses` sebagai bingkai. Jambatan meminta keputusan daripada
 `/api/v1/ws?handshake=1` dan enggan menaik taraf sambungan melainkan laluan itu telah
-menjalankan semakan. Jabat tangan diterima apabila:
+menjalankan semakan. Keperluan pengesahan identiti masih terpakai secara berasingan. Semakan asal lulus apabila:
 
 - ia tiada pengepala `Origin` (Codex CLI, SDK dan klien bukan pelayar yang lain);
 - `Origin` dibenarkan oleh senarai benar di atas (`CORS_ALLOWED_ORIGINS`, tetapan

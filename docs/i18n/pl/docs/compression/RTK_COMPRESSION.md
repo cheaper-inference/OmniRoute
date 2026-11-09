@@ -9,8 +9,6 @@ version: 3.8.40
 lastUpdated: 2026-06-28
 ---
 
-# Kompresja RTK
-
 Kompresja RTK to silnik kompresji OmniRoute świadomy poleceń, przeznaczony na wyjście terminala i narzędzi. Jest
 zaprojektowany pod sesje agentów kodujących, w których większość wzrostu kontekstu pochodzi z logów testów, wyjścia builda,
 szumu menedżerów pakietów, transkryptów shella, wyjścia Dockera, wyjścia gita oraz stack trace'ów.

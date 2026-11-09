@@ -444,67 +444,67 @@ E kewara ya n'ime subdirectories lekwasịrị anya:
 
 ---
 
-## 4. `open-sse/` — Ebe ọrụ igwe na-enyefe data
+## 4. `open-sse/` — Oghere ọrụ injin streaming
 
-Ọ bụ npm workspace dị iche a na-ebipụta dị ka `@omniroute/open-sse`. Ọ na-ahụ maka
-nhazi arịrịọ, executors, translators, services, transformer, na sava MCP.
+Oghere ọrụ npm dị iche nke e bipụtara dịka `@omniroute/open-sse`. Ọ na-ahụ maka nhazi arịrịọ,
+ndị executor, ndị ntụgharị, ọrụ, transformer, na sava MCP.
 
 ```
 open-sse/
-├── index.ts                Mbupụ ọha
-├── package.json            Manifest workspace
+├── index.ts                Mbupụ ọhaneze
+├── package.json            Manifest oghere ọrụ
 ├── tsconfig.json
 ├── types.d.ts
-├── config/                 Ndebanye aha ndị na-enye ọrụ, profaịlụ header, njirimara, …
-├── handlers/               Ndị na-ahụ maka arịrịọ (chat, embeddings, audio, image, …)
-├── executors/              Modul executor 159 nke ndị na-enye ọrụ (klas executor + enyemaka nke onye na-enye ọrụ ọ bụla)
-├── translator/             Mgbanwe usoro (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
-├── transformer/            Transformer iyi Responses API ↔ Chat Completions
-├── services/               Modul ọrụ karịrị 80 (combos, fallback, quotas, identity, …)
-├── utils/                  Ndị na-enyere aka n'inyefe data, TLS client, AWS SigV4, proxy fetch, …
-└── mcp-server/             Sava MCP (transports 3, scopes 33, tools 110)
+├── config/                 Ndebanye ndị na-eweta ọrụ, profaịlụ header, njirimara, …
+├── handlers/               Ndị njikwa arịrịọ (nkata, embeddings, ọdịyo, onyonyo, …)
+├── executors/              Modul executor 159 (klas executor + ndị enyemaka maka onye na-eweta ọrụ ọ bụla)
+├── translator/             Ntụgharị usoro (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
+├── transformer/            Responses API ↔ Chat Completions transformer nke stream
+├── services/               Modul ọrụ 80+ (combos, fallback, quotas, njirimara, …)
+├── utils/                  Ndị enyemaka streaming, TLS client, AWS SigV4, proxy fetch, …
+└── mcp-server/             Sava MCP (ụzọ mbufe 3, scopes 33, tools 110)
 ```
 
 ### 4.1 `open-sse/handlers/`
 
-| Handler                 | Ebumnuche                                                             |
+| Onye njikwa             | Ebumnuche                                                             |
 | ----------------------- | --------------------------------------------------------------------- |
-| `chatCore.ts`           | Pipeline chat bụ isi (cache, oke ọsọ, ntụgharị combo, nkesa executor) |
+| `chatCore.ts`           | Pipeline nkata bụ isi (cache, oke ọsọ, combo routing, iziga executor) |
 | `responsesHandler.ts`   | Ebe mbata OpenAI Responses API                                        |
 | `embeddings.ts`         | Embeddings                                                            |
 | `imageGeneration.ts`    | Mmepụta onyonyo                                                       |
-| `audioSpeech.ts`        | Mgbanwe ederede gaa n'okwu                                            |
-| `audioTranscription.ts` | Mgbanwe okwu gaa n'ederede                                            |
+| `audioSpeech.ts`        | Ederede gaa na okwu                                                   |
+| `audioTranscription.ts` | Okwu gaa na ederede                                                   |
 | `videoGeneration.ts`    | Mmepụta vidio                                                         |
 | `musicGeneration.ts`    | Mmepụta egwu                                                          |
-| `rerank.ts`             | Nhazigharị ọkwa                                                       |
-| `moderations.ts`        | Nchịkwa                                                               |
-| `search.ts`             | Ọchụchọ web                                                           |
-| `sseParser.ts`          | Onye na-enyocha mmemme SSE                                            |
-| `usageExtractor.ts`     | Ịwepụta ọnụọgụ token site na iyi ndị dị n'èzí                         |
-| `responseSanitizer.ts`  | Iwepụ mkpọtụ pụrụ iche nke onye na-enye ọrụ                           |
-| `responseTranslator.ts` | Njikọ dị n'etiti nzaghachi onye na-enye ọrụ na oyi akwa translator    |
+| `rerank.ts`             | Ịhazigharị ọkwa                                                       |
+| `moderations.ts`        | Nnyocha ọdịnaya                                                       |
+| `search.ts`             | Ọchụchọ webụ                                                          |
+| `sseParser.ts`          | Parser event SSE                                                      |
+| `usageExtractor.ts`     | Wepụta ọnụọgụ token na stream ndị sitere n'elu                        |
+| `responseSanitizer.ts`  | Wepụ mkpọtụ pụrụ iche nke onye na-eweta ọrụ                           |
+| `responseTranslator.ts` | Njikọ dị n'etiti nzaghachi onye na-eweta ọrụ na layer onye ntụgharị   |
 
 ### 4.2 `open-sse/executors/`
 
-Modul executor 159 dị n'ogo mbụ (`*.ts` ewepụrụ `base.ts`, `index.ts` na ule — ọnụọgụ
-`npm run check:docs-counts` na-atụ). Klas executor ọ bụla na-agbatị `BaseExecutor` (`base.ts`),
-ozugbo ma ọ bụ site na `DefaultExecutor` ma ọ bụ executor ọzọ; modul ndị fọdụrụ bụ enyemaka nke onye na-enye ọrụ
-ọ bụla (schemas ngwaọrụ, fetch/TTS adapters, ndị na-ahụ maka quirk). Executors gụnyere:
+Modul executor 159 dị n'elu (`*.ts` ma e wepụ `base.ts`, `index.ts` na ule — nke a bụ ọnụọgụ
+`npm run check:docs-counts` na-atụ). Klas executor ọ bụla na-esi na `BaseExecutor` (`base.ts`) gbasaa,
+ma ọ bụ ozugbo, ma ọ bụ site na `DefaultExecutor` ma ọ bụ executor ọzọ; modul ndị fọdụrụ bụ
+ndị enyemaka maka onye na-eweta ọrụ ọ bụla (schema tool, adapter fetch/TTS, ndị njikwa àgwà pụrụ iche). Ndị executor gụnyere:
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`,
 `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`,
 `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`,
 `pollinations`, `qoder`, `vertex`, `devin-desktop`, tinyere `claudeIdentity.ts`
-(enyi na-enye aka maka njirimara nke a na-ekekọrịta) na `index.ts` (ndebanye aha).
+(onye enyemaka njirimara a na-ekekọrịta) na `index.ts` (ndebanye).
 
-> Rịba ama: ndị na-enye ọrụ a na-edepụtaghị ebe a na-enweta ọrụ site na `default.ts` nke na-eji
-> executor OpenAI-compatible izugbe. Katalọgụ zuru ezu nke ndị na-enye ọrụ (380 providers) dị na
+> Rịba ama: `default.ts` na-eji executor zuru ụwa ọnụ dakọtara na OpenAI nye ọrụ maka ndị
+> na-eweta ọrụ ndị a na-edeghị ebe a. Katalọgụ ndị na-eweta ọrụ zuru ezu (ndị na-eweta ọrụ 380) dị na
 > `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`
 
-Ntụgharị hub-na-spoke (OpenAI bụ hub).
+Ntụgharị ụdị etiti-na-alaka (OpenAI bụ etiti).
 
 - **Ndị ntụgharị arịrịọ 9** (`translator/request/`):
   `antigravity-to-openai`, `claude-to-gemini`, `claude-to-openai`,
@@ -512,70 +512,71 @@ Ntụgharị hub-na-spoke (OpenAI bụ hub).
   `openai-to-cursor`, `openai-to-gemini`, `openai-to-kiro`.
 - **Ndị ntụgharị nzaghachi 9** (`translator/response/`):
   `claude-to-openai`, `cursor-to-openai`, `gemini-to-claude`, `gemini-to-openai`,
-  `kiro-to-openai`, `openai-responses`, `openai-to-antigravity`, `openai-to-claude`.
-- **Ndị na-enyere aka 9** (`translator/helpers/`):
+  `kiro-to-openai`, `openai-responses`, `openai-to-antigravity`,
+  `openai-to-claude`.
+- **Ndị enyemaka 9** (`translator/helpers/`):
   `claudeHelper`, `geminiHelper`, `geminiToolsSanitizer`, `maxTokensHelper`,
   `openaiHelper`, `responsesApiHelper`, `schemaCoercion`, `toolCallHelper`, tinyere
-  ule ndị na-enyere aka.
-- **Ndị na-enyere aka onyonyo** (`translator/image/sizeMapper.ts`).
-- N'ogo mbụ: `bootstrap.ts`, `formats.ts`, `registry.ts`, `index.ts`.
+  ule ndị enyemaka.
+- **Ndị enyemaka onyonyo** (`translator/image/sizeMapper.ts`).
+- Ndị dị n'elu: `bootstrap.ts`, `formats.ts`, `registry.ts`, `index.ts`.
 
 ### 4.4 `open-sse/transformer/`
 
-- `responsesTransformer.ts` — Onye ntụgharị Responses API ↔ Chat
-  Completions dabere na `TransformStream` (route catch-all nke `responses/` na-eji).
+- `responsesTransformer.ts` — Onye ntụgharị Responses API ↔ Chat Completions
+  dabere na `TransformStream` (ụzọ `responses/` na-anabata ihe niile na-eji ya).
 
 ### 4.5 `open-sse/services/`
 
-Isi ihe (ndepụta zuru ezu dị n'okpuru `open-sse/services/`):
+Ihe ndị pụtara ìhè (ndepụta zuru ezu dị n'okpuru `open-sse/services/`):
 
-| Ihe gbasara       | Faịlụ                                                                                                                                                                                                                                                    |
-| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Nhazi ụzọ Combo   | `combo.ts` (atụmatụ 20), `comboConfig.ts`, `comboMetrics.ts`, `comboManifestMetrics.ts`, `comboAgentMiddleware.ts`                                                                                                                                       |
-| Injin Auto Combo  | `autoCombo/` — `engine.ts`, `scoring.ts`, `taskFitness.ts`, `virtualFactory.ts`, `modePacks.ts`, `autoPrefix.ts`, `persistence.ts`, `providerDiversity.ts`, `providerRegistryAccessor.ts`, `routerStrategy.ts`, `selfHealing.ts`, `index.ts`             |
-| Nkwụsi ike        | `accountFallback.ts` (oge jụrụ oyi + mkpọchi), `errorClassifier.ts`, `requestRejectedStreak.ts`, `emergencyFallback.ts`, `rateLimitManager.ts`, `rateLimitSemaphore.ts`, `accountSemaphore.ts`, `accountSelector.ts`                                     |
-| Oke ojiji         | `quotaMonitor.ts`, `quotaPreflight.ts`, `bailianQuotaFetcher.ts`, `codexQuotaFetcher.ts`, `deepseekQuotaFetcher.ts`, `openrouterQuotaFetcher.ts`, `openrouterFreeWindow.ts`, `llmgatewayQuotaFetcher.ts`, `crofUsageFetcher.ts`, `antigravityCredits.ts` |
-| Nchekwa cache     | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                            |
-| Amamihe nhazi ụzọ | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                             |
-| Njikwa model      | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                              |
-| Mkpakọ            | `compression/` — njikọ wiring zuru ezu nke injin mkpakọ                                                                                                                                                                                                  |
-| Token + nnọkọ     | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts`        |
-| Ọkwa / manifest   | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                            |
-| IP / netwọk       | `ipFilter.ts`, `webSearchFallback.ts`                                                                                                                                                                                                                    |
-| Ogbe              | `batchProcessor.ts`                                                                                                                                                                                                                                      |
-| Ojiji             | `usage.ts`                                                                                                                                                                                                                                               |
+| Ihe gbasara      | Faịlụ                                                                                                                                                                                                                                                    |
+| ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Nduzi Combo      | `combo.ts` (usoro 20), `comboConfig.ts`, `comboMetrics.ts`, `comboManifestMetrics.ts`, `comboAgentMiddleware.ts`                                                                                                                                         |
+| Injin Auto Combo | `autoCombo/` — `engine.ts`, `scoring.ts`, `taskFitness.ts`, `virtualFactory.ts`, `modePacks.ts`, `autoPrefix.ts`, `persistence.ts`, `providerDiversity.ts`, `providerRegistryAccessor.ts`, `routerStrategy.ts`, `selfHealing.ts`, `index.ts`             |
+| Nkwụsi ike       | `accountFallback.ts` (oge nchere + mkpọchi), `errorClassifier.ts`, `requestRejectedStreak.ts`, `emergencyFallback.ts`, `rateLimitManager.ts`, `rateLimitSemaphore.ts`, `accountSemaphore.ts`, `accountSelector.ts`                                       |
+| Oke ojiji        | `quotaMonitor.ts`, `quotaPreflight.ts`, `bailianQuotaFetcher.ts`, `codexQuotaFetcher.ts`, `deepseekQuotaFetcher.ts`, `openrouterQuotaFetcher.ts`, `openrouterFreeWindow.ts`, `llmgatewayQuotaFetcher.ts`, `crofUsageFetcher.ts`, `antigravityCredits.ts` |
+| Nchekwa nwa oge  | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                            |
+| Amamihe nduzi    | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                             |
+| Njikwa ụdịdị     | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                              |
+| Mkpakọ           | `compression/` — njikọ zuru ezu nke injin mkpakọ                                                                                                                                                                                                         |
+| Token + nnọkọ    | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts`        |
+| Ọkwa / manifest  | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                            |
+| IP / netwọkụ     | `ipFilter.ts`, `webSearchFallback.ts`                                                                                                                                                                                                                    |
+| Otu nhazi        | `batchProcessor.ts`                                                                                                                                                                                                                                      |
+| Ojiji            | `usage.ts`                                                                                                                                                                                                                                               |
 
 ### 4.6 `open-sse/mcp-server/`
 
-- **Ngwaọrụ pụrụ iche 110** ejikọtaworo na `server.ts` (ngwaọrụ canonical 45 dị na `schemas/tools.ts` +
-  modul ebe nchekwa, skills, GitHub-skills, pool, gamification, plugin, Notion, Obsidian,
-  local-corpus na compression — a na-agụ njikọ ha site na `countUniqueMcpTools`).
-- **Ụzọ njem 3**: stdio, HTTP Streamable, SSE.
-- **Scopes 33** ka a na-amanye n'oge runtime — ndepụta ntọala dị na `src/shared/constants/mcpScopes.ts`, ebe ngụkọta scopes bụ njikọ nke scopes ndị modul ngwaọrụ ọ bụla kwupụtara.
-- Tebụl nyocha: `mcp_tool_audit` (nke `audit.ts` na-ejupụta).
+- E jikọtara **ngwaọrụ pụrụ iche 110** na `server.ts` (45 bụ ndị bụ isi na `schemas/tools.ts` +
+  ebe nchekwa, nka, nka GitHub, pool, gamification, plugin, Notion, Obsidian,
+  local-corpus na modul mkpakọ — `countUniqueMcpTools` na-agụ njikọ ha ọnụ).
+- **Ụzọ mbufe 3**: stdio, HTTP Streamable, SSE.
+- A na-amanye **oke ikike 33** n'oge sistemụ na-arụ ọrụ — ndepụta ntọala dị na `src/shared/constants/mcpScopes.ts`, ndepụta zuru ezu bụ njikọ nke oke ikike modul ngwaọrụ ọ bụla kwupụtara.
+- Tebụl nnyocha: `mcp_tool_audit` (`audit.ts` na-ejupụta ya).
 - Faịlụ: `server.ts`, `index.ts`, `httpTransport.ts`, `audit.ts`, `scopeEnforcement.ts`,
   `runtimeHeartbeat.ts`, `descriptionCompressor.ts`, `schemas/{tools, a2a, audit, index}.ts`,
   `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts`,
-  tinyekwa ule ndị dị n'okpuru `__tests__/`.
+  tinyere ule ndị dị n'okpuru `__tests__/`.
 - Lee [MCP-SERVER.md](../frameworks/MCP-SERVER.md) maka katalọgụ ngwaọrụ zuru ezu.
 
 ### 4.7 `open-sse/config/`
 
-Ndebanye aha ndị na-eweta ọrụ (`providerRegistry.ts`, `providerModels.ts`,
-`providerHeaderProfiles.ts`), ndebanye aha model dị iche iche n’usoro (`audioRegistry.ts`,
+Ndebanye ndị na-eweta ọrụ (`providerRegistry.ts`, `providerModels.ts`,
+`providerHeaderProfiles.ts`), ndebanye ụdịdị dị iche iche maka usoro ọ bụla (`audioRegistry.ts`,
 `embeddingRegistry.ts`, `imageRegistry.ts`, `moderationRegistry.ts`,
 `musicRegistry.ts`, `rerankRegistry.ts`, `searchRegistry.ts`, `videoRegistry.ts`),
-ndị enyemaka njirimara (`codexIdentity.ts`, `codexInstructions.ts`,
+ihe enyemaka njirimara (`codexIdentity.ts`, `codexInstructions.ts`,
 `anthropicHeaders.ts`, `antigravityUpstream.ts`, `antigravityModelAliases.ts`,
 `cliFingerprints.ts`, `toolCloaking.ts`, `defaultThinkingSignature.ts`),
-ndị enyemaka nzere (`credentialLoader.ts`, `codexClient.ts`), na ndị
-na-emegharị ọrụ igwe ojii (`azureAi.ts`, `bedrock.ts`, `datarobot.ts`, `glmProvider.ts`,
+ihe enyemaka nzere (`credentialLoader.ts`, `codexClient.ts`), na ihe nkwụnye
+ọrụ igwe ojii (`azureAi.ts`, `bedrock.ts`, `datarobot.ts`, `glmProvider.ts`,
 `maritalk.ts`, `oci.ts`, `petals.ts`, `runway.ts`, `sap.ts`, `watsonx.ts`,
 `ollamaModels.ts`, `errorConfig.ts`, `constants.ts`, `registryUtils.ts`).
 
 ### 4.8 `open-sse/utils/`
 
-Usoro ntọala nke streaming na ndị enyemaka ndị na-eweta ọrụ: `stream.ts`, `streamHandler.ts`,
+Ihe ntọala nkwanye na ndị enyemaka ndị na-enye ọrụ: `stream.ts`, `streamHandler.ts`,
 `streamHelpers.ts`, `streamPayloadCollector.ts`, `streamReadiness.ts`,
 `sseHeartbeat.ts`, `proxyFetch.ts`, `proxyDispatcher.ts`, `tlsClient.ts`,
 `networkProxy.ts`, `awsSigV4.ts`, `cacheControlPolicy.ts`,
@@ -781,7 +782,7 @@ Lee [RESILIENCE_GUIDE.md](./RESILIENCE_GUIDE.md) na ngalaba pụrụ iche dị n
    `open-sse/mcp-server/schemas/tools.ts`).
 2. Kenye scope kwesịrị ekwesị n'ime `src/shared/constants/mcpScopes.ts`.
 3. Debanye ngwa ahụ na `open-sse/mcp-server/server.ts`.
-4. Tinye ule n'okpuru `open-sse/mcp-server/__tests__/`.
+4. Tinye ule n'okpuru `tests/unit/`.
 5. Melite [MCP-SERVER.md](../frameworks/MCP-SERVER.md).
 
 ### Tinye nka A2A ọhụrụ
@@ -799,7 +800,7 @@ Lee [A2A-SERVER.md § Ịtinye Nka Ọhụrụ](../frameworks/A2A-SERVER.md). Nk
 - **Ịkpọ aha**: faịlụ `camelCase` ma ọ bụ `kebab-case`, components `PascalCase`,
   constants `UPPER_SNAKE`.
 - **ESLint**: `no-eval`, `no-implied-eval`, `no-new-func` = `error` n'ebe niile;
-  `no-explicit-any` = `warn` na `open-sse/` na `tests/`, ma bụrụ error n'ebe ndị ọzọ.
+  `no-explicit-any` = `error` na `open-sse/**/*.ts` na `tests/**/*.ts`.
 - **TypeScript**: `strict: false` (ọnọdụ e ketara n'usoro ochie). Họrọ ụdị akọwapụtara nke ọma karịa
   inference maka oke dị n'etiti modul.
 - **Database**: edela raw SQL ozugbo n'ime routes ma ọ bụ handlers — gafee
@@ -829,8 +830,7 @@ Lee [A2A-SERVER.md § Ịtinye Nka Ọhụrụ](../frameworks/A2A-SERVER.md). Nk
   `a2a`, `memory`, `skills`.
 - **Branches**: prefixes `feat/`, `fix/`, `refactor/`, `docs/`, `test/`,
   `chore/`. Etinyela commit ozugbo na `main`.
-- **Husky**: pre-commit na-agba `lint-staged` + `check:docs-sync` +
-  `check:any-budget:t11`; pre-push na-agba `check:any-budget:t11` + `check:tracked-artifacts` (nnyocha ngwa ngwa; ọ naghị agụnye `test:unit`).
+- **Husky**: [`pre-commit`](../../../../../.husky/pre-commit) · [`pre-push`](../../../../../.husky/pre-push).
 
 ---
 

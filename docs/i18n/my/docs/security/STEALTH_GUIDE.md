@@ -236,9 +236,9 @@ MITM endpoint အားလုံးတွင် စီမံခန့်ခွ�
 
 ---
 
-## အသုံးပြုသူ-အေးဂျင့်သည် — env vars ကို အစားထိုးသည် (`.env.example` အပိုင်း 12)
+## User-Agent အစားထိုးသတ်မှတ်ချက်များ — env vars (`.env.example` အပိုင်း 12)
 
-| ပြောင်းလဲနိုင်သော   | ပုံသေ                                         |
+| Variable            | မူလတန်ဖိုး                                    |
 | ------------------- | --------------------------------------------- |
 | `CLAUDE_USER_AGENT` | `claude-cli/2.1.280 (external, cli)`          |
 | `CODEX_USER_AGENT`  | `codex-cli/0.155.0 (Windows 10.0.26200; x64)` |
@@ -247,7 +247,7 @@ MITM endpoint အားလုံးတွင် စီမံခန့်ခွ�
 | `QODER_USER_AGENT`  | `Qoder-Cli`                                   |
 | `CURSOR_USER_AGENT` | `Cursor/3.4`                                  |
 
-ရွေ့လျားရှာဖွေမှုမှတစ်ဆင့် `open-sse/executors/base.ts::buildHeaders()` မှစားသုံးသည်။** ဝန်ဆောင်မှုပေးသူများသည် CLI ဗားရှင်းအသစ်များထုတ်သည့်အခါ ၎င်းတို့ကို ဆောင့်ကန်ပါ။** — stale UA strings များသည် ခေတ်မမီတော့သော ဖောက်သည်များအဖြစ် စတင်ပယ်ချခံရတော့သည်။
+Dynamic lookup မှတစ်ဆင့် `open-sse/executors/base.ts::buildHeaders()` က အသုံးပြုသည်။ **Provider များက CLI version အသစ်များ ထုတ်လွှင့်သည့်အခါ ဤတန်ဖိုးများကို မြှင့်တင်ပါ** — ခေတ်မမီတော့သော UA string များကို client အဟောင်းများအဖြစ် စတင်ငြင်းပယ်လာမည်ဖြစ်သည်။
 
 ## CLI လိုက်ဖက်ညီမှုမုဒ် Toggle များ (`.env.example` အပိုင်း 13)
 

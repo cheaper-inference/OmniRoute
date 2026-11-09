@@ -838,13 +838,7 @@ Exa `type: "lite"` (Exa 3.0) ಚಿಕ್ಕದಾದ ಕ್ಷೇತ್ರಗ�
 ಅವಧಿ ಮೀರಿದ `subpages`, `subpageTarget`, `highlights.numSentences` ಮತ್ತು `highlights.highlightsPerUrl` ಇನ್ನು ಮುಂದೆ
 ಫಾರ್ವರ್ಡ್ ಮಾಡಲಾಗುವುದಿಲ್ಲ.
 
-ವೆಚ್ಚ ಲೆಕ್ಕಾಚಾರವು ಸಮತಟ್ಟಾದ ರಿಜಿಸ್ಟ್ರಿ `costPerQuery` ಆಗಿರುತ್ತದೆ; ಆದರೆ Exa ತನ್ನದೇ ಬೆಲೆ ನಿಗದಿ ಅನುಸರಿಸುತ್ತದೆ:
-`auto` (ಮತ್ತು ಲೆಗಸಿ `fast`) ಗೆ ಪ್ರತಿ ಕರೆಗಾಗಿ $0.007 ಅಥವಾ `lite` (ಮತ್ತು ಲೆಗಸಿ `instant`) ಗೆ $0.004,
-ಇದು 10 ಫಲಿತಾಂಶಗಳನ್ನು ಒಳಗೊಂಡಿರುತ್ತದೆ; ಪ್ರತಿ ಹೆಚ್ಚುವರಿ ಫಲಿತಾಂಶಕ್ಕೆ $0.001; ಮತ್ತು
-`contents.summary` ಹೊಂದಿಸಿದಾಗ ಮರಳಿ ನೀಡಲಾದ ಪ್ರತಿ ಫಲಿತಾಂಶಕ್ಕೆ $0.001. `search_depth` `basic`, `fast` ಮತ್ತು
-`ultra-fast` ಗಾಗಿ Tavily ಅನ್ನು 1 ಕ್ರೆಡಿಟ್ ($0.008) ಮತ್ತು `advanced` ಗಾಗಿ 2 ಕ್ರೆಡಿಟ್ಗಳು ($0.016) ಎಂದು ದಾಖಲಿಸಲಾಗುತ್ತದೆ
-([Tavily API ಕ್ರೆಡಿಟ್ಗಳು](https://docs.tavily.com/documentation/api-credits)). `auto_parameters: true` ಹೊಂದಿರುವ
-ಕರೆಯಲ್ಲಿ Tavily ಅನ್ನು advanced ಗೆ ಅಪ್ಗ್ರೇಡ್ ಮಾಡಿದರೂ ಅದನ್ನು 1 ಕ್ರೆಡಿಟ್ ಎಂದು ದಾಖಲಿಸಲಾಗುತ್ತದೆ.
+Exa: `auto` (ಮತ್ತು ಪರಂಪರೆ `fast`) ಗೆ ಪ್ರತಿ ಕರೆಗೆ $0.007 ಅಥವಾ `lite` ಗೆ $0.004 (ಮತ್ತು ಲೆಗಸಿ `instant`), 10 ಫಲಿತಾಂಶಗಳನ್ನು ಒಳಗೊಂಡಿದೆ; ಪ್ರತಿ ಮುಂದಿನ ಫಲಿತಾಂಶಕ್ಕೆ $0.001; ಮತ್ತು `contents.summary` ಅನ್ನು ಹೊಂದಿಸಿದಾಗ ಹಿಂದಿರುಗಿದ ಫಲಿತಾಂಶಕ್ಕೆ $0.001. Tavily ಅನ್ನು `search_depth` `basic`, `fast` ಮತ್ತು `ultra-fast` ಗಾಗಿ 1 ಕ್ರೆಡಿಟ್ ($0.008) ನಲ್ಲಿ ದಾಖಲಿಸಲಾಗಿದೆ ಮತ್ತು `advanced` ಗಾಗಿ 2 ಕ್ರೆಡಿಟ್ಗಳು ($0.016) ( [Tavily API ಕ್ರೆಡಿಟ್ಗಳು](https://docs.tavily.com/documentation/api-credits) ). Tavily ಸುಧಾರಿತ ಗೆ ಅಪ್ಗ್ರೇಡ್ ಮಾಡುವ `auto_parameters: true` ನೊಂದಿಗೆ ಕರೆಯನ್ನು ಇನ್ನೂ 1 ಕ್ರೆಡಿಟ್ನಲ್ಲಿ ರೆಕಾರ್ಡ್ ಮಾಡಲಾಗಿದೆ.
 
 ---
 
@@ -1147,6 +1141,8 @@ X-OmniRoute-No-Cache: true
 
 ---
 
+<a id="cliproxyapi-management-compatibility"></a>
+
 ## CLIProxyAPI ನಿರ್ವಹಣಾ ಹೊಂದಾಣಿಕೆ
 
 ಬಳಕೆಯ ಡ್ಯಾಶ್ಬೋರ್ಡ್ಗಳು Claude ಮತ್ತು Codex ಸಬ್ಸ್ಕ್ರಿಪ್ಶನ್ ಮಿತಿಗಳನ್ನು ಓದಲು ಕರೆ ಮಾಡುವ ಮೂರು
@@ -1161,21 +1157,11 @@ OmniRoute ಗೆ ಸೂಚಿಸಿ ಮತ್ತು `manage` ಸ್ಕೋಪ್ 
 | POST   | `/v0/management/api-call`    | ಬಾಡಿ `{ auth_index, method, url, header?, data? }`. ಖಾತೆಯ ಟೋಕನ್ನೊಂದಿಗೆ ಒಂದು ಅನುಮತಿಸಲಾದ ವಿನಂತಿಯನ್ನು ಕಳುಹಿಸಿ `{ status_code, body }` ಅನ್ನು ಹಿಂತಿರುಗಿಸುತ್ತದೆ |
 | POST   | `/v0/management/reset-quota` | ಬಾಡಿ `{ auth_index }`. ಒಂದು ಖಾತೆಯ ಸಂಪರ್ಕ ಕೂಲ್ಡೌನ್, ಮಾದರಿ ಲಾಕ್ಔಟ್ಗಳು ಮತ್ತು Codex ಪ್ರತಿ-ಸ್ಕೋಪ್ ಕೂಲ್ಡೌನ್ಗಳನ್ನು ತೆರವುಗೊಳಿಸುತ್ತದೆ                              |
 
-- `auth_index` ಎಂಬುದು OmniRoute ಸಂಪರ್ಕ ID ಆಗಿದೆ. `provider` ಎಂಬುದು `claude` ಅಥವಾ `codex` ಆಗಿದೆ (OAuth
-  ಸಂಪರ್ಕಗಳು ಮಾತ್ರ; `anthropic` API-ಕೀ ಪ್ರೊವೈಡರ್ ಅನ್ನು ಪಟ್ಟಿ ಮಾಡಲಾಗುವುದಿಲ್ಲ). Codex ಗಾಗಿ,
-  `id_token.chatgpt_account_id` ಸಂಗ್ರಹಿಸಲಾದ ವರ್ಕ್ಸ್ಪೇಸ್ ID ಆಗಿದೆ ಮತ್ತು `plan_type` ಸಂಗ್ರಹಿಸಲಾದ ಪ್ಲಾನ್ ಆಗಿದೆ.
-- `api-call` ಸಾಮಾನ್ಯ ಪ್ರಾಕ್ಸಿಯಲ್ಲ. ಇದು Claude `GET
+- `auth_index` ಎಂಬುದು OmniRoute connection ID. `provider` ಮೌಲ್ಯ `claude` ಅಥವಾ `codex` (OAuth ಸಂಪರ್ಕಗಳು ಮಾತ್ರ; `anthropic` API-key provider ಅನ್ನು ಪಟ್ಟಿ ಮಾಡುವುದಿಲ್ಲ). Codex ಗಾಗಿ `id_token.chatgpt_account_id` ಸಂಗ್ರಹಿಸಿದ workspace ID ಆಗಿದ್ದು, `plan_type` ಸಂಗ್ರಹಿಸಿದ plan ಆಗಿದೆ.
+- `api-call` ಸಾಮಾನ್ಯ ಉದ್ದೇಶದ proxy ಅಲ್ಲ. ಇದು Claude `GET
 https://api.anthropic.com/api/oauth/usage` ಮತ್ತು Codex `GET
-https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits` ಮತ್ತು
-  `POST .../wham/rate-limit-reset-credits/consume` ಅನ್ನು ಮಾತ್ರ ಸ್ವೀಕರಿಸುತ್ತದೆ, ಅದೂ ಹೊಂದಾಣಿಕೆಯ
-  ಪ್ರೊವೈಡರ್ನ ಖಾತೆಗೆ ಮಾತ್ರ. ಬೇರೆ ಯಾವುದಾದರೂ ವಿನಂತಿಯು ಅಪ್ಸ್ಟ್ರೀಮ್ ಅನ್ನು ಸಂಪರ್ಕಿಸದೆ `403` ಅನ್ನು ಹಿಂತಿರುಗಿಸುತ್ತದೆ. ಕರೆ ಮಾಡುವವರ
-  `Authorization` ಹೆಡರ್ (`$TOKEN$` ಪ್ಲೇಸ್ಹೋಲ್ಡರ್ ಸೇರಿದಂತೆ) ನಿರ್ಲಕ್ಷಿಸಲಾಗುತ್ತದೆ: OmniRoute ಸಂಪರ್ಕದ
-  ಆಕ್ಸೆಸ್ ಟೋಕನ್ ಅನ್ನು ಸೇರಿಸುತ್ತದೆ, ಅದು ಅವಧಿ ಮುಗಿಯುವ ಸಮೀಪದಲ್ಲಿದ್ದರೆ ಮೊದಲು ರಿಫ್ರೆಶ್ ಮಾಡುತ್ತದೆ, ಮತ್ತು
-  ಅನುಮತಿಸಲಾದ ಹೆಡರ್ಗಳನ್ನು ಮಾತ್ರ (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`;
-  `Accept`, `Content-Type`) ಫಾರ್ವರ್ಡ್ ಮಾಡುತ್ತದೆ. `Chatgpt-Account-Id` ಇಲ್ಲದಿದ್ದರೆ ಸಂಗ್ರಹಿಸಲಾದ ವರ್ಕ್ಸ್ಪೇಸ್ ID ಅನ್ನು
-  ಡೀಫಾಲ್ಟ್ ಆಗಿ ಬಳಸಲಾಗುತ್ತದೆ. ವಿನಂತಿಗಳು 15 ಸೆಕೆಂಡ್ಗಳ ನಂತರ ಟೈಮ್ಔಟ್ ಆಗುತ್ತವೆ ಮತ್ತು ಸಂಪರ್ಕದ ಪ್ರಾಕ್ಸಿಯನ್ನು ಬಳಸುತ್ತವೆ.
-- `reset-quota` ಟರ್ಮಿನಲ್ ಸ್ಥಿತಿಗಳನ್ನು (banned, expired, credits_exhausted) ಹಾಗೆಯೇ ಉಳಿಸುತ್ತದೆ. ತಿಳಿಯದ
-  `auth_index` `404` ಅನ್ನು ಹಿಂತಿರುಗಿಸುತ್ತದೆ.
+https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits` ಹಾಗೂ `POST .../wham/rate-limit-reset-credits/consume` ಅನ್ನು ಮಾತ್ರ ಸ್ವೀಕರಿಸುತ್ತದೆ; ಪ್ರತಿಯೊಂದೂ ಹೊಂದುವ provider ನ ಖಾತೆಗೆ ಮಾತ್ರ. ಉಳಿದ ಎಲ್ಲವೂ upstream ಅನ್ನು ಸಂಪರ್ಕಿಸದೆ `403` ಹಿಂದಿರುಗಿಸುತ್ತವೆ. Caller ನ `Authorization` header (`$TOKEN$` placeholder ಸಹಿತ) ಕಡೆಗಣಿಸಲಾಗುತ್ತದೆ: OmniRoute ಸಂಪರ್ಕದ access token ಅನ್ನು ಸೇರಿಸುತ್ತದೆ, ಅವಧಿ ಮೀರುವ ಸಮಯ ಹತ್ತಿರವಾಗಿದ್ದರೆ ಮೊದಲು refresh ಮಾಡುತ್ತದೆ, ಮತ್ತು ಅನುಮತಿಪಟ್ಟಿಯ header ಗಳನ್ನು ಮಾತ್ರ ಮುಂದಕ್ಕೆ ಕಳುಹಿಸುತ್ತದೆ (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`; `Accept`, `Content-Type`). `Chatgpt-Account-Id` ಇಲ್ಲದಿದ್ದರೆ ಸಂಗ್ರಹಿಸಿದ workspace ID ಪೂರ್ವನಿಯೋಜಿತವಾಗಿ ಬಳಕೆಯಾಗುತ್ತದೆ. ಮೊದಲ upstream response `401` ಆಗಿದ್ದರೆ ಒಮ್ಮೆ refresh ಮಾಡಿ, access token ಬದಲಾದಾಗ ಮಾತ್ರ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸುತ್ತದೆ. ಪ್ರತಿ upstream ಪ್ರಯತ್ನಕ್ಕೂ 15 ಸೆಕೆಂಡ್ timeout ಇದೆ ಮತ್ತು ಅದು ಸಂಪರ್ಕದ proxy ಬಳಸುತ್ತದೆ.
+- `reset-quota` terminal ಸ್ಥಿತಿಗಳನ್ನು (banned, expired, credits_exhausted) ಬದಲಿಸುವುದಿಲ್ಲ. ತಿಳಿಯದ `auth_index` ಗೆ `404` ಬರುತ್ತದೆ.
 
 **ದೃಢೀಕರಣ:** ಡ್ಯಾಶ್ಬೋರ್ಡ್ ಸೆಷನ್ ಅಥವಾ `manage`-ಸ್ಕೋಪ್ ಹೊಂದಿರುವ API ಕೀ ಅಗತ್ಯವಿದೆ; ಲಾಗಿನ್ ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿದ್ದರೂ
 ಇದು ಅಗತ್ಯವೇ ಆಗಿರುತ್ತದೆ (ಈ ಪಥಗಳು `ALWAYS_PROTECTED_API_PATHS` ನಲ್ಲಿ ಸೇರಿವೆ). ಇನ್ಫರೆನ್ಸ್-ಮಾತ್ರ ಕೀಗಳು
@@ -1923,17 +1909,17 @@ curl -X DELETE http://localhost:20128/api/resilience/model-cooldowns \
 
 OmniRoute 3 ಸಾರಿಗೆ ವಿಧಾನಗಳು (stdio, SSE, streamable-http) ಮತ್ತು ವ್ಯಾಪ್ತಿಗೊಳಿಸಲಾದ ಟೂಲ್ಗಳನ್ನು ಹೊಂದಿರುವ ಎಂಬೆಡೆಡ್ Model Context Protocol ಸರ್ವರ್ನೊಂದಿಗೆ ಬರುತ್ತದೆ. ಕೆಳಗಿನ ಡ್ಯಾಶ್ಬೋರ್ಡ್ ಎಂಡ್ಪಾಯಿಂಟ್ಗಳು ಸ್ಥಿತಿ/ಆಡಿಟ್ ಡೇಟಾವನ್ನು ಓದುತ್ತವೆ ಮತ್ತು HTTP ಸಾರಿಗೆ ವಿಧಾನಗಳಿಗೆ ಪ್ರಾಕ್ಸಿ ಮಾಡುತ್ತವೆ.
 
-| ವಿಧಾನ  | ಪಥ                     | ವಿವರಣೆ                                                                                                                         |                      |
-| ------ | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------ | -------------------- |
-| GET    | `/api/mcp/status`      | ಹಾರ್ಟ್ಬೀಟ್, ಸಾರಿಗೆ ವಿಧಾನ, ಆನ್ಲೈನ್ ಸ್ಥಿತಿ, ಕೊನೆಯ ಕರೆ, ಪ್ರಮುಖ ಟೂಲ್ಗಳು, 24 ಗಂಟೆಗಳ ಯಶಸ್ಸಿನ ದರ                                      |
-| GET    | `/api/mcp/tools`       | `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints` ಹೊಂದಿರುವ MCP ಟೂಲ್ಗಳ ಪಟ್ಟಿ                            |
-| GET    | `/api/mcp/sse`         | SSE ಸಾರಿಗೆ ವಿಧಾನಕ್ಕಾಗಿ SSE ಸ್ಟ್ರೀಮ್ ತೆರೆಯಿರಿ (MCP ನಿಷ್ಕ್ರಿಯವಾಗಿದ್ದರೆ ಅಥವಾ ಸಾರಿಗೆ ಹೊಂದಾಣಿಕೆ ಇಲ್ಲದಿದ್ದರೆ `503` ಹಿಂತಿರುಗಿಸುತ್ತದೆ) |
-| POST   | `/api/mcp/sse`         | SSE ಸಾರಿಗೆ ವಿಧಾನದಲ್ಲಿ JSON-RPC ಫ್ರೇಮ್ ಕಳುಹಿಸಿ                                                                                  |
-| GET    | `/api/mcp/stream`      | Streamable HTTP ಸಾರಿಗೆ ವಿಧಾನದ SSE ಬದಿಯನ್ನು ತೆರೆಯಿರಿ (ಸರ್ವರ್ನಿಂದ ಪ್ರಾರಂಭಿಸಲಾದ ಸಂದೇಶಗಳು)                                         |
-| POST   | `/api/mcp/stream`      | Streamable HTTP ಸಾರಿಗೆ ವಿಧಾನದಲ್ಲಿ JSON-RPC ಫ್ರೇಮ್ ಕಳುಹಿಸಿ                                                                      |
-| DELETE | `/api/mcp/stream`      | Streamable HTTP ಸೆಷನ್ ಅನ್ನು ಕೊನೆಗೊಳಿಸಿ                                                                                         |
-| GET    | `/api/mcp/audit`       | ಆಡಿಟ್ ಲಾಗ್ ಅನ್ನು ಪ್ರಶ್ನಿಸಿ — `?limit=`, `?offset=`, `?tool=`, `?success=true                                                   | false`, `?apiKeyId=` |
-| GET    | `/api/mcp/audit/stats` | ಒಟ್ಟುಗೂಡಿಸಿದ ಆಡಿಟ್ ಅಂಕಿಅಂಶಗಳು (ಒಟ್ಟುಗಳು, ಯಶಸ್ಸಿನ ದರ, ಸರಾಸರಿ ಅವಧಿ, ಪ್ರಮುಖ ಟೂಲ್ಗಳು)                                              |
+| ವಿಧಾನ  | ಪಥ                     | ವಿವರಣೆ                                                                                                                                                 |
+| ------ | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| GET    | `/api/mcp/status`      | ಹಾರ್ಟ್ಬೀಟ್, ಸಾರಿಗೆ ವಿಧಾನ, ಆನ್ಲೈನ್ ಸ್ಥಿತಿ, ಕೊನೆಯ ಕರೆ, ಪ್ರಮುಖ ಟೂಲ್ಗಳು, 24 ಗಂಟೆಗಳ ಯಶಸ್ಸಿನ ದರ                                                              |
+| GET    | `/api/mcp/tools`       | `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints` ಹೊಂದಿರುವ MCP ಟೂಲ್ಗಳ ಪಟ್ಟಿ                                                    |
+| GET    | `/api/mcp/sse`         | SSE ಸಾರಿಗೆ ವಿಧಾನಕ್ಕಾಗಿ SSE ಸ್ಟ್ರೀಮ್ ತೆರೆಯಿರಿ (MCP ನಿಷ್ಕ್ರಿಯವಾಗಿದ್ದರೆ ಅಥವಾ ಸಾರಿಗೆ ಹೊಂದಾಣಿಕೆ ಇಲ್ಲದಿದ್ದರೆ `503` ಹಿಂತಿರುಗಿಸುತ್ತದೆ)                         |
+| POST   | `/api/mcp/sse`         | SSE ಸಾರಿಗೆ ವಿಧಾನದಲ್ಲಿ JSON-RPC ಫ್ರೇಮ್ ಕಳುಹಿಸಿ                                                                                                          |
+| GET    | `/api/mcp/stream`      | Streamable HTTP ಸಾರಿಗೆ ವಿಧಾನದ SSE ಬದಿಯನ್ನು ತೆರೆಯಿರಿ (ಸರ್ವರ್ನಿಂದ ಪ್ರಾರಂಭಿಸಲಾದ ಸಂದೇಶಗಳು)                                                                 |
+| POST   | `/api/mcp/stream`      | Streamable HTTP ಸಾರಿಗೆ ವಿಧಾನದಲ್ಲಿ JSON-RPC ಫ್ರೇಮ್ ಕಳುಹಿಸಿ                                                                                              |
+| DELETE | `/api/mcp/stream`      | Streamable HTTP ಸೆಷನ್ ಅನ್ನು ಕೊನೆಗೊಳಿಸಿ                                                                                                                 |
+| GET    | `/api/mcp/audit`       | ಆಡಿಟ್ ಲಾಗ್ ಅನ್ನು ಪ್ರಶ್ನಿಸಿ — `?limit=`, `?offset=`, `?tool=`, `?success=true                                                   \| false`, `?apiKeyId=` |
+| GET    | `/api/mcp/audit/stats` | ಒಟ್ಟುಗೂಡಿಸಿದ ಆಡಿಟ್ ಅಂಕಿಅಂಶಗಳು (ಒಟ್ಟುಗಳು, ಯಶಸ್ಸಿನ ದರ, ಸರಾಸರಿ ಅವಧಿ, ಪ್ರಮುಖ ಟೂಲ್ಗಳು)                                                                      |
 
 **ದೃಢೀಕರಣ:** `sse`/`stream` ಸಾರಿಗೆ ವಿಧಾನಗಳು MCP-ನಿರ್ದಿಷ್ಟ ದೃಢೀಕರಣ ಮೇಲ್ಮೈಯನ್ನು ( `mcp` ಸ್ಕೋಪ್ ಹೊಂದಿರುವ Bearer API ಕೀ) ಅನುಸರಿಸುತ್ತವೆ; `status`/`tools`/`audit*` ಮಾರ್ಗಗಳನ್ನು ಡ್ಯಾಶ್ಬೋರ್ಡ್ನಿಂದ ಓದಬಹುದು (ಡ್ಯಾಶ್ಬೋರ್ಡ್ ಹೋಸ್ಟ್ಗೆ ತಲುಪುವುದನ್ನು ಹೊರತುಪಡಿಸಿ ಹೆಚ್ಚುವರಿ ದೃಢೀಕರಣ ಅಗತ್ಯವಿಲ್ಲ).
 

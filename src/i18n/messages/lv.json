@@ -4147,7 +4147,9 @@
     "duplicateAutoComboFailedPrefix": "Neizdevās dublēt automātisko kombināciju:",
     "duplicateAutoComboUnknownError": "Nezināma kļūda",
     "duplicateAutoComboTitle": "Izveidot statisku kombināciju no {name}",
-    "fallbackSummary": "{rate}% pieprasījumu tika pārcelti, vidēji tiek izlaisti ~{skips} mērķi"
+    "fallbackSummary": "{rate}% pieprasījumu tika pārcelti, vidēji tiek izlaisti ~{skips} mērķi",
+    "reorderAll": "Pārkārtot visu",
+    "reorderAllDescription": "Visu {count} kombināciju pārkārtošana. Vilkšanas rokturi ir iespējoti."
   },
   "costs": {
     "title": "Izmaksas",
@@ -6281,10 +6283,6 @@
     "hideEmails": "Slēpt visas e-pasta adreses",
     "a": "A",
     "accountConcurrencyCapHint": "Maksimālais vienlaicīgo pieprasījumu skaits, ko šis savienojums/konts spēj apstrādāt. Abonēšanas konti parasti atļauj tikai dažus (1–3) — limita pārsniegšana izraisa 429 kļūdas un nogaidīšanas periodus. Atstājiet tukšu, lai izmantotu noklusējuma vērtību.",
-    "aiCreditsLimit": "AI Credits ierobežojums norēķinu periodā",
-    "aiCreditsLimitPlaceholder": "Nav vietējā ierobežojuma",
-    "aiCreditsLimitHint": "Izlaiž šo savienojumu, kad GitHub ziņotie AI Credits sasniedz šo vērtību, tāpēc maršrutēšana pāriet uz jūsu citiem savienojumiem. Tukšs to atspējo; 0 vienmēr izlaiž. Trūkstošs vai novecojis lietojuma rādījums nekad nebloķē — tas nav garantēts izdevumu griesti.",
-    "aiCreditsLimitInvalid": "AI Credits ierobežojumam jābūt nenegatīvam skaitlim vai tukšam, lai to atspējotu.",
     "accountConcurrencyCapLabel": "Konta vienlaicīguma limits",
     "accountIdHint": "Nepieciešams dažiem sniedzējiem (piem., Cloudflare Workers AI) kopā ar API tokenu.",
     "accountIdLabel": "Konta ID",
@@ -6378,8 +6376,6 @@
     "newApiUserIdLabel": "New-API lietotāja ID",
     "newApiUserIdPlaceholder": "piem., 12345",
     "newApiUserIdHint": "AgentRouter New-Api-User galvenes vērtība, ko izmanto kopā ar konsoles API atslēgu, lai iegūtu kvotas atlikumu.",
-    "tokenrouterManagementKeyLabel": "Pārvaldības atslēga (neobligāti)",
-    "tokenrouterManagementKeyHint": "Konta atslēga no TokenRouter informācijas paneļa (Settings → Management Key). Tiek izmantota tikai kvotas un atlikuma nolasīšanai, nekad pieprasījumiem. Saglabātā atslēga netiek rādīta; atstājiet tukšu, lai to paturētu.",
     "newApiAggregatorToggleLabel": "Apkopotāja vārteja",
     "newApiAggregatorToggleHint": "Iespējot atlikuma noteikšanu New-API / One-API / Sub2API apkopotāju mezgliem. Informācijas panelī tiks parādīta atlikuma emblēma, un kvotas priekšpārbaudes maršrutēšana izlaidīs kontus, kuru kvota ir izsmelta.",
     "newApiAggregatorConsoleApiKeyHint": "Sistēmas piekļuves marķieris apkopotāja /api/user/self galapunktam. Tā nav maršrutēšanas API atslēga.",
@@ -6393,8 +6389,6 @@
     "customUserAgentLabel": "Pielāgota lietotāja aģenta etiķete",
     "huggingfaceBillToHint": "Neobligāti. Jūsu Hugging Face norēķinu konta identifikators, kas tiek nosūtīts kā X-HF-Bill-To galvene izmaksu attiecināšanai.",
     "huggingfaceBillToLabel": "Hugging Face Bill-To konts",
-    "commandCodeZdrLabel": "Pieprasīt nulles datu saglabāšanu (ZDR)",
-    "commandCodeZdrHint": "Ar katru pieprasījumu, kas veikts ar šo API atslēgu, nosūta x-cmd-zdr: 1. Modeļi bez ZDR upstream var nebūt pieejami.",
     "databricksBaseUrlHint": "Databricks bāzes URL norāde",
     "defaultThinkingStrengthHint": "Tiek izmantota, ja pieprasījumā nav norādīta spriešanas intensitāte.",
     "defaultThinkingStrengthLabel": "Noklusējuma domāšanas intensitāte",
@@ -6869,7 +6863,7 @@
       "xai": "Savienojiet xAI (Grok) ar API atslēgu.",
       "xiaomi-mimo": "Savienojiet Xiaomi MiMo ar API atslēgu.",
       "yi": "Iegūstiet API atslēgu vietnē platform.lingyiwanwu.com",
-      "zai": "API atslēga no https://open.bigmodel.cn/usercenter/apikeys",
+      "zai": "API atslēga no https://z.ai/manage-apikey/apikey-list",
       "zenmux": "ZenMux piedāvā ar OpenAI saderīgu chat completions galapunktu adresē /api/v1/chat/completions, kā arī Anthropic Messages (/api/anthropic/v1/messages) un Google Gemini (/api/vertex-ai) protokolu saskarnes. OmniRoute izmanto OpenAI protokolu.",
       "galadriel": "Savienojiet Galadriel ar API atslēgu.",
       "predibase": "25 ASV dolāru bezmaksas izmēģinājuma kredīti (30 dienu derīgums)",
@@ -6990,11 +6984,6 @@
     "anonymousFallbackEnabled": "Pakalpojumam {provider} ir iespējota anonīma rezerves iespēja",
     "anonymousFallbackDisabled": "Pakalpojumam {provider} ir atspējota anonīma rezerves iespēja — ja savienojumu resursi būs izsmelti, šis pakalpojumu sniedzējs tiks izlaists",
     "anonymousFallbackUpdateFailed": "Neizdevās atjaunināt anonīmās rezerves iespējas iestatījumu",
-    "retryDelayTitle": "Atkārtota mēģinājuma aizkave",
-    "retryDelayDesc": "Cik ilgi savienojums atpūšas pēc pieprasījumu ātruma ierobežojuma kļūdas, ja pakalpojumu sniedzējs nenorāda, kad mēģināt vēlreiz. Automātiskais režīms izmanto iebūvēto atkāpšanos; pakalpojumu sniedzēja nosūtītajam atiestatīšanas laikam vienmēr ir prioritāte.",
-    "retryDelayAuto": "Automātiski",
-    "retryDelaySaved": "Atkārtota mēģinājuma aizkave saglabāta",
-    "retryDelayUpdateFailed": "Neizdevās atjaunināt atkārtota mēģinājuma aizkavi",
     "batchDeleteFailed": "Neizdevās veikt lielapjoma dzēšanu",
     "batchDeleteNetworkError": "Tīkla kļūda lielapjoma dzēšanas laikā",
     "batchUpdateFailed": "Neizdevās veikt lielapjoma atjaunināšanu",
@@ -7094,7 +7083,20 @@
     "chatgptConnectorLabel": "ChatGPT pielāgots savienotājs",
     "doctorChecking": "Pārbauda statusu...",
     "doctorCheck": "Pārbaudīt ārstēšanas statusu",
-    "fallbackRetryBackendTitle": "Rezerves atkārtota mēģinājuma aizmugure"
+    "fallbackRetryBackendTitle": "Rezerves atkārtota mēģinājuma aizmugure",
+    "retryDelayTitle": "Atkārtota mēģinājuma aizkave",
+    "retryDelayDesc": "Cik ilgi savienojums atpūšas pēc pieprasījumu ātruma ierobežojuma kļūdas, ja pakalpojumu sniedzējs nenorāda, kad mēģināt vēlreiz. Automātiskais režīms izmanto iebūvēto atkāpšanos; pakalpojumu sniedzēja nosūtītajam atiestatīšanas laikam vienmēr ir prioritāte.",
+    "retryDelayAuto": "Automātiski",
+    "retryDelaySaved": "Atkārtota mēģinājuma aizkave saglabāta",
+    "retryDelayUpdateFailed": "Neizdevās atjaunināt atkārtota mēģinājuma aizkavi",
+    "aiCreditsLimit": "AI Credits ierobežojums norēķinu periodā",
+    "aiCreditsLimitPlaceholder": "Nav vietējā ierobežojuma",
+    "aiCreditsLimitHint": "Izlaiž šo savienojumu, kad GitHub ziņotie AI Credits sasniedz šo vērtību, tāpēc maršrutēšana pāriet uz jūsu citiem savienojumiem. Tukšs to atspējo; 0 vienmēr izlaiž. Trūkstošs vai novecojis lietojuma rādījums nekad nebloķē — tas nav garantēts izdevumu griesti.",
+    "aiCreditsLimitInvalid": "AI Credits ierobežojumam jābūt nenegatīvam skaitlim vai tukšam, lai to atspējotu.",
+    "tokenrouterManagementKeyLabel": "Pārvaldības atslēga (neobligāti)",
+    "tokenrouterManagementKeyHint": "Konta atslēga no TokenRouter informācijas paneļa (Settings → Management Key). Tiek izmantota tikai kvotas un atlikuma nolasīšanai, nekad pieprasījumiem. Saglabātā atslēga netiek rādīta; atstājiet tukšu, lai to paturētu.",
+    "commandCodeZdrLabel": "Pieprasīt nulles datu saglabāšanu (ZDR)",
+    "commandCodeZdrHint": "Ar katru pieprasījumu, kas veikts ar šo API atslēgu, nosūta x-cmd-zdr: 1. Modeļi bez ZDR upstream var nebūt pieejami."
   },
   "settings": {
     "title": "Iestatījumi",
@@ -14255,6 +14257,10 @@
         "label": "Aizsargātās prioritātes infrastruktūras apturēšana kā 502",
         "description": "Atbildēt ar 502, nevis 503, ja prioritārais mērķis ar rezerves variantu tikai kvotas izsmelšanas gadījumā aptur Combo tāda iemesla dēļ, kas pierādāmi nav saistīts ar kvotu: atvērts pakalpojumu sniedzēja ķēdes pārtraucējs vai izlaišana prognozēta latentuma dēļ."
       },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Budžeta politika par necenotu izmantošanu",
+        "description": "Kā viena atslēgas diennakts vai nedēļas USD limiti izturas pret veiksmīgu izmantošanu, kurai pakalpojuma sniedzējam vai modelim nav cenas rindas. fail_closed (noklusējums) atzīmē logu kā pārsniegtu, tāpēc nezināmas izmaksas nekad nevar izsprukt ārpus stingra limita. count_as_zero uzskaita šo izmantošanu kā $0 un turpina piemērot cenas pamatotos izdevumus. Necenoti modeļi jebkurā gadījumā tiek parādīti paneļa sākumlapā."
+      },
       "AUTH_LOG_INCLUDE_ACCOUNT_ID": {
         "label": "Reģistrēt konta ID",
         "description": "Iekļaut konta prefiksu AUTH reģistra rindās (piem., \"Izmanto '<provider>' kontu: abc12345...\"). Pēc noklusējuma atspējots, lai konta identifikatori netiktu izlaukti koplietojamos/vairāku īpašnieku procesu reģistros. Neatkarīgi no Atkodašanas režīma; Atkodašanas režīma pārslēgšana to neatklāj."
@@ -14535,9 +14541,9 @@
         "label": "Atdzišanas atkārtošana: izlaist 403/410 atteikumus",
         "description": "Kad visiem kontiem ir atdzišanas periods un atdzišanu, kas beidzas vispirms, izraisīja 403 (piekļuve atteikta) vai 410 (vairs nepastāv), nekavējoties atgriezt šo atteikumu, nevis nogaidīt atdzišanas beigas un atkārtoti nosūtīt pieprasījumu; atjaunojošs agentrouter savienojuma tvēruma kvotas 403 atteikums tad tiek saglabāts ar errorCode 429, lai tas paliktu atkārtojams. Pēc noklusējuma izslēgts: tikai 401 izlaiž gaidīšanu, un katrs atteikums tiek saglabāts ar statusu, ar kādu tas tika saņemts."
       },
-      "UNPRICED_USAGE_BUDGET_POLICY": {
-        "label": "Budžeta politika par necenotu izmantošanu",
-        "description": "Kā viena atslēgas diennakts vai nedēļas USD limiti izturas pret veiksmīgu izmantošanu, kurai pakalpojuma sniedzējam vai modelim nav cenas rindas. fail_closed (noklusējums) atzīmē logu kā pārsniegtu, tāpēc nezināmas izmaksas nekad nevar izsprukt ārpus stingra limita. count_as_zero uzskaita šo izmantošanu kā $0 un turpina piemērot cenas pamatotos izdevumus. Necenoti modeļi jebkurā gadījumā tiek parādīti paneļa sākumlapā."
+      "COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE": {
+        "description": "Saspiešanas kešatmiņas statistikā uzskaitiet saspiestu pieprasījumu automātiskās prefiksu kešatmiņas nodrošinātājam (OpenAI, Codex, Azure vai pielāgotam savienojumam, kas deklarē tūlītēju kešatmiņu ar marķiera noņemšanu) kā aptuveno kešatmiņas trāpījumu pat bez cache_control marķieriem. Aprēķins ir kešatmiņas piemērotības signāls, nevis novērots trāpījums, tāpēc šo pakalpojumu sniedzēju ziņotais trāpījumu līmenis ir 100%. Izslēgts pēc noklusējuma: tikai pieprasījums, kas satur cache_control marķierus kešatmiņas nodrošinātājam, tiek uzskatīts par aptuvenu trāpījumu, tāpēc automātisko prefiksu nodrošinātāji turpina ziņot par 0.",
+        "label": "Kompresijas kešatmiņas statistika: automātiska prefiksa atbilstība"
       }
     }
   },

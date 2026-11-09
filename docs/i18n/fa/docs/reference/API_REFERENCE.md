@@ -842,8 +842,7 @@ Exa و Tavily فیلدهای مختص ارائهدهنده را از یک کیس
 
 Exa با `type: "lite"` (Exa 3.0) مجموعه کوچکتری از فیلدها را میپذیرد و اگر هر فیلد دیگری تنظیم شده باشد، کل درخواست را رد میکند. برای lite، `additionalQueries`، `systemPrompt` و تمام کلیدهای `contents` بهجز `text` و `highlights` پیش از فراخوانی حذف میشوند. فیلدهای منسوخشده `subpages`، `subpageTarget`، `highlights.numSentences` و `highlights.highlightsPerUrl` دیگر ارسال نمیشوند.
 
-حسابداری هزینه از رجیستری تخت `costPerQuery` استفاده میکند، بهجز Exa که از قیمتگذاری اختصاصی Exa پیروی میکند: برای `auto` (و `fast` قدیمی) بهازای هر فراخوانی ۰٫۰۰۷ دلار یا برای `lite` (و `instant` قدیمی) ۰٫۰۰۴ دلار، شامل ۱۰ نتیجه؛ برای هر نتیجه اضافی ۰٫۰۰۱ دلار؛ و در صورت تنظیم `contents.summary`، بهازای هر نتیجه بازگرداندهشده ۰٫۰۰۱ دلار. Tavily برای `search_depth`های `basic`، `fast` و `ultra-fast` با ۱ اعتبار (۰٫۰۰۸ دلار) و برای `advanced` با ۲ اعتبار (۰٫۰۱۶ دلار) ثبت میشود
-([اعتبارهای API Tavily](https://docs.tavily.com/documentation/api-credits)). فراخوانی دارای `auto_parameters: true` که توسط Tavily به advanced ارتقا یابد، همچنان با ۱ اعتبار ثبت میشود.
+Exa: 0.007 دلار در هر تماس برای `auto` (و `fast` میراث) یا 0.004 دلار برای `lite` (و `instant` میراث)، که 10 نتیجه را پوشش می دهد. 0.001 دلار برای هر نتیجه بعدی؛ و 0.001 دلار به ازای هر نتیجه برگشتی زمانی که `contents.summary` تنظیم شود. Tavily با 1 اعتبار (0.008 دلار) برای `search_depth` `basic`، `fast` و `ultra-fast`، و 2 اعتبار (0.016 دلار) برای `advanced` ( [اعتبارات Tavily API](https://docs.tavily.com/documentation/api-credits) ) ثبت شده است. تماس با `auto_parameters: true` که Tavily آن را به پیشرفته ارتقا میدهد همچنان با 1 اعتبار ثبت میشود.
 
 ---
 
@@ -1130,6 +1129,8 @@ X-OmniRoute-No-Cache: true
 
 ---
 
+<a id="cliproxyapi-management-compatibility"></a>
+
 ## سازگاری مدیریت CLIProxyAPI
 
 OmniRoute به سه endpoint مدیریتی [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI) که داشبوردهای مصرف برای خواندن محدودیتهای اشتراک Claude و Codex فراخوانی میکنند پاسخ میدهد (برای مثال، منبع محدودیت مصرف `cliproxy` در T3 Code). نشانی پایهٔ کلاینت را روی OmniRoute قرار دهید و از یک کلید API با scope `manage` بهعنوان کلید مدیریتی آن استفاده کنید. این مسیرها در `/v0/management/*` و `/api/v0/management/*` ارائه میشوند.
@@ -1140,12 +1141,11 @@ OmniRoute به سه endpoint مدیریتی [CLIProxyAPI](https://github.com/rou
 | POST | `/v0/management/api-call`    | بدنهٔ `{ auth_index, method, url, header?, data? }`. یک درخواست مجاز را با توکن حساب ارسال میکند و `{ status_code, body }` را برمیگرداند |
 | POST | `/v0/management/reset-quota` | بدنهٔ `{ auth_index }`. زمان توقف اتصال، قفلهای مدل و زمانهای توقف Codex در هر scope را برای یک حساب پاک میکند                           |
 
-- `auth_index` شناسهٔ اتصال OmniRoute است. `provider` برابر `claude` یا `codex` است (فقط اتصالهای OAuth؛ provider مربوط به کلید API یعنی `anthropic` فهرست نمیشود). برای Codex، مقدار `id_token.chatgpt_account_id` شناسهٔ workspace ذخیرهشده و `plan_type` طرح ذخیرهشده است.
-- `api-call` یک proxy عمومی نیست. این endpoint فقط `GET
-https://api.anthropic.com/api/oauth/usage` مربوط به Claude و `GET
-https://chatgpt.com/backend-api/wham/usage`، `GET .../wham/rate-limit-reset-credits` و
-  `POST .../wham/rate-limit-reset-credits/consume` مربوط به Codex را میپذیرد؛ هرکدام نیز فقط برای حسابی از provider متناظر. هر چیز دیگری بدون تماس با upstream مقدار `403` برمیگرداند. هدر `Authorization` فراخواننده (ازجمله placeholder یعنی `$TOKEN$`) نادیده گرفته میشود: OmniRoute توکن دسترسی اتصال را تزریق میکند، در صورت نزدیک بودن زمان انقضا ابتدا آن را تازهسازی میکند و فقط هدرهای مجاز (`anthropic-beta`؛ `OpenAI-Beta`، `Originator`، `Chatgpt-Account-Id`؛ `Accept`، `Content-Type`) را ارسال میکند. اگر `Chatgpt-Account-Id` وجود نداشته باشد، شناسهٔ workspace ذخیرهشده بهطور پیشفرض استفاده میشود. مهلت زمانی درخواستها ۱۵ ثانیه است و از proxy اتصال استفاده میکنند.
-- `reset-quota` وضعیتهای نهایی (`banned`، `expired`، `credits_exhausted`) را تغییر نمیدهد. اگر `auth_index` ناشناخته باشد، `404` برمیگرداند.
+- `auth_index` شناسهٔ اتصال OmniRoute است. `provider` برابر `claude` یا `codex` است (فقط اتصال‌های OAuth؛ ارائه‌دهندهٔ کلید API با نام `anthropic` فهرست نمی‌شود). برای Codex، `id_token.chatgpt_account_id` شناسهٔ ذخیره‌شدهٔ فضای کاری و `plan_type` طرح ذخیره‌شده است.
+- `api-call` پراکسی عمومی نیست. فقط Claude `GET
+https://api.anthropic.com/api/oauth/usage` و Codex `GET
+https://chatgpt.com/backend-api/wham/usage`، `GET .../wham/rate-limit-reset-credits` و `POST .../wham/rate-limit-reset-credits/consume` را می‌پذیرد؛ هرکدام فقط برای حساب ارائه‌دهندهٔ متناظر. هر چیز دیگری بدون تماس با بالادست `403` می‌دهد. هدر `Authorization` فراخواننده (از جمله جای‌نگهدار `$TOKEN$`) نادیده گرفته می‌شود: OmniRoute توکن دسترسی اتصال را تزریق می‌کند، در نزدیکی انقضا ابتدا آن را تازه می‌کند و فقط هدرهای مجاز را می‌فرستد (`anthropic-beta`؛ `OpenAI-Beta`، `Originator`، `Chatgpt-Account-Id`؛ `Accept`، `Content-Type`). اگر `Chatgpt-Account-Id` نباشد، شناسهٔ ذخیره‌شدهٔ فضای کاری پیش‌فرض است. اگر نخستین پاسخ بالادست `401` باشد، یک بار نوسازی می‌کند و فقط در صورت تغییر توکن دسترسی دوباره تلاش می‌کند. مهلت هر تلاش بالادست 15 ثانیه است و از پراکسی اتصال استفاده می‌کند.
+- `reset-quota` به وضعیت‌های نهایی (banned, expired, credits_exhausted) دست نمی‌زند. `auth_index` ناشناخته `404` می‌دهد.
 
 **احراز هویت:** نشست داشبورد یا یک کلید API با scope `manage`؛ حتی وقتی ورود غیرفعال است نیز الزامی است (این مسیرها در `ALWAYS_PROTECTED_API_PATHS` قرار دارند). کلیدهای صرفاً inference مقدار `403` دریافت میکنند. منبع: `src/lib/cliproxyCompat/managementApi.ts`.
 
@@ -1860,17 +1860,17 @@ curl -X DELETE http://localhost:20128/api/resilience/model-cooldowns \
 
 OmniRoute یک سرور تعبیهشدهٔ Model Context Protocol با ۳ انتقال (stdio، SSE، streamable-http) و ابزارهای دارای محدوده دسترسی ارائه میکند. نقاط پایانی داشبورد زیر دادههای وضعیت/ممیزی را میخوانند و انتقالهای HTTP را واسطهگری میکنند.
 
-| روش    | مسیر                   | توضیحات                                                                                                  |                      |
-| ------ | ---------------------- | -------------------------------------------------------------------------------------------------------- | -------------------- |
-| GET    | `/api/mcp/status`      | ضربان قلب، انتقال، وضعیت آنلاین، آخرین فراخوانی، ابزارهای برتر، نرخ موفقیت ۲۴ ساعته                      |
-| GET    | `/api/mcp/tools`       | فهرست ابزارهای MCP با `name`، `description`، `scopes`، `phase`، `auditLevel`، `sourceEndpoints`          |
-| GET    | `/api/mcp/sse`         | باز کردن جریان SSE برای انتقال SSE (اگر MCP غیرفعال باشد یا انتقال مطابقت نداشته باشد، `503` برمیگرداند) |
-| POST   | `/api/mcp/sse`         | ارسال فریم JSON-RPC در انتقال SSE                                                                        |
-| GET    | `/api/mcp/stream`      | باز کردن سمت SSE انتقال Streamable HTTP (پیامهای آغازشده از سوی سرور)                                    |
-| POST   | `/api/mcp/stream`      | ارسال فریم JSON-RPC در انتقال Streamable HTTP                                                            |
-| DELETE | `/api/mcp/stream`      | پایان دادن به نشست Streamable HTTP                                                                       |
-| GET    | `/api/mcp/audit`       | جستوجوی گزارش ممیزی — `?limit=`، `?offset=`، `?tool=`، `?success=true                                    | false`، `?apiKeyId=` |
-| GET    | `/api/mcp/audit/stats` | آمار تجمیعی ممیزی (مجموع، نرخ موفقیت، میانگین مدتزمان، ابزارهای برتر)                                    |
+| روش    | مسیر                   | توضیحات                                                                                                                          |
+| ------ | ---------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/mcp/status`      | ضربان قلب، انتقال، وضعیت آنلاین، آخرین فراخوانی، ابزارهای برتر، نرخ موفقیت ۲۴ ساعته                                              |
+| GET    | `/api/mcp/tools`       | فهرست ابزارهای MCP با `name`، `description`، `scopes`، `phase`، `auditLevel`، `sourceEndpoints`                                  |
+| GET    | `/api/mcp/sse`         | باز کردن جریان SSE برای انتقال SSE (اگر MCP غیرفعال باشد یا انتقال مطابقت نداشته باشد، `503` برمیگرداند)                         |
+| POST   | `/api/mcp/sse`         | ارسال فریم JSON-RPC در انتقال SSE                                                                                                |
+| GET    | `/api/mcp/stream`      | باز کردن سمت SSE انتقال Streamable HTTP (پیامهای آغازشده از سوی سرور)                                                            |
+| POST   | `/api/mcp/stream`      | ارسال فریم JSON-RPC در انتقال Streamable HTTP                                                                                    |
+| DELETE | `/api/mcp/stream`      | پایان دادن به نشست Streamable HTTP                                                                                               |
+| GET    | `/api/mcp/audit`       | جستوجوی گزارش ممیزی — `?limit=`، `?offset=`، `?tool=`، `?success=true                                    \| false`، `?apiKeyId=` |
+| GET    | `/api/mcp/audit/stats` | آمار تجمیعی ممیزی (مجموع، نرخ موفقیت، میانگین مدتزمان، ابزارهای برتر)                                                            |
 
 **احراز هویت:** انتقالهای `sse`/`stream` از سطح احراز هویت اختصاصی MCP پیروی میکنند (کلید API از نوع Bearer با محدوده `mcp`)؛ مسیرهای `status`/`tools`/`audit*` از داشبورد قابل خواندن هستند (فراتر از دسترسی به میزبان داشبورد، احراز هویت اضافی لازم نیست).
 

@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "scope": "release-cut-bump-admission-callers",
+  "overlay": {
+    "path": "skill-caller-overlays/release-cut-bump.patch",
+    "sha256": "69b2eccbd7db475581b8119f024e4e6843273a682de08f1014271fd573da25c1"
+  },
+  "files": [
+    {
+      "path": "generate-release/SKILL.md",
+      "beforeSha256": "2b90887639bfa71712ff4fe5eaff09120206692d1b55152a60f24c60196d2e1a",
+      "afterSha256": "581b07b49f8ae2ad1450669bd862da6acc1fc49b499715b31ed369b575484ea0"
+    },
+    {
+      "path": "generate-release/phases/candidate-admission.md",
+      "beforeSha256": null,
+      "afterSha256": "dbffaca539df23804fb8947ca697868971e8f5602ffa7ae08179d63b83351b3b"
+    },
+    {
+      "path": "generate-release/phases/phase-0a-reconciliation.md",
+      "beforeSha256": "623447b8db0877832a6a30e17287b850789181f40966c1cfa4207bf906712ae1",
+      "afterSha256": "72bc2549a06b496fbbf48a621d16afeb62663af72daba69b0cdb5d3ed16a55a6"
+    },
+    {
+      "path": "generate-release/phases/phase-5-next-cycle.md",
+      "beforeSha256": "71289a48e246f129e57c04f53d2500a5e082aeeda44e2e4d112817e2cb547644",
+      "afterSha256": "b62110cfc77fca98ba31e3c42e19617fd89bb9c64c0ef5b21b92411694629b25"
+    },
+    {
+      "path": "version-bump/SKILL.md",
+      "beforeSha256": "0bcac7bc196e4897df051b58c68255ca6da0fabf253a93582d6461713795bbf9",
+      "afterSha256": "92e855007508068b93227a52b4e7241a0b49668d534476e50f8fdbf519a54936"
+    }
+  ]
+}

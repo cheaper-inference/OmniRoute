@@ -54,7 +54,7 @@ Bagong tab para sa pagkuha ng content mula sa isang URL sa pamamagitan ng `POST 
 - Input: URL + toggle para sa buong page + tagapili ng format (markdown / text / HTML).
 - I-submit → kunin → i-render ang `ScrapeResult.tsx`.
 - Nagre-render ang `ScrapeResult` ng preview ng markdown + toggle para sa raw na content.
-- Limitasyon: kung ang response body ay > **256 KB**, ipinapakita ng UI ang `(pinaikli, tingnan ang raw)` at binubuksan ang raw na content sa isang Monaco modal (D21).
+- Limitasyon: kung ang response body ay > **256 KB**, ipinapakita ng UI ang `View full raw content` at binubuksan ang raw na content sa isang modal (D21).
 - Panel ng metadata: provider (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), latency, gastos, laki ng response, bilang ng mga link.
 - Ginagamit ang hook na `useScrapeFetch.ts`.
 

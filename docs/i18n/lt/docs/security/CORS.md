@@ -57,11 +57,11 @@ dėl vieno konkretaus įgyvendinimo ypatumo:
 
 Ką tai reiškia kiekvienai sąsajai, net kai nustatyta `CORS_ALLOW_ALL=true`:
 
-| Sąsaja                                   | Autentifikavimo mechanizmas   | CORS pakaitos simbolio poveikis                                                                                                                                                                                                                                                                                                                                                   |
-| ---------------------------------------- | ----------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Prietaisų skydelis / MANAGEMENT `/api/*` | Slapuku pagrįsta sesija       | Šaltinis grąžinamas, tačiau **be `Allow-Credentials`** naršyklė **blokuoja** skaitymą su kredencialais. Kenkėjiška kito šaltinio svetainė **negali perskaityti** autentifikuotų prietaisų skydelio atsakymų, o sesijos slapukas neatskleidžiamas.                                                                                                                                 |
-| Kliento API `/v1/*`, `/v1beta/*`         | Bearer / `x-api-key` antraštė | Jau yra liberalus **pagal projektą** (`relaxForTokenAuth`): naršyklės niekada automatiškai neprideda `Authorization`/`x-api-key`, todėl užpuoliko puslapis negali pateikti jūsų rakto. Atspindėjimas taikomas tik tada, kai pateiktas raktas patvirtintas; anoniminiai atsakymai (`REQUIRE_API_KEY=false`) išlaiko leidžiamųjų sąrašą. `CORS_ALLOW_ALL` šios prieigos neišplečia. |
-| Viešas tik skaitymui (`/api/health`, …)  | Nėra                          | Duomenys nėra jautrūs; pakaitos simbolis nepavojingas.                                                                                                                                                                                                                                                                                                                            |
+| Sąsaja                                   | Autentifikavimo mechanizmas   | CORS pakaitos simbolio poveikis                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| ---------------------------------------- | ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Prietaisų skydelis / MANAGEMENT `/api/*` | Slapuku pagrįsta sesija       | Šaltinis grąžinamas, tačiau **be `Allow-Credentials`** naršyklė **blokuoja** skaitymą su kredencialais. Kenkėjiška kito šaltinio svetainė **negali perskaityti** autentifikuotų prietaisų skydelio atsakymų, o sesijos slapukas neatskleidžiamas.                                                                                                                                                                                                                                                                                                                                                        |
+| Kliento API `/v1/*`, `/v1beta/*`         | Bearer / `x-api-key` antraštė | Jau yra liberalus **pagal projektą** (`relaxForTokenAuth`): naršyklės niekada automatiškai neprideda `Authorization`/`x-api-key`, todėl užpuoliko puslapis negali pateikti jūsų rakto. Kilmės atkartojimui pagal sušvelnintą taisyklę reikia autentifikuoto subjekto (patvirtinto API rakto arba patvirtinto valdymo skydelio seanso), o ne vien antraštės su prisijungimo duomenimis; jis niekada neapima `Access-Control-Allow-Credentials`. Anoniminiai atsakymai (`REQUIRE_API_KEY=false`) naudoja sukonfigūruotą leidžiamų kilmių sąrašą, įskaitant aiškų įjungimą naudojant `CORS_ALLOW_ALL=true`. |
+| Viešas tik skaitymui (`/api/health`, …)  | Nėra                          | Duomenys nėra jautrūs; pakaitos simbolis nepavojingas.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
 
 Taigi **likusi** `CORS_ALLOW_ALL=true` keliama rizika apsiriboja: (a)
 skaitymu iš kitų šaltinių **be kredencialų**, kai skaitomi ir taip neautentifikuoti duomenys, ir (b)
@@ -123,9 +123,7 @@ nepaleidžiant sistemos iš naujo.
   automatiškai. CORS čia nėra reikšmingas barjeras — barjeras yra API raktas —
   todėl ši sąsaja sąmoningai yra mažiau ribojama, kad naršyklės ir
   „Electron“ klientai galėtų skaityti atsakymus, kuriuos jie jau turi teisę gauti.
-  Sušvelnintas atspindėjimas priklauso nuo patvirtinto rakto, o ne vien nuo antraštės
-  buvimo: kai `REQUIRE_API_KEY=false` užklausą aptarnauja anonimiškai, sėkmingas jos
-  atsakymas išlaiko fail-closed leidžiamųjų sąrašą. Autentifikavimo atmetimai (401)
+  Kilmės atkartojimui pagal sušvelnintą taisyklę reikia autentifikuoto subjekto (patvirtinto API rakto arba patvirtinto valdymo skydelio seanso), o ne vien antraštės su prisijungimo duomenimis; jis niekada neapima `Access-Control-Allow-Credentials`. Anoniminiai atsakymai (`REQUIRE_API_KEY=false`) naudoja sukonfigūruotą leidžiamų kilmių sąrašą, įskaitant aiškų įjungimą naudojant `CORS_ALLOW_ALL=true`. Autentifikavimo atmetimai (401)
   lieka skaitomi, kad klientai galėtų parodyti atšauktą ar klaidingai įvestą raktą
   (#5242): paties konvejerio 401 išlaiko atspindėjimą, o maršrutas, kuris pats atmeta
   raktą po to, kai konvejeris užklausą aptarnavo kaip anoniminę (`/v1/models` ir
@@ -137,8 +135,7 @@ nepaleidžiant sistemos iš naujo.
   `auth_token`), o ne nuo to, kurią iš jų patikrino maršrutas, ir niekada nederinamas su
   `Access-Control-Allow-Credentials`; turinys yra fiksuotas klaidos vokas. Valdymo
   maršrutai po `/api/v1/`, saugomi `requireManagementAuth()` (`/api/v1/management/*`,
-  `/api/v1/registered-keys`), atspindėjimo neprideda: esant `REQUIRE_API_KEY=false`, jų
-  401/403 negalima perskaityti iš kito šaltinio.
+  `/api/v1/registered-keys`), nenaudoja šios prisijungimo duomenų atmetimo išimties: kai `REQUIRE_API_KEY=false`, jų 401/403 atsakymai atitinka sukonfigūruotą CORS kilmės politiką.
 - **Slapukų seansas (valdymo skydelis):** apsaugotas numatytąja uždara nuostata **ir**
   tuo, kad bendrame kelyje nėra `Access-Control-Allow-Credentials`. Neįtraukite
   administravimo / valdymo skydelio šaltinių į jokią mažiau ribojančią konfigūraciją; jiems turi būti taikoma
@@ -152,8 +149,7 @@ išvadų rezultatus, patys tikrina rankos paspaudimo `Origin`
 „OmniRoute“ paleidžiamas per `npm start` / `npm run dev`, `/v1/ws` ir
 `/api/v1/ws` tiltas, kuris srautu perduoda `/v1/chat/completions`, `/v1/messages` ir
 `/v1/responses` kaip kadrus. Tiltas sprendimo klausia `/api/v1/ws?handshake=1` ir
-atsisako atnaujinti ryšį, nebent tas maršrutas atliko patikrą. Rankos paspaudimas
-priimamas, kai:
+atsisako atnaujinti ryšį, nebent tas maršrutas atliko patikrą. Autentifikavimo reikalavimai ir toliau taikomi atskirai. Kilmės patikra sėkminga, kai:
 
 - jame nėra `Origin` antraštės (Codex CLI, SDK ir kiti ne naršyklės klientai);
 - `Origin` leidžia aukščiau aprašytas leidžiamųjų sąrašas (`CORS_ALLOWED_ORIGINS`,

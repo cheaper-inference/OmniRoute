@@ -12,13 +12,13 @@ webpack बिल्ड र lint job एकै समयमा पर्दा �
 होस्ट swap (16 GB) ले त्यसलाई सम्हाल्छ, र pull-request का बिल्डहरू hosted मा चल्ने भएकाले
 Turbopack स्लट अधिकांश समय निष्क्रिय रहन्छ:
 
-| रनर                  | लेबल           | भूमिका                                                                                                                                             | `MemoryHigh` / `MemoryMax` | `CPUQuota`     |
-| -------------------- | -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | -------------- |
-| `omniroute-113-5`    | `omni-build`   | Turbopack बिल्डहरू: `ci.yml` `Build` (push/dispatch मात्र), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, रातिको a11y बिल्ड | 56 GB / 60 GB (swap 0)     | 1600 %         |
-| `omniroute-113-6`    | `omni-release` | Release-Green (`release-green` + `main-green`), webpack बिल्ड                                                                                      | 20 GB / 24 GB (swap 4 GB)  | 800 %          |
-| `omniroute-113-2`    | `omni-light`   | रातिका job हरू (Schemathesis, promptfoo, garak, k6) र `quality.yml` `lint-guard`                                                                   | 12 GB / 16 GB (swap 4 GB)  | 600 %          |
-| `omniroute-113`      | `omni-light`   | माथिको जस्तै पूल                                                                                                                                   | 8 GB / 12 GB               | 400 %          |
-| OmniHeuris, OmniMind | (तिनका repos)  | Dependabot मात्र (प्रत्येकको उच्चतम खपत 155 MB, 2026-10-18)                                                                                        | 4 GB / 6 GB                | प्रत्येक 200 % |
+| रनर                  | लेबल                            | भूमिका                                                                                                                                             | `MemoryHigh` / `MemoryMax` | `CPUQuota`     |
+| -------------------- | ------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | -------------- |
+| `omniroute-113-5`    | `omni-build`, `omni-build-60gb` | Turbopack बिल्डहरू: `ci.yml` `Build` (push/dispatch मात्र), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, रातिको a11y बिल्ड | 56 GB / 60 GB (swap 0)     | 1600 %         |
+| `omniroute-113-6`    | `omni-release`                  | Release-Green (`release-green` + `main-green`), webpack बिल्ड                                                                                      | 20 GB / 24 GB (swap 4 GB)  | 800 %          |
+| `omniroute-113-2`    | `omni-light`                    | रातिका job हरू (Schemathesis, promptfoo, garak, k6) र `quality.yml` `lint-guard`                                                                   | 12 GB / 16 GB (swap 4 GB)  | 600 %          |
+| `omniroute-113`      | `omni-light`                    | माथिको जस्तै पूल                                                                                                                                   | 8 GB / 12 GB               | 400 %          |
+| OmniHeuris, OmniMind | (तिनका repos)                   | Dependabot मात्र (प्रत्येकको उच्चतम खपत 155 MB, 2026-10-18)                                                                                        | 4 GB / 6 GB                | प्रत्येक 200 % |
 
 2026-10-18 मा मापन गरिएको:
 
@@ -28,12 +28,13 @@ Turbopack स्लट अधिकांश समय निष्क्रि�
 | swap      | 16 GB                        | `omniroute-113-5` swap बन्द (`MemorySwapMax=0`) गरेर चल्छ, त्यसैले नियन्त्रणबाहिर गएको बिल्डले पूरै मेसिनलाई swap गराउनुको सट्टा आफ्नो सीमामा पुगेपछि काटिन्छ                                                                                                                                                                                                                    |
 | `/tmp`    | **12 GB tmpfs = RAM**        | त्यहाँ राखिएको कुनै पनि कुरा मेमोरीमै रहन्छ; बाँकी रहेका फाइलहरू 3 h पछि हटाइन्छन्                                                                                                                                                                                                                                                                                               |
 | CPU       | 32 कोरमा load 60 देखिएको     | quota हरू लागू गर्नुअघि, एउटै मेसिनमा एउटा Turbopack बिल्ड (~1166 % CPU) र coverage suite चल्दा अन्य listeners का heartbeats का लागि स्रोत पुगेको थिएन (`The self-hosted runner lost communication`, #16853)                                                                                                                                                                     |
-| रनरहरू    | **7 listeners** (2026-10-28) | 5 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-7` ले `omni-build` पनि बोक्छ; `omniroute-113-3/-4/-8` रिपोजिटरीबाट मेटाइएका छन् (2026-10-28)                                                                                                                                                                                                                                 |
+| रनरहरू    | **7 listeners** (2026-10-28) | 5 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-5` ले `omni-build-60gb` पनि बोक्छ; `omniroute-113-3/-4/-8` रिपोजिटरीबाट मेटाइएका छन् (2026-10-28)                                                                                                                                                                                                                            |
 
 सीमाहरू प्रत्येक unit को `/etc/systemd/system/actions.runner.<…>.service.d/override.conf`
 मा छन् (अघिल्ला मानहरू `override.conf.bak-20261018` का रूपमा राखिएका छन्) र
 `systemctl set-property --runtime … MemoryHigh=… MemoryMax=… CPUQuota=…` मार्फत चलिरहेकै अवस्थामा लागू गरिएका थिए — restart गरिएन, त्यसैले
-चलिरहेको कुनै पनि job प्रभावित भएन। लेबलहरू runners API मार्फत (`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
+चलिरहेको कुनै पनि job प्रभावित भएन। लेबलहरू runners API मार्फत
+(`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
 `gh api -X POST repos/<repo>/actions/runners/<id>/labels -f 'labels[]=<label>'`) परिवर्तन गरिन्छन्, त्यो पनि चलिरहेकै अवस्थामा।
 
 ## janitor स्थापना गर्नुहोस् (एक पटक, मेसिनमा)
@@ -75,7 +76,7 @@ CPU खाइरहन्छ। प्रत्येक OmniRoute unit मा
 ## सञ्चालन नियमहरू
 
 - **एक पटकमा एउटा मात्र Turbopack बिल्ड — लेबलद्वारा लागू गरिएको।** पूर्ण Turbopack
-  `next build` चलाउने प्रत्येक job ले `[self-hosted, omni-build]` लाई लक्षित गर्छ, र त्यो
+  `next build` चलाउने प्रत्येक job ले `[self-hosted, omni-build, omni-build-60gb]` लाई लक्षित गर्छ, र त्यो
   लेबल **`omniroute-113-5`** मा मात्र छ: `ci.yml` को `Build`, `npm-publish.yml` को `publish`, `nightly-v4-build`, `preview-artifact`,
   nightly a11y बिल्ड (#16853) र `docker-publish.yml` को **amd64** (BuildKit भित्र webpack —
   त्यहाँ Turbopack क्र्यास भएको थियो, run 33253576569)। arm64 Docker चरण `ubuntu-24.04-arm` मै रहन्छ।

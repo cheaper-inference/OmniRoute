@@ -897,14 +897,7 @@ Exa `type: "lite"` (Exa 3.0) ചെറിയൊരു കൂട്ടം ഫീ�
 `subpages`, `subpageTarget`, `highlights.numSentences`, `highlights.highlightsPerUrl` എന്നിവ
 ഇനി ഫോർവേഡ് ചെയ്യില്ല.
 
-Exa ഒഴികെയുള്ളവയ്ക്ക് ചെലവ് കണക്കാക്കുന്നത് ഫ്ലാറ്റ് രജിസ്ട്രിയായ `costPerQuery` അനുസരിച്ചാണ്. Exa സ്വന്തം
-വിലനിർണ്ണയം പിന്തുടരുന്നു: 10 ഫലങ്ങൾ ഉൾപ്പെടുന്ന `auto` (പഴയ `fast`) ഓരോ കോളിനും $0.007, അല്ലെങ്കിൽ
-`lite` (പഴയ `instant`) ഓരോ കോളിനും $0.004; ഓരോ അധിക ഫലത്തിനും $0.001; കൂടാതെ
-`contents.summary` സജ്ജീകരിച്ചിരിക്കുമ്പോൾ മടക്കിനൽകുന്ന ഓരോ ഫലത്തിനും $0.001. `search_depth`
-`basic`, `fast`, `ultra-fast` എന്നിവയ്ക്ക് Tavily 1 ക്രെഡിറ്റ് ($0.008) എന്ന നിരക്കിലും `advanced`-ന്
-2 ക്രെഡിറ്റുകൾ ($0.016) എന്ന നിരക്കിലും രേഖപ്പെടുത്തുന്നു
-([Tavily API ക്രെഡിറ്റുകൾ](https://docs.tavily.com/documentation/api-credits)). `auto_parameters: true` ഉള്ള
-ഒരു കോൾ Tavily-യെ advanced-ലേക്ക് അപ്ഗ്രേഡ് ചെയ്താലും 1 ക്രെഡിറ്റായാണ് രേഖപ്പെടുത്തുന്നത്.
+Exa: `auto` (ഒപ്പം ലെഗസി `fast`) ഓരോ കോളിനും $0.007 അല്ലെങ്കിൽ 10 ഫലങ്ങൾ ഉൾക്കൊള്ളുന്ന `lite` (ഒപ്പം ലെഗസി `instant`) ന് $0.004; ഓരോ തുടർന്നുള്ള ഫലത്തിനും $0.001; കൂടാതെ `contents.summary` സജ്ജീകരിക്കുമ്പോൾ ലഭിക്കുന്ന ഓരോ ഫലത്തിനും $0.001. `search_depth` `basic`, `fast`, `ultra-fast` എന്നിവയ്ക്ക് 1 ക്രെഡിറ്റിലും ($0.008) `advanced` ന് 2 ക്രെഡിറ്റുകളിലും ($0.016) Tavily രേഖപ്പെടുത്തിയിരിക്കുന്നു ( [Tavily API ക്രെഡിറ്റുകൾ](https://docs.tavily.com/documentation/api-credits) ). Tavily അഡ്വാൻസ്ഡിലേക്ക് അപ്ഗ്രേഡ് ചെയ്യുന്ന `auto_parameters: true` ഉള്ള ഒരു കോൾ ഇപ്പോഴും 1 ക്രെഡിറ്റിൽ റെക്കോർഡ് ചെയ്തിരിക്കുന്നു.
 
 ---
 
@@ -1202,6 +1195,8 @@ X-OmniRoute-No-Cache: true
 
 ---
 
+<a id="cliproxyapi-management-compatibility"></a>
+
 ## CLIProxyAPI മാനേജ്മെന്റ് അനുയോജ്യത
 
 ഉപയോഗ ഡാഷ്ബോർഡുകൾ Claude, Codex സബ്സ്ക്രിപ്ഷൻ പരിധികൾ വായിക്കാൻ വിളിക്കുന്ന മൂന്ന് [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI)
@@ -1216,17 +1211,11 @@ OmniRoute-ലേക്ക് ചൂണ്ടിക്കാണിക്കുക
 | POST | `/v0/management/api-call`    | ബോഡി `{ auth_index, method, url, header?, data? }`. അക്കൗണ്ടിന്റെ ടോക്കൺ ഉപയോഗിച്ച് ഒരു അനുവദിച്ച അഭ്യർത്ഥന അയച്ച് `{ status_code, body }` നൽകുന്നു |
 | POST | `/v0/management/reset-quota` | ബോഡി `{ auth_index }`. ഒരു അക്കൗണ്ടിന്റെ കണക്ഷൻ കൂൾഡൗൺ, മോഡൽ ലോക്ക്ഔട്ടുകൾ, Codex ഓരോ-സ്കോപ്പ് കൂൾഡൗണുകൾ എന്നിവ നീക്കം ചെയ്യുന്നു                   |
 
-- `auth_index` എന്നത് OmniRoute കണക്ഷൻ ഐഡിയാണ്. `provider` `claude` അല്ലെങ്കിൽ `codex` ആയിരിക്കും (OAuth
-  കണക്ഷനുകൾ മാത്രം; `anthropic` API-key പ്രൊവൈഡർ പട്ടികയിൽ ഉൾപ്പെടില്ല). Codex-നായി,
-  `id_token.chatgpt_account_id` സംഭരിച്ചിരിക്കുന്ന വർക്ക്സ്പേസ് ഐഡിയും `plan_type` സംഭരിച്ചിരിക്കുന്ന പ്ലാനുമാണ്.
-- `api-call` ഒരു പൊതുവായ പ്രോക്സിയല്ല. ഇത് Claude `GET
-https://api.anthropic.com/api/oauth/usage` മാത്രവും Codex `GET
-https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits`, `POST .../wham/rate-limit-reset-credits/consume` എന്നിവയും മാത്രമേ സ്വീകരിക്കൂ; ഓരോന്നും പൊരുത്തപ്പെടുന്ന പ്രൊവൈഡറുള്ള അക്കൗണ്ടിനായി മാത്രം. മറ്റെന്തും upstream-നെ ബന്ധപ്പെടാതെ `403` നൽകും. വിളിക്കുന്നയാളുടെ
-  `Authorization` ഹെഡർ (`$TOKEN$` പ്ലേസ്ഹോൾഡർ ഉൾപ്പെടെ) അവഗണിക്കപ്പെടുന്നു: OmniRoute കണക്ഷന്റെ ആക്സസ് ടോക്കൺ ചേർക്കുകയും, അത് കാലഹരണപ്പെടാൻ അടുത്തിരിക്കുമ്പോൾ ആദ്യം പുതുക്കുകയും, അനുവദിച്ച ഹെഡറുകൾ മാത്രം ഫോർവേഡ് ചെയ്യുകയും ചെയ്യുന്നു (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`;
-  `Accept`, `Content-Type`). `Chatgpt-Account-Id` ഇല്ലെങ്കിൽ സംഭരിച്ചിരിക്കുന്ന വർക്ക്സ്പേസ് ഐഡി ഡിഫോൾട്ടായി ഉപയോഗിക്കും.
-  അഭ്യർത്ഥനകൾക്ക് 15 സെക്കൻഡിന് ശേഷം ടൈംഔട്ട് സംഭവിക്കുകയും കണക്ഷന്റെ പ്രോക്സി ഉപയോഗിക്കുകയും ചെയ്യും.
-- `reset-quota` ടെർമിനൽ നിലകൾ (banned, expired, credits_exhausted) മാറ്റമില്ലാതെ നിലനിർത്തുന്നു. അറിയപ്പെടാത്ത
-  `auth_index` `404` നൽകുന്നു.
+- `auth_index` എന്നത് OmniRoute connection ID ആണ്. `provider` എന്നത് `claude` അല്ലെങ്കിൽ `codex` ആണ് (OAuth connection കൾ മാത്രം; `anthropic` API-key provider പട്ടികയിൽ ഇല്ല). Codex ന് `id_token.chatgpt_account_id` സൂക്ഷിച്ച workspace ID യും `plan_type` സൂക്ഷിച്ച plan ഉം ആണ്.
+- `api-call` പൊതുവായ proxy അല്ല. ഇത് Claude `GET
+https://api.anthropic.com/api/oauth/usage`, Codex `GET
+https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits`, `POST .../wham/rate-limit-reset-credits/consume` എന്നിവ മാത്രം സ്വീകരിക്കുന്നു; ഓരോന്നും അനുയോജ്യമായ provider ന്റെ account ന് മാത്രം. മറ്റെല്ലാം upstream നെ ബന്ധപ്പെടാതെ `403` നൽകുന്നു. Caller ന്റെ `Authorization` header (`$TOKEN$` placeholder ഉൾപ്പെടെ) അവഗണിക്കുന്നു: OmniRoute connection ന്റെ access token ചേർക്കുന്നു, കാലാവധി അടുത്താൽ ആദ്യം refresh ചെയ്യുന്നു, അനുവദിച്ച header കൾ മാത്രം കൈമാറുന്നു (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`; `Accept`, `Content-Type`). `Chatgpt-Account-Id` ഇല്ലെങ്കിൽ സൂക്ഷിച്ച workspace ID സ്വതേയുള്ള മൂല്യമാകും. ആദ്യ upstream response `401` ആണെങ്കിൽ ഒരിക്കൽ refresh ചെയ്ത്, access token മാറുമ്പോൾ മാത്രം വീണ്ടും ശ്രമിക്കുന്നു. ഓരോ upstream ശ്രമത്തിനും 15 സെക്കൻഡ് timeout ഉണ്ട്; connection ന്റെ proxy ഉപയോഗിക്കുന്നു.
+- `reset-quota` terminal നിലകളെ (banned, expired, credits_exhausted) മാറ്റുന്നില്ല. അറിയാത്ത `auth_index` ന് `404` ലഭിക്കും.
 
 **ഓത്ത്:** ലോഗിൻ പ്രവർത്തനരഹിതമാക്കിയിരിക്കുമ്പോഴും ഡാഷ്ബോർഡ് സെഷൻ അല്ലെങ്കിൽ `manage`-സ്കോപ്പുള്ള API കീ ആവശ്യമാണ്
 (പാതകൾ `ALWAYS_PROTECTED_API_PATHS`-ൽ ഉൾപ്പെട്ടിരിക്കുന്നു). ഇൻഫറൻസ്-മാത്രം കീകൾക്ക് `403` ലഭിക്കും. ഉറവിടം:
@@ -1927,17 +1916,17 @@ API കീ / സെഷൻ പരിധിയിൽ സ്ഥിരമായ സ�
 
 OmniRoute 3 ട്രാൻസ്പോർട്ടുകളും (stdio, SSE, streamable-http) പരിധിനിർണ്ണയിച്ച ടൂളുകളും ഉള്ള ഒരു എംബെഡഡ് Model Context Protocol സെർവർ നൽകുന്നു. താഴെയുള്ള ഡാഷ്ബോർഡ് എൻഡ്പോയിന്റുകൾ സ്റ്റാറ്റസ്/ഓഡിറ്റ് ഡാറ്റ വായിക്കുകയും HTTP ട്രാൻസ്പോർട്ടുകൾക്ക് പ്രോക്സിയായി പ്രവർത്തിക്കുകയും ചെയ്യുന്നു.
 
-| രീതി | പാത | വിവരണം |
-| ------ | ---------------------- | ------------------------------------------------------------------------------------------------ | -------------------- |
-| GET | `/api/mcp/status` | ഹാർട്ട്ബീറ്റ്, ട്രാൻസ്പോർട്ട്, ഓൺലൈൻ നില, അവസാന കോൾ, മുൻനിര ടൂളുകൾ, 24 മണിക്കൂർ വിജയ നിരക്ക് |
-| GET | `/api/mcp/tools` | `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints` എന്നിവയുള്ള MCP ടൂളുകളുടെ പട്ടിക |
-| GET | `/api/mcp/sse` | SSE ട്രാൻസ്പോർട്ടിനായി SSE സ്ട്രീം തുറക്കുക (MCP പ്രവർത്തനരഹിതമാണെങ്കിൽ അല്ലെങ്കിൽ ട്രാൻസ്പോർട്ട് പൊരുത്തപ്പെടുന്നില്ലെങ്കിൽ `503` നൽകുന്നു) |
-| POST | `/api/mcp/sse` | SSE ട്രാൻസ്പോർട്ടിൽ JSON-RPC ഫ്രെയിം അയയ്ക്കുക |
-| GET | `/api/mcp/stream` | Streamable HTTP ട്രാൻസ്പോർട്ടിന്റെ SSE വശം തുറക്കുക (സെർവർ ആരംഭിച്ച സന്ദേശങ്ങൾ) |
-| POST | `/api/mcp/stream` | Streamable HTTP ട്രാൻസ്പോർട്ടിൽ JSON-RPC ഫ്രെയിം അയയ്ക്കുക |
-| DELETE | `/api/mcp/stream` | ഒരു Streamable HTTP സെഷൻ അവസാനിപ്പിക്കുക |
-| GET | `/api/mcp/audit` | ഓഡിറ്റ് ലോഗ് അന്വേഷിക്കുക — `?limit=`, `?offset=`, `?tool=`, `?success=true                                | false`, `?apiKeyId=` |
-| GET | `/api/mcp/audit/stats` | സംഗ്രഹിച്ച ഓഡിറ്റ് സ്ഥിതിവിവരക്കണക്കുകൾ (ആകെ എണ്ണം, വിജയ നിരക്ക്, ശരാശരി ദൈർഘ്യം, മുൻനിര ടൂളുകൾ) |
+| രീതി   | പാത                    | വിവരണം                                                                                                                                       |
+| ------ | ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/mcp/status`      | ഹാർട്ട്ബീറ്റ്, ട്രാൻസ്പോർട്ട്, ഓൺലൈൻ നില, അവസാന കോൾ, മുൻനിര ടൂളുകൾ, 24 മണിക്കൂർ വിജയ നിരക്ക്                                                 |
+| GET    | `/api/mcp/tools`       | `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints` എന്നിവയുള്ള MCP ടൂളുകളുടെ പട്ടിക                                   |
+| GET    | `/api/mcp/sse`         | SSE ട്രാൻസ്പോർട്ടിനായി SSE സ്ട്രീം തുറക്കുക (MCP പ്രവർത്തനരഹിതമാണെങ്കിൽ അല്ലെങ്കിൽ ട്രാൻസ്പോർട്ട് പൊരുത്തപ്പെടുന്നില്ലെങ്കിൽ `503` നൽകുന്നു) |
+| POST   | `/api/mcp/sse`         | SSE ട്രാൻസ്പോർട്ടിൽ JSON-RPC ഫ്രെയിം അയയ്ക്കുക                                                                                               |
+| GET    | `/api/mcp/stream`      | Streamable HTTP ട്രാൻസ്പോർട്ടിന്റെ SSE വശം തുറക്കുക (സെർവർ ആരംഭിച്ച സന്ദേശങ്ങൾ)                                                              |
+| POST   | `/api/mcp/stream`      | Streamable HTTP ട്രാൻസ്പോർട്ടിൽ JSON-RPC ഫ്രെയിം അയയ്ക്കുക                                                                                   |
+| DELETE | `/api/mcp/stream`      | ഒരു Streamable HTTP സെഷൻ അവസാനിപ്പിക്കുക                                                                                                     |
+| GET    | `/api/mcp/audit`       | ഓഡിറ്റ് ലോഗ് അന്വേഷിക്കുക — `?limit=`, `?offset=`, `?tool=`, `?success=true                                \| false`, `?apiKeyId=`           |
+| GET    | `/api/mcp/audit/stats` | സംഗ്രഹിച്ച ഓഡിറ്റ് സ്ഥിതിവിവരക്കണക്കുകൾ (ആകെ എണ്ണം, വിജയ നിരക്ക്, ശരാശരി ദൈർഘ്യം, മുൻനിര ടൂളുകൾ)                                             |
 
 **പ്രാമാണീകരണം:** `sse`/`stream` ട്രാൻസ്പോർട്ടുകൾ MCP-നിർദ്ദിഷ്ട പ്രാമാണീകരണ ഉപരിതലത്തെ ( `mcp` സ്കോപ്പുള്ള Bearer API കീ) മാനിക്കുന്നു; `status`/`tools`/`audit*` റൂട്ടുകൾ ഡാഷ്ബോർഡിൽ നിന്ന് വായിക്കാനാകും (ഡാഷ്ബോർഡ് ഹോസ്റ്റിൽ എത്തിച്ചേരുന്നതിന് പുറമെ അധിക പ്രാമാണീകരണം ആവശ്യമില്ല).
 

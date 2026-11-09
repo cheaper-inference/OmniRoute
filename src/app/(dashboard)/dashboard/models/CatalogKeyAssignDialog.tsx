@@ -289,7 +289,9 @@ function AssignDialogControls({ context }: { context: AssignDialogContext }) {
         aria-label={t("assignToKeys")}
         value={action}
         disabled={running}
-        onValueChange={(next) => setAction(next as AssignAction)}
+        onValueChange={(next) => {
+          if (next === "add" || next === "remove") setAction(next);
+        }}
       >
         {(["add", "remove"] as const).map((mode) => {
           const label = t(mode === "add" ? "assignActionAdd" : "assignActionRemove");

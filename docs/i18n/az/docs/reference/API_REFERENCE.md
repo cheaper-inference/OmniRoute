@@ -833,7 +833,7 @@ Veb/axtarış provayderləri üçün abstraksiya (Tavily, Brave, Exa, Serper və
 **Autentifikasiya:** Bearer API açarı (`extractApiKey` + `isValidApiKey`). Axtarış siyasəti
 `enforceApiKeyPolicy` vasitəsilə tətbiq edilir.
 
-### Exa və Tavily `provider_options`
+### Exa və Tavily üçün `provider_options`
 
 Exa və Tavily provayderə xas sahələri ad sahəsi olan çantadan oxuyur:
 `provider_options.exa` (və ya `provider_options["exa-search"]`) və `provider_options.tavily`
@@ -877,15 +877,7 @@ təyin edildikdə bütün sorğunu rədd edir. `lite` üçün `additionalQueries
 Artıq istifadədən çıxarılmış `subpages`, `subpageTarget`, `highlights.numSentences` və
 `highlights.highlightsPerUrl` sahələri artıq ötürülmür.
 
-Dəyərin hesablanması `costPerQuery` olan düz reyestrə əsaslanır; yalnız Exa istisnadır və
-Exa-nın öz qiymət siyasətinə əməl edir: 10 nəticəni əhatə edən `auto` (və köhnə `fast`) üçün
-çağırış başına $0.007 və ya `lite` (və köhnə `instant`) üçün $0.004; hər əlavə nəticə üçün
-$0.001; `contents.summary` təyin edildikdə isə qaytarılan hər nəticə üçün $0.001. Tavily
-`search_depth` `basic`, `fast` və `ultra-fast` üçün 1 kredit ($0.008), `advanced` üçün isə
-2 kredit ($0.016) kimi qeyd edilir
-([Tavily API credits](https://docs.tavily.com/documentation/api-credits)). `auto_parameters:
-true` ilə edilən çağırış Tavily tərəfindən `advanced` səviyyəsinə yüksəldilsə belə, 1 kredit
-kimi qeyd olunur.
+Exa: `auto` (və köhnə `fast`) üçün hər zəng üçün $0,007 və ya `lite` (və köhnə `instant`) üçün $0,004, 10 nəticəni əhatə edir; Hər sonrakı nəticə üçün $0,001; və `contents.summary` təyin edildikdə hər qaytarılmış nəticə üçün $0,001. Tavily `search_depth` `basic`, `fast` və `ultra-fast` üçün 1 kreditlə ($0,008), `advanced` ( [Tavily API kreditləri](https://docs.tavily.com/documentation/api-credits) ) üçün isə 2 kreditlə ($0,016) qeydə alınır. Tavilinin qabaqcıl səviyyəyə yüksəltdiyi `auto_parameters: true` ilə zəng hələ də 1 kreditlə qeydə alınır.
 
 ---
 
@@ -1165,6 +1157,8 @@ X-OmniRoute-No-Cache: true
 
 ---
 
+<a id="cliproxyapi-management-compatibility"></a>
+
 ## CLIProxyAPI idarəetmə uyğunluğu
 
 OmniRoute istifadə panellərinin Claude və Codex abunə limitlərini oxumaq üçün çağırdığı üç [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI)
@@ -1176,21 +1170,11 @@ idarəetmə endpoint-inə cavab verir (məsələn, T3 Code-un `cliproxy` istifad
 | POST  | `/v0/management/api-call`    | `{ auth_index, method, url, header?, data? }` gövdəsi. Hesabın tokeni ilə icazə verilmiş bir sorğu göndərir və `{ status_code, body }` qaytarır |
 | POST  | `/v0/management/reset-quota` | `{ auth_index }` gövdəsi. Bir hesabın bağlantı soyumasını, model bloklamalarını və Codex-in əhatə dairəsi üzrə soyumalarını təmizləyir          |
 
-- `auth_index` OmniRoute bağlantı identifikatorudur. `provider` `claude` və ya `codex` olur (yalnız OAuth
-  bağlantıları; `anthropic` API açarı provayderi siyahıya daxil edilmir). Codex üçün
-  `id_token.chatgpt_account_id` saxlanılan iş sahəsi identifikatorudur, `plan_type` isə saxlanılan plandır.
-- `api-call` ümumi təyinatlı proksi deyil. O, yalnız Claude `GET
+- `auth_index` OmniRoute bağlantı ID-sidir. `provider`, `claude` və ya `codex` olur (yalnız OAuth bağlantıları; `anthropic` API-açarı provayderi göstərilmir). Codex üçün `id_token.chatgpt_account_id` saxlanmış iş sahəsi ID-si, `plan_type` isə saxlanmış plandır.
+- `api-call` ümumi proksi deyil. Yalnız Claude `GET
 https://api.anthropic.com/api/oauth/usage` və Codex `GET
-https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits` və
-  `POST .../wham/rate-limit-reset-credits/consume` sorğularını qəbul edir və bunların hər birini yalnız uyğun
-  provayderə aid hesab üçün yerinə yetirir. Digər bütün sorğular upstream-ə müraciət etmədən `403` qaytarır. Çağıranın
-  `Authorization` başlığı (`$TOKEN$` yer tutucusu daxil olmaqla) nəzərə alınmır: OmniRoute bağlantının giriş tokenini
-  daxil edir, tokenin müddəti bitmək üzrədirsə əvvəlcə onu yeniləyir və yalnız icazə verilmiş başlıqları
-  (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`;
-  `Accept`, `Content-Type`) ötürür. `Chatgpt-Account-Id` olmadıqda saxlanılan iş sahəsi identifikatorundan istifadə edilir.
-  Sorğular 15 saniyədən sonra vaxt aşımına uğrayır və bağlantının proksisindən istifadə edir.
-- `reset-quota` terminal vəziyyətləri (banned, expired, credits_exhausted) dəyişməz saxlayır. Naməlum
-  `auth_index` `404` qaytarır.
+https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits` və `POST .../wham/rate-limit-reset-credits/consume` qəbul edir; hər biri yalnız uyğun provayderin hesabına aiddir. Digər hər şey yuxarı axına müraciət etmədən `403` qaytarır. Çağıranın `Authorization` başlığı (`$TOKEN$` yer tutucusu daxil) nəzərə alınmır: OmniRoute bağlantının giriş tokenini əlavə edir, müddəti bitməyə yaxındırsa əvvəl yeniləyir və yalnız icazəli başlıqları ötürür (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`; `Accept`, `Content-Type`). `Chatgpt-Account-Id` yoxdursa, saxlanmış iş sahəsi ID-si standartdır. İlk yuxarı axın cavabı `401` olarsa, bir dəfə yeniləyir və yalnız giriş tokeni dəyişəndə təkrar edir. Hər yuxarı axın cəhdi 15 saniyədən sonra vaxtı bitir və bağlantının proksisini istifadə edir.
+- `reset-quota` son vəziyyətlərə (banned, expired, credits_exhausted) toxunmur. Naməlum `auth_index`, `404` qaytarır.
 
 **Autentifikasiya:** giriş deaktiv edilsə belə, dashboard sessiyası və ya `manage` əhatə dairəli API açarı tələb olunur
 (yollar `ALWAYS_PROTECTED_API_PATHS` daxilindədir). Yalnız inference üçün olan açarlar `403` alır. Mənbə:
@@ -1891,17 +1875,17 @@ Davamlı söhbət/fakt yaddaş anbarı, API açarı / sessiya üzrə əhatə dai
 
 OmniRoute 3 ötürmə üsuluna (stdio, SSE, streamable-http) və əhatə dairəsi müəyyən edilmiş alətlərə malik, daxili Model Context Protocol serveri ilə birlikdə təqdim olunur. Aşağıdakı idarə paneli endpoint-ləri status/audit məlumatlarını oxuyur və HTTP ötürmələrini proksi edir.
 
-| Metod | Yol | Təsvir |
-| ------ | ---------------------- | ------------------------------------------------------------------------------------------------ | -------------------- |
-| GET | `/api/mcp/status` | Ürək döyüntüsü, ötürmə üsulu, onlayn vəziyyət, son çağırış, əsas alətlər, 24 saatlıq uğur faizi |
-| GET | `/api/mcp/tools` | `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints` sahələri ilə MCP alətlərinin siyahısı |
-| GET | `/api/mcp/sse` | SSE ötürməsi üçün açıq SSE axını (MCP deaktiv edilibsə və ya ötürmə üsulu uyğun gəlmirsə `503` qaytarır) |
-| POST | `/api/mcp/sse` | SSE ötürməsi üzərindən JSON-RPC frame-i göndər |
-| GET | `/api/mcp/stream` | Streamable HTTP ötürməsinin SSE tərəfini aç (server tərəfindən başladılan mesajlar) |
-| POST | `/api/mcp/stream` | Streamable HTTP ötürməsi üzərindən JSON-RPC frame-i göndər |
-| DELETE | `/api/mcp/stream` | Streamable HTTP sessiyasını sonlandır |
-| GET | `/api/mcp/audit` | Audit jurnalını sorğula — `?limit=`, `?offset=`, `?tool=`, `?success=true                                | false`, `?apiKeyId=` |
-| GET | `/api/mcp/audit/stats` | Ümumiləşdirilmiş audit statistikası (ümumi saylar, uğur faizi, orta müddət, əsas alətlər) |
+| Metod  | Yol                    | Təsvir                                                                                                                           |
+| ------ | ---------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/mcp/status`      | Ürək döyüntüsü, ötürmə üsulu, onlayn vəziyyət, son çağırış, əsas alətlər, 24 saatlıq uğur faizi                                  |
+| GET    | `/api/mcp/tools`       | `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints` sahələri ilə MCP alətlərinin siyahısı                  |
+| GET    | `/api/mcp/sse`         | SSE ötürməsi üçün açıq SSE axını (MCP deaktiv edilibsə və ya ötürmə üsulu uyğun gəlmirsə `503` qaytarır)                         |
+| POST   | `/api/mcp/sse`         | SSE ötürməsi üzərindən JSON-RPC frame-i göndər                                                                                   |
+| GET    | `/api/mcp/stream`      | Streamable HTTP ötürməsinin SSE tərəfini aç (server tərəfindən başladılan mesajlar)                                              |
+| POST   | `/api/mcp/stream`      | Streamable HTTP ötürməsi üzərindən JSON-RPC frame-i göndər                                                                       |
+| DELETE | `/api/mcp/stream`      | Streamable HTTP sessiyasını sonlandır                                                                                            |
+| GET    | `/api/mcp/audit`       | Audit jurnalını sorğula — `?limit=`, `?offset=`, `?tool=`, `?success=true                                \| false`, `?apiKeyId=` |
+| GET    | `/api/mcp/audit/stats` | Ümumiləşdirilmiş audit statistikası (ümumi saylar, uğur faizi, orta müddət, əsas alətlər)                                        |
 
 **Autentifikasiya:** `sse`/`stream` ötürmələri MCP-yə xas autentifikasiya səthinə (`mcp` əhatə dairəsinə malik Bearer API açarı) riayət edir; `status`/`tools`/`audit*` marşrutları idarə panelindən oxuna bilər (idarə paneli hostuna çatmaqdan əlavə autentifikasiya tələb olunmur).
 

@@ -4,17 +4,17 @@
 
 ---
 
-Aġġornata l-aħħar: 2026-08-23
+Aġġornat l-aħħar: 2026-08-23
 
-OmniRoute jintegra ma' tliet kategoriji ta' għodod CLI mifruxa fuq tliet paġni tad-dashboard iddedikati:
+OmniRoute jintegra ma’ tliet kategoriji ta’ għodod CLI mifruxa fuq tliet paġni ddedikati tad-dashboard:
 
-| Paġna          | Rotta                   | Kunċett                                                                                     | Għadd        |
-| -------------- | ----------------------- | ------------------------------------------------------------------------------------------- | ------------ |
-| **CLI Code's** | `/dashboard/cli-code`   | Għodod tal-kodifikazzjoni li tipponta lejn OmniRoute (Klijent → CLI → OmniRoute → Fornitur) | 26           |
-| **CLI Aġenti** | `/dashboard/cli-agents` | Aġenti awtonomi li inti tipponta lejn OmniRoute (l-istess fluss, ambitu usa')               | 11           |
-| **ACP Aġenti** | `/dashboard/acp-agents` | CLIs li OmniRoute ibid bħala backend permezz ta stdio/ACP (fluss invers)                    | ara reġistru |
+| Paġna          | Rotta                   | Kunċett                                                                                   | Għadd          |
+| -------------- | ----------------------- | ----------------------------------------------------------------------------------------- | -------------- |
+| **Kodiċi CLI** | `/dashboard/cli-code`   | Għodod tal-ipprogrammar li tipponta lejn OmniRoute (Klijent → CLI → OmniRoute → Fornitur) | 28             |
+| **Aġenti CLI** | `/dashboard/cli-agents` | Aġenti awtonomi li tipponta lejn OmniRoute (l-istess fluss, ambitu usa’)                  | 11             |
+| **Aġenti ACP** | `/dashboard/acp-agents` | CLIs li OmniRoute iniedi bħala backend permezz ta’ stdio/ACP (fluss bil-maqlub)           | ara r-reġistru |
 
-Legacy rotot redirect permezz 308: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
+Ir-rotot preċedenti jagħmlu redirect permezz ta’ 308: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
 
 ---
 
@@ -43,9 +43,11 @@ Aġenti ACP (fluss ta’ tnedija bil-maqlub):
 
 ---
 
-## Awto-konfigura ma `setup-*`
+## Ikkonfigura awtomatikament b’`setup-*`
 
-M'għandekx għalfejn tikteb il-konfigurazzjoni ta' kull għodda bl-idejn. OmniRoute jibgħat kmand `setup-*` għal kull CLI appoġġjat li jaqra l** ħajjin** katalgu tal-mudell minn OmniRoute li qed jaħdem (lokali jew remot) u jikteb il-konfigurazzjoni tal-għodda stess fuq il-magna tiegħek:
+M’għandekx għalfejn tikteb il-konfigurazzjoni ta’ kull għodda manwalment. OmniRoute jipprovdi kmand `setup-*`
+għal kull CLI appoġġjat li jaqra l-katalgu **attiv** tal-mudelli minn istanza ta’
+OmniRoute li tkun qed taħdem (lokali jew remota) u jikteb il-konfigurazzjoni tal-għodda fuq il-magna tiegħek:
 
 ```bash
 omniroute setup-codex        omniroute setup-claude       omniroute setup-opencode
@@ -56,15 +58,52 @@ omniroute setup-5dive        omniroute setup-zed
 omniroute setup-whycodes
 ```
 
-Kull wieħed jaċċetta `--remote <url> --api-key <key>` (ikkonfigura għodda lokali kontra OmniRoute remot ), `--dry-run` (previżjoni mingħajr kitba), u `--port`. Għodod mingħajr mudell awto-iskoperta (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive, WhyCodes) jieħdu `--model <id>` (u `--yes` għal ġirjiet mhux interattivi). `setup-5dive` hija r-riċetta waħda li ma tiktebx taħt `$HOME`: tikkonfigura flotta ta' aġent 5dive billi tikteb profil ta' awtentikazzjoni ta' root-owned fuq l-ospitant tal-flotta, u għalhekk jerġa' jesegwixxi permezz `sudo` u m'għandu l-ebda mod remot tiegħu stess. Biex tniedi CLI bl-env it-tajjeb injettat u bl-ebda konfigurazzjoni miktuba, uża l-lanċjar `omniroute run <target>` ġeneriku (claude, codex, aider, goose, opencode, qwen, gemini, whycodes — miri u psewdonimi ġejjin minn `bin/cli/cli-manifest.mjs`); il-legati għal kull għodda launchers `omniroute launch` (Claude Code) u `omniroute launch-codex` (Codex) jibqgħu disponibbli. Gemini CLI huwa tnedija biss: hija mira `omniroute run` iżda m'għandha l-ebda riċetta `setup-*`/`configure`.
+Kull wieħed jaċċetta `--remote <url> --api-key <key>` (biex tikkonfigura għodda lokali ma’
+OmniRoute remot), `--dry-run` (biex tara minn qabel mingħajr ma tikteb), u `--port`. Għodod
+mingħajr skoperta awtomatika tal-mudelli (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive, WhyCodes) jieħdu
+`--model <id>` (u `--yes` għal eżekuzzjonijiet mhux interattivi). `setup-5dive` huwa l-unika
+riċetta li ma tiktebx taħt `$HOME`: din tikkonfigura flotta ta’ aġenti 5dive billi
+tikteb profil tal-awtentikazzjoni li huwa proprjetà ta’ root fuq il-host tal-flotta, għalhekk terġa’ teżegwixxi lilha nfisha permezz ta’ `sudo`
+u m’għandhiex modalità remota tagħha stess. Biex tniedi CLI bl-ambjent
+korrett injettat u mingħajr ma tinkiteb ebda konfigurazzjoni, uża l-lanċjatur ġeneriku
+`omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini,
+whycodes — il-miri u l-aliases jiġu minn `bin/cli/cli-manifest.mjs`); il-lanċjaturi
+preċedenti speċifiċi għall-għodda `omniroute launch` (Claude Code) u `omniroute launch-codex`
+(Codex) għadhom disponibbli. Gemini CLI jista’ jitnieda biss: huwa mira ta’ `omniroute run`
+iżda m’għandux riċetta `setup-*`/`configure`.
 
-> **Referenza sħiħa:** it-tabella prinċipali — dak li jikteb kull kmand, kull bandiera, lokali vs remota, u liema għodod iridu suffiss `/v1` — tgħix fiha** [CLI Integrazzjonijiet](../guides/CLI-INTEGRATIONS.md)** .
+> **Referenza sħiħa:** it-tabella ewlenija — x’jikteb kull kmand, kull flag,
+> lokali kontra remot, u liema għodod jeħtieġu suffiss `/v1` — tinsab f’
+> **[Integrazzjonijiet tas-CLI](../guides/CLI-INTEGRATIONS.md)**.
 
-### Tmexxi dawn ġewwa kontenitur
+### It-tħaddim ta’ dawn ġewwa container
 
-Kmand `setup-*` esegwit ġewwa l-kontenitur OmniRoute jikteb fid-dar tal-kontejner stess, li l-ebda CLI ospitanti ma jaqra u li jisparixxi mal-kontenitur. OmniRoute jiskopri dak u joħroġ minn `2` b'istruzzjonijiet aktar milli bil-miktub. Żewġ modi appoġġjati 'l quddiem — installa l- CLI fuq il-host u `omniroute connect` mal-kontenitur, jew torbot il-konfigurazzjoni dirs u ssettja `CLI_CONFIG_HOME` (il-profil `host` kompost). Kull kmand `setup-*`, flimkien `omniroute configure` u `omniroute config set`, jaċċetta `--allow-container-write` meta tikkonfigura CLIs tal-kontenitur stess huwa dak li fil-fatt riedet; `OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true` jagħmel l-istess għas-server. Ara [Docker Guide → Konfigurazzjoni ta' għodod CLI host](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker).
+Kmand `setup-*` eżegwit ġewwa l-container ta’ OmniRoute jikteb fil-home
+tal-container stess, li ma jinqara minn ebda CLI tal-host u li jisparixxi mal-
+container. OmniRoute jidentifika dan u joħroġ b’`2` flimkien ma’ istruzzjonijiet minflok
+ma jikteb. Hemm żewġ modi appoġġjati biex tkompli — installa s-CLI fuq il-host u
+uża `omniroute connect` biex tikkonnettja mal-container, jew agħmel bind-mount tad-direttorji tal-konfigurazzjoni u ssettja
+`CLI_CONFIG_HOME` (il-profil `host` ta’ compose). Kull kmand `setup-*`, flimkien ma’
+`omniroute configure` u `omniroute config set`, jaċċetta
+`--allow-container-write` meta dak li fil-fatt trid huwa li tikkonfigura s-CLIs tal-container
+stess; `OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true` jagħmel l-istess għas-
+server. Ara
+[Gwida ta’ Docker → Il-konfigurazzjoni tal-għodod CLI tal-host](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker).
 
-Id-dashboard** japplikaw endpoint** (`POST /api/cli-tools/apply`) jinforza l-istess gwardja: f’kontenitur, kitba li l-mira tagħha mhix bind-mounted mill-host tweġibiet.**`422`** bi `containerEphemeralTarget: true`, it-test tal-iżball sikur u — għall-għodod b'riċetta ospitanti (claude, codex, opencode, cline, kilo, continue) — `hostSetupCommand` (eż. `omniroute setup-opencode`) biex taħdem fuq il-host minflok; xejn mhu miktub. `dryRun: true` jibqa' jaħdem fil-modalità tal-kontejner u jirritorna mogħdija fil-mira + ta' preview redatta mingħajr ma tmiss id-disk. Il-kontenut tal-preview mhuwiex konfigurazzjoni li ġġorr il-kredenzjali biex tikkopja jew timporta. Applika bl-inputs oriġinali tool/base URL/API key/model fuq l-ospitant, jew uża l-kmand tas-setup indikat min-naħa tal-host. Ara [s-sigurtà tal-konfigurazzjoni CLI](../security/CLI-CONFIGURATION.md) għall-header tal-preview u talba kuntratt. Din l-imġieba hija intenzjonata u mħarsa mir-rigressjoni minn `tests/unit/api/cli-tools/apply-container-guard.test.ts` — qatt ma "tiffissa" 422 billi tneħħi l-ilqugħ.
+L-**endpoint tal-applikazzjoni** tad-dashboard (`POST /api/cli-tools/apply`) jinforza l-
+istess protezzjoni: f’container, kitba li l-mira tagħha mhijiex bind-mounted mill-
+host twieġeb b’**`422`** flimkien ma’ `containerEphemeralTarget: true`, it-test sikur tal-
+iżball u — għall-għodod b’riċetta għall-host (claude, codex, opencode, cline,
+kilo, continue) — `hostSetupCommand` (eż. `omniroute setup-opencode`) biex jiġi eżegwit
+fuq il-host minflok; ma jinkiteb xejn. `dryRun: true` jibqa’ jaħdem fil-modalità tal-container
+u jirritorna previżjoni b’informazzjoni sensittiva moħbija flimkien mal-path tal-mira mingħajr ma jmiss id-diska. Il-kontenut tal-
+previżjoni mhuwiex konfigurazzjoni li fiha kredenzjali biex tiġi kkupjata jew importata. Applika
+bl-inputs oriġinali tal-għodda/URL bażi/API key/mudell fuq il-host, jew uża l-kmand indikat
+ta’ setup fuq il-host. Ara [Sigurtà tal-konfigurazzjoni tas-CLI](../security/CLI-CONFIGURATION.md)
+għall-header tal-previżjoni u l-kuntratt tat-talba. Din l-imġiba hija
+intenzjonata u protetta kontra rigressjonijiet minn
+`tests/unit/api/cli-tools/apply-container-guard.test.ts` — qatt “issewwi” 422
+billi tneħħi l-protezzjoni.
 
 ---
 
@@ -109,59 +148,59 @@ wiċċ wieħed mingħajr l-oħrajn twassal biex is-sett tat-testijiet ifalli min
 
 ## 1. Il-Katalgu tal-Kodiċi CLI (28 għodda)
 
-L-għodda kollha li jidhru fiz `/dashboard/cli-code`. Dawk `baseUrlSupport: none` huma bil-fili permezz ta' MITM jew gwida manwali minflok bażi tad-dwana URL:
+L-għodod kollha li jidhru f’`/dashboard/cli-code`. Dawk b’`baseUrlSupport: none` huma kkonfigurati permezz ta’ MITM jew gwida manwali minflok URL bażi personalizzat:
 
-| id            | isem                                  | bejjiegħ            | baseUrlSupport | configType       | acpSpawnable |
-| ------------- | ------------------------------------- | ------------------- | -------------- | ---------------- | ------------ |
-| claude        | Claude Code                           | Anthropic           | sħiħa          | env              | veru         |
-| kodex         | OpenAI Codex CLI                      | OpenAI              | sħiħa          | drawwa           | veru         |
-| zcode         | ZCode ( Pjan ta' Kodifikazzjoni GLM ) | Z.ai                | xejn           | drawwa           | falza        |
-| inklinazzjoni | Cline                                 | OSS (ex-Claude Dev) | sħiħa          | drawwa           | veru         |
-| kilo          | Kilo Kodiċi                           | Kilo-Org            | sħiħa          | drawwa           | falza        |
-| roo           | Kodiċi Roo                            | Roo (OSS)           | sħiħa          | gwida            | falza        |
-| kompli        | Kompli                                | kompli.dev          | sħiħa          | gwida            | falza        |
-| aider         | Aider                                 | OSS (P. Gauthier)   | sħiħa          | gwida            | veru         |
-| ssawwar       | ForgeCode                             | Antinomija HQ       | sħiħa          | drawwa           | veru         |
-| jcode         | jcode                                 | 1jehuang (OSS)      | sħiħa          | drawwa           | falza        |
-| deepseek-tui  | DeepSeek TUI                          | Hunter Bown (OSS)   | sħiħa          | drawwa           | falza        |
-| codewhale     | CodeWhale                             | Hmbown (OSS)        | sħiħa          | drawwa           | falza        |
-| kodiċi miftuħ | OpenCode                              | Anomalja (ex-SST)   | sħiħa          | gwida            | veru         |
-| droid         | Fabbrika Droid                        | Fabbrika AI         | parzjali       | gwida            | falza        |
-| kopolot       | GitHub Copilot CLI                    | GitHub/MS           | sħiħa          | drawwa           | falza        |
-| cursor-cli    | Cursor CLI                            | Anysphere           | parzjali       | gwida            | veru         |
-| xamm          | Xomm                                  | leonardcser (OSS)   | sħiħa          | drawwa           | falza        |
-| pi            | Pi (aġent tal-kodifikazzjoni pi)      | M. Zechner (OSS)    | sħiħa          | drawwa           | falza        |
-| grok-bini     | Grok Ibni                             | xAI                 | sħiħa          | drawwa           | falza        |
-| tfarrak       | Għaffeġ                               | OSS (Charm)         | sħiħa          | drawwa           | falza        |
-| qwen          | Qwen Code                             | Alibaba             | sħiħa          | gwida            | veru         |
-| openclaude    | OpenClaude                            | Gitlawb (OSS)       | sħiħa          | gwida            | falza        |
-| zed           | Zed                                   | Zed Industries      | sħiħa          | gwida            | falza        |
-| cursor        | Cursor                                | Anysphere           | xejn           | gwida            | falza        |
-| antigravità   | Antigravity                           | Google              | xejn           | mitm             | falza        |
-| hermes        | Hermes                                | Nous Riċerka        | xejn           | gwida            | falza        |
-| kiro          | Kiro AI                               | Amazon              | xejn           | mitm             | falza        |
-| drawwa        | Custom CLI                            | —                   | sħiħa          | bennej tad-dwana | falza        |
+| id           | name                    | vendor              | baseUrlSupport | configType     | acpSpawnable |
+| ------------ | ----------------------- | ------------------- | -------------- | -------------- | ------------ |
+| claude       | Claude Code             | Anthropic           | full           | env            | true         |
+| codex        | OpenAI Codex CLI        | OpenAI              | full           | custom         | true         |
+| zcode        | ZCode (GLM Coding Plan) | Z.ai                | none           | custom         | false        |
+| cline        | Cline                   | OSS (ex-Claude Dev) | full           | custom         | true         |
+| kilo         | Kilo Code               | Kilo-Org            | full           | custom         | false        |
+| roo          | Roo Code                | Roo (OSS)           | full           | guide          | false        |
+| continue     | Continue                | continue.dev        | full           | guide          | false        |
+| aider        | Aider                   | OSS (P. Gauthier)   | full           | guide          | true         |
+| forge        | ForgeCode               | Antinomy HQ         | full           | custom         | true         |
+| jcode        | jcode                   | 1jehuang (OSS)      | full           | custom         | false        |
+| deepseek-tui | DeepSeek TUI            | Hunter Bown (OSS)   | full           | custom         | false        |
+| codewhale    | CodeWhale               | Hmbown (OSS)        | full           | custom         | false        |
+| opencode     | OpenCode                | Anomaly (ex-SST)    | full           | guide          | true         |
+| droid        | Factory Droid           | Factory AI          | partial        | guide          | false        |
+| copilot      | GitHub Copilot CLI      | GitHub/MS           | full           | custom         | false        |
+| cursor-cli   | Cursor CLI              | Anysphere           | partial        | guide          | true         |
+| smelt        | Smelt                   | leonardcser (OSS)   | full           | custom         | false        |
+| pi           | Pi (pi-coding-agent)    | M. Zechner (OSS)    | full           | custom         | false        |
+| grok-build   | Grok Build              | xAI                 | full           | custom         | false        |
+| crush        | Crush                   | OSS (Charm)         | full           | custom         | false        |
+| qwen         | Qwen Code               | Alibaba             | full           | guide          | true         |
+| openclaude   | OpenClaude              | Gitlawb (OSS)       | full           | guide          | false        |
+| zed          | Zed                     | Zed Industries      | full           | guide          | false        |
+| cursor       | Cursor                  | Anysphere           | none           | guide          | false        |
+| antigravity  | Antigravity             | Google              | none           | mitm           | false        |
+| hermes       | Hermes                  | Nous Research       | none           | guide          | false        |
+| kiro         | Kiro AI                 | Amazon              | none           | mitm           | false        |
+| custom       | Custom CLI              | —                   | full           | custom-builder | false        |
 
-Għodod bi `baseUrlSupport: "partial"` juru badge "⚠ Base URL parcial " fil-kard tad-dashboard.
+L-għodod b’`baseUrlSupport: "partial"` juru badge "⚠ URL bażi parzjali" fil-kard tad-dashboard.
 ---
 
-## 2. CLI Agents Catalog (11-il għodda)
+## 2. Katalgu tal-Aġenti CLI (11 għodod)
 
-Aġenti awtonomi li jidhru `/dashboard/cli-agents`:
+Aġenti awtonomi li jidhru f’`/dashboard/cli-agents`:
 
-| id           | isem              | bejjiegħ                  | baseUrlSupport | acpSpawnable |
-| ------------ | ----------------- | ------------------------- | -------------- | ------------ |
-| hermes-aġent | Aġent Hermes      | Nous Riċerka              | sħiħa          | falza        |
-| openclaw     | OpenClaw          | OSS (P. Steinberger)      | sħiħa          | veru         |
-| wiżż         | Wiżż              | Blokk / Fondazzjoni Linux | sħiħa          | veru         |
-| interpretu   | Interpretu Miftuħ | OSS                       | sħiħa          | veru         |
-| medd         | Warp AI           | Warp Inc.                 | parzjali       | veru         |
-| aġent-gverta | Gverta tal-Aġent  | ashishgoplani (OSS)       | sħiħa          | falza        |
-| omp          | Oh Pi Tiegħi      | OSS                       | sħiħa          | veru         |
-| letta        | Letta CLI         | Letta                     | sħiħa          | falza        |
-| prime-agent  | Aġent Prim        | Prime Intellect (OSS)     | sħiħa          | falza        |
-| 5 dive       | 5 dive            | OSS (5dive-ai)            | sħiħa          | falza        |
-| whycodes     | WhyCodes          | Għaliex Korporazzjoni     | sħiħa          | falza        |
+| id           | isem             | fornitur                 | appoġġ għal baseUrl | jista’ jitħaddem b’ACP |
+| ------------ | ---------------- | ------------------------ | ------------------- | ---------------------- |
+| hermes-agent | Hermes Agent     | Nous Research            | full                | false                  |
+| openclaw     | OpenClaw         | OSS (P. Steinberger)     | full                | true                   |
+| goose        | Goose            | Block / Linux Foundation | full                | true                   |
+| interpreter  | Open Interpreter | OSS                      | full                | true                   |
+| warp         | Warp AI          | Warp Inc.                | partial             | true                   |
+| agent-deck   | Agent Deck       | asheshgoplani (OSS)      | full                | false                  |
+| omp          | Oh My Pi         | OSS                      | full                | true                   |
+| letta        | Letta CLI        | Letta                    | full                | false                  |
+| prime-agent  | Prime Agent      | Prime Intellect (OSS)    | full                | false                  |
+| 5dive        | 5dive            | OSS (5dive-ai)           | full                | false                  |
+| whycodes     | WhyCodes         | Why Corporation          | full                | false                  |
 
 ---
 
@@ -220,22 +259,22 @@ interface ToolBatchStatus {
 
 ---
 
-## 6. Settings Handlers għal Għodod Ġodda
+## 6. Handlers tas-Settings għal Għodod Ġodda
 
-Għodod ġodda bi `configType: "custom"` għandhom settings apposta API rotot:
+Għodod ġodda b’`configType: "custom"` għandhom rotot dedikati tal-API għas-settings:
 
-| Rotta                                       | Għodda                                                                         |
-| ------------------------------------------- | ------------------------------------------------------------------------------ |
-| `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                                        |
-| `POST /api/cli-tools/jcode-settings`        | jcode (bandiera --base-url )                                                   |
-| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, wirt)                                           |
-| `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, primarja + legacy `~/.deepseek` sync)              |
-| `POST /api/cli-tools/smelt-settings`        | Xomm                                                                           |
-| `POST /api/cli-tools/pi-settings`           | Aġent tal-kodifikazzjoni Pi (`~/.pi/agent/models.json`, `providers.omniroute`) |
-| `POST /api/cli-tools/grok-build-settings`   | Grok Ibni (~/.grok/config.toml, `[model.omniroute]`)                           |
-| `POST /api/cli-tools/qwen-settings`         | Kodiċi Qwen (ċavetta + dedikata `.env` `~/.qwen/settings.json` )               |
+| Rotta                                       | Għodda                                                                            |
+| ------------------------------------------- | --------------------------------------------------------------------------------- |
+| `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                                           |
+| `POST /api/cli-tools/jcode-settings`        | jcode (flag --base-url)                                                           |
+| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, legat)                                             |
+| `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, primarju + sinkronizzazzjoni mal-legat `~/.deepseek`) |
+| `POST /api/cli-tools/smelt-settings`        | Smelt                                                                             |
+| `POST /api/cli-tools/pi-settings`           | Aġent tal-ipprogrammar Pi (`~/.pi/agent/models.json`, `providers.omniroute`)      |
+| `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)                             |
+| `POST /api/cli-tools/qwen-settings`         | Qwen Code (`~/.qwen/settings.json` + key dedikata f’`.env`)                       |
 
-Ir-rotot kollha jużaw `sanitizeErrorMessage()` għal tweġibiet għall-iżbalji (Regola Iebsa #12).
+Ir-rotot kollha jużaw `sanitizeErrorMessage()` għat-tweġibiet tal-iżbalji (Regola Stretta #12).
 
 ---
 
@@ -292,21 +331,21 @@ Huma pprovduti traduzzjonijiet sħaħ għall-PT-BR u l-EN. 39 locale oħra juża
 
 ---
 
-## 9. Quick Start
+## 9. Bidu Rapidu
 
-### Pass 1 — Ikseb Ċavetta OmniRoute API
+### Pass 1 — Ikseb API Key ta' OmniRoute
 
-1. Iftah `/dashboard/api-manager` →** Oħloq API Key**
+1. Iftaħ `/dashboard/api-manager` → **Oħloq API Key**
 2. Agħtiha isem (eż. `cli-tools`) u agħżel il-permessi kollha
-3. Ikkopja ċ-ċavetta — ikollok bżonnha għal kull CLI hawn taħt
+3. Ikkopja l-key — se jkollok bżonnha għal kull CLI hawn taħt
 
-> Iċ-ċavetta tiegħek tidher bħal: `sk-xxxxxxxxxxxxxxxx-xxxxxxxxx`
+> Il-key tiegħek tidher hekk: `sk-xxxxxxxxxxxxxxxx-xxxxxxxxx`
 
 ---
 
-### Pass 2 — Installa CLI Tools
+### Pass 2 — Installa l-Għodod CLI
 
-L-għodod kollha bbażati fuq npm jeħtieġu Node.js 22.22.2 + jew 24.x:
+L-għodod kollha bbażati fuq npm jeħtieġu Node.js 22.22.2+ jew 24.x:
 
 ```bash
 # Claude Code (Anthropic)
@@ -327,48 +366,49 @@ npm install -g kilocode
 # Qwen Code
 npm install -g @qwen-code/qwen-code
 
-# Google Gemini CLI (launchable via `omniroute run gemini` → /v1beta surface)
+# Google Gemini CLI (jista' jitħaddem permezz ta' `omniroute run gemini` → interfaċċa /v1beta)
 npm install -g @google/gemini-cli
 
 # Aider
 pip install aider-chat
 
 # Smelt
-cargo install smelt  # Rust-based
+cargo install smelt  # Ibbażat fuq Rust
 
-# Pi coding agent
+# Aġent tal-ipprogrammar Pi
 npm install -g --ignore-scripts @earendil-works/pi-coding-agent
 
 # jcode
-# see https://github.com/1jehuang/jcode for install
+# ara https://github.com/1jehuang/jcode għall-installazzjoni
 ```
 
 ---
 
-### Pass 3 — Konfigurat permezz Dashboard
+### Pass 3 — Ikkonfigura permezz tad-Dashboard
 
-1. `http://localhost:20128/dashboard/cli-code`
+1. Mur f'`http://localhost:20128/dashboard/cli-code`
 2. Sib l-għodda tiegħek fil-grilja
-3. Ikklikkja l-karta biex tiftaħ il-paġna tad-dettall tal-għodda
-4. Agħżel iċ-ċavetta API tiegħek u URL bażi
-5. Ikklikkja** Applika l-Konfigurazzjoni** jew tikkopja s-snippet tal-konfigurazzjoni manwali
+3. Ikklikkja l-kard biex tiftaħ il-paġna tad-dettalji tal-għodda
+4. Agħżel l-API key u l-base URL tiegħek
+5. Ikklikkja **Applika l-Konfigurazzjoni** jew ikkopja s-snippet tal-konfigurazzjoni manwali
 
 ---
 
-### Pass 4 — Issettja Varjabbli Ambjentali Globali
+### Pass 4 — Issettja l-Varjabbli Globali tal-Ambjent
 
 ```bash
-# OmniRoute Universal Endpoint
+# Endpoint Universali ta' OmniRoute
 export OPENAI_BASE_URL="http://localhost:20128/v1"
 export OPENAI_API_KEY="sk-your-omniroute-key"
 export ANTHROPIC_BASE_URL="http://localhost:20128"
 export ANTHROPIC_AUTH_TOKEN="sk-your-omniroute-key"
-# Gemini CLI reads GOOGLE_GEMINI_BASE_URL at the ROOT (its SDK appends /v1beta/... itself)
+# Gemini CLI jaqra GOOGLE_GEMINI_BASE_URL fl-GĦERQ (l-SDK tiegħu jżid /v1beta/... waħdu)
 export GOOGLE_GEMINI_BASE_URL="http://localhost:20128"
 export GEMINI_API_KEY="sk-your-omniroute-key"
 ```
 
-> Għal a** server remot** ibdel `localhost:20128` mas-server IP jew domain, eż. `http://<your-server-ip>:20128`.
+> Għal **server remot** ibdel `localhost:20128` bl-IP jew bid-domain tas-server,
+> eż. `http://<your-server-ip>:20128`.
 
 ---
 
@@ -377,7 +417,7 @@ export GEMINI_API_KEY="sk-your-omniroute-key"
 #### Claude Code
 
 ```bash
-# Create ~/.claude/settings.json:
+# Oħloq ~/.claude/settings.json:
 mkdir -p ~/.claude && cat > ~/.claude/settings.json << EOF
 {
   "env": {
@@ -388,7 +428,7 @@ mkdir -p ~/.claude && cat > ~/.claude/settings.json << EOF
 EOF
 ```
 
-Uża l-għerq tal-gateway Anthropic unifikat għall-Kodiċi Claude. Twaħħalx `/v1` hawn.
+Uża l-għerq unifikat tal-gateway ta' Anthropic għal Claude Code. Iżżidx `/v1` hawnhekk.
 
 **Test:** `claude "say hello"`
 
@@ -396,7 +436,10 @@ Uża l-għerq tal-gateway Anthropic unifikat għall-Kodiċi Claude. Twaħħalx `
 
 #### OpenAI Codex
 
-Modern Codex (v0.137 +) jaqra `~/.codex/config.toml` biss — l-antik `config.yaml` jappartjeni għall-legat npm CLI u siektament injorat. Iċ-ċavetta API tibqa' fil-varjabbli ambjentali `OMNIROUTE_API_KEY` (`env_key`), qatt ġewwa l-fajl:
+Codex modern (v0.137+) jaqra `~/.codex/config.toml` biss — il-
+`config.yaml` l-antik jappartjeni għall-CLI npm legacy u jiġi injorat fis-skiet. L-API
+key tibqa' fil-varjabbli tal-ambjent `OMNIROUTE_API_KEY` (`env_key`), u qatt
+ġewwa l-fajl:
 
 ```bash
 mkdir -p ~/.codex && cat > ~/.codex/config.toml << EOF
@@ -411,7 +454,7 @@ EOF
 export OMNIROUTE_API_KEY="sk-your-omniroute-key"
 ```
 
-Referenza sħiħa (profili, `wire_api`, windows tal-kuntest): [CODEX-CLI-CONFIGURATION.md](../guides/CODEX-CLI-CONFIGURATION.md).
+Referenza sħiħa (profili, `wire_api`, twieqi tal-kuntest): [CODEX-CLI-CONFIGURATION.md](../guides/CODEX-CLI-CONFIGURATION.md).
 
 **Test:** `codex "what is 2+2?"`
 
@@ -444,15 +487,17 @@ EOF
 
 **Test:** `opencode`
 
-> Uża `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high` biex tibgħat varjanti tal-ħsieb.
+> Uża `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high`
+> biex tibgħat varjanti tal-ħsieb.
 
 ---
 
-#### Aġent tal-Kodifikazzjoni Pi
+#### Pi Coding Agent
 
-Installa l-pakkett uffiċjali tal-Pi Coding Agent `npm install -g --ignore-scripts @earendil-works/pi-coding-agent`. Pi jaqra fornituri tad-dwana minn `~/.pi/agent/models.json`; issettja `PI_CODING_AGENT_DIR` biex iċċaqlaq id-direttorju kollu tal-aġent. Id-dashboard isegwi dik l-override. Pi ma jiskoprix mudelli minn endpoints tad-dwana, għalhekk OmniRoute jikteb il-mudell magħżul `models[]` billi juża `openai-completions` API ta' Pi u l-endpoint `/v1` kompatibbli ma' OpenAI OmniRoute.
+Installa l-pakkett uffiċjali Pi Coding Agent b'`npm install -g --ignore-scripts
+@earendil-works/pi-coding-agent`. Pi jaqra fornituri personalizzati minn `~/.pi/agent/models.json`; issettja `PI_CODING_AGENT_DIR` għal mogħdija assoluta (jew mogħdija bil-prefiss `~`) biex tmexxi d-direttorju kollu tal-aġent. Id-dashboard isegwi dik il-bidla. Pi ma jiskoprix mudelli minn endpoints personalizzati, għalhekk OmniRoute jikteb il-mudell magħżul f'`models[]` bl-API `openai-completions` ta' Pi u l-endpoint `/v1` ta' OmniRoute kompatibbli ma' OpenAI.
 
-Fil**CLI Għodda → Pi** , agħżel endpoint, API key, u mudell, irrevedi l-previżjoni tal-fornitur, imbagħad applika. Il-previżjoni hija framment tal-fornitur: għaqqad `providers.omniroute` fiż `models.json` eżistenti tiegħek meta tikkonfigura Pi manwalment sabiex fornituri u settings oħra jibqgħu intatti.
+F'**CLI Tools → Pi**, agħżel endpoint, ċavetta API u mudell, irrevedi l-preview tal-fornitur, imbagħad applika. Il-preview huwa framment ta' fornitur: għaqqad `providers.omniroute` fil-`models.json` eżistenti tiegħek meta tikkonfigura Pi manwalment sabiex fornituri u settings oħra jibqgħu intatti.
 
 ```json
 {
@@ -469,19 +514,19 @@ Fil**CLI Għodda → Pi** , agħżel endpoint, API key, u mudell, irrevedi l-pre
 }
 ```
 
-Pi reloads `models.json` meta tiftah `/model`. Ittestja r-rotta kkonfigurata bl-id tal-fornitur u l-id tal-mudell li għażilt:
+Pi jerġa' jgħabbi `models.json` meta tiftaħ `/model`. Ittestja r-route konfigurata bl-ID tal-fornitur u l-ID tal-mudell li għażilt:
 
 ```bash
 pi --provider omniroute --model auto/best-coding --print "Reply with a short greeting."
 ```
 
-Referenzi: [Mudelli Pi u fornituri tad-dwana](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/models.md), [varjabbli tal-ambjent Pi](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/environment-variables.md), [istruzzjonijiet tal-installazzjoni Pi](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/README.md).
+Referenzi: [Mudelli Pi u fornituri personalizzati](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/models.md), [Varjabbli tal-ambjent Pi](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/environment-variables.md), [Struzzjonijiet tal-installazzjoni Pi](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/README.md).
 
 ---
 
-#### Cline ( Kodiċi CLI jew VS )
+#### Cline (CLI jew VS Code)
 
-**CLI mode:**
+**Modalità CLI:**
 
 ```bash
 mkdir -p ~/.cline/data && cat > ~/.cline/data/globalState.json << EOF
@@ -493,21 +538,22 @@ mkdir -p ~/.cline/data && cat > ~/.cline/data/globalState.json << EOF
 EOF
 ```
 
-**Modalità tal-kodiċi VS :** settings ta' estensjoni Cline → API Fornitur: `OpenAI Compatible` → Bażi URL: `http://localhost:20128/v1`
+**Modalità VS Code:**
+Settings tal-estensjoni Cline → API Provider: `OpenAI Compatible` → Base URL: `http://localhost:20128/v1`
 
-Jew uża l- OmniRoute dashboard →**CLI Għodda → Cline → Applika Konfigurazzjoni** .
+Jew uża d-dashboard ta' OmniRoute → **Għodod CLI → Cline → Applika l-Konfigurazzjoni**.
 
 ---
 
-#### KiloCode ( Kodiċi CLI jew VS )
+#### KiloCode (CLI jew VS Code)
 
-**CLI mode:**
+**Modalità CLI:**
 
 ```bash
 kilocode --api-base http://localhost:20128/v1 --api-key sk-your-omniroute-key
 ```
 
-**Settings tal-kodiċi VS :**
+**Settings ta' VS Code:**
 
 ```json
 {
@@ -516,13 +562,13 @@ kilocode --api-base http://localhost:20128/v1 --api-key sk-your-omniroute-key
 }
 ```
 
-Jew uża l- OmniRoute dashboard →**CLI Għodda → KiloCode → Applika Konfigurazzjoni** .
+Jew uża d-dashboard ta' OmniRoute → **Għodod CLI → KiloCode → Applika l-Konfigurazzjoni**.
 
 ---
 
-#### Kompli (VS Code Extension)
+#### Continue (Estensjoni ta' VS Code)
 
-Edit `~/.continue/config.yaml`:
+Editja `~/.continue/config.yaml`:
 
 ```yaml
 models:
@@ -534,20 +580,20 @@ models:
     default: true
 ```
 
-Erġa ibda VS Code wara l-editjar.
+Erġa' ibda VS Code wara li teditja.
 
 ---
 
 #### VS Code Insiders (`chatLanguageModels.json`)
 
-Uża dan meta VS Code Insiders ikun ikkonfigurat għal mudelli ta' endpoint personalizzati u trid li OmniRoute jaħdem mingħajr kamp ta' header personalizzat.
+Uża dan meta VS Code Insiders ikun ikkonfigurat għal mudelli b'endpoint personalizzat u tkun trid li OmniRoute jaħdem mingħajr field personalizzat tal-header.
 
 **Post rakkomandat:**
 
 - Linux: `~/.config/Code - Insiders/User/chatLanguageModels.json`
 - Windows: `%APPDATA%/Code - Insiders/User/chatLanguageModels.json`
 
-**Eżempju bl-użu tal-alias OmniRoute tokenized:**
+**Eżempju bl-użu tal-alias tokenizzat ta’ OmniRoute:**
 
 ```json
 [
@@ -571,26 +617,27 @@ Uża dan meta VS Code Insiders ikun ikkonfigurat għal mudelli ta' endpoint pers
 
 **Noti:**
 
-- Ibdel `sk-your-omniroute-key` b'ċavetta API maħluqa OmniRoute.
-- Il-qasam `url` għandu jindika `/api/v1/vscode/{token}/chat/completions`.
-- Il-qasam `modelsUrl` għandu jindika `/api/v1/vscode/{token}/models`.
-- Ippreferi l-fluss normali tal-header `/v1` + Bearer meta l-klijent jappoġġja headers tad-dwana.
-- It-tokens inkorporati fl-URL huma riżerva tal-kompatibilità u jistgħu jidhru fil-ġurnali tal-editur jew fl-istorja tal-prokura.
+- Issostitwixxi `sk-your-omniroute-key` b’ċavetta API maħluqa f’OmniRoute.
+- Il-field `url` għandu jipponta lejn `/api/v1/vscode/{token}/chat/completions`.
+- Il-field `modelsUrl` għandu jipponta lejn `/api/v1/vscode/{token}/models`.
+- Agħti preferenza lill-fluss normali ta’ `/v1` + header Bearer meta l-klijent jappoġġja headers personalizzati.
+- It-tokens inkorporati fil-URL huma soluzzjoni alternattiva għall-kompatibbiltà u jistgħu jidhru fil-logs tal-editur jew fl-istorja tal-proxy.
 
 ---
 
 #### Kiro CLI (Amazon)
 
 ```bash
-# Login to your AWS/Kiro account:
+# Idħol fil-kont AWS/Kiro tiegħek:
 kiro-cli login
 
-# The CLI uses its own auth — OmniRoute is not needed as backend for Kiro CLI itself.
-# Use kiro-cli alongside OmniRoute for other tools.
+# Is-CLI juża l-awtentikazzjoni tiegħu stess — OmniRoute mhuwiex meħtieġ bħala backend għall-Kiro CLI innifsu.
+# Uża kiro-cli flimkien ma’ OmniRoute għal għodod oħra.
 kiro-cli status
 ```
 
-Għall-**Kiro IDE** app desktop, uża l-endpoint MITM espost minn OmniRoute taħt `/dashboard/cli-tools → Kiro`.
+Għall-app tad-desktop **Kiro IDE**, uża l-endpoint MITM espost minn OmniRoute
+taħt `/dashboard/cli-tools → Kiro`.
 
 ---
 

@@ -4,7 +4,7 @@
 //
 // Strategy: test the exported pure evaluator without spawning oasdiff or touching
 // git. The evaluator is the load-bearing decision: regression iff a real breaking
-// change appears (measured > baseline); a null measurement (graceful skip) never
+// change appears (unknown > 0); a null measurement (graceful skip) never
 // blocks. End-to-end SKIP behavior (binary absent / base unresolved) is covered by
 // the script's own advisory tests and a process-level skip assertion below.
 import test from "node:test";
@@ -93,15 +93,15 @@ test("evaluateOpenapiRatchet: undefined current → graceful skip", () => {
   assert.equal(r.skipped, true);
 });
 
-test("evaluateOpenapiRatchet: measured == baseline → not regressed", () => {
+test("evaluateOpenapiRatchet: unknown findings cannot consume an equal numeric ceiling", () => {
   const r = evaluate({ current: 2, baseline: 2 });
-  assert.equal(r.regressed, false);
+  assert.equal(r.regressed, true);
   assert.equal(r.skipped, false);
 });
 
-test("evaluateOpenapiRatchet: measured < baseline → not regressed (improvement)", () => {
+test("evaluateOpenapiRatchet: one unknown finding blocks even below the stored ceiling", () => {
   const r = evaluate({ current: 1, baseline: 5 });
-  assert.equal(r.regressed, false);
+  assert.equal(r.regressed, true);
   assert.equal(r.skipped, false);
 });
 
@@ -149,17 +149,17 @@ test("readBaselineOpenapiValue: invalid JSON returns null (does not throw)", () 
 });
 
 // ---------------------------------------------------------------------------
-// --ratchet end-to-end: binary-absent SKIP exits 0 (a missing measurement never
-// blocks). Runs the script with an empty PATH so oasdiff is unresolvable.
+// --ratchet end-to-end: unavailable tools fail closed as incomplete evidence.
+// Runs the script with an empty PATH so oasdiff is unresolvable.
 // ---------------------------------------------------------------------------
 
-test("--ratchet with oasdiff absent (empty PATH) SKIPs and exits 0", () => {
+test("--ratchet with oasdiff absent fails with INCOMPLETE", () => {
   const res = spawnSync(process.execPath, [SCRIPT_PATH, "--ratchet", "--quiet"], {
     encoding: "utf8",
     // Empty PATH → `which`/`oasdiff` unresolvable → findOasdiff() returns null.
     env: { ...process.env, PATH: "/nonexistent-bin-dir" },
     timeout: 30_000,
   });
-  assert.equal(res.status, 0, "binary-absent SKIP must exit 0 even with --ratchet");
-  assert.match(res.stdout, /openapiBreaking=SKIP reason=binary-absent/);
+  assert.equal(res.status, 2, "a required measurement cannot pass without its tool");
+  assert.match(res.stdout, /openapiBreaking=INCOMPLETE reason=binary-absent/);
 });

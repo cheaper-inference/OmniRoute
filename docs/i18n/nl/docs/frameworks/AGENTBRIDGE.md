@@ -20,7 +20,7 @@ Wanneer een IDE agent (bijv. GitHub Copilot, Cursor, Claude Code) een API aanroe
 
 Dit betekent dat u:
 
-- **Leid elke agent om naar elke provider** : Copilot praat met OpenAI? Stuur het door naar Anthropic Claude, Gemini of een van de 380 providers van OmniRoute.
+- **Leid elke agent om naar elke provider** : Copilot praat met OpenAI? Stuur het door naar Anthropic Claude, Gemini of een van de 381 providers van OmniRoute.
 - **Modeltoewijzingen toepassen** : `gemini-3-flash` → `claude-sonnet-4.7` transparant op handlerniveau.
 - **Observeer al het agentverkeer** : elk onderschept verzoek wordt gepubliceerd aan de [Verkeersinspecteur](./TRAFFIC_INSPECTOR.md).
 - **Pas OmniRoute veerkracht toe** : combo-routing, stroomonderbrekers, fallbacks en kostenregistratie werken ook voor IDE agentverkeer.
@@ -555,7 +555,7 @@ Trae is een relatief nieuwe AI-codeerassistent. Voordat een handler wordt geïmp
 3. Bepaal het authenticatiemechanisme
 4. Beoordeel go/no-go op basis van de TOS en de vindbaarheid van de API
 
-Totdat het onderzoek is afgerond, toont de Trae-kaart in het dashboard een badge 'In onderzoek' met een link 'Haalbaarheid rapporteren'. De handlerstub in `src/mitm/handlers/trae.ts` genereert een gestructureerde fout `Nog niet geïmplementeerd`.
+Totdat het onderzoek is afgerond, toont de Trae-kaart in het dashboard een badge 'In onderzoek' met een link 'Haalbaarheid rapporteren'. De handlerstub in `src/mitm/handlers/trae.ts` genereert een gestructureerde fout `Not yet implemented`.
 
 ### Agents in de backlog (MITM vereist — geen ondersteuning voor aangepaste basis-URL)
 

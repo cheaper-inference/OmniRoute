@@ -3,6 +3,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
+import { closeSharedLoggerResource } from "../../src/shared/utils/loggerResource.ts";
 
 const data = fs.mkdtempSync(path.join(os.tmpdir(), "omni-pinned-empty-turn-"));
 process.env.DATA_DIR = data;
@@ -17,6 +18,7 @@ test.after(
   async () => {
     await (await import("../../src/lib/usage/callLogs.ts")).closeCallLogSaves(5000);
     core.resetDbInstance();
+    await closeSharedLoggerResource();
     fs.rmSync(data, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   },
   { timeout: 6000 }

@@ -238,9 +238,9 @@ Toate endpointurile MITM necesită autentificare de administrare (`requireCliToo
 
 ---
 
-## User-Agent înlocuiește — env vars (`.env.example` secțiunea 12)
+## Suprascrieri User-Agent — variabile de mediu (secțiunea 12 din `.env.example`)
 
-| Variabilă           | Implicit                                      |
+| Variabilă           | Valoare implicită                             |
 | ------------------- | --------------------------------------------- |
 | `CLAUDE_USER_AGENT` | `claude-cli/2.1.280 (external, cli)`          |
 | `CODEX_USER_AGENT`  | `codex-cli/0.155.0 (Windows 10.0.26200; x64)` |
@@ -249,7 +249,7 @@ Toate endpointurile MITM necesită autentificare de administrare (`requireCliToo
 | `QODER_USER_AGENT`  | `Qoder-Cli`                                   |
 | `CURSOR_USER_AGENT` | `Cursor/3.4`                                  |
 
-Consumat de `open-sse/executors/base.ts::buildHeaders()` prin căutare dinamică.** Bucurați-le atunci când furnizorii lansează noi versiuni CLI** șirurile — stale UA încep să fie respinse ca clienți învechiți.
+Utilizate de `open-sse/executors/base.ts::buildHeaders()` prin căutare dinamică. **Actualizați-le când furnizorii lansează versiuni CLI noi** — șirurile UA învechite încep să fie respinse ca aparținând unor clienți neactualizați.
 
 ## Comutatoare pentru modul de compatibilitate CLI (secțiunea 13 din `.env.example`)
 

@@ -60,11 +60,11 @@ případě**, a to kvůli jednomu konkrétnímu implementačnímu faktu:
 
 Co to znamená pro jednotlivá rozhraní, a to i při `CORS_ALLOW_ALL=true`:
 
-| Rozhraní                                   | Mechanismus ověřování         | Dopad CORS se zástupným znakem                                                                                                                                                                                                                                                                                                                                                |
-| ------------------------------------------ | ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Řídicí panel / MANAGEMENT `/api/*`         | Relace pomocí cookie          | Zdroj je vrácen, ale **bez `Allow-Credentials`** prohlížeč **zablokuje** ověřené čtení. Škodlivý web z jiného zdroje **nemůže číst** vaše ověřené odpovědi řídicího panelu a soubor cookie relace není zpřístupněn.                                                                                                                                                           |
-| Klientské API `/v1/*`, `/v1beta/*`         | Hlavička Bearer / `x-api-key` | Již je tolerantní **záměrně** (`relaxForTokenAuth`): prohlížeče nikdy automaticky nepřipojují `Authorization`/`x-api-key`, takže stránka útočníka nemůže váš klíč poskytnout. Vrácení zdroje platí jen tehdy, když byl předložený klíč ověřen; anonymní odpovědi (`REQUIRE_API_KEY=false`) zachovávají seznam povolených zdrojů. `CORS_ALLOW_ALL` toto oprávnění nerozšiřuje. |
-| Veřejné pouze pro čtení (`/api/health`, …) | Žádný                         | Necitlivé; zástupný znak je neškodný.                                                                                                                                                                                                                                                                                                                                         |
+| Rozhraní                                   | Mechanismus ověřování         | Dopad CORS se zástupným znakem                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| ------------------------------------------ | ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Řídicí panel / MANAGEMENT `/api/*`         | Relace pomocí cookie          | Zdroj je vrácen, ale **bez `Allow-Credentials`** prohlížeč **zablokuje** ověřené čtení. Škodlivý web z jiného zdroje **nemůže číst** vaše ověřené odpovědi řídicího panelu a soubor cookie relace není zpřístupněn.                                                                                                                                                                                                                                                                                                                                                                       |
+| Klientské API `/v1/*`, `/v1beta/*`         | Hlavička Bearer / `x-api-key` | Již je tolerantní **záměrně** (`relaxForTokenAuth`): prohlížeče nikdy automaticky nepřipojují `Authorization`/`x-api-key`, takže stránka útočníka nemůže váš klíč poskytnout. Vrácení původu podle uvolněného pravidla vyžaduje autentizovaný subjekt (ověřený API klíč nebo ověřenou relaci ovládacího panelu), nikoli pouhou přítomnost hlavičky s přihlašovacími údaji, a nikdy nezahrnuje `Access-Control-Allow-Credentials`. Anonymní odpovědi (`REQUIRE_API_KEY=false`) používají nakonfigurovaný seznam povolených původů, včetně výslovného zapnutí pomocí `CORS_ALLOW_ALL=true`. |
+| Veřejné pouze pro čtení (`/api/health`, …) | Žádný                         | Necitlivé; zástupný znak je neškodný.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 
 **Zbytkové** vystavení při `CORS_ALLOW_ALL=true` je tedy omezeno na: (a)
 neověřená čtení již veřejně dostupných dat z jiného zdroje a (b) povolení
@@ -126,9 +126,7 @@ restartu.
   nepřipojují automaticky. CORS zde nepředstavuje smysluplnou bariéru — bariérou je
   klíč API — proto je toto rozhraní záměrně permisivní, aby klienti v prohlížečích
   a Electronu mohli číst odpovědi, ke kterým již mají oprávnění.
-  Uvolněné vrácení zdroje se řídí ověřeným klíčem, nikoli pouhou přítomností hlavičky:
-  když `REQUIRE_API_KEY=false` obslouží požadavek anonymně, jeho úspěšná odpověď
-  zachovává seznam povolených zdrojů, který při chybě přístup zamítá. Zamítnutí
+  Vrácení původu podle uvolněného pravidla vyžaduje autentizovaný subjekt (ověřený API klíč nebo ověřenou relaci ovládacího panelu), nikoli pouhou přítomnost hlavičky s přihlašovacími údaji, a nikdy nezahrnuje `Access-Control-Allow-Credentials`. Anonymní odpovědi (`REQUIRE_API_KEY=false`) používají nakonfigurovaný seznam povolených původů, včetně výslovného zapnutí pomocí `CORS_ALLOW_ALL=true`. Zamítnutí
   ověření (401) zůstávají čitelná, aby klienti mohli zobrazit odvolaný nebo chybně
   zadaný klíč (#5242): vlastní odpověď 401 z pipeline vrácení zdroje zachovává a trasa,
   která klíč sama odmítne poté, co jej pipeline obsloužila jako anonymní (`/v1/models`
@@ -140,8 +138,7 @@ restartu.
   soubor cookie `auth_token`), nikoli na tom, kterou z nich trasa zkontrolovala, a nikdy
   se nekombinuje s `Access-Control-Allow-Credentials`; tělo je pevná chybová obálka.
   Trasy pro správu pod `/api/v1/` chráněné pomocí `requireManagementAuth()`
-  (`/api/v1/management/*`, `/api/v1/registered-keys`) vrácení zdroje nepřidávají:
-  při `REQUIRE_API_KEY=false` nejsou jejich odpovědi 401/403 čitelné z jiného zdroje.
+  (`/api/v1/management/*`, `/api/v1/registered-keys`) nepoužívají tuto výjimku pro odmítnutí přihlašovacích údajů: při `REQUIRE_API_KEY=false` se jejich odpovědi 401/403 řídí nakonfigurovanou zásadou CORS pro původ.
 - **Relace používající soubory cookie (řídicí panel):** je chráněna výchozím
   nastavením, které při chybě přístup zamítne, **a také** absencí
   `Access-Control-Allow-Credentials` na sdílené cestě. Zdroje pro správu / řídicí
@@ -156,7 +153,7 @@ výstup inference, kontrolují hlavičku `Origin` handshaku samy
 pokud OmniRoute běží přes `npm start` / `npm run dev`, také most `/v1/ws` a
 `/api/v1/ws`, který streamuje `/v1/chat/completions`, `/v1/messages` a
 `/v1/responses` jako rámce. Most si u `/api/v1/ws?handshake=1` vyžádá verdikt a
-upgrade odmítne, pokud tato trasa kontrolu neprovedla. Handshake je přijat, když:
+upgrade odmítne, pokud tato trasa kontrolu neprovedla. Požadavky na autentizaci nadále platí samostatně. Kontrola původu projde, když:
 
 - nemá hlavičku `Origin` (Codex CLI, SDK a další klienti mimo prohlížeč);
 - hlavičku `Origin` připouští výše uvedený seznam povolených zdrojů

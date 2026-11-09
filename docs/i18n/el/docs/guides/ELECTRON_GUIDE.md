@@ -4,99 +4,107 @@
 
 ---
 
-> **Πηγή αλήθειας:** χώρο εργασίας `electron/`** Τελευταία ενημέρωση:** 2026-06-28 — v3.8.40
+> **Πηγή αναφοράς:** χώρος εργασίας `electron/`
+> **Τελευταία ενημέρωση:** 2026-06-28 — v3.8.40
 
-OmniRoute στέλνει μια εφαρμογή για υπολογιστές πολλαπλών πλατφορμών (Windows / macOS / Linux) ενσωματωμένη σε**Electron 41** +** ηλεκτρονιοδομητής 26.10** . Η εφαρμογή για επιτραπέζιους υπολογιστές δημιουργεί τον αυτόνομο διακομιστή Next.js ως θυγατρική διεργασία, δείχνει ένα `BrowserWindow` σε αυτόν και προσθέτει ένα δίσκο συστήματος, μια αυτόματη ενημέρωση, τη γέφυρα IPC και μια μυστική ζώνη εκκίνησης μηδενικής διαμόρφωσης.
+Το OmniRoute παρέχει μια εφαρμογή υπολογιστή πολλαπλών πλατφορμών (Windows / macOS / Linux), η οποία βασίζεται στα
+**Electron 41** + **electron-builder 26.10**. Η εφαρμογή υπολογιστή εκκινεί τον αυτόνομο διακομιστή Next.js
+ως θυγατρική διεργασία, κατευθύνει ένα `BrowserWindow` σε αυτόν και προσθέτει
+εικονίδιο στην περιοχή ειδοποιήσεων, αυτόματη ενημέρωση, γέφυρα IPC και αρχικοποίηση μυστικών χωρίς ρυθμίσεις.
 
 ## Αρχιτεκτονική
 
 ```
-┌──────────────────────────────────────────────┐
-│ Electron main process (electron/main.js)     │
-│ ├─ Single-instance lock                       │
-│ ├─ Child process: Next.js standalone server  │
-│ │   (spawned with Electron's Node runtime)   │
-│ ├─ BrowserWindow → http://localhost:PORT     │
-│ ├─ System tray + context menu                │
-│ ├─ Auto-update via electron-updater          │
-│ ├─ Content Security Policy (session headers) │
-│ └─ Secret bootstrap (JWT / API_KEY_SECRET)   │
-└──────────────────────────────────────────────┘
-            ↕ IPC bridge (electron/preload.js)
-┌──────────────────────────────────────────────┐
-│ Renderer (Next.js dashboard)                  │
-│   window.electronAPI.* (contextIsolation)     │
-└──────────────────────────────────────────────┘
+┌───────────────────────────────────────────────────┐
+│ Κύρια διεργασία Electron (electron/main.js)       │
+│ ├─ Κλείδωμα μοναδικής παρουσίας                    │
+│ ├─ Θυγατρική διεργασία: αυτόνομος διακομιστής     │
+│ │   Next.js (εκτελείται με το Node runtime του     │
+│ │   Electron)                                      │
+│ ├─ BrowserWindow → http://localhost:PORT           │
+│ ├─ Περιοχή ειδοποιήσεων + μενού περιβάλλοντος      │
+│ ├─ Αυτόματη ενημέρωση μέσω electron-updater        │
+│ ├─ Πολιτική Ασφάλειας Περιεχομένου (κεφαλίδες      │
+│ │   συνεδρίας)                                     │
+│ └─ Αρχικοποίηση μυστικών (JWT / API_KEY_SECRET)    │
+└───────────────────────────────────────────────────┘
+            ↕ Γέφυρα IPC (electron/preload.js)
+┌───────────────────────────────────────────────────┐
+│ Διεργασία απόδοσης (πίνακας ελέγχου Next.js)      │
+│   window.electronAPI.* (contextIsolation)          │
+└───────────────────────────────────────────────────┘
 ```
 
-## εκδόσεις
+## Εκδόσεις
 
-Επιβεβαιώθηκε από `electron/package.json`:
+Επιβεβαιωμένες από το `electron/package.json`:
 
-| Πακέτο                  | Εκδοχή                                                           |
-| ----------------------- | ---------------------------------------------------------------- |
-| `electron`              | `^43.4.1`                                                        |
-| `electron-builder`      | `^26.15.3`                                                       |
-| `electron-updater`      | `^6.8.9`                                                         |
-| `better-sqlite3`        | root `^13.0.2` (Node-API προκατασκευάζει — όχι Electron rebuild) |
-| Έκδοση εφαρμογής        | `3.8.0`                                                          |
-| Αναγνωριστικό εφαρμογής | `online.omniroute.desktop`                                       |
-| Όνομα προϊόντος         | `OmniRoute`                                                      |
+| Πακέτο                  | Έκδοση                                                                   |
+| ----------------------- | ------------------------------------------------------------------------ |
+| `electron`              | `^43.4.1`                                                                |
+| `electron-builder`      | `^26.15.3`                                                               |
+| `electron-updater`      | `^6.8.9`                                                                 |
+| `better-sqlite3`        | ριζικό `^13.0.2` (προκατασκευασμένα Node-API — χωρίς αναδόμηση Electron) |
+| Έκδοση εφαρμογής        | `3.8.0`                                                                  |
+| Αναγνωριστικό εφαρμογής | `online.omniroute.desktop`                                               |
+| Όνομα προϊόντος         | `OmniRoute`                                                              |
 
-## Σενάρια (root `package.json`)
+## Scripts (ριζικό `package.json`)
 
-| Γραφή                             | Σκοπός                                                                                       |
-| --------------------------------- | -------------------------------------------------------------------------------------------- |
-| `npm run electron:dev`            | Ξεκινά `npm run dev` + περιμένει για `localhost:20128` + εκκινεί Electron                    |
-| `npm run electron:build`          | Δημιουργεί Next.js και στη συνέχεια εκτελεί `electron-builder` για το τρέχον OS              |
-| `npm run electron:build:win`      | Δημιουργεί πρόγραμμα εγκατάστασης Windows NSIS φορητό + (x64)                                |
-| `npm run electron:build:mac`      | Κατασκευάζει macOS DMG (Intel + Apple Silicon)                                               |
-| `npm run electron:build:linux`    | Δημιουργεί Linux AppImage + DEB (x64 + arm64)                                                |
-| `npm run electron:smoke:packaged` | Εκκινεί το συσκευασμένο δυαδικό και ανιχνεύει `/login` για HTTP 200 και στη συνέχεια κλείνει |
+| Script                            | Σκοπός                                                                                                      |
+| --------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `npm run electron:dev`            | Εκκινεί το `npm run dev` + περιμένει το `localhost:20128` + εκκινεί το Electron                             |
+| `npm run electron:build`          | Δημιουργεί το build του Next.js και κατόπιν εκτελεί το `electron-builder` για το τρέχον λειτουργικό σύστημα |
+| `npm run electron:build:win`      | Δημιουργεί πρόγραμμα εγκατάστασης NSIS για Windows + φορητή έκδοση (x64)                                    |
+| `npm run electron:build:mac`      | Δημιουργεί DMG για macOS (Intel + Apple Silicon)                                                            |
+| `npm run electron:build:linux`    | Δημιουργεί AppImage + DEB για Linux (x64 + arm64)                                                           |
+| `npm run electron:smoke:packaged` | Εκκινεί το πακεταρισμένο εκτελέσιμο και ελέγχει το `/login` για HTTP 200, έπειτα το τερματίζει              |
 
-Ο χώρος εργασίας `electron/` εκθέτει επίσης:
+Ο χώρος εργασίας `electron/` παρέχει επίσης:
 
-- `npm run prepare:bundle` — τρέχει `scripts/build/prepare-electron-standalone.mjs`
-- `npm run build:mac-x64` / `build:mac-arm64` — μονότοξο macOS builds
-- Έκδοση μόνο καταλόγου `npm run pack` — για τοπική δοκιμή (χωρίς πρόγραμμα εγκατάστασης)
+- `npm run prepare:bundle` — εκτελεί το `scripts/build/prepare-electron-standalone.mjs`
+- `npm run build:mac-x64` / `build:mac-arm64` — builds macOS για μία αρχιτεκτονική
+- `npm run pack` — build μόνο σε κατάλογο για τοπικές δοκιμές (χωρίς πρόγραμμα εγκατάστασης)
 
-## Προαιρετικά πακέτα χρόνου εκτέλεσης
+## Προαιρετικά πακέτα περιβάλλοντος εκτέλεσης
 
-Οι εκδόσεις επιτραπέζιων υπολογιστών μπορούν να δημοσιεύουν προαιρετικά αρχεία χρόνου εκτέλεσης μαζί με τους εγκαταστάτες τους. Το ωφέλιμο φορτίο του εγκατεστημένου διακομιστή περιέχει `optional-packs.index.json` (κάτω από `resources/app` σε Windows και Linux). Για την καταχώρηση `browser-runtime`, διαβάστε `packs[].tarball` και κατεβάστε** αυτό ακριβώς το όνομα αρχείου από την ίδια έκδοση** . Τα ονόματα των αρχείων περιλαμβάνουν μια σύνοψη SHA-256. διαφορετικές εκδόσεις μπορεί να απαιτούν διαφορετικά αρχεία. Διατηρήστε το όνομα αρχείου που έχετε λάβει αμετάβλητο.
+Οι εκδόσεις desktop μπορούν να δημοσιεύουν προαιρετικά αρχεία περιβάλλοντος εκτέλεσης μαζί με τα προγράμματα εγκατάστασής τους. Τα εγκατεστημένα αρχεία διακομιστή περιέχουν το `optional-packs.index.json` (στο `resources/app` σε Windows και Linux). Για την εγγραφή `browser-runtime`, διαβάστε το `packs[].tarball` και κατεβάστε **ακριβώς αυτό το όνομα αρχείου από την ίδια έκδοση**. Τα ονόματα αρχείων περιλαμβάνουν σύνοψη SHA-256· διαφορετικές μεταγλωττίσεις μπορεί να απαιτούν διαφορετικά αρχεία. Κρατήστε αμετάβλητο το όνομα του ληφθέντος αρχείου.
 
-Αντιγράψτε το ευρετήριο της εγκατεστημένης εφαρμογής και το επιλεγμένο αρχείο σε έναν κατάλογο και, στη συνέχεια, χρησιμοποιήστε το CLI από την ίδια έκδοση:
+Αντιγράψτε το ευρετήριο της εγκατεστημένης εφαρμογής και το επιλεγμένο αρχείο σε έναν κατάλογο και χρησιμοποιήστε το CLI από την ίδια έκδοση:
 
 ```bash
 omniroute packs list --source /path/to/packs
 omniroute packs install browser-runtime --source /path/to/packs
 ```
 
-`packs list` εμφανίζει την κατάσταση εγκατάστασης και επαλήθευσης, όχι το όνομα αρχείου του αρχείου. Το ομαδοποιημένο ευρετήριο επιλέγει το αρχείο. Η εγκατάσταση επαληθεύει το άθροισμα ελέγχου αρχειοθέτησης πριν από την εξαγωγή και τα αθροίσματα ελέγχου του πακέτου πριν αντικαταστήσει ένα εγκατεστημένο πακέτο. Διαβάζει τοπικά αρχεία. δεν κατεβάζει τα αρχεία που λείπουν. Επανεκκινήστε την εφαρμογή μετά την εγκατάσταση. Εάν η κυκλοφορία δεν έχει αντίστοιχο στοιχείο, το προαιρετικό πακέτο δεν είναι διαθέσιμο μέσω των στοιχείων αυτής της κυκλοφορίας.
+Το `packs list` εμφανίζει την κατάσταση εγκατάστασης και επαλήθευσης, όχι το όνομα του αρχείου. Το συμπεριλαμβανόμενο ευρετήριο επιλέγει το αρχείο. Η εγκατάσταση επαληθεύει το άθροισμα ελέγχου του αρχείου πριν από την αποσυμπίεση και τα αθροίσματα ελέγχου των πακέτων πριν αντικαταστήσει εγκατεστημένο πακέτο. Διαβάζει τοπικά αρχεία· δεν κατεβάζει αρχεία που λείπουν. Επανεκκινήστε την εφαρμογή μετά την εγκατάσταση. Αν η έκδοση δεν έχει αντίστοιχο στοιχείο λήψης, το προαιρετικό πακέτο δεν είναι διαθέσιμο μέσω των στοιχείων αυτής της έκδοσης.
 
-## Διάταξη καταλόγου
+## Διάταξη καταλόγων
 
 ```
 electron/
-├── package.json              # Electron deps + electron-builder config
-├── main.js                   # Main process (24 KB — see annotations below)
-├── preload.js                # contextBridge IPC bridge
-├── types.d.ts                # AppInfo / ServerStatus / ElectronAPI types
-├── README.md                 # In-workspace notes
+├── package.json              # Εξαρτήσεις Electron + ρυθμίσεις electron-builder
+├── main.js                   # Κύρια διεργασία (24 KB — δείτε τις επισημάνσεις παρακάτω)
+├── preload.js                # Γέφυρα IPC μέσω contextBridge
+├── types.d.ts                # Τύποι AppInfo / ServerStatus / ElectronAPI
+├── README.md                 # Σημειώσεις εντός του workspace
 ├── assets/                   # icon.png, icon.ico, icon.icns, tray-icon.png
-└── dist-electron/            # electron-builder output (gitignored)
+└── dist-electron/            # Έξοδος του electron-builder (αγνοείται από το git)
 
 scripts/
 ├── build/
-│   └── prepare-electron-standalone.mjs   # Stages .next/electron-standalone bundle
+│   └── prepare-electron-standalone.mjs   # Προετοιμάζει το πακέτο .next/electron-standalone
 └── dev/
-    └── smoke-electron-packaged.mjs       # Post-build smoke test
+    └── smoke-electron-packaged.mjs       # Δοκιμή smoke μετά τη δημιουργία του build
 ```
 
-Και `main.js` και `preload.js` είναι**CommonJS `.js` αρχεία** , όχι TypeScript. Οι πληκτρολογήσεις από την πλευρά του renderer ζωντανά στο `electron/types.d.ts`.
+Τόσο το `main.js` όσο και το `preload.js` είναι **αρχεία CommonJS `.js`** και όχι TypeScript. Οι
+ορισμοί τύπων για την πλευρά του renderer βρίσκονται στο `electron/types.d.ts`.
 
-## IPC Bridge (`preload.js`)
+## Γέφυρα IPC (`preload.js`)
 
-Η προφόρτωση εκθέτει ένα API στη λίστα επιτρεπόμενων στο `window.electronAPI` χρησιμοποιώντας `contextBridge` με `contextIsolation: true` και `nodeIntegration: false`.
+Το preload εκθέτει ένα API εγκεκριμένης λίστας στο `window.electronAPI` χρησιμοποιώντας το `contextBridge`
+με `contextIsolation: true` και `nodeIntegration: false`.
 
 ```javascript
 const VALID_CHANNELS = {
@@ -115,113 +123,131 @@ const VALID_CHANNELS = {
 };
 ```
 
-Εκτεθειμένες μέθοδοι:
+Εκτιθέμενες μέθοδοι:
 
-| Κλήση απόδοσης                                                    | Τύπος                          |
-| ----------------------------------------------------------------- | ------------------------------ |
-| `getAppInfo()` → `{ name, version, platform, isDev, port }`       | επικαλούμαι                    |
-| `openExternal(url)`                                               | επικαλούμαι                    |
-| `getDataDir()`                                                    | επικαλούμαι                    |
-| `restartServer()`                                                 | επικαλούμαι                    |
-| `getAppVersion()`                                                 | επικαλούμαι                    |
-| `checkForUpdates()` / `downloadUpdate()` / `installUpdate()`      | επικαλούμαι                    |
-| `minimizeWindow()` / `maximizeWindow()` / `closeWindow()`         | στέλνω                         |
-| `onServerStatus(cb)` / `onPortChanged(cb)` / `onUpdateStatus(cb)` | παραλαβή (διαθέτης επιστροφών) |
+| Κλήση από τον renderer                                            | Τύπος                                      |
+| ----------------------------------------------------------------- | ------------------------------------------ |
+| `getAppInfo()` → `{ name, version, platform, isDev, port }`       | invoke                                     |
+| `openExternal(url)`                                               | invoke                                     |
+| `getDataDir()`                                                    | invoke                                     |
+| `restartServer()`                                                 | invoke                                     |
+| `getAppVersion()`                                                 | invoke                                     |
+| `checkForUpdates()` / `downloadUpdate()` / `installUpdate()`      | invoke                                     |
+| `minimizeWindow()` / `maximizeWindow()` / `closeWindow()`         | send                                       |
+| `onServerStatus(cb)` / `onPortChanged(cb)` / `onUpdateStatus(cb)` | receive (επιστρέφει συνάρτηση εκκαθάρισης) |
 
-Οι βοηθοί υποδοχής επιστρέφουν α** λειτουργία διάθεσης** Αντί να βασίζεστε στο `removeAllListeners` — αυτό αποτρέπει τη συσσώρευση του ακροατή κατά την επανατοποθέτηση των στοιχείων React.
+Οι βοηθητικές συναρτήσεις λήψης επιστρέφουν μια **συνάρτηση εκκαθάρισης** αντί να βασίζονται στο
+`removeAllListeners` — αυτό αποτρέπει τη συσσώρευση ακροατών όταν τα στοιχεία React
+επαναπροσαρτώνται.
 
 ## Κύκλος ζωής διακομιστή
 
-`main.js` δημιουργεί το αυτόνομο πακέτο Next.js απευθείας με το χρόνο εκτέλεσης του κόμβου Electron για να αποφευχθεί η αναντιστοιχία ABI της εγγενούς μονάδας με τον κόμβο συστήματος:
+Το `main.js` εκκινεί απευθείας το αυτόνομο πακέτο του Next.js με το περιβάλλον εκτέλεσης Node
+του Electron, ώστε να αποφεύγεται η ασυμβατότητα ABI των εγγενών αρθρωμάτων με το Node του συστήματος:
 
 ```js
 spawn(process.execPath, [serverScript], {
   cwd: NEXT_SERVER_PATH,
-  env: { ...serverEnv, PORT, NODE_ENV: "production", ELECTRON_RUN_AS_NODE: "1", NODE_PATH },
+  env: {
+    ...serverEnv,
+    PORT,
+    NODE_ENV: "production",
+    ELECTRON_RUN_AS_NODE: "1",
+    NODE_PATH,
+  },
   stdio: "pipe",
 });
 ```
 
-Ανταύγειες:
+Κύρια σημεία:
 
-- `waitForServer()` μετράει το URL έως και 30 δευτερόλεπτα πριν εμφανίσει το παράθυρο (χωρίς κενή οθόνη σε ψυχρή εκκίνηση).
-- `stdio: "pipe"` συλλαμβάνει stdout/stderr; έτοιμες φράσεις (`Ready` / `listening`) εκπέμπουν `server-status: running` πάνω από IPC.
-- `before-quit` περιμένει έως και 5 δευτερόλεπτα για το χαριτωμένο SIGTERM (σημείο ελέγχου WAL ) και στη συνέχεια στέλνει SIGKILL.
-- Ο διακόπτης θύρας στο δίσκο (`20128`, `3000`, `8080`) σταματά και επανεκκινεί τον διακομιστή και, στη συνέχεια, φορτώνει ξανά το BrowserWindow.
+- Η `waitForServer()` ελέγχει περιοδικά το URL για έως και 30 s πριν εμφανίσει το παράθυρο (χωρίς κενή οθόνη κατά την ψυχρή εκκίνηση).
+- Το `stdio: "pipe"` καταγράφει τα stdout/stderr· οι φράσεις ετοιμότητας (`Ready` / `listening`) εκπέμπουν `server-status: running` μέσω IPC.
+- Το `before-quit` περιμένει έως και 5 s για ομαλό SIGTERM (σημείο ελέγχου WAL) και, στη συνέχεια, στέλνει SIGKILL.
+- Ο επιλογέας θύρας στην περιοχή ειδοποιήσεων (`20128`, `3000`, `8080`) διακόπτει και επανεκκινεί τον διακομιστή και, στη συνέχεια, επαναφορτώνει το BrowserWindow.
 
-## Secret Bootstrap με μηδενική διαμόρφωση
+## Εκκίνηση μυστικών χωρίς ρυθμίσεις
 
-Κατά την πρώτη εκκίνηση, η κύρια διαδικασία δημιουργεί αυτόματα και συνεχίζει να λείπουν μυστικά:
+Κατά την πρώτη εκκίνηση, η κύρια διεργασία δημιουργεί αυτόματα και αποθηκεύει μόνιμα τα μυστικά που λείπουν:
 
-| Μυστικό                  | Πηγή                                                                                                |
-| ------------------------ | --------------------------------------------------------------------------------------------------- |
-| `JWT_SECRET`             | `crypto.randomBytes(64).toString("hex")`                                                            |
-| `STORAGE_ENCRYPTION_KEY` | `crypto.randomBytes(32).toString("hex")` (απορρίπτεται εάν υπάρχουν ήδη κρυπτογραφημένες πιστώσεις) |
-| `API_KEY_SECRET`         | `crypto.randomBytes(32).toString("hex")`                                                            |
+| Μυστικό                  | Προέλευση                                                                                          |
+| ------------------------ | -------------------------------------------------------------------------------------------------- |
+| `JWT_SECRET`             | `crypto.randomBytes(64).toString("hex")`                                                           |
+| `STORAGE_ENCRYPTION_KEY` | `crypto.randomBytes(32).toString("hex")` (αρνείται αν υπάρχουν ήδη κρυπτογραφημένα διαπιστευτήρια) |
+| `API_KEY_SECRET`         | `crypto.randomBytes(32).toString("hex")`                                                           |
 
-Επέμεινε να `<DATA_DIR>/server.env`. `DATA_DIR` επιλύει:
+Αποθηκεύονται μόνιμα στο `<DATA_DIR>/server.env`. Το `DATA_DIR` επιλύεται ως εξής:
 
 - Windows: `%APPDATA%\omniroute`
 - Linux: `$XDG_CONFIG_HOME/omniroute` ή `~/.omniroute`
 - macOS: `~/.omniroute`
 
-## Αναζήτηση αρχείων περιβάλλοντος
+## Αναζήτηση αρχείου περιβάλλοντος
 
-Πριν από την αναπαραγωγή του διακομιστή, η κύρια διαδικασία (`getPreferredEnvFilePath()` στο `electron/main.js`) επιλέγει** ένας** αρχείο `.env` : το πρώτο από αυτά που υπάρχει.
+Πριν από την εκκίνηση του διακομιστή, η κύρια διεργασία (`getPreferredEnvFilePath()` στο
+`electron/main.js`) επιλέγει **ένα** αρχείο `.env`: το πρώτο από τα παρακάτω που υπάρχει.
 
-1. `$DATA_DIR/.env`, όταν `DATA_DIR` έχει οριστεί στο περιβάλλον με το οποίο ξεκίνησε η εφαρμογή.
-2. `<resolved DATA_DIR>/.env`, χρησιμοποιώντας τις ίδιες προεπιλογές όπως παραπάνω: `%APPDATA%\omniroute\.env` στο Windows, `$XDG_CONFIG_HOME/omniroute/.env` ή `~/.omniroute/.env` στο Linux και macOS.
-3. `.env` στον κατάλογο εργασίας της διαδικασίας.
+1. `$DATA_DIR/.env`, όταν το `DATA_DIR` έχει οριστεί στο περιβάλλον από το οποίο εκκινήθηκε η εφαρμογή.
+2. `<resolved DATA_DIR>/.env`, χρησιμοποιώντας τις ίδιες προεπιλογές με παραπάνω: `%APPDATA%\omniroute\.env` στα
+   Windows, `$XDG_CONFIG_HOME/omniroute/.env` ή `~/.omniroute/.env` σε Linux και macOS.
+3. Το `.env` στον κατάλογο εργασίας της διεργασίας.
 
-Η κύρια διαδικασία διαβάζει μόνο αυτό το αρχείο. Οι μεταγενέστεροι υποψήφιοι δεν συγχωνεύονται. Στη συνέχεια, το περιβάλλον διακομιστή δημιουργείται με αυτήν την προτεραιότητα (πρώτα το υψηλότερο):
+Η κύρια διεργασία διαβάζει μόνο αυτό το αρχείο· τα επόμενα υποψήφια αρχεία δεν συγχωνεύονται. Στη συνέχεια, το
+περιβάλλον του διακομιστή δημιουργείται με την ακόλουθη σειρά προτεραιότητας (από την υψηλότερη προς τη χαμηλότερη):
 
-1. Το περιβάλλον διεργασίας Electron (μεταβλητές που κληρονομήθηκαν από οτιδήποτε ξεκίνησε η εφαρμογή).
+1. Το περιβάλλον της διεργασίας Electron (μεταβλητές που κληρονομήθηκαν από οτιδήποτε εκκίνησε την εφαρμογή).
 2. Το επιλεγμένο αρχείο `.env`.
-3. `<DATA_DIR>/server.env` (τα μυστικά του bootstrap παραπάνω).
+3. Το `<DATA_DIR>/server.env` (τα παραπάνω μυστικά εκκίνησης).
 
-Το περιβάλλον διεργασίας καταγράφεται κατά την εκκίνηση της εφαρμογής, επομένως μια μεταβλητή συστήματος ή περιβάλλοντος χρήστη που έχει οριστεί κατά την εκτέλεση της εφαρμογής (συμπεριλαμβανομένης της περιόδου που βρίσκεται στο δίσκο μετά το κλείσιμο του παραθύρου της) δεν φτάνει στον διακομιστή έως ότου η εφαρμογή τερματιστεί πλήρως και επανεκκινηθεί. Για κουμπιά χρόνου εκτέλεσης όπως `CONTEXT_LENGTH_<PROVIDER>` (δείτε [Μεταβλητές περιβάλλοντος: μήκος περιβάλλοντος ανά πάροχο](../reference/ENVIRONMENT.md#per-provider-context-length-context_length_provider) ), προτιμήστε το αρχείο `.env` και, στη συνέχεια, κλείστε τελείως (δίσκος,** Εγκαταλείπω** ) και επανεκκίνηση.
+Το περιβάλλον διεργασίας καταγράφεται κατά την εκκίνηση της εφαρμογής, επομένως μια μεταβλητή περιβάλλοντος
+συστήματος ή χρήστη που ορίζεται ενώ εκτελείται η εφαρμογή (ακόμη και όταν παραμένει στην περιοχή ειδοποιήσεων μετά
+το κλείσιμο του παραθύρου της) δεν μεταβιβάζεται στον διακομιστή μέχρι να τερματιστεί πλήρως και να επανεκκινηθεί η εφαρμογή. Για παραμέτρους
+χρόνου εκτέλεσης όπως το `CONTEXT_LENGTH_<PROVIDER>` (βλ.
+[Μεταβλητές περιβάλλοντος: Μήκος περιβάλλοντος ανά πάροχο](../reference/ENVIRONMENT.md#per-provider-context-length-context_length_provider)),
+προτιμήστε το αρχείο `.env` και, στη συνέχεια, τερματίστε πλήρως την εφαρμογή (περιοχή ειδοποιήσεων, **Έξοδος**) και επανεκκινήστε την.
 
-## Παράθυρο & Δίσκος
+## Παράθυρο και περιοχή ειδοποιήσεων
 
-- `BrowserWindow`: 1400 × 900 (ελάχ. 1024 × 700), `backgroundColor: "#0a0a0a"`.
-- macOS: `titleBarStyle: "hiddenInset"`, φανάρι στο `{ x: 16, y: 16 }`.
+- `BrowserWindow`: 1400×900 (ελάχ. 1024×700), `backgroundColor: "#0a0a0a"`.
+- macOS: `titleBarStyle: "hiddenInset"`, κουμπιά ελέγχου παραθύρου στη θέση `{ x: 16, y: 16 }`.
 - Windows/Linux: εγγενής γραμμή τίτλου.
-- Το κουμπί κλεισίματος ελαχιστοποιεί στο δίσκο. το μενού του δίσκου έχει** Ανοίξτε OmniRoute** ,** Ανοίξτε τον πίνακα ελέγχου** (εξωτερικό πρόγραμμα περιήγησης),** Θύρα διακομιστή** υπομενού,** Ελέγξτε για Ενημερώσεις** ,** Εγκαταλείπω** .
+- Το κουμπί κλεισίματος ελαχιστοποιεί την εφαρμογή στην περιοχή ειδοποιήσεων· το μενού της περιοχής ειδοποιήσεων περιλαμβάνει τις επιλογές **Άνοιγμα OmniRoute**, **Άνοιγμα πίνακα ελέγχου** (σε εξωτερικό πρόγραμμα περιήγησης), υπομενού **Θύρα διακομιστή**, **Έλεγχος για ενημερώσεις**, **Έξοδος**.
 
-## Πολιτική Ασφάλειας Περιεχομένου
+## Πολιτική ασφάλειας περιεχομένου
 
-Ρύθμιση μέσω `session.defaultSession.webRequest.onHeadersReceived`. Αξιοσημείωτες οδηγίες:
+Ορίζεται μέσω του `session.defaultSession.webRequest.onHeadersReceived`. Αξιοσημείωτες οδηγίες:
 
 - `frame-ancestors 'none'`, `object-src 'none'`, `child-src 'none'`
 - `connect-src 'self' http://localhost:* http://127.0.0.1:* ws://localhost:* ws://127.0.0.1:* https://*.omniroute.online https://*.omniroute.dev`
-- Η λειτουργία προγραμματιστή προσθέτει μόνο `'unsafe-eval'` στο `script-src`
+- Η λειτουργία ανάπτυξης προσθέτει το `'unsafe-eval'` μόνο στο `script-src`
 
 ## Αυτόματη ενημέρωση
 
-Χρησιμοποιεί `electron-updater` με τον πάροχο GitHub (`diegosouzapw/OmniRoute`).
+Χρησιμοποιεί το `electron-updater` με τον πάροχο GitHub (`diegosouzapw/OmniRoute`).
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
-- Τα συμβάντα προωθούνται στο renderer μέσω `update-status` IPC: `checking`, `available`, `not-available`, `downloading` (με `percent`), `downloaded`, `error`
-- `installUpdate()` σκοτώνει τον διακομιστή και στη συνέχεια καλεί `autoUpdater.quitAndInstall()`
-- Παράβλεψη σε λειτουργία προγραμματισμού (`!app.isPackaged`)
+- Τα συμβάντα προωθούνται στο renderer μέσω του IPC `update-status`:
+  `checking`, `available`, `not-available`, `downloading` (με `percent`), `downloaded`, `error`
+- Η `installUpdate()` τερματίζει τον διακομιστή και, στη συνέχεια, καλεί την `autoUpdater.quitAndInstall()`
+- Παραλείπεται σε λειτουργία ανάπτυξης (`!app.isPackaged`)
 
-## Κατασκευή αγωγού
+## Διοχέτευση Build
 
-1. `npm run build` → Next.js αυτόνομο στο `.next/standalone`.
-2. `prepare-electron-standalone.mjs` → επανατοποθετείται σε `.next/electron-standalone` και ξαναγράφει τις απόλυτες διαδρομές μέσα `server.js` + `required-server-files.json`, ώστε το πακέτο να μπορεί να μετακινηθεί.
-3. `electron-builder` πακέτα `main.js`, `preload.js`, `node_modules` και `extraResources: { ../.next/electron-standalone → app }`.
+1. `npm run build` → αυτόνομη έκδοση του Next.js στο `.next/standalone`.
+2. `prepare-electron-standalone.mjs` → αναδιατάσσει τα αρχεία στο `.next/electron-standalone` και επανεγγράφει τις απόλυτες διαδρομές μέσα στα `server.js` + `required-server-files.json`, ώστε το bundle να μπορεί να μεταφερθεί.
+3. Το `electron-builder` πακετάρει τα `main.js`, `preload.js`, `node_modules` και `extraResources: { ../.next/electron-standalone → app }`.
 
-### Κατασκευάστε στόχους
+### Στόχοι build
 
-| OS      | Στόχοι                                     |
-| ------- | ------------------------------------------ |
-| Windows | πρόγραμμα εγκατάστασης NSIS φορητό + (x64) |
-| macOS   | DMG (Intel + arm64, drag-to-Applications)  |
-| Linux   | AppImage + DEB (x64 + arm64)               |
+| Λειτουργικό σύστημα | Στόχοι                                            |
+| ------------------- | ------------------------------------------------- |
+| Windows             | Πρόγραμμα εγκατάστασης NSIS + φορητή έκδοση (x64) |
+| macOS               | DMG (Intel + arm64, μεταφορά στα Applications)    |
+| Linux               | AppImage + DEB (x64 + arm64)                      |
 
-Ρυθμίσεις NSIS : `oneClick: false`, επιτρέπει στον χρήστη να επιλέξει τον κατάλογο εγκατάστασης, δημιουργεί συντομεύσεις Desktop και Start-Menu.
+Ρυθμίσεις NSIS: `oneClick: false`, επιτρέπει στον χρήστη να επιλέξει τον κατάλογο εγκατάστασης και δημιουργεί συντομεύσεις στην Επιφάνεια εργασίας και στο μενού Έναρξης.
 
-## Smoke Testing Packaged Build
+## Γρήγορος έλεγχος του πακεταρισμένου build
 
 ```bash
 npm run electron:smoke:packaged
@@ -229,18 +255,18 @@ npm run electron:smoke:packaged
 
 `scripts/dev/smoke-electron-packaged.mjs`:
 
-- Ανακαλύπτει αυτόματα το συσκευασμένο δυαδικό αρχείο στο `electron/dist-electron/` για την τρέχουσα πλατφόρμα.
-- Εκκινεί με απομονωμένους καταλόγους `HOME`/`APPDATA`/`XDG_*`, ώστε να μην αγγίζει τα δεδομένα προγραμματιστή.
-- Δημοσκοπήσεις `http://127.0.0.1:20128/login` για HTTP 200 μέσα σε 45 δευτερόλεπτα.
-- Ρολόγια stderr/stdout για μοιραία μοτίβα (`Cannot find module`, `MODULE_NOT_FOUND`, `ERR_DLOPEN_FAILED`, `Failed to start server`, κ.λπ.).
-- Περιμένει 2 δευτερόλεπτα σταθερού χρόνου εκτέλεσης μετά την ετοιμότητα, μετά εκδίδει SIGTERM και περιμένει να ελευθερωθεί η θύρα.
-- Στο CI, περνά αυτόματα `--no-sandbox --disable-gpu` (και `--disable-dev-shm-usage` στο Linux).
+- Εντοπίζει αυτόματα το πακεταρισμένο εκτελέσιμο στο `electron/dist-electron/` για την τρέχουσα πλατφόρμα.
+- Εκκινεί με απομονωμένους καταλόγους `HOME`/`APPDATA`/`XDG_*`, ώστε να μην επηρεάζει τα δεδομένα του προγραμματιστή.
+- Ελέγχει επανειλημμένα το `http://127.0.0.1:20128/login` για απόκριση HTTP 200 εντός 45 δευτερολέπτων.
+- Παρακολουθεί τα stderr/stdout για μοτίβα κρίσιμων σφαλμάτων (`Cannot find module`, `MODULE_NOT_FOUND`, `ERR_DLOPEN_FAILED`, `Failed to start server` κ.λπ.).
+- Περιμένει 2 δευτερόλεπτα σταθερής λειτουργίας μετά την ετοιμότητα, κατόπιν στέλνει SIGTERM και περιμένει να αποδεσμευτεί η θύρα.
+- Στο CI, μεταβιβάζει αυτόματα τα `--no-sandbox --disable-gpu` (και το `--disable-dev-shm-usage` στο Linux).
 
-Το Env υπερισχύει: `ELECTRON_SMOKE_APP_EXECUTABLE`, `ELECTRON_SMOKE_URL`, `ELECTRON_SMOKE_TIMEOUT_MS`, `ELECTRON_SMOKE_SETTLE_MS`, `ELECTRON_SMOKE_DATA_DIR`, `ELECTRON_SMOKE_KEEP_DATA`, `ELECTRON_SMOKE_STREAM_LOGS`.
+Παρακάμψεις μέσω μεταβλητών περιβάλλοντος: `ELECTRON_SMOKE_APP_EXECUTABLE`, `ELECTRON_SMOKE_URL`, `ELECTRON_SMOKE_TIMEOUT_MS`, `ELECTRON_SMOKE_SETTLE_MS`, `ELECTRON_SMOKE_DATA_DIR`, `ELECTRON_SMOKE_KEEP_DATA`, `ELECTRON_SMOKE_STREAM_LOGS`.
 
 ## Υπογραφή κώδικα
 
-`electron/package.json` κάνει** δεν** απευθείας υπογραφή διαπιστευτηρίων. Περάστε τα μέσω env vars στο `electron-builder`:
+Το `electron/package.json` **δεν** συνδέει απευθείας τα διαπιστευτήρια υπογραφής. Μεταβιβάστε τα μέσω μεταβλητών περιβάλλοντος στο `electron-builder`:
 
 ### macOS
 
@@ -263,32 +289,32 @@ npm run electron:build:win
 
 ### Linux
 
-Η υπογραφή AppImage είναι `LINUX_GPG_KEY` —
+Η υπογραφή του AppImage είναι προαιρετική — ορίστε το `LINUX_GPG_KEY` εάν απαιτείται υπογραφή.
 
 ## Διανομή
 
-Τα αντικείμενα προσγειώνονται στο `electron/dist-electron/`:
+Τα παραγόμενα αρχεία τοποθετούνται στο `electron/dist-electron/`:
 
 - `OmniRoute.Setup.X.Y.Z.exe`, `OmniRoute X.Y.Z.exe` (Windows)
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-Οι εκδόσεις δημοσιεύονται στο GitHub Releases (`diegosouzapw/OmniRoute`), όπου επίσης `electron-updater` ελέγχει για νέες εκδόσεις.
+Οι εκδόσεις δημοσιεύονται στα GitHub Releases (`diegosouzapw/OmniRoute`), όπου το `electron-updater` ελέγχει επίσης για νέες εκδόσεις.
 
 ## Αντιμετώπιση προβλημάτων
 
-| Σύμπτωμα                                                           | Διορθώνω                                                                                                                                                                     |
-| ------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Cannot find module 'better-sqlite3'` μετά Electron μεγάλο χτύπημα | better-sqlite3 v13 αποστέλλει το Node-API προκατασκευάζει — επανεκτελεί `npm install` στη ρίζα και `prepare:bundle` (επαληθεύει την προκατασκευή για την τρέχουσα πλατφόρμα) |
-| `ERR_DLOPEN_FAILED` για εγγενή ενότητα                             | Εκτελέστε ξανά `prepare:bundle` — αποτυγχάνει γρήγορα όταν λείπει η προκατασκευή Node-API για την τρέχουσα πλατφόρμα                                                         |
-| Το παράθυρο εμφανίζεται κενό στο Linux                             | Επιβεβαιώστε ότι ο διακομιστής Next.js είναι πραγματικά συνδεδεμένος στο PORT (ελέγξτε τα αρχεία καταγραφής `[Server]` )                                                     |
-| στάβλοι συμβολαιογραφίας macOS                                     | Βεβαιωθείτε ότι `APPLE_*` vars εξάγονται, όχι μόνο στο `.env`                                                                                                                |
-| Windows SmartScreen προειδοποίηση                                  | Υπογράψτε με EV cert ή οι χρήστες κάνουν δεξί κλικ → "Εκτέλεση ούτως ή άλλως"                                                                                                |
-| Η δοκιμή καπνού αποτυγχάνει με τη θύρα σε χρήση                    | Σταματήστε οποιονδήποτε τοπικό διακομιστή προγραμματιστών στο 20128 πριν εκτελέσετε `electron:smoke:packaged`                                                                |
+| Σύμπτωμα                                                                     | Διόρθωση                                                                                                                                                                                         |
+| ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `Cannot find module 'better-sqlite3'` μετά από κύρια αναβάθμιση του Electron | Το better-sqlite3 v13 παρέχει προκατασκευασμένα αρχεία Node-API — εκτελέστε ξανά `npm install` στη ρίζα και `prepare:bundle` (επαληθεύει το προκατασκευασμένο αρχείο για την τρέχουσα πλατφόρμα) |
+| `ERR_DLOPEN_FAILED` για εγγενές module                                       | Εκτελέστε ξανά το `prepare:bundle` — αποτυγχάνει άμεσα όταν λείπει το προκατασκευασμένο αρχείο Node-API για την τρέχουσα πλατφόρμα                                                               |
+| Το παράθυρο εμφανίζεται κενό στο Linux                                       | Επιβεβαιώστε ότι ο διακομιστής Next.js συνδέθηκε πράγματι στο PORT (ελέγξτε τα αρχεία καταγραφής `[Server]`)                                                                                     |
+| Η επικύρωση συμβολαιογραφικής πράξης στο macOS καθυστερεί                    | Βεβαιωθείτε ότι οι μεταβλητές `APPLE_*` έχουν εξαχθεί και δεν βρίσκονται μόνο στο `.env`                                                                                                         |
+| Προειδοποίηση Windows SmartScreen                                            | Υπογράψτε με πιστοποιητικό EV ή ζητήστε από τους χρήστες να κάνουν δεξί κλικ → "Εκτέλεση ούτως ή άλλως"                                                                                          |
+| Ο γρήγορος έλεγχος αποτυγχάνει επειδή η θύρα χρησιμοποιείται                 | Διακόψτε οποιονδήποτε τοπικό διακομιστή ανάπτυξης στη θύρα 20128 πριν εκτελέσετε το `electron:smoke:packaged`                                                                                    |
 
 ## Δείτε επίσης
 
 - [SETUP_GUIDE.md](./SETUP_GUIDE.md)
 - [RELEASE_CHECKLIST.md](../ops/RELEASE_CHECKLIST.md)
-- Πηγή: `electron/main.js`, `electron/preload.js`, `electron/package.json`
-- Βοηθοί: `scripts/build/prepare-electron-standalone.mjs`, `scripts/dev/smoke-electron-packaged.mjs`
+- Πηγαίος κώδικας: `electron/main.js`, `electron/preload.js`, `electron/package.json`
+- Βοηθητικά εργαλεία: `scripts/build/prepare-electron-standalone.mjs`, `scripts/dev/smoke-electron-packaged.mjs`

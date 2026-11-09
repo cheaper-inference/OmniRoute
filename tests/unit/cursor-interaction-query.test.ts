@@ -1,5 +1,5 @@
 import type { ClientHttp2Stream } from "node:http2";
-import { describe, it } from "node:test";
+import { after, describe, it } from "node:test";
 import assert from "node:assert/strict";
 import {
   decodeInteractionQuery,
@@ -15,6 +15,11 @@ import {
   decodeStringField,
 } from "../../open-sse/utils/cursorAgentProtobuf/wire.ts";
 import { newStreamCtx, processFrame } from "../../open-sse/executors/cursor.ts";
+import { closeSharedLoggerResource } from "../../src/shared/utils/loggerResource.ts";
+
+after(async () => {
+  await closeSharedLoggerResource();
+});
 
 describe("Part B - Cursor interaction_query auto-response", () => {
   it("decodes interaction_query with id and variantField", () => {

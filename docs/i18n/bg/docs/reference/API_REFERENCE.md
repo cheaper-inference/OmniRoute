@@ -882,13 +882,7 @@ Exa `type: "lite"` (Exa 3.0) приема по-малък набор от пол
 При lite `additionalQueries`, `systemPrompt` и всеки ключ в `contents`, с изключение на `text` и `highlights`, се премахват преди извикването. Отхвърлените
 `subpages`, `subpageTarget`, `highlights.numSentences` и `highlights.highlightsPerUrl` вече не се предават.
 
-Отчитането на разходите използва плоския регистър `costPerQuery`, с изключение на Exa, който следва
-собственото ценообразуване на Exa: $0.007 за извикване при `auto` (и стария `fast`) или $0.004 при `lite`
-(и стария `instant`), покриващи 10 резултата; $0.001 за всеки следващ резултат; и $0.001 за
-всеки върнат резултат, когато е зададено `contents.summary`. Tavily се отчита като 1 кредит ($0.008) при
-`search_depth` `basic`, `fast` и `ultra-fast`, и 2 кредита ($0.016) при `advanced`
-([API кредити на Tavily](https://docs.tavily.com/documentation/api-credits)). Извикване с
-`auto_parameters: true`, при което Tavily надгражда до advanced, все още се отчита като 1 кредит.
+Exa: $0,007 на повикване за `auto` (и наследеното `fast`) или $0,004 за `lite` (и наследеното `instant`), покриващи 10 резултата; $0,001 за всеки следващ резултат; и $0,001 за върнат резултат, когато е зададен `contents.summary`. Tavily се записва на 1 кредит ($0,008) за `search_depth` `basic`, `fast` и `ultra-fast` и 2 кредита ($0,016) за `advanced` ( [Tavily API кредити](https://docs.tavily.com/documentation/api-credits) ). Обаждане с `auto_parameters: true`, което Tavily надгражда до напреднал, все още се записва на 1 кредит.
 
 ---
 
@@ -1191,6 +1185,8 @@ X-OmniRoute-No-Cache: true
 
 ---
 
+<a id="cliproxyapi-management-compatibility"></a>
+
 ## Съвместимост с управлението на CLIProxyAPI
 
 OmniRoute отговаря на трите крайни точки за управление на [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI),
@@ -1204,19 +1200,11 @@ OmniRoute и използвайте API ключ с обхват `manage` кат
 | POST  | `/v0/management/api-call`    | Тяло `{ auth_index, method, url, header?, data? }`. Изпраща една заявка от списъка с разрешени заявки с токена на акаунта и връща `{ status_code, body }`   |
 | POST  | `/v0/management/reset-quota` | Тяло `{ auth_index }`. Изчиства временното блокиране на връзката, блокирането на модели и временното блокиране на Codex за отделните обхвати на един акаунт |
 
-- `auth_index` е идентификаторът на връзката в OmniRoute. `provider` е `claude` или `codex` (само OAuth
-  връзки; доставчикът на API ключове `anthropic` не се включва в списъка). За Codex,
-  `id_token.chatgpt_account_id` е съхраненият идентификатор на работното пространство, а `plan_type` е съхраненият план.
-- `api-call` не е общ прокси. Той приема само Claude `GET
-https://api.anthropic.com/api/oauth/usage` и Codex `GET https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits` и
-  `POST .../wham/rate-limit-reset-credits/consume`, като всяка заявка трябва да е за акаунт от съответния
-  доставчик. Всичко останало връща `403`, без да се свързва с upstream. Заглавката
-  `Authorization` на извикващия (включително контейнера `$TOKEN$`) се игнорира: OmniRoute инжектира токена за достъп на връзката, като първо го обновява, когато наближава изтичането му, и препраща само
-  заглавки от списъка с разрешени (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`;
-  `Accept`, `Content-Type`). Ако `Chatgpt-Account-Id` липсва, по подразбиране се използва съхраненият идентификатор на работното пространство.
-  Заявките изтичат след 15 секунди и използват проксито на връзката.
-- `reset-quota` оставя крайните състояния (banned, expired, credits_exhausted) непроменени. Непознат
-  `auth_index` връща `404`.
+- `auth_index` е идентификаторът на връзката в OmniRoute. `provider` е `claude` или `codex` (само OAuth връзки; доставчикът с API ключ `anthropic` не се изброява). За Codex `id_token.chatgpt_account_id` е съхраненият идентификатор на работното пространство, а `plan_type` е съхраненият план.
+- `api-call` не е общо прокси. Приема само Claude `GET
+https://api.anthropic.com/api/oauth/usage` и Codex `GET
+https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits` и `POST .../wham/rate-limit-reset-credits/consume`, всяка само за акаунт на съответния доставчик. Всичко останало връща `403`, без да се свързва с upstream. Хедърът `Authorization` на извикващия (включително заместителят `$TOKEN$`) се игнорира: OmniRoute поставя токена за достъп на връзката, като първо го обновява, ако наближава изтичане, и препраща само разрешените хедъри (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`; `Accept`, `Content-Type`). При липсващ `Chatgpt-Account-Id` се използва съхраненият идентификатор на работното пространство. Ако първият upstream отговор е `401`, се извършва едно обновяване и нов опит само ако токенът за достъп се промени. Всеки upstream опит има таймаут 15 секунди и използва проксито на връзката.
+- `reset-quota` оставя крайните състояния (banned, expired, credits_exhausted) непроменени. Непознат `auth_index` връща `404`.
 
 **Удостоверяване:** сесия на таблото или API ключ с обхват `manage`, което е задължително дори когато входът е забранен
 (пътищата са в `ALWAYS_PROTECTED_API_PATHS`). Ключовете само за inference получават `403`. Източник:
@@ -1923,17 +1911,17 @@ curl -X DELETE http://localhost:20128/api/resilience/model-cooldowns \
 
 OmniRoute включва вграден сървър за Model Context Protocol с 3 транспорта (stdio, SSE, streamable-http) и инструменти с обхват. Крайните точки на таблото по-долу четат данни за състоянието/одита и проксират HTTP транспортите.
 
-| Метод  | Път                    | Описание                                                                                                                                |                      |
-| ------ | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------- | -------------------- |
-| GET    | `/api/mcp/status`      | Сигнал за работоспособност, транспорт, онлайн състояние, последно извикване, водещи инструменти, 24-часов процент на успешните операции |
-| GET    | `/api/mcp/tools`       | Списък с MCP инструменти с `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints`                                    |
-| GET    | `/api/mcp/sse`         | Отваряне на SSE поток за SSE транспорта (връща `503`, ако MCP е деактивиран или транспортът не съвпада)                                 |
-| POST   | `/api/mcp/sse`         | Изпращане на JSON-RPC кадър чрез SSE транспорта                                                                                         |
-| GET    | `/api/mcp/stream`      | Отваряне на SSE страната на Streamable HTTP транспорта (съобщения, инициирани от сървъра)                                               |
-| POST   | `/api/mcp/stream`      | Изпращане на JSON-RPC кадър чрез Streamable HTTP транспорта                                                                             |
-| DELETE | `/api/mcp/stream`      | Приключване на Streamable HTTP сесия                                                                                                    |
-| GET    | `/api/mcp/audit`       | Заявка към одитния журнал — `?limit=`, `?offset=`, `?tool=`, `?success=true                                                             | false`, `?apiKeyId=` |
-| GET    | `/api/mcp/audit/stats` | Обобщена статистика за одита (общи стойности, процент на успешните операции, средна продължителност, водещи инструменти)                |
+| Метод  | Път                    | Описание                                                                                                                                                        |
+| ------ | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/mcp/status`      | Сигнал за работоспособност, транспорт, онлайн състояние, последно извикване, водещи инструменти, 24-часов процент на успешните операции                         |
+| GET    | `/api/mcp/tools`       | Списък с MCP инструменти с `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints`                                                            |
+| GET    | `/api/mcp/sse`         | Отваряне на SSE поток за SSE транспорта (връща `503`, ако MCP е деактивиран или транспортът не съвпада)                                                         |
+| POST   | `/api/mcp/sse`         | Изпращане на JSON-RPC кадър чрез SSE транспорта                                                                                                                 |
+| GET    | `/api/mcp/stream`      | Отваряне на SSE страната на Streamable HTTP транспорта (съобщения, инициирани от сървъра)                                                                       |
+| POST   | `/api/mcp/stream`      | Изпращане на JSON-RPC кадър чрез Streamable HTTP транспорта                                                                                                     |
+| DELETE | `/api/mcp/stream`      | Приключване на Streamable HTTP сесия                                                                                                                            |
+| GET    | `/api/mcp/audit`       | Заявка към одитния журнал — `?limit=`, `?offset=`, `?tool=`, `?success=true                                                             \| false`, `?apiKeyId=` |
+| GET    | `/api/mcp/audit/stats` | Обобщена статистика за одита (общи стойности, процент на успешните операции, средна продължителност, водещи инструменти)                                        |
 
 **Удостоверяване:** транспортите `sse`/`stream` използват специфичния за MCP интерфейс за удостоверяване (Bearer API ключ с обхват `mcp`); маршрутите `status`/`tools`/`audit*` могат да се четат от таблото (не е необходимо допълнително удостоверяване извън достъпа до хоста на таблото).
 

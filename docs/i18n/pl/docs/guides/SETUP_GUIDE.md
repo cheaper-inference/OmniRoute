@@ -4,14 +4,7 @@
 
 ---
 
-title: "📖 Przewodnik instalacji — OmniRoute"
-version: 3.8.40
-lastUpdated: 2026-06-28
----
-
-# 📖 Przewodnik instalacji — OmniRoute
-
-> Kompletne odniesienie do instalacji OmniRoute. Szybka wersja: [Szybki start w README](../README.md#-quick-start).
+> Kompletne informacje dotyczące konfiguracji dla OmniRoute. Aby zapoznać się z szybką wersją, zobacz [Szybki start w README](../README.md#-quick-start).
 
 ## Spis treści
 
@@ -34,7 +27,9 @@ npm install -g omniroute
 omniroute
 ```
 
-Dashboard otwiera się pod adresem `http://localhost:20128`, a bazowy URL API to `http://localhost:20128/v1`.
+Panel otwiera się w `http://localhost:20128`, a baza API URL to `http://localhost:20128/v1`.
+
+> **użytkownicy npm:** Jeśli npm ostrzeże, że skrypty instalacyjne zostały zablokowane (np. `omniroute`, `better-sqlite3`), zobacz [Rozwiązywanie problemów — npm install-scripts zablokowane](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install).
 
 ### pnpm
 
@@ -54,14 +49,16 @@ systemctl --user enable --now omniroute.service
 
 [Pakiet AUR](https://aur.archlinux.org/packages/omniroute-bin) instaluje OmniRoute i udostępnia usługę użytkownika systemd.
 
-### Ze źródeł
+### Ze Źródła
 
 ```bash
 npm install
 PORT=20128 DASHBOARD_PORT=20129 NEXT_PUBLIC_BASE_URL=http://localhost:20129 npm run dev
 ```
 
-> **Uwaga:** `npm install` przy pierwszym uruchomieniu automatycznie generuje `.env` z `.env.example`. Kolejne instalacje nie nadpisują istniejącego `.env`, więc Twoje zmiany są zachowane. Aby ponownie zainicjować, usuń `.env` przed ponownym uruchomieniem.
+> **Uwaga Windows :** Domyślnie OmniRoute używa `%APPDATA%\omniroute`, gdy nie ma starszego katalogu `%USERPROFILE%\.omniroute`. Ustaw `DATA_DIR` tak, aby wybierał inną lokalizację katalogu danych.
+
+> **Notatka:** `npm install` automatycznie generuje `.env` z `.env.example` przy pierwszym uruchomieniu. Kolejne instalacje nie zastąpią istniejącego `.env`, więc dostosowania zostaną zachowane. Aby ponownie zasiać, usuń `.env` przed ponownym uruchomieniem.
 
 ### Docker
 
@@ -196,9 +193,9 @@ Szczegółową konfigurację poszczególnych narzędzi (Claude Code, Codex CLI, 
 
 ---
 
-## Konfiguracja protokołów (MCP + A2A)
+## Konfiguracja protokołu (MCP + A2A)
 
-### Konfiguracja MCP (Model Context Protocol)
+### Konfiguracja MCP (protokół kontekstu modelu)
 
 Uruchom transport MCP w trybie stdio:
 
@@ -222,15 +219,15 @@ npm run test:protocols:e2e
 
 #### Konfiguracja klienta MCP
 
-**Claude Code:**
+**Kod Claude :**
 
 ```bash
-claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
 ```
 
 **Cursor / Cline:**
 
-Dodaj do ustawień MCP:
+Dodaj do ustawień MCP (stdio, z kluczem, aby dzwoniący miał zleceniodawcę):
 
 ```json
 {
@@ -238,17 +235,24 @@ Dodaj do ustawień MCP:
     "omniroute": {
       "command": "omniroute",
       "args": ["--mcp"],
-      "env": {}
+      "env": {
+        "OMNIROUTE_API_KEY": "your-key",
+        "OMNIROUTE_BASE_URL": "http://localhost:20128"
+      }
     }
   }
 }
 ```
 
-**Pełna dokumentacja MCP:** [MCP Server README](../../open-sse/mcp-server/README.md) — 107 narzędzi, 32 scope'y, konfiguracje IDE, klienci Python/TS/Go.
+Lub, gdy `mcpTransport` to `streamable-http` (ustaw na `/dashboard/mcp` lub za pomocą `omniroute mcp enable --transport streamable-http`), skieruj wpis zdalnego serwera MCP klienta na `http://localhost:20128/api/mcp/stream`.
 
-### Konfiguracja A2A (Agent-to-Agent Protocol)
+Klucz podróżuje jako `Authorization: Bearer <api-key>` (zobacz [MCP Server → Zdalny dostęp](../frameworks/MCP-SERVER.md#remote-access-manage-scope-bypass) do zdalnych hostów; zdalny klucz wymaga `mcp:connect` i jego zakresów read/write ).
 
-Zweryfikuj Agent Card:
+**Pełna dokumentacja MCP :** [MCP Server README](../../open-sse/mcp-server/README.md) — 110 narzędzi, konfiguracje IDE, klienci Python/TS/Go. Informacje dla operatora dotyczące narzędzi do kompresji CCR/dedup (znaczniki, wymagania wstępne, zakresy poszczególnych narzędzi, paginacja wyszukiwania, diagnostyka): [Silniki kompresji → Wymagania wstępne / podręcznik operatora](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+
+### Konfiguracja A2A (protokół agent-agent)
+
+Zweryfikuj kartę agenta:
 
 ```bash
 curl http://localhost:20128/.well-known/agent.json
@@ -262,7 +266,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"Give me a short quota summary."}]}}'
 ```
 
-**Pełna dokumentacja A2A:** [A2A Server README](../../src/lib/a2a/README.md) — JSON-RPC 2.0, skills, streaming, cykl życia zadań.
+**Pełna dokumentacja A2A :** [A2A Serwer README](../../src/lib/a2a/README.md) — JSON-RPC 2.0, umiejętności, streaming, cykl życia zadań.
 
 ---
 
@@ -321,12 +325,12 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ---
 
-## Szablon dla Void Linux (xbps-src)
+## Unieważnij szablon Linux (xbps-src).
 
-Użytkownicy Void Linux mogą zbudować natywny pakiet za pomocą `xbps-src`. Zapisz ten blok jako `srcpkgs/omniroute/template`:
+Użytkownicy Void Linux mogą zbudować pakiet natywny za pomocą `xbps-src`. Zapisz ten blok jako `srcpkgs/omniroute/template`:
 
 ```bash
-# Plik szablonu dla „omniroute”
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -337,7 +341,7 @@ maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# Wygeneruj ponownie sumę kontrolną dla każdego wydania za pomocą:
+# Regenerate the checksum for each release with:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

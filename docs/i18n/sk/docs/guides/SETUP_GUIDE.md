@@ -27,7 +27,9 @@ npm install -g omniroute
 omniroute
 ```
 
-Ovládací panel sa otvorí na adrese `http://localhost:20128` a základná URL adresa API je `http://localhost:20128/v1`.
+Prístrojová doska sa otvára na `http://localhost:20128` a základňa API URL je `http://localhost:20128/v1`.
+
+> **Používatelia npm:** Ak npm varuje, že inštalačné skripty boli zablokované (napr. `omniroute`, `better-sqlite3`), pozrite si [tému Riešenie problémov — npm install-scripts blocked](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install).
 
 ### pnpm
 
@@ -198,11 +200,11 @@ Podrobnú konfiguráciu jednotlivých nástrojov (Claude Code, Codex CLI, Cursor
 
 ---
 
-## Nastavenie protokolov (MCP + A2A)
+## Nastavenie protokolu (MCP + A2A)
 
-### Nastavenie MCP (Model Context Protocol)
+### MCP Setup (Model Context Protocol)
 
-Spustite prenos MCP v režime štandardného vstupu a výstupu:
+Spustite prepravu MCP v režime stdio:
 
 ```bash
 omniroute --mcp
@@ -211,28 +213,28 @@ omniroute --mcp
 Odporúčaný postup overenia:
 
 ```bash
-# 1. Spustite server MCP
+# 1. Start MCP server
 omniroute --mcp
 
-# 2. Z vášho klienta MCP zavolajte:
-omniroute_get_health        # Malo by vrátiť stav systému
-omniroute_list_combos       # Malo by vrátiť aktívne kombinácie
+# 2. From your MCP client, call:
+omniroute_get_health        # Should return system health
+omniroute_list_combos       # Should return active combos
 
-# 3. Alebo spustite úplnú súpravu testov E2E:
+# 3. Or run the full E2E suite:
 npm run test:protocols:e2e
 ```
 
 #### Konfigurácia klienta MCP
 
-**Claude Code:**
+**Claude kód:**
 
 ```bash
-claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
 ```
 
 **Cursor / Cline:**
 
-Pridajte do svojich nastavení MCP:
+Pridajte do svojich nastavení MCP (stdio, pomocou kľúča, aby mal volajúci príkazcu):
 
 ```json
 {
@@ -240,15 +242,22 @@ Pridajte do svojich nastavení MCP:
     "omniroute": {
       "command": "omniroute",
       "args": ["--mcp"],
-      "env": {}
+      "env": {
+        "OMNIROUTE_API_KEY": "your-key",
+        "OMNIROUTE_BASE_URL": "http://localhost:20128"
+      }
     }
   }
 }
 ```
 
-**Úplná dokumentácia MCP:** [README servera MCP](../../open-sse/mcp-server/README.md) — 110 nástrojov, konfigurácie IDE, klienti pre Python/TS/Go.
+Alebo, keď je `mcpTransport` `streamable-http` (nastavte ho na `/dashboard/mcp` alebo pomocou `omniroute mcp enable --transport streamable-http`), nasmerujte položku vzdialeného servera MCP klienta na `http://localhost:20128/api/mcp/stream`.
 
-### Nastavenie A2A (Agent-to-Agent Protocol)
+Kľúč sa pohybuje ako `Authorization: Bearer <api-key>` (pozri [MCP Server → Vzdialený prístup](../frameworks/MCP-SERVER.md#remote-access-manage-scope-bypass) pre vzdialených hostiteľov; vzdialený kľúč potrebuje `mcp:connect` plus jeho rozsahy read/write ).
+
+**Kompletná dokumentácia MCP :** [MCP Server nástroje README](../../open-sse/mcp-server/README.md) — 110, konfigurácie IDE, klienti Python/TS/Go. Referenčné informácie pre operátora pre nástroje kompresie CCR/dedup (značky, predpoklady, rozsahy jednotlivých nástrojov, stránkovanie vyhľadávania, diagnostika): [Kompresné motory → Požiadavky / príručka operátora](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+
+### Nastavenie A2A (Protokol agent-agent)
 
 Overte kartu agenta:
 
@@ -256,7 +265,7 @@ Overte kartu agenta:
 curl http://localhost:20128/.well-known/agent.json
 ```
 
-Odošlite úlohu:
+Odoslať úlohu:
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -264,7 +273,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"Give me a short quota summary."}]}}'
 ```
 
-**Úplná dokumentácia A2A:** [README servera A2A](../../src/lib/a2a/README.md) — JSON-RPC 2.0, zručnosti, streamovanie, životný cyklus úloh.
+**Kompletná dokumentácia A2A :** [A2A Server README](../../src/lib/a2a/README.md) — JSON-RPC 2.0, zručnosti, streamovanie, životný cyklus úloh.
 
 ---
 
@@ -323,23 +332,23 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ---
 
-## Šablóna pre Void Linux (xbps-src)
+## Void Linux (xbps-src) šablóna
 
-Používatelia Void Linuxu môžu zostaviť natívny balík pomocou `xbps-src`. Uložte tento blok ako `srcpkgs/omniroute/template`:
+Pre používateľov Void Linux môžete vytvoriť natívny balík pomocou `xbps-src`. Uložte tento blok ako `srcpkgs/omniroute/template`:
 
 ```bash
-# Súbor šablóny pre „omniroute“
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
 hostmakedepends="nodejs python3 make"
 depends="openssl"
-short_desc="Univerzálna brána AI s inteligentným smerovaním pre viacerých poskytovateľov LLM"
+short_desc="Universal AI gateway with smart routing for multiple LLM providers"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# Kontrolný súčet pre každé vydanie vygenerujte znova pomocou:
+# Regenerate the checksum for each release with:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

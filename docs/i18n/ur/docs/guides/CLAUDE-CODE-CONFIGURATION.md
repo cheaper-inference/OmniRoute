@@ -25,27 +25,30 @@ omniroute launch --profile glm52  # OmniRoute کے ذریعے glm/glm-5.2 است
 
 ---
 
-## Claude کوڈ گیٹ وے سے کیسے جڑتا ہے۔
+## Claude Code گیٹ وے سے کیسے جڑتا ہے
 
-Claude کوڈ بات کرتا ہے۔**Anthropic پیغامات API** اور ماحولیاتی متغیرات کے ساتھ اپنی مرضی کے اختتامی نقطہ کی طرف اشارہ کیا گیا ہے (اس کا کوئی `--base-url` پرچم نہیں ہے):
+Claude Code، **Anthropic Messages API** سے رابطہ کرتا ہے اور اسے ماحولیاتی متغیرات کے ذریعے ایک حسبِ ضرورت
+اینڈ پوائنٹ کی طرف پوائنٹ کیا جاتا ہے (اس میں `--base-url` فلیگ موجود نہیں):
 
-| متغیر                                        | مقصد                                                                                                 |
-| -------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
-| `ANTHROPIC_BASE_URL`                         | گیٹ وے روٹ URL (Claude کوڈ `/v1/messages` کو شامل کرتا ہے)۔** کوئی `/v1` لاحقہ نہیں۔**               |
-| `ANTHROPIC_AUTH_TOKEN`                       | `Authorization: Bearer …` — کے بطور بھیجا گیا اپنے OmniRoute رسائی ٹوکن / API کلید کا استعمال کریں۔  |
-| `ANTHROPIC_API_KEY`                          | متبادل: `x-api-key` کے بطور بھیجا گیا۔ اگر دونوں سیٹ ہو جائیں تو `ANTHROPIC_AUTH_TOKEN` جیت جاتا ہے۔ |
-| `ANTHROPIC_MODEL`                            | ایک مخصوص ماڈل کو مجبور کریں ( `/model` چنندہ ڈیفالٹ کو اوور رائیڈ کرتا ہے)                          |
-| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → مقامی `/model` چننے والا `/v1/models` سے `claude*`/`anthropic*` ماڈلز کی فہرست دیتا ہے         |
-| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | کیپ آؤٹ پٹ ٹوکن فی جواب (مثلاً `65536`)                                                              |
-| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | آٹو کمپیکشن کے لیے ٹوکن کی حد                                                                        |
+| متغیر                                        | مقصد                                                                                                      |
+| -------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `ANTHROPIC_BASE_URL`                         | گیٹ وے کا روٹ URL (Claude Code آخر میں `/v1/messages` شامل کرتا ہے)۔ **آخر میں `/v1` نہ لگائیں۔**         |
+| `ANTHROPIC_AUTH_TOKEN`                       | `Authorization: Bearer …` کے طور پر بھیجا جاتا ہے — اپنا OmniRoute رسائی ٹوکن / API کلید استعمال کریں     |
+| `ANTHROPIC_API_KEY`                          | متبادل: `x-api-key` کے طور پر بھیجا جاتا ہے۔ اگر دونوں سیٹ ہوں تو `ANTHROPIC_AUTH_TOKEN` کو ترجیح ملتی ہے |
+| `ANTHROPIC_MODEL`                            | کسی مخصوص ماڈل کو لازمی بنائیں (`/model` پِکر کے ڈیفالٹ کو اوور رائیڈ کرتا ہے)                            |
+| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → مقامی `/model` پِکر، `/v1/models` سے `claude*`/`anthropic*` ماڈلز دکھاتا ہے                         |
+| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | فی جواب آؤٹ پٹ ٹوکنز کی حد مقرر کریں (مثلاً `65536`)                                                      |
+| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | خودکار کمپیکشن کے لیے ٹوکن کی حد                                                                          |
 
-> Env vars پڑھی جاتی ہیں۔** ایک بار شروع میں** — Claude کوڈ کو تبدیل کرنے کے بعد دوبارہ شروع کریں۔
+> ماحولیاتی متغیرات **اسٹارٹ اپ پر صرف ایک بار** پڑھے جاتے ہیں — انہیں تبدیل کرنے کے بعد Claude Code دوبارہ شروع کریں۔
 
-ایک سند کے لیے جو ایک مقررہ تار کے بجائے گھومتا ہے، `apiKeyHelper` `~/.claude/settings.json` میں ایک کمانڈ پر سیٹ کریں جو موجودہ اسناد کو stdout پر پرنٹ کرتا ہے۔ Claude کوڈ اپنے آؤٹ پٹ کو پانچ منٹ کے لیے بطور ڈیفالٹ کیش کرتا ہے (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` اسے اوور رائیڈ کرتا ہے) اور `Authorization: Bearer` اور `x-api-key` دونوں میں ویلیو بھیجتا ہے۔ اسکرپٹ کو اسناد کو پرنٹ کرنا چاہئے اور اس کے ساتھ بینر — کے علاوہ v2.1.227 + پر مددگار کو ناکام نہیں کرتا ہے۔
+مستقل متن کے بجائے بدلتے رہنے والے تصدیقی کوائف کے لیے، `~/.claude/settings.json` میں `apiKeyHelper` کو ایسی کمانڈ پر مقرر کریں جو موجودہ کوائف stdout پر لکھے۔ Claude Code طے شدہ طور پر نتیجہ پانچ منٹ کیش کرتا ہے (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` اس مدت کو بدلتا ہے) اور قدر `Authorization: Bearer` اور `x-api-key` دونوں میں بھیجتا ہے۔ اسکرپٹ کو صرف کوائف ہی لکھنے چاہییں — اضافی تعارفی پیغام v2.1.227+ میں معاون کی ناکامی کا باعث بنتا ہے۔
 
-Entra ID SSO اس طرح کام کرتا ہے: `scripts/cli/omniroute-sso.mjs token` ایک مختصر مدت کے Entra رسائی ٹوکن کو پرنٹ کرتا ہے جس کی API کلید کے بجائے OmniRoute تصدیق کرتا ہے۔ [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md) دیکھیں۔
+Entra ID SSO اسی طرح کام کرتا ہے: `scripts/cli/omniroute-sso.mjs token` مختصر مدت کا Entra رسائی ٹوکن لکھتا ہے جسے OmniRoute، API کلید کی جگہ تصدیق کرتا ہے۔ [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md) دیکھیں۔
 
-`omniroute launch` آپ کے لیے یہ سب سیٹ کرتا ہے: یہ URL + ٹوکن کو فعال سیاق و سباق سے حل کرتا ہے (لہذا `omniroute connect <vps>` پھر `omniroute launch` صرف کام کرتا ہے)، سرور کی صحت کی جانچ پڑتال کرتا ہے، اور `claude` پر عمل درآمد کرتا ہے۔
+`omniroute launch` یہ سب آپ کے لیے سیٹ کرتا ہے: یہ فعال کانٹیکسٹ سے بنیادی URL + ٹوکن
+حاصل کرتا ہے (لہٰذا `omniroute connect <vps>` کے بعد `omniroute launch`
+براہِ راست کام کرتا ہے)، سرور کی صحت جانچتا ہے، اور `claude` کو چلاتا ہے۔
 
 ---
 

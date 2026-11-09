@@ -4,47 +4,72 @@
 
 ---
 
-> Опт-ин, искључено по подразумеваној вредности (`modelVisibilityAllowlist`/`modelVisibilityDenylist` оба празна остављају `/v1/models` каталог AND сваки `auto/*` базен кандидата идентичан бајтовима). Брат `hidePaidModels`/`hideAutoCombos` (`src/lib/db/settings.ts`) за оператере који желе курирану листу модела из разлога који немају никакве везе са трошковима.
+> Zahteva izričito uključivanje, podrazumevano je isključeno (ako su `modelVisibilityAllowlist`/`modelVisibilityDenylist` obe prazne,
+> katalog `/v1/models` I svaki skup kandidata `auto/*` ostaju identični na nivou bajtova). Srodno podešavanjima
+> `hidePaidModels`/`hideAutoCombos` (`src/lib/db/settings.ts`), namenjeno operaterima koji žele odabranu
+> listu modela iz razloga koji nemaju nikakve veze sa cenom.
 
-## Зашто ово постоји
+## Zašto ovo postoji
 
-`hidePaidModels` одговара "да ли је овај модел бесплатан?" а `hideAutoCombos` одговара "да ли `auto/*` виртуелне ИД-ове уопште треба оглашавати?" — такође не дозвољава оператеру да управља произвољним подскупом модела (нпр. представља тачно оне моделе које дати Claude Цоде / OpenCode клијент треба да види, независно од цене). #11481 додаје то као два независна подешавања низа низова који се могу укључити.
+`hidePaidModels` odgovara na pitanje „da li je ovaj model besplatan?“, a `hideAutoCombos` na pitanje „da li `auto/*`
+virtuelne identifikatore uopšte treba oglašavati?“ — nijedno od njih ne omogućava operateru da odabere proizvoljan podskup
+modela (npr. da prikaže tačno one modele koje određeni Claude Code / OpenCode klijent treba da vidi,
+nezavisno od cene). #11481 to dodaje u vidu dva nezavisna podešavanja tipa niza stringova, koja se izričito uključuju.
 
-## Подешавања
+## Podešavanja
 
-| Кључ                       | Тип        | Подразумевано | Значење                                                                   |
-| -------------------------- | ---------- | ------------- | ------------------------------------------------------------------------- |
-| `modelVisibilityDenylist`  | `string[]` | `[]`          | Уноси који одговарају кандидату сакривају га из catalog/candidate базена. |
-| `modelVisibilityAllowlist` | `string[]` | `[]`          | Када нису празни, ONLY уноси који одговарају кандидату остају изложени.   |
+| Ključ                      | Tip        | Podrazumevano | Značenje                                                                        |
+| -------------------------- | ---------- | ------------- | ------------------------------------------------------------------------------- |
+| `modelVisibilityDenylist`  | `string[]` | `[]`          | Unosi koji se podudaraju sa kandidatom skrivaju ga iz kataloga/skupa kandidata. |
+| `modelVisibilityAllowlist` | `string[]` | `[]`          | Kada nije prazno, izloženi ostaju SAMO unosi koji se podudaraju sa kandidatom.  |
 
-Оба прихватају до 500 уноса до 200 знакова сваки (Зод валидиран у `src/shared/validation/settingsSchemas.ts`). Унос је или:
+Oba prihvataju do 500 unosa, od kojih svaki može imati do 200 znakova (validacija pomoću Zod-a u
+`src/shared/validation/settingsSchemas.ts`). Unos je ili:
 
-- тачан ИД каталога — `"gpt-4o"` (ид голог модела) или `"openai/gpt-4o"` (префикс добављача), или
-- глоб образац који користи `*`/`?` — нпр. `"openai/gpt-4*"` или `"anthropic/*"` — разрешен преко истог заједничког `globToRegex()` матцхер-а (`src/shared/utils/globPattern.ts`) који већ користе `ModelRoutingSection`-јева комбинована пресликавања по моделу и `freeModels.ts::matchesOnlyPaidModels`.
+- tačan identifikator iz kataloga — `"gpt-4o"` (samo identifikator modela) ili `"openai/gpt-4o"` (sa prefiksom dobavljača), ili
+- glob obrazac koji koristi `*`/`?` — npr. `"openai/gpt-4*"` ili `"anthropic/*"` — koji se razrešava pomoću
+  istog deljenog uparivača `globToRegex()` (`src/shared/utils/globPattern.ts`) koji već koriste
+  mapiranja kombinacija po modelu u `ModelRoutingSection` i `freeModels.ts::matchesOnlyPaidModels`.
 
-Приоритет: прво се проверава одбијена листа (одбијени унос је увек сакривен, чак и ако се подудара са листом дозвољених); када листа дозвољених није празна, опстају само уноси са којима се подудара.
+Prioritet: lista zabrana proverava se prva (zabranjeni unos je uvek skriven, čak i ako se takođe
+podudara sa listom dozvola); kada lista dozvola nije prazna, opstaju samo unosi sa kojima se ona podudara.
 
-## Две тачке гушења, не једна
+## Dve kontrolne tačke, ne jedna
 
-Лекција из #6512 ( `hidePaidModels` -only каталошки филтер и даље дозвољава `auto/*` руту до плаћеног модела, пошто је комбиновани скуп кандидата изграђен независно) овде се примењује идентично. Одговарајући предикат `isModelExposureAllowed()` (`src/shared/utils/modelExposureList.ts`) се позива из BOTH:
+Pouka iz #6512 (filter kataloga zasnovan samo na `hidePaidModels` i dalje je omogućavao da `auto/*` usmeri zahtev ka
+plaćenom modelu, pošto se skup kandidata kombinacije pravio nezavisno) ovde se primenjuje na isti način.
+Predikat za podudaranje `isModelExposureAllowed()` (`src/shared/utils/modelExposureList.ts`) poziva se sa OBA mesta:
 
-- `src/app/api/v1/models/catalog.ts` — сам `/v1/models` листинг, на истих 5 пригушних тачака по извору `shouldHidePaid()` већ улази (статички `PROVIDER_MODELS`, синхронизовани редови добављача, прилагођени редови, редови са псеудонимом, редови којима се управља.
-- `open-sse/services/autoCombo/modelExposureFilter.ts::filterModelExposureCandidates()` — позван из `virtualFactory.ts::buildPreparedPool`, одмах након еквивалентног `filterPaidOnlyCandidates()` позива, тако да одбијени модел никада не може бити изабран ни у `auto/*` групу кандидата.
+- `src/app/api/v1/models/catalog.ts` — sam spisak `/v1/models`, na istih 5 kontrolnih tačaka po izvoru
+  koje već kontroliše `shouldHidePaid()` (statički `PROVIDER_MODELS`, sinhronizovani redovi dobavljača,
+  prilagođeni redovi, redovi zasnovani na alijasima, redovi rezervnih upravljanih modela).
+- `open-sse/services/autoCombo/modelExposureFilter.ts::filterModelExposureCandidates()` — poziva se
+  iz `virtualFactory.ts::buildPreparedPool`, neposredno posle odgovarajućeg poziva
+  `filterPaidOnlyCandidates()`, tako da zabranjeni model nikada ne može biti izabran ni u skup kandidata
+  `auto/*`.
 
-## Шта се NOT филтрира
+## Šta se NE filtrira
 
-Пресликава постојеће понашање `hideAutoCombos`: послат ид модела** експлицитно** (не преко `auto/*`, и није откривено кроз каталошку листу) никада није блокирано при отпреми — филтрира се само advertisement/candidate-pool чланство. Ово је независно од `hidePaidModels`; оператер може желети одабрани скуп из разлога који немају никакве везе са трошковима, тако да се оба подешавања састоје као независни АНД-ед филтери, исто као и постојећа композиција са више заставица у `catalog.ts`.
+Prati postojeće ponašanje podešavanja `hideAutoCombos`: identifikator modela poslat **eksplicitno** (ne preko `auto/*`
+i ne otkriven putem spiska kataloga) nikada se ne blokira prilikom otpreme — filtriraju se samo
+oglašavanje/članstvo u skupu kandidata. Ovo je nezavisno od `hidePaidModels`;
+operater može želeti odabrani skup iz razloga koji nemaju nikakve veze sa cenom, tako da se oba
+podešavanja kombinuju kao nezavisni filteri povezani logičkim I, isto kao postojeća kompozicija više zastavica u
+`catalog.ts`.
 
-Извоз поставки (`GET /api/settings/export-json`) укључује оба низа дословно, као и свако друго поље подешавања — за разлику од `hidePaidModels`-овог филтера за извоз комбинованих корака, овде нема ризика од поновне хидратације: одбијени ид уграђен у извезени комбиновани корак је сопствени експлицитни избор рутирања, а не нешто што граница извоза треба да скине.
+Izvoz podešavanja (`GET /api/settings/export-json`) uključuje oba niza doslovno, kao i svako drugo
+polje podešavanja — za razliku od filtera za izvoz koraka kombinacije u `hidePaidModels`, ovde ne postoji rizik
+od ponovne hidratacije: zabranjeni identifikator ugrađen u izvezeni korak kombinacije predstavlja eksplicitan izbor usmeravanja
+samog operatera, a ne nešto što granica izvoza treba da ukloni.
 
-## Листа само за комбинације (`exposeCombosOnly`)
+## Списак само combo модела (`exposeCombosOnly`)
 
-Засебна логичка вредност, такође подразумевано опт-ин и `false`, за примене где су комбинације јавна површина модела, а провајдери су само позадински део. Када је `true`, јавна листа (`GET /v1/models`, `GET /v1` и друге руте за откривање `/v1` изграђене на `getUnifiedModelsResponse()`) задржава само редове са `owned_by: "combo"`: корисничке комбинације плус уграђене `auto/*` комбинације (осим ако их `hideAutoCombos` не сакрива). Користи исти тест реда као и `catalogScope: "combos"` по кључу, а сопствени allow/deny/scope филтери кључа се и даље примењују на врху.
+Засебна логичка опција, такође с изричитим укључивањем и подразумевано `false`, за инсталације у којима су combo модели јавна понуда модела, а провајдери само позадински системи. Када је `true`, јавни списак (`GET /v1/models`, `GET /v1` и остале руте откривања `/v1` засноване на `getUnifiedModelsResponse()`) задржава само редове с `owned_by: "combo"`: корисничке combo моделе и уграђене combo моделе `auto/*` (осим ако их скрива `hideAutoCombos`). Користи исти тест реда као `catalogScope: "combos"` по кључу, а сопствени филтри допуштења, забрана и опсега кључа и даље се додатно примењују.
 
-Укључите га** Подешавања → Роутинг → Модели API листинг** , или са `PATCH /api/settings {"exposeCombosOnly": true}`.
+Укључите или искључите опцију у **Settings → Routing → Models API listing** или путем `PATCH /api/settings {"exposeCombosOnly": true}`.
 
-Као и горе наведене листе, мења само оглас:
+Као и претходни спискови, мења само оглашавање доступности:
 
-- експлицитни `provider/model` ид се и даље шаље, а `GET /v1/models/{id}` га и даље решава;
-- каталог контролне табле (`GET /api/models/catalog`, који користе бирачи модела) није сужен;
-- није пресликан у `auto/*` скупове кандидата, тако да `auto/*` комбинације задржавају свој пуни скуп.
+- изричит ID `provider/model` и даље се усмерава, а `GET /v1/models/{id}` и даље га разрешава;
+- каталог надзорне плоче (`GET /api/models/catalog`, који користе бирачи модела) не сужава се;
+- опција се не пресликава у скупове кандидата `auto/*`, па combo модели `auto/*` задржавају пуни скуп.

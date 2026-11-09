@@ -82,6 +82,18 @@ Arī ārpus bloķētajiem reģioniem starpniekserveri ir noderīgi:
 
 ---
 
+## Noklusējuma starpniekservera stāvoklis jauniem kontiem
+
+In** Iestatījumi → Proxy → Globālā konfigurācija** , izmantojiet** Jauniem savienojumiem pēc noklusējuma iespējot starpniekserveri** lai izvēlētos tikko pievienoto pakalpojumu sniedzēja kontu sākotnējo starpniekservera stāvokli.
+
+Jaunais iestatījums kontrolē tikko pievienoto pakalpojumu sniedzēja kontu sākotnējo starpniekservera stāvokli. Tas nemaina esošos kontus un neaizstāj globālo starpniekservera slēdzi. Tās sākotnējā vērtība saglabā iepriekšējo uzvedību. Vienreiz izslēdziet to, lai turpmāk izveidotu kontus ar atspējotu starpniekserveri pēc noklusējuma.
+
+Preference tiek saglabāta kā `defaultNewConnectionProxyEnabled`, izmantojot esošos iestatījumus API. Pēc noklusējuma tas ir `true`, kad tas nekad nav saglabāts. `false` saglabāšana stājas spēkā nākamajiem jauniem kontiem bez restartēšanas. `POST /api/providers` pieņem neobligātu stingru Būla `proxyEnabled`; precīzs `true` vai `false` ir prioritārs pār izveides noklusējuma iestatījumu. Dublēta konta izlaišana vai OAuth reconnect saglabā šī konta saglabāto stāvokli. Atsevišķus kontus joprojām var iespējot vai atspējot pēc tam.
+
+Selektīvajiem pakalpojumu sniedzēju pārsūtījumiem tiek izmantota mērķa instalācijas noklusējuma vērtība jauniem kontiem un tiek saglabāta mērķa politika, aizstājot esošos kontus. Starpniekservera slēdži nav pārnēsājami pārsūtīšanas lauki. Pilna dublējuma atjaunošana un vēsturiskā JSON/SQL migrācija saglabā esošo atjaunošanas semantiku, tostarp saglabātās konta vērtības un mantotās shēmas noklusējuma vērtības; pilna iestatījumu atjaunošana var arī atjaunot šo preferenci.
+
+Šī preference nepiešķir starpniekserveri un nenosaka, ka tas ir vesels vai tiek lietots. Faktiskais maršrutēšana joprojām ir atkarīga no globālā starpniekservera slēdža un piemērojamās starpniekservera konfigurācijas. Sintētiskie pakalpojumu sniedzēji bez pastāvīga konta, OAuth trafika pirms konta izveides, environment/system starpniekserveri un ārējo aizmugursistēmu tīkli neietilpst tā darbības jomā.
+
 ## 4 līmeņu starpniekserveru sistēma
 
 OmniRoute atbalsta starpniekserveru konfigurāciju **četros neatkarīgos tvērumos**, kas tiek izvērtēti prioritārā secībā:
@@ -382,7 +394,7 @@ Izmanto `wreq-js`, lai ģenerētu pārlūkprogrammai līdzīgus TLS digitālos n
 
 ### CLI digitālā nospieduma atbilstība
 
-**CLI digitālā nospieduma pārslēgs** (`Iestatījumi → Drošība`) pārkārto HTTP galvenes un JSON pamatteksta laukus, lai tie precīzi atbilstu vietējo CLI bināro failu (Claude Code, Codex u.c.) signatūrai. Tas darbojas **papildus** starpniekserverim:
+**CLI digitālā nospieduma pārslēgs** (`Settings → Security`) pārkārto HTTP galvenes un JSON pamatteksta laukus, lai tie precīzi atbilstu vietējo CLI bināro failu (Claude Code, Codex u.c.) signatūrai. Tas darbojas **papildus** starpniekserverim:
 
 ```
 Jūsu IP (bloķēta) → Starpniekservera IP (ASV) → Pakalpojumu sniedzēja API

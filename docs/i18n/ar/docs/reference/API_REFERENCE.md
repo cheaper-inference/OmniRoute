@@ -859,13 +859,7 @@ POST /v1/providers/{provider}/images/generations
 `subpages` و`subpageTarget` و`highlights.numSentences` و`highlights.highlightsPerUrl` المهملة
 تُمرَّر.
 
-تعتمد محاسبة التكلفة على السجل المسطح `costPerQuery`، باستثناء Exa الذي يتبع
-أسعاره الخاصة: $0.007 لكل استدعاء للقيمة `auto` (وكذلك `fast` القديمة) أو $0.004 للقيمة `lite`
-(وكذلك `instant` القديمة)، مع تغطية 10 نتائج؛ و$0.001 لكل نتيجة إضافية؛ و$0.001 لكل
-نتيجة مُعادة عند تعيين `contents.summary`. ويُسجّل Tavily برصيد واحد (أي $0.008) للقيم
-`basic` و`fast` و`ultra-fast` من `search_depth`، وبرصيدين (أي $0.016) للقيمة `advanced`
-([أرصدة Tavily API](https://docs.tavily.com/documentation/api-credits)). ويظل الاستدعاء الذي
-يحتوي على `auto_parameters: true` والذي يرقّيه Tavily إلى advanced مسجّلًا برصيد واحد.
+Exa: 0.007 USD لكل استدعاء لـ `auto` (و `fast` القديم) أو 0.004 USD لـ `lite` (و `instant` القديم)، ويغطي 10 نتائج؛ 0.001 دولار لكل نتيجة إضافية؛ و0.001 دولار لكل نتيجة يتم إرجاعها عند تعيين `contents.summary`. تم تسجيل Tavily برصيد واحد (0.008 دولار) لـ `search_depth` `basic` و `fast` و `ultra-fast` و 2 رصيد (0.016 دولار) لـ `advanced` ( [أرصدة Tavily API](https://docs.tavily.com/documentation/api-credits) ). المكالمة مع `auto_parameters: true` التي يقوم Tavily بترقيتها إلى المستوى المتقدم لا تزال مسجلة برصيد واحد.
 
 ---
 
@@ -1161,6 +1155,8 @@ X-OmniRoute-No-Cache: true
 
 ---
 
+<a id="cliproxyapi-management-compatibility"></a>
+
 ## توافق إدارة CLIProxyAPI
 
 تستجيب OmniRoute لنقاط النهاية الإدارية الثلاث الخاصة بـ [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI)
@@ -1175,19 +1171,11 @@ OmniRoute واستخدم مفتاح API ذي نطاق `manage` كمفتاحه ا
 | POST    | `/v0/management/api-call`    | النص `{ auth_index, method, url, header?, data? }`. يرسل طلبًا واحدًا مسموحًا به باستخدام رمز الحساب ويُرجع `{ status_code, body }` |
 | POST    | `/v0/management/reset-quota` | النص `{ auth_index }`. يمسح فترة تهدئة الاتصال، وحالات حظر النماذج، وفترات التهدئة لكل نطاق في Codex لحساب واحد                     |
 
-- `auth_index` هو معرّف اتصال OmniRoute. و`provider` هو `claude` أو `codex` (لاتصالات OAuth
-  فقط؛ ولا يُدرج موفّر مفتاح API الخاص بـ `anthropic`). بالنسبة إلى Codex،
-  فإن `id_token.chatgpt_account_id` هو معرّف مساحة العمل المخزّن، و`plan_type` هي الخطة المخزّنة.
-- إن `api-call` ليس وكيلاً عامًا. فهو يقبل فقط Claude `GET
-https://api.anthropic.com/api/oauth/usage` وCodex `GET https://chatgpt.com/backend-api/wham/usage`، و`GET .../wham/rate-limit-reset-credits` و
-  `POST .../wham/rate-limit-reset-credits/consume`، وكل منها لحساب يطابق الموفّر فقط. ويُرجع أي شيء آخر
-  `403` من دون الاتصال بالمنبع. ويتم تجاهل ترويسة `Authorization` الخاصة بالمتصل (بما في ذلك العنصر النائب `$TOKEN$`): إذ تحقن OmniRoute
-  رمز وصول الاتصال، وتحدّثه أولًا عندما يقترب من انتهاء صلاحيته، ولا تمرر إلا
-  الترويسات المسموح بها (`anthropic-beta`؛ `OpenAI-Beta` و`Originator` و`Chatgpt-Account-Id`؛
-  `Accept` و`Content-Type`). ويُستخدَم معرّف مساحة العمل المخزّن افتراضيًا عند غياب `Chatgpt-Account-Id`.
-  تنتهي مهلة الطلبات بعد 15 ثانية وتستخدم الوكيل الخاص بالاتصال.
-- يترك `reset-quota` الحالات النهائية (banned وexpired وcredits_exhausted) كما هي. ويُرجع
-  `404` عند استخدام `auth_index` غير معروف.
+- `auth_index` هو معرّف اتصال OmniRoute. يكون `provider` هو `claude` أو `codex` (اتصالات OAuth فقط؛ لا يُدرَج مزوّد مفتاح API المسمى `anthropic`). في Codex، يكون `id_token.chatgpt_account_id` معرّف مساحة العمل المخزن و`plan_type` الخطة المخزنة.
+- ليس `api-call` وكيلًا عامًا. يقبل فقط طلب Claude `GET
+https://api.anthropic.com/api/oauth/usage` وطلبات Codex `GET
+https://chatgpt.com/backend-api/wham/usage` و`GET .../wham/rate-limit-reset-credits` و`POST .../wham/rate-limit-reset-credits/consume`، وكلٌّ منها لحساب المزوّد المطابق فقط. يعيد أي شيء آخر `403` دون الاتصال بالمنبع. تُتجاهَل ترويسة `Authorization` الخاصة بالمستدعي (بما في ذلك العنصر النائب `$TOKEN$`): يحقن OmniRoute رمز وصول الاتصال، ويحدّثه أولًا إذا اقتربت صلاحيته من الانتهاء، ويمرر الترويسات المسموحة فقط (`anthropic-beta`؛ `OpenAI-Beta` و`Originator` و`Chatgpt-Account-Id`؛ `Accept` و`Content-Type`). عند غياب `Chatgpt-Account-Id`، تُستخدم افتراضيًا هوية مساحة العمل المخزنة. إذا كانت استجابة المنبع الأولى `401`، يجري تحديثًا واحدًا ولا يعيد المحاولة إلا عند تغير رمز الوصول. تنتهي مهلة كل محاولة إلى المنبع بعد 15 ثانية وتستخدم وكيل الاتصال.
+- يترك `reset-quota` الحالات النهائية (banned, expired, credits_exhausted) دون تغيير. يعيد `auth_index` غير المعروف `404`.
 
 **المصادقة:** جلسة لوحة المعلومات أو مفتاح API ذي نطاق `manage`، وهو مطلوب حتى عند تعطيل تسجيل الدخول
 (المسارات موجودة في `ALWAYS_PROTECTED_API_PATHS`). تحصل المفاتيح المخصصة للاستدلال فقط على `403`. المصدر:
@@ -1924,17 +1912,17 @@ curl -X DELETE http://localhost:20128/api/resilience/model-cooldowns \
 
 يأتي OmniRoute مزودًا بخادم مضمن لبروتوكول سياق النموذج مع 3 وسائل نقل (stdio وSSE وstreamable-http) وأدوات محددة النطاق. تقرأ نقاط نهاية لوحة المعلومات أدناه بيانات الحالة/التدقيق وتعمل كوسيط لنقل HTTP.
 
-| الطريقة | المسار | الوصف | | |
-| ------ | ---------------------- | ------------------------------------------------------------------------------------------------ | -------------------- |
-| GET | `/api/mcp/status` | نبضة القلب، ووسيلة النقل، وحالة الاتصال، وآخر استدعاء، وأهم الأدوات، ومعدل النجاح خلال 24 ساعة |
-| GET | `/api/mcp/tools` | قائمة بأدوات MCP مع `name` و`description` و`scopes` و`phase` و`auditLevel` و`sourceEndpoints` |
-| GET | `/api/mcp/sse` | فتح تدفق SSE لوسيلة نقل SSE (يعيد `503` إذا كان MCP معطلًا أو كانت وسيلة النقل غير متطابقة) |
-| POST | `/api/mcp/sse` | إرسال إطار JSON-RPC عبر وسيلة نقل SSE |
-| GET | `/api/mcp/stream` | فتح جانب SSE من وسيلة نقل Streamable HTTP (رسائل يبدأها الخادم) |
-| POST | `/api/mcp/stream` | إرسال إطار JSON-RPC عبر وسيلة نقل Streamable HTTP |
-| DELETE | `/api/mcp/stream` | إنهاء جلسة Streamable HTTP |
-| GET | `/api/mcp/audit` | الاستعلام عن سجل التدقيق — `?limit=` و`?offset=` و`?tool=` و`?success=true                                | false` و`?apiKeyId=` |
-| GET | `/api/mcp/audit/stats` | إحصاءات التدقيق المجمعة (الإجماليات، ومعدل النجاح، ومتوسط المدة، وأهم الأدوات) |
+| الطريقة | المسار                 | الوصف                                                                                                                             |
+| ------- | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| GET     | `/api/mcp/status`      | نبضة القلب، ووسيلة النقل، وحالة الاتصال، وآخر استدعاء، وأهم الأدوات، ومعدل النجاح خلال 24 ساعة                                    |
+| GET     | `/api/mcp/tools`       | قائمة بأدوات MCP مع `name` و`description` و`scopes` و`phase` و`auditLevel` و`sourceEndpoints`                                     |
+| GET     | `/api/mcp/sse`         | فتح تدفق SSE لوسيلة نقل SSE (يعيد `503` إذا كان MCP معطلًا أو كانت وسيلة النقل غير متطابقة)                                       |
+| POST    | `/api/mcp/sse`         | إرسال إطار JSON-RPC عبر وسيلة نقل SSE                                                                                             |
+| GET     | `/api/mcp/stream`      | فتح جانب SSE من وسيلة نقل Streamable HTTP (رسائل يبدأها الخادم)                                                                   |
+| POST    | `/api/mcp/stream`      | إرسال إطار JSON-RPC عبر وسيلة نقل Streamable HTTP                                                                                 |
+| DELETE  | `/api/mcp/stream`      | إنهاء جلسة Streamable HTTP                                                                                                        |
+| GET     | `/api/mcp/audit`       | الاستعلام عن سجل التدقيق — `?limit=` و`?offset=` و`?tool=` و`?success=true                                \| false` و`?apiKeyId=` |
+| GET     | `/api/mcp/audit/stats` | إحصاءات التدقيق المجمعة (الإجماليات، ومعدل النجاح، ومتوسط المدة، وأهم الأدوات)                                                    |
 
 **المصادقة:** تستخدم وسيلتا النقل `sse`/`stream` واجهة المصادقة الخاصة بـ MCP (مفتاح API من نوع Bearer مع نطاق `mcp`)؛ ويمكن قراءة مسارات `status`/`tools`/`audit*` من لوحة المعلومات (من دون مصادقة إضافية تتجاوز الوصول إلى مضيف لوحة المعلومات).
 

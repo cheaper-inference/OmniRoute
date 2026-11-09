@@ -242,9 +242,9 @@ interface CliFingerprint {
 
 ---
 
-## વપરાશકર્તા-એજન્ટ — env vars ને ઓવરરાઇડ કરે છે (`.env.example` વિભાગ 12)
+## User-Agent ઓવરરાઇડ્સ — env vars (`.env.example` વિભાગ 12)
 
-| ચલ                  | ડિફૉલ્ટ                                       |
+| વેરિએબલ             | ડિફૉલ્ટ                                       |
 | ------------------- | --------------------------------------------- |
 | `CLAUDE_USER_AGENT` | `claude-cli/2.1.280 (external, cli)`          |
 | `CODEX_USER_AGENT`  | `codex-cli/0.155.0 (Windows 10.0.26200; x64)` |
@@ -253,7 +253,7 @@ interface CliFingerprint {
 | `QODER_USER_AGENT`  | `Qoder-Cli`                                   |
 | `CURSOR_USER_AGENT` | `Cursor/3.4`                                  |
 
-ડાયનેમિક લુકઅપ દ્વારા `open-sse/executors/base.ts::buildHeaders()` દ્વારા વપરાશ.** જ્યારે પ્રદાતાઓ નવા CLI સંસ્કરણો રિલીઝ કરે ત્યારે આને બમ્પ કરો** — વાસી UA શબ્દમાળાઓ જૂના ક્લાયન્ટ તરીકે નકારવા માંડે છે.
+ડાયનેમિક લુકઅપ દ્વારા `open-sse/executors/base.ts::buildHeaders()` તેનો ઉપયોગ કરે છે. **પ્રદાતાઓ નવા CLI વર્ઝન રિલીઝ કરે ત્યારે આને અપડેટ કરો** — જૂની UA સ્ટ્રિંગ્સને જૂના ક્લાયન્ટ તરીકે નકારવામાં આવવાનું શરૂ થાય છે.
 
 ## CLI સુસંગતતા મોડ ટૉગલ્સ (`.env.example` વિભાગ 13)
 

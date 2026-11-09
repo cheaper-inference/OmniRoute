@@ -7,6 +7,7 @@ import path from "node:path";
 import { spawn } from "node:child_process";
 import { pathToFileURL } from "node:url";
 import { generateGlobalErrorMessages } from "../i18n/generate-global-error-messages.mjs";
+import { createBuildProgress } from "./buildPhaseProgress.mjs";
 import {
   assembleStandalone,
   syncStandaloneNativeAssets as _syncNativeAssets,
@@ -329,6 +330,7 @@ export async function syncStandaloneExtraModules(
 }
 
 export async function main() {
+  const buildProgress = createBuildProgress({ projectRoot, role: "next" });
   const movedPaths = [];
   const transientBuildPaths = getTransientBuildPaths();
 
@@ -373,7 +375,7 @@ export async function main() {
 
     await resetStandaloneOutput(projectRoot);
 
-    const result = await runNextBuild();
+    const result = await buildProgress.runAsync("next-process", runNextBuild);
     const standaloneDir = path.join(distDir, "standalone");
     if (result.code === 0 && (await exists(standaloneDir)) && shouldBuildStandalone()) {
       try {
@@ -417,17 +419,19 @@ export async function main() {
         console.log(
           "[build-next-isolated] Assembling standalone bundle (static + public + natives + extras)..."
         );
-        assembleStandalone({
-          distDir,
-          outDir: standaloneDir,
-          projectRoot,
-          // Match the hardened packaging path used by Electron builds:
-          // Turbopack can emit hashed external-package references and
-          // standalone symlinks that break after the bundle is moved/copied.
-          patchTurbopackChunks: true,
-          copyNatives: true,
-          materializeSymlinks: true,
-        });
+        buildProgress.runSync("standalone-assembly", () =>
+          assembleStandalone({
+            distDir,
+            outDir: standaloneDir,
+            projectRoot,
+            // Match the hardened packaging path used by Electron builds:
+            // Turbopack can emit hashed external-package references and
+            // standalone symlinks that break after the bundle is moved/copied.
+            patchTurbopackChunks: true,
+            copyNatives: true,
+            materializeSymlinks: true,
+          })
+        );
         const { spawnSync } = await import("node:child_process");
         const basePathWrite = spawnSync(
           process.execPath,

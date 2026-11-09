@@ -219,9 +219,9 @@ Tous les points de terminaison MITM nécessitent une authentification de gestion
 
 ---
 
-## L'agent utilisateur remplace les variables d'environnement — (section `.env.example` 12)
+## Remplacement des User-Agent — variables d’environnement (section 12 de `.env.example`)
 
-| Variable            | Défaut                                        |
+| Variable            | Valeur par défaut                             |
 | ------------------- | --------------------------------------------- |
 | `CLAUDE_USER_AGENT` | `claude-cli/2.1.280 (external, cli)`          |
 | `CODEX_USER_AGENT`  | `codex-cli/0.155.0 (Windows 10.0.26200; x64)` |
@@ -230,7 +230,7 @@ Tous les points de terminaison MITM nécessitent une authentification de gestion
 | `QODER_USER_AGENT`  | `Qoder-Cli`                                   |
 | `CURSOR_USER_AGENT` | `Cursor/3.4`                                  |
 
-Consommé par `open-sse/executors/base.ts::buildHeaders()` via une recherche dynamique.** Supprimez-les lorsque les fournisseurs publient de nouvelles versions CLI** Les chaînes UA obsolètes — commencent à être rejetées en tant que clients obsolètes.
+Utilisées par `open-sse/executors/base.ts::buildHeaders()` via une recherche dynamique. **Mettez-les à jour lorsque les fournisseurs publient de nouvelles versions de leurs CLI** — les chaînes UA obsolètes finissent par être rejetées comme provenant de clients trop anciens.
 
 ## Options du mode de compatibilité CLI (section 13 de `.env.example`)
 

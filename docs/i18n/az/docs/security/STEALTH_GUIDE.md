@@ -219,9 +219,9 @@ Bütün MITM son nöqtələri idarəetmə autentifikasiyası (`requireCliToolsAu
 
 ---
 
-## İstifadəçi-Agent — env variantlarını ləğv edir (`.env.example` bölmə 12)
+## User-Agent əvəzləmələri — mühit dəyişənləri (`.env.example` bölmə 12)
 
-| Dəyişən             | Defolt                                        |
+| Dəyişən             | Standart dəyər                                |
 | ------------------- | --------------------------------------------- |
 | `CLAUDE_USER_AGENT` | `claude-cli/2.1.280 (external, cli)`          |
 | `CODEX_USER_AGENT`  | `codex-cli/0.155.0 (Windows 10.0.26200; x64)` |
@@ -230,7 +230,7 @@ Bütün MITM son nöqtələri idarəetmə autentifikasiyası (`requireCliToolsAu
 | `QODER_USER_AGENT`  | `Qoder-Cli`                                   |
 | `CURSOR_USER_AGENT` | `Cursor/3.4`                                  |
 
-Dinamik axtarış vasitəsilə `open-sse/executors/base.ts::buildHeaders()` tərəfindən istehlak edilir.** Provayderlər yeni CLI versiyalarını buraxdıqda bunları döyün** — köhnəlmiş UA sətirləri köhnəlmiş müştərilər kimi rədd edilməyə başlayır.
+Dinamik axtarış vasitəsilə `open-sse/executors/base.ts::buildHeaders()` tərəfindən istifadə olunur. **Provayderlər yeni CLI versiyalarını buraxdıqda bunları yeniləyin** — köhnəlmiş UA sətirləri vaxtı keçmiş müştərilər kimi rədd edilməyə başlayır.
 
 ## CLI Uyğunluq Rejimi Keçidləri (`.env.example` bölmə 13)
 

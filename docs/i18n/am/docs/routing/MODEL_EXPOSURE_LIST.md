@@ -4,47 +4,69 @@
 
 ---
 
-> መርጦ ግባ፣ በነባሪነት ጠፍቷል (`modelVisibilityAllowlist`/`modelVisibilityDenylist` ሁለቱም ባዶ ከ `/v1/models` ካታሎግ AND እያንዳንዱ `auto/*` እጩ ገንዳ ባይት-ተመሳሳይ ነው)። ከዋጋ ጋር ምንም ግንኙነት በሌላቸው ምክንያቶች የተስተካከለ ሞዴል ዝርዝር ለሚፈልጉ ኦፕሬተሮች የ `hidePaidModels`/`hideAutoCombos` (`src/lib/db/settings.ts`) ወንድም እህት።
+> በፍላጎት የሚነቃ ሲሆን፣ በነባሪነት ጠፍቷል (`modelVisibilityAllowlist`/`modelVisibilityDenylist` ሁለቱም ባዶ ከሆኑ
+> የ`/v1/models` ካታሎግን እና እያንዳንዱን የ`auto/*` ዕጩ ስብስብ በባይት ደረጃ ሳይለወጥ ይተዋል)። ከ
+> `hidePaidModels`/`hideAutoCombos` (`src/lib/db/settings.ts`) ጋር ተመሳሳይ ደረጃ ያለው፣ ከወጪ ጋር ምንም
+> ግንኙነት በሌላቸው ምክንያቶች የተመረጠ የሞዴል ዝርዝር ለሚፈልጉ ኦፕሬተሮች የተዘጋጀ ቅንብር።
 
-## ይህ ለምን አለ
+## ይህ ለምን እንዳለ
 
-`hidePaidModels` መልሶ "ይህ ሞዴል ነፃ ነው?" እና `hideAutoCombos` መልሶች " `auto/*` ቨርቹዋል መታወቂያዎች በጭራሽ ማስታወቂያ ሊደረግላቸው ይገባል?" — አንዳቸውም ኦፕሬተር የዘፈቀደ የሞዴሎችን ስብስብ እንዲመረምር አይፈቅድም (ለምሳሌ Claude Code/ OpenCode ደንበኛ ማየት ያለባቸውን ሞዴሎች ከዋጋ ነፃ በሆነ መልኩ በትክክል ማቅረብ)። #11481 ያክላል እንደ ሁለት ገለልተኛ ፣ የሕብረቁምፊ-ድርድር ቅንብሮችን መርጠው ይግቡ።
+`hidePaidModels` "ይህ ሞዴል ነፃ ነው?" የሚለውን ይመልሳል፣ `hideAutoCombos` ደግሞ "የ`auto/*`
+ምናባዊ idዎች በጭራሽ መታወቅ አለባቸው?" የሚለውን ይመልሳል — ከሁለቱም አንዱም ኦፕሬተር ማንኛውንም የሞዴሎች
+ንዑስ ስብስብ እንዲመርጥ አያስችለውም (ለምሳሌ፣ ከዋጋ አሰጣጥ ነፃ በሆነ መንገድ አንድ የተወሰነ Claude Code / OpenCode ደንበኛ
+ማየት ያለበትን ትክክለኛ የሞዴሎች ስብስብ ማቅረብ)። #11481 ይህንን እንደ ሁለት እርስ በርሳቸው ነፃ፣ በፍላጎት የሚነቁ የሕብረቁምፊ-ድርድር ቅንብሮች ያክላል።
 
 ## ቅንብሮች
 
-| ቁልፍ                        | ዓይነት       | ነባሪ  | ትርጉም                                                 |
-| -------------------------- | ---------- | ---- | ---------------------------------------------------- |
-| `modelVisibilityDenylist`  | `string[]` | `[]` | ከአንድ እጩ ጋር የሚዛመዱ ግቤቶች ከ catalog/candidate ገንዳ ይደብቁት። |
-| `modelVisibilityAllowlist` | `string[]` | `[]` | ባዶ በማይሆንበት ጊዜ፣ ONLY ግቤቶች ከእጩ ተወዳዳሪ ጋር የሚዛመዱ ተጋልጠዋል።  |
+| ቁልፍ                        | ዓይነት       | ነባሪ  | ትርጉም                                             |
+| -------------------------- | ---------- | ---- | ------------------------------------------------ |
+| `modelVisibilityDenylist`  | `string[]` | `[]` | ከዕጩ ጋር የሚዛመዱ ግቤቶች ከካታሎጉ/የዕጩዎች ስብስብ ይደብቁታል።       |
+| `modelVisibilityAllowlist` | `string[]` | `[]` | ባዶ ካልሆነ፣ ከዕጩ ጋር የሚዛመዱ ግቤቶች ብቻ ለእይታ ክፍት ሆነው ይቆያሉ። |
 
-ሁለቱም እያንዳንዳቸው እስከ 200 የሚደርሱ ቁምፊዎች እስከ 500 የሚደርሱ ግቤቶችን ይቀበላሉ (ዞድ-የተረጋገጠ በ `src/shared/validation/settingsSchemas.ts`)። መግቢያው አንድም ነው፡-
+ሁለቱም እያንዳንዳቸው እስከ 200 ቁምፊዎች ያሏቸውን እስከ 500 ግቤቶች ይቀበላሉ (በ
+`src/shared/validation/settingsSchemas.ts` ውስጥ በZod የተረጋገጡ)። አንድ ግቤት ከሚከተሉት አንዱ ነው፦
 
-- ትክክለኛ ካታሎግ መታወቂያ — `"gpt-4o"` (ባዶ ሞዴል መታወቂያ) ወይም `"openai/gpt-4o"` (አቅራቢ-ቅድመ ቅጥያ)፣ ወይም
-- `*`/`?` — በመጠቀም ግሎብ ጥለት ለምሳሌ `"openai/gpt-4*"` ወይም `"anthropic/*"` — በተመሳሳይ የተጋራ `globToRegex()` ተዛማጅ (`src/shared/utils/globPattern.ts`) ቀድሞ በ `ModelRoutingSection` በእያንዳንዱ ሞዴል ጥምር ካርታዎች እና `freeModels.ts::matchesOnlyPaidModels` ጥቅም ላይ ውሏል።
+- ትክክለኛ የካታሎግ id — `"gpt-4o"` (ባዶ የሞዴል id) ወይም `"openai/gpt-4o"` (በአቅራቢ ቅድመ-ቅጥ የተጨመረበት)፣ ወይም
+- `*`/`?` የሚጠቀም የglob ንድፍ — ለምሳሌ `"openai/gpt-4*"` ወይም `"anthropic/*"` — ቀድሞውኑ በ
+  `ModelRoutingSection` በእያንዳንዱ ሞዴል የcombo ማዛመጃዎች እና በ`freeModels.ts::matchesOnlyPaidModels`
+  ጥቅም ላይ በዋለው የጋራ `globToRegex()` ማዛመጃ (`src/shared/utils/globPattern.ts`) በኩል የሚፈታ።
 
-ቅድሚያ: ውድቅ የተደረገው ሰው በመጀመሪያ ምልክት ይደረግበታል (የተከለከለው ግቤት ሁል ጊዜ ተደብቋል ፣ ምንም እንኳን ከተፈቀደው ዝርዝር ጋር የሚዛመድ ቢሆንም); የፈቃድ ዝርዝሩ ባዶ ካልሆነ፣ ከሱ ጋር የሚዛመዱ ግቤቶች ብቻ ይኖራሉ።
+ቅድሚያ፦ denylist በመጀመሪያ ይፈተሻል (የተከለከለ ግቤት ከallowlist ጋርም ቢዛመድ ሁልጊዜ የተደበቀ ነው)፤ allowlist ባዶ ካልሆነ፣ ከእሱ ጋር የሚዛመዱ ግቤቶች ብቻ ይቀራሉ።
 
-## ሁለት ማነቆ ነጥቦች, አንድ አይደለም
+## አንድ ሳይሆን ሁለት የመቆጣጠሪያ ነጥቦች
 
-ከ#6512 ያለው ትምህርት (የጥምር እጩ ገንዳው ለብቻው ስለተገነባ የ `hidePaidModels` -only ካታሎግ ማጣሪያ አሁንም `auto/*` ወደሚከፈልበት ሞዴል እንዲሄድ ያስችለዋል) እዚህ ጋር ተመሳሳይ ነው። ተዛማጅ ተሳቢው `isModelExposureAllowed()` (`src/shared/utils/modelExposureList.ts`) ከ BOTH ይባላል፡-
+ከ#6512 የተገኘው ትምህርት (`hidePaidModels`ን ብቻ የሚጠቀም የካታሎግ ማጣሪያ አሁንም `auto/*` ወደ
+የሚከፈልበት ሞዴል እንዲመራ ይፈቅድ ነበር፣ ምክንያቱም የcombo ዕጩ ስብስብ ለብቻው ይገነባ ነበር) በተመሳሳይ ሁኔታ እዚህም ይተገበራል።
+የማዛመጃው ተሳቢ `isModelExposureAllowed()` (`src/shared/utils/modelExposureList.ts`) ከሁለቱም ይጠራል፦
 
-- `src/app/api/v1/models/catalog.ts` — የ `/v1/models` ዝርዝር ራሱ፣ በተመሳሳይ 5 በእያንዳንዱ የምንጭ ቾክ ነጥቦች `shouldHidePaid()` አስቀድሞ በሮች (ስታቲክ `PROVIDER_MODELS`, የተመሳሰለ የአቅራቢ ረድፎች፣ ብጁ ረድፎች፣ ተለዋጭ የተደገፉ ረድፎች፣ የሚተዳደሩ-ወደ ኋላ ረድፎች)።
-- `open-sse/services/autoCombo/modelExposureFilter.ts::filterModelExposureCandidates()` — ከ `virtualFactory.ts::buildPreparedPool` ተጠርቷል፣ ከተመሳሳዩ `filterPaidOnlyCandidates()` ጥሪ በኋላ ወዲያው፣ስለዚህ የተከለከለ ሞዴል ወደ `auto/*` እጩ ገንዳ ውስጥም ሊመረጥ አይችልም።
+- `src/app/api/v1/models/catalog.ts` — የ`/v1/models` ዝርዝር ራሱ፣ `shouldHidePaid()` ቀድሞውኑ በሚቆጣጠራቸው በእያንዳንዱ ምንጭ ባሉት ተመሳሳይ 5
+  የመቆጣጠሪያ ነጥቦች (የማይለዋወጥ `PROVIDER_MODELS`፣ የተመሳሰሉ የአቅራቢ ረድፎች፣
+  ብጁ ረድፎች፣ በalias የሚደገፉ ረድፎች፣ የሚተዳደሩ የfallback ረድፎች)።
+- `open-sse/services/autoCombo/modelExposureFilter.ts::filterModelExposureCandidates()` — ከእሱ ጋር እኩል የሆነው
+  `filterPaidOnlyCandidates()` ጥሪ ወዲያውኑ በኋላ ከ`virtualFactory.ts::buildPreparedPool` የሚጠራ ሲሆን፣ በዚህም የተከለከለ ሞዴል በማንኛውም የ`auto/*`
+  ዕጩ ስብስብ ውስጥ በፍጹም ሊመረጥ አይችልም።
 
-## NOT ምን ተጣርቶ ነው።
+## የማይጣራው
 
-መስተዋቶች `hideAutoCombos` ያለው ነባር ባህሪ፡ የሞዴል መታወቂያ ተልኳል።** በግልፅ** (በ `auto/*` አይደለም፣ እና በካታሎግ ዝርዝሩ አልተገኘም) — ሲላክ በጭራሽ አይታገድም advertisement/candidate-pool አባልነት ብቻ ነው የሚጣራው። ይህ ከ `hidePaidModels` ነፃ ነው; አንድ ኦፕሬተር ከዋጋ ጋር ምንም ግንኙነት በሌላቸው ምክንያቶች የተሰበሰበ ስብስብ ሊፈልግ ይችላል፣ ስለዚህ ሁለቱም ቅንብሮች እንደ ገለልተኛ AND-ed ማጣሪያዎች ያዘጋጃሉ፣ በ `catalog.ts` ውስጥ ካለው ባለብዙ ባንዲራ ቅንብር ጋር ተመሳሳይ።
+የ`hideAutoCombos`ን ነባር ባህሪ ያንጸባርቃል፦ **በግልጽ** የተላከ የሞዴል id (በ`auto/*` በኩል ያልሆነ፣
+እና በካታሎግ ዝርዝር በኩል ያልተገኘ) በማሰራጫ ጊዜ ፈጽሞ አይታገድም — የሚጣራው
+የማሳወቂያ/የዕጩ-ስብስብ አባልነት ብቻ ነው። ይህ ከ`hidePaidModels` ነፃ ነው፤
+አንድ ኦፕሬተር ከወጪ ጋር ምንም ግንኙነት በሌላቸው ምክንያቶች የተመረጠ ስብስብ ሊፈልግ ይችላል፣ ስለዚህ ሁለቱም
+ቅንብሮች በ`catalog.ts` ውስጥ እንዳለው ነባር የብዙ-flag ውህደት ሁሉ፣ እርስ በርሳቸው ነፃ የሆኑ በAND የተጣመሩ ማጣሪያዎች ሆነው ይዋሃዳሉ።
 
-ቅንጅቶች ወደ ውጪ መላክ (`GET /api/settings/export-json`) ሁለቱንም ድርድሮች በቃል ያካትታል፣ ልክ እንደሌሎች ማንኛውም የቅንብር መስክ — ከ `hidePaidModels`'s combo-step ኤክስፖርት ማጣሪያ በተለየ፣ እዚህ ምንም አይነት የውሃ መልሶ ማጠጣት አደጋ የለም፡ ወደ ውጭ በተላከ ጥምር ደረጃ ውስጥ የተካደ መታወቂያ የኦፕሬተሩ የራሱ ግልፅ የማዞሪያ ምርጫ ነው እንጂ የወጪ ድንበሩን መንቀል የሚያስፈልገው አይደለም።
+የቅንብሮች ወደ ውጭ መላክ (`GET /api/settings/export-json`) እንደማንኛውም ሌላ
+የቅንብሮች መስክ ሁለቱንም ድርድሮች ሳይለውጥ ያካትታል — ከ`hidePaidModels` የcombo-ደረጃ ወደ ውጭ መላኪያ ማጣሪያ በተለየ፣ እዚህ የመልሶ-ማስገባት
+አደጋ የለም፦ በወደ ውጭ በተላከ combo ደረጃ ውስጥ የተካተተ የተከለከለ id የኦፕሬተሩ የራሱ ግልጽ የማዞሪያ
+ምርጫ ነው፣ የወደ ውጭ መላኪያ ወሰኑ ሊያስወግደው የሚገባ ነገር አይደለም።
 
-## ጥምር-ብቻ ዝርዝር (`exposeCombosOnly`)
+## Combo-ዎችን ብቻ መዘርዘር (`exposeCombosOnly`)
 
-የተለየ ቡሊያን፣ እንዲሁም መርጦ መግባት እና `false` በነባሪነት፣ ኮምቦዎች የህዝብ ሞዴል ወለል የሆኑ እና አቅራቢዎች የኋላ ደጋፊ ለሆኑባቸው ማሰማራቶች። `true` ሲሆን የህዝብ ዝርዝሩ (`GET /v1/models`፣ `GET /v1` እና ሌሎች `/v1` ግኝቶች በ `getUnifiedModelsResponse()` ላይ የተገነቡት) ረድፎችን ብቻ ያስቀምጣቸዋል `owned_by: "combo"`: የተጠቃሚ ጥምር እና አብሮ የተሰራውን `auto/*` combos ( `hideAutoCombos` ካልደበቃቸው በቀር)። ልክ እንደ ፐር-ቁልፍ `catalogScope: "combos"` ተመሳሳይ የረድፍ ሙከራን ይጠቀማል፣ እና የቁልፍ የራሱ allow/deny/scope ማጣሪያዎች አሁንም ከላይ ይተገበራሉ።
+combo-ዎች የህዝብ model-ዎች ሲሆኑ provider-ዎች የውስጥ backend ብቻ ለሆኑ መጫኛዎች የተለየ boolean ነው፤ እሱም በምርጫ የሚነቃ ሲሆን ነባሪው `false` ነው። `true` ሲሆን የህዝብ ዝርዝሩ (`GET /v1/models`፣ `GET /v1` እና በ`getUnifiedModelsResponse()` ላይ የተገነቡ ሌሎች የ`/v1` ማግኛ መንገዶች) `owned_by: "combo"` ያላቸውን ረድፎች ብቻ ይይዛል፤ የተጠቃሚ combo-ዎችና አብረው የመጡ `auto/*` combo-ዎች (`hideAutoCombos` ካልደበቃቸው)። ከእያንዳንዱ ቁልፍ `catalogScope: "combos"` ጋር ተመሳሳይ የረድፍ ምርመራ ይጠቀማል፣ የቁልፉም የራሱ allow/deny/scope ማጣሪያዎች በላዩ አሁንም ይተገበራሉ።
 
-ወደ ውስጥ ቀይር** Settings → Routing → ሞዴሎች API ዝርዝር** ወይም በ `PATCH /api/settings {"exposeCombosOnly": true}`.
+በ**Settings → Routing → Models API listing** ወይም በ`PATCH /api/settings {"exposeCombosOnly": true}` ያብሩት/ያጥፉት።
 
-ልክ ከላይ እንዳሉት ዝርዝሮች፣ ማስታወቂያን ብቻ ይቀይራል፡-
+እንደ ላይ ያሉት ዝርዝሮች፣ የሚቀይረው የሚታወጀውን ብቻ ነው፦
 
-- ግልጽ የሆነ `provider/model` መታወቂያ አሁንም ይልካል፣ እና `GET /v1/models/{id}` አሁንም ይፈታዋል።
-- የዳሽቦርዱ ካታሎግ (`GET /api/models/catalog`, በአምሳያው መራጮች ጥቅም ላይ የዋለው) አልተጠበበም;
-- በ `auto/*` እጩ ገንዳዎች ውስጥ አይንጸባረቅም፣ ስለዚህ `auto/*` combos ሙሉ ገንዳቸውን ይጠብቃሉ።
+- በግልጽ የተወሰነ `provider/model` id አሁንም ይላካል፣ `GET /v1/models/{id}` አሁንም ያገኘዋል፤
+- የdashboard ካታሎግ (`GET /api/models/catalog`፣ በmodel መራጮች የሚጠቀሙበት) አይጠብም፤
+- ወደ `auto/*` የእጩ ስብስቦች አይቀዳም፣ ስለዚህ `auto/*` combo-ዎች ሙሉ ስብስባቸውን ይይዛሉ።

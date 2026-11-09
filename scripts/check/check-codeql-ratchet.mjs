@@ -14,8 +14,9 @@
 // RATCHET BLOQUEANTE (default): lê metrics.codeqlAlerts.value de
 // config/quality/quality-baseline.json e SAI 1 SE — E SOMENTE SE — a contagem
 // MEDIDA for MAIOR que o baseline (regressão real, mais alertas CodeQL abertos).
-// Qualquer falha de MEDIÇÃO (gh ausente / sem auth / sem repo / erro de API) é um
-// SKIP gracioso que SAI 0 — nunca bloqueia o build por falta de infraestrutura.
+// Modo global legado: falha de medição sai0. --strict-measurement, usado pelo
+// inventário nightly, sai2 quando não consegue medir. --candidate valida ref/SHA
+// e análises atuais antes da contagem; ausência de evidência nunca aprova CI.
 // Direction: down (a contagem só pode CAIR). Suporta --update para ratchetar.
 //
 // Uso:
@@ -24,11 +25,14 @@
 //   node scripts/check/check-codeql-ratchet.mjs --quiet   # suprime logs de diagnóstico
 //   node scripts/check/check-codeql-ratchet.mjs --update  # ratcheta o baseline (queda)
 //   node scripts/check/check-codeql-ratchet.mjs --advisory  # nunca falha (modo coletor)
+//   node scripts/check/check-codeql-ratchet.mjs --strict-measurement  # inventário global
+//   node scripts/check/check-codeql-ratchet.mjs --candidate  # after CodeQL producer
 
 import { execFileSync, spawnSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
+import { runCodeqlAdmission } from "../quality/codeql-admission.mjs";
 
 const QUIET = process.argv.includes("--quiet");
 const PRINT_JSON = process.argv.includes("--json");
@@ -36,6 +40,7 @@ const UPDATE = process.argv.includes("--update");
 // --advisory: nunca falha pela contagem (modo coletor legado). Sem esta flag o
 // gate é BLOQUEANTE: sai 1 numa regressão real (medida > baseline).
 const ADVISORY = process.argv.includes("--advisory");
+const STRICT_MEASUREMENT = process.argv.includes("--strict-measurement");
 
 const ROOT = process.cwd();
 const BASELINE_PATH = path.resolve(
@@ -243,13 +248,15 @@ function fetchCodeQLAlerts(ghBin, repo) {
       page_alerts = JSON.parse(stdout);
     } catch (parseErr) {
       // A malformed (but HTTP-200) API response is a MEASUREMENT failure, not a
-      // regression. A blocking gate must never red on it — return the same
-      // {error,message} shape the caller already maps to a graceful SKIP (exit 0).
+      // regression. Return a measurement error: legacy collection skips it,
+      // while --strict-measurement rejects unavailable evidence with exit2.
       return { error: "parse-error", message: String(parseErr.message ?? parseErr) };
     }
 
-    // A API retorna null quando não há mais páginas (ou array vazio)
-    if (!Array.isArray(page_alerts) || page_alerts.length === 0) break;
+    if (!Array.isArray(page_alerts)) {
+      return { error: "invalid-response", message: "Expected an alert array" };
+    }
+    if (page_alerts.length === 0) break;
 
     allAlerts.push(...page_alerts);
 
@@ -302,10 +309,10 @@ export function applyRatchet(alertCount) {
   if (baselineValue === null) {
     if (!QUIET) {
       process.stderr.write(
-        "[codeql-ratchet] baseline ausente (metrics.codeqlAlerts) — modo coletor, sem ratchet.\n"
+        `[codeql-ratchet] baseline ausente (metrics.codeqlAlerts) — ${STRICT_MEASUREMENT ? "medição obrigatória indisponível" : "modo coletor, sem ratchet"}.\n`
       );
     }
-    process.exitCode = 0;
+    process.exitCode = STRICT_MEASUREMENT ? 2 : 0;
     return;
   }
 
@@ -353,7 +360,7 @@ function main() {
           "[codeql-ratchet] ADVISORY — este gate sai 0 (ratchet entra no CI da Fase 7 INT).\n"
       );
     }
-    process.exitCode = 0;
+    process.exitCode = STRICT_MEASUREMENT ? 2 : 0;
     return;
   }
 
@@ -367,7 +374,7 @@ function main() {
           "[codeql-ratchet] Execute dentro de um repositório GitHub com `gh` autenticado.\n"
       );
     }
-    process.exitCode = 0;
+    process.exitCode = STRICT_MEASUREMENT ? 2 : 0;
     return;
   }
 
@@ -387,7 +394,7 @@ function main() {
         `[codeql-ratchet] SKIP — erro ao consultar API GitHub: ${message.slice(0, 200)}\n`
       );
     }
-    process.exitCode = 0;
+    process.exitCode = STRICT_MEASUREMENT ? 2 : 0;
     return;
   }
 
@@ -427,4 +434,10 @@ function main() {
   applyRatchet(alertCount);
 }
 
-if (import.meta.url === pathToFileURL(process.argv[1] || "").href) main();
+if (import.meta.url === pathToFileURL(process.argv[1] || "").href) {
+  if (process.argv.includes("--candidate")) {
+    process.exitCode = await runCodeqlAdmission();
+  } else {
+    main();
+  }
+}

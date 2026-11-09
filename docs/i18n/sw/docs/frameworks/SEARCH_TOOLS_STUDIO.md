@@ -54,7 +54,7 @@ Kichupo kipya cha kutoa maudhui kutoka kwa URL kupitia `POST /v1/web/fetch` (ili
 - Ingizo: URL + kigeuzi cha ukurasa mzima + kiteuzi cha umbizo (markdown / maandishi / HTML).
 - Wasilisha → chota → onyesha `ScrapeResult.tsx`.
 - `ScrapeResult` huonyesha onyesho la awali la markdown + kigeuzi cha maudhui ghafi.
-- Kikomo: ikiwa mwili wa jibu ni zaidi ya **256 KB**, UI huonyesha `(imekatwa, angalia maudhui ghafi)` na kufungua maudhui ghafi katika modal ya Monaco (D21).
+- Kikomo: ikiwa mwili wa jibu ni zaidi ya **256 KB**, UI huonyesha `View full raw content` na kufungua maudhui ghafi katika modal (D21).
 - Paneli ya metadata: mtoa huduma (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), muda wa kusubiri, gharama, ukubwa wa jibu, idadi ya viungo.
 - Hutumia hook ya `useScrapeFetch.ts`.
 

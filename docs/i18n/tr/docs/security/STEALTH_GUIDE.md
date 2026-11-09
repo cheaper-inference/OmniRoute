@@ -248,7 +248,7 @@ Tüm MITM uç noktaları yönetim kimlik doğrulaması (`requireCliToolsAuth`) g
 
 ---
 
-## Kullanıcı Aracısı — env değişkenlerini Geçersiz Kılır (`.env.example` bölüm 12)
+## User-Agent Geçersiz Kılmaları — ortam değişkenleri (`.env.example` bölüm 12)
 
 | Değişken            | Varsayılan                                    |
 | ------------------- | --------------------------------------------- |
@@ -259,7 +259,7 @@ Tüm MITM uç noktaları yönetim kimlik doğrulaması (`requireCliToolsAuth`) g
 | `QODER_USER_AGENT`  | `Qoder-Cli`                                   |
 | `CURSOR_USER_AGENT` | `Cursor/3.4`                                  |
 
-Dinamik arama aracılığıyla `open-sse/executors/base.ts::buildHeaders()` tarafından tüketilir.** Sağlayıcılar yeni CLI sürümlerini yayınladığında bunları artırın** — eski UA dizeleri, eski istemciler olarak reddedilmeye başlar.
+Dinamik arama yoluyla `open-sse/executors/base.ts::buildHeaders()` tarafından kullanılır. **Sağlayıcılar yeni CLI sürümleri yayımladığında bunların sürümlerini yükseltin** — güncelliğini yitirmiş UA dizeleri, eski istemciler oldukları gerekçesiyle reddedilmeye başlar.
 
 ## CLI Uyumluluk Modu Anahtarları (`.env.example` bölüm 13)
 

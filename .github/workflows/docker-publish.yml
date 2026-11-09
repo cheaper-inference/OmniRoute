@@ -82,7 +82,7 @@ jobs:
       GHCR_IMAGE_NAME: ghcr.io/cheaper-inference/omniroute
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
           # Control scripts come from this workflow ref, not an older release tag.
@@ -91,6 +91,18 @@ jobs:
           # 2.6 GB history is not needed. A full clone took 30+ min on a Blacksmith runner
           # (outside GitHub's network) on 2026-11-03.
           fetch-depth: 1
+
+      # Budget tooling belongs to this workflow revision, not the requested release tag.
+      # Older tags can predate the helper; keep their source checkout unchanged.
+      - name: Checkout Docker budget tooling
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+          ref: ${{ github.workflow_sha }}
+          path: .docker-budget-tooling
+          fetch-depth: 1
+          sparse-checkout: scripts/ci/blacksmith-budget.mjs
+          sparse-checkout-cone-mode: false
 
       # Blacksmith keeps running and invoices past its free 3,000 minutes, and a publish costs
       # ~90 of them, so the month's usage is summed here and the build falls back to the hosted
@@ -103,13 +115,43 @@ jobs:
           REPO: ${{ github.repository }}
           GH_TOKEN: ${{ github.token }}
           SELF_RUN_ID: ${{ github.run_id }}
-        run: node scripts/ci/blacksmith-budget.mjs
+          EXPECTED_WORKFLOW_SHA: ${{ github.workflow_sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ ! "$EXPECTED_WORKFLOW_SHA" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "::error::Invalid Docker budget tooling revision"
+            exit 1
+          fi
+          TOOLING_ROOT=$(cd .docker-budget-tooling && pwd -P)
+          ACTUAL_TOOLING_ROOT=$(git -C .docker-budget-tooling rev-parse --show-toplevel)
+          if [ "$ACTUAL_TOOLING_ROOT" != "$TOOLING_ROOT" ]; then
+            echo "::error::Docker budget tooling checkout is missing"
+            exit 1
+          fi
+          ACTUAL_WORKFLOW_SHA=$(git -C .docker-budget-tooling rev-parse --verify HEAD)
+          if [ "$ACTUAL_WORKFLOW_SHA" != "$EXPECTED_WORKFLOW_SHA" ]; then
+            echo "::error::Docker budget tooling revision mismatch"
+            exit 1
+          fi
+          if [ ! -f .docker-budget-tooling/scripts/ci/blacksmith-budget.mjs ] ||
+            [ -L .docker-budget-tooling/scripts/ci/blacksmith-budget.mjs ]; then
+            echo "::error::Docker budget tooling must be a regular file"
+            exit 1
+          fi
+          EXPECTED_HELPER_BLOB=$(git -C .docker-budget-tooling rev-parse --verify "$EXPECTED_WORKFLOW_SHA:scripts/ci/blacksmith-budget.mjs")
+          ACTUAL_HELPER_BLOB=$(git -C .docker-budget-tooling hash-object --no-filters scripts/ci/blacksmith-budget.mjs)
+          if [ "$ACTUAL_HELPER_BLOB" != "$EXPECTED_HELPER_BLOB" ]; then
+            echo "::error::Docker budget tooling content mismatch"
+            exit 1
+          fi
+          node .docker-budget-tooling/scripts/ci/blacksmith-budget.mjs
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
+        uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4
 
       - name: Login to GitHub Container Registry
-        uses: docker/login-action@v4.7.0
+        uses: docker/login-action@81c6f93d4bc991e510b342a00b419b3bb4efc5c6 # v4.7.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -218,7 +260,7 @@ jobs:
     permissions:
       contents: read
     steps:
-      - name: Check an online runner carries the omni-build label
+      - name: Check an online runner carries both build labels
         env:
           # Listing self-hosted runners needs the repository "Administration: read"
           # permission, which GITHUB_TOKEN can never be granted through `permissions:`.
@@ -230,13 +272,13 @@ jobs:
         run: |
           set -euo pipefail
           if ! ONLINE=$(gh api "repos/${GITHUB_REPOSITORY}/actions/runners" \
-            --paginate --jq '[.runners[] | select(.status == "online") | select(any(.labels[]; .name == "omni-build"))] | length'); then
+            --paginate --jq '[.runners[] | select(.status == "online") | select(any(.labels[]; .name == "omni-build")) | select(any(.labels[]; .name == "omni-build-60gb"))] | length'); then
             echo "::warning::Could not list self-hosted runners (token lacks Administration read — set the RUNNER_STATUS_TOKEN secret). Skipping the omni-build availability check."
             exit 0
           fi
-          echo "online omni-build runners: ${ONLINE}"
+          echo "online omni-build + omni-build-60gb runners: ${ONLINE}"
           if [ "${ONLINE}" -eq 0 ]; then
-            echo "::error::No ONLINE runner carries the omni-build label. The amd64 build would queue forever (silent publish stall, #14560)."
+            echo "::error::No ONLINE runner carries both omni-build and omni-build-60gb labels. The amd64 build would queue forever (silent publish stall, #14560)."
             echo "Check the self-hosted runner pool, or set DOCKER_AMD64_RUNNER=hosted (or blacksmith) to build amd64 off the .113 slot."
             exit 1
           fi
@@ -268,7 +310,7 @@ jobs:
     #   unset      → unchanged: omni-build when the .113 opt-in is on, hosted otherwise
     # The Dockerfile build is sized for 16 GB (OMNIROUTE_BUILD_WORKERS, #7518).
     # `blacksmith` routes through prepare's budget output; at the monthly cap it lands on hosted.
-    runs-on: ${{ matrix.arch == 'amd64' && (needs.prepare.outputs.blacksmith == 'true' && 'blacksmith-4vcpu-ubuntu-2404' || vars.DOCKER_AMD64_RUNNER != 'hosted' && vars.DOCKER_AMD64_RUNNER != 'blacksmith' && vars.USE_VPS_RUNNER == 'true' && vars.USE_VPS_BUILD_RUNNER == 'true' && fromJSON('["self-hosted","omni-build"]') || 'ubuntu-24.04') || 'ubuntu-24.04-arm' }}
+    runs-on: ${{ matrix.arch == 'amd64' && (needs.prepare.outputs.blacksmith == 'true' && 'blacksmith-4vcpu-ubuntu-2404' || vars.DOCKER_AMD64_RUNNER != 'hosted' && vars.DOCKER_AMD64_RUNNER != 'blacksmith' && vars.USE_VPS_RUNNER == 'true' && vars.USE_VPS_BUILD_RUNNER == 'true' && fromJSON('["self-hosted","omni-build","omni-build-60gb"]') || 'ubuntu-24.04') || 'ubuntu-24.04-arm' }}
     # Share the 1-slot omni-build ceiling (#12048) with ci.yml `Build` /
     # npm-publish. Same group as main's Build so a :next publish waits beside
     # the artefact instead of sitting next to it. arm64 is hosted — its own
@@ -299,7 +341,7 @@ jobs:
       GHCR_IMAGE_NAME: ghcr.io/cheaper-inference/omniroute
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
           ref: ${{ github.event_name == 'workflow_dispatch' && format('refs/tags/v{0}', inputs.version) || '' }}
@@ -310,16 +352,16 @@ jobs:
         run: docker info
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
+        uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4
 
       - name: Login to Docker Hub
-        uses: docker/login-action@v4.7.0
+        uses: docker/login-action@81c6f93d4bc991e510b342a00b419b3bb4efc5c6 # v4.7.0
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Login to GitHub Container Registry
-        uses: docker/login-action@v4.7.0
+        uses: docker/login-action@81c6f93d4bc991e510b342a00b419b3bb4efc5c6 # v4.7.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -332,7 +374,7 @@ jobs:
       # (tests/unit/docker-publish-build-heap-14325.test.ts).
       - name: Build and push platform image by digest
         id: build
-        uses: docker/build-push-action@v7
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7
         with:
           context: .
           target: runner-base
@@ -352,7 +394,7 @@ jobs:
 
       - name: Build and push WEB platform image by digest
         id: build-web
-        uses: docker/build-push-action@v7
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7
         with:
           context: .
           target: runner-web
@@ -406,7 +448,7 @@ jobs:
           touch "/tmp/digests/web/${DIGEST_WEB#sha256:}"
 
       - name: Upload base digests
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: digests-base-${{ matrix.arch }}
           path: /tmp/digests/base/*
@@ -414,7 +456,7 @@ jobs:
           retention-days: 1
 
       - name: Upload web digests
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: digests-web-${{ matrix.arch }}
           path: /tmp/digests/web/*
@@ -549,7 +591,7 @@ jobs:
       PROMOTE_LATEST: ${{ needs.prepare.outputs.promote_latest }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
           # Manifest validation must use the current workflow's helper on backfills.
@@ -557,30 +599,30 @@ jobs:
           fetch-depth: 1
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
+        uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4
 
       - name: Login to Docker Hub
-        uses: docker/login-action@v4.7.0
+        uses: docker/login-action@81c6f93d4bc991e510b342a00b419b3bb4efc5c6 # v4.7.0
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Login to GitHub Container Registry
-        uses: docker/login-action@v4.7.0
+        uses: docker/login-action@81c6f93d4bc991e510b342a00b419b3bb4efc5c6 # v4.7.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Download base digests
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
         with:
           pattern: digests-base-*
           path: /tmp/digests/base
           merge-multiple: true
 
       - name: Download web digests
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
         with:
           pattern: digests-web-*
           path: /tmp/digests/web
@@ -736,7 +778,7 @@ jobs:
           container="omniroute-smoke-${VERSION//[^a-zA-Z0-9_.-]/-}"
           trap 'docker rm -f "$container" >/dev/null 2>&1 || true' EXIT
           docker run --detach --name "$container" "${IMAGE_NAME}:${VERSION}"
-          for attempt in $(seq 1 30); do
+          for _attempt in $(seq 1 30); do
             status="$(docker inspect --format '{{.State.Health.Status}}' "$container")"
             if [ "$status" = "healthy" ]; then
               exit 0
@@ -824,7 +866,7 @@ jobs:
       - name: Generate CycloneDX SBOM (image, advisory)
         if: needs.prepare.outputs.version != 'main'
         continue-on-error: true
-        uses: anchore/sbom-action@v0
+        uses: anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610 # v0
         with:
           image: ${{ env.GHCR_IMAGE_NAME }}:${{ env.VERSION }}
           format: cyclonedx-json
@@ -880,7 +922,7 @@ jobs:
       - name: Upload Trivy SARIF to Security tab
         if: needs.prepare.outputs.version != 'main'
         continue-on-error: true
-        uses: github/codeql-action/upload-sarif@v4.39.1
+        uses: github/codeql-action/upload-sarif@9b3254085494b55a0f7c4c2b3d2d52cc712ce370 # v4.39.1
         with:
           sarif_file: trivy-results.sarif
           category: trivy-image
@@ -889,7 +931,7 @@ jobs:
         # Only refresh README/description when we actually promote :latest
         # (avoids overwriting from main, next, or back-fill builds).
         if: needs.prepare.outputs.promote_latest == 'true'
-        uses: peter-evans/dockerhub-description@v5
+        uses: peter-evans/dockerhub-description@1b9a80c056b620d92cedb9d9b5a223409c68ddfa # v5
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
@@ -907,6 +949,7 @@ jobs:
     if: >-
       (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') &&
       vars.USE_VPS_RUNNER == 'true' && vars.USE_VPS_BUILD_RUNNER == 'true' &&
+      vars.DOCKER_AMD64_RUNNER != 'blacksmith' && vars.DOCKER_AMD64_RUNNER != 'hosted' &&
       (github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute')
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -926,18 +969,18 @@ jobs:
           set -euo pipefail
           TITLE="Docker publish runner offline: no online omni-build runner"
           if ! ONLINE=$(GH_TOKEN="$RUNNERS_TOKEN" gh api "repos/${GITHUB_REPOSITORY}/actions/runners" \
-            --paginate --jq '[.runners[] | select(.status == "online") | select(any(.labels[]; .name == "omni-build"))] | length'); then
+            --paginate --jq '[.runners[] | select(.status == "online") | select(any(.labels[]; .name == "omni-build")) | select(any(.labels[]; .name == "omni-build-60gb"))] | length'); then
             echo "::warning::Could not list self-hosted runners (token lacks Administration read — set the RUNNER_STATUS_TOKEN secret). Alert skipped."
             exit 0
           fi
-          echo "online omni-build runners: ${ONLINE}"
+          echo "online omni-build + omni-build-60gb runners: ${ONLINE}"
 
           EXISTING=$(gh issue list --repo "$GITHUB_REPOSITORY" --state open \
             --search "in:title ${TITLE}" --json number --jq '.[0].number' 2>/dev/null || echo "")
 
           if [ "${ONLINE}" -eq 0 ]; then
             {
-              echo "No **online** runner carries the \`omni-build\` label (\`GET /repos/{owner}/{repo}/actions/runners\`)."
+              echo "No **online** runner carries both \`omni-build\` and \`omni-build-60gb\` labels (\`GET /repos/{owner}/{repo}/actions/runners\`)."
               echo ""
               echo "While this persists, every Docker publish with \`USE_VPS_RUNNER=true\` queues the amd64 build forever - the silent stall from #14560 (the runner-preflight job turns it into a red run at publish time; this issue is the standing signal between publishes)."
               echo ""
@@ -954,7 +997,7 @@ jobs:
             fi
           elif [ -n "$EXISTING" ]; then
             gh issue close "$EXISTING" --repo "$GITHUB_REPOSITORY" --reason completed \
-              --comment "OK: ${ONLINE} online \`omni-build\` runner(s) - pool recovered. Auto-closed."
+              --comment "OK: ${ONLINE} online \`omni-build\` + \`omni-build-60gb\` runner(s) - pool recovered. Auto-closed."
             echo "Closed issue #$EXISTING"
           else
             echo "Pool healthy (${ONLINE} online), nothing to do"

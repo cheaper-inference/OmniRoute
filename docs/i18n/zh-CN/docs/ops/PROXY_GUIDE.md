@@ -12,18 +12,18 @@ OmniRoute 包含一个功能完备的代理管理系统，可让您通过 HTTP�
 
 ## 目录
 
-- [为什么使用代理？](#为什么使用代理)
-- [架构概览](#架构概览)
-- [四级代理系统](#四级代理系统)
-- [代理注册表（CRUD）](#代理注册表crud)
-- [1proxy 免费代理市场](#1proxy-免费代理市场)
-- [代理轮换](#代理轮换)
-- [反检测与隐匿](#反检测与隐匿)
-- [上游代理模式](#上游代理模式)
-- [控制面板 UI](#控制面板-ui)
-- [API 参考](#api-参考)
-- [环境变量](#环境变量)
-- [故障排除](#故障排除)
+- [为什么使用代理？](#why-use-proxies)
+- [架构概述](#architecture-overview)
+- [四级代理系统](#4-level-proxy-system)
+- [代理注册处 (CRUD)](#proxy-registry-crud)
+- [1proxy 免费市场](#1proxy-free-proxy-marketplace)
+- [代理轮换](#proxy-rotation)
+- [反探测与隐身](#anti-detection--stealth)
+- [上游代理模式](#upstream-proxy-modes)
+- [仪表板UI](#dashboard-ui)
+- [API参考](#api-reference)
+- [环境变量](#environment-variables)
+- [故障排除](#troubleshooting)
 
 ---
 
@@ -79,6 +79,18 @@ unsupported_country_region_territory
 | **1proxy 数据库** | `src/lib/db/oneproxy.ts`                     | 免费代理市场的持久化存储                      |
 
 ---
+
+## 新帐户的默认代理状态
+
+在**设置→代理→全局配置**， 使用**默认为新连接启用代理**选择新添加的提供者帐户的初始代理状态。
+
+新设置控制新添加的提供者帐户的初始代理状态。它不会更改现有帐户或替换全局代理交换机。它的初始值保留了之前的行为。将其关闭一次以创建默认情况下禁用代理的未来帐户。
+
+该首选项通过现有设置API存储为`defaultNewConnectionProxyEnabled` 。从未保存时默认为`true` 。保存`false`对后续新账户生效，无需重启。 `POST /api/providers`接受可选的严格布尔值`proxyEnabled`；显式`true`或`false`优先于创建默认值。省略重复帐户或OAuth重新连接会保留该帐户的存储状态。之后仍可以启用或禁用个人帐户。
+
+选择性提供者传输使用新帐户的目标安装默认设置，并在替换现有帐户时保留目标策略。代理切换不是便携式传输字段。完整备份恢复和历史JSON/SQL迁移保留其现有的恢复语义，包括保存的帐户值和旧模式默认值；完整设置恢复也可以恢复此首选项。
+
+此首选项不会分配代理或确定代理是否健康或正在使用。实际路由仍然取决于全局代理交换机和适用的代理配置。没有持久帐户的综合提供者、帐户创建前的OAuth流量、 environment/system代理和外部后端网络均超出其范围。
 
 ## 四级代理系统
 
@@ -378,17 +390,17 @@ OmniRoute 不只是通过代理路由流量，还会让流量看起来合法：
 
 使用 `wreq-js` 生成类似浏览器的 TLS 指纹，从而绕过会标记非浏览器 TLS 握手的机器人检测系统。
 
-### CLI 指纹匹配
+### CLI指纹比对
 
-**CLI 指纹开关**（`设置 → 安全`）会重新排列 HTTP 标头和 JSON 正文字段，以精确匹配原生 CLI 二进制文件（Claude Code、Codex 等）的特征。此功能在代理之上运行：
+这**CLI指纹开关**(`Settings → Security`) 重新排序HTTP标头和JSON主体字段，以匹配本机CLI二进制文件的确切签名（Claude Code、 Codex等）。这有效**在上面**代理：
 
 ```
-您的 IP（被阻止）→ 代理 IP（美国）→ 提供者 API
-                   + TLS 伪装
-                   + CLI 指纹
+Your IP (blocked) → Proxy IP (US) → Provider API
+                    + TLS spoof
+                    + CLI fingerprint
 ```
 
-您可以同时获得 **IP 隐藏**和**请求真实性**。
+你两者都得到**IP掩蔽**和**要求真实性**同时地。
 
 ### 代理 IP 保留
 

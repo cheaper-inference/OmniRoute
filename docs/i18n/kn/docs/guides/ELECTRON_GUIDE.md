@@ -4,27 +4,28 @@
 
 ---
 
-> **ಸತ್ಯದ ಮೂಲ:** `electron/` ಕಾರ್ಯಸ್ಥಳ** ಕೊನೆಯದಾಗಿ ನವೀಕರಿಸಲಾಗಿದೆ:** 2026-06-28 — v3.8.40
+> **ಸತ್ಯದ ಮೂಲ:** `electron/` ಕಾರ್ಯಸ್ಥಳ
+> **ಕೊನೆಯದಾಗಿ ನವೀಕರಿಸಿದ್ದು:** 2026-06-28 — v3.8.40
 
-OmniRoute ಕ್ರಾಸ್-ಪ್ಲಾಟ್ಫಾರ್ಮ್ ಡೆಸ್ಕ್ಟಾಪ್ ಅಪ್ಲಿಕೇಶನ್ (Windows / macOS / Linux) ಅನ್ನು ನಿರ್ಮಿಸಲಾಗಿದೆ**Electron 41** +** ಎಲೆಕ್ಟ್ರಾನ್-ಬಿಲ್ಡರ್ 26.10** . ಡೆಸ್ಕ್ಟಾಪ್ ಅಪ್ಲಿಕೇಶನ್ Next.js ಸ್ಟ್ಯಾಂಡ್ಲೋನ್ ಸರ್ವರ್ ಅನ್ನು ಮಗುವಿನ ಪ್ರಕ್ರಿಯೆಯಾಗಿ ಹುಟ್ಟುಹಾಕುತ್ತದೆ, ಅದರ ಮೇಲೆ `BrowserWindow` ಅನ್ನು ತೋರಿಸುತ್ತದೆ ಮತ್ತು ಸಿಸ್ಟಮ್ ಟ್ರೇ, ಸ್ವಯಂ-ಅಪ್ಡೇಟರ್, IPC ಸೇತುವೆ ಮತ್ತು ಶೂನ್ಯ ಕಾನ್ಫಿಗರ್ ರಹಸ್ಯ ಬೂಟ್ಸ್ಟ್ರ್ಯಾಪ್ ಅನ್ನು ಸೇರಿಸುತ್ತದೆ.
+OmniRoute, **Electron 41** + **electron-builder 26.10** ಆಧಾರಿತ ಕ್ರಾಸ್-ಪ್ಲಾಟ್ಫಾರ್ಮ್ ಡೆಸ್ಕ್ಟಾಪ್ ಆ್ಯಪ್ ಅನ್ನು (Windows / macOS / Linux) ಒದಗಿಸುತ್ತದೆ. ಡೆಸ್ಕ್ಟಾಪ್ ಆ್ಯಪ್ Next.js ಸ್ವತಂತ್ರ ಸರ್ವರ್ ಅನ್ನು ಚೈಲ್ಡ್ ಪ್ರೊಸೆಸ್ ಆಗಿ ಪ್ರಾರಂಭಿಸಿ, ಅದರತ್ತ `BrowserWindow` ಅನ್ನು ನಿರ್ದೇಶಿಸುತ್ತದೆ ಮತ್ತು ಸಿಸ್ಟಮ್ ಟ್ರೇ, ಸ್ವಯಂ-ಅಪ್ಡೇಟರ್, IPC ಬ್ರಿಡ್ಜ್ ಹಾಗೂ ಕಾನ್ಫಿಗರೇಶನ್ ಅಗತ್ಯವಿಲ್ಲದ ರಹಸ್ಯ ಬೂಟ್ಸ್ಟ್ರ್ಯಾಪ್ ಅನ್ನು ಸೇರಿಸುತ್ತದೆ.
 
-## ವಾಸ್ತುಶಿಲ್ಪ
+## ಆರ್ಕಿಟೆಕ್ಚರ್
 
 ```
 ┌──────────────────────────────────────────────┐
-│ Electron main process (electron/main.js)     │
-│ ├─ Single-instance lock                       │
-│ ├─ Child process: Next.js standalone server  │
-│ │   (spawned with Electron's Node runtime)   │
+│ Electron ಮುಖ್ಯ ಪ್ರೊಸೆಸ್ (electron/main.js)    │
+│ ├─ ಏಕ-ಇನ್ಸ್ಟೆನ್ಸ್ ಲಾಕ್                       │
+│ ├─ ಚೈಲ್ಡ್ ಪ್ರೊಸೆಸ್: Next.js ಸ್ವತಂತ್ರ ಸರ್ವರ್    │
+│ │   (Electron ನ Node ರನ್ಟೈಮ್ನೊಂದಿಗೆ ಆರಂಭಿತ) │
 │ ├─ BrowserWindow → http://localhost:PORT     │
-│ ├─ System tray + context menu                │
-│ ├─ Auto-update via electron-updater          │
-│ ├─ Content Security Policy (session headers) │
-│ └─ Secret bootstrap (JWT / API_KEY_SECRET)   │
+│ ├─ ಸಿಸ್ಟಮ್ ಟ್ರೇ + ಸಂದರ್ಭ ಮೆನು                 │
+│ ├─ electron-updater ಮೂಲಕ ಸ್ವಯಂ-ಅಪ್ಡೇಟ್       │
+│ ├─ ವಿಷಯ ಭದ್ರತಾ ನೀತಿ (ಸೆಷನ್ ಹೆಡರ್ಗಳು)        │
+│ └─ ರಹಸ್ಯ ಬೂಟ್ಸ್ಟ್ರ್ಯಾಪ್ (JWT / API_KEY_SECRET) │
 └──────────────────────────────────────────────┘
-            ↕ IPC bridge (electron/preload.js)
+            ↕ IPC ಬ್ರಿಡ್ಜ್ (electron/preload.js)
 ┌──────────────────────────────────────────────┐
-│ Renderer (Next.js dashboard)                  │
+│ ರೆಂಡರರ್ (Next.js ಡ್ಯಾಶ್ಬೋರ್ಡ್)               │
 │   window.electronAPI.* (contextIsolation)     │
 └──────────────────────────────────────────────┘
 ```
@@ -33,70 +34,72 @@ OmniRoute ಕ್ರಾಸ್-ಪ್ಲಾಟ್ಫಾರ್ಮ್ ಡೆಸ್�
 
 `electron/package.json` ನಿಂದ ದೃಢೀಕರಿಸಲಾಗಿದೆ:
 
-| ಪ್ಯಾಕೇಜ್           | ಆವೃತ್ತಿ                                                           |
-| ------------------ | ----------------------------------------------------------------- |
-| `electron`         | `^43.4.1`                                                         |
-| `electron-builder` | `^26.15.3`                                                        |
-| `electron-updater` | `^6.8.9`                                                          |
-| `better-sqlite3`   | ರೂಟ್ `^13.0.2` (ನೋಡ್-API ಪ್ರಿಬಿಲ್ಡ್ಸ್ — ಇಲ್ಲ Electron ಮರುನಿರ್ಮಾಣ) |
-| ಅಪ್ಲಿಕೇಶನ್ ಆವೃತ್ತಿ | `3.8.0`                                                           |
-| ಅಪ್ಲಿಕೇಶನ್ ಐಡಿ     | `online.omniroute.desktop`                                        |
-| ಉತ್ಪನ್ನದ ಹೆಸರು     | `OmniRoute`                                                       |
+| ಪ್ಯಾಕೇಜ್           | ಆವೃತ್ತಿ                                                              |
+| ------------------ | -------------------------------------------------------------------- |
+| `electron`         | `^43.4.1`                                                            |
+| `electron-builder` | `^26.15.3`                                                           |
+| `electron-updater` | `^6.8.9`                                                             |
+| `better-sqlite3`   | ರೂಟ್ `^13.0.2` (Node-API ಪೂರ್ವನಿರ್ಮಿತಗಳು — Electron ಮರುನಿರ್ಮಾಣವಿಲ್ಲ) |
+| ಆ್ಯಪ್ ಆವೃತ್ತಿ      | `3.8.0`                                                              |
+| ಆ್ಯಪ್ ಐಡಿ          | `online.omniroute.desktop`                                           |
+| ಉತ್ಪನ್ನದ ಹೆಸರು     | `OmniRoute`                                                          |
 
-## ಸ್ಕ್ರಿಪ್ಟ್ಗಳು (ಮೂಲ `package.json`)
+## ಸ್ಕ್ರಿಪ್ಟ್ಗಳು (ರೂಟ್ `package.json`)
 
-| ಸ್ಕ್ರಿಪ್ಟ್                        | ಉದ್ದೇಶ                                                                                         |
-| --------------------------------- | ---------------------------------------------------------------------------------------------- |
-| `npm run electron:dev`            | `npm run dev` + ಪ್ರಾರಂಭಿಸುತ್ತದೆ `localhost:20128` + ಗಾಗಿ ಕಾಯುತ್ತದೆ Electron ಪ್ರಾರಂಭಿಸುತ್ತದೆ    |
-| `npm run electron:build`          | Next.js ನಿರ್ಮಿಸುತ್ತದೆ ನಂತರ ಪ್ರಸ್ತುತ OS ಗಾಗಿ `electron-builder` ರನ್ ಮಾಡುತ್ತದೆ                   |
-| `npm run electron:build:win`      | Windows NSIS ಸ್ಥಾಪಕ + ಪೋರ್ಟಬಲ್ (x64) ಅನ್ನು ನಿರ್ಮಿಸುತ್ತದೆ                                       |
-| `npm run electron:build:mac`      | macOS DMG (Intel + Apple Silicon) ನಿರ್ಮಿಸುತ್ತದೆ                                                |
-| `npm run electron:build:linux`    | Linux AppImage + DEB (x64 + arm64) ಅನ್ನು ನಿರ್ಮಿಸುತ್ತದೆ                                         |
-| `npm run electron:smoke:packaged` | HTTP 200 ಗಾಗಿ ಪ್ಯಾಕೇಜ್ಡ್ ಬೈನರಿ ಮತ್ತು ಪ್ರೋಬ್ಸ್ `/login` ಪ್ರಾರಂಭಿಸುತ್ತದೆ, ನಂತರ ಸ್ಥಗಿತಗೊಳ್ಳುತ್ತದೆ |
+| ಸ್ಕ್ರಿಪ್ಟ್                        | ಉದ್ದೇಶ                                                                                                  |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| `npm run electron:dev`            | `npm run dev` ಅನ್ನು ಪ್ರಾರಂಭಿಸುತ್ತದೆ + `localhost:20128` ಗಾಗಿ ಕಾಯುತ್ತದೆ + Electron ಅನ್ನು ಪ್ರಾರಂಭಿಸುತ್ತದೆ |
+| `npm run electron:build`          | Next.js ಅನ್ನು ನಿರ್ಮಿಸಿ, ನಂತರ ಪ್ರಸ್ತುತ OS ಗಾಗಿ `electron-builder` ಅನ್ನು ಚಲಾಯಿಸುತ್ತದೆ                     |
+| `npm run electron:build:win`      | Windows NSIS ಇನ್ಸ್ಟಾಲರ್ + ಪೋರ್ಟಬಲ್ ಆವೃತ್ತಿಯನ್ನು (x64) ನಿರ್ಮಿಸುತ್ತದೆ                                     |
+| `npm run electron:build:mac`      | macOS DMG ಅನ್ನು (Intel + Apple Silicon) ನಿರ್ಮಿಸುತ್ತದೆ                                                   |
+| `npm run electron:build:linux`    | Linux AppImage + DEB ಅನ್ನು (x64 + arm64) ನಿರ್ಮಿಸುತ್ತದೆ                                                  |
+| `npm run electron:smoke:packaged` | ಪ್ಯಾಕೇಜ್ ಮಾಡಲಾದ ಬೈನರಿಯನ್ನು ಪ್ರಾರಂಭಿಸಿ, HTTP 200 ಗಾಗಿ `/login` ಅನ್ನು ಪರಿಶೀಲಿಸಿ, ನಂತರ ಸ್ಥಗಿತಗೊಳಿಸುತ್ತದೆ   |
 
-`electron/` ಕಾರ್ಯಕ್ಷೇತ್ರವು ಸಹ ಬಹಿರಂಗಪಡಿಸುತ್ತದೆ:
+`electron/` ಕಾರ್ಯಸ್ಥಳವು ಇವುಗಳನ್ನೂ ಒದಗಿಸುತ್ತದೆ:
 
-- `npm run prepare:bundle` — `scripts/build/prepare-electron-standalone.mjs` ನಡೆಸುತ್ತದೆ
-- `npm run build:mac-x64` / `build:mac-arm64` — ಸಿಂಗಲ್-ಆರ್ಚ್ macOS ಬಿಲ್ಡ್ಗಳು
-- `npm run pack` — ಡೈರೆಕ್ಟರಿ-ಸ್ಥಳೀಯ ಪರೀಕ್ಷೆಗಾಗಿ ಮಾತ್ರ ನಿರ್ಮಿಸಲು (ಅನುಸ್ಥಾಪಕವಿಲ್ಲ)
+- `npm run prepare:bundle` — `scripts/build/prepare-electron-standalone.mjs` ಅನ್ನು ಚಲಾಯಿಸುತ್ತದೆ
+- `npm run build:mac-x64` / `build:mac-arm64` — ಏಕ-ಆರ್ಕಿಟೆಕ್ಚರ್ macOS ನಿರ್ಮಾಣಗಳು
+- `npm run pack` — ಸ್ಥಳೀಯ ಪರೀಕ್ಷೆಗಾಗಿ ಡೈರೆಕ್ಟರಿ-ಮಾತ್ರ ನಿರ್ಮಾಣ (ಇನ್ಸ್ಟಾಲರ್ ಇಲ್ಲ)
 
-## ಐಚ್ಛಿಕ ರನ್ಟೈಮ್ ಪ್ಯಾಕ್ಗಳು
+## ಐಚ್ಛಿಕ runtime ಪ್ಯಾಕ್‌ಗಳು
 
-ಡೆಸ್ಕ್ಟಾಪ್ ಬಿಲ್ಡ್ಗಳು ಐಚ್ಛಿಕ ರನ್ಟೈಮ್ ಆರ್ಕೈವ್ಗಳನ್ನು ತಮ್ಮ ಇನ್ಸ್ಟಾಲರ್ಗಳ ಜೊತೆಗೆ ಪ್ರಕಟಿಸಬಹುದು. ಸ್ಥಾಪಿಸಲಾದ ಸರ್ವರ್ ಪೇಲೋಡ್ `optional-packs.index.json` ಹೊಂದಿರುತ್ತದೆ ( Windows ಮತ್ತು Linux ನಲ್ಲಿ `resources/app` ಅಡಿಯಲ್ಲಿ). `browser-runtime` ಪ್ರವೇಶಕ್ಕಾಗಿ, `packs[].tarball` ಓದಿ ಮತ್ತು ಡೌನ್ಲೋಡ್ ಮಾಡಿ** ಅದೇ ಬಿಡುಗಡೆಯಿಂದ ನಿಖರವಾದ ಫೈಲ್ ಹೆಸರು** . ಆರ್ಕೈವ್ ಹೆಸರುಗಳು SHA-256 ಡೈಜೆಸ್ಟ್ ಅನ್ನು ಒಳಗೊಂಡಿವೆ; ವಿಭಿನ್ನ ನಿರ್ಮಾಣಗಳಿಗೆ ವಿಭಿನ್ನ ಆರ್ಕೈವ್ಗಳು ಬೇಕಾಗಬಹುದು. ಡೌನ್ಲೋಡ್ ಮಾಡಿದ ಫೈಲ್ ಹೆಸರನ್ನು ಬದಲಾಗದೆ ಇರಿಸಿ.
+Desktop build ಗಳು ತಮ್ಮ installer ಗಳ ಜೊತೆಗೆ ಐಚ್ಛಿಕ runtime archive ಗಳನ್ನೂ ಪ್ರಕಟಿಸಬಹುದು. ಸ್ಥಾಪಿಸಿದ server payload ನಲ್ಲಿ `optional-packs.index.json` ಇರುತ್ತದೆ (Windows ಮತ್ತು Linux ನಲ್ಲಿ `resources/app` ಅಡಿಯಲ್ಲಿ). `browser-runtime` entry ಗಾಗಿ `packs[].tarball` ಓದಿ, **ಅದೇ ಬಿಡುಗಡೆಗೆ ಸೇರಿದ ನಿಖರವಾಗಿ ಅದೇ ಫೈಲ್ ಹೆಸರನ್ನು ಡೌನ್‌ಲೋಡ್ ಮಾಡಿ**. Archive ಹೆಸರುಗಳಲ್ಲಿ SHA-256 digest ಇರುತ್ತದೆ; ವಿಭಿನ್ನ build ಗಳಿಗೆ ವಿಭಿನ್ನ archive ಗಳು ಬೇಕಾಗಬಹುದು. ಡೌನ್‌ಲೋಡ್ ಮಾಡಿದ ಫೈಲ್ ಹೆಸರನ್ನು ಬದಲಿಸಬೇಡಿ.
 
-ಸ್ಥಾಪಿಸಲಾದ ಅಪ್ಲಿಕೇಶನ್ನ ಸೂಚ್ಯಂಕ ಮತ್ತು ಆಯ್ಕೆಮಾಡಿದ ಆರ್ಕೈವ್ ಅನ್ನು ಒಂದು ಡೈರೆಕ್ಟರಿಯಲ್ಲಿ ನಕಲಿಸಿ, ನಂತರ ಅದೇ ಬಿಡುಗಡೆಯಿಂದ CLI ಅನ್ನು ಬಳಸಿ:
+ಸ್ಥಾಪಿಸಿದ app ನ index ಮತ್ತು ಆಯ್ದ archive ಅನ್ನು ಒಂದೇ directory ಗೆ ನಕಲಿಸಿ, ನಂತರ ಅದೇ ಬಿಡುಗಡೆಯ CLI ಬಳಸಿ:
 
 ```bash
 omniroute packs list --source /path/to/packs
 omniroute packs install browser-runtime --source /path/to/packs
 ```
 
-`packs list` ಅನುಸ್ಥಾಪನೆ ಮತ್ತು ಪರಿಶೀಲನೆ ಸ್ಥಿತಿಯನ್ನು ಪ್ರದರ್ಶಿಸುತ್ತದೆ, ಆರ್ಕೈವ್ ಫೈಲ್ ಹೆಸರಲ್ಲ. ಬಂಡಲ್ ಮಾಡಿದ ಸೂಚ್ಯಂಕವು ಆರ್ಕೈವ್ ಅನ್ನು ಆಯ್ಕೆ ಮಾಡುತ್ತದೆ. ಅನುಸ್ಥಾಪನೆಯು ಹೊರತೆಗೆಯುವ ಮೊದಲು ಅದರ ಆರ್ಕೈವ್ ಚೆಕ್ಸಮ್ ಅನ್ನು ಪರಿಶೀಲಿಸುತ್ತದೆ ಮತ್ತು ಸ್ಥಾಪಿಸಲಾದ ಪ್ಯಾಕ್ ಅನ್ನು ಬದಲಿಸುವ ಮೊದಲು ಅದರ ಪ್ಯಾಕೇಜ್ ಚೆಕ್ಸಮ್ಗಳನ್ನು ಪರಿಶೀಲಿಸುತ್ತದೆ. ಇದು ಸ್ಥಳೀಯ ಫೈಲ್ಗಳನ್ನು ಓದುತ್ತದೆ; ಇದು ಕಾಣೆಯಾದ ಆರ್ಕೈವ್ಗಳನ್ನು ಡೌನ್ಲೋಡ್ ಮಾಡುವುದಿಲ್ಲ. ಅನುಸ್ಥಾಪನೆಯ ನಂತರ ಅಪ್ಲಿಕೇಶನ್ ಅನ್ನು ಮರುಪ್ರಾರಂಭಿಸಿ. ಬಿಡುಗಡೆಯು ಯಾವುದೇ ಹೊಂದಾಣಿಕೆಯ ಸ್ವತ್ತನ್ನು ಹೊಂದಿಲ್ಲದಿದ್ದರೆ, ಆ ಬಿಡುಗಡೆಯ ಸ್ವತ್ತುಗಳ ಮೂಲಕ ಐಚ್ಛಿಕ ಪ್ಯಾಕ್ ಲಭ್ಯವಿರುವುದಿಲ್ಲ.
+`packs list` ಸ್ಥಾಪನೆ ಮತ್ತು ಪರಿಶೀಲನೆಯ ಸ್ಥಿತಿಯನ್ನು ತೋರಿಸುತ್ತದೆ, archive ಹೆಸರನ್ನಲ್ಲ. ಜೊತೆಯಲ್ಲಿರುವ index archive ಅನ್ನು ಆಯ್ಕೆಮಾಡುತ್ತದೆ. ಸ್ಥಾಪನೆ archive ತೆರೆಯುವ ಮೊದಲು ಅದರ checksum ಅನ್ನು ಮತ್ತು ಸ್ಥಾಪಿತ pack ಅನ್ನು ಬದಲಿಸುವ ಮೊದಲು ಅದರ package checksum ಗಳನ್ನು ಪರಿಶೀಲಿಸುತ್ತದೆ. ಇದು ಸ್ಥಳೀಯ ಫೈಲ್‌ಗಳನ್ನು ಓದುತ್ತದೆ; ಕಾಣೆಯಾದ archive ಗಳನ್ನು ಡೌನ್‌ಲೋಡ್ ಮಾಡುವುದಿಲ್ಲ. ಸ್ಥಾಪನೆಯ ನಂತರ application ಅನ್ನು ಮರುಪ್ರಾರಂಭಿಸಿ. ಬಿಡುಗಡೆಯಲ್ಲಿ ಹೊಂದುವ asset ಇಲ್ಲದಿದ್ದರೆ, ಆ ಬಿಡುಗಡೆಯ asset ಗಳ ಮೂಲಕ ಐಚ್ಛಿಕ pack ಲಭ್ಯವಿರುವುದಿಲ್ಲ.
 
-## ಡೈರೆಕ್ಟರಿ ಲೇಔಟ್
+## ಡೈರೆಕ್ಟರಿ ವಿನ್ಯಾಸ
 
 ```
 electron/
-├── package.json              # Electron deps + electron-builder config
-├── main.js                   # Main process (24 KB — see annotations below)
-├── preload.js                # contextBridge IPC bridge
-├── types.d.ts                # AppInfo / ServerStatus / ElectronAPI types
-├── README.md                 # In-workspace notes
+├── package.json              # Electron ಅವಲಂಬನೆಗಳು + electron-builder ಸಂರಚನೆ
+├── main.js                   # ಮುಖ್ಯ ಪ್ರಕ್ರಿಯೆ (24 KB — ಕೆಳಗಿನ ಟಿಪ್ಪಣಿಗಳನ್ನು ನೋಡಿ)
+├── preload.js                # contextBridge IPC ಸೇತುವೆ
+├── types.d.ts                # AppInfo / ServerStatus / ElectronAPI ಪ್ರಕಾರಗಳು
+├── README.md                 # ವರ್ಕ್ಸ್ಪೇಸ್ನೊಳಗಿನ ಟಿಪ್ಪಣಿಗಳು
 ├── assets/                   # icon.png, icon.ico, icon.icns, tray-icon.png
-└── dist-electron/            # electron-builder output (gitignored)
+└── dist-electron/            # electron-builder ಔಟ್ಪುಟ್ (gitignored)
 
 scripts/
 ├── build/
-│   └── prepare-electron-standalone.mjs   # Stages .next/electron-standalone bundle
+│   └── prepare-electron-standalone.mjs   # .next/electron-standalone ಬಂಡಲ್ ಅನ್ನು ಸಿದ್ಧಪಡಿಸುತ್ತದೆ
 └── dev/
-    └── smoke-electron-packaged.mjs       # Post-build smoke test
+    └── smoke-electron-packaged.mjs       # ಬಿಲ್ಡ್ ನಂತರದ ಸ್ಮೋಕ್ ಪರೀಕ್ಷೆ
 ```
 
-`main.js` ಮತ್ತು `preload.js` ಎರಡೂ ಇವೆ**CommonJS `.js` ಫೈಲ್ಗಳು** , TypeScript ಅಲ್ಲ. ರೆಂಡರರ್-ಸೈಡ್ ಟೈಪಿಂಗ್ಗಳು `electron/types.d.ts` ನಲ್ಲಿ ವಾಸಿಸುತ್ತವೆ.
+`main.js` ಮತ್ತು `preload.js` ಎರಡೂ TypeScript ಅಲ್ಲ, **CommonJS `.js` ಫೈಲ್ಗಳು**.
+ರೆಂಡರರ್-ಭಾಗದ ಟೈಪಿಂಗ್ಗಳು `electron/types.d.ts` ನಲ್ಲಿ ಇವೆ.
 
 ## IPC ಸೇತುವೆ (`preload.js`)
 
-ಪ್ರಿಲೋಡ್ `contextIsolation: true` ಮತ್ತು `nodeIntegration: false` ಜೊತೆಗೆ `contextBridge` ಬಳಸಿಕೊಂಡು `window.electronAPI` ನಲ್ಲಿ ಶ್ವೇತಪಟ್ಟಿ ಮಾಡಲಾದ API ಬಹಿರಂಗಪಡಿಸುತ್ತದೆ.
+ಪ್ರೀಲೋಡ್, `contextIsolation: true` ಮತ್ತು `nodeIntegration: false` ಜೊತೆಗೆ `contextBridge`
+ಬಳಸಿ `window.electronAPI` ನಲ್ಲಿ ಅನುಮತಿಸಲಾದ API ಅನ್ನು ಬಹಿರಂಗಪಡಿಸುತ್ತದೆ.
 
 ```javascript
 const VALID_CHANNELS = {
@@ -115,113 +118,129 @@ const VALID_CHANNELS = {
 };
 ```
 
-ಬಹಿರಂಗ ವಿಧಾನಗಳು:
+ಬಹಿರಂಗಪಡಿಸಲಾದ ವಿಧಾನಗಳು:
 
-| ರೆಂಡರರ್ ಕರೆ                                                       | ಟೈಪ್ ಮಾಡಿ                      |
-| ----------------------------------------------------------------- | ------------------------------ |
-| `getAppInfo()` → `{ name, version, platform, isDev, port }`       | ಆವಾಹನೆ ಮಾಡು                    |
-| `openExternal(url)`                                               | ಆವಾಹನೆ ಮಾಡು                    |
-| `getDataDir()`                                                    | ಆವಾಹನೆ ಮಾಡು                    |
-| `restartServer()`                                                 | ಆವಾಹನೆ ಮಾಡು                    |
-| `getAppVersion()`                                                 | ಆವಾಹನೆ ಮಾಡು                    |
-| `checkForUpdates()` / `downloadUpdate()` / `installUpdate()`      | ಆವಾಹನೆ ಮಾಡು                    |
-| `minimizeWindow()` / `maximizeWindow()` / `closeWindow()`         | ಕಳುಹಿಸು                        |
-| `onServerStatus(cb)` / `onPortChanged(cb)` / `onUpdateStatus(cb)` | ಸ್ವೀಕರಿಸಿ (ರಿಟರ್ನ್ಸ್ ವಿಲೇವಾರಿ) |
+| ರೆಂಡರರ್ ಕರೆ                                                       | ಪ್ರಕಾರ                                         |
+| ----------------------------------------------------------------- | ---------------------------------------------- |
+| `getAppInfo()` → `{ name, version, platform, isDev, port }`       | invoke                                         |
+| `openExternal(url)`                                               | invoke                                         |
+| `getDataDir()`                                                    | invoke                                         |
+| `restartServer()`                                                 | invoke                                         |
+| `getAppVersion()`                                                 | invoke                                         |
+| `checkForUpdates()` / `downloadUpdate()` / `installUpdate()`      | invoke                                         |
+| `minimizeWindow()` / `maximizeWindow()` / `closeWindow()`         | send                                           |
+| `onServerStatus(cb)` / `onPortChanged(cb)` / `onUpdateStatus(cb)` | receive (ವಿಲೇವಾರಿ ಕಾರ್ಯವನ್ನು ಹಿಂದಿರುಗಿಸುತ್ತದೆ) |
 
-ಸ್ವೀಕರಿಸುವ ಸಹಾಯಕರು ಹಿಂತಿರುಗುತ್ತಾರೆ a** ವಿಲೇವಾರಿ ಕಾರ್ಯ** `removeAllListeners` — ಅನ್ನು ಅವಲಂಬಿಸುವುದಕ್ಕಿಂತ ಹೆಚ್ಚಾಗಿ ಇದು React ಘಟಕಗಳನ್ನು ಮರುಮೌಂಟ್ ಮಾಡಿದಾಗ ಕೇಳುಗನ ಸಂಗ್ರಹವನ್ನು ತಡೆಯುತ್ತದೆ.
+ರಿಸೀವ್ ಸಹಾಯಕಗಳು `removeAllListeners` ಮೇಲೆ ಅವಲಂಬಿಸುವ ಬದಲು **ವಿಲೇವಾರಿ ಕಾರ್ಯವನ್ನು**
+ಹಿಂದಿರುಗಿಸುತ್ತವೆ — React ಕಾಂಪೊನೆಂಟ್ಗಳು ಮರು-ಮೌಂಟ್ ಆದಾಗ ಲಿಸನರ್ಗಳು ಸಂಗ್ರಹವಾಗುವುದನ್ನು
+ಇದು ತಡೆಯುತ್ತದೆ.
 
 ## ಸರ್ವರ್ ಜೀವನಚಕ್ರ
 
-ಸಿಸ್ಟಂ ನೋಡ್ನೊಂದಿಗೆ ಸ್ಥಳೀಯ-ಮಾಡ್ಯೂಲ್ ABI ಹೊಂದಾಣಿಕೆಯಾಗುವುದನ್ನು ತಪ್ಪಿಸಲು`main.js` ನೇರವಾಗಿ Electron ನೋಡ್ ರನ್ಟೈಮ್ನೊಂದಿಗೆ Next.js ಸ್ಟ್ಯಾಂಡ್ಲೋನ್ ಬಂಡಲ್ ಅನ್ನು ಹುಟ್ಟುಹಾಕುತ್ತದೆ:
+ಸಿಸ್ಟಮ್ Node ಜೊತೆಗೆ ಸ್ಥಳೀಯ ಮಾಡ್ಯೂಲ್ ABI ಅಸಂಗತತೆಯನ್ನು ತಪ್ಪಿಸಲು, `main.js` Next.js
+ಸ್ಟ್ಯಾಂಡ್ಅಲೋನ್ ಬಂಡಲ್ ಅನ್ನು Electron Node ರನ್ಟೈಮ್ನೊಂದಿಗೆ ನೇರವಾಗಿ ಪ್ರಾರಂಭಿಸುತ್ತದೆ:
 
 ```js
 spawn(process.execPath, [serverScript], {
   cwd: NEXT_SERVER_PATH,
-  env: { ...serverEnv, PORT, NODE_ENV: "production", ELECTRON_RUN_AS_NODE: "1", NODE_PATH },
+  env: {
+    ...serverEnv,
+    PORT,
+    NODE_ENV: "production",
+    ELECTRON_RUN_AS_NODE: "1",
+    NODE_PATH,
+  },
   stdio: "pipe",
 });
 ```
 
 ಮುಖ್ಯಾಂಶಗಳು:
 
-- `waitForServer()` ವಿಂಡೋವನ್ನು ತೋರಿಸುವ ಮೊದಲು 30 ಸೆಕೆಂಡುಗಳವರೆಗೆ URL ಅನ್ನು ಪೋಲ್ ಮಾಡುತ್ತದೆ (ಕೋಲ್ಡ್ ಸ್ಟಾರ್ಟ್ನಲ್ಲಿ ಯಾವುದೇ ಖಾಲಿ ಪರದೆಯಿಲ್ಲ).
-- `stdio: "pipe"` stdout/stderr ಸೆರೆಹಿಡಿಯುತ್ತದೆ; ಸಿದ್ಧ ನುಡಿಗಟ್ಟುಗಳು (`Ready` / `listening`) IPC ಮೇಲೆ `server-status: running` ಹೊರಸೂಸುತ್ತವೆ.
-- `before-quit` ಆಕರ್ಷಕವಾದ SIGTERM (WAL ಚೆಕ್ಪಾಯಿಂಟ್) ಗಾಗಿ 5 ಸೆಕೆಂಡುಗಳವರೆಗೆ ಕಾಯುತ್ತದೆ ನಂತರ SIGKILL ಕಳುಹಿಸುತ್ತದೆ.
-- ಟ್ರೇನಲ್ಲಿರುವ ಪೋರ್ಟ್ ಸ್ವಿಚರ್ (`20128`, `3000`, `8080`) ಸರ್ವರ್ ಅನ್ನು ನಿಲ್ಲಿಸುತ್ತದೆ ಮತ್ತು ಮರುಪ್ರಾರಂಭಿಸುತ್ತದೆ, ನಂತರ BrowserWindow ಅನ್ನು ಮರುಲೋಡ್ ಮಾಡುತ್ತದೆ.
+- ವಿಂಡೋವನ್ನು ತೋರಿಸುವ ಮೊದಲು `waitForServer()` URL ಅನ್ನು 30 s ವರೆಗೆ ಪೋಲ್ ಮಾಡುತ್ತದೆ (ಕೋಲ್ಡ್ ಸ್ಟಾರ್ಟ್ನಲ್ಲಿ ಖಾಲಿ ಪರದೆ ಇರುವುದಿಲ್ಲ).
+- `stdio: "pipe"` stdout/stderr ಅನ್ನು ಸೆರೆಹಿಡಿಯುತ್ತದೆ; ಸಿದ್ಧತೆಯ ಪದಗುಚ್ಛಗಳು (`Ready` / `listening`) IPC ಮೂಲಕ `server-status: running` ಅನ್ನು ಹೊರಸೂಸುತ್ತವೆ.
+- `before-quit`, ಸುಗಮ SIGTERM (WAL ಚೆಕ್ಪಾಯಿಂಟ್) ಗಾಗಿ 5 s ವರೆಗೆ ಕಾಯುತ್ತದೆ ಮತ್ತು ನಂತರ SIGKILL ಕಳುಹಿಸುತ್ತದೆ.
+- ಟ್ರೇಯಲ್ಲಿನ ಪೋರ್ಟ್ ಸ್ವಿಚರ್ (`20128`, `3000`, `8080`) ಸರ್ವರ್ ಅನ್ನು ನಿಲ್ಲಿಸಿ ಮರುಪ್ರಾರಂಭಿಸುತ್ತದೆ, ನಂತರ BrowserWindow ಅನ್ನು ಮರುಲೋಡ್ ಮಾಡುತ್ತದೆ.
 
-## ಶೂನ್ಯ ಸಂರಚನೆಯ ರಹಸ್ಯ ಬೂಟ್ಸ್ಟ್ರ್ಯಾಪ್
+## ಶೂನ್ಯ-ಕಾನ್ಫಿಗ್ ರಹಸ್ಯ ಬೂಟ್ಸ್ಟ್ರ್ಯಾಪ್
 
-ಮೊದಲ ಉಡಾವಣೆಯಲ್ಲಿ, ಮುಖ್ಯ ಪ್ರಕ್ರಿಯೆಯು ಸ್ವಯಂ-ಉತ್ಪಾದಿಸುತ್ತದೆ ಮತ್ತು ಕಾಣೆಯಾದ ರಹಸ್ಯಗಳನ್ನು ಮುಂದುವರಿಸುತ್ತದೆ:
+ಮೊದಲ ಬಾರಿಗೆ ಪ್ರಾರಂಭಿಸಿದಾಗ, ಮುಖ್ಯ ಪ್ರಕ್ರಿಯೆಯು ಕಾಣೆಯಾಗಿರುವ ರಹಸ್ಯಗಳನ್ನು ಸ್ವಯಂಚಾಲಿತವಾಗಿ ರಚಿಸಿ ಶಾಶ್ವತವಾಗಿ ಉಳಿಸುತ್ತದೆ:
 
-| ರಹಸ್ಯ                    | ಮೂಲ                                                                                                               |
-| ------------------------ | ----------------------------------------------------------------------------------------------------------------- |
-| `JWT_SECRET`             | `crypto.randomBytes(64).toString("hex")`                                                                          |
-| `STORAGE_ENCRYPTION_KEY` | `crypto.randomBytes(32).toString("hex")` (ಎನ್ಕ್ರಿಪ್ಟ್ ಮಾಡಿದ ಕ್ರೆಡಿಟ್ಗಳು ಈಗಾಗಲೇ ಅಸ್ತಿತ್ವದಲ್ಲಿದ್ದರೆ ನಿರಾಕರಿಸುತ್ತದೆ) |
-| `API_KEY_SECRET`         | `crypto.randomBytes(32).toString("hex")`                                                                          |
+| ರಹಸ್ಯ                    | ಮೂಲ                                                                                                                    |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------------------- |
+| `JWT_SECRET`             | `crypto.randomBytes(64).toString("hex")`                                                                               |
+| `STORAGE_ENCRYPTION_KEY` | `crypto.randomBytes(32).toString("hex")` (ಎನ್ಕ್ರಿಪ್ಟ್ ಮಾಡಿದ ಕ್ರೆಡೆನ್ಶಿಯಲ್ಗಳು ಈಗಾಗಲೇ ಅಸ್ತಿತ್ವದಲ್ಲಿದ್ದರೆ ನಿರಾಕರಿಸುತ್ತದೆ) |
+| `API_KEY_SECRET`         | `crypto.randomBytes(32).toString("hex")`                                                                               |
 
-`<DATA_DIR>/server.env` ಗೆ ಹಠ ಹಿಡಿದಿದೆ. `DATA_DIR` ಪರಿಹರಿಸುತ್ತದೆ:
+`<DATA_DIR>/server.env` ಗೆ ಶಾಶ್ವತವಾಗಿ ಉಳಿಸಲಾಗುತ್ತದೆ. `DATA_DIR` ಅನ್ನು ಹೀಗೆ ಪರಿಹರಿಸಲಾಗುತ್ತದೆ:
 
 - Windows: `%APPDATA%\omniroute`
 - Linux: `$XDG_CONFIG_HOME/omniroute` ಅಥವಾ `~/.omniroute`
 - macOS: `~/.omniroute`
 
-## ಪರಿಸರ ಫೈಲ್ ಹುಡುಕಾಟ
+## ಎನ್ವಿರಾನ್ಮೆಂಟ್ ಫೈಲ್ ಹುಡುಕಾಟ
 
-ಸರ್ವರ್ ಅನ್ನು ಹುಟ್ಟುಹಾಕುವ ಮೊದಲು, ಮುಖ್ಯ ಪ್ರಕ್ರಿಯೆಯು ( `electron/main.js` ನಲ್ಲಿ`getPreferredEnvFilePath()` ) ಆಯ್ಕೆಮಾಡುತ್ತದೆ** ಒಂದು** `.env` ಫೈಲ್: ಅಸ್ತಿತ್ವದಲ್ಲಿರುವ ಇವುಗಳಲ್ಲಿ ಮೊದಲನೆಯದು.
+ಸರ್ವರ್ ಅನ್ನು ಪ್ರಾರಂಭಿಸುವ ಮೊದಲು, ಮುಖ್ಯ ಪ್ರಕ್ರಿಯೆಯು (`electron/main.js` ನಲ್ಲಿನ
+`getPreferredEnvFilePath()`) **ಒಂದು** `.env` ಫೈಲ್ ಅನ್ನು ಆಯ್ಕೆಮಾಡುತ್ತದೆ: ಕೆಳಗಿನವುಗಳಲ್ಲಿ ಅಸ್ತಿತ್ವದಲ್ಲಿರುವ ಮೊದಲನೆಯದು.
 
-1. `$DATA_DIR/.env`, ಪರಿಸರದಲ್ಲಿ `DATA_DIR` ಅನ್ನು ಹೊಂದಿಸಿದಾಗ ಅಪ್ಲಿಕೇಶನ್ ಅನ್ನು ಪ್ರಾರಂಭಿಸಲಾಯಿತು.
-2. `<resolved DATA_DIR>/.env`, ಮೇಲಿನ ಅದೇ ಡೀಫಾಲ್ಟ್ಗಳನ್ನು ಬಳಸಿ: Windows ನಲ್ಲಿ `%APPDATA%\omniroute\.env`, `$XDG_CONFIG_HOME/omniroute/.env` ಅಥವಾ `~/.omniroute/.env` ನಲ್ಲಿ Linux ಮತ್ತು macOS.
-3. ಪ್ರಕ್ರಿಯೆ ಕೆಲಸ ಡೈರೆಕ್ಟರಿಯಲ್ಲಿ`.env`.
+1. ಆ್ಯಪ್ ಅನ್ನು ಪ್ರಾರಂಭಿಸಿದ ಎನ್ವಿರಾನ್ಮೆಂಟ್ನಲ್ಲಿ `DATA_DIR` ಹೊಂದಿಸಿದ್ದಾಗ, `$DATA_DIR/.env`.
+2. ಮೇಲಿನಂತೆಯೇ ಅದೇ ಡೀಫಾಲ್ಟ್ಗಳನ್ನು ಬಳಸಿಕೊಂಡು `<resolved DATA_DIR>/.env`: Windows ನಲ್ಲಿ
+   `%APPDATA%\omniroute\.env`, Linux ಮತ್ತು macOS ನಲ್ಲಿ `$XDG_CONFIG_HOME/omniroute/.env` ಅಥವಾ `~/.omniroute/.env`.
+3. ಪ್ರಕ್ರಿಯೆಯ ಕಾರ್ಯನಿರ್ವಹಣಾ ಡೈರೆಕ್ಟರಿಯಲ್ಲಿರುವ `.env`.
 
-ಮುಖ್ಯ ಪ್ರಕ್ರಿಯೆಯು ಆ ಫೈಲ್ ಅನ್ನು ಮಾತ್ರ ಓದುತ್ತದೆ; ನಂತರದ ಅಭ್ಯರ್ಥಿಗಳನ್ನು ವಿಲೀನಗೊಳಿಸಲಾಗಿಲ್ಲ. ನಂತರ ಸರ್ವರ್ ಪರಿಸರವನ್ನು ಈ ಪ್ರಾಶಸ್ತ್ಯದೊಂದಿಗೆ ನಿರ್ಮಿಸಲಾಗಿದೆ (ಅಧಿಕ ಮೊದಲು):
+ಮುಖ್ಯ ಪ್ರಕ್ರಿಯೆಯು ಆ ಫೈಲ್ ಅನ್ನು ಮಾತ್ರ ಓದುತ್ತದೆ; ನಂತರದ ಆಯ್ಕೆಗಳನ್ನು ವಿಲೀನಗೊಳಿಸಲಾಗುವುದಿಲ್ಲ. ನಂತರ ಸರ್ವರ್
+ಎನ್ವಿರಾನ್ಮೆಂಟ್ ಅನ್ನು ಈ ಆದ್ಯತೆಯೊಂದಿಗೆ ನಿರ್ಮಿಸಲಾಗುತ್ತದೆ (ಅತ್ಯುನ್ನತವಾದದ್ದು ಮೊದಲು):
 
-1. Electron ಪ್ರಕ್ರಿಯೆಯ ಪರಿಸರ (ಯಾವುದೇ ಅಪ್ಲಿಕೇಶನ್ ಅನ್ನು ಪ್ರಾರಂಭಿಸಿದ ವೇರಿಯೇಬಲ್ಗಳು ಆನುವಂಶಿಕವಾಗಿ ಪಡೆದಿವೆ).
+1. Electron ಪ್ರಕ್ರಿಯೆಯ ಎನ್ವಿರಾನ್ಮೆಂಟ್ (ಆ್ಯಪ್ ಅನ್ನು ಪ್ರಾರಂಭಿಸಿದ ಮೂಲದಿಂದ ಅನುವಂಶಿಕವಾಗಿ ಪಡೆದ ವೇರಿಯೇಬಲ್ಗಳು).
 2. ಆಯ್ಕೆಮಾಡಿದ `.env` ಫೈಲ್.
 3. `<DATA_DIR>/server.env` (ಮೇಲಿನ ಬೂಟ್ಸ್ಟ್ರ್ಯಾಪ್ ರಹಸ್ಯಗಳು).
 
-ಅಪ್ಲಿಕೇಶನ್ ಪ್ರಾರಂಭವಾದಾಗ ಪ್ರಕ್ರಿಯೆಯ ಪರಿಸರವನ್ನು ಸೆರೆಹಿಡಿಯಲಾಗುತ್ತದೆ, ಆದ್ದರಿಂದ ಅಪ್ಲಿಕೇಶನ್ ಚಾಲನೆಯಲ್ಲಿರುವಾಗ ಸಿಸ್ಟಮ್ ಅಥವಾ ಬಳಕೆದಾರ ಪರಿಸರದ ವೇರಿಯೇಬಲ್ ಅನ್ನು ಹೊಂದಿಸಲಾಗಿದೆ (ವಿಂಡೋ ಮುಚ್ಚಿದ ನಂತರ ಅದು ಟ್ರೇನಲ್ಲಿ ಕುಳಿತುಕೊಳ್ಳುವುದು ಸೇರಿದಂತೆ) ಅಪ್ಲಿಕೇಶನ್ ಸಂಪೂರ್ಣವಾಗಿ ತ್ಯಜಿಸುವವರೆಗೆ ಮತ್ತು ಮರುಪ್ರಾರಂಭಿಸುವವರೆಗೆ ಸರ್ವರ್ ಅನ್ನು ತಲುಪುವುದಿಲ್ಲ. `CONTEXT_LENGTH_<PROVIDER>` ನಂತಹ ರನ್ಟೈಮ್ ನಾಬ್ಗಳಿಗಾಗಿ ( [ಪರಿಸರದ ಅಸ್ಥಿರಗಳನ್ನು ನೋಡಿ: ಪ್ರತಿ-ಒದಗಿಸುವವರ ಸಂದರ್ಭದ ಉದ್ದ](../reference/ENVIRONMENT.md#per-provider-context-length-context_length_provider) ), `.env` ಫೈಲ್ಗೆ ಆದ್ಯತೆ ನೀಡಿ, ನಂತರ ಸಂಪೂರ್ಣವಾಗಿ ತ್ಯಜಿಸಿ (ಟ್ರೇ,** ತ್ಯಜಿಸು** ) ಮತ್ತು ಮರುಪ್ರಾರಂಭಿಸಿ.
+ಆ್ಯಪ್ ಪ್ರಾರಂಭವಾದಾಗ ಪ್ರಕ್ರಿಯೆಯ ಎನ್ವಿರಾನ್ಮೆಂಟ್ ಅನ್ನು ಸೆರೆಹಿಡಿಯಲಾಗುತ್ತದೆ, ಆದ್ದರಿಂದ ಆ್ಯಪ್ ಚಾಲನೆಯಲ್ಲಿರುವಾಗ ಹೊಂದಿಸಲಾದ ಸಿಸ್ಟಮ್ ಅಥವಾ ಬಳಕೆದಾರ ಎನ್ವಿರಾನ್ಮೆಂಟ್
+ವೇರಿಯೇಬಲ್ (ವಿಂಡೋ ಮುಚ್ಚಿದ ನಂತರ ಆ್ಯಪ್ ಟ್ರೇಯಲ್ಲಿರುವಾಗ ಹೊಂದಿಸಿದವುಗಳೂ ಸೇರಿದಂತೆ) ಆ್ಯಪ್ ಅನ್ನು ಸಂಪೂರ್ಣವಾಗಿ ನಿರ್ಗಮಿಸಿ ಮರುಪ್ರಾರಂಭಿಸುವವರೆಗೆ ಸರ್ವರ್ ಅನ್ನು ತಲುಪುವುದಿಲ್ಲ. `CONTEXT_LENGTH_<PROVIDER>` ನಂತಹ ರನ್ಟೈಮ್ ಆಯ್ಕೆಗಳಿಗಾಗಿ (ನೋಡಿ
+[ಎನ್ವಿರಾನ್ಮೆಂಟ್ ವೇರಿಯೇಬಲ್ಗಳು: ಪ್ರತಿ-ಪ್ರೊವೈಡರ್ ಕಾಂಟೆಕ್ಸ್ಟ್ ಉದ್ದ](../reference/ENVIRONMENT.md#per-provider-context-length-context_length_provider)),
+`.env` ಫೈಲ್ಗೆ ಆದ್ಯತೆ ನೀಡಿ, ನಂತರ ಸಂಪೂರ್ಣವಾಗಿ ನಿರ್ಗಮಿಸಿ (ಟ್ರೇ, **ನಿರ್ಗಮಿಸಿ**) ಮತ್ತು ಮರುಪ್ರಾರಂಭಿಸಿ.
 
-## ಕಿಟಕಿ ಮತ್ತು ತಟ್ಟೆ
+## ವಿಂಡೋ ಮತ್ತು ಟ್ರೇ
 
-- `BrowserWindow`: 1400 × 900 (ನಿಮಿಷ 1024 × 700), `backgroundColor: "#0a0a0a"`.
-- macOS: `titleBarStyle: "hiddenInset"`, `{ x: 16, y: 16 }` ನಲ್ಲಿ ಟ್ರಾಫಿಕ್-ಲೈಟ್.
+- `BrowserWindow`: 1400×900 (ಕನಿಷ್ಠ 1024×700), `backgroundColor: "#0a0a0a"`.
+- macOS: `titleBarStyle: "hiddenInset"`, ಟ್ರಾಫಿಕ್-ಲೈಟ್ `{ x: 16, y: 16 }` ನಲ್ಲಿ.
 - Windows/Linux: ಸ್ಥಳೀಯ ಶೀರ್ಷಿಕೆ ಪಟ್ಟಿ.
-- ಮುಚ್ಚು ಬಟನ್ ಟ್ರೇಗೆ ಕಡಿಮೆ ಮಾಡುತ್ತದೆ; ಟ್ರೇ ಮೆನು ಹೊಂದಿದೆ** OmniRoute ತೆರೆಯಿರಿ** ,** ಡ್ಯಾಶ್ಬೋರ್ಡ್ ತೆರೆಯಿರಿ** (ಬಾಹ್ಯ ಬ್ರೌಸರ್),** ಸರ್ವರ್ ಪೋರ್ಟ್** ಉಪಮೆನು,** ನವೀಕರಣಗಳಿಗಾಗಿ ಪರಿಶೀಲಿಸಿ** ,** ತ್ಯಜಿಸು** .
+- ಮುಚ್ಚುವ ಬಟನ್ ಟ್ರೇಗೆ ಮಿನಿಮೈಸ್ ಮಾಡುತ್ತದೆ; ಟ್ರೇ ಮೆನು **OmniRoute ತೆರೆಯಿರಿ**, **ಡ್ಯಾಶ್ಬೋರ್ಡ್ ತೆರೆಯಿರಿ** (ಬಾಹ್ಯ ಬ್ರೌಸರ್), **ಸರ್ವರ್ ಪೋರ್ಟ್** ಉಪಮೆನು, **ಅಪ್ಡೇಟ್ಗಳಿಗಾಗಿ ಪರಿಶೀಲಿಸಿ**, **ನಿರ್ಗಮಿಸಿ** ಆಯ್ಕೆಗಳನ್ನು ಹೊಂದಿದೆ.
 
 ## ವಿಷಯ ಭದ್ರತಾ ನೀತಿ
 
-`session.defaultSession.webRequest.onHeadersReceived` ಮೂಲಕ ಹೊಂದಿಸಿ. ಗಮನಾರ್ಹ ನಿರ್ದೇಶನಗಳು:
+`session.defaultSession.webRequest.onHeadersReceived` ಮೂಲಕ ಹೊಂದಿಸಲಾಗಿದೆ. ಗಮನಾರ್ಹ ಡೈರೆಕ್ಟಿವ್ಗಳು:
 
 - `frame-ancestors 'none'`, `object-src 'none'`, `child-src 'none'`
 - `connect-src 'self' http://localhost:* http://127.0.0.1:* ws://localhost:* ws://127.0.0.1:* https://*.omniroute.online https://*.omniroute.dev`
-- ದೇವ್ ಮೋಡ್ `'unsafe-eval'` `script-src` ಗೆ ಮಾತ್ರ ಸೇರಿಸುತ್ತದೆ
+- ಡೆವ್ ಮೋಡ್ `script-src` ಗೆ ಮಾತ್ರ `'unsafe-eval'` ಅನ್ನು ಸೇರಿಸುತ್ತದೆ
 
-## ಸ್ವಯಂ-ನವೀಕರಣ
+## ಸ್ವಯಂ-ಅಪ್ಡೇಟ್
 
-GitHub ಪೂರೈಕೆದಾರರೊಂದಿಗೆ (`diegosouzapw/OmniRoute`) `electron-updater` ಬಳಸುತ್ತದೆ.
+GitHub ಪ್ರೊವೈಡರ್ನೊಂದಿಗೆ (`diegosouzapw/OmniRoute`) `electron-updater` ಅನ್ನು ಬಳಸುತ್ತದೆ.
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
-- ಈವೆಂಟ್ಗಳನ್ನು `update-status` IPC ಮೂಲಕ ರೆಂಡರರ್ಗೆ ಫಾರ್ವರ್ಡ್ ಮಾಡಲಾಗಿದೆ: `checking`, `available`, `not-available`, `downloading` ( `percent` ನೊಂದಿಗೆ), `downloaded`, `error`
-- `installUpdate()` ಸರ್ವರ್ ಅನ್ನು ಕೊಲ್ಲುತ್ತದೆ ನಂತರ `autoUpdater.quitAndInstall()` ಎಂದು ಕರೆಯುತ್ತದೆ
-- ದೇವ್ ಮೋಡ್ನಲ್ಲಿ ಸ್ಕಿಪ್ ಮಾಡಲಾಗಿದೆ (`!app.isPackaged`)
+- `update-status` IPC ಮೂಲಕ ರೆಂಡರರ್ಗೆ ಫಾರ್ವರ್ಡ್ ಮಾಡಲಾದ ಈವೆಂಟ್ಗಳು:
+  `checking`, `available`, `not-available`, `downloading` (`percent` ಜೊತೆಗೆ), `downloaded`, `error`
+- `installUpdate()` ಸರ್ವರ್ ಅನ್ನು ಸ್ಥಗಿತಗೊಳಿಸಿ ನಂತರ `autoUpdater.quitAndInstall()` ಅನ್ನು ಕರೆಮಾಡುತ್ತದೆ
+- ಡೆವ್ ಮೋಡ್ನಲ್ಲಿ (`!app.isPackaged`) ಬಿಟ್ಟುಬಿಡಲಾಗುತ್ತದೆ
 
-## ಪೈಪ್ಲೈನ್ ನಿರ್ಮಿಸಿ
+## ಬಿಲ್ಡ್ ಪೈಪ್ಲೈನ್
 
-1. `.next/standalone` ನಲ್ಲಿ`npm run build` → Next.js ಸ್ವತಂತ್ರವಾಗಿದೆ.
-2. `prepare-electron-standalone.mjs` → ಮರು-ಹಂತಗಳನ್ನು `.next/electron-standalone` ಗೆ ಮತ್ತು `server.js` + `required-server-files.json` ಒಳಗೆ ಸಂಪೂರ್ಣ ಮಾರ್ಗಗಳನ್ನು ಪುನಃ ಬರೆಯುತ್ತದೆ ಆದ್ದರಿಂದ ಬಂಡಲ್ ಅನ್ನು ಸ್ಥಳಾಂತರಿಸಬಹುದಾಗಿದೆ.
-3. `electron-builder` ಪ್ಯಾಕೇಜುಗಳು `main.js`, `preload.js`, `node_modules`, ಮತ್ತು `extraResources: { ../.next/electron-standalone → app }`.
+1. `npm run build` → `.next/standalone` ನಲ್ಲಿ Next.js ಸ್ವತಂತ್ರ ಬಿಲ್ಡ್.
+2. `prepare-electron-standalone.mjs` → `.next/electron-standalone` ಗೆ ಮರು-ಹಂತಗೊಳಿಸುತ್ತದೆ ಮತ್ತು ಬಂಡಲ್ ಅನ್ನು ಸ್ಥಳಾಂತರಿಸಬಹುದಾಗಿಸಲು `server.js` + `required-server-files.json` ಒಳಗಿನ ನಿರಪೇಕ್ಷ ಪಥಗಳನ್ನು ಮರುಬರೆಯುತ್ತದೆ.
+3. `electron-builder`, `main.js`, `preload.js`, `node_modules`, ಮತ್ತು `extraResources: { ../.next/electron-standalone → app }` ಅನ್ನು ಪ್ಯಾಕೇಜ್ ಮಾಡುತ್ತದೆ.
 
-### ಗುರಿಗಳನ್ನು ನಿರ್ಮಿಸಿ
+### ಬಿಲ್ಡ್ ಗುರಿಗಳು
 
-| OS      | ಗುರಿಗಳು                                        |
-| ------- | ---------------------------------------------- |
-| Windows | NSIS ಅನುಸ್ಥಾಪಕ + ಪೋರ್ಟಬಲ್ (x64)                |
-| macOS   | DMG (Intel + arm64, ಡ್ರ್ಯಾಗ್-ಟು-ಅಪ್ಲಿಕೇಶನ್ಗಳು) |
-| Linux   | AppImage + DEB (x64 + arm64)                   |
+| OS      | ಗುರಿಗಳು                                             |
+| ------- | --------------------------------------------------- |
+| Windows | NSIS ಸ್ಥಾಪಕ + ಪೋರ್ಟಬಲ್ (x64)                        |
+| macOS   | DMG (Intel + arm64, Applications ಗೆ ಎಳೆದು ಬಿಡುವಿಕೆ) |
+| Linux   | AppImage + DEB (x64 + arm64)                        |
 
-NSIS ಸೆಟ್ಟಿಂಗ್ಗಳು: `oneClick: false`, ಬಳಕೆದಾರನು ಇನ್ಸ್ಟಾಲ್ ಡೈರೆಕ್ಟರಿಯನ್ನು ಆಯ್ಕೆ ಮಾಡಲು ಅನುಮತಿಸುತ್ತದೆ, ಡೆಸ್ಕ್ಟಾಪ್ ಮತ್ತು ಸ್ಟಾರ್ಟ್-ಮೆನು ಶಾರ್ಟ್ಕಟ್ಗಳನ್ನು ರಚಿಸುತ್ತದೆ.
+NSIS ಸೆಟ್ಟಿಂಗ್ಗಳು: `oneClick: false`, ಬಳಕೆದಾರರಿಗೆ ಸ್ಥಾಪನಾ ಡೈರೆಕ್ಟರಿಯನ್ನು ಆಯ್ಕೆ ಮಾಡಲು ಅವಕಾಶ ನೀಡುತ್ತದೆ ಮತ್ತು Desktop ಹಾಗೂ Start-Menu ಶಾರ್ಟ್ಕಟ್ಗಳನ್ನು ರಚಿಸುತ್ತದೆ.
 
-## ಸ್ಮೋಕ್ ಟೆಸ್ಟಿಂಗ್ ಪ್ಯಾಕೇಜ್ಡ್ ಬಿಲ್ಡ್
+## ಪ್ಯಾಕೇಜ್ ಮಾಡಿದ ಬಿಲ್ಡ್ನ ಸ್ಮೋಕ್ ಪರೀಕ್ಷೆ
 
 ```bash
 npm run electron:smoke:packaged
@@ -229,18 +248,18 @@ npm run electron:smoke:packaged
 
 `scripts/dev/smoke-electron-packaged.mjs`:
 
-- ಪ್ರಸ್ತುತ ಪ್ಲಾಟ್ಫಾರ್ಮ್ಗಾಗಿ `electron/dist-electron/` ನಲ್ಲಿ ಪ್ಯಾಕೇಜ್ ಮಾಡಲಾದ ಬೈನರಿಯನ್ನು ಸ್ವಯಂ-ಶೋಧಿಸುತ್ತದೆ.
-- ಪ್ರತ್ಯೇಕವಾದ `HOME`/`APPDATA`/`XDG_*` ಡೈರೆಕ್ಟರಿಗಳೊಂದಿಗೆ ಪ್ರಾರಂಭಿಸುತ್ತದೆ ಆದ್ದರಿಂದ ಅದು ಡೆವಲಪರ್ ಡೇಟಾವನ್ನು ಸ್ಪರ್ಶಿಸುವುದಿಲ್ಲ.
-- 45 ಸೆಕೆಂಡುಗಳ ಒಳಗೆ HTTP 200 ಕ್ಕೆ `http://127.0.0.1:20128/login` ಸಮೀಕ್ಷೆಗಳು.
-- ಮಾರಣಾಂತಿಕ ಮಾದರಿಗಳಿಗಾಗಿ stderr/stdout ಕೈಗಡಿಯಾರಗಳು (`Cannot find module`, `MODULE_NOT_FOUND`, `ERR_DLOPEN_FAILED`, `Failed to start server`, ಇತ್ಯಾದಿ).
-- ಸನ್ನದ್ಧತೆಯ ನಂತರ 2 ಸೆಕೆಂಡುಗಳ ಸ್ಥಿರ ರನ್ಟೈಮ್ ಕಾಯುತ್ತದೆ, ನಂತರ SIGTERM ನೀಡುತ್ತದೆ ಮತ್ತು ಪೋರ್ಟ್ ಮುಕ್ತವಾಗಲು ಕಾಯುತ್ತದೆ.
-- CI ನಲ್ಲಿ, ಸ್ವಯಂಚಾಲಿತವಾಗಿ `--no-sandbox --disable-gpu` (ಮತ್ತು Linux ನಲ್ಲಿ `--disable-dev-shm-usage` ) ಹಾದುಹೋಗುತ್ತದೆ.
+- ಪ್ರಸ್ತುತ ಪ್ಲಾಟ್ಫಾರ್ಮ್ಗಾಗಿ `electron/dist-electron/` ನಲ್ಲಿ ಪ್ಯಾಕೇಜ್ ಮಾಡಿದ ಬೈನರಿಯನ್ನು ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಪತ್ತೆಮಾಡುತ್ತದೆ.
+- ಡೆವಲಪರ್ ಡೇಟಾವನ್ನು ಮುಟ್ಟದಂತೆ ಪ್ರತ್ಯೇಕಿಸಿದ `HOME`/`APPDATA`/`XDG_*` ಡೈರೆಕ್ಟರಿಗಳೊಂದಿಗೆ ಪ್ರಾರಂಭಿಸುತ್ತದೆ.
+- 45 s ಒಳಗೆ HTTP 200 ಪ್ರತಿಕ್ರಿಯೆಗಾಗಿ `http://127.0.0.1:20128/login` ಅನ್ನು ಪದೇಪದೇ ಪರಿಶೀಲಿಸುತ್ತದೆ.
+- ಮಾರಕ ಮಾದರಿಗಳಿಗಾಗಿ stderr/stdout ಅನ್ನು ವೀಕ್ಷಿಸುತ್ತದೆ (`Cannot find module`, `MODULE_NOT_FOUND`, `ERR_DLOPEN_FAILED`, `Failed to start server`, ಇತ್ಯಾದಿ).
+- ಸಿದ್ಧತೆಯ ನಂತರ 2 s ಸ್ಥಿರ ರನ್ಟೈಮ್ಗಾಗಿ ಕಾಯುತ್ತದೆ, ಬಳಿಕ SIGTERM ಕಳುಹಿಸಿ ಪೋರ್ಟ್ ಮುಕ್ತವಾಗುವವರೆಗೆ ಕಾಯುತ್ತದೆ.
+- CI ನಲ್ಲಿ, ಸ್ವಯಂಚಾಲಿತವಾಗಿ `--no-sandbox --disable-gpu` ಅನ್ನು ರವಾನಿಸುತ್ತದೆ (ಮತ್ತು Linux ನಲ್ಲಿ `--disable-dev-shm-usage`).
 
-ಎನ್ವಿ ಅತಿಕ್ರಮಿಸುತ್ತದೆ: `ELECTRON_SMOKE_APP_EXECUTABLE`, `ELECTRON_SMOKE_URL`, `ELECTRON_SMOKE_TIMEOUT_MS`, `ELECTRON_SMOKE_SETTLE_MS`, `ELECTRON_SMOKE_DATA_DIR`, `ELECTRON_SMOKE_KEEP_DATA`, `ELECTRON_SMOKE_STREAM_LOGS`.
+Env ಅತಿಕ್ರಮಣಗಳು: `ELECTRON_SMOKE_APP_EXECUTABLE`, `ELECTRON_SMOKE_URL`, `ELECTRON_SMOKE_TIMEOUT_MS`, `ELECTRON_SMOKE_SETTLE_MS`, `ELECTRON_SMOKE_DATA_DIR`, `ELECTRON_SMOKE_KEEP_DATA`, `ELECTRON_SMOKE_STREAM_LOGS`.
 
 ## ಕೋಡ್ ಸಹಿ
 
-`electron/package.json` ಮಾಡುತ್ತದೆ** ಅಲ್ಲ** ವೈರ್ ಸಹಿ ರುಜುವಾತುಗಳನ್ನು ನೇರವಾಗಿ. ಅವುಗಳನ್ನು env vars ಮೂಲಕ `electron-builder` ಗೆ ರವಾನಿಸಿ:
+`electron/package.json` ಸಹಿ ರುಜುವಾತುಗಳನ್ನು ನೇರವಾಗಿ ಜೋಡಿಸುವುದಿಲ್ಲ. ಅವುಗಳನ್ನು env vars ಮೂಲಕ `electron-builder` ಗೆ ರವಾನಿಸಿ:
 
 ### macOS
 
@@ -263,32 +282,32 @@ npm run electron:build:win
 
 ### Linux
 
-ಸಹಿ ಮಾಡಿದರೆAppImage ಸಹಿ ಐಚ್ಛಿಕ — ಸೆಟ್ `LINUX_GPG_KEY` ಆಗಿದೆ.
+AppImage ಸಹಿ ಐಚ್ಛಿಕವಾಗಿದೆ — ಸಹಿ ಮಾಡಲು `LINUX_GPG_KEY` ಅನ್ನು ಹೊಂದಿಸಿ.
 
 ## ವಿತರಣೆ
 
-`electron/dist-electron/` ನಲ್ಲಿನ ಕಲಾಕೃತಿಗಳು:
+ಆರ್ಟಿಫ್ಯಾಕ್ಟ್ಗಳು `electron/dist-electron/` ನಲ್ಲಿ ಉಳಿಯುತ್ತವೆ:
 
 - `OmniRoute.Setup.X.Y.Z.exe`, `OmniRoute X.Y.Z.exe` (Windows)
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-ಬಿಡುಗಡೆಗಳನ್ನು GitHub ಬಿಡುಗಡೆಗಳಿಗೆ ಪ್ರಕಟಿಸಲಾಗಿದೆ (`diegosouzapw/OmniRoute`), ಇದು `electron-updater` ಹೊಸ ಆವೃತ್ತಿಗಳಿಗಾಗಿ ಪರಿಶೀಲಿಸುತ್ತದೆ.
+ಬಿಡುಗಡೆಗಳನ್ನು GitHub Releases (`diegosouzapw/OmniRoute`) ಗೆ ಪ್ರಕಟಿಸಲಾಗುತ್ತದೆ; `electron-updater` ಹೊಸ ಆವೃತ್ತಿಗಳಿಗಾಗಿ ಪರಿಶೀಲಿಸುವ ಸ್ಥಳವೂ ಇದೇ ಆಗಿದೆ.
 
-## ದೋಷನಿವಾರಣೆ
+## ಸಮಸ್ಯೆ ಪರಿಹಾರ
 
-| ರೋಗಲಕ್ಷಣ                                                       | ಸರಿಪಡಿಸಿ                                                                                                                                                                           |
-| -------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Electron ಮೇಜರ್ ಬಂಪ್ ನಂತರ `Cannot find module 'better-sqlite3'` | better-sqlite3 v13 ಹಡಗುಗಳು Node-API ರೂಟ್ ಮತ್ತು `prepare:bundle` ನಲ್ಲಿ — ಮರು-ರನ್ `npm install` ಪ್ರಿಬಿಲ್ಡ್ ಮಾಡುತ್ತದೆ (ಇದು ಪ್ರಸ್ತುತ ಪ್ಲಾಟ್ಫಾರ್ಮ್ಗಾಗಿ ಪ್ರಿಬಿಲ್ಡ್ ಅನ್ನು ಪರಿಶೀಲಿಸುತ್ತದೆ) |
-| ಸ್ಥಳೀಯ ಮಾಡ್ಯೂಲ್ಗಾಗಿ`ERR_DLOPEN_FAILED`                         | ಪ್ರಸ್ತುತ ಪ್ಲಾಟ್ಫಾರ್ಮ್ಗಾಗಿ ನೋಡ್-ಎಪಿಐ ಪ್ರಿಬಿಲ್ಡ್ ಕಾಣೆಯಾದಾಗ `prepare:bundle` — ಮರು-ರನ್ ಮಾಡಿ ಅದು ವೇಗವಾಗಿ ವಿಫಲಗೊಳ್ಳುತ್ತದೆ                                                               |
-| Linux ನಲ್ಲಿ ವಿಂಡೋ ಖಾಲಿಯಾಗಿ ಕಾಣುತ್ತದೆ                           | Next.js ಸರ್ವರ್ ನಿಜವಾಗಿ PORT ಗೆ ಬದ್ಧವಾಗಿದೆ ಎಂದು ಖಚಿತಪಡಿಸಿ ( `[Server]` ಲಾಗ್ಗಳನ್ನು ಪರಿಶೀಲಿಸಿ)                                                                                        |
-| macOS ನೋಟರೈಸೇಶನ್ ಮಳಿಗೆಗಳು                                      | `APPLE_*` vars ರಫ್ತು ಮಾಡುವುದನ್ನು ಖಚಿತಪಡಿಸಿಕೊಳ್ಳಿ, `.env` ನಲ್ಲಿ ಮಾತ್ರವಲ್ಲ                                                                                                           |
-| Windows SmartScreen ಎಚ್ಚರಿಕೆ                                   | EV ಪ್ರಮಾಣಪತ್ರದೊಂದಿಗೆ ಸಹಿ ಮಾಡಿ, ಅಥವಾ ಬಳಕೆದಾರರು → "ಹೇಗಾದರೂ ರನ್ ಮಾಡಿ" ಬಲ ಕ್ಲಿಕ್ ಮಾಡಿ                                                                                                  |
-| ಪೋರ್ಟ್-ಇನ್-ಯೂಸ್ನೊಂದಿಗೆ ಹೊಗೆ ಪರೀಕ್ಷೆಯು ವಿಫಲಗೊಳ್ಳುತ್ತದೆ          | `electron:smoke:packaged` ಚಾಲನೆ ಮಾಡುವ ಮೊದಲು 20128 ರಲ್ಲಿ ಯಾವುದೇ ಸ್ಥಳೀಯ ದೇವ್ ಸರ್ವರ್ ಅನ್ನು ನಿಲ್ಲಿಸಿ                                                                                   |
+| ಲಕ್ಷಣ                                                                      | ಪರಿಹಾರ                                                                                                                                                                                          |
+| -------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Electron ಪ್ರಮುಖ ಆವೃತ್ತಿ ನವೀಕರಣದ ನಂತರ `Cannot find module 'better-sqlite3'` | better-sqlite3 v13 Node-API ಪೂರ್ವಬಿಲ್ಡ್ಗಳನ್ನು ಒದಗಿಸುತ್ತದೆ — ರೂಟ್ನಲ್ಲಿ `npm install` ಮತ್ತು `prepare:bundle` ಅನ್ನು ಮರುಚಾಲನೆ ಮಾಡಿ (ಇದು ಪ್ರಸ್ತುತ ಪ್ಲಾಟ್ಫಾರ್ಮ್ಗಾಗಿ ಪೂರ್ವಬಿಲ್ಡ್ ಅನ್ನು ಪರಿಶೀಲಿಸುತ್ತದೆ) |
+| ಸ್ಥಳೀಯ ಮಾಡ್ಯೂಲ್ಗಾಗಿ `ERR_DLOPEN_FAILED`                                    | `prepare:bundle` ಅನ್ನು ಮರುಚಾಲನೆ ಮಾಡಿ — ಪ್ರಸ್ತುತ ಪ್ಲಾಟ್ಫಾರ್ಮ್ಗಾಗಿ Node-API ಪೂರ್ವಬಿಲ್ಡ್ ಇಲ್ಲದಿದ್ದಾಗ ಇದು ತಕ್ಷಣವೇ ವಿಫಲಗೊಳ್ಳುತ್ತದೆ                                                                   |
+| Linux ನಲ್ಲಿ ವಿಂಡೋ ಖಾಲಿಯಾಗಿ ಕಾಣಿಸುತ್ತದೆ                                     | Next.js ಸರ್ವರ್ ನಿಜವಾಗಿಯೂ PORT ಗೆ ಬದ್ಧವಾಗಿದೆಯೇ ಎಂದು ದೃಢಪಡಿಸಿ (`[Server]` ಲಾಗ್ಗಳನ್ನು ಪರಿಶೀಲಿಸಿ)                                                                                                   |
+| macOS ನೋಟರೈಸೇಶನ್ ಸ್ಥಗಿತಗೊಳ್ಳುತ್ತದೆ                                         | `APPLE_*` vars ಅನ್ನು ಕೇವಲ `.env` ನಲ್ಲಿ ಇರಿಸದೆ, export ಮಾಡಲಾಗಿದೆಯೇ ಎಂದು ಖಚಿತಪಡಿಸಿಕೊಳ್ಳಿ                                                                                                          |
+| Windows SmartScreen ಎಚ್ಚರಿಕೆ                                               | EV cert ಬಳಸಿ ಸಹಿ ಮಾಡಿ, ಅಥವಾ ಬಳಕೆದಾರರು ಬಲ-ಕ್ಲಿಕ್ ಮಾಡಿ → "Run anyway" ಆಯ್ಕೆಮಾಡಲಿ                                                                                                                  |
+| ಪೋರ್ಟ್ ಬಳಕೆಯಲ್ಲಿರುವುದರಿಂದ ಸ್ಮೋಕ್ ಪರೀಕ್ಷೆ ವಿಫಲಗೊಳ್ಳುತ್ತದೆ                   | `electron:smoke:packaged` ಅನ್ನು ಚಾಲನೆ ಮಾಡುವ ಮೊದಲು 20128 ನಲ್ಲಿ ಚಾಲನೆಯಲ್ಲಿರುವ ಯಾವುದೇ ಸ್ಥಳೀಯ dev ಸರ್ವರ್ ಅನ್ನು ನಿಲ್ಲಿಸಿ                                                                             |
 
 ## ಇದನ್ನೂ ನೋಡಿ
 
 - [SETUP_GUIDE.md](./SETUP_GUIDE.md)
 - [RELEASE_CHECKLIST.md](../ops/RELEASE_CHECKLIST.md)
 - ಮೂಲ: `electron/main.js`, `electron/preload.js`, `electron/package.json`
-- ಸಹಾಯಕರು: `scripts/build/prepare-electron-standalone.mjs`, `scripts/dev/smoke-electron-packaged.mjs`
+- ಸಹಾಯಕಗಳು: `scripts/build/prepare-electron-standalone.mjs`, `scripts/dev/smoke-electron-packaged.mjs`

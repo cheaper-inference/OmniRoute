@@ -38,59 +38,71 @@ coigilteas is ea 'costas' na deaise, ní bille").
 
 ## Conas a mheastar costais
 
-### An fhoinse praghsála
+### Foinse na praghsála
 
-Tagann costais ón tábla praghsála cumaiscthe in [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts), san ord tosaíochta seo (** is airde ar dtús** ):
+Tagann na costais ón tábla praghsála cumaiscthe in [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts), san ord tosaíochta seo (**an tosaíocht is airde ar dtús**):
 
-1. **Sáraíonn an t-úsáideoir** praghsanna — socraithe sa deais nó trí `PATCH /api/pricing` (an t-ainmspás `pricing` ).
-2. **samhlacha.dev sioncronaithe** praghsála — faighte ó `https://models.dev/api.json` (an t-ainmspás `models_dev_pricing` ).
-3. **LiteLLM sioncronaithe** Praghsanna — faighte ó `model_prices_and_context_window.json` poiblí LiteLLM(an t-ainmspás `pricing_synced` ).
-4. **Réamhshocruithe le hardcode** rátaí — seolta i [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/).
+1. **Sáruithe úsáideora** — praghsanna socraithe sa phainéal nó trí `PATCH /api/pricing` (an t-ainmspás `pricing`).
+2. **Sioncronú models.dev** — praghsanna faighte ó `https://models.dev/api.json` (an t-ainmspás `models_dev_pricing`).
+3. **Sioncronú LiteLLM** — praghsanna ó chomhad poiblí `model_prices_and_context_window.json` de chuid LiteLLM (an t-ainmspás `pricing_synced`).
+4. **Réamhshocruithe sa chód** — rátaí a sheachadtar in [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/).
 
-Maidir leis an provider/model céanna , forscríobhann luachanna ó shraitheanna ardtosaíochta réimsí meaitseála i sraitheanna níos ísle; is féidir le réimsí atá as láthair ó shraith uachtarach teacht fós ó chiseal níos ísle. Tá an t-ordú socraithe fiú nuair a ritheann an dá phost sioncronaithe neamhspleácha ag an am céanna. tuairisceáin `GET /api/pricing?includeSources=1` `pricing` agus `sourceMap`, a n-aithníonn a lipéid in aghaidh na samhla (`user`, `modelsDev`, `litellm`, `default`) an ciseal is airde tosaíochta ina bhfuil an tsamhail sin.
+Don soláthraí/samhail chéanna, forscríobhann sraitheanna tosaíochta níos airde na réimsí comhfhreagracha sna sraitheanna ísle; is féidir le réimsí nach bhfuil i sraith uachtarach teacht ó shraith íochtarach fós. Fanann an t-ord seasta fiú nuair a ritheann an dá thasc sioncronaithe neamhspleácha ag an am céanna. Tugann `GET /api/pricing?includeSources=1` `pricing` agus `sourceMap` ar ais; aithníonn a lipéid in aghaidh samhla (`user`, `modelsDev`, `litellm`, `default`) an tsraith tosaíochta is airde ina bhfuil an tsamhail sin.
 
-**LiteLLM sioncronaithe** is rogha an diúltaithe, díchumasaithe de réir réamhshocraithe. Is iad na hathróga timpeallachta (féach [`.env.example`](../../.env.example) ) ná:
+Ní mór **sioncronú LiteLLM** a chumasú go sainráite; tá sé díchumasaithe de réir réamhshocraithe. Is iad seo a athróga timpeallachta (féach [`.env.example`](../../.env.example)):
 
-| Env var                 | Réamhshocrú | Cuspóir                                                                           |
-| ----------------------- | ----------- | --------------------------------------------------------------------------------- |
-| `PRICING_SYNC_ENABLED`  | `false`     | Cumasaigh sioncronú praghsála cúlra LiteLLM.                                      |
-| `PRICING_SYNC_INTERVAL` | `86400`     | Eatramh sioncronaithe i soicindí (laethúil).                                      |
-| `PRICING_SYNC_SOURCES`  | `litellm`   | Roghnú foinse don sioncronú seo amháin; faoi láthair ní thacaítear ach `litellm`. |
+| Athróg timpeallachta    | Réamhshocrú | Cuspóir                                                                              |
+| ----------------------- | ----------- | ------------------------------------------------------------------------------------ |
+| `PRICING_SYNC_ENABLED`  | `false`     | Cumasaíonn sé sioncronú praghsanna LiteLLM sa chúlra.                                |
+| `PRICING_SYNC_INTERVAL` | `86400`     | Eatramh sioncronaithe i **soicindí** (gach lá de réir réamhshocraithe).              |
+| `PRICING_SYNC_SOURCES`  | `litellm`   | Roghnú foinsí don sioncronú seo amháin; ní thacaítear ach le `litellm` faoi láthair. |
 
-**samhlacha.dev sioncronaithe** ar leith ón LiteLLM sync agus tá sé díchumasaithe freisin de réir réamhshocraithe. Cumasaigh é i Socruithe (models.dev sync) nó úsáid na hathróga seo:
+Tá **sioncronú models.dev** ar leithligh ó shioncronú LiteLLM agus tá sé díchumasaithe de réir réamhshocraithe freisin. Cumasaigh é sna Socruithe (sioncronú models.dev), nó úsáid na hathróga seo:
 
-| Env var                    | Réamhshocrú     | Cuspóir                                                                                                                                    |
-| -------------------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| `MODELS_DEV_SYNC_ENABLED`  | _(díshuiteáil)_ | Leanann Unset an scoránaigh Socruithe; fórsaí `1/true/on/yes` ar aghaidh agus fórsaí `0/false/off/no` as (fiú má chumasaíonn Socruithe é). |
-| `MODELS_DEV_SYNC_INTERVAL` | `86400`         | Eatramh sioncronaithe models.dev réamhshocraithe i soicindí (laethúil).                                                                    |
+| Athróg timpeallachta       | Réamhshocrú   | Cuspóir                                                                                                                                                                                                 |
+| -------------------------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `MODELS_DEV_SYNC_ENABLED`  | _(gan socrú)_ | Mura bhfuil luach socraithe, leanann sé an lasc sna Socruithe; cuireann `1/true/on/yes` ar siúl é go héigeantach agus cuireann `0/false/off/no` as é go héigeantach, fiú má chumasaíonn na Socruithe é. |
+| `MODELS_DEV_SYNC_INTERVAL` | `86400`       | Eatramh réamhshocraithe shioncronú models.dev i soicindí (go laethúil).                                                                                                                                 |
 
-dhéanann `PRICING_SYNC_SOURCES`** nach bhfuil** samhlacha a chumasú.dev; rialaíonn sé an sioncrónú LiteLLM amháin. Ní ghlanann scriosadh sáraithe úsáideora ceachtar den dá ainmspás sioncronaithe; éiríonn an chéad chiseal praghsála eile atá ar fáil i bhfeidhm. Le haghaidh samhail gan phraghas, seiceáil an dá shocruithe sioncronaithe agus an `sourceMap` sula gcuireann tú sáraíocht láimhe leis.
+**Ní** chumasaíonn `PRICING_SYNC_SOURCES` models.dev; ní rialaíonn sé ach sioncronú LiteLLM. Ní ghlanann sárú úsáideora a scriosadh ceachtar ainmspás sioncronaithe; tagann an chéad sraith praghsála eile atá ar fáil i bhfeidhm. Maidir le samhail gan phraghas, seiceáil an dá shocrú sioncronaithe agus `sourceMap` sula gcuireann tú sárú láimhe leis.
 
-### An fhoirmle costais
+### Foirmle an chostais
 
-Ríomhtar an costas in aghaidh an iarratais ó chomhairimh chomharthaí agus rátaí in aghaidh na milliún in [`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts) (`computeCostFromPricing` / `calculateCost`):
+Ríomhtar costas in aghaidh an iarratais ó líon na dticeáilíní agus rátaí in aghaidh an mhilliúin ticeáilín in
+[`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts)
+(`computeCostFromPricing` / `calculateCost`):
 
-- **Comharthaí ionchuir** (lúide léite taisce agus comharthaí cruthaithe taisce) × `input` ráta.
-- **Comharthaí taisce-léamh** ráta × `cached` (titeann sé siar go dtí an ráta ionchuir).
-- **Comharthaí cruthúnais taisce** ráta × `cache_creation` (titeann sé siar go dtí an ráta ionchuir).
-- **Comharthaí aschuir** ráta × `output`.
-- **Comharthaí réasúnaíochta** ráta × `reasoning` (titeann sé ar ais go dtí an ráta aschuir).
+- **Ticeáilíní ionchuir** (lúide léamha taisce agus ticeáilíní cruthaithe taisce) × ráta `input`.
+- **Ticeáilíní léite ón taisce** × ráta `cached` (úsáidtear an ráta ionchuir mar chúltaca).
+- **Ticeáilíní cruthaithe taisce** × ráta `cache_creation` (úsáidtear an ráta ionchuir mar chúltaca).
+- **Ticeáilíní aschuir** × ráta `output`.
+- **Ticeáilíní réasúnaithe** × ráta `reasoning` (úsáidtear an ráta aschuir mar chúltaca).
 
-Léirmhínítear gach ráta mar USD in aghaidh an 1,000,000 comhartha. Cuireann sraith seirbhíse "tapa"/"tosaíochta" nó "flex" Codex i bhfeidhm iolraitheoir costais (`getCodexFastCostMultiplier`) — m.sh.** coigilteas flex** sa deais.
+Léirmhínítear gach ráta mar USD in aghaidh 1,000,000 ticeáilín. Cuireann sraith seirbhíse Codex "fast"/"priority" nó
+"flex" iolraitheoir costais i bhfeidhm (`getCodexFastCostMultiplier`) — mar shampla, gearrtar táille ar flex
+le lascaine 50% ar thiceáilíní, a thaispeántar mar **choigilteas flex** sa deais.
 
-Normalaítear ainmneacha samhlacha ar dtús (baintear réimíreanna cosán soláthraí mar `openai/` nó `accounts/fireworks/models/` ) agus mar sin tá sraitheanna stairiúla fós ag teacht le praghas.
+Déantar ainmneacha samhlacha a normalú ar dtús (baintear réimíreanna conairí soláthraithe amhail `openai/` nó
+`accounts/fireworks/models/`) ionas go mbeidh ró-nna stairiúla fós ag teacht le praghas.
 
 ### Conas a thaifeadtar caiteachas
 
-- Ríomhtar an costas in aghaidh an iarratais tar éis na freagartha agus taifeadtar tine agus dearmad mar sin ní chuireann sé foighne leis an gcliant riamh. Tá tomhaltas cuóta comhroinnte sceidealta ar an gcéad tic lúb imeachta eile trí [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
-- Déantar caiteachas API-eochair a mhaolánú agus a shruthlú i mbaisceanna ag an [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (eatramh sruthlaithe réamhshocraithe 60idí, maolán iontrála 1,000). Iniúchadh trí:
+- Ríomhtar an costas in aghaidh an iarratais tar éis an fhreagra agus taifeadtar é gan fanacht leis an toradh ionas nach gcuireann sé
+  aga folaigh leis don chliant choíche. Sceidealaítear ídiú cuóta chomhroinnte ar an gcéad
+  ticeáil eile den lúb teagmhas trí [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
+- Maolánaítear caiteachas eochrach API agus folmhaítear i mbaisceanna é ag an
+  [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (eatramh folmhaithe réamhshocraithe 60s,
+  maolán 1,000 iontráil). Is féidir iad a choigeartú trí:
 
-  | Env var                             | Réamhshocrú | Cuspóir                                           |
-  | ----------------------------------- | ----------- | ------------------------------------------------- |
-  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000`     | Eatramh sruthlaithe i milleasoicindí.             |
-  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`      | Uasmhéid iontrálacha maolánacha roimh an sruthlú. |
+  | Athróg timpeallachta                | Réamhshocrú | Cuspóir                                        |
+  | ----------------------------------- | ----------- | ---------------------------------------------- |
+  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000`     | Eatramh folmhaithe i milleasoicindí.           |
+  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`      | Uaslíon iontrálacha maolánaithe roimh fholmhú. |
 
-Is iad figiúirí costais an deais** nach bhfuil** léamh ó mhéid dollar stóráilte in aghaidh an tsraith — déantar iad a athríomh ar an eitilt ó chomhaireamh chomharthaí agus an tábla praghsála reatha gach uair a ritheann críochphointe na hanailíse. Ciallaíonn sé sin praghas mícheart a cheartú (agus athshioncronú) meastacháin chostais stairiúla a nuashonrú go haisghníomhach.
+Ní léitear figiúirí costais na deaise ó mhéid dollar atá stóráilte in aghaidh an ró — déantar iad
+a athríomh ar an toirt ó líon na dticeáilíní agus ón tábla praghsála reatha gach uair a
+ritheann an críochphointe anailísíochta. Ciallaíonn sé sin go nuashonraítear meastacháin chostais stairiúla
+go haisghníomhach nuair a cheartaítear praghas mícheart (agus nuair a dhéantar athshioncronú).
 
 ---
 
@@ -136,50 +148,53 @@ Tá siad seo a leanas le fáil freisin sa limistéar Costais (iad uile faoi `/da
 
 ---
 
-## críochphointí API
+## Críochphointí API
 
-Teastaíonn údarás bainistíochta (loopback/JWT, via `requireManagementAuth`) leo seo go léir mura dtugtar faoi deara.
+Teastaíonn fíordheimhniú bainistíochta uathu seo go léir (aischúb/JWT, trí `requireManagementAuth`) mura
+luaitear a mhalairt.
 
-### Anailísíocht úsáide & costais
+### Anailísíocht úsáide agus costais
 
-| Modh  | Críochphointe            | Cuspóir                                                                                                                                                                     |
-| ----- | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `GET` | `/api/usage/analytics`   | Anailísíocht cost/usage iomlán: achoimre, treocht laethúil, de réir provider/model/API key/account/tier. Iarratas: `range`, `startDate`, `endDate`, `apiKeyIds`, `presets`. |
-| `GET` | `/api/usage/utilization` | Úsáid cuóta in aghaidh an tsoláthraí le himeacht ama. Iarratas: `range` (`1h`/`24h`/`7d`/`30d`), `provider`.                                                                |
-| `GET` | `/api/usage/history`     | Sraitheanna stair úsáide amh.                                                                                                                                               |
-| `GET` | `/api/usage/call-logs`   | Logchomhaid glaonna in aghaidh an iarratais (samhail, comharthaí, costas, latency, stádas).                                                                                 |
-| `GET` | `/api/usage/quota`       | Stádas cuóta an tsoláthraí.                                                                                                                                                 |
-| `GET` | `/api/usage/proxy-logs`  | Logchomhaid iarratais seachfhreastalaí.                                                                                                                                     |
+| Modh  | Críochphointe            | Cuspóir                                                                                                                                                                                  |
+| ----- | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET` | `/api/usage/analytics`   | Anailísíocht iomlán costais/úsáide: achoimre, treocht laethúil, de réir soláthraí/samhla/eochair API/cuntais/sraithe. Iarratas: `range`, `startDate`, `endDate`, `apiKeyIds`, `presets`. |
+| `GET` | `/api/usage/utilization` | Úsáid cuóta in aghaidh an tsoláthraí le himeacht ama. Iarratas: `range` (`1h`/`24h`/`7d`/`30d`), `provider`.                                                                             |
+| `GET` | `/api/usage/history`     | Rónna staire úsáide amh.                                                                                                                                                                 |
+| `GET` | `/api/usage/call-logs`   | Logaí glaonna in aghaidh an iarratais (samhail, comharthaí, costas, aga folaigh, stádas).                                                                                                |
+| `GET` | `/api/usage/quota`       | Stádas cuóta soláthraí.                                                                                                                                                                  |
+| `GET` | `/api/usage/proxy-logs`  | Logaí iarratais seachfhreastalaí.                                                                                                                                                        |
 
 ### Buiséid
 
-| Modh   | Críochphointe            | Cuspóir                                                                                                        |
-| ------ | ------------------------ | -------------------------------------------------------------------------------------------------------------- |
-| `GET`  | `/api/usage/budget`      | Achoimre ar chostais + seiceáil buiséid le haghaidh eochair API amháin (parama ceiste `apiKeyId` ag teastáil). |
-| `POST` | `/api/usage/budget`      | Socraigh teorainneacha daily/weekly/monthly USD tairseach rabhaidh + le haghaidh eochair API.                  |
-| `GET`  | `/api/usage/budget/bulk` | Achoimrí ar bhuiséid ar fud na heochracha API.                                                                 |
+| Modh   | Críochphointe            | Cuspóir                                                                                                  |
+| ------ | ------------------------ | -------------------------------------------------------------------------------------------------------- |
+| `GET`  | `/api/usage/budget`      | Achoimre costais + seiceáil buiséid d'eochair API amháin (paraiméadar iarratais `apiKeyId` riachtanach). |
+| `POST` | `/api/usage/budget`      | Socraigh teorainneacha laethúla/seachtainiúla/míosúla USD + tairseach rabhaidh d'eochair API.            |
+| `GET`  | `/api/usage/budget/bulk` | Achoimrí buiséid ar an mórchóir thar eochracha API.                                                      |
 
-> Déantar an buiséad API a scóip in aghaidh** eochair API** (`apiKeyId`). I measc na dteorainneacha a sheoltar ar ais ag `GET /api/usage/budget` tá `dailyLimitUsd`, `weeklyLimitUsd`, `monthlyLimitUsd`, a `warningThreshold`, agus na hiomláin reatha (`totalCostToday`, `totalCostMonth`, …).
+> Tá an API buiséid scópáilte de réir **eochair API** (`apiKeyId`). Áirítear leis na teorainneacha a sheolann
+> `GET /api/usage/budget` ar ais `dailyLimitUsd`, `weeklyLimitUsd`, `monthlyLimitUsd`,
+> `warningThreshold`, agus na hiomláin reatha (`totalCostToday`, `totalCostMonth`, …).
 
 ### Praghsáil
 
-| Modh     | Críochphointe           | Cuspóir                                                                                                                                       |
-| -------- | ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| `GET`    | `/api/pricing`          | Praghsanna cumaiscthe ceithre chiseal (úsáideoir, models.dev, LiteLLM, mainneachtainí). Filleann `?includeSources=1` `pricing` + `sourceMap`. |
-| `PATCH`  | `/api/pricing`          | Sárú ar phraghsáil `{ provider: { model: { input, output, cached, … } } }`.                                                                   |
-| `DELETE` | `/api/pricing`          | Bain sáruithe praghais úsáideora (scóip roghnach ag `?provider=&model=`); fanann rátaí synced nó mainneachtainí ionsuite mar chúltacaí.       |
-| `GET`    | `/api/pricing/defaults` | Taispeáin rátaí réamhshocraithe per-1M cúltaca.                                                                                               |
-| `GET`    | `/api/pricing/models`   | Praghsáil eochair de réir samhail.                                                                                                            |
-| `POST`   | `/api/pricing/sync`     | Spreag sioncronú láimhe ó fhoinsí seachtracha (LiteLLM).                                                                                      |
-| `GET`    | `/api/pricing/sync`     | Stádas sioncronaithe reatha.                                                                                                                  |
-| `DELETE` | `/api/pricing/sync`     | Glan praghsáil LiteLLM-synced amháin (`pricing_synced`); tá sonraí models.dev ar leithligh.                                                   |
+| Modh     | Críochphointe           | Cuspóir                                                                                                                                                               |
+| -------- | ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET`    | `/api/pricing`          | Praghsáil chumaiscthe ceithre shraith (úsáideoir, models.dev, LiteLLM, réamhshocruithe). Tugann `?includeSources=1` `pricing` + `sourceMap` ar ais.                   |
+| `PATCH`  | `/api/pricing`          | Sáraigh praghsáil do `{ provider: { model: { input, output, cached, … } } }`.                                                                                         |
+| `DELETE` | `/api/pricing`          | Baineann sé sáruithe praghais úsáideora (teoranta go roghnach le `?provider=&model=`); fanann rátaí sioncronaithe agus réamhshocruithe ionsuite mar roghanna cúltaca. |
+| `GET`    | `/api/pricing/defaults` | Taispeáin rátaí cúltaca réamhshocraithe in aghaidh 1M.                                                                                                                |
+| `GET`    | `/api/pricing/models`   | Praghsáil eochraithe de réir samhla.                                                                                                                                  |
+| `POST`   | `/api/pricing/sync`     | Cuir tús le sioncronú láimhe ó fhoinsí seachtracha (LiteLLM).                                                                                                         |
+| `GET`    | `/api/pricing/sync`     | Stádas reatha an tsioncronaithe.                                                                                                                                      |
+| `DELETE` | `/api/pricing/sync`     | Glanann sé praghsáil shioncronaithe LiteLLM amháin (`pricing_synced`); tá sonraí models.dev ar leithligh.                                                             |
 
 ### Críochphointí eile a bhaineann le costais
 
-| Modh  | Críochphointe                 | Cuspóir                                                                                           |
-| ----- | ----------------------------- | ------------------------------------------------------------------------------------------------- |
-| `GET` | `/api/free-tier/summary`      | Iomlán na samhla saor in aisce, a úsáideadh an mhí seo, agus an liúntas saor in aisce atá fágtha. |
-| `GET` | `/api/quota/pools/[id]/usage` | Úsáid do chomhthiomsú cuóta roinnte.                                                              |
+| Modh  | Críochphointe                 | Cuspóir                                                                                                                |
+| ----- | ----------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `GET` | `/api/free-tier/summary`      | Iomláin chomharthaí na samhla saor in aisce, an méid a úsáideadh an mhí seo, agus an liúntas saor in aisce atá fágtha. |
+| `GET` | `/api/quota/pools/[id]/usage` | Úsáid do chomhthiomsú cuóta chomhroinnte.                                                                              |
 
 ---
 

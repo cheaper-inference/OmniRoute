@@ -4147,7 +4147,9 @@
     "duplicateAutoComboFailedPrefix": "Gagal menduplikasi kombo otomatis:",
     "duplicateAutoComboUnknownError": "Kesalahan tidak diketahui",
     "duplicateAutoComboTitle": "Buat kombo statis dari {name}",
-    "fallbackSummary": "{rate}% permintaan menggunakan cadangan, rata-rata ~{skips} target dilewati per permintaan"
+    "fallbackSummary": "{rate}% permintaan menggunakan cadangan, rata-rata ~{skips} target dilewati per permintaan",
+    "reorderAll": "Susun ulang semuanya",
+    "reorderAllDescription": "Menyusun ulang semua kombo {count}. Pegangan tarik diaktifkan."
   },
   "costs": {
     "title": "Biaya",
@@ -14538,6 +14540,10 @@
       "UNPRICED_USAGE_BUDGET_POLICY": {
         "label": "Kebijakan Anggaran Penggunaan Tanpa Harga",
         "description": "Bagaimana batas USD harian/mingguan per-kunci memperlakukan penggunaan yang berhasil apabila penyedia/modelnya tidak memiliki baris harga. fail_closed (bawaan) menandai jendela sebagai terlampaui, sehingga biaya yang tidak diketahui tidak pernah bisa melewati batas keras. count_as_zero menghitung penggunaan itu sebagai $0 dan terus menegakkan pengeluaran yang diberi harga. Model tanpa harga tetap ditampilkan di halaman utama dasbor dalam kedua kasus."
+      },
+      "COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE": {
+        "description": "Dalam statistik cache kompresi, hitung permintaan terkompresi ke penyedia cache awalan otomatis (OpenAI, Codex, Azure, atau koneksi khusus yang mendeklarasikan cache cepat dengan penghapusan penanda) sebagai perkiraan cache yang tercapai bahkan tanpa penanda cache_control. Perkiraan tersebut merupakan sinyal kelayakan cache, bukan hit yang teramati, sehingga tingkat hit yang dilaporkan untuk penyedia tersebut cenderung menuju 100%. Nonaktif secara default: hanya permintaan yang membawa penanda cache_control ke penyedia cache yang dihitung sebagai perkiraan hit, sehingga penyedia awalan otomatis terus melaporkan 0.",
+        "label": "Statistik Cache Kompresi: Kelayakan Awalan Otomatis"
       }
     }
   },

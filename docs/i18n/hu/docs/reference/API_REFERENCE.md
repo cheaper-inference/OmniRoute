@@ -923,15 +923,7 @@ ha bármely más mező be van állítva. A lite esetében a hívás előtt elvet
 `subpages`, `subpageTarget`, `highlights.numSentences` és `highlights.highlightsPerUrl` mezőket többé nem
 továbbítja.
 
-A költségelszámolás az egyszerű `costPerQuery`-nyilvántartást követi, kivéve az Exát, amely az Exa
-saját árképzését alkalmazza: hívásonként 0,007 dollár az `auto` (és a korábbi `fast`), illetve
-0,004 dollár a `lite` (és a korábbi `instant`) esetén, 10 eredményt lefedve; minden további eredmény
-0,001 dollár; továbbá minden visszaadott eredmény után 0,001 dollár, ha a `contents.summary` be van
-állítva. A Tavily esetében 1 kredit (0,008 dollár) kerül rögzítésre a `search_depth` `basic`, `fast`
-és `ultra-fast` értékeihez, valamint 2 kredit (0,016 dollár) az `advanced` értékhez
-([Tavily API-kreditek](https://docs.tavily.com/documentation/api-credits)). Ha egy
-`auto_parameters: true` értékű hívás során a Tavily `advanced` szintre vált, akkor is 1 kredit kerül
-rögzítésre.
+Exa: 0,007 USD hívásonként `auto` (és az örökölt `fast`) esetében vagy 0,004 USD `lite` (és az örökölt `instant`) esetében, amely 10 eredményt takar; 0,001 USD minden további eredményért; és 0,001 USD visszaadott eredményenként, ha `contents.summary` be van állítva. A Tavily 1 kreditet (0,008 USD) `search_depth` `basic`, `fast` és `ultra-fast` esetében, és 2 kreditet ($ 0,016) `advanced` esetében ( [Tavily API kredit](https://docs.tavily.com/documentation/api-credits) ). A `auto_parameters: true` folytatott hívást, amelyet Tavily haladó szintre frissít, továbbra is 1 kredittel rögzítenek.
 
 ---
 
@@ -1236,6 +1228,8 @@ X-OmniRoute-No-Cache: true
 
 ---
 
+<a id="cliproxyapi-management-compatibility"></a>
+
 ## CLIProxyAPI-kezelési kompatibilitás
 
 Az OmniRoute megválaszolja azt a három [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI)
@@ -1250,22 +1244,11 @@ Az útvonalak a `/v0/management/*` és az `/api/v0/management/*` alatt érhetők
 | POST    | `/v0/management/api-call`    | Törzs: `{ auth_index, method, url, header?, data? }`. Egy engedélyezőlistán szereplő kérést küld a fiók tokenjével, és `{ status_code, body }` formátumban adja vissza |
 | POST    | `/v0/management/reset-quota` | Törzs: `{ auth_index }`. Törli egy fiók kapcsolatának várakozási idejét, modellzárolásait és a Codex hatókörönkénti várakozási időit                                   |
 
-- Az `auth_index` az OmniRoute-kapcsolat azonosítója. A `provider` értéke `claude` vagy `codex` (csak
-  OAuth-kapcsolatok; az `anthropic` API-kulcs-szolgáltató nem szerepel a listában). A Codex esetében
-  az `id_token.chatgpt_account_id` a tárolt munkaterület-azonosító, a `plan_type` pedig a tárolt csomag.
+- Az `auth_index` az OmniRoute kapcsolatazonosítója. A `provider` értéke `claude` vagy `codex` (csak OAuth-kapcsolatok; az API-kulcsos `anthropic` szolgáltató nincs a listában). Codex esetén az `id_token.chatgpt_account_id` a tárolt munkaterület-azonosító, a `plan_type` pedig a tárolt előfizetési csomag.
 - Az `api-call` nem általános proxy. Csak a Claude `GET
-https://api.anthropic.com/api/oauth/usage` és a Codex `GET
-https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits`, valamint
-  `POST .../wham/rate-limit-reset-credits/consume` kéréseit fogadja el, és mindegyiket csak a
-  megfelelő szolgáltatóhoz tartozó fiók esetében. Minden egyéb kérés `403` választ ad anélkül, hogy
-  kapcsolatba lépne az upstreammel. A hívó `Authorization` fejléce (beleértve a `$TOKEN$` helyőrzőt)
-  figyelmen kívül marad: az OmniRoute a kapcsolat hozzáférési tokenjét illeszti be, szükség esetén
-  előtte frissítve azt, és csak az engedélyezőlistán szereplő fejléceket továbbítja (`anthropic-beta`;
-  `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`; `Accept`, `Content-Type`). A hiányzó
-  `Chatgpt-Account-Id` alapértelmezés szerint a tárolt munkaterület-azonosítót kapja.
-  A kérések időkorlátja 15 másodperc, és a kapcsolat proxyját használják.
-- A `reset-quota` érintetlenül hagyja a végleges állapotokat (`banned`, `expired`, `credits_exhausted`). Az ismeretlen
-  `auth_index` `404` választ ad.
+https://api.anthropic.com/api/oauth/usage`, valamint a Codex `GET
+https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits` és `POST .../wham/rate-limit-reset-credits/consume` hívásokat fogadja, mindegyiket csak a megfelelő szolgáltató fiókjához. Minden más `403` választ ad az upstream megkeresése nélkül. A hívó `Authorization` fejlécét (a `$TOKEN$` helyőrzőt is beleértve) figyelmen kívül hagyja: az OmniRoute beilleszti a kapcsolat hozzáférési tokenjét, közeli lejárat esetén előbb frissíti, és csak az engedélyezett fejléceket továbbítja (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`; `Accept`, `Content-Type`). Hiányzó `Chatgpt-Account-Id` esetén a tárolt munkaterület-azonosítót használja. Ha az első upstream-válasz `401`, egyszer frissít, és csak akkor próbálkozik újra, ha megváltozik a hozzáférési token. Minden upstream-próbálkozás időkorlátja 15 másodperc, és a kapcsolat proxyját használja.
+- A `reset-quota` érintetlenül hagyja a végállapotokat (banned, expired, credits_exhausted). Ismeretlen `auth_index` esetén `404` a válasz.
 
 **Hitelesítés:** irányítópult-munkamenet vagy `manage` hatókörrel rendelkező API-kulcs szükséges,
 akkor is, ha a bejelentkezés le van tiltva (az útvonalak az `ALWAYS_PROTECTED_API_PATHS` részét képezik).
@@ -1993,17 +1976,17 @@ Tartós beszélgetési/tényalapú memóriatároló, API-kulcsonként / munkamen
 
 Az OmniRoute beágyazott Model Context Protocol-kiszolgálót biztosít 3 átviteli móddal (stdio, SSE, streamable-http) és korlátozott hatókörű eszközökkel. Az alábbi irányítópult-végpontok állapot- és auditadatokat olvasnak, valamint proxyt biztosítanak a HTTP-átvitelekhez.
 
-| Metódus | Útvonal                | Leírás                                                                                                                       |                      |
-| ------- | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------- | -------------------- |
-| GET     | `/api/mcp/status`      | Életjel, átviteli mód, online állapot, utolsó hívás, leggyakrabban használt eszközök, 24 órás sikerességi arány              |
-| GET     | `/api/mcp/tools`       | MCP-eszközök listája `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints` mezőkkel                      |
-| GET     | `/api/mcp/sse`         | SSE-stream megnyitása az SSE-átvitelhez (`503` értéket ad vissza, ha az MCP le van tiltva, vagy az átviteli mód nem egyezik) |
-| POST    | `/api/mcp/sse`         | JSON-RPC-keret küldése az SSE-átvitelen                                                                                      |
-| GET     | `/api/mcp/stream`      | Az SSE-oldal megnyitása a Streamable HTTP-átvitelhez (a kiszolgáló által kezdeményezett üzenetekhez)                         |
-| POST    | `/api/mcp/stream`      | JSON-RPC-keret küldése a Streamable HTTP-átvitelen                                                                           |
-| DELETE  | `/api/mcp/stream`      | Streamable HTTP-munkamenet befejezése                                                                                        |
-| GET     | `/api/mcp/audit`       | Auditnapló lekérdezése — `?limit=`, `?offset=`, `?tool=`, `?success=true                                                     | false`, `?apiKeyId=` |
-| GET     | `/api/mcp/audit/stats` | Összesített auditstatisztikák (összesítés, sikerességi arány, átlagos időtartam, leggyakrabban használt eszközök)            |
+| Metódus | Útvonal                | Leírás                                                                                                                                               |
+| ------- | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET     | `/api/mcp/status`      | Életjel, átviteli mód, online állapot, utolsó hívás, leggyakrabban használt eszközök, 24 órás sikerességi arány                                      |
+| GET     | `/api/mcp/tools`       | MCP-eszközök listája `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints` mezőkkel                                              |
+| GET     | `/api/mcp/sse`         | SSE-stream megnyitása az SSE-átvitelhez (`503` értéket ad vissza, ha az MCP le van tiltva, vagy az átviteli mód nem egyezik)                         |
+| POST    | `/api/mcp/sse`         | JSON-RPC-keret küldése az SSE-átvitelen                                                                                                              |
+| GET     | `/api/mcp/stream`      | Az SSE-oldal megnyitása a Streamable HTTP-átvitelhez (a kiszolgáló által kezdeményezett üzenetekhez)                                                 |
+| POST    | `/api/mcp/stream`      | JSON-RPC-keret küldése a Streamable HTTP-átvitelen                                                                                                   |
+| DELETE  | `/api/mcp/stream`      | Streamable HTTP-munkamenet befejezése                                                                                                                |
+| GET     | `/api/mcp/audit`       | Auditnapló lekérdezése — `?limit=`, `?offset=`, `?tool=`, `?success=true                                                     \| false`, `?apiKeyId=` |
+| GET     | `/api/mcp/audit/stats` | Összesített auditstatisztikák (összesítés, sikerességi arány, átlagos időtartam, leggyakrabban használt eszközök)                                    |
 
 **Hitelesítés:** az `sse`/`stream` átviteli módok az MCP-specifikus hitelesítési felületet használják (Bearer API-kulcs `mcp` hatókörrel); a `status`/`tools`/`audit*` útvonalak az irányítópultról olvashatók (az irányítópult gazdagépének elérésén túl nincs szükség további hitelesítésre).
 

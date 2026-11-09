@@ -4147,7 +4147,9 @@
     "duplicateAutoComboFailedPrefix": "Kopiering av automatisk kombination misslyckades:",
     "duplicateAutoComboUnknownError": "Okänt fel",
     "duplicateAutoComboTitle": "Skapa en statisk kombination från {name}",
-    "fallbackSummary": "{rate}% av begärandedan använde en reserv, ~{skips} mål hopplat över per begärande"
+    "fallbackSummary": "{rate}% av begärandedan använde en reserv, ~{skips} mål hopplat över per begärande",
+    "reorderAll": "Ordna om alla",
+    "reorderAllDescription": "Ordnar om alla {count} kombinationer. Drahandtag är aktiverade."
   },
   "costs": {
     "title": "Kostnader",
@@ -14255,6 +14257,10 @@
         "label": "Infrastrukturstopp för skyddad prioritet som 502",
         "description": "Svara med 502 i stället för 503 när ett prioritetsmål med en reserv som endast används vid kvotfel stoppar kombinationen av en orsak som bevisligen inte är kvotrelaterad: en öppen kretsbrytare hos leverantören eller ett prediktivt latensbaserat överhopp."
       },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Policy för oprissad användningsbudget",
+        "description": "Hur per-nyckel dagliga/veckovisa USD-gränser behandlar lyckad användning vars leverantör/modell inte har någon prisrad. fail_closed (standard) markerar perioden som överskriden, så att en okänd kostnad aldrig kan smyga förbi ett hårt tak. count_as_zero räknar den användningen som $0 och fortsätter att tillämpa den prissatta förbrukningen. Oprissatta modeller listas på instrumentpanelens startsida i båda fallen."
+      },
       "AUTH_LOG_INCLUDE_ACCOUNT_ID": {
         "label": "Logga in kontoid",
         "description": "Inkludera kontoprefix i AUTH-loggrader (t.ex. \"Använder '<provider>'-konto: abc12345...\"). Inaktiverat som standard så att kontoidentifierare redigeras från delade/multi-tenant-processloggar. Oberoende från felsläckningsläge; att växla felsläckningsläget exponerar inte detta."
@@ -14535,9 +14541,9 @@
         "label": "Avsiktning vid återförsök: Hoppa över 403/410-avvisanden",
         "description": "När alla konton är i avsvällningsläge och den avsvällning som upphör först orsakades av ett 403 (tillträde nekat) eller ett 410 (borttaget) svar, returnera avvisandet omedelbart istället för att vänta ut avsvällningen och skicka om begäran; ett förnyat agentrouter-anslutningsspecifikt kvot 403 lagras då med errorCode 429 så att det förblir försökerbart. Avaktiverat som standard: endast ett 401 hoppar över väntan, och varje avvisande lagras med den status med vilken det mottogs."
       },
-      "UNPRICED_USAGE_BUDGET_POLICY": {
-        "label": "Policy för oprissad användningsbudget",
-        "description": "Hur per-nyckel dagliga/veckovisa USD-gränser behandlar lyckad användning vars leverantör/modell inte har någon prisrad. fail_closed (standard) markerar perioden som överskriden, så att en okänd kostnad aldrig kan smyga förbi ett hårt tak. count_as_zero räknar den användningen som $0 och fortsätter att tillämpa den prissatta förbrukningen. Oprissatta modeller listas på instrumentpanelens startsida i båda fallen."
+      "COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE": {
+        "description": "I komprimeringscachestatistiken räknar du en komprimerad begäran till en leverantör av automatisk prefix-cache (OpenAI, Codex, Azure eller en anpassad anslutning som deklarerar promptcache med markeringsstrippning) som en uppskattad cacheträff även utan cache_control markörer. Uppskattningen är en signal för cacheberättigande, inte en observerad träff, så den rapporterade träfffrekvensen för dessa leverantörer trendar mot 100 %. Av som standard: endast en begäran som bär cache_control markörer till en cachingleverantör räknas som en uppskattad träff, så leverantörer av automatiska prefix fortsätter att rapportera 0.",
+        "label": "Komprimeringscachestatistik: Kvalificering för automatiskt prefix"
       }
     }
   },

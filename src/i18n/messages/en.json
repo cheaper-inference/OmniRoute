@@ -3599,19 +3599,6 @@
     "autoComboTestTruncated": "Tested {tested} of {total} live candidates (highest weights first).",
     "controlCenter": "Control Center",
     "createCombo": "Create Combo",
-    "exportCombos": "Export",
-    "exportCombosFailed": "Failed to export combos",
-    "importCombos": "Import",
-    "importCombosTitle": "Import combos",
-    "importCombosInvalidFile": "This file is not a valid combos export.",
-    "importCombosSummary": "Combos in the file: {total} ({fresh} new, {conflicting} with a name that already exists).",
-    "importCombosMergeHint": "Merge keeps every existing combo and skips the ones whose name already exists. Connections and credentials are never imported.",
-    "importCombosReplaceHint": "Replace all deletes your existing combos ({current}) and imports the file instead. This cannot be undone.",
-    "importCombosMerge": "Merge",
-    "importCombosReplace": "Replace all",
-    "importCombosDone": "Combos imported: {created}. Skipped: {skipped}.",
-    "importCombosFailed": "Failed to import combos",
-    "importCombosWarnings": "Imported with warnings",
     "editCombo": "Edit Combo",
     "deleteCombo": "Delete Combo",
     "noModels": "No models",
@@ -4224,7 +4211,22 @@
     "duplicateAutoComboSnapshotMsg": "This will snapshot the currently connected providers/models that match this template into an editable combo.",
     "duplicateAutoComboFailedPrefix": "Failed to duplicate auto-combo:",
     "duplicateAutoComboUnknownError": "Unknown error",
-    "duplicateAutoComboTitle": "Create a static combo from {name}"
+    "duplicateAutoComboTitle": "Create a static combo from {name}",
+    "exportCombos": "Export",
+    "exportCombosFailed": "Failed to export combos",
+    "importCombos": "Import",
+    "importCombosTitle": "Import combos",
+    "importCombosInvalidFile": "This file is not a valid combos export.",
+    "importCombosSummary": "Combos in the file: {total} ({fresh} new, {conflicting} with a name that already exists).",
+    "importCombosMergeHint": "Merge keeps every existing combo and skips the ones whose name already exists. Connections and credentials are never imported.",
+    "importCombosReplaceHint": "Replace all deletes your existing combos ({current}) and imports the file instead. This cannot be undone.",
+    "importCombosMerge": "Merge",
+    "importCombosReplace": "Replace all",
+    "importCombosDone": "Combos imported: {created}. Skipped: {skipped}.",
+    "importCombosFailed": "Failed to import combos",
+    "importCombosWarnings": "Imported with warnings",
+    "reorderAll": "Reorder all",
+    "reorderAllDescription": "Reordering all {count} combos. Drag handles are enabled."
   },
   "costs": {
     "title": "Costs",
@@ -7067,11 +7069,6 @@
     "anonymousFallbackEnabled": "Anonymous fallback enabled for {provider}",
     "anonymousFallbackDisabled": "Anonymous fallback disabled for {provider} — exhausted connections will skip this provider",
     "anonymousFallbackUpdateFailed": "Failed to update anonymous fallback setting",
-    "retryDelayTitle": "Retry delay",
-    "retryDelayDesc": "How long a connection rests after a rate-limit error when the provider does not say when to retry. Auto uses the built-in backoff; a reset time sent by the provider always wins.",
-    "retryDelayAuto": "Auto",
-    "retryDelaySaved": "Retry delay saved",
-    "retryDelayUpdateFailed": "Failed to update retry delay",
     "batchDeleteFailed": "Batch delete failed",
     "batchDeleteNetworkError": "Network error during batch delete",
     "batchUpdateFailed": "Batch update failed",
@@ -7171,7 +7168,12 @@
     "chatgptConnectorLabel": "ChatGPT custom connector",
     "doctorChecking": "Checking status…",
     "doctorCheck": "Check doctor status",
-    "fallbackRetryBackendTitle": "Fallback retry backend"
+    "fallbackRetryBackendTitle": "Fallback retry backend",
+    "retryDelayTitle": "Retry delay",
+    "retryDelayDesc": "How long a connection rests after a rate-limit error when the provider does not say when to retry. Auto uses the built-in backoff; a reset time sent by the provider always wins.",
+    "retryDelayAuto": "Auto",
+    "retryDelaySaved": "Retry delay saved",
+    "retryDelayUpdateFailed": "Failed to update retry delay"
   },
   "settings": {
     "title": "Settings",
@@ -14332,6 +14334,10 @@
         "label": "Protected-Priority Infra Stops as 502",
         "description": "Answer 502 instead of 503 when a quota-only-fallback priority target stops the combo for a cause that is provably not quota: an open provider circuit breaker or a predictive latency skip."
       },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Unpriced Usage Budget Policy",
+        "description": "How per-key daily/weekly USD limits treat successful usage whose provider/model has no pricing row. fail_closed (default) marks the window as exceeded, so an unknown cost can never slip past a hard cap. count_as_zero counts that usage as $0 and keeps enforcing the priced spend. Unpriced models are listed on the dashboard home page either way."
+      },
       "AUTH_LOG_INCLUDE_ACCOUNT_ID": {
         "label": "Log Account IDs",
         "description": "Include account prefix in AUTH log lines (e.g. \"Using '<provider>' account: abc12345...\"). Disabled by default so account identifiers are redacted from shared/multi-tenant process logs. Independent from Debug Mode; flipping Debug Mode does not reveal this."
@@ -14612,9 +14618,9 @@
         "label": "Cooldown Retry: Skip 403/410 Refusals",
         "description": "When every account is cooling down and the cooldown that ends first was caused by a 403 (access refused) or a 410 (gone), return that refusal at once instead of waiting the cooldown out and re-sending the request; a renewing agentrouter connection-scoped quota 403 is then persisted with errorCode 429 so it stays retryable. Off by default: only a 401 skips the wait, and every refusal is persisted with the status it arrived with."
       },
-      "UNPRICED_USAGE_BUDGET_POLICY": {
-        "label": "Unpriced Usage Budget Policy",
-        "description": "How per-key daily/weekly USD limits treat successful usage whose provider/model has no pricing row. fail_closed (default) marks the window as exceeded, so an unknown cost can never slip past a hard cap. count_as_zero counts that usage as $0 and keeps enforcing the priced spend. Unpriced models are listed on the dashboard home page either way."
+      "COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE": {
+        "description": "In the compression cache stats, count a compressed request to an automatic-prefix-caching provider (OpenAI, Codex, Azure, or a custom connection that declares prompt caching with marker stripping) as an estimated cache hit even without cache_control markers. The estimate is a cache-eligibility signal, not an observed hit, so the reported hit rate for those providers trends toward 100%. Off by default: only a request carrying cache_control markers to a caching provider counts as an estimated hit, so automatic-prefix providers keep reporting 0.",
+        "label": "Compression Cache Stats: Automatic-Prefix Eligibility"
       }
     }
   },

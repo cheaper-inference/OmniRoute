@@ -20,7 +20,7 @@ Kiedy agent IDE (np. GitHub Copilot, Cursor, Claude Code) wykonuje wywołanie AP
 
 Oznacza to, że możesz:
 
-- **Przekieruj dowolnego agenta do dowolnego dostawcy** : Copilot rozmawia z OpenAI? Przekieruj go do Anthropic Claude, Gemini lub dowolnego z 380 dostawców OmniRoute.
+- **Przekieruj dowolnego agenta do dowolnego dostawcy** : Copilot rozmawia z OpenAI? Przekieruj go do Anthropic Claude, Gemini lub dowolnego z 381 dostawców OmniRoute.
 - **Zastosuj mapowania modelu** : `gemini-3-flash` → `claude-sonnet-4.7` w sposób przezroczysty na poziomie modułu obsługi.
 - **Obserwuj cały ruch agentów** : każde przechwycone żądanie jest publikowane dla [Inspektora Ruchu](./TRAFFIC_INSPECTOR.md).
 - **Zastosuj odporność OmniRoute** : routing kombinowany, wyłączniki automatyczne, rezerwy i śledzenie kosztów również dla ruchu agenta IDE.
@@ -168,13 +168,15 @@ AGENTBRIDGE_UPSTREAM_CA_CERT=/path/to/corporate-ca.pem
 
 Po ustawieniu konfiguruje globalny dispatcher `undici` o dodatkowy certyfikat CA, dzięki czemu AgentBridge może dotrzeć do upstreamowych providerów przez korporacyjne proxy terminujące TLS.
 
-### 2.7 Maskowanie sekretów (`src/mitm/maskSecrets.ts`)
+### 2.7 Maskowanie tajne (`src/mitm/maskSecrets.ts`)
 
-Stosowane do wszystkich ciał żądań i nagłówków **zanim** trafią do bufora Traffic Inspector lub jakiegokolwiek logu:
+Niezależny skaner pomieszczeń czystych jest stosowany do treści żądań i nagłówków poświadczeń **zanim** wchodzą do bufora Inspektora ruchu lub dowolnego dziennika. Wykonuje pojedynczy przebieg liniowy:
 
-- Tokeny z prefiksem `sk-` / `ak-` / `pk-` (styl OpenAI/Anthropic)
-- Nagłówki `Authorization: Bearer <token>`
-- Generyczne długie tokeny (≥40 znaków)
+- Tokeny z prefiksem `sk-` / `ak-` / `pk-` (OpenAI/Anthropic-style)
+- Poświadczenia RFC 6750 `Authorization: Bearer <token>` z pierwszeństwem całego tokenu
+- Ogólne, długie, nieprzezroczyste tokeny (≥ 40 znaków), w tym formularze kropkowane i wyściełane
+
+`sanitizeHeaders()` zachowuje nazwy małymi literami, deterministycznie łączy wartości tablicy, usuwa współdzieloną listę odrzuconych hop-by-hop/framing (w tym uwierzytelnianie proxy), całkowicie redaguje `cookie` i `set-cookie` oraz deleguje wartości poświadczeń do skanera.
 
 ---
 

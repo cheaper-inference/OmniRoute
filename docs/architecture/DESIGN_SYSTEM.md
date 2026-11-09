@@ -1,6 +1,6 @@
 ---
 title: "Design System & Visual Identity"
-lastUpdated: 2026-11-03
+lastUpdated: 2026-11-04
 ---
 
 # OmniRoute — Design System & Visual Identity
@@ -11,17 +11,31 @@ lastUpdated: 2026-11-03
 > theme; the default preference is `system`. The default palette is the kit's **Editions** appearance
 > (warm paper neutrals and the copper accent `#e5ac82`, `packages/ui-kit/src/ci-editions.css`); Settings →
 > Appearance → Color palette offers **Classic**, the kit's base tokens with the lime accent. Switzer is
-> the single family for UI, display and code text (`--ci-font-ui`; `--ci-font-display` and
+> the primary family for UI and display text (`--ci-font-ui`; `--ci-font-display` and
 > `--ci-font-mono` resolve to it), self-hosted by the kit itself (`packages/ui-kit/src/ci-fonts.css`,
-> imported by `ci-tokens.css`). Scripts Switzer lacks fall through glyph by glyph (`src/app/globals.css`):
-> Inter for Cyrillic, Greek and Vietnamese and, only under `html[dir="rtl"]`, Vazirmatn for Arabic script.
-> Every icon is a Lucide glyph.
+> imported by `ci-tokens.css`). Every icon is a Lucide glyph.
+>
+> Inter is a fallback for glyphs missing from Switzer; `--font-mono` maps to the system monospace stack `--ci-font-code`.
+>
+> `src/app/globals.css` selects fallback fonts per glyph when `Switzer` lacks a glyph: `Inter` for Cyrillic, Greek and Vietnamese, and `Vazirmatn` for Arabic script only under `html[dir="rtl"]`.
+
+`src/app/globals.css`:
+
+```css
+:root,
+.ci-theme {
+  --ci-font-ui:
+    "Switzer", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  --ci-font-code: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --font-mono: var(--ci-font-code);
+}
+```
 
 ## 1. Where things live
 
 - **Kit.** `packages/ui-kit/src` is a byte-for-byte copy of the upstream `src/` at the commit pinned in
   `packages/ui-kit/UPSTREAM.md` (which also records the license authorization); `PATCHES.md` lists local
-  patches (none). It is consumed as source, with no build: `next.config.mjs` transpiles it, and
+  patches. It is consumed as source, with no build: `next.config.mjs` transpiles it, and
   `tsconfig.json` maps `@omniroute/ui-kit` → `packages/ui-kit/src` and `@omniroute/ui-kit/*` →
   `packages/ui-kit/src/*` (`vitest.config.ts` and `vitest.mcp.config.ts` carry the same alias). Import a
   kit component by its subpath (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…), never
@@ -190,13 +204,14 @@ closed, or no PR token is set) the workflow keeps one tracking issue open that s
 
 The workflow uses two secrets:
 
-- `secrets.UI_KIT_READ_TOKEN`: a read-only token for the private upstream repo. When the workflow can't
-  read upstream (no token, a token that stopped working, or GitHub unreachable) the run stays green but
-  writes a warning and keeps one separate issue open, which closes itself once a later run can read
-  upstream again.
+- `secrets.UI_KIT_READ_TOKEN`: a read-only token for the private upstream repo. When the upstream
+  check cannot read data (no token, a token that stopped working, or GitHub unreachable), it reports
+  `unknown` and exits with code `0`. The workflow writes a warning and tries to keep one separate
+  tracking issue open; a later successful run closes it after access returns. A failure of the GitHub
+  issue API fails the job.
 - `secrets.UI_KIT_SYNC_PR_TOKEN`: a fine-grained token on this repository with Contents and Pull requests
-  write access. The default `GITHUB_TOKEN` can't create PRs here, and a PR it opened wouldn't trigger CI.
-  Without this token the workflow only pushes the branch.
+  write access. This workflow opens or updates synchronization PRs only when the dedicated token is
+  configured; without it, the workflow pushes the branch and reports that no PR was opened.
 
 `scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` copies the upstream `src/` at that commit (`latest`
 = the newest `v*` tag) into `packages/ui-kit/src`, applies the single allowed transformation (it drops
@@ -235,15 +250,15 @@ generator's output (job `test-unit`).
   `free-tier-budget` needs `node --import tsx/esm` because its figures come from the live catalog loader in
   `open-sse/config/freeModelCatalog.ts`; the CI consequence of a catalog change is in
   `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`). Commit the generator and the SVG together.
-- **Proof.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` renders a file the way GitHub serves
-  it (an `<img>` tag, camo's `Content-Security-Policy`, `image/svg+xml`), captures a light and a dark frame
-  and reports the external font requests the page made (must be 0).
+- **Proof.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` renders a file using an `<img>` tag,
+  a restrictive `Content-Security-Policy` and an `image/svg+xml` response in the local probe. It captures
+  a light and a dark frame and reports the external font requests the page made (must be 0).
 - **Budget.** Under 200 KB per file (each staleness test asserts it); 500 KB is the hard cap for any README
   image (the SVG studio validator's rule).
-- **Copy unchanged, counts from the gate.** The rebrand changed type and palette, not words: each generator
+- **Shared copy, counts from the gate.** Each generator
   carries its diagram's copy in a `*_COPY` constant (or builds it from the live catalog) that is both the
-  drawn text and the input of the outlining step. Canonical figures stay in `<text>` nodes (invisible once
-  outlined, `fill-opacity:0`), read by `check:docs-counts`
+  drawn text and the input of the outlining step. Canonical figures stay in `<text>` nodes
+  (invisible once outlined, `fill-opacity:0`), read by `check:docs-counts`
   (`scripts/check/check-docs-counts-sync.mjs`); the staleness tests of the diagrams that gate reads also run
   its validators on the generated file, so a figure that drifts from the code fails the test — fix the
   source the gate reads, never the number in the generator.

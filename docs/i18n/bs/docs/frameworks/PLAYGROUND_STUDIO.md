@@ -4,8 +4,6 @@
 
 ---
 
-# Playground Studio
-
 > **Funkcionalnost:** Playground Studio — jedinstveno radno okruženje za testiranje AI-a za `/dashboard/playground`.
 > **Planovi:** `17-playground-studio-redesign.plan.md` + `_orchestration/master-plan-group-C.md`
 > **Status:** Objavljeno u v3.8.6

@@ -25,27 +25,30 @@ omniroute launch --profile glm52  # Claude Code yana amfani da glm/glm-5.2 ta ha
 
 ---
 
-## Yadda lambar Claude ke haɗawa zuwa gateway
+## Yadda Claude Code ke haɗuwa da gateway
 
-Claude Code yayi magana da**Anthropic Saƙonni API** kuma an nuna shi a ƙarshen al'ada tare da masu canjin yanayi (ba shi da tutar `--base-url` ):
+Claude Code yana sadarwa da **Anthropic Messages API** kuma ana nuna masa endpoint
+na musamman ta hanyar environment variables (ba shi da tutar `--base-url`):
 
-| Mai canzawa                                  | Manufar                                                                                          |
-| -------------------------------------------- | ------------------------------------------------------------------------------------------------ |
-| `ANTHROPIC_BASE_URL`                         | Tushen URL (Kofin Claude ya haɗa `/v1/messages`).** Babu kari na `/v1`.**                        |
-| `ANTHROPIC_AUTH_TOKEN`                       | Aika azaman `Authorization: Bearer …` — yi amfani da alamar samun damar OmniRoute / maɓallin API |
-| `ANTHROPIC_API_KEY`                          | Madadin: aika a matsayin `x-api-key`. Idan duka an saita, `ANTHROPIC_AUTH_TOKEN` yayi nasara     |
-| `ANTHROPIC_MODEL`                            | Ƙaddamar da takamaiman samfuri (ya ƙetare tsohuwar zaɓen `/model` )                              |
-| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → ɗan asalin `/model` picker ya lissafa `claude*`/`anthropic*` samfuri daga `/v1/models`     |
-| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | Alamar fitarwa ta kowace amsa (misali `65536`)                                                   |
-| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | Matsakaicin alamar don haɗawa ta atomatik                                                        |
+| Variable                                     | Manufa                                                                                                       |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `ANTHROPIC_BASE_URL`                         | Tushen URL na gateway (Claude Code yana ƙara `/v1/messages`). **Ba tare da ƙarin `/v1` ba.**                 |
+| `ANTHROPIC_AUTH_TOKEN`                       | Ana aika shi a matsayin `Authorization: Bearer …` — yi amfani da token/API key na OmniRoute                  |
+| `ANTHROPIC_API_KEY`                          | Madadin: ana aika shi a matsayin `x-api-key`. Idan an saita duka biyun, `ANTHROPIC_AUTH_TOKEN` ne ke rinjaye |
+| `ANTHROPIC_MODEL`                            | Tilasta amfani da takamaiman samfuri (yana maye gurbin tsohon zaɓin `/model`)                                |
+| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → zaɓen asali na `/model` yana jera samfuran `claude*`/`anthropic*` daga `/v1/models`                    |
+| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | Iyakance output tokens na kowace amsa (misali `65536`)                                                       |
+| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | Matsayin token da zai kunna matsewa ta atomatik                                                              |
 
-> Ana karanta env vars** sau ɗaya a farawa** — zata sake kunna lambar Claude bayan canza su.
+> Ana karanta environment variables **sau ɗaya kawai a lokacin farawa** — sake kunna Claude Code bayan canza su.
 
-Don takardar shaidar da ke juyawa maimakon tsayayyen kirtani, saita `apiKeyHelper` a cikin `~/.claude/settings.json` zuwa umarni wanda ke buga takardar shaidar yanzu zuwa stdout. Lambar Claude tana adana kayan aikinta na mintuna biyar ta tsohuwa (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` ya soke wancan) kuma yana aika ƙimar a duka `Authorization: Bearer` da `x-api-key`. Rubutun dole ne ya buga takardar shaidar kuma ba wani abu ba — banner tare da shi ya kasa mataimaki akan v2.1.227 +.
+Don amfani da shaidar shiga da ke sauyawa maimakon rubutu na dindindin, saita `apiKeyHelper` a cikin `~/.claude/settings.json` zuwa umarnin da ke fitar da shaidar shiga ta yanzu zuwa stdout. Claude Code yana adana fitowarsa a cache na mintuna biyar a matsayin tsohon saiti (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` yana canza wannan lokaci), kuma yana aika ƙimar a cikin duka `Authorization: Bearer` da `x-api-key`. Dole ne script ɗin ya fitar da shaidar shiga kaɗai; ƙarin saƙon banner tare da ita yana sa mataimakin ya gaza a v2.1.227+.
 
-Wannan shine yadda Entra ID SSO ke aiki: `scripts/cli/omniroute-sso.mjs token` yana buga alamar shiga Entra na ɗan gajeren lokaci wanda OmniRoute ke tantancewa maimakon maɓallin API. Duba [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md).
+Haka Entra ID SSO yake aiki: `scripts/cli/omniroute-sso.mjs token` yana fitar da token na shiga Entra mai ɗan gajeren lokaci, wanda OmniRoute ke tantancewa maimakon maɓallin API. Duba [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md).
 
-`omniroute launch` ya saita muku waɗannan duka: yana warware tushen URL + alamar daga mahallin aiki (don haka `omniroute connect <vps>` sannan `omniroute launch` yana aiki kawai), lafiya-duba uwar garken, kuma yana aiwatar da `claude`.
+`omniroute launch` yana saita maka duk waɗannan: yana gano base URL + token
+daga mahallin da ke aiki (saboda haka `omniroute connect <vps>` sannan `omniroute launch`
+kawai zai yi aiki), yana duba lafiyar sabar, sannan yana aiwatar da `claude`.
 
 ---
 

@@ -81,6 +81,18 @@ A proxyk a blokkolt régiókon kívül is hasznosak:
 
 ---
 
+## Alapértelmezett proxy állapot az új fiókokhoz
+
+In** Beállítások → Proxy → Globális konfiguráció** , használja** Alapértelmezés szerint engedélyezze a proxyt az új kapcsolatokhoz** az újonnan hozzáadott szolgáltatói fiókok kezdeti proxyállapotának kiválasztásához.
+
+Az új beállítás szabályozza az újonnan hozzáadott szolgáltatói fiókok kezdeti proxy állapotát. Nem módosítja a meglévő fiókokat, és nem cseréli le a globális proxykapcsolót. Kezdeti értéke megőrzi a korábbi viselkedést. Kapcsolja ki egyszer, ha jövőbeli fiókokat szeretne létrehozni úgy, hogy a proxy alapértelmezés szerint le van tiltva.
+
+A preferenciát a `defaultNewConnectionProxyEnabled` néven tárolja a meglévő API beállításokon keresztül. Alapértelmezés szerint `true`, amikor soha nem menti. `false` mentése a következő új fiókoknál újraindítás nélkül lép életbe. `POST /api/providers` elfogad egy opcionális szigorú logikai `proxyEnabled`; az explicit `true` vagy `false` elsőbbséget élvez a létrehozási alapértelmezett értékkel szemben. A duplikált fiók kihagyása vagy OAuth reconnect megőrzi a fiók tárolt állapotát. Az egyéni fiókok ezután is engedélyezhetők vagy letilthatók.
+
+A szelektív szolgáltatói átvitel a céltelepítés alapértelmezett beállításait használja az új fiókokhoz, és megőrzi a célházirendet a meglévő fiókok cseréjekor. A proxy kapcsolók nem hordozható átviteli mezők. A teljes biztonsági másolat-visszaállítás és a történelmi JSON/SQL -migráció megtartja meglévő visszaállítási szemantikáját, beleértve a mentett fiókértékeket és a régi séma alapértelmezett beállításait; a beállítások teljes visszaállítása is visszaállíthatja ezt a preferenciát.
+
+Ez a beállítás nem rendel hozzá proxyt, és nem állapítja meg, hogy az egészséges vagy használatban van-e. A tényleges útválasztás továbbra is a globális proxykapcsolótól és az alkalmazandó proxykonfigurációtól függ. A megőrzött fiók nélküli szintetikus szolgáltatók, a fiók létrehozása előtti OAuth forgalom, environment/system proxy-k és a külső háttérrendszerek hálózata nem tartozik a hatálya alá.
+
 ## Négyszintű proxyrendszer
 
 Az OmniRoute **négy független hatókörben** támogatja a proxykonfigurációt, amelyek kiértékelése prioritási sorrendben történik:
@@ -381,7 +393,7 @@ A `wreq-js` használatával böngészőszerű TLS-ujjlenyomatokat generál, megk
 
 ### CLI-ujjlenyomat egyeztetése
 
-A **CLI-ujjlenyomat kapcsoló** (`Beállítások → Biztonság`) átrendezi a HTTP-fejléceket és a JSON-törzs mezőit, hogy azok pontosan megfeleljenek a natív CLI-binárisok (Claude Code, Codex stb.) aláírásának. Ez a proxy használatán **felül** működik:
+A **CLI-ujjlenyomat kapcsoló** (`Settings → Security`) átrendezi a HTTP-fejléceket és a JSON-törzs mezőit, hogy azok pontosan megfeleljenek a natív CLI-binárisok (Claude Code, Codex stb.) aláírásának. Ez a proxy használatán **felül** működik:
 
 ```
 Az Ön IP-je (blokkolva) → Proxy IP-je (USA) → Szolgáltatói API

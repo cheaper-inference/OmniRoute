@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import {
   computeRetryDelayOverrides,
   retryDelaySelectValue,
-} from "../components/ProviderRetryDelaySelect";
+} from "../../../src/app/(dashboard)/dashboard/providers/[id]/components/ProviderRetryDelaySelect";
 
 describe("ProviderRetryDelaySelect override-map helpers", () => {
   it("sets rateLimitCooldownSeconds and keeps the provider's other fields and other providers", () => {

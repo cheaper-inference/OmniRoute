@@ -11,13 +11,13 @@ seus picos medidos. A máquina só fica com recursos sobrealocados quando uma co
 webpack do Release-Green e uma tarefa de lint; a swap do host (16 GB) absorve isso e, como as compilações de pull requests são executadas
 em runners hospedados, o slot do Turbopack fica ocioso na maior parte do tempo:
 
-| runner               | rótulo               | função                                                                                                                                                                | `MemoryHigh` / `MemoryMax` | `CPUQuota` |
-| -------------------- | -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | ---------- |
-| `omniroute-113-5`    | `omni-build`         | Compilações do Turbopack: `ci.yml` `Build` (somente push/dispatch), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, a compilação noturna de a11y | 56 GB / 60 GB (swap 0)     | 1600 %     |
-| `omniroute-113-6`    | `omni-release`       | Release-Green (`release-green` + `main-green`), compilação webpack                                                                                                    | 20 GB / 24 GB (swap 4 GB)  | 800 %      |
-| `omniroute-113-2`    | `omni-light`         | execuções noturnas (Schemathesis, promptfoo, garak, k6) e `quality.yml` `lint-guard`                                                                                  | 12 GB / 16 GB (swap 4 GB)  | 600 %      |
-| `omniroute-113`      | `omni-light`         | mesmo pool acima                                                                                                                                                      | 8 GB / 12 GB               | 400 %      |
-| OmniHeuris, OmniMind | (repositórios deles) | somente Dependabot (pico de 155 MB cada, 2026-10-18)                                                                                                                  | 4 GB / 6 GB                | 200 % cada |
+| runner               | rótulo                          | função                                                                                                                                                                | `MemoryHigh` / `MemoryMax` | `CPUQuota` |
+| -------------------- | ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | ---------- |
+| `omniroute-113-5`    | `omni-build`, `omni-build-60gb` | Compilações do Turbopack: `ci.yml` `Build` (somente push/dispatch), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, a compilação noturna de a11y | 56 GB / 60 GB (swap 0)     | 1600 %     |
+| `omniroute-113-6`    | `omni-release`                  | Release-Green (`release-green` + `main-green`), compilação webpack                                                                                                    | 20 GB / 24 GB (swap 4 GB)  | 800 %      |
+| `omniroute-113-2`    | `omni-light`                    | execuções noturnas (Schemathesis, promptfoo, garak, k6) e `quality.yml` `lint-guard`                                                                                  | 12 GB / 16 GB (swap 4 GB)  | 600 %      |
+| `omniroute-113`      | `omni-light`                    | mesmo pool acima                                                                                                                                                      | 8 GB / 12 GB               | 400 %      |
+| OmniHeuris, OmniMind | (repositórios deles)            | somente Dependabot (pico de 155 MB cada, 2026-10-18)                                                                                                                  | 4 GB / 6 GB                | 200 % cada |
 
 Medições de 2026-10-18:
 
@@ -27,12 +27,13 @@ Medições de 2026-10-18:
 | swap      | 16 GB                            | `omniroute-113-5` é executado com a swap desativada (`MemorySwapMax=0`), portanto uma compilação fora de controle é encerrada ao atingir seu limite, em vez de levar a máquina a usar swap                                                                                                                                                                                                                                  |
 | `/tmp`    | **tmpfs de 12 GB = RAM**         | tudo o que for armazenado ali ocupa memória; resíduos são removidos após 3 h                                                                                                                                                                                                                                                                                                                                                |
 | CPU       | carga 60 observada em 32 núcleos | antes das cotas, uma compilação do Turbopack (~1166 % de CPU) mais uma suíte de cobertura na mesma máquina privavam os heartbeats dos outros listeners de recursos (`The self-hosted runner lost communication`, #16853)                                                                                                                                                                                                    |
-| runners   | **7 listeners** (2026-10-28)     | 5 do OmniRoute + OmniHeuris + OmniMind; `omniroute-113-7` também carrega `omni-build`; `omniroute-113-3/-4/-8` foram removidos do repositório (2026-10-28)                                                                                                                                                                                                                                                                  |
+| runners   | **7 listeners** (2026-10-28)     | 5 do OmniRoute + OmniHeuris + OmniMind; `omniroute-113-5` também carrega `omni-build-60gb`; `omniroute-113-3/-4/-8` foram removidos do repositório (2026-10-28)                                                                                                                                                                                                                                                             |
 
 Os limites ficam no arquivo `/etc/systemd/system/actions.runner.<…>.service.d/override.conf` de cada unidade
 (os valores anteriores foram mantidos como `override.conf.bak-20261018`) e foram aplicados em tempo real com
 `systemctl set-property --runtime … MemoryHigh=… MemoryMax=… CPUQuota=…` — sem reinicialização, portanto nenhuma
-tarefa em execução foi afetada. Os rótulos são alterados por meio da API de runners (`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
+tarefa em execução foi afetada. Os rótulos são alterados por meio da API de runners
+(`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
 `gh api -X POST repos/<repo>/actions/runners/<id>/labels -f 'labels[]=<label>'`), também em tempo real.
 
 ## Instale o processo de limpeza (uma única vez, no servidor)
@@ -78,7 +79,7 @@ vez, somente quando estiver ocioso**, executando a verificação de ociosidade e
 ## Regras operacionais
 
 - **Uma compilação do Turbopack por vez — imposta por rótulo.** Todo job que executa um
-  `next build` completo com Turbopack usa `[self-hosted, omni-build]`, e somente o
+  `next build` completo com Turbopack usa `[self-hosted, omni-build, omni-build-60gb]`, e somente o
   **`omniroute-113-5`** possui esse rótulo: `ci.yml` `Build`, `npm-publish.yml` `publish`,
   `nightly-v4-build`, `preview-artifact`, a compilação noturna de a11y (#16853) e
   `docker-publish.yml` **amd64** (webpack dentro do BuildKit — o Turbopack entrou em pânico ali,

@@ -20,14 +20,16 @@
 
 ## Способы установки
 
-### npm (рекомендуется)
+### НПМ (рекомендуется)
 
 ```bash
 npm install -g omniroute
 omniroute
 ```
 
-Панель управления откроется по адресу `http://localhost:20128`, а базовый URL API — `http://localhost:20128/v1`.
+Панель мониторинга открывается в `http://localhost:20128`, а база API URL — `http://localhost:20128/v1`.
+
+> **Пользователи нпм:** Если npm предупреждает, что сценарии установки заблокированы (например, `omniroute`, `better-sqlite3`), см. [раздел Устранение неполадок — заблокированные сценарии установки npm](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install).
 
 ### pnpm
 
@@ -191,9 +193,9 @@ omniroute setup-qwen         # ~/.qwen/settings.json + ~/.qwen/.env
 
 ---
 
-## Настройка протоколов (MCP + A2A)
+## Настройка протокола (MCP + A2A)
 
-### Настройка MCP (Model Context Protocol)
+### Настройка MCP (протокол контекста модели)
 
 Запустите транспорт MCP в режиме stdio:
 
@@ -201,31 +203,31 @@ omniroute setup-qwen         # ~/.qwen/settings.json + ~/.qwen/.env
 omniroute --mcp
 ```
 
-Рекомендуемый процесс проверки:
+Рекомендуемый порядок проверки:
 
 ```bash
-# 1. Запустите сервер MCP
+# 1. Start MCP server
 omniroute --mcp
 
-# 2. Из клиента MCP вызовите:
-omniroute_get_health        # Должен вернуть состояние системы
-omniroute_list_combos       # Должен вернуть активные комбинации
+# 2. From your MCP client, call:
+omniroute_get_health        # Should return system health
+omniroute_list_combos       # Should return active combos
 
-# 3. Или запустите полный набор тестов E2E:
+# 3. Or run the full E2E suite:
 npm run test:protocols:e2e
 ```
 
-#### Настройка клиента MCP
+#### Конфигурация клиента MCP
 
-**Claude Code:**
+**Код Claude :**
 
 ```bash
-claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
 ```
 
 **Cursor / Cline:**
 
-Добавьте в настройки MCP:
+Добавьте в настройки MCP (stdio, с ключом, чтобы у вызывающего абонента был принципал):
 
 ```json
 {
@@ -233,31 +235,38 @@ claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp
     "omniroute": {
       "command": "omniroute",
       "args": ["--mcp"],
-      "env": {}
+      "env": {
+        "OMNIROUTE_API_KEY": "your-key",
+        "OMNIROUTE_BASE_URL": "http://localhost:20128"
+      }
     }
   }
 }
 ```
 
-**Полная документация по MCP:** [README сервера MCP](../../open-sse/mcp-server/README.md) — 110 инструментов, конфигурации IDE, клиенты Python/TS/Go.
+Или, если `mcpTransport` равен `streamable-http` (установите его на `/dashboard/mcp` или с помощью `omniroute mcp enable --transport streamable-http`), укажите запись удаленного сервера MCP клиента на `http://localhost:20128/api/mcp/stream`.
 
-### Настройка A2A (протокол Agent-to-Agent)
+Ключ передается как `Authorization: Bearer <api-key>` (см. [MCP Server → Удаленный доступ](../frameworks/MCP-SERVER.md#remote-access-manage-scope-bypass) для удаленных хостов; для удаленного ключа требуется `mcp:connect` плюс его области действия read/write ).
 
-Проверьте Agent Card:
+**Полная документация MCP :** [Сервер MCP инструменты README](../../open-sse/mcp-server/README.md) — 110, конфигурации IDE, клиенты Python/TS/Go. Справочник оператора по инструментам сжатия CCR/dedup (маркеры, предварительные условия, области для каждого инструмента, разбиение на страницы, диагностика): [Предварительные условия для механизмов сжатия → /руководство оператора](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+
+### Настройка A2A (протокол между агентами)
+
+Проверьте карту агента:
 
 ```bash
 curl http://localhost:20128/.well-known/agent.json
 ```
 
-Отправьте задачу:
+Отправить задачу:
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
   -H 'content-type: application/json' \
-  -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"Дайте мне краткую сводку по квоте."}]}}'
+  -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"Give me a short quota summary."}]}}'
 ```
 
-**Полная документация по A2A:** [README сервера A2A](../../src/lib/a2a/README.md) — JSON-RPC 2.0, навыки, потоковая передача, жизненный цикл задач.
+**Полная документация A2A :** [Сервер A2A README](../../src/lib/a2a/README.md) — JSON-RPC 2.0, навыки, потоковая передача, жизненный цикл задач.
 
 ---
 
@@ -316,12 +325,12 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ---
 
-## Шаблон для Void Linux (xbps-src)
+## Шаблон Void Linux (xbps-src)
 
-Пользователи Void Linux могут собрать нативный пакет с помощью `xbps-src`. Сохраните этот блок как `srcpkgs/omniroute/template`:
+Пользователи Void Linux могут создать собственный пакет с помощью `xbps-src`. Сохраните этот блок как `srcpkgs/omniroute/template`:
 
 ```bash
-# Файл шаблона для 'omniroute'
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -332,7 +341,7 @@ maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# Создавайте контрольную сумму заново для каждого выпуска с помощью:
+# Regenerate the checksum for each release with:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

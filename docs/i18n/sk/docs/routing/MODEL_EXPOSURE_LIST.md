@@ -4,47 +4,74 @@
 
 ---
 
-> Prihlásenie, predvolene vypnuté (`modelVisibilityAllowlist`/`modelVisibilityDenylist` obe prázdne ponechajú katalóg `/v1/models` AND každý `auto/*` kandidátsky bajt fondu je identický). Súrodenec `hidePaidModels`/`hideAutoCombos` (`src/lib/db/settings.ts`) pre operátorov, ktorí chcú zoznam modelov z dôvodov, ktoré nemajú nič spoločné s cenou.
+> Voliteľné, predvolene vypnuté (ak sú `modelVisibilityAllowlist`/`modelVisibilityDenylist` obe prázdne,
+> katalóg `/v1/models` AJ každý fond kandidátov `auto/*` zostanú bajtovo identické). Súrodenecké nastavenie
+> k `hidePaidModels`/`hideAutoCombos` (`src/lib/db/settings.ts`) určené pre operátorov, ktorí chcú spravovaný
+> zoznam modelov z dôvodov, ktoré nijako nesúvisia s cenou.
 
-## Prečo toto existuje
+## Prečo to existuje
 
-`hidePaidModels` odpovedá "je tento model zadarmo?" a `hideAutoCombos` odpovedá "malo by sa vôbec inzerovať virtuálne ID `auto/*` ?" — ani neumožňuje operátorovi spravovať ľubovoľnú podmnožinu modelov (napr. prezentovať presne tie modely, ktoré by mal daný klient Claude Code / OpenCode vidieť, nezávisle od ceny). #11481 dodáva, že ako dve nezávislé, voliteľné nastavenia reťazca reťazcov.
+`hidePaidModels` odpovedá na otázku „je tento model bezplatný?“ a `hideAutoCombos` na otázku „majú sa
+virtuálne identifikátory `auto/*` vôbec propagovať?“ — ani jedno však operátorovi neumožňuje spravovať
+ľubovoľnú podmnožinu modelov (napr. zobraziť presne tie modely, ktoré má daný klient Claude Code / OpenCode
+vidieť, nezávisle od cien). #11481 túto možnosť pridáva ako dve nezávislé, voliteľné nastavenia typu pole
+reťazcov.
 
 ## Nastavenia
 
-| kľúč                       | Typ        | Predvolené | Význam                                                                       |
-| -------------------------- | ---------- | ---------- | ---------------------------------------------------------------------------- |
-| `modelVisibilityDenylist`  | `string[]` | `[]`       | Záznamy zodpovedajúce kandidátovi ho skryjú z fondu catalog/candidate.       |
-| `modelVisibilityAllowlist` | `string[]` | `[]`       | Ak nie sú prázdne, záznamy ONLY zodpovedajúce kandidátovi zostanú vystavené. |
+| Kľúč                       | Typ        | Predvolená hodnota | Význam                                                                       |
+| -------------------------- | ---------- | ------------------ | ---------------------------------------------------------------------------- |
+| `modelVisibilityDenylist`  | `string[]` | `[]`               | Položky zodpovedajúce kandidátovi ho skryjú z katalógu/fondu kandidátov.     |
+| `modelVisibilityAllowlist` | `string[]` | `[]`               | Ak nie je prázdny, zostanú zverejnené IBA položky zodpovedajúce kandidátovi. |
 
-Obidve akceptujú až 500 záznamov, z ktorých každý môže mať až 200 znakov (Zod-overené v `src/shared/validation/settingsSchemas.ts`). Záznam je buď:
+Obe nastavenia akceptujú najviac 500 položiek, z ktorých každá môže mať najviac 200 znakov (validované
+pomocou Zod v `src/shared/validation/settingsSchemas.ts`). Položka je buď:
 
-- presné katalógové ID — `"gpt-4o"` (holé ID modelu) alebo `"openai/gpt-4o"` (predponou poskytovateľa), alebo
-- vzor glob používajúci `*`/`?` — napr. `"openai/gpt-4*"` alebo `"anthropic/*"` — vyriešený prostredníctvom rovnakého zdieľaného porovnávača `globToRegex()` (`src/shared/utils/globPattern.ts`), ktorý už používajú kombinované mapovania `ModelRoutingSection` na model a `freeModels.ts::matchesOnlyPaidModels`.
+- presný identifikátor z katalógu — `"gpt-4o"` (samotný identifikátor modelu) alebo `"openai/gpt-4o"` (s predponou poskytovateľa), alebo
+- glob vzor používajúci `*`/`?` — napr. `"openai/gpt-4*"` alebo `"anthropic/*"` — vyhodnotený pomocou
+  rovnakého zdieľaného mechanizmu `globToRegex()` (`src/shared/utils/globPattern.ts`), ktorý už používajú
+  mapovania kombinácií pre jednotlivé modely v `ModelRoutingSection` a `freeModels.ts::matchesOnlyPaidModels`.
 
-Priorita: najskôr sa skontroluje zoznam zakázaných položiek (zakázaný záznam je vždy skrytý, aj keď sa tiež zhoduje so zoznamom povolených); keď zoznam povolených nie je prázdny, prežijú iba záznamy, ktorým vyhovuje.
+Priorita: najskôr sa kontroluje zoznam zakázaných položiek (zakázaná položka je vždy skrytá, aj keď
+zodpovedá aj zoznamu povolených položiek); ak zoznam povolených položiek nie je prázdny, zachovajú sa
+iba položky, ktoré mu zodpovedajú.
 
-## Dva škrtiace body, nie jeden
+## Dva kontrolné body, nie jeden
 
-Poučenie z #6512 (filter katalógu `hidePaidModels` -only stále umožňuje smerovanie `auto/*` do plateného modelu, pretože zoznam kandidátov na kombináciu bol zostavený nezávisle) tu platí identicky. Zodpovedajúci predikát `isModelExposureAllowed()` (`src/shared/utils/modelExposureList.ts`) sa volá z BOTH:
+Ponaučenie z #6512 (filter katalógu založený iba na `hidePaidModels` stále umožňoval, aby `auto/*`
+smerovalo na platený model, pretože fond kandidátov kombinácie sa zostavoval nezávisle) tu platí rovnako.
+Zodpovedajúci predikát `isModelExposureAllowed()` (`src/shared/utils/modelExposureList.ts`) sa volá
+na OBOCH miestach:
 
-- `src/app/api/v1/models/catalog.ts` — samotný výpis `/v1/models`, na rovnakých 5 tlmičových bodoch na zdroj `shouldHidePaid()` už brány (statické `PROVIDER_MODELS`, synchronizované riadky poskytovateľa, vlastné riadky, riadky zálohované aliasmi, riadky riadených záložných zdrojov).
-- `open-sse/services/autoCombo/modelExposureFilter.ts::filterModelExposureCandidates()` — volaný z `virtualFactory.ts::buildPreparedPool`, bezprostredne po ekvivalentnom volaní `filterPaidOnlyCandidates()`, takže odmietnutý model nemôže byť nikdy vybraný ani do skupiny kandidátov `auto/*`.
+- `src/app/api/v1/models/catalog.ts` — samotný zoznam `/v1/models`, v rovnakých 5 kontrolných bodoch
+  pre jednotlivé zdroje, ktoré už kontroluje `shouldHidePaid()` (statické `PROVIDER_MODELS`, synchronizované
+  riadky poskytovateľov, vlastné riadky, riadky založené na aliasoch, riadky spravovaných záložných možností).
+- `open-sse/services/autoCombo/modelExposureFilter.ts::filterModelExposureCandidates()` — volá sa
+  z `virtualFactory.ts::buildPreparedPool` bezprostredne po ekvivalentnom volaní
+  `filterPaidOnlyCandidates()`, takže zakázaný model nikdy nemožno vybrať ani do fondu kandidátov `auto/*`.
 
-## Čo je filtrované NOT
+## Čo sa NEFILTRUJE
 
-Zrkadlí existujúce správanie používateľa `hideAutoCombos`: odoslané ID modelu** výslovne** (nie cez `auto/*` a nezistené cez výpis v katalógu) nie je pri odoslaní nikdy blokované — je filtrované iba členstvo advertisement/candidate-pool. Toto je nezávislé od `hidePaidModels`; operátor môže chcieť upravenú množinu z dôvodov, ktoré nemajú nič spoločné s cenou, takže obe nastavenia sa skladajú ako nezávislé filtre typu AND, rovnako ako existujúca kompozícia s viacerými príznakmi v `catalog.ts`.
+Kopíruje existujúce správanie `hideAutoCombos`: identifikátor modelu odoslaný **explicitne** (nie
+prostredníctvom `auto/*` a nie nájdený cez zoznam katalógu) sa pri odosielaní nikdy neblokuje — filtruje
+sa iba propagácia/členstvo vo fonde kandidátov. Je to nezávislé od `hidePaidModels`; operátor môže chcieť
+spravovanú množinu z dôvodov, ktoré nijako nesúvisia s cenou, takže obe nastavenia sa kombinujú ako
+nezávislé filtre spojené operátorom AND, rovnako ako existujúca kombinácia viacerých príznakov v
+`catalog.ts`.
 
-Export nastavení (`GET /api/settings/export-json`) zahŕňa obe polia doslovne, ako každé iné pole nastavení — na rozdiel od filtra exportu s kombinovaným krokom `hidePaidModels` tu neexistuje žiadne riziko rehydratácie: odmietnuté id vložené do exportovaného kombinovaného kroku je vlastnou explicitnou voľbou smerovania operátora, nie niečo, čo musí hranica exportu odstrániť.
+Export nastavení (`GET /api/settings/export-json`) zahŕňa obe polia bezo zmeny, rovnako ako každé iné
+pole nastavení — na rozdiel od exportného filtra krokov kombinácie v `hidePaidModels` tu nehrozí riziko
+opätovnej hydratácie: zakázaný identifikátor vložený do exportovaného kroku kombinácie je vlastnou
+explicitnou voľbou smerovania operátora, nie niečím, čo musí hranica exportu odstrániť.
 
-## Výpis iba v kombinácii (`exposeCombosOnly`)
+## Výpis iba komb (`exposeCombosOnly`)
 
-Samostatná logická hodnota, predvolene tiež voliteľná a `false`, pre nasadenia, kde sú kombá verejným modelom a poskytovatelia sú iba backendy. Keď je to `true`, verejný zoznam (`GET /v1/models`, `GET /v1` a ďalšie `/v1` zisťovacie cesty postavené na `getUnifiedModelsResponse()`) uchováva iba riadky s `owned_by: "combo"`: používateľské kombá plus vstavané kombá `auto/*` (pokiaľ ich `hideAutoCombos` neskryje). Používa rovnaký test riadkov ako `catalogScope: "combos"` na kľúč a navrchu sa stále používajú vlastné filtre allow/deny/scope kľúča.
+Samostatná booleovská voľba, tiež voliteľne zapínaná a predvolene `false`, pre nasadenia, kde sú kombá verejným povrchom modelov a poskytovatelia iba backendmi. Pri `true` verejný výpis (`GET /v1/models`, `GET /v1` a ostatné objavovacie trasy `/v1` založené na `getUnifiedModelsResponse()`) ponechá iba riadky s `owned_by: "combo"`: používateľské kombá a vstavané kombá `auto/*` (pokiaľ ich neskryje `hideAutoCombos`). Používa rovnaký test riadkov ako `catalogScope: "combos"` pre jednotlivý kľúč; vlastné filtre povolenia, zákazu a rozsahu daného kľúča sa naďalej uplatnia navyše.
 
-Zapnite to** Nastavenia → Smerovanie → Modely API výpis** , alebo s `PATCH /api/settings {"exposeCombosOnly": true}`.
+Prepnite ju v **Settings → Routing → Models API listing** alebo pomocou `PATCH /api/settings {"exposeCombosOnly": true}`.
 
-Rovnako ako vyššie uvedené zoznamy, mení iba reklamu:
+Rovnako ako vyššie uvedené zoznamy mení iba zverejňovanie:
 
-- stále sa odosiela explicitné id `provider/model` a `GET /v1/models/{id}` ho stále rieši;
-- katalóg prístrojovej dosky (`GET /api/models/catalog`, používaný výbercami modelov) nie je zúžený;
-- nezrkadlí sa to do skupín kandidátov `auto/*`, takže kombá `auto/*` si ponechajú celú skupinu.
+- explicitné ID `provider/model` sa naďalej odošle a `GET /v1/models/{id}` ho naďalej vyhodnotí;
+- katalóg dashboardu (`GET /api/models/catalog`, používaný výbermi modelov) sa nezúži;
+- voľba sa nepremieta do skupín kandidátov `auto/*`, takže kombá `auto/*` si ponechajú úplnú skupinu.

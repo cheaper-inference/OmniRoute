@@ -910,14 +910,7 @@ något annat fält har angetts. För lite tas `additionalQueries`, `systemPrompt
 `subpages`, `subpageTarget`, `highlights.numSentences` och `highlights.highlightsPerUrl` skickas
 inte längre vidare.
 
-Kostnadsredovisningen använder det platta registret `costPerQuery`, förutom för Exa, som följer
-Exas egna priser: $0.007 per anrop för `auto` (och det äldre `fast`) eller $0.004 för `lite` (och
-det äldre `instant`), vilket täcker 10 resultat; $0.001 för varje ytterligare resultat; samt
-$0.001 per returnerat resultat när `contents.summary` är inställt. Tavily registreras till 1 kredit
-($0.008) för `search_depth` `basic`, `fast` och `ultra-fast`, samt 2 krediter ($0.016) för
-`advanced` ([Tavily API-krediter](https://docs.tavily.com/documentation/api-credits)). Ett anrop
-med `auto_parameters: true` som Tavily uppgraderar till advanced registreras fortfarande till
-1 kredit.
+Exa: 0,007 $ per samtal för `auto` (och den äldre `fast`) eller 0,004 $ för `lite` (och den äldre `instant`), som täcker 10 resultat; $0,001 för varje ytterligare resultat; och $0,001 per returnerat resultat när `contents.summary` är inställt. Tavily registreras till 1 poäng ($0,008) för `search_depth` `basic`, `fast` och `ultra-fast`, och 2 poäng ($0,016) för `advanced` ( [Tavily API credits](https://docs.tavily.com/documentation/api-credits) ). Ett samtal med `auto_parameters: true` som Tavily uppgraderar till avancerad spelas fortfarande in med 1 poäng.
 
 ---
 
@@ -1227,6 +1220,8 @@ X-OmniRoute-No-Cache: true
 
 ---
 
+<a id="cliproxyapi-management-compatibility"></a>
+
 ## Kompatibilitet med CLIProxyAPI-hantering
 
 OmniRoute besvarar de tre hanteringsendpoints för [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI)
@@ -1241,21 +1236,11 @@ serveras på `/v0/management/*` och `/api/v0/management/*`.
 | POST  | `/v0/management/api-call`    | Body `{ auth_index, method, url, header?, data? }`. Skickar en tillåten begäran med kontots token och returnerar `{ status_code, body }` |
 | POST  | `/v0/management/reset-quota` | Body `{ auth_index }`. Rensar anslutningens cooldown, modellblockeringar och Codex-cooldowns per omfång för ett konto                    |
 
-- `auth_index` är OmniRoutes anslutnings-ID. `provider` är `claude` eller `codex` (endast OAuth-
-  anslutningar; API-nyckelleverantören `anthropic` listas inte). För Codex är
-  `id_token.chatgpt_account_id` det lagrade arbetsområdes-ID:t och `plan_type` den lagrade planen.
-- `api-call` är inte en generell proxy. Den accepterar endast Claude `GET
+- `auth_index` är OmniRoute-anslutningens id. `provider` är `claude` eller `codex` (endast OAuth-anslutningar; API-nyckelleverantören `anthropic` listas inte). För Codex är `id_token.chatgpt_account_id` det lagrade arbetsyte-id:t och `plan_type` det lagrade abonnemanget.
+- `api-call` är ingen generell proxy. Den accepterar endast Claude `GET
 https://api.anthropic.com/api/oauth/usage` och Codex `GET
-https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits` samt
-  `POST .../wham/rate-limit-reset-credits/consume`, och då endast för ett konto från motsvarande
-  leverantör. Allt annat returnerar `403` utan att kontakta upstream. Anroparens
-  `Authorization`-header (inklusive platshållaren `$TOKEN$`) ignoreras: OmniRoute injicerar
-  anslutningens åtkomsttoken, uppdaterar den först när den snart löper ut och vidarebefordrar endast
-  tillåtna headers (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`;
-  `Accept`, `Content-Type`). Om `Chatgpt-Account-Id` saknas används det lagrade arbetsområdes-ID:t
-  som standard. Begäranden löper ut efter 15 sekunder och använder anslutningens proxy.
-- `reset-quota` lämnar slutgiltiga tillstånd (`banned`, `expired`, `credits_exhausted`) orörda. Ett okänt
-  `auth_index` returnerar `404`.
+https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits` och `POST .../wham/rate-limit-reset-credits/consume`, var och en endast för ett konto hos motsvarande leverantör. Allt annat returnerar `403` utan att kontakta uppströmstjänsten. Anroparens `Authorization`-huvud (inklusive platshållaren `$TOKEN$`) ignoreras: OmniRoute infogar anslutningens åtkomsttoken, förnyar den först när den snart löper ut och vidarebefordrar endast tillåtna huvuden (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`; `Accept`, `Content-Type`). Ett saknat `Chatgpt-Account-Id` får det lagrade arbetsyte-id:t som standard. Om det första uppströmssvaret är `401` förnyar den en gång och försöker igen endast när åtkomsttoken ändras. Varje uppströmsförsök får timeout efter 15 sekunder och använder anslutningens proxy.
+- `reset-quota` lämnar terminala tillstånd (banned, expired, credits_exhausted) oförändrade. Ett okänt `auth_index` returnerar `404`.
 
 **Autentisering:** panelsession eller en API-nyckel med omfånget `manage`, krävs även när inloggning är inaktiverad
 (sökvägarna finns i `ALWAYS_PROTECTED_API_PATHS`). Nycklar som endast används för inferens får `403`. Källa:
@@ -1992,17 +1977,17 @@ Beständigt konversations-/faktaminne, begränsat till API-nyckel/session.
 
 OmniRoute levereras med en inbäddad Model Context Protocol-server med 3 transportalternativ (stdio, SSE, streamable-http) och begränsade verktyg. Slutpunkterna i kontrollpanelen läser status-/granskningsdata och proxar HTTP-transportalternativen.
 
-| Metod | Sökväg | Beskrivning |
-| ------ | ---------------------- | ------------------------------------------------------------------------------------------------ | -------------------- |
-| GET | `/api/mcp/status` | Hjärtstatus, transport, onlinestatus, senaste anrop, främsta verktyg, lyckandefrekvens under 24 timmar |
-| GET | `/api/mcp/tools` | Lista över MCP-verktyg med `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints` |
-| GET | `/api/mcp/sse` | Öppna en SSE-ström för SSE-transporten (returnerar `503` om MCP är inaktiverat eller om transporten inte matchar) |
-| POST | `/api/mcp/sse` | Skicka en JSON-RPC-ram på SSE-transporten |
-| GET | `/api/mcp/stream` | Öppna SSE-sidan av Streamable HTTP-transporten (serverinitierade meddelanden) |
-| POST | `/api/mcp/stream` | Skicka en JSON-RPC-ram på Streamable HTTP-transporten |
-| DELETE | `/api/mcp/stream` | Avsluta en Streamable HTTP-session |
-| GET | `/api/mcp/audit` | Fråga granskningsloggen — `?limit=`, `?offset=`, `?tool=`, `?success=true                                | false`, `?apiKeyId=` |
-| GET | `/api/mcp/audit/stats` | Sammanställd granskningsstatistik (totaler, lyckandefrekvens, genomsnittlig varaktighet, främsta verktyg) |
+| Metod  | Sökväg                 | Beskrivning                                                                                                                      |
+| ------ | ---------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/mcp/status`      | Hjärtstatus, transport, onlinestatus, senaste anrop, främsta verktyg, lyckandefrekvens under 24 timmar                           |
+| GET    | `/api/mcp/tools`       | Lista över MCP-verktyg med `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints`                             |
+| GET    | `/api/mcp/sse`         | Öppna en SSE-ström för SSE-transporten (returnerar `503` om MCP är inaktiverat eller om transporten inte matchar)                |
+| POST   | `/api/mcp/sse`         | Skicka en JSON-RPC-ram på SSE-transporten                                                                                        |
+| GET    | `/api/mcp/stream`      | Öppna SSE-sidan av Streamable HTTP-transporten (serverinitierade meddelanden)                                                    |
+| POST   | `/api/mcp/stream`      | Skicka en JSON-RPC-ram på Streamable HTTP-transporten                                                                            |
+| DELETE | `/api/mcp/stream`      | Avsluta en Streamable HTTP-session                                                                                               |
+| GET    | `/api/mcp/audit`       | Fråga granskningsloggen — `?limit=`, `?offset=`, `?tool=`, `?success=true                                \| false`, `?apiKeyId=` |
+| GET    | `/api/mcp/audit/stats` | Sammanställd granskningsstatistik (totaler, lyckandefrekvens, genomsnittlig varaktighet, främsta verktyg)                        |
 
 **Autentisering:** transportalternativen `sse`/`stream` använder den MCP-specifika autentiseringsytan (Bearer API-nyckel med `mcp`-omfattning); rutterna `status`/`tools`/`audit*` kan läsas från kontrollpanelen (ingen ytterligare autentisering krävs utöver åtkomst till kontrollpanelens värd).
 

@@ -20,7 +20,7 @@ AgentBridge 是 OmniRoute 的 MITM（中间人）代理，可拦截来自 IDE AI
 
 这意味着您可以：
 
-- **将任何代理重新路由到任何提供者**: Copilot与OpenAI交谈？将其重定向到Anthropic Claude、 Gemini或OmniRoute的 380 个提供程序中的任何一个。
+- **将任何代理重新路由到任何提供者**: Copilot与OpenAI交谈？将其重定向到Anthropic Claude、 Gemini或OmniRoute的 381 个提供程序中的任何一个。
 - **应用模型映射**: `gemini-3-flash` → `claude-sonnet-4.7`在处理程序级别透明。
 - **观察所有代理流量**：每个拦截的请求都会发布到[Traffic Inspector](./TRAFFIC_INSPECTOR.md) 。
 - **应用OmniRoute弹性**：组合路由、断路器、后备和成本跟踪也适用于IDE代理流量。
@@ -533,16 +533,16 @@ ipconfig /flushdns
 
 ## §8 路线图
 
-### Trae 调研
+### 特雷调查
 
-Trae 是一款相对较新的 AI 编程助手。在实现处理器之前：
+Trae 是一个相对较新的AI编码助手。在实现处理程序之前：
 
-1. 在 VS Code / JetBrains 市场中或作为独立应用识别其二进制文件/扩展
-2. 使用 mitmproxy 捕获流量，以发现 API 主机和端点结构
-3. 确定身份验证机制
-4. 根据 TOS 和 API 的可发现性评估是否继续
+1. 识别VS代码/ JetBrains市场中的binary/extension或作为独立应用程序
+2. 使用 mitmproxy 捕获流量以发现API主机和端点形状
+3. 确定认证机制
+4. 基于TOS和API可发现性评估go/no-go
 
-在调研完成之前，仪表板中的 Trae 卡片会显示“调研中”徽章和“报告可行性”链接。位于 `src/mitm/handlers/trae.ts` 的处理器存根会抛出结构化的“尚未实现”错误。
+在调查完成之前，仪表板中的 Trae 卡会显示“正在调查”徽章以及“报告可行性”链接。 `src/mitm/handlers/trae.ts`的处理程序存根抛出结构化`Not yet implemented`错误。
 
 ### 待办代理（需要 MITM — 不支持自定义基础 URL）
 

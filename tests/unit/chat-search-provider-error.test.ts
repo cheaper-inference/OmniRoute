@@ -15,6 +15,12 @@ globalThis.fetch = async () => {
   throw new Error("Unexpected upstream request in the search-provider rejection test");
 };
 
+// Rejection assertions do not exercise the proxy journal's undici egress lookup.
+const { _setEgressProbeForTests, clearEgressCache } = await import("../../src/lib/proxyEgress.ts");
+_setEgressProbeForTests(async () => ({ ip: "192.0.2.1", latencyMs: 0 }));
+clearEgressCache();
+const { closeSharedLoggerResource } = await import("../../src/shared/utils/loggerResource.ts");
+
 const core = await import("../../src/lib/db/core.ts");
 const providersDb = await import("../../src/lib/db/providers.ts");
 const { POST } = await import("../../src/app/api/v1/chat/completions/route.ts");
@@ -37,6 +43,9 @@ test.after(async () => {
   await new Promise((resolve) => setImmediate(resolve));
   globalThis.fetch = originalFetch;
   core.resetDbInstance();
+  await closeSharedLoggerResource();
+  _setEgressProbeForTests(null);
+  clearEgressCache();
   fs.rmSync(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 

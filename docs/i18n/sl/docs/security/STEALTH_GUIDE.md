@@ -240,9 +240,9 @@ Poleg tega `updateNssDatabases()` namesti potrdilo v uporabniške zbirke podatko
 
 Vse končne točke MITM zahtevajo preverjanje pristnosti za upravljanje (`requireCliToolsAuth`). Geslo sudo je predpomnjeno v obsegu modula (nikoli v `globalThis`) in se izbriše ob `stopMitm()`.
 
-## User-Agent preglasi — env vars (`.env.example` razdelek 12)
+## Preglasitve User-Agent — spremenljivke okolja (12. razdelek datoteke `.env.example`)
 
-| Spremenljivka       | Privzeto                                      |
+| Spremenljivka       | Privzeta vrednost                             |
 | ------------------- | --------------------------------------------- |
 | `CLAUDE_USER_AGENT` | `claude-cli/2.1.280 (external, cli)`          |
 | `CODEX_USER_AGENT`  | `codex-cli/0.155.0 (Windows 10.0.26200; x64)` |
@@ -251,7 +251,7 @@ Vse končne točke MITM zahtevajo preverjanje pristnosti za upravljanje (`requir
 | `QODER_USER_AGENT`  | `Qoder-Cli`                                   |
 | `CURSOR_USER_AGENT` | `Cursor/3.4`                                  |
 
-Porabi `open-sse/executors/base.ts::buildHeaders()` prek dinamičnega iskanja.** Obrnite se na te, ko ponudniki izdajo nove različice CLI** — stale UA nizi se začnejo zavračati kot zastareli odjemalci.
+Uporablja jih `open-sse/executors/base.ts::buildHeaders()` prek dinamičnega iskanja. **Posodobite jih, ko ponudniki izdajo nove različice CLI-ja** — zastareli nizi UA so zavrnjeni, ker predstavljajo zastarele odjemalce.
 
 ## Preklopniki načina združljivosti CLI-ja (`.env.example`, razdelek 13)
 

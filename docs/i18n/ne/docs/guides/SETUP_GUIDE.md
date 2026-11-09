@@ -27,7 +27,9 @@ npm install -g omniroute
 omniroute
 ```
 
-ड्यासबोर्ड `http://localhost:20128` मा खुल्छ र API को आधार URL `http://localhost:20128/v1` हो।
+ड्यासबोर्ड `http://localhost:20128` मा खुल्छ र API आधार URL `http://localhost:20128/v1` हो।
+
+> **एनपीएम प्रयोगकर्ताहरू:** यदि npm ले चेतावनी दिन्छ कि स्थापना स्क्रिप्टहरू अवरुद्ध छन् (जस्तै, `omniroute`, `better-sqlite3`), [समस्या निवारण हेर्नुहोस् — npm स्थापना-स्क्रिप्टहरू अवरुद्ध](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install) ।
 
 ### pnpm
 
@@ -199,9 +201,9 @@ omniroute setup-qwen         # ~/.qwen/settings.json + ~/.qwen/.env
 
 ## प्रोटोकल सेटअप (MCP + A2A)
 
-### MCP सेटअप (मोडेल कन्टेक्स्ट प्रोटोकल)
+### MCP सेटअप (मोडेल सन्दर्भ प्रोटोकल)
 
-stdio मोडमा MCP ट्रान्सपोर्ट सुरु गर्नुहोस्:
+stdio मोडमा MCP यातायात सुरु गर्नुहोस्:
 
 ```bash
 omniroute --mcp
@@ -210,28 +212,28 @@ omniroute --mcp
 सिफारिस गरिएको प्रमाणीकरण प्रवाह:
 
 ```bash
-# 1. MCP सर्भर सुरु गर्नुहोस्
+# 1. Start MCP server
 omniroute --mcp
 
-# 2. आफ्नो MCP क्लाइन्टबाट, यी कल गर्नुहोस्:
-omniroute_get_health        # प्रणालीको स्वास्थ्य स्थिति फर्काउनुपर्छ
-omniroute_list_combos       # सक्रिय कम्बोहरू फर्काउनुपर्छ
+# 2. From your MCP client, call:
+omniroute_get_health        # Should return system health
+omniroute_list_combos       # Should return active combos
 
-# 3. वा पूर्ण E2E सुइट चलाउनुहोस्:
+# 3. Or run the full E2E suite:
 npm run test:protocols:e2e
 ```
 
-#### MCP क्लाइन्ट कन्फिगरेसन
+#### MCP ग्राहक कन्फिगरेसन
 
-**Claude Code:**
+**Claude कोड:**
 
 ```bash
-claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
 ```
 
 **Cursor / Cline:**
 
-आफ्नो MCP सेटिङहरूमा थप्नुहोस्:
+आफ्नो MCP सेटिङहरूमा थप्नुहोस् (stdio, साँचोको साथ ताकि कलरको प्रिन्सिपल छ):
 
 ```json
 {
@@ -239,23 +241,30 @@ claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp
     "omniroute": {
       "command": "omniroute",
       "args": ["--mcp"],
-      "env": {}
+      "env": {
+        "OMNIROUTE_API_KEY": "your-key",
+        "OMNIROUTE_BASE_URL": "http://localhost:20128"
+      }
     }
   }
 }
 ```
 
-**पूर्ण MCP दस्तावेजीकरण:** [MCP सर्भर README](../../open-sse/mcp-server/README.md) — 110 उपकरणहरू, IDE कन्फिगहरू, Python/TS/Go क्लाइन्टहरू।
+वा, जब `mcpTransport` `streamable-http` हुन्छ (यसलाई `/dashboard/mcp` मा वा `omniroute mcp enable --transport streamable-http` सँग सेट गर्नुहोस्), ग्राहकको रिमोट MCP सर्भर प्रविष्टिलाई `http://localhost:20128/api/mcp/stream` मा देखाउनुहोस्।
 
-### A2A सेटअप (एजेन्ट-टु-एजेन्ट प्रोटोकल)
+कुञ्जीले `Authorization: Bearer <api-key>` को रूपमा यात्रा गर्दछ (रिमोट होस्टहरूको लागि [MCP सर्भर → रिमोट पहुँच](../frameworks/MCP-SERVER.md#remote-access-manage-scope-bypass) हेर्नुहोस्; रिमोट कुञ्जीलाई `mcp:connect` र यसको read/write स्कोपहरू चाहिन्छ)।
 
-Agent Card प्रमाणित गर्नुहोस्:
+**पूर्ण MCP कागजात:** [MCP सर्भर README](../../open-sse/mcp-server/README.md) — 110 उपकरणहरू, IDE कन्फिगहरू, Python/TS/Go ग्राहकहरू। कम्प्रेसन CCR/dedup उपकरणहरूका लागि अपरेटर सन्दर्भ (मार्करहरू, आवश्यकताहरू, प्रति-उपकरण स्कोपहरू, पुन: प्राप्ति पृष्ठांकन, निदान): [कम्प्रेसन इन्जिनहरू → पूर्वाधारहरू / अपरेटर गाइड](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup) ।
+
+### A2A सेटअप (एजेन्ट-टू-एजेन्ट प्रोटोकल)
+
+एजेन्ट कार्ड प्रमाणित गर्नुहोस्:
 
 ```bash
 curl http://localhost:20128/.well-known/agent.json
 ```
 
-एउटा कार्य पठाउनुहोस्:
+कार्य पठाउनुहोस्:
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -263,7 +272,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"Give me a short quota summary."}]}}'
 ```
 
-**पूर्ण A2A दस्तावेजीकरण:** [A2A सर्भर README](../../src/lib/a2a/README.md) — JSON-RPC 2.0, सीपहरू, स्ट्रिमिङ, कार्य जीवनचक्र।
+**पूर्ण A2A कागजात:** [A2A सर्भर README](../../src/lib/a2a/README.md) — JSON-RPC 2.0, कौशल, स्ट्रिमिङ, कार्य जीवनचक्र।
 
 ---
 
@@ -322,23 +331,23 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ---
 
-## Void Linux (`xbps-src`) टेम्प्लेट
+## शून्य Linux (xbps-src) टेम्प्लेट
 
-Void Linux प्रयोगकर्ताहरूका लागि, तपाईंले `xbps-src` प्रयोग गरेर नेटिभ प्याकेज निर्माण गर्न सक्नुहुन्छ। यो ब्लकलाई `srcpkgs/omniroute/template` का रूपमा सुरक्षित गर्नुहोस्:
+Void Linux प्रयोगकर्ताहरूका लागि, तपाईंले `xbps-src` प्रयोग गरेर नेटिभ प्याकेज निर्माण गर्न सक्नुहुन्छ। यो ब्लक `srcpkgs/omniroute/template` को रूपमा बचत गर्नुहोस्:
 
 ```bash
-# 'omniroute' का लागि टेम्प्लेट फाइल
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
 hostmakedepends="nodejs python3 make"
 depends="openssl"
-short_desc="धेरै LLM प्रदायकहरूका लागि स्मार्ट राउटिङसहितको विश्वव्यापी AI गेटवे"
+short_desc="Universal AI gateway with smart routing for multiple LLM providers"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# प्रत्येक रिलीजका लागि यसरी चेकसम पुनः उत्पन्न गर्नुहोस्:
+# Regenerate the checksum for each release with:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

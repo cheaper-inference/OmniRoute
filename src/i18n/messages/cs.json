@@ -4224,7 +4224,9 @@
     "duplicateAutoComboFailedPrefix": "Duplikace automatické kombinace selhala:",
     "duplicateAutoComboUnknownError": "Neznámá chyba",
     "duplicateAutoComboTitle": "Vytvořte statickou kombinaci z {name}",
-    "fallbackSummary": "{rate} % požadavků využilo záložní cestu, každý přeskočil průměrně ~{skips} cílů"
+    "fallbackSummary": "{rate} % požadavků využilo záložní cestu, každý přeskočil průměrně ~{skips} cílů",
+    "reorderAll": "Objednejte vše znovu",
+    "reorderAllDescription": "Změna pořadí všech {count} komb. Přetahovací úchyty jsou povoleny."
   },
   "costs": {
     "title": "Náklady",
@@ -14615,6 +14617,10 @@
       "UNPRICED_USAGE_BUDGET_POLICY": {
         "label": "Zásada rozpočtu pro nepřiřazené ceny",
         "description": "Jak denní/týdenní USD limity na klíč zacházejí s úspěšným použitím, pro které poskytovatel/model nemá záznam o ceně. fail_closed (výchozí) označí okno jako překročené, takže neznámý náklad nikdy neprojde tvrdým limitem. count_as_zero započítá toto použití jako $0 a zachová vynucování oceněných výdajů. Modely bez ceny jsou tak či tak uvedeny na domovské stránce dashboardu."
+      },
+      "COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE": {
+        "description": "Ve statistikách komprimační mezipaměti počítejte komprimovaný požadavek na poskytovatele automatického ukládání do mezipaměti (OpenAI, Codex, Azure nebo vlastní připojení, které deklaruje rychlé ukládání do mezipaměti s odstraněním značek) jako odhadovaný přístup do mezipaměti i bez značek cache_control. Odhad je signálem vhodnosti mezipaměti, nikoli pozorovaným hitem, takže hlášená míra přístupu pro tyto poskytovatele směřuje ke 100 %. Ve výchozím nastavení vypnuto: pouze požadavek přenášející značky cache_control poskytovateli ukládání do mezipaměti se počítá jako odhadovaný požadavek na server, takže poskytovatelé automatických předpon nadále hlásí 0.",
+        "label": "Statistiky kompresní mezipaměti: Vhodnost automatické předpony"
       }
     }
   },

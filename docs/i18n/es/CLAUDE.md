@@ -15,7 +15,7 @@ a Claude Code: ajustes operativos de las reglas ya definidas en `AGENTS.md`.
 
 El protocolo obligatorio completo de worktrees (confirmación de la rama base, ruta canónica
 `.claude/worktrees/`, `cp -al` node_modules, reglas de desmantelamiento) se encuentra en
-[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) (resumido en `AGENTS.md` →
+[`docs/ops/WORKTREE_ISOLATION.md`](../../../docs/ops/WORKTREE_ISOLATION.md) (resumido en `AGENTS.md` →
 Flujo de trabajo de Git → "Aislamiento de worktrees"). Puntos específicos de Claude Code:
 
 - Confirma la rama base con el operador mediante `AskUserQuestion` (Regla estricta n.º 19), a menos

@@ -4,47 +4,72 @@
 
 ---
 
-> Chọn tham gia, tắt theo mặc định (`modelVisibilityAllowlist`/`modelVisibilityDenylist` cả hai đều trống để lại danh mục `/v1/models` AND mỗi nhóm ứng cử viên `auto/*` giống hệt byte). Là anh em của `hidePaidModels`/`hideAutoCombos` (`src/lib/db/settings.ts`) dành cho các nhà khai thác muốn có danh sách mô hình được tuyển chọn vì những lý do không liên quan đến chi phí.
+> Tính năng tùy chọn, mặc định tắt (khi `modelVisibilityAllowlist`/`modelVisibilityDenylist` đều trống,
+> danh mục `/v1/models` VÀ mọi tập ứng viên `auto/*` vẫn giống hệt từng byte). Đây là tính năng cùng nhóm với
+> `hidePaidModels`/`hideAutoCombos` (`src/lib/db/settings.ts`), dành cho các nhà vận hành muốn có một
+> danh sách mô hình được tuyển chọn vì những lý do không liên quan đến chi phí.
 
-## Tại sao điều này tồn tại
+## Lý do tồn tại
 
-`hidePaidModels` trả lời "mô hình này có miễn phí không?" và `hideAutoCombos` trả lời "id ảo `auto/*` có nên được quảng cáo không?" — không cho phép nhà điều hành quản lý một tập hợp con các mô hình tùy ý (ví dụ: trình bày chính xác các mô hình mà khách hàng Mã Claude / OpenCode nhất định sẽ thấy, không phụ thuộc vào giá cả). #11481 bổ sung thêm điều đó dưới dạng hai cài đặt mảng chuỗi chọn tham gia độc lập.
+`hidePaidModels` trả lời câu hỏi "mô hình này có miễn phí không?" và `hideAutoCombos` trả lời câu hỏi "có nên quảng bá
+các id ảo `auto/*` hay không?" — không tùy chọn nào cho phép nhà vận hành tuyển chọn một tập hợp con tùy ý gồm
+các mô hình (ví dụ: chỉ hiển thị chính xác những mô hình mà một client Claude Code / OpenCode nhất định nên thấy,
+không phụ thuộc vào giá). #11481 bổ sung khả năng đó dưới dạng hai cài đặt mảng chuỗi độc lập, có thể tùy chọn bật.
 
 ## Cài đặt
 
-| Chìa khóa                  | Kiểu       | Mặc định | Nghĩa                                                                            |
-| -------------------------- | ---------- | -------- | -------------------------------------------------------------------------------- |
-| `modelVisibilityDenylist`  | `string[]` | `[]`     | Các mục phù hợp với một ứng cử viên sẽ ẩn nó khỏi nhóm catalog/candidate.        |
-| `modelVisibilityAllowlist` | `string[]` | `[]`     | Khi không trống, các mục nhập ONLY phù hợp với một ứng cử viên sẽ được hiển thị. |
+| Khóa                       | Kiểu       | Mặc định | Ý nghĩa                                                                        |
+| -------------------------- | ---------- | -------- | ------------------------------------------------------------------------------ |
+| `modelVisibilityDenylist`  | `string[]` | `[]`     | Các mục khớp với một ứng viên sẽ ẩn ứng viên đó khỏi danh mục/tập ứng viên.    |
+| `modelVisibilityAllowlist` | `string[]` | `[]`     | Khi không trống, CHỈ các mục khớp với một ứng viên mới tiếp tục được hiển thị. |
 
-Cả hai đều chấp nhận tối đa 500 mục nhập, mỗi mục có tối đa 200 ký tự (được xác thực Zod trong `src/shared/validation/settingsSchemas.ts`). Một mục là:
+Cả hai chấp nhận tối đa 500 mục, mỗi mục dài tối đa 200 ký tự (được Zod xác thực trong
+`src/shared/validation/settingsSchemas.ts`). Một mục có thể là:
 
-- id danh mục chính xác — `"gpt-4o"` (id mẫu trần) hoặc `"openai/gpt-4o"` (tiền tố nhà cung cấp) hoặc
-- một mẫu hình cầu sử dụng `*`/`?` — ví dụ `"openai/gpt-4*"` hoặc `"anthropic/*"` — được giải quyết thông qua cùng một trình so khớp `globToRegex()` được chia sẻ (`src/shared/utils/globPattern.ts`) đã được sử dụng bởi ánh xạ kết hợp theo mô hình của `ModelRoutingSection` và `freeModels.ts::matchesOnlyPaidModels`.
+- một id danh mục chính xác — `"gpt-4o"` (id mô hình thuần) hoặc `"openai/gpt-4o"` (có tiền tố nhà cung cấp), hoặc
+- một mẫu glob sử dụng `*`/`?` — ví dụ `"openai/gpt-4*"` hoặc `"anthropic/*"` — được phân giải bằng cùng
+  bộ so khớp `globToRegex()` dùng chung (`src/shared/utils/globPattern.ts`) vốn đã được sử dụng bởi
+  các ánh xạ tổ hợp theo từng mô hình của `ModelRoutingSection` và `freeModels.ts::matchesOnlyPaidModels`.
 
-Ưu tiên: danh sách từ chối được kiểm tra đầu tiên (mục bị từ chối luôn bị ẩn, ngay cả khi nó cũng khớp với danh sách cho phép); khi danh sách cho phép không trống thì chỉ những mục phù hợp với nó mới tồn tại.
+Thứ tự ưu tiên: danh sách từ chối được kiểm tra trước (một mục bị từ chối luôn bị ẩn, ngay cả khi nó cũng
+khớp với danh sách cho phép); khi danh sách cho phép không trống, chỉ các mục khớp với danh sách đó mới được giữ lại.
 
-## Hai điểm nghẽn, không phải một
+## Hai điểm kiểm soát, không phải một
 
-Bài học từ #6512 (bộ lọc danh mục `hidePaidModels` -only vẫn cho phép `auto/*` định tuyến đến mô hình trả phí vì nhóm ứng viên kết hợp được xây dựng độc lập) áp dụng giống hệt ở đây. Vị từ phù hợp `isModelExposureAllowed()` (`src/shared/utils/modelExposureList.ts`) được gọi từ BOTH:
+Bài học từ #6512 (một bộ lọc danh mục chỉ dùng `hidePaidModels` vẫn cho phép `auto/*` định tuyến đến một
+mô hình trả phí, vì tập ứng viên tổ hợp được tạo độc lập) cũng áp dụng tương tự ở đây.
+Hàm kiểm tra khớp `isModelExposureAllowed()` (`src/shared/utils/modelExposureList.ts`) được gọi từ CẢ HAI nơi:
 
-- `src/app/api/v1/models/catalog.ts` — chính danh sách `/v1/models`, tại cùng 5 điểm chokepoint trên mỗi nguồn `shouldHidePaid()` đã có cổng ( `PROVIDER_MODELS` tĩnh, hàng nhà cung cấp được đồng bộ hóa, hàng tùy chỉnh, hàng được hỗ trợ bí danh, hàng dự phòng được quản lý).
-- `open-sse/services/autoCombo/modelExposureFilter.ts::filterModelExposureCandidates()` — được gọi từ `virtualFactory.ts::buildPreparedPool`, ngay sau lệnh gọi `filterPaidOnlyCandidates()` tương đương, do đó, một mô hình bị từ chối cũng không bao giờ có thể được chọn vào nhóm ứng viên `auto/*`.
+- `src/app/api/v1/models/catalog.ts` — chính danh sách `/v1/models`, tại cùng 5 điểm kiểm soát theo từng nguồn
+  mà `shouldHidePaid()` đã kiểm soát (các mục `PROVIDER_MODELS` tĩnh, các hàng nhà cung cấp đã đồng bộ,
+  các hàng tùy chỉnh, các hàng được hỗ trợ bởi bí danh, các hàng dự phòng được quản lý).
+- `open-sse/services/autoCombo/modelExposureFilter.ts::filterModelExposureCandidates()` — được gọi
+  từ `virtualFactory.ts::buildPreparedPool`, ngay sau lời gọi tương đương
+  `filterPaidOnlyCandidates()`, để một mô hình bị từ chối cũng không bao giờ có thể được chọn vào
+  tập ứng viên `auto/*`.
 
-## Lọc NOT là gì
+## Những gì KHÔNG bị lọc
 
-Phản ánh hành vi hiện tại của `hideAutoCombos`: một id mẫu đã được gửi** rõ ràng** (không qua `auto/*` và không được phát hiện qua danh sách danh mục) không bao giờ bị chặn khi gửi — chỉ có tư cách thành viên advertisement/candidate-pool được lọc. Điều này độc lập với `hidePaidModels`; nhà điều hành có thể muốn một bộ được tuyển chọn vì những lý do không liên quan đến chi phí, vì vậy cả hai cài đặt đều kết hợp thành các bộ lọc AND-ed độc lập, giống như thành phần nhiều cờ hiện có trong `catalog.ts`.
+Phản ánh hành vi hiện có của `hideAutoCombos`: một id mô hình được gửi **tường minh** (không thông qua `auto/*`,
+và không được tìm thấy qua danh sách danh mục) sẽ không bao giờ bị chặn khi điều phối — chỉ việc
+hiển thị/tư cách thành viên trong tập ứng viên mới bị lọc. Điều này độc lập với `hidePaidModels`;
+một nhà vận hành có thể muốn một tập hợp được tuyển chọn vì những lý do không liên quan đến chi phí, vì vậy cả hai
+cài đặt được kết hợp dưới dạng các bộ lọc AND độc lập, giống như cách kết hợp nhiều cờ hiện có trong
+`catalog.ts`.
 
-Xuất cài đặt (`GET /api/settings/export-json`) bao gồm nguyên văn cả hai mảng, giống như bất kỳ trường cài đặt nào khác — không giống như bộ lọc xuất bước kết hợp của `hidePaidModels`, không có rủi ro mất nước ở đây: id bị từ chối được nhúng trong bước kết hợp đã xuất là lựa chọn định tuyến rõ ràng của riêng nhà điều hành, không phải thứ mà ranh giới xuất cần loại bỏ.
+Chức năng xuất cài đặt (`GET /api/settings/export-json`) bao gồm nguyên trạng cả hai mảng, giống như bất kỳ trường
+cài đặt nào khác — không giống bộ lọc xuất bước tổ hợp của `hidePaidModels`, ở đây không có rủi ro
+tái nạp dữ liệu: một id bị từ chối được nhúng trong bước tổ hợp đã xuất là lựa chọn định tuyến tường minh của chính
+nhà vận hành, không phải thứ mà ranh giới xuất dữ liệu cần loại bỏ.
 
-## Danh sách chỉ có combo (`exposeCombosOnly`)
+## Chỉ liệt kê combo (`exposeCombosOnly`)
 
-Một boolean riêng biệt, cũng được chọn tham gia và `false` theo mặc định, dành cho các hoạt động triển khai trong đó các tổ hợp là bề mặt mô hình công khai và các nhà cung cấp chỉ là phần phụ trợ. Khi đó là `true`, danh sách công khai (`GET /v1/models`, `GET /v1` và các tuyến khám phá `/v1` khác được xây dựng trên `getUnifiedModelsResponse()`) chỉ giữ các hàng có `owned_by: "combo"`: combo của người dùng cộng với combo `auto/*` tích hợp (trừ khi `hideAutoCombos` ẩn chúng). Nó sử dụng kiểm tra hàng tương tự như `catalogScope: "combos"` cho mỗi khóa và các bộ lọc allow/deny/scope riêng của khóa vẫn được áp dụng ở trên cùng.
+Đây là một giá trị boolean riêng, cũng phải chủ động bật và mặc định là `false`, dành cho các triển khai dùng combo làm giao diện mô hình công khai và chỉ dùng nhà cung cấp làm hệ thống phía sau. Khi đặt thành `true`, danh sách công khai (`GET /v1/models`, `GET /v1` và các tuyến khám phá `/v1` khác xây dựng trên `getUnifiedModelsResponse()`) chỉ giữ các hàng có `owned_by: "combo"`: combo của người dùng cùng các combo `auto/*` tích hợp, trừ khi `hideAutoCombos` ẩn chúng. Nó dùng cùng phép kiểm tra hàng như `catalogScope: "combos"` theo từng khóa, và các bộ lọc cho phép/từ chối/phạm vi riêng của khóa vẫn được áp dụng thêm.
 
-Chuyển nó vào** Cài đặt → Định tuyến → Mô hình danh sách API** , hoặc với `PATCH /api/settings {"exposeCombosOnly": true}`.
+Bật hoặc tắt tại **Cài đặt → Định tuyến → Danh sách Models API**, hoặc bằng `PATCH /api/settings {"exposeCombosOnly": true}`.
 
-Giống như các danh sách trên, nó chỉ thay đổi quảng cáo:
+Giống các danh sách ở trên, thiết lập này chỉ thay đổi thông tin được công bố:
 
-- một id `provider/model` rõ ràng vẫn gửi đi và `GET /v1/models/{id}` vẫn giải quyết nó;
-- danh mục bảng điều khiển (`GET /api/models/catalog`, được người chọn mô hình sử dụng) không bị thu hẹp;
-- nó không được phản ánh vào nhóm ứng cử viên `auto/*`, vì vậy các combo `auto/*` sẽ giữ nguyên nhóm đầy đủ của chúng.
+- ID `provider/model` được chỉ định rõ vẫn được điều phối, và `GET /v1/models/{id}` vẫn phân giải được nó;
+- danh mục bảng điều khiển (`GET /api/models/catalog`, được các bộ chọn mô hình sử dụng) không bị thu hẹp;
+- thiết lập không được phản chiếu vào các nhóm ứng viên `auto/*`, nên combo `auto/*` giữ nguyên toàn bộ nhóm của mình.

@@ -889,13 +889,7 @@ jika kolom lain apa pun diatur. Untuk lite, `additionalQueries`, `systemPrompt`,
 `subpages`, `subpageTarget`, `highlights.numSentences`, dan `highlights.highlightsPerUrl` tidak lagi
 diteruskan.
 
-Akuntansi biaya menggunakan registri datar `costPerQuery`, kecuali Exa, yang mengikuti harga Exa
-sendiri: $0.007 per panggilan untuk `auto` (dan `fast` lama) atau $0.004 untuk `lite` (dan `instant`
-lama), yang mencakup 10 hasil; $0.001 untuk setiap hasil tambahan; dan $0.001 per
-hasil yang dikembalikan ketika `contents.summary` diatur. Tavily dicatat sebesar 1 kredit ($0.008) untuk
-`search_depth` `basic`, `fast`, dan `ultra-fast`, serta 2 kredit ($0.016) untuk `advanced`
-([kredit API Tavily](https://docs.tavily.com/documentation/api-credits)). Panggilan dengan
-`auto_parameters: true` yang membuat Tavily meningkat ke advanced tetap dicatat sebagai 1 kredit.
+Exa: $0,007 per panggilan untuk `auto` (dan warisan `fast`) atau $0,004 untuk `lite` (dan warisan `instant`), mencakup 10 hasil; $0,001 untuk setiap hasil selanjutnya; dan $0,001 per hasil yang dikembalikan ketika `contents.summary` disetel. Tavily dicatat pada 1 kredit ($0,008) untuk `search_depth` `basic`, `fast` dan `ultra-fast`, dan 2 kredit ($0,016) untuk `advanced` ( [Tavily API credits](https://docs.tavily.com/documentation/api-credits) ). Panggilan dengan `auto_parameters: true` yang ditingkatkan Tavily ke tingkat lanjut masih dicatat sebesar 1 kredit.
 
 ---
 
@@ -1174,6 +1168,8 @@ X-OmniRoute-No-Cache: true
 
 ---
 
+<a id="cliproxyapi-management-compatibility"></a>
+
 ## Kompatibilitas Manajemen CLIProxyAPI
 
 OmniRoute merespons tiga endpoint manajemen [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI)
@@ -1188,21 +1184,11 @@ disediakan di `/v0/management/*` dan `/api/v0/management/*`.
 | POST   | `/v0/management/api-call`    | Isi `{ auth_index, method, url, header?, data? }`. Mengirim satu permintaan yang diizinkan dengan token akun dan mengembalikan `{ status_code, body }` |
 | POST   | `/v0/management/reset-quota` | Isi `{ auth_index }`. Menghapus cooldown koneksi, penguncian model, dan cooldown per-cakupan Codex dari satu akun                                      |
 
-- `auth_index` adalah ID koneksi OmniRoute. `provider` adalah `claude` atau `codex` (hanya
-  koneksi OAuth; provider kunci API `anthropic` tidak dicantumkan). Untuk Codex,
-  `id_token.chatgpt_account_id` adalah ID ruang kerja yang disimpan dan `plan_type` adalah paket yang disimpan.
-- `api-call` bukan proksi generik. Endpoint ini hanya menerima Claude `GET
-https://api.anthropic.com/api/oauth/usage` dan Codex `GET
-https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits` serta
-  `POST .../wham/rate-limit-reset-credits/consume`, masing-masing hanya untuk akun dari
-  provider yang sesuai. Hal lainnya mengembalikan `403` tanpa menghubungi upstream. Header
-  `Authorization` milik pemanggil (termasuk placeholder `$TOKEN$`) diabaikan: OmniRoute menyisipkan
-  token akses koneksi, menyegarkannya terlebih dahulu jika hampir kedaluwarsa, dan hanya meneruskan
-  header yang diizinkan (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`;
-  `Accept`, `Content-Type`). Jika `Chatgpt-Account-Id` tidak ada, nilai default-nya adalah ID ruang kerja
-  yang disimpan. Permintaan berhenti setelah 15 detik dan menggunakan proksi koneksi.
-- `reset-quota` membiarkan status terminal (banned, expired, credits_exhausted) apa adanya. `auth_index`
-  yang tidak dikenal mengembalikan `404`.
+- `auth_index` adalah id koneksi OmniRoute. `provider` adalah `claude` atau `codex` (hanya koneksi OAuth; provider kunci API `anthropic` tidak dicantumkan). Untuk Codex, `id_token.chatgpt_account_id` adalah id workspace tersimpan dan `plan_type` adalah paket tersimpan.
+- `api-call` bukan proxy umum. Ia hanya menerima Claude `GET
+https://api.anthropic.com/api/oauth/usage` serta Codex `GET
+https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits` dan `POST .../wham/rate-limit-reset-credits/consume`, masing-masing hanya untuk akun provider yang cocok. Apa pun lainnya mengembalikan `403` tanpa menghubungi upstream. Header `Authorization` pemanggil (termasuk placeholder `$TOKEN$`) diabaikan: OmniRoute menyisipkan access token koneksi, memperbaruinya terlebih dahulu jika hampir kedaluwarsa, dan hanya meneruskan header yang diizinkan (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`; `Accept`, `Content-Type`). Jika `Chatgpt-Account-Id` tidak ada, defaultnya adalah id workspace tersimpan. Jika respons upstream pertama adalah `401`, token diperbarui sekali dan permintaan dicoba ulang hanya bila access token berubah. Setiap percobaan upstream timeout setelah 15 detik dan memakai proxy koneksi tersebut.
+- `reset-quota` tidak mengubah status terminal (banned, expired, credits_exhausted). `auth_index` yang tidak dikenal mengembalikan `404`.
 
 **Autentikasi:** sesi dasbor atau kunci API dengan cakupan `manage`, tetap diperlukan meskipun login dinonaktifkan
 (jalur ini berada di `ALWAYS_PROTECTED_API_PATHS`). Kunci yang hanya digunakan untuk inferensi mendapatkan `403`. Sumber:
@@ -1950,17 +1936,17 @@ Penyimpanan memori faktual/percakapan persisten, yang dicakup per kunci API / se
 
 OmniRoute menyertakan server Model Context Protocol tertanam dengan 3 transport (stdio, SSE, streamable-http) dan alat dengan cakupan. Endpoint dashboard di bawah membaca data status/audit dan mem-proxy transport HTTP.
 
-| Method | Path | Deskripsi |
-| ------ | ---------------------- | ------------------------------------------------------------------------------------------------ | -------------------- |
-| GET | `/api/mcp/status` | Heartbeat, transport, status online, panggilan terakhir, alat teratas, tingkat keberhasilan 24 jam |
-| GET | `/api/mcp/tools` | Daftar alat MCP dengan `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints` |
-| GET | `/api/mcp/sse` | Buka aliran SSE untuk transport SSE (mengembalikan `503` jika MCP dinonaktifkan atau transport tidak cocok) |
-| POST | `/api/mcp/sse` | Kirim frame JSON-RPC pada transport SSE |
-| GET | `/api/mcp/stream` | Buka sisi SSE dari transport Streamable HTTP (pesan yang diinisiasi server) |
-| POST | `/api/mcp/stream` | Kirim frame JSON-RPC pada transport Streamable HTTP |
-| DELETE | `/api/mcp/stream` | Akhiri sesi Streamable HTTP |
-| GET | `/api/mcp/audit` | Kueri log audit — `?limit=`, `?offset=`, `?tool=`, `?success=true                                | false`, `?apiKeyId=` |
-| GET | `/api/mcp/audit/stats` | Statistik audit agregat (total, tingkat keberhasilan, durasi rata-rata, alat teratas) |
+| Method | Path                   | Deskripsi                                                                                                                |
+| ------ | ---------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| GET    | `/api/mcp/status`      | Heartbeat, transport, status online, panggilan terakhir, alat teratas, tingkat keberhasilan 24 jam                       |
+| GET    | `/api/mcp/tools`       | Daftar alat MCP dengan `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints`                         |
+| GET    | `/api/mcp/sse`         | Buka aliran SSE untuk transport SSE (mengembalikan `503` jika MCP dinonaktifkan atau transport tidak cocok)              |
+| POST   | `/api/mcp/sse`         | Kirim frame JSON-RPC pada transport SSE                                                                                  |
+| GET    | `/api/mcp/stream`      | Buka sisi SSE dari transport Streamable HTTP (pesan yang diinisiasi server)                                              |
+| POST   | `/api/mcp/stream`      | Kirim frame JSON-RPC pada transport Streamable HTTP                                                                      |
+| DELETE | `/api/mcp/stream`      | Akhiri sesi Streamable HTTP                                                                                              |
+| GET    | `/api/mcp/audit`       | Kueri log audit — `?limit=`, `?offset=`, `?tool=`, `?success=true                                \| false`, `?apiKeyId=` |
+| GET    | `/api/mcp/audit/stats` | Statistik audit agregat (total, tingkat keberhasilan, durasi rata-rata, alat teratas)                                    |
 
 **Autentikasi:** transport `sse`/`stream` mematuhi permukaan autentikasi khusus MCP (kunci API Bearer dengan cakupan `mcp`); rute `status`/`tools`/`audit*` dapat dibaca dari dashboard (tanpa autentikasi tambahan selain akses ke host dashboard).
 

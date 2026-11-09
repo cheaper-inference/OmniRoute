@@ -11,13 +11,13 @@ naměřených maxim. K překročení kapacity serveru dochází pouze tehdy, kdy
 webpack pro Release-Green a úlohou lint; odkládací prostor hostitele (16 GB) tuto situaci absorbuje, a protože sestavení pro pull requesty běží
 na hostovaných runnerech, je slot pro Turbopack většinu času nečinný:
 
-| runner               | štítek              | role                                                                                                                                                   | `MemoryHigh` / `MemoryMax` | `CPUQuota`  |
-| -------------------- | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------- | ----------- |
-| `omniroute-113-5`    | `omni-build`        | sestavení Turbopack: `ci.yml` `Build` (pouze push/dispatch), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, noční sestavení a11y | 56 GB / 60 GB (swap 0)     | 1600 %      |
-| `omniroute-113-6`    | `omni-release`      | Release-Green (`release-green` + `main-green`), sestavení webpack                                                                                      | 20 GB / 24 GB (swap 4 GB)  | 800 %       |
-| `omniroute-113-2`    | `omni-light`        | noční úlohy (Schemathesis, promptfoo, garak, k6) a `quality.yml` `lint-guard`                                                                          | 12 GB / 16 GB (swap 4 GB)  | 600 %       |
-| `omniroute-113`      | `omni-light`        | stejný fond jako výše                                                                                                                                  | 8 GB / 12 GB               | 400 %       |
-| OmniHeuris, OmniMind | (jejich repozitáře) | pouze Dependabot (maximum 155 MB každý, 2026-10-18)                                                                                                    | 4 GB / 6 GB                | 200 % každý |
+| runner               | štítek                          | role                                                                                                                                                   | `MemoryHigh` / `MemoryMax` | `CPUQuota`  |
+| -------------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------- | ----------- |
+| `omniroute-113-5`    | `omni-build`, `omni-build-60gb` | sestavení Turbopack: `ci.yml` `Build` (pouze push/dispatch), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, noční sestavení a11y | 56 GB / 60 GB (swap 0)     | 1600 %      |
+| `omniroute-113-6`    | `omni-release`                  | Release-Green (`release-green` + `main-green`), sestavení webpack                                                                                      | 20 GB / 24 GB (swap 4 GB)  | 800 %       |
+| `omniroute-113-2`    | `omni-light`                    | noční úlohy (Schemathesis, promptfoo, garak, k6) a `quality.yml` `lint-guard`                                                                          | 12 GB / 16 GB (swap 4 GB)  | 600 %       |
+| `omniroute-113`      | `omni-light`                    | stejný fond jako výše                                                                                                                                  | 8 GB / 12 GB               | 400 %       |
+| OmniHeuris, OmniMind | (jejich repozitáře)             | pouze Dependabot (maximum 155 MB každý, 2026-10-18)                                                                                                    | 4 GB / 6 GB                | 200 % každý |
 
 Naměřeno 2026-10-18:
 
@@ -27,12 +27,13 @@ Naměřeno 2026-10-18:
 | swap       | 16 GB                              | `omniroute-113-5` běží s vypnutým swapem (`MemorySwapMax=0`), takže nekontrolovaně rostoucí sestavení je ukončeno při dosažení limitu, místo aby donutilo celý server swapovat                                                                                                                                                                                                                  |
 | `/tmp`     | **12 GB tmpfs = RAM**              | vše, co je tam uloženo, zabírá paměť; zbytky jsou odstraněny po 3 h                                                                                                                                                                                                                                                                                                                             |
 | CPU        | zaznamenána zátěž 60 na 32 jádrech | před zavedením kvót jedno sestavení Turbopack (~1166 % CPU) spolu se sadou testů pokrytí na stejném serveru připravily heartbeaty ostatních listenerů o prostředky (`The self-hosted runner lost communication`, #16853)                                                                                                                                                                        |
-| runnery    | **7 listenerů** (2026-10-28)       | 5 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-7` nese také `omni-build`; `omniroute-113-3/-4/-8` byly z repozitáře odstraněny (2026-10-28)                                                                                                                                                                                                                                                |
+| runnery    | **7 listenerů** (2026-10-28)       | 5 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-5` nese také `omni-build-60gb`; `omniroute-113-3/-4/-8` byly z repozitáře odstraněny (2026-10-28)                                                                                                                                                                                                                                           |
 
 Limity jsou uloženy pro každou jednotku v `/etc/systemd/system/actions.runner.<…>.service.d/override.conf`
 (předchozí hodnoty jsou zachovány jako `override.conf.bak-20261018`) a byly aplikovány za běhu pomocí
 `systemctl set-property --runtime … MemoryHigh=… MemoryMax=… CPUQuota=…` — bez restartu, takže žádná
-běžící úloha nebyla ovlivněna. Štítky se mění prostřednictvím API runnerů (`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
+běžící úloha nebyla ovlivněna. Štítky se mění prostřednictvím API runnerů
+(`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
 `gh api -X POST repos/<repo>/actions/runners/<id>/labels -f 'labels[]=<label>'`), rovněž za běhu.
 
 ## Instalace úklidového skriptu (jednorázově na serveru)
@@ -80,7 +81,7 @@ a to jen tehdy, když je nečinný**, přičemž kontrolu nečinnosti a restart 
 ## Provozní pravidla
 
 - **Současně probíhá pouze jedno sestavení Turbopack — vynuceno štítkem.** Každá úloha, která spouští úplné sestavení Turbopack
-  `next build`, cílí na `[self-hosted, omni-build]` a tento štítek má pouze
+  `next build`, cílí na `[self-hosted, omni-build, omni-build-60gb]` a tento štítek má pouze
   **`omniroute-113-5`**: `ci.yml` `Build`, `npm-publish.yml` `publish`, `nightly-v4-build`, `preview-artifact`,
   noční sestavení a11y (#16853) a **amd64** v `docker-publish.yml` (webpack uvnitř BuildKit —
   Turbopack tam havaroval, běh 33253576569). Větev Dockeru pro arm64 zůstává na `ubuntu-24.04-arm`.

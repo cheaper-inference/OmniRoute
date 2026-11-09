@@ -88,17 +88,17 @@ export HTTPS_PROXY=http://127.0.0.1:8080
 **Mechanizmas:** Naudoja OS API, kad per HTTP_PROXY klausymo tarnybą peradresuotų visą HTTP/HTTPS srautą:
 
 - **macOS:** `networksetup -setwebproxy / -setsecurewebproxy`
-- **Linux:** `gsettings set org.gnome.system.proxy` + `/etc/environment`
+- **Linux (GNOME):** `gsettings set org.gnome.system.proxy` ir HTTP/HTTPS serverio/prievado nustatymai
 - **Windows:** `netsh winhttp set proxy 127.0.0.1:8080`
   **Aprėptis:** Kiekviena kompiuterio programa, naudojanti sistemos tarpinio serverio nustatymus
   **Pastaba:** `source` = `"system-proxy"`
 
 **Saugos mechanizmai:**
 
-- Automatinio išjungimo laikmatis (numatytoji reikšmė — 30 min., konfigūruojamas naudojant `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES`)
-- Ankstesnė sistemos tarpinio serverio būsena išsaugoma DB ir atkuriama atšaukus pakeitimus
-- Jei naudotojas išeina iš puslapio, kol funkcija aktyvi, valdymo skydelyje rodomas raginimas „Atkuriami sistemos tarpinio serverio nustatymai“
-- NS rodomas ženklelis `⚠ Pažengusiesiems` ir aiškus patvirtinimo žymimasis langelis
+- Pritaikius tarpinį serverį nustatomas procesui vietinis laikmatis, kuris bando atkurti būseną be sėkmės garantijos (numatyta 30 min., keičiama per `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES`). Laikmatis neišlieka pasibaigus serverio procesui.
+- Ankstesnė tarpinio serverio būsena laikoma proceso atmintyje; ši fiksavimo būsenos saugykla jos nuolat nesaugo duomenų bazėje. Atkūrimas grąžina išsaugotus macOS/GNOME nustatymus; Windows sistemoje iš naujo nustato WinHTTP tarpinį serverį, užuot atkūręs ankstesnę konfigūraciją.
+- Kol pranešama, kad tarpinis serveris pritaikytas, iškraunant puslapį siunčiama keepalive atkūrimo užklausa be garantijos ir prašoma vietinio naršyklės patvirtinimo, kurio tekstą nustato naršyklė. Inspektoriaus išmontavimas naršant SPA taip pat bando atkurti, be šio naršyklės dialogo.
+- Fiksavimo įrankių juostoje rodomas lokalizuotas `System-wide` valdiklis su įspėjimo piktograma. Spustelėjimas šiuo metu pakeičia tik vietinę sąsajos būseną; nerodo patvirtinimo langelio ir nepritaiko bei neatkuria sistemos tarpinio serverio.
 
 ### 5 režimas — TPROXY skaidrusis iššifravimas (Linux, root, pasirenkama)
 
@@ -113,13 +113,13 @@ Tai yra didelė posistemė, turinti atskirą operatoriaus vadovą — išsamų u
 
 ### Fiksavimo režimų palyginimas
 
-| Režimas                 | Sąranka                              |            Reikia sudo?            | Aprėptis                                     | Pastabos                                                                                                                                            |
-| ----------------------- | ------------------------------------ | :--------------------------------: | -------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1. AgentBridge          | Automatinė                           | Vieną kartą (sertifikatas + hosts) | 9 IDE agentai                                | Įjungta pagal numatytuosius nustatymus                                                                                                              |
-| 2. Pasirinktiniai hosts | Įvestis kiekvienam host atskirai     |        Taip (hosts failas)         | Bet kuri tą host naudojanti programa         | Išsaugoma DB                                                                                                                                        |
-| 3. HTTP_PROXY           | `export HTTPS_PROXY=...`             |                 Ne                 | Aplinkos kintamuosius naudojančios programos | 8080 prievadas; HTTPS perduodamas per CONNECT tunelį (tik metaduomenys, niekada neiššifruojamas)                                                    |
-| 4. Visos sistemos       | Perjungti + patvirtinti              |                Taip                | Visos įrenginio programos                    | Automatiškai išjungiama po 30 min.                                                                                                                  |
-| 5. TPROXY iššifravimas  | Perjungti (Linux + vietinis priedas) |     Taip (root + CA diegimas)      | Bet kuris host tiksliniame prievade          | Iššifruoja savavališkus host; pagal numatytuosius nustatymus išjungta — žr. `docs/security/MITM-TPROXY-DECRYPT.md` (git; nekompiliuojama į `/docs`) |
+| Režimas                 | Sąranka                                                        |            Reikia sudo?            | Aprėptis                                     | Pastabos                                                                                                                                            |
+| ----------------------- | -------------------------------------------------------------- | :--------------------------------: | -------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1. AgentBridge          | Automatinė                                                     | Vieną kartą (sertifikatas + hosts) | 9 IDE agentai                                | Įjungta pagal numatytuosius nustatymus                                                                                                              |
+| 2. Pasirinktiniai hosts | Įvestis kiekvienam host atskirai                               |        Taip (hosts failas)         | Bet kuri tą host naudojanti programa         | Išsaugoma DB                                                                                                                                        |
+| 3. HTTP_PROXY           | `export HTTPS_PROXY=...`                                       |                 Ne                 | Aplinkos kintamuosius naudojančios programos | 8080 prievadas; HTTPS perduodamas per CONNECT tunelį (tik metaduomenys, niekada neiššifruojamas)                                                    |
+| 4. Visos sistemos       | `POST /api/tools/traffic-inspector/capture-modes/system-proxy` |                Taip                | Visos įrenginio programos                    | Atkūrimo laikmatis be sėkmės garantijos (numatyta 30 min.)                                                                                          |
+| 5. TPROXY iššifravimas  | Perjungti (Linux + vietinis priedas)                           |     Taip (root + CA diegimas)      | Bet kuris host tiksliniame prievade          | Iššifruoja savavališkus host; pagal numatytuosius nustatymus išjungta — žr. `docs/security/MITM-TPROXY-DECRYPT.md` (git; nekompiliuojama į `/docs`) |
 
 ---
 
@@ -317,7 +317,7 @@ niekada neblokuojamas. macOS/Windows sistemose funkcija grąžina `null` (pakait
 ### 5.1 Seanso įrašymas
 
 1. Įrankių juostoje spustelėkite **„● Įrašyti seansą“** → įveskite pavadinimą (nebūtina)
-2. Tiesioginis srautas tęsiamas įprastai; raudonas pulsuojantis indikatorius rodo `◉ ĮRAŠOMA · <pavadinimas> · 00:42 · 23 užklausos`
+2. Tiesioginis stebėjimas tęsiamas įprastai; įrašymo juostoje rodomas pulsuojantis raudonas taškas, praėjęs laikas, seanso pavadinimas, jei jis yra, ir lokalizuotas sustabdymo valdiklis.
 3. Spustelėkite **„⏹ Stabdyti“** → seanso momentinė kopija išsaugoma į `inspector_sessions` ir `inspector_session_requests`
 
 ### 5.2 Įrašyto seanso peržiūra
@@ -325,7 +325,7 @@ niekada neblokuojamas. macOS/Windows sistemose funkcija grąžina `null` (pakait
 Įrankių juostos išskleidžiamajame meniu **Seansai** pateikiamas išsaugotų seansų sąrašas. Pasirinkus vieną iš jų:
 
 - Įkeliama seanso momentinė kopija (fiksuota būsena)
-- Rodoma juosta: `Peržiūrimas įrašytas seansas „<pavadinimas>“ — [Grįžti į tiesioginį režimą]`
+- Juostoje rodoma lokalizuota įrašyto seanso žyma ir seanso pavadinimas (arba lokalizuotas pakaitinis tekstas seansui be pavadinimo) bei lokalizuotas grįžimo į tiesioginį vaizdą mygtukas.
 - Tampa pasiekiamas skirtukas „Statistika“ su „Recharts“ suvestinėmis
 
 ### 5.3 Eksportavimo formatai
@@ -349,7 +349,7 @@ Traffic Inspector rodo **visą perimtą HTTPS srautą**, įskaitant autorizavimo
 | ---------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **LOCAL_ONLY**                                 | Visi maršrutai ir WebSocket galinis taškas pasiekiami tik per loopback sąsają (tai užtikrinama `routeGuard.ts` prieš autentifikavimą)                                                                           |
 | **Paslapčių maskavimas**                       | Tiesinis `maskSecret()` skaitytuvas paslepia RFC 6750 Bearer kredencialus, teikėjo prefiksą turinčius raktus ir ilgus neskaidrius prieigos raktus prieš `TrafficBuffer.push()`                                  |
-| **Turinio dydžio riba**                        | Turinys, viršijantis `INSPECTOR_MAX_BODY_KB` (numatytoji reikšmė – 1024 KB), sutrumpinamas pateikiant pranešimą `"(sutrumpinta siekiant didesnio našumo)"`                                                      |
+| **Turinio dydžio riba**                        | Turinys, viršijantis `INSPECTOR_MAX_BODY_KB` (numatytoji reikšmė – 1024 KB), sutrumpinamas pateikiant pranešimą `"(truncated for performance)"`                                                                 |
 | **Antraščių išvalymas**                        | Pavadinimai paverčiami mažosiomis raidėmis; kadravimo, tarpinių mazgų ir tarpinio serverio autentifikavimo antraštės pašalinamos; slapukai visiškai paslepiami; kredencialų reikšmės perduodamos `maskSecret()` |
 | **CSP**                                        | Traffic Inspector puslapiams taikoma griežta turinio saugos politika, apsauganti nuo XSS per įterptą atsakymų turinį                                                                                            |
 | **Pagal numatytuosius nustatymus neišsaugoma** | `TrafficBuffer` laikomas atmintyje ir prarandamas paleidus serverį iš naujo. Seansai išsaugomi tik tada, kai aiškiai nurodoma juos įrašyti                                                                      |
@@ -417,7 +417,7 @@ gsettings set org.gnome.system.proxy mode 'none'
 netsh winhttp reset proxy
 ```
 
-Kitą kartą įkėlus valdymo skydą taip pat bus pasiūlyta „Atkurti sistemos tarpinio serverio nuostatas“, jei aptikta duomenų bazės būsena rodys, kad tarpinis serveris buvo aktyvus.
+Išsaugota tarpinio serverio būsena egzistuoja tik serverio procese. Po strigties ar paleidimo iš naujo dabartinė fiksavimo būsenos saugykla negali atkurti šios momentinės kopijos iš duomenų bazės; kai reikia atkurti rankiniu būdu, naudokite anksčiau pateiktas platformos atkūrimo komandas.
 
 ### Buferis pilnas
 

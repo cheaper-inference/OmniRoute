@@ -11,13 +11,13 @@
 webpack build እና lint job ጋር ሲገጣጠም ብቻ ነው፤ የhost swap (16 GB) ይህን ይሸፍናል፣ እና የpull-request Builds
 በhosted runner ላይ ስለሚሰሩ የTurbopack ስሎቱ አብዛኛውን ጊዜ ስራ ፈት ነው፦
 
-| runner               | label          | ሚና                                                                                                                                            | `MemoryHigh` / `MemoryMax` | `CPUQuota`   |
-| -------------------- | -------------- | --------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | ------------ |
-| `omniroute-113-5`    | `omni-build`   | የTurbopack builds፦ `ci.yml` `Build` (ለpush/dispatch ብቻ)፣ Docker amd64፣ `npm-publish`፣ `nightly-v4-build`፣ `preview-artifact`፣ የምሽቱ a11y build | 56 GB / 60 GB (swap 0)     | 1600 %       |
-| `omniroute-113-6`    | `omni-release` | Release-Green (`release-green` + `main-green`)፣ webpack build                                                                                 | 20 GB / 24 GB (swap 4 GB)  | 800 %        |
-| `omniroute-113-2`    | `omni-light`   | የምሽት ስራዎች (Schemathesis፣ promptfoo፣ garak፣ k6) እና `quality.yml` `lint-guard`                                                                  | 12 GB / 16 GB (swap 4 GB)  | 600 %        |
-| `omniroute-113`      | `omni-light`   | ከላይ ካለው ጋር ተመሳሳይ ፑል                                                                                                                           | 8 GB / 12 GB               | 400 %        |
-| OmniHeuris, OmniMind | (የእነሱ repos)   | Dependabot ብቻ (እያንዳንዱ ከፍተኛው 155 MB፣ 2026-10-18)                                                                                               | 4 GB / 6 GB                | እያንዳንዱ 200 % |
+| runner               | label                           | ሚና                                                                                                                                            | `MemoryHigh` / `MemoryMax` | `CPUQuota`   |
+| -------------------- | ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | ------------ |
+| `omniroute-113-5`    | `omni-build`, `omni-build-60gb` | የTurbopack builds፦ `ci.yml` `Build` (ለpush/dispatch ብቻ)፣ Docker amd64፣ `npm-publish`፣ `nightly-v4-build`፣ `preview-artifact`፣ የምሽቱ a11y build | 56 GB / 60 GB (swap 0)     | 1600 %       |
+| `omniroute-113-6`    | `omni-release`                  | Release-Green (`release-green` + `main-green`)፣ webpack build                                                                                 | 20 GB / 24 GB (swap 4 GB)  | 800 %        |
+| `omniroute-113-2`    | `omni-light`                    | የምሽት ስራዎች (Schemathesis፣ promptfoo፣ garak፣ k6) እና `quality.yml` `lint-guard`                                                                  | 12 GB / 16 GB (swap 4 GB)  | 600 %        |
+| `omniroute-113`      | `omni-light`                    | ከላይ ካለው ጋር ተመሳሳይ ፑል                                                                                                                           | 8 GB / 12 GB               | 400 %        |
+| OmniHeuris, OmniMind | (የእነሱ repos)                    | Dependabot ብቻ (እያንዳንዱ ከፍተኛው 155 MB፣ 2026-10-18)                                                                                               | 4 GB / 6 GB                | እያንዳንዱ 200 % |
 
 በ2026-10-18 የተለካ፦
 
@@ -27,12 +27,13 @@ webpack build እና lint job ጋር ሲገጣጠም ብቻ ነው፤ የhost sw
 | swap      | 16 GB                        | `omniroute-113-5` swap ጠፍቶ (`MemorySwapMax=0`) ይሰራል፤ ስለዚህ ከቁጥጥር ውጭ የሆነ build ማሽኑን swap ከማስገባት ይልቅ በተወሰነለት ገደብ ላይ ይቋረጣል                                                                                                                                                                                                                                              |
 | `/tmp`    | **12 GB tmpfs = RAM**        | እዚያ የተቀመጠ ማንኛውም ነገር memory ይጠቀማል፤ የቀሩ ፋይሎች ከ3 h በኋላ ይጸዳሉ                                                                                                                                                                                                                                                                                                            |
 | CPU       | በ32 cores ላይ load 60 ታይቷል    | quotas ከመደረጋቸው በፊት፣ አንድ Turbopack build (~1166 % CPU) ከcoverage suite ጋር በተመሳሳይ ማሽን ላይ ሲሰራ የሌሎቹን listeners heartbeats ሀብት አሳጥቷል (`The self-hosted runner lost communication`፣ #16853)                                                                                                                                                                               |
-| runners   | **7 listeners** (2026-10-28) | 5 OmniRoute + OmniHeuris + OmniMind፤ `omniroute-113-7` `omni-build`ንም ይይዛል፤ `omniroute-113-3/-4/-8` ከrepo ተሰርዘዋል (2026-10-28)                                                                                                                                                                                                                                       |
+| runners   | **7 listeners** (2026-10-28) | 5 OmniRoute + OmniHeuris + OmniMind፤ `omniroute-113-5` `omni-build-60gb`ንም ይይዛል፤ `omniroute-113-3/-4/-8` ከrepo ተሰርዘዋል (2026-10-28)                                                                                                                                                                                                                                  |
 
 ገደቦቹ በእያንዳንዱ unit `/etc/systemd/system/actions.runner.<…>.service.d/override.conf` ውስጥ ይገኛሉ
 (የቀድሞ ዋጋዎች እንደ `override.conf.bak-20261018` ተቀምጠዋል)፣ እና
 `systemctl set-property --runtime … MemoryHigh=… MemoryMax=… CPUQuota=…` በመጠቀም ስርዓቱ እየሰራ ተተግብረዋል — restart አልተደረገም፣ ስለዚህ
-እየሰራ ያለ job አልተነካም። Labels በrunners API በኩል (`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
+እየሰራ ያለ job አልተነካም። Labels በrunners API በኩል
+(`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
 `gh api -X POST repos/<repo>/actions/runners/<id>/labels -f 'labels[]=<label>'`) ይቀየራሉ፣ ይህም ስርዓቱ እየሰራ ይከናወናል።
 
 ## ጽዳት አስተዳዳሪውን ይጫኑ (አንድ ጊዜ፣ በማሽኑ ላይ)
@@ -87,7 +88,7 @@ job ሳይያያዝበት RAM እና CPU መጠቀሙን ይቀጥላል። እ�
 ## የአሠራር ደንቦች
 
 - **በአንድ ጊዜ አንድ Turbopack build ብቻ — በlabel የተገደበ።** ሙሉ Turbopack
-  `next build` የሚያስኬድ እያንዳንዱ job `[self-hosted, omni-build]`ን ዒላማ ያደርጋል፣ እና ያንን
+  `next build` የሚያስኬድ እያንዳንዱ job `[self-hosted, omni-build, omni-build-60gb]`ን ዒላማ ያደርጋል፣ እና ያንን
   label የያዘው **`omniroute-113-5`** ብቻ ነው፦ `ci.yml` `Build`፣ `npm-publish.yml` `publish`፣ `nightly-v4-build`፣ `preview-artifact`፣
   የሌሊቱ a11y build (#16853) እና `docker-publish.yml` **amd64** (በBuildKit ውስጥ webpack —
   Turbopack በዚያ ወድቋል፣ run 33253576569)። የarm64 Docker leg በ`ubuntu-24.04-arm` ላይ ይቆያል።

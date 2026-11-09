@@ -239,9 +239,9 @@ interface CliFingerprint {
 
 ---
 
-## يتجاوز وكيل المستخدم — env vars ( قسم `.env.example` 12)
+## تجاوزات User-Agent — متغيرات البيئة (القسم 12 من `.env.example`)
 
-| عامل                | تقصير                                         |
+| المتغير             | القيمة الافتراضية                             |
 | ------------------- | --------------------------------------------- |
 | `CLAUDE_USER_AGENT` | `claude-cli/2.1.280 (external, cli)`          |
 | `CODEX_USER_AGENT`  | `codex-cli/0.155.0 (Windows 10.0.26200; x64)` |
@@ -250,7 +250,7 @@ interface CliFingerprint {
 | `QODER_USER_AGENT`  | `Qoder-Cli`                                   |
 | `CURSOR_USER_AGENT` | `Cursor/3.4`                                  |
 
-يتم استهلاكها بواسطة `open-sse/executors/base.ts::buildHeaders()` عبر البحث الديناميكي.** ارتد هذه عندما يقوم مقدمو الخدمة بإصدار إصدارات CLI جديدة** يبدأ رفض سلاسل — UA لا معنى لها كعملاء قديمين.
+تُستخدم بواسطة `open-sse/executors/base.ts::buildHeaders()` عبر البحث الديناميكي. **حدّث هذه القيم عندما يصدر المزوّدون إصدارات CLI جديدة** — إذ تبدأ سلاسل UA القديمة بالتعرّض للرفض باعتبارها عملاء قديمين.
 
 ## مفاتيح تبديل وضع توافق CLI (القسم 13 من `.env.example`)
 

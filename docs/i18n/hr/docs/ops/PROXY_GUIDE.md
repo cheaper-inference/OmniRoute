@@ -81,6 +81,18 @@ unsupported_country_region_territory
 
 ---
 
+## Zadano stanje proxyja za nove račune
+
+U** Postavke → Proxy → Globalna konfiguracija** , koristiti** Omogući proxy prema zadanim postavkama za nove veze** za odabir početnog proxy stanja novododanih računa pružatelja usluga.
+
+Nova postavka kontrolira početno proxy stanje novododanih računa pružatelja usluga. Ne mijenja postojeće račune niti zamjenjuje globalni proxy prekidač. Njegova početna vrijednost čuva prethodno ponašanje. Isključite ga jednom za stvaranje budućih računa s proxy onemogućenim prema zadanim postavkama.
+
+Preferencija je pohranjena kao `defaultNewConnectionProxyEnabled` kroz postojeće postavke API. Zadana je `true` kada se nikad ne sprema. Spremanje `false` stupa na snagu za sljedeće nove račune bez ponovnog pokretanja. `POST /api/providers` prihvaća izborni strogi booleov `proxyEnabled`; eksplicitni `true` ili `false` ima prednost nad zadanom postavkom stvaranja. Izostavljanje na duplikatu računa ili OAuth ponovno povezivanje čuva pohranjeno stanje tog računa. Individualni računi se i dalje mogu omogućiti ili onemogućiti nakon toga.
+
+Selektivni prijenosi pružatelja usluga koriste zadane postavke odredišne instalacije za nove račune i čuvaju odredišnu politiku prilikom zamjene postojećih računa. Proxy prekidači nisu prijenosna polja prijenosa. Potpuno vraćanje sigurnosne kopije i povijesna JSON/SQL migracija zadržavaju svoju postojeću semantiku vraćanja, uključujući spremljene vrijednosti računa i zadane postavke naslijeđene sheme; potpuno vraćanje postavki također može vratiti ovu postavku.
+
+Ova preferenca ne dodjeljuje proxy niti utvrđuje da je on ispravan ili da se koristi. Stvarno usmjeravanje i dalje ovisi o globalnom proxy prekidaču i primjenjivoj konfiguraciji proxyja. Sintetički pružatelji usluga bez postojanog računa, OAuth promet prije stvaranja računa, environment/system proxyji i umrežavanje vanjskih pozadinskih sustava izvan su njegovog opsega.
+
 ## Sustav proxyja s 4 razine
 
 OmniRoute podržava konfiguraciju proxyja na **četiri neovisne razine**, koje se razrješavaju prema redoslijedu prioriteta:
@@ -381,7 +393,7 @@ Koristi `wreq-js` za generiranje TLS otisaka nalik onima iz preglednika, čime z
 
 ### Usklađivanje CLI otiska
 
-**Prekidač CLI otiska** (`Postavke → Sigurnost`) mijenja redoslijed HTTP zaglavlja i polja JSON tijela kako bi odgovarali točnom potpisu izvornih CLI izvršnih datoteka (Claude Code, Codex itd.). Ovo funkcionira **povrh** proxyja:
+**Prekidač CLI otiska** (`Settings → Security`) mijenja redoslijed HTTP zaglavlja i polja JSON tijela kako bi odgovarali točnom potpisu izvornih CLI izvršnih datoteka (Claude Code, Codex itd.). Ovo funkcionira **povrh** proxyja:
 
 ```
 Vaš IP (blokiran) → IP proxyja (SAD) → API pružatelja

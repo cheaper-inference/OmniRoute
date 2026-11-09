@@ -143,7 +143,7 @@ RTK yhdistää päällekkäiset rivit kahdella toisistaan riippumattomalla tasol
    `collapsePatterns`-asetuksen. Skeema: `deduplicate: z.boolean().default(false)` tiedostossa
    `open-sse/services/compression/engines/rtk/filterSchema.ts`.
 2. **Koko moottorin `deduplicateThreshold` (oletus `3`).** Kun kaikki suodattimet on suoritettu, moottori yhdistää
-   koko tuloksesta kaikki vähintään `deduplicateThreshold` identtisen peräkkäisen rivin jaksot
+   koko tuloksesta kaikki vähintään `>= deduplicateThreshold` identtisen peräkkäisen rivin jaksot
    (`deduplicateRepeatedLines`, käytössä tiedostossa `engines/rtk/index.ts`). Normalisoinnissa arvon rajat ovat 2–100.
 
 Suodatinkohtainen vaihe suoritetaan ensin (suodattimen sisällä) ja koko moottorin kattava vaihe viimeisenä (yhdistetylle

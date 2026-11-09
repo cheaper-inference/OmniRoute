@@ -107,60 +107,80 @@ function optionProperty(call: ts.CallExpression, name: string): ts.Expression | 
   assert.fail(`${name} must be an ordinary property`);
 }
 
-function assertBoundSender(call: ts.CallExpression, id: string, originalArguments: string[]) {
+function assertSenderBinding(call: ts.CallExpression, id: string) {
   const parent = call.parent;
   assert.ok(ts.isCallExpression(parent), "options must be consumed by a real call");
   assertExpression(parent.expression, "markAccountUnavailable", "receiver");
   assert.equal(parent.arguments.length, 7, "receiver argument count");
   assert.equal(parent.arguments[6], call, "options must be the seventh receiver argument");
-  originalArguments.forEach((expected, index) =>
-    assertExpression(parent.arguments[index], expected, `receiver argument ${index}`)
-  );
+  assertExpression(call.expression, "buildExhaustionOptions", "options helper");
   assertExpression(call.arguments[0], id, "request-scoped correlation id");
   assertExpression(optionProperty(call, "isCombo"), "isCombo", "combo flag");
 }
 
-function assertChatSenders(source: string) {
-  const senders = callsNamed(source, "buildExhaustionOptions");
-  assert.equal(senders.length, 4, "all four chat senders must forward the request id");
-  const common = ["provider", "model", "providerProfile"];
-  const expected = [
-    // Muse Code failure that marks the account (#15521).
-    [
-      "credentials.connectionId",
-      "result.status",
-      'String(result.rawMessage ?? result.error ?? "")',
-      ...common,
-    ],
-    [
-      "credentials.connectionId",
-      "result.status || HTTP_STATUS.BAD_GATEWAY",
-      "classificationError",
-      ...common,
-    ],
-    [
-      "credentials.connectionId",
-      "result.status",
-      "result.error || ANTIGRAVITY_PRE_RESPONSE_TIMEOUT_CODE",
-      ...common,
-    ],
-    ["credentials.connectionId", "result.status", "errorStr", ...common],
-  ];
-  senders.forEach((call, index) =>
-    assertBoundSender(call, "runtimeOptions.correlationId ?? null", expected[index])
+function assertBoundSender(call: ts.CallExpression, id: string, originalArguments: string[]) {
+  assertSenderBinding(call, id);
+  const parent = call.parent as ts.CallExpression;
+  originalArguments.forEach((expected, index) =>
+    assertExpression(parent.arguments[index], expected, `receiver argument ${index}`)
   );
+}
+
+const CHAT_SENDERS = {
+  muse: ["result.status", 'String(result.rawMessage ?? result.error ?? "")'],
+  streamReadiness: ["result.status || HTTP_STATUS.BAD_GATEWAY", "classificationError"],
+  preResponseTimeout: ["result.status", "result.error || ANTIGRAVITY_PRE_RESPONSE_TIMEOUT_CODE"],
+  fallback: ["result.status", "errorStr"],
+} as const;
+
+function chatSender(source: string, name: keyof typeof CHAT_SENDERS): ts.CallExpression {
+  const expectedError = tokens(CHAT_SENDERS[name][1]);
+  const matches = callsNamed(source, "markAccountUnavailable").filter((call) => {
+    const actualError = tokens(call.arguments[2]?.getText() ?? "");
+    return JSON.stringify(actualError) === JSON.stringify(expectedError);
+  });
+  assert.equal(matches.length, 1, `${name} account-failure receiver must exist exactly once`);
+  const sender = matches[0].arguments[6];
+  assert.ok(sender && ts.isCallExpression(sender), `${name} must consume an options helper`);
+  return sender;
+}
+
+function assertChatSenders(source: string) {
+  const receivers = callsNamed(source, "markAccountUnavailable");
+  const senders = callsNamed(source, "buildExhaustionOptions");
+  assert.equal(senders.length, receivers.length, "every helper must belong to an account failure");
+  // Check every receiver, including future failure paths, without depending on
+  // source order. Known paths below retain their original argument contracts.
+  for (const receiver of receivers) {
+    const sender = receiver.arguments[6];
+    assert.ok(
+      sender && ts.isCallExpression(sender),
+      "every account failure must build its options"
+    );
+    assertSenderBinding(sender, "runtimeOptions.correlationId ?? null");
+  }
+  for (const name of Object.keys(CHAT_SENDERS) as (keyof typeof CHAT_SENDERS)[]) {
+    assertBoundSender(chatSender(source, name), "runtimeOptions.correlationId ?? null", [
+      "credentials.connectionId",
+      ...CHAT_SENDERS[name],
+      "provider",
+      "model",
+      "providerProfile",
+    ]);
+  }
   assertExpression(
-    optionProperty(senders[0], "headers"),
+    optionProperty(chatSender(source, "muse"), "headers"),
     "result.response.headers",
     "Muse failure headers"
   );
+  const fallback = chatSender(source, "fallback");
   assertExpression(
-    optionProperty(senders[3], "headers"),
+    optionProperty(fallback, "headers"),
     "result.response.headers",
     "fallback headers"
   );
   assertExpression(
-    optionProperty(senders[3], "persistUnavailableState"),
+    optionProperty(fallback, "persistUnavailableState"),
     `!(
     isCombo && result.status === 429 && (failureKind === "rate_limit" || failureKind === "transient")
   )`,
@@ -289,11 +309,15 @@ test("exhaustion lines carry the request id", async (t) => {
   });
 });
 
-for (const index of [0, 1, 2, 3]) {
-  test(`sender AST rejects missing request id at chat sender ${index + 1}`, () => {
+for (const name of Object.keys(CHAT_SENDERS) as (keyof typeof CHAT_SENDERS)[]) {
+  test(`sender AST rejects missing request id at ${name}`, () => {
     const source = readSource("../../src/sse/handlers/chat.ts");
-    const call = callsNamed(source, "buildExhaustionOptions")[index];
-    assert.throws(() => assertChatSenders(replaceNode(source, call.arguments[0], "null")));
+    assertChatSenders(source);
+    const call = chatSender(source, name);
+    assert.throws(
+      () => assertChatSenders(replaceNode(source, call.arguments[0], "null")),
+      /request-scoped correlation id/
+    );
   });
 }
 
@@ -304,7 +328,8 @@ for (const [property, replacement] of [
 ]) {
   test(`sender AST rejects an unrelated fallback ${property}`, () => {
     const source = readSource("../../src/sse/handlers/chat.ts");
-    const fallback = callsNamed(source, "buildExhaustionOptions")[3];
+    assertChatSenders(source);
+    const fallback = chatSender(source, "fallback");
     const node = optionProperty(fallback, property);
     assert.ok(node);
     assert.throws(() => assertChatSenders(replaceNode(source, node, replacement)));
@@ -313,14 +338,16 @@ for (const [property, replacement] of [
 
 test("sender AST rejects a detached options helper even when its id text remains", () => {
   const source = readSource("../../src/sse/handlers/chat.ts");
-  const call = callsNamed(source, "buildExhaustionOptions")[3];
+  assertChatSenders(source);
+  const call = chatSender(source, "fallback");
   const detached = replaceNode(source, call, "{}") + `\n${call.getText()};`;
   assert.throws(() => assertChatSenders(detached));
 });
 
 test("sender AST permits additional structured options and ignores comments and strings", () => {
   const source = readSource("../../src/sse/handlers/chat.ts");
-  const fallback = callsNamed(source, "buildExhaustionOptions")[3];
+  assertChatSenders(source);
+  const fallback = chatSender(source, "fallback");
   const options = fallback.arguments[1];
   const changed = replaceNode(
     source,
@@ -333,10 +360,23 @@ test("sender AST permits additional structured options and ignores comments and 
 
 test("sender AST rejects a request id from another scope and a missing exhaustion id", () => {
   const source = readSource("../../src/sse/handlers/chat.ts");
-  const first = callsNamed(source, "buildExhaustionOptions")[0];
+  assertChatSenders(source);
+  const first = chatSender(source, "muse");
   assert.throws(() =>
     assertChatSenders(replaceNode(source, first.arguments[0], "other.correlationId ?? null"))
   );
   const exhaustion = callsNamed(source, "handleNoCredentials")[0];
   assert.throws(() => assertChatSenders(replaceNode(source, exhaustion.arguments[9], "null")));
+});
+
+test("sender AST accepts a further failure path only when it forwards the request id", () => {
+  const source = readSource("../../src/sse/handlers/chat.ts");
+  const extra = `\nmarkAccountUnavailable(credentials.connectionId, result.status, newFailure,
+    provider, model, providerProfile,
+    buildExhaustionOptions(runtimeOptions.correlationId ?? null, { isCombo }));`;
+  assertChatSenders(source + extra);
+  assert.throws(
+    () => assertChatSenders(source + extra.replace("runtimeOptions.correlationId ?? null", "null")),
+    /request-scoped correlation id/
+  );
 });

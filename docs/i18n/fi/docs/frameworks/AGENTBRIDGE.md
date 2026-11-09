@@ -20,7 +20,7 @@ Kun IDE agentti (esim. GitHub Copilot, Cursor, Claude Code) soittaa API puhelun,
 
 Tämä tarkoittaa, että voit:
 
-- **Ohjaa kaikki edustajat mille tahansa palveluntarjoajalle** : Copilot puhuu OpenAI:lle? Ohjaa se Anthropic Claude, Gemini tai johonkin OmniRoute:n 380-palveluntarjoajasta.
+- **Ohjaa kaikki edustajat mille tahansa palveluntarjoajalle** : Copilot puhuu OpenAI:lle? Ohjaa se Anthropic Claude, Gemini tai johonkin OmniRoute:n 381 palveluntarjoajalta.
 - **Käytä mallikartoituksia** : `gemini-3-flash` → `claude-sonnet-4.7` läpinäkyvästi ohjaajan tasolla.
 - **Tarkkaile kaikkea agenttiliikennettä** : jokainen pysäytetty pyyntö julkaistaan [liikennetarkastajalle](./TRAFFIC_INSPECTOR.md).
 - **Käytä OmniRoute kimmoisuutta** : yhdistelmäreititys, katkaisijat, varaosat ja kustannusseurantatyöt myös IDE -agenttiliikenteelle.
@@ -554,7 +554,7 @@ Trae on suhteellisen uusi tekoälyavusteinen ohjelmointiassistentti. Ennen käsi
 3. Selvitä todennusmekanismi
 4. Arvioi käyttöehtojen ja API:n löydettävyyden perusteella, jatketaanko toteutusta vai ei
 
-Kunnes selvitys valmistuu, hallintapaneelin Trae-kortissa näkyy "Selvitetään"-tunniste ja "Raportoi toteuttamiskelpoisuus" -linkki. Käsittelijän runko tiedostossa `src/mitm/handlers/trae.ts` antaa rakenteisen `Ei vielä toteutettu` -virheen.
+Kunnes selvitys valmistuu, hallintapaneelin Trae-kortissa näkyy "Selvitetään"-tunniste ja "Raportoi toteuttamiskelpoisuus" -linkki. Käsittelijän runko tiedostossa `src/mitm/handlers/trae.ts` antaa rakenteisen `Not yet implemented` -virheen.
 
 ### Työjonossa olevat agentit (MITM vaaditaan — ei mukautetun perus-URL-osoitteen tukea)
 

@@ -4,47 +4,78 @@
 
 ---
 
-> Opt-in, standaard uitgeschakeld (`modelVisibilityAllowlist`/`modelVisibilityDenylist` beide leeg, laat de `/v1/models` catalogus AND elke `auto/*` kandidaatpool byte-identiek). Een broer of zus van `hidePaidModels`/`hideAutoCombos` (`src/lib/db/settings.ts`) voor operators die een samengestelde modellenlijst willen om redenen die niets met de kosten te maken hebben.
+> Opt-in, standaard uitgeschakeld (als `modelVisibilityAllowlist`/`modelVisibilityDenylist` beide leeg zijn, blijven
+> de `/v1/models`-catalogus EN elke `auto/*`-kandidatenpool byte-identiek). Een equivalent van
+> `hidePaidModels`/`hideAutoCombos` (`src/lib/db/settings.ts`) voor operators die om redenen
+> die niets met kosten te maken hebben een samengestelde modellenlijst willen.
 
 ## Waarom dit bestaat
 
-`hidePaidModels` antwoordt "is dit model gratis?" en `hideAutoCombos` antwoordt: "moeten `auto/*` virtuele id's überhaupt worden geadverteerd?" — laat een operator ook geen willekeurige subset van modellen beheren (bijvoorbeeld door precies de modellen te presenteren die een bepaalde Claude -code / OpenCode -client zou moeten zien, onafhankelijk van de prijs). #11481 voegt dat toe als twee onafhankelijke, opt-in string-array-instellingen.
+`hidePaidModels` beantwoordt "is dit model gratis?" en `hideAutoCombos` beantwoordt "moeten virtuele
+`auto/*`-id's überhaupt worden weergegeven?" — geen van beide stelt een operator in staat om een
+willekeurige subset van modellen samen te stellen (bijvoorbeeld om precies de modellen te tonen die
+een bepaalde Claude Code-/OpenCode-client moet zien, onafhankelijk van de prijsstelling). #11481 voegt
+dit toe in de vorm van twee onafhankelijke, opt-in-instellingen voor string-arrays.
 
 ## Instellingen
 
-| Sleutel                    | Type       | Standaard | Betekenis                                                                                      |
-| -------------------------- | ---------- | --------- | ---------------------------------------------------------------------------------------------- |
-| `modelVisibilityDenylist`  | `string[]` | `[]`      | Inzendingen die overeenkomen met een kandidaat verbergen deze voor de catalog/candidate pool.  |
-| `modelVisibilityAllowlist` | `string[]` | `[]`      | Als ze niet leeg zijn, blijven ONLY vermeldingen die overeenkomen met een kandidaat zichtbaar. |
+| Sleutel                    | Type       | Standaard | Betekenis                                                                                       |
+| -------------------------- | ---------- | --------- | ----------------------------------------------------------------------------------------------- |
+| `modelVisibilityDenylist`  | `string[]` | `[]`      | Items die met een kandidaat overeenkomen, verbergen deze in de catalogus/kandidatenpool.        |
+| `modelVisibilityAllowlist` | `string[]` | `[]`      | Indien niet leeg, blijven ALLEEN kandidaten zichtbaar waarvoor een overeenkomstig item bestaat. |
 
-Beide accepteren maximaal 500 vermeldingen van elk maximaal 200 tekens (Zod-gevalideerd in `src/shared/validation/settingsSchemas.ts`). Een vermelding is ofwel:
+Beide accepteren maximaal 500 items van elk maximaal 200 tekens (gevalideerd met Zod in
+`src/shared/validation/settingsSchemas.ts`). Een item is:
 
-- een exacte catalogus-ID — `"gpt-4o"` (kale model-ID) of `"openai/gpt-4o"` (voorvoegsel provider), of
-- een globpatroon dat gebruik maakt van `*`/`?` — bijvoorbeeld `"openai/gpt-4*"` of `"anthropic/*"` — opgelost via dezelfde gedeelde `globToRegex()` matcher (`src/shared/utils/globPattern.ts`) die al wordt gebruikt door `ModelRoutingSection`'s combo-toewijzingen per model en `freeModels.ts::matchesOnlyPaidModels`.
+- een exacte catalogus-id — `"gpt-4o"` (model-id zonder voorvoegsel) of `"openai/gpt-4o"` (met providervoorvoegsel), of
+- een glob-patroon met `*`/`?` — bijvoorbeeld `"openai/gpt-4*"` of `"anthropic/*"` — verwerkt via
+  dezelfde gedeelde `globToRegex()`-matcher (`src/shared/utils/globPattern.ts`) die al wordt gebruikt
+  door de modelgebonden combotoewijzingen van `ModelRoutingSection` en
+  `freeModels.ts::matchesOnlyPaidModels`.
 
-Voorrang: de weigeringslijst wordt eerst gecontroleerd (een geweigerde invoer is altijd verborgen, zelfs als deze ook overeenkomt met de toelatingslijst); wanneer de toelatingslijst niet leeg is, blijven alleen de vermeldingen die ermee overeenkomen, bestaan.
+Prioriteit: de denylist wordt eerst gecontroleerd (een geweigerd item wordt altijd verborgen, zelfs
+als het ook met de allowlist overeenkomt); wanneer de allowlist niet leeg is, blijven alleen de
+items waarmee deze overeenkomt behouden.
 
 ## Twee knelpunten, niet één
 
-De les uit #6512 (een `hidePaidModels` -only -catalogusfilter laat `auto/*` nog steeds naar een betaald model routeren, aangezien de combo-kandidaatpool onafhankelijk is gebouwd) is hier identiek van toepassing. Het overeenkomende predikaat `isModelExposureAllowed()` (`src/shared/utils/modelExposureList.ts`) wordt aangeroepen vanuit BOTH:
+De les uit #6512 (een catalogusfilter uitsluitend op basis van `hidePaidModels` liet `auto/*` nog
+steeds naar een betaald model routeren, omdat de combokandidatenpool onafhankelijk werd opgebouwd)
+is hier op identieke wijze van toepassing. De matching-predicaatfunctie
+`isModelExposureAllowed()` (`src/shared/utils/modelExposureList.ts`) wordt vanuit BEIDE aangeroepen:
 
-- `src/app/api/v1/models/catalog.ts` — de `/v1/models` -lijst zelf, bij dezelfde 5 knelpunten per bron `shouldHidePaid()` al poorten (statische `PROVIDER_MODELS`, gesynchroniseerde providerrijen, aangepaste rijen, door alias ondersteunde rijen, beheerde fallback-rijen).
-- `open-sse/services/autoCombo/modelExposureFilter.ts::filterModelExposureCandidates()` — aangeroepen vanuit `virtualFactory.ts::buildPreparedPool`, onmiddellijk na de equivalente `filterPaidOnlyCandidates()` aanroep, dus een geweigerd model kan ook nooit worden geselecteerd in een `auto/*` kandidaatpool.
+- `src/app/api/v1/models/catalog.ts` — de `/v1/models`-vermelding zelf, bij dezelfde 5 knelpunten
+  per bron die al door `shouldHidePaid()` worden afgeschermd (statische `PROVIDER_MODELS`,
+  gesynchroniseerde providerrecords, aangepaste records, records op basis van aliassen,
+  beheerde fallback-records).
+- `open-sse/services/autoCombo/modelExposureFilter.ts::filterModelExposureCandidates()` — aangeroepen
+  vanuit `virtualFactory.ts::buildPreparedPool`, direct na de equivalente aanroep van
+  `filterPaidOnlyCandidates()`, zodat een geweigerd model ook nooit in een
+  `auto/*`-kandidatenpool kan worden geselecteerd.
 
-## Wat is NOT gefilterd
+## Wat NIET wordt gefilterd
 
-Spiegelt het bestaande gedrag van `hideAutoCombos`: er wordt een model-ID verzonden** uitdrukkelijk** (niet via `auto/*` en niet ontdekt via de cataloguslijst) wordt nooit geblokkeerd bij verzending — alleen advertisement/candidate-pool lidmaatschap wordt gefilterd. Dit is onafhankelijk van `hidePaidModels`; een operator wil misschien een samengestelde set om redenen die niets met de kosten te maken hebben, dus beide instellingen worden samengesteld als onafhankelijke EN-ed-filters, hetzelfde als de bestaande samenstelling met meerdere vlaggen in `catalog.ts`.
+Dit weerspiegelt het bestaande gedrag van `hideAutoCombos`: een model-id die **expliciet** wordt
+verzonden (niet via `auto/*` en niet ontdekt via de catalogusvermelding), wordt bij verzending nooit
+geblokkeerd — alleen weergave/lidmaatschap van de kandidatenpool wordt gefilterd. Dit staat los van
+`hidePaidModels`; een operator kan om redenen die niets met kosten te maken hebben een samengestelde
+set willen, zodat beide instellingen als onafhankelijke met EN gekoppelde filters worden gecombineerd,
+net als de bestaande combinatie van meerdere vlaggen in `catalog.ts`.
 
-Instellingenexport (`GET /api/settings/export-json`) omvat beide arrays woordelijk, net als elk ander instellingenveld — in tegenstelling tot `hidePaidModels`'s combo-stap exportfilter, is er hier geen risico op rehydratatie: een geweigerde id ingebed in een geëxporteerde combo-stap is de expliciete routeringskeuze van de operator, niet iets dat de exportgrens moet verwijderen.
+De instellingenexport (`GET /api/settings/export-json`) bevat beide arrays ongewijzigd, zoals elk
+ander instellingenveld — in tegenstelling tot het exportfilter voor combostappen van
+`hidePaidModels` is hier geen risico op rehydratatie: een geweigerde id die is opgenomen in een
+geëxporteerde combostap is de expliciete routeringskeuze van de operator zelf, niet iets wat aan de
+exportgrens moet worden verwijderd.
 
-## Alleen combo's (`exposeCombosOnly`)
+## Alleen combo's weergeven (`exposeCombosOnly`)
 
-Een aparte boolean, standaard ook opt-in en `false`, voor implementaties waarbij combo's het publieke modeloppervlak vormen en providers alleen backends zijn. Als het `true` is, houdt de openbare lijst (`GET /v1/models`, `GET /v1` en de andere `/v1` -ontdekkingsroutes gebouwd op `getUnifiedModelsResponse()`) alleen rijen met `owned_by: "combo"`: gebruikerscombinaties plus de ingebouwde `auto/*` combinaties (tenzij `hideAutoCombos` ze verbergt). Het gebruikt dezelfde rijtest als de `catalogScope: "combos"` per sleutel, en de eigen allow/deny/scope filters van een sleutel zijn er nog steeds bovenop van toepassing.
+Een afzonderlijke booleaanse instelling, eveneens expliciet in te schakelen en standaard `false`, voor implementaties waarin combo's het publieke modelaanbod vormen en providers alleen backends zijn. Bij `true` behoudt de publieke lijst (`GET /v1/models`, `GET /v1` en de andere `/v1`-ontdekkingsroutes op basis van `getUnifiedModelsResponse()`) alleen rijen met `owned_by: "combo"`: gebruikerscombo's plus de ingebouwde `auto/*`-combo's (tenzij `hideAutoCombos` ze verbergt). Dezelfde rijtest als bij `catalogScope: "combos"` per sleutel wordt gebruikt; de eigen toestaan/weigeren/scopefilters van een sleutel blijven daarbovenop gelden.
 
-Schakel het in** Instellingen → Routing → Modellen API -lijst** , of met `PATCH /api/settings {"exposeCombosOnly": true}`.
+Schakel dit in of uit via **Settings → Routing → Models API listing**, of met `PATCH /api/settings {"exposeCombosOnly": true}`.
 
-Net als de bovenstaande lijsten verandert het alleen de advertentie:
+Net als de bovenstaande lijsten verandert dit alleen wat wordt aangekondigd:
 
-- een expliciete `provider/model` id verzendt nog steeds, en `GET /v1/models/{id}` lost het nog steeds op;
-- de dashboardcatalogus (`GET /api/models/catalog`, gebruikt door de modelkiezers) is niet beperkt;
-- het wordt niet gespiegeld in de `auto/*` kandidaatpools, dus `auto/*` combo's behouden hun volledige pool.
+- een expliciete `provider/model`-ID wordt nog steeds verwerkt en `GET /v1/models/{id}` blijft deze opzoeken;
+- de dashboardcatalogus (`GET /api/models/catalog`, gebruikt door de modelkiezers) wordt niet beperkt;
+- dit wordt niet overgenomen in de kandidatenpools van `auto/*`, zodat `auto/*`-combo's hun volledige pool behouden.

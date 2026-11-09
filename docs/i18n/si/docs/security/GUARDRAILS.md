@@ -594,27 +594,24 @@ API:
 මේ තුනටම management auth අවශ්ය වන අතර, body එක Zod මඟින් validate කරයි
 (`src/shared/validation/schemas/piiSettings.ts`).
 
-#### GDPR (EU) සහ POPIA (දකුණු අප්රිකාව) identifiers
+#### GDPR (EU) සහ POPIA (දකුණු අප්‍රිකාව) හඳුනාගැනීම්
 
-| Id                  | Identifier               | Validation                                                                         |
-| ------------------- | ------------------------ | ---------------------------------------------------------------------------------- |
-| `iban`              | IBAN                     | දන්නා රටක්, එම රටට නිශ්චිත exact length එක, ISO 13616 MOD-97-10                    |
-| `eu_vat`            | EU VAT number            | දන්නා member-state prefix එක සහ එම ප්රාන්තයේ number format එක (VIES lookup නොමැත)  |
-| `es_dni_nie`        | Spanish DNI / NIE        | Control letter (value mod 23); NIE යනු `X/Y/Z` + digits 7කි                        |
-| `it_codice_fiscale` | Italian Codice Fiscale   | odd/even position tables වෙතින් ලැබෙන control letter                               |
-| `pl_pesel`          | Polish PESEL             | Weighted checksum එක සහ පවතින encoded birth date එක                                |
-| `nl_bsn`            | Dutch BSN                | 11-proof (weights 9..2, -1)                                                        |
-| `de_steuer_id`      | German Steuer-ID         | ISO 7064 Mod 11,10 සහ digit-structure rules (ආරම්භක 0 නොමැත)                       |
-| `se_personnummer`   | Swedish personnummer     | අවසන් digits දහය මත Luhn සහ plausibly valid birth date එකක් (digits 10 හෝ 12)      |
-| `za_id`             | South African ID number  | digits 13ම මත Luhn, valid birth month/day, citizenship digit 0 හෝ 1                |
-| `za_phone`          | South African phone      | `+27` / `27` prefix එක, හෝ space හෝ hyphen සමඟ ලියූ national `0..` form එක         |
-| `za_vat`            | South African VAT number | `4` න් ආරම්භ වන digits 10ක් **සහ** පෙර characters 48 තුළ "VAT" / "BTW"             |
-| `za_tax_ref`        | South African tax ref.   | `0`-`3` න් ආරම්භ වන digits 10ක්, Luhn, **සහ** පෙර characters 48 තුළ "tax" / "SARS" |
+| ID                  | හඳුනාගැනීම                     | වලංගුකරණය                                                                          |
+| ------------------- | ------------------------------ | ---------------------------------------------------------------------------------- |
+| `iban`              | IBAN                           | දන්නා රට, එම රට සඳහා නිශ්චිත දිග, ISO 13616 MOD-97-10                              |
+| `eu_vat`            | EU VAT අංකය                    | දන්නා සාමාජික රටේ prefix සහ එම රටේ අංක ආකෘතිය (VIES lookup නැත)                    |
+| `es_dni_nie`        | ස්පාඤ්ඤ DNI / NIE              | පරීක්ෂක අකුර (අගය mod 23); NIE යනු `X/Y/Z` + ඉලක්කම් 7 කි                          |
+| `it_codice_fiscale` | ඉතාලි Codice Fiscale           | ඔත්තේ/ඉරට්ටේ ස්ථාන වගුවලින් පරීක්ෂක අකුර                                           |
+| `pl_pesel`          | පෝලන්ත PESEL                   | බර යෙදූ checksum සහ encode කළ උපන් මාසය/දිනයේ සාධාරණ පරාස                          |
+| `nl_bsn`            | ලන්දේසි BSN                    | 11 පරීක්ෂාව (බර 9..2, -1)                                                          |
+| `de_steuer_id`      | ජර්මානු Steuer-ID              | ISO 7064 Mod 11,10 සහ ඉලක්කම් ව්‍යුහ නීති (මුලට 0 නැත)                             |
+| `se_personnummer`   | ස්වීඩන් personnummer           | අවසන් ඉලක්කම් දහය සඳහා Luhn සහ සාධාරණ උපන් දිනයක් (ඉලක්කම් 10 හෝ 12)               |
+| `za_id`             | දකුණු අප්‍රිකානු ID අංකය       | සියලු ඉලක්කම් 13 සඳහා Luhn, වලංගු උපන් මාසය/දිනය, පුරවැසි ඉලක්කම 0 හෝ 1            |
+| `za_phone`          | දකුණු අප්‍රිකානු දුරකථනය       | `+27` / `27` prefix, හෝ space/hyphen සහිත ජාතික `0..` ආකෘතිය                       |
+| `za_vat`            | දකුණු අප්‍රිකානු VAT අංකය      | `4` න් ආරම්භ වන ඉලක්කම් 10 ක් **සහ** ඊට පෙර අකුරු 48 තුළ "VAT" / "BTW"             |
+| `za_tax_ref`        | දකුණු අප්‍රිකානු tax reference | `0`-`3` න් ආරම්භ වන ඉලක්කම් 10 ක්, Luhn, **සහ** ඊට පෙර අකුරු 48 තුළ "tax" / "SARS" |
 
-ඉලක්කම් පමණක් අඩංගු ආකෘති ඇණවුම් අංක, build අංක සහ වේලා මුද්රා සමඟ ගැටෙන බැවින්, දුර්වලම ඒවාට (`za_vat`, `za_tax_ref`) keyword cue එක අවශ්ය වන අතර, හිස් දස-ඉලක්කම් `0..` අංකයක් දකුණු අප්රිකානු දුරකථන අංකයක් ලෙස සලකනු නොලැබේ.
-හිස්තැන් සහිත IBAN (`GB29 NWBK ...`) ගැළපෙන්නේ නැත. Streaming path එකේදී cue එක සොයන්නේ වත්මන් chunk එක තුළ පමණි. IDs සාමාන්ය දුරකථන රටා වලට ඉදිරියෙන් තබා ඇති බැවින්, වලංගු කළ identifier එක තමන්ගේම placeholder එක තබා ගනී
-(`[IBAN_REDACTED]`, `[NL_BSN_REDACTED]`, ...). `gdpr` සහ `popia` templates මඟින් පිළිවෙළින් EU සහ දකුණු අප්රිකානු IDs තෝරා ගනී. Masking එක opt-in ලෙසම පවතී
-(Hard Rule #20): මෙහි කිසිවක් feature-flag default එක වෙනස් නොකරයි.
+ඉලක්කම් පමණක් ඇති ආකෘති order number, build number සහ timestamp සමඟ ගැටෙන බැවින් දුර්වලම ඒවාට (`za_vat`, `za_tax_ref`) keyword ඉඟිය අවශ්‍යය; ඉලක්කම් දහයක `0..` අංකයක් පමණක් දකුණු අප්‍රිකානු phone number ලෙස නොසලකයි. Space සහිත IBAN (`GB29 NWBK ...`) match නොවේ. Streaming මාර්ගයේ ඉඟිය සොයන්නේ වත්මන් chunk ඇතුළත පමණි. ID පිහිටන්නේ generic phone pattern වලට පෙර බැවින් වලංගු කළ හඳුනාගැනීම තමන්ගේ placeholder රඳවාගනී (`[IBAN_REDACTED]`, `[NL_BSN_REDACTED]`, ...). `gdpr` සහ `popia` template පිළිවෙළින් EU සහ දකුණු අප්‍රිකානු ID තෝරයි. Masking තවමත් කැමැත්තෙන් සක්‍රිය කළ යුතුය (Hard Rule #20): මෙහි කිසිවක් feature-flag පෙරනිමිය වෙනස් නොකරයි.
 
 ### Prompt Injection (`promptInjection.ts`)
 

@@ -20,7 +20,7 @@ IDE agenti (masalan, GitHub Copilot, Cursor, Claude Code) API chaqiruvini amalga
 
 Bu shuni anglatadiki, siz:
 
-- **Har qanday agentni istalgan provayderga yo'naltiring** : Copilot OpenAI bilan gaplashyapsizmi? Uni Anthropic Claude, Gemini yoki OmniRoute ning 380 ta provayderlaridan biriga yoʻnaltiring.
+- **Har qanday agentni istalgan provayderga yo'naltiring** : Copilot OpenAI bilan gaplashyapsizmi? Uni Anthropic Claude, Gemini yoki OmniRoute ning 381 provayderlaridan biriga yo‘naltiring.
 - **Model xaritalarini qo'llang** : ishlov beruvchi darajasida `gemini-3-flash` → `claude-sonnet-4.7` shaffof.
 - **Barcha agent trafigini kuzating** : har bir ushlangan so'rov [Yo'l harakati inspektoriga](./TRAFFIC_INSPECTOR.md) e'lon qilinadi.
 - **OmniRoute chidamliligini qo'llang** : kombinatsiyalangan marshrutlash, o'chirgichlar, zaxiralar va IDE agent trafiki uchun xarajatlarni kuzatish ham ishlaydi.
@@ -543,7 +543,7 @@ Trae — nisbatan yangi AI kod yozish yordamchisi. Handler’ni amalga oshirishd
 3. Autentifikatsiya mexanizmini aniqlash
 4. TOS va API’ni aniqlash imkoniyatiga asoslanib, davom etish yoki etmaslikni baholash
 
-O‘rganish yakunlangunga qadar boshqaruv panelidagi Trae kartasida "Yaroqliligini bildirish" havolasi bilan "O‘rganilmoqda" belgisi ko‘rsatiladi. `src/mitm/handlers/trae.ts` dagi handler zagotovkasi tuzilmaviy `Hali amalga oshirilmagan` xatosini chiqaradi.
+O‘rganish yakunlangunga qadar boshqaruv panelidagi Trae kartasida "Yaroqliligini bildirish" havolasi bilan "O‘rganilmoqda" belgisi ko‘rsatiladi. `src/mitm/handlers/trae.ts` dagi handler zagotovkasi tuzilmaviy `Not yet implemented` xatosini chiqaradi.
 
 ### Rejadagi agentlar (MITM talab qilinadi — maxsus asosiy URL’ni qo‘llab-quvvatlamaydi)
 

@@ -905,12 +905,7 @@ wanneer een ander veld is ingesteld. Voor lite worden `additionalQueries`, `syst
 `subpages`, `subpageTarget`, `highlights.numSentences` en `highlights.highlightsPerUrl` worden niet langer
 doorgestuurd.
 
-De kostenberekening gebruikt het vaste register `costPerQuery`, behalve voor Exa, dat de
-eigen prijsstelling van Exa volgt: $0.007 per aanroep voor `auto` (en de legacywaarde `fast`) of $0.004 voor `lite` (en de legacywaarde `instant`), voor 10 resultaten; $0.001 voor elk aanvullend resultaat; en $0.001 per
-geretourneerd resultaat wanneer `contents.summary` is ingesteld. Tavily wordt geregistreerd tegen 1 credit ($0.008) voor
-`search_depth` `basic`, `fast` en `ultra-fast`, en 2 credits ($0.016) voor `advanced`
-([Tavily API-credits](https://docs.tavily.com/documentation/api-credits)). Een aanroep met
-`auto_parameters: true` die Tavily opwaardeert naar advanced, wordt nog steeds geregistreerd als 1 credit.
+Exa: $0,007 per oproep voor `auto` (en de oude `fast`) of $0,004 voor `lite` (en de oude `instant`), wat 10 resultaten omvat; $ 0,001 voor elk verder resultaat; en $ 0,001 per geretourneerd resultaat wanneer `contents.summary` is ingesteld. Tavily wordt geregistreerd op 1 credit ($0,008) voor `search_depth` `basic`, `fast` en `ultra-fast`, en 2 credits ($0,016) voor `advanced` ( [Tavily API credits](https://docs.tavily.com/documentation/api-credits) ). Een gesprek met `auto_parameters: true` dat Tavily upgradet naar geavanceerd wordt nog steeds geregistreerd tegen 1 credit.
 
 ---
 
@@ -1186,6 +1181,8 @@ X-OmniRoute-No-Cache: true
 
 ---
 
+<a id="cliproxyapi-management-compatibility"></a>
+
 ## Compatibiliteit met CLIProxyAPI-beheer
 
 OmniRoute beantwoordt de drie beheerendpoints van [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI) die gebruiksdashboards aanroepen om de abonnementslimieten van Claude en Codex te lezen (bijvoorbeeld de gebruikslimietbron `cliproxy` van T3 Code). Stel de basis-URL van de client in op OmniRoute en gebruik een API-sleutel met de scope `manage` als beheersleutel. De routes worden aangeboden op `/v0/management/*` en `/api/v0/management/*`.
@@ -1196,9 +1193,11 @@ OmniRoute beantwoordt de drie beheerendpoints van [CLIProxyAPI](https://github.c
 | POST    | `/v0/management/api-call`    | Body `{ auth_index, method, url, header?, data? }`. Verzendt één toegestane aanvraag met het token van het account en retourneert `{ status_code, body }` |
 | POST    | `/v0/management/reset-quota` | Body `{ auth_index }`. Wist de verbindingscooldown, modelblokkeringen en Codex-cooldowns per scope van één account                                        |
 
-- `auth_index` is de OmniRoute-verbindings-id. `provider` is `claude` of `codex` (alleen OAuth-verbindingen; de `anthropic` API-sleutelprovider wordt niet vermeld). Voor Codex is `id_token.chatgpt_account_id` de opgeslagen werkruimte-id en `plan_type` het opgeslagen abonnementstype.
-- `api-call` is geen generieke proxy. Deze accepteert alleen Claude `GET https://api.anthropic.com/api/oauth/usage` en Codex `GET https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits` en `POST .../wham/rate-limit-reset-credits/consume`, elk alleen voor een account van de overeenkomstige provider. Al het andere retourneert `403` zonder contact op te nemen met de upstream. De `Authorization`-header van de aanroeper (inclusief de tijdelijke aanduiding `$TOKEN$`) wordt genegeerd: OmniRoute injecteert het toegangstoken van de verbinding, vernieuwt dit eerst wanneer het bijna verloopt en stuurt alleen toegestane headers door (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`; `Accept`, `Content-Type`). Een ontbrekende `Chatgpt-Account-Id` gebruikt standaard de opgeslagen werkruimte-id. Aanvragen verlopen na 15 seconden en gebruiken de proxy van de verbinding.
-- `reset-quota` laat terminale statussen (`banned`, `expired`, `credits_exhausted`) ongemoeid. Een onbekende `auth_index` retourneert `404`.
+- `auth_index` is de OmniRoute-verbindings-ID. `provider` is `claude` of `codex` (alleen OAuth-verbindingen; de API-sleutelprovider `anthropic` wordt niet vermeld). Voor Codex is `id_token.chatgpt_account_id` de opgeslagen werkruimte-ID en `plan_type` het opgeslagen abonnement.
+- `api-call` is geen algemene proxy. Het accepteert alleen Claude `GET
+https://api.anthropic.com/api/oauth/usage` en Codex `GET
+https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits` en `POST .../wham/rate-limit-reset-credits/consume`, elk alleen voor een account van de bijbehorende provider. Al het overige retourneert `403` zonder contact met de upstream. De `Authorization`-header van de aanroeper (inclusief de tijdelijke aanduiding `$TOKEN$`) wordt genegeerd: OmniRoute voegt het toegangstoken van de verbinding in, vernieuwt het eerst als het bijna verloopt en stuurt alleen toegelaten headers door (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`; `Accept`, `Content-Type`). Bij een ontbrekende `Chatgpt-Account-Id` wordt de opgeslagen werkruimte-ID gebruikt. Als het eerste upstream-antwoord `401` is, vernieuwt het eenmaal en probeert het alleen opnieuw wanneer het toegangstoken verandert. Elke upstream-poging heeft een time-out van 15 seconden en gebruikt de proxy van de verbinding.
+- `reset-quota` laat terminale statussen (banned, expired, credits_exhausted) intact. Een onbekende `auth_index` retourneert `404`.
 
 **Authenticatie:** dashboardsessie of een API-sleutel met de scope `manage`, ook vereist wanneer inloggen is uitgeschakeld (de paden staan in `ALWAYS_PROTECTED_API_PATHS`). Alleen voor inference bestemde sleutels krijgen `403`. Bron: `src/lib/cliproxyCompat/managementApi.ts`.
 
@@ -1940,17 +1939,17 @@ Persistente conversationele/feitelijke geheugenopslag, afgebakend per API-sleute
 
 OmniRoute bevat een ingebouwde Model Context Protocol-server met 3 transports (stdio, SSE, streamable-http) en tools met scopes. De onderstaande dashboard-endpoints lezen status-/auditgegevens en fungeren als proxy voor de HTTP-transports.
 
-| Methode | Pad | Beschrijving |
-| ------ | ---------------------- | ------------------------------------------------------------------------------------------------ | -------------------- |
-| GET | `/api/mcp/status` | Heartbeat, transport, online status, laatste aanroep, belangrijkste tools, succespercentage over 24 uur |
-| GET | `/api/mcp/tools` | Lijst met MCP-tools met `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints` |
-| GET | `/api/mcp/sse` | SSE-stream openen voor de SSE-transport (retourneert `503` als MCP is uitgeschakeld of als het transport niet overeenkomt) |
-| POST | `/api/mcp/sse` | JSON-RPC-frame verzenden via de SSE-transport |
-| GET | `/api/mcp/stream` | SSE-gedeelte van de Streamable HTTP-transport openen (door de server geïnitieerde berichten) |
-| POST | `/api/mcp/stream` | JSON-RPC-frame verzenden via de Streamable HTTP-transport |
-| DELETE | `/api/mcp/stream` | Een Streamable HTTP-sessie beëindigen |
-| GET | `/api/mcp/audit` | Auditlog opvragen — `?limit=`, `?offset=`, `?tool=`, `?success=true                                | false`, `?apiKeyId=` |
-| GET | `/api/mcp/audit/stats` | Geaggregeerde auditstatistieken (totalen, succespercentage, gemiddelde duur, belangrijkste tools) |
+| Methode | Pad                    | Beschrijving                                                                                                               |
+| ------- | ---------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| GET     | `/api/mcp/status`      | Heartbeat, transport, online status, laatste aanroep, belangrijkste tools, succespercentage over 24 uur                    |
+| GET     | `/api/mcp/tools`       | Lijst met MCP-tools met `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints`                          |
+| GET     | `/api/mcp/sse`         | SSE-stream openen voor de SSE-transport (retourneert `503` als MCP is uitgeschakeld of als het transport niet overeenkomt) |
+| POST    | `/api/mcp/sse`         | JSON-RPC-frame verzenden via de SSE-transport                                                                              |
+| GET     | `/api/mcp/stream`      | SSE-gedeelte van de Streamable HTTP-transport openen (door de server geïnitieerde berichten)                               |
+| POST    | `/api/mcp/stream`      | JSON-RPC-frame verzenden via de Streamable HTTP-transport                                                                  |
+| DELETE  | `/api/mcp/stream`      | Een Streamable HTTP-sessie beëindigen                                                                                      |
+| GET     | `/api/mcp/audit`       | Auditlog opvragen — `?limit=`, `?offset=`, `?tool=`, `?success=true                                \| false`, `?apiKeyId=` |
+| GET     | `/api/mcp/audit/stats` | Geaggregeerde auditstatistieken (totalen, succespercentage, gemiddelde duur, belangrijkste tools)                          |
 
 **Authenticatie:** de `sse`/`stream`-transports gebruiken het MCP-specifieke authenticatieoppervlak (Bearer API-sleutel met `mcp`-scope); de `status`/`tools`/`audit*`-routes kunnen vanuit het dashboard worden gelezen (geen aanvullende authenticatie vereist naast toegang tot de dashboardhost).
 

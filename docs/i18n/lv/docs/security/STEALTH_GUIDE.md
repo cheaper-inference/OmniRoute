@@ -238,9 +238,9 @@ Visiem MITM galapunktiem ir nepieciešama pārvaldības autentifikācija (`requi
 
 ---
 
-## Lietotāja aģents ignorē — env vars (`.env.example` 12. sadaļa)
+## User-Agent pārrakstīšana — vides mainīgie (`.env.example` 12. sadaļa)
 
-| Mainīgs             | Noklusējums                                   |
+| Mainīgais           | Noklusējuma vērtība                           |
 | ------------------- | --------------------------------------------- |
 | `CLAUDE_USER_AGENT` | `claude-cli/2.1.280 (external, cli)`          |
 | `CODEX_USER_AGENT`  | `codex-cli/0.155.0 (Windows 10.0.26200; x64)` |
@@ -249,7 +249,7 @@ Visiem MITM galapunktiem ir nepieciešama pārvaldības autentifikācija (`requi
 | `QODER_USER_AGENT`  | `Qoder-Cli`                                   |
 | `CURSOR_USER_AGENT` | `Cursor/3.4`                                  |
 
-Patērē `open-sse/executors/base.ts::buildHeaders()`, izmantojot dinamisko meklēšanu.** Sasitiet tos, kad pakalpojumu sniedzēji izlaiž jaunas CLI versijas** — novecojušas UA virknes tiek noraidītas kā novecojuši klienti.
+Tos izmanto `open-sse/executors/base.ts::buildHeaders()`, veicot dinamisku uzmeklēšanu. **Atjauniniet tos, kad pakalpojumu sniedzēji izlaiž jaunas CLI versijas** — novecojušas UA virknes tiek noraidītas kā novecojuši klienti.
 
 ## CLI saderības režīma slēdži (`.env.example` 13. sadaļa)
 

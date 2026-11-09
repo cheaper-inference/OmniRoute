@@ -116,7 +116,15 @@ test("usage analytics maps current byProvider token fields and keeps legacy fall
 
 test("usage analytics table displays token totals from the current API", async () => {
   const result = await captureUsageAnalytics(
-    [{ provider: "provider-current", requests: 1, promptTokens: 2048, completionTokens: 3, cost: 0 }],
+    [
+      {
+        provider: "provider-current",
+        requests: 1,
+        promptTokens: 2048,
+        completionTokens: 3,
+        cost: 0,
+      },
+    ],
     "table"
   );
   assert.equal(result.code, 0, result.stderr);

@@ -490,7 +490,7 @@ Ha atọ chọrọ management auth ma jiri Zod kwado body
 | `eu_vat`            | Nọmba VAT nke EU            | Prefix nke mba so na ndị otu a maara na usoro nọmba nke steeti ahụ (enweghị nyocha VIES)         |
 | `es_dni_nie`        | DNI / NIE nke Spain         | Akwụkwọ ozi njikwa (value mod 23); NIE bụ `X/Y/Z` + digits 7                                     |
 | `it_codice_fiscale` | Codice Fiscale nke Italy    | Akwụkwọ ozi njikwa sitere na tebụl ọnọdụ odd/even                                                |
-| `pl_pesel`          | PESEL nke Poland            | Weighted checksum na ụbọchị ọmụmụ e debanyere nke dị adị                                         |
+| `pl_pesel`          | PESEL Poland                | Weighted checksum na oke ọnwa/ụbọchị ọmụmụ e encode nwere ezi uche                               |
 | `nl_bsn`            | BSN nke Netherlands         | 11-proof (weights 9..2, -1)                                                                      |
 | `de_steuer_id`      | Steuer-ID nke Germany       | ISO 7064 Mod 11,10 yana iwu nhazi digits (enweghị 0 n'isi)                                       |
 | `se_personnummer`   | personnummer nke Sweden     | Luhn n'elu digits iri ikpeazụ na ụbọchị ọmụmụ nwere ezi uche (digits 10 ma ọ bụ 12)              |

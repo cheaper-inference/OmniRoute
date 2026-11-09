@@ -241,9 +241,9 @@ interface CliFingerprint {
 
 ---
 
-## ユーザーエージェントによる—環境変数のオーバーライド (`.env.example`セクション 12)
+## User-Agent のオーバーライド — 環境変数（`.env.example` セクション 12）
 
-| 変数                | デフォルト                                    |
+| 変数                | デフォルト値                                  |
 | ------------------- | --------------------------------------------- |
 | `CLAUDE_USER_AGENT` | `claude-cli/2.1.280 (external, cli)`          |
 | `CODEX_USER_AGENT`  | `codex-cli/0.155.0 (Windows 10.0.26200; x64)` |
@@ -252,7 +252,7 @@ interface CliFingerprint {
 | `QODER_USER_AGENT`  | `Qoder-Cli`                                   |
 | `CURSOR_USER_AGENT` | `Cursor/3.4`                                  |
 
-動的検索を介して`open-sse/executors/base.ts::buildHeaders()`によって消費されます。**プロバイダーが新しいCLIバージョンをリリースするときにこれらをバンプします**—古いUA文字列は、古いクライアントとして拒否され始めます。
+`open-sse/executors/base.ts::buildHeaders()` によって動的ルックアップを介して使用されます。**プロバイダーが新しい CLI バージョンをリリースした際は、これらを更新してください** — 古い UA 文字列は、旧式のクライアントとして拒否されるようになります。
 
 ## CLI 互換モードの切り替え（`.env.example` セクション 13）
 

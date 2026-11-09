@@ -62,11 +62,11 @@ Implementierungseigenschaft:
 
 Das bedeutet für die einzelnen Oberflächen selbst bei `CORS_ALLOW_ALL=true`:
 
-| Oberfläche                                | Authentifizierungsmechanismus | Auswirkung von Wildcard-CORS                                                                                                                                                                                                                                                                                                                                                                                              |
-| ----------------------------------------- | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Dashboard / MANAGEMENT `/api/*`           | Cookie-Sitzung                | Der Ursprung wird zurückgegeben, aber **ohne `Allow-Credentials` blockiert** der Browser das **authentifizierte Lesen**. Eine bösartige Cross-Origin-Website **kann Ihre authentifizierten Dashboard-Antworten nicht lesen**, und das Sitzungscookie wird nicht offengelegt.                                                                                                                                              |
-| Client-API `/v1/*`, `/v1beta/*`           | Bearer- / `x-api-key`-Header  | Bereits **absichtlich** freizügig (`relaxForTokenAuth`): Browser hängen `Authorization`/`x-api-key` niemals automatisch an, sodass die Seite eines Angreifers Ihren Schlüssel nicht bereitstellen kann. Der Ursprung wird nur zurückgegeben, wenn der übermittelte Schlüssel validiert wurde; anonyme Antworten (`REQUIRE_API_KEY=false`) behalten die Positivliste bei. `CORS_ALLOW_ALL` erweitert diesen Zugriff nicht. |
-| Öffentlich, nur lesbar (`/api/health`, …) | Keine                         | Nicht sensibel; ein Platzhalter ist unbedenklich.                                                                                                                                                                                                                                                                                                                                                                         |
+| Oberfläche                                | Authentifizierungsmechanismus | Auswirkung von Wildcard-CORS                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| ----------------------------------------- | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Dashboard / MANAGEMENT `/api/*`           | Cookie-Sitzung                | Der Ursprung wird zurückgegeben, aber **ohne `Allow-Credentials` blockiert** der Browser das **authentifizierte Lesen**. Eine bösartige Cross-Origin-Website **kann Ihre authentifizierten Dashboard-Antworten nicht lesen**, und das Sitzungscookie wird nicht offengelegt.                                                                                                                                                                                                                                                                                                                                                                     |
+| Client-API `/v1/*`, `/v1beta/*`           | Bearer- / `x-api-key`-Header  | Bereits **absichtlich** freizügig (`relaxForTokenAuth`): Browser hängen `Authorization`/`x-api-key` niemals automatisch an, sodass die Seite eines Angreifers Ihren Schlüssel nicht bereitstellen kann. Die gelockerte Spiegelung des Ursprungs erfordert ein authentifiziertes Subjekt (einen validierten API-Schlüssel oder eine validierte Dashboard-Sitzung), nicht bloß einen Anmeldedaten-Header, und enthält niemals `Access-Control-Allow-Credentials`. Anonyme Antworten (`REQUIRE_API_KEY=false`) verwenden die konfigurierte Liste zulässiger Ursprünge, einschließlich einer ausdrücklichen Aktivierung durch `CORS_ALLOW_ALL=true`. |
+| Öffentlich, nur lesbar (`/api/health`, …) | Keine                         | Nicht sensibel; ein Platzhalter ist unbedenklich.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
 
 Die **verbleibende** Offenlegung durch `CORS_ALLOW_ALL=true` beschränkt sich
 somit auf: (a) nicht authentifizierte Cross-Origin-**Lesezugriffe** auf bereits
@@ -131,10 +131,7 @@ Neustart erforderlich ist.
   diese niemals automatisch an. CORS stellt hier keine wirksame Barriere dar — der API-Schlüssel ist die
   Barriere. Deshalb ist diese Schnittstelle bewusst permissiv konfiguriert, damit Browser- und
   Electron-Clients Antworten lesen können, zu deren Zugriff sie bereits berechtigt sind.
-  Die gelockerte Rückgabe des Ursprungs richtet sich nach dem validierten Schlüssel, nicht
-  nach dem bloßen Vorhandensein des Headers: Wenn `REQUIRE_API_KEY=false` eine Anfrage
-  anonym bedient, behält deren erfolgreiche Antwort die standardmäßig restriktive
-  Positivliste bei. Authentifizierungsablehnungen (401) bleiben lesbar, damit Clients
+  Die gelockerte Spiegelung des Ursprungs erfordert ein authentifiziertes Subjekt (einen validierten API-Schlüssel oder eine validierte Dashboard-Sitzung), nicht bloß einen Anmeldedaten-Header, und enthält niemals `Access-Control-Allow-Credentials`. Anonyme Antworten (`REQUIRE_API_KEY=false`) verwenden die konfigurierte Liste zulässiger Ursprünge, einschließlich einer ausdrücklichen Aktivierung durch `CORS_ALLOW_ALL=true`. Authentifizierungsablehnungen (401) bleiben lesbar, damit Clients
   einen widerrufenen oder falsch eingegebenen Schlüssel anzeigen können (#5242): Die
   eigene 401-Antwort der Pipeline behält die Rückgabe bei, und eine Route, die den
   Schlüssel selbst ablehnt, nachdem die Pipeline die Anfrage als anonym bedient hat
@@ -146,9 +143,7 @@ Neustart erforderlich ist.
   das Cookie `auth_token`), nicht, welchen davon die Route geprüft hat, und sie wird
   niemals mit `Access-Control-Allow-Credentials` kombiniert; der Body ist eine feste
   Fehlerhülle. Management-Routen unter `/api/v1/`, die durch `requireManagementAuth()`
-  geschützt sind (`/api/v1/management/*`, `/api/v1/registered-keys`), fügen die Rückgabe
-  nicht hinzu: Bei `REQUIRE_API_KEY=false` sind ihre 401/403-Antworten nicht Cross-Origin
-  lesbar.
+  geschützt sind (`/api/v1/management/*`, `/api/v1/registered-keys`), verwenden diese Ausnahme bei der Zurückweisung von Anmeldedaten nicht: Bei `REQUIRE_API_KEY=false` folgen ihre 401/403-Antworten der konfigurierten CORS-Ursprungsrichtlinie.
 - **Cookie-Sitzung (das Dashboard):** geschützt durch die standardmäßig geschlossene Konfiguration **und**
   durch das Fehlen von `Access-Control-Allow-Credentials` im gemeinsam genutzten Pfad. Nehmen Sie
   Ursprünge für Verwaltung und Dashboard nicht in eine permissive Konfiguration auf; sie müssen weiterhin strikt
@@ -162,8 +157,7 @@ Inferenzausgaben zurückgeben, den `Origin` des Handshakes selbst
 OmniRoute über `npm start` / `npm run dev` läuft, die Brücke `/v1/ws` und `/api/v1/ws`,
 die `/v1/chat/completions`, `/v1/messages` und `/v1/responses` als Frames streamt. Die
 Brücke fragt `/api/v1/ws?handshake=1` nach dem Ergebnis und verweigert das Upgrade,
-sofern diese Route die Prüfung nicht ausgeführt hat. Ein Handshake wird akzeptiert,
-wenn:
+sofern diese Route die Prüfung nicht ausgeführt hat. Die Authentifizierungsanforderungen gelten weiterhin separat. Die Ursprungsprüfung ist erfolgreich, wenn:
 
 - er keinen `Origin`-Header hat (Codex CLI, SDKs und andere Clients ohne Browser);
 - der `Origin` von der obigen Positivliste zugelassen wird (`CORS_ALLOWED_ORIGINS`, die

@@ -242,9 +242,9 @@ Tutti gli endpoint MITM richiedono l'autenticazione di gestione (`requireCliTool
 
 ---
 
-## L'agente utente esegue l'override — env vars (sezione `.env.example` 12)
+## Override dello User-Agent — variabili d'ambiente (sezione 12 di `.env.example`)
 
-| Variabile           | Predefinito                                   |
+| Variabile           | Valore predefinito                            |
 | ------------------- | --------------------------------------------- |
 | `CLAUDE_USER_AGENT` | `claude-cli/2.1.280 (external, cli)`          |
 | `CODEX_USER_AGENT`  | `codex-cli/0.155.0 (Windows 10.0.26200; x64)` |
@@ -253,7 +253,7 @@ Tutti gli endpoint MITM richiedono l'autenticazione di gestione (`requireCliTool
 | `QODER_USER_AGENT`  | `Qoder-Cli`                                   |
 | `CURSOR_USER_AGENT` | `Cursor/3.4`                                  |
 
-Consumato da `open-sse/executors/base.ts::buildHeaders()` tramite ricerca dinamica.** Aumentateli quando i provider rilasciano nuove versioni CLI** Le stringhe — UA obsolete iniziano a essere rifiutate come client obsoleti.
+Utilizzate da `open-sse/executors/base.ts::buildHeaders()` tramite ricerca dinamica. **Aggiornatele quando i provider rilasciano nuove versioni della CLI**: le stringhe UA obsolete iniziano a essere rifiutate perché associate a client non aggiornati.
 
 ## Opzioni della modalità di compatibilità CLI (sezione 13 di `.env.example`)
 

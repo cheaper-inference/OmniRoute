@@ -4,164 +4,173 @@
 
 ---
 
-Kontinuerlig, inkrementell eksport av OmniRoute-kallogger til et eksternt analyselager.
+Kontinuerlig, trinnvis eksport av OmniRoute-anropslogger til et eksternt analyselager.
 
-Loggfanen i dashbordet lagrer forespørselshistorikk i SQLite (`call_logs`), begrenset av
-rotasjon og oppbevaringstid. Loggeksport sender det samme postsettet ut etter en tidsplan, slik at det kan bevares
+Fanen Logger i kontrollpanelet lagrer forespørselshistorikken i SQLite (`call_logs`), som er begrenset av
+rotasjon og oppbevaring. Loggeksport sender det samme postsettet ut etter en tidsplan, slik at det kan bevares
 lenger enn den lokale databasen og kobles sammen med andre data. BigQuery er den første destinasjonen;
-pipelinen er registerbasert, så flere destinasjoner kan legges til.
+pipelinens register gjør det enkelt å legge til flere destinasjoner.
 
 ---
 
 ## 1. Slik fungerer det
 
 ```
-server (decrypt + validate config, reconcile cursor)
-  → start IPC → isolated exportChild OS process
-    → read-only storage.sqlite → shared call-log query/mapping
-      → async artifact hydration → destination prepare()/send()
-        → batch IPC → server persists cursor → ack IPC
-          → next batch; done IPC → server records success
+server (dekrypter + valider konfigurasjon, avstem markør)
+  → start IPC → isolert exportChild-OS-prosess
+    → skrivebeskyttet storage.sqlite → delt spørring/tilordning for anropslogg
+      → asynkron innlasting av artefakter → mål prepare()/send()
+        → satsvis IPC → server lagrer markør → bekreftelses-IPC
+          → neste sats; ferdig-IPC → server registrerer suksess
 ```
 
-- **Tidsplan** — én cron-jobb i `JobRegistry`, `log_export`, med standardverdien `0 * * * *` (hver time,
+- **Tidsplan** — én `JobRegistry`-cronjobb, `log_export`, med `0 * * * *` som standard (hver time,
   UTC). Registrert i `src/lib/initCloudSync.ts`; kan overstyres med `OMNIROUTE_LOG_EXPORT_CRON`.
-  Hver kjøring eksporterer alle ventende poster for hver **aktivert** destinasjon, sekvensielt.
-- **Markør** — SQLites implisitte `call_logs.rowid`, lagret per destinasjon i
+  Hver kjøring tømmer alle **aktiverte** mål, sekvensielt.
+- **Markør** — SQLites implisitte `call_logs.rowid`, lagret per mål i
   `log_export_destinations.cursor_row_id`. `timestamp` brukes bevisst ikke som markør: kallere
-  kan oppgi sin egen verdi, så en treg forespørsel kan bli skrevet etter en raskere som startet
-  senere, og en tidsstempelmarkør ville hoppet over den.
-- **Satsvis behandling** — `batch_size` rader per forespørsel (standard 500), `max_rows_per_run` rader per kjøring
-  (standard 10000), slik at et stort etterslep behandles over flere kjøringer i stedet for å blokkere én.
-- **Levering** — markøren flyttes frem først etter at `send()` er fullført. En mislykket sats lar
-  markøren stå der den var, slik at de samme radene forsøkes på nytt ved neste kjøring. Garantien er
-  minst én gang pluss deduplisering på destinasjonssiden, ikke ekte nøyaktig én gang: BigQuery bruker
-  kallogg-ID-en som nøkkel for hver rad og respekterer denne etter beste evne innenfor sitt eget dedupliseringsvindu.
-- **Overlappsvern** — cron-kjøringen og `POST .../run` kan utløses samtidig. En destinasjon
-  som allerede eksporterer, hoppes over i stedet for å eksporteres to ganger (`skipped: true` i kjøringsresultatet),
-  slik at en samtidig kjøring ikke kan sende en sats på nytt eller flytte markøren bakover.
-- **Gjenoppretting etter tømming** — hvis `cursor_row_id` havner over `MAX(rowid)` (hele tabellen ble
-  tømt og rad-ID-ene startet på nytt), tilbakestiller kjøreren til 0 i stedet for å bli permanent blind.
+  kan angi sin egen verdi, slik at en treg forespørsel kan bli skrevet etter en raskere forespørsel
+  som startet senere, og en tidsstempelmarkør ville hoppet over den.
+- **Satsvis behandling** — `batch_size` rader per forespørsel (standard 500), `max_rows_per_run`
+  rader per kjøring (standard 10000), slik at et stort etterslep tømmes over flere kjøringer i
+  stedet for å blokkere én.
+- **Levering** — markøren flyttes fremover bare etter at `send()` er fullført. En mislykket sats
+  lar markøren bli stående, slik at de samme radene forsøkes på nytt ved neste kjøring. Garantien
+  er minst én gang pluss deduplisering på målsiden, ikke reell nøyaktig én gang: BigQuery bruker
+  anropslogg-ID-en som nøkkel for hver rad, noe den overholder etter beste evne innenfor sitt eget
+  dedupliseringsvindu.
+- **Beskyttelse mot overlapp** — cron-kjøringen og `POST .../run` kan utløses samtidig. Et mål
+  som allerede tømmes, hoppes over i stedet for å tømmes to ganger (`skipped: true` i
+  kjøringsresultatet), slik at en samtidig kjøring ikke kan sende en sats på nytt eller skrive
+  markøren bakover.
+- **Gjenoppretting etter tømming** — hvis `cursor_row_id` ender over `MAX(rowid)` (hele tabellen
+  ble tømt og rad-ID-ene startet på nytt), tilbakestiller kjøreren markøren til 0 i stedet for å
+  bli permanent ute av stand til å oppdage nye rader.
 
 ### Isolert kjører og grenser
 
-Hver destinasjonskjøring på Node starter en separat, kortlivet underprosess på OS-nivå (`child_process`
-med IPC, ikke `worker_threads`). Lesing av innhold, JSON-parsing/-serialisering av nyttelast, destinasjonens
-`prepare()` og destinasjonens nettverks-I/O kjøres der, ikke i serverens hendelsesløkke.
-Bare konfigurasjon og små fremdriftsmeldinger sendes over IPC; eksporterte poster returneres aldri til
-serveren. Cron-jobben og Kjør nå-ruten beholder samme offentlige resultat og overlappsvern.
+Hver målkjøring på Node starter en separat, kortlivet underprosess i operativsystemet
+(`child_process` med IPC, ikke `worker_threads`). Lesing av innhold, JSON-parsing/-serialisering
+av nyttelast, målets `prepare()` og målets nettverks-I/O kjøres der, ikke i serverens hendelsessløyfe.
+Bare konfigurasjon og små fremdriftsmeldinger sendes over IPC; eksporterte oppføringer returneres
+aldri til serveren. Cronjobben og Kjør nå-ruten beholder det samme offentlige resultatet og den
+samme beskyttelsen mot overlapp.
 
-Underprosessen åpner serverens oppløste `DATA_DIR/storage.sqlite` skrivebeskyttet med `node:sqlite`,
-med `busy_timeout=5000` og `query_only=ON`. Den importerer ingen databasesingleton og utfører ingen
-migreringer, sikkerhetskopier eller SQLite-oppdateringer. Bokføring av manglende/korrupte artefakter (inkludert
-UPDATE for korrupte artefakter) forblir utelukkende i dashbordets detaljflyt. Begge flytene deler en ren
-detaljoppløser; eksport bruker asynkrone filsystemlesinger og samme oppløsningsrekkefølge: artefakt → eldre
-innebygd innhold → eldre diskinnhold → ingen. En kjøring tar et øyeblikksbilde av høyeste innsettings-rowid
-når underprosessen åpner leseren; senere innsettinger venter til neste kjøring. Dette er en innsettingsgrense,
-ikke en langvarig SQLite-transaksjon: WAL-skrivere og sjekkpunkter forblir uhindret under
-nettverksventing. Oppdateringer/slettinger av eksisterende rader fryses ikke av denne grensen.
+Underprosessen åpner serverens løste `DATA_DIR/storage.sqlite` skrivebeskyttet med `node:sqlite`,
+med `busy_timeout=5000` og `query_only=ON`. Den importerer ingen DB-singleton og utfører ingen
+migreringer, sikkerhetskopier eller SQLite-oppdateringer. Bokføring av manglende/skadede artefakter
+(inkludert UPDATE-operasjonen for skadede artefakter) finnes fortsatt bare i detaljvisningen i
+dashbordet. Begge banene deler en ren detaljløser; eksport bruker asynkron lesing fra filsystemet
+og samme rekkefølge for oppslag: artefakt → eldre innebygd → eldre disk → ingen. En kjøring tar et
+øyeblikksbilde av høyeste innsettings-rowid når underprosessen åpner leseren; senere innsettinger
+venter til neste kjøring. Dette er en innsettingsgrense, ikke en langvarig SQLite-transaksjon:
+WAL-skrivere og kontrollpunkter forblir frie under nettverksventing. Oppdateringer/slettinger av
+eksisterende rader fryses ikke av denne grensen.
 
-Etter hver akseptert sats venter underprosessen på en bekreftelse. Serveren lagrer først
-markøren med `advanceLogExportCursor`, og sender deretter `ack`; ingen ny sats starter før dette.
-En sendefeil, krasj eller tidsavbrudd registrerer feil uten å flytte markøren for den aktuelle satsen. Tidligere
-bekreftede satser forblir lagret; høyst den ene ubekreftede satsen kan sendes på nytt.
-Vellykket kjøring registreres først etter `done` og en normal avslutning av underprosessen. Feil avslutter underprosessen
-med SIGTERM, med eskalering til SIGKILL etter 500 ms, og kjøreren venter til prosessen er lukket.
+Etter hver godtatte sats venter underprosessen på en bekreftelse. Serveren lagrer først markøren
+med `advanceLogExportCursor` og sender deretter `ack`; ingen ny sats starter før dette.
+En sendefeil, krasj eller tidsavbrudd registrerer en feil uten å flytte markøren fremover for
+den aktuelle satsen. Tidligere bekreftede satser forblir lagret; maksimalt den ene ubekreftede
+satsen kan sendes på nytt. Suksess registreres bare etter `done` og en ren avslutning av
+underprosessen. Ved feil avsluttes underprosessen med SIGTERM, som eskaleres til SIGKILL etter
+500 ms, og kjøreren venter til prosessen er lukket.
 
-| Miljøvariabel                                 | Standard | Formål                                                |
-| --------------------------------------------- | -------- | ----------------------------------------------------- |
-| `OMNIROUTE_LOG_EXPORT_RUN_TIMEOUT_MS`         | 900000   | Tidsgrense per destinasjon målt i faktisk forløpt tid |
-| `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB` | 1024     | Grense for underprosessens V8 old-space i MB          |
+| Miljøvariabel                                 | Standard | Formål                             |
+| --------------------------------------------- | -------- | ---------------------------------- |
+| `OMNIROUTE_LOG_EXPORT_RUN_TIMEOUT_MS`         | 900000   | Tidsgrense per mål i veggklokketid |
+| `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB` | 1024     | V8-grense for gammelt område i MB  |
 
-Ugyldige/ikke-positive/ikke-heltallige verdier bruker standardverdiene. Heap-innstillingen er ikke en total
-RSS-grense; svært store satser kan fortsatt bruke opp underprosessens minne og få kjøringen til å feile på en trygg måte.
-Standardverdien på 1024 MB gir slingringsmonn for standardsatsen på 500 rader med artefakter på 512 KiB med
-innhold aktivert, inkludert BigQuerys JSON-serialisering i bytebaserte blokker. Den gjør ikke en
-sats på 10000 rader med innhold trygg. Uttømming av V8-heapen registrerer en feil med konkrete tiltak: reduser satsstørrelsen
-eller øk `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB`; markøren blir stående ved den sist
-bekreftede satsen. Historisk innebygd innhold / diskinnhold omfattes ikke av den moderne artefaktgrensen.
-Operatører må budsjettere RSS separat, særlig i containere med begrenset minne.
+Ugyldige, ikke-positive eller ikke-heltallige verdier bruker standardverdiene. Heap-innstillingen
+er ikke en grense for samlet RSS; svært store satser kan fortsatt bruke opp underprosessens minne
+og føre til at kjøringen feiler på en trygg måte. Standardverdien på 1024 MB gir rom for standardsatsen
+på 500 rader med artefakter på 512 KiB og innhold aktivert, inkludert BigQuery sin byteinndelte
+JSON-serialisering. Den gjør ikke en sats på 10000 rader med innhold trygg. Uttømming av V8-heapen
+registrerer en feil med et tydelig tiltak: reduser satsstørrelsen eller øk
+`OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB`; markøren blir stående ved den sist bekreftede satsen.
+Historisk innebygd innhold eller innhold på disk omfattes ikke av den moderne artefaktgrensen.
+Operatører må budsjettere RSS separat, spesielt i beholdere med minnebegrensning.
 
-Underprosessen arver bare den ferdig oppløste `DATA_DIR`, `NODE_ENV`, eksplisitt `TZ` (oppløsning av
-lokal tid i eldre filnavn), `ELECTRON_RUN_AS_NODE` når den finnes, og følgende inndata for utgående trafikk:
+Underprosessen arver bare den løste `DATA_DIR`, `NODE_ENV`, eksplisitt `TZ` (lokal tidsoppløsning
+for eldre filnavn), `ELECTRON_RUN_AS_NODE` når den finnes, og følgende inndata for utgående trafikk:
 `HTTP_PROXY`, `HTTPS_PROXY`, `ALL_PROXY`, `NO_PROXY` (og variantene med små bokstaver),
 `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS`, `NODE_EXTRA_CA_CERTS`, `SSL_CERT_FILE`, `SSL_CERT_DIR`.
-En global Undici-dispatcher deler serverens rent miljøbaserte proxyoppløsning og regler for å omgå
-proxy for lokale verter, inkludert `NO_PROXY`; den importerer ikke `proxyFetch.ts` eller tilhørende database-/funksjonsflagg.
-Proxyens påloggingsopplysninger sladdes i videresendte utdata og registrerte feil. Destinasjonens påloggingsopplysninger
-overføres bare i én IPC-startmelding, aldri via argv eller miljøet; videresendte utdata og feil får
-et prefiks og renses. Bare `ExperimentalWarning` deaktiveres i underprosessens kjøreargumenter for å unngå
-at Nodes SQLite-advarsel gjentas ved hver cron-kjøring; andre advarselstyper forblir synlige.
+En global Undici-dispatcher deler serverens rene miljøbaserte proxyoppløsning og regler for å
+omgå proxyen for lokale verter, inkludert `NO_PROXY`; den importerer ikke `proxyFetch.ts` eller
+tilhørende DB-/funksjonsflagg. Proxy-legitimasjon sladdes i videresendt utdata og registrerte feil.
+Mållegitimasjon sendes bare i én startmelding over IPC, aldri i argv eller miljøet; videresending
+av utdata/feil får prefiks og renses. Bare `ExperimentalWarning` deaktiveres i underprosessens
+exec-argumenter for å unngå å gjenta Nodes SQLite-advarsel ved hver cron-kjøring; andre typer
+advarsler forblir synlige.
 
-Destinasjonsmoduler må kunne importeres uten avhengigheter til Next.js eller komponenter som bare kan kjøres på serveren. Den eksisterende
-BigQuery-implementasjonen oppfyller allerede dette kravet. Hurtiglagre for tilgangstokener varer bare under
-kjøringen av underprosessen, ikke på tvers av kjøringer. Node er det støttede kjøremiljøet (`package.json` engines), men Bun-installasjonsdelen
-i README og `Dockerfile.bun` beskriver også en kompatibilitetsløsning for produksjon med
+Destinasjonsmoduler må kunne importeres uten avhengigheter til Next.js eller server-only. Den eksisterende
+BigQuery-implementasjonen oppfyller allerede denne kontrakten. Tilgangstokenbufre varer bare under
+den underordnede kjøringen, ikke på tvers av kjøringer. Node er den støttede kjøretiden (`package.json` engines), men READMEs
+installasjonsdel for Bun og `Dockerfile.bun` annonserer også en kompatibilitetsbane for produksjon som bruker
 `bun:sqlite` (`src/lib/db/core.ts` / adaptere). Under Bun beholder eksportene derfor den tidligere
-utførelsen i samme prosess og viser en engangsadvarsel: isolering av underprosessens heap og tidsavbrudd er ikke tilgjengelig. Bruk
-Node for isolering av hendelsesløkke og OOM; Bun regnes ikke som kun for utvikling her.
+prosesseringsbanen i samme prosess og sender et engangsvarsel: isolasjon av underprosessens heap/minne og tidsavbrudd er utilgjengelig. Bruk
+Node for isolasjon av hendelsesløkken og OOM; Bun behandles ikke som kun for utvikling her.
 
-Når `includeBodies` er aktivert, bør du foretrekke et intervall på minuttnivå, for eksempel
-`OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"`, fremfor å bygge opp en times etterslep av nyttelaster.
-Batch- og radgrenser begrenser fortsatt hver kjøring. Prosessoppstart skjer per destinasjon per kjøring;
-dette bytter en liten oppstartskostnad mot isolering av serverens hendelsesløkke, ikke redusert samlet CPU-bruk.
+Når `includeBodies` er aktivert, bør du foretrekke en frekvens på minuttnivå, for eksempel
+`OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"`, fremfor å akkumulere et etterslep med nyttelaster over en hel time.
+Grenser for både bunker og rader begrenser fortsatt hver kjøring. Prosessoppstart skjer per destinasjon per kjøring;
+dette bytter en liten oppstartskostnad mot isolasjon av serverens hendelsesløkke, ikke redusert samlet CPU-bruk.
 
 ### Nyttelaster (ledetekster og fullføringer)
 
-Som standard inneholder eksporten bare sammendragsfeltene som vises i **listen** i logger. Hvis du aktiverer
-**Eksporter ledetekster og svar** (`includeBodies`), sendes i tillegg det som vises i **detaljruten**
-i logger for hvert kall:
+Som standard inneholder eksporten bare sammendragsfeltene som **listen** i Logger viser. Hvis du slår på
+**Eksporter ledetekster og svar** (`includeBodies`), sendes i tillegg det som **detaljvisningen** i Logger
+viser for hvert anrop:
 
-| Felt                             | Hva det inneholder                                                  |
-| -------------------------------- | ------------------------------------------------------------------- |
-| `request_body` / `response_body` | Kallets nyttelaster slik de vises i dashbordet                      |
-| `pipeline_route_decision`        | Hvilket mål og hvilken modell ruteren valgte                        |
-| `pipeline_client_request`        | Den rå forespørselen nøyaktig slik klienten sendte den              |
-| `pipeline_openai_request`        | Etter oversettelse til det interne OpenAI-formatet                  |
-| `pipeline_provider_request`      | Slik den faktisk ble sendt til leverandøren, i leverandørens format |
-| `pipeline_provider_response`     | Det rå svaret fra leverandøren                                      |
-| `pipeline_client_response`       | Det som ble returnert til den som utførte kallet                    |
-| `pipeline_error`                 | Feildetaljer på pipelinenivå for et mislykket kall                  |
-| `bodies_truncated`               | Sann når et av feltene ovenfor nådde `maxBodyBytes`                 |
+| Felt                             | Hva det inneholder                                            |
+| -------------------------------- | ------------------------------------------------------------- |
+| `request_body` / `response_body` | Nyttelastene for anropet slik kontrollpanelet gjengir dem     |
+| `pipeline_route_decision`        | Hvilket mål og hvilken modell ruteren valgte                  |
+| `pipeline_client_request`        | Den rå forespørselen nøyaktig slik klienten sendte den        |
+| `pipeline_openai_request`        | Etter oversettelse til den interne OpenAI-formen              |
+| `pipeline_provider_request`      | Slik den faktisk ble sendt oppstrøms, i leverandørens dialekt |
+| `pipeline_provider_response`     | Det rå svaret fra oppstrømskilden                             |
+| `pipeline_client_response`       | Det som ble returnert til anroperen                           |
+| `pipeline_error`                 | Feildetaljer på pipeline-nivå for et mislykket anrop          |
+| `bodies_truncated`               | Sann når et av feltene ovenfor nådde `maxBodyBytes`           |
 
-Dette er ledetekstinnhold, så funksjonen er **av som standard** og er bevisst et valg per destinasjon.
-Det som sendes, er det dashbordet viser, fordi eksporten og `getCallLogById` deler samme
+Dette er innhold fra ledetekster, så det er **av som standard** og er bevisst et valg per destinasjon.
+Det som sendes, er det kontrollpanelet viser, fordi eksporten og `getCallLogById` deler
 detaljoppløsning: nyttelastene er
-allerede renset for personopplysninger og hemmeligheter når de skrives, og et kall utført med en
-`noLog`-API-nøkkel lagrer ingen nyttelast, så det finnes ingenting å eksportere.
+allerede PII-sanitert og hemmeligheter er fjernet når de skrives, og et anrop utført med en
+`noLog`-API-nøkkel lagrer ingen nyttelast i det hele tatt, så det finnes ingenting å eksportere.
 
-Nyttelaster leses per rad fra filsystemartefakten, så innlasting av disse kjøres bare for destinasjoner
-som har bedt om det. Hvis en artefakt mangler eller er skadet, eksporteres sammendraget med nullverdier for nyttelastene i stedet
-for at batchen feiler og markøren blir stående fast.
+Nyttelaster leses per rad fra filsystemartefakten, så hydrering kjøres bare for destinasjoner
+som har bedt om det. Hvis en artefakt mangler eller er skadet, eksporteres sammendraget med nullverdier for nyttelastene,
+fremfor at bunken mislykkes og markøren blir stående fast.
 
-`maxBodyBytes` (standard 262144) begrenser hvert felt. Lengre nyttelaster **avkortes i stedet for å
-utelates** — en avkortet ledetekst svarer fortsatt på «hva ble det spurt om» — og raden merkes med
-`bodies_truncated`. Strømmede deltaer, del for del, eksporteres ikke; det sammensatte svaret finnes
+`maxBodyBytes` (standardverdi 262144) begrenser hvert felt. Lengre nyttelaster blir **avkortet fremfor
+forkastet** — en avkortet ledetekst svarer fortsatt på «hva ble spurt om» — og raden merkes med
+`bodies_truncated`. Strømmede deltaer stykke for stykke eksporteres ikke; det sammensatte svaret finnes
 allerede i `pipeline_provider_response` og `pipeline_client_response`.
 
 ---
 
 ## 2. Filer
 
-| Del                                     | Plassering                                   |
-| --------------------------------------- | -------------------------------------------- |
-| Destinasjonskontrakt                    | `src/lib/logExport/types.ts`                 |
-| Register                                | `src/lib/logExport/registry.ts`              |
-| Håndtering av hemmeligheter             | `src/lib/logExport/secrets.ts`               |
-| Kjøringsmodul (IPC i forelderprosessen) | `src/lib/logExport/runner.ts`                |
-| Prosesslivssyklus                       | `src/lib/logExport/childRunner.ts`           |
-| Inngangspunkt for underprosess          | `src/lib/logExport/exportChild.ts`           |
-| Åpner for skrivebeskyttet tilgang       | `src/lib/db/logExportReadOnly.ts`            |
-| Delt spørring/tilordning                | `src/lib/usage/callLogExportQueries.ts`      |
-| Detaljoppløser                          | `src/lib/usage/callLogDetailResolver.ts`     |
-| API-projeksjon                          | `src/lib/logExport/presenter.ts`             |
-| BigQuery-destinasjon                    | `src/lib/logExport/destinations/bigquery.ts` |
-| Google-tjenestekontoautentisering       | `src/lib/logExport/googleServiceAccount.ts`  |
-| Kilde for anropslogg                    | `src/lib/usage/callLogExportSource.ts`       |
-| Lagring                                 | `src/lib/db/logExportDestinations.ts`        |
-| Cron-jobb                               | `src/lib/jobs/logExportJob.ts`               |
-| REST-lag                                | `src/app/api/log-export/`                    |
-| Dashbordside                            | `src/app/(dashboard)/dashboard/log-export/`  |
+| Del                       | Plassering                                   |
+| ------------------------- | -------------------------------------------- |
+| Destinasjonskontrakt      | `src/lib/logExport/types.ts`                 |
+| Register                  | `src/lib/logExport/registry.ts`              |
+| Hemmelighetshåndtering    | `src/lib/logExport/secrets.ts`               |
+| Kjører (overordnet IPC)   | `src/lib/logExport/runner.ts`                |
+| Prosesslivssyklus         | `src/lib/logExport/childRunner.ts`           |
+| Underordnet inngangspunkt | `src/lib/logExport/exportChild.ts`           |
+| Skrivebeskyttet åpner     | `src/lib/db/logExportReadOnly.ts`            |
+| Delt spørring/tilordning  | `src/lib/usage/callLogExportQueries.ts`      |
+| Detaljoppløser            | `src/lib/usage/callLogDetailResolver.ts`     |
+| API-projeksjon            | `src/lib/logExport/presenter.ts`             |
+| BigQuery-destinasjon      | `src/lib/logExport/destinations/bigquery.ts` |
+| Google SA-autentisering   | `src/lib/logExport/googleServiceAccount.ts`  |
+| Anropsloggkilde           | `src/lib/usage/callLogExportSource.ts`       |
+| Persistens                | `src/lib/db/logExportDestinations.ts`        |
+| Cron-jobb                 | `src/lib/jobs/logExportJob.ts`               |
+| REST-lag                  | `src/app/api/log-export/`                    |
+| Dashboardside             | `src/app/(dashboard)/dashboard/log-export/`  |
 
 Skjema: `src/lib/db/migrations/170_log_export_destinations.sql`.
 
@@ -169,29 +178,29 @@ Skjema: `src/lib/db/migrations/170_log_export_destinations.sql`.
 
 ## 3. REST-API
 
-Alle ruter krever administrasjonsautentisering (`requireManagementAuth`). Hemmeligheter returneres aldri:
-En lagret hemmelighet returneres som den bokstavelige verdien `__stored__`, og hvis denne verdien sendes tilbake ved en oppdatering,
-beholdes den lagrede påloggingsinformasjonen.
+Alle rutene er autentisert for administrasjon (`requireManagementAuth`). Hemmeligheter returneres aldri:
+En lagret hemmelighet returneres som den bokstavelige verdien `__stored__`, og hvis denne verdien sendes tilbake i en oppdatering,
+beholdes den lagrede legitimasjonen.
 
-Oppretting eller oppdatering av en destinasjon med en type som definerer en hemmelighet, **krever
-`STORAGE_ENCRYPTION_KEY`**. Uten denne slipper `encrypt()` verdien uendret gjennom uten varsel, så skriveoperasjonen
-avvises med 400 i stedet for å lagre påloggingsinformasjon i SQLite i klartekst (samme sikkerhetssjekk som
+Opprettelse eller oppdatering av en destinasjon med en type som deklarerer en hemmelighet, **krever
+`STORAGE_ENCRYPTION_KEY`**. Uten denne er `encrypt()` en stille passthrough, så skrivingen
+avvises med 400 i stedet for å lagre legitimasjon i SQLite som klartekst (samme beskyttelse som
 Telegram-webhooken bruker).
 
-| Metode   | Sti                                      | Formål                                                          |
-| -------- | ---------------------------------------- | --------------------------------------------------------------- |
-| `GET`    | `/api/log-export/types`                  | Destinasjonstyper + liste over konfigurasjonsfeltene deres      |
-| `GET`    | `/api/log-export/destinations`           | List opp destinasjoner (hemmeligheter skjult)                   |
-| `POST`   | `/api/log-export/destinations`           | Opprett en destinasjon                                          |
-| `GET`    | `/api/log-export/destinations/{id}`      | Hent én                                                         |
-| `PUT`    | `/api/log-export/destinations/{id}`      | Oppdater navn / aktivering / konfigurasjon / satsvis behandling |
-| `DELETE` | `/api/log-export/destinations/{id}`      | Slett                                                           |
-| `POST`   | `/api/log-export/destinations/{id}/test` | Test påloggingsinformasjon uten å skrive noe                    |
-| `POST`   | `/api/log-export/destinations/{id}/run`  | Tøm køen nå, med samme kjøringsløp som den planlagte kjøringen  |
-| `GET`    | `/api/log-export/status`                 | Cron-status, nylige kjøringer, etterslep per mål                |
+| Metode   | Bane                                     | Formål                                               |
+| -------- | ---------------------------------------- | ---------------------------------------------------- |
+| `GET`    | `/api/log-export/types`                  | Destinasjonstyper + listen over konfigurasjonsfelter |
+| `GET`    | `/api/log-export/destinations`           | Vis destinasjoner (hemmeligheter skjult)             |
+| `POST`   | `/api/log-export/destinations`           | Opprett en destinasjon                               |
+| `GET`    | `/api/log-export/destinations/{id}`      | Les én                                               |
+| `PUT`    | `/api/log-export/destinations/{id}`      | Oppdater navn / aktivert / konfigurasjon / batching  |
+| `DELETE` | `/api/log-export/destinations/{id}`      | Slett                                                |
+| `POST`   | `/api/log-export/destinations/{id}/test` | Test legitimasjon uten å skrive noe                  |
+| `POST`   | `/api/log-export/destinations/{id}/run`  | Tøm nå, samme flyt som den planlagte kjøringen       |
+| `GET`    | `/api/log-export/status`                 | Cron-status, nylige kjøringer, etterslep per mål     |
 
-`GET /api/log-export/types` er det som gjør brukergrensesnittet generisk: Dashbordskjemaet gjengis ut fra
-de returnerte feltbeskrivelsene, slik at en ny destinasjon ikke krever endringer i brukergrensesnittet.
+`GET /api/log-export/types` er det som gjør brukergrensesnittet generisk: kontrollpanelskjemaet gjengis fra
+de returnerte feltbeskrivelsene, slik at en ny destinasjon ikke krever noen endring i brukergrensesnittet.
 
 ---
 
@@ -199,58 +208,58 @@ de returnerte feltbeskrivelsene, slik at en ny destinasjon ikke krever endringer
 
 Konfigurasjonsnøkler (`type: "bigquery"`):
 
-| Nøkkel               | Merknader                                                             |
-| -------------------- | --------------------------------------------------------------------- |
-| `projectId`          | GCP-prosjektet som inneholder datasettet                              |
-| `datasetId`          | `[A-Za-z0-9_]+`                                                       |
-| `tableId`            | `[A-Za-z0-9_]+`                                                       |
-| `location`           | Brukes bare når datasettet må opprettes (standard `EU`)               |
-| `serviceAccountJson` | Tjenestekontonøkkel. Hemmelig: kryptert ved lagring, returneres aldri |
-| `autoCreate`         | Opprett datasettet og tabellen ved første eksport (standard `true`)   |
+| Nøkkel               | Merknader                                                                |
+| -------------------- | ------------------------------------------------------------------------ |
+| `projectId`          | GCP-prosjektet som inneholder datasettet                                 |
+| `datasetId`          | `[A-Za-z0-9_]+`                                                          |
+| `tableId`            | `[A-Za-z0-9_]+`                                                          |
+| `location`           | Brukes bare når datasettet må opprettes (standardverdi `EU`)             |
+| `serviceAccountJson` | Tjenestekontonøkkel. Hemmelighet: kryptert ved lagring, returneres aldri |
+| `autoCreate`         | Opprett datasettet og tabellen ved første eksport (standardverdi `true`) |
 
-Tjenestekontoen trenger `bigquery.tables.updateData` på måltabellen, samt
-`bigquery.datasets.create` / `bigquery.tables.create` når `autoCreate` er aktivert.
+Tjenestekontoen trenger `bigquery.tables.updateData` på måltabellen, i tillegg til
+`bigquery.datasets.create` / `bigquery.tables.create` når `autoCreate` er slått på.
 
-En konfigurert batch er en **markørenhet**, ikke en HTTP-enhet: `send()` deler den opp i insertAll-
-kall med høyst 500 rader, slik at en stor `batch_size` ikke kan overskride BigQuerys forespørselsgrense på 10 MB.
-Ved midlertidige statuskoder (408/429/500/502/503/504) gjøres opptil tre nye forsøk med eksponentielt
-økende ventetid, med gjenbruk av de samme insertIds-verdiene; autentiserings- og skjemafeil utløser et unntak ved første forsøk i stedet
-for å kaste bort resten av kjøringen.
+En konfigurert batch er en **markørenhet**, ikke en HTTP-enhet: `send()` deler den opp i insertAll-kall
+med maksimalt 500 rader, slik at en stor `batch_size` ikke kan utløse BigQuery-grensen på 10 MB per forespørsel.
+Midlertidige statuser (408/429/500/502/503/504) forsøkes på nytt opptil tre ganger med eksponentiell
+ventetid, med gjenbruk av de samme insertIds-verdiene. Autentiserings- og skjemafeil kaster ved første forsøk i stedet
+for å sløse bort kjøringen.
 
-En tabell som nettopp er opprettet, er ennå ikke synlig for strømmeendepunktet, som svarer med
-404 i noen sekunder. Ved denne 404-feilen gjøres nye forsøk, men **bare når denne kjøringen opprettet tabellen** —
-en tabell som faktisk mangler, fører fortsatt til umiddelbar feil. Merk at hvis en tabell opprettes på nytt med et navn som
-nylig ble slettet, nekter BigQuery strømmeinnsettinger i flere minutter; dette skyldes
-sletting etterfulgt av gjenoppretting, så bruk heller et nytt tabellnavn enn å slette og legge til tabellen på nytt.
+En tabell som ble opprettet for bare noen øyeblikk siden, er ennå ikke synlig for strømmingsendepunktet, som svarer
+med 404 i noen sekunder. Denne 404-feilen forsøkes på nytt, men **bare når denne kjøringen opprettet tabellen** —
+en tabell som faktisk mangler, feiler fortsatt umiddelbart. Merk at hvis en tabell opprettes på nytt under et navn som
+nylig ble slettet, vil BigQuery avvise strømmingsinnsettinger i flere minutter. Dette er en
+egenskap ved slett-og-opprett-på-nytt, så bruk helst et nytt tabellnavn fremfor å slette og legge til den samme på nytt.
 
-**En delvis feil kommer som HTTP 200 med en ikke-tom `insertErrors[]`.** Dette behandles som
-en feil og utløser et unntak, noe som hindrer markøren i å gå videre forbi rader BigQuery aldri
-aksepterte; `tests/unit/log-export-bigquery.test.ts` sikrer denne oppførselen.
+**En delvis feil returneres som HTTP 200 med en ikke-tom `insertErrors[]`.** Dette behandles som
+en feil og kaster et unntak, slik at markøren ikke flyttes forbi rader som BigQuery aldri
+godtok. `tests/unit/log-export-bigquery.test.ts` låser denne oppførselen.
 
-Transporten er ren REST — en egensignert RS256-påstand byttes mot et tilgangstoken på
+Transporten bruker ren REST — en selvsignert RS256-påstand byttes mot et tilgangstoken på
 `https://oauth2.googleapis.com/token`, og deretter sendes radene til `tabledata.insertAll`. Ingen Google-SDK
-hentes inn. Tilgangstokener hurtigbufres i prosessen per (tjenestekonto, tilgangsomfang).
+inkluderes. Tilgangstokener bufres i prosessen per (tjenestekonto, omfang).
 
-Den opprettede tabellen har én kolonne per felt i logger-fanen pluss `exported_at`, og er strukturert etter
-hvordan det faktisk gjøres spørringer mot anropslogger:
+Den opprettede tabellen har én kolonne per felt i Logger-fanen samt `exported_at`, og er strukturert etter
+hvordan anropslogger faktisk blir spurt mot:
 
-- **Partisjonert per dag på `timestamp`**, slik at en spørring avgrenset etter dato bare skanner disse dagene.
-- **Klynget etter `api_key_name`, `provider`, `model`, `status`** (i denne rekkefølgen), slik at filtrering etter
-  hvem som kjørte anropet, hvor det gikk, eller om det feilet, utelater blokker i hver partisjon. BigQuery
-  tillater høyst fire klyngekolonner, og rekkefølgen har betydning: et filter bare på `api_key_name`
+- **Dagspartisjonert på `timestamp`**, slik at en spørring avgrenset etter dato bare skanner disse dagene.
+- **Klynget etter `api_key_name`, `provider`, `model`, `status`** (i den rekkefølgen), slik at filtrering etter
+  hvem som kjørte den, hvor den ble sendt, eller om den feilet, utelater blokker i hver partisjon. BigQuery
+  tillater maksimalt fire klyngekolonner, og rekkefølgen er viktig: Et filter bare på `api_key_name`
   utelater blokker, mens et filter bare på `status` ikke gjør det.
-- **Valgfri oppbevaringstid for partisjoner** via `partitionExpirationDays` (0 beholder alt), angitt
+- **Valgfri oppbevaringstid for partisjoner** via `partitionExpirationDays` (0 beholder alt), brukt
   når tabellen opprettes.
 
-Begge innstillingene brukes ved opprettelse. En eksisterende tabell beholder strukturen den allerede har, så
+Begge innstillingene gjelder på opprettelsestidspunktet. En eksisterende tabell beholder oppsettet den allerede har, så
 pek destinasjonen mot en ny tabell-ID hvis du vil ta dem i bruk.
 
-`tests/unit/log-export-bigquery.test.ts` kontrollerer at tilordningen og tabellskjemaet holdes
-synkronisert, slik at en ny kolonne i anropsloggen ikke kan bli utelatt i det stille under eksport.
+`tests/unit/log-export-bigquery.test.ts` kontrollerer at mapperen og tabellskjemaet forblir
+synkronisert, slik at en ny kolonne i anropsloggen ikke kan utelates i det stille under eksporten.
 
-Batcher deles opp etter **både** antall rader og serialiserte byte. Antall rader alene er ikke nok
-når nyttelast eksporteres: 500 rader med ledetekster kan utgjøre flere titalls megabyte, og insertAll
-avviser forespørsler over 10 MB. Hver del avsluttes ved 500 rader eller 9 MB, avhengig av hva som nås først.
+Bunker deles opp etter **både** antall rader og serialiserte byte. Antall rader alene er ikke nok
+når nyttelaster eksporteres: 500 rader med prompter kan utgjøre flere titalls megabyte, og insertAll
+avviser en forespørsel på over 10 MB. Hver del avsluttes ved 500 rader eller 9 MB, avhengig av hva som inntreffer først.
 
 ---
 
@@ -402,7 +411,7 @@ sin separate sladding.
 HTTP-status uten å skrive spenn i anropsloggen.
 
 Spor-ID-er og spenn-ID-er er de første 32/16 heksadesimale sifrene i SHA-256 av
-`"omniroute.trace\\0" + callLogId` og `"omniroute.span\\0" + callLogId`. Nye sendinger har
+`"omniroute.trace\0" + callLogId` og `"omniroute.span\0" + callLogId`. Nye sendinger har
 identiske ID-er. Dette er ingen garanti for deduplisering: Noen bakender, inkludert Langfuse
 v4-inntak, dedupliserer ikke spenn med samme ID. Et krasj eller en feil i en del kan
 føre til at høyst den ene ubekreftede markørpuljen sendes på nytt; hele denne puljen kan bli duplisert,
@@ -467,33 +476,33 @@ tillatelser kreves; alle andre radfelt beholder streng skjemakontroll.
 ## 6. Legge til en destinasjon
 
 1. Opprett `src/lib/logExport/destinations/<name>.ts` som eksporterer en `LogExportDestinationType`:
-   et Zod-`configSchema`, en `fields`-beskrivelsesmatrise for brukergrensesnittet, `secretFields` og en
+   et Zod-`configSchema`, en `fields`-deskriptormatrise for brukergrensesnittet, `secretFields` og en
    `createClient(config)` som returnerer `test()` / `prepare()` / `send(records)`.
 2. Legg den til i `DESTINATIONS`-matrisen i `src/lib/logExport/registry.ts`.
 3. Skriv tester under `tests/unit/`.
 
-Det er hele endringen: persistenslaget, cron-jobben, REST-laget, krypteringen av hemmeligheter og
-skjemaet i kontrollpanelet leser alle fra registeret.
+Det er hele endringen: persistens, cron-jobben, REST-laget, hemmelighetskrypteringen og
+dashboardskjemaet leser alle registeret.
 
 To regler for en ny destinasjon:
 
-- `send()` **må kaste et unntak** ved delvis feil. Vellykket fullføring betyr «destinasjonen har disse radene»,
+- `send()` **må utløse et unntak** ved delvis feil. En vellykket retur betyr «destinasjonen har disse radene»,
   og markøren flyttes permanent forbi dem.
 - En destinasjon som tar imot en brukeroppgitt URL, må validere den gjennom
-  `parseAndValidateWebhookUrl` (`src/shared/network/outboundUrlGuardPolicy.ts`) før den henter data,
+  `parseAndValidateWebhookUrl` (`src/shared/network/outboundUrlGuardPolicy.ts`) før forespørselen sendes,
   på samme måte som webhooks gjør. BigQuery trenger ikke dette: vertene er konstanter.
 
 ---
 
-## 7. Drift
+## 7. Bruk
 
-- **Kontrollpanel**: Integrasjoner → Loggeksport. Legg til en destinasjon, kjør **Test** for å kontrollere påloggingsinformasjonen
-  uten å skrive rader, og aktiver den deretter.
-- **Etterslep**: hvert destinasjonskort viser ventende rader og markøren; `GET
+- **Dashboard**: Integrasjoner → Loggeksport. Legg til en destinasjon, kjør **Test** for å kontrollere
+  legitimasjonen uten å skrive rader, og aktiver den deretter.
+- **Restanse**: hvert destinasjonskort viser ventende rader og markøren; `GET
 /api/log-export/status` returnerer de samme tallene samt de siste 20 jobbkjøringene.
-- **En destinasjon som feiler, får ikke de andre til å feile** — kjøringssammendraget registrerer status
-  per destinasjon i `last_status` / `last_error`, og jobbkjøringshistorikken beholder den samlede statusen.
-- **Når en destinasjon slettes, slettes også markøren.** Hvis den legges til på nytt, starter den fra den eldste bevarte
-  kalloggen, noe som sender rader som destinasjonen kanskje allerede har, på nytt. I BigQuery håndterer
-  `insertId` per rad dette bare innenfor BigQuerys eget dedupliseringsvindu, så deaktiver heller
-  en destinasjon enn å slette den.
+- **En destinasjon med feil påvirker ikke de andre** — kjøringssammendraget registrerer status
+  per destinasjon i `last_status` / `last_error`, og jobbkjøringshistorikken beholder aggregatet.
+- **Når en destinasjon slettes, slettes også markøren.** Hvis den legges til på nytt, starter den
+  fra den eldste bevarte anropsloggen, noe som sender rader på nytt som destinasjonen kanskje allerede har.
+  I BigQuery absorberer `insertId` per rad dette bare innenfor BigQuery sitt eget dedupliseringsvindu,
+  så det er bedre å deaktivere en destinasjon enn å slette den.

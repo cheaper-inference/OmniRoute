@@ -848,9 +848,7 @@ Exa `type: "lite"` (Exa 3.0) ទទួលយកសំណុំវាលតូច
 `subpageTarget`, `highlights.numSentences` និង `highlights.highlightsPerUrl` ដែលលែងប្រើ
 មិនត្រូវបានបញ្ជូនបន្តទៀតឡើយ។
 
-ការគណនាថ្លៃគឺជាបញ្ជីឈ្មោះរាបស្មើ `costPerQuery` លើកលែងតែ Exa ដែលអនុវត្តតាមតម្លៃផ្ទាល់ខ្លួនរបស់ Exa៖ $0.007 ក្នុងមួយការហៅសម្រាប់ `auto` (និង `fast` ចាស់) ឬ $0.004 សម្រាប់ `lite` (និង `instant` ចាស់) ដែលគ្របដណ្តប់លទ្ធផល 10; $0.001 សម្រាប់លទ្ធផលបន្ថែមនីមួយៗ; និង $0.001 ក្នុងមួយលទ្ធផលដែលបានត្រឡប់មកវិញ នៅពេលកំណត់ `contents.summary`។ Tavily ត្រូវបានកត់ត្រា 1 ក្រេឌីត ($0.008) សម្រាប់ `search_depth` `basic`, `fast` និង `ultra-fast` និង 2 ក្រេឌីត ($0.016) សម្រាប់ `advanced`
-([ក្រេឌីត API របស់ Tavily](https://docs.tavily.com/documentation/api-credits))។ ការហៅដែលមាន
-`auto_parameters: true` ហើយ Tavily ដំឡើងទៅ advanced នៅតែត្រូវបានកត់ត្រា 1 ក្រេឌីត។
+Exa: 0.007 ដុល្លារក្នុងមួយការហៅសម្រាប់ `auto` (និង `fast` កេរ្តិ៍ដំណែល) ឬ 0.004 ដុល្លារសម្រាប់ `lite` (និង `instant` កេរ្តិ៍ដំណែល) គ្របដណ្តប់លទ្ធផល 10 ។ $0.001 សម្រាប់លទ្ធផលបន្ថែមនីមួយៗ; និង $0.001 ក្នុងមួយលទ្ធផលត្រឡប់មកវិញនៅពេលដែល `contents.summary` ត្រូវបានកំណត់។ Tavily ត្រូវបានកត់ត្រាក្នុង 1 ក្រេឌីត ($0.008) សម្រាប់ `search_depth` `basic`, `fast` និង `ultra-fast`, និង 2 credits ($0.016) សម្រាប់ `advanced` ( [Tavily API credits](https://docs.tavily.com/documentation/api-credits) )។ ការហៅទូរសព្ទជាមួយ `auto_parameters: true` ដែល Tavily ដំឡើងកំណែទៅកម្រិតខ្ពស់នៅតែត្រូវបានកត់ត្រាក្នុង 1 ក្រេឌីត។
 
 ---
 
@@ -1138,6 +1136,8 @@ X-OmniRoute-No-Cache: true
 
 ---
 
+<a id="cliproxyapi-management-compatibility"></a>
+
 ## ភាពឆបគ្នានៃការគ្រប់គ្រង CLIProxyAPI
 
 OmniRoute ឆ្លើយតបទៅកាន់ management endpoint ទាំងបីរបស់
@@ -1154,21 +1154,11 @@ key របស់វា។ Route ទាំងនេះត្រូវបានផ
 | POST   | `/v0/management/api-call`    | Body `{ auth_index, method, url, header?, data? }`។ ផ្ញើសំណើមួយដែលបានអនុញ្ញាត ដោយប្រើ token របស់គណនី ហើយត្រឡប់ `{ status_code, body }` |
 | POST   | `/v0/management/reset-quota` | Body `{ auth_index }`។ សម្អាត cooldown របស់ការតភ្ជាប់ ការទប់ស្កាត់ model និង cooldown តាម scope របស់ Codex សម្រាប់គណនីមួយ              |
 
-- `auth_index` គឺជា connection id របស់ OmniRoute។ `provider` គឺ `claude` ឬ `codex` (មានតែ
-  ការតភ្ជាប់ OAuth ប៉ុណ្ណោះ។ provider ប្រភេទ API key `anthropic` មិនត្រូវបានរាយបញ្ជីទេ)។ សម្រាប់ Codex,
-  `id_token.chatgpt_account_id` គឺជា workspace id ដែលបានរក្សាទុក ហើយ `plan_type` គឺជា plan ដែលបានរក្សាទុក។
-- `api-call` មិនមែនជា proxy ទូទៅទេ។ វាទទួលយកតែ Claude `GET
+- `auth_index` គឺជា id ការតភ្ជាប់ OmniRoute។ `provider` គឺ `claude` ឬ `codex` (តែការតភ្ជាប់ OAuth; អ្នកផ្ដល់សេវាសោ API `anthropic` មិនត្រូវបានរាយទេ)។ សម្រាប់ Codex, `id_token.chatgpt_account_id` គឺ id workspace ដែលរក្សាទុក ហើយ `plan_type` គឺគម្រោងដែលរក្សាទុក។
+- `api-call` មិនមែនជាប្រូកស៊ីទូទៅទេ។ វាទទួលតែ Claude `GET
 https://api.anthropic.com/api/oauth/usage` និង Codex `GET
-https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits` និង
-  `POST .../wham/rate-limit-reset-credits/consume` ប៉ុណ្ណោះ ហើយ endpoint នីមួយៗអាចប្រើបានតែសម្រាប់គណនីដែលមាន
-  provider ត្រូវគ្នាប៉ុណ្ណោះ។ អ្វីផ្សេងទៀតនឹងត្រឡប់ `403` ដោយមិនទាក់ទងទៅ upstream ទេ។ Header
-  `Authorization` របស់អ្នកហៅ (រួមទាំង placeholder `$TOKEN$`) ត្រូវបានមិនអើពើ៖ OmniRoute បញ្ចូល access token
-  របស់ connection ហើយ refresh វាជាមុន ប្រសិនបើជិតផុតសុពលភាព ហើយបញ្ជូនតែ header ដែលបានអនុញ្ញាត
-  (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`;
-  `Accept`, `Content-Type`) ប៉ុណ្ណោះ។ ប្រសិនបើខ្វះ `Chatgpt-Account-Id` វានឹងប្រើ workspace id ដែលបានរក្សាទុក
-  ជាលំនាំដើម។ សំណើនឹងអស់ពេលក្រោយ 15 វិនាទី ហើយប្រើ proxy របស់ connection។
-- `reset-quota` មិនប៉ះពាល់ដល់ស្ថានភាពចុងក្រោយ (banned, expired, credits_exhausted) ទេ។ `auth_index` ដែលមិនស្គាល់
-  នឹងត្រឡប់ `404`។
+https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits` និង `POST .../wham/rate-limit-reset-credits/consume` ដែលនីមួយៗសម្រាប់តែគណនីរបស់អ្នកផ្ដល់សេវាដែលត្រូវគ្នា។ អ្វីផ្សេងទៀតត្រឡប់ `403` ដោយមិនទាក់ទង upstream។ បឋមកថា `Authorization` របស់អ្នកហៅ (រួមទាំងសញ្ញាជំនួស `$TOKEN$`) មិនត្រូវបានយកមកប្រើទេ៖ OmniRoute បញ្ចូល access token របស់ការតភ្ជាប់ ធ្វើឱ្យវាថ្មីឡើងវិញជាមុនពេលជិតផុតកំណត់ ហើយបញ្ជូនបន្តតែបឋមកថាដែលមានក្នុងបញ្ជីអនុញ្ញាត (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`; `Accept`, `Content-Type`)។ បើគ្មាន `Chatgpt-Account-Id` វាប្រើ id workspace ដែលរក្សាទុកជាលំនាំដើម។ បើចម្លើយ upstream ដំបូងគឺ `401` វាធ្វើឱ្យ token ថ្មីឡើងវិញមួយដង ហើយព្យាយាមម្ដងទៀតតែនៅពេល access token ប្រែប្រួល។ ការសាកល្បង upstream នីមួយៗអស់ពេលក្រោយ 15 វិនាទី ហើយប្រើប្រូកស៊ីរបស់ការតភ្ជាប់។
+- `reset-quota` ទុកស្ថានភាពបញ្ចប់ (banned, expired, credits_exhausted) ដដែល។ `auth_index` ដែលមិនស្គាល់ត្រឡប់ `404`។
 
 **ការផ្ទៀងផ្ទាត់៖** សម័យរបស់ផ្ទាំងគ្រប់គ្រង ឬ API key ដែលមាន scope `manage` ត្រូវបានទាមទារ
 ទោះបីការចូលប្រើត្រូវបានបិទក៏ដោយ (ផ្លូវទាំងនេះស្ថិតក្នុង `ALWAYS_PROTECTED_API_PATHS`)។ Key
@@ -1885,17 +1875,17 @@ curl -X DELETE http://localhost:20128/api/resilience/model-cooldowns \
 
 OmniRoute ភ្ជាប់មកជាមួយម៉ាស៊ីនមេ Model Context Protocol ដែលបានបង្កប់ មាន transports ចំនួន 3 (stdio, SSE, streamable-http) និង tools ដែលមានវិសាលភាពកំណត់។ endpoints របស់ dashboard ខាងក្រោមអានទិន្នន័យស្ថានភាព/សវនកម្ម ហើយធ្វើ proxy សម្រាប់ HTTP transports។
 
-| Method | Path | Description |
-| ------ | ---------------------- | ------------------------------------------------------------------------------------------------ | -------------------- |
-| GET | `/api/mcp/status` | សញ្ញាបេះដូង, transport, ស្ថានភាពអនឡាញ, ការហៅចុងក្រោយ, tools កំពូល, អត្រាជោគជ័យក្នុងរយៈពេល 24 ម៉ោង |
-| GET | `/api/mcp/tools` | បញ្ជី MCP tools ដែលមាន `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints` |
-| GET | `/api/mcp/sse` | បើក SSE stream សម្រាប់ SSE transport (ត្រឡប់ `503` ប្រសិនបើ MCP ត្រូវបានបិទ ឬ transport មិនត្រូវគ្នា) |
-| POST | `/api/mcp/sse` | ផ្ញើ JSON-RPC frame តាម SSE transport |
-| GET | `/api/mcp/stream` | បើកផ្នែក SSE របស់ Streamable HTTP transport (សារដែលចាប់ផ្តើមដោយម៉ាស៊ីនមេ) |
-| POST | `/api/mcp/stream` | ផ្ញើ JSON-RPC frame តាម Streamable HTTP transport |
-| DELETE | `/api/mcp/stream` | បញ្ចប់ session របស់ Streamable HTTP |
-| GET | `/api/mcp/audit` | សួររកកំណត់ហេតុសវនកម្ម — `?limit=`, `?offset=`, `?tool=`, `?success=true                                | false`, `?apiKeyId=` |
-| GET | `/api/mcp/audit/stats` | ស្ថិតិសរុបនៃសវនកម្ម (ចំនួនសរុប, អត្រាជោគជ័យ, រយៈពេលមធ្យម, tools កំពូល) |
+| Method | Path                   | Description                                                                                                                    |
+| ------ | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| GET    | `/api/mcp/status`      | សញ្ញាបេះដូង, transport, ស្ថានភាពអនឡាញ, ការហៅចុងក្រោយ, tools កំពូល, អត្រាជោគជ័យក្នុងរយៈពេល 24 ម៉ោង                              |
+| GET    | `/api/mcp/tools`       | បញ្ជី MCP tools ដែលមាន `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints`                               |
+| GET    | `/api/mcp/sse`         | បើក SSE stream សម្រាប់ SSE transport (ត្រឡប់ `503` ប្រសិនបើ MCP ត្រូវបានបិទ ឬ transport មិនត្រូវគ្នា)                          |
+| POST   | `/api/mcp/sse`         | ផ្ញើ JSON-RPC frame តាម SSE transport                                                                                          |
+| GET    | `/api/mcp/stream`      | បើកផ្នែក SSE របស់ Streamable HTTP transport (សារដែលចាប់ផ្តើមដោយម៉ាស៊ីនមេ)                                                      |
+| POST   | `/api/mcp/stream`      | ផ្ញើ JSON-RPC frame តាម Streamable HTTP transport                                                                              |
+| DELETE | `/api/mcp/stream`      | បញ្ចប់ session របស់ Streamable HTTP                                                                                            |
+| GET    | `/api/mcp/audit`       | សួររកកំណត់ហេតុសវនកម្ម — `?limit=`, `?offset=`, `?tool=`, `?success=true                                \| false`, `?apiKeyId=` |
+| GET    | `/api/mcp/audit/stats` | ស្ថិតិសរុបនៃសវនកម្ម (ចំនួនសរុប, អត្រាជោគជ័យ, រយៈពេលមធ្យម, tools កំពូល)                                                         |
 
 **ការផ្ទៀងផ្ទាត់អត្តសញ្ញាណ:** `sse`/`stream` transports គោរពតាមផ្ទៃការផ្ទៀងផ្ទាត់អត្តសញ្ញាណជាក់លាក់របស់ MCP (Bearer API key ដែលមាន `mcp` scope)។ routes `status`/`tools`/`audit*` អាចអានបានពី dashboard (មិនត្រូវការការផ្ទៀងផ្ទាត់អត្តសញ្ញាណបន្ថែម ក្រៅពីការចូលទៅកាន់ dashboard host)។
 

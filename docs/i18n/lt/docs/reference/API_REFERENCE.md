@@ -899,13 +899,7 @@ kitas laukas. Naudojant lite, prieš iškvietimą pašalinami `additionalQueries
 `contents` raktai, išskyrus `text` ir `highlights`. Nebepersiunčiami nebenaudojami
 `subpages`, `subpageTarget`, `highlights.numSentences` ir `highlights.highlightsPerUrl`.
 
-Kainos apskaitai naudojamas nekintantis registras `costPerQuery`, išskyrus Exa, kuris taiko savo kainodarą:
-0,007 USD už iškvietimą naudojant `auto` (ir senąjį `fast`) arba 0,004 USD naudojant `lite` (ir senąjį
-`instant`), apimant 10 rezultatų; 0,001 USD už kiekvieną papildomą rezultatą; ir 0,001 USD už
-kiekvieną grąžintą rezultatą, kai nustatytas `contents.summary`. Tavily registruojamas kaip 1 kreditas
-(0,008 USD), kai `search_depth` yra `basic`, `fast` arba `ultra-fast`, ir 2 kreditai (0,016 USD), kai
-`advanced` ([Tavily API kreditai](https://docs.tavily.com/documentation/api-credits)). Iškvietimas su
-`auto_parameters: true`, kurio metu Tavily atnaujina paiešką į advanced, vis tiek registruojamas kaip 1 kreditas.
+Exa: 0,007 USD už `auto` (ir senojo `fast`) skambutį arba 0,004 USD už `lite` (ir senąjį `instant`), apimanti 10 rezultatų; 0,001 USD už kiekvieną tolesnį rezultatą; ir 0,001 USD už grąžintą rezultatą, kai nustatytas `contents.summary`. Tavily įrašytas 1 kreditu (0,008 USD) už `search_depth` `basic`, `fast` ir `ultra-fast` ir 2 kreditus (0,016 USD) už `advanced` ( [Tavily API kreditai](https://docs.tavily.com/documentation/api-credits) ). Skambutis su `auto_parameters: true`, kurį Tavily atnaujina į išplėstinį, vis tiek įrašomas į 1 kreditą.
 
 ---
 
@@ -1194,6 +1188,8 @@ X-OmniRoute-No-Cache: true
 
 ---
 
+<a id="cliproxyapi-management-compatibility"></a>
+
 ## CLIProxyAPI valdymo suderinamumas
 
 OmniRoute atsako į tris [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI)
@@ -1208,21 +1204,11 @@ pateikiami adresais `/v0/management/*` ir `/api/v0/management/*`.
 | POST    | `/v0/management/api-call`    | Kūnas `{ auth_index, method, url, header?, data? }`. Išsiunčia vieną leidžiamą užklausą su paskyros žetonu ir grąžina `{ status_code, body }` |
 | POST    | `/v0/management/reset-quota` | Kūnas `{ auth_index }`. Išvalo vienos paskyros ryšio vėsinimo laikotarpį, modelių blokavimus ir Codex srities vėsinimo laikotarpius           |
 
-- `auth_index` yra OmniRoute ryšio ID. `provider` yra `claude` arba `codex` (tik OAuth
-  ryšiai; `anthropic` API rakto teikėjas nepateikiamas). Codex atveju
-  `id_token.chatgpt_account_id` yra išsaugotas darbo srities ID, o `plan_type` – išsaugotas planas.
-- `api-call` nėra bendrasis tarpinis serveris. Jis priima tik Claude `GET
+- `auth_index` yra OmniRoute ryšio ID. `provider` yra `claude` arba `codex` (tik OAuth ryšiai; API rakto teikėjas `anthropic` neįtraukiamas). Codex atveju `id_token.chatgpt_account_id` yra saugomas darbo srities ID, o `plan_type` — saugomas planas.
+- `api-call` nėra bendros paskirties tarpinis serveris. Jis priima tik Claude `GET
 https://api.anthropic.com/api/oauth/usage` ir Codex `GET
-https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits` bei
-  `POST .../wham/rate-limit-reset-credits/consume`, ir kiekvieną iš jų tik tos pačios
-  teikėjo paskyrai. Bet kuri kita užklausa grąžina `403`, nesusisiekdama su upstream. Iškvietėjo
-  `Authorization` antraštė (įskaitant `$TOKEN$` vietos rezervavimo ženklą) ignoruojama: OmniRoute įterpia
-  ryšio prieigos žetoną, prieš tai jį atnaujindama, jei jo galiojimo laikas beveik pasibaigęs, ir persiunčia tik
-  leidžiamas antraštes (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`;
-  `Accept`, `Content-Type`). Jei `Chatgpt-Account-Id` nenurodytas, pagal numatytuosius nustatymus naudojamas išsaugotas darbo srities ID.
-  Užklausų laukimo laikas yra 15 sekundžių, jos naudoja ryšio tarpinį serverį.
-- `reset-quota` nekeičia galinių būsenų (`banned`, `expired`, `credits_exhausted`). Nežinomas
-  `auth_index` grąžina `404`.
+https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits` bei `POST .../wham/rate-limit-reset-credits/consume`, kiekvieną tik atitinkamo teikėjo paskyrai. Visa kita grąžina `403` nesusisiekiant su aukštesne grandimi. Kvietėjo `Authorization` antraštė (įskaitant vietaženklį `$TOKEN$`) ignoruojama: OmniRoute įterpia ryšio prieigos žetoną, pirmiausia jį atnaujindamas, jei artėja galiojimo pabaiga, ir persiunčia tik leidžiamas antraštes (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`; `Accept`, `Content-Type`). Trūkstamo `Chatgpt-Account-Id` numatytoji reikšmė yra saugomas darbo srities ID. Jei pirmas aukštesnės grandies atsakymas yra `401`, atnaujinama vieną kartą ir bandoma iš naujo tik pasikeitus prieigos žetonui. Kiekvieno aukštesnės grandies bandymo laiko limitas yra 15 sekundžių, ir naudojamas ryšio tarpinis serveris.
+- `reset-quota` nekeičia galutinių būsenų (banned, expired, credits_exhausted). Nežinomas `auth_index` grąžina `404`.
 
 **Autentifikavimas:** prietaisų skydelio seansas arba API raktas su `manage` sritimi; jis privalomas net tada, kai prisijungimas išjungtas
 (keliai įtraukti į `ALWAYS_PROTECTED_API_PATHS`). Tik išvadoms skirti raktai gauna `403`. Šaltinis:
@@ -1950,17 +1936,17 @@ Nuolatinė pokalbių / faktų atminties saugykla, apribota pagal API raktą / se
 
 „OmniRoute“ turi integruotą Model Context Protocol serverį su 3 perdavimo būdais (stdio, SSE, streamable-http) ir aprėptimis apribotais įrankiais. Toliau pateikti valdymo skydelio galiniai taškai nuskaito būsenos / audito duomenis ir tarpininkauja HTTP perdavimo būdams.
 
-| Metodas | Kelias | Aprašymas |
-| ------ | ---------------------- | ------------------------------------------------------------------------------------------------ | -------------------- |
-| GET | `/api/mcp/status` | Būsenos signalas, perdavimo būdas, prisijungimo būsena, paskutinis iškvietimas, pagrindiniai įrankiai, 24 val. sėkmės rodiklis |
-| GET | `/api/mcp/tools` | MCP įrankių sąrašas su `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints` |
-| GET | `/api/mcp/sse` | Atverti SSE srautą SSE perdavimo būdui (grąžina `503`, jei MCP išjungtas arba perdavimo būdas nesutampa) |
-| POST | `/api/mcp/sse` | Siųsti JSON-RPC kadrą SSE perdavimo būdu |
-| GET | `/api/mcp/stream` | Atverti Streamable HTTP perdavimo būdo SSE pusę (serverio inicijuojami pranešimai) |
-| POST | `/api/mcp/stream` | Siųsti JSON-RPC kadrą Streamable HTTP perdavimo būdu |
-| DELETE | `/api/mcp/stream` | Užbaigti Streamable HTTP sesiją |
-| GET | `/api/mcp/audit` | Užklausti audito žurnalą — `?limit=`, `?offset=`, `?tool=`, `?success=true                                | false`, `?apiKeyId=` |
-| GET | `/api/mcp/audit/stats` | Apibendrinta audito statistika (bendri skaičiai, sėkmės rodiklis, vidutinė trukmė, pagrindiniai įrankiai) |
+| Metodas | Kelias                 | Aprašymas                                                                                                                         |
+| ------- | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| GET     | `/api/mcp/status`      | Būsenos signalas, perdavimo būdas, prisijungimo būsena, paskutinis iškvietimas, pagrindiniai įrankiai, 24 val. sėkmės rodiklis    |
+| GET     | `/api/mcp/tools`       | MCP įrankių sąrašas su `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints`                                  |
+| GET     | `/api/mcp/sse`         | Atverti SSE srautą SSE perdavimo būdui (grąžina `503`, jei MCP išjungtas arba perdavimo būdas nesutampa)                          |
+| POST    | `/api/mcp/sse`         | Siųsti JSON-RPC kadrą SSE perdavimo būdu                                                                                          |
+| GET     | `/api/mcp/stream`      | Atverti Streamable HTTP perdavimo būdo SSE pusę (serverio inicijuojami pranešimai)                                                |
+| POST    | `/api/mcp/stream`      | Siųsti JSON-RPC kadrą Streamable HTTP perdavimo būdu                                                                              |
+| DELETE  | `/api/mcp/stream`      | Užbaigti Streamable HTTP sesiją                                                                                                   |
+| GET     | `/api/mcp/audit`       | Užklausti audito žurnalą — `?limit=`, `?offset=`, `?tool=`, `?success=true                                \| false`, `?apiKeyId=` |
+| GET     | `/api/mcp/audit/stats` | Apibendrinta audito statistika (bendri skaičiai, sėkmės rodiklis, vidutinė trukmė, pagrindiniai įrankiai)                         |
 
 **Autentifikavimas:** `sse` / `stream` perdavimo būdai naudoja MCP skirtą autentifikavimo sąsają (Bearer API raktą su `mcp` aprėptimi); `status` / `tools` / `audit*` maršrutai pasiekiami iš valdymo skydelio (nereikia papildomo autentifikavimo, išskyrus galimybę pasiekti valdymo skydelio pagrindinį kompiuterį).
 

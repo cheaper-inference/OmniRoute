@@ -880,15 +880,7 @@ maɓallin `contents` ban da `text` da `highlights` kafin kira. `subpages`, `subp
 `highlights.numSentences` da `highlights.highlightsPerUrl` da aka daina amfani da su, ba
 sa ƙara turawa.
 
-Ƙididdigar kuɗi ita ce rajistar lebur `costPerQuery`, sai dai Exa, wanda ke bin
-farashinsa na kansa: $0.007 a kowane kira ga `auto` (da tsohon `fast`) ko $0.004 ga `lite`
-(da tsohon `instant`), wanda ya ƙunshi sakamako 10; $0.001 ga kowane ƙarin sakamako; da
-$0.001 ga kowane sakamakon da aka dawo da shi idan an saita `contents.summary`. Ana rubuta Tavily
-a credits 1 ($0.008) ga `search_depth` `basic`, `fast` da `ultra-fast`, sannan credits 2
-($0.016) ga `advanced`
-([Credits na Tavily API](https://docs.tavily.com/documentation/api-credits)). Kira mai
-`auto_parameters: true` wanda ya sa Tavily ya haɓaka zuwa advanced har yanzu ana rubuta shi a
-credit 1.
+Exa: $0.007 a kowane kira don `auto` (da `fast` na gado ) ko $0.004 don `lite` (da `instant` na gado), yana rufe sakamako 10; $0.001 ga kowane ƙarin sakamako; da $0.001 a kowane sakamakon da aka dawo lokacin da aka saita `contents.summary`. Ana yin rikodin Tavily a 1 kiredit ($0.008) don `search_depth` `basic`, `fast` da `ultra-fast`, da ƙididdiga 2 ($0.016) don `advanced` ( [Tavily API credits](https://docs.tavily.com/documentation/api-credits) ). Kira tare da `auto_parameters: true` wanda Tavily ya inganta zuwa ci gaba har yanzu ana yin rikodin shi a 1 kiredit.
 
 ---
 
@@ -1174,6 +1166,8 @@ X-OmniRoute-No-Cache: true
 
 ---
 
+<a id="cliproxyapi-management-compatibility"></a>
+
 ## Dacewar Gudanarwa da CLIProxyAPI
 
 OmniRoute yana amsa ƙarshen hanyoyin gudanarwa guda uku na [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI)
@@ -1188,21 +1182,11 @@ a `/v0/management/*` da kuma `/api/v0/management/*`.
 | POST   | `/v0/management/api-call`    | Jiki `{ auth_index, method, url, header?, data? }`. Yana aika bukata guda da aka amince da ita tare da alamar asusun kuma ya dawo da `{ status_code, body }` |
 | POST   | `/v0/management/reset-quota` | Jiki `{ auth_index }`. Yana share lokacin dakatarwar haɗi, kulle-kullen samfuri da lokutan dakatarwa na Codex na kowane iyaka na asusu guda                  |
 
-- `auth_index` shi ne ID ɗin haɗin OmniRoute. `provider` shi ne `claude` ko `codex` (haɗin
-  OAuth kawai; ba a jera mai samar da maɓallin API na `anthropic` ba). Ga Codex,
-  `id_token.chatgpt_account_id` shi ne ID ɗin workspace da aka adana, sannan `plan_type` shi ne tsarin da aka adana.
-- `api-call` ba wakili na gama-gari ba ne. Yana karɓar Claude `GET
-https://api.anthropic.com/api/oauth/usage` kawai da Codex `GET
-https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits` da
-  `POST .../wham/rate-limit-reset-credits/consume` kawai, kuma kowanne sai don asusun mai samarwa da ya dace.
-  Duk wani abu dabam yana dawo da `403` ba tare da tuntuɓar upstream ba. Ana yin watsi da taken
-  `Authorization` na mai kira (har da madadin `$TOKEN$`): OmniRoute yana saka access token na haɗin,
-  yana sabunta shi da farko idan yana kusa da ƙarewa, sannan yana tura taken da aka amince da su kawai
-  (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`;
-  `Accept`, `Content-Type`). Idan `Chatgpt-Account-Id` ya ɓace, ana amfani da ID ɗin workspace da aka adana.
-  Bukatu suna ƙarewa bayan daƙiƙa 15 kuma suna amfani da wakilin haɗin.
-- `reset-quota` yana barin yanayi na ƙarshe (`banned`, `expired`, `credits_exhausted`) yadda suke. Idan
-  `auth_index` ba a sani ba ne, ana dawo da `404`.
+- `auth_index` shi ne connection id na OmniRoute. `provider` shi ne `claude` ko `codex` (OAuth connection kawai; ba a lissafa API-key provider `anthropic` ba). Ga Codex, `id_token.chatgpt_account_id` shi ne workspace id da aka adana, `plan_type` kuma shirin da aka adana.
+- `api-call` ba proxy na gama-gari ba ne. Yana karɓar Claude `GET
+https://api.anthropic.com/api/oauth/usage` da Codex `GET
+https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits` da `POST .../wham/rate-limit-reset-credits/consume` kawai, kowanne domin asusun provider da ya dace kawai. Duk wani abu dabam yana mayar da `403` ba tare da tuntuɓar upstream ba. Ana yin watsi da header `Authorization` na mai kira (har da placeholder `$TOKEN$`): OmniRoute yana saka access token na connection, yana fara sabunta shi idan ya kusa ƙarewa, kuma yana tura header da aka yarda da su kawai (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`; `Accept`, `Content-Type`). Idan babu `Chatgpt-Account-Id`, workspace id da aka adana shi ne na asali. Idan amsar upstream ta farko ita ce `401`, yana refresh sau ɗaya kuma yana sake gwadawa ne kawai idan access token ya canza. Kowace upstream attempt tana timeout bayan daƙiƙa 15 kuma tana amfani da proxy na connection.
+- `reset-quota` ba ya canza terminal state (banned, expired, credits_exhausted). `auth_index` da ba a sani ba yana mayar da `404`.
 
 **Tabbatarwa:** Zaman dashboard ko maɓallin API mai ikon `manage`, wanda ake buƙata ko da an kashe
 shiga (hanyoyin suna cikin `ALWAYS_PROTECTED_API_PATHS`). Maɓallan da ke da ikon inference kawai suna samun `403`. Madogara:
@@ -1913,17 +1897,17 @@ Ma’ajiyar bayanan tattaunawa/haƙiƙa ta dindindin, wadda ta keɓanta ga kowan
 
 OmniRoute na zuwa da ginanniyar sabar Model Context Protocol mai jigilar bayanai 3 (stdio, SSE, streamable-http) da kayan aiki masu iyakantaccen yanki. Ƙarshen dashboard da ke ƙasa suna karanta bayanan matsayi/audit kuma suna tura jigilar HTTP.
 
-| Hanya | Hanya | Bayani |
-| ------ | ---------------------- | ------------------------------------------------------------------------------------------------ | -------------------- |
-| GET | `/api/mcp/status` | Bugun zuciya, jigilar bayanai, matsayin kan layi, kiran ƙarshe, manyan kayan aiki, ƙimar nasara ta awanni 24 |
-| GET | `/api/mcp/tools` | Jerin kayan aikin MCP tare da `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints` |
-| GET | `/api/mcp/sse` | Buɗe rafin SSE don jigilar SSE (yana dawo da `503` idan MCP a kashe yake ko jigilar ba ta dace ba) |
-| POST | `/api/mcp/sse` | Aika firam ɗin JSON-RPC ta jigilar SSE |
-| GET | `/api/mcp/stream` | Buɗe ɓangaren SSE na jigilar Streamable HTTP (saƙonnin da sabar ta fara) |
-| POST | `/api/mcp/stream` | Aika firam ɗin JSON-RPC ta jigilar Streamable HTTP |
-| DELETE | `/api/mcp/stream` | Ƙare zaman Streamable HTTP |
-| GET | `/api/mcp/audit` | Yi tambaya ga log ɗin audit — `?limit=`, `?offset=`, `?tool=`, `?success=true                                | false`, `?apiKeyId=` |
-| GET | `/api/mcp/audit/stats` | Ƙididdigar audit da aka tattara (jimilloli, ƙimar nasara, matsakaicin tsawon lokaci, manyan kayan aiki) |
+| Hanya  | Hanya                  | Bayani                                                                                                                               |
+| ------ | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| GET    | `/api/mcp/status`      | Bugun zuciya, jigilar bayanai, matsayin kan layi, kiran ƙarshe, manyan kayan aiki, ƙimar nasara ta awanni 24                         |
+| GET    | `/api/mcp/tools`       | Jerin kayan aikin MCP tare da `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints`                              |
+| GET    | `/api/mcp/sse`         | Buɗe rafin SSE don jigilar SSE (yana dawo da `503` idan MCP a kashe yake ko jigilar ba ta dace ba)                                   |
+| POST   | `/api/mcp/sse`         | Aika firam ɗin JSON-RPC ta jigilar SSE                                                                                               |
+| GET    | `/api/mcp/stream`      | Buɗe ɓangaren SSE na jigilar Streamable HTTP (saƙonnin da sabar ta fara)                                                             |
+| POST   | `/api/mcp/stream`      | Aika firam ɗin JSON-RPC ta jigilar Streamable HTTP                                                                                   |
+| DELETE | `/api/mcp/stream`      | Ƙare zaman Streamable HTTP                                                                                                           |
+| GET    | `/api/mcp/audit`       | Yi tambaya ga log ɗin audit — `?limit=`, `?offset=`, `?tool=`, `?success=true                                \| false`, `?apiKeyId=` |
+| GET    | `/api/mcp/audit/stats` | Ƙididdigar audit da aka tattara (jimilloli, ƙimar nasara, matsakaicin tsawon lokaci, manyan kayan aiki)                              |
 
 **Tabbatar da izini:** jigilar `sse`/`stream` suna bin tsarin izini na musamman na MCP (maɓallin API na Bearer mai `mcp` scope); ana iya karanta hanyoyin `status`/`tools`/`audit*` daga dashboard (babu ƙarin izini da ake buƙata bayan isa ga masaukin dashboard).
 

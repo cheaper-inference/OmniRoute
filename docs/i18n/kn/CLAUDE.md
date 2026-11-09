@@ -15,7 +15,7 @@ Claude Code ಗೆ ಮಾತ್ರ ಅನ್ವಯಿಸುತ್ತದೆ — `
 
 ಕಡ್ಡಾಯವಾದ ಸಂಪೂರ್ಣ ವರ್ಕ್ಟ್ರೀ ಪ್ರೋಟೊಕಾಲ್ (base-branch ದೃಢೀಕರಣ, `.claude/worktrees/` ಕೆನೊನಿಕಲ್
 ಪಾತ್, `cp -al` node_modules, ಟಿಯರ್ಡೌನ್ ನಿಯಮಗಳು)
-[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) ನಲ್ಲಿದೆ (`AGENTS.md` →
+[`docs/ops/WORKTREE_ISOLATION.md`](../../../docs/ops/WORKTREE_ISOLATION.md) ನಲ್ಲಿದೆ (`AGENTS.md` →
 Git Workflow → "Worktree isolation" ನಲ್ಲಿ ಸಂಕ್ಷಿಪ್ತಗೊಳಿಸಲಾಗಿದೆ). Claude-Code-ನಿರ್ದಿಷ್ಟ ಅಂಶಗಳು:
 
 - ಆಪರೇಟರ್ ಈಗಾಗಲೇ ನಿಮಗೆ ಹೇಳಿಲ್ಲದಿದ್ದರೆ, `AskUserQuestion` ಮೂಲಕ ಆಪರೇಟರ್ನೊಂದಿಗೆ

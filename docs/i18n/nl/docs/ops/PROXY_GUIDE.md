@@ -80,6 +80,18 @@ Ook buiten geblokkeerde regio's zijn proxy's nuttig voor:
 
 ---
 
+## Standaardproxystatus voor nieuwe accounts
+
+In** Instellingen → Proxy → Algemene configuratie** , gebruik** Schakel proxy standaard in voor nieuwe verbindingen** om de initiële proxystatus van nieuw toegevoegde provideraccounts te kiezen.
+
+De nieuwe instelling bepaalt de initiële proxystatus van nieuw toegevoegde provideraccounts. Het verandert geen bestaande accounts en vervangt de globale proxy-switch niet. De initiële waarde behoudt het eerdere gedrag. Schakel het één keer uit om toekomstige accounts te maken waarbij proxy standaard is uitgeschakeld.
+
+De voorkeur wordt opgeslagen als `defaultNewConnectionProxyEnabled` via de bestaande Instellingen API. Het is standaard `true` als het nooit wordt opgeslagen. Het opslaan `false` wordt zonder herstart van kracht voor volgende nieuwe accounts. `POST /api/providers` accepteert een optionele strikte booleaanse `proxyEnabled`; een expliciete `true` of `false` heeft voorrang op de standaardinstelling voor het aanmaken. Als u een dubbel account weglaat of OAuth opnieuw verbindt, blijft de opgeslagen status van dat account behouden. Individuele accounts kunnen daarna nog steeds worden in- of uitgeschakeld.
+
+Selectieve provideroverdrachten gebruiken de standaardinstellingen van de doelinstallatie voor nieuwe accounts en behouden het bestemmingsbeleid bij het vervangen van bestaande accounts. Proxyschakelaars zijn geen draagbare overdrachtsvelden. Volledig back-upherstel en historische JSON/SQL -migratie behouden hun bestaande herstelsemantiek, inclusief opgeslagen accountwaarden en verouderde schemastandaarden; een volledig herstel van de instellingen kan deze voorkeur ook herstellen.
+
+Deze voorkeur kent geen proxy toe en stelt niet vast dat iemand gezond of in gebruik is. De daadwerkelijke routering is nog steeds afhankelijk van de globale proxyschakelaar en de toepasselijke proxyconfiguratie. Synthetische providers zonder een permanent account, OAuth verkeer vóór het aanmaken van een account, environment/system proxy's en externe backends-netwerken vallen buiten het bereik ervan.
+
 ## Proxysysteem met 4 niveaus
 
 OmniRoute ondersteunt proxyconfiguratie op **vier onafhankelijke niveaus**, die in volgorde van prioriteit worden bepaald:
@@ -380,7 +392,7 @@ Gebruikt `wreq-js` om browserachtige TLS-fingerprints te genereren en zo botdete
 
 ### CLI-fingerprintmatching
 
-De **CLI-fingerprintschakelaar** (`Instellingen → Beveiliging`) wijzigt de volgorde van HTTP-headers en velden in de JSON-body zodat deze overeenkomt met de exacte signatuur van native CLI-binaries (Claude Code, Codex, enz.). Dit werkt **boven op** de proxy:
+De **CLI-fingerprintschakelaar** (`Settings → Security`) wijzigt de volgorde van HTTP-headers en velden in de JSON-body zodat deze overeenkomt met de exacte signatuur van native CLI-binaries (Claude Code, Codex, enz.). Dit werkt **boven op** de proxy:
 
 ```
 Uw IP (geblokkeerd) → Proxy-IP (VS) → Provider-API

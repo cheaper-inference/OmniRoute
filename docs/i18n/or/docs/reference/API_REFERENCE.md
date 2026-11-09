@@ -887,13 +887,7 @@ Exa `type: "lite"` (Exa 3.0) ଏକ ଛୋଟ ଫିଲ୍ଡ ସେଟ୍ ଗ�
 `text` ଏବଂ `highlights` ବ୍ୟତୀତ ପ୍ରତ୍ୟେକ କୀକୁ କଲ୍ ପୂର୍ବରୁ ବାଦ ଦିଆଯାଏ। ଅବମୂଲ୍ୟାୟିତ
 `subpages`, `subpageTarget`, `highlights.numSentences` ଏବଂ `highlights.highlightsPerUrl` ଆଉ ଆଗକୁ ପଠାଯାଏ ନାହିଁ।
 
-ଖର୍ଚ୍ଚ ହିସାବ flat registry `costPerQuery` ଅନୁସରଣ କରେ, କେବଳ Exa ବ୍ୟତୀତ, ଯାହା Exa ର ନିଜସ୍ୱ
-ମୂଲ୍ୟ ନିର୍ଦ୍ଧାରଣ ଅନୁସରଣ କରେ: `auto` (ଏବଂ ପୁରୁଣା `fast`) ପାଇଁ ପ୍ରତି କଲ୍ $0.007 କିମ୍ବା `lite` (ଏବଂ
-ପୁରୁଣା `instant`) ପାଇଁ $0.004, ଯାହା 10ଟି ଫଳାଫଳକୁ ଅନ୍ତର୍ଭୁକ୍ତ କରେ; ପ୍ରତ୍ୟେକ ଅତିରିକ୍ତ ଫଳାଫଳ ପାଇଁ
-$0.001; ଏବଂ `contents.summary` ସେଟ୍ ହୋଇଥିଲେ ପ୍ରତ୍ୟେକ ଫେରସ୍ତ ହୋଇଥିବା ଫଳାଫଳ ପାଇଁ $0.001। Tavily କୁ
-`search_depth` `basic`, `fast` ଏବଂ `ultra-fast` ପାଇଁ 1 କ୍ରେଡିଟ୍ ($0.008), ଏବଂ `advanced` ପାଇଁ
-2 କ୍ରେଡିଟ୍ ($0.016) ଭାବେ ରେକର୍ଡ କରାଯାଏ
-([Tavily API କ୍ରେଡିଟ୍](https://docs.tavily.com/documentation/api-credits))। `auto_parameters: true` ସହିତ ଏକ କଲ୍ Tavily ଦ୍ୱାରା advanced କୁ ଅପଗ୍ରେଡ୍ ହେଲେ ମଧ୍ୟ 1 କ୍ରେଡିଟ୍ ଭାବେ ରେକର୍ଡ ହୁଏ।
+Exa: `auto` ପାଇଁ କଲ୍ ପାଇଁ $ 0.007 (ଏବଂ ଉତ୍ତରାଧିକାରୀ `fast`) କିମ୍ବା `lite` ପାଇଁ $ 0.004 (ଏବଂ ଉତ୍ତରାଧିକାରୀ `instant`), 10 ଫଳାଫଳକୁ ଅନ୍ତର୍ଭୁକ୍ତ କରେ; ପ୍ରତ୍ୟେକ ପରବର୍ତ୍ତୀ ଫଳାଫଳ ପାଇଁ $ 0.001; ଏବଂ `contents.summary` ସେଟ୍ ହେବାବେଳେ ଫେରସ୍ତ ଫଳାଫଳ ପାଇଁ $ 0.001 \| `search_depth` `basic`, `fast` ଏବଂ `ultra-fast` ପାଇଁ ଟାଭିଲି 1 କ୍ରେଡିଟ୍ ($ 0.008) ଏବଂ `advanced` ( [Tavily API କ୍ରେଡିଟ୍](https://docs.tavily.com/documentation/api-credits) ) ପାଇଁ 2 କ୍ରେଡିଟ୍ ($ 0.016) ରେକର୍ଡ କରାଯାଇଛି \| `auto_parameters: true` ସହିତ ଏକ କଲ ଯାହା ଟାଭିଲି ଉନ୍ନତକୁ ଅପଗ୍ରେଡ୍ କରେ ତଥାପି 1 କ୍ରେଡିଟ୍ ରେ ରେକର୍ଡ ହୋଇଛି \|
 
 ---
 
@@ -1168,6 +1162,8 @@ X-OmniRoute-No-Cache: true
 
 ---
 
+<a id="cliproxyapi-management-compatibility"></a>
+
 ## CLIProxyAPI ପରିଚାଳନା ସୁସଙ୍ଗତତା
 
 OmniRoute ତିନୋଟି [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI)
@@ -1183,21 +1179,11 @@ OmniRoute ତିନୋଟି [CLIProxyAPI](https://github.com/router-for-me/CLIP
 | POST   | `/v0/management/api-call`    | ବଡି `{ auth_index, method, url, header?, data? }`। ଆକାଉଣ୍ଟ୍ର ଟୋକେନ୍ ସହିତ ଗୋଟିଏ ଅନୁମୋଦିତ ଅନୁରୋଧ ପଠାଏ ଏବଂ `{ status_code, body }` ଫେରାଇଦିଏ |
 | POST   | `/v0/management/reset-quota` | ବଡି `{ auth_index }`। ଗୋଟିଏ ଆକାଉଣ୍ଟ୍ର ସଂଯୋଗ କୁଲ୍ଡାଉନ୍, ମଡେଲ୍ ଲକ୍ଆଉଟ୍ ଏବଂ Codex ପ୍ରତି-ସ୍କୋପ୍ କୁଲ୍ଡାଉନ୍ଗୁଡ଼ିକୁ ସଫା କରେ                     |
 
-- `auth_index` ହେଉଛି OmniRoute ସଂଯୋଗ ID। `provider` ହେଉଛି `claude` କିମ୍ବା `codex` (କେବଳ OAuth
-  ସଂଯୋଗ; `anthropic` API-key provider ତାଲିକାଭୁକ୍ତ ହୁଏ ନାହିଁ)। Codex ପାଇଁ,
-  `id_token.chatgpt_account_id` ସଂରକ୍ଷିତ workspace ID ଏବଂ `plan_type` ସଂରକ୍ଷିତ plan।
-- `api-call` ଏକ ସାଧାରଣ ପ୍ରକ୍ସି ନୁହେଁ। ଏହା କେବଳ Claude `GET
+- `auth_index` ହେଉଛି OmniRoute connection ID। `provider` ହେଉଛି `claude` କିମ୍ବା `codex` (କେବଳ OAuth connection; `anthropic` API-key provider ତାଲିକାରେ ନାହିଁ)। Codex ପାଇଁ `id_token.chatgpt_account_id` ସଞ୍ଚିତ workspace ID ଏବଂ `plan_type` ସଞ୍ଚିତ plan।
+- `api-call` ସାଧାରଣ proxy ନୁହେଁ। ଏହା କେବଳ Claude `GET
 https://api.anthropic.com/api/oauth/usage` ଏବଂ Codex `GET
-https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits` ଏବଂ
-  `POST .../wham/rate-limit-reset-credits/consume` ଗ୍ରହଣ କରେ, ଏବଂ ପ୍ରତ୍ୟେକଟି କେବଳ ସମ୍ପର୍କିତ
-  provider ର ଏକ ଆକାଉଣ୍ଟ୍ ପାଇଁ ହୁଏ। ଅନ୍ୟ ସମସ୍ତ କିଛି upstream ସହିତ ଯୋଗାଯୋଗ ନକରି
-  `403` ଫେରାଇଦିଏ। କଲର୍ର `Authorization` ହେଡର୍ (`$TOKEN$` placeholder ସମେତ) ଅଣଦେଖା କରାଯାଏ:
-  OmniRoute ସଂଯୋଗର access token ଯୋଡ଼େ, ଏହାର ମেয়ାଦ ନିକଟ ହେଲେ ପ୍ରଥମେ ତାହାକୁ ରିଫ୍ରେଶ୍ କରେ, ଏବଂ
-  କେବଳ ଅନୁମୋଦିତ ହେଡର୍ଗୁଡ଼ିକୁ (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`;
-  `Accept`, `Content-Type`) ଫର୍ୱାର୍ଡ କରେ। `Chatgpt-Account-Id` ନଥିଲେ ସଂରକ୍ଷିତ workspace ID
-  ଡିଫଲ୍ଟ ହୁଏ। ଅନୁରୋଧଗୁଡ଼ିକ 15 ସେକେଣ୍ଡ୍ ପରେ ଟାଇମ୍ ଆଉଟ୍ ହୁଏ ଏବଂ ସଂଯୋଗର ପ୍ରକ୍ସି ବ୍ୟବହାର କରେ।
-- `reset-quota` ଟର୍ମିନାଲ୍ ସ୍ଥିତିଗୁଡ଼ିକୁ (banned, expired, credits_exhausted) ଅପରିବର୍ତ୍ତିତ ରଖେ। ଅଜଣା
-  `auth_index` `404` ଫେରାଇଦିଏ।
+https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits` ଏବଂ `POST .../wham/rate-limit-reset-credits/consume` ଗ୍ରହଣ କରେ, ପ୍ରତ୍ୟେକ କେବଳ ମେଳଖାଉଥିବା provider ର account ପାଇଁ। ଅନ୍ୟ ସବୁ upstream ସହ ସମ୍ପର୍କ ନକରି `403` ଦିଏ। Caller ର `Authorization` header (`$TOKEN$` placeholder ସମେତ) ଅଣଦେଖା ହୁଏ: OmniRoute connection ର access token ଯୋଡ଼େ, ମିଆଦ ନିକଟ ହେଲେ ପ୍ରଥମେ refresh କରେ ଏବଂ କେବଳ ଅନୁମତି ତାଲିକାର header ପଠାଏ (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`; `Accept`, `Content-Type`)। `Chatgpt-Account-Id` ନଥିଲେ ସଞ୍ଚିତ workspace ID ଡିଫଲ୍ଟ ହୁଏ। ପ୍ରଥମ upstream response `401` ହେଲେ ଥରେ refresh କରି, access token ବଦଳିଲେ ମାତ୍ର ପୁଣି ଚେଷ୍ଟା କରେ। ପ୍ରତି upstream ଚେଷ୍ଟାର timeout 15 ସେକେଣ୍ଡ ଏବଂ ଏହା connection ର proxy ବ୍ୟବହାର କରେ।
+- `reset-quota` terminal ସ୍ଥିତି (banned, expired, credits_exhausted) ବଦଳାଏ ନାହିଁ। ଅଜଣା `auth_index` ପାଇଁ `404` ମିଳେ।
 
 **ପ୍ରମାଣୀକରଣ:** ଡ୍ୟାସବୋର୍ଡ୍ ସେସନ୍ କିମ୍ବା `manage`-ସ୍କୋପ୍ ଥିବା API କୀ ଆବଶ୍ୟକ, ଲଗଇନ୍ ଅକ୍ଷମ ଥିଲେ ମଧ୍ୟ
 (`ALWAYS_PROTECTED_API_PATHS` ରେ ଏହି ପଥଗୁଡ଼ିକ ରହିଛି)। କେବଳ inference ପାଇଁ ଥିବା କୀଗୁଡ଼ିକ `403` ପାଆନ୍ତି। ଉତ୍ସ:
@@ -1943,17 +1929,17 @@ curl -X DELETE http://localhost:20128/api/resilience/model-cooldowns \
 
 OmniRoute 3ଟି ଟ୍ରାନ୍ସପୋର୍ଟ (stdio, SSE, streamable-http) ଏବଂ ସ୍କୋପ୍ କରାଯାଇଥିବା ଟୁଲ୍ଗୁଡ଼ିକ ସହିତ ଏକ ଅନ୍ତର୍ନିହିତ Model Context Protocol ସର୍ଭର ପ୍ରଦାନ କରେ। ନିମ୍ନୋକ୍ତ ଡ୍ୟାସ୍ବୋର୍ଡ ଏଣ୍ଡପଏଣ୍ଟଗୁଡ଼ିକ ସ୍ଥିତି/ଅଡିଟ୍ ତଥ୍ୟ ପଢ଼ନ୍ତି ଏବଂ HTTP ଟ୍ରାନ୍ସପୋର୍ଟଗୁଡ଼ିକୁ ପ୍ରକ୍ସି କରନ୍ତି।
 
-| ପ୍ରଣାଳୀ | ପଥ | ବର୍ଣ୍ଣନା |
-| ------ | ---------------------- | ------------------------------------------------------------------------------------------------ | -------------------- |
-| GET | `/api/mcp/status` | ହାର୍ଟବିଟ୍, ଟ୍ରାନ୍ସପୋର୍ଟ, ଅନଲାଇନ୍ ସ୍ଥିତି, ଶେଷ କଲ୍, ଶୀର୍ଷ ଟୁଲ୍ଗୁଡ଼ିକ, 24 ଘଣ୍ଟିଆ ସଫଳତା ହାର |
-| GET | `/api/mcp/tools` | `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints` ସହିତ MCP ଟୁଲ୍ଗୁଡ଼ିକର ତାଲିକା |
-| GET | `/api/mcp/sse` | SSE ଟ୍ରାନ୍ସପୋର୍ଟ ପାଇଁ ଖୋଲା SSE ଷ୍ଟ୍ରିମ୍ (MCP ନିଷ୍କ୍ରିୟ କିମ୍ବା ଟ୍ରାନ୍ସପୋର୍ଟ ମେଳ ନହେଲେ `503` ଫେରାଇଥାଏ) |
-| POST | `/api/mcp/sse` | SSE ଟ୍ରାନ୍ସପୋର୍ଟରେ JSON-RPC ଫ୍ରେମ୍ ପଠାନ୍ତୁ |
-| GET | `/api/mcp/stream` | Streamable HTTP ଟ୍ରାନ୍ସପୋର୍ଟର SSE ପାର୍ଶ୍ୱ ଖୋଲନ୍ତୁ (ସର୍ଭର-ଆରମ୍ଭିତ ବାର୍ତ୍ତାଗୁଡ଼ିକ) |
-| POST | `/api/mcp/stream` | Streamable HTTP ଟ୍ରାନ୍ସପୋର୍ଟରେ JSON-RPC ଫ୍ରେମ୍ ପଠାନ୍ତୁ |
-| DELETE | `/api/mcp/stream` | ଏକ Streamable HTTP ସେସନ୍ ସମାପ୍ତ କରନ୍ତୁ |
-| GET | `/api/mcp/audit` | ଅଡିଟ୍ ଲଗ୍ ଜିଜ୍ଞାସା କରନ୍ତୁ — `?limit=`, `?offset=`, `?tool=`, `?success=true                                | false`, `?apiKeyId=` |
-| GET | `/api/mcp/audit/stats` | ସମଗ୍ରୀକୃତ ଅଡିଟ୍ ପରିସଂଖ୍ୟାନ (ମୋଟ, ସଫଳତା ହାର, ହାରାହାରି ଅବଧି, ଶୀର୍ଷ ଟୁଲ୍ଗୁଡ଼ିକ) |
+| ପ୍ରଣାଳୀ | ପଥ                     | ବର୍ଣ୍ଣନା                                                                                                                           |
+| ------- | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| GET     | `/api/mcp/status`      | ହାର୍ଟବିଟ୍, ଟ୍ରାନ୍ସପୋର୍ଟ, ଅନଲାଇନ୍ ସ୍ଥିତି, ଶେଷ କଲ୍, ଶୀର୍ଷ ଟୁଲ୍ଗୁଡ଼ିକ, 24 ଘଣ୍ଟିଆ ସଫଳତା ହାର                                            |
+| GET     | `/api/mcp/tools`       | `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints` ସହିତ MCP ଟୁଲ୍ଗୁଡ଼ିକର ତାଲିକା                              |
+| GET     | `/api/mcp/sse`         | SSE ଟ୍ରାନ୍ସପୋର୍ଟ ପାଇଁ ଖୋଲା SSE ଷ୍ଟ୍ରିମ୍ (MCP ନିଷ୍କ୍ରିୟ କିମ୍ବା ଟ୍ରାନ୍ସପୋର୍ଟ ମେଳ ନହେଲେ `503` ଫେରାଇଥାଏ)                               |
+| POST    | `/api/mcp/sse`         | SSE ଟ୍ରାନ୍ସପୋର୍ଟରେ JSON-RPC ଫ୍ରେମ୍ ପଠାନ୍ତୁ                                                                                         |
+| GET     | `/api/mcp/stream`      | Streamable HTTP ଟ୍ରାନ୍ସପୋର୍ଟର SSE ପାର୍ଶ୍ୱ ଖୋଲନ୍ତୁ (ସର୍ଭର-ଆରମ୍ଭିତ ବାର୍ତ୍ତାଗୁଡ଼ିକ)                                                   |
+| POST    | `/api/mcp/stream`      | Streamable HTTP ଟ୍ରାନ୍ସପୋର୍ଟରେ JSON-RPC ଫ୍ରେମ୍ ପଠାନ୍ତୁ                                                                             |
+| DELETE  | `/api/mcp/stream`      | ଏକ Streamable HTTP ସେସନ୍ ସମାପ୍ତ କରନ୍ତୁ                                                                                             |
+| GET     | `/api/mcp/audit`       | ଅଡିଟ୍ ଲଗ୍ ଜିଜ୍ଞାସା କରନ୍ତୁ — `?limit=`, `?offset=`, `?tool=`, `?success=true                                \| false`, `?apiKeyId=` |
+| GET     | `/api/mcp/audit/stats` | ସମଗ୍ରୀକୃତ ଅଡିଟ୍ ପରିସଂଖ୍ୟାନ (ମୋଟ, ସଫଳତା ହାର, ହାରାହାରି ଅବଧି, ଶୀର୍ଷ ଟୁଲ୍ଗୁଡ଼ିକ)                                                       |
 
 **ପ୍ରମାଣୀକରଣ:** `sse`/`stream` ଟ୍ରାନ୍ସପୋର୍ଟଗୁଡ଼ିକ MCP-ନିର୍ଦ୍ଦିଷ୍ଟ ପ୍ରମାଣୀକରଣ ପୃଷ୍ଠ ( `mcp` ସ୍କୋପ୍ ସହିତ Bearer API କି’) ଅନୁସରଣ କରେ; `status`/`tools`/`audit*` ରୁଟ୍ଗୁଡ଼ିକ ଡ୍ୟାସ୍ବୋର୍ଡରୁ ପଠନଯୋଗ୍ୟ (ଡ୍ୟାସ୍ବୋର୍ଡ ହୋଷ୍ଟରେ ପହଞ୍ଚିବା ବ୍ୟତୀତ ଅତିରିକ୍ତ ପ୍ରମାଣୀକରଣ ଆବଶ୍ୟକ ନାହିଁ)।
 

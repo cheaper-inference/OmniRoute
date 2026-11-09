@@ -4,8 +4,6 @@
 
 ---
 
-# Homologation Suite (`npm run homolog`)
-
 E2E validacija u stvarnom okruženju OmniRoute deploymenta koji se izvršava na homologacijskom VPS-u (`HOMOLOG_BASE_URL`, npr. `http://192.168.0.15:20128`). Jedna komanda zamjenjuje ručnu kontrolnu listu za izdanje (release) STOP #2 automatizovanim pokretanjem koje generiše dokaze.
 
 ## Šta obuhvata

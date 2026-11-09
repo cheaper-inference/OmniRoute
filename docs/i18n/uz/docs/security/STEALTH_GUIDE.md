@@ -231,9 +231,9 @@ Barcha MITM endpointlari boshqaruv autentifikatsiyasini (`requireCliToolsAuth`) 
 
 ---
 
-## Foydalanuvchi agenti — env varslarini bekor qiladi (`.env.example` 12-bo'lim)
+## User-Agent qiymatlarini qayta belgilash — muhit o‘zgaruvchilari (`.env.example` 12-bo‘lim)
 
-| O'zgaruvchan        | Standart                                      |
+| O‘zgaruvchi         | Standart qiymat                               |
 | ------------------- | --------------------------------------------- |
 | `CLAUDE_USER_AGENT` | `claude-cli/2.1.280 (external, cli)`          |
 | `CODEX_USER_AGENT`  | `codex-cli/0.155.0 (Windows 10.0.26200; x64)` |
@@ -242,7 +242,7 @@ Barcha MITM endpointlari boshqaruv autentifikatsiyasini (`requireCliToolsAuth`) 
 | `QODER_USER_AGENT`  | `Qoder-Cli`                                   |
 | `CURSOR_USER_AGENT` | `Cursor/3.4`                                  |
 
-Dinamik qidiruv orqali `open-sse/executors/base.ts::buildHeaders()` tomonidan iste'mol qilinadi.** Provayderlar yangi CLI versiyalarini chiqarganda, bularni buzing** — eskirgan UA satrlari eskirgan mijozlar sifatida rad etila boshlaydi.
+`open-sse/executors/base.ts::buildHeaders()` tomonidan dinamik qidiruv orqali ishlatiladi. **Provayderlar yangi CLI versiyalarini chiqarganda bu qiymatlarni yangilang** — eskirgan UA satrlari eski mijozlarga tegishli deb rad etila boshlaydi.
 
 ## CLI moslik rejimi almashtirgichlari (`.env.example` 13-boʻlim)
 

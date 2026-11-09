@@ -81,6 +81,18 @@ Fiú lasmuigh de réigiúin bhlocáilte, bíonn seachfhreastalaithe úsáideach 
 
 ---
 
+## Staid seachfhreastalaí réamhshocraithe do chuntais nua
+
+I** Socruithe → Proxy → Cumraíocht dhomhanda** , úsáid** Cumasaigh seachfhreastalaí de réir réamhshocraithe le haghaidh naisc nua** chun staid tosaigh seachfhreastalaí na gcuntas soláthraithe nua-bhreise a roghnú.
+
+Rialaíonn an socrú nua staid seachfhreastalaí tosaigh na gcuntas soláthraithe nua-bhreise. Ní athraíonn sé cuntais reatha ná ní athraítear an lasc seachfhreastalaí domhanda. Caomhnaíonn a luach tosaigh an t-iompar roimhe seo. Múch é uair amháin chun cuntais sa todhchaí a chruthú a bhfuil seachfhreastalaí díchumasaithe orthu de réir réamhshocraithe.
+
+Stóráiltear an rogha mar `defaultNewConnectionProxyEnabled` trí na Socruithe reatha API. Mainneachtainí sé `true` nuair riamh shábháil. Tagann sábháil `false` i bhfeidhm do chuntais nua ina dhiaidh sin gan atosú. glacann `POST /api/providers` `proxyEnabled` boolean dian roghnach; bíonn tosaíocht ag `true` nó `false` sainráite thar réamhshocrú an chruthaithe. Caomhnaíonn easnamh ar chuntas dúblach nó OAuth reconnect staid stóráilte an chuntais sin. Is féidir cuntais aonair a chumasú nó a dhíchumasú fós ina dhiaidh sin.
+
+Úsáideann aistrithe soláthraithe roghnacha réamhshocrú na suiteála sprice le haghaidh cuntas nua agus caomhnaítear an beartas cinn scríbe nuair a chuirtear cuntais nua in ionad na gcuntas atá ann cheana. Ní réimsí aistrithe iniompartha iad scoránaigh seachfhreastalaí. Coinníonn athchóiriú cúltaca iomlán agus ascnamh JSON/SQL stairiúil a shéimeantaic athchóirithe reatha, lena n-áirítear luachanna cuntas sábháilte agus mainneachtainí scéimre oidhreachta; is féidir an rogha seo a chur ar ais le hathchóiriú iomlán na socruithe.
+
+Ní dhéanann an rogha seo seachfhreastalaí a shannadh ná a shuíomh go bhfuil ceann sláintiúil nó in úsáid. Braitheann ródú iarbhír fós ar an lasc seachfhreastalaí domhanda agus ar chumraíocht seachfhreastalaí is infheidhme. Tá soláthraithe sintéiseacha gan cuntas leanúnach, trácht OAuth roimh chruthú cuntais, seachvótálaithe environment/system, agus líonrú na n-aisíní seachtracha lasmuigh dá raon feidhme.
+
 ## Córas Seachfhreastalaí 4 Leibhéal
 
 Tacaíonn OmniRoute le cumraíocht seachfhreastalaí ag **ceithre raon neamhspleácha**, a réitítear in ord tosaíochta:
@@ -381,7 +393,7 @@ Ní hamháin go seolann OmniRoute trácht trí sheachfhreastalaí — cuireann s
 
 ### Meaitseáil Méarloirg CLI
 
-Déanann an **Scorán Méarloirg CLI** (`Socruithe → Slándáil`) ceanntásca HTTP agus réimsí i gcorp JSON a athordú chun síniú beacht dénártha dúchasacha CLI (Claude Code, Codex, srl.) a mheaitseáil. Oibríonn sé seo **anuas ar** an seachfhreastalaí:
+Déanann an **Scorán Méarloirg CLI** (`Settings → Security`) ceanntásca HTTP agus réimsí i gcorp JSON a athordú chun síniú beacht dénártha dúchasacha CLI (Claude Code, Codex, srl.) a mheaitseáil. Oibríonn sé seo **anuas ar** an seachfhreastalaí:
 
 ```
 Do IP (blocáilte) → IP an tSeachfhreastalaí (SAM) → API an tSoláthraí

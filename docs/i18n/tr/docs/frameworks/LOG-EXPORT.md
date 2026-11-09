@@ -4,164 +4,175 @@
 
 ---
 
-OmniRoute çağrı günlüklerinin harici bir analiz deposuna sürekli, artımlı olarak dışa aktarılması.
+OmniRoute çağrı günlüklerinin harici bir analiz deposuna sürekli ve artımlı olarak aktarılması.
 
-Günlükler panosu sekmesi, istek geçmişini SQLite'ta (`call_logs`) tutar; bu geçmiş,
-rotasyon ve saklama süresiyle sınırlıdır. Günlük dışa aktarma, aynı kayıt kümesini bir zamanlamaya göre dışarı göndererek yerel
-veritabanından daha uzun süre saklanmasını ve diğer verilerle birleştirilmesini sağlar. İlk hedef BigQuery'dir;
-işlem hattı bir kayıt defteri yapısındadır, dolayısıyla yeni hedefler mevcut yapıya eklenebilir.
+Günlükler panosu sekmesi, istek geçmişini rotasyon ve saklama süresiyle sınırlandırılan SQLite'ta (`call_logs`) tutar. Günlük aktarımı, aynı kayıt kümesini belirli bir zamanlamayla dışarı göndererek kayıtların yerel veritabanından daha uzun süre saklanabilmesini ve diğer verilerle birleştirilebilmesini sağlar. İlk hedef BigQuery'dir; işlem hattı bir kayıt sistemi olduğundan daha fazla hedef eklenebilir.
 
 ---
 
 ## 1. Nasıl çalışır
 
 ```
-server (decrypt + validate config, reconcile cursor)
-  → start IPC → isolated exportChild OS process
-    → read-only storage.sqlite → shared call-log query/mapping
-      → async artifact hydration → destination prepare()/send()
-        → batch IPC → server persists cursor → ack IPC
-          → next batch; done IPC → server records success
+sunucu (yapılandırmanın şifresini çöz + doğrula, imleci uzlaştır)
+  → IPC'yi başlat → yalıtılmış exportChild işletim sistemi işlemi
+    → salt okunur storage.sqlite → paylaşılan çağrı günlüğü sorgulama/eşleme
+      → zaman uyumsuz yapıt yükleme → hedef prepare()/send()
+        → toplu IPC → sunucu imleci kalıcılaştırır → onay IPC'si
+          → sonraki toplu işlem; done IPC'si → sunucu başarıyı kaydeder
 ```
 
-- **Zamanlama** — `log_export` adlı tek bir `JobRegistry` cron işi; varsayılanı `0 * * * *` (saatlik,
-  UTC). `src/lib/initCloudSync.ts` içinde kaydedilir; `OMNIROUTE_LOG_EXPORT_CRON` ile değiştirilebilir.
-  Her tetiklemede, **etkin** tüm hedeflerin bekleyen kayıtları sırayla aktarılır.
-- **İmleç** — SQLite'ın örtük `call_logs.rowid` değeri; hedef başına
-  `log_export_destinations.cursor_row_id` içinde kalıcı olarak saklanır. `timestamp` bilinçli olarak imleç olarak kullanılmaz: çağrı yapanlar
-  kendi değerlerini sağlayabilir; bu nedenle yavaş bir istek, daha sonra başlayan daha hızlı bir istekten sonra
-  yazılabilir ve zaman damgasına dayalı bir imleç bu isteği atlar.
-- **Toplu işleme** — istek başına `batch_size` satır (varsayılan 500), çalıştırma başına `max_rows_per_run` satır
-  (varsayılan 10000); böylece büyük bir birikim, tek bir tetiklemeyi engellemek yerine birkaç tetiklemede aktarılır.
-- **Teslimat** — imleç yalnızca `send()` başarıyla tamamlandıktan sonra ilerler. Başarısız bir toplu işlem,
-  imleci olduğu yerde bırakır; böylece aynı satırlar bir sonraki çalıştırmada yeniden denenir. Sağlanan garanti,
-  gerçek anlamda tam bir kez teslimat değil, en az bir kez teslimat ile hedef tarafında yinelenen kayıtların ayıklanmasıdır: BigQuery her
-  satırı çağrı günlüğü kimliğiyle anahtarlar ve kendi yinelenen kayıt ayıklama zaman aralığı içinde bu anahtarı en iyi çaba esasına göre dikkate alır.
-- **Çakışma koruması** — cron tetiklemesi ile `POST .../run` aynı anda devreye girebilir. Kayıtları
-  zaten aktarılmakta olan bir hedef, iki kez işlenmek yerine atlanır (çalıştırma sonucunda `skipped: true`);
-  böylece eşzamanlı bir çalıştırma, bir toplu işlemi yeniden gönderemez veya imleci geriye yazamaz.
-- **Temizleme sonrası kurtarma** — `cursor_row_id`, `MAX(rowid)` değerinin üzerine çıkarsa (tablonun tamamı
-  temizlenmiş ve rowid değerleri yeniden başlamışsa), çalıştırıcı kalıcı olarak yeni kayıtları göremez hâle gelmek yerine 0'a geri döner.
+- **Zamanlama** — varsayılan olarak `0 * * * *` (saatlik, UTC) değerini kullanan tek bir
+  `JobRegistry` cron işi: `log_export`. `src/lib/initCloudSync.ts` içinde kaydedilir;
+  `OMNIROUTE_LOG_EXPORT_CRON` ile geçersiz kılınabilir. Her tetikleme, **etkinleştirilmiş**
+  tüm hedefleri sırayla boşaltır.
+- **İmleç** — SQLite'ın örtük `call_logs.rowid` değeri, hedef başına
+  `log_export_destinations.cursor_row_id` alanında kalıcılaştırılır. `timestamp` özellikle
+  imleç olarak kullanılmaz: çağıranlar kendi değerlerini sağlayabilir; bu nedenle yavaş bir
+  istek, daha sonra başlayan hızlı bir istekten sonra yazılabilir ve zaman damgası imleci
+  bunu atlar.
+- **Toplu işleme** — istek başına `batch_size` satır (varsayılan 500), çalıştırma başına
+  `max_rows_per_run` satır (varsayılan 10000); böylece büyük bir birikim tek bir çalıştırmayı
+  engellemek yerine birkaç tetikleme boyunca boşaltılır.
+- **Teslimat** — imleç yalnızca `send()` çözümlendikten sonra ilerler. Başarısız bir toplu
+  işlem, imleci bulunduğu yerde bırakır; böylece aynı satırlar bir sonraki çalıştırmada yeniden
+  denenir. Garanti, gerçek anlamda tam bir kez değil, en az bir kez teslimat ve hedef tarafında
+  yinelenenleri kaldırmadır: BigQuery, her satırı çağrı günlüğü kimliğiyle anahtarlar ve kendi
+  yinelenenleri kaldırma penceresi içinde bunu mümkün olan en iyi şekilde uygular.
+- **Çakışma koruması** — cron tetiklemesi ile `POST .../run` aynı anda çalışabilir. Hâlihazırda
+  boşaltılmakta olan bir hedef iki kez boşaltılmak yerine atlanır (çalıştırma sonucunda
+  `skipped: true`); böylece eşzamanlı bir çalıştırma, bir toplu işlemi yeniden gönderemez veya
+  imleci geriye yazamaz.
+- **Temizleme sonrası kurtarma** — `cursor_row_id`, `MAX(rowid)` değerinin üzerinde kalırsa
+  (tablonun tamamı temizlenmiş ve rowid değerleri yeniden başlamışsa), çalıştırıcı kalıcı olarak
+  verileri göremez hâle gelmek yerine 0'a geri sarar.
 
 ### Yalıtılmış çalıştırıcı ve sınırlar
 
-Node üzerinde her hedef çalıştırması ayrı, kısa ömürlü bir işletim sistemi alt süreci başlatır (IPC kullanan
-`child_process`, `worker_threads` değil). Gövde okumaları, yükün JSON olarak ayrıştırılması/serileştirilmesi, hedefin
-`prepare()` işlemi ve hedefin ağ G/Ç işlemlerinin tümü sunucunun olay döngüsünde değil, burada çalışır.
-IPC üzerinden yalnızca yapılandırma ve küçük ilerleme mesajları geçer; dışa aktarılan kayıtlar hiçbir zaman
-sunucuya geri dönmez. Cron işi ve Şimdi çalıştır rotası, dışarıya sunulan aynı sonucu ve çakışma korumasını korur.
+Node üzerindeki her hedef çalıştırması, ayrı ve kısa ömürlü bir işletim sistemi alt işlemi
+başlatır (IPC kullanan `child_process`; `worker_threads` değil). Gövde okumaları, yük JSON'unun
+ayrıştırılması/serileştirilmesi, hedef `prepare()` işlemi ve hedef ağ G/Ç işlemlerinin tamamı
+sunucunun olay döngüsünde değil, burada çalışır. IPC üzerinden yalnızca yapılandırma ve küçük
+ilerleme mesajları geçer; dışa aktarılan kayıtlar hiçbir zaman sunucuya geri dönmez. Cron işi
+ve Şimdi çalıştır rotası aynı genel sonucu ve çakışma korumasını kullanmaya devam eder.
 
-Alt süreç, sunucunun çözümlenmiş `DATA_DIR/storage.sqlite` dosyasını `node:sqlite` kullanarak salt okunur biçimde,
-`busy_timeout=5000` ve `query_only=ON` ayarlarıyla açar. Hiçbir veritabanı tekil örneğini içe aktarmaz ve hiçbir
-geçiş, yedekleme veya SQLite güncellemesi gerçekleştirmez. Eksik/bozuk artefakt kayıt takibi (bozuk artefakta ilişkin
-UPDATE işlemi dâhil) yalnızca pano ayrıntı yolunda kalır. Her iki yol da saf bir
-ayrıntı çözümleyicisini paylaşır; dışa aktarma, eşzamansız dosya sistemi okumalarını ve aynı artefakt → eski
-satır içi → eski disk → yok çözümleme sırasını kullanır. Alt süreç okuyucusunu açtığında çalıştırma,
-en yüksek ekleme rowid değerinin anlık görüntüsünü alır; daha sonraki eklemeler bir sonraki çalıştırmayı bekler. Bu bir ekleme
-sınırıdır, uzun ömürlü bir SQLite işlemi değildir: WAL yazıcıları ve denetim noktaları ağ beklemeleri sırasında
-serbest kalır. Mevcut satırlardaki güncellemeler/silmeler bu sınır tarafından dondurulmaz.
+Alt işlem, sunucunun çözümlenmiş `DATA_DIR/storage.sqlite` dosyasını `node:sqlite` kullanarak
+salt okunur biçimde, `busy_timeout=5000` ve `query_only=ON` ayarlarıyla açar. Herhangi bir
+veritabanı tekil örneğini içe aktarmaz ve geçiş, yedekleme veya SQLite güncellemesi gerçekleştirmez.
+Eksik/bozuk yapıt kayıtlarının yönetimi (bozuk yapıt UPDATE işlemi dâhil) yalnızca pano ayrıntı
+yolunda kalır. Her iki yol da saf bir ayrıntı çözümleyiciyi paylaşır; dışa aktarma, zaman uyumsuz
+dosya sistemi okumalarını ve aynı yapıt → eski satır içi → eski disk → yok çözümleme sırasını
+kullanır. Bir çalıştırma, alt işlem okuyucusunu açtığında en yüksek ekleme rowid değerinin
+anlık görüntüsünü alır; sonraki eklemeler bir sonraki çalıştırmayı bekler. Bu, uzun ömürlü bir
+SQLite işlemi değil, ekleme sınırıdır: WAL yazıcıları ve denetim noktaları, ağ beklemeleri sırasında
+serbest kalmaya devam eder. Mevcut satırlardaki güncellemeler/silmeler bu sınır tarafından
+dondurulmaz.
 
-Kabul edilen her toplu işlemden sonra alt süreç bir onay bekler. Sunucu önce
-`advanceLogExportCursor` ile imleci kalıcı olarak kaydeder, ardından `ack` gönderir; bundan önce bir sonraki toplu işlem başlamaz.
-Gönderim hatası, çökme veya zaman aşımı, ilgili toplu işlemin imlecini ilerletmeden başarısızlık kaydı oluşturur. Önceden
-onaylanmış toplu işlemler kalıcı olarak kaydedilmiş durumda kalır; en fazla, onaylanmamış tek toplu işlem yeniden gönderilebilir.
-Başarı yalnızca `done` sonrasında ve alt süreç sorunsuz biçimde çıktıktan sonra kaydedilir. Başarısızlık durumunda alt süreç
-SIGTERM ile sonlandırılır; 500 ms sonra SIGKILL'e geçilir ve çalıştırıcı sürecin kapanmasını bekler.
+Kabul edilen her toplu işlemden sonra alt işlem bir onay bekler. Sunucu önce imleci
+`advanceLogExportCursor` ile kalıcılaştırır, ardından `ack` gönderir; bundan önce sonraki toplu
+işlem başlamaz. Gönderim hatası, çökme veya zaman aşımı, ilgili toplu işlemin imlecini ilerletmeden
+başarısızlık kaydeder. Önceden onaylanmış toplu işlemler işlenmiş olarak kalır; en fazla onaylanmamış
+tek bir toplu işlem yeniden gönderilebilir. Başarı yalnızca `done` sonrasında ve alt işlem temiz
+biçimde sonlandığında kaydedilir. Başarısızlıklar alt işlemi SIGTERM ile sonlandırır, 500 ms
+sonra SIGKILL'e yükseltir ve çalıştırıcı işlemin kapanmasını bekler.
 
-| Ortam değişkeni                               | Varsayılan | Amaç                                         |
-| --------------------------------------------- | ---------- | -------------------------------------------- |
-| `OMNIROUTE_LOG_EXPORT_RUN_TIMEOUT_MS`         | 900000     | Hedef başına geçen gerçek süre sınırı        |
-| `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB` | 1024       | Alt sürecin MB cinsinden V8 old-space sınırı |
+| Ortam değişkeni                               | Varsayılan | Amaç                                  |
+| --------------------------------------------- | ---------- | ------------------------------------- |
+| `OMNIROUTE_LOG_EXPORT_RUN_TIMEOUT_MS`         | 900000     | Hedef başına geçen gerçek süre sınırı |
+| `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB` | 1024       | Alt işlem V8 old-space sınırı, MB     |
 
-Geçersiz/pozitif olmayan/tam sayı olmayan değerlerde varsayılanlar kullanılır. Yığın ayarı, toplam
-RSS sınırı değildir; çok büyük toplu işlemler yine de alt sürecin belleğini tüketebilir ve çalıştırmanın güvenli biçimde başarısız olmasına yol açabilir.
-1024 MB varsayılanı, gövdeler etkinleştirilmişken 512 KiB artefaktlardan oluşan varsayılan 500 satırlık toplu işlem için,
-BigQuery'nin bayt bazında parçalara ayrılmış JSON serileştirmesi de dâhil olmak üzere ek alan bırakır. Bu, gövde içeren
-10000 satırlık bir toplu işlemi güvenli hâle getirmez. V8 yığınının tükenmesi, çözüm adımı içeren bir hata kaydı oluşturur: toplu işlem
-boyutunu küçültün veya `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB` değerini artırın; imleç son
-onaylanan toplu işlemde kalır. Geçmişten kalan satır içi/disk gövdeleri, modern artefakt boyut sınırının kapsamında değildir.
-Operatörler, özellikle bellek sınırı olan kapsayıcılarda RSS için ayrıca bütçe ayırmalıdır.
+Geçersiz, pozitif olmayan veya tam sayı olmayan değerlerde varsayılanlar kullanılır. Yığın ayarı
+toplam RSS sınırı değildir; çok büyük toplu işlemler yine de alt işlem belleğini tüketebilir ve
+çalıştırmanın güvenli biçimde başarısız olmasına neden olabilir. Varsayılan 1024 MB, gövdeler
+etkinken 512 KiB boyutlu yapıtlardan oluşan varsayılan 500 satırlık toplu işlem için, BigQuery'nin
+bayt parçalı JSON serileştirmesi de dâhil olmak üzere yeterli ek alan bırakır. Bu ayar, gövdeler
+içeren 10000 satırlık bir toplu işlemi güvenli hâle getirmez. V8 yığın tükenmesi, uygulanabilir
+bir başarısızlık kaydeder: toplu işlem boyutunu azaltın veya
+`OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB` değerini artırın; imleç, son onaylanan toplu
+işlemde kalır. Geçmişe ait satır içi/disk gövdeleri modern yapıt sınırı kapsamında değildir.
+Operatörler, özellikle belleği sınırlı konteynerler içinde, RSS için ayrıca kapasite planlamalıdır.
 
-Alt süreç yalnızca çözümlenmiş `DATA_DIR`, `NODE_ENV`, açıkça belirtilmiş `TZ` (eski dosya adı
-yerel saat çözümlemesi), mevcut olduğunda `ELECTRON_RUN_AS_NODE` ve şu dış bağlantı girdilerini devralır:
-`HTTP_PROXY`, `HTTPS_PROXY`, `ALL_PROXY`, `NO_PROXY` (ve bunların küçük harfli biçimleri),
-`OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS`, `NODE_EXTRA_CA_CERTS`, `SSL_CERT_FILE`, `SSL_CERT_DIR`.
-Genel bir Undici dağıtıcısı, `NO_PROXY` dahil olmak üzere sunucunun yalnızca ortam değişkenlerine dayalı proxy çözümlemesini ve yerel ana bilgisayarlar için
-proxy'yi atlama kurallarını paylaşır; `proxyFetch.ts` dosyasını veya onun veritabanı/özellik bayraklarını içe aktarmaz.
-Proxy kimlik bilgileri, iletilen çıktılardan ve kaydedilen hatalardan çıkarılarak gizlenir. Hedef kimlik bilgileri
-yalnızca tek bir başlatma IPC iletisinde taşınır; asla argv veya ortam üzerinden aktarılmaz; çıktı/hata iletimine
-önek eklenir ve içerik temizlenir. Her cron çalıştırmasında Node'un SQLite uyarısının
-tekrarlanmasını önlemek için alt süreç yürütme argümanlarında yalnızca `ExperimentalWarning` devre dışı bırakılır; diğer uyarı türleri görünür kalır.
+Alt işlem yalnızca çözümlenmiş `DATA_DIR`, `NODE_ENV`, açıkça belirtilmiş `TZ` (eski dosya adı
+yerel saat çözümlemesi), mevcut olduğunda `ELECTRON_RUN_AS_NODE` ve aşağıdaki giden bağlantı
+girdilerini devralır: `HTTP_PROXY`, `HTTPS_PROXY`, `ALL_PROXY`, `NO_PROXY` (ve bunların küçük
+harfli biçimleri), `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS`, `NODE_EXTRA_CA_CERTS`, `SSL_CERT_FILE`,
+`SSL_CERT_DIR`. Genel bir Undici yönlendiricisi, `NO_PROXY` dâhil olmak üzere sunucunun saf ortam
+proxy'si çözümlemesini ve yerel ana bilgisayarı atlama kurallarını paylaşır; `proxyFetch.ts` veya
+onun veritabanı/özellik bayraklarını içe aktarmaz. Proxy kimlik bilgileri, iletilen çıktıda ve
+kaydedilen hatalarda maskelenir. Hedef kimlik bilgileri yalnızca tek bir başlangıç IPC mesajında
+taşınır; hiçbir zaman argv veya ortam üzerinden aktarılmaz. Çıktı/hata iletimi öneklenir ve
+hassas verilerden arındırılır. Her cron çalıştırmasında Node'un SQLite uyarısının yinelenmesini
+önlemek için alt işlem yürütme argümanlarında yalnızca `ExperimentalWarning` devre dışı bırakılır;
+diğer uyarı türleri görünür kalır.
 
-Hedef modülleri, Next.js/yalnızca sunucuya özgü bağımlılıklar olmadan içe aktarılabilir olmalıdır. Mevcut
-BigQuery uygulaması bu sözleşmeyi zaten karşılar. Erişim belirteci önbellekleri yalnızca alt sürecin
-çalışması boyunca geçerlidir, çalıştırmalar arasında korunmaz. Desteklenen çalışma zamanı Node'dur (`package.json` engines), ancak README'nin Bun
-kurulum bölümü ve `Dockerfile.bun`, `bun:sqlite` (`src/lib/db/core.ts` / bağdaştırıcılar) kullanan bir üretim uyumluluğu yolunu da
-duyurur. Bu nedenle Bun altında dışa aktarımlar önceki
-süreç içi yolu korur ve bir defalık uyarı verir: alt süreç yığın belleği/zaman aşımı yalıtımı kullanılamaz.
-Olay döngüsü ve OOM yalıtımı için Node kullanın; burada Bun yalnızca geliştirmeye yönelik olarak değerlendirilmez.
+Hedef modüller, Next.js/yalnızca sunucu bağımlılıkları olmadan içe aktarılabilir olmalıdır. Mevcut
+BigQuery uygulaması bu sözleşmeyi zaten karşılıyor. Erişim belirteci önbellekleri çalıştırmalar arasında
+değil, yalnızca alt işlem çalıştırması boyunca kalır. Node desteklenen çalışma zamanıdır (`package.json` engines), ancak README'deki Bun
+kurulum bölümü ve `Dockerfile.bun`, `bun:sqlite` (`src/lib/db/core.ts` / bağdaştırıcılar) kullanan
+bir üretim uyumluluğu yolunu da duyurur. Bu nedenle Bun altında dışa aktarımlar önceki
+işlem içi yolu korur ve tek seferlik bir uyarı verir: alt işlem heap/zaman aşımı yalıtımı kullanılamaz.
+Olay döngüsü ve OOM yalıtımı için Node kullanın; Bun burada yalnızca geliştirmeye yönelik kabul edilmez.
 
-`includeBodies` etkinleştirildiğinde, saatlik bir veri yükü birikimi oluşturmak yerine
+`includeBodies` etkinleştirildiğinde, saatlik bir payload birikimi oluşturmak yerine
 `OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"` gibi dakika düzeyinde bir çalışma sıklığını tercih edin.
-Toplu işlem ve satır sınırları yine de her çalıştırmayı sınırlar. Süreç başlatma maliyeti, her çalıştırmada her hedef için ödenir;
-bu, toplam CPU kullanımını azaltmak yerine küçük bir başlatma maliyeti karşılığında sunucunun olay döngüsünü yalıtır.
+Toplu iş ve satır sınırları her çalıştırmayı yine de sınırlar. İşlem başlatma maliyeti, her çalıştırmada her hedef için
+ödenir; bu, toplam CPU kullanımını azaltmak için değil, sunucu olay döngüsü yalıtımı karşılığında küçük bir başlatma maliyetini göze alır.
 
-### Veri yükleri (istemler ve tamamlamalar)
+### Payload'lar (istemler ve tamamlamalar)
 
-Varsayılan olarak dışa aktarım yalnızca Günlükler **listesinin** gösterdiği özet alanlarını taşır.
-**İstemleri ve yanıtları dışa aktar** (`includeBodies`) seçeneğini açmak, Günlükler **ayrıntı**
-bölmesinin her çağrı için gösterdiklerini de gönderir:
+Dışa aktarım varsayılan olarak yalnızca Günlükler **listesinde** gösterilen özet alanlarını taşır. **İstemleri ve yanıtları dışa aktar**
+(`includeBodies`) seçeneğinin etkinleştirilmesi, ayrıca Günlükler **ayrıntı**
+bölmesinde her çağrı için gösterilenleri gönderir:
 
-| Alan                             | İçerdiği bilgi                                                                |
-| -------------------------------- | ----------------------------------------------------------------------------- |
-| `request_body` / `response_body` | Çağrı veri yükleri, panoda görüntülendikleri biçimde                          |
-| `pipeline_route_decision`        | Yönlendiricinin seçtiği hedef ve model                                        |
-| `pipeline_client_request`        | İstemcinin gönderdiği biçimiyle ham istek                                     |
-| `pipeline_openai_request`        | Dahili OpenAI biçimine dönüştürüldükten sonraki hali                          |
-| `pipeline_provider_request`      | Üst sisteme gerçekten gönderildiği biçimde, sağlayıcının formatında           |
-| `pipeline_provider_response`     | Üst sistemden gelen ham yanıt                                                 |
-| `pipeline_client_response`       | Çağrıyı yapana geri iletilen içerik                                           |
-| `pipeline_error`                 | Başarısız bir çağrı için işlem hattı düzeyindeki hata ayrıntısı               |
-| `bodies_truncated`               | Yukarıdaki alanlardan herhangi biri `maxBodyBytes` sınırına ulaştığında doğru |
+| Alan                             | İçeriği                                                                      |
+| -------------------------------- | ---------------------------------------------------------------------------- |
+| `request_body` / `response_body` | Çağrı payload'larının panoda gösterilen hâli                                 |
+| `pipeline_route_decision`        | Yönlendiricinin seçtiği hedef ve model                                       |
+| `pipeline_client_request`        | İstemcinin tam olarak gönderdiği ham istek                                   |
+| `pipeline_openai_request`        | Dahili OpenAI biçimine çevrildikten sonraki hâli                             |
+| `pipeline_provider_request`      | Sağlayıcı lehçesinde, yukarı akışa gerçekten gönderildiği hâli               |
+| `pipeline_provider_response`     | Ham yukarı akış yanıtı                                                       |
+| `pipeline_client_response`       | Çağrıyı yapana geri iletilen içerik                                          |
+| `pipeline_error`                 | Başarısız bir çağrı için işlem hattı düzeyindeki hata ayrıntısı              |
+| `bodies_truncated`               | Yukarıdaki alanlardan herhangi biri `maxBodyBytes` sınırına ulaştığında True |
 
-Bu, istem içeriğidir; dolayısıyla **varsayılan olarak kapalıdır** ve bilinçli olarak hedef başına seçilir.
-Gönderilen içerik, panonun gösterdiği içeriktir; çünkü dışa aktarım ve `getCallLogById` aynı ayrıntı
-çözümlemesini paylaşır: veri yükleri
-yazıldıklarında zaten kişisel olarak tanımlanabilir bilgilerden arındırılmış ve gizli bilgileri maskelenmiştir; ayrıca
-`noLog` API anahtarıyla yapılan bir çağrı hiçbir veri yükü saklamaz, dolayısıyla dışa aktarılacak bir şey yoktur.
+Bu, istem içeriğidir; bu nedenle **varsayılan olarak kapalıdır** ve bilinçli olarak hedef başına yapılan bir seçimdir.
+Gönderilenler panoda gösterilenlerle aynıdır; çünkü dışa aktarım ve `getCallLogById` aynı ayrıntı
+çözümlemesini paylaşır: payload'lar
+yazılırken zaten PII'dan arındırılmış ve gizli bilgiler maskelenmiştir; ayrıca `noLog` API anahtarıyla yapılan bir çağrı
+hiçbir payload depolamaz, dolayısıyla dışa aktarılacak hiçbir şey yoktur.
 
-Veri yükleri, dosya sistemindeki çıktı dosyasından satır başına okunur; dolayısıyla ayrıntıların yüklenmesi yalnızca
-bunu isteyen hedefler için gerçekleştirilir. Eksik veya bozuk bir çıktı dosyası, toplu işlemin başarısız olmasına ve imlecin ilerleyememesine
-neden olmak yerine özetinin null veri yükleriyle dışa aktarılmasını sağlar.
+Payload'lar dosya sistemi yapıtından satır başına okunur; dolayısıyla tamamlama işlemi yalnızca bunu
+isteyen hedefler için çalışır. Eksik veya bozuk bir yapıt, toplu işi başarısız kılıp imleci takılı bırakmak
+yerine özetini null payload'larla dışa aktarır.
 
-`maxBodyBytes` (varsayılan 262144) her alanı sınırlar. Daha uzun veri yükleri **atılmak yerine
-kısaltılır** — kısaltılmış bir istem bile "ne soruldu" sorusunu yanıtlar — ve satır
-`bodies_truncated` ile işaretlenir. Akış halinde parça parça gelen farklar dışa aktarılmaz; birleştirilmiş yanıt
-zaten `pipeline_provider_response` ve `pipeline_client_response` içinde bulunur.
+`maxBodyBytes` (varsayılan 262144) her alanı sınırlar. Daha uzun payload'lar **atılmak yerine
+kırpılır** — kırpılmış bir istem yine de "ne istendi" sorusunu yanıtlar — ve satır
+`bodies_truncated` ile işaretlenir. Parça parça akışla iletilen deltalar dışa aktarılmaz; birleştirilmiş yanıt
+zaten `pipeline_provider_response` ve `pipeline_client_response` içindedir.
 
 ---
 
 ## 2. Dosyalar
 
-| Bileşen                                 | Konum                                        |
-| --------------------------------------- | -------------------------------------------- |
-| Hedef sözleşmesi                        | `src/lib/logExport/types.ts`                 |
-| Kayıt defteri                           | `src/lib/logExport/registry.ts`              |
-| Gizli bilgi işleme                      | `src/lib/logExport/secrets.ts`               |
-| Çalıştırıcı (üst süreç IPC)             | `src/lib/logExport/runner.ts`                |
-| Süreç yaşam döngüsü                     | `src/lib/logExport/childRunner.ts`           |
-| Alt süreç giriş noktası                 | `src/lib/logExport/exportChild.ts`           |
-| Salt okunur açıcı                       | `src/lib/db/logExportReadOnly.ts`            |
-| Paylaşılan sorgu/eşleme                 | `src/lib/usage/callLogExportQueries.ts`      |
-| Ayrıntı çözümleyici                     | `src/lib/usage/callLogDetailResolver.ts`     |
-| API izdüşümü                            | `src/lib/logExport/presenter.ts`             |
-| BigQuery hedefi                         | `src/lib/logExport/destinations/bigquery.ts` |
-| Google hizmet hesabı kimlik doğrulaması | `src/lib/logExport/googleServiceAccount.ts`  |
-| Çağrı günlüğü kaynağı                   | `src/lib/usage/callLogExportSource.ts`       |
-| Kalıcı depolama                         | `src/lib/db/logExportDestinations.ts`        |
-| Cron görevi                             | `src/lib/jobs/logExportJob.ts`               |
-| REST katmanı                            | `src/app/api/log-export/`                    |
-| Kontrol paneli sayfası                  | `src/app/(dashboard)/dashboard/log-export/`  |
+| Parça                        | Konum                                        |
+| ---------------------------- | -------------------------------------------- |
+| Hedef sözleşmesi             | `src/lib/logExport/types.ts`                 |
+| Kayıt defteri                | `src/lib/logExport/registry.ts`              |
+| Gizli bilgi yönetimi         | `src/lib/logExport/secrets.ts`               |
+| Çalıştırıcı (üst IPC)        | `src/lib/logExport/runner.ts`                |
+| Süreç yaşam döngüsü          | `src/lib/logExport/childRunner.ts`           |
+| Alt süreç giriş noktası      | `src/lib/logExport/exportChild.ts`           |
+| Salt okunur açıcı            | `src/lib/db/logExportReadOnly.ts`            |
+| Paylaşılan sorgu/eşleme      | `src/lib/usage/callLogExportQueries.ts`      |
+| Ayrıntı çözümleyici          | `src/lib/usage/callLogDetailResolver.ts`     |
+| API gösterimi                | `src/lib/logExport/presenter.ts`             |
+| BigQuery hedefi              | `src/lib/logExport/destinations/bigquery.ts` |
+| Google SA kimlik doğrulaması | `src/lib/logExport/googleServiceAccount.ts`  |
+| Çağrı günlüğü kaynağı        | `src/lib/usage/callLogExportSource.ts`       |
+| Kalıcılık                    | `src/lib/db/logExportDestinations.ts`        |
+| Cron görevi                  | `src/lib/jobs/logExportJob.ts`               |
+| REST katmanı                 | `src/app/api/log-export/`                    |
+| Kontrol paneli sayfası       | `src/app/(dashboard)/dashboard/log-export/`  |
 
 Şema: `src/lib/db/migrations/170_log_export_destinations.sql`.
 
@@ -169,29 +180,29 @@ zaten `pipeline_provider_response` ve `pipeline_client_response` içinde bulunur
 
 ## 3. REST API
 
-Tüm rotalar yönetim kimlik doğrulaması gerektirir (`requireManagementAuth`). Gizli bilgiler asla döndürülmez:
-saklanan bir gizli bilgi, doğrudan `__stored__` değeri olarak döner ve bir güncellemede bu değerin geri gönderilmesi
+Tüm rotalar yönetim kimlik doğrulaması gerektirir (`requireManagementAuth`). Gizli bilgiler hiçbir zaman döndürülmez:
+saklanan bir gizli bilgi `__stored__` değişmez değeri olarak geri gelir ve güncelleme sırasında bu değerin geri gönderilmesi
 saklanan kimlik bilgisini korur.
 
-Türü bir gizli bilgi tanımlayan bir hedefi oluşturmak veya güncellemek **`STORAGE_ENCRYPTION_KEY`
-gerektirir**. Bu anahtar olmadan `encrypt()` veriyi sessizce olduğu gibi geçirir; bu nedenle kimlik bilgisini
-SQLite'a düz metin olarak yazmak yerine yazma işlemi 400 ile reddedilir (Telegram webhook'unun
+Türü bir gizli bilgi tanımlayan hedefi oluşturmak veya güncellemek **`STORAGE_ENCRYPTION_KEY`
+gerektirir**. Bu olmadan `encrypt()` sessizce olduğu gibi aktarım yapar; bu nedenle kimlik bilgisini
+SQLite'a düz metin olarak kaydetmek yerine yazma işlemi 400 yanıtıyla reddedilir (Telegram webhook'unun
 uyguladığı korumanın aynısı).
 
-| Yöntem   | Yol                                      | Amaç                                                                        |
-| -------- | ---------------------------------------- | --------------------------------------------------------------------------- |
-| `GET`    | `/api/log-export/types`                  | Hedef türleri + yapılandırma alanı listeleri                                |
-| `GET`    | `/api/log-export/destinations`           | Hedefleri listele (gizli bilgiler gizlenmiş olarak)                         |
-| `POST`   | `/api/log-export/destinations`           | Bir hedef oluştur                                                           |
-| `GET`    | `/api/log-export/destinations/{id}`      | Tek bir hedefi oku                                                          |
-| `PUT`    | `/api/log-export/destinations/{id}`      | Adı / etkinlik durumunu / yapılandırmayı / toplu işleme ayarlarını güncelle |
-| `DELETE` | `/api/log-export/destinations/{id}`      | Sil                                                                         |
-| `POST`   | `/api/log-export/destinations/{id}/test` | Kimlik bilgilerini sına, hiçbir şey yazma                                   |
-| `POST`   | `/api/log-export/destinations/{id}/run`  | Bekleyenleri şimdi aktar, zamanlanmış çalıştırmayla aynı yolu kullan        |
-| `GET`    | `/api/log-export/status`                 | Cron durumu, son çalıştırmalar, hedef başına bekleyen birikim               |
+| Yöntem   | Yol                                      | Amaç                                                         |
+| -------- | ---------------------------------------- | ------------------------------------------------------------ |
+| `GET`    | `/api/log-export/types`                  | Hedef türleri + bunların yapılandırma alanı listesi          |
+| `GET`    | `/api/log-export/destinations`           | Hedefleri listeleme (gizli bilgiler maskelenir)              |
+| `POST`   | `/api/log-export/destinations`           | Hedef oluşturma                                              |
+| `GET`    | `/api/log-export/destinations/{id}`      | Tek bir hedefi okuma                                         |
+| `PUT`    | `/api/log-export/destinations/{id}`      | Adı / etkinliği / yapılandırmayı / toplu işlemeyi güncelleme |
+| `DELETE` | `/api/log-export/destinations/{id}`      | Silme                                                        |
+| `POST`   | `/api/log-export/destinations/{id}/test` | Kimlik bilgilerini sınama, hiçbir şey yazmama                |
+| `POST`   | `/api/log-export/destinations/{id}/run`  | Şimdi boşaltma, zamanlanmış çalıştırmayla aynı yol           |
+| `GET`    | `/api/log-export/status`                 | Cron durumu, son çalıştırmalar, hedef başına birikmiş işler  |
 
-Kullanıcı arayüzünü genel amaçlı kılan, `GET /api/log-export/types` uç noktasıdır: kontrol paneli formu
-döndürülen alan tanımlayıcılarından oluşturulur; böylece yeni bir hedef için kullanıcı arayüzünde değişiklik gerekmez.
+Kullanıcı arayüzünü genel amaçlı yapan şey `GET /api/log-export/types` çağrısıdır: pano formu,
+döndürülen alan tanımlayıcılarından oluşturulur; dolayısıyla yeni bir hedef için kullanıcı arayüzü değişikliği gerekmez.
 
 ---
 
@@ -199,61 +210,56 @@ döndürülen alan tanımlayıcılarından oluşturulur; böylece yeni bir hedef
 
 Yapılandırma anahtarları (`type: "bigquery"`):
 
-| Anahtar              | Notlar                                                                                    |
-| -------------------- | ----------------------------------------------------------------------------------------- |
-| `projectId`          | Veri kümesini barındıran GCP projesi                                                      |
-| `datasetId`          | `[A-Za-z0-9_]+`                                                                           |
-| `tableId`            | `[A-Za-z0-9_]+`                                                                           |
-| `location`           | Yalnızca veri kümesi oluşturulması gerektiğinde kullanılır (varsayılan `EU`)              |
-| `serviceAccountJson` | Hizmet hesabı anahtarı. Gizli bilgi: depolamada şifrelenir, hiçbir zaman geri döndürülmez |
-| `autoCreate`         | İlk dışa aktarmada veri kümesini ve tabloyu oluşturur (varsayılan `true`)                 |
+| Anahtar              | Notlar                                                                               |
+| -------------------- | ------------------------------------------------------------------------------------ |
+| `projectId`          | Veri kümesini barındıran GCP projesi                                                 |
+| `datasetId`          | `[A-Za-z0-9_]+`                                                                      |
+| `tableId`            | `[A-Za-z0-9_]+`                                                                      |
+| `location`           | Yalnızca veri kümesinin oluşturulması gerektiğinde kullanılır (varsayılan `EU`)      |
+| `serviceAccountJson` | Hizmet hesabı anahtarı. Gizli bilgi: depolamada şifrelenir, hiçbir zaman döndürülmez |
+| `autoCreate`         | İlk dışa aktarmada veri kümesini ve tabloyu oluşturur (varsayılan `true`)            |
 
-Hizmet hesabının hedef tabloda `bigquery.tables.updateData` iznine, ayrıca
-`autoCreate` açıkken `bigquery.datasets.create` / `bigquery.tables.create` izinlerine ihtiyacı vardır.
+Hizmet hesabının hedef tabloda `bigquery.tables.updateData` iznine; ayrıca `autoCreate` açıkken
+`bigquery.datasets.create` / `bigquery.tables.create` izinlerine ihtiyacı vardır.
 
-Yapılandırılan bir toplu işlem, HTTP birimi değil, bir **imleç** birimidir: `send()` bunu en fazla
-500 satırlık insertAll çağrılarına böler; böylece büyük bir `batch_size`, BigQuery'nin 10 MB istek sınırını aşamaz.
-Geçici durum kodlarında (408/429/500/502/503/504), aynı insertIds değerleri yeniden kullanılarak üstel
-bekleme ile en fazla üç kez yeniden denenir; kimlik doğrulama ve şema hatalarında ise çalıştırmayı
-boşa harcamak yerine ilk denemede hata fırlatılır.
+Yapılandırılmış bir toplu işlem, HTTP değil bir **imleç** birimidir: `send()` bunu en fazla 500 satırlık
+insertAll çağrılarına böler; dolayısıyla büyük bir `batch_size`, BigQuery'nin 10 MB'lık istek sınırının
+aşılmasına neden olamaz. Geçici durumlar (408/429/500/502/503/504), aynı insertIds yeniden kullanılarak
+üstel geri çekilmeyle en fazla üç kez yeniden denenir; kimlik doğrulama ve şema hataları ise çalıştırmayı
+boşa harcamamak için ilk denemede istisna fırlatır.
 
-Az önce oluşturulan bir tablo henüz akış uç noktasında görünmez ve uç nokta birkaç saniye boyunca
-404 yanıtı verir. Bu 404 için yeniden deneme yapılır, ancak **yalnızca tablo bu çalıştırmada oluşturulduysa** —
-gerçekten mevcut olmayan bir tablo için yine hemen hata verilir. Yakın zamanda silinmiş bir tablo adıyla
-yeniden tablo oluşturmanın, BigQuery'nin birkaç dakika boyunca akış yoluyla satır eklemeyi reddetmesine
-neden olduğunu unutmayın; bu, silip yeniden oluşturma işleminin bir özelliğidir. Bu nedenle bir tabloyu
-silip yeniden eklemek yerine yeni bir tablo adı kullanmayı tercih edin.
+Birkaç saniye önce oluşturulmuş bir tablo henüz akış uç noktası tarafından görülemez ve uç nokta
+birkaç saniye boyunca 404 yanıtı verir. Bu 404 yeniden denenir, ancak **yalnızca tabloyu bu çalıştırma oluşturduysa** —
+gerçekten eksik olan bir tablo yine hızla başarısız olur. Yakın zamanda silinmiş bir tabloyu aynı adla yeniden
+oluşturmanın, BigQuery'nin akış eklemelerini birkaç dakika boyunca reddetmesine neden olduğunu unutmayın; bu,
+silip yeniden oluşturma işleminin bir özelliğidir. Bu nedenle bir tabloyu silip tekrar eklemek yerine yeni bir tablo
+adı kullanmayı tercih edin.
 
-**Kısmi hata, boş olmayan bir `insertErrors[]` ile HTTP 200 olarak gelir.** Bu durum hata olarak
-değerlendirilir ve hata fırlatılır; imlecin BigQuery'nin hiç kabul etmediği satırları geçerek ilerlemesini
-engelleyen de budur. `tests/unit/log-export-bigquery.test.ts` bu davranışı güvence altına alır.
+**Kısmi bir hata, boş olmayan bir `insertErrors[]` ile HTTP 200 olarak gelir.** Bu, hata olarak değerlendirilir
+ve istisna fırlatılır; böylece imlecin BigQuery'nin hiçbir zaman kabul etmediği satırları geçmesi engellenir.
+`tests/unit/log-export-bigquery.test.ts` bu davranışı sabitler.
 
-İletişim doğrudan REST üzerinden yapılır — kendinden imzalı bir RS256 beyanı,
-`https://oauth2.googleapis.com/token` adresinde bir erişim belirteciyle değiştirilir, ardından satırlar
-`tabledata.insertAll` adresine gönderilir. Hiçbir Google SDK'sı bağımlılık olarak eklenmez.
-Erişim belirteçleri, her (hizmet hesabı, kapsam) çifti için süreç içinde önbelleğe alınır.
+Aktarım düz REST üzerinden yapılır — kendinden imzalı bir RS256 beyanı
+`https://oauth2.googleapis.com/token` adresinde erişim belirteciyle değiştirilir, ardından satırlar
+`tabledata.insertAll` hedefine gönderilir. Herhangi bir Google SDK'sı dahil edilmez. Erişim belirteçleri,
+(hizmet hesabı, kapsam) başına işlem içinde önbelleğe alınır.
 
-Oluşturulan tablo, Günlükler sekmesindeki her alan için bir sütun ve ek olarak `exported_at` sütununu içerir;
-düzeni, çağrı günlüklerinin gerçekte nasıl sorgulandığına göre belirlenir:
+Oluşturulan tablo, Günlükler sekmesindeki her alan için bir sütunun yanı sıra `exported_at` sütununu içerir
+ve çağrı günlüklerinin gerçek sorgulanma biçimine uygun olarak düzenlenir:
 
-- **`timestamp` üzerinden gün bazında bölümlenir**; böylece tarihle sınırlandırılmış bir sorgu yalnızca ilgili günleri tarar.
-- **`api_key_name`, `provider`, `model`, `status` üzerinden kümelenir** (bu sırayla); böylece çağrıyı
-  kimin yaptığına, nereye gönderildiğine veya başarısız olup olmadığına göre filtreleme, her bölüm içindeki
-  blokları tarama dışında bırakır. BigQuery en fazla dört kümeleme sütununa izin verir ve sıralama önemlidir:
-  yalnızca `api_key_name` üzerindeki bir filtre blokları elerken, yalnızca `status` üzerindeki bir filtre bunu yapmaz.
-- `partitionExpirationDays` aracılığıyla **isteğe bağlı bölüm saklama süresi** (0 her şeyi saklar),
-  tablo oluşturulurken uygulanır.
+- **`timestamp` üzerinde gün bazında bölümlenir**; böylece tarihle sınırlandırılan bir sorgu yalnızca ilgili günleri tarar.
+- **`api_key_name`, `provider`, `model`, `status` ölçütlerine göre kümelenir** (bu sırayla); böylece işlemi
+  kimin çalıştırdığına, nereye gittiğine veya başarısız olup olmadığına göre filtreleme, her bölüm içindeki blokları
+  eler. BigQuery en fazla dört kümeleme sütununa izin verir ve sıra önemlidir: yalnızca `api_key_name` filtresi
+  eleme yaparken yalnızca `status` filtresi yapmaz.
+- **`partitionExpirationDays` aracılığıyla isteğe bağlı bölüm saklama süresi** (`0` her şeyi saklar), tablo
+  oluşturulurken uygulanır.
 
-Her iki ayar da oluşturma sırasında uygulanır. Mevcut bir tablo, hâlihazırdaki düzenini korur;
-bu ayarları kullanmak istiyorsanız hedefi yeni bir tablo kimliğine yönlendirin.
+Her iki ayar da oluşturma sırasında uygulanır. Mevcut bir tablo, hâlihazırda sahip olduğu düzeni korur; bu nedenle bunları kullanmak istiyorsanız hedefi yeni bir tablo kimliğine yönlendirin.
 
-`tests/unit/log-export-bigquery.test.ts`, eşleyici ile tablo şemasının eşzamanlı kaldığını doğrular;
-böylece yeni bir çağrı günlüğü sütunu dışa aktarım sırasında sessizce atılamaz.
+`tests/unit/log-export-bigquery.test.ts`, eşleyicinin ve tablo şemasının birbiriyle uyumlu kalmasını doğrular; böylece yeni bir çağrı günlüğü sütunu dışa aktarma sırasında sessizce atılamaz.
 
-Toplu işlemler **hem** satır sayısına **hem de** serileştirilmiş bayt miktarına göre parçalara ayrılır.
-İçerik yükleri dışa aktarıldığında yalnızca satır sayısı yeterli değildir: istem içeren 500 satır onlarca
-megabayt tutabilir ve insertAll, 10 MB'ı aşan bir isteği reddeder. Parçalar, hangisine önce ulaşılırsa,
-500 satırda veya 9 MB'ta sonlandırılır.
+Toplu işlemler **hem** satır sayısına hem de serileştirilmiş bayt miktarına göre parçalara ayrılır. Yükler dışa aktarıldığında yalnızca satır sayısı yeterli değildir: istemleri taşıyan 500 satır onlarca megabayt olabilir ve insertAll, 10 MB üzerindeki istekleri reddeder. Parçalar, hangisine önce ulaşılırsa 500 satırda veya 9 MB'ta kapatılır.
 
 ---
 
@@ -405,7 +411,7 @@ ayrı sansürleme işlemlerini korur.
 çağrı günlüğü span'lerini yazmadan HTTP durumunu bildirir.
 
 İz kimlikleri ve span kimlikleri, sırasıyla
-`"omniroute.trace\\0" + callLogId` ve `"omniroute.span\\0" + callLogId` üzerinde hesaplanan SHA-256 değerinin ilk 32/16 onaltılık basamağıdır. Yeniden gönderimler
+`"omniroute.trace\0" + callLogId` ve `"omniroute.span\0" + callLogId` üzerinde hesaplanan SHA-256 değerinin ilk 32/16 onaltılık basamağıdır. Yeniden gönderimler
 aynı kimlikleri taşır. Bu, yinelenen kayıtların ayıklanacağını garanti etmez: Langfuse
 v4 veri alımı dahil bazı arka uçlar, aynı kimliğe sahip span'leri tekilleştirmez. Bir çökme veya parçanın kısmen başarısız olması,
 en fazla onaylanmamış tek imleç grubunun yeniden gönderilmesine neden olabilir; yalnızca son HTTP parçası değil,
@@ -469,34 +475,34 @@ izin gerekmez; diğer tüm satır alanlarında katı şema denetimi uygulanmaya 
 
 ## 6. Hedef ekleme
 
-1. Bir `LogExportDestinationType` dışa aktaran `src/lib/logExport/destinations/<name>.ts` dosyası oluşturun:
-   bir Zod `configSchema`, kullanıcı arayüzü için bir `fields` tanımlayıcı dizisi, `secretFields` ve
+1. Bir `LogExportDestinationType` dışa aktaran `src/lib/logExport/destinations/<name>.ts` dosyasını oluşturun:
+   UI için bir Zod `configSchema`, bir `fields` tanımlayıcı dizisi, `secretFields` ve
    `test()` / `prepare()` / `send(records)` döndüren bir `createClient(config)`.
 2. Bunu `src/lib/logExport/registry.ts` içindeki `DESTINATIONS` dizisine ekleyin.
-3. `tests/unit/` altında testler yazın.
+3. Testleri `tests/unit/` altında yazın.
 
-Değişikliğin tamamı bu kadar: kalıcı depolama, cron işi, REST katmanı, gizli bilgilerin şifrelenmesi ve
-kontrol paneli formunun tümü kayıt defterini okur.
+Değişikliğin tamamı bundan ibarettir: kalıcılık katmanı, cron görevi, REST katmanı, gizli değerlerin şifrelenmesi ve
+dashboard formunun tamamı registry'yi okur.
 
-Yeni bir hedef için iki kural:
+Yeni bir hedef için iki kural vardır:
 
-- `send()`, kısmi bir başarısızlık durumunda **hata fırlatmalıdır**. Başarıyla tamamlanması, "bu satırlar hedefte mevcut"
-  anlamına gelir ve imleç bu satırları kalıcı olarak geride bırakır.
-- Kullanıcının sağladığı bir URL'yi kabul eden hedef, istek göndermeden önce bu URL'yi
-  webhook'larla aynı şekilde `parseAndValidateWebhookUrl` (`src/shared/network/outboundUrlGuardPolicy.ts`) aracılığıyla
-  doğrulamalıdır. BigQuery'nin buna ihtiyacı yoktur: kullandığı ana makineler sabittir.
+- `send()`, kısmi bir hata durumunda **mutlaka hata fırlatmalıdır**. Başarıyla sonuçlanması, "hedef bu satırlara sahip"
+  anlamına gelir ve imleç kalıcı olarak bu satırların ötesine ilerler.
+- Kullanıcı tarafından sağlanan bir URL'yi alan hedef, isteği göndermeden önce bu URL'yi
+  webhook'larla aynı şekilde `parseAndValidateWebhookUrl` (`src/shared/network/outboundUrlGuardPolicy.ts`) aracılığıyla doğrulamalıdır.
+  BigQuery için buna gerek yoktur: kullandığı ana makineler sabittir.
 
 ---
 
-## 7. Kullanım
+## 7. İşletim
 
-- **Kontrol paneli**: Entegrasyonlar → Günlük dışa aktarma. Bir hedef ekleyin, satır yazmadan
-  kimlik bilgilerini denetlemek için **Test**'i çalıştırın, ardından hedefi etkinleştirin.
-- **Bekleyen kayıtlar**: her hedef kartı bekleyen satırları ve imleci gösterir; `GET
-/api/log-export/status` aynı sayısal verilerin yanı sıra son 20 iş çalıştırmasını döndürür.
-- **Bir hedefin başarısız olması diğerlerini etkilemez** — çalıştırma özeti, hedef bazındaki
-  durumu `last_status` / `last_error` içinde kaydeder; iş çalıştırma geçmişi ise toplu sonucu tutar.
-- **Bir hedefi silmek, imlecini de siler.** Hedefi yeniden eklemek, saklanan en eski
-  çağrı günlüğünden başlatır; bu da hedefte zaten bulunabilecek satırların yeniden gönderilmesine yol açar. BigQuery'de satır başına
-  `insertId`, bunu yalnızca BigQuery'nin kendi yinelenen kayıtları ayıklama aralığı içinde telafi eder; bu nedenle
+- **Dashboard**: Integrations → Log export. Bir hedef ekleyin, satır yazmadan kimlik bilgilerini
+  kontrol etmek için **Test** işlemini çalıştırın ve ardından hedefi etkinleştirin.
+- **İş yükü birikimi**: Her hedef kartı bekleyen satırları ve imleci gösterir; `GET
+/api/log-export/status`, aynı değerlerin yanı sıra son 20 görev çalıştırmasını da döndürür.
+- **Başarısız olan bir hedef diğerlerini başarısız kılmaz** — çalıştırma özeti, her hedefe ait
+  durumu `last_status` / `last_error` alanlarına kaydeder; görev çalıştırma geçmişi ise toplu sonucu saklar.
+- **Bir hedef silindiğinde imleci de silinir.** Yeniden eklendiğinde, saklanan en eski
+  çağrı günlüğünden başlar; bu da hedefte zaten bulunabilecek satırların yeniden gönderilmesine neden olur. BigQuery'de satır başına
+  `insertId`, bunu yalnızca BigQuery'nin kendi yinelenen kayıtları kaldırma zaman aralığı içinde engeller; bu nedenle
   bir hedefi silmek yerine devre dışı bırakmayı tercih edin.

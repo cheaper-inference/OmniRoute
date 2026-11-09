@@ -237,9 +237,9 @@ Selain itu, `updateNssDatabases()` memasang sijil ke dalam DB NSS setiap penggun
 
 Semua titik akhir MITM memerlukan pengesahan pengurusan (`requireCliToolsAuth`). Kata laluan sudo dicache dalam skop modul (tidak pernah dalam `globalThis`) dan dikosongkan ketika `stopMitm()`.
 
-## Ejen Pengguna Mengatasi — env vars (`.env.example` bahagian 12)
+## Penggantian User-Agent — pemboleh ubah persekitaran (`.env.example` seksyen 12)
 
-| Pembolehubah        | Lalai                                         |
+| Pemboleh ubah       | Lalai                                         |
 | ------------------- | --------------------------------------------- |
 | `CLAUDE_USER_AGENT` | `claude-cli/2.1.280 (external, cli)`          |
 | `CODEX_USER_AGENT`  | `codex-cli/0.155.0 (Windows 10.0.26200; x64)` |
@@ -248,7 +248,7 @@ Semua titik akhir MITM memerlukan pengesahan pengurusan (`requireCliToolsAuth`).
 | `QODER_USER_AGENT`  | `Qoder-Cli`                                   |
 | `CURSOR_USER_AGENT` | `Cursor/3.4`                                  |
 
-Digunakan oleh `open-sse/executors/base.ts::buildHeaders()` melalui carian dinamik.** Bantah ini apabila pembekal mengeluarkan versi CLI baharu** rentetan UA basi — mula ditolak sebagai pelanggan lapuk.
+Digunakan oleh `open-sse/executors/base.ts::buildHeaders()` melalui carian dinamik. **Naik taraf nilai ini apabila penyedia mengeluarkan versi CLI baharu** — rentetan UA yang lapuk akan mula ditolak sebagai klien yang sudah lapuk.
 
 ## Togol Mod Keserasian CLI (`.env.example` bahagian 13)
 

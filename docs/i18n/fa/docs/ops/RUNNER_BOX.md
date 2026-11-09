@@ -12,13 +12,13 @@ runner در OmniRoute دارای **یک نقش**، یک label و بودجهٔ ح
 این وضعیت را پوشش میدهد و چون Buildهای pull request بهصورت hosted اجرا میشوند، اسلات Turbopack
 بیشتر اوقات بیکار است:
 
-| runner               | label            | نقش                                                                                                                                              | `MemoryHigh` / `MemoryMax` | `CPUQuota`        |
-| -------------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------- | ----------------- |
-| `omniroute-113-5`    | `omni-build`     | buildهای Turbopack: `ci.yml` `Build` (فقط push/dispatch)، Docker amd64، `npm-publish`، `nightly-v4-build`، `preview-artifact`، build شبانهٔ a11y | 56 GB / 60 GB (swap 0)     | 1600 %            |
-| `omniroute-113-6`    | `omni-release`   | Release-Green (`release-green` + `main-green`)، build با webpack                                                                                 | 20 GB / 24 GB (swap 4 GB)  | 800 %             |
-| `omniroute-113-2`    | `omni-light`     | jobهای شبانه (Schemathesis، promptfoo، garak، k6) و `quality.yml` `lint-guard`                                                                   | 12 GB / 16 GB (swap 4 GB)  | 600 %             |
-| `omniroute-113`      | `omni-light`     | همان مجموعهٔ بالا                                                                                                                                | 8 GB / 12 GB               | 400 %             |
-| OmniHeuris, OmniMind | (مخزنهای خودشان) | فقط Dependabot (بیشینهٔ مصرف هرکدام 155 MB، 2026-10-18)                                                                                          | 4 GB / 6 GB                | 200 % برای هرکدام |
+| runner               | label                           | نقش                                                                                                                                              | `MemoryHigh` / `MemoryMax` | `CPUQuota`        |
+| -------------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------- | ----------------- |
+| `omniroute-113-5`    | `omni-build`, `omni-build-60gb` | buildهای Turbopack: `ci.yml` `Build` (فقط push/dispatch)، Docker amd64، `npm-publish`، `nightly-v4-build`، `preview-artifact`، build شبانهٔ a11y | 56 GB / 60 GB (swap 0)     | 1600 %            |
+| `omniroute-113-6`    | `omni-release`                  | Release-Green (`release-green` + `main-green`)، build با webpack                                                                                 | 20 GB / 24 GB (swap 4 GB)  | 800 %             |
+| `omniroute-113-2`    | `omni-light`                    | jobهای شبانه (Schemathesis، promptfoo، garak، k6) و `quality.yml` `lint-guard`                                                                   | 12 GB / 16 GB (swap 4 GB)  | 600 %             |
+| `omniroute-113`      | `omni-light`                    | همان مجموعهٔ بالا                                                                                                                                | 8 GB / 12 GB               | 400 %             |
+| OmniHeuris, OmniMind | (مخزنهای خودشان)                | فقط Dependabot (بیشینهٔ مصرف هرکدام 155 MB، 2026-10-18)                                                                                          | 4 GB / 6 GB                | 200 % برای هرکدام |
 
 اندازهگیریشده در 2026-10-18:
 
@@ -28,7 +28,7 @@ runner در OmniRoute دارای **یک نقش**، یک label و بودجهٔ ح
 | swap      | 16 GB                        | `omniroute-113-5` با swap غیرفعال (`MemorySwapMax=0`) اجرا میشود تا یک build مهارنشده بهجای درگیرکردن swap کل سرور، هنگام رسیدن به سقف خود متوقف شود                                                                                                                                                                                                                                                                                                     |
 | `/tmp`    | **12 GB tmpfs = RAM**        | هر چیزی که در آن قرار گیرد، حافظه مصرف میکند؛ باقیماندهها پس از 3 ساعت پاکسازی میشوند                                                                                                                                                                                                                                                                                                                                                                    |
 | CPU       | بار 60 روی 32 هسته مشاهده شد | پیش از اعمال quotaها، یک build با Turbopack (حدود 1166 % CPU) بههمراه یک مجموعهتست coverage روی همان سرور، heartbeatهای listenerهای دیگر را از منابع محروم کرد (`The self-hosted runner lost communication`، #16853)                                                                                                                                                                                                                                     |
-| runnerها  | **7 listener** (2026-10-28)  | 5 مورد OmniRoute به‌علاوهٔ OmniHeuris و OmniMind؛ `omniroute-113-7` برچسب `omni-build` را نیز دارد؛ `omniroute-113-3/-4/-8` از مخزن حذف شدند (2026-10-28)                                                                                                                                                                                                                                                                                                |
+| runnerها  | **7 listener** (2026-10-28)  | 5 مورد OmniRoute به‌علاوهٔ OmniHeuris و OmniMind؛ `omniroute-113-5` برچسب `omni-build-60gb` را نیز دارد؛ `omniroute-113-3/-4/-8` از مخزن حذف شدند (2026-10-28)                                                                                                                                                                                                                                                                                           |
 
 محدودیتها در `/etc/systemd/system/actions.runner.<…>.service.d/override.conf` مربوط به هر unit
 قرار دارند (مقادیر قبلی با نام `override.conf.bak-20261018` نگهداری شدهاند) و بهصورت زنده با
@@ -87,7 +87,7 @@ SIGKILL برای کل cgroup ارسال میشود. این تنظیم در را�
 ## قواعد عملیاتی
 
 - **در هر لحظه فقط یک build با Turbopack — اجباری از طریق label.** هر job که یک
-  `next build` کامل با Turbopack اجرا میکند، `[self-hosted, omni-build]` را هدف میگیرد و فقط
+  `next build` کامل با Turbopack اجرا میکند، `[self-hosted, omni-build, omni-build-60gb]` را هدف میگیرد و فقط
   **`omniroute-113-5`** دارای این label است: `ci.yml` `Build`، `npm-publish.yml` `publish`،
   `nightly-v4-build`، `preview-artifact`، build شبانهٔ a11y (#16853) و **amd64** در
   `docker-publish.yml` (webpack درون BuildKit — اجرای 33253576569 در آنجا باعث panic در

@@ -4147,7 +4147,9 @@
     "duplicateAutoComboFailedPrefix": "Nabigo ang pag-duplicate ng auto-combo:",
     "duplicateAutoComboUnknownError": "Hindi alam na error",
     "duplicateAutoComboTitle": "Gumawa ng static combo mula sa {name}",
-    "fallbackSummary": "{rate}% ng mga request ang nagbailback, tinatayang ~{skips} na target ang sinakrip sa bawat isa"
+    "fallbackSummary": "{rate}% ng mga request ang nagbailback, tinatayang ~{skips} na target ang sinakrip sa bawat isa",
+    "reorderAll": "Muling ayusin ang lahat",
+    "reorderAllDescription": "Muling pag-aayos ng lahat ng {count} combo. Naka-enable ang mga drag handle."
   },
   "costs": {
     "title": "Mga gastos",
@@ -14255,6 +14257,10 @@
         "label": "Humihinto bilang 502 ang Protektadong-Priyoridad na Imprastraktura",
         "description": "Ibalik ang 502 sa halip na 503 kapag pinahinto ng isang priyoridad na target na may fallback para lamang sa quota ang kumbinasyon dahil sa isang sanhi na mapatutunayang hindi quota: isang bukas na circuit breaker ng provider o paglaktaw batay sa hinulaang latency."
       },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Patakaran sa Badyet para sa Hindi Naka-presyong Paggamit",
+        "description": "Kung paano tinatrato ng pang-araw-araw/panglinggong USD na mga limitasyon kada key ang matagumpay na paggamit kung ang provider/model ay walang hilera ng presyo. Ang fail_closed (karaniwan) ay minamarkahan ang panahon bilang nalampasan, kaya ang hindi kilalang gastos ay hindi kailanman makakalusot sa isang mahigpit na limitasyon. Ang count_as_zero ay binibilang ang paggamit na iyon bilang $0 at pinapanatili ang pagpapatupad ng binayarang gastos. Nakalista ang mga modelong walang presyo sa home page ng dashboard sa anumang kaso."
+      },
       "AUTH_LOG_INCLUDE_ACCOUNT_ID": {
         "label": "Mga ID ng Account sa Log",
         "description": "Kasama ang prefix ng account sa mga linya ng AUTH log (hal. \"Ginagamit ang account ni '<provider>': abc12345...\"). Disabled sa default upang ang mga identifier ng account ay nakatago sa mga log ng process na nakahati o multi-tenant. Hiwalay sa Debug Mode; ang pagpapalit sa Debug Mode ay hindi ipapakita ito."
@@ -14535,9 +14541,9 @@
         "label": "Cooldown Retry: Laktawan ang mga Pagtangging 403/410",
         "description": "Kapag ang bawat account ay nasa cooldown at ang cooldown na unang magtatapos ay sanhi ng 403 (tinanggihan ang access) o 410 (wala na), ibalik agad ang pagtangging iyon sa halip na hintaying matapos ang cooldown at muling ipadala ang kahilingan; ang isang nagre-renew na agentrouter connection-scoped quota 403 ay pananatilihin gamit ang errorCode 429 upang manatili itong puwedeng subukang muli. Naka-off bilang default: 401 lamang ang lumalaktaw sa paghihintay, at ang bawat pagtanggi ay pinananatili gamit ang status na kasama nitong dumating."
       },
-      "UNPRICED_USAGE_BUDGET_POLICY": {
-        "label": "Patakaran sa Badyet para sa Hindi Naka-presyong Paggamit",
-        "description": "Kung paano tinatrato ng pang-araw-araw/panglinggong USD na mga limitasyon kada key ang matagumpay na paggamit kung ang provider/model ay walang hilera ng presyo. Ang fail_closed (karaniwan) ay minamarkahan ang panahon bilang nalampasan, kaya ang hindi kilalang gastos ay hindi kailanman makakalusot sa isang mahigpit na limitasyon. Ang count_as_zero ay binibilang ang paggamit na iyon bilang $0 at pinapanatili ang pagpapatupad ng binayarang gastos. Nakalista ang mga modelong walang presyo sa home page ng dashboard sa anumang kaso."
+      "COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE": {
+        "description": "Sa compression cache stats, bilangin ang isang naka-compress na kahilingan sa isang automatic-prefix-caching provider (OpenAI, Codex, Azure, o isang custom na koneksyon na nagdedeklara ng prompt caching na may marker stripping) bilang isang tinantyang cache hit kahit na walang cache_control marker. Ang pagtatantya ay isang signal ng pagiging kwalipikado sa cache, hindi isang naobserbahang hit, kaya ang naiulat na rate ng hit para sa mga provider na iyon ay nagte-trend sa 100%. Naka-off bilang default: isang kahilingan lang na nagdadala ng mga cache_control marker sa isang provider ng caching ang binibilang bilang isang tinantyang hit, kaya ang mga provider ng awtomatikong prefix ay patuloy na nag-uulat ng 0.",
+        "label": "Mga istatistika ng compression cache: kung ang isang awtomatikong prefix ay karapat-dapat"
       }
     }
   },

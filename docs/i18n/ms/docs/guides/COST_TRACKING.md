@@ -36,61 +36,73 @@ Oleh sebab angka tersebut ialah anggaran:
 
 ---
 
-## Bagaimana kos dianggarkan
+## Cara kos dianggarkan
 
 ### Sumber harga
 
-Kos datang daripada jadual harga yang digabungkan dalam [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts), dalam susunan keutamaan ini (** tertinggi dahulu** ):
+Kos datang daripada jadual harga gabungan dalam [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts), mengikut susunan keutamaan ini (**yang tertinggi dahulu**):
 
-1. **Pengguna menimpa** harga — ditetapkan dalam papan pemuka atau melalui `PATCH /api/pricing` (ruang nama `pricing` ).
-2. **penyegerakan models.dev** harga — diambil daripada `https://models.dev/api.json` (ruang nama `models_dev_pricing` ).
-3. **penyegerakan LiteLLM** harga — diambil daripada `model_prices_and_context_window.json` awam LiteLLM(ruang nama `pricing_synced` ).
-4. **Lalai berkod keras** kadar — dihantar dalam [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/).
+1. **Penggantian pengguna** — harga yang ditetapkan melalui papan pemuka atau `PATCH /api/pricing` (ruang nama `pricing`).
+2. **Penyegerakan models.dev** — harga yang diambil daripada `https://models.dev/api.json` (ruang nama `models_dev_pricing`).
+3. **Penyegerakan LiteLLM** — harga yang diambil daripada fail awam `model_prices_and_context_window.json` milik LiteLLM (ruang nama `pricing_synced`).
+4. **Nilai lalai dalam kod** — kadar yang disertakan dalam [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/).
 
-Untuk provider/model yang sama , nilai daripada lapisan keutamaan yang lebih tinggi menimpa medan padanan dalam lapisan bawah; medan yang tidak hadir dari lapisan atas masih boleh datang dari lapisan bawah. Pesanan itu tetap walaupun kedua-dua kerja penyegerakan bebas dijalankan pada masa yang sama. `GET /api/pricing?includeSources=1` mengembalikan `pricing` dan `sourceMap`, yang label setiap modelnya (`user`, `modelsDev`, `litellm`, `default`) mengenal pasti lapisan keutamaan tertinggi yang mengandungi model tersebut.
+Bagi penyedia/model yang sama, nilai daripada lapisan berkeutamaan lebih tinggi menulis ganti medan yang sepadan dalam lapisan lebih rendah; medan yang tiada pada lapisan atas masih boleh datang daripada lapisan bawah. Susunan ini kekal walaupun kedua-dua tugas penyegerakan bebas berjalan serentak. `GET /api/pricing?includeSources=1` mengembalikan `pricing` dan `sourceMap`; label bagi setiap model (`user`, `modelsDev`, `litellm`, `default`) mengenal pasti lapisan berkeutamaan tertinggi yang mengandungi model itu.
 
-**penyegerakan LiteLLM** adalah ikut serta, dilumpuhkan secara lalai. Pembolehubah persekitarannya (lihat [`.env.example`](../../.env.example) ) ialah:
+**Penyegerakan LiteLLM** ialah pilihan dan dinyahaktifkan secara lalai. Pemboleh ubah persekitarannya (lihat [`.env.example`](../../.env.example)) ialah:
 
-| Env var                 | Lalai     | Tujuan                                                                                       |
-| ----------------------- | --------- | -------------------------------------------------------------------------------------------- |
-| `PRICING_SYNC_ENABLED`  | `false`   | Dayakan penyegerakan harga LiteLLM latar belakang.                                           |
-| `PRICING_SYNC_INTERVAL` | `86400`   | Selang penyegerakan dalam beberapa saat (setiap hari).                                       |
-| `PRICING_SYNC_SOURCES`  | `litellm` | Pemilihan sumber untuk penyegerakan ini sahaja; buat masa ini hanya `litellm` yang disokong. |
+| Pemboleh ubah persekitaran | Lalai     | Tujuan                                                                                  |
+| -------------------------- | --------- | --------------------------------------------------------------------------------------- |
+| `PRICING_SYNC_ENABLED`     | `false`   | Aktifkan penyegerakan harga LiteLLM di latar belakang.                                  |
+| `PRICING_SYNC_INTERVAL`    | `86400`   | Selang penyegerakan dalam **saat** (lalai setiap hari).                                 |
+| `PRICING_SYNC_SOURCES`     | `litellm` | Pemilihan sumber untuk penyegerakan ini sahaja; buat masa ini hanya `litellm` disokong. |
 
-**penyegerakan models.dev** adalah berasingan daripada penyegerakan LiteLLM dan juga dilumpuhkan secara lalai. Dayakannya dalam Tetapan (models.dev sync) atau gunakan pembolehubah ini:
+**Penyegerakan models.dev** berasingan daripada penyegerakan LiteLLM dan turut dinyahaktifkan secara lalai. Aktifkannya dalam Tetapan (penyegerakan models.dev) atau gunakan pemboleh ubah berikut:
 
-| Env var                    | Lalai                | Tujuan                                                                                                                             |
-| -------------------------- | -------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| `MODELS_DEV_SYNC_ENABLED`  | _(tidak ditetapkan)_ | Nyahset mengikuti togol Tetapan; `1/true/on/yes` memaksa hidup dan `0/false/off/no` memaksa mati (walaupun Tetapan mendayakannya). |
-| `MODELS_DEV_SYNC_INTERVAL` | `86400`              | Selang penyegerakan models.dev lalai dalam beberapa saat (setiap hari).                                                            |
+| Pemboleh ubah persekitaran | Lalai                | Tujuan                                                                                                                                                             |
+| -------------------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `MODELS_DEV_SYNC_ENABLED`  | _(tidak ditetapkan)_ | Jika tidak ditetapkan, ia mengikut suis Tetapan; `1/true/on/yes` memaksa pengaktifan dan `0/false/off/no` memaksa penyahaktifan, walaupun Tetapan mengaktifkannya. |
+| `MODELS_DEV_SYNC_INTERVAL` | `86400`              | Selang lalai penyegerakan models.dev dalam saat, iaitu setiap hari.                                                                                                |
 
-`PRICING_SYNC_SOURCES` buat** bukan** dayakan models.dev; ia hanya mengawal penyegerakan LiteLLM. Memadamkan penggantian pengguna tidak mengosongkan sama ada ruang nama yang disegerakkan; lapisan harga yang tersedia seterusnya menjadi berkesan. Untuk model yang tidak berharga, semak kedua-dua tetapan penyegerakan dan `sourceMap` sebelum menambah penggantian manual.
+`PRICING_SYNC_SOURCES` **tidak** mengaktifkan models.dev; ia hanya mengawal penyegerakan LiteLLM. Memadam penggantian pengguna tidak mengosongkan mana-mana ruang nama yang disegerakkan; lapisan harga tersedia yang seterusnya mula berkuat kuasa. Untuk model tanpa harga, semak kedua-dua tetapan penyegerakan dan `sourceMap` sebelum menambah penggantian manual.
 
 ### Formula kos
 
-Kos dikira setiap permintaan daripada kiraan token dan kadar setiap juta token dalam [`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts) (`computeCostFromPricing` / `calculateCost`):
+Kos dikira bagi setiap permintaan berdasarkan bilangan token dan kadar bagi setiap sejuta token dalam
+[`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts)
+(`computeCostFromPricing` / `calculateCost`):
 
-- **Token input** (tolak bacaan cache dan token penciptaan cache) kadar × `input`.
-- **Token baca cache** kadar × `cached` (berbalik kepada kadar input).
-- **Token penciptaan cache** kadar × `cache_creation` (berbalik kepada kadar input).
-- **Token keluaran** kadar × `output`.
-- **Token penaakulan** kadar × `reasoning` (berbalik kepada kadar keluaran).
+- **Token input** (tolak bacaan cache dan token penciptaan cache) × kadar `input`.
+- **Token bacaan cache** × kadar `cached` (kembali menggunakan kadar input jika tiada).
+- **Token penciptaan cache** × kadar `cache_creation` (kembali menggunakan kadar input jika tiada).
+- **Token output** × kadar `output`.
+- **Token penaakulan** × kadar `reasoning` (kembali menggunakan kadar output jika tiada).
 
-Semua kadar ditafsirkan sebagai USD setiap 1,000,000 token. Peringkat perkhidmatan "cepat"/"keutamaan" atau "flex" Codex menggunakan pengganda kos (`getCodexFastCostMultiplier`) — cth flex dibilkan pada diskaun token 50%, muncul sebagai** penjimatan fleksibel** dalam papan pemuka.
+Semua kadar ditafsirkan sebagai USD bagi setiap 1,000,000 token. Peringkat perkhidmatan Codex "fast"/"priority" atau
+"flex" menggunakan pengganda kos (`getCodexFastCostMultiplier`) — contohnya, flex
+dicaj dengan diskaun token sebanyak 50%, yang dipaparkan sebagai **penjimatan flex** dalam papan pemuka.
 
-Nama model dinormalisasi dahulu (awalan laluan pembekal seperti `openai/` atau `accounts/fireworks/models/` dilucutkan) jadi baris sejarah masih sepadan dengan harga.
+Nama model dinormalkan terlebih dahulu (awalan laluan penyedia seperti `openai/` atau
+`accounts/fireworks/models/` dibuang) supaya baris sejarah masih dapat dipadankan dengan harga.
 
 ### Cara perbelanjaan direkodkan
 
-- Kos setiap permintaan dikira selepas respons dan direkodkan kebakaran-dan-lupa supaya ia tidak sekali-kali menambah kependaman kepada pelanggan. Penggunaan kuota dikongsi dijadualkan pada tanda gelung acara seterusnya melalui [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
-- Perbelanjaan kunci API ditimbal dan disiram secara berkelompok oleh [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (selang siram 60s lalai, penimbal 1,000 kemasukan). Boleh ditala melalui:
+- Kos bagi setiap permintaan dikira selepas respons dan direkodkan tanpa menunggu hasil supaya ia
+  tidak menambahkan kependaman kepada klien. Penggunaan kuota dikongsi dijadualkan pada kitaran
+  gelung peristiwa seterusnya melalui [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
+- Perbelanjaan kunci API dibuffer dan ditulis keluar secara kelompok oleh
+  [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (selang penulisan keluar lalai 60 saat,
+  buffer 1,000 entri). Boleh ditala melalui:
 
-  | Env var                             | Lalai   | Tujuan                                 |
-  | ----------------------------------- | ------- | -------------------------------------- |
-  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000` | Selang siram dalam milisaat.           |
-  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`  | Masukan buffer maksimum sebelum siram. |
+  | Pemboleh ubah persekitaran          | Lalai   | Tujuan                                               |
+  | ----------------------------------- | ------- | ---------------------------------------------------- |
+  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000` | Selang penulisan keluar dalam milisaat.              |
+  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`  | Entri maksimum yang dibuffer sebelum ditulis keluar. |
 
-Angka kos papan pemuka ialah** bukan** dibaca daripada jumlah dolar setiap baris yang disimpan — ia dikira semula dengan segera daripada kiraan token dan jadual harga semasa setiap kali titik akhir analitik dijalankan. Ini bermakna membetulkan harga yang salah (dan penyegerakan semula) mengemas kini anggaran kos sejarah secara retroaktif.
+Angka kos pada papan pemuka **tidak** dibaca daripada jumlah dolar bagi setiap baris yang disimpan — angka tersebut
+dikira semula secara dinamik berdasarkan bilangan token dan jadual harga semasa setiap kali
+titik akhir analitik dijalankan. Ini bermakna pembetulan harga yang salah (dan penyegerakan semula) akan mengemas kini
+anggaran kos sejarah secara retroaktif.
 
 ---
 
@@ -136,50 +148,53 @@ Bahagian Kos juga menempatkan (semuanya di bawah `/dashboard/costs/`):
 
 ---
 
-## titik akhir API
+## Titik akhir API
 
-Semua ini memerlukan pengesahan pengurusan (loopback/JWT, melalui `requireManagementAuth`) melainkan dinyatakan.
+Semua ini memerlukan pengesahan pengurusan (gelung balik/JWT, melalui `requireManagementAuth`) melainkan
+dinyatakan sebaliknya.
 
-### Analisis penggunaan & kos
+### Analitik penggunaan & kos
 
-| Kaedah | Titik akhir              | Tujuan                                                                                                                                                              |
-| ------ | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `GET`  | `/api/usage/analytics`   | Analitis cost/usage penuh: ringkasan, aliran harian, oleh provider/model/API key/account/tier. Pertanyaan: `range`, `startDate`, `endDate`, `apiKeyIds`, `presets`. |
-| `GET`  | `/api/usage/utilization` | Penggunaan kuota setiap pembekal dari semasa ke semasa. Pertanyaan: `range` (`1h`/`24h`/`7d`/`30d`), `provider`.                                                    |
-| `GET`  | `/api/usage/history`     | Baris sejarah penggunaan mentah.                                                                                                                                    |
-| `GET`  | `/api/usage/call-logs`   | Log panggilan setiap permintaan (model, token, kos, kependaman, status).                                                                                            |
-| `GET`  | `/api/usage/quota`       | Status kuota pembekal.                                                                                                                                              |
-| `GET`  | `/api/usage/proxy-logs`  | Log permintaan proksi.                                                                                                                                              |
+| Kaedah | Titik akhir              | Tujuan                                                                                                                                                                          |
+| ------ | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET`  | `/api/usage/analytics`   | Analitik kos/penggunaan penuh: ringkasan, trend harian, mengikut penyedia/model/kunci API/akaun/peringkat. Pertanyaan: `range`, `startDate`, `endDate`, `apiKeyIds`, `presets`. |
+| `GET`  | `/api/usage/utilization` | Penggunaan kuota setiap penyedia dari semasa ke semasa. Pertanyaan: `range` (`1h`/`24h`/`7d`/`30d`), `provider`.                                                                |
+| `GET`  | `/api/usage/history`     | Baris sejarah penggunaan mentah.                                                                                                                                                |
+| `GET`  | `/api/usage/call-logs`   | Log panggilan setiap permintaan (model, token, kos, kependaman, status).                                                                                                        |
+| `GET`  | `/api/usage/quota`       | Status kuota penyedia.                                                                                                                                                          |
+| `GET`  | `/api/usage/proxy-logs`  | Log permintaan proksi.                                                                                                                                                          |
 
 ### Belanjawan
 
-| Kaedah | Titik akhir              | Tujuan                                                                                             |
-| ------ | ------------------------ | -------------------------------------------------------------------------------------------------- |
-| `GET`  | `/api/usage/budget`      | Ringkasan kos semakan belanjawan + untuk satu kunci API ( param pertanyaan `apiKeyId` diperlukan). |
-| `POST` | `/api/usage/budget`      | Tetapkan daily/weekly/monthly USD had ambang amaran + untuk kunci API.                             |
-| `GET`  | `/api/usage/budget/bulk` | Ringkasan belanjawan pukal merentas kunci API.                                                     |
+| Kaedah | Titik akhir              | Tujuan                                                                                                |
+| ------ | ------------------------ | ----------------------------------------------------------------------------------------------------- |
+| `GET`  | `/api/usage/budget`      | Ringkasan kos + semakan belanjawan untuk satu kunci API (parameter pertanyaan `apiKeyId` diperlukan). |
+| `POST` | `/api/usage/budget`      | Tetapkan had USD harian/mingguan/bulanan + ambang amaran untuk satu kunci API.                        |
+| `GET`  | `/api/usage/budget/bulk` | Ringkasan belanjawan secara pukal merentas kunci API.                                                 |
 
-> Bajet API adalah berskop setiap** kunci API** (`apiKeyId`). Had yang dikembalikan oleh `GET /api/usage/budget` termasuk `dailyLimitUsd`, `weeklyLimitUsd`, `monthlyLimitUsd`, `warningThreshold`, dan jumlah berjalan (`totalCostToday`, `totalCostMonth`, …).
+> API belanjawan diskopkan bagi setiap **kunci API** (`apiKeyId`). Had yang dikembalikan oleh
+> `GET /api/usage/budget` termasuk `dailyLimitUsd`, `weeklyLimitUsd`, `monthlyLimitUsd`,
+> `warningThreshold`, dan jumlah semasa (`totalCostToday`, `totalCostMonth`, …).
 
-### penetapan harga
+### Penetapan Harga
 
-| Kaedah   | Titik akhir             | Tujuan                                                                                                                                              |
-| -------- | ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `GET`    | `/api/pricing`          | Harga empat lapisan digabungkan (pengguna, models.dev, LiteLLM, lalai). `?includeSources=1` mengembalikan `pricing` + `sourceMap`.                  |
-| `PATCH`  | `/api/pricing`          | Gantikan harga untuk `{ provider: { model: { input, output, cached, … } } }`.                                                                       |
-| `DELETE` | `/api/pricing`          | Alih keluar penggantian harga pengguna (skop pilihan oleh `?provider=&model=`); kadar disegerakkan atau lalai terbina dalam kekal sebagai sandaran. |
-| `GET`    | `/api/pricing/defaults` | Tunjukkan kadar sandaran per-1M lalai.                                                                                                              |
-| `GET`    | `/api/pricing/models`   | Harga ditentukan oleh model.                                                                                                                        |
-| `POST`   | `/api/pricing/sync`     | Cetuskan penyegerakan manual daripada sumber luaran (LiteLLM).                                                                                      |
-| `GET`    | `/api/pricing/sync`     | Status penyegerakan semasa.                                                                                                                         |
-| `DELETE` | `/api/pricing/sync`     | Kosongkan harga disegerakkan LiteLLM sahaja (`pricing_synced`); data models.dev adalah berasingan.                                                  |
+| Kaedah   | Titik akhir             | Tujuan                                                                                                                                                            |
+| -------- | ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET`    | `/api/pricing`          | Harga gabungan empat lapisan (pengguna, models.dev, LiteLLM, lalai). `?includeSources=1` mengembalikan `pricing` + `sourceMap`.                                   |
+| `PATCH`  | `/api/pricing`          | Ubah ganti penetapan harga untuk `{ provider: { model: { input, output, cached, … } } }`.                                                                         |
+| `DELETE` | `/api/pricing`          | Buang penggantian harga pengguna, dengan skop pilihan melalui `?provider=&model=`; kadar yang disegerakkan atau nilai lalai terbina dalam kekal sebagai sandaran. |
+| `GET`    | `/api/pricing/defaults` | Tunjukkan kadar sandaran lalai bagi setiap 1J.                                                                                                                    |
+| `GET`    | `/api/pricing/models`   | Penetapan harga yang dikunci mengikut model.                                                                                                                      |
+| `POST`   | `/api/pricing/sync`     | Cetuskan penyegerakan manual daripada sumber luaran (LiteLLM).                                                                                                    |
+| `GET`    | `/api/pricing/sync`     | Status penyegerakan semasa.                                                                                                                                       |
+| `DELETE` | `/api/pricing/sync`     | Kosongkan harga yang disegerakkan oleh LiteLLM sahaja (`pricing_synced`); data models.dev adalah berasingan.                                                      |
 
 ### Titik akhir lain yang berkaitan dengan kos
 
-| Kaedah | Titik akhir                   | Tujuan                                                                 |
-| ------ | ----------------------------- | ---------------------------------------------------------------------- |
-| `GET`  | `/api/free-tier/summary`      | Jumlah token model percuma, terpakai-bulan ini dan baki elaun percuma. |
-| `GET`  | `/api/quota/pools/[id]/usage` | Penggunaan untuk kumpulan kuota dikongsi.                              |
+| Kaedah | Titik Akhir                   | Tujuan                                                                        |
+| ------ | ----------------------------- | ----------------------------------------------------------------------------- |
+| `GET`  | `/api/free-tier/summary`      | Jumlah token model percuma, penggunaan bulan ini dan baki peruntukan percuma. |
+| `GET`  | `/api/quota/pools/[id]/usage` | Penggunaan untuk kumpulan kuota dikongsi.                                     |
 
 ---
 

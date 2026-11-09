@@ -57,11 +57,11 @@ zbog jedne konkretne implementacione činjenice:
 
 Šta to znači za svaku površinu, čak i uz `CORS_ALLOW_ALL=true`:
 
-| Površina                                  | Mehanizam autentifikacije      | Efekat CORS džokera                                                                                                                                                                                                                                                                                                                                               |
-| ----------------------------------------- | ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Kontrolna tabla / UPRAVLJANJE `/api/*`    | Sesija zasnovana na kolačiću   | Izvorište se vraća, ali **bez `Allow-Credentials`** pregledač **blokira** čitanje sa akreditivima. Zlonamerna lokacija sa drugog izvorišta **ne može da čita** vaše autentifikovane odgovore kontrolne table, a kolačić sesije nije izložen.                                                                                                                      |
-| Klijentski API `/v1/*`, `/v1beta/*`       | Bearer / zaglavlje `x-api-key` | Već je dopuštajuće **po dizajnu** (`relaxForTokenAuth`): pregledači nikada automatski ne dodaju `Authorization`/`x-api-key`, pa stranica napadača ne može da prosledi vaš ključ. Izvorište se vraća samo kada je predočeni ključ potvrđen; anonimni odgovori (`REQUIRE_API_KEY=false`) zadržavaju listu dozvoljenih izvorišta. `CORS_ALLOW_ALL` ovo ne proširuje. |
-| Javno, samo za čitanje (`/api/health`, …) | Nema                           | Nije osetljivo; džoker je bezopasan.                                                                                                                                                                                                                                                                                                                              |
+| Površina                                  | Mehanizam autentifikacije      | Efekat CORS džokera                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| ----------------------------------------- | ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Kontrolna tabla / UPRAVLJANJE `/api/*`    | Sesija zasnovana na kolačiću   | Izvorište se vraća, ali **bez `Allow-Credentials`** pregledač **blokira** čitanje sa akreditivima. Zlonamerna lokacija sa drugog izvorišta **ne može da čita** vaše autentifikovane odgovore kontrolne table, a kolačić sesije nije izložen.                                                                                                                                                                                                                                                                                                               |
+| Klijentski API `/v1/*`, `/v1beta/*`       | Bearer / zaglavlje `x-api-key` | Već je dopuštajuće **po dizajnu** (`relaxForTokenAuth`): pregledači nikada automatski ne dodaju `Authorization`/`x-api-key`, pa stranica napadača ne može da prosledi vaš ključ. Ублажено одражавање порекла захтева аутентификован субјект (проверен API кључ или проверену сесију контролне табле), а не само заглавље са акредитивима, и никада не укључује `Access-Control-Allow-Credentials`. Анонимни одговори (`REQUIRE_API_KEY=false`) користе конфигурисану листу дозвољених порекла, укључујући изричито укључивање путем `CORS_ALLOW_ALL=true`. |
+| Javno, samo za čitanje (`/api/health`, …) | Nema                           | Nije osetljivo; džoker je bezopasan.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
 
 Prema tome, **preostala** izloženost opcije `CORS_ALLOW_ALL=true` ograničena je na: (a)
 čitanje već neautentifikovanih podataka između različitih izvorišta **bez akreditiva** i (b)
@@ -122,10 +122,7 @@ CORS_ALLOWED_ORIGINS="http://localhost:5173, http://localhost:3000"
 - **Bearer / `x-api-key` (површина за закључивање `/v1/*`):** прегледачи их никада не прилажу
   аутоматски. CORS овде није значајна препрека — API кључ представља
   препреку — због чега је та површина намерно пермисивна како би прегледачки и
-  Electron клијенти могли да читају одговоре на које већ имају право. Ублажено враћање
-  изворишта прати потврђени кључ, а не пуко присуство заглавља: када
-  `REQUIRE_API_KEY=false` анонимно опслужи захтев, његов успешан одговор задржава листу
-  дозвољених изворишта која је подразумевано затворена. Одбијања аутентификације (401)
+  Electron клијенти могли да читају одговоре на које већ имају право. Ублажено одражавање порекла захтева аутентификован субјект (проверен API кључ или проверену сесију контролне табле), а не само заглавље са акредитивима, и никада не укључује `Access-Control-Allow-Credentials`. Анонимни одговори (`REQUIRE_API_KEY=false`) користе конфигурисану листу дозвољених порекла, укључујући изричито укључивање путем `CORS_ALLOW_ALL=true`. Одбијања аутентификације (401)
   остају читљива како би клијенти могли да прикажу опозван или погрешно унет кључ (#5242):
   сопствени 401 цевовода задржава враћање изворишта, а рута која сама одбије кључ након
   што га је цевовод опслужио као анониман (`/v1/models` и `/v1beta/models` уз
@@ -136,8 +133,7 @@ CORS_ALLOWED_ORIGINS="http://localhost:5173, http://localhost:3000"
   `x-goog-api-key` или колачић `auth_token`), а не од тога које је од њих рута проверила,
   и никада се не комбинује са `Access-Control-Allow-Credentials`; тело је фиксни омотач
   грешке. Управљачке руте под `/api/v1/` заштићене са `requireManagementAuth()`
-  (`/api/v1/management/*`, `/api/v1/registered-keys`) не додају враћање изворишта: уз
-  `REQUIRE_API_KEY=false` њихови 401/403 нису читљиви из других изворишта.
+  (`/api/v1/management/*`, `/api/v1/registered-keys`) не користе овај изузетак за одбијање акредитива: уз `REQUIRE_API_KEY=false`, њихови одговори 401/403 прате конфигурисану CORS политику порекла.
 - **Сесија са колачићима (контролна табла):** заштићена је подразумеваним режимом који у случају
   грешке забрањује приступ **и** одсуством заглавља `Access-Control-Allow-Credentials` на дељеној
   путањи. Немојте укључивати изворе за управљање/контролну таблу у било коју пермисивну
@@ -151,7 +147,7 @@ Responses WebSocket (`/v1/responses`) и, када се OmniRoute покреће
 `npm run dev`, мост `/v1/ws` и `/api/v1/ws`, који стримује `/v1/chat/completions`,
 `/v1/messages` и `/v1/responses` као оквире. Мост тражи пресуду од
 `/api/v1/ws?handshake=1` и одбија надоградњу осим ако је та рута извршила проверу.
-Руковање се прихвата када:
+Захтеви за аутентификацију и даље се примењују засебно. Провера порекла пролази када:
 
 - нема заглавље `Origin` (Codex CLI, SDK-ови и други клијенти који нису прегледачи);
 - `Origin` дозвољава горња листа дозвољених изворишта (`CORS_ALLOWED_ORIGINS`,

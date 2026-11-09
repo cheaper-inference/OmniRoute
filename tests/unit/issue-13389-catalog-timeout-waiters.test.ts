@@ -18,10 +18,25 @@ Object.assign(process.env, {
 const core = await import("../../src/lib/db/core.ts");
 const catalogCache = await import("../../src/app/api/v1/models/catalogCache.ts");
 
-test("#13389 one timeout wave of twenty clients does not duplicate the still-live catalog build", async () => {
+test("#13389 one timeout wave of twenty clients does not duplicate the still-live catalog build", async (t) => {
   // Initialize temporary storage before the clock used by the cache experiment.
   core.getDbInstance();
   catalogCache.__resetCatalogBuilderRunsForTest();
+  // The experiment owns its clock: host preemption must not age out the retained
+  // build between the timed-out wave and the immediate retry being asserted.
+  let now = 1_000_000;
+  let nextTimerId = 0;
+  const timers = new Map<ReturnType<typeof setTimeout>, () => void>();
+  t.mock.method(Date, "now", () => now);
+  t.mock.method(globalThis, "setTimeout", (callback: () => void, delay: number) => {
+    assert.equal(delay, 100, "the production wait bound stays unchanged");
+    const id = ++nextTimerId as unknown as ReturnType<typeof setTimeout>;
+    timers.set(id, callback);
+    return id;
+  });
+  t.mock.method(globalThis, "clearTimeout", (id: ReturnType<typeof setTimeout>) => {
+    timers.delete(id);
+  });
   let release!: () => void;
   const gate = new Promise<void>((resolve) => {
     release = resolve;
@@ -44,7 +59,14 @@ test("#13389 one timeout wave of twenty clients does not duplicate the still-liv
       build
     );
   const start = performance.now();
-  const wave = await Promise.all(Array.from({ length: 20 }, request));
+  const pendingWave = Array.from({ length: 20 }, request);
+  assert.equal(timers.size, 20, "every waiter has its original timeout");
+  now += 100;
+  for (const [id, timeout] of [...timers]) {
+    timers.delete(id);
+    timeout();
+  }
+  const wave = await Promise.all(pendingWave);
   const firstWaveMs = performance.now() - start;
   assert.deepEqual(
     wave.map((response) => response.status),

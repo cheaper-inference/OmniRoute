@@ -20,7 +20,7 @@ Cuando un agente IDE (por ejemplo, GitHub Copilot, Cursor, Claude Code) realiza 
 
 Esto significa que puedes:
 
-- **Redirigir a cualquier agente a cualquier proveedor** : Copilot hablando con OpenAI? Rediríjalo a Anthropic Claude, Gemini o cualquiera de los 380 proveedores de OmniRoute.
+- **Redirigir a cualquier agente a cualquier proveedor** : Copilot hablando con OpenAI? Rediríjalo a Anthropic Claude, Gemini o cualquiera de los 381 proveedores de OmniRoute.
 - **Aplicar asignaciones de modelos** : `gemini-3-flash` → `claude-sonnet-4.7` de forma transparente en el nivel del controlador.
 - **Observar todo el tráfico de agentes.** : cada solicitud interceptada se publica en el [Inspector de Tráfico](./TRAFFIC_INSPECTOR.md).
 - **Aplicar resiliencia OmniRoute** : enrutamiento combinado, disyuntores, respaldos y seguimiento de costos también funcionan para el tráfico de agentes IDE.
@@ -554,7 +554,7 @@ Trae es un asistente de programación con IA relativamente nuevo. Antes de imple
 3. Determinar el mecanismo de autenticación
 4. Evaluar si se debe proceder o no en función de los TOS y de la facilidad para descubrir la API
 
-Hasta que finalice la investigación, la tarjeta de Trae en el panel muestra una insignia de "En investigación" con un enlace "Informar sobre la viabilidad". El esqueleto del manejador en `src/mitm/handlers/trae.ts` genera un error estructurado `Aún no implementado`.
+Hasta que finalice la investigación, la tarjeta de Trae en el panel muestra una insignia de "En investigación" con un enlace "Informar sobre la viabilidad". El esqueleto del manejador en `src/mitm/handlers/trae.ts` genera un error estructurado `Not yet implemented`.
 
 ### Agentes pendientes (requieren MITM — sin compatibilidad con una URL base personalizada)
 

@@ -171,9 +171,23 @@ test("child records match old helpers across artifact, inline, disk, missing and
   assertGone();
 });
 
-test("large artifacts block the old hydration control but not the parent's event loop", async (t) => {
+test("large artifacts are hydrated in the child while the old control reads them in the parent", async (t) => {
   rows(500, 300_000); // ~150 MB, bounded below the storage artifact limit per row.
   const dest = destination("discard", 25);
+  const artifactPrefix = path.join(dir, "call_logs") + path.sep;
+  let parentArtifactReads = 0;
+  t.mock.method(
+    fs,
+    "readFileSync",
+    new Proxy(fs.readFileSync, {
+      apply(read, receiver, args) {
+        if (typeof args[0] === "string" && args[0].startsWith(artifactPrefix)) {
+          parentArtifactReads++;
+        }
+        return Reflect.apply(read, receiver, args);
+      },
+    })
+  );
   async function measure(action: () => Promise<unknown>) {
     const histogram = monitorEventLoopDelay({ resolution: 2 });
     histogram.enable();
@@ -188,17 +202,14 @@ test("large artifacts block the old hydration control but not the parent's event
     assert.equal(result.exported, 500);
     assert.equal(result.success, true, result.error ?? "");
   });
+  assert.equal(parentArtifactReads, 0, "export must never hydrate artifacts on the parent thread");
   const control = await measure(() =>
     source.attachExportBodies(source.getCallLogsForExport(0, 500))
   );
   t.diagnostic(`event-loop max: child=${isolated.toFixed(2)}ms control=${control.toFixed(2)}ms`);
-  // 80 ms tolerates CI scheduler/GC noise, but rules out the hundreds-of-ms
-  // synchronous parsing/serialization burst of the same 500-artifact control. On a loaded
-  // runner (the merge-train suite) the whole parent loop stretches, so the bound also
-  // scales with the control: the child path must stay well under half of the blocking one.
-  const bound = Math.max(80, control / 2);
-  assert.ok(isolated < bound, `child event-loop delay ${isolated}ms (bound ${bound}ms)`);
-  assert.ok(control > 80, `old control must demonstrate blocking, got ${control}ms`);
+  // The positive control proves the probe catches the original synchronous-read regression.
+  // Wall time remains diagnostic: another process can deschedule either measurement on CI.
+  assert.equal(parentArtifactReads, 500, "the old hydration control must read all 500 artifacts");
   assertGone();
 });
 
@@ -215,32 +226,51 @@ test("crash after two acknowledged batches retains cursor and records failure wi
   assertGone();
 });
 
-test("hung destination is terminated at timeout, escalating past ignored SIGTERM", async () => {
-  rows(2);
-  const dest = destination("hang");
-  const ready = `${output}.hang-ready`;
-  // The escalation is only observable once the child has booted far enough to ignore
-  // SIGTERM. On a heavily loaded runner, booting tsx can take longer than the run timeout;
-  // then the default handler ends the child on SIGTERM and the run proves nothing about
-  // escalation. The fixture writes `ready` right after installing its handler, so retry
-  // with a longer timeout only while that never happened.
-  for (const timeoutMs of [6000, 12000, 24000]) {
-    fs.rmSync(ready, { force: true });
-    process.env.OMNIROUTE_LOG_EXPORT_RUN_TIMEOUT_MS = String(timeoutMs);
-    const start = Date.now();
-    const result = await runner.runDestinationExport(dest);
+test(
+  "hung destination is terminated at timeout, escalating past ignored SIGTERM",
+  { timeout: 30_000 },
+  async (t) => {
+    rows(2);
+    process.env.OMNIROUTE_LOG_EXPORT_RUN_TIMEOUT_MS = "1500";
+    const dest = destination("hang");
+    function marker(suffix: string) {
+      return new Promise<void>((resolve, reject) => {
+        const target = `${output}.${suffix}`;
+        const watcher = fs.watch(dir, () => {
+          if (fs.existsSync(target)) {
+            watcher.close();
+            resolve();
+          }
+        });
+        watcher.on("error", reject);
+        t.after(() => watcher.close());
+      });
+    }
+    const ready = marker("hang-ready");
+    const ignored = marker("term-ignored");
+    t.mock.timers.enable({ apis: ["setTimeout"] });
+    t.after(() => {
+      if (child && child.exitCode === null && child.signalCode === null) child.kill("SIGKILL");
+    });
+    const pending = runner.runDestinationExport(dest);
+    // The old 1.5 s wall-clock deadline could kill a slow-starting child before it ignored TERM.
+    await ready;
+    t.mock.timers.tick(1499);
+    assert.equal(child?.killed, false, "the configured deadline must not fire early");
+    t.mock.timers.tick(1);
+    await ignored;
+    t.mock.timers.tick(499);
+    assert.equal(child?.signalCode, null, "the child must survive TERM until the grace expires");
+    t.mock.timers.tick(1);
+    const result = await pending;
     assert.equal(result.success, false);
     assert.match(result.error ?? "", /timed out/);
-    assert.ok(Date.now() - start < timeoutMs + 4000);
     assert.equal(dbDest.getLogExportDestination(dest.id)?.lastStatus, "failure");
     assert.equal(result.cursorRowId, 0);
     assertGone();
-    if (!fs.existsSync(ready)) continue;
     assert.equal(child?.signalCode, "SIGKILL");
-    return;
   }
-  assert.fail("hang fixture never installed its SIGTERM handler before the run timeout");
-});
+);
 
 test("secret travels over IPC only, not argv/env, and child gets explicit heap limit", async () => {
   rows(2);

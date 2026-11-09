@@ -12,13 +12,13 @@ bir Release-Green webpack derlemesi ve bir lint işiyle aynı zamana denk geldi�
 kaynak tahsis eder; ana makinenin swap alanı (16 GB) bunu karşılar ve pull-request derlemeleri barındırılan
 runner'larda çalıştığı için Turbopack yuvası çoğu zaman boştadır:
 
-| runner               | etiket           | rol                                                                                                                                                           | `MemoryHigh` / `MemoryMax` | `CPUQuota`     |
-| -------------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | -------------- |
-| `omniroute-113-5`    | `omni-build`     | Turbopack derlemeleri: `ci.yml` `Build` (yalnızca push/dispatch), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, gecelik a11y derlemesi | 56 GB / 60 GB (swap 0)     | 1600 %         |
-| `omniroute-113-6`    | `omni-release`   | Release-Green (`release-green` + `main-green`), webpack derlemesi                                                                                             | 20 GB / 24 GB (swap 4 GB)  | 800 %          |
-| `omniroute-113-2`    | `omni-light`     | gecelik işler (Schemathesis, promptfoo, garak, k6) ve `quality.yml` `lint-guard`                                                                              | 12 GB / 16 GB (swap 4 GB)  | 600 %          |
-| `omniroute-113`      | `omni-light`     | yukarıdakiyle aynı havuz                                                                                                                                      | 8 GB / 12 GB               | 400 %          |
-| OmniHeuris, OmniMind | (kendi repoları) | yalnızca Dependabot (her biri için tepe değeri 155 MB, 2026-10-18)                                                                                            | 4 GB / 6 GB                | her biri 200 % |
+| runner               | etiket                          | rol                                                                                                                                                           | `MemoryHigh` / `MemoryMax` | `CPUQuota`     |
+| -------------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | -------------- |
+| `omniroute-113-5`    | `omni-build`, `omni-build-60gb` | Turbopack derlemeleri: `ci.yml` `Build` (yalnızca push/dispatch), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, gecelik a11y derlemesi | 56 GB / 60 GB (swap 0)     | 1600 %         |
+| `omniroute-113-6`    | `omni-release`                  | Release-Green (`release-green` + `main-green`), webpack derlemesi                                                                                             | 20 GB / 24 GB (swap 4 GB)  | 800 %          |
+| `omniroute-113-2`    | `omni-light`                    | gecelik işler (Schemathesis, promptfoo, garak, k6) ve `quality.yml` `lint-guard`                                                                              | 12 GB / 16 GB (swap 4 GB)  | 600 %          |
+| `omniroute-113`      | `omni-light`                    | yukarıdakiyle aynı havuz                                                                                                                                      | 8 GB / 12 GB               | 400 %          |
+| OmniHeuris, OmniMind | (kendi repoları)                | yalnızca Dependabot (her biri için tepe değeri 155 MB, 2026-10-18)                                                                                            | 4 GB / 6 GB                | her biri 200 % |
 
 2026-10-18 tarihinde ölçüldü:
 
@@ -28,12 +28,13 @@ runner'larda çalıştığı için Turbopack yuvası çoğu zaman boştadır:
 | swap       | 16 GB                            | `omniroute-113-5`, swap kapalıyken (`MemorySwapMax=0`) çalışır; böylece kontrolden çıkan bir derleme, makineyi swap kullanmaya zorlamak yerine üst sınırında sonlandırılır                                                                                                                                                                                                                                                     |
 | `/tmp`     | **12 GB tmpfs = RAM**            | burada tutulan her şey bellek kullanır; kalan dosyalar 3 saat sonra temizlenir                                                                                                                                                                                                                                                                                                                                                 |
 | CPU        | 32 çekirdekte 60 yük gözlemlendi | kotalardan önce, bir Turbopack derlemesi (~1166 % CPU) ile aynı makinedeki bir coverage paketi, diğer listener'ların heartbeat sinyallerini kaynak yetersizliğine uğrattı (`The self-hosted runner lost communication`, #16853)                                                                                                                                                                                                |
-| runner'lar | **7 listener** (2026-10-28)      | 5 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-7` ayrıca `omni-build` etiketini de taşır; `omniroute-113-3/-4/-8` depodan silindi (2026-10-28)                                                                                                                                                                                                                                                                            |
+| runner'lar | **7 listener** (2026-10-28)      | 5 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-5` ayrıca `omni-build-60gb` etiketini de taşır; `omniroute-113-3/-4/-8` depodan silindi (2026-10-28)                                                                                                                                                                                                                                                                       |
 
 Sınırlar, her unit'in `/etc/systemd/system/actions.runner.<…>.service.d/override.conf` dosyasında
 bulunur (önceki değerler `override.conf.bak-20261018` olarak saklanmıştır) ve
 `systemctl set-property --runtime … MemoryHigh=… MemoryMax=… CPUQuota=…` ile canlı olarak uygulanmıştır — yeniden başlatma yapılmadığından
-çalışan hiçbir işe dokunulmamıştır. Etiketler de runners API'si aracılığıyla (`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
+çalışan hiçbir işe dokunulmamıştır. Etiketler de runners API'si aracılığıyla
+(`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
 `gh api -X POST repos/<repo>/actions/runners/<id>/labels -f 'labels[]=<label>'`) canlı olarak değiştirilir.
 
 ## Temizleyiciyi kurun (tek seferlik, sunucuda)
@@ -88,7 +89,7 @@ boşta olma denetimiyle yeniden başlatmayı aynı komutta gerçekleştirerek,
 ## İşletim kuralları
 
 - **Aynı anda yalnızca bir Turbopack derlemesi — etiketle zorunlu kılınır.** Tam bir Turbopack
-  `next build` çalıştıran her iş `[self-hosted, omni-build]` etiketlerini hedefler ve bu etiketi
+  `next build` çalıştıran her iş `[self-hosted, omni-build, omni-build-60gb]` etiketlerini hedefler ve bu etiketi
   yalnızca **`omniroute-113-5`** taşır: `ci.yml` içindeki `Build`, `npm-publish.yml` içindeki
   `publish`, `nightly-v4-build`, `preview-artifact`, gecelik a11y derlemesi (#16853) ve
   `docker-publish.yml` içindeki **amd64** (BuildKit içinde webpack — Turbopack burada panikledi,

@@ -833,14 +833,7 @@ Exa `type: "lite"` (Exa 3.0) குறைந்த எண்ணிக்கை�
 நீக்கப்பட்ட `subpages`, `subpageTarget`, `highlights.numSentences` மற்றும் `highlights.highlightsPerUrl`
 இனி முன்னோக்கி அனுப்பப்படாது.
 
-செலவுக் கணக்கீடு flat registry `costPerQuery`-ஆகும்; ஆனால் Exa மட்டும் Exa-வின் சொந்த விலை நிர்ணயத்தைப்
-பின்பற்றுகிறது: `auto` (மற்றும் legacy `fast`)-க்கு ஒவ்வொரு அழைப்புக்கும் $0.007 அல்லது `lite` (மற்றும்
-legacy `instant`)-க்கு $0.004, இது 10 முடிவுகளை உள்ளடக்கியது; அதன் பின்னர் வரும் ஒவ்வொரு முடிவுக்கும்
-$0.001; மேலும் `contents.summary` அமைக்கப்பட்டிருந்தால் திருப்பி வழங்கப்படும் ஒவ்வொரு முடிவுக்கும் $0.001.
-Tavily-க்கு `search_depth` `basic`, `fast` மற்றும் `ultra-fast` ஆகியவற்றில் 1 credit ($0.008), `advanced`-க்கு
-2 credits ($0.016) எனப் பதிவு செய்யப்படுகிறது
-([Tavily API credits](https://docs.tavily.com/documentation/api-credits)). `auto_parameters: true` கொண்ட
-அழைப்பை Tavily advanced-ஆக மேம்படுத்தினாலும், அது 1 credit-ஆகவே பதிவு செய்யப்படும்.
+Exa: `auto` (மற்றும் பழைய `fast`) முறைக்கு அழைப்பு ஒன்றுக்கு $0.007 அல்லது `lite` (மற்றும் பழைய `instant`) முறைக்கு $0.004; இதில் 10 முடிவுகள் அடங்கும். மேலும் ஒவ்வொரு முடிவுக்கும் $0.001; மற்றும் `contents.summary` அமைக்கப்படும் போது திரும்பிய முடிவு ஒன்றுக்கு $0.001. Tavily `search_depth` `basic`, `fast` மற்றும் `ultra-fast` க்கு 1 கிரெடிட் ($0.008) மற்றும் `advanced` க்கு 2 கிரெடிட்கள் ($0.016) ( [Tavily API கிரெடிட்ஸ்](https://docs.tavily.com/documentation/api-credits) ) என பதிவு செய்யப்பட்டுள்ளது. Tavily மேம்பட்டதாக மேம்படுத்தும் `auto_parameters: true` உடன் அழைப்பு இன்னும் 1 கிரெடிட்டில் பதிவுசெய்யப்படுகிறது.
 
 ---
 
@@ -1117,6 +1110,8 @@ X-OmniRoute-No-Cache: true
 
 ---
 
+<a id="cliproxyapi-management-compatibility"></a>
+
 ## CLIProxyAPI மேலாண்மை இணக்கத்தன்மை
 
 பயன்பாட்டு டாஷ்போர்டுகள் Claude மற்றும் Codex சந்தா வரம்புகளைப் படிக்க அழைக்கும் மூன்று [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI) மேலாண்மை endpoint-களுக்குப் OmniRoute பதிலளிக்கிறது (எடுத்துக்காட்டாக, T3 Code-இன் `cliproxy` usage-limit source). கிளையன்ட்டின் base URL-ஐ OmniRoute-க்கு சுட்டிக்காட்டி, `manage` scope கொண்ட API விசையை அதன் management key ஆகப் பயன்படுத்தவும். வழித்தடங்கள் `/v0/management/*` மற்றும் `/api/v0/management/*` ஆகிய இடங்களில் வழங்கப்படுகின்றன.
@@ -1127,20 +1122,11 @@ X-OmniRoute-No-Cache: true
 | POST   | `/v0/management/api-call`    | Body `{ auth_index, method, url, header?, data? }`. கணக்கின் token-ஐப் பயன்படுத்தி அனுமதிப்பட்ட ஒரு கோரிக்கையை அனுப்பி, `{ status_code, body }`-ஐத் திருப்பி வழங்கும் |
 | POST   | `/v0/management/reset-quota` | Body `{ auth_index }`. ஒரு கணக்கின் இணைப்பு cooldown, model lockout-கள் மற்றும் Codex per-scope cooldown-களை அழிக்கும்                                                |
 
-- `auth_index` என்பது OmniRoute இணைப்பு id ஆகும். `provider` என்பது `claude` அல்லது `codex` ஆகும் (OAuth
-  இணைப்புகள் மட்டுமே; `anthropic` API-key provider பட்டியலிடப்படாது). Codex-க்கு,
-  `id_token.chatgpt_account_id` சேமிக்கப்பட்ட workspace id ஆகவும், `plan_type` சேமிக்கப்பட்ட plan ஆகவும் இருக்கும்.
-- `api-call` ஒரு பொதுவான proxy அல்ல. இது Claude `GET
-https://api.anthropic.com/api/oauth/usage` மற்றும் Codex `GET https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits` மற்றும்
-  `POST .../wham/rate-limit-reset-credits/consume` ஆகியவற்றை மட்டுமே ஏற்கும்; ஒவ்வொன்றும் பொருந்தும்
-  provider-ஐச் சேர்ந்த கணக்கிற்காக மட்டுமே அனுமதிக்கப்படும். வேறு எதுவும் upstream-ஐத் தொடர்புகொள்ளாமல்
-  `403`-ஐத் திருப்பி வழங்கும். அழைப்பாளரின் `Authorization` header (`$TOKEN$` placeholder உட்பட) புறக்கணிக்கப்படுகிறது: OmniRoute
-  இணைப்பின் access token-ஐச் செலுத்தி, அது காலாவதியாகும் நிலையில் இருந்தால் முதலில் refresh செய்து, அனுமதிக்கப்பட்ட
-  header-களை மட்டுமே (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`;
-  `Accept`, `Content-Type`) முன்னனுப்பும். `Chatgpt-Account-Id` விடுபட்டிருந்தால், சேமிக்கப்பட்ட workspace id இயல்புநிலையாகப் பயன்படுத்தப்படும்.
-  கோரிக்கைகள் 15 விநாடிகளுக்குப் பிறகு timeout ஆகும் மற்றும் இணைப்பின் proxy-ஐப் பயன்படுத்தும்.
-- `reset-quota` terminal state-களை (banned, expired, credits_exhausted) அப்படியே விட்டுவிடும். அறியப்படாத
-  `auth_index` `404`-ஐத் திருப்பி வழங்கும்.
+- `auth_index` என்பது OmniRoute connection ID. `provider` என்பது `claude` அல்லது `codex` (OAuth connection கள் மட்டுமே; `anthropic` API-key provider பட்டியலிடப்படாது). Codex க்கு `id_token.chatgpt_account_id` என்பது சேமிக்கப்பட்ட workspace ID; `plan_type` சேமிக்கப்பட்ட plan.
+- `api-call` பொதுவான proxy அல்ல. இது Claude `GET
+https://api.anthropic.com/api/oauth/usage` மற்றும் Codex `GET
+https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits`, `POST .../wham/rate-limit-reset-credits/consume` ஆகியவற்றை மட்டுமே ஏற்கும்; ஒவ்வொன்றும் பொருத்தமான provider இன் account க்கு மட்டுமே. மற்றவை அனைத்தும் upstream ஐத் தொடர்புகொள்ளாமல் `403` தரும். Caller இன் `Authorization` header (`$TOKEN$` placeholder உட்பட) புறக்கணிக்கப்படும்: OmniRoute connection இன் access token ஐச் சேர்க்கும், காலாவதியாகும் நேரம் நெருங்கினால் முதலில் refresh செய்யும், அனுமதிக்கப்பட்ட header களை மட்டுமே அனுப்பும் (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`; `Accept`, `Content-Type`). `Chatgpt-Account-Id` இல்லாவிட்டால் சேமிக்கப்பட்ட workspace ID இயல்புநிலையாகும். முதல் upstream response `401` எனில் ஒருமுறை refresh செய்து, access token மாறினால் மட்டுமே மீண்டும் முயலும். ஒவ்வொரு upstream முயற்சிக்கும் 15 வினாடி timeout உண்டு; அது connection இன் proxy ஐப் பயன்படுத்தும்.
+- `reset-quota` terminal நிலைகளை (banned, expired, credits_exhausted) மாற்றாது. தெரியாத `auth_index` க்கு `404` வரும்.
 
 **Auth:** dashboard session அல்லது `manage`-scoped API key தேவைப்படுகிறது; login முடக்கப்பட்டிருந்தாலும் இது அவசியம்
 (இந்தப் பாதைகள் `ALWAYS_PROTECTED_API_PATHS`-ல் உள்ளன). Inference-only விசைகளுக்கு `403` கிடைக்கும். மூலம்:
@@ -1873,17 +1859,17 @@ curl -X DELETE http://localhost:20128/api/resilience/model-cooldowns \
 
 OmniRoute, 3 போக்குவரத்து முறைகள் (stdio, SSE, streamable-http) மற்றும் வரம்புக்குட்பட்ட கருவிகளுடன் உட்பொதிக்கப்பட்ட Model Context Protocol சேவையகத்தைக் கொண்டுள்ளது. கீழே உள்ள dashboard endpoint-கள் நிலை/தணிக்கைத் தரவைப் படித்து, HTTP போக்குவரத்து முறைகளுக்கான proxy ஆகச் செயல்படுகின்றன.
 
-| முறை | பாதை | விளக்கம் |
-| ------ | ---------------------- | ------------------------------------------------------------------------------------------------ | -------------------- |
-| GET | `/api/mcp/status` | Heartbeat, போக்குவரத்து, ஆன்லைன் நிலை, கடைசி அழைப்பு, முதன்மைக் கருவிகள், 24 மணி நேர வெற்றி விகிதம் |
-| GET | `/api/mcp/tools` | `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints` ஆகியவற்றைக் கொண்ட MCP கருவிகளின் பட்டியல் |
-| GET | `/api/mcp/sse` | SSE போக்குவரத்திற்கான திறந்த SSE stream (MCP முடக்கப்பட்டிருந்தால் அல்லது போக்குவரத்து பொருந்தாவிட்டால் `503` வழங்கப்படும்) |
-| POST | `/api/mcp/sse` | SSE போக்குவரத்தில் JSON-RPC frame-ஐ அனுப்புதல் |
-| GET | `/api/mcp/stream` | Streamable HTTP போக்குவரத்தின் SSE பக்கத்தைத் திறத்தல் (சேவையகம் தொடங்கும் செய்திகள்) |
-| POST | `/api/mcp/stream` | Streamable HTTP போக்குவரத்தில் JSON-RPC frame-ஐ அனுப்புதல் |
-| DELETE | `/api/mcp/stream` | Streamable HTTP அமர்வை முடித்தல் |
-| GET | `/api/mcp/audit` | தணிக்கைப் பதிவைக் கேள்வியிடுதல் — `?limit=`, `?offset=`, `?tool=`, `?success=true                                | false`, `?apiKeyId=` |
-| GET | `/api/mcp/audit/stats` | ஒருங்கிணைக்கப்பட்ட தணிக்கைப் புள்ளிவிவரங்கள் (மொத்தங்கள், வெற்றி விகிதம், சராசரி கால அளவு, முதன்மைக் கருவிகள்) |
+| முறை   | பாதை                   | விளக்கம்                                                                                                                                 |
+| ------ | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/mcp/status`      | Heartbeat, போக்குவரத்து, ஆன்லைன் நிலை, கடைசி அழைப்பு, முதன்மைக் கருவிகள், 24 மணி நேர வெற்றி விகிதம்                                      |
+| GET    | `/api/mcp/tools`       | `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints` ஆகியவற்றைக் கொண்ட MCP கருவிகளின் பட்டியல்                      |
+| GET    | `/api/mcp/sse`         | SSE போக்குவரத்திற்கான திறந்த SSE stream (MCP முடக்கப்பட்டிருந்தால் அல்லது போக்குவரத்து பொருந்தாவிட்டால் `503` வழங்கப்படும்)              |
+| POST   | `/api/mcp/sse`         | SSE போக்குவரத்தில் JSON-RPC frame-ஐ அனுப்புதல்                                                                                           |
+| GET    | `/api/mcp/stream`      | Streamable HTTP போக்குவரத்தின் SSE பக்கத்தைத் திறத்தல் (சேவையகம் தொடங்கும் செய்திகள்)                                                    |
+| POST   | `/api/mcp/stream`      | Streamable HTTP போக்குவரத்தில் JSON-RPC frame-ஐ அனுப்புதல்                                                                               |
+| DELETE | `/api/mcp/stream`      | Streamable HTTP அமர்வை முடித்தல்                                                                                                         |
+| GET    | `/api/mcp/audit`       | தணிக்கைப் பதிவைக் கேள்வியிடுதல் — `?limit=`, `?offset=`, `?tool=`, `?success=true                                \| false`, `?apiKeyId=` |
+| GET    | `/api/mcp/audit/stats` | ஒருங்கிணைக்கப்பட்ட தணிக்கைப் புள்ளிவிவரங்கள் (மொத்தங்கள், வெற்றி விகிதம், சராசரி கால அளவு, முதன்மைக் கருவிகள்)                           |
 
 **அங்கீகாரம்:** `sse`/`stream` போக்குவரத்து முறைகள் MCP-க்கான தனிப்பட்ட அங்கீகாரப் பரப்பைப் பயன்படுத்துகின்றன (`mcp` scope கொண்ட Bearer API விசை); `status`/`tools`/`audit*` வழித்தடங்களை dashboard-இலிருந்து படிக்கலாம் (dashboard host-ஐ அடைவதற்குத் தேவையான கூடுதல் அங்கீகாரம் எதுவும் இல்லை).
 

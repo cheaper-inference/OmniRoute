@@ -22,6 +22,7 @@ import tls from "node:tls";
 import type { EventEmitter } from "node:events";
 
 import { hasAmbientProxyContext, resolveProxyForRequest } from "../../utils/proxyFetch.ts";
+import { stripIpv6Brackets } from "../../utils/proxyFamily.ts";
 
 const DEFAULT_TUNNEL_TIMEOUT_MS = 15_000;
 const HEADER_TERMINATOR = "\r\n\r\n";
@@ -81,9 +82,11 @@ export function parseH2Authority(targetUrl: string): { host: string; port: numbe
  * `http2.connect({ createConnection })` expects to receive.
  */
 export function tlsConnectOverTunnel(socket: net.Socket, servername: string): tls.TLSSocket {
+  const hostname = stripIpv6Brackets(servername);
   const tlsSocket = tls.connect({
     socket,
-    servername,
+    host: hostname,
+    servername: net.isIP(hostname) ? undefined : hostname,
     ALPNProtocols: ["h2"],
   });
   // A peer that ignores ALPN would otherwise leave the HTTP/2 session hanging.
@@ -238,11 +241,16 @@ export function createProxyTunnelSocket(options: ProxyTunnelOptions): Promise<ne
 
     const isTlsProxy = proxy.protocol === "https:";
     const port = Number(proxy.port) || (isTlsProxy ? 443 : 80);
+    const proxyHost = stripIpv6Brackets(proxy.hostname);
     // An https:// proxy speaks TLS before CONNECT. Writing CONNECT in cleartext
     // makes it drop the connection and would expose Proxy-Authorization.
     const socket: net.Socket = isTlsProxy
-      ? tls.connect({ host: proxy.hostname, port, servername: proxy.hostname })
-      : net.connect({ host: proxy.hostname, port });
+      ? tls.connect({
+          host: proxyHost,
+          port,
+          servername: net.isIP(proxyHost) ? undefined : proxyHost,
+        })
+      : net.connect({ host: proxyHost, port });
     const readyEvent = isTlsProxy ? "secureConnect" : "connect";
 
     const timer = setTimeout(() => {

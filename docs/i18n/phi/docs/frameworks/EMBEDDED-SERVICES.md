@@ -4,9 +4,13 @@
 
 ---
 
-> **Bersyon:** v3.8.44** Huling na-update:** 2026-10-28** Madla:** Mga inhinyero na nagdaragdag, nagpapanatili, o nagde-debug ng mga naka-embed na serbisyo (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box).
+> **Bersyon:** v3.8.44
+> **Huling na-update:** 2026-10-28
+> **Para kanino:** Mga engineer na nagdaragdag, nagpapanatili, o nagde-debug ng mga naka-embed na serbisyo (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box).
 
-Ang mga naka-embed na serbisyo ay lokal na naka-install na mga tool sa proseso ng sidecar na ini-install, pinangangasiwaan, at inilalantad ng OmniRoute bilang mga target sa pagruruta sa unang klase. Hindi tulad ng mga external na provider (na naaabot sa internet sa pamamagitan ng mga API key), ang mga naka-embed na serbisyo ay tumatakbo sa parehong machine bilang OmniRoute at nakikipag-usap sa loopback.
+Ang mga naka-embed na serbisyo ay mga lokal na naka-install na sidecar tool ng proseso na ini-install, pinangangasiwaan, at
+inilalantad ng OmniRoute bilang mga pangunahing target sa pagruruta. Hindi tulad ng mga panlabas na provider (na ina-access sa internet
+gamit ang mga API key), tumatakbo ang mga naka-embed na serbisyo sa parehong machine kung saan tumatakbo ang OmniRoute at nakikipag-ugnayan sa pamamagitan ng loopback.
 
 ---
 
@@ -25,38 +29,38 @@ Ang mga naka-embed na serbisyo ay lokal na naka-install na mga tool sa proseso n
 
 ## 1. Pangkalahatang-ideya
 
-### Bakit naka-embed na mga serbisyo?
+### Bakit mga naka-embed na serbisyo?
 
-Naka-embed ang walong serbisyo:
+Walong serbisyo ang naka-embed:
 
-| Serbisyo        | npm package                        | Default na port | Layunin                                                                                                                                                                                                                                                                                                                                                           |
-| --------------- | ---------------------------------- | :-------------: | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **9Router**     | `9router`                          |      20130      | AI router na magagamit ng OmniRoute bilang sub-provider. Mga modelong nakalantad bilang `9router/{sub}/{model}`                                                                                                                                                                                                                                                   |
-| **CLIProxyAPI** | GitHub release binary (`cliproxy`) |      8317       | Lokal na proxy adapter para sa Anthropic CLI auth flows. Nagbibigay ng fallback routing kapag nag-expire ang mga OAuth token                                                                                                                                                                                                                                      |
-| **Mux**         | `mux` (walang ulo `mux server`)    |      8322       | Lokal na ahente-orkestrasyon daemon (coder/mux). — lang ang pinamamahalaan ng lifecycle hindi isang target sa pagruruta (walang LLM proxying).                                                                                                                                                                                                                    |
-| **Bifrost**     | `@maximhq/bifrost`                 |      8080       | Pumunta sa AI-gateway relay backend. Kapag tumatakbo, awtomatikong pinipili ng ruta ng relay (`/v1/relay/`)                                                                                                                                                                                                                                                       |
-| **Dario**       | `@askalf/dario`                    |      3456       | Claude-subscription proxy — alternative/failover to CLIProxyAPI para sa Claude-Code-shaped na trapiko; ang injected key ay nagiging `DARIO_ADMIN_TOKEN` gating nito `/admin/*` OAuth control plane                                                                                                                                                                |
-| **bukas-wa**    | `@open-wa/wa-automate`             |      8323       | WhatsApp Web automation (walang ulo na Chromium sa pamamagitan ng Puppeteer). — lang ang pinamamahalaan ng Lifecycle hindi isang target sa pagruruta.                                                                                                                                                                                                             |
-| **LLMLingua**   | `@atjsh/llmlingua-2`               |      20135      | Prompt-compression sidecar — real LLMLingua-2 ONNX model (JS/TS port ng Microsoft's algorithm). `open-sse/services/compression/engines/llmlingua/index.ts` ay nagpapadala `/compress` sa HTTP dito, na bumabalik sa nasa prosesong worker-thread backend kapag ang sidecar ay nakababa. — lang na pinamamahalaan ng Lifecycle ay hindi isang target sa pagruruta. |
-| **sing-box**    | GitHub release binary (`singbox`)  |      20140      | TPROXY sidecar backing ang transparent-proxy interception ng `applyTproxy()`(`src/mitm/tproxy/setup.ts`). Dina-download ng installer ang naka-pin, na-verify ng checksum na release. — lang ang pinamamahalaan ng lifecycle hindi target sa pagruruta (walang LLM proxying)                                                                                       |
+| Serbisyo        | npm package                                  | Default na port | Layunin                                                                                                                                                                                                                                                                                                                                                                         |
+| --------------- | -------------------------------------------- | :-------------: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **9Router**     | `9router`                                    |      20130      | AI router na maaaring gamitin ng OmniRoute bilang sub-provider. Inilalantad ang mga modelo bilang `9router/{sub}/{model}`                                                                                                                                                                                                                                                       |
+| **CLIProxyAPI** | Binary mula sa GitHub release (`cliproxy`)   |      8317       | Lokal na proxy adapter para sa mga daloy ng Anthropic CLI auth. Nagbibigay ng fallback routing kapag nag-expire ang mga OAuth token                                                                                                                                                                                                                                             |
+| **Mux**         | `mux` (headless `mux server`)                |      8322       | Lokal na daemon para sa agent orchestration (coder/mux). Lifecycle-managed lamang — hindi routing target (walang LLM proxying).                                                                                                                                                                                                                                                 |
+| **Bifrost**     | `@maximhq/bifrost`                           |      8080       | Go AI-gateway relay backend. Kapag tumatakbo, awtomatikong pinipili ng relay route (`/v1/relay/`)                                                                                                                                                                                                                                                                               |
+| **Dario**       | `@askalf/dario`                              |      3456       | Proxy ng Claude subscription — alternatibo/failover sa CLIProxyAPI para sa trapikong hugis-Claude-Code; ang ini-inject na key ay nagiging `DARIO_ADMIN_TOKEN` na kumokontrol sa access sa `/admin/*` OAuth control plane nito                                                                                                                                                   |
+| **open-wa**     | `@open-wa/wa-automate`                       |      8323       | Automation ng WhatsApp Web (headless Chromium sa pamamagitan ng Puppeteer). Lifecycle-managed lamang — hindi routing target.                                                                                                                                                                                                                                                    |
+| **LLMLingua**   | `@atjsh/llmlingua-2`                         |      20135      | Sidecar para sa prompt compression — tunay na LLMLingua-2 ONNX model (JS/TS port ng algorithm ng Microsoft). Nagpapadala ang `open-sse/services/compression/engines/llmlingua/index.ts` ng `/compress` sa pamamagitan ng HTTP papunta rito, at bumabalik sa in-process worker-thread backend kapag hindi gumagana ang sidecar. Lifecycle-managed lamang — hindi routing target. |
+| **sing-box**    | Binary mula sa release sa GitHub (`singbox`) |      20140      | TPROXY sidecar na sumusuporta sa transparent-proxy interception ng `applyTproxy()` (`src/mitm/tproxy/setup.ts`). Dina-download ng installer ang nakapirming release na sinusuri ang checksum. Lifecycle lamang ang pinamamahalaan: hindi ito routing target at hindi nagpo-proxy ng mga LLM request.                                                                            |
 
-Lahat ng walo ay sumusunod sa parehong supervisory model:
+Pare-pareho ang modelo ng pangangasiwa ng lahat ng walo:
 
-- ini-install OmniRoute ang mga ito sa ilalim `DATA_DIR/services/{name}/` (nahihiwalay sa sariling `package.json` ng OmniRoute)
-- OmniRoute spawns at sinusubaybayan ang mga ito bilang proseso ng bata
-- OmniRoute ay nag-inject ng ephemeral API key sa kapaligiran ng bata at iniikot ito nang walang downtime (kung saan naaangkop)
-- Ang lahat ng mga ruta ng pamamahala (`/api/services/*`) ay**LOCAL_ONLY** Maa-access lang — mula sa loopback (hard rule #17)
+- Ini-install sila ng OmniRoute sa ilalim ng `DATA_DIR/services/{name}/` (nakahiwalay sa sariling `package.json` ng OmniRoute)
+- Sinisimulan at mino-monitor sila ng OmniRoute bilang mga child process
+- Nag-i-inject ang OmniRoute ng panandaliang API key sa environment ng child at iniikot ito nang walang downtime (kung naaangkop)
+- Ang lahat ng management route (`/api/services/*`) ay **LOCAL_ONLY** — maa-access lamang mula sa loopback (mahigpit na panuntunan #17)
 
-### Mga pangunahing desisyon (mula sa plano ng disenyo)
+### Mga pangunahing pasya (mula sa plano ng disenyo)
 
-| Desisyon                              | Halaga                                                                                          |
-| ------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| Dashboard access sa 9Router native UI | Baliktarin ang proxy sa `/dashboard/providers/services/9router/embed/*`                         |
-| Mekanismo ng pag-install              | `npm install {package}` sa pamamagitan ng `execFile` (walang shell interpolation)               |
-| Mode ng pagkonsumo                    | Nakarehistro ang provider bilang `9router/{sub}/{model}` sa routing engine                      |
-| API key na pamamahala                 | OmniRoute ay bumubuo, nag-encrypt ng at-rest (AES-256-GCM), at nag-inject sa pamamagitan ng env |
-| Lokasyon ng dashboard                 | `/dashboard/providers/services` (tatlong tab)                                                   |
-| Auto-start                            | I-toggle bawat serbisyo, default OFF                                                            |
+| Pasya                                       | Halaga                                                                                                     |
+| ------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| Access ng dashboard sa native UI ng 9Router | Reverse proxy sa `/dashboard/providers/services/9router/embed/*`                                           |
+| Mekanismo ng pag-install                    | `npm install {package}` sa pamamagitan ng `execFile` (walang shell interpolation)                          |
+| Mode ng paggamit                            | Provider na nakarehistro bilang `9router/{sub}/{model}` sa routing engine                                  |
+| Pamamahala ng API key                       | Bumubuo ang OmniRoute, nag-e-encrypt habang nakaimbak (AES-256-GCM), at nag-i-inject sa pamamagitan ng env |
+| Lokasyon ng dashboard                       | `/dashboard/providers/services` (tatlong tab)                                                              |
+| Awtomatikong pagsisimula                    | Toggle para sa bawat serbisyo, default na OFF                                                              |
 
 ---
 
@@ -65,11 +69,11 @@ Lahat ng walo ay sumusunod sa parehong supervisory model:
 ```
 ┌────────────────────────────────────────────────────────────────────┐
 │  Layer 1 — UI                                                      │
-│  /dashboard/providers/services  (tabs: CLIProxyAPI | 9Router | Mux)│
-│  Logs live (SSE), Start/Stop/Restart/Update, Settings, Install     │
+│  /dashboard/providers/services  (mga tab: CLIProxyAPI | 9Router | Mux)│
+│  Mga live log (SSE), Start/Stop/Restart/Update, Mga Setting, I-install│
 │                                                                    │
 │  src/app/(dashboard)/dashboard/providers/services/                 │
-│    ├── page.tsx               Shell + tab routing by ?tab=         │
+│    ├── page.tsx               Shell + pagruruta ng tab ayon sa ?tab=│
 │    ├── tabs/                  CliproxyServiceTab, NinerouterServiceTab,│
 │    │                          MuxServiceTab                        │
 │    └── components/            ServiceStatusCard, ServiceLifecycleButtons,│
@@ -77,7 +81,7 @@ Lahat ng walo ay sumusunod sa parehong supervisory model:
 └──────────────────────┬─────────────────────────────────────────────┘
                        │ HTTP (Next.js fetch)
 ┌──────────────────────▼─────────────────────────────────────────────┐
-│  Layer 2 — API (LOCAL_ONLY — loopback only)                        │
+│  Layer 2 — API (LOCAL_ONLY — loopback lamang)                      │
 │                                                                    │
 │  /api/services/9router/{install|start|stop|restart|update|         │
 │                          rotate-key|status|auto-start|logs}        │
@@ -88,72 +92,73 @@ Lahat ng walo ay sumusunod sa parehong supervisory model:
 │  /dashboard/providers/services/9router/embed/[...path]             │
 │    (reverse HTTP + WebSocket proxy → 9Router upstream)             │
 │                                                                    │
-│  Gate: LOCAL_ONLY_API_PREFIXES includes "/api/services/" and       │
+│  Gate: Kabilang sa LOCAL_ONLY_API_PREFIXES ang "/api/services/" at │
 │        "/dashboard/providers/services/*/embed/"                    │
 └──────────────────────┬─────────────────────────────────────────────┘
-                       │ in-process calls
+                       │ mga in-process na tawag
 ┌──────────────────────▼─────────────────────────────────────────────┐
 │  Layer 3 — ServiceSupervisor (src/lib/services/)                   │
 │                                                                    │
-│  ServiceSupervisor.ts   Generic supervisor (child_process.spawn)   │
+│  ServiceSupervisor.ts   Pangkalahatang supervisor (child_process.spawn)│
 │    ├── install:    execFile('npm', ['install', pkg, '--prefix'])    │
 │    ├── start:      spawn(node, [entrypoint], {env, cwd})           │
 │    ├── api_key:    crypto.randomBytes(32) → env NINEROUTER_API_KEY  │
-│    ├── port:       20130 for 9Router (configurable)                │
-│    ├── logs:       stdio ring buffer 5 MB → SSE events             │
-│    ├── health:     HTTP GET /health every 2–5 s, lazy recovery     │
+│    ├── port:       20130 para sa 9Router (maaaring i-configure)     │
+│    ├── logs:       stdio ring buffer na 5 MB → mga SSE event       │
+│    ├── health:     HTTP GET /health bawat 2–5 s, lazy recovery     │
 │    └── lifecycle:  SIGTERM 15 s → SIGKILL                          │
 │                                                                    │
 │  registry.ts        getSupervisor(name) / registerSupervisor()     │
-│  bootstrap.ts       Bootstraps all SERVICES[] at process start     │
+│  bootstrap.ts       Sini-bootstrap ang lahat ng SERVICES[] sa pagsisimula ng proseso│
 │  apiKey.ts          getOrCreateApiKey(), generateServiceApiKey()   │
-│  modelSync.ts       Periodic GET /v1/models → service_models table │
-│  ringBuffer.ts      Circular log buffer (5 MB per service)         │
+│  modelSync.ts       Pana-panahong GET /v1/models → service_models table│
+│  ringBuffer.ts      Paikot na buffer ng log (5 MB bawat serbisyo)  │
 │  healthCheck.ts     Polling HTTP health probe                      │
 │  installers/        ninerouter.ts, cliproxy.ts, mux.ts, openwa.ts  │
-│                      (installer adapters)                          │
+│                      (mga installer adapter)                       │
 └──────────────────────┬─────────────────────────────────────────────┘
                        │ OpenAI-compatible HTTP (loopback)
 ┌──────────────────────▼─────────────────────────────────────────────┐
-│  Layer 4 — Provider / Routing                                      │
+│  Layer 4 — Provider / Pagruruta                                    │
 │                                                                    │
 │  open-sse/executors/ninerouter.ts                                  │
-│    Re-looks up port and API key per-request (no caching).          │
-│    Strips "9router/" prefix from model id before proxying.         │
-│    Returns 503 service_not_running if supervisor not in "running". │
+│    Muling hinahanap ang port at API key sa bawat request (walang caching).│
+│    Inaalis ang prefix na "9router/" sa model id bago mag-proxy.     │
+│    Nagbabalik ng 503 service_not_running kung ang supervisor ay wala sa "running".│
 │                                                                    │
 │  src/shared/constants/providers.ts                                 │
-│    Entry for "9router": isEmbeddedService: true                    │
+│    Entry para sa "9router": isEmbeddedService: true                │
 │                                                                    │
 │  open-sse/config/providerRegistry.ts                               │
-│    Models stored as "9router/{sub}/{model}" (prefixed).            │
-│    Synced every 5 min by modelSync.ts.                             │
+│    Iniimbak ang mga model bilang "9router/{sub}/{model}" (may prefix).│
+│    Sini-sync bawat 5 min ng modelSync.ts.                          │
 │                                                                    │
-│  Mux is lifecycle-managed ONLY (Layers 1-3) — it is an agent-       │
-│  orchestration daemon, not an LLM proxy, so it has no Layer 4      │
-│  executor/provider entry and is never a routing target.            │
+│  Ang Mux ay lifecycle-managed LAMANG (Mga Layer 1-3) — isa itong   │
+│  agent-orchestration daemon, hindi isang LLM proxy, kaya wala itong│
+│  Layer 4 executor/provider entry at hindi kailanman nagiging       │
+│  target ng pagruruta.                                              │
 └────────────────────────────────────────────────────────────────────┘
 ```
 
-### Mga pangunahing mapagkukunang file
+### Mga pangunahing source file
 
-| file                                        | Tungkulin                                                       |
+| File                                        | Gampanin                                                        |
 | ------------------------------------------- | --------------------------------------------------------------- |
-| `src/lib/services/ServiceSupervisor.ts`     | Core class: lifecycle, lock, kalusugan, ring buffer             |
+| `src/lib/services/ServiceSupervisor.ts`     | Pangunahing class: lifecycle, lock, health, ring buffer         |
 | `src/lib/services/bootstrap.ts`             | Pagpaparehistro sa antas ng proseso at awtomatikong pagsisimula |
-| `src/lib/services/registry.ts`              | Singleton mapa `tool → supervisor`                              |
-| `src/lib/services/apiKey.ts`                | Key generation, AES-256-GCM encryption at-rest                  |
-| `src/lib/services/modelSync.ts`             | Pana-panahong pag-sync ng modelo (5 min) + on-demand            |
+| `src/lib/services/registry.ts`              | Singleton map na `tool → supervisor`                            |
+| `src/lib/services/apiKey.ts`                | Pagbuo ng key, AES-256-GCM encryption habang nakaimbak          |
+| `src/lib/services/modelSync.ts`             | Pana-panahong pag-sync ng model (5 min) + kapag hiniling        |
 | `src/lib/services/ringBuffer.ts`            | 5 MB circular log buffer na may SSE subscribe                   |
-| `src/lib/services/healthCheck.ts`           | HTTP health probe (nako-configure na agwat)                     |
+| `src/lib/services/healthCheck.ts`           | HTTP health probe (maaaring i-configure ang interval)           |
 | `src/lib/services/installers/ninerouter.ts` | npm install/update/uninstall para sa 9Router                    |
 | `src/lib/services/installers/cliproxy.ts`   | npm install/update/uninstall para sa CLIProxyAPI                |
 | `src/lib/services/installers/mux.ts`        | npm install/update/uninstall para sa Mux                        |
 | `src/lib/services/installers/openwa.ts`     | npm install/update/uninstall para sa open-wa                    |
 | `src/lib/services/installers/llmlingua.ts`  | npm install/update/uninstall para sa LLMLingua                  |
-| `src/app/api/services/9router/_lib.ts`      | `getOrInitSupervisor()` katulong                                |
-| `src/app/api/services/[name]/logs/route.ts` | Nakabahaging SSE logs endpoint                                  |
-| `open-sse/executors/ninerouter.ts`          | Tagapagpatupad ng provider (Layer 4)                            |
+| `src/app/api/services/9router/_lib.ts`      | Helper na `getOrInitSupervisor()`                               |
+| `src/app/api/services/[name]/logs/route.ts` | Nakabahaging endpoint ng mga SSE log                            |
+| `open-sse/executors/ninerouter.ts`          | Provider executor (Layer 4)                                     |
 
 ---
 
@@ -207,52 +212,56 @@ ang mga race condition kapag, halimbawa, sabay na na-trigger ang auto-start at i
 
 ---
 
-## 4. API sanggunian
+## 4. Sanggunian ng API
 
-Ang lahat ng mga ruta sa ilalim ng `/api/services/` ay**LOCAL_ONLY** (loopback lang, hard rule #17). Ang mga non-loopback na kahilingan ay tumatanggap ng `403 LOCAL_ONLY` anuman ang auth token.
+Ang lahat ng route sa ilalim ng `/api/services/` ay **LOCAL_ONLY** (loopback lamang, mahigpit na tuntunin #17).
+Ang mga kahilingang hindi loopback ay makakatanggap ng `403 LOCAL_ONLY` anuman ang auth token.
 
-### 4.1 9Mga endpoint ng router (11 ruta)
+### 4.1 Mga endpoint ng 9Router (11 route)
 
 #### `POST /api/services/9router/install`
 
-I-install ang 9Router mula sa npm. Lumilikha `DATA_DIR/services/9router/` gamit ang sarili nitong `package.json` at `node_modules/`. Hindi sumasalungat sa sariling deps ni OmniRoute.
+I-install ang 9Router mula sa npm. Gumagawa ito ng `DATA_DIR/services/9router/` na may sarili nitong
+`package.json` at `node_modules/`. Hindi ito sumasalungat sa mga dependency ng OmniRoute.
 
-**Humiling ng katawan** (lahat ng opsyonal):
+**Body ng kahilingan** (opsyonal ang lahat):
 
 ```json
 { "version": "latest" }
 ```
 
-| Patlang   | Uri      | Default    | Paglalarawan                             |
-| --------- | -------- | ---------- | ---------------------------------------- |
-| `version` | `string` | `"latest"` | npm bersyon tag o semver upang i-install |
+| Field     | Uri      | Default    | Paglalarawan                           |
+| --------- | -------- | ---------- | -------------------------------------- |
+| `version` | `string` | `"latest"` | npm version tag o semver na ii-install |
 
 **Mga tugon:**
 
-| Katayuan | Paglalarawan                                                                |
-| -------- | --------------------------------------------------------------------------- |
-| `200`    | `{ ok: true, installedVersion: "x.y.z", path: "..." }`                      |
-| `400`    | Invalid na katawan ng kahilingan (Zod validation failure)                   |
-| `409`    | Naka-install na (nakahawak sa lock)                                         |
-| `500`    | Nabigo ang pag-install ng npm — tingnan `message` para sa friendly na error |
+| Status | Paglalarawan                                                                     |
+| ------ | -------------------------------------------------------------------------------- |
+| `200`  | `{ ok: true, installedVersion: "x.y.z", path: "..." }`                           |
+| `400`  | Di-wastong body ng kahilingan (kabiguan sa validation ng Zod)                    |
+| `409`  | Kasalukuyang nag-i-install (hawak ang lock)                                      |
+| `500`  | Nabigo ang npm install — tingnan ang `message` para sa madaling maunawaang error |
 
-**Mga Tala:** Gumagamit ng `execFile('npm', [...])` — na walang shell, walang interpolation (hard rule #13). Ang mga EACCES error ay lumalabas bilang mga friendly na mensahe.
+**Mga Tala:** Gumagamit ng `execFile('npm', [...])` — walang shell, walang interpolation (mahigpit na tuntunin #13).
+Ang mga error na EACCES ay ipinapakita bilang mga madaling maunawaang mensahe.
 
 ---
 
 #### `POST /api/services/9router/start`
 
-Simulan ang 9Router. Nagrerehistro ng superbisor kung hindi pa nakarehistro, pagkatapos ay tatawagan `supervisor.start()`. Idempotent kapag tumatakbo na.
+Simulan ang 9Router. Nagrerehistro ng supervisor kung hindi pa ito nakarehistro, pagkatapos ay tinatawag ang
+`supervisor.start()`. Idempotent kapag tumatakbo na.
 
-**katawan ng kahilingan:** wala
+**Body ng kahilingan:** wala
 
 **Mga tugon:**
 
-| Katayuan | Paglalarawan                                                    |
-| -------- | --------------------------------------------------------------- |
-| `200`    | `ServiceStatus` object (tingnan ang schema sa ibaba)            |
-| `409`    | Hindi naka-install ang 9Router (`status: "not_installed"`)      |
-| `503`    | Nabigo ang pagsisimula (error sa proseso — tingnan `lastError`) |
+| Status | Paglalarawan                                                    |
+| ------ | --------------------------------------------------------------- |
+| `200`  | `ServiceStatus` object (tingnan ang schema sa ibaba)            |
+| `409`  | Hindi naka-install ang 9Router (`status: "not_installed"`)      |
+| `503`  | Nabigong magsimula (error sa proseso — tingnan ang `lastError`) |
 
 **ServiceStatus schema:**
 
@@ -272,34 +281,37 @@ Simulan ang 9Router. Nagrerehistro ng superbisor kung hindi pa nakarehistro, pag
 
 #### `POST /api/services/9router/stop`
 
-Magiliw na ihinto ang 9Router. Nagpapadala ng SIGTERM, naghihintay ng 15 s, pagkatapos ay SIGKILL kung buhay pa. Idempotent kapag tumigil na.
+Maayos na ihinto ang 9Router. Nagpapadala ng SIGTERM, naghihintay nang 15 s, pagkatapos ay nagpapadala ng SIGKILL kung tumatakbo pa rin.
+Idempotent kapag nakahinto na.
 
-**katawan ng kahilingan:** wala
+**Body ng kahilingan:** wala
 
 **Mga tugon:**
 
-| Katayuan | Paglalarawan                             |
-| -------- | ---------------------------------------- |
-| `200`    | `ServiceStatus` (estado: "tinigil")      |
-| `503`    | Nabigo ang paghinto nang hindi inaasahan |
+| Status | Paglalarawan                         |
+| ------ | ------------------------------------ |
+| `200`  | `ServiceStatus` (state: "stopped")   |
+| `503`  | Hindi inaasahang nabigo ang paghinto |
 
 ---
 
 #### `POST /api/services/9router/restart`
 
-Katumbas ng `stop()` pagkatapos ay `start()` sa ilalim ng lock ng operasyon.
+Katumbas ng `stop()` na sinusundan ng `start()` sa ilalim ng operation lock.
 
-**katawan ng kahilingan:** wala
+**Body ng kahilingan:** wala
 
-**Mga tugon:** katulad ng `start` (nagbabalik ng huling `ServiceStatus`).
+**Mga tugon:** kapareho ng `start` (ibinabalik ang panghuling `ServiceStatus`).
 
 ---
 
 #### `POST /api/services/9router/update`
 
-Ina-update ang 9Router sa isang mas bagong bersyon ng npm. Kung tumatakbo ang serbisyo, ititigil muna ito, tatakbo ang npm install (i-install ang mas bagong bersyon sa lugar), at pagkatapos ay ire-restart ang serbisyo.
+Ina-update ang 9Router sa mas bagong bersyon ng npm. Kung tumatakbo ang serbisyo, ihihinto muna ito,
+patatakbuhin ang npm install (ini-install ang mas bagong bersyon sa kasalukuyang lokasyon), at pagkatapos ay
+muling sisimulan ang serbisyo.
 
-**Humiling ng katawan** (lahat ng opsyonal):
+**Body ng kahilingan** (opsyonal ang lahat):
 
 ```json
 { "version": "latest" }
@@ -307,41 +319,44 @@ Ina-update ang 9Router sa isang mas bagong bersyon ng npm. Kung tumatakbo ang se
 
 **Mga tugon:**
 
-| Katayuan | Paglalarawan                                                    |
-| -------- | --------------------------------------------------------------- |
-| `200`    | `{ ok: true, previousVersion: "...", installedVersion: "..." }` |
-| `400`    | Di-wastong katawan                                              |
-| `500`    | Nabigo ang pag-update ng npm                                    |
+| Status | Paglalarawan                                                    |
+| ------ | --------------------------------------------------------------- |
+| `200`  | `{ ok: true, previousVersion: "...", installedVersion: "..." }` |
+| `400`  | Di-wastong body                                                 |
+| `500`  | Nabigo ang npm update                                           |
 
 ---
 
 #### `POST /api/services/9router/rotate-key`
 
-Bumubuo ng bagong API key para sa 9Router, ine-encrypt ito sa pahinga, at i-restart ang serbisyo (kung tumatakbo) upang makuha nito ang bagong key mula sa kapaligiran nito. Ang lumang susi ay hindi wasto kaagad.
+Bumubuo ng bagong API key para sa 9Router, ini-encrypt ito habang nakaimbak, at muling sinisimulan ang serbisyo
+(kung tumatakbo) upang magamit nito ang bagong key mula sa environment nito. Agad na pinapawalang-bisa
+ang lumang key.
 
-**katawan ng kahilingan:** wala
+**Body ng kahilingan:** wala
 
 **Mga tugon:**
 
-| Katayuan | Paglalarawan                               |
-| -------- | ------------------------------------------ |
-| `200`    | `{ keyRotated: true, restarted: boolean }` |
-| `500`    | Nabigo ang pag-ikot                        |
+| Status | Paglalarawan                               |
+| ------ | ------------------------------------------ |
+| `200`  | `{ keyRotated: true, restarted: boolean }` |
+| `500`  | Nabigo ang rotation                        |
 
-**Seguridad:** Ang bagong susi ay hindi na ibinalik sa tugon (walang leak ng kredensyal). Ito ay naka-imbak na naka-encrypt (AES-256-GCM) sa `version_manager` table.
+**Seguridad:** Hindi kailanman ibinabalik ang bagong key sa tugon (walang pagtagas ng credential).
+Iniimbak ito nang naka-encrypt (AES-256-GCM) sa table na `version_manager`.
 
 ---
 
 #### `GET /api/services/9router/status`
 
-Ibinabalik ang pinagsamang live + DB status kabilang ang metadata ng bersyon at API key preview.
+Ibinabalik ang pinagsamang live + DB status, kabilang ang metadata ng bersyon at preview ng API key.
 
 **Mga tugon:**
 
-| Katayuan | Paglalarawan                   |
-| -------- | ------------------------------ |
-| `200`    | Tingnan ang schema sa ibaba    |
-| `500`    | Nabigo ang pagbabasa ng status |
+| Status | Paglalarawan                |
+| ------ | --------------------------- |
+| `200`  | Tingnan ang schema sa ibaba |
+| `500`  | Nabigong basahin ang status |
 
 **Schema ng tugon:**
 
@@ -367,9 +382,10 @@ Ibinabalik ang pinagsamang live + DB status kabilang ang metadata ng bersyon at 
 
 #### `POST /api/services/9router/auto-start`
 
-I-toggle ang auto-start na flag. Kapag `enabled: true`, awtomatikong magsisimula ang serbisyo sa susunod na mag-boot ang OmniRoute (kung naka-install ang serbisyo).
+I-toggle ang auto-start flag. Kapag `enabled: true`, awtomatikong magsisimula ang serbisyo
+sa susunod na pag-boot ng OmniRoute (kung naka-install ang serbisyo).
 
-**katawan ng kahilingan:**
+**Body ng kahilingan:**
 
 ```json
 { "enabled": true }
@@ -377,36 +393,40 @@ I-toggle ang auto-start na flag. Kapag `enabled: true`, awtomatikong magsisimula
 
 **Mga tugon:**
 
-| Katayuan | Paglalarawan          |
-| -------- | --------------------- |
-| `200`    | `{ autoStart: true }` |
-| `400`    | Di-wastong katawan    |
+| Status | Paglalarawan          |
+| ------ | --------------------- |
+| `200`  | `{ autoStart: true }` |
+| `400`  | Di-wastong body       |
 
 ---
 
 #### `GET /api/services/9router/logs`
 
-SSE stream ng mga live na log mula sa stdout/stderr ring buffer ng 9Router.
+SSE stream ng mga live log mula sa stdout/stderr ring buffer ng 9Router.
 
-**Mga parameter ng query:**
+**Mga query parameter:**
 
-| Param    | Uri       | Default | Paglalarawan                                                  |
-| -------- | --------- | ------- | ------------------------------------------------------------- |
-| `tail`   | `integer` | 200     | Ilang makasaysayang linya ang unang ipapadala (max 1000)      |
-| `filter` | `string`  | wala    | Case-insensitive substring filter (walang regex — ReDoS-safe) |
+| Param    | Uri       | Default | Paglalarawan                                                          |
+| -------- | --------- | ------- | --------------------------------------------------------------------- |
+| `tail`   | `integer` | 200     | Dami ng mga makasaysayang linya na unang ipapadala (max 1000)         |
+| `filter` | `string`  | wala    | Case-insensitive na substring filter (walang regex — ligtas sa ReDoS) |
 
-**SSE kaganapan:**
+**Mga SSE event:**
 
-| Kaganapan   | Data        | Paglalarawan                   |
-| ----------- | ----------- | ------------------------------ |
-| `snapshot`  | `LogLine[]` | Paunang makasaysayang buntot   |
-| `log`       | `LogLine`   | Live na linya ng log           |
-| `heartbeat` | `{}`        | Panatilihing buhay tuwing 15 s |
+| Event       | Data        | Paglalarawan               |
+| ----------- | ----------- | -------------------------- |
+| `snapshot`  | `LogLine[]` | Paunang makasaysayang tail |
+| `log`       | `LogLine`   | Live na linya ng log       |
+| `heartbeat` | `{}`        | Keep-alive kada 15 s       |
 
 **LogLine schema:**
 
 ```json
-{ "ts": 1716633600000, "stream": "stdout", "line": "[9router] Listening on :20130" }
+{
+  "ts": 1716633600000,
+  "stream": "stdout",
+  "line": "[9router] Listening on :20130"
+}
 ```
 
 **Mga tugon:**
@@ -414,150 +434,195 @@ SSE stream ng mga live na log mula sa stdout/stderr ring buffer ng 9Router.
 | Katayuan | Paglalarawan                                                   |
 | -------- | -------------------------------------------------------------- |
 | `200`    | `text/event-stream`                                            |
-| `400`    | masyadong mahaba ang parameter `filter` (> 200 chars)          |
-| `404`    | Hindi nahanap ang serbisyo (hindi nakarehistro ang superbisor) |
+| `400`    | Masyadong mahaba ang parameter na `filter` (> 200 character)   |
+| `404`    | Hindi nahanap ang serbisyo (hindi nakarehistro ang supervisor) |
 
 ---
 
-### 4.2 CLIProxyAPI endpoints (10 ruta)
+### 4.2 Mga endpoint ng CLIProxyAPI (10 ruta)
 
-CLIProxyAPI ay may parehong hugis ng endpoint gaya ng 9Router minus `rotate-key`, kasama ang `accounts`, `provider-expose` at `auto-restart-adopted`. Nakatanggap na ito ngayon ng dedikadong data-plane API key na ini-inject sa spawn (`needsApiKey: true` in `bootstrap.ts`, ginagamit para sa pag-sync ng modelo); `status` ay may kasamang mas kaunting mga field.
+Ang CLIProxyAPI ay may parehong anyo ng endpoint gaya ng 9Router maliban sa `rotate-key`, at may dagdag na
+`accounts`, `provider-expose`, at `auto-restart-adopted`. Tumatanggap na ito ngayon ng
+nakalaang data-plane API key na ini-inject sa pag-spawn (`needsApiKey: true` sa
+`bootstrap.ts`, ginagamit para sa pag-sync ng modelo); mas kaunti ang mga field na kasama sa
+`status`.
 
-| Pamamaraan | Daan                                | Paglalarawan                             |
-| ---------- | ----------------------------------- | ---------------------------------------- |
-| `POST`     | `/api/services/cliproxy/install`    | I-install CLIProxyAPI mula sa npm        |
-| `POST`     | `/api/services/cliproxy/start`      | Simulan CLIProxyAPI                      |
-| `POST`     | `/api/services/cliproxy/stop`       | Tumigil ka CLIProxyAPI                   |
-| `POST`     | `/api/services/cliproxy/restart`    | I-restart CLIProxyAPI                    |
-| `POST`     | `/api/services/cliproxy/update`     | I-update sa mas bagong bersyon           |
-| `GET`      | `/api/services/cliproxy/status`     | Live + DB status (walang `apiKeyMasked`) |
-| `POST`     | `/api/services/cliproxy/auto-start` | I-toggle ang auto-start                  |
+| Pamamaraan | Path                                | Paglalarawan                                  |
+| ---------- | ----------------------------------- | --------------------------------------------- |
+| `POST`     | `/api/services/cliproxy/install`    | I-install ang CLIProxyAPI mula sa npm         |
+| `POST`     | `/api/services/cliproxy/start`      | Simulan ang CLIProxyAPI                       |
+| `POST`     | `/api/services/cliproxy/stop`       | Ihinto ang CLIProxyAPI                        |
+| `POST`     | `/api/services/cliproxy/restart`    | I-restart ang CLIProxyAPI                     |
+| `POST`     | `/api/services/cliproxy/update`     | Mag-update sa mas bagong bersyon              |
+| `GET`      | `/api/services/cliproxy/status`     | Live + DB na katayuan (walang `apiKeyMasked`) |
+| `POST`     | `/api/services/cliproxy/auto-start` | I-toggle ang awtomatikong pagsisimula         |
 
-Ang nakabahaging `GET /api/services/{name}/logs` endpoint (tingnan ang §4.1) ay gumagana para sa lahat ng apat na serbisyo gamit ang `[name]` dynamic na segment.
+Gumagana ang nakabahaging endpoint na `GET /api/services/{name}/logs` (tingnan ang §4.1) para sa lahat ng
+apat na serbisyo gamit ang dynamic segment na `[name]`.
 
 ---
 
-### 4.3 Mux na mga endpoint (8 ruta)
+### 4.3 Mga endpoint ng Mux (8 ruta)
 
-Ang Mux ay may parehong hugis ng endpoint gaya CLIProxyAPI — no `rotate-key` na ruta sa API surface (ang bearer token ay nabuo sa parehong paraan tulad ng 9Router's sa pamamagitan ng `getOrCreateApiKey("mux")` at ini-inject sa pamamagitan ng `MUX_SERVER_AUTH_TOKEN` env var, ngunit wala pang nakatalagang rotation endpoint). Ang Mux ay lifecycle-managed lang: hindi tulad ng 9Router, wala itong Layer 4 executor at hindi kailanman nakarehistro bilang isang routing provider.
+Ang Mux ay may parehong anyo ng endpoint gaya ng CLIProxyAPI — walang rutang `rotate-key` sa API
+surface (binubuo ang bearer token sa parehong paraan gaya ng sa 9Router sa pamamagitan ng
+`getOrCreateApiKey("mux")` at ini-inject sa pamamagitan ng env var na `MUX_SERVER_AUTH_TOKEN`, ngunit
+wala pang nakalaang endpoint para sa pag-rotate). Lifecycle lamang ang pinamamahalaan sa Mux: hindi gaya ng
+9Router, wala itong Layer 4 executor at hindi ito kailanman nirerehistro bilang routing provider.
 
-| Pamamaraan | Daan                           | Paglalarawan                                |
+| Pamamaraan | Path                           | Paglalarawan                                |
 | ---------- | ------------------------------ | ------------------------------------------- |
 | `POST`     | `/api/services/mux/install`    | I-install ang Mux mula sa npm (`npm i mux`) |
 | `POST`     | `/api/services/mux/start`      | Simulan ang Mux (`mux server`)              |
-| `POST`     | `/api/services/mux/stop`       | Tigilan mo si Mux                           |
+| `POST`     | `/api/services/mux/stop`       | Ihinto ang Mux                              |
 | `POST`     | `/api/services/mux/restart`    | I-restart ang Mux                           |
-| `POST`     | `/api/services/mux/update`     | I-update sa mas bagong bersyon ng npm       |
-| `GET`      | `/api/services/mux/status`     | Live + DB status                            |
-| `POST`     | `/api/services/mux/auto-start` | I-toggle ang auto-start                     |
+| `POST`     | `/api/services/mux/update`     | Mag-update sa mas bagong bersyon ng npm     |
+| `GET`      | `/api/services/mux/status`     | Live + DB na katayuan                       |
+| `POST`     | `/api/services/mux/auto-start` | I-toggle ang awtomatikong pagsisimula       |
 
 ---
 
-### 4.4 Bifrost endpoints (8 ruta)
+### 4.4 Mga endpoint ng Bifrost (8 ruta)
 
-Ang Bifrost ay isang Go AI-gateway relay backend (`@maximhq/bifrost`). Ginagamit nito ang parehong hugis ng endpoint gaya ng CLIProxyAPI (walang `rotate-key` — Bifrost ang namamahala sa sarili nitong mga key ng provider sa `config.json` sa ilalim ng `-app-dir` nito).
+Ang Bifrost ay isang Go AI-gateway relay backend (`@maximhq/bifrost`). Ginagamit nito ang parehong
+anyo ng endpoint gaya ng CLIProxyAPI (walang `rotate-key` — pinamamahalaan ng Bifrost ang sarili nitong mga provider
+key sa `config.json` sa ilalim ng `-app-dir` nito).
 
-| Pamamaraan | Daan                               | Paglalarawan                                                               |
-| ---------- | ---------------------------------- | -------------------------------------------------------------------------- |
-| `POST`     | `/api/services/bifrost/install`    | I-install ang Bifrost mula sa npm (`@maximhq/bifrost`)                     |
-| `POST`     | `/api/services/bifrost/start`      | Simulan ang Bifrost sa port 8080 (default)                                 |
-| `POST`     | `/api/services/bifrost/stop`       | Itigil ang Bifrost                                                         |
-| `POST`     | `/api/services/bifrost/restart`    | I-restart ang Bifrost                                                      |
-| `POST`     | `/api/services/bifrost/update`     | I-update sa mas bagong bersyon                                             |
-| `GET`      | `/api/services/bifrost/status`     | Live + DB status                                                           |
-| `POST`     | `/api/services/bifrost/auto-start` | I-toggle ang auto-start                                                    |
-| `GET`      | `/api/services/bifrost/logs`       | SSE log tail (sa pamamagitan ng ibinahaging `[name]/logs` dynamic na ruta) |
+| Pamamaraan | Path                               | Paglalarawan                                                                 |
+| ---------- | ---------------------------------- | ---------------------------------------------------------------------------- |
+| `POST`     | `/api/services/bifrost/install`    | I-install ang Bifrost mula sa npm (`@maximhq/bifrost`)                       |
+| `POST`     | `/api/services/bifrost/start`      | Simulan ang Bifrost sa port 8080 (default)                                   |
+| `POST`     | `/api/services/bifrost/stop`       | Ihinto ang Bifrost                                                           |
+| `POST`     | `/api/services/bifrost/restart`    | I-restart ang Bifrost                                                        |
+| `POST`     | `/api/services/bifrost/update`     | Mag-update sa mas bagong bersyon                                             |
+| `GET`      | `/api/services/bifrost/status`     | Live + DB na katayuan                                                        |
+| `POST`     | `/api/services/bifrost/auto-start` | I-toggle ang awtomatikong pagsisimula                                        |
+| `GET`      | `/api/services/bifrost/logs`       | SSE log tail (sa pamamagitan ng nakabahaging dynamic route na `[name]/logs`) |
 
-**Pagruruta ng mga kable:** Kapag `BIFROST_BASE_URL` ay hindi nakatakda at ang pinangangasiwaang Bifrost instance ay tumatakbo, `getBifrostRoutingConfig()` (sa `routingBackend.ts`) ay awtomatikong gumagamit `http://127.0.0.1:{port}` bilang ang relay base URL. Palaging inuuna ang tahasang `BIFROST_BASE_URL` env.
+**Pagkakabit ng routing:** Kapag hindi nakatakda ang `BIFROST_BASE_URL` at tumatakbo ang pinangangasiwaang
+instance ng Bifrost, awtomatikong ginagamit ng `getBifrostRoutingConfig()` (sa `routingBackend.ts`) ang
+`http://127.0.0.1:{port}` bilang base URL ng relay. Laging may prayoridad ang tahasang itinakdang
+`BIFROST_BASE_URL` env.
 
 ---
 
 ### 4.5 Mga endpoint ng Dario (12 ruta)
 
-Parehong hugis ng lifecycle gaya ng iba pang mga serbisyo (`install`, `start`, `stop`, `restart`, `update`, `status`, `auto-start`, `auto-restart-adopted`) kasama ang token-gated OAuth control plane sa ilalim ng `admin/`: `admin/accounts`, `admin/import-from-omniroute`, `admin/login-start`, `admin/login-complete` (lahat sa likod `DARIO_ADMIN_TOKEN`).
+Parehong anyo ng lifecycle gaya ng ibang mga serbisyo (`install`, `start`, `stop`, `restart`,
+`update`, `status`, `auto-start`, `auto-restart-adopted`) at may dagdag na OAuth
+control plane na nangangailangan ng token sa ilalim ng `admin/`: `admin/accounts`, `admin/import-from-omniroute`,
+`admin/login-start`, `admin/login-complete` (lahat ay protektado ng `DARIO_ADMIN_TOKEN`).
 
-### 4.6 open-wa endpoints (7 ruta)
+### 4.6 Mga endpoint ng open-wa (7 ruta)
 
-ang open-wa (`@open-wa/wa-automate`) ay nagtutulak ng walang ulong Chromium instance (sa pamamagitan ng Puppeteer) upang i-automate WhatsApp Web. Ginagamit nito ang parehong hugis ng endpoint bilang Mux (wala pang ruta `rotate-key` ). Ito ay lifecycle-managed lang — hindi isang routing target, walang Layer 4 executor/provider entry.
+Pinapatakbo ng open-wa (`@open-wa/wa-automate`) ang isang headless Chromium instance (sa pamamagitan ng
+Puppeteer) upang i-automate ang WhatsApp Web. Ginagamit nito ang parehong anyo ng endpoint gaya ng Mux (wala pang
+rutang `rotate-key`). Lifecycle lamang ang pinamamahalaan rito — hindi ito routing target,
+at wala itong Layer 4 executor/provider entry.
 
-| Pamamaraan | Daan                              | Paglalarawan                                                               |
-| ---------- | --------------------------------- | -------------------------------------------------------------------------- |
-| `POST`     | `/api/services/openwa/install`    | I-install ang open-wa mula sa npm (`@open-wa/wa-automate`)                 |
-| `POST`     | `/api/services/openwa/start`      | Simulan ang open-wa sa port 8323 (default)                                 |
-| `POST`     | `/api/services/openwa/stop`       | Itigil ang open-wa                                                         |
-| `POST`     | `/api/services/openwa/restart`    | I-restart ang open-wa                                                      |
-| `POST`     | `/api/services/openwa/update`     | I-update sa mas bagong bersyon                                             |
-| `GET`      | `/api/services/openwa/status`     | Live + DB status                                                           |
-| `POST`     | `/api/services/openwa/auto-start` | I-toggle ang auto-start                                                    |
-| `GET`      | `/api/services/openwa/logs`       | SSE log tail (sa pamamagitan ng ibinahaging `[name]/logs` dynamic na ruta) |
+| Pamamaraan | Path                              | Paglalarawan                                                                 |
+| ---------- | --------------------------------- | ---------------------------------------------------------------------------- |
+| `POST`     | `/api/services/openwa/install`    | I-install ang open-wa mula sa npm (`@open-wa/wa-automate`)                   |
+| `POST`     | `/api/services/openwa/start`      | Simulan ang open-wa sa port 8323 (default)                                   |
+| `POST`     | `/api/services/openwa/stop`       | Ihinto ang open-wa                                                           |
+| `POST`     | `/api/services/openwa/restart`    | I-restart ang open-wa                                                        |
+| `POST`     | `/api/services/openwa/update`     | Mag-update sa mas bagong bersyon                                             |
+| `GET`      | `/api/services/openwa/status`     | Live + katayuan sa DB                                                        |
+| `POST`     | `/api/services/openwa/auto-start` | I-toggle ang awtomatikong pagsisimula                                        |
+| `GET`      | `/api/services/openwa/logs`       | SSE log tail (sa pamamagitan ng nakabahaging dynamic route na `[name]/logs`) |
 
-**API key:** na-injected bilang `WA_KEY` — open-wa's generic `WA_*` -prefixed env override imapa ito sa `--key`/`-k` CLI na opsyon (`dist/cli/setup.js::envArgs()`, na-verify laban sa naka-install na 4.76.0 package). Naka-prefix ang `ow_` kapag nabuo ng `generateServiceApiKey()`. binasa ng open-wa ang susi pabalik mula sa isang `key`/`api_key` HTTP header (hindi `Authorization: Bearer`); `/api-docs*` ay tahasang exempted sa tseke (`setupAuthenticationLayer` in `dist/cli/server.js`), kaya ang health probe ay hindi nangangailangan ng auth header.
+**API key:** ini-inject bilang `WA_KEY` — iminamapa ito ng generic na env override
+ng open-wa na may prefix na `WA_*` sa `--key`/`-k` CLI option
+(`dist/cli/setup.js::envArgs()`, napatunayan laban sa naka-install na 4.76.0
+package). Nilalagyan ng prefix na `ow_` kapag binubuo ng `generateServiceApiKey()`. Binabasa
+muli ng open-wa ang key mula sa isang `key`/`api_key` HTTP header (hindi `Authorization:
+Bearer`); tahasang hindi saklaw ng pagsusuri ang `/api-docs*`
+(`setupAuthenticationLayer` sa `dist/cli/server.js`), kaya hindi kailangan ng
+auth header ang health probe.
 
-**Pagpares:** open-wa ay hindi opisyal at hindi nauugnay sa WhatsApp — ang konektadong numero ay nagdadala ng panganib sa pagbabawal mula sa sariling automation detection ng WhatsApp. Sa unang pagsisimula, ang pagpapares QR code ay naka-print sa stdout at lumalabas sa pamamagitan ng umiiral na Logs panel/SSE stream — wala pang nakalaang QR-image na endpoint sa pagsasamang ito.
-
----
-
-### 4.7 LLMLingua endpoints (8 ruta)
-
-LLMLingua ay isang prompt-compression sidecar wrapping `@atjsh/llmlingua-2` (real ONNX token-classification model, na na-download mula sa Hugging Face sa unang `/compress` call). Ginagamit nito ang parehong hugis ng endpoint gaya ng Bifrost (walang API key — `needsApiKey: false`, hindi ito kailanman humahawak ng mga kredensyal).
-
-| Pamamaraan | Daan                                           | Paglalarawan                                                                            |
-| ---------- | ---------------------------------------------- | --------------------------------------------------------------------------------------- |
-| `POST`     | `/api/services/llmlingua/install`              | npm-install ng `@atjsh/llmlingua-2` + mga kapantay, isulat ang script ng sidecar server |
-| `POST`     | `/api/services/llmlingua/start`                | Simulan ang sidecar sa port 20135 (default)                                             |
-| `POST`     | `/api/services/llmlingua/stop`                 | Ihinto ang sidecar                                                                      |
-| `POST`     | `/api/services/llmlingua/restart`              | I-restart ang sidecar                                                                   |
-| `POST`     | `/api/services/llmlingua/update`               | I-update sa mas bagong bersyon ng package                                               |
-| `GET`      | `/api/services/llmlingua/status`               | Live + DB status                                                                        |
-| `POST`     | `/api/services/llmlingua/auto-start`           | I-toggle ang auto-start                                                                 |
-| `POST`     | `/api/services/llmlingua/auto-restart-adopted` | I-toggle ang auto-restart ng isang pinagtibay (nauna nang) instance                     |
-| `GET`      | `/api/services/llmlingua/logs`                 | SSE log tail (sa pamamagitan ng ibinahaging `[name]/logs` dynamic na ruta)              |
-
-**Kontrata ng sidecar:** inilalantad ng script ng server `GET /health` (hindi naghihintay ang instant — sa modelo) at `POST /compress` (`{ text, rate }` → `{ text, compressed, ratio }`). Tamad na naglo-load ang modelo sa unang `/compress` na tawag.
-
-**Mga kable ng compression:** `open-sse/services/compression/engines/llmlingua/index.ts`'s `httpSidecarBackend` ay tumatawag `LLMLINGUA_BASE_URL` (default `http://127.0.0.1:20135`) at tinatanggap lamang ang tugon ng sidecar kapag ito ay mahigpit na mas maikli kaysa sa input; anumang pagkabigo (hindi tumatakbo, timeout, walang-op na tugon) ay bumabalik sa in-process na worker-thread backend (`./worker.ts`).
+**Pagpapares:** hindi opisyal ang open-wa at hindi ito kaakibat ng WhatsApp — may
+panganib na ma-ban ng sariling automation detection ng WhatsApp ang nakakonektang
+numero. Sa unang pagsisimula, inilalabas sa stdout ang QR code para sa pagpapares at
+ipinapakita ito sa kasalukuyang Logs panel/SSE stream — wala pang nakalaang
+QR-image endpoint sa integration na ito.
 
 ---
 
-### 4.8 sing-box endpoints (8 ruta)
+### 4.7 Mga endpoint ng LLMLingua (8 route)
 
-Ang sing-box ay may parehong hugis ng endpoint gaya ng Mux — no `rotate-key` na ruta, walang API key injection (`needsApiKey: false` sa `bootstrap.ts`). Ito ay lifecycle-managed lamang: hindi kailanman isang routing/LLM provider. Dina-download `install()` ang opisyal GitHub release binary (`SagerNet/sing-box`) para sa naka-pin na bersyon (`SINGBOX_PINNED_VERSION` sa `src/lib/services/installers/singbox.ts`) at bini-verify SHA256 nito laban sa checksum na naka-bake sa parehong file bago ito isulat sa disk — anumang ibang hiniling na bersyon ay tinanggihan.
+Ang LLMLingua ay isang prompt-compression sidecar na bumabalot sa `@atjsh/llmlingua-2` (tunay
+na ONNX token-classification model, na dina-download mula sa Hugging Face sa unang
+pagtawag sa `/compress`). Ginagamit nito ang kaparehong hugis ng endpoint gaya ng Bifrost (walang API key —
+`needsApiKey: false`, hindi ito kailanman humahawak ng mga kredensyal).
 
-| Pamamaraan | Daan                                         | Paglalarawan                                                                 |
-| ---------- | -------------------------------------------- | ---------------------------------------------------------------------------- |
-| `POST`     | `/api/services/singbox/install`              | I-download ang + i-verify ang naka-pin na paglabas ng sing-box               |
-| `POST`     | `/api/services/singbox/start`                | Simulan ang sing-box (`sing-box run -c config.json`)                         |
-| `POST`     | `/api/services/singbox/stop`                 | Itigil ang sing-box                                                          |
-| `POST`     | `/api/services/singbox/restart`              | I-restart ang sing-box                                                       |
-| `POST`     | `/api/services/singbox/update`               | Re-verify/reinstall ang naka-pin na release                                  |
-| `GET`      | `/api/services/singbox/status`               | Live + DB status                                                             |
-| `POST`     | `/api/services/singbox/auto-start`           | I-toggle ang auto-start                                                      |
-| `POST`     | `/api/services/singbox/auto-restart-adopted` | I-toggle ang auto-restart para sa isang pinagtibay (pre-existing) na proseso |
-| `GET`      | `/api/services/singbox/logs`                 | SSE log tail (sa pamamagitan ng ibinahaging `[name]/logs` dynamic na ruta)   |
+| Pamamaraan | Path                                           | Paglalarawan                                                                              |
+| ---------- | ---------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| `POST`     | `/api/services/llmlingua/install`              | I-install sa npm ang `@atjsh/llmlingua-2` + mga peer, isulat ang server script ng sidecar |
+| `POST`     | `/api/services/llmlingua/start`                | Simulan ang sidecar sa port 20135 (default)                                               |
+| `POST`     | `/api/services/llmlingua/stop`                 | Ihinto ang sidecar                                                                        |
+| `POST`     | `/api/services/llmlingua/restart`              | I-restart ang sidecar                                                                     |
+| `POST`     | `/api/services/llmlingua/update`               | Mag-update sa mas bagong bersyon ng package                                               |
+| `GET`      | `/api/services/llmlingua/status`               | Live + katayuan sa DB                                                                     |
+| `POST`     | `/api/services/llmlingua/auto-start`           | I-toggle ang awtomatikong pagsisimula                                                     |
+| `POST`     | `/api/services/llmlingua/auto-restart-adopted` | I-toggle ang awtomatikong pag-restart ng isang inangkin (dati nang umiiral) na instance   |
+| `GET`      | `/api/services/llmlingua/logs`                 | SSE log tail (sa pamamagitan ng nakabahaging dynamic route na `[name]/logs`)              |
 
-**TPROXY wiring:** `ensureSingboxTproxy()` (`src/mitm/tproxy/setup.ts`) ay nagsusulat ng `config.json` at sinimulan ang superbisor bago i-install ng `applyTproxy()` ang mga panuntunan ng TPROXY firewall. Kung nawawala o nabigo ang superbisor na maabot `running`, nagla-log ito ngayon sa antas ng error (sa halip na tahimik na nilamon ang pagkabigo) upang masabi ng operator na ang mga panuntunan TPROXY ay inilapat nang walang gumaganang tagapakinig sa likod nila.
+**Kontrata ng sidecar:** inilalantad ng server script ang `GET /health` (agad-agad — hindi
+naghihintay sa model) at `POST /compress` (`{ text, rate }` →
+`{ text, compressed, ratio }`). Lazy na nilo-load ang model sa unang
+pagtawag sa `/compress`.
+
+**Pagkakabit ng compression:** tinatawag ng `httpSidecarBackend` ng `open-sse/services/compression/engines/llmlingua/index.ts`
+ang `LLMLINGUA_BASE_URL` (default
+`http://127.0.0.1:20135`) at tinatanggap lamang ang tugon ng sidecar kapag
+tiyak na mas maikli ito kaysa sa input; anumang kabiguan (hindi tumatakbo, timeout, no-op
+na tugon) ay bumabalik sa in-process worker-thread backend (`./worker.ts`).
 
 ---
 
-### 4.9 Reverse proxy (9Router dashboard embed)
+### 4.8 Mga endpoint ng sing-box (8 ruta)
 
-Ini-embed ng dashboard ang 9Router web UI sa loob ng isang iframe sa pamamagitan ng internal reverse proxy sa:
+Kapareho ng Mux ang estruktura ng mga endpoint ng sing-box: walang rutang `rotate-key` at walang paglalagay ng API key (`needsApiKey: false` sa `bootstrap.ts`). Lifecycle lamang ang pinamamahalaan; hindi ito kailanman routing o LLM provider. Dina-download ng `install()` ang opisyal na release binary sa GitHub (`SagerNet/sing-box`) para sa nakapirming bersiyon (`SINGBOX_PINNED_VERSION` sa `src/lib/services/installers/singbox.ts`) at sinusuri ang SHA256 nito laban sa checksum na nakapaloob sa parehong file bago ito isulat sa disk. Tinatanggihan ang anumang hiling para sa ibang bersiyon.
+
+| Paraan | Path                                         | Paglalarawan                                                                                                  |
+| ------ | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `POST` | `/api/services/singbox/install`              | I-download at suriin ang nakapirming release ng sing-box                                                      |
+| `POST` | `/api/services/singbox/start`                | Simulan ang sing-box (`sing-box run -c config.json`)                                                          |
+| `POST` | `/api/services/singbox/stop`                 | Ihinto ang sing-box                                                                                           |
+| `POST` | `/api/services/singbox/restart`              | Simulang muli ang sing-box                                                                                    |
+| `POST` | `/api/services/singbox/update`               | Suriing muli o muling i-install ang nakapirming release                                                       |
+| `GET`  | `/api/services/singbox/status`               | Kasalukuyang status at status sa DB                                                                           |
+| `POST` | `/api/services/singbox/auto-start`           | I-on o i-off ang awtomatikong pagsisimula                                                                     |
+| `POST` | `/api/services/singbox/auto-restart-adopted` | I-on o i-off ang awtomatikong pag-restart ng dati nang umiiral na prosesong isinama sa pamamahala             |
+| `GET`  | `/api/services/singbox/logs`                 | Subaybayan ang mga bagong log gamit ang SSE sa pamamagitan ng pinagsasaluhang dynamic na rutang `[name]/logs` |
+
+**Pagkakabit ng TPROXY:** Isinusulat ng `ensureSingboxTproxy()` (`src/mitm/tproxy/setup.ts`) ang `config.json` at sinisimulan ang supervisor bago ilagay ng `applyTproxy()` ang mga tuntunin ng TPROXY firewall. Kung wala ang supervisor o hindi nito maabot ang estadong `running`, itinatala na ngayon ang problema sa error level sa halip na tahimik itong balewalain. Dahil dito, malalaman ng operator kung nailapat ang mga tuntunin ng TPROXY nang walang gumaganang listener sa likod ng mga ito.
+
+---
+
+### 4.9 Reverse proxy (naka-embed na dashboard ng 9Router)
+
+Ini-embed ng dashboard ang web UI ng 9Router sa loob ng isang iframe sa pamamagitan ng internal reverse
+proxy sa:
 
 ```
 GET|POST|... /dashboard/providers/services/9router/embed/[...path]
 ```
 
-Ang proxy na ito:
+Ang proxy na ito ay:
 
-- Ipasa ang kahilingan sa `http://127.0.0.1:{port}/{path}` (loopback lang)
-- Tinatanggal ang mga papasok na `cookie` at `authorization` na header (walang leakage ng OmniRoute session)
-- Nag-inject ng `Authorization: Bearer {apiKey}` para sa 9Router authentication
-- Tinatanggal ang `set-cookie`, `content-security-policy`, `x-frame-options`, `cross-origin-*` mula sa tugon
-- Isinulat muli ang mga tugon HTML upang mag-inject `<base href>` at gawing normal ang mga ganap na landas (`/foo` → `/dashboard/.../embed/foo`)
+- Nagpapasa ng request sa `http://127.0.0.1:{port}/{path}` (loopback lamang)
+- Nag-aalis ng mga papasok na `cookie` at `authorization` header (walang pagtagas ng session ng OmniRoute)
+- Nag-i-inject ng `Authorization: Bearer {apiKey}` para sa authentication ng 9Router
+- Nag-aalis ng `set-cookie`, `content-security-policy`, `x-frame-options`, `cross-origin-*` mula sa response
+- Muling isinusulat ang mga HTML response upang i-inject ang `<base href>` at gawing pare-pareho ang mga absolute path (`/foo` → `/dashboard/.../embed/foo`)
 
-Ang mga pag-upgrade WebSocket para sa naka-embed na dashboard ay pinangangasiwaan ng isang kasamang server sa isang nakalaang port (tingnan `src/lib/services/embedWsProxy.ts`).
+Ang mga WebSocket upgrade para sa naka-embed na dashboard ay pinangangasiwaan ng isang kasamang server sa
+nakalaang port (tingnan ang `src/lib/services/embedWsProxy.ts`).
 
-**Seguridad:** Ang mga naka-embed na proxy na ruta ay inuri sa ilalim ng `LOCAL_ONLY_API_PREFIXES` at maaari lamang maabot mula sa loopback. Ang isang attacker na nakakakuha ng JWT sa pamamagitan ng Cloudflare/Ngrok tunnel ay hindi maaaring mag-proxy sa mga naka-embed na serbisyo.
+**Seguridad:** Inuuri ang mga route ng embed proxy sa ilalim ng `LOCAL_ONLY_API_PREFIXES`
+at maaabot lamang mula sa loopback. Ang isang attacker na nakakuha ng JWT sa pamamagitan ng
+Cloudflare/Ngrok tunnel ay hindi makakapag-proxy papasok sa mga naka-embed na serbisyo.
 
 ---
 

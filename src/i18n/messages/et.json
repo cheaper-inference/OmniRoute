@@ -4147,7 +4147,9 @@
     "duplicateAutoComboFailedPrefix": "Automaatse kombinatsiooni dubleerimine ebaõnnestus:",
     "duplicateAutoComboUnknownError": "Tundmatu viga",
     "duplicateAutoComboTitle": "Loo automaatsest kombinatsioonist {name} staatiline kombinatsioon",
-    "fallbackSummary": "{rate}% palvastest kasutas tagasilükkumist, keskmiselt hüljati igaühes ~{skips} sihtpunkti"
+    "fallbackSummary": "{rate}% palvastest kasutas tagasilükkumist, keskmiselt hüljati igaühes ~{skips} sihtpunkti",
+    "reorderAll": "Järjesta kõik ümber",
+    "reorderAllDescription": "Kõikide {count} kombinatsioonide järjestamine. Pukseerimiskäepidemed on lubatud."
   },
   "costs": {
     "title": "Kulud",
@@ -6281,10 +6283,6 @@
     "hideEmails": "Peida kõik e-posti aadressid",
     "a": "A",
     "accountConcurrencyCapHint": "Maksimaalne samaaegsete päringute arv, mida see ühendus või konto suudab töödelda. Tellimuskontod lubavad tavaliselt vaid mõnda päringut (1–3) — piiri ületamine põhjustab 429-vigu ja ooteaegu. Vaikeväärtuse kasutamiseks jätke tühjaks.",
-    "aiCreditsLimit": "AI Credits limiit arveldusperioodi kohta",
-    "aiCreditsLimitPlaceholder": "Kohalik limiit puudub",
-    "aiCreditsLimitHint": "Jätab selle ühenduse vahele, kui GitHubi teatatud AI Credits jõuavad selle väärtuseni, ja marsruutimine liigub teie teistele ühendustele. Tühi lülitab selle välja; 0 jätab alati vahele. Puuduv või aegunud kasutuslugem ei blokeeri kunagi — see ei ole garanteeritud kululagi.",
-    "aiCreditsLimitInvalid": "AI Credits limiit peab olema mittenegatiivne arv või tühi, et see välja lülitada.",
     "accountConcurrencyCapLabel": "Konto samaaegsete päringute piirang",
     "accountIdHint": "Mõned teenusepakkujad (nt Cloudflare Workers AI) nõuavad seda lisaks API-tokenile.",
     "accountIdLabel": "Konto ID",
@@ -6378,8 +6376,6 @@
     "newApiUserIdLabel": "New-API kasutaja ID",
     "newApiUserIdPlaceholder": "nt 12345",
     "newApiUserIdHint": "AgentRouteri New-Api-User päise väärtus, mida kasutatakse koos konsooli API-võtmega kvoodijäägi hankimiseks.",
-    "tokenrouterManagementKeyLabel": "Haldusvõti (valikuline)",
-    "tokenrouterManagementKeyHint": "Kontovõti TokenRouteri juhtpaneelilt (Settings → Management Key). Kasutatakse ainult kvoodi ja saldo lugemiseks, mitte kunagi päringuteks. Salvestatud võtit ei kuvata; selle säilitamiseks jätke väli tühjaks.",
     "newApiAggregatorToggleLabel": "Agregaatori lüüs",
     "newApiAggregatorToggleHint": "Luba New-API / One-API / Sub2API agregaatorisõlmede saldo tuvastamine. Juhtpaneel kuvab saldomärgi ja kvoodi eelkontrolliga marsruutimine jätab ammendunud kontod vahele.",
     "newApiAggregatorConsoleApiKeyHint": "Süsteemi juurdepääsutõend agregaatori /api/user/self lõpp-punkti jaoks. See ei ole marsruutimise API-võti.",
@@ -6393,8 +6389,6 @@
     "customUserAgentLabel": "Kohandatud User Agenti silt",
     "huggingfaceBillToHint": "Valikuline. Teie Hugging Face arvelduskonto identifikaator, mis saadetakse kulude omistamiseks päisena X-HF-Bill-To.",
     "huggingfaceBillToLabel": "Hugging Face Bill-To konto",
-    "commandCodeZdrLabel": "Nõua andmete nullsäilitamist (ZDR)",
-    "commandCodeZdrHint": "Saadab x-cmd-zdr: 1 iga selle API-võtmega tehtud päringuga. Mudelid ilma ZDR-toega upstreamita ei pruugi olla saadaval.",
     "databricksBaseUrlHint": "Databricksi baas-URL-i vihje",
     "defaultThinkingStrengthHint": "Kasutatakse siis, kui päringus pole arutluskäigu põhjalikkust määratud.",
     "defaultThinkingStrengthLabel": "Arutluskäigu vaikimisi põhjalikkus",
@@ -6869,7 +6863,7 @@
       "xai": "Ühenda xAI (Grok) API-võtmega.",
       "xiaomi-mimo": "Ühenda Xiaomi MiMo API-võtmega.",
       "yi": "Hangi API-võti aadressilt platform.lingyiwanwu.com",
-      "zai": "API-võti aadressilt https://open.bigmodel.cn/usercenter/apikeys",
+      "zai": "API-võti aadressilt https://z.ai/manage-apikey/apikey-list",
       "zenmux": "ZenMux pakub OpenAI-ga ühilduvat vestlusvastuste lõpp-punkti asukohas /api/v1/chat/completions ning Anthropic Messages (/api/anthropic/v1/messages) ja Google Gemini (/api/vertex-ai) protokolliliideseid. OmniRoute kasutab OpenAI protokolli.",
       "galadriel": "Ühenda Galadriel API-võtmega.",
       "predibase": "25 $ väärtuses tasuta proovikrediiti (kehtib 30 päeva)",
@@ -6990,11 +6984,6 @@
     "anonymousFallbackEnabled": "Teenusepakkuja {provider} anonüümne varurežiim on lubatud",
     "anonymousFallbackDisabled": "Teenusepakkuja {provider} anonüümne varurežiim on keelatud — ammendunud ühenduste korral jäetakse see teenusepakkuja vahele",
     "anonymousFallbackUpdateFailed": "Anonüümse varurežiimi seadistuse värskendamine nurjus",
-    "retryDelayTitle": "Kordusviivitus",
-    "retryDelayDesc": "Kui kaua ühendus pärast kiiruspiirangu viga puhkab, kui teenusepakkuja ei ütle, millal uuesti proovida. Automaatne režiim kasutab sisseehitatud ooteaega; teenusepakkuja saadetud lähtestamisaeg on alati ülimuslik.",
-    "retryDelayAuto": "Automaatne",
-    "retryDelaySaved": "Kordusviivitus salvestatud",
-    "retryDelayUpdateFailed": "Kordusviivituse värskendamine ebaõnnestus",
     "batchDeleteFailed": "Hulgikustutamine nurjus",
     "batchDeleteNetworkError": "Hulgikustutamisel tekkis võrguviga",
     "batchUpdateFailed": "Hulgvärskendamine nurjus",
@@ -7094,7 +7083,20 @@
     "chatgptConnectorLabel": "ChatGPT kohandatud ühendus",
     "doctorChecking": "Kontrollitakse olekut…",
     "doctorCheck": "Kontrolli arsti olekut",
-    "fallbackRetryBackendTitle": "Tagamiste katsetuste tagatagasi tugi"
+    "fallbackRetryBackendTitle": "Tagamiste katsetuste tagatagasi tugi",
+    "retryDelayTitle": "Kordusviivitus",
+    "retryDelayDesc": "Kui kaua ühendus pärast kiiruspiirangu viga puhkab, kui teenusepakkuja ei ütle, millal uuesti proovida. Automaatne režiim kasutab sisseehitatud ooteaega; teenusepakkuja saadetud lähtestamisaeg on alati ülimuslik.",
+    "retryDelayAuto": "Automaatne",
+    "retryDelaySaved": "Kordusviivitus salvestatud",
+    "retryDelayUpdateFailed": "Kordusviivituse värskendamine ebaõnnestus",
+    "aiCreditsLimit": "AI Credits limiit arveldusperioodi kohta",
+    "aiCreditsLimitPlaceholder": "Kohalik limiit puudub",
+    "aiCreditsLimitHint": "Jätab selle ühenduse vahele, kui GitHubi teatatud AI Credits jõuavad selle väärtuseni, ja marsruutimine liigub teie teistele ühendustele. Tühi lülitab selle välja; 0 jätab alati vahele. Puuduv või aegunud kasutuslugem ei blokeeri kunagi — see ei ole garanteeritud kululagi.",
+    "aiCreditsLimitInvalid": "AI Credits limiit peab olema mittenegatiivne arv või tühi, et see välja lülitada.",
+    "tokenrouterManagementKeyLabel": "Haldusvõti (valikuline)",
+    "tokenrouterManagementKeyHint": "Kontovõti TokenRouteri juhtpaneelilt (Settings → Management Key). Kasutatakse ainult kvoodi ja saldo lugemiseks, mitte kunagi päringuteks. Salvestatud võtit ei kuvata; selle säilitamiseks jätke väli tühjaks.",
+    "commandCodeZdrLabel": "Nõua andmete nullsäilitamist (ZDR)",
+    "commandCodeZdrHint": "Saadab x-cmd-zdr: 1 iga selle API-võtmega tehtud päringuga. Mudelid ilma ZDR-toega upstreamita ei pruugi olla saadaval."
   },
   "settings": {
     "title": "Seaded",
@@ -14255,6 +14257,10 @@
         "label": "Kaitstud prioriteediga taristu peatamised kui 502",
         "description": "Vasta 503 asemel 502-ga, kui ainult kvoodipõhise varuvariandiga prioriteetne sihtmärk peatab combo põhjusel, mis pole tõendatavalt kvoodiga seotud: teenusepakkuja avatud kaitselüliti või prognoosiv latentsuse tõttu vahelejätmine."
       },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Hinnastamata kasutuse eelarvepoliitika",
+        "description": "Kuidas per‑võtme päevased või nädalased USD‑limiidid käsitlevad edukat kasutust, mille teenusepakkujal või mudelil puudub hinnakirje. fail_closed (vaikimisi) märgib akna ületatuks, nii et tundmatu kulu ei pääse kunagi kõva limiidi alt läbi. count_as_zero arvestab selle kasutuse $0‑ks ja jätkab hinnastatud kulude piirangute rakendamist. Hinnastamata mudelid kuvatakse igal juhul juhtpaneeli avalehel."
+      },
       "AUTH_LOG_INCLUDE_ACCOUNT_ID": {
         "label": "Logi konto ID-d",
         "description": "Kaasa konto eesliide AUTH logirindadesse (nt \"Kasutatakse '<provider>' kontot: abc12345...\"). Vaikimisi keelustatud, et konto identifikaatorid jääks jagatud/mitme tenanti protsessilogidest varjatud. Sõltumatu Debug režiimist; Debug režiimi lülitamine seda ei avalda."
@@ -14535,9 +14541,9 @@
         "label": "Jahtumisaja korduskatse: jäta 403/410 keeldumised vahele",
         "description": "Kui kõik kontod on jahtumisolekus ning esimesena lõppeva jahtumisaja põhjustas 403 (juurdepääsust keeldutud) või 410 (kadunud), tagasta see keeldumine kohe, selle asemel et jahtumisaeg ära oodata ja päring uuesti saata; uuenev agentrouter ühendusepõhise kvoodi 403 talletatakse seejärel koodiga errorCode 429, et see jääks uuesti proovitavaks. Vaikimisi väljas: ainult 401 jätab ootamise vahele ja iga keeldumine talletatakse staatusega, millega see saabus."
       },
-      "UNPRICED_USAGE_BUDGET_POLICY": {
-        "label": "Hinnastamata kasutuse eelarvepoliitika",
-        "description": "Kuidas per‑võtme päevased või nädalased USD‑limiidid käsitlevad edukat kasutust, mille teenusepakkujal või mudelil puudub hinnakirje. fail_closed (vaikimisi) märgib akna ületatuks, nii et tundmatu kulu ei pääse kunagi kõva limiidi alt läbi. count_as_zero arvestab selle kasutuse $0‑ks ja jätkab hinnastatud kulude piirangute rakendamist. Hinnastamata mudelid kuvatakse igal juhul juhtpaneeli avalehel."
+      "COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE": {
+        "description": "Tihendusvahemälu statistikas arvestage tihendatud päring automaatse prefiksi vahemällu salvestamise pakkujale (OpenAI, Codex, Azure või kohandatud ühendus, mis deklareerib kiire vahemälu koos markeri eemaldamisega) hinnangulise vahemälu tabamusena isegi ilma vahemälu kontrollimise markeriteta. Prognoos on vahemälu sobivuse signaal, mitte täheldatud tabamus, seega on nende pakkujate teatatud tabamusmäär 100% suunas. Vaikimisi väljas: ainult taotlus, mis kannab vahemällu salvestamise pakkujale cache_control markereid, loetakse hinnanguliseks tabamuseks, nii et automaatse prefiksi pakkujad teatavad jätkuvalt 0.",
+        "label": "Tihendamise vahemälu statistika: automaatse prefiksi sobivus"
       }
     }
   },

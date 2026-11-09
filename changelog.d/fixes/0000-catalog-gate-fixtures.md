@@ -1,0 +1,1 @@
+- **test(ci):** Preserve the catalog's verified evidence in baseline-admission fixtures and pin the refreshed authenticated Zen model set, keeping debt reintroduction and unauthenticated provider removal checks intact.

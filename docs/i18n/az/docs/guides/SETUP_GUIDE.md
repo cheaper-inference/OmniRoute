@@ -27,7 +27,9 @@ npm install -g omniroute
 omniroute
 ```
 
-İdarəetmə paneli `http://localhost:20128` ünvanında açılır və API baza URL-i `http://localhost:20128/v1` olur.
+Dashboard `http://localhost:20128` -da açılır və API bazasında URL `http://localhost:20128/v1` dir.
+
+> **npm istifadəçiləri:** Əgər npm quraşdırma skriptlərinin bloklandığı barədə xəbərdarlıq edirsə (məsələn, `omniroute`, `better-sqlite3`), [— npm quraşdırma skriptlərinin bloklandığı problemlərin həlli bölməsinə](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install) baxın.
 
 ### pnpm
 
@@ -197,41 +199,41 @@ Hər bir alət üçün ətraflı konfiqurasiya (Claude Code, Codex CLI, Cursor, 
 
 ---
 
-## Protokolun Quraşdırılması (MCP + A2A)
+## Protokol Quraşdırma (MCP + A2A)
 
-### MCP Quraşdırılması (Model Konteksti Protokolu)
+### MCP Quraşdırma (Model Kontekst Protokolu)
 
-MCP nəqlini stdio rejimində başladın:
+Stdio rejimində MCP nəqlini başladın:
 
 ```bash
 omniroute --mcp
 ```
 
-Tövsiyə olunan yoxlama ardıcıllığı:
+Tövsiyə olunan doğrulama axını:
 
 ```bash
-# 1. MCP serverini başladın
+# 1. Start MCP server
 omniroute --mcp
 
-# 2. MCP klientinizdən bunları çağırın:
-omniroute_get_health        # Sistem sağlamlığını qaytarmalıdır
-omniroute_list_combos       # Aktiv kombinasiyaları qaytarmalıdır
+# 2. From your MCP client, call:
+omniroute_get_health        # Should return system health
+omniroute_list_combos       # Should return active combos
 
-# 3. Və ya tam E2E dəstini işə salın:
+# 3. Or run the full E2E suite:
 npm run test:protocols:e2e
 ```
 
-#### MCP Klientinin Konfiqurasiyası
+#### MCP Müştəri Konfiqurasiyası
 
-**Claude Code:**
+**Claude Kodu:**
 
 ```bash
-claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
 ```
 
 **Cursor / Cline:**
 
-MCP parametrlərinizə əlavə edin:
+MCP parametrlərinizə əlavə edin (stdio, açarla zəng edənin əsas sahibi olması üçün):
 
 ```json
 {
@@ -239,15 +241,22 @@ MCP parametrlərinizə əlavə edin:
     "omniroute": {
       "command": "omniroute",
       "args": ["--mcp"],
-      "env": {}
+      "env": {
+        "OMNIROUTE_API_KEY": "your-key",
+        "OMNIROUTE_BASE_URL": "http://localhost:20128"
+      }
     }
   }
 }
 ```
 
-**Tam MCP sənədləri:** [MCP Serverinin README-si](../../open-sse/mcp-server/README.md) — 110 alət, IDE konfiqurasiyaları, Python/TS/Go klientləri.
+Və ya `mcpTransport` `streamable-http` olduqda (onu `/dashboard/mcp` və ya `omniroute mcp enable --transport streamable-http` ilə təyin edin), müştərinin uzaq MCP server girişini `http://localhost:20128/api/mcp/stream` ünvanına yönəldin.
 
-### A2A Quraşdırılması (Agentlərarası Protokol)
+Açar `Authorization: Bearer <api-key>` kimi hərəkət edir (uzaqdan hostlar üçün [MCP Server → Uzaqdan girişə](../frameworks/MCP-SERVER.md#remote-access-manage-scope-bypass) baxın; uzaq açara `mcp:connect` və onun read/write əhatə dairəsi lazımdır).
+
+**Tam MCP sənədləri:** [MCP Server README](../../open-sse/mcp-server/README.md) — 110 alətləri, IDE konfiqurasiyaları, Python/TS/Go müştəriləri. Sıxılma CCR/dedup alətləri üçün operator arayışı (markerlər, ilkin şərtlər, alət üzrə əhatə dairələri, axtarış səhifələnməsi, diaqnostika): [Sıxılma Mühərrikləri → İlkin şərtlər / operator təlimatı](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+
+### A2A Quraşdırma (Agent-to-Agent Protokolu)
 
 Agent Kartını yoxlayın:
 
@@ -263,7 +272,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"Give me a short quota summary."}]}}'
 ```
 
-**Tam A2A sənədləri:** [A2A Serverinin README-si](../../src/lib/a2a/README.md) — JSON-RPC 2.0, bacarıqlar, axınla ötürmə, tapşırığın həyat dövrü.
+**Tam A2A sənədləri:** [A2A Server README](../../src/lib/a2a/README.md) — JSON-RPC 2.0, bacarıqlar, axın, tapşırıqların həyat dövrü.
 
 ---
 
@@ -322,12 +331,12 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ---
 
-## Void Linux (`xbps-src`) şablonu
+## Ləğv et Linux (xbps-src) Şablonu
 
-Void Linux istifadəçiləri `xbps-src` vasitəsilə yerli paket yarada bilərlər. Bu bloku `srcpkgs/omniroute/template` kimi yadda saxlayın:
+Void Linux istifadəçiləri üçün `xbps-src` istifadə edərək yerli paket yarada bilərsiniz. Bu bloku `srcpkgs/omniroute/template` olaraq yadda saxlayın:
 
 ```bash
-# 'omniroute' üçün şablon faylı
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -338,7 +347,7 @@ maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# Hər buraxılış üçün yoxlama cəmini aşağıdakı əmrlə yenidən yaradın:
+# Regenerate the checksum for each release with:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

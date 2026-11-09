@@ -1,10 +1,15 @@
-import { describe, it } from "node:test";
+import { after, describe, it } from "node:test";
 import assert from "node:assert/strict";
 import {
   buildAntigravityEnvelopeIdentity,
   getAntigravitySessionId,
 } from "../../open-sse/services/antigravityIdentity.ts";
 import { AntigravityExecutor } from "../../open-sse/executors/antigravity.ts";
+import { closeSharedLoggerResource } from "../../src/shared/utils/loggerResource.ts";
+
+after(async () => {
+  await closeSharedLoggerResource();
+});
 
 describe("Part A - Antigravity Envelope Identity and Labels", () => {
   it("buildAntigravityEnvelopeIdentity produces expected requestId, labels, and session fallback", () => {

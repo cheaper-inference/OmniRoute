@@ -254,9 +254,9 @@ Kaikki MITM-päätepisteet edellyttävät hallinnan todennusta (`requireCliTools
 
 ---
 
-## User-agent ohittaa — env vars (`.env.example` osa 12)
+## User-Agent-ohitukset — ympäristömuuttujat (`.env.example`-osion 12)
 
-| Muuttuva            | Oletus                                        |
+| Muuttuja            | Oletusarvo                                    |
 | ------------------- | --------------------------------------------- |
 | `CLAUDE_USER_AGENT` | `claude-cli/2.1.280 (external, cli)`          |
 | `CODEX_USER_AGENT`  | `codex-cli/0.155.0 (Windows 10.0.26200; x64)` |
@@ -265,7 +265,7 @@ Kaikki MITM-päätepisteet edellyttävät hallinnan todennusta (`requireCliTools
 | `QODER_USER_AGENT`  | `Qoder-Cli`                                   |
 | `CURSOR_USER_AGENT` | `Cursor/3.4`                                  |
 
-`open-sse/executors/base.ts::buildHeaders()` kuluttaa dynaamisen haun kautta.** Tyhjennä nämä, kun palveluntarjoajat julkaisevat uusia CLI versioita** — vanhentuneet UA -merkkijonot alkavat hylätä vanhentuneina asiakkaina.
+`open-sse/executors/base.ts::buildHeaders()` käyttää näitä dynaamisen haun kautta. **Päivitä nämä, kun palveluntarjoajat julkaisevat uusia CLI-versioita** — vanhentuneet UA-merkkijonot aletaan hylätä vanhentuneina asiakasohjelmina.
 
 ## CLI-yhteensopivuustilan valitsimet (`.env.example`, osio 13)
 

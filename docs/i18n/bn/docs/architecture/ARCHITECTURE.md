@@ -10,76 +10,76 @@ _সর্বশেষ হালনাগাদ: 2026-06-28_
 
 ## নির্বাহী সারসংক্ষেপ
 
-OmniRoute হলো Next.js-এর ওপর নির্মিত একটি স্থানীয় AI রাউটিং গেটওয়ে ও ড্যাশবোর্ড।
-এটি একটি একক OpenAI-সামঞ্জস্যপূর্ণ এন্ডপয়েন্ট (`/v1/*`) প্রদান করে এবং অনুবাদ, ফলব্যাক, টোকেন রিফ্রেশ ও ব্যবহার ট্র্যাকিংয়ের মাধ্যমে একাধিক আপস্ট্রিম প্রোভাইডারের মধ্যে ট্রাফিক রাউট করে।
+OmniRoute হলো Next.js-এর উপর নির্মিত একটি লোকাল AI রাউটিং গেটওয়ে ও ড্যাশবোর্ড।
+এটি একটি একক OpenAI-সামঞ্জস্যপূর্ণ এন্ডপয়েন্ট (`/v1/*`) প্রদান করে এবং অনুবাদ, ফলব্যাক, টোকেন রিফ্রেশ ও ব্যবহার ট্র্যাকিংসহ একাধিক আপস্ট্রিম প্রোভাইডারের মধ্যে ট্রাফিক রাউট করে।
 
-প্রধান সক্ষমতাসমূহ:
+মূল সক্ষমতাসমূহ:
 
-- CLI/টুলগুলোর জন্য OpenAI-সামঞ্জস্যপূর্ণ API সারফেস (380টি প্রোভাইডার, 159টি এক্সিকিউটার মডিউল)
-- প্রোভাইডার ফরম্যাটগুলোর মধ্যে রিকোয়েস্ট/রেসপন্স অনুবাদ
-- মডেল কম্বো ফলব্যাক (বহু-মডেল ক্রম)
-- স্ট্রাকচার্ড কম্বো ধাপ (`provider + model + connection`), `compositeTiers` দ্বারা রানটাইম ক্রম নির্ধারণ
+- CLI/টুলের জন্য OpenAI-সামঞ্জস্যপূর্ণ API সারফেস (৩৮০টি প্রোভাইডার, ১৫৯টি এক্সিকিউটর মডিউল)
+- বিভিন্ন প্রোভাইডার ফরম্যাটের মধ্যে রিকোয়েস্ট/রেসপন্স অনুবাদ
+- মডেল কম্বো ফলব্যাক (একাধিক মডেলের ক্রম)
+- `compositeTiers` অনুযায়ী রানটাইম ক্রমসহ কাঠামোবদ্ধ কম্বো ধাপ (`provider + model + connection`)
 - অ্যাকাউন্ট-স্তরের ফলব্যাক (প্রতি প্রোভাইডারে একাধিক অ্যাকাউন্ট)
-- প্রধান চ্যাট পাথে কোটা প্রিফ্লাইট এবং কোটা-সচেতন P2C অ্যাকাউন্ট নির্বাচন
-- OAuth + API-কী প্রোভাইডার সংযোগ ব্যবস্থাপনা (27টি OAuth প্রোভাইডার মডিউল)
-- `/v1/embeddings`-এর মাধ্যমে এমবেডিং তৈরি (18টি প্রোভাইডার)
-- `/v1/images/generations`-এর মাধ্যমে ছবি তৈরি (10+ প্রোভাইডার, 20+ মডেল)
-- `/v1/audio/transcriptions`-এর মাধ্যমে অডিও ট্রান্সক্রিপশন (18টি প্রোভাইডার)
-- `/v1/audio/speech`-এর মাধ্যমে টেক্সট-টু-স্পিচ (24টি বিল্ট-ইন প্রোভাইডার)
+- মূল চ্যাট পাথে কোটা প্রিফ্লাইট ও কোটা-সচেতন P2C অ্যাকাউন্ট নির্বাচন
+- OAuth + API-key প্রোভাইডার সংযোগ ব্যবস্থাপনা (২৭টি OAuth প্রোভাইডার মডিউল)
+- `/v1/embeddings`-এর মাধ্যমে এমবেডিং তৈরি (১৮টি প্রোভাইডার)
+- `/v1/images/generations`-এর মাধ্যমে ছবি তৈরি (১০টির বেশি প্রোভাইডার, ২০টির বেশি মডেল)
+- `/v1/audio/transcriptions`-এর মাধ্যমে অডিও ট্রান্সক্রিপশন (১৮টি প্রোভাইডার)
+- `/v1/audio/speech`-এর মাধ্যমে টেক্সট-টু-স্পিচ (২৪টি বিল্ট-ইন প্রোভাইডার)
 - `/v1/videos/generations`-এর মাধ্যমে ভিডিও তৈরি (ComfyUI + SD WebUI)
-- `/v1/music/generations`-এর মাধ্যমে সঙ্গীত তৈরি (ComfyUI)
-- `/v1/search`-এর মাধ্যমে ওয়েব অনুসন্ধান (20টি প্রোভাইডার)
+- `/v1/music/generations`-এর মাধ্যমে সংগীত তৈরি (ComfyUI)
+- `/v1/search`-এর মাধ্যমে ওয়েব অনুসন্ধান (২০টি প্রোভাইডার)
 - `/v1/moderations`-এর মাধ্যমে মডারেশন
-- `/v1/rerank`-এর মাধ্যমে পুনঃর্যাংকিং
-- রিজনিং মডেলের জন্য Think ট্যাগ পার্সিং (`<think>...</think>`)
+- `/v1/rerank`-এর মাধ্যমে পুনঃর্যাঙ্কিং
+- রিজনিং মডেলের জন্য থিংক ট্যাগ পার্সিং (`<think>...</think>`)
 - কঠোর OpenAI SDK সামঞ্জস্যের জন্য রেসপন্স স্যানিটাইজেশন
-- ক্রস-প্রোভাইডার সামঞ্জস্যের জন্য রোল নরমালাইজেশন (developer→system, system→user)
-- স্ট্রাকচার্ড আউটপুট রূপান্তর (json_schema → Gemini responseSchema)
-- প্রোভাইডার, কী, অ্যালিয়াস, কম্বো, সেটিংস ও মূল্য নির্ধারণের জন্য স্থানীয় পারসিস্টেন্স (122টি DB মডিউল)
-- ব্যবহার/খরচ ট্র্যাকিং এবং রিকোয়েস্ট লগিং
-- বহু-ডিভাইস/স্টেট সিঙ্কের জন্য ঐচ্ছিক ক্লাউড সিঙ্ক
-- API অ্যাক্সেস নিয়ন্ত্রণের জন্য IP অ্যালাউলিস্ট/ব্লকলিস্ট
-- থিংকিং বাজেট ব্যবস্থাপনা (passthrough/auto/custom/adaptive)
+- ক্রস-প্রোভাইডার সামঞ্জস্যের জন্য রোল স্বাভাবিকীকরণ (developer→system, system→user)
+- কাঠামোবদ্ধ আউটপুট রূপান্তর (json_schema → Gemini responseSchema)
+- প্রোভাইডার, কী, অ্যালিয়াস, কম্বো, সেটিংস ও মূল্যতথ্যের লোকাল পারসিস্টেন্স (১২২টি DB মডিউল)
+- ব্যবহার/খরচ ট্র্যাকিং ও রিকোয়েস্ট লগিং
+- একাধিক ডিভাইস/স্টেট সিঙ্কের জন্য ঐচ্ছিক ক্লাউড সিঙ্ক
+- API অ্যাক্সেস নিয়ন্ত্রণের জন্য IP অ্যালাওলিস্ট/ব্লকলিস্ট
+- থিংকিং বাজেট ব্যবস্থাপনা (পাসথ্রু/স্বয়ংক্রিয়/কাস্টম/অ্যাডাপ্টিভ)
 - গ্লোবাল সিস্টেম প্রম্পট ইনজেকশন
-- সেশন ট্র্যাকিং এবং ফিঙ্গারপ্রিন্টিং
+- সেশন ট্র্যাকিং ও ফিঙ্গারপ্রিন্টিং
 - প্রোভাইডার-নির্দিষ্ট প্রোফাইলসহ প্রতি-অ্যাকাউন্ট উন্নত রেট লিমিটিং
 - প্রোভাইডারের স্থিতিস্থাপকতার জন্য সার্কিট ব্রেকার প্যাটার্ন
-- মিউটেক্স লকিংয়ের মাধ্যমে অ্যান্টি-থান্ডারিং হার্ড সুরক্ষা
-- সিগনেচার-ভিত্তিক রিকোয়েস্ট ডিডুপ্লিকেশন ক্যাশ
+- মিউটেক্স লকিংসহ অ্যান্টি-থান্ডারিং হার্ড সুরক্ষা
+- স্বাক্ষর-ভিত্তিক রিকোয়েস্ট ডিডুপ্লিকেশন ক্যাশ
 - ডোমেইন স্তর: খরচের নিয়ম, ফলব্যাক নীতি, লকআউট নীতি
-- Context Relay: অ্যাকাউন্ট রোটেশনের ধারাবাহিকতার জন্য সেশন হ্যান্ডঅফ সারাংশ
-- ডোমেইন স্টেট পারসিস্টেন্স (ফলব্যাক, বাজেট, লকআউট ও সার্কিট ব্রেকারের জন্য SQLite write-through ক্যাশ)
+- কনটেক্সট রিলে: অ্যাকাউন্ট রোটেশনের ধারাবাহিকতার জন্য সেশন হ্যান্ডঅফ সারসংক্ষেপ
+- ডোমেইন স্টেট পারসিস্টেন্স (ফলব্যাক, বাজেট, লকআউট ও সার্কিট ব্রেকারের জন্য SQLite রাইট-থ্রু ক্যাশ)
 - কেন্দ্রীভূত রিকোয়েস্ট মূল্যায়নের জন্য পলিসি ইঞ্জিন (লকআউট → বাজেট → ফলব্যাক)
-- p50/p95/p99 লেটেন্সি অ্যাগ্রিগেশনসহ রিকোয়েস্ট টেলিমেট্রি
-- `combo_execution_key` / `combo_step_id`-এর মাধ্যমে কম্বো টার্গেট টেলিমেট্রি এবং ঐতিহাসিক কম্বো টার্গেট স্বাস্থ্য
-- এন্ড-টু-এন্ড ট্রেসিংয়ের জন্য করিলেশন ID (X-Request-Id)
-- প্রতি API কী-র জন্য অপ্ট-আউট সুবিধাসহ কমপ্লায়েন্স অডিট লগিং
-- LLM গুণমান নিশ্চয়তার জন্য Eval ফ্রেমওয়ার্ক
-- রিয়েল-টাইম প্রোভাইডার সার্কিট ব্রেকার স্ট্যাটাসসহ স্বাস্থ্য ড্যাশবোর্ড
-- 3টি ট্রান্সপোর্টসহ MCP Server (110টি টুল) (stdio/SSE/Streamable HTTP)
-- স্কিল ও টাস্ক লাইফসাইকেলসহ A2A Server (JSON-RPC 2.0 + SSE)
-- মেমরি সিস্টেম (এক্সট্রাকশন, ইনজেকশন, রিট্রিভাল, সামারাইজেশন)
-- স্কিল সিস্টেম (রেজিস্ট্রি, এক্সিকিউটার, স্যান্ডবক্স, বিল্ট-ইন স্কিল)
+- p50/p95/p99 ল্যাটেন্সি অ্যাগ্রিগেশনসহ রিকোয়েস্ট টেলিমেট্রি
+- `combo_execution_key` / `combo_step_id`-এর মাধ্যমে কম্বো টার্গেট টেলিমেট্রি ও ঐতিহাসিক কম্বো টার্গেটের স্বাস্থ্য
+- এন্ড-টু-এন্ড ট্রেসিংয়ের জন্য কোরিলেশন ID (X-Request-Id)
+- প্রতি API কীতে অপ্ট-আউট সুবিধাসহ কমপ্লায়েন্স অডিট লগিং
+- LLM গুণমান নিশ্চিতকরণের জন্য ইভ্যাল ফ্রেমওয়ার্ক
+- রিয়েল-টাইম প্রোভাইডার সার্কিট ব্রেকার স্ট্যাটাসসহ হেলথ ড্যাশবোর্ড
+- ৩টি ট্রান্সপোর্টসহ (stdio/SSE/Streamable HTTP) MCP সার্ভার (১১০টি টুল)
+- দক্ষতা ও টাস্ক লাইফসাইকেলসহ A2A সার্ভার (JSON-RPC 2.0 + SSE)
+- মেমোরি সিস্টেম (এক্সট্র্যাকশন, ইনজেকশন, রিট্রিভাল, সারসংক্ষেপ)
+- স্কিলস সিস্টেম (রেজিস্ট্রি, এক্সিকিউটর, স্যান্ডবক্স, বিল্ট-ইন স্কিল)
 - সার্টিফিকেট ব্যবস্থাপনা ও DNS হ্যান্ডলিংসহ MITM প্রক্সি
 - প্রম্পট ইনজেকশন গার্ড মিডলওয়্যার
-- Caveman, RTK, স্ট্যাকড পাইপলাইন, কম্প্রেশন কম্বো, ভাষা প্যাক ও অ্যানালিটিক্সসহ প্রম্পট কম্প্রেশন পাইপলাইন
+- Caveman, RTK, স্ট্যাকড পাইপলাইন, কম্প্রেশন কম্বো, ল্যাঙ্গুয়েজ প্যাক ও অ্যানালিটিক্সসহ প্রম্পট কম্প্রেশন পাইপলাইন
 - ACP (Agent Communication Protocol) রেজিস্ট্রি
-- মডুলার OAuth প্রোভাইডার (`src/lib/oauth/providers/`-এর অধীনে 22টি পৃথক মডিউল)
+- মডিউলার OAuth প্রোভাইডার (`src/lib/oauth/providers/`-এর অধীনে ২২টি পৃথক মডিউল)
 - আনইনস্টল/সম্পূর্ণ-আনইনস্টল স্ক্রিপ্ট
 - OAuth এনভায়রনমেন্ট মেরামত অ্যাকশন
 - OpenAI-সামঞ্জস্যপূর্ণ WS ক্লায়েন্টের জন্য WebSocket ব্রিজ (`/v1/ws`)
-- সিঙ্ক টোকেন ব্যবস্থাপনা (ইস্যু/রিভোক, ETag-সংস্করণযুক্ত কনফিগারেশন বান্ডেল ডাউনলোড)
-- GLM Thinking (`glmt`) ফার্স্ট-ক্লাস প্রোভাইডার প্রিসেট
-- হাইব্রিড টোকেন গণনা (প্রোভাইডার-পাশের `/messages/count_tokens`, আনুমানিক হিসাবের ফলব্যাকসহ)
-- মডেল অ্যালিয়াস অটো-সিডিং (স্টার্টআপে 30+ ক্রস-প্রক্সি ডায়ালেক্ট নরমালাইজেশন)
-- SSRF গার্ড, ব্যক্তিগত URL ব্লকিং ও কনফিগারযোগ্য রিট্রাইসহ নিরাপদ আউটবাউন্ড ফেচ
-- কনফিগারযোগ্য `requestRetry` এবং `maxRetryIntervalSec`সহ কুলডাউন-সচেতন চ্যাট রিট্রাই
-- স্টার্টআপে Zod-এর মাধ্যমে রানটাইম এনভায়রনমেন্ট ভ্যালিডেশন
-- পেজিনেশন, প্রোভাইডার CRUD ইভেন্ট এবং SSRF-ব্লকড ভ্যালিডেশন লগিংসহ কমপ্লায়েন্স অডিট v2
+- সিঙ্ক টোকেন ব্যবস্থাপনা (ইস্যু/রিভোক, ETag-সংস্করণযুক্ত কনফিগ বান্ডল ডাউনলোড)
+- GLM Thinking (`glmt`) প্রথম-শ্রেণির প্রোভাইডার প্রিসেট
+- হাইব্রিড টোকেন গণনা (অনুমানভিত্তিক ফলব্যাকসহ প্রোভাইডার-সাইড `/messages/count_tokens`)
+- মডেল অ্যালিয়াসের স্বয়ংক্রিয় সিডিং (স্টার্টআপের সময় ৩০টির বেশি ক্রস-প্রক্সি ডায়ালেক্ট স্বাভাবিকীকরণ)
+- SSRF গার্ড, প্রাইভেট URL ব্লকিং ও কনফিগারযোগ্য রিট্রাইসহ নিরাপদ আউটবাউন্ড ফেচ
+- কনফিগারযোগ্য `requestRetry` ও `maxRetryIntervalSec`-সহ কুলডাউন-সচেতন চ্যাট রিট্রাই
+- স্টার্টআপের সময় Zod-ভিত্তিক রানটাইম এনভায়রনমেন্ট যাচাইকরণ
+- পেজিনেশন, প্রোভাইডার CRUD ইভেন্ট ও SSRF-ব্লকড যাচাইকরণ লগিংসহ কমপ্লায়েন্স অডিট v2
 
 প্রাথমিক রানটাইম মডেল:
 
-- `src/app/api/*`-এর অধীনে Next.js অ্যাপ রুটগুলো ড্যাশবোর্ড API এবং সামঞ্জস্য API—উভয়ই বাস্তবায়ন করে
+- `src/app/api/*`-এর অধীনে থাকা Next.js অ্যাপ রুটগুলো ড্যাশবোর্ড API এবং সামঞ্জস্য API—উভয়ই বাস্তবায়ন করে
 - `src/sse/*` + `open-sse/*`-এর একটি শেয়ার্ড SSE/রাউটিং কোর প্রোভাইডার এক্সিকিউশন, অনুবাদ, স্ট্রিমিং, ফলব্যাক ও ব্যবহার পরিচালনা করে
 
 ## রেফারেন্স ডায়াগ্রাম
@@ -355,124 +355,158 @@ OmniRoute স্থানীয়ভাবে চলমান AI টুল প�
 
 বিস্তারিত আলোচনা: `docs/frameworks/EMBEDDED-SERVICES.md`
 
-## প্রধান সাবসিস্টেম (v3.8.0)
+## প্রধান সাবসিস্টেমসমূহ (v3.8.0)
 
-### উ: অটো কম্বো ইঞ্জিন
+### A. Auto Combo ইঞ্জিন
 
-একটি স্ট্যাটিক কম্বো সংজ্ঞার উপর নির্ভর না করে স্বয়ংক্রিয় কম্বো গতিশীলভাবে স্কোর করে এবং অনুরোধের সময়ে রাউটিং লক্ষ্য বাছাই করে। এটি `auto/*` মডেল উপসর্গ পরিবারকে শক্তি দেয়৷
+Auto Combo একটি স্থির combo সংজ্ঞার ওপর নির্ভর না করে, অনুরোধের সময় গতিশীলভাবে স্কোর নির্ধারণ করে এবং রাউটিং লক্ষ্য নির্বাচন করে। এটি `auto/*` model prefix পরিবারকে চালিত করে।
 
-- ইঞ্জিন এন্ট্রি: `open-sse/services/autoCombo/` (`autoComboEngine.ts`, `scoringEngine.ts`, `virtualFactory.ts`, `modePacks.ts`)
-- সমাধানকারী: `src/domain/comboResolver.ts` ( `auto/` উপসর্গের স্বয়ংক্রিয় সনাক্তকরণ)
+- ইঞ্জিন এন্ট্রি: `open-sse/services/autoCombo/` (`autoComboEngine.ts`,
+  `scoringEngine.ts`, `virtualFactory.ts`, `modePacks.ts`)
+- রিজলভার: `src/domain/comboResolver.ts` (`auto/` prefix-এর স্বয়ংক্রিয় শনাক্তকরণ)
 - ড্যাশবোর্ড: `/dashboard/auto-combo`
 - টেলিমেট্রি: `auto_combo_decisions` SQLite টেবিল
 
-মূল ক্ষমতা:
+প্রধান সক্ষমতাসমূহ:
 
-- **20টি রাউটিং কৌশল** (অগ্রাধিকার, ওজনযুক্ত, পূরণ-প্রথম, রাউন্ড-রবিন, P2C, এলোমেলো, সর্বনিম্ন-ব্যবহৃত, খরচ-অপ্টিমাইজ করা, রিসেট-সচেতন, রিসেট-উইন্ডো, হেডরুম, কোটা-ওয়েটেড, কঠোর-র্যান্ডম,** স্বয়ংক্রিয়** , lkgp, প্রসঙ্গ-অপ্টিমাইজ করা, ক্যাশে-অপ্টিমাইজ করা, প্রসঙ্গ-রিলে,** লয়** , পাইপলাইন) — auto হল v3.8.0-এর শিরোনাম সংযোজন; `fusion` (প্যানেল ফ্যান-আউট + বিচারক সংশ্লেষণ, `open-sse/services/fusion.ts`) v3.8.36-এ নতুন।
-- **16-ফ্যাক্টর স্কোরিং** : কোটা, স্বাস্থ্য, বিপরীত খরচ, বিপরীত লেটেন্সি, টাস্ক ফিট এবং আরও দশটি। কারণের ক্যানোনিকাল সারণী এবং তাদের ডিফল্ট ওজন [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) — তে থাকে এটিকে এখানে পুনঃস্থাপন করলে এটিকে বাসি হওয়ার দ্বিতীয় স্থান দেবে।
-- **ভার্চুয়াল কারখানা** ক্ষণস্থায়ী কম্বোকে বাস্তবায়িত করে যখন কোনো মিল নামের কম্বো বিদ্যমান থাকে না, সুস্থ সক্রিয় প্রদানকারী সংযোগ থেকে প্রার্থীদের সোর্সিং করে।
-- **স্বয়ংক্রিয় উপসর্গ** : `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`, `auto/smart`, `auto/lkgp` — প্রতিটি টিউন করা ওজন প্রোফাইল দ্বারা সমর্থিত৷
-- **6 মোড প্যাক** : `ship-fast`, `cost-saver`, `quality-first`, `offline-friendly`, `reliability-first` এবং `chaos-mode` — প্রিসেট ওজন কনফিগারেশন ড্যাশবোর্ড থেকে কল করা যায়। (উপরের `auto/*` উপসর্গগুলির সাথে বিভ্রান্ত হবেন না, যা অনুরোধ-সময়ের রূপ।)
+- **২০টি রাউটিং কৌশল** (priority, weighted, fill-first, round-robin, P2C, random,
+  least-used, cost-optimized, reset-aware, reset-window, headroom, quota-weighted,
+  strict-random, **auto**, lkgp, context-optimized, cache-optimized, context-relay, **fusion**,
+  pipeline) —
+  auto হলো v3.8.0-এর প্রধান সংযোজন; `fusion` (panel fan-out + judge synthesis,
+  `open-sse/services/fusion.ts`) v3.8.36-এ নতুন।
+- **১৬টি ফ্যাক্টরের স্কোরিং**: quota, health, inverse cost, inverse latency, task fit এবং
+  আরও দশটি। ফ্যাক্টরসমূহ ও তাদের ডিফল্ট weight-এর প্রামাণ্য টেবিলটি
+  [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md)-এ রয়েছে — এখানে সেটি পুনরায়
+  উল্লেখ করলে পুরোনো হয়ে যাওয়ার জন্য আরেকটি স্থান তৈরি হবে।
+- কোনো মিলে যাওয়া নামযুক্ত combo না থাকলে **Virtual factory** ক্ষণস্থায়ী combo
+  তৈরি করে এবং সুস্থ ও সক্রিয় provider connection থেকে candidate সংগ্রহ করে।
+- **Auto prefixসমূহ**: `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`,
+  `auto/smart`, `auto/lkgp` — প্রতিটির পেছনে একটি করে টিউন করা weight profile রয়েছে।
+- **৬টি mode pack**: `ship-fast`, `cost-saver`, `quality-first`, `offline-friendly`,
+  `reliability-first` এবং `chaos-mode` — ড্যাশবোর্ড থেকে ব্যবহারযোগ্য পূর্বনির্ধারিত
+  weight configuration। (এগুলোকে উপরের `auto/*` prefixগুলোর সঙ্গে গুলিয়ে ফেলবেন না,
+  যেগুলো অনুরোধের সময় ব্যবহৃত variant।)
 
-সম্পূর্ণ অ্যালগরিদমিক বিবরণের জন্য (ফ্যাক্টর সূত্র, ওজন টিউনিং), [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) দেখুন।
+অ্যালগরিদমের সম্পূর্ণ বিবরণের জন্য (ফ্যাক্টরের সূত্র, weight tuning), দেখুন
+[`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md)।
 
-### B. ক্লাউড এজেন্ট
+### B. Cloud Agents
 
-ক্লাউড এজেন্ট একটি ইউনিফর্ম ডিবি-ব্যাকড টাস্ক লাইফসাইকেলের পিছনে তৃতীয়-পক্ষের হোস্ট করা কোড-এজেন্ট প্ল্যাটফর্মগুলি (Codex ক্লাউড, Devin, Jules) আবৃত করে। সমস্ত টাস্ক creation/inspection এন্ডপয়েন্টের জন্য ব্যবস্থাপনা প্রমাণীকরণ প্রয়োজন।
+Cloud Agents তৃতীয়-পক্ষের হোস্ট করা code-agent platform (Codex Cloud, Devin,
+Jules)-কে একটি অভিন্ন DB-সমর্থিত task lifecycle-এর আড়ালে আবৃত করে। সব task তৈরি ও
+পরিদর্শনের endpoint-এর জন্য management authentication প্রয়োজন।
 
-- মডিউল রুট: `src/lib/cloudAgent/` (`baseAgent.ts`, `registry.ts`, `api.ts`, `types.ts`, `db.ts`, প্লাস `agents/` এর অধীনে প্রতি-এজেন্ট সাবডিরেক্টরি)
-- প্রতি-এজেন্ট বাস্তবায়ন: `agents/codex/`, `agents/devin/`, `agents/jules/`
-- পাবলিক এন্ডপয়েন্ট: `/api/v1/agents/tasks/*` (list/create/get/cancel)
-- ব্যবস্থাপনার শেষ পয়েন্ট: `/api/cloud/*` (প্রভিশনিং, স্ট্যাটাস, ব্যাচ)
+- মডিউল রুট: `src/lib/cloudAgent/` (`baseAgent.ts`, `registry.ts`, `api.ts`,
+  `types.ts`, `db.ts`, এবং `agents/`-এর অধীনে প্রতিটি agent-এর subdirectory)
+- প্রতিটি agent-এর implementation: `agents/codex/`, `agents/devin/`, `agents/jules/`
+- পাবলিক endpointসমূহ: `/api/v1/agents/tasks/*` (তালিকা/তৈরি/আহরণ/বাতিল)
+- Management endpointসমূহ: `/api/cloud/*` (provisioning, status, batch)
 - ড্যাশবোর্ড: `/dashboard/cloud-agents`
 - স্টোরেজ: `cloud_agent_tasks` টেবিল
 
-প্রতি-এজেন্ট বিধান এবং OAuth নির্দিষ্টকরণের জন্য, [`docs/frameworks/CLOUD_AGENT.md`](../frameworks/CLOUD_AGENT.md) দেখুন।
+প্রতিটি agent-এর provisioning এবং OAuth-সংক্রান্ত সুনির্দিষ্ট তথ্যের জন্য দেখুন
+[`docs/frameworks/CLOUD_AGENT.md`](../frameworks/CLOUD_AGENT.md)।
 
-### গ. গার্ডেল
+### C. Guardrails
 
-গার্ডেল মডিউল হল একটি হট-রিলোডযোগ্য মিডলওয়্যার স্তর যা PII, প্রম্পট ইনজেকশন এবং অনিরাপদ দৃষ্টি সামগ্রীর জন্য অনুরোধ এবং প্রতিক্রিয়াগুলি পরিদর্শন করে৷ লঙ্ঘন শর্ট সার্কিট HTTP সঙ্গে অনুরোধ** 503** প্লাস একটি স্ট্রাকচার্ড ত্রুটি কোড, ডাউনস্ট্রিম কলারদের পুনরায় চেষ্টা বা শাখা করার অনুমতি দেয়।
+guardrails মডিউলটি একটি hot-reloadable middleware layer, যা PII, prompt injection
+এবং অনিরাপদ vision content শনাক্ত করতে request ও response পরীক্ষা করে। লঙ্ঘন ঘটলে,
+পরবর্তী caller যেন পুনরায় চেষ্টা করতে বা বিকল্প শাখা নিতে পারে, সে জন্য একটি
+কাঠামোবদ্ধ error code-সহ HTTP **503** ফিরিয়ে request-টি তাৎক্ষণিকভাবে থামিয়ে দেওয়া হয়।
 
-- মডিউল রুট: `src/lib/guardrails/` (`base.ts`, `registry.ts`, `piiMasker.ts`, `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`)
-- হট রিলোড: রেজিস্ট্রি কনফিগার পরিবর্তনের জন্য ঘড়ি এবং জায়গায় চেইন পুনর্নির্মাণ করে
-- ওয়্যার-ইন পয়েন্ট: চ্যাট হ্যান্ডলার এন্ট্রি, ইমেজ জেনারেশন হ্যান্ডলার, রেসপন্স স্যানিটাইজার
-- HTTP চুক্তি: `error.code = "GUARDRAIL_VIOLATION"` এর সাথে `503` হিসাবে লঙ্ঘন পৃষ্ঠ
+- মডিউল রুট: `src/lib/guardrails/` (`base.ts`, `registry.ts`, `piiMasker.ts`,
+  `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`)
+- Hot reload: registry config পরিবর্তন পর্যবেক্ষণ করে এবং চলমান অবস্থাতেই chain পুনর্নির্মাণ করে
+- সংযুক্তির স্থানসমূহ: chat handler entry, image generation handler, response sanitizer
+- HTTP contract: লঙ্ঘন `error.code = "GUARDRAIL_VIOLATION"`-সহ `503` হিসেবে প্রকাশ পায়
 
-রুলসেট অথরিং এবং থ্রেশহোল্ড টিউনিংয়ের জন্য, [`docs/security/GUARDRAILS.md`](../security/GUARDRAILS.md) দেখুন।
+ruleset রচনা এবং threshold tuning-এর জন্য দেখুন
+[`docs/security/GUARDRAILS.md`](../security/GUARDRAILS.md)।
 
-### D. ডোমেইন লেয়ার
+### D. Domain Layer
 
-`src/domain/` নেমস্পেস নীতিগত সিদ্ধান্তকে কেন্দ্রীভূত করে তাই রুট হ্যান্ডলারদের নিজেদেরকে lockout/budget/fallback লজিক একত্র করতে হবে না।
+`src/domain/` namespace policy-সংক্রান্ত সিদ্ধান্তগুলোকে কেন্দ্রীভূত করে, যাতে route
+handler-গুলোকে নিজেরা lockout/budget/fallback logic একত্র করতে না হয়।
 
-- পলিসি ইঞ্জিন: প্রাক-নির্বাহী মূল্যায়নের জন্য `src/domain/policyEngine.ts` — একক এন্ট্রি পয়েন্ট (লকআউট → বাজেট → ফলব্যাক অর্ডারিং)
-- খরচ নিয়ম: `src/domain/costRules.ts`
-- ফলব্যাক নীতি: `src/domain/fallbackPolicy.ts`
-- লকআউট নীতি: `src/domain/lockoutPolicy.ts`
-- ট্যাগ-ভিত্তিক রাউটিং: `src/domain/tagRouter.ts`
-- কম্বো সমাধানকারী: `src/domain/comboResolver.ts` — কম্বো নাম, স্বয়ংক্রিয়/\* উপসর্গ এবং ওয়াইল্ডকার্ড মডেল লক্ষ্যগুলিকে কংক্রিট সম্পাদনের পরিকল্পনার সমাধান করে
-- Connection/model নিয়ম যোগদানকারী: `src/domain/connectionModelRules.ts`
-- মডেল প্রাপ্যতা স্ন্যাপশট: `src/domain/modelAvailability.ts`
-- প্রদানকারীর মেয়াদ শেষ হওয়ার ট্র্যাকিং: `src/domain/providerExpiration.ts`
-- কোটা ক্যাশে: `src/domain/quotaCache.ts`
-- অধঃপতন অবস্থা: `src/domain/degradation.ts`
-- কনফিগারেশন অডিট: `src/domain/configAudit.ts`
-- OmniRoute প্রতিক্রিয়া মেটাডেটা নির্মাতা: `src/domain/omnirouteResponseMeta.ts`
-- মূল্যায়ন সাবসিস্টেম: `src/domain/assessment/` — পর্যায়ক্রমিক মূল্যায়ন কাজ
+- Policy engine: `src/domain/policyEngine.ts` — execution-পূর্ব মূল্যায়নের একক entry
+  point (lockout → budget → fallback ক্রম)
+- Cost ruleসমূহ: `src/domain/costRules.ts`
+- Fallback policy: `src/domain/fallbackPolicy.ts`
+- Lockout policy: `src/domain/lockoutPolicy.ts`
+- Tag-ভিত্তিক routing: `src/domain/tagRouter.ts`
+- Combo resolver: `src/domain/comboResolver.ts` — combo name, auto/\*
+  prefix এবং wildcard model target-কে নির্দিষ্ট execution plan-এ রূপান্তর করে
+- Connection/model rule joiner: `src/domain/connectionModelRules.ts`
+- Model availability snapshotসমূহ: `src/domain/modelAvailability.ts`
+- Provider-এর মেয়াদোত্তীর্ণতা ট্র্যাকিং: `src/domain/providerExpiration.ts`
+- Quota cache: `src/domain/quotaCache.ts`
+- Degradation state: `src/domain/degradation.ts`
+- Configuration audit: `src/domain/configAudit.ts`
+- OmniRoute response metadata builder: `src/domain/omnirouteResponseMeta.ts`
+- Assessment subsystem: `src/domain/assessment/` — পর্যায়ক্রমিক evaluation job
 
-### E. অনুমোদন পাইপলাইন
+### E. Authorization Pipeline
 
-অনুমোদন পাইপলাইন প্রতিটি আগত অনুরোধকে শ্রেণীবদ্ধ করে এবং প্রেরণের আগে উপযুক্ত নীতি শৃঙ্খল প্রয়োগ করে।
+authorization pipeline প্রতিটি incoming request-কে শ্রেণিবদ্ধ করে এবং dispatch-এর
+আগে উপযুক্ত policy chain প্রয়োগ করে।
 
-- পাইপলাইন এন্ট্রি: `src/server/authz/pipeline.ts`
-- শ্রেণীবদ্ধ করার অনুরোধ করুন: `src/server/authz/classify.ts` — সার্বজনীন সামঞ্জস্যপূর্ণ রুটগুলিকে ব্যবস্থাপনা রুট থেকে আলাদা করে
-- পাবলিক রুট ইনভেন্টরি: `src/shared/constants/publicApiRoutes.ts`
-- নীতিগুলি: `src/server/authz/policies/` — সংমিশ্রণযোগ্য পূর্বাভাস (`requireApiKey`, `requireManagement`, `requireFreshAuth`, ইত্যাদি)
-- হেডার ইউটিলিটিস: `src/server/authz/headers.ts`
-- দাবী সহকারী: `src/server/authz/assertAuth.ts`
-- অনুরোধের প্রসঙ্গ: `src/server/authz/context.ts`
+- Pipeline entry: `src/server/authz/pipeline.ts`
+- Request classifier: `src/server/authz/classify.ts` — public compatibility route-কে
+  management route থেকে পৃথক করে
+- Public route inventory: `src/shared/constants/publicApiRoutes.ts`
+- Policyসমূহ: `src/server/authz/policies/` — সমন্বয়যোগ্য predicate
+  (`requireApiKey`, `requireManagement`, `requireFreshAuth`, ইত্যাদি)
+- Header utilityসমূহ: `src/server/authz/headers.ts`
+- Assertion helper: `src/server/authz/assertAuth.ts`
+- Request context: `src/server/authz/context.ts`
 
-পাবলিক বনাম ম্যানেজমেন্ট রুট একটি কঠিন সীমানা: agent/cooldown APIs এবং প্রদানকারীর মিউটেশনের জন্য ম্যানেজমেন্ট প্রমাণীকরণ প্রয়োজন (HTTP 401 যদি অনুপস্থিত থাকে)।
+Public ও management route-এর মধ্যকার সীমারেখা কঠোর: agent/cooldown API এবং
+provider mutation-এর জন্য management auth প্রয়োজন (না থাকলে HTTP 401)।
 
-সম্পূর্ণ রুট শ্রেণীবিভাগের নিয়মের জন্য, [`docs/architecture/AUTHZ_GUIDE.md`](./AUTHZ_GUIDE.md) দেখুন।
+সম্পূর্ণ route classification rule-এর জন্য দেখুন
+[`docs/architecture/AUTHZ_GUIDE.md`](./AUTHZ_GUIDE.md)।
 
-### F. ওয়ার্কফ্লো FSM এবং টাস্ক-সচেতন রাউটার
+### F. Workflow FSM এবং Task-Aware Router
 
-সনাক্ত করা ওয়ার্কফ্লো স্টেজ (পরিকল্পনা, সম্পাদন, পর্যালোচনা) এবং ব্যাকগ্রাউন্ড-টাস্ক অ্যাফিনিটির উপর ভিত্তি করে সরাসরি ট্র্যাফিকের জন্য কম্বো নির্বাচনের উপরে স্তরযুক্ত একটি সীমিত-রাষ্ট্র-মেশিন চালিত রাউটার।
+combo selection-এর ওপরে স্থাপিত একটি finite-state-machine-চালিত router, যা শনাক্ত করা
+workflow stage (planning, execution, review) এবং background-task affinity-এর ভিত্তিতে
+traffic পরিচালনা করে।
 
-- কর্মপ্রবাহ FSM: `open-sse/services/workflowFSM.ts`
+- ওয়ার্কফ্লো FSM: `open-sse/services/workflowFSM.ts`
 - টাস্ক-সচেতন রাউটার: `open-sse/services/taskAwareRouter.ts`
-- ব্যাকগ্রাউন্ড টাস্ক ডিটেক্টর: `open-sse/services/backgroundTaskDetector.ts`
-- অভিপ্রায় শ্রেণীবদ্ধকারী: `open-sse/services/intentClassifier.ts`
+- ব্যাকগ্রাউন্ড টাস্ক শনাক্তকারী: `open-sse/services/backgroundTaskDetector.ts`
+- ইন্টেন্ট শ্রেণিবিন্যাসকারী: `open-sse/services/intentClassifier.ts`
 
-FSM ট্রানজিশনগুলি অটো কম্বোর স্কোরিংয়ে ফিড করে, background/automation কাজের জন্য সস্তা মডেলের দিকে এবং ইন্টারেক্টিভ planning/review টার্নের জন্য আরও শক্তিশালী মডেলের দিকে পক্ষপাতিত্ব করে।
+FSM-এর ট্রানজিশনগুলো Auto Combo-এর স্কোরিংয়ে যুক্ত হয়, যা ব্যাকগ্রাউন্ড/অটোমেশন টাস্কের জন্য কম খরচের মডেলের দিকে এবং ইন্টারঅ্যাক্টিভ পরিকল্পনা/পর্যালোচনা টার্নের জন্য আরও শক্তিশালী মডেলের দিকে অগ্রাধিকার দেয়।
 
-### G. প্রদানকারী-নির্দিষ্ট স্থিতিস্থাপকতা
+### G. প্রোভাইডার-নির্দিষ্ট স্থিতিস্থাপকতা
 
-বেশ কিছু প্রদানকারী ডেডিকেটেড স্থিতিস্থাপকতা এবং স্টিলথ মডিউল পাঠায় যা গ্লোবাল সার্কিট ব্রেকার / সংযোগ কুলডাউন / মডেল লকআউট স্তরগুলিতে পিগি-ব্যাক করে:
+বেশ কয়েকটি প্রোভাইডার বিশেষায়িত স্থিতিস্থাপকতা ও স্টেলথ মডিউল সরবরাহ করে, যেগুলো গ্লোবাল সার্কিট ব্রেকার / সংযোগ কুলডাউন / মডেল লকআউট স্তরের সুবিধা নেয়:
 
-- Antigravity 429 ইঞ্জিন: `open-sse/services/antigravity429Engine.ts` (পরিচয় ঘোরায়, স্ক্রাব প্রতিক্রিয়া শিরোনাম, `antigravityCredits.ts`, `antigravityHeaderScrub.ts`, `antigravityHeaders.ts`, `antigravityIdentity.ts`, `antigravityVersion.ts` এর মাধ্যমে credits/version ট্র্যাকিং চালায়)
+- Antigravity 429 ইঞ্জিন: `open-sse/services/antigravity429Engine.ts` (আইডেন্টিটি রোটেট করে, রেসপন্স হেডার পরিষ্কার করে এবং `antigravityCredits.ts`, `antigravityHeaderScrub.ts`, `antigravityHeaders.ts`, `antigravityIdentity.ts`, `antigravityVersion.ts`-এর মাধ্যমে ক্রেডিট/ভার্সন ট্র্যাকিং পরিচালনা করে)
 - Antigravity 429 গার্ড: `open-sse/services/antigravity429Guard.ts` (সমস্ত হোস্ট জুড়ে আপস্ট্রিম 429s-এর প্রতি-অনুরোধ বাজেট, `ANTIGRAVITY_MAX_429_ATTEMPTS`; একটি প্রত্যাখ্যানকারী সংস্থার একটি অভিন্ন পুনঃপ্রেরণ স্থানীয়ভাবে উত্তর দেওয়া হয়; `src/sse/handlers/chat.ts` কুলডাউন-সচেতন পুনঃপ্রচেষ্টার মাধ্যমে এই ধরনের অনুরোধ পুনরায় চালু করে না)
 - ModelScope কোটা নীতি: `open-sse/services/modelscopePolicy.ts`
-- Claude কোড CCH (কম্প্যাটিবিলিটি চ্যানেল হ্যান্ডশেক): `open-sse/services/claudeCodeCCH.ts`, প্লাস `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`, `claudeCodeToolRemapper.ts`
-- Claude কোড ফিঙ্গারপ্রিন্ট শেপিং: `open-sse/services/claudeCodeFingerprint.ts`
-- Claude কোড অস্পষ্টতা: `open-sse/services/claudeCodeObfuscation.ts`
+- Claude Code CCH (কম্প্যাটিবিলিটি চ্যানেল হ্যান্ডশেক): `open-sse/services/claudeCodeCCH.ts`, সঙ্গে `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`, `claudeCodeToolRemapper.ts`
+- Claude Code ফিঙ্গারপ্রিন্ট শেপিং: `open-sse/services/claudeCodeFingerprint.ts`
+- Claude Code অবফাসকেশন: `open-sse/services/claudeCodeObfuscation.ts`
 
-সম্পূর্ণ স্টিলথ প্লেবুক এবং অপারেশনাল গাইডেন্সের জন্য, দেখুন `docs/security/STEALTH_GUIDE.md` (git; `/docs` এ কম্পাইল করা হয়নি)।
+সম্পূর্ণ স্টেলথ প্লেবুক ও পরিচালনাগত নির্দেশনার জন্য `docs/security/STEALTH_GUIDE.md` দেখুন (git-এ রয়েছে; `/docs`-এ কম্পাইল করা হয়নি)।
 
-### H. Webhooks, Reasoning Cache, Read Cache
+### H. ওয়েবহুক, রিজনিং ক্যাশ, রিড ক্যাশ
 
-- **ওয়েবহুক** provider/account/task ইভেন্টের জন্য — আউটবাউন্ড প্রেরণ।
-  - প্রেরণকারী: `src/lib/webhookDispatcher.ts`
-  - স্টোরেজ: `webhooks` SQLite টেবিল ( `src/lib/db/webhooks.ts` এর মাধ্যমে)
-  - ড্যাশবোর্ড: `/dashboard/webhooks` (সাবস্ক্রিপশন, গোপনীয়তা, আবার চেষ্টা করার ইতিহাস)
-  - ইভেন্ট শ্রেণীবিন্যাস এবং শব্দার্থ পুনরায় চেষ্টা করার জন্য, [`docs/frameworks/WEBHOOKS.md`](../frameworks/WEBHOOKS.md) দেখুন।
-- **রিজনিং ক্যাশে** — রিপ্লেয়েবল রিপ্লেবল রিজনিং ব্লক প্রোভাইডারদের জন্য যেগুলো চিন্তার টোকেন নির্গত করে (Claude, GLMT, ইত্যাদি) তাই একটানা বাঁক পুনরায় চিন্তা করা এড়িয়ে যেতে পারে।
+- **ওয়েবহুক** — প্রোভাইডার/অ্যাকাউন্ট/টাস্ক ইভেন্টের জন্য আউটবাউন্ড ডিসপ্যাচ।
+  - ডিসপ্যাচার: `src/lib/webhookDispatcher.ts`
+  - স্টোরেজ: `webhooks` SQLite টেবিল (`src/lib/db/webhooks.ts`-এর মাধ্যমে)
+  - ড্যাশবোর্ড: `/dashboard/webhooks` (সাবস্ক্রিপশন, সিক্রেট, রিট্রাই ইতিহাস)
+  - ইভেন্ট শ্রেণিবিন্যাস ও রিট্রাইয়ের আচরণ সম্পর্কে জানতে [`docs/frameworks/WEBHOOKS.md`](../frameworks/WEBHOOKS.md) দেখুন।
+- **রিজনিং ক্যাশ** — যেসব প্রোভাইডার থিংকিং টোকেন (Claude, GLMT ইত্যাদি) নির্গত করে, তাদের জন্য পুনরায় চালানো যায় এমন রিজনিং ব্লক, যাতে ধারাবাহিক টার্নে পুনরায় চিন্তা করা এড়ানো যায়।
   - DB স্তর: `src/lib/db/reasoningCache.ts`
-  - পরিষেবা স্তর: `open-sse/services/reasoningCache.ts`
-  - রিপ্লে শব্দার্থবিদ্যার জন্য, [`docs/routing/REASONING_REPLAY.md`](../routing/REASONING_REPLAY.md) দেখুন।
-- **ক্যাশে পড়ুন** — স্বল্প-কালীন প্রতিক্রিয়া ক্যাশে স্বাক্ষর দ্বারা কী করা হয় এবং ভাঙা আপস্ট্রিম SDKs থেকে অভিন্ন পুনঃপ্রচারগুলিকে ভেঙে ফেলার জন্য ব্যবহৃত হয়।
+  - সার্ভিস স্তর: `open-sse/services/reasoningCache.ts`
+  - রিপ্লে সেমান্টিকস সম্পর্কে জানতে [`docs/routing/REASONING_REPLAY.md`](../routing/REASONING_REPLAY.md) দেখুন।
+- **রিড ক্যাশ** — সিগনেচার দ্বারা কী করা স্বল্পস্থায়ী রেসপন্স ক্যাশ, যা ত্রুটিপূর্ণ আপস্ট্রিম SDK থেকে আসা অভিন্ন রিট্রাইগুলোকে একত্রিত করতে ব্যবহৃত হয়।
   - DB স্তর: `src/lib/db/readCache.ts`
-  - পরিসংখ্যান এন্ডপয়েন্ট: `GET /api/cache/stats`, `/dashboard/cache` এ ড্যাশবোর্ড
+  - পরিসংখ্যান এন্ডপয়েন্ট: `GET /api/cache/stats`, ড্যাশবোর্ড: `/dashboard/cache`
 
 ## 3) পারসিস্টেন্স স্তর
 
@@ -1055,11 +1089,11 @@ flowchart LR
 - স্টার্টআপে SQLite স্কিমা মাইগ্রেশন এবং স্বয়ংক্রিয় আপগ্রেড হুক
 - লিগ্যাসি JSON → SQLite মাইগ্রেশনের সামঞ্জস্য পাথ
 
-## 6) SSRF / আউটবাউন্ড URL গার্ড
+## 6) SSRF / আউটবাউন্ড URL সুরক্ষা
 
-- `src/shared/network/outboundUrlGuard.ts` প্রোভাইডার এক্সিকিউটরের কাছে পৌঁছানোর আগেই সব ব্যক্তিগত/লুপব্যাক/লিংক-লোকাল টার্গেট URL ব্লক করে
-- প্রোভাইডার মডেল আবিষ্কার ও যাচাইকরণ রুটগুলো `src/shared/network/safeOutboundFetch.ts` ব্যবহার করে, যা প্রতিটি আউটবাউন্ড অনুরোধের আগে গার্ড প্রয়োগ করে
-- গার্ড ত্রুটিগুলো HTTP 422 সহ `URL_GUARD_BLOCKED` হিসেবে প্রকাশিত হয় এবং `providerAudit.ts`-এর মাধ্যমে কমপ্লায়েন্স অডিট ট্রেইলে লগ করা হয়
+- `BaseExecutor.assertOutboundUrlAllowed` (`open-sse/executors/base.ts`) `BaseExecutor.execute()`-এর মাধ্যমে পাঠানো চ্যাট অনুরোধগুলোর ক্ষেত্রে `src/shared/network/outboundUrlGuard.ts` প্রয়োগ করে। শুধুমাত্র-পাবলিক মোডে (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false`, যেখানে প্রাইভেট ফ্ল্যাগ বন্ধ থাকে) এটি প্রাইভেট ও লুপব্যাক হোস্ট এবং 169.254.0.0/16 ব্লক করে; অন্য সব মোডে এটি ক্লাউড-মেটাডেটা হোস্ট ব্লক করে। কোনো DNS লুকআপের আগে, যেভাবে হোস্টনেম বা IP লিটারেল লেখা হয়েছে সেভাবেই এটি পরীক্ষা করে। বিল্ট-ইন লোকাল প্রোভাইডারগুলো এটি এড়িয়ে যায়।
+- প্রোভাইডার মডেল আবিষ্কার ও যাচাইকরণ রুটগুলো `src/shared/network/safeOutboundFetch.ts` ব্যবহার করে, যা প্রতিটি আউটবাউন্ড অনুরোধের আগে সুরক্ষা প্রয়োগ করে
+- সুরক্ষা-সংক্রান্ত ত্রুটিগুলো HTTP 503 সহ `URL_GUARD_BLOCKED` হিসেবে প্রকাশ পায় (`getSafeOutboundFetchErrorStatus`; মডেল-আবিষ্কার রুটটি 400 ফেরত দেয়), এবং যাচাইকরণের সময় প্রকৃত SSRF ব্লকগুলো `provider.validation.ssrf_blocked` ইভেন্ট হিসেবে অডিট ট্রেইলে লগ করা হয়
 
 ## পর্যবেক্ষণযোগ্যতা এবং অপারেশনাল সংকেত
 
@@ -1110,7 +1144,7 @@ flowchart LR
 4. ক্লাউডের আচরণ সঠিক `NEXT_PUBLIC_BASE_URL` এবং ক্লাউড এন্ডপয়েন্টের নাগালযোগ্যতার ওপর নির্ভর করে।
 5. `open-sse/` ডিরেক্টরিটি `@omniroute/open-sse` **npm workspace package** হিসেবে প্রকাশিত হয়। সোর্স কোড এটি `@omniroute/open-sse/...`-এর মাধ্যমে ইমপোর্ট করে (Next.js `transpilePackages` দ্বারা রিজলভ করা হয়)। সামঞ্জস্য বজায় রাখতে এই ডকুমেন্টের ফাইল পাথগুলোতে এখনও `open-sse/` ডিরেক্টরির নাম ব্যবহার করা হয়েছে।
 6. ড্যাশবোর্ডের চার্টগুলো অভিগম্য, ইন্টারঅ্যাকটিভ অ্যানালিটিক্স ভিজ্যুয়ালাইজেশনের জন্য **Recharts** (SVG-ভিত্তিক) ব্যবহার করে (মডেল ব্যবহারের বার চার্ট, সাফল্যের হারসহ প্রোভাইডার ব্রেকডাউন টেবিল)।
-7. E2E টেস্টগুলো **Playwright** (`tests/e2e/`) ব্যবহার করে এবং `npm run test:e2e`-এর মাধ্যমে চালানো হয়। ইউনিট টেস্টগুলো **Node.js test runner** (`tests/unit/`) ব্যবহার করে এবং `npm run test:unit`-এর মাধ্যমে চালানো হয়। `src/`-এর অধীনে থাকা সোর্স কোড **TypeScript** (`.ts`/`.tsx`); `open-sse/` ওয়ার্কস্পেসটি JavaScript (`.js`) হিসেবেই থাকে।
+7. E2E টেস্টগুলো **Playwright** (`tests/e2e/`) ব্যবহার করে এবং `npm run test:e2e`-এর মাধ্যমে চালানো হয়। ইউনিট টেস্টগুলো **Node.js test runner** (`tests/unit/`) ব্যবহার করে এবং `npm run test:unit`-এর মাধ্যমে চালানো হয়। `src/`-এর অধীনে থাকা সোর্স কোড **TypeScript** (`.ts`/`.tsx`); `open-sse/` ওয়ার্কস্পেসটি TypeScript (`.ts`) হিসেবেই থাকে।
 8. সেটিংস পেজটি ৭টি ট্যাবে সাজানো: General, Appearance, AI, Security, Routing, Resilience, Advanced। Resilience পেজটি কেবল রিকোয়েস্ট কিউ, কানেকশন কুলডাউন, প্রোভাইডার ব্রেকার এবং wait-for-cooldown আচরণ কনফিগার করে; লাইভ ব্রেকার রানটাইম স্টেট Health পেজে দেখানো হয়।
 9. **Context Relay** স্ট্র্যাটেজি (`context-relay`) দুটি স্তরে বিভক্ত: হ্যান্ডঅফ তৈরি করা উচিত কি না তা `combo.ts` নির্ধারণ করে, আর অ্যাকাউন্ট রিজল্যুশনের পরে `chat.ts` হ্যান্ডঅফটি ইনজেক্ট করে। হ্যান্ডঅফ ডেটা `context_handoffs` SQLite টেবিলে থাকে। এই বিভাজনটি ইচ্ছাকৃত, কারণ প্রকৃত অ্যাকাউন্ট পরিবর্তিত হয়েছে কি না তা কেবল `chat.ts`-ই জানে।
 10. **প্রক্সি প্রয়োগ** এখন বিস্তৃত: `tokenHealthCheck.ts` প্রতিটি কানেকশনের জন্য প্রক্সি রিজলভ করে, `/api/providers/validate` `runWithProxyContext` ব্যবহার করে এবং Node 22-এ ডিসপ্যাচার সামঞ্জস্য বজায় রাখতে `proxyFetch.ts` `undici.fetch()` ব্যবহার করে।

@@ -20,7 +20,7 @@ Amikor egy IDE ügynök (pl. GitHub Copilot, Cursor, Claude Code) API hívást k
 
 Ez azt jelenti, hogy:
 
-- **Bármely ügynök átirányítása bármely szolgáltatóhoz** : Copilot beszél OpenAI-vel? Irányítsa át Anthropic Claude, Gemini, vagy OmniRoute 380 szolgáltatóinak bármelyikére.
+- **Bármely ügynök átirányítása bármely szolgáltatóhoz** : Copilot beszél OpenAI-vel? Irányítsa át Anthropic Claude, Gemini, vagy OmniRoute 381 szolgáltatójának bármelyikére.
 - **Alkalmazzon modellleképezéseket** : `gemini-3-flash` → `claude-sonnet-4.7` transzparensen a kezelő szintjén.
 - **Figyelje meg az összes ügynökforgalmat** : minden elfogott kérést közzétesznek a [Közlekedési Felügyelőnek](./TRAFFIC_INSPECTOR.md).
 - **Alkalmazza OmniRoute rugalmasságot** : kombinált útválasztás, megszakítók, tartalékok és költségkövetési munka IDE ügynökforgalom számára is.
@@ -544,7 +544,7 @@ A Trae egy viszonylag új MI-alapú kódolási asszisztens. A kezelő implement�
 3. Határozza meg a hitelesítési mechanizmust
 4. Mérlegelje a folytatás vagy leállítás lehetőségét a szolgáltatási feltételek és az API feltérképezhetősége alapján
 
-A vizsgálat befejezéséig az irányítópulton lévő Trae-kártyán a „Vizsgálat alatt” jelvény és egy „Életképesség jelentése” hivatkozás látható. A `src/mitm/handlers/trae.ts` fájlban lévő kezelőváz egy strukturált `Még nincs implementálva` hibát dob.
+A vizsgálat befejezéséig az irányítópulton lévő Trae-kártyán a „Vizsgálat alatt” jelvény és egy „Életképesség jelentése” hivatkozás látható. A `src/mitm/handlers/trae.ts` fájlban lévő kezelőváz egy strukturált `Not yet implemented` hibát dob.
 
 ### Hátralékban lévő ügynökök (MITM szükséges — egyéni alap-URL nem támogatott)
 

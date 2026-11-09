@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+import "../../_helpers/pinnedProviderClientVersions";
 import React, { act } from "react";
 import { createRoot } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";

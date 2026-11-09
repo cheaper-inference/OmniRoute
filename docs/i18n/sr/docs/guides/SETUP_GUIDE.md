@@ -20,14 +20,16 @@
 
 ## Начини инсталације
 
-### npm (препоручено)
+### нпм (препоручено)
 
 ```bash
 npm install -g omniroute
 omniroute
 ```
 
-Контролна табла се отвара на `http://localhost:20128`, а основни URL API-ја је `http://localhost:20128/v1`.
+Контролна табла се отвара на `http://localhost:20128` и API база URL је `http://localhost:20128/v1`.
+
+> **нпм корисници:** Ако нпм упозорава да су скрипте за инсталацију блокиране (нпр. `omniroute`, `better-sqlite3`), погледајте [Решавање проблема — блокиране нпм скрипте за инсталацију](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install).
 
 ### pnpm
 
@@ -140,9 +142,9 @@ omniroute providers validate
 
 ### 1) Повежите добављаче и креирајте API кључ
 
-1. Отворите контролну таблу → `Добављачи` и повежите бар једног добављача (OAuth или API кључ).
-2. Отворите контролну таблу → `Крајње тачке` и креирајте API кључ.
-3. (Опционално) Отворите контролну таблу → `Комбинације` и подесите резервни ланац.
+1. Отворите Дасхбоард → `Providers` и повежите најмање једног провајдера (OAuth или API кључ).
+2. Отворите Дасхбоард → `Endpoints` и креирајте API кључ.
+3. (Опционално) Отворите Дасхбоард → `Combos` и поставите резервни ланац.
 
 ### 2) Усмерите свој алат за програмирање
 
@@ -200,39 +202,39 @@ omniroute setup-qwen         # ~/.qwen/settings.json + ~/.qwen/.env
 
 ## Подешавање протокола (MCP + A2A)
 
-### Подешавање MCP-а (Model Context Protocol)
+### MCP подешавање (протокол контекста модела)
 
-Покрените MCP транспорт у stdio режиму:
+Покрените MCP транспорт у стдио режиму:
 
 ```bash
 omniroute --mcp
 ```
 
-Препоручени поступак провере:
+Препоручени ток валидације:
 
 ```bash
-# 1. Покрените MCP сервер
+# 1. Start MCP server
 omniroute --mcp
 
-# 2. Из свог MCP клијента позовите:
-omniroute_get_health        # Требало би да врати стање система
-omniroute_list_combos       # Требало би да врати активне комбинације
+# 2. From your MCP client, call:
+omniroute_get_health        # Should return system health
+omniroute_list_combos       # Should return active combos
 
-# 3. Или покрените комплетан E2E пакет:
+# 3. Or run the full E2E suite:
 npm run test:protocols:e2e
 ```
 
 #### Конфигурација MCP клијента
 
-**Claude Code:**
+**Claude код:**
 
 ```bash
-claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
 ```
 
 **Cursor / Cline:**
 
-Додајте у своја MCP подешавања:
+Додајте у своја MCP подешавања (стдио, са кључем тако да позивалац има принципала):
 
 ```json
 {
@@ -240,17 +242,24 @@ claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp
     "omniroute": {
       "command": "omniroute",
       "args": ["--mcp"],
-      "env": {}
+      "env": {
+        "OMNIROUTE_API_KEY": "your-key",
+        "OMNIROUTE_BASE_URL": "http://localhost:20128"
+      }
     }
   }
 }
 ```
 
-**Комплетна MCP документација:** [README MCP сервера](../../open-sse/mcp-server/README.md) — 110 алата, IDE конфигурације, Python/TS/Go клијенти.
+Или, када је `mcpTransport` `streamable-http` (подесите га на `/dashboard/mcp` или са `omniroute mcp enable --transport streamable-http`), усмерите клијентов даљински унос MCP сервера на `http://localhost:20128/api/mcp/stream`.
 
-### Подешавање A2A протокола (Agent-to-Agent Protocol)
+Кључ путује као `Authorization: Bearer <api-key>` (погледајте [MCP сервер → Даљински приступ](../frameworks/MCP-SERVER.md#remote-access-manage-scope-bypass) за удаљене хостове; удаљеном кључу је потребан `mcp:connect` плус његови read/write опсеги).
 
-Проверите картицу агента:
+**Комплетна MCP документација:** [MCP сервер README](../../open-sse/mcp-server/README.md) — 110 алати, IDE конфигурације, Python/TS/Go клијенти. Референца за оператера за алате за компресију CCR/dedup (маркери, предуслови, опсези по алату, пагинација за проналажење, дијагностика): [Мотори компресије → Предуслови / водич за оператера](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+
+### A2A подешавање (протокол агент-то-агент)
+
+Верификујте картицу агента:
 
 ```bash
 curl http://localhost:20128/.well-known/agent.json
@@ -264,7 +273,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"Give me a short quota summary."}]}}'
 ```
 
-**Комплетна A2A документација:** [README A2A сервера](../../src/lib/a2a/README.md) — JSON-RPC 2.0, вештине, стримовање, животни циклус задатка.
+**Комплетна A2A документација:** [A2A сервер README](../../src/lib/a2a/README.md) — ЈСОН-РПЦ 2.0, вештине, стримовање, животни циклус задатка.
 
 ---
 
@@ -323,23 +332,23 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ---
 
-## Шаблон за Void Linux (xbps-src)
+## Воид Linux (кбпс-срц) шаблон
 
-Корисници Void Linux-а могу да направе изворни пакет користећи `xbps-src`. Сачувајте овај блок као `srcpkgs/omniroute/template`:
+За кориснике Воид Linux, можете да направите изворни пакет користећи `xbps-src`. Сачувајте овај блок као `srcpkgs/omniroute/template`:
 
 ```bash
-# Датотека шаблона за 'omniroute'
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
 hostmakedepends="nodejs python3 make"
 depends="openssl"
-short_desc="Универзални AI мрежни пролаз са паметним усмеравањем за више LLM добављача"
+short_desc="Universal AI gateway with smart routing for multiple LLM providers"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# Поново генеришите контролну суму за свако издање помоћу:
+# Regenerate the checksum for each release with:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

@@ -240,9 +240,9 @@ I tillegg installerer `updateNssDatabases()` sertifikatet i NSS-databaser per br
 
 Alle MITM-endepunkter krever administrasjonsautentisering (`requireCliToolsAuth`). Sudo-passordet bufres i modulens omfang (aldri `globalThis`) og slettes ved `stopMitm()`.
 
-## User-Agent overstyrer — env vars (`.env.example` seksjon 12)
+## Overstyringer av User-Agent — miljøvariabler (`.env.example` del 12)
 
-| Variabel            | Misligholde                                   |
+| Variabel            | Standardverdi                                 |
 | ------------------- | --------------------------------------------- |
 | `CLAUDE_USER_AGENT` | `claude-cli/2.1.280 (external, cli)`          |
 | `CODEX_USER_AGENT`  | `codex-cli/0.155.0 (Windows 10.0.26200; x64)` |
@@ -251,7 +251,7 @@ Alle MITM-endepunkter krever administrasjonsautentisering (`requireCliToolsAuth`
 | `QODER_USER_AGENT`  | `Qoder-Cli`                                   |
 | `CURSOR_USER_AGENT` | `Cursor/3.4`                                  |
 
-Brukes av `open-sse/executors/base.ts::buildHeaders()` via dynamisk oppslag.** Bump disse når leverandører slipper nye CLI versjoner** — foreldede UA -strenger begynner å bli avvist som utdaterte klienter.
+Brukes av `open-sse/executors/base.ts::buildHeaders()` via dynamisk oppslag. **Oppdater disse når leverandørene lanserer nye CLI-versjoner** — utdaterte UA-strenger begynner å bli avvist som utdaterte klienter.
 
 ## Brytere for CLI-kompatibilitetsmodus (`.env.example` del 13)
 

@@ -913,13 +913,7 @@ ak je nastavené akékoľvek iné pole. Pre lite sa `additionalQueries`, `system
 `subpages`, `subpageTarget`, `highlights.numSentences` a `highlights.highlightsPerUrl` sa už
 neodovzdávajú.
 
-Účtovanie nákladov používa plochý register `costPerQuery`, s výnimkou Exa, ktorý sa riadi vlastným
-cenníkom: 0,007 $ za volanie pre `auto` (a starší `fast`) alebo 0,004 $ pre `lite` (a starší
-`instant`), čo pokrýva 10 výsledkov; 0,001 $ za každý ďalší výsledok; a 0,001 $ za každý
-vrátený výsledok, keď je nastavené `contents.summary`. Tavily sa zaznamenáva ako 1 kredit
-(0,008 $) pre `search_depth` `basic`, `fast` a `ultra-fast` a 2 kredity (0,016 $) pre `advanced`
-([kredity API Tavily](https://docs.tavily.com/documentation/api-credits)). Volanie s
-`auto_parameters: true`, pri ktorom Tavily prejde na advanced, sa stále zaznamenáva ako 1 kredit.
+Exa: 0,007 USD za hovor pre `auto` (a starší `fast`) alebo 0,004 USD pre `lite` (a starý `instant`), pokrývajúci 10 výsledkov; 0,001 USD za každý ďalší výsledok; a 0,001 USD za vrátený výsledok, keď je nastavené `contents.summary`. Tavily je zaznamenaný vo výške 1 kreditu (0,008 USD) za `search_depth` `basic`, `fast` a `ultra-fast` a 2 kredity (0,016 USD) za `advanced` ( [kredity Tavily API](https://docs.tavily.com/documentation/api-credits) ). Hovor so `auto_parameters: true`, ktorý Tavily upgraduje na pokročilý, je stále zaznamenaný s 1 kreditom.
 
 ---
 
@@ -1212,6 +1206,8 @@ X-OmniRoute-No-Cache: true
 
 ---
 
+<a id="cliproxyapi-management-compatibility"></a>
+
 ## Kompatibilita správy CLIProxyAPI
 
 OmniRoute odpovedá na tri koncové body správy [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI),
@@ -1226,21 +1222,11 @@ OmniRoute a ako kľúč správy použite kľúč API s rozsahom `manage`. Trasy 
 | POST   | `/v0/management/api-call`    | Telo `{ auth_index, method, url, header?, data? }`. Odošle jednu požiadavku na povolený zoznam s tokenom účtu a vráti `{ status_code, body }` |
 | POST   | `/v0/management/reset-quota` | Telo `{ auth_index }`. Vymaže časový limit pripojenia, blokovania modelov a časové limity Codexu podľa rozsahu pre jeden účet                 |
 
-- `auth_index` je ID pripojenia OmniRoute. `provider` je `claude` alebo `codex` (iba pripojenia
-  OAuth; poskytovateľ API kľúča `anthropic` sa neuvádza). V prípade Codexu je
-  `id_token.chatgpt_account_id` uložené ID pracovného priestoru a `plan_type` uložený plán.
-- `api-call` nie je generické proxy. Akceptuje iba Claude `GET
+- `auth_index` je ID pripojenia OmniRoute. `provider` je `claude` alebo `codex` (iba pripojenia OAuth; poskytovateľ API kľúča `anthropic` sa neuvádza). Pri Codex je `id_token.chatgpt_account_id` uložené ID pracovného priestoru a `plan_type` uložený plán.
+- `api-call` nie je všeobecný proxy. Prijíma iba Claude `GET
 https://api.anthropic.com/api/oauth/usage` a Codex `GET
-https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits` a
-  `POST .../wham/rate-limit-reset-credits/consume`, pričom každý z nich iba pre účet zodpovedajúceho
-  poskytovateľa. Čokoľvek iné vráti `403` bez kontaktovania upstreamu. Hlavička
-  `Authorization` volajúceho (vrátane zástupného symbolu `$TOKEN$`) sa ignoruje: OmniRoute vloží
-  prístupový token pripojenia, najprv ho obnoví, ak sa blíži jeho skončenie platnosti, a prepošle iba
-  hlavičky povolené zo zoznamu (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`;
-  `Accept`, `Content-Type`). Ak `Chatgpt-Account-Id` chýba, predvolene sa použije uložené ID
-  pracovného priestoru. Časový limit požiadaviek je 15 sekúnd a použije sa proxy pripojenia.
-- `reset-quota` ponechá koncové stavy (banned, expired, credits_exhausted) nezmenené. Neznámy
-  `auth_index` vráti `404`.
+https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits` a `POST .../wham/rate-limit-reset-credits/consume`, vždy len pre účet zodpovedajúceho poskytovateľa. Všetko ostatné vráti `403` bez kontaktovania upstreamu. Hlavička `Authorization` volajúceho (vrátane zástupného `$TOKEN$`) sa ignoruje: OmniRoute vloží prístupový token pripojenia, najprv ho obnoví, ak sa blíži vypršanie, a prepošle iba povolené hlavičky (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`; `Accept`, `Content-Type`). Chýbajúca `Chatgpt-Account-Id` sa predvolí na uložené ID pracovného priestoru. Ak je prvá upstream odpoveď `401`, raz obnoví token a pokus zopakuje iba vtedy, keď sa prístupový token zmení. Každý upstream pokus má časový limit 15 sekúnd a používa proxy pripojenia.
+- `reset-quota` nemení terminálne stavy (banned, expired, credits_exhausted). Neznámy `auth_index` vráti `404`.
 
 **Autentifikácia:** relácia informačného panela alebo kľúč API s rozsahom `manage`, vyžadované aj v prípade, že je prihlasovanie vypnuté
 (cesty sa nachádzajú v `ALWAYS_PROTECTED_API_PATHS`). Kľúče určené iba na inferenciu dostanú `403`. Zdroj:
@@ -1974,17 +1960,17 @@ Trvalé konverzačné/faktické úložisko pamäte s rozsahom podľa kľúča AP
 
 OmniRoute obsahuje vložený server Model Context Protocol s 3 prenosmi (stdio, SSE, streamable-http) a nástrojmi s rozsahmi. Nasledujúce koncové body ovládacieho panela načítavajú údaje o stave/audite a sprostredkúvajú prenosy HTTP.
 
-| Metóda | Cesta                  | Popis                                                                                                      | -------------------- |
-| ------ | ---------------------- | ---------------------------------------------------------------------------------------------------------- | -------------------- |
-| GET    | `/api/mcp/status`      | Signál, prenos, stav online, posledné volanie, najpoužívanejšie nástroje, miera úspešnosti za 24 hodín     |
-| GET    | `/api/mcp/tools`       | Zoznam nástrojov MCP s položkami `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints` |
-| GET    | `/api/mcp/sse`         | Otvorenie SSE streamu pre prenos SSE (vracia `503`, ak je MCP zakázané alebo sa prenos nezhoduje)          |
-| POST   | `/api/mcp/sse`         | Odoslanie rámca JSON-RPC cez prenos SSE                                                                    |
-| GET    | `/api/mcp/stream`      | Otvorenie SSE strany prenosu Streamable HTTP (správy iniciované serverom)                                  |
-| POST   | `/api/mcp/stream`      | Odoslanie rámca JSON-RPC cez prenos Streamable HTTP                                                        |
-| DELETE | `/api/mcp/stream`      | Ukončenie relácie Streamable HTTP                                                                          |
-| GET    | `/api/mcp/audit`       | Dotazovanie denníka auditu — `?limit=`, `?offset=`, `?tool=`, `?success=true                               | false`, `?apiKeyId=` |
-| GET    | `/api/mcp/audit/stats` | Súhrnné štatistiky auditu (celkové počty, miera úspešnosti, priemerné trvanie, najpoužívanejšie nástroje)  |
+| Metóda | Cesta                  | Popis                                                                                                                              |
+| ------ | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/mcp/status`      | Signál, prenos, stav online, posledné volanie, najpoužívanejšie nástroje, miera úspešnosti za 24 hodín                             |
+| GET    | `/api/mcp/tools`       | Zoznam nástrojov MCP s položkami `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints`                         |
+| GET    | `/api/mcp/sse`         | Otvorenie SSE streamu pre prenos SSE (vracia `503`, ak je MCP zakázané alebo sa prenos nezhoduje)                                  |
+| POST   | `/api/mcp/sse`         | Odoslanie rámca JSON-RPC cez prenos SSE                                                                                            |
+| GET    | `/api/mcp/stream`      | Otvorenie SSE strany prenosu Streamable HTTP (správy iniciované serverom)                                                          |
+| POST   | `/api/mcp/stream`      | Odoslanie rámca JSON-RPC cez prenos Streamable HTTP                                                                                |
+| DELETE | `/api/mcp/stream`      | Ukončenie relácie Streamable HTTP                                                                                                  |
+| GET    | `/api/mcp/audit`       | Dotazovanie denníka auditu — `?limit=`, `?offset=`, `?tool=`, `?success=true                               \| false`, `?apiKeyId=` |
+| GET    | `/api/mcp/audit/stats` | Súhrnné štatistiky auditu (celkové počty, miera úspešnosti, priemerné trvanie, najpoužívanejšie nástroje)                          |
 
 **Autentifikácia:** prenosy `sse`/`stream` používajú autentifikačné rozhranie špecifické pre MCP (Bearer kľúč API s rozsahom `mcp`); trasy `status`/`tools`/`audit*` sú dostupné na čítanie z ovládacieho panela (nevyžaduje sa žiadna ďalšia autentifikácia okrem prístupu k hostiteľovi ovládacieho panela).
 

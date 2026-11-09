@@ -228,7 +228,7 @@ template અને regex literals ને ક્યારેય ભૂલથી �
 
 સંપૂર્ણ `rtkConfig` માળખું `open-sse/services/compression/types.ts` માં `RtkConfig` / `DEFAULT_RTK_CONFIG` દ્વારા વ્યાખ્યાયિત થયેલું છે. આખો ઑબ્જેક્ટ SQLite `key_value` કોષ્ટકમાં
 `namespace = "compression"`, `key = "rtkConfig"` હેઠળ એક જ JSON મૂલ્ય તરીકે સંગ્રહિત થાય છે
-(`/src/lib/db/compression.ts`), અને વાંચતી વખતે `normalizeRtkConfig` દ્વારા સામાન્યકૃત થાય છે. તેથી નીચેનું દરેક ફીલ્ડ
+(`src/lib/db/compression.ts`), અને વાંચતી વખતે `normalizeRtkConfig` દ્વારા સામાન્યકૃત થાય છે. તેથી નીચેનું દરેક ફીલ્ડ
 — જેમાં `enableGrouping`, `groupingThreshold`, `stripCodeComments`, અને `preserveDocstrings` સામેલ છે —
 એ જ સ્ટોર મારફતે રાઉન્ડ-ટ્રિપ થાય છે અને પુનઃપ્રારંભ પછી પણ જળવાઈ રહે છે.
 

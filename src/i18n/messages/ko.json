@@ -4147,7 +4147,9 @@
     "duplicateAutoComboFailedPrefix": "자동 콤보 복제 실패:",
     "duplicateAutoComboUnknownError": "알 수 없는 오류",
     "duplicateAutoComboTitle": "{name}에서 정적 콤보 만들기",
-    "fallbackSummary": "요청의 {rate}%가 폴백으로 전환되어 요청당 평균 약 {skips}개 타겟이 건너뛰었습니다"
+    "fallbackSummary": "요청의 {rate}%가 폴백으로 전환되어 요청당 평균 약 {skips}개 타겟이 건너뛰었습니다",
+    "reorderAll": "모두 재정렬",
+    "reorderAllDescription": "모든 {count} 콤보를 재정렬합니다. 드래그 핸들이 활성화되었습니다."
   },
   "costs": {
     "title": "비용",
@@ -6023,7 +6025,7 @@
     "cliVersionLoadError": "CLI 버전 설정을 로드하지 못했습니다: {error}",
     "cliVersionSaveError": "CLI 버전을 저장하지 못했습니다: {error}",
     "cliVersionLoadFailed": "현재 CLI 버전 설정을 로드할 수 없습니다.",
-    "cliVersionHintClaude": "Anthropic은 Claude Code 클라이언트 버전에서 최신 Claude 모델을 확인합니다. 이것은 OmniRoute 모든 Anthropic 관련 요청에 대해 광고하는 버전입니다.",
+    "cliVersionHintClaude": "Anthropic은 요청에서 확인한 Claude Code 클라이언트 버전에 따라 최신 Claude 모델에 대한 접근을 제한합니다. 이 값은 OmniRoute가 Anthropic으로 보내는 모든 요청에 표시하는 버전입니다.",
     "cliVersionCaveatClaude": "청구 주의사항: 청구 버전은 '<version>' 입니다.'<build-revision>' 이며 빌드 개정은 별도의 캡처된 상수입니다. 광고 2.1.260은 2.1.260.1e2를 보고하는데, 이는 실제 2.1.260 바이너리가 보내는 내용이 아닙니다.",
     "cliVersionHintCodex": "OpenAI 표시된 Codex 클라이언트 버전에서 최신 모델을 게이트합니다. 예를 들어 오류: The 'gpt-6-astra' model require a newer version of Codex.",
     "cliVersionCaveatCodex": "추론 주의 사항: 호출자가 보고하는 버전은 여전히 CODEX_CLIENT_VERSION env var보다 낫지만 이 재정의는 명시적인 운영자 의도이기 때문에 둘 다 능가합니다.",
@@ -6281,10 +6283,6 @@
     "hideEmails": "모든 이메일 숨기기",
     "a": "A",
     "accountConcurrencyCapHint": "이 연결/계정이 처리할 수 있는 최대 동시 요청 수입니다. 구독 계정은 보통 소수(1~3개)만 허용하며, 초과하면 429 오류와 쿨다운이 발생합니다. 기본값을 사용하려면 비워 두세요.",
-    "aiCreditsLimit": "청구 기간당 AI 크레딧 한도",
-    "aiCreditsLimitPlaceholder": "로컬 한도 없음",
-    "aiCreditsLimitHint": "GitHub가 보고한 AI 크레딧이 이 값에 도달하면 이 연결을 건너뛰고 라우팅이 다른 연결로 폴백합니다. 비워 두면 비활성화되고 0이면 항상 건너뜁니다. 사용량 정보가 없거나 오래된 경우에는 차단하지 않으며, 보장된 지출 상한이 아닙니다.",
-    "aiCreditsLimitInvalid": "AI 크레딧 한도는 0 이상의 숫자여야 하며, 비활성화하려면 비워 두세요.",
     "accountConcurrencyCapLabel": "Provider 계정 최대 동시 요청 수",
     "accountIdHint": "일부 공급자(예: Cloudflare Workers AI)에서 API 토큰과 함께 필요합니다.",
     "accountIdLabel": "계정 ID",
@@ -6369,8 +6367,6 @@
     "newApiUserIdLabel": "New-API 사용자 ID",
     "newApiUserIdPlaceholder": "예: 12345",
     "newApiUserIdHint": "AgentRouter의 New-Api-User 헤더 값으로, 할당량 잔액을 조회할 때 콘솔 API 키와 함께 사용됩니다.",
-    "tokenrouterManagementKeyLabel": "관리 키(선택 사항)",
-    "tokenrouterManagementKeyHint": "TokenRouter 대시보드의 계정 키(Settings → Management Key)입니다. 할당량과 잔액을 읽는 데만 사용되며 요청에는 절대 사용되지 않습니다. 저장된 키는 표시되지 않으며, 유지하려면 비워 두세요.",
     "newApiAggregatorToggleLabel": "집계 게이트웨이",
     "newApiAggregatorToggleHint": "New-API / One-API / Sub2API 집계 노드에 대한 잔액 감지를 활성화합니다. 대시보드는 잔액 배지를 표시하고 쿼터 사전 비행 라우팅은 소진된 계정을 건너뜁니다.",
     "newApiAggregatorConsoleApiKeyHint": "집계자의 /api/user/self 엔드포인트에 대한 시스템 액세스 토큰입니다. 라우팅 API 키가 아닙니다.",
@@ -6384,8 +6380,6 @@
     "customUserAgentLabel": "사용자 지정 User-Agent",
     "huggingfaceBillToHint": "선택 사항입니다. 비용 귀속을 위해 X-HF-Bill-To 헤더로 전송되는 Hugging Face 결제 계정 식별자입니다.",
     "huggingfaceBillToLabel": "Hugging Face Bill-To 계정",
-    "commandCodeZdrLabel": "제로 데이터 보존(ZDR) 필수",
-    "commandCodeZdrHint": "이 API 키로 보내는 모든 요청에 x-cmd-zdr: 1을 전송합니다. ZDR 업스트림이 없는 모델은 사용할 수 없을 수 있습니다.",
     "databricksBaseUrlHint": "Databricks 기본 URL 안내",
     "defaultThinkingStrengthHint": "요청에 추론 강도가 지정되지 않은 경우 사용됩니다.",
     "defaultThinkingStrengthLabel": "기본 사고 강도",
@@ -6990,11 +6984,6 @@
     "anonymousFallbackEnabled": "{provider}에 대한 익명 대체가 활성화되었습니다.",
     "anonymousFallbackDisabled": "{provider}에 대한 익명 대체가 비활성화되었습니다 — 소진된 연결은 이 공급자를 건너뜁니다",
     "anonymousFallbackUpdateFailed": "익명 대체 설정을 업데이트하지 못했습니다",
-    "retryDelayTitle": "재시도 지연",
-    "retryDelayDesc": "공급자가 재시도 시점을 알려주지 않을 때 속도 제한 오류 후 연결이 쉬는 시간입니다. 자동은 기본 제공 백오프를 사용하며, 공급자가 보낸 재설정 시간이 항상 우선합니다.",
-    "retryDelayAuto": "자동",
-    "retryDelaySaved": "재시도 지연이 저장되었습니다",
-    "retryDelayUpdateFailed": "재시도 지연을 업데이트하지 못했습니다",
     "batchDeleteFailed": "배치 삭제 실패",
     "batchDeleteNetworkError": "배치 삭제 중 네트워크 오류",
     "batchUpdateFailed": "배치 업데이트에 실패했습니다.",
@@ -7094,7 +7083,20 @@
     "chatgptConnectorLabel": "ChatGPT 커스텀 커넥터",
     "doctorChecking": "상태를 확인하는 중…",
     "doctorCheck": "doctor 상태 확인",
-    "fallbackRetryBackendTitle": "폴백 재시도 백엔드"
+    "fallbackRetryBackendTitle": "폴백 재시도 백엔드",
+    "retryDelayTitle": "재시도 지연",
+    "retryDelayDesc": "공급자가 재시도 시점을 알려주지 않을 때 속도 제한 오류 후 연결이 쉬는 시간입니다. 자동은 기본 제공 백오프를 사용하며, 공급자가 보낸 재설정 시간이 항상 우선합니다.",
+    "retryDelayAuto": "자동",
+    "retryDelaySaved": "재시도 지연이 저장되었습니다",
+    "retryDelayUpdateFailed": "재시도 지연을 업데이트하지 못했습니다",
+    "aiCreditsLimit": "청구 기간당 AI 크레딧 한도",
+    "aiCreditsLimitPlaceholder": "로컬 한도 없음",
+    "aiCreditsLimitHint": "GitHub가 보고한 AI 크레딧이 이 값에 도달하면 이 연결을 건너뛰고 라우팅이 다른 연결로 폴백합니다. 비워 두면 비활성화되고 0이면 항상 건너뜁니다. 사용량 정보가 없거나 오래된 경우에는 차단하지 않으며, 보장된 지출 상한이 아닙니다.",
+    "aiCreditsLimitInvalid": "AI 크레딧 한도는 0 이상의 숫자여야 하며, 비활성화하려면 비워 두세요.",
+    "tokenrouterManagementKeyLabel": "관리 키(선택 사항)",
+    "tokenrouterManagementKeyHint": "TokenRouter 대시보드의 계정 키(Settings → Management Key)입니다. 할당량과 잔액을 읽는 데만 사용되며 요청에는 절대 사용되지 않습니다. 저장된 키는 표시되지 않으며, 유지하려면 비워 두세요.",
+    "commandCodeZdrLabel": "제로 데이터 보존(ZDR) 필수",
+    "commandCodeZdrHint": "이 API 키로 보내는 모든 요청에 x-cmd-zdr: 1을 전송합니다. ZDR 업스트림이 없는 모델은 사용할 수 없을 수 있습니다."
   },
   "settings": {
     "title": "설정",
@@ -14255,6 +14257,10 @@
         "label": "보호된 우선순위 인프라 중단을 502로 처리",
         "description": "할당량 전용 폴백 우선순위 대상이 할당량 문제가 아님을 입증할 수 있는 원인, 즉 열린 공급자 회로 차단기 또는 예측적 지연 시간 건너뛰기로 인해 콤보를 중단하는 경우 503 대신 502로 응답합니다."
       },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "가격 미설정 사용량 예산 정책",
+        "description": "공급자/모델에 가격 항목이 없는 성공적인 사용량을 키별 일간/주간 USD 한도가 어떻게 처리하는지 설명합니다. fail_closed (기본값)은 해당 기간을 초과한 것으로 표시하여 알 수 없는 비용이 하드 한도를 통과하지 못하게 합니다. count_as_zero는 해당 사용량을 $0으로 계산하고 가격이 설정된 지출을 계속 적용합니다. 가격 미설정 모델은 어떤 경우든 대시보드 홈 페이지에 나열됩니다."
+      },
       "AUTH_LOG_INCLUDE_ACCOUNT_ID": {
         "label": "로그 계정 ID",
         "description": "AUTH 로그 줄에 계정 접두사를 포함합니다 (예: \"Use '<provider>' 계정: abc12345...\"). 계정 식별자가 공유/멀티테넌트 프로세스 로그에서 삭제되도록 기본값은 비활성화되어 있습니다. 디버그 모드와 독립적이며, 디버그 모드를 전환해도 이 설정이 노출되지 않습니다."
@@ -14535,9 +14541,9 @@
         "label": "쿨다운 재시도: 403/410 거부 건너뛰기",
         "description": "모든 계정이 쿨다운 중이고 가장 먼저 끝나는 쿨다운의 원인이 403(액세스 거부) 또는 410(사라짐)인 경우, 쿨다운이 끝날 때까지 대기한 뒤 요청을 재전송하는 대신 해당 거부 응답을 즉시 반환합니다. 이때 갱신 중인 agentrouter 연결 범위 할당량 403은 재시도 가능한 상태로 유지되도록 errorCode 429로 저장됩니다. 기본값은 비활성화입니다. 401만 대기를 건너뛰며, 모든 거부 응답은 수신된 상태 그대로 저장됩니다."
       },
-      "UNPRICED_USAGE_BUDGET_POLICY": {
-        "label": "가격 미설정 사용량 예산 정책",
-        "description": "공급자/모델에 가격 항목이 없는 성공적인 사용량을 키별 일간/주간 USD 한도가 어떻게 처리하는지 설명합니다. fail_closed (기본값)은 해당 기간을 초과한 것으로 표시하여 알 수 없는 비용이 하드 한도를 통과하지 못하게 합니다. count_as_zero는 해당 사용량을 $0으로 계산하고 가격이 설정된 지출을 계속 적용합니다. 가격 미설정 모델은 어떤 경우든 대시보드 홈 페이지에 나열됩니다."
+      "COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE": {
+        "description": "압축 캐시 통계에서 자동 접두사 캐싱 공급자(OpenAI, Codex, Azure 또는 마커 제거를 통해 프롬프트 캐싱을 선언하는 사용자 지정 연결)에 대한 압축된 요청을 캐시_제어 마커 없이도 예상 캐시 적중으로 계산합니다. 추정치는 관찰된 적중이 아닌 캐시 적격 신호이므로 해당 제공업체에 대해 보고된 적중률은 100%를 향해 가는 추세입니다. 기본적으로 꺼짐: 캐싱 공급자에게 캐시 제어 마커를 전달하는 요청만 예상 적중으로 계산되므로 자동 접두사 공급자는 계속 0을 보고합니다.",
+        "label": "압축 캐시 통계: 자동 접두사 적격성"
       }
     }
   },

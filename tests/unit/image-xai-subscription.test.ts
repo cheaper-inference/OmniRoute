@@ -17,19 +17,14 @@ const model = "grok-imagine-image-2.0";
 const prompt = "A chef preparing pho";
 
 test("xAI image catalog supports API keys and both OAuth connection identities", () => {
-  for (const [prefix, provider] of [
-    ["xai", "xai"],
-    ["gc", "grok-cli"],
-    ["xao", "xai-oauth"],
+  for (const [prefix, provider, baseUrl, format] of [
+    ["xai", "xai", "https://api.x.ai/v1/images/generations", "xai-image"],
+    ["gc", "grok-cli", "https://cli-chat-proxy.grok.com/v1/images/generations", "grok-image"],
+    ["xao", "xai-oauth", "https://api.x.ai/v1/images/generations", "xai-image"],
   ]) {
     assert.deepEqual(parseImageModel(`${prefix}/${model}`), { provider, model });
-    // Grok Build images go through its own proxy (#15305); the other two identities use xAI.
-    assert.equal(
-      getImageProvider(prefix)?.baseUrl,
-      provider === "grok-cli"
-        ? "https://cli-chat-proxy.grok.com/v1/images/generations"
-        : "https://api.x.ai/v1/images/generations"
-    );
+    assert.equal(getImageProvider(prefix)?.baseUrl, baseUrl);
+    assert.equal(getImageProvider(prefix)?.format, format);
     assert.equal(getImageProvider(prefix)?.authType, provider === "xai" ? "apikey" : "oauth");
     assert.ok(getAllImageModels().some((entry) => entry.id === `${provider}/${model}`));
   }

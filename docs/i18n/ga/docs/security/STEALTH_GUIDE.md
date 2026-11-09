@@ -237,7 +237,7 @@ Ina theannta sin, suiteálann `updateNssDatabases()` i mbunachair sonraí NSS in
 
 Éilíonn gach críochphointe MITM fíordheimhniú bainistíochta (`requireCliToolsAuth`). Cuirtear an focal faire sudo i dtaisce i scóip an mhodúil (`globalThis` riamh) agus glantar é ar `stopMitm()`.
 
-## Sáraíonn Gníomhaire Úsáideora — env vars (`.env.example` alt 12)
+## Sáruithe User-Agent — athróga timpeallachta (`.env.example` rannán 12)
 
 | Athróg              | Réamhshocrú                                   |
 | ------------------- | --------------------------------------------- |
@@ -248,7 +248,7 @@ Ina theannta sin, suiteálann `updateNssDatabases()` i mbunachair sonraí NSS in
 | `QODER_USER_AGENT`  | `Qoder-Cli`                                   |
 | `CURSOR_USER_AGENT` | `Cursor/3.4`                                  |
 
-Arna ithe ag `open-sse/executors/base.ts::buildHeaders()` trí chuardach dinimiciúil.** Buail iad seo nuair a scaoileann soláthraithe leaganacha nua CLI** tosaíonn teaghráin — stale UA ag fáil diúltaithe mar chliaint atá as dáta.
+Úsáideann `open-sse/executors/base.ts::buildHeaders()` iad trí chuardach dinimiciúil. **Nuashonraigh iad seo nuair a eisíonn soláthraithe leaganacha nua dá CLI** — tosaítear ar theaghráin UA atá as dáta a dhiúltú mar chliaint atá as dáta.
 
 ## Scoránaigh Mhód Comhoiriúnachta CLI (`.env.example` rannán 13)
 

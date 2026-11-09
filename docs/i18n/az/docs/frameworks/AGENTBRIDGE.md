@@ -20,7 +20,7 @@ Bir IDE agenti (məsələn, GitHub Copilot, Cursor, Claude Code) API zəngi etdi
 
 Bu o deməkdir ki, siz:
 
-- **İstənilən agenti istənilən provayderə yönləndirin** : Copilot OpenAI ilə danışır? Onu Anthropic Claude, Gemini və ya hər hansı OmniRoute 380 provayderinə yönləndirin.
+- **İstənilən agenti istənilən provayderə yönləndirin** : Copilot OpenAI ilə danışır? Onu Anthropic Claude, Gemini və ya hər hansı OmniRoute 381 provayderinə yönləndirin.
 - **Model xəritələrini tətbiq edin** : `gemini-3-flash` → `claude-sonnet-4.7` işləyici səviyyəsində şəffaf.
 - **Bütün agent trafikini müşahidə edin** : ələ keçirilən hər sorğu [Trafik Müfəttişinə](./TRAFFIC_INSPECTOR.md) dərc olunur.
 - **OmniRoute möhkəmliyini tətbiq edin** : IDE agent trafiki üçün kombin marşrutlaşdırma, elektrik açarları, ehtiyatlar və xərclərin izlənilməsi də işləyir.
@@ -548,7 +548,7 @@ Trae nisbətən yeni süni intellekt əsaslı kodlaşdırma köməkçisidir. Ema
 3. Autentifikasiya mexanizmini müəyyənləşdirin
 4. İstifadə şərtləri və API-nin aşkarlana bilməsi əsasında davam edib-etməmək barədə qərar verin
 
-Araşdırma tamamlanana qədər idarəetmə panelindəki Trae kartında "Həyata keçirilə bilməsi barədə hesabat verin" keçidi ilə birlikdə "Araşdırılır" nişanı göstərilir. `src/mitm/handlers/trae.ts` ünvanındakı emal modulu şablonu strukturlaşdırılmış `Hələ tətbiq edilməyib` xətası yaradır.
+Araşdırma tamamlanana qədər idarəetmə panelindəki Trae kartında "Həyata keçirilə bilməsi barədə hesabat verin" keçidi ilə birlikdə "Araşdırılır" nişanı göstərilir. `src/mitm/handlers/trae.ts` ünvanındakı emal modulu şablonu strukturlaşdırılmış `Not yet implemented` xətası yaradır.
 
 ### Gözləyən agentlər (MITM tələb olunur — fərdi baza URL-i dəstəklənmir)
 

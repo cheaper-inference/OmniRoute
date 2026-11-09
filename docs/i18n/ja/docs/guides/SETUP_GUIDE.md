@@ -20,14 +20,16 @@
 
 ## インストール方法
 
-### npm（推奨）
+### npm (推奨)
 
 ```bash
 npm install -g omniroute
 omniroute
 ```
 
-ダッシュボードは `http://localhost:20128` で開き、API のベース URL は `http://localhost:20128/v1` です。
+ダッシュボードは`http://localhost:20128`およびAPIで開きます。ベースURLは`http://localhost:20128/v1`です。
+
+> **npm ユーザー:** npm がインストール スクリプトがブロックされたことを警告する場合 (例: `omniroute`、 `better-sqlite3`)、 [「 —トラブルシューティング npm install-scripts block 」を](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install)参照してください。
 
 ### pnpm
 
@@ -191,41 +193,41 @@ omniroute setup-qwen         # ~/.qwen/settings.json + ~/.qwen/.env
 
 ---
 
-## プロトコルのセットアップ（MCP + A2A）
+## プロトコルのセットアップ (MCP + A2A)
 
-### MCP のセットアップ（Model Context Protocol）
+### MCPセットアップ (モデル コンテキスト プロトコル)
 
-stdio モードで MCP トランスポートを起動します。
+stdio モードでMCPトランスポートを開始します。
 
 ```bash
 omniroute --mcp
 ```
 
-推奨される検証フロー：
+推奨される検証フロー:
 
 ```bash
-# 1. MCP サーバーを起動
+# 1. Start MCP server
 omniroute --mcp
 
-# 2. MCP クライアントから以下を呼び出す：
-omniroute_get_health        # システムの正常性が返されること
-omniroute_list_combos       # アクティブなコンボが返されること
+# 2. From your MCP client, call:
+omniroute_get_health        # Should return system health
+omniroute_list_combos       # Should return active combos
 
-# 3. または、完全な E2E スイートを実行：
+# 3. Or run the full E2E suite:
 npm run test:protocols:e2e
 ```
 
-#### MCP クライアントの設定
+#### MCPクライアント構成
 
-**Claude Code：**
+**Claudeコード:**
 
 ```bash
-claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
 ```
 
-**Cursor / Cline：**
+**Cursor / Cline:**
 
-MCP 設定に以下を追加します。
+MCP設定に追加します (stdio、呼び出し元がプリンシパルを持つようにキーを使用):
 
 ```json
 {
@@ -233,17 +235,24 @@ MCP 設定に以下を追加します。
     "omniroute": {
       "command": "omniroute",
       "args": ["--mcp"],
-      "env": {}
+      "env": {
+        "OMNIROUTE_API_KEY": "your-key",
+        "OMNIROUTE_BASE_URL": "http://localhost:20128"
+      }
     }
   }
 }
 ```
 
-**MCP の完全なドキュメント：** [MCP Server README](../../open-sse/mcp-server/README.md) — 110 個のツール、IDE 設定、Python/TS/Go クライアント。
+または、 `mcpTransport`が`streamable-http`の場合 ( `/dashboard/mcp`または`omniroute mcp enable --transport streamable-http`で設定)、クライアントのリモートMCPサーバー エントリを`http://localhost:20128/api/mcp/stream`に指定します。
 
-### A2A のセットアップ（Agent-to-Agent Protocol）
+キーは`Authorization: Bearer <api-key>`として送信されます ( [MCPサーバー→リモート ホストのリモート アクセス」](../frameworks/MCP-SERVER.md#remote-access-manage-scope-bypass)を参照。リモート キーには`mcp:connect`とそのread/writeスコープが必要です)。
 
-Agent Card を確認します。
+**完全なMCPドキュメント:** [MCPサーバーREADME](../../open-sse/mcp-server/README.md) — 110 ツール、 IDE config、 Python/TS/Goクライアント。圧縮CCR/dedupツールのオペレーター リファレンス (マーカー、前提条件、ツールごとのスコープ、検索ページネーション、診断):[圧縮エンジン→前提条件 / オペレーター ガイド](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup)。
+
+### A2Aセットアップ (エージェント間プロトコル)
+
+エージェント カードを確認します。
 
 ```bash
 curl http://localhost:20128/.well-known/agent.json
@@ -257,7 +266,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"Give me a short quota summary."}]}}'
 ```
 
-**A2A の完全なドキュメント：** [A2A Server README](../../src/lib/a2a/README.md) — JSON-RPC 2.0、スキル、ストリーミング、タスクのライフサイクル。
+**完全なA2Aドキュメント:** [A2AサーバーREADME](../../src/lib/a2a/README.md) — JSON-RPC 2.0、スキル、ストリーミング、タスクのライフサイクル。
 
 ---
 
@@ -318,21 +327,21 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ## Void Linux (xbps-src) テンプレート
 
-Void Linux ユーザーは、`xbps-src` を使用してネイティブパッケージをビルドできます。次のブロックを `srcpkgs/omniroute/template` として保存してください：
+Void Linuxユーザーの場合は、 `xbps-src`を使用してネイティブ パッケージを構築できます。このブロックを`srcpkgs/omniroute/template`として保存します。
 
 ```bash
-# 'omniroute' 用テンプレートファイル
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
 hostmakedepends="nodejs python3 make"
 depends="openssl"
-short_desc="複数の LLM プロバイダーに対応したスマートルーティング機能付きユニバーサル AI ゲートウェイ"
+short_desc="Universal AI gateway with smart routing for multiple LLM providers"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# 各リリースで次のコマンドを使用してチェックサムを再生成してください：
+# Regenerate the checksum for each release with:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

@@ -92,8 +92,8 @@ test("one failing platform does not discard the platforms that built", () => {
   );
   assert.match(
     releaseBlock,
-    /fail_on_unmatched_files:\s*false/,
-    "attaching a partial set requires tolerating globs that match nothing"
+    /run: node scripts\/release\/upload-desktop-assets\.mjs/,
+    "the uploader accepts the existing files from partial build results"
   );
 });
 

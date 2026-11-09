@@ -25,27 +25,30 @@ omniroute launch --profile glm52  # OmniRoute ਰਾਹੀਂ glm/glm-5.2 ਵਰ
 
 ---
 
-## Claude ਕੋਡ ਗੇਟਵੇ ਨਾਲ ਕਿਵੇਂ ਜੁੜਦਾ ਹੈ
+## Claude Code ਕਿਸੇ ਗੇਟਵੇ ਨਾਲ ਕਿਵੇਂ ਕਨੈਕਟ ਹੁੰਦਾ ਹੈ
 
-Claude ਕੋਡ ਗੱਲ ਕਰਦਾ ਹੈ**Anthropic ਸੁਨੇਹੇ API** ਅਤੇ ਵਾਤਾਵਰਣ ਵੇਰੀਏਬਲ ਦੇ ਨਾਲ ਇੱਕ ਕਸਟਮ ਐਂਡਪੁਆਇੰਟ 'ਤੇ ਇਸ਼ਾਰਾ ਕੀਤਾ ਗਿਆ ਹੈ (ਇਸਦਾ ਕੋਈ `--base-url` ਫਲੈਗ ਨਹੀਂ ਹੈ):
+Claude Code **Anthropic Messages API** ਨਾਲ ਸੰਚਾਰ ਕਰਦਾ ਹੈ ਅਤੇ environment variables ਰਾਹੀਂ
+ਕਸਟਮ endpoint ਵੱਲ ਇਸ਼ਾਰਾ ਕੀਤਾ ਜਾਂਦਾ ਹੈ (ਇਸ ਵਿੱਚ `--base-url` flag ਨਹੀਂ ਹੈ):
 
-| ਵੇਰੀਏਬਲ                                      | ਮਕਸਦ                                                                                              |
-| -------------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| `ANTHROPIC_BASE_URL`                         | ਗੇਟਵੇ ਰੂਟ URL (Claude ਕੋਡ `/v1/messages` ਜੋੜਦਾ ਹੈ)।** ਕੋਈ `/v1` ਪਿਛੇਤਰ ਨਹੀਂ।**                    |
-| `ANTHROPIC_AUTH_TOKEN`                       | `Authorization: Bearer …` — ਦੇ ਤੌਰ 'ਤੇ ਭੇਜੇ ਗਏ ਆਪਣੇ OmniRoute ਐਕਸੈਸ ਟੋਕਨ / API ਕੁੰਜੀ ਦੀ ਵਰਤੋਂ ਕਰੋ |
-| `ANTHROPIC_API_KEY`                          | ਵਿਕਲਪਕ: `x-api-key` ਵਜੋਂ ਭੇਜਿਆ ਗਿਆ। ਜੇਕਰ ਦੋਵੇਂ ਸੈੱਟ ਹੁੰਦੇ ਹਨ, `ANTHROPIC_AUTH_TOKEN` ਜਿੱਤਦਾ ਹੈ    |
-| `ANTHROPIC_MODEL`                            | ਇੱਕ ਖਾਸ ਮਾਡਲ ਨੂੰ ਮਜਬੂਰ ਕਰੋ ( `/model` ਚੋਣਕਾਰ ਡਿਫੌਲਟ ਨੂੰ ਓਵਰਰਾਈਡ ਕਰਦਾ ਹੈ)                          |
-| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → ਮੂਲ `/model` ਚੋਣਕਾਰ `/v1/models` ਤੋਂ `claude*`/`anthropic*` ਮਾਡਲਾਂ ਨੂੰ ਸੂਚੀਬੱਧ ਕਰਦਾ ਹੈ      |
-| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | ਪ੍ਰਤੀ ਜਵਾਬ ਕੈਪ ਆਉਟਪੁੱਟ ਟੋਕਨ (ਜਿਵੇਂ ਕਿ `65536`)                                                    |
-| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | ਆਟੋ-ਕੰਪੈਕਸ਼ਨ ਲਈ ਟੋਕਨ ਥ੍ਰੈਸ਼ਹੋਲਡ                                                                   |
+| Variable                                     | ਮਕਸਦ                                                                                                 |
+| -------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `ANTHROPIC_BASE_URL`                         | ਗੇਟਵੇ ਦਾ root URL (Claude Code `/v1/messages` ਜੋੜਦਾ ਹੈ)। **ਅੰਤ ਵਿੱਚ `/v1` ਨਾ ਲਗਾਓ।**                 |
+| `ANTHROPIC_AUTH_TOKEN`                       | `Authorization: Bearer …` ਵਜੋਂ ਭੇਜਿਆ ਜਾਂਦਾ ਹੈ — ਆਪਣਾ OmniRoute access token / API key ਵਰਤੋ           |
+| `ANTHROPIC_API_KEY`                          | ਵਿਕਲਪ: `x-api-key` ਵਜੋਂ ਭੇਜਿਆ ਜਾਂਦਾ ਹੈ। ਜੇ ਦੋਵੇਂ ਸੈੱਟ ਹੋਣ, ਤਾਂ `ANTHROPIC_AUTH_TOKEN` ਤਰਜੀਹ ਲੈਂਦਾ ਹੈ |
+| `ANTHROPIC_MODEL`                            | ਕੋਈ ਖ਼ਾਸ ਮਾਡਲ ਲਾਜ਼ਮੀ ਵਰਤੋ (`/model` picker ਦੇ default ਨੂੰ override ਕਰਦਾ ਹੈ)                          |
+| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → ਮੂਲ `/model` picker `/v1/models` ਤੋਂ `claude*`/`anthropic*` ਮਾਡਲ ਦਿਖਾਉਂਦਾ ਹੈ                   |
+| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | ਹਰੇਕ response ਲਈ output tokens ਦੀ ਹੱਦ (ਉਦਾਹਰਨ ਲਈ `65536`)                                            |
+| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | auto-compaction ਲਈ token threshold                                                                   |
 
-> Env ਵਾਰਾਂ ਪੜ੍ਹੀਆਂ ਜਾਂਦੀਆਂ ਹਨ** ਇੱਕ ਵਾਰ ਸ਼ੁਰੂਆਤ ਵਿੱਚ** — Claude ਕੋਡ ਨੂੰ ਬਦਲਣ ਤੋਂ ਬਾਅਦ ਮੁੜ ਚਾਲੂ ਕਰੋ।
+> Env vars ਨੂੰ **startup ਵੇਲੇ ਸਿਰਫ਼ ਇੱਕ ਵਾਰ** ਪੜ੍ਹਿਆ ਜਾਂਦਾ ਹੈ — ਉਨ੍ਹਾਂ ਨੂੰ ਬਦਲਣ ਤੋਂ ਬਾਅਦ Claude Code ਮੁੜ ਚਲਾਓ।
 
-ਇੱਕ ਕ੍ਰੈਡੈਂਸ਼ੀਅਲ ਲਈ ਜੋ ਇੱਕ ਸਥਿਰ ਸਟ੍ਰਿੰਗ ਦੀ ਬਜਾਏ ਘੁੰਮਦਾ ਹੈ, `apiKeyHelper` `~/.claude/settings.json` ਵਿੱਚ ਇੱਕ ਕਮਾਂਡ ਤੇ ਸੈਟ ਕਰੋ ਜੋ ਮੌਜੂਦਾ ਪ੍ਰਮਾਣ ਪੱਤਰ ਨੂੰ stdout ਵਿੱਚ ਪ੍ਰਿੰਟ ਕਰਦਾ ਹੈ। Claude ਕੋਡ ਡਿਫਾਲਟ ਰੂਪ ਵਿੱਚ ਪੰਜ ਮਿੰਟ ਲਈ ਇਸਦੇ ਆਉਟਪੁੱਟ ਨੂੰ ਕੈਚ ਕਰਦਾ ਹੈ (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` ਉਸ ਨੂੰ ਓਵਰਰਾਈਡ ਕਰਦਾ ਹੈ) ਅਤੇ ਮੁੱਲ ਨੂੰ `Authorization: Bearer` ਅਤੇ `x-api-key` ਦੋਵਾਂ ਵਿੱਚ ਭੇਜਦਾ ਹੈ। ਸਕ੍ਰਿਪਟ ਨੂੰ ਪ੍ਰਮਾਣ ਪੱਤਰ ਪ੍ਰਿੰਟ ਕਰਨਾ ਚਾਹੀਦਾ ਹੈ ਅਤੇ ਇਸਦੇ ਨਾਲ ਇੱਕ ਬੈਨਰ — ਹੋਰ ਕੁਝ ਨਹੀਂ v2.1.227 + ਤੇ ਸਹਾਇਕ ਨੂੰ ਅਸਫਲ ਕਰਦਾ ਹੈ।
+ਸਥਿਰ ਸਟ੍ਰਿੰਗ ਦੀ ਥਾਂ ਨਿਯਮਿਤ ਤੌਰ ਉੱਤੇ ਬਦਲਦੇ ਪ੍ਰਮਾਣੀਕਰਨ ਵੇਰਵੇ ਲਈ, `~/.claude/settings.json` ਵਿੱਚ `apiKeyHelper` ਨੂੰ ਉਸ ਕਮਾਂਡ ਵਜੋਂ ਸੈੱਟ ਕਰੋ ਜੋ ਮੌਜੂਦਾ ਪ੍ਰਮਾਣੀਕਰਨ ਵੇਰਵਾ stdout ਉੱਤੇ ਛਾਪਦੀ ਹੈ। Claude Code ਮੂਲ ਰੂਪ ਵਿੱਚ ਇਸ ਦੀ ਆਉਟਪੁੱਟ ਪੰਜ ਮਿੰਟ ਲਈ ਕੈਸ਼ ਕਰਦਾ ਹੈ (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` ਇਹ ਮਿਆਦ ਬਦਲਦਾ ਹੈ) ਅਤੇ ਮੁੱਲ ਨੂੰ `Authorization: Bearer` ਅਤੇ `x-api-key` ਦੋਵਾਂ ਵਿੱਚ ਭੇਜਦਾ ਹੈ। ਸਕ੍ਰਿਪਟ ਸਿਰਫ਼ ਪ੍ਰਮਾਣੀਕਰਨ ਵੇਰਵਾ ਛਾਪੇ: ਨਾਲ ਬੈਨਰ ਛਾਪਣ ਨਾਲ v2.1.227+ ਵਿੱਚ helper ਅਸਫਲ ਹੋ ਜਾਂਦਾ ਹੈ।
 
-Entra ID SSO ਇਸ ਤਰ੍ਹਾਂ ਕੰਮ ਕਰਦਾ ਹੈ: `scripts/cli/omniroute-sso.mjs token` ਇੱਕ ਥੋੜ੍ਹੇ ਸਮੇਂ ਲਈ ਐਂਟਰਾ ਐਕਸੈਸ ਟੋਕਨ ਪ੍ਰਿੰਟ ਕਰਦਾ ਹੈ ਜੋ API ਕੁੰਜੀ ਦੀ ਬਜਾਏ OmniRoute ਪੁਸ਼ਟੀ ਕਰਦਾ ਹੈ। [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md) ਵੇਖੋ.
+Entra ID SSO ਇਸੇ ਤਰ੍ਹਾਂ ਕੰਮ ਕਰਦਾ ਹੈ: `scripts/cli/omniroute-sso.mjs token` ਥੋੜ੍ਹੇ ਸਮੇਂ ਲਈ ਵੈਧ Entra ਐਕਸੈੱਸ ਟੋਕਨ ਛਾਪਦਾ ਹੈ, ਜਿਸ ਨੂੰ OmniRoute API ਕੁੰਜੀ ਦੀ ਥਾਂ ਤਸਦੀਕ ਕਰਦਾ ਹੈ। [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md) ਵੇਖੋ।
 
-`omniroute launch` ਤੁਹਾਡੇ ਲਈ ਇਹ ਸਭ ਸੈੱਟ ਕਰਦਾ ਹੈ: ਇਹ ਕਿਰਿਆਸ਼ੀਲ ਸੰਦਰਭ ਤੋਂ ਅਧਾਰ URL + ਟੋਕਨ ਨੂੰ ਹੱਲ ਕਰਦਾ ਹੈ (ਇਸ ਲਈ `omniroute connect <vps>` ਫਿਰ `omniroute launch` ਕੰਮ ਕਰਦਾ ਹੈ), ਸਰਵਰ ਦੀ ਸਿਹਤ-ਜਾਂਚ ਕਰਦਾ ਹੈ, ਅਤੇ `claude` ਨੂੰ ਲਾਗੂ ਕਰਦਾ ਹੈ।
+`omniroute launch` ਇਹ ਸਾਰੇ ਤੁਹਾਡੇ ਲਈ ਸੈੱਟ ਕਰਦਾ ਹੈ: ਇਹ ਸਰਗਰਮ context ਤੋਂ base URL + token
+resolve ਕਰਦਾ ਹੈ (ਇਸ ਲਈ `omniroute connect <vps>` ਤੋਂ ਬਾਅਦ `omniroute launch`
+ਸਿੱਧਾ ਕੰਮ ਕਰਦਾ ਹੈ), server ਦੀ health-check ਕਰਦਾ ਹੈ ਅਤੇ `claude` ਨੂੰ exec ਕਰਦਾ ਹੈ।
 
 ---
 

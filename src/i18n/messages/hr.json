@@ -4147,7 +4147,9 @@
     "duplicateAutoComboFailedPrefix": "Dupliciranje automatske kombinacije nije uspjelo:",
     "duplicateAutoComboUnknownError": "Nepoznata pogreška",
     "duplicateAutoComboTitle": "Stvori statičnu kombinaciju iz {name}",
-    "fallbackSummary": "{rate}% zahtjeva je prebačeno na rezervni sustav, prosječno je zapremljeno ~{skips} ciljeva po zahtjevu"
+    "fallbackSummary": "{rate}% zahtjeva je prebačeno na rezervni sustav, prosječno je zapremljeno ~{skips} ciljeva po zahtjevu",
+    "reorderAll": "Preuredite sve",
+    "reorderAllDescription": "Promjena redoslijeda svih {count} kombinacija. Ručke za povlačenje su omogućene."
   },
   "costs": {
     "title": "Troškovi",
@@ -6281,10 +6283,6 @@
     "hideEmails": "Sakrij sve e-mailove",
     "a": "A",
     "accountConcurrencyCapHint": "Maksimalan broj istovremenih zahtjeva koje ova veza/račun može obraditi. Pretplatnički računi obično dopuštaju samo nekoliko (1–3) — prekoračenje uzrokuje pogreške 429 i razdoblja čekanja. Ostavite prazno za zadanu vrijednost.",
-    "aiCreditsLimit": "Ograničenje AI Credits po obračunskom razdoblju",
-    "aiCreditsLimitPlaceholder": "Nema lokalnog ograničenja",
-    "aiCreditsLimitHint": "Preskače ovu vezu kada AI Credits koje prijavljuje GitHub dosegnu ovu vrijednost, pa usmjeravanje prelazi na vaše ostale veze. Prazno ga isključuje; 0 je uvijek preskače. Nedostajuće ili zastarjelo očitanje potrošnje nikada ne blokira — ovo nije zajamčena gornja granica potrošnje.",
-    "aiCreditsLimitInvalid": "Ograničenje AI Credits mora biti nenegativan broj ili prazno za isključivanje.",
     "accountConcurrencyCapLabel": "Ograničenje istovremenih zahtjeva računa",
     "accountIdHint": "Zahtijevaju neki pružatelji usluga (npr. Cloudflare Workers AI) uz API token.",
     "accountIdLabel": "ID računa",
@@ -6378,8 +6376,6 @@
     "newApiUserIdLabel": "New-API korisnički ID",
     "newApiUserIdPlaceholder": "npr. 12345",
     "newApiUserIdHint": "Vrijednost zaglavlja AgentRouter New-Api-User, koja se koristi zajedno s konzolskim API ključem za dohvaćanje stanja kvote.",
-    "tokenrouterManagementKeyLabel": "Ključ za upravljanje (neobavezno)",
-    "tokenrouterManagementKeyHint": "Ključ računa s nadzorne ploče TokenRoutera (Settings → Management Key). Koristi se samo za čitanje kvote i stanja, nikada za zahtjeve. Spremljeni ključ se ne prikazuje; ostavite prazno kako biste ga zadržali.",
     "newApiAggregatorToggleLabel": "Agregacijski pristupnik",
     "newApiAggregatorToggleHint": "Omogući otkrivanje stanja za agregacijske čvorove New-API / One-API / Sub2API. Nadzorna ploča prikazivat će oznaku stanja, a usmjeravanje s prethodnom provjerom kvote preskočit će iscrpljene račune.",
     "newApiAggregatorConsoleApiKeyHint": "Sistemski pristupni token za krajnju točku /api/user/self agregatora. To nije API ključ za usmjeravanje.",
@@ -6393,8 +6389,6 @@
     "customUserAgentLabel": "Oznaka prilagođenog korisničkog agenta",
     "huggingfaceBillToHint": "Neobavezno. Identifikator vašeg Hugging Face računa za naplatu, koji se šalje kao zaglavlje X-HF-Bill-To radi pripisivanja troškova.",
     "huggingfaceBillToLabel": "Hugging Face Bill-To račun",
-    "commandCodeZdrLabel": "Zahtijevaj nulto zadržavanje podataka (ZDR)",
-    "commandCodeZdrHint": "Šalje x-cmd-zdr: 1 sa svakim zahtjevom upućenim ovim API ključem. Modeli bez ZDR upstreama možda neće biti dostupni.",
     "databricksBaseUrlHint": "Naznaka osnovnog URL-a za Databricks",
     "defaultThinkingStrengthHint": "Koristi se kada zahtjev ne navodi razinu zaključivanja.",
     "defaultThinkingStrengthLabel": "Zadana razina razmišljanja",
@@ -6869,7 +6863,7 @@
       "xai": "Povežite xAI (Grok) s API ključem.",
       "xiaomi-mimo": "Povežite Xiaomi MiMo s API ključem.",
       "yi": "Nabavite API ključ na platform.lingyiwanwu.com",
-      "zai": "API ključ s https://open.bigmodel.cn/usercenter/apikeys",
+      "zai": "API ključ s https://z.ai/manage-apikey/apikey-list",
       "zenmux": "ZenMux izlaže krajnju točku kompatibilnu s OpenAI-jem za dovršavanje razgovora na /api/v1/chat/completions, kao i sučelja protokola Anthropic Messages (/api/anthropic/v1/messages) i Google Gemini (/api/vertex-ai). OmniRoute koristi OpenAI protokol.",
       "galadriel": "Povežite Galadriel s API ključem.",
       "predibase": "25 USD besplatnih probnih kredita (vrijede 30 dana)",
@@ -6990,11 +6984,6 @@
     "anonymousFallbackEnabled": "Anonimni rezervni sustav omogućen za {provider}",
     "anonymousFallbackDisabled": "Anonimni rezervni sustav onemogućen za {provider} — iscrpljene veze preskočit će ovog pružatelja",
     "anonymousFallbackUpdateFailed": "Nije uspjelo ažuriranje postavke anonimnog rezervnog sustava",
-    "retryDelayTitle": "Odgoda ponovnog pokušaja",
-    "retryDelayDesc": "Koliko dugo veza miruje nakon pogreške ograničenja brzine kada pružatelj ne navede kada ponovno pokušati. Automatski način koristi ugrađenu odgodu; vrijeme resetiranja koje pošalje pružatelj uvijek ima prednost.",
-    "retryDelayAuto": "Automatski",
-    "retryDelaySaved": "Odgoda ponovnog pokušaja spremljena",
-    "retryDelayUpdateFailed": "Ažuriranje odgode ponovnog pokušaja nije uspjelo",
     "batchDeleteFailed": "Grupno brisanje nije uspjelo",
     "batchDeleteNetworkError": "Mrežna pogreška tijekom grupnog brisanja",
     "batchUpdateFailed": "Grupno ažuriranje nije uspjelo",
@@ -7094,7 +7083,20 @@
     "chatgptConnectorLabel": "Prilagodljivi konektor ChatGPT",
     "doctorChecking": "Provjeravanje statusa…",
     "doctorCheck": "Provjeri status doktoriranja",
-    "fallbackRetryBackendTitle": "Poslužnik za ponovna pokretanja u slučaju pada"
+    "fallbackRetryBackendTitle": "Poslužnik za ponovna pokretanja u slučaju pada",
+    "retryDelayTitle": "Odgoda ponovnog pokušaja",
+    "retryDelayDesc": "Koliko dugo veza miruje nakon pogreške ograničenja brzine kada pružatelj ne navede kada ponovno pokušati. Automatski način koristi ugrađenu odgodu; vrijeme resetiranja koje pošalje pružatelj uvijek ima prednost.",
+    "retryDelayAuto": "Automatski",
+    "retryDelaySaved": "Odgoda ponovnog pokušaja spremljena",
+    "retryDelayUpdateFailed": "Ažuriranje odgode ponovnog pokušaja nije uspjelo",
+    "aiCreditsLimit": "Ograničenje AI Credits po obračunskom razdoblju",
+    "aiCreditsLimitPlaceholder": "Nema lokalnog ograničenja",
+    "aiCreditsLimitHint": "Preskače ovu vezu kada AI Credits koje prijavljuje GitHub dosegnu ovu vrijednost, pa usmjeravanje prelazi na vaše ostale veze. Prazno ga isključuje; 0 je uvijek preskače. Nedostajuće ili zastarjelo očitanje potrošnje nikada ne blokira — ovo nije zajamčena gornja granica potrošnje.",
+    "aiCreditsLimitInvalid": "Ograničenje AI Credits mora biti nenegativan broj ili prazno za isključivanje.",
+    "tokenrouterManagementKeyLabel": "Ključ za upravljanje (neobavezno)",
+    "tokenrouterManagementKeyHint": "Ključ računa s nadzorne ploče TokenRoutera (Settings → Management Key). Koristi se samo za čitanje kvote i stanja, nikada za zahtjeve. Spremljeni ključ se ne prikazuje; ostavite prazno kako biste ga zadržali.",
+    "commandCodeZdrLabel": "Zahtijevaj nulto zadržavanje podataka (ZDR)",
+    "commandCodeZdrHint": "Šalje x-cmd-zdr: 1 sa svakim zahtjevom upućenim ovim API ključem. Modeli bez ZDR upstreama možda neće biti dostupni."
   },
   "settings": {
     "title": "Postavke",
@@ -14255,6 +14257,10 @@
         "label": "Infrastrukturna zaustavljanja zaštićenog prioriteta kao 502",
         "description": "Odgovori kodom 502 umjesto 503 kada prioritetno odredište s pričuvnim rješenjem samo za kvotu zaustavi kombinaciju zbog uzroka koji dokazivo nije kvota: otvorenog prekidača strujnog kruga davatelja usluge ili prediktivnog preskakanja zbog latencije."
       },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Politika budžeta za neprocijenjenu upotrebu",
+        "description": "Kako dnevna/tjedna USD ograničenja po ključu tretiraju uspješne upotrebe čiji pružatelj/model nema redak s cijenom. fail_closed (zadano) označava prozor kao prekoračen, tako da nepoznati trošak nikad ne može zaobići strogi limit. count_as_zero računa tu upotrebu kao $0 i nastavlja primjenjivati ograničenja na potrošnju s konfiguriranom cijenom. Neprocijenjeni modeli su ionako navedeni na početnoj stranici nadzorne ploče."
+      },
       "AUTH_LOG_INCLUDE_ACCOUNT_ID": {
         "label": "ID-je računa u dnevniku",
         "description": "Uključi prefiks računa u redovima dnevnika AUTH (npr. \"Korištenje računa za '<provider>'a: abc12345...\"). Onemogućeno podrazumijevano kako bi se identifikatori računa izbacili iz zajedničkih/dnevnikâ procesa s više stanara. Neovisno od Modusa za otpravljanje grešaka; uključivanje Modusa za otpravljanje grešaka ovo ne otkriva."
@@ -14535,9 +14541,9 @@
         "label": "Ponovni pokušaj pri hlađenju: Preskoči odbijanja 403/410",
         "description": "Kada su svi računi u stanju hlađenja i hlađenje koje prvo završava je uzrokovano statusom 403 (pristup odbijen) ili 410 (uklonjeno), odmah vrati to odbijanje umjesto čekanja da hlađenje istekne i ponovnog slanja zahtjeva; obnavljajući agentrouter status 403 za kvotu na razini veze tada se pohranjuje s errorCode 429 kako bi se mogao ponovno pokušati. Zadano isključeno: samo 401 preskače čekanje, a svako se odbijanje pohranjuje sa statusom s kojim je pristiglo."
       },
-      "UNPRICED_USAGE_BUDGET_POLICY": {
-        "label": "Politika budžeta za neprocijenjenu upotrebu",
-        "description": "Kako dnevna/tjedna USD ograničenja po ključu tretiraju uspješne upotrebe čiji pružatelj/model nema redak s cijenom. fail_closed (zadano) označava prozor kao prekoračen, tako da nepoznati trošak nikad ne može zaobići strogi limit. count_as_zero računa tu upotrebu kao $0 i nastavlja primjenjivati ograničenja na potrošnju s konfiguriranom cijenom. Neprocijenjeni modeli su ionako navedeni na početnoj stranici nadzorne ploče."
+      "COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE": {
+        "description": "U statistici predmemorije kompresije računajte komprimirani zahtjev pružatelju automatskog predmemoriranja prefiksa (OpenAI, Codex, Azure ili prilagođena veza koja deklarira brzo predmemoriranje s uklanjanjem markera) kao procijenjeni pogodak predmemorije čak i bez markera cache_control. Procjena je signal prihvatljivosti predmemorije, a ne promatrani pogodak, tako da se prijavljena stopa pogodaka za te pružatelje kreće prema 100%. Isključeno prema zadanim postavkama: samo zahtjev koji nosi markere cache_control pružatelju predmemoriranja računa se kao procijenjeni pogodak, tako da pružatelji automatskih prefiksa nastavljaju izvješćivati 0.",
+        "label": "Statistika predmemorije kompresije: Podobnost za automatski prefiks"
       }
     }
   },

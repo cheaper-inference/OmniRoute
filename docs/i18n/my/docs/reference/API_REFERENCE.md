@@ -845,15 +845,7 @@ request တစ်ခုလုံးကို ငြင်းပယ်သည်�
 ဖယ်ရှားသည်။ အသုံးမပြုတော့ရန် သတ်မှတ်ထားသော `subpages`၊ `subpageTarget`၊
 `highlights.numSentences` နှင့် `highlights.highlightsPerUrl` တို့ကို ရှေ့ဆက်မပေးပို့တော့ပါ။
 
-ကုန်ကျစရိတ်တွက်ချက်မှုသည် flat registry `costPerQuery` ကို အသုံးပြုသည်။ သို့သော် Exa သည်
-Exa ၏ ကိုယ်ပိုင်စျေးနှုန်းအတိုင်း လုပ်ဆောင်သည် - `auto` (နှင့် ယခင် `fast`) အတွက် ခေါ်ဆိုမှုတစ်ကြိမ်လျှင်
-$0.007 သို့မဟုတ် `lite` (နှင့် ယခင် `instant`) အတွက် $0.004 ဖြစ်ပြီး result ၁၀ ခုအထိ ပါဝင်သည်။
-ထပ်မံပြန်ပေးသည့် result တစ်ခုစီအတွက် $0.001 နှင့် `contents.summary` သတ်မှတ်ထားသောအခါ
-ပြန်ပေးသည့် result တစ်ခုစီအတွက် $0.001 ထပ်မံကုန်ကျသည်။ Tavily ကို
-`search_depth` `basic`၊ `fast` နှင့် `ultra-fast` အတွက် 1 credit ($0.008)၊
-`advanced` အတွက် 2 credits ($0.016) ဖြင့် မှတ်တမ်းတင်သည်
-([Tavily API credits](https://docs.tavily.com/documentation/api-credits))။ `auto_parameters: true` ပါသော
-ခေါ်ဆိုမှုတစ်ခုသည် Tavily က advanced သို့ အဆင့်မြှင့်ပေးသော်လည်း 1 credit ဖြင့်သာ မှတ်တမ်းတင်သည်။
+Exa: `auto` (နှင့် ယခင် `fast`) အတွက် ခေါ်ဆိုမှုတစ်ကြိမ်လျှင် $0.007 သို့မဟုတ် `lite` (နှင့် ယခင် `instant`) အတွက် $0.004 ဖြစ်ပြီး ရလဒ် 10 ခု ပါဝင်သည်။ နောက်ထပ်ရလဒ်တစ်ခုစီအတွက် $0.001; `contents.summary` သတ်မှတ်လိုက်သောအခါ ရလဒ်တစ်ခုလျှင် $0.001။ Tavily ကို `search_depth` `basic`၊ `fast` နှင့် `ultra-fast` အတွက် 1 ခရက်ဒစ် ($0.008) နှင့် `advanced` ( [Tavily API ခရက်ဒစ်](https://docs.tavily.com/documentation/api-credits) ) အတွက် ခရက်ဒစ် 2 ခု ($0.016) ဖြင့် မှတ်တမ်းတင်ထားသည်။ Tavily အဆင့်မြှင့်တင်ထားသော `auto_parameters: true` ဖြင့်ခေါ်ဆိုမှုကို 1 ခရက်ဒစ်တွင် မှတ်တမ်းတင်ထားဆဲဖြစ်သည်။
 
 ---
 
@@ -1137,6 +1129,8 @@ X-OmniRoute-No-Cache: true
 
 ---
 
+<a id="cliproxyapi-management-compatibility"></a>
+
 ## CLIProxyAPI စီမံခန့်ခွဲမှု လိုက်ဖက်ညီမှု
 
 OmniRoute သည် အသုံးပြုမှု dashboard များက Claude နှင့် Codex စာရင်းသွင်းမှု
@@ -1153,21 +1147,11 @@ OmniRoute သို့ ညွှန်ပြပြီး `manage` scope ပါ�
 | POST   | `/v0/management/api-call`    | Body `{ auth_index, method, url, header?, data? }`။ ခွင့်ပြုစာရင်းပါ တောင်းဆိုမှုတစ်ခုကို အကောင့်၏ token ဖြင့် ပေးပို့ပြီး `{ status_code, body }` ကို ပြန်ပေးသည် |
 | POST   | `/v0/management/reset-quota` | Body `{ auth_index }`။ အကောင့်တစ်ခု၏ connection cooldown၊ model lockout များနှင့် Codex per-scope cooldown များကို ရှင်းလင်းသည်                                   |
 
-- `auth_index` သည် OmniRoute connection id ဖြစ်သည်။ `provider` သည် `claude` သို့မဟုတ် `codex` ဖြစ်သည် (OAuth
-  connection များသာဖြစ်ပြီး `anthropic` API-key provider ကို စာရင်းမပြုပါ)။ Codex အတွက်
-  `id_token.chatgpt_account_id` သည် သိမ်းဆည်းထားသည့် workspace id ဖြစ်ပြီး `plan_type` သည် သိမ်းဆည်းထားသည့် plan ဖြစ်သည်။
-- `api-call` သည် ယေဘုယျ proxy မဟုတ်ပါ။ ၎င်းသည် Claude `GET
+- `auth_index` သည် OmniRoute connection id ဖြစ်သည်။ `provider` သည် `claude` သို့မဟုတ် `codex` ဖြစ်သည် (OAuth connection များသာဖြစ်ပြီး `anthropic` API-key provider ကို မဖော်ပြပါ)။ Codex အတွက် `id_token.chatgpt_account_id` သည် သိမ်းထားသော workspace id ဖြစ်ပြီး `plan_type` သည် သိမ်းထားသော plan ဖြစ်သည်။
+- `api-call` သည် အထွေထွေ proxy မဟုတ်ပါ။ Claude `GET
 https://api.anthropic.com/api/oauth/usage` နှင့် Codex `GET
-https://chatgpt.com/backend-api/wham/usage`၊ `GET .../wham/rate-limit-reset-credits` နှင့်
-  `POST .../wham/rate-limit-reset-credits/consume` တို့ကိုသာ လက်ခံပြီး၊ တစ်ခုချင်းစီကို ကိုက်ညီသော
-  provider ၏ အကောင့်အတွက်သာ ခွင့်ပြုသည်။ အခြားအရာအားလုံးသည် upstream သို့ ချိတ်ဆက်ခြင်းမပြုဘဲ
-  `403` ပြန်ပေးသည်။ ခေါ်ဆိုသူ၏ `Authorization` header (`$TOKEN$` placeholder အပါအဝင်) ကို လျစ်လျူရှုသည်။
-  OmniRoute သည် connection ၏ access token ကို ထည့်သွင်းပေးပြီး၊ သက်တမ်းကုန်ခါနီးပါက အရင် refresh လုပ်ကာ
-  ခွင့်ပြုစာရင်းပါ header များ (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`;
-  `Accept`, `Content-Type`) ကိုသာ forward လုပ်သည်။ `Chatgpt-Account-Id` မပါရှိပါက သိမ်းဆည်းထားသည့် workspace id ကို
-  မူလတန်ဖိုးအဖြစ် အသုံးပြုသည်။ တောင်းဆိုမှုများသည် 15 စက္ကန့်အကြာတွင် timeout ဖြစ်ပြီး connection ၏ proxy ကို အသုံးပြုသည်။
-- `reset-quota` သည် terminal state များ (banned, expired, credits_exhausted) ကို မပြောင်းလဲပါ။ မသိရှိသော
-  `auth_index` သည် `404` ပြန်ပေးသည်။
+https://chatgpt.com/backend-api/wham/usage`၊ `GET .../wham/rate-limit-reset-credits` နှင့် `POST .../wham/rate-limit-reset-credits/consume` ကိုသာ လက်ခံပြီး တစ်ခုချင်းစီသည် ကိုက်ညီသော provider ၏အကောင့်အတွက်သာ ဖြစ်ရမည်။ အခြားအရာအားလုံးသည် upstream ကို မဆက်သွယ်ဘဲ `403` ပြန်ပေးသည်။ ခေါ်သူ၏ `Authorization` header (`$TOKEN$` placeholder အပါအဝင်) ကို လျစ်လျူရှုသည်။ OmniRoute က connection ၏ access token ကို ထည့်ပေးပြီး သက်တမ်းကုန်ခါနီးလျှင် အရင် refresh လုပ်သည်။ ခွင့်ပြုစာရင်းထဲရှိ header များကိုသာ ဆက်ပို့သည် (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`; `Accept`, `Content-Type`)။ `Chatgpt-Account-Id` မပါလျှင် သိမ်းထားသော workspace id ကို မူလအဖြစ် သုံးသည်။ ပထမ upstream response သည် `401` ဖြစ်လျှင် တစ်ကြိမ် refresh လုပ်ပြီး access token ပြောင်းမှသာ ထပ်ကြိုးစားသည်။ upstream attempt တစ်ခုချင်းစီသည် 15 စက္ကန့်အကြာတွင် timeout ဖြစ်ပြီး connection ၏ proxy ကို သုံးသည်။
+- `reset-quota` သည် terminal state များ (banned, expired, credits_exhausted) ကို မပြောင်းပါ။ မသိသော `auth_index` သည် `404` ပြန်ပေးသည်။
 
 **အထောက်အထားပြခြင်း:** dashboard session သို့မဟုတ် `manage`-scoped API key လိုအပ်ပြီး login ပိတ်ထားသည့်အခါတွင်ပင်
 လိုအပ်သည် (`ALWAYS_PROTECTED_API_PATHS` တွင် လမ်းကြောင်းများ ပါဝင်သောကြောင့်)။ Inference-only key များသည် `403` ရရှိသည်။ အရင်းအမြစ်-
@@ -1908,17 +1892,17 @@ API key / session တစ်ခုချင်းစီအတွက် သီး�
 
 OmniRoute တွင် transport ၃ မျိုး (stdio၊ SSE၊ streamable-http) နှင့် scope သတ်မှတ်ထားသော tools များပါဝင်သည့် ထည့်သွင်းထားသော Model Context Protocol ဆာဗာ ပါဝင်သည်။ အောက်ပါ dashboard endpoint များသည် status/audit data များကို ဖတ်ရှုပြီး HTTP transport များအတွက် proxy အဖြစ် လုပ်ဆောင်သည်။
 
-| နည်းလမ်း | လမ်းကြောင်း            | ဖော်ပြချက်                                                                                                       |                      |
-| -------- | ---------------------- | ---------------------------------------------------------------------------------------------------------------- | -------------------- |
-| GET      | `/api/mcp/status`      | Heartbeat၊ transport၊ online အခြေအနေ၊ နောက်ဆုံးခေါ်ဆိုမှု၊ ထိပ်တန်း tools များ၊ ၂၄ နာရီအတွင်း အောင်မြင်မှုနှုန်း |
-| GET      | `/api/mcp/tools`       | `name`၊ `description`၊ `scopes`၊ `phase`၊ `auditLevel`၊ `sourceEndpoints` ပါဝင်သည့် MCP tools စာရင်း             |
-| GET      | `/api/mcp/sse`         | SSE transport အတွက် SSE stream ကို ဖွင့်ရန် (MCP ပိတ်ထားပါက သို့မဟုတ် transport မကိုက်ညီပါက `503` ပြန်ပေးသည်)    |
-| POST     | `/api/mcp/sse`         | SSE transport ပေါ်တွင် JSON-RPC frame ပေးပို့ရန်                                                                 |
-| GET      | `/api/mcp/stream`      | Streamable HTTP transport ၏ SSE ဘက်ကို ဖွင့်ရန် (ဆာဗာမှ စတင်ပေးပို့သော messages)                                 |
-| POST     | `/api/mcp/stream`      | Streamable HTTP transport ပေါ်တွင် JSON-RPC frame ပေးပို့ရန်                                                     |
-| DELETE   | `/api/mcp/stream`      | Streamable HTTP session ကို အဆုံးသတ်ရန်                                                                          |
-| GET      | `/api/mcp/audit`       | audit log ကို query လုပ်ရန် — `?limit=`၊ `?offset=`၊ `?tool=`၊ `?success=true                                    | false`၊ `?apiKeyId=` |
-| GET      | `/api/mcp/audit/stats` | စုစည်းထားသော audit စာရင်းအင်းများ (စုစုပေါင်း၊ အောင်မြင်မှုနှုန်း၊ ပျမ်းမျှကြာချိန်၊ ထိပ်တန်း tools များ)        |
+| နည်းလမ်း | လမ်းကြောင်း            | ဖော်ပြချက်                                                                                                                               |
+| -------- | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| GET      | `/api/mcp/status`      | Heartbeat၊ transport၊ online အခြေအနေ၊ နောက်ဆုံးခေါ်ဆိုမှု၊ ထိပ်တန်း tools များ၊ ၂၄ နာရီအတွင်း အောင်မြင်မှုနှုန်း                         |
+| GET      | `/api/mcp/tools`       | `name`၊ `description`၊ `scopes`၊ `phase`၊ `auditLevel`၊ `sourceEndpoints` ပါဝင်သည့် MCP tools စာရင်း                                     |
+| GET      | `/api/mcp/sse`         | SSE transport အတွက် SSE stream ကို ဖွင့်ရန် (MCP ပိတ်ထားပါက သို့မဟုတ် transport မကိုက်ညီပါက `503` ပြန်ပေးသည်)                            |
+| POST     | `/api/mcp/sse`         | SSE transport ပေါ်တွင် JSON-RPC frame ပေးပို့ရန်                                                                                         |
+| GET      | `/api/mcp/stream`      | Streamable HTTP transport ၏ SSE ဘက်ကို ဖွင့်ရန် (ဆာဗာမှ စတင်ပေးပို့သော messages)                                                         |
+| POST     | `/api/mcp/stream`      | Streamable HTTP transport ပေါ်တွင် JSON-RPC frame ပေးပို့ရန်                                                                             |
+| DELETE   | `/api/mcp/stream`      | Streamable HTTP session ကို အဆုံးသတ်ရန်                                                                                                  |
+| GET      | `/api/mcp/audit`       | audit log ကို query လုပ်ရန် — `?limit=`၊ `?offset=`၊ `?tool=`၊ `?success=true                                    \| false`၊ `?apiKeyId=` |
+| GET      | `/api/mcp/audit/stats` | စုစည်းထားသော audit စာရင်းအင်းများ (စုစုပေါင်း၊ အောင်မြင်မှုနှုန်း၊ ပျမ်းမျှကြာချိန်၊ ထိပ်တန်း tools များ)                                |
 
 **အထောက်အထားပြုခြင်း:** `sse`/`stream` transport များသည် MCP-specific auth surface ( `mcp` scope ပါသော Bearer API key) ကို လိုက်နာသည်။ `status`/`tools`/`audit*` route များကို dashboard မှ ဖတ်ရှုနိုင်သည် (dashboard host သို့ ရောက်ရှိနိုင်ခြင်းအပြင် အပိုအထောက်အထားပြုရန် မလိုအပ်ပါ)။
 

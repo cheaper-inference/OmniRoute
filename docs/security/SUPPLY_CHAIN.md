@@ -45,9 +45,12 @@ When osv or Trivy go red due to a newly disclosed CVE, the remedy is:
      comment + tracking issue. `ignore-unfixed: true` already covers CVEs without
      patches automatically.
 
-Both gates **gracefully SKIP** (exit 0) when the tool is absent or the measurement
-fails (osv-scanner not in PATH, osv.dev/network unreachable, invalid JSON) — a
-**measurement** failure never blocks, only a **measured** regression blocks.
+Required OSV executions (`check:vuln-ratchet -- --ratchet`) fail closed with
+`INCOMPLETE` and exit 2 when the scanner, report or baseline cannot be validated.
+A measured regression exits 1. Advisory execution can still report `SKIP` with
+exit 0, which does not establish that dependencies passed the scan. The blocking
+Trivy step also requires a successful measurement: unavailable tools, failed jobs
+and missing image evidence cannot certify an image as clean.
 
 ## Retired dependency risk
 

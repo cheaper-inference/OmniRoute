@@ -4224,7 +4224,9 @@
     "duplicateAutoComboFailedPrefix": "Neuspjelo dupliranje auto-comba:",
     "duplicateAutoComboUnknownError": "Nepoznata greška",
     "duplicateAutoComboTitle": "Kreiraj statični combo iz {name}",
-    "fallbackSummary": "{rate}% zahtjeva je koristilo alternativni put, svaki je prosječno preskočio ~{skips} meta"
+    "fallbackSummary": "{rate}% zahtjeva je koristilo alternativni put, svaki je prosječno preskočio ~{skips} meta",
+    "reorderAll": "Ponovo naruči sve",
+    "reorderAllDescription": "Promjena redoslijeda svih {count} kombinacija. Ručice za povlačenje su omogućene."
   },
   "costs": {
     "title": "Troškovi",
@@ -6937,7 +6939,7 @@
       "xai": "Povežite xAI (Grok) pomoću API ključa.",
       "xiaomi-mimo": "Povežite Xiaomi MiMo pomoću API ključa.",
       "yi": "Preuzmite API ključ na platform.lingyiwanwu.com",
-      "zai": "API ključ sa https://open.bigmodel.cn/usercenter/apikeys",
+      "zai": "API ključ sa https://z.ai/manage-apikey/apikey-list",
       "zenmux": "ZenMux izlaže OpenAI-kompatibilnu krajnju tačku za chat completions na /api/v1/chat/completions, uz Anthropic Messages (/api/anthropic/v1/messages) i Google Gemini (/api/vertex-ai) protokolne površine. OmniRoute koristi OpenAI protokol.",
       "galadriel": "Povežite Galadriel pomoću API ključa.",
       "predibase": "$25 besplatnih probnih kredita (valjanost 30 dana)",
@@ -14332,6 +14334,10 @@
         "label": "Zaustavljanja infrastrukture sa zaštićenim prioritetom kao 502",
         "description": "Odgovori sa 502 umjesto 503 kada prioritetna meta samo za fallback kvote zaustavi combo iz razloga koji dokazivo nije kvota: otvoreni circuit breaker provajdera ili prediktivno preskakanje latencije."
       },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Politika budžeta za neprocijenjenu upotrebu",
+        "description": "Kako dnevna/sedmična USD ograničenja po ključu tretiraju uspješnu upotrebu čiji provajder/model nema konfiguriranu cijenu. fail_closed (zadano) označava prozor kao prekoračen, pa nepoznat trošak ne može proći pored stroge granice. count_as_zero računa tu upotrebu kao $0 i nastavlja primjenjivati cjenovnu potrošnju. Neprocijenjeni modeli su ionako navedeni na početnoj stranici nadzorne ploče."
+      },
       "AUTH_LOG_INCLUDE_ACCOUNT_ID": {
         "label": "ID-je naloga u dnevniku",
         "description": "Uključi prefiks naloga u linije dnevnika za AUTH (npr. \"Korišten je nalog '<provider>': abc12345...\"). Isključeno po zadanoj postavci kako bi se identifikatori naloga prikrili iz dijeljenih logova procesa s više zakupača. Neovisno o načinu debugovanja; promjena načina debugovanja ovo ne otkriva."
@@ -14612,9 +14618,9 @@
         "label": "Ponovni pokušaj tokom hlađenja: Preskoči odbijanja 403/410",
         "description": "Kada su svi računi u periodu hlađenja i period hlađenja koji prvi završava je uzrokovan statusom 403 (pristup odbijen) ili 410 (nestalo), odmah vrati to odbijanje umjesto čekanja da period hlađenja istekne i ponovnog slanja zahtjeva; obnavljajući agentrouter 403 za kvotu na nivou konekcije se zatim sprema uz errorCode 429 kako bi se mogao ponovo pokušati. Podrazumijevano isključeno: samo 401 preskače čekanje, a svako odbijanje se sprema sa statusom s kojim je stiglo."
       },
-      "UNPRICED_USAGE_BUDGET_POLICY": {
-        "label": "Politika budžeta za neprocijenjenu upotrebu",
-        "description": "Kako dnevna/sedmična USD ograničenja po ključu tretiraju uspješnu upotrebu čiji provajder/model nema konfiguriranu cijenu. fail_closed (zadano) označava prozor kao prekoračen, pa nepoznat trošak ne može proći pored stroge granice. count_as_zero računa tu upotrebu kao $0 i nastavlja primjenjivati cjenovnu potrošnju. Neprocijenjeni modeli su ionako navedeni na početnoj stranici nadzorne ploče."
+      "COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE": {
+        "description": "U statistici keš memorije kompresije, računajte komprimirani zahtjev dobavljaču automatskog keširanja prefiksa (OpenAI, Codex, Azure ili prilagođena veza koja deklarira brzo keširanje sa uklanjanjem markera) kao procijenjeni pogodak u keš memoriji čak i bez markera cache_control. Procjena je signal podobnosti u keš memoriji, a ne uočeni pogodak, tako da prijavljena stopa pogodaka za te provajdere kreće se prema 100%. Isključeno prema zadanim postavkama: samo zahtjev koji nosi oznake cache_control dobavljaču keširanja računa se kao procijenjeni pogodak, tako da dobavljači s automatskim prefiksom nastavljaju prijavljivati 0.",
+        "label": "Statistika keša kompresije: Podobnost automatskog prefiksa"
       }
     }
   },

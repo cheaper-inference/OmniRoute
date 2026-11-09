@@ -20,14 +20,16 @@
 
 ## Phương thức cài đặt
 
-### npm (khuyến nghị)
+### npm (được khuyến nghị)
 
 ```bash
 npm install -g omniroute
 omniroute
 ```
 
-Bảng điều khiển sẽ mở tại `http://localhost:20128` và URL cơ sở của API là `http://localhost:20128/v1`.
+Bảng điều khiển mở tại `http://localhost:20128` và API cơ sở URL là `http://localhost:20128/v1`.
+
+> **người dùng npm:** Nếu npm cảnh báo rằng các tập lệnh cài đặt đã bị chặn (ví dụ: `omniroute`, `better-sqlite3`), hãy xem [Khắc phục sự cố — npm install-scripts bị chặn](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install).
 
 ### pnpm
 
@@ -193,39 +195,39 @@ Mỗi lệnh đều chấp nhận `--remote <url> --api-key <key>` để cấu h
 
 ## Thiết lập giao thức (MCP + A2A)
 
-### Thiết lập MCP (Model Context Protocol)
+### Thiết lập MCP (Giao thức bối cảnh mô hình)
 
-Khởi động giao thức truyền tải MCP ở chế độ stdio:
+Bắt đầu vận chuyển MCP ở chế độ stdio:
 
 ```bash
 omniroute --mcp
 ```
 
-Quy trình xác thực được khuyến nghị:
+Luồng xác thực được đề xuất:
 
 ```bash
-# 1. Khởi động máy chủ MCP
+# 1. Start MCP server
 omniroute --mcp
 
-# 2. Từ máy khách MCP của bạn, gọi:
-omniroute_get_health        # Sẽ trả về tình trạng hệ thống
-omniroute_list_combos       # Sẽ trả về các combo đang hoạt động
+# 2. From your MCP client, call:
+omniroute_get_health        # Should return system health
+omniroute_list_combos       # Should return active combos
 
-# 3. Hoặc chạy toàn bộ bộ kiểm thử E2E:
+# 3. Or run the full E2E suite:
 npm run test:protocols:e2e
 ```
 
 #### Cấu hình máy khách MCP
 
-**Claude Code:**
+**Mã Claude :**
 
 ```bash
-claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
 ```
 
 **Cursor / Cline:**
 
-Thêm vào phần cài đặt MCP của bạn:
+Thêm vào cài đặt MCP của bạn (stdio, với khóa để người gọi có hiệu trưởng):
 
 ```json
 {
@@ -233,23 +235,30 @@ Thêm vào phần cài đặt MCP của bạn:
     "omniroute": {
       "command": "omniroute",
       "args": ["--mcp"],
-      "env": {}
+      "env": {
+        "OMNIROUTE_API_KEY": "your-key",
+        "OMNIROUTE_BASE_URL": "http://localhost:20128"
+      }
     }
   }
 }
 ```
 
-**Tài liệu MCP đầy đủ:** [README máy chủ MCP](../../open-sse/mcp-server/README.md) — 110 công cụ, cấu hình IDE, máy khách Python/TS/Go.
+Hoặc, khi `mcpTransport` là `streamable-http` (đặt nó trên `/dashboard/mcp` hoặc với `omniroute mcp enable --transport streamable-http`), hãy trỏ mục nhập máy chủ MCP từ xa của khách hàng vào `http://localhost:20128/api/mcp/stream`.
 
-### Thiết lập A2A (Agent-to-Agent Protocol)
+Khóa di chuyển dưới dạng `Authorization: Bearer <api-key>` (xem [MCP Server → Truy cập từ xa](../frameworks/MCP-SERVER.md#remote-access-manage-scope-bypass) dành cho máy chủ từ xa; khóa từ xa cần `mcp:connect` cộng với phạm vi read/write của nó).
 
-Xác minh Agent Card:
+**Tài liệu MCP đầy đủ:** [Máy chủ MCP README](../../open-sse/mcp-server/README.md) — 110 công cụ, cấu hình IDE, máy khách Python/TS/Go. Tham chiếu toán tử cho các công cụ nén CCR/dedup (điểm đánh dấu, điều kiện tiên quyết, phạm vi của mỗi công cụ, phân trang truy xuất, chẩn đoán): [Điều kiện tiên quyết / hướng dẫn vận hành → của Công cụ nén](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+
+### Thiết lập A2A (Giao thức giữa tác nhân với tác nhân)
+
+Xác minh thẻ đại lý:
 
 ```bash
 curl http://localhost:20128/.well-known/agent.json
 ```
 
-Gửi một tác vụ:
+Gửi một nhiệm vụ:
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -257,7 +266,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"Give me a short quota summary."}]}}'
 ```
 
-**Tài liệu A2A đầy đủ:** [README máy chủ A2A](../../src/lib/a2a/README.md) — JSON-RPC 2.0, kỹ năng, truyền trực tuyến, vòng đời tác vụ.
+**Tài liệu A2A đầy đủ:** [Máy chủ A2A README](../../src/lib/a2a/README.md) — JSON-RPC 2.0, kỹ năng, phát trực tuyến, vòng đời nhiệm vụ.
 
 ---
 
@@ -316,12 +325,12 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ---
 
-## Mẫu Void Linux (xbps-src)
+## Mẫu Linux (xbps-src)
 
-Đối với người dùng Void Linux, bạn có thể xây dựng gói gốc bằng `xbps-src`. Lưu khối này thành `srcpkgs/omniroute/template`:
+Đối với người dùng Void Linux, bạn có thể xây dựng gói gốc bằng cách sử dụng `xbps-src`. Lưu khối này dưới dạng `srcpkgs/omniroute/template`:
 
 ```bash
-# Tệp mẫu cho 'omniroute'
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -332,7 +341,7 @@ maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# Tạo lại checksum cho mỗi bản phát hành bằng:
+# Regenerate the checksum for each release with:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

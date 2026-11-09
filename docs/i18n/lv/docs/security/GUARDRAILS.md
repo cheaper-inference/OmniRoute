@@ -25,11 +25,12 @@ Huki **netiek** palaisti katrā maršrutā vai pie katras atbildes. Pirms
 paļaušanās uz aizsargmehānismu kā drošības kontroles līdzekli izlasiet
 [Pārklājums un ierobežojumi](#coverage-and-limits).
 
-## Iebūvētas aizsargmargas
+## Iebūvētie aizsargmehānismi
 
-Reģistrs importējot prioritārā secībā automātiski ielādē sešas aizsargmargas (skatiet `registry.ts` → `registerDefaultGuardrails()`):
+Reģistrs importa brīdī automātiski ielādē sešus aizsargmehānismus prioritātes
+secībā (skat. `registry.ts` → `registerDefaultGuardrails()`):
 
-| Prioritāte | Vārds               | Posms(-i)      | Fails                 |
+| Prioritāte | Nosaukums           | Posms(-i)      | Fails                 |
 | ---------- | ------------------- | -------------- | --------------------- |
 | `5`        | `vision-bridge`     | `preCall`      | `visionBridge.ts`     |
 | `6`        | `audio-bridge`      | `preCall`      | `audioBridge.ts`      |
@@ -38,56 +39,149 @@ Reģistrs importējot prioritārā secībā automātiski ielādē sešas aizsarg
 | `20`       | `prompt-injection`  | `preCall`      | `promptInjection.ts`  |
 | `95`       | `credential-masker` | `pre` + `post` | `credentialMasker.ts` |
 
-Darbojas zemākas prioritātes numuri** vispirms** .
+Mazākas prioritātes vērtības tiek izpildītas **pirmās**.
 
-### Redzes tilts (`visionBridge.ts`) — Modality Bridge PR-1
+### Vision Bridge (`visionBridge.ts`) — Modality Bridge PR-1
 
-GLM 5.3 bāzes modelim un `glm-5.3-{low,high,max}` ir skaidri `supportsVision:false` registry/spec metadati. GLM 5.3 Flash varianti joprojām ir vietējie modeļi. Claude koda `/v1/messages` maršruts tiek ievadīts koplietotajā `handleChat` pirmszvana aizsargmargu ķēdē** pirms tam** tulkojums no Kloda uz OpenAI; ligzdotie `Read` rīka rezultātu attēli ir jāapraksta vai jāapstrādā, pirms tie tiek pārvērsti OpenAI `image_url` saturā (#17069).
+GLM 5.3 pamatmodelim un `glm-5.3-{low,high,max}` reģistra/specifikācijas
+metadatos ir skaidri norādīts `supportsVision:false`. GLM 5.3 Flash varianti
+joprojām ir modeļi ar iebūvētu redzes atbalstu. Claude Code maršruts
+`/v1/messages` nonāk koplietotajā `handleChat` pirmsizsaukuma aizsargmehānismu
+ķēdē **pirms** Claude-to-OpenAI tulkojuma; ligzdotie `Read` rīka rezultātu
+attēli ir jāapraksta vai jāapstrādā pirms šis tulkojums tos pārceļ OpenAI
+`image_url` saturā (#17069).
 
-Pārtver attēlus saturošus pieprasījumus, kuru mērķis ir** bezredzes modeļi** un vai nu pāradresē visu pieprasījumu uz modeli, kas spēj nodrošināt redzi, vai aizstāj attēla daļas ar teksta aprakstiem, ko izveidojis konfigurējams redzes modelis pirms augšupējā izsaukuma. Tas ļauj tikai teksta pakalpojumu sniedzējiem pārredzami apstrādāt multimodālās kravas.
+Uztver pieprasījumus ar attēliem, kas vērsti uz **modeļiem bez redzes
+atbalsta**, un vai nu novirza visu pieprasījumu uz modeli ar redzes atbalstu,
+vai arī pirms augšupvērstā izsaukuma aizstāj attēlu daļas ar teksta
+aprakstiem, ko ģenerē konfigurējams redzes modelis. Tas ļauj tikai tekstu
+atbalstošiem nodrošinātājiem pārredzami apstrādāt multimodālu saturu.
 
 Plūsma:
 
-1. Izlaist, ja mērķa modelis jau atbalsta redzi (ja vien tas nav redzams piespiedu tilta sarakstā `isVisionBridgeForcedModel`).
-2. Izņemiet attēla daļas, izmantojot `extractImageParts(messages)` (`visionBridgeHelpers.ts`), kas tiek deleģēta uz** vienotais mediju detektors** `detectMediaParts()` in `open-sse/utils/mediaParts.ts` — vienīgais patiesības avots, kas tiek koplietots ar kombinēto saderības filtru. Ekstrakcija ir atļauto formu sarakstā, ko `replaceImageParts` var savienot atpakaļ (izraksts ↔ aizstāj līgumu): OpenAI `image_url`, Anthropic base64 `source.type:"base64"`, Anthropic URL `source.type:"url"` un atbildes API `input_image`. Atbilstošie attēli, kas ir ligzdoti Claude Code `tool_result.content` un Responses rīka izvadēs, arī tiek iegūti un aizstāti to sākotnējos ceļos; tikai indikatora formas ir kombinētā filtra materiāls un netiek iegūtas. Izlaist, ja neviens nav atrasts.
-3. Atrisiniet izpildlaika konfigurāciju, izmantojot `resolveVisionBridgeRuntimeSettings()` (`src/shared/constants/modalityBridgeDefaults.ts`): jaunie `modalityBridge*` iestatījumu taustiņi uzvar; mantotās `visionBridge*` atslēgas paliek a** viena cikla atkāpšanās** (atcelšanas logs). Ja tilts ir atspējots, izlaidiet pirms jebkādas multivides šķērsošanas.
-4. Režīmu atlasītājs (`modalityBridgeVisionMode`, skatiet tabulu zemāk) nosaka maršruta maiņu un aprakstu. Reroute atgriež `modifiedPayload` ar apmainītu tikai `model`, kā arī meta `{ rerouted, fromModel, toModel, imagesKept }`.
-5. Aprakstiet ceļu: ierobežojiet attēlus vietnē `maxImages`, izveidojiet uzdevumu apzinošu uzvedni, skatiet apraksta kešatmiņu, izsauciet redzes modeli** paralēli** (`Promise.allSettled`), un to vietā ievadiet `[Image N]: <description>` teksta daļas. Neveiksmīgs apraksts nodrošina `null`: neapstrādāts attēls tiek saglabāts unknown/vision-capable mērķiem (#4012), bet** apstiprināts tikai teksta tiešais mērķis** vai nulles redzes kombinācija katram neaprakstītam attēlam, tostarp daļējām kļūmēm un attēliem, kas pārsniedz apraksta izsaukuma ierobežojumu (#17069), iegūst skaidru `(unavailable — no vision-capable provider connected)` teksta stublu. Esošā neveiksmīgā kombinācija, kas apraksta atkāpšanos, paliek spēkā (#8430).
-6. Atgriezt `modifiedPayload` + meta (`imagesProcessed`, `descriptions`, `processingTimeMs`, `visionModel`).
+1. Izlaist, ja mērķa modelis jau atbalsta redzi (izņemot gadījumus, kad tas
+   atrodas piespiedu tiltēšanas sarakstā `isVisionBridgeForcedModel`).
+2. Izņem attēlu daļas ar `extractImageParts(messages)`
+   (`visionBridgeHelpers.ts`), kas deleģē to **vienotajam multivides
+   detektoram** `detectMediaParts()` failā `open-sse/utils/mediaParts.ts` —
+   vienīgajam patiesības avotam, ko koplieto ar kombināciju saderības filtru.
+   Izņemšana ir ierobežota ar atļauto formu sarakstu, kuras `replaceImageParts`
+   spēj ielikt atpakaļ (izņemšanas↔aizstāšanas līgums): OpenAI `image_url`,
+   Anthropic base64 `source.type:"base64"`, Anthropic URL `source.type:"url"`
+   un Responses API `input_image`. Atbilstošie attēli, kas ligzdoti Claude Code
+   `tool_result.content` un Responses rīku izvadēs, arī tiek izņemti un
+   aizstāti savās sākotnējās vietās; tikai indikatoru formas ir kombināciju
+   filtra materiāls un netiek izņemtas. Izlaist, ja nekas netiek atrasts.
+3. Atrod izpildlaika konfigurāciju ar `resolveVisionBridgeRuntimeSettings()`
+   (`src/shared/constants/modalityBridgeDefaults.ts`): jaunās `modalityBridge*`
+   iestatījumu atslēgas ir prioritārās; mantotās `visionBridge*` atslēgas
+   paliek kā **viena cikla rezerves variants** (atkāpšanās logs). Ja tilts ir
+   atspējots, izlaist pirms jebkādas multivides pārlūkošanas.
+4. Režīma selektors (`modalityBridgeVisionMode`, skat. tabulu zemāk) izlemj
+   starp novirzīšanu un aprakstīšanu. Novirzīšana atgriež `modifiedPayload`,
+   kurā nomainīts tikai `model`, kā arī meta
+   `{ rerouted, fromModel, toModel, imagesKept }`.
+5. Aprakstīšanas ceļš: ierobežo attēlu skaitu līdz `maxImages`, sastāda
+   uzdevumam atbilstošu uzvedni, pārbauda aprakstu kešatmiņu, izsauc redzes
+   modeli **paralēli** (`Promise.allSettled`) un to vietā ievieto
+   `[Image N]: <description>` teksta daļas. Neveiksmīgs apraksts dod `null`:
+   neapstrādātais attēls tiek saglabāts nezināmiem vai redzi atbalstošiem
+   mērķiem (#4012), taču **apstiprināts tiešais mērķis, kas atbalsta tikai
+   tekstu**, vai kombinācija bez redzes atbalsta saņem skaidru
+   `(unavailable — no vision-capable provider connected)` teksta aizstājēju
+   katram neaprakstītam attēlam, tostarp daļēju kļūmju gadījumā un attēliem,
+   kas pārsniedz aprakstīšanas izsaukumu limitu (#17069). Esošais rezerves
+   variants gadījumam, kad neizdodas visi kombinācijas apraksti, paliek spēkā
+   (#8430).
+6. Atgriež `modifiedPayload` + meta (`imagesProcessed`, `descriptions`,
+   `processingTimeMs`, `visionModel`).
 
-#### Režīma atlasītājs (`modalityBridgeVisionMode`)
+#### Režīma selektors (`modalityBridgeVisionMode`)
 
-| Režīms     | Noklusējums | Uzvedība                                                                                                                                                                                                                                                                                         |
-| ---------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `auto`     | ✔           | Mantota heiristiska, neskarta (#6640/#7204): modeļi bez kombinācijas/`auto/` pārceļ uz labāko redzes modeli, ja vien sākotnējam modelim jau nav izmantojami akreditācijas dati (pēc tam aprakstiet); kombinētie mērķi vienmēr apraksta.                                                          |
-| `describe` |             | Vienmēr aprakstiet — ka maršruta maiņas bloks ir pilnībā izlaists; lietotāja izvēlētais modelis vienmēr atbild.                                                                                                                                                                                  |
-| `reroute`  |             | Piespiedu kārtā pārorientēt: saglabāt akreditācijas datus modeļa aizsargs ir apiets. Maršruta maiņa -** mērķis** akreditācijas datu aizsargs joprojām lieto —, ja nav izmantojama redzes mērķa, tilts bloķē ar skaidru kļūdu, nevis apraksta vai sūta neapstrādātus attēlus tikai teksta mērķim. |
+| Režīms     | Noklusējums | Uzvedība                                                                                                                                                                                                                                                                                                          |
+| ---------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `auto`     | ✔           | Mantojuma heuristika, nemainīta (#6640/#7204): modeļi, kas nav kombinētie/`auto/`, tiek pāradresēti uz labāko redzes modeli, ja vien sākotnējam modelim jau nav izmantojami akreditācijas dati (tad veic aprakstu); kombinētie mērķi vienmēr veic aprakstu.                                                       |
+| `describe` |             | Vienmēr veic aprakstu — pāradresācijas bloks tiek pilnībā izlaists; lietotāja izvēlētais modelis vienmēr atbild.                                                                                                                                                                                                  |
+| `reroute`  |             | Piespiedu pāradresācija: aizsargs, kas saglabā modeli ar akreditācijas datiem, tiek apiepts. Pāradresācijas **mērķa** akreditācijas datu aizsargs joprojām ir spēkā — ja nav izmantojama redzes mērķa, tilts bloķējas ar skaidru kļūdu, nevis veic aprakstu vai sūta neapstrādātus attēlus uz tikai teksta mērķi. |
 
-Piespiedu režīmu īssavienojums** pirms tam** automātiskās heiristiskās darbības; `auto` darbība ir baitiem identiska pre-PR-1 aizsargmargam.
+Piespiedu režīmi izsauc īsslēgumu **pirms** automātiskās heuristikas darbības; `auto` uzvedība
+ir baitu līmenī identiska aizsargam, kāds tas bija pirms PR-1.
 
-#### API atslēgas darbības joma (`visionBridgeKeyScope.ts`)
+#### API atslēgas tvērums (`visionBridgeKeyScope.ts`)
 
-Ja zvanītāja API taustiņš ierobežo `allowedConnections`, kvotu kopas (`allowedQuotas`) vai modeļus (`allowedModels` / `blockedModels` / `modelAccessMode: "restricted"` / `disableNonPublicModels`), tilts tikai izvēlas pārmaršrutu un apraksta modeļus, kurus atslēga var izmantot, savienojumos, kurus atslēga var izmantot. Apraksta izsaukums pēc tam vienmēr iziet cauri OmniRoute pašcilpai ar `x-omniroute-self-loop-key-id` galveni, tāpēc saņemošais tērzēšanas pieprasījums atkal ievieš šīs atslēgas savienojuma un modeļa politiku. `enforceApiKeyPolicy()` ievēro šo galveni tikai kopā ar pašcilpas nesēju, tāpēc tas var tikai sašaurināt piekļuvi, un ID, kas neatrisina, tiek noraidīts.
+Kad izsaucēja API atslēga ierobežo `allowedConnections`, kvotu kopas
+(`allowedQuotas`) vai modeļus (`allowedModels` / `blockedModels` /
+`modelAccessMode: "restricted"` / `disableNonPublicModels`), tilts izvēlas
+tikai tos pāradresācijas un apraksta modeļus, ko atslēga drīkst izmantot, un
+savienojumus, ko atslēga drīkst izmantot. Apraksta izsaukums pēc tam vienmēr
+iet caur OmniRoute pašciklu ar galveni `x-omniroute-self-loop-key-id`, tāpēc
+saņemošais tērzēšanas pieprasījums vēlreiz īsteno šīs atslēgas savienojumu un
+modeļu politiku. `enforceApiKeyPolicy()` ievēro šo galveni tikai kopā ar
+pašcikla bearer, tāpēc tas var tikai sašaurināt piekļuvi, un id, kuru neizdodas
+atrisināt, tiek noraidīts.
 
-Ja atslēgai nav atļauts neviens redzes modelis, a** apstiprināts tikai teksta mērķis** noraida attēla pieprasījumu lokāli ar skaidru HTTP 400, nevis pārsūta attēla baitus uz nespējīgu augšupvērstu (#17069). Mērķiem ar nezināmu vai vietējo redzes iespēju apraksta ceļš saglabā savu iepriekšējo atteices darbību (meta `{ skipped: true, reason: "no_permitted_vision_model" }`). Pieprasījumi bez atslēgas un atslēgas bez šiem ierobežojumiem darbojas tieši tāpat kā iepriekš.
+Ja atslēgai nav atļauts neviens redzes modelis, **apstiprināts tikai teksta
+mērķis** noraida attēla pieprasījumu lokāli ar skaidru HTTP 400, nevis pārsūta
+attēla baitus nespējīgam augšupvirzienam (#17069). Mērķiem ar nezināmu vai
+iebūvētu redzes iespēju apraksta ceļš saglabā iepriekšējo fail-open uzvedību
+(meta `{ skipped: true, reason: "no_permitted_vision_model" }`).
+Pieprasījumi bez atslēgas un atslēgas bez šiem ierobežojumiem uzvedas tieši
+tāpat kā iepriekš.
 
-#### Uzdevumu apzinoša apraksta uzvedne (`modalityBridgeVisionTaskAware`)
+#### Uzdevumam pielāgota apraksta uzvedne (`modalityBridgeVisionTaskAware`)
 
-Noklusējums** taisnība** . `composeVisionPrompt()` (`visionBridgeHelpers.ts`) pievieno tekstu** pēdējā lietotāja ziņa** (saīsināts līdz 500 rakstzīmēm) uz pamatnes apraksta uzvedni, virzot aprakstu uz to, ko lietotājs patiesībā jautāja (kodeksa redzes un starpniekservera modelis), un lūdzot redzes modelim pārrakstīt redzamo tekstu. Ja karodziņš ir izslēgts — vai nav lietotāja teksta — pamata uzvedne tiek izmantota nemainīga.
+Noklusējums **true**. `composeVisionPrompt()` (`visionBridgeHelpers.ts`)
+pievieno **pēdējā lietotāja ziņojuma** tekstu (saīsinātu līdz 500 rakstzīmēm)
+pamata apraksta uzvednei, virzot aprakstu uz to, ko lietotājs faktiski
+jautāja (codex-vision-proxy paraugs), un lūdzot redzes modelim pārrakstīt
+redzamo tekstu. Ja karodziņš ir izslēgts — vai nav lietotāja teksta — pamata
+uzvedne tiek izmantota nemainīta.
 
-Apraksta pašcilpas paša OpenAI saderīgais pieprasījums (`callVisionModelSingle()` in `visionBridgeHelpers.ts`) vienmēr pieprasa `image_url.detail: "high"` — bez nosacījumiem katram caller/provider, kas nav piesaistīts nevienam klienta signālam. Zemas detalizācijas paraugu ņemšana pasliktina OCR precizitāti tieši teksta transkripcijas uzdevumam, ko pieprasa šī uzvedne, tāpēc pašā apraksta izsaukumā vienmēr tiek prasīta ļoti detalizēta informācija neatkarīgi no tā, kādu detalizācijas līmeni izmantoja sākotnējais ienākošais pieprasījums. Tas ietekmē tikai iekšējā apraksta pieprasījuma struktūru; tas nemaina to, kā OmniRoute pārsūta paša zvanītāja `image_url.detail` primārajā pieprasījumā — kas noklusējuma tiek lietots atsevišķi un tikai atklātajiem OpenCode klientiem `defaultImageDetail()` (`open-sse/handlers/chatCore/upstreamBody.ts`). Apraksta pašcilpas Anthropic stieples formāta atzaram nav `detail` lauka, un to neietekmē neviens no noklusējuma.
+Apraksta pašcikla paša OpenAI saderīgais pieprasījums (`callVisionModelSingle()`
+failā `visionBridgeHelpers.ts`) vienmēr pieprasa `image_url.detail: "high"` —
+bez nosacījumiem, katram izsaucējam/pakalpojumu sniedzējam, ne atkarībā no
+jebkāda klienta signāla. Zema detalizācijas līmeņa paraugu ņemšana pasliktina
+OCR precizitāti tieši tam teksta pārrakstīšanas uzdevumam, ko šī uzvedne
+pieprasa, tāpēc pats apraksta izsaukums vienmēr pieprasa augstu detalizāciju
+neatkarīgi no tā, kādu detalizācijas līmeni izmantoja sākotnējais ienākošais
+pieprasījums. Tas ietekmē tikai iekšējā apraksta pieprasījuma ķermeni; tas
+nemaina to, kā OmniRoute pārsūta izsaucēja paša `image_url.detail` galvenajā
+pieprasījumā — šis noklusējums tiek lietots atsevišķi un tikai atklātiem
+OpenCode klientiem, funkcijā `defaultImageDetail()`
+(`open-sse/handlers/chatCore/upstreamBody.ts`). Apraksta pašcikla Anthropic
+vadu formāta zaram nav `detail` lauka, un neviens no abiem noklusējumiem to
+neietekmē.
 
-#### Aprakstiet izvades vāciņu (`modalityBridgeVisionMaxChars`)
+#### Apraksta izvades griesti (`modalityBridgeVisionMaxChars`)
 
-| Atslēga                        | Noklusējums | Diapazons          |
-| ------------------------------ | ----------- | ------------------ |
-| `modalityBridgeVisionMaxChars` | `0`         | `0` vai 100–50 000 |
+| Atslēga                        | Noklusējums | Diapazons         |
+| ------------------------------ | ----------- | ----------------- |
+| `modalityBridgeVisionMaxChars` | `0`         | `0` vai 100–50000 |
 
-`0` (default) means **no cap** — the description returned by `callVisionModel()` is passed through unmodified, preserving the existing behavior. Any value in the 100–50000 range truncates the description with a `…` suffix before it is spliced back as `[Image N]: <description>` (`VisionBridgeGuardrail.preCall()` in `src/lib/guardrails/visionBridge.ts`). Raise this for detail-heavy OCR tasks where the downstream model needs the full transcription; lower it to bound token usage on chatty vision models. The dashboard field lives on the Vision tab's Advanced panel (`modality-bridge-max-chars` in `ModalityBridgeVisionTab.tsx`) and clamps any value between 1 and 99 up to the 100 floor while leaving an explicit `0` untouched — `0` is a valid Zod value in its own right (`z.union([z.literal(0), z.number().int().min(100).max(50000)])`), not merely the "unset" default.
+`0` (noklusējums) nozīmē **bez griestiem** — apraksts, ko atgriež
+`callVisionModel()`, tiek nodots tālāk nemainīts, saglabājot esošo uzvedību.
+Jebkura vērtība diapazonā 100–50000 saīsina aprakstu ar `…` piedēkli pirms tas
+tiek ievietots atpakaļ kā `[Image N]: <description>`
+(`VisionBridgeGuardrail.preCall()` failā `src/lib/guardrails/visionBridge.ts`).
+Palieliniet šo vērtību OCR uzdevumiem ar lielu detaļu apjomu, kur
+lejupvirziena modelim nepieciešama pilna transkripcija; samaziniet to, lai
+ierobežotu žetonu patēriņu runīgiem redzes modeļiem. Informācijas paneļa lauks
+atrodas cilnes Vision panelī Advanced (`modality-bridge-max-chars` failā
+`ModalityBridgeVisionTab.tsx`) un paceļ jebkuru vērtību no 1 līdz 99 līdz 100
+apakšējai robežai, vienlaikus atstājot skaidri norādītu `0` nemainītu — `0` ir
+derīga Zod vērtība pati par sevi
+(`z.union([z.literal(0), z.number().int().min(100).max(50000)])`), ne tikai
+"neiestatītais" noklusējums.
 
-#### Aprakstiet kešatmiņu (`modalityBridge/bridgeCache.ts`)
+#### Apraksta kešatmiņa (`modalityBridge/bridgeCache.ts`)
 
-Atmiņā esoša LRU + TTL kešatmiņa izvadu aprakstīšanai, koplietojama visā procesā. Taustiņš = `sha256(imageRef + composedPrompt + configuredBridgeModel)` ar garuma prefiksa ierāmēšanu (bez lauka robežas sadursmēm). Modeļa sastāvdaļa ir** konfigurēts** tilta modelis, nevis modelis, kas faktiski atbildēja uz — `callVisionModel` var atkāpties iekšēji, un ievadīšana katrā mēģinājumā sadrumstalotu kešatmiņu. Neizdevušies apraksti nekad netiek saglabāti kešatmiņā. Iestatījumi:
+Operatīvās atmiņas LRU + TTL kešatmiņa apraksta izvadēm, koplietota visā
+procesā. Atslēga = `sha256(imageRef + composedPrompt + configuredBridgeModel)`
+ar garuma prefiksa ietvarējumu (bez lauka robežu sadursmēm). Modeļa komponents
+ir **konfigurētais** tilta modelis, nevis modelis, kas faktiski atbildēja —
+`callVisionModel` var iekšēji pārslēgties uz rezerves variantu, un atslēgu
+veidošana pa mēģinājumiem fragmentētu kešatmiņu. Neveiksmīgie apraksti nekad
+netiek kešoti. Iestatījumi:
 
 | Atslēga                         | Noklusējums | Diapazons |
 | ------------------------------- | ----------- | --------- |
@@ -95,202 +189,463 @@ Atmiņā esoša LRU + TTL kešatmiņa izvadu aprakstīšanai, koplietojama visā
 | `modalityBridgeCacheTtlMinutes` | `60`        | 1–1440    |
 | `modalityBridgeCacheMaxEntries` | `200`       | 10–5000   |
 
-#### Attālā attēla normalizācija (pašcilpas describe/base64 ielāde)
+#### Attālo attēlu normalizācija (self-loop describe/base64 ielāde)
 
-Kad tilts atnes a** tālvadības pults** pats attēls — Anthropic apraksta pašaizsaukumu un claude-wire formāta base64 konvertēšanu (`ensureBase64ImagesForClaudeWire`), izmantojot `fetchRemoteImageAsDataUri()` `visionBridgeHelpers.ts` — iegūtie dati URI tiek nodoti caur `normalizeDataUri()` (`open-sse/utils/imageNormalize.ts`), pirms tiek iegulti redzes modeļa pieprasījumā. Liela izmēra attēli tiek samazināti līdz a** 2048 pikseļu garā mala** (atbilst izmēru maiņas ierobežojumam OpenAI/Anthropic jau piemēro servera pusi), kas samazina augšupielādes bytes/latency nemainot to, ko redz redzes modelis. Izmēru maiņai tiek izmantots `sharp`, kas tiek ielādēts, izmantojot dinamisko importēšanu: platformā, kur tā sākotnējā binārā faila ielāde neizdodas, `normalizeDataUri()`** nekad nemet** — tas atgriežas pie sākotnējo baitu caurlaides, tāpēc describe/base64-conversion ceļš vienmēr turpina darboties. Bez attēla baiti (ienese, kas neatgrieza dekodējamu attēlu) arī tiek nodoti neskarti. Šī normalizācija attiecas uz attēliem, ko tilts ienes savam pašazvanam — un tas nekad netiek lietots zvanītāja neapstrādātajai caurlaides slodzei, kas atbilst tikai izvēles mutācijas principam (Cietais noteikums Nr. 20).
+Kad tilts pats ielādē **attālu** attēlu — Anthropic describe pašizsaukumā un claude-wire-format base64 konversijā (`ensureBase64ImagesForClaudeWire`), abi caur `fetchRemoteImageAsDataUri()` failā `visionBridgeHelpers.ts` — iegūtais data URI pirms iegulšanas redzes modeļa pieprasījumā tiek nodots caur `normalizeDataUri()` (`open-sse/utils/imageNormalize.ts`). Pārmērīgi lieli attēli tiek samazināti līdz **2048 px garajai malai** (atbilst tam izmēru griestiem, ko OpenAI/Anthropic jau piemēro servera pusē), kas samazina augšupielādes baitus/aizturi, nemainot to, ko redz redzes modelis. Izmēru maiņa izmanto `sharp`, kas ielādēts ar dinamisko importu: platformā, kurā tā native binārais fails neielādējas, `normalizeDataUri()` **nekad neizmet izņēmumu** — tas atgriežas pie sākotnējo baitu caurlaides, tāpēc describe/base64-konversijas ceļš vienmēr turpina darboties. Baiti, kas nav attēls (ielāde, kas neatgrieza dekodējamu attēlu), arī tiek caurlaisti nemainīti. Šī normalizācija attiecas tikai uz attēliem, ko tilts ielādē savam pašizsaukumam — tā nekad netiek piemērota izsaucēja neapstrādātajai caurlaides datu kravai, saskaņā ar principu par mutācijām tikai ar opt-in (Hard Rule #20).
 
 #### Iestatījumu shēma + migrācija
 
-Jaunie `modalityBridge*` taustiņi ir Zod validēti `updateSettingsSchema` (`src/shared/validation/settingsSchemas.ts`): `modalityBridgeVisionEnabled`, `modalityBridgeVisionMode`, `modalityBridgeVisionModel`, `modalityBridgeVisionTaskAware`, `modalityBridgeVisionPrompt`, `modalityBridgeVisionTimeout`, `modalityBridgeVisionMaxImages`, `modalityBridgeVisionMaxChars`, `modalityBridgeCache*` trio un `modalityBridgeAudio*` grupā, ko izmanto Audio Bridge. Migrācija `141_modality_bridge_settings.sql` kopē esošās mantotās `visionBridge*` vērtības uz atbilstošajām jaunajām atslēgām (idempotents, nekad nepārraksta operatora iestatīto `modalityBridge*` vērtību); mantotās atslēgas tiek pieņemtas kā lasīšanas rezerves vienam izlaišanas ciklam.
+Jaunās `modalityBridge*` atslēgas tiek Zod-validētas `updateSettingsSchema` (`src/shared/validation/settingsSchemas.ts`): `modalityBridgeVisionEnabled`, `modalityBridgeVisionMode`, `modalityBridgeVisionModel`, `modalityBridgeVisionTaskAware`, `modalityBridgeVisionPrompt`, `modalityBridgeVisionTimeout`, `modalityBridgeVisionMaxImages`, `modalityBridgeVisionMaxChars`, `modalityBridgeCache*` trio un `modalityBridgeAudio*` grupa, ko izmanto Audio Bridge. Migrācija `141_modality_bridge_settings.sql` kopē esošās mantotās `visionBridge*` vērtības uz atbilstošajām jaunajām atslēgām (idempotenti, nekad nepārraksta operatora iestatītu `modalityBridge*` vērtību); mantotās atslēgas paliek pieņemtas kā lasīšanas rezerves variants vienam laidiena ciklam.
 
-#### Pārredzamības galvenes + stats
+#### Caurspīdīguma galvene + statistika
 
-Aprakstiet pārveidotās atbildes satur `x-omniroute-modality-bridge: image->text;model=<visionModel>;parts=<n>` (veidots ar `buildModalityBridgeHeader()` `modalityBridge/bridgeStats.ts`, apzīmogots ar `withModalityBridgeHeader()` `src/sse/handlers/chatHelpers.ts`). Pāradresētie pieprasījumi tiek saņemti** nē** header — lietderīgā slodze bija neskarta, un modeļa maiņa jau ir redzama atbildes korpusa `model` laukā.
+Ar describe pārveidotās atbildes nes
+`x-omniroute-modality-bridge: image->text;model=<visionModel>;parts=<n>`
+(izveido `buildModalityBridgeHeader()` failā `modalityBridge/bridgeStats.ts`,
+uzliek `withModalityBridgeHeader()` failā `src/sse/handlers/chatHelpers.ts`).
+Pāradresētie pieprasījumi galveni **nesaņem** — datu krava netika aizskarta, un
+modeļa nomaiņa jau ir redzama atbildes ķermeņa laukā `model`.
 
-`GET /api/modality-bridge/stats` (pārvaldības autentifikācija, tāds pats līmenis kā `GET /api/settings`) atgriež atmiņā esošos modalitātes skaitītājus `{ attempts, successes, bridged, cacheHits, failures, totalLatencyMs, latencySamples, averageLatencyMs, lastUsedAt }` `vision`, `audio` un `video`. `averageLatencyMs` kā saucēju izmanto `latencySamples`, nevis visus mēģinājumus; darbība bez laika noteikšanas nerada nulles milisekundes paraugu. `bridged` joprojām ir ar atpakaļejošu datumu saderīgs aizstājvārds veiksmīgai pārvēršanai; neveiksmīgi mēģinājumi to nepalielina. Skaitītāji tiek atiestatīti pēc procesa restartēšanas (telemetrija, nevis uzskaite).
+`GET /api/modality-bridge/stats` (pārvaldības autentifikācija, tā pati piekļuves
+pakāpe kā `GET /api/settings`) atgriež operatīvajā atmiņā glabātos skaitītājus pa
+modalitātēm `{ attempts, successes, bridged, cacheHits, failures, totalLatencyMs,
+latencySamples, averageLatencyMs, lastUsedAt }` priekš `vision`, `audio` un
+`video`. `averageLatencyMs` kā saucēju izmanto `latencySamples`, nevis visus
+mēģinājumus; operācija bez laika mērījuma neizgudro nulles milisekunžu paraugu.
+`bridged` paliek atpakaļsaderīgs aizstājvārds veiksmīgām konversijām; neveiksmīgie
+mēģinājumi to nepalielina.
+Skaitītāji procesa restartēšanas brīdī tiek atiestatīti pēc nodoma
+(telemetrija, nevis uzskaites sistēma).
 
-#### Informācijas paneļa konfigurācija
+#### Vadības paneļa konfigurācija
 
-Īpašā informācijas paneļa lapa ir `/dashboard/settings/modality-bridge`. Tā URL adresētās cilnes `Vision`, `Audio` un `Video` saglabā vaicājuma parametrus, vienlaikus pārslēdzot `tab` vērtību. Cilnē Vision ir redzama iespējošana, režīms, modeļa atlase (tostarp automātiskā noklusējuma opcija), uzdevuma apzināšanās uzvedne, papildu timeout/image/description-length/cache ierobežojumi, izpildlaika skaitītāji un aizsargāts parauga pieprasījums. Cilne Audio arī ir pieejama: tajā ir redzama iespējošana, tikai STT modeļu atlasītājs ar automātisku, timeout/max-clip ierobežojumi, audio skaitītāji un `input_audio` izlases pārbaude. Cilne Video ir funkcionāla: tā ziņo par FFmpeg/ffprobe izpildlaika stāvokli — vienu no četriem skaidriem UI stāvokļiem (`unknown`, kamēr zonde ir lidojuma laikā vai to nevarēja pabeigt, `restricted` uz informācijas paneļa resursdatora bez cilpas, kur zonde tiek izlaista klienta pusē, `unavailable` kad zonde ir pārbaudīta un apstiprināta, ka tā trūkst, vai `available` versija ar FFmpeg/ffprobe ). enable/model/frame/video/timeout, filtrē modeļu atlasītāju uz —, kas spēj redzēt, un atklāj video skaitītājus.
+Īpašā paneļa lapa ir
+`/dashboard/settings/modality-bridge`. Tās URL-adresējamās cilnes `Vision`,
+`Audio` un `Video`, pārslēdzot `tab` vērtību, saglabā vaicājuma parametrus.
+Cilne Vision nodrošina iespējošanu, režīmu, modeļa izvēli (ieskaitot automātisko
+noklusējumu), uzdevumam pielāgotu uzvedņu veidošanu, paplašinātus
+taimauta/attēlu/apraksta garuma/kešatmiņas ierobežojumus, izpildlaika
+skaitītājus un aizsargātu paraugpieprasījumu. Cilne Audio arī ir aktīva: tā
+nodrošina iespējošanu, tikai-STT modeļu atlasītāju ar Auto, taimauta/maksimālā
+klipa ierobežojumus, audio skaitītājus un `input_audio` parauga testu. Cilne
+Video ir funkcionāla: tā ziņo par FFmpeg/ffprobe izpildlaika stāvokli — vienu no
+četriem skaidri definētiem UI stāvokļiem (`unknown`, kamēr pārbaude ir ceļā vai
+to neizdevās pabeigt, `restricted` uz paneļa resursdatora, kas nav loopback, kur
+pārbaude tiek izlaista klienta pusē, `unavailable`, kad pārbaude ir veikta un
+apstiprināts, ka to nav, vai `available` ar FFmpeg/ffprobe versijām) — saglabā
+iespējošanas/modeļa/kadru/video/taimauta ierobežojumus, filtrē modeļu
+atlasītāju uz modeļiem ar redzes iespējām un nodrošina video skaitītājus.
 
-Iepriekšējā Vision Bridge karte zem AI iestatījumiem ir saderības saite uz jauno lapu; tai vairs nepieder otrais veidlapas eksemplārs. Multivides nodrošinātāji arī saista attēla pārveidošanas un runas pārveidošanas darbplūsmas ar attiecīgajām Modality Bridge cilnēm, nenoņemot esošo runas pārveidošanas rotaļu laukumu.
+Bijušā Vision Bridge karte AI iestatījumos ir saderības saite uz jauno lapu; tā
+vairs netur otro veidlapas kopiju. Media Providers arī saista Image-to-Text un
+Speech-to-Text darbplūsmas ar atbilstošajām Modality Bridge cilnēm, neaiztiekot
+esošo Speech-to-Text izmēģinājumu vidi.
 
-**Pašcilpas ieejas apvedceļš:** kad apraksta zvana maršrutus caur OmniRoute paša `/v1` pašcilpu (nestandarta nodrošinātāja modelis), apakšpieprasījums nosūta `x-omniroute-admission-bypass: internal` un tiek autentificēts ar atrisināto pašcilpas akreditācijas datiem — lokālais `sk_omniroute` sentinel lokālajā režīmā vai `REQUIRE_API_KEY=true` konfigurēta `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` env atslēgu var aprakstīt (#13qh50) zvanu. Apvedceļš tiek ievērots tikai par šiem precīziem akreditācijas datiem, tāpēc ārējie klienti nevar izmantot galveni, lai izlaistu uzņemšanu. (#1350)
+**Self-loop pieļaušanas apiešana:** kad describe izsaukums tiek maršrutēts caur
+OmniRoute paša `/v1` self-loop (nestandarta nodrošinātāja modelis),
+apakšpieprasījums sūta `x-omniroute-admission-bypass: internal` un tiek
+autentificēts ar atrisināto self-loop akreditācijas datu — lokālo
+`sk_omniroute` marķieri lokālajā režīmā vai operatora konfigurēto
+`OMNIROUTE_API_KEY` / `ROUTER_API_KEY` vides atslēgu (#1350), lai
+`REQUIRE_API_KEY=true` izvietojumi joprojām varētu izpildīt describe izsaukumu.
+Apiešana tiek atzīta tikai šiem precīzajiem akreditācijas datiem, tāpēc ārējie
+klienti nevar izmantot šo galveni, lai izlaistu pieļaušanas pārbaudi.
 
-Mantotie noklusējuma iestatījumi dzīvo `src/shared/constants/visionBridgeDefaults.ts`; jaunie mode/task-aware/cache noklusējuma iestatījumi un iestatījumu atrisinātājs darbojas `src/shared/constants/modalityBridgeDefaults.ts`. Aizsargmargas atklāj `deps` konstruktora opciju, lai testi varētu ievadīt viltotus `getSettings` un `callVisionModel` implementācijas.
+Mantotās noklusējuma vērtības atrodas `src/shared/constants/visionBridgeDefaults.ts`;
+jaunās režīma/task-aware/kešatmiņas noklusējuma vērtības un iestatījumu
+atrisinātājs atrodas `src/shared/constants/modalityBridgeDefaults.ts`.
+Aizsargmehānisms nodrošina `deps` konstruktora opciju, lai testi varētu injicēt
+viltotas `getSettings` un `callVisionModel` implementācijas.
 
-### Audio tilts (`audioBridge.ts`) — Modality Bridge PR-3
+### Audio Bridge (`audioBridge.ts`) — Modality Bridge PR-3
 
-Pārtver audio saturošus tērzēšanas pieprasījumus, pirms tie sasniedz mērķi, kas, kā zināms, nepieņem audio ievadi. Tas nekad nepārvirza tērzēšanas pieprasījumu: audio daļas tiek transkribētas, izmantojot esošo ar OpenAI saderīgo vairāku daļu galapunktu, un izvēlētais tērzēšanas modelis turpinās ar teksta atšifrējumiem.
+Pārtver audio saturošus tērzēšanas pieprasījumus, pirms tie sasniedz mērķi, par
+kuru nav zināms, ka tas pieņem audio ievadi. Tas nekad nepāradresē tērzēšanas
+pieprasījumu: audio daļas tiek transkribētas caur esošo ar OpenAI saderīgo
+multipart galapunktu, un izvēlētais tērzēšanas modelis turpina darbu ar teksta
+transkriptiem.
 
 Plūsma:
 
-1. Atrisiniet `supportsAudio`, izmantojot `getResolvedModelCapabilities()`. Uzvar skaidrie pakalpojumu sniedzēja reģistra metadati, pēc tam statiskā modeļa metadati un pēc tam sinhronizētie `modalities_input`. Deklarēts ievades saraksts bez `audio` ir `false`; nekādu spēju pierādījumu nepaliek `null`. Gan `false` gan `null` aktivizē konservatīvo tiltu, savukārt `true` to apiet.
-2. Atrisiniet `modalityBridgeAudio*` iestatījumus un izņemiet savienojamas augstākā līmeņa audio daļas no katra ziņojuma, izmantojot koplietoto `detectMediaParts()` detektoru. Atbalstītās vadu formas ir OpenAI `input_audio`, `audio_url` un `source.media_type: "audio/*"`. Maršrutēšanai tiek noteikts ligzdots audio, bet savienojums nav noņemts. Darbu ierobežo `modalityBridgeAudioMaxClips`; vēlākās daļas paliek neskartas.
-3. Ievērojiet konfigurētu `provider/model` vai ļaujiet `selectAudioBridgeModel()` staigāt `AUDIO_TRANSCRIPTION_PROVIDERS` stabilā kataloga secībā un atlasiet pirmo modeli ar izmantojamiem aktīvajiem pakalpojumu sniedzēja akreditācijas datiem.
-4. `callAudioTranscription()` pārveido base64/data-URI audio par vairāku daļu `file` vai lejupielādē attālo `audio_url`, izmantojot tikai publisko izejošo aizsargu ar DNS piespraušanu un 25 MB saiti. Pēc tam tas POSTs failu un atlasīto modeli vietējā `/v1/audio/transcriptions` pašcilpā, kas autentificēts ar `resolveSelfLoopBearer()`. Esošais transkripcijas maršruts veic parasto akreditācijas datu meklēšanu, cooldown/rate-limit apstrādi un pakalpojumu sniedzēja nosūtīšanu.
-5. Veiksmīgi zvani aizstāj to daļas ar `[Audio N]: <transcript>`. Zvani tiek izpildīti ar `Promise.allSettled`: atsevišķa kļūme saglabā sākotnējo audio daļu (līgums Nr. #4012). Ja katrs zvans neizdodas un mērķis ir pierādīts `supportsAudio === false`, daļas kļūst par `[Audio N]: (unavailable — no STT provider connected)` (#8430 līgums). Nezināmam mērķim (`null`) visas kļūmes rezultāts paliek neskarts. Pierādīts tikai teksta mērķis bez izmantojamiem STT akreditācijas datiem saņem to pašu nepārprotamo stub bez tīkla izsaukuma.
+1. Atrod `supportsAudio`, izmantojot `getResolvedModelCapabilities()`. Prioritāte ir
+   skaidri norādītajiem pakalpojumu sniedzēja reģistra metadatiem, pēc tam
+   statiskajiem modeļa metadatiem, tad sinhronizētajiem `modalities_input`.
+   Deklarēts ievades saraksts bez `audio` ir `false`; ja nav spēju pierādījumu,
+   paliek `null`. Gan `false`, gan `null` aktivizē konservatīvo tiltu, savukārt
+   `true` to apiet.
+2. Atrod `modalityBridgeAudio*` iestatījumus un izgriež augšējā līmeņa audio
+   daļas no katras ziņas, izmantojot kopīgo `detectMediaParts()` detektoru.
+   Atbalstītās pārraides formas ir OpenAI `input_audio`, `audio_url` un
+   `source.media_type: "audio/*"`. Ligzdotā audio tiek noteikta maršrutēšanai,
+   bet izgriešanas ceļš to neizņem. Darba apjomu ierobežo
+   `modalityBridgeAudioMaxClips`; vēlākās daļas paliek neskartas.
+3. Ievēro konfigurēto `provider/model` vai ļauj `selectAudioBridgeModel()`
+   pāriet cauri `AUDIO_TRANSCRIPTION_PROVIDERS` stabilā kataloga secībā un
+   izvēlēties pirmo modeli ar izmantojamiem aktīviem pakalpojumu sniedzēja
+   akreditācijas datiem.
+4. `callAudioTranscription()` pārveido base64/data-URI audio par multipart
+   `file` vai lejupielādē attālu `audio_url` caur tikai publisko izejošo
+   aizsargu ar DNS piespraušanu un 25 MB robežu. Pēc tam tas ar POST nosūta
+   failu un izvēlēto modeli uz lokālo `/v1/audio/transcriptions` pašcilpu,
+   autentificējoties ar `resolveSelfLoopBearer()`. Esošais transkripcijas
+   maršruts veic parasto akreditācijas datu meklēšanu, dzesēšanas/pieprasījumu
+   ātruma ierobežojumu apstrādi un pakalpojumu sniedzēja nosūtīšanu.
+5. Veiksmīgie izsaukumi aizstāj savas daļas ar `[Audio N]: <transcript>`.
+   Izsaukumi darbojas ar `Promise.allSettled`: individuāla kļūme saglabā
+   attiecīgo oriģinālo audio daļu (#4012 līgums). Ja visi izsaukumi neizdodas
+   un mērķis ir pierādīti `supportsAudio === false`, daļas kļūst par
+   `[Audio N]: (unavailable — no STT provider connected)` (#8430 līgums).
+   Nezināma mērķa (`null`) gadījumā pilnīgas neveiksmes rezultāts paliek
+   neskarts. Pierādīts tikai teksta mērķis bez izmantojamiem STT akreditācijas
+   datiem saņem to pašu skaidri norādīto aizvietotāju, neveicot tīkla izsaukumu.
 
-Veiksmīgai atšifrēšanai tiek izmantota visa procesa Modality Bridge LRU/TTL kešatmiņa. Taustiņš apvieno audio atsauci, stabilas `audio-transcription` darbības etiķeti un atlasīto STT modeli; kļūmes nekad netiek saglabātas kešatmiņā. Audio mēģinājumi atjaunināt koplietotos `bridged`, `cacheHits`, `failures` un `lastUsedAt` skaitītājus. Pārveidotās atbildes satur `x-omniroute-modality-bridge: audio->text;model=<sttModel>;parts=<n>`; neskartie pieprasījumi nesaņem Audio tilta segmentu.
+Veiksmīgas transkripcijas izmanto visa procesa Modality Bridge LRU/TTL
+kešatmiņu. Atslēga apvieno audio atsauci, stabilo `audio-transcription`
+operācijas etiķeti un izvēlēto STT modeli; kļūmes nekad netiek kešotas. Audio
+mēģinājumi atjaunina kopīgos `bridged`, `cacheHits`, `failures` un `lastUsedAt`
+skaitītājus. Pārveidotajām atbildēm ir
+`x-omniroute-modality-bridge: audio->text;model=<sttModel>;parts=<n>`; neskartie
+pieprasījumi nesaņem Audio Bridge segmentu.
 
-Izpildlaika iestatījumi ir DB nodrošināti un Zod apstiprināti:
+Izpildlaika iestatījumi tiek glabāti datubāzē un validēti ar Zod:
 
-| Atslēga                       | Noklusējums | Diapazons       |
-| ----------------------------- | ----------- | --------------- |
-| `modalityBridgeAudioEnabled`  | `true`      | —               |
-| `modalityBridgeAudioModel`    | `""`        | Auto vai STT ID |
-| `modalityBridgeAudioTimeout`  | `60000`     | 1000–300000     |
-| `modalityBridgeAudioMaxClips` | `3`         | 1–10            |
+| Atslēga                       | Noklusējums | Diapazons              |
+| ----------------------------- | ----------- | ---------------------- |
+| `modalityBridgeAudioEnabled`  | `true`      | —                      |
+| `modalityBridgeAudioModel`    | `""`        | Automātiski vai STT ID |
+| `modalityBridgeAudioTimeout`  | `60000`     | 1000–300000            |
+| `modalityBridgeAudioMaxClips` | `3`         | 1–10                   |
 
-Koplietoto kešatmiņu joprojām kontrolē `modalityBridgeCacheEnabled`, `modalityBridgeCacheTtlMinutes` un `modalityBridgeCacheMaxEntries`.
+Kopīgo kešatmiņu joprojām kontrolē `modalityBridgeCacheEnabled`,
+`modalityBridgeCacheTtlMinutes` un `modalityBridgeCacheMaxEntries`.
 
-### Video tilts (`videoBridge.ts`, `videoBridgePipeline.ts`)
+### Video Bridge (`videoBridge.ts`, `videoBridgePipeline.ts`)
 
-Pārtver augstākā līmeņa video daļas programmā Chat Completions `messages` un Responses API `input` pirms tiek izsaukts mērķis bez zināma vietējā video atbalsta. Atbalstītās formas ir `input_video`, `video_url`, `video_source`, HTTPS URLs un `data:video/*;base64,...` data URIs. Vienkārši failu nosaukumi tekstā netiek uzskatīti par video.
+Pārtver augšējā līmeņa video daļas Chat Completions `messages` un Responses API
+`input`, pirms tiek izsaukts mērķis bez zināma natīvā video atbalsta.
+Atbalstītās formas ir `input_video`, `video_url`, `video_source`, HTTPS URL un
+`data:video/*;base64,...` datu URI. Parasti failu nosaukumi tekstā netiek
+uzskatīti par video.
 
-`VideoBridgeGuardrail.preCall` (`videoBridge.ts`) pieder pieprasījuma pārvietošana, capability/policy pārbaude, pieprasījuma apkopošana un atbildes slodze. Katra video darba — iegūšana, visa rezultāta kešatmiņa, kas apraksta kadru secību (kas apvieno jebkuru zvanītāja deklarēto audio atšifrējumu) un katram mēģinājumam metrics/abort/cleanup — ir paslēpts aiz `processVideoPart` `videoBridgePipeline.ts`, kas tiek izsaukts vienu reizi katrā video daļā `preCall` cilpas iekšpusē. Šis modulis definē arī precīzās portu robežas `VideoMediaBrokerPort` (baitu iegūšana un izlases kadru izvilkšana), `VideoAudioTranscriptionPort` (zvanītāja deklarēta audio transkripta sapludināšana ar izlases subtitriem) un `VideoDrilldownPort` (kadra urbuma noturības robeža; vēl nav pievienots `processVideoPart` — maršrutā, šodien tiek ierakstīti tikai atsevišķi ieraksti `/api/modality-bridge/video/drilldown` ).
+`VideoBridgeGuardrail.preCall` (`videoBridge.ts`) pārvalda pieprasījuma pāreju,
+spēju/politikas pārbaudi, pieprasījuma līmeņa apkopošanu un atbildes saturu.
+Katra video darbs — iegūšana, visa rezultāta kešatmiņa, kadru secības
+aprakstīšana (kas apvieno jebkuru izsaucēja deklarēto audio transkripciju) un
+mēģinājuma līmeņa metrika/pārtraukšana/tīrīšana — ir paslēpts aiz
+`processVideoPart` failā `videoBridgePipeline.ts`, kas tiek izsaukts reizi
+katrai video daļai `preCall` cilpas iekšienē. Šis modulis definē arī skaidrās
+portu robežas `VideoMediaBrokerPort` (baitu iegūšana un izlases kadru
+izvilkšana), `VideoAudioTranscriptionPort` (izsaucēja deklarētās audio
+transkripcijas apvienošana ar izlases parakstiem) un `VideoDrilldownPort`
+(kadru detalizācijas saglabāšanas robeža; vēl nav pieslēgta `processVideoPart`
+— šobrīd detalizācijas ierakstus raksta tikai atsevišķais
+`/api/modality-bridge/video/drilldown` maršruts).
 
-Publiskais `/v1` pieprasījuma ceļš nekad neimportē vai neizsauc apakšprocesu. Attālinātie videoklipi tiek lejupielādēti ar 50 MiB ierobežojumu; iekļautajiem base64 videoklipiem ir konservatīvs 36 MiB dekodētais videoklipa ierobežojums, tāpēc model/messages/framing aploksne var palikt publiskā JSON pieprasījuma pieļaujamā ierobežojuma robežās — 50 MiB. Pirms piešķiršanas tiek pārbaudīti iekļautie garuma un dekodētā izmēra aprēķini. HTTPS ir nepieciešams sākotnējā attālajā URL un katrā novirzīšanā, izmantojot esošo tikai publisko izejošo aizsargu ar DNS piespraušanu. Pēc tam baiti šķērso precīzu iekšējo `POST /api/modality-bridge/video/extract` brokera robežu. Šis maršruts ir gan `LOCAL_ONLY`, gan `SPAWN_CAPABLE`, tas pieņem tikai katram procesam autentificētu, uzticamas cilpas pieprasījumu un nekad nepieņem URL, failu sistēmas ceļu, izpildāmo failu vai argumentu sarakstu. API korpusa izmēra cauruļvads un apdarinātāja inkrementālais korpusa lasītājs neatkarīgi nodrošina 50 MiB starpnieka ievades vāciņu. Tās ierobežotajā rindā vienlaikus tiek izpildīta viena izvilkšana, ir atļauti četri neapstiprinātie darbi un tiek ierobežota gaidošā ievade pie 100 MiB.
+Publiskais `/v1` pieprasījuma ceļš nekad neimportē un neizsauc apakšprocesu.
+Attālie video tiek lejupielādēti ar 50 MiB robežu; iekļautajiem base64 video ir
+konservatīvs 36 MiB dekodētu ierobežojums katram video, lai modeļa/ziņu/
+iekārtojuma aploksne varētu palikt publiskā JSON pieprasījuma pieņemšanas
+limita 50 MiB robežās. Iekļautā garuma un dekodētā izmēra novērtējumi tiek
+pārbaudīti pirms piešķiršanas. HTTPS ir obligāts sākotnējam attālajam URL un
+katram pāradresējumam, izmantojot esošo tikai publisko izejošo aizsargu ar DNS
+piespraušanu. Pēc tam baiti šķērso precīzo iekšējo
+`POST /api/modality-bridge/video/extract` brokeru robežu. Šis maršruts ir gan
+`LOCAL_ONLY`, gan `SPAWN_CAPABLE`, pieņem tikai procesa līmenī autentificētu,
+uzticamu loopback pieprasījumu un nekad nepieņem URL, failu sistēmas ceļu,
+izpildāmo failu vai argumentu sarakstu. API ķermeņa izmēra konveijers un
+apstrādātāja inkrementālais ķermeņa lasītājs neatkarīgi īsteno 50 MiB brokeru
+ievades ierobežojumu. Tā ierobežotā rinda vienlaikus izpilda vienu izvilkšanu,
+pieļauj četrus gaidošos darbus un ierobežo gaidošo ievadi līdz 100 MiB.
 
-Brokera iekšpusē `ffprobe` nolasa privātu lokālo failu; fiksētā formāta atļaušanas saraksts neietver atskaņošanas sarakstu un manifesta formātus. Atļautajiem MOV ģimenes konteineriem ārējās MOV datu atsauces pēc noklusējuma paliek atspējotas, un fiksētā komanda tos neizvēlas. Gan `ffprobe`, gan `ffmpeg` izmanto `file` -only protokola balto sarakstu, vienu pavedienu, fiksētus argumentu masīvus, bez čaulas un izpildāmos failus, kas atrisināti no `PATH`. Pievienoto attēlu vāka straumes nav atskaņojamas. Visām atskaņojamām straumēm ir jāatbilst ierobežojumiem, un pirms deterministiskā zemākā indeksa atkāpšanās priekšroka tiek dota skaidrai noklusējuma straumei. Videoklipu garums ir ierobežots līdz 600 sekundēm, 8192 pikseļi katrā dimensijā un 33 554 432 avota pikseļi. FFmpeg izlasē 1–16 viduspunkta JPEG kadrus, samazina garo malu līdz ne vairāk kā 1024 pikseļiem, nepalielinot mazākas ievades vērtības, un nekad nesaņem URL. Pēc noklusējuma paraugu ņemšana ir `uniform`. Neobligātās `scene_aware` un eksperimentālās `segment_aware` politikas veic vienu papildu fiksētu FFmpeg pāreju pār jau apstiprināto lokālo straumi, atlasa ierobežotas `showinfo` ainas laikspiedolus un deterministiski atgriežas uz tiem pašiem vienotajiem viduspunktiem detektora kļūmes, taimauta, nepareizi veidotas izvades vai tukšas kandidātkopas gadījumā. Segmenta apzināšanās režīms piešķir viduspunkta paraugus proporcionāli apstiprinātajiem ainu intervāliem; Segmentu apzinošie pierādījumi un atkāpšanās darbības ir detalizēti aprakstītas tālāk. Cietais 16 kadru ierobežojums tiek piemērots pēc atlases katrā politikā. Ja sižeta pieprasījumam ir tikai viena kadra budžets, tas izmanto vienotu aktīvā pilna video vai fokusa loga viduspunktu un ziņo par `policyEffective: uniform`: viens atlasītais sižeta kadrs nevar saglabāt abus laika galus. Zvanītājs pēc izvēles var nodrošināt ierobežotu fokusa logu (`start`/`end` sekundes); robežas tiek ierobežotas ar datu nesēja ilgumu, apgrieztie vai neierobežotie logi tiek noraidīti, un visas izlases politikas tiek veiktas tikai normalizētajā intervālā. Iegūtais logs ir iekļauts izlases metadatos un neuzticamā apraksta prefiksā, lai pakārtotie modeļi varētu atšķirt koncentrētu fragmentu no pilnas laika skalas.
+Starpniekā `ffprobe` nolasa privātu lokālu failu; fiksētais formātu
+atļaušanas saraksts neietver atskaņošanas sarakstu un manifestu formātus.
+Atļautajiem MOV saimes konteineriem ārējās MOV datu atsauces pēc noklusējuma
+paliek atspējotas, un fiksētā komanda tās neiespējo. Gan `ffprobe`, gan `ffmpeg`
+izmanto tikai `file` protokolu saturošu atļaušanas sarakstu, vienu pavedienu,
+fiksētus argumentu masīvus, neizmanto čaulu, un izpildāmie faili tiek atrasti,
+izmantojot `PATH`. Pievienotā attēla vāka straumes netiek uzskatītas par
+atskaņošanas kandidātiem. Visām atskaņojamajām straumēm ir jāatbilst
+ierobežojumiem, un pirms deterministiskās atkāpšanās uz straumi ar zemāko
+indeksu priekšroka tiek dota skaidri norādītajai noklusējuma straumei. Video
+ilgums ir ierobežots līdz 600 sekundēm, katra dimensija — līdz 8 192 pikseļiem,
+bet avota pikseļu skaits — līdz 33 554 432. FFmpeg iegūst 1–16 JPEG kadrus no
+intervālu viduspunktiem, samazina garāko malu līdz ne vairāk kā 1 024 pikseļiem,
+nepalielinot mazākus ievades attēlus, un nekad nesaņem URL. Pēc noklusējuma
+iztveršana ir `uniform`. Neobligātās `scene_aware` un eksperimentālās
+`segment_aware` politikas jau validētajai lokālajai straumei veic vienu papildu
+fiksētu FFmpeg apstrādes gājienu, atlasa ierobežotas `showinfo` ainu laikspiedolu
+vērtības un detektora kļūmes, noildzes, nepareizi formatētas izvades vai tukšas
+kandidātu kopas gadījumā deterministiski atkāpjas uz tiem pašiem vienmērīgi
+izvietotajiem viduspunktiem. Segmentus ņemošais režīms viduspunktu paraugus
+piešķir proporcionāli validētajiem ainu intervāliem; segmentu pierādījumi un
+atkāpšanās darbība ir detalizēti aprakstīta tālāk. Stingrais 16 kadru
+ierobežojums katrā politikā tiek piemērots pēc atlases. Ja ainas ņemošam
+pieprasījumam pieejams tikai viena kadra budžets, tiek izmantots aktīvā pilnā
+video vai fokusa loga vienmērīgais viduspunkts un ziņots
+`policyEffective: uniform`: viens atlasīts ainas kadrs nevar saglabāt abus
+laika diapazona galus. Izsaucējs pēc izvēles var norādīt galīgu fokusa logu
+(`start`/`end` sekundēs); robežas tiek ierobežotas līdz multivides ilgumam,
+apgriezti vai negalīgi logi tiek noraidīti, un visas iztveršanas politikas tiek
+izpildītas tikai normalizētajā intervālā. Iegūtais logs tiek iekļauts
+iztveršanas metadatos un neuzticamā apraksta prefiksā, lai pakārtotie modeļi
+varētu atšķirt fokusētu fragmentu no pilnas laika līnijas.
 
-Semantisko parakstu fokuss ir atsevišķs, nepārprotams iestatījums. Noklusējuma `full` analīzes režīms saglabā esošo kadru uzvedni un nekad nepārsūta pieprasījuma tekstu uz parakstu modeli. `focused` režīmā tilts nolasa tikai jaunāko netukšo lietotāja autorizēto `text`/`input_text` no tā paša tērzēšanas vai atbilžu konteinera, normalizē to uz NFC, sakļauj kontroles rakstzīmes un atstarpes un ierobežo to līdz 500 unikoda koda punktiem. Tukšs rezultāts atgriežas precīzi `full` uzvednē. Izmantojams mājiens tiek seriāli veidots kā JSON speciālā neuzticamā lietotāja konteksta blokā, un tas var piešķirt prioritāti tikai novērojamām detaļām; tas nevar ignorēt atsevišķu brīdinājumu par datu nesējā redzamo vai dzirdamo instrukciju ievērošanu. Teksta fokuss nekad neizsecina `start`/`end` vai nemaina laika paraugu ņemšanu.
+Semantiskais parakstu fokuss ir atsevišķs, skaidri norādāms iestatījums.
+Noklusējuma `full` analīzes režīms saglabā esošo kadru uzvedni un nekad
+nepārsūta pieprasījuma tekstu parakstu modelim. Režīmā `focused` tilts nolasa
+tikai jaunāko netukšo lietotāja izveidoto `text`/`input_text` no tā paša Chat
+vai Responses konteinera, normalizē to NFC formā, apvieno vadības rakstzīmes un
+atstarpes un ierobežo līdz 500 Unicode koda punktiem. Tukša rezultāta gadījumā
+notiek atkāpšanās uz precīzo `full` uzvedni. Izmantojams mājiens tiek serializēts
+JSON formātā īpašā neuzticama lietotāja konteksta blokā un drīkst tikai noteikt
+prioritāti novērojamām detaļām; tas nevar ignorēt atsevišķo brīdinājumu
+neievērot multividē redzamus vai dzirdamus norādījumus. Tekstuālais fokuss nekad
+neizsecina `start`/`end` un nemaina laika iztvērēju.
 
-#### FU-07 strukturālā segmenta pierādījumi
+#### FU-07 strukturālie segmentu pierādījumi
 
-`segment_aware` izmanto vienu ierobežotu pirmsanalīzes pāreju jau apstiprinātajai vietējai video straumei. Fiksētā filtra ķēde vispirms mērogojas līdz ne vairāk kā 320 pikseļu platumam, nosaka ainas izmaiņas un fiksētos intervālus, pēc tam ņem paraugus ar ātrumu 1 kadrs sekundē, lai iegūtu izplūšanas, vidējās gaismas un spatial/temporal informāciju. Caurlaide ir ierobežota līdz 600 strukturālajiem paraugiem, vienam FFmpeg/filter pavedienam, vienam un tam pašam `file` -only protokolam un konteineru atļaušanas sarakstiem, 1 MiB procesa izvades saitei un ne vairāk kā 30 sekundēm starpnieka koplietotajā abort/deadline. Tā nekad nepieņem no pieprasījuma komandu, filtru, ceļu vai URL.
+`segment_aware` izmanto vienu ierobežotu priekšanalīzes gājienu jau validētajai
+lokālajai video straumei. Fiksētā filtru ķēde vispirms mērogo attēlu līdz ne
+vairāk kā 320 pikseļu platumam, nosaka ainu maiņas un sastingušus intervālus un
+pēc tam iztver ar ātrumu 1 kadrs sekundē, lai noteiktu izplūdumu, vidējo
+spožumu, kā arī telpisko un laika informāciju. Apstrādes gājiens ir ierobežots
+līdz 600 strukturālajiem paraugiem, vienam FFmpeg/filtra pavedienam, tiem pašiem
+tikai `file` protokolu un konteineru atļaušanas sarakstiem, 1 MiB procesa
+izvades ierobežojumam un ne vairāk kā 30 sekundēm starpnieka kopīgā
+pārtraukšanas/termiņa ietvaros. Tas nekad nepieņem komandu, filtru, ceļu vai URL
+no pieprasījuma.
 
-Strukturālās vērtības ir deterministiski izlases pierādījumi, nevis semantiskā video izpratne. Tie neizsecina tēmas, darbības, parakstus, runu vai lietotāja nolūku. Ainu un sasalšanas robežas veido segmentus; fiksēts pārklājums, izplūšana, ekspozīcija, telpiskās detaļas un laika izmaiņas ietekmē tikai to, kā tiek piešķirts esošais 1–16 kadru budžets. Pilnībā iesaldētam segmentam ir ierobežots viens kadrs, savukārt nesaldēti segmenti sacenšas par atlikušo budžetu. Ja robežas pārsniedz kadru skaitu, tiek saglabāts vienmērīgs laika skalas pārklājums, tāpēc ātrie agrīnie griezumi nevar paslēpt garu beigu segmentu. Ainu robežas sasalšanas robežas 1 sekundes analīzes izšķirtspējā tiek apvienotas.
+Strukturālās vērtības ir deterministiski iztveršanas pierādījumi, nevis
+semantiska video izpratne. Tās neizsecina subjektus, darbības, parakstus, runu
+vai lietotāja nolūku. Ainu un sastingumu robežas veido segmentus; sastinguma
+aptvērums, izplūdums, ekspozīcija, telpiskā detalizācija un izmaiņas laikā
+ietekmē tikai to, kā tiek sadalīts esošais 1–16 kadru budžets. Pilnībā sastingušam
+segmentam tiek piešķirts ne vairāk kā viens kadrs, savukārt nesastingušie
+segmenti konkurē par atlikušo budžetu. Ja robežu ir vairāk nekā kadru, tiek
+saglabāts vienmērīgs laika līnijas pārklājums, lai strauji sākuma griezumi
+nevarētu paslēpt garu beigu segmentu. Ainu robežas, kas ietilpst sastinguma
+robežas 1 sekundes analīzes izšķirtspējā, tiek apvienotas.
 
-Trūkstošie filtri, malformed/empty pierādījumi, detektora kļūda vai ierobežots pirmsanalīzes taimauts neatbilst precīzai vienotai viduspunkta politikai. Zvanītāja pārtraukšana vai starpnieka termiņš neizdodas atvērt: tas pārtrauc apakšprocesu lidojuma laikā, novērš vēlāku kadra izvilkšanu, un privātais pagaidu koks tiek noņemts programmā `finally`.
+Ja trūkst filtru, pierādījumi ir nepareizi formatēti vai tukši, rodas detektora
+kļūda vai iestājas ierobežotās priekšanalīzes noildze, sistēma turpina darbu,
+izmantojot precīzo vienmērīgo viduspunktu politiku. Izsaucēja veikta pārtraukšana
+vai starpnieka termiņa iestāšanās neļauj turpināt darbu: tā pārtrauc notiekošo
+apakšprocesu, novērš turpmāku kadru ieguvi, un privātais pagaidu direktoriju
+koks tiek noņemts blokā `finally`.
 
-`scripts/perf/video-bridge-fu07-eval.ts` ģenerē deterministiskus reālus FFmpeg armatūras ietaupījumus pēc parakstu izsaukšanas, blīvas kustības budžeta sadales, blur/exposure/SI-TI pierādījumu, ātru samazinājumu ar garu asti un pakāpenisku viltus pozitīvu rezultātu izzušanu. Tas reģistrē pirmsanalīzes sienas laiku un, ja ir pieejams `/usr/bin/time`, bērnu CPU un maksimālo RSS. Tās kvalitātes pārbaudes ir tikai struktūras orākuli. Īsta parakstu modeļa kvalitāte joprojām ir `HOLD` jo šai siksnai nav atļauta galapunkta vai iesaldēta tiesneša. Naudas ietaupījumi arī paliek `HOLD`, ja vien `--caption-cost-per-call-usd` nesniedz skaidru pozitīvu aprēķinu par katru zvanu; skripts nekad nesafabricē nevienu rezultātu.
+`scripts/perf/video-bridge-fu07-eval.ts` ģenerē deterministiskas reālas FFmpeg
+testa ievades parakstu izsaukumu ietaupījuma novērtēšanai pēc dublikātu
+noņemšanas, blīvas kustības budžeta sadalei, izplūduma/ekspozīcijas/SI-TI
+pierādījumiem, straujiem griezumiem ar garu beigu posmu un pakāpeniskas
+izdzišanas kļūdaini pozitīviem rezultātiem. Tas reģistrē priekšanalīzes reālo
+izpildes laiku un, ja ir pieejams `/usr/bin/time`, arī bērnprocesa CPU laiku un
+maksimālo RSS. Tā kvalitātes pārbaudes ir tikai strukturāli etaloni. Reāla
+parakstu modeļa kvalitāte paliek `HOLD` statusā, jo šim pārbaudes rīkam nav ne
+autorizēta galapunkta, ne fiksēta vērtētāja. Arī finansiālie ietaupījumi paliek
+`HOLD` statusā, ja vien `--caption-cost-per-call-usd` nenorāda skaidru pozitīvu
+izmaksu aplēsi vienam izsaukumam; skripts nekad neizdomā nevienu no šiem
+rezultātiem.
 
-Katrs kadrs ir ierobežots līdz 4 MiB, visi neapstrādātie kadri kopā līdz 23 MiB un sērijveida starpnieka reakcija līdz 32 MiB. Privāts pagaidu direktorijs tiek noņemts programmā `finally`. OmniRoute neapkopo FFmpeg un nepieņem pielāgotu izpildāmo ceļu. Pirms parakstu pievienošanas tilts izmanto konservatīvu vizuālo dublēšanas pāreju: katrs JPEG tiek samazināts līdz 16 × 16 pelēktoņu buferim un tiek salīdzināts tikai ar pēdējo saglabāto kadru. Ja pieprasītais subtitru budžets pārsniedz vienu kadru, izvilkšana nodrošina ierobežotu kandidātu kopu līdz pat divreiz lielākam budžetam un nekad vairāk par 16 kadriem. Pieprasītā maksimālā robeža tiek piemērota tikai pēc dublēšanas, pirmie un galīgie atlasītie kandidāti tiek saglabāti galīgās retināšanas laikā, kad budžets ir vismaz divi. Versionētā `grayscale-16x16-mean-cells-v2` politika izmanto lielāko no vidējā luma delta un to sīktēlu šūnu attiecību, kuru normalizētā delta ir vismaz 0,05. Dublikāta slieksnis ir konstante 0,04, kas izvēlēta paredzamībai, nevis tiek rādīta kā izpildlaika iestatījums. Šis sekundārais augsta kontrasta signāls saglabā nelielas kustības un redzamā teksta izmaiņas, kuras var paslēpt tikai vidējais salīdzinājums. Salīdzinājuma vai dekodētāja kļūdas neizdodas atvērt un saglabāt pārklājumu. Izvades metadati atdala izvilktos kandidātus, veiksmīgi izmantotos kadrus un atmet vizuālos dublikātus.
+Katrs kadrs ir ierobežots līdz 4 MiB, visi neapstrādātie kadri kopā — līdz 23 MiB, bet serializētā broker atbilde — līdz 32 MiB. Privāts pagaidu katalogs tiek dzēsts `finally` blokā. OmniRoute neietver FFmpeg un nepieņem pielāgotu izpildāmā faila ceļu. Pirms parakstīšanas tilts veic konservatīvu vizuālās deduplikācijas gājienu: katrs JPEG tiek samazināts līdz 16×16 pelēktoņu buferim un tiek salīdzināts tikai ar pēdējo saglabāto kadru. Pieprasītajam parakstu budžetam virs viena kadra ieguve nodrošina ierobežotu kandidātu kopu līdz divkāršam šī budžeta apjomam un nekad vairāk par 16 kadriem. Pieprasītais griestu ierobežojums tiek piemērots tikai pēc deduplikācijas, un gala retināšanas laikā, ja budžets ir vismaz divi, tiek saglabāts pirmais un pēdējais izvēlētais kandidāts. Versijā atzīmētā `grayscale-16x16-mean-cells-v2` politika izmanto lielāko no vidējās spilgtuma (luma) deltas un sīktēlu šūnu attiecības, kuru normalizētā delta ir vismaz 0.05. Dublikātu slieksnis ir konstante 0.04, kas izvēlēta paredzamības dēļ, nevis atklāta kā izpildlaika iestatījums. Šis sekundārais augsta kontrasta signāls saglabā nelielas kustības un redzamā teksta izmaiņas, ko salīdzinājums, balstīts tikai uz vidējo vērtību, var paslēpt. Salīdzinātāja vai dekodētāja kļūdas darbojas pēc fail-open principa un saglabā pārklājumu. Izvades metadatos tiek atdalīti izvilktie kandidāti, veiksmīgi izmantotie kadri un atmestie vizuālie dublikāti.
 
-Īpaši atzīmēta video daļa var pieprasīt kontaktu lapu ar laikspiedolu. Tilts veido ne vairāk kā 4 kolonnu, 16 kadru JPEG režģi. Katra 512 pikseļu šūna ievada savu avota laikspiedolu augsta kontrasta apakšējā joslā, bet tie paši laikspiedoli paliek teksta metadatos, lai veiktu saistīšanu un auditu. Pilns JPEG nepārsniedz 32 MiB. Ja `sharp` nevar atšifrēt vai izveidot režģi, tilts atgriežas pie atsevišķiem JPEG kadriem; klienta aborts joprojām tiek izplatīts, izmantojot lapas darbību.
+Nepārprotami atzīmēta video daļa var pieprasīt laika zīmogotu kontaktlapu. Tilts veido ne vairāk kā 4 kolonnu un 16 kadru JPEG režģi. Katra 512 pikseļu šūna iekodē savu avota laika zīmogu augsta kontrasta apakšējā joslā, savukārt tie paši laika zīmogi paliek teksta metadatos tālākai saistīšanai un auditam. Pilnais JPEG paliek ierobežots līdz 32 MiB. Ja `sharp` nevar dekodēt vai salikt režģi, tilts atgriežas pie atsevišķajiem JPEG kadriem; klienta pārtraukums joprojām izplatās caur kontaktlapas operāciju.
 
-Reklāmas pierādījumi ir apzināti nošķirti no sintētiskā sastāva mikroetalona. `scripts/perf/video-bridge-contact-sheet-eval.ts` definē shēmas versiju A/B instalāciju reāliem ar OpenAI saderīgiem redzes modeļiem. Tas mēra pakalpojumu sniedzēja ziņotos marķierus, visas sienas latentumu (tostarp lapas sastāvu), modeļa zvanu skaitu un manifestā definētu faktu saglabāšanu. Neapstrādātas modeļa atbildes netiek rakstītas atskaitē; tiek saglabāti tikai SHA-256 īssavilkumi un saskaņotie fakti IDs. Instalācija neveic tīkla vai maksas modeļa izsaukumu, ja vien `--execute-real` nav nodots un `--model`, `OMNIROUTE_BASE_URL` un `OMNIROUTE_API_KEY` nav konfigurēti. Bez šīs skaidrās reālās darbības tās mašīnlasāmais spriedums paliek `HOLD`; sintētiskie payload/call-count mērījumi vien nav veicināšanas pierādījumi.
+Virzīšanas pierādījumi ir apzināti atdalīti no sintētiskās kompozīcijas mikroetalontesta. `scripts/perf/video-bridge-contact-sheet-eval.ts` definē shēmas versijotu A/B apvalku reāliem ar OpenAI saderīgiem redzes modeļiem. Tas mēra nodrošinātāja ziņotos tokenus, pilno reālo aizkavi no sākuma līdz beigām (ieskaitot lapas kompozīciju), modeļa izsaukumu skaitu un manifestā definētu faktu saglabāšanu. Neapstrādātas modeļa atbildes netiek ierakstītas pārskatā; tiek saglabāti tikai SHA-256 kontrolsummas un atbilstošo faktu ID. Apvalks neveic tīkla vai maksas modeļa izsaukumus, ja vien nav nodots `--execute-real` un nav konfigurēti `--model`, `OMNIROUTE_BASE_URL` un `OMNIROUTE_API_KEY`. Bez šīs skaidras reālās palaišanas tā mašīnlasāmais verdikts paliek `HOLD`; sintētiskie slodzes/izsaukumu skaita mērījumi paši par sevi nav virzīšanas pierādījumi.
 
-Zvanītāji var pievienot papildu `transcript.cues` masīvu atbalstītai video daļai, ja viņiem jau ir līdzināts teksts. Katrai norādei ir jāietver `text`, ierobežots `start`/`end` intervāls pārbaudītajā ilgumā un baltajā sarakstā iekļauts `source` (`client`, `embedded` vai `audio-bridge`); `confidence` noklusējuma vērtība ir `1`, un tai jāpaliek starp `0` un `1`. Precīzi dublikāti ir sakļauti. OmniRoute nekad nesāk transkripciju no šiem metadatiem: apstiprinātās norādes tiek kopētas aprakstītajā rezultātā ar avotu, uzticamību un intervālu un tiek renderētas kā neuzticami novērojumi līdzās ietvara parakstiem. Nederīgs, ārpus diapazona vai bez izcelsmes teksts tiek noraidīts, nevis sajaukts parakstu straumē. Abi pieprasījuma pamatteksta transkripcijas kanāli normalizē `client` sniegto izcelsmi, tostarp pašpārliecinātās `embedded` vai `audio-bridge` etiķetes. Tikai serverim piederošs adapteris var piešķirt šīs uzticamās iezīmes, izmantojot tikai koda argumentu `trustedSource` ; pieprasījuma JSON lauks nevar sasniegt šo argumentu. Transkripcijas teksts joprojām ir neuzticams multivides saturs neatkarīgi no tā izcelsmes, un tas nekad nedrīkst noteikt autorizāciju.
+Izsaucēji var pievienot neobligātu `transcript.cues` masīvu atbalstītai video daļai, ja viņu rīcībā jau ir salāgots teksts. Katrai norādei jāietver `text`, galīgs `start`/`end` intervāls izpētītā ilguma robežās un baltajā sarakstā iekļauts `source` (`client`, `embedded` vai `audio-bridge`); `confidence` pēc noklusējuma ir `1` un tai jāpaliek starp `0` un `1`. Precīzi dublikātu norādes tiek apvienotas. OmniRoute nekad neuzsāk transkripciju no šiem metadatiem: pārbaudītās norādes tiek nokopētas aprakstītajā rezultātā kopā ar avotu, uzticamību un intervālu un tiek attēlotas kā neuzticami novērojumi blakus kadru parakstiem. Nederīgs, ārpus diapazona esošs vai bez izcelsmes norādes teksts tiek noraidīts, nevis sajaukts parakstu plūsmā. Abi pieprasījuma ķermeņa transkripta kanāli normalizē norādīto izcelsmi uz `client`, ieskaitot pašu izvirzītas `embedded` vai `audio-bridge` etiķetes. Tikai serverim piederošs adapters var piešķirt šīs uzticamās etiķetes, izmantojot tikai kodā pieejamo `trustedSource` argumentu; pieprasījuma JSON lauks nevar sasniegt šo argumentu. Transkripta teksts paliek neuzticams, no multivides atvasināts saturs neatkarīgi no tā izcelsmes, un tas nekad nedrīkst noteikt autorizāciju.
 
-Uzlabots zvanītājs var nodrošināt `audioTranscript` ierakstu vienam un tam pašam videoklipam; tas tiek uzskatīts par klienta nodrošinātu tekstu, nevis servera transkripcijas pierādījumu. Sapludināšanas šuve veic vizuālos un audio novērojumus saskaņā ar vienu termiņu un pārtrauc signālu, pasūta tos pēc kopīgas laika skalas, sakļauj precīzus dublikātus un ziņo par daļēju rezultātu, ja izdodas tikai viena puse. Nederīgs `audioTranscript` tiek degradēts līdz šim daļējam rezultātam — vizuālais apraksts tiek saglabāts, un audio atzars ieraksta sanitizētu kļūmes kodu — nevis visu videoklipu. Katras filiāles pieejamība, daļējs karodziņš un sanitārie kļūdu kodi tiek saglabāti aprakstītajā rezultātos, aizsargmargu metadatos (`audioFusionRuns`/`audioFusionPartials`/ `audioFusionFailureCodes`), rezultātu kešatmiņas metadatos un tilta saplūšanas skaitītājos. Noklusējuma video tilta ceļš neizsauc runas pārveidošanu tekstā vai nelejupielādē otru multivides kopiju; bez šī precīzā ieraksta tas paliek tikai video.
+Pieredzējis izsaucējs var tam pašam video nodrošināt `audioTranscript` celiņu; tas tiek uzskatīts par klienta sniegtu tekstu, nevis pierādījumu servera transkripcijai. Apvienošanas šuve izpilda vizuālos un audio novērojumus vienā termiņā un pārtraukšanas signālā, sakārto tos kopējā laika skalā, apvieno precīzus dublikātus un ziņo daļēju rezultātu, kad veiksmīga ir tikai viena puse. Nederīgs `audioTranscript` degradejas līdz šim daļējam rezultātam — vizuālais apraksts tiek saglabāts, un audio zars reģistrē attīrītu kļūdas kodu — tā vietā, lai izgāztu visu video. Katra zara pieejamība, daļējā rezultāta karodziņš un attīrītie kļūdu kodi tiek saglabāti aprakstītajā rezultātā, aizsargmēru metadatos (`audioFusionRuns`/`audioFusionPartials`/`audioFusionFailureCodes`), rezultātu kešatmiņas metadatos un tilta apvienošanas skaitītājos. Noklusējuma Video Bridge ceļš neizsauc runas pārveidi tekstā un nelejupielādē otro multivides kopiju; bez šī skaidri norādītā celiņa tas paliek tikai video režīmā.
 
-**Atšifrējuma saglabāšana (#12150 P1).** Tas attiecas automātiski ikreiz, kad Video Bridge (pats izvēles) atveido transkripcijas signālu — nav atsevišķa saglabāšanas karoga. Kad pieprasījums atveido jebkuru transkripcijas signālu (zvanītāja deklarēts `transcript` vai sapludināts `audioTranscript`), aizsargmarga atzīmē to `videoBridgeObserved` un izveido rediģētu video apraksta ēnu — identisku atveidojumu, kurā katra norādes brīvā teksta pamatteksts tiek aizstāts ar `[redacted-video-transcript]`, kas izveidots, aizvietojot strukturēto veringu lauku. saplacināts teksts, tāpēc nevar izdzīvot nekādas norādes saturs — pretrunīgs vai parasts, tostarp struktūras, kas satur `]` piemēram `[inaudible]`/`[music]` — ). Pastāvīgā zvanu žurnāla pieprasījuma pamatteksts apmaina katru video atvasināto teksta daļu pret šo rediģēto ēnu, kas atbilst satura vienlīdzībai; `fullText` enkurs tiek atkārtoti nolasīts no gatavās pirmszvana aizsargmargas derīgās slodzes, tāpēc atbilstība joprojām izdodas pēc tam, kad vēlākie ķēdes aizsargmargi ( PII un akreditācijas datu maskētāji, prioritātes 10/95) pārraksta apraksta tekstu vietā un pēc system-prompt/handoff/memory injekcijas pārveido ziņojumu masīvu. Korpuss, kas nosūtīts pirms modeļa, ir nemainīgs. Novērotais pieprasījums arī neaizpilda noturīgu atmiņu (tiek izlaista gan pieprasījuma, gan atbildes iegūtā izvilkšana), tāpēc paša modeļa atbilde nevar atbalsot transkripcijas tekstu atmiņā.
+**Transkripciju saglabāšana (#12150 P1).** Tas tiek piemērots automātiski ikreiz, kad
+Video Bridge (kas pats ir jāiespējo) atveido transkripcijas fragmentu — nav atsevišķa
+saglabāšanas karoga. Kad pieprasījums atveido jebkuru transkripcijas fragmentu (zvanītāja deklarētu
+`transcript` vai apvienotu `audioTranscript`), drošības mehānisms to atzīmē kā
+`videoBridgeObserved` un izveido aizklātu video apraksta ēnkopiju —
+identisku atveidojumu, kurā katra fragmenta brīvteksta pamatdaļa ir aizstāta ar
+`[redacted-video-transcript]`; tas tiek izveidots, aizstājot strukturēto fragmenta lauku
+pirms virknes izveides (nekad neparsējot saplacināto tekstu, tāpēc nekāds fragmenta
+saturs — ne ļaunprātīgs, ne parasts, tostarp pamatdaļas, kas satur `]`, piemēram,
+`[inaudible]`/`[music]` — nevar saglabāties). Saglabātā izsaukumu žurnāla pieprasījuma pamatdaļā
+katra no video iegūtā teksta daļa tiek aizstāta ar šo aizklāto ēnkopiju, atbilstību
+nosakot pēc satura vienādības; `fullText` enkurs tiek atkārtoti nolasīts no pabeigtās pirmsizsaukuma drošības
+mehānisma slodzes, tāpēc atbilstības noteikšana joprojām izdodas pēc tam, kad vēlākie ķēdes drošības mehānismi (PII un
+akreditācijas datu maskētāji ar prioritātēm 10/95) pārraksta apraksta tekstu turpat,
+kā arī pēc tam, kad sistēmas uzvednes/nodošanas/Memory ievietošana pārveido ziņojumu masīvu. Modeļa
+augšupstraumes pieprasījuma pamatdaļa netiek mainīta. Novērots pieprasījums arī neaizpilda
+nekādu pastāvīgu Memory (tiek izlaista gan no pieprasījuma, gan no atbildes iegūto datu izvilkšana),
+tāpēc modeļa atbilde nevar atbalsot transkripcijas tekstu Memory.
 
-**Neapstrādāti video lauki (#12430).** Ja tilts ir iespējots un vietējais video atbalsts nav zināms vai tā nav, definētie `transcript`/`audioTranscript` lauki arī aktivizē `videoBridgeObserved` pat pēc apraksta kļūmes vai `maxVideos` ierobežojuma. `null` un tukšās virknes skaits; nav pieejami lauki un metadati, kas nav video. Saglabātās kopijas rediģē šos laukus vai izlaiž pieprasījumu, un caches/Memory tiek apiets.
+**Neapstrādāti video lauki (#12430).** Kad tilts ir iespējots un vietējais video atbalsts nav zināms vai tā nav, definēti `transcript`/`audioTranscript` lauki arī aktivizē `videoBridgeObserved`, pat pēc apraksta izveides kļūmes vai `maxVideos` ierobežojuma sasniegšanas. `null` un tukšas virknes tiek ņemtas vērā; neesoši lauki un metadati, kas nav saistīti ar video, netiek ņemti vērā. Saglabātajās kopijās šie lauki tiek aizklāti vai pieprasījums tiek izlaists, un kešatmiņas/Memory tiek apietas.
 
-Šajos atkāpšanās ceļos derīgi zvanītāja norādījumi kļūst par atbalstītām `text`/`input_text` daļām, nevis nestandarta nodrošinātāja laukiem. Abi pēc pieprasījuma sniegtie celiņi joprojām ir neuzticami `client` novērojumi ar skaidru brīdinājumu, ka videoklips nav aprakstīts un laikspiedoli nav pārbaudīti pret plašsaziņas līdzekļiem. Esošais 256-cue/64-KiB kopējais budžets un budžets uz vienu zīmi tiek lietoti abos celiņos kopā; laikspiedoliem ir jāatbilst brokera 600 sekunžu griestiem un jebkuram piegādātajam fokusa logam. Nederīgi ieraksti tiek izmesti, nevis pārsūtīti kā patvaļīgs teksts; derīgu brāli un māsu joprojām var izmantot, ja vien netiek pārsniegts viņu kopējais budžets. Null/empty lauki nepievieno tekstu. Šis atkāpšanās līdzeklis nepievieno multivides ienesi vai transkripciju. Atšifrējuma paplašinājuma lauki tiek noņemti no rezerves video nesēja un tā `video_url`/`source` objektiem. OpenAI vadu atļaušanas saraksts paliek stingrs; Nezināmi vietējie video nesēji joprojām ir pieejami, un zināmie tikai teksta mērķi saglabā drošus marķierus. Strukturētas rediģēšanas ēnas aizsargā pievienoto atšifrējuma tekstu, savukārt sākotnējais zvanītāja pieprasījums paliek nemainīgs. Vietējie atbalstītie mērķi un invalīdi tilti saglabā savu esošo apiešanas darbību.
+Šajos rezerves apstrādes ceļos derīgi zvanītāja fragmenti kļūst par atbalstītām `text`/`input_text`
+daļām, nevis nestandarta nodrošinātāja laukiem. Abi pieprasījumā norādītie celiņi
+joprojām ir neuzticami `client` novērojumi ar skaidru brīdinājumu, ka video
+netika aprakstīts un laikspiedoli netika pārbaudīti pret multivides saturu. Esošie
+256 fragmentu/64 KiB kopējie un katra fragmenta budžeti tiek piemēroti abiem celiņiem kopā;
+laikspiedoliem jāiekļaujas brokera 600 sekunžu robežvērtībā un jebkurā norādītajā fokusa
+logā. Nederīgi celiņi tiek atmesti, nevis pārsūtīti kā patvaļīgs teksts; derīgs
+blakusceliņš joprojām var tikt izmantots, ja netiek pārsniegts to kopējais budžets. Nulles/tukši
+lauki nepievieno tekstu. Šis rezerves mehānisms nepievieno multivides ielādi vai transkribēšanu.
+Transkripcijas paplašinājuma lauki tiek noņemti no rezerves video nesēja un tā
+`video_url`/`source` objektiem. OpenAI pārraides atļauto elementu saraksts paliek stingrs; nesēji ar nezināmu vietējā
+video atbalstu joprojām ir pieejami, un zināmi tikai teksta mērķi saglabā drošus marķierus.
+Strukturētās aizklāšanas ēnkopijas aizsargā pievienoto transkripcijas tekstu, savukārt
+sākotnējais zvanītājam piederošais pieprasījums paliek nemainīts. Mērķi ar vietējo atbalstu un
+atspējoti tilti saglabā esošo apiešanas darbību.
 
-Papildu saglabātās kopijas izmanto to pašu novērotā pieprasījuma signālu. Neapstrādāts klienta pieprasījuma momentuzņēmums pirms aizsargmargas, atmiņā esošais gaidošais pieprasījums un agrīnā noraidīto pieprasījumu žurnāls strukturāli aizstāj atšifrējuma laukus video daļās; virknes uzvednes, ko sintezē konveijera posmi un konteksta nodošana, tiek rediģētas pastāvīgā pieprasījuma pamatteksta izlietnē. Pastāvīgais `video_content_removed` marķieris neļauj `previous_response_id` turpinājumam aizvērt, nevis rekonstruē tekstu, kas tika apzināti izmests. Ja novērotais pieprasījums zaudē savu daļu rediģēšanas ēnu pirms reģistrēšanas vai pat viena no vairākām video ēnām nesakrīt pēc vēlākām pieprasījuma mutācijām, saglabātais pieprasījuma pamatteksts tiek pilnībā izlaists, nevis tiek saglabāts daļēji rediģēts atšifrējums.
+Papildu saglabātās kopijas izmanto to pašu novērota pieprasījuma signālu. Neapstrādātais
+klienta pieprasījuma momentuzņēmums pirms drošības mehānisma, atmiņā esošais gaidošais pieprasījums un agrīni
+noraidīta pieprasījuma žurnāls strukturāli aizstāj transkripcijas laukus video daļās;
+konveijera posmu un konteksta nodošanas sintezētās virkņu uzvednes tiek aizklātas
+saglabātā pieprasījuma pamatdaļas izvades punktā. Saglabātais `video_content_removed` marķieris
+liek `previous_response_id` turpinājumam droši beigties ar kļūmi, nevis rekonstruēt
+tekstu, kas tika apzināti atmests. Ja novērots pieprasījums pirms reģistrēšanas zaudē savu
+katras daļas aizklāšanas ēnkopiju vai kaut viena no vairākām video ēnkopijām
+pēc vēlākām pieprasījuma izmaiņām vairs neatbilst, saglabātā pieprasījuma pamatdaļa tiek
+pilnībā izlaista, nevis tiek saglabāta daļēji aizklāta transkripcija.
 
-Novērotajam pieprasījumam modeļa atbilde var citēt jebkuru atšifrējuma daļu bez strukturētas norādes robežas. Tāpēc tā pastāvīgais zvanu žurnāla `responseBody` tiek aizstāts ar izlaiduma marķieri; detalizētais cauruļvada artefakts (kas var ietvert upstream/client korpusus un straumes gabalus) netiek saglabāts. Semantiskās, idempotences un argumentācijas atkārtošanas kešatmiņas apiet šī pieprasījuma nolasīšanu un rakstīšanu. Pakalpojumu sniedzēja pieprasījums un klienta redzamā atbilde paliek nemainīgi. Ja detalizētais artefakts tiek izlaists, agrīnie saglabāšanas baiti tiek iztukšoti no pagaidu bufera. Kiro nepareizi veidots EventStream brīdinājums ziņo tikai par derīgās slodzes baitu skaitu, nevis par tā saturu vai JSON parsētāja neapstrādāto kļūdu. Tas neapgalvo, ka katra nesaistītā provider/plugin diagnostika ir pārbaudīta; plašāks saglabātās izlietnes slaucīšana ir izsekots #11658.
+Novērota pieprasījuma gadījumā modeļa atbilde var citēt jebkuru transkripcijas daļu
+bez strukturētas fragmenta robežas. Tāpēc tās saglabātā izsaukumu žurnāla
+`responseBody` tiek aizstāta ar izlaišanas marķieri; detalizētais
+konveijera artefakts (kas var ietvert augšupstraumes/klienta pamatdaļas un straumes fragmentus)
+netiek saglabāts. Semantiskā, idempotences un spriešanas atkārtošanas kešatmiņa šim
+pieprasījumam apiet lasīšanu un rakstīšanu. Nodrošinātāja pieprasījums un klientam redzamā
+atbilde paliek nemainīti. Agrīnie savienojuma uzturēšanas baiti tiek iztukšoti no pagaidu
+bufera, kad detalizētais artefakts tiek izlaists. Kiro brīdinājums par nederīgu EventStream
+ziņo tikai slodzes baitu skaitu, nekad ne tās saturu vai JSON
+parsētāja neapstrādāto kļūdu.
+Tas neapgalvo, ka būtu auditēta katra nesaistītā nodrošinātāja/spraudņa diagnostika;
+plašākā saglabāto izvadpunktu pārbaude tiek izsekota #11658.
 
-Iekšējais `/api/modality-bridge/video/drilldown` dzīves cikls ir atsevišķs loopback/token-authenticated kešatmiņas substrāts. Katrai darbībai ir nepieciešams arī kanoniskais necaurspīdīgais galvenais ID. Pirms ražošanas izsaucēja ir iespējota, tai ir jāiegūst šis ID no autentificētā nomnieka un nekad nedrīkst pārsūtīt klienta izvēlētu vērtību. Kešatmiņas atslēgas saista šo principālu ar kanonisko sesiju un video atsauces IDs, saglabā tikai to SHA-256-derived atslēgas un attiecas gan uz lasīšanu, gan dzēšanu uz vienu un to pašu galveno. Kešatmiņā vienā ierakstā tiek saglabāti ne vairāk kā 16 atvasināti JPEG kadri, tiem beidzas derīguma termiņš pēc desmit minūtēm, un tiek atbalstīta ierobežota `start`/`end` nolasīšana vai nepārprotama sesijas dzēšana.
+Iekšējais `/api/modality-bridge/video/drilldown` dzīves cikls ir atsevišķs,
+ar cilpas interfeisu/tokeniem autentificēts kešatmiņas pamatslānis. Katrai operācijai ir nepieciešams arī
+kanonisks necaurredzams subjekta ID. Pirms tiek iespējots produkcijas zvanītājs, tam šis
+ID ir jāatvasina no autentificētā nomnieka un tas nekad nedrīkst pārsūtīt
+klienta izvēlētu vērtību. Kešatmiņas atslēgas sasaista šo subjektu ar kanoniskajiem sesijas un
+video atsauces ID, glabā tikai to no SHA-256 atvasinātās atslēgas un ierobežo gan lasīšanu,
+gan dzēšanu ar to pašu subjektu. Kešatmiņa katram ierakstam glabā ne vairāk kā 16 atvasinātus JPEG
+kadrus, pēc desmit minūtēm tie kļūst nederīgi, un tā atbalsta ierobežītu
+`start`/`end` lasīšanu vai nepārprotamu sesijas dzēšanu.
 
-Katrs galvenais ir ierobežots līdz 16 ierakstiem un 64 MiB kanonisko JPEG datu. Šie ierobežojumi nav atkarīgi no globālajiem 64-entry/256 MiB griestiem: galvenais kvotas spiediens izliek tikai tā principāla pēdējā laikā izmantotos ierakstus, pirms tiek apsvērta globālā LRU izlikšana. Ieraksti, kuriem beidzies derīguma termiņš, tiek dzēsti gan no galvenās, gan globālās kešatmiņas darbību uzskaites, savukārt atcelšanas un validācijas kļūme neizraisa daļēju aizstāšanu.
+Katram subjektam ir atļauti ne vairāk kā 16 ieraksti un 64 MiB kanonisku JPEG datu. Šie
+ierobežojumi nav atkarīgi no globālās 64 ierakstu/256 MiB robežvērtības: subjekta kvotas
+spiediens izspiež tikai šī subjekta visilgāk neizmantotos ierakstus, pirms tiek apsvērta globālā
+LRU izspiešana. Kešatmiņas darbības laikā ieraksti, kuru derīgums beidzies, tiek izņemti gan no subjekta, gan
+globālās uzskaites, savukārt atcelšana un validācijas kļūme nesaglabā daļēju aizvietojumu.
 
-Kešatmiņa noraida nekanonisku Base64, lieko polsterējumu, ne-JPEG datu nesēju, nepareizi veidotu vai saīsinātu JPEGs un JPEGs, kas rada brīdinājumu ierobežota pilna attēla `sharp` dekodēšanas laikā. Tas atkārtoti kodē katru pieņemto attēlu kā kanonisku JPEG, iegūst platumu un augstumu no dekodētajiem baitiem, nevis uzticas zvanītāja laukiem, un atmet visus beigu poliglota baitus, nevis saglabā tos. No abām kvotām tiek iekasēta tikai ierobežotā kanoniskā saspiestā buferis. JSON vadu ierobežojums ietver Base64 pieskaitāmās izmaksas 32 MiB dekodētās ieejas griestiem. Katrs saglabātais atvasinājums reģistrē savu apstiprināto JPEG format/resolution, iztveršanas politiku, atvasināšanas versiju, izveides laiku, servera aprēķināto satura jaukšanu un jauktā vecāk atsauci, kā arī uzticamā zvanītāja vecāku satura jaucējkodu. Atcelšana tiek pārbaudīta starp asinhronajām decode/hash fāzēm pirms atomu kešatmiņas apņemšanās.
+Kešatmiņa noraida nekanonisku Base64, lieku polsterējumu, medijus, kas nav JPEG, bojātus vai nogrieztus JPEG attēlus, kā arī JPEG attēlus, kas ierobežotas pilna attēla `sharp` dekodēšanas laikā rada brīdinājumu. Tā pār kodē katru pieņemto attēlu kā kanonisku JPEG, platumu un augstumu iegūst no dekodētajiem baitiem, nevis paļaujas uz izsaucēja laukiem, un izmet visus beigās esošos poliglota baitus, nevis tos saglabā. Abās kvotās tiek ieskaitīts tikai ierobežotais kanoniskais saspiestais buferis. JSON pārraides formāta limits ietver Base64 pieskaiti 32 MiB dekodētās ievades griestiem. Katrs saglabātais atvasinājums reģistrē savu pārbaudīto JPEG formātu/izšķirtspēju, paraugņemšanas politiku, atvasinājuma versiju, izveides laiku, servera aprēķināto satura jaucējvērtību un jaukto vecāka atsauci, kā arī uzticamā izsaucēja vecāka satura jaucējvērtību. Atcelšana tiek pārbaudīta starp asinhronajām dekodēšanas/jaukšanas fāzēm pirms atomiskās kešatmiņas fiksēšanas.
 
-Šī daļa vēl nesavieno ražošanas ražotāju ar maršrutu un nenodrošina vairāku izšķirtspēju variantu izvēli. Līdz ar to caurspīdīgais video tilta pieprasījuma ceļš nav saistīts ar papildu darbu, savukārt nomnieka piesaistītā galvenā atvasināšana un pilns FU-08 vairāku izšķirtspējas dzīves cikls paliek nepārprotami pēcpārbaudes darbi, nevis dokumentēti kā pilnīga darbība.
+Šis posms vēl nepievieno ražošanas veidotāju maršrutam un nenodrošina vairākizšķirtspējas variantu izvēli. Caurspīdīgajam Video Bridge pieprasījumu ceļam tāpēc nerodas papildu darbs, savukārt nomniekam piesaistītā principa atvasināšana un pilnais FU-08 vairākizšķirtspējas dzīves cikls paliek skaidri apzīmēts turpmākais darbs, nevis tiek dokumentēts kā pabeigta uzvedība.
 
-Kadriem tiek pievienoti paraksti secīgi ar konfigurēto video modeli. Tukša Video ignorēšana pārņem Vision iestatījumu; ja abi ir tukši, Vision automātiskais maršrutētājs izvēlas efektīvu modeli, kas spēj nodrošināt redzi. Veiksmīgi paraksti aizstāj sākotnējo daļu ar stabilu `[Video description:` prefiksu, kas arī atzīmē tekstu kā neuzticamu mediju radītu novērojumu un liek pakārtotajiem modeļiem neievērot plašsaziņas līdzekļos atrodamos norādījumus. Kadru parakstu kešatmiņas atslēgas ietver JPEG baitus, uzvedni, laikspiedolu un efektīvu modeli; kešatmiņā tiek saglabāti tikai veiksmīgie paraksti. Kešatmiņas ieraksti saglabā faktisko veiksmīgo ražotāja modeli, tostarp atkāpšanās modeli; tilts ziņo par `mixed` kad dažādi modeļi tika ražoti dažādi rāmji. Kešatmiņas trāpījums atkārtoti izmanto šo ražotāja identitāti, nevis pārzīmē to kā pieprasīto maršrutēšanas plānu. Visa video rezultāta kešatmiņa tiek ievadīta katrā ieejā, kas maina izvades — uzvedni, efektīvu modeli, iztveršanas politiku, kadru skaitu, semantiskās analīzes režīmu, normalizētā fokusa mājiena SHA-256 pirkstu nospiedumu, fokusa logu, `transcript`, `audioTranscript` un kontaktu lapas karogu —, tāpēc neviena no šiem izmēriem mainīšana nekad nav kešatmiņas atkārtota izmantošana. Vizuālā atkopšanas politikas versija, slieksnis un ierobežotais kandidātu kadru skaits ir arī skaidri norādīts rezultātu kešatmiņas atslēgā un metadatos; tādēļ politikas izmaiņas nevar atkārtoti izmantot novecojušu visa videoklipa aprakstu. Result-cache v4 metadati saglabā režīmu un pirkstu nospiedumu, nevis neapstrādātu lietotāja uzdevumu. Guardrail metadati ziņo gan par pieprasītajiem, gan efektīvajiem analīzes veidiem; pieprasītais `focused` režīms bez lietojama lietotāja teksta tiek ziņots kā efektīvs `full`.
+Kadri tiek parakstīti secīgi, izmantojot konfigurēto Video modeli. Tukšs Video pārraksts manto Vision iestatījumu; ja abi ir tukši, Vision automātiskais maršrutētājs izvēlas efektīvo redzes spējīgo modeli. Veiksmīgie paraksti aizstāj sākotnējo daļu ar stabilu `[Video description:` prefiksu, kas tekstu arī atzīmē kā neuzticamu, no multivides iegūtu novērojumu un norāda tālākajiem modeļiem neievērot multividē atrastās instrukcijas. Kadru parakstu kešatmiņas atslēgas ietver JPEG baitus, uzvedni, laika zīmogu un efektīvo modeli; kešatmiņā tiek saglabāti tikai veiksmīgie paraksti. Kešatmiņas ieraksti saglabā faktisko veiksmīgā veidotāja modeli, tostarp rezerves modeli; tilts ziņo `mixed`, ja dažādus kadrus veidoja dažādi modeļi. Kešatmiņas trāpījums atkārtoti izmanto šo veidotāja identitāti, nevis pārdēvē to par pieprasīto maršrutēšanas plānu. Visa video rezultātu kešatmiņas atslēga ietver katru ieeju, kas maina izvadi — uzvedni, efektīvo modeli, paraugņemšanas politiku, kadru skaitu, semantiskās analīzes režīmu, normalizētās fokusa norādes SHA-256 pirkstu nospiedumu, fokusa logu, `transcript`, `audioTranscript` un kontaktlapas karogu — tāpēc jebkuras no šīm dimensijām mainīšana ir kešatmiņas garāmietis, nekad ne novecojusi atkārtota izmantošana. Vizuālās dedublikācijas politikas versija, slieksnis un ierobežotais kandidātkadru skaits ir skaidri norādīti arī rezultātu kešatmiņas atslēgā un metadatos; politikas maiņa tāpēc nevar atkārtoti izmantot novecojušu visa video aprakstu. Rezultātu kešatmiņas v4 metadati saglabā režīmu un pirkstu nospiedumu, nekad ne neapstrādātu lietotāja uzdevumu. Aizsardzības mehānisma metadati ziņo gan pieprasīto, gan efektīvo analīzes režīmu; pieprasīts `focused` režīms bez lietojama lietotāja teksta tiek ziņots kā efektīvi `full`.
 
-Aizsargmarga izvelk katru atbalstīto video daļu, bet apraksta ne vairāk kā `modalityBridgeVideoMaxVideos`. Ja ir pierādīts, ka mērķim ir `supportsVideo === false`, neveiksmīgi un pārmērīgi ierobežoti videoklipi kļūst par skaidriem, drošiem teksta marķieriem, tāpēc neapstrādāts video nepaliek. Ja iespējas nav zināmas, šīs daļas saglabā savu video nesēju; Jebkurš atkāpšanās atšifrējums atbilst iepriekš norādītajai ierobežotā teksta konvertēšanai. Mērķi ar `supportsVideo === true` apiet tiltu. Klienta pieprasījuma pārtraukšanas signāls izplatās, izmantojot lejupielādi, starpnieka rindu, apakšprocesus un parakstu izsaukumus; pārtraukumi apstājas starp videoklipiem un nekad neizdodas atvērt neapstrādātiem medijiem.
+Aizsardzības mehānisms izvelk katru atbalstīto video daļu, bet apraksta ne vairāk kā `modalityBridgeVideoMaxVideos`. Mērķim, kuram pierādīts `supportsVideo === false`, neveiksmīgie un limitu pārsniedzošie video kļūst par skaidriem drošiem teksta marķieriem, lai neviens neapstrādāts video neizietu cauri. Ja spēja nav zināma, šīs daļas saglabā savu video nesēju; jebkurš rezerves transkripts seko iepriekš aprakstītajai ierobežotajai teksta konvertēšanai. Mērķi ar `supportsVideo === true` apiet tiltu. Klienta pieprasījuma pārtraukšanas signāls izplatās caur lejupielādi, brokeru rindu, apakšprocesiem un parakstu izsaukumiem; pārtraukumi stājas spēkā starp video un kļūmes gadījumā nekad necaurlaiž neapstrādātu multividi.
 
-Izpildlaika iestatījumi ir DB nodrošināti un Zod apstiprināti:
+Izpildlaika iestatījumi ir balstīti datubāzē un validēti ar Zod:
 
-| Atslēga                             | Noklusējums | Diapazons / uzvedība                                                                                      |
-| ----------------------------------- | ----------- | --------------------------------------------------------------------------------------------------------- |
-| `modalityBridgeVideoEnabled`        | `false`     | Izvēles izpildlaiks, izvēle                                                                               |
-| `modalityBridgeVideoAnalysisMode`   | `"full"`    | `full` saglabā vispārīgos parakstus; `focused` izmanto ierobežotu, neuzticamu jaunākā lietotāja kontekstu |
-| `modalityBridgeVideoModel`          | `""`        | Mantojiet Vision Bridge modeli                                                                            |
-| `modalityBridgeVideoFrameCount`     | `8`         | 1–16                                                                                                      |
-| `modalityBridgeVideoSamplingPolicy` | `"uniform"` | `uniform`, `scene_aware` vai proporcionālais `segment_aware`; detektora kļūme atgriežas uz `uniform`      |
-| `modalityBridgeVideoMaxVideos`      | `1`         | 1–4                                                                                                       |
-| `modalityBridgeVideoTimeout`        | `120000`    | 1000–120 000 ms                                                                                           |
+| Atslēga                             | Noklusējums | Diapazons / uzvedība                                                                                          |
+| ----------------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------- |
+| `modalityBridgeVideoEnabled`        | `false`     | Neobligāts izpildlaika iestatījums, ieslēdzams pēc izvēles                                                    |
+| `modalityBridgeVideoAnalysisMode`   | `"full"`    | `full` saglabā vispārīgus parakstus; `focused` izmanto ierobežotu, neuzticamu pēdējā lietotāja kontekstu      |
+| `modalityBridgeVideoModel`          | `""`        | Mantot Vision Bridge modeli                                                                                   |
+| `modalityBridgeVideoFrameCount`     | `8`         | 1–16                                                                                                          |
+| `modalityBridgeVideoSamplingPolicy` | `"uniform"` | `uniform`, `scene_aware` vai proporcionāls `segment_aware`; detektora kļūmes gadījumā atgriežas pie `uniform` |
+| `modalityBridgeVideoMaxVideos`      | `1`         | 1–4                                                                                                           |
+| `modalityBridgeVideoTimeout`        | `120000`    | 1000–120000 ms                                                                                                |
 
-Mantotā video noildzes vērtības, kas pārsniedz 120 sekundes, ir saistītas ar starpnieka termiņu; jauni iestatījumi raksta virs šī limita tiek noraidīti. `GET /api/modality-bridge/video/runtime` pirms autentifikācijas vai izpildlaika pārbaudes ir nepieciešama uzticama apzīmogota cilpas lokācija, pēc tam nepieciešama pārvaldības autentifikācija. Tas atgriež tikai `available`, sanitizētas FFmpeg/ffprobe versijas un fiksētu iemeslu, ja izpildlaiks nav pieejams. Iekšējās ekstrakcijas galapunkts nav publiska augšupielāde API: rindas piesātinājums atgriež `503` plus `Retry-After`, zvanītāja atvienošana atgriež `499`, un fiksētais brokera termiņš atgriež `504`. Pārveidotās atbildes pievieno `video->text;model=<visionModel>;parts=<videos>` centrālajai `x-omniroute-modality-bridge` galvenei, nenoņemot Vision vai Audio segmentus.
+Mantotās saglabātās Video noilguma vērtības virs 120 sekundēm tiek ierobežotas līdz brokeru termiņam; jauni iestatījumu ieraksti virs šī limita tiek noraidīti.
+`GET /api/modality-bridge/video/runtime` pieprasa uzticami iezīmētu atgriezeniskās cilpas lokalitāti pirms autentifikācijas vai izpildlaika zondēšanas, pēc tam pieprasa pārvaldības autentifikāciju. Tas atgriež tikai `available`, attīrītās FFmpeg/ffprobe versijas un fiksētu iemeslu, kad izpildlaiks nav pieejams. Iekšējais izvilkšanas galapunkts nav publiska augšupielādes API: rindas piesātinājums atgriež `503` plus `Retry-After`, izsaucēja atvienošanās atgriež `499`, un fiksētais brokeru termiņš atgriež `504`. Konvertētās atbildes pievieno
+`video->text;model=<visionModel>;parts=<videos>` centrālajai
+`x-omniroute-modality-bridge` galvenei, nenoņemot Vision vai Audio segmentus.
 
 ### PII Masker (`piiMasker.ts`)
 
-Darbojas tālāk** gan** posmos.
+Darbojas **abos** posmos.
 
-- **`preCall`** klonē lietderīgo slodzi, staigā `system`, `messages`, `input` un `prompt` (tostarp vienkāršus virknes elementus) un lieto `processPII()` (no `@/shared/utils/inputSanitizer`) virknes `content`/`text` laukiem. Kad `PII_REDACTION_ENABLED=true`, atklātais PII tiek rediģēts izejošā lietderīgajā slodzē. Tas nav atkarīgs no `INPUT_SANITIZER_MODE` (kas kontrolē tikai tūlītējas ievadīšanas politiku). Kad rediģēšana ir izslēgta, zvans reģistrē noteikšanas skaitījumus, nepārrakstot saturu.
-- **`postCall`** dziļi klonē atbildi, palaiž `sanitizePIIResponse()` un Responses-API formas maskētāju (`maskResponsesOutput` — aptver `output_text` un `output[].content[].text`). Ja tiek veikta rediģēšana, modificētā atbilde aizstāj sākotnējo.
+- **`preCall`** noklonē lietderīgo slodzi, iziet cauri `system`, `messages`, `input` un `prompt` (ieskaitot vienkāršas virkņu vienības), un piemēro `processPII()` (no `@/shared/utils/inputSanitizer`) virkņu laukiem `content`/`text`. Kad `PII_REDACTION_ENABLED=true`, konstatētie personas dati izejošajā slodzē tiek slēpti. Tas ir neatkarīgi no `INPUT_SANITIZER_MODE` (kas kontrolē tikai uzvednes injekcijas politiku). Kad slēpšana ir izslēgta, izsaukums reģistrē konstatējumu skaitus, nepārrakstot saturu.
+- **`postCall`** dziļi noklonē atbildi, izpilda `sanitizePIIResponse()` plus Responses-API-formas maskētāju (`maskResponsesOutput` — aptver `output_text` un `output[].content[].text`). Ja notiek kāda slēpšana, modificētā atbilde aizstāj sākotnējo.
 
-Aizsargmargas nekad nebloķējas; tas tikai anotē (`meta.detections`, `meta.redacted`) vai pārraksta.
+Aizsargmehānisms nekad nebloķē; tas tikai anotē (`meta.detections`, `meta.redacted`) vai pārraksta.
 
-#### Atlase pēc veida, pielāgoti modeļi un noteikšanas skaitītāji
+#### Atlase pēc tipa, pielāgotie šabloni un konstatējumu skaitītāji
 
-**Informācijas panelis → Iestatījumi → Drošība → PII maskēšana** izvēlas _kas_ ir maskēts. Tas neieslēdz maskēšanu: tas joprojām ir `PII_REDACTION_ENABLED` (pieprasījums) un `PII_RESPONSE_SANITIZATION` (atbilde + SSE), abi pēc noklusējuma ir izslēgti.
+**Vadības panelis → Iestatījumi → Drošība → PII maskēšana** izvēlas, _kas_ tiek maskēts. Tas neieslēdz maskēšanu: to joprojām nosaka `PII_REDACTION_ENABLED` (pieprasījums) un `PII_RESPONSE_SANITIZATION` (atbilde + SSE), kas abi pēc noklusējuma ir izslēgti.
 
-- **Atlase pēc veida** — iebūvētie ID ir norādīti `src/shared/constants/piiTypes.ts` (`PII_BUILTIN_TYPES`). Atiestatīts nozīmē visus veidus (darbība pirms šī iestatījuma pastāvēšanas). Pieprasījuma programmas `ssn_us` modelis tiek kartēts uz `ssn`. Veidnes (minimālais, standarta, finanšu, brazīļu, USA, GDPR, POPIA, pilna) aizpilda tikai izvēles rūtiņas laukā UI.
-- **GDPR un POPIA identifikatori** — divpadsmit iebūvētie ID, kas aptver EU un Dienvidāfrikas personas identifikatorus (tabula tālāk). Viņu regexes, validatori un jurisdikcijas atzīmes atrodas vienā tabulā `src/shared/utils/piiPatterns.ts`, ko patērē gan atbildes dezinfekcijas līdzeklis (`src/lib/piiSanitizer.ts`), gan pieprasījuma maskētājs (`src/shared/utils/inputSanitizer.ts`). Atbilstība tiek rediģēta tikai tad, kad tās pārbaudītājs to pieņem; ar tukšu ciparu rindu nekad nepietiek. Operators, kurš saglabāja sašaurinātu atlasi pirms šo ID pastāvēšanas, saglabā savu darbību, līdz tiek atzīmēti jaunie ID.
-- **Pielāgoti modeļi** — līdz 20 regulāras izteiksmes vai aizstājējzīmju modeļiem (`*` = līdz 64 rakstzīmēm, kas nav atstarpes, `?` = viens). Sērkociņi kļūst par `[CUSTOM_REDACTED]`. Katrs raksts iet cauri `compilePiiCustomPattern()` (`src/shared/utils/piiCustomPatterns.ts`): ne vairāk kā 500 rakstzīmes, karodziņi ir ierobežoti ar `g i m s u`, ir jākompilē, jāiztur `safe-regex` (katastrofāla atkāpšanās), un tas nedrīkst atbilst tukšai virknei vai rediģēšanas vietturim. Saglabājot un pārbaudot, modelis, kas neizdodas, tiek noraidīts, un saglabātā rinda, kas neizdodas, izpildlaikā tiek izlaista, nevis kompilēta. Pielāgotie modeļi darbojas tikai tad, kad ir ieslēgta maskēšana.
-- **Atklāšanas skaitītāji** — skaits katram tipam (vērtības nekad nav saskaņotas), tiek saglabātas atmiņā un atiestatītas restartējot (`src/lib/pii/piiDetectionStats.ts`). Tās tikai palielinās, kamēr ir ieslēgta maskēšana.
+- **Atlase pēc tipa** — iebūvētie identifikatori ir uzskaitīti `src/shared/constants/piiTypes.ts` (`PII_BUILTIN_TYPES`). Ja nav iestatīts, tiek izmantoti visi tipi (uzvedība, kāda bija pirms šī iestatījuma pastāvēšanas). Pieprasījumu dzinēja `ssn_us` šablons tiek kartēts uz `ssn`. Veidnes (Minimal, Standard, Financial, Brazilian, USA, GDPR, POPIA, Full) tikai aizpilda izvēles rūtiņas lietotāja saskarnē.
+- **GDPR un POPIA identifikatori** — divpadsmit iebūvēti ID ES un Dienvidāfrikas personas identifikatoriem (tabula tālāk). To regulārās izteiksmes, validatori un jurisdikciju birkas atrodas vienā tabulā `src/shared/utils/piiPatterns.ts`, ko izmanto gan atbildes attīrītājs (`src/lib/piiSanitizer.ts`), gan pieprasījuma maskētājs (`src/shared/utils/inputSanitizer.ts`). Atbilstību aizklāj tikai tad, ja validators to pieņem; ar vienkāršu ciparu virkni nekad nepietiek. Operators, kurš saglabājis sašaurinātu atlasi pirms šo ID parādīšanās, saglabā iepriekšējo darbību, līdz atzīmē jaunos ID.
+- **Pielāgotie šabloni** — līdz 20 regulāro izteiksmju vai aizstājējzīmju šabloniem (`*` = līdz 64 rakstzīmēm bez atstarpēm, `?` = viena). Atbilstības kļūst par `[CUSTOM_REDACTED]`. Katrs šablons iet caur `compilePiiCustomPattern()` (`src/shared/utils/piiCustomPatterns.ts`): ne vairāk kā 500 rakstzīmes, karodziņi ierobežoti līdz `g i m s u`, tam ir jākompilējas, jāiztur `safe-regex` pārbaude (katastrofālā atgriezeniskā meklēšana) un tas nedrīkst atbilst tukšai virknei vai slēpšanas vietturim. Šablons, kas neiztur pārbaudi, tiek noraidīts gan saglabājot, gan testējot, un saglabāta rinda, kas neiztur pārbaudi, izpildlaikā tiek izlaista, nevis kompilēta. Pielāgotie šabloni darbojas tikai, kamēr maskēšana ir ieslēgta.
+- **Konstatējumu skaitītāji** — skaitļi pa tipiem (nekad atbilstošās vērtības), kas tiek turēti atmiņā un atiestatīti pārstartējot (`src/lib/pii/piiDetectionStats.ts`). Tie palielinās tikai, kamēr maskēšana ir ieslēgta.
 
-Iestatījumi atrodas `key_value` tabulā (nosaukumtelpa `pii_settings`, `src/lib/db/piiSettings.ts`) un tiek lasīti 1 s kešatmiņā. API:
+Iestatījumi atrodas tabulā `key_value` (nosaukumvieta `pii_settings`, `src/lib/db/piiSettings.ts`) un tiek lasīti caur 1 s kešu. API:
 
-| Metode | Ceļš                     | Mērķis                                                                                 |
-| ------ | ------------------------ | -------------------------------------------------------------------------------------- |
-| `GET`  | `/api/settings/pii`      | Karoga stāvoklis, `enabledTypes`, `customPatterns`, noteikšanas skaitītāji             |
-| `PUT`  | `/api/settings/pii`      | Aizstāt `enabledTypes` (`null` = all) and/or `customPatterns`                          |
-| `POST` | `/api/settings/pii/test` | Sausā darbība ar vienu modeli pret paraugu, kas nepārsniedz 8 KB; nekas netiek glabāts |
+| Metode | Ceļš                     | Nozīme                                                                                   |
+| ------ | ------------------------ | ---------------------------------------------------------------------------------------- |
+| `GET`  | `/api/settings/pii`      | Karodziņu stāvoklis, `enabledTypes`, `customPatterns`, konstatējumu skaitītāji           |
+| `PUT`  | `/api/settings/pii`      | Aizstāj `enabledTypes` (`null` = visi) un/vai `customPatterns`                           |
+| `POST` | `/api/settings/pii/test` | Testa izpilde vienam šablonam pret paraugu, kas nepārsniedz 8 KB; nekas netiek saglabāts |
 
-Visiem trim ir nepieciešama vadības autentifikācija un ķermeņa apstiprināšana ar Zod (`src/shared/validation/schemas/piiSettings.ts`).
+Visas trīs prasa pārvaldības autentifikāciju un pārbauda pieprasījuma ķermeni ar Zod (`src/shared/validation/schemas/piiSettings.ts`).
 
-#### GDPR (EU) un POPIA (Dienvidāfrika) identifikatori
+#### GDPR (ES) un POPIA (Dienvidāfrika) identifikatori
 
-| Id                  | Identifikators              | Validācija                                                                          |
-| ------------------- | --------------------------- | ----------------------------------------------------------------------------------- |
-| `iban`              | IBAN                        | Zināma valsts, precīzs garums šai valstij, ISO 13616 MOD-97-10                      |
-| `eu_vat`            | EU VAT numurs               | Zināms dalībvalsts prefikss un šīs valsts numura formāts (bez VIES uzmeklēšanas)    |
-| `es_dni_nie`        | spāņu DNI / NIE             | Kontroles burts (vērtība mod 23); NIE ir `X/Y/Z` + 7 cipari                         |
-| `it_codice_fiscale` | Itāļu Codice Fiscale        | Kontroles burts no odd/even pozīciju tabulām                                        |
-| `pl_pesel`          | poļu PESEL                  | Svērtā kontrolsumma un kodēts dzimšanas datums, kas pastāv                          |
-| `nl_bsn`            | Holandiešu BSN              | 11 izturīgs (svars 9..2, -1)                                                        |
-| `de_steuer_id`      | Vācu Steuer-ID              | ISO 7064 Mod 11,10 plus ciparu struktūras noteikumi (bez 0 sākuma)                  |
-| `se_personnummer`   | Zviedru personnummer        | Luhn pāri pēdējiem desmit cipariem un ticamu dzimšanas datumu (10 vai 12 cipari)    |
-| `za_id`             | Dienvidāfrikas ID numurs    | Luhn pāri visiem 13 cipariem, derīga dzimšanas month/day, pilsonības cipars 0 vai 1 |
-| `za_phone`          | Dienvidāfrikas tālrunis     | `+27` / `27` prefikss vai valsts `0..` forma, kas rakstīta ar atstarpi vai defisi   |
-| `za_vat`            | Dienvidāfrikas VAT numurs   | 10 cipari, kas sākas ar `4`** un** "VAT" / "BTW" 48 rakstzīmēs iepriekš             |
-| `za_tax_ref`        | Dienvidāfrikas nodokļu ref. | 10 cipari, kas sākas `0`-`3`, Luhn,** un** "tax" / "SARS" 48 rakstzīmēs iepriekš    |
+| ID                  | Identifikators                 | Pārbaude                                                                               |
+| ------------------- | ------------------------------ | -------------------------------------------------------------------------------------- |
+| `iban`              | IBAN                           | Zināma valsts, precīzs šīs valsts garums, ISO 13616 MOD-97-10                          |
+| `eu_vat`            | ES PVN numurs                  | Zināms dalībvalsts prefikss un šīs valsts numura formāts (bez VIES vaicājuma)          |
+| `es_dni_nie`        | Spānijas DNI / NIE             | Kontrolburts (vērtība mod 23); NIE ir `X/Y/Z` + 7 cipari                               |
+| `it_codice_fiscale` | Itālijas Codice Fiscale        | Kontrolburts no nepāra/pāra pozīciju tabulām                                           |
+| `pl_pesel`          | Polijas PESEL                  | Svērta kontrolsumma un ticami kodētā dzimšanas mēneša/dienas diapazoni                 |
+| `nl_bsn`            | Nīderlandes BSN                | 11 pārbaude (svari 9..2, -1)                                                           |
+| `de_steuer_id`      | Vācijas Steuer-ID              | ISO 7064 Mod 11,10 un ciparu struktūras noteikumi (bez sākuma 0)                       |
+| `se_personnummer`   | Zviedrijas personnummer        | Luhn pēdējiem desmit cipariem un ticams dzimšanas datums (10 vai 12 cipari)            |
+| `za_id`             | Dienvidāfrikas ID numurs       | Luhn visiem 13 cipariem, derīgs dzimšanas mēnesis/diena, pilsonības cipars 0 vai 1     |
+| `za_phone`          | Dienvidāfrikas tālrunis        | Prefikss `+27` / `27` vai nacionālā forma `0..` ar atstarpi vai defisi                 |
+| `za_vat`            | Dienvidāfrikas PVN numurs      | 10 cipari, kas sākas ar `4`, **un** "VAT" / "BTW" iepriekšējās 48 rakstzīmēs           |
+| `za_tax_ref`        | Dienvidāfrikas nodokļu atsauce | 10 cipari, kas sākas ar `0`-`3`, Luhn **un** "tax" / "SARS" iepriekšējās 48 rakstzīmēs |
 
-Tā kā tikai ciparu formāti saduras ar pasūtījuma numuriem, būvējuma numuriem un laikspiedoliem, vājākajiem (`za_vat`, `za_tax_ref`) ir nepieciešams atslēgvārds cue, un tukšs desmit ciparu `0..` numurs netiek uzskatīts par Dienvidāfrikas tālruņa numuru. Atstarpes IBANs (`GB29 NWBK ...`) nav saskaņotas. Straumēšanas ceļā norāde tiek meklēta tikai pašreizējā gabalā. ID atrodas pirms vispārīgajiem tālruņu modeļiem, tāpēc apstiprinātajam identifikatoram ir savs vietturis (`[IBAN_REDACTED]`, `[NL_BSN_REDACTED]`, ...). Veidnēs `gdpr` un `popia` tiek atlasīti attiecīgi EU un Dienvidāfrikas ID. Pati maskēšana paliek izvēles iespēja (Stingrais noteikums Nr. 20): nekas šeit nemaina funkcijas karoga noklusējuma iestatījumu.
+Tā kā tikai ciparu formāti sakrīt ar pasūtījumu numuriem, būvējumu numuriem un laika zīmogiem, vājākajiem (`za_vat`, `za_tax_ref`) vajadzīgs atslēgvārda signāls, un vienkāršs desmitciparu `0..` numurs netiek uzskatīts par Dienvidāfrikas tālruni. IBAN ar atstarpēm (`GB29 NWBK ...`) netiek atpazīti. Straumēšanas ceļā signālu meklē tikai pašreizējā gabalā. ID ir pirms vispārīgajiem tālruņu šabloniem, tāpēc pārbaudīts identifikators saglabā savu vietturi (`[IBAN_REDACTED]`, `[NL_BSN_REDACTED]`, ...). Veidnes `gdpr` un `popia` izvēlas attiecīgi ES un Dienvidāfrikas ID. Pati maskēšana paliek ieslēdzama pēc izvēles (Hard Rule #20): nekas šeit nemaina funkcijas karodziņa noklusējumu.
 
-### Ātra injekcija (`promptInjection.ts`)
+### Uzvednes injekcija (`promptInjection.ts`)
 
-Atklāj pretrunīgas struktūras lietotāja nodrošinātajā saturā un ievieš konfigurēto politiku. Uzvedību nosaka vides mainīgie un konstruktora opcijas:
+Atklāj naidīgas struktūras lietotāja iesniegtajā saturā un īsteno konfigurēto politiku. Uzvedību nosaka vides mainīgie un konstruktora opcijas:
 
-| Iestatījums          | Env var                                                                                               | Noklusējums | Efekts                                                                                                                                                                                              |
-| -------------------- | ----------------------------------------------------------------------------------------------------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Iespējots            | `INPUT_SANITIZER_ENABLED`                                                                             | `true`      | Kad `false`, aizsargmargas īssavienojumi.                                                                                                                                                           |
-| Režīms               | `INJECTION_GUARD_MODE` / `INPUT_SANITIZER_MODE`                                                       | `warn`      | Injekcijas politika: `block`, `warn` vai `log`. (`redact` ir pieņemts back-compat, bet tas ir** nē** sloksnes injekcijas teksts; PII pārrakstīšanas pieprasījumu kontrolē `PII_REDACTION_ENABLED`.) |
-| Bloķēšanas slieksnis | `blockThreshold` opcija / `INPUT_SANITIZER_BLOCK_THRESHOLD` (alias `INJECTION_GUARD_BLOCK_THRESHOLD`) | `high`      | Bloķēšanai nepieciešama minimālā smaguma pakāpe. Vide pēc noklusējuma ir tikai novērojama.                                                                                                          |
+| Iestatījums          | Vides mainīgais                                                                                                | Noklusējums | Iedarbība                                                                                                                                                                                      |
+| -------------------- | -------------------------------------------------------------------------------------------------------------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Ieslēgts             | `INPUT_SANITIZER_ENABLED`                                                                                      | `true`      | Ja `false`, aizsargmehānisms tiek izlaists.                                                                                                                                                    |
+| Režīms               | `INJECTION_GUARD_MODE` / `INPUT_SANITIZER_MODE`                                                                | `warn`      | Injekcijas politika: `block`, `warn` vai `log`. (`redact` tiek pieņemts atpakaļsaderībai, bet **ne**noņem injekcijas tekstu; pieprasījuma PII pārrakstīšanu kontrolē `PII_REDACTION_ENABLED`.) |
+| Bloķēšanas slieksnis | `blockThreshold` opcija / `INPUT_SANITIZER_BLOCK_THRESHOLD` (aizstājējvārds `INJECTION_GUARD_BLOCK_THRESHOLD`) | `high`      | Minimālais smaguma līmenis, kas nepieciešams bloķēšanai. Vidējais (Medium) līmenis pēc noklusējuma ir paredzēts tikai novērošanai.                                                             |
 
-**Režīmu prioritāte** (`getMode`): zvanītājs `options.mode` → `INJECTION_GUARD_MODE`**DB funkcijas karoga ignorēšana** (Informācijas paneļa → iestatījumi → funkciju karodziņi) → `INJECTION_GUARD_MODE` env → `INPUT_SANITIZER_MODE` env → `warn`. Tāpēc informācijas paneļa ignorēšana uzvar pār env vars, tāpēc funkciju karodziņi UI kontrolē darbības aizsargu tiešraidē (bez restartēšanas). DB nolasīšana ir droša: ja rodas kļūdas, aizsargs atgriežas pie env balstītas darbības, un, ja nav iestatīta ignorēšana, darbība ir identiska tikai env izšķirtspējai.
+**Režīma prioritāte** (`getMode`): izsaucēja `options.mode` →
+`INJECTION_GUARD_MODE` **DB funkcionalitātes karodziņa pārrakstījums** (Vadības panelis → Iestatījumi →
+Funkcionalitātes karodziņi) → `INJECTION_GUARD_MODE` env → `INPUT_SANITIZER_MODE` env →
+`warn`. Tādējādi vadības paneļa pārrakstījums ir spēcīgāks par vides mainīgajiem, tāpēc
+Funkcionalitātes karodziņu UI kontrolē strādājošo aizsargu reāllaikā (bez pārstartēšanas). DB lasīšana ir fail-safe:
+ja tā neizdodas, aizsargs atgriežas pie uz vides mainīgajiem balstītas uzvedības, un, kad
+pārrakstījums nav iestatīts, uzvedība ir identiska izšķirtspējai, kas balstīta tikai vides mainīgajos.
 
-Atklāšanas avoti:
+Konstatēšanas avoti:
 
-1. `sanitizeRequest()` no `@/shared/utils/inputSanitizer` (kopīgs detektoru komplekts, ko izmanto citur cauruļvadā).
-2. Iebūvēts `DEFAULT_GUARD_PATTERNS` (šobrīd `system_override_inline` un `markdown_system_block`, abiem `high` smaguma pakāpe).
-3. Izvēles `customPatterns` tiek nodota, izmantojot konstruktora opcijas (virknes, regex vai `{ name, pattern, severity }` ierakstus).
+1. `sanitizeRequest()` no `@/shared/utils/inputSanitizer` (kopīga detektoru
+   kopa, ko izmanto arī citur konveijerā).
+2. Iebūvētie `DEFAULT_GUARD_PATTERNS` (pašlaik `system_override_inline` un
+   `markdown_system_block`, abi ar `high` smaguma līmeni).
+3. Pēc izvēles nodotie `customPatterns` caur konstruktora opcijām (virknes, regulārās izteiksmes
+   vai `{ name, pattern, severity }` ieraksti).
 
-Kad `mode === "block"`** un** vismaz viena noteikšana atbilst nopietnības slieksnim, `preCall` atgriež `{ block: true, message: "Request rejected: suspicious content detected" }`. Režīmos `warn`/`log` aizsargmargas reģistrējas, bet atļauj zvanu. Koplietotais palīgs `evaluatePromptInjection()` tiek eksportēts arī zvanītājiem, kuriem ir jānovērtē uzvednes, neizejot cauri reģistram.
+Kad `mode === "block"` **un** vismaz viena detekcija sasniedz smaguma slieksni, `preCall` atgriež `{ block: true, message: "Request rejected: suspicious content detected" }`. Režīmos `warn`/`log` aizsargmehānisms reģistrē žurnālā, bet atļauj izsaukumu. Koplietojamā palīgfunkcija `evaluatePromptInjection()` ir arī eksportēta izsaucējiem, kuriem jānovērtē uzvednes, neizmantojot reģistru.
 
-**Skenēšana saistīta (v3.8.20):** detektors pārbauda tikai** pirmie 16 KB** no pievienotā uzvednes teksta — `MAX_INJECTION_SCAN_BYTES = 16 * 1024` (16 384 baiti) `src/shared/utils/inputSanitizer.ts`. Gan `detectInjection()`, gan `evaluatePromptInjection()` `slice(0, MAX_INJECTION_SCAN_BYTES)` pirms modeļa cilpas palaišanas. Injekcijas direktīvas atrodas netālu no ievades augšdaļas, tāpēc vairāku simtu KB lietderīgās slodzes ierobežo regulāro izteiksmi CPU/GC nekaitējot noteikšanai (sal. #3932, #4041).
+**Skenēšanas robeža (v3.8.20):** detektors pārbauda tikai **pirmos 16 KB** no apvienotā uzvednes teksta — `MAX_INJECTION_SCAN_BYTES = 16 * 1024` (16 384 baiti) failā `src/shared/utils/inputSanitizer.ts`. Gan `detectInjection()`, gan `evaluatePromptInjection()` izpilda `slice(0, MAX_INJECTION_SCAN_BYTES)` pirms modeļu cilpas palaišanas. Injekcijas direktīvas atrodas ievades augšdaļas tuvumā, tāpēc tas ierobežo regex CPU/GC patēriņu vairāku simtu KB lielām datu kravām, nepavājinot noteikšanu (sk. #3932, #4041).
 
-### Credential Masker (`credentialMasker.ts`)
+### Akreditācijas datu maskētājs (`credentialMasker.ts`)
 
-Darbojas tālāk** gan** posmi, pēdējais noklusējuma ķēdē (prioritāte `95`). Rediģē labi zināmos API atslēgu/slepeno marķieru modeļus no izejošās lietderīgās slodzes (ziņojuma saturs, rīka izsaukuma argumenti, rīka rezultāti)** un** nodrošinātāja atbildi, tāpēc uzvednē ielīmētie akreditācijas dati (vai rīka rezultātos atbalsoti) netiek nopludināti augšupējam pakalpojumu sniedzējam vai atpakaļ klientam.
+Darbojas **abos** posmos, pēdējais noklusējuma ķēdē (prioritāte `95`). Izsvītro plaši zināmus API atslēgu / slepeno tokenu modeļus no izejošās datu kravas (ziņojumu saturs, rīku izsaukumu argumenti, rīku rezultāti) **un** nodrošinātāja atbildes, lai uzvednē ielīmēti akreditācijas dati (vai rīka rezultātā atkārtoti) nenoplūstu augšupējam nodrošinātājam vai atpakaļ klientam.
 
-- **Tikai pieteikšanās** , tāda pati konvencija kā PII rediģēšana (blakus esošais cietais noteikums Nr. 20): atspējots, ja vien nav `settings.credentialRedactionEnabled === true`** vai** `CREDENTIAL_REDACTION_ENABLED=true`. Ja tas ir izslēgts, aizsargmargas ir bezdarbīgs — tas nekad nebloķē un nepārraksta.
-- `redactCredentials()` iziet pilnu payload/response koku (`walkValue()`, prototype-pollution-safe, cycle-safe, izmantojot `WeakSet`) un aizstāj atbilstības ar `[REDACTED:<type>]` vietturi, klonējot tikai tos zarus, kas faktiski mainījušies.
-- `CREDENTIAL_PATTERNS` aptver LLM nodrošinātāja atslēgas (OpenAI, OpenAI-proj, Anthropic, Google, Hugging Face, Replicate ), VCS/SaaS marķierus (GitHub, Slack, Linear, Notion, npm, Pastnieks, Discord), maksājumu atslēgas (Square, Key,AWS, zwilio key, Strkpe). SendGrid, Mailgun), privātās atslēgas / JWTs, akreditācijas datu savienojumu virknes (`mongodb://user:pass@...` utt.) un vispārīgu `Authorization`/`x-api-key`/`api-key`/`apikey` galvenes vērtību modeli. Galvenes formas taustiņi (`authorization`, `x-api-key`, `api-key`, `apikey`) tiek rediģēti strukturāli (tikai vērtība, saglabāts shēmas prefikss, piemēram `Bearer `/`Basic ` ), nevis izmantojot vispārīgo teksta regulāro izteiksmi.
-- Aizsargmargas nekad nebloķējas; tas tikai pārraksta (`modifiedPayload` / `modifiedResponse`) un anotē (`meta.credentialsRedacted`, `meta.count`).
+- **Tikai opt-in režīmā**, tāda pati konvencija kā PII izsvītrošanai (saistībā ar Stingro noteikumu #20): atspējots, ja vien `settings.credentialRedactionEnabled === true` **vai** `CREDENTIAL_REDACTION_ENABLED=true`. Ja tas ir izslēgts, aizsargmehānisms ir tukšdarbība (no-op) — tas nekad nebloķē un nekad nepārraksta.
+- `redactCredentials()` šķērso visu datu kravas/atbildes koku (`walkValue()`, drošs pret prototipu piesārņošanu, ciklu drošs, izmantojot `WeakSet`) un aizstāj atbilstības ar `[REDACTED:<type>]` vietturi, klonējot tikai tos zarus, kas faktiski ir mainījušies.
+- `CREDENTIAL_PATTERNS` aptver LLM nodrošinātāju atslēgas (OpenAI, OpenAI-proj, Anthropic, Google, Hugging Face, Replicate), VCS/SaaS tokenus (GitHub, Slack, Linear, Notion, npm, Postman, Discord), maksājumu atslēgas (Stripe, Square), mākoņa atslēgas (AWS piekļuves atslēga, Twilio, SendGrid, Mailgun), privātās atslēgas / JWT, akreditācijas datus ietverošas savienojuma virknes (`mongodb://user:pass@...` u.c.) un vispārīgu `Authorization`/`x-api-key`/`api-key`/`apikey` galvenes vērtības modeli. Galvenes formas atslēgas (`authorization`, `x-api-key`, `api-key`, `apikey`) tiek izsvītrotas strukturāli (tikai vērtība, shēmas prefikss, piemēram, `Bearer `/`Basic `, tiek saglabāts), nevis ar vispārīgo teksta regulāro izteiksmi.
+- Aizsargmehānisms nekad nebloķē; tas tikai pārraksta (`modifiedPayload` / `modifiedResponse`) un pievieno anotācijas (`meta.credentialsRedacted`, `meta.count`).
 
-Regresa aizsargs: `tests/unit/credential-masker-guardrail.test.ts`.
+Regresijas aizsardzība: `tests/unit/credential-masker-guardrail.test.ts`.
 
 ## Bāzes līgums (`base.ts`)
 

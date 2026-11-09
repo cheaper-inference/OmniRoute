@@ -56,11 +56,11 @@ devido a um fato concreto da implementação:
 
 O que isso significa para cada superfície, mesmo com `CORS_ALLOW_ALL=true`:
 
-| Superfície                         | Mecanismo de autenticação      | Efeito do CORS com curinga                                                                                                                                                                                                                                                                                                                                                   |
-| ---------------------------------- | ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Dashboard / MANAGEMENT `/api/*`    | Sessão por cookie              | A origem é refletida, mas **sem `Allow-Credentials`** o navegador **bloqueia** a leitura com credenciais. Um site mal-intencionado de outra origem **não pode ler** as respostas autenticadas do seu dashboard, e o cookie de sessão não é exposto.                                                                                                                          |
-| Client API `/v1/*`, `/v1beta/*`    | Cabeçalho Bearer / `x-api-key` | Já é permissiva **por design** (`relaxForTokenAuth`): navegadores nunca anexam automaticamente `Authorization`/`x-api-key`, portanto a página de um invasor não pode fornecer sua chave. O reflexo só se aplica quando a chave apresentada foi validada; respostas anônimas (`REQUIRE_API_KEY=false`) mantêm a lista de permissões. `CORS_ALLOW_ALL` não amplia esse acesso. |
-| Leitura pública (`/api/health`, …) | Nenhum                         | Não contém dados confidenciais; o curinga é inofensivo.                                                                                                                                                                                                                                                                                                                      |
+| Superfície                         | Mecanismo de autenticação      | Efeito do CORS com curinga                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| ---------------------------------- | ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Dashboard / MANAGEMENT `/api/*`    | Sessão por cookie              | A origem é refletida, mas **sem `Allow-Credentials`** o navegador **bloqueia** a leitura com credenciais. Um site mal-intencionado de outra origem **não pode ler** as respostas autenticadas do seu dashboard, e o cookie de sessão não é exposto.                                                                                                                                                                                                                                                                                                                     |
+| Client API `/v1/*`, `/v1beta/*`    | Cabeçalho Bearer / `x-api-key` | Já é permissiva **por design** (`relaxForTokenAuth`): navegadores nunca anexam automaticamente `Authorization`/`x-api-key`, portanto a página de um invasor não pode fornecer sua chave. O reflexo permissivo da origem exige um sujeito autenticado (uma chave de API validada ou uma sessão do painel validada), não apenas um cabeçalho com credenciais, e nunca inclui `Access-Control-Allow-Credentials`. As respostas anônimas (`REQUIRE_API_KEY=false`) usam a lista configurada de origens permitidas, incluindo a ativação explícita de `CORS_ALLOW_ALL=true`. |
+| Leitura pública (`/api/health`, …) | Nenhum                         | Não contém dados confidenciais; o curinga é inofensivo.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 
 Portanto, a exposição **residual** de `CORS_ALLOW_ALL=true` limita-se a: (a)
 **leituras** entre origens sem credenciais de dados que já não exigem autenticação; e (b)
@@ -125,9 +125,7 @@ Security → CORS Allowed Origins**, sem necessidade de reinicialização.
   a chave de API é a barreira — e é por isso que essa superfície é intencionalmente
   permissiva, permitindo que clientes em navegadores e Electron leiam respostas às
   quais já têm direito.
-  O reflexo relaxado acompanha a chave validada, não a mera presença do cabeçalho:
-  quando `REQUIRE_API_KEY=false` atende uma solicitação de forma anônima, a resposta
-  bem-sucedida mantém a lista de permissões restritiva por padrão. As rejeições de
+  O reflexo permissivo da origem exige um sujeito autenticado (uma chave de API validada ou uma sessão do painel validada), não apenas um cabeçalho com credenciais, e nunca inclui `Access-Control-Allow-Credentials`. As respostas anônimas (`REQUIRE_API_KEY=false`) usam a lista configurada de origens permitidas, incluindo a ativação explícita de `CORS_ALLOW_ALL=true`. As rejeições de
   autenticação (401) continuam legíveis para que os clientes possam indicar uma chave
   revogada ou digitada incorretamente (#5242): o próprio 401 do pipeline mantém o
   reflexo, e uma rota que recusa a chave por conta própria depois que o pipeline a
@@ -140,8 +138,7 @@ Security → CORS Allowed Origins**, sem necessidade de reinicialização.
   `auth_token`), e não de qual deles a rota verificou, e nunca é combinado com
   `Access-Control-Allow-Credentials`; o corpo é um envelope de erro fixo. As rotas de
   gerenciamento sob `/api/v1/` protegidas por `requireManagementAuth()`
-  (`/api/v1/management/*`, `/api/v1/registered-keys`) não adicionam o reflexo: com
-  `REQUIRE_API_KEY=false`, os 401/403 dessas rotas não são legíveis entre origens.
+  (`/api/v1/management/*`, `/api/v1/registered-keys`) não usam esta exceção de rejeição de credenciais: com `REQUIRE_API_KEY=false`, suas respostas 401/403 seguem a política CORS de origens configurada.
 - **Sessão por cookie (o dashboard):** protegida pelo padrão de bloqueio seguro
   **e** pela ausência de `Access-Control-Allow-Credentials` no caminho compartilhado.
   Mantenha as origens de gerenciamento/dashboard fora de qualquer configuração
@@ -156,7 +153,7 @@ quando o OmniRoute é executado com `npm start` / `npm run dev`, a ponte `/v1/ws
 `/api/v1/ws`, que transmite `/v1/chat/completions`, `/v1/messages` e
 `/v1/responses` como frames. A ponte consulta `/api/v1/ws?handshake=1` para obter o
 veredito e se recusa a fazer o upgrade, a menos que essa rota tenha executado a
-verificação. Um handshake é aceito quando:
+verificação. Os requisitos de autenticação continuam sendo aplicados separadamente. A verificação da origem passa quando:
 
 - não tem cabeçalho `Origin` (Codex CLI, SDKs e outros clientes que não são navegadores);
 - a `Origin` é admitida pela lista de permissões acima (`CORS_ALLOWED_ORIGINS`, a

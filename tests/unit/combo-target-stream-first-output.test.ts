@@ -463,6 +463,38 @@ test("a budget stall still releases the original body", async () => {
   assert.equal(cancelled, true);
 });
 
+for (const partialOutput of [false, true]) {
+  test(`a failed peek preserves the original stream error (partial output=${partialOutput})`, async () => {
+    const upstreamError = new Error("upstream read failed");
+    let reads = 0;
+    const original = sseResponse(
+      new ReadableStream<Uint8Array>(
+        {
+          pull(controller) {
+            if (partialOutput && reads++ === 0) {
+              // A complete data line without its event separator: flush owns this tail.
+              controller.enqueue(enc.encode(frame({ content: "partial" }).trimEnd() + "\n"));
+            } else {
+              controller.error(upstreamError);
+            }
+          },
+        },
+        { highWaterMark: 0 }
+      )
+    );
+
+    const outcome = await awaitFirstOutput(original, 5000);
+    if (partialOutput) {
+      assert.equal(outcome.kind, "output");
+      assert.equal(outcome.kind === "output" && outcome.response, original);
+    } else {
+      assert.deepEqual(outcome, { kind: "stalled", reason: "empty" });
+    }
+    assert.equal(original.bodyUsed, false, "inspection must leave classification to its caller");
+    await assert.rejects(original.text(), (error) => error === upstreamError);
+  });
+}
+
 // ── Declared target budgets only ever lengthen the first-output wait ──
 
 test("a declared target budget lengthens the first-output wait past the dispatch budget", async () => {

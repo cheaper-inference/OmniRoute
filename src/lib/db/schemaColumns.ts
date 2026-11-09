@@ -271,7 +271,7 @@ export function ensureCallLogsColumns(db: SqliteDatabase) {
       db.exec("ALTER TABLE call_logs ADD COLUMN added_wait_ms INTEGER DEFAULT NULL");
       console.log("[DB] Added call_logs.added_wait_ms column");
     }
-    // The call-log INSERT names this column on every write (migration 224).
+    // The call-log INSERT names this column on every write (migration 223).
     if (!columnNames.has("queue_wait_ms")) {
       db.exec("ALTER TABLE call_logs ADD COLUMN queue_wait_ms INTEGER DEFAULT NULL");
       console.log("[DB] Added call_logs.queue_wait_ms column");

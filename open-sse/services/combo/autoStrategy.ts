@@ -625,6 +625,7 @@ async function loadPermittedConnectionsByProvider(
     );
     return groupConnectionsByProvider(permitted);
   } catch (error) {
+    // no-effect: authorization stays fail-closed; the caller maps null to an empty scoped pool.
     autoPoolLog.warn(
       "Restricted auto pool: active connection lookup failed; returning no candidates",
       {
@@ -750,8 +751,8 @@ async function expandRestrictedAutoComboCandidatePool(
         providerConnections
       );
     } catch {
-      // One provider's model inventory is best-effort. The already-scoped
-      // explicit targets and every other permitted provider remain available.
+      // no-effect: optional inventory failure preserves already-scoped explicit targets;
+      // every other permitted provider can still contribute its models.
       continue;
     }
   }

@@ -909,9 +909,7 @@ neovisno o tome dolazi li `depth` iz `provider_options` ili iz postavki veze.
 Exa `type: "lite"` (Exa 3.0) prihvaća manji skup polja i odbija cijeli zahtjev kada je postavljeno bilo koje drugo polje. Za lite se `additionalQueries`, `systemPrompt` i svaki ključ `contents` osim `text` i `highlights` odbacuju prije poziva. Zastarjeli
 `subpages`, `subpageTarget`, `highlights.numSentences` i `highlights.highlightsPerUrl` više se ne prosljeđuju.
 
-Obračun troška koristi ravni registar `costPerQuery`, osim za Exu, koji slijedi vlastite cijene Exa: 0,007 USD po pozivu za `auto` (i naslijeđeni `fast`) ili 0,004 USD za `lite` (i naslijeđeni `instant`), što obuhvaća 10 rezultata; 0,001 USD za svaki dodatni rezultat; te 0,001 USD po vraćenom rezultatu kada je postavljeno `contents.summary`. Tavily se evidentira s 1 kreditom (0,008 USD) za `search_depth` `basic`, `fast` i `ultra-fast`, odnosno s 2 kredita (0,016 USD) za `advanced`
-([API krediti Tavilyja](https://docs.tavily.com/documentation/api-credits)). Poziv s
-`auto_parameters: true` koji Tavily nadogradi na advanced i dalje se evidentira s 1 kreditom.
+Exa: 0,007 USD po pozivu za `auto` (i naslijeđeni `fast`) ili 0,004 USD za `lite` (i naslijeđeni `instant`), pokrivajući 10 rezultata; 0,001 $ za svaki daljnji rezultat; i 0,001 USD po vraćenom rezultatu kada je postavljen `contents.summary`. Tavily je zabilježen kao 1 kredit (0,008 USD) za `search_depth` `basic`, `fast` i `ultra-fast` i 2 kredita (0,016 USD) za `advanced` ( [Tavily API krediti](https://docs.tavily.com/documentation/api-credits) ). Poziv sa `auto_parameters: true` koji Tavily nadograđuje na napredni i dalje se bilježi s 1 kreditom.
 
 ---
 
@@ -1210,6 +1208,8 @@ X-OmniRoute-No-Cache: true
 
 ---
 
+<a id="cliproxyapi-management-compatibility"></a>
+
 ## Kompatibilnost upravljanja CLIProxyAPI-jem
 
 OmniRoute odgovara na tri krajnje točke za upravljanje sustavom [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI)
@@ -1224,20 +1224,11 @@ poslužuju na `/v0/management/*` i `/api/v0/management/*`.
 | POST   | `/v0/management/api-call`    | Tijelo `{ auth_index, method, url, header?, data? }`. Šalje jedan zahtjev s popisa dopuštenih zahtjeva s tokenom računa i vraća `{ status_code, body }` |
 | POST   | `/v0/management/reset-quota` | Tijelo `{ auth_index }`. Briše hlađenje veze, zaključavanja modela i hlađenja po opsegu za Codex jednog računa                                          |
 
-- `auth_index` je ID veze u sustavu OmniRoute. `provider` je `claude` ili `codex` (samo OAuth
-  veze; pružatelj API ključa `anthropic` nije naveden). Za Codex je
-  `id_token.chatgpt_account_id` spremljeni ID radnog prostora, a `plan_type` spremljeni plan.
-- `api-call` nije generički proxy. Prihvaća samo Claude `GET
-https://api.anthropic.com/api/oauth/usage` i Codex `GET https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits` te
-  `POST .../wham/rate-limit-reset-credits/consume`, i to samo za račun odgovarajućeg
-  pružatelja. Sve ostalo vraća `403` bez kontaktiranja uzvodne usluge. Zaglavlje
-  `Authorization` pozivatelja (uključujući rezervirano mjesto `$TOKEN$`) zanemaruje se: OmniRoute umeće
-  pristupni token veze, najprije ga osvježava kada je blizu isteka i prosljeđuje samo
-  zaglavlja s popisa dopuštenih zaglavlja (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`;
-  `Accept`, `Content-Type`). Ako nedostaje `Chatgpt-Account-Id`, upotrebljava se spremljeni ID radnog prostora.
-  Zahtjevi istječu nakon 15 sekundi i upotrebljavaju proxy veze.
-- `reset-quota` ne mijenja završna stanja (banned, expired, credits_exhausted). Nepoznati
-  `auth_index` vraća `404`.
+- `auth_index` je ID veze OmniRoute. `provider` je `claude` ili `codex` (samo veze OAuth; pružatelj s API ključem `anthropic` nije naveden). Za Codex, `id_token.chatgpt_account_id` je spremljeni ID radnog prostora, a `plan_type` spremljeni plan.
+- `api-call` nije opći proxy. Prihvaća samo Claude `GET
+https://api.anthropic.com/api/oauth/usage` i Codex `GET
+https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits` i `POST .../wham/rate-limit-reset-credits/consume`, svaki samo za račun odgovarajućeg pružatelja. Sve ostalo vraća `403` bez kontaktiranja upstreama. Pozivateljevo zaglavlje `Authorization` (uključujući zamjensku oznaku `$TOKEN$`) zanemaruje se: OmniRoute umeće pristupni token veze, najprije ga osvježava kada je blizu isteka i prosljeđuje samo dopuštena zaglavlja (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`; `Accept`, `Content-Type`). Nedostajući `Chatgpt-Account-Id` zadano dobiva spremljeni ID radnog prostora. Ako je prvi odgovor upstreama `401`, jednom osvježava token i ponavlja pokušaj samo ako se pristupni token promijeni. Svaki pokušaj prema upstreamu ima vremensko ograničenje od 15 sekundi i koristi proxy veze.
+- `reset-quota` ne mijenja terminalna stanja (banned, expired, credits_exhausted). Nepoznat `auth_index` vraća `404`.
 
 **Autentikacija:** sesija nadzorne ploče ili API ključ s opsegom `manage`, obavezno čak i kada je prijava onemogućena
 (putanje se nalaze u `ALWAYS_PROTECTED_API_PATHS`). Ključevi namijenjeni samo zaključivanju dobivaju `403`. Izvor:
@@ -1970,17 +1961,17 @@ Trajna memorija razgovora/činjenica, ograničena na API ključ / sesiju.
 
 OmniRoute uključuje ugrađeni poslužitelj Model Context Protocol s 3 transporta (stdio, SSE, streamable-http) i alatima ograničenima opsegom. Krajnje točke nadzorne ploče u nastavku čitaju podatke o statusu i reviziji te prosljeđuju HTTP transporte.
 
-| Metoda | Putanja                | Opis                                                                                                                       | -------------------- |
-| ------ | ---------------------- | -------------------------------------------------------------------------------------------------------------------------- | -------------------- |
-| GET    | `/api/mcp/status`      | Otkucaj, transport, stanje povezanosti, posljednji poziv, najčešće korišteni alati, stopa uspješnosti u posljednja 24 sata |
-| GET    | `/api/mcp/tools`       | Popis MCP alata s `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints`                                |
-| GET    | `/api/mcp/sse`         | Otvaranje SSE toka za SSE transport (vraća `503` ako je MCP onemogućen ili se transport ne podudara)                       |
-| POST   | `/api/mcp/sse`         | Slanje JSON-RPC okvira putem SSE transporta                                                                                |
-| GET    | `/api/mcp/stream`      | Otvaranje SSE strane Streamable HTTP transporta (poruke koje pokreće poslužitelj)                                          |
-| POST   | `/api/mcp/stream`      | Slanje JSON-RPC okvira putem Streamable HTTP transporta                                                                    |
-| DELETE | `/api/mcp/stream`      | Završetak Streamable HTTP sesije                                                                                           |
-| GET    | `/api/mcp/audit`       | Upitnik dnevnika revizije — `?limit=`, `?offset=`, `?tool=`, `?success=true                                                | false`, `?apiKeyId=` |
-| GET    | `/api/mcp/audit/stats` | Objedinjena statistika revizije (ukupne vrijednosti, stopa uspješnosti, prosječno trajanje, najčešće korišteni alati)      |
+| Metoda | Putanja                | Opis                                                                                                                                               |
+| ------ | ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/mcp/status`      | Otkucaj, transport, stanje povezanosti, posljednji poziv, najčešće korišteni alati, stopa uspješnosti u posljednja 24 sata                         |
+| GET    | `/api/mcp/tools`       | Popis MCP alata s `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints`                                                        |
+| GET    | `/api/mcp/sse`         | Otvaranje SSE toka za SSE transport (vraća `503` ako je MCP onemogućen ili se transport ne podudara)                                               |
+| POST   | `/api/mcp/sse`         | Slanje JSON-RPC okvira putem SSE transporta                                                                                                        |
+| GET    | `/api/mcp/stream`      | Otvaranje SSE strane Streamable HTTP transporta (poruke koje pokreće poslužitelj)                                                                  |
+| POST   | `/api/mcp/stream`      | Slanje JSON-RPC okvira putem Streamable HTTP transporta                                                                                            |
+| DELETE | `/api/mcp/stream`      | Završetak Streamable HTTP sesije                                                                                                                   |
+| GET    | `/api/mcp/audit`       | Upitnik dnevnika revizije — `?limit=`, `?offset=`, `?tool=`, `?success=true                                                \| false`, `?apiKeyId=` |
+| GET    | `/api/mcp/audit/stats` | Objedinjena statistika revizije (ukupne vrijednosti, stopa uspješnosti, prosječno trajanje, najčešće korišteni alati)                              |
 
 **Autentikacija:** transporti `sse`/`stream` poštuju MCP-specifičnu površinu za autentikaciju (Bearer API ključ s opsegom `mcp`); rute `status`/`tools`/`audit*` dostupne su za čitanje s nadzorne ploče (nije potrebna dodatna autentikacija osim pristupa hostu nadzorne ploče).
 

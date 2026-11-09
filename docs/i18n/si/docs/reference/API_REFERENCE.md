@@ -822,14 +822,7 @@ Exa `type: "lite"` (Exa 3.0) කුඩා fields සමූහයක් පිළ
 ඉවත් කරනු ලැබේ. අත්හැර දමා ඇති `subpages`, `subpageTarget`, `highlights.numSentences` සහ
 `highlights.highlightsPerUrl` තවදුරටත් ඉදිරියට යවනු නොලැබේ.
 
-පිරිවැය ගණනය කිරීම `costPerQuery` වන flat registry එක භාවිත කරයි; Exa සඳහා පමණක් Exa හි
-ස්වකීය pricing අනුගමනය කරයි: `auto` (සහ legacy `fast`) සඳහා call එකකට $0.007ක් හෝ
-`lite` (සහ legacy `instant`) සඳහා $0.004ක්, ප්රතිඵල 10ක් ආවරණය කරමින්; එක් අමතර ප්රතිඵලයක්
-සඳහා $0.001ක්; සහ `contents.summary` සකසා ඇති විට ආපසු ලබා දෙන සෑම ප්රතිඵලයක් සඳහාම
-$0.001ක්. `search_depth` `basic`, `fast` සහ `ultra-fast` සඳහා Tavily credits 1ක් ($0.008)
-ලෙසත්, `advanced` සඳහා credits 2ක් ($0.016) ලෙසත් වාර්තා කරයි
-([Tavily API credits](https://docs.tavily.com/documentation/api-credits)). `auto_parameters: true`
-සහිත call එකක් Tavily විසින් advanced වෙත upgrade කළද එය තවමත් credit 1ක් ලෙස වාර්තා කරයි.
+Exa: `auto` සඳහා ඇමතුමකට $0.007 (සහ උරුමය `fast`) හෝ `lite` සඳහා $0.004 (සහ උරුමය `instant`), ප්‍රතිඵල 10ක් ආවරණය කරයි; එක් එක් ප්‍රතිඵලයක් සඳහා $0.001; සහ `contents.summary` සකසා ඇති විට ලැබෙන ප්‍රතිඵලයකට $0.001. Tavily `search_depth` `basic`, `fast` සහ `ultra-fast` සඳහා ණය 1 ($0.008) ලෙසත්, `advanced` සඳහා ණය 2 ($0.016) ( [Tavily API ණය](https://docs.tavily.com/documentation/api-credits) ) ලෙසත් සටහන් වේ. Tavily උසස් වෙත උත්ශ්‍රේණි කරන `auto_parameters: true` සහිත ඇමතුමක් තවමත් ණය 1කින් වාර්තා වේ.
 
 ---
 
@@ -1120,6 +1113,8 @@ X-OmniRoute-No-Cache: true
 
 ---
 
+<a id="cliproxyapi-management-compatibility"></a>
+
 ## CLIProxyAPI කළමනාකරණ අනුකූලතාව
 
 භාවිත උපකරණ පුවරු Claude සහ Codex දායකත්ව සීමා කියවීමට අමතන
@@ -1134,21 +1129,11 @@ OmniRoute වෙත යොමු කර, කළමනාකරණ යතුර �
 | POST  | `/v0/management/api-call`    | Body `{ auth_index, method, url, header?, data? }`. ගිණුමේ ටෝකනය සමඟ allowlist කර ඇති එක් ඉල්ලීමක් යවා `{ status_code, body }` ආපසු ලබා දෙයි |
 | POST  | `/v0/management/reset-quota` | Body `{ auth_index }`. එක් ගිණුමක සම්බන්ධතා cooldown, model lockouts සහ Codex එක්-scope cooldowns හිස් කරයි                                  |
 
-- `auth_index` යනු OmniRoute සම්බන්ධතා id එකයි. `provider` යනු `claude` හෝ `codex` වේ (OAuth
-  සම්බන්ධතා සඳහා පමණි; `anthropic` API-key provider එක ලැයිස්තුගත නොවේ). Codex සඳහා,
-  `id_token.chatgpt_account_id` යනු ගබඩා කර ඇති workspace id එක වන අතර `plan_type` යනු ගබඩා කර ඇති plan එකයි.
-- `api-call` යනු සාමාන්ය proxy එකක් නොවේ. එය Claude `GET
+- `auth_index` යනු OmniRoute connection ID යි. `provider` යනු `claude` හෝ `codex` යි (OAuth connection පමණි; `anthropic` API-key provider ලැයිස්තුගත නොවේ). Codex සඳහා `id_token.chatgpt_account_id` ගබඩා කළ workspace ID වන අතර `plan_type` ගබඩා කළ plan වේ.
+- `api-call` සාමාන්‍ය proxy එකක් නොවේ. එය Claude `GET
 https://api.anthropic.com/api/oauth/usage` සහ Codex `GET
-https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits` සහ
-  `POST .../wham/rate-limit-reset-credits/consume` පමණක් පිළිගනී. ඒ සෑම එකක්ම ගැළපෙන
-  provider එක සහිත ගිණුමක් සඳහා පමණි. වෙනත් ඕනෑම දෙයක් upstream සම්බන්ධ කර නොගෙන `403` ආපසු ලබා දෙයි. අමතන්නාගේ
-  `Authorization` ශීර්ෂය (`$TOKEN$` placeholder එක ඇතුළුව) නොසලකා හරිනු ලැබේ: OmniRoute
-  සම්බන්ධතාවේ access token එක ඇතුළත් කරයි, එය කල් ඉකුත්වීමට ආසන්න නම් පළමුව අලුත් කරයි, සහ
-  allowlist කර ඇති ශීර්ෂ පමණක් (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`;
-  `Accept`, `Content-Type`) ඉදිරියට යවයි. `Chatgpt-Account-Id` නොමැති විට ගබඩා කර ඇති workspace id එක පෙරනිමියෙන් භාවිත වේ.
-  ඉල්ලීම් තත්පර 15කට පසු කාලය ඉකුත් වන අතර සම්බන්ධතාවේ proxy එක භාවිත කරයි.
-- `reset-quota` මඟින් අවසාන තත්ත්වයන් (banned, expired, credits_exhausted) වෙනස් නොකරයි. නොදන්නා
-  `auth_index` එකක් `404` ආපසු ලබා දෙයි.
+https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits`, `POST .../wham/rate-limit-reset-credits/consume` පමණක් පිළිගනී; එක් එක් එක ගැළපෙන provider ගේ account සඳහා පමණි. අන් සියල්ල upstream අමතන්නේ නැතිව `403` ලබාදෙයි. Caller හි `Authorization` header (`$TOKEN$` placeholder ඇතුළුව) නොසලකා හරියි: OmniRoute connection හි access token ඇතුළත් කරයි, කල් ඉකුත් වීමට ආසන්න නම් මුලින් refresh කරයි, අවසර ලැයිස්තුවේ header පමණක් ඉදිරියට යවයි (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`; `Accept`, `Content-Type`). `Chatgpt-Account-Id` නොමැති නම් ගබඩා කළ workspace ID පෙරනිමිය වේ. පළමු upstream response `401` නම් එක් වරක් refresh කර, access token වෙනස් වුවහොත් පමණක් නැවත උත්සාහ කරයි. සෑම upstream උත්සාහයකටම තත්පර 15 ක timeout ඇති අතර connection හි proxy භාවිත කරයි.
+- `reset-quota` terminal තත්ත්ව (banned, expired, credits_exhausted) වෙනස් නොකරයි. නොදන්නා `auth_index` සඳහා `404` ලැබේ.
 
 **සත්යාපනය:** login අක්රිය කර තිබුණද dashboard session එකක් හෝ `manage`-scoped API key එකක් අවශ්ය වේ
 (මෙම මාර්ග `ALWAYS_PROTECTED_API_PATHS` තුළ ඇත). Inference-only යතුරුවලට `403` ලැබේ. මූලාශ්රය:
@@ -1198,7 +1183,7 @@ prefix එකක් එක් කර ඇති ලැයිස්තුවකි
 id (උදා: `nvidia/nemotron-…`) එලෙසම ගබඩා කරයි. `/v1/models` කිසි විටෙකත් ගොඩගැසූ
 `<prefix>/<prefix>/<model>` id එකක් නිකුත් නොකරයි.
 
-Custom Chat Completions nodes මඟින් පැහැදිලි reasoning opt-out upstream backend වෙත අනුවර්තනය කරයි. සාර්ථක සම්බන්ධතා පරීක්ෂණයක් මඟින්, `/models` ප්රවේශය මඟින් හඳුනාගත් `owned_by` අගයක් — `vllm`, `sglang`, හෝ `llamacpp` — සනාථ කරන එක් එක් නිශ්චිත model ID සඳහා chat-template පාලන ස්වයංක්රීයව තෝරා ගනී.  
+Custom Chat Completions nodes මඟින් පැහැදිලි reasoning opt-out upstream backend වෙත අනුවර්තනය කරයි. සාර්ථක සම්බන්ධතා පරීක්ෂණයක් මඟින්, `/models` ප්රවේශය මඟින් හඳුනාගත් `owned_by` අගයක් — `vllm`, `sglang`, හෝ `llamacpp` — සනාථ කරන එක් එක් නිශ්චිත model ID සඳහා chat-template පාලන ස්වයංක්රීයව තෝරා ගනී.\
 විනිවිද පෙනෙන OpenAI-අනුකූල wrappers මඟින් මුල් model entry එක nested `openai` object එකක් තුළ රඳවා තැබිය හැක; හඳුනාගැනීම එවැනි envelopes තුනක් දක්වා අනුගමනය කරයි. ownership නොමැති, නොදන්නා, හෝ ගැටෙන models සාමාන්ය OpenAI හැසිරීම රඳවා ගනී. හඳුනාගැනීම දැනටමත් පවතින catalog request එක නැවත භාවිත කරයි, completion tokens කිසිවක් ජනනය නොකරයි, සහ connection endpoint එක වෙනස් වූ විට අවලංගු වේ.
 
 මෙම metadata හෙළි නොකරන backend එකක් සඳහා හැසිරීම ස්ථිර කිරීමට, පවතින partial provider update API එක භාවිත කරන්න:
@@ -1881,17 +1866,17 @@ curl -X DELETE http://localhost:20128/api/resilience/model-cooldowns \
 
 OmniRoute මඟින් transports 3ක් (stdio, SSE, streamable-http) සහ scope කළ tools සහිත, ඇතුළත් Model Context Protocol සේවාදායකයක් සපයයි. පහත dashboard endpoints මඟින් තත්ත්වය/audit දත්ත කියවා HTTP transports සඳහා proxy ලෙස ක්රියා කරයි.
 
-| Method | Path | Description |
-| ------ | ---------------------- | ------------------------------------------------------------------------------------------------ | -------------------- |
-| GET | `/api/mcp/status` | Heartbeat, transport, සබැඳි තත්ත්වය, අවසන් call එක, ප්රමුඛ tools, පැය 24ක සාර්ථකතා අනුපාතය |
-| GET | `/api/mcp/tools` | `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints` සහිත MCP tools ලැයිස්තුව |
-| GET | `/api/mcp/sse` | SSE transport සඳහා විවෘත SSE stream එකක් ආරම්භ කරන්න (MCP අබල කර ඇත්නම් හෝ transport නොගැළපේ නම් `503` ආපසු ලබා දෙයි) |
-| POST | `/api/mcp/sse` | SSE transport මත JSON-RPC frame එකක් යවන්න |
-| GET | `/api/mcp/stream` | Streamable HTTP transport හි SSE පැත්ත විවෘත කරන්න (සේවාදායකය මඟින් ආරම්භ කරන පණිවිඩ) |
-| POST | `/api/mcp/stream` | Streamable HTTP transport මත JSON-RPC frame එකක් යවන්න |
-| DELETE | `/api/mcp/stream` | Streamable HTTP සැසියක් අවසන් කරන්න |
-| GET | `/api/mcp/audit` | audit log විමසන්න — `?limit=`, `?offset=`, `?tool=`, `?success=true                                | false`, `?apiKeyId=` |
-| GET | `/api/mcp/audit/stats` | සමස්ත audit සංඛ්යාලේඛන (මුළු ගණන, සාර්ථකතා අනුපාතය, සාමාන්ය කාලය, ප්රමුඛ tools) |
+| Method | Path                   | Description                                                                                                                |
+| ------ | ---------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/mcp/status`      | Heartbeat, transport, සබැඳි තත්ත්වය, අවසන් call එක, ප්රමුඛ tools, පැය 24ක සාර්ථකතා අනුපාතය                                 |
+| GET    | `/api/mcp/tools`       | `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints` සහිත MCP tools ලැයිස්තුව                         |
+| GET    | `/api/mcp/sse`         | SSE transport සඳහා විවෘත SSE stream එකක් ආරම්භ කරන්න (MCP අබල කර ඇත්නම් හෝ transport නොගැළපේ නම් `503` ආපසු ලබා දෙයි)      |
+| POST   | `/api/mcp/sse`         | SSE transport මත JSON-RPC frame එකක් යවන්න                                                                                 |
+| GET    | `/api/mcp/stream`      | Streamable HTTP transport හි SSE පැත්ත විවෘත කරන්න (සේවාදායකය මඟින් ආරම්භ කරන පණිවිඩ)                                      |
+| POST   | `/api/mcp/stream`      | Streamable HTTP transport මත JSON-RPC frame එකක් යවන්න                                                                     |
+| DELETE | `/api/mcp/stream`      | Streamable HTTP සැසියක් අවසන් කරන්න                                                                                        |
+| GET    | `/api/mcp/audit`       | audit log විමසන්න — `?limit=`, `?offset=`, `?tool=`, `?success=true                                \| false`, `?apiKeyId=` |
+| GET    | `/api/mcp/audit/stats` | සමස්ත audit සංඛ්යාලේඛන (මුළු ගණන, සාර්ථකතා අනුපාතය, සාමාන්ය කාලය, ප්රමුඛ tools)                                            |
 
 **Auth:** `sse`/`stream` transports MCP-විශේෂිත auth surface එකට අනුකූල වේ (`mcp` scope සහිත Bearer API යතුරක්); `status`/`tools`/`audit*` routes dashboard වෙතින් කියවිය හැකිය (dashboard host වෙත ළඟාවීමට අවශ්ය අමතර auth එකක් නොමැත).
 

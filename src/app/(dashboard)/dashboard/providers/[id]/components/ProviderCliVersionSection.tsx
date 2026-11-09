@@ -288,6 +288,7 @@ export default function ProviderCliVersionSection({ providerId }: ProviderCliVer
         <Button
           variant="outline"
           size="sm"
+          type="button"
           onClick={() => void save(nextValue)}
           disabled={saving || unchanged}
         >
@@ -296,6 +297,7 @@ export default function ProviderCliVersionSection({ providerId }: ProviderCliVer
         <Button
           variant="outline"
           size="sm"
+          type="button"
           onClick={() => {
             setDraft("");
             void save(null);

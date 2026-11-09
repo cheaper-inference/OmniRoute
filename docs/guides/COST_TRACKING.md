@@ -65,19 +65,19 @@ jobs run at the same time. `GET /api/pricing?includeSources=1` returns
 **LiteLLM sync** is opt-in, disabled by default. Its environment variables
 (see [`.env.example`](../../.env.example)) are:
 
-| Env var | Default | Purpose |
-| --- | --- | --- |
-| `PRICING_SYNC_ENABLED` | `false` | Enable background LiteLLM pricing sync. |
-| `PRICING_SYNC_INTERVAL` | `86400` | Sync interval in seconds (daily). |
-| `PRICING_SYNC_SOURCES` | `litellm` | Source selection for this sync only; currently only `litellm` is supported. |
+| Env var                 | Default   | Purpose                                                                     |
+| ----------------------- | --------- | --------------------------------------------------------------------------- |
+| `PRICING_SYNC_ENABLED`  | `false`   | Enable background LiteLLM pricing sync.                                     |
+| `PRICING_SYNC_INTERVAL` | `86400`   | Sync interval in seconds (daily).                                           |
+| `PRICING_SYNC_SOURCES`  | `litellm` | Source selection for this sync only; currently only `litellm` is supported. |
 
 **models.dev sync** is separate from the LiteLLM sync and is also disabled
 by default. Enable it in Settings (models.dev sync) or use these variables:
 
-| Env var | Default | Purpose |
-| --- | --- | --- |
-| `MODELS_DEV_SYNC_ENABLED` | _(unset)_ | Unset follows the Settings toggle; `1/true/on/yes` forces on and `0/false/off/no` forces off (even if Settings enables it). |
-| `MODELS_DEV_SYNC_INTERVAL` | `86400` | Default models.dev sync interval in seconds (daily). |
+| Env var                    | Default   | Purpose                                                                                                                     |
+| -------------------------- | --------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `MODELS_DEV_SYNC_ENABLED`  | _(unset)_ | Unset follows the Settings toggle; `1/true/on/yes` forces on and `0/false/off/no` forces off (even if Settings enables it). |
+| `MODELS_DEV_SYNC_INTERVAL` | `86400`   | Default models.dev sync interval in seconds (daily).                                                                        |
 
 `PRICING_SYNC_SOURCES` does **not** enable models.dev; it controls only
 the LiteLLM sync. Deleting a user override does not clear either synced namespace; the next
@@ -196,16 +196,16 @@ noted.
 
 ### Pricing
 
-| Method   | Endpoint                | Purpose                                                                                         |
-| -------- | ----------------------- | ----------------------------------------------------------------------------------------------- |
-| `GET`    | `/api/pricing`          | Merged four-layer pricing (user, models.dev, LiteLLM, defaults). `?includeSources=1` returns `pricing` + `sourceMap`. |
-| `PATCH`  | `/api/pricing`          | Override pricing for `{ provider: { model: { input, output, cached, … } } }`.                   |
-| `DELETE` | `/api/pricing`          | Remove user price overrides (optionally scoped by `?provider=&model=`); synced rates or built-in defaults remain as fallbacks.                           |
-| `GET`    | `/api/pricing/defaults` | Show default per-1M fallback rates.                                                             |
-| `GET`    | `/api/pricing/models`   | Pricing keyed by model.                                                                         |
-| `POST`   | `/api/pricing/sync`     | Trigger a manual sync from external sources (LiteLLM).                                          |
-| `GET`    | `/api/pricing/sync`     | Current sync status.                                                                            |
-| `DELETE` | `/api/pricing/sync`     | Clear LiteLLM-synced pricing only (`pricing_synced`); models.dev data is separate.                                                                  |
+| Method   | Endpoint                | Purpose                                                                                                                        |
+| -------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `GET`    | `/api/pricing`          | Merged four-layer pricing (user, models.dev, LiteLLM, defaults). `?includeSources=1` returns `pricing` + `sourceMap`.          |
+| `PATCH`  | `/api/pricing`          | Override pricing for `{ provider: { model: { input, output, cached, … } } }`.                                                  |
+| `DELETE` | `/api/pricing`          | Remove user price overrides (optionally scoped by `?provider=&model=`); synced rates or built-in defaults remain as fallbacks. |
+| `GET`    | `/api/pricing/defaults` | Show default per-1M fallback rates.                                                                                            |
+| `GET`    | `/api/pricing/models`   | Pricing keyed by model.                                                                                                        |
+| `POST`   | `/api/pricing/sync`     | Trigger a manual sync from external sources (LiteLLM).                                                                         |
+| `GET`    | `/api/pricing/sync`     | Current sync status.                                                                                                           |
+| `DELETE` | `/api/pricing/sync`     | Clear LiteLLM-synced pricing only (`pricing_synced`); models.dev data is separate.                                             |
 
 ### Other cost-relevant endpoints
 

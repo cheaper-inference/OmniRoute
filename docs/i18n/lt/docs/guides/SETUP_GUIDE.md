@@ -27,7 +27,9 @@ npm install -g omniroute
 omniroute
 ```
 
-Valdymo skydelis atidaromas adresu `http://localhost:20128`, o bazinis API URL yra `http://localhost:20128/v1`.
+Prietaisų skydelis atidaromas `http://localhost:20128`, o API bazė URL yra `http://localhost:20128/v1`.
+
+> **npm vartotojai:** Jei npm įspėja, kad diegimo scenarijai buvo užblokuoti (pvz., `omniroute`, `better-sqlite3`), žr. [Trikčių šalinimas — npm diegimo scenarijai užblokuoti](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install).
 
 ### pnpm
 
@@ -191,41 +193,41 @@ Išsamią kiekvieno įrankio konfigūraciją (Claude Code, Codex CLI, Cursor, Cl
 
 ---
 
-## Protokolų sąranka (MCP + A2A)
+## Protokolo sąranka (MCP + A2A)
 
-### MCP sąranka (Model Context Protocol)
+### MCP sąranka (modelio konteksto protokolas)
 
-Paleiskite MCP transportą stdio režimu:
+Pradėti MCP transportavimą stdio režimu:
 
 ```bash
 omniroute --mcp
 ```
 
-Rekomenduojama tikrinimo eiga:
+Rekomenduojamas patvirtinimo eiga:
 
 ```bash
-# 1. Paleiskite MCP serverį
+# 1. Start MCP server
 omniroute --mcp
 
-# 2. Iš savo MCP kliento iškvieskite:
-omniroute_get_health        # Turėtų grąžinti sistemos būklę
-omniroute_list_combos       # Turėtų grąžinti aktyvius derinius
+# 2. From your MCP client, call:
+omniroute_get_health        # Should return system health
+omniroute_list_combos       # Should return active combos
 
-# 3. Arba paleiskite visą E2E testų rinkinį:
+# 3. Or run the full E2E suite:
 npm run test:protocols:e2e
 ```
 
 #### MCP kliento konfigūracija
 
-**Claude Code:**
+**Claude kodas:**
 
 ```bash
-claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
 ```
 
 **Cursor / Cline:**
 
-Pridėkite prie savo MCP nustatymų:
+Pridėkite prie savo MCP nustatymų (stdio, su raktu, kad skambinantysis turėtų pagrindinį):
 
 ```json
 {
@@ -233,23 +235,30 @@ Pridėkite prie savo MCP nustatymų:
     "omniroute": {
       "command": "omniroute",
       "args": ["--mcp"],
-      "env": {}
+      "env": {
+        "OMNIROUTE_API_KEY": "your-key",
+        "OMNIROUTE_BASE_URL": "http://localhost:20128"
+      }
     }
   }
 }
 ```
 
-**Visa MCP dokumentacija:** [MCP serverio README](../../open-sse/mcp-server/README.md) — 110 įrankių, IDE konfigūracijos, Python/TS/Go klientai.
+Arba, kai `mcpTransport` yra `streamable-http` (nustatykite jį `/dashboard/mcp` arba su `omniroute mcp enable --transport streamable-http`), nukreipkite kliento nuotolinio MCP serverio įrašą į `http://localhost:20128/api/mcp/stream`.
 
-### A2A sąranka (Agent-to-Agent Protocol)
+Raktas keliauja kaip `Authorization: Bearer <api-key>` (žr. [MCP Serveris → Nuotolinė prieiga](../frameworks/MCP-SERVER.md#remote-access-manage-scope-bypass) nuotoliniams pagrindiniams kompiuteriams; nuotoliniam raktui reikia `mcp:connect` ir jo read/write taikymo srities).
 
-Patikrinkite agento kortelę:
+**Visa MCP dokumentacija:** [MCP serveris README](../../open-sse/mcp-server/README.md) — 110 įrankiai, IDE konfigūracijos, Python/TS/Go klientai. Operatoriaus nuoroda į suspaudimo CCR/dedup įrankius (žymekliai, būtinos sąlygos, kiekvieno įrankio apimtys, paieškos puslapių numeravimas, diagnostika): [Suspaudimo varikliai → Būtinos sąlygos / operatoriaus vadovas](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+
+### A2A sąranka (agento-agento protokolas)
+
+Patvirtinkite agento kortelę:
 
 ```bash
 curl http://localhost:20128/.well-known/agent.json
 ```
 
-Išsiųskite užduotį:
+Siųsti užduotį:
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -257,7 +266,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"Give me a short quota summary."}]}}'
 ```
 
-**Visa A2A dokumentacija:** [A2A serverio README](../../src/lib/a2a/README.md) — JSON-RPC 2.0, įgūdžiai, srautinis perdavimas, užduočių gyvavimo ciklas.
+**Visa A2A dokumentacija:** [A2A Server README](../../src/lib/a2a/README.md) — JSON-RPC 2.0, įgūdžiai, srautinis perdavimas, užduočių gyvavimo ciklas.
 
 ---
 
@@ -316,23 +325,23 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ---
 
-## Void Linux (`xbps-src`) šablonas
+## Tuščias Linux (xbps-src) šablonas
 
-Void Linux naudotojai gali sukurti savąjį paketą naudodami `xbps-src`. Išsaugokite šį bloką kaip `srcpkgs/omniroute/template`:
+„Void Linux naudotojai gali sukurti savąjį paketą naudodami `xbps-src`. Išsaugokite šį bloką kaip `srcpkgs/omniroute/template`:
 
 ```bash
-# „omniroute“ šablono failas
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
 hostmakedepends="nodejs python3 make"
 depends="openssl"
-short_desc="Universalūs DI šliuzai su išmaniuoju maršrutizavimu keliems LLM teikėjams"
+short_desc="Universal AI gateway with smart routing for multiple LLM providers"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# Iš naujo sugeneruokite kontrolinę sumą kiekvienam leidimui naudodami:
+# Regenerate the checksum for each release with:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

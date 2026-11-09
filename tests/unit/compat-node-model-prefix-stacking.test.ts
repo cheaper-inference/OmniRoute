@@ -31,6 +31,9 @@ const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-prefix-st
 process.env.DATA_DIR = TEST_DATA_DIR;
 process.env.API_KEY_SECRET = process.env.API_KEY_SECRET || "prefix-stack-test-secret";
 
+const { aiHordeImageCatalog } = await import("../../open-sse/services/aihordeImageCatalog.ts");
+const { closeSharedLoggerResource } = await import("../../src/shared/utils/loggerResource.ts");
+
 type CoreModule = typeof import("../../src/lib/db/core.ts");
 type ProvidersDbModule = typeof import("../../src/lib/db/providers.ts");
 type ModelsDbModule = typeof import("../../src/lib/db/models.ts");
@@ -56,6 +59,10 @@ async function resetStorage() {
   fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   fs.mkdirSync(TEST_DATA_DIR, { recursive: true });
   v1ModelsCatalog.__resetCatalogBuilderRunsForTest();
+  // Anonymous image discovery is outside the compatible-node model-ID contract.
+  // Keep even an expired Horde snapshot offline via the established HTTP seam.
+  aiHordeImageCatalog.clear();
+  aiHordeImageCatalog.setFetch(async () => Response.json([]));
 }
 
 async function seedCompatibleNode() {
@@ -96,6 +103,8 @@ test.before(async () => {
 test.after(async () => {
   delete process.env.OMNIROUTE_API_KEY;
   if (core) core.resetDbInstance();
+  aiHordeImageCatalog.clear();
+  await closeSharedLoggerResource();
   fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
@@ -479,4 +488,38 @@ test("validate-and-add handler stores the bare upstream id for a prefixed node",
     MODEL_IQ1M,
     `service layer must receive the bare id, got "${capturedModelId}"`
   );
+});
+
+test("PATCH unhide updates a hidden legacy row addressed by its stored prefixed id", async () => {
+  await resetStorage();
+  await seedCompatibleNode();
+  process.env.OMNIROUTE_API_KEY = "sk-prefix-stack-mgmt";
+  await modelsDb.addCustomModel(NODE_ID, STACKED_IQ1M, "Qwen", "manual");
+  await modelsDb.updateCustomModel(NODE_ID, STACKED_IQ1M, { isHidden: true });
+
+  const response = await providerModelsRoute.PATCH(
+    new Request(
+      `http://localhost/api/provider-models?provider=${encodeURIComponent(NODE_ID)}&modelId=${encodeURIComponent(STACKED_IQ1M)}`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer sk-prefix-stack-mgmt",
+        },
+        body: JSON.stringify({ isHidden: false }),
+      }
+    )
+  );
+  assert.equal(response.status, 200);
+  const stored = (await modelsDb.getCustomModels(NODE_ID)) as Array<{
+    id: string;
+    isHidden?: boolean;
+  }>;
+  assert.equal(stored.find((model) => model.id === STACKED_IQ1M)?.isHidden, false);
+
+  const catalogResponse = await v1ModelsCatalog.getUnifiedModelsResponse(
+    new Request("http://localhost/api/v1/models")
+  );
+  const catalog = (await catalogResponse.json()) as { data: Array<{ id: string }> };
+  assert.ok(catalog.data.some((model) => model.id === `${NODE_PREFIX}/${MODEL_IQ1M}`));
 });

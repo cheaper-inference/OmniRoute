@@ -25,27 +25,30 @@ omniroute launch --profile glm52  # Claude Code naudoja glm/glm-5.2 per OmniRout
 
 ---
 
-## Kaip Claude kodas jungiasi prie šliuzo
+## Kaip Claude Code prisijungia prie šliuzo
 
-Claude Code kalba apie**Anthropic Žinutės API** ir yra nukreiptas į pasirinktinį galinį tašką su aplinkos kintamaisiais (jis neturi `--base-url` vėliavėlės):
+Claude Code naudoja **Anthropic Messages API** ir į pasirinktinį galinį tašką
+nukreipiamas aplinkos kintamaisiais (jis neturi `--base-url` parametro):
 
-| Kintamasis                                   | Tikslas                                                                                         |
-| -------------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| `ANTHROPIC_BASE_URL`                         | Šliuzo šaknis URL (Claude kodas pridedamas `/v1/messages`).** Nėra `/v1` priesagos.**           |
-| `ANTHROPIC_AUTH_TOKEN`                       | Išsiųsta kaip `Authorization: Bearer …` — naudokite OmniRoute prieigos raktą / API raktą        |
-| `ANTHROPIC_API_KEY`                          | Alternatyva: išsiųstas kaip `x-api-key`. Jei abu nustatomi, `ANTHROPIC_AUTH_TOKEN` laimi        |
-| `ANTHROPIC_MODEL`                            | Priversti konkretų modelį (nepaiso `/model` rinkiklio numatytosios)                             |
-| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → vietiniame `/model` rinkiklyje pateikiami `claude*`/`anthropic*` modeliai iš `/v1/models` |
-| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | Apriboti išvesties prieigos raktus vienam atsakymui (pvz., `65536`)                             |
-| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | Automatinio sutankinimo prieigos rakto slenkstis                                                |
+| Kintamasis                                   | Paskirtis                                                                                                |
+| -------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| `ANTHROPIC_BASE_URL`                         | Šliuzo šakninis URL (Claude Code prideda `/v1/messages`). **Be `/v1` priesagos.**                        |
+| `ANTHROPIC_AUTH_TOKEN`                       | Siunčiamas kaip `Authorization: Bearer …` — naudokite savo OmniRoute prieigos prieigos raktą / API raktą |
+| `ANTHROPIC_API_KEY`                          | Alternatyva: siunčiamas kaip `x-api-key`. Jei nustatyti abu, pirmenybė teikiama `ANTHROPIC_AUTH_TOKEN`   |
+| `ANTHROPIC_MODEL`                            | Priverstinai naudoti konkretų modelį (nepaisoma numatytojo `/model` parinkiklio pasirinkimo)             |
+| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → vietinis `/model` parinkiklis pateikia `claude*`/`anthropic*` modelius iš `/v1/models`             |
+| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | Apriboja vieno atsakymo išvesties žetonų skaičių (pvz., `65536`)                                         |
+| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | Žetonų slenkstis automatiniam sutankinimui                                                               |
 
-> Env vars skaitomi** vieną kartą paleidžiant** — iš naujo paleiskite Claude kodą juos pakeitę.
+> Aplinkos kintamieji nuskaitomi **vieną kartą paleidimo metu** — juos pakeitę paleiskite Claude Code iš naujo.
 
-Jei kredencialas sukasi, o ne fiksuota eilutė, nustatykite `apiKeyHelper` `~/.claude/settings.json` į komandą, kuri spausdina dabartinį kredencialą į stdout. Pagal numatytuosius nustatymus Claude kodas talpykloje saugo savo išvestį penkias minutes (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` nepaiso to) ir siunčia reikšmę ir `Authorization: Bearer` ir `x-api-key`. Scenarijus turi išspausdinti kredencialus ir nieko daugiau — reklamjuostę kartu su juo nepavyksta pagalbinės priemonės v2.1.227 +.
+Jei autentifikavimo duomuo periodiškai keičiamas, o ne yra pastovi eilutė, `apiKeyHelper` faile `~/.claude/settings.json` nurodykite komandą, kuri dabartinį duomenį išveda į stdout. Claude Code pagal numatytąją nuostatą išvestį saugo podėlyje penkias minutes (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` pakeičia šią trukmę) ir reikšmę siunčia tiek `Authorization: Bearer`, tiek `x-api-key`. Scenarijus turi išvesti tik autentifikavimo duomenį: papildomas informacinis tekstas sutrikdo pagalbinę priemonę nuo v2.1.227+.
 
-Taip veikia Entra ID SSO : `scripts/cli/omniroute-sso.mjs token` vietoj API rakto išspausdina trumpalaikį Entra prieigos raktą, kurį OmniRoute patikrina. Žiūrėkite [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md).
+Taip veikia Entra ID SSO: `scripts/cli/omniroute-sso.mjs token` išveda trumpai galiojantį Entra prieigos žetoną, kurį OmniRoute tikrina vietoje API rakto. Žr. [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md).
 
-`omniroute launch` nustato visa tai už jus: iš aktyvaus konteksto išskiria bazinį URL + raktą (taigi `omniroute connect <vps>` tada `omniroute launch` tiesiog veikia), patikrina serverio būklę ir vykdo `claude`.
+`omniroute launch` visa tai nustato už jus: iš aktyvaus konteksto nustato bazinį URL ir prieigos raktą
+(todėl po `omniroute connect <vps>` komanda `omniroute launch`
+tiesiog veikia), patikrina serverio būklę ir paleidžia `claude`.
 
 ---
 

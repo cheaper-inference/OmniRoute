@@ -16,7 +16,7 @@ zimefafanuliwa katika `AGENTS.md`.
 
 Itifaki kamili ya lazima ya worktree (uthibitisho wa base-branch, njia rasmi ya
 `.claude/worktrees/`, `cp -al` node_modules, sheria za kusafisha) iko katika
-[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) (imefupishwa katika `AGENTS.md` →
+[`docs/ops/WORKTREE_ISOLATION.md`](../../../docs/ops/WORKTREE_ISOLATION.md) (imefupishwa katika `AGENTS.md` →
 Git Workflow → "Worktree isolation"). Mambo mahususi ya Claude Code:
 
 - Thibitisha base branch na mwendeshaji kupitia `AskUserQuestion` (Hard Rule #19) isipokuwa

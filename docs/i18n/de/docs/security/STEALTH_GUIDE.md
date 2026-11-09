@@ -242,9 +242,9 @@ Alle MITM-Endpunkte erfordern eine Verwaltungs-Authentifizierung (`requireCliToo
 
 ---
 
-## User-Agent überschreibt — env vars (`.env.example` Abschnitt 12)
+## User-Agent-Überschreibungen — Umgebungsvariablen (`.env.example` Abschnitt 12)
 
-| Variable            | Standard                                      |
+| Variable            | Standardwert                                  |
 | ------------------- | --------------------------------------------- |
 | `CLAUDE_USER_AGENT` | `claude-cli/2.1.280 (external, cli)`          |
 | `CODEX_USER_AGENT`  | `codex-cli/0.155.0 (Windows 10.0.26200; x64)` |
@@ -253,7 +253,7 @@ Alle MITM-Endpunkte erfordern eine Verwaltungs-Authentifizierung (`requireCliToo
 | `QODER_USER_AGENT`  | `Qoder-Cli`                                   |
 | `CURSOR_USER_AGENT` | `Cursor/3.4`                                  |
 
-Wird von `open-sse/executors/base.ts::buildHeaders()` über eine dynamische Suche genutzt.** Erhöhen Sie diese, wenn Anbieter neue CLI Versionen veröffentlichen** Veraltete — UA -Strings werden zunehmend als veraltete Clients abgelehnt.
+Wird von `open-sse/executors/base.ts::buildHeaders()` über eine dynamische Suche verwendet. **Aktualisieren Sie diese Werte, wenn Anbieter neue CLI-Versionen veröffentlichen** — veraltete UA-Zeichenfolgen werden zunehmend mit der Begründung abgelehnt, dass die Clients nicht mehr aktuell sind.
 
 ## Umschalter für den CLI-Kompatibilitätsmodus (`.env.example` Abschnitt 13)
 

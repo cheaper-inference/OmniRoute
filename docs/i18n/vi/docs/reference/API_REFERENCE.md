@@ -920,12 +920,7 @@ khi có bất kỳ trường nào khác được thiết lập. Đối với lit
 `contents` ngoại trừ `text` và `highlights` sẽ bị loại bỏ trước khi gọi. Các trường không còn được dùng
 `subpages`, `subpageTarget`, `highlights.numSentences` và `highlights.highlightsPerUrl` không còn được chuyển tiếp.
 
-Việc hạch toán chi phí sử dụng registry phẳng `costPerQuery`, ngoại trừ Exa, sử dụng bảng giá riêng của Exa:
-$0.007 mỗi lần gọi cho `auto` (và `fast` cũ) hoặc $0.004 cho `lite` (và `instant` cũ), bao gồm 10 kết quả;
-$0.001 cho mỗi kết quả bổ sung; và $0.001 cho mỗi kết quả được trả về khi `contents.summary` được thiết lập. Tavily
-được ghi nhận là 1 tín dụng ($0.008) cho `search_depth` `basic`, `fast` và `ultra-fast`, và 2 tín dụng ($0.016) cho
-`advanced` ([tín dụng API Tavily](https://docs.tavily.com/documentation/api-credits)). Một lần gọi có
-`auto_parameters: true` mà Tavily nâng cấp lên advanced vẫn được ghi nhận là 1 tín dụng.
+Exa: 0,007 USD mỗi lệnh gọi cho `auto` (và `fast` cũ) hoặc 0,004 USD cho `lite` (và `instant` cũ), bao gồm 10 kết quả; 0,001 USD cho mỗi kết quả tiếp theo; và 0,001 USD cho mỗi kết quả trả về khi `contents.summary` được đặt. Tavily được ghi ở mức 1 tín dụng ($0,008) cho `search_depth` `basic`, `fast` và `ultra-fast` và 2 tín dụng ($0,016) cho `advanced` ( [tín dụng Tavily API](https://docs.tavily.com/documentation/api-credits) ). Cuộc gọi với `auto_parameters: true` mà Tavily nâng cấp lên nâng cao vẫn được ghi ở mức 1 tín dụng.
 
 ---
 
@@ -1216,6 +1211,8 @@ X-OmniRoute-No-Cache: true
 
 ---
 
+<a id="cliproxyapi-management-compatibility"></a>
+
 ## Khả năng tương thích quản lý CLIProxyAPI
 
 OmniRoute phản hồi ba endpoint quản lý của [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI)
@@ -1230,19 +1227,11 @@ cung cấp tại `/v0/management/*` và `/api/v0/management/*`.
 | POST        | `/v0/management/api-call`    | Nội dung `{ auth_index, method, url, header?, data? }`. Gửi một yêu cầu được cho phép với token của tài khoản và trả về `{ status_code, body }` |
 | POST        | `/v0/management/reset-quota` | Nội dung `{ auth_index }`. Xóa thời gian chờ kết nối, trạng thái khóa model và thời gian chờ theo phạm vi Codex của một tài khoản               |
 
-- `auth_index` là ID kết nối OmniRoute. `provider` là `claude` hoặc `codex` (chỉ dành cho các kết nối OAuth; nhà cung cấp khóa API `anthropic` không được liệt kê). Đối với Codex,
-  `id_token.chatgpt_account_id` là ID workspace được lưu trữ và `plan_type` là gói được lưu trữ.
-- `api-call` không phải là proxy chung. Nó chỉ chấp nhận Claude `GET
-https://api.anthropic.com/api/oauth/usage` và Codex `GET https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits` và
-  `POST .../wham/rate-limit-reset-credits/consume`, mỗi yêu cầu chỉ dành cho tài khoản thuộc
-  nhà cung cấp tương ứng. Mọi yêu cầu khác sẽ trả về `403` mà không liên hệ với upstream. Header
-  `Authorization` của bên gọi (bao gồm placeholder `$TOKEN$`) sẽ bị bỏ qua: OmniRoute chèn
-  access token của kết nối, làm mới token trước nếu token sắp hết hạn, và chỉ chuyển tiếp
-  các header được cho phép (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`;
-  `Accept`, `Content-Type`). Nếu thiếu `Chatgpt-Account-Id`, giá trị mặc định là ID workspace được lưu trữ.
-  Các yêu cầu hết thời gian chờ sau 15 giây và sử dụng proxy của kết nối.
-- `reset-quota` giữ nguyên các trạng thái kết thúc (banned, expired, credits_exhausted). `auth_index`
-  không xác định sẽ trả về `404`.
+- `auth_index` là ID kết nối OmniRoute. `provider` là `claude` hoặc `codex` (chỉ các kết nối OAuth; nhà cung cấp dùng API key `anthropic` không được liệt kê). Với Codex, `id_token.chatgpt_account_id` là ID không gian làm việc đã lưu và `plan_type` là gói đã lưu.
+- `api-call` không phải proxy tổng quát. Nó chỉ chấp nhận `GET
+https://api.anthropic.com/api/oauth/usage` của Claude và `GET
+https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits`, `POST .../wham/rate-limit-reset-credits/consume` của Codex, mỗi loại chỉ dùng với tài khoản của nhà cung cấp tương ứng. Mọi trường hợp khác trả về `403` mà không liên hệ thượng nguồn. Header `Authorization` của bên gọi, kể cả ký hiệu thay thế `$TOKEN$`, bị bỏ qua: OmniRoute chèn token truy cập của kết nối, làm mới trước nếu sắp hết hạn và chỉ chuyển tiếp các header trong danh sách cho phép (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`; `Accept`, `Content-Type`). Nếu thiếu `Chatgpt-Account-Id`, mặc định dùng ID không gian làm việc đã lưu. Nếu phản hồi thượng nguồn đầu tiên là `401`, hệ thống làm mới một lần và chỉ thử lại khi token truy cập thay đổi. Mỗi lần thử thượng nguồn hết thời gian chờ sau 15 giây và dùng proxy của kết nối.
+- `reset-quota` giữ nguyên các trạng thái kết thúc (banned, expired, credits_exhausted). Một `auth_index` không xác định trả về `404`.
 
 **Xác thực:** phiên bảng điều khiển hoặc khóa API có phạm vi `manage`, bắt buộc ngay cả khi tính năng đăng nhập bị vô hiệu hóa
 (các đường dẫn nằm trong `ALWAYS_PROTECTED_API_PATHS`). Khóa chỉ dùng cho suy luận sẽ nhận `403`. Nguồn:
@@ -1977,17 +1966,17 @@ Kho lưu trữ bộ nhớ hội thoại/sự kiện bền vững, được giớ
 
 OmniRoute tích hợp sẵn máy chủ Model Context Protocol với 3 phương thức truyền tải (stdio, SSE, streamable-http) và các công cụ có phạm vi. Các endpoint của dashboard bên dưới đọc dữ liệu trạng thái/kiểm tra và proxy các phương thức truyền tải HTTP.
 
-| Method | Path | Description |
-| ------ | ---------------------- | ------------------------------------------------------------------------------------------------ | -------------------- |
-| GET | `/api/mcp/status` | Heartbeat, phương thức truyền tải, trạng thái trực tuyến, lần gọi gần nhất, các công cụ hàng đầu, tỷ lệ thành công trong 24 giờ |
-| GET | `/api/mcp/tools` | Danh sách các công cụ MCP với `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints` |
-| GET | `/api/mcp/sse` | Mở luồng SSE cho phương thức truyền tải SSE (trả về `503` nếu MCP bị tắt hoặc phương thức truyền tải không khớp) |
-| POST | `/api/mcp/sse` | Gửi khung JSON-RPC qua phương thức truyền tải SSE |
-| GET | `/api/mcp/stream` | Mở phía SSE của phương thức truyền tải Streamable HTTP (các thông báo do máy chủ khởi tạo) |
-| POST | `/api/mcp/stream` | Gửi khung JSON-RPC qua phương thức truyền tải Streamable HTTP |
-| DELETE | `/api/mcp/stream` | Kết thúc một phiên Streamable HTTP |
-| GET | `/api/mcp/audit` | Truy vấn nhật ký kiểm tra — `?limit=`, `?offset=`, `?tool=`, `?success=true                                | false`, `?apiKeyId=` |
-| GET | `/api/mcp/audit/stats` | Thống kê kiểm tra tổng hợp (tổng số, tỷ lệ thành công, thời lượng trung bình, các công cụ hàng đầu) |
+| Method | Path                   | Description                                                                                                                        |
+| ------ | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/mcp/status`      | Heartbeat, phương thức truyền tải, trạng thái trực tuyến, lần gọi gần nhất, các công cụ hàng đầu, tỷ lệ thành công trong 24 giờ    |
+| GET    | `/api/mcp/tools`       | Danh sách các công cụ MCP với `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints`                            |
+| GET    | `/api/mcp/sse`         | Mở luồng SSE cho phương thức truyền tải SSE (trả về `503` nếu MCP bị tắt hoặc phương thức truyền tải không khớp)                   |
+| POST   | `/api/mcp/sse`         | Gửi khung JSON-RPC qua phương thức truyền tải SSE                                                                                  |
+| GET    | `/api/mcp/stream`      | Mở phía SSE của phương thức truyền tải Streamable HTTP (các thông báo do máy chủ khởi tạo)                                         |
+| POST   | `/api/mcp/stream`      | Gửi khung JSON-RPC qua phương thức truyền tải Streamable HTTP                                                                      |
+| DELETE | `/api/mcp/stream`      | Kết thúc một phiên Streamable HTTP                                                                                                 |
+| GET    | `/api/mcp/audit`       | Truy vấn nhật ký kiểm tra — `?limit=`, `?offset=`, `?tool=`, `?success=true                                \| false`, `?apiKeyId=` |
+| GET    | `/api/mcp/audit/stats` | Thống kê kiểm tra tổng hợp (tổng số, tỷ lệ thành công, thời lượng trung bình, các công cụ hàng đầu)                                |
 
 **Xác thực:** các phương thức truyền tải `sse`/`stream` tuân theo giao diện xác thực riêng của MCP (API key Bearer với phạm vi `mcp`); các route `status`/`tools`/`audit*` có thể được đọc từ dashboard (không yêu cầu xác thực bổ sung ngoài việc truy cập máy chủ dashboard).
 

@@ -101,9 +101,11 @@ async function decodeFailureBody(
     try {
       decodeBodyText(decoded, await cloned.text());
     } catch {
+      // no-effect: status/text still classify the error; prose/header hints remain available.
       unreadable("unparseable body");
     }
   } catch {
+    // no-effect: the original failure remains; only optional body-derived hints are missing.
     unreadable("clone failed");
   }
   return decoded;
@@ -140,6 +142,7 @@ function stringifyErrorText(errorText: unknown): string {
   try {
     return JSON.stringify(errorText);
   } catch {
+    // no-effect: a non-JSON-serializable error message retains its textual fallback.
     return String(errorText);
   }
 }

@@ -12,13 +12,13 @@ Turbopack-koonti osuu samanaikaisesti Release-Green-webpack-koonnin ja lint-työ
 sivutustila (16 GB) tasaa tilanteen. Koska pull request -koonnit suoritetaan ylläpidetyillä
 suorittajilla, Turbopack-paikka on suurimman osan ajasta käyttämättömänä:
 
-| suorittaja           | tunniste       | rooli                                                                                                                                                 | `MemoryHigh` / `MemoryMax` | `CPUQuota`     |
-| -------------------- | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | -------------- |
-| `omniroute-113-5`    | `omni-build`   | Turbopack-koonnit: `ci.yml` `Build` (vain push/dispatch), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, yöaikainen a11y-koonti | 56 GB / 60 GB (swap 0)     | 1600 %         |
-| `omniroute-113-6`    | `omni-release` | Release-Green (`release-green` + `main-green`), webpack-koonti                                                                                        | 20 GB / 24 GB (swap 4 GB)  | 800 %          |
-| `omniroute-113-2`    | `omni-light`   | yöajot (Schemathesis, promptfoo, garak, k6) ja `quality.yml`-tiedoston `lint-guard`                                                                   | 12 GB / 16 GB (swap 4 GB)  | 600 %          |
-| `omniroute-113`      | `omni-light`   | sama pooli kuin yllä                                                                                                                                  | 8 GB / 12 GB               | 400 %          |
-| OmniHeuris, OmniMind | (omat repot)   | vain Dependabot (kummankin huippu 155 MB, 2026-10-18)                                                                                                 | 4 GB / 6 GB                | 200 % kumpikin |
+| suorittaja           | tunniste                        | rooli                                                                                                                                                 | `MemoryHigh` / `MemoryMax` | `CPUQuota`     |
+| -------------------- | ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | -------------- |
+| `omniroute-113-5`    | `omni-build`, `omni-build-60gb` | Turbopack-koonnit: `ci.yml` `Build` (vain push/dispatch), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, yöaikainen a11y-koonti | 56 GB / 60 GB (swap 0)     | 1600 %         |
+| `omniroute-113-6`    | `omni-release`                  | Release-Green (`release-green` + `main-green`), webpack-koonti                                                                                        | 20 GB / 24 GB (swap 4 GB)  | 800 %          |
+| `omniroute-113-2`    | `omni-light`                    | yöajot (Schemathesis, promptfoo, garak, k6) ja `quality.yml`-tiedoston `lint-guard`                                                                   | 12 GB / 16 GB (swap 4 GB)  | 600 %          |
+| `omniroute-113`      | `omni-light`                    | sama pooli kuin yllä                                                                                                                                  | 8 GB / 12 GB               | 400 %          |
+| OmniHeuris, OmniMind | (omat repot)                    | vain Dependabot (kummankin huippu 155 MB, 2026-10-18)                                                                                                 | 4 GB / 6 GB                | 200 % kumpikin |
 
 Mitattu 2026-10-18:
 
@@ -28,12 +28,13 @@ Mitattu 2026-10-18:
 | swap        | 16 GB                             | `omniroute-113-5` toimii ilman sivutusta (`MemorySwapMax=0`), joten hallitsemattomasti kasvava koonti katkaistaan sen saavuttaessa rajansa sen sijaan, että koko palvelin alkaisi käyttää sivutusta                                                                                                                                                                                                                  |
 | `/tmp`      | **12 GB tmpfs = RAM**             | kaikki sinne tallennettu kuluttaa muistia; jäänteet poistetaan 3 tunnin kuluttua                                                                                                                                                                                                                                                                                                                                     |
 | CPU         | kuormaksi havaittu 60 32 ytimellä | ennen kiintiöitä yksi Turbopack-koonti (~1166 % CPU) sekä samalla palvelimella ajettu kattavuustestikokonaisuus estivät muita kuuntelijoita lähettämästä heartbeat-signaalejaan (`The self-hosted runner lost communication`, #16853)                                                                                                                                                                                |
-| suorittajat | **7 kuuntelijaa** (2026-10-28)    | 5 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-7` kantaa myös tunnistetta `omni-build`; `omniroute-113-3/-4/-8` poistettiin repositoriosta (2026-10-28)                                                                                                                                                                                                                                                         |
+| suorittajat | **7 kuuntelijaa** (2026-10-28)    | 5 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-5` kantaa myös tunnistetta `omni-build-60gb`; `omniroute-113-3/-4/-8` poistettiin repositoriosta (2026-10-28)                                                                                                                                                                                                                                                    |
 
 Rajat sijaitsevat kunkin yksikön tiedostossa `/etc/systemd/system/actions.runner.<…>.service.d/override.conf`
 (aiemmat arvot on säilytetty nimellä `override.conf.bak-20261018`), ja ne otettiin käyttöön ajon aikana komennolla
 `systemctl set-property --runtime … MemoryHigh=… MemoryMax=… CPUQuota=…` — ilman uudelleenkäynnistystä, joten
-käynnissä oleviin töihin ei puututtu. Tunnisteet muutetaan runners API:n kautta (`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
+käynnissä oleviin töihin ei puututtu. Tunnisteet muutetaan runners API:n kautta
+(`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
 `gh api -X POST repos/<repo>/actions/runners/<id>/labels -f 'labels[]=<label>'`), niin ikään ajon aikana.
 
 ## Asenna siivousohjelma (kerran palvelimelle)
@@ -81,7 +82,7 @@ kerrallaan ja vain sen ollessa käyttämätön** siten, että käyttämättömyy
 ## Käyttösäännöt
 
 - **Vain yksi Turbopack-koonti kerrallaan — rajoitus toteutetaan tunnisteella.** Jokainen täydellisen Turbopack-
-  `next build` -komennon suorittava työ kohdistuu tunnisteisiin `[self-hosted, omni-build]`, ja vain **`omniroute-113-5`** sisältää tämän
+  `next build` -komennon suorittava työ kohdistuu tunnisteisiin `[self-hosted, omni-build, omni-build-60gb]`, ja vain **`omniroute-113-5`** sisältää tämän
   tunnisteen: `ci.yml`-tiedoston `Build`, `npm-publish.yml`-tiedoston `publish`, `nightly-v4-build`, `preview-artifact`,
   öinen a11y-koonti (#16853) ja `docker-publish.yml`-tiedoston **amd64** (webpack BuildKitin sisällä —
   Turbopack kaatui siellä paniikkivirheeseen, suoritus 33253576569). Dockerin arm64-osuus pysyy ympäristössä `ubuntu-24.04-arm`.

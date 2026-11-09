@@ -11,13 +11,13 @@ OmniRoute رنر کا **ایک کردار**، ایک لیبل، اور اس کے
 webpack بلڈ اور lint جاب ایک ساتھ چل رہے ہوں؛ ہوسٹ swap (16 GB) اسے سنبھال لیتا ہے، اور چونکہ pull-request بلڈز
 ہوسٹڈ ماحول میں چلتے ہیں، اس لیے Turbopack سلاٹ زیادہ تر وقت غیر فعال رہتا ہے:
 
-| رنر                  | لیبل                   | کردار                                                                                                                                         | `MemoryHigh` / `MemoryMax` | `CPUQuota`          |
-| -------------------- | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | ------------------- |
-| `omniroute-113-5`    | `omni-build`           | Turbopack بلڈز: `ci.yml` کا `Build` (صرف push/dispatch)، Docker amd64، `npm-publish`، `nightly-v4-build`، `preview-artifact`، رات کا a11y بلڈ | 56 GB / 60 GB (swap 0)     | 1600 %              |
-| `omniroute-113-6`    | `omni-release`         | Release-Green (`release-green` + `main-green`)، webpack بلڈ                                                                                   | 20 GB / 24 GB (swap 4 GB)  | 800 %               |
-| `omniroute-113-2`    | `omni-light`           | رات کی جابز (Schemathesis، promptfoo، garak، k6) اور `quality.yml` کا `lint-guard`                                                            | 12 GB / 16 GB (swap 4 GB)  | 600 %               |
-| `omniroute-113`      | `omni-light`           | اوپر والا ہی پول                                                                                                                              | 8 GB / 12 GB               | 400 %               |
-| OmniHeuris, OmniMind | (ان کی اپنی ریپوزٹریز) | صرف Dependabot (ہر ایک کی بلند ترین کھپت 155 MB، 2026-10-18)                                                                                  | 4 GB / 6 GB                | ہر ایک کے لیے 200 % |
+| رنر                  | لیبل                            | کردار                                                                                                                                         | `MemoryHigh` / `MemoryMax` | `CPUQuota`          |
+| -------------------- | ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | ------------------- |
+| `omniroute-113-5`    | `omni-build`, `omni-build-60gb` | Turbopack بلڈز: `ci.yml` کا `Build` (صرف push/dispatch)، Docker amd64، `npm-publish`، `nightly-v4-build`، `preview-artifact`، رات کا a11y بلڈ | 56 GB / 60 GB (swap 0)     | 1600 %              |
+| `omniroute-113-6`    | `omni-release`                  | Release-Green (`release-green` + `main-green`)، webpack بلڈ                                                                                   | 20 GB / 24 GB (swap 4 GB)  | 800 %               |
+| `omniroute-113-2`    | `omni-light`                    | رات کی جابز (Schemathesis، promptfoo، garak، k6) اور `quality.yml` کا `lint-guard`                                                            | 12 GB / 16 GB (swap 4 GB)  | 600 %               |
+| `omniroute-113`      | `omni-light`                    | اوپر والا ہی پول                                                                                                                              | 8 GB / 12 GB               | 400 %               |
+| OmniHeuris, OmniMind | (ان کی اپنی ریپوزٹریز)          | صرف Dependabot (ہر ایک کی بلند ترین کھپت 155 MB، 2026-10-18)                                                                                  | 4 GB / 6 GB                | ہر ایک کے لیے 200 % |
 
 2026-10-18 کو پیمائش کی گئی:
 
@@ -27,12 +27,13 @@ webpack بلڈ اور lint جاب ایک ساتھ چل رہے ہوں؛ ہوسٹ 
 | swap      | 16 GB                        | `omniroute-113-5`، swap بند (`MemorySwapMax=0`) ہونے کے ساتھ چلتا ہے، تاکہ بے قابو بلڈ مشین کو swap پر ڈالنے کے بجائے اپنی حد پر ختم کر دیا جائے                                                                                                                                                                                                                                               |
 | `/tmp`    | **12 GB tmpfs = RAM**        | یہاں رکھی گئی ہر چیز میموری استعمال کرتی ہے؛ بچ جانے والی چیزیں 3 گھنٹے بعد صاف کر دی جاتی ہیں                                                                                                                                                                                                                                                                                                 |
 | CPU       | 32 کورز پر load 60 دیکھا گیا | quotas سے پہلے، اسی مشین پر ایک Turbopack بلڈ (تقریباً 1166 % CPU) اور coverage suite نے دوسرے listeners کے heartbeats کو وسائل سے محروم کر دیا تھا (`The self-hosted runner lost communication`، #16853)                                                                                                                                                                                      |
-| رنرز      | **7 listeners** (2026-10-28) | 5 OmniRoute + OmniHeuris + OmniMind؛ `omniroute-113-7` پر `omni-build` بھی ہے؛ `omniroute-113-3/-4/-8` کو repo سے حذف کر دیا گیا (2026-10-28)                                                                                                                                                                                                                                                  |
+| رنرز      | **7 listeners** (2026-10-28) | 5 OmniRoute + OmniHeuris + OmniMind؛ `omniroute-113-5` پر `omni-build-60gb` بھی ہے؛ `omniroute-113-3/-4/-8` کو repo سے حذف کر دیا گیا (2026-10-28)                                                                                                                                                                                                                                             |
 
 حدود ہر unit کی `/etc/systemd/system/actions.runner.<…>.service.d/override.conf`
 میں موجود ہیں (پچھلی اقدار `override.conf.bak-20261018` کے طور پر محفوظ ہیں) اور انہیں براہ راست
 `systemctl set-property --runtime … MemoryHigh=… MemoryMax=… CPUQuota=…` کے ذریعے لاگو کیا گیا — کوئی restart نہیں کیا گیا، لہٰذا کسی
-چلتی ہوئی جاب پر اثر نہیں پڑا۔ لیبلز runners API کے ذریعے تبدیل کیے جاتے ہیں (`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
+چلتی ہوئی جاب پر اثر نہیں پڑا۔ لیبلز runners API کے ذریعے تبدیل کیے جاتے ہیں
+(`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
 `gh api -X POST repos/<repo>/actions/runners/<id>/labels -f 'labels[]=<label>'`)، وہ بھی براہ راست۔
 
 ## جینیٹر انسٹال کریں (ایک بار، سرور پر)
@@ -57,7 +58,7 @@ ssh root@192.168.0.113 'chmod +x /opt/omniroute-ops/runner-janitor.sh; apt-get i
 ## عملیاتی اصول
 
 - **ایک وقت میں صرف ایک Turbopack بلڈ — لیبل کے ذریعے نافذ۔** مکمل Turbopack
-  `next build` چلانے والی ہر جاب `[self-hosted, omni-build]` کو ہدف بناتی ہے، اور صرف **`omniroute-113-5`** پر یہ
+  `next build` چلانے والی ہر جاب `[self-hosted, omni-build, omni-build-60gb]` کو ہدف بناتی ہے، اور صرف **`omniroute-113-5`** پر یہ
   لیبل موجود ہے: `ci.yml` کا `Build`، `npm-publish.yml` کا `publish`، `nightly-v4-build`، `preview-artifact`،
   رات کا a11y بلڈ (#16853) اور `docker-publish.yml` کا **amd64** (BuildKit کے اندر webpack —
   وہاں Turbopack پینک ہوا تھا، رن 33253576569)۔ arm64 Docker مرحلہ `ubuntu-24.04-arm` ہی پر رہتا ہے۔

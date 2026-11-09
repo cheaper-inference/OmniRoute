@@ -10,13 +10,13 @@ Turbopack 插槽获得构建所需的资源；其他插槽则按照其实际峰�
 Release-Green webpack 构建和 lint 作业同时运行时，该主机才会超额分配；主机的交换空间（16 GB）
 会吸收超出的部分。由于拉取请求的 Build 在托管运行器上执行，Turbopack 插槽大部分时间都处于空闲状态：
 
-| 运行器               | 标签           | 角色                                                                                                                                      | `MemoryHigh` / `MemoryMax`     | `CPUQuota` |
-| -------------------- | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------ | ---------- |
-| `omniroute-113-5`    | `omni-build`   | Turbopack 构建：`ci.yml` `Build`（仅 push/dispatch）、Docker amd64、`npm-publish`、`nightly-v4-build`、`preview-artifact`、夜间 a11y 构建 | 56 GB / 60 GB（交换空间 0）    | 1600 %     |
-| `omniroute-113-6`    | `omni-release` | Release-Green（`release-green` + `main-green`）、webpack 构建                                                                             | 20 GB / 24 GB（交换空间 4 GB） | 800 %      |
-| `omniroute-113-2`    | `omni-light`   | 夜间任务（Schemathesis、promptfoo、garak、k6）和 `quality.yml` `lint-guard`                                                               | 12 GB / 16 GB（交换空间 4 GB） | 600 %      |
-| `omniroute-113`      | `omni-light`   | 与上方相同的池                                                                                                                            | 8 GB / 12 GB                   | 400 %      |
-| OmniHeuris, OmniMind | （各自的仓库） | 仅 Dependabot（2026-10-18 实测每个峰值为 155 MB）                                                                                         | 4 GB / 6 GB                    | 每个 200 % |
+| 运行器               | 标签                            | 角色                                                                                                                                      | `MemoryHigh` / `MemoryMax`     | `CPUQuota` |
+| -------------------- | ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------ | ---------- |
+| `omniroute-113-5`    | `omni-build`, `omni-build-60gb` | Turbopack 构建：`ci.yml` `Build`（仅 push/dispatch）、Docker amd64、`npm-publish`、`nightly-v4-build`、`preview-artifact`、夜间 a11y 构建 | 56 GB / 60 GB（交换空间 0）    | 1600 %     |
+| `omniroute-113-6`    | `omni-release`                  | Release-Green（`release-green` + `main-green`）、webpack 构建                                                                             | 20 GB / 24 GB（交换空间 4 GB） | 800 %      |
+| `omniroute-113-2`    | `omni-light`                    | 夜间任务（Schemathesis、promptfoo、garak、k6）和 `quality.yml` `lint-guard`                                                               | 12 GB / 16 GB（交换空间 4 GB） | 600 %      |
+| `omniroute-113`      | `omni-light`                    | 与上方相同的池                                                                                                                            | 8 GB / 12 GB                   | 400 %      |
+| OmniHeuris, OmniMind | （各自的仓库）                  | 仅 Dependabot（2026-10-18 实测每个峰值为 155 MB）                                                                                         | 4 GB / 6 GB                    | 每个 200 % |
 
 2026-10-18 实测：
 
@@ -26,7 +26,7 @@ Release-Green webpack 构建和 lint 作业同时运行时，该主机才会超�
 | 交换空间  | 16 GB                        | `omniroute-113-5` 在关闭交换空间的情况下运行（`MemorySwapMax=0`），因此失控的构建会在达到上限时被终止，而不是导致整台主机开始使用交换空间                                                                                                                                                                                                              |
 | `/tmp`    | **12 GB tmpfs = RAM**        | 任何存放在其中的内容都会占用内存；残留内容会在 3 小时后被清理                                                                                                                                                                                                                                                                                          |
 | CPU       | 在 32 核上观察到负载为 60    | 设置配额之前，一个 Turbopack 构建（约 1166 % CPU）加上同一主机上的覆盖率测试套件，会导致其他监听器的心跳无法获得资源（`The self-hosted runner lost communication`，#16853）                                                                                                                                                                            |
-| 运行器    | **7 个监听器**（2026-10-28） | 5 个 OmniRoute + OmniHeuris + OmniMind；`omniroute-113-7` 同时承载 `omni-build`；`omniroute-113-3/-4/-8` 已从仓库中删除（2026-10-28）                                                                                                                                                                                                                  |
+| 运行器    | **7 个监听器**（2026-10-28） | 5 个 OmniRoute + OmniHeuris + OmniMind；`omniroute-113-5` 同时承载 `omni-build-60gb`；`omniroute-113-3/-4/-8` 已从仓库中删除（2026-10-28）                                                                                                                                                                                                             |
 
 这些限制位于各单元的 `/etc/systemd/system/actions.runner.<…>.service.d/override.conf`
 中（之前的值保存在 `override.conf.bak-20261018`），并通过
@@ -81,7 +81,7 @@ CPU。每个 OmniRoute 单元都带有一个 drop-in 配置
 ## 操作规则
 
 - **同一时间只运行一个 Turbopack 构建——通过标签强制实施。** 每个运行完整 Turbopack
-  `next build` 的作业都以 `[self-hosted, omni-build]` 为目标，并且只有 **`omniroute-113-5`** 带有该
+  `next build` 的作业都以 `[self-hosted, omni-build, omni-build-60gb]` 为目标，并且只有 **`omniroute-113-5`** 带有该
   标签：`ci.yml` 的 `Build`、`npm-publish.yml` 的 `publish`、`nightly-v4-build`、`preview-artifact`、
   夜间 a11y 构建 (#16853)，以及 `docker-publish.yml` 的 **amd64**（BuildKit 内使用 webpack——
   Turbopack 曾在那里出现 panic，运行 33253576569）。arm64 Docker 分支仍在 `ubuntu-24.04-arm` 上运行。

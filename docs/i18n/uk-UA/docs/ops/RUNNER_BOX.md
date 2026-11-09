@@ -11,13 +11,13 @@
 webpack Release-Green і завданням lint; файл підкачки хоста (16 GB) компенсує це, а оскільки збірки для pull request
 виконуються на хостингових раннерах, слот Turbopack більшу частину часу неактивний:
 
-| раннер               | мітка              | роль                                                                                                                                            | `MemoryHigh` / `MemoryMax`    | `CPUQuota`  |
-| -------------------- | ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------- | ----------- |
-| `omniroute-113-5`    | `omni-build`       | Збірки Turbopack: `ci.yml` `Build` (лише push/dispatch), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, нічна збірка a11y | 56 GB / 60 GB (підкачка 0)    | 1600 %      |
-| `omniroute-113-6`    | `omni-release`     | Release-Green (`release-green` + `main-green`), збірка webpack                                                                                  | 20 GB / 24 GB (підкачка 4 GB) | 800 %       |
-| `omniroute-113-2`    | `omni-light`       | нічні завдання (Schemathesis, promptfoo, garak, k6) і `quality.yml` `lint-guard`                                                                | 12 GB / 16 GB (підкачка 4 GB) | 600 %       |
-| `omniroute-113`      | `omni-light`       | той самий пул, що й вище                                                                                                                        | 8 GB / 12 GB                  | 400 %       |
-| OmniHeuris, OmniMind | (їхні репозиторії) | лише Dependabot (пікове значення 155 MB для кожного, 2026-10-18)                                                                                | 4 GB / 6 GB                   | 200 % кожен |
+| раннер               | мітка                           | роль                                                                                                                                            | `MemoryHigh` / `MemoryMax`    | `CPUQuota`  |
+| -------------------- | ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------- | ----------- |
+| `omniroute-113-5`    | `omni-build`, `omni-build-60gb` | Збірки Turbopack: `ci.yml` `Build` (лише push/dispatch), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, нічна збірка a11y | 56 GB / 60 GB (підкачка 0)    | 1600 %      |
+| `omniroute-113-6`    | `omni-release`                  | Release-Green (`release-green` + `main-green`), збірка webpack                                                                                  | 20 GB / 24 GB (підкачка 4 GB) | 800 %       |
+| `omniroute-113-2`    | `omni-light`                    | нічні завдання (Schemathesis, promptfoo, garak, k6) і `quality.yml` `lint-guard`                                                                | 12 GB / 16 GB (підкачка 4 GB) | 600 %       |
+| `omniroute-113`      | `omni-light`                    | той самий пул, що й вище                                                                                                                        | 8 GB / 12 GB                  | 400 %       |
+| OmniHeuris, OmniMind | (їхні репозиторії)              | лише Dependabot (пікове значення 155 MB для кожного, 2026-10-18)                                                                                | 4 GB / 6 GB                   | 200 % кожен |
 
 Виміряно 2026-10-18:
 
@@ -27,12 +27,13 @@ webpack Release-Green і завданням lint; файл підкачки хо
 | підкачка  | 16 GB                                      | `omniroute-113-5` працює з вимкненою підкачкою (`MemorySwapMax=0`), тому неконтрольована збірка примусово завершується після досягнення ліміту замість переведення машини на підкачку                                                                                                                                                                                                                      |
 | `/tmp`    | **12 GB tmpfs = RAM**                      | усе, що зберігається там, займає пам’ять; залишки видаляються через 3 h                                                                                                                                                                                                                                                                                                                                    |
 | CPU       | спостерігалося навантаження 60 на 32 ядрах | до введення квот одна збірка Turbopack (~1166 % CPU) разом із набором тестів покриття на тій самій машині позбавляли інші слухачі ресурсів для надсилання сигналів активності (`The self-hosted runner lost communication`, #16853)                                                                                                                                                                        |
-| раннери   | **7 слухачів** (2026-10-28)                | 5 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-7` також має мітку `omni-build`; `omniroute-113-3/-4/-8` видалено з репозиторію (2026-10-28)                                                                                                                                                                                                                                                           |
+| раннери   | **7 слухачів** (2026-10-28)                | 5 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-5` також має мітку `omni-build-60gb`; `omniroute-113-3/-4/-8` видалено з репозиторію (2026-10-28)                                                                                                                                                                                                                                                      |
 
 Обмеження містяться у файлі `/etc/systemd/system/actions.runner.<…>.service.d/override.conf` кожного юніта
 (попередні значення збережено як `override.conf.bak-20261018`) і були застосовані наживо за допомогою
 `systemctl set-property --runtime … MemoryHigh=… MemoryMax=… CPUQuota=…` — без перезапуску, тому жодне
-виконуване завдання не було зачеплено. Мітки змінюються через API раннерів (`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
+виконуване завдання не було зачеплено. Мітки змінюються через API раннерів
+(`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
 `gh api -X POST repos/<repo>/actions/runners/<id>/labels -f 'labels[]=<label>'`), також наживо.
 
 ## Установлення janitor (одноразово, на сервері)
@@ -80,7 +81,7 @@ omniroute/інші). Exit 1 = потрібна увага; перегляньт�
 ## Правила експлуатації
 
 - **Одночасно лише одна збірка Turbopack — обмеження за міткою.** Кожне завдання, що виконує повну збірку Turbopack
-  `next build`, націлене на `[self-hosted, omni-build]`, і лише **`omniroute-113-5`** має цю
+  `next build`, націлене на `[self-hosted, omni-build, omni-build-60gb]`, і лише **`omniroute-113-5`** має цю
   мітку: `ci.yml` `Build`, `npm-publish.yml` `publish`, `nightly-v4-build`, `preview-artifact`,
   нічна a11y-збірка (#16853) і **amd64** у `docker-publish.yml` (webpack усередині BuildKit —
   Turbopack аварійно завершився там, запуск 33253576569). Етап Docker для arm64 залишається на `ubuntu-24.04-arm`.

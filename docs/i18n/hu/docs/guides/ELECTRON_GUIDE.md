@@ -4,99 +4,106 @@
 
 ---
 
-> **Az igazság forrása:** `electron/` munkaterület** Utolsó frissítés:** 2026-06-28 — v3.8.40
+> **Hiteles forrás:** `electron/` munkaterület
+> **Utolsó frissítés:** 2026-06-28 — v3.8.40
 
-OmniRoute egy többplatformos asztali alkalmazást (Windows / macOS / Linux) szállít, amelyre épül**Electron 41** +** elektronépítő 26.10** . Az asztali alkalmazás a Next.js önálló kiszolgálót gyermekfolyamatként hozza létre, egy `BrowserWindow` mutat rá, és hozzáad egy rendszertálcát, automatikus frissítőt, IPC hidat és nulla konfigurációs titkos rendszerindítót.
+Az OmniRoute egy több platformon (Windows / macOS / Linux) használható asztali alkalmazást biztosít, amely az
+**Electron 41** + **electron-builder 26.10** technológiákra épül. Az asztali alkalmazás gyermekfolyamatként
+elindítja a Next.js önálló kiszolgálóját, egy `BrowserWindow` ablakot irányít rá, továbbá
+rendszertálcát, automatikus frissítőt, IPC-hidat és konfiguráció nélküli titok-inicializálást biztosít.
 
-## Építészet
+## Architektúra
 
 ```
 ┌──────────────────────────────────────────────┐
-│ Electron main process (electron/main.js)     │
-│ ├─ Single-instance lock                       │
-│ ├─ Child process: Next.js standalone server  │
-│ │   (spawned with Electron's Node runtime)   │
+│ Electron főfolyamat (electron/main.js)       │
+│ ├─ Egyetlen példányt biztosító zárolás       │
+│ ├─ Gyermekfolyamat: önálló Next.js-kiszolgáló│
+│ │   (az Electron Node futtatókörnyezetével)  │
 │ ├─ BrowserWindow → http://localhost:PORT     │
-│ ├─ System tray + context menu                │
-│ ├─ Auto-update via electron-updater          │
-│ ├─ Content Security Policy (session headers) │
-│ └─ Secret bootstrap (JWT / API_KEY_SECRET)   │
+│ ├─ Rendszertálca + helyi menü                │
+│ ├─ Automatikus frissítés electron-updaterrel │
+│ ├─ Tartalombiztonsági házirend (munkamenet-  │
+│ │  fejlécek)                                 │
+│ └─ Titok-inicializálás (JWT / API_KEY_SECRET)│
 └──────────────────────────────────────────────┘
-            ↕ IPC bridge (electron/preload.js)
+            ↕ IPC-híd (electron/preload.js)
 ┌──────────────────────────────────────────────┐
-│ Renderer (Next.js dashboard)                  │
-│   window.electronAPI.* (contextIsolation)     │
+│ Renderelő (Next.js irányítópult)             │
+│   window.electronAPI.* (contextIsolation)    │
 └──────────────────────────────────────────────┘
 ```
 
 ## Verziók
 
-`electron/package.json` ból megerősítve:
+Az `electron/package.json` alapján megerősítve:
 
-| Csomag                 | Változat                                                          |
-| ---------------------- | ----------------------------------------------------------------- |
-| `electron`             | `^43.4.1`                                                         |
-| `electron-builder`     | `^26.15.3`                                                        |
-| `electron-updater`     | `^6.8.9`                                                          |
-| `better-sqlite3`       | root `^13.0.2` (Node-API előre építi — nincs Electron újraépítés) |
-| Az alkalmazás verziója | `3.8.0`                                                           |
-| Alkalmazásazonosító    | `online.omniroute.desktop`                                        |
-| Termék neve            | `OmniRoute`                                                       |
+| Csomag              | Verzió                                                                                                        |
+| ------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `electron`          | `^43.4.1`                                                                                                     |
+| `electron-builder`  | `^26.15.3`                                                                                                    |
+| `electron-updater`  | `^6.8.9`                                                                                                      |
+| `better-sqlite3`    | gyökérszintű `^13.0.2` (Node-API előre lefordított binárisok — nincs szükség Electronhoz való újrafordításra) |
+| Alkalmazásverzió    | `3.8.0`                                                                                                       |
+| Alkalmazásazonosító | `online.omniroute.desktop`                                                                                    |
+| Terméknév           | `OmniRoute`                                                                                                   |
 
-## Szkriptek (root `package.json`)
+## Szkriptek (gyökérszintű `package.json`)
 
-| Forgatókönyv                      | Cél                                                                                    |
-| --------------------------------- | -------------------------------------------------------------------------------------- |
-| `npm run electron:dev`            | Elindítja `npm run dev` + vár `localhost:20128` + elindítja Electron                   |
-| `npm run electron:build`          | Összeállítja Next.js majd futtatja `electron-builder` az aktuális OS                   |
-| `npm run electron:build:win`      | Összeállítja Windows NSIS telepítőt, + portablet (x64)                                 |
-| `npm run electron:build:mac`      | macOS DMG épít (Intel + Apple Silicon)                                                 |
-| `npm run electron:build:linux`    | Linux AppImage + DEB (x64 + arm64) épít                                                |
-| `npm run electron:smoke:packaged` | Elindítja a csomagolt bináris fájlt, és megvizsgálja `/login` HTTP 200-hoz, majd leáll |
+| Szkript                           | Rendeltetés                                                                                                       |
+| --------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `npm run electron:dev`            | Elindítja az `npm run dev` parancsot, megvárja a `localhost:20128` elérhetőségét, majd elindítja az Electront     |
+| `npm run electron:build`          | Összeállítja a Next.js alkalmazást, majd futtatja az `electron-builder` eszközt az aktuális operációs rendszerhez |
+| `npm run electron:build:win`      | Elkészíti a Windows NSIS-telepítőt és a hordozható változatot (x64)                                               |
+| `npm run electron:build:mac`      | Elkészíti a macOS DMG-t (Intel + Apple Silicon)                                                                   |
+| `npm run electron:build:linux`    | Elkészíti a Linux AppImage- és DEB-csomagokat (x64 + arm64)                                                       |
+| `npm run electron:smoke:packaged` | Elindítja a csomagolt bináris fájlt, ellenőrzi, hogy a `/login` HTTP 200 választ ad-e, majd leállítja             |
 
-A `electron/` munkaterületen a következők is láthatók:
+Az `electron/` munkaterület a következőket is biztosítja:
 
-- `npm run prepare:bundle` — futtatja `scripts/build/prepare-electron-standalone.mjs`
-- `npm run build:mac-x64` / `build:mac-arm64` — egyíves macOS buildek
-- `npm run pack` — csak könyvtári build helyi teszteléshez (nincs telepítő)
+- `npm run prepare:bundle` — futtatja a `scripts/build/prepare-electron-standalone.mjs` fájlt
+- `npm run build:mac-x64` / `build:mac-arm64` — egyetlen architektúrához készült macOS-build
+- `npm run pack` — csak könyvtárat létrehozó build helyi teszteléshez (telepítő nélkül)
 
-## Opcionális futásidejű csomagok
+## Választható futtatókörnyezeti csomagok
 
-Az asztali buildek opcionális futásidejű archívumokat is közzétehetnek a telepítőik mellett. A telepített szerver hasznos adattartalma `optional-packs.index.json` tartalmaz ( `resources/app` alatt Windows és Linux esetén). A `browser-runtime` bejegyzéshez olvassa el `packs[].tarball` és töltse le** a pontos fájlnév ugyanabból a kiadásból** . Az archívum nevek között szerepel egy SHA-256 kivonat; a különböző összeállításokhoz különböző archívumok szükségesek. A letöltött fájl nevét ne változtassa meg.
+Az asztali buildek a telepítők mellett választható futtatókörnyezeti archívumokat is közzétehetnek. A telepített szerverfájlok tartalmazzák az `optional-packs.index.json` fájlt (Windows és Linux alatt a `resources/app` könyvtárban). A `browser-runtime` bejegyzésnél olvassa ki a `packs[].tarball` értéket, és töltse le **pontosan ezt a nevű fájlt ugyanabból a kiadásból**. Az archívumnevek SHA-256 lenyomatot tartalmaznak; a különböző buildek eltérő archívumokat igényelhetnek. Ne változtassa meg a letöltött fájl nevét.
 
-Másolja a telepített alkalmazás indexét és a kiválasztott archívumot egy könyvtárba, majd használja a CLI ugyanabból a kiadásból:
+Másolja a telepített alkalmazás indexét és a kiválasztott archívumot egy könyvtárba, majd használja az ugyanabból a kiadásból származó CLI-t:
 
 ```bash
 omniroute packs list --source /path/to/packs
 omniroute packs install browser-runtime --source /path/to/packs
 ```
 
-`packs list` a telepítési és ellenőrzési állapotot jeleníti meg, nem az archívum fájlnevét. A kötegelt index kiválasztja az archívumot. A telepítés ellenőrzi az archívum ellenőrző összegét a kibontás előtt és a csomag ellenőrző összegét a telepített csomag cseréje előtt. Helyi fájlokat olvas; nem tölti le a hiányzó archívumokat. A telepítés után indítsa újra az alkalmazást. Ha a kiadásnak nincs megfelelő eleme, akkor az opcionális csomag nem érhető el az adott kiadás eszközein keresztül.
+A `packs list` a telepítés és ellenőrzés állapotát mutatja, nem az archívum fájlnevét. Az archívumot a mellékelt index választja ki. A telepítés a kibontás előtt ellenőrzi az archívum ellenőrzőösszegét, a telepített csomag lecserélése előtt pedig a csomagok ellenőrzőösszegeit. Helyi fájlokat olvas; a hiányzó archívumokat nem tölti le. Telepítés után indítsa újra az alkalmazást. Ha a kiadáshoz nincs megfelelő fájl, a választható csomag nem érhető el az adott kiadás fájljain keresztül.
 
-## Könyvtár elrendezése
+## Könyvtárstruktúra
 
 ```
 electron/
-├── package.json              # Electron deps + electron-builder config
-├── main.js                   # Main process (24 KB — see annotations below)
-├── preload.js                # contextBridge IPC bridge
-├── types.d.ts                # AppInfo / ServerStatus / ElectronAPI types
-├── README.md                 # In-workspace notes
+├── package.json              # Electron-függőségek + electron-builder konfiguráció
+├── main.js                   # Főfolyamat (24 KB — lásd az alábbi megjegyzéseket)
+├── preload.js                # contextBridge IPC-híd
+├── types.d.ts                # AppInfo / ServerStatus / ElectronAPI típusok
+├── README.md                 # Munkaterületen belüli jegyzetek
 ├── assets/                   # icon.png, icon.ico, icon.icns, tray-icon.png
-└── dist-electron/            # electron-builder output (gitignored)
+└── dist-electron/            # electron-builder kimenete (git által figyelmen kívül hagyva)
 
 scripts/
 ├── build/
-│   └── prepare-electron-standalone.mjs   # Stages .next/electron-standalone bundle
+│   └── prepare-electron-standalone.mjs   # Előkészíti a .next/electron-standalone csomagot
 └── dev/
-    └── smoke-electron-packaged.mjs       # Post-build smoke test
+    └── smoke-electron-packaged.mjs       # Build utáni gyors ellenőrző teszt
 ```
 
-`main.js` és `preload.js` is az**CommonJS `.js` fájlokat** , nem TypeScript. A renderer-oldali gépelések `electron/types.d.ts`-ben élnek.
+A `main.js` és a `preload.js` egyaránt **CommonJS `.js` fájl**, nem TypeScript. A
+rendereroldali típusdefiníciók az `electron/types.d.ts` fájlban találhatók.
 
-## IPC híd (`preload.js`)
+## IPC-híd (`preload.js`)
 
-Az előtöltés egy engedélyezőlistán szereplő API tesz közzé a `window.electronAPI` -n a `contextBridge` `contextIsolation: true` és `nodeIntegration: false` használatával.
+A preload a `window.electronAPI` objektumon keresztül tesz elérhetővé egy engedélyezési listán szereplő API-t a `contextBridge`
+használatával, `contextIsolation: true` és `nodeIntegration: false` beállítások mellett.
 
 ```javascript
 const VALID_CHANNELS = {
@@ -115,51 +122,60 @@ const VALID_CHANNELS = {
 };
 ```
 
-Kitett módszerek:
+Elérhetővé tett metódusok:
 
-| Renderelő hívás                                                   | Írja be                              |
-| ----------------------------------------------------------------- | ------------------------------------ |
-| `getAppInfo()` → `{ name, version, platform, isDev, port }`       | hivatkozni                           |
-| `openExternal(url)`                                               | hivatkozni                           |
-| `getDataDir()`                                                    | hivatkozni                           |
-| `restartServer()`                                                 | hivatkozni                           |
-| `getAppVersion()`                                                 | hivatkozni                           |
-| `checkForUpdates()` / `downloadUpdate()` / `installUpdate()`      | hivatkozni                           |
-| `minimizeWindow()` / `maximizeWindow()` / `closeWindow()`         | elküld                               |
-| `onServerStatus(cb)` / `onPortChanged(cb)` / `onUpdateStatus(cb)` | fogadni (visszaküldi ártalmatlanító) |
+| Rendererhívás                                                     | Típus                                    |
+| ----------------------------------------------------------------- | ---------------------------------------- |
+| `getAppInfo()` → `{ name, version, platform, isDev, port }`       | invoke                                   |
+| `openExternal(url)`                                               | invoke                                   |
+| `getDataDir()`                                                    | invoke                                   |
+| `restartServer()`                                                 | invoke                                   |
+| `getAppVersion()`                                                 | invoke                                   |
+| `checkForUpdates()` / `downloadUpdate()` / `installUpdate()`      | invoke                                   |
+| `minimizeWindow()` / `maximizeWindow()` / `closeWindow()`         | send                                     |
+| `onServerStatus(cb)` / `onPortChanged(cb)` / `onUpdateStatus(cb)` | receive (eltávolító függvényt ad vissza) |
 
-A fogadó segítők visszaküldik a** ártalmatlanító funkció** Ahelyett, hogy `removeAllListeners` — -re hagyatkozna, ez megakadályozza a hallgatók felhalmozódását React komponensek visszacsatolásakor.
+A receive segédfüggvények egy **eltávolító függvényt** adnak vissza ahelyett, hogy a
+`removeAllListeners` metódusra támaszkodnának — ez megakadályozza a figyelők felhalmozódását, amikor a React-komponensek
+újracsatolódnak.
 
-## Szerver életciklusa
+## A szerver életciklusa
 
-`main.js` a Next.js önálló csomagot közvetlenül a Electron Node futási környezettel hozza létre, hogy elkerülje a natív modul ABI a rendszercsomópont közötti eltérést:
+A `main.js` közvetlenül az Electron Node-futtatókörnyezetével indítja el a Next.js önálló csomagját,
+hogy elkerülje a natív modulok és a rendszer Node-verziója közötti ABI-eltérést:
 
 ```js
 spawn(process.execPath, [serverScript], {
   cwd: NEXT_SERVER_PATH,
-  env: { ...serverEnv, PORT, NODE_ENV: "production", ELECTRON_RUN_AS_NODE: "1", NODE_PATH },
+  env: {
+    ...serverEnv,
+    PORT,
+    NODE_ENV: "production",
+    ELECTRON_RUN_AS_NODE: "1",
+    NODE_PATH,
+  },
   stdio: "pipe",
 });
 ```
 
-Fénypontok:
+Főbb jellemzők:
 
-- `waitForServer()` az ablak megjelenítése előtt 30 másodpercig lekérdezi a URL (hidegindításkor nincs üres képernyő).
-- `stdio: "pipe"` rögzíti stdout/stderr; kész kifejezések (`Ready` / `listening`) `server-status: running` bocsátanak ki IPC felett .
-- `before-quit` legfeljebb 5 másodpercet vár a kecses SIGTERM -re (WAL checkpoint), majd elküldi SIGKILL.
-- A tálcán lévő portváltó (`20128`, `3000`, `8080`) leállítja és újraindítja a szervert, majd újratölti a BrowserWindow.
+- A `waitForServer()` legfeljebb 30 másodpercig lekérdezi az URL-t az ablak megjelenítése előtt (így hidegindításkor nem jelenik meg üres képernyő).
+- A `stdio: "pipe"` rögzíti az stdout/stderr kimenetet; a készenléti kifejezések (`Ready` / `listening`) IPC-n keresztül `server-status: running` eseményt bocsátanak ki.
+- A `before-quit` legfeljebb 5 másodpercet vár a szabályos SIGTERM-leállításra (WAL-ellenőrzőpont), majd SIGKILL jelet küld.
+- A tálcán található portváltó (`20128`, `3000`, `8080`) leállítja és újraindítja a szervert, majd újratölti a BrowserWindow ablakot.
 
-## Zero-config Secret Bootstrap
+## Nulla konfigurációt igénylő titok-inicializálás
 
-Az első indításkor a fő folyamat automatikusan generálódik, és a hiányzó titkok továbbra is megmaradnak:
+Az első indításkor a főfolyamat automatikusan előállítja és tartósan tárolja a hiányzó titkokat:
 
-| Titkos                   | Forrás                                                                                           |
-| ------------------------ | ------------------------------------------------------------------------------------------------ |
-| `JWT_SECRET`             | `crypto.randomBytes(64).toString("hex")`                                                         |
-| `STORAGE_ENCRYPTION_KEY` | `crypto.randomBytes(32).toString("hex")` (megtagadja, ha már léteznek titkosított hitelesítések) |
-| `API_KEY_SECRET`         | `crypto.randomBytes(32).toString("hex")`                                                         |
+| Titok                    | Forrás                                                                                                           |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------------- |
+| `JWT_SECRET`             | `crypto.randomBytes(64).toString("hex")`                                                                         |
+| `STORAGE_ENCRYPTION_KEY` | `crypto.randomBytes(32).toString("hex")` (megtagadja a műveletet, ha már léteznek titkosított hitelesítő adatok) |
+| `API_KEY_SECRET`         | `crypto.randomBytes(32).toString("hex")`                                                                         |
 
-Kitartott `<DATA_DIR>/server.env`-ig. `DATA_DIR` a következőt oldja meg:
+Tárolási helyük: `<DATA_DIR>/server.env`. A `DATA_DIR` feloldása:
 
 - Windows: `%APPDATA%\omniroute`
 - Linux: `$XDG_CONFIG_HOME/omniroute` vagy `~/.omniroute`
@@ -167,61 +183,71 @@ Kitartott `<DATA_DIR>/server.env`-ig. `DATA_DIR` a következőt oldja meg:
 
 ## Környezeti fájl keresése
 
-A szerver létrehozása előtt a fő folyamat (`getPreferredEnvFilePath()` a `electron/main.js`-ben) választ** egy** `.env` fájl: ezek közül az első létező.
+A kiszolgáló elindítása előtt a főfolyamat (a `getPreferredEnvFilePath()` függvény az
+`electron/main.js` fájlban) **egy** `.env` fájlt választ ki: az alábbiak közül az első létezőt.
 
-1. `$DATA_DIR/.env`, ha `DATA_DIR` van állítva abban a környezetben, amellyel az alkalmazás elindult.
-2. `<resolved DATA_DIR>/.env`, ugyanazokkal az alapértelmezésekkel, mint fent: `%APPDATA%\omniroute\.env` a Windows n, `$XDG_CONFIG_HOME/omniroute/.env` vagy `~/.omniroute/.env` Linux en és macOS.
-3. `.env` a folyamat munkakönyvtárában.
+1. `$DATA_DIR/.env`, ha a `DATA_DIR` be van állítva abban a környezetben, amelyből az alkalmazást elindították.
+2. `<resolved DATA_DIR>/.env`, a fentiekkel azonos alapértelmezésekkel: `%APPDATA%\omniroute\.env`
+   Windows rendszeren, `$XDG_CONFIG_HOME/omniroute/.env` vagy `~/.omniroute/.env` Linux és macOS rendszeren.
+3. A folyamat munkakönyvtárában található `.env`.
 
-A fő folyamat csak azt a fájlt olvassa be; A későbbi jelöltek nem egyesülnek. A szerverkörnyezet ezután ezzel az elsőbbséggel épül fel (a legmagasabb először):
+A főfolyamat csak ezt a fájlt olvassa be; a későbbi jelöltek tartalma nem lesz összevonva. Ezután a
+kiszolgáló környezete a következő prioritási sorrendben épül fel (a legmagasabbal kezdve):
 
-1. A Electron folyamatkörnyezet (az alkalmazás elindítóitól örökölt változók).
+1. Az Electron-folyamat környezete (az alkalmazást elindító környezettől örökölt változók).
 2. A kiválasztott `.env` fájl.
-3. `<DATA_DIR>/server.env` (a fenti rendszerindító titkok).
+3. `<DATA_DIR>/server.env` (a fent ismertetett inicializálási titkok).
 
-A folyamatkörnyezet az alkalmazás indításakor kerül rögzítésre, így az alkalmazás futása közben beállított rendszer- vagy felhasználói környezeti változó (beleértve azt is, amikor az ablak bezárása után a tálcán van) addig nem éri el a szervert, amíg az alkalmazást teljesen ki nem zárják és újra nem indítják. A futásidejű potméterek, például `CONTEXT_LENGTH_<PROVIDER>` (lásd [: Környezeti változók: szolgáltatónkénti kontextushossz](../reference/ENVIRONMENT.md#per-provider-context-length-context_length_provider) ) esetén előnyben részesítse a `.env` fájlt, majd teljesen lépjen ki (tálca,** Kilép** ) és indítsa újra.
+A folyamat környezetét az alkalmazás indulásakor rögzíti a rendszer, ezért az alkalmazás futása
+közben beállított rendszer- vagy felhasználói környezeti változó (beleértve azt az időszakot is,
+amikor az ablak bezárása után az alkalmazás a tálcán marad) nem jut el a kiszolgálóhoz mindaddig,
+amíg az alkalmazást teljesen ki nem léptetik, majd újra nem indítják. Az olyan futásidejű
+beállításokhoz, mint a `CONTEXT_LENGTH_<PROVIDER>` (lásd:
+[Környezeti változók: szolgáltatónkénti kontextushossz](../reference/ENVIRONMENT.md#per-provider-context-length-context_length_provider)),
+részesítse előnyben a `.env` fájlt, majd teljesen lépjen ki (tálca, **Kilépés**), és indítsa újra az alkalmazást.
 
 ## Ablak és tálca
 
-- `BrowserWindow`: 1400 × 900 (min 1024 × 700), `backgroundColor: "#0a0a0a"`.
-- macOS: `titleBarStyle: "hiddenInset"`, közlekedési lámpa a `{ x: 16, y: 16 }`-nél.
+- `BrowserWindow`: 1400×900 (minimum 1024×700), `backgroundColor: "#0a0a0a"`.
+- macOS: `titleBarStyle: "hiddenInset"`, ablakvezérlő gombok helye: `{ x: 16, y: 16 }`.
 - Windows/Linux: natív címsor.
-- A bezárás gomb lekicsinyíti a tálcát; a tálca menüben van** Nyissa meg OmniRoute** ,** Nyissa meg az Irányítópultot** (külső böngésző),** Szerver port** almenü,** Ellenőrizze a frissítéseket** ,** Kilép** .
+- A bezárás gomb a tálcára minimalizál; a tálcamenü elemei: **OmniRoute megnyitása**, **Irányítópult megnyitása** (külső böngészőben), **Kiszolgáló portja** almenü, **Frissítések keresése**, **Kilépés**.
 
-## Tartalombiztonsági szabályzat
+## Tartalombiztonsági házirend
 
-Beállítás `session.defaultSession.webRequest.onHeadersReceived` keresztül. Figyelemre méltó irányelvek:
+Beállítása a `session.defaultSession.webRequest.onHeadersReceived` használatával történik. Fontosabb direktívák:
 
 - `frame-ancestors 'none'`, `object-src 'none'`, `child-src 'none'`
 - `connect-src 'self' http://localhost:* http://127.0.0.1:* ws://localhost:* ws://127.0.0.1:* https://*.omniroute.online https://*.omniroute.dev`
-- A fejlesztői mód csak `'unsafe-eval'` adja hozzá `script-src` hez
+- A fejlesztői mód csak a `script-src` direktívához adja hozzá az `'unsafe-eval'` értéket
 
 ## Automatikus frissítés
 
-`electron-updater` használja a GitHub szolgáltatóval (`diegosouzapw/OmniRoute`).
+Az `electron-updater` csomagot használja a GitHub-szolgáltatóval (`diegosouzapw/OmniRoute`).
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
-- `update-status` IPC keresztül a megjelenítőhöz továbbított események: `checking`, `available`, `not-available`, `downloading` ( `percent`), `downloaded`, `error`
-- `installUpdate()` megöli a szervert, majd meghívja `autoUpdater.quitAndInstall()`
-- Kihagyva fejlesztői módban (`!app.isPackaged`)
+- A renderelőnek az `update-status` IPC-n keresztül továbbított események:
+  `checking`, `available`, `not-available`, `downloading` (`percent` értékkel), `downloaded`, `error`
+- Az `installUpdate()` leállítja a kiszolgálót, majd meghívja az `autoUpdater.quitAndInstall()` függvényt
+- Fejlesztői módban kihagyva (`!app.isPackaged`)
 
-## Csővezeték építése
+## Buildelési folyamat
 
-1. `npm run build` → Next.js önálló a `.next/standalone`.
-2. `prepare-electron-standalone.mjs` → átlép `.next/electron-standalone` -be, és átírja az abszolút útvonalakat `server.js` + `required-server-files.json` belül, így a köteg áthelyezhető.
-3. `electron-builder` csomagok `main.js`, `preload.js`, `node_modules` és `extraResources: { ../.next/electron-standalone → app }`.
+1. `npm run build` → önálló Next.js-alkalmazás a `.next/standalone` könyvtárban.
+2. `prepare-electron-standalone.mjs` → újra előkészíti a fájlokat a `.next/electron-standalone` könyvtárban, és átírja az abszolút elérési utakat a `server.js` + `required-server-files.json` fájlokban, hogy a csomag áthelyezhető legyen.
+3. Az `electron-builder` csomagolja a `main.js`, `preload.js`, `node_modules` elemeket, valamint az `extraResources: { ../.next/electron-standalone → app }` erőforrásokat.
 
-### Építsen célokat
+### Buildelési célplatformok
 
-| OS      | Célok                                     |
-| ------- | ----------------------------------------- |
-| Windows | NSIS telepítő + hordozható (x64)          |
-| macOS   | DMG (Intel + arm64, drag-to-Applications) |
-| Linux   | AppImage + DEB (x64 + arm64)              |
+| Operációs rendszer | Célok                                              |
+| ------------------ | -------------------------------------------------- |
+| Windows            | NSIS-telepítő + hordozható verzió (x64)            |
+| macOS              | DMG (Intel + arm64, az Applications mappába húzva) |
+| Linux              | AppImage + DEB (x64 + arm64)                       |
 
-NSIS beállítások: `oneClick: false`, lehetővé teszi a felhasználó számára a telepítési könyvtár kiválasztását, létrehozza az Asztal és a Start menü parancsikonjait.
+NSIS-beállítások: `oneClick: false`; lehetővé teszi a felhasználónak a telepítési könyvtár kiválasztását, valamint parancsikonokat hoz létre az Asztalon és a Start menüben.
 
-## Füstvizsgálati csomagolt összeállítás
+## A csomagolt build gyors ellenőrzése
 
 ```bash
 npm run electron:smoke:packaged
@@ -229,18 +255,18 @@ npm run electron:smoke:packaged
 
 `scripts/dev/smoke-electron-packaged.mjs`:
 
-- Automatikusan felfedezi a csomagolt bináris fájlt `electron/dist-electron/` ban az aktuális platformhoz.
-- Elszigetelt `HOME`/`APPDATA`/`XDG_*` könyvtárakkal indul, így nem érinti a fejlesztői adatokat.
-- `http://127.0.0.1:20128/login` szavazás HTTP 200-hoz 45 másodpercen belül.
-- A stderr/stdout órák végzetes minták esetén (`Cannot find module`, `MODULE_NOT_FOUND`, `ERR_DLOPEN_FAILED`, `Failed to start server` stb.).
-- A készenlét után vár 2 másodpercet a stabil futásidőre, majd kiadja SIGTERM, és megvárja a port felszabadulását.
-- CI-ban automatikusan átadja `--no-sandbox --disable-gpu` (és `--disable-dev-shm-usage` Linux).
+- Automatikusan megkeresi az aktuális platformhoz tartozó csomagolt bináris fájlt az `electron/dist-electron/` könyvtárban.
+- Elkülönített `HOME`/`APPDATA`/`XDG_*` könyvtárakkal indítja el, így nem érinti a fejlesztői adatokat.
+- Legfeljebb 45 másodpercig lekérdezi a `http://127.0.0.1:20128/login` címet, amíg HTTP 200 választ nem kap.
+- Figyeli a stderr/stdout kimenetet a végzetes hibákra utaló minták (`Cannot find module`, `MODULE_NOT_FOUND`, `ERR_DLOPEN_FAILED`, `Failed to start server` stb.) után kutatva.
+- A készenléti állapot elérése után 2 másodperc stabil futásra vár, majd SIGTERM jelet küld, és megvárja, amíg a port felszabadul.
+- CI-környezetben automatikusan átadja a `--no-sandbox --disable-gpu` kapcsolókat (Linuxon pedig a `--disable-dev-shm-usage` kapcsolót is).
 
-Env felülbírálása: `ELECTRON_SMOKE_APP_EXECUTABLE`, `ELECTRON_SMOKE_URL`, `ELECTRON_SMOKE_TIMEOUT_MS`, `ELECTRON_SMOKE_SETTLE_MS`, `ELECTRON_SMOKE_DATA_DIR`, `ELECTRON_SMOKE_KEEP_DATA`, `ELECTRON_SMOKE_STREAM_LOGS`.
+Környezeti változókkal felülírható értékek: `ELECTRON_SMOKE_APP_EXECUTABLE`, `ELECTRON_SMOKE_URL`, `ELECTRON_SMOKE_TIMEOUT_MS`, `ELECTRON_SMOKE_SETTLE_MS`, `ELECTRON_SMOKE_DATA_DIR`, `ELECTRON_SMOKE_KEEP_DATA`, `ELECTRON_SMOKE_STREAM_LOGS`.
 
-## Kód aláírása
+## Kódaláírás
 
-`electron/package.json` igen** nem** vezetékes aláíró hitelesítő adatok közvetlenül. Adja át őket az env vars-on keresztül a `electron-builder`:
+Az `electron/package.json` **nem** tartalmazza közvetlenül az aláírási hitelesítő adatokat. Környezeti változókon keresztül adja át őket az `electron-builder` számára:
 
 ### macOS
 
@@ -263,32 +289,32 @@ npm run electron:build:win
 
 ### Linux
 
-AppImage aláírás nem kötelező, ha aláírja, — beállítása `LINUX_GPG_KEY`.
+Az AppImage aláírása opcionális — aláíráshoz állítsa be a `LINUX_GPG_KEY` változót.
 
-## Elosztás
+## Terjesztés
 
-Leletek landolnak `electron/dist-electron/`:
+Az elkészült fájlok az `electron/dist-electron/` könyvtárba kerülnek:
 
 - `OmniRoute.Setup.X.Y.Z.exe`, `OmniRoute X.Y.Z.exe` (Windows)
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-A kiadásokat GitHub Releases (`diegosouzapw/OmniRoute`) közzéteszi, ahol `electron-updater` is keresi az új verziókat.
+A kiadások a GitHub Releases szolgáltatásban (`diegosouzapw/OmniRoute`) jelennek meg; az `electron-updater` szintén itt ellenőrzi az új verziókat.
 
 ## Hibaelhárítás
 
-| Tünet                                                         | Fix                                                                                                                                                              |
-| ------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Cannot find module 'better-sqlite3'` Electron nagy ütés után | better-sqlite3 v13 szállítja a Node-API előépítéseit, — futtassa újra `npm install` a gyökérben és `prepare:bundle` (ellenőrzi az aktuális platform előépítését) |
-| `ERR_DLOPEN_FAILED` a natív modulhoz                          | Futtassa újra `prepare:bundle` — gyorsan meghibásodik, ha az aktuális platform csomópont-API előépítése hiányzik                                                 |
-| Az ablak üresen jelenik meg a Linux                           | Erősítse meg, hogy Next.js szerver valóban hozzá van kötve PORT (ellenőrizze `[Server]` naplókat)                                                                |
-| macOS közjegyzői standok                                      | Győződjön meg arról, hogy `APPLE_*` vars exportálásra kerül, nem csak `.env` ben                                                                                 |
-| Windows SmartScreen figyelmeztetés                            | Jelentkezzen be EV tanúsítvánnyal, vagy kattintson a jobb gombbal → "Futtatás mindenképpen" lehetőségre.                                                         |
-| A füstteszt sikertelen a használatban lévő portnál            | `electron:smoke:packaged` futtatása előtt állítson le minden helyi fejlesztői kiszolgálót 20128-on                                                               |
+| Jelenség                                                                     | Megoldás                                                                                                                                                                                                                                          |
+| ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Cannot find module 'better-sqlite3'` az Electron főverziójának emelése után | A better-sqlite3 v13 Node-API előre lefordított binárisokat tartalmaz — futtassa újra az `npm install` parancsot a gyökérkönyvtárban, majd a `prepare:bundle` parancsot (ez ellenőrzi az aktuális platformhoz tartozó előre lefordított binárist) |
+| `ERR_DLOPEN_FAILED` natív modul esetén                                       | Futtassa újra a `prepare:bundle` parancsot — azonnal hibát jelez, ha hiányzik az aktuális platformhoz tartozó Node-API előre lefordított bináris                                                                                                  |
+| Linuxon üresen jelenik meg az ablak                                          | Ellenőrizze, hogy a Next.js-kiszolgáló ténylegesen kapcsolódott-e a PORT értékéhez (ellenőrizze a `[Server]` naplókat)                                                                                                                            |
+| A macOS-közjegyzői hitelesítés elakad                                        | Győződjön meg róla, hogy az `APPLE_*` változókat exportálta, és nem csak a `.env` fájlban szerepelnek                                                                                                                                             |
+| Windows SmartScreen-figyelmeztetés                                           | Írja alá EV-tanúsítvánnyal, vagy a felhasználók kattintsanak a jobb egérgombbal → „Futtatás mindenképpen”                                                                                                                                         |
+| A gyors ellenőrzés foglalt port miatt meghiúsul                              | Az `electron:smoke:packaged` futtatása előtt állítsa le a 20128-as portot használó helyi fejlesztői kiszolgálót                                                                                                                                   |
 
 ## Lásd még
 
 - [SETUP_GUIDE.md](./SETUP_GUIDE.md)
 - [RELEASE_CHECKLIST.md](../ops/RELEASE_CHECKLIST.md)
 - Forrás: `electron/main.js`, `electron/preload.js`, `electron/package.json`
-- Segítők: `scripts/build/prepare-electron-standalone.mjs`, `scripts/dev/smoke-electron-packaged.mjs`
+- Segédprogramok: `scripts/build/prepare-electron-standalone.mjs`, `scripts/dev/smoke-electron-packaged.mjs`

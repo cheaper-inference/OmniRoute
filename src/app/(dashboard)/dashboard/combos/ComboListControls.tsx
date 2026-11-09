@@ -1,6 +1,6 @@
 "use client";
 
-import type { useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import Button from "@/shared/components/Button";
 import { getI18nOrFallback } from "./comboPageHelpers";
 
@@ -8,6 +8,7 @@ type Translator = ReturnType<typeof useTranslations>;
 
 type ComboListToolbarProps = {
   t: Translator;
+  tc: Translator;
   comboCount: number;
   filteredCount: number;
   pageStart: number;
@@ -20,6 +21,7 @@ type ComboListToolbarProps = {
 /** Page summary + the "Reorder all" switch above the combo inventory. */
 export function ComboListToolbar({
   t,
+  tc,
   comboCount,
   filteredCount,
   pageStart,
@@ -28,6 +30,7 @@ export function ComboListToolbar({
   savingOrder,
   onToggleReorder,
 }: ComboListToolbarProps) {
+  const tm = useTranslations("modelCatalog");
   const summary = reordering
     ? getI18nOrFallback(
         t,
@@ -36,10 +39,10 @@ export function ComboListToolbar({
         { count: comboCount }
       )
     : getI18nOrFallback(
-        t,
-        "paginationSummary",
-        `Showing ${pageStart}-${pageEnd} of ${filteredCount} combos`,
-        { start: pageStart, end: pageEnd, total: filteredCount }
+        tm,
+        "showingCombos",
+        `Showing ${pageStart}–${pageEnd} of ${filteredCount} combos`,
+        { first: pageStart, last: pageEnd, total: filteredCount }
       );
 
   return (
@@ -61,7 +64,7 @@ export function ComboListToolbar({
           data-testid="combo-reorder-all-toggle"
         >
           {reordering
-            ? getI18nOrFallback(t, "finishReorder", "Done reordering")
+            ? getI18nOrFallback(tc, "done", "Done")
             : getI18nOrFallback(t, "reorderAll", "Reorder all")}
         </Button>
       )}
@@ -70,7 +73,6 @@ export function ComboListToolbar({
 }
 
 type ComboPaginationNavProps = {
-  t: Translator;
   tc: Translator;
   page: number;
   pageCount: number;
@@ -78,17 +80,12 @@ type ComboPaginationNavProps = {
 };
 
 /** Previous / next controls shown below the combo cards when there is more than one page. */
-export function ComboPaginationNav({
-  t,
-  tc,
-  page,
-  pageCount,
-  onPageChange,
-}: ComboPaginationNavProps) {
+export function ComboPaginationNav({ tc, page, pageCount, onPageChange }: ComboPaginationNavProps) {
+  const tm = useTranslations("modelCatalog");
   return (
     <nav
       className="flex flex-wrap items-center justify-center gap-3 pt-2"
-      aria-label={getI18nOrFallback(t, "paginationLabel", "Combo pages")}
+      aria-label={getI18nOrFallback(tc, "pagination", "Pagination")}
       data-testid="combo-pagination"
     >
       <Button
@@ -97,15 +94,15 @@ export function ComboPaginationNav({
         icon="chevron_left"
         onClick={() => onPageChange(Math.max(1, page - 1))}
         disabled={page <= 1}
-        aria-label={getI18nOrFallback(t, "previousPage", "Previous combo page")}
+        aria-label={getI18nOrFallback(tc, "previousPage", "Previous page")}
         data-testid="combo-pagination-previous"
       >
-        {getI18nOrFallback(tc, "previous", "Previous")}
+        {getI18nOrFallback(tc, "previousPage", "Previous page")}
       </Button>
       <span className="text-sm tabular-nums text-text-muted" aria-current="page">
-        {getI18nOrFallback(t, "paginationPage", `Page ${page} of ${pageCount}`, {
+        {getI18nOrFallback(tm, "page", `Page ${page} of ${pageCount}`, {
           page,
-          totalPages: pageCount,
+          pageCount,
         })}
       </span>
       <Button
@@ -114,7 +111,7 @@ export function ComboPaginationNav({
         iconRight="chevron_right"
         onClick={() => onPageChange(Math.min(pageCount, page + 1))}
         disabled={page >= pageCount}
-        aria-label={getI18nOrFallback(t, "nextPage", "Next combo page")}
+        aria-label={getI18nOrFallback(tc, "nextPage", "Next page")}
         data-testid="combo-pagination-next"
       >
         {getI18nOrFallback(tc, "next", "Next")}

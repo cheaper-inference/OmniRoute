@@ -82,6 +82,18 @@ Nawet poza regionami objętymi blokadą serwery proxy są przydatne w następuj�
 
 ---
 
+## Domyślny stan proxy dla nowych kont
+
+W** Ustawienia → Proxy → Konfiguracja globalna** , używać** Włącz domyślnie serwer proxy dla nowych połączeń** aby wybrać początkowy stan proxy dla nowo dodanych kont dostawców.
+
+Nowe ustawienie kontroluje początkowy stan serwera proxy nowo dodanych kont dostawców. Nie zmienia istniejących kont ani nie zastępuje globalnego przełącznika proxy. Jego wartość początkowa zachowuje poprzednie zachowanie. Wyłącz tę opcję raz, aby tworzyć przyszłe konta z domyślnie wyłączonym serwerem proxy.
+
+Preferencje są przechowywane jako `defaultNewConnectionProxyEnabled` w istniejących ustawieniach API. Domyślnie jest to `true` jeśli nigdy nie jest zapisywany. Zapisanie `false` obowiązuje dla kolejnych nowych kont bez ponownego uruchamiania. `POST /api/providers` akceptuje opcjonalną, ścisłą wartość logiczną `proxyEnabled`; jawne `true` lub `false` ma pierwszeństwo przed domyślnym ustawieniem tworzenia. Pominięcie zduplikowanego konta lub ponowne połączenie OAuth zachowuje przechowywany stan tego konta. Konta indywidualne można później nadal włączać i wyłączać.
+
+Selektywne transfery dostawców korzystają z ustawień domyślnych instalacji docelowej dla nowych kont i zachowują zasady docelowe podczas zastępowania istniejących kont. Przełączniki proxy nie są przenośnymi polami transferu. Pełne przywracanie kopii zapasowych i migracja historii JSON/SQL zachowują istniejącą semantykę przywracania, w tym zapisane wartości konta i domyślne ustawienia schematu starszego typu; pełne przywrócenie ustawień może również przywrócić tę preferencję.
+
+Ta preferencja nie przypisuje serwera proxy ani nie ustala, czy jest on sprawny lub używany. Rzeczywisty routing nadal zależy od globalnego przełącznika proxy i odpowiedniej konfiguracji proxy. Dostawcy syntetyczni bez trwałego konta, ruch OAuth przed utworzeniem konta, serwery proxy environment/system i sieci zewnętrznych backendów są poza jego zakresem.
+
 ## 4-poziomowy system proxy
 
 OmniRoute obsługuje konfigurację proxy w **czterech niezależnych zakresach**, rozstrzyganych według kolejności priorytetów:
@@ -382,7 +394,7 @@ Wykorzystuje `wreq-js` do generowania odcisków TLS przypominających te używan
 
 ### Dopasowywanie odcisku CLI
 
-**Przełącznik odcisku CLI** (`Ustawienia → Bezpieczeństwo`) zmienia kolejność nagłówków HTTP i pól treści JSON, aby dokładnie odpowiadały sygnaturze natywnych plików binarnych CLI (Claude Code, Codex itp.). Działa to **niezależnie od** serwera proxy:
+**Przełącznik odcisku CLI** (`Settings → Security`) zmienia kolejność nagłówków HTTP i pól treści JSON, aby dokładnie odpowiadały sygnaturze natywnych plików binarnych CLI (Claude Code, Codex itp.). Działa to **niezależnie od** serwera proxy:
 
 ```
 Twój adres IP (zablokowany) → Adres IP proxy (USA) → API dostawcy

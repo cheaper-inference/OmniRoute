@@ -4,17 +4,17 @@
 
 ---
 
-最後更新: 2026-08-23
+最後更新：2026-08-23
 
-OmniRoute與分佈在三個專用儀表板頁面上的三類CLI工具整合：
+OmniRoute 整合了三類 CLI 工具，分布於三個專屬的儀表板頁面：
 
-| 頁          | 路線                    | 概念                                                             | 數數         |
-| ----------- | ----------------------- | ---------------------------------------------------------------- | ------------ |
-| **CLI代碼** | `/dashboard/cli-code`   | 你指向OmniRoute的編碼工具（Client → CLI → OmniRoute → Provider） | 26           |
-| **CLI代理** | `/dashboard/cli-agents` | 您指向OmniRoute自治代理（相同流程，範圍更廣）                    | 11           |
-| **ACP代理** | `/dashboard/acp-agents` | CLIs ， OmniRoute透過stdio/ACP作為後端產生（反向流）             | 請參閱註冊表 |
+| 頁面             | 路由                    | 概念                                                               | 數量         |
+| ---------------- | ----------------------- | ------------------------------------------------------------------ | ------------ |
+| **CLI 程式碼**   | `/dashboard/cli-code`   | 指向 OmniRoute 的程式設計工具（用戶端 → CLI → OmniRoute → 提供者） | 28           |
+| **CLI 代理程式** | `/dashboard/cli-agents` | 指向 OmniRoute 的自主代理程式（流程相同，但範圍更廣）              | 11           |
+| **ACP 代理程式** | `/dashboard/acp-agents` | OmniRoute 透過 stdio/ACP 產生並作為後端使用的 CLI（反向流程）      | 請參閱登錄表 |
 
-舊路由透過 308 重定向： `/dashboard/cli-tools` → `/dashboard/cli-code`、 `/dashboard/agents` → `/dashboard/acp-agents`。
+舊版路由會透過 308 重新導向：`/dashboard/cli-tools` → `/dashboard/cli-code`、`/dashboard/agents` → `/dashboard/acp-agents`。
 
 ---
 
@@ -43,9 +43,10 @@ ACP 代理程式（反向產生流程）：
 
 ---
 
-## 使用`setup-*`自動配置
+## 使用 `setup-*` 自動設定
 
-您不必手動編寫每個工具的配置。 OmniRoute為每個受支援的CLI提供一個`setup-*`命令，該命令讀取**居住**從正在運行的OmniRoute （本地或遠端）中取得模型目錄，並將該工具自己的配置寫入您的電腦：
+您不必手動編寫每個工具的設定。OmniRoute 針對每個支援的 CLI 提供一個 `setup-*`
+命令，此命令會從執行中的 OmniRoute（本機或遠端）讀取**即時**模型目錄，並將該工具本身的設定寫入您的機器：
 
 ```bash
 omniroute setup-codex        omniroute setup-claude       omniroute setup-opencode
@@ -56,15 +57,34 @@ omniroute setup-5dive        omniroute setup-zed
 omniroute setup-whycodes
 ```
 
-每個都接受`--remote <url> --api-key <key>` （針對遠端OmniRoute配置本機工具）、 `--dry-run` （無需編寫即可預覽）和`--port`。沒有模型自動發現的工具（Cline、 Kilo、 Roo、 Goose、 Aider、 Qwen、 5dive、 WhyCodes）採用`--model <id>` （以及用於非互動式運行的`--yes` ）。 `setup-5dive`是不在`$HOME`下編寫的配方：它透過在艦隊主機上寫入 root 擁有的身份驗證設定檔來配置 5dive 代理艦隊，因此它透過`sudo`重新執行，並且沒有自己的遠端模式。要在註入正確的環境且根本不編寫配置的情況下啟動CLI ，請使用通用`omniroute run <target>`啟動器（claude、codex、aider、goose、opencode、qwen、gemini、whycodes - 目標和別名來自`bin/cli/cli-manifest.mjs`）；舊版每個工具啟動器`omniroute launch` （Claude代碼）和`omniroute launch-codex` Codex可用。 Gemini CLI僅啟動：它是`omniroute run`目標，但沒有`setup-*`/`configure`配方。
+每個命令都接受 `--remote <url> --api-key <key>`（設定本機工具以連線至遠端
+OmniRoute）、`--dry-run`（只預覽而不寫入）及 `--port`。不支援自動探索模型的工具（Cline、Kilo、Roo、Goose、Aider、Qwen、5dive、WhyCodes）接受
+`--model <id>`（非互動式執行時也可使用 `--yes`）。`setup-5dive` 是唯一不會在
+`$HOME` 下寫入內容的設定流程：它會在機群主機上寫入由 root 擁有的驗證設定檔，以設定 5dive 代理程式機群，因此會透過 `sudo`
+重新執行，而且本身不支援遠端模式。若要啟動 CLI、注入正確的環境變數且完全不寫入任何設定，請使用通用的
+`omniroute run <target>` 啟動器（claude、codex、aider、goose、opencode、qwen、gemini、
+whycodes——目標及別名來自 `bin/cli/cli-manifest.mjs`）；舊版的各工具專用啟動器 `omniroute launch`（Claude Code）及 `omniroute launch-codex`
+（Codex）仍可使用。Gemini CLI 僅支援啟動：它是 `omniroute run`
+的目標，但沒有 `setup-*`/`configure` 設定流程。
 
-> **完整參考：**主表——每個命令寫入的內容、每個標誌、本地與遠端以及哪些工具需要`/v1`後綴——位於**[CLI集成](../guides/CLI-INTEGRATIONS.md)**。
+> **完整參考資料：**主表——包括每個命令會寫入哪些內容、所有旗標、
+> 本機與遠端模式的差異，以及哪些工具需要 `/v1` 後綴——位於
+> **[CLI 整合](../guides/CLI-INTEGRATIONS.md)**。
 
-### 在容器內運行它們
+### 在容器內執行這些命令
 
-在OmniRoute容器內執行的`setup-*`指令會寫入容器自己的 home，主機CLI不會讀取該 home，而這個指令會隨容器一起消失。 OmniRoute偵測到這一點並使用指令而不是寫入退出`2` 。有兩種支援的方法 — 在主機上安裝CLI ，在容器上安裝`omniroute connect` ，或綁定掛載設定目錄並設定`CLI_CONFIG_HOME` （撰寫`host`設定檔）。每個`setup-*`命令，加上`omniroute configure`和`omniroute config set`，在配置容器自己的CLIs時接受`--allow-container-write`是您實際的意思； `OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true`對伺服器做同樣的事情。請參閱[Docker指南→配置主機CLI工具](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker)。
+在 OmniRoute 容器內執行的 `setup-*` 命令會寫入容器本身的家目錄，而主機上的 CLI 不會讀取該目錄，且該目錄會隨容器消失。
+OmniRoute 會偵測這種情況並以結束碼 `2` 結束，同時提供操作說明，而不會進行寫入。後續有兩種受支援的做法——在主機上安裝 CLI，並使用
+`omniroute connect` 連線至容器；或繫結掛載設定目錄並設定
+`CLI_CONFIG_HOME`（compose 的 `host` 設定檔）。每個 `setup-*` 命令，以及
+`omniroute configure` 和 `omniroute config set`，都接受
+`--allow-container-write`；若您實際上就是要設定容器本身的 CLI，便可使用此旗標；伺服器則可使用
+`OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true` 達到相同效果。請參閱
+[Docker 指南 → 設定主機 CLI 工具](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker)。
 
-儀表板的**應用端點**(`POST /api/cli-tools/apply`) 強制執行相同的保護：在容器中，目標未從主機答案綁定安裝的寫入**`422`**使用`containerEphemeralTarget: true`，安全錯誤文字，以及 - 對於具有主機配方的工具（claude、codex、opencode、cline、kilo、 continue） - 在主機上運行的`hostSetupCommand` （例如`omniroute setup-opencode`）；什麼也沒寫。 `dryRun: true`繼續在容器模式下工作，並傳回經過編輯的預覽+目標路徑，而無需接觸磁碟。預覽內容不是要複製或匯入的帶有憑證的配置。應用主機上的原始tool/base URL/API key/model輸入，或使用指示的主機端設定指令。請參閱預覽標頭和請求合約的[CLI配置安全性](../security/CLI-CONFIGURATION.md)。這種行為是故意的，並且由`tests/unit/api/cli-tools/apply-container-guard.test.ts`進行回歸保護——永遠不要透過刪除保護來「修復」422。
+儀表板的**套用端點**（`POST /api/cli-tools/apply`）會執行相同的防護措施：在容器中，如果寫入目標不是從主機繫結掛載，則會回應 **`422`**，並包含 `containerEphemeralTarget: true`、安全的錯誤文字，以及——對於具有主機設定流程的工具（claude、codex、opencode、cline、
+kilo、continue）——一個可改在主機上執行的 `hostSetupCommand`（例如 `omniroute setup-opencode`）；不會寫入任何內容。`dryRun: true` 在容器模式下仍可正常運作，並會回傳經遮蔽的預覽內容與目標路徑，而不會修改磁碟。預覽內容並不是可供複製或匯入的憑證設定。請在主機上使用原始的工具／基礎 URL／API 金鑰／模型輸入來套用設定，或使用所指示的主機端設定命令。關於預覽標頭及請求合約，請參閱 [CLI 設定安全性](../security/CLI-CONFIGURATION.md)。此行為是刻意設計的，並由
+`tests/unit/api/cli-tools/apply-container-guard.test.ts` 進行迴歸防護——絕不可為了「修正」422 而移除此防護。
 
 ---
 
@@ -107,61 +127,61 @@ omniroute setup-whycodes
 
 ---
 
-## 1. CLI代碼目錄（28個工具）
+## 1. CLI Code 的目錄（28 項工具）
 
-`/dashboard/cli-code`中出現的所有工具。那些帶有`baseUrlSupport: none`連接通過MITM或手動指南而不是自訂基礎URL：
+所有顯示於 `/dashboard/cli-code` 的工具。`baseUrlSupport: none` 的工具會透過 MITM 或手動指南連接，而不是使用自訂基礎 URL：
 
-| ID           | 姓名                  | 小販                  | baseUrlSupport | configType   | acpSpawnable |
-| ------------ | --------------------- | --------------------- | -------------- | ------------ | ------------ |
-| 克勞德       | Claude代碼            | Anthropic             | 滿的           | 環境         | 真的         |
-| 法典         | OpenAI Codex CLI      | OpenAI                | 滿的           | 風俗         | 真的         |
-| 零碼         | ZCode （GLM編碼計劃） | 愛                    | 沒有任何       | 風俗         | 錯誤的       |
-| 克萊因       | Cline                 | OSS （前克勞德·戴夫） | 滿的           | 風俗         | 真的         |
-| 公斤         | 基洛程式碼            | 基洛組織              | 滿的           | 風俗         | 錯誤的       |
-| 袋鼠         | 袋鼠程式碼            | 袋鼠 (OSS)            | 滿的           | 指導         | 錯誤的       |
-| 繼續         | 繼續                  | 繼續.dev              | 滿的           | 指導         | 錯誤的       |
-| 助理         | 艾德爾                | OSS （P.高蒂爾）      | 滿的           | 指導         | 真的         |
-| 鍛造         | ForgeCode             | HQ                    | 滿的           | 風俗         | 真的         |
-| 程式碼       | 程式碼                | 1傑黃 (OSS)           | 滿的           | 風俗         | 錯誤的       |
-| 深度搜尋-tui | DeepSeek TUI          | 獵人弓 (OSS)          | 滿的           | 風俗         | 錯誤的       |
-| 碼鯨         | CodeWhale             | 赫姆本 (OSS)          | 滿的           | 風俗         | 錯誤的       |
-| 開放程式碼   | OpenCode              | 異常（前 SST）        | 滿的           | 指導         | 真的         |
-| 機器人       | 工廠機器人            | 工廠AI                | 部分的         | 指導         | 錯誤的       |
-| 副駕駛       | GitHub Copilot CLI    | GitHub/MS             | 滿的           | 風俗         | 錯誤的       |
-| 遊標 CLI     | Cursor CLI            | 任何領域              | 部分的         | 指導         | 真的         |
-| 冶煉         | 冶煉                  | 倫納德塞爾 (OSS)      | 滿的           | 風俗         | 錯誤的       |
-| 圓周率       | Pi（pi 編碼代理）     | M.澤克納（OSS）       | 滿的           | 風俗         | 錯誤的       |
-| 格羅克構建   | Grok構建              | xAI                   | 滿的           | 風俗         | 錯誤的       |
-| 壓碎         | 壓碎                  | OSS （魅力）          | 滿的           | 風俗         | 錯誤的       |
-| 麴           | Qwen代碼              | Alibaba               | 滿的           | 指導         | 真的         |
-| 開放克勞德   | OpenClaude            | 吉特勞布（OSS）       | 滿的           | 指導         | 錯誤的       |
-| 澤德         | Zed                   | Zed實業               | 滿的           | 指導         | 錯誤的       |
-| 游標         | Cursor                | 任何領域              | 沒有任何       | 指導         | 錯誤的       |
-| 反重力       | Antigravity           | Google                | 沒有任何       | 中間人       | 錯誤的       |
-| 愛馬仕       | 赫爾墨斯              | 諾斯研究              | 沒有任何       | 指導         | 錯誤的       |
-| 基羅         | Kiro AI               | Amazon                | 沒有任何       | 中間人       | 錯誤的       |
-| 風俗         | 客製化CLI             | —                     | 滿的           | 客製化建造者 | 錯誤的       |
+| id           | name                    | vendor              | baseUrlSupport | configType     | acpSpawnable |
+| ------------ | ----------------------- | ------------------- | -------------- | -------------- | ------------ |
+| claude       | Claude Code             | Anthropic           | full           | env            | true         |
+| codex        | OpenAI Codex CLI        | OpenAI              | full           | custom         | true         |
+| zcode        | ZCode (GLM Coding Plan) | Z.ai                | none           | custom         | false        |
+| cline        | Cline                   | OSS (ex-Claude Dev) | full           | custom         | true         |
+| kilo         | Kilo Code               | Kilo-Org            | full           | custom         | false        |
+| roo          | Roo Code                | Roo (OSS)           | full           | guide          | false        |
+| continue     | Continue                | continue.dev        | full           | guide          | false        |
+| aider        | Aider                   | OSS (P. Gauthier)   | full           | guide          | true         |
+| forge        | ForgeCode               | Antinomy HQ         | full           | custom         | true         |
+| jcode        | jcode                   | 1jehuang (OSS)      | full           | custom         | false        |
+| deepseek-tui | DeepSeek TUI            | Hunter Bown (OSS)   | full           | custom         | false        |
+| codewhale    | CodeWhale               | Hmbown (OSS)        | full           | custom         | false        |
+| opencode     | OpenCode                | Anomaly (ex-SST)    | full           | guide          | true         |
+| droid        | Factory Droid           | Factory AI          | partial        | guide          | false        |
+| copilot      | GitHub Copilot CLI      | GitHub/MS           | full           | custom         | false        |
+| cursor-cli   | Cursor CLI              | Anysphere           | partial        | guide          | true         |
+| smelt        | Smelt                   | leonardcser (OSS)   | full           | custom         | false        |
+| pi           | Pi (pi-coding-agent)    | M. Zechner (OSS)    | full           | custom         | false        |
+| grok-build   | Grok Build              | xAI                 | full           | custom         | false        |
+| crush        | Crush                   | OSS (Charm)         | full           | custom         | false        |
+| qwen         | Qwen Code               | Alibaba             | full           | guide          | true         |
+| openclaude   | OpenClaude              | Gitlawb (OSS)       | full           | guide          | false        |
+| zed          | Zed                     | Zed Industries      | full           | guide          | false        |
+| cursor       | Cursor                  | Anysphere           | none           | guide          | false        |
+| antigravity  | Antigravity             | Google              | none           | mitm           | false        |
+| hermes       | Hermes                  | Nous Research       | none           | guide          | false        |
+| kiro         | Kiro AI                 | Amazon              | none           | mitm           | false        |
+| custom       | Custom CLI              | —                   | full           | custom-builder | false        |
 
-使用`baseUrlSupport: "partial"`的工具會在儀表闆卡中顯示徽章「⚠ Base URL parcial」。
+`baseUrlSupport: "partial"` 的工具會在儀表板卡片中顯示「⚠ 部分支援基礎 URL」徽章。
 ---
 
-## CLI代理目錄（11個工具）
+## 2. CLI 代理程式目錄（11 項工具）
 
-`/dashboard/cli-agents`中出現的自主代理：
+顯示於 `/dashboard/cli-agents` 中的自主代理程式：
 
-| ID         | 姓名         | 小販                 | 基本Url支持 | acp可生成 |
-| ---------- | ------------ | -------------------- | ----------- | --------- |
-| 愛馬仕代理 | 愛馬仕代理   | 諾斯研究             | 滿的        | 錯誤的    |
-| 開爪       | OpenClaw     | OSS （P.斯坦伯格）   | 滿的        | 真的      |
-| 鵝         | 鵝           | 區塊 / Linux基金會   | 滿的        | 真的      |
-| 口譯員     | 打開解釋器   | OSS                  | 滿的        | 真的      |
-| 經         | Warp AI      | Warp公司             | 部分的      | 真的      |
-| 代理平台   | 特工套牌     | 阿什什戈普拉尼 (OSS) | 滿的        | 錯誤的    |
-| 奧普       | 喔我的圓周率 | OSS                  | 滿的        | 真的      |
-| 萊塔       | 萊塔CLI      | 萊塔                 | 滿的        | 錯誤的    |
-| 主要代理人 | 首席經紀人   | 原始智力 (OSS)       | 滿的        | 錯誤的    |
-| 5次潛水    | 5次潛水      | OSS (5dive-ai)       | 滿的        | 錯誤的    |
-| 原因碼     | WhyCodes     | 為什麼選擇公司       | 滿的        | 錯誤的    |
+| id           | 名稱             | 提供者                   | 基礎 URL 支援 | 可由 ACP 產生 |
+| ------------ | ---------------- | ------------------------ | ------------- | ------------- |
+| hermes-agent | Hermes Agent     | Nous Research            | full          | false         |
+| openclaw     | OpenClaw         | OSS（P. Steinberger）    | full          | true          |
+| goose        | Goose            | Block / Linux Foundation | full          | true          |
+| interpreter  | Open Interpreter | OSS                      | full          | true          |
+| warp         | Warp AI          | Warp Inc.                | partial       | true          |
+| agent-deck   | Agent Deck       | asheshgoplani（OSS）     | full          | false         |
+| omp          | Oh My Pi         | OSS                      | full          | true          |
+| letta        | Letta CLI        | Letta                    | full          | false         |
+| prime-agent  | Prime Agent      | Prime Intellect（OSS）   | full          | false         |
+| 5dive        | 5dive            | OSS（5dive-ai）          | full          | false         |
+| whycodes     | WhyCodes         | Why Corporation          | full          | false         |
 
 ---
 
@@ -220,22 +240,22 @@ interface ToolBatchStatus {
 
 ---
 
-## 6. 新工具的設定處理程序
+## 6. 新工具的設定處理常式
 
-`configType: "custom"`的新工具有專門的設定API路由：
+具有 `configType: "custom"` 的新工具會使用專用的設定 API 路由：
 
-| 路線                                        | 工具                                                          |
-| ------------------------------------------- | ------------------------------------------------------------- |
-| `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                       |
-| `POST /api/cli-tools/jcode-settings`        | jcode（--base-url標誌）                                       |
-| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI （OPENAI_BASE_URL，遺留）                        |
-| `POST /api/cli-tools/codewhale-settings`    | CodeWhale （OPENAI_BASE_URL、主要+遺留`~/.deepseek`同步）     |
-| `POST /api/cli-tools/smelt-settings`        | 冶煉                                                          |
-| `POST /api/cli-tools/pi-settings`           | Pi編碼劑（`~/.pi/agent/models.json`， `providers.omniroute`） |
-| `POST /api/cli-tools/grok-build-settings`   | Grok建構 (~grok/config.toml, `[model.omniroute]`)             |
-| `POST /api/cli-tools/qwen-settings`         | Qwen代碼（`~/.qwen/settings.json` +專用`.env`鑰）             |
+| 路由                                        | 工具                                                               |
+| ------------------------------------------- | ------------------------------------------------------------------ |
+| `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                            |
+| `POST /api/cli-tools/jcode-settings`        | jcode（--base-url 旗標）                                           |
+| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI（OPENAI_BASE_URL，舊版）                              |
+| `POST /api/cli-tools/codewhale-settings`    | CodeWhale（OPENAI_BASE_URL，主要設定 + 舊版 `~/.deepseek` 同步）   |
+| `POST /api/cli-tools/smelt-settings`        | Smelt                                                              |
+| `POST /api/cli-tools/pi-settings`           | Pi 程式設計代理 (`~/.pi/agent/models.json`, `providers.omniroute`) |
+| `POST /api/cli-tools/grok-build-settings`   | Grok Build（~/.grok/config.toml、`[model.omniroute]`）             |
+| `POST /api/cli-tools/qwen-settings`         | Qwen Code（`~/.qwen/settings.json` + 專用 `.env` 金鑰）            |
 
-所有路由都使用`sanitizeErrorMessage()`進行錯誤回應（硬規則 #12）。
+所有路由皆使用 `sanitizeErrorMessage()` 產生錯誤回應（硬性規則 #12）。
 
 ---
 
@@ -292,21 +312,21 @@ interface ToolBatchStatus {
 
 ---
 
-## 9. 快速啟動
+## 9. 快速開始
 
-### 步驟 1 —取得OmniRoute API密鑰
+### 步驟 1 — 取得 OmniRoute API 金鑰
 
-1. 打開`/dashboard/api-manager` →**建立API密鑰**
-2. 為其命名（例如`cli-tools`）並選擇所有權限
-3. 複製密鑰—下面的每個CLI都需要它
+1. 開啟 `/dashboard/api-manager` → **建立 API 金鑰**
+2. 為其命名（例如 `cli-tools`）並選取所有權限
+3. 複製金鑰 — 下方每個 CLI 都會用到它
 
-> 您的金鑰如下所示： `sk-xxxxxxxxxxxxxxxx-xxxxxxxxx`
+> 您的金鑰格式如下：`sk-xxxxxxxxxxxxxxxx-xxxxxxxxx`
 
 ---
 
-### 步驟2 —安裝CLI工具
+### 步驟 2 — 安裝 CLI 工具
 
-所有基於 npm 的工具都需要Node.js 22.22.2 +或 24.x：
+所有基於 npm 的工具都需要 Node.js 22.22.2+ 或 24.x：
 
 ```bash
 # Claude Code (Anthropic)
@@ -327,57 +347,58 @@ npm install -g kilocode
 # Qwen Code
 npm install -g @qwen-code/qwen-code
 
-# Google Gemini CLI (launchable via `omniroute run gemini` → /v1beta surface)
+# Google Gemini CLI（可透過 `omniroute run gemini` 啟動 → /v1beta 介面）
 npm install -g @google/gemini-cli
 
 # Aider
 pip install aider-chat
 
 # Smelt
-cargo install smelt  # Rust-based
+cargo install smelt  # 基於 Rust
 
-# Pi coding agent
+# Pi 程式設計代理
 npm install -g --ignore-scripts @earendil-works/pi-coding-agent
 
 # jcode
-# see https://github.com/1jehuang/jcode for install
+# 安裝方式請參閱 https://github.com/1jehuang/jcode
 ```
 
 ---
 
-### 步驟 3 —透過儀表板配置
+### 步驟 3 — 透過儀表板設定
 
-1. 前往`http://localhost:20128/dashboard/cli-code`
-2. 在網格中找到您的工具
-3. 點擊卡片開啟工具詳情頁面
-4. 選擇您的API鑰和基礎URL
-5. 點選**應用程式配置**或複製手動設定片段
+1. 前往 `http://localhost:20128/dashboard/cli-code`
+2. 在工具網格中找到您的工具
+3. 按一下卡片以開啟工具詳細資料頁面
+4. 選取您的 API 金鑰與基礎 URL
+5. 按一下 **套用設定**，或複製手動設定片段
 
 ---
 
-### 步驟4 —設定全域環境變數
+### 步驟 4 — 設定全域環境變數
 
 ```bash
-# OmniRoute Universal Endpoint
+# OmniRoute 通用端點
 export OPENAI_BASE_URL="http://localhost:20128/v1"
 export OPENAI_API_KEY="sk-your-omniroute-key"
 export ANTHROPIC_BASE_URL="http://localhost:20128"
 export ANTHROPIC_AUTH_TOKEN="sk-your-omniroute-key"
-# Gemini CLI reads GOOGLE_GEMINI_BASE_URL at the ROOT (its SDK appends /v1beta/... itself)
+# Gemini CLI 會從根路徑讀取 GOOGLE_GEMINI_BASE_URL（其 SDK 會自行附加 /v1beta/...）
 export GOOGLE_GEMINI_BASE_URL="http://localhost:20128"
 export GEMINI_API_KEY="sk-your-omniroute-key"
 ```
 
-> 對於一個**遠端伺服器**將`localhost:20128`替換為伺服器IP或網域，例如`http://<your-server-ip>:20128`。
+> 若使用**遠端伺服器**，請將 `localhost:20128` 替換為伺服器 IP 或網域，
+> 例如 `http://<your-server-ip>:20128`。
 
 ---
 
-### 步驟 4 —設定每個工具
+### 步驟 4 — 設定各項工具
 
-#### Claude代碼
+#### Claude Code
 
 ```bash
-# Create ~/.claude/settings.json:
+# 建立 ~/.claude/settings.json：
 mkdir -p ~/.claude && cat > ~/.claude/settings.json << EOF
 {
   "env": {
@@ -388,7 +409,7 @@ mkdir -p ~/.claude && cat > ~/.claude/settings.json << EOF
 EOF
 ```
 
-Claude程式碼使用統一的Anthropic網關根。不要在此處附加`/v1` 。
+Claude Code 請使用統一的 Anthropic 閘道根路徑。請勿在此附加 `/v1`。
 
 **測試：** `claude "say hello"`
 
@@ -396,7 +417,10 @@ Claude程式碼使用統一的Anthropic網關根。不要在此處附加`/v1` �
 
 #### OpenAI Codex
 
-現代Codex (v0.137 +) 僅讀取`~/.codex/config.toml` —舊`config.yaml`屬於舊版 npm CLI並被默默忽略。 API密鑰保留在`OMNIROUTE_API_KEY`環境變數 (`env_key`) 中，而不是在檔案中：
+新版 Codex (v0.137+) 僅讀取 `~/.codex/config.toml` — 舊版
+`config.yaml` 屬於舊有的 npm CLI，且會被直接忽略而不顯示任何提示。API
+金鑰應保留在 `OMNIROUTE_API_KEY` 環境變數（`env_key`）中，絕不要
+寫入檔案內：
 
 ```bash
 mkdir -p ~/.codex && cat > ~/.codex/config.toml << EOF
@@ -411,7 +435,7 @@ EOF
 export OMNIROUTE_API_KEY="sk-your-omniroute-key"
 ```
 
-完整參考（設定檔、 `wire_api`、上下文視窗）： [CODEX-CLI-CONFIGURATION.md](../guides/CODEX-CLI-CONFIGURATION.md) 。
+完整參考資料（設定檔、`wire_api`、內容視窗）：[CODEX-CLI-CONFIGURATION.md](../guides/CODEX-CLI-CONFIGURATION.md)。
 
 **測試：** `codex "what is 2+2?"`
 
@@ -444,15 +468,17 @@ EOF
 
 **測試：** `opencode`
 
-> 使用`opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high`發送思維變體。
+> 使用 `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high`
+> 來傳送思考變體。
 
 ---
 
-#### Pi編碼劑
+#### Pi Coding Agent
 
-使用`npm install -g --ignore-scripts @earendil-works/pi-coding-agent`安裝官方 Pi Coding Agent 套件。 Pi 從`~/.pi/agent/models.json`讀取自訂提供者；設定`PI_CODING_AGENT_DIR`移動整個代理目錄。儀表板遵循該覆蓋。 Pi 不會從自訂端點發現模型，因此OmniRoute使用 Pi 的`openai-completions` API和OmniRoute OpenAI 相容`/v1`端點在`models[]`中寫入所選模型。
+使用 `npm install -g --ignore-scripts
+@earendil-works/pi-coding-agent` 安裝官方 Pi Coding Agent 套件。Pi 從 `~/.pi/agent/models.json` 讀取自訂提供者；將 `PI_CODING_AGENT_DIR` 設為絕對路徑（或以 `~` 開頭的路徑），即可移動整個代理目錄。控制台遵循此覆寫設定。Pi 不會從自訂端點探索模型，因此 OmniRoute 使用 Pi 的 `openai-completions` API 和 OmniRoute 相容 OpenAI 的 `/v1` 端點，將選定模型寫入 `models[]`。
 
-在**CLI工具→ Pi** ，選擇端點、 API鑰和模型，查看提供者預覽，然後套用。預覽是一個提供者片段：在手動配置 Pi 時將`providers.omniroute`合併到現有的`models.json`中，以便其他提供者和設定保持不變。
+在 **CLI 工具 → Pi** 中選擇端點、API 金鑰和模型，檢查提供者預覽，然後套用。預覽是一個提供者片段：手動設定 Pi 時，請將 `providers.omniroute` 合併到現有 `models.json` 中，以保留其他提供者和設定。
 
 ```json
 {
@@ -469,19 +495,21 @@ EOF
 }
 ```
 
-當您開啟`/model`時，Pi 會重新載入`models.json` 。使用您選擇的提供者 ID 和模型 ID 測試配置的路由：
+開啟 `/model` 時，Pi 會重新載入 `models.json`。使用所選提供者 ID 和模型 ID 測試已設定的路由：
 
 ```bash
 pi --provider omniroute --model auto/best-coding --print "Reply with a short greeting."
 ```
 
-參考資料： [Pi 模型和自訂提供者](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/models.md)、 [Pi 環境變數](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/environment-variables.md)、 [Pi 安裝說明](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/README.md)。
+參考：[Pi 模型和自訂提供者](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/models.md)、
+[Pi 環境變數](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/environment-variables.md)、
+[Pi 安裝說明](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/README.md)。
 
 ---
 
-#### Cline （CLI或VS代碼）
+#### Cline（CLI 或 VS Code）
 
-**CLI模式：**
+**CLI 模式：**
 
 ```bash
 mkdir -p ~/.cline/data && cat > ~/.cline/data/globalState.json << EOF
@@ -493,21 +521,22 @@ mkdir -p ~/.cline/data && cat > ~/.cline/data/globalState.json << EOF
 EOF
 ```
 
-**VS代碼模式：** Cline擴充設定→ API提供者： `OpenAI Compatible` →基礎URL： `http://localhost:20128/v1`
+**VS Code 模式：**
+Cline 擴充功能設定 → API 提供者：`OpenAI Compatible` → 基礎 URL：`http://localhost:20128/v1`
 
-或使用OmniRoute儀表板→**CLI工具→ Cline →應用程式配置**。
+或者使用 OmniRoute 儀表板 → **CLI 工具 → Cline → 套用設定**。
 
 ---
 
-#### KiloCode （CLI或VS代碼）
+#### KiloCode（CLI 或 VS Code）
 
-**CLI模式：**
+**CLI 模式：**
 
 ```bash
 kilocode --api-base http://localhost:20128/v1 --api-key sk-your-omniroute-key
 ```
 
-**VS代碼設定：**
+**VS Code 設定：**
 
 ```json
 {
@@ -516,13 +545,13 @@ kilocode --api-base http://localhost:20128/v1 --api-key sk-your-omniroute-key
 }
 ```
 
-或使用OmniRoute儀表板→**CLI工具→ KiloCode →應用程式配置**。
+或者使用 OmniRoute 儀表板 → **CLI 工具 → KiloCode → 套用設定**。
 
 ---
 
-#### 繼續（VS代碼擴充）
+#### Continue（VS Code 擴充功能）
 
-編輯`~/.continue/config.yaml`：
+編輯 `~/.continue/config.yaml`：
 
 ```yaml
 models:
@@ -534,20 +563,20 @@ models:
     default: true
 ```
 
-編輯完成後重啟VS程式碼。
+編輯後請重新啟動 VS Code。
 
 ---
 
-#### VS代碼內部人士 (`chatLanguageModels.json`)
+#### VS Code Insiders (`chatLanguageModels.json`)
 
-當VS Code Insiders 配置為自訂端點模型並且您希望OmniRoute在沒有自訂標頭欄位的情況下工作時，請使用此選項。
+當 VS Code Insiders 已設定自訂端點模型，而您希望 OmniRoute 無需自訂標頭欄位即可運作時，請使用此方式。
 
-**推薦地點：**
+**建議位置：**
 
-- Linux: `~/.config/Code - Insiders/User/chatLanguageModels.json`
-- Windows: `%APPDATA%/Code - Insiders/User/chatLanguageModels.json`
+- Linux：`~/.config/Code - Insiders/User/chatLanguageModels.json`
+- Windows：`%APPDATA%/Code - Insiders/User/chatLanguageModels.json`
 
-**使用標記化OmniRoute別名的範例：**
+**使用權杖化 OmniRoute 別名的範例：**
 
 ```json
 [
@@ -569,28 +598,29 @@ models:
 ]
 ```
 
-**筆記：**
+**注意事項：**
 
-- 將`sk-your-omniroute-key`替換為OmniRoute中所建立的API鑰。
-- `url`欄位應指向`/api/v1/vscode/{token}/chat/completions`。
-- `modelsUrl`欄位應指向`/api/v1/vscode/{token}/models`。
-- 當客戶端支援自訂標頭時，首選正常的`/v1` +承載標頭流。
-- URL 嵌入令牌是一種相容性回退，可能會出現在編輯器日誌或代理程式歷史記錄中。
+- 將 `sk-your-omniroute-key` 替換為在 OmniRoute 中建立的 API 金鑰。
+- `url` 欄位應指向 `/api/v1/vscode/{token}/chat/completions`。
+- `modelsUrl` 欄位應指向 `/api/v1/vscode/{token}/models`。
+- 當用戶端支援自訂標頭時，建議優先使用一般的 `/v1` + Bearer 標頭流程。
+- 內嵌於 URL 的權杖是相容性備援方案，且可能會出現在編輯器日誌或代理伺服器歷程記錄中。
 
 ---
 
 #### Kiro CLI (Amazon)
 
 ```bash
-# Login to your AWS/Kiro account:
+# 登入您的 AWS/Kiro 帳戶：
 kiro-cli login
 
-# The CLI uses its own auth — OmniRoute is not needed as backend for Kiro CLI itself.
-# Use kiro-cli alongside OmniRoute for other tools.
+# 此 CLI 使用其自身的驗證機制——Kiro CLI 本身不需要使用 OmniRoute 作為後端。
+# 其他工具則可搭配 OmniRoute 使用 kiro-cli。
 kiro-cli status
 ```
 
-對於**Kiro IDE**桌面應用程序，使用OmniRoute在`/dashboard/cli-tools → Kiro`下公開的MITM端點。
+若使用 **Kiro IDE** 桌面應用程式，請使用 OmniRoute 所公開的 MITM 端點，
+其位置在 `/dashboard/cli-tools → Kiro`。
 
 ---
 

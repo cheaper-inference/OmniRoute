@@ -19,6 +19,7 @@
 //   Ticker: 32 commands scrolling left, one full period every 55 s.
 import { writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
+import { CURRENT_DOC_COUNTS } from "./lib/read-count-facts.ts";
 import { drawnSymbol, outlineSvg } from "./readme-outline.mjs";
 import { KIT, svgOpen, esc } from "./readme-diagram-theme.mjs";
 
@@ -33,104 +34,115 @@ const INV = KIT.dark;
 // The gate-checked provider total (scripts/check/check-docs-counts-sync.mjs reads
 // "<n> providers" from the title); the health line and the "… N more providers" footer of the
 // providers screen derive from it so the three numbers can never disagree.
-const PROVIDER_TOTAL = 381;
 
 // The three screens: command, then header + 4 lines + a dim footer line. Segments are plain
 // strings or { t, c } with c ∈ ok | warn | err | dim.
-const SCREENS = [
-  {
-    cmd: "omniroute providers list",
-    header: "OmniRoute Providers",
-    lines: [
-      [`1f3a9c2e${nb(2)}anthropic${nb(3)}Claude Max 20x${nb(4)}`, { t: "active", c: "ok" }],
-      [`8c2d5b1a${nb(2)}codex${nb(7)}Codex Pro (team)${nb(2)}`, { t: "active", c: "ok" }],
-      [`f4e0a97b${nb(2)}glm${nb(9)}GLM Coding Plan${nb(3)}`, { t: "active", c: "ok" }],
-      [`03bd6e5f${nb(2)}kimi${nb(8)}Kimi K2 free${nb(6)}`, { t: "active", c: "ok" }],
-    ],
-    footer: null, // computed below: PROVIDER_TOTAL minus the rows listed
-    // keyTimes, verbatim from the previous file
-    typing: "0;0.012;0.018;0.024;0.030;0.036;0.042;0.048;0.054;1",
-    caret: "0;0.011;0.012;0.022;0.032;0.042;0.052;0.074;1",
-    group: { values: "1;1;0;0", keyTimes: "0;0.315;0.33;1" },
-    reveal: [
-      "0.045;0.047",
-      "0.053;0.055",
-      "0.061;0.063",
-      "0.069;0.071",
-      "0.077;0.079",
-      "0.085;0.087",
-    ],
-  },
-  {
-    cmd: "omniroute combo list",
-    header: "OmniRoute Combos",
-    lines: [
-      [
-        nb(2),
-        { t: "●", c: "ok" },
-        ` always-on${nb(5)}[priority${nb(6)}] `,
-        { t: "enabled", c: "ok" },
+function buildScreens(PROVIDER_TOTAL) {
+  // The three screens: command, then header + 4 lines + a dim footer line. Segments are plain
+  // strings or { t, c } with c ∈ ok | warn | err | dim.
+  const SCREENS = [
+    {
+      cmd: "omniroute providers list",
+      header: "OmniRoute Providers",
+      lines: [
+        [`1f3a9c2e${nb(2)}anthropic${nb(3)}Claude Max 20x${nb(4)}`, { t: "active", c: "ok" }],
+        [`8c2d5b1a${nb(2)}codex${nb(7)}Codex Pro (team)${nb(2)}`, { t: "active", c: "ok" }],
+        [`f4e0a97b${nb(2)}glm${nb(9)}GLM Coding Plan${nb(3)}`, { t: "active", c: "ok" }],
+        [`03bd6e5f${nb(2)}kimi${nb(8)}Kimi K2 free${nb(6)}`, { t: "active", c: "ok" }],
       ],
-      [
-        nb(2),
-        { t: "○", c: "dim" },
-        ` cost-saver${nb(4)}[cost-optimized] `,
-        { t: "enabled", c: "ok" },
+      footer: null, // computed below: PROVIDER_TOTAL minus the rows listed
+      // keyTimes, verbatim from the previous file
+      typing: "0;0.012;0.018;0.024;0.030;0.036;0.042;0.048;0.054;1",
+      caret: "0;0.011;0.012;0.022;0.032;0.042;0.052;0.074;1",
+      group: { values: "1;1;0;0", keyTimes: "0;0.315;0.33;1" },
+      reveal: [
+        "0.045;0.047",
+        "0.053;0.055",
+        "0.061;0.063",
+        "0.069;0.071",
+        "0.077;0.079",
+        "0.085;0.087",
       ],
-      [
-        nb(2),
-        { t: "○", c: "dim" },
-        ` fusion-panel${nb(2)}[fusion${nb(8)}] `,
-        { t: "enabled", c: "ok" },
+    },
+    {
+      cmd: "omniroute combo list",
+      header: "OmniRoute Combos",
+      lines: [
+        [
+          nb(2),
+          { t: "●", c: "ok" },
+          ` always-on${nb(5)}[priority${nb(6)}] `,
+          { t: "enabled", c: "ok" },
+        ],
+        [
+          nb(2),
+          { t: "○", c: "dim" },
+          ` cost-saver${nb(4)}[cost-optimized] `,
+          { t: "enabled", c: "ok" },
+        ],
+        [
+          nb(2),
+          { t: "○", c: "dim" },
+          ` fusion-panel${nb(2)}[fusion${nb(8)}] `,
+          { t: "enabled", c: "ok" },
+        ],
+        [
+          nb(2),
+          { t: "○", c: "dim" },
+          ` context-relay [context-relay${nb(1)}] `,
+          { t: "enabled", c: "ok" },
+        ],
       ],
-      [
-        nb(2),
-        { t: "○", c: "dim" },
-        ` context-relay [context-relay${nb(1)}] `,
-        { t: "enabled", c: "ok" },
+      footer: "… run: omniroute combo create",
+      typing: "0;0.348;0.351;0.357;0.363;0.369;0.375;0.381;0.387;1",
+      caret: "0;0.344;0.348;0.355;0.365;0.375;0.385;0.407;1",
+      group: { values: "0;0;1;1;0;0", keyTimes: "0;0.333;0.348;0.648;0.663;1" },
+      reveal: [
+        "0.378;0.38",
+        "0.386;0.388",
+        "0.394;0.396",
+        "0.402;0.404",
+        "0.41;0.412",
+        "0.418;0.42",
       ],
-    ],
-    footer: "… run: omniroute combo create",
-    typing: "0;0.348;0.351;0.357;0.363;0.369;0.375;0.381;0.387;1",
-    caret: "0;0.344;0.348;0.355;0.365;0.375;0.385;0.407;1",
-    group: { values: "0;0;1;1;0;0", keyTimes: "0;0.333;0.348;0.648;0.663;1" },
-    reveal: ["0.378;0.38", "0.386;0.388", "0.394;0.396", "0.402;0.404", "0.41;0.412", "0.418;0.42"],
-  },
-  {
-    cmd: "omniroute health",
-    header: "OmniRoute Health",
-    lines: [
-      [`${nb(2)}Status: `, { t: "healthy", c: "ok" }, `${nb(3)}Uptime: 4d 12h 33m`],
-      [`${nb(2)}Requests (24h): 18,412${nb(3)}p95: 412ms`],
-      [
-        `${nb(2)}Breakers: `,
-        { t: "●", c: "ok" },
-        { t: " 24 closed", c: "ok" },
-        nb(2),
-        { t: "◒", c: "warn" },
-        { t: " 1 half-open", c: "warn" },
-        nb(2),
-        { t: "○", c: "err" },
-        { t: " 0 open", c: "err" },
+    },
+    {
+      cmd: "omniroute health",
+      header: "OmniRoute Health",
+      lines: [
+        [`${nb(2)}Status: `, { t: "healthy", c: "ok" }, `${nb(3)}Uptime: 4d 12h 33m`],
+        [`${nb(2)}Requests (24h): 18,412${nb(3)}p95: 412ms`],
+        [
+          `${nb(2)}Breakers: `,
+          { t: "●", c: "ok" },
+          { t: " 24 closed", c: "ok" },
+          nb(2),
+          { t: "◒", c: "warn" },
+          { t: " 1 half-open", c: "warn" },
+          nb(2),
+          { t: "○", c: "err" },
+          { t: " 0 open", c: "err" },
+        ],
+        [`${nb(2)}Providers: ${PROVIDER_TOTAL} registered${nb(3)}150+ free tiers`],
       ],
-      [`${nb(2)}Providers: ${PROVIDER_TOTAL} registered${nb(3)}150+ free tiers`],
-    ],
-    footer: "… live: /dashboard · omniroute status",
-    typing: "0;0.678;0.684;0.690;0.696;0.702;0.708;0.714;0.720;1",
-    caret: "0;0.677;0.678;0.688;0.698;0.708;0.718;0.74;1",
-    group: { values: "0;0;1;1;0;0", keyTimes: "0;0.666;0.678;0.93;0.945;1" },
-    reveal: [
-      "0.711;0.713",
-      "0.719;0.721",
-      "0.727;0.729",
-      "0.735;0.737",
-      "0.743;0.745",
-      "0.751;0.753",
-    ],
-  },
-];
+      footer: "… live: /dashboard · omniroute status",
+      typing: "0;0.678;0.684;0.690;0.696;0.702;0.708;0.714;0.720;1",
+      caret: "0;0.677;0.678;0.688;0.698;0.708;0.718;0.74;1",
+      group: { values: "0;0;1;1;0;0", keyTimes: "0;0.666;0.678;0.93;0.945;1" },
+      reveal: [
+        "0.711;0.713",
+        "0.719;0.721",
+        "0.727;0.729",
+        "0.735;0.737",
+        "0.743;0.745",
+        "0.751;0.753",
+      ],
+    },
+  ];
 
-SCREENS[0].footer = `… ${PROVIDER_TOTAL - SCREENS[0].lines.length} more providers`;
+  SCREENS[0].footer = `… ${PROVIDER_TOTAL - SCREENS[0].lines.length} more providers`;
+  return SCREENS;
+}
 
 // Subcommand ticker: 32 top-level commands, the accent ones are the diagram's brand emphasis.
 const TICKER = [
@@ -189,17 +201,23 @@ const TICKER_SEGS = tickerSegments();
 
 const segText = (s) => (typeof s === "string" ? s : s.t);
 
-export const CLI_TERMINAL_COPY = {
-  header: ["omniroute — 89 top-level commands"],
-  prompt: ["$"],
-  commands: SCREENS.map((s) => s.cmd),
-  headers: SCREENS.map((s) => s.header),
-  lines: SCREENS.flatMap((s) => s.lines.flatMap((l) => l.map(segText))),
-  footers: SCREENS.map((s) => s.footer),
-  ticker: TICKER_SEGS.map((s) => s.t),
-};
+export function buildCliTerminalCopy(screens = buildScreens(CURRENT_DOC_COUNTS.providers)) {
+  return {
+    header: ["omniroute — 89 top-level commands"],
+    prompt: ["$"],
+    commands: screens.map((s) => s.cmd),
+    headers: screens.map((s) => s.header),
+    lines: screens.flatMap((s) => s.lines.flatMap((l) => l.map(segText))),
+    footers: screens.map((s) => s.footer),
+    ticker: TICKER_SEGS.map((s) => s.t),
+  };
+}
 
-const TITLE = `Animated terminal demoing the OmniRoute CLI: omniroute providers list (${PROVIDER_TOTAL} providers registered, anthropic, codex, glm, kimi shown active), omniroute combo list (always-on priority, cost-saver, fusion-panel, context-relay) and omniroute health (healthy, 18412 requests in 24h, p95 412ms, circuit breakers 24 closed, 1 half-open, 0 open), cycling over 89 top-level commands: providers, oauth, keys, combo, nodes, models, cache, compression, cost, usage, quota, health, resilience, telemetry, logs, audit, mcp, a2a, cloud, memory, skills, eval, doctor, repl, tunnel, backup, sync, webhooks, policy, pricing, translator, simulate and more.`;
+export const CLI_TERMINAL_COPY = buildCliTerminalCopy();
+
+function buildTitle(PROVIDER_TOTAL) {
+  return `Animated terminal demoing the OmniRoute CLI: omniroute providers list (${PROVIDER_TOTAL} providers registered, anthropic, codex, glm, kimi shown active), omniroute combo list (always-on priority, cost-saver, fusion-panel, context-relay) and omniroute health (healthy, 18412 requests in 24h, p95 412ms, circuit breakers 24 closed, 1 half-open, 0 open), cycling over 89 top-level commands: providers, oauth, keys, combo, nodes, models, cache, compression, cost, usage, quota, health, resilience, telemetry, logs, audit, mcp, a2a, cloud, memory, skills, eval, doctor, repl, tunnel, backup, sync, webhooks, policy, pricing, translator, simulate and more.`;
+}
 const DESC =
   "Compact animated terminal cycling three real OmniRoute CLI commands with a typewriter effect and a scrolling subcommand ticker; the first frame shows the completed providers-list screen.";
 
@@ -284,8 +302,10 @@ function typingValues(cmd) {
   return widths;
 }
 
-export async function renderCliTerminal() {
-  const C = CLI_TERMINAL_COPY;
+export async function renderCliTerminal({ counts = CURRENT_DOC_COUNTS } = {}) {
+  const SCREENS = buildScreens(counts.providers);
+  const TITLE = buildTitle(counts.providers);
+  const C = buildCliTerminalCopy(SCREENS);
   // One typing ramp per screen: the clip widths and the caret x positions come from it.
   const ramps = SCREENS.map((s) => typingValues(s.cmd));
 

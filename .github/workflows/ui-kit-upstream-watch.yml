@@ -9,11 +9,13 @@ name: UI Kit upstream watch
 #
 # Secrets:
 #   UI_KIT_READ_TOKEN     read-only token for the private keak-ai/cheaper-inference-ui-kit. When the
-#                         check can't read upstream it reports "unknown": the run stays green but
-#                         warns, and keeps ONE issue open until a later run can read upstream again.
+#                         check can't read upstream it reports "unknown" and exits 0. Issue tracking
+#                         warns and attempts to keep ONE issue open until access returns; GitHub issue
+#                         API failures still fail the job.
 #   UI_KIT_SYNC_PR_TOKEN  fine-grained token on this repository (Contents and Pull requests: write).
-#                         This repository doesn't let GITHUB_TOKEN create PRs, and a PR it opened
-#                         wouldn't trigger CI. Without this token only the branch is pushed.
+#                         The dedicated token lets PR workflows run automatically instead of
+#                         waiting for the GITHUB_TOKEN approval prompt. Without it only the branch
+#                         is pushed.
 
 on:
   schedule:
@@ -175,7 +177,7 @@ jobs:
                 echo "The sync step didn't finish; see $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID."
               fi
               echo
-              echo "To sync by hand from the main checkout:"
+              echo "To sync by hand from an isolated worktree:"
               echo
               echo '```'
               echo 'git -C _references/cheaper-inference-ui-kit fetch --tags'

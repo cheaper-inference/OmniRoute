@@ -854,13 +854,7 @@ Exa `type: "lite"` (Exa 3.0) รองรับฟิลด์ชุดที่
 `subpageTarget`, `highlights.numSentences` และ `highlights.highlightsPerUrl` ที่เลิกใช้แล้วจะไม่ถูก
 ส่งต่ออีกต่อไป
 
-การคำนวณค่าใช้จ่ายใช้รีจิสทรีแบบคงที่ `costPerQuery` ยกเว้น Exa ซึ่งใช้
-การกำหนดราคาของ Exa เอง: $0.007 ต่อการเรียกสำหรับ `auto` (และ `fast` แบบเดิม) หรือ $0.004 สำหรับ
-`lite` (และ `instant` แบบเดิม) ครอบคลุมผลลัพธ์ 10 รายการ; $0.001 สำหรับแต่ละผลลัพธ์เพิ่มเติม; และ $0.001 ต่อ
-ผลลัพธ์ที่ส่งคืนเมื่อกำหนด `contents.summary` Tavily จะถูกบันทึกเป็น 1 เครดิต ($0.008) สำหรับ
-`search_depth` `basic`, `fast` และ `ultra-fast` และ 2 เครดิต ($0.016) สำหรับ `advanced`
-([เครดิต API ของ Tavily](https://docs.tavily.com/documentation/api-credits)) การเรียกที่มี
-`auto_parameters: true` ซึ่ง Tavily ยกระดับเป็น advanced ยังคงถูกบันทึกเป็น 1 เครดิต
+Exa: 0.007 ดอลลาร์ต่อการเรียก `auto` (และ `fast` แบบเดิม) หรือ 0.004 ดอลลาร์สำหรับ `lite` (และ `instant` แบบเดิม) ครอบคลุม 10 ผลลัพธ์ $0.001 สำหรับผลลัพธ์เพิ่มเติมแต่ละรายการ และ 0.001 ดอลลาร์ต่อผลลัพธ์ที่ส่งคืนเมื่อตั้งค่า `contents.summary` Tavily ได้รับการบันทึกที่ 1 เครดิต ($0.008) สำหรับ `search_depth` `basic`, `fast` และ `ultra-fast` และ 2 เครดิต ($0.016) สำหรับ `advanced` ( [Tavily API credits](https://docs.tavily.com/documentation/api-credits) ) การโทรด้วย `auto_parameters: true` ที่ Tavily อัปเกรดเป็นขั้นสูงจะยังคงบันทึกไว้ที่ 1 เครดิต
 
 ---
 
@@ -1140,6 +1134,8 @@ X-OmniRoute-No-Cache: true
 
 ---
 
+<a id="cliproxyapi-management-compatibility"></a>
+
 ## ความเข้ากันได้ในการจัดการ CLIProxyAPI
 
 OmniRoute ตอบสนองต่อเอนด์พอยต์การจัดการทั้งสามของ
@@ -1154,20 +1150,11 @@ OmniRoute และใช้คีย์ API ที่มีสโคป `manage
 | POST   | `/v0/management/api-call`    | เนื้อหา `{ auth_index, method, url, header?, data? }` ส่งคำขอที่อนุญาตไว้หนึ่งรายการด้วยโทเค็นของบัญชี และส่งคืน `{ status_code, body }` |
 | POST   | `/v0/management/reset-quota` | เนื้อหา `{ auth_index }` ล้างคูลดาวน์ของการเชื่อมต่อ การล็อกเอาต์ของโมเดล และคูลดาวน์ตามสโคปของ Codex สำหรับบัญชีหนึ่งบัญชี              |
 
-- `auth_index` คือ ID การเชื่อมต่อของ OmniRoute ส่วน `provider` คือ `claude` หรือ `codex` (เฉพาะ
-  การเชื่อมต่อ OAuth เท่านั้น โดยไม่มีการแสดงผู้ให้บริการคีย์ API `anthropic`) สำหรับ Codex
-  `id_token.chatgpt_account_id` คือ ID เวิร์กสเปซที่จัดเก็บไว้ และ `plan_type` คือแผนที่จัดเก็บไว้
-- `api-call` ไม่ใช่พร็อกซีทั่วไป ยอมรับเฉพาะ Claude `GET
-https://api.anthropic.com/api/oauth/usage` และ Codex `GET
-https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits` และ
-  `POST .../wham/rate-limit-reset-credits/consume` โดยแต่ละรายการต้องเป็นบัญชีของผู้ให้บริการที่ตรงกันเท่านั้น สิ่งอื่นใดจะส่งคืน
-  `403` โดยไม่ติดต่อ upstream ระบบจะละเว้นเฮดเดอร์
-  `Authorization` ของผู้เรียก (รวมถึงตัวยึดตำแหน่ง `$TOKEN$`): OmniRoute จะแทรก access token ของการเชื่อมต่อ
-  และรีเฟรชก่อนเมื่อใกล้หมดอายุ จากนั้นจะส่งต่อเฉพาะเฮดเดอร์ที่อนุญาตไว้ (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`;
-  `Accept`, `Content-Type`) หากไม่มี `Chatgpt-Account-Id` จะใช้ ID เวิร์กสเปซที่จัดเก็บไว้เป็นค่าเริ่มต้น
-  คำขอจะหมดเวลาหลัง 15 วินาที และใช้พร็อกซีของการเชื่อมต่อ
-- `reset-quota` จะคงสถานะสิ้นสุด (banned, expired, credits_exhausted) ไว้ตามเดิม หากไม่พบ
-  `auth_index` จะส่งคืน `404`
+- `auth_index` คือ ID การเชื่อมต่อของ OmniRoute ส่วน `provider` คือ `claude` หรือ `codex` (เฉพาะการเชื่อมต่อ OAuth โดยไม่นับผู้ให้บริการแบบ API key `anthropic`) สำหรับ Codex ค่า `id_token.chatgpt_account_id` คือ ID เวิร์กสเปซที่เก็บไว้ และ `plan_type` คือแผนที่เก็บไว้
+- `api-call` ไม่ใช่พร็อกซีทั่วไป ยอมรับเฉพาะ `GET
+https://api.anthropic.com/api/oauth/usage` ของ Claude และ `GET
+https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits`, `POST .../wham/rate-limit-reset-credits/consume` ของ Codex โดยแต่ละรายการใช้ได้เฉพาะกับบัญชีของผู้ให้บริการที่ตรงกัน สิ่งอื่นจะคืน `403` โดยไม่ติดต่อระบบต้นทาง เฮดเดอร์ `Authorization` ของผู้เรียก รวมถึงตัวแทนค่า `$TOKEN$` จะถูกละเลย OmniRoute ใส่โทเค็นการเข้าถึงของการเชื่อมต่อให้ โดยรีเฟรชก่อนหากใกล้หมดอายุ และส่งต่อเฉพาะเฮดเดอร์ที่อยู่ในรายการอนุญาต (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`; `Accept`, `Content-Type`) หากไม่มี `Chatgpt-Account-Id` จะใช้ ID เวิร์กสเปซที่เก็บไว้เป็นค่าเริ่มต้น หากคำตอบแรกจากต้นทางคือ `401` ระบบจะรีเฟรชหนึ่งครั้งและลองใหม่เฉพาะเมื่อโทเค็นการเข้าถึงเปลี่ยนไป แต่ละครั้งที่เรียกต้นทางจะหมดเวลาหลัง 15 วินาทีและใช้พร็อกซีของการเชื่อมต่อ
+- `reset-quota` ไม่เปลี่ยนสถานะสิ้นสุด (banned, expired, credits_exhausted) หากไม่รู้จัก `auth_index` จะคืน `404`
 
 **การตรวจสอบสิทธิ์:** ต้องใช้เซสชันแดชบอร์ดหรือคีย์ API ที่มีสโคป `manage` แม้จะปิดใช้งานการเข้าสู่ระบบ
 แล้วก็ตาม (เส้นทางเหล่านี้อยู่ใน `ALWAYS_PROTECTED_API_PATHS`) คีย์ที่ใช้สำหรับการอนุมานเท่านั้นจะได้รับ `403` แหล่งที่มา:
@@ -1213,7 +1200,7 @@ https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-cred
 การตอบกลับจะแสดงรหัสที่จัดเก็บไว้ รหัสที่มีเครื่องหมายทับของผู้ให้บริการมาตรฐาน (เช่น `nvidia/nemotron-…`) จะถูก
 จัดเก็บตามเดิม `/v1/models` จะไม่แสดงรหัสในรูปแบบ `<prefix>/<prefix>/<model>` ที่มีคำนำหน้าซ้อนกัน
 
-โหนด Custom Chat Completions จะปรับการเลือกไม่ใช้เหตุผลอย่างชัดแจ้งให้เข้ากับแบ็กเอนด์ต้นทาง การทดสอบการเชื่อมต่อที่สำเร็จจะเลือกตัวควบคุม chat-template โดยอัตโนมัติสำหรับ model ID ที่ตรงกันทุกประการ ซึ่งรายการ `/models` ยืนยันค่า `owned_by` ที่รู้จัก ได้แก่ `vllm`, `sglang` หรือ `llamacpp`  
+โหนด Custom Chat Completions จะปรับการเลือกไม่ใช้เหตุผลอย่างชัดแจ้งให้เข้ากับแบ็กเอนด์ต้นทาง การทดสอบการเชื่อมต่อที่สำเร็จจะเลือกตัวควบคุม chat-template โดยอัตโนมัติสำหรับ model ID ที่ตรงกันทุกประการ ซึ่งรายการ `/models` ยืนยันค่า `owned_by` ที่รู้จัก ได้แก่ `vllm`, `sglang` หรือ `llamacpp`\
 wrapper ที่เข้ากันได้กับ OpenAI แบบโปร่งใสอาจเก็บรายการโมเดลเดิมไว้ภายในออบเจ็กต์ `openai` ที่ซ้อนกัน การตรวจจับจะติดตาม envelope ดังกล่าวได้สูงสุดสามชั้น โมเดลที่ไม่มีข้อมูล ownership มีค่าที่ไม่รู้จัก หรือมี ownership ขัดแย้งกัน จะคงพฤติกรรม OpenAI ปกติไว้ การตรวจจับจะใช้คำขอ catalog ที่มีอยู่เดิม ไม่สร้าง completion token และจะถูกทำให้ใช้งานไม่ได้เมื่อ endpoint ของการเชื่อมต่อเปลี่ยนแปลง
 
 หากต้องการกำหนดพฤติกรรมตายตัวสำหรับแบ็กเอนด์ที่ไม่เปิดเผย metadata ดังกล่าว ให้ใช้ API การอัปเดต provider บางส่วนที่มีอยู่เดิม:
@@ -1262,7 +1249,7 @@ wrapper ที่เข้ากันได้กับ OpenAI แบบโป�
 | `effort-base:` prefix                        | แถวยืมมาจากโมเดลฐานของตัวแปรที่มี suffix เป็น effort                        |
 | `none`                                       | ไม่มีแหล่งที่มาที่ประกาศขีดจำกัด (ค่าคือ `null`)                            |
 
-การใช้งาน: `getResolvedModelCapabilitiesWithLimitSources()` ใน `src/lib/modelCapabilities.ts`  
+การใช้งาน: `getResolvedModelCapabilitiesWithLimitSources()` ใน `src/lib/modelCapabilities.ts`\
 และ chain ลำดับความสำคัญใน `src/lib/modelCapabilityLimits.ts`
 
 ### การใช้งานและการวิเคราะห์ข้อมูล
@@ -1871,17 +1858,17 @@ curl -X DELETE http://localhost:20128/api/resilience/model-cooldowns \
 
 OmniRoute มาพร้อมเซิร์ฟเวอร์ Model Context Protocol ในตัว ซึ่งมีการขนส่ง 3 รูปแบบ (stdio, SSE, streamable-http) และเครื่องมือที่กำหนดขอบเขตไว้ จุดปลายทางของแดชบอร์ดด้านล่างนี้อ่านข้อมูลสถานะ/การตรวจสอบ และทำหน้าที่เป็นพร็อกซีสำหรับการขนส่งผ่าน HTTP
 
-| Method | Path | Description |
-| ------ | ---------------------- | ------------------------------------------------------------------------------------------------ | -------------------- |
-| GET | `/api/mcp/status` | ฮาร์ตบีต, การขนส่ง, สถานะออนไลน์, การเรียกล่าสุด, เครื่องมือยอดนิยม, อัตราความสำเร็จในช่วง 24 ชั่วโมง |
-| GET | `/api/mcp/tools` | รายการเครื่องมือ MCP พร้อม `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints` |
-| GET | `/api/mcp/sse` | เปิดสตรีม SSE สำหรับการขนส่ง SSE (ส่งคืน `503` หาก MCP ถูกปิดใช้งานหรือการขนส่งไม่ตรงกัน) |
-| POST | `/api/mcp/sse` | ส่งเฟรม JSON-RPC ผ่านการขนส่ง SSE |
-| GET | `/api/mcp/stream` | เปิดฝั่ง SSE ของการขนส่ง Streamable HTTP (ข้อความที่เซิร์ฟเวอร์เริ่มส่งเอง) |
-| POST | `/api/mcp/stream` | ส่งเฟรม JSON-RPC ผ่านการขนส่ง Streamable HTTP |
-| DELETE | `/api/mcp/stream` | สิ้นสุดเซสชัน Streamable HTTP |
-| GET | `/api/mcp/audit` | ค้นหาบันทึกการตรวจสอบ — `?limit=`, `?offset=`, `?tool=`, `?success=true                                | false`, `?apiKeyId=` |
-| GET | `/api/mcp/audit/stats` | สถิติการตรวจสอบแบบรวม (จำนวนรวม, อัตราความสำเร็จ, ระยะเวลาเฉลี่ย, เครื่องมือยอดนิยม) |
+| Method | Path                   | Description                                                                                                                    |
+| ------ | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| GET    | `/api/mcp/status`      | ฮาร์ตบีต, การขนส่ง, สถานะออนไลน์, การเรียกล่าสุด, เครื่องมือยอดนิยม, อัตราความสำเร็จในช่วง 24 ชั่วโมง                          |
+| GET    | `/api/mcp/tools`       | รายการเครื่องมือ MCP พร้อม `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints`                           |
+| GET    | `/api/mcp/sse`         | เปิดสตรีม SSE สำหรับการขนส่ง SSE (ส่งคืน `503` หาก MCP ถูกปิดใช้งานหรือการขนส่งไม่ตรงกัน)                                      |
+| POST   | `/api/mcp/sse`         | ส่งเฟรม JSON-RPC ผ่านการขนส่ง SSE                                                                                              |
+| GET    | `/api/mcp/stream`      | เปิดฝั่ง SSE ของการขนส่ง Streamable HTTP (ข้อความที่เซิร์ฟเวอร์เริ่มส่งเอง)                                                    |
+| POST   | `/api/mcp/stream`      | ส่งเฟรม JSON-RPC ผ่านการขนส่ง Streamable HTTP                                                                                  |
+| DELETE | `/api/mcp/stream`      | สิ้นสุดเซสชัน Streamable HTTP                                                                                                  |
+| GET    | `/api/mcp/audit`       | ค้นหาบันทึกการตรวจสอบ — `?limit=`, `?offset=`, `?tool=`, `?success=true                                \| false`, `?apiKeyId=` |
+| GET    | `/api/mcp/audit/stats` | สถิติการตรวจสอบแบบรวม (จำนวนรวม, อัตราความสำเร็จ, ระยะเวลาเฉลี่ย, เครื่องมือยอดนิยม)                                           |
 
 **การยืนยันตัวตน:** การขนส่ง `sse`/`stream` ใช้พื้นผิวการยืนยันตัวตนเฉพาะของ MCP (Bearer API key ที่มี scope `mcp`); เส้นทาง `status`/`tools`/`audit*` สามารถอ่านได้จากแดชบอร์ด (ไม่ต้องมีการยืนยันตัวตนเพิ่มเติมนอกเหนือจากการเข้าถึงโฮสต์แดชบอร์ด)
 

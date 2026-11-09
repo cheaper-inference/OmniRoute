@@ -218,9 +218,9 @@ Tất cả endpoint MITM đều yêu cầu xác thực quản lý (`requireCliTo
 
 ---
 
-## Tác nhân người dùng ghi đè — env vars (`.env.example` phần 12)
+## Ghi đè User-Agent — biến môi trường (`.env.example` mục 12)
 
-| Biến                | Mặc định                                      |
+| Biến                | Giá trị mặc định                              |
 | ------------------- | --------------------------------------------- |
 | `CLAUDE_USER_AGENT` | `claude-cli/2.1.280 (external, cli)`          |
 | `CODEX_USER_AGENT`  | `codex-cli/0.155.0 (Windows 10.0.26200; x64)` |
@@ -229,7 +229,7 @@ Tất cả endpoint MITM đều yêu cầu xác thực quản lý (`requireCliTo
 | `QODER_USER_AGENT`  | `Qoder-Cli`                                   |
 | `CURSOR_USER_AGENT` | `Cursor/3.4`                                  |
 
-Được sử dụng bởi `open-sse/executors/base.ts::buildHeaders()` thông qua tra cứu động.** Hãy tăng cường những điều này khi nhà cung cấp phát hành phiên bản CLI mới** Các chuỗi UA cũ — bắt đầu bị từ chối vì là ứng dụng khách lỗi thời.
+Được `open-sse/executors/base.ts::buildHeaders()` sử dụng thông qua tra cứu động. **Hãy cập nhật các giá trị này khi nhà cung cấp phát hành phiên bản CLI mới** — các chuỗi UA cũ sẽ bắt đầu bị từ chối vì được coi là ứng dụng khách lỗi thời.
 
 ## Công tắc chế độ tương thích CLI (`.env.example` mục 13)
 

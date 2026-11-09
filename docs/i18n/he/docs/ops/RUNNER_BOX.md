@@ -11,13 +11,13 @@ runner של OmniRoute יש **תפקיד אחד**, תווית אחת ותקציב
 Release-Green ולמשימת lint; זיכרון ה־swap של המארח (16 GB) סופג זאת, ומכיוון שבניות של בקשות משיכה
 רצות על תשתית מתארחת, משבצת Turbopack אינה פעילה רוב הזמן:
 
-| runner               | תווית          | תפקיד                                                                                                                                                     | `MemoryHigh` / `MemoryMax`    | `CPUQuota`    |
-| -------------------- | -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------- | ------------- |
-| `omniroute-113-5`    | `omni-build`   | בניות Turbopack:‏ `ci.yml` `Build` (עבור push/dispatch בלבד), Docker amd64,‏ `npm-publish`,‏ `nightly-v4-build`,‏ `preview-artifact`, בניית ה־a11y הלילית | 56 GB / 60 GB (ללא swap)      | 1600 %        |
-| `omniroute-113-6`    | `omni-release` | Release-Green (`release-green` + `main-green`), בניית webpack                                                                                             | 20 GB / 24 GB (‏swap של 4 GB) | 800 %         |
-| `omniroute-113-2`    | `omni-light`   | משימות ליליות (Schemathesis,‏ promptfoo,‏ garak,‏ k6) ו־`quality.yml` `lint-guard`                                                                        | 12 GB / 16 GB (‏swap של 4 GB) | 600 %         |
-| `omniroute-113`      | `omni-light`   | אותו מאגר כמו לעיל                                                                                                                                        | 8 GB / 12 GB                  | 400 %         |
-| OmniHeuris, OmniMind | (המאגרים שלהם) | Dependabot בלבד (שיא של 155 MB לכל אחד, 2026-10-18)                                                                                                       | 4 GB / 6 GB                   | 200 % לכל אחד |
+| runner               | תווית                           | תפקיד                                                                                                                                                     | `MemoryHigh` / `MemoryMax`    | `CPUQuota`    |
+| -------------------- | ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------- | ------------- |
+| `omniroute-113-5`    | `omni-build`, `omni-build-60gb` | בניות Turbopack:‏ `ci.yml` `Build` (עבור push/dispatch בלבד), Docker amd64,‏ `npm-publish`,‏ `nightly-v4-build`,‏ `preview-artifact`, בניית ה־a11y הלילית | 56 GB / 60 GB (ללא swap)      | 1600 %        |
+| `omniroute-113-6`    | `omni-release`                  | Release-Green (`release-green` + `main-green`), בניית webpack                                                                                             | 20 GB / 24 GB (‏swap של 4 GB) | 800 %         |
+| `omniroute-113-2`    | `omni-light`                    | משימות ליליות (Schemathesis,‏ promptfoo,‏ garak,‏ k6) ו־`quality.yml` `lint-guard`                                                                        | 12 GB / 16 GB (‏swap של 4 GB) | 600 %         |
+| `omniroute-113`      | `omni-light`                    | אותו מאגר כמו לעיל                                                                                                                                        | 8 GB / 12 GB                  | 400 %         |
+| OmniHeuris, OmniMind | (המאגרים שלהם)                  | Dependabot בלבד (שיא של 155 MB לכל אחד, 2026-10-18)                                                                                                       | 4 GB / 6 GB                   | 200 % לכל אחד |
 
 נמדד ב־2026-10-18:
 
@@ -27,12 +27,13 @@ Release-Green ולמשימת lint; זיכרון ה־swap של המארח (16 GB)
 | swap      | 16 GB                       | `omniroute-113-5` פועל כאשר swap מושבת (`MemorySwapMax=0`), כך שבנייה שיצאה משליטה נעצרת בגבול שלה במקום לגרום לשרת להשתמש ב־swap                                                                                                                                                                                                                                       |
 | `/tmp`    | **tmpfs של 12 GB = RAM**    | כל דבר שמאוחסן שם צורך זיכרון; שאריות נמחקות לאחר 3 שעות                                                                                                                                                                                                                                                                                                                |
 | CPU       | נצפה עומס של 60 על 32 ליבות | לפני המכסות, בניית Turbopack אחת (כ־1166 % CPU) יחד עם חבילת בדיקות כיסוי באותו שרת מנעו את אותות החיים של המאזינים האחרים (`The self-hosted runner lost communication`,‏ #16853)                                                                                                                                                                                       |
-| runners   | **7 מאזינים** (2026-10-28)  | 5 של OmniRoute +‏ OmniHeuris +‏ OmniMind;‏ `omniroute-113-7` נושא גם את `omni-build`;‏ `omniroute-113-3/-4/-8` נמחקו מהמאגר (2026-10-28)                                                                                                                                                                                                                                |
+| runners   | **7 מאזינים** (2026-10-28)  | 5 של OmniRoute +‏ OmniHeuris +‏ OmniMind;‏ `omniroute-113-5` נושא גם את `omni-build-60gb`;‏ `omniroute-113-3/-4/-8` נמחקו מהמאגר (2026-10-28)                                                                                                                                                                                                                           |
 
 ההגבלות נמצאות בקובץ `/etc/systemd/system/actions.runner.<…>.service.d/override.conf` של כל יחידה
 (הערכים הקודמים נשמרו בשם `override.conf.bak-20261018`) והוחלו בזמן אמת באמצעות
 `systemctl set-property --runtime … MemoryHigh=… MemoryMax=… CPUQuota=…` — ללא הפעלה מחדש, ולכן
-אף משימה פעילה לא הושפעה. התוויות משתנות באמצעות API ה־runners (`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
+אף משימה פעילה לא הושפעה. התוויות משתנות באמצעות API ה־runners
+(`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
 `gh api -X POST repos/<repo>/actions/runners/<id>/labels -f 'labels[]=<label>'`), גם כן בזמן אמת.
 
 ## התקנת המנקה (פעם אחת, בשרת)
@@ -80,7 +81,7 @@ worker מדווח שהמשימה בוטלה, וה-listener חוזר למצב מ�
 ## כללי תפעול
 
 - **בניית Turbopack אחת בכל רגע — נאכף באמצעות label.** כל job שמריץ
-  `next build` מלא עם Turbopack מכוון אל `[self-hosted, omni-build]`, ורק **`omniroute-113-5`**
+  `next build` מלא עם Turbopack מכוון אל `[self-hosted, omni-build, omni-build-60gb]`, ורק **`omniroute-113-5`**
   נושא את ה-label הזה: `ci.yml` `Build`,‏ `npm-publish.yml` `publish`,‏ `nightly-v4-build`,‏
   `preview-artifact`, בניית ה-a11y הלילית (#16853) ו-**amd64** של `docker-publish.yml`
   (webpack בתוך BuildKit —‏ Turbopack קרס שם, ריצה 33253576569). שלב ה-Docker של arm64 נשאר על

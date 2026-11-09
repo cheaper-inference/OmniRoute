@@ -15,7 +15,7 @@
 
 Полный обязательный протокол изоляции worktree (подтверждение базовой ветки, канонический путь
 `.claude/worktrees/`, `cp -al` для node_modules, правила удаления) описан в
-[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) (краткое изложение — в `AGENTS.md` →
+[`docs/ops/WORKTREE_ISOLATION.md`](../../../docs/ops/WORKTREE_ISOLATION.md) (краткое изложение — в `AGENTS.md` →
 «Рабочий процесс Git» → «Изоляция worktree»). Моменты, специфичные для Claude Code:
 
 - Подтвердите базовую ветку у оператора через `AskUserQuestion` (Жёсткое правило №19), если он

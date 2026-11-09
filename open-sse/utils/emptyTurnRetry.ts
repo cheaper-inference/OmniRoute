@@ -30,6 +30,8 @@ export type EmptyTurnSummary = {
   forwardedValuableChunk: boolean;
   hasValidUsage: boolean;
   toolCallsPresent: boolean;
+  /** A refusal or generated image is usable output even without text. */
+  nonTextOutputPresent?: boolean;
 };
 
 /**
@@ -123,15 +125,16 @@ export function resolveEmptyTurnReplayPath(
 }
 
 /**
- * The direct-path rule: a turn is mute when it produced neither usable text nor
- * a tool call, whatever number of tokens it spent. `isUselessEmptyTurn` lets a
- * blank turn pass when the upstream reported usage; on the direct path that
- * usage is the cost of the missing answer, so the turn is replayed instead.
+ * The direct-path rule: a turn is mute when it produced no usable text, refusal,
+ * image output or tool call, whatever number of tokens it spent.
+ * `isUselessEmptyTurn` lets a blank turn pass when the upstream reported usage;
+ * on the direct path that usage is the cost of the missing answer, so the turn
+ * is replayed instead.
  * Legit empty stops (length, tool_calls, content_filter) are never mute.
  */
 export function isMuteDirectTurn(summary: EmptyTurnSummary): boolean {
   if (LEGIT_EMPTY_TURN_FINISH.has(summary.finishReason)) return false;
-  if (summary.toolCallsPresent) return false;
+  if (summary.toolCallsPresent || summary.nonTextOutputPresent) return false;
   return !hasUsableContentText(summary.contentText);
 }
 
@@ -559,6 +562,8 @@ type ProbeAccum = {
   forwardedValuableChunk: boolean;
   finishReason: string;
   toolCallsPresent: boolean;
+  /** A refusal or generated image is usable output even without text. */
+  nonTextOutputPresent?: boolean;
 };
 
 function asRecord(value: unknown): Record<string, unknown> | null {
@@ -647,6 +652,15 @@ function recordValuableItem(rec: Record<string, unknown>, probe: ProbeAccum): vo
   const finish = choice?.finish_reason;
   if (typeof finish === "string" && finish) probe.finishReason = finish;
   const delta = choice ? asRecord(choice.delta) : null;
+  const hasImageOutput =
+    Array.isArray(delta?.images) &&
+    delta.images.some((image) => {
+      const url = asRecord(asRecord(image)?.image_url)?.url;
+      return typeof url === "string" && url.trim().length > 0;
+    });
+  if ((typeof delta?.refusal === "string" && delta.refusal.trim().length > 0) || hasImageOutput) {
+    probe.nonTextOutputPresent = true;
+  }
   const toolCalls = delta?.tool_calls;
   if (Array.isArray(toolCalls) && toolCalls.length > 0) probe.toolCallsPresent = true;
 }
@@ -723,6 +737,7 @@ function buildProbeSummary(probe: ProbeAccum): EmptyTurnSummary {
       typeof probe.state.accumulatedReasoning === "string" ? probe.state.accumulatedReasoning : "",
     forwardedValuableChunk: probe.forwardedValuableChunk,
     hasValidUsage: hasValidUsage(probe.state.usage as never),
+    nonTextOutputPresent: probe.nonTextOutputPresent === true,
     toolCallsPresent:
       probe.toolCallsPresent ||
       (probe.state.toolCalls instanceof Map && probe.state.toolCalls.size > 0),

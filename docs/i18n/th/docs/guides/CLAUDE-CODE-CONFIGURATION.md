@@ -25,27 +25,30 @@ omniroute launch --profile glm52  # Claude Code ที่ใช้ glm/glm-5.2 �
 
 ---
 
-## รหัส Claude เชื่อมต่อกับเกตเวย์อย่างไร
+## วิธีที่ Claude Code เชื่อมต่อกับเกตเวย์
 
-รหัส Claude พูดถึง** ข้อความ Anthropic API** และชี้ไปที่จุดสิ้นสุดที่กำหนดเองพร้อมตัวแปรสภาพแวดล้อม (ไม่มีแฟล็ก `--base-url` ):
+Claude Code สื่อสารผ่าน **Anthropic Messages API** และถูกกำหนดให้ชี้ไปยัง
+เอนด์พอยต์แบบกำหนดเองด้วยตัวแปรสภาพแวดล้อม (ไม่มีแฟล็ก `--base-url`):
 
-| ตัวแปร                                       | วัตถุประสงค์                                                                            |
-| -------------------------------------------- | --------------------------------------------------------------------------------------- |
-| `ANTHROPIC_BASE_URL`                         | เกตเวย์รูท URL ( รหัส Claude ต่อท้าย `/v1/messages`)** ไม่มีส่วนต่อท้าย `/v1`**         |
-| `ANTHROPIC_AUTH_TOKEN`                       | ส่งเป็น `Authorization: Bearer …` — ใช้โทเค็นการเข้าถึง OmniRoute / คีย์ API ของคุณ     |
-| `ANTHROPIC_API_KEY`                          | ทางเลือก: ส่งเป็น `x-api-key` หากทั้งสองตั้งค่า `ANTHROPIC_AUTH_TOKEN` ชนะ              |
-| `ANTHROPIC_MODEL`                            | บังคับใช้โมเดลเฉพาะ (แทนที่ค่าเริ่มต้นของตัวเลือก `/model` )                            |
-| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → ตัวเลือก `/model` ดั้งเดิมแสดงรายการโมเดล `claude*`/`anthropic*` จาก `/v1/models` |
-| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | โทเค็นเอาต์พุตสูงสุดต่อการตอบกลับ (เช่น `65536`)                                        |
-| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | เกณฑ์โทเค็นสำหรับการบีบอัดอัตโนมัติ                                                     |
+| ตัวแปร                                       | วัตถุประสงค์                                                                                      |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| `ANTHROPIC_BASE_URL`                         | URL รากของเกตเวย์ (Claude Code จะต่อท้ายด้วย `/v1/messages`) **ห้ามมีส่วนต่อท้าย `/v1`**          |
+| `ANTHROPIC_AUTH_TOKEN`                       | ส่งเป็น `Authorization: Bearer …` — ใช้โทเค็นการเข้าถึง / API key ของ OmniRoute                   |
+| `ANTHROPIC_API_KEY`                          | ทางเลือก: ส่งเป็น `x-api-key` หากกำหนดทั้งสองค่า `ANTHROPIC_AUTH_TOKEN` จะมีลำดับความสำคัญสูงกว่า |
+| `ANTHROPIC_MODEL`                            | บังคับใช้โมเดลที่ระบุ (แทนที่ค่าเริ่มต้นของตัวเลือก `/model`)                                     |
+| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → ตัวเลือก `/model` แบบเนทีฟจะแสดงโมเดล `claude*`/`anthropic*` จาก `/v1/models`               |
+| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | จำกัดจำนวนโทเค็นเอาต์พุตต่อการตอบกลับ (เช่น `65536`)                                              |
+| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | เกณฑ์จำนวนโทเค็นสำหรับการย่ออัตโนมัติ                                                             |
 
-> Env vars ถูกอ่าน** ครั้งหนึ่งเมื่อเริ่มต้น** — รีสตาร์ทรหัส Claude หลังจากเปลี่ยนแล้ว
+> ตัวแปรสภาพแวดล้อมจะถูกอ่าน **เพียงครั้งเดียวเมื่อเริ่มต้น** — ให้รีสตาร์ต Claude Code หลังจากเปลี่ยนแปลงค่า
 
-สำหรับหนังสือรับรองที่หมุนเวียนแทนสตริงคงที่ ให้ตั้งค่า `apiKeyHelper` ใน `~/.claude/settings.json` เป็นคำสั่งที่พิมพ์หนังสือรับรองปัจจุบันเป็น stdout รหัส Claude แคชเอาต์พุตเป็นเวลาห้านาทีโดยค่าเริ่มต้น (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` แทนที่สิ่งนั้น) และส่งค่าทั้งใน `Authorization: Bearer` และ `x-api-key` สคริปต์จะต้องพิมพ์ข้อมูลประจำตัวและไม่มีอะไรอื่นใดที่ — แบนเนอร์ด้านข้างจะทำให้ตัวช่วยใน v2.1.227 + ล้มเหลว
+หากใช้ข้อมูลรับรองที่หมุนเวียนเปลี่ยนแทนสตริงคงที่ ให้กำหนด `apiKeyHelper` ใน `~/.claude/settings.json` เป็นคำสั่งที่พิมพ์ข้อมูลรับรองปัจจุบันไปยัง stdout โดยปริยาย Claude Code จะแคชผลลัพธ์ไว้ห้านาที (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` ใช้แทนค่าระยะเวลานี้ได้) และส่งค่าในทั้ง `Authorization: Bearer` และ `x-api-key` สคริปต์ต้องพิมพ์เฉพาะข้อมูลรับรองเท่านั้น ข้อความต้อนรับที่พิมพ์เพิ่มจะทำให้ตัวช่วยล้มเหลวใน v2.1.227+
 
-นี่คือวิธีการทำงานของ Entra ID SSO : `scripts/cli/omniroute-sso.mjs token` พิมพ์โทเค็นการเข้าถึง Entra ที่มีอายุสั้นซึ่ง OmniRoute จะตรวจสอบแทนคีย์ API ดู [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md)
+Entra ID SSO ทำงานด้วยวิธีนี้: `scripts/cli/omniroute-sso.mjs token` พิมพ์โทเค็นการเข้าถึง Entra อายุสั้นที่ OmniRoute ตรวจสอบแทนคีย์ API ดู [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md)
 
-`omniroute launch` ตั้งค่าสิ่งเหล่านี้ทั้งหมดให้กับคุณ: แก้ไขโทเค็น URL + ฐานจากบริบทที่ใช้งานอยู่ (ดังนั้น `omniroute connect <vps>` จึงใช้งานได้ `omniroute launch` ) ตรวจสอบสุขภาพเซิร์ฟเวอร์ และ execs `claude`
+`omniroute launch` จะตั้งค่าทั้งหมดนี้ให้คุณ: คำสั่งนี้จะค้นหา URL ฐานและโทเค็น
+จากคอนเท็กซ์ที่ใช้งานอยู่ (ดังนั้นเมื่อใช้ `omniroute connect <vps>` แล้วตามด้วย `omniroute launch`
+ก็จะใช้งานได้ทันที) ตรวจสอบสถานะของเซิร์ฟเวอร์ และเรียกใช้ `claude`
 
 ---
 

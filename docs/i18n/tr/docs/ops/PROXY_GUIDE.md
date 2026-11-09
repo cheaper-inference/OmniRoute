@@ -82,6 +82,18 @@ Proxy'ler, engellenmiş bölgelerin dışında da şu amaçlarla kullanılabilir
 
 ---
 
+## Yeni hesaplar için varsayılan proxy durumu
+
+İçinde** Ayarlar → Proxy → Genel yapılandırma** , kullanmak** Yeni bağlantılar için proxy'yi varsayılan olarak etkinleştirin** yeni eklenen sağlayıcı hesaplarının ilk proxy durumunu seçmek için.
+
+Yeni ayar, yeni eklenen sağlayıcı hesaplarının başlangıçtaki proxy durumunu kontrol eder. Mevcut hesapları değiştirmez veya genel proxy anahtarının yerini almaz. Başlangıç değeri önceki davranışı korur. Gelecekte proxy'nin varsayılan olarak devre dışı olduğu hesaplar oluşturmak için bunu bir kez kapatın.
+
+Tercih, mevcut Ayarlar API aracılığıyla `defaultNewConnectionProxyEnabled` olarak saklanır. Hiçbir zaman kaydedilmediğinde varsayılan olarak `true` olur. `false` kaydedilmesi, sonraki yeni hesaplar için yeniden başlatma gerekmeden geçerli olur. `POST /api/providers` isteğe bağlı katı bir boolean `proxyEnabled` kabul eder; açık bir `true` veya `false` oluşturma varsayılanına göre önceliklidir. Yinelenen bir hesabın ihmal edilmesi veya OAuth yeniden bağlanması, o hesabın kayıtlı durumunu korur. Bireysel hesaplar daha sonra yine etkinleştirilebilir veya devre dışı bırakılabilir.
+
+Seçici sağlayıcı aktarımları, yeni hesaplar için hedef kurulumun varsayılanını kullanır ve mevcut hesapları değiştirirken hedef ilkesini korur. Proxy geçişleri taşınabilir aktarım alanları değildir. Tam yedekleme geri yüklemesi ve geçmiş JSON/SQL geçişi, kayıtlı hesap değerleri ve eski şema varsayılanları dahil olmak üzere mevcut geri yükleme anlamlarını korur; tam ayarların geri yüklenmesi de bu tercihi geri yükleyebilir.
+
+Bu tercih bir vekil atamaz veya kişinin sağlıklı veya kullanımda olduğunu belirlemez. Gerçek yönlendirme hâlâ genel proxy anahtarına ve geçerli proxy yapılandırmasına bağlıdır. Kalıcı bir hesaba sahip olmayan sentetik sağlayıcılar, hesap oluşturmadan önceki OAuth trafiği, environment/system proxy'leri ve harici arka uçların ağ iletişimi kapsamı dışındadır.
+
 ## 4 Seviyeli Proxy Sistēmi
 
 OmniRoute, öncelik sırasına göre çözümlenen **dört bağımsız kapsamda** proxy yapılandırmasını destekler:
@@ -382,7 +394,7 @@ Tarayıcı benzeri TLS parmak izleri oluşturmak için `wreq-js` kullanarak tara
 
 ### CLI Parmak İzi Eşleştirme
 
-**CLI Parmak İzi Anahtarı** (`Ayarlar → Güvenlik`), HTTP başlıklarını ve JSON gövde alanlarını yerel CLI ikili dosyalarının (Claude Code, Codex vb.) imzasıyla tam olarak eşleşecek şekilde yeniden sıralar. Bu özellik, proxy'nin **üzerine ek olarak** çalışır:
+**CLI Parmak İzi Anahtarı** (`Settings → Security`), HTTP başlıklarını ve JSON gövde alanlarını yerel CLI ikili dosyalarının (Claude Code, Codex vb.) imzasıyla tam olarak eşleşecek şekilde yeniden sıralar. Bu özellik, proxy'nin **üzerine ek olarak** çalışır:
 
 ```
 IP adresiniz (engellenmiş) → Proxy IP'si (ABD) → Sağlayıcı API'si

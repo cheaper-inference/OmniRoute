@@ -4,9 +4,13 @@
 
 ---
 
-> **កំណែ៖** v3.8.44** ធ្វើបច្ចុប្បន្នភាពចុងក្រោយ៖** 2026-10-28** ទស្សនិកជន៖** វិស្វករបន្ថែម ថែទាំ ឬបំបាត់កំហុសសេវាកម្មបង្កប់ (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box)។
+> **កំណែ៖** v3.8.44
+> **បានធ្វើបច្ចុប្បន្នភាពចុងក្រោយ៖** 2026-10-28
+> **អ្នកអានគោលដៅ៖** វិស្វករដែលបន្ថែម ថែទាំ ឬស្វែងរកកំហុសក្នុងសេវាដែលបង្កប់មកជាមួយ (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box)។
 
-សេវាកម្មដែលបានបង្កប់គឺជាឧបករណ៍ចំហៀងដំណើរការដែលបានដំឡើងក្នុងមូលដ្ឋានដែល OmniRoute ដំឡើង គ្រប់គ្រង និងបង្ហាញជាគោលដៅកំណត់ផ្លូវថ្នាក់ដំបូង។ មិនដូចអ្នកផ្តល់សេវាខាងក្រៅ (ដែលត្រូវបានទៅដល់តាមអ៊ីនធឺណិតតាមរយៈគ្រាប់ចុច API ) សេវាកម្មដែលបានបង្កប់ដំណើរការនៅលើម៉ាស៊ីនដូចគ្នាជាមួយ OmniRoute និងទំនាក់ទំនងតាមរយៈរង្វិលជុំ។
+សេវាកម្មដែលបានបង្កប់គឺជាឧបករណ៍ sidecar ដំណើរការដែលបានដំឡើងនៅមូលដ្ឋាន ដែល OmniRoute ដំឡើង ត្រួតពិនិត្យ និង
+ដាក់ឱ្យប្រើជាគោលដៅកំណត់ផ្លូវកម្រិតដំបូង។ មិនដូចអ្នកផ្តល់សេវាខាងក្រៅ (ដែលត្រូវបានចូលប្រើតាមអ៊ីនធឺណិត
+តាមរយៈ API keys) ទេ សេវាកម្មដែលបានបង្កប់ដំណើរការនៅលើម៉ាស៊ីនដូចគ្នានឹង OmniRoute ហើយទំនាក់ទំនងតាមរយៈ loopback។
 
 ---
 
@@ -25,38 +29,38 @@
 
 ## 1. ទិដ្ឋភាពទូទៅ
 
-### ហេតុអ្វីបានជាសេវាកម្មបង្កប់?
+### ហេតុអ្វីត្រូវមានសេវាកម្មបង្កប់?
 
-សេវាកម្មចំនួនប្រាំបីត្រូវបានបង្កប់៖
+មានសេវាចំនួនប្រាំបីបង្កប់មកជាមួយ៖
 
-| សេវាកម្ម         | កញ្ចប់ npm                                 | ច្រកលំនាំដើម | គោលបំណង                                                                                                                                                                                                                                                                                                                             |
-| ---------------- | ------------------------------------------ | :----------: | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **9 រ៉ោតទ័រ**    | `9router`                                  |    20130     | AI រ៉ោតទ័រដែល OmniRoute អាចប្រើជាអ្នកផ្តល់រង។ ម៉ូដែលលាតត្រដាងជា `9router/{sub}/{model}`                                                                                                                                                                                                                                             |
-| **CLIProxyAPI**  | GitHub ចេញផ្សាយប្រព័ន្ធគោលពីរ (`cliproxy`) |     8317     | អាដាប់ទ័រប្រូកស៊ីក្នុងស្រុកសម្រាប់លំហូរផ្ទៀងផ្ទាត់ Anthropic CLI ។ ផ្តល់ការកំណត់ផ្លូវត្រឡប់វិញនៅពេលនិមិត្តសញ្ញា OAuth ផុតកំណត់                                                                                                                                                                                                      |
-| **មូស**          | `mux` ( `mux server` គ្មានក្បាល)           |     8322     | ដេមិនភ្នាក់ងារ-វង់តន្រ្តីក្នុងស្រុក (coder/mux) ។ វដ្តជីវិតដែលគ្រប់គ្រងតែ — មិនមែនជាគោលដៅកំណត់ផ្លូវទេ (គ្មាន LLM proxying) ។                                                                                                                                                                                                        |
-| **បាយកក**        | `@maximhq/bifrost`                         |     8080     | ចូលទៅផ្នែកខាងក្រោយ AI-gateway relay ។ នៅពេលដំណើរការ ជ្រើសរើសដោយស្វ័យប្រវត្តិដោយផ្លូវបញ្ជូនត (`/v1/relay/`)                                                                                                                                                                                                                          |
-| **ដារីយ៉ូ**      | `@askalf/dario`                            |     3456     | Claude-subscribe proxy — alternative/failover to CLIProxyAPI សម្រាប់ចរាចររាងអក្សរ Claude-Code; គ្រាប់ចុចដែលបានចាក់ចូលក្លាយជា `DARIO_ADMIN_TOKEN` បើកយន្តហោះគ្រប់គ្រង `/admin/*` OAuth របស់វា។                                                                                                                                       |
-| **បើក-វ៉ា**      | `@open-wa/wa-automate`                     |     8323     | WhatsApp បណ្តាញស្វ័យប្រវត្តិកម្ម (Chromium គ្មានក្បាលតាមរយៈ Puppeteer) ។ វដ្តជីវិតដែលគ្រប់គ្រងតែ — មិនមែនជាគោលដៅកំណត់ផ្លូវទេ។                                                                                                                                                                                                       |
-| **LLMLingua**    | `@atjsh/llmlingua-2`                       |    20135     | prompt-compression sidecar — real LLMLingua-2 ONNX model (JS/TS port of Microsoft's algorithm)។ `open-sse/services/compression/engines/llmlingua/index.ts` បញ្ជូន `/compress` លើ HTTP ទៅវា ដោយធ្លាក់ត្រឡប់ទៅផ្នែកខាងក្រោយខ្សែស្រឡាយកម្មករដែលកំពុងដំណើរការ នៅពេលរថយន្តចំហៀងចុះ។ វដ្តជីវិតដែលគ្រប់គ្រងតែ — មិនមែនជាគោលដៅកំណត់ផ្លូវទេ។ |
-| **ប្រអប់ចម្រៀង** | GitHub ចេញផ្សាយប្រព័ន្ធគោលពីរ (`singbox`)  |    20140     | TPROXY sidecar backing `applyTproxy()`'s transparent-proxy interception (`src/mitm/tproxy/setup.ts`)។ កម្មវិធីដំឡើងទាញយកការចេញផ្សាយដែលបានខ្ទាស់ ពិនិត្យ-ផ្ទៀងផ្ទាត់។ វដ្តជីវិតដែលគ្រប់គ្រងតែ — មិនមែនជាគោលដៅកំណត់ផ្លូវទេ (គ្មាន LLM proxying)                                                                                       |
+| សេវាកម្ម        | កញ្ចប់ npm                                    | ច្រកលំនាំដើម | គោលបំណង                                                                                                                                                                                                                                                                                                                                                 |
+| --------------- | --------------------------------------------- | :----------: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **9Router**     | `9router`                                     |    20130     | រ៉ោតទ័រ AI ដែល OmniRoute អាចប្រើជាអ្នកផ្តល់សេវារង។ ម៉ូដែលត្រូវបានបង្ហាញជា `9router/{sub}/{model}`                                                                                                                                                                                                                                                       |
+| **CLIProxyAPI** | ឯកសារប្រតិបត្តិពី GitHub release (`cliproxy`) |     8317     | អាដាប់ទ័រប្រូកស៊ីមូលដ្ឋានសម្រាប់លំហូរផ្ទៀងផ្ទាត់អត្តសញ្ញាណ Anthropic CLI។ ផ្តល់ការកំណត់ផ្លូវបម្រុង នៅពេលថូខិន OAuth ផុតកំណត់                                                                                                                                                                                                                            |
+| **Mux**         | `mux` (`mux server` ដែលគ្មាន UI)              |     8322     | daemon រៀបចំភ្នាក់ងារមូលដ្ឋាន (coder/mux)។ គ្រប់គ្រងតែវដ្តជីវិតប៉ុណ្ណោះ — មិនមែនជាគោលដៅកំណត់ផ្លូវទេ (គ្មានការធ្វើប្រូកស៊ី LLM)។                                                                                                                                                                                                                         |
+| **Bifrost**     | `@maximhq/bifrost`                            |     8080     | backend បញ្ជូនបន្ត AI-gateway ដែលសរសេរដោយ Go។ នៅពេលកំពុងដំណើរការ វាត្រូវបានជ្រើសរើសដោយស្វ័យប្រវត្តិតាមផ្លូវបញ្ជូនបន្ត (`/v1/relay/`)                                                                                                                                                                                                                    |
+| **Dario**       | `@askalf/dario`                               |     3456     | ប្រូកស៊ីសម្រាប់ការជាវ Claude — ជាជម្រើស/ការប្ដូរបម្រុងទៅ CLIProxyAPI សម្រាប់ចរាចរណ៍ដែលមានទម្រង់ដូច Claude-Code; key ដែលបានបញ្ចូលនឹងក្លាយជា `DARIO_ADMIN_TOKEN` ដើម្បីគ្រប់គ្រងសិទ្ធិចូលប្រើផ្ទៃគ្រប់គ្រង OAuth `/admin/*` របស់វា                                                                                                                        |
+| **open-wa**     | `@open-wa/wa-automate`                        |     8323     | ស្វ័យប្រវត្តិកម្ម WhatsApp Web (Chromium ដែលគ្មាន UI តាមរយៈ Puppeteer)។ គ្រប់គ្រងតែវដ្តជីវិតប៉ុណ្ណោះ — មិនមែនជាគោលដៅកំណត់ផ្លូវទេ។                                                                                                                                                                                                                       |
+| **LLMLingua**   | `@atjsh/llmlingua-2`                          |    20135     | sidecar សម្រាប់បង្ហាប់ prompt — ម៉ូដែល LLMLingua-2 ONNX ពិតប្រាកដ (ច្រក JS/TS នៃអាល់ហ្គូរីតរបស់ Microsoft)។ `open-sse/services/compression/engines/llmlingua/index.ts` បញ្ជូន `/compress` តាម HTTP ទៅវា ហើយប្តូរទៅប្រើ backend worker-thread ក្នុងដំណើរការជាបម្រុង នៅពេល sidecar មិនដំណើរការ។ គ្រប់គ្រងតែវដ្តជីវិតប៉ុណ្ណោះ — មិនមែនជាគោលដៅកំណត់ផ្លូវទេ។ |
+| **sing-box**    | ឯកសារប៊ីណារីពីការចេញផ្សាយ GitHub (`singbox`)  |    20140     | ដំណើរការជំនួយ TPROXY ដែលគាំទ្រការស្ទាក់ចាប់តាមប្រូកស៊ីថ្លារបស់ `applyTproxy()` (`src/mitm/tproxy/setup.ts`)។ កម្មវិធីដំឡើងទាញយកការចេញផ្សាយដែលបានកំណត់កំណែជាមុន ហើយផ្ទៀងផ្ទាត់តម្លៃ checksum។ មានតែវដ្តជីវិតប៉ុណ្ណោះដែលត្រូវបានគ្រប់គ្រង។ វាមិនមែនជាគោលដៅនៃការបញ្ជូនផ្លូវ ហើយមិនធ្វើជាប្រូកស៊ីសម្រាប់ LLM ទេ។                                            |
 
-ទាំងប្រាំបីអនុវត្តតាមគំរូត្រួតពិនិត្យដូចគ្នា៖
+សេវាទាំងប្រាំបីអនុវត្តតាមគំរូត្រួតពិនិត្យដូចគ្នា៖
 
-- OmniRoute ដំឡើងពួកវានៅក្រោម `DATA_DIR/services/{name}/` (ដាច់ដោយឡែកពី `package.json` ផ្ទាល់ខ្លួនរបស់ OmniRoute)
-- OmniRoute ពង និងតាមដានពួកវាជាដំណើរការកុមារ
-- OmniRoute ចាក់គន្លឹះ API មួយភ្លែតទៅក្នុងបរិយាកាសរបស់កុមារ ហើយបង្វិលវាដោយមិនចាំបាច់ចាំបាច់ (កន្លែងដែលអាចអនុវត្តបាន)
-- ផ្លូវគ្រប់គ្រងទាំងអស់ (`/api/services/*`) គឺ**LOCAL_ONLY** — អាចចូលប្រើបានតែពី loopback (ច្បាប់រឹង #17)
+- OmniRoute ដំឡើងពួកវានៅក្រោម `DATA_DIR/services/{name}/` (ដាច់ដោយឡែកពី `package.json` ផ្ទាល់របស់ OmniRoute)
+- OmniRoute បង្កើត និងត្រួតពិនិត្យពួកវាជាដំណើរការកូន
+- OmniRoute បញ្ចូល API key បណ្ដោះអាសន្នទៅក្នុង environment របស់ដំណើរការកូន ហើយបង្វិលវាដោយមិនមានការផ្អាកដំណើរការ (នៅកន្លែងដែលអាចអនុវត្តបាន)
+- ផ្លូវគ្រប់គ្រងទាំងអស់ (`/api/services/*`) គឺ **LOCAL_ONLY** — អាចចូលប្រើបានតែពី loopback ប៉ុណ្ណោះ (ច្បាប់តឹងរ៉ឹង #17)
 
 ### ការសម្រេចចិត្តសំខាន់ៗ (ពីផែនការរចនា)
 
-| ការសម្រេចចិត្ត                             | តម្លៃ                                                                   |
-| ------------------------------------------ | ----------------------------------------------------------------------- |
-| ផ្ទាំងគ្រប់គ្រងការចូលទៅកាន់ 9Router UI ដើម | ប្រូកស៊ីបញ្ច្រាសនៅ `/dashboard/providers/services/9router/embed/*`      |
-| យន្តការដំឡើង                               | `npm install {package}` តាមរយៈ `execFile` (គ្មានការបញ្ចូលសែល)           |
-| របៀបប្រើប្រាស់                             | អ្នកផ្តល់សេវាបានចុះឈ្មោះជា `9router/{sub}/{model}` នៅក្នុងម៉ាស៊ីនបញ្ជូន |
-| ការគ្រប់គ្រងគន្លឹះAPI                      | OmniRoute បង្កើត អ៊ិនគ្រីប at-rest (AES-256-GCM) និងចាក់តាម env         |
-| ទីតាំងផ្ទាំងគ្រប់គ្រង                      | `/dashboard/providers/services` (បីផ្ទាំង)                              |
-| ចាប់ផ្តើមដោយស្វ័យប្រវត្តិ                  | បិទ/បើកក្នុងមួយសេវាកម្ម, OFF លំនាំដើម                                   |
+| ការសម្រេចចិត្ត                             | តម្លៃ                                                                            |
+| ------------------------------------------ | -------------------------------------------------------------------------------- |
+| ការចូលប្រើ UI ដើមរបស់ 9Router ពី Dashboard | ប្រូកស៊ីបញ្ច្រាសនៅ `/dashboard/providers/services/9router/embed/*`               |
+| យន្តការដំឡើង                               | `npm install {package}` តាមរយៈ `execFile` (គ្មាន shell interpolation)            |
+| របៀបប្រើប្រាស់                             | អ្នកផ្តល់សេវាត្រូវបានចុះឈ្មោះជា `9router/{sub}/{model}` នៅក្នុងម៉ាស៊ីនកំណត់ផ្លូវ |
+| ការគ្រប់គ្រង API key                       | OmniRoute បង្កើត អ៊ិនគ្រីបពេលរក្សាទុក (AES-256-GCM) និងបញ្ចូលតាម env             |
+| ទីតាំង Dashboard                           | `/dashboard/providers/services` (ផ្ទាំងចំនួនបី)                                  |
+| ការចាប់ផ្តើមដោយស្វ័យប្រវត្តិ               | បិទ/បើកតាមសេវាកម្មនីមួយៗ, លំនាំដើម OFF                                           |
 
 ---
 
@@ -64,12 +68,12 @@
 
 ```
 ┌────────────────────────────────────────────────────────────────────┐
-│  Layer 1 — UI                                                      │
-│  /dashboard/providers/services  (tabs: CLIProxyAPI | 9Router | Mux)│
-│  Logs live (SSE), Start/Stop/Restart/Update, Settings, Install     │
+│  ស្រទាប់ទី 1 — UI                                                  │
+│  /dashboard/providers/services  (ផ្ទាំង: CLIProxyAPI | 9Router | Mux)│
+│  កំណត់ហេតុផ្ទាល់ (SSE), ចាប់ផ្ដើម/បញ្ឈប់/ចាប់ផ្ដើមឡើងវិញ/អាប់ដេត, ការកំណត់, ដំឡើង │
 │                                                                    │
 │  src/app/(dashboard)/dashboard/providers/services/                 │
-│    ├── page.tsx               Shell + tab routing by ?tab=         │
+│    ├── page.tsx               សែល + កំណត់ផ្លូវផ្ទាំងតាម ?tab=      │
 │    ├── tabs/                  CliproxyServiceTab, NinerouterServiceTab,│
 │    │                          MuxServiceTab                        │
 │    └── components/            ServiceStatusCard, ServiceLifecycleButtons,│
@@ -77,7 +81,7 @@
 └──────────────────────┬─────────────────────────────────────────────┘
                        │ HTTP (Next.js fetch)
 ┌──────────────────────▼─────────────────────────────────────────────┐
-│  Layer 2 — API (LOCAL_ONLY — loopback only)                        │
+│  ស្រទាប់ទី 2 — API (LOCAL_ONLY — តែ loopback ប៉ុណ្ណោះ)             │
 │                                                                    │
 │  /api/services/9router/{install|start|stop|restart|update|         │
 │                          rotate-key|status|auto-start|logs}        │
@@ -86,74 +90,74 @@
 │  /api/services/mux/{install|start|stop|restart|update|             │
 │                      status|auto-start|logs}                       │
 │  /dashboard/providers/services/9router/embed/[...path]             │
-│    (reverse HTTP + WebSocket proxy → 9Router upstream)             │
+│    (ប្រូកស៊ីបញ្ច្រាស HTTP + WebSocket → upstream របស់ 9Router)       │
 │                                                                    │
-│  Gate: LOCAL_ONLY_API_PREFIXES includes "/api/services/" and       │
+│  ច្រកត្រួតពិនិត្យ: LOCAL_ONLY_API_PREFIXES រួមមាន "/api/services/" និង│
 │        "/dashboard/providers/services/*/embed/"                    │
 └──────────────────────┬─────────────────────────────────────────────┘
-                       │ in-process calls
+                       │ ការហៅក្នុងដំណើរការតែមួយ
 ┌──────────────────────▼─────────────────────────────────────────────┐
-│  Layer 3 — ServiceSupervisor (src/lib/services/)                   │
+│  ស្រទាប់ទី 3 — ServiceSupervisor (src/lib/services/)               │
 │                                                                    │
-│  ServiceSupervisor.ts   Generic supervisor (child_process.spawn)   │
-│    ├── install:    execFile('npm', ['install', pkg, '--prefix'])    │
-│    ├── start:      spawn(node, [entrypoint], {env, cwd})           │
-│    ├── api_key:    crypto.randomBytes(32) → env NINEROUTER_API_KEY  │
-│    ├── port:       20130 for 9Router (configurable)                │
-│    ├── logs:       stdio ring buffer 5 MB → SSE events             │
-│    ├── health:     HTTP GET /health every 2–5 s, lazy recovery     │
-│    └── lifecycle:  SIGTERM 15 s → SIGKILL                          │
+│  ServiceSupervisor.ts   កម្មវិធីត្រួតពិនិត្យទូទៅ (child_process.spawn)│
+│    ├── ដំឡើង:      execFile('npm', ['install', pkg, '--prefix'])   │
+│    ├── ចាប់ផ្ដើម:  spawn(node, [entrypoint], {env, cwd})            │
+│    ├── កូនសោ API:  crypto.randomBytes(32) → env NINEROUTER_API_KEY │
+│    ├── ច្រក:       20130 សម្រាប់ 9Router (អាចកំណត់បាន)              │
+│    ├── កំណត់ហេតុ: stdio ring buffer 5 MB → ព្រឹត្តិការណ៍ SSE        │
+│    ├── សុខភាព:     HTTP GET /health រៀងរាល់ 2–5 s, ស្ដារឡើងវិញតាមតម្រូវការ│
+│    └── វដ្ដជីវិត:   SIGTERM 15 s → SIGKILL                         │
 │                                                                    │
 │  registry.ts        getSupervisor(name) / registerSupervisor()     │
-│  bootstrap.ts       Bootstraps all SERVICES[] at process start     │
+│  bootstrap.ts       ចាប់ផ្ដើម SERVICES[] ទាំងអស់ពេលដំណើរការចាប់ផ្ដើម│
 │  apiKey.ts          getOrCreateApiKey(), generateServiceApiKey()   │
-│  modelSync.ts       Periodic GET /v1/models → service_models table │
-│  ringBuffer.ts      Circular log buffer (5 MB per service)         │
-│  healthCheck.ts     Polling HTTP health probe                      │
+│  modelSync.ts       GET /v1/models តាមកាលកំណត់ → តារាង service_models│
+│  ringBuffer.ts      សតិបណ្ដោះអាសន្នកំណត់ហេតុជារង្វង់ (5 MB ក្នុងមួយសេវា)│
+│  healthCheck.ts     ការស្ទង់ពិនិត្យសុខភាព HTTP                     │
 │  installers/        ninerouter.ts, cliproxy.ts, mux.ts, openwa.ts  │
-│                      (installer adapters)                          │
+│                      (អាដាប់ទ័រកម្មវិធីដំឡើង)                      │
 └──────────────────────┬─────────────────────────────────────────────┘
-                       │ OpenAI-compatible HTTP (loopback)
+                       │ HTTP ដែលត្រូវគ្នាជាមួយ OpenAI (loopback)
 ┌──────────────────────▼─────────────────────────────────────────────┐
-│  Layer 4 — Provider / Routing                                      │
+│  ស្រទាប់ទី 4 — អ្នកផ្ដល់សេវា / ការកំណត់ផ្លូវ                       │
 │                                                                    │
 │  open-sse/executors/ninerouter.ts                                  │
-│    Re-looks up port and API key per-request (no caching).          │
-│    Strips "9router/" prefix from model id before proxying.         │
-│    Returns 503 service_not_running if supervisor not in "running". │
+│    ស្វែងរកច្រក និងកូនសោ API ឡើងវិញសម្រាប់សំណើនីមួយៗ (គ្មាន cache)។ │
+│    ដកបុព្វបទ "9router/" ចេញពី model id មុនពេលធ្វើប្រូកស៊ី។          │
+│    ត្រឡប់ 503 service_not_running ប្រសិនបើ supervisor មិនស្ថិតក្នុង "running"។│
 │                                                                    │
 │  src/shared/constants/providers.ts                                 │
-│    Entry for "9router": isEmbeddedService: true                    │
+│    ធាតុសម្រាប់ "9router": isEmbeddedService: true                  │
 │                                                                    │
 │  open-sse/config/providerRegistry.ts                               │
-│    Models stored as "9router/{sub}/{model}" (prefixed).            │
-│    Synced every 5 min by modelSync.ts.                             │
+│    Models ត្រូវបានរក្សាទុកជា "9router/{sub}/{model}" (មានបុព្វបទ)។ │
+│    ធ្វើសមកាលកម្មរៀងរាល់ 5 min ដោយ modelSync.ts។                    │
 │                                                                    │
-│  Mux is lifecycle-managed ONLY (Layers 1-3) — it is an agent-       │
-│  orchestration daemon, not an LLM proxy, so it has no Layer 4      │
-│  executor/provider entry and is never a routing target.            │
+│  Mux ត្រូវបានគ្រប់គ្រងតែវដ្ដជីវិតប៉ុណ្ណោះ (ស្រទាប់ទី 1-3) — វាជា   │
+│  daemon សម្រាប់សម្របសម្រួល agent មិនមែនជាប្រូកស៊ី LLM ទេ ដូច្នេះវា│
+│  មិនមានធាតុ executor/provider ក្នុងស្រទាប់ទី 4 ហើយមិនដែលជាគោលដៅកំណត់ផ្លូវទេ។│
 └────────────────────────────────────────────────────────────────────┘
 ```
 
 ### ឯកសារប្រភពសំខាន់ៗ
 
-| ឯកសារ                                       | តួនាទី                                                    |
-| ------------------------------------------- | --------------------------------------------------------- |
-| `src/lib/services/ServiceSupervisor.ts`     | ថ្នាក់ស្នូល៖ វដ្តជីវិត សោ សុខភាព សតិបណ្ដោះអាសន្នរោទ៍      |
-| `src/lib/services/bootstrap.ts`             | ការចុះឈ្មោះកម្រិតដំណើរការ និងការចាប់ផ្ដើមដោយស្វ័យប្រវត្តិ |
-| `src/lib/services/registry.ts`              | ផែនទី Singleton `tool → supervisor`                       |
-| `src/lib/services/apiKey.ts`                | ការបង្កើតកូនសោ ការអ៊ិនគ្រីប AES-256-GCM ពេលសម្រាក         |
-| `src/lib/services/modelSync.ts`             | ការធ្វើសមកាលកម្មគំរូតាមកាលកំណត់ (5 នាទី) + តាមតម្រូវការ   |
-| `src/lib/services/ringBuffer.ts`            | សតិបណ្ដោះអាសន្នកំណត់ហេតុរាងជារង្វង់ 5 MB ជាមួយ SSE ជាវ    |
-| `src/lib/services/healthCheck.ts`           | ការស៊ើបអង្កេតសុខភាព HTTP (ចន្លោះពេលកំណត់)                 |
-| `src/lib/services/installers/ninerouter.ts` | npm install/update/uninstall សម្រាប់ 9 Router             |
-| `src/lib/services/installers/cliproxy.ts`   | npm install/update/uninstall សម្រាប់ CLIProxyAPI          |
-| `src/lib/services/installers/mux.ts`        | npm install/update/uninstall សម្រាប់ Mux                  |
-| `src/lib/services/installers/openwa.ts`     | npm install/update/uninstall សម្រាប់ open-wa              |
-| `src/lib/services/installers/llmlingua.ts`  | npm install/update/uninstall សម្រាប់ LLMLingua            |
-| `src/app/api/services/9router/_lib.ts`      | អ្នកជំនួយ `getOrInitSupervisor()`                         |
-| `src/app/api/services/[name]/logs/route.ts` | ចំណុចបញ្ចប់កំណត់ហេតុ SSE ដែលបានចែករំលែក                   |
-| `open-sse/executors/ninerouter.ts`          | ប្រតិបត្តិករអ្នកផ្តល់សេវា (ស្រទាប់ទី 4)                   |
+| ឯកសារ                                       | តួនាទី                                                               |
+| ------------------------------------------- | -------------------------------------------------------------------- |
+| `src/lib/services/ServiceSupervisor.ts`     | ថ្នាក់ស្នូល៖ វដ្តជីវិត ការចាក់សោ សុខភាព និង ring buffer              |
+| `src/lib/services/bootstrap.ts`             | ការចុះឈ្មោះនៅកម្រិត process និងការចាប់ផ្ដើមដោយស្វ័យប្រវត្តិ          |
+| `src/lib/services/registry.ts`              | ផែនទី singleton `tool → supervisor`                                  |
+| `src/lib/services/apiKey.ts`                | ការបង្កើត key និងការអ៊ិនគ្រីប AES-256-GCM សម្រាប់ទិន្នន័យពេលរក្សាទុក |
+| `src/lib/services/modelSync.ts`             | ការធ្វើសមកាលកម្ម model ជាប្រចាំ (5 នាទី) + តាមតម្រូវការ              |
+| `src/lib/services/ringBuffer.ts`            | buffer កំណត់ហេតុរាងជារង្វង់ទំហំ 5 MB ជាមួយការជាវ SSE                 |
+| `src/lib/services/healthCheck.ts`           | ការត្រួតពិនិត្យសុខភាពតាម HTTP (អាចកំណត់ចន្លោះពេលបាន)                 |
+| `src/lib/services/installers/ninerouter.ts` | ការដំឡើង/ធ្វើបច្ចុប្បន្នភាព/លុបការដំឡើងតាម npm សម្រាប់ 9Router       |
+| `src/lib/services/installers/cliproxy.ts`   | ការដំឡើង/ធ្វើបច្ចុប្បន្នភាព/លុបការដំឡើងតាម npm សម្រាប់ CLIProxyAPI   |
+| `src/lib/services/installers/mux.ts`        | ការដំឡើង/ធ្វើបច្ចុប្បន្នភាព/លុបការដំឡើងតាម npm សម្រាប់ Mux           |
+| `src/lib/services/installers/openwa.ts`     | ការដំឡើង/ធ្វើបច្ចុប្បន្នភាព/លុបការដំឡើងតាម npm សម្រាប់ open-wa       |
+| `src/lib/services/installers/llmlingua.ts`  | ការដំឡើង/ធ្វើបច្ចុប្បន្នភាព/លុបការដំឡើងតាម npm សម្រាប់ LLMLingua     |
+| `src/app/api/services/9router/_lib.ts`      | មុខងារជំនួយ `getOrInitSupervisor()`                                  |
+| `src/app/api/services/[name]/logs/route.ts` | endpoint កំណត់ហេតុ SSE រួម                                           |
+| `open-sse/executors/ninerouter.ts`          | executor របស់ provider (ស្រទាប់ទី 4)                                 |
 
 ---
 
@@ -207,54 +211,58 @@
 
 ---
 
-## 4. API ឯកសារយោង
+## 4. ឯកសារយោង API
 
-ផ្លូវទាំងអស់នៅក្រោម `/api/services/` គឺ**LOCAL_ONLY** (ការវិលត្រឡប់មកវិញតែប៉ុណ្ណោះ ច្បាប់រឹង #17)។ សំណើដែលមិនមែនជារង្វិលជុំទទួលបាន `403 LOCAL_ONLY` ដោយមិនគិតពីសញ្ញាសម្ងាត់។
+រាល់ route ក្រោម `/api/services/` គឺ **LOCAL_ONLY** (សម្រាប់តែ loopback ប៉ុណ្ណោះ ជាច្បាប់ដាច់ខាត #17)។
+សំណើដែលមិនមែនជា loopback នឹងទទួលបាន `403 LOCAL_ONLY` ដោយមិនគិតពី auth token ឡើយ។
 
-### 4.1 9 Router endpoints (11 ផ្លូវ)
+### 4.1 endpoint របស់ 9Router (11 route)
 
 #### `POST /api/services/9router/install`
 
-ដំឡើង 9 Router ពី npm ។ បង្កើត `DATA_DIR/services/9router/` ជាមួយ `package.json` និង `node_modules/` ផ្ទាល់ខ្លួន។ មិនប៉ះទង្គិចជាមួយ deps ផ្ទាល់របស់ OmniRoute ទេ។
+ដំឡើង 9Router ពី npm។ បង្កើត `DATA_DIR/services/9router/` ជាមួយនឹង
+`package.json` និង `node_modules/` ផ្ទាល់ខ្លួន។ មិនប៉ះទង្គិចជាមួយ dependency ផ្ទាល់ខ្លួនរបស់ OmniRoute ទេ។
 
-**ស្នើសុំរាងកាយ** (ស្រេចចិត្តទាំងអស់)៖
+**តួសំណើ** (ទាំងអស់សុទ្ធតែជាជម្រើស):
 
 ```json
 { "version": "latest" }
 ```
 
-| វាល       | ប្រភេទ   | លំនាំដើម   | ការពិពណ៌នា                           |
-| --------- | -------- | ---------- | ------------------------------------ |
-| `version` | `string` | `"latest"` | npm version tag ឬ semver ដើម្បីដំឡើង |
+| វាល       | ប្រភេទ   | លំនាំដើម   | ការពិពណ៌នា                          |
+| --------- | -------- | ---------- | ----------------------------------- |
+| `version` | `string` | `"latest"` | tag កំណែ npm ឬ semver ដែលត្រូវដំឡើង |
 
-**ការឆ្លើយតប៖**
+**ការឆ្លើយតប:**
 
-| ស្ថានភាព | ការពិពណ៌នា                                             |
-| -------- | ------------------------------------------------------ |
-| `200`    | `{ ok: true, installedVersion: "x.y.z", path: "..." }` |
-| `400`    | តួសំណើមិនត្រឹមត្រូវ (Zod validation បរាជ័យ)            |
-| `409`    | ដំឡើងរួចហើយ (ចាក់សោ)                                   |
-| `500`    | npm ដំឡើងបរាជ័យ — ឃើញ `message` សម្រាប់កំហុសមិត្តភាព   |
+| ស្ថានភាព | ការពិពណ៌នា                                                         |
+| -------- | ------------------------------------------------------------------ |
+| `200`    | `{ ok: true, installedVersion: "x.y.z", path: "..." }`             |
+| `400`    | តួសំណើមិនត្រឹមត្រូវ (ការផ្ទៀងផ្ទាត់ Zod បរាជ័យ)                    |
+| `409`    | កំពុងដំឡើងរួចហើយ (lock ត្រូវបានកាន់កាប់)                           |
+| `500`    | ការដំឡើង npm បានបរាជ័យ — សូមមើល `message` សម្រាប់សារកំហុសដែលងាយយល់ |
 
-**កំណត់ចំណាំ៖** ប្រើ `execFile('npm', [...])` — no shell គ្មាន interpolation (ច្បាប់រឹង #13)។ កំហុស EACCES ត្រូវបានបង្ហាញជាសារដែលងាយស្រួល។
+**កំណត់សម្គាល់:** ប្រើ `execFile('npm', [...])` — គ្មាន shell និងគ្មាន interpolation (ជាច្បាប់ដាច់ខាត #13)។
+កំហុស EACCES ត្រូវបានបង្ហាញជាសារដែលងាយយល់។
 
 ---
 
 #### `POST /api/services/9router/start`
 
-ចាប់ផ្តើម 9 Router ។ ចុះឈ្មោះអ្នកគ្រប់គ្រង ប្រសិនបើមិនទាន់បានចុះឈ្មោះទេ បន្ទាប់មកហៅទៅ `supervisor.start()`។ Ideempotent នៅពេលដំណើរការរួចហើយ។
+ចាប់ផ្ដើម 9Router។ ចុះឈ្មោះ supervisor ប្រសិនបើមិនទាន់បានចុះឈ្មោះ បន្ទាប់មកហៅ
+`supervisor.start()`។ ប្រតិបត្តិការនេះជា idempotent នៅពេលកំពុងដំណើរការរួចហើយ។
 
-**ស្នើសុំរាងកាយ៖** គ្មាន
+**តួសំណើ:** គ្មាន
 
-**ការឆ្លើយតប៖**
+**ការឆ្លើយតប:**
 
 | ស្ថានភាព | ការពិពណ៌នា                                              |
 | -------- | ------------------------------------------------------- |
-| `200`    | វត្ថុ`ServiceStatus` (សូមមើលគ្រោងការណ៍ខាងក្រោម)         |
-| `409`    | 9 រ៉ោតទ័រមិនត្រូវបានដំឡើង (`status: "not_installed"`)   |
-| `503`    | ការចាប់ផ្តើមបរាជ័យ (ដំណើរការកំហុស — សូមមើល `lastError`) |
+| `200`    | object `ServiceStatus` (សូមមើល schema ខាងក្រោម)         |
+| `409`    | 9Router មិនត្រូវបានដំឡើង (`status: "not_installed"`)    |
+| `503`    | ការចាប់ផ្ដើមបរាជ័យ (កំហុស process — សូមមើល `lastError`) |
 
-**គ្រោងការណ៍ServiceStatus ៖**
+**schema របស់ ServiceStatus:**
 
 ```json
 {
@@ -272,78 +280,84 @@
 
 #### `POST /api/services/9router/stop`
 
-បញ្ឈប់ 9 Router យ៉ាងរលូន។ ផ្ញើ SIGTERM រង់ចាំ 15 វិនាទី បន្ទាប់មក SIGKILL ប្រសិនបើនៅមានជីវិត។ Ideempotent នៅពេលដែលបានបញ្ឈប់រួចហើយ។
+បញ្ឈប់ 9Router ដោយរលូន។ ផ្ញើ SIGTERM រង់ចាំ 15 s រួចផ្ញើ SIGKILL ប្រសិនបើវានៅតែដំណើរការ។
+ប្រតិបត្តិការនេះជា idempotent នៅពេលបានបញ្ឈប់រួចហើយ។
 
-**ស្នើសុំរាងកាយ៖** គ្មាន
+**តួសំណើ:** គ្មាន
 
-**ការឆ្លើយតប៖**
+**ការឆ្លើយតប:**
 
 | ស្ថានភាព | ការពិពណ៌នា                          |
 | -------- | ----------------------------------- |
-| `200`    | `ServiceStatus` (រដ្ឋ៖ "ឈប់")       |
-| `503`    | ការបញ្ឈប់បានបរាជ័យដោយមិននឹកស្មានដល់ |
+| `200`    | `ServiceStatus` (state: "stopped")  |
+| `503`    | ការបញ្ឈប់បានបរាជ័យដោយមិនបានរំពឹងទុក |
 
 ---
 
 #### `POST /api/services/9router/restart`
 
-ស្មើនឹង `stop()` បន្ទាប់មក `start()` នៅក្រោមសោប្រតិបត្តិការ។
+ស្មើនឹង `stop()` បន្ទាប់មក `start()` ក្រោម operation lock។
 
-**ស្នើសុំរាងកាយ៖** គ្មាន
+**តួសំណើ:** គ្មាន
 
-**ការឆ្លើយតប៖** ដូចគ្នានឹង `start` (ត្រឡប់ `ServiceStatus` ចុងក្រោយ) ។
+**ការឆ្លើយតប:** ដូចគ្នានឹង `start` (ត្រឡប់ `ServiceStatus` ចុងក្រោយ)។
 
 ---
 
 #### `POST /api/services/9router/update`
 
-ធ្វើបច្ចុប្បន្នភាព 9Router ទៅកំណែ npm ថ្មី។ ប្រសិនបើសេវាកម្មកំពុងដំណើរការ វាត្រូវបានបញ្ឈប់ជាមុន ការដំឡើង npm ត្រូវបានដំណើរការ (ដំឡើងកំណែថ្មីជាងនេះនៅនឹងកន្លែង) ហើយបន្ទាប់មកសេវាត្រូវបានចាប់ផ្តើមឡើងវិញ។
+ធ្វើបច្ចុប្បន្នភាព 9Router ទៅកំណែ npm ថ្មីជាង។ ប្រសិនបើ service កំពុងដំណើរការ វាត្រូវបានបញ្ឈប់
+ជាមុន បន្ទាប់មកដំណើរការ npm install (ដំឡើងកំណែថ្មីជាងនៅទីតាំងដដែល) ហើយបន្ទាប់មក
+service ត្រូវបានចាប់ផ្ដើមឡើងវិញ។
 
-**ស្នើសុំរាងកាយ** (ស្រេចចិត្តទាំងអស់)៖
+**តួសំណើ** (ទាំងអស់សុទ្ធតែជាជម្រើស):
 
 ```json
 { "version": "latest" }
 ```
 
-**ការឆ្លើយតប៖**
+**ការឆ្លើយតប:**
 
 | ស្ថានភាព | ការពិពណ៌នា                                                      |
 | -------- | --------------------------------------------------------------- |
 | `200`    | `{ ok: true, previousVersion: "...", installedVersion: "..." }` |
-| `400`    | រាងកាយមិនត្រឹមត្រូវ                                             |
+| `400`    | តួសំណើមិនត្រឹមត្រូវ                                             |
 | `500`    | ការធ្វើបច្ចុប្បន្នភាព npm បានបរាជ័យ                             |
 
 ---
 
 #### `POST /api/services/9router/rotate-key`
 
-បង្កើតកូនសោ API ថ្មីសម្រាប់ 9Router អ៊ិនគ្រីបវានៅពេលសម្រាក និងចាប់ផ្តើមសេវាកម្មឡើងវិញ (ប្រសិនបើដំណើរការ) ដូច្នេះវាយកសោថ្មីពីបរិស្ថានរបស់វា។ សោចាស់មិនត្រឹមត្រូវភ្លាមៗ។
+បង្កើត API key ថ្មីសម្រាប់ 9Router អ៊ិនគ្រីបវាពេលរក្សាទុក និងចាប់ផ្ដើម service ឡើងវិញ
+(ប្រសិនបើកំពុងដំណើរការ) ដើម្បីឱ្យវាទទួលយក key ថ្មីពី environment របស់វា។ key ចាស់ត្រូវបាន
+ធ្វើឱ្យអសុពលភាពភ្លាមៗ។
 
-**ស្នើសុំរាងកាយ៖** គ្មាន
+**តួសំណើ:** គ្មាន
 
-**ការឆ្លើយតប៖**
+**ការឆ្លើយតប:**
 
 | ស្ថានភាព | ការពិពណ៌នា                                 |
 | -------- | ------------------------------------------ |
 | `200`    | `{ keyRotated: true, restarted: boolean }` |
-| `500`    | ការបង្វិលបានបរាជ័យ                         |
+| `500`    | ការប្ដូរ key បានបរាជ័យ                     |
 
-**សុវត្ថិភាព៖** សោថ្មីនឹងមិនត្រលប់មកវិញទេក្នុងការឆ្លើយតប (គ្មានការលេចធ្លាយព័ត៌មានសម្ងាត់)។ វាត្រូវបានរក្សាទុកដោយអ៊ិនគ្រីប (AES-256-GCM) នៅក្នុងតារាង `version_manager` ។
+**សុវត្ថិភាព:** key ថ្មីមិនត្រូវបានត្រឡប់មកក្នុង response ឡើយ (គ្មានការលេចធ្លាយ credential)។
+វាត្រូវបានរក្សាទុកក្នុងទម្រង់អ៊ិនគ្រីប (AES-256-GCM) នៅក្នុងតារាង `version_manager`។
 
 ---
 
 #### `GET /api/services/9router/status`
 
-ត្រឡប់ស្ថានភាព + DB ផ្ទាល់រួមបញ្ចូលទាំងទិន្នន័យមេតាកំណែ និងការមើលជាមុនគ្រាប់ចុច API ។
+ត្រឡប់ស្ថានភាពរួមបញ្ចូលគ្នារវាង live + DB រួមទាំង metadata កំណែ និងការមើលជាមុននៃ API key។
 
-**ការឆ្លើយតប៖**
+**ការឆ្លើយតប:**
 
-| ស្ថានភាព | ការពិពណ៌នា               |
-| -------- | ------------------------ |
-| `200`    | សូមមើលគ្រោងការណ៍ខាងក្រោម |
-| `500`    | ការអានស្ថានភាពបានបរាជ័យ  |
+| ស្ថានភាព | ការពិពណ៌នា              |
+| -------- | ----------------------- |
+| `200`    | សូមមើល schema ខាងក្រោម  |
+| `500`    | ការអានស្ថានភាពបានបរាជ័យ |
 
-**គ្រោងការណ៍ឆ្លើយតប៖**
+**schema នៃការឆ្លើយតប:**
 
 ```json
 {
@@ -367,181 +381,227 @@
 
 #### `POST /api/services/9router/auto-start`
 
-បិទ/បើកទង់ចាប់ផ្តើមដោយស្វ័យប្រវត្តិ។ នៅពេល `enabled: true` សេវាកម្មចាប់ផ្តើមដោយស្វ័យប្រវត្តិនៅពេលបន្ទាប់ OmniRoute boots (ប្រសិនបើសេវាកម្មត្រូវបានដំឡើង) ។
+បិទ/បើក flag ចាប់ផ្ដើមដោយស្វ័យប្រវត្តិ។ នៅពេល `enabled: true` service នឹងចាប់ផ្ដើមដោយស្វ័យប្រវត្តិ
+នៅពេលបន្ទាប់ដែល OmniRoute boot (ប្រសិនបើ service ត្រូវបានដំឡើង)។
 
-**ស្នើសុំរាងកាយ៖**
+**តួសំណើ:**
 
 ```json
 { "enabled": true }
 ```
 
-**ការឆ្លើយតប៖**
+**ការឆ្លើយតប:**
 
 | ស្ថានភាព | ការពិពណ៌នា            |
 | -------- | --------------------- |
 | `200`    | `{ autoStart: true }` |
-| `400`    | រាងកាយមិនត្រឹមត្រូវ   |
+| `400`    | តួសំណើមិនត្រឹមត្រូវ   |
 
 ---
 
 #### `GET /api/services/9router/logs`
 
-SSE ស្ទ្រីមនៃកំណត់ហេតុបន្តផ្ទាល់ពី 9Router's stdout/stderr ring ring buffer ។
+SSE stream នៃ log ផ្ទាល់ពី ring buffer របស់ stdout/stderr របស់ 9Router។
 
-**ប៉ារ៉ាម៉ែត្រសំណួរ៖**
+**query parameter:**
 
-| ប៉ារ៉ាម  | ប្រភេទ    | លំនាំដើម | ការពិពណ៌នា                                                          |
-| -------- | --------- | -------- | ------------------------------------------------------------------- |
-| `tail`   | `integer` | 200      | តើមានបន្ទាត់ប្រវត្តិសាស្ត្រប៉ុន្មានដែលត្រូវផ្ញើមុនគេ (អតិបរមា 1000) |
-| `filter` | `string`  | គ្មាន    | តម្រងខ្សែអក្សររងដែលមិនប្រកាន់អក្សរតូចធំ (គ្មាន regex — ReDoS-safe)  |
+| ប៉ារ៉ាម៉ែត្រ | ប្រភេទ    | លំនាំដើម | ការពិពណ៌នា                                                                 |
+| ------------ | --------- | -------- | -------------------------------------------------------------------------- |
+| `tail`       | `integer` | 200      | ចំនួនបន្ទាត់ប្រវត្តិដែលត្រូវផ្ញើជាមុន (អតិបរមា 1000)                       |
+| `filter`     | `string`  | គ្មាន    | តម្រង substring មិនប្រកាន់អក្សរធំតូច (គ្មាន regex — មានសុវត្ថិភាពពី ReDoS) |
 
-**ព្រឹត្តិការណ៍SSE ៖**
+**ព្រឹត្តិការណ៍ SSE:**
 
 | ព្រឹត្តិការណ៍ | ទិន្នន័យ    | ការពិពណ៌នា                  |
 | ------------- | ----------- | --------------------------- |
-| `snapshot`    | `LogLine[]` | កន្ទុយប្រវត្តិសាស្ត្រដំបូង  |
-| `log`         | `LogLine`   | បន្ទាត់កំណត់ហេតុផ្ទាល់      |
-| `heartbeat`   | `{}`        | រក្សាជីវិតរៀងរាល់ 15 វិនាទី |
+| `snapshot`    | `LogLine[]` | ចុងបញ្ចប់ប្រវត្តិដំបូង      |
+| `log`         | `LogLine`   | បន្ទាត់ log ផ្ទាល់          |
+| `heartbeat`   | `{}`        | រក្សាការតភ្ជាប់រៀងរាល់ 15 s |
 
-**គ្រោងការណ៍LogLine ៖**
+**schema របស់ LogLine:**
 
 ```json
-{ "ts": 1716633600000, "stream": "stdout", "line": "[9router] Listening on :20130" }
+{
+  "ts": 1716633600000,
+  "stream": "stdout",
+  "line": "[9router] Listening on :20130"
+}
 ```
 
-**ការឆ្លើយតប៖**
+**ការឆ្លើយតប:**
 
-| ស្ថានភាព | ការពិពណ៌នា                                     |
-| -------- | ---------------------------------------------- |
-| `200`    | `text/event-stream`                            |
-| `400`    | ប៉ារ៉ាម៉ែត្រ `filter` វែងពេក (> 200 តួអក្សរ)   |
-| `404`    | រកមិនឃើញសេវាកម្ម (អ្នកគ្រប់គ្រងមិនបានចុះឈ្មោះ) |
-
----
-
-### 4.2 ចំណុចបញ្ចប់ CLIProxyAPI (10 ផ្លូវ)
-
-CLIProxyAPI មានទម្រង់ចុងដូចគ្នានឹង 9Router ដក `rotate-key` បូក `accounts` `provider-expose` និង `auto-restart-adopted`។ ឥឡូវនេះវាទទួលបានគ្រាប់ចុច API យន្តហោះទិន្នន័យដែលបានដាក់បញ្ចូលនៅកន្លែងពងកូន (`needsApiKey: true` in `bootstrap.ts` ប្រើសម្រាប់សមកាលកម្មគំរូ) ។ `status` រួមបញ្ចូលវាលតិចជាង។
-
-| វិធីសាស្រ្ត | ផ្លូវ                               | ការពិពណ៌នា                                  |
-| ----------- | ----------------------------------- | ------------------------------------------- |
-| `POST`      | `/api/services/cliproxy/install`    | ដំឡើង CLIProxyAPI ពី npm                    |
-| `POST`      | `/api/services/cliproxy/start`      | ចាប់ផ្តើម CLIProxyAPI                       |
-| `POST`      | `/api/services/cliproxy/stop`       | បញ្ឈប់ CLIProxyAPI                          |
-| `POST`      | `/api/services/cliproxy/restart`    | ចាប់ផ្តើម CLIProxyAPI ឡើងវិញ                |
-| `POST`      | `/api/services/cliproxy/update`     | ធ្វើបច្ចុប្បន្នភាពទៅកំណែថ្មីជាងនេះ។         |
-| `GET`       | `/api/services/cliproxy/status`     | ស្ថានភាព + DB ផ្ទាល់ (គ្មាន `apiKeyMasked`) |
-| `POST`      | `/api/services/cliproxy/auto-start` | បិទ/បើកការចាប់ផ្ដើមដោយស្វ័យប្រវត្តិ         |
-
-ចំណុចបញ្ចប់ `GET /api/services/{name}/logs` ចែករំលែក (សូមមើល§4.1) ដំណើរការសម្រាប់សេវាកម្មទាំងបួនដោយប្រើផ្នែកថាមវន្ត `[name]` ។
+| ស្ថានភាព | ការពិពណ៌នា                                   |
+| -------- | -------------------------------------------- |
+| `200`    | `text/event-stream`                          |
+| `400`    | ប៉ារ៉ាម៉ែត្រ `filter` វែងពេក (> 200 តួអក្សរ) |
+| `404`    | រកមិនឃើញសេវា (supervisor មិនបានចុះឈ្មោះ)     |
 
 ---
 
-### 4.3 ចំណុចបញ្ចប់ Mux (8 ផ្លូវ)
+### 4.2 ចំណុចបញ្ចប់ CLIProxyAPI (10 routes)
 
-Mux មានទម្រង់ចំណុចបញ្ចប់ដូចគ្នានឹងផ្លូវ CLIProxyAPI — no `rotate-key` ក្នុងផ្ទៃ API (សញ្ញាសម្គាល់អ្នកកាន់ត្រូវបានបង្កើតដូចគ្នានឹង 9Router's តាមរយៈ `getOrCreateApiKey("mux")` និងចាក់តាមរយៈ `MUX_SERVER_AUTH_TOKEN` env var ប៉ុន្តែមិនទាន់មានចំណុចបញ្ចប់បង្វិលជាក់លាក់នៅឡើយទេ)។ Mux ត្រូវបានគ្រប់គ្រងដោយវដ្តជីវិតតែប៉ុណ្ណោះ៖ មិនដូច 9Router ទេ វាមិនមាន Layer 4 executor ទេ ហើយមិនដែលបានចុះឈ្មោះជាអ្នកផ្តល់សេវាផ្លូវទេ។
+CLIProxyAPI មានទម្រង់ចំណុចបញ្ចប់ដូចគ្នានឹង 9Router ដោយដក `rotate-key` ចេញ ហើយបន្ថែម
+`accounts`, `provider-expose` និង `auto-restart-adopted`។ ឥឡូវនេះ វាទទួលបាន
+API key សម្រាប់ data-plane ដាច់ដោយឡែក ដែលត្រូវបានបញ្ចូលនៅពេល spawn (`needsApiKey: true` ក្នុង
+`bootstrap.ts` ដែលប្រើសម្រាប់ធ្វើសមកាលកម្មម៉ូដែល); `status` មានវាលតិចជាងមុន។
 
-| វិធីសាស្រ្ត | ផ្លូវ                          | ការពិពណ៌នា                          |
-| ----------- | ------------------------------ | ----------------------------------- |
-| `POST`      | `/api/services/mux/install`    | ដំឡើង Mux ពី npm (`npm i mux`)      |
-| `POST`      | `/api/services/mux/start`      | ចាប់ផ្តើម Mux (`mux server`)        |
-| `POST`      | `/api/services/mux/stop`       | បញ្ឈប់ Mux                          |
-| `POST`      | `/api/services/mux/restart`    | ចាប់ផ្ដើម Mux ឡើងវិញ                |
-| `POST`      | `/api/services/mux/update`     | ធ្វើបច្ចុប្បន្នភាពទៅកំណែ npm ថ្មី។  |
-| `GET`       | `/api/services/mux/status`     | ស្ថានភាព + DB ផ្ទាល់                |
-| `POST`      | `/api/services/mux/auto-start` | បិទ/បើកការចាប់ផ្ដើមដោយស្វ័យប្រវត្តិ |
+| វិធីសាស្ត្រ | ផ្លូវ                               | ការពិពណ៌នា                                 |
+| ----------- | ----------------------------------- | ------------------------------------------ |
+| `POST`      | `/api/services/cliproxy/install`    | ដំឡើង CLIProxyAPI ពី npm                   |
+| `POST`      | `/api/services/cliproxy/start`      | ចាប់ផ្ដើម CLIProxyAPI                      |
+| `POST`      | `/api/services/cliproxy/stop`       | បញ្ឈប់ CLIProxyAPI                         |
+| `POST`      | `/api/services/cliproxy/restart`    | ចាប់ផ្ដើម CLIProxyAPI ឡើងវិញ               |
+| `POST`      | `/api/services/cliproxy/update`     | ធ្វើបច្ចុប្បន្នភាពទៅកំណែថ្មីជាងមុន         |
+| `GET`       | `/api/services/cliproxy/status`     | ស្ថានភាពផ្ទាល់ + DB (គ្មាន `apiKeyMasked`) |
+| `POST`      | `/api/services/cliproxy/auto-start` | បិទ/បើកការចាប់ផ្ដើមដោយស្វ័យប្រវត្តិ        |
 
----
-
-### 4.4 ចំណុចបញ្ចប់ Bifrost (8 ផ្លូវ)
-
-Bifrost គឺជាផ្នែកខាងក្រោយរបស់ Go AI-gateway relay (`@maximhq/bifrost`) ។ វាប្រើទម្រង់ចំណុចបញ្ចប់ដូចគ្នានឹង CLIProxyAPI (គ្មាន `rotate-key` — Bifrost គ្រប់គ្រងសោអ្នកផ្តល់សេវាផ្ទាល់ខ្លួនរបស់វានៅក្នុង `config.json` នៅក្រោម `-app-dir` របស់វា ) ។
-
-| វិធីសាស្រ្ត | ផ្លូវ                              | ការពិពណ៌នា                                                           |
-| ----------- | ---------------------------------- | -------------------------------------------------------------------- |
-| `POST`      | `/api/services/bifrost/install`    | ដំឡើង Bifrost ពី npm (`@maximhq/bifrost`)                            |
-| `POST`      | `/api/services/bifrost/start`      | ចាប់ផ្តើម Bifrost នៅលើច្រក 8080 (លំនាំដើម)                           |
-| `POST`      | `/api/services/bifrost/stop`       | បញ្ឈប់ Bifrost                                                       |
-| `POST`      | `/api/services/bifrost/restart`    | ចាប់ផ្តើម Bifrost ឡើងវិញ                                             |
-| `POST`      | `/api/services/bifrost/update`     | ធ្វើបច្ចុប្បន្នភាពទៅកំណែថ្មីជាងនេះ។                                  |
-| `GET`       | `/api/services/bifrost/status`     | ស្ថានភាព + DB ផ្ទាល់                                                 |
-| `POST`      | `/api/services/bifrost/auto-start` | បិទ/បើកការចាប់ផ្ដើមដោយស្វ័យប្រវត្តិ                                  |
-| `GET`       | `/api/services/bifrost/logs`       | កន្ទុយកំណត់ហេតុSSE (តាមរយៈផ្លូវថាមវន្ត `[name]/logs` ដែលបានចែករំលែក) |
-
-**ការដាក់ខ្សែភ្លើង៖** នៅពេលដែល `BIFROST_BASE_URL` មិនត្រូវបានកំណត់ ហើយវត្ថុ Bifrost ដែលត្រូវបានគ្រប់គ្រងកំពុងដំណើរការ `getBifrostRoutingConfig()` (នៅក្នុង `routingBackend.ts`) ប្រើ `http://127.0.0.1:{port}` ដោយស្វ័យប្រវត្តិជា URL មូលដ្ឋានបញ្ជូនត។ `BIFROST_BASE_URL` env ច្បាស់លាស់តែងតែមានអាទិភាព។
+ចំណុចបញ្ចប់រួម `GET /api/services/{name}/logs` (សូមមើល §4.1) ដំណើរការសម្រាប់សេវា
+ទាំងបួន ដោយប្រើ segment ថាមវន្ត `[name]`។
 
 ---
 
-### 4.5 ចំណុចបញ្ចប់ Dario (ផ្លូវ 12)
+### 4.3 ចំណុចបញ្ចប់ Mux (8 routes)
 
-រូបរាងវដ្តជីវិតដូចគ្នាទៅនឹងសេវាកម្មផ្សេងទៀត (`install`, `start`, `stop`, `restart`, `update`, `status`, `auto-start`, `auto-restart-adopted`) បូកនឹងយន្តហោះបញ្ជា OAuth ដែលបិទដោយសញ្ញាសម្ងាត់នៅក្រោម `admin/`: `admin/accounts`, `admin/import-from-omniroute`, `admin/login-start`, `admin/login-complete` (ទាំងអស់នៅពីក្រោយ `DARIO_ADMIN_TOKEN`) ។
+Mux មានទម្រង់ចំណុចបញ្ចប់ដូចគ្នានឹង CLIProxyAPI — មិនមាន route `rotate-key` នៅក្នុងផ្ទៃ
+API ទេ (bearer token ត្រូវបានបង្កើតតាមវិធីដូចគ្នានឹងរបស់ 9Router តាមរយៈ
+`getOrCreateApiKey("mux")` និងបញ្ចូលតាមរយៈ env var `MUX_SERVER_AUTH_TOKEN` ប៉ុន្តែ
+នៅមិនទាន់មានចំណុចបញ្ចប់សម្រាប់ប្ដូរ token ដាច់ដោយឡែកនៅឡើយទេ)។ Mux ត្រូវបានគ្រប់គ្រងតែវដ្ដជីវិតប៉ុណ្ណោះ៖ ខុសពី
+9Router វាមិនមាន executor ស្រទាប់ទី 4 ហើយមិនដែលត្រូវបានចុះឈ្មោះជាអ្នកផ្ដល់សេវា routing ទេ។
 
-### 4.6 ចំណុចបញ្ចប់បើកចំហ (7 ផ្លូវ)
-
-open-wa (`@open-wa/wa-automate`) ជំរុញឧទាហរណ៍ Chromium ដែលគ្មានក្បាល (តាមរយៈ Puppeteer) ដើម្បីធ្វើស្វ័យប្រវត្តិកម្ម WhatsApp Web ។ វាប្រើរូបរាងចំណុចបញ្ចប់ដូចគ្នានឹង Mux (មិនទាន់មានផ្លូវ `rotate-key` នៅឡើយទេ)។ វាគឺជាវដ្តជីវិតដែលគ្រប់គ្រងតែ — មិនមែនជាគោលដៅកំណត់ផ្លូវទេ គ្មានការបញ្ចូលស្រទាប់ 4 executor/provider ទេ។
-
-| វិធីសាស្រ្ត | ផ្លូវ                             | ការពិពណ៌នា                                                           |
-| ----------- | --------------------------------- | -------------------------------------------------------------------- |
-| `POST`      | `/api/services/openwa/install`    | ដំឡើង open-wa ពី npm (`@open-wa/wa-automate`)                        |
-| `POST`      | `/api/services/openwa/start`      | ចាប់ផ្តើម open-wa នៅលើច្រក 8323 (លំនាំដើម)                           |
-| `POST`      | `/api/services/openwa/stop`       | បញ្ឈប់ការបើកចំហ                                                      |
-| `POST`      | `/api/services/openwa/restart`    | ចាប់ផ្តើមបើកវ៉ា                                                      |
-| `POST`      | `/api/services/openwa/update`     | ធ្វើបច្ចុប្បន្នភាពទៅកំណែថ្មីជាងនេះ។                                  |
-| `GET`       | `/api/services/openwa/status`     | ស្ថានភាព + DB ផ្ទាល់                                                 |
-| `POST`      | `/api/services/openwa/auto-start` | បិទ/បើកការចាប់ផ្ដើមដោយស្វ័យប្រវត្តិ                                  |
-| `GET`       | `/api/services/openwa/logs`       | កន្ទុយកំណត់ហេតុSSE (តាមរយៈផ្លូវថាមវន្ត `[name]/logs` ដែលបានចែករំលែក) |
-
-**គ្រាប់ចុច API ៖** បញ្ចូលជា `WA_KEY` — open-wa's generic `WA_*` -prefixed env override maps on the `--key`/`-k` CLI option (`dist/cli/setup.js::envArgs()`, verified against the installed 4.76.0 package )។ បុព្វបទ `ow_` នៅពេលបង្កើតដោយ `generateServiceApiKey()`។ open-wa អានគន្លឹះត្រឡប់ពីបឋមកថា `key`/`api_key` HTTP (មិនមែន `Authorization: Bearer`); `/api-docs*` ត្រូវបានលើកលែងយ៉ាងច្បាស់ពីការត្រួតពិនិត្យ (`setupAuthenticationLayer` ក្នុង `dist/cli/server.js`) ដូច្នេះការស៊ើបអង្កេតសុខភាពមិនត្រូវការបឋមកថាភាពត្រឹមត្រូវទេ។
-
-**ការផ្គូផ្គង៖** open-wa មិនផ្លូវការ និងមិនមានទំនាក់ទំនងជាមួយ WhatsApp — លេខដែលភ្ជាប់មានហានិភ័យហាមឃាត់ពីការរកឃើញស្វ័យប្រវត្តិកម្មផ្ទាល់ខ្លួនរបស់ WhatsApp។ នៅពេលចាប់ផ្តើមដំបូង លេខកូដ QR ដែលផ្គូផ្គងត្រូវបានបោះពុម្ពទៅ stdout ហើយបង្ហាញតាមរយៈ Logs panel/SSE stream — ដែលមានស្រាប់ មិនមានចំណុចបញ្ចប់រូបភាព QR ពិសេសនៅក្នុងការរួមបញ្ចូលនេះនៅឡើយទេ។
+| វិធីសាស្ត្រ | ផ្លូវ                          | ការពិពណ៌នា                              |
+| ----------- | ------------------------------ | --------------------------------------- |
+| `POST`      | `/api/services/mux/install`    | ដំឡើង Mux ពី npm (`npm i mux`)          |
+| `POST`      | `/api/services/mux/start`      | ចាប់ផ្ដើម Mux (`mux server`)            |
+| `POST`      | `/api/services/mux/stop`       | បញ្ឈប់ Mux                              |
+| `POST`      | `/api/services/mux/restart`    | ចាប់ផ្ដើម Mux ឡើងវិញ                    |
+| `POST`      | `/api/services/mux/update`     | ធ្វើបច្ចុប្បន្នភាពទៅកំណែ npm ថ្មីជាងមុន |
+| `GET`       | `/api/services/mux/status`     | ស្ថានភាពផ្ទាល់ + DB                     |
+| `POST`      | `/api/services/mux/auto-start` | បិទ/បើកការចាប់ផ្ដើមដោយស្វ័យប្រវត្តិ     |
 
 ---
 
-### 4.7 LLMLingua ចំណុចបញ្ចប់ (8 ផ្លូវ)
+### 4.4 ចំណុចបញ្ចប់ Bifrost (8 routes)
 
-LLMLingua គឺជា `@atjsh/llmlingua-2` រុំចំហៀងរថយន្តដែលបង្ហាប់ភ្លាមៗ (គំរូចំណាត់ថ្នាក់ ONNX ថូខឹនពិតប្រាកដ ទាញយកពី Hugging Face នៅលើការហៅ `/compress` ដំបូង) ។ វាប្រើទម្រង់ចុងដូចគ្នានឹង Bifrost (គ្មាន API key — `needsApiKey: false` វាមិនដែលគ្រប់គ្រងព័ត៌មានសម្ងាត់ទេ)។
+Bifrost គឺជា backend relay សម្រាប់ AI-gateway ដែលសរសេរដោយ Go (`@maximhq/bifrost`)។ វាប្រើទម្រង់
+ចំណុចបញ្ចប់ដូចគ្នានឹង CLIProxyAPI (គ្មាន `rotate-key` — Bifrost គ្រប់គ្រង key របស់អ្នកផ្ដល់សេវា
+ដោយខ្លួនឯងក្នុង `config.json` នៅក្រោម `-app-dir`)។
 
-| វិធីសាស្រ្ត | ផ្លូវ                                          | ការពិពណ៌នា                                                                  |
-| ----------- | ---------------------------------------------- | --------------------------------------------------------------------------- |
-| `POST`      | `/api/services/llmlingua/install`              | npm-ដំឡើង `@atjsh/llmlingua-2` + peers សរសេរស្គ្រីប server sidecar          |
-| `POST`      | `/api/services/llmlingua/start`                | ចាប់ផ្តើម sidecar នៅលើច្រក 20135 (លំនាំដើម)                                 |
-| `POST`      | `/api/services/llmlingua/stop`                 | ឈប់ឡានចំហៀង                                                                 |
-| `POST`      | `/api/services/llmlingua/restart`              | ចាប់ផ្តើមរថយន្តចំហៀងឡើងវិញ                                                  |
-| `POST`      | `/api/services/llmlingua/update`               | ធ្វើបច្ចុប្បន្នភាពទៅកំណែកញ្ចប់ថ្មីជាងនេះ។                                   |
-| `GET`       | `/api/services/llmlingua/status`               | ស្ថានភាព + DB ផ្ទាល់                                                        |
-| `POST`      | `/api/services/llmlingua/auto-start`           | បិទ/បើកការចាប់ផ្ដើមដោយស្វ័យប្រវត្តិ                                         |
-| `POST`      | `/api/services/llmlingua/auto-restart-adopted` | បិទ/បើកការចាប់ផ្ដើមឡើងវិញដោយស្វ័យប្រវត្តិនៃវត្ថុដែលបានអនុម័ត (ដែលមានស្រាប់) |
-| `GET`       | `/api/services/llmlingua/logs`                 | កន្ទុយកំណត់ហេតុSSE (តាមរយៈផ្លូវថាមវន្ត `[name]/logs` ដែលបានចែករំលែក)        |
+| វិធីសាស្ត្រ | ផ្លូវ                              | ការពិពណ៌នា                                                  |
+| ----------- | ---------------------------------- | ----------------------------------------------------------- |
+| `POST`      | `/api/services/bifrost/install`    | ដំឡើង Bifrost ពី npm (`@maximhq/bifrost`)                   |
+| `POST`      | `/api/services/bifrost/start`      | ចាប់ផ្ដើម Bifrost នៅលើ port 8080 (លំនាំដើម)                 |
+| `POST`      | `/api/services/bifrost/stop`       | បញ្ឈប់ Bifrost                                              |
+| `POST`      | `/api/services/bifrost/restart`    | ចាប់ផ្ដើម Bifrost ឡើងវិញ                                    |
+| `POST`      | `/api/services/bifrost/update`     | ធ្វើបច្ចុប្បន្នភាពទៅកំណែថ្មីជាងមុន                          |
+| `GET`       | `/api/services/bifrost/status`     | ស្ថានភាពផ្ទាល់ + DB                                         |
+| `POST`      | `/api/services/bifrost/auto-start` | បិទ/បើកការចាប់ផ្ដើមដោយស្វ័យប្រវត្តិ                         |
+| `GET`       | `/api/services/bifrost/logs`       | កន្ទុយ log តាម SSE (តាមរយៈ route ថាមវន្ត `[name]/logs` រួម) |
 
-**កិច្ចសន្យាខាងរថយន្ត៖** ស្គ្រីបម៉ាស៊ីនមេលាតត្រដាង `GET /health` ( — ភ្លាមៗមិនរង់ចាំលើគំរូ) និង `POST /compress` (`{ text, rate }` → `{ text, compressed, ratio }`) ។ ម៉ូដែលផ្ទុកដោយខ្ជិលនៅលើការហៅ `/compress` ដំបូង។
-
-**ខ្សែភ្លើងបង្ហាប់៖** `open-sse/services/compression/engines/llmlingua/index.ts` របស់ `httpSidecarBackend` ហៅ `LLMLINGUA_BASE_URL` ( `http://127.0.0.1:20135` លំនាំដើម ) ហើយទទួលយកតែការឆ្លើយតបរបស់ sidecar នៅពេលដែលវាខ្លីជាងការបញ្ចូល។ ការបរាជ័យណាមួយ (មិនដំណើរការ, អស់ពេល, ការឆ្លើយតប no-op) ត្រឡប់ទៅកាន់ backend worker-thread ដែលកំពុងដំណើរការ (`./worker.ts`)។
-
----
-
-### 4.8 ចំណុចបញ្ចប់នៃប្រអប់ចម្រៀង (8 ផ្លូវ)
-
-sing-box មានទម្រង់ចុងដូចគ្នានឹងផ្លូវ Mux — no `rotate-key` គ្មានការចាក់គ្រាប់ចុច API (`needsApiKey: false` in `bootstrap.ts`). វាត្រូវបានគ្រប់គ្រងដោយវដ្តជីវិតតែប៉ុណ្ណោះ៖ មិនដែលជាអ្នកផ្តល់សេវា routing/LLM ទេ។ `install()` ទាញយក GitHub release binary ផ្លូវការ (`SagerNet/sing-box`) សម្រាប់កំណែដែលបានខ្ទាស់ (`SINGBOX_PINNED_VERSION` in `src/lib/services/installers/singbox.ts`) ហើយផ្ទៀងផ្ទាត់ SHA256 របស់វាប្រឆាំងនឹង checksum ដែលត្រូវបានដុតនំនៅក្នុងឯកសារដូចគ្នា មុនពេលដែលសរសេរវាទៅ disk — កំណែដែលបានស្នើផ្សេងទៀតត្រូវបានបដិសេធ។
-
-| វិធីសាស្រ្ត | ផ្លូវ                                        | ការពិពណ៌នា                                                                         |
-| ----------- | -------------------------------------------- | ---------------------------------------------------------------------------------- |
-| `POST`      | `/api/services/singbox/install`              | ទាញយក + ផ្ទៀងផ្ទាត់ការចេញផ្សាយ sing-box ដែលបានខ្ទាស់                               |
-| `POST`      | `/api/services/singbox/start`                | ចាប់ផ្តើម sing-box (`sing-box run -c config.json`)                                 |
-| `POST`      | `/api/services/singbox/stop`                 | ឈប់ sing-box                                                                       |
-| `POST`      | `/api/services/singbox/restart`              | ចាប់ផ្តើមប្រអប់ចម្រៀងឡើងវិញ                                                        |
-| `POST`      | `/api/services/singbox/update`               | Re-verify/reinstall ការចេញផ្សាយដែលបានខ្ទាស់                                        |
-| `GET`       | `/api/services/singbox/status`               | ស្ថានភាព + DB ផ្ទាល់                                                               |
-| `POST`      | `/api/services/singbox/auto-start`           | បិទ/បើកការចាប់ផ្ដើមដោយស្វ័យប្រវត្តិ                                                |
-| `POST`      | `/api/services/singbox/auto-restart-adopted` | បិទបើកការចាប់ផ្តើមឡើងវិញដោយស្វ័យប្រវត្តិសម្រាប់ដំណើរការដែលបានអនុម័ត (ដែលមានស្រាប់) |
-| `GET`       | `/api/services/singbox/logs`                 | កន្ទុយកំណត់ហេតុSSE (តាមរយៈផ្លូវថាមវន្ត `[name]/logs` ដែលបានចែករំលែក)               |
-
-**ខ្សែភ្លើង TPROXY :** `ensureSingboxTproxy()` (`src/mitm/tproxy/setup.ts`) សរសេរ `config.json` ហើយចាប់ផ្តើមអ្នកគ្រប់គ្រង មុនពេល `applyTproxy()` ដំឡើងច្បាប់ជញ្ជាំងភ្លើង TPROXY ។ ប្រសិនបើអ្នកគ្រប់គ្រងបាត់ ឬបរាជ័យក្នុងការឈានដល់ `running` ឥឡូវនេះវាកត់ត្រានៅកម្រិតកំហុស (ជាជាងលេបការបរាជ័យដោយស្ងៀមស្ងាត់) ដូច្នេះប្រតិបត្តិករអាចប្រាប់ពីច្បាប់ TPROXY ត្រូវបានអនុវត្តដោយគ្មានអ្នកស្តាប់ដែលធ្វើការនៅពីក្រោយពួកគេ។
+**ការតភ្ជាប់ routing៖** នៅពេល `BIFROST_BASE_URL` មិនត្រូវបានកំណត់ ហើយ instance Bifrost
+ដែលស្ថិតក្រោមការគ្រប់គ្រងកំពុងដំណើរការ `getBifrostRoutingConfig()` (ក្នុង `routingBackend.ts`) នឹងប្រើ
+`http://127.0.0.1:{port}` ដោយស្វ័យប្រវត្តិជា URL មូលដ្ឋានរបស់ relay។ env
+`BIFROST_BASE_URL` ដែលបានកំណត់ជាក់លាក់ តែងតែមានអាទិភាព។
 
 ---
 
-### 4.9 ប្រូកស៊ីបញ្ច្រាស (9 Router dashboard បង្កប់)
+### 4.5 ចំណុចបញ្ចប់ Dario (12 routes)
 
-ផ្ទៃតាប្លូបង្កប់ UI បណ្តាញ 9Router នៅខាងក្នុង iframe តាមរយៈប្រូកស៊ីបញ្ច្រាសខាងក្នុងនៅ៖
+មានទម្រង់វដ្ដជីវិតដូចគ្នានឹងសេវាផ្សេងទៀត (`install`, `start`, `stop`, `restart`,
+`update`, `status`, `auto-start`, `auto-restart-adopted`) បូករួមទាំង control plane OAuth
+ដែលត្រូវបានការពារដោយ token នៅក្រោម `admin/`៖ `admin/accounts`, `admin/import-from-omniroute`,
+`admin/login-start`, `admin/login-complete` (ទាំងអស់ស្ថិតនៅក្រោយ `DARIO_ADMIN_TOKEN`)។
+
+### 4.6 ចំណុចបញ្ចប់ open-wa (7 routes)
+
+open-wa (`@open-wa/wa-automate`) ដំណើរការ instance Chromium ដោយគ្មាន UI (តាមរយៈ
+Puppeteer) ដើម្បីធ្វើស្វ័យប្រវត្តិកម្ម WhatsApp Web។ វាប្រើទម្រង់ចំណុចបញ្ចប់ដូចគ្នានឹង Mux (នៅមិនទាន់មាន
+route `rotate-key`)។ វាត្រូវបានគ្រប់គ្រងតែវដ្ដជីវិតប៉ុណ្ណោះ — មិនមែនជាគោលដៅ routing,
+គ្មានធាតុ executor/អ្នកផ្ដល់សេវាស្រទាប់ទី 4 ទេ។
+
+| វិធីសាស្ត្រ | ផ្លូវ                             | ការពិពណ៌នា                                                                   |
+| ----------- | --------------------------------- | ---------------------------------------------------------------------------- |
+| `POST`      | `/api/services/openwa/install`    | ដំឡើង open-wa ពី npm (`@open-wa/wa-automate`)                                |
+| `POST`      | `/api/services/openwa/start`      | ចាប់ផ្ដើម open-wa នៅលើច្រក 8323 (លំនាំដើម)                                   |
+| `POST`      | `/api/services/openwa/stop`       | បញ្ឈប់ open-wa                                                               |
+| `POST`      | `/api/services/openwa/restart`    | ចាប់ផ្ដើម open-wa ឡើងវិញ                                                     |
+| `POST`      | `/api/services/openwa/update`     | ធ្វើបច្ចុប្បន្នភាពទៅកំណែថ្មីជាងនេះ                                           |
+| `GET`       | `/api/services/openwa/status`     | ស្ថានភាពផ្ទាល់ + DB                                                          |
+| `POST`      | `/api/services/openwa/auto-start` | បិទ/បើកការចាប់ផ្ដើមដោយស្វ័យប្រវត្តិ                                          |
+| `GET`       | `/api/services/openwa/logs`       | កំណត់ហេតុបន្តផ្ទាល់តាម SSE (តាមរយៈផ្លូវថាមវន្ត `[name]/logs` ដែលប្រើរួមគ្នា) |
+
+**សោ API៖** ត្រូវបានបញ្ចូលជា `WA_KEY` — ការកំណត់ជំនួស env ទូទៅរបស់ open-wa ដែលមានបុព្វបទ `WA_*`
+ផ្គូផ្គងវាទៅនឹងជម្រើស CLI `--key`/`-k`
+(`dist/cli/setup.js::envArgs()` ដែលបានផ្ទៀងផ្ទាត់ជាមួយកញ្ចប់កំណែ 4.76.0
+ដែលបានដំឡើង)។ មានបុព្វបទ `ow_` នៅពេលបង្កើតដោយ `generateServiceApiKey()`។ open-wa
+អានសោត្រឡប់មកវិញពីបឋមកថា HTTP `key`/`api_key` (មិនមែន `Authorization:
+Bearer` ទេ)។ `/api-docs*` ត្រូវបានលើកលែងពីការត្រួតពិនិត្យនេះយ៉ាងជាក់លាក់
+(`setupAuthenticationLayer` នៅក្នុង `dist/cli/server.js`) ដូច្នេះការស្ទង់ពិនិត្យសុខភាព
+មិនត្រូវការបឋមកថាផ្ទៀងផ្ទាត់អត្តសញ្ញាណទេ។
+
+**ការផ្គូផ្គង៖** open-wa មិនមែនជាផលិតផលផ្លូវការ និងមិនមានទំនាក់ទំនងជាមួយ WhatsApp ទេ —
+លេខដែលបានភ្ជាប់មានហានិភ័យត្រូវបានហាមឃាត់ដោយប្រព័ន្ធរកឃើញស្វ័យប្រវត្តិកម្មរបស់ WhatsApp។
+នៅពេលចាប់ផ្ដើមលើកដំបូង កូដ QR សម្រាប់ផ្គូផ្គងត្រូវបានបោះពុម្ពទៅ stdout និងបង្ហាញតាមរយៈ
+ផ្ទាំងកំណត់ហេតុ/ស្ទ្រីម SSE ដែលមានស្រាប់ — បច្ចុប្បន្នមិនទាន់មាន endpoint
+សម្រាប់រូបភាព QR ដាច់ដោយឡែកនៅក្នុងការរួមបញ្ចូលនេះទេ។
+
+---
+
+### 4.7 endpoint របស់ LLMLingua (8 ផ្លូវ)
+
+LLMLingua គឺជា sidecar សម្រាប់បង្ហាប់ prompt ដែលរុំជុំវិញ `@atjsh/llmlingua-2` (ម៉ូដែល
+ចាត់ថ្នាក់ token ដោយ ONNX ពិតប្រាកដ ដែលត្រូវបានទាញយកពី Hugging Face នៅពេលហៅ
+`/compress` លើកដំបូង)។ វាប្រើទម្រង់ endpoint ដូចគ្នានឹង Bifrost (គ្មានសោ API —
+`needsApiKey: false` វាមិនដែលដោះស្រាយព័ត៌មានសម្ងាត់ទេ)។
+
+| វិធីសាស្ត្រ | ផ្លូវ                                          | ការពិពណ៌នា                                                                              |
+| ----------- | ---------------------------------------------- | --------------------------------------------------------------------------------------- |
+| `POST`      | `/api/services/llmlingua/install`              | ដំឡើង `@atjsh/llmlingua-2` + កញ្ចប់ពាក់ព័ន្ធតាម npm ហើយសរសេរស្គ្រីបម៉ាស៊ីនបម្រើ sidecar |
+| `POST`      | `/api/services/llmlingua/start`                | ចាប់ផ្ដើម sidecar នៅលើច្រក 20135 (លំនាំដើម)                                             |
+| `POST`      | `/api/services/llmlingua/stop`                 | បញ្ឈប់ sidecar                                                                          |
+| `POST`      | `/api/services/llmlingua/restart`              | ចាប់ផ្ដើម sidecar ឡើងវិញ                                                                |
+| `POST`      | `/api/services/llmlingua/update`               | ធ្វើបច្ចុប្បន្នភាពទៅកំណែកញ្ចប់ថ្មីជាងនេះ                                                |
+| `GET`       | `/api/services/llmlingua/status`               | ស្ថានភាពផ្ទាល់ + DB                                                                     |
+| `POST`      | `/api/services/llmlingua/auto-start`           | បិទ/បើកការចាប់ផ្ដើមដោយស្វ័យប្រវត្តិ                                                     |
+| `POST`      | `/api/services/llmlingua/auto-restart-adopted` | បិទ/បើកការចាប់ផ្ដើមឡើងវិញដោយស្វ័យប្រវត្តិនៃ instance ដែលបានទទួលយក (មានស្រាប់ពីមុន)      |
+| `GET`       | `/api/services/llmlingua/logs`                 | កំណត់ហេតុបន្តផ្ទាល់តាម SSE (តាមរយៈផ្លូវថាមវន្ត `[name]/logs` ដែលប្រើរួមគ្នា)            |
+
+**កិច្ចសន្យា sidecar៖** ស្គ្រីបម៉ាស៊ីនបម្រើផ្ដល់ `GET /health` (ភ្លាមៗ — មិន
+រង់ចាំម៉ូដែលទេ) និង `POST /compress` (`{ text, rate }` →
+`{ text, compressed, ratio }`)។ ម៉ូដែលផ្ទុកតាមតម្រូវការនៅពេលហៅ
+`/compress` លើកដំបូង។
+
+**ការតភ្ជាប់ការបង្ហាប់៖** `httpSidecarBackend` របស់ `open-sse/services/compression/engines/llmlingua/index.ts`
+ហៅ `LLMLINGUA_BASE_URL` (លំនាំដើម
+`http://127.0.0.1:20135`) ហើយទទួលយកការឆ្លើយតបរបស់ sidecar តែនៅពេលវា
+ខ្លីជាងទិន្នន័យបញ្ចូលយ៉ាងតឹងរ៉ឹងប៉ុណ្ណោះ។ រាល់ការបរាជ័យ (មិនដំណើរការ អស់ពេលរង់ចាំ ការឆ្លើយតប
+ដែលមិនធ្វើអ្វី) នឹងត្រឡប់ទៅប្រើ backend worker-thread ក្នុងដំណើរការ (`./worker.ts`)។
+
+---
+
+### 4.8 ចំណុចចុង sing-box (8 ផ្លូវ)
+
+sing-box មានរចនាសម្ព័ន្ធចំណុចចុងដូច Mux៖ គ្មានផ្លូវ `rotate-key` ហើយក៏គ្មានការបញ្ចូលកូនសោ API ដែរ (`needsApiKey: false` ក្នុង `bootstrap.ts`)។ មានតែវដ្តជីវិតប៉ុណ្ណោះដែលត្រូវបានគ្រប់គ្រង។ វាមិនដែលជាអ្នកផ្តល់ការបញ្ជូនផ្លូវ ឬ LLM ឡើយ។ `install()` ទាញយកឯកសារប៊ីណារីផ្លូវការពីការចេញផ្សាយ GitHub (`SagerNet/sing-box`) សម្រាប់កំណែដែលបានកំណត់ជាមុន (`SINGBOX_PINNED_VERSION` ក្នុង `src/lib/services/installers/singbox.ts`) ហើយផ្ទៀងផ្ទាត់ SHA256 របស់វាជាមួយតម្លៃ checksum ដែលបង្កប់នៅក្នុងឯកសារដដែល មុនពេលសរសេរវាទៅលើឌីស។ សំណើសម្រាប់កំណែផ្សេងណាមួយត្រូវបានបដិសេធ។
+
+| វិធីសាស្ត្រ | ផ្លូវ                                        | ការពិពណ៌នា                                                                                         |
+| ----------- | -------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `POST`      | `/api/services/singbox/install`              | ទាញយក និងផ្ទៀងផ្ទាត់ការចេញផ្សាយ sing-box ដែលបានកំណត់ជាមុន                                          |
+| `POST`      | `/api/services/singbox/start`                | ចាប់ផ្តើម sing-box (`sing-box run -c config.json`)                                                 |
+| `POST`      | `/api/services/singbox/stop`                 | បញ្ឈប់ sing-box                                                                                    |
+| `POST`      | `/api/services/singbox/restart`              | ចាប់ផ្តើម sing-box ឡើងវិញ                                                                          |
+| `POST`      | `/api/services/singbox/update`               | ផ្ទៀងផ្ទាត់ ឬដំឡើងការចេញផ្សាយដែលបានកំណត់ជាមុនឡើងវិញ                                                |
+| `GET`       | `/api/services/singbox/status`               | ស្ថានភាពបច្ចុប្បន្ន និងស្ថានភាពក្នុង DB                                                            |
+| `POST`      | `/api/services/singbox/auto-start`           | បើក ឬបិទការចាប់ផ្តើមដោយស្វ័យប្រវត្តិ                                                               |
+| `POST`      | `/api/services/singbox/auto-restart-adopted` | បើក ឬបិទការចាប់ផ្តើមឡើងវិញដោយស្វ័យប្រវត្តិសម្រាប់ដំណើរការដែលមានស្រាប់ ហើយត្រូវបានទទួលយកមកគ្រប់គ្រង |
+| `GET`       | `/api/services/singbox/logs`                 | តាមដានធាតុថ្មីនៅចុងកំណត់ហេតុតាម SSE តាមរយៈផ្លូវថាមវន្តរួម `[name]/logs`                            |
+
+**ការតភ្ជាប់ TPROXY៖** `ensureSingboxTproxy()` (`src/mitm/tproxy/setup.ts`) សរសេរ `config.json` និងចាប់ផ្តើមកម្មវិធីត្រួតពិនិត្យ មុនពេល `applyTproxy()` ដំឡើងវិធានជញ្ជាំងភ្លើង TPROXY។ ប្រសិនបើគ្មានកម្មវិធីត្រួតពិនិត្យ ឬវាមិនអាចឈានដល់ស្ថានភាព `running` ឥឡូវនេះប្រព័ន្ធកត់ត្រានៅកម្រិតកំហុស ជំនួសឱ្យការមិនអើពើនឹងបរាជ័យដោយស្ងាត់ស្ងៀម។ ដូច្នេះ អ្នកប្រតិបត្តិការអាចដឹងថាវិធាន TPROXY ត្រូវបានអនុវត្តដោយគ្មានកម្មវិធីស្តាប់ដែលដំណើរការនៅពីក្រោយវា។
+
+---
+
+### 4.9 ប្រូកស៊ីបញ្ច្រាស (ការបង្កប់ផ្ទាំងគ្រប់គ្រង 9Router)
+
+ផ្ទាំងគ្រប់គ្រងបង្កប់ UI វេបរបស់ 9Router នៅខាងក្នុង iframe តាមរយៈប្រូកស៊ីបញ្ច្រាស
+ខាងក្នុងនៅ៖
 
 ```
 GET|POST|... /dashboard/providers/services/9router/embed/[...path]
@@ -549,15 +609,18 @@ GET|POST|... /dashboard/providers/services/9router/embed/[...path]
 
 ប្រូកស៊ីនេះ៖
 
-- បញ្ជូនបន្តសំណើទៅ `http://127.0.0.1:{port}/{path}` (រង្វិលជុំត្រឡប់មកវិញតែប៉ុណ្ណោះ)
-- ដកបឋមកថា `cookie` និង `authorization` ចូល (គ្មានការលេចធ្លាយនៃវគ្គ OmniRoute )
-- ចាក់បញ្ចូល `Authorization: Bearer {apiKey}` សម្រាប់ការផ្ទៀងផ្ទាត់ 9Router
-- ច្រូត `set-cookie`, `content-security-policy`, `x-frame-options`, `cross-origin-*` ពីការឆ្លើយតប
-- សរសេរការឆ្លើយតប HTML ឡើងវិញដើម្បីចាក់ `<base href>` និងធ្វើឱ្យផ្លូវដាច់ខាតធម្មតា (`/foo` → `/dashboard/.../embed/foo`)
+- បញ្ជូនបន្តសំណើទៅ `http://127.0.0.1:{port}/{path}` (សម្រាប់តែ loopback)
+- ដកបឋមកថា `cookie` និង `authorization` ដែលចូលមក (មិនឱ្យលេចធ្លាយ session របស់ OmniRoute)
+- បញ្ចូល `Authorization: Bearer {apiKey}` សម្រាប់ការផ្ទៀងផ្ទាត់អត្តសញ្ញាណរបស់ 9Router
+- ដក `set-cookie`, `content-security-policy`, `x-frame-options`, `cross-origin-*` ចេញពីការឆ្លើយតប
+- សរសេរការឆ្លើយតប HTML ឡើងវិញ ដើម្បីបញ្ចូល `<base href>` និងធ្វើឱ្យផ្លូវដាច់ខាតមានទម្រង់ស្តង់ដារ (`/foo` → `/dashboard/.../embed/foo`)
 
-ការធ្វើឱ្យប្រសើរ WebSocket សម្រាប់ផ្ទៃតាប្លូដែលបានបង្កប់ត្រូវបានគ្រប់គ្រងដោយម៉ាស៊ីនមេដៃគូនៅលើច្រកជាក់លាក់មួយ (សូមមើល `src/lib/services/embedWsProxy.ts`) ។
+ការដំឡើងកម្រិត WebSocket សម្រាប់ផ្ទាំងគ្រប់គ្រងដែលបានបង្កប់ ត្រូវបានគ្រប់គ្រងដោយម៉ាស៊ីនបម្រើដៃគូនៅលើ
+ច្រកដាច់ដោយឡែកមួយ (សូមមើល `src/lib/services/embedWsProxy.ts`)។
 
-**សុវត្ថិភាព៖** ផ្លូវប្រូកស៊ីបង្កប់ត្រូវបានចាត់ថ្នាក់ក្រោម `LOCAL_ONLY_API_PREFIXES` ហើយអាចទៅដល់បានតែពីរង្វិលជុំវិញប៉ុណ្ណោះ។ អ្នកវាយប្រហារដែលទទួលបាន JWT តាមរយៈផ្លូវរូងក្រោមដី Cloudflare/Ngrok មិនអាចប្រូកស៊ីចូលទៅក្នុងសេវាកម្មដែលបានបង្កប់ទេ។
+**សុវត្ថិភាព៖** ផ្លូវប្រូកស៊ីបង្កប់ត្រូវបានចាត់ថ្នាក់ក្រោម `LOCAL_ONLY_API_PREFIXES`
+ហើយអាចចូលប្រើបានតែពី loopback ប៉ុណ្ណោះ។ អ្នកវាយប្រហារដែលទទួលបាន JWT តាមរយៈ
+tunnel របស់ Cloudflare/Ngrok មិនអាចប្រើប្រូកស៊ីដើម្បីចូលទៅសេវាដែលបានបង្កប់បានទេ។
 
 ---
 

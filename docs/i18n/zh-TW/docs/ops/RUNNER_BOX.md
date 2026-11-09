@@ -11,13 +11,13 @@ OmniRoute runner 都只有**一種角色**、一個標籤，以及依其工作�
 主機 swap（16 GB）會吸收超出的部分，而且由於 pull request 的 Builds 在託管環境中執行，
 Turbopack 執行槽大多數時間都處於閒置狀態：
 
-| runner               | 標籤            | 角色                                                                                                                                        | `MemoryHigh` / `MemoryMax` | `CPUQuota` |
-| -------------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | ---------- |
-| `omniroute-113-5`    | `omni-build`    | Turbopack 建置：`ci.yml` `Build`（僅限 push/dispatch）、Docker amd64、`npm-publish`、`nightly-v4-build`、`preview-artifact`、每晚 a11y 建置 | 56 GB / 60 GB（swap 0）    | 1600 %     |
-| `omniroute-113-6`    | `omni-release`  | Release-Green（`release-green` + `main-green`）、webpack 建置                                                                               | 20 GB / 24 GB（swap 4 GB） | 800 %      |
-| `omniroute-113-2`    | `omni-light`    | 每晚工作（Schemathesis、promptfoo、garak、k6）以及 `quality.yml` `lint-guard`                                                               | 12 GB / 16 GB（swap 4 GB） | 600 %      |
-| `omniroute-113`      | `omni-light`    | 與上述相同的集區                                                                                                                            | 8 GB / 12 GB               | 400 %      |
-| OmniHeuris, OmniMind | （各自的 repo） | 僅執行 Dependabot（各自峰值為 155 MB，2026-10-18）                                                                                          | 4 GB / 6 GB                | 各 200 %   |
+| runner               | 標籤                            | 角色                                                                                                                                        | `MemoryHigh` / `MemoryMax` | `CPUQuota` |
+| -------------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | ---------- |
+| `omniroute-113-5`    | `omni-build`, `omni-build-60gb` | Turbopack 建置：`ci.yml` `Build`（僅限 push/dispatch）、Docker amd64、`npm-publish`、`nightly-v4-build`、`preview-artifact`、每晚 a11y 建置 | 56 GB / 60 GB（swap 0）    | 1600 %     |
+| `omniroute-113-6`    | `omni-release`                  | Release-Green（`release-green` + `main-green`）、webpack 建置                                                                               | 20 GB / 24 GB（swap 4 GB） | 800 %      |
+| `omniroute-113-2`    | `omni-light`                    | 每晚工作（Schemathesis、promptfoo、garak、k6）以及 `quality.yml` `lint-guard`                                                               | 12 GB / 16 GB（swap 4 GB） | 600 %      |
+| `omniroute-113`      | `omni-light`                    | 與上述相同的集區                                                                                                                            | 8 GB / 12 GB               | 400 %      |
+| OmniHeuris, OmniMind | （各自的 repo）                 | 僅執行 Dependabot（各自峰值為 155 MB，2026-10-18）                                                                                          | 4 GB / 6 GB                | 各 200 %   |
 
 2026-10-18 實測：
 
@@ -27,7 +27,7 @@ Turbopack 執行槽大多數時間都處於閒置狀態：
 | swap      | 16 GB                           | `omniroute-113-5` 執行時停用 swap（`MemorySwapMax=0`），因此失控的建置會在達到上限時被終止，而不會因使用 swap 拖垮整台主機                                                                                                                                                                                                                    |
 | `/tmp`    | **12 GB tmpfs = RAM**           | 放在此處的任何內容都會占用記憶體；殘留內容會在 3 小時後清除                                                                                                                                                                                                                                                                                   |
 | CPU       | 在 32 核心上觀察到負載 60       | 在設定 quota 之前，一個 Turbopack 建置（約 1166 % CPU）加上同一台主機上的 coverage suite，曾導致其他 listener 的 heartbeat 無法獲得資源（`The self-hosted runner lost communication`，#16853）                                                                                                                                                |
-| runners   | **7 個 listener**（2026-10-28） | 5 個 OmniRoute，加上 OmniHeuris 與 OmniMind；`omniroute-113-7` 也帶有 `omni-build`；`omniroute-113-3/-4/-8` 已從儲存庫刪除（2026-10-28）                                                                                                                                                                                                      |
+| runners   | **7 個 listener**（2026-10-28） | 5 個 OmniRoute，加上 OmniHeuris 與 OmniMind；`omniroute-113-5` 也帶有 `omni-build-60gb`；`omniroute-113-3/-4/-8` 已從儲存庫刪除（2026-10-28）                                                                                                                                                                                                 |
 
 這些限制位於各 unit 的 `/etc/systemd/system/actions.runner.<…>.service.d/override.conf`
 中（先前的值保留為 `override.conf.bak-20261018`），並已透過
@@ -83,7 +83,7 @@ Runner 的預設 `KillMode=process` 會在單元停止或重新啟動後，留�
 ## 操作規則
 
 - **一次只能執行一個 Turbopack 建置——透過標籤強制執行。** 每個執行完整 Turbopack
-  `next build` 的工作都以 `[self-hosted, omni-build]` 為目標，而且只有 **`omniroute-113-5`** 帶有該
+  `next build` 的工作都以 `[self-hosted, omni-build, omni-build-60gb]` 為目標，而且只有 **`omniroute-113-5`** 帶有該
   標籤：`ci.yml` 的 `Build`、`npm-publish.yml` 的 `publish`、`nightly-v4-build`、`preview-artifact`、
   每夜 a11y 建置（#16853），以及 `docker-publish.yml` 的 **amd64**（在 BuildKit 內使用 webpack——
   Turbopack 曾在該處發生 panic，執行編號 33253576569）。arm64 Docker 工作仍在 `ubuntu-24.04-arm` 上執行。

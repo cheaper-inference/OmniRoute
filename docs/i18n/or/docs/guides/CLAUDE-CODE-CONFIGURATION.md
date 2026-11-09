@@ -24,27 +24,27 @@ omniroute launch --profile glm52  # OmniRoute ମାଧ୍ୟମରେ glm/glm-5
 
 ---
 
-## Claude କୋଡ୍ କିପରି ଏକ ଗେଟୱେ ସହିତ ସଂଯୁକ୍ତ \|
+## Claude Code କିପରି ଏକ gateway ସହିତ ସଂଯୋଗ କରେ
 
-Claude କୋଡ୍**Anthropic ବାର୍ତ୍ତା API** ଏବଂ ପରିବେଶ ଭେରିଏବଲ୍ ସହିତ ଏକ କଷ୍ଟମ୍ ଏଣ୍ଡପଏଣ୍ଟକୁ ସୂଚିତ କରାଯାଇଛି (ଏହାର କ `--base-url` ପତାକା ନାହିଁ):
+Claude Code **Anthropic Messages API** ସହିତ ଯୋଗାଯୋଗ କରେ ଏବଂ environment variable ମାଧ୍ୟମରେ ଏକ କଷ୍ଟମ୍ endpoint ଆଡ଼କୁ ନିର୍ଦ୍ଦେଶିତ ହୁଏ (ଏଥିରେ କୌଣସି `--base-url` flag ନାହିଁ):
 
-| ଭେରିଏବଲ୍                                     | ଉଦ୍ଦେଶ୍ୟ                                                                                        |
+| Variable                                     | ଉଦ୍ଦେଶ୍ୟ                                                                                        |
 | -------------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| `ANTHROPIC_BASE_URL`                         | ଗେଟୱେ ରୁଟ୍ URL (Claude କୋଡ୍ `/v1/messages` ଯୋଡିଥାଏ) \|** `/v1` ସଫିକ୍ସ ନାହିଁ \|**                |
-| `ANTHROPIC_AUTH_TOKEN`                       | `Authorization: Bearer …` — ଭାବରେ ପଠାଯାଇଛି ତୁମର OmniRoute ଆକ୍ସେସ୍ ଟୋକେନ୍ / API କି ବ୍ୟବହାର କର \| |
-| `ANTHROPIC_API_KEY`                          | ବିକଳ୍ପ: `x-api-key` ଭାବରେ ପଠାଯାଇଛି \| ଯଦି ଉଭୟ ସେଟ୍ ହୁଏ, `ANTHROPIC_AUTH_TOKEN` ଜିତେ \|          |
-| `ANTHROPIC_MODEL`                            | ଏକ ନିର୍ଦ୍ଦିଷ୍ଟ ମଡେଲକୁ ବାଧ୍ୟ କରନ୍ତୁ ( `/model` ପିକର୍ ଡିଫଲ୍ଟକୁ ନବଲିଖନ କରେ)                        |
-| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → ଦେଶୀ `/model` ପିକର୍ `/v1/models` ରୁ `claude*`/`anthropic*` ମଡେଲଗୁଡିକ ତାଲିକାଭୁକ୍ତ କରେ \|   |
-| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | ପ୍ରତିକ୍ରିୟାରେ କ୍ୟାପ୍ ଆଉଟପୁଟ୍ ଟୋକେନ୍ (ଯଥା `65536`)                                               |
-| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | ଅଟୋ-ସଙ୍କୋଚନ ପାଇଁ ଟୋକେନ୍ ସୀମା                                                                    |
+| `ANTHROPIC_BASE_URL`                         | Gateway root URL (Claude Code `/v1/messages` ଯୋଡ଼େ)। **କୌଣସି `/v1` suffix ନୁହେଁ।**              |
+| `ANTHROPIC_AUTH_TOKEN`                       | `Authorization: Bearer …` ଭାବରେ ପଠାଯାଏ — ଆପଣଙ୍କ OmniRoute access token / API key ବ୍ୟବହାର କରନ୍ତୁ |
+| `ANTHROPIC_API_KEY`                          | ବିକଳ୍ପ: `x-api-key` ଭାବରେ ପଠାଯାଏ। ଉଭୟ ସେଟ୍ ହୋଇଥିଲେ, `ANTHROPIC_AUTH_TOKEN` ପ୍ରାଧାନ୍ୟ ପାଏ        |
+| `ANTHROPIC_MODEL`                            | ଏକ ନିର୍ଦ୍ଦିଷ୍ଟ model ବାଧ୍ୟତାମୂଳକ କରେ (`/model` pickerର defaultକୁ override କରେ)                  |
+| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → native `/model` picker `/v1/models`ରୁ `claude*`/`anthropic*` modelଗୁଡ଼ିକୁ ତାଲିକାଭୁକ୍ତ କରେ |
+| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | ପ୍ରତି responseର output token ସୀମିତ କରେ (ଯଥା `65536`)                                            |
+| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | auto-compaction ପାଇଁ token threshold                                                            |
 
-> Env vars ପ read ାଯାଏ \|** ଥରେ ଷ୍ଟାର୍ଟଅପ୍ ରେ \|** — ସେଗୁଡିକ ପରିବର୍ତ୍ତନ କରିବା ପରେ Claude କୋଡ୍ ପୁନ rest ଆରମ୍ଭ କରନ୍ତୁ \|
+> Env varଗୁଡ଼ିକ **startup ସମୟରେ କେବଳ ଥରେ** ପଢ଼ାଯାଏ — ସେଗୁଡ଼ିକ ପରିବର୍ତ୍ତନ କରିବା ପରେ Claude Codeକୁ restart କରନ୍ତୁ।
 
-ଏକ ପରିଚୟପତ୍ର ପାଇଁ ଯାହା ଏକ ସ୍ଥିର ଷ୍ଟ୍ରିଙ୍ଗ ପରିବର୍ତ୍ତେ ଘୂର୍ଣ୍ଣନ କରେ, `~/.claude/settings.json` ରେ `apiKeyHelper` ଏକ ନିର୍ଦ୍ଦେଶରେ ସେଟ୍ କର ଯାହାକି ସାମ୍ପ୍ରତିକ ପରିଚୟକୁ stdout ରେ ପ୍ରିଣ୍ଟ କରେ \| Claude କୋଡ୍ ଏହାର ଆଉଟପୁଟ୍ କୁ ଡିଫଲ୍ଟ ଭାବରେ ପାଞ୍ଚ ମିନିଟ୍ ପାଇଁ କ୍ୟାଚ୍ କରେ (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` ଏହାକୁ ନବଲିଖନ କରେ) ଏବଂ ଉଭୟ `Authorization: Bearer` ଏବଂ `x-api-key` ରେ ମୂଲ୍ୟ ପଠାଏ \| ସ୍କ୍ରିପ୍ଟ ନିଶ୍ଚିତ ଭାବରେ ପରିଚୟପତ୍ର ପ୍ରିଣ୍ଟ କରିବ ଏବଂ ଏହା ବ୍ୟତୀତ ଅନ୍ୟ କିଛି — ଏକ ବ୍ୟାନର ଏହା v2.1.227 + ରେ ହେଲପରଙ୍କୁ ବିଫଳ କରିବ \|
+ସ୍ଥିର ଷ୍ଟ୍ରିଂ ପରିବର୍ତ୍ତେ ନିୟମିତ ଭାବେ ବଦଳୁଥିବା ପ୍ରମାଣୀକରଣ ତଥ୍ୟ ବ୍ୟବହାର କରିବାକୁ, `~/.claude/settings.json` ରେ `apiKeyHelper` କୁ ଏପରି କମାଣ୍ଡ ଭାବେ ସେଟ୍ କରନ୍ତୁ ଯାହା ବର୍ତ୍ତମାନର ପ୍ରମାଣୀକରଣ ତଥ୍ୟ stdout ରେ ପ୍ରିଣ୍ଟ କରେ। Claude Code ଡିଫଲ୍ଟ ଭାବେ ଏହାର ଆଉଟପୁଟ୍ ପାଞ୍ଚ ମିନିଟ୍ କ୍ୟାଶ୍‌ରେ ରଖେ (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` ଏହି ଅବଧି ବଦଳାଏ) ଏବଂ ମୂଲ୍ୟକୁ `Authorization: Bearer` ଓ `x-api-key` ଉଭୟରେ ପଠାଏ। ସ୍କ୍ରିପ୍ଟ କେବଳ ପ୍ରମାଣୀକରଣ ତଥ୍ୟ ପ୍ରିଣ୍ଟ କରିବା ଆବଶ୍ୟକ; ଏହା ସହ ବ୍ୟାନର୍ ପ୍ରିଣ୍ଟ କଲେ v2.1.227+ ରେ helper ବିଫଳ ହୁଏ।
 
-ଏହିପରି ଏଣ୍ଟ୍ରା ID SSO କାମ କରେ: `scripts/cli/omniroute-sso.mjs token` ଏକ ସ୍ୱଳ୍ପ ସମୟର ଏଣ୍ଟ୍ରା ଆକସେସ୍ ଟୋକେନ୍ ପ୍ରିଣ୍ଟ କରେ ଯାହାକି API କି ବଦଳରେ OmniRoute ଯାଞ୍ଚ କରେ \| [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md) ଦେଖନ୍ତୁ \|
+Entra ID SSO ଏଭଳି କାମ କରେ: `scripts/cli/omniroute-sso.mjs token` ସ୍ୱଳ୍ପ ସମୟ ପାଇଁ ବୈଧ ଥିବା Entra ଆକ୍ସେସ୍ ଟୋକେନ୍ ପ୍ରିଣ୍ଟ କରେ, ଯାହାକୁ OmniRoute API କୀ ପରିବର୍ତ୍ତେ ଯାଞ୍ଚ କରେ। [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md) ଦେଖନ୍ତୁ।
 
-`omniroute launch` ତୁମ ପାଇଁ ଏସବୁ ସେଟ୍ କରେ: ଏହା ସକ୍ରିୟ URL + ଟୋକେନ୍ କୁ ସକ୍ରିୟ ପ୍ରସଙ୍ଗରୁ ସମାଧାନ କରେ (ତେଣୁ `omniroute connect <vps>` ତାପରେ `omniroute launch` କେବଳ କାମ କରେ), ସର୍ଭରକୁ ସ୍ୱାସ୍ଥ୍ୟ-ଯାଞ୍ଚ କରେ, ଏବଂ `claude` ନିର୍ବାହ କରେ \|
+`omniroute launch` ଆପଣଙ୍କ ପାଇଁ ଏସବୁ ସେଟ୍ କରେ: ଏହା ସକ୍ରିୟ contextରୁ base URL + token ନିର୍ଦ୍ଧାରଣ କରେ (ତେଣୁ `omniroute connect <vps>` ପରେ `omniroute launch` ସିଧାସଳଖ କାମ କରେ), serverର health-check କରେ, ଏବଂ `claude`କୁ exec କରେ।
 
 ---
 

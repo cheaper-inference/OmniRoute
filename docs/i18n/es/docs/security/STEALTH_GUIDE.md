@@ -238,9 +238,9 @@ Todos los endpoints MITM requieren autenticación de administración (`requireCl
 
 ---
 
-## El agente de usuario anula las vars env — (sección 12 `.env.example` )
+## Sobrescrituras de User-Agent — variables de entorno (sección 12 de `.env.example`)
 
-| Variable            | Por defecto                                   |
+| Variable            | Valor predeterminado                          |
 | ------------------- | --------------------------------------------- |
 | `CLAUDE_USER_AGENT` | `claude-cli/2.1.280 (external, cli)`          |
 | `CODEX_USER_AGENT`  | `codex-cli/0.155.0 (Windows 10.0.26200; x64)` |
@@ -249,7 +249,7 @@ Todos los endpoints MITM requieren autenticación de administración (`requireCl
 | `QODER_USER_AGENT`  | `Qoder-Cli`                                   |
 | `CURSOR_USER_AGENT` | `Cursor/3.4`                                  |
 
-Consumido por `open-sse/executors/base.ts::buildHeaders()` mediante búsqueda dinámica.** Elimínelos cuando los proveedores lancen nuevas versiones CLI** Las cadenas — obsoletas UA comienzan a ser rechazadas como clientes obsoletos.
+Utilizadas por `open-sse/executors/base.ts::buildHeaders()` mediante una búsqueda dinámica. **Actualice estos valores cuando los proveedores publiquen nuevas versiones de la CLI** — las cadenas de UA obsoletas comienzan a rechazarse por corresponder a clientes desactualizados.
 
 ## Interruptores del modo de compatibilidad con CLI (`.env.example`, sección 13)
 

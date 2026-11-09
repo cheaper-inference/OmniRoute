@@ -25,27 +25,30 @@ omniroute launch --profile glm52  # Claude Code ikitumia glm/glm-5.2 kupitia Omn
 
 ---
 
-## Jinsi Msimbo Claude unavyounganishwa na lango
+## Jinsi Claude Code inavyounganishwa na lango
 
-Claude Kanuni inazungumza**Anthropic Ujumbe API** na imeelekezwa kwa mwisho maalum na anuwai za mazingira (haina bendera `--base-url` ):
+Claude Code huwasiliana na **Anthropic Messages API** na huelekezwa kwenye endpoint maalumu
+kupitia vigezo vya mazingira (haina chaguo la `--base-url`):
 
-| Inaweza kubadilika                           | Kusudi                                                                                           |
-| -------------------------------------------- | ------------------------------------------------------------------------------------------------ |
-| `ANTHROPIC_BASE_URL`                         | Mzizi wa lango URL ( Msimbo wa Claude unaongeza `/v1/messages`).** Hakuna kiambishi `/v1`.**     |
-| `ANTHROPIC_AUTH_TOKEN`                       | Imetumwa kama `Authorization: Bearer …` — tumia tokeni yako ya ufikiaji OmniRoute / API kitufe   |
-| `ANTHROPIC_API_KEY`                          | Mbadala: imetumwa kama `x-api-key`. Ikiwa zote mbili zimewekwa, `ANTHROPIC_AUTH_TOKEN` itashinda |
-| `ANTHROPIC_MODEL`                            | Lazimisha muundo maalum (hubatilisha chaguo-msingi la kichagua `/model` )                        |
-| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → kiteuzi asili `/model` huorodhesha mifano `claude*`/`anthropic*` kutoka `/v1/models`       |
-| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | Tokeni kubwa kwa kila jibu (kwa mfano `65536`)                                                   |
-| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | Kiwango cha juu cha ishara kwa ugandamizaji kiotomatiki                                          |
+| Kigezo                                       | Madhumuni                                                                                            |
+| -------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `ANTHROPIC_BASE_URL`                         | URL ya msingi ya lango (Claude Code huongeza `/v1/messages`). **Bila kiambishi `/v1`.**              |
+| `ANTHROPIC_AUTH_TOKEN`                       | Hutumwa kama `Authorization: Bearer …` — tumia tokeni yako ya ufikiaji / ufunguo wa API wa OmniRoute |
+| `ANTHROPIC_API_KEY`                          | Mbadala: hutumwa kama `x-api-key`. Vyote viwekwa, `ANTHROPIC_AUTH_TOKEN` hutangulia                  |
+| `ANTHROPIC_MODEL`                            | Lazimisha modeli maalumu (hubatilisha chaguo-msingi la kiteuzi cha `/model`)                         |
+| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → kiteuzi asilia cha `/model` huorodhesha modeli za `claude*`/`anthropic*` kutoka `/v1/models`   |
+| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | Weka kikomo cha tokeni za matokeo kwa kila jibu (k.m. `65536`)                                       |
+| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | Kizingiti cha tokeni kwa ajili ya ubanaji wa kiotomatiki                                             |
 
-> Vyombo vya env vinasomwa** mara moja katika kuanza** — anza tena Msimbo wa Claude baada ya kuzibadilisha.
+> Vigezo vya mazingira husomwa **mara moja wakati wa kuanza** — anzisha upya Claude Code baada ya kuvibadilisha.
 
-Kwa kitambulisho kinachozunguka badala ya mfuatano thabiti, weka `apiKeyHelper` katika `~/.claude/settings.json` hadi amri inayochapisha kitambulisho cha sasa kwa stdout. Claude Code huhifadhi matokeo yake kwa dakika tano kwa chaguo-msingi (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` hubatilisha hiyo) na kutuma thamani katika zote `Authorization: Bearer` na `x-api-key`. Hati lazima ichapishe kitambulisho na hakuna kitu kingine chochote — bango kando yake kinachoshindwa msaidizi kwenye v2.1.227 +.
+Kwa kitambulisho kinachobadilishwa mara kwa mara badala ya mfuatano usiobadilika, weka `apiKeyHelper` katika `~/.claude/settings.json` kuwa amri inayoandika kitambulisho cha sasa kwenye stdout. Claude Code huhifadhi matokeo kwenye akiba kwa dakika tano kwa chaguo-msingi (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` hubadilisha muda huo) na kutuma thamani katika `Authorization: Bearer` na `x-api-key` zote mbili. Skripti lazima iandike kitambulisho pekee — ujumbe wa utangulizi unaoongezwa husababisha msaidizi kushindwa katika v2.1.227+.
 
-Hivi ndivyo Entra ID SSO inavyofanya kazi: `scripts/cli/omniroute-sso.mjs token` huchapisha tokeni ya ufikiaji ya Entra ya muda mfupi ambayo OmniRoute inathibitisha badala ya kitufe API. Angalia [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md).
+Hivi ndivyo Entra ID SSO inavyofanya kazi: `scripts/cli/omniroute-sso.mjs token` huandika tokeni ya ufikiaji ya Entra yenye muda mfupi, ambayo OmniRoute huthibitisha badala ya ufunguo wa API. Tazama [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md).
 
-`omniroute launch` inakuwekea haya yote: inasuluhisha ishara ya URL + msingi kutoka kwa muktadha amilifu (kwa hivyo `omniroute connect <vps>` kisha `omniroute launch` inafanya kazi tu), afya-hukagua seva, na kutekeleza `claude`.
+`omniroute launch` hukuwekea vyote hivi: hutatua URL ya msingi + tokeni
+kutoka kwenye muktadha unaotumika (kwa hivyo `omniroute connect <vps>` kisha `omniroute launch`
+hufanya kazi moja kwa moja), hukagua afya ya seva, na hutekeleza `claude`.
 
 ---
 

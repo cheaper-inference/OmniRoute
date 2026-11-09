@@ -20,7 +20,7 @@ När en IDE agent (t.ex. GitHub Copilot, Cursor, Claude Code) ringer ett API sam
 
 Det betyder att du kan:
 
-- **Omdirigera vilken agent som helst till vilken leverantör som helst** : Copilot pratar med OpenAI? Omdirigera den till Anthropic Claude, Gemini, eller någon av OmniRoute 380-leverantörer.
+- **Omdirigera vilken agent som helst till vilken leverantör som helst** : Copilot pratar med OpenAI? Omdirigera den till Anthropic Claude, Gemini, eller någon av OmniRoute 381-leverantörer.
 - **Tillämpa modellmappningar** : `gemini-3-flash` → `claude-sonnet-4.7` transparent på hanterarnivå.
 - **Observera all agenttrafik** : varje avlyssnad begäran publiceras till [Trafikinspektören](./TRAFFIC_INSPECTOR.md).
 - **Applicera OmniRoute resilience** : kombinerad routing, strömbrytare, fallbacks och kostnadsspårningsarbete för IDE agenttrafik också.
@@ -554,7 +554,7 @@ Trae är en relativt ny AI-kodningsassistent. Innan en hanterare implementeras:
 3. Fastställ autentiseringsmekanismen
 4. Bedöm om arbetet ska fortsätta eller avbrytas baserat på användarvillkoren och API:ets upptäckbarhet
 
-Tills undersökningen är slutförd visar Trae-kortet på instrumentpanelen märket "Undersöks" med länken "Rapportera genomförbarhet". Hanterarstubben i `src/mitm/handlers/trae.ts` genererar ett strukturerat `Ännu inte implementerat`-fel.
+Tills undersökningen är slutförd visar Trae-kortet på instrumentpanelen märket "Undersöks" med länken "Rapportera genomförbarhet". Hanterarstubben i `src/mitm/handlers/trae.ts` genererar ett strukturerat `Not yet implemented`-fel.
 
 ### Agenter i backloggen (MITM krävs — inget stöd för anpassad bas-URL)
 

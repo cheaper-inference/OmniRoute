@@ -4147,7 +4147,9 @@
     "duplicateAutoComboFailedPrefix": "Không thể sao chép tổ hợp tự động:",
     "duplicateAutoComboUnknownError": "Lỗi không xác định",
     "duplicateAutoComboTitle": "Tạo tổ hợp tĩnh từ {name}",
-    "fallbackSummary": "{rate}% yêu cầu đã dùng phương án dự phòng, mỗi lần bỏ qua ~{skips} mục tiêu"
+    "fallbackSummary": "{rate}% yêu cầu đã dùng phương án dự phòng, mỗi lần bỏ qua ~{skips} mục tiêu",
+    "reorderAll": "Sắp xếp lại tất cả",
+    "reorderAllDescription": "Sắp xếp lại tất cả các combo {count}. Tay cầm kéo được bật."
   },
   "costs": {
     "title": "Chi phí",
@@ -14538,6 +14540,10 @@
       "UNPRICED_USAGE_BUDGET_POLICY": {
         "label": "Chính sách ngân sách cho sử dụng chưa định giá",
         "description": "Cách giới hạn USD hàng ngày/hàng tuần theo mỗi khóa xử lý lượng sử dụng thành công khi nhà cung cấp/mô hình không có dòng giá. fail_closed (mặc định) đánh dấu cửa sổ là đã vượt, nên một chi phí không xác định sẽ không bao giờ vượt qua giới hạn cứng. count_as_zero tính lượng sử dụng đó là $0 và tiếp tục áp dụng chi tiêu đã định giá. Các mô hình chưa có giá vẫn được liệt kê trên trang chính của bảng điều khiển trong mọi trường hợp."
+      },
+      "COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE": {
+        "description": "Trong số liệu thống kê về bộ nhớ đệm nén, hãy tính yêu cầu đã nén tới nhà cung cấp bộ đệm ẩn tiền tố tự động (OpenAI, Codex, Azure hoặc kết nối tùy chỉnh khai báo bộ nhớ đệm nhanh chóng bằng cách loại bỏ điểm đánh dấu) là một lần truy cập bộ nhớ đệm ước tính ngay cả khi không có điểm đánh dấu cache_control. Ước tính này là tín hiệu đủ điều kiện cho bộ đệm, không phải là lần truy cập được quan sát, vì vậy tỷ lệ lần truy cập được báo cáo cho các nhà cung cấp đó có xu hướng đạt tới 100%. Tắt theo mặc định: chỉ yêu cầu mang dấu cache_control đến nhà cung cấp bộ đệm được tính là lần truy cập ước tính, do đó, nhà cung cấp tiền tố tự động tiếp tục báo cáo 0.",
+        "label": "Thống kê bộ nhớ đệm nén: Tính đủ điều kiện cho tiền tố tự động"
       }
     }
   },

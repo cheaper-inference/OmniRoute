@@ -869,15 +869,7 @@ ve `text` ile `highlights` dışındaki tüm `contents` anahtarları çağrıdan
 Kullanımdan kaldırılan `subpages`, `subpageTarget`, `highlights.numSentences` ve
 `highlights.highlightsPerUrl` artık iletilmez.
 
-Maliyet hesaplaması, Exa dışında düz `costPerQuery` kayıt defterini kullanır; Exa ise kendi
-fiyatlandırmasını izler: 10 sonucu kapsayacak şekilde `auto` (ve eski `fast`) için çağrı
-başına 0,007 ABD doları veya `lite` (ve eski `instant`) için 0,004 ABD doları; sonraki her
-sonuç için 0,001 ABD doları; `contents.summary` ayarlandığında döndürülen her sonuç için
-0,001 ABD doları. Tavily, `search_depth` değeri `basic`, `fast` ve `ultra-fast` için 1 kredi
-(0,008 ABD doları), `advanced` için 2 kredi (0,016 ABD doları) olarak kaydedilir
-([Tavily API kredileri](https://docs.tavily.com/documentation/api-credits)). Tavily'nin
-`auto_parameters: true` içeren bir çağrıyı advanced düzeyine yükseltmesi hâlinde de çağrı
-1 kredi olarak kaydedilir.
+Exa: 10 sonucu kapsayan `auto` (ve eski `fast`) için çağrı başına 0,007 ABD doları veya `lite` (ve eski `instant`) için 0,004 ABD doları; Sonraki her sonuç için 0,001 ABD doları; ve `contents.summary` ayarlandığında döndürülen sonuç başına 0,001 ABD doları. Tavily `search_depth` `basic`, `fast` ve `ultra-fast` için 1 kredi (0,008 ABD doları) ve `advanced` ( [Tavily API kredileri](https://docs.tavily.com/documentation/api-credits) ) için 2 kredi (0,016 ABD doları) olarak kaydedilmiştir. Tavily'nin gelişmiş seviyeye yükselttiği `auto_parameters: true` ile yapılan bir çağrı hâlâ 1 kredi olarak kaydediliyor.
 
 ---
 
@@ -1189,6 +1181,8 @@ X-OmniRoute-No-Cache: true
 
 ---
 
+<a id="cliproxyapi-management-compatibility"></a>
+
 ## CLIProxyAPI Yönetim Uyumluluğu
 
 OmniRoute, kullanım panolarının Claude ve Codex abonelik limitlerini okumak için çağırdığı üç [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI) yönetim uç noktasına yanıt verir (örneğin T3 Code'un `cliproxy` kullanım limiti kaynağı). İstemcinin temel URL'sini OmniRoute'a yönlendirin ve yönetim anahtarı olarak `manage` kapsamına sahip bir API anahtarı kullanın. Rotalar `/v0/management/*` ve `/api/v0/management/*` adreslerinde sunulur.
@@ -1199,9 +1193,11 @@ OmniRoute, kullanım panolarının Claude ve Codex abonelik limitlerini okumak i
 | POST   | `/v0/management/api-call`    | Gövde `{ auth_index, method, url, header?, data? }`. İzin verilen tek bir isteği hesabın belirteciyle gönderir ve `{ status_code, body }` döndürür |
 | POST   | `/v0/management/reset-quota` | Gövde `{ auth_index }`. Bir hesabın bağlantı bekleme süresini, model kilitlenmelerini ve Codex kapsam başına bekleme sürelerini temizler           |
 
-- `auth_index`, OmniRoute bağlantı kimliğidir. `provider`, `claude` veya `codex` değerlerinden biridir (yalnızca OAuth bağlantıları; `anthropic` API anahtarı sağlayıcısı listelenmez). Codex için `id_token.chatgpt_account_id`, depolanan çalışma alanı kimliğidir ve `plan_type`, depolanan plandır.
-- `api-call` genel amaçlı bir proxy değildir. Yalnızca Claude `GET https://api.anthropic.com/api/oauth/usage` ve Codex `GET https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits` ve `POST .../wham/rate-limit-reset-credits/consume` isteklerini kabul eder; bunların her biri yalnızca eşleşen sağlayıcıya ait bir hesap için geçerlidir. Diğer tüm istekler yukarı akışla iletişim kurmadan `403` döndürür. Çağıranın `Authorization` başlığı (`$TOKEN$` yer tutucusu dahil) yok sayılır: OmniRoute bağlantının erişim belirtecini ekler, süresi dolmak üzereyse önce yeniler ve yalnızca izin verilen başlıkları (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`; `Accept`, `Content-Type`) iletir. `Chatgpt-Account-Id` eksikse depolanan çalışma alanı kimliği varsayılan olarak kullanılır. İstekler 15 saniye sonra zaman aşımına uğrar ve bağlantının proxy'sini kullanır.
-- `reset-quota`, terminal durumları (banned, expired, credits_exhausted) olduğu gibi bırakır. Bilinmeyen bir `auth_index`, `404` döndürür.
+- `auth_index`, OmniRoute bağlantı kimliğidir. `provider`, `claude` veya `codex` olur (yalnızca OAuth bağlantıları; `anthropic` API anahtarı sağlayıcısı listelenmez). Codex için `id_token.chatgpt_account_id` saklanan çalışma alanı kimliği, `plan_type` ise saklanan plandır.
+- `api-call` genel amaçlı bir vekil değildir. Yalnızca Claude `GET
+https://api.anthropic.com/api/oauth/usage` ve Codex `GET
+https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits` ve `POST .../wham/rate-limit-reset-credits/consume` kabul edilir; her biri yalnızca eşleşen sağlayıcının bir hesabı için kullanılabilir. Diğer her şey üst hizmete bağlanmadan `403` döndürür. Çağıranın `Authorization` başlığı (`$TOKEN$` yer tutucusu dahil) yok sayılır: OmniRoute, süresi dolmak üzereyse önce yenileyerek bağlantının erişim tokenini ekler ve yalnızca izin verilen başlıkları iletir (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`; `Accept`, `Content-Type`). Eksik `Chatgpt-Account-Id`, saklanan çalışma alanı kimliğine varsayılır. İlk üst hizmet yanıtı `401` ise bir kez yeniler ve yalnızca erişim tokeni değiştiğinde yeniden dener. Her üst hizmet denemesi 15 saniye sonra zaman aşımına uğrar ve bağlantının vekilini kullanır.
+- `reset-quota`, son durumları (banned, expired, credits_exhausted) değiştirmez. Bilinmeyen bir `auth_index`, `404` döndürür.
 
 **Kimlik doğrulama:** Giriş devre dışı olsa bile pano oturumu veya `manage` kapsamına sahip bir API anahtarı gereklidir (yollar `ALWAYS_PROTECTED_API_PATHS` içinde yer alır). Yalnızca çıkarım için kullanılan anahtarlar `403` alır. Kaynak: `src/lib/cliproxyCompat/managementApi.ts`.
 
@@ -1920,17 +1916,17 @@ API anahtarı / oturum kapsamında kalıcı konuşma/olgusal bellek deposu.
 
 OmniRoute, 3 aktarım türüne (stdio, SSE, streamable-http) ve kapsamlandırılmış araçlara sahip gömülü bir Model Context Protocol sunucusuyla birlikte gelir. Aşağıdaki pano uç noktaları durum/denetim verilerini okur ve HTTP aktarımlarını vekil olarak yönlendirir.
 
-| Method | Path | Açıklama |
-| ------ | ---------------------- | ------------------------------------------------------------------------------------------------ | -------------------- |
-| GET | `/api/mcp/status` | Kalp atışı, aktarım, çevrimiçi durumu, son çağrı, en çok kullanılan araçlar, 24 saatlik başarı oranı |
-| GET | `/api/mcp/tools` | `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints` alanlarına sahip MCP araçlarının listesi |
-| GET | `/api/mcp/sse` | SSE aktarımı için açık SSE akışı (MCP devre dışıysa veya aktarım eşleşmiyorsa `503` döndürür) |
-| POST | `/api/mcp/sse` | SSE aktarımında JSON-RPC çerçevesi gönderir |
-| GET | `/api/mcp/stream` | Streamable HTTP aktarımının SSE tarafını açar (sunucu tarafından başlatılan iletiler) |
-| POST | `/api/mcp/stream` | Streamable HTTP aktarımında JSON-RPC çerçevesi gönderir |
-| DELETE | `/api/mcp/stream` | Bir Streamable HTTP oturumunu sonlandırır |
-| GET | `/api/mcp/audit` | Denetim günlüğünü sorgular — `?limit=`, `?offset=`, `?tool=`, `?success=true                                | false`, `?apiKeyId=` |
-| GET | `/api/mcp/audit/stats` | Toplu denetim istatistikleri (toplamlar, başarı oranı, ortalama süre, en çok kullanılan araçlar) |
+| Method | Path                   | Açıklama                                                                                                                            |
+| ------ | ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/mcp/status`      | Kalp atışı, aktarım, çevrimiçi durumu, son çağrı, en çok kullanılan araçlar, 24 saatlik başarı oranı                                |
+| GET    | `/api/mcp/tools`       | `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints` alanlarına sahip MCP araçlarının listesi                  |
+| GET    | `/api/mcp/sse`         | SSE aktarımı için açık SSE akışı (MCP devre dışıysa veya aktarım eşleşmiyorsa `503` döndürür)                                       |
+| POST   | `/api/mcp/sse`         | SSE aktarımında JSON-RPC çerçevesi gönderir                                                                                         |
+| GET    | `/api/mcp/stream`      | Streamable HTTP aktarımının SSE tarafını açar (sunucu tarafından başlatılan iletiler)                                               |
+| POST   | `/api/mcp/stream`      | Streamable HTTP aktarımında JSON-RPC çerçevesi gönderir                                                                             |
+| DELETE | `/api/mcp/stream`      | Bir Streamable HTTP oturumunu sonlandırır                                                                                           |
+| GET    | `/api/mcp/audit`       | Denetim günlüğünü sorgular — `?limit=`, `?offset=`, `?tool=`, `?success=true                                \| false`, `?apiKeyId=` |
+| GET    | `/api/mcp/audit/stats` | Toplu denetim istatistikleri (toplamlar, başarı oranı, ortalama süre, en çok kullanılan araçlar)                                    |
 
 **Kimlik doğrulama:** `sse`/`stream` aktarımları MCP'ye özgü kimlik doğrulama yüzeyini ( `mcp` kapsamına sahip Bearer API anahtarı) kullanır; `status`/`tools`/`audit*` rotaları panodan okunabilir (pano sunucusuna erişim dışında ek kimlik doğrulaması gerekmez).
 

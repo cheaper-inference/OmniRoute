@@ -8,79 +8,79 @@
 
 _Huling na-update: 2026-06-28_
 
-## Buod na Ehekutibo
+## Buod para sa mga Ehekutibo
 
-Ang OmniRoute ay isang lokal na AI routing gateway at dashboard na binuo sa Next.js.  
-Nagbibigay ito ng iisang endpoint na compatible sa OpenAI (`/v1/*`) at niruruta ang trapiko sa maraming upstream provider gamit ang translation, fallback, token refresh, at pagsubaybay sa paggamit.
+Ang OmniRoute ay isang lokal na AI routing gateway at dashboard na binuo gamit ang Next.js.
+Nagbibigay ito ng iisang endpoint na compatible sa OpenAI (`/v1/*`) at nagra-route ng trapiko sa maraming upstream provider gamit ang translation, fallback, token refresh, at pagsubaybay sa paggamit.
 
 Mga pangunahing kakayahan:
 
-- API surface na compatible sa OpenAI para sa CLI/tools (380 provider, 159 executor module)
-- Translation ng request/response sa iba’t ibang format ng provider
-- Fallback ng model combo (sequence ng maraming modelo)
+- API surface na compatible sa OpenAI para sa mga CLI/tool (380 provider, 159 executor module)
+- Translation ng request/response sa iba't ibang format ng provider
+- Model combo fallback (pagkakasunod-sunod ng maraming modelo)
 - Mga structured combo step (`provider + model + connection`) na may runtime ordering ayon sa `compositeTiers`
-- Fallback sa antas ng account (maraming account bawat provider)
+- Account-level fallback (maraming account sa bawat provider)
 - Quota preflight at quota-aware na pagpili ng P2C account sa pangunahing chat path
-- Pamamahala ng koneksyon ng OAuth + API-key provider (27 OAuth provider module)
+- Pamamahala ng koneksyon sa provider gamit ang OAuth + API key (27 OAuth provider module)
 - Pagbuo ng embedding sa pamamagitan ng `/v1/embeddings` (18 provider)
-- Pagbuo ng larawan sa pamamagitan ng `/v1/images/generations` (10+ provider, 20+ modelo)
-- Transkripsyon ng audio sa pamamagitan ng `/v1/audio/transcriptions` (18 provider)
-- Text-to-speech sa pamamagitan ng `/v1/audio/speech` (24 built-in provider)
+- Pagbuo ng image sa pamamagitan ng `/v1/images/generations` (10+ provider, 20+ modelo)
+- Audio transcription sa pamamagitan ng `/v1/audio/transcriptions` (18 provider)
+- Text-to-speech sa pamamagitan ng `/v1/audio/speech` (24 built-in na provider)
 - Pagbuo ng video sa pamamagitan ng `/v1/videos/generations` (ComfyUI + SD WebUI)
 - Pagbuo ng musika sa pamamagitan ng `/v1/music/generations` (ComfyUI)
 - Paghahanap sa web sa pamamagitan ng `/v1/search` (20 provider)
 - Mga moderation sa pamamagitan ng `/v1/moderations`
 - Reranking sa pamamagitan ng `/v1/rerank`
 - Pag-parse ng think tag (`<think>...</think>`) para sa mga reasoning model
-- Paglilinis ng response para sa mahigpit na compatibility sa OpenAI SDK
-- Normalisasyon ng role (developer→system, system→user) para sa cross-provider compatibility
+- Sanitization ng response para sa mahigpit na compatibility sa OpenAI SDK
+- Normalization ng role (developer→system, system→user) para sa cross-provider compatibility
 - Conversion ng structured output (json_schema → Gemini responseSchema)
-- Lokal na persistence para sa mga provider, key, alias, combo, setting, pricing (122 DB module)
+- Lokal na persistence para sa mga provider, key, alias, combo, setting, at pricing (122 DB module)
 - Pagsubaybay sa paggamit/gastos at pag-log ng request
 - Opsyonal na cloud sync para sa multi-device/state sync
-- IP allowlist/blocklist para sa access control ng API
+- IP allowlist/blocklist para sa kontrol ng access sa API
 - Pamamahala ng thinking budget (passthrough/auto/custom/adaptive)
-- Pandaigdigang injection ng system prompt
-- Pagsubaybay sa session at fingerprinting
-- Pinahusay na rate limiting bawat account na may mga profile na partikular sa provider
-- Pattern ng circuit breaker para sa katatagan ng provider
+- Pag-inject ng global system prompt
+- Pagsubaybay at fingerprinting ng session
+- Pinahusay na rate limiting sa bawat account gamit ang mga profile na partikular sa provider
+- Circuit breaker pattern para sa resilience ng provider
 - Proteksyon laban sa thundering herd gamit ang mutex locking
-- Signature-based na cache para sa deduplication ng request
-- Domain layer: mga panuntunan sa gastos, polisiya ng fallback, polisiya ng lockout
-- Context Relay: mga buod ng session handoff para sa pagpapatuloy sa pag-ikot ng account
-- Persistence ng domain state (SQLite write-through cache para sa mga fallback, budget, lockout, circuit breaker)
+- Cache para sa signature-based na pag-deduplicate ng request
+- Domain layer: mga panuntunan sa gastos, fallback policy, lockout policy
+- Context Relay: mga buod ng session handoff para sa continuity habang nagpapalit ng account
+- Persistence ng domain state (SQLite write-through cache para sa mga fallback, budget, lockout, at circuit breaker)
 - Policy engine para sa sentralisadong pagsusuri ng request (lockout → budget → fallback)
-- Telemetry ng request na may aggregation ng latency na p50/p95/p99
-- Telemetry ng combo target at historikal na kalusugan ng combo target sa pamamagitan ng `combo_execution_key` / `combo_step_id`
+- Request telemetry na may aggregation ng p50/p95/p99 latency
+- Combo target telemetry at dating kalagayan ng combo target sa pamamagitan ng `combo_execution_key` / `combo_step_id`
 - Correlation ID (X-Request-Id) para sa end-to-end tracing
-- Compliance audit logging na may opt-out bawat API key
+- Compliance audit logging na may opt-out sa bawat API key
 - Eval framework para sa quality assurance ng LLM
 - Health dashboard na may real-time na status ng circuit breaker ng provider
 - MCP Server (110 tool) na may 3 transport (stdio/SSE/Streamable HTTP)
 - A2A Server (JSON-RPC 2.0 + SSE) na may mga skill at lifecycle ng task
 - Memory system (extraction, injection, retrieval, summarization)
-- Skills system (registry, executor, sandbox, built-in skill)
-- MITM proxy na may pamamahala ng certificate at paghawak sa DNS
-- Middleware na panangga sa prompt injection
-- Pipeline ng prompt compression na may Caveman, RTK, stacked pipeline, compression combo, language pack, at analytics
-- ACP (Agent Communication Protocol) registry
-- Mga modular OAuth provider (22 indibidwal na module sa ilalim ng `src/lib/oauth/providers/`)
-- Mga script para sa pag-uninstall/full-uninstall
-- Aksyon para sa pag-aayos ng OAuth environment
-- WebSocket bridge para sa mga OpenAI-compatible WS client (`/v1/ws`)
-- Pamamahala ng sync token (issue/revoke, pag-download ng config bundle na may bersyong ETag)
-- GLM Thinking (`glmt`) na first-class provider preset
-- Hybrid na pagbibilang ng token (provider-side `/messages/count_tokens` na may fallback sa estimation)
-- Awtomatikong pag-seed ng model alias (30+ cross-proxy dialect normalization sa pagsisimula)
-- Ligtas na outbound fetch na may SSRF guard, pagharang sa pribadong URL, at nako-configure na retry
-- Mga chat retry na may kamalayan sa cooldown at nako-configure na `requestRetry` at `maxRetryIntervalSec`
-- Pagpapatunay ng runtime environment gamit ang Zod sa pagsisimula
-- Compliance audit v2 na may pagination, mga event ng CRUD ng provider, at pag-log ng validation na na-block ng SSRF
+- Skills system (registry, executor, sandbox, mga built-in na skill)
+- MITM proxy na may pamamahala ng certificate at DNS handling
+- Middleware na panangga laban sa prompt injection
+- Pipeline ng prompt compression na may Caveman, RTK, mga stacked pipeline, compression combo, language pack, at analytics
+- Registry ng ACP (Agent Communication Protocol)
+- Mga modular na OAuth provider (22 indibidwal na module sa ilalim ng `src/lib/oauth/providers/`)
+- Mga uninstall/full-uninstall script
+- Aksyon para sa pag-repair ng OAuth environment
+- WebSocket bridge para sa mga WS client na compatible sa OpenAI (`/v1/ws`)
+- Pamamahala ng sync token (issue/revoke, pag-download ng ETag-versioned config bundle)
+- GLM Thinking (`glmt`) bilang first-class na provider preset
+- Hybrid token counting (provider-side na `/messages/count_tokens` na may estimation fallback)
+- Awtomatikong pag-seed ng model alias (30+ normalization ng cross-proxy dialect sa startup)
+- Ligtas na outbound fetch na may SSRF guard, pag-block ng pribadong URL, at configurable na retry
+- Cooldown-aware na chat retry na may configurable na `requestRetry` at `maxRetryIntervalSec`
+- Validation ng runtime environment gamit ang Zod sa startup
+- Compliance audit v2 na may pagination, mga provider CRUD event, at pag-log ng validation na na-block ng SSRF
 
 Pangunahing runtime model:
 
-- Ipinapatupad ng mga app route ng Next.js sa ilalim ng `src/app/api/*` ang mga API para sa dashboard at mga compatibility API
-- Pinangangasiwaan ng isang shared SSE/routing core sa `src/sse/*` + `open-sse/*` ang execution ng provider, translation, streaming, fallback, at paggamit
+- Ipinapatupad ng mga Next.js app route sa ilalim ng `src/app/api/*` ang mga dashboard API at compatibility API
+- Isang shared SSE/routing core sa `src/sse/*` + `open-sse/*` ang nangangasiwa sa provider execution, translation, streaming, fallback, at paggamit
 
 ## Mga Reference Diagram
 
@@ -361,120 +361,166 @@ Masusing talakayan: `docs/frameworks/EMBEDDED-SERVICES.md`
 
 ### A. Auto Combo Engine
 
-Ang Auto Combo ay dynamic na nagmamarka at pumipili ng mga target sa pagruruta sa oras ng kahilingan, sa halip na umasa sa isang static na kahulugan ng combo. Pinapagana nito ang `auto/*` model prefix family.
+Dinamikong nagbibigay ng score at pumipili ang Auto Combo ng mga target sa pag-route sa oras ng kahilingan, sa halip na
+umasa sa isang static na depinisyon ng combo. Pinapagana nito ang pamilya ng prefix ng model na `auto/*`.
 
-- Pagpasok ng makina: `open-sse/services/autoCombo/` (`autoComboEngine.ts`, `scoringEngine.ts`, `virtualFactory.ts`, `modePacks.ts`)
-- Resolver: `src/domain/comboResolver.ts` (auto-detection ng `auto/` prefix)
+- Entry ng engine: `open-sse/services/autoCombo/` (`autoComboEngine.ts`,
+  `scoringEngine.ts`, `virtualFactory.ts`, `modePacks.ts`)
+- Resolver: `src/domain/comboResolver.ts` (awtomatikong pagtukoy sa prefix na `auto/`)
 - Dashboard: `/dashboard/auto-combo`
-- Telemetry: `auto_combo_decisions` SQLite table
+- Telemetry: SQLite table na `auto_combo_decisions`
 
 Mga pangunahing kakayahan:
 
-- **20 mga diskarte sa pagruruta** (priyoridad, weighted, fill-first, round-robin, P2C, random, hindi gaanong ginagamit, cost-optimized, reset-aware, reset-window, headroom, quota-weighted, strict-random,** sasakyan** , lkgp, context-optimized, cache-optimized, context-relay,** pagsasanib** , pipeline) — auto ay ang karagdagan ng headline sa v3.8.0; `fusion` (panel fan-out + judge synthesis, `open-sse/services/fusion.ts`) ay bago sa v3.8.36.
-- **16-factor na pagmamarka** : quota, kalusugan, inverse cost, inverse latency, task fit at sampu pa. Ang kanonikal na talahanayan ng mga salik at ang kanilang mga default na timbang ay nabubuhay sa [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) — na muling ipinahayag dito ay magbibigay ito ng pangalawang lugar upang maging lipas.
-- **Virtual na pabrika** nagpapatupad ng mga ephemeral combo kapag walang tumutugmang pinangalanang combo, na kumukuha ng mga kandidato mula sa malusog na aktibong koneksyon sa provider.
-- **Mga awtomatikong prefix** : `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`, `auto/smart`, `auto/lkgp` — bawat isa na sinusuportahan ng nakatutok na profile ng timbang.
-- **6 na mode pack** : `ship-fast`, `cost-saver`, `quality-first`, `offline-friendly`, `reliability-first` at `chaos-mode` — preset na mga configuration ng timbang na matatawag mula sa dashboard. (Hindi dapat malito sa mga `auto/*` prefix sa itaas, na mga variant ng oras ng kahilingan.)
+- **20 diskarte sa pag-route** (priority, weighted, fill-first, round-robin, P2C, random,
+  least-used, cost-optimized, reset-aware, reset-window, headroom, quota-weighted,
+  strict-random, **auto**, lkgp, context-optimized, cache-optimized, context-relay, **fusion**,
+  pipeline) —
+  auto ang pangunahing idinagdag sa v3.8.0; bago sa v3.8.36 ang `fusion` (panel fan-out + judge synthesis,
+  `open-sse/services/fusion.ts`).
+- **Pagbibigay ng score gamit ang 16 na salik**: quota, kalagayan, inverse cost, inverse latency, task fit, at
+  sampu pa. Ang opisyal na talahanayan ng mga salik at ng kanilang mga default na weight ay nasa
+  [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) — ang muling paglalahad nito rito ay
+  lilikha lamang ng pangalawang lugar kung saan maaari itong maluma.
+- **Virtual factory** na bumubuo ng mga pansamantalang combo kapag walang umiiral na katugmang pinangalanang combo,
+  gamit ang mga kandidato mula sa malulusog at aktibong koneksyon ng provider.
+- **Mga auto prefix**: `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`,
+  `auto/smart`, `auto/lkgp` — bawat isa ay sinusuportahan ng isang naka-tune na profile ng weight.
+- **6 na mode pack**: `ship-fast`, `cost-saver`, `quality-first`, `offline-friendly`,
+  `reliability-first`, at `chaos-mode` — mga preset na configuration ng weight na maaaring gamitin mula
+  sa dashboard. (Huwag itong ipagkamali sa mga prefix na `auto/*` sa itaas, na mga
+  variant sa oras ng kahilingan.)
 
-Para sa buong algorithmic na detalye (factor formula, weight tuning), tingnan [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md).
+Para sa buong detalye ng algorithm (mga formula ng salik, pag-tune ng weight), tingnan ang
+[`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md).
 
-### B. Mga Ahente ng Ulap
+### B. Cloud Agents
 
-Binabalot ng Cloud Agents ang mga platform ng code-agent na naka-host ng third-party (Codex Cloud, Devin, Jules) sa likod ng isang unipormeng DB-backed task lifecycle. Ang lahat ng gawaing creation/inspection endpoint ay nangangailangan ng pagpapatunay ng pamamahala.
+Inilalagay ng Cloud Agents ang mga third-party na naka-host na platform ng code agent (Codex Cloud, Devin,
+Jules) sa likod ng isang pare-parehong lifecycle ng task na sinusuportahan ng DB. Nangangailangan ng management authentication
+ang lahat ng endpoint para sa paggawa/pagsusuri ng task.
 
-- Root ng module: `src/lib/cloudAgent/` (`baseAgent.ts`, `registry.ts`, `api.ts`, `types.ts`, `db.ts`, kasama ang mga subdirectory ng bawat ahente sa ilalim `agents/`)
-- Mga pagpapatupad ng bawat ahente: `agents/codex/`, `agents/devin/`, `agents/jules/`
+- Root ng module: `src/lib/cloudAgent/` (`baseAgent.ts`, `registry.ts`, `api.ts`,
+  `types.ts`, `db.ts`, kasama ang mga subdirectory ng bawat agent sa ilalim ng `agents/`)
+- Mga implementation ng bawat agent: `agents/codex/`, `agents/devin/`, `agents/jules/`
 - Mga pampublikong endpoint: `/api/v1/agents/tasks/*` (list/create/get/cancel)
-- Mga endpoint ng pamamahala: `/api/cloud/*` (provisioning, status, batch)
+- Mga management endpoint: `/api/cloud/*` (provisioning, status, batch)
 - Dashboard: `/dashboard/cloud-agents`
-- Imbakan: `cloud_agent_tasks` table
+- Storage: table na `cloud_agent_tasks`
 
-Para sa provisioning ng bawat ahente at mga detalye OAuth, tingnan [`docs/frameworks/CLOUD_AGENT.md`](../frameworks/CLOUD_AGENT.md).
+Para sa mga detalye ng provisioning at OAuth ng bawat agent, tingnan ang
+[`docs/frameworks/CLOUD_AGENT.md`](../frameworks/CLOUD_AGENT.md).
 
 ### C. Guardrails
 
-Ang guardrails module ay isang hot-reloadable middleware layer na sumusuri sa mga kahilingan at tugon para sa PII, agarang pag-iniksyon, at hindi ligtas na nilalaman ng paningin. Ang mga paglabag ay nag-short-circuit sa kahilingan sa HTTP** 503** kasama ang isang structured na error code, na nagbibigay-daan sa mga downstream na tumatawag na muling subukan o sangay.
+Ang module na guardrails ay isang hot-reloadable na middleware layer na nagsusuri ng mga kahilingan
+at tugon para sa PII, prompt injection, at hindi ligtas na nilalamang biswal. Agad na
+winawakasan ng mga paglabag ang kahilingan gamit ang HTTP **503** at isang structured na error code, na nagbibigay-daan
+sa mga downstream caller na muling sumubok o pumili ng ibang sangay.
 
-- ugat ng module: `src/lib/guardrails/` (`base.ts`, `registry.ts`, `piiMasker.ts`, `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`)
-- Mainit na pag-reload: binabantayan ng registry ang mga pagbabago sa config at muling itinatayo ang chain sa lugar
-- Wire-in point: entry ng tagapangasiwa ng chat, tagapangasiwa ng pagbuo ng larawan, sanitizer ng pagtugon
-- kontrata HTTP : lumalabas ang mga paglabag bilang `503` na may `error.code = "GUARDRAIL_VIOLATION"`
+- Root ng module: `src/lib/guardrails/` (`base.ts`, `registry.ts`, `piiMasker.ts`,
+  `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`)
+- Hot reload: binabantayan ng registry ang mga pagbabago sa configuration at muling binubuo ang chain nang hindi ito pinapalitan
+- Mga punto ng pagkakabit: entry ng chat handler, image generation handler, response sanitizer
+- Kontrata ng HTTP: lumalabas ang mga paglabag bilang `503` na may `error.code = "GUARDRAIL_VIOLATION"`
 
-Para sa ruleset authoring at threshold tuning, tingnan [`docs/security/GUARDRAILS.md`](../security/GUARDRAILS.md).
+Para sa pagbuo ng ruleset at pag-tune ng threshold, tingnan ang
+[`docs/security/GUARDRAILS.md`](../security/GUARDRAILS.md).
 
-### D. Layer ng Domain
+### D. Domain Layer
 
-Ang `src/domain/` namespace ay nakasentro sa mga desisyon sa patakaran upang ang mga humahawak ng ruta ay hindi na kailangang mag-assemble ng lockout/budget/fallback logic sa kanilang sarili.
+Isinasentralisa ng namespace na `src/domain/` ang mga desisyon sa patakaran upang hindi na
+kailangang buuin mismo ng mga route handler ang logic para sa lockout/budget/fallback.
 
-- Policy engine: `src/domain/policyEngine.ts` — single entry point para sa pre-execution evaluation (lockout → budget → fallback ordering)
+- Policy engine: `src/domain/policyEngine.ts` — nag-iisang entry point para sa
+  pagsusuri bago ang execution (pagkakasunod-sunod na lockout → budget → fallback)
 - Mga panuntunan sa gastos: `src/domain/costRules.ts`
-- Patakaran sa pagbabalik: `src/domain/fallbackPolicy.ts`
-- Patakaran sa pag-lockout: `src/domain/lockoutPolicy.ts`
-- Nakabatay sa tag na pagruruta: `src/domain/tagRouter.ts`
-- Combo resolver: nire-resolve ng `src/domain/comboResolver.ts` — ang mga combo name, auto/\* prefix, at mga target ng wildcard na modelo sa mga konkretong plano sa pagpapatupad
-- Connection/model rule joiner: `src/domain/connectionModelRules.ts`
-- Mga snapshot ng availability ng modelo: `src/domain/modelAvailability.ts`
-- Pagsubaybay sa pag-expire ng provider: `src/domain/providerExpiration.ts`
-- Quota cache: `src/domain/quotaCache.ts`
-- Estado ng pagkasira: `src/domain/degradation.ts`
-- Pag-audit ng configuration: `src/domain/configAudit.ts`
-- tagabuo ng metadata ng tugon OmniRoute : `src/domain/omnirouteResponseMeta.ts`
-- Subsystem ng pagtatasa: `src/domain/assessment/` — periodic evaluation jobs
+- Patakaran sa fallback: `src/domain/fallbackPolicy.ts`
+- Patakaran sa lockout: `src/domain/lockoutPolicy.ts`
+- Pag-route batay sa tag: `src/domain/tagRouter.ts`
+- Combo resolver: `src/domain/comboResolver.ts` — nagre-resolve ng mga pangalan ng combo, mga prefix na auto/\*,
+  at mga wildcard na target ng model tungo sa mga kongkretong plano ng execution
+- Joiner ng panuntunan ng koneksyon/model: `src/domain/connectionModelRules.ts`
+- Mga snapshot ng availability ng model: `src/domain/modelAvailability.ts`
+- Pagsubaybay sa expiration ng provider: `src/domain/providerExpiration.ts`
+- Cache ng quota: `src/domain/quotaCache.ts`
+- Kalagayan ng degradation: `src/domain/degradation.ts`
+- Audit ng configuration: `src/domain/configAudit.ts`
+- Tagabuo ng metadata ng tugon ng OmniRoute: `src/domain/omnirouteResponseMeta.ts`
+- Subsystem ng assessment: `src/domain/assessment/` — mga pana-panahong evaluation job
 
-### E. Awtorisasyon Pipeline
+### E. Authorization Pipeline
 
-Inuuri ng pipeline ng pahintulot ang bawat papasok na kahilingan at inilalapat ang naaangkop na chain ng patakaran bago ipadala.
+Kinakategorya ng authorization pipeline ang bawat papasok na kahilingan at inilalapat ang
+naaangkop na policy chain bago ang dispatch.
 
-- Pagpasok ng pipeline: `src/server/authz/pipeline.ts`
-- Request classifier: itinatangi `src/server/authz/classify.ts` — ang mga pampublikong ruta ng compatibility mula sa mga ruta ng pamamahala
-- Imbentaryo ng pampublikong ruta: `src/shared/constants/publicApiRoutes.ts`
-- Mga Patakaran: `src/server/authz/policies/` — composable predicates (`requireApiKey`, `requireManagement`, `requireFreshAuth`, atbp.)
-- Mga kagamitan sa header: `src/server/authz/headers.ts`
-- Katulong sa paninindigan: `src/server/authz/assertAuth.ts`
+- Entry ng pipeline: `src/server/authz/pipeline.ts`
+- Request classifier: `src/server/authz/classify.ts` — tinutukoy ang pagkakaiba ng mga pampublikong
+  compatibility route at mga management route
+- Imbentaryo ng pampublikong route: `src/shared/constants/publicApiRoutes.ts`
+- Mga patakaran: `src/server/authz/policies/` — mga composable na predicate
+  (`requireApiKey`, `requireManagement`, `requireFreshAuth`, atbp.)
+- Mga utility ng header: `src/server/authz/headers.ts`
+- Assertion helper: `src/server/authz/assertAuth.ts`
 - Konteksto ng kahilingan: `src/server/authz/context.ts`
 
-Ang mga pampublikong ruta laban sa pamamahala ay isang mahirap na hangganan: agent/cooldown APIs at provider mutations ay nangangailangan ng pamamahala ng auth (HTTP 401 kung nawawala).
+Mahigpit ang hangganan sa pagitan ng mga pampubliko at management route: ang mga API ng agent/cooldown at
+mga pagbabago sa provider ay nangangailangan ng management auth (HTTP 401 kung wala ito).
 
-Para sa buong mga panuntunan sa pag-uuri ng ruta, tingnan [`docs/architecture/AUTHZ_GUIDE.md`](./AUTHZ_GUIDE.md).
+Para sa kumpletong mga panuntunan sa pagkakategorya ng route, tingnan ang
+[`docs/architecture/AUTHZ_GUIDE.md`](./AUTHZ_GUIDE.md).
 
 ### F. Workflow FSM at Task-Aware Router
 
-Isang finite-state-machine driven na router na naka-layer sa itaas ng combo selection para idirekta ang trapiko batay sa natukoy na yugto ng daloy ng trabaho (pagpaplano, pagpapatupad, pagsusuri) at background-task affinity.
+Isang router na pinapagana ng finite-state machine at nakapatong sa combo selection upang idirekta
+ang traffic batay sa natukoy na yugto ng workflow (pagpaplano, execution,
+review) at affinity sa background task.
 
-- Daloy ng trabaho FSM: `open-sse/services/workflowFSM.ts`
-- Router na alam ang gawain: `open-sse/services/taskAwareRouter.ts`
-- Detektor ng gawain sa background: `open-sse/services/backgroundTaskDetector.ts`
-- Intent classifier: `open-sse/services/intentClassifier.ts`
+- Workflow FSM: `open-sse/services/workflowFSM.ts`
+- Router na may kamalayan sa gawain: `open-sse/services/taskAwareRouter.ts`
+- Detector ng gawain sa background: `open-sse/services/backgroundTaskDetector.ts`
+- Classifier ng layunin: `open-sse/services/intentClassifier.ts`
 
-Ang mga FSM transition ay dumaan sa pagmamarka ng Auto Combo, na kumikiling sa mas murang mga modelo para sa mga gawaing background/automation at patungo sa mas malalakas na modelo para sa mga interactive planning/review turn.
+Ang mga transition ng FSM ay nagsisilbing input sa scoring ng Auto Combo, na kumikiling sa mas murang mga modelo
+para sa mga gawain sa background/automation at sa mas mahuhusay na mga modelo para sa mga interactive
+na yugto ng pagpaplano/pagsusuri.
 
-### G. Katatagan na Partikular sa Provider
+### G. Katatagang Partikular sa Provider
 
-Nagpapadala ang ilang provider ng dedikadong resilience at stealth module na nagpiggy-back sa global circuit breaker / connection cooldown / model lockout layers:
+May ilang provider na naghahatid ng mga nakalaang module para sa katatagan at stealth na umaasa sa
+mga pandaigdigang layer ng circuit breaker / cooldown ng koneksyon / lockout ng modelo:
 
-- Antigravity 429 engine: `open-sse/services/antigravity429Engine.ts` (iniikot ang pagkakakilanlan, nag-i-scrub ng mga header ng tugon, nag-drive ng credits/version tracking sa pamamagitan ng `antigravityCredits.ts`, `antigravityHeaderScrub.ts`, `antigravityHeaders.ts`, `antigravityIdentity.ts`, `antigravityVersion.ts`)
+- Antigravity 429 engine: `open-sse/services/antigravity429Engine.ts` (nagpapalit
+  ng identity, naglilinis ng mga response header, namamahala sa pagsubaybay ng credits/bersyon sa pamamagitan ng
+  `antigravityCredits.ts`, `antigravityHeaderScrub.ts`, `antigravityHeaders.ts`,
+  `antigravityIdentity.ts`, `antigravityVersion.ts`)
 - Antigravity 429 guard: `open-sse/services/antigravity429Guard.ts` (bawat-request na budget ng upstream 429s sa lahat ng host, `ANTIGRAVITY_MAX_429_ATTEMPTS`; isang kaparehong re-send ng isang tinanggihang katawan ay sinasagot nang lokal; hindi nire-restart `src/sse/handlers/chat.ts` ang naturang kahilingan sa pamamagitan ng cooldown-aware retry)
-- patakaran sa quota ModelScope : `open-sse/services/modelscopePolicy.ts`
-- Claude Code CCH (Compatibility Channel Handshake): `open-sse/services/claudeCodeCCH.ts`, plus `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`, `claudeCodeToolRemapper.ts`
-- Claude Code paghubog ng fingerprint: `open-sse/services/claudeCodeFingerprint.ts`
-- Claude Code obfuscation: `open-sse/services/claudeCodeObfuscation.ts`
+- Patakaran sa quota ng ModelScope: `open-sse/services/modelscopePolicy.ts`
+- Claude Code CCH (Compatibility Channel Handshake): `open-sse/services/claudeCodeCCH.ts`,
+  kasama ang `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`,
+  `claudeCodeToolRemapper.ts`
+- Paghubog ng fingerprint ng Claude Code: `open-sse/services/claudeCodeFingerprint.ts`
+- Obfuscation ng Claude Code: `open-sse/services/claudeCodeObfuscation.ts`
 
-Para sa buong stealth playbook at gabay sa pagpapatakbo, tingnan `docs/security/STEALTH_GUIDE.md` (git; hindi pinagsama sa `/docs`).
+Para sa kumpletong gabay sa stealth at mga tagubiling pang-operasyon, tingnan ang
+`docs/security/STEALTH_GUIDE.md` (git; hindi kino-compile sa `/docs`).
 
-### H. Webhooks, Reasoning Cache, Read Cache
+### H. Mga Webhook, Reasoning Cache, Read Cache
 
-- **Mga Webhook** — outbound dispatch para sa provider/account/task event.
+- **Mga Webhook** — outbound dispatch para sa mga event ng provider/account/gawain.
   - Dispatcher: `src/lib/webhookDispatcher.ts`
-  - Imbakan: `webhooks` SQLite table (sa pamamagitan ng `src/lib/db/webhooks.ts`)
-  - Dashboard: `/dashboard/webhooks` (mga subscription, sikreto, muling pagsubok sa kasaysayan)
-  - Para sa taxonomy ng kaganapan at muling subukan ang semantics, tingnan [`docs/frameworks/WEBHOOKS.md`](../frameworks/WEBHOOKS.md).
-- **Pangangatwiran Cache** — replayable reasoning blocks para sa mga provider na naglalabas ng mga token ng pag-iisip (Claude, GLMT, atbp.) kaya maaaring laktawan ng magkakasunod na pagliko ang muling pag-iisip.
+  - Imbakan: `webhooks` na SQLite table (sa pamamagitan ng `src/lib/db/webhooks.ts`)
+  - Dashboard: `/dashboard/webhooks` (mga subscription, secret, kasaysayan ng retry)
+  - Para sa taxonomy ng event at semantics ng retry, tingnan ang [`docs/frameworks/WEBHOOKS.md`](../frameworks/WEBHOOKS.md).
+- **Reasoning Cache** — mga reasoning block na maaaring i-replay para sa mga provider na naglalabas ng
+  mga thinking token (Claude, GLMT, atbp.) upang maaaring laktawan ng magkakasunod na turn ang muling pag-iisip.
   - DB layer: `src/lib/db/reasoningCache.ts`
-  - Layer ng serbisyo: `open-sse/services/reasoningCache.ts`
-  - Para sa replay semantics, tingnan [`docs/routing/REASONING_REPLAY.md`](../routing/REASONING_REPLAY.md).
-- **Basahin ang Cache** — panandaliang tugon cache na na-key sa pamamagitan ng lagda at ginamit upang i-collapse ang magkaparehong mga muling pagsubok mula sa sirang upstream SDKs.
+  - Service layer: `open-sse/services/reasoningCache.ts`
+  - Para sa semantics ng replay, tingnan ang [`docs/routing/REASONING_REPLAY.md`](../routing/REASONING_REPLAY.md).
+- **Read Cache** — panandaliang response cache na naka-key ayon sa signature at ginagamit upang
+  pagsamahin ang magkakatulad na retry mula sa mga sirang upstream SDK.
   - DB layer: `src/lib/db/readCache.ts`
-  - Endpoint ng istatistika: `GET /api/cache/stats`, dashboard at `/dashboard/cache`
+  - Stats endpoint: `GET /api/cache/stats`, dashboard sa `/dashboard/cache`
 
 ## 3) Layer ng Persistence
 
@@ -1057,11 +1103,11 @@ compatibility sa mga legacy na sistema. Ginagamit ng kasalukuyang runtime contra
 - Mga migration ng SQLite schema at mga hook para sa awtomatikong pag-upgrade sa startup
 - Compatibility path para sa migration mula sa legacy JSON → SQLite
 
-## 6) SSRF / Guard ng Outbound URL
+## 6) SSRF / Proteksiyon sa Outbound URL
 
-- Hinaharang ng `src/shared/network/outboundUrlGuard.ts` ang lahat ng pribado/loopback/link-local na target URL bago makarating ang mga ito sa mga provider executor
-- Gumagamit ang mga route para sa pagtuklas at validation ng provider model ng `src/shared/network/safeOutboundFetch.ts`, na inilalapat ang guard bago ang bawat outbound na kahilingan
-- Lumalabas ang mga error ng guard bilang `URL_GUARD_BLOCKED` na may HTTP 422 at nilo-log sa compliance audit trail sa pamamagitan ng `providerAudit.ts`
+- Inilalapat ng `BaseExecutor.assertOutboundUrlAllowed` (`open-sse/executors/base.ts`) ang `src/shared/network/outboundUrlGuard.ts` sa mga kahilingan sa chat na ipinadadala sa pamamagitan ng `BaseExecutor.execute()`. Sa public-only mode (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false` habang naka-off ang private flag), bina-block nito ang mga private at loopback host at ang 169.254.0.0/16; sa lahat ng iba pang mode, bina-block nito ang mga cloud-metadata host. Sinusuri nito ang hostname o literal na IP ayon sa pagkakasulat, bago ang anumang DNS lookup. Nilalaktawan ito ng mga built-in na local provider.
+- Ginagamit ng mga ruta para sa pagtuklas at pagpapatunay ng provider model ang `src/shared/network/safeOutboundFetch.ts`, na inilalapat ang proteksiyon bago ang bawat outbound request
+- Lumalabas ang mga error ng proteksiyon bilang `URL_GUARD_BLOCKED` na may HTTP 503 (`getSafeOutboundFetchErrorStatus`; nagbabalik ng 400 ang ruta para sa pagtuklas ng model), at ang mga tunay na pag-block sa SSRF habang nagpapatunay ay itinatala sa audit trail bilang mga event na `provider.validation.ssrf_blocked`
 
 ## Observability at Mga Signal sa Operasyon
 
@@ -1112,7 +1158,7 @@ Mga environment variable na aktibong ginagamit ng code:
 4. Nakasalalay ang gawi ng cloud sa tamang `NEXT_PUBLIC_BASE_URL` at pagiging naaabot ng cloud endpoint.
 5. Pino-publish ang direktoryong `open-sse/` bilang **npm workspace package** na `@omniroute/open-sse`. Ini-import ito ng source code sa pamamagitan ng `@omniroute/open-sse/...` (nire-resolve ng Next.js `transpilePackages`). Ginagamit pa rin ng mga file path sa dokumentong ito ang pangalan ng direktoryong `open-sse/` para sa pagkakapare-pareho.
 6. Gumagamit ang mga chart sa dashboard ng **Recharts** (batay sa SVG) para sa naa-access at interaktibong mga visualization ng analytics (mga bar chart ng paggamit ng modelo, mga talahanayan ng breakdown ng provider na may mga success rate).
-7. Gumagamit ang mga E2E test ng **Playwright** (`tests/e2e/`), na pinapatakbo sa pamamagitan ng `npm run test:e2e`. Gumagamit ang mga unit test ng **Node.js test runner** (`tests/unit/`), na pinapatakbo sa pamamagitan ng `npm run test:unit`. Ang source code sa ilalim ng `src/` ay **TypeScript** (`.ts`/`.tsx`); nananatiling JavaScript (`.js`) ang workspace na `open-sse/`.
+7. Gumagamit ang mga E2E test ng **Playwright** (`tests/e2e/`), na pinapatakbo sa pamamagitan ng `npm run test:e2e`. Gumagamit ang mga unit test ng **Node.js test runner** (`tests/unit/`), na pinapatakbo sa pamamagitan ng `npm run test:unit`. Ang source code sa ilalim ng `src/` ay **TypeScript** (`.ts`/`.tsx`); nananatiling TypeScript (`.ts`) ang workspace na `open-sse/`.
 8. Nakaayos ang pahina ng mga setting sa 7 tab: General, Appearance, AI, Security, Routing, Resilience, Advanced. Kino-configure lamang ng pahinang Resilience ang request queue, connection cooldown, provider breaker, at gawi ng wait-for-cooldown; ipinapakita sa pahinang Health ang live na runtime state ng breaker.
 9. Nahahati sa dalawang layer ang estratehiyang **Context Relay** (`context-relay`): nagpapasya ang `combo.ts` kung dapat bumuo ng handoff, at ini-inject ng `chat.ts` ang handoff pagkatapos ng paglutas ng account. Nasa SQLite table na `context_handoffs` ang data ng handoff. Sinadya ang paghahating ito dahil ang `chat.ts` lamang ang nakaaalam kung nagbago ang aktuwal na account.
 10. Komprehensibo na ngayon ang **pagpapatupad ng proxy**: nire-resolve ng `tokenHealthCheck.ts` ang proxy para sa bawat koneksyon, ginagamit ng `/api/providers/validate` ang `runWithProxyContext`, at ginagamit ng `proxyFetch.ts` ang `undici.fetch()` upang mapanatili ang compatibility ng dispatcher sa Node 22.

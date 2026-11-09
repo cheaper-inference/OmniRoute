@@ -4,47 +4,73 @@
 
 ---
 
-> Izvēlēties, izslēgts pēc noklusējuma (abas `modelVisibilityAllowlist`/`modelVisibilityDenylist` tukšas atstāj `/v1/models` katalogu AND katrs `auto/*` kandidātu pūla baits ir identisks). `hidePaidModels`/`hideAutoCombos` (`src/lib/db/settings.ts`) brālis operatoriem, kuri vēlas izveidot modeļu sarakstu tādu iemeslu dēļ, kuriem nav nekā kopīga ar izmaksām.
+> Izvēles funkcionalitāte, pēc noklusējuma izslēgta (ja `modelVisibilityAllowlist`/`modelVisibilityDenylist` abi ir tukši,
+> `/v1/models` katalogs UN katrs `auto/*` kandidātu kopums paliek identisks baitu līmenī). Līdzvērtīgs
+> `hidePaidModels`/`hideAutoCombos` iestatījumiem (`src/lib/db/settings.ts`) operatoriem, kuri vēlas atlasītu
+> modeļu sarakstu ar izmaksām nesaistītu iemeslu dēļ.
 
 ## Kāpēc tas pastāv
 
-`hidePaidModels` atbild "vai šis modelis ir bezmaksas?" un `hideAutoCombos` atbild "vai `auto/*` virtual ids vispār ir jāreklamē?" — arī neļauj operatoram atlasīt patvaļīgu modeļu apakškopu (piemēram, precīzi uzrādot modeļus, kas jāredz konkrētajam Claude Code / OpenCode klientam neatkarīgi no cenas). #11481 piebilst, ka kā divi neatkarīgi, izvēles virknes masīva iestatījumi.
+`hidePaidModels` atbild uz jautājumu „vai šis modelis ir bezmaksas?”, bet `hideAutoCombos` — „vai `auto/*`
+virtuālie identifikatori vispār ir jāuzrāda?” — neviens no tiem neļauj operatoram atlasīt patvaļīgu
+modeļu apakškopu (piem., parādīt tieši tos modeļus, kuri būtu jāredz konkrētam Claude Code / OpenCode klientam,
+neatkarīgi no cenu noteikšanas). #11481 to pievieno kā divus neatkarīgus, izvēles virkņu masīvu iestatījumus.
 
 ## Iestatījumi
 
-| Atslēga                    | Tips       | Noklusējums | Nozīme                                                                   |
-| -------------------------- | ---------- | ----------- | ------------------------------------------------------------------------ |
-| `modelVisibilityDenylist`  | `string[]` | `[]`        | Ieraksti, kas atbilst kandidātam, to paslēpj no catalog/candidate kopas. |
-| `modelVisibilityAllowlist` | `string[]` | `[]`        | Ja tas nav tukšs, ONLY ieraksti, kas atbilst kandidātam, paliek atklāti. |
+| Atslēga                    | Tips       | Noklusējums | Nozīme                                                               |
+| -------------------------- | ---------- | ----------- | -------------------------------------------------------------------- |
+| `modelVisibilityDenylist`  | `string[]` | `[]`        | Kandidātam atbilstoši ieraksti to paslēpj katalogā/kandidātu kopumā. |
+| `modelVisibilityAllowlist` | `string[]` | `[]`        | Ja nav tukšs, redzami paliek TIKAI ierakstiem atbilstošie kandidāti. |
 
-Abi var pieņemt līdz 500 ierakstiem, katrā līdz 200 rakstzīmēm (Zod-validated in `src/shared/validation/settingsSchemas.ts`). Ieraksts ir vai nu:
+Abos var būt līdz 500 ierakstiem, katrs līdz 200 rakstzīmēm (Zod validācija failā
+`src/shared/validation/settingsSchemas.ts`). Ieraksts ir vai nu:
 
-- precīzs kataloga ID — `"gpt-4o"` (bez modeļa ID) vai `"openai/gpt-4o"` (ar nodrošinātāja prefiksu) vai
-- glob modelis, izmantojot `*`/`?` — piemēram, `"openai/gpt-4*"` vai `"anthropic/*"` — kas atrisināts, izmantojot to pašu koplietojamo `globToRegex()` saskaņotāju (`src/shared/utils/globPattern.ts`), ko jau izmanto `ModelRoutingSection` katra modeļa kombinētās kartēšanas un `freeModels.ts::matchesOnlyPaidModels`.
+- precīzs kataloga identifikators — `"gpt-4o"` (modeļa identifikators bez prefiksa) vai `"openai/gpt-4o"` (ar pakalpojumu sniedzēja prefiksu), vai
+- glob paraugs, izmantojot `*`/`?` — piem., `"openai/gpt-4*"` vai `"anthropic/*"` — tas tiek apstrādāts ar
+  to pašu kopīgoto `globToRegex()` atbilstības noteicēju (`src/shared/utils/globPattern.ts`), kuru jau izmanto
+  `ModelRoutingSection` modeļu kombināciju kartējumi un `freeModels.ts::matchesOnlyPaidModels`.
 
-Prioritāte: vispirms tiek pārbaudīts aizlieguma saraksts (liegtais ieraksts vienmēr ir paslēpts, pat ja tas atbilst arī atļaušanas sarakstam); ja atļaušanas saraksts nav tukšs, saglabājas tikai tie ieraksti, kuriem tas atbilst.
+Prioritāte: vispirms tiek pārbaudīts liegumu saraksts (liegts ieraksts vienmēr ir paslēpts, pat ja tas
+atbilst arī atļauju sarakstam); ja atļauju saraksts nav tukšs, paliek tikai tam atbilstošie ieraksti.
 
-## Divi čokpunkti, nevis viens
+## Divi kontroles punkti, nevis viens
 
-Mācība no #6512 ( `hidePaidModels` -only kataloga filtrs joprojām ļauj `auto/*` novirzīt uz apmaksātu modeli, jo kombinētais kandidātu kopums tika izveidots neatkarīgi) šeit attiecas identiski. Atbilstošais predikāts `isModelExposureAllowed()` (`src/shared/utils/modelExposureList.ts`) tiek izsaukts no BOTH:
+No #6512 gūtā mācība (kataloga filtrs tikai ar `hidePaidModels` joprojām ļāva `auto/*` maršrutēt uz
+maksas modeli, jo kombinācijas kandidātu kopums tika izveidots neatkarīgi) ir identiski attiecināma arī šeit.
+Atbilstības predikāts `isModelExposureAllowed()` (`src/shared/utils/modelExposureList.ts`) tiek
+izsaukts ABĀS vietās:
 
-- `src/app/api/v1/models/catalog.ts` — pats `/v1/models` ieraksts, pie tiem pašiem 5 katra avota aizsprostošanās punktiem `shouldHidePaid()` jau ir vārti (statiskās `PROVIDER_MODELS`, sinhronizētās nodrošinātāja rindas, pielāgotās rindas, aizstājvārda atbalstītās rindas, pārvaldītās atkāpšanās rindas).
-- `open-sse/services/autoCombo/modelExposureFilter.ts::filterModelExposureCandidates()` — izsauca no `virtualFactory.ts::buildPreparedPool` tūlīt pēc līdzvērtīgā `filterPaidOnlyCandidates()` izsaukuma, tāpēc arī liegto modeli nekad nevar atlasīt `auto/*` kandidātu pūlā.
+- `src/app/api/v1/models/catalog.ts` — pašā `/v1/models` sarakstā, tajos pašos piecos katra avota
+  kontroles punktos, kurus jau kontrolē `shouldHidePaid()` (statiskie `PROVIDER_MODELS`, sinhronizētās pakalpojumu sniedzēju rindas,
+  pielāgotās rindas, uz aizstājvārdiem balstītās rindas, pārvaldītās atkāpšanās rindas).
+- `open-sse/services/autoCombo/modelExposureFilter.ts::filterModelExposureCandidates()` — tiek izsaukts
+  no `virtualFactory.ts::buildPreparedPool` uzreiz pēc līdzvērtīgā
+  `filterPaidOnlyCandidates()` izsaukuma, tādēļ liegtu modeli nekad nevar atlasīt arī `auto/*`
+  kandidātu kopumā.
 
-## Kas ir NOT filtrēts
+## Kas NETIEK filtrēts
 
-Atspoguļo `hideAutoCombos` esošo uzvedību: ir nosūtīts modeļa ID** nepārprotami** (nevis caur `auto/*` un netiek atklāts kataloga sarakstā) nekad netiek bloķēts nosūtīšanas laikā — tiek filtrēta tikai dalība advertisement/candidate-pool. Tas nav atkarīgs no `hidePaidModels`; operators var vēlēties atlasītu kopu tādu iemeslu dēļ, kuriem nav nekāda sakara ar izmaksām, tāpēc abi iestatījumi tiek veidoti kā neatkarīgi UN-ed filtri, tāpat kā esošais vairāku karodziņu sastāvs `catalog.ts`.
+Atbilst `hideAutoCombos` esošajai darbībai: **tieši** nosūtīts modeļa identifikators (nevis ar `auto/*`
+starpniecību un nevis atrasts kataloga sarakstā) nekad netiek bloķēts nosūtīšanas laikā — tiek filtrēta tikai
+uzrādīšana/piederība kandidātu kopumam. Tas nav atkarīgs no `hidePaidModels`;
+operators var vēlēties atlasītu kopu ar izmaksām nesaistītu iemeslu dēļ, tādēļ abi
+iestatījumi darbojas kā neatkarīgi ar loģisko UN saistīti filtri, tāpat kā esošā vairāku karodziņu kombinācija
+failā `catalog.ts`.
 
-Iestatījumu eksportēšana (`GET /api/settings/export-json`) ietver abus masīvus burtiski, tāpat kā jebkurš cits iestatījumu lauks — atšķirībā no `hidePaidModels` kombinētā soļa eksporta filtra, šeit nepastāv atkārtotas hidratācijas risks: eksportētā kombinētā solī iegultais liegtais ID ir operatora paša precīza maršrutēšanas izvēle, nevis eksporta robeža, kas ir jānoņem.
+Iestatījumu eksports (`GET /api/settings/export-json`) ietver abus masīvus nemainītā veidā, tāpat kā jebkuru citu
+iestatījumu lauku — atšķirībā no `hidePaidModels` kombinācijas soļa eksporta filtra šeit nav atkārtotas ielādes
+riska: eksportētā kombinācijas solī iegults liegts identifikators ir paša operatora nepārprotama maršrutēšanas
+izvēle, nevis kaut kas tāds, kas būtu jāizņem uz eksporta robežas.
 
-## Tikai kombinācijas saraksts (`exposeCombosOnly`)
+## Tikai kombināciju saraksts (`exposeCombosOnly`)
 
-Atsevišķs Būla vērtība (pēc noklusējuma arī opt-in un `false` izvietošanai, kur kombinācijas ir publiskā modeļa virsma un nodrošinātāji ir tikai aizmugursistēmas. Ja tas ir `true`, publiskais saraksts (`GET /v1/models`, `GET /v1` un citi `/v1` atklāšanas maršruti, kas izveidoti uz `getUnifiedModelsResponse()`) saglabā tikai rindas ar `owned_by: "combo"`: lietotāju kombinācijas un iebūvētās `auto/*` kombinācijas (ja vien `hideAutoCombos` tās nepaslēpj). Tas izmanto to pašu rindu testu, ko katrai atslēgai `catalogScope: "combos"`, un atslēgas allow/deny/scope filtri joprojām tiek lietoti augšpusē.
+Atsevišķa loģiskā vērtība, arī ieslēdzama pēc izvēles un pēc noklusējuma `false`, izvietojumiem, kuros kombinācijas ir publiskais modeļu interfeiss, bet nodrošinātāji ir tikai aizmugursistēmas. Kad tā ir `true`, publiskais saraksts (`GET /v1/models`, `GET /v1` un citi `/v1` atklāšanas maršruti, kas balstīti uz `getUnifiedModelsResponse()`) saglabā tikai rindas ar `owned_by: "combo"`: lietotāja kombinācijas un iebūvētās `auto/*` kombinācijas (ja tās neslēpj `hideAutoCombos`). Tā izmanto to pašu rindu pārbaudi kā atslēgas `catalogScope: "combos"`, un papildus joprojām darbojas pašas atslēgas atļaušanas/aizliegšanas/tvēruma filtri.
 
-Ieslēdziet to** Iestatījumi → Maršrutēšana → Modeļi API saraksts** , vai ar `PATCH /api/settings {"exposeCombosOnly": true}`.
+Pārslēdziet to sadaļā **Settings → Routing → Models API listing** vai ar `PATCH /api/settings {"exposeCombosOnly": true}`.
 
-Tāpat kā iepriekš minētie saraksti, tas maina tikai reklāmu:
+Tāpat kā iepriekšējie saraksti, tas maina tikai publisko izziņošanu:
 
-- nepārprotams `provider/model` id joprojām tiek nosūtīts, un `GET /v1/models/{id}` joprojām to atrisina;
-- informācijas paneļa katalogs (`GET /api/models/catalog`, izmanto modeļu atlasītāji) nav sašaurināts;
-- tas netiek atspoguļots `auto/*` kandidātu grupās, tāpēc `auto/*` kombinācijas saglabā pilnu kopu.
+- tiešs `provider/model` ID joprojām tiek nosūtīts, un `GET /v1/models/{id}` to joprojām atrisina;
+- paneļa katalogs (`GET /api/models/catalog`, ko izmanto modeļu atlasītāji) netiek sašaurināts;
+- tas netiek pārnests uz `auto/*` kandidātu kopām, tāpēc `auto/*` kombinācijas saglabā pilnu kopu.

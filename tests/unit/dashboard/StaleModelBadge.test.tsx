@@ -47,5 +47,6 @@ describe("StaleModelBadge", () => {
     render(<StaleModelBadge label="Not in live catalog" />);
     const badge = screen.getByTitle("Not in live catalog");
     assert.match(badge.textContent || "", /Not in live catalog/);
+    assert.ok(badge.querySelector("svg"), "warning icon renders without a ligature font");
   });
 });

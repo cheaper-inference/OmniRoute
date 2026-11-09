@@ -4147,7 +4147,9 @@
     "duplicateAutoComboFailedPrefix": "Échec de la duplication de la combinaison automatique :",
     "duplicateAutoComboUnknownError": "Erreur inconnue",
     "duplicateAutoComboTitle": "Créer une combinaison statique à partir de {name}",
-    "fallbackSummary": "{rate}% des requêtes ont été basculées, environ {skips} cibles ont été ignorées par requête"
+    "fallbackSummary": "{rate}% des requêtes ont été basculées, environ {skips} cibles ont été ignorées par requête",
+    "reorderAll": "Tout réorganiser",
+    "reorderAllDescription": "Réorganisation de tous les combos {count}. Les poignées de déplacement sont activées."
   },
   "costs": {
     "title": "Coûts",
@@ -14538,6 +14540,10 @@
       "UNPRICED_USAGE_BUDGET_POLICY": {
         "label": "Politique de budget pour utilisation non tarifée",
         "description": "Comment les limites USD journalières/hebdomadaires par clé traitent l’utilisation réussie dont le fournisseur/le modèle n’a pas de ligne de tarification. fail_closed (par défaut) marque la fenêtre comme dépassée, empêchant ainsi qu’un coût inconnu dépasse un plafond strict. count_as_zero compte cette utilisation comme $0 et continue d’appliquer les dépenses tarifées. Les modèles sans prix sont listés sur la page d’accueil du tableau de bord dans les deux cas."
+      },
+      "COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE": {
+        "description": "Dans les statistiques du cache de compression, comptez une requête compressée adressée à un fournisseur de mise en cache de préfixes automatique (OpenAI, Codex, Azure ou une connexion personnalisée qui déclare la mise en cache rapide avec suppression des marqueurs) comme une estimation du cache, même sans marqueurs cache_control. L'estimation est un signal d'éligibilité au cache, et non un succès observé, de sorte que le taux de succès signalé pour ces fournisseurs tend vers 100 %. Désactivé par défaut : seule une requête transportant des marqueurs cache_control vers un fournisseur de mise en cache compte comme une estimation du succès, donc les fournisseurs de préfixes automatiques continuent de signaler 0.",
+        "label": "Statistiques du cache de compression : éligibilité au préfixe automatique"
       }
     }
   },

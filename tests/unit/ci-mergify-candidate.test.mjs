@@ -11,7 +11,9 @@ const policy = JSON.parse(
 );
 const ready = {
   "github.event_name": "pull_request",
-  "github.event.action": "synchronize",
+  "github.event.action": "ready_for_review",
+  "github.event.changes.base": null,
+  "needs.changes.result": "success",
   "github.event.pull_request.draft": false,
   "github.head_ref": "fix/example",
   "github.event.pull_request.user.id": 1,
@@ -27,11 +29,6 @@ const ready = {
   "needs.lint.result": "success",
   "needs.test-unit.result": "success",
 };
-// The one event that skips the matrix: a description edit on a Mergify queue draft.
-const QUEUE_DRAFT_EDIT =
-  "github.event_name == 'pull_request' && github.event.action == 'edited' && github.event.pull_request.user.login == 'mergify[bot]' && startsWith(github.head_ref, 'mergify/merge-queue/') && github.event.pull_request.head.repo.id == github.event.repository.id";
-const ADMISSION_IF = `\${{ always() && !(${QUEUE_DRAFT_EDIT}) }}`;
-
 const queue = {
   ...ready,
   "github.event.pull_request.draft": true,
@@ -41,30 +38,21 @@ const queue = {
   "github.event.pull_request.user.type": "Bot",
 };
 
-// Evaluate only the boolean/comparison subset used by these job guards. Reject
-// unknown syntax instead of executing workflow text as JavaScript or shell code.
-function condition(expression, values) {
-  let text = String(expression).replace(/^\$\{\{\s*|\s*\}\}$/g, "");
-  text = text.replace(/'([^']*)'/g, (_, value) => JSON.stringify(value));
-  text = text.replace(/(?:github|needs)\.[\w.-]+/g, (key) => {
-    assert.ok(Object.hasOwn(values, key), `unsupported context: ${key}`);
-    return JSON.stringify(values[key]);
-  });
-  text = text.replace(/startsWith\(("[^"]*"),\s*("[^"]*")\)/g, (_, value, prefix) =>
-    String(JSON.parse(value).startsWith(JSON.parse(prefix)))
-  );
-  text = text.replace(/always\(\)/g, "true").replace(/cancelled\(\)/g, "false");
-  text = text.replace(
-    /("[^"]*"|true|false|null|\d+)\s*(==|!=|>)\s*("[^"]*"|true|false|null|\d+)/g,
-    (_, left, operator, right) => {
-      const a = JSON.parse(left);
-      const b = JSON.parse(right);
-      return String(operator === "==" ? a === b : operator === "!=" ? a !== b : a > b);
-    }
-  );
-  const tokens = text.match(/true|false|&&|\|\||[!()]/g) ?? [];
-  assert.equal(tokens.join(""), text.replace(/\s/g, ""), `unsupported guard: ${text}`);
+// Interpret the bounded expression grammar used by these guards, including the
+// operand-returning &&/|| used in names and concurrency. Never execute workflow
+// text as JavaScript. Context values remain typed (a retarget contains an object).
+function expression(source, values) {
+  const text = String(source).replace(/^\$\{\{\s*|\s*\}\}$/g, "");
+  const tokens = text.match(/'(?:[^']|'')*'|[\w.-]+|&&|\|\||==|!=|[!>(),]/g) ?? [];
+  assert.equal(tokens.join(""), text.replace(/\s+(?=(?:[^']*'[^']*')*[^']*$)/g, ""));
   let index = 0;
+  const number = (value) => (typeof value === "object" && value !== null ? NaN : Number(value));
+  const equal = (a, b) =>
+    typeof a === typeof b
+      ? typeof a === "string"
+        ? a.toLowerCase() === b.toLowerCase()
+        : a === b
+      : number(a) === number(b);
   function primary() {
     const token = tokens[index++];
     if (token === "!") return !primary();
@@ -73,14 +61,36 @@ function condition(expression, values) {
       assert.equal(tokens[index++], ")");
       return value;
     }
-    assert.ok(["true", "false"].includes(token), `unexpected token: ${token}`);
-    return token === "true";
+    if (token?.startsWith("'")) return token.slice(1, -1).replaceAll("''", "'");
+    if (["true", "false", "null"].includes(token) || /^\d+$/.test(token)) return JSON.parse(token);
+    if (["always", "cancelled", "startsWith"].includes(token)) {
+      assert.equal(tokens[index++], "(");
+      if (token !== "startsWith") {
+        assert.equal(tokens[index++], ")");
+        return token === "always";
+      }
+      const value = disjunction();
+      assert.equal(tokens[index++], ",");
+      const prefix = disjunction();
+      assert.equal(tokens[index++], ")");
+      return String(value).toLowerCase().startsWith(String(prefix).toLowerCase());
+    }
+    assert.ok(Object.hasOwn(values, token), `unsupported context: ${token}`);
+    return values[token];
+  }
+  function comparison() {
+    const a = primary();
+    const operator = tokens[index];
+    if (!["==", "!=", ">"].includes(operator)) return a;
+    index++;
+    const b = primary();
+    return operator === "==" ? equal(a, b) : operator === "!=" ? !equal(a, b) : a > b;
   }
   function conjunction() {
-    let value = primary();
+    let value = comparison();
     while (tokens[index] === "&&") {
       index++;
-      const next = primary();
+      const next = comparison();
       value = value && next;
     }
     return value;
@@ -99,8 +109,18 @@ function condition(expression, values) {
   return result;
 }
 
-function jobValues(values) {
-  const guard = workflow.jobs.changes.outputs.queueCandidate ?? "false";
+function render(source, values) {
+  return String(source).replace(/\$\{\{([\s\S]+?)\}\}/g, (_, body) =>
+    String(expression(body, values))
+  );
+}
+
+function condition(source, values) {
+  return Boolean(expression(source, values));
+}
+
+function jobValues(values, selectedWorkflow = workflow) {
+  const guard = selectedWorkflow.jobs.changes.outputs.queueCandidate ?? "false";
   return {
     ...values,
     "needs.changes.outputs.queueCandidate": String(condition(guard, values)),
@@ -185,74 +205,106 @@ test("ready PRs run the fast lane, skip the full matrix, and classification stil
   ])
     assert.equal(condition(workflow.jobs[id].if, docsOnly), false, id);
   assert.equal(condition(workflow.jobs["docs-sync-strict"].if, docsOnly), true);
-  assert.equal(workflow.jobs["admission-verdict"].if, ADMISSION_IF);
+  assert.equal(condition(workflow.jobs["admission-verdict"].if, jobValues(ready)), true);
 });
 
-// 2026-11-03: Mergify (its queue summary) and the Blacksmith app (its footer) edit a queue
-// draft's description ~4 times in its first 30 s. In the shared concurrency group each edit
-// cancelled the candidate's real run, and Mergify dequeued the PR on the cancelled checks
-// ("checks interrupted"). An edit run now gets its own group and runs nothing heavy.
-function editRunValues(expression) {
-  const values = { ...queue, "github.event.action": "edited" };
-  for (const key of String(expression).match(/(?:github|needs)\.[\w.-]+/g) ?? []) {
-    // `changes` is skipped, so every job it gates is skipped and exposes no outputs.
-    if (key.startsWith("needs.")) values[key] = key.endsWith(".result") ? "skipped" : "";
-    else if (!Object.hasOwn(values, key)) values[key] = "";
-  }
-  return values;
+// Preserve the eight public #18961 scenarios in their original test file while
+// exercising the broader metadata/retarget policy from the actual workflows.
+function scheduledIn(selectedWorkflow, id, values) {
+  const job = selectedWorkflow.jobs[id];
+  return (
+    [job.needs ?? []]
+      .flat()
+      .every((dependency) => scheduledIn(selectedWorkflow, dependency, values)) &&
+    condition(job.if ?? "true", values)
+  );
 }
 
 for (const name of ["ci.yml", "quality.yml"]) {
-  const wf = load(
+  const selectedWorkflow = load(
     readFileSync(new URL(`../../.github/workflows/${name}`, import.meta.url), "utf8")
   );
+  const checkName = name === "ci.yml" ? "Gate / CI" : "Gate / Quality";
+  const context = (values) => ({
+    ...jobValues(values, selectedWorkflow),
+    "github.workflow": selectedWorkflow.name,
+    "github.ref": "refs/pull/123/merge",
+    "github.run_id": "1234",
+  });
+  const metadata = (values) => ({
+    ...context(values),
+    "github.event.action": "edited",
+    "github.event.changes.base": null,
+    "needs.changes.result": "skipped",
+    "needs.changes.outputs.queueCandidate": "",
+  });
+  const retarget = { ref: { from: "release/v3.8.52" }, sha: { from: "b".repeat(40) } };
 
   test(`${name}: a queue-draft description edit gets its own concurrency group`, () => {
-    assert.equal(
-      wf.concurrency.group,
-      `\${{ github.workflow }}-\${{ github.ref }}\${{ (${QUEUE_DRAFT_EDIT}) && format('-queue-edit-{0}', github.run_id) || '' }}`
-    );
-    assert.equal(wf.concurrency["cancel-in-progress"], true);
+    const group = selectedWorkflow.concurrency.group;
+    const edited = metadata(queue);
+    assert.notEqual(render(group, edited), render(group, context(queue)));
+    assert.notEqual(render(group, edited), render(group, { ...edited, "github.run_id": "5678" }));
+    assert.equal(selectedWorkflow.concurrency["cancel-in-progress"], false);
   });
 
   test(`${name}: a queue-draft description edit runs no gate and no matrix`, () => {
-    const changes = wf.jobs.changes.if;
-    assert.equal(condition(changes, editRunValues(changes)), false, "changes");
-    // Jobs without always()/cancelled() inherit success() and skip with `changes`; the rest
-    // must opt out themselves. merge-integrity has no needs: it keeps running so the latest
-    // "Merge integrity" check on the draft stays a success.
-    for (const [id, job] of Object.entries(wf.jobs)) {
-      // Repository variables at their worst case: switched on.
-      const guard = String(job.if ?? "").replace(/vars\.\w+/g, "'true'");
-      if (!/always\(\)|cancelled\(\)/.test(guard)) continue;
-      assert.equal(condition(guard, editRunValues(guard)), false, `${name}:${id}`);
-    }
-    if (name === "quality.yml") {
-      const guard = wf.jobs["merge-integrity"].if;
-      assert.equal(condition(guard, editRunValues(guard)), true, "merge-integrity keeps running");
+    for (const candidate of [ready, queue]) {
+      const edited = metadata(candidate);
+      assert.equal(condition(selectedWorkflow.jobs.changes.if, edited), false);
+      for (const id of Object.keys(selectedWorkflow.jobs))
+        assert.equal(scheduledIn(selectedWorkflow, id, edited), false, id);
+      assert.equal(condition(selectedWorkflow.jobs["admission-verdict"].if, edited), false);
+      if (selectedWorkflow.jobs["merge-integrity"]) {
+        assert.notEqual(
+          render(selectedWorkflow.jobs["merge-integrity"].name, edited),
+          "Merge integrity (changelog + generated skills)"
+        );
+      }
     }
   });
 
-  test(`${name}: only an edit run renames the gate check`, () => {
-    // 2026-11-04: the edit run's skipped "Gate / CI" was the latest check of that name on draft
-    // #18962, and Mergify dequeued #18961 on it before the real run reported.
-    const checkName = name === "ci.yml" ? "Gate / CI" : "Gate / Quality";
+  test(`${name}: metadata edits and ordinary drafts isolate the gate name`, () => {
+    const admission = selectedWorkflow.jobs["admission-verdict"];
+    const ordinaryDraft = context({ ...ready, "github.event.pull_request.draft": true });
+    assert.equal(condition(admission.if, ordinaryDraft), false);
     assert.equal(
-      wf.jobs["admission-verdict"].name,
-      `\${{ (${QUEUE_DRAFT_EDIT}) && '${checkName} (queue-draft edit)' || '${checkName}' }}`
+      render(admission.name, ordinaryDraft),
+      `Admission not requested / ${name === "ci.yml" ? "CI" : "Quality"}`
     );
+    for (const candidate of [ready, queue]) {
+      assert.notEqual(render(admission.name, metadata(candidate)), checkName);
+      assert.equal(render(admission.name, context(candidate)), checkName);
+      assert.equal(
+        render(
+          admission.name,
+          context({
+            ...candidate,
+            "github.event.action": "edited",
+            "github.event.changes.base": retarget,
+          })
+        ),
+        checkName
+      );
+    }
   });
 
-  test(`${name}: everything else still runs the gate and the classifier`, () => {
-    for (const values of [
-      ready,
-      queue,
-      { ...ready, "github.event.action": "edited" },
-      { ...queue, "github.event.action": "synchronize" },
-    ]) {
-      const v = { ...editRunValues(""), ...values };
-      assert.equal(condition(wf.jobs.changes.if, v), true);
-      assert.equal(condition(wf.jobs["admission-verdict"].if, v), true);
+  test(`${name}: candidate, retarget and non-PR runs keep the classifier and gate`, () => {
+    const admission = selectedWorkflow.jobs["admission-verdict"];
+    for (const candidate of [ready, queue]) {
+      for (const patch of [
+        { "github.event.action": "synchronize" },
+        { "github.event.action": "ready_for_review" },
+        { "github.event.action": "edited", "github.event.changes.base": retarget },
+        { "github.event_name": "push" },
+        { "github.event_name": "workflow_dispatch" },
+        { "github.event_name": "merge_group" },
+      ]) {
+        const values = context({ ...candidate, ...patch });
+        assert.equal(condition(selectedWorkflow.jobs.changes.if, values), true);
+        assert.equal(condition(admission.if, values), true);
+        assert.equal(render(admission.name, values), checkName);
+      }
     }
   });
 }

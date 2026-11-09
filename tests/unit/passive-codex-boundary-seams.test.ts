@@ -25,8 +25,55 @@ test("codexAccount/write exposes the direct connection reader from db/providers"
   assert.equal(seam.getProviderConnectionById, db.getProviderConnectionById);
 });
 
+function assertPassiveCodexBoundary(source: string) {
+  assert.match(source, /export function isPassiveCodex\b/, "passive predicate must exist");
+  assert.match(
+    source,
+    /export async function resolvePassiveCodex\b/,
+    "passive resolver must exist"
+  );
+  assert.match(
+    source,
+    /import\(["']\.\.\/codexAccount\/write\.ts["']\)/,
+    "passive resolver must read through the existing Codex connection seam"
+  );
+  assert.doesNotMatch(source, /(?:from|import\()\s*["'](?:@\/|(?:\.\.\/)+src\/)/);
+}
+
 test("passiveCodex.ts does not import src/ directly", () => {
-  const s = readFileSync("open-sse/services/tokenRefresh/passiveCodex.ts", "utf8");
-  assert.match(s, /export function isPassiveCodex/);
-  assert.doesNotMatch(s, /(?:from|import\()\s*["'](?:@\/|(?:\.\.\/)+src\/)/);
+  const source = readFileSync("open-sse/services/tokenRefresh/passiveCodex.ts", "utf8");
+  assertPassiveCodexBoundary(source);
+});
+
+test("passive boundary rejects empty sources, missing seams and direct src imports", () => {
+  const source = readFileSync("open-sse/services/tokenRefresh/passiveCodex.ts", "utf8");
+  assertPassiveCodexBoundary(source);
+  assert.throws(() => assertPassiveCodexBoundary(""), /passive predicate must exist/);
+  assert.throws(
+    () =>
+      assertPassiveCodexBoundary(
+        source.replace("export function isPassiveCodex", "function hiddenPassivePredicate")
+      ),
+    /passive predicate must exist/
+  );
+  assert.throws(
+    () =>
+      assertPassiveCodexBoundary(
+        source.replace(
+          "export async function resolvePassiveCodex",
+          "async function hiddenPassiveResolver"
+        )
+      ),
+    /passive resolver must exist/
+  );
+  assert.throws(
+    () => assertPassiveCodexBoundary(source.replace("../codexAccount/write.ts", "./other.ts")),
+    /existing Codex connection seam/
+  );
+  for (const directImport of [
+    'import { getProviderConnectionById } from "@/lib/db/providers";',
+    'await import("../../../src/lib/db/providers.ts");',
+  ]) {
+    assert.throws(() => assertPassiveCodexBoundary(source + "\n" + directImport));
+  }
 });

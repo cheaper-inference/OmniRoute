@@ -55,8 +55,10 @@ const FREE_BUDGETS = FREE_MODEL_BUDGETS.filter((m) => grantsFreeAccess(m.freeTyp
 
 /** Provider ids that have at least one documented free model. */
 // SiliconFlow has a live free-labelled catalog but the shipped ten-flagship list
-// was actually billable (#17028). Accept only verified per-model live evidence.
-const LIVE_EVIDENCE_ONLY_PROVIDERS = ["siliconflow"] as const;
+// was actually billable (#17028). Token Harbor's catalogued campaign ended;
+// its remaining free offers have a rolling allowance, not an uncapped budget.
+// Accept per-model live evidence with a paid-evidence veto for both providers.
+const LIVE_EVIDENCE_ONLY_PROVIDERS: readonly string[] = ["siliconflow", "tokenharbor"];
 export const PROVIDERS_WITH_FREE_MODELS: Set<string> = new Set([
   ...FREE_BUDGETS.map((m) => m.provider),
   ...LIVE_EVIDENCE_ONLY_PROVIDERS,
@@ -74,6 +76,20 @@ const FREE_MODEL_IDS_BY_PROVIDER: Map<string, Set<string>> = (() => {
   }
   return map;
 })();
+
+// Known retirements take precedence over stale payload flags and :free suffixes.
+const DISCONTINUED_MODEL_IDS = new Set(
+  FREE_MODEL_BUDGETS.filter((m) => !grantsFreeAccess(m.freeType)).map(
+    (m) => `${m.provider}/${m.modelId}`
+  )
+);
+
+function isDiscontinuedCatalogModel(provider: string, modelId: unknown): boolean {
+  return (
+    typeof modelId === "string" &&
+    DISCONTINUED_MODEL_IDS.has(`${resolveProviderId(provider)}/${modelId}`)
+  );
+}
 
 /** Whether the given provider exposes any documented free models. Accepts a provider id or alias. */
 export function providerHasFreeModels(providerId: string | undefined | null): boolean {
@@ -110,10 +126,11 @@ export function isCatalogFreeModel(provider: string, modelId: unknown): boolean 
  * shipped-catalog entry, or a payload signal on a provider with a documented free tier.
  */
 export function isFreeModel(provider: string, model: FreeModelCandidate): boolean {
+  if (isDiscontinuedCatalogModel(provider, model.id)) return false;
   // Live paid evidence overrides catalog entries and optimistic free markers (#17028).
   if (hasPayloadPaidEvidence(model)) return false;
-  // SiliconFlow requires affirmative live evidence; catalog membership is insufficient.
-  if (resolveProviderId(provider) === "siliconflow") {
+  // These providers require affirmative live evidence; catalog membership is insufficient.
+  if (LIVE_EVIDENCE_ONLY_PROVIDERS.includes(resolveProviderId(provider))) {
     return hasPayloadFreeEvidence(model);
   }
   if (isCatalogFreeModel(provider, model.id)) return true;
@@ -174,10 +191,12 @@ export function isModelFreeBadge(
   model: FreeBadgeCandidate,
   options: { strict?: boolean } = {}
 ): boolean {
+  if (isDiscontinuedCatalogModel(provider, model.id)) return false;
   // Both badge modes honor client eligibility and the free-only import paid veto.
   if (hasFreeBadgeVeto(provider, model)) return false;
   const candidate = toFreeModelCandidate(model);
-  if (resolveProviderId(provider) === "siliconflow") {
+  // Match free-only import for providers whose current offers require live evidence.
+  if (LIVE_EVIDENCE_ONLY_PROVIDERS.includes(resolveProviderId(provider))) {
     return isFreeModel(provider, candidate);
   }
   if (!options.strict) {

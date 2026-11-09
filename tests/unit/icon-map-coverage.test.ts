@@ -78,3 +78,9 @@ test("resolveIcon only resolves own ICON_MAP keys (no Object.prototype members)"
   }
   assert.ok(resolveIcon("settings"), "a real key still resolves");
 });
+
+test("anchor resolves to the real Lucide Anchor glyph", async () => {
+  const { Anchor } = await import("lucide-react");
+  const { resolveIcon } = await import("../../src/shared/constants/iconMap.ts");
+  assert.ok(resolveIcon("anchor") === Anchor, "anchor must map to the Lucide Anchor glyph");
+});

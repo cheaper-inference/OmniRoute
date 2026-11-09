@@ -4147,7 +4147,9 @@
     "duplicateAutoComboFailedPrefix": "Avtomatik kombinatsiyani nusxalab bo‘lmadi:",
     "duplicateAutoComboUnknownError": "Noma’lum xato",
     "duplicateAutoComboTitle": "{name} asosida statik kombinatsiya yaratish",
-    "fallbackSummary": "So'rovlar uchun %{rate} o'rin aldi, har birida ~{skips} maqsadlar o'tkazib yuborildi"
+    "fallbackSummary": "So'rovlar uchun %{rate} o'rin aldi, har birida ~{skips} maqsadlar o'tkazib yuborildi",
+    "reorderAll": "Hammasini qayta tartiblang",
+    "reorderAllDescription": "Barcha {count} kombinatsiyalari qayta tartiblanmoqda. Surish tutqichlari yoqilgan."
   },
   "costs": {
     "title": "Xarajatlar",
@@ -6281,10 +6283,6 @@
     "hideEmails": "Barcha e-pochta manzillarini yashirish",
     "a": "A",
     "accountConcurrencyCapHint": "Ushbu ulanish/hisob qaydnomasi bajara oladigan bir vaqtdagi so‘rovlarning maksimal soni. Obuna hisoblari odatda faqat bir nechtasiga (1–3) ruxsat beradi — limitdan oshish 429 xatolari va kutish davrlarini keltirib chiqaradi. Standart qiymat uchun bo‘sh qoldiring.",
-    "aiCreditsLimit": "Hisob-kitob davri uchun AI Credits limiti",
-    "aiCreditsLimitPlaceholder": "Mahalliy limit yo‘q",
-    "aiCreditsLimitHint": "GitHub xabar bergan AI Credits ushbu qiymatga yetganda bu ulanish o‘tkazib yuboriladi va marshrutlash boshqa ulanishlaringizga o‘tadi. Bo‘sh qoldirish uni o‘chiradi; 0 har doim o‘tkazib yuboradi. Yo‘qolgan yoki eskirgan foydalanish ko‘rsatkichi hech qachon bloklamaydi — bu kafolatlangan xarajat chegarasi emas.",
-    "aiCreditsLimitInvalid": "AI Credits limiti manfiy bo‘lmagan son bo‘lishi yoki o‘chirish uchun bo‘sh qolishi kerak.",
     "accountConcurrencyCapLabel": "Hisob qaydnomasining parallellik chegarasi",
     "accountIdHint": "Ayrim provayderlar (masalan, Cloudflare Workers AI) API tokeni bilan birga buni ham talab qiladi.",
     "accountIdLabel": "Hisob qaydnomasi IDsi",
@@ -6369,8 +6367,6 @@
     "newApiUserIdLabel": "New-API foydalanuvchi IDsi",
     "newApiUserIdPlaceholder": "masalan, 12345",
     "newApiUserIdHint": "Kvota qoldigʻini olish uchun konsol API kaliti bilan birga ishlatiladigan AgentRouter New-Api-User sarlavha qiymati.",
-    "tokenrouterManagementKeyLabel": "Boshqaruv kaliti (ixtiyoriy)",
-    "tokenrouterManagementKeyHint": "TokenRouter boshqaruv panelidagi hisob kaliti (Settings → Management Key). Faqat kvota va balansni oʻqish uchun ishlatiladi, hech qachon soʻrovlar uchun emas. Saqlangan kalit koʻrsatilmaydi; uni saqlab qolish uchun boʻsh qoldiring.",
     "newApiAggregatorToggleLabel": "Agregator shlyuzi",
     "newApiAggregatorToggleHint": "New-API / One-API / Sub2API agregator tugunlari uchun balansni aniqlashni yoqing. Boshqaruv paneli balans nishonini koʻrsatadi va kvotani oldindan tekshiruvchi marshrutlash limiti tugagan hisoblarni chetlab oʻtadi.",
     "newApiAggregatorConsoleApiKeyHint": "Agregatorning /api/user/self endpointi uchun tizim kirish tokeni. Bu marshrutlash API kaliti emas.",
@@ -6384,8 +6380,6 @@
     "customUserAgentLabel": "Maxsus User Agent yorligʻi",
     "huggingfaceBillToHint": "Ixtiyoriy. Xarajatlarni tegishli hisobga biriktirish uchun X-HF-Bill-To sarlavhasi sifatida yuboriladigan Hugging Face billing hisobingiz identifikatori.",
     "huggingfaceBillToLabel": "Hugging Face Bill-To hisobi",
-    "commandCodeZdrLabel": "Nol ma'lumot saqlashni (ZDR) talab qilish",
-    "commandCodeZdrHint": "Ushbu API kaliti bilan yuborilgan har bir so'rov bilan x-cmd-zdr: 1 yuboradi. ZDR upstreamiga ega bo'lmagan modellar mavjud bo'lmasligi mumkin.",
     "databricksBaseUrlHint": "Databricks asosiy URL manzili uchun izoh",
     "defaultThinkingStrengthHint": "Soʻrovda fikrlash darajasi koʻrsatilmaganda ishlatiladi.",
     "defaultThinkingStrengthLabel": "Standart fikrlash kuchi",
@@ -6860,7 +6854,7 @@
       "xai": "xAI (Grok)’ni API kaliti bilan ulang.",
       "xiaomi-mimo": "Xiaomi MiMo’ni API kaliti bilan ulang.",
       "yi": "API kalitini platform.lingyiwanwu.com saytidan oling",
-      "zai": "https://open.bigmodel.cn/usercenter/apikeys saytidan API kaliti",
+      "zai": "https://z.ai/manage-apikey/apikey-list saytidan API kaliti",
       "zenmux": "ZenMux /api/v1/chat/completions manzilida OpenAI bilan mos chat yakunlash endpointini, shuningdek Anthropic Messages (/api/anthropic/v1/messages) va Google Gemini (/api/vertex-ai) protokol interfeyslarini taqdim etadi. OmniRoute OpenAI protokolidan foydalanadi.",
       "galadriel": "Galadriel’ni API kaliti bilan ulang.",
       "predibase": "$25 miqdoridagi bepul sinov krediti (30 kun amal qiladi)",
@@ -6990,11 +6984,6 @@
     "anonymousFallbackEnabled": "{provider} uchun anonim zaxira yoqildi",
     "anonymousFallbackDisabled": "{provider} uchun anonim zaxira oʻchirildi — tugagan ulanishlar bu provayderni chetlab oʻtadi",
     "anonymousFallbackUpdateFailed": "Anonim zaxira sozlamasini yangilab boʻlmadi",
-    "retryDelayTitle": "Qayta urinish kechikishi",
-    "retryDelayDesc": "Provayder qachon qayta urinish kerakligini aytmaganda, tezlik cheklovi xatosidan keyin ulanish qancha vaqt dam oladi. Avtomatik rejim o‘rnatilgan kutishdan foydalanadi; provayder yuborgan tiklash vaqti har doim ustun turadi.",
-    "retryDelayAuto": "Avtomatik",
-    "retryDelaySaved": "Qayta urinish kechikishi saqlandi",
-    "retryDelayUpdateFailed": "Qayta urinish kechikishini yangilab bo‘lmadi",
     "batchDeleteFailed": "Ommaviy oʻchirish amalga oshmadi",
     "batchDeleteNetworkError": "Ommaviy oʻchirish vaqtida tarmoq xatosi yuz berdi",
     "batchUpdateFailed": "Ommaviy yangilash amalga oshmadi",
@@ -7094,7 +7083,20 @@
     "chatgptConnectorLabel": "ChatGPT o‘zlashtirilgan konnektor",
     "doctorChecking": "Holat tekshirilmoqda…",
     "doctorCheck": "Doctor holatini tekshirish",
-    "fallbackRetryBackendTitle": "Zaxira takrorlash orqali backend"
+    "fallbackRetryBackendTitle": "Zaxira takrorlash orqali backend",
+    "retryDelayTitle": "Qayta urinish kechikishi",
+    "retryDelayDesc": "Provayder qachon qayta urinish kerakligini aytmaganda, tezlik cheklovi xatosidan keyin ulanish qancha vaqt dam oladi. Avtomatik rejim o‘rnatilgan kutishdan foydalanadi; provayder yuborgan tiklash vaqti har doim ustun turadi.",
+    "retryDelayAuto": "Avtomatik",
+    "retryDelaySaved": "Qayta urinish kechikishi saqlandi",
+    "retryDelayUpdateFailed": "Qayta urinish kechikishini yangilab bo‘lmadi",
+    "aiCreditsLimit": "Hisob-kitob davri uchun AI Credits limiti",
+    "aiCreditsLimitPlaceholder": "Mahalliy limit yo‘q",
+    "aiCreditsLimitHint": "GitHub xabar bergan AI Credits ushbu qiymatga yetganda bu ulanish o‘tkazib yuboriladi va marshrutlash boshqa ulanishlaringizga o‘tadi. Bo‘sh qoldirish uni o‘chiradi; 0 har doim o‘tkazib yuboradi. Yo‘qolgan yoki eskirgan foydalanish ko‘rsatkichi hech qachon bloklamaydi — bu kafolatlangan xarajat chegarasi emas.",
+    "aiCreditsLimitInvalid": "AI Credits limiti manfiy bo‘lmagan son bo‘lishi yoki o‘chirish uchun bo‘sh qolishi kerak.",
+    "tokenrouterManagementKeyLabel": "Boshqaruv kaliti (ixtiyoriy)",
+    "tokenrouterManagementKeyHint": "TokenRouter boshqaruv panelidagi hisob kaliti (Settings → Management Key). Faqat kvota va balansni oʻqish uchun ishlatiladi, hech qachon soʻrovlar uchun emas. Saqlangan kalit koʻrsatilmaydi; uni saqlab qolish uchun boʻsh qoldiring.",
+    "commandCodeZdrLabel": "Nol ma'lumot saqlashni (ZDR) talab qilish",
+    "commandCodeZdrHint": "Ushbu API kaliti bilan yuborilgan har bir so'rov bilan x-cmd-zdr: 1 yuboradi. ZDR upstreamiga ega bo'lmagan modellar mavjud bo'lmasligi mumkin."
   },
   "settings": {
     "title": "Sozlamalar",
@@ -14255,6 +14257,10 @@
         "label": "Himoyalangan ustuvorlikdagi infratuzilma toʻxtashlariga 502 javobi",
         "description": "Faqat kvota sababli zaxira variantga oʻtadigan ustuvor maqsad comboʼni kvotaga aloqador emasligi isbotlangan sabab — provayderning ochiq circuit breakerʼi yoki bashorat qilingan kechikish tufayli oʻtkazib yuborish — bilan toʻxtatsa, 503 oʻrniga 502 javobini bering."
       },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Narxi belgilanmagan foydalanish byudjet siyosati",
+        "description": "Har bir kalit uchun kunlik/haftalik USD limitlar provayder/model uchun narx satri yo’q bo’lgan muvaffaqiyatli foydalanishni qanday hisoblashini ko’rsatadi. fail_closed (odatiy) oynani ortiqcha deb belgilaydi, shuning uchun noma’lum xarajat qattiq cheklovdan o’tib ketmaydi. count_as_zero ushbu foydalanishni $0 deb hisoblaydi va narxlangan sarfni majburan nazorat qilishni davom ettiradi. Narxi belgilanmagan modellar har holda boshqaruv paneli bosh sahifasida ko’rsatiladi."
+      },
       "AUTH_LOG_INCLUDE_ACCOUNT_ID": {
         "label": "Hisob identifikatorlarini yozib olish",
         "description": "AUTH jurnallash qatorlariga hisob raqami prefiksini kiritish (masalan, \"«'<provider>'» hisobdan foydalanilmoqda: abc12345...\"). Boshqacha aytilmasa, ulashilgan/koʻp ijarogar jarayon jurnallarida hisob identifikatorlarini yashirish uchun oʻchirilgan holatda ishga tushiriladi. Debug rejimidan mustaqil; Debug rejimini yoqish/soʻndirish bu sozlamani namoyon qilmaydi."
@@ -14535,9 +14541,9 @@
         "label": "Poxatona takrorlash: 403/410 radlarini oʻtkazib yuborish",
         "description": "Agar barcha hisoblar poxatona holatida boʻlsa va birinchi tugaydigan poxatona 403 (kirish rad etildi) yoki 410 (yoʻq qilindi) tufayli yuzaga kelgan boʻlsa, soʻrovni kutib qayta yuborishning oʻrniga shu radni darhol qaytariladi; yangilanayotgan agentrouter ulanish-scopeli kvota 403 endi errorCode 429 bilan saqlanadi, shunda u qayta urinish uchun saqlanib qoladi. Standart holdan o'chirilgan: faqat 401 kutishni oʻtkazib yuboradi va har bir rad kelgan holat kodida saqlanadi."
       },
-      "UNPRICED_USAGE_BUDGET_POLICY": {
-        "label": "Narxi belgilanmagan foydalanish byudjet siyosati",
-        "description": "Har bir kalit uchun kunlik/haftalik USD limitlar provayder/model uchun narx satri yo’q bo’lgan muvaffaqiyatli foydalanishni qanday hisoblashini ko’rsatadi. fail_closed (odatiy) oynani ortiqcha deb belgilaydi, shuning uchun noma’lum xarajat qattiq cheklovdan o’tib ketmaydi. count_as_zero ushbu foydalanishni $0 deb hisoblaydi va narxlangan sarfni majburan nazorat qilishni davom ettiradi. Narxi belgilanmagan modellar har holda boshqaruv paneli bosh sahifasida ko’rsatiladi."
+      "COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE": {
+        "description": "Siqish kesh statistikasida avtomatik-prefiks-keshlash provayderiga (OpenAI, Codex, Azure yoki markerni olib tashlash bilan tezkor keshlashni e'lon qiluvchi maxsus ulanish) siqilgan so'rovni cache_control markerlarisiz ham taxminiy kesh urishi deb hisoblang. Hisob-kitob kuzatilgan zarba emas, keshga moslik signalidir, shuning uchun ushbu provayderlar uchun xabar qilingan hit darajasi 100% ga to'g'ri keladi. Sukut bo'yicha o'chirilgan: keshlash provayderiga faqat cache_control belgilarini olib boradigan so'rov taxminiy zarba sifatida hisoblanadi, shuning uchun avtomatik prefiks provayderlari 0 ni hisobot berishda davom etadilar.",
+        "label": "Siqish kesh statistikasi: Avtomatik-prefiks muvofiqligi"
       }
     }
   },

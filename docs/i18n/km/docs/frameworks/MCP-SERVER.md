@@ -10,35 +10,30 @@
 
 ## ការដំឡើង
 
-OmniRoute MCP ត្រូវបានបង្កើតឡើង។ ចាប់ផ្តើមវាជាមួយ:
+OmniRoute MCP ត្រូវបានភ្ជាប់មកជាមួយ។ ចាប់ផ្តើមវាជាមួយ៖
 
 ```bash
 omniroute --mcp
 ```
 
-ឬតាមរយៈការដឹកជញ្ជូន open-sse:
+ឬតាមរយៈការដឹកជញ្ជូនបើកចំហរ៖
 
 ```bash
-# ការដឹកជញ្ជូនស្ទ្រីម HTTP (ច្រក 20130)
-omniroute --dev  # MCP ចាប់ផ្តើមដោយស្វ័យប្រវត្តិនៅលើ /mcp endpoint
+# Streamable HTTP transport (default port 20128, in-process on the dashboard server)
+# Client endpoint: http://localhost:20128/api/mcp/stream
+# stdio: omniroute --mcp
 ```
 
-ការដឹកជញ្ជូន HTTP (`sse` / `streamable-http`, បម្រើក្នុងដំណើរការដោយម៉ាស៊ីនមេផ្ទាំងគ្រប់គ្រង) ត្រូវបាន
-បិទតាមលំនាំដើម ហើយពីមុនអាចបិទបើកបានតែពីទំព័រ `/dashboard/mcp` ប៉ុណ្ណោះ។ ចាប់ពី v3.8.51
-CLI មានភាពស្មើគ្នា:
+ការដឹកជញ្ជូន HTTP (`sse` / `streamable-http` បម្រើក្នុងដំណើរការដោយម៉ាស៊ីនមេនៃផ្ទាំងគ្រប់គ្រង) ត្រូវបានបិទតាមលំនាំដើម ហើយពីមុនអាចបិទបើកបានតែពីទំព័រ `/dashboard/mcp` ប៉ុណ្ណោះ។ គិតត្រឹម v3.8.51 CLI មាន parity:
 
 ```bash
-omniroute mcp status                                  # អាចប្រើបាន/អនឡាញ, ការដឹកជញ្ជូន, ចំនួនឧបករណ៍
+omniroute mcp status                                  # enabled/online, transport, tool count
 omniroute mcp enable [--transport stdio|sse|streamable-http]
 omniroute mcp disable
-omniroute mcp restart                                 # កំណត់ឡើងវិញនូវវគ្គ sse/streamable-http សកម្ម
+omniroute mcp restart                                 # resets active sse/streamable-http sessions
 ```
 
-`mcp enable`/`mcp disable` PATCH ការកំណត់ `mcpEnabled` (និងជាជម្រើស `mcpTransport`) ដូចគ្នា
-ដែលផ្ទាំងគ្រប់គ្រងបិទបើកតាមរយៈ `/api/settings`។ `mcp restart` ហៅ `POST /api/mcp/restart`: វាបិទ
-វគ្គ `sse`/`streamable-http` សកម្ម ដូច្នេះសំណើបន្ទាប់ចាប់ផ្តើមឡើងវិញដោយស្អាត, ត្រឡប់
-`409` ប្រសិនបើ MCP ត្រូវបានបិទ, និង `501` សម្រាប់ការដឹកជញ្ជូន `stdio` (អតិថិជន stdio គ្រប់គ្រង
-ដំណើរការរងរបស់ពួកគេផ្ទាល់ — មិនមានការគ្រប់គ្រងក្នុងដំណើរការដើម្បីចាប់ផ្តើមឡើងវិញទេ)។
+`mcp enable`/`mcp disable` PATCH ដូចគ្នា `mcpEnabled` (និងជាជម្រើស `mcpTransport`) ការកំណត់ផ្ទាំងគ្រប់គ្រងបិទបើកតាមរយៈ `/api/settings`។ `mcp restart` ហៅ `POST /api/mcp/restart`: វាធ្វើឱ្យខូចវគ្គ `sse`/`streamable-http` សកម្ម ដូច្នេះសំណើបន្ទាប់ចាប់ផ្តើមឡើងវិញយ៉ាងស្អាត ត្រឡប់ `409` ប្រសិនបើ MCP ត្រូវបានបិទ ហើយ `501` សម្រាប់ការដឹកជញ្ជូន `stdio` (ម៉ាស៊ីនភ្ញៀវ stdio គ្រប់គ្រងដំណើរការរងរបស់ពួកគេ — មិនមានចំណុចទាញក្នុងដំណើរការដើម្បីចាប់ផ្តើមឡើងវិញទេ) ។
 
 ## ការដឹកជញ្ជូន
 
@@ -130,51 +125,42 @@ curl -i \
 | `omniroute_cache_stats` | `read:cache`  | Semantic cache, prompt-cache, និង idempotency stats |
 | `omniroute_cache_flush` | `write:cache` | Flush cache ជាសកល ឬតាម signature/model              |
 
-## ឧបករណ៍បង្រួម (13)
+## ឧបករណ៍បង្ហាប់ (13)
 
-| ឧបករណ៍                              | វិសាលភាព            | ការពិពណ៌នា                                                                                                                                                       |
-| :---------------------------------- | :------------------ | :--------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `omniroute_compression_status`      | `read:compression`  | ការកំណត់ការបង្រួម, សេចក្តីសង្ខេបការវិភាគ, និង cache-aware stats (រួមបញ្ចូល metadata `analytics.mcpDescriptionCompression`)                                       |
-| `omniroute_compression_configure`   | `write:compression` | កំណត់រចនាសម្ព័ន្ធរបៀបបង្រួម, កម្រិតកំណត់, សមាមាត្រគោលដៅ, ការរក្សា system-prompt, ការបិទ/បើកការបង្រួមការពិពណ៌នា MCP                                               |
-| `omniroute_set_compression_engine`  | `write:compression` | ជ្រើសរើស engine សកម្ម (off/caveman/rtk/stacked) និងកម្រិត Caveman/RTK                                                                                            |
-| `omniroute_list_compression_combos` | `read:compression`  | រាយបញ្ជី compression combos ដែលមានឈ្មោះ និង engine pipelines របស់ពួកគេ                                                                                           |
-| `omniroute_compression_combo_stats` | `read:compression`  | ការវិភាគដែលបានដាក់ជាក្រុមតាម compression combo និង engine                                                                                                        |
-| `omniroute_ccr_store`               | `write:compression` | រក្សាទុកមាតិកាដែលដាច់ដោយឡែកពីអ្នកហៅ (caller-isolated) នៅក្នុងឃ្លាំង CCR ក្នុងអង្គចងចាំដែលមានកំណត់ (bounded in-memory) ហើយប្រគល់ marker បូកនឹង reference `ccr://` |
-| `omniroute_ccr_retrieve`            | `read:compression`  | ទាញយកមាតិកា CCR ទាំងស្រុង ឬជាមួយនឹងរបៀប head, tail, lines, grep, និង stats                                                                                       |
-| `omniroute_ccr_inspect`             | `read:compression`  | ត្រួតពិនិត្យ metadata CCR ដែលជាកម្មសិទ្ធិរបស់អ្នកហៅ (caller-owned) ដោយមិនប្រគល់មាតិកា                                                                            |
-| `omniroute_ccr_list`                | `read:compression`  | រាយបញ្ជី metadata ដែលបានបែងចែកទំព័រ (paginated) សម្រាប់ caller-owned CCR blocks                                                                                  |
-| `omniroute_ccr_delete`              | `write:compression` | លុប caller-owned CCR block                                                                                                                                       |
-| `omniroute_ccr_stats`               | `read:compression`  | រាយការណ៍ការប្រើប្រាស់អង្គចងចាំតាម caller (caller-scoped), lifecycle counters, និងដែនកំណត់ឃ្លាំង                                                                  |
-| `omniroute_rtk_discover`            | `read:compression`  | ស្វែងរកសំឡេងរំខានដែលកើតឡើងដដែលៗនៅក្នុង opt-in RTK output samples                                                                                                 |
-| `omniroute_rtk_learn`               | `read:compression`  | បង្កើត RTK filter draft ដែលអាចពិនិត្យបានពី opt-in samples                                                                                                        |
+| ឧបករណ៍                              | វិសាលភាព            | ការពិពណ៌នា                                                                                                                           |
+| :---------------------------------- | :------------------ | :----------------------------------------------------------------------------------------------------------------------------------- |
+| `omniroute_compression_status`      | `read:compression`  | ការកំណត់ការបង្ហាប់ ការសង្ខេបការវិភាគ និងស្ថិតិដែលដឹងអំពីឃ្លាំងសម្ងាត់ (រួមបញ្ចូលទិន្នន័យមេតា `analytics.mcpDescriptionCompression` ) |
+| `omniroute_compression_configure`   | `write:compression` | កំណត់រចនាសម្ព័ន្ធរបៀបបង្ហាប់ កម្រិតកំណត់ សមាមាត្រគោលដៅ ការរក្សាទុកប្រព័ន្ធភ្លាមៗ បិទបើកការបង្ហាប់ការពិពណ៌នា MCP                      |
+| `omniroute_set_compression_engine`  | `write:compression` | ជ្រើសរើសម៉ាស៊ីនសកម្ម (off/caveman/rtk/stacked) និងអាំងតង់ស៊ីតេ Caveman/RTK                                                           |
+| `omniroute_list_compression_combos` | `read:compression`  | រាយឈ្មោះ Combos Combos និងបំពង់ម៉ាស៊ីនរបស់វា។                                                                                        |
+| `omniroute_compression_combo_stats` | `read:compression`  | ការវិភាគត្រូវបានដាក់ជាក្រុមដោយបន្សំការបង្ហាប់ និងម៉ាស៊ីន                                                                             |
+| `omniroute_ccr_store`               | `write:compression` | រក្សាទុកមាតិកាដាច់ដោយឡែកពីអ្នកហៅចូលនៅក្នុងហាង CCR ក្នុងសតិដែលមានព្រំដែន ហើយត្រឡប់សញ្ញាសម្គាល់បូកនឹងឯកសារយោង `ccr://`                 |
+| `omniroute_ccr_retrieve`            | `read:compression`  | ទាញយកមាតិកា CCR ពេញ ឬដោយប្រើក្បាល កន្ទុយ បន្ទាត់ grep និងរបៀបស្ថិតិ                                                                  |
+| `omniroute_ccr_inspect`             | `read:compression`  | ពិនិត្យទិន្នន័យមេតា CCR ដែលគ្រប់គ្រងដោយអ្នកហៅទូរសព្ទដោយមិនត្រឡប់មាតិកា                                                               |
+| `omniroute_ccr_list`                | `read:compression`  | រាយបញ្ជីទិន្នន័យមេតាសម្រាប់ប្លុក CCR របស់អ្នកហៅចូល                                                                                   |
+| `omniroute_ccr_delete`              | `write:compression` | លុបប្លុក CCR របស់អ្នកហៅចូល                                                                                                           |
+| `omniroute_ccr_stats`               | `read:compression`  | រាយការណ៍អំពីការប្រើប្រាស់អង្គចងចាំតាមវិសាលភាពអ្នកហៅទូរសព្ទ ការរាប់វដ្តជីវិត និងដែនកំណត់ហាង                                           |
+| `omniroute_rtk_discover`            | `read:compression`  | ស្វែងរកសំលេងរំខានដែលកើតឡើងដដែលៗនៅក្នុងគំរូលទ្ធផល RTK ជ្រើសរើស                                                                        |
+| `omniroute_rtk_learn`               | `read:compression`  | បង្កើតសេចក្តីព្រាងតម្រង RTK ដែលអាចពិនិត្យឡើងវិញបានពីគំរូជ្រើសរើស                                                                     |
 
-ធាតុ CCR គឺស្ថិតនៅក្នុងអង្គចងចាំតែប៉ុណ្ណោះ ហើយបាត់ទៅវិញនៅពេលចាប់ផ្តើមឡើងវិញ។ block នីមួយៗត្រូវបានកំណត់ត្រឹម 2 MiB, principal នីមួយៗត្រឹម 16 MiB, និងឃ្លាំងសកលត្រឹម 64 MiB។ ធាតុមាន TTL លំនាំដើម 24 ម៉ោង (អតិបរមាប្រាំពីរថ្ងៃ)។ ការទាញយក MCP ពេញលេញត្រូវបានកំណត់ត្រឹម 256 KiB; blocks ដែលធំជាងនេះនៅតែអាចប្រើបានតាមរយៈរបៀប ranged និង grep។ ការផ្ទុក, ការទាញយក, ការរាយបញ្ជី, ការត្រួតពិនិត្យ, ការលុប, និង stats ត្រូវបានញែកដាច់ដោយឡែកដោយ API-key principal ដែលបានផ្ទៀងផ្ទាត់។ កំណត់ត្រា Audit មាន hashes និង metadata ទំហំ មិនមែនមាតិកាឡើយ។
+ធាតុCCR ប្រើហាងពីរជាន់៖ ថ្នាក់ក្នុងអង្គចងចាំក្តៅដែលបានគាំទ្រនៅលើម៉ោងដំណើរការដែលមិនមែនពពកក្នុងមូលដ្ឋានដោយលំដាប់ SQLite ជាប់លាប់ (`ccr_blocks` តាមលំនាំដើម) ដូច្នេះប្លុកអាចរួចផុតពីការបណ្តេញចេញ ឬចាប់ផ្ដើមឡើងវិញរហូតដល់ TTL របស់វាអស់ — លើកលែងតែប្លុកលើស 512 KB និង cloud-runtimes អង្គចងចាំដដែល។ ប្លុកនីមួយៗត្រូវបានកំណត់ត្រឹម 2 MiB មួយដើមដល់ 16 MiB និងហាងសកលដល់ 64 MiB។ ធាតុលំនាំដើមទៅ TTL 24 ម៉ោង (អតិបរមាប្រាំពីរថ្ងៃ) ។ ការទាញយក MCP ពេញលេញត្រូវបានកំណត់ត្រឹម 256 KiB; ប្លុកធំ ៗ នៅតែមានតាមរយៈរបៀបជួរនិង grep ។ ការផ្ទុក ការទាញយក ការចុះបញ្ជី ការត្រួតពិនិត្យ ការលុប និងស្ថិតិត្រូវបានញែកដាច់ពីគ្នាដោយមេ API-key ដែលបានផ្ទៀងផ្ទាត់។ កំណត់ត្រាសវនកម្មមានសញ្ញាមេតា និងទំហំ ដែលមិនដែលមានមាតិកា។ ព័ត៌មានលម្អិតដែលប្រឈមមុខនឹងប្រតិបត្តិករ (សញ្ញាសម្គាល់ទាំងពីរ តម្រូវការជាមុនរបស់អតិថិជន `codemode:false` វិសាលភាពឧបករណ៍នីមួយៗ ការកំណត់ទំព័រ និងម៉ាទ្រីសវិនិច្ឆ័យ) រស់នៅក្នុង [ម៉ាស៊ីនបង្ហាប់ → តម្រូវការជាមុន / មគ្គុទ្ទេសក៍ប្រតិបត្តិករ](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup) ។
 
-`omniroute_compression_status` រាយការណ៍ពីការបង្ហាប់ការពិពណ៌នា MCP ដោយឡែកពីគ្នានៅក្រោម
-`analytics.mcpDescriptionCompression`។ តម្លៃទាំងនោះគឺជាការប៉ាន់ស្មានទំហំទិន្នន័យមេតាសម្រាប់
-ការពិពណ៌នា MCP ដែលអាចរាយបញ្ជីបាន (`tools`, `prompts`, `resources`, និង `resourceTemplates`);
-ពួកវាមិនមែនជាបង្កាន់ដៃប្រើប្រាស់របស់អ្នកផ្តល់សេវាទេ ហើយត្រូវបានសម្គាល់ដោយ `source: "mcp_metadata_estimate"`។
+`omniroute_compression_status` រាយការណ៍ការបង្ហាប់ការពិពណ៌នា MCP ដោយឡែកពីគ្នានៅក្រោម `analytics.mcpDescriptionCompression`។ តម្លៃទាំងនោះគឺជាការប៉ាន់ប្រមាណទំហំទិន្នន័យមេតាសម្រាប់ការពិពណ៌នាដែលអាចរាយបញ្ជីបាន MCP (`tools`, `prompts`, `resources`, និង `resourceTemplates`); ពួកគេមិនមែនជាវិក័យប័ត្រប្រើប្រាស់របស់អ្នកផ្តល់សេវាទេ ហើយត្រូវបានសម្គាល់ដោយ `source: "mcp_metadata_estimate"`។
 
-### តម្រងដើមឈើភាពងាយស្រួលប្រើ MCP (MCP Accessibility Tree Filter) (v3.8.0)
+### MCP Accessibility Tree Filter (v3.8.0)
 
-ក្រៅពីឧបករណ៍បង្ហាប់ខាងលើ OmniRoute រួមបញ្ចូលតម្រងក្រោយការប្រតិបត្តិដែល
-បង្ហាប់**លទ្ធផលឧបករណ៍**នៃឧបករណ៍រុករក/ភាពងាយស្រួលប្រើ MCP មុនពេលពួកវាត្រូវបានបញ្ជូនត្រឡប់ទៅ
-ភ្នាក់ងារវិញ។ តម្រងនេះមិនមែនជាឧបករណ៍ដោយខ្លួនឯងទេ — វាដំណើរការដោយតម្លាភាពលើលទ្ធផលឧបករណ៍ណាមួយ
-ដែលមានអត្ថបទដើមឈើភាពងាយស្រួលប្រើ ឬរូបថតអេក្រង់កម្មវិធីរុករកលម្អិត (≥2000 តួអក្សរ)។
+ដោយដាច់ដោយឡែកពីឧបករណ៍បង្ហាប់ខាងលើ OmniRoute រួមបញ្ចូលតម្រងក្រោយការប្រតិបត្តិដែលបង្ហាប់** លទ្ធផលឧបករណ៍** នៃឧបករណ៍ MCP browser/accessibility មុនពេលពួកវាត្រូវបានបញ្ជូនត្រឡប់ទៅភ្នាក់ងារវិញ។ តម្រងនេះមិនមែនជាឧបករណ៍ — ទេ វាដំណើរការដោយតម្លាភាពលើលទ្ធផលឧបករណ៍ណាមួយដែលមាន verbose accessibility-tree ឬ browser-snapshot text (≥ 2000 chars)។
 
 ឥរិយាបថសំខាន់ៗ៖
 
-- បង្រួមបន្ទាត់បងប្អូនដែលកើតឡើងដដែលៗជាប់គ្នា ≥30 ទៅជាសេចក្តីសង្ខេបផ្នែកក្បាល + កន្ទុយ
-- រក្សាទុក `[ref=eXX]` anchors ដែលតម្រូវដោយ Playwright/computer-use
-- កាត់ផ្តាច់អត្ថបទធំពេក (>50,000 តួអក្សរ) ជាមួយនឹងការណែនាំអំពីការរុករក
-- ការសន្សំដែលរំពឹងទុក៖ **60–80%** លើទិន្នន័យរូបថតអេក្រង់កម្មវិធីរុករក
+- បង្រួម ≥ 30 បន្តបន្ទាប់គ្នាបន្ទាត់បងប្អូនបង្កើតទៅជាការសង្ខេបកន្ទុយ + ក្បាល
+- រក្សាយុថ្កា `[ref=eXX]` ដែលតម្រូវដោយ Playwright/computer-use
+- កាត់អត្ថបទដែលមានទំហំធំ (> 50,000 chars) ដោយមានតម្រុយរុករក
+- ការសន្សំដែលរំពឹងទុក៖** 60-80%** នៅលើកម្មវិធីរុករកតាមអ៊ីនធឺណិត
 
-ការកំណត់រចនាសម្ព័ន្ធ៖ `compression.mcpAccessibility` នៅក្នុងការកំណត់សកល (migration 056)។
-ការអនុវត្ត៖ `open-sse/services/compression/engines/mcpAccessibility/`។
-ឯកសារពេញលេញ៖ [ម៉ាស៊ីនបង្ហាប់ — តម្រងដើមឈើភាពងាយស្រួលប្រើ MCP](../compression/COMPRESSION_ENGINES.md#mcp-accessibility-tree-filter)។
+ការកំណត់រចនាសម្ព័ន្ធ៖ `compression.mcpAccessibility` នៅក្នុងការកំណត់សកល (ការធ្វើចំណាកស្រុក 056) ។ ការអនុវត្ត៖ `open-sse/services/compression/engines/mcpAccessibility/`។ ឯកសារពេញ៖ [ម៉ាស៊ីនបង្ហាប់ — MCP Accessibility Tree Filter](../compression/COMPRESSION_ENGINES.md#mcp-accessibility-tree-filter) ។
 
-សូមមើល [ម៉ាស៊ីនបង្ហាប់](../compression/COMPRESSION_ENGINES.md) និង [ការបង្ហាប់ RTK](../compression/RTK_COMPRESSION.md) សម្រាប់
-គំរូការបង្ហាប់ពេលដំណើរការនៅពីក្រោយឧបករណ៍ទាំងនេះ។
+សូមមើល [Compression Engines](../compression/COMPRESSION_ENGINES.md) និង [RTK Compression](../compression/RTK_COMPRESSION.md) សម្រាប់គំរូការបង្ហាប់ពេលដំណើរការនៅពីក្រោយឧបករណ៍ទាំងនេះ។
 
 ## ឧបករណ៍ 1Proxy (3)
 
@@ -235,10 +221,7 @@ curl -X DELETE http://localhost:20128/api/settings/notion
 
 ## ឧបករណ៍កាតាឡុកជំនាញភ្នាក់ងារ (3)
 
-បានកំណត់នៅក្នុង `open-sse/mcp-server/tools/agentSkillTools.ts`។ គាំទ្រដោយ `src/lib/agentSkills/catalog`។ ឧបករណ៍ទាំងនេះបង្ហាញកាតាឡុកឯកសារជំនាញភ្នាក់ងារ 45 ធាតុទៅកាន់ម៉ាស៊ីនភ្ញៀវ MCP និងភ្នាក់ងារខាងក្រៅ។ វិសាលភាព៖ `read:catalog`។
-
-| ឧបករណ៍ | វិសាលភាព | ការពិពណ៌នា  
-The following table lists the tools available in the MCP tool catalog.
+កំណត់ក្នុង `open-sse/mcp-server/tools/agentSkillTools.ts`។ គាំទ្រដោយ `src/lib/agentSkills/catalog`។ ឧបករណ៍ទាំងនេះបង្ហាញកាតាឡុកឯកសារ Agent Skills 45-entry ទៅឱ្យអតិថិជន MCP និងភ្នាក់ងារខាងក្រៅ។ វិសាលភាព៖ `read:catalog`។
 
 | Tool                              | Scopes         | Description                                                                                                                  |
 | :-------------------------------- | :------------- | :--------------------------------------------------------------------------------------------------------------------------- |

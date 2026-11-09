@@ -3,28 +3,14 @@
 //
 // "Release-green" pre-flight validator (Solution C).
 //
-// WHY: the full gate (ci.yml — unit shards, vitest, ratchets, package-artifact)
-// runs ONLY on the release PR (PR → main). PRs into release/** only get the
-// fast-gates (quality.yml: TIA-impacted tests + typecheck + lint checks). So
-// reds accumulate silently on the release branch and explode — in layers — at
-// release time. This script reproduces the release-equivalent validation against
-// the CURRENT working tree so the maintainer (or the nightly, Solution D) can see
-// the real state of the release branch at any time.
-//
-// DESIGN — never blocking to contributors:
-//   • HARD checks (typecheck, lint errors, db-rules, public-creds, docs-all,
-//     unit, vitest, integration, optionally package-artifact) → a failure here is
-//     a real defect; exit 1.
-//   • DRIFT checks (eslint WARNINGS, cognitive-complexity, file-size, cyclomatic
-//     complexity, dead-code, type-coverage, compression-budget, openapi-coverage,
-//     pricing-freshness,
-//     workflow-lint/zizmor, codeql-ratchet) → ratchet drift accrued across the
-//     cycle is NOT a contributor's fault; it is reported and rebaselined by the
-//     maintainer at release. Drift NEVER changes the exit code, so wiring this as
-//     a check can never block anyone on drift.
+// Diagnose an exact working tree with retained process evidence. Curated checks
+// distinguish hard failures from advisory drift. With --full-ci, the reviewed
+// static profile supplies each requirement's blocking policy, including gates
+// omitted by the curated subset. No failure is automatically contributor-owned,
+// and diagnosis never authorizes a baseline increase or merge.
 //
 // SCOPE: this diagnoses the curated checks below and, with --full-ci, the static
-// commands extracted from selected CI jobs. It does not reproduce every workflow,
+// commands in config/quality/release-green-static-profile.json. It does not reproduce every workflow,
 // matrix, hosted scanner or merge-candidate gate. A local PASS is not merge admission.
 //
 // This script DIAGNOSES + REPORTS only (no auto-fix). The fix-to-green
@@ -36,14 +22,17 @@
 //     --with-build  also run check:pack-artifact (needs a dist/ build — slow)
 //     --quick       skip the slow unit + vitest + integration suites (drift + fast
 //                   gates only)
-//     --full-ci     ALSO run every static gate declared in ci.yml's gate jobs (lint,
-//                   quality-gate, quality-extended, docs-sync-strict, pr-test-policy) —
-//                   read straight from ci.yml so the set never drifts. Catches the whole
-//                   "static base-red" category the curated list missed (v3.8.46: 11 of 16
-//                   leaked reds). Pair with --quick for the fast "1 command, 0 CI layers" pass.
+//     --full-ci     run the versioned static argv inventory (including audit, mutation
+//                   and i18n). Reject missing/stale declarations before execution.
+//                   Hosted suites and remote checks still require separate evidence.
 //     --hermetic    scrub OMNIROUTE_API_KEY/OMNIROUTE_URL from gate env so live
 //                   tests self-skip exactly like CI (dev machines otherwise run
 //                   them against localhost and produce false-positive reds)
+//     --i18n-base-sha <sha> --i18n-candidate-sha <sha>  explicit comparison pair
+//                   for --full-ci; otherwise resolve the event or explicit local BASE_REF.
+//     --i18n-scope <candidate|push-range|last-commit>  scope of an explicit pair
+//     --test-masking-base-sha <sha>  immutable test comparison base; otherwise pin
+//                   local origin/main once. No fetch runs during the observation.
 //     --suites-from <dir>  consume hosted receipts instead of local suite execution;
 //                   requires --suites-workflow-sha <sha> from the producing workflow.
 //
@@ -58,6 +47,20 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { load as parseYaml } from "js-yaml";
 import { runGateProcess } from "./gate-process.mjs";
+import { buildProgressEnvironment } from "../build/buildPhaseProgress.mjs";
+import {
+  unitDiagnosticReference,
+  integrationDiagnosticReference,
+} from "../ci/unit-diagnostics.mjs";
+import { integrationPlanFromCiJob, executeIntegrationPlan } from "./integration-shards.mjs";
+import { eslintMeasurementCounts, readEslintMeasurement } from "./eslint-measurement.mjs";
+import {
+  loadFullCiProfile,
+  resolveFullCiComparison,
+  resolveTestMaskingBase,
+  staticGateOutcome,
+  testMaskingGateEnv,
+} from "./release-green-static-profile.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, "..", "..");
@@ -77,6 +80,30 @@ function saveGateLog(id, out) {
 }
 
 // ─── Pure helpers (exported for tests) ──────────────────────────────────────
+
+/** Complete JSON delivery before the CLI exits; pipe writes can finish asynchronously. */
+export async function writeObserverJson(report, output = process.stdout) {
+  const json = JSON.stringify(report, null, 2) + "\n";
+  await new Promise((resolve, reject) => {
+    const onError = (error) => reject(error);
+    output.once("error", onError);
+    try {
+      output.write(json, (error) => {
+        if (error) {
+          // Writable emits the error after invoking its callback. Keep the once-listener
+          // until that event so a rejected write cannot become an unhandled error.
+          reject(error);
+          return;
+        }
+        output.removeListener("error", onError);
+        resolve();
+      });
+    } catch (error) {
+      output.removeListener("error", onError);
+      reject(error);
+    }
+  });
+}
 
 /** Read the committed ratchet baseline value for a metric (null if unknown). */
 export function baselineValue(metric, root = ROOT) {
@@ -110,12 +137,15 @@ const INLINE_FAILURE_RE = /\berror TS\d+\b|\bAssertionError\b|\bError:|\bREGRESS
 /** Best-effort "first meaningful failure line" from captured command output. */
 export function firstFailureLine(out) {
   const lines = String(out || "")
+    .replace(/\u001b\[[0-9;]*m/g, "")
     .split("\n")
     .map((l) => l.trim())
     .filter(Boolean);
-  const hit = lines.find(
-    (l) => !GREEN_LINE_RE.test(l) && (LINE_START_FAILURE_RE.test(l) || INLINE_FAILURE_RE.test(l))
-  );
+  const summary = lines.findLastIndex((line) => /(?:failing tests:|Failed Tests \d+)/.test(line));
+  const terminal = summary >= 0 ? lines.slice(summary + 1) : lines;
+  const hit =
+    terminal.find((line) => LINE_START_FAILURE_RE.test(line)) ||
+    lines.find((line) => !GREEN_LINE_RE.test(line) && INLINE_FAILURE_RE.test(line));
   return (hit || lines[lines.length - 1] || "failed").slice(0, 200);
 }
 
@@ -189,7 +219,8 @@ export function parseEslintJson(out) {
  * "could not parse eslint json" hides the actionable cause and sends maintainers debugging
  * the parser instead of the gate ceiling.
  */
-export function evaluateEslintRun({ code, out }, warningBaseline) {
+export function evaluateEslintRun(run, warningBaseline) {
+  const { code, out } = run;
   if (code !== 0) {
     return [
       {
@@ -204,8 +235,11 @@ export function evaluateEslintRun({ code, out }, warningBaseline) {
       },
     ];
   }
-  const parsed = parseEslintJson(out);
-  if (!parsed) {
+  const parsed = Object.hasOwn(run, "measurement") ? run.measurement : parseEslintJson(out);
+  let counts;
+  try {
+    counts = eslintMeasurementCounts(parsed);
+  } catch {
     return [
       {
         id: "lint",
@@ -220,7 +254,7 @@ export function evaluateEslintRun({ code, out }, warningBaseline) {
     ];
   }
 
-  const { errors, warnings } = eslintCounts(parsed);
+  const { errors, warnings } = counts;
   const warningDrift = isDrift(warnings, warningBaseline);
   return [
     {
@@ -349,15 +383,8 @@ function evaluateWorkflowRun({ code, out }) {
   };
 }
 
-// ─── --full-ci: reproduce the EXACT ci.yml gate set (P0, v3.8.46 post-mortem) ──
-//
-// WHY: the curated HARD/DRIFT lists above are a hand-maintained SUBSET. The v3.8.46
-// release leaked 11 static/gate base-reds (route-validation:t06, docs-counts --strict,
-// docs-symbols, bundle-size --ratchet, test-masking, …) that the pre-flight never ran
-// because they live only in the ci.yml gate JOBS, not in this script. --full-ci reads
-// ci.yml itself and runs every `npm run check:*` / `npm run lint` from those jobs, so the
-// set stays current as gates are added (no drift between this script and CI). One command
-// → zero CI layers for the whole static category.
+// Legacy extraction remains a discovery helper for callers/tests. Full execution
+// uses the reviewed argv manifest, never whitespace-split workflow shell.
 
 /** ci.yml jobs whose npm-run gate steps --full-ci reproduces locally. */
 export const FULL_CI_GATE_JOBS = [
@@ -413,7 +440,8 @@ export function curatedEquivalentId(scriptId) {
  * not cover). This only changes WHICH BUCKET a result is printed in — it never changes whether
  * a gate runs, nor whether it passed.
  */
-export function fullCiKindFor(scriptId, results) {
+export function fullCiKindFor(scriptId, results, declaredKind) {
+  if (["hard", "drift"].includes(declaredKind)) return declaredKind;
   const equivalent = curatedEquivalentId(scriptId);
   const curated = (results || []).find((r) => r.id === scriptId || r.id === equivalent);
   return curated?.kind ?? "hard";
@@ -550,9 +578,13 @@ export function mergeUnitShardResults(shardResults) {
  * shards, its integration shards, then vitest (MCP + UI). The workflow's `suites` matrix writes
  * one `<name>.json` per job; a name with no file is a job that never reported.
  */
-export function hostedSuiteNames(unitShards, integrationShards) {
+export function hostedSuiteNames(unitShards, integrationShards, vitestShards = 1) {
   const range = (n, prefix) => Array.from({ length: n }, (_, i) => `${prefix}-${i + 1}`);
-  return [...range(unitShards, "unit"), ...range(integrationShards, "integration"), "vitest"];
+  return [
+    ...range(unitShards, "unit"),
+    ...range(integrationShards, "integration"),
+    ...(vitestShards === 1 ? ["vitest"] : range(vitestShards, "vitest")),
+  ];
 }
 
 /** Exact execution identity shared by hosted writers and their consuming observer. */
@@ -605,7 +637,10 @@ export function parseHostedSuiteResult(text, expected) {
  * release-green.json keep the same ids. A lane passes only when every expected job reported
  * exit 0; a job that never reported (cancelled, timed out, upload lost) fails it.
  */
-export function foldHostedSuiteResults(results, { unitShards, integrationShards }) {
+export function foldHostedSuiteResults(
+  results,
+  { unitShards, integrationShards, vitestShards = 1 }
+) {
   const byName = new Map(results.filter(Boolean).map((r) => [r.name, r]));
   const lane = (id, label, names) => {
     const parts = [];
@@ -628,7 +663,7 @@ export function foldHostedSuiteResults(results, { unitShards, integrationShards 
       detail: parts.length === 0 ? "pass" : `${parts.join(", ")}${line ? ` — ${line}` : ""}`,
     };
   };
-  const names = hostedSuiteNames(unitShards, integrationShards);
+  const names = hostedSuiteNames(unitShards, integrationShards, vitestShards);
   return [
     ...(results.some((r) => !r || !names.includes(r.name)) || byName.size !== results.length
       ? [
@@ -651,7 +686,11 @@ export function foldHostedSuiteResults(results, { unitShards, integrationShards 
       `Integration tests (ci.yml's ${integrationShards} shards on hosted runners)`,
       names.filter((n) => n.startsWith("integration-"))
     ),
-    lane("vitest", "Vitest (MCP + UI, hosted runner)", ["vitest"]),
+    lane(
+      "vitest",
+      "Vitest (MCP + all UI shards, hosted runners)",
+      names.filter((n) => n.startsWith("vitest"))
+    ),
   ];
 }
 
@@ -719,10 +758,58 @@ const cancellation = new AbortController();
 
 async function run(cmd, cmdArgs, opts = {}) {
   const label = opts.label || `${cmd} ${cmdArgs.join(" ")}`;
-  const logPath = join(LOG_DIR, "commands", `${randomUUID()}.log`);
+  const invocationId = randomUUID();
+  const logPath = join(LOG_DIR, "commands", `${invocationId}.log`);
+  let unitDiagnostics = unitDiagnosticReference(cmdArgs, invocationId, null);
+  let integrationDiagnostics = integrationDiagnosticReference(cmdArgs, invocationId, null);
+  let checkoutSha = null;
+  if (unitDiagnostics || integrationDiagnostics || opts.packPhase) {
+    try {
+      checkoutSha = execFileSync("git", ["rev-parse", "HEAD"], {
+        cwd: ROOT,
+        encoding: "utf8",
+        timeout: 5000,
+      }).trim();
+    } catch {
+      // Unit diagnostics retain uncertainty; package phases reject missing checkout identity.
+    }
+    if (unitDiagnostics)
+      unitDiagnostics = unitDiagnosticReference(cmdArgs, invocationId, checkoutSha);
+    if (integrationDiagnostics)
+      integrationDiagnostics = integrationDiagnosticReference(cmdArgs, invocationId, checkoutSha);
+  }
+  const packPhase = opts.packPhase
+    ? makePackPhaseReference(opts.packPhase, invocationId, checkoutSha, {
+        runId: process.env.GITHUB_RUN_ID,
+        runAttempt: process.env.GITHUB_RUN_ATTEMPT,
+        workflowSha: process.env.GITHUB_WORKFLOW_SHA,
+      })
+    : null;
+  const receiptIdentity = {
+    invocationId,
+    ...(packPhase ? { packPhase } : {}),
+    ...(unitDiagnostics ? { unitDiagnostics } : {}),
+    ...(integrationDiagnostics ? { integrationDiagnostics } : {}),
+  };
   const result = await runGateProcess(cmd, cmdArgs, {
+    receiptIdentity,
     cwd: ROOT,
-    env: buildGateEnv(opts.env),
+    env: buildGateEnv({
+      ...opts.env,
+      ...buildProgressEnvironment(packPhase),
+      ...(integrationDiagnostics
+        ? {
+            OMNIROUTE_INTEGRATION_INVOCATION_ID: integrationDiagnostics.invocationId || "",
+            OMNIROUTE_INTEGRATION_CHECKOUT_SHA: integrationDiagnostics.checkoutSha || "",
+          }
+        : {}),
+      ...(unitDiagnostics
+        ? {
+            OMNIROUTE_UNIT_INVOCATION_ID: unitDiagnostics.invocationId || "",
+            OMNIROUTE_UNIT_CHECKOUT_SHA: unitDiagnostics.checkoutSha || "",
+          }
+        : {}),
+    }),
     logPath,
     timeout: opts.timeout || 30 * 60 * 1000,
     signal: cancellation.signal,
@@ -731,8 +818,12 @@ async function run(cmd, cmdArgs, opts = {}) {
         `… ${label}: ${Math.round(elapsedMs / 1000)}s, ${bytes} bytes, last output ${lastOutputAt}\n`
       ),
   });
-  commandReceipts.push({ command: label, receiptPath: result.receiptPath, ...result.receipt });
-  return result;
+  commandReceipts.push({
+    command: label,
+    receiptPath: result.receiptPath,
+    ...result.receipt,
+  });
+  return { ...result, invocationId, ...(packPhase ? { packPhase } : {}) };
 }
 
 const runAsync = run;
@@ -746,24 +837,147 @@ const runAsync = run;
  * missing". ci.yml builds, stamps, then validates; mirror that order here. The guard is not
  * relaxed: an unstamped dist/ or one built from another commit still fails.
  */
-async function runPackArtifactGate(timeoutMs) {
-  const deadline = Date.now() + timeoutMs;
+export const PACK_POLICY_TIMEOUT_MS = 3 * 60 * 1000;
+export const PACK_LANE_TIMEOUT_MS = 90 * 60 * 1000;
+
+export function makePackPhaseReference(phase, invocationId, candidateSha, context = {}) {
+  const phases = ["build-next", "build-cli", "stamp-build-sha", "validate-pack-artifact"];
+  if (
+    !phases.includes(phase?.phaseId) ||
+    !["shared", "independent-policy"].includes(phase.mode) ||
+    !Number.isSafeInteger(phase.budgetMs) ||
+    phase.budgetMs <= 0 ||
+    !Number.isSafeInteger(phase.preparationBudgetMs) ||
+    phase.preparationBudgetMs <= 0 ||
+    phase.preparationBudgetMs >
+      (phase.mode === "independent-policy"
+        ? PACK_LANE_TIMEOUT_MS - PACK_POLICY_TIMEOUT_MS
+        : PACK_LANE_TIMEOUT_MS) ||
+    phase.budgetMs >
+      (phase.phaseId === "validate-pack-artifact" && phase.mode === "independent-policy"
+        ? PACK_POLICY_TIMEOUT_MS
+        : phase.preparationBudgetMs) ||
+    !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(invocationId || "") ||
+    !/^[0-9a-f]{40}$/.test(candidateSha || "")
+  )
+    throw new Error("Invalid package phase identity or budget");
+  const github = [context.runId, context.runAttempt, context.workflowSha].some(
+    (value) => value !== undefined && value !== ""
+  );
+  if (
+    github &&
+    (!/^[1-9][0-9]*$/.test(context.runId || "") ||
+      !/^[1-9][0-9]*$/.test(context.runAttempt || "") ||
+      !/^[0-9a-f]{40}$/.test(context.workflowSha || ""))
+  ) {
+    throw new Error("Incomplete package workflow identity");
+  }
+  return {
+    schemaVersion: 1,
+    laneId: "pack-artifact",
+    phaseId: phase.phaseId,
+    mode: phase.mode,
+    budgetMs: phase.budgetMs,
+    preparationBudgetMs: phase.preparationBudgetMs,
+    invocationId,
+    candidateSha,
+    runId: github ? context.runId : null,
+    runAttempt: github ? context.runAttempt : null,
+    workflowSha: github ? context.workflowSha : null,
+  };
+}
+
+export function summarizeExecutionIncidents(checks) {
+  const incidents = new Map();
+  const blockedDependencies = [];
+  for (const check of checks) {
+    if (check.kind !== "hard" || check.ok) continue;
+    if (check.dependencyOf) {
+      blockedDependencies.push({ checkId: check.id, dependencyOf: check.dependencyOf });
+      continue;
+    }
+    const bound = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(
+      check.causeId || ""
+    );
+    const key = bound ? `command:${check.causeId}` : `check:${check.id}`;
+    if (!incidents.has(key))
+      incidents.set(key, { causeId: bound ? check.causeId : null, checkIds: [] });
+    incidents.get(key).checkIds.push(check.id);
+  }
+  return { incidentCount: incidents.size, incidents: [...incidents.values()], blockedDependencies };
+}
+
+export async function runPackArtifactGate(
+  timeoutMs,
+  { independentPolicy = false, runCommand = runAsync, now = Date.now } = {}
+) {
+  if (
+    !Number.isSafeInteger(timeoutMs) ||
+    timeoutMs <= 0 ||
+    timeoutMs > PACK_LANE_TIMEOUT_MS ||
+    typeof independentPolicy !== "boolean" ||
+    (independentPolicy && timeoutMs !== PACK_LANE_TIMEOUT_MS)
+  ) {
+    throw new Error("Invalid package lane budget");
+  }
+  // Reserve the checker inside the public 90-minute lane: preparation 87 + policy 3.
+  const preparationBudgetMs = independentPolicy ? timeoutMs - PACK_POLICY_TIMEOUT_MS : timeoutMs;
+  const deadline = now() + preparationBudgetMs;
   const steps = [
-    { cmd: npmCmd, args: ["run", "build:cli"], env: BUILD_GATE_ENV },
-    { cmd: process.execPath, args: ["scripts/build/write-build-sha.mjs"] },
+    // Match CI: npm runs prebuild/build/postbuild before the strict package consumer.
+    // Both commands and the stamp spend the same preparation deadline.
+    { phaseId: "build-next", cmd: npmCmd, args: ["run", "build"], env: BUILD_GATE_ENV },
     {
+      phaseId: "build-cli",
       cmd: npmCmd,
-      args: ["run", "check:pack-artifact"],
+      args: ["run", "build:cli"],
+      env: { ...BUILD_GATE_ENV, OMNIROUTE_REQUIRE_PREBUILT_NEXT: "1" },
+    },
+    {
+      phaseId: "stamp-build-sha",
+      cmd: process.execPath,
+      args: ["scripts/build/write-build-sha.mjs"],
+    },
+    {
+      phaseId: "validate-pack-artifact",
+      cmd: npmCmd,
+      args: [
+        "run",
+        "check:pack-artifact",
+        ...(independentPolicy ? ["--", "--require-staging"] : []),
+      ],
       env: PACK_GATE_ENV,
     },
   ];
   let out = "";
   for (const step of steps) {
-    const remaining = deadline - Date.now();
-    if (remaining <= 0) return classifyRunError({ killed: true, signal: "SIGTERM" }, timeoutMs);
-    const result = await runAsync(step.cmd, step.args, { env: step.env, timeout: remaining });
+    const remaining =
+      independentPolicy && step.phaseId === "validate-pack-artifact"
+        ? PACK_POLICY_TIMEOUT_MS
+        : deadline - now();
+    if (remaining <= 0)
+      return {
+        ...classifyRunError({ killed: true, signal: "SIGTERM" }, preparationBudgetMs),
+        phaseId: step.phaseId,
+      };
+    const result = await runCommand(step.cmd, step.args, {
+      env: step.env,
+      timeout: remaining,
+      packPhase: {
+        phaseId: step.phaseId,
+        mode: independentPolicy ? "independent-policy" : "shared",
+        budgetMs: remaining,
+        preparationBudgetMs,
+      },
+    });
     out += result.out;
-    if (result.code !== 0) return { code: result.code, out };
+    if (result.code !== 0 || result.receipt?.outcome !== "PASS")
+      return {
+        code: result.code || 1,
+        out,
+        phaseId: step.phaseId,
+        causeId: result.invocationId || null,
+      };
   }
   return { code: 0, out };
 }
@@ -785,9 +999,32 @@ async function runUnitShards(total, pool, timeout) {
   return mergeUnitShardResults(results);
 }
 
+/** CI's integration matrix, sequential locally with the unchanged CI job ceiling per shard. */
+async function runIntegrationShards() {
+  let plan;
+  try {
+    const ci = parseYaml(readFileSync(join(ROOT, ".github/workflows/ci.yml"), "utf8"));
+    const { scripts } = JSON.parse(readFileSync(join(ROOT, "package.json"), "utf8"));
+    plan = integrationPlanFromCiJob(ci?.jobs?.["test-integration"], scripts);
+  } catch {
+    return {
+      code: 1,
+      out: "INCOMPLETE: integration CI plan could not be reproduced\n",
+      detail: "INCOMPLETE: integration CI matrix, command or timeout is invalid",
+    };
+  }
+  return executeIntegrationPlan(plan, (args, options) => runAsync(npmCmd, args, options));
+}
+
 async function main() {
+  let flushingJson = false;
   for (const signal of ["SIGINT", "SIGTERM"]) {
-    process.once(signal, () => cancellation.abort(signal));
+    process.once(signal, () => {
+      cancellation.abort(signal);
+      // Gates have finished before the final flush. A blocked consumer must not
+      // prevent the existing supervisor deadline from terminating this process.
+      if (flushingJson) process.exit(1);
+    });
   }
   const args = new Set(process.argv.slice(2));
   const JSON_OUT = args.has("--json");
@@ -804,12 +1041,42 @@ async function main() {
   const SUITES_WORKFLOW_SHA =
     suitesWorkflowIndex >= 0 ? process.argv[suitesWorkflowIndex + 1] : null;
 
+  let testMaskingBaseSha = null;
+  let testMaskingBaseError = null;
+  if (!QUICK || FULL_CI || process.argv.some((arg) => arg.startsWith("--test-masking"))) {
+    try {
+      testMaskingBaseSha = resolveTestMaskingBase(ROOT, process.argv.slice(2));
+    } catch (error) {
+      testMaskingBaseError = error;
+    }
+  }
+
+  let i18nComparison = null;
+  let i18nComparisonError = null;
+  if (FULL_CI) {
+    try {
+      i18nComparison = resolveFullCiComparison(ROOT, process.argv.slice(2));
+    } catch (error) {
+      i18nComparisonError = error;
+    }
+  }
+
   const results = [];
   const record = (r) => {
     results.push(r);
     const icon = r.ok ? "✅" : r.kind === "drift" ? "🟡" : "❌";
     process.stderr.write(`${icon} [${r.kind}] ${r.label}${r.detail ? ` — ${r.detail}` : ""}\n`);
   };
+  if (QUICK && !FULL_CI && testMaskingBaseError) {
+    record({
+      id: "test-masking-base",
+      label: "Test-masking comparison input",
+      kind: "hard",
+      ok: false,
+      evidenceState: "INCOMPLETE",
+      detail: testMaskingBaseError.message,
+    });
+  }
 
   // Announce before running; supervisor heartbeats then distinguish a quiet process
   // from a missing observation without treating silence as a successful result.
@@ -828,8 +1095,9 @@ async function main() {
     });
   };
 
-  // Ratchet findings remain drift. Workflow auditing additionally requires explicit
-  // measurement evidence: its exit 1 can also mean missing/broken scanner tooling.
+  // Workflow auditing additionally requires explicit scanner measurement evidence.
+  // Curated ratchets retain their diagnostic bucket here. The full profile overrides
+  // it with the applicable policy, and incomplete command receipts remain blocking.
   // ALL checks run regardless of earlier failures (the report is collected, not
   // fail-fast) so one pass surfaces every red instead of revealing them in layers.
   const driftCmd = async (id, label, cmd, cmdArgs, okDetail = "within baseline", opts) => {
@@ -850,6 +1118,7 @@ async function main() {
   };
 
   process.stderr.write("🔎 Release-green validation (current working tree)\n\n");
+  let freshLintReport = null;
 
   await hardCmd("typecheck", "Typecheck (core)", npmCmd, ["run", "typecheck:core"]);
 
@@ -860,6 +1129,11 @@ async function main() {
     // pre-existing debt in config/quality/eslint-suppressions.json must not count as
     // errors here — only NET-NEW violations are release reds. The cold release runner can
     // exceed 30 minutes as the repository grows, and this pre-flight often runs under load.
+    // stdout/stderr chunks may interleave, and dependencies can print bracketed
+    // diagnostics. Keep the machine report in its own fresh file, not that stream.
+    const lintReportPath = join(LOG_DIR, "commands", `${randomUUID()}.eslint.json`);
+    mkdirSync(dirname(lintReportPath), { recursive: true });
+    writeFileSync(lintReportPath, "", { flag: "wx", mode: 0o600 });
     const lintRun = await run(
       "npx",
       [
@@ -870,6 +1144,8 @@ async function main() {
         ".eslintcache",
         "--format",
         "json",
+        "--output-file",
+        lintReportPath,
         "--suppressions-location",
         "config/quality/eslint-suppressions.json",
         // An "unpruned" suppression means a previously-frozen violation was legitimately
@@ -886,7 +1162,25 @@ async function main() {
     );
     const { out } = lintRun;
     saveGateLog("lint", out);
-    for (const result of evaluateEslintRun(lintRun, baselineValue("eslintWarnings"))) {
+    let measurement = null;
+    if ([0, 1].includes(lintRun.code) && ["PASS", "FAIL"].includes(lintRun.receipt.outcome)) {
+      try {
+        measurement = readEslintMeasurement(lintReportPath);
+        freshLintReport = lintReportPath;
+      } catch {
+        record({
+          id: "lint-measurement",
+          label: "Retain the current ESLint measurement",
+          kind: "hard",
+          ok: false,
+          detail: "no complete lint report retained for this execution",
+        });
+      }
+    }
+    for (const result of evaluateEslintRun(
+      { ...lintRun, measurement },
+      baselineValue("eslintWarnings")
+    )) {
       record(result);
     }
   }
@@ -923,21 +1217,31 @@ async function main() {
   // config/quality/test-masking-allowlist.json; tautology/skip/deletion signals are never allowlistable.
   if (!QUICK) {
     announce("Test-masking (weakened-assert guard vs main)");
-    // best-effort fetch so the merge-base diff is accurate; ignore fetch failure (offline pre-flight)
-    await run("git", ["fetch", "--no-tags", "origin", "main", "--depth=200"], {
-      timeout: 60 * 1000,
-    });
-    const { code, out } = await run(npmCmd, ["run", "check:test-masking"], {
-      env: { GITHUB_BASE_REF: "main" },
-    });
-    saveGateLog("test-masking", out);
-    record({
-      id: "test-masking",
-      label: "Test-masking (weakened-assert guard)",
-      kind: "hard",
-      ok: code === 0,
-      detail: code === 0 ? "no weakening" : firstFailureLine(out),
-    });
+    let env;
+    try {
+      if (testMaskingBaseError) throw testMaskingBaseError;
+      env = testMaskingGateEnv(ROOT, testMaskingBaseSha);
+    } catch (error) {
+      record({
+        id: "test-masking",
+        label: "Test-masking (weakened-assert guard)",
+        kind: "hard",
+        ok: false,
+        evidenceState: "INCOMPLETE",
+        detail: error.message,
+      });
+    }
+    if (env) {
+      const { code, out } = await run(npmCmd, ["run", "check:test-masking"], { env });
+      saveGateLog("test-masking", out);
+      record({
+        id: "test-masking",
+        label: "Test-masking (weakened-assert guard)",
+        kind: "hard",
+        ok: code === 0,
+        detail: code === 0 ? "no weakening" : firstFailureLine(out),
+      });
+    }
   }
 
   // Remaining quality-gate / quality-extended ratchets that the PR→release
@@ -1020,18 +1324,23 @@ async function main() {
       // starvation such as the catalog's 8 s build bound). The suites now run on hosted
       // runners exactly like a PR's CI; this slot keeps the static gates and the build.
       let integrationShards = null;
+      let vitestShards = null;
       try {
         integrationShards = shardCountFromCi(
           readFileSync(join(ROOT, ".github/workflows/ci.yml"), "utf8"),
           "test-integration"
         );
+        vitestShards = shardCountFromCi(
+          readFileSync(join(ROOT, ".github/workflows/ci.yml"), "utf8"),
+          "test-vitest"
+        );
       } catch {
         integrationShards = null;
       }
-      if (!unitShards || !integrationShards) {
+      if (!unitShards || !integrationShards || !vitestShards) {
         record({
           id: "hosted-suites",
-          label: "Hosted suites: read ci.yml's unit and integration matrices",
+          label: "Hosted suites: read ci.yml's unit, integration and UI matrices",
           kind: "hard",
           ok: false,
           detail: "could not read the shard counts from .github/workflows/ci.yml",
@@ -1044,7 +1353,7 @@ async function main() {
           files = [];
         }
         const expected = hostedSuiteIdentity(ROOT, SUITES_WORKFLOW_SHA);
-        const names = hostedSuiteNames(unitShards, integrationShards);
+        const names = hostedSuiteNames(unitShards, integrationShards, vitestShards);
         const results = files.map((f) => {
           try {
             const name = f.slice(0, -5);
@@ -1052,16 +1361,16 @@ async function main() {
             const log = readFileSync(join(SUITES_FROM, `${name}.log`));
             if (log.length === 0) return null;
             const isUnit = name.startsWith("unit-");
+            const isVitest = name.startsWith("vitest-");
             const script =
-              name === "vitest"
+              name === "vitest-1"
                 ? "test:vitest+test:vitest:ui"
-                : isUnit
-                  ? "test:unit:ci:shard"
-                  : "test:integration:ci";
-            const shard =
-              name === "vitest"
-                ? ""
-                : `${name.split("-")[1]}/${isUnit ? unitShards : integrationShards}`;
+                : isVitest
+                  ? "test:vitest:ui"
+                  : isUnit
+                    ? "test:unit:ci:shard"
+                    : "test:integration:ci";
+            const shard = `${name.split("-")[1]}/${isVitest ? vitestShards : isUnit ? unitShards : integrationShards}`;
             return parseHostedSuiteResult(
               readFileSync(join(SUITES_FROM, f), "utf8"),
               expected && {
@@ -1076,7 +1385,11 @@ async function main() {
             return null;
           }
         });
-        for (const r of foldHostedSuiteResults(results, { unitShards, integrationShards })) {
+        for (const r of foldHostedSuiteResults(results, {
+          unitShards,
+          integrationShards,
+          vitestShards,
+        })) {
           announce(r.label);
           record(r);
         }
@@ -1099,16 +1412,9 @@ async function main() {
             timeout: 120 * 60 * 1000,
           },
       {
-        // Measured 2026-08-05 on an idle 16-core box: 22m08s hermetic (935 tests,
-        // 112 files at --test-concurrency=1, i.e. strictly serial because ~16 of
-        // them bind a port or share a DB). The old "~3-10min" estimate was stale by
-        // ~3x and the 20min ceiling killed a healthy run. 40min keeps the ceiling's
-        // real purpose — turning a genuine hang (unreleased DB handle) into a
-        // visible failure — without punishing a long-but-healthy suite.
         id: "integration",
-        label: "Integration tests (~20-25min)",
-        args: ["run", "test:integration"],
-        timeout: 40 * 60 * 1000,
+        label: "Integration tests (ci.yml shards, one at a time)",
+        run: () => runIntegrationShards(),
       },
       {
         id: "vitest",
@@ -1122,7 +1428,7 @@ async function main() {
       slow.push({
         id: "pack-artifact",
         label: "Package artifact (npm pack policy)",
-        run: runPackArtifactGate,
+        run: (timeout) => runPackArtifactGate(timeout, { independentPolicy: FULL_CI }),
         // Covers build:cli + check:pack-artifact. Measured 2026-10-31 on an idle runner and a
         // stationary tip: next build compiles silently for ~12 min, keeps printing, and the old
         // 20 min ceiling killed it on every scheduled run. 40 min still turns a genuine hang
@@ -1134,6 +1440,8 @@ async function main() {
         // 8 min. Run 42038590490 hit the shared 60 min deadline mid-pack (52.1 + 7.9) and the
         // green run before it passed by 40 s (51.4 + 7.9). 90 min restores real headroom; a
         // genuine hang still fails.
+        // Full CI reserves 3 of those 90 minutes for policy: preparation gets 87.
+        // Standard shares all 90; quick remains 20. Strict staging forbids a rebuild.
         timeout: 90 * 60 * 1000,
       });
     }
@@ -1153,6 +1461,8 @@ async function main() {
         kind: "hard",
         ok: result.code === 0,
         detail: result.code === 0 ? "pass" : result.detail || firstFailureLine(result.out),
+        ...(result.causeId ? { causeId: result.causeId } : {}),
+        ...(result.phaseId ? { phaseId: result.phaseId } : {}),
       });
     }
 
@@ -1166,7 +1476,8 @@ async function main() {
       const bootLabel = "Tarball boot-smoke (installed CLI serves /health)";
 
       if (!packArtifactResult || packArtifactResult.code !== 0) {
-        const out = "skipped because package-artifact did not produce a valid dist/ build";
+        const out =
+          "skipped because package-artifact did not complete successfully; package remains unvalidated";
         saveGateLog("pack-boot", out);
         record({
           id: "pack-boot",
@@ -1174,6 +1485,7 @@ async function main() {
           kind: "hard",
           ok: false,
           detail: out,
+          dependencyOf: "pack-artifact",
         });
       } else {
         announce(bootLabel);
@@ -1205,45 +1517,72 @@ async function main() {
     });
   }
 
-  // --full-ci: run every static gate declared in ci.yml's gate jobs (superset of the
-  // curated HARD list above). Combine with --quick to run ONLY these + drift ratchets
-  // (skip the slow suites) — the "1 command, 0 CI layers" pre-flight for the static category.
+  // --full-ci executes the reviewed static argv profile and rejects drift in modeled
+  // workflow requirements. It does not interpret workflow shell or replace hosted lanes.
   if (FULL_CI) {
     let gates = [];
     try {
-      gates = extractCiGates(readFileSync(join(ROOT, ".github/workflows/ci.yml"), "utf8"));
+      if (i18nComparisonError) throw i18nComparisonError;
+      if (testMaskingBaseError) throw testMaskingBaseError;
+      gates = loadFullCiProfile(ROOT, { comparison: i18nComparison, testMaskingBaseSha });
     } catch (err) {
       record({
         id: "full-ci-extract",
-        label: "full-ci: parse .github/workflows/ci.yml",
+        label: "full-ci: validate explicit static profile",
         kind: "hard",
         ok: false,
-        detail: `could not read/parse ci.yml: ${err?.message || err}`,
+        evidenceState: "INCOMPLETE",
+        detail: `invalid full static profile or comparison: ${err?.message || err}`,
       });
     }
     const already = new Set(results.map((r) => r.id));
-    process.stderr.write(`\n──── full-ci gates from ci.yml (${gates.length}) ────\n`);
+    let metricsCollected = false;
+    process.stderr.write(`\n──── full-ci explicit static gates (${gates.length}) ────\n`);
     for (const g of gates) {
+      const prior = results.find((result) => result.id === curatedEquivalentId(g.id));
+      if (prior && !(g.id === "check:workflows" && prior.kind === "hard")) prior.kind = g.kind;
       // Skip a gate the curated pass already ran with the same id (avoid double-running lint).
       if (already.has(g.id)) continue;
-      const { code, out } = await run(npmCmd, g.args, {
-        env: g.env,
+      const collectsMetrics = g.args[1] === "quality:collect";
+      const checksMetrics = g.args[1] === "quality:ratchet";
+      if ((collectsMetrics && !freshLintReport) || (checksMetrics && !metricsCollected)) {
+        record({
+          id: g.id,
+          label: `${g.job} → npm ${g.args.join(" ")}`,
+          kind: "hard",
+          ok: false,
+          evidenceState: "INCOMPLETE",
+          detail: collectsMetrics
+            ? "current ESLint measurement unavailable; metrics were not collected"
+            : "current metrics collection incomplete; ratchet was not evaluated",
+        });
+        continue;
+      }
+      const { code, out, receipt } = await run(npmCmd, g.args, {
+        env: { ...g.env, ...(collectsMetrics ? { ESLINT_RESULTS_JSON: freshLintReport } : {}) },
         timeout: fullCiTimeoutFor(g.id),
       });
       saveGateLog(`fullci-${g.id.replace(/[^a-z0-9]+/gi, "-")}`, out);
+      const outcome = staticGateOutcome(code, out, receipt.outcome);
+      const workflowOutcome =
+        g.id === "check:workflows" ? evaluateWorkflowRun({ code, out }) : null;
+      if (collectsMetrics) metricsCollected = outcome.ok;
       record({
         id: g.id,
-        label: `ci.yml:${g.job} → npm ${g.args.join(" ")}`,
-        // Respect the curated classification when the curated pass already ran an equivalent
-        // gate under a different id — otherwise the same ratchet is reported as a HARD failure
-        // here AND as drift above, in one self-contradicting verdict.
-        ...(g.id === "check:workflows"
-          ? evaluateWorkflowRun({ code, out })
+        label: `${g.job} → npm ${g.args.join(" ")}`,
+        ...(workflowOutcome
+          ? workflowOutcome
           : {
-              kind: fullCiKindFor(g.id, results),
-              ok: code === 0,
-              detail: code === 0 ? "pass" : firstFailureLine(out),
+              ok: outcome.ok,
+              evidenceState: outcome.evidenceState,
+              detail:
+                outcome.evidenceState === "INCOMPLETE"
+                  ? "required measurement incomplete; inspect gate log"
+                  : outcome.ok
+                    ? "pass"
+                    : firstFailureLine(out),
             }),
+        kind: workflowOutcome?.kind === "hard" ? "hard" : fullCiKindFor(g.id, results, g.kind),
       });
     }
   }
@@ -1258,49 +1597,62 @@ async function main() {
         kind: "hard",
         ok: false,
         detail: `${receipt.outcome}: ${receipt.receiptPath}`,
+        causeId: receipt.invocationId,
       });
     }
   });
   const { releaseGreen, hardFailures, drift } = computeVerdict(results);
+  const executionIncidents = summarizeExecutionIncidents(results);
 
   process.stderr.write("\n──────── verdict ────────\n");
-  process.stderr.write(`HARD failures (block — real defects): ${hardFailures.length}\n`);
+  process.stderr.write(
+    `HARD failures (blocking requirements or incomplete evidence): ${hardFailures.length}\n`
+  );
+  process.stderr.write(
+    `Command incidents: ${executionIncidents.incidentCount}; blocked dependencies: ${executionIncidents.blockedDependencies.length}\n`
+  );
   hardFailures.forEach((r) => process.stderr.write(`  ❌ ${r.label}: ${r.detail}\n`));
-  process.stderr.write(`Ratchet drift (non-blocking — rebaseline at release): ${drift.length}\n`);
+  process.stderr.write(`Advisory drift in this profile: ${drift.length}\n`);
   drift.forEach((r) => process.stderr.write(`  🟡 ${r.label}: ${r.detail}\n`));
   process.stderr.write(
     releaseGreen
-      ? "\n✅ RELEASE-GREEN (no hard failures). Any drift above is rebaselined at release, not a contributor concern.\n"
+      ? "\n✅ RELEASE-GREEN for this observer profile. Advisory debt remains visible; candidate admission requires every applicable check.\n"
       : "\n❌ NOT release-green — inspect execution evidence and compare the exact base before attributing a failure to a contributor.\n"
   );
 
   if (JSON_OUT) {
-    process.stdout.write(
-      JSON.stringify(
-        {
-          schemaVersion: 1,
-          candidateSha: execFileSync("git", ["rev-parse", "HEAD"], {
-            cwd: ROOT,
-            encoding: "utf8",
-          }).trim(),
-          profile: QUICK ? "quick" : WITH_BUILD && FULL_CI ? "full" : "standard",
-          completedAt: new Date().toISOString(),
-          releaseGreen,
-          hardFailures: hardFailures.map((r) => ({ id: r.id, label: r.label, detail: r.detail })),
-          drift: drift.map((r) => ({ id: r.id, label: r.label, detail: r.detail })),
-          checks: results.map((r) => ({
-            id: r.id,
-            kind: r.kind,
-            ok: r.ok,
-            detail: r.detail,
-            ...(r.evidenceState ? { evidenceState: r.evidenceState } : {}),
-          })),
-          commandReceipts,
-        },
-        null,
-        2
-      ) + "\n"
-    );
+    flushingJson = true;
+    try {
+      await writeObserverJson({
+        schemaVersion: 1,
+        candidateSha: execFileSync("git", ["rev-parse", "HEAD"], {
+          cwd: ROOT,
+          encoding: "utf8",
+        }).trim(),
+        profile: QUICK ? "quick" : WITH_BUILD && FULL_CI ? "full" : "standard",
+        completedAt: new Date().toISOString(),
+        i18nComparison,
+        testMaskingBaseSha,
+        releaseGreen,
+        hardFailures: hardFailures.map((r) => ({ id: r.id, label: r.label, detail: r.detail })),
+        drift: drift.map((r) => ({ id: r.id, label: r.label, detail: r.detail })),
+        checks: results.map((r) => ({
+          id: r.id,
+          kind: r.kind,
+          ok: r.ok,
+          detail: r.detail,
+          ...(r.evidenceState ? { evidenceState: r.evidenceState } : {}),
+          ...(r.causeId ? { causeId: r.causeId } : {}),
+          ...(r.phaseId ? { phaseId: r.phaseId } : {}),
+          ...(r.dependencyOf ? { dependencyOf: r.dependencyOf } : {}),
+        })),
+        commandReceipts,
+        executionIncidents,
+      });
+    } catch {
+      process.stderr.write("Observer JSON output failed; evidence is incomplete.\n");
+      process.exit(1);
+    }
   }
 
   process.exit(releaseGreen ? 0 : 1);

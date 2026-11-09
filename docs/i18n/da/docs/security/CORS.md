@@ -56,11 +56,11 @@ på grund af én konkret implementeringsdetalje:
 
 Det betyder følgende for hver flade, selv med `CORS_ALLOW_ALL=true`:
 
-| Flade                                        | Godkendelsesmekanisme      | Effekt af CORS med jokertegn                                                                                                                                                                                                                                                                                                                |
-| -------------------------------------------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Dashboard / MANAGEMENT `/api/*`              | Cookiesession              | Oprindelsen returneres, men **uden `Allow-Credentials`** **blokerer** browseren den legitimationsoplysningsbaserede læsning. Et ondsindet websted fra en anden oprindelse **kan ikke læse** dine godkendte dashboardsvar, og sessionscookien eksponeres ikke.                                                                               |
-| Klient-API `/v1/*`, `/v1beta/*`              | Bearer-/`x-api-key`-header | Er allerede eftergivende **med vilje** (`relaxForTokenAuth`): Browsere vedhæfter aldrig automatisk `Authorization`/`x-api-key`, så en angribers side kan ikke levere din nøgle. Ekkoet gælder kun, når den fremsendte nøgle er valideret; anonyme svar (`REQUIRE_API_KEY=false`) beholder allowlisten. `CORS_ALLOW_ALL` udvider ikke dette. |
-| Offentlig skrivebeskyttet (`/api/health`, …) | Ingen                      | Ikke følsomt; jokertegnet er harmløst.                                                                                                                                                                                                                                                                                                      |
+| Flade                                        | Godkendelsesmekanisme      | Effekt af CORS med jokertegn                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| -------------------------------------------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Dashboard / MANAGEMENT `/api/*`              | Cookiesession              | Oprindelsen returneres, men **uden `Allow-Credentials`** **blokerer** browseren den legitimationsoplysningsbaserede læsning. Et ondsindet websted fra en anden oprindelse **kan ikke læse** dine godkendte dashboardsvar, og sessionscookien eksponeres ikke.                                                                                                                                                                                                                                                                                                                               |
+| Klient-API `/v1/*`, `/v1beta/*`              | Bearer-/`x-api-key`-header | Er allerede eftergivende **med vilje** (`relaxForTokenAuth`): Browsere vedhæfter aldrig automatisk `Authorization`/`x-api-key`, så en angribers side kan ikke levere din nøgle. Den lempede gengivelse af oprindelsen kræver en autentificeret part (en valideret API-nøgle eller en valideret dashboardsession), ikke blot en header med legitimationsoplysninger, og inkluderer aldrig `Access-Control-Allow-Credentials`. Anonyme svar (`REQUIRE_API_KEY=false`) bruger den konfigurerede liste over tilladte oprindelser, herunder en udtrykkelig aktivering med `CORS_ALLOW_ALL=true`. |
+| Offentlig skrivebeskyttet (`/api/health`, …) | Ingen                      | Ikke følsomt; jokertegnet er harmløst.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 
 Den **resterende** eksponering ved `CORS_ALLOW_ALL=true` er derfor begrænset til: (a)
 læsning på tværs af oprindelser uden legitimationsoplysninger af data, der allerede er tilgængelige uden godkendelse, og (b)
@@ -122,9 +122,7 @@ uden genstart.
   aldrig automatisk disse. CORS er ikke en meningsfuld barriere her — API-nøglen
   er barrieren — og derfor er denne grænseflade bevidst tilladende, så browser- og
   Electron-klienter kan læse svar, som de allerede har adgang til.
-  Det lempede ekko følger den validerede nøgle, ikke blot tilstedeværelsen af headeren:
-  når `REQUIRE_API_KEY=false` behandler en anmodning anonymt, beholder dens vellykkede
-  svar den fail-closed allowlist. Godkendelsesafvisninger (401) forbliver læsbare, så
+  Den lempede gengivelse af oprindelsen kræver en autentificeret part (en valideret API-nøgle eller en valideret dashboardsession), ikke blot en header med legitimationsoplysninger, og inkluderer aldrig `Access-Control-Allow-Credentials`. Anonyme svar (`REQUIRE_API_KEY=false`) bruger den konfigurerede liste over tilladte oprindelser, herunder en udtrykkelig aktivering med `CORS_ALLOW_ALL=true`. Godkendelsesafvisninger (401) forbliver læsbare, så
   klienter kan vise en tilbagekaldt eller fejlindtastet nøgle (#5242): pipelinens egen
   401 beholder ekkoet, og en rute, der selv afviser nøglen, efter at pipelinen har
   behandlet anmodningen som anonym (`/v1/models` og `/v1beta/models` med konfigureret
@@ -135,8 +133,7 @@ uden genstart.
   cookien `auth_token`), ikke af hvilken af dem ruten kontrollerede, og kombineres aldrig
   med `Access-Control-Allow-Credentials`; brødteksten er en fast fejlkonvolut.
   Administrationsruter under `/api/v1/`, der er beskyttet af `requireManagementAuth()`
-  (`/api/v1/management/*`, `/api/v1/registered-keys`), tilføjer ikke ekkoet: med
-  `REQUIRE_API_KEY=false` kan deres 401/403 ikke læses på tværs af oprindelser.
+  (`/api/v1/management/*`, `/api/v1/registered-keys`), bruger ikke denne undtagelse ved afvisning af legitimationsoplysninger: med `REQUIRE_API_KEY=false` følger deres 401/403-svar den konfigurerede CORS-politik for oprindelser.
 - **Cookie-session (dashboardet):** beskyttes af den fail-closed-standardindstilling **og**
   af fraværet af `Access-Control-Allow-Credentials` på den delte sti. Undlad at
   inkludere administrations-/dashboard-origins i tilladende konfigurationer; de skal
@@ -150,8 +147,7 @@ inferensoutput, kontrollerer selv handshakens `Origin`
 OmniRoute køres via `npm start` / `npm run dev`, broen på `/v1/ws` og
 `/api/v1/ws`, som streamer `/v1/chat/completions`, `/v1/messages` og
 `/v1/responses` som frames. Broen spørger `/api/v1/ws?handshake=1` om afgørelsen og
-nægter at opgradere, medmindre den rute har udført kontrollen. En handshake accepteres,
-når:
+nægter at opgradere, medmindre den rute har udført kontrollen. Kravene til autentificering gælder stadig separat. Kontrollen af oprindelsen godkendes, når:
 
 - den ikke har nogen `Origin`-header (Codex CLI, SDK'er og andre klienter, der ikke er browsere);
 - dens `Origin` tillades af ovenstående allowlist (`CORS_ALLOWED_ORIGINS`, indstillingen

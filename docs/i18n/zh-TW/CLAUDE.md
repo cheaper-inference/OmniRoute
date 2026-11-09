@@ -11,7 +11,7 @@
 ## Worktree 隔離 — Claude Code 專屬事項
 
 完整的強制 worktree 協定(基底分支確認、`.claude/worktrees/` 標準路徑、`cp -al` node_modules、拆除規則)請參閱
-[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md)(摘要見 `AGENTS.md` →
+[`docs/ops/WORKTREE_ISOLATION.md`](../../../docs/ops/WORKTREE_ISOLATION.md)(摘要見 `AGENTS.md` →
 Git 工作流程 →「Worktree 隔離」)。Claude Code 專屬事項:
 
 - 透過 `AskUserQuestion` 向操作者確認基底分支(硬性規則 #19),除非對方

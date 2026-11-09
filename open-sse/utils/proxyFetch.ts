@@ -187,11 +187,11 @@ export type AppliedProxySink = {
    */
   reselectPoolMember?: () => Promise<unknown>;
   /**
-   * Wall-clock Date.now() of the first upstream dispatch inside this capture
-   * (sticky: the first writer wins, retries keep the original stamp). Null /
-   * absent when nothing dispatched. Lets the call log derive how long the
-   * request waited in OmniRoute (scheduling, translation, parking) before the
-   * first byte left for the provider.
+   * Wall-clock Date.now() immediately before the first executor invocation
+   * inside this capture (sticky: retries keep the original stamp). Null /
+   * absent when no executor was invoked. The call log derives pipeline wait
+   * before that invocation; setup inside the executor and transport timing
+   * are outside this measurement.
    */
   upstreamDispatchedAt?: number | null;
 };
@@ -308,9 +308,9 @@ export function readUpstreamDispatchedAt(): number | null {
 }
 
 /**
- * Queue wait = how long the serving execution waited from `startTime` until
- * the first byte left for the provider. Null when no dispatch happened
- * (rejected before egress); clamped at 0 against clock skew.
+ * Queue wait = time from the serving execution's `startTime` until the first
+ * executor invocation. This does not measure the first byte on the network.
+ * Null when no executor was invoked; clamped at 0 against clock skew.
  */
 export function queueWaitMsFromDispatch(
   upstreamDispatchedAt: number | null,

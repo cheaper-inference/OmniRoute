@@ -899,14 +899,7 @@ lukuun ottamatta avaimia `text` ja `highlights` poistetaan ennen kutsua. Vanhent
 `subpages`, `subpageTarget`, `highlights.numSentences` ja `highlights.highlightsPerUrl` ei enää
 välitetä eteenpäin.
 
-Kustannusten kirjaaminen käyttää tasaista rekisteriä `costPerQuery`, paitsi Exan osalta, joka
-noudattaa Exan omaa hinnoittelua: 0,007 $ kutsulta arvolla `auto` (ja vanhalla arvolla `fast`) tai
-0,004 $ arvolla `lite` (ja vanhalla arvolla `instant`), kattaen 10 tulosta; 0,001 $ jokaisesta
-lisätuloksesta; sekä 0,001 $ jokaisesta palautetusta tuloksesta, kun `contents.summary` on asetettu.
-Tavily kirjataan 1 krediittinä (0,008 $), kun `search_depth` on `basic`, `fast` tai `ultra-fast`,
-ja 2 krediittinä (0,016 $), kun se on `advanced`
-([Tavily API -krediitit](https://docs.tavily.com/documentation/api-credits)). Kutsu, jossa
-`auto_parameters: true` saa Tavilyn päivittämään haun advanced-tilaan, kirjataan silti 1 krediittinä.
+Exa: 0,007 $ per puhelu `auto` (ja vanhalle `fast`) tai 0,004 $ `lite` :lle (ja vanhalle `instant`), joka kattaa 10 tulosta; 0,001 dollaria jokaisesta lisätuloksesta; ja 0,001 $ per palautettu tulos, kun `contents.summary` on asetettu. Tavily on kirjattu 1 krediittiin (0,008 dollaria) `search_depth` `basic`, `fast` ja `ultra-fast` ja 2 krediittiä (0,016 dollaria) `advanced` ( [Tavily API krediittejä](https://docs.tavily.com/documentation/api-credits) ). Puhelu `auto_parameters: true` llä, jonka Tavily päivittää edistyneemmäksi, tallennetaan edelleen 1 pisteellä.
 
 ---
 
@@ -1225,6 +1218,8 @@ X-OmniRoute-No-Cache: true
 
 ---
 
+<a id="cliproxyapi-management-compatibility"></a>
+
 ## CLIProxyAPI-hallinnan yhteensopivuus
 
 OmniRoute vastaa kolmeen [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI)
@@ -1239,20 +1234,11 @@ tarjotaan poluissa `/v0/management/*` ja `/api/v0/management/*`.
 | POST      | `/v0/management/api-call`    | Runko `{ auth_index, method, url, header?, data? }`. Lähettää yhden sallittujen luettelossa olevan pyynnön tilin tunnuksella ja palauttaa `{ status_code, body }` |
 | POST      | `/v0/management/reset-quota` | Runko `{ auth_index }`. Tyhjentää yhden tilin yhteyden jäähdytysajan, mallien estot ja Codexin käyttöaluekohtaiset jäähdytysajat                                  |
 
-- `auth_index` on OmniRouten yhteyden tunnus. `provider` on `claude` tai `codex` (vain OAuth-
-  yhteydet; `anthropic` API-avainpalveluntarjoajaa ei luetella). Codexin tapauksessa
-  `id_token.chatgpt_account_id` on tallennettu työtilan tunnus ja `plan_type` tallennettu tilaus.
+- `auth_index` on OmniRoute-yhteyden tunnus. `provider` on `claude` tai `codex` (vain OAuth-yhteydet; API-avainpalveluntarjoajaa `anthropic` ei luetella). Codexissa `id_token.chatgpt_account_id` on tallennettu työtilatunnus ja `plan_type` tallennettu tilaustaso.
 - `api-call` ei ole yleinen välityspalvelin. Se hyväksyy vain Clauden `GET
-https://api.anthropic.com/api/oauth/usage`- ja Codexin `GET https://chatgpt.com/backend-api/wham/usage`-, `GET .../wham/rate-limit-reset-credits`- sekä
-  `POST .../wham/rate-limit-reset-credits/consume`-pyynnöt, kukin vain vastaavan
-  palveluntarjoajan tilille. Kaikki muu palauttaa `403` ottamatta yhteyttä upstreamiin. Kutsujan
-  `Authorization`-otsake (mukaan lukien `$TOKEN$`-paikkamerkki) ohitetaan: OmniRoute lisää
-  yhteyden käyttöoikeustunnuksen ja päivittää sen ensin, jos se on vanhenemassa, ja välittää vain
-  sallittujen luettelossa olevat otsakkeet (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`;
-  `Accept`, `Content-Type`). Puuttuva `Chatgpt-Account-Id` käyttää oletuksena tallennettua työtilan tunnusta.
-  Pyyntöjen aikakatkaisu on 15 sekuntia, ja ne käyttävät yhteyden välityspalvelinta.
-- `reset-quota` jättää päätetyt tilat (`banned`, `expired`, `credits_exhausted`) ennalleen. Tuntematon
-  `auth_index` palauttaa `404`.
+https://api.anthropic.com/api/oauth/usage`-kutsun ja Codexin `GET
+https://chatgpt.com/backend-api/wham/usage`-, `GET .../wham/rate-limit-reset-credits`- ja `POST .../wham/rate-limit-reset-credits/consume`-kutsut, jokaisen vain vastaavan palveluntarjoajan tilille. Kaikki muu palauttaa `403` ottamatta yhteyttä upstream-palveluun. Kutsujan `Authorization`-otsake (myös paikkamerkki `$TOKEN$`) ohitetaan: OmniRoute lisää yhteyden käyttötokenin, päivittää sen ensin vanhenemisen lähestyessä ja välittää vain sallitut otsakkeet (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`; `Accept`, `Content-Type`). Puuttuvan `Chatgpt-Account-Id`-arvon oletuksena käytetään tallennettua työtilatunnusta. Jos ensimmäinen upstream-vastaus on `401`, päivitys tehdään kerran ja pyyntöä yritetään uudelleen vain käyttötokenin muuttuessa. Jokainen upstream-yritys aikakatkaistaan 15 sekunnin kuluttua ja käyttää yhteyden välityspalvelinta.
+- `reset-quota` jättää lopulliset tilat (banned, expired, credits_exhausted) ennalleen. Tuntematon `auth_index` palauttaa `404`.
 
 **Todennus:** hallintapaneelin istunto tai `manage`-laajuuden API-avain vaaditaan myös silloin, kun kirjautuminen on poistettu käytöstä
 (polut ovat luettelossa `ALWAYS_PROTECTED_API_PATHS`). Vain päättelyyn tarkoitetut avaimet saavat vastauksen `403`. Lähde:
@@ -1967,17 +1953,17 @@ Pysyvä keskustelu-/faktamuistivarasto, jonka laajuus on API-avainkohtainen / is
 
 OmniRoute sisältää upotetun Model Context Protocol -palvelimen, jossa on kolme siirtotapaa (stdio, SSE, streamable-http) ja rajatut työkalut. Alla olevat hallintapaneelin päätepisteet lukevat tila-/auditointitietoja ja välittävät HTTP-siirrot.
 
-| Menetelmä | Polku | Kuvaus |
-| ------ | ---------------------- | ------------------------------------------------------------------------------------------------ | -------------------- |
-| GET | `/api/mcp/status` | Sydämenlyönti, siirtotapa, online-tila, viimeisin kutsu, tärkeimmät työkalut, onnistumisprosentti 24 tunnin ajalta |
-| GET | `/api/mcp/tools` | MCP-työkalujen luettelo, joka sisältää `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints` |
-| GET | `/api/mcp/sse` | Avaa SSE-virran SSE-siirtoa varten (palauttaa `503`, jos MCP on poistettu käytöstä tai siirtotapa ei täsmää) |
-| POST | `/api/mcp/sse` | Lähetä JSON-RPC-kehys SSE-siirron kautta |
-| GET | `/api/mcp/stream` | Avaa Streamable HTTP -siirron SSE-puolen (palvelimen aloittamat viestit) |
-| POST | `/api/mcp/stream` | Lähetä JSON-RPC-kehys Streamable HTTP -siirron kautta |
-| DELETE | `/api/mcp/stream` | Lopeta Streamable HTTP -istunto |
-| GET | `/api/mcp/audit` | Kysely auditointilokiin — `?limit=`, `?offset=`, `?tool=`, `?success=true                                | false`, `?apiKeyId=` |
-| GET | `/api/mcp/audit/stats` | Kooste auditointitilastoista (määrät, onnistumisprosentti, keskimääräinen kesto, tärkeimmät työkalut) |
+| Menetelmä | Polku                  | Kuvaus                                                                                                                           |
+| --------- | ---------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| GET       | `/api/mcp/status`      | Sydämenlyönti, siirtotapa, online-tila, viimeisin kutsu, tärkeimmät työkalut, onnistumisprosentti 24 tunnin ajalta               |
+| GET       | `/api/mcp/tools`       | MCP-työkalujen luettelo, joka sisältää `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints`                 |
+| GET       | `/api/mcp/sse`         | Avaa SSE-virran SSE-siirtoa varten (palauttaa `503`, jos MCP on poistettu käytöstä tai siirtotapa ei täsmää)                     |
+| POST      | `/api/mcp/sse`         | Lähetä JSON-RPC-kehys SSE-siirron kautta                                                                                         |
+| GET       | `/api/mcp/stream`      | Avaa Streamable HTTP -siirron SSE-puolen (palvelimen aloittamat viestit)                                                         |
+| POST      | `/api/mcp/stream`      | Lähetä JSON-RPC-kehys Streamable HTTP -siirron kautta                                                                            |
+| DELETE    | `/api/mcp/stream`      | Lopeta Streamable HTTP -istunto                                                                                                  |
+| GET       | `/api/mcp/audit`       | Kysely auditointilokiin — `?limit=`, `?offset=`, `?tool=`, `?success=true                                \| false`, `?apiKeyId=` |
+| GET       | `/api/mcp/audit/stats` | Kooste auditointitilastoista (määrät, onnistumisprosentti, keskimääräinen kesto, tärkeimmät työkalut)                            |
 
 **Todennus:** `sse`/`stream`-siirtotavat noudattavat MCP-kohtaista todennusrajapintaa (Bearer API-avain, jolla on `mcp`-laajuus); `status`/`tools`/`audit*`-reitit ovat luettavissa hallintapaneelista (hallintapaneelin isäntään pääsyyn ei tarvita muuta todennusta).
 

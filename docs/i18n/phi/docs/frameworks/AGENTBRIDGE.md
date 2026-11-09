@@ -20,7 +20,7 @@ Kapag ang isang IDE agent (hal., GitHub Copilot, Cursor, Claude Code) ay tumawag
 
 Nangangahulugan ito na maaari mong:
 
-- **I-rerouting ang sinumang ahente sa alinmang provider** : kinakausap ni Copilot si OpenAI? I-redirect ito sa Anthropic Claude, Gemini, o alinman sa 380 provider ng OmniRoute.
+- **I-rerouting ang sinumang ahente sa alinmang provider** : kinakausap ni Copilot si OpenAI? I-redirect ito sa Anthropic Claude, Gemini, o alinman sa 381 provider ng OmniRoute.
 - **Ilapat ang mga pagmamapa ng modelo** : `gemini-3-flash` → `claude-sonnet-4.7` nang malinaw sa antas ng handler.
 - **Obserbahan ang lahat ng trapiko ng ahente** : bawat naharang na kahilingan ay nai-publish sa [Traffic Inspector](./TRAFFIC_INSPECTOR.md).
 - **Ilapat ang OmniRoute resilience** : combo routing, circuit breaker, fallbacks, at cost tracking work para din sa trapiko IDE agent.
@@ -548,7 +548,7 @@ Ang Trae ay isang medyo bagong AI coding assistant. Bago magpatupad ng handler:
 3. Tukuyin ang mekanismo ng authentication
 4. Suriin kung itutuloy o hindi batay sa TOS at kung gaano kadaling matuklasan ang API
 
-Hanggang sa makumpleto ang pagsisiyasat, nagpapakita ang Trae card sa dashboard ng badge na "Sinisiyasat" na may link na "Iulat ang pagiging posible." Ang handler stub sa `src/mitm/handlers/trae.ts` ay naglalabas ng structured na error na `Hindi pa naipapatupad`.
+Hanggang sa makumpleto ang pagsisiyasat, nagpapakita ang Trae card sa dashboard ng badge na "Sinisiyasat" na may link na "Iulat ang pagiging posible." Ang handler stub sa `src/mitm/handlers/trae.ts` ay naglalabas ng structured na error na `Not yet implemented`.
 
 ### Mga backlog agent (kailangan ang MITM — walang suporta para sa custom base URL)
 

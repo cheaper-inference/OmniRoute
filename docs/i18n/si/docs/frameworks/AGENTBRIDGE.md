@@ -20,12 +20,12 @@ IDE නියෝජිතයෙකු (උදා, GitHub Copilot, Cursor, Claude
 
 මෙයින් අදහස් කරන්නේ ඔබට කළ හැක්කේ:
 
-- **ඕනෑම නියෝජිතයෙකු ඕනෑම සැපයුම්කරුවෙකු වෙත ආපසු හරවන්න** : Copilot OpenAI සමඟ කතා කරනවාද? එය Anthropic Claude, Gemini, හෝ OmniRoute හි 380 සපයන්නන්ගෙන් ඕනෑම කෙනෙකුට හරවා යවන්න.
+- **ඕනෑම නියෝජිතයෙකු ඕනෑම සැපයුම්කරුවෙකු වෙත ආපසු හරවන්න** : Copilot OpenAI සමඟ කතා කරනවාද? එය Anthropic Claude, Gemini, හෝ OmniRoute හි 381 සපයන්නන්ගෙන් ඕනෑම කෙනෙකුට හරවා යවන්න.
 - **ආකෘති සිතියම්කරණය යොදන්න** : `gemini-3-flash` → `claude-sonnet-4.7` හසුරුවන්න මට්ටමේ විනිවිද පෙනෙන ලෙස.
 - **සියලුම නියෝජිත ගමනාගමනය නිරීක්ෂණය කරන්න** : බාධා කරන ලද සෑම ඉල්ලීමක්ම [රථවාහන පරීක්ෂක](./TRAFFIC_INSPECTOR.md) වෙත ප්‍රකාශ කරනු ලැබේ.
 - **OmniRoute ඔරොත්තු දීමේ හැකියාව යොදන්න** : combo routing, circuit Breakers, Fallbacks, and cost tracking work for IDE agent traffic සඳහාද.
 
-### වෙළඳපොළට එරෙහිව ස්ථානගත කිරීම
+### ස්ථානගත කිරීම එදිරිව වෙළෙඳපොළ
 
 | විශේෂාංගය               | 9 රවුටරය | විරෝධී api | llm-interceptor | **OmniRoute AgentBridge** |
 | ----------------------- | :------: | :--------: | :-------------: | :-----------------------: |
@@ -551,7 +551,7 @@ Trae යනු සාපේක්ෂව නව AI කේතකරණ සහා�
 3. authentication යාන්ත්රණය තීරණය කරන්න
 4. TOS සහ API සොයාගත හැකි බව මත පදනම්ව ඉදිරියට යා යුතුද නැද්ද යන්න තක්සේරු කරන්න
 
-විමර්ශනය සම්පූර්ණ වන තෙක්, dashboard එකෙහි Trae card එක "විමර්ශනය කරමින් පවතී" badge එකක් සහ "ශක්යතාව වාර්තා කරන්න" link එකක් පෙන්වයි. `src/mitm/handlers/trae.ts` හි ඇති handler stub එක ව්යූහගත `තවම ක්රියාත්මක කර නොමැත` error එකක් නිකුත් කරයි.
+විමර්ශනය සම්පූර්ණ වන තෙක්, dashboard එකෙහි Trae card එක "විමර්ශනය කරමින් පවතී" badge එකක් සහ "ශක්යතාව වාර්තා කරන්න" link එකක් පෙන්වයි. `src/mitm/handlers/trae.ts` හි ඇති handler stub එක ව්යූහගත `Not yet implemented` error එකක් නිකුත් කරයි.
 
 ### Backlog agents (MITM අවශ්යයි — custom base URL සඳහා සහාය නැත)
 

@@ -1155,7 +1155,7 @@ export const OPENAPI_ENDPOINTS: OpenApiEndpoint[] = [
     method: "POST",
     summary: "System One typed decisions",
     description:
-      "One `state` plus typed `questions` (`noul` / `choice` / `score`); the backend is selected by the model id — `typesafe/jev-*` or a bare `jev-*` alias routes natively to api.typesafe.ai, `openrouter/<vendor>/ <model>` routes to OpenRouter's alpha decisions endpoint. Answers, probabilities and usage (tokens, cost) pass through untouched.",
+      "One `state` plus typed `questions` (`noul` / `choice` / `score`); the backend is selected by the model id — `typesafe/jev-*` or a bare `jev-*` alias routes natively to api.typesafe.ai, `openrouter/<vendor>/<model>` routes to OpenRouter's alpha decisions endpoint. Answers, probabilities and usage (tokens, cost) pass through untouched.",
     tag: "Decisions",
     tags: ["Decisions"],
     requiresAuth: true,

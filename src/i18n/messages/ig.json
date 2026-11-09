@@ -4147,7 +4147,9 @@
     "duplicateAutoComboFailedPrefix": "Ime oyiri nke ngwakọta akpaka dara:",
     "duplicateAutoComboUnknownError": "Njehie amaghị ama",
     "duplicateAutoComboTitle": "Mepụta ngwakọta anaghị agbanwe agbanwe site na {name}",
-    "fallbackSummary": "{rate}% nke akaụnyụ jiri ọnụọgụgụ, otu ụzọ dịka ~{skips} ihe ebe a chọrọ"
+    "fallbackSummary": "{rate}% nke akaụnyụ jiri ọnụọgụgụ, otu ụzọ dịka ~{skips} ihe ebe a chọrọ",
+    "reorderAll": "Dezie ha niile",
+    "reorderAllDescription": "Na-atụgharị combos {count} niile. Agbanyere aka ịdọrọ."
   },
   "costs": {
     "title": "Ọnụ ahịa",
@@ -6860,7 +6862,7 @@
       "xai": "Jikọọ xAI (Grok) site na API key.",
       "xiaomi-mimo": "Jikọọ Xiaomi MiMo site na API key.",
       "yi": "Nweta API key na platform.lingyiwanwu.com",
-      "zai": "API key sitere na https://open.bigmodel.cn/usercenter/apikeys",
+      "zai": "API key sitere na https://z.ai/manage-apikey/apikey-list",
       "zenmux": "ZenMux na-enye ebe njedebe mmezu nkata dakọtara na OpenAI na /api/v1/chat/completions, tinyere ọnụ njikọ protokol Anthropic Messages (/api/anthropic/v1/messages) na Google Gemini (/api/vertex-ai). OmniRoute na-eji protokol OpenAI.",
       "galadriel": "Jikọọ Galadriel site na API key.",
       "predibase": "Kredit nnwale efu $25 (ọ dị irè ụbọchị 30)",
@@ -14255,6 +14257,10 @@
         "label": "Nkwụsị Akụrụngwa nke Prioriti Echedoro dịka 502",
         "description": "Zaghachi 502 kama 503 mgbe ebumnuche prioriti quota-only-fallback kwụsịrị combo n'ihi ihe e gosipụtara na ọ bụghị quota: provider circuit breaker mepere emepe ma ọ bụ predictive latency skip."
       },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Atụgharị Mmefu Ojiji Na-enweghị Ọnụahịa",
+        "description": "Otu ókè USD kwa ụbọchị/kwa izu nke igodo si elee ojiji rụpụtara anya mgbe onye na-eweta ma ọ bụ nlereanya enweghị ahịrị ọnụahịa. fail_closed (ndabara) na-ama oge ahụ dịka gafere, yabụ na ọnụahịa amaghị agaghị agafe oke siri ike. count_as_zero na-atụle ojiji ahụ dị ka $0 ma na-aga n’ihu na-eme ka mmefu e nwere ọnụahịa ka na-arụ ọrụ. A na-edekọ nlereanya ndị enweghị ọnụahịa na ibe isi dashboard n’agbanyeghị."
+      },
       "AUTH_LOG_INCLUDE_ACCOUNT_ID": {
         "label": "Log Account IDs",
         "description": "Tinye prefix akaụntụ n'ahịrị log AUTH (dịka \"Using '<provider>' account: abc12345...\"). Agbanyụrụ ya na ndabara ka e zoo njirimara akaụntụ na log usoro a na-ekerịta/nke ọtụtụ tenant. Ọ nọọrọ onwe ya n'ebe Debug Mode nọ; ịgbanwe Debug Mode anaghị ekpughe ya."
@@ -14535,9 +14541,9 @@
         "label": "Nnwagharị Cooldown: Mafere Ọjụjụ 403/410",
         "description": "Mgbe akaụntụ niile nọ na cooldown ma cooldown nke na-ebu ụzọ gwụ bụ nke 403 (ajụrụ ohere) ma ọ bụ 410 (adịkwaghị) kpatara, weghachi ọjụjụ ahụ ozugbo kama ichere ka cooldown ahụ gwụ ma zigharịa arịrịọ ahụ; a na-echekwa agentrouter connection-scoped quota 403 na-emeghachi ọhụrụ nwere errorCode 429 ka o wee nọgide na-enwe ike ịnwagharị ya. Agbanyụrụ na ndabara: naanị 401 na-amafe nchere ahụ, a na-echekwa ọjụjụ ọ bụla nwere ọnọdụ o ji bịa."
       },
-      "UNPRICED_USAGE_BUDGET_POLICY": {
-        "label": "Atụgharị Mmefu Ojiji Na-enweghị Ọnụahịa",
-        "description": "Otu ókè USD kwa ụbọchị/kwa izu nke igodo si elee ojiji rụpụtara anya mgbe onye na-eweta ma ọ bụ nlereanya enweghị ahịrị ọnụahịa. fail_closed (ndabara) na-ama oge ahụ dịka gafere, yabụ na ọnụahịa amaghị agaghị agafe oke siri ike. count_as_zero na-atụle ojiji ahụ dị ka $0 ma na-aga n’ihu na-eme ka mmefu e nwere ọnụahịa ka na-arụ ọrụ. A na-edekọ nlereanya ndị enweghị ọnụahịa na ibe isi dashboard n’agbanyeghị."
+      "COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE": {
+        "description": "N'ime stats cache mkpakọ, gụọ arịrịọ agbakwunyere na onye na-eweta caching prefix akpaaka (OpenAI, Codex, Azure, ma ọ bụ njikọ omenala nke na-ekwupụta caching ngwa ngwa na ihe nrịbama akara) dị ka echere cache kụrụ ọbụlagodi na enweghị akara cache_control. Atụmatụ ahụ bụ akara ntozu nke cache, ọ bụghị ihe a hụrụ n'anya, yabụ ọnụego a kọrọ maka ndị na-enye ndị ahụ na-aga n'ihu na 100%. Gbanyụọ na ndabara: naanị arịrịọ na-ebu akara cache_control gaa na onye na-eweta caching na-agụta dị ka ihe echere echere, yabụ ndị na-eweta prefix akpaka na-aga n'ihu na-akọ 0.",
+        "label": "Nchịkọta cache mkpakọ: ntozu akpaaka-prefix"
       }
     }
   },

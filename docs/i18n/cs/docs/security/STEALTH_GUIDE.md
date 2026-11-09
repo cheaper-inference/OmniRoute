@@ -248,9 +248,9 @@ Všechny koncové body MITM vyžadují ověření správy (`requireCliToolsAuth`
 
 ---
 
-## User-Agent Overrides — env vars (`.env.example` sekce 12)
+## Přepsání User-Agent — proměnné prostředí (oddíl 12 souboru `.env.example`)
 
-| Variabilní          | Výchozí                                       |
+| Proměnná            | Výchozí hodnota                               |
 | ------------------- | --------------------------------------------- |
 | `CLAUDE_USER_AGENT` | `claude-cli/2.1.280 (external, cli)`          |
 | `CODEX_USER_AGENT`  | `codex-cli/0.155.0 (Windows 10.0.26200; x64)` |
@@ -259,7 +259,7 @@ Všechny koncové body MITM vyžadují ověření správy (`requireCliToolsAuth`
 | `QODER_USER_AGENT`  | `Qoder-Cli`                                   |
 | `CURSOR_USER_AGENT` | `Cursor/3.4`                                  |
 
-Spotřebováno `open-sse/executors/base.ts::buildHeaders()` prostřednictvím dynamického vyhledávání.** Nabijte je, když poskytovatelé uvolní nové verze CLI** — zastaralé řetězce UA začnou být odmítány jako zastaralí klienti.
+Používá je `open-sse/executors/base.ts::buildHeaders()` prostřednictvím dynamického vyhledávání. **Aktualizujte je, když poskytovatelé vydají nové verze CLI** — zastaralé řetězce UA začnou být odmítány jako neaktuální klienti.
 
 ## Přepínače režimu kompatibility CLI (`.env.example`, sekce 13)
 

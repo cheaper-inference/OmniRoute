@@ -340,7 +340,7 @@ function PiInstallHint({ t }) {
 /** Corrupt / foreign models.json — do not let this read as "empty". */
 function PiConfigErrorNotice({ t, configError }) {
   return (
-    <div className="flex items-start gap-3 p-3 bg-error/10 border border-error/30 rounded-lg">
+    <div className="flex items-start gap-3 p-3 bg-error-bg border border-error/30 rounded-lg">
       <Icon name="error" size={18} className="text-error" />
       <div className="flex flex-col gap-1">
         <p className="text-sm text-error">{t("piConfigInvalidTitle")}</p>
@@ -352,7 +352,7 @@ function PiConfigErrorNotice({ t, configError }) {
 
 function PiConfiguredNotice({ t, piStatus }) {
   return (
-    <div className="flex items-start gap-3 p-3 bg-success/10 border border-success/30 rounded-lg">
+    <div className="flex items-start gap-3 p-3 bg-success-bg border border-success/30 rounded-lg">
       <Icon name="check_circle" size={18} className="text-success" />
       <div className="flex flex-col gap-1">
         <p className="text-sm text-success">{t("piOmnirouteConfigured")}</p>
@@ -381,6 +381,7 @@ function PiEndpointField({ t, endpointUrl, onChange }) {
         onChange={(event) => onChange(event.target.value)}
         placeholder={DEFAULT_DISPLAY_BASE_URL}
         autoComplete="url"
+        className="w-full"
       />
       <p className="text-xs text-text-muted">{t("piEndpointHelp")}</p>
     </div>
@@ -398,6 +399,7 @@ function PiModelField({ t, selectedModel, onChange, onPick, onManual, hasActiveP
           onChange={(e) => onChange(e.target.value)}
           placeholder={t("providerModelPlaceholder")}
           className="flex-1"
+          aria-label={t("model")}
         />
         <Button variant="outline" size="sm" onClick={onPick} disabled={!hasActiveProviders}>
           {t("select")}
@@ -416,7 +418,11 @@ function PiApiKeyField({ t, apiKeys, effectiveApiKeyId, onChange, cloudEnabled }
     <div className="flex flex-col gap-2">
       <label className="text-sm text-text-muted">{t("apiKey")}</label>
       {apiKeys && apiKeys.length > 0 ? (
-        <Select value={effectiveApiKeyId} onChange={(e) => onChange(e.target.value)}>
+        <Select
+          value={effectiveApiKeyId}
+          onChange={(e) => onChange(e.target.value)}
+          aria-label={t("apiKey")}
+        >
           {apiKeys.map((key) => (
             <option key={key.id} value={key.id}>
               {key.key}
@@ -464,7 +470,7 @@ function PiMessageBanner({ message }) {
   const success = message.type === "success";
   return (
     <div
-      className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm ${success ? "bg-success/10 text-success" : "bg-error/10 text-error"}`}
+      className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm ${success ? "bg-success-bg text-success" : "bg-error-bg text-error"}`}
     >
       <Icon name={success ? "check_circle" : "error"} size={16} />
       <span className={message.containerEphemeralTarget ? "whitespace-pre-line" : ""}>
@@ -514,6 +520,7 @@ function PiBackupsSection({ t, backups, restoringBackup, onRestore, showBackups,
         variant="ghost"
         size="sm"
         className="text-text-muted"
+        aria-expanded={showBackups}
         onClick={() => setShowBackups(!showBackups)}
       >
         <Icon

@@ -10,35 +10,30 @@
 
 ## Instalasi
 
-OmniRoute MCP sudah tersedia secara bawaan. Jalankan dengan:
+OmniRoute MCP sudah ada di dalamnya. Mulailah dengan:
 
 ```bash
 omniroute --mcp
 ```
 
-Atau melalui transport open-sse:
+Atau melalui transportasi terbuka:
 
 ```bash
-# Transport HTTP yang dapat dialirkan (port 20130)
-omniroute --dev  # MCP dimulai secara otomatis pada endpoint /mcp
+# Streamable HTTP transport (default port 20128, in-process on the dashboard server)
+# Client endpoint: http://localhost:20128/api/mcp/stream
+# stdio: omniroute --mcp
 ```
 
-Transport HTTP (`sse` / `streamable-http`, disajikan dalam proses oleh server dasbor) dinonaktifkan
-secara bawaan dan sebelumnya hanya dapat diaktifkan atau dinonaktifkan dari halaman `/dashboard/mcp`. Mulai v3.8.51,
-CLI memiliki kemampuan yang setara:
+Transportasi HTTP (`sse` / `streamable-http`, disajikan dalam proses oleh server dasbor) dinonaktifkan secara default dan sebelumnya hanya dapat diubah dari halaman `/dashboard/mcp`. Pada v3.8.51 CLI memiliki paritas:
 
 ```bash
-omniroute mcp status                                  # status aktif/online, transport, jumlah alat
+omniroute mcp status                                  # enabled/online, transport, tool count
 omniroute mcp enable [--transport stdio|sse|streamable-http]
 omniroute mcp disable
-omniroute mcp restart                                 # mengatur ulang sesi sse/streamable-http yang aktif
+omniroute mcp restart                                 # resets active sse/streamable-http sessions
 ```
 
-`mcp enable`/`mcp disable` melakukan PATCH terhadap pengaturan `mcpEnabled` (dan secara opsional `mcpTransport`) yang sama
-dengan yang diaktifkan atau dinonaktifkan oleh dasbor melalui `/api/settings`. `mcp restart` memanggil `POST /api/mcp/restart`: tindakan ini menghentikan
-sesi `sse`/`streamable-http` yang aktif agar permintaan berikutnya melakukan inisialisasi ulang secara bersih, mengembalikan
-`409` jika MCP dinonaktifkan, dan `501` untuk transport `stdio` (klien stdio memiliki
-subprosesnya sendiri — tidak ada handle dalam proses yang dapat dimulai ulang).
+`mcp enable`/`mcp disable` PATCH `mcpEnabled` yang sama (dan opsional `mcpTransport`) menyetel dasbor untuk beralih melalui `/api/settings`. `mcp restart` memanggil `POST /api/mcp/restart`: ia menghancurkan sesi `sse`/`streamable-http` yang aktif sehingga permintaan berikutnya diinisialisasi ulang dengan bersih, mengembalikan `409` jika MCP dinonaktifkan, dan `501` untuk transportasi `stdio` (klien stdio memiliki subproses mereka sendiri — tidak ada pegangan dalam proses untuk memulai ulang).
 
 ## Transport
 
@@ -133,53 +128,40 @@ Cursor, Cline, dan klien MCP yang kompatibel.
 
 ## Alat Kompresi (13)
 
-| Alat                                | Cakupan             | Deskripsi                                                                                                                                   |
-| :---------------------------------- | :------------------ | :------------------------------------------------------------------------------------------------------------------------------------------ |
-| `omniroute_compression_status`      | `read:compression`  | Pengaturan kompresi, ringkasan analitik, dan statistik sadar-cache (mencakup metadata `analytics.mcpDescriptionCompression`)                |
-| `omniroute_compression_configure`   | `write:compression` | Konfigurasikan mode kompresi, ambang batas, rasio target, preservasi prompt sistem, dan tombol kompresi deskripsi MCP                       |
-| `omniroute_set_compression_engine`  | `write:compression` | Pilih mesin aktif (off/caveman/rtk/stacked) serta intensitas Caveman/RTK                                                                    |
-| `omniroute_list_compression_combos` | `read:compression`  | Cantumkan kombo kompresi bernama beserta pipeline mesinnya                                                                                  |
-| `omniroute_compression_combo_stats` | `read:compression`  | Analitik yang dikelompokkan berdasarkan kombo kompresi dan mesin                                                                            |
-| `omniroute_ccr_store`               | `write:compression` | Simpan konten yang diisolasi per pemanggil dalam penyimpanan CCR dalam memori yang dibatasi, lalu kembalikan penanda dan referensi `ccr://` |
-| `omniroute_ccr_retrieve`            | `read:compression`  | Ambil konten CCR secara penuh atau dengan mode bagian awal, bagian akhir, baris, grep, dan statistik                                        |
-| `omniroute_ccr_inspect`             | `read:compression`  | Periksa metadata CCR milik pemanggil tanpa mengembalikan konten                                                                             |
-| `omniroute_ccr_list`                | `read:compression`  | Cantumkan metadata berpaginasi untuk blok CCR milik pemanggil                                                                               |
-| `omniroute_ccr_delete`              | `write:compression` | Hapus blok CCR milik pemanggil                                                                                                              |
-| `omniroute_ccr_stats`               | `read:compression`  | Laporkan penggunaan memori dalam cakupan pemanggil, penghitung siklus hidup, dan batas penyimpanan                                          |
-| `omniroute_rtk_discover`            | `read:compression`  | Temukan derau berulang dalam sampel output RTK yang disertakan secara sukarela                                                              |
-| `omniroute_rtk_learn`               | `read:compression`  | Buat draf filter RTK yang dapat ditinjau dari sampel yang disertakan secara sukarela                                                        |
+| Alat                                | Lingkup             | Keterangan                                                                                                                          |
+| :---------------------------------- | :------------------ | :---------------------------------------------------------------------------------------------------------------------------------- |
+| `omniroute_compression_status`      | `read:compression`  | Pengaturan kompresi, ringkasan analitik, dan statistik cache-aware (termasuk metadata `analytics.mcpDescriptionCompression` )       |
+| `omniroute_compression_configure`   | `write:compression` | Konfigurasikan mode kompresi, ambang batas, rasio target, pelestarian prompt sistem, sakelar kompresi deskripsi MCP                 |
+| `omniroute_set_compression_engine`  | `write:compression` | Pilih mesin aktif (off/caveman/rtk/stacked) dan intensitas Caveman/RTK                                                              |
+| `omniroute_list_compression_combos` | `read:compression`  | Daftar bernama kombo kompresi dan saluran mesinnya                                                                                  |
+| `omniroute_compression_combo_stats` | `read:compression`  | Analisis dikelompokkan berdasarkan kombo kompresi dan mesin                                                                         |
+| `omniroute_ccr_store`               | `write:compression` | Simpan konten yang diisolasi penelepon di penyimpanan CCR dalam memori yang dibatasi dan kembalikan penanda plus referensi `ccr://` |
+| `omniroute_ccr_retrieve`            | `read:compression`  | Ambil konten CCR secara penuh atau dengan mode kepala, ekor, garis, grep, dan statistik                                             |
+| `omniroute_ccr_inspect`             | `read:compression`  | Periksa metadata CCR milik penelepon tanpa mengembalikan konten                                                                     |
+| `omniroute_ccr_list`                | `read:compression`  | Cantumkan metadata yang diberi nomor halaman untuk blok CCR milik pemanggil                                                         |
+| `omniroute_ccr_delete`              | `write:compression` | Hapus blok CCR milik penelepon                                                                                                      |
+| `omniroute_ccr_stats`               | `read:compression`  | Laporkan penggunaan memori cakupan pemanggil, penghitung siklus hidup, dan batas penyimpanan                                        |
+| `omniroute_rtk_discover`            | `read:compression`  | Temukan kebisingan berulang dalam sampel keluaran RTK opt-in                                                                        |
+| `omniroute_rtk_learn`               | `read:compression`  | Hasilkan draf filter RTK yang dapat ditinjau dari sampel keikutsertaan                                                              |
 
-Entri CCR hanya disimpan dalam memori dan akan hilang saat dimulai ulang. Setiap blok dibatasi hingga 2 MiB, setiap
-prinsipal hingga 16 MiB, dan penyimpanan global hingga 64 MiB. Secara default, entri memiliki TTL 24 jam (maksimum
-tujuh hari). Pengambilan MCP penuh dibatasi hingga 256 KiB; blok yang lebih besar tetap tersedia melalui mode
-rentang dan grep. Penyimpanan, pengambilan, pencantuman, pemeriksaan, penghapusan, dan statistik diisolasi berdasarkan
-prinsipal kunci API yang diautentikasi. Catatan audit berisi hash dan metadata ukuran, bukan konten.
+entri CCR menggunakan penyimpanan dua tingkat: tingkat dalam memori panas yang didukung, pada runtime non-cloud lokal, oleh tingkat SQLite yang tahan lama (`ccr_blocks`, diaktifkan secara default) sehingga sebuah blok bertahan dari penggusuran atau restart hingga TTL -nya habis — kecuali memblokir lebih dari 512 KB dan runtime cloud, yang tetap hanya memori. Setiap blok dibatasi hingga 2 MiB, masing-masing blok utama hingga 16 MiB, dan penyimpanan global hingga 64 MiB. Entri default adalah TTL 24 jam (maksimum tujuh hari). Pengambilan MCP penuh dibatasi hingga 256 KiB; blok yang lebih besar tetap tersedia melalui mode jarak jauh dan grep. Penyimpanan, pengambilan, pencatatan, inspeksi, penghapusan, dan statistik diisolasi oleh prinsip kunci API yang diautentikasi. Catatan audit berisi hash dan metadata ukuran, tidak pernah berisi konten. Detail yang dilihat oleh operator (dua penanda, prasyarat klien, `codemode:false`, cakupan per alat, penomoran halaman, dan matriks diagnostik) terdapat di [Mesin Kompresi → Prasyarat / panduan operator](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
 
-`omniroute_compression_status` melaporkan kompresi deskripsi MCP secara terpisah di bawah
-`analytics.mcpDescriptionCompression`. Nilai tersebut merupakan estimasi ukuran metadata untuk deskripsi MCP yang dapat dicantumkan
-(`tools`, `prompts`, `resources`, dan `resourceTemplates`); nilai tersebut bukan tanda terima penggunaan
-penyedia dan ditandai dengan `source: "mcp_metadata_estimate"`.
+`omniroute_compression_status` melaporkan kompresi deskripsi MCP secara terpisah di bawah `analytics.mcpDescriptionCompression`. Nilai tersebut merupakan perkiraan ukuran metadata untuk deskripsi daftar MCP (`tools`, `prompts`, `resources`, dan `resourceTemplates`); itu bukan tanda terima penggunaan penyedia dan ditandai dengan `source: "mcp_metadata_estimate"`.
 
-### Filter Pohon Aksesibilitas MCP (v3.8.0)
+### MCP Filter Pohon Aksesibilitas (v3.8.0)
 
-Terpisah dari alat kompresi di atas, OmniRoute menyertakan filter pascaeksekusi yang
-mengompresi **hasil alat** dari alat peramban/aksesibilitas MCP sebelum dikembalikan ke
-agen. Filter ini bukan merupakan alat — filter ini berjalan secara transparan pada setiap hasil alat yang berisi
-teks pohon aksesibilitas atau snapshot peramban yang panjang (≥2000 karakter).
+Terpisah dari alat kompresi di atas, OmniRoute menyertakan filter pasca-eksekusi yang mengompresi** hasil alat** alat MCP browser/accessibility sebelum dikembalikan ke agen. Filter ini sendiri bukan merupakan alat — melainkan berjalan secara transparan pada hasil alat apa pun yang berisi pohon aksesibilitas verbose atau teks cuplikan browser (≥ 2000 karakter).
 
 Perilaku utama:
 
-- Meringkas ≥30 baris saudara berulang yang berurutan menjadi ringkasan bagian awal + akhir
-- Mempertahankan jangkar `[ref=eXX]` yang diperlukan oleh Playwright/computer-use
-- Memangkas paksa teks yang terlalu besar (>50.000 karakter) dengan petunjuk navigasi
-- Perkiraan penghematan: **60–80%** pada muatan snapshot peramban
+- Runtuh ≥ 30 baris saudara berulang berturut-turut menjadi ringkasan kepala + ekor
+- Mempertahankan jangkar `[ref=eXX]` yang dibutuhkan oleh Playwright/computer-use
+- Memotong teks berukuran besar (> 50.000 karakter) dengan petunjuk navigasi
+- Penghematan yang diharapkan:** 60–80%** pada muatan snapshot browser
 
-Konfigurasi: `compression.mcpAccessibility` dalam pengaturan global (migrasi 056).
-Implementasi: `open-sse/services/compression/engines/mcpAccessibility/`.
-Dokumentasi lengkap: [Mesin Kompresi — Filter Pohon Aksesibilitas MCP](../compression/COMPRESSION_ENGINES.md#mcp-accessibility-tree-filter).
+Konfigurasi: `compression.mcpAccessibility` dalam pengaturan global (migrasi 056). Implementasi: `open-sse/services/compression/engines/mcpAccessibility/`. Dokumen lengkap: [Mesin Kompresi — MCP Filter Pohon Aksesibilitas](../compression/COMPRESSION_ENGINES.md#mcp-accessibility-tree-filter).
 
-Lihat [Mesin Kompresi](../compression/COMPRESSION_ENGINES.md) dan [Kompresi RTK](../compression/RTK_COMPRESSION.md) untuk
-model kompresi runtime yang mendasari alat-alat ini.
+Lihat [Mesin Kompresi](../compression/COMPRESSION_ENGINES.md) dan [Kompresi RTK](../compression/RTK_COMPRESSION.md) untuk model kompresi runtime di balik alat ini.
 
 ## Alat 1Proxy (3)
 
@@ -282,7 +264,7 @@ guardrail **sebelum** mencapai lapisan penegakan cakupan MCP.
 
 ---
 
-## Endpoint REST API
+## Titik Akhir REST API
 
 | Endpoint               | Metode                | Deskripsi                                                                                           | Autentikasi            |
 | :--------------------- | :-------------------- | :-------------------------------------------------------------------------------------------------- | :--------------------- |
@@ -295,17 +277,9 @@ guardrail **sebelum** mencapai lapisan penegakan cakupan MCP.
 
 File sumber: `src/app/api/mcp/{status,tools,sse,stream,audit,audit/stats}/route.ts`.
 
-Transport SSE dan HTTP yang dapat dialirkan sama-sama diblokir hingga server MCP diaktifkan di Pengaturan (`mcpEnabled`) dan `mcpTransport` yang sesuai dipilih. Jika transport yang dikonfigurasi salah, rute akan mengembalikan HTTP 400 dengan petunjuk untuk mengganti pengaturan.
+Transport SSE dan Streamable HTTP diblokir hingga server MCP diaktifkan di Pengaturan (`mcpEnabled`) dan `mcpTransport` yang sesuai dipilih. Jika transportasi yang salah dikonfigurasi, rute akan mengembalikan HTTP 400 dengan petunjuk untuk mengganti pengaturan.
 
 ---
-
-# Autentikasi & Cakupan
-
-Panggilan alat MCP membaca string cakupan dari pemanggil. Pemeriksaan itu adalah
-satu dari tiga namespace yang independen. Kelulusan dari satu pemeriksa bukan
-berarti kelulusan dari pemeriksa lainnya.
-Aturannya ada di [Tiga namespace cakupan](#three-scope-namespaces).
-Katalog alatnya ada di [Cakupan alat MCP](#mcp-tool-scopes).
 
 ## Otentikasi & Cakupan
 

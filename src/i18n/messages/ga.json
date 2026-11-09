@@ -4147,7 +4147,9 @@
     "duplicateAutoComboFailedPrefix": "Theip ar chóip den chomhcheangal uathoibríoch a chruthú:",
     "duplicateAutoComboUnknownError": "Earráid anaithnid",
     "duplicateAutoComboTitle": "Cruthaigh comhcheangal statach ó {name}",
-    "fallbackSummary": "d'fhéad fa ghabh {rate}% d'iarruithe siuile, thit thart {skips} sprioc sa chineál gach ceann"
+    "fallbackSummary": "d'fhéad fa ghabh {rate}% d'iarruithe siuile, thit thart {skips} sprioc sa chineál gach ceann",
+    "reorderAll": "Athordú go léir",
+    "reorderAllDescription": "Gach combos {count} a athordú. Tá láimhseálacha tarraing cumasaithe."
   },
   "costs": {
     "title": "Costais",
@@ -6281,10 +6283,6 @@
     "hideEmails": "Folaigh na ríomhphoist go léir",
     "a": "A",
     "accountConcurrencyCapHint": "Uasmhéid na n-iarratas comhthráthach is féidir leis an gceangal/cuntas seo a láimhseáil. De ghnáth ní cheadaíonn cuntais shíntiúis ach cúpla (1–3) — má théann tú thar an teorainn, spreagtar 429s agus tréimhsí fuaraithe. Fág folamh don réamhshocrú.",
-    "aiCreditsLimit": "Teorainn AI Credits in aghaidh na tréimhse billeála",
-    "aiCreditsLimitPlaceholder": "Gan teorainn áitiúil",
-    "aiCreditsLimitHint": "Scipeáiltear an nasc seo nuair a shroicheann na AI Credits a thuairiscíonn GitHub an luach seo, ionas go dtéann an ródú ar ais chuig do naisc eile. Díchumasaíonn folamh é; scipeálann 0 i gcónaí é. Ní chuireann léamh úsáide atá in easnamh nó as dáta bac riamh — ní uasteorainn chaiteachais ráthaithe í seo.",
-    "aiCreditsLimitInvalid": "Caithfidh teorainn AI Credits a bheith ina huimhir neamhdhiúltach, nó folamh chun í a dhíchumasú.",
     "accountConcurrencyCapLabel": "Uasteorainn chomhthráthachta an chuntais",
     "accountIdHint": "Éilíonn roinnt soláthraithe é seo (m.sh. Cloudflare Workers AI) in éineacht leis an gcomhartha API.",
     "accountIdLabel": "Aitheantas Cuntais",
@@ -6378,8 +6376,6 @@
     "newApiUserIdLabel": "Aitheantas Úsáideora New-API",
     "newApiUserIdPlaceholder": "m.sh. 12345",
     "newApiUserIdHint": "Luach ceanntáisc AgentRouter New-Api-User, a úsáidtear in éineacht le heochair API an chonsóil chun iarmhéid cuóta a fháil.",
-    "tokenrouterManagementKeyLabel": "Eochair bhainistíochta (roghnach)",
-    "tokenrouterManagementKeyHint": "Eochair chuntais ó dheais TokenRouter (Settings → Management Key). Úsáidtear í chun cuóta agus iarmhéid a léamh amháin, riamh le haghaidh iarratas. Ní thaispeántar an eochair shábháilte; fág folamh í chun í a choinneáil.",
     "newApiAggregatorToggleLabel": "Geata Comhiomlánóra",
     "newApiAggregatorToggleHint": "Cuir ar chumas braite iarmhéid do nóid chomhiomlánaithe New-API / One-API / Sub2API. Taispeánfaidh an deais an suaitheantas iarmhéid agus scipeoidh ródú réamhsheiceála cuóta cuntais ídithe.",
     "newApiAggregatorConsoleApiKeyHint": "Comhartha Rochtana Córais do chríochphointe /api/user/self an chomhiomlánóra. Ní hé eochair API an ródaithe é.",
@@ -6393,8 +6389,6 @@
     "customUserAgentLabel": "Lipéad Gníomhaire Úsáideora Saincheaptha",
     "huggingfaceBillToHint": "Roghnach. Aitheantóir do chuntais billeála Hugging Face, a sheoltar mar an ceanntásc X-HF-Bill-To chun costais a chur i leith.",
     "huggingfaceBillToLabel": "Cuntas Bill-To Hugging Face",
-    "commandCodeZdrLabel": "Éiligh coinneáil nialasach sonraí (ZDR)",
-    "commandCodeZdrHint": "Seolann sé x-cmd-zdr: 1 le gach iarratas a dhéantar leis an eochair API seo. B'fhéidir nach mbeidh samhlacha gan upstream ZDR ar fáil.",
     "databricksBaseUrlHint": "Leid maidir le Bun-URL Databricks",
     "defaultThinkingStrengthHint": "Úsáidtear é nuair nach sonraíonn iarratas iarracht réasúnaíochta.",
     "defaultThinkingStrengthLabel": "Neart smaointeoireachta réamhshocraithe",
@@ -6869,7 +6863,7 @@
       "xai": "Ceangail xAI (Grok) le heochair API.",
       "xiaomi-mimo": "Ceangail Xiaomi MiMo le heochair API.",
       "yi": "Faigh eochair API ag platform.lingyiwanwu.com",
-      "zai": "Eochair API ó https://open.bigmodel.cn/usercenter/apikeys",
+      "zai": "Eochair API ó https://z.ai/manage-apikey/apikey-list",
       "zenmux": "Cuireann ZenMux críochphointe comhlánuithe comhrá atá comhoiriúnach le OpenAI ar fáil ag /api/v1/chat/completions, chomh maith le dromchlaí prótacail Anthropic Messages (/api/anthropic/v1/messages) agus Google Gemini (/api/vertex-ai). Úsáideann OmniRoute prótacal OpenAI.",
       "galadriel": "Ceangail Galadriel le heochair API.",
       "predibase": "Creidmheasanna trialach saor in aisce ar fiú $25 iad (bailí ar feadh 30 lá)",
@@ -6990,11 +6984,6 @@
     "anonymousFallbackEnabled": "Cúltaca gan ainm cumasaithe do {provider}",
     "anonymousFallbackDisabled": "Cúltaca gan ainm díchumasaithe do {provider} — scipeálfaidh naisc ídithe an soláthraí seo",
     "anonymousFallbackUpdateFailed": "Theip ar shocrú an chúltaca gan ainm a nuashonrú",
-    "retryDelayTitle": "Moill athiarrachta",
-    "retryDelayDesc": "An fad a ligeann nasc a scíth tar éis earráid teorann ráta nuair nach ndeir an soláthraí cathain is ceart triail arís. Úsáideann an mód uathoibríoch an cúlú ionsuite; bíonn tosaíocht i gcónaí ag am athshocraithe a sheolann an soláthraí.",
-    "retryDelayAuto": "Uathoibríoch",
-    "retryDelaySaved": "Sábháladh an mhoill athiarrachta",
-    "retryDelayUpdateFailed": "Theip ar an moill athiarrachta a nuashonrú",
     "batchDeleteFailed": "Theip ar scriosadh baisce",
     "batchDeleteNetworkError": "Earráid líonra le linn scriosadh baisce",
     "batchUpdateFailed": "Theip ar nuashonrú baisce",
@@ -7094,7 +7083,20 @@
     "chatgptConnectorLabel": "Ceanglaíocá saincheaptha ChatGPT",
     "doctorChecking": "Ag seiceáil stádas…",
     "doctorCheck": "Seiceáil stádas an dochtúra",
-    "fallbackRetryBackendTitle": "Cúltaca ath-iarrachta"
+    "fallbackRetryBackendTitle": "Cúltaca ath-iarrachta",
+    "retryDelayTitle": "Moill athiarrachta",
+    "retryDelayDesc": "An fad a ligeann nasc a scíth tar éis earráid teorann ráta nuair nach ndeir an soláthraí cathain is ceart triail arís. Úsáideann an mód uathoibríoch an cúlú ionsuite; bíonn tosaíocht i gcónaí ag am athshocraithe a sheolann an soláthraí.",
+    "retryDelayAuto": "Uathoibríoch",
+    "retryDelaySaved": "Sábháladh an mhoill athiarrachta",
+    "retryDelayUpdateFailed": "Theip ar an moill athiarrachta a nuashonrú",
+    "aiCreditsLimit": "Teorainn AI Credits in aghaidh na tréimhse billeála",
+    "aiCreditsLimitPlaceholder": "Gan teorainn áitiúil",
+    "aiCreditsLimitHint": "Scipeáiltear an nasc seo nuair a shroicheann na AI Credits a thuairiscíonn GitHub an luach seo, ionas go dtéann an ródú ar ais chuig do naisc eile. Díchumasaíonn folamh é; scipeálann 0 i gcónaí é. Ní chuireann léamh úsáide atá in easnamh nó as dáta bac riamh — ní uasteorainn chaiteachais ráthaithe í seo.",
+    "aiCreditsLimitInvalid": "Caithfidh teorainn AI Credits a bheith ina huimhir neamhdhiúltach, nó folamh chun í a dhíchumasú.",
+    "tokenrouterManagementKeyLabel": "Eochair bhainistíochta (roghnach)",
+    "tokenrouterManagementKeyHint": "Eochair chuntais ó dheais TokenRouter (Settings → Management Key). Úsáidtear í chun cuóta agus iarmhéid a léamh amháin, riamh le haghaidh iarratas. Ní thaispeántar an eochair shábháilte; fág folamh í chun í a choinneáil.",
+    "commandCodeZdrLabel": "Éiligh coinneáil nialasach sonraí (ZDR)",
+    "commandCodeZdrHint": "Seolann sé x-cmd-zdr: 1 le gach iarratas a dhéantar leis an eochair API seo. B'fhéidir nach mbeidh samhlacha gan upstream ZDR ar fáil."
   },
   "settings": {
     "title": "Socruithe",
@@ -14255,6 +14257,10 @@
         "label": "Stadanna Bonneagair Tosaíochta Cosanta mar 502",
         "description": "Tabhair freagra 502 in ionad 503 nuair a stopann sprioc tosaíochta le cúltaca cuóta amháin an teaglama ar chúis ar féidir a chruthú nach mbaineann sí le cuóta: scoradán ciorcaid oscailte soláthraí nó scipeáil thuarthach de bharr aga folaigh."
       },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Polasaí Buiséid Úsáide Gan Phraghas",
+        "description": "Conas a láimhseálann teorainneacha USD laethúla/seachtainiúla in aghaidh eochair úsáid rathúil nach bhfuil sraith phraghsála ag an soláthraí nó an múnla aige. fail_closed (réamhshocraithe) déanann sé an fhuinneog a mharcáil mar sroichte, mar sin ní rachaidh costas anaithnid riamh thart ar chaip dhian. count_as_zero cuireann an úsáid sin san áireamh mar $0 agus leanann sé ar aghaidh ag cur i bhfeidhm an chaitheamh phraghsáilte. Tá múnlaí gan phraghas liostaithe ar leathanach baile an phainéil i ngach cás."
+      },
       "AUTH_LOG_INCLUDE_ACCOUNT_ID": {
         "label": "Logáil ID áicse",
         "description": "Áirítear réamhghluaiste áicse i línte loga AUTH (m.sh. \"Á úsáid áicse '<provider>' áicse: abc12345...\"). Díchumaithe go réamhshocraithe chun náisiúntais áicse a chomhaireachtáil ó chomhtharláithíocht / iad logaíochtaí próisis il-tennant. Neamhspleách ó Mhódúgh Dúille; ní féidir é seo a léiriú trí Mhódúgh Dúille a chaitheamh."
@@ -14535,9 +14541,9 @@
         "label": "Atriail Tréimhse Fuaraigh: Scipeáil Diúltuithe 403/410",
         "description": "Nuair a bhíonn gach cuntas i dtréimhse fhuaraigh agus gurbh é 403 (rochtain diúltaithe) nó 410 (imithe) ba chúis leis an tréimhse fhuaraigh a chríochnaíonn ar dtús, seol an diúltú sin ar ais láithreach in ionad fanacht go dtiocfaidh deireadh leis an tréimhse fhuaraigh agus an t-iarratas a athsheoladh; buanaítear cuóta 403 athnuachana le scóip cheangail agentrouter ansin le errorCode 429 ionas go bhfanfaidh sé in-atriallta. Múchta de réir réamhshocraithe: ní scipeálann ach 401 an feitheamh, agus buanaítear gach diúltú leis an stádas a tháinig leis."
       },
-      "UNPRICED_USAGE_BUDGET_POLICY": {
-        "label": "Polasaí Buiséid Úsáide Gan Phraghas",
-        "description": "Conas a láimhseálann teorainneacha USD laethúla/seachtainiúla in aghaidh eochair úsáid rathúil nach bhfuil sraith phraghsála ag an soláthraí nó an múnla aige. fail_closed (réamhshocraithe) déanann sé an fhuinneog a mharcáil mar sroichte, mar sin ní rachaidh costas anaithnid riamh thart ar chaip dhian. count_as_zero cuireann an úsáid sin san áireamh mar $0 agus leanann sé ar aghaidh ag cur i bhfeidhm an chaitheamh phraghsáilte. Tá múnlaí gan phraghas liostaithe ar leathanach baile an phainéil i ngach cás."
+      "COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE": {
+        "description": "Sna stats taisce comhbhrú, comhaireamh iarratas comhbhrúite chuig soláthraí uathoibríoch-réimír-caching (OpenAI, Codex, Azure , nó nasc saincheaptha a dhearbhaíonn taisceadh pras le stripping marcóra) mar thaisce measta buailte fiú gan marcóirí cache_control. Comhartha incháilitheachta taisce atá sa mheastachán, ní buaicphointe breathnaithe, agus mar sin treoraíonn an ráta buailte tuairiscithe do na soláthraithe sin i dtreo 100%. As de réir réamhshocraithe: ní áirítear ach iarratas a iompraíonn marcóirí cache_control chuig soláthraí taisce mar bhua measta, agus mar sin coinníonn soláthraithe réimír uathoibríocha ag tuairisciú 0.",
+        "label": "Stats Cache Comhbhrú: Incháilitheacht Uath-Réimír"
       }
     }
   },

@@ -11,13 +11,13 @@ mức đỉnh đã đo được. Máy chỉ cấp phát vượt mức khi một 
 Release-Green và một job lint; swap của host (16 GB) sẽ hấp thụ phần vượt mức đó, và vì các bản Build của pull request chạy
 trên runner được lưu trữ, slot Turbopack hầu như luôn ở trạng thái nhàn rỗi:
 
-| runner               | nhãn             | vai trò                                                                                                                                                     | `MemoryHigh` / `MemoryMax` | `CPUQuota`       |
-| -------------------- | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | ---------------- |
-| `omniroute-113-5`    | `omni-build`     | Các bản build Turbopack: `ci.yml` `Build` (chỉ push/dispatch), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, bản build a11y hằng đêm | 56 GB / 60 GB (swap 0)     | 1600 %           |
-| `omniroute-113-6`    | `omni-release`   | Release-Green (`release-green` + `main-green`), bản build webpack                                                                                           | 20 GB / 24 GB (swap 4 GB)  | 800 %            |
-| `omniroute-113-2`    | `omni-light`     | Các job hằng đêm (Schemathesis, promptfoo, garak, k6) và `quality.yml` `lint-guard`                                                                         | 12 GB / 16 GB (swap 4 GB)  | 600 %            |
-| `omniroute-113`      | `omni-light`     | cùng nhóm như trên                                                                                                                                          | 8 GB / 12 GB               | 400 %            |
-| OmniHeuris, OmniMind | (repo của chúng) | chỉ Dependabot (mức đỉnh 155 MB mỗi runner, 2026-10-18)                                                                                                     | 4 GB / 6 GB                | 200 % mỗi runner |
+| runner               | nhãn                            | vai trò                                                                                                                                                     | `MemoryHigh` / `MemoryMax` | `CPUQuota`       |
+| -------------------- | ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | ---------------- |
+| `omniroute-113-5`    | `omni-build`, `omni-build-60gb` | Các bản build Turbopack: `ci.yml` `Build` (chỉ push/dispatch), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, bản build a11y hằng đêm | 56 GB / 60 GB (swap 0)     | 1600 %           |
+| `omniroute-113-6`    | `omni-release`                  | Release-Green (`release-green` + `main-green`), bản build webpack                                                                                           | 20 GB / 24 GB (swap 4 GB)  | 800 %            |
+| `omniroute-113-2`    | `omni-light`                    | Các job hằng đêm (Schemathesis, promptfoo, garak, k6) và `quality.yml` `lint-guard`                                                                         | 12 GB / 16 GB (swap 4 GB)  | 600 %            |
+| `omniroute-113`      | `omni-light`                    | cùng nhóm như trên                                                                                                                                          | 8 GB / 12 GB               | 400 %            |
+| OmniHeuris, OmniMind | (repo của chúng)                | chỉ Dependabot (mức đỉnh 155 MB mỗi runner, 2026-10-18)                                                                                                     | 4 GB / 6 GB                | 200 % mỗi runner |
 
 Đo vào 2026-10-18:
 
@@ -27,12 +27,13 @@ trên runner được lưu trữ, slot Turbopack hầu như luôn ở trạng th
 | swap       | 16 GB                               | `omniroute-113-5` chạy với swap bị tắt (`MemorySwapMax=0`), vì vậy một bản build mất kiểm soát sẽ bị dừng tại giới hạn thay vì khiến cả máy phải dùng swap                                                                                                                                                                                                                                                                                             |
 | `/tmp`     | **tmpfs 12 GB = RAM**               | mọi thứ được lưu ở đó đều chiếm bộ nhớ; dữ liệu còn sót lại được dọn sau 3 giờ                                                                                                                                                                                                                                                                                                                                                                         |
 | CPU        | đã quan sát thấy tải 60 trên 32 lõi | trước khi áp dụng hạn ngạch, một bản build Turbopack (~1166 % CPU) cộng với một bộ kiểm thử coverage trên cùng máy đã làm gián đoạn heartbeat của các listener khác (`The self-hosted runner lost communication`, #16853)                                                                                                                                                                                                                              |
-| runner     | **7 listener** (2026-10-28)         | 5 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-7` cũng mang `omni-build`; `omniroute-113-3/-4/-8` đã bị xóa khỏi repo (2026-10-28)                                                                                                                                                                                                                                                                                                                |
+| runner     | **7 listener** (2026-10-28)         | 5 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-5` cũng mang `omni-build-60gb`; `omniroute-113-3/-4/-8` đã bị xóa khỏi repo (2026-10-28)                                                                                                                                                                                                                                                                                                           |
 
 Các giới hạn nằm trong `/etc/systemd/system/actions.runner.<…>.service.d/override.conf` của từng unit
 (các giá trị trước đó được giữ lại dưới tên `override.conf.bak-20261018`) và đã được áp dụng trực tiếp bằng
 `systemctl set-property --runtime … MemoryHigh=… MemoryMax=… CPUQuota=…` — không cần khởi động lại, vì vậy không
-job đang chạy nào bị ảnh hưởng. Các nhãn được thay đổi thông qua API runner (`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
+job đang chạy nào bị ảnh hưởng. Các nhãn được thay đổi thông qua API runner
+(`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
 `gh api -X POST repos/<repo>/actions/runners/<id>/labels -f 'labels[]=<label>'`), cũng theo thời gian thực.
 
 ## Cài đặt trình dọn dẹp (một lần, trên máy chủ)
@@ -57,7 +58,7 @@ Quy tắc 75 phút không phát hiện được một build mà GitHub đã từ
 ## Quy tắc vận hành
 
 - **Mỗi lần chỉ một bản dựng Turbopack — được thực thi bằng nhãn.** Mọi job chạy lệnh Turbopack
-  `next build` đầy đủ đều nhắm đến `[self-hosted, omni-build]`, và chỉ **`omniroute-113-5`** mang
+  `next build` đầy đủ đều nhắm đến `[self-hosted, omni-build, omni-build-60gb]`, và chỉ **`omniroute-113-5`** mang
   nhãn đó: `ci.yml` `Build`, `npm-publish.yml` `publish`, `nightly-v4-build`, `preview-artifact`,
   bản dựng a11y hằng đêm (#16853) và **amd64** của `docker-publish.yml` (webpack bên trong BuildKit —
   Turbopack đã bị panic tại đó, lượt chạy 33253576569). Nhánh Docker arm64 vẫn chạy trên `ubuntu-24.04-arm`.

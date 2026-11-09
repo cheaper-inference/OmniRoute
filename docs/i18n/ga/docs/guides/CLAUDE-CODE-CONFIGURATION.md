@@ -25,27 +25,31 @@ omniroute launch --profile glm52  # Claude Code ag úsáid glm/glm-5.2 trí Omni
 
 ---
 
-## Conas a nascann Cód Claude le geata
+## Conas a nascann Claude Code le geata
 
-Claude Cód cainteanna an** Teachtaireachtaí Anthropic API** agus tá sé dírithe ar chríochphointe saincheaptha le hathróga timpeallachta (níl aon bhratach `--base-url` aige):
+Déanann Claude Code cumarsáid le **Anthropic Messages API** agus treoraítear é chuig
+críochphointe saincheaptha le hathróga timpeallachta (níl bratach `--base-url` aige):
 
-| Athróg                                       | Cuspóir                                                                                                |
-| -------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| `ANTHROPIC_BASE_URL`                         | Gheata root URL (Claude Cód ag gabháil leis `/v1/messages`).** Gan iarmhír `/v1`.**                    |
-| `ANTHROPIC_AUTH_TOKEN`                       | Seolta mar `Authorization: Bearer …` — bain úsáid as OmniRoute eochair chomhartha rochtana / API       |
-| `ANTHROPIC_API_KEY`                          | Rogha eile: seolta mar `x-api-key`. Má shocraíonn an dá cheann, bíonn an bua ag `ANTHROPIC_AUTH_TOKEN` |
-| `ANTHROPIC_MODEL`                            | Cuir iallach ar shamhail ar leith (sáraíonn sé an rogha réamhshocraithe `/model` )                     |
-| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → liostaíonn an roghnóir `/model` dúchais samhlacha `claude*`/`anthropic*` ó `/v1/models`          |
-| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | comharthaí aschuir caipín in aghaidh an fhreagra (m.sh. `65536`)                                       |
-| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | Tairseach comhartha le haghaidh uath-dhlúthú                                                           |
+| Athróg                                       | Cuspóir                                                                                                        |
+| -------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| `ANTHROPIC_BASE_URL`                         | Fréamh-URL an gheata (cuireann Claude Code `/v1/messages` leis). **Gan iarmhír `/v1`.**                        |
+| `ANTHROPIC_AUTH_TOKEN`                       | Seoltar mar `Authorization: Bearer …` é — úsáid do chomhartha rochtana / eochair API OmniRoute                 |
+| `ANTHROPIC_API_KEY`                          | Rogha eile: seoltar mar `x-api-key` é. Má tá an dá cheann socraithe, bíonn tosaíocht ag `ANTHROPIC_AUTH_TOKEN` |
+| `ANTHROPIC_MODEL`                            | Cuir samhail shonrach i bhfeidhm (sáraíonn sé réamhshocrú roghnóir `/model`)                                   |
+| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → liostaíonn an roghnóir dúchasach `/model` samhlacha `claude*`/`anthropic*` ó `/v1/models`                |
+| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | Cuir teorainn le comharthaí aschuir in aghaidh an fhreagra (m.sh. `65536`)                                     |
+| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | Tairseach comharthaí don uath-chomhbhrú                                                                        |
 
-> Léitear Env vars** uair amháin ag am tosaithe** — atosú Claude Cód tar éis iad a athrú.
+> Léitear athróga timpeallachta **uair amháin ag am tosaithe** — atosaigh Claude Code tar éis iad a athrú.
 
-Le haghaidh dintiúir a rothlaíonn in ionad teaghrán seasta, socraigh `apiKeyHelper` in `~/.claude/settings.json` chuig ordú a phriontálann an dintiúir reatha go stdout. Déanann Claude Code a aschur a thaisceadh ar feadh cúig nóiméad de réir réamhshocraithe (sáraíonn `CLAUDE_CODE_API_KEY_HELPER_TTL_MS` é sin) agus seolann sé an luach i `Authorization: Bearer` agus `x-api-key`. Ní mór don script an dintiúir a phriontáil agus ní theipeann ar aon rud eile — bratach taobh leis an cúntóir ar v2.1.227 +.
+Chun dintiúr a rothlaíonn a úsáid in áit teaghráin sheasta, socraigh `apiKeyHelper` in `~/.claude/settings.json` mar ordú a phriontálann an dintiúr reatha chuig stdout. Cuireann Claude Code a aschur i dtaisce ar feadh cúig nóiméad de réir réamhshocraithe (sáraíonn `CLAUDE_CODE_API_KEY_HELPER_TTL_MS` an tréimhse sin) agus seolann sé an luach in `Authorization: Bearer` agus in `x-api-key` araon. Ní mór don script an dintiúr amháin a phriontáil; má bhíonn meirge bhreise leis, teipeann ar an gcúntóir in v2.1.227+.
 
-Seo mar a oibríonn Entra ID SSO : priontaí `scripts/cli/omniroute-sso.mjs token` comhartha rochtana Entra gearrthéarmach a fhíoraíonn OmniRoute in ionad eochair API. Féach [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md).
+Seo mar a oibríonn Entra ID SSO: priontálann `scripts/cli/omniroute-sso.mjs token` comhartha rochtana gearrshaolach Entra a fhíoraíonn OmniRoute in áit eochrach API. Féach [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md).
 
-Socraíonn `omniroute launch` iad seo go léir duit: réitíonn sé an bonn URL + chomhartha ón gcomhthéacs gníomhach (mar sin `omniroute connect <vps>` ansin oibríonn `omniroute launch` díreach), seiceálann sláinte an freastalaí, agus execs `claude`.
+Socraíonn `omniroute launch` iad seo go léir duit: réitíonn sé an bun-URL + an comhartha
+ón gcomhthéacs gníomhach (mar sin oibríonn `omniroute connect <vps>` agus ansin
+`omniroute launch` gan aon chumraíocht eile), déanann sé seiceáil sláinte ar an
+bhfreastalaí, agus ritheann sé `claude` trí exec.
 
 ---
 

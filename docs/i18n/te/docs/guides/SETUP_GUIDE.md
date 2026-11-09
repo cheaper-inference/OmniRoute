@@ -27,7 +27,9 @@ npm install -g omniroute
 omniroute
 ```
 
-డాష్బోర్డ్ `http://localhost:20128` వద్ద తెరుచుకుంటుంది మరియు API బేస్ URL `http://localhost:20128/v1`.
+డాష్బోర్డ్ `http://localhost:20128` వద్ద తెరవబడుతుంది మరియు API బేస్ URL `http://localhost:20128/v1`.
+
+> **npm వినియోగదారులు:** ఇన్స్టాల్ స్క్రిప్ట్లు బ్లాక్ చేయబడతాయని npm హెచ్చరిస్తే (ఉదా, `omniroute`, `better-sqlite3`), [ట్రబుల్షూటింగ్ — npm ఇన్స్టాల్-స్క్రిప్ట్లు బ్లాక్ చేయబడ్డాయి](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install).
 
 ### pnpm
 
@@ -200,39 +202,39 @@ envను ఇంజెక్ట్ చేసి, ఎలాంటి కాన్
 
 ## ప్రోటోకాల్ సెటప్ (MCP + A2A)
 
-### MCP సెటప్ (Model Context Protocol)
+### MCP సెటప్ (మోడల్ కాంటెక్స్ట్ ప్రోటోకాల్)
 
-stdio మోడ్లో MCP ట్రాన్స్పోర్ట్ను ప్రారంభించండి:
+stdio మోడ్లో MCP రవాణాను ప్రారంభించండి:
 
 ```bash
 omniroute --mcp
 ```
 
-సిఫార్సు చేసిన ధ్రువీకరణ ప్రక్రియ:
+సిఫార్సు చేయబడిన ధృవీకరణ విధానం:
 
 ```bash
-# 1. MCP సర్వర్ను ప్రారంభించండి
+# 1. Start MCP server
 omniroute --mcp
 
-# 2. మీ MCP క్లయింట్ నుండి, వీటిని కాల్ చేయండి:
-omniroute_get_health        # సిస్టమ్ ఆరోగ్య స్థితిని తిరిగి ఇవ్వాలి
-omniroute_list_combos       # సక్రియ కాంబోలను తిరిగి ఇవ్వాలి
+# 2. From your MCP client, call:
+omniroute_get_health        # Should return system health
+omniroute_list_combos       # Should return active combos
 
-# 3. లేదా పూర్తి E2E సూట్ను అమలు చేయండి:
+# 3. Or run the full E2E suite:
 npm run test:protocols:e2e
 ```
 
 #### MCP క్లయింట్ కాన్ఫిగరేషన్
 
-**Claude Code:**
+**Claude కోడ్:**
 
 ```bash
-claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
 ```
 
 **Cursor / Cline:**
 
-మీ MCP సెట్టింగ్లకు జోడించండి:
+మీ MCP సెట్టింగ్లకు జోడించండి (stdio, కీతో పాటు కాలర్కి ప్రిన్సిపల్ ఉంటుంది):
 
 ```json
 {
@@ -240,31 +242,38 @@ claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp
     "omniroute": {
       "command": "omniroute",
       "args": ["--mcp"],
-      "env": {}
+      "env": {
+        "OMNIROUTE_API_KEY": "your-key",
+        "OMNIROUTE_BASE_URL": "http://localhost:20128"
+      }
     }
   }
 }
 ```
 
-**పూర్తి MCP డాక్యుమెంటేషన్:** [MCP Server README](../../open-sse/mcp-server/README.md) — 110 సాధనాలు, IDE కాన్ఫిగ్లు, Python/TS/Go క్లయింట్లు.
+లేదా, `mcpTransport` `streamable-http` అయినప్పుడు (దీన్ని `/dashboard/mcp` లేదా `omniroute mcp enable --transport streamable-http` తో సెట్ చేయండి), క్లయింట్ యొక్క రిమోట్ MCP సర్వర్ ఎంట్రీని `http://localhost:20128/api/mcp/stream` వద్ద సూచించండి.
 
-### A2A సెటప్ (Agent-to-Agent Protocol)
+కీ `Authorization: Bearer <api-key>` వలె ప్రయాణిస్తుంది (రిమోట్ హోస్ట్ల కోసం [MCP సర్వర్ → రిమోట్ యాక్సెస్](../frameworks/MCP-SERVER.md#remote-access-manage-scope-bypass) చూడండి; రిమోట్ కీకి `mcp:connect` మరియు దాని read/write స్కోప్లు అవసరం).
 
-Agent Cardను ధ్రువీకరించండి:
+**పూర్తి MCP డాక్యుమెంటేషన్:** [MCP సర్వర్ README](../../open-sse/mcp-server/README.md) — 110 సాధనాలు, IDE configs, Python/TS/Go క్లయింట్లు. కంప్రెషన్ CCR/dedup సాధనాల కోసం ఆపరేటర్ సూచన (మార్కర్లు, ప్రీరిక్విజిట్స్, పర్-టూల్ స్కోప్లు, రిట్రీవల్ పేజినేషన్, డయాగ్నస్టిక్స్): [కంప్రెషన్ ఇంజిన్లు → ముందస్తు అవసరాలు / ఆపరేటర్ గైడ్](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+
+### A2A సెటప్ (ఏజెంట్-టు-ఏజెంట్ ప్రోటోకాల్)
+
+ఏజెంట్ కార్డ్ని ధృవీకరించండి:
 
 ```bash
 curl http://localhost:20128/.well-known/agent.json
 ```
 
-ఒక టాస్క్ను పంపండి:
+ఒక పనిని పంపండి:
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
   -H 'content-type: application/json' \
-  -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"నాకు సంక్షిప్త కోటా సారాంశాన్ని ఇవ్వండి."}]}}'
+  -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"Give me a short quota summary."}]}}'
 ```
 
-**పూర్తి A2A డాక్యుమెంటేషన్:** [A2A Server README](../../src/lib/a2a/README.md) — JSON-RPC 2.0, నైపుణ్యాలు, స్ట్రీమింగ్, టాస్క్ జీవితచక్రం.
+**పూర్తి A2A డాక్యుమెంటేషన్:** [A2A సర్వర్ README](../../src/lib/a2a/README.md) — JSON-RPC 2.0, నైపుణ్యాలు, స్ట్రీమింగ్, టాస్క్ లైఫ్సైకిల్.
 
 ---
 
@@ -323,12 +332,12 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ---
 
-## Void Linux (xbps-src) టెంప్లేట్
+## శూన్యమైన Linux (xbps-src) టెంప్లేట్
 
-Void Linux వినియోగదారులు `xbps-src` ఉపయోగించి స్థానిక ప్యాకేజీని నిర్మించవచ్చు. ఈ బ్లాక్ను `srcpkgs/omniroute/template`గా సేవ్ చేయండి:
+Void Linux వినియోగదారుల కోసం, మీరు `xbps-src` ఉపయోగించి స్థానిక ప్యాకేజీని రూపొందించవచ్చు. ఈ బ్లాక్ని `srcpkgs/omniroute/template` గా సేవ్ చేయండి:
 
 ```bash
-# 'omniroute' కోసం టెంప్లేట్ ఫైల్
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -339,7 +348,7 @@ maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# ప్రతి విడుదలకు చెక్సమ్ను దీనితో మళ్లీ రూపొందించండి:
+# Regenerate the checksum for each release with:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

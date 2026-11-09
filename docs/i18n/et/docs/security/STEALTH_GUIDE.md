@@ -231,9 +231,9 @@ Kõik MITM-i lõpp-punktid nõuavad haldusautentimist (`requireCliToolsAuth`). S
 
 ---
 
-## User-Agent alistab — env vars (`.env.example` jaotis 12)
+## User-Agenti ülekirjutused — keskkonnamuutujad (`.env.example` jaotis 12)
 
-| Muutuv              | Vaikimisi                                     |
+| Muutuja             | Vaikeväärtus                                  |
 | ------------------- | --------------------------------------------- |
 | `CLAUDE_USER_AGENT` | `claude-cli/2.1.280 (external, cli)`          |
 | `CODEX_USER_AGENT`  | `codex-cli/0.155.0 (Windows 10.0.26200; x64)` |
@@ -242,7 +242,7 @@ Kõik MITM-i lõpp-punktid nõuavad haldusautentimist (`requireCliToolsAuth`). S
 | `QODER_USER_AGENT`  | `Qoder-Cli`                                   |
 | `CURSOR_USER_AGENT` | `Cursor/3.4`                                  |
 
-Tarbib `open-sse/executors/base.ts::buildHeaders()` dünaamilise otsingu kaudu.** Kui pakkujad lasevad välja uued CLI versioonid, tehke need löögiks** — aegunud UA stringid lükatakse tagasi kui aegunud kliendid.
+Seda kasutab `open-sse/executors/base.ts::buildHeaders()` dünaamilise otsingu kaudu. **Uuendage neid väärtusi, kui teenusepakkujad annavad välja uued CLI-versioonid** — aegunud UA-stringe hakatakse tagasi lükkama, kuna neid peetakse aegunud klientideks.
 
 ## CLI ühilduvusrežiimi lülitid (`.env.example` jaotis 13)
 

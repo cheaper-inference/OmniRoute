@@ -20,7 +20,7 @@ Wakati wakala wa IDE (km, GitHub Copilot, Cursor, Claude Code) anapiga simu API,
 
 Hii inamaanisha kuwa unaweza:
 
-- **Rudisha wakala yeyote kwa mtoa huduma yeyote** : Copilot kuzungumza na OpenAI? Ielekeze upya kwa Anthropic Claude, Gemini, au yeyote kati ya watoa huduma 380 wa OmniRoute.
+- **Rudisha wakala yeyote kwa mtoa huduma yeyote** : Copilot kuzungumza na OpenAI? Ielekeze upya kwa Anthropic Claude, Gemini, au yeyote kati ya watoa huduma 381 wa OmniRoute.
 - **Tumia michoro za kielelezo** : `gemini-3-flash` → `claude-sonnet-4.7` kwa uwazi katika kiwango cha kidhibiti.
 - **Angalia trafiki yote ya wakala** : kila ombi lililoingiliwa huchapishwa kwa [Mkaguzi wa Trafiki](./TRAFFIC_INSPECTOR.md).
 - **Tumia ustahimilivu wa OmniRoute** : uelekezaji wa mseto, vivunja saketi, vikwazo, na kazi ya kufuatilia gharama kwa trafiki ya wakala IDE pia.
@@ -555,7 +555,7 @@ Trae ni msaidizi mpya kwa kiasi fulani wa uandishi wa msimbo kwa kutumia AI. Kab
 3. Bainisha utaratibu wa uthibitishaji
 4. Tathmini kuendelea/kutoendelea kulingana na TOS na uwezekano wa kugundua API
 
-Hadi uchunguzi utakapokamilika, kadi ya Trae kwenye dashibodi itaonyesha beji ya "Inachunguzwa" yenye kiungo cha "Ripoti uwezekano wa kutekelezeka". Kiolezo cha kishughulikiaji kilicho katika `src/mitm/handlers/trae.ts` hutupa hitilafu iliyopangwa ya `Bado haijatekelezwa`.
+Hadi uchunguzi utakapokamilika, kadi ya Trae kwenye dashibodi itaonyesha beji ya "Inachunguzwa" yenye kiungo cha "Ripoti uwezekano wa kutekelezeka". Kiolezo cha kishughulikiaji kilicho katika `src/mitm/handlers/trae.ts` hutupa hitilafu iliyopangwa ya `Not yet implemented`.
 
 ### Ajenti zilizo kwenye orodha ya kusubiri (MITM inahitajika — hazitumii URL maalum ya msingi)
 

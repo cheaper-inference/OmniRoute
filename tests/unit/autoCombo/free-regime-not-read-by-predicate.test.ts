@@ -7,8 +7,10 @@
  * `strictZeroCostFilter` already reads it. These guards pin the same rule into
  * the predicate that `hidePaidModels` and `/v1/models` go through.
  */
-import { test } from "vitest";
+import "../../_helpers/pinnedProviderClientVersions";
+import { afterAll, test } from "vitest";
 import assert from "node:assert/strict";
+import { closeSharedLoggerResource } from "../../../src/shared/utils/loggerResource.ts";
 
 import {
   FREE_MODEL_BUDGETS,
@@ -21,6 +23,9 @@ import {
   evaluateCandidateConnections,
   findBudgetEntry,
 } from "../../../open-sse/services/autoCombo/strictZeroCostFilter.ts";
+
+// The strict filter imports the shared console logger; finish its worker before teardown.
+afterAll(closeSharedLoggerResource);
 
 /** Catalogued under `pollinations` as `discontinued`: the provider moved them
  * behind an API key, and their `displayName` says so. */
@@ -81,18 +86,25 @@ test("hidePaidModels drops them from the auto/* candidate pool", () => {
   );
 });
 
-test("no provider loses its free status", () => {
-  const withFreeRegime = new Set(
-    FREE_MODEL_BUDGETS.filter((m) => grantsFreeAccess(m.freeType)).map((m) => m.provider)
-  );
-  const lost = [...new Set(FREE_MODEL_BUDGETS.map((m) => m.provider))].filter(
-    (p) => !withFreeRegime.has(p)
-  );
+test("catalogued providers retain active catalog or documented live free access", () => {
+  for (const provider of new Set(FREE_MODEL_BUDGETS.map((m) => m.provider))) {
+    assert.equal(providerHasFreeModels(provider), true, `${provider} lost documented free access`);
+  }
+  // The release catalogs two current routes; the ended campaign remains a
+  // separate discontinued identity and cannot regain access through stale flags.
+  const tokenHarbor = FREE_MODEL_BUDGETS.filter((m) => m.provider === "tokenharbor");
   assert.deepEqual(
-    lost,
-    [],
-    "no catalogued provider is discontinued across the board today; if one ever is, decide deliberately"
+    tokenHarbor
+      .filter((m) => grantsFreeAccess(m.freeType))
+      .map((m) => m.modelId)
+      .sort(),
+    ["deepseek-v4.1-flash:free", "mimo-v2.6-flash:free"]
   );
+  const retired = tokenHarbor.find((m) => m.modelId === "claude-haiku-5.5:free");
+  assert.ok(retired, "retain the ended campaign as explicit negative evidence");
+  assert.equal(retired.freeType, "discontinued");
+  assert.equal(isFreeModel("tokenharbor", { id: retired.modelId, isFree: true }), false);
+  assert.equal(providerHasFreeModels("tokenharbor"), true);
 });
 
 test("every regime is classified, with the expected verdict", () => {

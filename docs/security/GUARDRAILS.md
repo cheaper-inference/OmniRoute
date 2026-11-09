@@ -780,7 +780,7 @@ from loopback.
 | `eu_vat`            | EU VAT number            | Known member-state prefix and that state's number format (no VIES lookup)            |
 | `es_dni_nie`        | Spanish DNI / NIE        | Control letter (value mod 23); NIE is `X/Y/Z` + 7 digits                             |
 | `it_codice_fiscale` | Italian Codice Fiscale   | Control letter from the odd/even position tables                                     |
-| `pl_pesel`          | Polish PESEL             | Weighted checksum and an encoded birth date that exists                              |
+| `pl_pesel`          | Polish PESEL             | Weighted checksum and plausible encoded birth month/day ranges                       |
 | `nl_bsn`            | Dutch BSN                | 11-proof (weights 9..2, -1)                                                          |
 | `de_steuer_id`      | German Steuer-ID         | ISO 7064 Mod 11,10 plus the digit-structure rules (no leading 0)                     |
 | `se_personnummer`   | Swedish personnummer     | Luhn over the last ten digits and a plausible birth date (10 or 12 digits)           |

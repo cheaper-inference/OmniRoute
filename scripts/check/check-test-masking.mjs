@@ -14,7 +14,7 @@ import fs from "node:fs";
 import { execFileSync } from "node:child_process";
 import { pathToFileURL } from "node:url";
 
-const TEST_RE = /\.(test|spec)\.(ts|tsx)$/;
+const TEST_RE = /\.(test|spec)\.(ts|tsx|js|mjs)$/;
 // Production TypeScript sources (excludes test files, handled separately via TEST_RE).
 const PROD_SRC_RE = /\.(ts|tsx|mts|cts)$/;
 
@@ -389,7 +389,7 @@ export function partitionDeletedRenamed(nameStatusOutput) {
  * `check-test-masking-selfref-6634.test.ts`, which likewise embed tautology-pattern
  * literals as fixtures/documentation to prove this gate's own behavior.
  */
-const SELF_TEST_FIXTURE_RE = /(^|\/)check-test-masking(-[\w-]+)?\.test\.tsx?$/;
+const SELF_TEST_FIXTURE_RE = /(^|\/)check-test-masking(-[\w-]+)?\.test\.(ts|tsx|js|mjs)$/;
 function isSelfTestFixtureFile(file) {
   return SELF_TEST_FIXTURE_RE.test(file);
 }
@@ -476,7 +476,7 @@ function git(args) {
   }
 }
 
-/** All git-tracked test files (`.test.ts(x)`/`.spec.ts(x)`), repo-wide — used by the
+/** All tracked TS/TSX/JS/MJS test/spec files, repo-wide — used by the
  * absolute floor scan so it also covers files untouched by the current diff/PR. */
 function listTrackedTestFiles() {
   return git(["ls-files"])
@@ -531,12 +531,23 @@ function main() {
     process.exit(1);
   }
 
-  const base = resolveBase();
-  if (!base) {
+  const baseRef = resolveBase();
+  if (!baseRef) {
     console.log(
       "[test-masking] sem base ref (não é PR) — pulando checks de diff (scan absoluto de tautologias OK)."
     );
     return;
+  }
+
+  // Three-dot diffs describe changes since the common ancestor, not the base tip.
+  // Resolve that ancestor once so file selection and prior contents use the same tree.
+  const mergeBases = git(["merge-base", "--all", "--", baseRef, "HEAD"]).trim().split(/\r?\n/);
+  const [base] = mergeBases;
+  if (mergeBases.length !== 1 || !/^(?:[0-9a-f]{40}|[0-9a-f]{64})$/.test(base)) {
+    console.error(
+      "[test-masking] comparison base unavailable or ambiguous — diff checks cannot run."
+    );
+    process.exit(1);
   }
 
   // (6A.10 subcheck 1) Arquivos de teste deletados/renomeados via MDR filter.

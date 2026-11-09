@@ -56,11 +56,11 @@ nítorí òtítọ́ kan pàtó nípa ìmúṣẹ:
 
 Ohun tí ìyẹn túmọ̀ sí fún ojú-iṣẹ́ kọ̀ọ̀kan, àní pẹ̀lú `CORS_ALLOW_ALL=true`:
 
-| Ojú-iṣẹ́                                         | Ọ̀nà ìfàṣẹsí                | Ipa CORS àmì gbogbogbò                                                                                                                                                                                                                                                                                                                                                                     |
-| ----------------------------------------------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Pátákó Ìṣàkóso / MANAGEMENT `/api/*`            | Ìgbà cookie                | A dá orísun padà, ṣùgbọ́n **láìsí `Allow-Credentials`** aṣàwákiri máa **dí** kíkà tí ó ní ẹ̀rí ìdánimọ̀. Ojúlé oníjàngbọ̀n láti orísun mìíràn **kò lè ka** àwọn ìdáhùn pátákó ìṣàkóso rẹ tí a ti jẹ́rìí sí, a kò sì ṣí cookie ìgbà náà sílẹ̀.                                                                                                                                                    |
-| API Oníbàárà `/v1/*`, `/v1beta/*`               | Akọlé Bearer / `x-api-key` | Ó ti gba ààyè tẹ́lẹ̀ **gẹ́gẹ́ bí a ṣe ṣe àpẹrẹ rẹ̀** (`relaxForTokenAuth`): àwọn aṣàwákiri kì í so `Authorization`/`x-api-key` mọ́ ìbéèrè fúnra wọn, nítorí náà ojú-ìwé akóbíni kò lè pèsè kọ́kọ́rọ́ rẹ. Echo náà máa ń ṣiṣẹ́ nìkan nígbà tí a bá ti fìdí kọ́kọ́rọ́ tí a gbé kalẹ̀ múlẹ̀; àwọn ìdáhùn aláìlórúkọ (`REQUIRE_API_KEY=false`) máa ń pa allowlist mọ́. `CORS_ALLOW_ALL` kò mú èyí gbòòrò sí i. |
-| Ti gbogbo ènìyàn, kíkà-nìkan (`/api/health`, …) | Kò sí                      | Kò ní ìsọfúnni àṣírí; àmì gbogbogbò kò léwu.                                                                                                                                                                                                                                                                                                                                               |
+| Ojú-iṣẹ́                                         | Ọ̀nà ìfàṣẹsí                | Ipa CORS àmì gbogbogbò                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| ----------------------------------------------- | -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Pátákó Ìṣàkóso / MANAGEMENT `/api/*`            | Ìgbà cookie                | A dá orísun padà, ṣùgbọ́n **láìsí `Allow-Credentials`** aṣàwákiri máa **dí** kíkà tí ó ní ẹ̀rí ìdánimọ̀. Ojúlé oníjàngbọ̀n láti orísun mìíràn **kò lè ka** àwọn ìdáhùn pátákó ìṣàkóso rẹ tí a ti jẹ́rìí sí, a kò sì ṣí cookie ìgbà náà sílẹ̀.                                                                                                                                                                                                                                                                                                                                                       |
+| API Oníbàárà `/v1/*`, `/v1beta/*`               | Akọlé Bearer / `x-api-key` | Ó ti gba ààyè tẹ́lẹ̀ **gẹ́gẹ́ bí a ṣe ṣe àpẹrẹ rẹ̀** (`relaxForTokenAuth`): àwọn aṣàwákiri kì í so `Authorization`/`x-api-key` mọ́ ìbéèrè fúnra wọn, nítorí náà ojú-ìwé akóbíni kò lè pèsè kọ́kọ́rọ́ rẹ. Fífi orísun hàn padà lábẹ́ òfin tí a tú sílẹ̀ nílò ẹni tí a ti fìdí ìdánimọ̀ rẹ̀ múlẹ̀ (kọ́kọ́rọ́ API tí a ti ṣàyẹ̀wò tàbí ìgbà dashboard tí a ti ṣàyẹ̀wò), kì í ṣe akọlé ìjẹ́rìísí nìkan, kò sì ní `Access-Control-Allow-Credentials` nínú láéláé. Àwọn ìdáhùn aláìlórúkọ (`REQUIRE_API_KEY=false`) ń lo àkójọ àwọn orísun tí a ti ṣètò láti gba láàyè, pẹ̀lú fífi `CORS_ALLOW_ALL=true` ṣiṣẹ́ ní kedere. |
+| Ti gbogbo ènìyàn, kíkà-nìkan (`/api/health`, …) | Kò sí                      | Kò ní ìsọfúnni àṣírí; àmì gbogbogbò kò léwu.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 
 Nítorí náà, ìṣípayá **tó ṣẹ́kù** láti inú `CORS_ALLOW_ALL=true` ní ààlà sí: (a)
 kíkà láti orísun mìíràn **tí kò ní ẹ̀rí ìdánimọ̀** fún dátà tí kò nílò ìfàṣẹsí tẹ́lẹ̀, àti (b)
@@ -122,9 +122,7 @@ fo slash tó wà ní ìparí, nítorí náà `http://localhost:3000` àti
   ìwọ̀nyí mọ́ request fúnra wọn láéláé. CORS kì í ṣe ìdènà tó nítumọ̀ níbí — API key ni
   ìdènà náà — ìdí nìyẹn tí ojú yìí fi mọ̀ọ́mọ̀ jẹ́ permissive kí àwọn client
   browser àti Electron lè ka àwọn response tí wọ́n ti ní ẹ̀tọ́ sí.
-  Echo tí a ṣe ní ìrọ̀rùn yìí ń tẹ̀lé key tí a ti fìdí rẹ̀ múlẹ̀, kì í ṣe wíwà header
-  nìkan: nígbà tí `REQUIRE_API_KEY=false` bá sin request kan láìlórúkọ, response rẹ̀ tó
-  yọrí sí rere máa ń pa allowlist fail-closed mọ́. Àwọn ìkọ̀sílẹ̀ auth (401) ṣì máa ń ṣeé
+  Fífi orísun hàn padà lábẹ́ òfin tí a tú sílẹ̀ nílò ẹni tí a ti fìdí ìdánimọ̀ rẹ̀ múlẹ̀ (kọ́kọ́rọ́ API tí a ti ṣàyẹ̀wò tàbí ìgbà dashboard tí a ti ṣàyẹ̀wò), kì í ṣe akọlé ìjẹ́rìísí nìkan, kò sì ní `Access-Control-Allow-Credentials` nínú láéláé. Àwọn ìdáhùn aláìlórúkọ (`REQUIRE_API_KEY=false`) ń lo àkójọ àwọn orísun tí a ti ṣètò láti gba láàyè, pẹ̀lú fífi `CORS_ALLOW_ALL=true` ṣiṣẹ́ ní kedere. Àwọn ìkọ̀sílẹ̀ auth (401) ṣì máa ń ṣeé
   kà kí àwọn client lè fi key tí a ti fagilé tàbí tí a tẹ̀ ní àṣìṣe hàn (#5242): 401 ti
   pipeline fúnra rẹ̀ máa ń pa echo mọ́, àti route kan tí ó fúnra rẹ̀ kọ key náà lẹ́yìn tí
   pipeline ti sin ín gẹ́gẹ́ bí aláìlórúkọ (`/v1/models` àti `/v1beta/models` nígbà tí a
@@ -135,8 +133,7 @@ fo slash tó wà ní ìparí, nítorí náà `http://localhost:3000` àti
   tàbí cookie `auth_token`), kì í ṣe lórí èwo nínú wọn ni route náà ṣàyẹ̀wò, a kì í sì
   so ó pọ̀ mọ́ `Access-Control-Allow-Credentials` láéláé; body rẹ̀ jẹ́ error envelope tí
   kò yí padà. Àwọn management route lábẹ́ `/api/v1/` tí `requireManagementAuth()` ń dáàbò
-  bò (`/api/v1/management/*`, `/api/v1/registered-keys`) kì í fi echo kún un: pẹ̀lú
-  `REQUIRE_API_KEY=false`, a kò lè ka 401/403 wọn láti origin mìíràn.
+  bò (`/api/v1/management/*`, `/api/v1/registered-keys`) kì í lo ìyàsọ́tọ̀ yìí fún kíkọ ìjẹ́rìísí: nígbà tí `REQUIRE_API_KEY=false`, àwọn ìdáhùn 401/403 wọn ń tẹ̀ lé ìlànà orísun CORS tí a ti ṣètò.
 - **Cookie session (dashboard):** default **fail-closed** ń dáàbò bò ó, àti pé
   `Access-Control-Allow-Credentials` kò sí lórí shared path náà. Má ṣe fi àwọn origin
   management/dashboard sínú config permissive èyíkéyìí; wọ́n gbọ́dọ̀ dúró gẹ́gẹ́ bí
@@ -151,7 +148,7 @@ OmniRoute bá ń ṣiṣẹ́ nípasẹ̀ `npm start` / `npm run dev`, bridge `/
 `/api/v1/ws`, tí ń stream `/v1/chat/completions`, `/v1/messages` àti
 `/v1/responses` gẹ́gẹ́ bí frame. Bridge náà máa ń béèrè ìpinnu lọ́wọ́
 `/api/v1/ws?handshake=1`, ó sì máa ń kọ̀ láti upgrade àyàfi tí route yẹn bá ti ṣe àyẹ̀wò
-náà. A máa ń gba handshake kan nígbà tí:
+náà. Àwọn ohun tí a béèrè fún ìfìdímúlẹ̀ ìdánimọ̀ ṣì ń kan ọ̀ràn náà lọ́tọ̀. Àyẹ̀wò orísun máa ń yọrí sí rere nígbà tí:
 
 - kò ní header `Origin` (Codex CLI, àwọn SDK àti àwọn client mìíràn tí kì í ṣe browser);
 - allowlist tó wà lókè gba `Origin` náà láàyè (`CORS_ALLOWED_ORIGINS`, ètò

@@ -20,14 +20,16 @@
 
 ## ස්ථාපන ක්රම
 
-### npm (නිර්දේශිතයි)
+### npm (නිර්දේශිත)
 
 ```bash
 npm install -g omniroute
 omniroute
 ```
 
-උපකරණ පුවරුව `http://localhost:20128` හි විවෘත වන අතර API මූලික URL එක `http://localhost:20128/v1` වේ.
+උපකරණ පුවරුව `http://localhost:20128` හි විවෘත වන අතර API පදනම URL `http://localhost:20128/v1` වේ.
+
+> **npm භාවිතා කරන්නන්:** ස්ථාපන ස්ක්‍රිප්ට් අවහිර කර ඇති බවට npm අනතුරු අඟවන්නේ නම් (උදා, `omniroute`, `better-sqlite3`), [— npm install-scripts blocked දෝශ නිරාකරණය](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install) බලන්න.
 
 ### pnpm
 
@@ -197,41 +199,41 @@ omniroute setup-qwen         # ~/.qwen/settings.json + ~/.qwen/.env
 
 ---
 
-## ප්රොටෝකෝල සැකසුම (MCP + A2A)
+## ප්‍රොටෝකෝල සැකසුම (MCP + A2A)
 
-### MCP සැකසුම (Model Context Protocol)
+### MCP සැකසුම (ආදර්ශ සන්දර්භ ප්‍රොටෝකෝලය)
 
-stdio ප්රකාරයෙන් MCP ප්රවාහනය ආරම්භ කරන්න:
+stdio මාදිලියේ MCP ප්‍රවාහනය ආරම්භ කරන්න:
 
 ```bash
 omniroute --mcp
 ```
 
-නිර්දේශිත වලංගුකරණ ප්රවාහය:
+නිර්දේශිත වලංගුකරණ ප්‍රවාහය:
 
 ```bash
-# 1. MCP සේවාදායකය ආරම්භ කරන්න
+# 1. Start MCP server
 omniroute --mcp
 
-# 2. ඔබේ MCP සේවාලාභියා වෙතින්, පහත ඒවා අමතන්න:
-omniroute_get_health        # පද්ධතියේ සෞඛ්ය තත්ත්වය ආපසු ලබා දිය යුතුය
-omniroute_list_combos       # සක්රිය combos ආපසු ලබා දිය යුතුය
+# 2. From your MCP client, call:
+omniroute_get_health        # Should return system health
+omniroute_list_combos       # Should return active combos
 
-# 3. නැතහොත් සම්පූර්ණ E2E කට්ටලය ධාවනය කරන්න:
+# 3. Or run the full E2E suite:
 npm run test:protocols:e2e
 ```
 
-#### MCP සේවාලාභී වින්යාසය
+#### MCP Client Configuration
 
-**Claude Code:**
+**Claude කේතය:**
 
 ```bash
-claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
 ```
 
 **Cursor / Cline:**
 
-ඔබේ MCP සැකසුම්වලට එක් කරන්න:
+ඔබගේ MCP සැකසීම් වෙත එක් කරන්න (stdio, යතුර සමඟින් ඇමතුම්කරුට ප්‍රධානය):
 
 ```json
 {
@@ -239,17 +241,24 @@ claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp
     "omniroute": {
       "command": "omniroute",
       "args": ["--mcp"],
-      "env": {}
+      "env": {
+        "OMNIROUTE_API_KEY": "your-key",
+        "OMNIROUTE_BASE_URL": "http://localhost:20128"
+      }
     }
   }
 }
 ```
 
-**සම්පූර්ණ MCP ලේඛනගත කිරීම:** [MCP Server README](../../open-sse/mcp-server/README.md) — මෙවලම් 110ක්, IDE වින්යාස, Python/TS/Go සේවාලාභීන්.
+නැතහොත්, `mcpTransport` `streamable-http` වන විට (එය `/dashboard/mcp` හෝ `omniroute mcp enable --transport streamable-http` සමඟ සකසන්න), සේවාලාභියාගේ දුරස්ථ MCP සේවාදායක ප්‍රවේශය `http://localhost:20128/api/mcp/stream` වෙත යොමු කරන්න.
 
-### A2A සැකසුම (Agent-to-Agent Protocol)
+යතුර `Authorization: Bearer <api-key>` ලෙස ගමන් කරයි (බලන්න [MCP Server → දුරස්ථ ධාරක සඳහා දුරස්ථ ප්‍රවේශය](../frameworks/MCP-SERVER.md#remote-access-manage-scope-bypass) ; දුරස්ථ යතුරකට `mcp:connect` සහ එහි read/write විෂය පථයන් අවශ්‍ය වේ).
 
-Agent Card එක සත්යාපනය කරන්න:
+**සම්පූර්ණ MCP ලියකියවිලි:** [MCP සේවාදායකය README](../../open-sse/mcp-server/README.md) — 110 මෙවලම්, IDE configs, Python/TS/Go සේවාදායකයින්. සම්පීඩන CCR/dedup මෙවලම් සඳහා ක්‍රියාකරු යොමු කිරීම (සලකුණු, පූර්ව අවශ්‍යතා, එක් මෙවලමක් සඳහා විෂය පථයන්, නැවත ලබා ගැනීමේ පිටුකරණය, රෝග විනිශ්චය): [සම්පීඩන එන්ජින් → පූර්වාවශ්‍යතා / ක්‍රියාකරු මාර්ගෝපදේශය](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+
+### A2A සැකසුම (නියෝජිත සිට නියෝජිත ප්‍රොටෝකෝලය)
+
+නියෝජිත කාඩ්පත තහවුරු කරන්න:
 
 ```bash
 curl http://localhost:20128/.well-known/agent.json
@@ -263,7 +272,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"Give me a short quota summary."}]}}'
 ```
 
-**සම්පූර්ණ A2A ලේඛනගත කිරීම:** [A2A Server README](../../src/lib/a2a/README.md) — JSON-RPC 2.0, කුසලතා, ප්රවාහනය, කාර්ය ජීවන චක්රය.
+**සම්පූර්ණ A2A ලියකියවිලි:** [A2A සේවාදායකය README](../../src/lib/a2a/README.md) — JSON-RPC 2.0, කුසලතා, ප්‍රවාහය, කාර්ය ජීවන චක්‍රය.
 
 ---
 
@@ -324,21 +333,21 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ## Void Linux (xbps-src) සැකිල්ල
 
-Void Linux පරිශීලකයන්ට `xbps-src` භාවිතයෙන් ස්වදේශීය පැකේජයක් ගොඩනැගිය හැක. මෙම කොටස `srcpkgs/omniroute/template` ලෙස සුරකින්න:
+Void Linux භාවිතා කරන්නන් සඳහා, ඔබට `xbps-src` භාවිතයෙන් ස්වදේශීය පැකේජයක් සෑදිය හැක. මෙම කොටස `srcpkgs/omniroute/template` ලෙස සුරකින්න:
 
 ```bash
-# 'omniroute' සඳහා සැකිලි ගොනුව
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
 hostmakedepends="nodejs python3 make"
 depends="openssl"
-short_desc="LLM සපයන්නන් කිහිපයක් සඳහා බුද්ධිමත් මාර්ගගත කිරීම සහිත විශ්වීය AI ද්වාරය"
+short_desc="Universal AI gateway with smart routing for multiple LLM providers"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# සෑම නිකුතුවක් සඳහාම checksum එක පහත පරිදි නැවත ජනනය කරන්න:
+# Regenerate the checksum for each release with:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

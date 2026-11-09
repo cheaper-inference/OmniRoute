@@ -839,13 +839,7 @@ nígbà tí a bá ṣètò pápá mìíràn. Fún lite, a máa yọ `additionalQ
 `subpages`, `subpageTarget`, `highlights.numSentences` àti `highlights.highlightsPerUrl` tí kò gbọ́dọ̀
 lò mọ́, kò tún ní jẹ́ kí a rán wọn síwájú.
 
-Ìṣírò iye owó jẹ́ àkọsílẹ̀ alapin `costPerQuery`, àyàfi fún Exa, tó ń tẹ̀lé iye owó tirẹ̀: $0.007 fún ìpè
-kọ̀ọ̀kan fún `auto` (àti `fast` àtijọ́) tàbí $0.004 fún `lite` (àti `instant` àtijọ́), èyí tó bo èsì mẹ́wàá;
-$0.001 fún èsì àfikún kọ̀ọ̀kan; àti $0.001 fún èsì kọ̀ọ̀kan tí a dá padà nígbà tí a bá ṣètò
-`contents.summary`. A máa ń ṣe àkọsílẹ̀ Tavily ní kírẹ́dììtì 1 ($0.008) fún `search_depth` `basic`,
-`fast` àti `ultra-fast`, àti kírẹ́dììtì 2 ($0.016) fún `advanced`
-([Kírẹ́dììtì API Tavily](https://docs.tavily.com/documentation/api-credits)). Ìpè kan tí ó ní
-`auto_parameters: true` tí Tavily gbéga sí advanced ṣì máa ń jẹ́ àkọsílẹ̀ gẹ́gẹ́ bí kírẹ́dììtì 1.
+Exa: $ 0.007 fun ipe fun `auto` (ati julọ `fast`) tabi $ 0.004 fun `lite` (ati aṣẹ `instant`), ti o bo awọn abajade 10; $ 0.001 fun abajade siwaju kọọkan; ati $0.001 fun esi pada nigbati `contents.summary` ti ṣeto. Tavily ti wa ni igbasilẹ ni 1 kirẹditi ($0.008) fun `search_depth` `basic`, `fast` ati `ultra-fast`, ati 2 kirediti ($0.016) fun `advanced` ( [Tavily API kirediti](https://docs.tavily.com/documentation/api-credits) ). Ipe pẹlu `auto_parameters: true` ti awọn iṣagbega Tavily si ilọsiwaju jẹ ṣi gbasilẹ ni kirẹditi 1.
 
 ---
 
@@ -1139,6 +1133,8 @@ X-OmniRoute-No-Cache: true
 
 ---
 
+<a id="cliproxyapi-management-compatibility"></a>
+
 ## Ìbámu Ìṣàkóso CLIProxyAPI
 
 OmniRoute ń dáhùn sí àwọn endpoint ìṣàkóso mẹ́ta ti [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI)
@@ -1152,15 +1148,11 @@ OmniRoute, kí o sì lo kọ́kọ́rọ́ API kan tí ó ní scope `manage` g�
 | POST   | `/v0/management/api-call`    | Ara `{ auth_index, method, url, header?, data? }`. Ó ń rán ìbéèrè kan tí a fọwọ́ sí pẹ̀lú token àkọọ́lẹ̀ náà, ó sì dá `{ status_code, body }` padà |
 | POST   | `/v0/management/reset-quota` | Ara `{ auth_index }`. Ó ń pa àkókò ìtútù ìsopọ̀, ìdènà model àti àwọn àkókò ìtútù Codex fún scope kọ̀ọ̀kan ti àkọọ́lẹ̀ kan rẹ́                       |
 
-- `auth_index` ni ID ìsopọ̀ OmniRoute. `provider` jẹ́ `claude` tàbí `codex` (àwọn ìsopọ̀ OAuth nìkan; a kò ṣe àfihàn provider kọ́kọ́rọ́ API `anthropic`). Fún Codex,
-  `id_token.chatgpt_account_id` ni ID workspace tí a pamọ́, `plan_type` sì ni ètò tí a pamọ́.
-- `api-call` kì í ṣe proxy gbogbogbòò. Ó gba Claude `GET
+- `auth_index` ni connection id OmniRoute. `provider` jẹ́ `claude` tàbí `codex` (OAuth connection nìkan; a kò ṣe àkójọ API-key provider `anthropic`). Fún Codex, `id_token.chatgpt_account_id` ni workspace id tí a tọ́jú, `plan_type` sì ni plan tí a tọ́jú.
+- `api-call` kì í ṣe proxy gbogbogbò. Ó ń gba Claude `GET
 https://api.anthropic.com/api/oauth/usage` àti Codex `GET
-https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits` àti
-  `POST .../wham/rate-limit-reset-credits/consume` nìkan, ọ̀kọ̀ọ̀kan sì jẹ́ fún àkọọ́lẹ̀ provider tó bá mu. Ohun mìíràn yóò dá `403` padà láì kàn sí upstream. A kọ́bi sí àkọsílẹ̀ `Authorization` olùpè
-  (pẹ̀lú placeholder `$TOKEN$`); OmniRoute máa ń fi access token ìsopọ̀ náà sínú rẹ̀, ó sì máa ń tún un ṣe ní àkọ́kọ́ nígbà tí ó bá fẹ́rẹ̀ẹ́ parí, ó sì ń fi àwọn àkọsílẹ̀ tí a fọwọ́ sí nìkan ránṣẹ́ (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`;
-  `Accept`, `Content-Type`). Bí `Chatgpt-Account-Id` bá sọnù, workspace ID tí a pamọ́ ni a máa lò. Àwọn ìbéèrè máa ń parí lẹ́yìn ìṣẹ́jú àá mẹ́ẹ̀ẹ́dógún, wọ́n sì máa ń lo proxy ìsopọ̀ náà.
-- `reset-quota` máa ń fi àwọn ipò ìkẹyìn (banned, expired, credits_exhausted) sílẹ̀. `auth_index` tí a kò mọ̀ yóò dá `404` padà.
+https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits` àti `POST .../wham/rate-limit-reset-credits/consume` nìkan, ọ̀kọ̀ọ̀kan fún àkọọ́lẹ̀ provider tó bá a mu nìkan. Ohun mìíràn ń dá `403` padà láì kan sí upstream. A kò kọbi ara sí header `Authorization` ẹni tó pè é (pẹ̀lú placeholder `$TOKEN$`): OmniRoute ń fi access token connection sínú rẹ̀, ó ń kọ́kọ́ ṣe refresh bí ó bá fẹ́ parí, ó sì ń fi header tí a yọ̀ǹda nìkan ránṣẹ́ (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`; `Accept`, `Content-Type`). Bí `Chatgpt-Account-Id` kò bá sí, workspace id tí a tọ́jú ni a ń lò ní ìṣètò àkọ́kọ́. Bí ìdáhùn upstream àkọ́kọ́ bá jẹ́ `401`, ó ń ṣe refresh lẹ́ẹ̀kan, ó sì ń gbìyànjú lẹ́ẹ̀kan sí i kìkì bí access token bá yí padà. Upstream attempt kọ̀ọ̀kan ń parí àkókò lẹ́yìn ìṣẹ́jú-àáyá 15, ó sì ń lo proxy connection.
+- `reset-quota` ń fi terminal state (banned, expired, credits_exhausted) sílẹ̀ bí wọ́n ti rí. `auth_index` tí a kò mọ̀ ń dá `404` padà.
 
 **Ìfàṣẹsí:** session dashboard tàbí kọ́kọ́rọ́ API tí ó ní scope `manage`, èyí tó ṣe pàtàkì kódà nígbà tí a bá pa ìwọlé mọ́
 (àwọn ọ̀nà náà wà nínú `ALWAYS_PROTECTED_API_PATHS`). Àwọn kọ́kọ́rọ́ tí inference nìkan jẹ́ fún yóò gba `403`. Orísun:
@@ -1883,17 +1875,17 @@ Ibi ìpamọ́ ìrántí ìbánisọ̀rọ̀/òtítọ́ tó wà pẹ́ títí, 
 
 OmniRoute wá pẹ̀lú embedded Model Context Protocol server tí ó ní transports mẹ́ta (stdio, SSE, streamable-http) àti àwọn irinṣẹ́ tí a fi scope sí. Àwọn dashboard endpoints tó wà nísàlẹ̀ ń ka status/audit data, wọ́n sì ń ṣe proxy fún àwọn HTTP transports.
 
-| Method | Path | Description |
-| ------ | ---------------------- | ------------------------------------------------------------------------------------------------ | -------------------- |
-| GET | `/api/mcp/status` | Heartbeat, transport, ipò online, ìpè tó kẹ́yìn, àwọn irinṣẹ́ tó wà lókè, àti ìwọ̀n àṣeyọrí fún wákàtí 24 |
-| GET | `/api/mcp/tools` | Àtòjọ àwọn irinṣẹ́ MCP pẹ̀lú `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints` |
-| GET | `/api/mcp/sse` | Ṣí SSE stream fún SSE transport (ó máa dá `503` padà bí MCP bá wà ní pipa tàbí tí transport kò bá mu) |
-| POST | `/api/mcp/sse` | Rán JSON-RPC frame lórí SSE transport |
-| GET | `/api/mcp/stream` | Ṣí apá SSE ti Streamable HTTP transport (àwọn messages tí server bẹ̀rẹ̀) |
-| POST | `/api/mcp/stream` | Rán JSON-RPC frame lórí Streamable HTTP transport |
-| DELETE | `/api/mcp/stream` | Parí Streamable HTTP session |
-| GET | `/api/mcp/audit` | Béèrè lọ́wọ́ audit log — `?limit=`, `?offset=`, `?tool=`, `?success=true                                | false`, `?apiKeyId=` |
-| GET | `/api/mcp/audit/stats` | Àkópọ̀ audit stats (àpapọ̀, ìwọ̀n àṣeyọrí, ìpẹ̀yà àkókò, àwọn irinṣẹ́ tó wà lókè) |
+| Method | Path                   | Description                                                                                                                   |
+| ------ | ---------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/mcp/status`      | Heartbeat, transport, ipò online, ìpè tó kẹ́yìn, àwọn irinṣẹ́ tó wà lókè, àti ìwọ̀n àṣeyọrí fún wákàtí 24                        |
+| GET    | `/api/mcp/tools`       | Àtòjọ àwọn irinṣẹ́ MCP pẹ̀lú `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints`                          |
+| GET    | `/api/mcp/sse`         | Ṣí SSE stream fún SSE transport (ó máa dá `503` padà bí MCP bá wà ní pipa tàbí tí transport kò bá mu)                         |
+| POST   | `/api/mcp/sse`         | Rán JSON-RPC frame lórí SSE transport                                                                                         |
+| GET    | `/api/mcp/stream`      | Ṣí apá SSE ti Streamable HTTP transport (àwọn messages tí server bẹ̀rẹ̀)                                                        |
+| POST   | `/api/mcp/stream`      | Rán JSON-RPC frame lórí Streamable HTTP transport                                                                             |
+| DELETE | `/api/mcp/stream`      | Parí Streamable HTTP session                                                                                                  |
+| GET    | `/api/mcp/audit`       | Béèrè lọ́wọ́ audit log — `?limit=`, `?offset=`, `?tool=`, `?success=true                                \| false`, `?apiKeyId=` |
+| GET    | `/api/mcp/audit/stats` | Àkópọ̀ audit stats (àpapọ̀, ìwọ̀n àṣeyọrí, ìpẹ̀yà àkókò, àwọn irinṣẹ́ tó wà lókè)                                                  |
 
 **Ìfọwọ́sí:** àwọn transports `sse`/`stream` ń bọ̀wọ̀ fún MCP-specific auth surface (Bearer API key pẹ̀lú `mcp` scope); àwọn routes `status`/`tools`/`audit*` lè ka láti dashboard (kò sí ìfọwọ́sí àfikún tó nílò ju dídé dashboard host lọ).
 

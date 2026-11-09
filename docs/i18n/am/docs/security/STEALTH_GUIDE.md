@@ -243,7 +243,7 @@ interface CliFingerprint {
 
 ---
 
-## የተጠቃሚ-ወኪል — env varsን ይሽራል (`.env.example` ክፍል 12)
+## User-Agent መሻሪያዎች — env vars (`.env.example` ክፍል 12)
 
 | ተለዋዋጭ               | ነባሪ                                           |
 | ------------------- | --------------------------------------------- |
@@ -254,7 +254,7 @@ interface CliFingerprint {
 | `QODER_USER_AGENT`  | `Qoder-Cli`                                   |
 | `CURSOR_USER_AGENT` | `Cursor/3.4`                                  |
 
-በተለዋዋጭ ፍለጋ በ `open-sse/executors/base.ts::buildHeaders()` የተበላ።** አቅራቢዎች አዲስ CLI ስሪቶችን ሲለቁ እነዚህን ያጥፉ** — የቆዩ UA ሕብረቁምፊዎች ጊዜ ያለፈባቸው ደንበኞች ውድቅ መደረግ ይጀምራሉ።
+በ`open-sse/executors/base.ts::buildHeaders()` በተለዋዋጭ ፍለጋ በኩል ጥቅም ላይ ይውላሉ። **አቅራቢዎች አዲስ የCLI ስሪቶችን ሲለቁ እነዚህን ያዘምኑ** — ጊዜ ያለፈባቸው የUA ሕብረቁምፊዎች እንደ ጊዜ ያለፈባቸው ደንበኞች ውድቅ መደረግ ይጀምራሉ።
 
 ## የCLI ተኳኋኝነት ሁነታ መቀያየሪያዎች (`.env.example` ክፍል 13)
 

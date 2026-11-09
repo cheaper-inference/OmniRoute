@@ -816,15 +816,7 @@ Exa の `type: "lite"`（Exa 3.0）は、より少ないフィールドの組み
 `subpageTarget`、`highlights.numSentences`、`highlights.highlightsPerUrl` は
 今後転送されません。
 
-コスト計算は、Exa を除き、固定のレジストリ `costPerQuery` に基づきます。Exa は
-独自の料金体系に従います: `auto`（および従来の `fast`）は呼び出し 1 回あたり $0.007、
-`lite`（および従来の `instant`）は $0.004 で、10 件の結果を含みます。追加の結果には
-1 件あたり $0.001 がかかり、`contents.summary` が設定されている場合は返された結果
-1 件あたり $0.001 がかかります。Tavily は、`search_depth` が `basic`、`fast`、
-`ultra-fast` の場合は 1 クレジット（$0.008）、`advanced` の場合は 2 クレジット
-（$0.016）として記録されます（[Tavily API クレジット](https://docs.tavily.com/documentation/api-credits)）。
-`auto_parameters: true` を指定した呼び出しで Tavily が `advanced` にアップグレード
-した場合も、1 クレジットとして記録されます。
+Exa: `auto` (および従来の`fast`) の場合は呼び出しごとに 0.007 ドル、 `lite` (および従来の`instant`) の場合は 0.004 ドルで、10 件の結果がカバーされます。その後の結果ごとに 0.001 ドル。 `contents.summary`が設定されている場合は、返された結果ごとに $0.001 がかかります。 Tavily は、 `search_depth` `basic`、 `fast`および`ultra-fast`の場合は 1 クレジット ($0.008)、 `advanced` ( [Tavily APIクレジット](https://docs.tavily.com/documentation/api-credits)) の場合は 2 クレジット ($0.016) で記録されます。 Tavily がアドバンストにアップグレードした`auto_parameters: true`との通話は、引き続き 1 クレジットで記録されます。
 
 ---
 
@@ -1077,6 +1069,8 @@ X-OmniRoute-No-Cache: true
 
 ---
 
+<a id="cliproxyapi-management-compatibility"></a>
+
 ## CLIProxyAPI 管理互換性
 
 OmniRoute は、使用状況ダッシュボードが Claude および Codex のサブスクリプション上限を読み取るために呼び出す、3 つの [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI) 管理エンドポイント（たとえば T3 Code の `cliproxy` 使用量ソース）に応答します。クライアントのベース URL を OmniRoute に設定し、管理キーとして `manage` スコープを持つ API キーを使用してください。ルートは `/v0/management/*` および `/api/v0/management/*` で提供されます。
@@ -1087,11 +1081,11 @@ OmniRoute は、使用状況ダッシュボードが Claude および Codex の�
 | POST   | `/v0/management/api-call`    | 本文 `{ auth_index, method, url, header?, data? }`。アカウントのトークンを使用して、許可リストに登録されたリクエストを 1 件送信し、`{ status_code, body }` を返します |
 | POST   | `/v0/management/reset-quota` | 本文 `{ auth_index }`。1 つのアカウントの接続クールダウン、モデルロックアウト、Codex のスコープごとのクールダウンをクリアします                                       |
 
-- `auth_index` は OmniRoute の接続 ID です。`provider` は `claude` または `codex` です（OAuth 接続のみ。`anthropic` API キープロバイダーは一覧に含まれません）。Codex の場合、`id_token.chatgpt_account_id` は保存されたワークスペース ID、`plan_type` は保存されたプランです。
+- `auth_index` は OmniRoute の接続 ID です。`provider` は `claude` または `codex` です（OAuth 接続のみ。API キープロバイダー `anthropic` は一覧に含みません）。Codex では、`id_token.chatgpt_account_id` は保存済みのワークスペース ID、`plan_type` は保存済みのプランです。
 - `api-call` は汎用プロキシではありません。Claude の `GET
-https://api.anthropic.com/api/oauth/usage` および Codex の `GET
-https://chatgpt.com/backend-api/wham/usage`、`GET .../wham/rate-limit-reset-credits`、`POST .../wham/rate-limit-reset-credits/consume` のみを受け付け、それぞれ対応するプロバイダーのアカウントに対してのみ実行します。それ以外はアップストリームに接続せずに `403` を返します。呼び出し元の `Authorization` ヘッダー（`$TOKEN$` プレースホルダーを含む）は無視されます。OmniRoute は接続のアクセストークンを注入し、有効期限が近い場合は先に更新し、許可リストに登録されたヘッダー（`anthropic-beta`、`OpenAI-Beta`、`Originator`、`Chatgpt-Account-Id`、`Accept`、`Content-Type`）のみを転送します。`Chatgpt-Account-Id` がない場合は、保存されたワークスペース ID がデフォルトになります。リクエストは 15 秒後にタイムアウトし、接続のプロキシを使用します。
-- `reset-quota` は終端状態（banned、expired、credits_exhausted）をそのままにします。不明な `auth_index` は `404` を返します。
+https://api.anthropic.com/api/oauth/usage` と、Codex の `GET
+https://chatgpt.com/backend-api/wham/usage`、`GET .../wham/rate-limit-reset-credits`、`POST .../wham/rate-limit-reset-credits/consume` だけを受け付け、それぞれ対応するプロバイダーのアカウントでのみ使用できます。それ以外は上流に接続せず `403` を返します。呼び出し元の `Authorization` ヘッダー（プレースホルダー `$TOKEN$` を含む）は無視されます。OmniRoute は接続のアクセストークンを注入し、期限切れが近ければ先に更新します。転送するヘッダーは許可リスト内だけです（`anthropic-beta`、`OpenAI-Beta`、`Originator`、`Chatgpt-Account-Id`、`Accept`、`Content-Type`）。`Chatgpt-Account-Id` がなければ、保存済みのワークスペース ID が既定値になります。上流からの最初の応答が `401` の場合は一度更新し、アクセストークンが変わった場合に限って再試行します。上流への各試行は 15 秒でタイムアウトし、接続のプロキシを使用します。
+- `reset-quota` は最終状態（banned、expired、credits_exhausted）を変更しません。未知の `auth_index` は `404` を返します。
 
 **認証:** ログインが無効になっている場合でも、ダッシュボードセッションまたは `manage` スコープの API キーが必要です（パスは `ALWAYS_PROTECTED_API_PATHS` に含まれています）。推論専用キーでは `403` が返されます。ソース: `src/lib/cliproxyCompat/managementApi.ts`。
 
@@ -1812,17 +1806,17 @@ API キー / セッションごとにスコープされた、会話および事�
 
 OmniRoute には、3 つのトランスポート（stdio、SSE、streamable-http）とスコープ付きツールを備えた、組み込みの Model Context Protocol サーバーが付属しています。以下のダッシュボードエンドポイントでは、ステータス/監査データを読み取り、HTTP トランスポートをプロキシします。
 
-| メソッド | パス | 説明 |
-| ------ | ---------------------- | ------------------------------------------------------------------------------------------------ | -------------------- |
-| GET | `/api/mcp/status` | ハートビート、トランスポート、オンライン状態、最終呼び出し、上位ツール、24 時間の成功率 |
-| GET | `/api/mcp/tools` | `name`、`description`、`scopes`、`phase`、`auditLevel`、`sourceEndpoints` を含む MCP ツールの一覧 |
-| GET | `/api/mcp/sse` | SSE トランスポート用の SSE ストリームを開く（MCP が無効、またはトランスポートが一致しない場合は `503` を返す） |
-| POST | `/api/mcp/sse` | SSE トランスポート上で JSON-RPC フレームを送信 |
-| GET | `/api/mcp/stream` | Streamable HTTP トランスポートの SSE 側を開く（サーバー起点のメッセージ） |
-| POST | `/api/mcp/stream` | Streamable HTTP トランスポート上で JSON-RPC フレームを送信 |
-| DELETE | `/api/mcp/stream` | Streamable HTTP セッションを終了 |
-| GET | `/api/mcp/audit` | 監査ログをクエリ — `?limit=`、`?offset=`、`?tool=`、`?success=true                                | false`、`?apiKeyId=` |
-| GET | `/api/mcp/audit/stats` | 監査統計の集計（合計、成功率、平均所要時間、上位ツール） |
+| メソッド | パス                   | 説明                                                                                                                      |
+| -------- | ---------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| GET      | `/api/mcp/status`      | ハートビート、トランスポート、オンライン状態、最終呼び出し、上位ツール、24 時間の成功率                                   |
+| GET      | `/api/mcp/tools`       | `name`、`description`、`scopes`、`phase`、`auditLevel`、`sourceEndpoints` を含む MCP ツールの一覧                         |
+| GET      | `/api/mcp/sse`         | SSE トランスポート用の SSE ストリームを開く（MCP が無効、またはトランスポートが一致しない場合は `503` を返す）            |
+| POST     | `/api/mcp/sse`         | SSE トランスポート上で JSON-RPC フレームを送信                                                                            |
+| GET      | `/api/mcp/stream`      | Streamable HTTP トランスポートの SSE 側を開く（サーバー起点のメッセージ）                                                 |
+| POST     | `/api/mcp/stream`      | Streamable HTTP トランスポート上で JSON-RPC フレームを送信                                                                |
+| DELETE   | `/api/mcp/stream`      | Streamable HTTP セッションを終了                                                                                          |
+| GET      | `/api/mcp/audit`       | 監査ログをクエリ — `?limit=`、`?offset=`、`?tool=`、`?success=true                                \| false`、`?apiKeyId=` |
+| GET      | `/api/mcp/audit/stats` | 監査統計の集計（合計、成功率、平均所要時間、上位ツール）                                                                  |
 
 **認証:** `sse`/`stream` トランスポートでは MCP 固有の認証インターフェース（`mcp` スコープを持つ Bearer API キー）が使用されます。`status`/`tools`/`audit*` ルートはダッシュボードから読み取り可能です（ダッシュボードホストへのアクセス以外に追加の認証は必要ありません）。
 

@@ -53,7 +53,7 @@ Search Tools Studio ले `/dashboard/search-tools` लाई सामान�
 - इनपुट: URL + पूर्ण-पृष्ठ टगल + ढाँचा चयनकर्ता (markdown / text / HTML)।
 - पेस गर्नुहोस् → फेच गर्नुहोस् → `ScrapeResult.tsx` रेन्डर गर्नुहोस्।
 - `ScrapeResult` ले markdown पूर्वावलोकन + कच्चा सामग्री टगल रेन्डर गर्छ।
-- सीमा: यदि प्रतिक्रिया बडी **256 KB** भन्दा ठूलो छ भने, UI ले `(काटिएको, कच्चा सामग्री हेर्नुहोस्)` देखाउँछ र कच्चा सामग्रीलाई Monaco मोडलमा खोल्छ (D21)।
+- सीमा: यदि प्रतिक्रिया बडी **256 KB** भन्दा ठूलो छ भने, UI ले `View full raw content` देखाउँछ र कच्चा सामग्रीलाई मोडलमा खोल्छ (D21)।
 - मेटाडेटा प्यानल: प्रदायक (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), विलम्बता, लागत, प्रतिक्रिया आकार, लिङ्क सङ्ख्या।
 - `useScrapeFetch.ts` हुक प्रयोग गर्छ।
 

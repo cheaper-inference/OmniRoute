@@ -1251,7 +1251,7 @@ function CombosPageContent() {
       router.replace(buildUnfilteredCombosHref(searchParams.toString()), { scroll: false });
     }
     setReorderingAllCombos(false);
-    setComboPage(findComboPage(nextCombos, comboId));
+    setComboPage(findComboPage(nextCombos, comboId), "all");
     scrollToComboCardWhenRendered(comboId);
   };
 
@@ -1456,6 +1456,7 @@ function CombosPageContent() {
       {combos.length > 0 && (
         <ComboListToolbar
           t={t}
+          tc={tc}
           comboCount={combos.length}
           filteredCount={filteredCombos.length}
           pageStart={comboPageStart}
@@ -1546,7 +1547,6 @@ function CombosPageContent() {
           ))}
           {!reorderingAllCombos && comboPageCount > 1 && (
             <ComboPaginationNav
-              t={t}
               tc={tc}
               page={visibleComboPage}
               pageCount={comboPageCount}

@@ -11,13 +11,13 @@ OmniRoute runner នីមួយៗមាន **តួនាទីតែមួយ
 ដែលប្រើ webpack និងការងារ lint មួយប៉ុណ្ណោះ។ host swap (16 GB) នឹងស្រូបយកការប្រើប្រាស់លើសនោះ ហើយដោយសារ Build សម្រាប់ pull request ដំណើរការ
 លើ hosted runners ស្លុត Turbopack ដូច្នេះទំនេរស្ទើរតែគ្រប់ពេល៖
 
-| runner               | ស្លាក             | តួនាទី                                                                                                                                                        | `MemoryHigh` / `MemoryMax` | `CPUQuota`            |
-| -------------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | --------------------- |
-| `omniroute-113-5`    | `omni-build`      | build ដោយ Turbopack៖ `ci.yml` `Build` (សម្រាប់តែ push/dispatch), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact` និង build a11y ប្រចាំយប់ | 56 GB / 60 GB (swap 0)     | 1600 %                |
-| `omniroute-113-6`    | `omni-release`    | Release-Green (`release-green` + `main-green`) និង build ដោយ webpack                                                                                          | 20 GB / 24 GB (swap 4 GB)  | 800 %                 |
-| `omniroute-113-2`    | `omni-light`      | ការងារប្រចាំយប់ (Schemathesis, promptfoo, garak, k6) និង `quality.yml` `lint-guard`                                                                           | 12 GB / 16 GB (swap 4 GB)  | 600 %                 |
-| `omniroute-113`      | `omni-light`      | ពូលដូចខាងលើ                                                                                                                                                   | 8 GB / 12 GB               | 400 %                 |
-| OmniHeuris, OmniMind | (ឃ្លាំងរបស់ពួកវា) | សម្រាប់តែ Dependabot ប៉ុណ្ណោះ (កម្រិតខ្ពស់បំផុត 155 MB ក្នុងមួយ runner, 2026-10-18)                                                                           | 4 GB / 6 GB                | 200 % ក្នុងមួយ runner |
+| runner               | ស្លាក                           | តួនាទី                                                                                                                                                        | `MemoryHigh` / `MemoryMax` | `CPUQuota`            |
+| -------------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | --------------------- |
+| `omniroute-113-5`    | `omni-build`, `omni-build-60gb` | build ដោយ Turbopack៖ `ci.yml` `Build` (សម្រាប់តែ push/dispatch), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact` និង build a11y ប្រចាំយប់ | 56 GB / 60 GB (swap 0)     | 1600 %                |
+| `omniroute-113-6`    | `omni-release`                  | Release-Green (`release-green` + `main-green`) និង build ដោយ webpack                                                                                          | 20 GB / 24 GB (swap 4 GB)  | 800 %                 |
+| `omniroute-113-2`    | `omni-light`                    | ការងារប្រចាំយប់ (Schemathesis, promptfoo, garak, k6) និង `quality.yml` `lint-guard`                                                                           | 12 GB / 16 GB (swap 4 GB)  | 600 %                 |
+| `omniroute-113`      | `omni-light`                    | ពូលដូចខាងលើ                                                                                                                                                   | 8 GB / 12 GB               | 400 %                 |
+| OmniHeuris, OmniMind | (ឃ្លាំងរបស់ពួកវា)               | សម្រាប់តែ Dependabot ប៉ុណ្ណោះ (កម្រិតខ្ពស់បំផុត 155 MB ក្នុងមួយ runner, 2026-10-18)                                                                           | 4 GB / 6 GB                | 200 % ក្នុងមួយ runner |
 
 បានវាស់វែងនៅ 2026-10-18៖
 
@@ -27,12 +27,13 @@ OmniRoute runner នីមួយៗមាន **តួនាទីតែមួយ
 | swap      | 16 GB                              | `omniroute-113-5` ដំណើរការដោយបិទ swap (`MemorySwapMax=0`) ដូច្នេះ build ដែលប្រើធនធានមិនអាចគ្រប់គ្រងបាននឹងត្រូវកាត់ផ្តាច់នៅកម្រិតកំណត់របស់វា ជំនួសឱ្យការធ្វើឱ្យម៉ាស៊ីនទាំងមូលប្រើ swap                                                                                                                                                                                                                                                                     |
 | `/tmp`    | **12 GB tmpfs = RAM**              | អ្វីៗដែលដាក់រក្សាទុកនៅទីនោះសុទ្ធតែប្រើ memory ហើយឯកសារសំណល់ត្រូវបានសម្អាតចេញក្រោយរយៈពេល 3 ម៉ោង                                                                                                                                                                                                                                                                                                                                                            |
 | CPU       | បានសង្កេតឃើញ load 60 លើ 32 ស្នូល   | មុនពេលដាក់កម្រិត quota build ដោយ Turbopack មួយ (~1166 % CPU) រួមជាមួយ coverage suite មួយនៅលើម៉ាស៊ីនដូចគ្នា បានដណ្តើមធនធានពី heartbeat របស់ listeners ផ្សេងទៀត (`The self-hosted runner lost communication`, #16853)                                                                                                                                                                                                                                       |
-| runners   | **listeners ចំនួន 7** (2026-10-28) | OmniRoute 5 + OmniHeuris + OmniMind; `omniroute-113-7` ក៏ផ្ទុក `omni-build` ផងដែរ; `omniroute-113-3/-4/-8` ត្រូវបានលុបចេញពី repo (2026-10-28)                                                                                                                                                                                                                                                                                                             |
+| runners   | **listeners ចំនួន 7** (2026-10-28) | OmniRoute 5 + OmniHeuris + OmniMind; `omniroute-113-5` ក៏ផ្ទុក `omni-build-60gb` ផងដែរ; `omniroute-113-3/-4/-8` ត្រូវបានលុបចេញពី repo (2026-10-28)                                                                                                                                                                                                                                                                                                        |
 
 កម្រិតកំណត់ស្ថិតនៅក្នុង `/etc/systemd/system/actions.runner.<…>.service.d/override.conf` របស់ unit នីមួយៗ
 (តម្លៃមុនៗត្រូវបានរក្សាទុកជា `override.conf.bak-20261018`) ហើយត្រូវបានអនុវត្តភ្លាមៗដោយប្រើ
 `systemctl set-property --runtime … MemoryHigh=… MemoryMax=… CPUQuota=…` ដោយមិនចាំបាច់ restart ដូច្នេះ
-មិនមានការងារដែលកំពុងដំណើរការណាមួយត្រូវបានប៉ះពាល់ទេ។ ស្លាកត្រូវបានផ្លាស់ប្តូរតាមរយៈ runners API (`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
+មិនមានការងារដែលកំពុងដំណើរការណាមួយត្រូវបានប៉ះពាល់ទេ។ ស្លាកត្រូវបានផ្លាស់ប្តូរតាមរយៈ runners API
+(`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
 `gh api -X POST repos/<repo>/actions/runners/<id>/labels -f 'labels[]=<label>'`) ហើយការផ្លាស់ប្តូរនេះក៏មានប្រសិទ្ធភាពភ្លាមៗផងដែរ។
 
 ## ដំឡើងកម្មវិធីសម្អាត (តែម្តងគត់ លើម៉ាស៊ីន)
@@ -80,7 +81,7 @@ CPU ដោយគ្មាន job ភ្ជាប់ជាមួយ។ រាល�
 ## ច្បាប់ប្រតិបត្តិការ
 
 - **មួយពេលអាចដំណើរការ Turbopack build បានតែមួយប៉ុណ្ណោះ — អនុវត្តបង្ខំដោយ label។** រាល់ job ដែលដំណើរការ Turbopack
-  `next build` ពេញលេញ សុទ្ធតែកំណត់គោលដៅទៅ `[self-hosted, omni-build]` ហើយមានតែ **`omniroute-113-5`** ប៉ុណ្ណោះដែលមាន
+  `next build` ពេញលេញ សុទ្ធតែកំណត់គោលដៅទៅ `[self-hosted, omni-build, omni-build-60gb]` ហើយមានតែ **`omniroute-113-5`** ប៉ុណ្ណោះដែលមាន
   label នោះ៖ `ci.yml` `Build`, `npm-publish.yml` `publish`, `nightly-v4-build`, `preview-artifact`,
   nightly a11y build (#16853) និង **amd64** ក្នុង `docker-publish.yml` (webpack នៅខាងក្នុង BuildKit —
   Turbopack បានគាំងនៅទីនោះក្នុង run 33253576569)។ ផ្នែក Docker arm64 នៅតែដំណើរការលើ `ubuntu-24.04-arm`។

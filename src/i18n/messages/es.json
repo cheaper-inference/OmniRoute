@@ -4147,7 +4147,9 @@
     "duplicateAutoComboFailedPrefix": "Error al duplicar la combinación automática:",
     "duplicateAutoComboUnknownError": "Error desconocido",
     "duplicateAutoComboTitle": "Crear una combinación estática de {name}",
-    "fallbackSummary": "{rate}% de las solicitudes usaron el respaldo; cada una omitió en promedio ~{skips} objetivos"
+    "fallbackSummary": "{rate}% de las solicitudes usaron el respaldo; cada una omitió en promedio ~{skips} objetivos",
+    "reorderAll": "Reordenar todo",
+    "reorderAllDescription": "Reordenando todos los combos {count}. Los controladores de arrastre están habilitados."
   },
   "costs": {
     "title": "Costos",
@@ -14538,6 +14540,10 @@
       "UNPRICED_USAGE_BUDGET_POLICY": {
         "label": "Política de presupuesto de uso sin precio",
         "description": "Cómo los límites diarios/semanales por clave en USD tratan el uso exitoso cuyo proveedor/modelo no tiene una fila de precios. fail_closed (predeterminado) marca la ventana como excedida, de modo que un coste desconocido nunca puede eludir un tope estricto. count_as_zero cuenta ese uso como $0 y mantiene la aplicación del gasto tarifado. Los modelos sin precio se muestran en la página principal del panel de control de todas formas."
+      },
+      "COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE": {
+        "description": "En las estadísticas de caché de compresión, cuente una solicitud comprimida a un proveedor de almacenamiento en caché de prefijo automático (OpenAI, Codex, Azure o una conexión personalizada que declare el almacenamiento en caché rápido con eliminación de marcadores) como un acierto de caché estimado incluso sin marcadores cache_control. La estimación es una señal de elegibilidad de caché, no un acierto observado, por lo que la tasa de aciertos reportada por esos proveedores tiende hacia el 100%. Desactivado de forma predeterminada: solo una solicitud que lleva marcadores cache_control a un proveedor de almacenamiento en caché cuenta como un acierto estimado, por lo que los proveedores de prefijo automático siguen informando 0.",
+        "label": "Estadísticas de caché de compresión: elegibilidad de prefijo automático"
       }
     }
   },

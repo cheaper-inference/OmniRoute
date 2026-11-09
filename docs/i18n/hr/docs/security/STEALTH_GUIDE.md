@@ -246,9 +246,9 @@ Osim toga, `updateNssDatabases()` instalira certifikat u NSS baze podataka pojed
 
 Sve MITM krajnje točke zahtijevaju autentifikaciju za upravljanje (`requireCliToolsAuth`). Sudo lozinka predmemorira se u opsegu modula (nikada u `globalThis`) i briše se pri pozivu `stopMitm()`.
 
-## User-Agent nadjačava — env vars (`.env.example` odjeljak 12)
+## Nadjačavanja User-Agent zaglavlja — varijable okruženja (`.env.example`, odjeljak 12)
 
-| Varijabilna         | Zadano                                        |
+| Varijabla           | Zadana vrijednost                             |
 | ------------------- | --------------------------------------------- |
 | `CLAUDE_USER_AGENT` | `claude-cli/2.1.280 (external, cli)`          |
 | `CODEX_USER_AGENT`  | `codex-cli/0.155.0 (Windows 10.0.26200; x64)` |
@@ -257,7 +257,7 @@ Sve MITM krajnje točke zahtijevaju autentifikaciju za upravljanje (`requireCliT
 | `QODER_USER_AGENT`  | `Qoder-Cli`                                   |
 | `CURSOR_USER_AGENT` | `Cursor/3.4`                                  |
 
-Konzumira `open-sse/executors/base.ts::buildHeaders()` putem dinamičkog pretraživanja.** Uklonite ih kada pružatelji izdaju nove CLI verzije** — stale UA nizovi počinju se odbijati kao zastarjeli klijenti.
+Koristi ih `open-sse/executors/base.ts::buildHeaders()` putem dinamičkog dohvaćanja. **Ažurirajte ih kada pružatelji objave nove verzije CLI-ja** — zastarjeli UA nizovi počinju se odbijati kao zastarjeli klijenti.
 
 ## Prekidači načina kompatibilnosti CLI-ja (`.env.example`, odjeljak 13)
 

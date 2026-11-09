@@ -238,9 +238,9 @@ Gbogbo àwọn endpoint MITM nílò ìfàṣẹsí ìṣàkóso (`requireCliTool
 
 ---
 
-## Olumulo-Aṣoju Yipadanu — env vars (apakan `.env.example` 12)
+## Àwọn Ìyípadà User-Agent — àwọn àyípadà àyíká (`.env.example` abala 12)
 
-| Ayípadà             | Aiyipada                                      |
+| Àyípadà             | Àìpéye                                        |
 | ------------------- | --------------------------------------------- |
 | `CLAUDE_USER_AGENT` | `claude-cli/2.1.280 (external, cli)`          |
 | `CODEX_USER_AGENT`  | `codex-cli/0.155.0 (Windows 10.0.26200; x64)` |
@@ -249,7 +249,7 @@ Gbogbo àwọn endpoint MITM nílò ìfàṣẹsí ìṣàkóso (`requireCliTool
 | `QODER_USER_AGENT`  | `Qoder-Cli`                                   |
 | `CURSOR_USER_AGENT` | `Cursor/3.4`                                  |
 
-Je nipasẹ `open-sse/executors/base.ts::buildHeaders()` nipasẹ wiwa ìmúdàgba.** Kọlu iwọnyi nigbati awọn olupese ba tu awọn ẹya CLI tuntun silẹ** — stale UA awọn gbolohun ọrọ bẹrẹ nini kọ bi awọn onibara igba atijọ.
+`open-sse/executors/base.ts::buildHeaders()` ń lò wọ́n nípasẹ̀ ìṣàwárí alágbára. **Ṣe àfikún ẹ̀yà wọn nígbà tí àwọn olùpèsè bá ṣe ìtújáde àwọn ẹ̀yà CLI tuntun** — àwọn ọ̀rọ̀ UA tí ó ti pẹ́ máa ń bẹ̀rẹ̀ sí í jẹ́ kí a kọ̀ wọ́n gẹ́gẹ́ bí àwọn oníbàárà tí ó ti di àtijọ́.
 
 ## Àwọn Yíyí Ìpo Ìbámu CLI (`.env.example` abala 13)
 

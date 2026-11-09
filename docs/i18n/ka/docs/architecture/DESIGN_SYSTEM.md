@@ -4,111 +4,34 @@
 
 ---
 
-> **სტატუსი:** საინფორმაციო დაფა აგებულია **Keak CI UI Kit**-ზე (`@keak/cheaper-inference-ui-kit`), რომელიც
-> ჩაშენებულია როგორც სამუშაო სივრცე `packages/ui-kit` (`@omniroute/ui-kit`; საწყისი პროექტის სურათი დაფიქსირებულია
-> `packages/ui-kit/UPSTREAM.md`-ში და მოწმდება `npm run check:ui-kit-snapshot`-ით). ნათელი თემა კანონიკურია,
-> ხოლო ნაგულისხმევი პარამეტრია `system`. ნაგულისხმევი პალიტრა არის ნაკრების **Editions** იერსახე
-> (თბილი, ქაღალდის მსგავსი ნეიტრალური ფერები და სპილენძისფერი აქცენტი `#e5ac82`, `packages/ui-kit/src/ci-editions.css`); პარამეტრები →
-> იერსახე → ფერთა პალიტრა გთავაზობთ **Classic** ვარიანტს — ნაკრების საბაზისო ტოკენებს ლაიმისფერი აქცენტით. Switzer
-> ერთადერთი შრიფტის ოჯახია ინტერფეისის, სათაურებისა და კოდის ტექსტისთვის (`--ci-font-ui`; `--ci-font-display` და
-> `--ci-font-mono` მასზე მიუთითებს) და ლოკალურად თავად ნაკრების მიერ არის განთავსებული (`packages/ui-kit/src/ci-fonts.css`,
-> რომელიც იმპორტირებულია `ci-tokens.css`-ის მიერ). დამწერლობები, რომლებსაც Switzer არ მოიცავს, გლიფების დონეზე გადადის სათადარიგო შრიფტებზე (`src/app/globals.css`):
-> Inter — კირილიცის, ბერძნულისა და ვიეტნამურისთვის, ხოლო Vazirmatn — არაბული დამწერლობისთვის, მხოლოდ `html[dir="rtl"]`-ის პირობებში.
-> ყველა ხატულა Lucide-ის გლიფია.
+> **სტატუსი:** დაფა აგებულია **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`). ნაკრები შედის ამ საცავში, როგორც სამუშაო ადგილი `packages/ui-kit` (`@omniroute/ui-kit`). ზედა დინების სნეპშოტი მიმაგრებულია `packages/ui-kit/UPSTREAM.md` ში და დაცულია `npm run check:ui-kit-snapshot` ით. საცნობარო თემაა მსუბუქი რეჟიმი; ნაგულისხმევი უპირატესობა არის `system`. ნაგულისხმევი პალიტრა არის ნაკრები **Editions** გარეგნობა: თბილი ქაღალდის ნეიტრალური ფერები და სპილენძის აქცენტის ფერი `#e5ac82` (`packages/ui-kit/src/ci-editions.css`). პარამეტრები → გარეგნობა → ფერების პალიტრა გთავაზობთ **Classic** , ნაკრების ბაზის დიზაინის ჟეტონები ცაცხვისფერ-მწვანე აქცენტით. Switzer არის ძირითადი შრიფტის ოჯახი UI და საჩვენებელი ტექსტისთვის (`--ci-font-ui`; `--ci-font-display` და `--ci-font-mono` გადაჭრის მას). შრიფტი ემსახურება კომპლექტში შეტანილი ადგილობრივი შრიფტის ფაილებიდან (`packages/ui-kit/src/ci-fonts.css`, იმპორტირებული `ci-tokens.css` მიერ). ყველა ხატი მოდის Lucide დან.
+>
+> Inter არის Switzer დან გამოტოვებული გლიფების ჩანაცვლება; `--font-mono` ასახავს სისტემის monospace stack `--ci-font-code`.
+>
+> `src/app/globals.css` ირჩევს სარეზერვო შრიფტებს თითო გლიფზე, როდესაც `Switzer` აკლია გლიფი: `Inter` კირილიცას, ბერძნულს და ვიეტნამურს, ხოლო `Vazirmatn` არაბული დამწერლობისთვის მხოლოდ `html[dir="rtl"]` ქვეშ.
 
-## 1. სად რა მდებარეობს
+`src/app/globals.css`:
 
-- **კომპლექტი.** `packages/ui-kit/src` არის ზედა დონის `src/`-ის ბაიტ-ბაიტზე იდენტური ასლი იმ კომიტზე, რომელიც დაფიქსირებულია
-  `packages/ui-kit/UPSTREAM.md`-ში (სადაც ასევე აღრიცხულია ლიცენზიის ავტორიზაცია); `PATCHES.md` ჩამოთვლის ლოკალურ
-  პატჩებს (არცერთი). ის გამოიყენება პირდაპირ საწყისი კოდის სახით, აგების გარეშე: `next.config.mjs` ახდენს მის ტრანსპილაციას, ხოლო
-  `tsconfig.json` აკავშირებს `@omniroute/ui-kit` → `packages/ui-kit/src` და `@omniroute/ui-kit/*` →
-  `packages/ui-kit/src/*` (`vitest.config.ts` და `vitest.mcp.config.ts` იმავე ალიასს შეიცავს). კომპლექტის
-  კომპონენტი შემოიტანეთ მისი ქვეკონტურის მიხედვით (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…), და არასოდეს
-  `@omniroute/ui-kit` გამაერთიანებელი ექსპორტის გავლით: ეს გამაერთიანებელი ყველა კომპონენტს (თარიღის ამომრჩევლის ჩათვლით)
-  თითოეულ იმპორტიორში ტვირთავს. კომპლექტის სტილების ფაილი შემოდის `src/app/globals.css`-ის გავლით
-  (`@import "../../packages/ui-kit/src/ci-styles.css"`, სრული სტილების ნაკრები: ძირითადი `ci-ui.css` და შაბლონების ყველა ოჯახი).
-- **ტოკენები.** `packages/ui-kit/src/ci-tokens.css` განსაზღვრავს `--ci-*` ტოკენებს; `src/app/globals.css`
-  მათ ძველ OmniRoute სახელებთან აკავშირებს (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`,
-  `--table-*`, `--orch-status-*`, `--color-fd-*`), რათა არსებულმა `var(--color-*)` წაკითხვებმა და Tailwind-ის
-  უტილიტებმა მუშაობა განაგრძოს. ახალი კოდი იყენებს Tailwind-ის უტილიტებს (`bg-surface`, `text-text-muted`,
-  `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…) ან კომპლექტის კლასებს — არასოდეს თექვსმეტობით მნიშვნელობას
-  (`tests/unit/design-kit-bridge.test.ts` ამ კავშირის დაცვას უზრუნველყოფს). `text-primary` გადაიჭრება
-  `--color-primary-ink`-ად `--text-color-primary`-ის გავლით, ამიტომ ძირითადი ტექსტი წაკითხვადი რჩება, ხოლო
-  `bg-primary`/`border-primary` აქცენტის ზედაპირს ინარჩუნებს: Editions-ში ეს არის კომპლექტის
-  `--ci-color-accent-active` (ღრმა სპილენძისფერი `#99562f` ღია რეჟიმში და სპილენძისფერი აქცენტი მუქ რეჟიმში); Classic-ში —
-  lime-800 ღია რეჟიმში და ლაიმისფერი აქცენტი მუქ რეჟიმში. დიაგრამის სერიები იყენებს
-  `--color-chart-1` … `--color-chart-8`-ს, თითოეული ტექსტისთვის უსაფრთხო `--color-chart-N-ink`-ითა და გაუმჭვირვალე
-  `--color-chart-N-subtle` ჭდის ელფერით, რომლებიც მინიჭებულია კომპლექტის სერიების თანმიმდევრობით (`ciChartSeriesOrder`).
-- **თემები.** `<html className="ci-theme">` (`src/app/layout.tsx`) დოკუმენტისთვის კომპლექტის თემას ააქტიურებს.
-  პარამეტრი არის `light`, `dark` ან `system` (`THEME_CONFIG.defaultTheme = "system"` ფაილში
-  `src/shared/constants/appConfig.ts`; `system` მიჰყვება `prefers-color-scheme`-ს). `applyTheme()` ფუნქცია
-  `src/store/themeStore.ts`-ში (რომელსაც იმეორებს `THEME_BOOT_SCRIPT`, ჩაშენებული `src/app/layout.tsx`-ში და გაშვებული
-  ჰიდრატაციამდე) ერთდროულად ადგენს `data-theme="dark"|"light"`-ს და `<html>`-ზე `.dark` კლასს გადართავს.
-  კომპლექტის მუქი თემის ტოკენების ნაკრები მიბმულია `data-theme="dark"`-ზე (`packages/ui-kit/src/ci-tokens.css`);
-  OmniRoute-ის საკუთარი მუქი რეჟიმის ჩანაცვლებები (`.dark` ბლოკი `globals.css`-ში) და ძველი Tailwind-ის `dark:`
-  უტილიტები მიბმულია `.dark` კლასზე. აქცენტის ფერის წინასწარ განსაზღვრული ნაკრებები არ არსებობს: აქცენტი ყოველთვის
-  კომპლექტიდან მოდის, ხოლო ძველი აგებიდან შენახული წინასწარი ნაკრები საცავის ჩატვირთვისას იშლება.
-- **პალიტრები.** ორია და ორივე კომპლექტიდან მოდის (`src/shared/constants/appearancePalette.ts`): `editions`,
-  ნაგულისხმევი, და `classic`. Editions არის კომპლექტის `data-ci-appearance="editions"` ატრიბუტი `<html>`-ზე, რომელსაც
-  `ci-editions.css` (`ci-ui.css`-ის მიერ იმპორტირებული) `data-theme`-თან აერთიანებს; Classic ნიშნავს ამ ატრიბუტის
-  არარსებობას. ფესვური განლაგება ატრიბუტს სერვერზე არენდერებს, ამიტომ მნახველი, რომელსაც არაფერი აქვს შენახული (ან JS არ აქვს),
-  Editions-ს ყველა ზედაპირზე იღებს — მართვის დაფაზე, შესვლის გვერდზე, `/status`-ზე, შეცდომის გვერდებზე, `/docs`-სა და PWA-ში. არჩევანი
-  თემის გვერდით იმავე `theme` საცავში ინახება (`palette`, `setPalette()`, `applyPalette()` ფაილში
-  `src/store/themeStore.ts`) და დახატვამდე გამოიყენება `THEME_BOOT_SCRIPT`-ის მიერ
-  (`src/shared/utils/themeBootScript.ts`, ჩაშენებული განლაგების `<head>`-ში), რომელიც ატრიბუტს მხოლოდ მაშინ შლის,
-  როდესაც შენახული პალიტრა არის `"classic"`; ფესვური განლაგების გარეთ არსებული `src/app/global-error.tsx` მას
-  იმავე საცავიდან იყენებს. `data-ci-appearance` არცერთ სხვა ელემენტზე არ განათავსოთ: კომპლექტი მას
-  `html:root:has([data-ci-appearance="editions"])`-ით ამოწმებს, ამიტომ ერთი შთამომავალი მთელ დოკუმენტს გადართავს.
-  Editions-ის `data-ci-editions-variant="landing"` ვარიანტი მარკეტინგული გვერდებისთვისაა და არა მართვის დაფისთვის.
-  ბრაუზერის ინტერფეისი: სერვერი ნაგულისხმევ Editions-ს არენდერებს `viewport.themeColor`-ში (თითო ტეგი თითოეული
-  `prefers-color-scheme`-ისთვის) და ვებ-მანიფესტში — `PWA_THEME_COLORS` ფაილში
-  `src/shared/constants/pwaThemeColors.ts`, Editions-ის `--ci-color-background`-ის ერთადერთი ასლი
-  (`#f3f1e9` / `#11120f`), რომელიც `ci-editions.css`-თან დაფიქსირებულია `tests/unit/pwa-theme-colors.test.ts`-ით. შემდეგ მოქმედი
-  `<meta name="theme-color">` შენახულ პალიტრასა და რეჟიმს მიჰყვება: `THEME_BOOT_SCRIPT` ტეგებს დახატვამდე თავიდან წერს,
-  ხოლო თემის საცავის მოქმედებები ამას ყოველი ცვლილებისას ასრულებს (`resolveThemeColor()` /
-  `applyThemeColor()` ფაილში `src/shared/utils/themeColorMeta.ts`, სადაც `CLASSIC_PAGE_BACKGROUND` კომპლექტის
-  `ciTokens`-იდან იკითხება). აშკარად მითითებული ღია/მუქი თემა ყველა ტეგს ამ რეჟიმზე აყენებს; `system` თითო
-  სქემისთვის თითო ფერს ინარჩუნებს. მანიფესტი Editions-ზე რჩება: ის თითო ინსტალაციაზე ერთხელ, პარამეტრის
-  გარეშე იტვირთება. Monaco თავის ფერებს საცდელი ელემენტიდან კითხულობს (`monacoKitTheme.ts`);
-  Editions-ში საცდელი წაკითხვა ერთი სინქრონული გავლისთვის ფესვურ `data-theme`-ს გადართავს, რადგან კომპლექტი
-  Editions-ის ღია/მუქ რეჟიმს ფესვიდან განსაზღვრავს.
-- **კომპონენტები (ადაპტერები).** `src/shared/components/index.tsx` ინარჩუნებს OmniRoute-ის კომპონენტების API-ს (იგივე
-  სახელები, ნაგულისხმევი ექსპორტები და თვისებები), ხოლო მის უკან არსებული პრიმიტივები კომპლექტზე აგებული ადაპტერებია: ფორმები
-  (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`), გადაფარვები და უკუკავშირი
-  (`Modal`/`ConfirmModal`, `Tooltip`/`InfoTooltip`, `NotificationToast`, `EmptyState`, `Loading`),
-  სტრუქტურა (`Collapsible`, `CollapsibleSection`, `SegmentedControl`, `Breadcrumbs`, `Avatar`) და ცხრილები
-  (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`). ადაპტერი კომპლექტის
-  კომპონენტს ქვეკონტურის მიხედვით შემოიტანს და ძველ თვისებებს მასზე ასახავს — მაგალითად, `Button variant="primary"` არის
-  კომპლექტის `default` ღილაკი (`--ci-button-primary-*`: ინვერსიული ზედაპირი ღია რეჟიმში და აქცენტი თავისი
-  `--ci-color-accent-foreground` ტექსტის ფერით მუქ რეჟიმში), `danger` არის `destructive`, ხოლო `warning` — კომპლექტის `warning`
-  ღილაკი. `Badge`-ის სტატუსის ვარიანტები კომპლექტის ტონებია, ხოლო `<option>` შვილების მქონე `Select` კომპლექტის
-  `NativeSelect`-ს არენდერებს.
-  `tests/unit/ui/adapters/*.test.tsx` თითოეულ ადაპტერს აფიქსირებს.
-- **გარსი.** `src/app/(dashboard)/layout.tsx` რენდერს უკეთებს `DashboardLayout`-ს, რომელიც, თავის მხრივ, რენდერს უკეთებს
-  `src/shared/components/layouts/DashboardShell.tsx`-ს: ნაკრების `SidebarProvider` / `Sidebar` /
-  `SidebarInset` (`packages/ui-kit/src/sidebar.tsx`), OmniRoute-ის ნავიგაციის ლოგიკით
-  `src/shared/components/Sidebar.tsx`-ში. „კონტენტზე გადასვლის“ ბმული, რომელიც `#main-content`-ზე მიუთითებს, პირველი ფოკუსირებადი
-  ელემენტია. `src/shared/components/Header.tsx` შეიცავს ნაკრების `SidebarTrigger`-ს (გვერდითი ზოლის ერთადერთ
-  გადამრთველს გარსში), Keak-ის `ProductSwitcher`-სა და ბრძანებათა პალიტრის გამხსნელს; ის მარშრუტის სათაურს აჩვენებს მხოლოდ მაშინ, როცა
-  ნაკრების `PageHeader` (`.ci-page-header`) არ არის დამონტაჟებული `#main-content`-ის შიგნით, ამიტომ გვერდს, რომელსაც საკუთარი
-  `PageHeader` აქვს, მხოლოდ ერთი `h1` აქვს. `src/shared/components/CommandPalette.tsx` ნაკრების `Dialog`-ია.
-- **ხატულები.** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) სახელს (ეკრანებზე გამოყენებულ
-  Material Symbols-ის ლექსიკას) `ICON_MAP`-ის (`src/shared/constants/iconMap.ts`) მეშვეობით
-  Lucide-ის გლიფთან აკავშირებს. Material Symbols-ის შრიფტი და პაკეტი წაშლილია: თუ სახელი რუკაში არ არის, რენდერდება
-  ნეიტრალური ჩანაცვლების გლიფი (`data-icon-missing="true"`) და production-ის გარეთ კონსოლში გაფრთხილება იწერება.
-  `npm run gen:icon-map` ბეჭდავს გამოყენებულ სახელებს, რომლებიც რუკაში არ არის
-  (`tests/unit/icon-map-coverage.test.ts` მარცხდება ნებისმიერ სახელზე, რომელსაც Lucide-ის ხატულა არ აქვს;
-  `tests/unit/icon-map-object-values.test.ts` ფარავს საძიებო ობიექტებში შენახულ სახელებს);
-  `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` ლიტერალურ
-  `<span className="material-symbols-outlined">` span-ებს `<Icon>`-ად გარდაქმნის.
-- **ბრენდი.** `src/shared/components/OmniRouteLogo.tsx` ნაკრებს გარს ეხვევა: ნაგულისხმევი ექსპორტი `OmniRouteLogo`
-  რენდერს უკეთებს `ProductIcon product="omniroute" variant="glyph"`-ს (ჩაშენებული SVG, `basePath`-თან თავსებადი), ხოლო
-  `OmniRouteLockup` რენდერს უკეთებს `ProductLockup product="omniroute"`-ს (ხელმისაწვდომი სახელი „Keak OmniRoute“) ან,
-  თეთრი ეტიკეტის მქონე ოპერატორებისთვის, მათ საკუთარ `name`/`logoSrc`-ს. პროდუქტების გადამრთველის დანიშნულების მისამართები ინახება
-  `src/shared/constants/keakProducts.ts`-ში (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`). დამოუკიდებელი
-  ეკრანები — `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`,
-  `src/app/offline/page.tsx`, `src/app/not-found.tsx` და `src/shared/components/ErrorPageScaffold.tsx`
-  — ლოკაპს აჩვენებს; `tests/unit/brand-pages-static.test.ts` მის არსებობას იცავს.
+```css
+:root,
+.ci-theme {
+  --ci-font-ui:
+    "Switzer", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  --ci-font-code: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --font-mono: var(--ci-font-code);
+}
+```
+
+## 1. სადაც ნივთები ცხოვრობენ
+
+- **ნაკრები.** `packages/ui-kit/src` არის ბაიტი-ბაიტი ასლი `src/` ის ზემო დინებაში ჩასადენში, რომელიც ჩამაგრებულია `packages/ui-kit/UPSTREAM.md` ში (რომელიც ასევე იწერს ლიცენზიის ავტორიზაციას); `PATCHES.md` ჩამოთვლის ადგილობრივ პატჩებს. ის მოიხმარება, როგორც წყარო, კონსტრუქციის გარეშე: `next.config.mjs` ახორციელებს მას ტრანსპილაციას და `tsconfig.json` ასახავს `@omniroute/ui-kit` → `packages/ui-kit/src` და `@omniroute/ui-kit/*` → `packages/ui-kit/src/*` (`vitest.config.ts` და `vitest.mcp.config.ts` ატარებენ იგივე მეტსახელებს). ნაკრების კომპონენტის იმპორტი მისი ქვებილიკით (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…), არასოდეს `@omniroute/ui-kit` ლულის მეშვეობით: ლულა იზიდავს ყველა კომპონენტს (თარიღის ამომრჩეველის ჩათვლით) თითოეულ იმპორტიორში. ნაკრების სტილის ფურცელი შემოდის `src/app/globals.css` მეშვეობით (`@import "../../packages/ui-kit/src/ci-styles.css"`, სრული ფურცელი: ძირითადი `ci-ui.css` პლუს ყველა შაბლონის ოჯახი).
+- **ჟეტონები.** `packages/ui-kit/src/ci-tokens.css` აცხადებს `--ci-*` ტოკენებს; `src/app/globals.css` აკავშირებს მათ ძველ OmniRoute სახელებთან (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`, `--table-*`, `--orch-status-*`, `--color-fd-*`), ასე რომ, არსებული `var(--color-*)` კითხულობს და Tailwind უტილიტები აგრძელებს მუშაობას. ახალი კოდი იყენებს Tailwind კომუნალურ პროგრამებს (`bg-surface`, `text-text-muted`, `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…) ან ნაკრების კლასებს — არასოდეს ჰექსის მნიშვნელობას (`tests/unit/design-kit-bridge.test.ts` ახორციელებს ხიდს). `text-primary` გადადის `--color-primary-ink` ზე `--text-color-primary` მეშვეობით, ამიტომ პირველადი ტექსტი იკითხებადი, ხოლო `bg-primary`/`border-primary` ინარჩუნებს აქცენტის ზედაპირს: Editions ქვეშ ეს არის ნაკრების `--ci-color-accent-active` (ღრმა სპილენძის `#99562f` სინათლეში, სპილენძის აქცენტი სიბნელეში); Classic ქვეშ, lime-800 სინათლეში და ცაცხვის აქცენტი სიბნელეში. დიაგრამების სერიები იყენებს `--color-chart-1` … `--color-chart-8`, თითოეული ტექსტისთვის დაცული `--color-chart-N-ink` და გაუმჭვირვალე `--color-chart-N-subtle` ჩიპის ელფერით, მინიჭებული ნაკრების სერიის თანმიმდევრობით (`ciChartSeriesOrder`).
+- **თემები.** `<html className="ci-theme">` (`src/app/layout.tsx`) არჩევს დოკუმენტს ნაკრების თემაში. უპირატესობა არის `light`, `dark` ან `system` (`THEME_CONFIG.defaultTheme = "system"` `src/shared/constants/appConfig.ts` ში; `system` შემდეგნაირად `prefers-color-scheme`). `applyTheme()` `src/store/themeStore.ts` ში (არეკებული `THEME_BOOT_SCRIPT` ით, ჩასმული `src/app/layout.tsx` ში, რომელიც გადის დატენიანებამდე) აყენებს `data-theme="dark"|"light"` და გადართავს `.dark` კლასს `<html>` ზე ერთად. ნაკრების მუქი ჟეტონების ნაკრები ჩართულია `data-theme="dark"` ზე (`packages/ui-kit/src/ci-tokens.css`); OmniRoute ის საკუთარი ბნელი გადაფარვები ( `.dark` ბლოკი `globals.css` ში) და ძველი Tailwind `dark:` კომუნალური კლავიშები `.dark` კლასში. აქცენტის ფერის წინასწარ დაყენება არ არის: აქცენტი ყოველთვის მოდის ნაკრებიდან, ხოლო ძველი კონსტრუქციის მდგრადი წინასწარ დაყენება იშლება მაღაზიაში ჩატვირთვისას.
+- **პალიტრები.** ორი, ორივე ნაკრებიდან (`src/shared/constants/appearancePalette.ts`): `editions`, ნაგულისხმევი და `classic`. Editions არის ნაკრების `data-ci-appearance="editions"` ატრიბუტი `<html>` ზე, რომელიც `ci-editions.css` (იმპორტირებული `ci-ui.css` მიერ) აერთიანებს `data-theme`; Classic არის ატრიბუტის არარსებობა. ძირეული განლაგება სერვერზე ასახავს ატრიბუტს, ასე რომ, ვიზიტორი, რომელსაც არაფერი აქვს შენახული (ან არ აქვს JS) იღებს Editions ყველა ზედაპირზე — დაფაზე, შესვლაზე, `/status` ზე, შეცდომის გვერდებზე, `/docs` და PWA ზე. არჩევანი შენარჩუნებულია თემის გვერდით იმავე `theme` მაღაზიაში (`palette`, `setPalette()`, `applyPalette()` `src/store/themeStore.ts` ში) და საღებავის წინ გამოიყენება `THEME_BOOT_SCRIPT` (`src/shared/utils/themeBootScript.ts`, ჩასმულია განლაგების `<head>` ში), რომელიც ხსნის ატრიბუტს მხოლოდ მაშინ, როდესაც შენახული პალიტრა არის `"classic"`; `src/app/global-error.tsx`, root განლაგების მიღმა, იყენებს მას იმავე მაღაზიიდან. არ დააყენოთ `data-ci-appearance` სხვა ელემენტზე: ნაკრები მას ემთხვევა `html:root:has([data-ci-appearance="editions"])`, ასე რომ, ერთი შთამომავალი შეცვლის მთელ დოკუმენტს. Editions `data-ci-editions-variant="landing"` ვარიანტი განკუთვნილია მარკეტინგული გვერდებისთვის და არა დაფისთვის. ბრაუზერი chrome: სერვერი ასახავს ნაგულისხმევს, Editions, `viewport.themeColor` ში (ერთი ტეგი `prefers-color-scheme` ზე) და ვებ მანიფესტი — `PWA_THEME_COLORS` `src/shared/constants/pwaThemeColors.ts` ში, Editions `--ci-color-background` ის (`#f3f1e9` / `#11120f`) ერთი სარკე, მიმაგრებული `ci-editions.css` ზე `tests/unit/pwa-theme-colors.test.ts` ით. ცოცხალი `<meta name="theme-color">` შემდეგ მიჰყვება შენახულ პალიტრას და რეჟიმს: `THEME_BOOT_SCRIPT` ხელახლა წერს ტეგებს საღებავის წინ და თემების მაღაზიის მოქმედებები ამას აკეთებს ყოველ ცვლილებაზე (`resolveThemeColor()` / `applyThemeColor()` `src/shared/utils/themeColorMeta.ts` ში, `CLASSIC_PAGE_BACKGROUND` წაკითხული ნაკრების `ciTokens` დან). აშკარა light/dark თემა აყენებს ყველა ტეგს ამ რეჟიმში; `system` ინახავს ერთ ფერს თითო სქემაზე. მანიფესტი რჩება Editions: მისი მიღება ხდება ერთხელ ინსტალაციაზე, უპირატესობის გარეშე. მონაკო კითხულობს თავის ფერებს ზონდიდან (`monacoKitTheme.ts`); Editions ში წაკითხული ზონდი აბრუნებს ფესვს `data-theme` ერთი სინქრონული უღელტეხილისთვის, რადგან ნაკრები წყვეტს Editions light/dark ძირიდან.
+- **კომპონენტები (ადაპტერები).** `src/shared/components/index.tsx` ინახავს OmniRoute კომპონენტს API (იგივე სახელები, ნაგულისხმევი ექსპორტი და რეკვიზიტები), ხოლო მის უკან პრიმიტიული არის ადაპტერები ნაკრების თავზე: ფორმები (`Button`, `Input` `Loading` `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`), გადაფარვები და გამოხმაურება (`Modal`,`ConfirmModal`, `Tooltip`,`InfoTooltip` `NotificationToast`, `EmptyState`), სტრუქტურა (`Collapsible`, `CollapsibleSection`, `SegmentedControl`, `Breadcrumbs`, `Avatar`) და ცხრილები (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`). ადაპტერი მოაქვს ნაკრების კომპონენტს ქვებილიკით და ასახავს მასზე მოძველებულ საყრდენებს — მაგალითად `Button variant="primary"` არის ნაკრები `default` ღილაკი (`--ci-button-primary-*`: ინვერსიული ზედაპირი შუქზე, აქცენტი მისი `--ci-color-accent-foreground` მელნით სიბნელეში), `danger` არის `destructive` და `warning` არის ნაკრები `warning` ღილაკი. `Badge` სტატუსის ვარიანტები არის ნაკრების ტონები და `Select` `<option>` ბავშვებთან ერთად გამოაქვს ნაკრები `NativeSelect`. `tests/unit/ui/adapters/*.test.tsx` დაამაგრეთ თითოეული ადაპტერი.
+- **ჭურვი.** `src/app/(dashboard)/layout.tsx` წარმოქმნის `DashboardLayout`, რომელიც გამოიმუშავებს `src/shared/components/layouts/DashboardShell.tsx`: ნაკრები `SidebarProvider` / `Sidebar` / `SidebarInset` (`packages/ui-kit/src/sidebar.tsx`), OmniRoute ის ნავიგაციის ლოგიკით `src/shared/components/Sidebar.tsx` ში. `#main-content` ის ბმული „შინაარსზე გადასვლა“ არის პირველი ფოკუსირებადი ელემენტი. `src/shared/components/Header.tsx` უჭირავს ნაკრები `SidebarTrigger` (ჭურვის გვერდითი ზოლის ერთადერთი გადართვა), Keak `ProductSwitcher` და ბრძანების პალიტრის გამხსნელი; ის აჩვენებს მარშრუტის სათაურს მხოლოდ მაშინ, როდესაც `PageHeader` (`.ci-page-header`) ნაკრები არ არის დამონტაჟებული `#main-content` ში, ამიტომ გვერდს თავისი `PageHeader` აქვს ერთი `h1`. `src/shared/components/CommandPalette.tsx` არის ნაკრები `Dialog`.
+- **ხატები.** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) წყვეტს სახელს (მატერიალური სიმბოლოების ლექსიკა, რომელსაც ეკრანები იყენებენ) `ICON_MAP` (`src/shared/constants/iconMap.ts`) მეშვეობით Lucide გლიფში. Material Symbols შრიფტი და პაკეტი გაქრა: რუკიდან გამოტოვებული სახელი წარმოქმნის ნეიტრალურ ადგილსამყოფელ გლიფს (`data-icon-missing="true"`) და აღრიცხავს კონსოლის გაფრთხილებას წარმოების გარეთ. `npm run gen:icon-map` ბეჭდავს გამოყენებული სახელებს, რომლებიც აკლია რუკას (`tests/unit/icon-map-coverage.test.ts` ვერ ხერხდება ნებისმიერ სახელზე Lucide ხატის გარეშე; `tests/unit/icon-map-object-values.test.ts` მოიცავს საძიებო ობიექტებში შენახულ სახელებს); `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` გადაწერს სიტყვასიტყვით `<span className="material-symbols-outlined">` სპანებს `<Icon>` ზე.
+- **ბრენდი.** `src/shared/components/OmniRouteLogo.tsx` ახვევს კომპლექტს: ნაგულისხმევი ექსპორტი `OmniRouteLogo` ასახავს `ProductIcon product="omniroute" variant="glyph"` (inline SVG, `basePath` -safe) და `OmniRouteLockup` - `ProductLockup product="omniroute"` (ხელმისაწვდომი სახელწოდება "Keak OmniRoute") ან, white label ოპერატორებისთვის, საკუთარ `name`/`logoSrc`. პროდუქტის გადამრთველი მიმართულებები ცხოვრობს `src/shared/constants/keakProducts.ts` ში (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`). დამოუკიდებელი ეკრანები — `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`, `src/app/offline/page.tsx`, `src/app/not-found.tsx` და `src/shared/components/ErrorPageScaffold.tsx` — აჩვენებს ჩაკეტვას; `tests/unit/brand-pages-static.test.ts` იცავს მას.
 
 ## 2. წესები
 
@@ -184,10 +107,10 @@
 
 სამუშაო პროცესი იყენებს ორ საიდუმლოს:
 
-- `secrets.UI_KIT_READ_TOKEN`: მხოლოდ წასაკითხი ჟეტონი კერძო ზედა დინების რეპოსთვის. როდესაც სამუშაო ნაკადს არ შეუძლია წაიკითხოს ზემოთ (არ არის ჟეტონი, ჟეტონი, რომელმაც შეწყვიტა მუშაობა, ან GitHub მიუწვდომელია), გაშვება რჩება მწვანე, მაგრამ წერს გაფრთხილებას და ინახავს ერთ ცალკეულ საკითხს ღიად, რომელიც იხურება ერთხელ, მოგვიანებით გაშვების შემდეგ, ხელახლა წაიკითხება ზემოთ.
-- `secrets.UI_KIT_SYNC_PR_TOKEN`: წვრილმარცვლოვანი ჟეტონი ამ საცავზე Contents და Pull მოთხოვნები ჩაწერის წვდომით. ნაგულისხმევი `GITHUB_TOKEN` ვერ ქმნის PRs აქ და მისი გახსნილი PR არ გამოიწვევს CI. ამ ნიშნის გარეშე სამუშაო პროცესი მხოლოდ ტოტს უბიძგებს.
+- `secrets.UI_KIT_READ_TOKEN`: მხოლოდ წასაკითხი ჟეტონი კერძო ზედა დინების რეპოსთვის. როდესაც ზედა ნაკადის შემოწმებას არ შეუძლია მონაცემების წაკითხვა (ჟეტონი არ არის, ჟეტონი, რომელმაც შეწყვიტა მუშაობა, ან GitHub მიუწვდომელია), ის იტყობინება `unknown` და გადის კოდით `0`. სამუშაო პროცესი წერს გაფრთხილებას და ცდილობს დარჩეს ერთი ცალკეული თრექინგის საკითხი ღიად; მოგვიანებით წარმატებული გაშვება ხურავს მას წვდომის დაბრუნების შემდეგ. GitHub საკითხის წარუმატებლობა API არ მუშაობს.
+- `secrets.UI_KIT_SYNC_PR_TOKEN`: წვრილმარცვლოვანი ჟეტონი ამ საცავზე Contents და Pull მოთხოვნები ჩაწერის წვდომით. ეს სამუშაო პროცესი ხსნის ან განაახლებს PRs სინქრონიზაციას მხოლოდ მაშინ, როდესაც გამოყოფილი ჟეტონი კონფიგურირებულია; ამის გარეშე, სამუშაო პროცესი უბიძგებს ფილიალს და იუწყება, რომ PR არ გაიხსნა.
 
-`scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` აკოპირებს ზემოთ დინებაში `src/` ამ დავალებაში (`latest` = უახლესი `v*` ტეგი) `packages/ui-kit/src` ში, იყენებს ერთ დაშვებულ ტრანსფორმაციას (ის ჩამოაგდებს `.js` სუფიქსს შედარებითი იმპორტიდან) და აყენებს სამუშაო სივრცის ვერსიას `packages/ui-kit/package.json` ში და `package-lock.json` ზე ზემოთ. შემდეგ: გადახედეთ `git diff packages/ui-kit`, გააკეთეთ ვიზუალური საშვი პროვაიდერებზე, პარამეტრებზე, კომბინაციებზე, გამოყენებასა და საბოლოო წერტილზე ორივე თემაში, გაუშვით `npm run check:ui-kit-snapshot` და `npm run test:vitest:ui` და გახსენით PR ზედა ნაკადის ცვლილების ჟურნალით.
+`scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` აკოპირებს ზემოთ დინებაში `src/` ამ დავალებაში (`latest` = უახლესი `v*` ტეგი) `packages/ui-kit/src` ში, იყენებს ერთ დაშვებულ ტრანსფორმაციას (ის ჩამოაგდებს `.js` სუფიქსს შედარებითი იმპორტიდან) და აყენებს სამუშაო სივრცის ვერსიას `packages/ui-kit/package.json` ში და `package-lock.json` ზე ზემოთ. შემდეგ: გადახედეთ `git diff packages/ui-kit`, ჩაატარეთ ვიზუალური შემოწმება პროვაიდერებზე, პარამეტრებზე, კომბინაციებზე, გამოყენებასა და საბოლოო წერტილზე ორივე თემაში, გაუშვით `npm run check:ui-kit-snapshot` და `npm run test:vitest:ui` და გახსენით PR ზედა ნაკადის ცვლილების ჟურნალით.
 
 ## 6. README-ის დიაგრამები
 
@@ -219,18 +142,17 @@
   `free-tier-budget`-ს სჭირდება `node --import tsx/esm`, რადგან მისი მონაცემები მიიღება მოქმედი კატალოგის ჩამტვირთავიდან
   `open-sse/config/freeModelCatalog.ts`; კატალოგის ცვლილების CI-შედეგი აღწერილია
   `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`-ში). გენერატორი და SVG ერთად დააკომიტეთ.
-- **შემოწმება.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` ფაილს იმავე სახით არენდერებს, როგორც მას GitHub
-  ემსახურება (`<img>` ტეგი, camo-ს `Content-Security-Policy`, `image/svg+xml`), იღებს ღია და მუქ კადრებს
-  და ანგარიშში უთითებს გვერდის მიერ შესრულებულ გარე შრიფტების მოთხოვნებს (უნდა იყოს 0).
+- **დადასტურება.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` ფაილს ლოკალურ შემოწმებაში გამოსახავს (`<img>` ტეგი, შემზღუდავი `Content-Security-Policy` და `image/svg+xml` პასუხი), ნათელ და მუქ კადრს იღებს და გვერდის გარე შრიფტის მოთხოვნებს აჩვენებს; მათი რაოდენობა 0 უნდა იყოს.
+
 - **ზომის ლიმიტი.** თითო ფაილი 200 KB-ზე ნაკლები უნდა იყოს (ამას მოძველებულობის თითოეული ტესტი ამოწმებს); 500 KB არის README-ის
   ნებისმიერი გამოსახულებისთვის დაწესებული მკაცრი ზედა ზღვარი (SVG სტუდიის ვალიდატორის წესი).
-- **ტექსტი უცვლელია, რიცხვები — შემოწმების მექანიზმიდან.** რებრენდინგმა შეცვალა შრიფტი და პალიტრა, მაგრამ არა სიტყვები: თითოეული გენერატორი
-  დიაგრამის ტექსტს ინახავს `*_COPY` კონსტანტაში (ან ქმნის მას მოქმედი კატალოგიდან), რომელიც ერთდროულად წარმოადგენს
-  დახატულ ტექსტსაც და კონტურების შექმნის ეტაპის შესატან მონაცემებსაც. კანონიკური რიცხვები რჩება `<text>` კვანძებში (კონტურებად გარდაქმნის შემდეგ უხილავი,
-  `fill-opacity:0`) და მათ კითხულობს `check:docs-counts`
-  (`scripts/check/check-docs-counts-sync.mjs`); იმ დიაგრამების მოძველებულობის ტესტები, რომლებსაც ეს შემოწმების მექანიზმი ამოწმებს, გენერირებულ ფაილზე მის
-  ვალიდატორებსაც უშვებს, ამიტომ კოდთან აცდენილი რიცხვი ტესტის ჩავარდნას იწვევს — გაასწორეთ
-  წყარო, რომელსაც შემოწმების მექანიზმი კითხულობს, და არასოდეს — გენერატორში არსებული რიცხვი.
+- **საერთო ტექსტი, რიცხვები gate-დან.** თითოეული
+  გენერატორი თავის დიაგრამის ტექსტს `*_COPY` constant-ში ინახავს (ან ცოცხალი კატალოგიდან აგებს), რომელიც არის
+  როგორც დახატული ტექსტი, ისე outlining ეტაპის input. კანონიკური ფიგურები `<text>` nodes-ში რჩება
+  (outline-ებად გარდაქმნის შემდეგ უხილავია, `fill-opacity:0`), მათ კითხულობს
+  `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`); დიაგრამების მოძველებულობის ტესტები, რომლებიც gate-ის
+  წაკითხვას მართავენ, გენერირებულ ფაილზე მის validator-ებსაც უშვებენ, ამიტომ თუ ფიგურა კოდს აცდა, ტესტი ჩავარდება —
+  შეასწორეთ ის source, რომელსაც gate კითხულობს, და არასოდეს შეცვალოთ რიცხვი გენერატორში.
 
 ## 7. საცნობარო ინდექსი
 

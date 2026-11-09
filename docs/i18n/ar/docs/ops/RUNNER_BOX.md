@@ -11,13 +11,13 @@
 webpack الخاصة بـ Release-Green ومهمة lint؛ وتمتص ذاكرة التبديل الخاصة بالمضيف (16 GB) ذلك، وبما أن عمليات
 بناء طلبات السحب تعمل على مشغّلات مستضافة، تظل فتحة Turbopack خاملة معظم الوقت:
 
-| المشغّل              | التسمية        | الدور                                                                                                                                                                   | `MemoryHigh` / `MemoryMax`       | `CPUQuota`      |
-| -------------------- | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------- | --------------- |
-| `omniroute-113-5`    | `omni-build`   | عمليات بناء Turbopack: ‏`ci.yml` ‏`Build` (للدفع/التشغيل اليدوي فقط)، وDocker amd64، و`npm-publish`، و`nightly-v4-build`، و`preview-artifact`، وعملية بناء a11y الليلية | 56 GB / 60 GB (ذاكرة تبديل 0)    | 1600 %          |
-| `omniroute-113-6`    | `omni-release` | ‏Release-Green ‏(`release-green` + `main-green`)، وعملية بناء webpack                                                                                                   | 20 GB / 24 GB (ذاكرة تبديل 4 GB) | 800 %           |
-| `omniroute-113-2`    | `omni-light`   | المهام الليلية (Schemathesis وpromptfoo وgarak وk6) و`quality.yml` ‏`lint-guard`                                                                                        | 12 GB / 16 GB (ذاكرة تبديل 4 GB) | 600 %           |
-| `omniroute-113`      | `omni-light`   | المجموعة نفسها المذكورة أعلاه                                                                                                                                           | 8 GB / 12 GB                     | 400 %           |
-| OmniHeuris, OmniMind | (مستودعاتهما)  | ‏Dependabot فقط (ذروة قدرها 155 MB لكل منهما، 2026-10-18)                                                                                                               | 4 GB / 6 GB                      | 200 % لكل منهما |
+| المشغّل              | التسمية                         | الدور                                                                                                                                                                   | `MemoryHigh` / `MemoryMax`       | `CPUQuota`      |
+| -------------------- | ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------- | --------------- |
+| `omniroute-113-5`    | `omni-build`, `omni-build-60gb` | عمليات بناء Turbopack: ‏`ci.yml` ‏`Build` (للدفع/التشغيل اليدوي فقط)، وDocker amd64، و`npm-publish`، و`nightly-v4-build`، و`preview-artifact`، وعملية بناء a11y الليلية | 56 GB / 60 GB (ذاكرة تبديل 0)    | 1600 %          |
+| `omniroute-113-6`    | `omni-release`                  | ‏Release-Green ‏(`release-green` + `main-green`)، وعملية بناء webpack                                                                                                   | 20 GB / 24 GB (ذاكرة تبديل 4 GB) | 800 %           |
+| `omniroute-113-2`    | `omni-light`                    | المهام الليلية (Schemathesis وpromptfoo وgarak وk6) و`quality.yml` ‏`lint-guard`                                                                                        | 12 GB / 16 GB (ذاكرة تبديل 4 GB) | 600 %           |
+| `omniroute-113`      | `omni-light`                    | المجموعة نفسها المذكورة أعلاه                                                                                                                                           | 8 GB / 12 GB                     | 400 %           |
+| OmniHeuris, OmniMind | (مستودعاتهما)                   | ‏Dependabot فقط (ذروة قدرها 155 MB لكل منهما، 2026-10-18)                                                                                                               | 4 GB / 6 GB                      | 200 % لكل منهما |
 
 القياسات بتاريخ 2026-10-18:
 
@@ -27,12 +27,13 @@ webpack الخاصة بـ Release-Green ومهمة lint؛ وتمتص ذاكرة 
 | ذاكرة التبديل | 16 GB                        | يعمل `omniroute-113-5` مع تعطيل ذاكرة التبديل (`MemorySwapMax=0`)، لذا تُوقَف عملية البناء المنفلتة عند حدها الأقصى بدلًا من إجبار الجهاز على استخدام ذاكرة التبديل                                                                                                                                                                                                                                                                         |
 | `/tmp`        | **12 GB tmpfs = RAM**        | أي شيء يُترك هناك يستهلك الذاكرة؛ وتُزال البقايا بعد 3 ساعات                                                                                                                                                                                                                                                                                                                                                                                |
 | CPU           | لوحظ حمل قدره 60 على 32 نواة | قبل فرض الحصص، تسببت عملية بناء Turbopack واحدة (نحو 1166 % من CPU) إلى جانب حزمة اختبارات تغطية على الجهاز نفسه في حرمان إشارات نبض المستمعين الآخرين من الموارد (`The self-hosted runner lost communication`، #16853)                                                                                                                                                                                                                     |
-| المشغّلات     | **7 مستمعين** (2026-10-28)   | ‏5 لـ OmniRoute بالإضافة إلى OmniHeuris وOmniMind؛ يحمل `omniroute-113-7` أيضًا `omni-build`؛ حُذفت المشغّلات `omniroute-113-3/-4/-8` من المستودع (2026-10-28)                                                                                                                                                                                                                                                                              |
+| المشغّلات     | **7 مستمعين** (2026-10-28)   | ‏5 لـ OmniRoute بالإضافة إلى OmniHeuris وOmniMind؛ يحمل `omniroute-113-5` أيضًا `omni-build-60gb`؛ حُذفت المشغّلات `omniroute-113-3/-4/-8` من المستودع (2026-10-28)                                                                                                                                                                                                                                                                         |
 
 توجد الحدود في `/etc/systemd/system/actions.runner.<…>.service.d/override.conf` لكل وحدة
 (مع الاحتفاظ بالقيم السابقة في `override.conf.bak-20261018`)، وقد طُبّقت مباشرة باستخدام
 `systemctl set-property --runtime … MemoryHigh=… MemoryMax=… CPUQuota=…` — دون إعادة تشغيل، لذلك لم
-تتأثر أي مهمة قيد التشغيل. تُغيّر التسميات عبر واجهة API الخاصة بالمشغّلات (`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
+تتأثر أي مهمة قيد التشغيل. تُغيّر التسميات عبر واجهة API الخاصة بالمشغّلات
+(`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
 `gh api -X POST repos/<repo>/actions/runners/<id>/labels -f 'labels[]=<label>'`)، مباشرة أيضًا.
 
 ## تثبيت أداة التنظيف (مرة واحدة، على الخادم)
@@ -80,7 +81,7 @@ CPU من دون مهمة مرتبطة بها. تحتوي كل وحدة OmniRoute
 ## قواعد التشغيل
 
 - **بناء Turbopack واحد في كل مرة — يُفرض بواسطة التصنيف.** كل مهمة تشغّل أمر
-  `next build` كاملًا باستخدام Turbopack تستهدف `[self-hosted, omni-build]`، ولا يحمل هذا
+  `next build` كاملًا باستخدام Turbopack تستهدف `[self-hosted, omni-build, omni-build-60gb]`، ولا يحمل هذا
   التصنيف سوى **`omniroute-113-5`**: مهمة `Build` في `ci.yml`، ومهمة `publish` في `npm-publish.yml`،
   و`nightly-v4-build`، و`preview-artifact`، وبناء a11y الليلي (#16853)، ومهمة **amd64** في
   `docker-publish.yml` (باستخدام webpack داخل BuildKit — تعطل Turbopack هناك، في التشغيل 33253576569).

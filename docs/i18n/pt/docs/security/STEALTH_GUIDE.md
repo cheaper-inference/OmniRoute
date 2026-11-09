@@ -242,7 +242,7 @@ Todos os endpoints MITM requerem autenticação de gestão (`requireCliToolsAuth
 
 ---
 
-## O agente do utilizador substitui — env vars (`.env.example` secção 12)
+## Substituições do User-Agent — variáveis de ambiente (secção 12 de `.env.example`)
 
 | Variável            | Predefinição                                  |
 | ------------------- | --------------------------------------------- |
@@ -253,7 +253,7 @@ Todos os endpoints MITM requerem autenticação de gestão (`requireCliToolsAuth
 | `QODER_USER_AGENT`  | `Qoder-Cli`                                   |
 | `CURSOR_USER_AGENT` | `Cursor/3.4`                                  |
 
-Consumed by `open-sse/executors/base.ts::buildHeaders()` via dynamic lookup. **Bump these when providers release new CLI versions** — stale UA strings start getting rejected as outdated clients.
+Consumidas por `open-sse/executors/base.ts::buildHeaders()` através de pesquisa dinâmica. **Atualize-as quando os fornecedores lançarem novas versões da CLI** — as cadeias de UA desatualizadas começam a ser rejeitadas por pertencerem a clientes desatualizados.
 
 ## Comutadores do modo de compatibilidade com CLI (secção 13 de `.env.example`)
 

@@ -446,23 +446,22 @@ server/
 
 ## 4. `open-sse/` — ಸ್ಟ್ರೀಮಿಂಗ್ ಎಂಜಿನ್ ವರ್ಕ್ಸ್ಪೇಸ್
 
-`@omniroute/open-sse` ಆಗಿ ಪ್ರಕಟವಾಗುವ ಪ್ರತ್ಯೇಕ npm ವರ್ಕ್ಸ್ಪೇಸ್. ವಿನಂತಿ
-ಪ್ರಕ್ರಿಯೆ, ಎಕ್ಸಿಕ್ಯೂಟರ್ಗಳು, ಅನುವಾದಕರು, ಸೇವೆಗಳು, ಟ್ರಾನ್ಸ್ಫಾರ್ಮರ್ ಮತ್ತು MCP ಸರ್ವರ್ನ
-ಜವಾಬ್ದಾರಿಯನ್ನು ಹೊಂದಿದೆ.
+`@omniroute/open-sse` ಆಗಿ ಪ್ರಕಟಿಸಲಾದ ಪ್ರತ್ಯೇಕ npm ಕಾರ್ಯಸ್ಥಳ. ಇದು ವಿನಂತಿ
+ಸಂಸ್ಕರಣೆ, ಎಕ್ಸಿಕ್ಯೂಟರ್ಗಳು, ಅನುವಾದಕಗಳು, ಸೇವೆಗಳು, ಟ್ರಾನ್ಸ್ಫಾರ್ಮರ್ ಮತ್ತು MCP ಸರ್ವರ್ ಅನ್ನು ನಿರ್ವಹಿಸುತ್ತದೆ.
 
 ```
 open-sse/
 ├── index.ts                ಸಾರ್ವಜನಿಕ ಎಕ್ಸ್ಪೋರ್ಟ್ಗಳು
-├── package.json            ವರ್ಕ್ಸ್ಪೇಸ್ ಮ್ಯಾನಿಫೆಸ್ಟ್
+├── package.json            ಕಾರ್ಯಸ್ಥಳ ಮ್ಯಾನಿಫೆಸ್ಟ್
 ├── tsconfig.json
 ├── types.d.ts
-├── config/                 ಪ್ರೊವೈಡರ್ ರಿಜಿಸ್ಟ್ರಿಗಳು, ಹೆಡರ್ ಪ್ರೊಫೈಲ್ಗಳು, ಐಡೆಂಟಿಟಿ, …
-├── handlers/               ವಿನಂತಿ ಹ್ಯಾಂಡ್ಲರ್ಗಳು (chat, embeddings, audio, image, …)
+├── config/                 ಪ್ರೊವೈಡರ್ ರಿಜಿಸ್ಟ್ರಿಗಳು, ಹೆಡರ್ ಪ್ರೊಫೈಲ್ಗಳು, ಗುರುತು, …
+├── handlers/               ವಿನಂತಿ ಹ್ಯಾಂಡ್ಲರ್ಗಳು (ಚಾಟ್, ಎಂಬೆಡಿಂಗ್ಗಳು, ಆಡಿಯೊ, ಚಿತ್ರ, …)
 ├── executors/              159 ಪ್ರೊವೈಡರ್ ಎಕ್ಸಿಕ್ಯೂಟರ್ ಮಾಡ್ಯೂಲ್ಗಳು (ಎಕ್ಸಿಕ್ಯೂಟರ್ ಕ್ಲಾಸ್ಗಳು + ಪ್ರತಿ-ಪ್ರೊವೈಡರ್ ಸಹಾಯಕಗಳು)
-├── translator/             ಫಾರ್ಮ್ಯಾಟ್ ಪರಿವರ್ತನೆ (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
+├── translator/             ಸ್ವರೂಪ ಪರಿವರ್ತನೆ (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions ಸ್ಟ್ರೀಮ್ ಟ್ರಾನ್ಸ್ಫಾರ್ಮರ್
-├── services/               80+ ಸೇವಾ ಮಾಡ್ಯೂಲ್ಗಳು (combos, fallback, quotas, identity, …)
-├── utils/                  ಸ್ಟ್ರೀಮಿಂಗ್ ಸಹಾಯಕಗಳು, TLS ಕ್ಲೈಂಟ್, AWS SigV4, ಪ್ರಾಕ್ಸಿ fetch, …
+├── services/               80+ ಸೇವಾ ಮಾಡ್ಯೂಲ್ಗಳು (ಕಾಂಬೊಗಳು, ಫಾಲ್ಬ್ಯಾಕ್, ಕೋಟಾಗಳು, ಗುರುತು, …)
+├── utils/                  ಸ್ಟ್ರೀಮಿಂಗ್ ಸಹಾಯಕಗಳು, TLS ಕ್ಲೈಂಟ್, AWS SigV4, ಪ್ರಾಕ್ಸಿ ಫೆಚ್, …
 └── mcp-server/             MCP ಸರ್ವರ್ (3 ಟ್ರಾನ್ಸ್ಪೋರ್ಟ್ಗಳು, 33 ಸ್ಕೋಪ್ಗಳು, 110 ಟೂಲ್ಗಳು)
 ```
 
@@ -470,61 +469,62 @@ open-sse/
 
 | ಹ್ಯಾಂಡ್ಲರ್              | ಉದ್ದೇಶ                                                                        |
 | ----------------------- | ----------------------------------------------------------------------------- |
-| `chatCore.ts`           | ಮುಖ್ಯ ಚಾಟ್ ಪೈಪ್ಲೈನ್ (ಕ್ಯಾಶ್, ದರ ಮಿತಿ, ಕಾಂಬೋ ರೂಟಿಂಗ್, ಎಕ್ಸಿಕ್ಯೂಟರ್ ಡಿಸ್ಪ್ಯಾಚ್) |
-| `responsesHandler.ts`   | OpenAI Responses API ಎಂಟ್ರಿ ಪಾಯಿಂಟ್                                           |
-| `embeddings.ts`         | ಎಂಬೆಡ್ಡಿಂಗ್ಗಳು                                                                |
+| `chatCore.ts`           | ಮುಖ್ಯ ಚಾಟ್ ಪೈಪ್ಲೈನ್ (ಕ್ಯಾಶ್, ದರ ಮಿತಿ, ಕಾಂಬೊ ರೂಟಿಂಗ್, ಎಕ್ಸಿಕ್ಯೂಟರ್ ಡಿಸ್ಪ್ಯಾಚ್) |
+| `responsesHandler.ts`   | OpenAI Responses API ಪ್ರವೇಶ ಬಿಂದು                                             |
+| `embeddings.ts`         | ಎಂಬೆಡಿಂಗ್ಗಳು                                                                  |
 | `imageGeneration.ts`    | ಚಿತ್ರ ಉತ್ಪಾದನೆ                                                                |
-| `audioSpeech.ts`        | ಟೆಕ್ಸ್ಟ್-ಟು-ಸ್ಪೀಚ್                                                            |
-| `audioTranscription.ts` | ಸ್ಪೀಚ್-ಟು-ಟೆಕ್ಸ್ಟ್                                                            |
+| `audioSpeech.ts`        | ಪಠ್ಯದಿಂದ-ಧ್ವನಿಗೆ                                                              |
+| `audioTranscription.ts` | ಧ್ವನಿಯಿಂದ-ಪಠ್ಯಕ್ಕೆ                                                            |
 | `videoGeneration.ts`    | ವೀಡಿಯೊ ಉತ್ಪಾದನೆ                                                               |
 | `musicGeneration.ts`    | ಸಂಗೀತ ಉತ್ಪಾದನೆ                                                                |
-| `rerank.ts`             | ಮರು-ರ್ಯಾಂಕಿಂಗ್                                                                |
-| `moderations.ts`        | ಮಾಡರೇಶನ್                                                                      |
+| `rerank.ts`             | ಮರುಶ್ರೇಯಾಂಕ                                                                   |
+| `moderations.ts`        | ಮಾಡರೇಷನ್                                                                      |
 | `search.ts`             | ವೆಬ್ ಹುಡುಕಾಟ                                                                  |
 | `sseParser.ts`          | SSE ಈವೆಂಟ್ ಪಾರ್ಸರ್                                                            |
 | `usageExtractor.ts`     | ಅಪ್ಸ್ಟ್ರೀಮ್ ಸ್ಟ್ರೀಮ್ಗಳಿಂದ ಟೋಕನ್ ಎಣಿಕೆಗಳನ್ನು ಹೊರತೆಗೆಯುವುದು                     |
 | `responseSanitizer.ts`  | ಪ್ರೊವೈಡರ್-ನಿರ್ದಿಷ್ಟ ಅನಗತ್ಯ ಮಾಹಿತಿಯನ್ನು ತೆಗೆದುಹಾಕುವುದು                         |
-| `responseTranslator.ts` | ಪ್ರೊವೈಡರ್ ಪ್ರತಿಕ್ರಿಯೆ ಮತ್ತು ಅನುವಾದಕ ಪದರದ ನಡುವಿನ ಸಂಯೋಜಕ                        |
+| `responseTranslator.ts` | ಪ್ರೊವೈಡರ್ ಪ್ರತಿಕ್ರಿಯೆ ಮತ್ತು ಅನುವಾದಕ ಲೇಯರ್ ನಡುವಿನ ಸಂಯೋಜಕ                       |
 
 ### 4.2 `open-sse/executors/`
 
-159 ಟಾಪ್-ಲೆವೆಲ್ ಎಕ್ಸಿಕ್ಯೂಟರ್ ಮಾಡ್ಯೂಲ್ಗಳು (`*.ts`, ಆದರೆ `base.ts`, `index.ts` ಮತ್ತು ಟೆಸ್ಟ್ಗಳನ್ನು ಹೊರತುಪಡಿಸಿ — ಎಣಿಕೆಯನ್ನು
-`npm run check:docs-counts` ಅಳೆಯುತ್ತದೆ). ಪ್ರತಿಯೊಂದು ಎಕ್ಸಿಕ್ಯೂಟರ್ ಕ್ಲಾಸ್ `BaseExecutor` (`base.ts`) ಅನ್ನು
-ನೇರವಾಗಿ ಅಥವಾ `DefaultExecutor` ಅಥವಾ ಮತ್ತೊಂದು ಎಕ್ಸಿಕ್ಯೂಟರ್ ಮೂಲಕ ವಿಸ್ತರಿಸುತ್ತದೆ; ಉಳಿದ ಮಾಡ್ಯೂಲ್ಗಳು ಪ್ರತಿ-ಪ್ರೊವೈಡರ್
-ಸಹಾಯಕಗಳಾಗಿವೆ (ಟೂಲ್ ಸ್ಕೀಮಾಗಳು, fetch/TTS ಅಡಾಪ್ಟರ್ಗಳು, ಕ್ವಿರ್ಕ್ ಹ್ಯಾಂಡ್ಲರ್ಗಳು). ಎಕ್ಸಿಕ್ಯೂಟರ್ಗಳಲ್ಲಿ ಇವು ಸೇರಿವೆ:
+159 ಉನ್ನತ-ಹಂತದ ಎಕ್ಸಿಕ್ಯೂಟರ್ ಮಾಡ್ಯೂಲ್ಗಳು (`*.ts` ಇಂದ `base.ts`, `index.ts` ಮತ್ತು ಪರೀಕ್ಷೆಗಳನ್ನು ಹೊರತುಪಡಿಸಿ — ಈ ಸಂಖ್ಯೆಯನ್ನು
+`npm run check:docs-counts` ಅಳೆಯುತ್ತದೆ). ಪ್ರತಿಯೊಂದು ಎಕ್ಸಿಕ್ಯೂಟರ್ ಕ್ಲಾಸ್ `BaseExecutor` (`base.ts`) ಅನ್ನು,
+ನೇರವಾಗಿ ಅಥವಾ `DefaultExecutor` ಅಥವಾ ಇನ್ನೊಂದು ಎಕ್ಸಿಕ್ಯೂಟರ್ ಮೂಲಕ ವಿಸ್ತರಿಸುತ್ತದೆ; ಉಳಿದ ಮಾಡ್ಯೂಲ್ಗಳು ಪ್ರತಿ-ಪ್ರೊವೈಡರ್
+ಸಹಾಯಕಗಳಾಗಿವೆ (ಟೂಲ್ ಸ್ಕೀಮಾಗಳು, ಫೆಚ್/TTS ಅಡಾಪ್ಟರ್ಗಳು, ವಿಶಿಷ್ಟ ವರ್ತನೆ ಹ್ಯಾಂಡ್ಲರ್ಗಳು). ಎಕ್ಸಿಕ್ಯೂಟರ್ಗಳಲ್ಲಿ ಇವು ಸೇರಿವೆ:
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`,
 `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`,
 `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`,
-`pollinations`, `qoder`, `vertex`, `devin-desktop`, ಜೊತೆಗೆ
-`claudeIdentity.ts` (ಹಂಚಿಕೆಯ ಐಡೆಂಟಿಟಿ ಸಹಾಯಕ) ಮತ್ತು `index.ts` (ರಿಜಿಸ್ಟ್ರಿ).
+`pollinations`, `qoder`, `vertex`, `devin-desktop`, ಜೊತೆಗೆ `claudeIdentity.ts`
+(ಹಂಚಿಕೆಯ ಗುರುತು ಸಹಾಯಕ) ಮತ್ತು `index.ts` (ರಿಜಿಸ್ಟ್ರಿ).
 
-> ಗಮನಿಸಿ: ಇಲ್ಲಿ ಪಟ್ಟಿ ಮಾಡದ ಪ್ರೊವೈಡರ್ಗಳನ್ನು ಸಾಮಾನ್ಯ
-> OpenAI-ಸಂಗತ ಎಕ್ಸಿಕ್ಯೂಟರ್ ಬಳಸುವ `default.ts` ಪೂರೈಸುತ್ತದೆ. ಸಂಪೂರ್ಣ ಪ್ರೊವೈಡರ್ ಕ್ಯಾಟಲಾಗ್ (380 ಪ್ರೊವೈಡರ್ಗಳು)
+> ಗಮನಿಸಿ: ಇಲ್ಲಿ ಪಟ್ಟಿ ಮಾಡದ ಪ್ರೊವೈಡರ್ಗಳನ್ನು ಸಾರ್ವತ್ರಿಕ
+> OpenAI-ಹೊಂದಾಣಿಕೆಯ ಎಕ್ಸಿಕ್ಯೂಟರ್ ಬಳಸುವ `default.ts` ಒದಗಿಸುತ್ತದೆ. ಸಂಪೂರ್ಣ ಪ್ರೊವೈಡರ್ ಕ್ಯಾಟಲಾಗ್ (380 ಪ್ರೊವೈಡರ್ಗಳು)
 > `src/shared/constants/providers.ts` ನಲ್ಲಿ ಇದೆ.
 
 ### 4.3 `open-sse/translator/`
 
-ಹಬ್-ಮತ್ತು-ಸ್ಪೋಕ್ ಅನುವಾದ (OpenAI ಹಬ್ ಆಗಿದೆ).
+ಹಬ್-ಅಂಡ್-ಸ್ಪೋಕ್ ಅನುವಾದ (OpenAI ಹಬ್ ಆಗಿದೆ).
 
-- **9 ವಿನಂತಿ ಅನುವಾದಕರು** (`translator/request/`):
+- **9 ವಿನಂತಿ ಅನುವಾದಕಗಳು** (`translator/request/`):
   `antigravity-to-openai`, `claude-to-gemini`, `claude-to-openai`,
   `gemini-to-openai`, `openai-responses`, `openai-to-claude`,
   `openai-to-cursor`, `openai-to-gemini`, `openai-to-kiro`.
-- **9 ಪ್ರತಿಕ್ರಿಯೆ ಅನುವಾದಕರು** (`translator/response/`):
+- **9 ಪ್ರತಿಕ್ರಿಯೆ ಅನುವಾದಕಗಳು** (`translator/response/`):
   `claude-to-openai`, `cursor-to-openai`, `gemini-to-claude`, `gemini-to-openai`,
-  `kiro-to-openai`, `openai-responses`, `openai-to-antigravity`, `openai-to-claude`.
+  `kiro-to-openai`, `openai-responses`, `openai-to-antigravity`,
+  `openai-to-claude`.
 - **9 ಸಹಾಯಕಗಳು** (`translator/helpers/`):
   `claudeHelper`, `geminiHelper`, `geminiToolsSanitizer`, `maxTokensHelper`,
   `openaiHelper`, `responsesApiHelper`, `schemaCoercion`, `toolCallHelper`, ಜೊತೆಗೆ
-  ಸಹಾಯಕ ಟೆಸ್ಟ್ಗಳು.
+  ಸಹಾಯಕ ಪರೀಕ್ಷೆಗಳು.
 - **ಚಿತ್ರ ಸಹಾಯಕಗಳು** (`translator/image/sizeMapper.ts`).
-- ಟಾಪ್-ಲೆವೆಲ್: `bootstrap.ts`, `formats.ts`, `registry.ts`, `index.ts`.
+- ಉನ್ನತ-ಹಂತ: `bootstrap.ts`, `formats.ts`, `registry.ts`, `index.ts`.
 
 ### 4.4 `open-sse/transformer/`
 
-- `responsesTransformer.ts` — `TransformStream` ಆಧಾರಿತ Responses API ↔ Chat
-  Completions ಪರಿವರ್ತಕ (`responses/` ರೂಟ್ ಕ್ಯಾಚ್-ಆಲ್ ಬಳಸುತ್ತದೆ).
+- `responsesTransformer.ts` — `TransformStream`-ಆಧಾರಿತ Responses API ↔ Chat
+  Completions ಪರಿವರ್ತಕ (`responses/` ರೂಟ್ ಕ್ಯಾಚ್-ಆಲ್ನಿಂದ ಬಳಸಲಾಗುತ್ತದೆ).
 
 ### 4.5 `open-sse/services/`
 
@@ -533,13 +533,13 @@ open-sse/
 | ಕಾಳಜಿ                | ಫೈಲ್ಗಳು                                                                                                                                                                                                                                                  |
 | -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | ಕಾಂಬೊ ರೂಟಿಂಗ್        | `combo.ts` (20 ತಂತ್ರಗಳು), `comboConfig.ts`, `comboMetrics.ts`, `comboManifestMetrics.ts`, `comboAgentMiddleware.ts`                                                                                                                                      |
-| ಆಟೋ ಕಾಂಬೊ ಎಂಜಿನ್     | `autoCombo/` — `engine.ts`, `scoring.ts`, `taskFitness.ts`, `virtualFactory.ts`, `modePacks.ts`, `autoPrefix.ts`, `persistence.ts`, `providerDiversity.ts`, `providerRegistryAccessor.ts`, `routerStrategy.ts`, `selfHealing.ts`, `index.ts`             |
-| ಸ್ಥೈರ್ಯ              | `accountFallback.ts` (ಕೂಲ್ಡೌನ್ + ಲಾಕ್ಔಟ್), `errorClassifier.ts`, `requestRejectedStreak.ts`, `emergencyFallback.ts`, `rateLimitManager.ts`, `rateLimitSemaphore.ts`, `accountSemaphore.ts`, `accountSelector.ts`                                         |
+| ಸ್ವಯಂ ಕಾಂಬೊ ಎಂಜಿನ್   | `autoCombo/` — `engine.ts`, `scoring.ts`, `taskFitness.ts`, `virtualFactory.ts`, `modePacks.ts`, `autoPrefix.ts`, `persistence.ts`, `providerDiversity.ts`, `providerRegistryAccessor.ts`, `routerStrategy.ts`, `selfHealing.ts`, `index.ts`             |
+| ಸ್ಥಿತಿಸ್ಥಾಪಕತ್ವ      | `accountFallback.ts` (ಕೂಲ್ಡೌನ್ + ಲಾಕ್ಔಟ್), `errorClassifier.ts`, `requestRejectedStreak.ts`, `emergencyFallback.ts`, `rateLimitManager.ts`, `rateLimitSemaphore.ts`, `accountSemaphore.ts`, `accountSelector.ts`                                         |
 | ಕೋಟಾಗಳು              | `quotaMonitor.ts`, `quotaPreflight.ts`, `bailianQuotaFetcher.ts`, `codexQuotaFetcher.ts`, `deepseekQuotaFetcher.ts`, `openrouterQuotaFetcher.ts`, `openrouterFreeWindow.ts`, `llmgatewayQuotaFetcher.ts`, `crofUsageFetcher.ts`, `antigravityCredits.ts` |
 | ಕ್ಯಾಶಿಂಗ್            | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                            |
 | ರೂಟಿಂಗ್ ಬುದ್ಧಿಮತ್ತೆ  | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                             |
 | ಮಾದರಿ ನಿರ್ವಹಣೆ       | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                              |
-| ಸಂಕುಚನ               | `compression/` — ಸಂಪೂರ್ಣ ಸಂಕುಚನ ಎಂಜಿನ್ ವೈರಿಂಗ್                                                                                                                                                                                                           |
+| ಸಂಕುಚನ               | `compression/` — ಸಂಪೂರ್ಣ ಸಂಕುಚನ ಎಂಜಿನ್ನ ವೈರಿಂಗ್                                                                                                                                                                                                          |
 | ಟೋಕನ್ + ಸೆಷನ್        | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts`        |
 | ಟಿಯರ್ / ಮ್ಯಾನಿಫೆಸ್ಟ್ | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                            |
 | IP / ನೆಟ್ವರ್ಕ್       | `ipFilter.ts`, `webSearchFallback.ts`                                                                                                                                                                                                                    |
@@ -548,35 +548,35 @@ open-sse/
 
 ### 4.6 `open-sse/mcp-server/`
 
-- `server.ts` ನಲ್ಲಿ ಸಂಪರ್ಕಿಸಲಾದ **110 ಅನನ್ಯ ಟೂಲ್ಗಳು** (`schemas/tools.ts` ನಲ್ಲಿ 45 ಕ್ಯಾನಾನಿಕಲ್ ಟೂಲ್ಗಳು +
-  ಮೆಮೊರಿ, ಕೌಶಲ್ಯಗಳು, GitHub-ಕೌಶಲ್ಯಗಳು, ಪೂಲ್, ಗ್ಯಾಮಿಫಿಕೇಶನ್, ಪ್ಲಗಿನ್, Notion, Obsidian,
-  ಸ್ಥಳೀಯ-ಕಾರ್ಪಸ್ ಮತ್ತು ಸಂಕುಚನ ಮಾಡ್ಯೂಲ್ಗಳು — `countUniqueMcpTools` ಮೂಲಕ ಯೂನಿಯನ್ ಎಣಿಕೆ).
-- **3 ಸಾರಿಗೆ ವಿಧಾನಗಳು**: stdio, HTTP Streamable, SSE.
-- ರನ್ಟೈಮ್ನಲ್ಲಿ ಜಾರಿಗೊಳಿಸಲಾದ **33 ಸ್ಕೋಪ್ಗಳು** — ಮೂಲ ಪಟ್ಟಿಯು `src/shared/constants/mcpScopes.ts` ನಲ್ಲಿ ಇದೆ; ಸಂಪೂರ್ಣ ಸಮೂಹವು ಪ್ರತಿಯೊಂದು ಟೂಲ್ ಮಾಡ್ಯೂಲ್ ಘೋಷಿಸಿದ ಸ್ಕೋಪ್ಗಳ ಯೂನಿಯನ್ ಆಗಿದೆ.
-- ಆಡಿಟ್ ಟೇಬಲ್: `mcp_tool_audit` (`audit.ts` ಮೂಲಕ ತುಂಬಿಸಲಾಗುತ್ತದೆ).
+- `server.ts`ನಲ್ಲಿ **110 ಅನನ್ಯ ಪರಿಕರಗಳನ್ನು** ಜೋಡಿಸಲಾಗಿದೆ (`schemas/tools.ts`ನಲ್ಲಿ 45 ಪ್ರಮಾಣಿತ ಪರಿಕರಗಳು +
+  ಮೆಮೊರಿ, ಕೌಶಲ್ಯಗಳು, GitHub-ಕೌಶಲ್ಯಗಳು, ಪೂಲ್, ಗೇಮಿಫಿಕೇಶನ್, ಪ್ಲಗಿನ್, Notion, Obsidian,
+  ಸ್ಥಳೀಯ-ಕಾರ್ಪಸ್ ಮತ್ತು ಸಂಕುಚನ ಮಾಡ್ಯೂಲ್ಗಳು — ಒಕ್ಕೂಟವನ್ನು `countUniqueMcpTools` ಮೂಲಕ ಎಣಿಸಲಾಗಿದೆ).
+- **3 ಸಾರಿಗೆಗಳು**: stdio, HTTP Streamable, SSE.
+- ರನ್ಟೈಮ್ನಲ್ಲಿ **33 ಸ್ಕೋಪ್ಗಳನ್ನು** ಜಾರಿಗೊಳಿಸಲಾಗಿದೆ — ಮೂಲ ಪಟ್ಟಿ `src/shared/constants/mcpScopes.ts`ನಲ್ಲಿದೆ; ಸಂಪೂರ್ಣ ಸೆಟ್ ಪ್ರತಿ ಪರಿಕರ ಮಾಡ್ಯೂಲ್ ಘೋಷಿಸಿರುವ ಸ್ಕೋಪ್ಗಳ ಒಕ್ಕೂಟವಾಗಿದೆ.
+- ಆಡಿಟ್ ಕೋಷ್ಟಕ: `mcp_tool_audit` (`audit.ts` ಮೂಲಕ ಭರ್ತಿ ಮಾಡಲಾಗಿದೆ).
 - ಫೈಲ್ಗಳು: `server.ts`, `index.ts`, `httpTransport.ts`, `audit.ts`, `scopeEnforcement.ts`,
   `runtimeHeartbeat.ts`, `descriptionCompressor.ts`, `schemas/{tools, a2a, audit, index}.ts`,
   `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts`,
-  ಹಾಗೆಯೇ `__tests__/` ಅಡಿಯಲ್ಲಿ ಪರೀಕ್ಷೆಗಳು.
-- ಸಂಪೂರ್ಣ ಟೂಲ್ ಕ್ಯಾಟಲಾಗ್ಗಾಗಿ [MCP-SERVER.md](../frameworks/MCP-SERVER.md) ನೋಡಿ.
+  ಜೊತೆಗೆ `__tests__/` ಅಡಿಯಲ್ಲಿನ ಪರೀಕ್ಷೆಗಳು.
+- ಸಂಪೂರ್ಣ ಪರಿಕರ ಕ್ಯಾಟಲಾಗ್ಗಾಗಿ [MCP-SERVER.md](../frameworks/MCP-SERVER.md) ನೋಡಿ.
 
 ### 4.7 `open-sse/config/`
 
-ಪ್ರೊವೈಡರ್ ರಿಜಿಸ್ಟ್ರಿಗಳು (`providerRegistry.ts`, `providerModels.ts`,
-`providerHeaderProfiles.ts`), ಪ್ರತಿ ಫಾರ್ಮ್ಯಾಟ್ಗೆ ಮಾದರಿ ರಿಜಿಸ್ಟ್ರಿಗಳು (`audioRegistry.ts`,
+ಪೂರೈಕೆದಾರರ ರಿಜಿಸ್ಟ್ರಿಗಳು (`providerRegistry.ts`, `providerModels.ts`,
+`providerHeaderProfiles.ts`), ಪ್ರತಿ-ಸ್ವರೂಪದ ಮಾದರಿ ರಿಜಿಸ್ಟ್ರಿಗಳು (`audioRegistry.ts`,
 `embeddingRegistry.ts`, `imageRegistry.ts`, `moderationRegistry.ts`,
 `musicRegistry.ts`, `rerankRegistry.ts`, `searchRegistry.ts`, `videoRegistry.ts`),
-ಗುರುತು ಸಹಾಯಕಗಳು (`codexIdentity.ts`, `codexInstructions.ts`,
+ಗುರುತಿನ ಸಹಾಯಕಗಳು (`codexIdentity.ts`, `codexInstructions.ts`,
 `anthropicHeaders.ts`, `antigravityUpstream.ts`, `antigravityModelAliases.ts`,
 `cliFingerprints.ts`, `toolCloaking.ts`, `defaultThinkingSignature.ts`),
-ಪ್ರಮಾಣೀಕರಣ ಸಹಾಯಕಗಳು (`credentialLoader.ts`, `codexClient.ts`), ಮತ್ತು ಕ್ಲೌಡ್
+ರುಜುವಾತು ಸಹಾಯಕಗಳು (`credentialLoader.ts`, `codexClient.ts`) ಮತ್ತು ಕ್ಲೌಡ್
 ಅಡಾಪ್ಟರ್ಗಳು (`azureAi.ts`, `bedrock.ts`, `datarobot.ts`, `glmProvider.ts`,
 `maritalk.ts`, `oci.ts`, `petals.ts`, `runway.ts`, `sap.ts`, `watsonx.ts`,
 `ollamaModels.ts`, `errorConfig.ts`, `constants.ts`, `registryUtils.ts`).
 
 ### 4.8 `open-sse/utils/`
 
-ಸ್ಟ್ರೀಮಿಂಗ್ ಮೂಲಪ್ರಕಾರಗಳು ಮತ್ತು ಪೂರೈಕೆದಾರ ಸಹಾಯಕಗಳು: `stream.ts`, `streamHandler.ts`,
+ಸ್ಟ್ರೀಮಿಂಗ್ ಪ್ರಿಮಿಟಿವ್ಗಳು ಮತ್ತು ಪ್ರೊವೈಡರ್ ಸಹಾಯಕಗಳು: `stream.ts`, `streamHandler.ts`,
 `streamHelpers.ts`, `streamPayloadCollector.ts`, `streamReadiness.ts`,
 `sseHeartbeat.ts`, `proxyFetch.ts`, `proxyDispatcher.ts`, `tlsClient.ts`,
 `networkProxy.ts`, `awsSigV4.ts`, `cacheControlPolicy.ts`,
@@ -782,7 +782,7 @@ bin/
    `open-sse/mcp-server/schemas/tools.ts` ಅನ್ನು ವಿಸ್ತರಿಸಿ).
 2. `src/shared/constants/mcpScopes.ts` ನಲ್ಲಿ ಸೂಕ್ತ scope(ಗಳನ್ನು) ನಿಯೋಜಿಸಿ.
 3. `open-sse/mcp-server/server.ts` ನಲ್ಲಿ tool ಅನ್ನು ನೋಂದಾಯಿಸಿ.
-4. `open-sse/mcp-server/__tests__/` ಅಡಿಯಲ್ಲಿ ಪರೀಕ್ಷೆಗಳನ್ನು ಸೇರಿಸಿ.
+4. `tests/unit/` ಅಡಿಯಲ್ಲಿ ಪರೀಕ್ಷೆಗಳನ್ನು ಸೇರಿಸಿ.
 5. [MCP-SERVER.md](../frameworks/MCP-SERVER.md) ಅನ್ನು ನವೀಕರಿಸಿ.
 
 ### ಹೊಸ A2A skill ಅನ್ನು ಸೇರಿಸಿ
@@ -800,7 +800,7 @@ bin/
 - **Naming**: files `camelCase` ಅಥವಾ `kebab-case`, components `PascalCase`,
   constants `UPPER_SNAKE`.
 - **ESLint**: ಎಲ್ಲೆಡೆ `no-eval`, `no-implied-eval`, `no-new-func` = `error`;
-  `open-sse/` ಮತ್ತು `tests/` ನಲ್ಲಿ `no-explicit-any` = `warn`, ಇತರೆಡೆ error.
+  `open-sse/**/*.ts` ಮತ್ತು `tests/**/*.ts` ನಲ್ಲಿ `no-explicit-any` = `error`.
 - **TypeScript**: `strict: false` (legacy ನಿಲುವು). Cross-module boundaries ಗಾಗಿ
   inference ಗಿಂತ explicit types ಗೆ ಆದ್ಯತೆ ನೀಡಿ.
 - **Database**: routes ಅಥವಾ handlers ನಲ್ಲಿ raw SQL ಅನ್ನು ಎಂದಿಗೂ ಬರೆಯಬೇಡಿ — ಯಾವಾಗಲೂ
@@ -827,8 +827,7 @@ bin/
   `a2a`, `memory`, `skills`.
 - **Branches**: prefixes `feat/`, `fix/`, `refactor/`, `docs/`, `test/`,
   `chore/`. `main` ಗೆ ಎಂದಿಗೂ ನೇರವಾಗಿ commit ಮಾಡಬೇಡಿ.
-- **Husky**: pre-commit ವೇಳೆ `lint-staged` + `check:docs-sync` +
-  `check:any-budget:t11` ರನ್ ಆಗುತ್ತವೆ; pre-push ವೇಳೆ `check:any-budget:t11` + `check:tracked-artifacts` ರನ್ ಆಗುತ್ತವೆ (ವೇಗದ gates; `test:unit` ಅನ್ನು ಹೊರತುಪಡಿಸುತ್ತದೆ).
+- **Husky**: [`pre-commit`](../../../../../.husky/pre-commit) · [`pre-push`](../../../../../.husky/pre-push).
 
 ---
 

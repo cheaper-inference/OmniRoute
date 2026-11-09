@@ -56,11 +56,11 @@ yhden konkreettisen toteutusseikan vuoksi:
 
 Tämä tarkoittaa seuraavaa kullekin rajapinnalle, vaikka `CORS_ALLOW_ALL=true`:
 
-| Rajapinta                                        | Todennusmekanismi           | Yleismerkillä määritetyn CORS:n vaikutus                                                                                                                                                                                                                                                                                                                                                       |
-| ------------------------------------------------ | --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Hallintapaneeli / MANAGEMENT `/api/*`            | Evästeistunto               | Alkuperä palautetaan vastauksessa, mutta **ilman `Allow-Credentials`-otsaketta** selain **estää** tunnistetietoja sisältävän vastauksen lukemisen. Haitallinen eri alkuperässä oleva sivusto **ei voi lukea** todennettuja hallintapaneelivastauksiasi, eikä istuntoevästettä paljasteta.                                                                                                      |
-| Asiakasrajapinta `/v1/*`, `/v1beta/*`            | Bearer / `x-api-key`-otsake | On jo valmiiksi salliva **tarkoituksellisesti** (`relaxForTokenAuth`): selaimet eivät koskaan liitä automaattisesti `Authorization`/`x-api-key`-otsakkeita, joten hyökkääjän sivu ei voi toimittaa avaintasi. Alkuperä palautetaan vain, kun esitetty avain on validoitu; anonyymit vastaukset (`REQUIRE_API_KEY=false`) noudattavat sallittujen luetteloa. `CORS_ALLOW_ALL` ei laajenna tätä. |
-| Julkinen vain luku -rajapinta (`/api/health`, …) | Ei mitään                   | Ei arkaluonteinen; yleismerkki on vaaraton.                                                                                                                                                                                                                                                                                                                                                    |
+| Rajapinta                                        | Todennusmekanismi           | Yleismerkillä määritetyn CORS:n vaikutus                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| ------------------------------------------------ | --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Hallintapaneeli / MANAGEMENT `/api/*`            | Evästeistunto               | Alkuperä palautetaan vastauksessa, mutta **ilman `Allow-Credentials`-otsaketta** selain **estää** tunnistetietoja sisältävän vastauksen lukemisen. Haitallinen eri alkuperässä oleva sivusto **ei voi lukea** todennettuja hallintapaneelivastauksiasi, eikä istuntoevästettä paljasteta.                                                                                                                                                                                                                                                                                                                                                                            |
+| Asiakasrajapinta `/v1/*`, `/v1beta/*`            | Bearer / `x-api-key`-otsake | On jo valmiiksi salliva **tarkoituksellisesti** (`relaxForTokenAuth`): selaimet eivät koskaan liitä automaattisesti `Authorization`/`x-api-key`-otsakkeita, joten hyökkääjän sivu ei voi toimittaa avaintasi. Alkuperän palauttaminen lievennetyn säännön mukaisesti edellyttää todennettua osapuolta (validoitua API-avainta tai validoitua hallintapaneelin istuntoa), ei pelkkää tunnistetieto-otsaketta, eikä se koskaan sisällä `Access-Control-Allow-Credentials`-otsaketta. Anonyymit vastaukset (`REQUIRE_API_KEY=false`) käyttävät määritettyä sallittujen alkuperien luetteloa, mukaan lukien nimenomainen käyttöönotto asetuksella `CORS_ALLOW_ALL=true`. |
+| Julkinen vain luku -rajapinta (`/api/health`, …) | Ei mitään                   | Ei arkaluonteinen; yleismerkki on vaaraton.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
 
 Näin ollen `CORS_ALLOW_ALL=true`-asetuksen **jäännösriski** rajoittuu seuraaviin: (a)
 jo valmiiksi todentamattomien tietojen eri alkuperästä tehtävät **lukupyynnöt** ilman tunnistetietoja ja (b)
@@ -122,9 +122,7 @@ uudelleenkäynnistystä.
   näitä automaattisesti. CORS ei ole tässä merkityksellinen este — API-avain on
   este — minkä vuoksi tämä rajapinta on tarkoituksella salliva, jotta selain- ja
   Electron-asiakkaat voivat lukea vastaukset, joihin niillä on jo oikeus.
-  Salliva alkuperän palautus seuraa validoitua avainta, ei pelkkää otsakkeen
-  olemassaoloa: kun `REQUIRE_API_KEY=false` palvelee pyynnön anonyymisti, sen
-  onnistunut vastaus noudattaa oletusarvoisesti estävää sallittujen luetteloa.
+  Alkuperän palauttaminen lievennetyn säännön mukaisesti edellyttää todennettua osapuolta (validoitua API-avainta tai validoitua hallintapaneelin istuntoa), ei pelkkää tunnistetieto-otsaketta, eikä se koskaan sisällä `Access-Control-Allow-Credentials`-otsaketta. Anonyymit vastaukset (`REQUIRE_API_KEY=false`) käyttävät määritettyä sallittujen alkuperien luetteloa, mukaan lukien nimenomainen käyttöönotto asetuksella `CORS_ALLOW_ALL=true`.
   Todennuksen hylkäykset (401) pysyvät luettavina, jotta asiakkaat voivat näyttää
   peruutetun tai väärin kirjoitetun avaimen (#5242): putken oma 401 säilyttää alkuperän
   palautuksen, ja reitti, joka hylkää avaimen itse sen jälkeen, kun putki on palvellut
@@ -137,8 +135,7 @@ uudelleenkäynnistystä.
   tarkisti, eikä sitä koskaan yhdistetä `Access-Control-Allow-Credentials`-otsakkeeseen;
   runko on kiinteä virhekuori. `/api/v1/`-polun alla olevat hallintareitit, joita
   `requireManagementAuth()` suojaa (`/api/v1/management/*`, `/api/v1/registered-keys`),
-  eivät lisää alkuperän palautusta: kun `REQUIRE_API_KEY=false`, niiden 401/403-vastaukset
-  eivät ole luettavissa eri alkuperästä.
+  eivät käytä tätä tunnistetietojen hylkäyspoikkeusta: kun `REQUIRE_API_KEY=false`, niiden 401/403-vastaukset noudattavat määritettyä CORS-alkuperäkäytäntöä.
 - **Evästeistunto (hallintapaneeli):** sitä suojaavat sekä oletusarvoinen estävä
   toimintatapa **että** `Access-Control-Allow-Credentials`-otsakkeen puuttuminen
   jaetulta polulta. Älä sisällytä hallinta- tai hallintapaneelialkuperiä mihinkään
@@ -153,7 +150,7 @@ OmniRoutea ajetaan komennolla `npm start` / `npm run dev`, `/v1/ws`- ja
 `/api/v1/ws`-silta, joka suoratoistaa `/v1/chat/completions`-, `/v1/messages`- ja
 `/v1/responses`-vastaukset kehyksinä. Silta kysyy ratkaisua osoitteesta
 `/api/v1/ws?handshake=1` ja kieltäytyy päivittämästä yhteyttä, ellei kyseinen reitti
-suorittanut tarkistusta. Kättely hyväksytään, kun:
+suorittanut tarkistusta. Todennusvaatimukset pätevät edelleen erikseen. Alkuperän tarkistus onnistuu, kun:
 
 - siinä ei ole `Origin`-otsaketta (Codex CLI, SDK:t ja muut kuin selainasiakkaat);
 - yllä kuvattu sallittujen luettelo hyväksyy `Origin`-arvon (`CORS_ALLOWED_ORIGINS`,

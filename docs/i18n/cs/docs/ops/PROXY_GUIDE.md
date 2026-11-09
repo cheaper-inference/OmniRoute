@@ -81,6 +81,18 @@ Proxy servery jsou užitečné i mimo blokované oblasti:
 
 ---
 
+## Výchozí stav proxy pro nové účty
+
+V** Nastavení → Proxy → Globální konfigurace** , použití** Ve výchozím nastavení povolit pro nová připojení proxy** vyberte počáteční stav proxy nově přidaných účtů poskytovatelů.
+
+Nové nastavení řídí počáteční stav proxy nově přidaných účtů poskytovatelů. Nemění stávající účty ani nenahrazuje globální přepínač proxy. Jeho počáteční hodnota zachovává předchozí chování. Jednou jej vypněte, chcete-li vytvářet budoucí účty se serverem proxy ve výchozím nastavení vypnutým.
+
+Předvolba je uložena jako `defaultNewConnectionProxyEnabled` prostřednictvím existujících Nastavení API. Výchozí hodnota je `true`, když se nikdy neuloží. Uložení `false` se projeví pro další nové účty bez restartu. `POST /api/providers` přijímá volitelný přísný booleovský `proxyEnabled`; explicitní `true` nebo `false` má přednost před výchozím nastavením vytvoření. Vynechání duplicitního účtu nebo opětovné připojení OAuth zachová uložený stav tohoto účtu. Jednotlivé účty lze povolit nebo zakázat i poté.
+
+Převody selektivních poskytovatelů používají výchozí nastavení cílové instalace pro nové účty a zachovávají zásady cíle při nahrazování stávajících účtů. Přepínače proxy nejsou přenosná pole přenosu. Úplné obnovení zálohy a historická migrace JSON/SQL si zachovají svou stávající sémantiku obnovení, včetně uložených hodnot účtů a výchozích výchozích nastavení schémat; úplné obnovení nastavení může také obnovit tuto předvolbu.
+
+Tato předvolba nepřiřazuje proxy ani neurčuje, že je v pořádku nebo se používá. Skutečné směrování stále závisí na globálním přepínači proxy a příslušné konfiguraci proxy. Syntetičtí poskytovatelé bez trvalého účtu, provoz OAuth před vytvořením účtu, proxy servery environment/system a síťování externích backendů jsou mimo jeho rozsah.
+
 ## Čtyřúrovňový systém proxy
 
 OmniRoute podporuje konfiguraci proxy na **čtyřech nezávislých úrovních**, které se vyhodnocují podle priority:
@@ -381,7 +393,7 @@ Používá `wreq-js` ke generování otisků TLS podobných prohlížečům, č�
 
 ### Napodobení otisku CLI
 
-**Přepínač otisku CLI** (`Nastavení → Zabezpečení`) mění pořadí hlaviček HTTP a polí v těle JSON tak, aby přesně odpovídalo signatuře nativních binárních souborů CLI (Claude Code, Codex atd.). Tato funkce pracuje **nad rámec** proxy:
+**Přepínač otisku CLI** (`Settings → Security`) mění pořadí hlaviček HTTP a polí v těle JSON tak, aby přesně odpovídalo signatuře nativních binárních souborů CLI (Claude Code, Codex atd.). Tato funkce pracuje **nad rámec** proxy:
 
 ```
 Vaše IP (blokovaná) → IP proxy (USA) → API poskytovatele

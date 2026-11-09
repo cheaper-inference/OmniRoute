@@ -57,11 +57,11 @@ saboda wani takamaiman tsarin aiwatarwa:
 
 Ga abin da wannan ke nufi a kowane surface, ko da `CORS_ALLOW_ALL=true`:
 
-| Surface                                 | Hanyar auth                    | Tasirin wildcard CORS                                                                                                                                                                                                                                                                                                                                                                      |
-| --------------------------------------- | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Dashboard / MANAGEMENT `/api/*`         | Zaman cookie                   | Ana mayar da asalin, amma **ba tare da `Allow-Credentials` ba** burauzar tana **hana** karatun da ke da shaida. Shafin mugunta daga wani asali **ba zai iya karanta** amsoshin dashboard ɗinku da aka tabbatar ba, kuma ba a fallasa cookie na zaman.                                                                                                                                      |
-| Client API `/v1/*`, `/v1beta/*`         | Header na Bearer / `x-api-key` | Tuni yana da sassauci **da gangan** (`relaxForTokenAuth`): burauzoci ba sa haɗa `Authorization`/`x-api-key` kai tsaye, don haka shafin maharin ba zai iya samar da key ɗinku ba. Ana mayar da asalin ne kawai idan an tabbatar da key ɗin da aka gabatar; amsoshin da ba a san mai su ba (`REQUIRE_API_KEY=false`) suna ci gaba da bin jerin izinin. `CORS_ALLOW_ALL` ba ya faɗaɗa wannan. |
-| Karatun jama'a kawai (`/api/health`, …) | Babu                           | Ba mai muhimmanci ba ne; wildcard ba shi da illa.                                                                                                                                                                                                                                                                                                                                          |
+| Surface                                 | Hanyar auth                    | Tasirin wildcard CORS                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| --------------------------------------- | ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Dashboard / MANAGEMENT `/api/*`         | Zaman cookie                   | Ana mayar da asalin, amma **ba tare da `Allow-Credentials` ba** burauzar tana **hana** karatun da ke da shaida. Shafin mugunta daga wani asali **ba zai iya karanta** amsoshin dashboard ɗinku da aka tabbatar ba, kuma ba a fallasa cookie na zaman.                                                                                                                                                                                                                                                                                                                                                      |
+| Client API `/v1/*`, `/v1beta/*`         | Header na Bearer / `x-api-key` | Tuni yana da sassauci **da gangan** (`relaxForTokenAuth`): burauzoci ba sa haɗa `Authorization`/`x-api-key` kai tsaye, don haka shafin maharin ba zai iya samar da key ɗinku ba. Mayar da asali bisa sassaucin ƙa’ida yana buƙatar wanda aka tabbatar da shaidarsa (maɓallin API da aka tantance ko zaman dashboard da aka tantance), ba kanun bayanan shaida kawai ba, kuma ba ya taɓa haɗa `Access-Control-Allow-Credentials`. Amsoshin da ba su da shaidar mai nema (`REQUIRE_API_KEY=false`) suna amfani da jerin asalan da aka saita a yarda da su, ciki har da kunna `CORS_ALLOW_ALL=true` a sarari. |
+| Karatun jama'a kawai (`/api/health`, …) | Babu                           | Ba mai muhimmanci ba ne; wildcard ba shi da illa.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
 
 Saboda haka, fallasar da ta **rage** daga `CORS_ALLOW_ALL=true` ta taƙaita ne ga: (a)
 karatun da ba ya ɗauke da shaida daga wani asali na bayanan da tun farko ba sa buƙatar auth, da (b)
@@ -123,9 +123,7 @@ sake kunnawa ba.
   waɗannan ta atomatik. CORS ba katanga mai ma’ana ba ce a nan — maɓallin API ne
   katangar — shi ya sa aka tsara wannan farfajiya ta zama mai sassauci domin browser da
   Electron clients su iya karanta amsoshin da suke da haƙƙin samu.
-  Mayar da asali mai sassauci yana bin key ɗin da aka tabbatar, ba kawai kasancewar
-  header ɗin ba: idan `REQUIRE_API_KEY=false` ta yi wa buƙata hidima ba tare da sanin mai
-  ita ba, amsarta mai nasara tana ci gaba da bin jerin izinin da ke rufewa idan an gaza.
+  Mayar da asali bisa sassaucin ƙa’ida yana buƙatar wanda aka tabbatar da shaidarsa (maɓallin API da aka tantance ko zaman dashboard da aka tantance), ba kanun bayanan shaida kawai ba, kuma ba ya taɓa haɗa `Access-Control-Allow-Credentials`. Amsoshin da ba su da shaidar mai nema (`REQUIRE_API_KEY=false`) suna amfani da jerin asalan da aka saita a yarda da su, ciki har da kunna `CORS_ALLOW_ALL=true` a sarari.
   Ƙin tantancewa (401) suna ci gaba da kasancewa masu karantuwa domin clients su iya
   nuna key da aka soke ko aka rubuta ba daidai ba (#5242): 401 na pipeline ɗin kanta yana
   riƙe mayar da asalin, kuma hanyar da ita kanta ta ƙi key ɗin bayan pipeline ta yi wa
@@ -138,8 +136,7 @@ sake kunnawa ba.
   hanyar ta duba ba, kuma ba a taɓa haɗa shi da `Access-Control-Allow-Credentials` ba;
   jikin amsar ambulan kuskure ne da ba ya canzawa. Hanyoyin gudanarwa a ƙarƙashin
   `/api/v1/` da `requireManagementAuth()` ke kiyayewa (`/api/v1/management/*`,
-  `/api/v1/registered-keys`) ba sa ƙara mayar da asalin: tare da `REQUIRE_API_KEY=false`,
-  ba za a iya karanta 401/403 ɗinsu daga wani asali ba.
+  `/api/v1/registered-keys`) ba sa amfani da wannan keɓantaccen tsarin ƙin karɓar bayanan shaida: idan `REQUIRE_API_KEY=false`, amsoshinsu na 401/403 suna bin ƙa’idar CORS ta asali da aka saita.
 - **Zaman cookie (dashboard):** ana kiyaye shi ta tsohuwar ƙa’idar rufewa idan an gaza **da kuma**
   rashin `Access-Control-Allow-Credentials` a kan hanyar da ake amfani da ita tare. Kada ka saka
   asalan gudanarwa/dashboard a cikin wani saitin sassauci; dole su ci gaba da kasancewa
@@ -153,7 +150,7 @@ da ke mayar da sakamakon inference suna duba `Origin` na musafahar da kansu
 OmniRoute na gudana ta `npm start` / `npm run dev`, gadar `/v1/ws` da `/api/v1/ws`, wadda
 ke yaɗa `/v1/chat/completions`, `/v1/messages` da `/v1/responses` a matsayin frames.
 Gadar tana tambayar `/api/v1/ws?handshake=1` hukunci kuma tana ƙin haɓaka haɗin sai
-dai idan wannan hanyar ta gudanar da binciken. Ana karɓar musafaha idan:
+dai idan wannan hanyar ta gudanar da binciken. Har yanzu ana amfani da sharuɗɗan tantance shaida dabam. Binciken asali yana wucewa idan:
 
 - ba ta da header na `Origin` (Codex CLI, SDKs da sauran clients da ba burauza ba);
 - jerin izinin da ke sama ya amince da `Origin` ɗin (`CORS_ALLOWED_ORIGINS`, saitin

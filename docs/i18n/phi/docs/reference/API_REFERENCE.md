@@ -885,13 +885,7 @@ kapag may nakatakdang ibang field. Para sa lite, inaalis ang `additionalQueries`
 `contents` maliban sa `text` at `highlights` bago ang tawag. Hindi na ipinapasa ang mga deprecated na
 `subpages`, `subpageTarget`, `highlights.numSentences` at `highlights.highlightsPerUrl`.
 
-Ang pagtatala ng gastos ay gumagamit ng flat registry na `costPerQuery`, maliban sa Exa, na sumusunod sa sarili nitong
-pagpepresyo: $0.007 bawat tawag para sa `auto` (at legacy na `fast`) o $0.004 para sa `lite` (at legacy na `instant`), na
-sumasaklaw sa 10 resulta; $0.001 para sa bawat karagdagang resulta; at $0.001 bawat ibinalik na resulta kapag nakatakda ang
-`contents.summary`. Itinatala ang Tavily bilang 1 credit ($0.008) para sa `search_depth` na `basic`, `fast` at `ultra-fast`, at
-2 credit ($0.016) para sa `advanced`
-([mga credit ng Tavily API](https://docs.tavily.com/documentation/api-credits)). Ang tawag na may
-`auto_parameters: true` na nag-a-upgrade ang Tavily sa advanced ay itinatala pa rin bilang 1 credit.
+Exa: $0.007 bawat tawag para sa `auto` (at ang legacy `fast`) o $0.004 para sa `lite` (at ang legacy `instant`), na sumasaklaw sa 10 resulta; $0.001 para sa bawat karagdagang resulta; at $0.001 bawat ibinalik na resulta kapag itinakda ang `contents.summary`. Ang Tavily ay naitala sa 1 credit ($0.008) para sa `search_depth` `basic`, `fast` at `ultra-fast`, at 2 credits ($0.016) para sa `advanced` ( [Tavily API credits](https://docs.tavily.com/documentation/api-credits) ). Ang isang tawag na may `auto_parameters: true` na ina-upgrade ni Tavily sa advanced ay naitala pa rin sa 1 credit.
 
 ---
 
@@ -1185,6 +1179,8 @@ X-OmniRoute-No-Cache: true
 
 ---
 
+<a id="cliproxyapi-management-compatibility"></a>
+
 ## Compatibility sa Pamamahala ng CLIProxyAPI
 
 Sinasagot ng OmniRoute ang tatlong endpoint ng pamamahala ng [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI)
@@ -1199,20 +1195,11 @@ sa `/v0/management/*` at sa `/api/v0/management/*`.
 | POST   | `/v0/management/api-call`    | Body `{ auth_index, method, url, header?, data? }`. Nagpapadala ng isang pinapayagang request gamit ang token ng account at nagbabalik ng `{ status_code, body }` |
 | POST   | `/v0/management/reset-quota` | Body `{ auth_index }`. Nililinis ang connection cooldown, model lockout at mga Codex per-scope cooldown ng isang account                                          |
 
-- Ang `auth_index` ay ang connection id ng OmniRoute. Ang `provider` ay `claude` o `codex` (mga OAuth
-  connection lamang; hindi nakalista ang `anthropic` API-key provider). Para sa Codex,
-  ang `id_token.chatgpt_account_id` ay ang nakaimbak na workspace id at ang `plan_type` ang nakaimbak na plan.
-- Ang `api-call` ay hindi isang generic proxy. Tumatanggap lamang ito ng Claude `GET
-https://api.anthropic.com/api/oauth/usage` at Codex `GET https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits` at
-  `POST .../wham/rate-limit-reset-credits/consume`, at bawat isa ay para lamang sa account ng katugmang
-  provider. Anumang iba pa ay nagbabalik ng `403` nang hindi kumokontak sa upstream. Hindi pinapansin ang
-  `Authorization` header ng tumatawag (kabilang ang placeholder na `$TOKEN$`): ini-inject ng OmniRoute
-  ang access token ng connection, nire-refresh muna ito kapag malapit nang mag-expire, at ipinapasa lamang
-  ang mga pinapayagang header (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`;
-  `Accept`, `Content-Type`). Kung walang `Chatgpt-Account-Id`, ginagamit bilang default ang nakaimbak na
-  workspace id. Nagta-time out ang mga request makalipas ang 15 segundo at ginagamit ang proxy ng connection.
-- Iniiwan ng `reset-quota` ang mga terminal state (banned, expired, credits_exhausted) na hindi nababago. Ang hindi
-  kilalang `auth_index` ay nagbabalik ng `404`.
+- Ang `auth_index` ay OmniRoute connection id. Ang `provider` ay `claude` o `codex` (OAuth connection lamang; hindi nakalista ang `anthropic` API-key provider). Para sa Codex, ang `id_token.chatgpt_account_id` ay ang nakaimbak na workspace id at ang `plan_type` ay ang nakaimbak na plan.
+- Hindi generic proxy ang `api-call`. Tinatanggap lamang nito ang Claude `GET
+https://api.anthropic.com/api/oauth/usage` at Codex `GET
+https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits` at `POST .../wham/rate-limit-reset-credits/consume`, bawat isa para lamang sa account ng katugmang provider. Lahat ng iba pa ay nagbabalik ng `403` nang hindi kumokontak sa upstream. Binabalewala ang `Authorization` header ng tumatawag (kasama ang placeholder na `$TOKEN$`): inilalagay ng OmniRoute ang access token ng koneksyon, nire-refresh muna ito kapag malapit nang mag-expire, at ipinapasa lamang ang mga header na nasa allowlist (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`; `Accept`, `Content-Type`). Kapag nawawala ang `Chatgpt-Account-Id`, ang nakaimbak na workspace id ang default. Kung `401` ang unang upstream response, isang beses itong nagre-refresh at umuulit lamang kapag nagbago ang access token. Bawat upstream attempt ay nagta-timeout pagkalipas ng 15 segundo at gumagamit ng proxy ng koneksyon.
+- Hindi ginagalaw ng `reset-quota` ang mga terminal state (banned, expired, credits_exhausted). Nagbabalik ng `404` ang hindi kilalang `auth_index`.
 
 **Auth:** dashboard session o API key na may `manage` scope, na kinakailangan kahit naka-disable ang login
 (nasa `ALWAYS_PROTECTED_API_PATHS` ang mga path). Nagkakakuha ng `403` ang mga key na para lamang sa inference. Source:
@@ -1936,17 +1923,17 @@ Persistenteng tindahan ng memoryang pang-usap/pangkaalaman, saklaw bawat API key
 
 Ang OmniRoute ay may kasamang naka-embed na Model Context Protocol server na may 3 transportasyon (stdio, SSE, streamable-http) at mga saklaw na tool. Binabasa ng mga endpoint ng dashboard sa ibaba ang status/data ng audit at ipinapasa ang mga HTTP transport.
 
-| Pamamaraan | Path | Paglalarawan |
-| ------ | ---------------------- | ------------------------------------------------------------------------------------------------ | -------------------- |
-| GET | `/api/mcp/status` | Heartbeat, transport, online state, huling tawag, nangungunang mga tool, rate ng tagumpay sa loob ng 24 na oras |
-| GET | `/api/mcp/tools` | Listahan ng mga MCP tool na may `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints` |
-| GET | `/api/mcp/sse` | Magbukas ng SSE stream para sa SSE transport (nagbabalik ng `503` kung hindi pinagana ang MCP o hindi tugma ang transport) |
-| POST | `/api/mcp/sse` | Magpadala ng JSON-RPC frame sa SSE transport |
-| GET | `/api/mcp/stream` | Magbukas ng SSE side ng Streamable HTTP transport (mga mensaheng sinimulan ng server) |
-| POST | `/api/mcp/stream` | Magpadala ng JSON-RPC frame sa Streamable HTTP transport |
-| DELETE | `/api/mcp/stream` | Tapusin ang isang Streamable HTTP session |
-| GET | `/api/mcp/audit` | Mag-query ng audit log — `?limit=`, `?offset=`, `?tool=`, `?success=true                                | false`, `?apiKeyId=` |
-| GET | `/api/mcp/audit/stats` | Pinagsama-samang audit stats (mga kabuuan, rate ng tagumpay, average na tagal, nangungunang mga tool) |
+| Pamamaraan | Path                   | Paglalarawan                                                                                                                    |
+| ---------- | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| GET        | `/api/mcp/status`      | Heartbeat, transport, online state, huling tawag, nangungunang mga tool, rate ng tagumpay sa loob ng 24 na oras                 |
+| GET        | `/api/mcp/tools`       | Listahan ng mga MCP tool na may `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints`                       |
+| GET        | `/api/mcp/sse`         | Magbukas ng SSE stream para sa SSE transport (nagbabalik ng `503` kung hindi pinagana ang MCP o hindi tugma ang transport)      |
+| POST       | `/api/mcp/sse`         | Magpadala ng JSON-RPC frame sa SSE transport                                                                                    |
+| GET        | `/api/mcp/stream`      | Magbukas ng SSE side ng Streamable HTTP transport (mga mensaheng sinimulan ng server)                                           |
+| POST       | `/api/mcp/stream`      | Magpadala ng JSON-RPC frame sa Streamable HTTP transport                                                                        |
+| DELETE     | `/api/mcp/stream`      | Tapusin ang isang Streamable HTTP session                                                                                       |
+| GET        | `/api/mcp/audit`       | Mag-query ng audit log — `?limit=`, `?offset=`, `?tool=`, `?success=true                                \| false`, `?apiKeyId=` |
+| GET        | `/api/mcp/audit/stats` | Pinagsama-samang audit stats (mga kabuuan, rate ng tagumpay, average na tagal, nangungunang mga tool)                           |
 
 **Pagpapatunay:** sinusunod ng mga `sse`/`stream` transport ang partikular na auth surface ng MCP (Bearer API key na may saklaw na `mcp`); maaaring basahin mula sa dashboard ang mga rutang `status`/`tools`/`audit*` (walang karagdagang pagpapatunay maliban sa pag-abot sa dashboard host).
 

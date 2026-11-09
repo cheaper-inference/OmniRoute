@@ -4224,7 +4224,9 @@
     "duplicateAutoComboFailedPrefix": "ራስ-ሰር ጥምረቱን ማባዛት አልተሳካም፦",
     "duplicateAutoComboUnknownError": "ያልታወቀ ስህተት",
     "duplicateAutoComboTitle": "ከ{name} የማይለወጥ ጥምረት ፍጠር",
-    "fallbackSummary": "የጥያቄዎች {rate}% ተመለሱ፣ እያንዳንዱ ~{skips} ግዴታዎች ተገለጭዋለን"
+    "fallbackSummary": "የጥያቄዎች {rate}% ተመለሱ፣ እያንዳንዱ ~{skips} ግዴታዎች ተገለጭዋለን",
+    "reorderAll": "ሁሉንም እንደገና ይዘዙ",
+    "reorderAllDescription": "ሁሉንም {count} ጥንብሮችን እንደገና በማዘዝ ላይ። የመጎተት መያዣዎች ነቅተዋል።"
   },
   "costs": {
     "title": "ወጪዎች",
@@ -6358,10 +6360,6 @@
     "hideEmails": "ሁሉንም ኢሜይሎች ደብቅ",
     "a": "A",
     "accountConcurrencyCapHint": "ይህ ግንኙነት/መለያ በአንድ ጊዜ ሊያስተናግዳቸው የሚችላቸው ከፍተኛው የጥያቄዎች ብዛት። የደንበኝነት ምዝገባ መለያዎች ብዙውን ጊዜ ጥቂት ብቻ (1–3) ይፈቅዳሉ፤ ከዚህ ገደብ ማለፍ 429 ስህተቶችን እና የማቀዝቀዣ ጊዜያትን ያስከትላል። ነባሪውን ለመጠቀም ባዶ ይተዉት።",
-    "aiCreditsLimit": "በክፍያ ጊዜ የAI ክሬዲቶች ገደብ",
-    "aiCreditsLimitPlaceholder": "አካባቢያዊ ገደብ የለም",
-    "aiCreditsLimitHint": "በGitHub የተዘገቡት AI ክሬዲቶች ይህን እሴት ሲደርሱ ይህ ግንኙነት ይዘለላል፣ ማዘዋወሩም ወደ ሌሎች ግንኙነቶችዎ ይመለሳል። ባዶ ማድረግ ያሰናክለዋል፤ 0 ሁልጊዜ ይዘልለዋል። የጎደለ ወይም ያረጀ የአጠቃቀም ንባብ በፍጹም አያግድም — ይህ የተረጋገጠ የወጪ ጣሪያ አይደለም።",
-    "aiCreditsLimitInvalid": "የAI ክሬዲቶች ገደብ አሉታዊ ያልሆነ ቁጥር መሆን አለበት፣ ወይም ለማሰናከል ባዶ ይተዉት።",
     "accountConcurrencyCapLabel": "የመለያ በአንድ ጊዜ ጥያቄዎች ገደብ",
     "accountIdHint": "ከAPI ቶከኑ ጋር በአንዳንድ አቅራቢዎች (ለምሳሌ፦ Cloudflare Workers AI) ይፈለጋል።",
     "accountIdLabel": "የመለያ መታወቂያ",
@@ -6446,8 +6444,6 @@
     "newApiUserIdLabel": "የNew-API ተጠቃሚ መለያ",
     "newApiUserIdPlaceholder": "ለምሳሌ 12345",
     "newApiUserIdHint": "የAgentRouter New-Api-User ራስጌ እሴት፤ የኮታ ቀሪ ሂሳብን ለማምጣት ከኮንሶል API ቁልፍ ጋር አብሮ ጥቅም ላይ ይውላል።",
-    "tokenrouterManagementKeyLabel": "የአስተዳደር ቁልፍ (አማራጭ)",
-    "tokenrouterManagementKeyHint": "ከTokenRouter ዳሽቦርድ የሚገኝ የመለያ ቁልፍ (Settings → Management Key)። ኮታን እና ቀሪ ሂሳብን ለማንበብ ብቻ ያገለግላል፣ ለጥያቄዎች በፍጹም አይውልም። የተቀመጠው ቁልፍ አይታይም፤ ለማቆየት ባዶ ይተዉት።",
     "newApiAggregatorToggleLabel": "የአግሪጌተር ጌትዌይ",
     "newApiAggregatorToggleHint": "ለNew-API / One-API / Sub2API አግሪጌተር ኖዶች የቀሪ ሂሳብ ማወቂያን አንቃ። ዳሽቦርዱ የቀሪ ሂሳብ ባጅን ያሳያል፣ እንዲሁም ከኮታ ቅድመ-ማረጋገጫ ጋር የሚደረግ ማዘዋወር ኮታቸው ያለቀባቸውን መለያዎች ይዘላል።",
     "newApiAggregatorConsoleApiKeyHint": "ለአግሪጌተሩ /api/user/self የመዳረሻ ነጥብ የስርዓት መዳረሻ ቶከን። ይህ የማዘዋወሪያ API ቁልፍ አይደለም።",
@@ -6461,8 +6457,6 @@
     "customUserAgentLabel": "ብጁ User Agent መለያ",
     "huggingfaceBillToHint": "አማራጭ። ለወጪ መመደቢያ እንደ X-HF-Bill-To ራስጌ የሚላከው የHugging Face የክፍያ መለያዎ መለያ ቁጥር።",
     "huggingfaceBillToLabel": "የHugging Face Bill-To መለያ",
-    "commandCodeZdrLabel": "ዜሮ የውሂብ ማቆያ (ZDR) ጠይቅ",
-    "commandCodeZdrHint": "በዚህ የAPI ቁልፍ በሚደረግ እያንዳንዱ ጥያቄ x-cmd-zdr: 1 ይልካል። ZDR የሚደግፍ upstream የሌላቸው ሞዴሎች ላይገኙ ይችላሉ።",
     "databricksBaseUrlHint": "የDatabricks መሠረታዊ URL ፍንጭ",
     "defaultThinkingStrengthHint": "ጥያቄው የማመዛዘን ጥረትን ካልገለጸ ጥቅም ላይ ይውላል።",
     "defaultThinkingStrengthLabel": "ነባሪ የማሰብ ጥንካሬ",
@@ -6937,7 +6931,7 @@
       "xai": "xAI (Grok)ን በAPI ቁልፍ ያገናኙ።",
       "xiaomi-mimo": "Xiaomi MiMoን በAPI ቁልፍ ያገናኙ።",
       "yi": "የAPI ቁልፍን ከ platform.lingyiwanwu.com ያግኙ",
-      "zai": "የAPI ቁልፍ ከ https://open.bigmodel.cn/usercenter/apikeys",
+      "zai": "የAPI ቁልፍ ከ https://z.ai/manage-apikey/apikey-list",
       "zenmux": "ZenMux በ /api/v1/chat/completions ላይ OpenAI-ተኳሃኝ የውይይት ማጠናቀቂያ መገናኛ ነጥብን፣ እንዲሁም Anthropic Messages (/api/anthropic/v1/messages) እና Google Gemini (/api/vertex-ai) የፕሮቶኮል በይነገጾችን ያቀርባል። OmniRoute የOpenAI ፕሮቶኮልን ይጠቀማል።",
       "galadriel": "Galadrielን በAPI ቁልፍ ያገናኙ።",
       "predibase": "$25 የነጻ ሙከራ ክሬዲት (ለ30 ቀናት የሚሰራ)",
@@ -7067,11 +7061,6 @@
     "anonymousFallbackEnabled": "ስም-አልባ ተተኪ ለ{provider} ነቅቷል",
     "anonymousFallbackDisabled": "ስም-አልባ ተተኪ ለ{provider} ተሰናክሏል — ያለቁ ግንኙነቶች ይህን አቅራቢ ይዘሉታል",
     "anonymousFallbackUpdateFailed": "የስም-አልባ ተተኪ ቅንብርን ማዘመን አልተሳካም",
-    "retryDelayTitle": "የዳግም ሙከራ መዘግየት",
-    "retryDelayDesc": "አቅራቢው መቼ እንደገና መሞከር እንዳለበት ካልገለጸ ከፍጥነት ገደብ ስህተት በኋላ ግንኙነቱ ምን ያህል ጊዜ እንደሚያርፍ። ራስ-ሰር አብሮ የተሰራውን የመመለሻ ጊዜ ይጠቀማል፤ አቅራቢው የሚልከው የዳግም ማስጀመሪያ ጊዜ ሁልጊዜ ይቀድማል።",
-    "retryDelayAuto": "ራስ-ሰር",
-    "retryDelaySaved": "የዳግም ሙከራ መዘግየት ተቀምጧል",
-    "retryDelayUpdateFailed": "የዳግም ሙከራ መዘግየትን ማዘመን አልተሳካም",
     "batchDeleteFailed": "በቡድን መሰረዝ አልተሳካም",
     "batchDeleteNetworkError": "በቡድን ስረዛ ወቅት የአውታረ መረብ ስህተት ተከስቷል",
     "batchUpdateFailed": "በቡድን ማዘመን አልተሳካም",
@@ -7171,7 +7160,20 @@
     "chatgptConnectorLabel": "የChatGPT ተዛዳዊ አገናኝ",
     "doctorChecking": "ሁኔታን በማረጋገጥ ላይ…",
     "doctorCheck": "የዶክተር ሁኔታ ማረጋገጫ",
-    "fallbackRetryBackendTitle": "ፋሎቤክ ረትሪ ቤክ-ኤንድ"
+    "fallbackRetryBackendTitle": "ፋሎቤክ ረትሪ ቤክ-ኤንድ",
+    "retryDelayTitle": "የዳግም ሙከራ መዘግየት",
+    "retryDelayDesc": "አቅራቢው መቼ እንደገና መሞከር እንዳለበት ካልገለጸ ከፍጥነት ገደብ ስህተት በኋላ ግንኙነቱ ምን ያህል ጊዜ እንደሚያርፍ። ራስ-ሰር አብሮ የተሰራውን የመመለሻ ጊዜ ይጠቀማል፤ አቅራቢው የሚልከው የዳግም ማስጀመሪያ ጊዜ ሁልጊዜ ይቀድማል።",
+    "retryDelayAuto": "ራስ-ሰር",
+    "retryDelaySaved": "የዳግም ሙከራ መዘግየት ተቀምጧል",
+    "retryDelayUpdateFailed": "የዳግም ሙከራ መዘግየትን ማዘመን አልተሳካም",
+    "aiCreditsLimit": "በክፍያ ጊዜ የAI ክሬዲቶች ገደብ",
+    "aiCreditsLimitPlaceholder": "አካባቢያዊ ገደብ የለም",
+    "aiCreditsLimitHint": "በGitHub የተዘገቡት AI ክሬዲቶች ይህን እሴት ሲደርሱ ይህ ግንኙነት ይዘለላል፣ ማዘዋወሩም ወደ ሌሎች ግንኙነቶችዎ ይመለሳል። ባዶ ማድረግ ያሰናክለዋል፤ 0 ሁልጊዜ ይዘልለዋል። የጎደለ ወይም ያረጀ የአጠቃቀም ንባብ በፍጹም አያግድም — ይህ የተረጋገጠ የወጪ ጣሪያ አይደለም።",
+    "aiCreditsLimitInvalid": "የAI ክሬዲቶች ገደብ አሉታዊ ያልሆነ ቁጥር መሆን አለበት፣ ወይም ለማሰናከል ባዶ ይተዉት።",
+    "tokenrouterManagementKeyLabel": "የአስተዳደር ቁልፍ (አማራጭ)",
+    "tokenrouterManagementKeyHint": "ከTokenRouter ዳሽቦርድ የሚገኝ የመለያ ቁልፍ (Settings → Management Key)። ኮታን እና ቀሪ ሂሳብን ለማንበብ ብቻ ያገለግላል፣ ለጥያቄዎች በፍጹም አይውልም። የተቀመጠው ቁልፍ አይታይም፤ ለማቆየት ባዶ ይተዉት።",
+    "commandCodeZdrLabel": "ዜሮ የውሂብ ማቆያ (ZDR) ጠይቅ",
+    "commandCodeZdrHint": "በዚህ የAPI ቁልፍ በሚደረግ እያንዳንዱ ጥያቄ x-cmd-zdr: 1 ይልካል። ZDR የሚደግፍ upstream የሌላቸው ሞዴሎች ላይገኙ ይችላሉ።"
   },
   "settings": {
     "title": "ቅንብሮች",
@@ -14332,6 +14334,10 @@
         "label": "የተጠበቀ ቅድሚያ ያላቸው የመሠረተ ልማት ማቆሚያዎች እንደ 502",
         "description": "በኮታ ብቻ የመጠባበቂያ አማራጭ የሆነ ቅድሚያ ያለው ዒላማ፣ ምክንያቱ ኮታ አለመሆኑ በእርግጠኝነት ሊረጋገጥ ለሚችል ሁኔታ—ክፍት የአቅራቢ circuit breaker ወይም ትንበያዊ የመዘግየት መዝለል—comboውን ሲያቆም፣ ከ503 ይልቅ 502 መልስ።"
       },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "ያልተዋጋ የአጠቃቀም የበጀት ፖሊሲ",
+        "description": "የእያንዳንዱ ቁልፍ የዕለታዊ/የሳምንታዊ USD ገደቦች ለአቅራቢው/ሞዴሉ የዋጋ መዝገብ የሌለው ተጠቃሚነትን እንዴት እንደሚያነካ ይገልፃል። fail_closed (ነባር) መድብን እንደ ተበላሸ ይምልከታል፣ ስለዚህ ያልታወቀ ወጪ ከጥንቃቄ የተደረገ ከፍ አይላላም። count_as_zero እንዲሁ እንደ $0 ይቆጠራል እና የተዋጋ ወጪን መቆጣጠር ይቀጥላል። በሁለቱም ሁኔታዎች ያልተዋጋ ሞዴሎች በዳሽቦርድ መነጽር ገጽ ላይ ይታያሉ።"
+      },
       "AUTH_LOG_INCLUDE_ACCOUNT_ID": {
         "label": "የመለያ መታወቂያዎችን መዝግብ",
         "description": "በAUTH ምዝግብ መስመሮች ውስጥ የመለያ ቅድመ-ቅጥያን ያካትቱ (ለምሳሌ \"'<provider>' መለያን በመጠቀም: abc12345...\"). በነባሪነት ጠፍቷል፣ በዚህም የመለያ መታወቂያዎች ከተጋሩ/ባለብዙ ተከራይ የሂደት ምዝግቦች ይደበቃሉ። ከDebug Mode ነጻ ነው፤ Debug Modeን መቀየር ይህንን አይገልጠውም።"
@@ -14612,9 +14618,9 @@
         "label": "የ Cooldown ዳግም ሙከራ፦ የ 403/410 እምቢታዎችን ዝለል",
         "description": "ሁሉም መለያዎች በ cooldown ላይ ሲሆኑ እና መጀመሪያ የሚያበቃው cooldown በ 403 (access refused) ወይም በ 410 (gone) የተከሰተ ከሆነ፣ የ cooldown ጊዜ እስኪያበቃ ከመጠበቅ እና ጥያቄውን በድጋሚ ከመላክ ይልቅ ያንን እምቢታ ወዲያውኑ ይመልሱ፤ የሚታደስ agentrouter connection-scoped quota 403 ዳግም ሊሞከር የሚችል ሆኖ እንዲቀጥል ከ errorCode 429 ጋር ይቀመጣል። በነባሪነት ጠፍቷል፦ ጥበቃውን የሚዘለው 401 ብቻ ነው፣ እንዲሁም እያንዳንዱ እምቢታ በመጣበት status ይቀመጣል።"
       },
-      "UNPRICED_USAGE_BUDGET_POLICY": {
-        "label": "ያልተዋጋ የአጠቃቀም የበጀት ፖሊሲ",
-        "description": "የእያንዳንዱ ቁልፍ የዕለታዊ/የሳምንታዊ USD ገደቦች ለአቅራቢው/ሞዴሉ የዋጋ መዝገብ የሌለው ተጠቃሚነትን እንዴት እንደሚያነካ ይገልፃል። fail_closed (ነባር) መድብን እንደ ተበላሸ ይምልከታል፣ ስለዚህ ያልታወቀ ወጪ ከጥንቃቄ የተደረገ ከፍ አይላላም። count_as_zero እንዲሁ እንደ $0 ይቆጠራል እና የተዋጋ ወጪን መቆጣጠር ይቀጥላል። በሁለቱም ሁኔታዎች ያልተዋጋ ሞዴሎች በዳሽቦርድ መነጽር ገጽ ላይ ይታያሉ።"
+      "COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE": {
+        "description": "በመጭመቂያው መሸጎጫ ስታቲስቲክስ ውስጥ፣ የተጨመቀ ጥያቄን በራስ-ሰር ቅድመ-ቅጥያ መሸጎጫ አቅራቢ (OpenAI፣ Codex፣ Azure፣ ወይም ፈጣን መሸጎጫ በጠቋሚ መታወቂያ የሚገልጽ ብጁ ግንኙነት) መሸጎጫ ያለ መሸጎጫ መቆጣጠሪያ ጠቋሚዎች እንኳን እንደተመታ ይቆጥሩ። ግምቱ የመሸጎጫ ብቁነት ምልክት እንጂ የታየ ስኬት አይደለም፣ ስለዚህ ለእነዚያ አቅራቢዎች ሪፖርት የተደረገው የመሸጫ ፍጥነት ወደ 100% አዝማሚያ አለው። በነባሪነት ጠፍቷል፡ የመሸጎጫ መቆጣጠሪያ ምልክቶችን ወደ መሸጎጫ አቅራቢው የሚወስድ ጥያቄ ብቻ እንደ የተገመተው ስኬት ይቆጠራል፣ ስለዚህ አውቶማቲክ ቅድመ ቅጥያ አቅራቢዎች 0 ሪፖርት ማድረጋቸውን ይቀጥላሉ ።",
+        "label": "የማመቅ መሸጎጫ ስታቲስቲክስ፡ ራስ-ሰር ቅድመ ቅጥያ ብቁነት"
       }
     }
   },

@@ -4147,7 +4147,9 @@
     "duplicateAutoComboFailedPrefix": "Imeshindwa kuiga combo ya otomatiki:",
     "duplicateAutoComboUnknownError": "Hitilafai isiyojulikana",
     "duplicateAutoComboTitle": "Tengeneza combo thabiti kutoka {name}",
-    "fallbackSummary": "{rate}% ya maombi yalitembea, ~{skips} lengo zilizopitishwa kila moja"
+    "fallbackSummary": "{rate}% ya maombi yalitembea, ~{skips} lengo zilizopitishwa kila moja",
+    "reorderAll": "Panga upya zote",
+    "reorderAllDescription": "Inapanga upya michanganyiko yote {count}. Ncha za kuburuta zimewashwa."
   },
   "costs": {
     "title": "Gharama",
@@ -14538,6 +14540,10 @@
       "UNPRICED_USAGE_BUDGET_POLICY": {
         "label": "Sera ya bajeti ya matumizi isiyo na bei",
         "description": "Jinsi vikwazo vya USD vya kila ufunguo vya kila siku/kila wiki vinavyoshughulikia matumizi yaliyofanikiwa ambayo muuzaji/modeli hana safu ya bei. fail_closed (chaguo-msingi) inaweka dirisha kuwa limevuka, kwa hivyo gharama isiyojulikana haiwezi kupita kikomo thabiti. count_as_zero inahesabu matumizi hayo kama $0 na inaendelea kutekeleza matumizi yenye bei. Modeli zisizo na bei zinaorodheshwa kwenye ukurasa wa nyumbani wa dashibodi kwa njia yoyote."
+      },
+      "COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE": {
+        "description": "Katika takwimu za akiba ya mbano, hesabu ombi lililobanwa kwa mtoa huduma wa akiba ya kiambishi kiambishi kiotomatiki (OpenAI, Codex, Azure, au muunganisho maalum unaotangaza uwekaji wa papo hapo kwa uondoaji wa alama) kama makadirio ya akiba ya kugonga bila alama za kache_control. Kadirio ni ishara ya ustahiki wa akiba, si mvuto uliogunduliwa, kwa hivyo kiwango kilichoripotiwa cha watoa huduma hao kinaelekea 100%. Imezimwa kwa chaguo-msingi: ombi lililobeba viambishi vya cache_control kwa mtoaji huduma wa akiba pekee ndilo linalohesabiwa kama kipigo kinachokadiriwa, kwa hivyo watoa huduma za kiambishi otomatiki wanaendelea kuripoti 0.",
+        "label": "Takwimu za Akiba ya Mfinyazo: Ustahiki wa Kiambishi Kiotomatiki"
       }
     }
   },

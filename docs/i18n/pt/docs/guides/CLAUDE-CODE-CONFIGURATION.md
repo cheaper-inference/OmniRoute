@@ -25,27 +25,30 @@ omniroute launch --profile glm52  # Claude Code a utilizar glm/glm-5.2 através 
 
 ---
 
-## Como Claude Code se liga a um gateway
+## Como o Claude Code se liga a um gateway
 
-Código Claude fala o**Anthropic Mensagens API** e é apontado para um endpoint personalizado com variáveis de ambiente (não tem o flag `--base-url` ):
+O Claude Code comunica através da **Anthropic Messages API** e é direcionado para um
+endpoint personalizado através de variáveis de ambiente (não tem a opção `--base-url`):
 
-| Variável                                     | Finalidade                                                                                        |
-| -------------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| `ANTHROPIC_BASE_URL`                         | Raiz do gateway URL ( código Claude anexa `/v1/messages`).** Sem sufixo `/v1`.**                  |
-| `ANTHROPIC_AUTH_TOKEN`                       | Enviado como `Authorization: Bearer …` — use o seu token de acesso OmniRoute /chave API           |
-| `ANTHROPIC_API_KEY`                          | Alternativa: enviado como `x-api-key`. Se ambos estiverem definidos, `ANTHROPIC_AUTH_TOKEN` ganha |
-| `ANTHROPIC_MODEL`                            | Forçar um modelo específico (substitui o padrão do selector `/model` )                            |
-| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → o selector nativo `/model` lista os modelos `claude*`/`anthropic*` do `/v1/models`          |
-| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | Limitar os tokens de saída por resposta (por exemplo, `65536`)                                    |
-| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | Limite de token para compressão automática                                                        |
+| Variável                                     | Finalidade                                                                                            |
+| -------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `ANTHROPIC_BASE_URL`                         | URL raiz do gateway (o Claude Code acrescenta `/v1/messages`). **Sem o sufixo `/v1`.**                |
+| `ANTHROPIC_AUTH_TOKEN`                       | Enviado como `Authorization: Bearer …` — utilize o seu token de acesso/chave de API do OmniRoute      |
+| `ANTHROPIC_API_KEY`                          | Alternativa: enviado como `x-api-key`. Se ambos estiverem definidos, `ANTHROPIC_AUTH_TOKEN` prevalece |
+| `ANTHROPIC_MODEL`                            | Força um modelo específico (substitui a predefinição do seletor `/model`)                             |
+| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → o seletor nativo `/model` apresenta modelos `claude*`/`anthropic*` de `/v1/models`              |
+| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | Limita os tokens de saída por resposta (por exemplo, `65536`)                                         |
+| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | Limite de tokens para compactação automática                                                          |
 
-> Env vars são lidos** uma vez no arranque** — reinicie o código Claude após os ter alterado.
+> As variáveis de ambiente são lidas **uma única vez no arranque** — reinicie o Claude Code depois de as alterar.
 
-Para uma credencial que roda em vez de uma string fixa, defina `apiKeyHelper` em `~/.claude/settings.json` como um comando que imprime a credencial atual em stdout. O código Claude armazena a sua saída em cache durante cinco minutos por defeito (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` substitui isso) e envia o valor em `Authorization: Bearer` e `x-api-key`. O script deve imprimir a credencial e nada mais — um banner ao lado falha no auxiliar na v2.1.227 +.
+Para usar uma credencial que é renovada em vez de uma cadeia fixa, defina `apiKeyHelper` em `~/.claude/settings.json` como um comando que escreve a credencial atual em stdout. Por predefinição, o Claude Code guarda o resultado em cache durante cinco minutos (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` substitui esse intervalo) e envia o valor tanto em `Authorization: Bearer` como em `x-api-key`. O script deve escrever apenas a credencial — uma mensagem de apresentação adicional faz o auxiliar falhar em v2.1.227+.
 
-É assim que funciona o Entra ID SSO : `scripts/cli/omniroute-sso.mjs token` imprime um token de acesso Entra de curta duração que OmniRoute verifica em vez de uma chave API. Veja [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md).
+É assim que funciona o Entra ID SSO: `scripts/cli/omniroute-sso.mjs token` escreve um token de acesso Entra de curta duração, que o OmniRoute verifica em vez de uma chave API. Consulte [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md).
 
-`omniroute launch` define tudo isto para si: resolve o token base URL + do contexto ativo (portanto, `omniroute connect <vps>` então `omniroute launch` simplesmente funciona), verifica a integridade do servidor e executa `claude`.
+`omniroute launch` define tudo isto por si: resolve o URL base + token
+a partir do contexto ativo (pelo que `omniroute connect <vps>` seguido de `omniroute launch`
+funciona de imediato), verifica o estado do servidor e executa `claude`.
 
 ---
 

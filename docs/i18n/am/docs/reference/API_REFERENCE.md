@@ -741,7 +741,7 @@ POST /v1/providers/{provider}/images/generations
 
 **ማረጋገጫ:** Bearer API ቁልፍ (`extractApiKey` + `isValidApiKey`)። የፍለጋ ፖሊሲ በ`enforceApiKeyPolicy` ይተገበራል።
 
-### Exa እና Tavily `provider_options`
+### የExa እና Tavily `provider_options`
 
 Exa እና Tavily ከስም በተሰጠው ቦርሳ ውስጥ ያሉ ለአቅራቢው የተወሰኑ መስኮችን ያነባሉ፦
 `provider_options.exa` (ወይም `provider_options["exa-search"]`) እና `provider_options.tavily`
@@ -776,11 +776,7 @@ Exa `type: "lite"` (Exa 3.0) አነስተኛ የመስኮች ስብስብን ይ
 `additionalQueries`፣ `systemPrompt` እና ከ`contents` ውስጥ `text` እና `highlights` በስተቀር ያሉ ቁልፎች በጥሪው በፊት ይወገዳሉ። ጊዜ ያለፈባቸው
 `subpages`፣ `subpageTarget`፣ `highlights.numSentences` እና `highlights.highlightsPerUrl` ከአሁን በኋላ ወደ ፊት አይተላለፉም።
 
-የወጪ ሂሳብ አያያዝ ጠፍጣፋው `costPerQuery` መዝገብ ነው፤ ከExa በስተቀር፣ እሱም የExaን የራሱን የዋጋ አሰጣጥ ይከተላል፦ ለ`auto` (እና ለቆየው
-`fast`) በጥሪ $0.007 ወይም ለ`lite` (እና ለቆየው `instant`) $0.004፣ ይህም 10 ውጤቶችን ይሸፍናል፤ ለእያንዳንዱ ተጨማሪ ውጤት $0.001፤ እና
-`contents.summary` ሲዘጋጅ ለእያንዳንዱ የተመለሰ ውጤት $0.001። Tavily ለ`search_depth` `basic`፣ `fast` እና `ultra-fast` 1 ክሬዲት ($0.008)፣ እና ለ`advanced`
-2 ክሬዲት ($0.016) ተብሎ ይመዘገባል
-([የTavily API ክሬዲቶች](https://docs.tavily.com/documentation/api-credits))። `auto_parameters: true` ያለው ጥሪ Tavily ወደ advanced ቢያሳድገውም እንኳ አሁንም በ1 ክሬዲት ይመዘገባል።
+Exa: $0.007 በአንድ ጥሪ `auto` (እና ቅርስ `fast`) ወይም $0.004 `lite` (እና ቅርስ `instant`), 10 ውጤቶች የሚሸፍን; ለእያንዳንዱ ተጨማሪ ውጤት $ 0.001; እና `contents.summary` ሲዘጋጅ በአንድ የተመለሰ ውጤት $0.001። ታቪሊ በ1 ክሬዲት ($0.008) ለ `search_depth` `basic`፣ `fast` እና `ultra-fast`፣ እና 2 ክሬዲት ($0.016) ለ `advanced` ( [Tavily API credits](https://docs.tavily.com/documentation/api-credits) ) ተመዝግቧል። Tavily ወደ የላቀ የሚያሻሽለው `auto_parameters: true` ያለው ጥሪ አሁንም በ1 ክሬዲት ተመዝግቧል።
 
 ---
 
@@ -1055,6 +1051,8 @@ X-OmniRoute-No-Cache: true
 
 ---
 
+<a id="cliproxyapi-management-compatibility"></a>
+
 ## የCLIProxyAPI አስተዳደር ተኳሃኝነት
 
 OmniRoute ሦስቱን [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI)
@@ -1069,19 +1067,11 @@ OmniRoute ሦስቱን [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAP
 | POST | `/v0/management/api-call`    | አካል `{ auth_index, method, url, header?, data? }`። አንድ የተፈቀደ ጥያቄን በመለያው ቶከን ይልካል እና `{ status_code, body }` ይመልሳል           |
 | POST | `/v0/management/reset-quota` | አካል `{ auth_index }`። የአንድ መለያ የግንኙነት የማቀዝቀዣ ጊዜን፣ የሞዴል መቆለፊያዎችን እና የCodex በወሰን ደረጃ ያሉ የማቀዝቀዣ ጊዜዎችን ያጸዳል                     |
 
-- `auth_index` የOmniRoute ግንኙነት መለያ ነው። `provider` `claude` ወይም `codex` ነው (OAuth
-  ግንኙነቶች ብቻ፤ `anthropic` API-ቁልፍ አቅራቢው አይዘረዘርም)። ለCodex፣
-  `id_token.chatgpt_account_id` የተቀመጠው የworkspace መለያ ነው፣ `plan_type` ደግሞ የተቀመጠው ዕቅድ ነው።
+- `auth_index` የOmniRoute ግንኙነት id ነው። `provider` `claude` ወይም `codex` ነው (የOAuth ግንኙነቶች ብቻ፤ የ`anthropic` API-key provider አይዘረዘርም)። ለCodex፣ `id_token.chatgpt_account_id` የተቀመጠው workspace id ሲሆን `plan_type` የተቀመጠው እቅድ ነው።
 - `api-call` አጠቃላይ proxy አይደለም። የClaude `GET
-https://api.anthropic.com/api/oauth/usage` እና የCodex `GET https://chatgpt.com/backend-api/wham/usage`፣ `GET .../wham/rate-limit-reset-credits` እና
-  `POST .../wham/rate-limit-reset-credits/consume` ብቻ ይቀበላል፤ እያንዳንዱም ከሚዛመደው
-  provider ጋር ላለ መለያ ብቻ ነው። ሌላ ማንኛውም ነገር upstreamን ሳያገናኝ `403` ይመልሳል። የጠሪው
-  `Authorization` ራስጌ (`$TOKEN$` ቦታ ያዥን ጨምሮ) ችላ ይባላል፤ OmniRoute የግንኙነቱን የመዳረሻ ቶከን
-  ያስገባል፣ ጊዜው ሊያልቅ ሲቃረብም መጀመሪያ ያድሰዋል፣ እና የተፈቀዱ ራስጌዎችን ብቻ ያስተላልፋል (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`;
-  `Accept`, `Content-Type`)። `Chatgpt-Account-Id` ካልተገኘ በነባሪ የተቀመጠው workspace መለያ ይጠቀማል።
-  ጥያቄዎች ከ15 ሰከንድ በኋላ ጊዜያቸው ያልፋል፣ እና የግንኙነቱን proxy ይጠቀማሉ።
-- `reset-quota` የመጨረሻ ሁኔታዎችን (banned፣ expired፣ credits_exhausted) አይነካም። ያልታወቀ
-  `auth_index` `404` ይመልሳል።
+https://api.anthropic.com/api/oauth/usage` እና የCodex `GET
+https://chatgpt.com/backend-api/wham/usage`፣ `GET .../wham/rate-limit-reset-credits` እና `POST .../wham/rate-limit-reset-credits/consume` ብቻ ይቀበላል፣ እያንዳንዱም ለሚዛመደው provider መለያ ብቻ ነው። ሌላ ማንኛውም ጥያቄ upstream-ን ሳያገናኝ `403` ይመልሳል። የጠሪው `Authorization` header (የ`$TOKEN$` መተኪያን ጨምሮ) ችላ ይባላል፤ OmniRoute የግንኙነቱን access token ያስገባል፣ ሊያበቃ ሲቃረብ አስቀድሞ ያድሰዋል፣ በፈቃድ ዝርዝር ያሉ header-ዎችን ብቻ ያስተላልፋል (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`; `Accept`, `Content-Type`)። `Chatgpt-Account-Id` ከጎደለ ነባሪው የተቀመጠው workspace id ነው። የመጀመሪያው upstream መልስ `401` ከሆነ አንድ ጊዜ ያድሳል፣ access token ከተለወጠ ብቻ ዳግም ይሞክራል። እያንዳንዱ upstream ሙከራ ከ15 ሰከንድ በኋላ ጊዜው ያበቃል፣ የግንኙነቱን proxy ይጠቀማል።
+- `reset-quota` የመጨረሻ ሁኔታዎችን (banned, expired, credits_exhausted) አይቀይርም። ያልታወቀ `auth_index` `404` ይመልሳል።
 
 **ማረጋገጫ፦** የዳሽቦርድ ክፍለ ጊዜ ወይም `manage`-ወሰን ያለው API ቁልፍ ያስፈልጋል፤ መግባት ቢሰናከልም
 እንኳን ያስፈልጋል (መንገዶቹ በ`ALWAYS_PROTECTED_API_PATHS` ውስጥ ናቸው)። ለኢንፈረንስ ብቻ የሚያገለግሉ ቁልፎች `403` ያገኛሉ። ምንጭ፦
@@ -1798,17 +1788,17 @@ OmniRouteን በብጁ ሊፈጸሙ በሚችሉ አስተናጋጆች ለማራ
 
 OmniRoute ከ3 የማጓጓዣ ዘዴዎች (stdio፣ SSE፣ streamable-http) እና ወሰን ያላቸው መሣሪያዎች ጋር የተካተተ Model Context Protocol አገልጋይ ያቀርባል። ከዚህ በታች ያሉት የዳሽቦርድ መጨረሻ ነጥቦች የሁኔታ/ኦዲት መረጃን ያነባሉ እና የHTTP ማጓጓዣዎችን በፕሮክሲ ያስተላልፋሉ።
 
-| Method | Path | Description |
-| ------ | ---------------------- | ------------------------------------------------------------------------------------------------ | -------------------- |
-| GET | `/api/mcp/status` | የልብ ምት፣ ማጓጓዣ፣ የመስመር ላይ ሁኔታ፣ የመጨረሻ ጥሪ፣ ዋና መሣሪያዎች፣ የ24 ሰዓት የስኬት መጠን |
-| GET | `/api/mcp/tools` | የMCP መሣሪያዎች ዝርዝር፣ `name`፣ `description`፣ `scopes`፣ `phase`፣ `auditLevel`፣ `sourceEndpoints` ያካትታል |
-| GET | `/api/mcp/sse` | ለSSE ማጓጓዣ የSSE ዥረት ይክፈቱ (`503` የሚመልሰው MCP ከተሰናከለ ወይም የማጓጓዣ አለመመሳሰል ካለ) |
-| POST | `/api/mcp/sse` | በSSE ማጓጓዣ ላይ JSON-RPC ፍሬም ይላኩ |
-| GET | `/api/mcp/stream` | የStreamable HTTP ማጓጓዣ የSSE ጎን ይክፈቱ (በአገልጋይ የሚጀመሩ መልዕክቶች) |
-| POST | `/api/mcp/stream` | በStreamable HTTP ማጓጓዣ ላይ JSON-RPC ፍሬም ይላኩ |
-| DELETE | `/api/mcp/stream` | የStreamable HTTP ክፍለ ጊዜን ያብቁ |
-| GET | `/api/mcp/audit` | የኦዲት ምዝገባን ይጠይቁ — `?limit=`፣ `?offset=`፣ `?tool=`፣ `?success=true                                | false`፣ `?apiKeyId=` |
-| GET | `/api/mcp/audit/stats` | የተጠቃለለ የኦዲት ስታቲስቲክስ (ጠቅላላዎች፣ የስኬት መጠን፣ አማካይ ቆይታ፣ ዋና መሣሪያዎች) |
+| Method | Path                   | Description                                                                                                              |
+| ------ | ---------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| GET    | `/api/mcp/status`      | የልብ ምት፣ ማጓጓዣ፣ የመስመር ላይ ሁኔታ፣ የመጨረሻ ጥሪ፣ ዋና መሣሪያዎች፣ የ24 ሰዓት የስኬት መጠን                                                        |
+| GET    | `/api/mcp/tools`       | የMCP መሣሪያዎች ዝርዝር፣ `name`፣ `description`፣ `scopes`፣ `phase`፣ `auditLevel`፣ `sourceEndpoints` ያካትታል                        |
+| GET    | `/api/mcp/sse`         | ለSSE ማጓጓዣ የSSE ዥረት ይክፈቱ (`503` የሚመልሰው MCP ከተሰናከለ ወይም የማጓጓዣ አለመመሳሰል ካለ)                                                   |
+| POST   | `/api/mcp/sse`         | በSSE ማጓጓዣ ላይ JSON-RPC ፍሬም ይላኩ                                                                                            |
+| GET    | `/api/mcp/stream`      | የStreamable HTTP ማጓጓዣ የSSE ጎን ይክፈቱ (በአገልጋይ የሚጀመሩ መልዕክቶች)                                                                 |
+| POST   | `/api/mcp/stream`      | በStreamable HTTP ማጓጓዣ ላይ JSON-RPC ፍሬም ይላኩ                                                                                |
+| DELETE | `/api/mcp/stream`      | የStreamable HTTP ክፍለ ጊዜን ያብቁ                                                                                             |
+| GET    | `/api/mcp/audit`       | የኦዲት ምዝገባን ይጠይቁ — `?limit=`፣ `?offset=`፣ `?tool=`፣ `?success=true                                \| false`፣ `?apiKeyId=` |
+| GET    | `/api/mcp/audit/stats` | የተጠቃለለ የኦዲት ስታቲስቲክስ (ጠቅላላዎች፣ የስኬት መጠን፣ አማካይ ቆይታ፣ ዋና መሣሪያዎች)                                                              |
 
 **ማረጋገጫ:** የ`sse`/`stream` ማጓጓዣዎች MCP-ተኮር የማረጋገጫ በይነገጽን ያከብራሉ (የBearer API ቁልፍ ከ`mcp` ስፋት ጋር)፤ የ`status`/`tools`/`audit*` መንገዶች ከዳሽቦርድ ሊነበቡ ይችላሉ (የዳሽቦርድ አስተናጋጁን ከመድረስ በላይ ተጨማሪ ማረጋገጫ አያስፈልግም)።
 

@@ -27,7 +27,9 @@ npm install -g omniroute
 omniroute
 ```
 
-Id-dashboard jinfetaħ fuq `http://localhost:20128` u l-URL bażi tal-API huwa `http://localhost:20128/v1`.
+Dashboard jiftaħ `http://localhost:20128` u API bażi URL hija `http://localhost:20128/v1`.
+
+> **utenti npm:** Jekk npm iwissi li install scripts ġew imblukkati (eż., `omniroute`, `better-sqlite3`), ara [Issolvi l-problemi — npm install-scripts blocked](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install).
 
 ### pnpm
 
@@ -198,41 +200,41 @@ Għal konfigurazzjoni dettaljata għal kull għodda (Claude Code, Codex CLI, Cur
 
 ---
 
-## Konfigurazzjoni tal-Protokolli (MCP + A2A)
+## Setup tal-Protokoll (MCP + A2A)
 
-### Konfigurazzjoni tal-MCP (Model Context Protocol)
+### MCP Setup (Protokoll tal-Kuntest tal-Mudell)
 
-Ibda t-trasport MCP fil-modalità stdio:
+Ibda t-trasport MCP -modalità stdio:
 
 ```bash
 omniroute --mcp
 ```
 
-Fluss ta’ validazzjoni rakkomandat:
+Fluss ta' validazzjoni rakkomandat:
 
 ```bash
-# 1. Ibda s-server MCP
+# 1. Start MCP server
 omniroute --mcp
 
-# 2. Mill-klijent MCP tiegħek, sejjaħ:
-omniroute_get_health        # Għandu jirritorna l-istat tas-sistema
-omniroute_list_combos       # Għandu jirritorna l-combos attivi
+# 2. From your MCP client, call:
+omniroute_get_health        # Should return system health
+omniroute_list_combos       # Should return active combos
 
-# 3. Jew ħaddem is-suite E2E sħiħa:
+# 3. Or run the full E2E suite:
 npm run test:protocols:e2e
 ```
 
-#### Konfigurazzjoni tal-Klijent MCP
+#### MCP Konfigurazzjoni tal-Klijent
 
-**Claude Code:**
+**Kodiċi Claude :**
 
 ```bash
-claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
 ```
 
 **Cursor / Cline:**
 
-Żid dan mas-settings tal-MCP tiegħek:
+Żid mas-settings MCP tiegħek (stdio, biċ-ċavetta sabiex min iċempel ikollu prinċipali):
 
 ```json
 {
@@ -240,17 +242,24 @@ claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp
     "omniroute": {
       "command": "omniroute",
       "args": ["--mcp"],
-      "env": {}
+      "env": {
+        "OMNIROUTE_API_KEY": "your-key",
+        "OMNIROUTE_BASE_URL": "http://localhost:20128"
+      }
     }
   }
 }
 ```
 
-**Dokumentazzjoni sħiħa tal-MCP:** [README tas-Server MCP](../../open-sse/mcp-server/README.md) — 110 għodod, konfigurazzjonijiet tal-IDE, klijenti Python/TS/Go.
+Jew, meta `mcpTransport` huwa `streamable-http` (issettjah fuq `/dashboard/mcp` jew bi `omniroute mcp enable --transport streamable-http`), ippunta d-dħul remot tas-server MCP tal-klijent fuq `http://localhost:20128/api/mcp/stream`.
 
-### Konfigurazzjoni tal-A2A (Agent-to-Agent Protocol)
+Iċ-ċavetta tivvjaġġa bħala `Authorization: Bearer <api-key>` (ara [MCP Server → Aċċess mill-bogħod](../frameworks/MCP-SERVER.md#remote-access-manage-scope-bypass) għal hosts remoti; ċavetta remota teħtieġ `mcp:connect` flimkien mal-ambiti read/write tagħha).
 
-Ivverifika l-Agent Card:
+**Dokumentazzjoni sħiħa MCP :** [MCP Server README](../../open-sse/mcp-server/README.md) — 110 għodda, konfigurazzjonijiet IDE, klijenti Python/TS/Go. Referenza tal-operatur għall-għodod tal-kompressjoni CCR/dedup (markaturi, prerekwiżiti, ambiti għal kull għodda, paginazzjoni ta 'rkupru, dijanjostika): [Magni ta' Kompressjoni → Prerekwiżiti / gwida tal-operatur](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+
+### A2A Setup (Protokoll minn aġent għal aġent)
+
+Ivverifika l-Karta tal-Aġent:
 
 ```bash
 curl http://localhost:20128/.well-known/agent.json
@@ -261,10 +270,10 @@ Ibgħat kompitu:
 ```bash
 curl -X POST http://localhost:20128/a2a \
   -H 'content-type: application/json' \
-  -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"Agħtini sommarju qasir tal-kwota."}]}}'
+  -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"Give me a short quota summary."}]}}'
 ```
 
-**Dokumentazzjoni sħiħa tal-A2A:** [README tas-Server A2A](../../src/lib/a2a/README.md) — JSON-RPC 2.0, ħiliet, streaming, ċiklu tal-ħajja tal-kompiti.
+**Dokumentazzjoni sħiħa A2A :** [A2A Server README](../../src/lib/a2a/README.md) — JSON-RPC 2.0, ħiliet, streaming, ċiklu tal-ħajja tal-kompitu.
 
 ---
 
@@ -323,12 +332,12 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ---
 
-## Mudell għal Void Linux (xbps-src)
+## Void Linux (xbps-src) Template
 
-Għall-utenti ta’ Void Linux, tista’ tibni pakkett nattiv billi tuża `xbps-src`. Issejvja din il-blokka bħala `srcpkgs/omniroute/template`:
+Għall-utenti ta' Void Linux, tista' tibni pakkett nattiv billi tuża `xbps-src`. Issejvja din il-blokka bħala `srcpkgs/omniroute/template`:
 
 ```bash
-# Fajl tal-mudell għal 'omniroute'
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -339,7 +348,7 @@ maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# Iġġenera mill-ġdid is-somma ta’ kontroll għal kull rilaxx permezz ta’:
+# Regenerate the checksum for each release with:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

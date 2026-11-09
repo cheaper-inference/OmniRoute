@@ -446,8 +446,8 @@ Opgesplitst in doelgerichte submappen:
 
 ## 4. `open-sse/` — Streamingengine-werkruimte
 
-Afzonderlijke npm-werkruimte, gepubliceerd als `@omniroute/open-sse`. Beheert
-requestverwerking, executors, vertalers, services, transformer en de MCP-server.
+Afzonderlijke npm-werkruimte die wordt gepubliceerd als `@omniroute/open-sse`. Beheert de verwerking van
+verzoeken, executors, translators, services, de transformer en de MCP-server.
 
 ```
 open-sse/
@@ -456,103 +456,104 @@ open-sse/
 ├── tsconfig.json
 ├── types.d.ts
 ├── config/                 Providerregisters, headerprofielen, identiteit, …
-├── handlers/               Requesthandlers (chat, embeddings, audio, image, …)
-├── executors/              159 provider-executormodules (executor-klassen + helpers per provider)
+├── handlers/               Verzoekhandlers (chat, embeddings, audio, afbeeldingen, …)
+├── executors/              159 provider-executormodules (executorklassen + helpers per provider)
 ├── translator/             Formaatconversie (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions-streamtransformer
-├── services/               80+ servicemodules (combinaties, fallback, quota's, identiteit, …)
-├── utils/                  Streaminghelpers, TLS-client, AWS SigV4, proxy fetch, …
-└── mcp-server/             MCP-server (3 transports, 33 scopes, 110 tools)
+├── services/               Meer dan 80 servicemodules (combinaties, fallback, quota's, identiteit, …)
+├── utils/                  Streaminghelpers, TLS-client, AWS SigV4, proxy-fetch, …
+└── mcp-server/             MCP-server (3 transporten, 33 scopes, 110 tools)
 ```
 
 ### 4.1 `open-sse/handlers/`
 
-| Handler                 | Doel                                                                                     |
-| ----------------------- | ---------------------------------------------------------------------------------------- |
-| `chatCore.ts`           | Hoofdpijplijn voor chat (cache, snelheidslimiet, combinatieroutering, executor-dispatch) |
-| `responsesHandler.ts`   | Ingangspunt voor de OpenAI Responses API                                                 |
-| `embeddings.ts`         | Embeddings                                                                               |
-| `imageGeneration.ts`    | Afbeeldingsgeneratie                                                                     |
-| `audioSpeech.ts`        | Tekst-naar-spraak                                                                        |
-| `audioTranscription.ts` | Spraak-naar-tekst                                                                        |
-| `videoGeneration.ts`    | Videogeneratie                                                                           |
-| `musicGeneration.ts`    | Muziekgeneratie                                                                          |
-| `rerank.ts`             | Herordening                                                                              |
-| `moderations.ts`        | Moderatie                                                                                |
-| `search.ts`             | Webzoekopdrachten                                                                        |
-| `sseParser.ts`          | Parser voor SSE-gebeurtenissen                                                           |
-| `usageExtractor.ts`     | Haalt tokenaantallen uit upstream-streams                                                |
-| `responseSanitizer.ts`  | Verwijdert providerspecifieke ruis                                                       |
-| `responseTranslator.ts` | Koppeling tussen providerrespons en de vertaal-laag                                      |
+| Handler                 | Doel                                                                                    |
+| ----------------------- | --------------------------------------------------------------------------------------- |
+| `chatCore.ts`           | Hoofdpijplijn voor chat (cache, snelheidslimiet, combinatieroutering, executordispatch) |
+| `responsesHandler.ts`   | Ingangspunt voor de OpenAI Responses API                                                |
+| `embeddings.ts`         | Embeddings                                                                              |
+| `imageGeneration.ts`    | Afbeeldingen genereren                                                                  |
+| `audioSpeech.ts`        | Tekst-naar-spraak                                                                       |
+| `audioTranscription.ts` | Spraak-naar-tekst                                                                       |
+| `videoGeneration.ts`    | Video's genereren                                                                       |
+| `musicGeneration.ts`    | Muziek genereren                                                                        |
+| `rerank.ts`             | Opnieuw rangschikken                                                                    |
+| `moderations.ts`        | Moderatie                                                                               |
+| `search.ts`             | Zoeken op het web                                                                       |
+| `sseParser.ts`          | Parser voor SSE-events                                                                  |
+| `usageExtractor.ts`     | Aantallen tokens uit upstream-streams halen                                             |
+| `responseSanitizer.ts`  | Providerspecifieke ruis verwijderen                                                     |
+| `responseTranslator.ts` | Koppeling tussen providerrespons en translator-laag                                     |
 
 ### 4.2 `open-sse/executors/`
 
-159 executor-modules op het hoogste niveau (`*.ts` minus `base.ts`, `index.ts` en tests — het aantal
-wordt gemeten door `npm run check:docs-counts`). Elke executor-klasse breidt `BaseExecutor` (`base.ts`) uit,
-rechtstreeks of via `DefaultExecutor` of een andere executor; de overige modules zijn helpers per provider
-(tool-schema's, fetch/TTS-adapters, handlers voor afwijkend gedrag). Executors omvatten:
+159 executormodules op het hoogste niveau (`*.ts` minus `base.ts`, `index.ts` en tests — dit aantal
+wordt gemeten door `npm run check:docs-counts`). Elke executorklasse breidt `BaseExecutor` (`base.ts`)
+uit, rechtstreeks of via `DefaultExecutor` of een andere executor; de overige modules zijn helpers
+per provider (toolschema's, fetch-/TTS-adapters, handlers voor eigenaardigheden). Executors zijn onder andere:
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`,
 `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`,
 `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`,
 `pollinations`, `qoder`, `vertex`, `devin-desktop`, plus `claudeIdentity.ts`
-(gedeelde identity-helper) en `index.ts` (register).
+(gedeelde identiteitshelper) en `index.ts` (register).
 
 > Opmerking: providers die hier niet worden vermeld, worden bediend door `default.ts` met de generieke
-> OpenAI-compatibele executor. De volledige providercatalogus (380 providers) staat in
+> OpenAI-compatibele executor. De volledige providercatalogus (380 providers) bevindt zich in
 > `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`
 
-Hub-and-spoke-vertaling (OpenAI is de hub).
+Hub-and-spokevertaling (OpenAI is de hub).
 
-- **9 requestvertalers** (`translator/request/`):
+- **9 verzoektranslators** (`translator/request/`):
   `antigravity-to-openai`, `claude-to-gemini`, `claude-to-openai`,
   `gemini-to-openai`, `openai-responses`, `openai-to-claude`,
   `openai-to-cursor`, `openai-to-gemini`, `openai-to-kiro`.
-- **9 responsvertalers** (`translator/response/`):
+- **9 responsetranslators** (`translator/response/`):
   `claude-to-openai`, `cursor-to-openai`, `gemini-to-claude`, `gemini-to-openai`,
-  `kiro-to-openai`, `openai-responses`, `openai-to-antigravity`, `openai-to-claude`.
+  `kiro-to-openai`, `openai-responses`, `openai-to-antigravity`,
+  `openai-to-claude`.
 - **9 helpers** (`translator/helpers/`):
   `claudeHelper`, `geminiHelper`, `geminiToolsSanitizer`, `maxTokensHelper`,
   `openaiHelper`, `responsesApiHelper`, `schemaCoercion`, `toolCallHelper`, plus
   helpertests.
 - **Afbeeldingshelpers** (`translator/image/sizeMapper.ts`).
-- Op het hoogste niveau: `bootstrap.ts`, `formats.ts`, `registry.ts`, `index.ts`.
+- Hoogste niveau: `bootstrap.ts`, `formats.ts`, `registry.ts`, `index.ts`.
 
 ### 4.4 `open-sse/transformer/`
 
-- `responsesTransformer.ts` — Op `TransformStream` gebaseerde converter voor Responses API ↔ Chat
-  Completions (gebruikt door de catch-all voor de `responses/`-route).
+- `responsesTransformer.ts` — op `TransformStream` gebaseerde Responses API ↔ Chat
+  Completions-converter (gebruikt door de catch-all van de route `responses/`).
 
 ### 4.5 `open-sse/services/`
 
 Hoogtepunten (volledige lijst onder `open-sse/services/`):
 
-| Zorgpunt                | Bestanden                                                                                                                                                                                                                                                |
+| Aandachtspunt           | Bestanden                                                                                                                                                                                                                                                |
 | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Combo-routering         | `combo.ts` (20 strategieën), `comboConfig.ts`, `comboMetrics.ts`, `comboManifestMetrics.ts`, `comboAgentMiddleware.ts`                                                                                                                                   |
+| Combinatieroutering     | `combo.ts` (20 strategieën), `comboConfig.ts`, `comboMetrics.ts`, `comboManifestMetrics.ts`, `comboAgentMiddleware.ts`                                                                                                                                   |
 | Auto Combo-engine       | `autoCombo/` — `engine.ts`, `scoring.ts`, `taskFitness.ts`, `virtualFactory.ts`, `modePacks.ts`, `autoPrefix.ts`, `persistence.ts`, `providerDiversity.ts`, `providerRegistryAccessor.ts`, `routerStrategy.ts`, `selfHealing.ts`, `index.ts`             |
-| Veerkracht              | `accountFallback.ts` (cooldown + lockout), `errorClassifier.ts`, `requestRejectedStreak.ts`, `emergencyFallback.ts`, `rateLimitManager.ts`, `rateLimitSemaphore.ts`, `accountSemaphore.ts`, `accountSelector.ts`                                         |
-| Quota's                 | `quotaMonitor.ts`, `quotaPreflight.ts`, `bailianQuotaFetcher.ts`, `codexQuotaFetcher.ts`, `deepseekQuotaFetcher.ts`, `openrouterQuotaFetcher.ts`, `openrouterFreeWindow.ts`, `llmgatewayQuotaFetcher.ts`, `crofUsageFetcher.ts`, `antigravityCredits.ts` |
+| Veerkracht              | `accountFallback.ts` (afkoelperiode + vergrendeling), `errorClassifier.ts`, `requestRejectedStreak.ts`, `emergencyFallback.ts`, `rateLimitManager.ts`, `rateLimitSemaphore.ts`, `accountSemaphore.ts`, `accountSelector.ts`                              |
+| Quota                   | `quotaMonitor.ts`, `quotaPreflight.ts`, `bailianQuotaFetcher.ts`, `codexQuotaFetcher.ts`, `deepseekQuotaFetcher.ts`, `openrouterQuotaFetcher.ts`, `openrouterFreeWindow.ts`, `llmgatewayQuotaFetcher.ts`, `crofUsageFetcher.ts`, `antigravityCredits.ts` |
 | Caching                 | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                            |
 | Routeringsintelligentie | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                             |
 | Modelverwerking         | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                              |
 | Compressie              | `compression/` — volledige bedrading van de compressie-engine                                                                                                                                                                                            |
-| Tokens + sessie         | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts`        |
-| Tier / manifest         | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                            |
+| Token + sessie          | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts`        |
+| Niveau / manifest       | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                            |
 | IP / netwerk            | `ipFilter.ts`, `webSearchFallback.ts`                                                                                                                                                                                                                    |
 | Batches                 | `batchProcessor.ts`                                                                                                                                                                                                                                      |
 | Gebruik                 | `usage.ts`                                                                                                                                                                                                                                               |
 
 ### 4.6 `open-sse/mcp-server/`
 
-- **110 unieke tools** gekoppeld in `server.ts` (45 canonieke tools in `schemas/tools.ts` +
-  geheugen-, skill-, GitHub-skill-, pool-, gamification-, plugin-, Notion-, Obsidian-,
+- **110 unieke tools** gekoppeld in `server.ts` (45 canonieke in `schemas/tools.ts` +
+  geheugen-, vaardigheids-, GitHub-vaardigheids-, pool-, gamificatie-, plugin-, Notion-, Obsidian-,
   lokale-corpus- en compressiemodules — de unie wordt geteld door `countUniqueMcpTools`).
-- **3 transports**: stdio, HTTP Streamable, SSE.
-- **33 scopes** die tijdens runtime worden afgedwongen — de basislijst staat in `src/shared/constants/mcpScopes.ts`; de volledige set is de unie van de scopes die door elke toolmodule worden gedeclareerd.
-- Audit-tabel: `mcp_tool_audit` (ingevuld door `audit.ts`).
+- **3 transportmethoden**: stdio, HTTP Streamable, SSE.
+- **33 scopes** worden tijdens runtime afgedwongen — de basislijst staat in `src/shared/constants/mcpScopes.ts`; de volledige set is de unie van de scopes die door elke toolmodule worden gedeclareerd.
+- Audittabel: `mcp_tool_audit` (gevuld door `audit.ts`).
 - Bestanden: `server.ts`, `index.ts`, `httpTransport.ts`, `audit.ts`, `scopeEnforcement.ts`,
   `runtimeHeartbeat.ts`, `descriptionCompressor.ts`, `schemas/{tools, a2a, audit, index}.ts`,
   `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts`,
@@ -562,14 +563,14 @@ Hoogtepunten (volledige lijst onder `open-sse/services/`):
 ### 4.7 `open-sse/config/`
 
 Providerregisters (`providerRegistry.ts`, `providerModels.ts`,
-`providerHeaderProfiles.ts`), modelregisters per indeling (`audioRegistry.ts`,
+`providerHeaderProfiles.ts`), modelregisters per formaat (`audioRegistry.ts`,
 `embeddingRegistry.ts`, `imageRegistry.ts`, `moderationRegistry.ts`,
 `musicRegistry.ts`, `rerankRegistry.ts`, `searchRegistry.ts`, `videoRegistry.ts`),
 identiteitshulpmiddelen (`codexIdentity.ts`, `codexInstructions.ts`,
 `anthropicHeaders.ts`, `antigravityUpstream.ts`, `antigravityModelAliases.ts`,
 `cliFingerprints.ts`, `toolCloaking.ts`, `defaultThinkingSignature.ts`),
-referentiegegevenshulpmiddelen (`credentialLoader.ts`, `codexClient.ts`) en cloudadapters
-(`azureAi.ts`, `bedrock.ts`, `datarobot.ts`, `glmProvider.ts`,
+referentiehulpmiddelen (`credentialLoader.ts`, `codexClient.ts`) en cloud-
+adapters (`azureAi.ts`, `bedrock.ts`, `datarobot.ts`, `glmProvider.ts`,
 `maritalk.ts`, `oci.ts`, `petals.ts`, `runway.ts`, `sap.ts`, `watsonx.ts`,
 `ollamaModels.ts`, `errorConfig.ts`, `constants.ts`, `registryUtils.ts`).
 
@@ -781,7 +782,7 @@ Zie [RESILIENCE_GUIDE.md](./RESILIENCE_GUIDE.md) en de betreffende sectie in
    `open-sse/mcp-server/schemas/tools.ts` uit).
 2. Wijs de juiste scope(s) toe in `src/shared/constants/mcpScopes.ts`.
 3. Registreer de tool in `open-sse/mcp-server/server.ts`.
-4. Voeg tests toe onder `open-sse/mcp-server/__tests__/`.
+4. Voeg tests toe onder `tests/unit/`.
 5. Werk [MCP-SERVER.md](../frameworks/MCP-SERVER.md) bij.
 
 ### Een nieuwe A2A-skill toevoegen
@@ -799,7 +800,7 @@ Zie [A2A-SERVER.md § Een nieuwe skill toevoegen](../frameworks/A2A-SERVER.md). 
 - **Naamgeving**: bestanden `camelCase` of `kebab-case`, componenten `PascalCase`,
   constanten `UPPER_SNAKE`.
 - **ESLint**: `no-eval`, `no-implied-eval`, `no-new-func` = overal `error`;
-  `no-explicit-any` = `warn` in `open-sse/` en `tests/`, elders `error`.
+  `no-explicit-any` = `error` in `open-sse/**/*.ts` en `tests/**/*.ts`.
 - **TypeScript**: `strict: false` (vanwege verouderde code). Geef voor grenzen tussen
   modules de voorkeur aan expliciete typen boven type-inferentie.
 - **Database**: schrijf nooit onbewerkte SQL in routes of handlers — gebruik altijd
@@ -829,8 +830,7 @@ Zie [A2A-SERVER.md § Een nieuwe skill toevoegen](../frameworks/A2A-SERVER.md). 
   `a2a`, `memory`, `skills`.
 - **Branches**: voorvoegsels `feat/`, `fix/`, `refactor/`, `docs/`, `test/`,
   `chore/`. Commit nooit rechtstreeks naar `main`.
-- **Husky**: pre-commit voert `lint-staged` + `check:docs-sync` +
-  `check:any-budget:t11` uit; pre-push voert `check:any-budget:t11` + `check:tracked-artifacts` uit (snelle controles; exclusief `test:unit`).
+- **Husky**: [`pre-commit`](../../../../../.husky/pre-commit) · [`pre-push`](../../../../../.husky/pre-push).
 
 ---
 

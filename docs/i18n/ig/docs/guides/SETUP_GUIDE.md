@@ -20,14 +20,16 @@
 
 ## Ụzọ Nwụnye
 
-### npm (a tụrụ aro)
+### npm (atụ aro)
 
 ```bash
 npm install -g omniroute
 omniroute
 ```
 
-Dashboard ga-emeghe na `http://localhost:20128`, ebe URL ntọala API bụ `http://localhost:20128/v1`.
+Dashboard mepere na `http://localhost:20128` na API base URL bụ `http://localhost:20128/v1`.
+
+> **ndị ọrụ npm:** Ọ bụrụ npm dọrọ aka ná ntị na egbochiri scripts arụnyere (dịka, `omniroute`, `better-sqlite3`), lee [Nchọpụta nsogbu — npm](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install).
 
 ### pnpm
 
@@ -198,11 +200,11 @@ Maka nkọwa nhazi zuru ezu maka ngwaọrụ ọ bụla (Claude Code, Codex CLI,
 
 ---
 
-## Nhazi Protokọl (MCP + A2A)
+## Ntọala Protocol (MCP + A2A)
 
-### Nhazi MCP (Model Context Protocol)
+### Ntọlite MCP (Protocol Context Model)
 
-Malite mbufe MCP na ọnọdụ stdio:
+Bido njem MCP na ọnọdụ stdio:
 
 ```bash
 omniroute --mcp
@@ -211,28 +213,28 @@ omniroute --mcp
 Usoro nkwado akwadoro:
 
 ```bash
-# 1. Malite sava MCP
+# 1. Start MCP server
 omniroute --mcp
 
-# 2. Site na klayenti MCP gị, kpọọ:
-omniroute_get_health        # Kwesịrị iweghachi ọnọdụ ahụike sistemụ
-omniroute_list_combos       # Kwesịrị iweghachi combos ndị na-arụ ọrụ
+# 2. From your MCP client, call:
+omniroute_get_health        # Should return system health
+omniroute_list_combos       # Should return active combos
 
-# 3. Ma ọ bụ mee usoro E2E zuru ezu:
+# 3. Or run the full E2E suite:
 npm run test:protocols:e2e
 ```
 
-#### Nhazi Klayenti MCP
+#### MCP Nhazi onye ahịa
 
-**Claude Code:**
+**Claude :**
 
 ```bash
-claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
 ```
 
 **Cursor / Cline:**
 
-Tinye na ntọala MCP gị:
+Tinye na ntọala MCP gị (stdio, jiri igodo mee ka onye na-akpọ oku nwee onye isi):
 
 ```json
 {
@@ -240,31 +242,38 @@ Tinye na ntọala MCP gị:
     "omniroute": {
       "command": "omniroute",
       "args": ["--mcp"],
-      "env": {}
+      "env": {
+        "OMNIROUTE_API_KEY": "your-key",
+        "OMNIROUTE_BASE_URL": "http://localhost:20128"
+      }
     }
   }
 }
 ```
 
-**Akwụkwọ MCP zuru ezu:** [README Sava MCP](../../open-sse/mcp-server/README.md) — ngwaọrụ 110, nhazi IDE, klayenti Python/TS/Go.
+Ma ọ bụ, mgbe `mcpTransport` bụ `streamable-http` (tọọ ya na `/dashboard/mcp` ma ọ bụ jiri `omniroute mcp enable --transport streamable-http`), rụtụ aka nbanye ihe nkesa MCP dịpụrụ adịpụ nke onye ahịa na `http://localhost:20128/api/mcp/stream`.
 
-### Nhazi A2A (Agent-to-Agent Protocol)
+Igodo ahụ na-eme njem dị ka `Authorization: Bearer <api-key>` (lee [MCP Server → ohere dịpụrụ adịpụ](../frameworks/MCP-SERVER.md#remote-access-manage-scope-bypass) maka ndị ọbịa dịpụrụ adịpụ; igodo dịpụrụ adịpụ chọrọ `mcp:connect` gbakwunyere read/write scopes ya).
 
-Nyochaa Agent Card:
+**Akwụkwọ MCP zuru ezu:** [MCP Server README](../../open-sse/mcp-server/README.md) — 110 ngwaọrụ, IDE configs, Python/TS/Go ahịa. Onye na-arụ ọrụ maka mkpakọ CCR/dedup ngwaọrụ (akara akara, ihe ndị a chọrọ, oghere nke ngwaọrụ ọ bụla, pagination iweghachi, nchọpụta nchọpụta): [Mkpakọ Engines → Prerequisites / onye ọrụ ntuziaka](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+
+### Ntọala A2A (Protocol onye nnọchite anya na onye nnọchi anya)
+
+Nyochaa kaadị onye nnọchi anya:
 
 ```bash
 curl http://localhost:20128/.well-known/agent.json
 ```
 
-Zipụ ọrụ:
+Zipu ọrụ:
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
   -H 'content-type: application/json' \
-  -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"Nye m nchịkọta oke ojiji dị nkenke."}]}}'
+  -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"Give me a short quota summary."}]}}'
 ```
 
-**Akwụkwọ A2A zuru ezu:** [README Sava A2A](../../src/lib/a2a/README.md) — JSON-RPC 2.0, nka, nnyefe na-aga n'ihu, usoro ndụ ọrụ.
+**Akwụkwọ A2A zuru ezu:** [A2A Server README](../../src/lib/a2a/README.md) — JSON-RPC 2.0, nkà, nkwanye, ọrụ ndụ okirikiri.
 
 ---
 
@@ -323,12 +332,12 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ---
 
-## Ndebiri Void Linux (xbps-src)
+## Ndebiri Linux (xbps-src) efu
 
-Maka ndị ọrụ Void Linux, ị nwere ike iji `xbps-src` wuo ngwugwu nke sistemụ ahụ. Chekwaa blọk a dị ka `srcpkgs/omniroute/template`:
+Maka ndị ọrụ Void Linux, ị nwere ike iji `xbps-src` wuo ngwugwu ala. Chekwaa ngọngọ a ka `srcpkgs/omniroute/template`:
 
 ```bash
-# Faịlụ ndebiri maka 'omniroute'
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -339,7 +348,7 @@ maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# Mepụta checksum ahụ ọzọ maka mbipụta ọ bụla site na iji:
+# Regenerate the checksum for each release with:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

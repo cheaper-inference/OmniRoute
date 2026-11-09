@@ -81,6 +81,18 @@ Bahkan di luar wilayah yang diblokir, proksi berguna untuk:
 
 ---
 
+## Status proksi default untuk akun baru
+
+Di dalam** Pengaturan → Proxy → Konfigurasi global** , menggunakan** Aktifkan proxy secara default untuk koneksi baru** untuk memilih status proksi awal dari akun penyedia yang baru ditambahkan.
+
+Pengaturan baru mengontrol status proksi awal dari akun penyedia yang baru ditambahkan. Itu tidak mengubah akun yang ada atau menggantikan saklar proksi global. Nilai awalnya mempertahankan perilaku sebelumnya. Nonaktifkan sekali untuk membuat akun berikutnya dengan proxy yang dinonaktifkan secara default.
+
+Preferensi disimpan sebagai `defaultNewConnectionProxyEnabled` melalui Pengaturan yang ada API. Defaultnya adalah `true` ketika tidak pernah disimpan. Menyimpan `false` berlaku untuk akun baru berikutnya tanpa memulai ulang. `POST /api/providers` menerima boolean ketat opsional `proxyEnabled`; `true` atau `false` eksplisit lebih diutamakan daripada default pembuatan. Kelalaian pada akun duplikat atau penyambungan kembali OAuth mempertahankan status penyimpanan akun tersebut. Akun individual masih dapat diaktifkan atau dinonaktifkan setelahnya.
+
+Transfer penyedia selektif menggunakan default instalasi tujuan untuk akun baru dan mempertahankan kebijakan tujuan saat mengganti akun yang ada. Tombol alih proxy bukanlah bidang transfer portabel. Pemulihan cadangan penuh dan migrasi JSON/SQL historis mempertahankan semantik pemulihan yang ada, termasuk nilai akun yang disimpan dan default skema lama; pemulihan pengaturan penuh juga dapat memulihkan preferensi ini.
+
+Preferensi ini tidak menetapkan proxy atau menetapkan bahwa proxy tersebut sehat atau sedang digunakan. Perutean sebenarnya masih bergantung pada saklar proksi global dan konfigurasi proksi yang berlaku. Penyedia sintetis tanpa akun tetap, lalu lintas OAuth sebelum pembuatan akun, proxy environment/system, dan jaringan backend eksternal berada di luar cakupannya.
+
 ## Sistem Proxy 4 Tingkat
 
 OmniRoute mendukung konfigurasi proxy pada **empat cakupan independen**, yang diresolusikan berdasarkan urutan prioritas:
@@ -381,7 +393,7 @@ Menggunakan `wreq-js` untuk menghasilkan sidik jari TLS yang menyerupai browser,
 
 ### Pencocokan Sidik Jari CLI
 
-**Tombol Sidik Jari CLI** (`Pengaturan → Keamanan`) mengurutkan ulang header HTTP dan bidang isi JSON agar cocok dengan karakteristik persis biner CLI native (Claude Code, Codex, dll.). Fitur ini bekerja **di atas** proksi:
+**Tombol Sidik Jari CLI** (`Settings → Security`) mengurutkan ulang header HTTP dan bidang isi JSON agar cocok dengan karakteristik persis biner CLI native (Claude Code, Codex, dll.). Fitur ini bekerja **di atas** proksi:
 
 ```
 IP Anda (diblokir) → IP Proksi (AS) → API Penyedia

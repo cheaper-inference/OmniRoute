@@ -822,7 +822,7 @@ OpenAI-संगत ब्याच प्रशोधन।
 
 **प्रमाणीकरण:** Bearer API key (`extractApiKey` + `isValidApiKey`)। खोज नीति `enforceApiKeyPolicy` मार्फत लागू गरिन्छ।
 
-### Exa र Tavily `provider_options`
+### Exa र Tavily का `provider_options`
 
 Exa र Tavily ले नेमस्पेस गरिएको bag बाट प्रदायक-विशिष्ट field हरू पढ्छन्:
 `provider_options.exa` (वा `provider_options["exa-search"]`) र `provider_options.tavily`
@@ -864,15 +864,7 @@ Exa `type: "lite"` (Exa 3.0) ले field हरूको सानो समू
 बहिष्कृत `subpages`, `subpageTarget`, `highlights.numSentences` र
 `highlights.highlightsPerUrl` अब अगाडि पठाइँदैनन्।
 
-लागत गणना `costPerQuery` भएको flat registry मा आधारित हुन्छ, तर Exa को हकमा Exa कै
-मूल्य निर्धारण लागू हुन्छ: `auto` (र पुरानो `fast`) का लागि प्रति call $0.007 वा `lite` (र
-पुरानो `instant`) का लागि $0.004, जसले 10 परिणाम समेट्छ; प्रत्येक थप परिणामका लागि $0.001;
-र `contents.summary` सेट गरिएको अवस्थामा फर्काइएका प्रत्येक परिणामका लागि $0.001।
-Tavily का लागि `search_depth` `basic`, `fast` र `ultra-fast` मा 1 credit ($0.008) तथा
-`advanced` मा 2 credits ($0.016) का रूपमा रेकर्ड गरिन्छ
-([Tavily API credits](https://docs.tavily.com/documentation/api-credits))। Tavily ले
-`auto_parameters: true` भएको call लाई advanced मा upgrade गरे पनि त्यसलाई 1 credit का
-रूपमा रेकर्ड गरिन्छ।
+Exa: $0.007 प्रति कल `auto` (र लेगेसी `fast`) को लागि वा $0.004 `lite` (र लिगेसी `instant`) को लागि, 10 परिणामहरू समावेश गर्दछ; प्रत्येक अर्को परिणामको लागि $0.001; र $0.001 प्रति फिर्ता परिणाम जब `contents.summary` सेट हुन्छ। Tavily `search_depth` `basic`, `fast` र `ultra-fast` को लागि 1 क्रेडिट ($ 0.008), र `advanced` ( [Tavily API क्रेडिटहरू](https://docs.tavily.com/documentation/api-credits) ) को लागि 2 क्रेडिट ($ 0.016) मा रेकर्ड गरिएको छ। Tavily ले उन्नतमा अपग्रेड गर्ने `auto_parameters: true` सँगको कल अझै पनि १ क्रेडिटमा रेकर्ड गरिएको छ।
 
 ---
 
@@ -1179,6 +1171,8 @@ X-OmniRoute-No-Cache: true
 
 ---
 
+<a id="cliproxyapi-management-compatibility"></a>
+
 ## CLIProxyAPI व्यवस्थापन अनुकूलता
 
 OmniRoute ले प्रयोगसम्बन्धी ड्यासबोर्डहरूले Claude र Codex सदस्यता सीमाहरू पढ्नका लागि कल गर्ने तीनवटा [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI) व्यवस्थापन एन्डपोइन्टहरूको जवाफ दिन्छ (उदाहरणका लागि, T3 Code को `cliproxy` usage-limit स्रोत)। क्लाइन्टको आधार URL OmniRoute मा पोइन्ट गर्नुहोस् र यसको व्यवस्थापन कुञ्जीका रूपमा `manage` स्कोप भएको API कुञ्जी प्रयोग गर्नुहोस्। रुटहरू `/v0/management/*` र `/api/v0/management/*` मा उपलब्ध छन्।
@@ -1189,15 +1183,11 @@ OmniRoute ले प्रयोगसम्बन्धी ड्यासब�
 | POST | `/v0/management/api-call`    | `{ auth_index, method, url, header?, data? }` बडी। खाताको टोकन प्रयोग गरी एउटा अनुमति-सूचीमा रहेको अनुरोध पठाउँछ र `{ status_code, body }` फर्काउँछ |
 | POST | `/v0/management/reset-quota` | `{ auth_index }` बडी। एउटा खाताको जडान कूलडाउन, मोडेल लकआउटहरू र Codex का प्रति-स्कोप कूलडाउनहरू खाली गर्छ                                          |
 
-- `auth_index` OmniRoute जडानको ID हो। `provider` `claude` वा `codex` हो (OAuth जडानहरू मात्र; `anthropic` API-कुञ्जी प्रदायक सूचीबद्ध हुँदैन)। Codex का लागि, `id_token.chatgpt_account_id` भण्डारण गरिएको कार्यक्षेत्र ID हो र `plan_type` भण्डारण गरिएको योजना हो।
+- `auth_index` OmniRoute कनेक्सन ID हो। `provider` `claude` वा `codex` हुन्छ (OAuth कनेक्सन मात्र; `anthropic` API-कुञ्जी प्रदायक सूचीमा हुँदैन)। Codex का लागि `id_token.chatgpt_account_id` भण्डारित वर्कस्पेस ID र `plan_type` भण्डारित योजना हो।
 - `api-call` सामान्य प्रोक्सी होइन। यसले Claude `GET
-https://api.anthropic.com/api/oauth/usage` र Codex `GET https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits` तथा
-  `POST .../wham/rate-limit-reset-credits/consume` मात्र स्वीकार गर्छ, र प्रत्येक अनुरोध सम्बन्धित प्रदायकको खाताका लागि मात्र स्वीकार गरिन्छ। अन्य कुनै कुराले अपस्ट्रिमसँग सम्पर्क नगरी `403` फर्काउँछ। कल गर्नेको
-  `Authorization` हेडर (`$TOKEN$` प्लेसहोल्डरसहित) लाई बेवास्ता गरिन्छ: OmniRoute ले जडानको access token प्रविष्ट गर्छ, म्याद सकिन लाग्दा पहिले त्यसलाई नवीकरण गर्छ, र अनुमति-सूचीमा रहेका हेडरहरू मात्र अगाडि पठाउँछ (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`;
-  `Accept`, `Content-Type`)। `Chatgpt-Account-Id` नभएमा भण्डारण गरिएको कार्यक्षेत्र ID पूर्वनिर्धारित हुन्छ।
-  अनुरोधहरू 15 सेकेन्डपछि टाइम आउट हुन्छन् र जडानको प्रोक्सी प्रयोग गर्छन्।
-- `reset-quota` ले टर्मिनल अवस्थाहरू (banned, expired, credits_exhausted) लाई यथावत् राख्छ। अज्ञात
-  `auth_index` ले `404` फर्काउँछ।
+https://api.anthropic.com/api/oauth/usage` र Codex `GET
+https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits` र `POST .../wham/rate-limit-reset-credits/consume` मात्र स्वीकार्छ, प्रत्येक सम्बन्धित प्रदायकको खाताका लागि मात्र। अरू सबैले अपस्ट्रिमलाई सम्पर्क नगरी `403` फर्काउँछन्। कलरको `Authorization` हेडर (`$TOKEN$` प्लेसहोल्डरसहित) बेवास्ता गरिन्छ: OmniRoute ले कनेक्सनको एक्सेस टोकन राख्छ, म्याद नजिक भए पहिले रिफ्रेस गर्छ र अनुमत हेडर मात्र पठाउँछ (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`; `Accept`, `Content-Type`)। `Chatgpt-Account-Id` नभए भण्डारित वर्कस्पेस ID पूर्वनिर्धारित हुन्छ। पहिलो अपस्ट्रिम उत्तर `401` भए यसले एकपटक रिफ्रेस गर्छ र एक्सेस टोकन परिवर्तन भएमा मात्र फेरि प्रयास गर्छ। प्रत्येक अपस्ट्रिम प्रयास 15 सेकेन्डपछि टाइमआउट हुन्छ र कनेक्सनको प्रोक्सी प्रयोग गर्छ।
+- `reset-quota` ले अन्तिम अवस्था (banned, expired, credits_exhausted) परिवर्तन गर्दैन। अज्ञात `auth_index` ले `404` फर्काउँछ।
 
 **प्रमाणीकरण:** ड्यासबोर्ड सत्र वा `manage`-स्कोप भएको API कुञ्जी आवश्यक हुन्छ, लगइन निष्क्रिय गरिएको अवस्थामा पनि (यी पथहरू `ALWAYS_PROTECTED_API_PATHS` मा छन्)। अनुमानसम्बन्धी मात्र कुञ्जीहरूले `403` पाउँछन्। स्रोत:
 `src/lib/cliproxyCompat/managementApi.ts`.
@@ -1950,17 +1940,17 @@ curl -X DELETE http://localhost:20128/api/resilience/model-cooldowns \
 
 OmniRoute ले ३ वटा transport (stdio, SSE, streamable-http) र scoped tools सहितको embedded Model Context Protocol सर्भर उपलब्ध गराउँछ। तलका dashboard endpoints ले status/audit डेटा पढ्छन् र HTTP transports का लागि proxy को रूपमा काम गर्छन्।
 
-| विधि | पथ | विवरण |
-| ------ | ---------------------- | ------------------------------------------------------------------------------------------------ | -------------------- |
-| GET | `/api/mcp/status` | Heartbeat, transport, online state, last call, top tools, 24h success rate |
-| GET | `/api/mcp/tools` | `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints` सहित MCP tools को सूची |
-| GET | `/api/mcp/sse` | SSE transport का लागि खुला SSE stream (MCP disabled वा transport mismatch भए `503` फर्काउँछ) |
-| POST | `/api/mcp/sse` | SSE transport मा JSON-RPC frame पठाउनुहोस् |
-| GET | `/api/mcp/stream` | Streamable HTTP transport को SSE भाग खोल्नुहोस् (सर्भरद्वारा सुरु गरिएका सन्देशहरू) |
-| POST | `/api/mcp/stream` | Streamable HTTP transport मा JSON-RPC frame पठाउनुहोस् |
-| DELETE | `/api/mcp/stream` | Streamable HTTP session समाप्त गर्नुहोस् |
-| GET | `/api/mcp/audit` | Audit log क्वेरी गर्नुहोस् — `?limit=`, `?offset=`, `?tool=`, `?success=true                                | false`, `?apiKeyId=` |
-| GET | `/api/mcp/audit/stats` | समग्र audit तथ्याङ्क (कुल, success rate, औसत अवधि, top tools) |
+| विधि   | पथ                     | विवरण                                                                                                                               |
+| ------ | ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/mcp/status`      | Heartbeat, transport, online state, last call, top tools, 24h success rate                                                          |
+| GET    | `/api/mcp/tools`       | `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints` सहित MCP tools को सूची                                    |
+| GET    | `/api/mcp/sse`         | SSE transport का लागि खुला SSE stream (MCP disabled वा transport mismatch भए `503` फर्काउँछ)                                        |
+| POST   | `/api/mcp/sse`         | SSE transport मा JSON-RPC frame पठाउनुहोस्                                                                                          |
+| GET    | `/api/mcp/stream`      | Streamable HTTP transport को SSE भाग खोल्नुहोस् (सर्भरद्वारा सुरु गरिएका सन्देशहरू)                                                 |
+| POST   | `/api/mcp/stream`      | Streamable HTTP transport मा JSON-RPC frame पठाउनुहोस्                                                                              |
+| DELETE | `/api/mcp/stream`      | Streamable HTTP session समाप्त गर्नुहोस्                                                                                            |
+| GET    | `/api/mcp/audit`       | Audit log क्वेरी गर्नुहोस् — `?limit=`, `?offset=`, `?tool=`, `?success=true                                \| false`, `?apiKeyId=` |
+| GET    | `/api/mcp/audit/stats` | समग्र audit तथ्याङ्क (कुल, success rate, औसत अवधि, top tools)                                                                       |
 
 **प्रमाणीकरण:** `sse`/`stream` transports ले MCP-विशिष्ट प्रमाणीकरण सतह ( `mcp` scope सहितको Bearer API key) पालना गर्छन्; `status`/`tools`/`audit*` routes dashboard बाट पढ्न सकिन्छ (dashboard host सम्म पहुँचबाहेक अतिरिक्त प्रमाणीकरण आवश्यक पर्दैन)।
 

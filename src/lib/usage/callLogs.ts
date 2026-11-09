@@ -721,8 +721,8 @@ async function buildCallLogRow(entry: any, metadataOnly = false): Promise<Prepar
         ? entry.addedWaitMs
         : null,
     addedWaitCause: toStringOrNull(entry.addedWaitCause),
-    // Ms this execution waited from start to the first upstream dispatch
-    // (migration 224). Null when nothing was dispatched (rejected before egress).
+    // Ms from execution start to the first executor invocation (migration 223).
+    // Null when no executor was invoked; this is not a network first-byte metric.
     queueWaitMs:
       typeof entry.queueWaitMs === "number" &&
       Number.isFinite(entry.queueWaitMs) &&

@@ -4,47 +4,74 @@
 
 ---
 
-> ပုံသေအားဖြင့် ရွေးချယ်ပါ၊ ပိတ်ပါ (`modelVisibilityAllowlist`/`modelVisibilityDenylist` နှစ်ခုလုံးသည် `/v1/models` catalog AND `auto/*` ကိုယ်စားလှယ်လောင်းတိုင်း pool byte-တူညီသည်)။ ကုန်ကျစရိတ်နှင့် မသက်ဆိုင်သော အကြောင်းပြချက်များဖြင့် စုစည်းထားသော မော်ဒယ်စာရင်းကို လိုချင်သူများအတွက် `hidePaidModels`/`hideAutoCombos` (`src/lib/db/settings.ts`) ၏ ညီအကို။
+> အသုံးပြုရန် သီးသန့်ဖွင့်ရပြီး မူလအတိုင်းဆို ပိတ်ထားသည် (`modelVisibilityAllowlist`/`modelVisibilityDenylist` နှစ်ခုစလုံး ဗလာဖြစ်ပါက
+> `/v1/models` ကတ်တလောက်နှင့် `auto/*` candidate pool တိုင်းသည် byte အလိုက် လုံးဝတူညီနေမည်)။ ကုန်ကျစရိတ်နှင့်
+> လုံးဝမသက်ဆိုင်သော အကြောင်းပြချက်များဖြင့် စိတ်ကြိုက်ရွေးချယ်ထားသည့် model စာရင်းကို အသုံးပြုလိုသော operator များအတွက်
+> `hidePaidModels`/`hideAutoCombos` (`src/lib/db/settings.ts`) နှင့် အဆင့်တူ setting တစ်ခုဖြစ်သည်။
 
-## ဒါက ဘာကြောင့်ရှိတာလဲ။
+## ဤအရာ ရှိရသည့်အကြောင်းရင်း
 
-`hidePaidModels` က "ဒီမော်ဒယ်က အခမဲ့လား။" `hideAutoCombos` က " `auto/*` virtual ids တွေကို ကြော်ငြာသင့်သလား?" — အော်ပရေတာတစ်ဦးမှ မထင်မရှား မော်ဒယ်များ၏ အစုခွဲတစ်ခုကို စိတ်ကြိုက်ရွေးချယ်ခွင့်မပြုပါ (ဥပမာ- ပေးထားသည့် Claude Code / OpenCode client မှ မြင်သင့်သည့် မော်ဒယ်များကို အတိအကျတင်ပြခြင်း၊ စျေးနှုန်းနှင့် ကင်းလွတ်ခြင်း)။ #11481 သည် လွတ်လပ်သော၊ ရွေးချယ်မှုတွင် string-array ဆက်တင်နှစ်ခုအဖြစ် ထပ်လောင်းသည်။
+`hidePaidModels` သည် "ဤ model သည် အခမဲ့လား?" ဆိုသည်ကို ဖြေဆိုပြီး `hideAutoCombos` သည် "`auto/*`
+virtual id များကို လုံးဝ ကြေညာပေးသင့်သလား?" ဆိုသည်ကို ဖြေဆိုသည် — သို့သော် နှစ်ခုစလုံးသည် operator တစ်ဦးအား
+model များ၏ မည်သည့် subset ကိုမဆို စိတ်ကြိုက်ရွေးချယ်စီမံခွင့် မပေးပါ (ဥပမာ ဈေးနှုန်းနှင့်မသက်ဆိုင်ဘဲ
+သတ်မှတ်ထားသည့် Claude Code / OpenCode client တစ်ခု မြင်သင့်သော model များကိုသာ အတိအကျ ပြသခြင်း)။
+#11481 သည် ယင်းလုပ်ဆောင်ချက်ကို လွတ်လပ်စွာလုပ်ဆောင်သော၊ အသုံးပြုရန် သီးသန့်ဖွင့်ရသည့် string-array setting နှစ်ခုအဖြစ် ထည့်သွင်းပေးသည်။
 
-## ဆက်တင်များ
+## Setting များ
 
-| သော့                       | ရိုက်ပါ။   | ပုံသေ | အဓိပ္ပါယ်                                                                                                   |
-| -------------------------- | ---------- | ----- | ----------------------------------------------------------------------------------------------------------- |
-| `modelVisibilityDenylist`  | `string[]` | `[]`  | ကိုယ်စားလှယ်လောင်းတစ်ဦးနှင့် ကိုက်ညီသော ထည့်သွင်းမှုများကို catalog/candidate ရေကန်မှ ဝှက်ထားသည်။           |
-| `modelVisibilityAllowlist` | `string[]` | `[]`  | အချည်းနှီးမဟုတ်သောအခါ၊ ကိုယ်စားလှယ်လောင်းတစ်ဦးနှင့် ကိုက်ညီသော ONLY ထည့်သွင်းမှုများကို ထိတွေ့နေမည်ဖြစ်သည်။ |
+| Key                        | အမျိုးအစား | မူလတန်ဖိုး | အဓိပ္ပာယ်                                                                          |
+| -------------------------- | ---------- | ---------- | ---------------------------------------------------------------------------------- |
+| `modelVisibilityDenylist`  | `string[]` | `[]`       | candidate နှင့် ကိုက်ညီသော entry များကို ကတ်တလောက်/candidate pool မှ ဖျောက်ထားသည်။ |
+| `modelVisibilityAllowlist` | `string[]` | `[]`       | ဗလာမဟုတ်ပါက candidate နှင့် ကိုက်ညီသော entry များကိုသာ ဆက်လက်ဖော်ပြထားသည်။         |
 
-နှစ်ခုလုံးသည် တစ်ခုလျှင် စာလုံး 200 အထိ ပါဝင်သည့် 500 အထိ လက်ခံသည် (Zod-validated in `src/shared/validation/settingsSchemas.ts`)။ ဝင်ခွင့်သည်-
+နှစ်ခုစလုံးတွင် စာလုံးရေ 200 အထိပါဝင်သော entry အခု 500 အထိ လက်ခံသည်
+(`src/shared/validation/settingsSchemas.ts` တွင် Zod ဖြင့် စစ်ဆေးထားသည်)။ Entry တစ်ခုသည် အောက်ပါတို့အနက် တစ်ခုဖြစ်သည်-
 
-- အတိအကျ catalog id — `"gpt-4o"` (bare model id) သို့မဟုတ် `"openai/gpt-4o"` (provider-prefixed) သို့မဟုတ်
-- `*`/`?` — ဥပမာ `"openai/gpt-4*"` သို့မဟုတ် `"anthropic/*"` — ကို အသုံးပြု၍ `ModelRoutingSection`၏ တူညီသော မျှဝေထားသော `globToRegex()` matcher (`src/shared/utils/globPattern.ts`) မှတဆင့် ဖြေရှင်းသည် `freeModels.ts::matchesOnlyPaidModels`
+- အတိအကျကိုက်ညီသော catalog id — `"gpt-4o"` (provider ရှေ့ဆက်မပါသော model id) သို့မဟုတ် `"openai/gpt-4o"` (provider ရှေ့ဆက်ပါသော id)၊ သို့မဟုတ်
+- `*`/`?` ကို အသုံးပြုသည့် glob pattern — ဥပမာ `"openai/gpt-4*"` သို့မဟုတ် `"anthropic/*"` — `ModelRoutingSection` ၏
+  model တစ်ခုချင်းစီဆိုင်ရာ combo mapping များနှင့် `freeModels.ts::matchesOnlyPaidModels` တို့တွင် အသုံးပြုပြီးဖြစ်သည့်
+  တူညီသော မျှဝေသုံး `globToRegex()` matcher (`src/shared/utils/globPattern.ts`) ဖြင့် ဖြေရှင်းသည်။
 
-ဦးစားပေး- ငြင်းပယ်သည့်စာရင်းကို ဦးစွာစစ်ဆေးသည် (ခွင့်ပြုစာရင်းနှင့် ကိုက်ညီသော်လည်း၊ ငြင်းဆိုထားသော ဝင်ခွင့်ကို အမြဲတမ်း ဝှက်ထားသည်)။ ခွင့်ပြုစာရင်းသည် အချည်းနှီးမဟုတ်သောအခါ၊ ၎င်းနှင့်ကိုက်ညီသော ထည့်သွင်းမှုများသာ ရှင်သန်နိုင်သည်။
+ဦးစားပေးအစီအစဉ်- denylist ကို ဦးစွာစစ်ဆေးသည် (ပိတ်ပင်ထားသော entry သည် allowlist နှင့်လည်း
+ကိုက်ညီလျှင်ပင် အမြဲဖျောက်ထားမည်)။ allowlist သည် ဗလာမဟုတ်ပါက ၎င်းနှင့်ကိုက်ညီသော entry များသာ ကျန်ရှိမည်။
 
-## ခလုတ်နှစ်ခု၊ တစ်ခုမဟုတ်ပါ။
+## Chokepoint တစ်ခုမဟုတ်ဘဲ နှစ်ခု
 
-#6512 မှ သင်ခန်းစာ ( `hidePaidModels` -only catalog filter သည် combo ကိုယ်စားလှယ်လောင်းပေါင်းကို သီးခြားတည်ဆောက်ထားသောကြောင့် အခပေးမော်ဒယ်သို့ `auto/*` လမ်းကြောင်းကို လမ်းကြောင်းပေးနေဆဲဖြစ်သည်) သည် ဤနေရာတွင် တူညီပါသည်။ ကိုက်ညီသော ပရီကိတ် `isModelExposureAllowed()` (`src/shared/utils/modelExposureList.ts`) ကို BOTH မှ ခေါ်သည် ။
+#6512 မှ ရရှိခဲ့သော သင်ခန်းစာ (`hidePaidModels` ကိုသာ အသုံးပြုသည့် catalog filter သည် combo candidate pool ကို
+သီးခြားတည်ဆောက်ထားသောကြောင့် `auto/*` ကို အခပေး model တစ်ခုသို့ route လုပ်ခွင့် ပေးနေဆဲဖြစ်သည်) သည်
+ဤနေရာတွင်လည်း အလားတူ သက်ဆိုင်သည်။ ကိုက်ညီမှုစစ်ဆေးသည့် predicate `isModelExposureAllowed()`
+(`src/shared/utils/modelExposureList.ts`) ကို အောက်ပါနေရာ နှစ်ခုစလုံးမှ ခေါ်သည်-
 
-- `src/app/api/v1/models/catalog.ts` — တွင် `/v1/models` ကိုယ်တိုင်စာရင်းသွင်းထားသော၊ တူညီသော ရင်းမြစ် chokepoints 5 ခုတွင် `shouldHidePaid()` ဂိတ်ပေါက်များ (static `PROVIDER_MODELS`၊ စင့်ခ်လုပ်ထားသော ဝန်ဆောင်မှုပေးသူအတန်းများ၊ စိတ်ကြိုက်အတန်းများ၊ alias-ကျောထောက်နောက်ခံပြုထားသောအတန်းများ၊ စီမံထားသော-ပြန်လှည့်သည့်အတန်းများ)။
-- `open-sse/services/autoCombo/modelExposureFilter.ts::filterModelExposureCandidates()` — `virtualFactory.ts::buildPreparedPool` မှ ခေါ်သည် ၊ ညီမျှသော `filterPaidOnlyCandidates()` ခေါ်ဆိုမှုပြီးနောက် ချက်ခြင်းတွင်၊ ထို့ကြောင့် ငြင်းထားသော မော်ဒယ်ကို `auto/*` ကိုယ်စားလှယ်လောင်းပေါင်းကူးကန်တွင် မည်သည့်အခါမှ ရွေးချယ်၍ မရနိုင်ပါ။
+- `src/app/api/v1/models/catalog.ts` — `/v1/models` စာရင်းကိုယ်တိုင်တွင် `shouldHidePaid()` က
+  gate လုပ်ထားပြီးဖြစ်သည့် source တစ်ခုချင်းစီအလိုက် chokepoint 5 ခု (static `PROVIDER_MODELS`၊ sync လုပ်ထားသော provider row များ၊
+  custom row များ၊ alias-backed row များ၊ managed-fallback row များ) ၌ ခေါ်သည်။
+- `open-sse/services/autoCombo/modelExposureFilter.ts::filterModelExposureCandidates()` — တူညီသော
+  `filterPaidOnlyCandidates()` ခေါ်ဆိုမှုအပြီး ချက်ချင်း `virtualFactory.ts::buildPreparedPool` မှ ခေါ်သောကြောင့်
+  ပိတ်ပင်ထားသော model ကို `auto/*` candidate pool ထဲသို့လည်း မည်သည့်အခါမျှ ရွေးချယ်မထည့်နိုင်ပါ။
 
-## NOT စစ်ထုတ်ခြင်းဟူသည် အဘယ်နည်း
+## Filter မလုပ်သည့်အရာများ
 
-Mirrors `hideAutoCombos`၏ လက်ရှိအပြုအမူ- မော်ဒယ် id ကို ပေးပို့ခဲ့သည်။** အတိအလင်း** ( `auto/*` မှတဆင့်မဟုတ်ဘဲ၊ ကက်တလောက်စာရင်းတွင်မတွေ့ပါ) သည် dispatch — တွင်သာ advertisement/candidate-pool အဖွဲ့ဝင်ခြင်းကို စစ်ထုတ်ခြင်းမပြုပါ။ ၎င်းသည် `hidePaidModels` နှင့် သီးခြားဖြစ်သည်။ အော်ပရေတာတစ်ခုသည် ကုန်ကျစရိတ်နှင့်မသက်ဆိုင်သော အကြောင်းပြချက်များအတွက် စီစစ်ထားသော set တစ်ခုကို လိုချင်နိုင်သည်၊ ထို့ကြောင့် ဆက်တင်နှစ်ခုစလုံးသည် သီးခြား AND-ed စစ်ထုတ်မှုများအဖြစ် `catalog.ts` ရှိ ရှိပြီးသား အလံပေါင်းများစွာ ဖွဲ့စည်းမှုကဲ့သို့ ပေါင်းစပ်ထားသည်။
+`hideAutoCombos` ၏ လက်ရှိအပြုအမူနှင့် တူညီသည်- **အတိအလင်း** ပေးပို့ထားသော model id (`auto/*` မှတစ်ဆင့် မဟုတ်ဘဲ
+catalog စာရင်းမှတစ်ဆင့်လည်း ရှာဖွေတွေ့ရှိထားခြင်းမဟုတ်သော id) ကို dispatch လုပ်ရာတွင် မည်သည့်အခါမျှ ပိတ်ဆို့မည်မဟုတ်ပါ —
+ကြေညာဖော်ပြမှု/candidate-pool အဖွဲ့ဝင်ဖြစ်မှုကိုသာ filter လုပ်သည်။ ဤအရာသည် `hidePaidModels` နှင့် သီးခြားလွတ်လပ်သည်။
+Operator တစ်ဦးသည် ကုန်ကျစရိတ်နှင့် လုံးဝမသက်ဆိုင်သော အကြောင်းပြချက်များဖြင့် စိတ်ကြိုက်ရွေးချယ်ထားသည့် set တစ်ခုကို
+အသုံးပြုလိုနိုင်သောကြောင့် setting နှစ်ခုစလုံးသည် `catalog.ts` ရှိ လက်ရှိ multi-flag ပေါင်းစပ်မှုကဲ့သို့ပင်
+လွတ်လပ်သော AND ဖြင့် ချိတ်ဆက်ထားသည့် filter များအဖြစ် ပေါင်းစပ်လုပ်ဆောင်သည်။
 
-Settings export (`GET /api/settings/export-json`) includes both arrays verbatim, like any other settings field — unlike `hidePaidModels`'s combo-step export filter, there is no re-hydration risk here: a denied id embedded in an exported combo step is the operator's own explicit routing choice, not something the export boundary needs to strip.
+Setting export (`GET /api/settings/export-json`) တွင် အခြား settings field များကဲ့သို့ array နှစ်ခုစလုံးကို
+မူရင်းအတိုင်း ထည့်သွင်းပေးသည် — `hidePaidModels` ၏ combo-step export filter နှင့်မတူဘဲ ဤနေရာတွင်
+ပြန်လည်ဖြည့်သွင်းခြင်းဆိုင်ရာ အန္တရာယ် မရှိပါ။ Export လုပ်ထားသော combo step တစ်ခုတွင် ထည့်သွင်းထားသည့်
+ပိတ်ပင်ထားသော id သည် operator ကိုယ်တိုင် အတိအလင်း ရွေးချယ်ထားသော routing ဖြစ်ပြီး export boundary က
+ဖယ်ရှားပစ်ရန် လိုအပ်သည့်အရာ မဟုတ်ပါ။
 
-## ပေါင်းစပ်သီးသန့်စာရင်း (`exposeCombosOnly`)
+## Combo များကိုသာ စာရင်းပြခြင်း (`exposeCombosOnly`)
 
-combos များသည် အများသူငှာ မော်ဒယ်မျက်နှာပြင်ဖြစ်ပြီး ပံ့ပိုးပေးသူများသာ နောက်ကွယ်တွင်သာရှိသော ဖြန့်ကျက်မှုများအတွက် သီးခြား boolean နှင့် `false` ပုံမှန်အားဖြင့် ရွေးချယ်နိုင်သည်။ ၎င်းသည် `true` ဖြစ်သောအခါ၊ အများသူငှာစာရင်း (`GET /v1/models`၊ `GET /v1` နှင့် `getUnifiedModelsResponse()` တွင်တည်ဆောက်ထားသော အခြား `/v1` ရှာဖွေမှုလမ်းကြောင်းများ) သည် `owned_by: "combo"` နှင့် အတန်းများကိုသာ ထားရှိပါသည် : အသုံးပြုသူ ကွန်ဘိုများ နှင့် ပါ၀င်သော `auto/*` ကွန်ဘိုများ ( `hideAutoCombos` ဝှက်မထားပါက ) ။ ၎င်းသည် per-key `catalogScope: "combos"` ကဲ့သို့တူညီသောအတန်းစမ်းသပ်မှုကိုအသုံးပြုပြီး သော့၏ကိုယ်ပိုင် allow/deny/scope စစ်ထုတ်မှုများအပေါ်တွင် ဆက်လက်သက်ရောက်ဆဲဖြစ်သည်။
+combo များကို အများမြင် model အဖြစ်ထားပြီး provider များကို backend အဖြစ်သာ သုံးသော deployment များအတွက် သီးခြား boolean ဖြစ်သည်။ ၎င်းကိုလည်း ရွေးချယ်ဖွင့်ရပြီး မူလတန်ဖိုးမှာ `false` ဖြစ်သည်။ `true` ဖြစ်လျှင် public listing (`GET /v1/models`၊ `GET /v1` နှင့် `getUnifiedModelsResponse()` ကို သုံးထားသော အခြား `/v1` discovery route များ) သည် `owned_by: "combo"` ပါသော row များကိုသာ ထားသည်။ ယင်းတို့မှာ user combo များနှင့် built-in `auto/*` combo များဖြစ်သည် (`hideAutoCombos` ဖြင့် ဖျောက်မထားလျှင်)။ key တစ်ခုချင်းစီ၏ `catalogScope: "combos"` နှင့် တူညီသော row စစ်ဆေးမှုကို သုံးပြီး key ကိုယ်တိုင်၏ allow/deny/scope filter များလည်း ထပ်အကျုံးဝင်နေဆဲဖြစ်သည်။
 
-အဖွင့်အပိတ်လုပ်ပါ။** ဆက်တင်များ → Routing → မော်ဒယ်များ API စာရင်းသွင်းခြင်း။** သို့မဟုတ် `PATCH /api/settings {"exposeCombosOnly": true}` နှင့် .
+**Settings → Routing → Models API listing** တွင် သို့မဟုတ် `PATCH /api/settings {"exposeCombosOnly": true}` ဖြင့် ဖွင့်ပိတ်ပါ။
 
-အထက်ဖော်ပြပါစာရင်းများကဲ့သို့၊ ၎င်းသည် ကြော်ငြာများကိုသာ ပြောင်းလဲသည်-
+အထက်ပါစာရင်းများကဲ့သို့ ကြေညာပြသမှုကိုသာ ပြောင်းသည်။
 
-- တိကျပြတ်သားသော `provider/model` id သည် ဖြန့်ဝေဆဲဖြစ်ပြီး `GET /v1/models/{id}` ၎င်းကို ဖြေရှင်းနေဆဲဖြစ်သည်။
-- ဒက်ရှ်ဘုတ်ကတ်တလောက် (`GET /api/models/catalog`၊ မော်ဒယ်ရွေးချယ်သူများအသုံးပြုသည်) ကို မကျဉ်းမြောင်းပါ။
-- ၎င်းကို `auto/*` ကိုယ်စားလှယ်လောင်းရေကူးကန်များတွင် ရောင်ပြန်ဟပ်ထားခြင်းမဟုတ်သောကြောင့် `auto/*` combos များသည် ၎င်းတို့၏ရေကန်အပြည့်ကို ထိန်းသိမ်းထားသည်။
+- အတိအကျသတ်မှတ်သော `provider/model` id သည် request ပို့နိုင်နေဆဲဖြစ်ပြီး `GET /v1/models/{id}` ကလည်း ၎င်းကို ရှာဖွေရရှိနေဆဲဖြစ်သည်။
+- dashboard catalog (`GET /api/models/catalog`၊ model picker များသုံးသောစာရင်း) ကို မကျဉ်းစေပါ။
+- ၎င်းကို `auto/*` candidate pool များသို့ မကူးထားသဖြင့် `auto/*` combo များသည် မိမိတို့၏ pool အပြည့်ကို ထိန်းထားသည်။

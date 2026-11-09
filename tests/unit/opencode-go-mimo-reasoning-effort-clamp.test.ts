@@ -25,15 +25,22 @@ async function captureOutbound(
   t: TestContext,
   provider: string,
   model: string,
-  body: Record<string, unknown>
+  body: Record<string, unknown>,
+  endpoint?: string
 ): Promise<Record<string, unknown>> {
   const sent: Record<string, unknown>[] = [];
-  t.mock.method(globalThis, "fetch", async (_url: unknown, init: RequestInit) => {
+  t.mock.method(globalThis, "fetch", async (url: unknown, init: RequestInit) => {
+    if (endpoint) {
+      assert.ok(new URL(String(url)).pathname.endsWith(endpoint), `expected ${endpoint} dispatch`);
+    }
     sent.push(JSON.parse(String(init?.body)) as Record<string, unknown>);
-    return new Response(JSON.stringify({ choices: [] }), {
-      status: 200,
-      headers: { "content-type": "application/json" },
-    });
+    return new Response(
+      JSON.stringify(endpoint === "/responses" ? { output: [] } : { choices: [] }),
+      {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      }
+    );
   });
   const executor = new OpencodeExecutor(provider);
   const result = await executor.execute({
@@ -203,12 +210,31 @@ describe("models that accept max on opencode-go still receive max", () => {
         t,
         "opencode-go",
         "deepseek-v4-pro",
-        chatBody("deepseek-v4-pro", effort)
+        { model: "deepseek-v4-pro", input: MESSAGES, reasoning_effort: effort },
+        "/responses"
       );
-      // deepseek-v4-pro is a Responses model on Go, so #14142's sanitizer folds the flat field
-      // into the Responses reasoning object; the effort itself stays max.
-      const { reasoning_effort: _flat, ...rest } = chatBody("deepseek-v4-pro", "max");
-      assert.deepEqual(sent, { ...rest, reasoning: { effort: "max", summary: "auto" } });
+      assert.deepEqual(sent, {
+        model: "deepseek-v4-pro",
+        input: MESSAGES,
+        reasoning: { effort: "max", summary: "auto" },
+      });
+    });
+  }
+
+  for (const effort of ["low", "high", "max"]) {
+    it(`deepseek-v4-pro preserves native Responses effort ${effort}`, async (t) => {
+      const sent = await captureOutbound(
+        t,
+        "opencode-go",
+        "deepseek-v4-pro",
+        { model: "deepseek-v4-pro", input: MESSAGES, reasoning: { effort } },
+        "/responses"
+      );
+      assert.deepEqual(sent, {
+        model: "deepseek-v4-pro",
+        input: MESSAGES,
+        reasoning: { effort, summary: "auto" },
+      });
     });
   }
 

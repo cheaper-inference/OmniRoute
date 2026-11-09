@@ -907,14 +907,7 @@ kui määratud on mõni muu väli. Lite-režiimis eemaldatakse enne päringu teg
 Aegunud `subpages`, `subpageTarget`, `highlights.numSentences` ja `highlights.highlightsPerUrl` ei
 edastata enam.
 
-Kulukirvestus kasutab kindlat registriväärtust `costPerQuery`, välja arvatud Exa puhul, mis järgib Exa
-enda hinnastamist: `auto` (ja pärandatud `fast`) korral 0,007 dollarit päringu kohta või `lite` (ja
-pärandatud `instant`) korral 0,004 dollarit päringu kohta, hõlmates 10 tulemust; iga järgmine tulemus
-maksab 0,001 dollarit ning iga tagastatud tulemus maksab 0,001 dollarit, kui määratud on
-`contents.summary`. Tavily puhul arvestatakse `search_depth`-i väärtuste `basic`, `fast` ja
-`ultra-fast` korral 1 krediit (0,008 dollarit) ning `advanced` korral 2 krediiti (0,016 dollarit)
-([Tavily API krediidid](https://docs.tavily.com/documentation/api-credits)). Päring, mille
-`auto_parameters: true` korral Tavily täiendab otsingu tasemele advanced, arvestatakse siiski 1 krediidina.
+Exa: 0,007 dollarit `auto` (ja pärand `fast`) kõne kohta või 0,004 dollarit `lite` (ja pärand `instant`) puhul, mis hõlmab 10 tulemust; 0,001 dollarit iga järgmise tulemuse eest; ja 0,001 $ iga tagastatud tulemuse kohta, kui `contents.summary` on määratud. Tavily on registreeritud 1 krediit ($ 0,008) `search_depth` `basic`, `fast` ja `ultra-fast` jaoks ning 2 krediiti ($ 0,016) `advanced` ( [Tavily API krediiti](https://docs.tavily.com/documentation/api-credits) ). Kõne `auto_parameters: true`, mille Tavily täiendab edasijõudnutele, salvestatakse endiselt 1 krediidiga.
 
 ---
 
@@ -1221,6 +1214,8 @@ X-OmniRoute-No-Cache: true
 
 ---
 
+<a id="cliproxyapi-management-compatibility"></a>
+
 ## CLIProxyAPI halduse ühilduvus
 
 OmniRoute vastab kolmele [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI)
@@ -1235,20 +1230,11 @@ on saadaval aadressidel `/v0/management/*` ja `/api/v0/management/*`.
 | POST   | `/v0/management/api-call`    | Keha `{ auth_index, method, url, header?, data? }`. Saadab ühe lubatud päringu konto tokeniga ja tagastab `{ status_code, body }`              |
 | POST   | `/v0/management/reset-quota` | Keha `{ auth_index }`. Eemaldab ühe konto ühenduse jahtumisaja, mudeli blokeeringud ning Codexi ulatusepõhised jahtumisajad                    |
 
-- `auth_index` on OmniRoute'i ühenduse ID. `provider` on `claude` või `codex` (ainult OAuth-
-  ühendused; `anthropic` API-võtme pakkujat ei loetleta). Codexi puhul on
-  `id_token.chatgpt_account_id` salvestatud tööruumi ID ja `plan_type` salvestatud pakett.
-- `api-call` ei ole üldotstarbeline puhverserver. See aktsepteerib ainult Claude'i `GET
-https://api.anthropic.com/api/oauth/usage` ja Codexi `GET https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits` ning
-  `POST .../wham/rate-limit-reset-credits/consume` päringuid, kusjuures iga päring peab
-  olema tehtud vastava pakkuja konto jaoks. Kõik muu tagastab `403` ilma ülesvooluga ühendust võtmata. Helistaja
-  `Authorization` päist (sealhulgas `$TOKEN$` kohatäidet) eiratakse: OmniRoute lisab
-  ühenduse juurdepääsuloa, värskendades seda esmalt, kui see on aegumas, ning edastab ainult
-  lubatud päised (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`;
-  `Accept`, `Content-Type`). Puuduva `Chatgpt-Account-Id` korral kasutatakse salvestatud tööruumi ID-d.
-  Päringud aeguvad 15 sekundi möödumisel ja kasutavad ühenduse puhverserverit.
-- `reset-quota` jätab lõppolekud (`banned`, `expired`, `credits_exhausted`) muutmata. Tundmatu
-  `auth_index` tagastab `404`.
+- `auth_index` on OmniRoute'i ühenduse ID. `provider` on `claude` või `codex` (ainult OAuthi ühendused; API-võtmega pakkujat `anthropic` ei loetleta). Codexi puhul on `id_token.chatgpt_account_id` salvestatud tööruumi ID ja `plan_type` salvestatud pakett.
+- `api-call` ei ole üldine proksi. See lubab ainult Claude'i `GET
+https://api.anthropic.com/api/oauth/usage` ja Codexi `GET
+https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits` ning `POST .../wham/rate-limit-reset-credits/consume`, igaüht ainult vastava pakkuja kontole. Kõik muu tagastab `403` ülesvooluteenusega ühendust võtmata. Kutsuja `Authorization`-päist (ka kohatäitjat `$TOKEN$`) eiratakse: OmniRoute lisab ühenduse pääsutokeni, värskendades seda esmalt läheneva aegumise korral, ning edastab ainult lubatud päised (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`; `Accept`, `Content-Type`). Puuduva `Chatgpt-Account-Id` vaikeväärtus on salvestatud tööruumi ID. Kui esimene ülesvooluvastus on `401`, värskendab see ühe korra ja proovib uuesti ainult pääsutokeni muutumisel. Iga ülesvoolukatse aegub 15 sekundi järel ja kasutab ühenduse proksit.
+- `reset-quota` jätab lõppolekud (banned, expired, credits_exhausted) muutmata. Tundmatu `auth_index` tagastab `404`.
 
 **Autentimine:** armatuurlaua seanss või `manage` ulatusega API-võti on nõutav isegi siis, kui sisselogimine on keelatud
 (teed asuvad `ALWAYS_PROTECTED_API_PATHS`-is). Ainult inference'i jaoks mõeldud võtmed saavad vastuseks `403`. Allikas:
@@ -1981,17 +1967,17 @@ Püsiv vestluslik/faktiline mälupood, mille ulatus on piiratud API-võtme/seans
 
 OmniRoute sisaldab 3 transpordiviisi (stdio, SSE, streamable-http) ja piiratud ulatusega tööriistu kasutavat manustatud Model Context Protocoli serverit. Allolevad armatuurlaua lõpp-punktid loevad oleku-/auditiandmeid ja vahendavad HTTP-transporte.
 
-| Meetod | Tee | Kirjeldus |
-| ------ | ---------------------- | ------------------------------------------------------------------------------------------------ | -------------------- |
-| GET | `/api/mcp/status` | Südamelöök, transport, võrguolek, viimane väljakutse, enim kasutatud tööriistad, 24 tunni edukuse määr |
-| GET | `/api/mcp/tools` | MCP-tööriistade loend väljadega `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints` |
-| GET | `/api/mcp/sse` | SSE-transpordi SSE-voo avamine (tagastab `503`, kui MCP on keelatud või transpordiviis ei ühti) |
-| POST | `/api/mcp/sse` | JSON-RPC-kaadri saatmine SSE-transpordil |
-| GET | `/api/mcp/stream` | Streamable HTTP-transpordi SSE-poole avamine (serveri algatatud sõnumid) |
-| POST | `/api/mcp/stream` | JSON-RPC-kaadri saatmine Streamable HTTP-transpordil |
-| DELETE | `/api/mcp/stream` | Streamable HTTP-seansi lõpetamine |
-| GET | `/api/mcp/audit` | Auditi logi päring — `?limit=`, `?offset=`, `?tool=`, `?success=true                                | false`, `?apiKeyId=` |
-| GET | `/api/mcp/audit/stats` | Auditi koondstatistika (koguarvud, edukuse määr, keskmine kestus, enim kasutatud tööriistad) |
+| Meetod | Tee                    | Kirjeldus                                                                                                                   |
+| ------ | ---------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/mcp/status`      | Südamelöök, transport, võrguolek, viimane väljakutse, enim kasutatud tööriistad, 24 tunni edukuse määr                      |
+| GET    | `/api/mcp/tools`       | MCP-tööriistade loend väljadega `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints`                   |
+| GET    | `/api/mcp/sse`         | SSE-transpordi SSE-voo avamine (tagastab `503`, kui MCP on keelatud või transpordiviis ei ühti)                             |
+| POST   | `/api/mcp/sse`         | JSON-RPC-kaadri saatmine SSE-transpordil                                                                                    |
+| GET    | `/api/mcp/stream`      | Streamable HTTP-transpordi SSE-poole avamine (serveri algatatud sõnumid)                                                    |
+| POST   | `/api/mcp/stream`      | JSON-RPC-kaadri saatmine Streamable HTTP-transpordil                                                                        |
+| DELETE | `/api/mcp/stream`      | Streamable HTTP-seansi lõpetamine                                                                                           |
+| GET    | `/api/mcp/audit`       | Auditi logi päring — `?limit=`, `?offset=`, `?tool=`, `?success=true                                \| false`, `?apiKeyId=` |
+| GET    | `/api/mcp/audit/stats` | Auditi koondstatistika (koguarvud, edukuse määr, keskmine kestus, enim kasutatud tööriistad)                                |
 
 **Autentimine:** `sse`/`stream`-transpordid järgivad MCP-spetsiifilist autentimispinda (Bearer API-võti ulatusega `mcp`); `status`/`tools`/`audit*`-marsruudid on armatuurlaualt loetavad (lisaks armatuurlaua hostini jõudmisele pole täiendavat autentimist vaja).
 

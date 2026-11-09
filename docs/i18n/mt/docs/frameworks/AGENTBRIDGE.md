@@ -20,7 +20,7 @@ Meta aġent IDE (eż., GitHub Copilot, Cursor, Claude Code) jagħmel sejħa API,
 
 Dan ifisser li tista':
 
-- **Ibdel kull aġent lejn kwalunkwe fornitur** : Copilot titkellem ma OpenAI? Idderieġih lejn Anthropic Claude, Gemini, jew kwalunkwe mit-380 fornitur ta' OmniRoute.
+- **Ibdel kull aġent lejn kwalunkwe fornitur** : Copilot titkellem ma OpenAI? Idderieġih lura lejn Anthropic Claude, Gemini, jew kwalunkwe mit-381 fornitur ta' OmniRoute.
 - **Applika mappings tal-mudell** : `gemini-3-flash` → `claude-sonnet-4.7` b'mod trasparenti fil-livell ta' handler.
 - **Osserva t-traffiku kollu tal-aġenti** : kull talba interċettata tiġi ppubblikata lill - [Ispettur tat - Traffiku](./TRAFFIC_INSPECTOR.md).
 - **Applika OmniRoute resilience** : combo routing, circuit breakers, fallbacks, u xogħol ta 'traċċar tal-ispejjeż għat-traffiku tal-aġent IDE ukoll.
@@ -554,7 +554,7 @@ Trae huwa assistent tal-kodifikazzjoni bl-IA relattivament ġdid. Qabel ma jiġi
 3. Iddetermina l-mekkaniżmu ta' awtentikazzjoni
 4. Evalwa jekk għandux jitkompla jew le abbażi tat-TOS u kemm l-API tista' tiġi skoperta
 
-Sakemm titlesta l-investigazzjoni, il-kard ta' Trae fid-dashboard turi badge "Taħt investigazzjoni" b'link "Irrapporta l-vijabbiltà". L-istub tal-handler f'`src/mitm/handlers/trae.ts` jitfa' żball strutturat `Għadu mhux implimentat`.
+Sakemm titlesta l-investigazzjoni, il-kard ta' Trae fid-dashboard turi badge "Taħt investigazzjoni" b'link "Irrapporta l-vijabbiltà". L-istub tal-handler f'`src/mitm/handlers/trae.ts` jitfa' żball strutturat `Not yet implemented`.
 
 ### Aġenti fil-backlog (MITM meħtieġ — ebda appoġġ għal URL bażi personalizzat)
 

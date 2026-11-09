@@ -218,9 +218,9 @@ interface CliFingerprint {
 
 ---
 
-## 사용자 에이전트가 — env vars를 재정의함(`.env.example` 섹션 12)
+## User-Agent 재정의 — 환경 변수(`.env.example` 섹션 12)
 
-| 변하기 쉬운         | 기본                                          |
+| 변수                | 기본값                                        |
 | ------------------- | --------------------------------------------- |
 | `CLAUDE_USER_AGENT` | `claude-cli/2.1.280 (external, cli)`          |
 | `CODEX_USER_AGENT`  | `codex-cli/0.155.0 (Windows 10.0.26200; x64)` |
@@ -229,7 +229,7 @@ interface CliFingerprint {
 | `QODER_USER_AGENT`  | `Qoder-Cli`                                   |
 | `CURSOR_USER_AGENT` | `Cursor/3.4`                                  |
 
-동적 조회를 통해 `open-sse/executors/base.ts::buildHeaders()` 에서 사용됩니다.** 공급자가 새로운 CLI 버전을 출시할 때 이를 범하십시오.** — 오래된 UA 문자열은 오래된 클라이언트로 인해 거부되기 시작합니다.
+동적 조회를 통해 `open-sse/executors/base.ts::buildHeaders()`에서 사용됩니다. **공급자가 새 CLI 버전을 출시하면 이 값들을 업데이트하세요** — 오래된 UA 문자열은 구형 클라이언트로 간주되어 거부되기 시작합니다.
 
 ## CLI 호환성 모드 토글 (`.env.example` 섹션 13)
 

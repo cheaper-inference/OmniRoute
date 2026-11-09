@@ -27,7 +27,9 @@ npm install -g omniroute
 omniroute
 ```
 
-แดชบอร์ดจะเปิดที่ `http://localhost:20128` และ URL ฐานของ API คือ `http://localhost:20128/v1`
+แดชบอร์ดเปิดที่ฐาน `http://localhost:20128` และ API URL คือ `http://localhost:20128/v1`
+
+> **ผู้ใช้ npm:** หาก npm เตือนว่าสคริปต์การติดตั้งถูกบล็อก (เช่น `omniroute`, `better-sqlite3`) โปรดดู [การแก้ไขปัญหา — npm install-scripts blocked](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install)
 
 ### pnpm
 
@@ -202,7 +204,7 @@ env ที่ถูกต้องและไม่เขียนไฟล์�
 
 ### การตั้งค่า MCP (Model Context Protocol)
 
-เริ่มการรับส่งข้อมูล MCP ในโหมด stdio:
+เริ่มการขนส่ง MCP ในโหมด stdio:
 
 ```bash
 omniroute --mcp
@@ -211,28 +213,28 @@ omniroute --mcp
 ขั้นตอนการตรวจสอบที่แนะนำ:
 
 ```bash
-# 1. เริ่มเซิร์ฟเวอร์ MCP
+# 1. Start MCP server
 omniroute --mcp
 
-# 2. เรียกใช้จากไคลเอนต์ MCP ของคุณ:
-omniroute_get_health        # ควรส่งคืนสถานะความสมบูรณ์ของระบบ
-omniroute_list_combos       # ควรส่งคืนคอมโบที่ใช้งานอยู่
+# 2. From your MCP client, call:
+omniroute_get_health        # Should return system health
+omniroute_list_combos       # Should return active combos
 
-# 3. หรือเรียกใช้ชุดทดสอบ E2E แบบเต็ม:
+# 3. Or run the full E2E suite:
 npm run test:protocols:e2e
 ```
 
-#### การกำหนดค่าไคลเอนต์ MCP
+#### การกำหนดค่าไคลเอนต์MCP
 
-**Claude Code:**
+**รหัส Claude :**
 
 ```bash
-claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
 ```
 
 **Cursor / Cline:**
 
-เพิ่มลงในการตั้งค่า MCP ของคุณ:
+เพิ่มการตั้งค่า MCP ของคุณ (stdio พร้อมปุ่มเพื่อให้ผู้โทรมีตัวการ):
 
 ```json
 {
@@ -240,17 +242,24 @@ claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp
     "omniroute": {
       "command": "omniroute",
       "args": ["--mcp"],
-      "env": {}
+      "env": {
+        "OMNIROUTE_API_KEY": "your-key",
+        "OMNIROUTE_BASE_URL": "http://localhost:20128"
+      }
     }
   }
 }
 ```
 
-**เอกสาร MCP ฉบับเต็ม:** [README ของเซิร์ฟเวอร์ MCP](../../open-sse/mcp-server/README.md) — เครื่องมือ 110 รายการ การกำหนดค่า IDE และไคลเอนต์ Python/TS/Go
+หรือเมื่อ `mcpTransport` เป็น `streamable-http` (ตั้งค่าเป็น `/dashboard/mcp` หรือด้วย `omniroute mcp enable --transport streamable-http`) ให้ชี้รายการเซิร์ฟเวอร์ MCP ระยะไกลของไคลเอ็นต์ไปที่ `http://localhost:20128/api/mcp/stream`
 
-### การตั้งค่า A2A (Agent-to-Agent Protocol)
+คีย์เดินทางเป็น `Authorization: Bearer <api-key>` (ดู [เซิร์ฟเวอร์MCP → การเข้าถึงระยะไกล](../frameworks/MCP-SERVER.md#remote-access-manage-scope-bypass) สำหรับโฮสต์ระยะไกล คีย์ระยะไกลจำเป็นต้องมี `mcp:connect` บวกกับขอบเขต read/write ของมัน)
 
-ตรวจสอบ Agent Card:
+**เอกสาร MCP ฉบับเต็ม:** [เซิร์ฟเวอร์MCP เครื่องมือ README](../../open-sse/mcp-server/README.md) — 110, การกำหนดค่า IDE, ไคลเอนต์ Python/TS/Go การอ้างอิงผู้ดำเนินการสำหรับเครื่องมือการบีบอัด CCR/dedup (เครื่องหมาย ข้อกำหนดเบื้องต้น ขอบเขตต่อเครื่องมือ การเรียกเลขหน้า การวินิจฉัย): [Compression Engines → ข้อกำหนดเบื้องต้น / คู่มือผู้ปฏิบัติงาน](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup)
+
+### การตั้งค่า A2A (โปรโตคอลตัวแทนต่อตัวแทน)
+
+ตรวจสอบบัตรตัวแทน:
 
 ```bash
 curl http://localhost:20128/.well-known/agent.json
@@ -264,7 +273,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"Give me a short quota summary."}]}}'
 ```
 
-**เอกสาร A2A ฉบับเต็ม:** [README ของเซิร์ฟเวอร์ A2A](../../src/lib/a2a/README.md) — JSON-RPC 2.0, ทักษะ, การสตรีม และวงจรชีวิตของงาน
+**เอกสาร A2A ฉบับเต็ม:** [เซิร์ฟเวอร์A2A README](../../src/lib/a2a/README.md) — JSON-RPC 2.0, ทักษะ, การสตรีม, วงจรชีวิตของงาน
 
 ---
 
@@ -323,12 +332,12 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ---
 
-## เทมเพลตสำหรับ Void Linux (xbps-src)
+## เทมเพลต Linux (xbps-src) เป็นโมฆะ
 
-สำหรับผู้ใช้ Void Linux คุณสามารถสร้างแพ็กเกจแบบเนทีฟโดยใช้ `xbps-src` ได้ บันทึกบล็อกนี้เป็น `srcpkgs/omniroute/template`:
+สำหรับผู้ใช้ Void Linux คุณสามารถสร้างแพ็คเกจเนทิฟได้โดยใช้ `xbps-src` บันทึกบล็อกนี้เป็น `srcpkgs/omniroute/template`:
 
 ```bash
-# ไฟล์เทมเพลตสำหรับ 'omniroute'
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -339,7 +348,7 @@ maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# สร้างค่า checksum ใหม่สำหรับแต่ละรุ่นด้วย:
+# Regenerate the checksum for each release with:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

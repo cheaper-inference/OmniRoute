@@ -49,7 +49,9 @@ function visibleImageProviders(): Record<string, ImageProviderConfig> {
   return { ...IMAGE_PROVIDERS, ...XAI_SUBSCRIPTION_IMAGE_PROVIDERS };
 }
 
-function resolveImageModelAlias(modelStr: string) {
+function resolveImageModelAlias(
+  modelStr: string
+): Pick<ImageModelAliasEntry, "provider" | "model"> | null {
   const alias = IMAGE_MODEL_ALIASES[modelStr];
   return alias ? { provider: alias.provider, model: alias.model } : null;
 }
@@ -89,7 +91,7 @@ function resolveImageProviderModelId(providerId: string, modelId: string): strin
 function resolveAliasImageRequired(
   alias: ImageModelAliasEntry,
   modelConfig: ImageModelEntry | null
-) {
+): boolean | undefined {
   return alias.imageRequired ?? modelConfig?.imageRequired;
 }
 
@@ -110,7 +112,10 @@ export function getImageProvider(providerId: string): ImageProviderConfig | null
  * Parse image model string (format: "provider/model")
  * Returns { provider, model }
  */
-export function parseImageModel(modelStr: string) {
+export function parseImageModel(modelStr: string | null | undefined): {
+  provider: string | null;
+  model: string | null;
+} {
   if (!modelStr || hasUnsafeModelIdSyntax(modelStr)) return { provider: null, model: null };
 
   const directAlias = resolveImageModelAlias(modelStr);
@@ -221,7 +226,7 @@ export function isRegisteredImageModel(providerId: string, modelId: string): boo
   return Boolean(findImageModelConfig(providerId, modelId));
 }
 
-export function getImageModelEntry(modelStr: string) {
+export function getImageModelEntry(modelStr: string | null | undefined) {
   if (!modelStr) return null;
 
   const alias = IMAGE_MODEL_ALIASES[modelStr];

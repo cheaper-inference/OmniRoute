@@ -238,9 +238,9 @@ Selain itu, `updateNssDatabases()` menginstal ke DB NSS per pengguna saat `certu
 
 Semua endpoint MITM memerlukan autentikasi manajemen (`requireCliToolsAuth`). Kata sandi sudo disimpan dalam cache pada cakupan modul (tidak pernah di `globalThis`) dan dihapus saat `stopMitm()`.
 
-## Agen-Pengguna Mengganti — env vars (`.env.example` bagian 12)
+## Penimpaan User-Agent — variabel lingkungan (`.env.example` bagian 12)
 
-| Variabel            | Bawaan                                        |
+| Variabel            | Default                                       |
 | ------------------- | --------------------------------------------- |
 | `CLAUDE_USER_AGENT` | `claude-cli/2.1.280 (external, cli)`          |
 | `CODEX_USER_AGENT`  | `codex-cli/0.155.0 (Windows 10.0.26200; x64)` |
@@ -249,7 +249,7 @@ Semua endpoint MITM memerlukan autentikasi manajemen (`requireCliToolsAuth`). Ka
 | `QODER_USER_AGENT`  | `Qoder-Cli`                                   |
 | `CURSOR_USER_AGENT` | `Cursor/3.4`                                  |
 
-Dikonsumsi oleh `open-sse/executors/base.ts::buildHeaders()` melalui pencarian dinamis.** Buang ini ketika penyedia merilis versi CLI baru** — string UA basi mulai ditolak karena klien sudah ketinggalan zaman.
+Digunakan oleh `open-sse/executors/base.ts::buildHeaders()` melalui pencarian dinamis. **Perbarui nilai-nilai ini saat penyedia merilis versi CLI baru** — string UA yang usang akan mulai ditolak karena dianggap sebagai klien kedaluwarsa.
 
 ## Sakelar Mode Kompatibilitas CLI (`.env.example` bagian 13)
 

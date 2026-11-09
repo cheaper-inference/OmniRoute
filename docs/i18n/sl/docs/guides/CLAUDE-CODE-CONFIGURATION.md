@@ -25,27 +25,30 @@ omniroute launch --profile glm52  # Claude Code, ki prek OmniRoute uporablja glm
 
 ---
 
-## Kako se koda Claude poveže s prehodom
+## Kako se Claude Code poveže s prehodom
 
-Claude Code talks the**Anthropic Sporočila API** in je usmerjen na končno točko po meri s spremenljivkami okolja (nima zastavice `--base-url` ):
+Claude Code komunicira prek API-ja **Anthropic Messages** in je na končno točko po meri
+usmerjen s spremenljivkami okolja (nima zastavice `--base-url`):
 
-| Spremenljivka                                | Namen                                                                                        |
-| -------------------------------------------- | -------------------------------------------------------------------------------------------- |
-| `ANTHROPIC_BASE_URL`                         | Koren prehoda URL (koda Claude doda `/v1/messages`).** Brez pripone `/v1`.**                 |
-| `ANTHROPIC_AUTH_TOKEN`                       | Poslano kot `Authorization: Bearer …` — uporabite svoj žeton za dostop OmniRoute / ključ API |
-| `ANTHROPIC_API_KEY`                          | Druga možnost: poslano kot `x-api-key`. Če sta oba postavljena, zmaga `ANTHROPIC_AUTH_TOKEN` |
-| `ANTHROPIC_MODEL`                            | Vsili določen model (preglasi privzeti izbirnik `/model` )                                   |
-| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → izvorni izbirnik `/model` navaja modele `claude*`/`anthropic*` iz `/v1/models`         |
-| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | Omejitev izhodnih žetonov na odgovor (npr. `65536`)                                          |
-| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | Prag žetona za samodejno zgoščevanje                                                         |
+| Spremenljivka                                | Namen                                                                                                           |
+| -------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| `ANTHROPIC_BASE_URL`                         | Korenski URL prehoda (Claude Code doda `/v1/messages`). **Brez pripone `/v1`.**                                 |
+| `ANTHROPIC_AUTH_TOKEN`                       | Poslano kot `Authorization: Bearer …` — uporabite svoj žeton za dostop oziroma ključ API za OmniRoute           |
+| `ANTHROPIC_API_KEY`                          | Alternativa: poslano kot `x-api-key`. Če sta nastavljeni obe spremenljivki, ima prednost `ANTHROPIC_AUTH_TOKEN` |
+| `ANTHROPIC_MODEL`                            | Vsili določen model (preglasi privzeto izbiro iz izbirnika `/model`)                                            |
+| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → izvorni izbirnik `/model` prikaže modele `claude*`/`anthropic*` iz `/v1/models`                           |
+| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | Omeji število izhodnih žetonov na odgovor (npr. `65536`)                                                        |
+| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | Prag števila žetonov za samodejno strnjevanje                                                                   |
 
-> Spremenljivke env so prebrane** enkrat ob zagonu** — znova zaženite kodo Claude potem ko jih spremenite.
+> Spremenljivke okolja se preberejo **samo enkrat ob zagonu** — po njihovi spremembi znova zaženite Claude Code.
 
-Za poverilnico, ki se vrti namesto fiksnega niza, nastavite `apiKeyHelper` v `~/.claude/settings.json` na ukaz, ki natisne trenutno poverilnico v stdout. Koda Claude privzeto predpomni svoj izhod za pet minut (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` to preglasi) in pošlje vrednost tako v `Authorization: Bearer` kot `x-api-key`. Skript mora natisniti poverilnico in nič drugega — pasice zraven ne uspe pomočniku na v2.1.227 +.
+Za poverilnico, ki se obnavlja namesto nespremenljivega niza, nastavite `apiKeyHelper` v `~/.claude/settings.json` na ukaz, ki trenutno poverilnico izpiše na stdout. Claude Code izhod privzeto shrani v predpomnilnik za pet minut (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` preglasi ta čas) ter vrednost pošlje v `Authorization: Bearer` in `x-api-key`. Skript mora izpisati samo poverilnico — dodaten uvodni napis povzroči odpoved pomožnega programa v v2.1.227+.
 
-Entra ID SSO deluje takole: `scripts/cli/omniroute-sso.mjs token` natisne kratkotrajni žeton dostopa Entra, ki ga OmniRoute preveri namesto ključa API. Glej [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md).
+Tako deluje Entra ID SSO: `scripts/cli/omniroute-sso.mjs token` izpiše kratkotrajni dostopni žeton Entra, ki ga OmniRoute preveri namesto ključa API. Glejte [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md).
 
-`omniroute launch` nastavi vse to namesto vas: razreši osnovni žeton URL + iz aktivnega konteksta (tako da `omniroute connect <vps>` nato `omniroute launch` preprosto deluje), preveri zdravje strežnika in izvede `claude`.
+`omniroute launch` vse te spremenljivke nastavi namesto vas: osnovni URL in žeton
+razreši iz aktivnega konteksta (zato po `omniroute connect <vps>` ukaz
+`omniroute launch` preprosto deluje), preveri stanje strežnika in izvede `claude`.
 
 ---
 

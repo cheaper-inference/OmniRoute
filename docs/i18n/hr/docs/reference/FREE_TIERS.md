@@ -110,28 +110,28 @@ pretpregled u pregledniku čitao jedan izvor, a uvoz na poslužitelju drugi,
 pretpregled se ne bi slagao s onime što se dogodi nakon klika — razdvajanje je
 zadržano namjerno.
 
-## Metodologija i napomene
+## Metodologija i upozorenja
 
-- Brojevi su **procjene gornje granice** temeljene na dokumentiranim ograničenjima besplatne razine svakog pružatelja na dan **2026-06-17**, prikupljene internetskim istraživanjem. Besplatne se razine neprestano mijenjaju — ponovno ih provjerite prije nego što se oslonite na neki broj.
-- **Što pojedina stavka zapravo potvrđuje.** Nijedna stavka nema ocjenu pouzdanosti po retku, a ni API je ne pruža — svaki prethodno navedeni broj smatrajte procjenom iste, nenavedene kvalitete. Dvije se činjenice razlikuju jer su ručno uređene, a ne izvedene: 44 stavke imaju neovisno dokumentirano čvrsto ograničenje (od toga 39 redaka xKiro, koji svi dijele istu dnevnu kvotu), a 20 stavki ima objavu o obučavanju na upitima. `hardStopGuaranteed` postavlja se samo kada vlastiti uvjeti pružatelja navode da se zahtjev odbija nakon prekoračenja besplatne kvote umjesto da vam se bez upozorenja počne naplaćivati, pri čemu je izvor naveden u komentaru uz stavku; nikada se zadano ne postavlja na `true`, a stavka koju nitko nije provjerio ostaje bez postavljene vrijednosti. Stoga nedostatak oznake čvrstog ograničenja znači „nije utvrđeno”, a ne „poznato je da će se naplatiti”. **Način STRICT** (opcionalna zaštita usmjeravanja `freeAccessPolicy=strict`) vjeruje samo stavkama koje imaju tu oznaku; sve ostale besplatne razine isključuju se kao `no-hard-stop` (pogledajte `open-sse/services/autoCombo/strictZeroCostFilter.ts`). Kada zaštita filtrira skup, zapis vidljiv operateru prikazuje i broj isključenih stavki i njihov udio `no-hard-stop`.
-- `estMonthlyFreeTokens` = samo mjesečni tokeni koji se redovito obnavljaju. **Jednokratni krediti pri registraciji ne obnavljaju se** i računaju se kao 0. Ukinute razine također se računaju kao 0.
-- Dnevno ograničenje tokena → `monthly = daily × 30`. Ako je dokumentiran samo RPD → `RPD × ~800 izlaznih tokena × 30`. Ako su dostupni samo RPM/TPM (bez dnevnog ograničenja) → **bez ograničenja** (pogledajte u nastavku).
-- **Trajno besplatno, ali bez objavljenog ograničenja tokena** (`glm-cn`, `tencent`, `baidu`, `kilo-gateway`, `opencode-zen`, `gemini`, `ollama-cloud`): riječ je o stvarnom, redovito obnavljanom besplatnom pristupu ograničenom brzinom/istodobnošću. Klasificiramo ih kao `recurring-uncapped` i **nikada ih ne zbrajamo** — množenjem `RPM × 24/7 × 30d` dobila bi se izmišljena gornja granica (takvo napuhavanje odbacujemo). Navedeni su kako biste znali da postoje.
-- **Povećanje otključano pologom:** jednokratna mala nadoplata koja trajno povećava besplatnu kvotu (OpenRouter: $10 → 1000 zahtjeva/dan ≈ +24M/mj.). Prikazuje se kao zaseban broj i ne uključuje se u glavni podatak o stalnoj kvoti.
-- **Kvote ograničene uvjetima prihvatljivosti** (`eligibilityGate: "regional-identity"`): stvarna redovito obnavljana kvota koja se otključava tek nakon provjere identiteta vezane uz regiju (trenutačno provjera pravog imena u kontinentalnoj Kini). Računa se prema istom pravilu uklanjanja duplikata u skupu kao zaseban broj (`gatedRecurringTokens`) i nikada se ne uključuje u glavni podatak o stalnoj kvoti. Režim (`freeType`) ostaje nepromijenjen, pa se ne mijenja ni usmjeravanje.
-- **Klase dokaza.** Pravilo glasi: broj u katalogu navodi svoj izvor u komentaru `// evidence:` uz stavku — `public-page` (stranica pružatelja koju svatko može pročitati), `api-public` (neautentificirana krajnja točka pružatelja, npr. NaraRouterova javna krajnja točka za planove na router.bynara.id) ili `console-verified <date> por <who>` (broj je vidljiv samo unutar konzole računa; komentar bilježi tko ga je vidio i kada te javnu stranicu koja navodi da ograničenje postoji). Trenutačno stanje: pet blokova ponovno provjerenih 2026-09-02 ima taj komentar (`gemini`, `groq`, `mistral`, `ollama-cloud`, `nara`); stavke koje prethode ponovnoj provjeri od 2026-09-02 nasljeđuju ranije istraživanje dok se ne izmijene; svaki **nov ili promijenjen** broj bez komentara o dokazu pogreška je. Trenutačno je samo `mistral` potvrđen putem konzole.
+- Brojevi su** gornje granice procjene** od dokumentiranih ograničenja besplatnog sloja svakog pružatelja od** 2026-06-17** , prikupljeno web istraživanjem. Besplatne razine se stalno mijenjaju — ponovno provjerite prije nego se oslonite na brojku.
+- **Za što ulazak zapravo jamči.** Nijedan unos ne nosi ocjenu pouzdanosti po retku, a API ne služi nijednom — tretira svaku gornju brojku kao procjenu iste, nenavedene kvalitete. Dvije su činjenice različite jer su odabrane ručno, a ne zaključene: 44 unosa nose neovisno dokumentirano teško zaustavljanje (od toga 39 xKiro redaka, koji svi dijele jednu dnevnu naknadu), a 21 unos nosi objavu brzog treninga. `hardStopGuaranteed` se postavlja samo kada davateljevi vlastiti uvjeti kažu da se prekoračenjem besplatnog dopuštenja odbija zahtjev umjesto da vam se tiho počinje naplaćivati, s izvorom u komentaru pokraj unosa; nikad nije zadana vrijednost `true`, a unos koji nitko nije provjerio ostaje nepostavljen. Dakle, zastavica za teško zaustavljanje koja nedostaje znači "nije uspostavljeno", a ne "poznato da vam naplaćuje".**STRICT mod** (opt-in `freeAccessPolicy=strict` routing guard) vjeruje samo unosima koji nose oznaku; svaki drugi besplatni sloj je isključen kao `no-hard-stop` (vidi `open-sse/services/autoCombo/strictZeroCostFilter.ts`). Kada čuvar filtrira skup, dnevnik vidljiv operateru prijavljuje i broj isključenja i njegov `no-hard-stop` udio.
+- `estMonthlyFreeTokens` = samo ponavljajući mjesečni tokeni.** Jednokratni krediti za registraciju se ne ponavljaju** i računaju se kao 0. Ukinuti slojevi također su 0.
+- Dnevno ograničenje tokena → `monthly = daily × 30`. Samo RPD dokumentirano → `RPD × ~800 output tokens × 30`. Samo RPM/TPM (bez dnevnog ograničenja) →** bez kapice** (vidi dolje).
+- **Trajno besplatno, ali nema objavljenog ograničenja tokena** (`glm-cn`, `tencent`, `baidu`, `kilo-gateway`, `opencode-zen`, `gemini`, `ollama-cloud`): ovo je pravi ponavljajući besplatni pristup, rate/concurrency-limited. Klasificiramo ih `recurring-uncapped` i** nikada ih ne zbrajajte** — množenje `RPM × 24/7 × 30d` proizvelo bi fantazijski strop (inflacija koju odbijamo). Navedeni su tako da znate da postoje.
+- **Pojačanje za otključavanje depozita:** jednokratnu malu dopunu koja trajno podiže besplatnu kvotu (OpenRouter: $10 → 1000 req/day ≈ +24M/mo). Prijavljeno kao zasebna brojka, izdvojeno iz stalnog naslova.
+- **Kvote ograničene podobnošću** (`eligibilityGate: "regional-identity"`): stvarna ponavljajuća kvota koja se otvara tek nakon regionalne provjere identiteta (današnja potvrda pravog imena u Kini). Računa se s istim pravilom za dedupiranje skupa u zasebnu brojku (`gatedRecurringTokens`), nikad u stalni naslov. Režim (`freeType`) je nepromijenjen, tako da je rutiranje nepromijenjeno.
+- **Dokazi klase.** Pravilo: broj u katalogu navodi svoj izvor u `// evidence:` komentaru pored unosa — `public-page` (stranica pružatelja koju svatko može čitati), `api-public` (neautorizirana krajnja točka pružatelja, npr. NaraRouter-ova krajnja točka javnih planova na router.bynara.id) ili `console-verified <date> por <who>` (figura je vidljiva samo unutar konzole računa; komentar bilježi tko ju je vidio i kada te javna stranica na kojoj piše kapa postoji). Stanje danas: pet blokova ponovno revidiranih 2026-09-02 nose ga (`gemini`, `groq`, `mistral`, `ollama-cloud`, `nara`); unosi koji prethode ponovnoj reviziji 2026-09-02 nasljeđuju ranija istraživanja dok se ne dotaknu; bilo koji** novo ili promijenjeno** broj bez dokaza komentar je bug. Danas je samo `mistral` verificiran konzolom.
 
 ---
 
-## Zašto je naš broj manji od brojeva drugih agregatora
+## Zašto je naš broj manji od ostalih agregatora
 
-Većina brojki za „besplatne tokene mjesečno” u ovom području zbroj je oznaka po modelu. Naša to namjerno nije:
+Većina brojki "besplatnih tokena mjesečno" u ovom prostoru su zbrojevi oznaka po modelu. Naš nije, namjerno:
 
-- **Svaki zajednički fond računa se jednom.** Mistralov besplatni plan nudi jednu kvotu od 1B mjesečno po organizaciji; navođenjem te kvote uz pet modela ona ne postaje 5B. Kad bi se zbrajalo po modelu, naš bi vlastiti katalog prikazivao **~7.4B** (ponovno izračunato 2026-09-03; ta brojka nije provjeravana putem CI-ja — ponovno je izmjerite kad god se katalog promijeni) — naslov navodi **~1.47B** jer je to ono što jedan račun kod svakog pružatelja usluge doista može potrošiti.
-- **Dnevna ograničenja pretvaraju se, stope ne.** Dokumentirano ograničenje tokena po danu postaje `× 30`; dokumentirano ograničenje zahtjeva po danu postaje `RPD × ~800 tokena × 30`; pružatelj usluge koji objavljuje samo broj zahtjeva u minuti **nema** mjesečnu brojku i navodi se kao _bez ograničenja_, nikad se ne zbraja. Množenje ograničenja stope s 24/7 jest napuhavanje koje odbijamo.
-- **Kvote dostupne tek nakon regionalne provjere identiteta prikazane su zasebno** (`+~6M nakon regionalne provjere identiteta`) jer ih većina čitatelja ne može koristiti.
-- **Krediti za registraciju vrijede samo prvi mjesec** i navode se kao zasebna brojka te se nikad ne spajaju sa stalnom brojkom.
-- **Brojku provodi CI.** `npm run check:docs-counts` ponovno izračunava ukupne vrijednosti iz kataloga i prekida izgradnju kad se ova datoteka, README ili kartica proračuna više ne podudaraju s njima.
+- **Svaki zajednički skup broji se jednom.** Besplatni plan Mistral-e je jedan 1B/month dodatak po organizaciji; navođenje pod pet modela ne znači da je 5B. Zbrojeno po modelu, glasio bi naš vlastiti katalog **~ 7.4B** (ponovno izračunato 2026-09-03; ova brojka nije CI-gated — ponovno je izmjerite kad god se katalog promijeni) — naslov kaže **~ 1.47B** jer to je ono što jedan račun svakog pružatelja zapravo može potrošiti.
+- **Dnevna ograničenja su preračunata, stope nisu.** Dokumentirana tokens/day kapa postaje `× 30`; dokumentirana requests/day kapa postaje `RPD × ~800 tokens × 30`; pružatelj koji objavljuje samo zahtjeve po minuti ima **Ne** mjesečna brojka i naveden je kao _neograničen_, nikad zbrojen. Množenje ograničenja stope sa 24/7 je inflacija koju odbijamo.
+- **Kvote iza regionalne provjere identiteta prikazane su odvojeno** (`+~6M behind regional identity verification`), jer ih većina čitatelja ne može koristiti.
+- **Bonus za registraciju vrijedi samo za prvi mjesec** i prijavljen kao druga brojka, nikada se ne uklapa u stalni broj.
+- **Brojku provodi CI.** `npm run check:docs-counts` ponovno izračunava ukupne iznose iz kataloga i ne uspije u izradi kada ova datoteka, README ili proračunska kartica odstupaju od njih.
 
 ---
 
@@ -389,14 +389,14 @@ Većina brojki za „besplatne tokene mjesečno” u ovom području zbroj je ozn
 - **`voyage-ai`** — Isporučena freeNote „200M besplatnih tokena za ugrađivanja i ponovno rangiranje” u osnovi je točna po pitanju broja tokena, ali dovodi u zabludu — izostavlja činjenicu da je riječ o jednokratnoj alokaciji po računu, a ne ponavljajućoj…
 - **`yi`** — Isporučena freeNote „Besplatni modeli Yi-Light” upućuje na naziv modela („Yi-Light”) koji se ne pojavljuje ni u jednoj trenutačnoj dokumentaciji ili katalogu modela tvrtke 01.AI — nijedan takav model nije naveden na platform.01.ai, …
 
-## Pojmovnik
+## Glosar
 
-| Pojam                   | Značenje                                                                            |
-| ----------------------- | ----------------------------------------------------------------------------------- |
-| **RPM / RPD / RPH**     | Zahtjevi po minuti / danu / satu                                                    |
-| **TPM / TPD**           | Tokeni po minuti / danu                                                             |
-| **Dokumentirana kvota** | Pružatelj objavljuje izričito dnevno/mjesečno ograničenje tokena (opravdani budžet) |
-| **Teorijski maksimum**  | `ograničenje stope × 24/7 × 30 d` — maksimum, a ne dodijeljeni budžet               |
-| **Neuron**              | Cloudflareova računalna jedinica (~1 izlazni token)                                 |
+| Termin                    | Značenje                                                                              |
+| ------------------------- | ------------------------------------------------------------------------------------- |
+| **RPM / RPD / RPH**       | Zahtjevi po minuti / danu / satu                                                      |
+| **TPM / TPD**             | Tokeni po minuti / danu                                                               |
+| **Dokumentirana potpora** | Pružatelj objavljuje eksplicitno ograničenje daily/monthly tokena (obranjiv proračun) |
+| **Teoretski strop**       | `rate-limit × 24/7 × 30d` — maksimalni, a ne odobreni proračun                        |
+| **Neuron**                | Cloudflare računska jedinica (~ 1 izlazni token)                                      |
 
-> Generirano na temelju istraživanja pojedinačnih pružatelja 2026-06-05. Ponovno pokrenite tijek istraživanja (pogledajte `_tasks/features-v3.8.12`) radi ažuriranja.
+> Generirano iz istraživanja po pružatelju 2026-06-05. Ponovno pokrenite tijek istraživanja (pogledajte `_tasks/features-v3.8.12`) za osvježavanje.

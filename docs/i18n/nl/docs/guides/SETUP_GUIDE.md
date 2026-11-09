@@ -27,7 +27,9 @@ npm install -g omniroute
 omniroute
 ```
 
-Het dashboard wordt geopend op `http://localhost:20128` en de basis-URL van de API is `http://localhost:20128/v1`.
+Dashboard wordt geopend op `http://localhost:20128` en API basis URL is `http://localhost:20128/v1`.
+
+> **npm-gebruikers:** Als npm waarschuwt dat installatiescripts zijn geblokkeerd (bijvoorbeeld `omniroute`, `better-sqlite3`), zie [Problemen oplossen met — npm install-scripts geblokkeerd](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install).
 
 ### pnpm
 
@@ -191,41 +193,41 @@ Zie de afzonderlijke **[Handleiding voor CLI-tools](../reference/CLI-TOOLS.md)**
 
 ---
 
-## Protocolconfiguratie (MCP + A2A)
+## Protocol instellen (MCP + A2A)
 
-### MCP-configuratie (Model Context Protocol)
+### MCP -installatie (Model Context Protocol)
 
-Start het MCP-transport in stdio-modus:
+Start MCP -transport in stdio-modus:
 
 ```bash
 omniroute --mcp
 ```
 
-Aanbevolen validatieprocedure:
+Aanbevolen validatiestroom:
 
 ```bash
-# 1. Start de MCP-server
+# 1. Start MCP server
 omniroute --mcp
 
-# 2. Roep vanuit uw MCP-client het volgende aan:
-omniroute_get_health        # Moet de systeemstatus retourneren
-omniroute_list_combos       # Moet actieve combo's retourneren
+# 2. From your MCP client, call:
+omniroute_get_health        # Should return system health
+omniroute_list_combos       # Should return active combos
 
-# 3. Of voer de volledige E2E-testsuite uit:
+# 3. Or run the full E2E suite:
 npm run test:protocols:e2e
 ```
 
-#### MCP-clientconfiguratie
+#### MCP -clientconfiguratie
 
-**Claude Code:**
+**Claude -code:**
 
 ```bash
-claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
 ```
 
 **Cursor / Cline:**
 
-Voeg het volgende toe aan uw MCP-instellingen:
+Voeg toe aan je MCP -instellingen (stdio, met de sleutel zodat de beller een opdrachtgever heeft):
 
 ```json
 {
@@ -233,23 +235,30 @@ Voeg het volgende toe aan uw MCP-instellingen:
     "omniroute": {
       "command": "omniroute",
       "args": ["--mcp"],
-      "env": {}
+      "env": {
+        "OMNIROUTE_API_KEY": "your-key",
+        "OMNIROUTE_BASE_URL": "http://localhost:20128"
+      }
     }
   }
 }
 ```
 
-**Volledige MCP-documentatie:** [README van de MCP-server](../../open-sse/mcp-server/README.md) — 110 tools, IDE-configuraties, Python-/TS-/Go-clients.
+Of, wanneer `mcpTransport` `streamable-http` is (zet het op `/dashboard/mcp` of met `omniroute mcp enable --transport streamable-http`), wijs de externe MCP -serveringang van de client naar `http://localhost:20128/api/mcp/stream`.
 
-### A2A-configuratie (Agent-to-Agent Protocol)
+De sleutel reist als `Authorization: Bearer <api-key>` (zie [MCP Server → Externe toegang](../frameworks/MCP-SERVER.md#remote-access-manage-scope-bypass) voor externe hosts; een externe sleutel heeft `mcp:connect` nodig plus zijn read/write scopes).
 
-Controleer de Agent Card:
+**Volledige MCP -documentatie:** [MCP Server README](../../open-sse/mcp-server/README.md) — 110 tools, IDE -configuraties, Python/TS/Go clients. Operatorreferentie voor de compressie- CCR/dedup tools (markeringen, vereisten, scopes per tool, ophaalpaginering, diagnostiek): [Compressie-engines → Vereisten / operatorhandleiding](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+
+### A2A installatie (agent-naar-agent-protocol)
+
+Controleer de agentkaart:
 
 ```bash
 curl http://localhost:20128/.well-known/agent.json
 ```
 
-Verzend een taak:
+Stuur een taak:
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -257,7 +266,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"Give me a short quota summary."}]}}'
 ```
 
-**Volledige A2A-documentatie:** [README van de A2A-server](../../src/lib/a2a/README.md) — JSON-RPC 2.0, vaardigheden, streaming en taaklevenscyclus.
+**Volledige A2A -documentatie:** [A2A Server README](../../src/lib/a2a/README.md) — JSON-RPC 2.0, vaardigheden, streaming, taaklevenscyclus.
 
 ---
 
@@ -316,12 +325,12 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ---
 
-## Void Linux (xbps-src)-sjabloon
+## Ongeldige Linux (xbps-src).
 
-Voor gebruikers van Void Linux kun je met `xbps-src` een systeemeigen pakket bouwen. Sla dit blok op als `srcpkgs/omniroute/template`:
+Voor Void Linux gebruikers kunt u een native pakket bouwen met `xbps-src`. Sla dit blok op als `srcpkgs/omniroute/template`:
 
 ```bash
-# Sjabloonbestand voor 'omniroute'
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -332,7 +341,7 @@ maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# Genereer voor elke release opnieuw de controlesom met:
+# Regenerate the checksum for each release with:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

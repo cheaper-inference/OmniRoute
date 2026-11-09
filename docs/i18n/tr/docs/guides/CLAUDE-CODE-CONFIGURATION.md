@@ -27,25 +27,29 @@ omniroute launch --profile glm52  # OmniRoute üzerinden glm/glm-5.2 kullanan Cl
 
 ## Claude Code bir ağ geçidine nasıl bağlanır?
 
-Claude Kodu konuşuyor**Anthropic Mesajlar API** ve ortam değişkenlerine sahip özel bir uç noktaya işaret edilir ( `--base-url` bayrağı yoktur):
+Claude Code, **Anthropic Messages API** ile iletişim kurar ve ortam değişkenleri
+aracılığıyla özel bir uç noktaya yönlendirilir (`--base-url` bayrağı yoktur):
 
 | Değişken                                     | Amaç                                                                                                     |
 | -------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| `ANTHROPIC_BASE_URL`                         | Ağ geçidi kökü URL (Claude Kodu `/v1/messages` ekler).** `/v1` son eki yok.**                            |
-| `ANTHROPIC_AUTH_TOKEN`                       | `Authorization: Bearer …` — olarak gönderildi, OmniRoute erişim belirtecinizi/ API anahtarınızı kullanın |
-| `ANTHROPIC_API_KEY`                          | Alternatif: `x-api-key` olarak gönderilir. Her ikisi de tamamlanırsa `ANTHROPIC_AUTH_TOKEN` kazanır      |
-| `ANTHROPIC_MODEL`                            | Belirli bir modeli zorlayın ( `/model` seçici varsayılanını geçersiz kılar)                              |
-| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → yerel `/model` seçici, `/v1/models` `claude*`/`anthropic*` modellerini listeler                    |
-| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | Yanıt başına çıkış belirteçlerinin üst sınırı (örn. `65536`)                                             |
+| `ANTHROPIC_BASE_URL`                         | Ağ geçidi kök URL'si (Claude Code sonuna `/v1/messages` ekler). **`/v1` son eki olmamalıdır.**           |
+| `ANTHROPIC_AUTH_TOKEN`                       | `Authorization: Bearer …` olarak gönderilir — OmniRoute erişim belirtecinizi / API anahtarınızı kullanın |
+| `ANTHROPIC_API_KEY`                          | Alternatif: `x-api-key` olarak gönderilir. İkisi de ayarlanmışsa `ANTHROPIC_AUTH_TOKEN` önceliklidir     |
+| `ANTHROPIC_MODEL`                            | Belirli bir modeli zorunlu kılar (`/model` seçicisinin varsayılanını geçersiz kılar)                     |
+| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → yerel `/model` seçicisi, `/v1/models` içindeki `claude*`/`anthropic*` modellerini listeler         |
+| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | Yanıt başına çıktı belirteçlerini sınırlar (ör. `65536`)                                                 |
 | `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | Otomatik sıkıştırma için belirteç eşiği                                                                  |
 
-> Env değişkenleri okunur** başlangıçta bir kez** — Claude Kodunu değiştirdikten sonra yeniden başlatın.
+> Ortam değişkenleri **başlangıçta yalnızca bir kez** okunur — bunları değiştirdikten sonra Claude Code'u yeniden başlatın.
 
-Sabit bir dize yerine dönen bir kimlik bilgisi için `~/.claude/settings.json` `apiKeyHelper`, geçerli kimlik bilgisini stdout'a yazdıran bir komuta ayarlayın. Claude Code, çıktısını varsayılan olarak beş dakika boyunca önbelleğe alır (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` bunu geçersiz kılar) ve değeri hem `Authorization: Bearer` hem de `x-api-key` olarak gönderir. Komut dosyası kimlik bilgilerini yazdırmalı ve v2.1.227 + yardımcıyı başarısızlığa uğratan — başlığının yanında başka hiçbir şey basmamalıdır.
+Sabit bir dize yerine dönüşümlü olarak yenilenen bir kimlik bilgisi için `~/.claude/settings.json` içindeki `apiKeyHelper` değerini güncel kimlik bilgisini stdout üzerine yazan bir komuta ayarlayın. Claude Code çıktıyı varsayılan olarak beş dakika önbelleğe alır (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` bu süreyi değiştirir) ve değeri hem `Authorization: Bearer` hem de `x-api-key` içinde gönderir. Betik yalnızca kimlik bilgisini yazmalıdır — ek bir tanıtım yazısı v2.1.227+ sürümlerinde yardımcının başarısız olmasına yol açar.
 
-Entra ID SSO şu şekilde çalışır: `scripts/cli/omniroute-sso.mjs token` API anahtarı yerine OmniRoute doğruladığı kısa ömürlü bir Entra erişim belirtecini yazdırır. [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md) bakın.
+Entra ID SSO bu şekilde çalışır: `scripts/cli/omniroute-sso.mjs token`, OmniRoute tarafından API anahtarı yerine doğrulanan kısa ömürlü bir Entra erişim belirteci yazdırır. Bkz. [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md).
 
-`omniroute launch` bunların hepsini sizin için ayarlar: aktif bağlamdan temel URL + belirtecini çözer (böylece `omniroute connect <vps>` sonra `omniroute launch` çalışır), sunucunun durumunu kontrol eder ve `claude` komutunu çalıştırır.
+`omniroute launch` bunların tümünü sizin için ayarlar: temel URL'yi ve belirteci
+etkin bağlamdan çözümler (böylece `omniroute connect <vps>` ve ardından
+`omniroute launch` doğrudan çalışır), sunucunun sistem durumunu denetler ve
+`claude` komutunu çalıştırır.
 
 ---
 

@@ -81,6 +81,18 @@ Välityspalvelimista on hyötyä myös estettyjen alueiden ulkopuolella:
 
 ---
 
+## Uusien tilien oletusvälityspalvelimen tila
+
+sisään** Asetukset → Välityspalvelin → Yleiset asetukset** , käytä** Ota välityspalvelin oletuksena käyttöön uusille yhteyksille** valitaksesi uusien palveluntarjoajatilien alkuperäisen välityspalvelimen tilan.
+
+Uusi asetus hallitsee äskettäin lisättyjen palveluntarjoajatilien alkuperäistä välityspalvelintilaa. Se ei muuta olemassa olevia tilejä tai korvaa yleistä välityspalvelinkytkintä. Sen alkuarvo säilyttää aiemman käyttäytymisen. Poista se käytöstä kerran, jos haluat luoda tulevia tilejä, joissa välityspalvelin on oletuksena pois käytöstä.
+
+Asetus tallennetaan nimellä `defaultNewConnectionProxyEnabled` olemassa olevien asetusten API kautta. Se on oletuksena `true`, kun sitä ei koskaan tallennettu. `false` tallentaminen tulee voimaan seuraavissa uusissa tileissä ilman uudelleenkäynnistystä. `POST /api/providers` hyväksyy valinnaisen tiukan loogisen `proxyEnabled`; eksplisiittinen `true` tai `false` on etusijalla luomisoletusarvoon nähden. Päällekkäisen tilin puuttuminen tai OAuth reconnect säilyttää tilin tallennetun tilan. Yksittäiset tilit voidaan edelleen ottaa käyttöön tai poistaa käytöstä myöhemmin.
+
+Valikoidut palveluntarjoajan siirrot käyttävät kohdeasennuksen oletusasetusta uusille tileille ja säilyttävät kohdekäytännön, kun nykyiset tilit korvataan. Välityspalvelimen kytkimet eivät ole siirrettäviä siirtokenttiä. Täysi varmuuskopion palautus ja historiallinen JSON/SQL -siirto säilyttävät nykyisen palautussemantiikkansa, mukaan lukien tallennetut tiliarvot ja vanhat skeeman oletusasetukset; täydellinen asetusten palautus voi myös palauttaa tämän asetuksen.
+
+Tämä asetus ei määritä välityspalvelinta tai vahvista, että se on terve tai käytössä. Todellinen reititys riippuu edelleen yleisestä välityspalvelimen kytkimestä ja soveltuvista välityspalvelimen määrityksistä. Synteettiset palveluntarjoajat, joilla ei ole pysyvää tiliä, OAuth -liikenne ennen tilin luomista, environment/system -välityspalvelimet ja ulkoisten taustajärjestelmien verkot eivät kuulu sen soveltamisalaan.
+
 ## 4-tasoinen välityspalvelinjärjestelmä
 
 OmniRoute tukee välityspalvelinten määritystä **neljällä toisistaan riippumattomalla tasolla**, jotka ratkaistaan tärkeysjärjestyksessä:
@@ -381,7 +393,7 @@ Luo `wreq-js`-paketin avulla selaimen kaltaisia TLS-sormenjälkiä ja ohittaa bo
 
 ### CLI-sormenjäljen täsmäytys
 
-**CLI-sormenjäljen valitsin** (`Asetukset → Suojaus`) järjestää HTTP-otsakkeet ja JSON-rungon kentät uudelleen vastaamaan natiivien CLI-binääritiedostojen (Claude Code, Codex jne.) tarkkaa allekirjoitusta. Tämä toimii **välityspalvelimen lisäksi**:
+**CLI-sormenjäljen valitsin** (`Settings → Security`) järjestää HTTP-otsakkeet ja JSON-rungon kentät uudelleen vastaamaan natiivien CLI-binääritiedostojen (Claude Code, Codex jne.) tarkkaa allekirjoitusta. Tämä toimii **välityspalvelimen lisäksi**:
 
 ```
 IP-osoitteesi (estetty) → Välityspalvelimen IP (Yhdysvallat) → Palveluntarjoajan API

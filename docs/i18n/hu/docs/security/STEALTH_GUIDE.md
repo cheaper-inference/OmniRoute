@@ -240,7 +240,7 @@ Minden MITM-végpont kezelési hitelesítést igényel (`requireCliToolsAuth`). 
 
 ---
 
-## A felhasználói ügynök felülbírálja — env vars-t (`.env.example`, 12. szakasz)
+## User-Agent felülbírálások — környezeti változók (`.env.example` 12. szakasz)
 
 | Változó             | Alapértelmezett                               |
 | ------------------- | --------------------------------------------- |
@@ -251,7 +251,7 @@ Minden MITM-végpont kezelési hitelesítést igényel (`requireCliToolsAuth`). 
 | `QODER_USER_AGENT`  | `Qoder-Cli`                                   |
 | `CURSOR_USER_AGENT` | `Cursor/3.4`                                  |
 
-`open-sse/executors/base.ts::buildHeaders()` dinamikus keresésen keresztül fogyasztja.** Ha a szolgáltatók új CLI verziókat adnak ki, nyomd meg ezeket** — elavult UA karakterláncait elavult kliensként kezdik elutasítani.
+Az `open-sse/executors/base.ts::buildHeaders()` használja dinamikus kereséssel. **Frissítse ezeket, amikor a szolgáltatók új CLI-verziókat adnak ki** — az elavult UA-karakterláncokat a rendszer elavult kliensekként kezdi elutasítani.
 
 ## CLI-kompatibilitási mód kapcsolói (`.env.example` 13. szakasz)
 

@@ -20,9 +20,20 @@ const { seedAntigravityIdeVersionCache, seedAntigravityCliVersionCache } =
   await import("../../open-sse/services/antigravityVersion.ts");
 const { BaseExecutor, buildRequest, handleChat, resetStorage, settingsDb } = harness;
 
+// These cases measure request/cooldown behavior. Logging's egress probe and the
+// post-usage dashboard refresh are outside these assertions and must not send live
+// traffic while resetStorage restores the harness fetch and drains asynchronous writes.
+const { _setEgressProbeForTests, clearEgressCache } = await import("../../src/lib/proxyEgress.ts");
+const { onUsageRecorded } = await import("../../src/lib/usage/usageEvents.ts");
+const { notifyProviderUsageRecorded } = await import("../../src/lib/usage/providerLimits.ts");
+const unsubscribePostUsageRefresh = onUsageRecorded(notifyProviderUsageRecorded);
+unsubscribePostUsageRefresh();
+_setEgressProbeForTests(async () => ({ ip: "192.0.2.1", latencyMs: 0 }));
+
 const MODEL = "gemini-3.8-flash-high";
 
 test.beforeEach(async () => {
+  clearEgressCache();
   BaseExecutor.RETRY_CONFIG.delayMs = 0;
   await resetStorage();
   clearAllModelLockouts();
@@ -40,7 +51,13 @@ test.afterEach(async () => {
 
 test.after(async () => {
   delete process.env.ANTIGRAVITY_MAX_429_ATTEMPTS;
-  await harness.cleanup();
+  try {
+    await harness.cleanup();
+  } finally {
+    _setEgressProbeForTests(null);
+    clearEgressCache();
+    onUsageRecorded(notifyProviderUsageRecorded);
+  }
 });
 
 async function seedAgyConnection() {

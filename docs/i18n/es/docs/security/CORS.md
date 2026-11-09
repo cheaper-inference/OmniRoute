@@ -56,11 +56,11 @@ debido a un hecho concreto de la implementación:
 
 Esto es lo que significa para cada superficie, incluso con `CORS_ALLOW_ALL=true`:
 
-| Superficie                          | Mecanismo de autenticación      | Efecto de CORS con comodín                                                                                                                                                                                                                                                                                                                                                                                               |
-| ----------------------------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Panel / MANAGEMENT `/api/*`         | Sesión mediante cookie          | El origen se devuelve, pero **sin `Allow-Credentials`** el navegador **bloquea** la lectura con credenciales. Un sitio malicioso de otro origen **no puede leer** las respuestas autenticadas de su panel y la cookie de sesión no queda expuesta.                                                                                                                                                                       |
-| API de cliente `/v1/*`, `/v1beta/*` | Encabezado Bearer / `x-api-key` | Ya es permisiva **por diseño** (`relaxForTokenAuth`): los navegadores nunca adjuntan automáticamente `Authorization`/`x-api-key`, por lo que la página de un atacante no puede proporcionar su clave. La devolución del origen solo se aplica cuando la clave presentada se ha validado; las respuestas anónimas (`REQUIRE_API_KEY=false`) mantienen la lista de permitidos. `CORS_ALLOW_ALL` no amplía esta exposición. |
-| Lectura pública (`/api/health`, …)  | Ninguno                         | No contiene información confidencial; el comodín es inocuo.                                                                                                                                                                                                                                                                                                                                                              |
+| Superficie                          | Mecanismo de autenticación      | Efecto de CORS con comodín                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| ----------------------------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Panel / MANAGEMENT `/api/*`         | Sesión mediante cookie          | El origen se devuelve, pero **sin `Allow-Credentials`** el navegador **bloquea** la lectura con credenciales. Un sitio malicioso de otro origen **no puede leer** las respuestas autenticadas de su panel y la cookie de sesión no queda expuesta.                                                                                                                                                                                                                                                                                                                                               |
+| API de cliente `/v1/*`, `/v1beta/*` | Encabezado Bearer / `x-api-key` | Ya es permisiva **por diseño** (`relaxForTokenAuth`): los navegadores nunca adjuntan automáticamente `Authorization`/`x-api-key`, por lo que la página de un atacante no puede proporcionar su clave. El reflejo permisivo del origen requiere un sujeto autenticado (una clave de API validada o una sesión del panel validada), no solo una cabecera de credenciales, y nunca incluye `Access-Control-Allow-Credentials`. Las respuestas anónimas (`REQUIRE_API_KEY=false`) usan la lista configurada de orígenes permitidos, incluida la activación explícita mediante `CORS_ALLOW_ALL=true`. |
+| Lectura pública (`/api/health`, …)  | Ninguno                         | No contiene información confidencial; el comodín es inocuo.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 
 Por tanto, la exposición **residual** de `CORS_ALLOW_ALL=true` se limita a: (a)
 **lecturas** entre orígenes sin credenciales de datos que ya no requerían autenticación, y (b)
@@ -122,9 +122,7 @@ reiniciar.
   estos datos automáticamente. CORS no constituye una barrera significativa aquí —la clave de API es la
   barrera—, razón por la que esta superficie es intencionadamente permisiva para que los clientes web y
   Electron puedan leer las respuestas a las que ya tienen derecho.
-  La devolución relajada del origen depende de la clave validada, no de la mera presencia
-  del encabezado: cuando `REQUIRE_API_KEY=false` atiende una solicitud de forma anónima,
-  su respuesta correcta mantiene la lista de permitidos cerrada de forma predeterminada.
+  El reflejo permisivo del origen requiere un sujeto autenticado (una clave de API validada o una sesión del panel validada), no solo una cabecera de credenciales, y nunca incluye `Access-Control-Allow-Credentials`. Las respuestas anónimas (`REQUIRE_API_KEY=false`) usan la lista configurada de orígenes permitidos, incluida la activación explícita mediante `CORS_ALLOW_ALL=true`.
   Los rechazos de autenticación (401) siguen siendo legibles para que los clientes puedan
   indicar una clave revocada o mal escrita (#5242): el propio 401 del pipeline conserva la
   devolución del origen, y una ruta que rechaza la clave por sí misma después de que el
@@ -137,8 +135,7 @@ reiniciar.
   cookie `auth_token`), no de cuál de ellos haya comprobado la ruta, y nunca se combina con
   `Access-Control-Allow-Credentials`; el cuerpo es un sobre de error fijo. Las rutas de
   administración bajo `/api/v1/` protegidas por `requireManagementAuth()`
-  (`/api/v1/management/*`, `/api/v1/registered-keys`) no añaden la devolución del origen:
-  con `REQUIRE_API_KEY=false`, sus respuestas 401/403 no son legibles entre orígenes.
+  (`/api/v1/management/*`, `/api/v1/registered-keys`) no usan esta excepción de rechazo de credenciales: con `REQUIRE_API_KEY=false`, sus respuestas 401/403 siguen la política de orígenes CORS configurada.
 - **Sesión con cookies (el panel):** está protegida por el valor predeterminado de cierre ante fallos **y**
   por la ausencia de `Access-Control-Allow-Credentials` en la ruta compartida. Mantenga
   los orígenes de administración/del panel fuera de cualquier configuración permisiva; deben permanecer
@@ -153,7 +150,7 @@ cuando OmniRoute se ejecuta mediante `npm start` / `npm run dev`, el puente `/v1
 `/api/v1/ws`, que transmite `/v1/chat/completions`, `/v1/messages` y
 `/v1/responses` como tramas. El puente consulta `/api/v1/ws?handshake=1` para obtener el
 veredicto y se niega a realizar el upgrade a menos que esa ruta haya ejecutado la
-comprobación. Un handshake se acepta cuando:
+comprobación. Los requisitos de autenticación siguen aplicándose por separado. La comprobación del origen se supera cuando:
 
 - no tiene encabezado `Origin` (Codex CLI, SDK y otros clientes que no son navegadores);
 - el `Origin` está admitido por la lista de permitidos anterior (`CORS_ALLOWED_ORIGINS`,

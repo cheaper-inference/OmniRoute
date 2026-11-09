@@ -883,14 +883,7 @@ Exa `type: "lite"` (Exa 3.0) फ़ील्ड के एक छोटे स�
 `subpages`, `subpageTarget`, `highlights.numSentences` और `highlights.highlightsPerUrl` अब
 फ़ॉरवर्ड नहीं किए जाते।
 
-लागत लेखांकन फ़्लैट रजिस्ट्री `costPerQuery` पर आधारित है, सिवाय Exa के, जो Exa के
-अपने मूल्य निर्धारण का पालन करता है: `auto` (और पुराना `fast`) के लिए प्रति कॉल $0.007 या
-`lite` (और पुराना `instant`) के लिए $0.004, जिसमें 10 परिणाम शामिल हैं; प्रत्येक अतिरिक्त परिणाम के
-लिए $0.001; और `contents.summary` सेट होने पर लौटाए गए प्रत्येक परिणाम के लिए $0.001।
-Tavily के लिए `search_depth` `basic`, `fast` और `ultra-fast` पर 1 क्रेडिट ($0.008), तथा
-`advanced` पर 2 क्रेडिट ($0.016) दर्ज किए जाते हैं
-([Tavily API क्रेडिट](https://docs.tavily.com/documentation/api-credits))। `auto_parameters: true` वाली
-कॉल में Tavily द्वारा advanced पर अपग्रेड किए जाने पर भी 1 क्रेडिट ही दर्ज किया जाता है।
+Exa: `auto` के लिए $ 0.007 प्रति कॉल (और विरासत `fast`) या `lite` (और विरासत `instant`) के लिए $ 0.004, 10 परिणामों को कवर करता है; प्रत्येक अगले परिणाम के लिए $0.001; और `contents.summary` सेट होने पर लौटाए गए परिणाम के लिए $0.001। Tavily को `search_depth` `basic`, `fast` और `ultra-fast` के लिए 1 क्रेडिट ($0.008) और `advanced` ( [Tavily API क्रेडिट](https://docs.tavily.com/documentation/api-credits) ) के लिए 2 क्रेडिट ($0.016) पर दर्ज किया गया है। `auto_parameters: true` के साथ एक कॉल जिसे टैविली ने उन्नत में अपग्रेड किया है, अभी भी 1 क्रेडिट पर रिकॉर्ड किया जाता है।
 
 ---
 
@@ -1200,6 +1193,8 @@ X-OmniRoute-No-Cache: true
 
 ---
 
+<a id="cliproxyapi-management-compatibility"></a>
+
 ## CLIProxyAPI प्रबंधन संगतता
 
 OmniRoute उन तीन [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI) प्रबंधन एंडपॉइंट का उत्तर देता है, जिन्हें उपयोग डैशबोर्ड Claude और Codex सदस्यता सीमाएँ पढ़ने के लिए कॉल करते हैं (उदाहरण के लिए, T3 Code का `cliproxy` उपयोग-सीमा स्रोत)। क्लाइंट का बेस URL OmniRoute पर सेट करें और `manage` स्कोप वाली API कुंजी को उसकी प्रबंधन कुंजी के रूप में उपयोग करें। रूट `/v0/management/*` और `/api/v0/management/*` पर उपलब्ध हैं।
@@ -1210,22 +1205,11 @@ OmniRoute उन तीन [CLIProxyAPI](https://github.com/router-for-me/CLIPro
 | POST   | `/v0/management/api-call`    | बॉडी `{ auth_index, method, url, header?, data? }`। खाते के टोकन के साथ एक allowlisted अनुरोध भेजता है और `{ status_code, body }` लौटाता है |
 | POST   | `/v0/management/reset-quota` | बॉडी `{ auth_index }`। एक खाते के कनेक्शन कूलडाउन, मॉडल लॉकआउट और Codex प्रति-स्कोप कूलडाउन साफ़ करता है                                    |
 
-- `auth_index` OmniRoute कनेक्शन आईडी है। `provider` `claude` या `codex` है (केवल OAuth
-  कनेक्शन; `anthropic` API-कुंजी प्रदाता सूचीबद्ध नहीं है)। Codex के लिए,
-  `id_token.chatgpt_account_id` संग्रहीत वर्कस्पेस आईडी है और `plan_type` संग्रहीत प्लान है।
-- `api-call` एक सामान्य प्रॉक्सी नहीं है। यह केवल Claude `GET
+- `auth_index` OmniRoute का connection ID है। `provider` का मान `claude` या `codex` है (केवल OAuth कनेक्शन; API-key वाला `anthropic` provider सूची में नहीं है)। Codex के लिए `id_token.chatgpt_account_id` संग्रहीत workspace ID है और `plan_type` संग्रहीत plan है।
+- `api-call` सामान्य proxy नहीं है। यह केवल Claude `GET
 https://api.anthropic.com/api/oauth/usage` और Codex `GET
-https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits` तथा
-  `POST .../wham/rate-limit-reset-credits/consume` स्वीकार करता है, और प्रत्येक अनुरोध केवल
-  संबंधित प्रदाता के खाते के लिए स्वीकार किया जाता है। अन्य सभी अनुरोध अपस्ट्रीम से संपर्क किए बिना
-  `403` लौटाते हैं। कॉलर के `Authorization` हेडर (`$TOKEN$` प्लेसहोल्डर सहित) को अनदेखा किया जाता है:
-  OmniRoute कनेक्शन का एक्सेस टोकन इंजेक्ट करता है, उसकी समय-सीमा निकट होने पर पहले उसे रीफ़्रेश करता है,
-  और केवल allowlisted हेडर (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`;
-  `Accept`, `Content-Type`) अग्रेषित करता है। अनुपस्थित `Chatgpt-Account-Id` का डिफ़ॉल्ट
-  संग्रहीत वर्कस्पेस आईडी होता है। अनुरोध 15 सेकंड के बाद टाइम आउट हो जाते हैं और कनेक्शन के
-  प्रॉक्सी का उपयोग करते हैं।
-- `reset-quota` टर्मिनल अवस्थाओं (banned, expired, credits_exhausted) को यथावत छोड़ता है। अज्ञात
-  `auth_index` `404` लौटाता है।
+https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits` तथा `POST .../wham/rate-limit-reset-credits/consume` स्वीकार करता है, और हर एक केवल संबंधित provider के खाते के लिए। बाकी सब पर upstream से संपर्क किए बिना `403` मिलता है। कॉलर का `Authorization` header (`$TOKEN$` placeholder सहित) अनदेखा किया जाता है: OmniRoute कनेक्शन का access token डालता है, समाप्ति निकट होने पर पहले उसे रिफ्रेश करता है और केवल अनुमति-सूची के header आगे भेजता है (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`; `Accept`, `Content-Type`)। `Chatgpt-Account-Id` न होने पर संग्रहीत workspace ID इस्तेमाल होता है। अगर upstream का पहला जवाब `401` है, तो एक बार रिफ्रेश होता है और access token बदलने पर ही फिर प्रयास किया जाता है। हर upstream प्रयास का timeout 15 सेकंड है और वह कनेक्शन का proxy इस्तेमाल करता है।
+- `reset-quota` अंतिम अवस्थाएँ (banned, expired, credits_exhausted) नहीं बदलता। अज्ञात `auth_index` पर `404` मिलता है।
 
 **प्रमाणीकरण:** डैशबोर्ड सत्र या `manage`-स्कोप वाली API कुंजी आवश्यक है, लॉगिन अक्षम होने पर भी
 (पथ `ALWAYS_PROTECTED_API_PATHS` में हैं)। केवल inference वाली कुंजियों को `403` मिलता है। स्रोत:
@@ -1974,17 +1958,17 @@ curl -X DELETE http://localhost:20128/api/resilience/model-cooldowns \
 
 OmniRoute में 3 ट्रांसपोर्ट (stdio, SSE, streamable-http) और स्कोप-आधारित टूल वाला एम्बेडेड Model Context Protocol सर्वर शामिल है। नीचे दिए गए डैशबोर्ड एंडपॉइंट स्थिति/ऑडिट डेटा पढ़ते हैं और HTTP ट्रांसपोर्ट के लिए प्रॉक्सी का कार्य करते हैं।
 
-| Method | Path | Description |
-| ------ | ---------------------- | ------------------------------------------------------------------------------------------------ | -------------------- |
-| GET | `/api/mcp/status` | हार्टबीट, ट्रांसपोर्ट, ऑनलाइन स्थिति, पिछली कॉल, शीर्ष टूल, 24 घंटे की सफलता दर |
-| GET | `/api/mcp/tools` | `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints` वाले MCP टूल की सूची |
-| GET | `/api/mcp/sse` | SSE ट्रांसपोर्ट के लिए SSE स्ट्रीम खोलें (MCP अक्षम होने या ट्रांसपोर्ट मेल न खाने पर `503` लौटाता है) |
-| POST | `/api/mcp/sse` | SSE ट्रांसपोर्ट पर JSON-RPC फ़्रेम भेजें |
-| GET | `/api/mcp/stream` | Streamable HTTP ट्रांसपोर्ट का SSE पक्ष खोलें (सर्वर द्वारा शुरू किए गए संदेश) |
-| POST | `/api/mcp/stream` | Streamable HTTP ट्रांसपोर्ट पर JSON-RPC फ़्रेम भेजें |
-| DELETE | `/api/mcp/stream` | Streamable HTTP सत्र समाप्त करें |
-| GET | `/api/mcp/audit` | ऑडिट लॉग पर क्वेरी करें — `?limit=`, `?offset=`, `?tool=`, `?success=true                                | false`, `?apiKeyId=` |
-| GET | `/api/mcp/audit/stats` | समेकित ऑडिट आँकड़े (कुल, सफलता दर, औसत अवधि, शीर्ष टूल) |
+| Method | Path                   | Description                                                                                                                      |
+| ------ | ---------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/mcp/status`      | हार्टबीट, ट्रांसपोर्ट, ऑनलाइन स्थिति, पिछली कॉल, शीर्ष टूल, 24 घंटे की सफलता दर                                                  |
+| GET    | `/api/mcp/tools`       | `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints` वाले MCP टूल की सूची                                   |
+| GET    | `/api/mcp/sse`         | SSE ट्रांसपोर्ट के लिए SSE स्ट्रीम खोलें (MCP अक्षम होने या ट्रांसपोर्ट मेल न खाने पर `503` लौटाता है)                           |
+| POST   | `/api/mcp/sse`         | SSE ट्रांसपोर्ट पर JSON-RPC फ़्रेम भेजें                                                                                         |
+| GET    | `/api/mcp/stream`      | Streamable HTTP ट्रांसपोर्ट का SSE पक्ष खोलें (सर्वर द्वारा शुरू किए गए संदेश)                                                   |
+| POST   | `/api/mcp/stream`      | Streamable HTTP ट्रांसपोर्ट पर JSON-RPC फ़्रेम भेजें                                                                             |
+| DELETE | `/api/mcp/stream`      | Streamable HTTP सत्र समाप्त करें                                                                                                 |
+| GET    | `/api/mcp/audit`       | ऑडिट लॉग पर क्वेरी करें — `?limit=`, `?offset=`, `?tool=`, `?success=true                                \| false`, `?apiKeyId=` |
+| GET    | `/api/mcp/audit/stats` | समेकित ऑडिट आँकड़े (कुल, सफलता दर, औसत अवधि, शीर्ष टूल)                                                                          |
 
 **प्रमाणीकरण:** `sse`/`stream` ट्रांसपोर्ट MCP-विशिष्ट प्रमाणीकरण इंटरफ़ेस ( `mcp` स्कोप वाली Bearer API कुंजी) का पालन करते हैं; `status`/`tools`/`audit*` रूट डैशबोर्ड से पढ़े जा सकते हैं (डैशबोर्ड होस्ट तक पहुँचने के अतिरिक्त किसी प्रमाणीकरण की आवश्यकता नहीं है)।
 

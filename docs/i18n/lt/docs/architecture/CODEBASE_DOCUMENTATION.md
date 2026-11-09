@@ -189,7 +189,7 @@ src/app/api/
 #### 3.1.2a `src/app/api/services/` — Integruotų paslaugų valdymas
 
 Maršrutai, skirti 9Router ir CLIProxyAPI diegti, paleisti, stabdyti ir stebėti.
-Visi keliai klasifikuojami kaip **LOCAL_ONLY** (tik grįžtamojo ryšio sąsaja, griežta taisyklė Nr. 17), nes jie
+Visi keliai klasifikuojami kaip **LOCAL_ONLY** (tik grįžtamojo ryšio sąsaja, griežta taisyklė Nr. #17), nes jie
 gali iškviesti `npm install` ir kurti antrinius procesus.
 
 ```
@@ -446,125 +446,124 @@ Suskirstyta į konkrečios paskirties pakatalogius:
 
 ## 4. `open-sse/` — Srautinių duomenų apdorojimo variklio darbo sritis
 
-Atskira npm darbo sritis, publikuojama kaip `@omniroute/open-sse`. Atsakinga už užklausų
-apdorojimą, vykdykles, vertiklius, paslaugas, transformatorių ir MCP serverį.
+Atskira npm darbo sritis, publikuojama kaip `@omniroute/open-sse`. Apima užklausų
+apdorojimą, vykdiklius, vertiklius, paslaugas, transformatorių ir MCP serverį.
 
 ```
 open-sse/
-├── index.ts                Public exports
-├── package.json            Workspace manifest
+├── index.ts                Viešai eksportuojami elementai
+├── package.json            Darbo srities manifestas
 ├── tsconfig.json
 ├── types.d.ts
-├── config/                 Provider registries, header profiles, identity, …
-├── handlers/               Request handlers (chat, embeddings, audio, image, …)
-├── executors/              159 provider executor modules (executor classes + per-provider helpers)
-├── translator/             Format conversion (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
-├── transformer/            Responses API ↔ Chat Completions stream transformer
-├── services/               80+ service modules (combos, fallback, quotas, identity, …)
-├── utils/                  Streaming helpers, TLS client, AWS SigV4, proxy fetch, …
-└── mcp-server/             MCP server (3 transports, 33 scopes, 110 tools)
+├── config/                 Teikėjų registrai, antraščių profiliai, tapatybė, …
+├── handlers/               Užklausų apdorojimo moduliai (pokalbiai, vektoriniai atvaizdai, garsas, vaizdai, …)
+├── executors/              159 teikėjų vykdiklių moduliai (vykdiklių klasės ir konkrečių teikėjų pagalbiniai moduliai)
+├── translator/             Formatų konvertavimas (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
+├── transformer/            Responses API ↔ Chat Completions srauto transformatorius
+├── services/               Daugiau nei 80 paslaugų modulių (deriniai, atsarginis perjungimas, kvotos, tapatybė, …)
+├── utils/                  Srautinio perdavimo pagalbiniai moduliai, TLS klientas, AWS SigV4, tarpinio serverio užklausos, …
+└── mcp-server/             MCP serveris (3 perdavimo būdai, 33 sritys, 110 įrankių)
 ```
 
 ### 4.1 `open-sse/handlers/`
 
-| Handler                 | Purpose                                                                                                                        |
-| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| `chatCore.ts`           | Pagrindinis pokalbio srautas (spartinančioji atmintinė, spartos ribojimas, kombinuotas maršrutizavimas, vykdyklės iškvietimas) |
-| `responsesHandler.ts`   | OpenAI Responses API įvesties taškas                                                                                           |
-| `embeddings.ts`         | Įterpiniai                                                                                                                     |
-| `imageGeneration.ts`    | Vaizdų generavimas                                                                                                             |
-| `audioSpeech.ts`        | Teksto vertimas į kalbą                                                                                                        |
-| `audioTranscription.ts` | Kalbos vertimas į tekstą                                                                                                       |
-| `videoGeneration.ts`    | Vaizdo įrašų generavimas                                                                                                       |
-| `musicGeneration.ts`    | Muzikos generavimas                                                                                                            |
-| `rerank.ts`             | Perreitingavimas                                                                                                               |
-| `moderations.ts`        | Moderavimas                                                                                                                    |
-| `search.ts`             | Paieška internete                                                                                                              |
-| `sseParser.ts`          | SSE įvykių analizatorius                                                                                                       |
-| `usageExtractor.ts`     | Žetonų skaičiaus išgavimas iš aukštesnio lygmens srautų                                                                        |
-| `responseSanitizer.ts`  | Teikėjui būdingo triukšmo pašalinimas                                                                                          |
-| `responseTranslator.ts` | Sąsaja tarp teikėjo atsako ir vertiklių sluoksnio                                                                              |
+| Apdorojimo modulis      | Paskirtis                                                                                                        |
+| ----------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `chatCore.ts`           | Pagrindinis pokalbių konvejeris (podėlis, spartos ribojimas, derinių maršruto parinkimas, vykdiklio iškvietimas) |
+| `responsesHandler.ts`   | OpenAI Responses API įvesties taškas                                                                             |
+| `embeddings.ts`         | Vektoriniai atvaizdai                                                                                            |
+| `imageGeneration.ts`    | Vaizdų generavimas                                                                                               |
+| `audioSpeech.ts`        | Teksto vertimas į kalbą                                                                                          |
+| `audioTranscription.ts` | Kalbos vertimas į tekstą                                                                                         |
+| `videoGeneration.ts`    | Vaizdo įrašų generavimas                                                                                         |
+| `musicGeneration.ts`    | Muzikos generavimas                                                                                              |
+| `rerank.ts`             | Pakartotinis reitingavimas                                                                                       |
+| `moderations.ts`        | Moderavimas                                                                                                      |
+| `search.ts`             | Paieška žiniatinklyje                                                                                            |
+| `sseParser.ts`          | SSE įvykių analizatorius                                                                                         |
+| `usageExtractor.ts`     | Žetonų skaičiaus išgavimas iš aukštesniojo lygmens srautų                                                        |
+| `responseSanitizer.ts`  | Teikėjui būdingo triukšmo pašalinimas                                                                            |
+| `responseTranslator.ts` | Jungiamoji grandis tarp teikėjo atsako ir vertimo sluoksnio                                                      |
 
 ### 4.2 `open-sse/executors/`
 
-159 aukščiausio lygio vykdyklių moduliai (`*.ts`, išskyrus `base.ts`, `index.ts` ir testus — skaičių
-matuoja `npm run check:docs-counts`). Kiekviena vykdyklės klasė tiesiogiai arba per `DefaultExecutor`
-ar kitą vykdyklę išplečia `BaseExecutor` (`base.ts`); likę moduliai yra konkrečiam teikėjui skirti
-pagalbiniai moduliai (įrankių schemos, `fetch`/TTS adapteriai, specifinių ypatybių apdorojimo
-tvarkytuvės). Vykdyklės apima:
+159 aukščiausio lygio vykdiklių moduliai (`*.ts` atmetus `base.ts`, `index.ts` ir testus — skaičių
+nustato `npm run check:docs-counts`). Kiekviena vykdiklio klasė išplečia `BaseExecutor` (`base.ts`)
+tiesiogiai arba per `DefaultExecutor` ar kitą vykdiklį; likę moduliai yra konkretiems teikėjams
+skirti pagalbiniai moduliai (įrankių schemos, užklausų / TTS adapteriai, ypatumų apdorojimo moduliai). Vykdikliai:
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`,
 `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`,
 `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`,
 `pollinations`, `qoder`, `vertex`, `devin-desktop`, taip pat `claudeIdentity.ts`
-(bendras tapatybės pagalbinis modulis) ir `index.ts` (registras).
+(bendrinamas tapatybės pagalbinis modulis) ir `index.ts` (registras).
 
-> Pastaba: čia nepaminėtus teikėjus aptarnauja `default.ts`, naudodamas bendrą
-> su OpenAI suderinamą vykdyklę. Visas teikėjų katalogas (380 teikėjų) yra faile
+> Pastaba: čia nenurodytus teikėjus aptarnauja `default.ts`, naudodamas bendrąjį
+> su OpenAI suderinamą vykdiklį. Visas teikėjų katalogas (380 teikėjai) yra
 > `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`
 
-Vertimas pagal centro ir šakų modelį (centras yra OpenAI).
+Vertimas pagal centro ir stipinų modelį (OpenAI yra centras).
 
 - **9 užklausų vertikliai** (`translator/request/`):
   `antigravity-to-openai`, `claude-to-gemini`, `claude-to-openai`,
   `gemini-to-openai`, `openai-responses`, `openai-to-claude`,
   `openai-to-cursor`, `openai-to-gemini`, `openai-to-kiro`.
-- **9 atsakų vertikliai** (`translator/response/`):
+- **9 atsakymų vertikliai** (`translator/response/`):
   `claude-to-openai`, `cursor-to-openai`, `gemini-to-claude`, `gemini-to-openai`,
-  `kiro-to-openai`, `openai-responses`, `openai-to-antigravity`, `openai-to-claude`.
+  `kiro-to-openai`, `openai-responses`, `openai-to-antigravity`,
+  `openai-to-claude`.
 - **9 pagalbiniai moduliai** (`translator/helpers/`):
   `claudeHelper`, `geminiHelper`, `geminiToolsSanitizer`, `maxTokensHelper`,
   `openaiHelper`, `responsesApiHelper`, `schemaCoercion`, `toolCallHelper`, taip pat
   pagalbinių modulių testai.
 - **Vaizdų pagalbiniai moduliai** (`translator/image/sizeMapper.ts`).
-- Aukščiausio lygio moduliai: `bootstrap.ts`, `formats.ts`, `registry.ts`, `index.ts`.
+- Aukščiausias lygis: `bootstrap.ts`, `formats.ts`, `registry.ts`, `index.ts`.
 
 ### 4.4 `open-sse/transformer/`
 
-- `responsesTransformer.ts` — `TransformStream` pagrindu sukurtas Responses API ↔ Chat
-  Completions keitiklis (naudojamas `responses/` maršruto galutiniame universaliame
-  apdorojime).
+- `responsesTransformer.ts` — `TransformStream` pagrįstas Responses API ↔ Chat
+  Completions keitiklis (naudojamas viską apimančiame `responses/` maršrute).
 
 ### 4.5 `open-sse/services/`
 
-Svarbiausi moduliai (visas sąrašas pateiktas `open-sse/services/`):
+Svarbiausi elementai (visas sąrašas pateiktas `open-sse/services/`):
 
-| Susirūpinimas                    | Failai                                                                                                                                                                                                                                                   |
-| -------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Kombinuotas maršrutizavimas      | `combo.ts` (20 strategijų), `comboConfig.ts`, `comboMetrics.ts`, `comboManifestMetrics.ts`, `comboAgentMiddleware.ts`                                                                                                                                    |
-| Automatinio kombinavimo variklis | `autoCombo/` — `engine.ts`, `scoring.ts`, `taskFitness.ts`, `virtualFactory.ts`, `modePacks.ts`, `autoPrefix.ts`, `persistence.ts`, `providerDiversity.ts`, `providerRegistryAccessor.ts`, `routerStrategy.ts`, `selfHealing.ts`, `index.ts`             |
-| Atsparumas trikčiams             | `accountFallback.ts` (atvėsimo laikotarpis + blokavimas), `errorClassifier.ts`, `requestRejectedStreak.ts`, `emergencyFallback.ts`, `rateLimitManager.ts`, `rateLimitSemaphore.ts`, `accountSemaphore.ts`, `accountSelector.ts`                          |
-| Kvotos                           | `quotaMonitor.ts`, `quotaPreflight.ts`, `bailianQuotaFetcher.ts`, `codexQuotaFetcher.ts`, `deepseekQuotaFetcher.ts`, `openrouterQuotaFetcher.ts`, `openrouterFreeWindow.ts`, `llmgatewayQuotaFetcher.ts`, `crofUsageFetcher.ts`, `antigravityCredits.ts` |
-| Spartinančioji atmintinė         | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                            |
-| Maršrutizavimo išmanumas         | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                             |
-| Modelių tvarkymas                | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                              |
-| Glaudinimas                      | `compression/` — visas glaudinimo variklio sujungimas                                                                                                                                                                                                    |
-| Žetonas + sesija                 | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts`        |
-| Lygis / manifestas               | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                            |
-| IP / tinklas                     | `ipFilter.ts`, `webSearchFallback.ts`                                                                                                                                                                                                                    |
-| Paketai                          | `batchProcessor.ts`                                                                                                                                                                                                                                      |
-| Naudojimas                       | `usage.ts`                                                                                                                                                                                                                                               |
+| Sritis                        | Failai                                                                                                                                                                                                                                                   |
+| ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Combo maršruto parinkimas     | `combo.ts` (20 strategijų), `comboConfig.ts`, `comboMetrics.ts`, `comboManifestMetrics.ts`, `comboAgentMiddleware.ts`                                                                                                                                    |
+| Automatinis Combo variklis    | `autoCombo/` — `engine.ts`, `scoring.ts`, `taskFitness.ts`, `virtualFactory.ts`, `modePacks.ts`, `autoPrefix.ts`, `persistence.ts`, `providerDiversity.ts`, `providerRegistryAccessor.ts`, `routerStrategy.ts`, `selfHealing.ts`, `index.ts`             |
+| Atsparumas                    | `accountFallback.ts` (atvėsimo laikotarpis + blokavimas), `errorClassifier.ts`, `requestRejectedStreak.ts`, `emergencyFallback.ts`, `rateLimitManager.ts`, `rateLimitSemaphore.ts`, `accountSemaphore.ts`, `accountSelector.ts`                          |
+| Kvotos                        | `quotaMonitor.ts`, `quotaPreflight.ts`, `bailianQuotaFetcher.ts`, `codexQuotaFetcher.ts`, `deepseekQuotaFetcher.ts`, `openrouterQuotaFetcher.ts`, `openrouterFreeWindow.ts`, `llmgatewayQuotaFetcher.ts`, `crofUsageFetcher.ts`, `antigravityCredits.ts` |
+| Podėliavimas                  | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                            |
+| Maršruto parinkimo intelektas | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                             |
+| Modelių tvarkymas             | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                              |
+| Glaudinimas                   | `compression/` — visa glaudinimo variklio integracija                                                                                                                                                                                                    |
+| Žetonai + sesijos             | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts`        |
+| Pakopa / manifestas           | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                            |
+| IP / tinklas                  | `ipFilter.ts`, `webSearchFallback.ts`                                                                                                                                                                                                                    |
+| Paketai                       | `batchProcessor.ts`                                                                                                                                                                                                                                      |
+| Naudojimas                    | `usage.ts`                                                                                                                                                                                                                                               |
 
 ### 4.6 `open-sse/mcp-server/`
 
-- **110 unikalių įrankių**, sujungtų faile `server.ts` (45 kanoniniai faile `schemas/tools.ts` +
-  atminties, įgūdžių, „GitHub“ įgūdžių, telkinio, žaidybinimo, papildinių, „Notion“, „Obsidian“,
-  vietinio korpuso ir glaudinimo moduliai — junginys suskaičiuojamas naudojant `countUniqueMcpTools`).
-- **3 perdavimo būdai**: stdio, HTTP Streamable, SSE.
-- **33 veikimo metu taikomos sritys** — bazinis sąrašas faile `src/shared/constants/mcpScopes.ts`, visas rinkinys yra kiekvieno įrankio modulio deklaruojamų sričių junginys.
-- Audito lentelė: `mcp_tool_audit` (užpildoma naudojant `audit.ts`).
+- **110 unikalių įrankių**, susietų faile `server.ts` (45 kanoniniai faile `schemas/tools.ts` +
+  atminties, įgūdžių, GitHub įgūdžių, telkinio, žaidybinimo, papildinių, Notion, Obsidian,
+  vietinio tekstyno ir glaudinimo moduliai — jų sąjunga skaičiuojama naudojant `countUniqueMcpTools`).
+- **3 perdavimo būdai**: stdio, srautinis HTTP, SSE.
+- **33 aprėptys**, užtikrinamos vykdymo metu — bazinis sąrašas pateiktas faile `src/shared/constants/mcpScopes.ts`, o visas rinkinys yra kiekvieno įrankių modulio deklaruotų aprėpčių sąjunga.
+- Audito lentelė: `mcp_tool_audit` (ją užpildo `audit.ts`).
 - Failai: `server.ts`, `index.ts`, `httpTransport.ts`, `audit.ts`, `scopeEnforcement.ts`,
   `runtimeHeartbeat.ts`, `descriptionCompressor.ts`, `schemas/{tools, a2a, audit, index}.ts`,
   `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts`,
   taip pat testai kataloge `__tests__/`.
-- Visą įrankių katalogą rasite faile [MCP-SERVER.md](../frameworks/MCP-SERVER.md).
+- Visą įrankių katalogą rasite [MCP-SERVER.md](../frameworks/MCP-SERVER.md).
 
 ### 4.7 `open-sse/config/`
 
 Teikėjų registrai (`providerRegistry.ts`, `providerModels.ts`,
-`providerHeaderProfiles.ts`), kiekvieno formato modelių registrai (`audioRegistry.ts`,
+`providerHeaderProfiles.ts`), atskirų formatų modelių registrai (`audioRegistry.ts`,
 `embeddingRegistry.ts`, `imageRegistry.ts`, `moderationRegistry.ts`,
 `musicRegistry.ts`, `rerankRegistry.ts`, `searchRegistry.ts`, `videoRegistry.ts`),
 tapatybės pagalbinės priemonės (`codexIdentity.ts`, `codexInstructions.ts`,
@@ -783,7 +782,7 @@ Kliento užklausa
    `open-sse/mcp-server/schemas/tools.ts`).
 2. Priskirkite tinkamą (-as) aprėptį (-is) faile `src/shared/constants/mcpScopes.ts`.
 3. Užregistruokite įrankį faile `open-sse/mcp-server/server.ts`.
-4. Pridėkite testus kataloge `open-sse/mcp-server/__tests__/`.
+4. Pridėkite testus kataloge `tests/unit/`.
 5. Atnaujinkite [MCP-SERVER.md](../frameworks/MCP-SERVER.md).
 
 ### Pridėti naują A2A įgūdį
@@ -801,7 +800,7 @@ Kliento užklausa
 - **Pavadinimai**: failams naudojamas `camelCase` arba `kebab-case`, komponentams `PascalCase`,
   konstantoms `UPPER_SNAKE`.
 - **ESLint**: `no-eval`, `no-implied-eval`, `no-new-func` = `error` visur;
-  `no-explicit-any` = `warn` kataloguose `open-sse/` ir `tests/`, kitur — klaida.
+  `no-explicit-any` = `error` kataloguose `open-sse/**/*.ts` ir `tests/**/*.ts`.
 - **TypeScript**: `strict: false` (paveldėta nuostata). Tarpmodulinėse ribose pirmenybę
   teikite aiškiai nurodytiems tipams, o ne jų išvedimui.
 - **Duomenų bazė**: niekada nerašykite neapdoroto SQL maršrutuose ar apdorojimo funkcijose — visada naudokite
@@ -830,8 +829,7 @@ Kliento užklausa
   `a2a`, `memory`, `skills`.
 - **Šakos**: priešdėliai `feat/`, `fix/`, `refactor/`, `docs/`, `test/`,
   `chore/`. Niekada neįsipareigokite tiesiogiai į `main`.
-- **Husky**: prieš įsipareigojimą vykdomi `lint-staged` + `check:docs-sync` +
-  `check:any-budget:t11`; prieš išsiuntimą vykdomi `check:any-budget:t11` + `check:tracked-artifacts` (greitosios patikros; neįtraukiamas `test:unit`).
+- **Husky**: [`pre-commit`](../../../../../.husky/pre-commit) · [`pre-push`](../../../../../.husky/pre-push).
 
 ---
 

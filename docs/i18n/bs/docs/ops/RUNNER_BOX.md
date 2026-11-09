@@ -11,13 +11,13 @@ izmjerenim vršnim vrijednostima. Server prekoračuje raspoložive resurse samo 
 webpack buildom i lint zadatkom; swap hosta (16 GB) to apsorbuje, a pošto se buildovi za pull requestove
 izvršavaju na hostovanim runnerima, Turbopack slot je većinu vremena neaktivan:
 
-| runner               | oznaka                 | uloga                                                                                                                                            | `MemoryHigh` / `MemoryMax` | `CPUQuota`     |
-| -------------------- | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------- | -------------- |
-| `omniroute-113-5`    | `omni-build`           | Turbopack buildovi: `ci.yml` `Build` (samo push/dispatch), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, noćni a11y build | 56 GB / 60 GB (swap 0)     | 1600 %         |
-| `omniroute-113-6`    | `omni-release`         | Release-Green (`release-green` + `main-green`), webpack build                                                                                    | 20 GB / 24 GB (swap 4 GB)  | 800 %          |
-| `omniroute-113-2`    | `omni-light`           | noćni zadaci (Schemathesis, promptfoo, garak, k6) i `quality.yml` `lint-guard`                                                                   | 12 GB / 16 GB (swap 4 GB)  | 600 %          |
-| `omniroute-113`      | `omni-light`           | isti skup kao iznad                                                                                                                              | 8 GB / 12 GB               | 400 %          |
-| OmniHeuris, OmniMind | (njihovi repozitoriji) | samo Dependabot (vršna vrijednost 155 MB za svaki, 2026-10-18)                                                                                   | 4 GB / 6 GB                | 200 % za svaki |
+| runner               | oznaka                          | uloga                                                                                                                                            | `MemoryHigh` / `MemoryMax` | `CPUQuota`     |
+| -------------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------- | -------------- |
+| `omniroute-113-5`    | `omni-build`, `omni-build-60gb` | Turbopack buildovi: `ci.yml` `Build` (samo push/dispatch), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, noćni a11y build | 56 GB / 60 GB (swap 0)     | 1600 %         |
+| `omniroute-113-6`    | `omni-release`                  | Release-Green (`release-green` + `main-green`), webpack build                                                                                    | 20 GB / 24 GB (swap 4 GB)  | 800 %          |
+| `omniroute-113-2`    | `omni-light`                    | noćni zadaci (Schemathesis, promptfoo, garak, k6) i `quality.yml` `lint-guard`                                                                   | 12 GB / 16 GB (swap 4 GB)  | 600 %          |
+| `omniroute-113`      | `omni-light`                    | isti skup kao iznad                                                                                                                              | 8 GB / 12 GB               | 400 %          |
+| OmniHeuris, OmniMind | (njihovi repozitoriji)          | samo Dependabot (vršna vrijednost 155 MB za svaki, 2026-10-18)                                                                                   | 4 GB / 6 GB                | 200 % za svaki |
 
 Izmjereno 2026-10-18:
 
@@ -27,12 +27,13 @@ Izmjereno 2026-10-18:
 | swap      | 16 GB                                   | `omniroute-113-5` radi s isključenim swapom (`MemorySwapMax=0`), tako da se nekontrolisani build prekida kada dostigne svoje ograničenje umjesto da prebaci server na swap                                                                                                                                                                                                                    |
 | `/tmp`    | **12 GB tmpfs = RAM**                   | sve što se tamo smjesti zauzima memoriju; preostale datoteke uklanjaju se nakon 3 h                                                                                                                                                                                                                                                                                                           |
 | CPU       | zabilježeno opterećenje 60 na 32 jezgre | prije uvođenja kvota, jedan Turbopack build (~1166 % CPU) zajedno s paketom testova pokrivenosti na istom serveru blokirao je heartbeat signale ostalih listenera (`The self-hosted runner lost communication`, #16853)                                                                                                                                                                       |
-| runneri   | **7 listenera** (2026-10-28)            | 5 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-7` nosi i `omni-build`; `omniroute-113-3/-4/-8` su obrisani iz repozitorija (2026-10-28)                                                                                                                                                                                                                                                  |
+| runneri   | **7 listenera** (2026-10-28)            | 5 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-5` nosi i `omni-build-60gb`; `omniroute-113-3/-4/-8` su obrisani iz repozitorija (2026-10-28)                                                                                                                                                                                                                                             |
 
 Ograničenja se nalaze u `/etc/systemd/system/actions.runner.<…>.service.d/override.conf` svake jedinice
 (prethodne vrijednosti sačuvane su kao `override.conf.bak-20261018`) i primijenjena su uživo pomoću
 `systemctl set-property --runtime … MemoryHigh=… MemoryMax=… CPUQuota=…` — bez ponovnog pokretanja, tako da nijedan
-aktivni zadatak nije bio pogođen. Oznake se mijenjaju putem runners API-ja (`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
+aktivni zadatak nije bio pogođen. Oznake se mijenjaju putem runners API-ja
+(`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
 `gh api -X POST repos/<repo>/actions/runners/<id>/labels -f 'labels[]=<label>'`), također uživo.
 
 ## Instalirajte janitor (jednokratno, na serveru)
@@ -81,7 +82,7 @@ odjednom, samo kada nije aktivan**, pri čemu provjera neaktivnosti i ponovno po
 ## Operativna pravila
 
 - **Jedan Turbopack build istovremeno — nametnuto oznakom.** Svaki posao koji pokreće puni Turbopack
-  `next build` cilja `[self-hosted, omni-build]`, a samo **`omniroute-113-5`** ima tu
+  `next build` cilja `[self-hosted, omni-build, omni-build-60gb]`, a samo **`omniroute-113-5`** ima tu
   oznaku: `ci.yml` `Build`, `npm-publish.yml` `publish`, `nightly-v4-build`, `preview-artifact`,
   noćni a11y build (#16853) i `docker-publish.yml` **amd64** (webpack unutar BuildKita —
   Turbopack je tamo panično prekinuo rad, pokretanje 33253576569). Dockerova arm64 grana ostaje na `ubuntu-24.04-arm`.

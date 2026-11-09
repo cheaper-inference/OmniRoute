@@ -130,6 +130,8 @@ test("non-streaming HTTP errors hand the parsed upstream body to call-log persis
     error: { message: "Parameter temperature is invalid", code: "invalid_request_error" },
   };
   let persisted: Args | undefined;
+  const pendingRequestId = "upstream-error-fixture";
+  const pendingCompletions: unknown[][] = [];
   const noop = () => undefined;
   const wire = { model: "test-model", messages: [{ role: "user", content: "test" }] };
   const deps = {
@@ -144,12 +146,19 @@ test("non-streaming HTTP errors hand the parsed upstream body to call-log persis
     targetFormat: "openai",
     clientResponseFormat: "openai",
     connectionId: "test-connection",
+    pendingConnId: "test-connection",
+    pendingRequestId,
+    pendingScope: {
+      id: pendingRequestId,
+      model: "test-model",
+      provider: "openai",
+      connectionId: "test-connection",
+    },
     credentials: {},
     triedModels: new Set(["test-model"]),
     getCurrentConnectionId: () => "test-connection",
     syncExecuteTranslatedBody: noop,
     assertManagedLeaseFence: noop,
-    pendingScope: {},
     updatePendingScope: noop,
     updateFromHeaders: noop,
     updateFromResponseBody: noop,
@@ -174,7 +183,7 @@ test("non-streaming HTTP errors hand the parsed upstream body to call-log persis
       persisted = args;
     },
     persistFailureUsage: noop,
-    trackPendingRequest: noop,
+    trackPendingRequest: (...args: unknown[]) => pendingCompletions.push(args),
     buildErrorBody,
     createErrorResult,
     isLocalStreamLifecycleError: () => false,
@@ -185,6 +194,9 @@ test("non-streaming HTTP errors hand the parsed upstream body to call-log persis
   };
   const result = await runNonStreamingResponse(deps);
   assert.equal(result.response.status, 400, JSON.stringify(result.response));
+  assert.deepEqual(pendingCompletions, [
+    ["test-model", "openai", "test-connection", false, undefined, pendingRequestId],
+  ]);
   assert.deepEqual(persisted?.providerResponse, upstream);
   assert.deepEqual((await logFailure(persisted ?? {})).responseBody, upstream);
 });

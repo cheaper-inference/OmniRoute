@@ -237,9 +237,9 @@ Zaidi ya hayo, `updateNssDatabases()` husakinisha kwenye hifadhidata za NSS za k
 
 Vituo vyote vya ufikiaji vya MITM vinahitaji uthibitishaji wa usimamizi (`requireCliToolsAuth`). Nenosiri la sudo huhifadhiwa kwenye akiba ndani ya upeo wa moduli (kamwe si `globalThis`) na huondolewa wakati wa `stopMitm()`.
 
-## Wakala wa Mtumiaji Anabatilisha — env vars (`.env.example` sehemu ya 12)
+## Ubatilishaji wa User-Agent — vibadala vya mazingira (`.env.example` sehemu ya 12)
 
-| Inaweza kubadilika  | Chaguomsingi                                  |
+| Kibadala            | Chaguo-msingi                                 |
 | ------------------- | --------------------------------------------- |
 | `CLAUDE_USER_AGENT` | `claude-cli/2.1.280 (external, cli)`          |
 | `CODEX_USER_AGENT`  | `codex-cli/0.155.0 (Windows 10.0.26200; x64)` |
@@ -248,7 +248,7 @@ Vituo vyote vya ufikiaji vya MITM vinahitaji uthibitishaji wa usimamizi (`requir
 | `QODER_USER_AGENT`  | `Qoder-Cli`                                   |
 | `CURSOR_USER_AGENT` | `Cursor/3.4`                                  |
 
-Inatumiwa na `open-sse/executors/base.ts::buildHeaders()` kupitia utaftaji wa nguvu.** Bomba hizi wakati watoa huduma wanatoa matoleo mapya CLI** — stale UA strings kuanza kukataliwa kama wateja waliopitwa na wakati.
+Hutumiwa na `open-sse/executors/base.ts::buildHeaders()` kupitia utafutaji unaobadilika. **Ongeza matoleo haya watoa huduma wanapotoa matoleo mapya ya CLI** — mifuatano ya UA iliyopitwa na wakati huanza kukataliwa kama viteja vilivyopitwa na wakati.
 
 ## Vigeuzi vya Hali ya Upatanifu wa CLI (`.env.example` sehemu ya 13)
 

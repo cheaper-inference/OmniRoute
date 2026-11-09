@@ -816,7 +816,7 @@ yaratish paytidagi `input_file_id` tekshiruvi uchun). `GET /v1/batches` anonim c
 
 ---
 
-## Qidiruv API
+## Qidiruv API’si
 
 Web/qidiruv provayderlari abstraksiyasi (Tavily, Brave, Exa, Serper va boshqalar).
 
@@ -871,15 +871,7 @@ maydon o‘rnatilgan bo‘lsa, butun so‘rovni rad etadi. `lite` uchun `additio
 oldin olib tashlanadi. Eskirgan `subpages`, `subpageTarget`, `highlights.numSentences` va
 `highlights.highlightsPerUrl` endi uzatilmaydi.
 
-Xarajatlarni hisoblash tekis `costPerQuery` reyestri asosida amalga oshiriladi, faqat Exa
-bundan mustasno: u Exa’ning o‘z narxlash tizimiga amal qiladi — `auto` (va eski `fast`) uchun
-har bir chaqiruvga $0.007 yoki `lite` (va eski `instant`) uchun $0.004, bu 10 ta natijani
-qamrab oladi; har bir qo‘shimcha natija uchun $0.001; `contents.summary` o‘rnatilganda esa
-qaytarilgan har bir natija uchun $0.001. Tavily `search_depth` `basic`, `fast` va `ultra-fast`
-uchun 1 kredit ($0.008), `advanced` uchun esa 2 kredit ($0.016) miqdorida qayd etiladi
-([Tavily API kreditlari](https://docs.tavily.com/documentation/api-credits)). `auto_parameters: true`
-bilan berilgan chaqiruv Tavily tomonidan `advanced` darajasiga ko‘tarilsa ham, u 1 kredit
-sifatida qayd etiladi.
+Exa: `auto` (va eski `fast`) uchun har bir qo'ng'iroq uchun $0,007 yoki `lite` (va eski `instant`) uchun $0,004, 10 ta natijani qamrab oladi; Har bir keyingi natija uchun $0,001; va `contents.summary` o'rnatilganda qaytarilgan natija uchun $0,001. Tavily `search_depth` `basic`, `fast` va `ultra-fast` uchun 1 kredit ($0,008) va `advanced` ( [Tavily API kreditlari](https://docs.tavily.com/documentation/api-credits) ) uchun 2 kredit ($0,016) da qayd etilgan. Tavily ilg'or darajaga ko'taradigan `auto_parameters: true` bilan qo'ng'iroq hali ham 1 kreditda qayd etiladi.
 
 ---
 
@@ -1178,6 +1170,8 @@ X-OmniRoute-No-Cache: true
 
 ---
 
+<a id="cliproxyapi-management-compatibility"></a>
+
 ## CLIProxyAPI boshqaruvi bilan moslik
 
 OmniRoute foydalanish panellari Claude va Codex obuna limitlarini o‘qish uchun chaqiradigan uchta [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI)
@@ -1192,23 +1186,11 @@ OmniRoute’ga yo‘naltiring va boshqaruv kaliti sifatida `manage` qamroviga eg
 | POST   | `/v0/management/api-call`    | `{ auth_index, method, url, header?, data? }` tanasi. Hisob qaydnomasining tokeni bilan ruxsat berilgan bitta so‘rovni yuboradi va `{ status_code, body }` qiymatini qaytaradi |
 | POST   | `/v0/management/reset-quota` | `{ auth_index }` tanasi. Bitta hisob qaydnomasining ulanish kutish vaqtini, model bloklanishlarini va Codex’ning qamrov bo‘yicha kutish vaqtlarini tozalaydi                   |
 
-- `auth_index` — OmniRoute ulanish identifikatori. `provider` — `claude` yoki `codex` (faqat OAuth
-  ulanishlari; `anthropic` API-key provayderi ro‘yxatga kiritilmaydi). Codex uchun
-  `id_token.chatgpt_account_id` saqlangan ish maydoni identifikatori, `plan_type` esa saqlangan tarifdir.
-- `api-call` umumiy proksi emas. U faqat Claude uchun `GET
-https://api.anthropic.com/api/oauth/usage` va Codex uchun `GET
-https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits` hamda
-  `POST .../wham/rate-limit-reset-credits/consume` so‘rovlarini qabul qiladi; har biri faqat mos
-  provayderga tegishli hisob qaydnomasi uchun ishlaydi. Boshqa barcha so‘rovlar upstream’ga ulanmasdan
-  `403` qaytaradi. Murojaat qiluvchining
-  `Authorization` sarlavhasi (`$TOKEN$` o‘rnini bosuvchi qiymat bilan birga) e’tiborga olinmaydi: OmniRoute
-  ulanishning kirish tokenini qo‘shadi, token muddati tugashiga yaqin bo‘lsa, avval uni yangilaydi va faqat
-  ruxsat berilgan sarlavhalarni (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`;
-  `Accept`, `Content-Type`) uzatadi. `Chatgpt-Account-Id` mavjud bo‘lmasa, saqlangan ish maydoni identifikatori
-  standart qiymat sifatida ishlatiladi.
-  So‘rovlar 15 soniyadan so‘ng vaqt tugashi bilan to‘xtatiladi va ulanish proksisidan foydalanadi.
-- `reset-quota` terminal holatlarni (`banned`, `expired`, `credits_exhausted`) o‘zgartirmaydi. Noma’lum
-  `auth_index` `404` qaytaradi.
+- `auth_index` OmniRoute ulanish ID’sidir. `provider`, `claude` yoki `codex` bo‘ladi (faqat OAuth ulanishlari; `anthropic` API-kalit provayderi ro‘yxatga kirmaydi). Codex uchun `id_token.chatgpt_account_id` saqlangan ish maydoni ID’si, `plan_type` esa saqlangan tarifdir.
+- `api-call` umumiy proksi emas. U faqat Claude `GET
+https://api.anthropic.com/api/oauth/usage` hamda Codex `GET
+https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits` va `POST .../wham/rate-limit-reset-credits/consume` ni qabul qiladi, har biri faqat mos provayder hisobiga. Boshqa barcha holatlar yuqori oqimga murojaat qilmasdan `403` qaytaradi. Chaqiruvchining `Authorization` sarlavhasi (`$TOKEN$` o‘rinbosari ham) e’tiborga olinmaydi: OmniRoute ulanishning kirish tokenini qo‘shadi, muddati yaqin bo‘lsa avval yangilaydi va faqat ruxsatli sarlavhalarni uzatadi (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`; `Accept`, `Content-Type`). `Chatgpt-Account-Id` yo‘q bo‘lsa, saqlangan ish maydoni ID’si olinadi. Birinchi yuqori oqim javobi `401` bo‘lsa, bir marta yangilaydi va faqat kirish tokeni o‘zgarsa qayta urinadi. Har bir yuqori oqim urinishi 15 soniyada tugaydi va ulanish proksisidan foydalanadi.
+- `reset-quota` yakuniy holatlarni (banned, expired, credits_exhausted) o‘z holicha qoldiradi. Noma’lum `auth_index`, `404` qaytaradi.
 
 **Autentifikatsiya:** dashboard sessiyasi yoki `manage` qamroviga ega API kaliti, hatto login o‘chirilgan
 bo‘lsa ham talab qilinadi (yo‘llar `ALWAYS_PROTECTED_API_PATHS` tarkibida). Faqat inference uchun mo‘ljallangan kalitlar
@@ -1937,17 +1919,17 @@ Doimiy suhbatga oid/faktik xotira, har bir API kaliti/sessiyasi doirasida.
 
 OmniRoute 3 ta transportga (stdio, SSE, streamable-http) va doirasi belgilangan vositalarga ega oʻrnatilgan Model Context Protocol serveri bilan taʼminlanadi. Quyidagi boshqaruv paneli endpointlari holat/audit maʼlumotlarini oʻqiydi va HTTP transportlari uchun proksi vazifasini bajaradi.
 
-| Method | Path | Description |
-| ------ | ---------------------- | ------------------------------------------------------------------------------------------------ | -------------------- |
-| GET | `/api/mcp/status` | Yurak urishi, transport, onlayn holat, oxirgi chaqiruv, eng koʻp ishlatiladigan vositalar, 24 soatlik muvaffaqiyat darajasi |
-| GET | `/api/mcp/tools` | `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints` maydonlariga ega MCP vositalari roʻyxati |
-| GET | `/api/mcp/sse` | SSE transporti uchun SSE oqimini ochish (MCP oʻchirilgan yoki transport mos kelmagan boʻlsa, `503` qaytaradi) |
-| POST | `/api/mcp/sse` | SSE transportida JSON-RPC freym yuborish |
-| GET | `/api/mcp/stream` | Streamable HTTP transportining SSE tomonini ochish (server tomonidan ishga tushiriladigan xabarlar) |
-| POST | `/api/mcp/stream` | Streamable HTTP transportida JSON-RPC freym yuborish |
-| DELETE | `/api/mcp/stream` | Streamable HTTP sessiyasini yakunlash |
-| GET | `/api/mcp/audit` | Audit jurnalini soʻrash — `?limit=`, `?offset=`, `?tool=`, `?success=true                                | false`, `?apiKeyId=` |
-| GET | `/api/mcp/audit/stats` | Umumlashtirilgan audit statistikasi (jami sonlar, muvaffaqiyat darajasi, oʻrtacha davomiylik, eng koʻp ishlatiladigan vositalar) |
+| Method | Path                   | Description                                                                                                                      |
+| ------ | ---------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/mcp/status`      | Yurak urishi, transport, onlayn holat, oxirgi chaqiruv, eng koʻp ishlatiladigan vositalar, 24 soatlik muvaffaqiyat darajasi      |
+| GET    | `/api/mcp/tools`       | `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints` maydonlariga ega MCP vositalari roʻyxati               |
+| GET    | `/api/mcp/sse`         | SSE transporti uchun SSE oqimini ochish (MCP oʻchirilgan yoki transport mos kelmagan boʻlsa, `503` qaytaradi)                    |
+| POST   | `/api/mcp/sse`         | SSE transportida JSON-RPC freym yuborish                                                                                         |
+| GET    | `/api/mcp/stream`      | Streamable HTTP transportining SSE tomonini ochish (server tomonidan ishga tushiriladigan xabarlar)                              |
+| POST   | `/api/mcp/stream`      | Streamable HTTP transportida JSON-RPC freym yuborish                                                                             |
+| DELETE | `/api/mcp/stream`      | Streamable HTTP sessiyasini yakunlash                                                                                            |
+| GET    | `/api/mcp/audit`       | Audit jurnalini soʻrash — `?limit=`, `?offset=`, `?tool=`, `?success=true                                \| false`, `?apiKeyId=` |
+| GET    | `/api/mcp/audit/stats` | Umumlashtirilgan audit statistikasi (jami sonlar, muvaffaqiyat darajasi, oʻrtacha davomiylik, eng koʻp ishlatiladigan vositalar) |
 
 **Auth:** `sse`/`stream` transportlari MCPʼga xos autentifikatsiya interfeysini ( `mcp` doirasiga ega Bearer API kaliti) qoʻllab-quvvatlaydi; `status`/`tools`/`audit*` yoʻnalishlarini boshqaruv panelidan oʻqish mumkin (boshqaruv paneli hostiga kirishdan tashqari qoʻshimcha autentifikatsiya talab etilmaydi).
 

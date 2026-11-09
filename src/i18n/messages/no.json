@@ -4147,7 +4147,9 @@
     "duplicateAutoComboFailedPrefix": "Duplisering av auto-kombinasjon mislyktes:",
     "duplicateAutoComboUnknownError": "Ukjent feil",
     "duplicateAutoComboTitle": "Opprett en statisk kombinasjon fra {name}",
-    "fallbackSummary": "{rate}% av forespurningene gikk til fallback, i snitt ~{skips} mål hoppet over hver"
+    "fallbackSummary": "{rate}% av forespurningene gikk til fallback, i snitt ~{skips} mål hoppet over hver",
+    "reorderAll": "Omorganiser alle",
+    "reorderAllDescription": "Omorganiserer alle {count} kombinasjoner. Drahåndtak er aktivert."
   },
   "costs": {
     "title": "Kostnader",
@@ -14538,6 +14540,10 @@
       "UNPRICED_USAGE_BUDGET_POLICY": {
         "label": "Retningslinje for budsjett ved bruk uten pris",
         "description": "Hvordan USD-grenser per nøkkel (daglig/ukentlig) behandler vellykket bruk der leverandør/modell ikke har en prisrad. fail_closed (standard) markerer vinduet som overskredet, slik at en ukjent kostnad aldri kan passere et hardt tak. count_as_zero teller denne bruken som $0 og fortsetter å håndheve priset forbruk. Modeller uten pris listes på dashbordets forside uansett."
+      },
+      "COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE": {
+        "description": "I komprimeringsbufferstatistikken teller du en komprimert forespørsel til en leverandør av automatisk prefiksbufring (OpenAI, Codex, Azure eller en tilpasset tilkobling som erklærer hurtigbufring med markørstripping) som et estimert cachetreff selv uten cache_control-markører. Anslaget er et signal for cache-kvalifisering, ikke et observert treff, så den rapporterte trefffrekvensen for disse leverandørene går mot 100 %. Av som standard: bare en forespørsel som sender cache_control-markører til en hurtigbufferleverandør teller som et estimert treff, så leverandører av automatiske prefikser fortsetter å rapportere 0.",
+        "label": "Komprimeringsbufferstatistikk: Kvalifisering for automatisk prefiks"
       }
     }
   },

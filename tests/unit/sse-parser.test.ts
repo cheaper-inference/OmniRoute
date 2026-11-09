@@ -441,6 +441,50 @@ test("parseSSEToGeminiResponse rejects an invalid cached count", () => {
   assert.equal(parsed.usage.cache_evidence, undefined);
 });
 
+test("parseSSEToGeminiResponse does not infer a cache hit without a valid prompt count", () => {
+  for (const promptTokenCount of [undefined, null, "10", {}]) {
+    const rawSSE = `data: ${JSON.stringify({
+      response: {
+        candidates: [{ content: { parts: [{ text: "Hello" }] }, finishReason: "STOP" }],
+        usageMetadata: {
+          promptTokenCount,
+          candidatesTokenCount: 2,
+          totalTokenCount: 2,
+          cachedContentTokenCount: 1,
+        },
+      },
+    })}`;
+    const parsed = parseSSEToGeminiResponse(rawSSE, "gemini-2.5-flash");
+    assert.deepEqual(parsed?.usage, { completion_tokens: 2, total_tokens: 2 });
+  }
+});
+
+test("parseSSEToGeminiResponse validates cached counts against the last valid prompt snapshot", () => {
+  const rawSSE = [
+    {
+      response: {
+        candidates: [{ content: { parts: [{ text: "Hello" }] } }],
+        usageMetadata: {
+          promptTokenCount: 10,
+          candidatesTokenCount: 2,
+          totalTokenCount: 12,
+          cachedContentTokenCount: 4,
+        },
+      },
+    },
+    { response: { usageMetadata: { promptTokenCount: "invalid", cachedContentTokenCount: 6 } } },
+  ]
+    .map((frame) => `data: ${JSON.stringify(frame)}`)
+    .join("\n");
+  const parsed = parseSSEToGeminiResponse(rawSSE, "gemini-2.5-flash");
+  assert.deepEqual(parsed?.usage, {
+    prompt_tokens: 10,
+    completion_tokens: 2,
+    total_tokens: 12,
+    prompt_tokens_details: { cached_tokens: 6 },
+  });
+});
+
 test("parseSSEToGeminiResponse handles markdown shortcut format", () => {
   const rawSSE = [
     'data: {"markdown":"Hello "}',

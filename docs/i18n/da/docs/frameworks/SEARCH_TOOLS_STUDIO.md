@@ -54,7 +54,7 @@ Ny fane til udtrækning af indhold fra en URL via `POST /v1/web/fetch` (oprettet
 - Input: URL + indstilling for hele siden + formatvælger (markdown / tekst / HTML).
 - Indsend → hent → gengiv `ScrapeResult.tsx`.
 - `ScrapeResult` gengiver en markdown-forhåndsvisning + skift til rådata.
-- Grænse: Hvis svarindholdet er større end **256 KB**, viser brugerfladen `(afkortet, vis rådata)` og åbner rådata i en Monaco-modal (D21).
+- Grænse: Hvis svarindholdet er større end **256 KB**, viser brugerfladen `View full raw content` og åbner rådata i en modal (D21).
 - Metadatapanel: provider (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), latenstid, pris, svarstørrelse, antal links.
 - Bruger hooket `useScrapeFetch.ts`.
 

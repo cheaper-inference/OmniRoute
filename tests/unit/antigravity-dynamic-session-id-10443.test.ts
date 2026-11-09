@@ -5,6 +5,11 @@ import {
   deriveAntigravitySessionId,
   getAntigravitySessionId,
 } from "../../open-sse/services/antigravityIdentity.ts";
+import { closeSharedLoggerResource } from "../../src/shared/utils/loggerResource.ts";
+
+test.after(async () => {
+  await closeSharedLoggerResource();
+});
 
 test("getAntigravitySessionId derives a stable session ID from credentials for prompt-cache reuse", () => {
   const credentials = { email: "user@example.com", connectionId: "conn_123" };

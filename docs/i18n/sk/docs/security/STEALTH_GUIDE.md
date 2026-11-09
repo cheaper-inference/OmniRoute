@@ -239,9 +239,9 @@ Všetky koncové body MITM vyžadujú autentifikáciu pre správu (`requireCliTo
 
 ---
 
-## User-Agent prepíše — env vars (`.env.example` sekcia 12)
+## Prepísanie reťazcov User-Agent — premenné prostredia (`.env.example`, sekcia 12)
 
-| Variabilné          | Predvolené                                    |
+| Premenná            | Predvolená hodnota                            |
 | ------------------- | --------------------------------------------- |
 | `CLAUDE_USER_AGENT` | `claude-cli/2.1.280 (external, cli)`          |
 | `CODEX_USER_AGENT`  | `codex-cli/0.155.0 (Windows 10.0.26200; x64)` |
@@ -250,7 +250,7 @@ Všetky koncové body MITM vyžadujú autentifikáciu pre správu (`requireCliTo
 | `QODER_USER_AGENT`  | `Qoder-Cli`                                   |
 | `CURSOR_USER_AGENT` | `Cursor/3.4`                                  |
 
-Spotrebované `open-sse/executors/base.ts::buildHeaders()` prostredníctvom dynamického vyhľadávania.** Zvýšte ich, keď poskytovatelia vydajú nové verzie CLI** — zastaralé reťazce UA začínajú byť odmietané ako zastaraní klienti.
+Používa ich `open-sse/executors/base.ts::buildHeaders()` prostredníctvom dynamického vyhľadávania. **Aktualizujte ich, keď poskytovatelia vydajú nové verzie CLI** — zastarané reťazce UA začnú byť odmietané ako neaktuálni klienti.
 
 ## Prepínače režimu kompatibility CLI (`.env.example`, časť 13)
 

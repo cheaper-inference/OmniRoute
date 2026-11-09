@@ -7,7 +7,7 @@ import {
   useModelImportHandlers,
   type UseModelImportHandlersParams,
   type UseModelImportHandlersReturn,
-} from "../hooks/useModelImportHandlers";
+} from "../../../src/app/(dashboard)/dashboard/providers/[id]/hooks/useModelImportHandlers";
 
 type HookResult = UseModelImportHandlersReturn;
 

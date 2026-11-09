@@ -4,164 +4,161 @@
 
 ---
 
-Export continuu, incremental al jurnalelor de apeluri OmniRoute către un depozit extern de date analitice.
+Export continuu și incremental al jurnalelor de apeluri OmniRoute către un depozit extern de date analitice.
 
-Fila Jurnale din tabloul de bord păstrează istoricul cererilor în SQLite (`call_logs`), limitat de
-rotație și retenție. Exportul jurnalelor trimite același set de înregistrări conform unui program, astfel încât acesta să poată fi păstrat
-dincolo de durata de viață a bazei de date locale și corelat cu alte date. BigQuery este prima destinație;
-fluxul de procesare folosește un registru, astfel încât pot fi adăugate alte destinații.
+Fila Logs a tabloului de bord păstrează istoricul solicitărilor în SQLite (`call_logs`), acesta fiind limitat prin rotație și retenție. Exportul jurnalelor trimite periodic același set de înregistrări, astfel încât acestea să poată exista mai mult decât baza de date locală și să poată fi corelate cu alte date. BigQuery este prima destinație; conducta folosește un registru, astfel încât pot fi adăugate și alte destinații.
 
 ---
 
 ## 1. Cum funcționează
 
 ```
-server (decriptare + validare configurație, reconciliere cursor)
-  → pornire IPC → proces OS exportChild izolat
-    → storage.sqlite doar în citire → interogare/mapare comună a jurnalelor de apeluri
-      → hidratare asincronă a artefactelor → prepare()/send() ale destinației
-        → lot IPC → serverul persistă cursorul → confirmare IPC
-          → lotul următor; finalizare IPC → serverul înregistrează succesul
+server (decriptează + validează configurația, reconciliază cursorul)
+  → pornește IPC → proces OS exportChild izolat
+    → storage.sqlite doar în citire → interogare/mapare partajată a jurnalului de apeluri
+      → încărcare asincronă a artefactelor → prepare()/send() pentru destinație
+        → IPC pentru lot → serverul persistă cursorul → confirmare IPC
+          → lotul următor; IPC de finalizare → serverul înregistrează succesul
 ```
 
-- **Programare** — o singură sarcină cron `JobRegistry`, `log_export`, cu valoarea implicită `0 * * * *` (orar,
-  UTC). Înregistrată în `src/lib/initCloudSync.ts`; poate fi suprascrisă cu `OMNIROUTE_LOG_EXPORT_CRON`.
-  Fiecare declanșare procesează toate destinațiile **activate**, secvențial.
+- **Programare** — o singură sarcină cron `JobRegistry`, `log_export`, cu valoarea implicită `0 * * * *` (la fiecare oră,
+  UTC). Este înregistrată în `src/lib/initCloudSync.ts`; poate fi suprascrisă cu `OMNIROUTE_LOG_EXPORT_CRON`.
+  La fiecare execuție sunt procesate secvențial toate destinațiile **activate**.
 - **Cursor** — valoarea implicită `call_logs.rowid` din SQLite, persistată pentru fiecare destinație în
-  `log_export_destinations.cursor_row_id`. `timestamp` nu este folosit intenționat drept cursor: apelanții
-  pot furniza propria valoare, astfel încât o cerere lentă poate fi scrisă după una mai rapidă care a început
-  mai târziu, iar un cursor bazat pe marcajul temporal ar omite-o.
-- **Procesare în loturi** — `batch_size` rânduri per cerere (implicit 500), `max_rows_per_run` rânduri per execuție
-  (implicit 10000), astfel încât un volum mare de date restante să fie procesat pe parcursul mai multor declanșări, în loc să blocheze una singură.
-- **Livrare** — cursorul avansează numai după rezolvarea `send()`. Un lot eșuat lasă
-  cursorul în poziția anterioară, astfel încât aceleași rânduri sunt retrimise la execuția următoare. Garanția este
-  livrarea cel puțin o dată, plus deduplicare la destinație, nu livrare efectivă exact o dată: BigQuery identifică fiecare
-  rând prin ID-ul jurnalului de apel, pe care îl respectă în limita posibilităților, în propria fereastră de deduplicare.
-- **Protecție împotriva suprapunerii** — declanșarea cron și `POST .../run` pot avea loc simultan. O destinație
+  `log_export_destinations.cursor_row_id`. `timestamp` nu este în mod intenționat cursorul: apelanții
+  își pot furniza propria valoare, astfel încât o solicitare lentă poate fi scrisă după una mai rapidă care a început
+  ulterior, iar un cursor bazat pe marcajul temporal ar omite-o.
+- **Procesare în loturi** — `batch_size` rânduri per solicitare (implicit 500), `max_rows_per_run` rânduri per execuție
+  (implicit 10000), astfel încât un volum restant mare să fie procesat pe parcursul mai multor execuții, în loc să blocheze una singură.
+- **Livrare** — cursorul avansează numai după ce `send()` se finalizează. Un lot eșuat lasă
+  cursorul în poziția în care se afla, astfel încât aceleași rânduri sunt reîncercate la următoarea execuție. Garanția este
+  de cel puțin o livrare, împreună cu deduplicarea la nivelul destinației, nu de exact o singură livrare reală: BigQuery identifică fiecare
+  rând după ID-ul jurnalului de apeluri, pe care îl respectă în regim best-effort în propria fereastră de deduplicare.
+- **Protecție împotriva suprapunerii** — execuția cron și `POST .../run` pot porni simultan. O destinație
   aflată deja în curs de procesare este omisă, în loc să fie procesată de două ori (`skipped: true` în rezultatul execuției),
-  astfel încât o execuție concurentă să nu poată retrimite un lot sau muta cursorul înapoi.
-- **Recuperare după golire** — dacă `cursor_row_id` ajunge deasupra `MAX(rowid)` (întregul tabel a fost
-  golit și valorile rowid au repornit), executorul revine la 0, în loc să nu mai detecteze permanent datele.
+  astfel încât o execuție concurentă nu poate retrimite un lot și nici nu poate muta cursorul înapoi.
+- **Recuperare după ștergere** — dacă `cursor_row_id` ajunge deasupra valorii `MAX(rowid)` (întregul tabel a fost
+  golit, iar valorile rowid au fost reluate), runnerul revine la 0 în loc să rămână permanent fără vizibilitate.
 
-### Executor izolat și limite
+### Runner izolat și limite
 
-Fiecare execuție pentru o destinație pe Node pornește un proces copil separat, de scurtă durată, la nivelul sistemului de operare (`child_process`
-cu IPC, nu `worker_threads`). Citirea corpurilor, parsarea/serializarea JSON a datelor, `prepare()` pentru
-destinație și toate operațiile de rețea I/O ale destinației rulează acolo, nu în bucla de evenimente a serverului.
-Doar configurația și mesajele mici de progres traversează IPC; înregistrările exportate nu revin niciodată
-la server. Sarcina cron și ruta Rulează acum păstrează același rezultat public și aceeași protecție împotriva suprapunerii.
+Fiecare execuție a unei destinații pe Node pornește un proces copil OS separat și de scurtă durată (`child_process`
+cu IPC, nu `worker_threads`). Citirea corpurilor, parsarea/serializarea JSON a payloadurilor, operația
+`prepare()` a destinației și I/O-ul de rețea al destinației rulează toate acolo, nu în bucla de evenimente a serverului.
+Prin IPC trec numai configurația și mesajele mici de progres; înregistrările exportate nu revin niciodată la
+server. Sarcina cron și ruta Run now păstrează același rezultat public și aceeași protecție împotriva suprapunerii.
 
-Procesul copil deschide doar pentru citire calea rezolvată de server `DATA_DIR/storage.sqlite`, folosind `node:sqlite`,
-cu `busy_timeout=5000` și `query_only=ON`. Nu importă nicio instanță unică a bazei de date și nu efectuează
-migrări, copii de siguranță sau actualizări SQLite. Gestionarea evidenței artefactelor lipsă/corupte (inclusiv
-UPDATE pentru artefacte corupte) rămâne exclusiv în fluxul de detalii al tabloului de bord. Ambele fluxuri folosesc același
-rezolvitor de detalii pur; exportul folosește citiri asincrone din sistemul de fișiere și aceeași ordine de rezolvare: artefact → conținut
-inline vechi → disc vechi → nimic. O execuție fixează valoarea rowid maximă de inserare
-când procesul copil își deschide cititorul; inserările ulterioare așteaptă execuția următoare. Aceasta este o limită
-de inserare, nu o tranzacție SQLite de lungă durată: procesele de scriere WAL și punctele de control rămân libere în timpul
+Procesul copil deschide baza de date `DATA_DIR/storage.sqlite` rezolvată a serverului doar în citire, folosind `node:sqlite`,
+cu `busy_timeout=5000` și `query_only=ON`. Nu importă niciun singleton pentru baza de date și nu efectuează
+migrări, copii de rezervă sau actualizări SQLite. Evidența artefactelor lipsă/deteriorate (inclusiv
+operația UPDATE pentru artefactul deteriorat) rămâne numai în fluxul de detalii al tabloului de bord. Ambele fluxuri partajează un resolver
+pur pentru detalii; exportul folosește citiri asincrone din sistemul de fișiere și aceeași ordine de rezolvare
+artefact → conținut inline moștenit → disc moștenit → nimic. O execuție capturează valoarea rowid maximă a inserărilor
+atunci când procesul copil își deschide cititorul; inserările ulterioare așteaptă execuția următoare. Aceasta este o limită
+de inserare, nu o tranzacție SQLite de lungă durată: scrierile și punctele de control WAL rămân libere în timpul
 așteptărilor de rețea. Actualizările/ștergerile rândurilor existente nu sunt înghețate de această limită.
 
 După fiecare lot acceptat, procesul copil așteaptă o confirmare. Serverul persistă mai întâi
-cursorul cu `advanceLogExportCursor`, apoi trimite `ack`; niciun lot următor nu începe înainte de aceasta.
-Un eșec de trimitere, o cădere sau o expirare a timpului-limită înregistrează un eșec fără a avansa cursorul pentru acel lot. Loturile
-confirmate anterior rămân salvate; cel mult singurul lot neconfirmat poate fi retrimis.
-Succesul este înregistrat numai după `done` și o încheiere normală a procesului copil. Eșecurile încheie procesul copil
-cu SIGTERM, apoi cu SIGKILL după 500 ms dacă este necesar, iar executorul așteaptă închiderea procesului.
+cursorul cu `advanceLogExportCursor`, apoi trimite `ack`; niciun lot următor nu pornește înainte de aceasta.
+Un eșec de trimitere, un crash sau expirarea timpului înregistrează eșecul fără a avansa lotul respectiv. Loturile
+confirmate anterior rămân salvate; cel mult un singur lot neconfirmat poate fi retrimis.
+Succesul este înregistrat numai după `done` și o închidere fără erori a procesului copil. Eșecurile opresc procesul copil
+cu SIGTERM, escaladând la SIGKILL după 500 ms, iar runnerul așteaptă închiderea procesului.
 
-| Variabilă de mediu                            | Implicit | Scop                                          |
-| --------------------------------------------- | -------- | --------------------------------------------- |
-| `OMNIROUTE_LOG_EXPORT_RUN_TIMEOUT_MS`         | 900000   | Limită de timp efectiv per destinație         |
-| `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB` | 1024     | Limită old-space V8 a procesului copil, în MB |
+| Variabilă de mediu                            | Valoare implicită | Scop                                          |
+| --------------------------------------------- | ----------------- | --------------------------------------------- |
+| `OMNIROUTE_LOG_EXPORT_RUN_TIMEOUT_MS`         | 900000            | Limită de timp per destinație                 |
+| `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB` | 1024              | Limita spațiului vechi V8 pentru copil, în MB |
 
-Valorile nevalide/nepozitive/neîntregi determină folosirea valorilor implicite. Setarea heap-ului nu reprezintă o limită
-RSS totală; loturile foarte mari pot totuși epuiza memoria procesului copil și pot provoca eșecul execuției în condiții de siguranță.
-Valoarea implicită de 1024 MB lasă o marjă pentru lotul implicit de 500 de rânduri cu artefacte de 512 KiB și
-corpuri activate, inclusiv serializarea JSON a BigQuery în fragmente delimitate după numărul de octeți. Aceasta nu face sigură procesarea unui
-lot de 10000 de rânduri cu corpuri. Epuizarea heap-ului V8 înregistrează un eșec însoțit de măsuri concrete: reduceți dimensiunea
-lotului sau măriți `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB`; cursorul rămâne la ultimul
-lot confirmat. Corpurile istorice inline/de pe disc nu sunt acoperite de limita modernă pentru artefacte.
-Operatorii trebuie să aloce separat un buget RSS, mai ales în containere cu memorie limitată.
+Valorile nevalide/negative sau nule/care nu sunt numere întregi folosesc valorile implicite. Setarea heapului nu reprezintă o limită
+RSS totală; loturile foarte mari pot epuiza în continuare memoria procesului copil și pot face ca execuția să eșueze în siguranță.
+Valoarea implicită de 1024 MB lasă suficientă rezervă pentru lotul implicit de 500 de rânduri cu artefacte de 512 KiB și
+corpuri activate, inclusiv serializarea JSON pe segmente de octeți din BigQuery. Aceasta nu face sigur
+un lot de 10000 de rânduri cu corpuri. Epuizarea heapului V8 înregistrează un eșec cu instrucțiuni aplicabile: reduceți dimensiunea lotului
+sau măriți `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB`; cursorul rămâne la ultimul lot
+confirmat. Corpurile istorice inline/de pe disc nu sunt acoperite de limita modernă pentru artefacte.
+Operatorii trebuie să bugeteze separat memoria RSS, mai ales în containere cu memorie limitată.
 
-Procesul copil moștenește doar valoarea rezolvată pentru `DATA_DIR`, `NODE_ENV`, valoarea explicită pentru `TZ` (rezolvarea orei
-locale din numele de fișier în format vechi), `ELECTRON_RUN_AS_NODE` când este prezentă și următoarele variabile pentru conexiunile de ieșire:
-`HTTP_PROXY`, `HTTPS_PROXY`, `ALL_PROXY`, `NO_PROXY` (și formele lor cu litere mici),
+Procesul copil moștenește numai valoarea rezolvată `DATA_DIR`, `NODE_ENV`, valoarea explicită `TZ` (rezolvarea după ora
+locală a numelor de fișiere moștenite), `ELECTRON_RUN_AS_NODE` atunci când este prezentă și următoarele intrări pentru conexiunile de ieșire:
+`HTTP_PROXY`, `HTTPS_PROXY`, `ALL_PROXY`, `NO_PROXY` (și formele lor scrise cu litere mici),
 `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS`, `NODE_EXTRA_CA_CERTS`, `SSL_CERT_FILE`, `SSL_CERT_DIR`.
-Un dispecer Undici global folosește aceeași rezolvare a proxy-ului bazată exclusiv pe variabilele de mediu și aceleași reguli de
-ocolire a proxy-ului pentru gazdele locale ca serverul, inclusiv `NO_PROXY`; acesta nu importă `proxyFetch.ts` sau opțiunile sale pentru baza de date/funcționalități.
-Datele de autentificare pentru proxy sunt mascate în ieșirea redirecționată și în erorile înregistrate. Datele de autentificare ale destinației
-sunt transmise doar într-un singur mesaj IPC de pornire, niciodată prin argv sau variabile de mediu; ieșirea și erorile redirecționate sunt
-prefixate și igienizate. Doar `ExperimentalWarning` este dezactivat în argumentele de execuție ale procesului copil, pentru a evita
-repetarea avertismentului SQLite al Node la fiecare rulare cron; celelalte tipuri de avertismente rămân vizibile.
+Un dispatcher Undici global partajează rezolvarea pură a proxyului din mediu și regulile de evitare pentru gazdele locale
+ale serverului, inclusiv `NO_PROXY`; acesta nu importă `proxyFetch.ts` și nici baza de date/feature flagurile sale.
+Datele de autentificare pentru proxy sunt redactate din ieșirea redirecționată și din erorile înregistrate. Datele de autentificare ale destinației
+circulă numai într-un singur mesaj IPC de pornire, niciodată prin argv sau mediu; redirecționarea ieșirii/erorilor este
+prefixată și igienizată. Numai `ExperimentalWarning` este dezactivat în argumentele de execuție ale procesului copil, pentru a evita
+repetarea avertismentului SQLite al Node la fiecare execuție cron; celelalte tipuri de avertismente rămân vizibile.
 
-Modulele destinațiilor trebuie să poată fi importate fără dependențe Next.js/exclusive serverului. Implementarea
-BigQuery existentă îndeplinește deja acest contract. Cache-urile tokenurilor de acces persistă doar pe durata rulării procesului
-copil, nu și între rulări. Node este mediul de execuție acceptat (engines din `package.json`), dar secțiunea de instalare cu Bun
-din README și `Dockerfile.bun` prezintă și o cale de compatibilitate pentru producție folosind
+Modulele de destinație trebuie să poată fi importate fără dependențe Next.js sau exclusiv pentru server. Implementarea
+BigQuery existentă respectă deja acest contract. Cache-urile tokenurilor de acces persistă doar pe durata
+execuției procesului copil, nu și între execuții. Node este mediul de execuție acceptat (secțiunea `engines` din `package.json`), însă secțiunea
+de instalare Bun din README și `Dockerfile.bun` promovează și o cale de compatibilitate pentru producție care utilizează
 `bun:sqlite` (`src/lib/db/core.ts` / adaptoare). Prin urmare, sub Bun, exporturile păstrează calea anterioară
-în cadrul aceluiași proces și emit un avertisment o singură dată: izolarea memoriei heap și a timpului-limită prin proces copil nu este disponibilă. Folosiți
-Node pentru izolarea buclei de evenimente și a epuizării memoriei (OOM); Bun nu este tratat aici ca fiind destinat exclusiv dezvoltării.
+din cadrul procesului și emit o singură avertizare: izolarea memoriei heap și a expirării procesului copil nu este disponibilă. Utilizați
+Node pentru izolarea buclei de evenimente și a erorilor OOM; Bun nu este tratat aici ca fiind exclusiv pentru dezvoltare.
 
-Când `includeBodies` este activat, preferați o frecvență la nivel de minute, precum
-`OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"`, în loc să acumulați timp de o oră date în așteptare.
-Limitele pentru loturi și rânduri limitează în continuare fiecare rulare. Costul pornirii procesului este suportat pentru fiecare destinație la fiecare rulare;
-acest compromis adaugă un cost mic de pornire pentru a izola bucla de evenimente a serverului, nu pentru a reduce utilizarea totală a procesorului.
+Când `includeBodies` este activat, preferați o cadență la nivel de minute, precum
+`OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"`, în loc să acumulați un volum de sarcini utile pentru o oră.
+Limitele pentru loturi și rânduri continuă să limiteze fiecare execuție. Costul pornirii procesului este suportat pentru fiecare destinație și pentru fiecare execuție;
+astfel, un cost redus de pornire este acceptat în schimbul izolării buclei de evenimente a serverului, nu pentru reducerea utilizării totale a procesorului.
 
-### Date transmise (prompturi și completări)
+### Sarcini utile (prompturi și completări)
 
-În mod implicit, exportul conține doar câmpurile de sinteză afișate în **lista** de jurnale. Activarea opțiunii
-**Exportă prompturile și răspunsurile** (`includeBodies`) transmite suplimentar ceea ce afișează panoul de **detalii**
-al jurnalelor pentru fiecare apel:
+În mod implicit, exportul conține doar câmpurile rezumative afișate în **lista** Logs. Activarea opțiunii
+**Exportă prompturile și răspunsurile** (`includeBodies`) trimite suplimentar ceea ce afișează panoul de **detalii**
+Logs pentru fiecare apel:
 
-| Câmp                             | Ce conține                                                               |
-| -------------------------------- | ------------------------------------------------------------------------ |
-| `request_body` / `response_body` | Datele apelului, așa cum le afișează tabloul de bord                     |
-| `pipeline_route_decision`        | Destinația și modelul alese de router                                    |
-| `pipeline_client_request`        | Cererea brută, exact așa cum a trimis-o clientul                         |
-| `pipeline_openai_request`        | După conversia în formatul OpenAI intern                                 |
-| `pipeline_provider_request`      | Așa cum a fost trimisă efectiv în amonte, în dialectul furnizorului      |
-| `pipeline_provider_response`     | Răspunsul brut din amonte                                                |
-| `pipeline_client_response`       | Ceea ce a fost returnat apelantului                                      |
-| `pipeline_error`                 | Detalii despre eroarea la nivel de pipeline pentru un apel eșuat         |
-| `bodies_truncated`               | Adevărat când oricare dintre câmpurile de mai sus a atins `maxBodyBytes` |
+| Câmp                             | Ce conține                                                           |
+| -------------------------------- | -------------------------------------------------------------------- |
+| `request_body` / `response_body` | Sarcinile utile ale apelului, așa cum le redă tabloul de bord        |
+| `pipeline_route_decision`        | Ținta și modelul alese de router                                     |
+| `pipeline_client_request`        | Solicitarea brută, exact așa cum a trimis-o clientul                 |
+| `pipeline_openai_request`        | După traducerea în formatul OpenAI intern                            |
+| `pipeline_provider_request`      | Așa cum a fost trimisă efectiv în amonte, în dialectul furnizorului  |
+| `pipeline_provider_response`     | Răspunsul brut din amonte                                            |
+| `pipeline_client_response`       | Ceea ce a fost returnat apelantului                                  |
+| `pipeline_error`                 | Detaliile erorii la nivel de pipeline pentru un apel eșuat           |
+| `bodies_truncated`               | True când oricare dintre câmpurile de mai sus a atins `maxBodyBytes` |
 
-Acesta este conținutul prompturilor, așa că opțiunea este **dezactivată implicit** și este în mod deliberat o alegere pentru fiecare destinație.
-Se transmite ceea ce afișează tabloul de bord, deoarece exportul și `getCallLogById` folosesc aceeași
-rezolvare a detaliilor: datele sunt
-deja curățate de informații de identificare personală (PII), iar secretele sunt mascate la scriere; un apel efectuat cu o
-cheie API `noLog` nu stochează deloc datele apelului, deci nu există nimic de exportat.
+Acesta este conținutul promptului, deci opțiunea este **dezactivată în mod implicit** și este în mod intenționat o alegere pentru fiecare destinație.
+Se trimite ceea ce afișează tabloul de bord, deoarece exportul și `getCallLogById` folosesc în comun
+rezolvarea detaliilor: sarcinile utile sunt
+deja igienizate de date cu caracter personal și au secretele mascate atunci când sunt scrise, iar un apel efectuat cu o cheie API
+`noLog` nu stochează nicio sarcină utilă, deci nu există nimic de exportat.
 
-Datele sunt citite pentru fiecare rând din artefactul din sistemul de fișiere, astfel încât hidratarea rulează doar pentru destinațiile
-care au solicitat-o. Un artefact lipsă sau corupt duce la exportarea sintezei sale cu date nule, în loc
-să provoace eșuarea lotului și blocarea cursorului.
+Sarcinile utile sunt citite pentru fiecare rând din artefactul sistemului de fișiere, astfel încât hidratarea rulează doar pentru destinațiile
+care au solicitat-o. În cazul unui artefact lipsă sau corupt, rezumatul acestuia este exportat cu sarcini utile nule, în loc ca
+lotul să eșueze și cursorul să rămână blocat.
 
-`maxBodyBytes` (implicit 262144) limitează fiecare câmp. Datele mai lungi sunt **trunchiate, nu
-eliminate** — un prompt scurtat răspunde în continuare la întrebarea „ce s-a cerut” — iar rândul este marcat cu
-`bodies_truncated`. Diferențele transmise în flux, fragment cu fragment, nu sunt exportate; răspunsul asamblat se află
+`maxBodyBytes` (implicit 262144) limitează fiecare câmp. Sarcinile utile mai lungi sunt **trunchiate, nu
+eliminate** — un prompt scurtat răspunde în continuare la întrebarea „ce s-a solicitat” — iar rândul este marcat prin
+`bodies_truncated`. Delta-urile transmise în flux, fragment cu fragment, nu sunt exportate; răspunsul asamblat se află
 deja în `pipeline_provider_response` și `pipeline_client_response`.
 
 ---
 
 ## 2. Fișiere
 
-| Componentă                                 | Locație                                      |
-| ------------------------------------------ | -------------------------------------------- |
-| Contractul destinației                     | `src/lib/logExport/types.ts`                 |
-| Registru                                   | `src/lib/logExport/registry.ts`              |
-| Gestionarea secretelor                     | `src/lib/logExport/secrets.ts`               |
-| Executor (IPC părinte)                     | `src/lib/logExport/runner.ts`                |
-| Ciclul de viață al procesului              | `src/lib/logExport/childRunner.ts`           |
-| Punct de intrare al procesului copil       | `src/lib/logExport/exportChild.ts`           |
-| Deschidere doar pentru citire              | `src/lib/db/logExportReadOnly.ts`            |
-| Interogare/mapare comună                   | `src/lib/usage/callLogExportQueries.ts`      |
-| Rezolvarea detaliilor                      | `src/lib/usage/callLogDetailResolver.ts`     |
-| Proiecție API                              | `src/lib/logExport/presenter.ts`             |
-| Destinație BigQuery                        | `src/lib/logExport/destinations/bigquery.ts` |
-| Autentificare prin cont de serviciu Google | `src/lib/logExport/googleServiceAccount.ts`  |
-| Sursa jurnalului de apeluri                | `src/lib/usage/callLogExportSource.ts`       |
-| Persistență                                | `src/lib/db/logExportDestinations.ts`        |
-| Sarcină cron                               | `src/lib/jobs/logExportJob.ts`               |
-| Strat REST                                 | `src/app/api/log-export/`                    |
-| Pagina tabloului de bord                   | `src/app/(dashboard)/dashboard/log-export/`  |
+| Componentă                    | Locație                                      |
+| ----------------------------- | -------------------------------------------- |
+| Contract destinație           | `src/lib/logExport/types.ts`                 |
+| Registru                      | `src/lib/logExport/registry.ts`              |
+| Gestionarea secretelor        | `src/lib/logExport/secrets.ts`               |
+| Executor (IPC părinte)        | `src/lib/logExport/runner.ts`                |
+| Ciclul de viață al procesului | `src/lib/logExport/childRunner.ts`           |
+| Punct de intrare copil        | `src/lib/logExport/exportChild.ts`           |
+| Deschidere doar în citire     | `src/lib/db/logExportReadOnly.ts`            |
+| Interogare/mapare comună      | `src/lib/usage/callLogExportQueries.ts`      |
+| Resolver de detalii           | `src/lib/usage/callLogDetailResolver.ts`     |
+| Proiecție API                 | `src/lib/logExport/presenter.ts`             |
+| Destinație BigQuery           | `src/lib/logExport/destinations/bigquery.ts` |
+| Autentificare Google SA       | `src/lib/logExport/googleServiceAccount.ts`  |
+| Sursă jurnal apeluri          | `src/lib/usage/callLogExportSource.ts`       |
+| Persistență                   | `src/lib/db/logExportDestinations.ts`        |
+| Sarcină cron                  | `src/lib/jobs/logExportJob.ts`               |
+| Strat REST                    | `src/app/api/log-export/`                    |
+| Pagina tabloului de bord      | `src/app/(dashboard)/dashboard/log-export/`  |
 
 Schemă: `src/lib/db/migrations/170_log_export_destinations.sql`.
 
@@ -169,29 +166,29 @@ Schemă: `src/lib/db/migrations/170_log_export_destinations.sql`.
 
 ## 3. API REST
 
-Toate rutele necesită autentificare de administrare (`requireManagementAuth`). Secretele nu sunt returnate niciodată:
-un secret stocat este returnat ca valoarea literală `__stored__`, iar trimiterea acestei valori la o actualizare
-păstrează credențialele stocate.
+Toate rutele sunt autentificate pentru administrare (`requireManagementAuth`). Secretele nu sunt returnate niciodată:
+un secret stocat este returnat ca valoarea literală `__stored__`, iar trimiterea acestei valori înapoi la actualizare
+păstrează credențialul stocat.
 
 Crearea sau actualizarea unei destinații al cărei tip declară un secret **necesită
-`STORAGE_ENCRYPTION_KEY`**. Fără aceasta, `encrypt()` lasă datele neschimbate fără niciun avertisment, așa că scrierea este
-refuzată cu un cod 400, în loc să stocheze credențialele în SQLite în text simplu (aceeași protecție pe care o
+`STORAGE_ENCRYPTION_KEY`**. Fără aceasta, `encrypt()` lasă în tăcere datele nemodificate, astfel încât scrierea este
+refuzată cu un răspuns 400, în loc să introducă un credențial în SQLite ca text simplu (aceeași protecție pe care o
 aplică webhook-ul Telegram).
 
-| Metodă   | Cale                                     | Scop                                                                              |
-| -------- | ---------------------------------------- | --------------------------------------------------------------------------------- |
-| `GET`    | `/api/log-export/types`                  | Tipurile de destinații + lista câmpurilor lor de configurare                      |
-| `GET`    | `/api/log-export/destinations`           | Listează destinațiile (cu secretele mascate)                                      |
-| `POST`   | `/api/log-export/destinations`           | Creează o destinație                                                              |
-| `GET`    | `/api/log-export/destinations/{id}`      | Citește o destinație                                                              |
-| `PUT`    | `/api/log-export/destinations/{id}`      | Actualizează numele / activarea / configurația / procesarea în loturi             |
-| `DELETE` | `/api/log-export/destinations/{id}`      | Șterge                                                                            |
-| `POST`   | `/api/log-export/destinations/{id}/test` | Verifică credențialele, fără a scrie nimic                                        |
-| `POST`   | `/api/log-export/destinations/{id}/run`  | Procesează acum toate datele în așteptare, pe aceeași cale ca execuția programată |
-| `GET`    | `/api/log-export/status`                 | Starea cron, execuțiile recente, datele în așteptare pentru fiecare destinație    |
+| Metodă   | Cale                                     | Scop                                                                        |
+| -------- | ---------------------------------------- | --------------------------------------------------------------------------- |
+| `GET`    | `/api/log-export/types`                  | Tipuri de destinații + lista câmpurilor de configurare                      |
+| `GET`    | `/api/log-export/destinations`           | Listează destinațiile (secrete mascate)                                     |
+| `POST`   | `/api/log-export/destinations`           | Creează o destinație                                                        |
+| `GET`    | `/api/log-export/destinations/{id}`      | Citește o destinație                                                        |
+| `PUT`    | `/api/log-export/destinations/{id}`      | Actualizează numele / starea activată / configurația / procesarea pe loturi |
+| `DELETE` | `/api/log-export/destinations/{id}`      | Șterge                                                                      |
+| `POST`   | `/api/log-export/destinations/{id}/test` | Verifică credențialele, fără a scrie nimic                                  |
+| `POST`   | `/api/log-export/destinations/{id}/run`  | Procesează acum, folosind aceeași cale ca execuția programată               |
+| `GET`    | `/api/log-export/status`                 | Starea cron, execuțiile recente, restanțele per destinație                  |
 
-`GET /api/log-export/types` este ceea ce face interfața generică: formularul din tabloul de bord este generat pe baza
-descriptorilor de câmp returnați, astfel încât o destinație nouă nu necesită modificări ale interfeței.
+`GET /api/log-export/types` este ceea ce face interfața generică: formularul din tabloul de bord este redat din
+descriptorii de câmp returnați, astfel încât o destinație nouă nu necesită nicio modificare a interfeței.
 
 ---
 
@@ -199,58 +196,59 @@ descriptorilor de câmp returnați, astfel încât o destinație nouă nu necesi
 
 Chei de configurare (`type: "bigquery"`):
 
-| Cheie                | Note                                                                      |
-| -------------------- | ------------------------------------------------------------------------- |
-| `projectId`          | Proiectul GCP care conține setul de date                                  |
-| `datasetId`          | `[A-Za-z0-9_]+`                                                           |
-| `tableId`            | `[A-Za-z0-9_]+`                                                           |
-| `location`           | Folosită doar când trebuie creat setul de date (implicit `EU`)            |
-| `serviceAccountJson` | Cheia contului de serviciu. Secret: criptat în repaus, niciodată returnat |
-| `autoCreate`         | Creează setul de date și tabelul la primul export (implicit `true`)       |
+| Cheie                | Note                                                                         |
+| -------------------- | ---------------------------------------------------------------------------- |
+| `projectId`          | Proiectul GCP care conține setul de date                                     |
+| `datasetId`          | `[A-Za-z0-9_]+`                                                              |
+| `tableId`            | `[A-Za-z0-9_]+`                                                              |
+| `location`           | Utilizată numai când setul de date trebuie creat (implicit `EU`)             |
+| `serviceAccountJson` | Cheia contului de serviciu. Secret: criptată la stocare, niciodată returnată |
+| `autoCreate`         | Creează setul de date și tabelul la primul export (implicit `true`)          |
 
-Contul de serviciu are nevoie de `bigquery.tables.updateData` pentru tabelul țintă, plus
-`bigquery.datasets.create` / `bigquery.tables.create` când `autoCreate` este activat.
+Contul de serviciu necesită `bigquery.tables.updateData` pentru tabelul țintă, plus
+`bigquery.datasets.create` / `bigquery.tables.create` atunci când `autoCreate` este activat.
 
 Un lot configurat este o unitate de **cursor**, nu una HTTP: `send()` îl împarte în apeluri insertAll
-de cel mult 500 de rânduri, astfel încât o valoare mare pentru `batch_size` nu poate depăși limita BigQuery de 10 MB per cerere.
-Pentru codurile de stare tranzitorii (408/429/500/502/503/504), se reîncearcă de până la trei ori, cu un interval de așteptare
-care crește exponențial, reutilizând aceleași insertIds; erorile de autentificare și de schemă declanșează o excepție la prima încercare, în loc
-să irosească execuția.
+de cel mult 500 de rânduri, astfel încât un `batch_size` mare nu poate depăși limita BigQuery de 10 MB per cerere.
+Stările tranzitorii (408/429/500/502/503/504) sunt reîncercate de până la trei ori, cu întârziere
+exponențială, reutilizând aceleași insertIds; erorile de autentificare și de schemă sunt aruncate la prima încercare,
+în loc să consume execuția.
 
-Un tabel creat cu câteva clipe în urmă nu este încă vizibil pentru endpointul de streaming, care răspunde cu
-404 timp de câteva secunde. Se reîncearcă după acel 404, dar **numai când tabelul a fost creat în această execuție** —
-un tabel care lipsește cu adevărat provoacă în continuare o eroare imediată. Rețineți că recrearea unui tabel cu un nume care
-a fost șters recent face ca BigQuery să refuze inserările prin streaming timp de câteva minute; aceasta este o
-proprietate a secvenței ștergere-recreare, așa că preferați un nume de tabel nou în loc să ștergeți și să adăugați din nou unul.
+Un tabel creat cu doar câteva momente în urmă nu este încă vizibil pentru endpoint-ul de streaming, care răspunde
+cu 404 timp de câteva secunde. Acest 404 este reîncercat, dar **numai atunci când această execuție a creat tabelul** —
+un tabel care lipsește cu adevărat eșuează în continuare imediat. Rețineți că recrearea unui tabel sub un nume care
+a fost șters recent determină BigQuery să refuze inserările în streaming timp de câteva minute; aceasta este o
+caracteristică a secvenței ștergere-urmată-de-recreare, așa că preferați un nume de tabel nou în locul ștergerii și
+readăugării unuia.
 
-**Un eșec parțial este returnat ca HTTP 200 cu un `insertErrors[]` nevid.** Acesta este tratat ca
-un eșec și declanșează o excepție, ceea ce împiedică avansarea cursorului dincolo de rândurile pe care BigQuery nu
-le-a acceptat niciodată; `tests/unit/log-export-bigquery.test.ts` fixează acest comportament prin teste.
+**Un eșec parțial sosește ca HTTP 200 cu un `insertErrors[]` nevid.** Acesta este tratat drept
+eșec și generează o excepție, ceea ce împiedică avansarea cursorului dincolo de rândurile pe care BigQuery nu le-a
+acceptat niciodată; `tests/unit/log-export-bigquery.test.ts` fixează acest comportament.
 
-Transportul folosește REST simplu — o aserțiune RS256 autosemnată este schimbată pentru un token de acces la
-`https://oauth2.googleapis.com/token`, apoi rândurile sunt trimise către `tabledata.insertAll`. Nu este
-inclus niciun SDK Google. Tokenurile de acces sunt păstrate în cache în cadrul procesului pentru fiecare pereche (cont de serviciu, domeniu de acces).
+Transportul folosește REST simplu — o aserțiune RS256 auto-semnată este schimbată pentru un token de acces la
+`https://oauth2.googleapis.com/token`, apoi rândurile sunt trimise la `tabledata.insertAll`. Nu este inclus niciun SDK Google.
+Tokenurile de acces sunt păstrate în cache în cadrul procesului pentru fiecare pereche (cont de serviciu, domeniu de acces).
 
-Tabelul creat conține câte o coloană pentru fiecare câmp din fila Logs, plus `exported_at`, și este organizat în funcție de
-modul în care sunt interogate efectiv jurnalele de apeluri:
+Tabelul creat conține câte o coloană pentru fiecare câmp din fila Jurnale, plus `exported_at`, și este structurat în
+funcție de modul în care sunt interogate efectiv jurnalele de apeluri:
 
-- **Partiționat pe zile după `timestamp`**, astfel încât o interogare limitată după dată scanează doar zilele respective.
-- **Grupat în clustere după `api_key_name`, `provider`, `model`, `status`** (în această ordine), astfel încât filtrarea după
-  cine a executat apelul, unde a fost trimis sau dacă a eșuat exclude blocuri din fiecare partiție. BigQuery
-  permite cel mult patru coloane de clustering, iar ordinea contează: un filtru doar pe `api_key_name`
-  exclude blocuri, un filtru doar pe `status` nu.
-- **Retenție opțională a partițiilor** prin `partitionExpirationDays` (0 păstrează totul), aplicată
-  la crearea tabelului.
+- **Partiționat pe zile după `timestamp`**, astfel încât o interogare delimitată după dată scanează numai zilele respective.
+- **Grupat după `api_key_name`, `provider`, `model`, `status`** (în această ordine), astfel încât filtrarea după
+  cine a executat apelul, unde a fost direcționat sau dacă a eșuat elimină blocuri din fiecare partiție. BigQuery
+  permite cel mult patru coloane de grupare, iar ordinea contează: un filtru doar după `api_key_name`
+  elimină blocuri, iar un filtru doar după `status` nu o face.
+- **Păstrare opțională a partițiilor** prin `partitionExpirationDays` (0 păstrează totul), aplicată
+  atunci când este creat tabelul.
 
-Ambele setări se aplică la momentul creării. Un tabel existent își păstrează organizarea actuală, așa că
-configurați destinația cu un identificator de tabel nou dacă doriți să le adoptați.
+Ambele setări se aplică în momentul creării. Un tabel existent păstrează aspectul pe care îl are deja, așa că
+indicați ca destinație un ID de tabel nou dacă doriți să le adoptați.
 
-`tests/unit/log-export-bigquery.test.ts` verifică dacă maparea și schema tabelului rămân
-sincronizate, astfel încât o coloană nouă din jurnalul de apeluri să nu poată fi omisă fără avertisment la export.
+`tests/unit/log-export-bigquery.test.ts` verifică dacă mapperul și schema tabelului rămân
+sincronizate, astfel încât o coloană nouă din jurnalul de apeluri să nu poată fi omisă în mod silențios la export.
 
-Loturile sunt împărțite în funcție **atât** de numărul de rânduri, cât și de numărul de octeți serializați. Numărul de rânduri nu este suficient
-odată ce sunt exportate și datele utile: 500 de rânduri care conțin prompturi pot ocupa zeci de megaocteți, iar insertAll
-respinge o cerere mai mare de 10 MB. Segmentele se închid la 500 de rânduri sau 9 MB, în funcție de limita atinsă prima.
+Loturile sunt împărțite atât după numărul de rânduri, cât și după dimensiunea serializată în octeți. Numărul de rânduri nu este suficient
+după exportarea sarcinilor utile: 500 de rânduri care conțin prompturi pot însuma zeci de megaocteți, iar insertAll
+respinge o solicitare de peste 10 MB. Loturile sunt închise la 500 de rânduri sau la 9 MB, oricare prag este atins primul.
 
 ---
 
@@ -403,7 +401,7 @@ redactarea separată.
 codul de stare HTTP fără a scrie span-uri în jurnalul apelurilor.
 
 Identificatorii de trasare și identificatorii de span sunt primele 32/16 cifre hexazecimale ale SHA-256 calculat pentru
-`"omniroute.trace\\0" + callLogId` și `"omniroute.span\\0" + callLogId`. Retrimiterile folosesc
+`"omniroute.trace\0" + callLogId` și `"omniroute.span\0" + callLogId`. Retrimiterile folosesc
 identificatori identici. Aceasta nu este o garanție de deduplicare: unele backenduri, inclusiv ingestia Langfuse
 v4, nu deduplică span-urile cu același identificator. O cădere sau un eșec parțial al unui segment poate
 duce la retrimiterea a cel mult unui singur lot neconfirmat al cursorului; întregul lot poate fi duplicat,
@@ -467,34 +465,34 @@ suplimentare; toate celelalte câmpuri ale rândurilor păstrează verificarea s
 
 ## 6. Adăugarea unei destinații
 
-1. Creați `src/lib/logExport/destinations/<name>.ts` care exportă un `LogExportDestinationType`:
-   un `configSchema` Zod, un tablou de descriptori `fields` pentru interfața cu utilizatorul, `secretFields` și o
+1. Creați `src/lib/logExport/destinations/<name>.ts`, exportând un `LogExportDestinationType`:
+   o `configSchema` Zod, o matrice descriptivă `fields` pentru interfața cu utilizatorul, `secretFields` și o
    funcție `createClient(config)` care returnează `test()` / `prepare()` / `send(records)`.
-2. Adăugați-l în tabloul `DESTINATIONS` din `src/lib/logExport/registry.ts`.
+2. Adăugați-o în matricea `DESTINATIONS` din `src/lib/logExport/registry.ts`.
 3. Scrieți teste în `tests/unit/`.
 
-Aceasta este întreaga modificare: persistența, sarcina cron, stratul REST, criptarea secretelor și
-formularul din panoul de control citesc toate registrul.
+Aceasta este întreaga modificare: persistența, sarcina cron, nivelul REST, criptarea secretelor și
+formularul tabloului de bord citesc toate registrul.
 
 Două reguli pentru o destinație nouă:
 
-- `send()` **trebuie să arunce o excepție** în cazul unui eșec parțial. Finalizarea cu succes înseamnă „destinația are aceste rânduri”,
-  iar cursorul avansează definitiv dincolo de ele.
+- `send()` **trebuie să genereze o excepție** în cazul unui eșec parțial. Rezolvarea înseamnă „destinația conține aceste rânduri”,
+  iar cursorul avansează permanent dincolo de acestea.
 - O destinație care acceptă un URL furnizat de utilizator trebuie să îl valideze prin
-  `parseAndValidateWebhookUrl` (`src/shared/network/outboundUrlGuardPolicy.ts`) înainte de a efectua cererea,
-  la fel ca webhook-urile. BigQuery nu are nevoie de acest lucru: gazdele sale sunt constante.
+  `parseAndValidateWebhookUrl` (`src/shared/network/outboundUrlGuardPolicy.ts`) înainte de preluare,
+  la fel ca webhook-urile. BigQuery nu necesită acest lucru: gazdele sale sunt constante.
 
 ---
 
-## 7. Utilizare
+## 7. Operare
 
-- **Panou de control**: Integrări → Export de jurnale. Adăugați o destinație, rulați **Testare** pentru a verifica datele de autentificare
+- **Tablou de bord**: Integrări → Exportul jurnalelor. Adăugați o destinație, rulați **Testare** pentru a verifica acreditările
   fără a scrie rânduri, apoi activați-o.
-- **Date restante**: fiecare card de destinație afișează rândurile în așteptare și cursorul; `GET
-/api/log-export/status` returnează aceleași valori plus ultimele 20 de execuții ale sarcinii.
-- **Eșecul unei destinații nu provoacă eșecul celorlalte** — rezumatul execuției înregistrează starea fiecărei destinații
+- **Restanțe**: fiecare card de destinație afișează rândurile în așteptare și cursorul; `GET
+/api/log-export/status` returnează aceleași date, plus ultimele 20 de execuții ale sarcinii.
+- **Eșecul unei destinații nu le afectează pe celelalte** — rezumatul execuției înregistrează starea fiecărei destinații
   în `last_status` / `last_error`, iar istoricul execuțiilor sarcinii păstrează rezultatul agregat.
-- **Ștergerea unei destinații îi șterge cursorul.** Readăugarea acesteia pornește de la cel mai vechi
-  jurnal de apel păstrat, ceea ce retrimite rânduri pe care destinația le poate deține deja. În BigQuery, valoarea
-  `insertId` pentru fiecare rând previne această duplicare doar în intervalul de deduplicare propriu BigQuery, așa că este de preferat să dezactivați
-  o destinație în loc să o ștergeți.
+- **Ștergerea unei destinații îi șterge cursorul.** Adăugarea ei din nou pornește de la cel mai vechi
+  jurnal de apeluri păstrat, ceea ce retrimite rânduri pe care destinația este posibil să le conțină deja. În BigQuery, valoarea `insertId`
+  a fiecărui rând compensează acest lucru numai în intervalul propriu de deduplicare al BigQuery, așadar este preferabil să
+  dezactivați o destinație în loc să o ștergeți.

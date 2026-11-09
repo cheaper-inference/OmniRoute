@@ -4,6 +4,7 @@ import {
   rehydrateAntigravityFamilyLocks,
   getAntigravityFamilyCooldownUntil,
 } from "../../open-sse/services/antigravityFamilyCooldown.ts";
+import { getAntigravityQuotaFamily } from "../../open-sse/services/antigravityQuotaFamily.ts";
 import {
   clearAllModelLockouts,
   getAllModelLockouts,
@@ -80,6 +81,24 @@ test("saved family reader preserves the lock sets and deadlines of hydration", (
     }
   } finally {
     clearAllModelLockouts();
+  }
+});
+
+test("saved family reader accepts the canonical Argon scope without borrowing sibling cooldowns", () => {
+  const now = Date.parse("2099-01-01T00:00:00Z");
+  const family = getAntigravityQuotaFamily("antigravity/gemini-4-argon-high");
+  assert.equal(family, "argon");
+  const deadline = now + 600_000;
+  const siblings = { gemini: now + 900_000, claude: now + 1_200_000 };
+  for (const value of [deadline, String(deadline), new Date(deadline).toISOString()]) {
+    const psd = { antigravityFamilyRateLimitedUntil: { ...siblings, argon: value } };
+    assert.equal(getAntigravityFamilyCooldownUntil(psd, family, now), deadline);
+    assert.equal(getAntigravityFamilyCooldownUntil(psd, "gemini", now), siblings.gemini);
+    assert.equal(getAntigravityFamilyCooldownUntil(psd, "claude", now), siblings.claude);
+  }
+  for (const value of [undefined, null, "invalid", now - 1, now]) {
+    const psd = { antigravityFamilyRateLimitedUntil: { ...siblings, argon: value } };
+    assert.equal(getAntigravityFamilyCooldownUntil(psd, family, now), null);
   }
 });
 

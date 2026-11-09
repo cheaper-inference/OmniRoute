@@ -851,12 +851,7 @@ atunci când este setat orice alt câmp. Pentru lite, `additionalQueries`, `syst
 `subpages`, `subpageTarget`, `highlights.numSentences` și `highlights.highlightsPerUrl` nu mai sunt
 transmise.
 
-Contabilizarea costurilor folosește registrul fix `costPerQuery`, cu excepția Exa, care urmează
-propriile prețuri Exa: 0,007 USD per apel pentru `auto` (și vechiul `fast`) sau 0,004 USD pentru `lite` (și vechiul `instant`), acoperind 10 rezultate; 0,001 USD pentru fiecare rezultat suplimentar; și 0,001 USD per
-rezultat returnat atunci când este setat `contents.summary`. Tavily este înregistrat la 1 credit (0,008 USD) pentru
-`search_depth` `basic`, `fast` și `ultra-fast` și la 2 credite (0,016 USD) pentru `advanced`
-([creditele API Tavily](https://docs.tavily.com/documentation/api-credits)). Un apel cu
-`auto_parameters: true` pe care Tavily îl actualizează la advanced este în continuare înregistrat la 1 credit.
+Exa: 0,007 USD per apel pentru `auto` (și `fast` moștenit) sau 0,004 USD pentru `lite` (și `instant` moștenit), acoperind 10 rezultate; 0,001 USD pentru fiecare rezultat suplimentar; și 0,001 USD per rezultat returnat când `contents.summary` este setat. Tavily este înregistrat la 1 credit (0,008 USD) pentru `search_depth` `basic`, `fast` și `ultra-fast` și 2 credite (0,016 USD) pentru `advanced` ( [credite Tavily API](https://docs.tavily.com/documentation/api-credits) ). Un apel cu `auto_parameters: true` pe care Tavily face upgrade la avansat este încă înregistrat la 1 credit.
 
 ---
 
@@ -1146,6 +1141,8 @@ X-OmniRoute-No-Cache: true
 
 ---
 
+<a id="cliproxyapi-management-compatibility"></a>
+
 ## Compatibilitate de administrare cu CLIProxyAPI
 
 OmniRoute răspunde la cele trei endpointuri de administrare [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI)
@@ -1160,21 +1157,11 @@ disponibile la `/v0/management/*` și la `/api/v0/management/*`.
 | POST   | `/v0/management/api-call`    | Corp `{ auth_index, method, url, header?, data? }`. Trimite o singură cerere permisă cu tokenul contului și returnează `{ status_code, body }`              |
 | POST   | `/v0/management/reset-quota` | Corp `{ auth_index }`. Șterge perioada de așteptare a conexiunii, blocările modelelor și perioadele de așteptare Codex pentru fiecare domeniu ale unui cont |
 
-- `auth_index` este ID-ul conexiunii OmniRoute. `provider` este `claude` sau `codex` (numai
-  conexiuni OAuth; furnizorul cu cheie API `anthropic` nu este listat). Pentru Codex,
-  `id_token.chatgpt_account_id` este ID-ul spațiului de lucru stocat, iar `plan_type` este planul stocat.
+- `auth_index` este ID-ul conexiunii OmniRoute. `provider` este `claude` sau `codex` (numai conexiuni OAuth; furnizorul `anthropic` cu cheie API nu este inclus). Pentru Codex, `id_token.chatgpt_account_id` este ID-ul spațiului de lucru stocat, iar `plan_type` este planul stocat.
 - `api-call` nu este un proxy generic. Acceptă numai Claude `GET
 https://api.anthropic.com/api/oauth/usage` și Codex `GET
-https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits` și
-  `POST .../wham/rate-limit-reset-credits/consume`, fiecare numai pentru un cont al furnizorului
-  corespunzător. Orice altceva returnează `403` fără a contacta upstream-ul. Antetul
-  `Authorization` al apelantului (inclusiv substituentul `$TOKEN$`) este ignorat: OmniRoute injectează
-  tokenul de acces al conexiunii, reîmprospătându-l mai întâi când este aproape de expirare, și transmite numai
-  antetele permise (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`;
-  `Accept`, `Content-Type`). Dacă `Chatgpt-Account-Id` lipsește, se utilizează implicit ID-ul spațiului
-  de lucru stocat. Cererile expiră după 15 secunde și utilizează proxy-ul conexiunii.
-- `reset-quota` lasă neschimbate stările terminale (banned, expired, credits_exhausted). Un
-  `auth_index` necunoscut returnează `404`.
+https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits` și `POST .../wham/rate-limit-reset-credits/consume`, fiecare doar pentru un cont al furnizorului corespunzător. Orice altceva returnează `403` fără a contacta upstreamul. Antetul `Authorization` al apelantului (inclusiv substituentul `$TOKEN$`) este ignorat: OmniRoute inserează tokenul de acces al conexiunii, reîmprospătându-l mai întâi când este aproape de expirare, și redirecționează numai antetele permise (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`; `Accept`, `Content-Type`). Dacă lipsește `Chatgpt-Account-Id`, se folosește ID-ul spațiului de lucru stocat. Dacă primul răspuns upstream este `401`, se reîmprospătează o dată și se reîncearcă numai când tokenul de acces se schimbă. Fiecare încercare upstream are un timeout de 15 secunde și folosește proxy-ul conexiunii.
+- `reset-quota` lasă stările terminale (banned, expired, credits_exhausted) neschimbate. Un `auth_index` necunoscut returnează `404`.
 
 **Autentificare:** sesiunea tabloului de bord sau o cheie API cu scopul `manage`, obligatorie chiar și atunci când autentificarea este dezactivată
 (căile se află în `ALWAYS_PROTECTED_API_PATHS`). Cheile destinate exclusiv inferenței primesc `403`. Sursa:
@@ -1902,17 +1889,17 @@ Magazin persistent de memorie conversațională/factuală, asociat cu cheia API 
 
 OmniRoute include un server încorporat pentru Model Context Protocol, cu 3 transporturi (stdio, SSE, streamable-http) și instrumente cu domeniu de aplicare. Endpointurile tabloului de bord de mai jos citesc date despre stare/audit și intermediază transporturile HTTP.
 
-| Metodă | Cale | Descriere | | -------------------- |
-| ------ | ---------------------- | ------------------------------------------------------------------------------------------------ | -------------------- |
-| GET | `/api/mcp/status` | Semnal de activitate, transport, stare online, ultimul apel, instrumente principale, rata de succes în ultimele 24 de ore |
-| GET | `/api/mcp/tools` | Lista instrumentelor MCP cu `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints` |
-| GET | `/api/mcp/sse` | Deschide fluxul SSE pentru transportul SSE (returnează `503` dacă MCP este dezactivat sau transportul nu corespunde) |
-| POST | `/api/mcp/sse` | Trimite cadrul JSON-RPC pe transportul SSE |
-| GET | `/api/mcp/stream` | Deschide partea SSE a transportului Streamable HTTP (mesaje inițiate de server) |
-| POST | `/api/mcp/stream` | Trimite cadrul JSON-RPC pe transportul Streamable HTTP |
-| DELETE | `/api/mcp/stream` | Încheie o sesiune Streamable HTTP |
-| GET | `/api/mcp/audit` | Interoghează jurnalul de audit — `?limit=`, `?offset=`, `?tool=`, `?success=true                                | false`, `?apiKeyId=` |
-| GET | `/api/mcp/audit/stats` | Statistici agregate de audit (totaluri, rata de succes, durata medie, instrumente principale) |
+| Metodă | Cale                   | Descriere                                                                                                                               |
+| ------ | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/mcp/status`      | Semnal de activitate, transport, stare online, ultimul apel, instrumente principale, rata de succes în ultimele 24 de ore               |
+| GET    | `/api/mcp/tools`       | Lista instrumentelor MCP cu `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints`                                   |
+| GET    | `/api/mcp/sse`         | Deschide fluxul SSE pentru transportul SSE (returnează `503` dacă MCP este dezactivat sau transportul nu corespunde)                    |
+| POST   | `/api/mcp/sse`         | Trimite cadrul JSON-RPC pe transportul SSE                                                                                              |
+| GET    | `/api/mcp/stream`      | Deschide partea SSE a transportului Streamable HTTP (mesaje inițiate de server)                                                         |
+| POST   | `/api/mcp/stream`      | Trimite cadrul JSON-RPC pe transportul Streamable HTTP                                                                                  |
+| DELETE | `/api/mcp/stream`      | Încheie o sesiune Streamable HTTP                                                                                                       |
+| GET    | `/api/mcp/audit`       | Interoghează jurnalul de audit — `?limit=`, `?offset=`, `?tool=`, `?success=true                                \| false`, `?apiKeyId=` |
+| GET    | `/api/mcp/audit/stats` | Statistici agregate de audit (totaluri, rata de succes, durata medie, instrumente principale)                                           |
 
 **Autentificare:** transporturile `sse`/`stream` respectă suprafața de autentificare specifică MCP (cheie API Bearer cu domeniul `mcp`); rutele `status`/`tools`/`audit*` pot fi citite din tabloul de bord (fără autentificare suplimentară în afară de accesarea gazdei tabloului de bord).
 

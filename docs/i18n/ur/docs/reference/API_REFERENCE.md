@@ -880,14 +880,7 @@ Exa `type: "lite"` (Exa 3.0) فیلڈز کے ایک محدود مجموعے کو
 فرسودہ `subpages`، `subpageTarget`، `highlights.numSentences` اور `highlights.highlightsPerUrl`
 اب آگے نہیں بھیجے جاتے۔
 
-لاگت کا حساب فلیٹ رجسٹری `costPerQuery` کے مطابق ہوتا ہے، سوائے Exa کے، جو Exa کی اپنی قیمت گذاری
-کی پیروی کرتا ہے: `auto` (اور پرانا `fast`) کے لیے فی کال $0.007، یا `lite` (اور پرانا `instant`)
-کے لیے $0.004، جس میں 10 نتائج شامل ہیں؛ ہر اضافی نتیجے کے لیے $0.001؛ اور
-`contents.summary` مقرر ہونے پر ہر واپس کیے گئے نتیجے کے لیے $0.001۔ Tavily کے لیے
-`search_depth` کی قدروں `basic`، `fast` اور `ultra-fast` پر 1 کریڈٹ ($0.008)، اور `advanced`
-پر 2 کریڈٹس ($0.016) ریکارڈ کیے جاتے ہیں
-([Tavily API کریڈٹس](https://docs.tavily.com/documentation/api-credits))۔ `auto_parameters: true`
-والی کال میں اگر Tavily کو `advanced` پر اپ گریڈ کیا جائے، تب بھی اسے 1 کریڈٹ کے طور پر ریکارڈ کیا جاتا ہے۔
+Exa: $0.007 فی کال `auto` (اور لیگیسی `fast`) کے لیے یا $0.004 `lite` (اور لیگیسی `instant`) کے لیے، جس میں 10 نتائج شامل ہیں۔ ہر مزید نتیجے کے لیے $0.001؛ اور $0.001 فی لوٹا ہوا نتیجہ جب `contents.summary` سیٹ ہو۔ Tavily کو `search_depth` `basic`، `fast` اور `ultra-fast` کے لیے 1 کریڈٹ ($0.008) اور `advanced` ( [Tavily API کریڈٹس](https://docs.tavily.com/documentation/api-credits) ) کے لیے 2 کریڈٹ ($0.016) پر ریکارڈ کیا گیا ہے۔ `auto_parameters: true` کے ساتھ ایک کال جسے Tavily ایڈوانس میں اپ گریڈ کرتا ہے اب بھی 1 کریڈٹ پر ریکارڈ کیا جاتا ہے۔
 
 ---
 
@@ -1179,6 +1172,8 @@ X-OmniRoute-No-Cache: true
 
 ---
 
+<a id="cliproxyapi-management-compatibility"></a>
+
 ## CLIProxyAPI مینجمنٹ مطابقت
 
 OmniRoute ان تین [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI)
@@ -1193,21 +1188,11 @@ OmniRoute پر سیٹ کریں اور `manage` scope والی API key کو اپ�
 | POST   | `/v0/management/api-call`    | باڈی `{ auth_index, method, url, header?, data? }`۔ اکاؤنٹ کے ٹوکن کے ساتھ ایک allowlisted درخواست بھیجتا ہے اور `{ status_code, body }` واپس کرتا ہے |
 | POST   | `/v0/management/reset-quota` | باڈی `{ auth_index }`۔ ایک اکاؤنٹ کے کنکشن کول ڈاؤن، ماڈل لاک آؤٹس اور Codex کے فی-scope کول ڈاؤنز صاف کرتا ہے                                        |
 
-- `auth_index` OmniRoute کا کنکشن id ہے۔ `provider`، `claude` یا `codex` ہوتا ہے (صرف OAuth
-  کنکشنز؛ `anthropic` API-key provider فہرست میں شامل نہیں ہے)۔ Codex کے لیے،
-  `id_token.chatgpt_account_id` ذخیرہ شدہ workspace id ہے اور `plan_type` ذخیرہ شدہ plan ہے۔
-- `api-call` ایک عمومی proxy نہیں ہے۔ یہ صرف Claude `GET
+- `auth_index`، OmniRoute کنکشن کی ID ہے۔ `provider`، `claude` یا `codex` ہے (صرف OAuth کنکشن؛ API کلید والا فراہم کنندہ `anthropic` فہرست میں نہیں)۔ Codex کے لیے `id_token.chatgpt_account_id` محفوظ ورک اسپیس ID اور `plan_type` محفوظ منصوبہ ہے۔
+- `api-call` عمومی پراکسی نہیں۔ یہ صرف Claude `GET
 https://api.anthropic.com/api/oauth/usage` اور Codex `GET
-https://chatgpt.com/backend-api/wham/usage`، `GET .../wham/rate-limit-reset-credits` اور
-  `POST .../wham/rate-limit-reset-credits/consume` قبول کرتا ہے، اور ہر ایک صرف متعلقہ
-  provider کے اکاؤنٹ کے لیے۔ کوئی بھی دوسری چیز upstream سے رابطہ کیے بغیر `403` واپس کرتی ہے۔ کالر کا
-  `Authorization` ہیڈر (`$TOKEN$` placeholder سمیت) نظر انداز کیا جاتا ہے: OmniRoute کنکشن کا access token
-  داخل کرتا ہے، قریباً ختم ہونے کی صورت میں پہلے اسے refresh کرتا ہے، اور صرف allowlisted headers
-  (`anthropic-beta`؛ `OpenAI-Beta`، `Originator`، `Chatgpt-Account-Id`؛
-  `Accept`، `Content-Type`) آگے بھیجتا ہے۔ `Chatgpt-Account-Id` نہ ہونے کی صورت میں ذخیرہ شدہ workspace id
-  پہلے سے طے شدہ ہوتی ہے۔ درخواستیں 15 سیکنڈ بعد timeout ہو جاتی ہیں اور کنکشن کا proxy استعمال کرتی ہیں۔
-- `reset-quota` terminal states (banned، expired، credits_exhausted) کو جوں کا توں چھوڑتا ہے۔ نامعلوم
-  `auth_index`، `404` واپس کرتا ہے۔
+https://chatgpt.com/backend-api/wham/usage`، `GET .../wham/rate-limit-reset-credits` اور `POST .../wham/rate-limit-reset-credits/consume` قبول کرتا ہے، ہر ایک صرف متعلقہ فراہم کنندہ کے اکاؤنٹ کے لیے۔ باقی سب اپ اسٹریم سے رابطہ کیے بغیر `403` لوٹاتے ہیں۔ کال کرنے والے کا `Authorization` ہیڈر (بشمول `$TOKEN$` پلیس ہولڈر) نظر انداز ہوتا ہے: OmniRoute کنکشن کا ایکسیس ٹوکن شامل کرتا ہے، میعاد قریب ہو تو پہلے اسے تازہ کرتا ہے، اور صرف منظور شدہ ہیڈرز آگے بھیجتا ہے (`anthropic-beta`؛ `OpenAI-Beta`، `Originator`، `Chatgpt-Account-Id`؛ `Accept`، `Content-Type`)۔ `Chatgpt-Account-Id` نہ ہو تو محفوظ ورک اسپیس ID استعمال ہوتی ہے۔ اگر پہلا اپ اسٹریم جواب `401` ہو تو ایک بار ریفریش ہوتا ہے، اور صرف ایکسیس ٹوکن بدلنے پر دوبارہ کوشش ہوتی ہے۔ ہر اپ اسٹریم کوشش 15 سیکنڈ بعد ٹائم آؤٹ ہوتی ہے اور کنکشن کی پراکسی استعمال کرتی ہے۔
+- `reset-quota` حتمی حالتوں (banned, expired, credits_exhausted) کو نہیں بدلتا۔ نامعلوم `auth_index`، `404` لوٹاتا ہے۔
 
 **Auth:** ڈیش بورڈ session یا `manage`-scoped API key، login غیر فعال ہونے پر بھی لازمی ہے
 (راستے `ALWAYS_PROTECTED_API_PATHS` میں شامل ہیں)۔ صرف inference والی keys کو `403` ملتا ہے۔ ماخذ:
@@ -1259,11 +1244,11 @@ inference API keys کے ذریعے **نہیں** دی جاتی۔ کریڈینشل
 سلَیش والی آئی ڈیز (مثلاً `nvidia/nemotron-…`) جوں کی توں محفوظ کی جاتی ہیں۔
 `/v1/models` کبھی بھی stacked `<prefix>/<prefix>/<model>` آئی ڈی خارج نہیں کرتا۔
 
-حسب ضرورت Chat Completions کے کسٹم نوڈز، واضح reasoning opt-outs کو upstream بیک اینڈ کے مطابق ڈھالتے ہیں۔ کنکشن کا کامیاب ٹیسٹ خودکار طور پر ہر ایسے عین model ID کے لیے chat-template کنٹرولز منتخب کرتا ہے جس کے `/models` اندراج میں تسلیم شدہ `owned_by` قدر ثابت ہو: `vllm`، `sglang`، یا `llamacpp`۔  
-شفاف OpenAI-compatible wrappers اصل model اندراج کو nested  
+حسب ضرورت Chat Completions کے کسٹم نوڈز، واضح reasoning opt-outs کو upstream بیک اینڈ کے مطابق ڈھالتے ہیں۔ کنکشن کا کامیاب ٹیسٹ خودکار طور پر ہر ایسے عین model ID کے لیے chat-template کنٹرولز منتخب کرتا ہے جس کے `/models` اندراج میں تسلیم شدہ `owned_by` قدر ثابت ہو: `vllm`، `sglang`، یا `llamacpp`۔\
+شفاف OpenAI-compatible wrappers اصل model اندراج کو nested\
 `openai` آبجیکٹ کے اندر برقرار رکھ سکتے ہیں؛ شناخت ایسے زیادہ سے زیادہ تین envelopes تک کی جاتی ہے۔ جن models کی ملکیت غائب، نامعلوم، یا متضاد ہو، وہ عام OpenAI رویہ برقرار رکھتے ہیں۔ شناخت موجودہ catalog request کو دوبارہ استعمال کرتی ہے، completion tokens پیدا نہیں کرتی، اور connection endpoint تبدیل ہونے پر غیر مؤثر ہو جاتی ہے۔
 
-ایسے بیک اینڈ کے لیے یہ رویہ مقرر کرنے کے لیے جو یہ metadata ظاہر نہیں کرتا، موجودہ partial  
+ایسے بیک اینڈ کے لیے یہ رویہ مقرر کرنے کے لیے جو یہ metadata ظاہر نہیں کرتا، موجودہ partial\
 provider update API استعمال کریں:
 
 ```json
@@ -1274,8 +1259,8 @@ provider update API استعمال کریں:
 }
 ```
 
-یہ body `PUT /api/providers/<connection-id>` کے ساتھ بھیجیں۔ اس connection پر `none` کی واضح  
-reasoning effort کو `chat_template_kwargs.thinking=false` اور  
+یہ body `PUT /api/providers/<connection-id>` کے ساتھ بھیجیں۔ اس connection پر `none` کی واضح\
+reasoning effort کو `chat_template_kwargs.thinking=false` اور\
 `chat_template_kwargs.enable_thinking=false` کے طور پر بھیجا جاتا ہے۔ واضح native template اقدار اس وقت تک بااختیار رہتی ہیں جب تک server-side reasoning rule کسی effort کو لازم نہ کرے۔ یہ ترتیب صرف اس وقت لاگو ہوتی ہے جب کوئی custom OpenAI-compatible connection، Chat Completions body کو dispatch کرے؛ Responses requests اور عام providers اپنی native request shape برقرار رکھتے ہیں۔ عام OpenAI `reasoning_effort` passthrough کو زبردستی نافذ کرنے کے لیے `reasoningControl` کو `openai` پر سیٹ کریں، یا خودکار شناخت استعمال کرنے کے لیے اسے حذف کریں/`null` پر سیٹ کریں۔
 
 Claude Code کے auto-mode classifier requests میں جب کوئی واضح reasoning controls موجود نہ ہوں تو native thinking بطور ڈیفالٹ غیر فعال رہتی ہے۔ شناخت model names یا completion limits کے بجائے Claude-format requests میں classifier کے system marker کو استعمال کرتی ہے۔ واضح body controls، معاون effort/thinking headers، routing rules، اور resolved model effort اپنی موجودہ ترجیح برقرار رکھتے ہیں۔ دونوں classifier stages اپنے prompts، completion limits، stop sequences، اور اصل upstream permission verdicts برقرار رکھتے ہیں؛ دوسرا stage اب بھی اپنی مطلوبہ visible reasoning کو عام متن کے طور پر پیدا کر سکتا ہے۔
@@ -1299,7 +1284,7 @@ Claude Code کے auto-mode classifier requests میں جب کوئی واضح rea
 
 #### Model limit کا ماخذ
 
-`GET /api/models?withLimits=1` (نیز `true`؛ `0`/`false` یا اسے حذف کرنے سے پہلے سے طے شدہ  
+`GET /api/models?withLimits=1` (نیز `true`؛ `0`/`false` یا اسے حذف کرنے سے پہلے سے طے شدہ\
 payload میں کوئی تبدیلی نہیں ہوتی) ہر model row میں `contextWindow`، `maxInputTokens`، `maxOutputTokens` اور ایک `capsSource` object شامل کرتا ہے۔ `capsSource` اس rule کا نام بتاتا ہے جس نے ہر limit فراہم کی، تاکہ کسی حیران کن limit (مثلاً 1M model پر 128k) کا ماخذ معلوم کیا جا سکے۔ حل شدہ values وہی ہیں جنہیں routing استعمال کرتی ہے؛ یہ flag صرف fields شامل کرتا ہے اور کسی value کو کبھی تبدیل نہیں کرتا۔ `withLimits` کی کوئی بھی دوسری value `400` کے ساتھ مسترد کر دی جاتی ہے۔
 
 | `capsSource` value                           | ماخذ                                                               |
@@ -1313,7 +1298,7 @@ payload میں کوئی تبدیلی نہیں ہوتی) ہر model row میں `c
 | `effort-base:` prefix                        | effort-suffixed variant کے base model سے لی گئی row                |
 | `none`                                       | کوئی source limit کا اعلان نہیں کرتا (value `null` ہے)             |
 
-Implementation: `getResolvedModelCapabilitiesWithLimitSources()` in `src/lib/modelCapabilities.ts`  
+Implementation: `getResolvedModelCapabilitiesWithLimitSources()` in `src/lib/modelCapabilities.ts`\
 اور precedence chains in `src/lib/modelCapabilityLimits.ts`.
 
 ### استعمال اور Analytics
@@ -1946,17 +1931,17 @@ curl -X DELETE http://localhost:20128/api/resilience/model-cooldowns \
 
 OmniRoute میں 3 ٹرانسپورٹس (stdio، SSE، streamable-http) اور محدود دائرہ کار والے ٹولز کے ساتھ سرایت شدہ Model Context Protocol سرور شامل ہے۔ ذیل کے ڈیش بورڈ اینڈ پوائنٹس اسٹیٹس/آڈٹ ڈیٹا پڑھتے ہیں اور HTTP ٹرانسپورٹس کے لیے پراکسی کا کام کرتے ہیں۔
 
-| طریقہ  | راستہ                  | تفصیل                                                                                                             | -------------------- |
-| ------ | ---------------------- | ----------------------------------------------------------------------------------------------------------------- | -------------------- |
-| GET    | `/api/mcp/status`      | ہارٹ بیٹ، ٹرانسپورٹ، آن لائن حالت، آخری کال، نمایاں ٹولز، 24 گھنٹوں کی کامیابی کی شرح                             |
-| GET    | `/api/mcp/tools`       | MCP ٹولز کی فہرست، جن میں `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints` شامل ہیں      |
-| GET    | `/api/mcp/sse`         | SSE ٹرانسپورٹ کے لیے SSE اسٹریم کھولیں (اگر MCP غیر فعال ہو یا ٹرانسپورٹ میں عدم مطابقت ہو تو `503` واپس کرتا ہے) |
-| POST   | `/api/mcp/sse`         | SSE ٹرانسپورٹ پر JSON-RPC فریم بھیجیں                                                                             |
-| GET    | `/api/mcp/stream`      | Streamable HTTP ٹرانسپورٹ کا SSE پہلو کھولیں (سرور کی جانب سے شروع کیے گئے پیغامات)                               |
-| POST   | `/api/mcp/stream`      | Streamable HTTP ٹرانسپورٹ پر JSON-RPC فریم بھیجیں                                                                 |
-| DELETE | `/api/mcp/stream`      | Streamable HTTP سیشن ختم کریں                                                                                     |
-| GET    | `/api/mcp/audit`       | آڈٹ لاگ سے استفسار کریں — `?limit=`, `?offset=`, `?tool=`, `?success=true                                         | false`, `?apiKeyId=` |
-| GET    | `/api/mcp/audit/stats` | مجموعی آڈٹ اعدادوشمار (کل تعداد، کامیابی کی شرح، اوسط دورانیہ، نمایاں ٹولز)                                       |
+| طریقہ  | راستہ                  | تفصیل                                                                                                                                     |
+| ------ | ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/mcp/status`      | ہارٹ بیٹ، ٹرانسپورٹ، آن لائن حالت، آخری کال، نمایاں ٹولز، 24 گھنٹوں کی کامیابی کی شرح                                                     |
+| GET    | `/api/mcp/tools`       | MCP ٹولز کی فہرست، جن میں `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints` شامل ہیں                              |
+| GET    | `/api/mcp/sse`         | SSE ٹرانسپورٹ کے لیے SSE اسٹریم کھولیں (اگر MCP غیر فعال ہو یا ٹرانسپورٹ میں عدم مطابقت ہو تو `503` واپس کرتا ہے)                         |
+| POST   | `/api/mcp/sse`         | SSE ٹرانسپورٹ پر JSON-RPC فریم بھیجیں                                                                                                     |
+| GET    | `/api/mcp/stream`      | Streamable HTTP ٹرانسپورٹ کا SSE پہلو کھولیں (سرور کی جانب سے شروع کیے گئے پیغامات)                                                       |
+| POST   | `/api/mcp/stream`      | Streamable HTTP ٹرانسپورٹ پر JSON-RPC فریم بھیجیں                                                                                         |
+| DELETE | `/api/mcp/stream`      | Streamable HTTP سیشن ختم کریں                                                                                                             |
+| GET    | `/api/mcp/audit`       | آڈٹ لاگ سے استفسار کریں — `?limit=`, `?offset=`, `?tool=`, `?success=true                                         \| false`, `?apiKeyId=` |
+| GET    | `/api/mcp/audit/stats` | مجموعی آڈٹ اعدادوشمار (کل تعداد، کامیابی کی شرح، اوسط دورانیہ، نمایاں ٹولز)                                                               |
 
 **توثیق:** `sse`/`stream` ٹرانسپورٹس MCP سے مخصوص توثیقی سطح (Bearer API key جس میں `mcp` scope ہو) کی پابندی کرتی ہیں؛ `status`/`tools`/`audit*` روٹس ڈیش بورڈ سے قابلِ مطالعہ ہیں (ڈیش بورڈ ہوسٹ تک رسائی کے علاوہ اضافی توثیق درکار نہیں)۔
 

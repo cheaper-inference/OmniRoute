@@ -27,7 +27,9 @@ npm install -g omniroute
 omniroute
 ```
 
-Dashibodi hufunguka kwenye `http://localhost:20128` na URL ya msingi ya API ni `http://localhost:20128/v1`.
+Dashibodi hufunguliwa `http://localhost:20128` na API msingi URL ni `http://localhost:20128/v1`.
+
+> **watumiaji wa npm:** Ikiwa npm itaonya kuwa hati za kusakinisha zilizuiwa (kwa mfano, `omniroute`, `better-sqlite3`), angalia [Utatuzi wa Matatizo — npm install-scripts blocked](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install).
 
 ### pnpm
 
@@ -200,39 +202,39 @@ Kwa usanidi wa kina wa kila zana (Claude Code, Codex CLI, Cursor, Cline, OpenCla
 
 ## Usanidi wa Itifaki (MCP + A2A)
 
-### Usanidi wa MCP (Itifaki ya Muktadha wa Modeli)
+### Usanidi wa MCP (Itifaki ya Muktadha wa Muundo)
 
-Anzisha usafirishaji wa MCP katika modi ya stdio:
+Anzisha usafiri MCP katika hali ya stdio:
 
 ```bash
 omniroute --mcp
 ```
 
-Mtiririko unaopendekezwa wa uthibitishaji:
+Mtiririko wa uthibitishaji unaopendekezwa:
 
 ```bash
-# 1. Anzisha seva ya MCP
+# 1. Start MCP server
 omniroute --mcp
 
-# 2. Kutoka kwa kiteja chako cha MCP, ita:
-omniroute_get_health        # Inapaswa kurejesha hali ya mfumo
-omniroute_list_combos       # Inapaswa kurejesha combos zinazotumika
+# 2. From your MCP client, call:
+omniroute_get_health        # Should return system health
+omniroute_list_combos       # Should return active combos
 
-# 3. Au endesha mkusanyiko kamili wa E2E:
+# 3. Or run the full E2E suite:
 npm run test:protocols:e2e
 ```
 
-#### Usanidi wa Kiteja cha MCP
+#### MCP Usanidi wa Mteja
 
-**Claude Code:**
+**Msimbo wa Claude :**
 
 ```bash
-claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
 ```
 
 **Cursor / Cline:**
 
-Ongeza kwenye mipangilio yako ya MCP:
+Ongeza kwenye mipangilio yako MCP (stdio, na ufunguo ili mpigaji awe na mkuu):
 
 ```json
 {
@@ -240,15 +242,22 @@ Ongeza kwenye mipangilio yako ya MCP:
     "omniroute": {
       "command": "omniroute",
       "args": ["--mcp"],
-      "env": {}
+      "env": {
+        "OMNIROUTE_API_KEY": "your-key",
+        "OMNIROUTE_BASE_URL": "http://localhost:20128"
+      }
     }
   }
 }
 ```
 
-**Nyaraka kamili za MCP:** [README ya Seva ya MCP](../../open-sse/mcp-server/README.md) — zana 110, usanidi wa IDE, viteja vya Python/TS/Go.
+Au, wakati `mcpTransport` ni `streamable-http` (iweke `/dashboard/mcp` au na `omniroute mcp enable --transport streamable-http`), elekeza ingizo la seva ya MCP la mbali kwa `http://localhost:20128/api/mcp/stream`.
 
-### Usanidi wa A2A (Itifaki ya Wakala-kwa-Wakala)
+Ufunguo husafiri kama `Authorization: Bearer <api-key>` (angalia [MCP Seva → Ufikiaji wa Mbali](../frameworks/MCP-SERVER.md#remote-access-manage-scope-bypass) kwa seva pangishi za mbali; ufunguo wa mbali unahitaji `mcp:connect` pamoja na mawanda yake read/write ).
+
+**Nyaraka kamili MCP :** [MCP Seva README](../../open-sse/mcp-server/README.md) — 110, usanidi IDE, wateja wa Python/TS/Go. Marejeleo ya opereta kwa zana za CCR/dedup mgandamizo (alama, sharti, upeo wa kila chombo, urejeleaji wa urejeshaji, uchunguzi): [Injini za Ukandamizaji → Masharti / mwongozo wa opereta](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+
+### Usanidi wa A2A (Itifaki ya Wakala kwa Wakala)
 
 Thibitisha Kadi ya Wakala:
 
@@ -264,7 +273,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"Give me a short quota summary."}]}}'
 ```
 
-**Nyaraka kamili za A2A:** [README ya Seva ya A2A](../../src/lib/a2a/README.md) — JSON-RPC 2.0, ujuzi, utiririshaji, mzunguko wa maisha wa jukumu.
+**Nyaraka kamili A2A :** [A2A Seva README](../../src/lib/a2a/README.md) — JSON-RPC 2.0, ujuzi, utiririshaji, mzunguko wa maisha ya kazi.
 
 ---
 
@@ -323,12 +332,12 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ---
 
-## Kiolezo cha Void Linux (xbps-src)
+## Kiolezo cha Linux (xbps-src) tupu
 
-Kwa watumiaji wa Void Linux, unaweza kuunda kifurushi asilia kwa kutumia `xbps-src`. Hifadhi sehemu hii kama `srcpkgs/omniroute/template`:
+Kwa watumiaji wa Void Linux, unaweza kuunda kifurushi asilia kwa kutumia `xbps-src`. Hifadhi kizuizi hiki kama `srcpkgs/omniroute/template`:
 
 ```bash
-# Faili ya kiolezo ya 'omniroute'
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -339,7 +348,7 @@ maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# Tengeneza upya checksum kwa kila toleo kwa kutumia:
+# Regenerate the checksum for each release with:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

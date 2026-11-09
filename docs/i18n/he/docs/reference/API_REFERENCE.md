@@ -875,13 +875,7 @@ Exa `type: "lite"` (Exa 3.0) מקבל קבוצת שדות מצומצמת יות�
 `subpages`, `subpageTarget`, `highlights.numSentences` ו-`highlights.highlightsPerUrl` אינם מועברים
 עוד.
 
-חישוב העלויות הוא לפי הרישום השטוח `costPerQuery`, למעט Exa, שפועל לפי התמחור העצמי של Exa:
-$0.007 לקריאה עבור `auto` (וגם עבור `fast` מדור קודם) או $0.004 עבור `lite` (וגם עבור
-`instant` מדור קודם), עבור 10 תוצאות; $0.001 עבור כל תוצאה נוספת; ו-$0.001 לכל
-תוצאה שהוחזרה כאשר מוגדר `contents.summary`. Tavily נרשם כקרדיט אחד ($0.008) עבור
-`search_depth` בערכים `basic`, `fast` ו-`ultra-fast`, וכ-2 קרדיטים ($0.016) עבור `advanced`
-([קרדיטי API של Tavily](https://docs.tavily.com/documentation/api-credits)). קריאה עם
-`auto_parameters: true` שבה Tavily משדרג ל-advanced עדיין נרשמת כקרדיט אחד.
+Exa: $0.007 לקריאה עבור `auto` (וה- `fast` מדור קודם) או $0.004 עבור `lite` (וה- `instant` מדור קודם), המכסה 10 תוצאות; $0.001 עבור כל תוצאה נוספת; ו-$0.001 לתוצאה שהוחזרה כאשר `contents.summary` מוגדר. Tavily נרשם ב-1 זיכוי ($0.008) עבור `search_depth` `basic`, `fast` ו- `ultra-fast`, ו-2 קרדיטים ($0.016) עבור `advanced` ( [Tavily API credits](https://docs.tavily.com/documentation/api-credits) ). שיחה עם `auto_parameters: true` שתווילי משדרגת למתקדמים עדיין מוקלטת ב-1 זיכוי.
 
 ---
 
@@ -1176,6 +1170,8 @@ X-OmniRoute-No-Cache: true
 
 ---
 
+<a id="cliproxyapi-management-compatibility"></a>
+
 ## תאימות לניהול CLIProxyAPI
 
 OmniRoute משיב לשלוש נקודות הקצה לניהול של [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI)
@@ -1190,20 +1186,11 @@ OmniRoute משיב לשלוש נקודות הקצה לניהול של [CLIProxyA
 | POST   | `/v0/management/api-call`    | גוף `{ auth_index, method, url, header?, data? }`. שולח בקשה אחת מרשימת-ההיתרים עם האסימון של החשבון ומחזיר `{ status_code, body }` |
 | POST   | `/v0/management/reset-quota` | גוף `{ auth_index }`. מנקה את תקופת הצינון של החיבור, את נעילות המודלים ואת תקופות הצינון של Codex לפי scope עבור חשבון אחד         |
 
-- `auth_index` הוא מזהה החיבור של OmniRoute. `provider` הוא `claude` או `codex` (חיבורי OAuth
-  בלבד; ספק מפתח ה-API של `anthropic` אינו מופיע ברשימה). עבור Codex,
-  `id_token.chatgpt_account_id` הוא מזהה סביבת העבודה המאוחסן, ו-`plan_type` הוא התוכנית המאוחסנת.
-- `api-call` אינו פרוקסי כללי. הוא מקבל רק את Claude `GET
-https://api.anthropic.com/api/oauth/usage` ואת Codex `GET https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits` ו-
-  `POST .../wham/rate-limit-reset-credits/consume`, וכל אחד מהם רק עבור חשבון של
-  הספק התואם. כל דבר אחר מחזיר `403` מבלי ליצור קשר עם ה-upstream. כותרת
-  `Authorization` של הקורא (כולל מציין המיקום `$TOKEN$`) מתעלמים: OmniRoute מחדיר את אסימון
-  הגישה של החיבור, מרענן אותו תחילה כאשר הוא קרוב לתפוגה, ומעביר רק
-  כותרות מרשימת-ההיתרים (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`;
-  `Accept`, `Content-Type`). אם `Chatgpt-Account-Id` חסר, ברירת המחדל היא מזהה סביבת העבודה המאוחסן.
-  פסק הזמן של בקשות הוא 15 שניות, והן משתמשות בפרוקסי של החיבור.
-- `reset-quota` משאיר מצבים סופיים (`banned`, `expired`, `credits_exhausted`) ללא שינוי. `auth_index`
-  לא מוכר מחזיר `404`.
+- `auth_index` הוא מזהה החיבור ב־OmniRoute. `provider` הוא `claude` או `codex` (חיבורי OAuth בלבד; ספק מפתח ה־API ‏`anthropic` אינו נכלל). ב־Codex, ‏`id_token.chatgpt_account_id` הוא מזהה סביבת העבודה השמור ו־`plan_type` הוא המסלול השמור.
+- `api-call` אינו פרוקסי כללי. הוא מקבל רק Claude `GET
+https://api.anthropic.com/api/oauth/usage` ו־Codex `GET
+https://chatgpt.com/backend-api/wham/usage`, ‏`GET .../wham/rate-limit-reset-credits` ו־`POST .../wham/rate-limit-reset-credits/consume`, כל אחד רק עבור חשבון של הספק המתאים. כל דבר אחר מחזיר `403` בלי לפנות למעלה הזרם. מתעלמים מכותרת `Authorization` של הקורא (לרבות מציין המקום `$TOKEN$`): OmniRoute מזריק את אסימון הגישה של החיבור, מרענן אותו תחילה אם תפוגתו קרובה ומעביר רק כותרות מורשות (`anthropic-beta`; ‏`OpenAI-Beta`, ‏`Originator`, ‏`Chatgpt-Account-Id`; ‏`Accept`, ‏`Content-Type`). אם `Chatgpt-Account-Id` חסרה, ברירת המחדל היא מזהה סביבת העבודה השמור. אם התשובה הראשונה ממעלה הזרם היא `401`, מתבצע רענון אחד וניסיון חוזר רק אם אסימון הגישה השתנה. כל ניסיון במעלה הזרם מוגבל ל־15 שניות ומשתמש בפרוקסי של החיבור.
+- `reset-quota` אינו משנה מצבים סופיים (banned, expired, credits_exhausted). ‏`auth_index` לא מוכר מחזיר `404`.
 
 **אימות:** סשן של לוח המחוונים או מפתח API עם scope `manage`, הנדרש גם כאשר הכניסה מושבתת
 (הנתיבים נמצאים ב-`ALWAYS_PROTECTED_API_PATHS`). מפתחות המיועדים להסקה בלבד מקבלים `403`. מקור:
@@ -1952,17 +1939,17 @@ curl -X DELETE http://localhost:20128/api/resilience/model-cooldowns \
 
 OmniRoute מגיע עם שרת Model Context Protocol משובץ, הכולל 3 תעבורות (stdio, SSE, streamable-http) וכלים בעלי תחום מוגבל. נקודות הקצה של לוח הבקרה שלהלן קוראות נתוני מצב/ביקורת ומשמשות כפרוקסי לתעבורות HTTP.
 
-| שיטה | נתיב | תיאור |
-| ------ | ---------------------- | ------------------------------------------------------------------------------------------------ | -------------------- |
-| GET | `/api/mcp/status` | פעימת לב, תעבורה, מצב מקוון, הקריאה האחרונה, הכלים המובילים, שיעור הצלחה ב-24 השעות האחרונות |
-| GET | `/api/mcp/tools` | רשימת כלי MCP עם `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints` |
-| GET | `/api/mcp/sse` | פתיחת זרם SSE עבור תעבורת SSE (מחזיר `503` אם MCP מושבת או אם קיימת אי-התאמה בתעבורה) |
-| POST | `/api/mcp/sse` | שליחת מסגרת JSON-RPC בתעבורת SSE |
-| GET | `/api/mcp/stream` | פתיחת צד ה-SSE של תעבורת Streamable HTTP (הודעות שיוזם השרת) |
-| POST | `/api/mcp/stream` | שליחת מסגרת JSON-RPC בתעבורת Streamable HTTP |
-| DELETE | `/api/mcp/stream` | סיום סשן Streamable HTTP |
-| GET | `/api/mcp/audit` | שאילתת יומן ביקורת — `?limit=`, `?offset=`, `?tool=`, `?success=true                                | false`, `?apiKeyId=` |
-| GET | `/api/mcp/audit/stats` | נתוני ביקורת מצטברים (סיכומים, שיעור הצלחה, משך ממוצע, כלים מובילים) |
+| שיטה   | נתיב                   | תיאור                                                                                                                       |
+| ------ | ---------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/mcp/status`      | פעימת לב, תעבורה, מצב מקוון, הקריאה האחרונה, הכלים המובילים, שיעור הצלחה ב-24 השעות האחרונות                                |
+| GET    | `/api/mcp/tools`       | רשימת כלי MCP עם `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints`                                  |
+| GET    | `/api/mcp/sse`         | פתיחת זרם SSE עבור תעבורת SSE (מחזיר `503` אם MCP מושבת או אם קיימת אי-התאמה בתעבורה)                                       |
+| POST   | `/api/mcp/sse`         | שליחת מסגרת JSON-RPC בתעבורת SSE                                                                                            |
+| GET    | `/api/mcp/stream`      | פתיחת צד ה-SSE של תעבורת Streamable HTTP (הודעות שיוזם השרת)                                                                |
+| POST   | `/api/mcp/stream`      | שליחת מסגרת JSON-RPC בתעבורת Streamable HTTP                                                                                |
+| DELETE | `/api/mcp/stream`      | סיום סשן Streamable HTTP                                                                                                    |
+| GET    | `/api/mcp/audit`       | שאילתת יומן ביקורת — `?limit=`, `?offset=`, `?tool=`, `?success=true                                \| false`, `?apiKeyId=` |
+| GET    | `/api/mcp/audit/stats` | נתוני ביקורת מצטברים (סיכומים, שיעור הצלחה, משך ממוצע, כלים מובילים)                                                        |
 
 **אימות:** תעבורות `sse`/`stream` מכבדות את ממשק האימות הייעודי ל-MCP (מפתח API מסוג Bearer עם תחום `mcp`); ניתן לקרוא את נתיבי `status`/`tools`/`audit*` מלוח הבקרה (ללא צורך באימות נוסף מעבר לגישה למארח לוח הבקרה).
 

@@ -27,7 +27,9 @@ npm install -g omniroute
 omniroute
 ```
 
-Papan pemuka dibuka di `http://localhost:20128` dan URL asas API ialah `http://localhost:20128/v1`.
+Papan pemuka dibuka pada `http://localhost:20128` dan API asas URL ialah `http://localhost:20128/v1`.
+
+> **pengguna npm:** Jika npm memberi amaran bahawa skrip pemasangan telah disekat (cth, `omniroute`, `better-sqlite3`), lihat [Penyelesaian masalah — npm install-scripts blocked](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install).
 
 ### pnpm
 
@@ -200,7 +202,7 @@ Untuk konfigurasi terperinci bagi setiap alat (Claude Code, Codex CLI, Cursor, C
 
 ## Persediaan Protokol (MCP + A2A)
 
-### Persediaan MCP (Model Context Protocol)
+### Persediaan MCP (Protokol Konteks Model)
 
 Mulakan pengangkutan MCP dalam mod stdio:
 
@@ -211,28 +213,28 @@ omniroute --mcp
 Aliran pengesahan yang disyorkan:
 
 ```bash
-# 1. Mulakan pelayan MCP
+# 1. Start MCP server
 omniroute --mcp
 
-# 2. Daripada klien MCP anda, panggil:
-omniroute_get_health        # Sepatutnya mengembalikan status kesihatan sistem
-omniroute_list_combos       # Sepatutnya mengembalikan kombo aktif
+# 2. From your MCP client, call:
+omniroute_get_health        # Should return system health
+omniroute_list_combos       # Should return active combos
 
-# 3. Atau jalankan suite E2E penuh:
+# 3. Or run the full E2E suite:
 npm run test:protocols:e2e
 ```
 
-#### Konfigurasi Klien MCP
+#### MCP Konfigurasi Pelanggan
 
-**Claude Code:**
+**Kod Claude :**
 
 ```bash
-claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
 ```
 
 **Cursor / Cline:**
 
-Tambahkan pada tetapan MCP anda:
+Tambahkan pada tetapan MCP anda (stdio, dengan kunci supaya pemanggil mempunyai prinsipal):
 
 ```json
 {
@@ -240,15 +242,22 @@ Tambahkan pada tetapan MCP anda:
     "omniroute": {
       "command": "omniroute",
       "args": ["--mcp"],
-      "env": {}
+      "env": {
+        "OMNIROUTE_API_KEY": "your-key",
+        "OMNIROUTE_BASE_URL": "http://localhost:20128"
+      }
     }
   }
 }
 ```
 
-**Dokumentasi MCP penuh:** [README Pelayan MCP](../../open-sse/mcp-server/README.md) — 110 alat, konfigurasi IDE, klien Python/TS/Go.
+Atau, apabila `mcpTransport` ialah `streamable-http` (tetapkannya pada `/dashboard/mcp` atau dengan `omniroute mcp enable --transport streamable-http`), halakan entri pelayan MCP jauh pelanggan pada `http://localhost:20128/api/mcp/stream`.
 
-### Persediaan A2A (Agent-to-Agent Protocol)
+Kunci bergerak sebagai `Authorization: Bearer <api-key>` (lihat [MCP Server → Akses jauh](../frameworks/MCP-SERVER.md#remote-access-manage-scope-bypass) untuk hos jauh; kunci jauh memerlukan `mcp:connect` serta skop read/write ).
+
+**Dokumentasi MCP penuh:** [MCP Pelayan README](../../open-sse/mcp-server/README.md) — 110 alatan, konfigurasi IDE, pelanggan Python/TS/Go. Rujukan operator untuk alat CCR/dedup mampatan (penanda, prasyarat, skop setiap alat, penomboran pengambilan semula, diagnostik): [Enjin Mampatan → Prasyarat / panduan pengendali](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+
+### A2A Persediaan (Protokol Agen-ke-Ejen)
 
 Sahkan Kad Ejen:
 
@@ -264,7 +273,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"Give me a short quota summary."}]}}'
 ```
 
-**Dokumentasi A2A penuh:** [README Pelayan A2A](../../src/lib/a2a/README.md) — JSON-RPC 2.0, kemahiran, penstriman, kitaran hayat tugasan.
+**Dokumentasi A2A penuh:** [A2A Pelayan README](../../src/lib/a2a/README.md) — JSON-RPC 2.0, kemahiran, penstriman, kitaran hayat tugas.
 
 ---
 
@@ -323,12 +332,12 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ---
 
-## Templat Void Linux (xbps-src)
+## Void Linux (xbps-src) Templat
 
-Bagi pengguna Void Linux, anda boleh membina pakej natif menggunakan `xbps-src`. Simpan blok ini sebagai `srcpkgs/omniroute/template`:
+Untuk pengguna Void Linux, anda boleh membina pakej asli menggunakan `xbps-src`. Simpan blok ini sebagai `srcpkgs/omniroute/template`:
 
 ```bash
-# Fail templat untuk 'omniroute'
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -339,7 +348,7 @@ maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# Jana semula jumlah semak bagi setiap keluaran dengan:
+# Regenerate the checksum for each release with:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

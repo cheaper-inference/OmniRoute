@@ -4,15 +4,13 @@
 
 ---
 
-# Rangiranje besplatnih provajdera (Arena ELO)
-
-> **TL;DR**: OmniRoute rangira svoje **besplatne** provajdere prema kvalitetu modela koristeći **Arena AI (LMArena-stil) ELO rezultate**. Otvorite stranicu **Rangiranje besplatnih provajdera** na kontrolnoj tabli da vidite koji besplatni provajderi isporučuju najjače modele za vaš zadatak — ukupno, ili filtrirano po kategoriji (kodiranje, pregled, dokumentacija, otklanjanje grešaka).
+> **TL;DR** : OmniRoute rangira svoje **besplatno** provajderi prema kvaliteti modela koji koriste **Arena AI (LMArena u stilu) ELO rezultati** . Otvorite **Free Provider Rankings** stranicu na kontrolnoj tabli da vidite koji besplatni provajderi isporučuju najjače modele za vaš zadatak — općenito, ili filtrirane po kategoriji (kodiranje, pregled, dokumentacija, otklanjanje grešaka).
 
 ---
 
 ## Šta je to
 
-OmniRoute registruje 380 provajdera, uključujući 155 označenih kataloških zapisa**free/no-auth** (no-auth, free-tier OAuth ili free-tier API ključ — pogledajte [Vodič za besplatne razine](../getting-started/FREE-TIERS-GUIDE.md) i cijeli [direktorij besplatnih razina](../reference/FREE_TIERS.md) ). Kvaka: besplatni provajderi se jako razlikuju po kvaliteti modela. Ne-auth provajder koji opslužuje granični model je daleko korisniji od onog koji opslužuje mali naslijeđeni model.
+OmniRoute registruje 381 provajdera, uključujući 155 označenih kataloških zapisa**free/no-auth** (no-auth, free-tier OAuth ili free-tier API ključ — pogledajte [Vodič za besplatne razine](../getting-started/FREE-TIERS-GUIDE.md) i cijeli [direktorij besplatnih razina](../reference/FREE_TIERS.md) ). Kvaka: besplatni provajderi se jako razlikuju po kvaliteti modela. Ne-auth provajder koji opslužuje granični model je daleko korisniji od onog koji opslužuje mali naslijeđeni model.
 
 **Free Provider Rankings** odgovori "** koji besplatni provajder mi daje najbolji model?** " pridruživanjem katalogu svakog besplatnog provajdera sa** ocjene kvaliteta prikupljene od strane publike** od** Arena AI rang lista** (ljudske preferencije ELO, ista ideja koja stoji iza LMArena chatbot arene). Ponuđači se zatim rangiraju prema njihovoj snazi** najbolji besplatni model** .
 

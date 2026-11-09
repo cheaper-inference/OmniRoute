@@ -240,9 +240,9 @@ Aha faịlụ cert: `omniroute-mitm.crt`. A na-eji `getCertFingerprint()` tụny
 
 Endpoint MITM niile chọrọ nyocha ikike njikwa (`requireCliToolsAuth`). A na-edobe okwuntughe sudo na cache n'ime scope nke modulu (ọ bụghị `globalThis` ma ọlị), a na-ehichapụkwa ya na `stopMitm()`.
 
-## Onye nnọchi anya onye ọrụ wepụrụ — env vars (`.env.example` ngalaba 12)
+## Ndochi User-Agent — mgbanwe env (ngalaba 12 nke `.env.example`)
 
-| Na-agbanwe agbanwe  | Ọdabara                                       |
+| Mgbanwe             | Ndabara                                       |
 | ------------------- | --------------------------------------------- |
 | `CLAUDE_USER_AGENT` | `claude-cli/2.1.280 (external, cli)`          |
 | `CODEX_USER_AGENT`  | `codex-cli/0.155.0 (Windows 10.0.26200; x64)` |
@@ -251,7 +251,7 @@ Endpoint MITM niile chọrọ nyocha ikike njikwa (`requireCliToolsAuth`). A na-
 | `QODER_USER_AGENT`  | `Qoder-Cli`                                   |
 | `CURSOR_USER_AGENT` | `Cursor/3.4`                                  |
 
-Eji `open-sse/executors/base.ts::buildHeaders()` eri ya site na nchọcha ike.** Kpochapụ ndị a mgbe ndị na-eweta ha wepụtara ụdị CLI ọhụrụ** eriri — stale UA na-amalite ịjụ dị ka ndị ahịa emechiela.
+`open-sse/executors/base.ts::buildHeaders()` na-eji ha site na nchọgharị dinamiki. **Bulie ụdị ndị a mgbe ndị na-eweta ọrụ wepụtara ụdị CLI ọhụrụ** — a na-amalite ịjụ eriri UA ndị merela ochie dịka klayenti ndị ochie.
 
 ## Ihe Mgbanwe Ọnọdụ Ndakọrịta CLI (`.env.example` ngalaba 13)
 

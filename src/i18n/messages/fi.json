@@ -4147,7 +4147,9 @@
     "duplicateAutoComboFailedPrefix": "Automaattisen yhdistelmän kaksoiskappaleen luonti epäonnistui:",
     "duplicateAutoComboUnknownError": "Tuntematon virhe",
     "duplicateAutoComboTitle": "Luo staattinen yhdistelmä kohteesta {name}",
-    "fallbackSummary": "{rate}% pyynnöistä siirtyi varatahoojeen, noin {skips} kohdet ohitettiin kussakin pyynnössä"
+    "fallbackSummary": "{rate}% pyynnöistä siirtyi varatahoojeen, noin {skips} kohdet ohitettiin kussakin pyynnössä",
+    "reorderAll": "Järjestä kaikki uudelleen",
+    "reorderAllDescription": "Järjestetään kaikki {count} yhdistelmät uudelleen. Vetokahvat ovat käytössä."
   },
   "costs": {
     "title": "Kustannukset",
@@ -14538,6 +14540,10 @@
       "UNPRICED_USAGE_BUDGET_POLICY": {
         "label": "Hinnoittelemattoman käytön budjettikäytäntö",
         "description": "Miten avainkohtaiset päivä- ja viikkokohtaiset USD-rajoitukset käsittelevät onnistunutta käyttöä, jolla tarjoajalla tai mallilla ei ole hintariviä. fail_closed (oletus) merkitsee ikkunan ylittäneeksi, joten tuntematon kustannus ei voi koskaan päästä kiinteän ylärajan ohi. count_as_zero laskee käytön arvoksi $0 ja jatkaa hinnoitellun käytön valvontaa. Hinnoittelemattomat mallit listataan joka tapauksessa kojelaudan etusivulle."
+      },
+      "COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE": {
+        "description": "Laske pakkausvälimuistin tilastoissa pakattu pyyntö automaattisen etuliitevälimuistin palveluntarjoajalle (OpenAI, Codex, Azure tai mukautettu yhteys, joka ilmoittaa välimuistin nopean tallennuksen merkintöjen poistamisella) arvioiduksi välimuistiosumaksi myös ilman cache_control-merkkejä. Arvio on välimuistin kelpoisuussignaali, ei havaittu osuma, joten näiden palveluntarjoajien raportoitu osumaprosentti on kohti 100 %. Oletusarvoisesti pois päältä: vain pyyntö, joka kuljettaa välimuistin_hallinta-merkkejä välimuistin tarjoajalle, lasketaan arvioiduksi osumaksi, joten automaattisten etuliitteiden tarjoajat raportoivat jatkuvasti 0:n.",
+        "label": "Pakkauksen välimuistin tilastot: Automaattinen etuliite kelpoisuus"
       }
     }
   },

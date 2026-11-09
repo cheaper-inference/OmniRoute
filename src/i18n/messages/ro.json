@@ -4147,7 +4147,9 @@
     "duplicateAutoComboFailedPrefix": "Duplicarea combinației automate a eșuat:",
     "duplicateAutoComboUnknownError": "Eroare necunoscută",
     "duplicateAutoComboTitle": "Creați o combinație statică din {name}",
-    "fallbackSummary": "{rate}% din cereri au folosit alternativ, ~{skips} ținte omise fiecare"
+    "fallbackSummary": "{rate}% din cereri au folosit alternativ, ~{skips} ținte omise fiecare",
+    "reorderAll": "Reordonați toate",
+    "reorderAllDescription": "Reordonarea tuturor combo-urilor {count}. Mânerele de glisare sunt activate."
   },
   "costs": {
     "title": "Costuri",
@@ -14538,6 +14540,10 @@
       "UNPRICED_USAGE_BUDGET_POLICY": {
         "label": "Politica bugetului pentru utilizare fără preț",
         "description": "Cum tratează limitele zilnice/săptămânale în USD pe cheie utilizarea reușită pentru care furnizorul/modelul nu are o linie de preț. fail_closed (implicit) marchează fereastra ca depășită, astfel încât un cost necunoscut să nu poată trece peste un plafon strict. count_as_zero contabilizează acea utilizare ca $0 și continuă să aplice cheltuielile cu preț. Modelele fără preț sunt listate oricum pe pagina principală a tabloului de bord."
+      },
+      "COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE": {
+        "description": "În statisticile cache-ului de compresie, numărați o solicitare comprimată către un furnizor de stocare în cache automată a prefixelor (OpenAI, Codex, Azure sau o conexiune personalizată care declară memorarea promptă în cache cu eliminarea markerului) ca o atingere estimată a cache-ului chiar și fără marcatori cache_control. Estimarea este un semnal de eligibilitate pentru cache, nu o lovitură observată, astfel încât rata de accesare raportată pentru acei furnizori este de 100%. Dezactivat în mod prestabilit: doar o solicitare care transportă marcatori cache_control către un furnizor de stocare în cache este considerată o atingere estimată, astfel încât furnizorii de prefix automat raportează în continuare 0.",
+        "label": "Statistici de compresie cache: Eligibilitate automată pentru prefix"
       }
     }
   },

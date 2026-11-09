@@ -57,11 +57,11 @@ på grund av ett konkret implementeringsfaktum:
 
 Detta innebär följande för varje yta, även med `CORS_ALLOW_ALL=true`:
 
-| Yta                                       | Autentiseringsmekanism    | Effekt av CORS med jokertecken                                                                                                                                                                                                                                                                                                                               |
-| ----------------------------------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Instrumentpanel / MANAGEMENT `/api/*`     | Cookiesession             | Ursprunget returneras, men **utan `Allow-Credentials`** **blockerar** webbläsaren den autentiserade läsningen. En skadlig webbplats med ett annat ursprung **kan inte läsa** dina autentiserade svar från instrumentpanelen, och sessionscookien exponeras inte.                                                                                             |
-| Klient-API `/v1/*`, `/v1beta/*`           | Bearer-/`x-api-key`-huvud | Redan tillåtande **avsiktligt** (`relaxForTokenAuth`): webbläsare bifogar aldrig `Authorization`/`x-api-key` automatiskt, så en angripares sida kan inte tillhandahålla din nyckel. Ursprunget returneras bara när den angivna nyckeln har validerats; anonyma svar (`REQUIRE_API_KEY=false`) behåller tillåtelselistan. `CORS_ALLOW_ALL` utökar inte detta. |
-| Offentlig skrivskyddad (`/api/health`, …) | Ingen                     | Icke-känslig; jokertecken är ofarligt.                                                                                                                                                                                                                                                                                                                       |
+| Yta                                       | Autentiseringsmekanism    | Effekt av CORS med jokertecken                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| ----------------------------------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Instrumentpanel / MANAGEMENT `/api/*`     | Cookiesession             | Ursprunget returneras, men **utan `Allow-Credentials`** **blockerar** webbläsaren den autentiserade läsningen. En skadlig webbplats med ett annat ursprung **kan inte läsa** dina autentiserade svar från instrumentpanelen, och sessionscookien exponeras inte.                                                                                                                                                                                                                                                                                                                                       |
+| Klient-API `/v1/*`, `/v1beta/*`           | Bearer-/`x-api-key`-huvud | Redan tillåtande **avsiktligt** (`relaxForTokenAuth`): webbläsare bifogar aldrig `Authorization`/`x-api-key` automatiskt, så en angripares sida kan inte tillhandahålla din nyckel. Återspegling av ursprunget enligt den lättade regeln kräver en autentiserad part (en validerad API-nyckel eller en validerad panelsession), inte bara en header med autentiseringsuppgifter, och innehåller aldrig `Access-Control-Allow-Credentials`. Anonyma svar (`REQUIRE_API_KEY=false`) använder den konfigurerade listan över tillåtna ursprung, inklusive uttrycklig aktivering med `CORS_ALLOW_ALL=true`. |
+| Offentlig skrivskyddad (`/api/health`, …) | Ingen                     | Icke-känslig; jokertecken är ofarligt.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 
 Den **kvarvarande** exponeringen med `CORS_ALLOW_ALL=true` är alltså begränsad till: (a)
 oautentiserade läsningar mellan olika ursprung av data som redan är tillgängliga utan autentisering, och (b)
@@ -125,9 +125,7 @@ CORS-ursprung** utan omstart.
   automatiskt. CORS utgör inget meningsfullt hinder här — API-nyckeln är hindret
   — vilket är anledningen till att den ytan avsiktligt är tillåtande så att
   webbläsar- och Electron-klienter kan läsa svar som de redan har rätt till.
-  Den tillåtande ursprungsreturneringen följer den validerade nyckeln, inte enbart att
-  huvudet finns: när `REQUIRE_API_KEY=false` betjänar en begäran anonymt behåller dess
-  lyckade svar den tillåtelselista som nekar som standard. Autentiseringsavslag (401)
+  Återspegling av ursprunget enligt den lättade regeln kräver en autentiserad part (en validerad API-nyckel eller en validerad panelsession), inte bara en header med autentiseringsuppgifter, och innehåller aldrig `Access-Control-Allow-Credentials`. Anonyma svar (`REQUIRE_API_KEY=false`) använder den konfigurerade listan över tillåtna ursprung, inklusive uttrycklig aktivering med `CORS_ALLOW_ALL=true`. Autentiseringsavslag (401)
   förblir läsbara så att klienter kan visa en återkallad eller felskriven nyckel (#5242):
   pipelinens egen 401 behåller ursprungsreturneringen, och en rutt som själv avvisar
   nyckeln efter att pipelinen har betjänat begäran som anonym (`/v1/models` och
@@ -139,8 +137,7 @@ CORS-ursprung** utan omstart.
   `auth_token`), inte av vilket av dem rutten kontrollerade, och kombineras aldrig med
   `Access-Control-Allow-Credentials`; brödtexten är ett fast felkuvert. Hanteringsrutter
   under `/api/v1/` som skyddas av `requireManagementAuth()` (`/api/v1/management/*`,
-  `/api/v1/registered-keys`) lägger inte till returneringen: med `REQUIRE_API_KEY=false`
-  går deras 401/403 inte att läsa från ett annat ursprung.
+  `/api/v1/registered-keys`) använder inte detta undantag vid avvisning av autentiseringsuppgifter: med `REQUIRE_API_KEY=false` följer deras 401/403-svar den konfigurerade CORS-policyn för ursprung.
 - **Cookiesession (instrumentpanelen):** skyddas av standardinställningen som
   nekar vid fel **och** av avsaknaden av `Access-Control-Allow-Credentials` på
   den delade sökvägen. Undanta ursprung för hantering/instrumentpanelen från alla
@@ -154,7 +151,7 @@ inferensutdata kontrollerar själva handskakningens `Origin`
 OmniRoute körs via `npm start` / `npm run dev`, bryggan `/v1/ws` och `/api/v1/ws`, som
 strömmar `/v1/chat/completions`, `/v1/messages` och `/v1/responses` som ramar. Bryggan
 frågar `/api/v1/ws?handshake=1` om utslaget och vägrar uppgradera om inte den rutten
-har kört kontrollen. En handskakning accepteras när:
+har kört kontrollen. Autentiseringskraven gäller fortfarande separat. Ursprungskontrollen godkänns när:
 
 - den saknar `Origin`-huvud (Codex CLI, SDK:er och andra klienter som inte är webbläsare);
 - `Origin` godkänns av tillåtelselistan ovan (`CORS_ALLOWED_ORIGINS`, inställningen

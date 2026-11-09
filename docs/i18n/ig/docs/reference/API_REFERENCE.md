@@ -865,13 +865,7 @@ mgbe edobere ubi ọzọ ọ bụla. Maka lite, a na-ewepụ `additionalQueries`
 ewezuga `text` na `highlights` tupu oku ahụ. A naghịzi ebufe
 `subpages`, `subpageTarget`, `highlights.numSentences` na `highlights.highlightsPerUrl` ndị ochie.
 
-Ịgbakọ ụgwọ bụ ndekọ dị larịị `costPerQuery`, ewezuga Exa, nke na-agbaso ọnụahịa nke Exa:
-$0.007 kwa oku maka `auto` (na `fast` ochie) ma ọ bụ $0.004 maka `lite` (na `instant` ochie),
-na-ekpuchi nsonaazụ 10; $0.001 maka nsonaazụ ọ bụla ọzọ; na $0.001 kwa nsonaazụ e weghachiri mgbe
-edobere `contents.summary`. A na-edekọ Tavily na kredit 1 ($0.008) maka
-`search_depth` `basic`, `fast` na `ultra-fast`, yana kredit 2 ($0.016) maka `advanced`
-([kredit API Tavily](https://docs.tavily.com/documentation/api-credits)). Oku nwere
-`auto_parameters: true` nke na-eme ka Tavily kwalite gaa na advanced ka a ka na-edekọ ya dịka kredit 1.
+Exa: $ 0.007 kwa oku maka `auto` (na ihe nketa `fast`) ma ọ bụ $ 0.004 maka `lite` (na ihe nketa `instant`), na-ekpuchi 10 nsonaazụ; $0.001 maka nsonaazụ ọ bụla ọzọ; yana $0.001 kwa rịzọlt weghachi mgbe edobere `contents.summary`. A na-edekọ Tavily na 1 kredit ($0.008) maka `search_depth` `basic`, `fast` na `ultra-fast`, yana kredit 2 ($0.016) maka `advanced` ( [Tavily API credits](https://docs.tavily.com/documentation/api-credits) ). A ka na-edekọ oku nwere `auto_parameters: true` nke Tavily kwalitere na kredit 1.
 
 ---
 
@@ -1136,6 +1130,8 @@ X-OmniRoute-No-Cache: true
 
 ---
 
+<a id="cliproxyapi-management-compatibility"></a>
+
 ## Ndakọrịta Nlekọta CLIProxyAPI
 
 OmniRoute na-aza endpoints nlekọta atọ nke [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI) nke dashboard ojiji na-akpọ iji gụọ oke ndenye aha Claude na Codex (dịka ọmụmaatụ, isi iyi oke ojiji `cliproxy` nke T3 Code). Tụọ URL ntọala nke onye ahịa ahụ na OmniRoute ma jiri igodo API nwere scope `manage` dị ka igodo nlekọta ya. A na-eje ozi routes ndị a na `/v0/management/*` na `/api/v0/management/*`.
@@ -1146,9 +1142,11 @@ OmniRoute na-aza endpoints nlekọta atọ nke [CLIProxyAPI](https://github.com/
 | POST   | `/v0/management/api-call`    | Ahụ `{ auth_index, method, url, header?, data? }`. Na-eziga otu arịrịọ e kwadoro site na token akaụntụ ahụ ma weghachite `{ status_code, body }` |
 | POST   | `/v0/management/reset-quota` | Ahụ `{ auth_index }`. Na-ehichapụ oge nkwụsị njikọ, mkpọchi model na oge nkwụsị Codex kwa-scope nke otu akaụntụ                                  |
 
-- `auth_index` bụ njirimara njikọ OmniRoute. `provider` bụ `claude` ma ọ bụ `codex` (naanị njikọ OAuth; e depụtaghị onye na-eweta igodo API `anthropic`). Maka Codex, `id_token.chatgpt_account_id` bụ njirimara workspace echekwara, ebe `plan_type` bụ atụmatụ echekwara.
-- `api-call` abụghị proxy izugbe. Ọ na-anabata naanị Claude `GET https://api.anthropic.com/api/oauth/usage` na Codex `GET https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits` na `POST .../wham/rate-limit-reset-credits/consume`, nke ọ bụla naanị maka akaụntụ onye na-eweta ya dabara. Ihe ọ bụla ọzọ na-alaghachi `403` n'ekwughị upstream okwu. A na-eleghara header `Authorization` nke onye na-akpọ (gụnyere placeholder `$TOKEN$`) anya: OmniRoute na-etinye access token njikọ ahụ, na-eme ka ọ dị ọhụrụ tupu oge ngafe ya eruo nso, ma na-ebufe naanị headers e kwadoro (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`; `Accept`, `Content-Type`). Ọ bụrụ na `Chatgpt-Account-Id` adịghị, ọ na-eji workspace id echekwara dịka ndabara. Arịrịọ na-akwụsị mgbe sekọnd 15 gachara ma jiri proxy njikọ ahụ.
-- `reset-quota` na-ahapụ steeti ngwụcha (banned, expired, credits_exhausted) dịka ha dị. `auth_index` a na-amaghị na-alaghachi `404`.
+- `auth_index` bụ connection id OmniRoute. `provider` bụ `claude` ma ọ bụ `codex` (naanị njikọ OAuth; API-key provider `anthropic` adịghị na ndepụta). Maka Codex, `id_token.chatgpt_account_id` bụ workspace id echekwara, `plan_type` bụkwa plan echekwara.
+- `api-call` abụghị proxy izugbe. Ọ na-anabata naanị Claude `GET
+https://api.anthropic.com/api/oauth/usage` na Codex `GET
+https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits` na `POST .../wham/rate-limit-reset-credits/consume`, nke ọ bụla naanị maka akaụntụ provider dabara. Ihe ọzọ ọ bụla na-eweghachi `403` n'emetụghị upstream. A na-eleghara header `Authorization` nke onye na-akpọ anya (gụnyere placeholder `$TOKEN$`): OmniRoute na-etinye access token njikọ, buru ụzọ mee refresh ma ọ bụrụ na oge ya na-achọ ịgwụ, ma zipụ naanị header e kwere (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`; `Accept`, `Content-Type`). Ọ bụrụ na `Chatgpt-Account-Id` adịghị, workspace id echekwara bụ ndabara. Ọ bụrụ na azịza upstream mbụ bụ `401`, ọ na-eme refresh otu ugboro, na-anwa ọzọ naanị mgbe access token gbanwere. Upstream attempt ọ bụla na-akwụsị n'oge mgbe sekọnd 15 gasịrị ma na-eji proxy njikọ ahụ.
+- `reset-quota` na-ahapụ terminal state (banned, expired, credits_exhausted) dịka ha dị. `auth_index` a na-amaghị na-eweghachi `404`.
 
 **Nyocha ikike:** Session dashboard ma ọ bụ igodo API nwere scope `manage`, nke achọrọ ọbụna mgbe login kwụsịrị (paths ndị ahụ dị na `ALWAYS_PROTECTED_API_PATHS`). Igodo nke inference naanị na-enweta `403`. Isi iyi: `src/lib/cliproxyCompat/managementApi.ts`.
 
@@ -1858,17 +1856,17 @@ Ebe nchekwa ncheta mkparịta ụka/eziokwu na-adịgide adịgide, nke ejikọt
 
 OmniRoute na-ebunye sava Model Context Protocol nke etinyere n'ime ya, nwere transports 3 (stdio, SSE, streamable-http) na ngwaọrụ ndị nwere oke. Endpoint dashboard ndị dị n'okpuru na-agụ data ọnọdụ/audit ma na-eje ozi dị ka proxy maka HTTP transports.
 
-| Method | Path | Description |
-| ------ | ---------------------- | ------------------------------------------------------------------------------------------------ | -------------------- |
-| GET | `/api/mcp/status` | Akara ndụ, transport, ọnọdụ online, oku ikpeazụ, ngwaọrụ ndị kacha eji, ọnụego ihe ịga nke ọma n'ime awa 24 |
-| GET | `/api/mcp/tools` | Ndepụta ngwaọrụ MCP nwere `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints` |
-| GET | `/api/mcp/sse` | Mepee iyi SSE maka SSE transport (na-eweghachi `503` ma ọ bụrụ na MCP agbanyụrụ ma ọ bụ transport adabaghị) |
-| POST | `/api/mcp/sse` | Ziga frame JSON-RPC na SSE transport |
-| GET | `/api/mcp/stream` | Mepee akụkụ SSE nke Streamable HTTP transport (ozi ndị sava bidoro) |
-| POST | `/api/mcp/stream` | Ziga frame JSON-RPC na Streamable HTTP transport |
-| DELETE | `/api/mcp/stream` | Mechie nnọkọ Streamable HTTP |
-| GET | `/api/mcp/audit` | Jụọ ndekọ audit — `?limit=`, `?offset=`, `?tool=`, `?success=true                                | false`, `?apiKeyId=` |
-| GET | `/api/mcp/audit/stats` | Nchịkọta ọnụ ọgụgụ audit (ngụkọta, ọnụego ihe ịga nke ọma, nkezi oge, ngwaọrụ ndị kacha eji) |
+| Method | Path                   | Description                                                                                                              |
+| ------ | ---------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| GET    | `/api/mcp/status`      | Akara ndụ, transport, ọnọdụ online, oku ikpeazụ, ngwaọrụ ndị kacha eji, ọnụego ihe ịga nke ọma n'ime awa 24              |
+| GET    | `/api/mcp/tools`       | Ndepụta ngwaọrụ MCP nwere `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints`                      |
+| GET    | `/api/mcp/sse`         | Mepee iyi SSE maka SSE transport (na-eweghachi `503` ma ọ bụrụ na MCP agbanyụrụ ma ọ bụ transport adabaghị)              |
+| POST   | `/api/mcp/sse`         | Ziga frame JSON-RPC na SSE transport                                                                                     |
+| GET    | `/api/mcp/stream`      | Mepee akụkụ SSE nke Streamable HTTP transport (ozi ndị sava bidoro)                                                      |
+| POST   | `/api/mcp/stream`      | Ziga frame JSON-RPC na Streamable HTTP transport                                                                         |
+| DELETE | `/api/mcp/stream`      | Mechie nnọkọ Streamable HTTP                                                                                             |
+| GET    | `/api/mcp/audit`       | Jụọ ndekọ audit — `?limit=`, `?offset=`, `?tool=`, `?success=true                                \| false`, `?apiKeyId=` |
+| GET    | `/api/mcp/audit/stats` | Nchịkọta ọnụ ọgụgụ audit (ngụkọta, ọnụego ihe ịga nke ọma, nkezi oge, ngwaọrụ ndị kacha eji)                             |
 
 **Nyocha ikike:** transports `sse`/`stream` na-asọpụrụ mpaghara nyocha ikike MCP kpọmkwem (igodo API Bearer nwere oke `mcp`); routes `status`/`tools`/`audit*` nwere ike ịgụ site na dashboard (enweghị nyocha ikike ọzọ achọrọ karịa iru host dashboard).
 

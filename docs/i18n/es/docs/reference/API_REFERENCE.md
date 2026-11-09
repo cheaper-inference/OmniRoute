@@ -901,13 +901,7 @@ cuando se establece cualquier otro campo. Para lite, `additionalQueries`, `syste
 `subpages`, `subpageTarget`, `highlights.numSentences` y `highlights.highlightsPerUrl` ya no se
 reenvían.
 
-El cálculo de costes utiliza el registro plano `costPerQuery`, excepto en Exa, que sigue sus
-propios precios: $0.007 por llamada para `auto` (y el heredado `fast`) o $0.004 para `lite` (y el heredado
-`instant`), cubriendo 10 resultados; $0.001 por cada resultado adicional; y $0.001 por
-cada resultado devuelto cuando se establece `contents.summary`. Tavily se registra con 1 crédito ($0.008) para
-`search_depth` `basic`, `fast` y `ultra-fast`, y con 2 créditos ($0.016) para `advanced`
-([Créditos de la API de Tavily](https://docs.tavily.com/documentation/api-credits)). Una llamada con
-`auto_parameters: true` que Tavily actualiza a advanced se sigue registrando con 1 crédito.
+Exa: $0,007 por llamada para `auto` (y el legado `fast`) o $0,004 para `lite` (y el legado `instant`), que cubre 10 resultados; $0,001 por cada resultado adicional; y $0,001 por resultado devuelto cuando se establece `contents.summary`. Tavily se registra a 1 crédito ($0,008) para `search_depth` `basic`, `fast` y `ultra-fast`, y 2 créditos ($0,016) para `advanced` ( [créditos Tavily API](https://docs.tavily.com/documentation/api-credits) ). Una llamada con `auto_parameters: true` que Tavily actualiza a avanzado todavía se registra con 1 crédito.
 
 ---
 
@@ -1191,6 +1185,8 @@ X-OmniRoute-No-Cache: true
 
 ---
 
+<a id="cliproxyapi-management-compatibility"></a>
+
 ## Compatibilidad de gestión con CLIProxyAPI
 
 OmniRoute responde a los tres endpoints de gestión de [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI) que los paneles de uso consultan para leer los límites de suscripción de Claude y Codex (por ejemplo, el origen de límites de uso `cliproxy` de T3 Code). Apunta la URL base del cliente a OmniRoute y utiliza una clave de API con el ámbito `manage` como clave de gestión. Las rutas se sirven en `/v0/management/*` y en `/api/v0/management/*`.
@@ -1201,8 +1197,10 @@ OmniRoute responde a los tres endpoints de gestión de [CLIProxyAPI](https://git
 | POST   | `/v0/management/api-call`    | Cuerpo `{ auth_index, method, url, header?, data? }`. Envía una solicitud permitida con el token de la cuenta y devuelve `{ status_code, body }`     |
 | POST   | `/v0/management/reset-quota` | Cuerpo `{ auth_index }`. Borra el tiempo de espera de la conexión, los bloqueos del modelo y los tiempos de espera por ámbito de Codex de una cuenta |
 
-- `auth_index` es el identificador de conexión de OmniRoute. `provider` es `claude` o `codex` (solo conexiones OAuth; el proveedor de clave de API `anthropic` no aparece en la lista). Para Codex, `id_token.chatgpt_account_id` es el identificador de espacio de trabajo almacenado y `plan_type` es el plan almacenado.
-- `api-call` no es un proxy genérico. Solo acepta Claude `GET https://api.anthropic.com/api/oauth/usage` y Codex `GET https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits` y `POST .../wham/rate-limit-reset-credits/consume`, cada uno únicamente para una cuenta del proveedor correspondiente. Cualquier otra solicitud devuelve `403` sin contactar con upstream. La cabecera `Authorization` del solicitante (incluido el marcador de posición `$TOKEN$`) se ignora: OmniRoute inyecta el token de acceso de la conexión, lo actualiza primero cuando está cerca de caducar y reenvía únicamente las cabeceras permitidas (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`; `Accept`, `Content-Type`). Si falta `Chatgpt-Account-Id`, se utiliza de forma predeterminada el identificador de espacio de trabajo almacenado. Las solicitudes agotan el tiempo de espera después de 15 segundos y utilizan el proxy de la conexión.
+- `auth_index` es el ID de conexión de OmniRoute. `provider` es `claude` o `codex` (solo conexiones OAuth; no se incluye el proveedor con clave de API `anthropic`). Para Codex, `id_token.chatgpt_account_id` es el ID de espacio de trabajo almacenado y `plan_type` es el plan almacenado.
+- `api-call` no es un proxy genérico. Solo acepta Claude `GET
+https://api.anthropic.com/api/oauth/usage` y Codex `GET
+https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits` y `POST .../wham/rate-limit-reset-credits/consume`, cada uno solo para una cuenta del proveedor correspondiente. Cualquier otra solicitud devuelve `403` sin contactar al upstream. Se ignora el encabezado `Authorization` del llamante (incluido el marcador `$TOKEN$`): OmniRoute inyecta el token de acceso de la conexión, lo renueva primero cuando está próximo a caducar y reenvía solo los encabezados permitidos (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`; `Accept`, `Content-Type`). Si falta `Chatgpt-Account-Id`, se utiliza el ID de espacio de trabajo almacenado. Si la primera respuesta del upstream es `401`, se renueva una vez y solo se reintenta cuando cambia el token de acceso. Cada intento al upstream tiene un tiempo límite de 15 segundos y usa el proxy de la conexión.
 - `reset-quota` deja intactos los estados terminales (banned, expired, credits_exhausted). Un `auth_index` desconocido devuelve `404`.
 
 **Autenticación:** se requiere una sesión del panel o una clave de API con el ámbito `manage`, incluso cuando el inicio de sesión está deshabilitado (las rutas están en `ALWAYS_PROTECTED_API_PATHS`). Las claves exclusivamente de inferencia reciben `403`. Fuente: `src/lib/cliproxyCompat/managementApi.ts`.
@@ -1944,17 +1942,17 @@ Almacén persistente de memoria conversacional/factual, con ámbito por clave de
 
 OmniRoute incluye un servidor integrado de Model Context Protocol con 3 transportes (stdio, SSE, streamable-http) y herramientas con ámbitos. Los endpoints del panel que aparecen a continuación leen datos de estado/auditoría y actúan como proxy de los transportes HTTP.
 
-| Método | Ruta | Descripción |
-| ------ | ---------------------- | ------------------------------------------------------------------------------------------------ | -------------------- |
-| GET | `/api/mcp/status` | Latido, transporte, estado en línea, última llamada, herramientas principales, tasa de éxito de las últimas 24 h |
-| GET | `/api/mcp/tools` | Lista de herramientas MCP con `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints` |
-| GET | `/api/mcp/sse` | Abrir el flujo SSE para el transporte SSE (devuelve `503` si MCP está deshabilitado o si no coincide el transporte) |
-| POST | `/api/mcp/sse` | Enviar una trama JSON-RPC en el transporte SSE |
-| GET | `/api/mcp/stream` | Abrir el lado SSE del transporte Streamable HTTP (mensajes iniciados por el servidor) |
-| POST | `/api/mcp/stream` | Enviar una trama JSON-RPC en el transporte Streamable HTTP |
-| DELETE | `/api/mcp/stream` | Finalizar una sesión de Streamable HTTP |
-| GET | `/api/mcp/audit` | Consultar el registro de auditoría — `?limit=`, `?offset=`, `?tool=`, `?success=true                                | false`, `?apiKeyId=` |
-| GET | `/api/mcp/audit/stats` | Estadísticas agregadas de auditoría (totales, tasa de éxito, duración media, herramientas principales) |
+| Método | Ruta                   | Descripción                                                                                                                                 |
+| ------ | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/mcp/status`      | Latido, transporte, estado en línea, última llamada, herramientas principales, tasa de éxito de las últimas 24 h                            |
+| GET    | `/api/mcp/tools`       | Lista de herramientas MCP con `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints`                                     |
+| GET    | `/api/mcp/sse`         | Abrir el flujo SSE para el transporte SSE (devuelve `503` si MCP está deshabilitado o si no coincide el transporte)                         |
+| POST   | `/api/mcp/sse`         | Enviar una trama JSON-RPC en el transporte SSE                                                                                              |
+| GET    | `/api/mcp/stream`      | Abrir el lado SSE del transporte Streamable HTTP (mensajes iniciados por el servidor)                                                       |
+| POST   | `/api/mcp/stream`      | Enviar una trama JSON-RPC en el transporte Streamable HTTP                                                                                  |
+| DELETE | `/api/mcp/stream`      | Finalizar una sesión de Streamable HTTP                                                                                                     |
+| GET    | `/api/mcp/audit`       | Consultar el registro de auditoría — `?limit=`, `?offset=`, `?tool=`, `?success=true                                \| false`, `?apiKeyId=` |
+| GET    | `/api/mcp/audit/stats` | Estadísticas agregadas de auditoría (totales, tasa de éxito, duración media, herramientas principales)                                      |
 
 **Autenticación:** los transportes `sse`/`stream` respetan la superficie de autenticación específica de MCP (clave de API Bearer con ámbito `mcp`); las rutas `status`/`tools`/`audit*` se pueden leer desde el panel (sin autenticación adicional más allá del acceso al host del panel).
 

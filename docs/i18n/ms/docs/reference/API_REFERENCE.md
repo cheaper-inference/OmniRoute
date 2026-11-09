@@ -887,9 +887,7 @@ kunci `contents` kecuali `text` dan `highlights` digugurkan sebelum panggilan. M
 `subpages`, `subpageTarget`, `highlights.numSentences` dan `highlights.highlightsPerUrl` tidak lagi
 dihantar.
 
-Perakaunan kos menggunakan daftar rata `costPerQuery`, kecuali Exa yang mengikut harga tersendiri Exa: $0.007 setiap panggilan untuk `auto` (dan `fast` lama) atau $0.004 untuk `lite` (dan `instant` lama), meliputi 10 hasil; $0.001 bagi setiap hasil tambahan; dan $0.001 bagi setiap hasil yang dikembalikan apabila `contents.summary` ditetapkan. Tavily direkodkan pada 1 kredit ($0.008) untuk `search_depth` `basic`, `fast` dan `ultra-fast`, serta 2 kredit ($0.016) untuk `advanced`
-([kredit API Tavily](https://docs.tavily.com/documentation/api-credits)). Panggilan dengan
-`auto_parameters: true` yang menyebabkan Tavily dinaik taraf kepada advanced masih direkodkan sebagai 1 kredit.
+Exa: $0.007 setiap panggilan untuk `auto` (dan `fast` legasi ) atau $0.004 untuk `lite` (dan `instant` warisan ), meliputi 10 keputusan; $0.001 untuk setiap keputusan selanjutnya; dan $0.001 setiap hasil yang dikembalikan apabila `contents.summary` ditetapkan. Tavily direkodkan pada 1 kredit ($0.008) untuk `search_depth` `basic`, `fast` dan `ultra-fast`, dan 2 kredit ($0.016) untuk `advanced` ( [Tavily API credits](https://docs.tavily.com/documentation/api-credits) ). Panggilan dengan `auto_parameters: true` yang Tavily naik taraf kepada lanjutan masih direkodkan pada 1 kredit.
 
 ---
 
@@ -1171,6 +1169,8 @@ X-OmniRoute-No-Cache: true
 
 ---
 
+<a id="cliproxyapi-management-compatibility"></a>
+
 ## Keserasian Pengurusan CLIProxyAPI
 
 OmniRoute menjawab tiga endpoint pengurusan [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI) yang dipanggil oleh papan pemuka penggunaan untuk membaca had langganan Claude dan Codex (contohnya sumber had penggunaan `cliproxy` T3 Code). Halakan URL asas klien kepada OmniRoute dan gunakan kunci API dengan skop `manage` sebagai kunci pengurusan. Laluan ini disediakan di `/v0/management/*` dan `/api/v0/management/*`.
@@ -1181,9 +1181,11 @@ OmniRoute menjawab tiga endpoint pengurusan [CLIProxyAPI](https://github.com/rou
 | POST   | `/v0/management/api-call`    | Isi `{ auth_index, method, url, header?, data? }`. Menghantar satu permintaan yang dibenarkan menggunakan token akaun dan mengembalikan `{ status_code, body }` |
 | POST   | `/v0/management/reset-quota` | Isi `{ auth_index }`. Mengosongkan tempoh bertenang sambungan, sekatan model dan tempoh bertenang mengikut skop Codex bagi satu akaun                           |
 
-- `auth_index` ialah id sambungan OmniRoute. `provider` ialah `claude` atau `codex` (sambungan OAuth sahaja; pembekal kunci API `anthropic` tidak disenaraikan). Untuk Codex, `id_token.chatgpt_account_id` ialah id ruang kerja yang disimpan dan `plan_type` ialah pelan yang disimpan.
-- `api-call` bukan proksi generik. Ia hanya menerima Claude `GET https://api.anthropic.com/api/oauth/usage` dan Codex `GET https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits` serta `POST .../wham/rate-limit-reset-credits/consume`, setiap satunya hanya untuk akaun pembekal yang sepadan. Apa-apa yang lain mengembalikan `403` tanpa menghubungi upstream. Pengepala `Authorization` pemanggil (termasuk ruang letak `$TOKEN$`) diabaikan: OmniRoute memasukkan token akses sambungan, menyegarkannya terlebih dahulu apabila hampir tamat tempoh, dan hanya memajukan pengepala yang dibenarkan (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`; `Accept`, `Content-Type`). `Chatgpt-Account-Id` yang tiada akan menggunakan id ruang kerja yang disimpan secara lalai. Permintaan tamat masa selepas 15 saat dan menggunakan proksi sambungan.
-- `reset-quota` membiarkan keadaan terminal (banned, expired, credits_exhausted) tanpa perubahan. `auth_index` yang tidak dikenali mengembalikan `404`.
+- `auth_index` ialah id sambungan OmniRoute. `provider` ialah `claude` atau `codex` (sambungan OAuth sahaja; penyedia kunci API `anthropic` tidak disenaraikan). Bagi Codex, `id_token.chatgpt_account_id` ialah id ruang kerja tersimpan dan `plan_type` ialah pelan tersimpan.
+- `api-call` bukan proksi umum. Ia hanya menerima Claude `GET
+https://api.anthropic.com/api/oauth/usage` dan Codex `GET
+https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits` dan `POST .../wham/rate-limit-reset-credits/consume`, setiap satunya hanya untuk akaun penyedia yang sepadan. Selain itu, semuanya mengembalikan `403` tanpa menghubungi upstream. Pengepala `Authorization` pemanggil (termasuk pemegang tempat `$TOKEN$`) diabaikan: OmniRoute menyuntik token akses sambungan, menyegarkannya terlebih dahulu apabila hampir luput, dan hanya memajukan pengepala yang dibenarkan (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`; `Accept`, `Content-Type`). `Chatgpt-Account-Id` yang tiada menggunakan id ruang kerja tersimpan secara lalai. Jika respons upstream pertama ialah `401`, ia menyegar sekali dan mencuba semula hanya apabila token akses berubah. Setiap percubaan upstream tamat masa selepas 15 saat dan menggunakan proksi sambungan.
+- `reset-quota` tidak mengubah keadaan terminal (banned, expired, credits_exhausted). `auth_index` yang tidak diketahui mengembalikan `404`.
 
 **Pengesahan:** sesi papan pemuka atau kunci API berskop `manage`, diperlukan walaupun log masuk dilumpuhkan (laluan tersebut berada dalam `ALWAYS_PROTECTED_API_PATHS`). Kunci yang hanya mempunyai keupayaan inferens menerima `403`. Sumber: `src/lib/cliproxyCompat/managementApi.ts`.
 
@@ -1904,17 +1906,17 @@ Gedung memori perbualan/fakta berterusan, diskopkan mengikut kunci API / sesi.
 
 OmniRoute menyediakan pelayan Model Context Protocol terbenam dengan 3 pengangkutan (stdio, SSE, streamable-http) dan alat berskop. Titik akhir papan pemuka di bawah membaca data status/audit dan memproksikan pengangkutan HTTP.
 
-| Kaedah | Laluan | Perihalan |
-| ------ | ---------------------- | ------------------------------------------------------------------------------------------------ | -------------------- |
-| GET | `/api/mcp/status` | Denyutan, pengangkutan, status dalam talian, panggilan terakhir, alat teratas, kadar kejayaan 24 jam |
-| GET | `/api/mcp/tools` | Senarai alat MCP dengan `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints` |
-| GET | `/api/mcp/sse` | Buka strim SSE untuk pengangkutan SSE (mengembalikan `503` jika MCP dilumpuhkan atau pengangkutan tidak sepadan) |
-| POST | `/api/mcp/sse` | Hantar bingkai JSON-RPC pada pengangkutan SSE |
-| GET | `/api/mcp/stream` | Buka bahagian SSE pengangkutan Streamable HTTP (mesej yang dimulakan pelayan) |
-| POST | `/api/mcp/stream` | Hantar bingkai JSON-RPC pada pengangkutan Streamable HTTP |
-| DELETE | `/api/mcp/stream` | Tamatkan sesi Streamable HTTP |
-| GET | `/api/mcp/audit` | Buat pertanyaan log audit — `?limit=`, `?offset=`, `?tool=`, `?success=true                                | false`, `?apiKeyId=` |
-| GET | `/api/mcp/audit/stats` | Statistik audit terkumpul (jumlah, kadar kejayaan, tempoh purata, alat teratas) |
+| Kaedah | Laluan                 | Perihalan                                                                                                                          |
+| ------ | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/mcp/status`      | Denyutan, pengangkutan, status dalam talian, panggilan terakhir, alat teratas, kadar kejayaan 24 jam                               |
+| GET    | `/api/mcp/tools`       | Senarai alat MCP dengan `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints`                                  |
+| GET    | `/api/mcp/sse`         | Buka strim SSE untuk pengangkutan SSE (mengembalikan `503` jika MCP dilumpuhkan atau pengangkutan tidak sepadan)                   |
+| POST   | `/api/mcp/sse`         | Hantar bingkai JSON-RPC pada pengangkutan SSE                                                                                      |
+| GET    | `/api/mcp/stream`      | Buka bahagian SSE pengangkutan Streamable HTTP (mesej yang dimulakan pelayan)                                                      |
+| POST   | `/api/mcp/stream`      | Hantar bingkai JSON-RPC pada pengangkutan Streamable HTTP                                                                          |
+| DELETE | `/api/mcp/stream`      | Tamatkan sesi Streamable HTTP                                                                                                      |
+| GET    | `/api/mcp/audit`       | Buat pertanyaan log audit — `?limit=`, `?offset=`, `?tool=`, `?success=true                                \| false`, `?apiKeyId=` |
+| GET    | `/api/mcp/audit/stats` | Statistik audit terkumpul (jumlah, kadar kejayaan, tempoh purata, alat teratas)                                                    |
 
 **Pengesahan:** pengangkutan `sse`/`stream` mematuhi permukaan pengesahan khusus MCP (kunci API Bearer dengan skop `mcp`); laluan `status`/`tools`/`audit*` boleh dibaca daripada papan pemuka (tiada pengesahan tambahan diperlukan selain mencapai hos papan pemuka).
 

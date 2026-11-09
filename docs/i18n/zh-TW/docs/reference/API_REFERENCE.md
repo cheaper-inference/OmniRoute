@@ -861,13 +861,7 @@ Exa `type: "lite"`（Exa 3.0）接受較小的欄位集合，若設定任何其�
 `subpages`、`subpageTarget`、`highlights.numSentences` 和 `highlights.highlightsPerUrl` 不再
 轉送。
 
-成本核算採用扁平登錄中的 `costPerQuery`，但 Exa 例外，會遵循 Exa 自身的定價：`auto`
-（以及舊版 `fast`）每次呼叫 $0.007，或 `lite`（以及舊版 `instant`）每次呼叫 $0.004，
-涵蓋 10 個結果；每增加一個結果收費 $0.001；設定 `contents.summary` 時，每個傳回結果
-收費 $0.001。Tavily 在 `search_depth` 為 `basic`、`fast` 和 `ultra-fast` 時記錄為 1 點數
-（$0.008），在 `advanced` 時記錄為 2 點數（$0.016）
-（[Tavily API 點數](https://docs.tavily.com/documentation/api-credits)）。若呼叫使用
-`auto_parameters: true` 且 Tavily 將其升級為 advanced，仍會記錄為 1 點數。
+Exa：`auto`（以及舊版 `fast`）每次呼叫 $0.007，`lite`（以及舊版 `instant`）每次呼叫 $0.004，均包含 10 筆結果；每筆額外結果收取 $0.001；設定 `contents.summary` 時，每筆傳回結果再收取 $0.001。Tavily 的 `search_depth` 為 `basic`、`fast` 和 `ultra-fast` 時，記為 1 個點數（$0.008）；為 `advanced` 時，記為 2 個點數（$0.016）（[Tavily API 點數](https://docs.tavily.com/documentation/api-credits)）。對於設定了 `auto_parameters: true` 且被 Tavily 升級為 advanced 的呼叫，仍記為 1 個點數。
 
 ---
 
@@ -1121,6 +1115,8 @@ X-OmniRoute-No-Cache: true
 
 ---
 
+<a id="cliproxyapi-management-compatibility"></a>
+
 ## CLIProxyAPI 管理相容性
 
 OmniRoute 會回應三個 [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI) 管理端點，供使用量儀表板讀取 Claude 和 Codex 訂閱限制（例如 T3 Code 的 `cliproxy` 使用量限制來源）。將用戶端的基底 URL 指向 OmniRoute，並使用具有 `manage` 範圍的 API 金鑰作為管理金鑰。這些路由提供於 `/v0/management/*` 和 `/api/v0/management/*`。
@@ -1131,19 +1127,11 @@ OmniRoute 會回應三個 [CLIProxyAPI](https://github.com/router-for-me/CLIProx
 | POST | `/v0/management/api-call`    | 主體為 `{ auth_index, method, url, header?, data? }`。使用帳戶的權杖傳送一個允許清單中的請求，並回傳 `{ status_code, body }` |
 | POST | `/v0/management/reset-quota` | 主體為 `{ auth_index }`。清除一個帳戶的連線冷卻時間、模型鎖定和 Codex 各範圍冷卻時間                                         |
 
-- `auth_index` 是 OmniRoute 連線 ID。`provider` 為 `claude` 或 `codex`（僅限 OAuth
-  連線；`anthropic` API 金鑰提供者不會列出）。對 Codex 而言，
-  `id_token.chatgpt_account_id` 是儲存的工作區 ID，而 `plan_type` 是儲存的方案。
-- `api-call` 不是通用代理。它只接受 Claude 的 `GET
-https://api.anthropic.com/api/oauth/usage`，以及 Codex 的 `GET
-https://chatgpt.com/backend-api/wham/usage`、`GET .../wham/rate-limit-reset-credits` 和
-  `POST .../wham/rate-limit-reset-credits/consume`，且每個請求只能針對相符提供者的帳戶。其他任何請求都會回傳 `403`，且不會聯絡上游。呼叫端的
-  `Authorization` 標頭（包括 `$TOKEN$` 預留位置）會被忽略：OmniRoute 會注入連線的存取權杖，在權杖即將過期時先重新整理，並且只轉送
-  允許清單中的標頭（`anthropic-beta`；`OpenAI-Beta`、`Originator`、`Chatgpt-Account-Id`；
-  `Accept`、`Content-Type`）。缺少 `Chatgpt-Account-Id` 時，會預設使用儲存的工作區 ID。
-  請求會在 15 秒後逾時，並使用連線的代理。
-- `reset-quota` 不會變更終端狀態（banned、expired、credits_exhausted）。未知的
-  `auth_index` 會回傳 `404`。
+- `auth_index` 是 OmniRoute 連線 ID。`provider` 為 `claude` 或 `codex`（僅限 OAuth 連線；不列出 API 金鑰提供者 `anthropic`）。對於 Codex，`id_token.chatgpt_account_id` 是已儲存的工作區 ID，`plan_type` 是已儲存的方案。
+- `api-call` 不是通用代理。僅接受 Claude `GET
+https://api.anthropic.com/api/oauth/usage`，以及 Codex `GET
+https://chatgpt.com/backend-api/wham/usage`、`GET .../wham/rate-limit-reset-credits` 和 `POST .../wham/rate-limit-reset-credits/consume`，且各自只能用於對應提供者的帳戶。其他請求會直接傳回 `403`，不聯絡上游。呼叫端的 `Authorization` 標頭（包括 `$TOKEN$` 預留位置）會被忽略：OmniRoute 注入連線的存取權杖，若即將到期則先更新，並僅轉送允許清單中的標頭（`anthropic-beta`；`OpenAI-Beta`、`Originator`、`Chatgpt-Account-Id`；`Accept`、`Content-Type`）。若缺少 `Chatgpt-Account-Id`，預設使用已儲存的工作區 ID。如果首次上游回應為 `401`，則更新一次，且僅在存取權杖變更時重試。每次上游嘗試的逾時為 15 秒，並使用該連線的代理。
+- `reset-quota` 不更改終止狀態（banned, expired, credits_exhausted）。未知的 `auth_index` 傳回 `404`。
 
 **驗證：**即使停用登入，也需要儀表板工作階段或具有 `manage` 範圍的 API 金鑰（這些路徑位於 `ALWAYS_PROTECTED_API_PATHS`）。僅限推論的金鑰會得到 `403`。來源：`src/lib/cliproxyCompat/managementApi.ts`。
 
@@ -1188,7 +1176,7 @@ https://chatgpt.com/backend-api/wham/usage`、`GET .../wham/rate-limit-reset-cre
 `/api/provider-models/validate-and-add`）會將模型 ID 儲存為不含前綴的上游 ID：從帶前綴的清單貼上的 ID，其開頭連續出現的節點自身前綴會被合併，而回應會回傳儲存的 ID。標準提供者的斜線 ID（例如 `nvidia/nemotron-…`）會
 原樣儲存。`/v1/models` 絕不會發出堆疊的 `<prefix>/<prefix>/<model>` ID。
 
-自訂 Chat Completions 節點會將明確的推理停用選項調整為上游後端所使用的格式。連線測試成功後，對於 `/models` 項目中的 `owned_by` 值已確認為下列其中之一的每個確切模型 ID，自動選取 chat-template 控制項：`vllm`、`sglang` 或 `llamacpp`。  
+自訂 Chat Completions 節點會將明確的推理停用選項調整為上游後端所使用的格式。連線測試成功後，對於 `/models` 項目中的 `owned_by` 值已確認為下列其中之一的每個確切模型 ID，自動選取 chat-template 控制項：`vllm`、`sglang` 或 `llamacpp`。\
 透明的 OpenAI 相容包裝器可能會在巢狀的 `openai` 物件中保留原始模型項目；偵測最多會沿著三層此類封裝進行。缺少、未知或互相衝突的擁有者資訊之模型，會維持一般的 OpenAI 行為。偵測會重複使用現有的目錄請求，不會產生任何完成 token，並會在連線端點變更時失效。
 
 若要固定不公開該中繼資料之後端的行為，請使用現有的部分提供者更新 API：
@@ -1853,17 +1841,17 @@ curl -X DELETE http://localhost:20128/api/resilience/model-cooldowns \
 
 OmniRoute 隨附內嵌的 Model Context Protocol 伺服器，支援 3 種傳輸方式（stdio、SSE、streamable-http）及具範圍限制的工具。下方的儀表板端點會讀取狀態／稽核資料，並代理 HTTP 傳輸。
 
-| 方法 | 路徑 | 描述 |
-| ------ | ---------------------- | ------------------------------------------------------------------------------------------------ | -------------------- |
-| GET | `/api/mcp/status` | 心跳、傳輸方式、上線狀態、上次呼叫、熱門工具、24 小時成功率 |
-| GET | `/api/mcp/tools` | MCP 工具清單，包含 `name`、`description`、`scopes`、`phase`、`auditLevel`、`sourceEndpoints` |
-| GET | `/api/mcp/sse` | 開啟 SSE 傳輸的 SSE 串流（如果 MCP 已停用或傳輸方式不符，則傳回 `503`） |
-| POST | `/api/mcp/sse` | 在 SSE 傳輸上傳送 JSON-RPC 框架 |
-| GET | `/api/mcp/stream` | 開啟 Streamable HTTP 傳輸的 SSE 端（伺服器啟動的訊息） |
-| POST | `/api/mcp/stream` | 在 Streamable HTTP 傳輸上傳送 JSON-RPC 框架 |
-| DELETE | `/api/mcp/stream` | 結束 Streamable HTTP 工作階段 |
-| GET | `/api/mcp/audit` | 查詢稽核記錄 — `?limit=`、`?offset=`、`?tool=`、`?success=true                                | false`、`?apiKeyId=` |
-| GET | `/api/mcp/audit/stats` | 彙總稽核統計資料（總數、成功率、平均持續時間、熱門工具） |
+| 方法   | 路徑                   | 描述                                                                                                                  |
+| ------ | ---------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/mcp/status`      | 心跳、傳輸方式、上線狀態、上次呼叫、熱門工具、24 小時成功率                                                           |
+| GET    | `/api/mcp/tools`       | MCP 工具清單，包含 `name`、`description`、`scopes`、`phase`、`auditLevel`、`sourceEndpoints`                          |
+| GET    | `/api/mcp/sse`         | 開啟 SSE 傳輸的 SSE 串流（如果 MCP 已停用或傳輸方式不符，則傳回 `503`）                                               |
+| POST   | `/api/mcp/sse`         | 在 SSE 傳輸上傳送 JSON-RPC 框架                                                                                       |
+| GET    | `/api/mcp/stream`      | 開啟 Streamable HTTP 傳輸的 SSE 端（伺服器啟動的訊息）                                                                |
+| POST   | `/api/mcp/stream`      | 在 Streamable HTTP 傳輸上傳送 JSON-RPC 框架                                                                           |
+| DELETE | `/api/mcp/stream`      | 結束 Streamable HTTP 工作階段                                                                                         |
+| GET    | `/api/mcp/audit`       | 查詢稽核記錄 — `?limit=`、`?offset=`、`?tool=`、`?success=true                                \| false`、`?apiKeyId=` |
+| GET    | `/api/mcp/audit/stats` | 彙總稽核統計資料（總數、成功率、平均持續時間、熱門工具）                                                              |
 
 **驗證：**`sse`／`stream` 傳輸遵循 MCP 專用驗證介面（具有 `mcp` 範圍的 Bearer API 金鑰）；`status`／`tools`／`audit*` 路由可從儀表板讀取（除了連線至儀表板主機外，不需要額外驗證）。
 

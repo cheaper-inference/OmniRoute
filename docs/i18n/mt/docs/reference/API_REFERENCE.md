@@ -843,8 +843,7 @@ kemm jekk `depth` ġej minn `provider_options` kif ukoll jekk ġej mis-settings 
 
 Exa `type: "lite"` (Exa 3.0) jaċċetta sett iżgħar ta’ oqsma u jirrifjuta t-talba kollha meta jkun issettjat xi qasam ieħor. Għal lite, `additionalQueries`, `systemPrompt` u kull ċavetta ta’ `contents` minbarra `text` u `highlights` jitneħħew qabel is-sejħa. L-oqsma skaduti `subpages`, `subpageTarget`, `highlights.numSentences` u `highlights.highlightsPerUrl` ma jibqgħux jintbagħtu.
 
-Il-kontabbiltà tal-ispejjeż tuża r-reġistru ċatt `costPerQuery`, ħlief għal Exa, li jsegwi l-prezzijiet tiegħu stess: $0.007 għal kull sejħa għal `auto` (u l-legacy `fast`) jew $0.004 għal `lite` (u l-legacy `instant`), li jkopru 10 riżultati; $0.001 għal kull riżultat addizzjonali; u $0.001 għal kull riżultat irritornat meta jkun issettjat `contents.summary`. Tavily jiġi rreġistrat bħala kreditu 1 ($0.008) għal `search_depth` `basic`, `fast` u `ultra-fast`, u 2 krediti ($0.016) għal `advanced`
-([krediti tal-API ta’ Tavily](https://docs.tavily.com/documentation/api-credits)). Sejħa b’`auto_parameters: true` li fiha Tavily jaġġorna għal advanced xorta tiġi rreġistrata bħala kreditu 1.
+Exa: $0.007 għal kull sejħa għal `auto` (u l-legacy `fast`) jew $0.004 għal `lite` (u l-legacy `instant`), li jkopri 10 riżultati; $0.001 għal kull riżultat ieħor; u $0.001 għal kull riżultat ritornat meta `contents.summary` huwa stabbilit. Tavily huwa rreġistrat f'kreditu 1 ($0.008) għal `search_depth` `basic`, `fast` u `ultra-fast`, u 2 krediti ($0.016) għal `advanced` ( [krediti Tavily API](https://docs.tavily.com/documentation/api-credits) ). Sejħa `auto_parameters: true` li Tavily jaġġorna għal avvanzat għadha rreġistrata bi kreditu 1.
 
 ---
 
@@ -1120,6 +1119,8 @@ X-OmniRoute-No-Cache: true
 
 ---
 
+<a id="cliproxyapi-management-compatibility"></a>
+
 ## Kompatibbiltà tal-Ġestjoni ma’ CLIProxyAPI
 
 OmniRoute iwieġeb għat-tliet endpoints tal-ġestjoni ta’ [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI)
@@ -1134,19 +1135,11 @@ disponibbli f’`/v0/management/*` u f’`/api/v0/management/*`.
 | POST   | `/v0/management/api-call`    | Il-korp `{ auth_index, method, url, header?, data? }`. Ibgħat talba waħda mil-lista permessa bit-token tal-kont u rritorna `{ status_code, body }` |
 | POST   | `/v0/management/reset-quota` | Il-korp `{ auth_index }`. Ħassar il-cooldown tal-konnessjoni, il-lockouts tal-mudell u l-cooldowns għal kull ambitu ta’ Codex ta’ kont wieħed      |
 
-- `auth_index` huwa l-ID tal-konnessjoni ta’ OmniRoute. `provider` huwa `claude` jew `codex` (konnessjonijiet
-  OAuth biss; il-provider taċ-ċavetta API `anthropic` mhuwiex elenkat). Għal Codex,
-  `id_token.chatgpt_account_id` huwa l-ID tal-workspace maħżun u `plan_type` huwa l-pjan maħżun.
+- `auth_index` huwa l-ID tal-konnessjoni OmniRoute. `provider` huwa `claude` jew `codex` (konnessjonijiet OAuth biss; il-fornitur taċ-ċavetta API `anthropic` mhuwiex elenkat). Għal Codex, `id_token.chatgpt_account_id` huwa l-ID tal-workspace maħżun u `plan_type` huwa l-pjan maħżun.
 - `api-call` mhuwiex proxy ġeneriku. Jaċċetta biss Claude `GET
-https://api.anthropic.com/api/oauth/usage` u Codex `GET https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits` u
-  `POST .../wham/rate-limit-reset-credits/consume`, kull wieħed biss għal kont tal-provider korrispondenti. Kull ħaġa oħra tirritorna `403` mingħajr ma tikkuntattja l-upstream. L-header
-  `Authorization` ta’ min jagħmel is-sejħa (inkluż il-placeholder `$TOKEN$`) jiġi injorat: OmniRoute idaħħal
-  it-token tal-aċċess tal-konnessjoni, u jġeddu l-ewwel meta jkun qrib l-iskadenza, u jgħaddi biss
-  headers permessi (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`;
-  `Accept`, `Content-Type`). `Chatgpt-Account-Id` nieqes juża b’mod awtomatiku l-ID tal-workspace maħżun.
-  It-talbiet jiskadu wara 15-il sekonda u jużaw il-proxy tal-konnessjoni.
-- `reset-quota` iħalli l-istati terminali (banned, expired, credits_exhausted) kif inhuma. `auth_index`
-  mhux magħruf jirritorna `404`.
+https://api.anthropic.com/api/oauth/usage` u Codex `GET
+https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits` u `POST .../wham/rate-limit-reset-credits/consume`, kull wieħed biss għal kont tal-fornitur korrispondenti. Kull ħaġa oħra tirritorna `403` mingħajr ma tikkuntattja l-upstream. Il-header `Authorization` ta' min isejjaħ (inkluż il-placeholder `$TOKEN$`) jiġi injorat: OmniRoute jdaħħal it-token ta' aċċess tal-konnessjoni, iġeddu l-ewwel meta jkun qrib l-iskadenza, u jgħaddi biss headers permessi (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`; `Accept`, `Content-Type`). `Chatgpt-Account-Id` nieqes juża l-ID tal-workspace maħżun bħala default. Jekk l-ewwel tweġiba upstream tkun `401`, iġedded darba u jerġa' jipprova biss meta t-token ta' aċċess jinbidel. Kull tentattiv upstream jiskadi wara 15-il sekonda u juża l-proxy tal-konnessjoni.
+- `reset-quota` ma jbiddilx stati terminali (banned, expired, credits_exhausted). `auth_index` mhux magħruf jirritorna `404`.
 
 **Awtentikazzjoni:** sessjoni tad-dashboard jew ċavetta API bl-ambitu `manage`, meħtieġa anki meta l-login ikun diżattivat
 (il-mogħdijiet jinsabu f’`ALWAYS_PROTECTED_API_PATHS`). Ċwievet li jintużaw għall-inferenza biss jirċievu `403`. Sors:
@@ -1860,17 +1853,17 @@ Qafas tal-ħiliet biex testendi OmniRoute b’handlers eżegwibbli personalizzat
 
 OmniRoute jiġi ma’ server inkorporat tal-Model Context Protocol bi 3 trasporti (stdio, SSE, streamable-http) u għodod skopati. L-endpoints tad-dashboard hawn taħt jaqraw id-dejta tal-istatus/awditjar u jagħmlu proxy għat-trasporti HTTP.
 
-| Metodu | Mogħdija | Deskrizzjoni | | -------------------- |
-| ------ | ---------------------- | ------------------------------------------------------------------------------------------------ | -------------------- |
-| GET | `/api/mcp/status` | Taħbit tal-qalb, trasport, stat online, l-aħħar sejħa, l-aqwa għodod, rata ta’ suċċess ta’ 24 siegħa |
-| GET | `/api/mcp/tools` | Lista ta’ għodod MCP b’`name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints` |
-| GET | `/api/mcp/sse` | Iftaħ fluss SSE għat-trasport SSE (jirritorna `503` jekk MCP ikun diżattivat jew ikun hemm nuqqas ta’ qbil fit-trasport) |
-| POST | `/api/mcp/sse` | Ibgħat frame JSON-RPC fuq it-trasport SSE |
-| GET | `/api/mcp/stream` | Iftaħ in-naħa SSE tat-trasport Streamable HTTP (messaġġi mibdija mis-server) |
-| POST | `/api/mcp/stream` | Ibgħat frame JSON-RPC fuq it-trasport Streamable HTTP |
-| DELETE | `/api/mcp/stream` | Temm sessjoni Streamable HTTP |
-| GET | `/api/mcp/audit` | Agħmel mistoqsija fir-reġistru tal-awditjar — `?limit=`, `?offset=`, `?tool=`, `?success=true                                | false`, `?apiKeyId=` |
-| GET | `/api/mcp/audit/stats` | Statistika aggregata tal-awditjar (totali, rata ta’ suċċess, tul medju, l-aqwa għodod) |
+| Metodu | Mogħdija               | Deskrizzjoni                                                                                                                                         |
+| ------ | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/mcp/status`      | Taħbit tal-qalb, trasport, stat online, l-aħħar sejħa, l-aqwa għodod, rata ta’ suċċess ta’ 24 siegħa                                                 |
+| GET    | `/api/mcp/tools`       | Lista ta’ għodod MCP b’`name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints`                                                     |
+| GET    | `/api/mcp/sse`         | Iftaħ fluss SSE għat-trasport SSE (jirritorna `503` jekk MCP ikun diżattivat jew ikun hemm nuqqas ta’ qbil fit-trasport)                             |
+| POST   | `/api/mcp/sse`         | Ibgħat frame JSON-RPC fuq it-trasport SSE                                                                                                            |
+| GET    | `/api/mcp/stream`      | Iftaħ in-naħa SSE tat-trasport Streamable HTTP (messaġġi mibdija mis-server)                                                                         |
+| POST   | `/api/mcp/stream`      | Ibgħat frame JSON-RPC fuq it-trasport Streamable HTTP                                                                                                |
+| DELETE | `/api/mcp/stream`      | Temm sessjoni Streamable HTTP                                                                                                                        |
+| GET    | `/api/mcp/audit`       | Agħmel mistoqsija fir-reġistru tal-awditjar — `?limit=`, `?offset=`, `?tool=`, `?success=true                                \| false`, `?apiKeyId=` |
+| GET    | `/api/mcp/audit/stats` | Statistika aggregata tal-awditjar (totali, rata ta’ suċċess, tul medju, l-aqwa għodod)                                                               |
 
 **Awtentikazzjoni:** it-trasporti `sse`/`stream` jirrispettaw il-wiċċ tal-awtentikazzjoni speċifiku għall-MCP (ċavetta API Bearer bl-iskop `mcp`); ir-rotot `status`/`tools`/`audit*` jistgħu jinqraw mid-dashboard (l-ebda awtentikazzjoni addizzjonali mhija meħtieġa lil hinn mill-aċċess għall-host tad-dashboard).
 

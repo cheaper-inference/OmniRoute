@@ -12,13 +12,13 @@ webpack build மற்றும் lint job உடன் ஒரே நேரத
 host swap (16 GB) அதைச் சமாளிக்கிறது, மேலும் pull-request Build-கள் hosted சூழலில் இயங்குவதால்
 Turbopack slot பெரும்பாலான நேரத்தில் செயலற்றே உள்ளது:
 
-| runner               | label                 | role                                                                                                                                                   | `MemoryHigh` / `MemoryMax` | `CPUQuota`        |
-| -------------------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------- | ----------------- |
-| `omniroute-113-5`    | `omni-build`          | Turbopack build-கள்: `ci.yml` `Build` (push/dispatch மட்டும்), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, இரவுநேர a11y build | 56 GB / 60 GB (swap 0)     | 1600 %            |
-| `omniroute-113-6`    | `omni-release`        | Release-Green (`release-green` + `main-green`), webpack build                                                                                          | 20 GB / 24 GB (swap 4 GB)  | 800 %             |
-| `omniroute-113-2`    | `omni-light`          | இரவுநேர job-கள் (Schemathesis, promptfoo, garak, k6) மற்றும் `quality.yml` `lint-guard`                                                                | 12 GB / 16 GB (swap 4 GB)  | 600 %             |
-| `omniroute-113`      | `omni-light`          | மேலே உள்ள அதே pool                                                                                                                                     | 8 GB / 12 GB               | 400 %             |
-| OmniHeuris, OmniMind | (அவற்றின் repo-க்கள்) | Dependabot மட்டும் (ஒவ்வொன்றும் உச்சமாக 155 MB, 2026-10-18)                                                                                            | 4 GB / 6 GB                | ஒவ்வொன்றும் 200 % |
+| runner               | label                           | role                                                                                                                                                   | `MemoryHigh` / `MemoryMax` | `CPUQuota`        |
+| -------------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------- | ----------------- |
+| `omniroute-113-5`    | `omni-build`, `omni-build-60gb` | Turbopack build-கள்: `ci.yml` `Build` (push/dispatch மட்டும்), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, இரவுநேர a11y build | 56 GB / 60 GB (swap 0)     | 1600 %            |
+| `omniroute-113-6`    | `omni-release`                  | Release-Green (`release-green` + `main-green`), webpack build                                                                                          | 20 GB / 24 GB (swap 4 GB)  | 800 %             |
+| `omniroute-113-2`    | `omni-light`                    | இரவுநேர job-கள் (Schemathesis, promptfoo, garak, k6) மற்றும் `quality.yml` `lint-guard`                                                                | 12 GB / 16 GB (swap 4 GB)  | 600 %             |
+| `omniroute-113`      | `omni-light`                    | மேலே உள்ள அதே pool                                                                                                                                     | 8 GB / 12 GB               | 400 %             |
+| OmniHeuris, OmniMind | (அவற்றின் repo-க்கள்)           | Dependabot மட்டும் (ஒவ்வொன்றும் உச்சமாக 155 MB, 2026-10-18)                                                                                            | 4 GB / 6 GB                | ஒவ்வொன்றும் 200 % |
 
 2026-10-18 அன்று அளவிடப்பட்டது:
 
@@ -28,12 +28,13 @@ Turbopack slot பெரும்பாலான நேரத்தில் ச
 | swap      | 16 GB                           | `omniroute-113-5` swap முடக்கப்பட்ட நிலையில் (`MemorySwapMax=0`) இயங்குகிறது; எனவே கட்டுப்பாட்டை மீறும் build, பெட்டியை swap செய்ய வைப்பதற்குப் பதிலாக அதன் வரம்பிலேயே நிறுத்தப்படுகிறது                                                                                                                                                                                                                                 |
 | `/tmp`    | **12 GB tmpfs = RAM**           | அங்கு வைக்கப்படும் எதுவும் memory-யையே பயன்படுத்தும்; எஞ்சியவை 3 மணிநேரத்திற்குப் பிறகு அகற்றப்படும்                                                                                                                                                                                                                                                                                                                     |
 | CPU       | 32 core-களில் load 60 பதிவானது  | quota-களுக்கு முன்பு, அதே பெட்டியில் ஒரு Turbopack build (~1166 % CPU) மற்றும் coverage suite இணைந்து இயங்கியபோது மற்ற listener-களின் heartbeat-களுக்குப் போதுமான வளம் கிடைக்கவில்லை (`The self-hosted runner lost communication`, #16853)                                                                                                                                                                               |
-| runners   | **7 listener-கள்** (2026-10-28) | 5 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-7` `omni-build` label-ஐயும் கொண்டுள்ளது; `omniroute-113-3/-4/-8` repository-இலிருந்து நீக்கப்பட்டன (2026-10-28)                                                                                                                                                                                                                                                      |
+| runners   | **7 listener-கள்** (2026-10-28) | 5 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-5` `omni-build-60gb` label-ஐயும் கொண்டுள்ளது; `omniroute-113-3/-4/-8` repository-இலிருந்து நீக்கப்பட்டன (2026-10-28)                                                                                                                                                                                                                                                 |
 
 வரம்புகள் ஒவ்வொரு unit-இன் `/etc/systemd/system/actions.runner.<…>.service.d/override.conf`-இல்
 உள்ளன (முந்தைய மதிப்புகள் `override.conf.bak-20261018` ஆக வைக்கப்பட்டுள்ளன), மேலும் அவை
 `systemctl set-property --runtime … MemoryHigh=… MemoryMax=… CPUQuota=…` மூலம் நேரடியாகப் பயன்படுத்தப்பட்டன — restart செய்யப்படவில்லை, எனவே
-இயங்கிக்கொண்டிருந்த எந்த job-மும் பாதிக்கப்படவில்லை. Label-கள் runners API மூலம் (`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
+இயங்கிக்கொண்டிருந்த எந்த job-மும் பாதிக்கப்படவில்லை. Label-கள் runners API மூலம்
+(`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
 `gh api -X POST repos/<repo>/actions/runners/<id>/labels -f 'labels[]=<label>'`) நேரடியாகவே மாற்றப்படுகின்றன.
 
 ## பராமரிப்பு ஸ்கிரிப்டை நிறுவுதல் (ஒரே முறை, சர்வரில்)
@@ -90,7 +91,7 @@ Runner-இன் இயல்புநிலை `KillMode=process`, ஒரு un
 ## செயல்பாட்டு விதிகள்
 
 - **ஒரு நேரத்தில் ஒரே ஒரு Turbopack பில்ட் — லேபல் மூலம் கட்டாயப்படுத்தப்படுகிறது.** முழுமையான Turbopack
-  `next build`-ஐ இயக்கும் ஒவ்வொரு ஜாப்பும் `[self-hosted, omni-build]`-ஐ இலக்காகக் கொள்கிறது; மேலும்
+  `next build`-ஐ இயக்கும் ஒவ்வொரு ஜாப்பும் `[self-hosted, omni-build, omni-build-60gb]`-ஐ இலக்காகக் கொள்கிறது; மேலும்
   **`omniroute-113-5`** மட்டுமே அந்த லேபலைக் கொண்டுள்ளது: `ci.yml`-இன் `Build`, `npm-publish.yml`-இன்
   `publish`, `nightly-v4-build`, `preview-artifact`, இரவுநேர a11y பில்ட் (#16853), மற்றும்
   `docker-publish.yml`-இன் **amd64** (BuildKit-க்குள் webpack — அங்கே Turbopack செயலிழந்தது,

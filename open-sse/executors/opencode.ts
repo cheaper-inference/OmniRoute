@@ -8,6 +8,7 @@ import { PROVIDERS } from "../config/constants.ts";
 import { dropInjectedToolCalls } from "./opencodeInjectedToolFilter.ts";
 import { applyRelayHeaders, freeTierDispatchBase, relayEgressUrl } from "./opencodeRelay.ts";
 import { getModelTargetFormat, stripOpencodeModelPrefix } from "../config/providerModels.ts";
+import { extractReplayableResponsesReasoningText } from "../services/reasoningInputPolicy.ts";
 import {
   injectReasoningContentForThinkingModel,
   isThinkingMessageModel,
@@ -231,15 +232,6 @@ function normalizeResponsesToolEntry(t: unknown): Record<string, unknown> | null
   return toolObj;
 }
 
-/** Whether a Responses-API reasoning item carries plaintext in `content` or `summary`. */
-function hasReplayableReasoningText(item: Record<string, unknown>): boolean {
-  return [item.content, item.summary].some(
-    (parts) =>
-      Array.isArray(parts) &&
-      parts.some((part) => isPlainRecord(part) && typeof part.text === "string" && part.text !== "")
-  );
-}
-
 /**
  * Whether a Responses-API `input` item should be kept, normalizing
  * function_call/function_call_output entries in place as a side effect.
@@ -247,11 +239,19 @@ function hasReplayableReasoningText(item: Record<string, unknown>): boolean {
 function shouldKeepResponsesInputItem(item: unknown): boolean {
   if (!item || typeof item !== "object" || Array.isArray(item)) return true;
   const rec = item as Record<string, unknown>;
+  if (rec.type === "reasoning") {
+    // DeepSeek requires the plaintext restored by the replay cache on each turn.
+    // Keep only portable text: encrypted state, IDs and display summaries belong
+    // to the upstream that issued them and must not cross this boundary.
+    const text = extractReplayableResponsesReasoningText(rec);
+    if (!text) return false;
+    for (const key of Object.keys(rec)) delete rec[key];
+    rec.type = "reasoning";
+    rec.content = [{ type: "reasoning_text", text }];
+    return true;
+  }
   delete rec.encrypted_content;
   delete rec.reasoning_encrypted_content;
-  // An opaque reasoning item means nothing to this upstream, but one with readable text is the
-  // replayed thinking DeepSeek rejects a turn without (#13031).
-  if (rec.type === "reasoning") return hasReplayableReasoningText(rec);
   if (rec.type === "function_call") {
     if (!rec.name || typeof rec.name !== "string" || (rec.name as string).trim() === "")
       return false;

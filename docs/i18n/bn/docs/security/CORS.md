@@ -56,11 +56,11 @@ OmniRoute একটি একক, কেন্দ্রীভূত অনুম
 
 `CORS_ALLOW_ALL=true` থাকলেও প্রতিটি surface-এর ক্ষেত্রে এর অর্থ:
 
-| Surface                             | Auth mechanism              | Wildcard CORS-এর প্রভাব                                                                                                                                                                                                                                                                                                                                                  |
-| ----------------------------------- | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Dashboard / MANAGEMENT `/api/*`     | Cookie session              | Origin প্রতিক্রিয়ায় ফিরিয়ে দেওয়া হয়, কিন্তু **`Allow-Credentials` ছাড়া** browser credentialed read **ব্লক করে**। কোনো ক্ষতিকর cross-origin site আপনার authenticated dashboard response **পড়তে পারে না**, এবং session cookie উন্মুক্ত হয় না।                                                                                                                      |
-| Client API `/v1/*`, `/v1beta/*`     | Bearer / `x-api-key` header | **নকশাগতভাবেই** ইতোমধ্যে permissive (`relaxForTokenAuth`): browser কখনো স্বয়ংক্রিয়ভাবে `Authorization`/`x-api-key` সংযুক্ত করে না, তাই আক্রমণকারীর page আপনার key সরবরাহ করতে পারে না। echo কেবল তখনই প্রযোজ্য হয় যখন উপস্থাপিত key যাচাইয়ে সফল হয়; বেনামি response (`REQUIRE_API_KEY=false`) অনুমোদন-তালিকা বজায় রাখে। `CORS_ALLOW_ALL` এটিকে আরও বিস্তৃত করে না। |
-| Public read-only (`/api/health`, …) | None                        | সংবেদনশীল নয়; wildcard ক্ষতিকর নয়।                                                                                                                                                                                                                                                                                                                                     |
+| Surface                             | Auth mechanism              | Wildcard CORS-এর প্রভাব                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| ----------------------------------- | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Dashboard / MANAGEMENT `/api/*`     | Cookie session              | Origin প্রতিক্রিয়ায় ফিরিয়ে দেওয়া হয়, কিন্তু **`Allow-Credentials` ছাড়া** browser credentialed read **ব্লক করে**। কোনো ক্ষতিকর cross-origin site আপনার authenticated dashboard response **পড়তে পারে না**, এবং session cookie উন্মুক্ত হয় না।                                                                                                                                                                                                                                                                                                                                   |
+| Client API `/v1/*`, `/v1beta/*`     | Bearer / `x-api-key` header | **নকশাগতভাবেই** ইতোমধ্যে permissive (`relaxForTokenAuth`): browser কখনো স্বয়ংক্রিয়ভাবে `Authorization`/`x-api-key` সংযুক্ত করে না, তাই আক্রমণকারীর page আপনার key সরবরাহ করতে পারে না। শিথিল নিয়মে উৎস প্রতিফলনের জন্য একটি প্রমাণীকৃত সত্তা (যাচাইকৃত API কী বা যাচাইকৃত ড্যাশবোর্ড সেশন) প্রয়োজন, শুধু পরিচয়পত্রের হেডার থাকলেই হয় না, এবং এতে কখনো `Access-Control-Allow-Credentials` অন্তর্ভুক্ত হয় না। বেনামী প্রতিক্রিয়াগুলি (`REQUIRE_API_KEY=false`) কনফিগার করা অনুমোদিত উৎসের তালিকা ব্যবহার করে, যার মধ্যে স্পষ্টভাবে `CORS_ALLOW_ALL=true` চালু করাও অন্তর্ভুক্ত। |
+| Public read-only (`/api/health`, …) | None                        | সংবেদনশীল নয়; wildcard ক্ষতিকর নয়।                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 
 তাই `CORS_ALLOW_ALL=true`-এর **অবশিষ্ট** exposure শুধু এগুলোর মধ্যে সীমাবদ্ধ: (a)
 ইতোমধ্যে unauthenticated data-এর non-credentialed cross-origin **read**, এবং (b)
@@ -120,9 +120,7 @@ restart ছাড়াই runtime-এ **Dashboard → Security → CORS Allowed
 - **Bearer / `x-api-key` (`/v1/*` inference surface):** browser কখনোই
   এগুলো স্বয়ংক্রিয়ভাবে সংযুক্ত করে না। এখানে CORS অর্থবহ কোনো প্রতিবন্ধকতা নয়—API key-ই
   প্রতিবন্ধকতা—এ কারণেই এই surface ইচ্ছাকৃতভাবে permissive রাখা হয়েছে, যাতে browser ও
-  Electron client তাদের আগে থেকেই অনুমোদিত response পড়তে পারে। শিথিল echo যাচাইকৃত key
-  অনুসরণ করে, কেবল header-এর উপস্থিতি নয়: যখন `REQUIRE_API_KEY=false` কোনো request
-  বেনামিভাবে পরিবেশন করে, তখন তার সফল response fail-closed অনুমোদন-তালিকা বজায় রাখে। Auth
+  Electron client তাদের আগে থেকেই অনুমোদিত response পড়তে পারে। শিথিল নিয়মে উৎস প্রতিফলনের জন্য একটি প্রমাণীকৃত সত্তা (যাচাইকৃত API কী বা যাচাইকৃত ড্যাশবোর্ড সেশন) প্রয়োজন, শুধু পরিচয়পত্রের হেডার থাকলেই হয় না, এবং এতে কখনো `Access-Control-Allow-Credentials` অন্তর্ভুক্ত হয় না। বেনামী প্রতিক্রিয়াগুলি (`REQUIRE_API_KEY=false`) কনফিগার করা অনুমোদিত উৎসের তালিকা ব্যবহার করে, যার মধ্যে স্পষ্টভাবে `CORS_ALLOW_ALL=true` চালু করাও অন্তর্ভুক্ত। Auth
   প্রত্যাখ্যান (401) পাঠযোগ্য থাকে, যাতে client বাতিল হওয়া বা ভুল টাইপ করা key দেখাতে
   পারে (#5242): pipeline-এর নিজস্ব 401 echo বজায় রাখে, এবং pipeline request-টিকে বেনামি
   হিসেবে পরিবেশন করার পর যে route নিজেই key প্রত্যাখ্যান করে (management auth কনফিগার করা
@@ -134,8 +132,7 @@ restart ছাড়াই runtime-এ **Dashboard → Security → CORS Allowed
   ভিত্তিতে নয়, এবং এটি কখনো `Access-Control-Allow-Credentials`-এর সঙ্গে যুক্ত হয় না;
   body একটি নির্দিষ্ট error envelope। `requireManagementAuth()` দ্বারা সুরক্ষিত
   `/api/v1/`-এর অধীন management route (`/api/v1/management/*`, `/api/v1/registered-keys`)
-  echo যোগ করে না: `REQUIRE_API_KEY=false` থাকলে তাদের 401/403 ক্রস-origin থেকে পড়া যায়
-  না।
+  পরিচয়পত্র প্রত্যাখ্যানের এই ব্যতিক্রম ব্যবহার করে না: `REQUIRE_API_KEY=false` থাকলে তাদের 401/403 প্রতিক্রিয়াগুলি কনফিগার করা CORS উৎস নীতি অনুসরণ করে।
 - **Cookie session (ড্যাশবোর্ড):** fail-closed default **এবং**
   shared path-এ `Access-Control-Allow-Credentials` অনুপস্থিত থাকা—উভয়টির মাধ্যমেই সুরক্ষিত। যেকোনো
   permissive config থেকে management/dashboard অরিজিনগুলো বাদ রাখুন; এগুলোকে অবশ্যই সম্পূর্ণভাবে
@@ -149,7 +146,7 @@ browser WebSocket-এ CORS প্রয়োগ করে না, তাই য
 যখন `npm start` / `npm run dev` দিয়ে চলে, তখন `/v1/ws` ও `/api/v1/ws` সেতু, যা
 `/v1/chat/completions`, `/v1/messages` ও `/v1/responses`-কে frame হিসেবে stream করে।
 সেতুটি সিদ্ধান্তের জন্য `/api/v1/ws?handshake=1`-কে জিজ্ঞাসা করে এবং সেই route যাচাই না
-চালালে upgrade করতে অস্বীকার করে। একটি handshake গৃহীত হয় যখন:
+চালালে upgrade করতে অস্বীকার করে। প্রমাণীকরণের শর্তগুলি আলাদাভাবে প্রযোজ্য থাকে। উৎস যাচাই সফল হয় যখন:
 
 - এতে কোনো `Origin` header নেই (Codex CLI, SDK এবং অন্যান্য browser-বহির্ভূত client);
 - `Origin` উপরের অনুমোদন-তালিকা দ্বারা অনুমোদিত (`CORS_ALLOWED_ORIGINS`, `corsOrigins`

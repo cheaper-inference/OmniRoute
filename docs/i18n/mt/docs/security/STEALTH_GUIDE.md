@@ -238,9 +238,9 @@ Barra minn hekk, `updateNssDatabases()` jinstalla fid-databases NSS għal kull u
 
 L-endpoints MITM kollha jeħtieġu awtentikazzjoni tal-ġestjoni (`requireCliToolsAuth`). Il-password ta’ sudo tinżamm fil-cache fl-ambitu tal-modulu (qatt f’`globalThis`) u titħassar meta jiġi eżegwit `stopMitm()`.
 
-## L-Aġent tal-Utent Jissostitwixxi — env vars (`.env.example` taqsima 12)
+## Sostituzzjonijiet tal-User-Agent — varjabbli tal-ambjent (`.env.example` taqsima 12)
 
-| Varjabbli           | Default                                       |
+| Varjabbli           | Valur predefinit                              |
 | ------------------- | --------------------------------------------- |
 | `CLAUDE_USER_AGENT` | `claude-cli/2.1.280 (external, cli)`          |
 | `CODEX_USER_AGENT`  | `codex-cli/0.155.0 (Windows 10.0.26200; x64)` |
@@ -249,7 +249,7 @@ L-endpoints MITM kollha jeħtieġu awtentikazzjoni tal-ġestjoni (`requireCliToo
 | `QODER_USER_AGENT`  | `Qoder-Cli`                                   |
 | `CURSOR_USER_AGENT` | `Cursor/3.4`                                  |
 
-Ikkunsmat minn `open-sse/executors/base.ts::buildHeaders()` permezz ta' tfittxija dinamika.** Bump dawn meta l-fornituri jirrilaxxaw verżjonijiet ġodda CLI** — stale UA kordi jibdew jiġu miċħuda bħala klijenti antikwati.
+Użati minn `open-sse/executors/base.ts::buildHeaders()` permezz ta’ tfittxija dinamika. **Aġġornahom meta l-fornituri joħorġu verżjonijiet ġodda tas-CLI** — strings tal-UA skaduti jibdew jiġu rrifjutati bħala klijenti mhux aġġornati.
 
 ## Swiċċijiet tal-Mod ta’ Kompatibbiltà tas-CLI (`.env.example` taqsima 13)
 

@@ -48,7 +48,7 @@ const TEST_FILE_RE = /\.(test|spec)\.(ts|tsx|mjs)$/;
 // glob) deve aparecer textualmente — se o runner mudar, este gate exige o sync.
 export const COLLECTORS = [
   // Node native runner — test:unit / test:unit:fast / shards / test:coverage. O CI
-  // (test-unit ×8) agora chama o npm script test:unit:ci:shard
+  // (test-unit ×12) agora chama o npm script test:unit:ci:shard
   // (fonte única, plano mestre testes+CI QW-d) — o wiring é ancorado pelo NOME do script
   // nos workflows (entrada dedicada abaixo), e os globs vivem SÓ no package.json.
   { glob: "tests/unit/*.test.ts", sources: ["package.json"] },

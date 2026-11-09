@@ -464,6 +464,13 @@ export const FREE_MODEL_BUDGETS: FreeModelBudget[] = [
   // evidence: public /v1/models (2026-10-27): zero prices, NVIDIA trial
   // terms, 30-day retention and data_used_for_training=true.
   { provider: "requesty", modelId: "nvidia/nemotron-3-nano-30b-a3b", displayName: "Nemotron 3 Nano 30B (Requesty free)", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "requesty-free", tos: "caution", trainsOnPrompts: true },
+  // Token Harbor ended this limited-time free campaign on 2026-10-26. Retain the
+  // identity as discontinued so a stale :free payload cannot revive it. Current
+  // free offers require live model evidence and share a rolling 7-day allowance;
+  // an unspecified quota is not an uncapped entitlement. Checked 2026-10-30:
+  // evidence: public-page https://tokenharbor.ai/blog/3-best-free-ai-apis-for-coding-and-agents-in-2026
+  // https://tokenharbor.ai/docs/billing/cashback#free-model-access
+  { provider: "tokenharbor", modelId: "claude-haiku-5.5:free", displayName: "Claude Haiku 5.5 (Token Harbor free campaign ended)", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "tokenharbor-free", tos: "caution" },
   // Exact free routes listed at tokenharbor.ai/models?category=free (2026-10-29).
   // Shared rolling 7-day allowance; no published fixed token count. See the
   // per-model source records and limitations in free-catalog-evidence.json.

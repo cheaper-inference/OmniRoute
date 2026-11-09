@@ -4,47 +4,73 @@
 
 ---
 
-> Pasirinkti, išjungti pagal numatytuosius nustatymus (`modelVisibilityAllowlist`/`modelVisibilityDenylist` abu tušti palieka `/v1/models` katalogą AND kiekvienas `auto/*` kandidatas telkinio baitas yra identiškas). `hidePaidModels`/`hideAutoCombos` (`src/lib/db/settings.ts`) brolis, skirtas operatoriams, kurie nori kuruojamo modelių sąrašo dėl priežasčių, kurios neturi nieko bendra su kaina.
+> Pasirenkama funkcija, pagal numatytuosius nustatymus išjungta (kai `modelVisibilityAllowlist` / `modelVisibilityDenylist` abu yra tušti,
+> `/v1/models` katalogas IR kiekvienas `auto/*` kandidatų telkinys išlieka identiški baitų lygmeniu). Tai
+> `hidePaidModels` / `hideAutoCombos` giminingas nustatymas (`src/lib/db/settings.ts`), skirtas operatoriams, norintiems kuruojamo
+> modelių sąrašo dėl su kaina visiškai nesusijusių priežasčių.
 
 ## Kodėl tai egzistuoja
 
-`hidePaidModels` atsako "ar šis modelis nemokamas?" o `hideAutoCombos` atsako "ar `auto/*` virtualius id iš viso reikėtų reklamuoti?" — taip pat neleidžia operatoriui kuruoti savavališko modelių poaibio (pvz., pateikti tiksliai modelius, kuriuos turi matyti nurodytas Claude kodas / OpenCode klientas, nepriklausomai nuo kainodaros). #11481 prideda, kad tai yra du nepriklausomi pasirenkami eilučių masyvo nustatymai.
+`hidePaidModels` atsako į klausimą „ar šis modelis nemokamas?“, o `hideAutoCombos` – „ar `auto/*`
+virtualieji ID apskritai turėtų būti skelbiami?“ — nė vienas iš jų neleidžia operatoriui kuruoti savavališko
+modelių poaibio (pvz., pateikti tiksliai tuos modelius, kuriuos turėtų matyti konkretus Claude Code / OpenCode klientas,
+nepriklausomai nuo kainodaros). #11481 prideda šią galimybę kaip du nepriklausomus, pasirenkamus eilučių masyvų nustatymus.
 
 ## Nustatymai
 
-| Raktas                     | Tipas      | Numatytoji | Reikšmė                                                                |
-| -------------------------- | ---------- | ---------- | ---------------------------------------------------------------------- |
-| `modelVisibilityDenylist`  | `string[]` | `[]`       | Kandidatą atitinkantys įrašai slepia jį iš catalog/candidate telkinio. |
-| `modelVisibilityAllowlist` | `string[]` | `[]`       | Kai netušti, ONLY įrašai, atitinkantys kandidatą, lieka rodomi.        |
+| Raktas                     | Tipas      | Numatytoji reikšmė | Reikšmė                                                                   |
+| -------------------------- | ---------- | ------------------ | ------------------------------------------------------------------------- |
+| `modelVisibilityDenylist`  | `string[]` | `[]`               | Kandidatą atitinkantys įrašai paslepia jį kataloge / kandidatų telkinyje. |
+| `modelVisibilityAllowlist` | `string[]` | `[]`               | Kai sąrašas netuščias, rodomi lieka TIK kandidatą atitinkantys įrašai.    |
 
-Abi priima iki 500 įrašų po 200 simbolių (Zod patvirtinta `src/shared/validation/settingsSchemas.ts`). Įrašas yra:
+Abu priima iki 500 įrašų, kurių kiekvienas gali būti iki 200 simbolių ilgio (tikrinama naudojant Zod faile
+`src/shared/validation/settingsSchemas.ts`). Įrašas yra:
 
-- tikslus katalogo ID — `"gpt-4o"` (pliko modelio ID) arba `"openai/gpt-4o"` (su tiekėjo priešdėliu), arba
-- globos šablonas, naudojant `*`/`?` — pvz., `"openai/gpt-4*"` arba `"anthropic/*"` — išspręstas naudojant tą patį bendrąjį `globToRegex()` atitikmenį (`src/shared/utils/globPattern.ts`), kurį jau naudoja `ModelRoutingSection` modelio deriniai ir `freeModels.ts::matchesOnlyPaidModels`.
+- tikslus katalogo ID — `"gpt-4o"` (modelio ID be prefikso) arba `"openai/gpt-4o"` (su teikėjo prefiksu), arba
+- bendrinis šablonas, naudojantis `*` / `?` — pvz., `"openai/gpt-4*"` arba `"anthropic/*"` — apdorojamas naudojant
+  tą pačią bendrinamą `globToRegex()` atitikties funkciją (`src/shared/utils/globPattern.ts`), kuri jau naudojama
+  `ModelRoutingSection` kiekvieno modelio derinių susiejimams ir `freeModels.ts::matchesOnlyPaidModels`.
 
-Pirmenybė: pirmiausia pažymimas atmetimo sąrašas (atmestas įrašas visada paslėptas, net jei jis taip pat atitinka leidžiamų sąrašą); kai leidimų sąrašas nėra tuščias, išlieka tik tie įrašai, kuriuos jis atitinka.
+Pirmenybė: pirmiausia tikrinamas draudžiamasis sąrašas (uždraustas įrašas visada paslepiamas, net jei jis taip pat
+atitinka leidžiamąjį sąrašą); kai leidžiamasis sąrašas netuščias, išlieka tik jį atitinkantys įrašai.
 
-## Du taškai, o ne vienas
+## Du kontroliniai taškai, o ne vienas
 
-Pamoka iš #6512 ( `hidePaidModels` -only katalogo filtras vis tiek leidžia `auto/*` nukreipti į mokamą modelį, nes kombinuotas kandidatų telkinys buvo sukurtas atskirai) čia taip pat taikoma. Atitinkantis predikatas `isModelExposureAllowed()` (`src/shared/utils/modelExposureList.ts`) iškviečiamas iš BOTH:
+#6512 pamoka (vien katalogo filtras pagal `hidePaidModels` vis tiek leido `auto/*` nukreipti užklausą į
+mokamą modelį, nes derinio kandidatų telkinys buvo sudaromas nepriklausomai) lygiai taip pat taikoma ir čia.
+Atitikties predikatas `isModelExposureAllowed()` (`src/shared/utils/modelExposureList.ts`) iškviečiamas
+ABIEJOSE vietose:
 
-- `src/app/api/v1/models/catalog.ts` — patį `/v1/models` sąrašą, tuose pačiuose 5 šaltinio stabdymo taškuose `shouldHidePaid()` jau yra užtvarai (statinis `PROVIDER_MODELS`, sinchronizuotos teikėjo eilutės, tinkintos eilutės, slapyvardžiu paremtos eilutės, valdomos atsarginės eilutės).
-- `open-sse/services/autoCombo/modelExposureFilter.ts::filterModelExposureCandidates()` — iškvietė iš `virtualFactory.ts::buildPreparedPool`, iškart po lygiaverčio `filterPaidOnlyCandidates()` skambučio, todėl uždraustas modelis niekada negali būti pasirinktas į `auto/*` kandidatų grupę.
+- `src/app/api/v1/models/catalog.ts` — pačiame `/v1/models` sąraše, tuose pačiuose 5 kiekvieno šaltinio
+  kontroliniuose taškuose, kuriuos jau valdo `shouldHidePaid()` (statiniai `PROVIDER_MODELS`, sinchronizuotos teikėjo eilutės,
+  pasirinktinės eilutės, pseudonimais paremtos eilutės, valdomo atsarginio varianto eilutės).
+- `open-sse/services/autoCombo/modelExposureFilter.ts::filterModelExposureCandidates()` — iškviečiama
+  iš `virtualFactory.ts::buildPreparedPool`, iškart po lygiaverčio
+  `filterPaidOnlyCandidates()` iškvietimo, todėl uždraustas modelis taip pat niekada negali būti pasirinktas į `auto/*`
+  kandidatų telkinį.
 
-## Kas yra NOT filtruojamas
+## Kas NEFILTRUOJAMA
 
-Atspindi esamą `hideAutoCombos` elgesį: išsiųstas modelio ID** aiškiai** (ne per `auto/*` ir neatrastas per katalogo sąrašą) niekada nėra blokuojamas išsiuntimo metu — filtruojama tik advertisement/candidate-pool narystė. Tai nepriklauso nuo `hidePaidModels`; operatorius gali norėti kuruojamo rinkinio dėl priežasčių, kurios neturi nieko bendro su kaina, todėl abu nustatymai sudaromi kaip nepriklausomi IR filtrai, kaip ir esama kelių žymų kompozicija `catalog.ts`.
+Atitinka esamą `hideAutoCombos` veikseną: **aiškiai** nurodytas modelio ID (ne per `auto/*`
+ir ne aptiktas katalogo sąraše) niekada neblokuojamas užklausos vykdymo metu — filtruojamas tik
+viešinimas / narystė kandidatų telkinyje. Tai nepriklauso nuo `hidePaidModels`;
+operatorius gali norėti kuruojamo rinkinio dėl su kaina visiškai nesusijusių priežasčių, todėl abu
+nustatymai veikia kartu kaip nepriklausomi IR operatoriumi sujungti filtrai, kaip ir esama kelių požymių kompozicija
+faile `catalog.ts`.
 
-Nustatymų eksportavimas (`GET /api/settings/export-json`) apima abu masyvus pažodžiui, kaip ir bet kuris kitas nustatymų laukas — skirtingai nei `hidePaidModels` kombinuoto žingsnio eksporto filtras, čia nėra pakartotinio hidratacijos pavojaus: atmestas ID, įterptas į eksportuotą kombinuotą veiksmą, yra operatoriaus aiškus maršruto pasirinkimas, o ne eksporto ribos turi būti panaikintos.
+Nustatymų eksportas (`GET /api/settings/export-json`) įtraukia abu masyvus nepakeistus, kaip ir bet kurį kitą
+nustatymų lauką — skirtingai nuo `hidePaidModels` derinio žingsnių eksporto filtro, čia nėra pakartotinio įkėlimo
+rizikos: eksportuotame derinio žingsnyje įrašytas uždraustas ID yra paties operatoriaus aiškiai pasirinktas maršrutas,
+o ne tai, ką eksporto riba turėtų pašalinti.
 
-## Sąrašas tik deriniams (`exposeCombosOnly`)
+## Tik kombinacijų sąrašas (`exposeCombosOnly`)
 
-Atskira loginė vertė, pagal numatytuosius nustatymus taip pat pasirenkama ir `false`, skirta diegimams, kai kombinacijos yra viešas modelio paviršius, o teikėjai yra tik užpakalinės programos. Kai tai yra `true`, viešajame sąraše (`GET /v1/models`, `GET /v1` ir kiti `/v1` aptikimo maršrutai, sukurti remiantis `getUnifiedModelsResponse()`) išlaikomos tik eilutės su `owned_by: "combo"`: vartotojo deriniai ir įtaisytieji `auto/*` deriniai (nebent `hideAutoCombos` jų nepaslepia). Jame naudojamas tas pats eilutės testas kaip ir raktui `catalogScope: "combos"`, o pačiam raktui skirti allow/deny/scope filtrai vis tiek taikomi viršuje.
+Atskira loginė reikšmė, taip pat įjungiama pasirinktinai ir pagal nutylėjimą `false`, diegimams, kuriuose kombinacijos yra vieša modelių sąsaja, o teikėjai tik užnugario sistemos. Kai ji `true`, viešas sąrašas (`GET /v1/models`, `GET /v1` ir kiti `/v1` aptikimo maršrutai, pagrįsti `getUnifiedModelsResponse()`) palieka tik eilutes su `owned_by: "combo"`: naudotojų kombinacijas ir įtaisytas `auto/*` kombinacijas (nebent jas paslepia `hideAutoCombos`). Naudojama ta pati eilučių patikra kaip rakto `catalogScope: "combos"`, o paties rakto leidimo/draudimo/apimties filtrai vis tiek taikomi papildomai.
 
-Įjunkite** Nustatymai → Maršrutas → Modeliai API sąrašas** , arba su `PATCH /api/settings {"exposeCombosOnly": true}`.
+Perjunkite skiltyje **Settings → Routing → Models API listing** arba su `PATCH /api/settings {"exposeCombosOnly": true}`.
 
-Kaip ir aukščiau pateiktuose sąrašuose, jis keičia tik reklamą:
+Kaip ir ankstesni sąrašai, tai keičia tik viešą paskelbimą:
 
-- aiškus `provider/model` ID vis tiek siunčiamas, o `GET /v1/models/{id}` vis tiek jį išsprendžia;
-- prietaisų skydelio katalogas (`GET /api/models/catalog`, naudojamas modelių rinkėjų) nėra siaurinamas;
-- jis neatsispindi `auto/*` kandidatų telkiniuose, todėl `auto/*` deriniai išlaiko visą savo fondą.
+- tiesioginis `provider/model` ID vis tiek nukreipiamas, o `GET /v1/models/{id}` jį vis tiek nustato;
+- skydelio katalogas (`GET /api/models/catalog`, naudojamas modelių parinkikliuose) nesusiaurinamas;
+- tai neperkeliama į `auto/*` kandidatų rinkinius, todėl `auto/*` kombinacijos išlaiko visą savo rinkinį.

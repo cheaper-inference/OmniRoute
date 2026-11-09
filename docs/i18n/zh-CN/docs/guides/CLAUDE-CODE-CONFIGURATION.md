@@ -27,25 +27,28 @@ omniroute launch --profile glm52  # Claude Code 通过 OmniRoute 使用 glm/glm-
 
 ## Claude Code 如何连接到网关
 
-Claude代码讲述**Anthropic留言API**并指向带有环境变量的自定义端点（它没有`--base-url`标志）：
+Claude Code 使用 **Anthropic Messages API**，并通过环境变量指向自定义
+端点（它没有 `--base-url` 标志）：
 
-| 多变的                                       | 目的                                                                       |
-| -------------------------------------------- | -------------------------------------------------------------------------- |
-| `ANTHROPIC_BASE_URL`                         | 网关根URL （Claude代码附加`/v1/messages`）。**没有`/v1`后缀。**            |
-| `ANTHROPIC_AUTH_TOKEN`                       | 作为`Authorization: Bearer …` —发送，使用您的OmniRoute访问令牌/ API密钥    |
-| `ANTHROPIC_API_KEY`                          | 替代方案：作为`x-api-key`发送。如果两者都成立， `ANTHROPIC_AUTH_TOKEN`获胜 |
-| `ANTHROPIC_MODEL`                            | 强制使用特定模型（覆盖`/model`选择器默认值）                               |
-| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` →原生`/model`选择器列出`/v1/models`中的`claude*`/`anthropic*`模型      |
-| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | 每个响应的输出令牌上限（例如`65536`）                                      |
-| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | 自动压缩的令牌阈值                                                         |
+| 变量                                         | 用途                                                                                   |
+| -------------------------------------------- | -------------------------------------------------------------------------------------- |
+| `ANTHROPIC_BASE_URL`                         | 网关根 URL（Claude Code 会追加 `/v1/messages`）。**不要带 `/v1` 后缀。**               |
+| `ANTHROPIC_AUTH_TOKEN`                       | 以 `Authorization: Bearer …` 形式发送——请使用你的 OmniRoute 访问令牌/API 密钥          |
+| `ANTHROPIC_API_KEY`                          | 替代方式：以 `x-api-key` 形式发送。如果两者均已设置，则优先使用 `ANTHROPIC_AUTH_TOKEN` |
+| `ANTHROPIC_MODEL`                            | 强制使用特定模型（覆盖 `/model` 选择器的默认值）                                       |
+| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → 原生 `/model` 选择器会列出 `/v1/models` 中的 `claude*`/`anthropic*` 模型         |
+| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | 限制每个响应的最大输出令牌数（例如 `65536`）                                           |
+| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | 自动压缩的令牌阈值                                                                     |
 
-> 读取环境变量**启动时一次**—更改后重新启动Claude代码。
+> 环境变量仅在启动时读取**一次**——更改后请重启 Claude Code。
 
-对于轮换而不是固定字符串的凭证，请将`~/.claude/settings.json`中的`apiKeyHelper`设置为将当前凭证打印到 stdout 的命令。默认情况下， Claude代码将其输出缓存五分钟（`CLAUDE_CODE_API_KEY_HELPER_TTL_MS`会覆盖它），并在`Authorization: Bearer`和`x-api-key`中发送值。该脚本必须打印凭证，而不打印任何其他—横幅，它会使 v2.1.227 +上的帮助程序失败。
+若凭据会定期轮换，而不是固定字符串，请将 `~/.claude/settings.json` 中的 `apiKeyHelper` 设为向 stdout 输出当前凭据的命令。Claude Code 默认缓存其输出五分钟（可通过 `CLAUDE_CODE_API_KEY_HELPER_TTL_MS` 覆盖），并同时在 `Authorization: Bearer` 和 `x-api-key` 中发送该值。脚本只能输出凭据，不能附带其他内容；在 v2.1.227+ 中，额外的欢迎信息会导致辅助程序失败。
 
-Entra ID SSO工作原理如下： `scripts/cli/omniroute-sso.mjs token`打印OmniRoute验证的短期 Entra 访问令牌，而不是API密钥。参见[`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md) 。
+Entra ID SSO 正是这样工作的：`scripts/cli/omniroute-sso.mjs token` 输出短期有效的 Entra 访问令牌，OmniRoute 验证该令牌而非 API 密钥。参见 [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md)。
 
-`omniroute launch`为您设置所有这些：它从活动上下文解析基本URL +令牌（因此`omniroute connect <vps>`然后`omniroute launch`正常工作），健康检查服务器，并执行`claude`。
+`omniroute launch` 会为你设置所有这些变量：它会从活动上下文解析基础 URL 和令牌
+（因此先执行 `omniroute connect <vps>`，再执行 `omniroute launch`
+即可直接使用），对服务器执行健康检查，然后执行 `claude`。
 
 ---
 

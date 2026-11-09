@@ -4147,7 +4147,9 @@
     "duplicateAutoComboFailedPrefix": "Nepavyko dubliuoti automatinio kombo:",
     "duplicateAutoComboUnknownError": "Nežinoma klaida",
     "duplicateAutoComboTitle": "Sukurti statinį kombo iš {name}",
-    "fallbackSummary": "{rate}% užklausų naudojo atsarginį variantą, vidutiniškai praleido apie {skips} tikslų per užklausą"
+    "fallbackSummary": "{rate}% užklausų naudojo atsarginį variantą, vidutiniškai praleido apie {skips} tikslų per užklausą",
+    "reorderAll": "Pertvarkyti viską",
+    "reorderAllDescription": "Visų {count} kombinacijų pertvarkymas. Vilkimo rankenos įjungtos."
   },
   "costs": {
     "title": "Išlaidos",
@@ -6281,10 +6283,6 @@
     "hideEmails": "Slėpti visus el. pašto adresus",
     "a": "A",
     "accountConcurrencyCapHint": "Didžiausias vienu metu vykdomų užklausų skaičius, kurį gali apdoroti šis ryšys / paskyra. Prenumeratos paskyros paprastai leidžia tik kelias (1–3) — viršijus šią ribą gaunami 429 atsakymai ir įjungiami atvėsimo laikotarpiai. Palikite tuščią, jei norite naudoti numatytąją reikšmę.",
-    "aiCreditsLimit": "AI Credits limitas atsiskaitymo laikotarpiui",
-    "aiCreditsLimitPlaceholder": "Nėra vietinio limito",
-    "aiCreditsLimitHint": "Praleidžia šį ryšį, kai GitHub praneštas AI Credits kiekis pasiekia šią reikšmę, todėl maršrutizavimas pereina prie kitų jūsų ryšių. Tuščias jį išjungia; 0 visada praleidžia. Trūkstamas ar pasenęs naudojimo rodmuo niekada neblokuoja — tai nėra garantuota išlaidų riba.",
-    "aiCreditsLimitInvalid": "AI Credits limitas turi būti neneigiamas skaičius arba tuščias, kad būtų išjungtas.",
     "accountConcurrencyCapLabel": "Paskyros lygiagrečių užklausų riba",
     "accountIdHint": "Kai kurie teikėjai (pvz., Cloudflare Workers AI) to reikalauja kartu su API prieigos raktu.",
     "accountIdLabel": "Paskyros ID",
@@ -6378,8 +6376,6 @@
     "newApiUserIdLabel": "New-API naudotojo ID",
     "newApiUserIdPlaceholder": "pvz., 12345",
     "newApiUserIdHint": "AgentRouter New-API-User antraštės reikšmė, naudojama kartu su konsolės API raktu kvotos likučiui gauti.",
-    "tokenrouterManagementKeyLabel": "Valdymo raktas (neprivaloma)",
-    "tokenrouterManagementKeyHint": "Paskyros raktas iš TokenRouter valdymo skydelio (Settings → Management Key). Naudojamas tik kvotai ir likučiui nuskaityti, niekada užklausoms. Išsaugotas raktas nerodomas; palikite tuščią, kad jį išlaikytumėte.",
     "newApiAggregatorToggleLabel": "Agregatoriaus tinklų sietuvas",
     "newApiAggregatorToggleHint": "Įjungti New-API / One-API / Sub2API agregatoriaus mazgų likučio aptikimą. Prietaisų skydelyje bus rodoma likučio žyma, o išankstinis maršruto parinkimas pagal kvotą praleis išnaudotas paskyras.",
     "newApiAggregatorConsoleApiKeyHint": "Sistemos prieigos raktas, skirtas agregatoriaus /api/user/self galiniam taškui. Tai nėra maršruto parinkimo API raktas.",
@@ -6393,8 +6389,6 @@
     "customUserAgentLabel": "Pasirinktinė User Agent žyma",
     "huggingfaceBillToHint": "Neprivaloma. Jūsų Hugging Face atsiskaitymo paskyros identifikatorius, siunčiamas kaip X-HF-Bill-To antraštė išlaidoms priskirti.",
     "huggingfaceBillToLabel": "Hugging Face Bill-To paskyra",
-    "commandCodeZdrLabel": "Reikalauti nulinio duomenų saugojimo (ZDR)",
-    "commandCodeZdrHint": "Su kiekviena šiuo API raktu atliekama užklausa siunčia x-cmd-zdr: 1. Modeliai be ZDR upstream gali būti nepasiekiami.",
     "databricksBaseUrlHint": "Databricks bazinio URL paaiškinimas",
     "defaultThinkingStrengthHint": "Naudojama, kai užklausoje nenurodytas samprotavimo pastangų lygis.",
     "defaultThinkingStrengthLabel": "Numatytasis mąstymo intensyvumas",
@@ -6869,7 +6863,7 @@
       "xai": "Prijunkite xAI (Grok) naudodami API raktą.",
       "xiaomi-mimo": "Prijunkite Xiaomi MiMo naudodami API raktą.",
       "yi": "Gaukite API raktą adresu platform.lingyiwanwu.com",
-      "zai": "API raktas iš https://open.bigmodel.cn/usercenter/apikeys",
+      "zai": "API raktas iš https://z.ai/manage-apikey/apikey-list",
       "zenmux": "ZenMux suteikia su OpenAI suderinamą pokalbių užbaigimų galinį tašką adresu /api/v1/chat/completions, taip pat Anthropic Messages (/api/anthropic/v1/messages) ir Google Gemini (/api/vertex-ai) protokolų sąsajas. OmniRoute naudoja OpenAI protokolą.",
       "galadriel": "Prijunkite Galadriel naudodami API raktą.",
       "predibase": "$25 nemokamų bandomųjų kreditų (galioja 30 dienų)",
@@ -6990,11 +6984,6 @@
     "anonymousFallbackEnabled": "Anoniminis atsarginis režimas įjungtas teikėjui {provider}",
     "anonymousFallbackDisabled": "Anoniminis atsarginis režimas išjungtas teikėjui {provider} — išnaudojus ryšius šis teikėjas bus praleistas",
     "anonymousFallbackUpdateFailed": "Nepavyko atnaujinti anoniminio atsarginio režimo nuostatos",
-    "retryDelayTitle": "Pakartotinio bandymo delsa",
-    "retryDelayDesc": "Kiek laiko ryšys ilsisi po užklausų dažnio ribos klaidos, kai tiekėjas nenurodo, kada bandyti dar kartą. Automatinis režimas naudoja įtaisytą atidėjimą; tiekėjo atsiųstas atstatymo laikas visada turi pirmenybę.",
-    "retryDelayAuto": "Automatinis",
-    "retryDelaySaved": "Pakartotinio bandymo delsa išsaugota",
-    "retryDelayUpdateFailed": "Nepavyko atnaujinti pakartotinio bandymo delsos",
     "batchDeleteFailed": "Paketinis šalinimas nepavyko",
     "batchDeleteNetworkError": "Tinklo klaida atliekant paketinį šalinimą",
     "batchUpdateFailed": "Paketinis naujinimas nepavyko",
@@ -7094,7 +7083,20 @@
     "chatgptConnectorLabel": "ChatGPT pasirinktinė jungtis",
     "doctorChecking": "Tikrinamas būsena…",
     "doctorCheck": "Patikrinti doctor būseną",
-    "fallbackRetryBackendTitle": "Atsarginis pakartojimo backendas"
+    "fallbackRetryBackendTitle": "Atsarginis pakartojimo backendas",
+    "retryDelayTitle": "Pakartotinio bandymo delsa",
+    "retryDelayDesc": "Kiek laiko ryšys ilsisi po užklausų dažnio ribos klaidos, kai tiekėjas nenurodo, kada bandyti dar kartą. Automatinis režimas naudoja įtaisytą atidėjimą; tiekėjo atsiųstas atstatymo laikas visada turi pirmenybę.",
+    "retryDelayAuto": "Automatinis",
+    "retryDelaySaved": "Pakartotinio bandymo delsa išsaugota",
+    "retryDelayUpdateFailed": "Nepavyko atnaujinti pakartotinio bandymo delsos",
+    "aiCreditsLimit": "AI Credits limitas atsiskaitymo laikotarpiui",
+    "aiCreditsLimitPlaceholder": "Nėra vietinio limito",
+    "aiCreditsLimitHint": "Praleidžia šį ryšį, kai GitHub praneštas AI Credits kiekis pasiekia šią reikšmę, todėl maršrutizavimas pereina prie kitų jūsų ryšių. Tuščias jį išjungia; 0 visada praleidžia. Trūkstamas ar pasenęs naudojimo rodmuo niekada neblokuoja — tai nėra garantuota išlaidų riba.",
+    "aiCreditsLimitInvalid": "AI Credits limitas turi būti neneigiamas skaičius arba tuščias, kad būtų išjungtas.",
+    "tokenrouterManagementKeyLabel": "Valdymo raktas (neprivaloma)",
+    "tokenrouterManagementKeyHint": "Paskyros raktas iš TokenRouter valdymo skydelio (Settings → Management Key). Naudojamas tik kvotai ir likučiui nuskaityti, niekada užklausoms. Išsaugotas raktas nerodomas; palikite tuščią, kad jį išlaikytumėte.",
+    "commandCodeZdrLabel": "Reikalauti nulinio duomenų saugojimo (ZDR)",
+    "commandCodeZdrHint": "Su kiekviena šiuo API raktu atliekama užklausa siunčia x-cmd-zdr: 1. Modeliai be ZDR upstream gali būti nepasiekiami."
   },
   "settings": {
     "title": "Nustatymai",
@@ -14255,6 +14257,10 @@
         "label": "Apsaugoto prioriteto infrastruktūros sustabdymai pateikiami kaip 502",
         "description": "Grąžinti 502, o ne 503, kai prioritetinis tik atsarginiam perėjimui dėl kvotos skirtas tikslas sustabdo derinį dėl priežasties, kuri akivaizdžiai nesusijusi su kvota: atviro teikėjo grandinės pertraukiklio arba praleidimo dėl prognozuojamos delsos."
       },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Neįkainoto naudojimo biudžeto politika",
+        "description": "Kaip kiekvieno rakto dieniniai/savaitiniai USD limitai traktuoja sėkmingą naudojimą, kurio tiekėjas ar modelis neturi kainos įrašo. fail_closed (numatytasis) pažymi langą kaip viršytą, todėl nežinoma kaina niekada nepraslys per griežtą ribą. count_as_zero skaičiuoja tą naudojimą kaip $0 ir toliau taiko apribojimus pagal apibrėžtas kainas. Neįkainoti modeliai bet kuriuo atveju yra išvardyti pagrindiniame informacijos suvestinės puslapyje."
+      },
       "AUTH_LOG_INCLUDE_ACCOUNT_ID": {
         "label": "Įrašyti paskyros ID",
         "description": "Įtraukti paskyros prefiksą į AUTENTIKAVIMO žurnalo eilutes (pvz., „Naudojamas „'<provider>'“ paskyros: abc12345...“). Numatyta, kad paskyrų identifikatoriai nėra rodomi bendra naudojamuose / daugelio nuomininkų procesų žurnaluose. Nepriklauso nuo atsekimo režimo; atsekimo režimo įjungimas to nepadaro."
@@ -14535,9 +14541,9 @@
         "label": "Atvėsimo pakartotinis bandymas: praleisti 403/410 atmetimus",
         "description": "Kai visos paskyros yra atvėsimo būsenoje ir anksčiausiai pasibaigiantis atvėsimas kilo dėl 403 (prieiga atmesta) arba 410 (nebeegzistuoja), iš karto grąžinti šį atmetimą, užuot laukus atvėsimo pabaigos ir iš naujo siuntus užklausą; atsinaujinantis agentrouter ryšio aprėpties kvotos 403 atsakymas tuomet išsaugomas su errorCode 429, kad išliktų kartojamas. Pagal numatytuosius nustatymus išjungta: tik 401 praleidžia laukimą, o kiekvienas atmetimas išsaugomas su ta būsena, su kuria buvo gautas."
       },
-      "UNPRICED_USAGE_BUDGET_POLICY": {
-        "label": "Neįkainoto naudojimo biudžeto politika",
-        "description": "Kaip kiekvieno rakto dieniniai/savaitiniai USD limitai traktuoja sėkmingą naudojimą, kurio tiekėjas ar modelis neturi kainos įrašo. fail_closed (numatytasis) pažymi langą kaip viršytą, todėl nežinoma kaina niekada nepraslys per griežtą ribą. count_as_zero skaičiuoja tą naudojimą kaip $0 ir toliau taiko apribojimus pagal apibrėžtas kainas. Neįkainoti modeliai bet kuriuo atveju yra išvardyti pagrindiniame informacijos suvestinės puslapyje."
+      "COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE": {
+        "description": "Suglaudinimo talpyklos statistikoje skaičiuokite suglaudintą užklausą automatinio priešdėlio kaupimo talpykloje teikėjui (OpenAI, Codex, Azure arba tinkintam ryšiui, kuris deklaruoja greitą talpyklą su žymeklio pašalinimu) kaip apskaičiuotą talpyklos įvykį net be cache_control žymeklių. Įvertinimas yra talpyklos tinkamumo signalas, o ne pastebėtas įvykis, todėl tų paslaugų teikėjų pranešimų apie įvykius rodiklis siekia 100 %. Išjungta pagal numatytuosius nustatymus: tik užklausa, pernešanti cache_control žymeklius talpyklos teikėjui, skaičiuojama kaip įvertintas įvykis, todėl automatinio priešdėlio teikėjai praneša 0.",
+        "label": "Suspaudimo talpyklos statistika: automatinio prefikso tinkamumas"
       }
     }
   },

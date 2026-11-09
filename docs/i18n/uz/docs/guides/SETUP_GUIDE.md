@@ -27,7 +27,9 @@ npm install -g omniroute
 omniroute
 ```
 
-Boshqaruv paneli `http://localhost:20128` manzilida ochiladi va API asosiy URL manzili `http://localhost:20128/v1` boʻladi.
+Boshqaruv paneli `http://localhost:20128` da ochiladi va API bazasi URL `http://localhost:20128/v1` hisoblanadi.
+
+> **npm foydalanuvchilari:** Agar npm oʻrnatish skriptlari bloklanganligi haqida ogohlantirsa (masalan, `omniroute`, `better-sqlite3`), [— npm oʻrnatish skriptlari bloklangan muammolarni bartaraf etish boʻlimiga](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install) qarang.
 
 ### pnpm
 
@@ -199,39 +201,39 @@ Har bir vosita uchun batafsil konfiguratsiya (Claude Code, Codex CLI, Cursor, Cl
 
 ## Protokolni sozlash (MCP + A2A)
 
-### MCP sozlamalari (Model konteksti protokoli)
+### MCP sozlash (Model kontekst protokoli)
 
-MCP transportini stdio rejimida ishga tushiring:
+stdio rejimida MCP transportini ishga tushiring:
 
 ```bash
 omniroute --mcp
 ```
 
-Tavsiya etilgan tekshirish jarayoni:
+Tavsiya etilgan tekshirish oqimi:
 
 ```bash
-# 1. MCP serverini ishga tushiring
+# 1. Start MCP server
 omniroute --mcp
 
-# 2. MCP mijozingizdan quyidagilarni chaqiring:
-omniroute_get_health        # Tizim holatini qaytarishi kerak
-omniroute_list_combos       # Faol kombinatsiyalarni qaytarishi kerak
+# 2. From your MCP client, call:
+omniroute_get_health        # Should return system health
+omniroute_list_combos       # Should return active combos
 
-# 3. Yoki to‘liq E2E testlar to‘plamini ishga tushiring:
+# 3. Or run the full E2E suite:
 npm run test:protocols:e2e
 ```
 
-#### MCP mijozini sozlash
+#### MCP mijoz konfiguratsiyasi
 
-**Claude Code:**
+**Claude kodi:**
 
 ```bash
-claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
 ```
 
 **Cursor / Cline:**
 
-MCP sozlamalaringizga qo‘shing:
+MCP sozlamalaringizga qo'shing (stdio, kalit bilan qo'ng'iroq qiluvchining asosiy egasi bo'lishi uchun):
 
 ```json
 {
@@ -239,17 +241,24 @@ MCP sozlamalaringizga qo‘shing:
     "omniroute": {
       "command": "omniroute",
       "args": ["--mcp"],
-      "env": {}
+      "env": {
+        "OMNIROUTE_API_KEY": "your-key",
+        "OMNIROUTE_BASE_URL": "http://localhost:20128"
+      }
     }
   }
 }
 ```
 
-**To‘liq MCP hujjatlari:** [MCP Server README](../../open-sse/mcp-server/README.md) — 110 ta vosita, IDE konfiguratsiyalari, Python/TS/Go mijozlari.
+Yoki `mcpTransport` `streamable-http` bo'lsa (uni `/dashboard/mcp` yoki `omniroute mcp enable --transport streamable-http` bilan o'rnating), mijozning masofaviy MCP server yozuvini `http://localhost:20128/api/mcp/stream` ga qarating.
 
-### A2A sozlamalari (Agentlararo protokol)
+Kalit `Authorization: Bearer <api-key>` sifatida harakatlanadi (qarang: [MCP Server → Masofaviy xostlar uchun masofaviy kirish](../frameworks/MCP-SERVER.md#remote-access-manage-scope-bypass) ; masofaviy kalitga `mcp:connect` va uning read/write doiralari kerak).
 
-Agent kartasini tekshiring:
+**To'liq MCP hujjatlari:** [MCP Server README](../../open-sse/mcp-server/README.md) — 110 vositalari, IDE konfiguratsiyalari, Python/TS/Go mijozlari. Siqish CCR/dedup asboblari uchun operator ma'lumotnomasi (markerlar, dastlabki shartlar, har bir asbob doirasi, qidirish sahifalari, diagnostika): [Siqish dvigatellari → Prerequisites / operator qo'llanmasi](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+
+### A2A sozlash (Agentdan agentga protokoli)
+
+Agent kartasini tasdiqlang:
 
 ```bash
 curl http://localhost:20128/.well-known/agent.json
@@ -263,7 +272,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"Give me a short quota summary."}]}}'
 ```
 
-**To‘liq A2A hujjatlari:** [A2A Server README](../../src/lib/a2a/README.md) — JSON-RPC 2.0, ko‘nikmalar, oqimli uzatish, vazifaning hayot sikli.
+**To'liq A2A hujjatlari:** [A2A Server README](../../src/lib/a2a/README.md) — JSON-RPC 2.0, ko'nikmalar, oqim, vazifaning hayot aylanishi.
 
 ---
 
@@ -322,12 +331,12 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ---
 
-## Void Linux (`xbps-src`) shabloni
+## Void Linux (xbps-src) andozasi
 
-Void Linux foydalanuvchilari `xbps-src` yordamida mahalliy paket yaratishlari mumkin. Ushbu blokni `srcpkgs/omniroute/template` sifatida saqlang:
+Void Linux foydalanuvchilari uchun siz `xbps-src` dan foydalanib mahalliy paket yaratishingiz mumkin. Ushbu blokni `srcpkgs/omniroute/template` sifatida saqlang:
 
 ```bash
-# 'omniroute' uchun shablon fayli
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -338,7 +347,7 @@ maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# Har bir reliz uchun nazorat yigʻindisini quyidagicha qayta yarating:
+# Regenerate the checksum for each release with:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

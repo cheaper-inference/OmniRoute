@@ -56,11 +56,11 @@ n’ihi otu eziokwu doro anya gbasara mmejuputa ya:
 
 Ihe nke ahụ pụtara n’elu interface ọ bụla, ọbụna mgbe `CORS_ALLOW_ALL=true`:
 
-| Interface                           | Usoro nyocha njirimara      | Mmetụta wildcard CORS                                                                                                                                                                                                                                                                                                                                                              |
-| ----------------------------------- | --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Dashboard / MANAGEMENT `/api/*`     | Oge njikọ cookie            | A na-ezighachi isi mmalite ahụ, mana **n’enweghị `Allow-Credentials`** ihe nchọgharị na-**egbochi** ịgụ nwere nzere. Saịtị ọjọọ sitere n’isi mmalite ọzọ **enweghị ike ịgụ** nzaghachi dashboard gị a nyochara njirimara ya, a naghịkwa ekpughe cookie oge njikọ ahụ.                                                                                                              |
-| Client API `/v1/*`, `/v1beta/*`     | Header Bearer / `x-api-key` | Ọ dịlarị mfe ịnweta **site na nhazi** (`relaxForTokenAuth`): ihe nchọgharị anaghị etinye `Authorization`/`x-api-key` na-akpaghị aka, ya mere ibe onye na-awakpo enweghị ike iweta key gị. A na-eweghachi origin naanị mgbe e kwadoro key e gosiri; nzaghachi ndị na-enweghị aha (`REQUIRE_API_KEY=false`) na-edebe ndepụta ikike ahụ. `CORS_ALLOW_ALL` anaghị eme ka nke a gbasaa. |
-| Ọha na-agụ naanị (`/api/health`, …) | Ọ dịghị                     | Ọ bụghị ozi nwere mmetụta; wildcard adịghị emerụ ahụ.                                                                                                                                                                                                                                                                                                                              |
+| Interface                           | Usoro nyocha njirimara      | Mmetụta wildcard CORS                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| ----------------------------------- | --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Dashboard / MANAGEMENT `/api/*`     | Oge njikọ cookie            | A na-ezighachi isi mmalite ahụ, mana **n’enweghị `Allow-Credentials`** ihe nchọgharị na-**egbochi** ịgụ nwere nzere. Saịtị ọjọọ sitere n’isi mmalite ọzọ **enweghị ike ịgụ** nzaghachi dashboard gị a nyochara njirimara ya, a naghịkwa ekpughe cookie oge njikọ ahụ.                                                                                                                                                                                                                                                                                                                                                                                 |
+| Client API `/v1/*`, `/v1beta/*`     | Header Bearer / `x-api-key` | Ọ dịlarị mfe ịnweta **site na nhazi** (`relaxForTokenAuth`): ihe nchọgharị anaghị etinye `Authorization`/`x-api-key` na-akpaghị aka, ya mere ibe onye na-awakpo enweghị ike iweta key gị. Iweghachi ebe arịrịọ si bịa n’okpuru iwu a mere ka ọ dị nro chọrọ onye a kwadoro njirimara ya (igodo API a nyochara ma ọ bụ nnọkọ dashboard a nyochara), ọ bụghị naanị nkụnye nwere ihe akaebe njirimara, ọ naghịkwa etinye `Access-Control-Allow-Credentials` mgbe ọ bụla. Azịza ndị na-enweghị njirimara (`REQUIRE_API_KEY=false`) na-eji ndepụta ebe e si bịa ndị a haziri ka a na-anabata, gụnyere iji `CORS_ALLOW_ALL=true` nye ikike n’ụzọ doro anya. |
+| Ọha na-agụ naanị (`/api/health`, …) | Ọ dịghị                     | Ọ bụghị ozi nwere mmetụta; wildcard adịghị emerụ ahụ.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 
 Ya mere, mkpughe **fọdụrụ** nke `CORS_ALLOW_ALL=true` nwere oke naanị na: (a)
 ịgụ sitere n’isi mmalite ọzọ **na-enweghị nzere** nke data na-achọghị nyocha njirimara, na (b)
@@ -121,10 +121,7 @@ restart.
 - **Bearer / `x-api-key` (elu inference `/v1/*`):** browser anaghị etinye
   ihe ndị a n’onwe ya. CORS abụghị ihe mgbochi bara uru ebe a — API key bụ
   ihe mgbochi ahụ — ọ bụkwa ya mere e ji kpachapụ anya mee ka elu ahụ nabata ọtụtụ origin ka browser na
-  Electron client nwee ike ịgụ response ndị ha nwere ikike inweta. Nweghachi origin a mere
-  ka ọ dị nro na-agbaso key e kwadoro, ọ bụghị naanị ịdị adị nke header ahụ: mgbe
-  `REQUIRE_API_KEY=false` na-ejere arịrịọ ozi n’enweghị aha, nzaghachi ya gara nke ọma
-  na-edebe ndepụta ikike fail-closed ahụ. Ọjụjụ auth (401) na-anọgide na-agụ agụ ka client
+  Electron client nwee ike ịgụ response ndị ha nwere ikike inweta. Iweghachi ebe arịrịọ si bịa n’okpuru iwu a mere ka ọ dị nro chọrọ onye a kwadoro njirimara ya (igodo API a nyochara ma ọ bụ nnọkọ dashboard a nyochara), ọ bụghị naanị nkụnye nwere ihe akaebe njirimara, ọ naghịkwa etinye `Access-Control-Allow-Credentials` mgbe ọ bụla. Azịza ndị na-enweghị njirimara (`REQUIRE_API_KEY=false`) na-eji ndepụta ebe e si bịa ndị a haziri ka a na-anabata, gụnyere iji `CORS_ALLOW_ALL=true` nye ikike n’ụzọ doro anya. Ọjụjụ auth (401) na-anọgide na-agụ agụ ka client
   nwee ike igosi key a kagburu ma ọ bụ nke e dehiere ihe (#5242): 401 nke pipeline n’onwe
   ya na-edebe nweghachi ahụ, na route nke n’onwe ya na-ajụ key ahụ mgbe pipeline jesịrị
   arịrịọ ahụ ozi dị ka nke na-enweghị aha (`/v1/models` na `/v1beta/models` mgbe a haziri
@@ -135,8 +132,7 @@ restart.
   ọ bụ cookie `auth_token`), ọ bụghị nke n’ime ha route ahụ lelere, a naghịkwa ejikọ ya
   ọnụ na `Access-Control-Allow-Credentials`; body ya bụ envelope njehie a kapịrị ọnụ.
   Route management ndị dị n’okpuru `/api/v1/` nke `requireManagementAuth()` na-echekwa
-  (`/api/v1/management/*`, `/api/v1/registered-keys`) anaghị agbakwunye nweghachi ahụ:
-  mgbe `REQUIRE_API_KEY=false`, a pụghị ịgụ 401/403 ha site n’isi mmalite ọzọ.
+  (`/api/v1/management/*`, `/api/v1/registered-keys`) anaghị eji mwepụ pụrụ iche a maka ịjụ ihe akaebe njirimara: mgbe `REQUIRE_API_KEY=false`, azịza 401/403 ha na-agbaso iwu CORS maka ebe e si bịa nke a haziri.
 - **Cookie session (dashboard):** ndabara **fail-closed** na
   enweghị `Access-Control-Allow-Credentials` n’ụzọ a na-ekekọrịta na-echebe ya. Etinyela
   origin management/dashboard na config ọ bụla na-enye ohere sara mbara; ha ga-anọrịrị kpọmkwem
@@ -150,7 +146,7 @@ na-eweghachi mmepụta inference na-enyocha `Origin` nke njikọ mbido ahụ n�
 OmniRoute na-arụ ọrụ site na `npm start` / `npm run dev`, akwa mmiri `/v1/ws` na
 `/api/v1/ws`, nke na-ezipụ `/v1/chat/completions`, `/v1/messages` na `/v1/responses` dị
 ka frame. Akwa mmiri ahụ na-ajụ `/api/v1/ws?handshake=1` maka mkpebi ma na-ajụ ịme
-upgrade ma ọ bụrụ na route ahụ emeghị nlele ahụ. A na-anabata njikọ mbido mgbe:
+upgrade ma ọ bụrụ na route ahụ emeghị nlele ahụ. Ihe ndị a chọrọ maka nkwado njirimara ka na-emetụta iche. Nyocha ebe arịrịọ si bịa na-aga nke ọma mgbe:
 
 - o nweghị header `Origin` (Codex CLI, SDK na client ndị ọzọ na-abụghị ihe nchọgharị);
 - ndepụta ikike dị n’elu kwere `Origin` ahụ (`CORS_ALLOWED_ORIGINS`, ntọala

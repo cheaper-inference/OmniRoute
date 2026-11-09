@@ -25,27 +25,30 @@ omniroute launch --profile glm52  # استخدام Claude Code للنموذج gl
 
 ---
 
-## كيف يتصل رمز Claude بالبوابة
+## كيفية اتصال Claude Code ببوابة
 
-يتحدث رمز Claude** رسائل Anthropic API** ويتم الإشارة إليه عند نقطة نهاية مخصصة بمتغيرات البيئة (لا تحتوي على علامة `--base-url` ):
+يتواصل Claude Code باستخدام **Anthropic Messages API**، ويُوجَّه إلى نقطة نهاية
+مخصّصة عبر متغيرات البيئة (إذ لا يوفّر الخيار `--base-url`):
 
-| عامل                                         | غاية                                                                                |
-| -------------------------------------------- | ----------------------------------------------------------------------------------- |
-| `ANTHROPIC_BASE_URL`                         | جذر البوابة URL (يلحق كود Claude `/v1/messages`).** لا توجد لاحقة `/v1`.**          |
-| `ANTHROPIC_AUTH_TOKEN`                       | تم الإرسال كـ `Authorization: Bearer …` — استخدم رمز وصول OmniRoute / مفتاح API     |
-| `ANTHROPIC_API_KEY`                          | البديل: يتم إرساله كـ `x-api-key`. إذا تم تعيين كلاهما، يفوز `ANTHROPIC_AUTH_TOKEN` |
-| `ANTHROPIC_MODEL`                            | فرض نموذج محدد (يتجاوز الإعداد الافتراضي لمنتقي `/model` )                          |
-| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → يسرد منتقي `/model` الأصلي نماذج `claude*`/`anthropic*` من `/v1/models`       |
-| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | الحد الأقصى لرموز الإخراج لكل استجابة (على سبيل المثال `65536`)                     |
-| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | عتبة الرمز المميز للضغط التلقائي                                                    |
+| المتغير                                      | الغرض                                                                                         |
+| -------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| `ANTHROPIC_BASE_URL`                         | عنوان URL الجذري للبوابة (يُلحق Claude Code المسار `/v1/messages`). **من دون اللاحقة `/v1`.** |
+| `ANTHROPIC_AUTH_TOKEN`                       | يُرسل بصيغة `Authorization: Bearer …` — استخدم رمز وصول OmniRoute / مفتاح API الخاص بك        |
+| `ANTHROPIC_API_KEY`                          | بديل: يُرسل بصيغة `x-api-key`. إذا ضُبط كلاهما، تكون الأولوية لـ `ANTHROPIC_AUTH_TOKEN`       |
+| `ANTHROPIC_MODEL`                            | فرض استخدام نموذج محدد (يتجاوز القيمة الافتراضية لمنتقي `/model`)                             |
+| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | تؤدي القيمة `1` إلى عرض منتقي `/model` الأصلي لنماذج `claude*`/`anthropic*` من `/v1/models`   |
+| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | تحديد الحد الأقصى لرموز الإخراج لكل استجابة (مثل `65536`)                                     |
+| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | حدّ الرموز للضغط التلقائي                                                                     |
 
-> تتم قراءة Env vars** مرة واحدة عند بدء التشغيل** — قم بإعادة تشغيل رمز Claude بعد تغييرها.
+> تُقرأ متغيرات البيئة **مرة واحدة عند بدء التشغيل** — أعد تشغيل Claude Code بعد تغييرها.
 
-بالنسبة لبيانات الاعتماد التي يتم تدويرها بدلاً من سلسلة ثابتة، قم بتعيين `apiKeyHelper` في `~/.claude/settings.json` إلى أمر يطبع بيانات الاعتماد الحالية إلى stdout. يقوم Claude Code بتخزين مخرجاته مؤقتًا لمدة خمس دقائق بشكل افتراضي (يتجاوز `CLAUDE_CODE_API_KEY_HELPER_TTL_MS` ذلك) ويرسل القيمة في كل من `Authorization: Bearer` و `x-api-key`. يجب أن يقوم البرنامج النصي بطباعة بيانات الاعتماد ولا يوجد أي شيء آخر بجانبه — المساعد على v2.1.227 +.
+لاستخدام بيانات اعتماد تتجدد بدل سلسلة ثابتة، اضبط `apiKeyHelper` في `~/.claude/settings.json` على أمر يطبع بيانات الاعتماد الحالية إلى stdout. يخزّن Claude Code ناتجه مؤقتًا لخمس دقائق افتراضيًا (يمكن تجاوز ذلك باستخدام `CLAUDE_CODE_API_KEY_HELPER_TTL_MS`)، ويرسل القيمة في كل من `Authorization: Bearer` و`x-api-key`. يجب أن يطبع السكربت بيانات الاعتماد وحدها؛ إذ تؤدي إضافة لافتة نصية بجانبها إلى فشل الأداة المساعدة في v2.1.227+.
 
-هذه هي الطريقة التي يعمل بها Entra ID SSO : يقوم `scripts/cli/omniroute-sso.mjs token` بطباعة رمز وصول Entra قصير العمر والذي يتحقق منه OmniRoute بدلاً من مفتاح API. انظر [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md).
+هكذا يعمل Entra ID SSO: يطبع `scripts/cli/omniroute-sso.mjs token` رمز وصول Entra قصير العمر يتحقق منه OmniRoute بدل مفتاح API. راجع [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md).
 
-يقوم `omniroute launch` بتعيين كل هذه الأشياء لك: فهو يحل رمز URL + الأساسي من السياق النشط (لذلك يعمل `omniroute connect <vps>` ثم `omniroute launch` فقط)، ويفحص سلامة الخادم، و execs `claude`.
+يضبط `omniroute launch` جميع هذه المتغيرات نيابةً عنك: فهو يستخرج عنوان URL الأساسي والرمز
+من السياق النشط (وبذلك يعمل `omniroute connect <vps>` ثم `omniroute launch`
+مباشرةً)، ويتحقق من سلامة الخادم، ثم يشغّل `claude` عبر `exec`.
 
 ---
 

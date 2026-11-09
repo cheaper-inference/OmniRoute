@@ -4147,7 +4147,9 @@
     "duplicateAutoComboFailedPrefix": "Az automatikus kombináció duplikálása sikertelen:",
     "duplicateAutoComboUnknownError": "Ismeretlen hiba",
     "duplicateAutoComboTitle": "Hozzon létre statikus kombinációt a(z) {name}-ból",
-    "fallbackSummary": "{rate}% kérés vésztárhelyre váltott, átlagosan ~{skips} célpontot ugrottunk feje kérésenként"
+    "fallbackSummary": "{rate}% kérés vésztárhelyre váltott, átlagosan ~{skips} célpontot ugrottunk feje kérésenként",
+    "reorderAll": "Rendezze át az összeset",
+    "reorderAllDescription": "Az összes {count} kombó átrendezése. A húzófogantyúk engedélyezve vannak."
   },
   "costs": {
     "title": "Költségek",
@@ -14538,6 +14540,10 @@
       "UNPRICED_USAGE_BUDGET_POLICY": {
         "label": "Árazatlan használati költségpolitika",
         "description": "Hogyan kezelik a kulcsonkénti napi/hetentei USD-korlátok a sikeres használatot, amelynél a szolgáltatónál vagy a modellnél nincs árazási bejegyzés. fail_closed (alapértelmezett) a periódust túllépettnek jelöli, így egy ismeretlen költség soha nem kerülhet át a kemény plafonon. count_as_zero ezt a használatot $0-ként számolja, és továbbra is érvényesíti a beárazott költést. Az árazatlan modelleket mindenesetre listázza a műszerfal kezdőlapja."
+      },
+      "COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE": {
+        "description": "A tömörítési gyorsítótár statisztikáiban az automatikus előtag-gyorsítótárazási szolgáltatóhoz (OpenAI, Codex, Azure vagy egy olyan egyéni kapcsolathoz intézett tömörített kérést, amely deklarálja a gyorsítótárazást jelölőeltávolítással) becsült gyorsítótár-találatként, még cache_control markerek nélkül is. A becslés a gyorsítótár-jogosultság jele, nem pedig megfigyelt találat, így ezeknek a szolgáltatóknak a jelentett találati aránya 100% felé tart. Alapértelmezés szerint ki: csak a cache_control markereket a gyorsítótárazási szolgáltatóhoz vivő kérés számít becsült találatnak, ezért az automatikus előtagot használó szolgáltatók folyamatosan 0-t jelentenek.",
+        "label": "Tömörítési gyorsítótár statisztikái: Automatic Prefix jogosultság"
       }
     }
   },

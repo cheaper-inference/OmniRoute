@@ -16,6 +16,9 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { installOfflineCatalogNetwork } from "../_helpers/offlineCatalogNetwork.ts";
+
+const network = installOfflineCatalogNetwork();
 
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-curated-custom-"));
 process.env.DATA_DIR = TEST_DATA_DIR;
@@ -25,8 +28,11 @@ process.env.CATALOG_BUILD_TIMEOUT_MS = "120000";
 
 const core = await import("../../src/lib/db/core.ts");
 const providersDb = await import("../../src/lib/db/providers.ts");
+const settingsDb = await import("../../src/lib/db/settings.ts");
 const modelsDb = await import("../../src/lib/db/models.ts");
 const v1ModelsCatalog = await import("../../src/app/api/v1/models/catalog.ts");
+
+network.activate();
 
 // `codebuddy-intl` is the provider from the report: alias `cbai`, curated-only.
 const CURATED_PROVIDER = "codebuddy-intl";
@@ -38,6 +44,8 @@ async function resetStorage() {
   fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   fs.mkdirSync(TEST_DATA_DIR, { recursive: true });
   v1ModelsCatalog.__resetCatalogBuilderRunsForTest();
+  // These contracts cover saved rows; synthesized auto/* models and live quota APIs are separate.
+  await settingsDb.updateSettings({ hideAutoCombos: true });
 }
 
 async function seedCuratedConnection() {
@@ -58,9 +66,18 @@ test.beforeEach(async () => {
   await seedCuratedConnection();
 });
 
-test.after(() => {
-  core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+test.after(async () => {
+  try {
+    await v1ModelsCatalog.__flushCatalogBackgroundRefreshForTest();
+    assert.deepEqual(network.unexpectedRequests, [], "catalog contracts must stay offline");
+  } finally {
+    try {
+      core.resetDbInstance();
+      fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+    } finally {
+      await network.restore();
+    }
+  }
 });
 
 test("/v1/models advertises an operator-defined custom model on a curated-only provider", async () => {

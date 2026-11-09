@@ -237,9 +237,9 @@ Wszystkie endpointy MITM wymagają management auth (`requireCliToolsAuth`). Has�
 
 ---
 
-## User-Agent zastępuje — env vars (`.env.example` sekcja 12)
+## Nadpisywanie User-Agent — zmienne środowiskowe (`.env.example`, sekcja 12)
 
-| Zmienny             | Domyślny                                      |
+| Zmienna             | Wartość domyślna                              |
 | ------------------- | --------------------------------------------- |
 | `CLAUDE_USER_AGENT` | `claude-cli/2.1.280 (external, cli)`          |
 | `CODEX_USER_AGENT`  | `codex-cli/0.155.0 (Windows 10.0.26200; x64)` |
@@ -248,7 +248,7 @@ Wszystkie endpointy MITM wymagają management auth (`requireCliToolsAuth`). Has�
 | `QODER_USER_AGENT`  | `Qoder-Cli`                                   |
 | `CURSOR_USER_AGENT` | `Cursor/3.4`                                  |
 
-Używane przez `open-sse/executors/base.ts::buildHeaders()` poprzez wyszukiwanie dynamiczne.** Podbijaj je, gdy dostawcy wypuszczą nowe wersje CLI** — nieaktualne ciągi UA zaczynają być odrzucane jako nieaktualni klienci.
+Używane przez `open-sse/executors/base.ts::buildHeaders()` za pośrednictwem dynamicznego wyszukiwania. **Aktualizuj te wartości, gdy dostawcy wydają nowe wersje CLI** — nieaktualne ciągi UA zaczynają być odrzucane jako pochodzące z przestarzałych klientów.
 
 ## Przełączniki trybu zgodności CLI (sekcja 13 pliku `.env.example`)
 

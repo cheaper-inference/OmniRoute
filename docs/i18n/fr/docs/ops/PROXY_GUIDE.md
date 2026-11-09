@@ -81,6 +81,18 @@ Même en dehors des régions bloquées, les proxys sont utiles pour :
 
 ---
 
+## État du proxy par défaut pour les nouveaux comptes
+
+Dans** Paramètres → Proxy → Configuration globale** , utiliser** Activer le proxy par défaut pour les nouvelles connexions** pour choisir l'état proxy initial des comptes de fournisseur nouvellement ajoutés.
+
+Le nouveau paramètre contrôle l'état du proxy initial des comptes de fournisseur nouvellement ajoutés. Il ne modifie pas les comptes existants et ne remplace pas le commutateur de proxy global. Sa valeur initiale conserve le comportement précédent. Désactivez-le une fois pour créer de futurs comptes avec le proxy désactivé par défaut.
+
+La préférence est stockée sous `defaultNewConnectionProxyEnabled` via les paramètres API existants. La valeur par défaut est `true` lorsqu'elle n'est jamais enregistrée. L'enregistrement `false` prend effet pour les nouveaux comptes suivants sans redémarrage. `POST /api/providers` accepte un `proxyEnabled` booléen strict facultatif ; un `true` ou `false` explicite a priorité sur la valeur par défaut de création. L'omission sur un compte en double ou la reconnexion OAuth préserve l'état stocké de ce compte. Les comptes individuels peuvent toujours être activés ou désactivés par la suite.
+
+Les transferts de fournisseur sélectifs utilisent la valeur par défaut de l'installation de destination pour les nouveaux comptes et préservent la politique de destination lors du remplacement des comptes existants. Les bascules de proxy ne sont pas des champs de transfert portables. La restauration par sauvegarde complète et la migration historique JSON/SQL conservent leur sémantique de restauration existante, y compris les valeurs de compte enregistrées et les valeurs par défaut des schémas hérités ; une restauration complète des paramètres peut également restaurer cette préférence.
+
+Cette préférence n’attribue pas de proxy et n’établit pas qu’il est sain ou en cours d’utilisation. Le routage réel dépend toujours du commutateur proxy global et de la configuration proxy applicable. Les fournisseurs synthétiques sans compte persistant, le trafic OAuth avant la création du compte, les proxys environment/system et la mise en réseau des backends externes sortent de son champ d'application.
+
 ## Système de proxy à 4 niveaux
 
 OmniRoute prend en charge la configuration des proxys à **quatre niveaux indépendants**, résolus par ordre de priorité :
@@ -381,7 +393,7 @@ Utilise `wreq-js` pour générer des empreintes TLS similaires à celles des nav
 
 ### Correspondance de l’empreinte CLI
 
-Le **bouton d’activation de l’empreinte CLI** (`Paramètres → Sécurité`) réorganise les en-têtes HTTP et les champs du corps JSON pour correspondre exactement à la signature des binaires CLI natifs (Claude Code, Codex, etc.). Cette fonctionnalité s’applique **en complément** du proxy :
+Le **bouton d’activation de l’empreinte CLI** (`Settings → Security`) réorganise les en-têtes HTTP et les champs du corps JSON pour correspondre exactement à la signature des binaires CLI natifs (Claude Code, Codex, etc.). Cette fonctionnalité s’applique **en complément** du proxy :
 
 ```
 Votre IP (bloquée) → IP du proxy (États-Unis) → API du fournisseur

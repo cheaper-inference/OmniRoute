@@ -4224,7 +4224,9 @@
     "duplicateAutoComboFailedPrefix": "Avtokombo kopyalanması uğursuz oldu:",
     "duplicateAutoComboUnknownError": "Naməlum xəta",
     "duplicateAutoComboTitle": "{name}-dan statik kombo yarat",
-    "fallbackSummary": "Sorğuların {rate}-i ehtiyat rejimindən istifadə etdi, hər sorğuda təqribən {skips} obyekti atlandı"
+    "fallbackSummary": "Sorğuların {rate}-i ehtiyat rejimindən istifadə etdi, hər sorğuda təqribən {skips} obyekti atlandı",
+    "reorderAll": "Hamısını yenidən sıralayın",
+    "reorderAllDescription": "Bütün {count} kombinləri yenidən sıralanır. Sürük tutacaqları aktivləşdirilib."
   },
   "costs": {
     "title": "Xərclər",
@@ -14615,6 +14617,10 @@
       "UNPRICED_USAGE_BUDGET_POLICY": {
         "label": "Qiymətsiz İstifadə Büdcə Siyasəti",
         "description": "Bir-açar günlük/həftəlik USD limitləri provideri/modeli üçün qiymət sətri olmayan uğurlu istifadəni necə idarə edir. fail_closed (varsayılan) pəncərəni aşılmış kimi qeyd edir, beləliklə naməlum xərc heç vaxt sərt limiti keçə bilməz. count_as_zero həmin istifadəni $0 kimi hesablayır və qiymətlənmiş xərclərin tətbiqini davam etdirir. Qiyməti təyin olunmamış modellər hər halda panelin ana səhifəsində siyahılanır."
+      },
+      "COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE": {
+        "description": "Sıxılma keş statistiklərində avtomatik prefiks-keşləmə provayderinə (OpenAI, Codex, Azure və ya markerin çıxarılması ilə operativ keşləşdirməni elan edən fərdi əlaqə) sıxılmış sorğunu hətta cache_control markerləri olmadan da təxmin edilən keş vurulması kimi hesablayın. Təxmin, müşahidə olunan hit deyil, keş-uyğunluq siqnalıdır, ona görə də həmin provayderlər üçün bildirilən hit dərəcəsi 100%-ə doğru meyl edir. Defolt olaraq deaktivdir: yalnız cache_control markerlərini keşləmə provayderinə daşıyan sorğu təxmin edilən hit kimi sayılır, beləliklə, avtomatik prefiks təminatçıları 0 hesabat verməkdə davam edirlər.",
+        "label": "Sıxılma Keş Statistikası: Avtomatik Prefiks Uyğunluğu"
       }
     }
   },

@@ -90,6 +90,11 @@ async function setHiddenByStoredIds(
   for (const requestedId of modelIds) {
     const modelId = await normalizeNodeModelId(provider, requestedId);
     normalizedIds.push(modelId);
+    // Keep an existing legacy row in sync when its stored id still carries the
+    // node prefix. Catalog emission checks that row's own isHidden flag first.
+    if (modelId !== requestedId) {
+      await updateCustomModel(provider, requestedId, { isHidden });
+    }
     const updatedModel = await updateCustomModel(provider, modelId, { isHidden });
     if (!updatedModel) {
       mergeModelCompatOverride(provider, modelId, { isHidden, modality });

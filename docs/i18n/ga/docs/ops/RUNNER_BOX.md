@@ -6,13 +6,13 @@
 
 Ritheann an linn féinóstáilte ar an meaisín **.113** (`tomni-proxmox-113`). Ó 2026-10-18 i leith, tá **ról amháin**, lipéad amháin, agus buiséad cuimhne/CPU atá meánaithe de réir ualach oibre gach reathaí OmniRoute. Faigheann sliotán Turbopack na hacmhainní a theastaíonn ón tógáil; tá na sliotáin eile meánaithe de réir na mbuaicluachanna tomhaiste acu. Ní bhíonn róthiomnú ar an meaisín ach amháin nuair a tharlaíonn tógáil Turbopack ag an am céanna le tógáil webpack Release-Green agus jab lint; ionsúnn babhtáil an óstríomhaire (16 GB) é sin, agus ós rud é go ritheann tógálacha iarrataí tarraingthe ar reathaithe óstáilte, bíonn sliotán Turbopack díomhaoin an chuid is mó den am:
 
-| reathaí              | lipéad         | ról                                                                                                                                                   | `MemoryHigh` / `MemoryMax`    | `CPUQuota`     |
-| -------------------- | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------- | -------------- |
-| `omniroute-113-5`    | `omni-build`   | Tógálacha Turbopack: `ci.yml` `Build` (brú/seoladh amháin), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, an tógáil a11y oíche | 56 GB / 60 GB (babhtáil 0)    | 1600 %         |
-| `omniroute-113-6`    | `omni-release` | Release-Green (`release-green` + `main-green`), tógáil webpack                                                                                        | 20 GB / 24 GB (babhtáil 4 GB) | 800 %          |
-| `omniroute-113-2`    | `omni-light`   | jabanna oíche (Schemathesis, promptfoo, garak, k6) agus `quality.yml` `lint-guard`                                                                    | 12 GB / 16 GB (babhtáil 4 GB) | 600 %          |
-| `omniroute-113`      | `omni-light`   | an linn chéanna agus atá thuas                                                                                                                        | 8 GB / 12 GB                  | 400 %          |
-| OmniHeuris, OmniMind | (a stórtha)    | Dependabot amháin (buaic 155 MB an ceann, 2026-10-18)                                                                                                 | 4 GB / 6 GB                   | 200 % an ceann |
+| reathaí              | lipéad                          | ról                                                                                                                                                   | `MemoryHigh` / `MemoryMax`    | `CPUQuota`     |
+| -------------------- | ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------- | -------------- |
+| `omniroute-113-5`    | `omni-build`, `omni-build-60gb` | Tógálacha Turbopack: `ci.yml` `Build` (brú/seoladh amháin), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, an tógáil a11y oíche | 56 GB / 60 GB (babhtáil 0)    | 1600 %         |
+| `omniroute-113-6`    | `omni-release`                  | Release-Green (`release-green` + `main-green`), tógáil webpack                                                                                        | 20 GB / 24 GB (babhtáil 4 GB) | 800 %          |
+| `omniroute-113-2`    | `omni-light`                    | jabanna oíche (Schemathesis, promptfoo, garak, k6) agus `quality.yml` `lint-guard`                                                                    | 12 GB / 16 GB (babhtáil 4 GB) | 600 %          |
+| `omniroute-113`      | `omni-light`                    | an linn chéanna agus atá thuas                                                                                                                        | 8 GB / 12 GB                  | 400 %          |
+| OmniHeuris, OmniMind | (a stórtha)                     | Dependabot amháin (buaic 155 MB an ceann, 2026-10-18)                                                                                                 | 4 GB / 6 GB                   | 200 % an ceann |
 
 Tomhaiste 2026-10-18:
 
@@ -22,12 +22,13 @@ Tomhaiste 2026-10-18:
 | babhtáil   | 16 GB                                  | ritheann `omniroute-113-5` agus babhtáil díchumasaithe (`MemorySwapMax=0`), ionas go stoptar tógáil as smacht ag a huasteorainn seachas an meaisín a chur ag babhtáil                                                                                                                                                                                                                                              |
 | `/tmp`     | **12 GB tmpfs = RAM**                  | is cuimhne é aon rud a fhágtar ansin; glantar fuílleach tar éis 3 h                                                                                                                                                                                                                                                                                                                                                |
 | CPU        | ualach 60 ar 32 croí tugtha faoi deara | roimh na cuótaí, d'fhág tógáil Turbopack amháin (~1166 % CPU) móide sraith cumhdaigh ar an meaisín céanna na héisteoirí eile gan acmhainní dá gcomharthaí croí (`The self-hosted runner lost communication`, #16853)                                                                                                                                                                                               |
-| reathaithe | **7 n-éisteoir** (2026-10-28)          | 5 OmniRoute + OmniHeuris + OmniMind; iompraíonn `omniroute-113-7` `omni-build` freisin; scriosadh `omniroute-113-3/-4/-8` ón stórlann (2026-10-28)                                                                                                                                                                                                                                                                 |
+| reathaithe | **7 n-éisteoir** (2026-10-28)          | 5 OmniRoute + OmniHeuris + OmniMind; iompraíonn `omniroute-113-5` `omni-build-60gb` freisin; scriosadh `omniroute-113-3/-4/-8` ón stórlann (2026-10-28)                                                                                                                                                                                                                                                            |
 
 Tá na teorainneacha i `/etc/systemd/system/actions.runner.<…>.service.d/override.conf` gach aonaid
 (coimeádtar na luachanna roimhe seo mar `override.conf.bak-20261018`) agus cuireadh i bhfeidhm beo iad le
 `systemctl set-property --runtime … MemoryHigh=… MemoryMax=… CPUQuota=…` — gan atosú, mar sin níor
-cuireadh isteach ar aon jab a bhí ar siúl. Athraítear lipéid trí API na reathaithe (`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
+cuireadh isteach ar aon jab a bhí ar siúl. Athraítear lipéid trí API na reathaithe
+(`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
 `gh api -X POST repos/<repo>/actions/runners/<id>/labels -f 'labels[]=<label>'`), agus déantar é sin beo freisin.
 
 ## Suiteáil an glantóir (aon uair amháin, ar an meaisín)
@@ -75,7 +76,7 @@ an am, agus é díomhaoin amháin**, agus an tseiceáil díomhaointis agus an t-
 ## Rialacha oibriúcháin
 
 - **Tógáil Turbopack amháin ag an am — curtha i bhfeidhm de réir lipéid.** Díríonn gach jab a ritheann
-  `next build` iomlán Turbopack ar `[self-hosted, omni-build]`, agus níl an lipéad sin ach ar
+  `next build` iomlán Turbopack ar `[self-hosted, omni-build, omni-build-60gb]`, agus níl an lipéad sin ach ar
   **`omniroute-113-5`**: `ci.yml` `Build`, `npm-publish.yml` `publish`, `nightly-v4-build`, `preview-artifact`,
   tógáil oíche a11y (#16853) agus **amd64** `docker-publish.yml` (webpack laistigh de BuildKit —
   tháinig cliseadh tubaisteach ar Turbopack ann, rith 33253576569). Fanann géag Docker arm64 ar `ubuntu-24.04-arm`.

@@ -13,11 +13,17 @@ import os from "node:os";
 import path from "node:path";
 
 import { useDecollidedMigrationsDir } from "./helpers/decollidedMigrationsDir.ts";
+import { closeSharedLoggerResource } from "../../src/shared/utils/loggerResource.ts";
 
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-systemone-route-13987-"));
 process.env.DATA_DIR = TEST_DATA_DIR;
 process.env.API_KEY_SECRET = process.env.API_KEY_SECRET || "systemone-route-test-secret";
 useDecollidedMigrationsDir();
+
+// GET also builds the catalog; image discovery is outside the decisions contract.
+const { aiHordeImageCatalog } = await import("../../open-sse/services/aihordeImageCatalog.ts");
+aiHordeImageCatalog.clear();
+aiHordeImageCatalog.setFetch(async () => Response.json([]));
 
 const core = await import("../../src/lib/db/core.ts");
 const providersDb = await import("../../src/lib/db/providers.ts");
@@ -31,8 +37,11 @@ const VALID_BODY = {
   questions: { risk: { type: "choice", choices: ["low", "high"] } },
 };
 
-test.after(() => {
+test.after(async () => {
+  await (await import("../../src/lib/usage/callLogs.ts")).closeCallLogSaves(5000);
   core.resetDbInstance();
+  aiHordeImageCatalog.clear();
+  await closeSharedLoggerResource();
   fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 

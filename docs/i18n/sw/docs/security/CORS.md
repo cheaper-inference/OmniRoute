@@ -57,11 +57,11 @@ kwa sababu ya ukweli mmoja mahususi wa utekelezaji:
 
 Hivi ndivyo inavyomaanisha kwa kila sehemu, hata ikiwa `CORS_ALLOW_ALL=true`:
 
-| Sehemu                                     | Utaratibu wa uthibitishaji     | Athari ya wildcard CORS                                                                                                                                                                                                                                                                                                                                                                 |
-| ------------------------------------------ | ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Dashibodi / MANAGEMENT `/api/*`            | Kipindi cha cookie             | Asili hurudishwa, lakini **bila `Allow-Credentials`** kivinjari **huzuia** usomaji wenye vitambulisho. Tovuti hasidi ya asili tofauti **haiwezi kusoma** majibu yako ya dashibodi yaliyothibitishwa, na cookie ya kipindi haifichuliwi.                                                                                                                                                 |
-| API ya mteja `/v1/*`, `/v1beta/*`          | Header ya Bearer / `x-api-key` | Tayari inaruhusu **kwa makusudi** (`relaxForTokenAuth`): vivinjari haviambatishi `Authorization`/`x-api-key` kiotomatiki, kwa hivyo ukurasa wa mshambulizi hauwezi kutoa ufunguo wako. Kurudisha asili hutumika tu wakati ufunguo uliowasilishwa umethibitishwa; majibu ya bila utambulisho (`REQUIRE_API_KEY=false`) hubaki chini ya orodha ya ruhusa. `CORS_ALLOW_ALL` haipanui hili. |
-| Ya umma ya kusoma pekee (`/api/health`, …) | Hakuna                         | Si nyeti; wildcard haina madhara.                                                                                                                                                                                                                                                                                                                                                       |
+| Sehemu                                     | Utaratibu wa uthibitishaji     | Athari ya wildcard CORS                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| ------------------------------------------ | ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Dashibodi / MANAGEMENT `/api/*`            | Kipindi cha cookie             | Asili hurudishwa, lakini **bila `Allow-Credentials`** kivinjari **huzuia** usomaji wenye vitambulisho. Tovuti hasidi ya asili tofauti **haiwezi kusoma** majibu yako ya dashibodi yaliyothibitishwa, na cookie ya kipindi haifichuliwi.                                                                                                                                                                                                                                                                                                                                                                                 |
+| API ya mteja `/v1/*`, `/v1beta/*`          | Header ya Bearer / `x-api-key` | Tayari inaruhusu **kwa makusudi** (`relaxForTokenAuth`): vivinjari haviambatishi `Authorization`/`x-api-key` kiotomatiki, kwa hivyo ukurasa wa mshambulizi hauwezi kutoa ufunguo wako. Kuakisi asili chini ya kanuni iliyolegezwa kunahitaji mhusika aliyethibitishwa (ufunguo wa API uliothibitishwa au kipindi cha dashibodi kilichothibitishwa), si kichwa cha taarifa za utambulisho pekee, na hakujumuishi kamwe `Access-Control-Allow-Credentials`. Majibu ya bila utambulisho (`REQUIRE_API_KEY=false`) hutumia orodha iliyosanidiwa ya asili zinazoruhusiwa, ikiwemo kuwezesha `CORS_ALLOW_ALL=true` kwa uwazi. |
+| Ya umma ya kusoma pekee (`/api/health`, …) | Hakuna                         | Si nyeti; wildcard haina madhara.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
 
 Kwa hivyo, ufichuzi **uliobaki** wa `CORS_ALLOW_ALL=true` unaishia kwenye: (a)
 **usomaji** wa asili tofauti usio na vitambulisho wa data ambayo tayari haikuhitaji uthibitishaji, na (b)
@@ -123,9 +123,7 @@ kuanzisha upya.
   hivi kiotomatiki kamwe. CORS si kizuizi chenye maana hapa — ufunguo wa API ndio
   kizuizi — na ndiyo sababu sehemu hiyo imeruhusiwa kimakusudi ili wateja wa kivinjari na
   Electron waweze kusoma majibu ambayo tayari wana haki ya kuyapata.
-  Kurudisha asili kwa njia iliyolegezwa hufuata ufunguo uliothibitishwa, si kuwepo tu kwa
-  header: `REQUIRE_API_KEY=false` inapohudumia ombi bila utambulisho, jibu lake lililofaulu
-  hubaki chini ya orodha ya ruhusa inayozuia kila kitu kwa chaguo-msingi. Makataa ya
+  Kuakisi asili chini ya kanuni iliyolegezwa kunahitaji mhusika aliyethibitishwa (ufunguo wa API uliothibitishwa au kipindi cha dashibodi kilichothibitishwa), si kichwa cha taarifa za utambulisho pekee, na hakujumuishi kamwe `Access-Control-Allow-Credentials`. Majibu ya bila utambulisho (`REQUIRE_API_KEY=false`) hutumia orodha iliyosanidiwa ya asili zinazoruhusiwa, ikiwemo kuwezesha `CORS_ALLOW_ALL=true` kwa uwazi. Makataa ya
   uthibitishaji (401) hubaki yanasomeka ili wateja waweze kuonyesha ufunguo uliobatilishwa au
   ulioandikwa vibaya (#5242): 401 ya pipeline yenyewe huhifadhi urudishaji wa asili, na route
   inayokataa ufunguo yenyewe baada ya pipeline kuhudumia ombi kama lisilo na utambulisho
@@ -137,8 +135,7 @@ kuanzisha upya.
   si ni ipi kati yake ambayo route iliikagua, na kamwe hauambatani na
   `Access-Control-Allow-Credentials`; mwili wa jibu ni bahasha ya hitilafu isiyobadilika.
   Routes za usimamizi chini ya `/api/v1/` zinazolindwa na `requireManagementAuth()`
-  (`/api/v1/management/*`, `/api/v1/registered-keys`) haziongezi urudishaji wa asili: kwa
-  `REQUIRE_API_KEY=false`, majibu yao ya 401/403 hayasomeki kutoka asili tofauti.
+  (`/api/v1/management/*`, `/api/v1/registered-keys`) hazitumii hali hii ya kipekee ya kukataa taarifa za utambulisho: kwa `REQUIRE_API_KEY=false`, majibu yake ya 401/403 hufuata sera ya asili ya CORS iliyosanidiwa.
 - **Kipindi cha cookie (dashibodi):** hulindwa na chaguo-msingi linalokataa ufikiaji **na**
   kwa kutokuwepo kwa `Access-Control-Allow-Credentials` kwenye njia inayoshirikiwa. Usiweke
   vyanzo vya usimamizi/dashibodi katika usanidi wowote unaoruhusu kwa upana; ni lazima viendelee
@@ -152,7 +149,7 @@ matokeo ya inference hukagua wenyewe `Origin` ya mpeano wa mkono
 inapoendeshwa kupitia `npm start` / `npm run dev`, daraja la `/v1/ws` na `/api/v1/ws`,
 linalotiririsha `/v1/chat/completions`, `/v1/messages` na `/v1/responses` kama fremu.
 Daraja huuliza `/api/v1/ws?handshake=1` ili kupata uamuzi na hukataa kuboresha muunganisho
-isipokuwa route hiyo imeendesha ukaguzi. Mpeano wa mkono hukubaliwa wakati:
+isipokuwa route hiyo imeendesha ukaguzi. Masharti ya uthibitishaji bado yanatumika kando. Ukaguzi wa asili hufaulu wakati:
 
 - hauna header ya `Origin` (Codex CLI, SDK na wateja wengine wasio vivinjari);
 - `Origin` imekubaliwa na orodha ya ruhusa iliyo hapo juu (`CORS_ALLOWED_ORIGINS`, mpangilio

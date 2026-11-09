@@ -4,253 +4,253 @@
 
 ---
 
-Xuất liên tục, gia tăng nhật ký lệnh gọi OmniRoute sang kho phân tích bên ngoài.
+Xuất liên tục, tăng dần nhật ký cuộc gọi OmniRoute sang một kho phân tích bên ngoài.
 
-Tab Nhật ký trên bảng điều khiển lưu lịch sử yêu cầu trong SQLite (`call_logs`), được giới hạn bởi
-cơ chế luân chuyển và lưu giữ. Tính năng xuất nhật ký chuyển cùng tập bản ghi đó ra ngoài theo lịch để dữ liệu có thể tồn tại lâu hơn
-cơ sở dữ liệu cục bộ và được kết hợp với dữ liệu khác. BigQuery là đích đến đầu tiên;
-quy trình xử lý sử dụng cơ chế đăng ký, nên có thể bổ sung thêm các đích đến.
+Tab Logs trên bảng điều khiển lưu lịch sử yêu cầu trong SQLite (`call_logs`), với dung lượng bị giới hạn bởi cơ chế
+xoay vòng và chính sách lưu giữ. Tính năng xuất nhật ký chuyển cùng một tập bản ghi ra ngoài theo lịch để dữ liệu có thể tồn tại lâu hơn
+cơ sở dữ liệu cục bộ và được kết hợp với dữ liệu khác. BigQuery là đích đầu tiên; pipeline sử dụng một registry, vì vậy có thể bổ sung
+thêm các đích khác.
 
 ---
 
-## 1. Cách hoạt động
+## 1. Cách thức hoạt động
 
 ```
 máy chủ (giải mã + xác thực cấu hình, đối soát con trỏ)
   → khởi động IPC → tiến trình HĐH exportChild biệt lập
-    → storage.sqlite chỉ đọc → truy vấn/ánh xạ nhật ký lệnh gọi dùng chung
-      → nạp dữ liệu hiện vật bất đồng bộ → prepare()/send() của đích đến
-        → IPC lô → máy chủ lưu con trỏ → IPC xác nhận
-          → lô tiếp theo; IPC hoàn tất → máy chủ ghi nhận thành công
+    → storage.sqlite chỉ đọc → truy vấn/ánh xạ nhật ký cuộc gọi dùng chung
+      → nạp artifact bất đồng bộ → prepare()/send() của đích
+        → IPC theo lô → máy chủ lưu con trỏ → IPC ack
+          → lô tiếp theo; IPC done → máy chủ ghi nhận thành công
 ```
 
-- **Lịch chạy** — một tác vụ cron `JobRegistry`, `log_export`, mặc định là `0 * * * *` (hằng giờ,
+- **Lịch chạy** — một tác vụ cron `JobRegistry`, `log_export`, mặc định là `0 * * * *` (hàng giờ,
   UTC). Được đăng ký trong `src/lib/initCloudSync.ts`; có thể ghi đè bằng `OMNIROUTE_LOG_EXPORT_CRON`.
-  Mỗi lần kích hoạt sẽ lần lượt xử lý hết dữ liệu của từng đích đến **đã bật**.
-- **Con trỏ** — `call_logs.rowid` ngầm định của SQLite, được lưu riêng cho từng đích đến trong
+  Mỗi lần chạy sẽ lần lượt xử lý mọi đích **đã bật**.
+- **Con trỏ** — `call_logs.rowid` ngầm định của SQLite, được lưu riêng cho từng đích trong
   `log_export_destinations.cursor_row_id`. `timestamp` được chủ ý không dùng làm con trỏ: bên gọi
-  có thể cung cấp giá trị riêng, nên một yêu cầu chậm có thể được ghi sau một yêu cầu nhanh hơn nhưng bắt đầu
-  muộn hơn, và con trỏ dấu thời gian sẽ bỏ sót yêu cầu đó.
+  có thể cung cấp giá trị riêng, vì vậy một yêu cầu chậm có thể được ghi sau một yêu cầu nhanh hơn
+  dù yêu cầu nhanh bắt đầu muộn hơn, và con trỏ dựa trên dấu thời gian sẽ bỏ qua yêu cầu đó.
 - **Chia lô** — `batch_size` hàng cho mỗi yêu cầu (mặc định 500), `max_rows_per_run` hàng cho mỗi lần chạy
-  (mặc định 10000) để lượng dữ liệu tồn đọng lớn được xử lý qua nhiều lần kích hoạt thay vì chặn một lần.
-- **Phân phối** — con trỏ chỉ tiến lên sau khi `send()` hoàn tất thành công. Khi một lô thất bại,
-  con trỏ giữ nguyên vị trí, nên các hàng đó sẽ được thử lại vào lần chạy tiếp theo. Cơ chế bảo đảm là
-  ít nhất một lần kết hợp với loại bỏ trùng lặp ở phía đích đến, chứ không thực sự là đúng một lần: BigQuery dùng
-  id nhật ký lệnh gọi làm khóa cho từng hàng và xử lý khóa đó theo nguyên tắc nỗ lực tối đa trong cửa sổ loại bỏ trùng lặp của chính nó.
-- **Chống chạy chồng lấn** — lần kích hoạt cron và `POST .../run` có thể xảy ra cùng lúc. Một đích đến
+  (mặc định 10000), để lượng tồn đọng lớn được xử lý qua nhiều lần chạy thay vì chặn trong một lần.
+- **Phân phối** — con trỏ chỉ tiến lên sau khi `send()` hoàn tất. Một lô thất bại sẽ giữ nguyên
+  con trỏ, vì vậy các hàng đó được thử lại trong lần chạy tiếp theo. Cơ chế bảo đảm là
+  ít nhất một lần cộng với việc loại bỏ trùng lặp ở phía đích, chứ không phải chính xác một lần thực sự: BigQuery
+  định danh từng hàng bằng id của nhật ký cuộc gọi và áp dụng điều này theo khả năng tối đa trong cửa sổ khử trùng lặp riêng.
+- **Bảo vệ khỏi chạy chồng lấn** — lần chạy cron và `POST .../run` có thể được kích hoạt cùng lúc. Một đích
   đang được xử lý sẽ bị bỏ qua thay vì được xử lý hai lần (`skipped: true` trong kết quả chạy),
-  nên một lần chạy đồng thời không thể gửi lại một lô hoặc ghi lùi con trỏ.
-- **Khôi phục sau khi xóa sạch** — nếu `cursor_row_id` lớn hơn `MAX(rowid)` (toàn bộ bảng đã bị
-  xóa sạch và rowid bắt đầu lại), trình chạy sẽ đặt lại về 0 thay vì vĩnh viễn không nhận thấy dữ liệu.
+  vì vậy một lần chạy đồng thời không thể gửi lại một lô hoặc ghi lùi con trỏ.
+- **Khôi phục sau khi xóa dữ liệu** — nếu `cursor_row_id` lớn hơn `MAX(rowid)` (toàn bộ bảng đã bị
+  xóa sạch và rowid bắt đầu lại), trình chạy sẽ tua con trỏ về 0 thay vì vĩnh viễn không thấy dữ liệu mới.
 
 ### Trình chạy biệt lập và các giới hạn
 
-Mỗi lần chạy cho một đích đến trên Node đều khởi động một tiến trình con HĐH riêng biệt, tồn tại ngắn hạn (`child_process`
-với IPC, không phải `worker_threads`). Việc đọc phần thân, phân tích cú pháp/tuần tự hóa JSON của tải dữ liệu,
-`prepare()` của đích đến và I/O mạng đến đích đều chạy tại đó, không chạy trên vòng lặp sự kiện của máy chủ.
-Chỉ cấu hình và các thông báo tiến độ nhỏ đi qua IPC; các bản ghi được xuất không bao giờ quay về
-máy chủ. Tác vụ cron và tuyến Chạy ngay vẫn giữ nguyên kết quả công khai và cơ chế chống chạy chồng lấn.
+Mỗi lần chạy một đích trên Node sẽ khởi động một tiến trình con HĐH riêng biệt, tồn tại trong thời gian ngắn (`child_process`
+với IPC, không phải `worker_threads`). Việc đọc nội dung, phân tích/chuyển đổi tuần tự JSON của payload, thao tác
+`prepare()` của đích và I/O mạng của đích đều chạy tại đó, không chạy trên vòng lặp sự kiện của máy chủ.
+Chỉ cấu hình và các thông báo tiến độ nhỏ được truyền qua IPC; các bản ghi đã xuất không bao giờ quay lại
+máy chủ. Tác vụ cron và route Chạy ngay vẫn giữ nguyên kết quả công khai và cơ chế bảo vệ khỏi chạy chồng lấn.
 
 Tiến trình con mở `DATA_DIR/storage.sqlite` đã được máy chủ phân giải ở chế độ chỉ đọc bằng `node:sqlite`,
-với `busy_timeout=5000` và `query_only=ON`. Nó không nhập singleton cơ sở dữ liệu và không thực hiện
-di chuyển lược đồ, sao lưu hay cập nhật SQLite. Việc quản lý trạng thái hiện vật bị thiếu/hỏng (bao gồm
-thao tác UPDATE cho hiện vật hỏng) vẫn chỉ nằm trong luồng xử lý chi tiết của bảng điều khiển. Cả hai luồng dùng chung một
-bộ phân giải chi tiết thuần túy; tính năng xuất sử dụng các thao tác đọc hệ thống tệp bất đồng bộ và cùng thứ tự phân giải hiện vật → dữ liệu
-nội tuyến kiểu cũ → dữ liệu trên đĩa kiểu cũ → không có. Một lần chạy chụp lại rowid chèn lớn nhất
-khi tiến trình con mở bộ đọc; các bản ghi được chèn sau đó sẽ chờ lần chạy tiếp theo. Đây là ranh giới
-chèn dữ liệu, không phải giao dịch SQLite kéo dài: các bên ghi WAL và các điểm kiểm tra vẫn hoạt động tự do trong
-thời gian chờ mạng. Việc cập nhật/xóa các hàng hiện có không bị đóng băng bởi ranh giới này.
+với `busy_timeout=5000` và `query_only=ON`. Nó không nhập singleton DB và không thực hiện
+migration, sao lưu hay cập nhật SQLite. Việc theo dõi artifact bị thiếu/hỏng (bao gồm cả
+UPDATE cho artifact hỏng) chỉ nằm trong đường dẫn chi tiết của bảng điều khiển. Cả hai đường dẫn dùng chung một
+trình phân giải chi tiết thuần túy; thao tác xuất dùng các lần đọc hệ thống tệp bất đồng bộ và cùng thứ tự phân giải
+artifact → nội tuyến kiểu cũ → đĩa kiểu cũ → không có. Một lần chạy sẽ chụp lại rowid chèn tối đa
+khi tiến trình con mở trình đọc; các bản ghi được chèn sau đó sẽ chờ đến lần chạy tiếp theo. Đây là một ranh giới
+chèn, không phải một giao dịch SQLite tồn tại lâu: các trình ghi WAL và checkpoint vẫn có thể hoạt động tự do trong
+thời gian chờ mạng. Các thao tác cập nhật/xóa hàng hiện có không bị đóng băng bởi ranh giới này.
 
-Sau mỗi lô được chấp nhận, tiến trình con chờ xác nhận. Trước tiên máy chủ lưu
-con trỏ bằng `advanceLogExportCursor`, rồi gửi `ack`; không lô tiếp theo nào bắt đầu trước bước đó.
-Lỗi gửi, sự cố hoặc hết thời gian chờ sẽ ghi nhận thất bại mà không tiến con trỏ cho lô đó. Các lô
-đã được xác nhận trước đó vẫn được lưu nhận; nhiều nhất chỉ một lô chưa được xác nhận có thể bị gửi lại.
-Thành công chỉ được ghi nhận sau `done` và khi tiến trình con thoát bình thường. Khi thất bại, tiến trình con bị chấm dứt
-bằng SIGTERM, nâng lên SIGKILL sau 500 ms, và trình chạy chờ tiến trình đóng hoàn toàn.
+Sau mỗi lô được chấp nhận, tiến trình con sẽ chờ xác nhận. Trước tiên, máy chủ lưu
+con trỏ bằng `advanceLogExportCursor`, sau đó gửi `ack`; lô tiếp theo sẽ không bắt đầu trước thời điểm đó.
+Lỗi gửi, sự cố tiến trình hoặc hết thời gian chờ sẽ được ghi nhận là thất bại mà không đẩy con trỏ qua lô đó. Các lô
+đã được xác nhận trước đó vẫn được cam kết; nhiều nhất chỉ lô chưa được xác nhận mới có thể bị gửi lại.
+Thành công chỉ được ghi nhận sau `done` và khi tiến trình con thoát sạch. Khi có lỗi, tiến trình con bị kết thúc
+bằng SIGTERM, sau 500 ms sẽ nâng lên SIGKILL, và trình chạy chờ tiến trình đóng hoàn toàn.
 
-| Biến môi trường                               | Mặc định | Mục đích                                                      |
-| --------------------------------------------- | -------- | ------------------------------------------------------------- |
-| `OMNIROUTE_LOG_EXPORT_RUN_TIMEOUT_MS`         | 900000   | Giới hạn thời gian thực cho mỗi đích đến                      |
-| `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB` | 1024     | Giới hạn vùng old-space của V8 ở tiến trình con, tính bằng MB |
+| Biến môi trường                               | Mặc định | Mục đích                                               |
+| --------------------------------------------- | -------- | ------------------------------------------------------ |
+| `OMNIROUTE_LOG_EXPORT_RUN_TIMEOUT_MS`         | 900000   | Giới hạn thời gian thực cho mỗi đích                   |
+| `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB` | 1024     | Giới hạn old-space V8 của tiến trình con, tính bằng MB |
 
 Các giá trị không hợp lệ/không dương/không phải số nguyên sẽ dùng giá trị mặc định. Thiết lập heap không phải là giới hạn
-tổng RSS; các lô rất lớn vẫn có thể làm cạn bộ nhớ của tiến trình con và khiến lần chạy thất bại an toàn.
-Giá trị mặc định 1024 MB chừa dung lượng dự phòng cho lô mặc định 500 hàng với các hiện vật 512 KiB khi
-bật phần thân, bao gồm cả việc tuần tự hóa JSON chia khối theo byte của BigQuery. Giá trị này không bảo đảm an toàn cho
-một lô 10000 hàng có phần thân. Khi heap V8 cạn, hệ thống ghi nhận lỗi kèm hướng xử lý: giảm kích thước
-lô hoặc tăng `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB`; con trỏ giữ nguyên tại lô
-được xác nhận gần nhất. Phần thân nội tuyến/trên đĩa từ trước không chịu giới hạn dung lượng hiện vật hiện đại.
-Người vận hành phải dự trù RSS riêng, đặc biệt trong các container bị giới hạn bộ nhớ.
+RSS tổng thể; các lô rất lớn vẫn có thể làm cạn bộ nhớ của tiến trình con và khiến lần chạy thất bại một cách an toàn.
+Mức mặc định 1024 MB chừa đủ dung lượng cho lô mặc định 500 hàng gồm các artifact 512 KiB khi
+bật nội dung, bao gồm cả quá trình chuyển đổi tuần tự JSON theo từng khối byte của BigQuery. Mức này không bảo đảm an toàn cho
+một lô 10000 hàng có kèm nội dung. Khi V8 cạn heap, hệ thống sẽ ghi lại lỗi kèm hành động khắc phục: giảm kích thước lô
+hoặc tăng `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB`; con trỏ vẫn ở lô cuối cùng
+đã được xác nhận. Các nội dung nội tuyến/trên đĩa kiểu cũ không chịu giới hạn artifact hiện đại.
+Đơn vị vận hành phải lập ngân sách RSS riêng, đặc biệt là bên trong các container bị giới hạn bộ nhớ.
 
-Tiến trình con chỉ kế thừa `DATA_DIR` đã được phân giải, `NODE_ENV`, `TZ` được chỉ định tường minh (phân giải
-giờ địa phương cho tên tệp kiểu cũ), `ELECTRON_RUN_AS_NODE` nếu có, và các đầu vào cho kết nối đi sau:
-`HTTP_PROXY`, `HTTPS_PROXY`, `ALL_PROXY`, `NO_PROXY` (và các dạng chữ thường tương ứng),
+Tiến trình con chỉ kế thừa `DATA_DIR` đã phân giải, `NODE_ENV`, `TZ` được chỉ định rõ ràng (để phân giải
+giờ địa phương trong tên tệp kiểu cũ), `ELECTRON_RUN_AS_NODE` khi có, và các đầu vào kết nối ra ngoài sau:
+`HTTP_PROXY`, `HTTPS_PROXY`, `ALL_PROXY`, `NO_PROXY` (cùng các dạng viết thường tương ứng),
 `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS`, `NODE_EXTRA_CA_CERTS`, `SSL_CERT_FILE`, `SSL_CERT_DIR`.
-Một dispatcher Undici toàn cục dùng chung cơ chế phân giải proxy chỉ dựa trên biến môi trường và các quy tắc
-bỏ qua proxy cho máy chủ cục bộ của máy chủ, bao gồm `NO_PROXY`; nó không nhập `proxyFetch.ts` hay các cờ cơ sở dữ liệu/tính năng của mô-đun đó.
-Thông tin xác thực proxy được che khỏi đầu ra được chuyển tiếp và các lỗi được ghi lại. Thông tin xác thực đích
-chỉ được truyền trong một thông điệp IPC khởi động, không bao giờ qua argv hoặc biến môi trường; đầu ra/lỗi được chuyển tiếp
-đều được thêm tiền tố và làm sạch. Chỉ `ExperimentalWarning` bị tắt trong các đối số thực thi của tiến trình con để tránh
-lặp lại cảnh báo SQLite của Node mỗi lần cron chạy; các loại cảnh báo khác vẫn hiển thị.
+Một dispatcher Undici toàn cục dùng chung logic thuần túy của máy chủ để phân giải proxy từ môi trường và các quy tắc
+bỏ qua proxy cho máy chủ cục bộ, bao gồm `NO_PROXY`; nó không nhập `proxyFetch.ts` hoặc các cờ DB/tính năng của tệp này.
+Thông tin xác thực proxy được che khỏi đầu ra được chuyển tiếp và các lỗi được ghi nhận. Thông tin xác thực của đích
+chỉ được truyền trong một thông báo IPC khởi động, không bao giờ qua argv hoặc môi trường; việc chuyển tiếp đầu ra/lỗi
+được thêm tiền tố và làm sạch. Chỉ `ExperimentalWarning` bị tắt trong các đối số thực thi của tiến trình con để tránh
+lặp lại cảnh báo SQLite của Node trong mỗi lần chạy cron; các loại cảnh báo khác vẫn hiển thị.
 
-Các mô-đun đích phải có thể được nhập mà không cần các phần phụ thuộc Next.js/chỉ dành cho máy chủ. Triển khai
-BigQuery hiện tại đã đáp ứng yêu cầu đó. Bộ nhớ đệm token truy cập chỉ tồn tại trong lần chạy của tiến trình
-con, không được giữ lại giữa các lần chạy. Node là môi trường chạy được hỗ trợ (trường engines trong `package.json`), nhưng mục
-cài đặt Bun trong README và `Dockerfile.bun` cũng giới thiệu một phương án tương thích cho môi trường sản xuất sử dụng
-`bun:sqlite` (`src/lib/db/core.ts` / các adapter). Vì vậy, khi chạy trên Bun, các tác vụ xuất vẫn giữ
-cách xử lý trong cùng tiến trình như trước và phát cảnh báo một lần: không có cơ chế cô lập heap/thời gian chờ bằng tiến trình con. Hãy dùng
-Node để cô lập vòng lặp sự kiện và tình trạng hết bộ nhớ (OOM); ở đây Bun không được xem là chỉ dành cho phát triển.
+Các mô-đun đích phải có thể được import mà không cần các phần phụ thuộc chỉ dành cho Next.js/máy chủ. Phần triển khai
+BigQuery hiện tại đã đáp ứng hợp đồng đó. Bộ nhớ đệm access token chỉ tồn tại trong lần chạy của tiến trình con,
+không tồn tại xuyên suốt nhiều lần chạy. Node là runtime được hỗ trợ (`package.json` engines), nhưng phần cài đặt
+Bun trong README và `Dockerfile.bun` cũng công bố một lộ trình tương thích cho môi trường production sử dụng
+`bun:sqlite` (`src/lib/db/core.ts` / các adapter). Vì vậy, dưới Bun, các tác vụ xuất vẫn giữ lại
+luồng xử lý trong cùng tiến trình trước đây và phát cảnh báo một lần: không hỗ trợ cô lập heap/timeout của tiến trình con. Hãy dùng
+Node để cô lập event loop và OOM; Bun không được xem là chỉ dành cho môi trường phát triển ở đây.
 
-Khi bật `includeBodies`, nên ưu tiên lịch chạy theo phút như
-`OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"` thay vì để tồn đọng tải dữ liệu theo giờ.
-Giới hạn lô và số hàng vẫn giới hạn mỗi lần chạy. Chi phí khởi động tiến trình phát sinh cho từng đích trong mỗi lần chạy;
-cách này đánh đổi một khoản chi phí khởi động nhỏ để cô lập vòng lặp sự kiện của máy chủ, chứ không giảm tổng mức sử dụng CPU.
+Khi bật `includeBodies`, nên ưu tiên tần suất theo phút, chẳng hạn như
+`OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"`, thay vì tích lũy lượng payload tồn đọng trong một giờ.
+Các giới hạn về batch và hàng vẫn ràng buộc mỗi lần chạy. Chi phí khởi động tiến trình được tính cho từng đích trong mỗi lần chạy;
+đây là sự đánh đổi một khoản chi phí khởi động nhỏ để đổi lấy khả năng cô lập event loop của máy chủ, chứ không làm giảm tổng mức sử dụng CPU.
 
-### Tải dữ liệu (lời nhắc và nội dung hoàn thành)
+### Payload (prompt và phần hoàn thành)
 
-Theo mặc định, bản xuất chỉ chứa các trường tóm tắt mà **danh sách** Nhật ký hiển thị. Bật
-**Xuất lời nhắc và phản hồi** (`includeBodies`) sẽ xuất thêm những gì ngăn **chi tiết** Nhật ký
-hiển thị cho mỗi lệnh gọi:
+Theo mặc định, dữ liệu xuất chỉ chứa các trường tóm tắt mà danh sách **list** của Logs hiển thị. Việc bật
+**Xuất prompt và phản hồi** (`includeBodies`) sẽ gửi thêm những gì ngăn **detail**
+của Logs hiển thị cho mỗi lệnh gọi:
 
-| Trường                           | Nội dung                                                               |
-| -------------------------------- | ---------------------------------------------------------------------- |
-| `request_body` / `response_body` | Tải dữ liệu của lệnh gọi như được hiển thị trên bảng điều khiển        |
-| `pipeline_route_decision`        | Đích và mô hình mà bộ định tuyến đã chọn                               |
-| `pipeline_client_request`        | Yêu cầu thô đúng như máy khách đã gửi                                  |
-| `pipeline_openai_request`        | Sau khi chuyển đổi sang định dạng OpenAI nội bộ                        |
-| `pipeline_provider_request`      | Dữ liệu thực tế được gửi lên nhà cung cấp, theo định dạng riêng của họ |
-| `pipeline_provider_response`     | Phản hồi thô từ nhà cung cấp                                           |
-| `pipeline_client_response`       | Nội dung được trả lại cho bên gọi                                      |
-| `pipeline_error`                 | Chi tiết lỗi ở cấp pipeline của một lệnh gọi thất bại                  |
-| `bodies_truncated`               | True khi bất kỳ trường nào ở trên chạm giới hạn `maxBodyBytes`         |
+| Trường                           | Nội dung                                                                    |
+| -------------------------------- | --------------------------------------------------------------------------- |
+| `request_body` / `response_body` | Payload của lệnh gọi như được hiển thị trên bảng điều khiển                 |
+| `pipeline_route_decision`        | Đích và model mà bộ định tuyến đã chọn                                      |
+| `pipeline_client_request`        | Yêu cầu thô chính xác như client đã gửi                                     |
+| `pipeline_openai_request`        | Sau khi được chuyển đổi sang cấu trúc OpenAI nội bộ                         |
+| `pipeline_provider_request`      | Dữ liệu thực tế được gửi lên thượng nguồn, theo phương ngữ của nhà cung cấp |
+| `pipeline_provider_response`     | Phản hồi thô từ thượng nguồn                                                |
+| `pipeline_client_response`       | Nội dung được trả lại cho bên gọi                                           |
+| `pipeline_error`                 | Chi tiết lỗi ở cấp pipeline cho một lệnh gọi thất bại                       |
+| `bodies_truncated`               | True khi bất kỳ trường nào ở trên đạt `maxBodyBytes`                        |
 
-Đây là nội dung lời nhắc, vì vậy tính năng này **mặc định bị tắt** và được chủ ý thiết kế để lựa chọn riêng cho từng đích.
-Nội dung được xuất chính là nội dung bảng điều khiển hiển thị, vì chức năng xuất và `getCallLogById` dùng chung cơ chế
-phân giải chi tiết: tải dữ liệu
-đã được làm sạch thông tin nhận dạng cá nhân (PII) và che thông tin bí mật ngay khi ghi, còn lệnh gọi dùng
-khóa API `noLog` hoàn toàn không lưu tải dữ liệu, nên không có gì để xuất.
+Đây là nội dung prompt, vì vậy tính năng này **bị tắt theo mặc định** và được thiết kế để lựa chọn riêng cho từng đích.
+Nội dung được gửi chính là những gì bảng điều khiển hiển thị, vì dữ liệu xuất và `getCallLogById` dùng chung cơ chế
+phân giải chi tiết: các payload
+đã được loại bỏ PII và che thông tin bí mật khi ghi, đồng thời một lệnh gọi được thực hiện bằng
+API key `noLog` hoàn toàn không lưu payload, nên không có gì để xuất.
 
-Tải dữ liệu được đọc theo từng hàng từ tệp dữ liệu trên hệ thống tệp, vì vậy việc nạp bổ sung chỉ chạy cho các đích
-đã yêu cầu. Nếu tệp dữ liệu bị thiếu hoặc hỏng, bản tóm tắt vẫn được xuất với tải dữ liệu null thay vì
-làm cả lô thất bại và khiến con trỏ bị kẹt.
+Payload được đọc theo từng hàng từ artifact trên hệ thống tệp, vì vậy quá trình hydrate chỉ chạy cho những đích
+đã yêu cầu dữ liệu này. Khi artifact bị thiếu hoặc hỏng, phần tóm tắt của hàng vẫn được xuất với các payload null
+thay vì khiến batch thất bại và làm con trỏ bị mắc kẹt.
 
-`maxBodyBytes` (mặc định 262144) giới hạn kích thước từng trường. Tải dữ liệu dài hơn sẽ được **cắt ngắn thay vì
-loại bỏ** — lời nhắc bị cắt vẫn cho biết "đã hỏi gì" — và hàng đó được đánh dấu bằng
-`bodies_truncated`. Các phần thay đổi được truyền trực tuyến theo từng đoạn không được xuất; phản hồi đã ghép hoàn chỉnh
+`maxBodyBytes` (mặc định 262144) giới hạn kích thước từng trường. Các payload dài hơn sẽ **bị cắt ngắn thay vì
+bị loại bỏ** — một prompt bị cắt vẫn trả lời được câu hỏi "đã hỏi điều gì" — và hàng đó được đánh dấu bằng
+`bodies_truncated`. Các delta được truyền trực tuyến theo từng chunk không được xuất; phản hồi đã lắp ráp
 đã có trong `pipeline_provider_response` và `pipeline_client_response`.
 
 ---
 
 ## 2. Tệp
 
-| Thành phần                            | Vị trí                                       |
-| ------------------------------------- | -------------------------------------------- |
-| Hợp đồng đích xuất                    | `src/lib/logExport/types.ts`                 |
-| Sổ đăng ký                            | `src/lib/logExport/registry.ts`              |
-| Xử lý bí mật                          | `src/lib/logExport/secrets.ts`               |
-| Bộ thực thi (IPC phía tiến trình cha) | `src/lib/logExport/runner.ts`                |
-| Vòng đời tiến trình                   | `src/lib/logExport/childRunner.ts`           |
-| Điểm vào tiến trình con               | `src/lib/logExport/exportChild.ts`           |
-| Bộ mở chỉ đọc                         | `src/lib/db/logExportReadOnly.ts`            |
-| Truy vấn/ánh xạ dùng chung            | `src/lib/usage/callLogExportQueries.ts`      |
-| Bộ phân giải chi tiết                 | `src/lib/usage/callLogDetailResolver.ts`     |
-| Phép chiếu API                        | `src/lib/logExport/presenter.ts`             |
-| Đích xuất BigQuery                    | `src/lib/logExport/destinations/bigquery.ts` |
-| Xác thực tài khoản dịch vụ Google     | `src/lib/logExport/googleServiceAccount.ts`  |
-| Nguồn nhật ký cuộc gọi                | `src/lib/usage/callLogExportSource.ts`       |
-| Lưu trữ bền vững                      | `src/lib/db/logExportDestinations.ts`        |
-| Tác vụ cron                           | `src/lib/jobs/logExportJob.ts`               |
-| Lớp REST                              | `src/app/api/log-export/`                    |
-| Trang bảng điều khiển                 | `src/app/(dashboard)/dashboard/log-export/`  |
+| Thành phần                 | Vị trí                                       |
+| -------------------------- | -------------------------------------------- |
+| Hợp đồng đích              | `src/lib/logExport/types.ts`                 |
+| Registry                   | `src/lib/logExport/registry.ts`              |
+| Xử lý bí mật               | `src/lib/logExport/secrets.ts`               |
+| Trình chạy (IPC cha)       | `src/lib/logExport/runner.ts`                |
+| Vòng đời tiến trình        | `src/lib/logExport/childRunner.ts`           |
+| Điểm vào tiến trình con    | `src/lib/logExport/exportChild.ts`           |
+| Trình mở chỉ đọc           | `src/lib/db/logExportReadOnly.ts`            |
+| Truy vấn/ánh xạ dùng chung | `src/lib/usage/callLogExportQueries.ts`      |
+| Trình phân giải chi tiết   | `src/lib/usage/callLogDetailResolver.ts`     |
+| Phép chiếu API             | `src/lib/logExport/presenter.ts`             |
+| Đích BigQuery              | `src/lib/logExport/destinations/bigquery.ts` |
+| Xác thực SA của Google     | `src/lib/logExport/googleServiceAccount.ts`  |
+| Nguồn nhật ký cuộc gọi     | `src/lib/usage/callLogExportSource.ts`       |
+| Lưu trữ bền vững           | `src/lib/db/logExportDestinations.ts`        |
+| Tác vụ cron                | `src/lib/jobs/logExportJob.ts`               |
+| Lớp REST                   | `src/app/api/log-export/`                    |
+| Trang bảng điều khiển      | `src/app/(dashboard)/dashboard/log-export/`  |
 
 Lược đồ: `src/lib/db/migrations/170_log_export_destinations.sql`.
 
 ---
 
-## 3. REST API
+## 3. API REST
 
 Tất cả các tuyến đều yêu cầu xác thực quản trị (`requireManagementAuth`). Bí mật không bao giờ được trả về:
-bí mật đã lưu được trả về dưới dạng giá trị nguyên văn `__stored__`, và việc gửi lại giá trị đó khi cập nhật
+một bí mật đã lưu sẽ được trả về dưới dạng giá trị chữ `__stored__`, và việc gửi lại giá trị đó trong một lần cập nhật
 sẽ giữ nguyên thông tin xác thực đã lưu.
 
-Việc tạo hoặc cập nhật một đích xuất có kiểu khai báo bí mật **yêu cầu
-`STORAGE_ENCRYPTION_KEY`**. Nếu không có khóa này, `encrypt()` sẽ âm thầm trả nguyên dữ liệu đầu vào, nên thao tác ghi bị
-từ chối với mã 400 thay vì đưa thông tin xác thực vào SQLite dưới dạng văn bản thuần (cùng cơ chế bảo vệ mà
+Việc tạo hoặc cập nhật một đích mà kiểu của nó khai báo có bí mật **yêu cầu
+`STORAGE_ENCRYPTION_KEY`**. Nếu không có biến này, `encrypt()` sẽ âm thầm truyền nguyên giá trị, vì vậy thao tác ghi
+sẽ bị từ chối với mã 400 thay vì đưa thông tin xác thực vào SQLite dưới dạng văn bản thuần túy (cùng cơ chế bảo vệ mà
 webhook Telegram áp dụng).
 
-| Phương thức | Đường dẫn                                | Mục đích                                                                |
-| ----------- | ---------------------------------------- | ----------------------------------------------------------------------- |
-| `GET`       | `/api/log-export/types`                  | Các kiểu đích xuất + danh sách trường cấu hình tương ứng                |
-| `GET`       | `/api/log-export/destinations`           | Liệt kê các đích xuất (ẩn bí mật)                                       |
-| `POST`      | `/api/log-export/destinations`           | Tạo đích xuất                                                           |
-| `GET`       | `/api/log-export/destinations/{id}`      | Đọc một đích xuất                                                       |
-| `PUT`       | `/api/log-export/destinations/{id}`      | Cập nhật tên / trạng thái bật / cấu hình / xử lý theo lô                |
-| `DELETE`    | `/api/log-export/destinations/{id}`      | Xóa                                                                     |
-| `POST`      | `/api/log-export/destinations/{id}/test` | Kiểm tra thông tin xác thực, không ghi dữ liệu                          |
-| `POST`      | `/api/log-export/destinations/{id}/run`  | Xuất hết dữ liệu chờ ngay, dùng cùng luồng xử lý như lần chạy theo lịch |
-| `GET`       | `/api/log-export/status`                 | Trạng thái cron, các lần chạy gần đây, dữ liệu tồn đọng theo từng đích  |
+| Phương thức | Đường dẫn                                | Mục đích                                                       |
+| ----------- | ---------------------------------------- | -------------------------------------------------------------- |
+| `GET`       | `/api/log-export/types`                  | Các kiểu đích + danh sách trường cấu hình của chúng            |
+| `GET`       | `/api/log-export/destinations`           | Liệt kê các đích (bí mật đã được che)                          |
+| `POST`      | `/api/log-export/destinations`           | Tạo một đích                                                   |
+| `GET`       | `/api/log-export/destinations/{id}`      | Đọc một đích                                                   |
+| `PUT`       | `/api/log-export/destinations/{id}`      | Cập nhật tên / trạng thái bật / cấu hình / chia lô             |
+| `DELETE`    | `/api/log-export/destinations/{id}`      | Xóa                                                            |
+| `POST`      | `/api/log-export/destinations/{id}/test` | Kiểm tra thông tin xác thực, không ghi gì                      |
+| `POST`      | `/api/log-export/destinations/{id}/run`  | Xử lý ngay, cùng luồng với lần chạy theo lịch                  |
+| `GET`       | `/api/log-export/status`                 | Trạng thái cron, các lần chạy gần đây, tồn đọng theo từng đích |
 
-`GET /api/log-export/types` giúp giao diện người dùng có tính tổng quát: biểu mẫu trên bảng điều khiển được kết xuất từ
-các mô tả trường được trả về, nên việc thêm đích xuất mới không cần thay đổi giao diện.
+`GET /api/log-export/types` là yếu tố giúp giao diện người dùng trở nên tổng quát: biểu mẫu trên bảng điều khiển được kết xuất từ
+các mô tả trường được trả về, vì vậy việc thêm một đích mới không yêu cầu thay đổi giao diện người dùng.
 
 ---
 
-## 4. Đích xuất BigQuery
+## 4. Đích BigQuery
 
 Các khóa cấu hình (`type: "bigquery"`):
 
-| Khóa                 | Ghi chú                                                                            |
-| -------------------- | ---------------------------------------------------------------------------------- |
-| `projectId`          | Dự án GCP chứa tập dữ liệu                                                         |
-| `datasetId`          | `[A-Za-z0-9_]+`                                                                    |
-| `tableId`            | `[A-Za-z0-9_]+`                                                                    |
-| `location`           | Chỉ dùng khi cần tạo tập dữ liệu (mặc định là `EU`)                                |
-| `serviceAccountJson` | Khóa tài khoản dịch vụ. Bí mật: được mã hóa khi lưu trữ, không bao giờ được trả về |
-| `autoCreate`         | Tạo tập dữ liệu và bảng trong lần xuất đầu tiên (mặc định là `true`)               |
+| Khóa                 | Ghi chú                                                                   |
+| -------------------- | ------------------------------------------------------------------------- |
+| `projectId`          | Dự án GCP chứa tập dữ liệu                                                |
+| `datasetId`          | `[A-Za-z0-9_]+`                                                           |
+| `tableId`            | `[A-Za-z0-9_]+`                                                           |
+| `location`           | Chỉ được dùng khi cần tạo tập dữ liệu (mặc định `EU`)                     |
+| `serviceAccountJson` | Khóa tài khoản dịch vụ. Bí mật: được mã hóa khi lưu, không bao giờ trả về |
+| `autoCreate`         | Tạo tập dữ liệu và bảng trong lần xuất đầu tiên (mặc định `true`)         |
 
-Tài khoản dịch vụ cần có quyền `bigquery.tables.updateData` trên bảng đích, cùng với
-`bigquery.datasets.create` / `bigquery.tables.create` khi bật `autoCreate`.
+Tài khoản dịch vụ cần quyền `bigquery.tables.updateData` trên bảng đích, cùng với
+`bigquery.datasets.create` / `bigquery.tables.create` khi `autoCreate` được bật.
 
-Một lô được cấu hình là đơn vị của **con trỏ**, không phải đơn vị HTTP: `send()` chia lô thành các lệnh gọi insertAll
-với tối đa 500 hàng mỗi lần, nên `batch_size` lớn không thể vượt giới hạn yêu cầu 10 MB của BigQuery.
-Các mã trạng thái tạm thời (408/429/500/502/503/504) được thử lại tối đa ba lần với thời gian chờ
-tăng theo cấp số nhân, sử dụng lại cùng các insertIds; lỗi xác thực và lược đồ sẽ phát sinh ngoại lệ ngay lần thử đầu tiên thay vì
+Một lô đã cấu hình là đơn vị **con trỏ**, không phải đơn vị HTTP: `send()` chia lô đó thành các lời gọi insertAll
+với tối đa 500 hàng, vì vậy một `batch_size` lớn không thể vượt quá giới hạn yêu cầu 10 MB của BigQuery.
+Các trạng thái tạm thời (408/429/500/502/503/504) được thử lại tối đa ba lần với thời gian chờ tăng theo cấp số nhân,
+đồng thời tái sử dụng cùng các insertIds; lỗi xác thực và lược đồ sẽ ném lỗi ngay trong lần thử đầu tiên thay vì
 lãng phí cả lượt chạy.
 
-Bảng vừa được tạo chưa hiển thị ngay với điểm cuối truyền trực tuyến, nên điểm cuối này trả về
-404 trong vài giây. Mã 404 đó sẽ được thử lại, nhưng **chỉ khi bảng được tạo trong lượt chạy này** —
-bảng thực sự không tồn tại vẫn sẽ báo lỗi ngay. Lưu ý rằng việc tạo lại bảng bằng tên
-vừa bị xóa gần đây khiến BigQuery từ chối chèn dữ liệu trực tuyến trong vài phút; đây là
-đặc tính của thao tác xóa rồi tạo lại, vì vậy hãy ưu tiên tên bảng mới thay vì xóa rồi thêm lại bảng cũ.
+Một bảng vừa được tạo chưa thể xuất hiện ngay với điểm cuối truyền phát, nên điểm cuối này sẽ trả về
+404 trong vài giây. Lỗi 404 đó được thử lại, nhưng **chỉ khi lượt chạy này đã tạo bảng** —
+một bảng thực sự không tồn tại vẫn sẽ thất bại ngay. Lưu ý rằng việc tạo lại một bảng bằng tên của
+một bảng vừa bị xóa gần đây khiến BigQuery từ chối các thao tác chèn truyền phát trong vài phút; đây là
+đặc tính của quy trình xóa rồi tạo lại, vì vậy hãy ưu tiên dùng tên bảng mới thay vì xóa và thêm lại bảng.
 
-**Lỗi một phần được trả về dưới dạng HTTP 200 với `insertErrors[]` không rỗng.** Trường hợp này được coi là
-thất bại và phát sinh ngoại lệ, nhờ đó ngăn con trỏ tiến qua các hàng mà BigQuery chưa từng
-chấp nhận; `tests/unit/log-export-bigquery.test.ts` kiểm chứng hành vi này.
+**Lỗi một phần được trả về dưới dạng HTTP 200 với `insertErrors[]` không rỗng.** Trường hợp này được xem là
+lỗi và sẽ ném lỗi, nhờ đó con trỏ không tiến qua những hàng mà BigQuery chưa từng chấp nhận;
+`tests/unit/log-export-bigquery.test.ts` cố định hành vi này.
 
-Việc truyền dữ liệu sử dụng REST thuần — một xác nhận RS256 tự ký được đổi lấy mã thông báo truy cập tại
-`https://oauth2.googleapis.com/token`, sau đó các hàng được gửi đến `tabledata.insertAll`. Không đưa thêm Google SDK
-vào làm phần phụ thuộc. Mã thông báo truy cập được lưu đệm trong tiến trình theo từng cặp (tài khoản dịch vụ, phạm vi).
+Giao vận sử dụng REST thuần túy — một assertion RS256 tự ký được trao đổi để lấy mã truy cập tại
+`https://oauth2.googleapis.com/token`, sau đó các hàng được gửi đến `tabledata.insertAll`. Không sử dụng
+Google SDK. Các mã truy cập được lưu vào bộ nhớ đệm trong tiến trình theo từng cặp (tài khoản dịch vụ, phạm vi).
 
-Bảng được tạo có một cột cho mỗi trường trong thẻ Logs cùng với `exported_at`, và được bố trí theo
-cách truy vấn nhật ký lệnh gọi trong thực tế:
+Bảng được tạo có một cột cho mỗi trường trong thẻ Logs, cùng với `exported_at`, và được bố trí phù hợp với
+cách nhật ký cuộc gọi thực sự được truy vấn:
 
-- **Phân vùng theo ngày trên `timestamp`**, để truy vấn giới hạn theo ngày chỉ quét những ngày đó.
-- **Phân cụm theo `api_key_name`, `provider`, `model`, `status`** (theo thứ tự đó), để khi lọc theo
-  người thực hiện, đích đến hoặc trạng thái thất bại, các khối trong mỗi phân vùng được loại bớt. BigQuery
-  cho phép tối đa bốn cột phân cụm và thứ tự có ý nghĩa: chỉ lọc theo `api_key_name`
-  sẽ loại bớt các khối, còn chỉ lọc theo `status` thì không.
-- **Thời hạn lưu giữ phân vùng tùy chọn** thông qua `partitionExpirationDays` (0 giữ lại mọi dữ liệu), được áp dụng
-  khi tạo bảng.
+- **Phân vùng theo ngày dựa trên `timestamp`**, vì vậy một truy vấn bị giới hạn theo ngày chỉ quét những ngày đó.
+- **Phân cụm theo `api_key_name`, `provider`, `model`, `status`** (theo thứ tự đó), nhờ vậy việc lọc theo
+  người chạy, nơi yêu cầu được gửi đến hoặc liệu yêu cầu có thất bại hay không sẽ loại bỏ các khối không liên quan trong mỗi phân vùng. BigQuery
+  cho phép tối đa bốn cột phân cụm và thứ tự có ý nghĩa quan trọng: chỉ riêng bộ lọc theo `api_key_name`
+  có thể loại bỏ các khối, còn chỉ riêng bộ lọc theo `status` thì không.
+- **Thời gian lưu giữ phân vùng tùy chọn** thông qua `partitionExpirationDays` (0 giữ lại mọi thứ), được áp dụng
+  khi bảng được tạo.
 
-Cả hai thiết lập đều áp dụng tại thời điểm tạo. Bảng hiện có giữ nguyên bố cục sẵn có, vì vậy
-hãy trỏ đích xuất đến một mã định danh bảng mới nếu bạn muốn áp dụng chúng.
+Cả hai thiết lập đều được áp dụng tại thời điểm tạo. Một bảng hiện có sẽ giữ nguyên bố cục hiện tại, vì vậy
+hãy trỏ đích đến một table id mới nếu bạn muốn áp dụng chúng.
 
-`tests/unit/log-export-bigquery.test.ts` xác nhận rằng bộ ánh xạ và lược đồ bảng luôn đồng bộ,
-để không có cột nhật ký lệnh gọi mới nào bị âm thầm bỏ qua khi xuất.
+`tests/unit/log-export-bigquery.test.ts` xác nhận rằng mapper và schema của bảng luôn
+đồng bộ chặt chẽ, nhờ đó một cột call-log mới không thể bị âm thầm loại bỏ trong quá trình xuất.
 
-Các lô được chia thành các phần dựa trên **cả** số hàng và số byte sau khi tuần tự hóa. Chỉ dựa vào số hàng là chưa đủ
-khi xuất cả dữ liệu tải: 500 hàng chứa câu lệnh đầu vào có thể lên tới hàng chục megabyte, và insertAll
-từ chối yêu cầu vượt quá 10 MB. Mỗi phần kết thúc khi đạt 500 hàng hoặc 9 MB, tùy giới hạn nào đến trước.
+Các batch được chia chunk dựa trên **cả** số lượng hàng và số byte sau khi tuần tự hóa. Chỉ số lượng hàng là không đủ
+khi payload được xuất: 500 hàng chứa prompt có thể chiếm hàng chục megabyte, và insertAll
+từ chối yêu cầu vượt quá 10 MB. Các chunk được đóng khi đạt 500 hàng hoặc 9 MB, tùy điều kiện nào đến trước.
 
 ---
 
@@ -402,7 +402,7 @@ cơ chế che dữ liệu riêng.
 trạng thái HTTP mà không ghi span nhật ký cuộc gọi.
 
 ID trace và ID span là 32/16 chữ số thập lục phân đầu tiên của SHA-256 tính trên
-`"omniroute.trace\\0" + callLogId` và `"omniroute.span\\0" + callLogId`. Các lần gửi lại mang
+`"omniroute.trace\0" + callLogId` và `"omniroute.span\0" + callLogId`. Các lần gửi lại mang
 ID giống hệt nhau. Điều này không bảo đảm loại bỏ trùng lặp: một số hệ thống phía sau, bao gồm cơ chế tiếp nhận của Langfuse
 v4, không loại bỏ các span có cùng ID. Sự cố hoặc lỗi ở một phần dữ liệu có thể
 khiến tối đa một lô con trỏ chưa được xác nhận được gửi lại; toàn bộ lô đó có thể bị trùng lặp,
@@ -464,36 +464,36 @@ quyền bổ sung; tất cả các trường khác của hàng vẫn được ki
 
 ---
 
-## 6. Thêm đích đến
+## 6. Thêm một đích đến
 
-1. Tạo `src/lib/logExport/destinations/<name>.ts` xuất một `LogExportDestinationType`:
-   một `configSchema` của Zod, một mảng mô tả `fields` cho giao diện người dùng, `secretFields`, và một
+1. Tạo `src/lib/logExport/destinations/<name>.ts` để export một `LogExportDestinationType`:
+   một `configSchema` của Zod, một mảng mô tả `fields` cho UI, `secretFields`, và một
    `createClient(config)` trả về `test()` / `prepare()` / `send(records)`.
-2. Thêm đích đến đó vào mảng `DESTINATIONS` trong `src/lib/logExport/registry.ts`.
+2. Thêm nó vào mảng `DESTINATIONS` trong `src/lib/logExport/registry.ts`.
 3. Viết các bài kiểm thử trong `tests/unit/`.
 
-Đó là toàn bộ thay đổi: cơ chế lưu trữ bền vững, tác vụ cron, lớp REST, cơ chế mã hóa thông tin bí mật và
-biểu mẫu trên bảng điều khiển đều đọc registry.
+Đó là toàn bộ thay đổi: cơ chế lưu trữ, cron job, lớp REST, mã hóa thông tin bí mật và biểu mẫu
+trên dashboard đều đọc từ registry.
 
 Hai quy tắc dành cho đích đến mới:
 
-- `send()` **phải ném ngoại lệ** khi xảy ra lỗi một phần. Hoàn tất thành công có nghĩa là "đích đến đã có các hàng này",
+- `send()` **phải throw** khi xảy ra lỗi một phần. Việc resolve có nghĩa là "đích đến đã có các hàng này",
   và con trỏ sẽ vĩnh viễn di chuyển qua chúng.
-- Đích đến nhận URL do người dùng cung cấp phải xác thực URL đó qua
-  `parseAndValidateWebhookUrl` (`src/shared/network/outboundUrlGuardPolicy.ts`) trước khi gửi yêu cầu,
-  giống như cách webhook thực hiện. BigQuery không cần điều này: các máy chủ của nó là hằng số.
+- Một đích đến nhận URL do người dùng cung cấp phải xác thực URL đó thông qua
+  `parseAndValidateWebhookUrl` (`src/shared/network/outboundUrlGuardPolicy.ts`) trước khi fetch,
+  tương tự như cách webhook thực hiện. BigQuery không cần bước này vì các host của nó là hằng số.
 
 ---
 
 ## 7. Vận hành
 
-- **Bảng điều khiển**: Tích hợp → Xuất nhật ký. Thêm đích đến, chạy **Kiểm tra** để kiểm tra thông tin xác thực
-  mà không ghi hàng nào, sau đó bật đích đến.
-- **Dữ liệu tồn đọng**: mỗi thẻ đích đến hiển thị các hàng đang chờ và con trỏ; `GET
-/api/log-export/status` trả về các số liệu tương tự cùng 20 lần chạy tác vụ gần nhất.
-- **Một đích đến bị lỗi không khiến các đích đến khác bị lỗi** — bản tóm tắt lần chạy ghi lại trạng thái của từng đích đến
-  trong `last_status` / `last_error`, còn lịch sử chạy tác vụ lưu kết quả tổng hợp.
-- **Xóa đích đến sẽ xóa cả con trỏ của nó.** Khi thêm lại, quá trình sẽ bắt đầu từ nhật ký cuộc gọi cũ nhất còn được lưu giữ,
-  do đó gửi lại các hàng mà đích đến có thể đã có. Trên BigQuery, `insertId`
-  của từng hàng chỉ xử lý được việc trùng lặp này trong khoảng thời gian khử trùng lặp riêng của BigQuery, vì vậy nên tắt
-  đích đến thay vì xóa.
+- **Dashboard**: Integrations → Log export. Thêm một đích đến, chạy **Test** để kiểm tra thông tin xác thực
+  mà không ghi các hàng, sau đó bật đích đến.
+- **Dữ liệu tồn đọng**: mỗi thẻ đích đến hiển thị số hàng đang chờ và con trỏ; `GET
+/api/log-export/status` trả về các số liệu tương tự cùng 20 lần chạy job gần nhất.
+- **Một đích đến bị lỗi không làm các đích đến khác thất bại** — bản tóm tắt lần chạy ghi lại trạng thái
+  của từng đích đến trong `last_status` / `last_error`, còn lịch sử chạy job lưu giữ thông tin tổng hợp.
+- **Xóa một đích đến cũng sẽ xóa con trỏ của nó.** Khi thêm lại, hệ thống sẽ bắt đầu từ nhật ký cuộc gọi
+  cũ nhất còn được lưu giữ, khiến các hàng mà đích đến có thể đã lưu bị gửi lại. Trên BigQuery, `insertId`
+  của từng hàng chỉ xử lý việc này trong khoảng thời gian chống trùng lặp riêng của BigQuery, vì vậy nên
+  ưu tiên tắt một đích đến thay vì xóa nó.

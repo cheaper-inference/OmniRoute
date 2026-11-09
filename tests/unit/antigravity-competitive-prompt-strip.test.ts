@@ -13,6 +13,11 @@ import {
   normalizeAntigravitySystemInstruction,
   stripCompetitiveAgentPrompts,
 } from "../../open-sse/executors/antigravity.ts";
+import { closeSharedLoggerResource } from "../../src/shared/utils/loggerResource.ts";
+
+test.after(async () => {
+  await closeSharedLoggerResource();
+});
 
 test("strips the exact Claude Agent SDK identity line (9router b566b20 case)", () => {
   const input = {

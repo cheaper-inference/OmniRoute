@@ -849,13 +849,7 @@ nuair a shocraítear aon réimse eile. I gcás lite, baintear `additionalQueries
 `contents` seachas `text` agus `highlights` sula ndéantar an glao. Ní chuirtear na réimsí dímholta
 `subpages`, `subpageTarget`, `highlights.numSentences` agus `highlights.highlightsPerUrl` ar aghaidh a thuilleadh.
 
-Is é an clárlann chomhréidh `costPerQuery` a úsáidtear chun costais a ríomh, seachas i gcás Exa, a leanann praghsáil
-Exa féin: $0.007 in aghaidh glao le haghaidh `auto` (agus an seanleagan `fast`) nó $0.004 le haghaidh `lite` (agus an
-seanleagan `instant`), rud a chlúdaíonn 10 dtoradh; $0.001 do gach toradh breise; agus $0.001 in aghaidh an
-toraidh a chuirtear ar ais nuair a shocraítear `contents.summary`. Taifeadtar Tavily ag 1 chreidmheas ($0.008) le haghaidh
-`search_depth` `basic`, `fast` agus `ultra-fast`, agus 2 chreidmheas ($0.016) le haghaidh `advanced`
-([creidmheasanna Tavily API](https://docs.tavily.com/documentation/api-credits)). Glao le
-`auto_parameters: true` a uasghrádaíonn Tavily go advanced, taifeadtar fós é ag 1 chreidmheas.
+Exa: $0.007 in aghaidh an ghlao ar `auto` (agus an `fast` oidhreachta) nó $0.004 le haghaidh `lite` (agus an oidhreacht `instant`), ag clúdach 10 dtorthaí; $0.001 do gach toradh eile; agus $0.001 in aghaidh an toraidh a tugadh ar ais nuair a shocraítear `contents.summary`. Taifeadtar Tavily ag 1 chreidmheas ($0.008) le haghaidh `search_depth` `basic`, `fast` agus `ultra-fast`, agus 2 chreidmheas ($0.016) le haghaidh `advanced` ( [creidmheasanna Tavily API](https://docs.tavily.com/documentation/api-credits) ). Tá glao le `auto_parameters: true` a uasghrádaíonn Tavily go hardleibhéal fós taifeadta ag 1 chreidmheas.
 
 ---
 
@@ -1157,6 +1151,8 @@ X-OmniRoute-No-Cache: true
 
 ---
 
+<a id="cliproxyapi-management-compatibility"></a>
+
 ## Comhoiriúnacht Bainistíochta CLIProxyAPI
 
 Freagraíonn OmniRoute do na trí chríochphointe bhainistíochta [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI) a ghlaonn painéil úsáide chun teorainneacha síntiúis Claude agus Codex a léamh (mar shampla foinse teorann úsáide `cliproxy` T3 Code). Socraigh bunURL an chliaint chuig OmniRoute agus úsáid eochair API a bhfuil an raon `manage` aici mar eochair bhainistíochta. Soláthraítear na bealaí ag `/v0/management/*` agus ag `/api/v0/management/*`.
@@ -1167,9 +1163,11 @@ Freagraíonn OmniRoute do na trí chríochphointe bhainistíochta [CLIProxyAPI](
 | POST | `/v0/management/api-call`    | Corp `{ auth_index, method, url, header?, data? }`. Seolann iarratas amháin atá ceadaithe le liosta bán le comhartha chuntas agus seolann ar ais `{ status_code, body }` |
 | POST | `/v0/management/reset-quota` | Corp `{ auth_index }`. Glanann sé fuarú an naisc, glasálacha samhlacha agus fuaruithe in aghaidh an raoin Codex de chuntas amháin                                        |
 
-- Is é `auth_index` aitheantas naisc OmniRoute. Is é `provider` `claude` nó `codex` (naisc OAuth amháin; ní liostaítear an soláthraí eochrach API `anthropic`). I gcás Codex, is é `id_token.chatgpt_account_id` aitheantas an spáis oibre stóráilte agus is é `plan_type` an plean stóráilte.
-- Ní seachfhreastalaí ginearálta é `api-call`. Ní ghlacann sé ach le Claude `GET https://api.anthropic.com/api/oauth/usage` agus Codex `GET https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits` agus `POST .../wham/rate-limit-reset-credits/consume`, agus gach ceann acu do chuntas den soláthraí comhoiriúnach amháin. Seoltar `403` ar aon rud eile gan teagmháil a dhéanamh leis an upstream. Déantar neamhaird de cheanntásc `Authorization` an ghlaoiteora (lena n-áirítear an sealbhóir ionadach `$TOKEN$`): cuireann OmniRoute comhartha rochtana an naisc isteach, agus athnuachan é ar dtús nuair atá sé gar dá dhul in éag, agus cuireann sé ar aghaidh na ceanntásca atá ceadaithe amháin (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`; `Accept`, `Content-Type`). Mura bhfuil `Chatgpt-Account-Id` ann, úsáidtear aitheantas an spáis oibre stóráilte mar réamhshocrú. Téann iarratais in éag tar éis 15 soicind agus úsáideann siad seachfhreastalaí an naisc.
-- Fágann `reset-quota` stáit chríochnaitheacha (banned, expired, credits_exhausted) gan athrú. Seolann `auth_index` anaithnid `404`.
+- Is é `auth_index` ID naisc OmniRoute. Is é `provider` ná `claude` nó `codex` (naisc OAuth amháin; ní liostaítear an soláthraí eochrach API `anthropic`). Do Codex, is é `id_token.chatgpt_account_id` ID an spáis oibre stóráilte agus is é `plan_type` an plean stóráilte.
+- Ní seachfhreastalaí ginearálta é `api-call`. Ní ghlacann sé ach le Claude `GET
+https://api.anthropic.com/api/oauth/usage` agus Codex `GET
+https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits` agus `POST .../wham/rate-limit-reset-credits/consume`, gach ceann acu do chuntas den soláthraí comhfhreagrach amháin. Tugann aon rud eile `403` ar ais gan teagmháil a dhéanamh leis an réamhtheachtaí. Déantar neamhaird de cheanntásc `Authorization` an ghlaoiteora (lena n-áirítear an t-ionadchoinneálaí `$TOKEN$`): cuireann OmniRoute comhartha rochtana an naisc isteach, á athnuachan ar dtús má tá sé gar d'éag, agus ní chuireann sé ar aghaidh ach ceanntásca ceadaithe (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`; `Accept`, `Content-Type`). Úsáidtear ID stóráilte an spáis oibre mar réamhshocrú má tá `Chatgpt-Account-Id` ar iarraidh. Más é `401` an chéad fhreagra réamhtheachtach, athnuann sé uair amháin agus ní dhéanann sé iarracht eile ach má athraíonn an comhartha rochtana. Téann gach iarracht réamhtheachtach thar am tar éis 15 soicind agus úsáideann sí seachfhreastalaí an naisc.
+- Fágann `reset-quota` staideanna críochnaitheacha (banned, expired, credits_exhausted) mar atá. Tugann `auth_index` anaithnid `404` ar ais.
 
 **Fíordheimhniú:** seisiún painéil nó eochair API a bhfuil raon `manage` aici, riachtanach fiú nuair atá logáil isteach díchumasaithe (tá na conairí in `ALWAYS_PROTECTED_API_PATHS`). Faigheann eochracha atá le haghaidh tátail amháin `403`. Foinse: `src/lib/cliproxyCompat/managementApi.ts`.
 
@@ -1882,17 +1880,17 @@ Stór cuimhne leanúnach comhrá/fíorasach, scóipithe de réir eochair API / s
 
 Seolann OmniRoute freastalaí leabaithe Model Context Protocol le 3 iompar (stdio, SSE, streamable-http) agus uirlisí scóipithe. Léann críochphointí an deais thíos sonraí stádais/iniúchta agus déanann siad seachfhreastalaí ar iompair HTTP.
 
-| Modh | Conair | Cur síos |
-| ------ | ---------------------- | ------------------------------------------------------------------------------------------------ | -------------------- |
-| GET | `/api/mcp/status` | Buille croí, iompar, stádas ar líne, glao is déanaí, na huirlisí is mó úsáid, ráta ratha 24 uair an chloig |
-| GET | `/api/mcp/tools` | Liosta d’uirlisí MCP le `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints` |
-| GET | `/api/mcp/sse` | Oscail sruth SSE don iompar SSE (filleann sé `503` má tá MCP díchumasaithe nó mura bhfuil an t-iompar comhoiriúnach) |
-| POST | `/api/mcp/sse` | Seol fráma JSON-RPC ar an iompar SSE |
-| GET | `/api/mcp/stream` | Oscail an taobh SSE den iompar Streamable HTTP (teachtaireachtaí a thionscnaíonn an freastalaí) |
-| POST | `/api/mcp/stream` | Seol fráma JSON-RPC ar an iompar Streamable HTTP |
-| DELETE | `/api/mcp/stream` | Cuir deireadh le seisiún Streamable HTTP |
-| GET | `/api/mcp/audit` | Fiosraigh loga iniúchta — `?limit=`, `?offset=`, `?tool=`, `?success=true                                | false`, `?apiKeyId=` |
-| GET | `/api/mcp/audit/stats` | Staitisticí comhiomlánaithe iniúchta (iomláin, ráta ratha, meánfhad, na huirlisí is mó úsáid) |
+| Modh   | Conair                 | Cur síos                                                                                                                         |
+| ------ | ---------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/mcp/status`      | Buille croí, iompar, stádas ar líne, glao is déanaí, na huirlisí is mó úsáid, ráta ratha 24 uair an chloig                       |
+| GET    | `/api/mcp/tools`       | Liosta d’uirlisí MCP le `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints`                                |
+| GET    | `/api/mcp/sse`         | Oscail sruth SSE don iompar SSE (filleann sé `503` má tá MCP díchumasaithe nó mura bhfuil an t-iompar comhoiriúnach)             |
+| POST   | `/api/mcp/sse`         | Seol fráma JSON-RPC ar an iompar SSE                                                                                             |
+| GET    | `/api/mcp/stream`      | Oscail an taobh SSE den iompar Streamable HTTP (teachtaireachtaí a thionscnaíonn an freastalaí)                                  |
+| POST   | `/api/mcp/stream`      | Seol fráma JSON-RPC ar an iompar Streamable HTTP                                                                                 |
+| DELETE | `/api/mcp/stream`      | Cuir deireadh le seisiún Streamable HTTP                                                                                         |
+| GET    | `/api/mcp/audit`       | Fiosraigh loga iniúchta — `?limit=`, `?offset=`, `?tool=`, `?success=true                                \| false`, `?apiKeyId=` |
+| GET    | `/api/mcp/audit/stats` | Staitisticí comhiomlánaithe iniúchta (iomláin, ráta ratha, meánfhad, na huirlisí is mó úsáid)                                    |
 
 **Fíordheimhniú:** géilleann na hiompair `sse`/`stream` don dromchla fíordheimhnithe sonrach do MCP (eochair API Bearer le scóip `mcp`); is féidir na bealaí `status`/`tools`/`audit*` a léamh ón deais (níl aon fhíordheimhniú breise riachtanach seachas an t-óstach deais a bhaint amach).
 

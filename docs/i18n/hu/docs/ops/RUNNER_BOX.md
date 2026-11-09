@@ -12,13 +12,13 @@ túlfoglalás, amikor egy Turbopack-build egy Release-Green webpack-builddel és
 esik egybe; ezt a gazdagép swapja (16 GB) kezeli, és mivel a pull requestek buildjei hosztolt
 runnereken futnak, a Turbopack-hely az idő nagy részében üresjáratban van:
 
-| runner               | címke          | szerep                                                                                                                                                | `MemoryHigh` / `MemoryMax` | `CPUQuota`      |
-| -------------------- | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | --------------- |
-| `omniroute-113-5`    | `omni-build`   | Turbopack-buildek: `ci.yml` `Build` (csak push/dispatch), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, az éjszakai a11y-build | 56 GB / 60 GB (swap 0)     | 1600 %          |
-| `omniroute-113-6`    | `omni-release` | Release-Green (`release-green` + `main-green`), webpack-build                                                                                         | 20 GB / 24 GB (swap 4 GB)  | 800 %           |
-| `omniroute-113-2`    | `omni-light`   | éjszakai futások (Schemathesis, promptfoo, garak, k6) és a `quality.yml` `lint-guard`                                                                 | 12 GB / 16 GB (swap 4 GB)  | 600 %           |
-| `omniroute-113`      | `omni-light`   | ugyanaz a pool, mint fent                                                                                                                             | 8 GB / 12 GB               | 400 %           |
-| OmniHeuris, OmniMind | (saját repóik) | csak Dependabot (egyenként 155 MB-os csúcs, 2026-10-18)                                                                                               | 4 GB / 6 GB                | egyenként 200 % |
+| runner               | címke                           | szerep                                                                                                                                                | `MemoryHigh` / `MemoryMax` | `CPUQuota`      |
+| -------------------- | ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | --------------- |
+| `omniroute-113-5`    | `omni-build`, `omni-build-60gb` | Turbopack-buildek: `ci.yml` `Build` (csak push/dispatch), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, az éjszakai a11y-build | 56 GB / 60 GB (swap 0)     | 1600 %          |
+| `omniroute-113-6`    | `omni-release`                  | Release-Green (`release-green` + `main-green`), webpack-build                                                                                         | 20 GB / 24 GB (swap 4 GB)  | 800 %           |
+| `omniroute-113-2`    | `omni-light`                    | éjszakai futások (Schemathesis, promptfoo, garak, k6) és a `quality.yml` `lint-guard`                                                                 | 12 GB / 16 GB (swap 4 GB)  | 600 %           |
+| `omniroute-113`      | `omni-light`                    | ugyanaz a pool, mint fent                                                                                                                             | 8 GB / 12 GB               | 400 %           |
+| OmniHeuris, OmniMind | (saját repóik)                  | csak Dependabot (egyenként 155 MB-os csúcs, 2026-10-18)                                                                                               | 4 GB / 6 GB                | egyenként 200 % |
 
 Mérés időpontja: 2026-10-18:
 
@@ -28,13 +28,14 @@ Mérés időpontja: 2026-10-18:
 | swap      | 16 GB                       | az `omniroute-113-5` kikapcsolt swappal (`MemorySwapMax=0`) fut, így egy elszabadult buildet a korlátjánál leállít a rendszer ahelyett, hogy a gépet swapelésre kényszerítené                                                                                                                                                                                                                                       |
 | `/tmp`    | **12 GB tmpfs = RAM**       | minden, amit itt tárolunk, memóriát foglal; a maradványokat 3 óra után eltávolítja a rendszer                                                                                                                                                                                                                                                                                                                       |
 | CPU       | 60-as terhelés 32 magon     | a kvóták előtt egy Turbopack-build (~1166 % CPU) és az ugyanazon a gépen futó coverage tesztcsomag együtt kiéheztette a többi listener heartbeatjeit (`The self-hosted runner lost communication`, #16853)                                                                                                                                                                                                          |
-| runnerek  | **7 listener** (2026-10-28) | 5 OmniRoute + OmniHeuris + OmniMind; az `omniroute-113-7` az `omni-build` címkét is viseli; az `omniroute-113-3/-4/-8` runnereket töröltük a tárolóból (2026-10-28)                                                                                                                                                                                                                                                 |
+| runnerek  | **7 listener** (2026-10-28) | 5 OmniRoute + OmniHeuris + OmniMind; az `omniroute-113-5` az `omni-build-60gb` címkét is viseli; az `omniroute-113-3/-4/-8` runnereket töröltük a tárolóból (2026-10-28)                                                                                                                                                                                                                                            |
 
 A korlátok az egyes unitok `/etc/systemd/system/actions.runner.<…>.service.d/override.conf`
 fájljában találhatók (a korábbi értékeket az `override.conf.bak-20261018` őrzi), és futás közben,
 újraindítás nélkül lettek alkalmazva a
 `systemctl set-property --runtime … MemoryHigh=… MemoryMax=… CPUQuota=…` paranccsal, így egyetlen
-futó feladatot sem érintettek. A címkék szintén futás közben módosíthatók a runners API-n keresztül (`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
+futó feladatot sem érintettek. A címkék szintén futás közben módosíthatók a runners API-n keresztül
+(`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
 `gh api -X POST repos/<repo>/actions/runners/<id>/labels -f 'labels[]=<label>'`).
 
 ## A takarító telepítése (egyszeri alkalommal, a gépen)
@@ -91,7 +92,7 @@ egység következő újraindításakor lép életbe — egyszerre **csak egy fut
 ## Üzemeltetési szabályok
 
 - **Egyszerre csak egy Turbopack-build — címkével kikényszerítve.** Minden teljes Turbopack
-  `next build` parancsot futtató feladat a `[self-hosted, omni-build]` célra irányul, és csak az
+  `next build` parancsot futtató feladat a `[self-hosted, omni-build, omni-build-60gb]` célra irányul, és csak az
   **`omniroute-113-5`** rendelkezik ezzel a címkével: `ci.yml` `Build`, `npm-publish.yml` `publish`,
   `nightly-v4-build`, `preview-artifact`, az éjszakai a11y-build (#16853), valamint a
   `docker-publish.yml` **amd64** ága (webpack a BuildKiten belül — a Turbopack ott pánikhibával

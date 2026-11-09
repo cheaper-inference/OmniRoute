@@ -53,7 +53,7 @@
 - اِن پٹ: URL + مکمل صفحہ ٹوگل + فارمیٹ سلیکٹر (markdown / متن / HTML)۔
 - جمع کریں → حاصل کریں → `ScrapeResult.tsx` رینڈر کریں۔
 - `ScrapeResult`، markdown پیش منظر + خام مواد کا ٹوگل رینڈر کرتا ہے۔
-- حد: اگر رسپانس باڈی **256 KB** سے زیادہ ہو تو UI، `(مختصر کیا گیا، خام مواد دیکھیں)` دکھاتا ہے اور خام مواد کو Monaco موڈل (D21) میں کھولتا ہے۔
+- حد: اگر رسپانس باڈی **256 KB** سے زیادہ ہو تو UI، `View full raw content` دکھاتا ہے اور خام مواد کو موڈل (D21) میں کھولتا ہے۔
 - میٹا ڈیٹا پینل: فراہم کنندہ (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search)، تاخیر، لاگت، رسپانس سائز، لنکس کی تعداد۔
 - `useScrapeFetch.ts` ہُک استعمال کرتا ہے۔
 

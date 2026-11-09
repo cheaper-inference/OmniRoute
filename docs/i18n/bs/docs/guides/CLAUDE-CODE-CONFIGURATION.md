@@ -1,10 +1,8 @@
-# Claude Code CLI — Configuration with OmniRoute (Bosanski)
+# Claude Code CLI — Konfiguracija sa OmniRoute (Bosanski)
 
 🌐 **Languages:** 🇺🇸 [English](../../../../guides/CLAUDE-CODE-CONFIGURATION.md) · 🇪🇹 [am](../../../am/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇸🇦 [ar](../../../ar/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇦🇿 [az](../../../az/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇧🇬 [bg](../../../bg/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇧🇩 [bn](../../../bn/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇨🇿 [cs](../../../cs/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇩🇰 [da](../../../da/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇩🇪 [de](../../../de/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇬🇷 [el](../../../el/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇪🇸 [es](../../../es/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇪🇪 [et](../../../et/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇮🇷 [fa](../../../fa/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇫🇮 [fi](../../../fi/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇫🇷 [fr](../../../fr/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇮🇪 [ga](../../../ga/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇮🇳 [gu](../../../gu/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇳🇬 [ha](../../../ha/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇮🇱 [he](../../../he/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇮🇳 [hi](../../../hi/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇭🇷 [hr](../../../hr/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇭🇺 [hu](../../../hu/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇦🇲 [hy](../../../hy/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇮🇩 [id](../../../id/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇳🇬 [ig](../../../ig/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇮🇹 [it](../../../it/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇯🇵 [ja](../../../ja/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇬🇪 [ka](../../../ka/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇰🇭 [km](../../../km/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇮🇳 [kn](../../../kn/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇰🇷 [ko](../../../ko/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇱🇹 [lt](../../../lt/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇱🇻 [lv](../../../lv/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇮🇳 [ml](../../../ml/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇮🇳 [mr](../../../mr/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇲🇾 [ms](../../../ms/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇲🇹 [mt](../../../mt/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇲🇲 [my](../../../my/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇳🇵 [ne](../../../ne/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇳🇱 [nl](../../../nl/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇳🇴 [no](../../../no/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇮🇳 [or](../../../or/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇮🇳 [pa](../../../pa/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇵🇭 [phi](../../../phi/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇵🇱 [pl](../../../pl/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇵🇹 [pt](../../../pt/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇷🇴 [ro](../../../ro/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇷🇺 [ru](../../../ru/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇱🇰 [si](../../../si/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇸🇰 [sk](../../../sk/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇸🇮 [sl](../../../sl/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇷🇸 [sr](../../../sr/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇸🇪 [sv](../../../sv/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇰🇪 [sw](../../../sw/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇮🇳 [ta](../../../ta/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇮🇳 [te](../../../te/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇹🇭 [th](../../../th/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇹🇷 [tr](../../../tr/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇵🇰 [ur](../../../ur/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇺🇿 [uz](../../../uz/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇻🇳 [vi](../../../vi/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇳🇬 [yo](../../../yo/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/guides/CLAUDE-CODE-CONFIGURATION.md)
 
 ---
-
-# Claude Code CLI — Konfiguracija sa OmniRoute
 
 Usmjerite **Claude Code** CLI (`claude`) na OmniRoute — lokalni ili udaljeni VPS — sa profilima po modelu, oponašajući Codex postavke.
 
@@ -26,27 +24,27 @@ omniroute launch --profile glm52  # Claude Code koristi glm/glm-5.2 putem OmniRo
 
 ---
 
-## Kako Claude Code povezuje na gateway
+## Kako se Claude Code povezuje na gateway
 
-Claude Code govori o**Anthropic Poruke API** i usmjeren je na prilagođenu krajnju tačku s varijablama okruženja (nema `--base-url` zastavicu):
+Claude Code komunicira putem **Anthropic Messages API**-ja i usmjeren je na prilagođenu krajnju tačku (endpoint) pomoću varijabli okruženja (nema `--base-url` zastavicu):
 
-| Varijabilna                                  | Svrha                                                                                          |
-| -------------------------------------------- | ---------------------------------------------------------------------------------------------- |
-| `ANTHROPIC_BASE_URL`                         | Gateway root URL (Claude kod dodaje `/v1/messages`).** Nema `/v1` sufiksa.**                   |
-| `ANTHROPIC_AUTH_TOKEN`                       | Poslano kao `Authorization: Bearer …` — koristite svoj OmniRoute pristupni token / API ključ   |
-| `ANTHROPIC_API_KEY`                          | Alternativa: poslano kao `x-api-key`. Ako su oba postavljena, `ANTHROPIC_AUTH_TOKEN` pobjeđuje |
-| `ANTHROPIC_MODEL`                            | Forsiranje određenog modela (prevazilazi zadanu vrijednost birača `/model` )                   |
-| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → izvorni `/model` birač navodi `claude*`/`anthropic*` modele iz `/v1/models`              |
-| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | Ograničite izlazne tokene po odgovoru (npr. `65536`)                                           |
-| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | Prag tokena za automatsko zbijanje                                                             |
+| Varijabla                                    | Svrha                                                                                              |
+| -------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `ANTHROPIC_BASE_URL`                         | Root URL gateway-a (Claude Code dodaje `/v1/messages`). **Bez `/v1` sufiksa.**                     |
+| `ANTHROPIC_AUTH_TOKEN`                       | Šalje se kao `Authorization: Bearer …` — koristite svoj OmniRoute pristupni token / API ključ      |
+| `ANTHROPIC_API_KEY`                          | Alternativa: šalje se kao `x-api-key`. Ako su oba postavljena, `ANTHROPIC_AUTH_TOKEN` ima prednost |
+| `ANTHROPIC_MODEL`                            | Forsirajte određeni model (nadjačava zadani `/model` birač)                                        |
+| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → izvorni `/model` birač navodi `claude*`/`anthropic*` modele iz `/v1/models`                  |
+| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | Ograničite izlazne tokene po odgovoru (npr. `65536`)                                               |
+| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | Prag tokena za automatsko sažimanje                                                                |
 
-> Env vars se čitaju** jednom prilikom pokretanja** — ponovo pokrenite Claude kod nakon što ih promijenite.
+> Varijable okruženja se čitaju **jednom pri pokretanju** — ponovo pokrenite Claude Code nakon što ih promijenite.
 
-Za akreditiv koji se rotira umjesto fiksnog niza, postavite `apiKeyHelper` u `~/.claude/settings.json` na naredbu koja ispisuje trenutnu vjerodajnicu na stdout. Claude kod kešira svoj izlaz pet minuta po defaultu (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` to nadjačava) i šalje vrijednost u `Authorization: Bearer` i `x-api-key`. Skripta mora odštampati akreditiv i ništa drugo — banner pored njega ne uspijeva pomoćniku na v2.1.227 +.
+Za pristupni podatak koji se rotira umjesto fiksnog niza, postavite `apiKeyHelper` u `~/.claude/settings.json` na naredbu koja ispisuje trenutni pristupni podatak na stdout. Claude Code podrazumijevano kešira njen izlaz pet minuta (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` mijenja taj rok) i šalje vrijednost i u `Authorization: Bearer` i u `x-api-key`. Skripta mora ispisati samo pristupni podatak; dodatni natpis uz njega uzrokuje neuspjeh pomoćnog programa u v2.1.227+.
 
-Ovako radi Entra ID SSO : `scripts/cli/omniroute-sso.mjs token` ispisuje kratkotrajni Entra pristupni token koji OmniRoute provjerava umjesto API ključa. Vidi [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md).
+Tako radi Entra ID SSO: `scripts/cli/omniroute-sso.mjs token` ispisuje kratkotrajni Entra pristupni token koji OmniRoute provjerava umjesto API ključa. Pogledajte [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md).
 
-`omniroute launch` postavlja sve ovo za vas: rješava osnovni URL + token iz aktivnog konteksta (tako da `omniroute connect <vps>` onda `omniroute launch` samo radi), provjerava zdravlje servera i izvršava `claude`.
+`omniroute launch` postavlja sve ovo za vas: razrješava base URL + token iz aktivnog konteksta (tako da `omniroute connect <vps>` pa `omniroute launch` jednostavno radi), provjerava zdravlje servera i izvršava `claude`.
 
 ---
 

@@ -11,13 +11,13 @@ de målte toppene. Boksen overallokerer bare når et Turbopack-bygg sammenfaller
 webpack-bygg og en lint-jobb. Vertens swap (16 GB) absorberer dette, og fordi bygg for pull-forespørsler kjører
 hostet, er Turbopack-plassen inaktiv mesteparten av tiden:
 
-| runner               | etikett        | rolle                                                                                                                                               | `MemoryHigh` / `MemoryMax` | `CPUQuota` |
-| -------------------- | -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | ---------- |
-| `omniroute-113-5`    | `omni-build`   | Turbopack-bygg: `ci.yml` `Build` (kun push/dispatch), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, det nattlige a11y-bygget | 56 GB / 60 GB (swap 0)     | 1600 %     |
-| `omniroute-113-6`    | `omni-release` | Release-Green (`release-green` + `main-green`), webpack-bygg                                                                                        | 20 GB / 24 GB (swap 4 GB)  | 800 %      |
-| `omniroute-113-2`    | `omni-light`   | nattlige jobber (Schemathesis, promptfoo, garak, k6) og `quality.yml` `lint-guard`                                                                  | 12 GB / 16 GB (swap 4 GB)  | 600 %      |
-| `omniroute-113`      | `omni-light`   | samme pool som ovenfor                                                                                                                              | 8 GB / 12 GB               | 400 %      |
-| OmniHeuris, OmniMind | (deres repoer) | kun Dependabot (topp på 155 MB hver, 2026-10-18)                                                                                                    | 4 GB / 6 GB                | 200 % hver |
+| runner               | etikett                         | rolle                                                                                                                                               | `MemoryHigh` / `MemoryMax` | `CPUQuota` |
+| -------------------- | ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | ---------- |
+| `omniroute-113-5`    | `omni-build`, `omni-build-60gb` | Turbopack-bygg: `ci.yml` `Build` (kun push/dispatch), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, det nattlige a11y-bygget | 56 GB / 60 GB (swap 0)     | 1600 %     |
+| `omniroute-113-6`    | `omni-release`                  | Release-Green (`release-green` + `main-green`), webpack-bygg                                                                                        | 20 GB / 24 GB (swap 4 GB)  | 800 %      |
+| `omniroute-113-2`    | `omni-light`                    | nattlige jobber (Schemathesis, promptfoo, garak, k6) og `quality.yml` `lint-guard`                                                                  | 12 GB / 16 GB (swap 4 GB)  | 600 %      |
+| `omniroute-113`      | `omni-light`                    | samme pool som ovenfor                                                                                                                              | 8 GB / 12 GB               | 400 %      |
+| OmniHeuris, OmniMind | (deres repoer)                  | kun Dependabot (topp på 155 MB hver, 2026-10-18)                                                                                                    | 4 GB / 6 GB                | 200 % hver |
 
 Målt 2026-10-18:
 
@@ -27,12 +27,13 @@ Målt 2026-10-18:
 | swap      | 16 GB                                    | `omniroute-113-5` kjører med swap slått av (`MemorySwapMax=0`), slik at et løpsk bygg stoppes ved grensen i stedet for å få boksen til å bruke swap                                                                                                                                                                                                                                 |
 | `/tmp`    | **12 GB tmpfs = RAM**                    | alt som plasseres der, bruker minne; gjenværende filer ryddes etter 3 t                                                                                                                                                                                                                                                                                                             |
 | CPU       | belastning på 60 observert på 32 kjerner | før kvotene førte ett Turbopack-bygg (~1166 % CPU) pluss en dekningssuite på samme boks til at de andre lytternes livstegn ble sultet ut (`The self-hosted runner lost communication`, #16853)                                                                                                                                                                                      |
-| runnere   | **7 lyttere** (2026-10-28)               | 5 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-7` bærer også `omni-build`; `omniroute-113-3/-4/-8` ble slettet fra repoet (2026-10-28)                                                                                                                                                                                                                                         |
+| runnere   | **7 lyttere** (2026-10-28)               | 5 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-5` bærer også `omni-build-60gb`; `omniroute-113-3/-4/-8` ble slettet fra repoet (2026-10-28)                                                                                                                                                                                                                                    |
 
 Grensene ligger i hver enhets `/etc/systemd/system/actions.runner.<…>.service.d/override.conf`
 (tidligere verdier er beholdt som `override.conf.bak-20261018`) og ble tatt i bruk direkte med
 `systemctl set-property --runtime … MemoryHigh=… MemoryMax=… CPUQuota=…` — uten omstart, så ingen
-kjørende jobb ble berørt. Etiketter endres gjennom runner-API-et (`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
+kjørende jobb ble berørt. Etiketter endres gjennom runner-API-et
+(`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
 `gh api -X POST repos/<repo>/actions/runners/<id>/labels -f 'labels[]=<label>'`), også direkte.
 
 ## Installer oppryddingsskriptet (én gang, på maskinen)
@@ -80,7 +81,7 @@ gangen, kun når den er inaktiv**, med inaktivitetskontrollen og omstarten i sam
 ## Driftsregler
 
 - **Én Turbopack-bygging om gangen — håndhevet med etikett.** Hver jobb som kjører en fullstendig Turbopack-
-  `next build`, bruker `[self-hosted, omni-build]`, og bare **`omniroute-113-5`** har denne
+  `next build`, bruker `[self-hosted, omni-build, omni-build-60gb]`, og bare **`omniroute-113-5`** har denne
   etiketten: `ci.yml` `Build`, `npm-publish.yml` `publish`, `nightly-v4-build`, `preview-artifact`,
   den nattlige a11y-byggingen (#16853) og **amd64** i `docker-publish.yml` (webpack i BuildKit —
   Turbopack fikk panikk der, kjøring 33253576569). Docker-etappen for arm64 forblir på `ubuntu-24.04-arm`.

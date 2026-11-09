@@ -923,8 +923,7 @@ when any other field is set. For lite, `additionalQueries`, `systemPrompt` and e
 `subpages`, `subpageTarget`, `highlights.numSentences` and `highlights.highlightsPerUrl` are no
 longer forwarded.
 
-Cost accounting is the flat registry `costPerQuery`, except for Exa, which follows Exa's
-own pricing: $0.007 per call for `auto` (and the legacy `fast`) or $0.004 for `lite` (and the
+Exa: $0.007 per call for `auto` (and the legacy `fast`) or $0.004 for `lite` (and the
 legacy `instant`), covering 10 results; $0.001 for each further result; and $0.001 per
 returned result when `contents.summary` is set. Tavily is recorded at 1 credit ($0.008) for
 `search_depth` `basic`, `fast` and `ultra-fast`, and 2 credits ($0.016) for `advanced`
@@ -1240,6 +1239,8 @@ X-OmniRoute-No-Cache: true
 
 ---
 
+<a id="cliproxyapi-management-compatibility"></a>
+
 ## CLIProxyAPI Management Compatibility
 
 OmniRoute answers the three [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI)
@@ -1248,11 +1249,11 @@ management endpoints that usage dashboards call to read Claude and Codex subscri
 OmniRoute and use an API key with the `manage` scope as its management key. The routes are
 served at `/v0/management/*` and at `/api/v0/management/*`.
 
-| Method | Path                         | Description                                                                                                                                    |
-| ------ | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/v0/management/auth-files`  | Claude and Codex OAuth connections as `{ files: [{ id, auth_index, provider, email, disabled, id_token }] }`. No tokens                        |
-| POST   | `/v0/management/api-call`    | Body `{ auth_index, method, url, header?, data? }`. Sends one allowlisted request with the account's token and returns `{ status_code, body }` |
-| POST   | `/v0/management/reset-quota` | Body `{ auth_index }`. Clears the connection cooldown, model lockouts and Codex per-scope cooldowns of one account                             |
+| Method | Path                         | Description                                                                                                                                   |
+| ------ | ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/v0/management/auth-files`  | Claude and Codex OAuth connections as `{ files: [{ id, auth_index, provider, email, disabled, id_token }] }`. No tokens                       |
+| POST   | `/v0/management/api-call`    | Body `{ auth_index, method, url, header?, data? }`. Sends an allowlisted request with the account's token and returns `{ status_code, body }` |
+| POST   | `/v0/management/reset-quota` | Body `{ auth_index }`. Clears the connection cooldown, model lockouts and Codex per-scope cooldowns of one account                            |
 
 - `auth_index` is the OmniRoute connection id. `provider` is `claude` or `codex` (OAuth
   connections only; the `anthropic` API-key provider is not listed). For Codex,
@@ -1266,7 +1267,7 @@ https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-cred
   the connection's access token, refreshing it first when it is near expiry, and forwards only
   allowlisted headers (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`;
   `Accept`, `Content-Type`). A missing `Chatgpt-Account-Id` defaults to the stored workspace id.
-  Requests time out after 15 seconds and use the connection's proxy.
+  If the first upstream response is `401`, it refreshes once and retries only when the access token changes. Each upstream attempt times out after 15 seconds and uses the connection's proxy.
 - `reset-quota` leaves terminal states (banned, expired, credits_exhausted) alone. An unknown
   `auth_index` returns `404`.
 
@@ -2048,17 +2049,17 @@ Persistent conversational/factual memory store, scoped per API key / session.
 
 OmniRoute ships an embedded Model Context Protocol server with 3 transports (stdio, SSE, streamable-http) and scoped tools. The dashboard endpoints below read status/audit data and proxy the HTTP transports.
 
-| Method | Path | Description |
-| ------ | ---------------------- | ------------------------------------------------------------------------------------------------ | -------------------- |
-| GET | `/api/mcp/status` | Heartbeat, transport, online state, last call, top tools, 24h success rate |
-| GET | `/api/mcp/tools` | List of MCP tools with `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints` |
-| GET | `/api/mcp/sse` | Open SSE stream for the SSE transport (returns `503` if MCP disabled or transport mismatch) |
-| POST | `/api/mcp/sse` | Send JSON-RPC frame on the SSE transport |
-| GET | `/api/mcp/stream` | Open SSE side of the Streamable HTTP transport (server-initiated messages) |
-| POST | `/api/mcp/stream` | Send JSON-RPC frame on the Streamable HTTP transport |
-| DELETE | `/api/mcp/stream` | End a Streamable HTTP session |
-| GET | `/api/mcp/audit` | Query audit log — `?limit=`, `?offset=`, `?tool=`, `?success=true                                | false`, `?apiKeyId=` |
-| GET | `/api/mcp/audit/stats` | Aggregate audit stats (totals, success rate, avg duration, top tools) |
+| Method | Path                   | Description                                                                                                              |
+| ------ | ---------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| GET    | `/api/mcp/status`      | Heartbeat, transport, online state, last call, top tools, 24h success rate                                               |
+| GET    | `/api/mcp/tools`       | List of MCP tools with `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints`                         |
+| GET    | `/api/mcp/sse`         | Open SSE stream for the SSE transport (returns `503` if MCP disabled or transport mismatch)                              |
+| POST   | `/api/mcp/sse`         | Send JSON-RPC frame on the SSE transport                                                                                 |
+| GET    | `/api/mcp/stream`      | Open SSE side of the Streamable HTTP transport (server-initiated messages)                                               |
+| POST   | `/api/mcp/stream`      | Send JSON-RPC frame on the Streamable HTTP transport                                                                     |
+| DELETE | `/api/mcp/stream`      | End a Streamable HTTP session                                                                                            |
+| GET    | `/api/mcp/audit`       | Query audit log — `?limit=`, `?offset=`, `?tool=`, `?success=true                                \| false`, `?apiKeyId=` |
+| GET    | `/api/mcp/audit/stats` | Aggregate audit stats (totals, success rate, avg duration, top tools)                                                    |
 
 **Auth:** the `sse`/`stream` transports honor the MCP-specific auth surface (Bearer API key with `mcp` scope); the `status`/`tools`/`audit*` routes are readable from the dashboard (no extra auth required beyond reaching the dashboard host).
 

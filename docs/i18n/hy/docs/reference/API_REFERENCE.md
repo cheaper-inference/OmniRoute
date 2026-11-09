@@ -874,15 +874,7 @@ Exa-ի `type: "lite"` (Exa 3.0) ռեժիմն ընդունում է դաշտեր�
 Հնացած `subpages`, `subpageTarget`, `highlights.numSentences` և `highlights.highlightsPerUrl`
 դաշտերն այլևս չեն փոխանցվում։
 
-Արժեքի հաշվառումը կատարվում է հարթ `costPerQuery` ռեեստրով, բացառությամբ Exa-ի, որը հետևում է
-Exa-ի սեփական գնագոյացմանը․ `auto`-ի (և ժառանգական `fast`-ի) համար յուրաքանչյուր կանչը $0.007,
-կամ `lite`-ի (և ժառանգական `instant`-ի) համար՝ $0.004՝ ներառելով 10 արդյունք․ յուրաքանչյուր
-հետագա արդյունքի համար՝ $0.001, իսկ `contents.summary` սահմանված լինելու դեպքում՝ յուրաքանչյուր
-վերադարձված արդյունքի համար $0.001։ Tavily-ն գրանցվում է որպես 1 կրեդիտ ($0.008)՝
-`search_depth`-ի `basic`, `fast` և `ultra-fast` արժեքների, և 2 կրեդիտ ($0.016)՝ `advanced` արժեքի
-համար ([Tavily API-ի կրեդիտներ](https://docs.tavily.com/documentation/api-credits))։ `auto_parameters: true`
-արժեքով կանչը, որի դեպքում Tavily-ն անցնում է advanced ռեժիմի, միևնույն է գրանցվում է որպես
-1 կրեդիտ։
+Exa: յուրաքանչյուր կանչի համար $0,007՝ `auto` (և հին `fast`) ռեժիմում, կամ $0,004՝ `lite` (և հին `instant`) ռեժիմում՝ ներառյալ 10 արդյունք; $0,001 յուրաքանչյուր հետագա արդյունքի համար; և $0,001 մեկ վերադարձված արդյունքի համար, երբ `contents.summary` սահմանվում է: Tavily-ն գրանցվում է 1 կրեդիտով ($0,008) `search_depth` `basic`, `fast` և `ultra-fast` համար, իսկ 2 վարկ (0,016$) `advanced` համար ( [Tavily API վարկեր](https://docs.tavily.com/documentation/api-credits) ): `auto_parameters: true` ով զանգը, որը Tavily-ն թարմացնում է առաջադեմի, դեռ գրանցվում է 1 կրեդիտով:
 
 ---
 
@@ -1182,6 +1174,8 @@ X-OmniRoute-No-Cache: true
 
 ---
 
+<a id="cliproxyapi-management-compatibility"></a>
+
 ## CLIProxyAPI-ի կառավարման համատեղելիություն
 
 OmniRoute-ը պատասխանում է [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI)-ի
@@ -1197,20 +1191,11 @@ OmniRoute-ին և որպես կառավարման բանալի օգտագործ�
 | POST   | `/v0/management/api-call`    | Մարմին՝ `{ auth_index, method, url, header?, data? }`։ Ուղարկում է մեկ թույլատրված հարցում հաշվի token-ով և վերադարձնում `{ status_code, body }` |
 | POST   | `/v0/management/reset-quota` | Մարմին՝ `{ auth_index }`։ Մաքրում է մեկ հաշվի միացման cooldown-ը, մոդելի lockout-ները և Codex-ի յուրաքանչյուր scope-ի cooldown-ները              |
 
-- `auth_index`-ը OmniRoute-ի միացման id-ն է։ `provider`-ը `claude` կամ `codex` է (միայն OAuth
-  միացումներ․ `anthropic` API բանալու provider-ը չի ցուցակագրվում)։ Codex-ի համար
-  `id_token.chatgpt_account_id`-ը պահպանված workspace id-ն է, իսկ `plan_type`-ը՝ պահպանված պլանը։
-- `api-call`-ը ընդհանուր նշանակության proxy չէ։ Այն ընդունում է միայն Claude-ի `GET
-https://api.anthropic.com/api/oauth/usage` և Codex-ի `GET https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits` և
-  `POST .../wham/rate-limit-reset-credits/consume` հարցումները, որոնցից յուրաքանչյուրը՝ միայն համապատասխան
-  provider-ի հաշվին։ Մնացած ամեն ինչ վերադարձնում է `403`՝ առանց upstream-ին դիմելու։ Կանչողի
-  `Authorization` վերնագիրը (ներառյալ `$TOKEN$` placeholder-ը) անտեսվում է․ OmniRoute-ը ներդնում է
-  միացման access token-ը՝ նախ թարմացնելով այն, երբ դրա ժամկետը մոտ է լրանալուն, և փոխանցում է միայն
-  թույլատրված վերնագրերը (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`;
-  `Accept`, `Content-Type`)։ Բացակայող `Chatgpt-Account-Id`-ը լռելյայն ստանում է պահպանված workspace id-ի արժեքը։
-  Հարցումների ժամկետը լրանում է 15 վայրկյանից հետո, և դրանք օգտագործում են միացման proxy-ն։
-- `reset-quota`-ն անփոփոխ է թողնում վերջնական վիճակները (`banned`, `expired`, `credits_exhausted`)։ Անհայտ
-  `auth_index`-ը վերադարձնում է `404`։
+- `auth_index`-ը OmniRoute connection id-ն է։ `provider`-ը `claude` կամ `codex` է (միայն OAuth կապեր․ `anthropic` API-key provider-ը չի նշվում)։ Codex-ի համար `id_token.chatgpt_account_id`-ը պահված workspace id-ն է, իսկ `plan_type`-ը՝ պահված plan-ը։
+- `api-call`-ը ընդհանուր proxy չէ։ Այն ընդունում է միայն Claude-ի `GET
+https://api.anthropic.com/api/oauth/usage`-ը և Codex-ի `GET
+https://chatgpt.com/backend-api/wham/usage`-ը, `GET .../wham/rate-limit-reset-credits`-ը և `POST .../wham/rate-limit-reset-credits/consume`-ը, յուրաքանչյուրը՝ միայն համապատասխան provider-ի հաշվի համար։ Մնացած ամեն ինչ վերադարձնում է `403`՝ առանց upstream-ի հետ կապվելու։ Կանչողի `Authorization` header-ը (ներառյալ `$TOKEN$` տեղապահը) անտեսվում է․ OmniRoute-ը տեղադրում է connection-ի access token-ը՝ նախ թարմացնելով այն, եթե ժամկետը մոտենում է ավարտին, և փոխանցում միայն թույլատրելի header-ները (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`; `Accept`, `Content-Type`)։ Բացակայող `Chatgpt-Account-Id`-ի լռելյայն արժեքը պահված workspace id-ն է։ Եթե upstream-ի առաջին պատասխանը `401` է, այն մեկ անգամ թարմացնում է և նորից փորձում միայն access token-ի փոփոխվելու դեպքում։ Յուրաքանչյուր upstream փորձի ժամանակը սպառվում է 15 վայրկյանից հետո, և այն օգտագործում է connection-ի proxy-ն։
+- `reset-quota`-ն վերջնական վիճակները (banned, expired, credits_exhausted) թողնում է անփոփոխ։ Անհայտ `auth_index`-ը վերադարձնում է `404`։
 
 **Նույնականացում․** վահանակի սեսիա կամ `manage` scope-ով API բանալի, որը պարտադիր է նույնիսկ այն դեպքում, երբ մուտքն անջատված է
 (ուղիները գտնվում են `ALWAYS_PROTECTED_API_PATHS`-ում)։ Միայն inference-ի համար նախատեսված բանալիները ստանում են `403`։ Աղբյուրը՝
@@ -1931,17 +1916,17 @@ OmniRoute-ը հատուկ գործարկվող մշակիչներով ընդլա
 
 OmniRoute-ը ներառում է ներկառուցված Model Context Protocol սերվեր՝ 3 տրանսպորտային եղանակներով (stdio, SSE, streamable-http) և սահմանափակված գործիքներով։ Ստորև ներկայացված dashboard-ի endpoint-ները կարդում են կարգավիճակի/աուդիտի տվյալները և պրոքսավորում HTTP տրանսպորտները։
 
-| Մեթոդ  | Ուղի                   | Նկարագրություն                                                                                                       |                      |
-| ------ | ---------------------- | -------------------------------------------------------------------------------------------------------------------- | -------------------- |
-| GET    | `/api/mcp/status`      | Սրտի զարկ, տրանսպորտ, առցանց վիճակ, վերջին կանչ, առաջատար գործիքներ, 24-ժամյա հաջողության մակարդակ                   |
-| GET    | `/api/mcp/tools`       | MCP գործիքների ցանկ՝ `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints` դաշտերով              |
-| GET    | `/api/mcp/sse`         | SSE տրանսպորտի համար SSE հոսքի բացում (վերադարձնում է `503`, եթե MCP-ն անջատված է կամ տրանսպորտը չի համապատասխանում) |
-| POST   | `/api/mcp/sse`         | JSON-RPC frame-ի ուղարկում SSE տրանսպորտով                                                                           |
-| GET    | `/api/mcp/stream`      | Streamable HTTP տրանսպորտի SSE կողմի բացում (սերվերի կողմից նախաձեռնված հաղորդագրություններ)                         |
-| POST   | `/api/mcp/stream`      | JSON-RPC frame-ի ուղարկում Streamable HTTP տրանսպորտով                                                               |
-| DELETE | `/api/mcp/stream`      | Streamable HTTP սեսիայի ավարտում                                                                                     |
-| GET    | `/api/mcp/audit`       | Աուդիտի մատյանի հարցում — `?limit=`, `?offset=`, `?tool=`, `?success=true                                            | false`, `?apiKeyId=` |
-| GET    | `/api/mcp/audit/stats` | Աուդիտի վիճակագրության համախմբում (ընդհանուր քանակներ, հաջողության մակարդակ, միջին տևողություն, առաջատար գործիքներ)  |
+| Մեթոդ  | Ուղի                   | Նկարագրություն                                                                                                                               |
+| ------ | ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/mcp/status`      | Սրտի զարկ, տրանսպորտ, առցանց վիճակ, վերջին կանչ, առաջատար գործիքներ, 24-ժամյա հաջողության մակարդակ                                           |
+| GET    | `/api/mcp/tools`       | MCP գործիքների ցանկ՝ `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints` դաշտերով                                      |
+| GET    | `/api/mcp/sse`         | SSE տրանսպորտի համար SSE հոսքի բացում (վերադարձնում է `503`, եթե MCP-ն անջատված է կամ տրանսպորտը չի համապատասխանում)                         |
+| POST   | `/api/mcp/sse`         | JSON-RPC frame-ի ուղարկում SSE տրանսպորտով                                                                                                   |
+| GET    | `/api/mcp/stream`      | Streamable HTTP տրանսպորտի SSE կողմի բացում (սերվերի կողմից նախաձեռնված հաղորդագրություններ)                                                 |
+| POST   | `/api/mcp/stream`      | JSON-RPC frame-ի ուղարկում Streamable HTTP տրանսպորտով                                                                                       |
+| DELETE | `/api/mcp/stream`      | Streamable HTTP սեսիայի ավարտում                                                                                                             |
+| GET    | `/api/mcp/audit`       | Աուդիտի մատյանի հարցում — `?limit=`, `?offset=`, `?tool=`, `?success=true                                            \| false`, `?apiKeyId=` |
+| GET    | `/api/mcp/audit/stats` | Աուդիտի վիճակագրության համախմբում (ընդհանուր քանակներ, հաջողության մակարդակ, միջին տևողություն, առաջատար գործիքներ)                          |
 
 **Նույնականացում․** `sse`/`stream` տրանսպորտները կիրառում են MCP-ին հատուկ նույնականացման մակերեսը (Bearer API բանալի՝ `mcp` scope-ով), իսկ `status`/`tools`/`audit*` երթուղիները հասանելի են dashboard-ից (dashboard host-ին հասանելիությունից բացի լրացուցիչ նույնականացում չի պահանջվում)։
 

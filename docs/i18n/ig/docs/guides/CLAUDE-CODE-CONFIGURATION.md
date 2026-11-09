@@ -25,27 +25,30 @@ omniroute launch --profile glm52  # Claude Code na-eji glm/glm-5.2 site na OmniR
 
 ---
 
-## Kedu ka koodu Claude si ejikọta na ọnụ ụzọ ámá
+## Otu Claude Code si ejikọta na gateway
 
-Claude Code na-ekwu na**Anthropic Ozi API** ma tụọ aka na njedebe omenala nwere mgbanwe gburugburu ebe obibi (o nweghị ọkọlọtọ `--base-url` ):
+Claude Code na-eji **Anthropic Messages API** ekwurịta okwu, a na-ejikwa environment variables
+tụnye ya aka na endpoint ahaziri iche (o nweghị ọkọlọtọ `--base-url`):
 
-| Na-agbanwe agbanwe                           | Ebumnuche                                                                                       |
-| -------------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| `ANTHROPIC_BASE_URL`                         | Mgbọrọgwụ URL Gateway ( Koodu Claude gbakwunyere `/v1/messages`).** Enweghị mgbakwunye `/v1`.** |
-| `ANTHROPIC_AUTH_TOKEN`                       | Ezitere dị ka `Authorization: Bearer …` — jiri akara ohere OmniRoute / API igodo gị             |
-| `ANTHROPIC_API_KEY`                          | Nhọrọ: ezitere ka `x-api-key`. Ọ bụrụ na ha abụọ atọrọ, `ANTHROPIC_AUTH_TOKEN` na-emeri         |
-| `ANTHROPIC_MODEL`                            | Manye otu ụdịdị (na-ewepụ ndabara `/model` picker)                                              |
-| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → nwa afọ `/model` picker depụtara `claude*`/`anthropic*` ụdị si `/v1/models`               |
-| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | Token mmepụta okpu kwa nzaghachi (dịka `65536`)                                                 |
-| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | Ọnụ ụzọ akara maka mgbakọ akpaaka                                                               |
+| Variable                                     | Ebumnuche                                                                                                 |
+| -------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `ANTHROPIC_BASE_URL`                         | URL mgbọrọgwụ nke gateway (Claude Code na-etinye `/v1/messages`). **Etinyekwala ngwụcha `/v1`.**          |
+| `ANTHROPIC_AUTH_TOKEN`                       | A na-eziga ya dịka `Authorization: Bearer …` — jiri token nnweta / API key OmniRoute gị                   |
+| `ANTHROPIC_API_KEY`                          | Nhọrọ ọzọ: a na-eziga ya dịka `x-api-key`. Ọ bụrụ na edobere ha abụọ, `ANTHROPIC_AUTH_TOKEN` ga-ebute ụzọ |
+| `ANTHROPIC_MODEL`                            | Manye otu ụdịdị kpọmkwem (na-akagbu ndabara nke onye-ahọpụta `/model`)                                    |
+| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → onye-ahọpụta `/model` nke mbụ na-edepụta ụdịdị `claude*`/`anthropic*` sitere na `/v1/models`        |
+| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | Debe oke token mmepụta maka nzaghachi ọ bụla (dịka `65536`)                                               |
+| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | Oke token nke na-akpalite mkpakọ na-akpaghị aka                                                           |
 
-> A na-agụ env vars** otu ugboro na mmalite** — malitegharịa koodu Claude mgbe ị gbanwee ha.
+> A na-agụ env vars **naanị otu ugboro mgbe mmalite** — malitegharịa Claude Code mgbe ị gbanwere ha.
 
-Maka nzere nke na-atụgharị kama iji eriri edoziri, tọọ `apiKeyHelper` na `~/.claude/settings.json` na iwu nke na-ebipụta nzere dị ugbu a ka stdout. Koodu Claude na-echekwa mmepụta ya maka nkeji ise na ndabara (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` na-ewepụ nke ahụ) wee zipu uru na ma `Authorization: Bearer` na `x-api-key`. Edemede ahụ ga-ebipụta nzere na ọ nweghị ihe ọzọ — ọkọlọtọ n'akụkụ ya na-ada onye inyeaka na v2.1.227 +.
+Maka nzere nnweta na-agbanwe oge ụfọdụ kama eriri ederede na-adịgide, tọọ `apiKeyHelper` n’ime `~/.claude/settings.json` ka ọ bụrụ iwu na-ebipụta nzere ugbu a na stdout. Claude Code na-echekwa ihe ọ bipụtara na cache ruo nkeji ise na ndabara (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` na-agbanwe oge ahụ), ma na-eziga uru ahụ na `Authorization: Bearer` na `x-api-key` abụọ. Skript ga-ebipụta naanị nzere ahụ: banner ọzọ so ya na-eme ka helper daa na v2.1.227+.
 
-Otu a ka Entra ID SSO si arụ ọrụ: `scripts/cli/omniroute-sso.mjs token` na-ebipụta akara ohere Entra dị mkpụmkpụ nke OmniRoute na-enyocha kama igodo API. Lee [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md).
+Nke a bụ otú Entra ID SSO si arụ ọrụ: `scripts/cli/omniroute-sso.mjs token` na-ebipụta token nnweta Entra nke na-adị obere oge, OmniRoute na-enyochakwa ya kama igodo API. Lee [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md).
 
-`omniroute launch` na-edobere gị ihe ndị a niile: ọ na-edozi akara URL + isi site na ọnọdụ nọ n'ọrụ (ya mere `omniroute connect <vps>` wee `omniroute launch` na-arụ ọrụ), ahụike-enyocha ihe nkesa, yana execs `claude`.
+`omniroute launch` na-edozi ihe ndị a niile maka gị: ọ na-achọpụta base URL + token
+site na ọnọdụ na-arụ ọrụ (ya mere `omniroute connect <vps>` wee bụrụ `omniroute launch`
+ga-arụ ọrụ ozugbo), na-enyocha ahụike sava, ma na-eme exec nke `claude`.
 
 ---
 

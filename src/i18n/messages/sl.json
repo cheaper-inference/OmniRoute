@@ -4147,7 +4147,9 @@
     "duplicateAutoComboFailedPrefix": "Podvajanje samodejne kombinacije ni uspelo:",
     "duplicateAutoComboUnknownError": "Neznana napaka",
     "duplicateAutoComboTitle": "Ustvari statično kombinacijo iz {name}",
-    "fallbackSummary": "{rate}% zahtev je uporabilo nadomestno rešitev, vsaka je preskočila približno {skips} ciljev"
+    "fallbackSummary": "{rate}% zahtev je uporabilo nadomestno rešitev, vsaka je preskočila približno {skips} ciljev",
+    "reorderAll": "Preuredite vse",
+    "reorderAllDescription": "Preurejanje vseh kombinacij {count}. Ročaji za vlečenje so omogočeni."
   },
   "costs": {
     "title": "Stroški",
@@ -6281,10 +6283,6 @@
     "hideEmails": "Skrij vse e-poštne naslove",
     "a": "A",
     "accountConcurrencyCapHint": "Največje število sočasnih zahtev, ki jih lahko obravnava ta povezava oziroma račun. Naročniški računi običajno dovoljujejo le nekaj zahtev (1–3) — prekoračitev sproži napake 429 in obdobja ohlajanja. Za privzeto vrednost pustite prazno.",
-    "aiCreditsLimit": "Omejitev AI Credits na obračunsko obdobje",
-    "aiCreditsLimitPlaceholder": "Brez lokalne omejitve",
-    "aiCreditsLimitHint": "Preskoči to povezavo, ko AI Credits, ki jih sporoča GitHub, dosežejo to vrednost, zato usmerjanje preide na vaše druge povezave. Prazno jo onemogoči; 0 jo vedno preskoči. Manjkajoč ali zastarel odčitek porabe nikoli ne blokira — to ni zajamčena zgornja meja porabe.",
-    "aiCreditsLimitInvalid": "Omejitev AI Credits mora biti nenegativno število ali prazna za onemogočenje.",
     "accountConcurrencyCapLabel": "Omejitev sočasnosti računa",
     "accountIdHint": "Nekateri ponudniki (npr. Cloudflare Workers AI) to zahtevajo poleg žetona API.",
     "accountIdLabel": "ID računa",
@@ -6378,8 +6376,6 @@
     "newApiUserIdLabel": "ID uporabnika New-API",
     "newApiUserIdPlaceholder": "npr. 12345",
     "newApiUserIdHint": "Vrednost glave AgentRouter New-Api-User, ki se skupaj z API-ključem konzole uporablja za pridobivanje stanja kvote.",
-    "tokenrouterManagementKeyLabel": "Ključ za upravljanje (neobvezno)",
-    "tokenrouterManagementKeyHint": "Ključ računa z nadzorne plošče TokenRouter (Settings → Management Key). Uporablja se samo za branje kvote in stanja, nikoli za zahteve. Shranjeni ključ ni prikazan; pustite prazno, da ga ohranite.",
     "newApiAggregatorToggleLabel": "Prehod agregatorja",
     "newApiAggregatorToggleHint": "Omogočite zaznavanje stanja za agregatorska vozlišča New-API / One-API / Sub2API. Nadzorna plošča bo prikazala značko stanja, usmerjanje s predhodnim preverjanjem kvote pa bo preskočilo izčrpane račune.",
     "newApiAggregatorConsoleApiKeyHint": "Sistemski žeton za dostop do agregatorjeve končne točke /api/user/self. To ni API-ključ za usmerjanje.",
@@ -6393,8 +6389,6 @@
     "customUserAgentLabel": "Oznaka uporabniškega agenta po meri",
     "huggingfaceBillToHint": "Izbirno. Identifikator vašega računa za obračunavanje Hugging Face, ki se pošlje kot glava X-HF-Bill-To za dodelitev stroškov.",
     "huggingfaceBillToLabel": "Račun Bill-To za Hugging Face",
-    "commandCodeZdrLabel": "Zahtevaj ničelno hrambo podatkov (ZDR)",
-    "commandCodeZdrHint": "Pošlje x-cmd-zdr: 1 z vsako zahtevo, opravljeno s tem ključem API. Modeli brez ZDR upstreama morda ne bodo na voljo.",
     "databricksBaseUrlHint": "Namig za osnovni URL storitve Databricks",
     "defaultThinkingStrengthHint": "Uporabi se, ko zahteva ne določa stopnje razmišljanja.",
     "defaultThinkingStrengthLabel": "Privzeta intenzivnost razmišljanja",
@@ -6869,7 +6863,7 @@
       "xai": "Povežite xAI (Grok) s ključem API.",
       "xiaomi-mimo": "Povežite Xiaomi MiMo s ključem API.",
       "yi": "Pridobite ključ API na platform.lingyiwanwu.com",
-      "zai": "Ključ API s spletnega mesta https://open.bigmodel.cn/usercenter/apikeys",
+      "zai": "Ključ API s spletnega mesta https://z.ai/manage-apikey/apikey-list",
       "zenmux": "ZenMux ponuja končno točko za dokončevanje klepeta, združljivo z OpenAI, na /api/v1/chat/completions ter podporo za protokola Anthropic Messages (/api/anthropic/v1/messages) in Google Gemini (/api/vertex-ai). OmniRoute uporablja protokol OpenAI.",
       "galadriel": "Povežite Galadriel s ključem API.",
       "predibase": "Brezplačno dobroimetje za preizkus v višini 25 USD (veljavnost 30 dni)",
@@ -6990,11 +6984,6 @@
     "anonymousFallbackEnabled": "Anonimni nadomestni način je omogočen za {provider}",
     "anonymousFallbackDisabled": "Anonimni nadomestni način je onemogočen za {provider} — izčrpane povezave bodo tega ponudnika preskočile",
     "anonymousFallbackUpdateFailed": "Nastavitve anonimnega nadomestnega načina ni bilo mogoče posodobiti",
-    "retryDelayTitle": "Zakasnitev ponovnega poskusa",
-    "retryDelayDesc": "Kako dolgo povezava počiva po napaki omejitve hitrosti, ko ponudnik ne navede, kdaj poskusiti znova. Samodejni način uporablja vgrajeno odlaganje; čas ponastavitve, ki ga pošlje ponudnik, ima vedno prednost.",
-    "retryDelayAuto": "Samodejno",
-    "retryDelaySaved": "Zakasnitev ponovnega poskusa shranjena",
-    "retryDelayUpdateFailed": "Posodobitev zakasnitve ponovnega poskusa ni uspela",
     "batchDeleteFailed": "Paketno brisanje ni uspelo",
     "batchDeleteNetworkError": "Napaka omrežja med paketnim brisanjem",
     "batchUpdateFailed": "Paketna posodobitev ni uspela",
@@ -7094,7 +7083,20 @@
     "chatgptConnectorLabel": "Češni adapter ChatGPT",
     "doctorChecking": "Preverjanje stanja …",
     "doctorCheck": "Preveri zdravstveno stanje",
-    "fallbackRetryBackendTitle": "Backend za ponovna poskuse ob neuspehu"
+    "fallbackRetryBackendTitle": "Backend za ponovna poskuse ob neuspehu",
+    "retryDelayTitle": "Zakasnitev ponovnega poskusa",
+    "retryDelayDesc": "Kako dolgo povezava počiva po napaki omejitve hitrosti, ko ponudnik ne navede, kdaj poskusiti znova. Samodejni način uporablja vgrajeno odlaganje; čas ponastavitve, ki ga pošlje ponudnik, ima vedno prednost.",
+    "retryDelayAuto": "Samodejno",
+    "retryDelaySaved": "Zakasnitev ponovnega poskusa shranjena",
+    "retryDelayUpdateFailed": "Posodobitev zakasnitve ponovnega poskusa ni uspela",
+    "aiCreditsLimit": "Omejitev AI Credits na obračunsko obdobje",
+    "aiCreditsLimitPlaceholder": "Brez lokalne omejitve",
+    "aiCreditsLimitHint": "Preskoči to povezavo, ko AI Credits, ki jih sporoča GitHub, dosežejo to vrednost, zato usmerjanje preide na vaše druge povezave. Prazno jo onemogoči; 0 jo vedno preskoči. Manjkajoč ali zastarel odčitek porabe nikoli ne blokira — to ni zajamčena zgornja meja porabe.",
+    "aiCreditsLimitInvalid": "Omejitev AI Credits mora biti nenegativno število ali prazna za onemogočenje.",
+    "tokenrouterManagementKeyLabel": "Ključ za upravljanje (neobvezno)",
+    "tokenrouterManagementKeyHint": "Ključ računa z nadzorne plošče TokenRouter (Settings → Management Key). Uporablja se samo za branje kvote in stanja, nikoli za zahteve. Shranjeni ključ ni prikazan; pustite prazno, da ga ohranite.",
+    "commandCodeZdrLabel": "Zahtevaj ničelno hrambo podatkov (ZDR)",
+    "commandCodeZdrHint": "Pošlje x-cmd-zdr: 1 z vsako zahtevo, opravljeno s tem ključem API. Modeli brez ZDR upstreama morda ne bodo na voljo."
   },
   "settings": {
     "title": "Nastavitve",
@@ -14255,6 +14257,10 @@
         "label": "Infrastrukturne zaustavitve z zaščiteno prioriteto kot 502",
         "description": "Odgovori s 502 namesto 503, ko prednostni cilj z nadomestno uporabo samo ob izčrpani kvoti ustavi kombinacijo zaradi vzroka, ki dokazljivo ni povezan s kvoto: odprtega odklopnika ponudnika ali preskoka zaradi napovedane zakasnitve."
       },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Politika proračuna za neocenjeno uporabo",
+        "description": "Kako dnevne/tedenske omejitve (v USD) za posamezen ključ obravnavajo uspešno uporabo, pri kateri ponudnik/model nima vnesene cene. fail_closed (privzeto) označi okno kot prekoračeno, zato neznan strošek nikoli ne more zaobiti trde omejitve. count_as_zero šteje to uporabo kot $0 in še naprej uveljavlja porabo s ceno. Modeli brez cene so v vsakem primeru navedeni na domači strani nadzorne plošče."
+      },
       "AUTH_LOG_INCLUDE_ACCOUNT_ID": {
         "label": "IDs računa za dnevnike",
         "description": "Vključi predpono računa v vrstice dnevnika AUTH (npr. \"Uporaba računa '<provider>': abc12345...\"). Privzeto je izklopljeno, da se identifikatorji računov brišejo iz posnetih/multi-tenant dnevnikov. Samostojno od Debug Mode; preklop Debug Mode tega ne izpostavi."
@@ -14535,9 +14541,9 @@
         "label": "Ponovna poskusa po čakanju: Preskoči zavrge 403/410",
         "description": "Ko so vse račune v stanju čakanja in je najprej končano čakanje povzročilo 403 (dostop zavrnjen) ali 410 (odstranjeno), takoj vrnite to zavrnitev namesto da bi čakali, da se čakanje konča, in ponovno poslali zahtevo; obnavljajoča se povezava agentroutera z omejeno kvoto 403 se nato shranjuje s kodo napake 429, da ostane ponovno poskusna. Privzeto izklopljeno: le 401 preskoči čakanje, vsaka zavrnitev pa se shrani s stanjem, s katerim je prišla."
       },
-      "UNPRICED_USAGE_BUDGET_POLICY": {
-        "label": "Politika proračuna za neocenjeno uporabo",
-        "description": "Kako dnevne/tedenske omejitve (v USD) za posamezen ključ obravnavajo uspešno uporabo, pri kateri ponudnik/model nima vnesene cene. fail_closed (privzeto) označi okno kot prekoračeno, zato neznan strošek nikoli ne more zaobiti trde omejitve. count_as_zero šteje to uporabo kot $0 in še naprej uveljavlja porabo s ceno. Modeli brez cene so v vsakem primeru navedeni na domači strani nadzorne plošče."
+      "COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE": {
+        "description": "V statističnih podatkih o stiskanju predpomnilnika štejte stisnjeno zahtevo ponudniku samodejnega predpomnjenja v predpono (OpenAI, Codex, Azure ali povezava po meri, ki deklarira hitro predpomnjenje z odstranjevanjem oznak) kot ocenjeni zadetek predpomnilnika tudi brez oznak cache_control. Ocena je signal primernosti predpomnilnika in ne opažen zadetek, zato se poročana stopnja zadetkov za te ponudnike giblje proti 100 %. Privzeto izklopljeno: samo zahteva, ki nosi oznake cache_control ponudniku predpomnjenja, šteje kot ocenjeni zadetek, zato ponudniki samodejnih predpon še naprej poročajo 0.",
+        "label": "Statistika predpomnilnika stiskanja: primernost samodejne predpone"
       }
     }
   },

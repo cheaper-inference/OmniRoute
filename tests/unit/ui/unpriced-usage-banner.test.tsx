@@ -61,6 +61,10 @@ describe("UnpricedUsageBanner", () => {
   it("keeps missing-price visibility informational when no limited key is affected", async () => {
     await showReport(0);
     expect(container.textContent).toContain("example/no-price");
+    expect(container.querySelector('svg[data-icon="price_change"]')).not.toBeNull();
+    expect(
+      container.querySelector('button[aria-label="unpricedUsageDismiss"]')?.className
+    ).toContain("ci-button");
     expect(container.querySelector('[role="status"]')).not.toBeNull();
     expect(container.querySelector('[role="alert"]')).toBeNull();
     expect(container.textContent).not.toContain("unpricedUsageFailClosed");

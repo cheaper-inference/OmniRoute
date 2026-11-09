@@ -27,7 +27,7 @@ hooks များသည် route တိုင်း သို့မဟုတ်
 
 ## ထည့်သွင်းပါရှိသော Guardrails
 
-Registry သည် import လုပ်ချိန်တွင် priority အစဉ်အတိုင်း guardrails ခြောက်ခုကို အလိုအလျောက် load လုပ်သည်  
+Registry သည် import လုပ်ချိန်တွင် priority အစဉ်အတိုင်း guardrails ခြောက်ခုကို အလိုအလျောက် load လုပ်သည်\
 (`registry.ts` → `registerDefaultGuardrails()` ကိုကြည့်ပါ)။
 
 | Priority | Name                | Stage(s)       | File                  |
@@ -271,8 +271,8 @@ Flow:
 2. `modalityBridgeAudio*` ဆက်တင်များကို ဖြေရှင်းပြီး shared `detectMediaParts()` detector မှတစ်ဆင့် message တိုင်းမှ splice ပြုလုပ်နိုင်သော top-level audio parts များကို ထုတ်ယူပါ။ ထောက်ပံ့ထားသော wire shape များမှာ OpenAI `input_audio`၊ `audio_url` နှင့် `source.media_type: "audio/*"` တို့ဖြစ်သည်။ Nested audio ကို routing အတွက် ရှာဖွေတွေ့ရှိသော်လည်း splice လမ်းကြောင်းမှ ဖယ်ရှားမည်မဟုတ်ပါ။ လုပ်ဆောင်မှုကို `modalityBridgeAudioMaxClips` ဖြင့် ကန့်သတ်ထားပြီး နောက်ပိုင်း parts များကို မပြောင်းလဲဘဲ ထားရှိသည်။
 3. သတ်မှတ်ထားသော `provider/model` ကို အသုံးပြုပါ၊ သို့မဟုတ် `selectAudioBridgeModel()` က `AUDIO_TRANSCRIPTION_PROVIDERS` ကို တည်ငြိမ်သော catalog အစီအစဉ်အတိုင်း လှည့်လည်ပြီး အသုံးပြုနိုင်သော active provider credential ရှိသည့် ပထမဆုံး model ကို ရွေးချယ်ပါ။
 4. `callAudioTranscription()` သည် base64/data-URI audio ကို multipart `file` အဖြစ် ပြောင်းလဲပေးသည်၊ သို့မဟုတ် remote `audio_url` ကို DNS pinning နှင့် 25 MB ကန့်သတ်ချက်ပါသော public-only outbound guard မှတစ်ဆင့် ဒေါင်းလုဒ်လုပ်သည်။ ထို့နောက် file နှင့် ရွေးချယ်ထားသော model ကို `resolveSelfLoopBearer()` ဖြင့် authentication ပြုလုပ်ထားသော local `/v1/audio/transcriptions` self-loop သို့ POST လုပ်သည်။ ရှိပြီးသား transcription route သည် ပုံမှန် credential lookup၊ cooldown/rate-limit ကိုင်တွယ်မှုနှင့် provider dispatch ကို လုပ်ဆောင်သည်။
-5. အောင်မြင်သော calls များသည် ၎င်းတို့၏ parts များကို `[Audio N]: <transcript>` ဖြင့် အစားထိုးသည်။ Calls များကို `Promise.allSettled` ဖြင့် လုပ်ဆောင်သောကြောင့် တစ်ခုချင်းစီ မအောင်မြင်ပါက မူရင်း audio part ကို ထိန်းသိမ်းထားသည် (#4012 contract)။ Calls အားလုံး မအောင်မြင်ဘဲ target ၏ `supportsAudio === false` ဖြစ်ကြောင်း အတည်ပြုနိုင်ပါက parts များကို  
-   `[Audio N]: (unavailable — no STT provider connected)` (#8430 contract)  
+5. အောင်မြင်သော calls များသည် ၎င်းတို့၏ parts များကို `[Audio N]: <transcript>` ဖြင့် အစားထိုးသည်။ Calls များကို `Promise.allSettled` ဖြင့် လုပ်ဆောင်သောကြောင့် တစ်ခုချင်းစီ မအောင်မြင်ပါက မူရင်း audio part ကို ထိန်းသိမ်းထားသည် (#4012 contract)။ Calls အားလုံး မအောင်မြင်ဘဲ target ၏ `supportsAudio === false` ဖြစ်ကြောင်း အတည်ပြုနိုင်ပါက parts များကို\
+   `[Audio N]: (unavailable — no STT provider connected)` (#8430 contract)\
    အဖြစ် ပြောင်းလဲသည်။ မသေချာသော target (`null`) အတွက် calls အားလုံး မအောင်မြင်သည့် ရလဒ်တွင် မူရင်းအတိုင်း ထားရှိသည်။ အတည်ပြုထားသော text-only target တွင် အသုံးပြုနိုင်သော STT credential မရှိပါက network call မပြုလုပ်ဘဲ အလားတူ explicit stub ကို ထည့်ပေးသည်။
 
 အောင်မြင်သော transcripts များသည် process တစ်ခုလုံးအတွက် အသုံးပြုသည့် Modality Bridge LRU/TTL cache ကို အသုံးပြုသည်။ Key တွင် audio reference၊ တည်ငြိမ်သော `audio-transcription` operation label နှင့် ရွေးချယ်ထားသော STT model တို့ ပါဝင်သည်။ မအောင်မြင်မှုများကို cache ထဲတွင် မသိမ်းဆည်းပါ။ Audio attempts များသည် shared `bridged`၊ `cacheHits`၊ `failures` နှင့် `lastUsedAt` counters များကို update လုပ်သည်။ ပြောင်းလဲထားသော responses များတွင် `x-omniroute-modality-bridge: audio->text;model=<sttModel>;parts=<n>` ပါဝင်ပြီး၊ မပြောင်းလဲသော requests များတွင် Audio Bridge segment မပါဝင်ပါ။
@@ -428,7 +428,7 @@ Runtime settings များကို DB တွင် သိမ်းဆည်�
 | `modalityBridgeVideoMaxVideos`      | `1`         | 1–4                                                                                                                               |
 | `modalityBridgeVideoTimeout`        | `120000`    | 1000–120000 ms                                                                                                                    |
 
-ယခင်က သိမ်းဆည်းထားသော Video timeout တန်ဖိုးသည် 120 စက္ကန့်ထက် ကျော်လွန်ပါက broker deadline အထိ ကန့်သတ်ချိန်ညှိသည်။ အသစ်ရေးသားသည့် settings များတွင် ထိုကန့်သတ်ချက်ထက် ကျော်လွန်သော တန်ဖိုးများကို ငြင်းပယ်သည်။  
+ယခင်က သိမ်းဆည်းထားသော Video timeout တန်ဖိုးသည် 120 စက္ကန့်ထက် ကျော်လွန်ပါက broker deadline အထိ ကန့်သတ်ချိန်ညှိသည်။ အသစ်ရေးသားသည့် settings များတွင် ထိုကန့်သတ်ချက်ထက် ကျော်လွန်သော တန်ဖိုးများကို ငြင်းပယ်သည်။\
 `GET /api/modality-bridge/video/runtime` သည် authentication သို့မဟုတ် runtime probing မလုပ်မီ trusted stamped loopback locality လိုအပ်ပြီး၊ ထို့နောက် management auth ကို လိုအပ်သည်။ ၎င်းသည် `available`၊ သန့်စင်ထားသော FFmpeg/ffprobe versions များနှင့် runtime မရရှိနိုင်သည့်အခါ fixed reason တစ်ခုကိုသာ ပြန်ပေးသည်။ Internal extraction endpoint သည် public upload API မဟုတ်ပါ။ Queue saturation ဖြစ်ပါက `503` နှင့် `Retry-After` ကို ပြန်ပေးသည်။ Caller disconnect ဖြစ်ပါက `499` ကို ပြန်ပေးပြီး၊ သတ်မှတ်ထားသော broker deadline ပြည့်သွားပါက `504` ကို ပြန်ပေးသည်။ Converted response များသည် Vision သို့မဟုတ် Audio segments များကို မဖယ်ရှားဘဲ central `x-omniroute-modality-bridge` header ထဲသို့ `video->text;model=<visionModel>;parts=<videos>` ကို ထပ်ပေါင်းသည်။
 
 ### PII ဖုံးကွယ်စနစ် (`piiMasker.ts`)
@@ -511,7 +511,7 @@ API:
 | `eu_vat`            | EU VAT number            | သိရှိထားသော member-state prefix နှင့် ထိုပြည်နယ်၏ number format (VIES lookup မပါဝင်)                       |
 | `es_dni_nie`        | Spanish DNI / NIE        | Control letter (တန်ဖိုး mod 23)၊ NIE သည် `X/Y/Z` + ဂဏန်း ၇ လုံး                                            |
 | `it_codice_fiscale` | Italian Codice Fiscale   | odd/even position table များမှ control letter                                                              |
-| `pl_pesel`          | Polish PESEL             | Weighted checksum နှင့် အမှန်တကယ်ရှိသော မွေးသက္ကရာဇ်ကို encode လုပ်ထားခြင်း                                |
+| `pl_pesel`          | ပိုလန် PESEL             | အလေးပေး checksum နှင့် encoded လုပ်ထားသော မွေးလ/ရက်၏ ယုတ္တိရှိသောအပိုင်းအခြားများ                          |
 | `nl_bsn`            | Dutch BSN                | 11-proof (weights 9..2, -1)                                                                                |
 | `de_steuer_id`      | German Steuer-ID         | ISO 7064 Mod 11,10 နှင့် digit-structure rule များ (ရှေ့ဆုံး 0 မဖြစ်ရ)                                     |
 | `se_personnummer`   | Swedish personnummer     | နောက်ဆုံး ဂဏန်း ၁၀ လုံးအပေါ် Luhn နှင့် ဖြစ်နိုင်ဖွယ်ရှိသော မွေးသက္ကရာဇ် (ဂဏန်း ၁၀ လုံး သို့မဟုတ် ၁၂ လုံး) |

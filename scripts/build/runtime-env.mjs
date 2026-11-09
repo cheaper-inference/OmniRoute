@@ -210,6 +210,8 @@ export function spawnWithForwardedSignals(command, args, options = {}) {
 const SELF_PING_DEFAULT_PATH = "/api/monitoring/health";
 const SELF_PING_DEFAULT_INTERVAL_SECONDS = 180;
 const SELF_PING_MIN_INTERVAL_SECONDS = 30;
+// Node timers above 2^31 - 1 milliseconds are clamped to 1 millisecond.
+const SELF_PING_MAX_INTERVAL_SECONDS = Math.floor(2_147_483_647 / 1000);
 const SELF_PING_FIRST_DELAY_MS = 60_000; // give the server time to boot
 const SELF_PING_TIMEOUT_MS = 15_000;
 
@@ -234,7 +236,11 @@ export function resolveSelfPingConfig(env) {
 
   let target;
   try {
-    target = new URL(path, baseUrl);
+    const base = new URL(baseUrl);
+    target = new URL(path, base);
+    // WHATWG URL parsing normalizes backslashes and strips some control characters.
+    // The resolved origin, rather than the raw path prefix, defines this boundary.
+    if (target.origin !== base.origin) return { status: "invalid" };
   } catch {
     return { status: "invalid" };
   }
@@ -242,7 +248,9 @@ export function resolveSelfPingConfig(env) {
 
   const requested = Number.parseInt(String(env.SELF_PING_INTERVAL_SECONDS ?? ""), 10);
   const intervalSeconds =
-    Number.isFinite(requested) && requested >= SELF_PING_MIN_INTERVAL_SECONDS
+    Number.isSafeInteger(requested) &&
+    requested >= SELF_PING_MIN_INTERVAL_SECONDS &&
+    requested <= SELF_PING_MAX_INTERVAL_SECONDS
       ? requested
       : SELF_PING_DEFAULT_INTERVAL_SECONDS;
   return { status: "on", target, intervalSeconds };
@@ -274,6 +282,7 @@ export function startSelfPinger(env, fetchImpl = fetch) {
     try {
       const res = await fetchImpl(target, {
         method: "GET",
+        redirect: "manual",
         headers: { "user-agent": "omniroute-self-pinger" },
         signal: AbortSignal.timeout(SELF_PING_TIMEOUT_MS),
       });

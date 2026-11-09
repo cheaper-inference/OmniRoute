@@ -81,6 +81,18 @@ Proksilər hətta bloklanmış regionlardan kənarda da faydalıdır:
 
 ---
 
+## Yeni hesablar üçün defolt proksi vəziyyəti
+
+In** Parametrlər → Proxy → Qlobal konfiqurasiya** , istifadə edin** Yeni bağlantılar üçün defolt olaraq proksi-ni aktivləşdirin** yeni əlavə edilmiş provayder hesablarının ilkin proksi vəziyyətini seçmək üçün.
+
+Yeni parametr yeni əlavə edilmiş provayder hesablarının ilkin proksi vəziyyətinə nəzarət edir. O, mövcud hesabları dəyişdirmir və ya qlobal proxy keçidini əvəz etmir. Onun ilkin dəyəri əvvəlki davranışı qoruyur. Defolt olaraq deaktiv edilmiş proxy ilə gələcək hesablar yaratmaq üçün onu bir dəfə söndürün.
+
+Üstünlük mövcud Parametrlər API vasitəsilə `defaultNewConnectionProxyEnabled` kimi saxlanılır. Heç vaxt saxlanmadıqda standart olaraq `true` dir. `false` saxlanması yenidən başlamadan sonrakı yeni hesablar üçün qüvvəyə minir. `POST /api/providers` isteğe bağlı ciddi boolean `proxyEnabled` qəbul edir; açıq `true` və ya `false` yaradılması defoltundan üstündür. Dublikat hesabda buraxılma və ya OAuth yenidən qoşulma həmin hesabın saxlanmış vəziyyətini qoruyur. Fərdi hesablar daha sonra aktivləşdirilə və ya deaktiv edilə bilər.
+
+Seçilmiş provayder köçürmələri yeni hesablar üçün təyinat quraşdırmasının defoltundan istifadə edir və mövcud hesabları əvəz edərkən təyinat siyasətini qoruyur. Proksi keçidləri portativ ötürmə sahələri deyil. Tam ehtiyat nüsxəsinin bərpası və tarixi JSON/SQL miqrasiyası saxlanmış hesab dəyərləri və köhnə sxem defoltları daxil olmaqla, mövcud bərpa semantikasını saxlayır; tam parametrlərin bərpası da bu üstünlükləri bərpa edə bilər.
+
+Bu üstünlük proksi təyin etmir və ya onun sağlam və ya istifadədə olduğunu müəyyən etmir. Faktiki marşrutlaşdırma hələ də qlobal proksi keçidindən və müvafiq proksi konfiqurasiyasından asılıdır. Davamlı hesabı olmayan sintetik provayderlər, hesab yaratmazdan əvvəl OAuth trafiki, environment/system proksiləri və xarici backendlər şəbəkəsi onun əhatə dairəsindən kənardadır.
+
 ## 4 Səviyyəli Proksi Sistemi
 
 OmniRoute proksi konfiqurasiyasını prioritet sırasına görə müəyyən edilən **dörd müstəqil əhatə dairəsində** dəstəkləyir:
@@ -381,7 +393,7 @@ Brauzerə bənzər TLS barmaq izləri yaratmaq üçün `wreq-js` istifadə edir 
 
 ### CLI Barmaq İzinin Uyğunlaşdırılması
 
-**CLI Barmaq İzi Dəyişdiricisi** (`Parametrlər → Təhlükəsizlik`) HTTP başlıqlarını və JSON gövdəsindəki sahələri yerli CLI binar fayllarının (Claude Code, Codex və s.) dəqiq imzasına uyğunlaşdırmaq üçün yenidən sıralayır. Bu, proksi ilə **birlikdə** işləyir:
+**CLI Barmaq İzi Dəyişdiricisi** (`Settings → Security`) HTTP başlıqlarını və JSON gövdəsindəki sahələri yerli CLI binar fayllarının (Claude Code, Codex və s.) dəqiq imzasına uyğunlaşdırmaq üçün yenidən sıralayır. Bu, proksi ilə **birlikdə** işləyir:
 
 ```
 IP ünvanınız (bloklanıb) → Proksi IP-si (ABŞ) → Provayder API-si

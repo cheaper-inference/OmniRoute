@@ -871,15 +871,7 @@ Exa `type: "lite"`(Exa 3.0)는 더 적은 수의 필드를 허용하며, 다른 
 삭제됩니다. 더 이상 사용되지 않는 `subpages`, `subpageTarget`,
 `highlights.numSentences`, `highlights.highlightsPerUrl`은 더 이상 전달되지 않습니다.
 
-비용 계산은 `costPerQuery`라는 고정 레지스트리를 따릅니다. 단, Exa는 자체 가격
-정책을 따릅니다. `auto`(및 레거시 `fast`)는 호출당 $0.007, `lite`(및 레거시
-`instant`)는 호출당 $0.004이며, 두 경우 모두 결과 10개까지 포함됩니다. 추가 결과마다
-$0.001이 부과되고, `contents.summary`가 설정된 경우 반환된 결과마다 $0.001이
-부과됩니다. Tavily는 `search_depth`가 `basic`, `fast`, `ultra-fast`일 때 1크레딧
-($0.008), `advanced`일 때 2크레딧($0.016)으로 기록됩니다
-([Tavily API credits](https://docs.tavily.com/documentation/api-credits)).
-`auto_parameters: true`인 호출에서 Tavily가 `advanced`로 업그레이드하더라도 여전히
-1크레딧으로 기록됩니다.
+Exa: `auto` (및 레거시 `fast`)의 경우 호출당 $0.007, `lite` (및 레거시 `instant`)의 경우 $0.004, 10개 결과 포함. 추가 결과당 $0.001; `contents.summary` 설정된 경우 반환된 결과당 $0.001입니다. Tavily는 `search_depth` `basic`, `fast` 및 `ultra-fast` 에 대해 1 크레딧($0.008), `advanced` ( [Tavily API 크레딧](https://docs.tavily.com/documentation/api-credits) )에 대해 2 크레딧($0.016)으로 기록됩니다. Tavily가 고급으로 업그레이드한 `auto_parameters: true` 사용한 통화는 여전히 1크레딧으로 기록됩니다.
 
 ---
 
@@ -1157,6 +1149,8 @@ X-OmniRoute-No-Cache: true
 
 ---
 
+<a id="cliproxyapi-management-compatibility"></a>
+
 ## CLIProxyAPI 관리 호환성
 
 OmniRoute는 사용량 대시보드가 Claude 및 Codex 구독 한도를 읽기 위해 호출하는 세 가지 [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI) 관리 엔드포인트에 응답합니다(예: T3 Code의 `cliproxy` 사용량 제한 소스). 클라이언트의 기본 URL을 OmniRoute로 지정하고 `manage` 범위가 있는 API 키를 관리 키로 사용합니다. 경로는 `/v0/management/*` 및 `/api/v0/management/*`에서 제공됩니다.
@@ -1167,14 +1161,11 @@ OmniRoute는 사용량 대시보드가 Claude 및 Codex 구독 한도를 읽기 
 | POST   | `/v0/management/api-call`    | 본문 `{ auth_index, method, url, header?, data? }`. 계정의 토큰으로 허용 목록에 있는 요청 하나를 보내고 `{ status_code, body }`를 반환합니다 |
 | POST   | `/v0/management/reset-quota` | 본문 `{ auth_index }`. 한 계정의 연결 쿨다운, 모델 잠금 및 Codex 범위별 쿨다운을 지웁니다                                                    |
 
-- `auth_index`는 OmniRoute 연결 ID입니다. `provider`는 `claude` 또는 `codex`입니다(OAuth 연결만 해당하며 `anthropic` API 키 제공자는 나열되지 않습니다). Codex의 경우 `id_token.chatgpt_account_id`는 저장된 워크스페이스 ID이고 `plan_type`은 저장된 요금제입니다.
-- `api-call`은 일반 프록시가 아닙니다. Claude `GET
+- `auth_index`는 OmniRoute 연결 ID입니다. `provider`는 `claude` 또는 `codex`입니다(OAuth 연결만 포함하며, API 키 제공자 `anthropic`는 나열하지 않음). Codex에서 `id_token.chatgpt_account_id`는 저장된 워크스페이스 ID이며 `plan_type`는 저장된 요금제입니다.
+- `api-call`는 범용 프록시가 아닙니다. Claude `GET
 https://api.anthropic.com/api/oauth/usage`와 Codex `GET
-https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits` 및
-  `POST .../wham/rate-limit-reset-credits/consume`만 허용하며, 각각 일치하는 제공자의 계정에 대해서만 허용합니다. 그 외의 요청은 업스트림에 연결하지 않고 `403`을 반환합니다. 호출자의
-  `Authorization` 헤더(`$TOKEN$` 자리 표시자 포함)는 무시됩니다. OmniRoute는 연결의 액세스 토큰을 주입하고, 토큰이 곧 만료될 경우 먼저 갱신하며, 허용 목록에 있는 헤더(`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`; `Accept`, `Content-Type`)만 전달합니다. `Chatgpt-Account-Id`가 없으면 저장된 워크스페이스 ID를 기본값으로 사용합니다. 요청 시간 제한은 15초이며 연결의 프록시를 사용합니다.
-- `reset-quota`는 최종 상태(banned, expired, credits_exhausted)를 그대로 유지합니다. 알 수 없는
-  `auth_index`는 `404`를 반환합니다.
+https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits`, `POST .../wham/rate-limit-reset-credits/consume`만 허용하며 각각 해당 제공자의 계정에서만 사용할 수 있습니다. 그 외에는 업스트림에 연결하지 않고 `403`를 반환합니다. 호출자의 `Authorization` 헤더(`$TOKEN$` 자리표시자 포함)는 무시됩니다. OmniRoute는 연결의 액세스 토큰을 삽입하며, 만료가 가까우면 먼저 갱신합니다. 전달하는 헤더는 허용 목록에 있는 것뿐입니다(`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`; `Accept`, `Content-Type`). `Chatgpt-Account-Id`가 없으면 저장된 워크스페이스 ID를 기본값으로 사용합니다. 첫 업스트림 응답이 `401`이면 한 번 갱신한 뒤 액세스 토큰이 바뀐 경우에만 다시 시도합니다. 업스트림의 각 시도는 15초 후 시간 초과되며 연결의 프록시를 사용합니다.
+- `reset-quota`는 최종 상태(banned, expired, credits_exhausted)를 그대로 둡니다. 알 수 없는 `auth_index`는 `404`를 반환합니다.
 
 **인증:** 로그인 세션 또는 `manage` 범위의 API 키가 필요하며, 로그인 기능이 비활성화된 경우에도 필수입니다(경로가 `ALWAYS_PROTECTED_API_PATHS`에 포함되어 있습니다). 추론 전용 키는 `403`을 반환합니다. 소스:
 `src/lib/cliproxyCompat/managementApi.ts`.
@@ -1891,17 +1882,17 @@ API 키 / 세션 범위로 지정된 대화형/사실 기반 영구 메모리 �
 
 OmniRoute는 3개의 전송 방식(stdio, SSE, streamable-http)과 범위가 지정된 도구를 지원하는 내장 Model Context Protocol 서버를 제공합니다. 아래 대시보드 엔드포인트는 상태/감사 데이터를 읽고 HTTP 전송을 프록시합니다.
 
-| Method | Path | Description |
-| ------ | ---------------------- | ------------------------------------------------------------------------------------------------ | -------------------- |
-| GET | `/api/mcp/status` | 하트비트, 전송 방식, 온라인 상태, 마지막 호출, 주요 도구, 24시간 성공률 |
-| GET | `/api/mcp/tools` | `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints`를 포함하는 MCP 도구 목록 |
-| GET | `/api/mcp/sse` | SSE 전송을 위한 SSE 스트림 열기(MCP가 비활성화되었거나 전송 방식이 일치하지 않으면 `503` 반환) |
-| POST | `/api/mcp/sse` | SSE 전송에서 JSON-RPC 프레임 전송 |
-| GET | `/api/mcp/stream` | Streamable HTTP 전송의 SSE 측면 열기(서버가 시작한 메시지) |
-| POST | `/api/mcp/stream` | Streamable HTTP 전송에서 JSON-RPC 프레임 전송 |
-| DELETE | `/api/mcp/stream` | Streamable HTTP 세션 종료 |
-| GET | `/api/mcp/audit` | 감사 로그 쿼리 — `?limit=`, `?offset=`, `?tool=`, `?success=true                                | false`, `?apiKeyId=` |
-| GET | `/api/mcp/audit/stats` | 집계된 감사 통계(총계, 성공률, 평균 기간, 주요 도구) |
+| Method | Path                   | Description                                                                                                             |
+| ------ | ---------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/mcp/status`      | 하트비트, 전송 방식, 온라인 상태, 마지막 호출, 주요 도구, 24시간 성공률                                                 |
+| GET    | `/api/mcp/tools`       | `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints`를 포함하는 MCP 도구 목록                      |
+| GET    | `/api/mcp/sse`         | SSE 전송을 위한 SSE 스트림 열기(MCP가 비활성화되었거나 전송 방식이 일치하지 않으면 `503` 반환)                          |
+| POST   | `/api/mcp/sse`         | SSE 전송에서 JSON-RPC 프레임 전송                                                                                       |
+| GET    | `/api/mcp/stream`      | Streamable HTTP 전송의 SSE 측면 열기(서버가 시작한 메시지)                                                              |
+| POST   | `/api/mcp/stream`      | Streamable HTTP 전송에서 JSON-RPC 프레임 전송                                                                           |
+| DELETE | `/api/mcp/stream`      | Streamable HTTP 세션 종료                                                                                               |
+| GET    | `/api/mcp/audit`       | 감사 로그 쿼리 — `?limit=`, `?offset=`, `?tool=`, `?success=true                                \| false`, `?apiKeyId=` |
+| GET    | `/api/mcp/audit/stats` | 집계된 감사 통계(총계, 성공률, 평균 기간, 주요 도구)                                                                    |
 
 **인증:** `sse`/`stream` 전송은 MCP 전용 인증 영역(`mcp` 범위가 포함된 Bearer API 키)을 따릅니다. `status`/`tools`/`audit*` 경로는 대시보드에서 읽을 수 있습니다(대시보드 호스트에 접근하는 것 외에 추가 인증 필요 없음).
 

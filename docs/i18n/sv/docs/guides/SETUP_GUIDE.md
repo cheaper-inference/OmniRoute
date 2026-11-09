@@ -27,7 +27,9 @@ npm install -g omniroute
 omniroute
 ```
 
-Kontrollpanelen öppnas på `http://localhost:20128` och API:ets bas-URL är `http://localhost:20128/v1`.
+Dashboard öppnas vid `http://localhost:20128` och API bas URL är `http://localhost:20128/v1`.
+
+> **npm användare:** Om npm varnar för att installationsskript blockerades (t.ex. `omniroute`, `better-sqlite3`), se [Felsökning av — npm installationsskript blockerade](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install).
 
 ### pnpm
 
@@ -198,11 +200,11 @@ Detaljerad konfiguration för varje verktyg (Claude Code, Codex CLI, Cursor, Cli
 
 ---
 
-## Protokollkonfiguration (MCP + A2A)
+## Protokollinställningar (MCP + A2A)
 
-### MCP-konfiguration (Model Context Protocol)
+### MCP Setup (Model Context Protocol)
 
-Starta MCP-transporten i stdio-läge:
+Starta MCP transport i stdio-läge:
 
 ```bash
 omniroute --mcp
@@ -211,28 +213,28 @@ omniroute --mcp
 Rekommenderat valideringsflöde:
 
 ```bash
-# 1. Starta MCP-servern
+# 1. Start MCP server
 omniroute --mcp
 
-# 2. Anropa följande från din MCP-klient:
-omniroute_get_health        # Bör returnera systemets hälsostatus
-omniroute_list_combos       # Bör returnera aktiva kombinationer
+# 2. From your MCP client, call:
+omniroute_get_health        # Should return system health
+omniroute_list_combos       # Should return active combos
 
-# 3. Eller kör hela E2E-sviten:
+# 3. Or run the full E2E suite:
 npm run test:protocols:e2e
 ```
 
-#### Konfiguration av MCP-klient
+#### MCP klientkonfiguration
 
-**Claude Code:**
+**Claude kod:**
 
 ```bash
-claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
 ```
 
 **Cursor / Cline:**
 
-Lägg till följande i dina MCP-inställningar:
+Lägg till i dina MCP inställningar (stdio, med nyckeln så att den som ringer har en huvudman):
 
 ```json
 {
@@ -240,17 +242,24 @@ Lägg till följande i dina MCP-inställningar:
     "omniroute": {
       "command": "omniroute",
       "args": ["--mcp"],
-      "env": {}
+      "env": {
+        "OMNIROUTE_API_KEY": "your-key",
+        "OMNIROUTE_BASE_URL": "http://localhost:20128"
+      }
     }
   }
 }
 ```
 
-**Fullständig MCP-dokumentation:** [README för MCP-servern](../../open-sse/mcp-server/README.md) — 110 verktyg, IDE-konfigurationer samt Python-/TS-/Go-klienter.
+Eller, när `mcpTransport` är `streamable-http` (ställ den på `/dashboard/mcp` eller med `omniroute mcp enable --transport streamable-http`), peka klientens fjärrserver MCP servern mot `http://localhost:20128/api/mcp/stream`.
 
-### A2A-konfiguration (Agent-to-Agent Protocol)
+Nyckeln färdas som `Authorization: Bearer <api-key>` (se [MCP Server → Fjärråtkomst](../frameworks/MCP-SERVER.md#remote-access-manage-scope-bypass) för fjärrvärdar; en fjärrnyckel behöver `mcp:connect` plus dess read/write omfång).
 
-Verifiera Agent Card:
+**Fullständig MCP -dokumentation:** [MCP Server README](../../open-sse/mcp-server/README.md) — 110-verktyg, IDE -konfigurationer, Python/TS/Go klienter. Operatörsreferens för komprimeringsverktygen CCR/dedup (markörer, förutsättningar, omfattningar per verktyg, paginering för hämtning, diagnostik): [Kompressionsmotorer → Förutsättningar / operatörsguide](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+
+### A2A inställningar (Agent-to-Agent-protokoll)
+
+Verifiera agentkortet:
 
 ```bash
 curl http://localhost:20128/.well-known/agent.json
@@ -264,7 +273,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"Give me a short quota summary."}]}}'
 ```
 
-**Fullständig A2A-dokumentation:** [README för A2A-servern](../../src/lib/a2a/README.md) — JSON-RPC 2.0, färdigheter, strömning och uppgifters livscykel.
+**Fullständig A2A -dokumentation:** [A2A Server README](../../src/lib/a2a/README.md) — JSON-RPC 2.0, färdigheter, streaming, uppgiftens livscykel.
 
 ---
 
@@ -323,23 +332,23 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ---
 
-## Void Linux-mall (xbps-src)
+## Void Linux (xbps-src) mall
 
-För Void Linux-användare kan du bygga ett systemanpassat paket med `xbps-src`. Spara detta block som `srcpkgs/omniroute/template`:
+För Void Linux användare kan du bygga ett inbyggt paket med `xbps-src`. Spara detta block som `srcpkgs/omniroute/template`:
 
 ```bash
-# Mallfil för 'omniroute'
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
 hostmakedepends="nodejs python3 make"
 depends="openssl"
-short_desc="Universell AI-gateway med smart dirigering för flera LLM-leverantörer"
+short_desc="Universal AI gateway with smart routing for multiple LLM providers"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# Generera kontrollsumman på nytt för varje utgåva med:
+# Regenerate the checksum for each release with:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

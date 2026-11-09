@@ -241,9 +241,9 @@ interface CliFingerprint {
 
 ---
 
-## User-Agent עוקף — env vars (`.env.example` סעיף 12)
+## דריסות User-Agent — משתני סביבה (`.env.example`, סעיף 12)
 
-| מִשְׁתַנֶה          | בְּרִירַת מֶחדָל                              |
+| משתנה               | ברירת מחדל                                    |
 | ------------------- | --------------------------------------------- |
 | `CLAUDE_USER_AGENT` | `claude-cli/2.1.280 (external, cli)`          |
 | `CODEX_USER_AGENT`  | `codex-cli/0.155.0 (Windows 10.0.26200; x64)` |
@@ -252,7 +252,7 @@ interface CliFingerprint {
 | `QODER_USER_AGENT`  | `Qoder-Cli`                                   |
 | `CURSOR_USER_AGENT` | `Cursor/3.4`                                  |
 
-נצרך על ידי `open-sse/executors/base.ts::buildHeaders()` באמצעות חיפוש דינמי.** תקפו אותם כאשר ספקים משחררים גרסאות CLI חדשות** מחרוזות UA מיושנות — מתחילות להידחות כלקוחות מיושנים.
+נצרכים על ידי `open-sse/executors/base.ts::buildHeaders()` באמצעות חיפוש דינמי. **יש לעדכן אותם כאשר ספקים משחררים גרסאות CLI חדשות** — מחרוזות UA מיושנות מתחילות להידחות כלקוחות שאינם מעודכנים.
 
 ## מתגים למצב תאימות CLI (`.env.example` סעיף 13)
 

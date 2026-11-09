@@ -12,13 +12,13 @@ kai Turbopack komponavimas sutampa su Release-Green webpack komponavimu ir lint 
 kompensuoja pagrindinio kompiuterio sukeitimo sritis (16 GB), o kadangi ištraukimo užklausų komponavimai
 vykdomi talpinamose vykdyklėse, Turbopack vieta didžiąją laiko dalį nenaudojama:
 
-| vykdyklė             | žyma           | vaidmuo                                                                                                                                                       | `MemoryHigh` / `MemoryMax`      | `CPUQuota` |
-| -------------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------- | ---------- |
-| `omniroute-113-5`    | `omni-build`   | Turbopack komponavimai: `ci.yml` `Build` (tik push/dispatch), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, naktinis a11y komponavimas | 56 GB / 60 GB (sukeitimas 0)    | 1600 %     |
-| `omniroute-113-6`    | `omni-release` | Release-Green (`release-green` + `main-green`), webpack komponavimas                                                                                          | 20 GB / 24 GB (sukeitimas 4 GB) | 800 %      |
-| `omniroute-113-2`    | `omni-light`   | naktinės užduotys (Schemathesis, promptfoo, garak, k6) ir `quality.yml` `lint-guard`                                                                          | 12 GB / 16 GB (sukeitimas 4 GB) | 600 %      |
-| `omniroute-113`      | `omni-light`   | tas pats telkinys kaip pirmiau                                                                                                                                | 8 GB / 12 GB                    | 400 %      |
-| OmniHeuris, OmniMind | (jų saugyklos) | tik Dependabot (kiekvienos didžiausias naudojimas – 155 MB, 2026-10-18)                                                                                       | 4 GB / 6 GB                     | po 200 %   |
+| vykdyklė             | žyma                            | vaidmuo                                                                                                                                                       | `MemoryHigh` / `MemoryMax`      | `CPUQuota` |
+| -------------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------- | ---------- |
+| `omniroute-113-5`    | `omni-build`, `omni-build-60gb` | Turbopack komponavimai: `ci.yml` `Build` (tik push/dispatch), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, naktinis a11y komponavimas | 56 GB / 60 GB (sukeitimas 0)    | 1600 %     |
+| `omniroute-113-6`    | `omni-release`                  | Release-Green (`release-green` + `main-green`), webpack komponavimas                                                                                          | 20 GB / 24 GB (sukeitimas 4 GB) | 800 %      |
+| `omniroute-113-2`    | `omni-light`                    | naktinės užduotys (Schemathesis, promptfoo, garak, k6) ir `quality.yml` `lint-guard`                                                                          | 12 GB / 16 GB (sukeitimas 4 GB) | 600 %      |
+| `omniroute-113`      | `omni-light`                    | tas pats telkinys kaip pirmiau                                                                                                                                | 8 GB / 12 GB                    | 400 %      |
+| OmniHeuris, OmniMind | (jų saugyklos)                  | tik Dependabot (kiekvienos didžiausias naudojimas – 155 MB, 2026-10-18)                                                                                       | 4 GB / 6 GB                     | po 200 %   |
 
 Išmatuota 2026-10-18:
 
@@ -28,13 +28,14 @@ Išmatuota 2026-10-18:
 | sukeitimas | 16 GB                               | `omniroute-113-5` veikia be sukeitimo (`MemorySwapMax=0`), todėl nevaldomas komponavimo procesas nutraukiamas pasiekęs ribą, užuot privertęs visą serverį naudoti sukeitimo sritį                                                                                                                                                                                                                  |
 | `/tmp`     | **12 GB tmpfs = RAM**               | viskas, kas ten laikoma, naudoja atmintį; likučiai pašalinami po 3 val.                                                                                                                                                                                                                                                                                                                            |
 | CPU        | 32 branduoliuose stebėta 60 apkrova | prieš nustatant kvotas vienas Turbopack komponavimas (~1166 % CPU) kartu su aprėpties testų rinkiniu tame pačiame serveryje neleido kitų klausytojų gyvybingumo signalams laiku pasiekti serverio (`The self-hosted runner lost communication`, #16853)                                                                                                                                            |
-| vykdyklės  | **7 klausytojai** (2026-10-28)      | 5 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-7` taip pat turi `omni-build`; `omniroute-113-3/-4/-8` buvo ištrinti iš saugyklos (2026-10-28)                                                                                                                                                                                                                                                 |
+| vykdyklės  | **7 klausytojai** (2026-10-28)      | 5 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-5` taip pat turi `omni-build-60gb`; `omniroute-113-3/-4/-8` buvo ištrinti iš saugyklos (2026-10-28)                                                                                                                                                                                                                                            |
 
 Ribos saugomos kiekvieno vieneto faile `/etc/systemd/system/actions.runner.<…>.service.d/override.conf`
 (ankstesnės reikšmės išsaugotos kaip `override.conf.bak-20261018`) ir buvo pritaikytos veikiančioje
 sistemoje naudojant `systemctl set-property --runtime … MemoryHigh=… MemoryMax=… CPUQuota=…` — be
 paleidimo iš naujo, todėl nebuvo paveikta nė viena vykdoma užduotis. Žymos taip pat keičiamos veikiančioje
-sistemoje per vykdyklių API (`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
+sistemoje per vykdyklių API
+(`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
 `gh api -X POST repos/<repo>/actions/runners/<id>/labels -f 'labels[]=<label>'`).
 
 ## Įdiekite valymo priemonę (vieną kartą serveryje)
@@ -92,7 +93,7 @@ komanda.
 ## Eksploatavimo taisyklės
 
 - **Vienu metu vykdomas tik vienas Turbopack komponavimas — tai užtikrinama žyma.** Kiekviena užduotis, vykdanti visą Turbopack
-  `next build`, naudoja `[self-hosted, omni-build]`, o šią žymą turi tik **`omniroute-113-5`**:
+  `next build`, naudoja `[self-hosted, omni-build, omni-build-60gb]`, o šią žymą turi tik **`omniroute-113-5`**:
   `ci.yml` `Build`, `npm-publish.yml` `publish`, `nightly-v4-build`, `preview-artifact`,
   naktinis a11y komponavimas (#16853) ir `docker-publish.yml` **amd64** (webpack sistemoje BuildKit —
   ten Turbopack užstrigo su kritine klaida, vykdymas 33253576569). arm64 Docker etapas lieka `ubuntu-24.04-arm`.

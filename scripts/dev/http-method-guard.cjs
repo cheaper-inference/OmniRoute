@@ -5,11 +5,16 @@ const http = require("node:http");
 const HIGH_RISK_METHOD_RULES = [
   [/^\/api\/auth\/login\/?$/, ["POST"]],
   [/^\/api\/auth\/logout\/?$/, ["POST"]],
+  [/^\/api\/auth\/status\/?$/, ["GET", "HEAD"]],
   [/^\/api\/keys\/?$/, ["GET", "POST"]],
   // Must precede the generic /api/keys/{id} rule: "import" is a static segment, not a key id.
   [/^\/api\/keys\/import\/?$/, ["POST"]],
+  // Match the group collection before the generic API-key id route.
+  [/^\/api\/keys\/groups\/?$/, ["GET", "POST"]],
+  [/^\/api\/keys\/groups\/[^/]+\/?$/, ["GET", "PUT", "DELETE"]],
   [/^\/api\/keys\/[^/]+\/?$/, ["GET", "PATCH", "DELETE"]],
   [/^\/api\/keys\/[^/]+\/devices\/?$/, ["GET"]],
+  [/^\/api\/keys\/[^/]+\/access\/?$/, ["POST"]],
 ];
 
 let installed = false;

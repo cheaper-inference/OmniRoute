@@ -4,47 +4,72 @@
 
 ---
 
-> Opt-in, av som standard (`modelVisibilityAllowlist`/`modelVisibilityDenylist` båda tomma lämnar `/v1/models` katalogen AND varje `auto/*` kandidatpool byte-identisk). Ett syskon till `hidePaidModels`/`hideAutoCombos` (`src/lib/db/settings.ts`) för operatörer som vill ha en kurerad modelllista av skäl som inte har med kostnad att göra.
+> Anmälningsbaserat, avstängt som standard (om både `modelVisibilityAllowlist` och `modelVisibilityDenylist` är tomma förblir
+> `/v1/models`-katalogen OCH varje kandidatpool för `auto/*` identiska på byte-nivå). En motsvarighet till
+> `hidePaidModels`/`hideAutoCombos` (`src/lib/db/settings.ts`) för operatörer som vill ha en kurerad
+> modellista av skäl som inte har något med kostnad att göra.
 
 ## Varför detta finns
 
-`hidePaidModels` svarar "är den här modellen gratis?" och `hideAutoCombos` svarar "ska virtuella `auto/*` -id:n annonseras överhuvudtaget?" — låter inte heller en operatör kurera en godtycklig delmängd av modeller (t.ex. presentera exakt de modeller som en given Claude Code / OpenCode -klient ska se, oberoende av prissättning). #11481 lägger till det som två oberoende, opt-in string-array-inställningar.
+`hidePaidModels` besvarar frågan ”är den här modellen kostnadsfri?” och `hideAutoCombos` besvarar ”ska virtuella
+`auto/*`-id:n överhuvudtaget visas?” — inget av dem låter en operatör kurera en godtycklig delmängd av
+modeller (t.ex. visa exakt de modeller som en viss Claude Code-/OpenCode-klient ska se,
+oberoende av prissättning). #11481 lägger till detta i form av två oberoende, anmälningsbaserade inställningar för stränglistor.
 
 ## Inställningar
 
-| Nyckel                     | Typ        | Standard | Menande                                                                      |
-| -------------------------- | ---------- | -------- | ---------------------------------------------------------------------------- |
-| `modelVisibilityDenylist`  | `string[]` | `[]`     | Inlägg som matchar en kandidat döljer den från catalog/candidate poolen.     |
-| `modelVisibilityAllowlist` | `string[]` | `[]`     | När de inte är tomma förblir ONLY poster som matchar en kandidat exponerade. |
+| Nyckel                     | Typ        | Standardvärde | Betydelse                                                                |
+| -------------------------- | ---------- | ------------- | ------------------------------------------------------------------------ |
+| `modelVisibilityDenylist`  | `string[]` | `[]`          | Poster som matchar en kandidat döljer den från katalogen/kandidatpoolen. |
+| `modelVisibilityAllowlist` | `string[]` | `[]`          | När listan inte är tom visas ENDAST kandidater som matchar posterna.     |
 
-Båda accepterar upp till 500 poster på upp till 200 tecken vardera (Zod-validerad i `src/shared/validation/settingsSchemas.ts`). En post är antingen:
+Båda accepterar upp till 500 poster med högst 200 tecken vardera (Zod-validerat i
+`src/shared/validation/settingsSchemas.ts`). En post är antingen:
 
-- ett exakt katalog-id — `"gpt-4o"` (bar modell-id) eller `"openai/gpt-4o"` (leverantörsprefix), eller
-- ett globmönster som använder `*`/`?` — t.ex. `"openai/gpt-4*"` eller `"anthropic/*"` —, löst via samma delade `globToRegex()` matchare (`src/shared/utils/globPattern.ts`) som redan används av `ModelRoutingSection` per-modell combo-mappningar och `freeModels.ts::matchesOnlyPaidModels`.
+- ett exakt katalog-id — `"gpt-4o"` (modell-id utan prefix) eller `"openai/gpt-4o"` (med leverantörsprefix), eller
+- ett globmönster som använder `*`/`?` — t.ex. `"openai/gpt-4*"` eller `"anthropic/*"` — som matchas via
+  samma delade `globToRegex()`-matchare (`src/shared/utils/globPattern.ts`) som redan används av
+  `ModelRoutingSection`:s kombinationsmappningar per modell och `freeModels.ts::matchesOnlyPaidModels`.
 
-Företräde: denylistan kontrolleras först (en nekad post döljs alltid, även om den också matchar godkännandelistan); när godkännandelistan inte är tom, är det bara poster som den matchar.
+Prioritet: spärrlistan kontrolleras först (en spärrad post är alltid dold, även om den också
+matchar tillåtelselistan); när tillåtelselistan inte är tom visas endast poster som den matchar.
 
-## Två chokepoints, inte en
+## Två kontrollpunkter, inte en
 
-Lärdomen från #6512 (ett `hidePaidModels` -only -katalogfilter lät fortfarande `auto/*` dirigera till en betald modell, eftersom kombinationskandidatpoolen byggdes oberoende) gäller identiskt här. Det matchande predikatet `isModelExposureAllowed()` (`src/shared/utils/modelExposureList.ts`) anropas från BOTH:
+Lärdomen från #6512 (ett katalogfilter enbart för `hidePaidModels` lät ändå `auto/*` dirigera till en
+betald modell, eftersom kombinationens kandidatpool byggdes separat) gäller på exakt samma sätt här.
+Matchningspredikatet `isModelExposureAllowed()` (`src/shared/utils/modelExposureList.ts`) anropas från BÅDE:
 
-- `src/app/api/v1/models/catalog.ts` — själva `/v1/models` listan, vid samma 5 chokepoints per källa `shouldHidePaid()` redan grindar (statisk `PROVIDER_MODELS`, synkroniserade leverantörsrader, anpassade rader, aliasstödda rader, hanterade reservrader).
-- `open-sse/services/autoCombo/modelExposureFilter.ts::filterModelExposureCandidates()` — anropas från `virtualFactory.ts::buildPreparedPool`, omedelbart efter motsvarande `filterPaidOnlyCandidates()` -anrop, så en nekad modell kan aldrig väljas in i en `auto/*` kandidatpool heller.
+- `src/app/api/v1/models/catalog.ts` — själva `/v1/models`-listningen, vid samma fem kontrollpunkter per källa
+  som `shouldHidePaid()` redan styr (statiska `PROVIDER_MODELS`, synkroniserade leverantörsrader,
+  anpassade rader, aliasbaserade rader och hanterade reservrader).
+- `open-sse/services/autoCombo/modelExposureFilter.ts::filterModelExposureCandidates()` — anropas
+  från `virtualFactory.ts::buildPreparedPool`, omedelbart efter motsvarande
+  `filterPaidOnlyCandidates()`-anrop, så att en spärrad modell aldrig heller kan väljas in i en
+  kandidatpool för `auto/*`.
 
-## Vad är NOT filtrerat
+## Vad som INTE filtreras
 
-Speglar `hideAutoCombos` befintliga beteende: ett modell-id skickat** uttryckligen** (inte via `auto/*`, och inte upptäckt genom kataloglistan) blockeras aldrig vid avsändning — endast advertisement/candidate-pool medlemskap filtreras. Detta är oberoende av `hidePaidModels`; en operatör kanske vill ha en kurerad uppsättning av skäl som inte har med kostnad att göra, så båda inställningarna består av oberoende AND-ed-filter, samma som den befintliga multi-flaggade sammansättningen i `catalog.ts`.
+Speglar det befintliga beteendet hos `hideAutoCombos`: ett modell-id som skickas **explicit** (inte via `auto/*`
+och inte upptäcks genom kataloglistningen) blockeras aldrig vid dirigeringen — endast
+visning/medlemskap i kandidatpoolen filtreras. Detta är oberoende av `hidePaidModels`;
+en operatör kan vilja ha en kurerad uppsättning av skäl som inte har något med kostnad att göra, så båda
+inställningarna kombineras som oberoende OCH-kopplade filter, på samma sätt som den befintliga kombinationen av flera flaggor i
+`catalog.ts`.
 
-Inställningsexport (`GET /api/settings/export-json`) inkluderar båda arrayerna ordagrant, precis som alla andra inställningsfält — till skillnad från `hidePaidModels` kombinerade exportfilter, finns det ingen återhydreringsrisk här: ett nekat id inbäddat i ett exporterat kombinationssteg är operatörens eget explicita ruttval, inte något som exportgränsen behöver ta bort.
+Inställningsexporten (`GET /api/settings/export-json`) inkluderar båda listorna ordagrant, precis som alla andra
+inställningsfält — till skillnad från `hidePaidModels`:s exportfilter för kombinationssteg finns det ingen risk för
+återinförande här: ett spärrat id som är inbäddat i ett exporterat kombinationssteg är operatörens eget explicita dirigeringsval,
+inte något som behöver tas bort vid exportgränsen.
 
-## Enbart kombinationer (`exposeCombosOnly`)
+## Listning av enbart comboer (`exposeCombosOnly`)
 
-En separat boolean, även opt-in och `false` som standard, för distributioner där kombinationer är den offentliga modellens yta och leverantörer endast är backends. När det är `true` behåller den offentliga noteringen (`GET /v1/models`, `GET /v1`, och de andra `/v1` -upptäckarvägarna byggda på `getUnifiedModelsResponse()`) endast rader med `owned_by: "combo"`: användarkombinationer plus de inbyggda `auto/*` -kombinationerna (om inte `hideAutoCombos` döljer dem). Den använder samma radtest som per-tangenten `catalogScope: "combos"`, och en nyckels egna allow/deny/scope filter gäller fortfarande ovanpå.
+En separat boolesk inställning, även den uttryckligen aktiverad och `false` som standard, för installationer där comboer utgör det offentliga modellutbudet och leverantörer bara är backender. När den är `true` behåller den offentliga listan (`GET /v1/models`, `GET /v1` och övriga `/v1`-upptäcktsrutter byggda på `getUnifiedModelsResponse()`) endast rader med `owned_by: "combo"`: användarcomboer plus de inbyggda `auto/*`-comboerna (om inte `hideAutoCombos` döljer dem). Den använder samma radtest som `catalogScope: "combos"` per nyckel, och nyckelns egna tillåt-/neka-/scope-filter gäller fortfarande utöver detta.
 
-Slå in den** Inställningar → Routing → Modeller API listning** , eller med `PATCH /api/settings {"exposeCombosOnly": true}`.
+Växla inställningen i **Settings → Routing → Models API listing**, eller med `PATCH /api/settings {"exposeCombosOnly": true}`.
 
-Liksom listorna ovan ändrar den bara annonsen:
+Liksom listorna ovan ändrar detta endast vad som annonseras:
 
-- ett explicit `provider/model` id skickas fortfarande, och `GET /v1/models/{id}` löser det fortfarande;
-- instrumentbrädans katalog (`GET /api/models/catalog`, används av modellväljarna) är inte smalare;
-- den speglas inte i `auto/*` kandidatpoolerna, så `auto/*` kombinationer behåller sin fulla pool.
+- ett uttryckligt `provider/model`-ID skickas fortfarande vidare, och `GET /v1/models/{id}` hittar det fortfarande;
+- instrumentpanelens katalog (`GET /api/models/catalog`, som modellväljarna använder) begränsas inte;
+- detta speglas inte till kandidatpoolerna för `auto/*`, så `auto/*`-comboer behåller hela sin pool.

@@ -81,6 +81,18 @@ Incluso fuera de las regiones bloqueadas, los proxies resultan útiles para:
 
 ---
 
+## Estado de proxy predeterminado para cuentas nuevas
+
+En** Configuración → Proxy → Configuración global** , usar** Habilite el proxy de forma predeterminada para nuevas conexiones** para elegir el estado de proxy inicial de las cuentas de proveedores recién agregadas.
+
+La nueva configuración controla el estado del proxy inicial de las cuentas de proveedores recién agregadas. No cambia las cuentas existentes ni reemplaza el conmutador de proxy global. Su valor inicial conserva el comportamiento anterior. Desactívelo una vez para crear cuentas futuras con el proxy desactivado de forma predeterminada.
+
+La preferencia se almacena como `defaultNewConnectionProxyEnabled` a través de la Configuración API existente. El valor predeterminado es `true` cuando nunca se guarda. Guardar `false` tiene efecto para las cuentas nuevas posteriores sin reiniciar. `POST /api/providers` acepta un `proxyEnabled` booleano estricto opcional; un `true` o `false` explícito tiene prioridad sobre el valor predeterminado de creación. La omisión de una cuenta duplicada o la reconexión OAuth preserva el estado almacenado de esa cuenta. Las cuentas individuales aún se pueden habilitar o deshabilitar después.
+
+Las transferencias selectivas de proveedores utilizan el valor predeterminado de instalación de destino para cuentas nuevas y preservan la política de destino al reemplazar cuentas existentes. Los conmutadores de proxy no son campos de transferencia portátiles. La restauración completa de la copia de seguridad y la migración histórica JSON/SQL conservan su semántica de restauración existente, incluidos los valores de cuenta guardados y los valores predeterminados del esquema heredado; una restauración completa de la configuración también puede restaurar esta preferencia.
+
+Esta preferencia no asigna un proxy ni establece que uno esté en buen estado o en uso. El enrutamiento real aún depende del conmutador de proxy global y de la configuración de proxy aplicable. Los proveedores sintéticos sin una cuenta persistente, el tráfico OAuth antes de la creación de la cuenta, los proxies environment/system y las redes de servidores externos están fuera de su alcance.
+
 ## Sistema de proxy de 4 niveles
 
 OmniRoute admite la configuración de proxies en **cuatro ámbitos independientes**, que se resuelven por orden de prioridad:
@@ -381,7 +393,7 @@ Utiliza `wreq-js` para generar huellas digitales TLS similares a las de los nave
 
 ### Coincidencia de huellas digitales de CLI
 
-El **selector de huella digital de CLI** (`Configuración → Seguridad`) reordena los encabezados HTTP y los campos del cuerpo JSON para que coincidan con la firma exacta de los binarios de CLI nativos (Claude Code, Codex, etc.). Esto funciona **además del** proxy:
+El **selector de huella digital de CLI** (`Settings → Security`) reordena los encabezados HTTP y los campos del cuerpo JSON para que coincidan con la firma exacta de los binarios de CLI nativos (Claude Code, Codex, etc.). Esto funciona **además del** proxy:
 
 ```
 Tu IP (bloqueada) → IP del proxy (EE. UU.) → API del proveedor

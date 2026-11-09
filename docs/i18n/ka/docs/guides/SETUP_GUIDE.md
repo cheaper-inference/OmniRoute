@@ -20,14 +20,16 @@
 
 ## ინსტალაციის მეთოდები
 
-### npm (რეკომენდებული)
+### npm (რეკომენდებულია)
 
 ```bash
 npm install -g omniroute
 omniroute
 ```
 
-მართვის პანელი იხსნება მისამართზე `http://localhost:20128`, ხოლო API-ის საბაზო URL არის `http://localhost:20128/v1`.
+დაფა იხსნება `http://localhost:20128` ზე და API ბაზაზე URL არის `http://localhost:20128/v1`.
+
+> **npm მომხმარებლები:** თუ npm აფრთხილებს, რომ ინსტალაციის სკრიპტები დაბლოკილია (მაგ., `omniroute`, `better-sqlite3`), იხილეთ [პრობლემების მოგვარება — npm install-scripts დაბლოკილი](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install).
 
 ### pnpm
 
@@ -198,41 +200,41 @@ omniroute setup-qwen         # ~/.qwen/settings.json + ~/.qwen/.env
 
 ---
 
-## პროტოკოლების დაყენება (MCP + A2A)
+## პროტოკოლის დაყენება (MCP + A2A)
 
-### MCP-ის დაყენება (Model Context Protocol)
+### MCP Setup (მოდელის კონტექსტური პროტოკოლი)
 
-გაუშვით MCP ტრანსპორტი stdio რეჟიმში:
+დაიწყეთ MCP ტრანსპორტი stdio რეჟიმში:
 
 ```bash
 omniroute --mcp
 ```
 
-რეკომენდებული შემოწმების პროცესი:
+რეკომენდებული ვალიდაციის ნაკადი:
 
 ```bash
-# 1. გაუშვით MCP სერვერი
+# 1. Start MCP server
 omniroute --mcp
 
-# 2. თქვენი MCP კლიენტიდან გამოიძახეთ:
-omniroute_get_health        # უნდა დააბრუნოს სისტემის მდგომარეობა
-omniroute_list_combos       # უნდა დააბრუნოს აქტიური კომბინაციები
+# 2. From your MCP client, call:
+omniroute_get_health        # Should return system health
+omniroute_list_combos       # Should return active combos
 
-# 3. ან გაუშვით სრული E2E ნაკრები:
+# 3. Or run the full E2E suite:
 npm run test:protocols:e2e
 ```
 
 #### MCP კლიენტის კონფიგურაცია
 
-**Claude Code:**
+**Claude კოდი:**
 
 ```bash
-claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
 ```
 
 **Cursor / Cline:**
 
-დაამატეთ თქვენს MCP პარამეტრებში:
+დაამატეთ თქვენს MCP პარამეტრებს (stdio, გასაღებით, რათა აბონენტს ჰქონდეს მთავარი):
 
 ```json
 {
@@ -240,23 +242,30 @@ claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp
     "omniroute": {
       "command": "omniroute",
       "args": ["--mcp"],
-      "env": {}
+      "env": {
+        "OMNIROUTE_API_KEY": "your-key",
+        "OMNIROUTE_BASE_URL": "http://localhost:20128"
+      }
     }
   }
 }
 ```
 
-**MCP-ის სრული დოკუმენტაცია:** [MCP სერვერის README](../../open-sse/mcp-server/README.md) — 110 ინსტრუმენტი, IDE კონფიგურაციები, Python/TS/Go კლიენტები.
+ან, როდესაც `mcpTransport` არის `streamable-http` (დააყენეთ იგი `/dashboard/mcp` ზე ან `omniroute mcp enable --transport streamable-http` ზე), მიუთითეთ კლიენტის დისტანციური MCP სერვერის ჩანაწერი `http://localhost:20128/api/mcp/stream` ზე.
 
-### A2A-ის დაყენება (Agent-to-Agent Protocol)
+გასაღები მოძრაობს როგორც `Authorization: Bearer <api-key>` (იხ. [MCP სერვერი → დისტანციური წვდომა](../frameworks/MCP-SERVER.md#remote-access-manage-scope-bypass) დისტანციური ჰოსტებისთვის; დისტანციურ გასაღებს სჭირდება `mcp:connect` პლუს მისი read/write არეები).
 
-შეამოწმეთ Agent Card:
+**სრული MCP დოკუმენტაცია:** [MCP სერვერი README](../../open-sse/mcp-server/README.md) — 110 ინსტრუმენტები, IDE კონფიგურაციები, Python/TS/Go კლიენტები. ოპერატორის მითითება შეკუმშვის CCR/dedup ხელსაწყოებისთვის (მარკერები, წინაპირობები, თითო ხელსაწყოს სკოპი, მოძიების პაგინაცია, დიაგნოსტიკა): [შეკუმშვის ძრავები → წინაპირობები / ოპერატორის სახელმძღვანელო](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+
+### A2A Setup (აგენტიდან აგენტის პროტოკოლი)
+
+გადაამოწმეთ აგენტის ბარათი:
 
 ```bash
 curl http://localhost:20128/.well-known/agent.json
 ```
 
-გაგზავნეთ დავალება:
+დავალების გაგზავნა:
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -264,7 +273,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"Give me a short quota summary."}]}}'
 ```
 
-**A2A-ის სრული დოკუმენტაცია:** [A2A სერვერის README](../../src/lib/a2a/README.md) — JSON-RPC 2.0, უნარები, ნაკადური გადაცემა, დავალების სასიცოცხლო ციკლი.
+**სრული A2A დოკუმენტაცია:** [A2A სერვერი README](../../src/lib/a2a/README.md) — JSON-RPC 2.0, უნარები, სტრიმინგი, დავალების სასიცოცხლო ციკლი.
 
 ---
 
@@ -323,12 +332,12 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ---
 
-## Void Linux-ის (xbps-src) შაბლონი
+## Void Linux (xbps-src) შაბლონი
 
-Void Linux-ის მომხმარებლებს შეუძლიათ `xbps-src`-ის გამოყენებით ნატიური პაკეტის აგება. შეინახეთ ეს ბლოკი ფაილად `srcpkgs/omniroute/template`:
+Void Linux მომხმარებლებისთვის შეგიძლიათ შექმნათ მშობლიური პაკეტი `xbps-src` გამოყენებით. შეინახეთ ეს ბლოკი, როგორც `srcpkgs/omniroute/template`:
 
 ```bash
-# შაბლონის ფაილი 'omniroute'-ისთვის
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -339,7 +348,7 @@ maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# თითოეული გამოშვებისთვის საკონტროლო ჯამი ხელახლა შექმენით შემდეგი ბრძანებით:
+# Regenerate the checksum for each release with:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

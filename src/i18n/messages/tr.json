@@ -4147,7 +4147,9 @@
     "duplicateAutoComboFailedPrefix": "Otomatik kombinasyon kopyalanamadı:",
     "duplicateAutoComboUnknownError": "Bilinmeyen hata",
     "duplicateAutoComboTitle": "{name}-den statik bir kombinasyon oluştur",
-    "fallbackSummary": "İsteklerin %{rate}'i yedek hedeflere geçti, her seferinde ~{skips} hedef atlandı"
+    "fallbackSummary": "İsteklerin %{rate}'i yedek hedeflere geçti, her seferinde ~{skips} hedef atlandı",
+    "reorderAll": "Tümünü yeniden sırala",
+    "reorderAllDescription": "Tüm {count} kombinasyonları yeniden sıralanıyor. Sürükleme tutamaçları etkinleştirildi."
   },
   "costs": {
     "title": "Maliyetler",
@@ -14538,6 +14540,10 @@
       "UNPRICED_USAGE_BUDGET_POLICY": {
         "label": "Fiyatlandırılmamış Kullanım Bütçe Politikası",
         "description": "Anahtar başına günlük/haftalık USD limitlerinin, sağlayıcısı/modeli için fiyat satırı olmayan başarılı kullanımı nasıl ele aldığı. fail_closed (varsayılan) pencereyi aşılmış olarak işaretler; böylece bilinmeyen bir maliyet sert bir üst sınırı aşamaz. count_as_zero bu kullanımı $0 olarak sayar ve fiyatlandırılmış harcamayı uygulamaya devam eder. Fiyatlandırılmamış modeller her durumda pano ana sayfasında listelenir."
+      },
+      "COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE": {
+        "description": "Sıkıştırma önbellek istatistiklerinde, otomatik önek önbelleğe alma sağlayıcısına (OpenAI, Codex, Azure veya işaretleyici ayırma ile anında önbelleğe almayı bildiren özel bir bağlantı) sıkıştırılmış bir isteği, önbellek_kontrol işaretleri olmasa bile tahmini bir önbellek isabeti olarak sayın. Tahmin, gözlemlenen bir isabet değil, bir önbellek uygunluk sinyalidir; dolayısıyla bu sağlayıcılar için bildirilen isabet oranı %100'e doğru eğilim gösterir. Varsayılan olarak kapalı: yalnızca önbellekleme sağlayıcısına önbellek_kontrol işaretleyicileri taşıyan bir istek tahmini isabet olarak sayılır, dolayısıyla otomatik önek sağlayıcıları 0 raporlamaya devam eder.",
+        "label": "Sıkıştırma Önbellek İstatistikleri: Otomatik Önek Uygunluğu"
       }
     }
   },

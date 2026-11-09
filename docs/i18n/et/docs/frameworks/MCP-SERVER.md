@@ -10,35 +10,30 @@
 
 ## Paigaldamine
 
-OmniRoute MCP on sissee ehitatud. Käivitage see järgmiselt:
+OmniRoute MCP on sisseehitatud. Alustage sellega:
 
 ```bash
 omniroute --mcp
 ```
 
-Või open-sse transpordi kaudu:
+Või avatud transpordiga:
 
 ```bash
-# HTTP voogedastatav transport (port 20130)
-omniroute --dev  # MCP käivitub automaatselt lõpp-punktil /mcp
+# Streamable HTTP transport (default port 20128, in-process on the dashboard server)
+# Client endpoint: http://localhost:20128/api/mcp/stream
+# stdio: omniroute --mcp
 ```
 
-HTTP-transpordid (`sse` / `streamable-http`, mida teenindab protsessisiseselt töölauaserver) on
-vaikimisi välja lülitatud ja varem sai neid sisse või välja lülitada ainult lehel `/dashboard/mcp`. Alates versioonist v3.8.51
-on CLI-l samaväärne funktsionaalsus:
+HTTP transpordid (`sse` / `streamable-http`, mida teenindab armatuurlaua server) on vaikimisi välja lülitatud ja neid saab varem lülitada ainult `/dashboard/mcp` lehelt. Alates versioonist 3.8.51 on CLI paarsus:
 
 ```bash
-omniroute mcp status                                  # lubatud/võrgus, transport, tööriistade arv
+omniroute mcp status                                  # enabled/online, transport, tool count
 omniroute mcp enable [--transport stdio|sse|streamable-http]
 omniroute mcp disable
-omniroute mcp restart                                 # lähtestab aktiivsed sse/streamable-http seansid
+omniroute mcp restart                                 # resets active sse/streamable-http sessions
 ```
 
-`mcp enable`/`mcp disable` muudavad PATCH-päringuga sama `mcpEnabled` seadistust (ja valikuliselt
-`mcpTransport` seadistust), mida töölaud lülitab lõpp-punkti `/api/settings` kaudu. `mcp restart` kutsub välja
-`POST /api/mcp/restart`: see sulgeb aktiivsed `sse`/`streamable-http` seansid, et järgmine päring
-lähtestaks need puhtalt uuesti, tagastab `409`, kui MCP on keelatud, ja `501` transpordi `stdio` korral
-(stdio kliendid haldavad oma alamprotsessi ise — taaskäivitamiseks puudub protsessisisene pide).
+`mcp enable`/`mcp disable` PATCH sama `mcpEnabled` (ja valikuliselt `mcpTransport`) armatuurlaua seadistus lülitub `/api/settings` kaudu. `mcp restart` kutsub `POST /api/mcp/restart`: see lõhub aktiivsed `sse`/`streamable-http` seansid, nii et järgmine päring lähtestatakse puhtalt uuesti, tagastab `409` kui MCP on keelatud, ja `501` `stdio` transpordi jaoks (stdio klientidel on oma alamprotsess — pole protsessisisest käepidet, mida taaskäivitada).
 
 ## Transpordid
 
@@ -131,55 +126,42 @@ Cursor, Cline ja ühilduvate MCP klientide seadistamiseks.
 | `omniroute_cache_stats` | `read:cache`  | Semantilise vahemälu, viipavahemälu ja idempotentsuse statistika |
 | `omniroute_cache_flush` | `write:cache` | Vahemälu tühjendamine globaalselt või signatuuri/mudeli järgi    |
 
-## Tihendamise tööriistad (13)
+## Tihendustööriistad (13)
 
-| Tööriist                            | Õigused             | Kirjeldus                                                                                                                            |
-| :---------------------------------- | :------------------ | :----------------------------------------------------------------------------------------------------------------------------------- |
-| `omniroute_compression_status`      | `read:compression`  | Tihendamise seaded, analüütika kokkuvõte ja vahemälu-teadlik statistika (sisaldab `analytics.mcpDescriptionCompression` metaandmeid) |
-| `omniroute_compression_configure`   | `write:compression` | Konfigureerib tihendusrežiimi, läve, sihttihendussuhte, süsteemiviipa säilitamise, MCP kirjelduse tihenduse lüliti                   |
-| `omniroute_set_compression_engine`  | `write:compression` | Aktiivse mootori valik (off/caveman/rtk/stacked) ja Caveman/RTK intensiivsus                                                         |
-| `omniroute_list_compression_combos` | `read:compression`  | Loetleb nimetatud tihenduskombod ja nende mootorite töövood                                                                          |
-| `omniroute_compression_combo_stats` | `read:compression`  | Analüütika, mis on grupeeritud tihenduskombo ja mootori järgi                                                                        |
-| `omniroute_ccr_store`               | `write:compression` | Salvestab kutsuja-isoleeritud sisu piiratud mahulise mällu sees olevasse CCR-hoidlasse ja tagastab markeri koos `ccr://` viitega     |
-| `omniroute_ccr_retrieve`            | `read:compression`  | Toob CCR sisu tervikuna või päise, saba, ridade, grep- ja statistikarežiimides                                                       |
-| `omniroute_ccr_inspect`             | `read:compression`  | Vaatab kutsujale kuuluvaid CCR metaandmeid, tagastamata sisu                                                                         |
-| `omniroute_ccr_list`                | `read:compression`  | Loetleb kutsujale kuuluvate CCR-plokkide metaandmed lehekülgede kaupa                                                                |
-| `omniroute_ccr_delete`              | `write:compression` | Kustutab kutsujale kuuluva CCR-ploki                                                                                                 |
-| `omniroute_ccr_stats`               | `read:compression`  | Annab teada kutsuja-põhise mälukasutuse, elutsükli loendurid ja hoidla piirangud                                                     |
-| `omniroute_rtk_discover`            | `read:compression`  | Avastab korduvat müra vabatahtlikult esitatud RTK väljundnäidistest                                                                  |
-| `omniroute_rtk_learn`               | `read:compression`  | Loob ülevaatamiseks mõeldud RTK filtri mustandi vabatahtlikult esitatud näidistest                                                   |
+| Tööriist                            | Ulatused            | Kirjeldus                                                                                                                       |
+| :---------------------------------- | :------------------ | :------------------------------------------------------------------------------------------------------------------------------ |
+| `omniroute_compression_status`      | `read:compression`  | Tihendusseaded, analüüsi kokkuvõte ja vahemälu arvestav statistika (sisaldab `analytics.mcpDescriptionCompression` metaandmeid) |
+| `omniroute_compression_configure`   | `write:compression` | Tihendusrežiimi, läve, sihtsuhte, süsteemi viipade säilitamise, MCP kirjelduse tihendamise lüliti seadistamine                  |
+| `omniroute_set_compression_engine`  | `write:compression` | Valige aktiivne mootor (off/caveman/rtk/stacked) ja Caveman/RTK intensiivsus                                                    |
+| `omniroute_list_compression_combos` | `read:compression`  | Loetlege nimega kompressioonikombod ja nende mootoritorustikud                                                                  |
+| `omniroute_compression_combo_stats` | `read:compression`  | Tihenduskombo ja mootori järgi rühmitatud analüüs                                                                               |
+| `omniroute_ccr_store`               | `write:compression` | Salvestage helistajast eraldatud sisu piiratud mälus olevasse CCR poodi ja tagastage marker pluss `ccr://` viide                |
+| `omniroute_ccr_retrieve`            | `read:compression`  | Hankige CCR sisu täielikult või pea-, saba-, joon-, grep- ja statistikarežiimidega                                              |
+| `omniroute_ccr_inspect`             | `read:compression`  | Kontrollige helistajale kuuluvaid CCR metaandmeid sisu tagastamata                                                              |
+| `omniroute_ccr_list`                | `read:compression`  | Loetlege helistaja omanduses olevate CCR -plokkide leheküljelised metaandmed                                                    |
+| `omniroute_ccr_delete`              | `write:compression` | Kustutage helistajale kuuluv CCR plokk                                                                                          |
+| `omniroute_ccr_stats`               | `read:compression`  | Teatage helistaja ulatusega mälukasutusest, elutsükli loenduritest ja salvestamise piirangutest                                 |
+| `omniroute_rtk_discover`            | `read:compression`  | Avastage korduvat müra opt-in RTK väljundnäidistes                                                                              |
+| `omniroute_rtk_learn`               | `read:compression`  | Looge lubatud näidistest ülevaatav RTK -filtri mustand                                                                          |
 
-CCR kirjed asuvad ainult mälus ja kaovad taaskäivitamisel. Iga plokk on piiratud 2 MiB-ga, iga
-printsiip 16 MiB-ga ja globaalne hoidla 64 MiB-ga. Kirjete vaikimisi eluiga (TTL) on 24 tundi (maksimaalselt
-seitse päeva). Täielik MCP toomine on piiratud 256 KiB-ga; suuremad plokid jäävad kättesaadavaks
-piiratud vahemiku ja grep-režiimide kaudu. Salvestamine, toomine, loetlemine, kontrollimine, kustutamine ja statistika on
-isoleeritud autenditud API-võtme printsiibi järgi. Auditkirjed sisaldavad räsisid ja suurusandmeid, mitte kunagi sisu.
+CCR kirjed kasutavad kahetasandilist salvestusruumi: kuum mälusisene tase, mida toetab kohalikel mittepilvede käitusaegadel vastupidav SQLite tasand (`ccr_blocks`, vaikimisi sees), nii et plokk jääb ellu väljatõstmise või taaskäivitamise, kuni selle TTL saab — otsa, välja arvatud plokid, mis on üle 512 pilve käitusaja KB, ja jäävad alles. Iga plokk on piiratud 2 MiB, iga põhiosa 16 MiB ja globaalne pood 64 MiB-ga. Kirjete vaikeväärtus on 24-tunnine TTL (maksimaalselt seitse päeva). Täielik MCP otsimine on piiratud 256 KiB; suuremad plokid jäävad kättesaadavaks vahemiku ja grep režiimide kaudu. Salvestus, otsimine, loetlemine, ülevaatus, kustutamine ja statistika on isoleeritud autentitud API-võtme põhimõttega. Auditikirjed sisaldavad räsi ja suuruse metaandmeid, mitte kunagi sisu. Operaatorile suunatud üksikasjad (kaks markerit, kliendi eeltingimused, `codemode:false`, tööriistapõhised ulatused, lehekülgede arv ja diagnostiline maatriks) asuvad [tihendusmootorites → Eeltingimused / operaatori juhend](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
 
-`omniroute_compression_status` esitab MCP kirjelduse tihenduse eraldi
-`analytics.mcpDescriptionCompression` all. Need väärtused on metaandmete suuruse hinnangud MCP loetletavate
-kirjelduste jaoks (`tools`, `prompts`, `resources` ja `resourceTemplates`); need ei ole pakkuja kasutuse
-kviitungid ja on märgistatud kui `source: "mcp_metadata_estimate"`.
+`omniroute_compression_status` teatab MCP kirjelduse tihendamisest eraldi `analytics.mcpDescriptionCompression` all. Need väärtused on metaandmete suuruse hinnangud MCP loendatavate kirjelduste jaoks (`tools`, `prompts`, `resources` ja `resourceTemplates`); need ei ole teenusepakkuja kasutuskviitungid ja on tähistatud tähisega `source: "mcp_metadata_estimate"`.
 
-### MCP ligipääsetavuspuu filter (v3.8.0)
+### MCP juurdepääsetavuse puufilter (v3.8.0)
 
-Eraldiseisvalt ülalkirjeldatud tihendustööriistadest sisaldab OmniRoute käitusjärgset filtrit, mis
-tihendab MCP brauseri/ligipääsetavuse tööriistade **tulemusi** enne nende tagastamist agendile. See
-filter ei ole iseenesest tööriist — see töötab läbipaistvalt igal tööriistatulemusel, mis sisaldab
-paljusõnalist ligipääsetavuspuu- või brauserimomenttõmmise teksti (≥2000 tähemärki).
+Ülaltoodud tihendustööriistadest eraldiseisvalt sisaldab OmniRoute täitmisjärgset filtrit, mis tihendab** tööriista tulemused** MCP browser/accessibility tööriistad, enne kui need agendile tagastatakse. See filter ei ole ise tööriist — see töötab läbipaistvalt mis tahes tööriista tulemusel, mis sisaldab üksikasjalikku juurdepääsetavuse puud või brauseri hetktõmmise teksti (≥ 2000 tähemärki).
 
-Peamised käitumisomadused:
+Peamised käitumisviisid:
 
-- Ahendab ≥30 järjestikust korduvat vennalise-elemendi rida päise- ja sabakokkuvõtteks
-- Säilitab `[ref=eXX]` ankrud, mida Playwright/computer-use vajab
-- Tükeldab liigsuured tekstid (>50 000 tähemärki) navigeerimisvihjega
-- Eeldatav kokkuhoid: **60–80%** brauseri momenttõmmiste kasuliku koormuse osas
+- Ahendab ≥ 30 järjestikust korduvat õde-venda rida pea + saba kokkuvõtteks
+- Säilitab Playwright/computer-use nõutavad `[ref=eXX]` ankrud
+- Kärbib kõvasti liiga suurt teksti (> 50 000 tähemärki) koos navigeerimisvihjega
+- Oodatav kokkuhoid:** 60–80%** brauseri hetktõmmiste kasulike koormuste kohta
 
-Konfiguratsioon: `compression.mcpAccessibility` globaalsetes seadetes (migratsioon 056).
-Rakendus: `open-sse/services/compression/engines/mcpAccessibility/`.
-Täielik dokumentatsioon: [Tihendusmootorid — MCP ligipääsetavuspuu filter](../compression/COMPRESSION_ENGINES.md#mcp-accessibility-tree-filter).
+Konfiguratsioon: `compression.mcpAccessibility` globaalsetes seadetes (migratsioon 056). Rakendamine: `open-sse/services/compression/engines/mcpAccessibility/`. Täielikud dokumendid: [tihendusmootorid — MCP juurdepääsetavuse puufilter](../compression/COMPRESSION_ENGINES.md#mcp-accessibility-tree-filter).
 
-Vaata [Tihendusmootorid](../compression/COMPRESSION_ENGINES.md) ja [RTK tihendamine](../compression/RTK_COMPRESSION.md), et
-mõista neid tööriistu toetavat käitusaegset tihendusmudelit.
+Nende tööriistade taga oleva käitusaegse tihendusmudeli kohta vaadake jaotist [Compression Engines](../compression/COMPRESSION_ENGINES.md) ja [RTK Compression](../compression/RTK_COMPRESSION.md).
 
 ## 1Proxy tööriistad (3)
 
@@ -494,14 +476,14 @@ Südamelöögi hetktõmmis sisaldab:
 
 ## Auditi logimine
 
-Iga tööriistakõne logitakse SQLite `mcp_tool_audit` tabelisse faili `open-sse/mcp-server/audit.ts` poolt:
+`open-sse/mcp-server/audit.ts` logib iga tööriistakutse SQLite `mcp_tool_audit` tabelisse:
 
-- Tööriista nimi, argumendid (räsitud/kärbitud vastavalt tööriistapõhisele `auditLevel`-ile), tulemus
-- Kestus millisekundites, õnnestumise/ebaõnnestumise lipp, veateade (kui asjakohane)
-- API võtme räsi, ajatempel
-- Ulatuse keeldumised logitakse kujul `scope_denied:<põhjus>` koos puuduvate ulatuste loendiga
+- Tööriista nimi, argumendid (hashed/truncated tööriista `auditLevel` kohta ), tulemus
+- Kestus ms, success/failure lipp, veateade (kui see on kohaldatav)
+- API võtmeräsi, ajatempel
+- Ulatuse keelamised logitakse puuduva ulatuse loendiga `scope_denied:<reason>` na
 
-Kasuta töölauda või `/api/mcp/audit` ja `/api/mcp/audit/stats` REST lõpp-punkte, et vaadata viimaseid kõnesid.
+Kasutage viimaste kõnede kontrollimiseks armatuurlauda või `/api/mcp/audit` ja `/api/mcp/audit/stats` REST lõpp-punkte.
 
 ---
 

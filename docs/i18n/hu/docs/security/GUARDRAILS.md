@@ -209,7 +209,7 @@ dekódolható képet adott vissza) szintén érintetlenül haladnak tovább. Ez 
 normalizálás azokra a képekre korlátozódik, amelyeket a híd a saját önhívásához
 tölt le — soha nem alkalmazza a hívó nyers, változatlanul továbbított
 adatcsomagjára, összhangban a kizárólag kifejezett engedéllyel történő
-módosítás elvével (20. szigorú szabály).
+módosítás elvével (#20. szigorú szabály).
 
 #### Beállítási séma + migráció
 
@@ -637,7 +637,7 @@ törzset (`src/shared/validation/schemas/piiSettings.ts`).
 | `eu_vat`            | Uniós adószám             | Ismert tagállami előtag és az adott állam számformátuma (VIES-lekérdezés nélkül)                      |
 | `es_dni_nie`        | Spanyol DNI / NIE         | Ellenőrző betű (érték modulo 23); a NIE formátuma `X/Y/Z` + 7 számjegy                                |
 | `it_codice_fiscale` | Olasz Codice Fiscale      | Ellenőrző betű a páratlan/páros pozíciók táblái alapján                                               |
-| `pl_pesel`          | Lengyel PESEL             | Súlyozott ellenőrző összeg és egy valóban létező kódolt születési dátum                               |
+| `pl_pesel`          | Lengyel PESEL             | Súlyozott ellenőrzőösszeg és a kódolt születési hónap/nap hihető tartományai                          |
 | `nl_bsn`            | Holland BSN               | 11-próba (súlyok: 9..2, -1)                                                                           |
 | `de_steuer_id`      | Német Steuer-ID           | ISO 7064 Mod 11,10 és a számjegyszerkezeti szabályok (nem kezdődhet 0-val)                            |
 | `se_personnummer`   | Svéd personnummer         | Luhn-ellenőrzés az utolsó tíz számjegyen és hihető születési dátum (10 vagy 12 számjegy)              |
@@ -654,7 +654,7 @@ csak az aktuális adatrészleten belül keresi a támpontot. Az azonosítók az 
 minták előtt helyezkednek el, így az ellenőrzött azonosítók megtartják saját helyőrzőjüket
 (`[IBAN_REDACTED]`, `[NL_BSN_REDACTED]`, ...). A `gdpr`, illetve a `popia` sablonok
 az EU-s, illetve a dél-afrikai azonosítókat választják ki. Maga a maszkolás továbbra is külön engedélyezendő
-(20. szigorú szabály): itt semmi sem módosítja a funkciójelző alapértelmezett értékét.
+(#20. szigorú szabály): itt semmi sem módosítja a funkciójelző alapértelmezett értékét.
 
 ### Promptinjektálás (`promptInjection.ts`)
 
@@ -707,7 +707,7 @@ tartalmából, az eszközhívások argumentumaiból és az eszközök eredménye
 promptba beillesztett (vagy egy eszközeredmény által visszaadott) hitelesítőadat nem szivárog ki
 a külső szolgáltatóhoz vagy vissza az ügyfélhez.
 
-- **Csak külön engedélyezéssel**, a PII-kitakarással megegyező konvenció szerint (a 20. szigorú szabályhoz kapcsolódóan):
+- **Csak külön engedélyezéssel**, a PII-kitakarással megegyező konvenció szerint (a #20. szigorú szabályhoz kapcsolódóan):
   le van tiltva, kivéve, ha `settings.credentialRedactionEnabled === true` **vagy**
   `CREDENTIAL_REDACTION_ENABLED=true`. Kikapcsolt állapotban a védelmi mechanizmus nem végez műveletet —
   soha nem blokkol és soha nem ír át semmit.

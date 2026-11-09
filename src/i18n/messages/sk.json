@@ -4147,7 +4147,9 @@
     "duplicateAutoComboFailedPrefix": "Duplikácia automatickej kombinácie zlyhala:",
     "duplicateAutoComboUnknownError": "Neznáma chyba",
     "duplicateAutoComboTitle": "Vytvorte staticú kombináciu z {name}",
-    "fallbackSummary": "{rate}% požiadaviek použilo záložný proces, ~{skips} cieľov preskočených každou"
+    "fallbackSummary": "{rate}% požiadaviek použilo záložný proces, ~{skips} cieľov preskočených každou",
+    "reorderAll": "Znova objednať všetko",
+    "reorderAllDescription": "Zmena poradia všetkých komb {count}. Rukoväte ťahania sú povolené."
   },
   "costs": {
     "title": "náklady",
@@ -14538,6 +14540,10 @@
       "UNPRICED_USAGE_BUDGET_POLICY": {
         "label": "Politika rozpočtu pre použitie bez ceny",
         "description": "Ako denné/týždenné USD limity na kľúč zaobchádzajú s úspešným použitím, ktorého poskytovateľ/model nemá položku ceny. fail_closed (predvolené) označí okno za prekročené, takže neznáma cena nikdy nemôže obísť tvrdý limit. count_as_zero započítava takéto použitie ako $0 a naďalej vynucuje výdavky na modely s nastavenou cenou. Modely bez ceny sú v každom prípade uvedené na domovskej stránke panela."
+      },
+      "COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE": {
+        "description": "V štatistike vyrovnávacej pamäte kompresie počítajte komprimovanú požiadavku na poskytovateľa automatického ukladania predpony do vyrovnávacej pamäte (OpenAI, Codex, Azure alebo vlastné pripojenie, ktoré deklaruje rýchle ukladanie do vyrovnávacej pamäte s odstránením značiek) ako odhadovaný prístup do vyrovnávacej pamäte aj bez značiek cache_control. Odhad je signálom vhodnosti vyrovnávacej pamäte, nie pozorovaným prístupom, takže hlásená miera prístupov týchto poskytovateľov smeruje k 100 %. Predvolene vypnuté: ako odhadovaný prístup sa počíta iba požiadavka nesúca značky cache_control poskytovateľovi ukladania do vyrovnávacej pamäte, takže poskytovatelia s automatickou predponou naďalej hlásia 0.",
+        "label": "Štatistika vyrovnávacej pamäte kompresie: Vhodnosť automatickej predpony"
       }
     }
   },

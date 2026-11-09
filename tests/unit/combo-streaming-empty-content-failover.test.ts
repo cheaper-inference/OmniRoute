@@ -8,6 +8,11 @@
  */
 import test from "node:test";
 import assert from "node:assert/strict";
+import { closeSharedLoggerResource } from "../../src/shared/utils/loggerResource.ts";
+
+test.after(async () => {
+  await closeSharedLoggerResource();
+});
 
 const { validateResponseQuality } = await import("../../open-sse/services/combo.ts");
 

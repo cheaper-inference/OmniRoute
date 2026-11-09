@@ -1,61 +1,62 @@
-# REASONING_REPLAY (മലയാളം)
+# Reasoning Replay Cache (മലയാളം)
 
 🌐 **Languages:** 🇺🇸 [English](../../../../routing/REASONING_REPLAY.md) · 🇪🇹 [am](../../../am/docs/routing/REASONING_REPLAY.md) · 🇸🇦 [ar](../../../ar/docs/routing/REASONING_REPLAY.md) · 🇦🇿 [az](../../../az/docs/routing/REASONING_REPLAY.md) · 🇧🇬 [bg](../../../bg/docs/routing/REASONING_REPLAY.md) · 🇧🇩 [bn](../../../bn/docs/routing/REASONING_REPLAY.md) · 🇧🇦 [bs](../../../bs/docs/routing/REASONING_REPLAY.md) · 🇨🇿 [cs](../../../cs/docs/routing/REASONING_REPLAY.md) · 🇩🇰 [da](../../../da/docs/routing/REASONING_REPLAY.md) · 🇩🇪 [de](../../../de/docs/routing/REASONING_REPLAY.md) · 🇬🇷 [el](../../../el/docs/routing/REASONING_REPLAY.md) · 🇪🇸 [es](../../../es/docs/routing/REASONING_REPLAY.md) · 🇪🇪 [et](../../../et/docs/routing/REASONING_REPLAY.md) · 🇮🇷 [fa](../../../fa/docs/routing/REASONING_REPLAY.md) · 🇫🇮 [fi](../../../fi/docs/routing/REASONING_REPLAY.md) · 🇫🇷 [fr](../../../fr/docs/routing/REASONING_REPLAY.md) · 🇮🇪 [ga](../../../ga/docs/routing/REASONING_REPLAY.md) · 🇮🇳 [gu](../../../gu/docs/routing/REASONING_REPLAY.md) · 🇳🇬 [ha](../../../ha/docs/routing/REASONING_REPLAY.md) · 🇮🇱 [he](../../../he/docs/routing/REASONING_REPLAY.md) · 🇮🇳 [hi](../../../hi/docs/routing/REASONING_REPLAY.md) · 🇭🇷 [hr](../../../hr/docs/routing/REASONING_REPLAY.md) · 🇭🇺 [hu](../../../hu/docs/routing/REASONING_REPLAY.md) · 🇦🇲 [hy](../../../hy/docs/routing/REASONING_REPLAY.md) · 🇮🇩 [id](../../../id/docs/routing/REASONING_REPLAY.md) · 🇳🇬 [ig](../../../ig/docs/routing/REASONING_REPLAY.md) · 🇮🇹 [it](../../../it/docs/routing/REASONING_REPLAY.md) · 🇯🇵 [ja](../../../ja/docs/routing/REASONING_REPLAY.md) · 🇬🇪 [ka](../../../ka/docs/routing/REASONING_REPLAY.md) · 🇰🇭 [km](../../../km/docs/routing/REASONING_REPLAY.md) · 🇮🇳 [kn](../../../kn/docs/routing/REASONING_REPLAY.md) · 🇰🇷 [ko](../../../ko/docs/routing/REASONING_REPLAY.md) · 🇱🇹 [lt](../../../lt/docs/routing/REASONING_REPLAY.md) · 🇱🇻 [lv](../../../lv/docs/routing/REASONING_REPLAY.md) · 🇮🇳 [mr](../../../mr/docs/routing/REASONING_REPLAY.md) · 🇲🇾 [ms](../../../ms/docs/routing/REASONING_REPLAY.md) · 🇲🇹 [mt](../../../mt/docs/routing/REASONING_REPLAY.md) · 🇲🇲 [my](../../../my/docs/routing/REASONING_REPLAY.md) · 🇳🇵 [ne](../../../ne/docs/routing/REASONING_REPLAY.md) · 🇳🇱 [nl](../../../nl/docs/routing/REASONING_REPLAY.md) · 🇳🇴 [no](../../../no/docs/routing/REASONING_REPLAY.md) · 🇮🇳 [or](../../../or/docs/routing/REASONING_REPLAY.md) · 🇮🇳 [pa](../../../pa/docs/routing/REASONING_REPLAY.md) · 🇵🇭 [phi](../../../phi/docs/routing/REASONING_REPLAY.md) · 🇵🇱 [pl](../../../pl/docs/routing/REASONING_REPLAY.md) · 🇵🇹 [pt](../../../pt/docs/routing/REASONING_REPLAY.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/routing/REASONING_REPLAY.md) · 🇷🇴 [ro](../../../ro/docs/routing/REASONING_REPLAY.md) · 🇷🇺 [ru](../../../ru/docs/routing/REASONING_REPLAY.md) · 🇱🇰 [si](../../../si/docs/routing/REASONING_REPLAY.md) · 🇸🇰 [sk](../../../sk/docs/routing/REASONING_REPLAY.md) · 🇸🇮 [sl](../../../sl/docs/routing/REASONING_REPLAY.md) · 🇷🇸 [sr](../../../sr/docs/routing/REASONING_REPLAY.md) · 🇸🇪 [sv](../../../sv/docs/routing/REASONING_REPLAY.md) · 🇰🇪 [sw](../../../sw/docs/routing/REASONING_REPLAY.md) · 🇮🇳 [ta](../../../ta/docs/routing/REASONING_REPLAY.md) · 🇮🇳 [te](../../../te/docs/routing/REASONING_REPLAY.md) · 🇹🇭 [th](../../../th/docs/routing/REASONING_REPLAY.md) · 🇹🇷 [tr](../../../tr/docs/routing/REASONING_REPLAY.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/routing/REASONING_REPLAY.md) · 🇵🇰 [ur](../../../ur/docs/routing/REASONING_REPLAY.md) · 🇺🇿 [uz](../../../uz/docs/routing/REASONING_REPLAY.md) · 🇻🇳 [vi](../../../vi/docs/routing/REASONING_REPLAY.md) · 🇳🇬 [yo](../../../yo/docs/routing/REASONING_REPLAY.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/routing/REASONING_REPLAY.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/routing/REASONING_REPLAY.md)
 
 ---
 
-> **സത്യത്തിൻ്റെ ഉറവിടം:** `src/lib/db/reasoningCache.ts`, `open-sse/services/reasoningCache.ts`** അവസാനം അപ്ഡേറ്റ് ചെയ്തത്:** 2026-06-28 — v3.8.40
+> **ആധികാരിക ഉറവിടം:** `src/lib/db/reasoningCache.ts`, `open-sse/services/reasoningCache.ts`
+> **അവസാനം പുതുക്കിയത്:** 2026-06-28 — v3.8.40
 
-OmniRoute തിങ്കിംഗ് മോഡ് മോഡലുകൾ നിർമ്മിക്കുന്ന അസിസ്റ്റൻ്റ് `reasoning_content` ക്യാപ്ചർ ചെയ്യുകയും അപ്സ്ട്രീം ദാതാവിന് ആവശ്യമുള്ളപ്പോൾ മൾട്ടി-ടേൺ അഭ്യർത്ഥനകളിൽ അത് സുതാര്യമായി റീപ്ലേ ചെയ്യുകയും ചെയ്യുന്നു. ഒരു ക്ലയൻ്റിൻറെ സംഭാഷണ ചരിത്രത്തിൽ മുൻ ടേണിൻ്റെ ന്യായവാദം നഷ്ടപ്പെടുമ്പോൾ കർശന ദാതാക്കൾ ഉയർത്തുന്ന HTTP 400 പിശകുകൾ ഇത് ഇല്ലാതാക്കുന്നു.
+ചിന്താ-മോഡ് മോഡലുകൾ സൃഷ്ടിക്കുന്ന അസിസ്റ്റന്റ് `reasoning_content` OmniRoute ശേഖരിക്കുകയും, അപ്സ്ട്രീം പ്രൊവൈഡർ അത് ആവശ്യപ്പെടുമ്പോൾ മൾട്ടി-ടേൺ അഭ്യർത്ഥനകളിൽ സുതാര്യമായി വീണ്ടും ഉപയോഗിക്കുകയും ചെയ്യുന്നു. ക്ലയന്റിന്റെ സംഭാഷണ ചരിത്രത്തിൽ മുൻ ടേണിലെ റീസണിംഗ് ഇല്ലാത്തപ്പോൾ കർശനമായ പ്രൊവൈഡർമാർ ഉയർത്തുന്ന HTTP 400 പിശകുകൾ ഇത് ഒഴിവാക്കുന്നു.
 
-## എന്തുകൊണ്ട് ഇത് നിലനിൽക്കുന്നു
+## ഇത് നിലനിൽക്കുന്നതിന്റെ കാരണം
 
-പല ചിന്താ-മോഡ് ദാതാക്കളും ഒരു ഫോളോ-അപ്പ് ടേൺ നിരസിക്കുന്നു** മുമ്പത്തെ അസിസ്റ്റൻ്റ് സന്ദേശത്തിൽ യഥാർത്ഥ `reasoning_content` ഉൾപ്പെടുന്നു** . അപ്സ്ട്രീം ഇതുപോലുള്ള സന്ദേശങ്ങൾക്കൊപ്പം 400 നൽകുന്നു:
+**മുമ്പത്തെ അസിസ്റ്റന്റ് സന്ദേശത്തിൽ യഥാർഥ `reasoning_content` ഉൾപ്പെടുന്നില്ലെങ്കിൽ**, പല ചിന്താ-മോഡ് പ്രൊവൈഡർമാരും തുടർ ടേൺ നിരസിക്കുന്നു. അപ്സ്ട്രീം ഇനിപ്പറയുന്നതുപോലുള്ള സന്ദേശങ്ങളോടെ 400 തിരികെ നൽകുന്നു:
 
 ```
 Param Incorrect: The reasoning_content in the thinking mode must be passed back to the API.
 ```
 
-എന്നാൽ സാധാരണ ക്ലയൻ്റുകൾ (Cursor, Cline, Roo Code, OpenAI SDK) അവർ വീണ്ടും പ്ലേ ചെയ്യുന്ന ചരിത്രത്തിൽ നിന്ന് `reasoning_content` നീക്കം ചെയ്യുന്നു. OmniRoute ഇത് ഒരു സെർവർ-സൈഡ് കാഷെയിൽ നിന്ന് പുനഃസ്ഥാപിക്കുന്നു, അതിനാൽ അപ്സ്ട്രീം കാണുന്ന അഭ്യർത്ഥന സ്ഥിരമായിരിക്കും. ലക്കം #1628 ഹൈബ്രിഡ് memory/SQLite പെർസിസ്റ്റൻസ് അവതരിപ്പിച്ചു, അതിനാൽ പ്രോസസ്സ് പുനരാരംഭിക്കുമ്പോൾ കാഷെ അതിജീവിക്കുന്നു.
+എന്നാൽ സാധാരണ ക്ലയന്റുകൾ (Cursor, Cline, Roo Code, OpenAI SDK) അവർ വീണ്ടും ഉപയോഗിക്കുന്ന ചരിത്രത്തിൽനിന്ന് `reasoning_content` നീക്കംചെയ്യുന്നു. അപ്സ്ട്രീം കാണുന്ന അഭ്യർത്ഥന സ്ഥിരതയുള്ളതാക്കാൻ OmniRoute അത് സെർവർ-സൈഡ് കാഷിൽനിന്ന് പുനഃസ്ഥാപിക്കുന്നു. പ്രോസസ് പുനരാരംഭിച്ചതിനുശേഷവും കാഷ് നിലനിൽക്കുന്നതിനായി ഹൈബ്രിഡ് മെമ്മറി/SQLite പെർസിസ്റ്റൻസ് Issue #1628 അവതരിപ്പിച്ചു.
 
-## വാസ്തുവിദ്യ
+## ആർക്കിടെക്ചർ
 
 ```
-Turn N (assistant generates):
-  → response contains reasoning_content + tool_calls
-  → if requiresReasoningReplay(provider, model): cacheReasoningFromAssistantMessage()
-      writes (memory + DB), keyed by every tool_call.id
-  → forward response to client (which may or may not retain reasoning)
+ടേൺ N (അസിസ്റ്റന്റ് സൃഷ്ടിക്കുന്നു):
+  → പ്രതികരണത്തിൽ reasoning_content + tool_calls അടങ്ങിയിരിക്കുന്നു
+  → requiresReasoningReplay(provider, model) ആണെങ്കിൽ: cacheReasoningFromAssistantMessage()
+      ഓരോ tool_call.id-ഉം കീ ആയി ഉപയോഗിച്ച് (മെമ്മറി + DB)-യിൽ എഴുതുന്നു
+  → പ്രതികരണം ക്ലയന്റിലേക്ക് കൈമാറുന്നു (അത് റീസണിംഗ് നിലനിർത്തുകയോ നിലനിർത്താതിരിക്കുകയോ ചെയ്യാം)
 
-Turn N+1 (client sends follow-up):
-  → translator detects: requiresReasoningReplay(provider, model) === true
-  → for each assistant message with tool_calls and no reasoning_content:
-      lookupReasoning(toolCalls[0].id) → memory → DB
-      hit  → msg.reasoning_content = cached; recordReplay()
-      miss → msg.reasoning_content = "" (legacy fallback for older DeepSeek)
-  → upstream sees consistent history → no 400
+ടേൺ N+1 (ക്ലയന്റ് തുടർസന്ദേശം അയയ്ക്കുന്നു):
+  → ട്രാൻസ്ലേറ്റർ കണ്ടെത്തുന്നു: requiresReasoningReplay(provider, model) === true
+  → tool_calls ഉള്ളതും reasoning_content ഇല്ലാത്തതുമായ ഓരോ അസിസ്റ്റന്റ് സന്ദേശത്തിനും:
+      lookupReasoning(toolCalls[0].id) → മെമ്മറി → DB
+      ഹിറ്റ്  → msg.reasoning_content = cached; recordReplay()
+      മിസ് → msg.reasoning_content = "" (പഴയ DeepSeek പതിപ്പുകൾക്കായുള്ള ലെഗസി ഫാൾബാക്ക്)
+  → അപ്സ്ട്രീമിന് സ്ഥിരതയുള്ള ഹിസ്റ്ററി ലഭിക്കുന്നു → 400 ഇല്ല
 ```
 
-ക്യാപ്ചർ സംഭവിക്കുന്നത് `open-sse/handlers/chatCore.ts` ലാണ് (രണ്ട് സൈറ്റുകൾ, രണ്ട് `cacheReasoningFromAssistantMessage` കോൾ സൈറ്റുകളിൽ). സ്കീമ നിർബന്ധത്തിന് ശേഷം `open-sse/translator/index.ts` ൽ റീപ്ലേ സംഭവിക്കുന്നു, പക്ഷേ അയയ്ക്കുന്നതിന് മുമ്പ്.
+ക്യാപ്ചർ നടക്കുന്നത് `open-sse/handlers/chatCore.ts`-ലാണ് (`cacheReasoningFromAssistantMessage` വിളിക്കുന്ന രണ്ട് സ്ഥലങ്ങളിൽ). സ്കീമ കോർഷനുശേഷവും ഡിസ്പാച്ചിന് മുമ്പുമായി `open-sse/translator/index.ts`-ലാണ് റീപ്ലേ നടക്കുന്നത്.
 
-പ്ലെയിൻ (നോൺ-ടൂൾ-കോൾ) അസിസ്റ്റൻ്റ് ടേണുകൾ വ്യത്യസ്തമായി കീ ചെയ്തിരിക്കുന്നു: `buildAssistantMessageCacheKey()` സെഷൻ സ്കോപ്പും നോർമലൈസ് ചെയ്ത OpenAI- ഫോർമാറ്റ് ട്രാൻസ്ക്രിപ്റ്റും ആ ടേൺ വരെ ദഹിപ്പിക്കുന്നു, കാരണം DeepSeek _every_ മുൻ ടേണിൻ്റെ ന്യായവാദം ആവശ്യമാണ് `tools` ഉണ്ടെങ്കിൽ. പ്രതികരണങ്ങൾ-API ടാർഗെറ്റുകൾക്ക് (ഉദാഹരണത്തിന് `opencode-go/deepseek-v4-flash`, `/responses` ലേക്ക് റൂട്ട് ചെയ്തത്) അപ്സ്ട്രീം ബോഡി `input` അല്ല, `messages` ആണ് വഹിക്കുന്നത്, അതിനാൽ `translateRequest()` (`open-sse/translator/index.ts`) അത് ഒരു കോൾബാക്ക് ഓപ്ഷനിലൂടെ ദഹിപ്പിച്ച പിവറ്റ് ട്രാൻസ്ക്രിപ്റ്റ് റിപ്പോർട്ടുചെയ്യുകയും ക്യാപ്ചർ സൈറ്റുകൾ അതേ ട്രാൻസ്ക്രിപ്റ്റ് ഡൈജസ്റ്റ് ചെയ്യുകയും ചെയ്യുന്നു. എല്ലാ സോഴ്സ് ഫോർമാറ്റുകൾക്കുമായി പ്രതികരണങ്ങൾ റീപ്ലേ പാസ് OpenAI പിവറ്റിൽ പ്രവർത്തിക്കുന്നു, അതിനാൽ Anthropic സന്ദേശ ക്ലയൻ്റുകളും (Claude → OpenAI → പ്രതികരണങ്ങൾ) വീണ്ടും പ്ലേ ചെയ്യുന്നു.
+സാധാരണ (ടൂൾ-കോൾ ഇല്ലാത്ത) അസിസ്റ്റന്റ് ടേണുകൾക്ക് വ്യത്യസ്തമായാണ് കീ നൽകുന്നത്: `buildAssistantMessageCacheKey()` സെഷൻ സ്കോപ്പിനെയും ആ ടേൺ വരെയുള്ള നോർമലൈസ് ചെയ്ത OpenAI-ഫോർമാറ്റ് ട്രാൻസ്ക്രിപ്റ്റിനെയും ഡൈജസ്റ്റ് ചെയ്യുന്നു, കാരണം `tools` ഉണ്ടായാൽ മുമ്പത്തെ _ഓരോ_ ടേണിന്റെയും റീസണിംഗ് DeepSeek-ന് ആവശ്യമാണ്. Responses-API ടാർഗെറ്റുകൾക്കായി (ഉദാഹരണത്തിന്, `/responses`-ലേക്ക് റൂട്ട് ചെയ്യുന്ന `opencode-go/deepseek-v4-flash`) അപ്സ്ട്രീം ബോഡിയിൽ `messages` അല്ല, `input` ആണ് ഉള്ളത്; അതിനാൽ `translateRequest()` (`open-sse/translator/index.ts`) ഒരു കോൾബാക്ക് ഓപ്ഷനിലൂടെ താൻ ഡൈജസ്റ്റ് ചെയ്ത പിവറ്റ് ട്രാൻസ്ക്രിപ്റ്റ് റിപ്പോർട്ട് ചെയ്യുകയും ക്യാപ്ചർ സൈറ്റുകൾ അതേ ട്രാൻസ്ക്രിപ്റ്റ് ഡൈജസ്റ്റ് ചെയ്യുകയും ചെയ്യുന്നു. എല്ലാ സോഴ്സ് ഫോർമാറ്റുകൾക്കുമായി OpenAI പിവറ്റിലാണ് Responses റീപ്ലേ പാസ് പ്രവർത്തിക്കുന്നത്; അതിനാൽ Anthropic Messages ക്ലയന്റുകളും (Claude → OpenAI → Responses) റീപ്ലേ ചെയ്യപ്പെടുന്നു.
 
 ## സംഭരണം — ഹൈബ്രിഡ് മെമ്മറി + SQLite
 
-ക്രാഷ് വീണ്ടെടുക്കലിനും ഡാഷ്ബോർഡ് ദൃശ്യപരതയ്ക്കുമായി ഒരു SQLite പട്ടികയുടെ പിന്തുണയുള്ള ഇൻ-മെമ്മറി `Map` (LRU-by-creation) ഹോട്ട് പാത്ത് ഉപയോഗിക്കുന്നു.
+ക്രാഷ് റിക്കവറിക്കും ഡാഷ്ബോർഡ് ദൃശ്യതയ്ക്കുമായി SQLite ടേബിൾ പിന്തുണയ്ക്കുന്ന ഇൻ-മെമ്മറി `Map` (സൃഷ്ടിക്കൽ ക്രമത്തിലുള്ള LRU) ആണ് ഹോട്ട് പാത്ത് ഉപയോഗിക്കുന്നത്.
 
-| പാളി    | നടപ്പിലാക്കൽ                                  | ഉദ്ദേശ്യം                                                                   |
-| ------- | --------------------------------------------- | --------------------------------------------------------------------------- |
-| മെമ്മറി | `open-sse/services/reasoningCache.ts` ൽ `Map` | വേഗത്തിലുള്ള ലുക്ക്അപ്പുകൾ, 200 വയസ്സിന് മുകളിലുള്ളവരെ പുറത്താക്കുന്നു      |
-| DB      | `reasoning_cache` പട്ടിക (`src/lib/db/`)      | പുനരാരംഭിക്കുന്നതിലും ഡ്രൈവ് സ്ഥിതിവിവരക്കണക്കുകളിലും ഉടനീളം നിലനിൽക്കുന്നു |
+| ലെയർ    | ഇംപ്ലിമെന്റേഷൻ                                 | ഉദ്ദേശ്യം                                                                          |
+| ------- | ---------------------------------------------- | ---------------------------------------------------------------------------------- |
+| മെമ്മറി | `open-sse/services/reasoningCache.ts`-ലെ `Map` | വേഗത്തിലുള്ള ലുക്കപ്പുകൾ, 200 ആകുമ്പോൾ ഏറ്റവും പഴയത് നീക്കംചെയ്യുന്നു              |
+| DB      | `reasoning_cache` ടേബിൾ (`src/lib/db/`)        | പുനരാരംഭങ്ങൾക്കിടയിലും നിലനിൽക്കുന്നു, സ്ഥിതിവിവരക്കണക്കുകൾക്ക് അടിസ്ഥാനം നൽകുന്നു |
 
-എഴുത്തുകൾ രണ്ടിലേക്കും പോകുന്നു. ആദ്യം കൺസൾട്ട് മെമ്മറി വായിക്കുന്നു, തുടർന്ന് DB ലേക്ക് മടങ്ങുക (DB ഹിറ്റുകൾ മെമ്മറിയിലേക്ക് തിരികെ പ്രമോട്ടുചെയ്യുന്നു). DB പരാജയങ്ങൾ മാരകമല്ലാത്ത — ആണ് ഇൻ-മെമ്മറി കാഷെ ഹോട്ട് പാത്ത് സേവിക്കുന്നത് തുടരുന്നു.
+റൈറ്റുകൾ രണ്ടിലേക്കും പോകുന്നു. റീഡുകൾ ആദ്യം മെമ്മറി പരിശോധിക്കുകയും തുടർന്ന് DB-യിലേക്ക് ഫാൾബാക്ക് ചെയ്യുകയും ചെയ്യുന്നു (DB ഹിറ്റുകൾ വീണ്ടും മെമ്മറിയിലേക്ക് പ്രമോട്ട് ചെയ്യപ്പെടുന്നു). DB പരാജയങ്ങൾ ഗുരുതരമല്ല — ഇൻ-മെമ്മറി കാഷ് ഹോട്ട് പാത്തിന് സേവനം നൽകുന്നത് തുടരുന്നു.
 
-**സ്ഥിരസ്ഥിതികൾ:**
+**ഡിഫോൾട്ടുകൾ:**
 
 - TTL: `2h` (`TTL_MS = 2 * 60 * 60 * 1000`)
 - പരമാവധി മെമ്മറി എൻട്രികൾ: `200` (`MAX_MEMORY_ENTRIES`)
-- കുടിയൊഴിപ്പിക്കൽ: ഏറ്റവും പഴയ `createdAt` ആദ്യം
+- ഇവിക്ഷൻ: ഏറ്റവും പഴയ `createdAt` ആദ്യം
 
 ## ഡാറ്റാബേസ് സ്കീമ
 
@@ -73,13 +74,13 @@ CREATE TABLE IF NOT EXISTS reasoning_cache (
 );
 ```
 
-സൂചികകൾ: `expires_at`, `provider`, `model`, `created_at`. `expires_at` Unix epoch seconds ആയി സൂക്ഷിക്കുന്നു; SELECT ലെയർ ലെഗസി ടെക്സ്റ്റ് മൂല്യങ്ങൾ `EXPIRES_AT_EPOCH_SQL` വഴി നോർമലൈസ് ചെയ്യുന്നു.
+ഇൻഡെക്സുകൾ: `expires_at`, `provider`, `model`, `created_at`. `expires_at` Unix epoch സെക്കൻഡുകളായി സംഭരിക്കുന്നു; SELECT ലെയർ `EXPIRES_AT_EPOCH_SQL` വഴി പഴയ ടെക്സ്റ്റ് മൂല്യങ്ങളെ നോർമലൈസ് ചെയ്യുന്നു.
 
-## ദാതാവ് / മോഡൽ കണ്ടെത്തൽ
+## പ്രൊവൈഡർ / മോഡൽ കണ്ടെത്തൽ
 
-`requiresReasoningReplay(provider, model)` `true` തിരികെ നൽകുമ്പോൾ റീപ്ലേ പ്രവർത്തനക്ഷമമാകും. ഫംഗ്ഷൻ `open-sse/services/reasoningCache.ts` ൽ രണ്ട് ലിസ്റ്റുകൾ പരിശോധിക്കുന്നു.
+`requiresReasoningReplay(provider, model)` എന്നത് `true` നൽകുമ്പോൾ Replay പ്രവർത്തനക്ഷമമാകും. ഈ ഫങ്ഷൻ `open-sse/services/reasoningCache.ts`-ലെ രണ്ട് ലിസ്റ്റുകൾ പരിശോധിക്കുന്നു.
 
-**ദാതാവ് IDs (കൃത്യമായ പൊരുത്തം, കേസ്-ഇൻസെൻസിറ്റീവ്):**
+**പ്രൊവൈഡർ ID-കൾ (കൃത്യമായ പൊരുത്തം, അക്ഷരവലുപ്പ വ്യത്യാസം പരിഗണിക്കാതെ):**
 
 - `deepseek`
 - `opencode-go`
@@ -93,12 +94,12 @@ CREATE TABLE IF NOT EXISTS reasoning_cache (
 - `kimi-coding-apikey`
 - `xiaomi-mimo`
 
-**മോഡൽ റീജക്സ് പാറ്റേണുകൾ (കേസ്-ഇൻസെൻസിറ്റീവ്):**
+**മോഡൽ regex പാറ്റേണുകൾ (അക്ഷരവലുപ്പ വ്യത്യാസം പരിഗണിക്കാതെ):**
 
 - `/deepseek-r1/i`
 - `/deepseek-reasoner/i`
 - `/deepseek-chat/i`
-- `/deepseek[-/]?v4[-.]flash/i`, `/deepseek[-/]?v4[-.]pro/i` (V4 Flash / Pro, ഓപ്ഷണൽ `-free` സഫിക്സ്)
+- `/deepseek[-/]?v4[-.]flash/i` കൂടാതെ `/deepseek[-/]?v4[-.]pro/i` (V4 Flash / Pro, ഐച്ഛികമായ `-free` സഫിക്സോടെ)
 - `/(deepseek|zen\/deepseek)-v4/i`
 - `/kimi[-/]k\d/i`
 - `/qwq/i`
@@ -106,21 +107,21 @@ CREATE TABLE IF NOT EXISTS reasoning_cache (
 - `/glm.*think/i`
 - `/^mimo[-.]?v\d/i`
 
-ഒരു പുതിയ കർശനമായ provider/model ചേർക്കുന്നത് അർത്ഥമാക്കുന്നത് ഈ ലിസ്റ്റുകളിലൊന്നിലേക്ക് കൂട്ടിച്ചേർക്കുകയും റീപ്ലേ ഇൻജക്ഷൻ ഉറപ്പിക്കുന്ന ഒരു യൂണിറ്റ് ടെസ്റ്റ് എഴുതുകയും ചെയ്യുക എന്നാണ്. PR വിവരണം മാറ്റത്തിന് പ്രേരിപ്പിച്ച കൃത്യമായ അപ്സ്ട്രീം 400 സ്ട്രിംഗിനെ ഉദ്ധരിക്കുന്നതായിരിക്കണം.
+പുതിയൊരു strict പ്രൊവൈഡർ/മോഡൽ ചേർക്കുന്നതിന്, ഈ ലിസ്റ്റുകളിലൊന്നിൽ അത് കൂട്ടിച്ചേർക്കുകയും replay injection ഉറപ്പാക്കുന്ന ഒരു unit test എഴുതുകയും വേണം. ഈ മാറ്റത്തിന് കാരണമായ കൃത്യമായ upstream 400 string PR വിവരണത്തിൽ ഉദ്ധരിക്കണം.
 
 ## REST API
 
-കാഷെ `src/app/api/cache/reasoning/route.ts` യുടെ കീഴിലുള്ള രണ്ട് അവസാന പോയിൻ്റുകൾ വെളിപ്പെടുത്തുന്നു. രണ്ടിനും മാനേജ്മെൻ്റ് ആധികാരികത ആവശ്യമാണ് (`isAuthenticated` മുതൽ `@/shared/utils/apiAuth`).
+`src/app/api/cache/reasoning/route.ts`-ന് കീഴിൽ cache രണ്ട് endpoints ലഭ്യമാക്കുന്നു. രണ്ടിനും management authentication (`@/shared/utils/apiAuth`-ൽ നിന്നുള്ള `isAuthenticated`) ആവശ്യമാണ്.
 
-| രീതി   | അവസാന പോയിൻ്റ്                                            | വിവരണം                                                                      |
-| ------ | --------------------------------------------------------- | --------------------------------------------------------------------------- |
-| GET    | `/api/cache/reasoning`                                    | സ്ഥിതിവിവരക്കണക്കുകൾ + പേജ് ചെയ്ത എൻട്രികൾ                                  |
-| GET    | `/api/cache/reasoning?provider=deepseek&model=...&limit=` | ഫിൽട്ടർ ചെയ്ത ലിസ്റ്റിംഗ് (`limit` `[1, 200]` ലേക്ക് ഘടിപ്പിച്ചിരിക്കുന്നു) |
-| DELETE | `/api/cache/reasoning`                                    | എല്ലാം മായ്ക്കുക (മെമ്മറി + DB) കൂടാതെ hit/miss എണ്ണം പുനഃസജ്ജമാക്കുക       |
-| DELETE | `/api/cache/reasoning?provider=deepseek`                  | ഒരു ദാതാവിനുള്ള എൻട്രികൾ മാത്രം മായ്ക്കുക                                   |
-| DELETE | `/api/cache/reasoning?toolCallId=call_abc`                | ഒരൊറ്റ എൻട്രി ഇല്ലാതാക്കുക                                                  |
+| രീതി   | Endpoint                                                  | വിവരണം                                                                          |
+| ------ | --------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| GET    | `/api/cache/reasoning`                                    | സ്ഥിതിവിവരക്കണക്കുകൾ + പേജ് തിരിച്ചതായ entries                                  |
+| GET    | `/api/cache/reasoning?provider=deepseek&model=...&limit=` | ഫിൽട്ടർ ചെയ്ത listing (`limit` `[1, 200]` പരിധിയിലേക്ക് പരിമിതപ്പെടുത്തുന്നു)   |
+| DELETE | `/api/cache/reasoning`                                    | എല്ലാം മായ്ക്കുകയും (memory + DB) hit/miss എണ്ണങ്ങൾ reset ചെയ്യുകയും ചെയ്യുന്നു |
+| DELETE | `/api/cache/reasoning?provider=deepseek`                  | ഒരു പ്രൊവൈഡറിനുള്ള entries മാത്രം മായ്ക്കുന്നു                                  |
+| DELETE | `/api/cache/reasoning?toolCallId=call_abc`                | ഒരു entry മായ്ക്കുന്നു                                                          |
 
-**GET പ്രതികരണ രൂപം:**
+**GET response ഘടന:**
 
 ```json
 {
@@ -152,35 +153,35 @@ CREATE TABLE IF NOT EXISTS reasoning_cache (
 }
 ```
 
-## പ്രവർത്തന കുറിപ്പുകൾ
+## പ്രവർത്തനപരമായ കുറിപ്പുകൾ
 
-- **ക്ലീനപ്പ്:** `cleanupReasoningCache()` കാലഹരണപ്പെട്ട മെമ്മറി എൻട്രികൾ ശുദ്ധീകരിക്കുകയും `DELETE FROM reasoning_cache WHERE expires_at <= unixepoch('now')` പ്രവർത്തിപ്പിക്കുകയും ചെയ്യുന്നു. ആരോഗ്യ-പരിശോധന പ്രവർത്തകർ ഇത് ഇടയ്ക്കിടെ വിളിക്കുന്നു.
-- **ക്രാഷ് വീണ്ടെടുക്കൽ:** പുനരാരംഭിച്ചതിന് ശേഷം, മെമ്മറി ശൂന്യമാണ്, പക്ഷേ DB ഇപ്പോഴും കാലഹരണപ്പെടാത്ത എൻട്രികൾ സൂക്ഷിക്കുന്നു. നൽകിയിരിക്കുന്ന `tool_call_id` യുടെ ആദ്യ ലുക്ക്അപ്പ് ഒരു DB ഹിറ്റാണ്; പിന്നീടുള്ള ലുക്കപ്പുകൾ മെമ്മറി ഹിറ്റുകളാണ്.
-- **യുക്തിയില്ല, കാഷെ ഇല്ല:** അസിസ്റ്റൻ്റ് സന്ദേശത്തിന് `reasoning_content` / `reasoning` ഫീൽഡ് ഇല്ലാത്തപ്പോൾ `cacheReasoningFromAssistantMessage` `0` നൽകുന്നു, അതിനാൽ ചിന്തിക്കാത്ത പ്രതികരണങ്ങൾക്ക് ഒന്നും തന്നെ ചെലവാകില്ല.
-- **എഴുതുന്നതും ഗേറ്റഡ് ആണ്:** `chatCore.ts` ലെ രണ്ട് കോൾ സൈറ്റുകളും (സ്ട്രീമിംഗ് അല്ലാത്തതും സ്ട്രീമിംഗും) `requiresReasoningReplay(provider, model)` `true` — ആയിരിക്കുമ്പോൾ മാത്രമേ `cacheReasoningFromAssistantMessage()` വിളിക്കൂ, അതേ റീഡ് സൈഡ് ചെക്കുകൾ പ്രവചിക്കുന്നു. റീപ്ലേ പ്രൊവൈഡറെ ഒരിക്കലും സ്പർശിക്കാത്ത ഇൻസ്റ്റാളുകൾ, എല്ലാ യുക്തിസഹമായ പ്രതികരണത്തിലും റൈറ്റിനും ഇൻഡക്സ് അപ്ഡേറ്റിനും try/catch നും പണം നൽകുന്നത് നിർത്തുന്നു.
-- **കർശനമല്ലാത്ത ദാതാക്കൾ:** `requiresReasoningReplay` `false` ഉം ടാർഗെറ്റ് ഫോർമാറ്റ് OpenAI ആയിരിക്കുമ്പോൾ, വിവർത്തകൻ** സ്ട്രിപ്പുകൾ** ഔട്ട്ഗോയിംഗ് സന്ദേശങ്ങളിൽ നിന്നുള്ള ഏതെങ്കിലും `reasoning_content` ഫീൽഡ് — OpenAI ചാറ്റ് പൂർത്തീകരണങ്ങൾ അത് സ്വീകരിക്കുന്നില്ല.
+- **Cleanup:** `cleanupReasoningCache()` കാലഹരണപ്പെട്ട memory entries നീക്കംചെയ്യുകയും `DELETE FROM reasoning_cache WHERE expires_at <= unixepoch('now')` പ്രവർത്തിപ്പിക്കുകയും ചെയ്യുന്നു. Health-check workers ഇത് ഇടയ്ക്കിടെ വിളിക്കുന്നു.
+- **Crash recovery:** restart ചെയ്തതിനുശേഷം memory ശൂന്യമായിരിക്കും, എന്നാൽ കാലഹരണപ്പെടാത്ത entries DB-യിൽ തുടരും. നൽകിയിരിക്കുന്ന ഒരു `tool_call_id`-നുള്ള ആദ്യ lookup ഒരു DB hit ആയിരിക്കും; തുടർന്നുള്ള lookups memory hits ആയിരിക്കും.
+- **Reasoning ഇല്ലെങ്കിൽ cache ഇല്ല:** assistant message-ൽ `reasoning_content` / `reasoning` field ഇല്ലെങ്കിൽ `cacheReasoningFromAssistantMessage` `0` നൽകുന്നു; അതിനാൽ non-thinking responses-ന് യാതൊരു ചെലവും ഉണ്ടാകില്ല.
+- **Write-നും നിയന്ത്രണമുണ്ട്:** `chatCore.ts`-ലെ രണ്ട് call sites-ഉം (non-streaming, streaming) `requiresReasoningReplay(provider, model)` `true` ആയിരിക്കുമ്പോൾ മാത്രമേ `cacheReasoningFromAssistantMessage()` വിളിക്കൂ — read side പരിശോധിക്കുന്ന അതേ predicate തന്നെയാണിത്. ഒരിക്കലും replay പ്രൊവൈഡർ ഉപയോഗിക്കാത്ത installs-ൽ ഓരോ reasoning-bearing response-നും write, index update, try/catch എന്നിവയ്ക്കുള്ള ചെലവ് ഒഴിവാകും.
+- **Non-strict പ്രൊവൈഡർമാർ:** `requiresReasoningReplay` `false` ആകുകയും target format OpenAI ആകുകയും ചെയ്യുമ്പോൾ, പുറത്തേക്ക് പോകുന്ന messages-ൽനിന്ന് translator ഏതൊരു `reasoning_content` field-ഉം **നീക്കംചെയ്യുന്നു** — OpenAI Chat Completions അത് സ്വീകരിക്കുന്നില്ല.
 
-## മ്യൂസ് അതാര്യമായ-യുക്തിപരമായ ഉടമസ്ഥത
+## Muse opaque reasoning ന്റെ ഉടമസ്ഥത
 
-മ്യൂസ് (`muse-code`) കോളർ-ബൗണ്ട് അതാര്യമായ ന്യായവാദം (`encrypted_content`) നൽകുന്നു. മറ്റൊരു അക്കൌണ്ടിന് കീഴിൽ ഇത് വീണ്ടും പ്ലേ ചെയ്യുന്നത് അല്ലെങ്കിൽ റിമൻ്റ് ചെയ്ത ക്രെഡൻഷ്യൽ അപ്സ്ട്രീമിൽ പരാജയപ്പെടുന്നു, അതിനാൽ നേറ്റീവ് OAuth അഭ്യർത്ഥനകൾ ഓരോ അഭ്യർത്ഥന റൊട്ടേഷനുപകരം സെഷൻ-ലെവൽ ഉടമസ്ഥത ഉപയോഗിക്കുന്നു (`src/sse/services/museSessionOwnership.ts`, `src/sse/handlers/chat.ts` യിൽ നടപ്പിലാക്കിയത്). വ്യക്തമായി തിരഞ്ഞെടുത്ത API-കീ കണക്ഷനുകളും API-കീ-മാത്രം കോൺഫിഗറേഷനുകളും ഈ ഉടമസ്ഥാവകാശ മോഡ് കൂടാതെ നിലവിലുള്ള റൂട്ടിംഗ് നിലനിർത്തുന്നു.
+Muse (`muse-code`) caller നോട് ബന്ധിപ്പിച്ച opaque reasoning (`encrypted_content`) നൽകുന്നു. അത് മറ്റൊരു account ലോ പുതുതായി വീണ്ടും നൽകിയ credential ലോ replay ചെയ്താൽ upstream ൽ പരാജയപ്പെടും; അതിനാൽ native OAuth request കൾ ഓരോ request ലും rotation ചെയ്യുന്നതിനു പകരം session തലത്തിലുള്ള ഉടമസ്ഥത ഉപയോഗിക്കുന്നു (`src/sse/services/museSessionOwnership.ts`, `src/sse/handlers/chat.ts` ൽ നടപ്പാക്കുന്നു). വ്യക്തമായി തിരഞ്ഞെടുത്ത API-key connection കളും API-key മാത്രമുള്ള configuration കളും ഈ ownership mode ഇല്ലാതെ നിലവിലുള്ള routing നിലനിർത്തുന്നു.
 
-- ഓരോ തിരിവിലും സ്ഥിരതയുള്ള ഒരു സെഷൻ ID നൽകുക: `x-omniroute-session-id`, `x-omniroute-session`, `x-session-id`, അല്ലെങ്കിൽ `x-codex-session-id`; പകരമായി ശരീരത്തിൽ `prompt_cache_key`, `session_id`, `conversation_id`, അല്ലെങ്കിൽ `metadata.session_id` ഉപയോഗിക്കുക (ആ മുൻഗണന ക്രമത്തിൽ). രണ്ടോ അതിലധികമോ നേറ്റീവ് OAuth അക്കൗണ്ടുകൾ സജീവമാകുമ്പോൾ 400 നഷ്ടമായതോ ശൂന്യമായതോ ആയ IDs റിട്ടേൺ; ഒരൊറ്റ OAuth അക്കൗണ്ടിൽ റൊട്ടേറ്റ് ചെയ്യാൻ ഒന്നുമില്ല, അതിനാൽ അത്തരമൊരു അഭ്യർത്ഥന അൺപിൻ റൂട്ടിംഗ് നിലനിർത്തുന്നു. സ്കോപ്പിൽ കോളറുടെ OmniRoute API-കീ ID ഉൾപ്പെടുന്നു.
-- API-കീ കണക്ഷൻ നയം അനുവദനീയമായ സജീവ നേറ്റീവ് OAuth അക്കൗണ്ടുകളിലുടനീളം പുതിയ സ്വതന്ത്ര സെഷനുകൾ റൗണ്ട്-റോബിൻ, കണക്ഷൻ ID. ഒരു ടെർമിനൽ സ്റ്റാറ്റസ് (`banned`, `expired`, `credits_exhausted`) ഉള്ള കണക്ഷൻ കൂൾഡൗണിലെ അക്കൗണ്ടുകൾ റൗണ്ട്-റോബിൻ ഒഴിവാക്കുന്നു അല്ലെങ്കിൽ അഭ്യർത്ഥിച്ച മോഡലിനായി മോഡൽ ലോക്ക് ചെയ്യുന്നു; മ്യൂസ് അപ്സ്ട്രീം പരാജയങ്ങൾ മറ്റ് ദാതാക്കളെപ്പോലെ കൂൾഡൗണും ബ്രേക്കർ അവസ്ഥയും രേഖപ്പെടുത്തുന്നു. വ്യക്തമായ നിർബന്ധിത കണക്ഷൻ ഒരു പുതിയ സെഷനായി റൗണ്ട്-റോബിൻ മറികടക്കുന്നു, എന്നാൽ നിലവിലുള്ള ഒരു ഉടമയെ മറികടക്കാൻ കഴിയില്ല.
-- ഉടമ വിജയകരമായ ഒരു പ്രതികരണം നൽകുന്നതുവരെ, ഉടമ ലഭ്യമല്ലാത്ത ഒരു സെഷൻ ആരോഗ്യകരമായ ഒരു അക്കൗണ്ടിലേക്ക് വീണ്ടും ക്ലെയിം ചെയ്യപ്പെടും. ആദ്യത്തെ വിജയകരമായ പ്രതികരണത്തിന് ശേഷം, സെഷൻ 30 ദിവസത്തേക്ക് നിഷ്ക്രിയമാകുന്നതുവരെ ആ ഉടമയ്ക്ക് പിൻ ചെയ്തിരിക്കും (`MUSE_SESSION_IDLE_TTL_MS`).
-- എല്ലാ തുടർച്ചയും ടൂൾ-ഫല ടേണും സെഷൻ ഉടമയ്ക്ക് പിൻ ചെയ്തിരിക്കും: കണക്ഷൻ, അക്കൗണ്ട് ഐഡൻ്റിറ്റി, അനുമാനം-ക്രെഡൻഷ്യൽ ജനറേഷൻ എന്നിവ, ക്രെഡൻഷ്യൽ-റിഫ്രഷ് റീട്രീസ് ഉൾപ്പെടെ, അപ്സ്ട്രീം ശ്രമങ്ങൾക്ക് മുമ്പ് വീണ്ടും പരിശോധിച്ചു. പ്രതികരണങ്ങൾ കോൾ IDs/item റഫറൻസുകളും ചാറ്റ് പൂർത്തിയാക്കൽ ടൂൾ-കോൾ IDs ആ സെഷനും ജനറേഷനും റെക്കോർഡ് ചെയ്തിരിക്കണം.
-- SQLite `key_value` രേഖകൾ `muse_session_ownership` നെയിംസ്പെയ്സിലെ (`src/lib/db/museSessionOwnership.ts`) ഉടമസ്ഥാവകാശം നിലനിൽക്കുകയും പുനരാരംഭിക്കുമ്പോൾ ഉടനീളം റൊട്ടേഷൻ കഴ്സർ തുടരുകയും ചെയ്യുന്നു. ഓരോ ക്ലെയിമും നൽകിയ പ്രതികരണവും സെഷൻ്റെ പ്രവർത്തന സ്റ്റാമ്പ് പുതുക്കുന്നു; `MUSE_SESSION_IDLE_TTL_MS` യെക്കാൾ ദൈർഘ്യമേറിയ ഒരു സെഷൻ, പ്രൂൺ ചെയ്യപ്പെടും (ഉടമയുടെ പിൻ, സെർവ് ചെയ്ത ഫ്ലാഗ്, റെക്കോർഡ് ചെയ്ത opaque/reference ഹാഷുകൾ), ഓരോ 10 മിനിറ്റിലും ഒരിക്കലെങ്കിലും ബൗണ്ടഡ് ബാച്ചുകളായി, അതിനാൽ അതിൻ്റെ ചരിത്രത്തിൻ്റെ പിന്നീടുള്ള റീപ്ലേ ഒരു അജ്ഞാത ഉടമയെന്ന നിലയിൽ പരാജയപ്പെടുന്നു. രേഖകളിൽ കണക്ഷൻ IDs, അക്കൗണ്ട് ഐഡൻ്റിറ്റിയുടെ ഹാഷുകൾ, ക്രെഡൻഷ്യലുകൾ, അതാര്യമായ ഉള്ളടക്കം, തുടർച്ച റഫറൻസുകൾ എന്നിവ അടങ്ങിയിരിക്കുന്നു, രഹസ്യങ്ങളോ സംഭാഷണ ചരിത്രമോ അല്ല. ഉപഭോക്താക്കൾ അവരുടെ മുഴുവൻ ചരിത്രവും അതാര്യമായ ന്യായവാദവും നിലനിർത്തുകയും അയയ്ക്കുകയും വേണം.
-- അജ്ഞാതമോ വിദേശമോ ആയ അതാര്യമായ ന്യായവാദം, കാണാതായ ഉടമ, ലഭ്യമല്ലാത്ത ഉടമ അക്കൗണ്ട്, അല്ലെങ്കിൽ റെക്കോർഡ് ചെയ്ത ചരിത്രമുള്ള ഒരു തലമുറ മാറ്റം എന്നിവ ഒരു വ്യക്തമായ 4xx/503 — ഉപയോഗിച്ച് പരാജയപ്പെടുന്നു.
-- സെഷൻ റീപ്ലേ ചെയ്യാവുന്ന ചരിത്രമൊന്നും രേഖപ്പെടുത്താത്തപ്പോൾ മാത്രമേ റിമൻ്റ് ചെയ്ത അതേ അക്കൗണ്ട് കീ സ്വീകരിക്കുകയുള്ളൂ; പുതിയതായി ആരംഭിക്കുന്നത് വരെ റെക്കോർഡ് ചെയ്ത സെഷനുകൾ പരാജയപ്പെടുന്നു.
-- ഒരു ശൂന്യമായ അപ്സ്ട്രീം പ്രതികരണം (`upstream_empty_response` / `empty_response`, വിളിക്കുന്നയാൾക്ക് ഒന്നും പുറത്തുവിടുന്നില്ല) ഒരേ ഉടമയിൽ നിന്ന് പരമാവധി രണ്ട് തവണ വീണ്ടും ശ്രമിക്കും, 0.5 സെക്കൻഡിന് ശേഷം 1.5 സെക്കൻഡ് (`MUSE_EMPTY_RESPONSE_RETRY_DELAYS_MS`). എല്ലാ ശ്രമങ്ങളും ശൂന്യമാണെങ്കിൽ, ഒറിജിനൽ 502 കൂൾഡൗൺ അല്ലെങ്കിൽ ബ്രേക്കർ അടയാളപ്പെടുത്തൽ ഇല്ലാതെ തിരികെ നൽകും, അതിനാൽ ഒരു ഫ്ലാക്കി മറുപടി ഒരിക്കലും ഉടമയെ പൂട്ടുന്നില്ല.
-- എല്ലാ `muse-code` അഭ്യർത്ഥനകളും സെമാൻ്റിക്-കാഷെ വായിക്കുകയും എഴുതുകയും ചെയ്യുന്നു, സ്ട്രീമിംഗ് റൈറ്റുകൾ ഉൾപ്പെടെ, അതിനാൽ കാഷെ ചെയ്ത അതാര്യമായ ഔട്ട്പുട്ടിന് മറ്റൊരു സെഷൻ ഉടമയെ സ്വന്തമാക്കാൻ കഴിയില്ല.
+- ഓരോ turn ലും സ്ഥിരമായ session ID നൽകുക: `x-omniroute-session-id`, `x-omniroute-session`, `x-session-id` അല്ലെങ്കിൽ `x-codex-session-id`; പകരമായി body യിൽ `prompt_cache_key`, `session_id`, `conversation_id` അല്ലെങ്കിൽ `metadata.session_id` ഉപയോഗിക്കുക (ആ മുൻഗണനാക്രമത്തിൽ). രണ്ടോ അതിലധികമോ native OAuth account കൾ active ആണെങ്കിൽ, ഇല്ലാത്തതോ ശൂന്യമായതോ ആയ ID കൾ 400 നൽകും; ഒറ്റ OAuth account മാത്രമാണെങ്കിൽ rotate ചെയ്യാൻ മറ്റൊന്നില്ല, അതിനാൽ അത്തരം request pin ഇല്ലാത്ത routing നിലനിർത്തുന്നു. Scope ൽ caller ന്റെ OmniRoute API-key ID ഉൾപ്പെടുന്നു.
+- പുതിയ സ്വതന്ത്ര session കൾ API-key connection policy അനുവദിക്കുന്ന active native OAuth account കൾക്കിടയിൽ connection ID ക്രമത്തിൽ round-robin ആയി വിതരണം ചെയ്യുന്നു. Connection cooldown ൽ ഉള്ളതോ terminal status (`banned`, `expired`, `credits_exhausted`) ഉള്ളതോ ആവശ്യപ്പെട്ട model ന് lock ചെയ്തതോ ആയ account കൾ round-robin ഒഴിവാക്കുന്നു; മറ്റ് provider കളെപ്പോലെ Muse upstream പരാജയങ്ങളും cooldown, breaker state എന്നിവ രേഖപ്പെടുത്തുന്നു. വ്യക്തമായി നിർബന്ധിച്ച connection പുതിയ session ന് round-robin ഒഴിവാക്കും; എന്നാൽ owner വിജയകരമായ response നൽകിയശേഷം ആ owner നെ മറികടക്കാനാവില്ല.
+- Owner വിജയകരമായ response നൽകുന്നതുവരെ, owner ലഭ്യമല്ലാതായ session ആരോഗ്യകരമായ account ലേക്ക് വീണ്ടും claim ചെയ്യുന്നു. ആദ്യ വിജയകരമായ response കഴിഞ്ഞാൽ, session 30 ദിവസം idle ആകുന്നതുവരെ (`MUSE_SESSION_IDLE_TTL_MS`) ആ owner നോട് pin ചെയ്തിരിക്കും.
+- എല്ലാ continuation ഉം tool-result turn ഉം session owner നോട് pin ചെയ്തിരിക്കും: connection, account identity, inference-credential generation; credential-refresh retry കൾ ഉൾപ്പെടെ upstream ശ്രമങ്ങൾക്ക് മുമ്പ് ഇവ വീണ്ടും പരിശോധിക്കുന്നു. Responses call ID കൾ/item reference കളും Chat Completions tool-call ID കളും ആ session നും generation നും വേണ്ടി രേഖപ്പെടുത്തിയിരിക്കണം.
+- `muse_session_ownership` namespace ലെ SQLite `key_value` record കൾ (`src/lib/db/museSessionOwnership.ts`) restart കൾക്കിടയിലും ownership, rotation cursor എന്നിവ നിലനിർത്തുന്നു. ഓരോ claim ഉം നൽകിയ response ഉം session activity timestamp പുതുക്കുന്നു; `MUSE_SESSION_IDLE_TTL_MS` നേക്കാൾ കൂടുതൽ idle ആയ session prune ചെയ്യുന്നു (owner pin, served flag, രേഖപ്പെടുത്തിയ opaque/reference hash കൾ), പരമാവധി 10 മിനിറ്റിൽ ഒരിക്കൽ, പരിധിയുള്ള batch കളിൽ. അതിനാൽ പിന്നീട് അതിന്റെ history replay ചെയ്താൽ unknown owner ആയി അനുമതി നിഷേധിക്കും. Record കളിൽ connection ID കളും account identity, credential കൾ, opaque content, continuation reference കൾ എന്നിവയുടെ hash കളുമാണ് ഉള്ളത്; secrets അല്ലെങ്കിൽ conversation history അല്ല. Client കൾ മുഴുവൻ history യും opaque reasoning ഉം സൂക്ഷിച്ച് അയയ്ക്കണം.
+- അറിയാത്തതോ മറ്റൊരാളുടേതോ ആയ opaque reasoning, ഇല്ലാത്ത owner, ലഭ്യമല്ലാത്ത owner account, അല്ലെങ്കിൽ രേഖപ്പെടുത്തിയ history ഉള്ളപ്പോൾ generation മാറുന്നത് — ഇവ explicit 4xx/503 നൽകി അനുമതി നിഷേധിക്കും; ഒരിക്കലും നിശ്ശബ്ദമായി മറ്റൊരു account ലേക്ക് failover ചെയ്യുകയോ reasoning ഉപേക്ഷിക്കുകയോ ചെയ്യില്ല.
+- അതേ account ന് വീണ്ടും നൽകിയ key സ്വീകരിക്കുന്നത് session ൽ replay ചെയ്യാവുന്ന history ഒന്നും രേഖപ്പെടുത്തിയിട്ടില്ലെങ്കിൽ മാത്രം; രേഖപ്പെടുത്തിയ session കൾ പുതുതായി ആരംഭിക്കുന്നതുവരെ അനുമതി നിഷേധിച്ചുതന്നെ തുടരും.
+- ശൂന്യമായ upstream response (`upstream_empty_response` / `empty_response`, caller ന് ഒന്നും നൽകിയിട്ടില്ല) അതേ owner ൽ പരമാവധി രണ്ടുതവണ retry ചെയ്യും, ആദ്യം 0.5 s കഴിഞ്ഞും തുടർന്ന് 1.5 s കഴിഞ്ഞും (`MUSE_EMPTY_RESPONSE_RETRY_DELAYS_MS`). എല്ലാ ശ്രമങ്ങളും ശൂന്യമെങ്കിൽ cooldown അല്ലെങ്കിൽ breaker രേഖപ്പെടുത്താതെ ആദ്യത്തെ 502 നൽകും; അതിനാൽ ഇടയ്ക്കിടെ പരാജയപ്പെടുന്ന reply owner നെ lock ചെയ്യില്ല.
+- എല്ലാ `muse-code` request കളും semantic-cache read, write എന്നിവ ഒഴിവാക്കുന്നു, streaming write കൾ ഉൾപ്പെടെ; അതിനാൽ cache ചെയ്ത opaque output മറ്റൊരു session owner നോട് ചേരില്ല.
 
-റിഗ്രഷൻ ഗാർഡുകൾ: `tests/unit/muse-session-ownership.test.ts`, `tests/unit/muse-session-ownership-retention.test.ts`, `tests/unit/muse-empty-response-retry.test.ts`, ഒപ്പം `tests/unit/chatcore-semantic-cache.test.ts`.
+Regression സംരക്ഷണങ്ങൾ: `tests/unit/muse-session-ownership.test.ts`, `tests/unit/muse-session-ownership-retention.test.ts`, `tests/unit/muse-empty-response-retry.test.ts`, `tests/unit/chatcore-semantic-cache.test.ts`.
 
 ## ഇതും കാണുക
 
 - [RESILIENCE_GUIDE.md](../architecture/RESILIENCE_GUIDE.md) — സർക്യൂട്ട് ബ്രേക്കറുകൾ, കൂൾഡൗണുകൾ, മോഡൽ ലോക്കൗട്ടുകൾ
-- [TROUBLESHOOTING.md](../guides/TROUBLESHOOTING.md) — അപ്സ്ട്രീം 400s രോഗനിർണ്ണയം ചെയ്യുന്നു
-- ഉറവിടം: `src/lib/db/reasoningCache.ts`, `open-sse/services/reasoningCache.ts`, `open-sse/translator/index.ts`
+- [TROUBLESHOOTING.md](../guides/TROUBLESHOOTING.md) — അപ്സ്ട്രീം 400 പിശകുകൾ നിർണയിക്കൽ
+- സോഴ്സ്: `src/lib/db/reasoningCache.ts`, `open-sse/services/reasoningCache.ts`, `open-sse/translator/index.ts`
 - മൈഗ്രേഷൻ: `src/lib/db/migrations/033_create_reasoning_cache.sql`
 - API റൂട്ട്: `src/app/api/cache/reasoning/route.ts`
-- യഥാർത്ഥ ലക്കം: #1628
+- യഥാർത്ഥ ഇഷ്യൂ: #1628

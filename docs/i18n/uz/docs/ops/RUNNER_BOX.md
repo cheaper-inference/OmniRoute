@@ -12,13 +12,13 @@ buildi Release-Green webpack buildi va lint job bilan bir vaqtda ishlaganda orti
 host swap (16 GB) buni qoplaydi, pull-request Buildlari esa hostingdagi runnerlarda ishlagani uchun
 Turbopack sloti ko‘pincha bo‘sh turadi:
 
-| runner               | label               | rol                                                                                                                                                 | `MemoryHigh` / `MemoryMax` | `CPUQuota`           |
-| -------------------- | ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | -------------------- |
-| `omniroute-113-5`    | `omni-build`        | Turbopack buildlari: `ci.yml` `Build` (faqat push/dispatch), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, tungi a11y buildi | 56 GB / 60 GB (swap 0)     | 1600 %               |
-| `omniroute-113-6`    | `omni-release`      | Release-Green (`release-green` + `main-green`), webpack buildi                                                                                      | 20 GB / 24 GB (swap 4 GB)  | 800 %                |
-| `omniroute-113-2`    | `omni-light`        | tungi ishlar (Schemathesis, promptfoo, garak, k6) va `quality.yml` faylidagi `lint-guard`                                                           | 12 GB / 16 GB (swap 4 GB)  | 600 %                |
-| `omniroute-113`      | `omni-light`        | yuqoridagi bilan bir xil pool                                                                                                                       | 8 GB / 12 GB               | 400 %                |
-| OmniHeuris, OmniMind | (ularning repolari) | faqat Dependabot (har biri uchun eng yuqori ko‘rsatkich 155 MB, 2026-10-18)                                                                         | 4 GB / 6 GB                | har biri uchun 200 % |
+| runner               | label                           | rol                                                                                                                                                 | `MemoryHigh` / `MemoryMax` | `CPUQuota`           |
+| -------------------- | ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | -------------------- |
+| `omniroute-113-5`    | `omni-build`, `omni-build-60gb` | Turbopack buildlari: `ci.yml` `Build` (faqat push/dispatch), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, tungi a11y buildi | 56 GB / 60 GB (swap 0)     | 1600 %               |
+| `omniroute-113-6`    | `omni-release`                  | Release-Green (`release-green` + `main-green`), webpack buildi                                                                                      | 20 GB / 24 GB (swap 4 GB)  | 800 %                |
+| `omniroute-113-2`    | `omni-light`                    | tungi ishlar (Schemathesis, promptfoo, garak, k6) va `quality.yml` faylidagi `lint-guard`                                                           | 12 GB / 16 GB (swap 4 GB)  | 600 %                |
+| `omniroute-113`      | `omni-light`                    | yuqoridagi bilan bir xil pool                                                                                                                       | 8 GB / 12 GB               | 400 %                |
+| OmniHeuris, OmniMind | (ularning repolari)             | faqat Dependabot (har biri uchun eng yuqori ko‘rsatkich 155 MB, 2026-10-18)                                                                         | 4 GB / 6 GB                | har biri uchun 200 % |
 
 2026-10-18 sanasida o‘lchangan:
 
@@ -28,13 +28,14 @@ Turbopack sloti ko‘pincha bo‘sh turadi:
 | swap      | 16 GB                          | `omniroute-113-5` swap o‘chirilgan holda (`MemorySwapMax=0`) ishlaydi, shuning uchun nazoratdan chiqqan build mashinani swap ishlatishga majbur qilish o‘rniga o‘z limitida to‘xtatiladi                                                                                                                                                                                                                            |
 | `/tmp`    | **12 GB tmpfs = RAM**          | bu yerda saqlangan har qanday narsa xotirani egallaydi; qoldiqlar 3 soatdan keyin tozalanadi                                                                                                                                                                                                                                                                                                                        |
 | CPU       | 32 yadroda 60 load kuzatildi   | kvotalardan oldin bitta Turbopack buildi (~1166 % CPU) va shu mashinadagi coverage to‘plami boshqa listenerlarning heartbeatlarini resursdan mahrum qilgan (`The self-hosted runner lost communication`, #16853)                                                                                                                                                                                                    |
-| runnerlar | **7 ta listener** (2026-10-28) | 5 ta OmniRoute + OmniHeuris + OmniMind; `omniroute-113-7` `omni-build` labelini ham olib yuradi; `omniroute-113-3/-4/-8` repozitoriydan o‘chirib tashlandi (2026-10-28)                                                                                                                                                                                                                                             |
+| runnerlar | **7 ta listener** (2026-10-28) | 5 ta OmniRoute + OmniHeuris + OmniMind; `omniroute-113-5` `omni-build-60gb` labelini ham olib yuradi; `omniroute-113-3/-4/-8` repozitoriydan o‘chirib tashlandi (2026-10-28)                                                                                                                                                                                                                                        |
 
 Limitlar har bir unitning `/etc/systemd/system/actions.runner.<…>.service.d/override.conf`
 faylida joylashgan (avvalgi qiymatlar `override.conf.bak-20261018` sifatida saqlangan) va
 `systemctl set-property --runtime … MemoryHigh=… MemoryMax=… CPUQuota=…` orqali ishlayotgan
 tizimga qo‘llangan — restart qilinmagan, shuning uchun hech bir ishlayotgan jobga ta’sir qilinmagan.
-Labellar runnerlar API orqali (`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
+Labellar runnerlar API orqali
+(`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
 `gh api -X POST repos/<repo>/actions/runners/<id>/labels -f 'labels[]=<label>'`) o‘zgartiriladi va
 bu ham ishlayotgan tizimda amalga oshiriladi.
 
@@ -88,7 +89,7 @@ ishga tushirish bitta buyruq ichida bajarilsin.
 ## Ishlatish qoidalari
 
 - **Bir vaqtda faqat bitta Turbopack build — label orqali majburiy cheklangan.** To‘liq Turbopack
-  `next build` ishga tushiradigan har bir job `[self-hosted, omni-build]`ni nishonga oladi va bu
+  `next build` ishga tushiradigan har bir job `[self-hosted, omni-build, omni-build-60gb]`ni nishonga oladi va bu
   label faqat **`omniroute-113-5`**da mavjud: `ci.yml`dagi `Build`, `npm-publish.yml`dagi `publish`,
   `nightly-v4-build`, `preview-artifact`, tungi a11y build (#16853) va `docker-publish.yml`dagi
   **amd64** (BuildKit ichidagi webpack — u yerda Turbopack vahimali xato bilan to‘xtagan,

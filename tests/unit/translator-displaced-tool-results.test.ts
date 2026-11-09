@@ -10,9 +10,8 @@ import assert from "node:assert/strict";
 // request. repairDisplacedToolResults hoists the result back into the turn's
 // contiguous run; fixMissingToolResponses (per-id coverage) inserts empty
 // results for calls nothing resolves.
-const { repairDisplacedToolResults, fixMissingToolResponses } = await import(
-  "../../open-sse/translator/helpers/toolCallHelper.ts"
-);
+const { repairDisplacedToolResults, fixMissingToolResponses } =
+  await import("../../open-sse/translator/helpers/toolCallHelper.ts");
 
 const asst = (ids, text = null) => ({
   role: "assistant",
@@ -32,7 +31,14 @@ function runBoth(body) {
 
 test("displaced result is hoisted back into the assistant turn's result run", () => {
   const body = {
-    messages: [user("go"), asst(["c1", "c2"]), tool("c1"), user("task notification"), tool("c2"), user("next")],
+    messages: [
+      user("go"),
+      asst(["c1", "c2"]),
+      tool("c1"),
+      user("task notification"),
+      tool("c2"),
+      user("next"),
+    ],
   };
   const out = runBoth(body).messages;
   // The displaced c2 result moves above the steering user message; the run is
@@ -41,7 +47,10 @@ test("displaced result is hoisted back into the assistant turn's result run", ()
     out.map((m) => m.role),
     ["user", "assistant", "tool", "tool", "user", "user"]
   );
-  assert.deepEqual(out.slice(2, 4).map((m) => m.tool_call_id), ["c1", "c2"]);
+  assert.deepEqual(
+    out.slice(2, 4).map((m) => m.tool_call_id),
+    ["c1", "c2"]
+  );
   assert.equal(out[2].content, "result");
   assert.equal(out[3].content, "result");
 });
@@ -79,7 +88,15 @@ test("trailing assistant turn gets its pending call closed with an empty result"
 
 test("hoisting never crosses the next assistant message", () => {
   const body = {
-    messages: [user("go"), asst(["c1"]), user("steer"), user("later"), asst([], "hi"), tool("c1"), user("next")],
+    messages: [
+      user("go"),
+      asst(["c1"]),
+      user("steer"),
+      user("later"),
+      asst([], "hi"),
+      tool("c1"),
+      user("next"),
+    ],
   };
   const out = runBoth(body).messages;
   // The dangling call gets its empty result right after the assistant; the
@@ -127,7 +144,14 @@ test("Claude-format displaced tool_result user message hoists the same way", () 
     content: [{ type: "tool_result", tool_use_id: id, content: "r" }],
   });
   const body = {
-    messages: [user("go"), claudeAsst, resultCarrier("c1"), user("notif"), resultCarrier("c2"), user("next")],
+    messages: [
+      user("go"),
+      claudeAsst,
+      resultCarrier("c1"),
+      user("notif"),
+      resultCarrier("c2"),
+      user("next"),
+    ],
   };
   const out = runBoth(body).messages;
   // The c2 carrier hoists above the notification; no synthetic result needed.
