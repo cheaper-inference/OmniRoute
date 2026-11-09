@@ -1,0 +1,1 @@
+- **fix(routing):** An AUTO combo no longer classifies a plain question as code because Claude Code or Codex added a `<system-reminder>` or similar block to the user message. The intent now ignores those blocks.
