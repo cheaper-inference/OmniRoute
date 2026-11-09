@@ -4,7 +4,7 @@ import { DatabaseSync } from "node:sqlite";
 import { readFileSync } from "node:fs";
 
 const migration = readFileSync(
-  new URL("../../../src/lib/db/migrations/231_key_templates.sql", import.meta.url),
+  new URL("../../../src/lib/db/migrations/232_key_templates.sql", import.meta.url),
   "utf8"
 );
 
