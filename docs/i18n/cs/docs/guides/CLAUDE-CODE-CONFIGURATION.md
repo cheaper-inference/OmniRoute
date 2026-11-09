@@ -27,24 +27,25 @@ omniroute launch --profile glm52  # Claude Code používající glm/glm-5.2 pře
 
 ## Jak se Claude Code připojuje k bráně
 
-Claude Code komunikuje prostřednictvím **Anthropic Messages API** a na vlastní
-koncový bod se směruje pomocí proměnných prostředí (nemá příznak `--base-url`):
+Claude Code mluví**Anthropic Zprávy API** a ukazuje na vlastní koncový bod s proměnnými prostředí (nemá žádný příznak `--base-url` ):
 
-| Proměnná                                     | Účel                                                                                                   |
-| -------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| `ANTHROPIC_BASE_URL`                         | Kořenová URL brány (Claude Code připojí `/v1/messages`). **Bez přípony `/v1`.**                        |
-| `ANTHROPIC_AUTH_TOKEN`                       | Odesílá se jako `Authorization: Bearer …` — použijte svůj přístupový token / API klíč OmniRoute        |
-| `ANTHROPIC_API_KEY`                          | Alternativa: odesílá se jako `x-api-key`. Pokud jsou nastaveny obě, má přednost `ANTHROPIC_AUTH_TOKEN` |
-| `ANTHROPIC_MODEL`                            | Vynutí konkrétní model (přepíše výchozí volbu nástroje `/model`)                                       |
-| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → nativní nástroj `/model` zobrazí modely `claude*`/`anthropic*` z `/v1/models`                    |
-| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | Omezí počet výstupních tokenů na odpověď (např. `65536`)                                               |
-| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | Prahová hodnota tokenů pro automatickou kompakci                                                       |
+| Variabilní                                   | Účel                                                                                              |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| `ANTHROPIC_BASE_URL`                         | Kořen brány URL ( ke kódu Claude se připojuje `/v1/messages`).** Žádná přípona `/v1`.**           |
+| `ANTHROPIC_AUTH_TOKEN`                       | Odesláno jako `Authorization: Bearer …` — pomocí vašeho přístupového tokenu OmniRoute / klíče API |
+| `ANTHROPIC_API_KEY`                          | Alternativa: odesláno jako `x-api-key`. Pokud jsou oba nastaveny, `ANTHROPIC_AUTH_TOKEN` vyhrává  |
+| `ANTHROPIC_MODEL`                            | Vynutit konkrétní model (přepíše výchozí nastavení výběru `/model` )                              |
+| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → nativní výběr `/model` uvádí modely `claude*`/`anthropic*` od `/v1/models`                  |
+| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | Omezení výstupních tokenů na odpověď (např. `65536`)                                              |
+| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | Práh tokenu pro automatické zhutňování                                                            |
 
-> Proměnné prostředí se načítají **pouze jednou při spuštění** — po jejich změně Claude Code restartujte.
+> Env vars jsou načteny** jednou při spuštění** — restartujte kód Claude po jejich změně.
 
-`omniroute launch` nastaví všechny tyto proměnné za vás: zjistí základní URL a token
-z aktivního kontextu (takže po `omniroute connect <vps>` stačí spustit
-`omniroute launch`), zkontroluje stav serveru a spustí `claude`.
+Pro pověření, které se otáčí místo pevného řetězce, nastavte `apiKeyHelper` v `~/.claude/settings.json` na příkaz, který vytiskne aktuální pověření na stdout. Claude Code standardně ukládá svůj výstup do mezipaměti po dobu pěti minut (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` to přepíše) a odešle hodnotu v `Authorization: Bearer` i `x-api-key`. Skript musí vytisknout pověření a nic jiného — banner vedle něj selže pomocník na v2.1.227 +.
+
+Takto funguje Entra ID SSO : `scripts/cli/omniroute-sso.mjs token` vytiskne krátkodobý přístupový token Entra, který OmniRoute ověří namísto klíče API. Viz [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md).
+
+`omniroute launch` nastaví toto vše za vás: vyhodnotí základní token URL + z aktivního kontextu (takže `omniroute connect <vps>` a pak `omniroute launch` prostě funguje), zkontroluje stav serveru a spustí `claude`.
 
 ---
 

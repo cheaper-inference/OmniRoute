@@ -3,6 +3,7 @@
 import { Slot } from "@radix-ui/react-slot";
 import { useCallback, useRef } from "react";
 import type { ComponentPropsWithoutRef, CSSProperties, ReactElement, ReactNode } from "react";
+import { brandTintVars } from "./brand-tint";
 import { ControlHighlight } from "./control-highlight";
 import { Toast } from "./toast";
 import { cn } from "./lib/utils";
@@ -27,14 +28,19 @@ export interface FeatureNoticeProps extends Omit<ComponentPropsWithoutRef<"div">
   mobileAlign?: FeatureNoticeAlign;
   /** Preferred popup width in pixels; capped to the viewport with 16px gutters. */
   width?: number;
+  /** Accessible name for the notice's close button. Defaults to "Dismiss notification". */
+  closeLabel?: string;
+  /** Tints the popup for a partner or sponsor: `#rgb` or `#rrggbb`. Other values keep the accent look. */
+  brandColor?: string;
 }
 
 /** A persistent contextual announcement attached to an existing control. */
 export function FeatureNotice({
   open, onDismiss, title, description, titleLeading, children,
-  side = "bottom", align = "end", mobileAlign = align, width = 384,
+  side = "bottom", align = "end", mobileAlign = align, width = 384, closeLabel, brandColor,
   className, style, ...props
 }: FeatureNoticeProps) {
+  const brand = brandTintVars(brandColor);
   const triggerRef = useRef<HTMLElement>(null);
   const noticeRef = useRef<HTMLDivElement>(null);
   const dismiss = useCallback(() => {
@@ -61,7 +67,7 @@ export function FeatureNotice({
         </Slot>
       </ControlHighlight>
       {open && (
-        <div ref={noticeRef} data-slot="feature-notice-content" className="ci-feature-notice__content">
+        <div ref={noticeRef} data-slot="feature-notice-content" className={cn("ci-feature-notice__content", brand && "ci-brand-tint")} style={brand as CSSProperties | undefined}>
           <Toast
             variant="accent"
             showIcon={false}
@@ -73,6 +79,7 @@ export function FeatureNotice({
             }
             description={description}
             duration={Infinity}
+            closeLabel={closeLabel}
             onDismiss={dismiss}
           />
         </div>

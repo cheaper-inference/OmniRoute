@@ -150,24 +150,24 @@ curl -X POST http://localhost:20128/a2a \
 
 ---
 
-## Kemahiran Tersedia
+## Kemahiran yang Ada
 
-OmniRoute mendedahkan 6 kemahiran A2A yang disambungkan dalam `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Setiap modul kemahiran terletak dalam `src/lib/a2a/skills/`.
+OmniRoute mendedahkan 6 kemahiran A2A berwayar dalam `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Setiap modul kemahiran hidup dalam `src/lib/a2a/skills/`.
 
-| Kemahiran          | ID                   | Penerangan                                                                                                                                               | Teg                        | Contoh                                      |
-| :----------------- | :------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------- | :------------------------------------------ |
-| Smart Routing      | `smart-routing`      | Menghala prompt melalui penyedia/kombo optimum menggunakan enjin kombo + pemarkahan OmniRoute                                                            | routing, providers         | "Halakan prompt ini melalui model terbaik"  |
-| Quota Management   | `quota-management`   | Melaporkan keadaan kuota setiap penyedia, membantu pemanggil memutuskan bila untuk menyekat/bertukar                                                     | quota, providers           | "Semak kuota untuk anthropic"               |
-| Provider Discovery | `provider-discovery` | Menyenaraikan penyedia terpasang berserta keupayaan, penanda peringkat percuma, status OAuth                                                             | providers, discovery       | "Penyedia apa yang tersedia?"               |
-| Cost Analysis      | `cost-analysis`      | Menganggarkan kos sesuatu permintaan/perbualan berdasarkan katalog + penggunaan terkini                                                                  | cost, usage                | "Anggarkan kos untuk perbualan ini"         |
-| Health Report      | `health-report`      | Mengagregatkan keadaan circuit breaker, cooldown dan lockout setiap penyedia                                                                             | health, resilience         | "Tunjukkan status kesihatan semua penyedia" |
-| List Capabilities  | `list-capabilities`  | Mengembalikan katalog Agent Skills 45 entri penuh (23 API + 21 CLI + 1 config) sebagai jadual markdown dengan URL SKILL.md mentah untuk suntikan konteks | catalog, discovery, skills | "Senaraikan semua keupayaan OmniRoute"      |
+| Kemahiran            | ID                   | Penerangan                                                                                                                                                                   | Tag                          | Contoh                                      |
+| :------------------- | :------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--------------------------- | :------------------------------------------ |
+| Penghalaan Pintar    | `smart-routing`      | Halakan gesaan melalui provider/combo optimum menggunakan pemarkahan + enjin kombo OmniRoute                                                                                 | penghalaan, pembekal         | "Halakan gesaan ini melalui model terbaik"  |
+| Pengurusan Kuota     | `quota-management`   | Laporan menyatakan kuota setiap pembekal, membantu pemanggil memutuskan bila untuk throttle/switch                                                                           | kuota, pembekal              | "Semak kuota untuk antropik"                |
+| Penemuan Pembekal    | `provider-discovery` | Menyenaraikan pembekal yang dipasang dengan keupayaan, bendera peringkat percuma, status OAuth                                                                               | pembekal, penemuan           | "Pembekal apa yang tersedia?"               |
+| Analisis Kos         | `cost-analysis`      | Anggaran kos request/conversation berdasarkan katalog + penggunaan terkini                                                                                                   | kos, penggunaan              | "Anggaran kos untuk perbualan ini"          |
+| Laporan Kesihatan    | `health-report`      | Agregat pemutus litar, cooldown, keadaan kunci keluar bagi setiap pembekal                                                                                                   | kesihatan, daya tahan        | "Tunjukkan status kesihatan semua pembekal" |
+| Senaraikan Keupayaan | `list-capabilities`  | Mengembalikan katalog Kemahiran Ejen 45 penyertaan penuh (23 API + 21 CLI + 1 konfigurasi) sebagai jadual penurunan harga dengan SKILL.md URLs mentah untuk suntikan konteks | katalog, penemuan, kemahiran | "Senaraikan semua keupayaan OmniRoute "     |
 
-> Kad Ejen harus dikekalkan sejajar dengan katalog 375 penyedia langsung; bilangan penyedia dan metadata percuma/tanpa-auth bersumber daripada pendaftar runtime.
+> Kad Ejen hendaklah sentiasa sejajar dengan katalog 381-pembekal langsung; kiraan pembekal dan metadata free/no-auth diperoleh daripada pendaftaran masa jalan.
 
-### Butiran Kemahiran `list-capabilities`
+### `list-capabilities` Butiran Kemahiran
 
-Kemahiran `list-capabilities` amat berguna untuk ejen luaran yang perlu menemui apa yang didedahkan oleh OmniRoute sebelum menghantar panggilan API. Ia mengembalikan artifak jadual markdown berstruktur:
+Kemahiran `list-capabilities` amat berguna untuk ejen luar yang perlu mengetahui perkara yang OmniRoute dedahkan sebelum menghantar panggilan API. Ia mengembalikan artifak jadual penurunan nilai berstruktur:
 
 ```
 | ID | Name | Category | Area | Endpoints/Commands | Raw URL |
@@ -176,46 +176,54 @@ Kemahiran `list-capabilities` amat berguna untuk ejen luaran yang perlu menemui 
 ...
 ```
 
-Setiap baris mengandungi lajur `rawUrl` supaya ejen boleh terus mengambil SKILL.md penuh. Medan `metadata.totalSkills` mencerminkan saiz katalog (45 buat masa ini). Pelaksanaan: `src/lib/a2a/skills/listCapabilities.ts`. Lihat juga [AGENT-SKILLS.md](./AGENT-SKILLS.md).
+Setiap baris termasuk lajur `rawUrl` supaya ejen boleh segera mengambil SKILL.md penuh . Medan `metadata.totalSkills` mencerminkan saiz katalog (45 hari ini). Pelaksanaan: `src/lib/a2a/skills/listCapabilities.ts`. Lihat juga [AGENT-SKILLS.md](./AGENT-SKILLS.md).
 
 ---
 
-## REST API (tambahan)
+## REST API (bantuan)
 
-Titik akhir JSON-RPC `/a2a` ialah titik masuk A2A kanonik. Titik akhir REST di bawah menyediakan akses tambahan untuk papan pemuka dan perkakas luaran:
+`/a2a` titik akhir JSON-RPC ialah titik masuk A2A kanonik. Titik akhir REST di bawah menyediakan akses tambahan untuk papan pemuka dan alatan luaran:
 
-| Titik akhir                  | Kaedah | Penerangan                                                         | Pengesahan                                           |
-| :--------------------------- | :----- | :----------------------------------------------------------------- | :--------------------------------------------------- |
-| `/api/a2a/status`            | GET    | Status pelayan, kemahiran berdaftar                                | (awam)                                               |
-| `/api/a2a/tasks`             | GET    | Senaraikan tugasan dengan penapis                                  | pengurusan                                           |
-| `/api/a2a/tasks/[id]`        | GET    | Dapatkan tugasan mengikut ID                                       | pengurusan                                           |
-| `/api/a2a/tasks/[id]/cancel` | POST   | Batalkan tugasan yang sedang berjalan                              | pengurusan                                           |
-| `/.well-known/agent.json`    | GET    | Kad Ejen (penemuan A2A)                                            | (awam, dicache selama 3600s)                         |
-| `/api/a2a/tasks`             | POST   | Perwakilan masuk kepada kelompok OmniConductor (Conductor PRD RF5) | Bearer berbanding `OMNIROUTE_API_KEY` + `a2aEnabled` |
+| Titik akhir                  | Kaedah | Penerangan                                                 | Pengesahan                                                                                                      |
+| :--------------------------- | :----- | :--------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------- |
+| `/api/a2a/status`            | GET    | Status pelayan, kemahiran berdaftar                        | (awam)                                                                                                          |
+| `/api/a2a/tasks`             | GET    | Senaraikan tugasan dengan penapis                          | pengurusan atau kunci API (lihat di bawah)                                                                      |
+| `/api/a2a/tasks/[id]`        | GET    | Dapatkan tugas oleh ID                                     | pengurusan atau kunci API (lihat di bawah)                                                                      |
+| `/api/a2a/tasks/[id]/cancel` | POST   | Batalkan tugas yang sedang dijalankan                      | pengurusan atau kunci API (lihat di bawah)                                                                      |
+| `/.well-known/agent.json`    | GET    | Kad Ejen (A2A discovery)                                   | (awam, cache 3600s)                                                                                             |
+| `/api/a2a/tasks`             | POST   | Delegasi masuk ke armada OmniConductor (Konduktor PRD RF5) | sama seperti `GET`, tambah `OMNIROUTE_API_KEY` jika ditetapkan semasa `REQUIRE_API_KEY` dimatikan; `a2aEnabled` |
 
-**Perwakilan Conductor masuk (`POST /api/a2a/tasks`):** ejen A2A luaran mewakilkan kerja pengekodan kepada kelompok OmniConductor melalui OmniRoute. Badan: `{ skill: "conductor" | "conductor-cli-<profile>", messages: [{role, content}], metadata: { conductor: { repo: { url, base_ref? }, mode?, cli?, model? } } }` — hanya kemahiran kelompok Conductor (yang diumumkan pada Kad Ejen) boleh diwakilkan; `metadata.conductor.repo.url` diperlukan (kelompok tersebut mengendalikan repositori git). Laluan ini diterjemahkan kepada `POST /v1/tasks` hab menggunakan `CONDUCTOR_ORCHESTRATOR_TOKEN` pada bahagian pelayan (sandaran `CONDUCTOR_HUB_TOKEN`) dan mengembalikan `201 { conductor_task_id, state: "submitted" }`; keadaan tugasan disalurkan semula melalui cermin SSE→A2A (RF1) dan boleh dilihat melalui `GET /api/a2a/tasks?skill=conductor`.
+Siapa yang melalui laluan `/api/a2a/tasks*` bergantung pada log masuk dan tetapan kunci API:
+
+- `requireLogin=true` (lalai): middleware hanya menerima bukti kelayakan pengurusan (sesi papan pemuka, kunci `manage` -scope API, token akses `oma_` ) dan `OMNIROUTE_API_KEY`. Kunci inferens biasa mendapat `403`. Dalam pengepala `Authorization` middleware hanya mengambil `OMNIROUTE_API_KEY` sebagai `Bearer <key>`; kunci kosong atau tab selepas `Bearer` mendapat `401`.
+- `requireLogin=false`, atau tetingkap gelung balik sebelum masuk: dengan `REQUIRE_API_KEY=true` sebarang kunci OmniRoute API yang sah atau kelayakan pengurusan diterima dan pemanggil tanpa nama mendapat `401`; dengan `REQUIRE_API_KEY` di luar laluan dibuka.
+- `POST /api/a2a/tasks` juga memerlukan `OMNIROUTE_API_KEY` dalam pengepala `Authorization` apabila pembolehubah itu ditetapkan dan `REQUIRE_API_KEY` dimatikan. Pengepala lain, seperti `x-api-key`, tidak dikira di sana. Dengan log masuk mati atau sebelum onboard, pas kunci dengan atau tanpa awalan `Bearer` ; dengan log masuk dihidupkan, hanya `Bearer <key>` yang melepasi perisian tengah.
+
+Jika kelayakan diperlukan, token `read` -scope `oma_` hanya berfungsi untuk `GET`.
+
+**Delegasi Konduktor Masuk (`POST /api/a2a/tasks`):** ejen A2A luaran mewakilkan kerja pengekodan kepada armada OmniConductor melalui OmniRoute. Badan: `{ skill: "conductor" | "conductor-cli-<profile>", messages: [{role, content}], metadata: { conductor: { repo: { url, base_ref? }, mode?, cli?, model? } } }` — sahaja Kemahiran armada konduktor (yang diumumkan pada Kad Ejen) boleh diwakilkan; `metadata.conductor.repo.url` diperlukan (armada berfungsi pada git repos). Laluan itu diterjemahkan kepada `POST /v1/tasks` hab menggunakan `CONDUCTOR_ORCHESTRATOR_TOKEN` sisi pelayan (fallback `CONDUCTOR_HUB_TOKEN`) dan mengembalikan `201 { conductor_task_id, state: "submitted" }`; keadaan tugas mengalir kembali melalui cermin SSE→A2A (RF1) dan boleh dilihat melalui `GET /api/a2a/tasks?skill=conductor`.
 
 ---
 
-## Menambahkan Kemahiran Baharu
+## Menambah Kemahiran Baru
 
-1. **Cipta fail kemahiran:** `src/lib/a2a/skills/<your-skill>.ts`
+1. **Buat fail kemahiran:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   Eksport fungsi tak segerak `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Ikuti struktur kemahiran sedia ada seperti `smartRouting.ts`.
+   Eksport fungsi async `(task: A2ATask, caller?: A2ACallerContext) => Promise<{ artifacts, metadata }>`. Ikut bentuk kemahiran sedia ada seperti `smartRouting.ts`. Jika kemahiran memanggil semula ke OmniRoute atas HTTP, bina pengepala dengan `buildSelfLoopHeaders(caller)` daripada `src/lib/a2a/selfLoopAuth.ts` supaya panggilan berjalan dengan kunci pemanggil A2A, bukan `OMNIROUTE_API_KEY`, dan hantar `redirect: "error"` kepada `fetch` supaya ubah hala tidak pernah mendapat kunci. Pembantu hanya membina tajuk; setiap kemahiran menetapkan dasar ubah hala itu sendiri. Ia membuang `UnsafeSelfLoopTargetError` daripada melampirkan kunci apabila URL asas yang diselesaikan adalah http biasa di luar rangkaian peribadi (gelung belakang, bekas atau nama perkhidmatan dan alamat peribadi adalah baik) atau memegang bukti kelayakan, jadi kemahiran yang menelan panggilan yang ditolak mesti membuang semula ralat itu.
 
-2. **Daftarkan pengendali:** dalam `src/lib/a2a/taskExecution.ts`, tambahkan entri kepada `A2A_SKILL_HANDLERS`:
+2. **Pengendali daftar:** dalam `src/lib/a2a/taskExecution.ts`, tambahkan entri pada `A2A_SKILL_HANDLERS`:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...kemahiran sedia ada
-     "your-skill": async (task) => {
+     // ...existing skills
+     "your-skill": async (task, caller) => {
        const skillModule = await import("./skills/yourSkill");
-       return skillModule.executeYourSkill(task);
+       return skillModule.executeYourSkill(task, caller);
      },
    };
    ```
 
-3. **Dedahkan dalam Kad Ejen:** dalam `src/app/.well-known/agent.json/route.ts`, tambahkan kepada tatasusunan `skills`:
+3. **Dedahkan dalam Kad Ejen:** dalam `src/lib/a2a/agentCardMetadata.ts` (dikongsi oleh `/.well-known/agent.json` dan `/.well-known/agent-card.json`), tambahkan pada tatasusunan `skills` :
 
    ```json
    {
@@ -227,9 +235,9 @@ Titik akhir JSON-RPC `/a2a` ialah titik masuk A2A kanonik. Titik akhir REST di b
    }
    ```
 
-4. **Tulis ujian:** `tests/unit/a2a-<your-skill>.test.ts`. Liputi laluan berjaya + laluan ralat.
+4. **Tulis ujian:** `tests/unit/a2a-<your-skill>.test.ts`. Tutup laluan gembira + laluan ralat.
 
-5. **Dokumentasikan** kemahiran baharu dalam jadual `Available Skills` fail ini.
+5. **Dokumen** kemahiran baharu dalam jadual `Available Skills` fail ini.
 
 ---
 
@@ -268,7 +276,7 @@ diserahkan → sedang diproses → selesai
 
 ## Contoh Integrasi
 
-### Python (requests)
+### Python (permintaan)
 
 ```python
 import requests
@@ -287,7 +295,7 @@ print(result["artifacts"][0]["content"])
 print(result["metadata"]["routing_explanation"])
 ```
 
-### TypeScript (fetch)
+### TypeScript (ambil)
 
 ```typescript
 const resp = await fetch("http://localhost:20128/a2a", {

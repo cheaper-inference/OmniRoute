@@ -17,64 +17,72 @@ OmniRoute അഡ്മിനിസ്ട്രേറ്റീവ് പ്രവ
 എന്തെങ്കിലും പരാജയം സംഭവിച്ചാൽ കോൾ നിശ്ശബ്ദമായി അവഗണിക്കപ്പെടുന്നതിനാൽ ഓഡിറ്റ് ലോഗിംഗ്
 പ്രധാന റിക്വസ്റ്റ് ഫ്ലോയെ തടസ്സപ്പെടുത്തില്ല.
 
-## എന്തൊക്കെയാണ് ലോഗ് ചെയ്യപ്പെടുന്നത്
+## എന്താണ് രേഖപ്പെടുത്തുന്നത്
 
 ### അഡ്മിനിസ്ട്രേറ്റീവ് ഓഡിറ്റ് ഇവന്റുകൾ (`audit_log`)
 
-`logAuditEvent({ action, actor, target, details, ... })`-ലേക്കുള്ള ഓരോ കോളും
-ഒരു റോ സൃഷ്ടിക്കുന്നു. ആക്ഷൻ സ്ട്രിങ്ങുകൾ `domain.verb` (അല്ലെങ്കിൽ `domain.verb.outcome`)
-പാറ്റേൺ പിന്തുടരുന്നു. സോഴ്സ് ട്രീയിൽ സ്ഥിരീകരിച്ചിട്ടുള്ള ആക്ഷൻ തരങ്ങളിൽ ഇവ ഉൾപ്പെടുന്നു:
+`logAuditEvent({ action, actor, target, details, ... })` എന്നതിലേക്കുള്ള ഓരോ വിളിയും
+ഒരു വരി സൃഷ്ടിക്കുന്നു. ആക്ഷൻ സ്ട്രിംഗുകൾ `domain.verb` (അല്ലെങ്കിൽ
+`domain.verb.outcome`) പാറ്റേൺ പിന്തുടരുന്നു. ഇൻ-ട്രീയിൽ സ്ഥിരീകരിച്ച ആക്ഷൻ തരങ്ങൾ:
 
-| ആക്ഷൻ                                | ഉറവിടം                                  |
-| ------------------------------------ | --------------------------------------- |
-| `auth.login.success`                 | `src/app/api/auth/login/route.ts`       |
-| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.error`                   | `src/app/api/auth/login/route.ts`       |
-| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`       |
-| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`       |
-| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`      |
-| `provider.credentials.created`       | `src/app/api/providers/route.ts`        |
-| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`        |
-| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`      |
-| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts` |
-| `compliance.cleanup`                 | `src/lib/compliance/index.ts`           |
+| ആക്ഷൻ                                | ഉറവിടം                                   |
+| ------------------------------------ | ---------------------------------------- |
+| `auth.login.success`                 | `src/app/api/auth/login/route.ts`        |
+| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.error`                   | `src/app/api/auth/login/route.ts`        |
+| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`        |
+| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`        |
+| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`       |
+| `provider.credentials.created`       | `src/app/api/providers/route.ts`         |
+| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`         |
+| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`       |
+| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts`  |
+| `compliance.cleanup`                 | `src/lib/compliance/index.ts`            |
+| `api_key.auth.touch`                 | `src/server/authz/policies/clientApi.ts` |
 
-ഓരോ എൻട്രിയും `action`, `actor` (ഡിഫോൾട്ട് `"system"`), `target`,
+ഓരോ എൻട്രിയും `action`, `actor` (സ്ഥിരസ്ഥിതിയായി `"system"`), `target`,
 `details`/`metadata` (JSON), `ip_address`, `resource_type`, `status`,
-`request_id`, `timestamp` എന്നിവ രേഖപ്പെടുത്തുന്നു. സെൻസിറ്റീവ് കീകൾ (`apiKey`, `accessToken`,
-`refreshToken`, `password`, `*token`/`*secret`/`*apikey` എന്നിവയുമായി പൊരുത്തപ്പെടുന്ന ഏതും,
-തുടങ്ങിയവ) റോ എഴുതുന്നതിന് മുമ്പ് ആവർത്തിതമായി `"[redacted]"` ആക്കി മറയ്ക്കുന്നു.
+`request_id`, `timestamp` എന്നിവ രേഖപ്പെടുത്തുന്നു. സെൻസിറ്റീവ് കീകൾ
+(`apiKey`, `accessToken`, `refreshToken`, `password`, `*token`/`*secret`/`*apikey`
+എന്നിവയുമായി പൊരുത്തപ്പെടുന്നവ ഉൾപ്പെടെ) വരി എഴുതുന്നതിന് മുമ്പ് ആവർത്തനമായി
+`"[redacted]"` ആയി മറച്ചുവയ്ക്കുന്നു.
+
+`api_key.auth.touch` വരികൾ വിജയകരമായ API കീ മെറ്റാഡാറ്റയും അഭ്യർത്ഥന ലോഗിൽ
+എത്താത്ത ഡിസ്കവറി റീഡുകളും (GET/HEAD) രേഖപ്പെടുത്തുന്നു: ഏത് കീ, എപ്പോൾ,
+നോർമലൈസ് ചെയ്ത പാത എന്നിവ. ഇവ കൂട്ടിച്ചേർത്ത് പരമാവധി 1,000 വരികളായി
+പരിമിതപ്പെടുത്തുന്നു. `noLog` ഉള്ള കീകളും എൻവയോൺമെന്റ് കീയും ഒഴിവാക്കുന്നു.
+`API_KEY_AUDIT_CLIENT_DETAILS_ENABLED` ഫീച്ചർ ഫ്ലാഗ് ഓണായിരിക്കുമ്പോൾ മാത്രം
+കോളറുടെ IP വിലാസവും user-agent-ഉം ചേർക്കുന്നു (സ്ഥിരസ്ഥിതിയായി ഓഫാണ്).
 
 ### MCP ടൂൾ കോളുകൾ (`mcp_tool_audit`)
 
-ഓരോ MCP ടൂൾ ഇൻവൊക്കേഷനും
-`open-sse/mcp-server/audit.ts` വഴി ഒരു റോ എഴുതുന്നു. സ്കീമ
-(`src/lib/db/migrations/002_mcp_a2a_tables.sql`-ൽ നിന്ന്):
+ഓരോ MCP ടൂൾ ഇൻവൊക്കേഷനും `open-sse/mcp-server/audit.ts` വഴി ഒരു വരി
+എഴുതുന്നു. സ്കീമ (`src/lib/db/migrations/002_mcp_a2a_tables.sql` ൽ നിന്ന്):
 
-| കോളം             | കുറിപ്പുകൾ                                 |
-| ---------------- | ------------------------------------------ |
-| `id`             | സ്വയമേവ വർധിക്കുന്നത്                      |
-| `tool_name`      | MCP ടൂൾ ഐഡന്റിഫയർ                          |
-| `input_hash`     | ഇൻപുട്ടിന്റെ sha256 (പേലോഡ് സൂക്ഷിക്കില്ല) |
-| `output_summary` | ഹ്രസ്വവും ചുരുക്കിയതുമായ സംഗ്രഹം           |
-| `duration_ms`    | യഥാർത്ഥ സമയദൈർഘ്യം                         |
-| `api_key_id`     | കോളർ (nullable)                            |
-| `success`        | `1` / `0`                                  |
-| `error_code`     | പരാജയത്തിൽ ലഭിക്കുന്ന അന്തിമ എറർ കോഡ്      |
-| `created_at`     | ISO ടൈംസ്റ്റാമ്പ്                          |
+| കോളം             | കുറിപ്പുകൾ                                      |
+| ---------------- | ----------------------------------------------- |
+| `id`             | സ്വയമേവ വർധിക്കുന്നത്                           |
+| `tool_name`      | MCP ടൂൾ ഐഡന്റിഫയർ                               |
+| `input_hash`     | ഇൻപുട്ടിന്റെ sha256 (പേയ്ലോഡ് സംഭരിക്കുന്നില്ല) |
+| `output_summary` | ചുരുക്കിയ, ഹ്രസ്വമായ സംഗ്രഹം                    |
+| `duration_ms`    | ആകെ എടുത്ത സമയം                                 |
+| `api_key_id`     | കോളർ (nullable)                                 |
+| `success`        | `1` / `0`                                       |
+| `error_code`     | പരാജയപ്പെടുമ്പോഴുള്ള ടെർമിനൽ എറർ കോഡ്           |
+| `created_at`     | ISO ടൈംസ്റ്റാമ്പ്                               |
 
-### റിക്വസ്റ്റ് / ഉപയോഗ ലോഗുകൾ
+### അഭ്യർത്ഥന / ഉപയോഗ ലോഗുകൾ
 
-ഇവ പ്രവർത്തനപരമായ ടെലിമെട്രിയാണ് (കർശനമായി അഡ്മിൻ ഓഡിറ്റ് അല്ല), എന്നാൽ ഒരേ
-റിറ്റെൻഷൻ പൈപ്പ്ലൈൻ പങ്കിടുന്നു:
+ഇവ പ്രവർത്തന ടെലിമെട്രിയാണ് (കർശനമായി അഡ്മിൻ ഓഡിറ്റ് അല്ലെങ്കിലും) കൂടാതെ
+അതേ നിലനിർത്തൽ പൈപ്പ്ലൈൻ പങ്കിടുന്നു:
 
-- `usage_history` — ഓരോ റിക്വസ്റ്റിന്റെയും ഉപയോഗ റോൾ-അപ്പ്
-- `call_logs` — ഓരോ റിക്വസ്റ്റിന്റെയും പൂർണ്ണ ലോഗ് (റോ പരിധിക്ക് വിധേയം, താഴെ കാണുക)
-- `proxy_logs` — പ്രോക്സി ട്രാഫിക് ലോഗ് (റോ പരിധിക്ക് വിധേയം)
-- `request_detail_logs` — ലെഗസി വിശദമായ റിക്വസ്റ്റ് ലോഗ് (നിലവിലുണ്ടെങ്കിൽ ഇപ്പോഴും പ്രൂൺ ചെയ്യപ്പെടും)
+- `usage_history` — ഓരോ അഭ്യർത്ഥനയ്ക്കുമുള്ള ഉപയോഗത്തിന്റെ സംഗ്രഹം
+- `call_logs` — ഓരോ അഭ്യർത്ഥനയുടെയും പൂർണ്ണ ലോഗ് (വരി പരിധിക്ക് വിധേയം, താഴെ കാണുക)
+- `proxy_logs` — പ്രോക്സി ട്രാഫിക് ലോഗ് (വരി പരിധിക്ക് വിധേയം)
+- `request_detail_logs` — ലെഗസി വിശദമായ അഭ്യർത്ഥന ലോഗ് (നിലവിലുണ്ടെങ്കിൽ ഇപ്പോഴും പ്രൂൺ ചെയ്യുന്നു)
 
 ## സ്റ്റോറേജ് സ്കീമ
 

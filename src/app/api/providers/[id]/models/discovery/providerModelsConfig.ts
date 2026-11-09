@@ -28,10 +28,32 @@ import { shouldUseLiveAlibabaFreeModelDiscovery } from "@omniroute/open-sse/serv
 import { isDashscopeTextModelId } from "@omniroute/open-sse/services/dashscopeTextModels.ts";
 import { extractZaiToken } from "@omniroute/open-sse/services/zaiWebCredentials.ts";
 import { buildOpencodeBackgroundHeaders } from "@omniroute/open-sse/utils/opencodeHeaders.ts";
+import { CODEBUDDY_CN_USER_AGENT } from "@omniroute/open-sse/config/providerHeaderProfiles.ts";
 import { isFeatureFlagEnabled } from "@/shared/utils/featureFlags";
 import { applyConnectionCustomHeaders } from "./connectionCustomHeaders";
+import {
+  CLOUDFLARE_MODELS_SEARCH_URL,
+  nextCloudflareModelsPageUrl,
+  parseCloudflareModelsSearch,
+} from "./cloudflareModels";
 import { buildChatPlaygroundModelsDiscoveryEntry } from "@omniroute/open-sse/services/chatplaygroundModels.ts";
-import { normalizeOpenAiLikeModelsResponse, normalizeWorkbuddyModelsResponse } from "./normalizers";
+import {
+  normalizeCodeBuddyCnModelsResponse,
+  normalizeOpenAiLikeModelsResponse,
+  normalizeWorkbuddyModelsResponse,
+} from "./normalizers";
+
+/**
+ * `type` values AI/ML API uses for models routable through /v1/chat/completions.
+ *
+ * `openai/chat-completions` is the current vocabulary (353 of 936 catalog rows on
+ * 2026-09-03); `chat-completion` is the pre-rename spelling, kept so a future
+ * rename in either direction cannot silently empty the provider's model list
+ * again. Everything else the catalog publishes — video, image, TTS, STT,
+ * `openai/responses/submit`, `anthropic/messages`, batches — is a different
+ * upstream surface and must not reach a chat model picker.
+ */
+export const AIMLAPI_CHAT_MODEL_TYPES = new Set(["openai/chat-completions", "chat-completion"]);
 
 const QWEN_CLOUD_TEXT_MODEL_IDS = new Set(QWEN_CLOUD_TEXT_MODELS.map((model) => model.id));
 const ALIBABA_MODEL_STUDIO_MODEL_IDS = new Set(
@@ -109,6 +131,40 @@ export function parsePerplexitySonarModels(data: any): any[] {
     (model: any) => typeof model?.id === "string" && /^sonar(-|$)/.test(model.id)
   );
 }
+
+// EmpirioLabs AI's public /v1/models also lists image, video, speech and embedding
+// models. Each entry names the routes it serves in `supported_endpoints`, so keep
+// only the chat completions models and carry the catalog's context window, output
+// limit and image input, which the synced catalog would otherwise lack.
+const EMPIRIOLABS_CHAT_ENDPOINT = "POST /v1/chat/completions";
+
+export function parseEmpirioLabsChatModels(data: any): any[] {
+  const models = Array.isArray(data?.data) ? data.data : [];
+  return models
+    .filter(
+      (model: any) =>
+        typeof model?.id === "string" &&
+        model.id.length > 0 &&
+        Array.isArray(model.supported_endpoints) &&
+        model.supported_endpoints.includes(EMPIRIOLABS_CHAT_ENDPOINT)
+    )
+    .map((model: any) => ({
+      id: model.id,
+      name:
+        typeof model.display_name === "string" && model.display_name
+          ? model.display_name
+          : model.id,
+      ...(typeof model.context_window === "number" && model.context_window > 0
+        ? { contextLength: model.context_window }
+        : {}),
+      ...(typeof model.max_output_tokens === "number" && model.max_output_tokens > 0
+        ? { outputTokenLimit: model.max_output_tokens }
+        : {}),
+      ...(Array.isArray(model.input_modalities) && model.input_modalities.includes("image")
+        ? { supportsVision: true }
+        : {}),
+    }));
+}
 export type ProviderModelsHeaderContext = {
   id?: string;
   authType?: string;
@@ -131,6 +187,11 @@ export type ProviderModelsConfigEntry = {
     connection?: ProviderModelsHeaderContext
   ) => Record<string, string>;
   parseResponse: (data: any) => any;
+  /**
+   * Page-numbered pagination: returns the next page URL derived from the current
+   * one, or null on the last page. Without it only `nextPageToken` is followed.
+   */
+  nextPageUrl?: (data: any, currentUrl: string) => string | null;
 };
 
 export function assembleProviderModelsHeaders(
@@ -667,17 +728,32 @@ export const PROVIDER_MODELS_CONFIG: Record<string, ProviderModelsConfigEntry> =
     parseResponse: (data) => data.data || [],
   },
   aimlapi: {
-    // #5570: AI/ML API's live catalog (400+ models) lives at the public,
-    // auth-free /models database endpoint (NOT /v1/models). The registry has no
-    // modelsUrl, so without this entry the route fell back to a stale 6-model
-    // seed. Response is a bare array of { id, type, info: { name } }.
+    // #5570: AI/ML API's live catalog lives at the public, auth-free /models
+    // database endpoint (NOT /v1/models). The registry has no modelsUrl, so
+    // without this entry the route falls back to the static seed.
+    //
+    // The two premises in the original #5570 comment went stale and silently
+    // zeroed this provider out (936 catalog rows -> 0 discovered models -> the
+    // 6-entry static seed):
+    //   1. the response is NOT a bare array — it is the OpenAI-style envelope
+    //      `{ "object": "list", "data": [...] }`, so `Array.isArray(data)` was
+    //      false and every row was discarded before the filter even ran;
+    //   2. the chat `type` vocabulary is now `openai/chat-completions`; the old
+    //      `chat-completion` spelling matches 0 of 936 rows (verified against the
+    //      live catalog 2026-09-03).
+    // Both spellings are accepted below so a future vocabulary change degrades to
+    // "older models missing" rather than "provider has no models", and the bare
+    // array is still unwrapped for the same reason. Non-chat rows (video, image,
+    // TTS, batches) are dropped outright — the previous `chat.length ? chat : all`
+    // fallback would have surfaced 583 non-chat ids in a chat model picker, which
+    // is what hid defect 2 from the tests.
     url: "https://api.aimlapi.com/models",
     method: "GET",
     headers: { "Content-Type": "application/json" },
     parseResponse: (data) => {
-      const all = Array.isArray(data) ? data : [];
-      const chat = all.filter((m) => m?.type === "chat-completion");
-      return (chat.length > 0 ? chat : all)
+      const rows = Array.isArray(data) ? data : Array.isArray(data?.data) ? data.data : [];
+      return rows
+        .filter((m) => AIMLAPI_CHAT_MODEL_TYPES.has(m?.type))
         .map((m) => ({ id: m?.id, name: m?.info?.name || m?.id }))
         .filter((m) => typeof m.id === "string" && m.id);
     },
@@ -801,6 +877,14 @@ export const PROVIDER_MODELS_CONFIG: Record<string, ProviderModelsConfigEntry> =
     authPrefix: "Bearer ",
     parseResponse: (data) => data.data || data.models || [],
   },
+  empiriolabs: {
+    url: "https://api.empiriolabs.ai/v1/models",
+    method: "GET",
+    headers: { "Content-Type": "application/json" },
+    authHeader: "Authorization",
+    authPrefix: "Bearer ",
+    parseResponse: parseEmpirioLabsChatModels,
+  },
   openference: {
     url: "https://api.openference.com/v1/models",
     method: "GET",
@@ -920,7 +1004,7 @@ export const PROVIDER_MODELS_CONFIG: Record<string, ProviderModelsConfigEntry> =
     },
   },
   "cloudflare-ai": {
-    url: "https://api.cloudflare.com/client/v4/accounts/{accountId}/ai/models/search",
+    url: CLOUDFLARE_MODELS_SEARCH_URL,
     method: "GET",
     headers: { "Content-Type": "application/json" },
     authHeader: "Authorization",
@@ -928,20 +1012,9 @@ export const PROVIDER_MODELS_CONFIG: Record<string, ProviderModelsConfigEntry> =
     // #4259: Cloudflare's `/ai/models/search` returns `{ id: "<uuid>", name: "@cf/..." }`.
     // `name` is the usable model slug; `id` is an internal UUID. Map `name`→id so the
     // dashboard/import surfaces callable model ids (`@cf/...`) instead of UUIDs.
-    parseResponse: (data) =>
-      (data.result || [])
-        .map((model: any) => {
-          const slug = typeof model?.name === "string" ? model.name : "";
-          if (!slug) return null;
-          return {
-            id: slug,
-            name: slug,
-            ...(typeof model?.description === "string" && model.description
-              ? { description: model.description }
-              : {}),
-          };
-        })
-        .filter(Boolean),
+    // The search is page-numbered and also lists embeddings/speech/classifiers.
+    parseResponse: parseCloudflareModelsSearch,
+    nextPageUrl: nextCloudflareModelsPageUrl,
   },
   synthetic: {
     url: "https://api.synthetic.new/openai/v1/models",
@@ -998,6 +1071,25 @@ export const PROVIDER_MODELS_CONFIG: Record<string, ProviderModelsConfigEntry> =
   },
   chatplayground: buildChatPlaygroundModelsDiscoveryEntry(),
   cpl: buildChatPlaygroundModelsDiscoveryEntry(),
+  // CodeBuddy CN's official CLI reads this authenticated product catalog. Keep
+  // the registry snapshot as offline fallback and replace it with the account's
+  // live chat roster after a successful discovery sync.
+  "codebuddy-cn": {
+    url: "https://copilot.tencent.com/v3/config",
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      "User-Agent": CODEBUDDY_CN_USER_AGENT,
+      "X-Product": "SaaS",
+      "X-IDE-Type": "CLI",
+      "X-IDE-Name": "CLI",
+      "x-requested-with": "XMLHttpRequest",
+      "x-codebuddy-request": "1",
+    },
+    authHeader: "Authorization",
+    authPrefix: "Bearer ",
+    parseResponse: (data) => normalizeCodeBuddyCnModelsResponse(data),
+  },
   // WorkBuddy serves no OpenAI-shaped /models endpoint (/v1/models and
   // /v2/models both 404) and its bundled catalog is known to be stale, so the
   // roster is read from the authenticated config the official CLI itself uses.

@@ -504,9 +504,9 @@ test("usage namespace includes Provider Limits UI translation keys", () => {
 
   for (const key of [
     "statTotal",
-    "statCritical",
-    "statAlert",
-    "statHealthy",
+    "healthUnavailable",
+    "healthRestricted",
+    "healthAvailable",
     "filterPurchaseTypeLabel",
     "filterTierLabel",
     "purchaseAll",

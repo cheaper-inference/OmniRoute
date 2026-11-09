@@ -25,26 +25,27 @@ omniroute launch --profile glm52  # OmniRoute ద్వారా glm/glm-5.2న�
 
 ---
 
-## Claude Code ఒక గేట్వేకి ఎలా కనెక్ట్ అవుతుంది
+## Claude కోడ్ గేట్వేకి ఎలా కనెక్ట్ అవుతుంది
 
-Claude Code **Anthropic Messages API**తో కమ్యూనికేట్ చేస్తుంది మరియు environment variables ద్వారా అనుకూల
-endpointకు మళ్లించబడుతుంది (దీనికి `--base-url` flag లేదు):
+Claude కోడ్ మాట్లాడుతుంది**Anthropic సందేశాలు API** మరియు ఎన్విరాన్మెంట్ వేరియబుల్స్తో కస్టమ్ ఎండ్ పాయింట్ వద్ద సూచించబడుతుంది (దీనికి `--base-url` ఫ్లాగ్ లేదు):
 
-| Variable                                     | ఉద్దేశ్యం                                                                                                |
-| -------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| `ANTHROPIC_BASE_URL`                         | గేట్వే root URL (Claude Code `/v1/messages`ను జోడిస్తుంది). **`/v1` suffix ఉండకూడదు.**                   |
-| `ANTHROPIC_AUTH_TOKEN`                       | `Authorization: Bearer …`గా పంపబడుతుంది — మీ OmniRoute access token / API keyని ఉపయోగించండి              |
-| `ANTHROPIC_API_KEY`                          | ప్రత్యామ్నాయం: `x-api-key`గా పంపబడుతుంది. రెండూ సెట్ చేస్తే, `ANTHROPIC_AUTH_TOKEN`కు ప్రాధాన్యం ఉంటుంది |
-| `ANTHROPIC_MODEL`                            | నిర్దిష్ట మోడల్ను బలవంతంగా ఉపయోగిస్తుంది (`/model` picker defaultను override చేస్తుంది)                  |
-| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → స్థానిక `/model` picker, `/v1/models` నుండి `claude*`/`anthropic*` మోడల్లను జాబితా చేస్తుంది       |
-| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | ఒక్కో responseకు output tokensపై పరిమితి విధిస్తుంది (ఉదా. `65536`)                                      |
-| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | auto-compaction కోసం token threshold                                                                     |
+| వేరియబుల్                                    | ప్రయోజనం                                                                                         |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| `ANTHROPIC_BASE_URL`                         | గేట్వే రూట్ URL (Claude కోడ్ అనుబంధంగా `/v1/messages`).** `/v1` ప్రత్యయం లేదు.**                 |
+| `ANTHROPIC_AUTH_TOKEN`                       | `Authorization: Bearer …` — గా పంపబడింది మీ OmniRoute యాక్సెస్ టోకెన్ / API కీని ఉపయోగించండి     |
+| `ANTHROPIC_API_KEY`                          | ప్రత్యామ్నాయం: `x-api-key` గా పంపబడింది. రెండూ సెట్ అయితే, `ANTHROPIC_AUTH_TOKEN` గెలుస్తుంది    |
+| `ANTHROPIC_MODEL`                            | నిర్దిష్ట మోడల్ను బలవంతం చేయండి ( `/model` పికర్ డిఫాల్ట్ను భర్తీ చేస్తుంది)                     |
+| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → స్థానిక `/model` పికర్ `/v1/models` నుండి `claude*`/`anthropic*` మోడల్లను జాబితా చేస్తుంది |
+| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | ప్రతి ప్రతిస్పందనకు క్యాప్ అవుట్పుట్ టోకెన్లు (ఉదా `65536`)                                      |
+| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | ఆటో-కాంపాక్షన్ కోసం టోకెన్ థ్రెషోల్డ్                                                            |
 
-> Env vars **ప్రారంభ సమయంలో ఒక్కసారి మాత్రమే** చదవబడతాయి — వాటిని మార్చిన తర్వాత Claude Codeను పునఃప్రారంభించండి.
+> Env vars చదవబడతాయి** ఒకసారి ప్రారంభంలో** — వాటిని మార్చిన తర్వాత Claude కోడ్ని పునఃప్రారంభించండి.
 
-`omniroute launch` వీటన్నింటినీ మీ కోసం సెట్ చేస్తుంది: ఇది సక్రియ context నుండి base URL + tokenను
-పరిష్కరిస్తుంది (కాబట్టి `omniroute connect <vps>` తర్వాత `omniroute launch`
-నేరుగా పనిచేస్తుంది), server health-check నిర్వహించి, `claude`ను exec చేస్తుంది.
+స్థిర స్ట్రింగ్కు బదులుగా తిరిగే ఆధారం కోసం, `apiKeyHelper` `~/.claude/settings.json` లో ప్రస్తుత క్రెడెన్షియల్ను stdoutకి ప్రింట్ చేసే ఆదేశానికి సెట్ చేయండి. Claude కోడ్ డిఫాల్ట్గా ఐదు నిమిషాల పాటు దాని అవుట్పుట్ను కాష్ చేస్తుంది (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` దాన్ని భర్తీ చేస్తుంది) మరియు విలువను `Authorization: Bearer` మరియు `x-api-key` రెండింటిలోనూ పంపుతుంది. స్క్రిప్ట్ తప్పనిసరిగా క్రెడెన్షియల్ను ప్రింట్ చేయకూడదు మరియు దానితో పాటుగా వేరే — బ్యానర్ ఏమీ ఉండకూడదు v2.1.227 + లో హెల్పర్ను విఫలం చేస్తుంది.
+
+ఈ విధంగా Entra ID SSO పని చేస్తుంది: `scripts/cli/omniroute-sso.mjs token` API కీకి బదులుగా OmniRoute ధృవీకరించే స్వల్పకాలిక Entra యాక్సెస్ టోకెన్ను ముద్రిస్తుంది. [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md) చూడండి.
+
+`omniroute launch` మీ కోసం వీటన్నింటిని సెట్ చేస్తుంది: ఇది యాక్టివ్ కాంటెక్స్ట్ నుండి బేస్ URL + టోకెన్ను పరిష్కరిస్తుంది (కాబట్టి `omniroute connect <vps>` తర్వాత `omniroute launch` పని చేస్తుంది), సర్వర్ని ఆరోగ్య-తనిఖీ చేస్తుంది మరియు `claude` అమలు చేస్తుంది.
 
 ---
 

@@ -110,7 +110,7 @@ function main() {
   }
 
   console.log("[dashboard-typecheck] Running tsc scoped to src/app/(dashboard)/**…");
-  const stdout = runScopedTypecheck(ROOT, TSCONFIG);
+  const stdout = runScopedTypecheck(ROOT, TSCONFIG, { incremental: false });
   const live = parseTscOutput(stdout);
   const baseline = loadBaseline();
   const { regressions, improvements } = diffAgainstBaseline(live, baseline);

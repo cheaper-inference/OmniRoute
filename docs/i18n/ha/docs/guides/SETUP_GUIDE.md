@@ -198,41 +198,41 @@ Don cikakken bayani kan daidaita kowane kayan aiki (Claude Code, Codex CLI, Curs
 
 ---
 
-## Saitin Yarjejeniya (MCP + A2A)
+## Saitin Protocol (MCP + A2A)
 
-### Saitin MCP (Yarjejeniyar Mahallin Samfuri)
+### Saita MCP (Tsarin Tsarin Magana)
 
-Fara jigilar MCP a yanayin stdio:
+Fara safarar MCP a yanayin sitiyo:
 
 ```bash
 omniroute --mcp
 ```
 
-Hanyar tabbatarwa da aka ba da shawara:
+Shawarar ingantaccen kwarara:
 
 ```bash
-# 1. Fara sabar MCP
+# 1. Start MCP server
 omniroute --mcp
 
-# 2. Daga MCP client ɗinka, kira:
-omniroute_get_health        # Ya kamata ya dawo da lafiyar tsarin
-omniroute_list_combos       # Ya kamata ya dawo da combos masu aiki
+# 2. From your MCP client, call:
+omniroute_get_health        # Should return system health
+omniroute_list_combos       # Should return active combos
 
-# 3. Ko gudanar da cikakken jerin gwajin E2E:
+# 3. Or run the full E2E suite:
 npm run test:protocols:e2e
 ```
 
-#### Daidaita MCP Client
+#### MCP Kanfigareshan Abokin Ciniki
 
 **Claude Code:**
 
 ```bash
-claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
 ```
 
 **Cursor / Cline:**
 
-Ƙara wannan zuwa saitunan MCP naka:
+Ƙara zuwa saitunan MCP ɗinku (stdio, tare da maɓallin don haka mai kira ya sami babba):
 
 ```json
 {
@@ -240,23 +240,30 @@ claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp
     "omniroute": {
       "command": "omniroute",
       "args": ["--mcp"],
-      "env": {}
+      "env": {
+        "OMNIROUTE_API_KEY": "your-key",
+        "OMNIROUTE_BASE_URL": "http://localhost:20128"
+      }
     }
   }
 }
 ```
 
-**Cikakkun takardun MCP:** [README na Sabar MCP](../../open-sse/mcp-server/README.md) — kayan aiki 110, saitunan IDE, clients na Python/TS/Go.
+Ko, lokacin da `mcpTransport` yake `streamable-http` (saita shi akan `/dashboard/mcp` ko tare da `omniroute mcp enable --transport streamable-http`), nuna shigarwar uwar garken MCP mai nisa a `http://localhost:20128/api/mcp/stream`.
 
-### Saitin A2A (Yarjejeniyar Agent-zuwa-Agent)
+Maɓallin yana tafiya azaman `Authorization: Bearer <api-key>` (duba [MCP Server → Samun nisa](../frameworks/MCP-SERVER.md#remote-access-manage-scope-bypass) don runduna mai nisa; maɓalli mai nisa yana buƙatar `mcp:connect` da read/write ɗin sa).
 
-Tabbatar da Agent Card:
+**Cikakken takardun MCP :** [MCP Server README](../../open-sse/mcp-server/README.md) — 110 kayan aikin, IDE configs, Python/TS/Go abokan ciniki. Maganar mai aiki don matsawa kayan aikin CCR/dedup (alamomi, abubuwan da ake buƙata, ƙayyadaddun kayan aiki, fakitin dawo da, bincike): [Injin matsawa → Abubuwan buƙatu / jagorar mai aiki](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+
+### Saita A2A (Agent-to-Agent Protocol)
+
+Tabbatar da Katin Agent:
 
 ```bash
 curl http://localhost:20128/.well-known/agent.json
 ```
 
-Aika wani aiki:
+Aika aiki:
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -264,7 +271,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"Give me a short quota summary."}]}}'
 ```
 
-**Cikakkun takardun A2A:** [README na Sabar A2A](../../src/lib/a2a/README.md) — JSON-RPC 2.0, ƙwarewa, watsawa kai tsaye, da zagayowar rayuwar aiki.
+**Cikakken takardun A2A :** [A2A Server README](../../src/lib/a2a/README.md) — JSON-RPC 2.0, basira, yawo, aikin rayuwa.
 
 ---
 
@@ -323,23 +330,23 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ---
 
-## Samfurin Void Linux (xbps-src)
+## Wurin Linux (xbps-src) Samfura
 
-Ga masu amfani da Void Linux, za ku iya gina kunshin asali ta amfani da `xbps-src`. Ajiye wannan sashe a matsayin `srcpkgs/omniroute/template`:
+Ga masu amfani da Void Linux, zaku iya gina fakitin asali ta amfani da `xbps-src`. Ajiye wannan toshe a matsayin `srcpkgs/omniroute/template`:
 
 ```bash
-# Fayil ɗin samfuri na 'omniroute'
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
 hostmakedepends="nodejs python3 make"
 depends="openssl"
-short_desc="Ƙofar AI ta bai ɗaya mai sarrafa turawa cikin hikima don masu samar da LLM da yawa"
+short_desc="Universal AI gateway with smart routing for multiple LLM providers"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# Sake samar da checksum ga kowace fitarwa ta amfani da:
+# Regenerate the checksum for each release with:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

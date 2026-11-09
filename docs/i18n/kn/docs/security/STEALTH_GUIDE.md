@@ -240,19 +240,18 @@ interface CliFingerprint {
 
 ---
 
-## User-Agent ಓವರ್ರೈಡ್ಗಳು — env vars (`.env.example` ವಿಭಾಗ 12)
+## ಬಳಕೆದಾರ-ಏಜೆಂಟ್ — env vars ಅನ್ನು ಅತಿಕ್ರಮಿಸುತ್ತದೆ (`.env.example` ವಿಭಾಗ 12)
 
-| ವೇರಿಯಬಲ್                 | ಡೀಫಾಲ್ಟ್                                                        |
-| ------------------------ | --------------------------------------------------------------- |
-| `CLAUDE_USER_AGENT`      | `claude-cli/2.1.280 (external, cli)`                            |
-| `CODEX_USER_AGENT`       | `codex-cli/0.155.0 (Windows 10.0.26200; x64)`                   |
-| `GITHUB_USER_AGENT`      | `GitHubCopilotChat/0.54.0`                                      |
-| `ANTIGRAVITY_USER_AGENT` | `antigravity/2.0.1 linux/arm64 google-api-nodejs-client/10.3.0` |
-| `KIRO_USER_AGENT`        | `AWS-SDK-JS/3.0.0 kiro-ide/1.0.0`                               |
-| `QODER_USER_AGENT`       | `Qoder-Cli`                                                     |
-| `CURSOR_USER_AGENT`      | `Cursor/3.4`                                                    |
+| ವೇರಿಯಬಲ್            | ಡೀಫಾಲ್ಟ್                                      |
+| ------------------- | --------------------------------------------- |
+| `CLAUDE_USER_AGENT` | `claude-cli/2.1.280 (external, cli)`          |
+| `CODEX_USER_AGENT`  | `codex-cli/0.155.0 (Windows 10.0.26200; x64)` |
+| `GITHUB_USER_AGENT` | `GitHubCopilotChat/0.54.0`                    |
+| `KIRO_USER_AGENT`   | `AWS-SDK-JS/3.0.0 kiro-ide/1.0.0`             |
+| `QODER_USER_AGENT`  | `Qoder-Cli`                                   |
+| `CURSOR_USER_AGENT` | `Cursor/3.4`                                  |
 
-ಡೈನಾಮಿಕ್ ಲುಕ್ಅಪ್ ಮೂಲಕ `open-sse/executors/base.ts::buildHeaders()` ಇದನ್ನು ಬಳಸುತ್ತದೆ. **ಪೂರೈಕೆದಾರರು ಹೊಸ CLI ಆವೃತ್ತಿಗಳನ್ನು ಬಿಡುಗಡೆ ಮಾಡಿದಾಗ ಇವುಗಳ ಆವೃತ್ತಿಯನ್ನು ಹೆಚ್ಚಿಸಿ** — ಹಳೆಯ UA ಸ್ಟ್ರಿಂಗ್ಗಳು ಹಳೆಯದಾದ ಕ್ಲೈಂಟ್ಗಳೆಂದು ತಿರಸ್ಕರಿಸಲ್ಪಡಲು ಪ್ರಾರಂಭಿಸುತ್ತವೆ.
+ಡೈನಾಮಿಕ್ ಲುಕಪ್ ಮೂಲಕ `open-sse/executors/base.ts::buildHeaders()` ಮೂಲಕ ಸೇವಿಸಲಾಗುತ್ತದೆ.** ಪೂರೈಕೆದಾರರು ಹೊಸ CLI ಆವೃತ್ತಿಗಳನ್ನು ಬಿಡುಗಡೆ ಮಾಡಿದಾಗ ಇವುಗಳನ್ನು ಬಂಪ್ ಮಾಡಿ** — ಸ್ಥಬ್ದ UA ಸ್ಟ್ರಿಂಗ್ಗಳು ಹಳತಾದ ಕ್ಲೈಂಟ್ಗಳಾಗಿ ತಿರಸ್ಕರಿಸಲು ಪ್ರಾರಂಭಿಸುತ್ತವೆ.
 
 ## CLI ಹೊಂದಾಣಿಕೆ ಮೋಡ್ ಟಾಗಲ್ಗಳು (`.env.example` ವಿಭಾಗ 13)
 

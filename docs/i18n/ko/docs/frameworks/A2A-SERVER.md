@@ -148,24 +148,24 @@ curl -X POST http://localhost:20128/a2a \
 
 ---
 
-## 사용 가능한 스킬
+## 사용 가능한 기술
 
-OmniRoute는 `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`에 연결된 6개의 A2A 스킬을 제공합니다. 각 스킬 모듈은 `src/lib/a2a/skills/`에 위치합니다.
+OmniRoute `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS` 에 연결된 6개의 A2A 기술을 노출합니다. 각 기술 모듈은 `src/lib/a2a/skills/` 에 있습니다.
 
-| 스킬          | ID                   | 설명                                                                                                                                                    | 태그                       | 예시                                   |
-| :------------ | :------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------ | :------------------------- | :------------------------------------- |
-| 스마트 라우팅 | `smart-routing`      | OmniRoute의 콤보 엔진과 스코어링을 사용해 프롬프트를 최적의 제공자/콤보로 라우팅합니다                                                                  | routing, providers         | "Route this prompt via the best model" |
-| 쿼터 관리     | `quota-management`   | 제공자별 쿼터 상태를 보고하고, 호출자가 언제 스로틀링하거나 전환할지 결정할 수 있도록 돕습니다                                                          | quota, providers           | "Check quota for anthropic"            |
-| 제공자 검색   | `provider-discovery` | 설치된 제공자를 기능, 프리 티어 여부, OAuth 상태와 함께 나열합니다                                                                                      | providers, discovery       | "What providers are available?"        |
-| 비용 분석     | `cost-analysis`      | 카탈로그와 최근 사용량을 기반으로 요청/대화의 비용을 추정합니다                                                                                         | cost, usage                | "Estimate cost for this conversation"  |
-| 상태 리포트   | `health-report`      | 제공자별 서킷 브레이커, 쿨다운, 잠금 상태를 집계합니다                                                                                                  | health, resilience         | "Show health status of all providers"  |
-| 기능 목록     | `list-capabilities`  | 전체 45개 항목의 Agent Skills 카탈로그(23개 API + 21개 CLI + 1개 config)를 컨텍스트 주입을 위한 원본 SKILL.md URL이 포함된 마크다운 테이블로 반환합니다 | catalog, discovery, skills | "List all OmniRoute capabilities"      |
+| 기능          | ID                   | 설명                                                                                                                                             | 태그                 | 예                                               |
+| :------------ | :------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------- | :------------------- | :----------------------------------------------- |
+| 스마트 라우팅 | `smart-routing`      | OmniRoute 의 콤보 엔진 + 점수를 사용하여 최적의 provider/combo 통해 프롬프트를 라우팅합니다.                                                     | 라우팅, 공급자       | "최고의 모델을 통해 이 프롬프트를 라우팅하세요." |
+| 할당량 관리   | `quota-management`   | 공급자별 할당량 상태를 보고하여 호출자가 언제 throttle/switch 수행할지 결정하는 데 도움이 됩니다.                                                | 할당량, 공급자       | "인류 할당량을 확인하세요"                       |
+| 공급자 검색   | `provider-discovery` | 기능, 무료 계층 플래그, OAuth 상태와 함께 설치된 공급자를 나열합니다.                                                                            | 공급자, 검색         | "어떤 제공업체를 이용할 수 있나요?"              |
+| 비용 분석     | `cost-analysis`      | 카탈로그 + 최근 사용량을 고려하여 request/conversation 의 비용을 추정합니다.                                                                     | 비용, 사용량         | "이 대화에 대한 예상 비용"                       |
+| 건강 보고서   | `health-report`      | 공급자별로 회로 차단기, 쿨다운, 잠금 상태를 집계합니다.                                                                                          | 건강, 회복력         | "모든 공급자의 상태 표시"                        |
+| 목록 기능     | `list-capabilities`  | 전체 45개 항목 에이전트 기술 카탈로그(23 API + 21 CLI + 1 config)를 컨텍스트 삽입을 위한 원시 SKILL.md URLs 포함된 마크다운 테이블로 반환합니다. | 카탈로그, 발견, 기술 | "모든 OmniRoute 기능 나열"                       |
 
-> Agent Card는 실시간 375개 제공자 카탈로그와 일치하도록 유지되어야 하며, 제공자 수와 무료/인증 불필요 메타데이터는 런타임 레지스트리에서 가져옵니다.
+> 에이전트 카드는 실시간 381 제공자 카탈로그와 일치하도록 유지되어야 합니다. 공급자 수와 free/no-auth 메타데이터는 런타임 레지스트리에서 제공됩니다.
 
 ### `list-capabilities` 스킬 상세
 
-`list-capabilities` 스킬은 API 호출을 보내기 전에 OmniRoute가 제공하는 기능을 파악해야 하는 외부 에이전트에게 특히 유용합니다. 구조화된 마크다운 테이블 아티팩트를 반환합니다:
+`list-capabilities` 기술은 API 호출을 보내기 전에 OmniRoute 노출하는 내용을 검색해야 하는 외부 에이전트에 특히 유용합니다. 구조화된 마크다운 테이블 아티팩트를 반환합니다.
 
 ```
 | ID | Name | Category | Area | Endpoints/Commands | Raw URL |
@@ -174,46 +174,54 @@ OmniRoute는 `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`에 연결된 6�
 ...
 ```
 
-각 행에는 `rawUrl` 열이 포함되어 있어 에이전트가 전체 SKILL.md를 즉시 가져올 수 있습니다. `metadata.totalSkills` 필드는 카탈로그 크기(현재 45)를 반영합니다. 구현 위치: `src/lib/a2a/skills/listCapabilities.ts`. [AGENT-SKILLS.md](./AGENT-SKILLS.md)도 참조하세요.
+각 행에는 `rawUrl` 열이 포함되어 있으므로 에이전트는 즉시 전체 SKILL.md 가져올 수 있습니다. `metadata.totalSkills` 필드는 카탈로그 크기(현재 45)를 반영합니다. 구현: `src/lib/a2a/skills/listCapabilities.ts`. [AGENT-SKILLS.md](./AGENT-SKILLS.md) 도 참조하세요.
 
 ---
 
-## REST API(보조)
+## REST API (보조)
 
-JSON-RPC 엔드포인트 `/a2a`는 표준 A2A 진입점입니다. 아래 REST 엔드포인트는 대시보드 및 외부 도구를 위한 보조 액세스를 제공합니다.
+JSON-RPC 엔드포인트 `/a2a` 는 표준 A2A 진입점입니다. 아래 REST 엔드포인트는 대시보드 및 외부 도구에 대한 보조 액세스를 제공합니다.
 
-| 엔드포인트                   | 메서드 | 설명                                                      | 인증                                             |
-| :--------------------------- | :----- | :-------------------------------------------------------- | :----------------------------------------------- |
-| `/api/a2a/status`            | GET    | 서버 상태, 등록된 스킬                                    | (공개)                                           |
-| `/api/a2a/tasks`             | GET    | 필터를 적용하여 작업 목록 조회                            | 관리                                             |
-| `/api/a2a/tasks/[id]`        | GET    | ID로 작업 조회                                            | 관리                                             |
-| `/api/a2a/tasks/[id]/cancel` | POST   | 실행 중인 작업 취소                                       | 관리                                             |
-| `/.well-known/agent.json`    | GET    | 에이전트 카드(A2A 검색)                                   | (공개, 3600초 동안 캐시됨)                       |
-| `/api/a2a/tasks`             | POST   | OmniConductor 플릿으로의 인바운드 위임(Conductor PRD RF5) | Bearer와 `OMNIROUTE_API_KEY` 비교 + `a2aEnabled` |
+| 엔드포인트                   | 방법 | 설명                                                    | 인증                                                                                                       |
+| :--------------------------- | :--- | :------------------------------------------------------ | :--------------------------------------------------------------------------------------------------------- |
+| `/api/a2a/status`            | GET  | 서버상태, 등록된 스킬                                   | (공공의)                                                                                                   |
+| `/api/a2a/tasks`             | GET  | 필터를 사용하여 작업 나열                               | 관리 또는 API 키(아래 참조)                                                                                |
+| `/api/a2a/tasks/[id]`        | GET  | ID 로 작업 가져오기                                     | 관리 또는 API 키(아래 참조)                                                                                |
+| `/api/a2a/tasks/[id]/cancel` | POST | 실행 중인 작업 취소                                     | 관리 또는 API 키(아래 참조)                                                                                |
+| `/.well-known/agent.json`    | GET  | 에이전트 카드(A2A 발견)                                 | (공개, 캐시된 3600)                                                                                        |
+| `/api/a2a/tasks`             | POST | OmniConductor 함대에 대한 인바운드 위임(컨덕터 PRD RF5) | `GET` 와 동일하며, `REQUIRE_API_KEY` 꺼져 있는 동안 설정된 경우 `OMNIROUTE_API_KEY` 더합니다. `a2aEnabled` |
 
-**인바운드 Conductor 위임(`POST /api/a2a/tasks`):** 외부 A2A 에이전트는 OmniRoute를 통해 코딩 작업을 OmniConductor 플릿에 위임합니다. 본문: `{ skill: "conductor" | "conductor-cli-<profile>", messages: [{role, content}], metadata: { conductor: { repo: { url, base_ref? }, mode?, cli?, model? } } }` — Conductor 플릿 스킬(에이전트 카드에 명시된 스킬)만 위임할 수 있으며, 플릿이 git 저장소에서 작업하므로 `metadata.conductor.repo.url`은 필수입니다. 이 라우트는 서버 측 `CONDUCTOR_ORCHESTRATOR_TOKEN`(대체 값: `CONDUCTOR_HUB_TOKEN`)을 사용하여 허브의 `POST /v1/tasks`로 변환하고 `201 { conductor_task_id, state: "submitted" }`를 반환합니다. 작업 상태는 SSE→A2A 미러(RF1)를 통해 다시 전달되며 `GET /api/a2a/tasks?skill=conductor`를 통해 확인할 수 있습니다.
+`/api/a2a/tasks*` 경로를 통과하는 사람은 로그인 및 API 키 설정에 따라 다릅니다.
+
+- `requireLogin=true` (기본값): 미들웨어는 관리 자격 증명(대시보드 세션, `manage` -scope API 키, `oma_` 액세스 토큰) 및 `OMNIROUTE_API_KEY` 만 허용합니다. 일반 추론 키는 `403` 얻습니다. `Authorization` 헤더에서 미들웨어는 `OMNIROUTE_API_KEY` `Bearer <key>` 로만 사용합니다. `Bearer` `401` 얻은 후의 기본 키 또는 탭입니다.
+- `requireLogin=false` 또는 온보딩 전 루프백 창: `REQUIRE_API_KEY=true` 사용하면 유효한 OmniRoute API 키 또는 관리 자격 증명이 허용되고 익명 호출자는 `401` 얻습니다. `REQUIRE_API_KEY` 끄면 경로가 열려 있습니다.
+- `POST /api/a2a/tasks` 해당 변수가 설정되고 `REQUIRE_API_KEY` 꺼진 경우 `Authorization` 헤더에 `OMNIROUTE_API_KEY` 추가로 필요합니다. `x-api-key` 와 같은 다른 헤더는 여기에 포함되지 않습니다. 로그인을 끄거나 온보딩하기 전에 키는 `Bearer` 접두어 유무에 관계없이 전달됩니다. 로그인하면 `Bearer <key>` 만이 미들웨어를 통과합니다.
+
+자격 증명이 필요한 경우 `read` -scope `oma_` 토큰은 `GET` 에서만 작동합니다.
+
+**인바운드 지휘자 위임(`POST /api/a2a/tasks`):** 외부 A2A 에이전트는 OmniRoute 통해 코딩 작업을 OmniConductor 집합에 위임합니다. 본문: `{ skill: "conductor" | "conductor-cli-<profile>", messages: [{role, content}], metadata: { conductor: { repo: { url, base_ref? }, mode?, cli?, model? } } }` — 지휘자 함대 기술(에이전트 카드에 공지된 기술)만 위임 가능합니다. `metadata.conductor.repo.url` 필요합니다(플릿은 git repos에서 작동합니다). 경로는 서버 측 `CONDUCTOR_ORCHESTRATOR_TOKEN` (폴백 `CONDUCTOR_HUB_TOKEN`)를 사용하여 허브의 `POST /v1/tasks` 로 변환되고 `201 { conductor_task_id, state: "submitted" }` 반환합니다. 작업 상태는 SSE→A2A 미러(RF1)를 통해 다시 흐르고 `GET /api/a2a/tasks?skill=conductor` 통해 표시됩니다.
 
 ---
 
-## 새 스킬 추가하기
+## 새로운 스킬 추가
 
 1. **스킬 파일 생성:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   `(task: A2ATask) => Promise<{ artifacts, metadata }>` 형태의 비동기 함수를 내보냅니다. `smartRouting.ts`와 같은 기존 스킬의 구조를 따르세요.
+   비동기 함수 `(task: A2ATask, caller?: A2ACallerContext) => Promise<{ artifacts, metadata }>` 내보냅니다. `smartRouting.ts` 등 기존 스킬의 형태를 따릅니다. 기술이 HTTP 통해 OmniRoute 로 다시 호출하는 경우 `src/lib/a2a/selfLoopAuth.ts` 에서 `buildSelfLoopHeaders(caller)` 사용하여 헤더를 빌드하여 호출이 `OMNIROUTE_API_KEY` 아닌 A2A 호출자의 키로 실행되도록 하고 `redirect: "error"` `fetch` 에 전달하여 리디렉션이 키를 가져오지 않도록 합니다. 도우미는 헤더만 작성합니다. 각 기술은 리디렉션 정책 자체를 설정합니다. 확인된 기본 URL 이 개인 네트워크 외부의 일반 http이거나(루프백, 컨테이너 또는 서비스 이름, 개인 주소는 괜찮음) 자격 증명을 보유하고 있는 경우 키를 연결하는 대신 `UnsafeSelfLoopTargetError` 발생시키므로 거부된 호출을 삼키는 기술은 해당 오류를 다시 발생시켜야 합니다.
 
-2. **핸들러 등록:** `src/lib/a2a/taskExecution.ts`의 `A2A_SKILL_HANDLERS`에 항목을 추가합니다.
+2. **핸들러 등록:** `src/lib/a2a/taskExecution.ts` 에서 `A2A_SKILL_HANDLERS` 에 항목을 추가합니다.
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...기존 스킬
-     "your-skill": async (task) => {
+     // ...existing skills
+     "your-skill": async (task, caller) => {
        const skillModule = await import("./skills/yourSkill");
-       return skillModule.executeYourSkill(task);
+       return skillModule.executeYourSkill(task, caller);
      },
    };
    ```
 
-3. **에이전트 카드에 공개:** `src/app/.well-known/agent.json/route.ts`의 `skills` 배열에 다음을 추가합니다.
+3. **에이전트 카드에 노출:** `src/lib/a2a/agentCardMetadata.ts` ( `/.well-known/agent.json` 및 `/.well-known/agent-card.json` 에서 공유)에서 `skills` 배열에 추가합니다.
 
    ```json
    {
@@ -225,9 +233,9 @@ JSON-RPC 엔드포인트 `/a2a`는 표준 A2A 진입점입니다. 아래 REST �
    }
    ```
 
-4. **테스트 작성:** `tests/unit/a2a-<your-skill>.test.ts`. 정상 경로와 오류 경로를 모두 다루세요.
+4. **테스트 작성:** `tests/unit/a2a-<your-skill>.test.ts`. 행복한 경로 + 오류 경로를 다루세요.
 
-5. 이 파일의 `Available Skills` 표에 새 스킬을 **문서화**하세요.
+5. **문서** 이 파일의 `Available Skills` 테이블에 있는 새로운 스킬입니다.
 
 ---
 
@@ -264,9 +272,9 @@ JSON-RPC 엔드포인트 `/a2a`는 표준 A2A 진입점입니다. 아래 REST �
 
 ---
 
-## 통합 예제
+## 통합 예
 
-### Python (requests)
+### Python(요청)
 
 ```python
 import requests
@@ -285,7 +293,7 @@ print(result["artifacts"][0]["content"])
 print(result["metadata"]["routing_explanation"])
 ```
 
-### TypeScript (fetch)
+### TypeScript (가져오기)
 
 ```typescript
 const resp = await fetch("http://localhost:20128/a2a", {
