@@ -4,204 +4,119 @@
 
 ---
 
-OmniRoute jikkontrolla liema **oriġini tal-brawżer** jistgħu jaqraw risposti minn oriġini differenti
-permezz ta’ lista ta’ permessi waħda u ċentralizzata. Il-mudell huwa **magħluq awtomatikament f’każ ta’ falliment**:
-l-ebda oriġini ma tkun permessa sakemm ma tippermettihiex espliċitament. Din il-paġna tiddokumenta kif tiġi riżolta l-lista ta’ permessi,
-x’jesponi fil-fatt `CORS_ALLOW_ALL=true` (u, importanti, x’**ma**
-jesponix), kif tikkonfigura l-ambjenti tal-iżvilupp u tal-produzzjoni b’mod sikur, u t-twissija waqt l-eżekuzzjoni
-li juri d-dashboard meta wildcard ikun attiv.
+OmniRoute tikkontrolla liema **oriġini tal-browser** jista' jaqra tweġibiet trans-oriġini minn lista ta' permessi waħda ċentralizzata. Il-mudell huwa **fail-closed awtomatikament** : l-ebda oriġini mhi permessa sakemm tagħżel waħda. Din il-paġna tiddokumenta kif issolvi l-lista ta' permessi, dak li `CORS_ALLOW_ALL=true` fil-fatt jesponi (u, importanti, x'tagħmel **le** ), kif tikkonfigura dev vs produzzjoni b'mod sikur, u t-twissija tar-runtime li d-dashboard juri meta wildcard ikun ħaj.
 
-**Sors ewlieni tal-verità:** `src/server/cors/origins.ts` (`resolveAllowedOrigin`,
-`applyCorsHeaders`, `getCorsStatus`). Il-lista ta’ permessi tiġi applikata darba waħda, fil-
-middleware (`src/server/authz/pipeline.ts`) — il-handlers għal kull rotta ma jissettjawx
-`Access-Control-Allow-Origin` huma stess.
+**Sors tal-verità:** `src/server/cors/origins.ts` (`resolveAllowedOrigin`, `applyCorsHeaders`, `getCorsStatus`). Il-lista ta' permessi tiġi applikata darba, fil-middleware (`src/server/authz/pipeline.ts`) — per-route handlers ma jistabbilixxux `Access-Control-Allow-Origin` huma stess.
 
-## Kif tiġi riżolta oriġini
+## Kif tiġi solvuta oriġini
 
-Għal kull talba, il-middleware jikkalkula l-valur ta’ `Access-Control-Allow-Origin`
-f’din l-ordni:
+Għal kull talba l-middleware jikkalkula l-valur `Access-Control-Allow-Origin` f'din l-ordni:
 
-1. **`CORS_ALLOW_ALL=true`** (jew il-konfigurazzjoni legata `CORS_ORIGIN=*`) → jirritorna l-
-   `Origin` ta’ min jagħmel it-talba (jew `*` meta ma jkun hemm l-ebda header `Origin`), flimkien ma’ `Vary: Origin`
-   sabiex il-caches jibqgħu korretti. L-istess punt ta’ kontroll `applyCorsHeaders()` iżid ukoll
-   `Vary: Accept-Encoding` ma’ kull risposta 2xx li jkollha body fuq is-superfiċje
-   `/v1*`/`/v1beta*` awtentikata permezz ta’ token (`relaxForTokenAuth`, RFC 9110 §12.5.5, issue #6737), sabiex
-   il-caches downstream/kondiviżi jkunu jistgħu jiddistingwu b’mod korrett bejn il-varjanti kkompressati u dawk mhux ikkompressati.
-2. Inkella, l-`Origin` tat-talba jiġi normalizzat (ikkonvertit għal ittri żgħar u titneħħa
-   s-slash finali) u mqabbel mal-**lista ta’ permessi magħquda**:
-   - l-env **`CORS_ALLOWED_ORIGINS`** — lista separata b’virgoli, u
-   - is-setting waqt l-eżekuzzjoni **`corsOrigins`** (Dashboard → Security → _CORS Allowed
-     Origins_), injettat permezz ta’ `setRuntimeAllowedOrigins()` minn
-     `src/lib/config/runtimeSettings.ts`.
-3. L-ebda qbil → **ma jiġi emess l-ebda header `Access-Control-Allow-Origin`**. Il-brawżer
-   jimblokka l-qari minn oriġini differenti. Dan huwa l-aġir intenzjonat li jkun magħluq awtomatikament f’każ ta’ falliment.
+1. **`CORS_ALLOW_ALL=true`** (jew il-legat `CORS_ORIGIN=*`) → ieku lura `Origin` ta 'min iċempel (jew `*` meta ma jkunx hemm header `Origin` ), `Vary: Origin` sabiex il-caches jibqgħu korretti. L-istess chokepoint `applyCorsHeaders()` jwaħħal ukoll `Vary: Accept-Encoding` għal kull rispons 2xx-with-body fuq il-wiċċ `/v1*`/`/v1beta*` awtentikat bit-token (`relaxForTokenAuth`, RFC 9110 §12.5.5, issue #6737), sabiex il-caches downstream/shared jistgħu jiddistingwu b'mod korrett varjanti kompressati vs mhux kompressati.
+2. Inkella, it-talba `Origin` hija normalizzata (b'kitba anqas, trailing slash imqaxxar) u mqabbla mal-**lista ta' permessi magħquda** :
+   - env **`CORS_ALLOWED_ORIGINS`** Lista separata minn virgola —, u
+   - ir-runtime **`corsOrigins`** setting (Dashboard → Security → _CORS Allowed Orijins_), injettat permezz `setRuntimeAllowedOrigins()` minn `src/lib/config/runtimeSettings.ts`.
+3. Ebda taqbila →**l-ebda header `Access-Control-Allow-Origin` ma jiġi emess** . Il-browser jimblokka l-qari cross-origin. Din hija l-inadempjenza intenzjonata ta' fail-closed.
 
-| Varjabbli tal-env      | Tifsira                                                                                |
-| ---------------------- | -------------------------------------------------------------------------------------- |
-| `CORS_ALLOWED_ORIGINS` | CSV tal-oriġini eżatti li għandhom jiġu permessi (rakkomandat).                        |
-| `CORS_ALLOW_ALL`       | `true`/`1` → jirritorna kwalunkwe oriġini (wildcard). Għall-iżvilupp biss.             |
-| `CORS_ORIGIN`          | Legat. `*` jaġixxi bħal `CORS_ALLOW_ALL`; valur wieħed jiżdied mal-lista ta’ permessi. |
+| Env var                | Tifsira                                                                                 |
+| ---------------------- | --------------------------------------------------------------------------------------- |
+| `CORS_ALLOWED_ORIGINS` | CSV ta 'oriġini eżatta li tippermetti (rakkomandat).                                    |
+| `CORS_ALLOW_ALL`       | `true`/`1` → eku kwalunkwe oriġini (wildcard). Dev biss.                                |
+| `CORS_ORIGIN`          | Wirt. `*` iġib ruħu bħal `CORS_ALLOW_ALL`; valur wieħed huwa miżjud mal-lista permessa. |
 
-## Mudell tat-theddid — x’jesponi verament `CORS_ALLOW_ALL=true`
+## Theddida mudell — dak li `CORS_ALLOW_ALL=true` verament jesponi
 
-It-twissija ġenerika tal-OWASP ("wildcard CORS = kwalunkwe sit jista’ jċempel l-API tiegħek") jistħoqqilha
-tittieħed bis-serjetà, iżda l-esponiment ta’ OmniRoute huwa **aktar limitat mill-każ ġeneriku**,
-minħabba fatt konkret wieħed tal-implimentazzjoni:
+It-twissija ġenerika OWASP ("wildcard CORS = kull sit jista' jċempel API tiegħek") ta' min jieħu bis-serjetà, iżda l-espożizzjoni ta' OmniRoute hija **idjaq mill-każ ġeneriku** , minħabba fatt wieħed ta' implimentazzjoni konkret:
 
-> **Il-`applyCorsHeaders()` ċentrali qatt ma jemetti
-> `Access-Control-Allow-Credentials`.** Brawżer ma jesponix risposta minn oriġini differenti _bi kredenzjali_
-> (li tinkludi cookies) sakemm is-server ma jibgħatx
-> `Access-Control-Allow-Credentials: true`. Il-passaġġ CORS kondiviż ta’ OmniRoute qatt ma
-> jagħmel dan.
+> **`applyCorsHeaders()` ċentrali qatt ma temetti `Access-Control-Allow-Credentials`.** Brawżer mhux se jesponi rispons trans-oriġini _credentialed_ (li jġorr il-cookie) sakemm is-server ma jibgħatx `Access-Control-Allow-Credentials: true`. It-triq CORS kondiviża ta' OmniRoute qatt ma tagħmel.
 
-Dan huwa xi jfisser għal kull superfiċje, anke b’`CORS_ALLOW_ALL=true`:
+Xi jfisser dan għal kull wiċċ, anke ma ' `CORS_ALLOW_ALL=true`:
 
-| Superfiċje                            | Mekkaniżmu ta’ awtentikazzjoni | Effett ta’ wildcard CORS                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| ------------------------------------- | ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Dashboard / MANAGEMENT `/api/*`       | Sessjoni bil-cookie            | L-oriġini tiġi ritornata, iżda **mingħajr `Allow-Credentials`** il-brawżer **jimblokka** l-qari bi kredenzjali. Sit malizzjuż minn oriġini differenti **ma jistax jaqra** r-risposti awtentikati tad-dashboard tiegħek, u l-cookie tas-sessjoni ma tiġix esposta.                                                                                                                                                                                                                                                                                                                                        |
-| API tal-klijent `/v1/*`, `/v1beta/*`  | Header Bearer / `x-api-key`    | Diġà permissiv **apposta** (`relaxForTokenAuth`): il-brawżers qatt ma jehmżu awtomatikament `Authorization`/`x-api-key`, għalhekk il-paġna ta’ attakkant ma tistax tipprovdi ċ-ċavetta tiegħek. Ir-rifless tal-oriġini bir-regola mtaffija jeħtieġ suġġett awtentikat (ċavetta API vvalidata jew sessjoni vvalidata tad-dashboard), mhux sempliċement header tal-kredenzjali, u qatt ma jinkludi `Access-Control-Allow-Credentials`. Ir-risposti anonimi (`REQUIRE_API_KEY=false`) jużaw il-lista kkonfigurata tal-oriġini permessi, inkluża l-attivazzjoni espliċita permezz ta’ `CORS_ALLOW_ALL=true`. |
-| Qari pubbliku biss (`/api/health`, …) | Xejn                           | Mhux sensittiv; wildcard ma jagħmilx ħsara.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| Wiċċ                                  | Mekkaniżmu ta' awtorizzazzjoni | Effett ta' wildcard CORS                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| ------------------------------------- | ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Dashboard / MANAGEMENT `/api/*`       | Sessjoni tal-cookies           | L-oriġini hija ripetuta, iżda **mingħajr `Allow-Credentials`** il-browser **blokki** il-kredenzjali jinqara. Sit malizzjuż ta' oriġini inkroċjata **ma jistax jaqra** it-tweġibiet tad-dashboard awtentikati tiegħek, u l-cookie tas-sessjoni mhix esposta.                                                                                                                                                                                                                                                                            |
+| Klijent API `/v1/*`, `/v1beta/*`      | Bearer / `x-api-key` ras       | Diġà permissiv **bid-disinn** (`relaxForTokenAuth`): il-browsers qatt ma jwaħħlu awtomatikament `Authorization`/`x-api-key`, għalhekk il-paġna ta 'attakkant ma tistax tipprovdi ċ-ċavetta tiegħek. L-eku rilassat jeħtieġ suġġett awtentikat (ċavetta API validata jew sessjoni tad-dashboard), mhux biss header tal-kredenzjali, u qatt ma tinkludi `Access-Control-Allow-Credentials`. Risposti anonimi (`REQUIRE_API_KEY=false`) jużaw il-lista permessa tal-oriġini kkonfigurata, inkluża `CORS_ALLOW_ALL=true` opt-in espliċita. |
+| Pubbliku qari biss (`/api/health`, …) | Xejn                           | Mhux sensittivi; wildcard ma jagħmilx ħsara.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 
-Għalhekk, l-esponiment **residwu** ta’ `CORS_ALLOW_ALL=true` huwa limitat għal: (a)
-**qari** minn oriġini differenti mingħajr kredenzjali ta’ data li diġà ma teħtieġx awtentikazzjoni, u (b)
-li jippermetti li l-**preflight ta’ CORS jgħaddi** fuq ir-rotot tal-ġestjoni — li xorta waħda jeħtieġu awtentikazzjoni
-li paġna minn oriġini differenti ma tistax tipprovdi. Dan **mhuwiex** vettur għall-ħtif ta’ sessjoni jew
-is-serq ta’ kredenzjali fuq il-passaġġ CORS kondiviż.
+Allura l-**residwu** espożizzjoni ta' `CORS_ALLOW_ALL=true` hija limitata għal: (a) oriġini inkroċjata mhux kredenzjali **jaqra** ta' dejta diġà mhux awtentikata, u (b) kiri ta CORS**pass ta' qabel it-titjira** fuq rotot ta' ġestjoni — li għadhom jeħtieġu awtorizzazzjoni li paġna ta' oriġini inkroċjata ma tistax tipprovdi. Huwa **le** vettur ta' sekwestru ta' sessjoni jew serq ta' kredenzjali fuq il-mogħdija CORS kondiviża.
 
-### Eċċezzjoni waħda reali — `/api/v1/agents/`
+### Eċċezzjoni waħda ġenwina — `/api/v1/agents/`
 
-Ir-rotot Cloud-Agent (`/api/v1/agents/{health,credentials,tasks,tasks/[id]}`) jissettjaw
-il-headers CORS **tagħhom stess**
-(`src/lib/cloudAgent/api.ts`, `getCloudAgentCorsHeaders`) u **jemettu**
-`Access-Control-Allow-Origin: <origin>|*` flimkien ma’
-`Access-Control-Allow-Credentials: true`. Din hija l-unika superfiċje fejn
-ir-ritorn tal-oriġini u l-kredenzjali jeżistu flimkien, u hija **indipendenti minn
-`CORS_ALLOW_ALL`**. Dawn ir-rotot huma awtentikati għall-ġestjoni
-(`requireManagementAuth`); l-operaturi li jesponu d-dashboard barra mill-host għandhom ikunu
-konxji li dan huwa l-uniku post fejn qari minn oriġini differenti bi kredenzjali huwa permess mill-
-headers tar-risposta. Ir-restrizzjoni tiegħu għal lista ta’ permessi espliċita qed tiġi segwita
-separatament minn din il-gwida dwar CORS.
+Ir-rotot Cloud-Agent (`/api/v1/agents/{health,credentials,tasks,tasks/[id]}`) jistabbilixxu tagħhom **stess** CORS headers (`src/lib/cloudAgent/api.ts`, `getCloudAgentCorsHeaders`) u **tagħmel** jarmu `Access-Control-Allow-Origin: <origin>|*` flimkien ma ' `Access-Control-Allow-Credentials: true`. Dan huwa l-wiċċ uniku fejn l-oriġini-eku u l-kredenzjali jeżistu flimkien, u huwa **indipendenti minn `CORS_ALLOW_ALL`** . Dawn ir-rotot huma awtentikati mill-ġestjoni (`requireManagementAuth`); operaturi li jesponu d-dashboard barra mill-host għandhom ikunu konxji li dan huwa l-post wieħed fejn qari b'kredenzjali ta' oriġini inkroċjata huwa permess mill-intestaturi tar-rispons. L-issikkar tiegħu għal lista ta' permessi espliċita jiġi ssorveljat separatament minn din il-gwida CORS.
 
-## Lista ta’ kontroll għall-produzzjoni
+## Lista ta 'kontroll tal-produzzjoni
 
-- **Qatt tissettja `CORS_ALLOW_ALL=true` fil-produzzjoni.** Ħallih mhux issettjat.
-- Issettja lista **espliċita** ta’ oriġini — jew il-varjabbli tal-ambjent jew il-qasam fit-tab Security:
+- **Qatt issettja `CORS_ALLOW_ALL=true` fil-produzzjoni.** Ħalliha mhux issettjata.
+- Issettja an **espliċitu** lista tal-oriġini — jew l-env var jew il-qasam Security-tab:
 
   ```bash
   CORS_ALLOWED_ORIGINS="https://app.example.com, https://admin.example.com"
   ```
 
-- Jekk OmniRoute jaħdem wara reverse proxy / tunnel (nginx, Caddy, Cloudflare
-  Tunnel, Tailscale), CORS **mhuwiex** l-uniku kontroll tiegħek — il-protezzjoni
-  tar-rotot loopback xorta tipproteġi r-rotot li jistgħu jniedu proċessi (ara
-  [ROUTE_GUARD_TIERS](./ROUTE_GUARD_TIERS.md)). Tiffalsifikax
-  `X-Forwarded-For: 127.0.0.1` biex “tirranġa” 403; dan jerġa’ jiftaħ il-klassi RCE li
-  tagħlaq il-protezzjoni tar-rotot.
-- Ikkonferma l-istat waqt it-tħaddim: id-dashboard juri **banner ambra persistenti**
-  taħt Dashboard → Security → Authorization Inventory kull meta
-  `CORS_ALLOW_ALL=true` ikun attiv, u `/api/settings/authz-inventory` jirritorna
-  envelope `cors: { allowAll, allowedOrigins }` li l-għodod ta’ monitoraġġ jistgħu jinterrogaw.
+- Jekk OmniRoute jaħdem wara prokura inversa / mina (nginx, Caddy, Cloudflare Tunnel, Tailscale), CORS huwa **le** l-uniku kontroll tiegħek — il-loopback route guard għadu jipproteġi rotot kapaċi spawn (ara [ROUTE_GUARD_TIERS](./ROUTE_GUARD_TIERS.md) ). Tfalsifikax `X-Forwarded-For: 127.0.0.1` biex "tiffissa" 403; li terġa tiftaħ il-klassi RCE il-gwardja tar-rotta tagħlaq.
+- Ikkonferma l-istat tar-runtime: id-dashboard juri a **banner ambra persistenti** taħt Dashboard → Sigurtà → Awtorizzazzjoni Inventarju kull meta `CORS_ALLOW_ALL=true` huwa ħaj, u `/api/settings/authz-inventory` jirritorna `cors: { allowAll, allowedOrigins }` envelope għodod ta 'monitoraġġ jistgħu poll.
 
-## Konvenjenza għall-iżvilupp — ippermetti oriġini lokali speċifiċi
+## Żvilupp konvenjenza — jippermettu oriġini lokali speċifiċi
 
-Rari jkollok bżonn il-wildcard anki fl-iżvilupp. Ippermetti biss is-servers tal-iżvilupp li tuża:
+Rari għandek bżonn il-wildcard anke fid-dev. Ħalli biss is-servers dev li tuża:
 
 ```bash
-# Servers tal-iżvilupp Vite (5173) + Next.js (3000) li jsejħu OmniRoute lokali
+# Vite (5173) + Next.js (3000) dev servers calling a local OmniRoute
 CORS_ALLOWED_ORIGINS="http://localhost:5173, http://localhost:3000"
 ```
 
-L-oriġini jitqabblu mingħajr distinzjoni bejn ittri kbar u żgħar, u s-slash finali
-tiġi injorata, għalhekk `http://localhost:3000` u `http://localhost:3000/` huma
-ekwivalenti. L-istess CSV jista’ jiġi ssettjat waqt it-tħaddim f’**Dashboard → Security → CORS Allowed Origins**
-mingħajr restart.
+L-oriġini huma mqabbla b'mod insensittiv għall-każi mal-linja mmejla ta' wara injorata, għalhekk `http://localhost:3000` u `http://localhost:3000/` huma ekwivalenti. L-istess CSV jista 'jiġi ssettjat waqt ir-runtime in **Dashboard → Sigurtà → CORS Oriġini Permessi** mingħajr bidu mill-ġdid.
 
-## Ċwievet tal-API kontra sessjonijiet tal-cookies
+## Ċwievet API vs sessjonijiet tal-cookies
 
-- **Bearer / `x-api-key` (is-superfiċje tal-inferenza `/v1/*`):** il-browsers qatt ma jehmżu
-  dawn awtomatikament. CORS mhuwiex ostaklu sinifikanti hawnhekk — iċ-ċavetta tal-API hija
-  l-ostaklu — u għalhekk dik is-superfiċje hija intenzjonalment permissiva biex il-klijenti tal-browser u
-  Electron ikunu jistgħu jaqraw it-tweġibiet li diġà għandhom dritt għalihom. Ir-rifless tal-oriġini bir-regola mtaffija jeħtieġ suġġett awtentikat (ċavetta API vvalidata jew sessjoni vvalidata tad-dashboard), mhux sempliċement header tal-kredenzjali, u qatt ma jinkludi `Access-Control-Allow-Credentials`. Ir-risposti anonimi (`REQUIRE_API_KEY=false`) jużaw il-lista kkonfigurata tal-oriġini permessi, inkluża l-attivazzjoni espliċita permezz ta’ `CORS_ALLOW_ALL=true`. Iċ-ċaħdiet
-  tal-awtentikazzjoni (401) jibqgħu jinqraw sabiex il-klijenti jkunu jistgħu juru ċavetta
-  revokata jew miktuba ħażin (#5242): l-401 tal-pipeline innifsu jżomm ir-rimandar, u
-  rotta li tirrifjuta ċ-ċavetta hija stess wara li l-pipeline qeda t-talba bħala anonima
-  (`/v1/models` u `/v1beta/models` meta tkun ikkonfigurata l-awtentikazzjoni tal-ġestjoni,
-  ir-rotot limitati għas-sid `/v1/files`, `/v1/batches`, `/v1/media`, `/v1/session-leases`
-  u r-rotot kandidati tal-auto-combo) iżżid ir-rimandar ma’ dak l-401 permezz ta’
-  `credentialRejectionHeaders()`. Ir-rimandar jiddependi minn jekk it-talba ġġorrx header
-  ta’ kredenzjali (`Authorization`, `x-api-key`, `x-goog-api-key` jew il-cookie
-  `auth_token`), mhux minn liema minnhom iċċekkjat ir-rotta, u qatt ma jingħaqad ma’
-  `Access-Control-Allow-Credentials`; il-body huwa envelope ta’ żball fiss. Ir-rotot
-  tal-ġestjoni taħt `/api/v1/` protetti minn `requireManagementAuth()`
-  (`/api/v1/management/*`, `/api/v1/registered-keys`) ma jużawx din l-eċċezzjoni għaċ-ċaħda tal-kredenzjali: b’`REQUIRE_API_KEY=false`, ir-risposti 401/403 tagħhom isegwu l-politika tal-oriġini CORS ikkonfigurata.
-- **Sessjoni tal-cookie (id-dashboard):** protetta mill-imġiba awtomatika ta’ għeluq f’każ ta’ ħsara **u**
-  min-nuqqas ta’ `Access-Control-Allow-Credentials` fil-path kondiviż. Żomm
-  l-oriġini tal-ġestjoni/dashboard barra minn kwalunkwe konfigurazzjoni permissiva; dawn għandhom jibqgħu
-  strettament magħluqa f’każ ta’ ħsara.
+- **Bearer / `x-api-key` (il-wiċċ tal-inferenza `/v1/*` ):** browsers qatt ma jehmżu dawn awtomatikament. CORS mhix barriera sinifikanti hawn — iċ-ċavetta API hija l-barriera — u huwa għalhekk li dak il-wiċċ huwa intenzjonalment permissiv sabiex il-klijenti tal-brawżer u Electron jistgħu jaqraw tweġibiet li huma diġà intitolati għalihom. L-eku rilassat jeħtieġ suġġett awtentikat (ċavetta API validata jew sessjoni tad-dashboard), mhux biss header tal-kredenzjali, u qatt ma tinkludi `Access-Control-Allow-Credentials`. Risposti anonimi (`REQUIRE_API_KEY=false`) jużaw il-lista ta' permessi ta' oriġini kkonfigurata, inkluża `CORS_ALLOW_ALL=true` opt-in espliċita. Iċ-ċaħdiet ta' awtorizzazzjoni (401) jibqgħu jinqraw sabiex il-klijenti jkunu jistgħu joħorġu ċavetta revokata jew ittajpjata ħażin (#5242): 401 tal-pipeline stess iżomm l-eku, u rotta li tirrifjuta ċ-ċavetta nnifisha wara li l-pipeline servaha bħala anonima (`/v1/models` u `/v1beta/models` b'awtorizzazzjoni ta' ġestjoni kkonfigurata, `/v1/files`, `/v1/batches` `/v1/media` `/v1/session-leases` u r-rotta b'ambitu tas-sid ikkonfigurat) iżid l-eku għal dak 401 permezz `credentialRejectionHeaders()`. L-eku huwa keyed fuq it-talba li jġorr header kredenzjali (`Authorization`, `x-api-key`, `x-goog-api-key` jew il-cookie `auth_token` ), mhux fuq liema minnhom ir-rotta ċċekkjata, u qatt ma hija paired ma ' `Access-Control-Allow-Credentials`; il-korp huwa pakkett ta 'żball fiss. Ir-rotot ta' ġestjoni taħt `/api/v1/` mgħasses minn `requireManagementAuth()` (`/api/v1/management/*`, `/api/v1/registered-keys`, `/api/v1/providers/[provider]/limits`, `/api/v1/accounts/[id]/limits`, `/api/v1/issues/report`) ma jużawx din l-eċċezzjoni ta' rifjut ta' kredenzjali: ma' `REQUIRE_API_KEY=false`, ir-risposti 401/403 tagħhom isegwu l-politika tal-oriġini CORS konfigurata.
+- **Sessjoni tal-cookies (id-dashboard):** protetti mill-inadempjenza fail-closed **u** min-nuqqas ta’ `Access-Control-Allow-Credentials` fit-triq kondiviża. Żomm l-oriġini management/dashboard barra minn kwalunkwe konfigurazzjoni permissiva; għandhom jibqgħu eżattament fail-closed.
 
-## Handshakes tal-WebSocket (`/v1/responses`, `/v1/ws`)
+## WebSocket handshakes (`/v1/responses`, `/v1/ws`)
 
-Il-brawżers ma japplikawx CORS għall-WebSocket, għalhekk it-trasporti WebSocket li
-jirritornaw l-output tal-inferenza jiċċekkjaw huma stess l-`Origin` tal-handshake
-(`src/server/origin/wsOrigin.ts`): il-Responses WebSocket (`/v1/responses`) u, meta
-OmniRoute jaħdem permezz ta’ `npm start` / `npm run dev`, il-pont `/v1/ws` u
-`/api/v1/ws`, li jibgħat `/v1/chat/completions`, `/v1/messages` u `/v1/responses` bħala
-frames fi stream. Il-pont jistaqsi lil `/api/v1/ws?handshake=1` għall-verdett u
-jirrifjuta li jagħmel upgrade sakemm dik ir-rotta ma tkunx għamlet il-kontroll.
-Ir-rekwiżiti tal-awtentikazzjoni għadhom japplikaw separatament. Il-verifika tal-oriġini tgħaddi meta:
+Il-browsers ma japplikawx CORS għal WebSocket, għalhekk it-trasport WebSocket li jirritorna l-output ta 'inferenza jiċċekkja l-handshake `Origin` infushom (`src/server/origin/wsOrigin.ts`): ir-Responses WebSocket (`/v1/responses`) u, meta OmniRoute jgħaddi minn `npm start` / `npm run dev`, il-pont `/v1/ws` u `/api/v1/ws`, li jixxandar `/v1/chat/completions`, `/v1/messages` bħala frames u `/v1/responses`. Il-pont jitlob `/api/v1/ws?handshake=1` għall-verdett u jirrifjuta li jaġġorna sakemm dik ir-rotta ma tkunx għamlet il-kontroll. Ir-rekwiżiti tal-awtentikazzjoni għadhom japplikaw separatament. Il-kontroll tal-oriġini jgħaddi meta:
 
-- ma jkollux header `Origin` (Codex CLI, SDKs u klijenti oħra li mhumiex brawżers);
-- l-`Origin` ikun ammess mil-lista ta’ permessi ta’ hawn fuq (`CORS_ALLOWED_ORIGINS`,
-  is-setting `corsOrigins`, `CORS_ORIGIN`, `CORS_ALLOW_ALL`);
-- l-`Origin` ikun waħda mill-oriġini pubbliċi ta’ OmniRoute stess (l-URL bażi pubbliku
-  kkonfigurat, l-oriġini mgħoddija ta’ proxy fdat, jew host loopback/LAN dirett mogħti
-  bħala IP letterali jew `localhost` — l-istess kandidati li juża l-kontroll
-  tal-mutazzjonijiet tad-dashboard); jew
-- ikollu ċavetta tal-API valida, bħal fuq is-superfiċje HTTP `/v1/*`.
+- m'għandu l-ebda header `Origin` (Codex CLI, SDKs u klijenti oħra mhux tal-browser);
+- iż- `Origin` hija ammessa mil-lista ta' permessi hawn fuq (`CORS_ALLOWED_ORIGINS`, l-issettjar `corsOrigins`, `CORS_ORIGIN`, `CORS_ALLOW_ALL`);
+- iż- `Origin` hija waħda mill-oriġini pubblika ta' OmniRoute stess (il-bażi pubblika konfigurata URL, oriġini mgħoddija ta' prokura fdata, jew host loopback/LAN dirett mogħti bħala IP letterali jew `localhost` — l-istess kandidati li juża l-kontroll tal-mutazzjoni tad-dashboard); jew
+- iġorr ċavetta API valida, bħal fuq il-wiċċ HTTP `/v1/*`.
 
-Kull ħaġa oħra tieħu `403 ws_origin_forbidden`. Cookie tas-sessjoni tad-dashboard ma
-teżentax `Origin` barrani, għax il-brawżer jehmżha mas-socket ta’ kwalunkwe paġna.
-`localhost` fuq port ieħor ma jitqiesx bħala l-istess oriġini; żid oriġini bħal dawn
-tal-iżvilupp ma’ `CORS_ALLOWED_ORIGINS`.
+Xi ħaġa oħra tikseb `403 ws_origin_forbidden`. Cookie tas-sessjoni tad-dashboard ma teżentax `Origin` barrani , minħabba li l-browser jehmeż mas-socket ta' kwalunkwe paġna. `localhost` fuq port ieħor ma jiġix ittrattat bħala tal-istess oriġini; żid tali oriġini dev għal `CORS_ALLOWED_ORIGINS`.
 
-## Eżempju: reverse proxy quddiem OmniRoute
+## Eżempju: prokura inversa quddiem OmniRoute
 
-CORS jiġi infurzat minn OmniRoute stess, għalhekk ġeneralment il-proxy **m’għandux** iżid jew
-jikteb mill-ġdid l-headers `Access-Control-*` (headers doppji jikkawżaw problemi fil-browsers). Ittermina t-TLS
-u għaddi t-traffiku — ħalli lil OmniRoute jwieġeb għall-preflight:
+CORS huwa infurzat minn OmniRoute innifsu, għalhekk il-prokura ġeneralment għandha **le** żid jew ikteb mill-ġdid `Access-Control-*` headers (headers doppji break browsers). Ittermina TLS u jgħaddi — ħalli OmniRoute iwieġeb qabel it-titjira:
 
 ```nginx
-# nginx — għaddi t-traffiku lil OmniRoute; IDDAĦĦALX Access-Control-* hawnhekk
+# nginx — forward to OmniRoute; do NOT inject Access-Control-* here
 location / {
     proxy_pass http://127.0.0.1:20128;
     proxy_set_header Host $host;
     proxy_set_header X-Real-IP $remote_addr;
     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     proxy_set_header X-Forwarded-Proto $scheme;
-    # Żomm l-headers tat-trażmissjoni: proxy fuq l-istess host jikkonnettja mil-loopback, u huma
-    # dawn li jgħidu lil OmniRoute li min qed jagħmel it-talba mhuwiex l-operatur lokali. Proxy li ma jżid ebda wieħed minnhom
-    # iġiegħel lil kull min jagħmel talba mill-bogħod jidher lokali. Lanqas qatt tissettja X-Forwarded-For għal 127.0.0.1.
+    # Keep the forwarding headers: a proxy on the same host connects from loopback, and they are
+    # what tells OmniRoute the caller is not the local operator. A proxy that adds none of them
+    # makes every remote caller look local. Never set X-Forwarded-For to 127.0.0.1 either.
 }
 ```
 
-Issettja l-oriġini permessi tal-browser f’OmniRoute (`CORS_ALLOWED_ORIGINS` jew it-tab
-Security), mhux fil-proxy.
+Issettja l-oriġini tal-brawżer permessi OmniRoute (`CORS_ALLOWED_ORIGINS` jew it-tab tas-Sigurtà), mhux fil-prokura.
 
 ## Fajls tas-sors
 
-| Aspett                                               | Fajl                                                                 |
+| Tħassib                                              | Fajl                                                                 |
 | ---------------------------------------------------- | -------------------------------------------------------------------- |
-| Riżoluzzjoni tal-allowlist + `getCorsStatus()`       | `src/server/cors/origins.ts`                                         |
-| Applikazzjoni tal-middleware (sors uniku tal-verità) | `src/server/authz/pipeline.ts`                                       |
-| Settings → injezzjoni tal-oriġini waqt it-tħaddim    | `src/lib/config/runtimeSettings.ts`                                  |
-| Status waqt it-tħaddim għad-dashboard                | `src/app/api/settings/authz-inventory/route.ts`                      |
-| Banner ta’ twissija tad-dashboard                    | `src/app/(dashboard)/dashboard/settings/components/AuthzSection.tsx` |
-| Qasam CORS Allowed Origins                           | `src/app/(dashboard)/dashboard/settings/components/SecurityTab.tsx`  |
-| CORS għal kull rotta ta’ Cloud-Agent (l-eċċezzjoni)  | `src/lib/cloudAgent/api.ts`                                          |
-| Kontroll tal-`Origin` fil-handshake tal-WebSocket    | `src/server/origin/wsOrigin.ts`                                      |
+| Riżoluzzjoni tal-lista permessa + `getCorsStatus()`  | `src/server/cors/origins.ts`                                         |
+| Applikazzjoni ta' middleware (sors uniku tal-verità) | `src/server/authz/pipeline.ts`                                       |
+| Settings → runtime oriġini injezzjoni                | `src/lib/config/runtimeSettings.ts`                                  |
+| Status ta' runtime għad-dashboard                    | `src/app/api/settings/authz-inventory/route.ts`                      |
+| Banner ta' twissija tad-dashboard                    | `src/app/(dashboard)/dashboard/settings/components/AuthzSection.tsx` |
+| Qasam ta' Oriġini Permessi CORS                      | `src/app/(dashboard)/dashboard/settings/components/SecurityTab.tsx`  |
+| Cloud-Agent għal kull rotta CORS (l-eċċezzjoni)      | `src/lib/cloudAgent/api.ts`                                          |
+| WebSocket handshake `Origin` check                   | `src/server/origin/wsOrigin.ts`                                      |
 
 ## Ara wkoll
 
-- [Livelli tal-Gwardji tar-Rotot](./ROUTE_GUARD_TIERS.md) — infurzar tal-loopback għal
-  rotot li jistgħu joħolqu proċessi (kontroll separat u komplementari).
-- [Gwida għall-Awtorizzazzjoni](../architecture/AUTHZ_GUIDE.md) — il-pipeline sħiħ tal-awtentikazzjoni.
+- [Rotta Guard Tiers](./ROUTE_GUARD_TIERS.md) — infurzar loopback għal rotot kapaċi spawn (kontroll separat u kumplimentari).
+- [Gwida ta 'Awtorizzazzjoni](../architecture/AUTHZ_GUIDE.md) — il-pipeline ta' awtorizzazzjoni sħiħa.

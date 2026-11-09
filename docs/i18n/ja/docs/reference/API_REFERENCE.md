@@ -886,14 +886,14 @@ CLI は `base_url + /responses` を WebSocket にアップグレードし、Omni
 
 ---
 
-## クォータと問題の報告
+## 割り当てと問題のレポート
 
-| Method | Path                | Description                                                                               |
-| ------ | ------------------- | ----------------------------------------------------------------------------------------- |
-| GET    | `/v1/quotas/check`  | 登録済みキーを発行する前に、`provider` + `accountId` のクォータを事前検証する             |
-| POST   | `/v1/issues/report` | クォータまたはキー発行の失敗を GitHub に報告する（`GITHUB_ISSUES_REPO` + トークンが必要） |
+| 方法 | パス                | 説明                                                                            |
+| ---- | ------------------- | ------------------------------------------------------------------------------- |
+| GET  | `/v1/quotas/check`  | 登録されたキーを発行する前に、 `provider` + `accountId`のクォータを事前検証する |
+| POST | `/v1/issues/report` | quota/key発行失敗をGitHubに報告する ( `GITHUB_ISSUES_REPO` +トークンが必要)     |
 
-**認証:** Bearer API キー（`isAuthenticated`）。
+**認証:** `/v1/quotas/check`ベアラーAPIキー (`isAuthenticated`) を受け取ります。 `/v1/issues/report` 、 `/api/v1/registered-keys`と同様に管理専用 (`requireManagementAuth`) です。ダッシュボード セッション、ローカルCLIトークン、または`manage`/`admin`スコープのAPIキーです。推論専用のAPIキーは`403`を取得します。
 
 ### クォータセッションの復旧（オプトイン）
 
@@ -1666,19 +1666,23 @@ OmniRoute のイベント（リクエスト完了、クォータ超過、キー�
 
 ---
 
-## 登録済みキー（自動管理）
+## 登録されたキー（自動管理）
 
-自動キー管理サブシステムが、バックエンドのプロバイダー/アカウントに対して API キーを発行・ローテーションするために使用します。日次/時間単位のクォータに対応しています。
+daily/hourlyクォータを使用して、バッキングprovider/accountに対してAPIキーを発行およびローテーションするために、自動キー管理サブシステムによって使用されます。
 
-| メソッド | パス                                  | 説明                                                                                                                                                                                                          |
-| -------- | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET      | `/api/v1/registered-keys`             | 登録済みキーを一覧表示（マスクされたプレフィックスのみ）                                                                                                                                                      |
-| POST     | `/api/v1/registered-keys`             | 新しい登録済みキーを発行 — body: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`。生のキーを**一度だけ**返します。クォータにより拒否された場合は `429` を返します。 |
-| GET      | `/api/v1/registered-keys/[id]`        | 登録済みキーのメタデータを取得（生のキー情報は含まれません）                                                                                                                                                  |
-| DELETE   | `/api/v1/registered-keys/[id]`        | 登録済みキーを失効させる                                                                                                                                                                                      |
-| POST     | `/api/v1/registered-keys/[id]/revoke` | 明示的な失効エンドポイント（DELETE と同じ効果）                                                                                                                                                               |
+| 方法   | パス                                  | 説明                                                                                                                                                                                                      |
+| ------ | ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/v1/registered-keys`             | 登録されたキーのリスト (マスクされたプレフィックスのみ)                                                                                                                                                   |
+| POST   | `/api/v1/registered-keys`             | 新しい登録されたキー—本体: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`を発行します。生のキーを返します**一度**。クォータが拒否された場合は`429`を返します。 |
+| GET    | `/api/v1/registered-keys/[id]`        | 登録されたキーのメタデータを取得します (原材料なし)                                                                                                                                                       |
+| DELETE | `/api/v1/registered-keys/[id]`        | 登録されたキーを取り消す                                                                                                                                                                                  |
+| POST   | `/api/v1/registered-keys/[id]/revoke` | 明示的な取り消しエンドポイント ( DELETEと同じ効果)                                                                                                                                                        |
+| GET    | `/api/v1/providers/[provider]/limits` | プロバイダーの発行上限を読む                                                                                                                                                                              |
+| PUT    | `/api/v1/providers/[provider]/limits` | プロバイダーの発行上限を設定します—本体: `{maxActiveKeys?, dailyIssueLimit?, hourlyIssueLimit?}`                                                                                                          |
+| GET    | `/api/v1/accounts/[id]/limits`        | アカウントの発行上限を読む                                                                                                                                                                                |
+| PUT    | `/api/v1/accounts/[id]/limits`        | アカウントの発行上限—プロバイダールートと同じ本体に設定します                                                                                                                                             |
 
-**認証:** 管理セッション/API キー（`requireManagementAuth`） — `/api/keys` と同じガードです。ダッシュボードセッション、ローカル CLI トークン、または `manage`/`admin` スコープを持つ API キーを使用できます。推論専用 API キーでは `403` が返されます。`/v1/quotas/check` および `/v1/issues/report` も参照してください。
+**認証:**管理session/APIキー (`requireManagementAuth`) — `/api/keys`と同じガード: ダッシュボード セッション、ローカルCLIトークン、または`manage`/`admin`スコープのAPIキー。推論専用APIキーは`403`を取得します。 `/v1/quotas/check`および`/v1/issues/report`も参照してください。
 
 ---
 

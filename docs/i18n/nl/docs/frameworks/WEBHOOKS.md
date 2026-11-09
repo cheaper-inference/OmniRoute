@@ -4,57 +4,52 @@
 
 ---
 
-> **Bron van waarheid:** `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`, `src/app/api/webhooks/`
-> **Laatst bijgewerkt:** 2026-06-28 — v3.8.40
+> **Bron van waarheid:** `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`, `src/app/api/webhooks/`**Laatst bijgewerkt:** 28-06-2026 — v3.8.40
 
-OmniRoute kan HTTP-webhooks activeren bij platformgebeurtenissen. Gebruik ze om te integreren met
-Slack, PagerDuty, Datadog, interne waarschuwingsservices of een andere HTTP-ontvanger.
+OmniRoute kan HTTP webhooks op platformevenementen afvuren. Gebruik ze om te integreren met Slack, PagerDuty, Datadog, interne waarschuwingsdiensten of elke HTTP ontvanger.
 
-De dispatcher ondertekent elke aflevering met HMAC-SHA256, probeert opnieuw bij tijdelijke
-fouten, houdt de afleveringsstatus per webhook bij en schakelt eindpunten die
-blijven mislukken automatisch uit.
+De coördinator ondertekent elke levering met HMAC-SHA256, probeert opnieuw bij tijdelijke fouten, volgt de leveringsstatus per webhook en schakelt automatisch eindpunten uit die blijven mislukken.
 
-## Ondersteunde gebeurtenissen
+## Ondersteunde evenementen
 
-Het type `WebhookEvent` (`src/lib/webhooks/eventDescriptions.ts`, gebruikt door `src/lib/webhookDispatcher.ts`) modelleert momenteel precies vier gebeurtenissen:
+Het `WebhookEvent` type (`src/lib/webhooks/eventDescriptions.ts`, verbruikt door `src/lib/webhookDispatcher.ts`) modelleert momenteel zeven gebeurtenissen:
 
-| Gebeurtenis         | Wordt geactiveerd wanneer                                        |
-| ------------------- | ---------------------------------------------------------------- |
-| `request.completed` | Een geproxiede aanvraag met succes wordt voltooid                |
-| `request.failed`    | Een geproxiede aanvraag na alle nieuwe pogingen/fallback mislukt |
-| `quota.exceeded`    | Een API-sleutel een budget-/quotalimiet overschrijdt             |
-| `test.ping`         | Synthetische gebeurtenis gebruikt door het testeindpunt          |
+| Evenement                 | Brandt wanneer                                                                                             |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `request.completed`       | Een proxyverzoek is succesvol voltooid                                                                     |
+| `request.failed`          | Een proxyverzoek mislukt immers retries/fallback                                                           |
+| `quota.exceeded`          | Een API sleutel overschrijdt een budget/quota -drempel                                                     |
+| `proxy.set_aside`         | Een lid van de proxypool wordt na herhaalde weigeringen aan de kant gezet (alleen overgang)                |
+| `proxy.pool.exhausted`    | Elk lid van een proxypoolbereik wordt opzij gezet                                                          |
+| `provider.reset_redeemed` | Automatisch toepassen van bankresets, ingewisseld voor een resettegoed of de wekelijkse Claude sessiereset |
+| `test.ping`               | Synthetische gebeurtenis gebruikt door het testeindpunt                                                    |
 
-Abonnementen accepteren de letterlijke waarde `"*"` om elke gebeurtenis te ontvangen. Onbekende
-gebeurtenisnamen in `events` worden tijdens de dispatch genegeerd.
+Abonnementen accepteren de letterlijke `"*"` om elk evenement te ontvangen. Onbekende gebeurtenisnamen in `events` worden tijdens verzending genegeerd.
 
-> Opmerking: de dispatcher-API is aangesloten, maar productie-aanroepen voor sommige
-> andere gebeurtenissen dan `test.ping` worden nog toegevoegd. Gebruik `grep dispatchEvent` om te zien
-> welke paden de dispatcher momenteel aanroepen in jouw release.
+> Let op: de coördinator API is aangesloten, maar productieoproeplocaties voor sommige niet-`test.ping` -evenementen komen nog steeds binnen. Controleer `grep dispatchEvent` om te zien welke paden momenteel de dispatcher in uw release aanroepen.
 
 ## Architectuur
 
 ```
-Aanroeper (handler, service, monitor)
+Caller (handler, service, monitor)
   dispatchEvent(event, data)            [src/lib/webhookDispatcher.ts]
     -> getEnabledWebhooks()             [src/lib/db/webhooks.ts]
-    -> filteren op webhook.events
-    -> voor elke overeenkomst (parallel):
+    -> filter by webhook.events
+    -> for each match (in parallel):
        deliverWebhook(url, payload, secret)
-         payload { event, timestamp, data } opbouwen
-         body ondertekenen met HMAC-SHA256 (als een secret aanwezig is)
-         POST met een time-out van 10 s
-         maximaal 3 keer opnieuw proberen bij 5xx-/netwerkfout
+         build payload { event, timestamp, data }
+         sign body with HMAC-SHA256 (if secret present)
+         POST with 10s timeout
+         retry up to 3 times on 5xx / network error
        recordWebhookDelivery(id, status, success)
     -> disableWebhooksWithHighFailures(10)
 ```
 
-Dispatch wordt voor de aanroeper op de achtergrond uitgevoerd zonder erop te wachten: `Promise.allSettled` onderdrukt
-fouten per webhook, zodat één defecte ontvanger de andere niet kan blokkeren.
+Verzending is voor de beller een kwestie van vergeten: `Promise.allSettled` slikt fouten per webhook in, zodat de ene slechte ontvanger de andere niet kan blokkeren.
 
-## HMAC-ondertekening
+## HMAC -ondertekening
 
-Wanneer een webhook een `secret` heeft, ondertekent OmniRoute de JSON-body en verzendt het:
+Wanneer een webhook een `secret` heeft, ondertekent OmniRoute de JSON body en verzendt:
 
 ```
 Content-Type: application/json
@@ -64,13 +59,11 @@ X-Webhook-Timestamp: <ISO-8601>
 X-Webhook-Signature: sha256=<hex HMAC-SHA256(secret, body)>
 ```
 
-> Headernamen gebruiken het voorvoegsel `X-Webhook-*` (niet `X-OmniRoute-*`). De waarde van de
-> handtekening is `sha256=<hex>` — verifieer het volledige voorvoegsel.
+> Headernamen gebruiken het `X-Webhook-*` voorvoegsel (niet `X-OmniRoute-*`). De handtekeningwaarde is `sha256=<hex>` — verifieer het volledige voorvoegsel.
 
-Als `createWebhook` zonder een secret wordt aangeroepen, genereert de DB-module er een
-(`whsec_<48 hex>`), zodat alle webhooks standaard worden ondertekend.
+Als `createWebhook` zonder geheim wordt aangeroepen, genereert de DB module er een (`whsec_<48 hex>`), zodat alle webhooks standaard worden ondertekend.
 
-### Verificatie aan de kant van de ontvanger
+### Verificatie op de ontvanger
 
 ```typescript
 import { createHmac, timingSafeEqual } from "node:crypto";
@@ -83,23 +76,19 @@ function verify(rawBody: string, signature: string, secret: string) {
 }
 ```
 
-Verifieer altijd aan de hand van de **onbewerkte** requestbody, voordat de JSON wordt geparseerd.
+Verifieer altijd aan de hand van de **rauw** request body, vóór enige JSON parsering.
 
-## Beleid voor nieuwe pogingen en fouten
+## Beleid voor opnieuw proberen en mislukken
 
 `deliverWebhook(url, payload, secret, maxRetries = 3)`:
 
 - Time-out van 10 seconden per poging (`AbortController`).
-- HTTP 2xx geldt als geslaagd.
-- HTTP 3xx/4xx geldt als een definitieve status waarvoor geen nieuwe poging wordt gedaan — geregistreerd als afgeleverd
-  met `success = res.ok`.
-- Bij HTTP 5xx en netwerkfouten worden nieuwe pogingen gedaan met exponentiële back-off:
-  `2^attempt * 1000 ms` (1s, 2s, 4s).
-- Na `maxRetries` wordt de aflevering als mislukt geregistreerd.
-- Elke aflevering werkt `last_triggered_at`, `last_status` bij en stelt
-  `failure_count` opnieuw in of verhoogt deze.
-- De dispatcher roept `disableWebhooksWithHighFailures(10)` aan na elke fan-out,
-  zodat elke webhook met `failure_count >= 10` automatisch wordt uitgeschakeld.
+- HTTP 2xx geldt als succes.
+- HTTP 3xx/4xx geldt als een niet-herhaalbare eindstatus — vastgelegd als afgeleverd bij `success = res.ok`.
+- HTTP 5xx en netwerkfouten worden opnieuw geprobeerd met exponentiële uitstel: `2^attempt * 1000 ms` (1s, 2s, 4s).
+- Na `maxRetries` wordt de levering als mislukt geregistreerd.
+- Bij elke levering worden `last_triggered_at` en `last_status` bijgewerkt en wordt `failure_count` opnieuw ingesteld of verhoogd.
+- De coördinator roept `disableWebhooksWithHighFailures(10)` op na elke fan-out, zodat elke webhook met `failure_count >= 10` automatisch wordt uitgeschakeld.
 
 ## Database
 
@@ -108,41 +97,36 @@ Tabel `webhooks` (migratie `011_webhooks.sql`):
 | Kolom               | Type    | Opmerkingen                                                 |
 | ------------------- | ------- | ----------------------------------------------------------- |
 | `id`                | TEXT PK | UUID                                                        |
-| `url`               | TEXT    | Bestemmings-URL                                             |
-| `events`            | TEXT    | JSON-array; standaard `["*"]`                               |
-| `secret`            | TEXT    | HMAC-geheim (automatisch gegenereerd indien niet opgegeven) |
-| `enabled`           | INT     | 0/1; standaard 1                                            |
-| `description`       | TEXT    | Optioneel, door mensen leesbaar label                       |
+| `url`               | TEXT    | Bestemming URL                                              |
+| `events`            | TEXT    | JSON array; standaard `["*"]`                               |
+| `secret`            | TEXT    | HMAC geheim (automatisch gegenereerd indien niet opgegeven) |
+| `enabled`           | INT     | 0/1; standaard ingesteld op 1                               |
+| `description`       | TEXT    | Optioneel menselijk label                                   |
 | `created_at`        | TEXT    | `datetime('now')`                                           |
-| `last_triggered_at` | TEXT    | Bijgewerkt bij elke afleverpoging                           |
-| `last_status`       | INT     | HTTP-status van de laatste poging (0 = netwerk)             |
-| `failure_count`     | INT     | Opnieuw ingesteld op 0 bij succes, +1 bij mislukking        |
+| `last_triggered_at` | TEXT    | Bij elke bezorgpoging bijgewerkt                            |
+| `last_status`       | INT     | HTTP status van de laatste poging (0 = -netwerk)            |
+| `failure_count`     | INT     | Wordt gereset naar 0 bij succes, + 1 bij mislukking         |
 
-De aflevergeschiedenis wordt opgeslagen in de speciale tabel `webhook_deliveries`
-(migratie `069_webhook_deliveries.sql`, bij elke poging geschreven via
-`src/lib/db/webhookDeliveries.ts::insertDelivery`), naast de geaggregeerde
-tellers in de rij van `webhooks`. Metadata over het type (Slack / Discord /
-Telegram / aangepaste payloadtransformaties) is toegevoegd door `070_webhooks_kind_metadata.sql`.
+De leveringsgeschiedenis wordt bewaard in de speciale `webhook_deliveries` tabel (migratie `069_webhook_deliveries.sql`, bij elke poging via `src/lib/db/webhookDeliveries.ts::insertDelivery` geschreven), naast de verzamelde tellers op de `webhooks` rij. Soort metadata (Slack / Discord / Telegram / aangepaste payload transformers) zijn toegevoegd door `070_webhooks_kind_metadata.sql`.
 
-## REST-API
+## REST API
 
-Alle endpoints vereisen beheer-authenticatie (`requireManagementAuth`).
+Voor alle eindpunten is beheerauthenticatie (`requireManagementAuth`) vereist.
 
-| Endpoint                        | Methode | Beschrijving                                     |
-| ------------------------------- | ------- | ------------------------------------------------ |
-| `/api/webhooks`                 | GET     | Webhooks weergeven (geheimen gemaskeerd)         |
-| `/api/webhooks`                 | POST    | Webhook maken                                    |
-| `/api/webhooks/[id]`            | GET     | Webhookdetails (volledig geheim)                 |
-| `/api/webhooks/[id]`            | PUT     | Velden bijwerken                                 |
-| `/api/webhooks/[id]`            | DELETE  | Verwijderen                                      |
-| `/api/webhooks/[id]/test`       | POST    | Een `test.ping` activeren (geen nieuwe pogingen) |
-| `/api/webhooks/[id]/deliveries` | GET     | Recente afleverpogingen voor één webhook         |
-| `/api/webhooks/validate-url`    | POST    | Voorafgaande URL-validatie (SSRF-beveiliging)    |
+| Eindpunt                        | Methode | Beschrijving                                   |
+| ------------------------------- | ------- | ---------------------------------------------- |
+| `/api/webhooks`                 | GET     | Webhooks weergeven (geheimen gemaskeerd)       |
+| `/api/webhooks`                 | POST    | Maak een webhook                               |
+| `/api/webhooks/[id]`            | GET     | Webhookdetail (volledig geheim)                |
+| `/api/webhooks/[id]`            | PUT     | Velden bijwerken                               |
+| `/api/webhooks/[id]`            | DELETE  | Verwijderen                                    |
+| `/api/webhooks/[id]/test`       | POST    | Vuur een `test.ping` af (geen nieuwe pogingen) |
+| `/api/webhooks/[id]/deliveries` | GET     | Recente bezorgpogingen voor één webhook        |
+| `/api/webhooks/validate-url`    | POST    | URL -validatie vóór de vlucht (SSRF bewaking)  |
 
-`GET /api/webhooks` maskeert het geheim als `<eerste 10 tekens>...` om lekken
-op overzichtspagina's te voorkomen. Gebruik de GET-aanvraag voor `[id]` wanneer u het geheim daadwerkelijk nodig hebt.
+`GET /api/webhooks` maskeert het geheim van `<first 10 chars>...` om lekken op aanbiedingspagina's te voorkomen. Gebruik de `[id]` GET wanneer je het geheim echt nodig hebt.
 
-### Webhook maken
+### Maak een webhook
 
 ```bash
 curl -X POST http://localhost:20128/api/webhooks \
@@ -152,12 +136,11 @@ curl -X POST http://localhost:20128/api/webhooks \
     "url": "https://hooks.slack.com/services/...",
     "secret": "whsec_my_shared_secret",
     "events": ["quota.exceeded", "request.failed"],
-    "description": "Slack-meldingen"
+    "description": "Slack alerts"
   }'
 ```
 
-Als `secret` wordt weggelaten, genereert de server een `whsec_<hex>`-geheim en retourneert
-dit in het antwoord.
+Als `secret` wordt weggelaten, genereert de server een `whsec_<hex>` geheim en retourneert dit in het antwoord.
 
 ### Webhook testen
 
@@ -166,23 +149,20 @@ curl -X POST http://localhost:20128/api/webhooks/<id>/test \
   -H "Cookie: auth_token=..."
 ```
 
-Retourneert `{ delivered, status, error }`. Er worden geen nieuwe pogingen gedaan — handig om
-snel te controleren of de ontvanger de payload en handtekening accepteert.
+Retourneert `{ delivered, status, error }`. Er worden geen nieuwe pogingen ondernomen. — is handig om snel te valideren dat de ontvanger de payload en handtekening accepteert.
 
 ## Dashboard
 
-De dashboardpagina op `/dashboard/webhooks` (zie
-`src/app/(dashboard)/dashboard/webhooks/page.tsx`) biedt:
+De dashboardpagina bij `/dashboard/webhooks` (zie `src/app/(dashboard)/dashboard/webhooks/page.tsx`) biedt:
 
-- Webhooks maken/bewerken met een gebeurteniskiezer
-- Statusindicator (actief / inactief / fout opgetreden) op basis van `enabled`,
-  `failure_count` en `last_status`
+- Create/edit webhooks met een evenementenkiezer
+- Statusindicator (actief / inactief / foutief) op basis van `enabled`, `failure_count` en `last_status`
 - Testlevering met één klik
-- Handmatig in-/uitschakelen
+- Handmatige enable/disable schakelaar
 
-## Voorbeelden van payloads
+## Voorbeelden van laadvermogen
 
-### request.completed
+### verzoek.voltooid
 
 ```json
 {
@@ -214,29 +194,19 @@ De dashboardpagina op `/dashboard/webhooks` (zie
 }
 ```
 
-De veldstructuren voor andere gebeurtenissen dan `test.ping` worden gedefinieerd door de aanroeplocaties die
-ze verzenden; behandel het `data`-object als voorwaarts compatibel (voeg velden toe, ga niet uit van
-hun afwezigheid).
+Veldvormen voor niet-`test.ping` gebeurtenissen worden gedefinieerd door de oproeplocaties die deze uitzenden; behandel het `data` object als voorwaarts compatibel (voeg velden toe, ben niet afhankelijk van afwezigheid).
 
-## Aanbevolen werkwijzen
+## Beste praktijken
 
-- **Verifieer bij elke levering de handtekening** aan de hand van de onbewerkte body — dit voorkomt
-  vervalste POST-verzoeken van iedereen die uw webhook-URL raadt.
-- **Antwoord binnen circa 5 seconden met 2xx** — de dispatcher krijgt na 10 s een time-out. Trage
-  ontvangers verbruiken nieuwe pogingen en verhogen `failure_count`.
-- **Maak handlers idempotent** — nieuwe pogingen en leveringssemantiek waarbij minstens één levering wordt gegarandeerd,
-  betekenen dat duplicaten mogelijk zijn.
-- **Abonneer u zo beperkt mogelijk** — vermeld alleen gebeurtenissen die u daadwerkelijk verwerkt; `"*"` brengt
-  kosten met zich mee voor ontvangers waarover u geen controle hebt.
-- **Bewaak `failure_count`** — eindpunten worden na 10 opeenvolgende
-  fouten automatisch uitgeschakeld; stel dit opnieuw in door `PUT /api/webhooks/[id]` aan te roepen met `enabled: true`
-  nadat de ontvanger is hersteld.
-- **Roteer geheimen periodiek** — voer een `PUT` uit met een nieuw `secret`, implementeer de nieuwe waarde
-  op de ontvanger en bevestig dit via het testeindpunt.
+- **Controleer de handtekening bij elke levering** tegen het rauwe lichaam voorkomt — vervalste POSTs van iedereen die uw webhook URL raadt.
+- **Reageer 2xx binnen ~ 5 seconden** — de coördinator krijgt een time-out na 10 s. Langzame ontvangers zullen nieuwe pogingen opeten en `failure_count` opblazen.
+- **Maak begeleiders idempotent** — pogingen en de semantiek van minstens één keer bezorgen zorgen ervoor dat duplicaten mogelijk zijn.
+- **Abonneer minimaal** — vermeldt alleen evenementen die u daadwerkelijk gebruikt; `"*"` brengt kosten in rekening voor ontvangers die u niet beheert.
+- **Kijk `failure_count`** — eindpunten worden automatisch uitgeschakeld bij 10 opeenvolgende fouten; resetten door `PUT /api/webhooks/[id]` aan te roepen met `enabled: true` nadat de ontvanger is gerepareerd.
+- **Roteer geheimen periodiek** — `PUT` een nieuwe `secret`, implementeer de nieuwe waarde naar de ontvanger en bevestig via het testeindpunt.
 
 ## Zie ook
 
-- [API_REFERENCE.md](../reference/API_REFERENCE.md) — volledig oppervlak van de beheer-API
-- [RESILIENCE_GUIDE.md](../architecture/RESILIENCE_GUIDE.md) — semantiek voor circuitonderbreking / afkoelperiode
-  achter providerfouten die via `request.failed` zichtbaar worden gemaakt
+- [API_REFERENCE.md](../reference/API_REFERENCE.md) — volledig beheer API oppervlak
+- [RESILIENCE_GUIDE.md](../architecture/RESILIENCE_GUIDE.md) — stroomonderbreker/cooldown-semantiek achter providerfouten opgedoken via `request.failed`
 - Bron: `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`

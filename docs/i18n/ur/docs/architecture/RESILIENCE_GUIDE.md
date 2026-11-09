@@ -162,6 +162,45 @@ OmniRoute میں تین الگ لیکن متعلقہ لچکدار میکانزم
 Regression guards: `tests/unit/claude-low-priority-mode.test.ts`,
 `tests/unit/claude-limit-reset.test.ts`, `tests/unit/claude-low-priority-executor.test.ts`.
 
+### خودکار طور پر لاگو بینک شدہ ری سیٹس
+
+**دائرہ کار:** Codex اور Claude سبسکرپشن (OAuth) کنکشنز۔**آپٹ ان** : `bankedResetAutoApply` سیٹنگ آف ہے اور `dry-run` موڈ میں بذریعہ ڈیفالٹ (ترتیبات → AI → آٹو اپلائی بینکڈ ری سیٹس)۔
+
+**مقصد:** جب کوئی اکاؤنٹ استعمال کی دیوار سے ٹکرا جاتا ہے تو آپریٹر کی جانب سے فراہم کنندہ کی حدود کے صفحہ پر "ریڈیم" کو دبانے کا انتظار کرنے کے بجائے خود ہی بینکڈ ری سیٹ خرچ کریں۔
+
+| کریڈٹ کی قسم (`creditTypes`) | جو چھڑایا جاتا ہے۔                       | جہاں یہ چلتا ہے۔                                                        |
+| ---------------------------- | ---------------------------------------- | ----------------------------------------------------------------------- |
+| `codexCredits`               | Codex ری سیٹ کریڈٹس                      | پس منظر کا کام، ہر 60 سیکنڈ                                             |
+| `claudeCredits`              | Claude بینکڈ گرانٹس (`GRANT` کریڈٹ)      | پس منظر کا کام، ہر 60 سیکنڈ                                             |
+| `claudeSessionReset`         | Claude ہفتہ وار سیشن کی حد ری سیٹ (اوپر) | راہ کی درخواست کریں، اسی پالیسی کے ذریعے جس طرح فی اکاؤنٹ ٹوگل ہوتا ہے۔ |
+
+**نفاذ:**
+
+- خالص فیصلہ (دونوں راستوں کے لیے ایک اصول مقرر): `src/lib/usage/bankedResetPolicy.ts::decideBankedReset()`
+- پس منظر کا کام: `src/lib/services/bankedResetAutoApply.ts` ( `src/instrumentation-node.ts` میں شروع ہوا)
+- Claude ریکوسٹ پاتھ گیٹ: `src/lib/usage/claudeSessionResetPolicy.ts`، `open-sse/services/claudeLimitReset.ts` میں `setClaudeLimitResetPolicy()` کے ذریعے رجسٹرڈ
+- تاریخ، کیپس اور ویب ہک: `src/lib/usage/bankedResetAudit.ts`
+- ہسٹری API: `GET /api/settings/banked-reset-auto/history?limit=50` (انتظام کی توثیق)
+
+**فیصلہ کا حکم** (پہلا ناکام اصول ریکارڈ شدہ وجہ ہے):
+
+1. فیچر آف، کریڈٹ ٹائپ آف، یا اکاؤنٹ آف سکوپ (`accountScope` `all` / `selected` پلس فی اکاؤنٹ `connections` نقشہ)۔
+2. اختیاری UTC شیڈول سے باہر (`startHourUtc` > `endHourUtc` آدھی رات کو کراس کرتا ہے)۔
+3. آخری 24 گھنٹوں کے دوران کیپس: `maxPerAccountPerDay` (1) `maxPerDay` (3) اور `minSpacingMinutes` (30) کسی بھی دو چھٹکارے کے درمیان۔
+4. ٹرگر: ایک دیوار والی `session` یا `weekly` ونڈو ( `getQuotaWindowStatus().reachedThreshold` سے پڑھیں، `isAccountQuotaExhausted()` سے نہیں، جو صرف خرچ کی گئی ہر ونڈو کے ساتھ ایک اکاؤنٹ کی اطلاع دیتا ہے)، یا `expiringCreditHours` (24) کے اندر ختم ہونے والا کریڈٹ ایسے اکاؤنٹ پر جس نے کم از کم `expiringCreditMinUsedPercent` (50) استعمال کیا ہو۔
+5. قدرتی ری سیٹ گارڈ: جب دیوار والی 5 گھنٹے والی ونڈو `sessionResetGuardMinutes` (90) کے اندر دوبارہ سیٹ ہو جائے، یا `weeklyResetGuardHours` (12) کے اندر دیوار والی ہفتہ وار ونڈو دوبارہ سیٹ ہو جائے تو اسے چھوڑ دیں۔
+6. ہفتہ وار منزل: جب ہفتہ وار باقی `weeklyFloorPercent` (10) سے کم ہو تو 5 گھنٹے کا ری سیٹ چھوڑ دیں۔
+7. `last-resort` موڈ: چھوڑیں جب کہ اسی فراہم کنندہ کے ایک اور ان اسکوپ اکاؤنٹ میں دونوں ونڈوز میں کم از کم `poolHeadroomPercent` (10) باقی ہے۔ ایکسپائرنگ کریڈٹ ٹرگرز اس کو نظرانداز کرتے ہیں۔
+8. `dry-run` ایک قطار کو ریکارڈ کرتا ہے اور کچھ بھی نہیں چھڑاتا ہے۔ `last-resort` اور `eager` چھڑانا۔
+
+گمشدہ کوٹہ ڈیٹا کبھی بھی چھٹکارے کو غیر مقفل نہیں کرتا ہے: دوبارہ ترتیب دینے کا نامعلوم وقت یا ہفتہ وار استعمال چھوڑ دیتا ہے۔
+
+**Claude سیشن ری سیٹ:** فیچر آف، یا `claudeSessionReset` آف کے ساتھ، فی اکاؤنٹ `autoLimitReset` ٹوگل بالکل پہلے کی طرح فیصلہ کرتا ہے۔ دونوں کے آن ہونے کے ساتھ، فیچر فی اکاؤنٹ ٹوگلز کی جگہ لے لیتا ہے: ایک دائرہ کار اکاؤنٹ صرف اس وقت دعویٰ کر سکتا ہے جب پالیسی اس کی اجازت دیتی ہے، اور `dry-run` موڈ میں کوئی دعوی نہیں کیا جاتا ہے۔
+
+**حفاظت:** جاب فی ٹک زیادہ سے زیادہ ایک کریڈٹ کو چھڑاتا ہے، کریڈٹ کی فہرست سے پہلے فیصلہ کرتا ہے (چھوڑ دیا گیا اکاؤنٹ کبھی بھی درج نہیں ہوتا ہے)، idempotency کیز `auto-reset:<connectionId>:<yyyy-mm-dd>:<n>` استعمال کرتا ہے، اور ناکام لسٹنگ یا چھٹکارے کے بعد اکاؤنٹ کو 1 گھنٹے کے لیے بند کر دیتا ہے۔ ہر چھٹکارا، ناکامی اور ڈرائی رن فیصلہ `audit_log` کو لکھا جاتا ہے (`action: "bankedReset.redeem"`، کوئی ٹوکن یا کریڈٹ آئی ڈی نہیں)؛ ٹوپیوں کو ان قطاروں سے شمار کیا جاتا ہے، لہذا وہ دوبارہ شروع ہونے سے بچ جاتے ہیں۔ کامیاب چھٹکارے `provider.reset_redeemed` ویب ہک کو بھی فائر کر دیتے ہیں۔
+
+ریگریشن گارڈز: `tests/unit/banked-reset-policy.test.ts`، `tests/unit/banked-reset-auto-apply.test.ts`، `tests/unit/claude-limit-reset-policy-gate.test.ts`، `tests/unit/banked-reset-history-route.test.ts`۔
+
 ### Session affinity (#7274)
 
 **دائرۂ کار:** ایک client session (`X-Session-Id` / `x-codex-session-id` / `x-omniroute-session` header) کو کسی ایک connection کے ساتھ pin کرنا، **کسی بھی** provider کے لیے۔

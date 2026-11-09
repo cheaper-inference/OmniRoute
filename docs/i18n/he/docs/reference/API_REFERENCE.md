@@ -984,12 +984,12 @@ codex exec "Responda apenas: PONG"
 
 ## דיווח על מכסות ובעיות
 
-| שיטה | נתיב                | תיאור                                                                       |
-| ---- | ------------------- | --------------------------------------------------------------------------- |
-| GET  | `/v1/quotas/check`  | אימות מוקדם של מכסה עבור `provider` + `accountId` לפני הנפקת מפתח רשום      |
-| POST | `/v1/issues/report` | דיווח ל-GitHub על כשל בהנפקת מכסה/מפתח (דורש `GITHUB_ISSUES_REPO` + אסימון) |
+| שִׁיטָה | נָתִיב              | תֵאוּר                                                                       |
+| ------- | ------------------- | ---------------------------------------------------------------------------- |
+| GET     | `/v1/quotas/check`  | אמת מראש מכסה עבור `provider` + `accountId` לפני הנפקת מפתח רשום             |
+| POST    | `/v1/issues/report` | דווח על כשל בהנפקת quota/key ל- GitHub (דורש אסימון `GITHUB_ISSUES_REPO` + ) |
 
-**אימות:** מפתח API מסוג Bearer (`isAuthenticated`).
+**אישור:** `/v1/quotas/check` לוקח מפתח API נושאת (`isAuthenticated`). `/v1/issues/report` הוא לניהול בלבד (`requireManagementAuth`), כמו `/api/v1/registered-keys`: הפעלת לוח מחוונים, אסימון CLI המקומי, או מפתח API עם היקף `manage`/`admin` ; מפתחות API להסקת מסקנות בלבד מקבלים `403`.
 
 ### שחזור סשן מכסה (בהצטרפות מרצון)
 
@@ -1839,17 +1839,21 @@ DELETE /api/usage/token-limits?id=tl-abc
 
 ## מפתחות רשומים (ניהול אוטומטי)
 
-משמש את תת־המערכת לניהול מפתחות אוטומטי כדי להנפיק ולבצע סבב של מפתחות API מול ספק/חשבון גיבוי, עם מכסות יומיות/שעתיות.
+משמש את תת-המערכת לניהול מפתחות אוטומטיים להנפקה ולסיבוב מפתחות API כנגד provider/account גיבוי, עם מכסות daily/hourly.
 
-| Method | Path                                  | Description                                                                                                                                                                                    |
-| ------ | ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/api/v1/registered-keys`             | הצגת רשימת המפתחות הרשומים (קידומת מוסווית בלבד)                                                                                                                                               |
-| POST   | `/api/v1/registered-keys`             | הנפקת מפתח רשום חדש — גוף: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. החזרת המפתח הגולמי **פעם אחת בלבד**. החזרה של `429` במקרה של דחיית מכסה. |
-| GET    | `/api/v1/registered-keys/[id]`        | אחזור המטא־נתונים של מפתח רשום (ללא חומר גולמי)                                                                                                                                                |
-| DELETE | `/api/v1/registered-keys/[id]`        | ביטול מפתח רשום                                                                                                                                                                                |
-| POST   | `/api/v1/registered-keys/[id]/revoke` | נקודת קצה מפורשת לביטול (אותה השפעה כמו DELETE)                                                                                                                                                |
+| שִׁיטָה | נָתִיב                                | תֵאוּר                                                                                                                                                                              |
+| ------- | ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET     | `/api/v1/registered-keys`             | רשימת מפתחות רשומים (רק קידומת מסיכה)                                                                                                                                               |
+| POST    | `/api/v1/registered-keys`             | הנפק גוף מפתח רשום חדש — : `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. מחזיר את המפתח הגולמי **פַּעַם** . מחזיר `429` על סירוב מכסה. |
+| GET     | `/api/v1/registered-keys/[id]`        | אחזר מטא נתונים של מפתח רשום (ללא חומר גלם)                                                                                                                                         |
+| DELETE  | `/api/v1/registered-keys/[id]`        | בטל מפתח רשום                                                                                                                                                                       |
+| POST    | `/api/v1/registered-keys/[id]/revoke` | נקודת קצה של ביטול מפורש (אותה השפעה כמו DELETE)                                                                                                                                    |
+| GET     | `/api/v1/providers/[provider]/limits` | קרא את מכסי ההנפקה של הספק                                                                                                                                                          |
+| PUT     | `/api/v1/providers/[provider]/limits` | הגדר את מכסי ההנפקה של הספק גוף — : `{maxActiveKeys?, dailyIssueLimit?, hourlyIssueLimit?}`                                                                                         |
+| GET     | `/api/v1/accounts/[id]/limits`        | קרא את תקרות ההנפקה של החשבון                                                                                                                                                       |
+| PUT     | `/api/v1/accounts/[id]/limits`        | הגדר את מכסי ההנפקה של החשבון — באותו גוף כמו מסלול הספק                                                                                                                            |
 
-**אימות:** סשן/מפתח API לניהול (`requireManagementAuth`) — אותה הגנה כמו `/api/keys`: סשן של לוח בקרה, האסימון המקומי של CLI, או מפתח API עם תחום `manage`/`admin`; מפתחות API המיועדים להסיק בלבד מקבלים `403`. ראו גם את `/v1/quotas/check` ואת `/v1/issues/report`.
+**אישור:** מקש session/API ניהול (`requireManagementAuth`) — אותו שמירה כמו `/api/keys`: הפעלת לוח מחוונים, אסימון CLI המקומי, או מפתח API עם היקף `manage`/`admin` ; מפתחות API להסקת מסקנות בלבד מקבלים `403`. ראה גם `/v1/quotas/check` ו- `/v1/issues/report`.
 
 ---
 

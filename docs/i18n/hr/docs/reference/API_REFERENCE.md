@@ -992,14 +992,14 @@ CLI nadograđuje `base_url + /responses` na WebSocket, a OmniRoute ga tunelira d
 
 ---
 
-## Izvještavanje o kvotama i problemima
+## Kvote i prijava problema
 
-| Metoda | Putanja             | Opis                                                                                          |
-| ------ | ------------------- | --------------------------------------------------------------------------------------------- |
-| GET    | `/v1/quotas/check`  | Prethodna provjera kvote za `provider` + `accountId` prije izdavanja registriranog ključa     |
-| POST   | `/v1/issues/report` | Prijava neuspješnog izdavanja kvote/ključa na GitHub (zahtijeva `GITHUB_ISSUES_REPO` + token) |
+| metoda | Put                 | Opis                                                                                       |
+| ------ | ------------------- | ------------------------------------------------------------------------------------------ |
+| GET    | `/v1/quotas/check`  | Prethodno potvrdite kvotu za `provider` + `accountId` prije izdavanja registriranog ključa |
+| POST   | `/v1/issues/report` | Prijavite neuspjeh izdavanja quota/key GitHub (potreban je `GITHUB_ISSUES_REPO` + token)   |
 
-**Autentikacija:** Bearer API ključ (`isAuthenticated`).
+**Autent:** `/v1/quotas/check` uzima API ključ nositelja (`isAuthenticated`). `/v1/issues/report` je samo za upravljanje (`requireManagementAuth`), kao `/api/v1/registered-keys`: sesija nadzorne ploče, lokalni CLI token ili API ključ sa `manage`/`admin` opsegom; API ključevi samo za zaključivanje dobivaju `403`.
 
 ### Oporavak sesije kvote (uz uključivanje)
 
@@ -1812,17 +1812,21 @@ Izlazne pretplate na webhookove za događaje OmniRoutea (dovršetak zahtjeva, is
 
 ## Registrirani ključevi (automatsko upravljanje)
 
-Koristi ga podsustav za automatsko upravljanje ključevima za izdavanje i rotaciju API ključeva prema pozadinskom pružatelju/računu, uz dnevne/satne kvote.
+Koristi ga podsustav za automatsko upravljanje ključevima za izdavanje i rotiranje API ključeva u odnosu na prateći provider/account, sa daily/hourly kvotama.
 
-| Metoda | Putanja                               | Opis                                                                                                                                                                                                                     |
-| ------ | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| GET    | `/api/v1/registered-keys`             | Popis registriranih ključeva (samo maskirani prefiks)                                                                                                                                                                    |
-| POST   | `/api/v1/registered-keys`             | Izdavanje novog registriranog ključa — tijelo: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Vraća neobrađeni ključ **jednom**. Vraća `429` u slučaju odbijanja zbog kvote. |
-| GET    | `/api/v1/registered-keys/[id]`        | Dohvaćanje metapodataka registriranog ključa (bez neobrađenog materijala)                                                                                                                                                |
-| DELETE | `/api/v1/registered-keys/[id]`        | Opoziv registriranog ključa                                                                                                                                                                                              |
-| POST   | `/api/v1/registered-keys/[id]/revoke` | Eksplicitna krajnja točka za opoziv (isti učinak kao DELETE)                                                                                                                                                             |
+| metoda | Put                                   | Opis                                                                                                                                                                                                      |
+| ------ | ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/v1/registered-keys`             | Popis registriranih ključeva (samo maskirani prefiks)                                                                                                                                                     |
+| POST   | `/api/v1/registered-keys`             | Izdajte novi registrirani ključ — tijelo: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Vraća neobrađeni ključ **jednom** . Vraća `429` pri odbijanju kvote. |
+| GET    | `/api/v1/registered-keys/[id]`        | Dohvaćanje metapodataka registriranog ključa (bez sirovog materijala)                                                                                                                                     |
+| DELETE | `/api/v1/registered-keys/[id]`        | Opozovi registrirani ključ                                                                                                                                                                                |
+| POST   | `/api/v1/registered-keys/[id]/revoke` | Krajnja točka eksplicitnog opoziva (isti učinak kao DELETE)                                                                                                                                               |
+| GET    | `/api/v1/providers/[provider]/limits` | Pročitajte ograničenja izdavanja davatelja                                                                                                                                                                |
+| PUT    | `/api/v1/providers/[provider]/limits` | Postavite davateljeva ograničenja izdavanja — tijelo: `{maxActiveKeys?, dailyIssueLimit?, hourlyIssueLimit?}`                                                                                             |
+| GET    | `/api/v1/accounts/[id]/limits`        | Pročitajte ograničenja izdavanja računa                                                                                                                                                                   |
+| PUT    | `/api/v1/accounts/[id]/limits`        | Postavite ograničenje izdavanja računa — isto tijelo kao ruta pružatelja                                                                                                                                  |
 
-**Autentikacija:** upravljačka sesija/API ključ (`requireManagementAuth`) — ista zaštita kao za `/api/keys`: sesija nadzorne ploče, lokalni CLI token ili API ključ s opsegom `manage`/`admin`; API ključevi samo za izvođenje zaključivanja dobivaju `403`. Pogledajte i `/v1/quotas/check` i `/v1/issues/report`.
+**Autent:** upravljanje session/API ključem (`requireManagementAuth`) — isti čuvar kao `/api/keys`: sesija nadzorne ploče, lokalni CLI token ili API ključ sa `manage`/`admin` opsegom; ključevi API samo za zaključivanje dobivaju `403`. Vidi također `/v1/quotas/check` i `/v1/issues/report`.
 
 ---
 

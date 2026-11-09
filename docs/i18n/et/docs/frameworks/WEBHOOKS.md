@@ -4,73 +4,66 @@
 
 ---
 
-> **Tõeallikas:** `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`, `src/app/api/webhooks/`
-> **Viimati uuendatud:** 2026-06-28 — v3.8.40
+> **Tõe allikas:** `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`, `src/app/api/webhooks/`**Viimati värskendatud:** 28.06.2026 — v3.8.40
 
-OmniRoute saab platvormisündmuste korral käivitada HTTP-veebihaake. Kasutage neid lõimimiseks
-Slacki, PagerDuty, Datadogi, sisemiste teavitusteenuste või mis tahes HTTP-vastuvõtjaga.
+OmniRoute saab käivitada HTTP veebihaake platvormi sündmustel. Kasutage neid Slack, PagerDuty, Datadogi, sisemiste hoiatusteenuste või mis tahes HTTP vastuvõtjaga integreerimiseks.
 
-Dispetšer allkirjastab iga edastuse HMAC-SHA256 abil, proovib ajutiste
-tõrgete korral uuesti, jälgib iga veebihaagi edastuste töökindlust ja keelab automaatselt lõpp-punktid,
-mille tõrked jätkuvad.
+Dispetšer allkirjastab iga tarne HMAC-SHA256, proovib mööduvaid tõrkeid uuesti, jälgib kohaletoimetamise seisukorda veebihaagi kaupa ja keelab automaatselt lõpp-punktid, mis pidevalt ebaõnnestuvad.
 
 ## Toetatud sündmused
 
-Tüüp `WebhookEvent` (`src/lib/webhooks/eventDescriptions.ts`, mida kasutab `src/lib/webhookDispatcher.ts`) modelleerib praegu täpselt nelja sündmust:
+`WebhookEvent` tüüp (`src/lib/webhooks/eventDescriptions.ts`, tarbib `src/lib/webhookDispatcher.ts`) modelleerib praegu seitset sündmust:
 
-| Sündmus             | Käivitub, kui                                               |
-| ------------------- | ----------------------------------------------------------- |
-| `request.completed` | Proksitud päring lõpetatakse edukalt                        |
-| `request.failed`    | Proksitud päring nurjub pärast kõiki korduskatseid/varuteid |
-| `quota.exceeded`    | API-võti ületab eelarve-/kvoodipiiri                        |
-| `test.ping`         | Testimise lõpp-punkti kasutatav sünteetiline sündmus        |
+| Sündmus                   | Põleb, kui                                                                                                        |
+| ------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `request.completed`       | Puhverserveri taotlus on edukalt lõpule viidud                                                                    |
+| `request.failed`          | Puhverserveri taotlus nurjub pärast kogu retries/fallback                                                         |
+| `quota.exceeded`          | API võti ületab budget/quota läve                                                                                 |
+| `proxy.set_aside`         | Puhverserveri koguli liige jäetakse pärast korduvaid keeldumisi kõrvale (ainult üleminek)                         |
+| `proxy.pool.exhausted`    | Iga puhverserveri kogumi liige on kõrvale jäetud                                                                  |
+| `provider.reset_redeemed` | Panga lähtestamise automaatne rakendamine lunastas lähtestamiskrediidi või Claude iganädalase seansi lähtestamise |
+| `test.ping`               | Testi lõpp-punktis kasutatav sünteetiline sündmus                                                                 |
 
-Tellimused aktsepteerivad literaali `"*"`, et võtta vastu kõik sündmused. Tundmatuid sündmuste
-nimesid väljal `events` eiratakse dispetšimise ajal.
+Tellimused aktsepteerivad iga sündmuse vastuvõtmiseks sõnasõnalist `"*"`. Tundmatuid sündmuste nimesid `events` s eiratakse lähetamise ajal.
 
-> Märkus: dispetšeri API on ühendatud, kuid mõne muu sündmuse kui
-> `test.ping` tootmiskeskkonna väljakutsekohad on endiselt lisamisel. Kontrollige käsuga `grep dispatchEvent`,
-> millised teed teie väljalaskes praegu dispetšeri välja kutsuvad.
+> Märkus. Dispetšer API on juhtmega, kuid mõnede mitte-`test.ping` sündmuste tootmiskõnede saidid maanduvad endiselt. Kontrollige `grep dispatchEvent` et näha, millised teed teie versioonis praegu dispetšerit kutsuvad.
 
 ## Arhitektuur
 
 ```
-Väljakutsuja (töötleja, teenus, seire)
+Caller (handler, service, monitor)
   dispatchEvent(event, data)            [src/lib/webhookDispatcher.ts]
     -> getEnabledWebhooks()             [src/lib/db/webhooks.ts]
-    -> filtreeri webhook.events järgi
-    -> iga vaste jaoks (paralleelselt):
+    -> filter by webhook.events
+    -> for each match (in parallel):
        deliverWebhook(url, payload, secret)
-         koosta last { event, timestamp, data }
-         allkirjasta sisu HMAC-SHA256 abil (kui secret on olemas)
-         POST 10 s ajalõpuga
-         proovi 5xx / võrgutõrke korral kuni 3 korda uuesti
+         build payload { event, timestamp, data }
+         sign body with HMAC-SHA256 (if secret present)
+         POST with 10s timeout
+         retry up to 3 times on 5xx / network error
        recordWebhookDelivery(id, status, success)
     -> disableWebhooksWithHighFailures(10)
 ```
 
-Dispetšimine toimub väljakutsuja jaoks käivita-ja-unusta-põhimõttel: `Promise.allSettled` neelab
-iga veebihaagi vead, et üks vigane vastuvõtja ei saaks teisi blokeerida.
+Väljasaatmine on helistaja jaoks tuli ja unusta: `Promise.allSettled` neelab veebihaagi vead, nii et üks halb vastuvõtja ei saa teisi blokeerida.
 
-## HMAC-allkirjastamine
+## HMAC allkirjastamine
 
-Kui veebihaagil on `secret`, allkirjastab OmniRoute JSON-sisu ja saadab:
+Kui veebihaagil on `secret`, allkirjastab OmniRoute JSON keha ja saadab:
 
 ```
 Content-Type: application/json
 User-Agent: OmniRoute-Webhook/1.0
-X-Webhook-Event: <sündmus>
+X-Webhook-Event: <event>
 X-Webhook-Timestamp: <ISO-8601>
-X-Webhook-Signature: sha256=<kuueteistkümnendkujul HMAC-SHA256(secret, sisu)>
+X-Webhook-Signature: sha256=<hex HMAC-SHA256(secret, body)>
 ```
 
-> Päisenimed kasutavad prefiksit `X-Webhook-*` (mitte `X-OmniRoute-*`). Allkirja
-> väärtus on `sha256=<kuueteistkümnendkujul väärtus>` — kontrollige kogu prefiksit.
+> Päise nimed kasutavad `X-Webhook-*` eesliidet (mitte `X-OmniRoute-*`). Allkirja väärtus on `sha256=<hex>` — kontrollige täielikku eesliidet.
 
-Kui `createWebhook` kutsutakse välja ilma saladuseta, genereerib andmebaasimoodul selle
-(`whsec_<48 kuueteistkümnendmärki>`), mistõttu allkirjastatakse vaikimisi kõik veebihaagid.
+Kui `createWebhook` kutsutakse välja ilma saladuseta, genereerib DB moodul selle (`whsec_<48 hex>`), nii et kõik veebihaagid allkirjastatakse vaikimisi.
 
-### Kontrollimine vastuvõtjas
+### Vastuvõtja kontrollimine
 
 ```typescript
 import { createHmac, timingSafeEqual } from "node:crypto";
@@ -83,64 +76,57 @@ function verify(rawBody: string, signature: string, secret: string) {
 }
 ```
 
-Kontrollige alati **töötlemata** päringusisu enne JSON-i sõelumist.
+Kontrollige alati vastu **toores** päringu keha enne mis tahes JSON sõelumist.
 
-## Korduskatsete ja tõrgete reeglistik
+## Uuesti proovimise ja ebaõnnestumise eeskirjad
 
 `deliverWebhook(url, payload, secret, maxRetries = 3)`:
 
-- Iga katse ajalõpp on 10 sekundit (`AbortController`).
-- HTTP 2xx loetakse õnnestumiseks.
-- HTTP 3xx/4xx loetakse lõplikuks olekuks, mille korral korduskatset ei tehta — tarne registreeritakse väärtusega `success = res.ok`.
-- HTTP 5xx vastuste ja võrgutõrgete korral tehakse eksponentsiaalse viivitusega korduskatsed:
-  `2^attempt * 1000 ms` (1 s, 2 s, 4 s).
-- Pärast `maxRetries` korduskatset registreeritakse tarne nurjununa.
-- Iga tarne uuendab välju `last_triggered_at`, `last_status` ning kas lähtestab või suurendab välja `failure_count`.
-- Jaotur kutsub pärast iga levitamist välja `disableWebhooksWithHighFailures(10)`, seega keelatakse automaatselt kõik webhook'id, mille `failure_count >= 10`.
+- 10-sekundiline ajalõpp katse kohta (`AbortController`).
+- HTTP 2xx loetakse õnnestunuks.
+- HTTP 3xx/4xx loetakse lõplikuks olekuks — mida ei saa `success = res.ok` proovida.
+- HTTP 5xx ja võrguvigu proovitakse uuesti eksponentsiaalse tagasilöögiga: `2^attempt * 1000 ms` (1s, 2s, 4s).
+- Pärast `maxRetries` registreeritakse tarne ebaõnnestunuks.
+- Iga tarne värskendab `last_triggered_at`, `last_status` ja kas lähtestab või suurendab `failure_count`.
+- Dispetšer helistab `disableWebhooksWithHighFailures(10)` pärast iga väljapuhumist, nii et kõik `failure_count >= 10` -ga veebikonks on automaatselt keelatud.
 
 ## Andmebaas
 
 Tabel `webhooks` (migratsioon `011_webhooks.sql`):
 
-| Veerg               | Tüüp    | Märkused                                                        |
-| ------------------- | ------- | --------------------------------------------------------------- |
-| `id`                | TEXT PK | UUID                                                            |
-| `url`               | TEXT    | Sihtkoha URL                                                    |
-| `events`            | TEXT    | JSON-massiiv; vaikeväärtus `["*"]`                              |
-| `secret`            | TEXT    | HMAC-saladus (genereeritakse automaatselt, kui seda pole antud) |
-| `enabled`           | INT     | 0/1; vaikeväärtus on 1                                          |
-| `description`       | TEXT    | Valikuline inimloetav silt                                      |
-| `created_at`        | TEXT    | `datetime('now')`                                               |
-| `last_triggered_at` | TEXT    | Uuendatakse iga tarnekatse korral                               |
-| `last_status`       | INT     | Viimase katse HTTP-olek (0 = võrk)                              |
-| `failure_count`     | INT     | Õnnestumisel lähtestatakse 0-le, tõrke korral +1                |
+| Veerg               | Tüüp    | Märkmed                                                       |
+| ------------------- | ------- | ------------------------------------------------------------- |
+| `id`                | TEXT PK | UUID                                                          |
+| `url`               | TEXT    | Sihtkoht URL                                                  |
+| `events`            | TEXT    | JSON massiiv; vaikimisi `["*"]`                               |
+| `secret`            | TEXT    | HMAC saladus (genereeritud automaatselt, kui seda pole antud) |
+| `enabled`           | INT     | 0/1; vaikimisi 1                                              |
+| `description`       | TEXT    | Valikuline inimese silt                                       |
+| `created_at`        | TEXT    | `datetime('now')`                                             |
+| `last_triggered_at` | TEXT    | Uuendatakse igal tarnekatsel                                  |
+| `last_status`       | INT     | Viimase katse HTTP olek (0 = võrk)                            |
+| `failure_count`     | INT     | Lähtestab 0 õnnestumise korral, + 1 ebaõnnestumise korral     |
 
-Tarnete ajalugu säilitatakse spetsiaalses tabelis `webhook_deliveries`
-(migratsioon `069_webhook_deliveries.sql`, kuhu iga katse korral kirjutatakse
-funktsiooniga `src/lib/db/webhookDeliveries.ts::insertDelivery`) lisaks rea
-`webhooks` koondloenduritele. Liigi metaandmed (Slack / Discord /
-Telegram / kohandatud lasti teisendajad) lisati migratsiooniga `070_webhooks_kind_metadata.sql`.
+Tarneajalugu säilitatakse lisaks `webhooks` rea koondloenduritele spetsiaalses `webhook_deliveries` tabelis (migratsioon `069_webhook_deliveries.sql`, kirjutatakse `src/lib/db/webhookDeliveries.ts::insertDelivery` kaudu igal katsel). Kind metaandmed (Slack / Discord / Telegram / kohandatud kasuliku koormuse trafod) lisas `070_webhooks_kind_metadata.sql`.
 
 ## REST API
 
-Kõik lõpp-punktid nõuavad haldusautentimist (`requireManagementAuth`).
+Kõik lõpp-punktid nõuavad haldamise autentimist (`requireManagementAuth`).
 
-| Lõpp-punkt                      | Meetod | Kirjeldus                                 |
+| Lõpp-punkt                      | meetod | Kirjeldus                                 |
 | ------------------------------- | ------ | ----------------------------------------- |
-| `/api/webhooks`                 | GET    | Webhook'ide loend (saladused maskitud)    |
-| `/api/webhooks`                 | POST   | Webhook'i loomine                         |
-| `/api/webhooks/[id]`            | GET    | Webhook'i üksikasjad (täielik saladus)    |
-| `/api/webhooks/[id]`            | PUT    | Väljade uuendamine                        |
-| `/api/webhooks/[id]`            | DELETE | Eemaldamine                               |
-| `/api/webhooks/[id]/test`       | POST   | `test.ping` käivitamine (korduskatseteta) |
-| `/api/webhooks/[id]/deliveries` | GET    | Ühe webhook'i hiljutised tarnekatsed      |
-| `/api/webhooks/validate-url`    | POST   | URL-i eelkontroll (SSRF-i kaitse)         |
+| `/api/webhooks`                 | GET    | Veebihaagide loend (saladused varjatud)   |
+| `/api/webhooks`                 | POST   | Loo veebihaak                             |
+| `/api/webhooks/[id]`            | GET    | Veebihaagi üksikasjad (täielik saladus)   |
+| `/api/webhooks/[id]`            | PUT    | Värskenda väljad                          |
+| `/api/webhooks/[id]`            | DELETE | Eemalda                                   |
+| `/api/webhooks/[id]/test`       | POST   | Käivitage `test.ping` (ei proovi uuesti)  |
+| `/api/webhooks/[id]/deliveries` | GET    | Ühe veebihaagi hiljutised edastamiskatsed |
+| `/api/webhooks/validate-url`    | POST   | Lennueelne URL valideerimine (SSRF valve) |
 
-`GET /api/webhooks` maskeerib saladuse kujule `<esimesed 10 märki>...`, et vältida
-selle lekkimist loendilehtedel. Kasutage `[id]` GET-päringut siis, kui vajate
-tegelikult saladust.
+`GET /api/webhooks` varjab `<first 10 chars>...` saladust, et vältida loendilehtedele lekkimist. Kasutage `[id]` GET, kui vajate saladust.
 
-### Webhook'i loomine
+### Loo veebihaak
 
 ```bash
 curl -X POST http://localhost:20128/api/webhooks \
@@ -154,33 +140,29 @@ curl -X POST http://localhost:20128/api/webhooks \
   }'
 ```
 
-Kui `secret` puudub, genereerib server saladuse kujul `whsec_<hex>` ja tagastab
-selle vastuses.
+Kui `secret` jäetakse välja, genereerib server `whsec_<hex>` saladuse ja tagastab selle vastuses.
 
-### Webhook'i testimine
+### Testige veebihaagi
 
 ```bash
 curl -X POST http://localhost:20128/api/webhooks/<id>/test \
   -H "Cookie: auth_token=..."
 ```
 
-Tagastab `{ delivered, status, error }`. Korduskatseid ei tehta — see on kasulik,
-et kiiresti kontrollida, kas vastuvõtja aktsepteerib lasti ja allkirja.
+Tagastab `{ delivered, status, error }`. Korduskatseid ei üritata. — on kasulik kiireks kinnitamiseks, et vastuvõtja aktsepteerib kasulikku lasti ja allkirja.
 
-## Juhtpaneel
+## Armatuurlaud
 
-Juhtpaneeli leht aadressil `/dashboard/webhooks` (vt
-`src/app/(dashboard)/dashboard/webhooks/page.tsx`) võimaldab:
+`/dashboard/webhooks` armatuurlaua leht (vt `src/app/(dashboard)/dashboard/webhooks/page.tsx`) pakub järgmist:
 
-- Luua ja muuta webhook'e sündmuste valijaga
-- Kuvada olekuindikaatorit (aktiivne / mitteaktiivne / veaga), mis põhineb väljadel `enabled`,
-  `failure_count` ja `last_status`
-- Saata testpäringu ühe klõpsuga
-- Käsitsi lubada või keelata
+- Create/edit veebihaagid sündmuste valijaga
+- Olekuindikaator (aktiivne / passiivne / vigane) põhineb `enabled`, `failure_count` ja `last_status`
+- Testedastus ühe klõpsuga
+- Manuaalne enable/disable lüliti
 
-## Päringu sisu näited
+## Kasuliku koormuse näited
 
-### request.completed
+### taotlus.lõpetatud
 
 ```json
 {
@@ -212,29 +194,19 @@ Juhtpaneeli leht aadressil `/dashboard/webhooks` (vt
 }
 ```
 
-Muude kui `test.ping` sündmuste väljade struktuuri määravad neid väljastavad
-väljakutsumiskohad; käsitlege objekti `data` edasiühilduvana (lisage välju, ärge eeldage
-nende puudumist).
+Mitte-`test.ping` sündmuste väljakujud on määratletud neid väljastavate kõnesaitide järgi; käsitleda `data` objekti edasiühilduvana (lisage väljad, ärge sõltuge puudumisest).
 
 ## Parimad tavad
 
-- **Kontrollige iga edastuse signatuuri** töötlemata sisu põhjal — see takistab
-  võltsitud POST-päringuid kõigilt, kes teie webhook'i URL-i ära arvavad.
-- **Vastake 2xx-koodiga umbes 5 sekundi jooksul** — dispetšer katkestab päringu 10 sekundi pärast. Aeglased
-  vastuvõtjad kulutavad korduskatseid ja suurendavad `failure_count` väärtust.
-- **Muutke töötlejad idempotentseks** — korduskatsed ja vähemalt ühe edastuse semantika
-  tähendavad, et duplikaadid on võimalikud.
-- **Tellige minimaalselt** — loetlege ainult sündmused, mida tegelikult kasutate; `"*"`
-  suurendab teie kontrolli alt väljas olevate vastuvõtjate kulusid.
-- **Jälgige välja `failure_count`** — lõpp-punktid keelatakse automaatselt pärast 10 järjestikust
-  tõrget; pärast vastuvõtja parandamist lähtestage see, kutsudes välja `PUT /api/webhooks/[id]`
-  väärtusega `enabled: true`.
-- **Vahetage saladusi regulaarselt** — saatke `PUT`-päring uue `secret` väärtusega, juurutage uus väärtus
-  vastuvõtjasse ja kontrollige seda testimise lõpp-punkti kaudu.
+- **Kontrollige allkirja igal tarnimisel** vastu töötlemata korpust — takistab võltsitud POSTs kõigilt, kes arvavad ära teie veebihaagi URL.
+- **Vastake 2xx ~ 5 sekundi jooksul** Dispetšer — aegub 10 sekundi pärast. Aeglased vastuvõtjad söövad korduskatseid ja suurendavad `failure_count`.
+- **Muutke käitlejad idempotentseks** — korduskatsed ja vähemalt korra edastamise semantika tähendavad, et duplikaadid on võimalikud.
+- **Telli minimaalselt** — loetleb ainult sündmused, mida tegelikult tarbite; `"*"` lisab kulusid vastuvõtjatele, mida te ei kontrolli.
+- **Vaadake `failure_count`** — lõpp-punktid keelatakse automaatselt 10 järjestikuse tõrke korral; lähtestage, helistades pärast vastuvõtja parandamist `PUT /api/webhooks/[id]` koos `enabled: true`.
+- **Pöörake perioodiliselt saladusi** — `PUT` uus `secret`, juurutage uus väärtus vastuvõtjasse ja kinnitage testi lõpp-punkti kaudu.
 
-## Vaadake ka
+## Vaata ka
 
-- [API_REFERENCE.md](../reference/API_REFERENCE.md) — haldus-API täielik liides
-- [RESILIENCE_GUIDE.md](../architecture/RESILIENCE_GUIDE.md) — teenusepakkuja tõrgete taga olevad circuit breaker'i / cooldown'i
-  semantikad, mis avalduvad sündmuse `request.failed` kaudu
-- Lähtekood: `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`
+- [API_REFERENCE.md](../reference/API_REFERENCE.md) — täishaldus API pind
+- [RESILIENCE_GUIDE.md](../architecture/RESILIENCE_GUIDE.md) — kaitselüliti/jahutussemantika pakkuja rikete taga, mis ilmnesid `request.failed` kaudu
+- Allikas: `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`

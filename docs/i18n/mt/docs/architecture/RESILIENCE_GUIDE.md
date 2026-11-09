@@ -210,6 +210,45 @@ Dawn jibqgħu sakemm jinbidlu l-kredenzjali jew operatur jirrisettjahom. Tiktibx
 Gwardji ta’ regressjoni: `tests/unit/claude-low-priority-mode.test.ts`,
 `tests/unit/claude-limit-reset.test.ts`, `tests/unit/claude-low-priority-executor.test.ts`.
 
+### Applika awtomatikament resets banked
+
+**Skop:** Konnessjonijiet ta' abbonament Codex u Claude (OAuth).**Opt-in** : l-issettjar `bankedResetAutoApply` huwa mitfi u fil-modalità `dry-run` awtomatikament (Settings → AI → Awto-apply banked resets).
+
+**Għan:** jonfqu resets bankarji waħedhom meta kont jolqot ħajt tal-użu, minflok ma jistennew li operatur jagħfas "Ifdi" fuq il-paġna Limiti tal-Fornitur.
+
+| Tip ta' kreditu (`creditTypes`) | Dak li hu mifdi                                                 | Fejn tmur                                                           |
+| ------------------------------- | --------------------------------------------------------------- | ------------------------------------------------------------------- |
+| `codexCredits`                  | Codex reset krediti                                             | xogħol fl-isfond, kull 60 s                                         |
+| `claudeCredits`                 | Għotjiet bankarji Claude (krediti `GRANT` )                     | xogħol fl-isfond, kull 60 s                                         |
+| `claudeSessionReset`            | Reset tal-limitu tas-sessjoni Claude ta' kull ġimgħa (hawn fuq) | triq talba, permezz tal-istess politika bħall-toggle għal kull kont |
+
+**Implimentazzjoni:**
+
+- Deċiżjoni pura (regola waħda stabbilita għaż-żewġ mogħdijiet): `src/lib/usage/bankedResetPolicy.ts::decideBankedReset()`
+- Xogħol fl-isfond: `src/lib/services/bankedResetAutoApply.ts` (beda `src/instrumentation-node.ts`)
+- Xatba tal-mogħdija tat-talba Claude : `src/lib/usage/claudeSessionResetPolicy.ts`, irreġistrat permezz ta ' `setClaudeLimitResetPolicy()` `open-sse/services/claudeLimitReset.ts`
+- Storja, brieret u webhook: `src/lib/usage/bankedResetAudit.ts`
+- Storja API: `GET /api/settings/banked-reset-auto/history?limit=50` (management awth)
+
+**Ordni ta' deċiżjoni** (l-ewwel regola li tonqos hija r-raġuni rreġistrata):
+
+1. Karatteristika mitfija, tip ta' kreditu mitfi, jew kont barra mill-ambitu (`accountScope` `all` / `selected` flimkien mal-mappa `connections` għal kull kont).
+2. Barra l-iskeda UTC fakultattiva (`startHourUtc` > `endHourUtc` jaqsam nofsillejl).
+3. Limiti matul l-aħħar 24 siegħa: `maxPerAccountPerDay` (1), `maxPerDay` (3), u `minSpacingMinutes` (30) bejn kwalunkwe żewġ fidwa.
+4. Trigger: tieqa `session` jew `weekly` b'ħitan (aqra minn `getQuotaWindowStatus().reachedThreshold`, mhux `isAccountQuotaExhausted()`, li tirrapporta biss kont ma' kull tieqa minfuqa), jew kreditu li jiskadi fi ħdan `expiringCreditHours` (24) fuq kont li jkun uża mill-inqas `expiringCreditMinUsedPercent` (50).
+5. Gwardja ta 'reset naturali: aqbeż meta t-tieqa ta' 5 sigħat b'ħitan reset fi ħdan `sessionResetGuardMinutes` (90), jew it-tieqa ta 'kull ġimgħa b'ħitan fi ħdan `weeklyResetGuardHours` (12).
+6. Art ta' kull ġimgħa: aqbeż reset ta' 5 sigħat meta l-bqija ta' kull ġimgħa tkun taħt iż `weeklyFloorPercent` (10).
+7. Modalità `last-resort` : aqbeż filwaqt li kont ieħor fl-ambitu tal-istess fornitur fadal mill-inqas `poolHeadroomPercent` (10) fiż-żewġ twieqi. Jiskadi-kreditu jqajjem bypass dan.
+8. `dry-run` tirreġistra ringiela u ma tifdi xejn; `last-resort` u `eager` jifdu.
+
+Id-dejta tal-kwota nieqsa qatt ma tagħti lok għal fidwa: ħin ta' reset mhux magħruf jew skips ta' użu ta' kull ġimgħa.
+
+**Reset tas-sessjoni Claude :** bil-karatteristika mitfija, jew `claudeSessionReset` mitfija, il-toggle `autoLimitReset` għal kull kont jiddeċiedi eżattament bħal qabel. Bit-tnejn mixgħula, il-karatteristika tissostitwixxi l-toggles għal kull kont: kont fl-ambitu jista 'jitlob biss meta l-politika tippermetti dan, u fil-mod `dry-run` ma ssir l-ebda talba.
+
+**Sigurtà:** l-impjieg jifdi mhux aktar minn kreditu wieħed għal kull qurdien, jiddeċiedi qabel ma jelenka l-krediti (kont maqbuż qatt mhu elenkat), juża ċ-ċwievet ta 'idempotenza `auto-reset:<connectionId>:<yyyy-mm-dd>:<n>`, u jsostni kont off għal siegħa wara elenkar jew fidwa falluti. Kull deċiżjoni ta 'fidwa, falliment u dry-run tinkiteb lil `audit_log` (`action: "bankedReset.redeem"`, l-ebda tokens jew ids ta' kreditu); il-limiti huma magħduda minn dawk ir-ringieli, sabiex jibqgħu ħajjin mill-ġdid. Fidji b'suċċess jisparaw ukoll il-webhook `provider.reset_redeemed`.
+
+Gwardji tar-rigressjoni: `tests/unit/banked-reset-policy.test.ts`, `tests/unit/banked-reset-auto-apply.test.ts`, `tests/unit/claude-limit-reset-policy-gate.test.ts`, `tests/unit/banked-reset-history-route.test.ts`.
+
 ### Affinità tas-sessjoni (#7274)
 
 **Ambitu:** sessjoni waħda tal-klijent (`X-Session-Id` / `x-codex-session-id` / `x-omniroute-session` header) marbuta ma’ konnessjoni waħda, għal **kwalunkwe** provider.

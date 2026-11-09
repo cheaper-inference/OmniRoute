@@ -207,6 +207,45 @@ Estos estados persisten hasta que cambien las credenciales o un operador los res
 Protecciones contra regresiones: `tests/unit/claude-low-priority-mode.test.ts`,
 `tests/unit/claude-limit-reset.test.ts`, `tests/unit/claude-low-priority-executor.test.ts`.
 
+### Aplicar automáticamente restablecimientos bancarios
+
+**Alcance:** Conexiones de suscripción Codex y Claude (OAuth).**Inscribirse** : la configuración `bankedResetAutoApply` está desactivada y en modo `dry-run` de forma predeterminada (Configuración → AI → Auto-aplicar restablecimientos bancarios).
+
+**Objetivo:** gastar los reinicios bancarios por su cuenta cuando una cuenta llega a un límite de uso, en lugar de esperar a que un operador presione "Canjear" en la página de Límites del proveedor.
+
+| Tipo de crédito (`creditTypes`) | lo que se redime                                              | donde corre                                                                    |
+| ------------------------------- | ------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| `codexCredits`                  | Créditos de reinicio Codex                                    | trabajo en segundo plano, cada 60 s                                            |
+| `claudeCredits`                 | Ayudas bancarias Claude (créditos `GRANT` )                   | trabajo en segundo plano, cada 60 s                                            |
+| `claudeSessionReset`            | Restablecimiento del límite de sesión semanal Claude (arriba) | ruta de solicitud, a través de la misma política que la alternancia por cuenta |
+
+**Implementación:**
+
+- Decisión pura (una regla establecida para ambos caminos): `src/lib/usage/bankedResetPolicy.ts::decideBankedReset()`
+- Trabajo en segundo plano: `src/lib/services/bankedResetAutoApply.ts` (iniciado en `src/instrumentation-node.ts`)
+- Puerta de ruta de solicitud Claude : `src/lib/usage/claudeSessionResetPolicy.ts`, registrada a través de `setClaudeLimitResetPolicy()` en `open-sse/services/claudeLimitReset.ts`
+- Historia, mayúsculas y webhook: `src/lib/usage/bankedResetAudit.ts`
+- Historia API: `GET /api/settings/banked-reset-auto/history?limit=50` (autenticación de gestión)
+
+**Orden de decisión** (la primera regla fallida es el motivo registrado):
+
+1. Función desactivada, tipo de crédito desactivado o cuenta fuera de alcance (`accountScope` `all` / `selected` más el mapa `connections` por cuenta).
+2. Fuera del horario opcional UTC (`startHourUtc` > `endHourUtc` cruza la medianoche).
+3. Límites en las últimas 24 h: `maxPerAccountPerDay` (1), `maxPerDay` (3) y `minSpacingMinutes` (30) entre dos reembolsos cualesquiera.
+4. Activador: una ventana `session` o `weekly` bloqueada (leída de `getQuotaWindowStatus().reachedThreshold`, no `isAccountQuotaExhausted()`, que solo informa una cuenta con cada ventana gastada), o un crédito que vence dentro de `expiringCreditHours` (24) en una cuenta que ha utilizado al menos `expiringCreditMinUsedPercent` (50).
+5. Guardia de reinicio natural: omita cuando la ventana amurallada de 5 horas se reinicie dentro de `sessionResetGuardMinutes` (90), o la ventana amurallada semanal dentro de `weeklyResetGuardHours` (12).
+6. Piso semanal: omita un reinicio de 5 horas cuando el resto semanal esté por debajo de `weeklyFloorPercent` (10).
+7. Modo `last-resort` : omita mientras a otra cuenta dentro del alcance del mismo proveedor le queden al menos `poolHeadroomPercent` (10) en ambas ventanas. Los desencadenantes del crédito vencido evitan esto.
+8. `dry-run` registra una fila y no canjea nada; Canje `last-resort` y `eager`.
+
+La falta de datos de cuota nunca desbloquea un canje: un tiempo de reinicio desconocido o saltos de uso semanal.
+
+**Restablecimiento de sesión Claude :** Con la función desactivada o `claudeSessionReset` desactivado, el interruptor `autoLimitReset` por cuenta decide exactamente como antes. Con ambos activados, la función reemplaza las alternancias por cuenta: una cuenta dentro del alcance puede reclamar solo cuando la póliza lo permite, y en el modo `dry-run` no se realiza ningún reclamo.
+
+**Seguridad:** el trabajo canjea como máximo un crédito por tick, decide antes de enumerar los créditos (una cuenta omitida nunca aparece en la lista), utiliza claves de idempotencia `auto-reset:<connectionId>:<yyyy-mm-dd>:<n>` y respalda una cuenta durante 1 hora después de una inclusión o canje fallido. Cada decisión de canje, fracaso y ejecución en seco se escribe en `audit_log` (`action: "bankedReset.redeem"`, sin tokens ni identificadores de crédito); los límites se cuentan a partir de esas filas, por lo que sobreviven a los reinicios. Los canjes exitosos también activan el webhook `provider.reset_redeemed`.
+
+Guardias de regresión: `tests/unit/banked-reset-policy.test.ts`, `tests/unit/banked-reset-auto-apply.test.ts`, `tests/unit/claude-limit-reset-policy-gate.test.ts`, `tests/unit/banked-reset-history-route.test.ts`.
+
 ### Afinidad de sesión (#7274)
 
 **Alcance:** una sesión de cliente (`X-Session-Id` / `x-codex-session-id` / `x-omniroute-session` header) fijada a una conexión, para **cualquier** proveedor.

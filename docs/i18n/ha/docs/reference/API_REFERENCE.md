@@ -980,14 +980,14 @@ CLI yana haɓaka `base_url + /responses` zuwa WebSocket, kuma OmniRoute tana rat
 
 ---
 
-## Rahoton Ƙayyadaddun Amfani da Matsaloli
+## Ƙididdigar Ƙidaya & Batun Batutuwa
 
-| Hanya | Hanya               | Bayani                                                                                               |
-| ----- | ------------------- | ---------------------------------------------------------------------------------------------------- |
-| GET   | `/v1/quotas/check`  | Tabbatar da quota tun farko don `provider` + `accountId` kafin bayar da maɓallin da aka yi rajista   |
-| POST  | `/v1/issues/report` | Ba da rahoton gazawar bayar da quota/maɓalli zuwa GitHub (yana buƙatar `GITHUB_ISSUES_REPO` + token) |
+| Hanya | Hanya               | Bayani                                                                                             |
+| ----- | ------------------- | -------------------------------------------------------------------------------------------------- |
+| GET   | `/v1/quotas/check`  | Ƙaddamar da ƙididdiga na `provider` + `accountId` kafin ba da maɓallin rajista                     |
+| POST  | `/v1/issues/report` | Ba da rahoton gazawar fitar da quota/key zuwa GitHub (yana buƙatar alamar `GITHUB_ISSUES_REPO` + ) |
 
-**Tabbatarwa:** Maɓallin API na Bearer (`isAuthenticated`).
+**Gaskiya:** `/v1/quotas/check` yana ɗaukar maɓallin API mai ɗaukar nauyi (`isAuthenticated`). `/v1/issues/report` shine gudanarwa-kawai (`requireManagementAuth`), kamar `/api/v1/registered-keys`: zaman dashboard, alamar CLI na gida, ko maɓallin API tare da iyakar `manage`/`admin` ; Maɓallan API kawai suna samun `403`.
 
 ### Maido da zaman quota (na zaɓi)
 
@@ -1785,19 +1785,23 @@ Biyan kuɗin webhook na waje don abubuwan OmniRoute (kammala buƙata, ƙarewar k
 
 ---
 
-## Maɓallan da Aka Yi Rajista (Gudanarwa ta atomatik)
+## Maɓallai masu Rijista (Mai sarrafa kansa)
 
-Ana amfani da su ta tsarin gudanar da maɓallai ta atomatik don fitarwa da jujjuya maɓallan API a kan mai samarwa/asusu na baya, tare da kaso na yau da kullum/na awa.
+Ƙarƙashin tsarin sarrafa maɓalli na atomatik yana amfani dashi don fitarwa da juya maɓallan API akan provider/account mai goyan baya, tare da ƙimar daily/hourly.
 
-| Hanya  | Hanya                                 | Bayani                                                                                                                                                                                                                                  |
-| ------ | ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/api/v1/registered-keys`             | Jera maɓallan da aka yi rajista (gabatarwar da aka ɓoye kawai)                                                                                                                                                                          |
-| POST   | `/api/v1/registered-keys`             | Fitar da sabon maɓallin da aka yi rajista — jiki: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Yana dawo da maɓallin danye **sau ɗaya kawai**. Yana dawo da `429` idan an ƙi saboda kaso. |
-| GET    | `/api/v1/registered-keys/[id]`        | Dawo da bayanan maɓallin da aka yi rajista (babu ainihin abin da ke cikin maɓallin)                                                                                                                                                     |
-| DELETE | `/api/v1/registered-keys/[id]`        | Soke maɓallin da aka yi rajista                                                                                                                                                                                                         |
-| POST   | `/api/v1/registered-keys/[id]/revoke` | Ƙarshen API na soke maɓalli a sarari (sakamako iri ɗaya da DELETE)                                                                                                                                                                      |
+| Hanya  | Hanya                                 | Bayani                                                                                                                                                                                                         |
+| ------ | ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/v1/registered-keys`             | Lissafin maɓallan da aka yi rajista (madarar da aka rufe kawai)                                                                                                                                                |
+| POST   | `/api/v1/registered-keys`             | Fitar da sabon maɓallin — mai rijista: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Yana dawo da danyen maɓalli **sau ɗaya** . Yana dawo da `429` akan kin ƙima. |
+| GET    | `/api/v1/registered-keys/[id]`        | Maido metadata maɓalli mai rijista (babu ɗanyen abu)                                                                                                                                                           |
+| DELETE | `/api/v1/registered-keys/[id]`        | Murke maɓallin rajista                                                                                                                                                                                         |
+| POST   | `/api/v1/registered-keys/[id]/revoke` | Bayanin soke ƙarshen ƙarshen (tasiri ɗaya da DELETE)                                                                                                                                                           |
+| GET    | `/api/v1/providers/[provider]/limits` | Karanta iyakoki na bayarwa na mai bayarwa                                                                                                                                                                      |
+| PUT    | `/api/v1/providers/[provider]/limits` | Saita fitar da mai bada madaidaicin jikin — : `{maxActiveKeys?, dailyIssueLimit?, hourlyIssueLimit?}`                                                                                                          |
+| GET    | `/api/v1/accounts/[id]/limits`        | Karanta iyakar fitar da asusun                                                                                                                                                                                 |
+| PUT    | `/api/v1/accounts/[id]/limits`        | Saita fitar da asusun ya wuce — jiki ɗaya da hanyar mai bayarwa                                                                                                                                                |
 
-**Tabbatarwa:** zaman gudanarwa/maɓallin API (`requireManagementAuth`) — mai gadi iri ɗaya da `/api/keys`: zaman dashboard, alamar CLI ta cikin gida, ko maɓallin API mai ikon `manage`/`admin`; maɓallan API na inference-kawai suna samun `403`. Duba kuma `/v1/quotas/check` da `/v1/issues/report`.
+**Gaskiya:** Maɓallin session/API na gudanarwa (`requireManagementAuth`) — mai tsaro ɗaya kamar `/api/keys`: zaman dashboard, alamar CLI na gida, ko maɓallin API tare da iyakar `manage`/`admin` ; Maɓallan API kawai suna samun `403`. Duba kuma `/v1/quotas/check` da `/v1/issues/report`.
 
 ---
 

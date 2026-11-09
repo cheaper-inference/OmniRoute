@@ -4,57 +4,52 @@
 
 ---
 
-> **Sumber acuan:** `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`, `src/app/api/webhooks/`
-> **Terakhir diperbarui:** 2026-06-28 — v3.8.40
+> **Sumber kebenaran:** `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`, `src/app/api/webhooks/`**Terakhir diperbarui:** 28-06-2026 — v3.8.40
 
-OmniRoute dapat mengirim webhook HTTP pada peristiwa platform. Gunakan webhook tersebut untuk berintegrasi dengan
-Slack, PagerDuty, Datadog, layanan peringatan internal, atau penerima HTTP apa pun.
+OmniRoute dapat mengaktifkan webhook HTTP pada acara platform. Gunakan mereka untuk berintegrasi dengan Slack, PagerDuty, Datadog, layanan peringatan internal, atau penerima HTTP apa pun.
 
-Dispatcher menandatangani setiap pengiriman dengan HMAC-SHA256, mencoba kembali saat terjadi
-kegagalan sementara, melacak kesehatan pengiriman per webhook, dan secara otomatis menonaktifkan endpoint yang
-terus mengalami kegagalan.
+Petugas operator menandatangani setiap pengiriman dengan HMAC-SHA256, mencoba kembali kegagalan sementara, melacak kesehatan pengiriman per webhook, dan menonaktifkan secara otomatis titik akhir yang terus gagal.
 
-## Peristiwa yang Didukung
+## Acara yang Didukung
 
-Tipe `WebhookEvent` (`src/lib/webhooks/eventDescriptions.ts`, digunakan oleh `src/lib/webhookDispatcher.ts`) saat ini memodelkan tepat empat peristiwa:
+Tipe `WebhookEvent` (`src/lib/webhooks/eventDescriptions.ts`, digunakan oleh `src/lib/webhookDispatcher.ts`) saat ini memodelkan tujuh peristiwa:
 
-| Peristiwa           | Dipicu ketika                                                           |
-| ------------------- | ----------------------------------------------------------------------- |
-| `request.completed` | Permintaan yang diteruskan berhasil diselesaikan                        |
-| `request.failed`    | Permintaan yang diteruskan gagal setelah semua percobaan ulang/fallback |
-| `quota.exceeded`    | Kunci API melewati ambang batas anggaran/kuota                          |
-| `test.ping`         | Peristiwa sintetis yang digunakan oleh endpoint pengujian               |
+| Peristiwa                 | Kebakaran kapan                                                                                                            |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `request.completed`       | Permintaan yang diproksi berhasil diselesaikan                                                                             |
+| `request.failed`          | Permintaan proksi gagal setelah semua retries/fallback                                                                     |
+| `quota.exceeded`          | Kunci API melewati ambang batas budget/quota                                                                               |
+| `proxy.set_aside`         | Anggota kumpulan proxy disisihkan setelah penolakan berulang kali (hanya transisi)                                         |
+| `proxy.pool.exhausted`    | Setiap anggota ruang lingkup kumpulan proksi disisihkan                                                                    |
+| `provider.reset_redeemed` | Terapkan otomatis penyetelan ulang bank yang menukarkan kredit penyetelan ulang atau penyetelan ulang sesi mingguan Claude |
+| `test.ping`               | Peristiwa sintetik yang digunakan oleh titik akhir pengujian                                                               |
 
-Langganan menerima literal `"*"` untuk menerima setiap peristiwa. Nama peristiwa yang tidak dikenal
-dalam `events` diabaikan saat dispatch.
+Langganan menerima `"*"` literal untuk menerima setiap acara. Nama acara yang tidak diketahui di `events` diabaikan pada waktu pengiriman.
 
-> Catatan: API dispatcher telah terhubung, tetapi pemanggilan produksi untuk beberapa
-> peristiwa selain `test.ping` masih dalam proses penerapan. Periksa `grep dispatchEvent` untuk melihat
-> jalur mana yang saat ini memanggil dispatcher dalam rilis Anda.
+> Catatan: operator API terhubung dengan kabel, tetapi situs panggilan produksi untuk beberapa peristiwa non-`test.ping` masih terhubung. Periksa `grep dispatchEvent` untuk melihat jalur mana yang saat ini memanggil petugas operator dalam rilis Anda.
 
 ## Arsitektur
 
 ```
-Pemanggil (handler, layanan, monitor)
+Caller (handler, service, monitor)
   dispatchEvent(event, data)            [src/lib/webhookDispatcher.ts]
     -> getEnabledWebhooks()             [src/lib/db/webhooks.ts]
-    -> filter berdasarkan webhook.events
-    -> untuk setiap kecocokan (secara paralel):
+    -> filter by webhook.events
+    -> for each match (in parallel):
        deliverWebhook(url, payload, secret)
-         buat payload { event, timestamp, data }
-         tanda tangani body dengan HMAC-SHA256 (jika secret tersedia)
-         POST dengan batas waktu 10 detik
-         coba ulang hingga 3 kali saat terjadi 5xx / kesalahan jaringan
+         build payload { event, timestamp, data }
+         sign body with HMAC-SHA256 (if secret present)
+         POST with 10s timeout
+         retry up to 3 times on 5xx / network error
        recordWebhookDelivery(id, status, success)
     -> disableWebhooksWithHighFailures(10)
 ```
 
-Dispatch bersifat fire-and-forget bagi pemanggil: `Promise.allSettled` mengabaikan
-kesalahan per webhook sehingga satu penerima yang bermasalah tidak dapat memblokir penerima lainnya.
+Pengiriman sangat mudah bagi penelepon: `Promise.allSettled` menerima kesalahan per-webhook sehingga satu penerima yang buruk tidak dapat memblokir yang lain.
 
 ## Penandatanganan HMAC
 
-Ketika webhook memiliki `secret`, OmniRoute menandatangani body JSON dan mengirim:
+Ketika webhook memiliki `secret`, OmniRoute menandatangani isi JSON dan mengirimkan:
 
 ```
 Content-Type: application/json
@@ -64,11 +59,9 @@ X-Webhook-Timestamp: <ISO-8601>
 X-Webhook-Signature: sha256=<hex HMAC-SHA256(secret, body)>
 ```
 
-> Nama header menggunakan prefiks `X-Webhook-*` (bukan `X-OmniRoute-*`). Nilai tanda tangan
-> adalah `sha256=<hex>` — verifikasi prefiks lengkapnya.
+> Header names use the `X-Webhook-*` prefix (not `X-OmniRoute-*`). Nilai tanda tangannya adalah `sha256=<hex>` — verifikasi awalan lengkap.
 
-Jika `createWebhook` dipanggil tanpa secret, modul DB akan menghasilkan secret
-(`whsec_<48 hex>`) sehingga semua webhook ditandatangani secara default.
+Jika `createWebhook` dipanggil tanpa rahasia, modul DB akan menghasilkan satu (`whsec_<48 hex>`) sehingga semua webhook ditandatangani secara default.
 
 ### Memverifikasi pada penerima
 
@@ -83,66 +76,57 @@ function verify(rawBody: string, signature: string, secret: string) {
 }
 ```
 
-Selalu lakukan verifikasi terhadap body permintaan **mentah**, sebelum parsing JSON apa pun.
+Selalu verifikasi terhadap **mentah** badan permintaan, sebelum penguraian JSON apa pun.
 
-## Kebijakan Percobaan Ulang & Kegagalan
+## Kebijakan Coba Ulang & Kegagalan
 
 `deliverWebhook(url, payload, secret, maxRetries = 3)`:
 
-- Batas waktu 10 detik per percobaan (`AbortController`).
-- HTTP 2xx dianggap berhasil.
-- HTTP 3xx/4xx dianggap sebagai status akhir yang tidak dapat dicoba ulang — dicatat sebagai terkirim
-  dengan `success = res.ok`.
-- HTTP 5xx dan kesalahan jaringan dicoba ulang dengan backoff eksponensial:
-  `2^attempt * 1000 ms` (1 dtk, 2 dtk, 4 dtk).
-- Setelah `maxRetries`, pengiriman dicatat sebagai gagal.
-- Setiap pengiriman memperbarui `last_triggered_at`, `last_status`, serta mereset
-  atau menaikkan `failure_count`.
-- Dispatcher memanggil `disableWebhooksWithHighFailures(10)` setelah setiap fan-out,
-  sehingga setiap webhook dengan `failure_count >= 10` dinonaktifkan secara otomatis.
+- Batas waktu 10 detik per upaya (`AbortController`).
+- HTTP 2xx dianggap sukses.
+- HTTP 3xx/4xx dihitung sebagai status akhir yang tidak dapat dicoba ulang — dicatat sebagai dikirimkan dengan `success = res.ok`.
+- HTTP 5xx dan kesalahan jaringan dicoba ulang dengan backoff eksponensial: `2^attempt * 1000 ms` (1s, 2s, 4s).
+- Setelah `maxRetries`, pengiriman dicatat gagal.
+- Setiap pengiriman memperbarui `last_triggered_at`, `last_status`, dan menyetel ulang atau menambah `failure_count`.
+- Petugas operator memanggil `disableWebhooksWithHighFailures(10)` setelah setiap fan-out, sehingga webhook apa pun dengan `failure_count >= 10` dinonaktifkan secara otomatis.
 
-## Basis Data
+## Basis data
 
 Tabel `webhooks` (migrasi `011_webhooks.sql`):
 
-| Kolom               | Tipe    | Catatan                                             |
-| ------------------- | ------- | --------------------------------------------------- |
-| `id`                | TEXT PK | UUID                                                |
-| `url`               | TEXT    | URL tujuan                                          |
-| `events`            | TEXT    | Larik JSON; default `["*"]`                         |
-| `secret`            | TEXT    | Rahasia HMAC (dibuat otomatis jika tidak diberikan) |
-| `enabled`           | INT     | 0/1; default-nya 1                                  |
-| `description`       | TEXT    | Label opsional yang dapat dibaca manusia            |
-| `created_at`        | TEXT    | `datetime('now')`                                   |
-| `last_triggered_at` | TEXT    | Diperbarui pada setiap percobaan pengiriman         |
-| `last_status`       | INT     | Status HTTP dari percobaan terakhir (0 = jaringan)  |
-| `failure_count`     | INT     | Direset ke 0 jika berhasil, +1 jika gagal           |
+| Kolom               | Jenis   | Catatan                                                        |
+| ------------------- | ------- | -------------------------------------------------------------- |
+| `id`                | TEXT PK | UUID                                                           |
+| `url`               | TEXT    | Tujuan URL                                                     |
+| `events`            | TEXT    | susunan JSON ; `["*"]` bawaan                                  |
+| `secret`            | TEXT    | Rahasia HMAC (dihasilkan secara otomatis jika tidak diberikan) |
+| `enabled`           | INT     | 0/1; defaultnya adalah 1                                       |
+| `description`       | TEXT    | Label manusia opsional                                         |
+| `created_at`        | TEXT    | `datetime('now')`                                              |
+| `last_triggered_at` | TEXT    | Diperbarui pada setiap upaya pengiriman                        |
+| `last_status`       | INT     | Status HTTP dari upaya terakhir (0 jaringan = )                |
+| `failure_count`     | INT     | Reset ke 0 jika berhasil, + 1 jika gagal                       |
 
-Riwayat pengiriman disimpan dalam tabel khusus `webhook_deliveries`
-(migrasi `069_webhook_deliveries.sql`, ditulis melalui
-`src/lib/db/webhookDeliveries.ts::insertDelivery` pada setiap percobaan), selain
-penghitung agregat pada baris `webhooks`. Metadata jenis (Slack / Discord /
-Telegram / transformer payload khusus) ditambahkan oleh `070_webhooks_kind_metadata.sql`.
+Riwayat pengiriman disimpan dalam tabel `webhook_deliveries` khusus (migrasi `069_webhook_deliveries.sql`, ditulis melalui `src/lib/db/webhookDeliveries.ts::insertDelivery` pada setiap upaya), selain penghitung agregat pada baris `webhooks`. Jenis metadata (Slack / Discord / Telegram / transformator muatan khusus) telah ditambahkan oleh `070_webhooks_kind_metadata.sql`.
 
-## API REST
+## REST API
 
-Semua endpoint memerlukan autentikasi manajemen (`requireManagementAuth`).
+Semua titik akhir memerlukan autentikasi manajemen (`requireManagementAuth`).
 
-| Endpoint                        | Metode | Deskripsi                                       |
-| ------------------------------- | ------ | ----------------------------------------------- |
-| `/api/webhooks`                 | GET    | Menampilkan webhook (rahasia disamarkan)        |
-| `/api/webhooks`                 | POST   | Membuat webhook                                 |
-| `/api/webhooks/[id]`            | GET    | Detail webhook (rahasia lengkap)                |
-| `/api/webhooks/[id]`            | PUT    | Memperbarui bidang                              |
-| `/api/webhooks/[id]`            | DELETE | Menghapus                                       |
-| `/api/webhooks/[id]/test`       | POST   | Memicu `test.ping` (tanpa percobaan ulang)      |
-| `/api/webhooks/[id]/deliveries` | GET    | Percobaan pengiriman terbaru untuk satu webhook |
-| `/api/webhooks/validate-url`    | POST   | Validasi URL awal (perlindungan SSRF)           |
+| Titik akhir                     | Metode | Keterangan                                        |
+| ------------------------------- | ------ | ------------------------------------------------- |
+| `/api/webhooks`                 | GET    | Daftar webhook (rahasia terselubung)              |
+| `/api/webhooks`                 | POST   | Buat webhook                                      |
+| `/api/webhooks/[id]`            | GET    | Detail webhook (rahasia lengkap)                  |
+| `/api/webhooks/[id]`            | PUT    | Perbarui bidang                                   |
+| `/api/webhooks/[id]`            | DELETE | Menghapus                                         |
+| `/api/webhooks/[id]/test`       | POST   | Tembakkan `test.ping` (tidak ada percobaan ulang) |
+| `/api/webhooks/[id]/deliveries` | GET    | Upaya pengiriman terbaru untuk satu webhook       |
+| `/api/webhooks/validate-url`    | POST   | Validasi URL pra-penerbangan (penjaga SSRF )      |
 
-`GET /api/webhooks` menyamarkan rahasia menjadi `<10 karakter pertama>...` untuk menghindari kebocoran
-pada halaman daftar. Gunakan GET `[id]` ketika Anda benar-benar membutuhkan rahasia tersebut.
+`GET /api/webhooks` menutupi rahasia `<first 10 chars>...` untuk menghindari kebocoran pada halaman daftar. Gunakan `[id]` GET ketika Anda benar-benar membutuhkan rahasianya.
 
-### Membuat webhook
+### Buat webhook
 
 ```bash
 curl -X POST http://localhost:20128/api/webhooks \
@@ -156,33 +140,29 @@ curl -X POST http://localhost:20128/api/webhooks \
   }'
 ```
 
-Jika `secret` tidak disertakan, server menghasilkan rahasia `whsec_<hex>` dan mengembalikannya
-dalam respons.
+Jika `secret` dihilangkan, server menghasilkan rahasia `whsec_<hex>` dan mengembalikannya sebagai respons.
 
-### Menguji webhook
+### Uji webhook
 
 ```bash
 curl -X POST http://localhost:20128/api/webhooks/<id>/test \
   -H "Cookie: auth_token=..."
 ```
 
-Mengembalikan `{ delivered, status, error }`. Tidak ada percobaan ulang yang dilakukan — berguna untuk
-memvalidasi dengan cepat bahwa penerima menerima payload dan tanda tangan tersebut.
+Mengembalikan `{ delivered, status, error }`. Tidak ada percobaan ulang yang dilakukan — yang berguna untuk memvalidasi dengan cepat bahwa penerima menerima payload dan tanda tangan.
 
 ## Dasbor
 
-Halaman dasbor di `/dashboard/webhooks` (lihat
-`src/app/(dashboard)/dashboard/webhooks/page.tsx`) menyediakan:
+Halaman dasbor di `/dashboard/webhooks` (lihat `src/app/(dashboard)/dashboard/webhooks/page.tsx`) menyediakan:
 
-- Pembuatan/pengeditan webhook dengan pemilih peristiwa
-- Indikator status (aktif / tidak aktif / mengalami galat) berdasarkan `enabled`,
-  `failure_count`, dan `last_status`
-- Pengiriman uji dengan sekali klik
-- Tombol aktifkan/nonaktifkan secara manual
+- Webhook Create/edit dengan pemilih peristiwa
+- Indikator status (aktif / tidak aktif / error) berdasarkan `enabled`, `failure_count`, dan `last_status`
+- Pengiriman tes sekali klik
+- Pengalih enable/disable manual
 
-## Contoh Payload
+## Contoh Muatan
 
-### request.completed
+### permintaan.selesai
 
 ```json
 {
@@ -201,40 +181,32 @@ Halaman dasbor di `/dashboard/webhooks` (lihat
 }
 ```
 
-### test.ping
+### tes.ping
 
 ```json
 {
   "event": "test.ping",
   "timestamp": "2026-05-13T20:32:00.000Z",
   "data": {
-    "message": "Pengiriman webhook uji dari OmniRoute",
+    "message": "Test webhook delivery from OmniRoute",
     "webhookId": "<uuid>"
   }
 }
 ```
 
-Struktur bidang untuk peristiwa selain `test.ping` ditentukan oleh lokasi pemanggilan yang memancarkannya; perlakukan objek `data` sebagai kompatibel ke depan (tambahkan bidang, jangan bergantung pada ketiadaannya).
+Bentuk bidang untuk kejadian non-`test.ping` ditentukan oleh situs panggilan yang memancarkannya; perlakukan objek `data` sebagai kompatibel ke depan (tambahkan bidang, jangan bergantung pada ketidakhadiran).
 
 ## Praktik Terbaik
 
-- **Verifikasi tanda tangan pada setiap pengiriman** terhadap isi mentah — mencegah
-  POST palsu dari siapa pun yang menebak URL webhook Anda.
-- **Respons dengan 2xx dalam ~5 detik** — dispatcher mengalami timeout pada 10 dtk. Penerima
-  yang lambat akan menghabiskan percobaan ulang dan meningkatkan `failure_count`.
-- **Buat handler idempoten** — percobaan ulang dan semantik pengiriman setidaknya sekali
-  berarti duplikat mungkin terjadi.
-- **Berlangganan seminimal mungkin** — cantumkan hanya peristiwa yang benar-benar Anda gunakan; `"*"` akan
-  menambah beban pada penerima yang tidak Anda kendalikan.
-- **Pantau `failure_count`** — endpoint dinonaktifkan secara otomatis setelah 10 kegagalan
-  berturut-turut; atur ulang dengan memanggil `PUT /api/webhooks/[id]` dengan `enabled: true`
-  setelah memperbaiki penerima.
-- **Rotasi secret secara berkala** — kirim `PUT` dengan `secret` baru, deploy nilai baru
-  ke penerima, lalu konfirmasikan melalui endpoint pengujian.
+- **Verifikasi tanda tangan pada setiap pengiriman** terhadap tubuh mentah — mencegah POSTs palsu dari siapa pun yang menebak webhook Anda URL.
+- **Respons 2xx dalam ~ 5 detik** — waktu operator habis pada 10 detik. Penerima yang lambat akan memakan percobaan ulang dan mengembangkan `failure_count`.
+- **Jadikan penangan idempoten** Percobaan ulang — dan semantik pengiriman setidaknya sekali berarti duplikat mungkin terjadi.
+- **Berlangganan minimal** — hanya mencantumkan acara yang benar-benar Anda konsumsi; `"*"` akan menambah biaya pada receiver yang tidak Anda kendalikan.
+- **Tonton `failure_count`** Titik akhir — dinonaktifkan secara otomatis jika terjadi 10 kegagalan berturut-turut; reset dengan memanggil `PUT /api/webhooks/[id]` dengan `enabled: true` setelah memperbaiki receiver.
+- **Putar rahasia secara berkala** — `PUT` adalah `secret` baru, terapkan nilai baru ke penerima, dan konfirmasi melalui titik akhir pengujian.
 
 ## Lihat Juga
 
-- [API_REFERENCE.md](../reference/API_REFERENCE.md) — cakupan lengkap API pengelolaan
-- [RESILIENCE_GUIDE.md](../architecture/RESILIENCE_GUIDE.md) — semantik circuit breaker / cooldown
-  di balik kegagalan penyedia yang diekspos melalui `request.failed`
+- [API_REFERENCE.md](../reference/API_REFERENCE.md) — manajemen penuh permukaan API
+- [RESILIENCE_GUIDE.md](../architecture/RESILIENCE_GUIDE.md) — pemutus sirkuit / semantik cooldown di balik kegagalan penyedia muncul melalui `request.failed`
 - Sumber: `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`

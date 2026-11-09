@@ -1005,14 +1005,14 @@ dokončení.
 
 ---
 
-## Hlášení kvót a problémů
+## Kvóty a hlášení problémů
 
-| Metoda | Cesta               | Popis                                                                                |
-| ------ | ------------------- | ------------------------------------------------------------------------------------ |
-| GET    | `/v1/quotas/check`  | Předběžně ověří kvótu pro `provider` + `accountId` před vydáním registrovaného klíče |
-| POST   | `/v1/issues/report` | Nahlásí selhání vydání kvóty/klíče na GitHub (vyžaduje `GITHUB_ISSUES_REPO` + token) |
+| Metoda | Cesta               | Popis                                                                              |
+| ------ | ------------------- | ---------------------------------------------------------------------------------- |
+| GET    | `/v1/quotas/check`  | Před vydáním registrovaného klíče předem ověřte kvótu pro `provider` + `accountId` |
+| POST   | `/v1/issues/report` | Nahlásit selhání vydání quota/key GitHub (vyžaduje token `GITHUB_ISSUES_REPO` + )  |
 
-**Autentizace:** Bearer API klíč (`isAuthenticated`).
+**Auth:** `/v1/quotas/check` bere klíč API na nosiče (`isAuthenticated`). `/v1/issues/report` je pouze pro správu (`requireManagementAuth`), jako `/api/v1/registered-keys`: relace řídicího panelu, místní token CLI nebo klíč API s rozsahem `manage`/`admin` ; Klíče API pouze pro odvození získají `403`.
 
 ### Obnovení relace kvóty (volitelné)
 
@@ -1836,17 +1836,21 @@ Odchozí odběry webhooků pro události OmniRoute (dokončení požadavku, vyč
 
 ## Registrované klíče (automatická správa)
 
-Používá subsystém automatické správy klíčů k vydávání a rotaci klíčů API vůči podpůrnému poskytovateli/účtu s denními a hodinovými kvótami.
+Používá se subsystémem správy automatických klíčů k vydávání a otáčení klíčů API proti podpůrnému provider/account s kvótami daily/hourly.
 
-| Metoda | Cesta                                 | Popis                                                                                                                                                                                                            |
-| ------ | ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/api/v1/registered-keys`             | Seznam registrovaných klíčů (pouze maskovaný prefix)                                                                                                                                                             |
-| POST   | `/api/v1/registered-keys`             | Vydání nového registrovaného klíče — tělo: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Vrací nezpracovaný klíč **jednou**. Při odmítnutí kvůli kvótě vrací `429`. |
-| GET    | `/api/v1/registered-keys/[id]`        | Načtení metadat registrovaného klíče (bez nezpracovaného materiálu)                                                                                                                                              |
-| DELETE | `/api/v1/registered-keys/[id]`        | Odvolání registrovaného klíče                                                                                                                                                                                    |
-| POST   | `/api/v1/registered-keys/[id]/revoke` | Explicitní endpoint pro odvolání (stejný účinek jako DELETE)                                                                                                                                                     |
+| Metoda | Cesta                                 | Popis                                                                                                                                                                                                   |
+| ------ | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/v1/registered-keys`             | Vypsat registrované klíče (pouze maskovaná předpona)                                                                                                                                                    |
+| POST   | `/api/v1/registered-keys`             | Vydejte nový registrovaný klíč — tělo: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Vrátí nezpracovaný klíč **jednou** . Vrátí `429` při odmítnutí kvóty. |
+| GET    | `/api/v1/registered-keys/[id]`        | Načíst metadata registrovaného klíče (žádný nezpracovaný materiál)                                                                                                                                      |
+| DELETE | `/api/v1/registered-keys/[id]`        | Odvolat registrovaný klíč                                                                                                                                                                               |
+| POST   | `/api/v1/registered-keys/[id]/revoke` | Koncový bod explicitního odvolání (stejný účinek jako DELETE)                                                                                                                                           |
+| GET    | `/api/v1/providers/[provider]/limits` | Přečtěte si limity vydávání poskytovatele                                                                                                                                                               |
+| PUT    | `/api/v1/providers/[provider]/limits` | Nastavte limity vydání poskytovatele — tělo: `{maxActiveKeys?, dailyIssueLimit?, hourlyIssueLimit?}`                                                                                                    |
+| GET    | `/api/v1/accounts/[id]/limits`        | Přečtěte si limity vydání účtu                                                                                                                                                                          |
+| PUT    | `/api/v1/accounts/[id]/limits`        | Nastavte limity vydání účtu — stejné tělo jako trasu poskytovatele                                                                                                                                      |
 
-**Autentizace:** relace/API klíč pro správu (`requireManagementAuth`) — stejná ochrana jako u `/api/keys`: relace řídicího panelu, místní token CLI nebo klíč API s rozsahem `manage`/`admin`; klíče API určené pouze pro inference obdrží `403`. Viz také `/v1/quotas/check` a `/v1/issues/report`.
+**Auth:** management klíč session/API (`requireManagementAuth`) — stejný strážce jako `/api/keys`: relace řídicího panelu, místní token CLI nebo klíč API s rozsahem `manage`/`admin` ; Klíče API pouze pro odvození získají `403`. Viz také `/v1/quotas/check` a `/v1/issues/report`.
 
 ---
 

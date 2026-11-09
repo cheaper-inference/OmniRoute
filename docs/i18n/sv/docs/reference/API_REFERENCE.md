@@ -1005,12 +1005,12 @@ slutförandet.
 
 ## Rapportering av kvoter och problem
 
-| Metod | Sökväg              | Beskrivning                                                                                              |
-| ----- | ------------------- | -------------------------------------------------------------------------------------------------------- |
-| GET   | `/v1/quotas/check`  | Förvalidera kvoten för en `provider` + `accountId` innan en registrerad nyckel utfärdas                  |
-| POST  | `/v1/issues/report` | Rapportera ett misslyckande vid kvot-/nyckelutfärdande till GitHub (kräver `GITHUB_ISSUES_REPO` + token) |
+| Metod | Väg                 | Beskrivning                                                                                |
+| ----- | ------------------- | ------------------------------------------------------------------------------------------ |
+| GET   | `/v1/quotas/check`  | Förvalidera kvoten för en `provider` + `accountId` innan du utfärdar en registrerad nyckel |
+| POST  | `/v1/issues/report` | Rapportera ett quota/key -emissionsfel till GitHub (kräver `GITHUB_ISSUES_REPO` + token)   |
 
-**Autentisering:** Bearer API-nyckel (`isAuthenticated`).
+**Auth:** `/v1/quotas/check` tar en bärar API nyckel (`isAuthenticated`). `/v1/issues/report` är enbart för hantering (`requireManagementAuth`), som `/api/v1/registered-keys`: en instrumentpanelsession, den lokala CLI token eller en API nyckel med `manage`/`admin` omfattning; API -nycklar endast för slutledning får `403`.
 
 ### Återställning av kvotsession (valfritt)
 
@@ -1827,17 +1827,21 @@ Utgående webhookprenumerationer för OmniRoute-händelser (slutförda begärand
 
 ## Registrerade nycklar (automatisk hantering)
 
-Används av undersystemet för automatisk nyckelhantering för att utfärda och rotera API-nycklar mot en underliggande leverantör/ett konto, med dagliga/timvisa kvoter.
+Används av undersystemet för automatisk nyckelhantering för att utfärda och rotera API nycklar mot en stödjande provider/account, med daily/hourly kvoter.
 
-| Metod  | Sökväg                                | Beskrivning                                                                                                                                                                                                  |
-| ------ | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| GET    | `/api/v1/registered-keys`             | Lista registrerade nycklar (endast maskerat prefix)                                                                                                                                                          |
-| POST   | `/api/v1/registered-keys`             | Utfärda en ny registrerad nyckel — body: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Returnerar den råa nyckeln **en gång**. Returnerar `429` vid nekad kvot. |
-| GET    | `/api/v1/registered-keys/[id]`        | Hämta metadata för en registrerad nyckel (inget råvärde)                                                                                                                                                     |
-| DELETE | `/api/v1/registered-keys/[id]`        | Återkalla en registrerad nyckel                                                                                                                                                                              |
-| POST   | `/api/v1/registered-keys/[id]/revoke` | Explicit endpoint för återkallande (samma effekt som DELETE)                                                                                                                                                 |
+| Metod  | Väg                                   | Beskrivning                                                                                                                                                                                                       |
+| ------ | ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/v1/registered-keys`             | Lista registrerade nycklar (endast maskerade prefix)                                                                                                                                                              |
+| POST   | `/api/v1/registered-keys`             | Utfärda en ny registrerad nyckel — body: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Returnerar den råa nyckeln **en gång** . Returnerar `429` vid avslag på kvot. |
+| GET    | `/api/v1/registered-keys/[id]`        | Hämta en registrerad nyckels metadata (inget råmaterial)                                                                                                                                                          |
+| DELETE | `/api/v1/registered-keys/[id]`        | Återkalla en registrerad nyckel                                                                                                                                                                                   |
+| POST   | `/api/v1/registered-keys/[id]/revoke` | Explicit återkallelseslutpunkt (samma effekt som DELETE)                                                                                                                                                          |
+| GET    | `/api/v1/providers/[provider]/limits` | Läs leverantörens emissionstak                                                                                                                                                                                    |
+| PUT    | `/api/v1/providers/[provider]/limits` | Ställ in leverantörens emissionstak — body: `{maxActiveKeys?, dailyIssueLimit?, hourlyIssueLimit?}`                                                                                                               |
+| GET    | `/api/v1/accounts/[id]/limits`        | Läs kontots emissionstak                                                                                                                                                                                          |
+| PUT    | `/api/v1/accounts/[id]/limits`        | Ställ in kontots emissionstak — samma kropp som leverantörsvägen                                                                                                                                                  |
 
-**Autentisering:** hanteringssession/API-nyckel (`requireManagementAuth`) — samma skydd som `/api/keys`: en dashboardsession, den lokala CLI-token eller en API-nyckel med scopet `manage`/`admin`; API-nycklar som endast har behörighet för inferens får `403`. Se även `/v1/quotas/check` och `/v1/issues/report`.
+**Auth:** management session/API nyckel (`requireManagementAuth`) — samma skydd som `/api/keys`: en instrumentpanelsession, den lokala CLI token eller en API nyckel med `manage`/`admin` -omfattning; API -nycklar endast för slutledning får `403`. Se även `/v1/quotas/check` och `/v1/issues/report`.
 
 ---
 

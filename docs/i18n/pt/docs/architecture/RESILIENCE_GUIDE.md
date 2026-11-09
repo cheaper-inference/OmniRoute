@@ -187,6 +187,45 @@ Estes persistem até as credenciais serem alteradas ou um operador os repor. Nã
 Proteções de regressão: `tests/unit/claude-low-priority-mode.test.ts`,
 `tests/unit/claude-limit-reset.test.ts`, `tests/unit/claude-low-priority-executor.test.ts`.
 
+### Aplicação automática de redefinições acumuladas
+
+**Escopo:** conexões de assinatura Codex e Claude (OAuth). **Ativação opcional:** a configuração `bankedResetAutoApply` vem desativada e no modo `dry-run` por padrão (Configurações → AI → Aplicação automática de redefinições acumuladas).
+
+**Objetivo:** usar créditos de redefinição acumulados quando uma conta atinge um limite de uso, sem esperar que um operador pressione "Resgatar" na página Limites do Provedor.
+
+| Tipo de crédito (`creditTypes`) | O que é resgatado                                         | Onde é executado                                                           |
+| ------------------------------- | --------------------------------------------------------- | -------------------------------------------------------------------------- |
+| `codexCredits`                  | Créditos de redefinição do Codex                          | tarefa em segundo plano, a cada 60 s                                       |
+| `claudeCredits`                 | Créditos acumulados do Claude (créditos `GRANT`)          | tarefa em segundo plano, a cada 60 s                                       |
+| `claudeSessionReset`            | Redefinição semanal do limite de sessão do Claude (acima) | caminho da requisição, pela mesma política usada na configuração por conta |
+
+**Implementação:**
+
+- Decisão pura (um conjunto de regras para os dois caminhos): `src/lib/usage/bankedResetPolicy.ts::decideBankedReset()`
+- Tarefa em segundo plano: `src/lib/services/bankedResetAutoApply.ts` (iniciada em `src/instrumentation-node.ts`)
+- Verificação no caminho da requisição do Claude: `src/lib/usage/claudeSessionResetPolicy.ts`, registrada por `setClaudeLimitResetPolicy()` em `open-sse/services/claudeLimitReset.ts`
+- Histórico, limites e webhook: `src/lib/usage/bankedResetAudit.ts`
+- API do histórico: `GET /api/settings/banked-reset-auto/history?limit=50` (autenticação de gerenciamento)
+
+**Ordem de decisão** (a primeira regra que impedir a operação define o motivo registrado):
+
+1. Recurso desativado, tipo de crédito desativado ou conta fora do escopo (`accountScope` `all` / `selected`, junto com o mapa `connections` por conta).
+2. Fora do horário opcional em UTC (`startHourUtc` > `endHourUtc` indica um intervalo que atravessa a meia-noite).
+3. Limites nas últimas 24 h: `maxPerAccountPerDay` (1), `maxPerDay` (3) e `minSpacingMinutes` (30) entre quaisquer dois resgates.
+4. Gatilho: uma janela `session` ou `weekly` que atingiu o limite (obtida de `getQuotaWindowStatus().reachedThreshold`, e não de `isAccountQuotaExhausted()`, que só indica uma conta com todas as janelas esgotadas), ou um crédito que expira em até `expiringCreditHours` (24), em uma conta que já usou pelo menos `expiringCreditMinUsedPercent` (50).
+5. Proteção para a redefinição natural: não resgatar quando a janela de 5 horas que atingiu o limite será redefinida em até `sessionResetGuardMinutes` (90), ou quando a janela semanal que atingiu o limite será redefinida em até `weeklyResetGuardHours` (12).
+6. Mínimo semanal: não resgatar uma redefinição de 5 horas quando o saldo semanal restante estiver abaixo de `weeklyFloorPercent` (10).
+7. Modo `last-resort`: não resgatar enquanto outra conta do mesmo provedor, dentro do escopo, ainda tiver pelo menos `poolHeadroomPercent` (10) disponível nas duas janelas. O gatilho de crédito prestes a expirar não passa por essa restrição.
+8. `dry-run` registra uma linha sem resgatar nada; `last-resort` e `eager` efetuam o resgate.
+
+Dados de cota ausentes nunca autorizam um resgate: se o horário de redefinição ou o uso semanal necessário à decisão for desconhecido, a conta é ignorada.
+
+**Redefinição de sessão do Claude:** com o recurso desativado, ou com `claudeSessionReset` desativado, a configuração `autoLimitReset` por conta continua decidindo como antes. Com ambos ativados, o recurso substitui as configurações por conta: uma conta dentro do escopo só pode solicitar a redefinição quando a política permitir; no modo `dry-run`, nenhuma solicitação é feita.
+
+**Segurança:** a tarefa resgata no máximo um crédito por execução, decide antes de listar os créditos (os créditos de uma conta ignorada nunca são listados), usa chaves de idempotência `auto-reset:<connectionId>:<yyyy-mm-dd>:<n>` e suspende novas tentativas nessa conta por 1 h após uma falha de listagem ou resgate. Cada resgate, falha e decisão de simulação é gravado em `audit_log` (`action: "bankedReset.redeem"`, sem tokens nem IDs de créditos). Os limites são calculados a partir desses registros e, por isso, persistem após reinicializações. Resgates bem-sucedidos também disparam o webhook `provider.reset_redeemed`.
+
+Testes de regressão: `tests/unit/banked-reset-policy.test.ts`, `tests/unit/banked-reset-auto-apply.test.ts`, `tests/unit/claude-limit-reset-policy-gate.test.ts`, `tests/unit/banked-reset-history-route.test.ts`.
+
 ### Afinidade da sessão (#7274)
 
 **Âmbito:** uma sessão de cliente (`X-Session-Id` / `x-codex-session-id` / `x-omniroute-session`

@@ -171,6 +171,45 @@ haɗi** (Edit connection → sashen Claude → `lowPriorityMode` / `autoLimitRes
 Masu tsaron koma-baya: `tests/unit/claude-low-priority-mode.test.ts`,
 `tests/unit/claude-limit-reset.test.ts`, `tests/unit/claude-low-priority-executor.test.ts`.
 
+### Aiwatar da sake saitin banki ta atomatik
+
+**Iyakar:** Haɗin haɗin Codex da Claude (OAuth).**Ficewa** : Saitin `bankedResetAutoApply` yana kashe kuma a yanayin `dry-run` ta tsohuwa (Saitunan → AI → Saitunan sake saitin banki ta atomatik).
+
+**Manufar:** kashe sake saitin banki da kansu lokacin da asusu ya bugi bangon amfani, maimakon jiran ma'aikaci ya danna "Ciki" akan shafin Iyakan Masu bayarwa.
+
+| Nau'in Kiredit (`creditTypes`) | Abin da aka fanshi                             | Inda yake gudu                                                     |
+| ------------------------------ | ---------------------------------------------- | ------------------------------------------------------------------ |
+| `codexCredits`                 | Codex sake saitin ƙididdiga                    | baya aiki, kowane 60 s                                             |
+| `claudeCredits`                | Tallafin banki na Claude (Kiredit `GRANT` )    | baya aiki, kowane 60 s                                             |
+| `claudeSessionReset`           | Sake saitin iyaka na mako-mako Claude (a sama) | hanyar neman, ta hanyar manufa iri ɗaya da jujjuyawar kowane asusu |
+
+**Aiwatarwa:**
+
+- Tsabtataccen yanke shawara (ka'ida ɗaya da aka saita don hanyoyi biyu): `src/lib/usage/bankedResetPolicy.ts::decideBankedReset()`
+- Aikin bango: `src/lib/services/bankedResetAutoApply.ts` (wanda aka fara a `src/instrumentation-node.ts`)
+- Ƙofar buƙatun Claude : `src/lib/usage/claudeSessionResetPolicy.ts`, rajista ta hanyar `setClaudeLimitResetPolicy()` a cikin `open-sse/services/claudeLimitReset.ts`
+- Tarihi, iyakoki da ƙugiya: `src/lib/usage/bankedResetAudit.ts`
+- Tarihi API: `GET /api/settings/banked-reset-auto/history?limit=50` (Auth Gudanarwa)
+
+**Odar yanke shawara** (ka'idar rashin nasara ta farko ita ce dalilin da aka rubuta):
+
+1. An kashe fasalin, nau'in kiredit, ko asusu mara iyaka (`accountScope` `all` / `selected` da taswirar `connections` kowane-asusu).
+2. A waje da jadawalin UTC na zaɓi (`startHourUtc` > `endHourUtc` ya haye tsakiyar dare).
+3. Matsakaicin sa'o'i 24 na ƙarshe: `maxPerAccountPerDay` (1), `maxPerDay` (3), da `minSpacingMinutes` (30) tsakanin kowane fanni biyu.
+4. Trigger: taga `session` ko `weekly` mai bango (karanta daga `getQuotaWindowStatus().reachedThreshold`, ba `isAccountQuotaExhausted()`, wanda ke ba da rahoton asusu tare da kowane taga da aka kashe kawai), ko kiredit ɗin da ke ƙarewa a cikin `expiringCreditHours` (24) akan asusun da ya yi amfani da aƙalla `expiringCreditMinUsedPercent` (50).
+5. Tsaron sake saitin dabi'a: tsallake lokacin da taga mai bangon sa'o'i 5 ta sake saitawa a cikin `sessionResetGuardMinutes` (90), ko tagar mako-mako tsakanin `weeklyResetGuardHours` (12).
+6. Kasa na mako-mako: tsallake sake saitin sa'o'i 5 lokacin da saura sati ya kasa `weeklyFloorPercent` (10).
+7. Yanayin `last-resort` : tsallake yayin da wani asusu mai iyaka na mai samarwa yana da aƙalla `poolHeadroomPercent` (10) hagu a duka windows biyu. Ƙarshe-ƙiredit yana jawo ketare wannan.
+8. `dry-run` yana rikodin jere kuma bai fanshi komai ba; `last-resort` da `eager` sun fanshi.
+
+Rasa bayanan keɓaɓɓun bayanai baya buɗe fansa: lokacin sake saitin da ba a san shi ba ko tsallakewar amfani na mako-mako.
+
+**Sake saitin zaman Claude :** tare da fasalin a kashe, ko `claudeSessionReset` a kashe, kowane asusu `autoLimitReset` toggle yana yanke hukunci daidai kamar da. Tare da duka biyun, fasalin yana maye gurbin kowane-asusu na toggles: asusun da ke cikin iyaka yana iya da'awar kawai lokacin da manufofin ke ba da izini, kuma a cikin yanayin `dry-run` ba a yi da'awar ba.
+
+**Tsaro:** aikin yana fanshi a mafi yawan kiredit ɗaya a kowane kaska, yana yanke hukunci kafin lissafin ƙididdigewa (asusun da ba a taɓa jera shi ba), yana amfani da maɓallan idempotency `auto-reset:<connectionId>:<yyyy-mm-dd>:<n>`, kuma yana adana asusu don 1 h bayan gazawar jeri ko fansa. Kowane fansa, gazawar da bushe-gudu yanke shawara an rubuta zuwa `audit_log` (`action: "bankedReset.redeem"`, babu alamun ko ID ID); Ana kirga iyakoki daga waɗancan layuka, don haka suna tsira da sake farawa. Nasarar fansa kuma tana ƙone gidan yanar gizon `provider.reset_redeemed`.
+
+Masu gadin koma baya: `tests/unit/banked-reset-policy.test.ts`, `tests/unit/banked-reset-auto-apply.test.ts`, `tests/unit/claude-limit-reset-policy-gate.test.ts`, `tests/unit/banked-reset-history-route.test.ts`.
+
 ### Dangantakar zaman (#7274)
 
 **Faɗin aiki:** zaman abokin ciniki guda ɗaya (`X-Session-Id` / `x-codex-session-id` / `x-omniroute-session` header) ana kulle shi ga haɗi guda ɗaya, ga **kowane** mai bayarwa.

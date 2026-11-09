@@ -192,6 +192,45 @@ yẹ̀ àti fagilé oníbàárà ṣì máa ń ṣiṣẹ́ lọ́tọ̀ (`open-
 Àwọn olùṣọ́ ìpadàbọ̀sípò: `tests/unit/claude-low-priority-mode.test.ts`,
 `tests/unit/claude-limit-reset.test.ts`, `tests/unit/claude-low-priority-executor.test.ts`.
 
+### Lo awọn atunto banki ni aifọwọyi
+
+**Ààlà:** Codex ati Claude ṣiṣe alabapin (OAuth) awọn isopọ.**Jade wọle** : eto `bankedResetAutoApply` wa ni pipa ati ni ipo `dry-run` nipasẹ aiyipada (Eto → AI → Awọn atunto ile-ifowo aifọwọyi-laifọwọyi).
+
+**Idi:** na awọn atunto banki lori ara wọn nigbati akọọlẹ kan ba de odi lilo, dipo iduro fun oniṣẹ kan lati tẹ “Ràpada” lori oju-iwe Awọn opin Olupese.
+
+| Iru kirẹditi (`creditTypes`) | Ohun ti a rà                                      | Ibi ti o nṣiṣẹ                                           |
+| ---------------------------- | ------------------------------------------------- | -------------------------------------------------------- |
+| `codexCredits`               | Codex atunto kirediti                             | lẹhin ise, gbogbo 60 s                                   |
+| `claudeCredits`              | Awọn ifunni Banki Claude (awọn kirẹditi `GRANT` ) | lẹhin ise, gbogbo 60 s                                   |
+| `claudeSessionReset`         | Atunto akoko-osẹ-ọsẹ Claude (loke)                | ọna ibeere, nipasẹ eto imulo kanna gẹgẹbi iyipada-iroyin |
+
+**imuse:**
+
+- Ipinnu mimọ (ofin kan ti a ṣeto fun awọn ọna mejeeji): `src/lib/usage/bankedResetPolicy.ts::decideBankedReset()`
+- Iṣẹ abẹlẹ: `src/lib/services/bankedResetAutoApply.ts` (bẹrẹ ni `src/instrumentation-node.ts`)
+- Ẹnu-ọna ibeere Claude : `src/lib/usage/claudeSessionResetPolicy.ts`, ti a forukọsilẹ nipasẹ `setClaudeLimitResetPolicy()` ni `open-sse/services/claudeLimitReset.ts`
+- Itan, awọn fila ati webhook: `src/lib/usage/bankedResetAudit.ts`
+- Itan-akọọlẹ API: `GET /api/settings/banked-reset-auto/history?limit=50` (ifọwọsi iṣakoso)
+
+**Ilana ipinnu** (ofin ikuna akọkọ ni idi ti o gbasilẹ):
+
+1. Ẹya-ara ni pipa, iru kirẹditi pipa, tabi akọọlẹ ko ni opin (`accountScope` `all` / `selected` pẹlu maapu `connections` akọọlẹ-kọọkan).
+2. Ita awọn iyan UTC iṣeto (`startHourUtc` > `endHourUtc` irekọja ọganjọ).
+3. Awọn bọtini ni awọn wakati 24 to kẹhin: `maxPerAccountPerDay` (1), `maxPerDay` (3), ati `minSpacingMinutes` (30) laarin eyikeyi awọn irapada meji.
+4. Nfa: `session` olodi tabi window `weekly` (ka lati `getQuotaWindowStatus().reachedThreshold`, kii ṣe `isAccountQuotaExhausted()`, eyiti o ṣe ijabọ akọọlẹ kan pẹlu gbogbo window ti o lo), tabi kirẹditi ti o pari laarin `expiringCreditHours` (24) lori akọọlẹ ti o ti lo o kere ju `expiringCreditMinUsedPercent` (50).
+5. Ẹṣọ atunto Adayeba: foo nigbati window olodi 5-wakati tunto laarin `sessionResetGuardMinutes` (90), tabi window olodi laarin `weeklyResetGuardHours` (12).
+6. Ilẹ-ilẹ osẹ: foo atunto wakati marun-un nigbati o ku ni ọsẹ kan wa labẹ `weeklyFloorPercent` (10).
+7. Ipo `last-resort` : foo nigba ti iroyin inu-opin miiran ti olupese kanna ni o kere ju `poolHeadroomPercent` (10) osi ni awọn window mejeeji. Ipari-kirẹditi okunfa fori yi.
+8. `dry-run` akqsilc kana ati ki o rà ohunkohun; `last-resort` ati `eager` irapada.
+
+Awọn data ipin ti o padanu ko ṣii irapada kan: akoko atunto aimọ tabi awọn fo lilo ọsẹ.
+
+**Atunto igba Claude :** pẹlu ẹya ti o wa ni pipa, tabi pipa `claudeSessionReset`, iyipada `autoLimitReset` fun akọọlẹ kọọkan pinnu gangan bi iṣaaju. Pẹlu awọn mejeeji ti wa ni titan, ẹya ara ẹrọ rọpo awọn toggles fun-iroyin: akọọlẹ inu-ipin le beere nikan nigbati eto imulo ba gba laaye, ati ni ipo `dry-run` ko si ẹtọ.
+
+**Aabo:** iṣẹ naa irapada ni pupọ julọ kirẹditi kan fun ami kan, pinnu ṣaaju kikojọ awọn kirẹditi (iroyin ti o fo ko ni atokọ rara), nlo awọn bọtini idempotency `auto-reset:<connectionId>:<yyyy-mm-dd>:<n>`, ati ṣe afẹyinti akọọlẹ kan fun wakati 1 lẹhin atokọ ti o kuna tabi irapada. Gbogbo irapada, ikuna ati ipinnu ṣiṣe-gbẹ ni a kọ si `audit_log` (`action: "bankedReset.redeem"`, ko si awọn ami ami tabi awọn ids kirẹditi); Awọn fila naa ni a ka lati awọn ori ila wọnyẹn, nitorinaa wọn ye awọn atunbere. Awọn irapada ti o ṣaṣeyọri tun ina oju opo wẹẹbu `provider.reset_redeemed`.
+
+Awọn oluso ifasẹyin: `tests/unit/banked-reset-policy.test.ts`, `tests/unit/banked-reset-auto-apply.test.ts`, `tests/unit/claude-limit-reset-policy-gate.test.ts`, `tests/unit/banked-reset-history-route.test.ts`.
+
 ### Ìfaramọ́ ìpàdé (#7274)
 
 **Ààlà:** ìpàdé oníbàárà kan (`X-Session-Id` / `x-codex-session-id` / `x-omniroute-session` header) tí a so mọ́ ìsopọ̀ kan ṣoṣo, fún **olùpèsè èyíkéyìí**.

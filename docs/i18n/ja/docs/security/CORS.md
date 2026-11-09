@@ -4,156 +4,119 @@
 
 ---
 
-OmniRoute は、一元管理された単一の許可リストを使用して、どの **ブラウザオリジン** がクロスオリジンレスポンスを読み取れるかを制御します。このモデルは **デフォルトでフェイルクローズ** です。明示的に許可するまで、どのオリジンも許可されません。このページでは、許可リストの解決方法、`CORS_ALLOW_ALL=true` が実際に何を公開するのか（そして重要な点として、何を公開 **しない** のか）、開発環境と本番環境を安全に設定する方法、およびワイルドカードが有効な場合にダッシュボードに表示されるランタイム警告について説明します。
+OmniRoute制御するのは**ブラウザの起源**単一の集中化されたホワイトリストからクロスオリジン応答を読み取ることができます。モデルは**デフォルトでフェールクローズされる**: オプトインするまでオリジンは許可されません。このページでは、ホワイトリストがどのように解決されるか、 `CORS_ALLOW_ALL=true`実際に何を公開するか (そして重要なことに、それが何をするのか) について説明します。**ない**）、開発と運用を安全に構成する方法、ワイルドカードが有効な場合にダッシュボードに表示されるランタイム警告について説明します。
 
-**信頼できる情報源:** `src/server/cors/origins.ts`（`resolveAllowedOrigin`、`applyCorsHeaders`、`getCorsStatus`）。許可リストはミドルウェア（`src/server/authz/pipeline.ts`）で一度だけ適用されます。ルートごとのハンドラーが独自に `Access-Control-Allow-Origin` を設定することはありません。
+**真実の情報源:** `src/server/cors/origins.ts` (`resolveAllowedOrigin`、 `applyCorsHeaders`、 `getCorsStatus`)。ホワイトリストはミドルウェア (`src/server/authz/pipeline.ts`) で一度適用されます—ルートごとのハンドラーは`Access-Control-Allow-Origin`自体を設定しません。
 
-## オリジンの解決方法
+## 原点の解決方法
 
-リクエストごとに、ミドルウェアは次の順序で `Access-Control-Allow-Origin` の値を算出します。
+リクエストごとに、ミドルウェアは次の順序で`Access-Control-Allow-Origin`値を計算します。
 
-1. **`CORS_ALLOW_ALL=true`**（または従来の `CORS_ORIGIN=*`）→ 呼び出し元の `Origin` をそのまま返します（`Origin` ヘッダーがない場合は `*`）。また、キャッシュが正しく機能するように `Vary: Origin` を設定します。同じ `applyCorsHeaders()` チョークポイントは、トークン認証された `/v1*`/`/v1beta*` サーフェス上で、本文を含むすべての 2xx レスポンスに `Vary: Accept-Encoding` も追加します（`relaxForTokenAuth`、RFC 9110 §12.5.5、issue #6737）。これにより、ダウンストリームキャッシュや共有キャッシュは、圧縮版と非圧縮版を正しく区別できます。
-2. それ以外の場合、リクエストの `Origin` を正規化し（小文字化し、末尾のスラッシュを削除）、次の **統合された許可リスト** と照合します。
-   - env **`CORS_ALLOWED_ORIGINS`** — カンマ区切りのリスト、および
-   - ランタイムの **`corsOrigins`** 設定（Dashboard → Security → _CORS Allowed Origins_）。これは `src/lib/config/runtimeSettings.ts` から `setRuntimeAllowedOrigins()` を介して注入されます。
-3. 一致しない場合 → **`Access-Control-Allow-Origin` ヘッダーは送信されません**。ブラウザはクロスオリジンでの読み取りをブロックします。これが意図されたフェイルクローズのデフォルト動作です。
+1. **`CORS_ALLOW_ALL=true`** (または従来の`CORS_ORIGIN=*`) →呼び出し元の`Origin` (または`Origin`ヘッダーがない場合は`*` ) をエコー バックし、 `Vary: Origin`を使用するため、キャッシュは正確なままになります。同じ`applyCorsHeaders()`チョークポイントは、トークン認証された`/v1*`/`/v1beta*`サーフェス上のすべての 2xx-with-body 応答に`Vary: Accept-Encoding`追加するため (`relaxForTokenAuth`、 RFC 9110 §12.5.5、発行#6737)、 downstream/sharedキャッシュは圧縮バリアントと非圧縮バリアントを正しく区別できます。
+2. それ以外の場合、リクエスト`Origin`は正規化され (小文字、末尾のスラッシュが削除され)、**統合された許可リスト**:
+   - 環境**`CORS_ALLOWED_ORIGINS`** —カンマ区切りリスト、および
+   - ランタイム**`corsOrigins`**設定 (ダッシュボード→セキュリティ→ _CORS 許可オリジン_)、 `src/lib/config/runtimeSettings.ts`から`setRuntimeAllowedOrigins()`経由で挿入されます。
+3. 一致する→ありません**`Access-Control-Allow-Origin`ヘッダーは出力されません**。ブラウザはクロスオリジン読み取りをブロックします。これは意図されたフェールクローズのデフォルトです。
 
-| 環境変数               | 意味                                                                                     |
-| ---------------------- | ---------------------------------------------------------------------------------------- |
-| `CORS_ALLOWED_ORIGINS` | 許可する完全一致のオリジンを指定する CSV（推奨）。                                       |
-| `CORS_ALLOW_ALL`       | `true`/`1` → 任意のオリジンをそのまま返す（ワイルドカード）。開発環境専用。              |
-| `CORS_ORIGIN`          | 従来の設定。`*` は `CORS_ALLOW_ALL` と同様に動作し、単一の値は許可リストに追加されます。 |
+| 環境変数               | 意味                                                                                |
+| ---------------------- | ----------------------------------------------------------------------------------- |
+| `CORS_ALLOWED_ORIGINS` | 正確な起源のCSVを許可します (推奨)。                                                |
+| `CORS_ALLOW_ALL`       | `true`/`1` →任意のオリジン (ワイルドカード) をエコーします。開発のみ。              |
+| `CORS_ORIGIN`          | 遺産。 `*` `CORS_ALLOW_ALL`のように動作します。単一の値が許可リストに追加されます。 |
 
-## 脅威モデル — `CORS_ALLOW_ALL=true` が実際に公開するもの
+## `CORS_ALLOW_ALL=true`が実際に暴露する脅威モデル—
 
-一般的な OWASP の警告（「ワイルドカード CORS = どのサイトからでも API を呼び出せる」）は真剣に受け止めるべきですが、OmniRoute での公開範囲は、次の具体的な実装上の事実により、**一般的なケースよりも限定的** です。
+一般的なOWASP警告 (「ワイルドカードCORS =どのサイトでもAPIを呼び出すことができる」) は真剣に受け止める価値がありますが、 OmniRouteの暴露は**一般的なケースより狭い**1 つの具体的な実装事実があるためです。
 
-> **中央の `applyCorsHeaders()` は
-> `Access-Control-Allow-Credentials` を決して送信しません。** サーバーが
-> `Access-Control-Allow-Credentials: true` を送信しない限り、ブラウザは
-> _認証情報付き_（Cookie を含む）のクロスオリジンレスポンスを公開しません。
-> OmniRoute の共有 CORS パスがこれを送信することはありません。
+> **中央の`applyCorsHeaders()` `Access-Control-Allow-Credentials`を発行しません。**サーバーが`Access-Control-Allow-Credentials: true`を送信しない限り、ブラウザーは _credentialed_ (Cookie を含む) クロスオリジン応答を公開しません。 OmniRouteの共有CORSパスは決してそうではありません。
 
-これは、`CORS_ALLOW_ALL=true` の場合でも、各サーフェスで次のことを意味します。
+`CORS_ALLOW_ALL=true`使用した場合でも、サーフェスごとにそれが何を意味するか:
 
-| サーフェス                           | 認証メカニズム                | ワイルドカード CORS の影響                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| ------------------------------------ | ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Dashboard / MANAGEMENT `/api/*`      | Cookie セッション             | オリジンはそのまま返されますが、**`Allow-Credentials` がないため**、ブラウザは **認証情報付きの読み取りをブロック** します。悪意のあるクロスオリジンサイトが認証済みのダッシュボードレスポンスを **読み取ることはできず**、セッション Cookie も公開されません。                                                                                                                                                                                                                                                                                                                    |
-| Client API `/v1/*`, `/v1beta/*`      | Bearer / `x-api-key` ヘッダー | **設計上、すでに許容的** です（`relaxForTokenAuth`）。ブラウザが `Authorization`/`x-api-key` を自動的に付加することはないため、攻撃者のページがユーザーのキーを提供することはできません。緩和されたルールによるオリジンの反映には、単に認証情報のヘッダーがあるだけではなく、認証済みの主体（検証済みの API キーまたは検証済みのダッシュボードセッション）が必要であり、`Access-Control-Allow-Credentials` は決して含まれません。匿名のレスポンス（`REQUIRE_API_KEY=false`）では、`CORS_ALLOW_ALL=true` による明示的な有効化も含め、設定されたオリジンの許可リストが使用されます。 |
-| 公開読み取り専用（`/api/health`、…） | なし                          | 機密性がないため、ワイルドカードでも問題ありません。                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| 表面                                      | 認証メカニズム                | ワイルドカードCORSの効果                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| ----------------------------------------- | ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ダッシュボード / MANAGEMENT `/api/*`      | クッキーセッション            | 原点は響きますが、**`Allow-Credentials`なし**ブラウザ**ブロック**認証された読み取り。悪意のあるクロスオリジン サイト**読めない**認証されたダッシュボード応答があれば、セッション Cookie は公開されません。                                                                                                                                                                                                                                                                                |
+| クライアントAPI `/v1/*`、 `/v1beta/*`     | ベアラー/ `x-api-key`ヘッダー | すでに寛容**設計上**(`relaxForTokenAuth`): ブラウザは`Authorization`/`x-api-key`を自動的にアタッチしないため、攻撃者のページはキーを提供できません。緩和されたエコーには、資格情報ヘッダーだけでなく、認証されたサブジェクト (検証されたAPIキーまたはダッシュボード セッション) が必要であり、 `Access-Control-Allow-Credentials`は決して含まれません。匿名応答 (`REQUIRE_API_KEY=false`) は、明示的な`CORS_ALLOW_ALL=true`オプトインを含む、構成された送信元ホワイトリストを使用します。 |
+| パブリック読み取り専用 (`/api/health`、…) | なし                          | 非敏感。ワイルドカードは無害です。                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
 
-したがって、`CORS_ALLOW_ALL=true` による **残余** の公開範囲は、次のものに限定されます。(a) すでに未認証で利用可能なデータに対する、認証情報を伴わないクロスオリジンの **読み取り**、および (b) 管理ルートで CORS **プリフライトを通過させること**。ただし、これらのルートには引き続き認証が必要であり、クロスオリジンページがその認証を提供することはできません。共有 CORS パスにおいて、これはセッションハイジャックや認証情報窃取の攻撃経路では **ありません**。
+それで、**残留物**`CORS_ALLOW_ALL=true`の公開は以下に限定されます: (a) 認証されていないクロスオリジン**読む**すでに認証されていないデータの保存、および (b) CORSに許可**プリフライトパス**管理ルート—では、依然としてクロスオリジン ページでは提供できない認証が必要です。それは**ない**共有CORSパス上のセッション ハイジャックまたは資格情報盗難ベクトル。
 
-### 唯一の実質的な例外 — `/api/v1/agents/`
+### 本物の例外— `/api/v1/agents/` 1 つ
 
-Cloud-Agent ルート（`/api/v1/agents/{health,credentials,tasks,tasks/[id]}`）は **独自の** CORS ヘッダー（`src/lib/cloudAgent/api.ts`、`getCloudAgentCorsHeaders`）を設定し、`Access-Control-Allow-Origin: <origin>|*` と `Access-Control-Allow-Credentials: true` を同時に送信 **します**。これはオリジンのエコーと認証情報が共存する唯一のサーフェスであり、`CORS_ALLOW_ALL` とは **独立しています**。これらのルートは管理認証（`requireManagementAuth`）で保護されています。ダッシュボードをホスト外部に公開する運用担当者は、レスポンスヘッダーによってクロスオリジンの認証情報付き読み取りが許可される唯一の箇所がここであることを認識しておく必要があります。これを明示的な許可リストに制限する対応は、この CORS ガイダンスとは別に追跡されています。
+Cloud-Agent ルート (`/api/v1/agents/{health,credentials,tasks,tasks/[id]}`) は、**自分の**CORSヘッダー (`src/lib/cloudAgent/api.ts`、 `getCloudAgentCorsHeaders`) および**する**`Access-Control-Allow-Origin: <origin>|*` `Access-Control-Allow-Credentials: true`と一緒に発行します。これは、オリジンエコーと資格情報が共存する単一のサーフェスであり、**`CORS_ALLOW_ALL`から独立した**。これらのルートは管理認証 (`requireManagementAuth`) されています。オフホストでダッシュボードを公開するオペレーターは、これが応答ヘッダーによってクロスオリジン認証情報の読み取りが許可される唯一の場所であることを認識する必要があります。明示的な許可リストへの厳格化は、このCORSガイダンスとは別に追跡されます。
 
-## 本番環境向けチェックリスト
+## 製作チェックリスト
 
-- **本番環境では絶対に `CORS_ALLOW_ALL=true` を設定しないでください。** 未設定のままにしてください。
-- 環境変数または Security タブのフィールドで、**明示的な**オリジンリストを設定してください。
+- **運用環境では決して`CORS_ALLOW_ALL=true`を設定しないでください。**未設定のままにしておきます。
+- を設定します**明示的な**オリジン リスト—環境変数または [セキュリティ] タブ フィールドのいずれか:
 
   ```bash
   CORS_ALLOWED_ORIGINS="https://app.example.com, https://admin.example.com"
   ```
 
-- OmniRoute がリバースプロキシ／トンネル（nginx、Caddy、Cloudflare
-  Tunnel、Tailscale）の背後で動作する場合、CORS は**唯一の**制御手段ではありません。ループバックルート
-  ガードは引き続き、プロセス起動が可能なルートを保護します（
-  [ROUTE_GUARD_TIERS](./ROUTE_GUARD_TIERS.md) を参照）。403 を「修正」するために
-  `X-Forwarded-For: 127.0.0.1` を偽装しないでください。これを行うと、ルートガードが
-  防いでいる RCE クラスの脆弱性が再び生じます。
-- ランタイム状態を確認してください。`CORS_ALLOW_ALL=true` が有効な間、ダッシュボードの
-  Dashboard → Security → Authorization Inventory の下には**常時表示される琥珀色のバナー**
-  が表示され、`/api/settings/authz-inventory` は監視ツールがポーリングできる
-  `cors: { allowAll, allowedOrigins }` エンベロープを返します。
+- OmniRouteリバース プロキシ/トンネル (nginx、Caddy、 Cloudflareトンネル、 Tailscale) の背後で実行されている場合、 CORSは**ない**唯一の制御—ループバック ルート ガードであり、スポーン可能なルートを保護します ( [ROUTE_GUARD_TIERS](./ROUTE_GUARD_TIERS.md)参照)。 403 を「修正」するために`X-Forwarded-For: 127.0.0.1`偽造しないでください。これにより、ルート ガードが閉じたRCEクラスが再び開きます。
+- 実行時の状態を確認します。ダッシュボードに**永続的な琥珀色のバナー**`CORS_ALLOW_ALL=true`がライブであり、 `/api/settings/authz-inventory` `cors: { allowAll, allowedOrigins }`エンベロープを返すたびに、ダッシュボード→セキュリティ→認証インベントリで監視ツールがポーリングできます。
 
-## 開発時の利便性 — 特定のローカルオリジンを許可する
+## 開発上の利便性—特定のローカル起源が許可される
 
-開発環境でも、ワイルドカードが必要になることはほとんどありません。使用する開発サーバーだけを許可してください。
+開発環境でもワイルドカードが必要になることはほとんどありません。使用する開発サーバーのみを許可します。
 
 ```bash
-# ローカルの OmniRoute を呼び出す Vite (5173) + Next.js (3000) 開発サーバー
+# Vite (5173) + Next.js (3000) dev servers calling a local OmniRoute
 CORS_ALLOWED_ORIGINS="http://localhost:5173, http://localhost:3000"
 ```
 
-オリジンは大文字と小文字を区別せず、末尾のスラッシュを無視して照合されるため、
-`http://localhost:3000` と `http://localhost:3000/` は同等です。同じ CSV を
-**Dashboard → Security → CORS Allowed Origins** で設定すれば、再起動せずにランタイムへ
-反映できます。
+オリジンは大文字と小文字を区別せずに末尾のスラッシュを無視して照合されるため、 `http://localhost:3000`と`http://localhost:3000/`は同等です。同じCSV実行時に設定できます。**ダッシュボード→セキュリティ→ CORS許可されたオリジン**再起動せずに。
 
-## API キーと Cookie セッションの比較
+## APIキーと Cookie セッションの比較
 
-- **Bearer / `x-api-key`（`/v1/*` 推論サーフェス）：** ブラウザーがこれらを自動的に
-  付加することはありません。ここでは CORS は意味のある防壁ではなく、API キーが
-  防壁です。そのため、このサーフェスは意図的に寛容に設定されており、ブラウザーおよび
-  Electron クライアントは、すでにアクセス権を持つレスポンスを読み取れます。
-  緩和されたルールによるオリジンの反映には、単に認証情報のヘッダーがあるだけではなく、認証済みの主体（検証済みの API キーまたは検証済みのダッシュボードセッション）が必要であり、`Access-Control-Allow-Credentials` は決して含まれません。匿名のレスポンス（`REQUIRE_API_KEY=false`）では、`CORS_ALLOW_ALL=true` による明示的な有効化も含め、設定されたオリジンの許可リストが使用されます。認証拒否（401）は読み取り可能なままであるため、
-  クライアントは失効したキーや入力ミスのあるキーをユーザーに示せます（#5242）。パイプライン自身が
-  返す 401 ではエコーが維持され、パイプラインが匿名として処理した後にルート自身がキーを拒否する場合
-  （管理認証が設定されている場合の `/v1/models` と `/v1beta/models`、所有者スコープの
-  `/v1/files`、`/v1/batches`、`/v1/media`、`/v1/session-leases`、および auto-combo の候補ルート）は、
-  `credentialRejectionHeaders()` によってその 401 にエコーが追加されます。エコーの有無は、
-  ルートがそのうちどれを検査したかではなく、リクエストが認証情報ヘッダー（`Authorization`、
-  `x-api-key`、`x-goog-api-key`、または `auth_token` Cookie）を含んでいるかどうかで決まり、
-  `Access-Control-Allow-Credentials` と組み合わされることはありません。本文は固定のエラーエンベロープです。
-  `requireManagementAuth()` で保護された `/api/v1/` 配下の管理ルート（`/api/v1/management/*`、
-  `/api/v1/registered-keys`）はこの認証情報拒否時の例外を使用しません。`REQUIRE_API_KEY=false` の場合、これらの 401/403 レスポンスは設定された CORS オリジンポリシーに従います。
-- **Cookie セッション（ダッシュボード）：** フェイルクローズのデフォルト設定**と**
-  共有パスに `Access-Control-Allow-Credentials` が存在しないことによって保護されます。
-  管理／ダッシュボードのオリジンを寛容な設定に含めないでください。これらは厳密に
-  フェイルクローズのままにする必要があります。
+- **ベアラー / `x-api-key` ( `/v1/*`推論面):**ブラウザがこれらを自動的に添付することはありません。ここでは、 CORSは意味のあるバリアではありません— APIキーはバリア—です。そのため、その表面は意図的に許可されており、ブラウザーとElectronクライアントはすでに権利を持っている応答を読み取ることができます。緩和されたエコーには、資格情報ヘッダーだけでなく、認証されたサブジェクト (検証されたAPIキーまたはダッシュボード セッション) が必要であり、 `Access-Control-Allow-Credentials`は決して含まれません。匿名応答 (`REQUIRE_API_KEY=false`) は、明示的な`CORS_ALLOW_ALL=true`オプトインを含む、構成された送信元ホワイトリストを使用します。認証拒否 (401) は読み取り可能なままであるため、クライアントは取り消されたキーまたはタイプミスされたキー (#5242) を表面化できます。パイプライン自体の 401 はエコーを保持し、パイプラインが匿名として提供した後にキー自体を拒否するルート (管理認証が設定された`/v1/models`および`/v1beta/models` 、所有者スコープの`/v1/files`、 `/v1/batches`、 `/v1/media`、 `/v1/session-leases`および自動コンボ候補ルート) にエコーを追加します。 `credentialRejectionHeaders()`経由の 401 。エコーは、ルートがチェックされたヘッダー (`Authorization`、 `x-api-key`、 `x-goog-api-key`または`auth_token` Cookie) を運ぶリクエストに基づいてキー設定され、 `Access-Control-Allow-Credentials`とペアになることはありません。本体は固定エラー エンベロープです。 `requireManagementAuth()`によって保護された`/api/v1/`下の管理ルート (`/api/v1/management/*`、 `/api/v1/registered-keys`、 `/api/v1/providers/[provider]/limits`、 `/api/v1/accounts/[id]/limits`、 `/api/v1/issues/report`) は、この資格情報拒否例外を使用しません。 `REQUIRE_API_KEY=false`では、その401/403応答は、設定されたCORSオリジン ポリシーに従います。
+- **Cookie セッション (ダッシュボード):**フェールクローズのデフォルトで保護されています**そして**共有パス上に`Access-Control-Allow-Credentials`が存在しないことが原因です。 management/dashboardオリジンを許容的な構成から遠ざけてください。正確にフェールクローズ状態を維持する必要があります。
 
-## WebSocket ハンドシェイク（`/v1/responses`、`/v1/ws`）
+## WebSocketハンドシェイク (`/v1/responses`、 `/v1/ws`)
 
-ブラウザーは WebSocket に CORS を適用しないため、推論出力を返す WebSocket トランスポートは、ハンドシェイクの `Origin` を自ら検査します（`src/server/origin/wsOrigin.ts`）。対象は Responses WebSocket（`/v1/responses`）と、OmniRoute を `npm start` / `npm run dev` で実行している場合の `/v1/ws` および `/api/v1/ws` ブリッジです。このブリッジは `/v1/chat/completions`、`/v1/messages`、`/v1/responses` をフレームとしてストリーミングします。ブリッジは `/api/v1/ws?handshake=1` に判定を問い合わせ、そのルートが検査を実行していない限りアップグレードを拒否します。認証要件は引き続き別途適用されます。オリジンのチェックは、次の場合に通過します:
+ブラウザーはCORS WebSocketに適用しないため、推論出力を返すWebSocketトランスポートは、ハンドシェイク`Origin`自体 (`src/server/origin/wsOrigin.ts`)、つまり応答WebSocket (`/v1/responses`)、およびOmniRoute `npm start` / `npm run dev`を介して実行される場合、 `/v1/chat/completions`、 `/v1/messages`および`/v1/responses`フレームとしてストリーミングする`/v1/ws`および`/api/v1/ws`ブリッジをチェックします。ブリッジは`/api/v1/ws?handshake=1`に判定を求め、そのルートがチェックを実行しない限りアップグレードを拒否します。認証要件は引き続き別途適用されます。原点チェックは次の場合に合格します。
 
-- `Origin` ヘッダーがない場合（Codex CLI、SDK、その他のブラウザー以外のクライアント）
-- `Origin` が上記の許可リスト（`CORS_ALLOWED_ORIGINS`、`corsOrigins` 設定、`CORS_ORIGIN`、`CORS_ALLOW_ALL`）で許可されている場合
-- `Origin` が OmniRoute 自身の公開オリジンのいずれかである場合（設定済みの公開ベース URL、信頼済みプロキシが転送したオリジン、または IP リテラルか `localhost` で指定された直接の loopback/LAN ホスト。ダッシュボードの変更操作チェックが使用するのと同じ候補です）
-- HTTP の `/v1/*` サーフェスと同様に、有効な API キーを含んでいる場合
+- `Origin`ヘッダー (Codex CLI、 SDKsおよびその他の非ブラウザー クライアント) はありません。
+- `Origin`は上記の許可リスト (`CORS_ALLOWED_ORIGINS`、 `corsOrigins`設定、 `CORS_ORIGIN`、 `CORS_ALLOW_ALL`) によって許可されます。
+- `Origin`は、 OmniRoute自身のパブリック オリジン (構成済みのパブリック ベースURL、信頼できるプロキシの転送オリジン、またはダッシュボードの変異チェックで使用されるのと同じ候補であるIPリテラルまたは`localhost` —として指定される直接loopback/LANホスト) の 1 つです。または
+- HTTP `/v1/*`サーフェスと同様に、有効なAPIキーが保持されます。
 
-それ以外はすべて `403 ws_origin_forbidden` を受け取ります。ダッシュボードのセッション Cookie は、ブラウザーがどのページのソケットにも付加するため、外部の `Origin` を免除する理由にはなりません。別のポートの `localhost` は同一オリジンとして扱われません。そのような開発用オリジンは `CORS_ALLOWED_ORIGINS` に追加してください。
+それ以外のものは何でも得られます `403 ws_origin_forbidden`。ダッシュボード セッション Cookie は外部のセッションを免除しません。 `Origin`ブラウザがそれを任意のページのソケットに接続するためです。 `localhost` 別のポートでは同一オリジンとして扱われません。そのような開発元を追加します `CORS_ALLOWED_ORIGINS`.
 
-## 例：OmniRoute の前段に配置するリバースプロキシ
+## 例: OmniRouteの前のリバース プロキシ
 
-CORS は OmniRoute 自体によって適用されるため、通常、プロキシ側で
-`Access-Control-*` ヘッダーを追加または書き換えるべきでは**ありません**（ヘッダーが重複するとブラウザーで問題が発生します）。TLS を終端して
-転送し、プリフライトへの応答は OmniRoute に任せてください。
+CORSはOmniRoute自体によって強制されるため、プロキシは通常、**ない**`Access-Control-*`ヘッダーを追加または書き換えます (二重ヘッダーはブラウザーを破壊します)。 TLSを終了し、 —を転送して、 OmniRouteプリフライトに応答できるようにします。
 
 ```nginx
-# nginx — OmniRoute に転送します。ここでは Access-Control-* を挿入しないでください
+# nginx — forward to OmniRoute; do NOT inject Access-Control-* here
 location / {
     proxy_pass http://127.0.0.1:20128;
     proxy_set_header Host $host;
     proxy_set_header X-Real-IP $remote_addr;
     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     proxy_set_header X-Forwarded-Proto $scheme;
-    # 転送ヘッダーは維持してください。同じホスト上のプロキシはループバックから接続するため、
-    # 呼び出し元がローカルのオペレーターではないことを OmniRoute に伝えるのは、これらのヘッダーです。
-    # これらを一切追加しないプロキシでは、すべてのリモート呼び出し元がローカルに見えてしまいます。
-    # また、X-Forwarded-For を 127.0.0.1 に設定しないでください。
+    # Keep the forwarding headers: a proxy on the same host connects from loopback, and they are
+    # what tells OmniRoute the caller is not the local operator. A proxy that adds none of them
+    # makes every remote caller look local. Never set X-Forwarded-For to 127.0.0.1 either.
 }
 ```
 
-ブラウザーに許可するオリジンは、プロキシではなく OmniRoute（`CORS_ALLOWED_ORIGINS` または
-Security タブ）で設定してください。
+許可されるブラウザーの起点は、プロキシではなく、 OmniRoute (`CORS_ALLOWED_ORIGINS`または [セキュリティ] タブ) で設定します。
 
 ## ソースファイル
 
-| 対象                                         | ファイル                                                             |
-| -------------------------------------------- | -------------------------------------------------------------------- |
-| 許可リストの解決 + `getCorsStatus()`         | `src/server/cors/origins.ts`                                         |
-| ミドルウェアの適用（信頼できる唯一の情報源） | `src/server/authz/pipeline.ts`                                       |
-| Settings → ランタイムへのオリジン注入        | `src/lib/config/runtimeSettings.ts`                                  |
-| ダッシュボード向けのランタイム状態           | `src/app/api/settings/authz-inventory/route.ts`                      |
-| ダッシュボードの警告バナー                   | `src/app/(dashboard)/dashboard/settings/components/AuthzSection.tsx` |
-| CORS Allowed Origins フィールド              | `src/app/(dashboard)/dashboard/settings/components/SecurityTab.tsx`  |
-| Cloud-Agent のルート単位 CORS（例外）        | `src/lib/cloudAgent/api.ts`                                          |
-| WebSocket ハンドシェイクの `Origin` チェック | `src/server/origin/wsOrigin.ts`                                      |
+| 懸念                                                   | ファイル                                                             |
+| ------------------------------------------------------ | -------------------------------------------------------------------- |
+| ホワイトリストの解決+ `getCorsStatus()`                | `src/server/cors/origins.ts`                                         |
+| ミドルウェア アプリケーション (唯一の信頼できる情報源) | `src/server/authz/pipeline.ts`                                       |
+| →ランタイム オリジン インジェクションの設定            | `src/lib/config/runtimeSettings.ts`                                  |
+| ダッシュボードの実行時のステータス                     | `src/app/api/settings/authz-inventory/route.ts`                      |
+| ダッシュボードの警告バナー                             | `src/app/(dashboard)/dashboard/settings/components/AuthzSection.tsx` |
+| CORS許可されたオリジンフィールド                       | `src/app/(dashboard)/dashboard/settings/components/SecurityTab.tsx`  |
+| クラウドエージェントのルートごとのCORS (例外)          | `src/lib/cloudAgent/api.ts`                                          |
+| WebSocketハンドシェイク`Origin`チェック                | `src/server/origin/wsOrigin.ts`                                      |
 
-## 関連項目
+## こちらも参照
 
-- [ルートガードの階層](./ROUTE_GUARD_TIERS.md) — spawn 対応ルートに対するループバックの強制
-  （独立した補完的な制御）。
-- [認可ガイド](../architecture/AUTHZ_GUIDE.md) — 認証・認可パイプラインの全体像。
+- [ルート ガード層](./ROUTE_GUARD_TIERS.md)生成可能なルートに対する—ループバックの適用 (別個の補完的な制御)。
+- [認可ガイド](../architecture/AUTHZ_GUIDE.md)—完全な認証パイプライン。

@@ -198,6 +198,45 @@ Kiro のバイナリ `reasoningContentEvent` フレームは、空でない署�
 リグレッションガード: `tests/unit/claude-low-priority-mode.test.ts`,
 `tests/unit/claude-limit-reset.test.ts`, `tests/unit/claude-low-priority-executor.test.ts`.
 
+### 蓄積したリセットの自動適用
+
+**範囲：** CodexおよびClaudeサブスクリプション (OAuth) 接続。**オプトイン**: `bankedResetAutoApply`設定はオフで、デフォルトでは`dry-run`モードになっています (設定→ AI →バンク リセットの自動適用)。
+
+**目的：**アカウントが使用量の上限に達したとき、プロバイダー制限ページでオペレーターが「引き換え」を押すのを待たずに、蓄積したリセットクレジットを自動的に使用します。
+
+| クレジットタイプ (`creditTypes`) | 何が償還されるのか                                 | どこで実行されるか                                             |
+| -------------------------------- | -------------------------------------------------- | -------------------------------------------------------------- |
+| `codexCredits`                   | Codexリセット クレジット                           | バックグラウンド ジョブ、60 秒ごと                             |
+| `claudeCredits`                  | Claudeの蓄積した付与クレジット (`GRANT`クレジット) | バックグラウンド ジョブ、60 秒ごと                             |
+| `claudeSessionReset`             | Claude週次セッション制限のリセット (上)            | リクエストパス、アカウントごとの切り替えと同じポリシーを介して |
+
+**実装：**
+
+- 純粋な決定 (両方のパスに 1 つのルール セット): `src/lib/usage/bankedResetPolicy.ts::decideBankedReset()`
+- バックグラウンドジョブ: `src/lib/services/bankedResetAutoApply.ts` ( `src/instrumentation-node.ts`で開始)
+- Claudeリクエスト パス ゲート: `src/lib/usage/claudeSessionResetPolicy.ts`、 `setClaudeLimitResetPolicy()`を通じて`open-sse/services/claudeLimitReset.ts`に登録
+- 履歴、上限、Webhook: `src/lib/usage/bankedResetAudit.ts`
+- 履歴API: `GET /api/settings/banked-reset-auto/history?limit=50` (管理認証)
+
+**決定順序**(最初に失敗したルールが記録された理由です):
+
+1. 機能がオフ、クレジット タイプがオフ、またはアカウントが範囲外です (`accountScope` `all` / `selected`とアカウントごとの`connections`マップ)。
+2. オプションのUTCスケジュール外 (`startHourUtc` > `endHourUtc`午前 0 時をまたぐ)。
+3. 過去 24 時間の上限: 2 つの引き換え間の`maxPerAccountPerDay` (1)、 `maxPerDay` (3)、および`minSpacingMinutes` (30)。
+4. トリガー: 壁に囲まれた`session`または`weekly`ウィンドウ ( `isAccountQuotaExhausted()`ではなく`getQuotaWindowStatus().reachedThreshold`から読み取り、すべてのウィンドウが使用されたアカウントをレポートするだけです)、または少なくとも`expiringCreditMinUsedPercent` (50) を使用したアカウントで`expiringCreditHours` (24) 以内に期限切れになるクレジット。
+5. ナチュラル リセット ガード: `sessionResetGuardMinutes` (90) 内で壁に囲まれた 5 時間ウィンドウ、または`weeklyResetGuardHours` (12) 内で壁に囲まれた週次ウィンドウがリセットされる場合はスキップします。
+6. 週次フロア: 週次残りが`weeklyFloorPercent` (10) を下回る場合、5 時間のリセットをスキップします。
+7. `last-resort`モード: 同じプロバイダーの別の範囲内アカウントが両方のウィンドウに少なくとも`poolHeadroomPercent` (10) 残っている間はスキップします。有効期限が間近のクレジットによるトリガーには、この制約を適用しません。
+8. `dry-run`は記録を追加するだけで、引き換えは行いません。`last-resort`と`eager`では引き換えを行います。
+
+クォータデータが欠けていても、引き換えは許可されません。判断に必要なリセット時刻または週次使用量が不明な場合、ポリシーはそのアカウントをスキップします。
+
+**Claudeセッションのリセット:**機能がオフまたは`claudeSessionReset`がオフの場合、アカウントごとの`autoLimitReset`トグルは以前とまったく同じように決定します。両方をオンにすると、この機能はアカウントごとの切り替えを置き換えます。スコープ内のアカウントは、ポリシーで許可されている場合にのみ要求を行うことができ、 `dry-run`モードでは要求は行われません。
+
+**安全性：**ジョブはティックごとに最大 1 クレジットを引き換え、クレジットをリストする前に決定し (スキップされたアカウントは決してリストされません)、冪等キー`auto-reset:<connectionId>:<yyyy-mm-dd>:<n>`を使用し、リストまたは引き換えの失敗後にアカウントを 1 時間バックオフします。すべての償還、失敗、およびドライランの決定は`audit_log` (`action: "bankedReset.redeem"`、トークンやクレジット ID なし) に書き込まれます。上限はこれらの記録から計算されるため、再起動後も維持されます。引き換えが成功すると、 `provider.reset_redeemed` Webhook も起動されます。
+
+回帰ガード: `tests/unit/banked-reset-policy.test.ts`、 `tests/unit/banked-reset-auto-apply.test.ts`、 `tests/unit/claude-limit-reset-policy-gate.test.ts`、 `tests/unit/banked-reset-history-route.test.ts`。
+
 ### セッションアフィニティ（#7274）
 
 **対象範囲:** 1つのクライアントセッション（`X-Session-Id` / `x-codex-session-id` / `x-omniroute-session` ヘッダー）を、**任意の**プロバイダーの1つの接続に固定します。

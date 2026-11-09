@@ -179,6 +179,45 @@ az `anthropic-ratelimit-unified-slow-offer: treatment` értéket. Az első plafo
 Regressziós védelmek: `tests/unit/claude-low-priority-mode.test.ts`,
 `tests/unit/claude-limit-reset.test.ts`, `tests/unit/claude-low-priority-executor.test.ts`.
 
+### A banki alaphelyzetbe állítások automatikus alkalmazása
+
+**Hatály:** Codex és Claude előfizetéses (OAuth) kapcsolatok.**Feliratkozás** : a `bankedResetAutoApply` beállítás ki van kapcsolva, és alapértelmezés szerint `dry-run` módban van (Beállítások → AI → A banki alaphelyzetbe állítások automatikus alkalmazása).
+
+**Cél:** a banki visszaállításokat önmagukban költik el, amikor egy számla használati falhoz ér, ahelyett, hogy megvárnák, amíg a kezelő megnyomja a „Beváltás” gombot a Szolgáltatói limitek oldalon.
+
+| Hiteltípus (`creditTypes`) | Ami meg van váltva                                  | Ahol fut                                                                           |
+| -------------------------- | --------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| `codexCredits`             | Codex kreditek visszaállítása                       | háttérmunka, 60 másodpercenként                                                    |
+| `claudeCredits`            | Claude banki támogatások (`GRANT` kreditek)         | háttérmunka, 60 másodpercenként                                                    |
+| `claudeSessionReset`       | Claude heti munkamenet-korlát visszaállítása (fent) | kérési útvonalat, ugyanazon a házirenden keresztül, mint a fiókonkénti kapcsolónál |
+
+**Végrehajtás:**
+
+- Tiszta döntés (egy szabálykészlet mindkét úthoz): `src/lib/usage/bankedResetPolicy.ts::decideBankedReset()`
+- Háttérmunka: `src/lib/services/bankedResetAutoApply.ts` ( `src/instrumentation-node.ts` ben kezdődött)
+- Claude kérelem-útvonal kapu: `src/lib/usage/claudeSessionResetPolicy.ts`, `setClaudeLimitResetPolicy()` keresztül regisztrálva `open-sse/services/claudeLimitReset.ts` ben
+- Előzmények, sapkák és webhook: `src/lib/usage/bankedResetAudit.ts`
+- API előzmények: `GET /api/settings/banked-reset-auto/history?limit=50` (menedzsment hitelesítés)
+
+**Határozati sorrend** (az első hibás szabály a rögzített ok):
+
+1. Ki van kapcsolva a szolgáltatás, a hiteltípus kikapcsolása vagy a számla hatályon kívül esik (`accountScope` `all` / `selected` plusz a számlánkénti `connections` térkép).
+2. Az opcionális UTC ütemezésen kívül (`startHourUtc` > `endHourUtc` éjfélkor van).
+3. Korlátozások az elmúlt 24 órában: `maxPerAccountPerDay` (1), `maxPerDay` (3) és `minSpacingMinutes` (30) bármely két beváltás között.
+4. Trigger: befalazott `session` vagy `weekly` ablak (olvasható `getQuotaWindowStatus().reachedThreshold` ből, nem pedig `isAccountQuotaExhausted()` ből, amely minden elköltött időszakkal csak egy számlát jelent), vagy egy `expiringCreditHours` belül (24) lejáró jóváírás egy olyan számlán, amely legalább `expiringCreditMinUsedPercent` (50) használt.
+5. Természetes visszaállítású védő: kihagyja, ha a falazott 5 órás ablak visszaáll `sessionResetGuardMinutes` belül (90), vagy a falazott heti ablak `weeklyResetGuardHours` belül (12).
+6. Heti alsó szint: hagyja ki az 5 órás visszaállítást, ha a heti hátralévő idő `weeklyFloorPercent` (10) alatt van.
+7. `last-resort` mód: kihagyja, amíg ugyanazon szolgáltató másik, hatókörébe tartozó fiókjában legalább `poolHeadroomPercent` (10) maradt mindkét ablakban. A lejáró hitel kiváltója ezt megkerüli.
+8. `dry-run` egy sort rögzít, és semmit sem vált be; `last-resort` és `eager` beváltani.
+
+A hiányzó kvótaadatok soha nem nyitják meg a beváltást: az ismeretlen visszaállítási idő vagy a heti használat kimarad.
+
+**Claude munkamenet visszaállítása:** a funkció kikapcsolt vagy `claudeSessionReset` kikapcsolása esetén a fiókonkénti `autoLimitReset` kapcsoló pontosan úgy dönt, mint korábban. Ha mindkettő be van kapcsolva, a funkció lecseréli a fiókonkénti kapcsolót: egy hatókörbe tartozó fiók csak akkor igényelhet igényt, ha a házirend lehetővé teszi, és `dry-run` módban nem történik követelés.
+
+**Biztonság:** a munka legfeljebb egy kreditet vált be jelölőnként, dönt a kreditek listázása előtt (az átugrott fiók soha nem szerepel a listán), használja `auto-reset:<connectionId>:<yyyy-mm-dd>:<n>` idempotenciakulcsokat, és a sikertelen listázás vagy beváltás után 1 órára visszatartja a számlát. Minden visszaváltás, kudarc és szárazonfutási döntés `audit_log` ba íródik (`action: "bankedReset.redeem"`, tokenek vagy hitelazonosítók nélkül); a sapkákat ezekből a sorokból számolják, így túlélik az újraindítást. A sikeres visszaváltások aktiválják a `provider.reset_redeemed` webhookot is.
+
+Regressziós védők: `tests/unit/banked-reset-policy.test.ts`, `tests/unit/banked-reset-auto-apply.test.ts`, `tests/unit/claude-limit-reset-policy-gate.test.ts`, `tests/unit/banked-reset-history-route.test.ts`.
+
 ### Munkamenet-affinitás (#7274)
 
 **Hatókör:** egy kliensmunkamenet (`X-Session-Id` / `x-codex-session-id` / `x-omniroute-session` fejléc) egyetlen kapcsolathoz rögzítve, **bármely** szolgáltatónál.

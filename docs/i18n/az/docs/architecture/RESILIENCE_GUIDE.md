@@ -216,6 +216,45 @@ Bunlar etimadnamələr dəyişdirilənə və ya operator onları sıfırlayana q
 Reqressiya qoruyucuları: `tests/unit/claude-low-priority-mode.test.ts`,
 `tests/unit/claude-limit-reset.test.ts`, `tests/unit/claude-low-priority-executor.test.ts`.
 
+### Banklaşdırılmış sıfırlamaları avtomatik tətbiq edin
+
+**Əhatə dairəsi:** Codex və Claude abunə (OAuth) əlaqələri.**Daxil olun** : `bankedResetAutoApply` parametri defolt olaraq söndürülüb və `dry-run` rejimindədir (Parametrlər → AI → Banklaşdırılmış sıfırlamaları avtomatik tətbiq edin).
+
+**Məqsəd:** operatorun Provayder Limitləri səhifəsində "Geri Al" düyməsini basmasını gözləmək əvəzinə, hesab istifadə divarına dəyəndə banklaşdırılmış sıfırlamaları özbaşına xərcləyin.
+
+| Kredit növü (`creditTypes`) | Nə geri alınır                                            | Harada qaçır                                            |
+| --------------------------- | --------------------------------------------------------- | ------------------------------------------------------- |
+| `codexCredits`              | Codex kreditlərini sıfırladı                              | fon işi, hər 60 s                                       |
+| `claudeCredits`             | Claude bank qrantları (`GRANT` kreditləri)                | fon işi, hər 60 s                                       |
+| `claudeSessionReset`        | Claude həftəlik sessiya limitinin sıfırlanması (yuxarıda) | hər hesab keçidi ilə eyni siyasət vasitəsilə sorğu yolu |
+
+**İcra:**
+
+- Təmiz qərar (hər iki yol üçün müəyyən edilmiş bir qayda): `src/lib/usage/bankedResetPolicy.ts::decideBankedReset()`
+- Əsas iş: `src/lib/services/bankedResetAutoApply.ts` ( `src/instrumentation-node.ts` də başlamışdır)
+- Claude sorğu yolu qapısı: `src/lib/usage/claudeSessionResetPolicy.ts`, `open-sse/services/claudeLimitReset.ts`-də `setClaudeLimitResetPolicy()` vasitəsilə qeydiyyatdan keçmişdir
+- Tarix, qapaqlar və webhook: `src/lib/usage/bankedResetAudit.ts`
+- Tarix API: `GET /api/settings/banked-reset-auto/history?limit=50` (idarəetmə auth)
+
+**Qərar əmri** (birinci uğursuz qayda qeydə alınmış səbəbdir):
+
+1. Xüsusiyyət deaktivdir, kredit növü deaktivdir və ya hesab əhatə dairəsindən kənardır (`accountScope` `all` / `selected` və hər hesab üçün `connections` xəritəsi).
+2. Əlavə UTC cədvəlindən kənarda (`startHourUtc` > `endHourUtc` gecə yarısını keçir).
+3. Son 24 saat ərzində məhdudiyyətlər: `maxPerAccountPerDay` (1), `maxPerDay` (3) və `minSpacingMinutes` (30) istənilən iki ödəniş arasında.
+4. Tətik: divarlı `session` və ya `weekly` pəncərəsi ( `getQuotaWindowStatus().reachedThreshold` dən oxunur, `isAccountQuotaExhausted()` deyil, yalnız xərclənmiş hər pəncərə ilə hesab haqqında məlumat verir) və ya ən azı `expiringCreditMinUsedPercent` (50) istifadə etmiş hesabda `expiringCreditHours` (24) daxilində müddəti bitən kredit.
+5. Təbii sıfırlama qoruyucusu: divarlı 5 saatlıq pəncərə `sessionResetGuardMinutes` (90) daxilində və ya `weeklyResetGuardHours` daxilində divarlı həftəlik pəncərə (12) sıfırlandıqda keçin.
+6. Həftəlik mərtəbə: həftəlik qalan `weeklyFloorPercent` (10) aşağı olduqda 5 saatlıq sıfırlamağa keçin.
+7. `last-resort` rejimi: hər iki pəncərədə eyni provayderin digər əhatə dairəsi hesabında ən azı `poolHeadroomPercent` (10) qaldıqda keçin. Müddəti bitən kredit tətikləri bundan yan keçir.
+8. `dry-run` sıra qeyd edir və heç nə geri qaytarmır; `last-resort` və `eager` geri qaytarılır.
+
+Çatışmayan kvota datası heç vaxt geri ödəməni açmır: naməlum sıfırlama vaxtı və ya həftəlik istifadə atlanır.
+
+**Claude sessiyasının sıfırlanması:** xüsusiyyət söndürüldükdə və ya `claudeSessionReset` söndürüldükdə, hər hesab üçün `autoLimitReset` keçidi əvvəlki kimi qərar verir. Hər ikisi aktiv olduqda, funksiya hər hesab üçün keçidləri əvəz edir: əhatə dairəsi daxilində hesab yalnız siyasət buna icazə verdikdə iddia edə bilər və `dry-run` rejimində heç bir iddia irəli sürülmür.
+
+**Təhlükəsizlik:** iş hər bir işarə üçün ən çox bir kredit geri alır, kreditləri siyahıya salmazdan əvvəl qərar verir (keçilmiş hesab heç vaxt siyahıya alınmır), `auto-reset:<connectionId>:<yyyy-mm-dd>:<n>` identifikasiya açarlarından istifadə edir və uğursuz siyahıdan və ya ödənişdən sonra 1 saat ərzində hesabı söndürür. Hər bir geri alma, uğursuzluq və quru iş qərarı `audit_log` -yə yazılır (`action: "bankedReset.redeem"`, token və ya kredit idləri yoxdur); qapaqlar həmin cərgələrdən sayılır, ona görə də onlar yenidən işə salındıqda sağ qalırlar. Uğurlu ödənişlər `provider.reset_redeemed` webhook-u da işə salır.
+
+Reqressiya qoruyucuları: `tests/unit/banked-reset-policy.test.ts`, `tests/unit/banked-reset-auto-apply.test.ts`, `tests/unit/claude-limit-reset-policy-gate.test.ts`, `tests/unit/banked-reset-history-route.test.ts`.
+
 ### Sessiya bağlılığı (#7274)
 
 **Əhatə dairəsi:** istənilən provayder üçün bir klient sessiyası

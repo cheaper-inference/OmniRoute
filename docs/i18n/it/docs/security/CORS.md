@@ -4,209 +4,119 @@
 
 ---
 
-OmniRoute controlla quali **origini del browser** possono leggere le risposte cross-origin
-tramite un'unica allowlist centralizzata. Il modello è **fail-closed per impostazione predefinita**:
-nessuna origine è consentita finché non viene esplicitamente autorizzata. Questa pagina documenta come viene
-risolta l'allowlist, cosa espone effettivamente `CORS_ALLOW_ALL=true` (e, soprattutto, cosa
-**non** espone), come configurare in sicurezza gli ambienti di sviluppo e produzione e l'avviso
-di runtime mostrato dalla dashboard quando è attivo un wildcard.
+OmniRoute controlla quale **origini del browser** può leggere risposte multiorigine da un'unica lista consentita centralizzata. Il modello è **fail-closed per impostazione predefinita** : nessuna origine è consentita finché non ne viene attivata una. Questa pagina documenta come si risolve la lista consentita, cosa `CORS_ALLOW_ALL=true` effettivamente espone (e, soprattutto, cosa fa **non** ), come configurare lo sviluppo rispetto alla produzione in modo sicuro e l'avviso di runtime nel dashboard mostra quando un carattere jolly è attivo.
 
-**Fonte autorevole:** `src/server/cors/origins.ts` (`resolveAllowedOrigin`,
-`applyCorsHeaders`, `getCorsStatus`). L'allowlist viene applicata una sola volta, nel
-middleware (`src/server/authz/pipeline.ts`): i gestori delle singole route non impostano
-direttamente `Access-Control-Allow-Origin`.
+**Fonte della verità:** `src/server/cors/origins.ts` (`resolveAllowedOrigin`, `applyCorsHeaders`, `getCorsStatus`). La lista consentita viene applicata una volta, nel middleware (`src/server/authz/pipeline.ts`) i gestori — per percorso non impostano `Access-Control-Allow-Origin` da soli.
 
-## Come viene risolta un'origine
+## Come si risolve un'origine
 
-Per ogni richiesta, il middleware calcola il valore di `Access-Control-Allow-Origin`
-nel seguente ordine:
+Per ogni richiesta il middleware calcola il valore `Access-Control-Allow-Origin` in questo ordine:
 
-1. **`CORS_ALLOW_ALL=true`** (oppure il precedente `CORS_ORIGIN=*`) → restituisce l'`Origin`
-   del chiamante (oppure `*` quando l'header `Origin` è assente), con `Vary: Origin`
-   per garantire il corretto funzionamento delle cache. Lo stesso punto di controllo `applyCorsHeaders()`
-   aggiunge inoltre `Vary: Accept-Encoding` a ogni risposta 2xx con corpo sulla superficie
-   `/v1*`/`/v1beta*` autenticata tramite token (`relaxForTokenAuth`, RFC 9110 §12.5.5, issue #6737),
-   affinché le cache a valle/condivise possano distinguere correttamente tra le varianti
-   compresse e non compresse.
-2. In caso contrario, l'`Origin` della richiesta viene normalizzato (convertito in minuscolo e privato
-   della barra finale) e confrontato con l'**allowlist unificata**:
-   - variabile d'ambiente **`CORS_ALLOWED_ORIGINS`** — elenco separato da virgole, e
-   - impostazione di runtime **`corsOrigins`** (Dashboard → Security → _Origini CORS
-     consentite_), iniettata tramite `setRuntimeAllowedOrigins()` da
-     `src/lib/config/runtimeSettings.ts`.
-3. Nessuna corrispondenza → **non viene emesso alcun header `Access-Control-Allow-Origin`**. Il browser
-   blocca la lettura cross-origin. Questo è il comportamento fail-closed previsto.
+1. **`CORS_ALLOW_ALL=true`** (o l'eredità `CORS_ORIGIN=*`) → fa eco al `Origin` del chiamante (o `*` quando non è presente un'intestazione `Origin` ), con `Vary: Origin` in modo che le cache rimangano corrette. Lo stesso chokepoint `applyCorsHeaders()` aggiunge anche `Vary: Accept-Encoding` a ogni risposta 2xx-with-body sulla superficie `/v1*`/`/v1beta*` autenticata con token (`relaxForTokenAuth`, RFC 9110 §12.5.5, rilascio #6737), in modo che le cache downstream/shared possano distinguere correttamente le varianti compresse da quelle non compresse.
+2. Altrimenti, la richiesta `Origin` viene normalizzata (in minuscolo, barra finale eliminata) e confrontata con il **lista consentita unita** :
+   - ambiente **`CORS_ALLOWED_ORIGINS`** — elenco separato da virgole e
+   - il tempo di esecuzione **`corsOrigins`** impostazione (Dashboard → Sicurezza → _CORS Origini consentite_), inserita tramite `setRuntimeAllowedOrigins()` da `src/lib/config/runtimeSettings.ts`.
+3. Nessuna corrispondenza →**non viene emessa alcuna intestazione `Access-Control-Allow-Origin`** . Il browser blocca la lettura multiorigine. Questa è l'impostazione predefinita di chiusura in caso di errore prevista.
 
-| Variabile d'ambiente   | Significato                                                                                        |
-| ---------------------- | -------------------------------------------------------------------------------------------------- |
-| `CORS_ALLOWED_ORIGINS` | CSV delle origini esatte da consentire (scelta consigliata).                                       |
-| `CORS_ALLOW_ALL`       | `true`/`1` → restituisce qualsiasi origine (wildcard). Solo per lo sviluppo.                       |
-| `CORS_ORIGIN`          | Precedente. `*` si comporta come `CORS_ALLOW_ALL`; un singolo valore viene aggiunto all'allowlist. |
+| Inv.var                | Senso                                                                                                   |
+| ---------------------- | ------------------------------------------------------------------------------------------------------- |
+| `CORS_ALLOWED_ORIGINS` | CSV di origini esatte da consentire (consigliato).                                                      |
+| `CORS_ALLOW_ALL`       | `true`/`1` → eco qualsiasi origine (carattere jolly). Solo sviluppatore.                                |
+| `CORS_ORIGIN`          | Eredità. `*` si comporta come `CORS_ALLOW_ALL`; un singolo valore viene aggiunto alla lista consentita. |
 
-## Modello delle minacce — cosa espone realmente `CORS_ALLOW_ALL=true`
+## Modello di minaccia — ciò che `CORS_ALLOW_ALL=true` espone realmente
 
-L'avvertenza generica di OWASP ("CORS wildcard = qualsiasi sito può chiamare la tua API") merita
-di essere presa sul serio, ma l'esposizione di OmniRoute è **più limitata rispetto al caso generico**,
-per via di un fatto concreto relativo all'implementazione:
+Vale la pena prendere sul serio l'avviso OWASP generico ("carattere jolly CORS = qualsiasi sito può chiamare il tuo API"), ma l'esposizione di OmniRoute è **più ristretto rispetto al caso generico** , a causa di un fatto concreto di implementazione:
 
-> **La funzione centrale `applyCorsHeaders()` non emette mai
-> `Access-Control-Allow-Credentials`.** Un browser non renderà disponibile una risposta cross-origin
-> _con credenziali_ (contenente cookie), a meno che il server non invii
-> `Access-Control-Allow-Credentials: true`. Il percorso CORS condiviso di OmniRoute non
-> lo fa mai.
+> **La `applyCorsHeaders()` centrale non emette mai `Access-Control-Allow-Credentials`.** Un browser non esporrà una risposta multiorigine _credentialed_ (contenente cookie) a meno che il server non invii `Access-Control-Allow-Credentials: true`. Il percorso CORS condiviso di OmniRoute non lo fa mai.
 
-Ecco cosa comporta per ogni superficie, anche con `CORS_ALLOW_ALL=true`:
+Cosa significa per superficie, anche con `CORS_ALLOW_ALL=true`:
 
-| Superficie                          | Meccanismo di autenticazione | Effetto del CORS wildcard                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| ----------------------------------- | ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Dashboard / MANAGEMENT `/api/*`     | Sessione tramite cookie      | L'origine viene restituita, ma **senza `Allow-Credentials`** il browser **blocca** la lettura con credenziali. Un sito cross-origin malevolo **non può leggere** le risposte autenticate della dashboard e il cookie di sessione non viene esposto.                                                                                                                                                                                                                                                                                                                                                                     |
-| API client `/v1/*`, `/v1beta/*`     | Header bearer / `x-api-key`  | Già permissiva **per progettazione** (`relaxForTokenAuth`): i browser non allegano mai automaticamente `Authorization`/`x-api-key`, quindi la pagina di un attaccante non può fornire la tua chiave. La restituzione permissiva dell’origine richiede un soggetto autenticato (una chiave API convalidata o una sessione della dashboard convalidata), non soltanto un header con credenziali, e non include mai `Access-Control-Allow-Credentials`. Le risposte anonime (`REQUIRE_API_KEY=false`) usano l’elenco configurato delle origini consentite, compresa l’attivazione esplicita tramite `CORS_ALLOW_ALL=true`. |
-| Lettura pubblica (`/api/health`, …) | Nessuno                      | Dati non sensibili; il wildcard è innocuo.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| Superficie                                  | Meccanismo di autenticazione      | Effetto del carattere jolly CORS                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| ------------------------------------------- | --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Cruscotto/ MANAGEMENT `/api/*`              | Sessione di cookie                | L'origine è riecheggiata, ma **senza `Allow-Credentials`** il navigatore **blocchi** la credenziale letta. Un sito multiorigine dannoso **non può leggere** le risposte autenticate della dashboard e il cookie di sessione non viene esposto.                                                                                                                                                                                                                                                                                                                                                             |
+| Cliente API `/v1/*`, `/v1beta/*`            | Portante/intestazione `x-api-key` | Già permissivo **in base alla progettazione** (`relaxForTokenAuth`): i browser non allegano mai automaticamente `Authorization`/`x-api-key`, quindi la pagina di un utente malintenzionato non può fornire la tua chiave. L'eco rilassato richiede un oggetto autenticato (una chiave API convalidata o una sessione del dashboard), non solo un'intestazione della credenziale, e non include mai `Access-Control-Allow-Credentials`. Le risposte anonime (`REQUIRE_API_KEY=false`) utilizzano la lista consentita di origine configurata, incluso un esplicito consenso esplicito `CORS_ALLOW_ALL=true`. |
+| Pubblica di sola lettura (`/api/health`, …) | Nessuno                           | Non sensibile; il carattere jolly è innocuo.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 
-Pertanto, l'esposizione **residua** di `CORS_ALLOW_ALL=true` è limitata a: (a)
-**letture** cross-origin senza credenziali di dati già privi di autenticazione e (b)
-consentire il superamento del **preflight** CORS sulle route di gestione, che richiedono comunque
-un'autenticazione che una pagina cross-origin non può fornire. **Non** costituisce un vettore per
-il dirottamento della sessione o il furto di credenziali nel percorso CORS condiviso.
+Quindi il **residuo** l'esposizione di `CORS_ALLOW_ALL=true` è limitata a: (a) origine incrociata senza credenziali **legge** di dati già non autenticati e (b) lasciare che CORS**passaggio pre-volo** sulle rotte di gestione — che richiedono ancora l'autenticazione che una pagina multiorigine non può fornire. È **non** un vettore di dirottamento della sessione o di furto di credenziali sul percorso CORS condiviso.
 
-### Un'unica vera eccezione — `/api/v1/agents/`
+### Una vera eccezione — `/api/v1/agents/`
 
-Le route Cloud-Agent (`/api/v1/agents/{health,credentials,tasks,tasks/[id]}`) impostano
-i **propri** header CORS
-(`src/lib/cloudAgent/api.ts`, `getCloudAgentCorsHeaders`) ed emettono effettivamente
-`Access-Control-Allow-Origin: <origin>|*` insieme a
-`Access-Control-Allow-Credentials: true`. Questa è l'unica superficie in cui
-la restituzione dell'origine e le credenziali coesistono ed è **indipendente da
-`CORS_ALLOW_ALL`**. Queste route sono autenticate per la gestione
-(`requireManagementAuth`); gli operatori che espongono la dashboard all'esterno dell'host devono
-essere consapevoli che questo è l'unico punto in cui gli header della risposta consentono una lettura
-cross-origin con credenziali. La relativa restrizione a un'allowlist esplicita viene monitorata
-separatamente da queste indicazioni CORS.
+I percorsi Cloud-Agent (`/api/v1/agents/{health,credentials,tasks,tasks/[id]}`) impostano i loro **Proprio** Intestazioni CORS (`src/lib/cloudAgent/api.ts`, `getCloudAgentCorsHeaders`) e **Fare** emettono `Access-Control-Allow-Origin: <origin>|*` insieme a `Access-Control-Allow-Credentials: true`. Questa è l’unica superficie dove l’eco dell’origine e le credenziali coesistono, e lo è **indipendente da `CORS_ALLOW_ALL`** . Questi percorsi sono autenticati dalla gestione (`requireManagementAuth`); gli operatori che espongono il dashboard fuori dall'host devono essere consapevoli che questo è l'unico luogo in cui è consentita una lettura con credenziali multiorigine dalle intestazioni di risposta. Il suo restringimento a una lista consentita esplicita viene monitorato separatamente da queste linee guida CORS.
 
-## Checklist per la produzione
+## Lista di controllo della produzione
 
 - **Non impostare mai `CORS_ALLOW_ALL=true` in produzione.** Lascialo non impostato.
-- Imposta un elenco **esplicito** delle origini, tramite la variabile d'ambiente oppure il campo nella scheda Security:
+- Imposta un **esplicito** origin list — il campo env var o la scheda Sicurezza:
 
   ```bash
   CORS_ALLOWED_ORIGINS="https://app.example.com, https://admin.example.com"
   ```
 
-- Se OmniRoute viene eseguito dietro un reverse proxy / tunnel (nginx, Caddy, Cloudflare
-  Tunnel, Tailscale), CORS **non** è l'unico controllo: la protezione delle route
-  loopback continua a proteggere le route in grado di avviare processi (vedi
-  [ROUTE_GUARD_TIERS](./ROUTE_GUARD_TIERS.md)). Non falsificare
-  `X-Forwarded-For: 127.0.0.1` per "risolvere" un errore 403: ciò riapre la classe
-  di vulnerabilità RCE bloccata dalla protezione delle route.
-- Verifica lo stato a runtime: la dashboard mostra un **banner ambra persistente**
-  in Dashboard → Security → Authorization Inventory ogni volta che
-  `CORS_ALLOW_ALL=true` è attivo, mentre `/api/settings/authz-inventory` restituisce
-  un contenitore `cors: { allowAll, allowedOrigins }` che gli strumenti di
-  monitoraggio possono interrogare periodicamente.
+- Se OmniRoute viene eseguito dietro un proxy/tunnel inverso (nginx, Caddy, Cloudflare Tunnel, Tailscale), CORS è **non** il tuo unico controllo — la protezione del percorso di loopback protegge ancora i percorsi che supportano lo spawn (vedi [ROUTE_GUARD_TIERS](./ROUTE_GUARD_TIERS.md) ). Non forgiare `X-Forwarded-For: 127.0.0.1` per "aggiustare" un 403; che riapre la classe RCE la guardia di percorso chiude.
+- Conferma lo stato di runtime: la dashboard mostra a **striscione ambrato persistente** in Dashboard → Sicurezza → Autorizzazione Inventario ogni volta che `CORS_ALLOW_ALL=true` è attivo e `/api/settings/authz-inventory` restituisce una busta `cors: { allowAll, allowedOrigins }` che gli strumenti di monitoraggio possono eseguire il polling.
 
-## Praticità in fase di sviluppo — consentire origini locali specifiche
+## Convenienza dello sviluppo — consente origini locali specifiche
 
-Anche durante lo sviluppo, raramente è necessario usare il carattere jolly. Consenti
-solo i server di sviluppo che utilizzi:
+Raramente hai bisogno del carattere jolly anche in dev. Consenti solo i server di sviluppo che utilizzi:
 
 ```bash
-# Server di sviluppo Vite (5173) + Next.js (3000) che chiamano un'istanza OmniRoute locale
+# Vite (5173) + Next.js (3000) dev servers calling a local OmniRoute
 CORS_ALLOWED_ORIGINS="http://localhost:5173, http://localhost:3000"
 ```
 
-Le origini vengono confrontate senza distinzione tra maiuscole e minuscole,
-ignorando la barra finale; pertanto `http://localhost:3000` e
-`http://localhost:3000/` sono equivalenti. Lo stesso CSV può essere impostato a
-runtime in **Dashboard → Security → CORS Allowed Origins** senza riavviare.
+Le origini vengono abbinate senza distinzione tra maiuscole e minuscole con la barra finale ignorata, quindi `http://localhost:3000` e `http://localhost:3000/` sono equivalenti. Lo stesso CSV può essere impostato in fase di esecuzione in **Dashboard → Sicurezza → CORS Origini consentite** senza riavvio.
 
-## Chiavi API e sessioni basate su cookie
+## Chiavi API e sessioni di cookie
 
-- **Bearer / `x-api-key` (la superficie di inferenza `/v1/*`):** i browser non
-  allegano mai automaticamente queste credenziali. CORS non rappresenta una
-  barriera significativa in questo caso: la barriera è la chiave API. Per questo
-  motivo, tale superficie è intenzionalmente permissiva, così i client browser ed
-  Electron possono leggere le risposte a cui hanno già diritto.
-  La restituzione permissiva dell’origine richiede un soggetto autenticato (una chiave API convalidata o una sessione della dashboard convalidata), non soltanto un header con credenziali, e non include mai `Access-Control-Allow-Credentials`. Le risposte anonime (`REQUIRE_API_KEY=false`) usano l’elenco configurato delle origini consentite, compresa l’attivazione esplicita tramite `CORS_ALLOW_ALL=true`. I rifiuti di
-  autenticazione (401) restano leggibili, così i client possono segnalare una chiave
-  revocata o digitata male (#5242): il 401 emesso dalla pipeline stessa mantiene la
-  restituzione dell'origine, e una route che rifiuta direttamente la chiave dopo che la
-  pipeline l'ha servita come anonima (`/v1/models` e `/v1beta/models` con
-  l'autenticazione di gestione configurata, le route con ambito proprietario
-  `/v1/files`, `/v1/batches`, `/v1/media`, `/v1/session-leases` e le route dei candidati
-  auto-combo) aggiunge la restituzione dell'origine a quel 401 tramite
-  `credentialRejectionHeaders()`. La restituzione dipende dal fatto che la richiesta
-  contenga un header di credenziali (`Authorization`, `x-api-key`, `x-goog-api-key` o il
-  cookie `auth_token`), non da quale di essi la route abbia verificato, e non è mai
-  accompagnata da `Access-Control-Allow-Credentials`; il corpo è un involucro di errore
-  fisso. Le route di gestione sotto `/api/v1/` protette da `requireManagementAuth()`
-  (`/api/v1/management/*`, `/api/v1/registered-keys`) non usano questa eccezione per il rifiuto delle credenziali: con `REQUIRE_API_KEY=false`, le loro risposte 401/403 seguono la politica CORS configurata per le origini.
-- **Sessione basata su cookie (la dashboard):** è protetta dall'impostazione
-  predefinita fail-closed **e** dall'assenza di `Access-Control-Allow-Credentials`
-  nel percorso condiviso. Non includere le origini di gestione/dashboard in alcuna
-  configurazione permissiva: devono rimanere rigorosamente fail-closed.
+- **Portante/ `x-api-key` (la superficie di inferenza `/v1/*` ):** i browser non li allegano mai automaticamente. CORS non è una barriera significativa qui — la chiave API è la barriera — motivo per cui quella superficie è intenzionalmente permissiva in modo che il browser e i client Electron possano leggere le risposte a cui hanno già diritto. L'eco rilassato richiede un oggetto autenticato (una chiave API convalidata o una sessione del dashboard), non solo un'intestazione della credenziale, e non include mai `Access-Control-Allow-Credentials`. Le risposte anonime (`REQUIRE_API_KEY=false`) utilizzano la lista consentita di origine configurata, incluso un esplicito consenso esplicito `CORS_ALLOW_ALL=true`. I rifiuti di autenticazione (401) rimangono leggibili in modo che i client possano far emergere una chiave revocata o digitata in modo errato (#5242): il 401 della pipeline mantiene l'eco e un percorso che rifiuta la chiave stessa dopo che la pipeline l'ha resa anonima (`/v1/models` e `/v1beta/models` con l'autenticazione di gestione configurata, i percorsi candidati `/v1/files`, `/v1/batches`, `/v1/media`, `/v1/session-leases` con ambito proprietario e combo automatica) aggiunge l'eco a quel 401 tramite `credentialRejectionHeaders()`. L'eco viene digitato sulla richiesta che trasporta un'intestazione di credenziale (`Authorization`, `x-api-key`, `x-goog-api-key` o il cookie `auth_token` ), non su quale di essi è stato controllato il percorso e non è mai accoppiato con `Access-Control-Allow-Credentials`; il corpo è una busta di errore fissa. Le rotte di gestione sotto `/api/v1/` protette da `requireManagementAuth()` (`/api/v1/management/*`, `/api/v1/registered-keys`, `/api/v1/providers/[provider]/limits`, `/api/v1/accounts/[id]/limits`, `/api/v1/issues/report`) non utilizzano questa eccezione di rifiuto delle credenziali: con `REQUIRE_API_KEY=false`, le loro risposte 401/403 seguono la policy di origine CORS configurata.
+- **Cookie di sessione (la dashboard):** protetto dal default fail-closed **E** dall’assenza di `Access-Control-Allow-Credentials` sul percorso condiviso. Mantenere le origini management/dashboard fuori da qualsiasi configurazione permissiva; devono rimanere esattamente in fail-close.
 
-## Handshake WebSocket (`/v1/responses`, `/v1/ws`)
+## Strette di mano WebSocket (`/v1/responses`, `/v1/ws`)
 
-I browser non applicano CORS ai WebSocket, quindi i trasporti WebSocket che restituiscono
-output di inferenza verificano autonomamente l'`Origin` dell'handshake
-(`src/server/origin/wsOrigin.ts`): il WebSocket Responses (`/v1/responses`) e, quando
-OmniRoute viene eseguito tramite `npm start` / `npm run dev`, il bridge `/v1/ws` e
-`/api/v1/ws`, che trasmette `/v1/chat/completions`, `/v1/messages` e `/v1/responses`
-come frame. Il bridge chiede il verdetto a `/api/v1/ws?handshake=1` e rifiuta
-l'upgrade a meno che quella route non abbia eseguito il controllo. I requisiti di autenticazione continuano ad applicarsi separatamente. Il controllo dell’origine viene superato quando:
+I browser non applicano CORS a WebSocket, quindi i trasporti WebSocket che restituiscono l'output dell'inferenza controllano essi stessi l'handshake `Origin` (`src/server/origin/wsOrigin.ts`): le risposte WebSocket (`/v1/responses`) e, quando OmniRoute attraversa `npm start` / `npm run dev`, il bridge `/v1/ws` e `/api/v1/ws`, che trasmette `/v1/chat/completions`, `/v1/messages` e `/v1/responses` come frame. Il ponte chiede il verdetto `/api/v1/ws?handshake=1` e si rifiuta di aggiornare a meno che quel percorso non esegua il controllo. I requisiti di autenticazione si applicano ancora separatamente. Il controllo dell'origine viene superato quando:
 
-- non ha alcun header `Origin` (Codex CLI, SDK e altri client non browser);
-- l'`Origin` è ammessa dall'allowlist descritta sopra (`CORS_ALLOWED_ORIGINS`,
-  l'impostazione `corsOrigins`, `CORS_ORIGIN`, `CORS_ALLOW_ALL`);
-- l'`Origin` è una delle origini pubbliche di OmniRoute stesso (l'URL di base pubblico
-  configurato, l'origine inoltrata da un proxy attendibile oppure un host diretto
-  loopback/LAN indicato come indirizzo IP letterale o come `localhost` — gli stessi
-  candidati usati dal controllo sulle modifiche della dashboard); oppure
-- contiene una chiave API valida, come sulla superficie HTTP `/v1/*`.
+- non ha intestazione `Origin` (Codex CLI, SDKs e altri client non browser);
+- la `Origin` è ammessa dalla lista consentita sopra (`CORS_ALLOWED_ORIGINS`, l'impostazione `corsOrigins`, `CORS_ORIGIN`, `CORS_ALLOW_ALL`);
+- `Origin` è una delle origini pubbliche di OmniRoute(la base pubblica configurata URL, l'origine inoltrata di un proxy attendibile o un host loopback/LAN diretto fornito come valore letterale IP o `localhost` — gli stessi candidati utilizzati dal controllo di mutazione del dashboard); O
+- trasporta una chiave API valida, come sulla superficie HTTP `/v1/*`.
 
-Qualsiasi altro caso riceve `403 ws_origin_forbidden`. Un cookie di sessione della
-dashboard non esenta un'`Origin` esterna, perché il browser lo allega al socket di
-qualsiasi pagina. `localhost` su un'altra porta non viene considerato same-origin;
-aggiungi tali origini di sviluppo a `CORS_ALLOWED_ORIGINS`.
+Tutto il resto ottiene `403 ws_origin_forbidden`. Un cookie di sessione del dashboard non esenta un `Origin` esterno, poiché il browser lo collega al socket di qualsiasi pagina. `localhost` su un'altra porta non viene trattato come della stessa origine; aggiungi tali origini di sviluppo a `CORS_ALLOWED_ORIGINS`.
 
-## Esempio: reverse proxy davanti a OmniRoute
+## Esempio: proxy inverso davanti a OmniRoute
 
-CORS viene applicato da OmniRoute stesso, quindi il proxy in genere **non** dovrebbe aggiungere o
-riscrivere le intestazioni `Access-Control-*` (le intestazioni duplicate causano problemi nei browser). Termina TLS
-e inoltra le richieste: lascia che OmniRoute risponda alle richieste preflight:
+CORS è applicato dallo stesso OmniRoute, quindi generalmente dovrebbe farlo il proxy **non** aggiungere o riscrivere le intestazioni `Access-Control-*` (le doppie intestazioni interrompono i browser). Termina TLS e inoltra — per consentire OmniRoute di rispondere al preflight:
 
 ```nginx
-# nginx — inoltra a OmniRoute; NON inserire Access-Control-* qui
+# nginx — forward to OmniRoute; do NOT inject Access-Control-* here
 location / {
     proxy_pass http://127.0.0.1:20128;
     proxy_set_header Host $host;
     proxy_set_header X-Real-IP $remote_addr;
     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     proxy_set_header X-Forwarded-Proto $scheme;
-    # Mantieni le intestazioni di inoltro: un proxy sullo stesso host si connette dal loopback e sono
-    # queste a indicare a OmniRoute che il chiamante non è l'operatore locale. Un proxy che non ne aggiunge
-    # nessuna fa apparire locale ogni chiamante remoto. Inoltre, non impostare mai X-Forwarded-For su 127.0.0.1.
+    # Keep the forwarding headers: a proxy on the same host connects from loopback, and they are
+    # what tells OmniRoute the caller is not the local operator. A proxy that adds none of them
+    # makes every remote caller look local. Never set X-Forwarded-For to 127.0.0.1 either.
 }
 ```
 
-Imposta le origini consentite per i browser in OmniRoute (`CORS_ALLOWED_ORIGINS` o nella
-scheda Sicurezza), non nel proxy.
+Imposta le origini browser consentite in OmniRoute (`CORS_ALLOWED_ORIGINS` o scheda Sicurezza), non nel proxy.
 
-## File sorgente
+## File di origine
 
-| Ambito                                                | File                                                                 |
-| ----------------------------------------------------- | -------------------------------------------------------------------- |
-| Risoluzione dell'allowlist + `getCorsStatus()`        | `src/server/cors/origins.ts`                                         |
-| Applicazione del middleware (unica fonte attendibile) | `src/server/authz/pipeline.ts`                                       |
-| Settings → inserimento delle origini a runtime        | `src/lib/config/runtimeSettings.ts`                                  |
-| Stato a runtime per la dashboard                      | `src/app/api/settings/authz-inventory/route.ts`                      |
-| Banner di avviso della dashboard                      | `src/app/(dashboard)/dashboard/settings/components/AuthzSection.tsx` |
-| Campo CORS Allowed Origins                            | `src/app/(dashboard)/dashboard/settings/components/SecurityTab.tsx`  |
-| CORS per route di Cloud-Agent (l'eccezione)           | `src/lib/cloudAgent/api.ts`                                          |
-| Controllo dell'`Origin` nell'handshake WebSocket      | `src/server/origin/wsOrigin.ts`                                      |
+| Preoccupazione                                   | File                                                                 |
+| ------------------------------------------------ | -------------------------------------------------------------------- |
+| Risoluzione lista consentita + `getCorsStatus()` | `src/server/cors/origins.ts`                                         |
+| Applicazione middleware (unica fonte di verità)  | `src/server/authz/pipeline.ts`                                       |
+| Impostazioni Iniezione dell'origine runtime →    | `src/lib/config/runtimeSettings.ts`                                  |
+| Stato di runtime per il dashboard                | `src/app/api/settings/authz-inventory/route.ts`                      |
+| Banner di avviso sul dashboard                   | `src/app/(dashboard)/dashboard/settings/components/AuthzSection.tsx` |
+| Campo Origini consentite CORS                    | `src/app/(dashboard)/dashboard/settings/components/SecurityTab.tsx`  |
+| CORS Cloud-Agent per percorso (l'eccezione)      | `src/lib/cloudAgent/api.ts`                                          |
+| Controllo WebSocket stretta di mano `Origin`     | `src/server/origin/wsOrigin.ts`                                      |
 
 ## Vedi anche
 
-- [Livelli di protezione delle route](./ROUTE_GUARD_TIERS.md) — applicazione del loopback per
-  le route in grado di generare processi (un controllo separato e complementare).
+- [Livelli Route Guard](./ROUTE_GUARD_TIERS.md) Applicazione del loopback — per percorsi che supportano lo spawn (un controllo separato e complementare).
 - [Guida all'autorizzazione](../architecture/AUTHZ_GUIDE.md) — la pipeline di autenticazione completa.

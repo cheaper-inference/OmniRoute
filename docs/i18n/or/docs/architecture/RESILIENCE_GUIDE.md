@@ -151,6 +151,45 @@ OmniRoute ର ତିନୋଟି ପୃଥକ କିନ୍ତୁ ସମ୍ବନ
 ରିଗ୍ରେସନ୍ ଗାର୍ଡ୍: `tests/unit/claude-low-priority-mode.test.ts`,
 `tests/unit/claude-limit-reset.test.ts`, `tests/unit/claude-low-priority-executor.test.ts`।
 
+### ବ୍ୟାଙ୍କ୍ ରିସେଟଗୁଡିକ ଅଟୋ-ପ୍ରୟୋଗ କରନ୍ତୁ।
+
+**ପରିସର:** Codex ଏବଂ Claude ସଦସ୍ୟତା (OAuth) ସଂଯୋଗଗୁଡ଼ିକ।**ଅପ୍ଟ-ଇନ୍।** : `bankedResetAutoApply` ସେଟିଂ ବନ୍ଦ ଅଛି ଏବଂ ଡିଫଲ୍ଟ ଭାବରେ `dry-run` ମୋଡ୍ ରେ (ସେଟିଂସମୂହ → AI → ଅଟୋ-ପ୍ରୟୋଗ ବ୍ୟାଙ୍କ୍ ପୁନ ets ସେଟ୍)।
+
+**ଉଦ୍ଦେଶ୍ୟ:** ପ୍ରଦାନକାରୀ ସୀମା ପୃଷ୍ଠାରେ “ମୁକ୍ତି” ଦବାଇବା ପାଇଁ ଏକ ଅପରେଟର ଅପେକ୍ଷା କରିବା ପରିବର୍ତ୍ତେ ଏକ ଆକାଉଣ୍ଟ୍ ଏକ ବ୍ୟବହାର କାନ୍ଥକୁ ହିଟ୍ କଲାବେଳେ ନିଜେ ବ୍ୟାଙ୍କ୍ ରିସେଟ୍ ଖର୍ଚ୍ଚ କରନ୍ତୁ।
+
+| କ୍ରେଡିଟ୍ ପ୍ରକାର (`creditTypes`) | ଯାହା ମୁକ୍ତ ହୋଇଛି                                 | ଯେଉଁଠାରେ ଏହା ଚାଲିଥାଏ।                                    |
+| ------------------------------- | ------------------------------------------------ | -------------------------------------------------------- |
+| `codexCredits`                  | Codex କ୍ରେଡିଟ୍ ପୁନ res ସେଟ୍ କରନ୍ତୁ।              | ପୃଷ୍ଠଭୂମି କାର୍ଯ୍ୟ, ପ୍ରତି 60 ସେକେଣ୍ଡ୍।                    |
+| `claudeCredits`                 | Claude ବ୍ୟାଙ୍କ ଅନୁଦାନ (`GRANT` କ୍ରେଡିଟ୍)         | ପୃଷ୍ଠଭୂମି କାର୍ଯ୍ୟ, ପ୍ରତି 60 ସେକେଣ୍ଡ୍।                    |
+| `claudeSessionReset`            | Claude ସାପ୍ତାହିକ ଅଧିବେଶନ-ସୀମା ପୁନ et ସେଟ୍ (ଉପରେ) | ଅନୁରୋଧ ଖାତା, ପ୍ରତି ଆକାଉଣ୍ଟ ଟୋଗଲ୍ ଭଳି ସମାନ ନୀତି ମାଧ୍ୟମରେ। |
+
+**କାର୍ଯ୍ୟାନ୍ୱୟନ:**
+
+- ଶୁଦ୍ଧ ନିଷ୍ପତ୍ତି (ଉଭୟ ପଥ ପାଇଁ ଗୋଟିଏ ନିୟମ ସେଟ୍): `src/lib/usage/bankedResetPolicy.ts::decideBankedReset()`
+- ପୃଷ୍ଠଭୂମି କାର୍ଯ୍ୟ: `src/lib/services/bankedResetAutoApply.ts` ( `src/instrumentation-node.ts` ରେ ଆରମ୍ଭ)
+- Claude ଅନୁରୋଧ-ପଥ ଗେଟ୍: `src/lib/usage/claudeSessionResetPolicy.ts`, `open-sse/services/claudeLimitReset.ts` ରେ `setClaudeLimitResetPolicy()` ମାଧ୍ୟମରେ ପଞ୍ଜିକୃତ।
+- ଇତିହାସ, କ୍ୟାପ୍ ଏବଂ ୱେବ୍ ହକ୍: `src/lib/usage/bankedResetAudit.ts`
+- ଇତିହାସ API: `GET /api/settings/banked-reset-auto/history?limit=50` (ପରିଚାଳନା auth)
+
+**ନିଷ୍ପତ୍ତି କ୍ରମ।** (ପ୍ରଥମ ବିଫଳ ନିୟମ ହେଉଛି ରେକର୍ଡ ହୋଇଥିବା କାରଣ):
+
+1. ଫିଚର୍ ଅଫ୍, କ୍ରେଡିଟ୍ ଟାଇପ୍ ଅଫ୍, କିମ୍ବା ଆକାଉଣ୍ଟ୍ ପରିସର ବାହାରେ (`accountScope` `all` / `selected` ପ୍ଲସ୍ ପ୍ରତି ଆକାଉଣ୍ଟ୍ `connections` ମାନଚିତ୍ର)।
+2. ବ Z କଳ୍ପିକ UTC କାର୍ଯ୍ୟସୂଚୀ ବାହାରେ (`startHourUtc` > `endHourUtc` ମଧ୍ୟରାତ୍ରି ଅତିକ୍ରମ କରେ)।
+3. ଗତ 24 ଘଣ୍ଟା ଉପରେ କ୍ୟାପ୍ସ: ଯେକ any ଣସି ଦୁଇଟି ମୁକ୍ତି ମଧ୍ୟରେ `maxPerAccountPerDay` (1), `maxPerDay` (3), ଏବଂ `minSpacingMinutes` (30)।
+4. ଟ୍ରିଗର: ଏକ ପାଚେରୀ `session` କିମ୍ବା `weekly` ୱିଣ୍ଡୋ ( `getQuotaWindowStatus().reachedThreshold` ରୁ ପ read ଼ନ୍ତୁ, `isAccountQuotaExhausted()` ନୁହେଁ, ଯାହା କେବଳ ଖର୍ଚ୍ଚ ହୋଇଥିବା ପ୍ରତ୍ୟେକ ୱିଣ୍ଡୋ ସହିତ ଏକ ଆକାଉଣ୍ଟ ରିପୋର୍ଟ କରେ), କିମ୍ବା ଏକ ଆକାଉଣ୍ଟରେ `expiringCreditHours` (24) ମଧ୍ୟରେ ଏକ କ୍ରେଡିଟ୍ ମିଆଦ ପୂର୍ଣ୍ଣ ହୋଇଛି ଯାହା ଅତି କମରେ `expiringCreditMinUsedPercent` (50) ବ୍ୟବହାର କରିଛି।
+5. ପ୍ରାକୃତିକ-ପୁନ et ସେଟ୍ ଗାର୍ଡ: ପାଚେରୀ 5 ଘଣ୍ଟିଆ ୱିଣ୍ଡୋ `sessionResetGuardMinutes` (90) ମଧ୍ୟରେ ପୁନ ets ସେଟ୍ ହେବାବେଳେ କିମ୍ବା `weeklyResetGuardHours` (12) ମଧ୍ୟରେ ପାଚେରୀ ସାପ୍ତାହିକ ୱିଣ୍ଡୋକୁ ଛାଡିଦିଅ।
+6. ସାପ୍ତାହିକ ଚଟାଣ: ସାପ୍ତାହିକ ଅବଶିଷ୍ଟ `weeklyFloorPercent` (10) ତଳେ ଥିବାବେଳେ 5 ଘଣ୍ଟିଆ ପୁନ et ସେଟ୍ ଛାଡିଦିଅ।
+7. `last-resort` ମୋଡ୍: ସମାନ ପ୍ରଦାନକାରୀଙ୍କର ଅନ୍ୟ ଏକ ଇନ୍-ସ୍କୋପ୍ ଆକାଉଣ୍ଟ୍ ଉଭୟ ୱିଣ୍ଡୋରେ ଅତି କମରେ `poolHeadroomPercent` (10) ବାକି ଅଛି। ମିଆଦ ପୂର୍ଣ୍ଣ-କ୍ରେଡିଟ୍ ଟ୍ରିଗର ଏହାକୁ ବାଇପାସ୍ କରେ।
+8. `dry-run` ଏକ ଧାଡି ରେକର୍ଡ କରେ ଏବଂ କିଛି ମୁକ୍ତ କରେ ନାହିଁ; `last-resort` ଏବଂ `eager` ମୁକ୍ତି।
+
+ନିଖୋଜ କୋଟା ତଥ୍ୟ କଦାପି ମୁକ୍ତିକୁ ଖୋଲିବ ନାହିଁ: ଏକ ଅଜ୍ଞାତ ପୁନ et ସେଟ୍ ସମୟ କିମ୍ବା ସାପ୍ତାହିକ ବ୍ୟବହାର ସ୍କିପ୍।
+
+**Claude ଅଧିବେଶନ ପୁନ et ସେଟ୍:** ବ feature ଶିଷ୍ଟ୍ୟ ବନ୍ଦ, କିମ୍ବା `claudeSessionReset` ବନ୍ଦ ସହିତ, ପ୍ରତି ଆକାଉଣ୍ଟ `autoLimitReset` ଟୋଗଲ୍ ପୂର୍ବ ପରି ସ୍ଥିର କରେ। ଉଭୟ ଅନ୍ ସହିତ, ବ feature ଶିଷ୍ଟ୍ୟ ପ୍ରତି ଆକାଉଣ୍ଟ୍ ଟୋଗଲ୍ଗୁଡ଼ିକୁ ବଦଳାଇଥାଏ: ଏକ ଇନ୍-ସ୍କୋପ୍ ଆକାଉଣ୍ଟ୍ ଯେତେବେଳେ ପଲିସି ଅନୁମତି ଦିଏ ସେତେବେଳେ ଦାବି କରିପାରିବ ଏବଂ `dry-run` ମୋଡ୍ ରେ କ claim ଣସି ଦାବି କରାଯାଇ ନାହିଁ।
+
+**ସୁରକ୍ଷା:** ଚାକିରି ଟିକ୍ ପ୍ରତି ସର୍ବାଧିକ ଏକ କ୍ରେଡିଟ୍ ମୁକ୍ତ କରେ, କ୍ରେଡିଟ୍ ତାଲିକାଭୁକ୍ତ କରିବା ପୂର୍ବରୁ ସ୍ଥିର କରେ (ଏକ ସ୍କିପ୍ ଆକାଉଣ୍ଟ୍ କେବେବି ତାଲିକାଭୁକ୍ତ ହୁଏ ନାହିଁ), idempotency କି `auto-reset:<connectionId>:<yyyy-mm-dd>:<n>` ବ୍ୟବହାର କରେ, ଏବଂ ବିଫଳ ତାଲିକା କିମ୍ବା ମୁକ୍ତି ପରେ 1 ଘଣ୍ଟା ପାଇଁ ଏକ ଆକାଉଣ୍ଟକୁ ବ୍ୟାକ୍ କରେ। ପ୍ରତ୍ୟେକ ମୁକ୍ତି, ବିଫଳତା ଏବଂ ଶୁଖିଲା ନିଷ୍ପତ୍ତି `audit_log` କୁ ଲେଖାଯାଇଛି (`action: "bankedReset.redeem"`, କ to ଣସି ଟୋକେନ୍ କିମ୍ବା କ୍ରେଡିଟ୍ ଆଇଡି); କ୍ୟାପଗୁଡିକ ସେହି ଧାଡିରୁ ଗଣନା କରାଯାଏ, ତେଣୁ ସେମାନେ ପୁନ art ଆରମ୍ଭରୁ ବଞ୍ଚନ୍ତି। ସଫଳ ମୁକ୍ତି ମଧ୍ୟ `provider.reset_redeemed` ୱେବହୋକ୍କୁ ନିଆଁ ଲଗାଇଥାଏ।
+
+ରେଗ୍ରେସନ୍ ଗାର୍ଡ: `tests/unit/banked-reset-policy.test.ts`, `tests/unit/banked-reset-auto-apply.test.ts`, `tests/unit/claude-limit-reset-policy-gate.test.ts`, `tests/unit/banked-reset-history-route.test.ts`।
+
 ### ସେସନ୍ ଆଫିନିଟି (#7274)
 
 **ପରିସର:** ଯେକୌଣସି ପ୍ରୋଭାଇଡର୍ ପାଇଁ ଗୋଟିଏ କ୍ଲାଏଣ୍ଟ ସେସନ୍ (`X-Session-Id` / `x-codex-session-id` / `x-omniroute-session` header) ଗୋଟିଏ ସଂଯୋଗରେ ପିନ୍ କରାଯାଏ।

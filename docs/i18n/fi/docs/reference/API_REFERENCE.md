@@ -1002,14 +1002,14 @@ ja suoratoistaa valmistuneen vastauksen.
 
 ---
 
-## Kiintiöt ja ongelmien raportointi
+## Kiintiöt ja ongelmaraportointi
 
-| Menetelmä | Polku               | Kuvaus                                                                                                        |
-| --------- | ------------------- | ------------------------------------------------------------------------------------------------------------- |
-| GET       | `/v1/quotas/check`  | Tarkistaa kiintiön etukäteen yhdistelmälle `provider` + `accountId` ennen rekisteröidyn avaimen myöntämistä   |
-| POST      | `/v1/issues/report` | Raportoi kiintiö-/avaimenmyöntämisvirheen GitHubiin (edellyttää `GITHUB_ISSUES_REPO`-asetusta ja tunnistetta) |
+| Menetelmä | Polku               | Kuvaus                                                                                       |
+| --------- | ------------------- | -------------------------------------------------------------------------------------------- |
+| GET       | `/v1/quotas/check`  | Vahvista `provider` + `accountId` :n kiintiö ennen rekisteröidyn avaimen myöntämistä         |
+| POST      | `/v1/issues/report` | Ilmoita quota/key n myöntämisvirheestä GitHub lle (vaatii `GITHUB_ISSUES_REPO` + -tunnuksen) |
 
-**Todennus:** Bearer-API-avain (`isAuthenticated`).
+**Todennus:** `/v1/quotas/check` ottaa kantajan API -avaimen (`isAuthenticated`). `/v1/issues/report` on vain hallintaan tarkoitettu (`requireManagementAuth`), kuten `/api/v1/registered-keys`: kojelautaistunto, paikallinen CLI tunnus tai API avain `manage`/`admin` laajuudella; Vain päättelyyn perustuvat API -avaimet saavat `403`.
 
 ### Kiintiöistunnon palautus (valinnainen)
 
@@ -1806,17 +1806,21 @@ OmniRoute-tapahtumien lähtevät webhook-tilaukset (pyynnön valmistuminen, kiin
 
 ## Rekisteröidyt avaimet (automaattinen hallinta)
 
-Automaattinen avaintenhallintajärjestelmä käyttää tätä API-avainten myöntämiseen ja kiertämiseen taustalla olevan palveluntarjoajan/tilin kautta sekä päivä- ja tuntikohtaisten kiintiöiden hallintaan.
+Automaattisen avainten hallintaalijärjestelmän käyttämä API avaimien myöntäminen ja kiertäminen tausta provider/account vastaan daily/hourly -kiintiöillä.
 
-| Menetelmä | Polku                                 | Kuvaus                                                                                                                                                                                                                           |
-| --------- | ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET       | `/api/v1/registered-keys`             | Luettele rekisteröidyt avaimet (vain peitetty etuliite)                                                                                                                                                                          |
-| POST      | `/api/v1/registered-keys`             | Myönnä uusi rekisteröity avain — runko: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Palauttaa raakamuotoisen avaimen **vain kerran**. Palauttaa `429`, jos kiintiö estää pyynnön. |
-| GET       | `/api/v1/registered-keys/[id]`        | Nouda rekisteröidyn avaimen metatiedot (ei raakamuotoista avainta)                                                                                                                                                               |
-| DELETE    | `/api/v1/registered-keys/[id]`        | Peruuta rekisteröity avain                                                                                                                                                                                                       |
-| POST      | `/api/v1/registered-keys/[id]/revoke` | Nimenomainen peruutuspäätepiste (sama vaikutus kuin komennolla `DELETE`)                                                                                                                                                         |
+| Menetelmä | Polku                                 | Kuvaus                                                                                                                                                                                                     |
+| --------- | ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET       | `/api/v1/registered-keys`             | Listaa rekisteröidyt avaimet (vain peitetty etuliite)                                                                                                                                                      |
+| POST      | `/api/v1/registered-keys`             | Anna uusi rekisteröity avain — body: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Palauttaa raaka-avaimen **kerran** . Palauttaa `429` kiintiön epäämisestä. |
+| GET       | `/api/v1/registered-keys/[id]`        | Hae rekisteröidyn avaimen metatiedot (ei raaka-ainetta)                                                                                                                                                    |
+| DELETE    | `/api/v1/registered-keys/[id]`        | Peruuta rekisteröity avain                                                                                                                                                                                 |
+| POST      | `/api/v1/registered-keys/[id]/revoke` | Eksplisiittinen peruutuspäätepiste (sama vaikutus kuin DELETE)                                                                                                                                             |
+| GET       | `/api/v1/providers/[provider]/limits` | Lue palveluntarjoajan liikkeeseenlaskijat                                                                                                                                                                  |
+| PUT       | `/api/v1/providers/[provider]/limits` | Aseta palveluntarjoajan myöntämisrajat — body: `{maxActiveKeys?, dailyIssueLimit?, hourlyIssueLimit?}`                                                                                                     |
+| GET       | `/api/v1/accounts/[id]/limits`        | Lue tilin myöntämisrajat                                                                                                                                                                                   |
+| PUT       | `/api/v1/accounts/[id]/limits`        | Aseta tilin myöntämisrajat — samalle rungolle kuin palveluntarjoajan reitti                                                                                                                                |
 
-**Todennus:** hallintaistunto/API-avain (`requireManagementAuth`) — sama suojaus kuin kohteessa `/api/keys`: hallintapaneelin istunto, paikallinen CLI-tunnus tai API-avain, jolla on `manage`/`admin`-käyttöoikeusalue; vain päättelyyn tarkoitetut API-avaimet saavat vastauksen `403`. Katso myös `/v1/quotas/check` ja `/v1/issues/report`.
+**Todennus:** hallinta session/API avain (`requireManagementAuth`) — sama suoja kuin `/api/keys`: kojelautaistunto, paikallinen CLI tunnus tai API avain `manage`/`admin` -laajuudella; Vain päättelyyn perustuvat API -avaimet saavat `403`. Katso myös `/v1/quotas/check` ja `/v1/issues/report`.
 
 ---
 

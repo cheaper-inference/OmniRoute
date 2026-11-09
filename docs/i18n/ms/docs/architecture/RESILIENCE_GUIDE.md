@@ -177,6 +177,45 @@ Ini kekal sehingga kelayakan berubah atau operator menetapkannya semula. Jangan 
 Pengawal regresi: `tests/unit/claude-low-priority-mode.test.ts`,
 `tests/unit/claude-limit-reset.test.ts`, `tests/unit/claude-low-priority-executor.test.ts`.
 
+### Gunakan tetapan semula bank secara automatik
+
+**Skop:** Sambungan langganan Codex dan Claude (OAuth).**Ikut serta** : tetapan `bankedResetAutoApply` dimatikan dan dalam mod `dry-run` secara lalai (Tetapan → AI → Gunakan tetapan semula bank secara automatik).
+
+**Tujuan:** belanjakan tetapan semula yang dibankkan sendiri apabila akaun mencecah dinding penggunaan, bukannya menunggu pengendali menekan "Tebus" pada halaman Had Penyedia.
+
+| Jenis kredit (`creditTypes`) | Apa yang ditebus                                  | Di mana ia berjalan                                                   |
+| ---------------------------- | ------------------------------------------------- | --------------------------------------------------------------------- |
+| `codexCredits`               | Codex menetapkan semula kredit                    | kerja latar belakang, setiap 60 saat                                  |
+| `claudeCredits`              | Geran dibankkan Claude ( kredit `GRANT` )         | kerja latar belakang, setiap 60 saat                                  |
+| `claudeSessionReset`         | Tetapan semula had sesi mingguan Claude (di atas) | laluan permintaan, melalui dasar yang sama seperti togol setiap akaun |
+
+**Pelaksanaan:**
+
+- Keputusan tulen (satu peraturan ditetapkan untuk kedua-dua laluan): `src/lib/usage/bankedResetPolicy.ts::decideBankedReset()`
+- Kerja latar belakang: `src/lib/services/bankedResetAutoApply.ts` (bermula dalam `src/instrumentation-node.ts`)
+- Gerbang laluan permintaan Claude : `src/lib/usage/claudeSessionResetPolicy.ts`, didaftarkan melalui `setClaudeLimitResetPolicy()` dalam `open-sse/services/claudeLimitReset.ts`
+- Sejarah, topi dan webhook: `src/lib/usage/bankedResetAudit.ts`
+- Sejarah API: `GET /api/settings/banked-reset-auto/history?limit=50` (pengesahan pengurusan)
+
+**Perintah keputusan** (peraturan gagal pertama ialah sebab yang direkodkan):
+
+1. Ciri dimatikan, jenis kredit dimatikan atau akaun di luar skop (`accountScope` `all` / `selected` serta peta `connections` setiap akaun).
+2. Di luar jadual UTC pilihan (`startHourUtc` > `endHourUtc` melintasi tengah malam).
+3. Had sepanjang 24 jam terakhir: `maxPerAccountPerDay` (1), `maxPerDay` (3) dan `minSpacingMinutes` (30) antara mana-mana dua penebusan.
+4. Pencetus: tetingkap `session` atau `weekly` berdinding (baca dari `getQuotaWindowStatus().reachedThreshold`, bukan `isAccountQuotaExhausted()`, yang hanya melaporkan akaun dengan setiap tetingkap yang dibelanjakan) atau kredit yang tamat tempoh dalam `expiringCreditHours` (24) pada akaun yang telah menggunakan sekurang-kurangnya `expiringCreditMinUsedPercent` (50).
+5. Pelindung semula semula jadi: langkau apabila tetingkap 5 jam berdinding ditetapkan semula dalam `sessionResetGuardMinutes` (90), atau tetingkap mingguan berdinding dalam `weeklyResetGuardHours` (12).
+6. Tingkat mingguan: langkau tetapan semula 5 jam apabila baki mingguan di bawah `weeklyFloorPercent` (10).
+7. Mod `last-resort` : langkau sementara akaun dalam skop lain pembekal yang sama mempunyai sekurang-kurangnya `poolHeadroomPercent` (10) dalam kedua-dua tetingkap. Pencetus kredit tamat tempoh memintas ini.
+8. `dry-run` merekodkan baris dan tidak menebus apa-apa; `last-resort` dan `eager` menebus.
+
+Data kuota yang tiada tidak akan membuka kunci penebusan: masa tetapan semula yang tidak diketahui atau penggunaan mingguan melangkau.
+
+**Tetapan semula sesi Claude :** dengan ciri dimatikan, atau `claudeSessionReset` dimatikan, togol `autoLimitReset` setiap akaun memutuskan sama seperti sebelum ini. Dengan kedua-duanya dihidupkan, ciri ini menggantikan togol setiap akaun: akaun dalam skop hanya boleh menuntut apabila dasar membenarkannya dan dalam mod `dry-run` tiada tuntutan dibuat.
+
+**Keselamatan:** tugas itu menebus paling banyak satu kredit setiap tanda, membuat keputusan sebelum menyenaraikan kredit (akaun yang dilangkau tidak pernah disenaraikan), menggunakan kunci idempotency `auto-reset:<connectionId>:<yyyy-mm-dd>:<n>`, dan menyandarkan akaun selama 1 jam selepas penyenaraian atau penebusan yang gagal. Setiap penebusan, kegagalan dan keputusan jangka kering ditulis kepada `audit_log` (`action: "bankedReset.redeem"`, tiada token atau id kredit); topi dikira dari baris tersebut, jadi mereka bertahan dimulakan semula. Penebusan yang berjaya turut melancarkan webhook `provider.reset_redeemed`.
+
+Pengawal regresi: `tests/unit/banked-reset-policy.test.ts`, `tests/unit/banked-reset-auto-apply.test.ts`, `tests/unit/claude-limit-reset-policy-gate.test.ts`, `tests/unit/banked-reset-history-route.test.ts`.
+
 ### Afiniti sesi (#7274)
 
 **Skop:** satu sesi klien (`X-Session-Id` / `x-codex-session-id` / `x-omniroute-session` header)

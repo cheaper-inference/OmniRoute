@@ -974,14 +974,14 @@ completamento.
 
 ---
 
-## Report di quote e problemi
+## Reporting su quote e problemi
 
-| Metodo | Percorso            | Descrizione                                                                                                    |
-| ------ | ------------------- | -------------------------------------------------------------------------------------------------------------- |
-| GET    | `/v1/quotas/check`  | Preconvalida la quota per una combinazione di `provider` + `accountId` prima di emettere una chiave registrata |
-| POST   | `/v1/issues/report` | Segnala a GitHub un errore di emissione di quota/chiave (richiede `GITHUB_ISSUES_REPO` + token)                |
+| Metodo | Sentiero            | Descrizione                                                                                       |
+| ------ | ------------------- | ------------------------------------------------------------------------------------------------- |
+| GET    | `/v1/quotas/check`  | Pre-convalidare la quota per una `provider` + `accountId` prima di emettere una chiave registrata |
+| POST   | `/v1/issues/report` | Segnala un errore di emissione quota/key a GitHub (richiede il token `GITHUB_ISSUES_REPO` + )     |
 
-**Autenticazione:** chiave API Bearer (`isAuthenticated`).
+**Autenticazione:** `/v1/quotas/check` accetta una chiave al portatore API (`isAuthenticated`). `/v1/issues/report` è di sola gestione (`requireManagementAuth`), come `/api/v1/registered-keys`: una sessione dashboard, il token CLI locale o una chiave API con ambito `manage`/`admin` ; Le chiavi API di sola inferenza ottengono `403`.
 
 ### Recupero della sessione di quota (facoltativo)
 
@@ -1776,19 +1776,23 @@ Sottoscrizioni a webhook in uscita per gli eventi di OmniRoute (completamento de
 
 ---
 
-## Chiavi registrate (gestione automatica)
+## Chiavi Registrate (Autogestione)
 
-Utilizzate dal sottosistema di gestione automatica delle chiavi per emettere e ruotare chiavi API tramite un provider/account di supporto, con quote giornaliere/orarie.
+Utilizzato dal sottosistema di gestione delle chiavi automatiche per emettere e ruotare le chiavi API rispetto a una provider/account di supporto, con quote daily/hourly.
 
-| Metodo | Percorso                              | Descrizione                                                                                                                                                                                                                             |
-| ------ | ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/api/v1/registered-keys`             | Elenca le chiavi registrate (solo il prefisso mascherato)                                                                                                                                                                               |
-| POST   | `/api/v1/registered-keys`             | Emette una nuova chiave registrata — corpo: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Restituisce la chiave grezza **una sola volta**. Restituisce `429` in caso di rifiuto per quota. |
-| GET    | `/api/v1/registered-keys/[id]`        | Recupera i metadati di una chiave registrata (nessun materiale grezzo)                                                                                                                                                                  |
-| DELETE | `/api/v1/registered-keys/[id]`        | Revoca una chiave registrata                                                                                                                                                                                                            |
-| POST   | `/api/v1/registered-keys/[id]/revoke` | Endpoint di revoca esplicita (stesso effetto di DELETE)                                                                                                                                                                                 |
+| Metodo | Sentiero                              | Descrizione                                                                                                                                                                                                                                  |
+| ------ | ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/v1/registered-keys`             | Elenca le chiavi registrate (solo prefisso mascherato)                                                                                                                                                                                       |
+| POST   | `/api/v1/registered-keys`             | Emettere un nuovo corpo — della chiave registrata: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Restituisce la chiave grezza **una volta** . Restituisce `429` in caso di rifiuto della quota. |
+| GET    | `/api/v1/registered-keys/[id]`        | Recuperare i metadati di una chiave registrata (nessuna materia prima)                                                                                                                                                                       |
+| DELETE | `/api/v1/registered-keys/[id]`        | Revoca una chiave registrata                                                                                                                                                                                                                 |
+| POST   | `/api/v1/registered-keys/[id]/revoke` | Endpoint di revoca esplicita (stesso effetto di DELETE)                                                                                                                                                                                      |
+| GET    | `/api/v1/providers/[provider]/limits` | Leggi i limiti di emissione del fornitore                                                                                                                                                                                                    |
+| PUT    | `/api/v1/providers/[provider]/limits` | Imposta i limiti di emissione del fornitore Corpo — : `{maxActiveKeys?, dailyIssueLimit?, hourlyIssueLimit?}`                                                                                                                                |
+| GET    | `/api/v1/accounts/[id]/limits`        | Leggi i limiti di emissione del conto                                                                                                                                                                                                        |
+| PUT    | `/api/v1/accounts/[id]/limits`        | Imposta i limiti di emissione del conto — stesso corpo del percorso del fornitore                                                                                                                                                            |
 
-**Autenticazione:** sessione/chiave API di gestione (`requireManagementAuth`) — la stessa protezione di `/api/keys`: una sessione della dashboard, il token CLI locale o una chiave API con ambito `manage`/`admin`; le chiavi API di sola inferenza ricevono `403`. Vedi anche `/v1/quotas/check` e `/v1/issues/report`.
+**Autenticazione:** gestione chiave session/API (`requireManagementAuth`) — la stessa guardia di `/api/keys`: una sessione dashboard, il token CLI locale o una chiave API con ambito `manage`/`admin` ; Le chiavi API di sola inferenza ottengono `403`. Vedi anche `/v1/quotas/check` e `/v1/issues/report`.
 
 ---
 

@@ -973,14 +973,14 @@ renvoie `codex.rate_limits` + `response.created` et diffuse la complétion.
 
 ---
 
-## Rapports des quotas et des problèmes
+## Rapports sur les quotas et les problèmes
 
-| Méthode | Chemin              | Description                                                                                    |
-| ------- | ------------------- | ---------------------------------------------------------------------------------------------- |
-| GET     | `/v1/quotas/check`  | Prévalider le quota pour un `provider` + `accountId` avant d’émettre une clé enregistrée       |
-| POST    | `/v1/issues/report` | Signaler un échec d’émission de quota/clé à GitHub (nécessite `GITHUB_ISSUES_REPO` + un jeton) |
+| Méthode | Chemin              | Description                                                                                  |
+| ------- | ------------------- | -------------------------------------------------------------------------------------------- |
+| GET     | `/v1/quotas/check`  | Pré-valider le quota pour un `provider` + `accountId` avant de délivrer une clé enregistrée  |
+| POST    | `/v1/issues/report` | Signaler un échec d'émission quota/key à GitHub (nécessite le jeton `GITHUB_ISSUES_REPO` + ) |
 
-**Authentification :** clé API Bearer (`isAuthenticated`).
+**Authentification :** `/v1/quotas/check` prend une clé Bearer API (`isAuthenticated`). `/v1/issues/report` est uniquement de gestion (`requireManagementAuth`), comme `/api/v1/registered-keys`: une session de tableau de bord, le jeton CLI local ou une clé API avec une portée `manage`/`admin` ; Les clés API d'inférence uniquement obtiennent `403`.
 
 ### Récupération de session de quota (opt-in)
 
@@ -1774,17 +1774,21 @@ Abonnements aux webhooks sortants pour les événements OmniRoute (achèvement d
 
 ## Clés enregistrées (gestion automatique)
 
-Utilisé par le sous-système de gestion automatique des clés pour émettre et faire tourner des clés API auprès d’un fournisseur ou d’un compte sous-jacent, avec des quotas quotidiens et horaires.
+Utilisé par le sous-système de gestion automatique des clés pour émettre et alterner les clés API par rapport à un provider/account de support, avec des quotas daily/hourly.
 
-| Méthode | Chemin                                | Description                                                                                                                                                                                                                   |
-| ------- | ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET     | `/api/v1/registered-keys`             | Lister les clés enregistrées (uniquement le préfixe masqué)                                                                                                                                                                   |
-| POST    | `/api/v1/registered-keys`             | Émettre une nouvelle clé enregistrée — corps : `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Renvoie la clé brute **une seule fois**. Renvoie `429` en cas de refus dû au quota. |
-| GET     | `/api/v1/registered-keys/[id]`        | Récupérer les métadonnées d’une clé enregistrée (aucune donnée brute)                                                                                                                                                         |
-| DELETE  | `/api/v1/registered-keys/[id]`        | Révoquer une clé enregistrée                                                                                                                                                                                                  |
-| POST    | `/api/v1/registered-keys/[id]/revoke` | Point de terminaison de révocation explicite (même effet que DELETE)                                                                                                                                                          |
+| Méthode | Chemin                                | Description                                                                                                                                                                                                           |
+| ------- | ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET     | `/api/v1/registered-keys`             | Liste des clés enregistrées (préfixe masqué uniquement)                                                                                                                                                               |
+| POST    | `/api/v1/registered-keys`             | Émettez un nouveau corps de clé — enregistré : `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Renvoie la clé brute **une fois** . Renvoie `429` en cas de refus de quota. |
+| GET     | `/api/v1/registered-keys/[id]`        | Récupérer les métadonnées d'une clé enregistrée (pas de matière première)                                                                                                                                             |
+| DELETE  | `/api/v1/registered-keys/[id]`        | Révoquer une clé enregistrée                                                                                                                                                                                          |
+| POST    | `/api/v1/registered-keys/[id]/revoke` | Point de terminaison de révocation explicite (même effet que DELETE)                                                                                                                                                  |
+| GET     | `/api/v1/providers/[provider]/limits` | Lire les plafonds d'émission du fournisseur                                                                                                                                                                           |
+| PUT     | `/api/v1/providers/[provider]/limits` | Définir les plafonds d'émission du fournisseur Corps — : `{maxActiveKeys?, dailyIssueLimit?, hourlyIssueLimit?}`                                                                                                      |
+| GET     | `/api/v1/accounts/[id]/limits`        | Lire les plafonds d'émission du compte                                                                                                                                                                                |
+| PUT     | `/api/v1/accounts/[id]/limits`        | Définir les plafonds d'émission du compte — même corps que l'itinéraire du fournisseur                                                                                                                                |
 
-**Authentification :** session/clé API de gestion (`requireManagementAuth`) — le même garde-fou que pour `/api/keys` : une session du tableau de bord, le jeton CLI local ou une clé API avec la portée `manage`/`admin` ; les clés API limitées à l’inférence reçoivent `403`. Voir également `/v1/quotas/check` et `/v1/issues/report`.
+**Authentification :** gestion clé session/API (`requireManagementAuth`) — la même garde que `/api/keys`: une session de tableau de bord, le token CLI local, ou une clé API avec portée `manage`/`admin` ; Les clés API d'inférence uniquement obtiennent `403`. Voir aussi `/v1/quotas/check` et `/v1/issues/report`.
 
 ---
 

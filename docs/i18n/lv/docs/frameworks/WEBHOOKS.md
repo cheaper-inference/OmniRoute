@@ -4,53 +4,48 @@
 
 ---
 
-> **Patiesais avots:** `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`, `src/app/api/webhooks/`
-> **Pēdējoreiz atjaunināts:** 2026-06-28 — v3.8.40
+> **Patiesības avots:** `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`, `src/app/api/webhooks/`**Pēdējo reizi atjaunināts:** 2026-06-28 — v3.8.40
 
-OmniRoute var nosūtīt HTTP tīmekļa aizķeres platformas notikumu gadījumā. Izmantojiet tās integrācijai ar
-Slack, PagerDuty, Datadog, iekšējiem brīdinājumu pakalpojumiem vai jebkuru HTTP saņēmēju.
+OmniRoute var aktivizēt HTTP tīmekļa aizķeres platformas notikumos. Izmantojiet tos, lai integrētu ar Slack, PagerDuty, Datadog, iekšējiem brīdināšanas pakalpojumiem vai jebkuru HTTP uztvērēju.
 
-Dispečers katru piegādi paraksta ar HMAC-SHA256, īslaicīgu
-kļūmju gadījumā veic atkārtotus mēģinājumus, izseko katras tīmekļa aizķeres piegādes stāvokli un automātiski atspējo galapunktus, kuru
-darbība atkārtoti neizdodas.
+Dispečers katru piegādi paraksta ar HMAC-SHA256, atkārtoti mēģina konstatēt pārejošas kļūmes, izseko piegādes stāvokli katram tīmekļa aizķerei un automātiski atspējo galapunktus, kas pastāvīgi neizdodas.
 
-## Atbalstītie notikumi
+## Atbalstītie pasākumi
 
-Tips `WebhookEvent` (`src/lib/webhooks/eventDescriptions.ts`, ko izmanto `src/lib/webhookDispatcher.ts`) pašlaik modelē tieši četrus notikumus:
+`WebhookEvent` tips (`src/lib/webhooks/eventDescriptions.ts`, patērē `src/lib/webhookDispatcher.ts`) pašlaik modelē septiņus notikumus:
 
-| Notikums            | Aktivizējas, kad                                                                                |
-| ------------------- | ----------------------------------------------------------------------------------------------- |
-| `request.completed` | Starpniekots pieprasījums tiek sekmīgi pabeigts                                                 |
-| `request.failed`    | Starpniekots pieprasījums neizdodas pēc visiem atkārtotajiem mēģinājumiem/rezerves risinājumiem |
-| `quota.exceeded`    | API atslēga pārsniedz budžeta/kvotas slieksni                                                   |
-| `test.ping`         | Testa galapunkta izmantots sintētisks notikums                                                  |
+| Pasākums                  | Aizdedzina, kad                                                                                                        |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `request.completed`       | Starpniekservera pieprasījums ir veiksmīgi pabeigts                                                                    |
+| `request.failed`          | Starpniekservera pieprasījums neizdodas pēc retries/fallback                                                           |
+| `quota.exceeded`          | API atslēga šķērso budget/quota slieksni                                                                               |
+| `proxy.set_aside`         | Pēc atkārtotiem atteikumiem starpniekserveru pūla dalībnieks tiek atcelts (tikai pārejai)                              |
+| `proxy.pool.exhausted`    | Katrs starpniekservera pūla tvēruma dalībnieks ir rezervēts                                                            |
+| `provider.reset_redeemed` | Automātiski lietot bankas atiestatīšanu, kas izpirka atiestatīšanas kredītu vai Claude iknedēļas sesijas atiestatīšanu |
+| `test.ping`               | Sintētisks notikums, ko izmanto testa galapunkts                                                                       |
 
-Abonementi pieņem literāli `"*"`, lai saņemtu visus notikumus. Nezināmi notikumu
-nosaukumi laukā `events` nosūtīšanas laikā tiek ignorēti.
+Abonementi pieņem burtisku `"*"`, lai saņemtu katru notikumu. Nezināmi notikumu nosaukumi `events` tiek ignorēti nosūtīšanas laikā.
 
-> Piezīme: dispečera API ir pieslēgta, taču dažu
-> notikumu, kas nav `test.ping`, izsaukumu vietas produkcijas vidē joprojām tiek ieviestas. Pārbaudiet `grep dispatchEvent`, lai noskaidrotu,
-> kuri ceļi pašlaik izsauc dispečeru jūsu laidienā.
+> Piezīme. Dispečeram API ir pievienots vads, bet dažu notikumu, kas nav `test.ping`, ražošanas zvanu vietas joprojām tiek nolaistas. Pārbaudiet `grep dispatchEvent`, lai redzētu, kuri ceļi pašlaik izsauc dispečeru jūsu laidienā.
 
 ## Arhitektūra
 
 ```
-Izsaucējs (apstrādātājs, pakalpojums, pārraugs)
+Caller (handler, service, monitor)
   dispatchEvent(event, data)            [src/lib/webhookDispatcher.ts]
     -> getEnabledWebhooks()             [src/lib/db/webhooks.ts]
-    -> filtrēt pēc webhook.events
-    -> katrai atbilstībai (paralēli):
+    -> filter by webhook.events
+    -> for each match (in parallel):
        deliverWebhook(url, payload, secret)
-         izveidot lietderīgo slodzi { event, timestamp, data }
-         parakstīt pamattekstu ar HMAC-SHA256 (ja norādīts secret)
-         POST ar 10 s taimautu
-         atkārtot līdz 3 reizēm 5xx / tīkla kļūdas gadījumā
+         build payload { event, timestamp, data }
+         sign body with HMAC-SHA256 (if secret present)
+         POST with 10s timeout
+         retry up to 3 times on 5xx / network error
        recordWebhookDelivery(id, status, success)
     -> disableWebhooksWithHighFailures(10)
 ```
 
-Izsaucējam nosūtīšana notiek, negaidot rezultātu: `Promise.allSettled` ignorē
-atsevišķu tīmekļa aizķeru kļūdas, tāpēc viens problemātisks saņēmējs nevar bloķēt pārējos.
+Nosūtīšana zvanītājam ir uguns un aizmirst: `Promise.allSettled` norij katras tīmekļa aizķeres kļūdas, tāpēc viens slikts uztvērējs nevar bloķēt citus.
 
 ## HMAC parakstīšana
 
@@ -64,13 +59,11 @@ X-Webhook-Timestamp: <ISO-8601>
 X-Webhook-Signature: sha256=<hex HMAC-SHA256(secret, body)>
 ```
 
-> Galveņu nosaukumi izmanto prefiksu `X-Webhook-*` (nevis `X-OmniRoute-*`). Paraksta
-> vērtība ir `sha256=<hex>` — pārbaudiet pilno prefiksu.
+> Galvenes nosaukumos tiek izmantots `X-Webhook-*` prefikss (nevis `X-OmniRoute-*`). Paraksta vērtība ir `sha256=<hex>` — verificējiet pilnu prefiksu.
 
-Ja `createWebhook` tiek izsaukta bez noslēpuma, DB modulis to ģenerē
-(`whsec_<48 hex>`), tāpēc pēc noklusējuma visas tīmekļa aizķeres tiek parakstītas.
+Ja `createWebhook` tiek izsaukts bez noslēpuma, DB modulis ģenerē vienu (`whsec_<48 hex>`), tāpēc visi tīmekļa aizķeri tiek parakstīti pēc noklusējuma.
 
-### Pārbaude saņēmēja pusē
+### Pārbaude uztvērējā
 
 ```typescript
 import { createHmac, timingSafeEqual } from "node:crypto";
@@ -83,66 +76,57 @@ function verify(rawBody: string, signature: string, secret: string) {
 }
 ```
 
-Vienmēr pārbaudiet parakstu pret **neapstrādāto** pieprasījuma pamattekstu pirms jebkādas JSON parsēšanas.
+Vienmēr pārbaudiet pret **neapstrādāts** pieprasījuma pamatteksts pirms JSON parsēšanas.
 
-## Atkārtotu mēģinājumu un kļūmju politika
+## Atkārtota mēģinājuma un neveiksmes politika
 
 `deliverWebhook(url, payload, secret, maxRetries = 3)`:
 
-- Katra mēģinājuma noildze ir 10 sekundes (`AbortController`).
-- HTTP 2xx tiek uzskatīts par veiksmīgu rezultātu.
-- HTTP 3xx/4xx tiek uzskatīts par galīgu statusu bez atkārtota mēģinājuma — piegāde tiek reģistrēta
-  ar `success = res.ok`.
-- HTTP 5xx un tīkla kļūdu gadījumā tiek veikti atkārtoti mēģinājumi ar eksponenciāli pieaugošu aizkavi:
-  `2^attempt * 1000 ms` (1 s, 2 s, 4 s).
-- Pēc `maxRetries` sasniegšanas piegāde tiek reģistrēta kā neveiksmīga.
-- Katra piegāde atjaunina `last_triggered_at`, `last_status` un vai nu atiestata,
-  vai palielina `failure_count`.
-- Dispečers pēc katras izsūtīšanas izsauc `disableWebhooksWithHighFailures(10)`,
-  tādēļ jebkurš tīmekļa aizķeres punkts ar `failure_count >= 10` tiek automātiski atspējots.
+- 10 sekunžu taimauts vienam mēģinājumam (`AbortController`).
+- HTTP 2xx tiek uzskatīts par panākumu.
+- HTTP 3xx/4xx tiek uzskatīts par neizmēģināmu galīgo statusu — kas reģistrēts kā piegādāts kopā ar `success = res.ok`.
+- HTTP 5xx un tīkla kļūdas tiek mēģināts atkārtoti ar eksponenciālu atkāpšanos: `2^attempt * 1000 ms` (1s, 2s, 4s).
+- Pēc `maxRetries` piegāde tiek reģistrēta kā neizdevusies.
+- Katra piegāde atjaunina `last_triggered_at`, `last_status` un atiestata vai palielina `failure_count`.
+- Dispečers izsauc `disableWebhooksWithHighFailures(10)` pēc katras ventilatora izslēgšanas, tāpēc jebkurš tīmekļa aizķere ar `failure_count >= 10` tiek automātiski atspējots.
 
-## Datubāze
+## Datu bāze
 
-Tabula `webhooks` (migrācija `011_webhooks.sql`):
+`webhooks` tabula (migrācija `011_webhooks.sql`):
 
-| Kolonna             | Tips    | Piezīmes                                               |
-| ------------------- | ------- | ------------------------------------------------------ |
-| `id`                | TEXT PK | UUID                                                   |
-| `url`               | TEXT    | Galamērķa URL                                          |
-| `events`            | TEXT    | JSON masīvs; noklusējums `["*"]`                       |
-| `secret`            | TEXT    | HMAC noslēpums (automātiski ģenerēts, ja nav norādīts) |
-| `enabled`           | INT     | 0/1; noklusējums ir 1                                  |
-| `description`       | TEXT    | Neobligāta cilvēklasāma etiķete                        |
-| `created_at`        | TEXT    | `datetime('now')`                                      |
-| `last_triggered_at` | TEXT    | Atjaunināts katrā piegādes mēģinājumā                  |
-| `last_status`       | INT     | Pēdējā mēģinājuma HTTP statuss (0 = tīkls)             |
-| `failure_count`     | INT     | Veiksmes gadījumā atiestatīts uz 0, kļūmes gadījumā +1 |
+| Kolonna             | Tips    | Piezīmes                                                         |
+| ------------------- | ------- | ---------------------------------------------------------------- |
+| `id`                | TEXT PK | UUID                                                             |
+| `url`               | TEXT    | Galamērķis URL                                                   |
+| `events`            | TEXT    | JSON masīvs; noklusējuma `["*"]`                                 |
+| `secret`            | TEXT    | HMAC noslēpums (automātiski ģenerēts, ja tas nav norādīts)       |
+| `enabled`           | INT     | 0/1; noklusējuma vērtība ir 1                                    |
+| `description`       | TEXT    | Cilvēka etiķete pēc izvēles                                      |
+| `created_at`        | TEXT    | `datetime('now')`                                                |
+| `last_triggered_at` | TEXT    | Atjaunināts katrā piegādes mēģinājumā                            |
+| `last_status`       | INT     | Pēdējā mēģinājuma HTTP statuss (0 = tīkls)                       |
+| `failure_count`     | INT     | Veiksmes gadījumā tiek atiestatīts uz 0, neveiksmes gadījumā + 1 |
 
-Piegāžu vēsture tiek glabāta īpašajā tabulā `webhook_deliveries`
-(migrācija `069_webhook_deliveries.sql`, katrā mēģinājumā ierakstīta, izmantojot
-`src/lib/db/webhookDeliveries.ts::insertDelivery`), papildus apkopotajiem
-skaitītājiem tabulas `webhooks` rindā. Veida metadati (Slack / Discord /
-Telegram / pielāgoti lietderīgās slodzes pārveidotāji) tika pievienoti ar `070_webhooks_kind_metadata.sql`.
+Piegādes vēsture tiek saglabāta speciālajā `webhook_deliveries` tabulā (migrācija `069_webhook_deliveries.sql`, kas tiek ierakstīta, izmantojot `src/lib/db/webhookDeliveries.ts::insertDelivery` katrā mēģinājumā), papildus apkopotajiem skaitītājiem `webhooks` rindā. `070_webhooks_kind_metadata.sql` pievienoja veida metadatus (Slack / Discord / Telegram / pielāgotus kravas transformatorus).
 
 ## REST API
 
 Visiem galapunktiem ir nepieciešama pārvaldības autentifikācija (`requireManagementAuth`).
 
-| Galapunkts                      | Metode | Apraksts                                                  |
-| ------------------------------- | ------ | --------------------------------------------------------- |
-| `/api/webhooks`                 | GET    | Uzskaitīt tīmekļa aizķeres punktus (noslēpumi maskēti)    |
-| `/api/webhooks`                 | POST   | Izveidot tīmekļa aizķeres punktu                          |
-| `/api/webhooks/[id]`            | GET    | Tīmekļa aizķeres punkta informācija (pilns noslēpums)     |
-| `/api/webhooks/[id]`            | PUT    | Atjaunināt laukus                                         |
-| `/api/webhooks/[id]`            | DELETE | Noņemt                                                    |
-| `/api/webhooks/[id]/test`       | POST   | Nosūtīt `test.ping` (bez atkārtotiem mēģinājumiem)        |
-| `/api/webhooks/[id]/deliveries` | GET    | Viena tīmekļa aizķeres punkta nesenie piegādes mēģinājumi |
-| `/api/webhooks/validate-url`    | POST   | Iepriekšēja URL validācija (SSRF aizsardzība)             |
+| Galapunkts                      | Metode | Apraksts                                            |
+| ------------------------------- | ------ | --------------------------------------------------- |
+| `/api/webhooks`                 | GET    | Tīmekļa aizķeru saraksts (slēpti noslēpumi)         |
+| `/api/webhooks`                 | POST   | Izveidojiet tīmekļa aizķeri                         |
+| `/api/webhooks/[id]`            | GET    | Web aizķeres informācija (pilns noslēpums)          |
+| `/api/webhooks/[id]`            | PUT    | Atjaunināt laukus                                   |
+| `/api/webhooks/[id]`            | DELETE | Noņemt                                              |
+| `/api/webhooks/[id]/test`       | POST   | Aktivizēt `test.ping` (nav atkārtotu mēģinājumu)    |
+| `/api/webhooks/[id]/deliveries` | GET    | Nesenie piegādes mēģinājumi vienam tīmekļa aizķerei |
+| `/api/webhooks/validate-url`    | POST   | Pirmslidojuma URL validācija (SSRF aizsargs)        |
 
-`GET /api/webhooks` maskē noslēpumu formātā `<pirmās 10 rakstzīmes>...`, lai izvairītos no tā
-nopludināšanas saraksta lapās. Izmantojiet `[id]` GET pieprasījumu, kad noslēpums patiešām ir nepieciešams.
+`GET /api/webhooks` maskē `<first 10 chars>...` noslēpumu, lai izvairītos no informācijas noplūdes saraksta lapās. Izmantojiet `[id]` GET kad jums patiešām ir nepieciešams noslēpums.
 
-### Tīmekļa aizķeres punkta izveide
+### Izveidojiet tīmekļa aizķeri
 
 ```bash
 curl -X POST http://localhost:20128/api/webhooks \
@@ -156,33 +140,29 @@ curl -X POST http://localhost:20128/api/webhooks \
   }'
 ```
 
-Ja `secret` nav norādīts, serveris ģenerē `whsec_<hex>` noslēpumu un atgriež
-to atbildē.
+Ja `secret` tiek izlaists, serveris ģenerē `whsec_<hex>` noslēpumu un atgriež to atbildē.
 
-### Tīmekļa aizķeres punkta testēšana
+### Pārbaudiet tīmekļa aizķeri
 
 ```bash
 curl -X POST http://localhost:20128/api/webhooks/<id>/test \
   -H "Cookie: auth_token=..."
 ```
 
-Atgriež `{ delivered, status, error }`. Atkārtoti mēģinājumi netiek veikti — tas ir noderīgi,
-lai ātri pārbaudītu, vai saņēmējs pieņem lietderīgo slodzi un parakstu.
+Atgriež `{ delivered, status, error }`. Netiek mēģināts mēģināt. — ir noderīgs, lai ātri pārbaudītu, vai uztvērējs pieņem lietderīgo slodzi un parakstu.
 
 ## Informācijas panelis
 
-Informācijas paneļa lapa `/dashboard/webhooks` (skatiet
-`src/app/(dashboard)/dashboard/webhooks/page.tsx`) nodrošina:
+`/dashboard/webhooks` informācijas paneļa lapa (skatiet `src/app/(dashboard)/dashboard/webhooks/page.tsx`) nodrošina:
 
-- Tīmekļa aizķeru izveidi un rediģēšanu ar notikumu atlasītāju
-- Statusa indikatoru (aktīvs / neaktīvs / ar kļūdu), kura pamatā ir `enabled`,
-  `failure_count` un `last_status`
-- Testa piegādi ar vienu klikšķi
-- Manuālu ieslēgšanas/izslēgšanas slēdzi
+- Create/edit tīmekļa aizķeres ar notikumu atlasītāju
+- Statusa indikators (aktīvs / neaktīvs / kļūdains), pamatojoties uz `enabled`, `failure_count` un `last_status`
+- Testa piegāde ar vienu klikšķi
+- Manuāls enable/disable pārslēgs
 
-## Derīgo datu piemēri
+## Kravas piemēri
 
-### request.completed
+### pieprasījums.pabeigts
 
 ```json
 {
@@ -214,29 +194,19 @@ Informācijas paneļa lapa `/dashboard/webhooks` (skatiet
 }
 ```
 
-Lauku struktūras notikumiem, kas nav `test.ping`, nosaka izsaukuma vietas, kuras
-tos emitē; uzskatiet objektu `data` par turpmāk saderīgu (pievienojiet laukus,
-nepaļaujieties uz to neesamību).
+Lauku formas notikumiem, kas nav `test.ping` nosaka zvanu vietnes, kas tos izstaro; apstrādājiet `data` objektu kā uz priekšu saderīgu (pievienojiet laukus, nav atkarīgi no prombūtnes).
 
 ## Labākā prakse
 
-- **Pārbaudiet parakstu katrai piegādei**, izmantojot neapstrādāto pieprasījuma pamattekstu, — tas novērš
-  viltotus POST pieprasījumus no ikviena, kurš uzmin jūsu tīmekļa aizķeres URL.
-- **Atbildiet ar 2xx aptuveni 5 sekunžu laikā** — dispečera noildze ir 10 s. Lēni
-  saņēmēji iztērēs atkārtotos mēģinājumus un palielinās `failure_count`.
-- **Veidojiet apdarinātājus idempotentus** — atkārtoti mēģinājumi un piegādes semantika
-  «vismaz vienreiz» nozīmē, ka iespējami dublikāti.
-- **Abonējiet minimāli** — norādiet tikai tos notikumus, kurus faktiski patērējat; `"*"`
-  palielinās izmaksas saņēmējiem, kurus jūs nekontrolējat.
-- **Uzraugiet `failure_count`** — galapunkti tiek automātiski atspējoti pēc 10 secīgām
-  kļūmēm; pēc saņēmēja salabošanas atiestatiet to, izsaucot `PUT /api/webhooks/[id]`
-  ar `enabled: true`.
-- **Periodiski mainiet noslēpumus** — ar `PUT` iestatiet jaunu `secret`, izvietojiet jauno vērtību
-  saņēmējā un apstipriniet to, izmantojot testa galapunktu.
+- **Pārbaudiet parakstu uz katras piegādes** pret neapstrādātu korpusu — novērš viltotu POSTs no ikviena, kas uzmin jūsu tīmekļa aizķeri URL.
+- **Atbildiet 2xx ~ 5 sekunžu laikā** Dispečera — noildze beidzas pēc 10 s. Lēnie uztvērēji ēdīs atkārtotus mēģinājumus un uzpūtīs `failure_count`.
+- **Padariet apdarinātājus idempotentus** — atkārtojumi un vismaz vienreizējas piegādes semantika nozīmē, ka ir iespējami dublikāti.
+- **Abonējiet minimāli** — uzskaita tikai tos notikumus, kurus jūs faktiski patērējat; `"*"` palielinās izmaksas par uztvērējiem, kurus jūs nekontrolējat.
+- **Skatieties `failure_count`** — galapunkti tiek automātiski atspējoti 10 secīgu kļūmju gadījumā; atiestatiet, zvanot `PUT /api/webhooks/[id]` ar `enabled: true` pēc uztvērēja labošanas.
+- **Periodiski apgrieziet noslēpumus** — `PUT` jaunu `secret`, izvietojiet jauno vērtību uztvērējā un apstipriniet, izmantojot testa galapunktu.
 
-## Skatiet arī
+## Skatīt arī
 
-- [API_REFERENCE.md](../reference/API_REFERENCE.md) — pilna pārvaldības API saskarne
-- [RESILIENCE_GUIDE.md](../architecture/RESILIENCE_GUIDE.md) — ķēdes pārtraucēja / nogaidīšanas perioda
-  semantika pakalpojumu sniedzēju kļūmēm, kas tiek parādītas, izmantojot `request.failed`
-- Pirmkods: `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`
+- [API_REFERENCE.md](../reference/API_REFERENCE.md) — pilna pārvaldība API virsma
+- [RESILIENCE_GUIDE.md](../architecture/RESILIENCE_GUIDE.md) — ķēdes pārtraucēja/atdzišanas semantika aiz pakalpojumu sniedzēja kļūmēm, kas atklātas, izmantojot `request.failed`
+- Avots: `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`

@@ -191,6 +191,45 @@ Persistono finché le credenziali non cambiano o un operatore non li reimposta. 
 Protezione dalle regressioni: `tests/unit/claude-low-priority-mode.test.ts`,
 `tests/unit/claude-limit-reset.test.ts`, `tests/unit/claude-low-priority-executor.test.ts`.
 
+### Applica automaticamente i ripristini bancari
+
+**Ambito:** Connessioni in abbonamento Codex e Claude (OAuth).**Accettazione** : l'impostazione `bankedResetAutoApply` è disattivata e in modalità `dry-run` per impostazione predefinita (Impostazioni → AI → Applica automaticamente i ripristini bancari).
+
+**Scopo:** spendere autonomamente i ripristini accumulati quando un account raggiunge un limite di utilizzo, invece di attendere che un operatore prema "Riscatta" nella pagina Limiti del fornitore.
+
+| Tipo di credito (`creditTypes`) | Ciò che è redento                                                | Dove corre                                                                                        |
+| ------------------------------- | ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| `codexCredits`                  | Crediti di ripristino Codex                                      | lavoro in background, ogni 60 s                                                                   |
+| `claudeCredits`                 | Sovvenzioni bancarie Claude (crediti `GRANT` )                   | lavoro in background, ogni 60 s                                                                   |
+| `claudeSessionReset`            | Reimpostazione del limite di sessioni settimanali Claude (sopra) | percorso della richiesta, attraverso la stessa policy dell'attivazione/disattivazione per account |
+
+**Attuazione:**
+
+- Decisione pura (una serie di regole per entrambi i percorsi): `src/lib/usage/bankedResetPolicy.ts::decideBankedReset()`
+- Lavoro in background: `src/lib/services/bankedResetAutoApply.ts` (avviato in `src/instrumentation-node.ts`)
+- Gate del percorso della richiesta Claude : `src/lib/usage/claudeSessionResetPolicy.ts`, registrato tramite `setClaudeLimitResetPolicy()` in `open-sse/services/claudeLimitReset.ts`
+- Storia, limiti e webhook: `src/lib/usage/bankedResetAudit.ts`
+- Cronologia API: `GET /api/settings/banked-reset-auto/history?limit=50` (autenticazione di gestione)
+
+**Ordine di decisione** (la prima regola fallita è il motivo registrato):
+
+1. Funzionalità disattivata, tipo di credito disattivato o account fuori ambito (`accountScope` `all` / `selected` più la mappa `connections` per account).
+2. Al di fuori dell'orario UTC opzionale (`startHourUtc` > `endHourUtc` supera la mezzanotte).
+3. Limiti nelle ultime 24 ore: `maxPerAccountPerDay` (1), `maxPerDay` (3) e `minSpacingMinutes` (30) tra due riscatti qualsiasi.
+4. Trigger: una finestra `session` o `weekly` murata (letta da `getQuotaWindowStatus().reachedThreshold`, non `isAccountQuotaExhausted()`, che riporta solo un account con ogni finestra spesa) o un credito in scadenza all'interno di `expiringCreditHours` (24) su un account che ha utilizzato almeno `expiringCreditMinUsedPercent` (50).
+5. Protezione a ripristino naturale: salta quando la finestra murata di 5 ore si ripristina entro `sessionResetGuardMinutes` (90) o la finestra settimanale murata all'interno di `weeklyResetGuardHours` (12).
+6. Piano settimanale: salta un ripristino di 5 ore quando il rimanente settimanale è inferiore a `weeklyFloorPercent` (10).
+7. Modalità `last-resort` : salta mentre un altro account nell'ambito dello stesso fornitore ha almeno `poolHeadroomPercent` (10) rimasti in entrambe le finestre. I trigger del credito in scadenza ignorano questo problema.
+8. `dry-run` registra una riga e non riscatta nulla; Riscatto `last-resort` e `eager`.
+
+I dati sulla quota mancanti non sbloccano mai un riscatto: un tempo di ripristino sconosciuto o un utilizzo settimanale saltano.
+
+**Ripristino della sessione Claude :** con la funzione disattivata o `claudeSessionReset` disattivato, l'interruttore `autoLimitReset` per account decide esattamente come prima. Con entrambi attivi, la funzione sostituisce le opzioni per account: un account nell'ambito può richiedere solo quando la politica lo consente e in modalità `dry-run` non viene effettuata alcuna richiesta.
+
+**Sicurezza:** il lavoro riscatta al massimo un credito per tick, decide prima di elencare i crediti (un account saltato non viene mai elencato), utilizza le chiavi di idempotenza `auto-reset:<connectionId>:<yyyy-mm-dd>:<n>` e annulla un account per 1 ora dopo un elenco o un riscatto fallito. Ogni decisione di riscatto, fallimento e prova viene scritta a `audit_log` (`action: "bankedReset.redeem"`, senza token o ID di credito); i tappi vengono contati da quelle righe, quindi sopravvivono ai riavvii. I riscatti riusciti attivano anche il webhook `provider.reset_redeemed`.
+
+Protezioni di regressione: `tests/unit/banked-reset-policy.test.ts`, `tests/unit/banked-reset-auto-apply.test.ts`, `tests/unit/claude-limit-reset-policy-gate.test.ts`, `tests/unit/banked-reset-history-route.test.ts`.
+
 ### Affinità di sessione (#7274)
 
 **Ambito:** una sessione client (`X-Session-Id` / `x-codex-session-id` / `x-omniroute-session` header) associata a una sola connessione, per **qualsiasi** provider.

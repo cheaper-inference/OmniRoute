@@ -960,12 +960,12 @@ CLI face upgrade pentru `base_url + /responses` la un WebSocket, iar OmniRoute �
 
 ## Raportarea cotelor și a problemelor
 
-| Metodă | Cale                | Descriere                                                                                                 |
-| ------ | ------------------- | --------------------------------------------------------------------------------------------------------- |
-| GET    | `/v1/quotas/check`  | Prevalidează cota pentru o combinație `provider` + `accountId` înainte de emiterea unei chei înregistrate |
-| POST   | `/v1/issues/report` | Raportează către GitHub un eșec de emitere a cotei/cheii (necesită `GITHUB_ISSUES_REPO` + token)          |
+| Metodă | Cale                | Descriere                                                                                      |
+| ------ | ------------------- | ---------------------------------------------------------------------------------------------- |
+| GET    | `/v1/quotas/check`  | Prevalidați cota pentru un `provider` + `accountId` înainte de a emite o cheie înregistrată    |
+| POST   | `/v1/issues/report` | Raportați o eșec de emitere quota/key către GitHub (necesită un token `GITHUB_ISSUES_REPO` + ) |
 
-**Autentificare:** cheie API Bearer (`isAuthenticated`).
+**Auth:** `/v1/quotas/check` ia o cheie Bearer API (`isAuthenticated`). `/v1/issues/report` este doar pentru management (`requireManagementAuth`), cum ar fi `/api/v1/registered-keys`: o sesiune de tablou de bord, jetonul CLI local sau o cheie API cu domeniu `manage`/`admin` ; Cheile API numai pentru inferență primesc `403`.
 
 ### Recuperarea sesiunii pentru cote (opțională)
 
@@ -1791,17 +1791,21 @@ Abonamente webhook de ieșire pentru evenimente OmniRoute (finalizarea solicită
 
 ## Chei înregistrate (gestionare automată)
 
-Utilizate de subsistemul de gestionare automată a cheilor pentru emiterea și rotația cheilor API pentru un furnizor/cont asociat, cu cote zilnice/orare.
+Folosit de subsistemul de gestionare a cheilor automate pentru a emite și roti cheile API față de un provider/account de suport, cu cote daily/hourly.
 
-| Method | Path                                  | Description                                                                                                                                                                                                                |
-| ------ | ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/api/v1/registered-keys`             | Listează cheile înregistrate (doar prefixul mascat)                                                                                                                                                                        |
-| POST   | `/api/v1/registered-keys`             | Emite o cheie înregistrată nouă — corp: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Returnează cheia brută **o singură dată**. Returnează `429` la refuzul din cauza cotei. |
-| GET    | `/api/v1/registered-keys/[id]`        | Preia metadatele unei chei înregistrate (fără valoarea brută)                                                                                                                                                              |
-| DELETE | `/api/v1/registered-keys/[id]`        | Revocă o cheie înregistrată                                                                                                                                                                                                |
-| POST   | `/api/v1/registered-keys/[id]/revoke` | Endpoint explicit de revocare (același efect ca DELETE)                                                                                                                                                                    |
+| Metodă | Cale                                  | Descriere                                                                                                                                                                                                 |
+| ------ | ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/v1/registered-keys`             | Listează cheile înregistrate (numai prefixul mascat)                                                                                                                                                      |
+| POST   | `/api/v1/registered-keys`             | Emiteți o nouă cheie înregistrată — body: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Returnează cheia brută **dată** . Returnează `429` la refuzul cotei. |
+| GET    | `/api/v1/registered-keys/[id]`        | Preluați metadatele unei chei înregistrate (fără materie primă)                                                                                                                                           |
+| DELETE | `/api/v1/registered-keys/[id]`        | Revocați o cheie înregistrată                                                                                                                                                                             |
+| POST   | `/api/v1/registered-keys/[id]/revoke` | Punct final de revocare explicită (același efect ca și DELETE)                                                                                                                                            |
+| GET    | `/api/v1/providers/[provider]/limits` | Citiți limitele de emitere ale furnizorului                                                                                                                                                               |
+| PUT    | `/api/v1/providers/[provider]/limits` | Setați limitele de emitere ale furnizorului Corpul — : `{maxActiveKeys?, dailyIssueLimit?, hourlyIssueLimit?}`                                                                                            |
+| GET    | `/api/v1/accounts/[id]/limits`        | Citiți limitele de emisiune ale contului                                                                                                                                                                  |
+| PUT    | `/api/v1/accounts/[id]/limits`        | Setați limitele de emitere ale contului — același organism ca și ruta furnizorului                                                                                                                        |
 
-**Autentificare:** sesiune/cheie API de gestionare (`requireManagementAuth`) — aceeași protecție ca pentru `/api/keys`: o sesiune a panoului de control, tokenul CLI local sau o cheie API cu domeniul de aplicare `manage`/`admin`; cheile API numai pentru inferență primesc `403`. Consultați și `/v1/quotas/check` și `/v1/issues/report`.
+**Auth:** management session/API key (`requireManagementAuth`) — aceeași gardă ca și `/api/keys`: o sesiune de tablou de bord, jetonul CLI local sau o cheie API cu domeniul `manage`/`admin` ; Cheile API numai pentru inferență primesc `403`. Vezi și `/v1/quotas/check` și `/v1/issues/report`.
 
 ---
 

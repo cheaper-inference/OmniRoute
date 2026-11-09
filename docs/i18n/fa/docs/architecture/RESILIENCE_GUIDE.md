@@ -195,6 +195,45 @@ timeout مستقل جریان فعال و لغو توسط کلاینت همچن�
 `tests/unit/claude-limit-reset.test.ts`,
 `tests/unit/claude-low-priority-executor.test.ts`.
 
+### بازنشانی های بانکی را به طور خودکار اعمال کنید
+
+**محدوده:** اتصالات اشتراک Codex و Claude (OAuth).**انتخاب کنید** : تنظیم `bankedResetAutoApply` به طور پیش فرض خاموش و در حالت `dry-run` است (تنظیمات → AI → اعمال بازنشانی بانکی خودکار).
+
+**هدف:** به جای اینکه منتظر بمانید تا اپراتور «Redeem» را در صفحه «محدودیتهای ارائهدهنده» فشار دهد، بازنشانیهای بانکی را خود به خود خرج میکنند.
+
+| نوع اعتبار (`creditTypes`) | آنچه بازخرید می شود                           | جایی که اجرا می شود                                   |
+| -------------------------- | --------------------------------------------- | ----------------------------------------------------- |
+| `codexCredits`             | اعتبارات بازنشانی Codex                       | کار پس زمینه، هر 60 ثانیه                             |
+| `claudeCredits`            | کمک های مالی بانکی Claude (اعتبارات `GRANT` ) | کار پس زمینه، هر 60 ثانیه                             |
+| `claudeSessionReset`       | بازنشانی محدودیت جلسه هفتگی Claude (در بالا)  | مسیر درخواست، از طریق همان خطمشی با تغییر جهت هر حساب |
+
+**پیاده سازی:**
+
+- تصمیم خالص (یک قانون برای هر دو مسیر): `src/lib/usage/bankedResetPolicy.ts::decideBankedReset()`
+- شغل پیشینه: `src/lib/services/bankedResetAutoApply.ts` (شروع شده در `src/instrumentation-node.ts`)
+- دروازه درخواست مسیر Claude : `src/lib/usage/claudeSessionResetPolicy.ts`، ثبت شده از طریق `setClaudeLimitResetPolicy()` در `open-sse/services/claudeLimitReset.ts`
+- تاریخچه، کلاه ها و وب هوک: `src/lib/usage/bankedResetAudit.ts`
+- تاریخچه API: `GET /api/settings/banked-reset-auto/history?limit=50` (مدیریت auth)
+
+**دستور تصمیم گیری** (اولین قانون شکست، دلیل ثبت شده است):
+
+1. ویژگی خاموش، نوع اعتبار خاموش، یا حساب خارج از محدوده (`accountScope` `all` / `selected` به اضافه نقشه `connections` هر حساب).
+2. خارج از برنامه اختیاری UTC (`startHourUtc` > `endHourUtc` از نیمه شب عبور می کند).
+3. سقف در 24 ساعت گذشته: `maxPerAccountPerDay` (1)، `maxPerDay` (3) و `minSpacingMinutes` (30) بین هر دو بازخرید.
+4. ماشه: یک پنجره دیواری `session` یا `weekly` (خوانده شده از `getQuotaWindowStatus().reachedThreshold`، نه `isAccountQuotaExhausted()`، که فقط یک حساب را با هر پنجره سپری شده گزارش میکند)، یا اعتباری که در `expiringCreditHours` (24) در حسابی که حداقل `expiringCreditMinUsedPercent` (50) استفاده کرده است منقضی میشود.
+5. حفاظ تنظیم مجدد طبیعی: از زمانی که پنجره 5 ساعته دیواردار در `sessionResetGuardMinutes` (90) یا پنجره هفتگی دیواردار در `weeklyResetGuardHours` (12) بازنشانی میشود، رد شوید.
+6. طبقه هفتگی: وقتی باقیمانده هفتگی کمتر از `weeklyFloorPercent` (10) است، از تنظیم مجدد 5 ساعته صرفنظر کنید.
+7. حالت `last-resort` : رد شوید در حالی که یک حساب دیگر از همان ارائه دهنده حداقل `poolHeadroomPercent` (10) در هر دو پنجره باقی مانده است. محرکهای اعتبار در حال انقضا این را دور میزنند.
+8. `dry-run` یک ردیف را ثبت می کند و هیچ چیز را بازخرید نمی کند. `last-resort` و `eager` بازخرید می شوند.
+
+دادههای سهمیه از دست رفته هرگز بازخرید را باز نمیکند: زمان بازنشانی ناشناخته یا استفاده هفتگی رد میشود.
+
+**بازنشانی جلسه Claude :** با خاموش بودن ویژگی یا خاموش بودن `claudeSessionReset` ، کلید `autoLimitReset` برای هر حساب دقیقاً مانند قبل تصمیم می گیرد. با روشن بودن هر دو، این ویژگی جایگزین کلیدهای هر حساب میشود: یک حساب درون محدوده فقط زمانی میتواند ادعا کند که خطمشی اجازه میدهد، و در حالت `dry-run` هیچ ادعایی وجود ندارد.
+
+**ایمنی:** شغل حداکثر یک اعتبار در هر تیک بازخرید میکند، قبل از فهرست کردن اعتبارها تصمیم میگیرد (یک حساب از قلم افتاده هرگز فهرست نمیشود)، از کلیدهای ناتوانی `auto-reset:<connectionId>:<yyyy-mm-dd>:<n>` استفاده میکند، و پس از یک لیست یا بازخرید ناموفق، حساب را به مدت 1 ساعت پشتیبان میگیرد. هر تصمیم بازخرید، شکست و اجرای خشک به `audit_log` نوشته می شود (`action: "bankedReset.redeem"`، بدون توکن یا شناسه اعتباری). کلاه ها از آن ردیف ها شمارش می شوند، بنابراین از راه اندازی مجدد جان سالم به در می برند. بازخریدهای موفقیت آمیز همچنین وب هوک `provider.reset_redeemed` را فعال می کند.
+
+محافظ های رگرسیون: `tests/unit/banked-reset-policy.test.ts`، `tests/unit/banked-reset-auto-apply.test.ts`، `tests/unit/claude-limit-reset-policy-gate.test.ts`، `tests/unit/banked-reset-history-route.test.ts`.
+
 ### وابستگی نشست (#7274)
 
 **محدوده:** یک نشست کلاینت (`X-Session-Id` / `x-codex-session-id` / `x-omniroute-session` header) که برای هر **ارائهدهندهای** به یک اتصال متصل میشود.

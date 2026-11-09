@@ -235,6 +235,45 @@ lỗi 429 đột biến không có các header unified sẽ đi qua đường d�
 Các bảo vệ hồi quy: `tests/unit/claude-low-priority-mode.test.ts`,
 `tests/unit/claude-limit-reset.test.ts`, `tests/unit/claude-low-priority-executor.test.ts`.
 
+### Tự động áp dụng đặt lại ngân hàng
+
+**phạm vi:** Kết nối đăng ký Codex và Claude (OAuth).**Chọn tham gia** : cài đặt `bankedResetAutoApply` bị tắt và ở chế độ `dry-run` theo mặc định (Cài đặt → AI → Tự động áp dụng đặt lại ngân hàng).
+
+**Mục đích:** chi tiêu sẽ tự đặt lại trong ngân hàng khi tài khoản gặp giới hạn sử dụng, thay vì đợi nhà điều hành nhấn "Đổi" trên trang Giới hạn nhà cung cấp.
+
+| Loại tín dụng (`creditTypes`) | Những gì được chuộc                                    | Nó chạy ở đâu                                                                     |
+| ----------------------------- | ------------------------------------------------------ | --------------------------------------------------------------------------------- |
+| `codexCredits`                | Tín dụng đặt lại Codex                                 | công việc nền, cứ sau 60 giây                                                     |
+| `claudeCredits`               | Các khoản trợ cấp ngân hàng Claude (tín dụng `GRANT` ) | công việc nền, cứ sau 60 giây                                                     |
+| `claudeSessionReset`          | Đặt lại giới hạn phiên hàng tuần Claude (ở trên)       | đường dẫn yêu cầu, thông qua chính sách tương tự như chuyển đổi cho mỗi tài khoản |
+
+**Thực hiện:**
+
+- Quyết định thuần túy (một bộ quy tắc cho cả hai đường dẫn): `src/lib/usage/bankedResetPolicy.ts::decideBankedReset()`
+- Công việc nền: `src/lib/services/bankedResetAutoApply.ts` (bắt đầu từ `src/instrumentation-node.ts`)
+- Cổng đường dẫn yêu cầu Claude : `src/lib/usage/claudeSessionResetPolicy.ts`, được đăng ký thông qua `setClaudeLimitResetPolicy()` trong `open-sse/services/claudeLimitReset.ts`
+- Lịch sử, mũ và webhook: `src/lib/usage/bankedResetAudit.ts`
+- Lịch sử API: `GET /api/settings/banked-reset-auto/history?limit=50` (xác thực quản lý)
+
+**Trình tự quyết định** (quy tắc thất bại đầu tiên là lý do được ghi lại):
+
+1. Tắt tính năng, loại tín dụng hoặc tài khoản nằm ngoài phạm vi (`accountScope` `all` / `selected` cộng với bản đồ `connections` cho mỗi tài khoản).
+2. Ngoài lịch trình UTC tùy chọn (`startHourUtc` > `endHourUtc` vượt qua nửa đêm).
+3. Giới hạn trong 24 giờ qua: `maxPerAccountPerDay` (1), `maxPerDay` (3) và `minSpacingMinutes` (30) giữa hai lần quy đổi bất kỳ.
+4. Trình kích hoạt: cửa sổ `session` hoặc `weekly` có tường bao quanh (đọc từ `getQuotaWindowStatus().reachedThreshold`, không phải `isAccountQuotaExhausted()`, chỉ báo cáo một tài khoản với mỗi cửa sổ đã chi tiêu) hoặc tín dụng hết hạn trong `expiringCreditHours` (24) trên tài khoản đã sử dụng ít nhất `expiringCreditMinUsedPercent` (50).
+5. Bảo vệ thiết lập lại tự nhiên: bỏ qua khi khoảng thời gian 5 giờ có tường bao quanh được đặt lại trong `sessionResetGuardMinutes` (90) hoặc khoảng thời gian có tường bao hàng tuần trong `weeklyResetGuardHours` (12).
+6. Tầng hàng tuần: bỏ qua việc đặt lại 5 giờ khi mức còn lại hàng tuần ở dưới `weeklyFloorPercent` (10).
+7. Chế độ `last-resort` : bỏ qua trong khi tài khoản khác trong phạm vi của cùng một nhà cung cấp còn lại ít nhất `poolHeadroomPercent` (10) trong cả hai cửa sổ. Trình kích hoạt tín dụng hết hạn bỏ qua điều này.
+8. `dry-run` ghi lại một hàng và không đổi được gì; Đổi `last-resort` và `eager`.
+
+Thiếu dữ liệu hạn ngạch không bao giờ mở khóa quy đổi: thời gian đặt lại không xác định hoặc bỏ qua mức sử dụng hàng tuần.
+
+**Đặt lại phiên Claude :** khi tắt tính năng này hoặc tắt `claudeSessionReset`, việc chuyển đổi `autoLimitReset` trên mỗi tài khoản sẽ quyết định chính xác như trước. Khi bật cả hai tính năng này, tính năng này sẽ thay thế các nút chuyển đổi cho mỗi tài khoản: tài khoản trong phạm vi chỉ có thể xác nhận quyền sở hữu khi chính sách cho phép và ở chế độ `dry-run` sẽ không có yêu cầu nào được đưa ra.
+
+**Sự an toàn:** công việc đổi tối đa một tín dụng cho mỗi tích tắc, quyết định trước khi liệt kê các khoản tín dụng (tài khoản bị bỏ qua không bao giờ được liệt kê), sử dụng khóa tạm thời `auto-reset:<connectionId>:<yyyy-mm-dd>:<n>` và sao lưu tài khoản trong 1 giờ sau khi danh sách hoặc đổi quà không thành công. Mọi quyết định mua lại, thất bại và chạy thử đều được ghi vào `audit_log` (`action: "bankedReset.redeem"`, không có mã thông báo hoặc id tín dụng); giới hạn được tính từ các hàng đó, vì vậy chúng vẫn tồn tại khi khởi động lại. Việc quy đổi thành công cũng kích hoạt webhook `provider.reset_redeemed`.
+
+Bộ bảo vệ hồi quy: `tests/unit/banked-reset-policy.test.ts`, `tests/unit/banked-reset-auto-apply.test.ts`, `tests/unit/claude-limit-reset-policy-gate.test.ts`, `tests/unit/banked-reset-history-route.test.ts`.
+
 ### Liên kết phiên (#7274)
 
 **Phạm vi:** một phiên máy khách (`X-Session-Id` / `x-codex-session-id` / `x-omniroute-session`

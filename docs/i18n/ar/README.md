@@ -1294,7 +1294,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # تؤدي CI=1 أيضً
   <tr><td nowrap><b>وقت التشغيل</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>لغة</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> عبر <code>src/</code> و <code>open-sse/</code> (لا يوجد <code>any</code> في المركز منذ الإصدار 2.0)</td></tr>
   <tr><td nowrap><b>نطاق</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>قاعدة البيانات</b></td><td>better-sqlite3 (SQLite، WAL Journal) + LowDB (تراث JSON ) — 147 وحدة نطاق، 229 عملية ترحيل</td></tr>
+  <tr><td nowrap><b>قاعدة البيانات</b></td><td>better-sqlite3 (SQLite، WAL Journal) + LowDB (تراث JSON ) — 147 وحدة نطاق، 230 عملية ترحيل</td></tr>
   <tr><td nowrap><b>ذاكرة</b></td><td>SQLite FTS5 النص الكامل + int8-quantized التضمين المتجهي، الاضمحلال المكتوب</td></tr>
   <tr><td nowrap><b>المخططات</b></td><td>Zod 4 — MCP أداة I/O التحقق من صحة عقود + API</td></tr>
   <tr><td nowrap><b>البروتوكولات</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

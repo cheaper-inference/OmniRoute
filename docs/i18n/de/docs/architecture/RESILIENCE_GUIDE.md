@@ -192,6 +192,45 @@ Diese bleiben bestehen, bis sich die Anmeldedaten ändern oder ein Operator sie 
 Regressionstests: `tests/unit/claude-low-priority-mode.test.ts`,
 `tests/unit/claude-limit-reset.test.ts`, `tests/unit/claude-low-priority-executor.test.ts`.
 
+### Bank-Resets automatisch anwenden
+
+**Umfang:** Codex und Claude -Abonnementverbindungen (OAuth).**Opt-in** : Die `bankedResetAutoApply` Einstellung ist deaktiviert und befindet sich standardmäßig im `dry-run` Modus (Einstellungen → AI → Bank-Resets automatisch anwenden).
+
+**Zweck:** Sie können Guthabenrücksetzungen selbst durchführen, wenn ein Konto an eine Nutzungsgrenze stößt, anstatt darauf zu warten, dass ein Betreiber auf der Seite „Anbieterlimits“ auf „Einlösen“ klickt.
+
+| Kreditart (`creditTypes`) | Was wird eingelöst                                          | Wo es läuft                                                             |
+| ------------------------- | ----------------------------------------------------------- | ----------------------------------------------------------------------- |
+| `codexCredits`            | Codex Reset-Credits                                         | Hintergrundjob, alle 60 s                                               |
+| `claudeCredits`           | Claude -Bankzuschüsse (`GRANT` Credits)                     | Hintergrundjob, alle 60 s                                               |
+| `claudeSessionReset`      | Claude wöchentliches Zurücksetzen des Sitzungslimits (oben) | Anforderungspfad über dieselbe Richtlinie wie die Umschaltung pro Konto |
+
+**Durchführung:**
+
+- Reine Entscheidung (ein Regelsatz für beide Pfade): `src/lib/usage/bankedResetPolicy.ts::decideBankedReset()`
+- Hintergrundjob: `src/lib/services/bankedResetAutoApply.ts` (gestartet in `src/instrumentation-node.ts`)
+- Claude Anforderungspfad-Gate: `src/lib/usage/claudeSessionResetPolicy.ts`, registriert über `setClaudeLimitResetPolicy()` in `open-sse/services/claudeLimitReset.ts`
+- Geschichte, Obergrenzen und Webhook: `src/lib/usage/bankedResetAudit.ts`
+- Geschichte API: `GET /api/settings/banked-reset-auto/history?limit=50` (Management-Authentifizierung)
+
+**Entscheidungsreihenfolge** (Die erste fehlerhafte Regel ist der aufgezeichnete Grund):
+
+1. Funktion deaktiviert, Kreditart deaktiviert oder Konto außerhalb des Gültigkeitsbereichs (`accountScope` `all` / `selected` plus die `connections` -Karte pro Konto).
+2. Außerhalb des optionalen UTC Zeitplans (`startHourUtc` > `endHourUtc` überschreitet Mitternacht).
+3. Obergrenzen in den letzten 24 Stunden: `maxPerAccountPerDay` (1), `maxPerDay` (3) und `minSpacingMinutes` (30) zwischen zwei beliebigen Einlösungen.
+4. Auslöser: ein ummauertes `session` oder `weekly` Fenster (gelesen aus `getQuotaWindowStatus().reachedThreshold`, nicht `isAccountQuotaExhausted()`, das nur ein Konto mit jedem ausgegebenen Fenster meldet) oder ein Guthaben, das innerhalb von `expiringCreditHours` (24) auf einem Konto abläuft, das mindestens `expiringCreditMinUsedPercent` (50) verwendet hat.
+5. Schutz vor natürlichem Zurücksetzen: Überspringen, wenn das ummauerte 5-Stunden-Fenster innerhalb von `sessionResetGuardMinutes` (90) oder das ummauerte wöchentliche Fenster innerhalb von `weeklyResetGuardHours` (12) zurückgesetzt wird.
+6. Wöchentlicher Mindestwert: Überspringen Sie ein 5-Stunden-Reset, wenn die wöchentlich verbleibende Restmenge unter `weeklyFloorPercent` (10) liegt.
+7. `last-resort` Modus: Überspringen, während ein anderes im Geltungsbereich befindliches Konto desselben Anbieters in beiden Fenstern mindestens noch `poolHeadroomPercent` (10) übrig hat. Auslöser für ablaufendes Guthaben umgehen dies.
+8. `dry-run` zeichnet eine Reihe auf und löst nichts ein; `last-resort` und `eager` einlösen.
+
+Fehlende Kontingentdaten entsperren nie eine Einlösung: eine unbekannte Rücksetzzeit oder wöchentliche Nutzungsausfälle.
+
+**Zurücksetzen Claude Sitzung:** Wenn die Funktion deaktiviert ist oder `claudeSessionReset` deaktiviert ist, entscheidet der `autoLimitReset` Schalter pro Konto genau wie zuvor. Wenn beide aktiviert sind, ersetzt die Funktion das Umschalten pro Konto: Ein in den Geltungsbereich fallendes Konto kann nur dann Anspruch erheben, wenn die Richtlinie dies zulässt, und im `dry-run` Modus wird kein Anspruch geltend gemacht.
+
+**Sicherheit:** Der Job löst höchstens ein Guthaben pro Tick ein, entscheidet vor der Auflistung von Guthaben (ein übersprungenes Konto wird nie aufgeführt), verwendet Idempotenzschlüssel `auto-reset:<connectionId>:<yyyy-mm-dd>:<n>` und sperrt ein Konto für 1 Stunde nach einer fehlgeschlagenen Auflistung oder Einlösung. Jede Rücknahme-, Fehlschlags- und Probelaufentscheidung wird an `audit_log` geschrieben (`action: "bankedReset.redeem"`, keine Token oder Kredit-IDs); Die Obergrenzen werden ab diesen Reihen gezählt, sodass sie Neustarts überstehen. Erfolgreiche Einlösungen lösen auch den `provider.reset_redeemed` Webhook aus.
+
+Regressionswächter: `tests/unit/banked-reset-policy.test.ts`, `tests/unit/banked-reset-auto-apply.test.ts`, `tests/unit/claude-limit-reset-policy-gate.test.ts`, `tests/unit/banked-reset-history-route.test.ts`.
+
 ### Sitzungsaffinität (#7274)
 
 **Geltungsbereich:** eine Clientsitzung (`X-Session-Id` / `x-codex-session-id` / `x-omniroute-session`-Header), die an eine Verbindung gebunden wird, für **jeden** Anbieter.

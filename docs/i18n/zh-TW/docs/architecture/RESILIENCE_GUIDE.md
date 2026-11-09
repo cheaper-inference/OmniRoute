@@ -203,6 +203,45 @@ Kiro 的二進位 `reasoningContentEvent` 框架若具有非空簽章，會透�
 迴歸防護：`tests/unit/claude-low-priority-mode.test.ts`、
 `tests/unit/claude-limit-reset.test.ts`、`tests/unit/claude-low-priority-executor.test.ts`。
 
+### 自動應用儲存重置
+
+**範圍：** Codex和Claude訂閱 (OAuth) 連線。**選擇加入**： `bankedResetAutoApply`設定關閉並預設為`dry-run`模式（設定→ AI →自動套用分組重設）。
+
+**目的：**當帳戶達到使用限制時，銀行支出會自行重置，而不是等待操作員在提供者限制頁面上按「兌換」。
+
+| 信用類型（`creditTypes`） | 贖回的是什麼                   | 它運行在哪裡                           |
+| ------------------------- | ------------------------------ | -------------------------------------- |
+| `codexCredits`            | Codex重置積分                  | 後台作業，每 60 秒                     |
+| `claudeCredits`           | Claude銀行補助（`GRANT`學分）  | 後台作業，每 60 秒                     |
+| `claudeSessionReset`      | Claude每週會話限制重置（上圖） | 請求路徑，透過與每個帳戶切換相同的策略 |
+
+**執行：**
+
+- 純粹決策（一條規則集適用於兩條路徑）： `src/lib/usage/bankedResetPolicy.ts::decideBankedReset()`
+- 後台作業： `src/lib/services/bankedResetAutoApply.ts` （從`src/instrumentation-node.ts`開始）
+- Claude請求路徑門： `src/lib/usage/claudeSessionResetPolicy.ts`，透過`setClaudeLimitResetPolicy()`在`open-sse/services/claudeLimitReset.ts`中註冊
+- 歷史、上限和 webhook： `src/lib/usage/bankedResetAudit.ts`
+- 歷史API： `GET /api/settings/banked-reset-auto/history?limit=50` （管理授權）
+
+**決策順序**（第一個失敗規則是記錄的原因）：
+
+1. 功能關閉、信用類型關閉或帳戶超出範圍（`accountScope` `all` / `selected`加上每個帳戶的`connections`地圖）。
+2. 在可選的UTC時間表之外（`startHourUtc` > `endHourUtc`穿過午夜）。
+3. 過去 24 小時內的上限：任兩次兌換之間的`maxPerAccountPerDay` (1)、 `maxPerDay` (3) 和`minSpacingMinutes` (30)。
+4. 觸發器：受圍牆的`session`或`weekly`視窗（從`getQuotaWindowStatus().reachedThreshold`讀取，而不是`isAccountQuotaExhausted()`，後者僅報告每個視窗花費的帳戶），或至少使用`expiringCreditMinUsedPercent` (50) 的帳戶在`expiringCreditHours` (24) 內到期的信用。
+5. 自然重置守衛：當`sessionResetGuardMinutes` （90）內的圍牆5小時窗口重置或`weeklyResetGuardHours` （12）內的圍牆每週窗口重置時跳過。
+6. 每週下限：每週剩餘時間低於`weeklyFloorPercent` (10) 時，跳過 5 小時重置。
+7. `last-resort`模式：當同一提供者的另一個範圍內帳戶在兩個視窗中至少剩餘`poolHeadroomPercent` (10) 時跳過。到期信用觸發器繞過了這個。
+8. `dry-run`記錄了一行並且沒有贖回任何東西； `last-resort`和`eager`兌換。
+
+遺失配額資料永遠無法解鎖兌換：未知的重置時間或每週使用量跳過。
+
+**Claude會話重置：**當該功能關閉或`claudeSessionReset`關閉時，每個帳戶的`autoLimitReset`切換會像以前一樣做出決定。啟用兩者後，此功能將取代每個帳戶的切換：範圍內的帳戶僅在策略允許時才可以提出索賠，而在`dry-run`模式下則不會提出索賠。
+
+**安全：**該作業每次蜱最多兌換一個積分，在列出積分之前決定（跳過的帳戶永遠不會列出），使用冪等性密鑰`auto-reset:<connectionId>:<yyyy-mm-dd>:<n>`，並在列出或兌換失敗後將帳戶退回 1 小時。每個兌換、失敗和試運行決策都會寫入`audit_log` （`action: "bankedReset.redeem"`，無代幣或信用 ID）；上限是從這些行中計算的，因此它們在重新啟動後仍然存在。成功兌換也會觸發`provider.reset_redeemed` webhook。
+
+回歸守衛： `tests/unit/banked-reset-policy.test.ts`、 `tests/unit/banked-reset-auto-apply.test.ts`、 `tests/unit/claude-limit-reset-policy-gate.test.ts`、 `tests/unit/banked-reset-history-route.test.ts`。
+
 ### 工作階段親和性 (#7274)
 
 **範圍：**將一個用戶端工作階段（`X-Session-Id` / `x-codex-session-id` / `x-omniroute-session` 標頭）固定至一個連線，適用於**任何**提供者。

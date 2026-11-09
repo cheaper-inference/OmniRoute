@@ -1004,12 +1004,12 @@ El CLI convierte `base_url + /responses` en un WebSocket y OmniRoute crea un tú
 
 ## Informes de cuotas y problemas
 
-| Método | Ruta                | Descripción                                                                                     |
-| ------ | ------------------- | ----------------------------------------------------------------------------------------------- |
-| GET    | `/v1/quotas/check`  | Prevalidar la cuota para un `provider` + `accountId` antes de emitir una clave registrada       |
-| POST   | `/v1/issues/report` | Informar a GitHub de un error de emisión de cuota/clave (requiere `GITHUB_ISSUES_REPO` + token) |
+| Método | Camino              | Descripción                                                                                         |
+| ------ | ------------------- | --------------------------------------------------------------------------------------------------- |
+| GET    | `/v1/quotas/check`  | Validar previamente la cuota para una `provider` + `accountId` antes de emitir una clave registrada |
+| POST   | `/v1/issues/report` | Informar un error de emisión de quota/key a GitHub (requiere token `GITHUB_ISSUES_REPO` + )         |
 
-**Autenticación:** clave de API Bearer (`isAuthenticated`).
+**Autenticación:** `/v1/quotas/check` toma una clave portadora API (`isAuthenticated`). `/v1/issues/report` es solo de administración (`requireManagementAuth`), como `/api/v1/registered-keys`: una sesión de panel, el token CLI local o una clave API con alcance `manage`/`admin` ; Las claves API de solo inferencia obtienen `403`.
 
 ### Recuperación de sesiones de cuota (optativa)
 
@@ -1832,17 +1832,21 @@ Suscripciones de webhook salientes para eventos de OmniRoute (finalización de s
 
 ## Claves registradas (gestión automática)
 
-Se utilizan en el subsistema de gestión automática de claves para emitir y rotar claves de API contra un proveedor/cuenta de respaldo, con cuotas diarias/horarias.
+Utilizado por el subsistema de administración automática de claves para emitir y rotar claves API contra un provider/account de respaldo, con cuotas daily/hourly.
 
-| Método | Ruta                                  | Descripción                                                                                                                                                                                                                                |
-| ------ | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| GET    | `/api/v1/registered-keys`             | Listar claves registradas (solo el prefijo enmascarado)                                                                                                                                                                                    |
-| POST   | `/api/v1/registered-keys`             | Emitir una nueva clave registrada — cuerpo: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Devuelve la clave sin procesar **una sola vez**. Devuelve `429` si se rechaza por exceder la cuota. |
-| GET    | `/api/v1/registered-keys/[id]`        | Recuperar los metadatos de una clave registrada (sin el material sin procesar)                                                                                                                                                             |
-| DELETE | `/api/v1/registered-keys/[id]`        | Revocar una clave registrada                                                                                                                                                                                                               |
-| POST   | `/api/v1/registered-keys/[id]/revoke` | Endpoint de revocación explícita (el mismo efecto que DELETE)                                                                                                                                                                              |
+| Método | Camino                                | Descripción                                                                                                                                                                                                                     |
+| ------ | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/v1/registered-keys`             | Listar claves registradas (solo prefijo enmascarado)                                                                                                                                                                            |
+| POST   | `/api/v1/registered-keys`             | Emitir una nueva clave registrada cuerpo — : `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Devuelve la clave sin formato **una vez** . Devuelve `429` en caso de rechazo de cuota. |
+| GET    | `/api/v1/registered-keys/[id]`        | Recuperar los metadatos de una clave registrada (sin materia prima)                                                                                                                                                             |
+| DELETE | `/api/v1/registered-keys/[id]`        | Revocar una clave registrada                                                                                                                                                                                                    |
+| POST   | `/api/v1/registered-keys/[id]/revoke` | Punto final de revocación explícita (mismo efecto que DELETE)                                                                                                                                                                   |
+| GET    | `/api/v1/providers/[provider]/limits` | Lea los límites de emisión del proveedor                                                                                                                                                                                        |
+| PUT    | `/api/v1/providers/[provider]/limits` | Establecer los límites de emisión del proveedor Cuerpo — : `{maxActiveKeys?, dailyIssueLimit?, hourlyIssueLimit?}`                                                                                                              |
+| GET    | `/api/v1/accounts/[id]/limits`        | Lea los límites de emisión de la cuenta                                                                                                                                                                                         |
+| PUT    | `/api/v1/accounts/[id]/limits`        | Establezca los límites de emisión de la cuenta — en el mismo organismo que la ruta del proveedor                                                                                                                                |
 
-**Autenticación:** sesión/clave de API de administración (`requireManagementAuth`) — el mismo mecanismo de protección que `/api/keys`: una sesión del panel, el token de la CLI local o una clave de API con el alcance `manage`/`admin`; las claves de API de solo inferencia reciben `403`. Consulta también `/v1/quotas/check` y `/v1/issues/report`.
+**Autenticación:** gestión de clave session/API (`requireManagementAuth`) — con la misma protección que `/api/keys`: una sesión del panel de control, el token CLI local o una clave API con alcance `manage`/`admin` ; Las claves API de solo inferencia obtienen `403`. Véase también `/v1/quotas/check` y `/v1/issues/report`.
 
 ---
 

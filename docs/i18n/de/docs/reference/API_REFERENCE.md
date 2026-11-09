@@ -983,14 +983,14 @@ Die CLI wandelt `base_url + /responses` in eine WebSocket-Verbindung um, und Omn
 
 ---
 
-## Kontingente & Problemberichte
+## Quoten- und Problemberichte
 
-| Methode | Pfad                | Beschreibung                                                                                                                     |
-| ------- | ------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| GET     | `/v1/quotas/check`  | Kontingent für eine Kombination aus `provider` + `accountId` vor der Ausstellung eines registrierten Schlüssels vorab validieren |
-| POST    | `/v1/issues/report` | Einen Fehler bei der Ausstellung eines Kontingents/Schlüssels an GitHub melden (erfordert `GITHUB_ISSUES_REPO` + Token)          |
+| Verfahren | Weg                 | Beschreibung                                                                                                               |
+| --------- | ------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| GET       | `/v1/quotas/check`  | Überprüfen Sie das Kontingent für einen `provider` + `accountId` vorab, bevor Sie einen registrierten Schlüssel ausstellen |
+| POST      | `/v1/issues/report` | Einen quota/key Ausstellungsfehler an GitHub melden (erfordert `GITHUB_ISSUES_REPO` + -Token)                              |
 
-**Authentifizierung:** Bearer-API-Schlüssel (`isAuthenticated`).
+**Authentifizierung:** `/v1/quotas/check` benötigt einen Inhaber API Schlüssel (`isAuthenticated`). `/v1/issues/report` dient nur der Verwaltung (`requireManagementAuth`), wie `/api/v1/registered-keys`: eine Dashboard-Sitzung, das lokale CLI Token oder ein API Schlüssel mit `manage`/`admin` -Bereich; Nur-Inferenz- API -Schlüssel erhalten `403`.
 
 ### Wiederherstellung von Kontingentsitzungen (optional)
 
@@ -1813,19 +1813,23 @@ Ausgehende Webhook-Abonnements für OmniRoute-Ereignisse (Anfrageabschluss, Quot
 
 ---
 
-## Registrierte Schlüssel (automatische Verwaltung)
+## Registrierte Schlüssel (Automatische Verwaltung)
 
-Wird vom Subsystem zur automatischen Schlüsselverwaltung verwendet, um API-Schlüssel bei einem zugrunde liegenden Anbieter/Konto auszustellen und zu rotieren, mit täglichen/stündlichen Quotas.
+Wird vom Subsystem für die automatische Schlüsselverwaltung verwendet, um API Schlüssel mit daily/hourly Kontingenten auszugeben und gegen einen unterstützenden provider/account zu rotieren.
 
-| Methode | Pfad                                  | Beschreibung                                                                                                                                                                                                                                        |
-| ------- | ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET     | `/api/v1/registered-keys`             | Registrierte Schlüssel auflisten (nur maskiertes Präfix)                                                                                                                                                                                            |
-| POST    | `/api/v1/registered-keys`             | Einen neuen registrierten Schlüssel ausstellen — Body: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Gibt den Rohschlüssel **einmalig** zurück. Gibt bei Ablehnung aufgrund eines Quotas `429` zurück. |
-| GET     | `/api/v1/registered-keys/[id]`        | Metadaten eines registrierten Schlüssels abrufen (kein Rohmaterial)                                                                                                                                                                                 |
-| DELETE  | `/api/v1/registered-keys/[id]`        | Einen registrierten Schlüssel widerrufen                                                                                                                                                                                                            |
-| POST    | `/api/v1/registered-keys/[id]/revoke` | Expliziter Widerruf-Endpunkt (gleiche Wirkung wie DELETE)                                                                                                                                                                                           |
+| Verfahren | Weg                                   | Beschreibung                                                                                                                                                                                                                                  |
+| --------- | ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET       | `/api/v1/registered-keys`             | Registrierte Schlüssel auflisten (nur maskiertes Präfix)                                                                                                                                                                                      |
+| POST      | `/api/v1/registered-keys`             | Stellen Sie einen neuen registrierten Schlüssel — -Stelle aus: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Gibt den Rohschlüssel zurück **einmal** . Gibt `429` bei Quotenverweigerung zurück. |
+| GET       | `/api/v1/registered-keys/[id]`        | Metadaten eines registrierten Schlüssels abrufen (kein Rohmaterial)                                                                                                                                                                           |
+| DELETE    | `/api/v1/registered-keys/[id]`        | Einen registrierten Schlüssel widerrufen                                                                                                                                                                                                      |
+| POST      | `/api/v1/registered-keys/[id]/revoke` | Expliziter Widerrufendpunkt (gleicher Effekt wie DELETE)                                                                                                                                                                                      |
+| GET       | `/api/v1/providers/[provider]/limits` | Lesen Sie die Emissionsobergrenzen des Anbieters                                                                                                                                                                                              |
+| PUT       | `/api/v1/providers/[provider]/limits` | Legen Sie die Ausgabeobergrenzen des Anbieters fest — -Stelle: `{maxActiveKeys?, dailyIssueLimit?, hourlyIssueLimit?}`                                                                                                                        |
+| GET       | `/api/v1/accounts/[id]/limits`        | Lesen Sie die Emissionsobergrenzen des Kontos                                                                                                                                                                                                 |
+| PUT       | `/api/v1/accounts/[id]/limits`        | Legen Sie die Ausstellungsobergrenzen des Kontos — für dieselbe Stelle fest wie für die Anbieterroute                                                                                                                                         |
 
-**Authentifizierung:** Management-Sitzung/API-Schlüssel (`requireManagementAuth`) — dieselbe Zugriffskontrolle wie bei `/api/keys`: eine Dashboard-Sitzung, das lokale CLI-Token oder ein API-Schlüssel mit `manage`-/`admin`-Berechtigungsbereich; API-Schlüssel mit ausschließlich Inferenzberechtigungen erhalten `403`. Siehe auch `/v1/quotas/check` und `/v1/issues/report`.
+**Authentifizierung:** Management- session/API Schlüssel (`requireManagementAuth`) — derselbe Schutz wie `/api/keys`: eine Dashboard-Sitzung, das lokale CLI Token oder ein API Schlüssel mit `manage`/`admin` -Bereich; Nur-Inferenz- API -Schlüssel erhalten `403`. Siehe auch `/v1/quotas/check` und `/v1/issues/report`.
 
 ---
 

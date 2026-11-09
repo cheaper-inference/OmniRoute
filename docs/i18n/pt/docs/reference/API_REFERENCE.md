@@ -949,14 +949,14 @@ A CLI atualiza `base_url + /responses` para um WebSocket e o OmniRoute estabelec
 
 ---
 
-## Relatórios de Quotas e Problemas
+## Relatório de quotas e problemas
 
-| Método | Caminho             | Descrição                                                                                     |
+| Método | Percurso            | Descrição                                                                                     |
 | ------ | ------------------- | --------------------------------------------------------------------------------------------- |
-| GET    | `/v1/quotas/check`  | Pré-validar a quota para um `provider` + `accountId` antes de emitir uma chave registada      |
-| POST   | `/v1/issues/report` | Comunicar uma falha de emissão de quota/chave ao GitHub (requer `GITHUB_ISSUES_REPO` + token) |
+| GET    | `/v1/quotas/check`  | Pré-valide a quota para um `provider` + `accountId` antes de emitir uma chave registada       |
+| POST   | `/v1/issues/report` | Reportar uma falha de emissão de quota/key ao GitHub (requer o token `GITHUB_ISSUES_REPO` + ) |
 
-**Autenticação:** chave de API Bearer (`isAuthenticated`).
+**Autenticação:** `/v1/quotas/check` utiliza uma chave Bearer API (`isAuthenticated`). `/v1/issues/report` é apenas de gestão (`requireManagementAuth`), como `/api/v1/registered-keys`: uma sessão de painel, o token CLI local ou uma chave API com âmbito `manage`/`admin` ; As chaves API apenas de inferência obtêm `403`.
 
 ### Recuperação de sessões de quota (opcional)
 
@@ -1773,17 +1773,21 @@ Subscrições de webhooks de saída para eventos do OmniRoute (conclusão de ped
 
 ## Chaves Registadas (Gestão Automática)
 
-Utilizado pelo subsistema de gestão automática de chaves para emitir e rodar chaves da API relativamente a um fornecedor/conta de suporte, com quotas diárias/horárias.
+Utilizado pelo subsistema de gestão de chaves automáticas para emitir e rodar chaves API contra um provider/account de apoio, com cotas daily/hourly.
 
-| Método | Caminho                               | Descrição                                                                                                                                                                                                                  |
-| ------ | ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/api/v1/registered-keys`             | Listar chaves registadas (apenas o prefixo ocultado)                                                                                                                                                                       |
-| POST   | `/api/v1/registered-keys`             | Emitir uma nova chave registada — corpo: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Devolve a chave em bruto **uma única vez**. Devolve `429` em caso de recusa por quota. |
-| GET    | `/api/v1/registered-keys/[id]`        | Obter os metadados de uma chave registada (sem o material em bruto)                                                                                                                                                        |
-| DELETE | `/api/v1/registered-keys/[id]`        | Revogar uma chave registada                                                                                                                                                                                                |
-| POST   | `/api/v1/registered-keys/[id]/revoke` | Endpoint de revogação explícita (o mesmo efeito que DELETE)                                                                                                                                                                |
+| Método | Percurso                              | Descrição                                                                                                                                                                                                          |
+| ------ | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| GET    | `/api/v1/registered-keys`             | Listar chaves registadas (apenas prefixo mascarado)                                                                                                                                                                |
+| POST   | `/api/v1/registered-keys`             | Emita um novo corpo — de chave registada: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Retorna a chave bruta **uma vez** . Retorna `429` em caso de recusa de quota. |
+| GET    | `/api/v1/registered-keys/[id]`        | Recuperar os metadados de uma chave registada (sem matéria-prima)                                                                                                                                                  |
+| DELETE | `/api/v1/registered-keys/[id]`        | Revogar uma chave registada                                                                                                                                                                                        |
+| POST   | `/api/v1/registered-keys/[id]/revoke` | Endpoint de revogação explícita (mesmo efeito que DELETE)                                                                                                                                                          |
+| GET    | `/api/v1/providers/[provider]/limits` | Leia os limites de emissão do fornecedor                                                                                                                                                                           |
+| PUT    | `/api/v1/providers/[provider]/limits` | Definir os limites de emissão do fornecedor Corpo — : `{maxActiveKeys?, dailyIssueLimit?, hourlyIssueLimit?}`                                                                                                      |
+| GET    | `/api/v1/accounts/[id]/limits`        | Leia os limites de emissão da conta                                                                                                                                                                                |
+| PUT    | `/api/v1/accounts/[id]/limits`        | Definir os limites de emissão da conta — no mesmo corpo da rota do fornecedor                                                                                                                                      |
 
-**Autenticação:** sessão/chave da API de gestão (`requireManagementAuth`) — o mesmo mecanismo de proteção que `/api/keys`: uma sessão do painel, o token local da CLI ou uma chave da API com o âmbito `manage`/`admin`; as chaves da API apenas de inferência recebem `403`. Consulte também `/v1/quotas/check` e `/v1/issues/report`.
+**Autenticação:** chave session/API de gestão (`requireManagementAuth`) — a mesma proteção do `/api/keys`: uma sessão de painel, o token CLI local ou uma chave API com âmbito `manage`/`admin` ; chaves API apenas de inferência obtêm `403`. Consulte também `/v1/quotas/check` e `/v1/issues/report`.
 
 ---
 

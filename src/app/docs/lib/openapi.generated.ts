@@ -25,7 +25,7 @@ export interface OpenApiEndpoint {
   hasRequestBody: boolean;
 }
 
-export const OPENAPI_VERSION = "3.8.53";
+export const OPENAPI_VERSION = "3.8.54";
 export const OPENAPI_TITLE = "OmniRoute API";
 
 export const OPENAPI_ENDPOINTS: OpenApiEndpoint[] = [
@@ -93,20 +93,22 @@ export const OPENAPI_ENDPOINTS: OpenApiEndpoint[] = [
     path: "/api/v1/accounts/{id}/limits",
     method: "GET",
     summary: "GET accounts › <id> › limits",
-    description: "",
+    description:
+      "Management-only, like `/api/v1/registered-keys`: a dashboard session, the local CLI token, or an API key with `manage`/`admin` scope. Inference-only API keys get 403.\n",
     tag: "V1 Accounts",
     tags: ["V1 Accounts"],
-    requiresAuth: false,
+    requiresAuth: true,
     hasRequestBody: false,
   },
   {
     path: "/api/v1/accounts/{id}/limits",
     method: "PUT",
     summary: "PUT accounts › <id> › limits",
-    description: "",
+    description:
+      "Management-only, like `/api/v1/registered-keys`: a dashboard session, the local CLI token, or an API key with `manage`/`admin` scope. Inference-only API keys get 403.\n",
     tag: "V1 Accounts",
     tags: ["V1 Accounts"],
-    requiresAuth: false,
+    requiresAuth: true,
     hasRequestBody: false,
   },
   {
@@ -382,6 +384,56 @@ export const OPENAPI_ENDPOINTS: OpenApiEndpoint[] = [
     hasRequestBody: false,
   },
   {
+    path: "/api/v1/fal/jobs/{id}",
+    method: "DELETE",
+    summary: "Cancel a saved Fal job or close its realtime session",
+    description: "",
+    tag: "Providers",
+    tags: ["Providers"],
+    requiresAuth: true,
+    hasRequestBody: false,
+  },
+  {
+    path: "/api/v1/fal/jobs/{id}",
+    method: "GET",
+    summary: "Poll a saved Fal job or retrieve its result without resubmission",
+    description: "",
+    tag: "Providers",
+    tags: ["Providers"],
+    requiresAuth: true,
+    hasRequestBody: false,
+  },
+  {
+    path: "/api/v1/fal/jobs/{id}",
+    method: "POST",
+    summary: "Send one authorized invocation to an active Fal realtime or HTTP WebSocket",
+    description: "",
+    tag: "Providers",
+    tags: ["Providers"],
+    requiresAuth: true,
+    hasRequestBody: true,
+  },
+  {
+    path: "/api/v1/fal/models",
+    method: "GET",
+    summary: "Discover Fal endpoints or load one endpoint's validated schema",
+    description: "",
+    tag: "Models",
+    tags: ["Models"],
+    requiresAuth: true,
+    hasRequestBody: false,
+  },
+  {
+    path: "/api/v1/fal/run",
+    method: "POST",
+    summary: "Execute validated native Fal model inputs",
+    description: "",
+    tag: "Providers",
+    tags: ["Providers"],
+    requiresAuth: true,
+    hasRequestBody: true,
+  },
+  {
     path: "/api/v1/files",
     method: "GET",
     summary: "GET files",
@@ -475,10 +527,11 @@ export const OPENAPI_ENDPOINTS: OpenApiEndpoint[] = [
     path: "/api/v1/issues/report",
     method: "POST",
     summary: "POST issues › report",
-    description: "",
+    description:
+      "Management-only, like `/api/v1/registered-keys`: a dashboard session, the local CLI token, or an API key with `manage`/`admin` scope. Inference-only API keys get 403.\n",
     tag: "V1 Issues",
     tags: ["V1 Issues"],
-    requiresAuth: false,
+    requiresAuth: true,
     hasRequestBody: false,
   },
   {
@@ -641,10 +694,11 @@ export const OPENAPI_ENDPOINTS: OpenApiEndpoint[] = [
     path: "/api/v1/me/status",
     method: "GET",
     summary: "GET me › status",
-    description: "",
+    description:
+      "Self-service usage status for the calling API key (also served at /v1/me/status). Authenticate with `Authorization: Bearer <key>` or `x-api-key: <key>`. Requires scope `self:usage`. `accountQuotas` / `accountQuota` are included only with scope `self:account-quota` and are filtered by the key's `sharedQuotaProviders` setting. `listPriceUsd` / `unpricedRequests` in `usage.cost`, `usage.daily` and `usage.weekly` are cached per key for 60 s, so they may lag by up to 60 s.",
     tag: "V1 Me",
     tags: ["V1 Me"],
-    requiresAuth: false,
+    requiresAuth: true,
     hasRequestBody: false,
   },
   {
@@ -892,20 +946,22 @@ export const OPENAPI_ENDPOINTS: OpenApiEndpoint[] = [
     path: "/api/v1/providers/{provider}/limits",
     method: "GET",
     summary: "GET providers › <provider> › limits",
-    description: "",
+    description:
+      "Management-only, like `/api/v1/registered-keys`: a dashboard session, the local CLI token, or an API key with `manage`/`admin` scope. Inference-only API keys get 403.\n",
     tag: "V1 Providers",
     tags: ["V1 Providers"],
-    requiresAuth: false,
+    requiresAuth: true,
     hasRequestBody: false,
   },
   {
     path: "/api/v1/providers/{provider}/limits",
     method: "PUT",
     summary: "PUT providers › <provider> › limits",
-    description: "",
+    description:
+      "Management-only, like `/api/v1/registered-keys`: a dashboard session, the local CLI token, or an API key with `manage`/`admin` scope. Inference-only API keys get 403.\n",
     tag: "V1 Providers",
     tags: ["V1 Providers"],
-    requiresAuth: false,
+    requiresAuth: true,
     hasRequestBody: false,
   },
   {
@@ -1175,21 +1231,23 @@ export const OPENAPI_ENDPOINTS: OpenApiEndpoint[] = [
   {
     path: "/api/v1/video-bridge/drilldown",
     method: "DELETE",
-    summary: "DELETE video bridge › drilldown",
-    description: "",
-    tag: "V1 Video-bridge",
-    tags: ["V1 Video-bridge"],
-    requiresAuth: false,
+    summary: "Delete an authenticated owner's video drill-down handle",
+    description:
+      "Idempotent; unknown, expired or cross-key handles remove zero entries. Releases retained frames and accounting for the owner only. Remote operator consent and a valid API key are always required. A nonempty API-key endpoint allowlist must include video.",
+    tag: "System",
+    tags: ["System"],
+    requiresAuth: true,
     hasRequestBody: false,
   },
   {
     path: "/api/v1/video-bridge/drilldown",
     method: "GET",
-    summary: "GET video bridge › drilldown",
-    description: "",
-    tag: "V1 Video-bridge",
-    tags: ["V1 Video-bridge"],
-    requiresAuth: false,
+    summary: "Read authenticated tenant-bound video frame variants",
+    description:
+      "Requires explicit remote drill-down operator consent and an authenticated API key. A nonempty API-key endpoint allowlist must include video. Resolves an opaque handle from the x-omniroute-video-drilldown chat response header; never accepts a client principal, raw video or session ID. JSON including Base64 is limited to 32 MiB. Unknown, expired and cross-key handles return indistinguishable 404 responses. Handles are process-local and expire after ten minutes or a restart.",
+    tag: "System",
+    tags: ["System"],
+    requiresAuth: true,
     hasRequestBody: false,
   },
   {

@@ -146,6 +146,45 @@ Tie saglabājas, līdz tiek mainīti akreditācijas dati vai operators tos aties
 Regresijas aizsargi: `tests/unit/claude-low-priority-mode.test.ts`,
 `tests/unit/claude-limit-reset.test.ts`, `tests/unit/claude-low-priority-executor.test.ts`.
 
+### Automātiski lietot bankas atiestatīšanu
+
+**Darbības joma:** Codex un Claude abonēšanas (OAuth) savienojumi.**Pieteikties** : `bankedResetAutoApply` iestatījums ir izslēgts un pēc noklusējuma ir `dry-run` režīmā (Iestatījumi → AI → Automātiski lietot bankas atiestatīšanu).
+
+**Mērķis:** tērēt bankas atiestatīšanas pašas, kad konts saskaras ar lietošanas sienu, nevis gaidīt, līdz operators nospiež "Izpirkt" lapā Pakalpojumu sniedzēja ierobežojumi.
+
+| Kredīta veids (`creditTypes`) | Kas ir izpirkts                                        | Kur tas iet                                                                   |
+| ----------------------------- | ------------------------------------------------------ | ----------------------------------------------------------------------------- |
+| `codexCredits`                | Codex atiestatīšanas kredīti                           | fona darbs, ik pēc 60 s                                                       |
+| `claudeCredits`               | Claude bankas dotācijas (`GRANT` kredīti)              | fona darbs, ik pēc 60 s                                                       |
+| `claudeSessionReset`          | Claude nedēļas sesijas limita atiestatīšana (iepriekš) | pieprasījuma ceļu, izmantojot to pašu politiku, ko izmanto konta pārslēgšanai |
+
+**Īstenošana:**
+
+- Tīrs lēmums (viens noteikums abiem ceļiem): `src/lib/usage/bankedResetPolicy.ts::decideBankedReset()`
+- Fona darbs: `src/lib/services/bankedResetAutoApply.ts` (sākās `src/instrumentation-node.ts`)
+- Claude pieprasījuma ceļa vārti: `src/lib/usage/claudeSessionResetPolicy.ts`, reģistrēts, izmantojot `setClaudeLimitResetPolicy()` pakalpojumā `open-sse/services/claudeLimitReset.ts`
+- Vēsture, vāciņi un tīmekļa aizķere: `src/lib/usage/bankedResetAudit.ts`
+- Vēsture API: `GET /api/settings/banked-reset-auto/history?limit=50` (pārvaldības autentifikācija)
+
+**Lēmuma rīkojums** (pirmais neveiksmes noteikums ir reģistrētais iemesls):
+
+1. Funkcija ir izslēgta, kredīta veids ir izslēgts vai konts ir ārpus darbības jomas (`accountScope` `all` / `selected` plus katra konta `connections` karte).
+2. Ārpus izvēles UTC grafika (`startHourUtc` > `endHourUtc` šķērso pusnakti).
+3. Ierobežojumi pēdējo 24 stundu laikā: `maxPerAccountPerDay` (1), `maxPerDay` (3) un `minSpacingMinutes` (30) starp jebkurām divām izpirkšanas reizēm.
+4. Aktivizētājs: `session` vai `weekly` logs ar sienu (lasiet no `getQuotaWindowStatus().reachedThreshold`, nevis `isAccountQuotaExhausted()`, kas ziņo tikai par kontu ar katru iztērēto periodu) vai kredīts, kura derīguma termiņš beidzas `expiringCreditHours` (24) ietvaros kontā, kurš ir izmantojis vismaz `expiringCreditMinUsedPercent` (50).
+5. Dabiskās atiestatīšanas aizsargs: izlaidiet, ja tiek atiestatīts 5 stundu logs ar sienu `sessionResetGuardMinutes` (90) vai iknedēļas logs ar sienu `weeklyResetGuardHours` (12).
+6. Nedēļas minimālā vērtība: izlaidiet 5 stundu atiestatīšanu, ja nedēļas atlikums ir mazāks par `weeklyFloorPercent` (10).
+7. `last-resort` režīms: izlaidiet, kamēr cita tā paša pakalpojumu sniedzēja konta abos logos ir atlicis vismaz `poolHeadroomPercent` (10). Kredīta izbeigšanās aktivizētāji to apiet.
+8. `dry-run` ieraksta rindu un neko neizpērk; `last-resort` un `eager` izpirkt.
+
+Trūkstošie kvotas dati nekad neatbloķē izpirkšanu: nezināms atiestatīšanas laiks vai iknedēļas lietojums tiek izlaists.
+
+**Claude sesijas atiestatīšana:** ja funkcija ir izslēgta vai `claudeSessionReset` izslēgta, katram kontam `autoLimitReset` pārslēgs izlemj tieši tāpat kā iepriekš. Ja abi ir ieslēgti, funkcija aizstāj konta pārslēgšanas slēdžus: darbības jomā esošs konts var pieprasīt tikai tad, ja politika to atļauj, un `dry-run` režīmā pretenzija netiek iesniegta.
+
+**Drošība:** darbs izpērk ne vairāk kā vienu kredītu uz vienu atzīmi, izlemj pirms kredītu iekļaušanas sarakstā (izlaists konts nekad netiek iekļauts sarakstā), izmanto idempotences atslēgas `auto-reset:<connectionId>:<yyyy-mm-dd>:<n>` un atmaksā kontu 1 stundu pēc neveiksmīgas ierakstīšanas vai izpirkšanas. Katrs izpirkšanas, neveiksmes un sausās darbības lēmums tiek rakstīts `audit_log` (`action: "bankedReset.redeem"`, bez žetoniem vai kredīta ID); vāciņi tiek skaitīti no šīm rindām, tāpēc tie izdzīvo restartēšanu. Veiksmīga izpirkšana aktivizē arī `provider.reset_redeemed` tīmekļa aizķeri.
+
+Regresa aizsargi: `tests/unit/banked-reset-policy.test.ts`, `tests/unit/banked-reset-auto-apply.test.ts`, `tests/unit/claude-limit-reset-policy-gate.test.ts`, `tests/unit/banked-reset-history-route.test.ts`.
+
 ### Sesijas piesaiste (#7274)
 
 **Tvērums:** viena klienta sesija (`X-Session-Id` / `x-codex-session-id` / `x-omniroute-session` galvene) tiek piesaistīta vienam savienojumam jebkuram pakalpojumu sniedzējam.

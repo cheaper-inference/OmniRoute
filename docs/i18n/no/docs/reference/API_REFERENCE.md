@@ -981,14 +981,14 @@ fullføringen.
 
 ---
 
-## Kvoter og rapportering av problemer
+## Rapportering av kvoter og problemer
 
-| Metode | Bane                | Beskrivelse                                                                                    |
-| ------ | ------------------- | ---------------------------------------------------------------------------------------------- |
-| GET    | `/v1/quotas/check`  | Forhåndsvalider kvote for en `provider` + `accountId` før en registrert nøkkel utstedes        |
-| POST   | `/v1/issues/report` | Rapporter en feil ved kvote-/nøkkelutstedelse til GitHub (krever `GITHUB_ISSUES_REPO` + token) |
+| Metode | Sti                 | Beskrivelse                                                                                 |
+| ------ | ------------------- | ------------------------------------------------------------------------------------------- |
+| GET    | `/v1/quotas/check`  | Forhåndsvalider kvoten for en `provider` + `accountId` før du utsteder en registrert nøkkel |
+| POST   | `/v1/issues/report` | Rapporter en quota/key -utstedelsesfeil til GitHub (krever `GITHUB_ISSUES_REPO` + token)    |
 
-**Autentisering:** Bearer API-nøkkel (`isAuthenticated`).
+**Auth:** `/v1/quotas/check` tar en bærer API nøkkel (`isAuthenticated`). `/v1/issues/report` er kun for administrasjon (`requireManagementAuth`), som `/api/v1/registered-keys`: en dashbordøkt, det lokale CLI tokenet eller en API nøkkel med `manage`/`admin` omfang; API -nøkler som bare inferens får `403`.
 
 ### Gjenoppretting av kvoteøkter (valgfritt)
 
@@ -1798,17 +1798,21 @@ Utgående webhook-abonnementer for OmniRoute-hendelser (fullføring av forespør
 
 ## Registrerte nøkler (automatisk administrasjon)
 
-Brukes av subsystemet for automatisk nøkkeladministrasjon til å utstede og rotere API-nøkler mot en underliggende leverandør/konto, med daglige/timelange kvoter.
+Brukes av undersystemet for automatisk nøkkeladministrasjon til å utstede og rotere API nøkler mot en støttende provider/account, med daily/hourly kvoter.
 
-| Method | Path                                  | Description                                                                                                                                                                                                                 |
-| ------ | ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/api/v1/registered-keys`             | List registrerte nøkler (kun maskert prefiks)                                                                                                                                                                               |
-| POST   | `/api/v1/registered-keys`             | Utsted en ny registrert nøkkel — body: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Returnerer den rå nøkkelen **én gang**. Returnerer `429` ved avvisning på grunn av kvote. |
-| GET    | `/api/v1/registered-keys/[id]`        | Hent metadata for en registrert nøkkel (ingen rått nøkkelmateriale)                                                                                                                                                         |
-| DELETE | `/api/v1/registered-keys/[id]`        | Tilbakekall en registrert nøkkel                                                                                                                                                                                            |
-| POST   | `/api/v1/registered-keys/[id]/revoke` | Eksplisitt endepunkt for tilbakekalling (samme effekt som DELETE)                                                                                                                                                           |
+| Metode | Sti                                   | Beskrivelse                                                                                                                                                                                             |
+| ------ | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/v1/registered-keys`             | Liste registrerte nøkler (bare maskert prefiks)                                                                                                                                                         |
+| POST   | `/api/v1/registered-keys`             | Utsted en ny registrert nøkkel — body: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Returnerer rånøkkelen **en gang** . Returnerer `429` ved kvoteavslag. |
+| GET    | `/api/v1/registered-keys/[id]`        | Hent en registrert nøkkels metadata (ingen råmateriale)                                                                                                                                                 |
+| DELETE | `/api/v1/registered-keys/[id]`        | Tilbakekall en registrert nøkkel                                                                                                                                                                        |
+| POST   | `/api/v1/registered-keys/[id]/revoke` | Eksplisitt tilbakekallende endepunkt (samme effekt som DELETE)                                                                                                                                          |
+| GET    | `/api/v1/providers/[provider]/limits` | Les leverandørens utstedelsestak                                                                                                                                                                        |
+| PUT    | `/api/v1/providers/[provider]/limits` | Angi leverandørens utstedelsestak — body: `{maxActiveKeys?, dailyIssueLimit?, hourlyIssueLimit?}`                                                                                                       |
+| GET    | `/api/v1/accounts/[id]/limits`        | Les kontoens utstedelsestak                                                                                                                                                                             |
+| PUT    | `/api/v1/accounts/[id]/limits`        | Angi kontoens utstedelsestak — samme kropp som leverandørruten                                                                                                                                          |
 
-**Autentisering:** administrasjonsøkt/API-nøkkel (`requireManagementAuth`) — samme tilgangskontroll som `/api/keys`: en dashboardøkt, det lokale CLI-tokenet eller en API-nøkkel med `manage`/`admin`-omfang; API-nøkler som kun brukes til inferens får `403`. Se også `/v1/quotas/check` og `/v1/issues/report`.
+**Auth:** management session/API nøkkel (`requireManagementAuth`) — samme vakt som `/api/keys`: en dashbordøkt, det lokale CLI tokenet eller en API nøkkel med `manage`/`admin` omfang; API -nøkler som bare inferens får `403`. Se også `/v1/quotas/check` og `/v1/issues/report`.
 
 ---
 

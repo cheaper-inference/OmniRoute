@@ -231,6 +231,45 @@ limit", GLM `并发数过高`) የሚገልጽ `429` ማለት መለያው ጤ�
 `tests/unit/claude-limit-reset.test.ts`,
 `tests/unit/claude-low-priority-executor.test.ts`.
 
+### የባንክ ዳግም ማስጀመሪያዎችን በራስ ሰር ያመልክቱ
+
+**ወሰን፡** Codex እና Claude የደንበኝነት ምዝገባ (OAuth) ግንኙነቶች.**መርጠው ይግቡ** የ `bankedResetAutoApply` ቅንብር ጠፍቷል እና በነባሪ በ `dry-run` ሁነታ (ቅንጅቶች → AI → በራስ ሰር የባንክ ዳግም ማስጀመሪያዎችን ይተግብሩ)።
+
+**ዓላማ፡-** አንድ ኦፕሬተር በአቅራቢ ገደቦች ገጽ ላይ "ቤዛ"ን እንዲጫኑ ከመጠበቅ ይልቅ አንድ አካውንት የአጠቃቀም ግድግዳ ሲመታ በራሳቸው የባንክ ዳግም ማስጀመሪያዎችን ያሳልፉ።
+
+| የብድር ዓይነት (`creditTypes`) | ምን ተቤዠ                                  | የት እንደሚሮጥ                      |
+| ------------------------- | --------------------------------------- | ------------------------------ |
+| `codexCredits`            | Codex ክሬዲቶች ዳግም ያስጀምሩ                   | የጀርባ ሥራ, በየ 60 ዎቹ              |
+| `claudeCredits`           | Claude የባንክ ዕርዳታ (`GRANT` ክሬዲት)         | የጀርባ ሥራ, በየ 60 ዎቹ              |
+| `claudeSessionReset`      | Claude ሳምንታዊ ክፍለ ጊዜ ገደብ ዳግም ማስጀመር (ከላይ) | የጥያቄ ዱካ፣ በየመለያ መቀያየር ባለበት መመሪያ |
+
+**ትግበራ፡**
+
+- ንጹህ ውሳኔ (ለሁለቱም ዱካዎች አንድ ደንብ ተቀምጧል): `src/lib/usage/bankedResetPolicy.ts::decideBankedReset()`
+- የበስተጀርባ ስራ `src/lib/services/bankedResetAutoApply.ts` (በ `src/instrumentation-node.ts` የተጀመረ)
+- Claude ጥያቄ-መንገድ በር `src/lib/usage/claudeSessionResetPolicy.ts`፣ በ `setClaudeLimitResetPolicy()` በኩል በ `open-sse/services/claudeLimitReset.ts` የተመዘገበ
+- ታሪክ፣ ካፕ እና የድር መንጠቆ `src/lib/usage/bankedResetAudit.ts`
+- ታሪክ API: `GET /api/settings/banked-reset-auto/history?limit=50` (አስተዳደር auth)
+
+**የውሳኔ ቅደም ተከተል** (የመጀመሪያው ያልተሳካ ህግ የተመዘገበው ምክንያት ነው)
+
+1. ባህሪ ጠፍቷል፣ የክሬዲት አይነት ጠፍቷል ወይም መለያ ወሰን የለውም (`accountScope` `all` / `selected` እና በእያንዳንዱ መለያ `connections` ካርታ)።
+2. ከአማራጭ UTC መርሐግብር ውጪ (`startHourUtc` > `endHourUtc` እኩለ ሌሊት ያቋርጣል)።
+3. ካለፉት 24 ሰአታት በላይ ከፍሏል `maxPerAccountPerDay` (1)፣ `maxPerDay` (3) እና `minSpacingMinutes` (30) በማንኛውም ሁለት ቤዛዎች መካከል።
+4. ቀስቅሴ፡- ግድግዳ ላይ ያለ `session` ወይም `weekly` መስኮት (ከ `getQuotaWindowStatus().reachedThreshold` አንብብ እንጂ `isAccountQuotaExhausted()` አይደለም፣ እያንዳንዱ የወጣ መስኮት መለያ ብቻ ሪፖርት ያደርጋል) ወይም በ `expiringCreditHours` (24) ውስጥ የሚያልፍ ክሬዲት ቢያንስ `expiringCreditMinUsedPercent` (50) በተጠቀመ መለያ ላይ።
+5. የተፈጥሮ ዳግም ማስጀመሪያ ዘብ፡ በ `sessionResetGuardMinutes` (90) ውስጥ የታጠረው የ5-ሰአት መስኮት ዳግም ሲጀምር ወይም `weeklyResetGuardHours` ውስጥ ባለ ሳምንታዊ መስኮት (12) ውስጥ ይዝለሉ።
+6. ሳምንታዊ ፎቅ፡ ሳምንታዊ ቀሪው `weeklyFloorPercent` (10) በታች ከሆነ የ5-ሰዓት ዳግም ማስጀመር ይዝለሉ።
+7. `last-resort` ሁነታ፡ ሌላኛው ውስጠ-ወሰን መለያ በሁለቱም መስኮቶች ላይ ቢያንስ `poolHeadroomPercent` (10) ሲቀረው ይዝለሉ። ጊዜው ያለፈበት-የክሬዲት ቀስቅሴዎች ይህንን ያልፋሉ።
+8. `dry-run` አንድ ረድፍ ይመዘግባል እና ምንም ነገር አይዋጅም; `last-resort` እና `eager` ማስመለስ።
+
+የጎደለ የኮታ ውሂብ መቤዠትን በጭራሽ አይከፍትም፡ ያልታወቀ ዳግም ማስጀመሪያ ጊዜ ወይም ሳምንታዊ አጠቃቀም መዝለሎች።
+
+**Claude ክፍለ ጊዜ ዳግም ማስጀመር፡-** ባህሪው ጠፍቶ ወይም `claudeSessionReset` ጠፍቶ፣ በየመለያ `autoLimitReset` መቀያየር ልክ እንደበፊቱ ይወስናል። ከሁለቱም ጋር፣ ባህሪው በየመለያ መቀያየሪያዎችን ይተካዋል፡- ውስጠ-ወሰን መለያ ፖሊሲው ሲፈቅድ ብቻ ነው ሊጠይቅ የሚችለው፣ እና በ `dry-run` ሁነታ ምንም አይነት የይገባኛል ጥያቄ የለም።
+
+**ደህንነት፡** ስራው በቲኬት ቢበዛ አንድ ክሬዲት ያስወጣል፣ ክሬዲቶችን ከመዘርዘሩ በፊት ይወስናል (የተዘለለ መለያ በጭራሽ አልተዘረዘረም)፣ የ idempotency ቁልፎችን ይጠቀማል `auto-reset:<connectionId>:<yyyy-mm-dd>:<n>`, እና ከተሳካ ዝርዝር ወይም ማስመለስ በኋላ ለ 1 ሰአታት የጠፋ ሂሳብ ይደግፋል። እያንዳንዱ መቤዠት, ውድቀት እና ደረቅ ውሳኔ ለ `audit_log` (`action: "bankedReset.redeem"`, ምንም ቶከኖች ወይም ክሬዲት መታወቂያዎች) ተጽፏል; ባርኔጣዎቹ ከእነዚያ ረድፎች ውስጥ ተቆጥረዋል, ስለዚህ እንደገና ከመጀመሩ ይተርፋሉ. የተሳካላቸው ቤዛዎች የ `provider.reset_redeemed` ዌብ መንጠቆንም ያቃጥላሉ።
+
+የመመለሻ ጠባቂዎች `tests/unit/banked-reset-policy.test.ts`, `tests/unit/banked-reset-auto-apply.test.ts`, `tests/unit/claude-limit-reset-policy-gate.test.ts`, `tests/unit/banked-reset-history-route.test.ts`.
+
 ### የክፍለ-ጊዜ ተያያዥነት (#7274)
 
 **ወሰን፦** አንድ የደንበኛ ክፍለ-ጊዜ (`X-Session-Id` / `x-codex-session-id` / `x-omniroute-session` ራስጌ)

@@ -4,50 +4,52 @@
 
 ---
 
-> **事实来源：** `src/lib/webhookDispatcher.ts`、`src/lib/db/webhooks.ts`、`src/app/api/webhooks/`
-> **最后更新：** 2026-06-28 — v3.8.40
+> **事实来源：** `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`, `src/app/api/webhooks/`**最后更新：** 2026-06-28 — v3.8.40
 
-OmniRoute 可以在平台事件发生时触发 HTTP webhook。可使用它们与 Slack、PagerDuty、Datadog、内部告警服务或任何 HTTP 接收端集成。
+OmniRoute可以在平台事件上触发HTTP Webhook。使用它们与Slack、 PagerDuty、Datadog、内部警报服务或任何HTTP接收器集成。
 
-调度器使用 HMAC-SHA256 对每次投递进行签名，在发生暂时性故障时重试，跟踪每个 webhook 的投递健康状况，并自动禁用持续失败的端点。
+调度程序使用HMAC-SHA256对每个交付进行签名，重试暂时性故障，跟踪每个 Webhook 的交付运行状况，并自动禁用不断失败的端点。
 
-## 支持的事件
+## 支持的活动
 
-`WebhookEvent` 类型（`src/lib/webhooks/eventDescriptions.ts`，由 `src/lib/webhookDispatcher.ts` 使用）目前准确地定义了四种事件：
+`WebhookEvent`类型（`src/lib/webhooks/eventDescriptions.ts`，由`src/lib/webhookDispatcher.ts`使用）当前对七个事件进行建模：
 
-| 事件                | 触发条件                            |
-| ------------------- | ----------------------------------- |
-| `request.completed` | 代理请求成功完成                    |
-| `request.failed`    | 代理请求在所有重试/回退均失败后失败 |
-| `quota.exceeded`    | API 密钥达到预算/配额阈值           |
-| `test.ping`         | 测试端点使用的合成事件              |
+| 事件                      | 触发时                                             |
+| ------------------------- | -------------------------------------------------- |
+| `request.completed`       | 代理请求成功完成                                   |
+| `request.failed`          | 代理请求在所有retries/fallback后失败               |
+| `quota.exceeded`          | API密钥跨越budget/quota阈值                        |
+| `proxy.set_aside`         | 代理池成员在多次拒绝后被搁置（仅限过渡）           |
+| `proxy.pool.exhausted`    | 代理池范围的每个成员都被预留                       |
+| `provider.reset_redeemed` | 自动应用银行重置已兑换重置积分或Claude每周会话重置 |
+| `test.ping`               | 测试端点使用的综合事件                             |
 
-订阅可使用字面值 `"*"` 接收所有事件。`events` 中未知的事件名称会在调度时被忽略。
+订阅接受字面`"*"`来接收每个事件。 `events`中的未知事件名称在调度时将被忽略。
 
-> 注意：调度器 API 已接入，但部分非 `test.ping` 事件的生产调用点仍在陆续实现中。请使用 `grep dispatchEvent` 检查当前版本中哪些路径会调用调度器。
+> 注意：调度程序API已连线，但某些非`test.ping`事件的生产呼叫站点仍在登陆。检查`grep dispatchEvent`以查看当前在您的版本中哪些路径调用调度程序。
 
-## 架构
+## 建筑学
 
 ```
-调用方（处理程序、服务、监控器）
+Caller (handler, service, monitor)
   dispatchEvent(event, data)            [src/lib/webhookDispatcher.ts]
     -> getEnabledWebhooks()             [src/lib/db/webhooks.ts]
-    -> 按 webhook.events 过滤
-    -> 对每个匹配项（并行）：
+    -> filter by webhook.events
+    -> for each match (in parallel):
        deliverWebhook(url, payload, secret)
-         构建负载 { event, timestamp, data }
-         使用 HMAC-SHA256 对正文进行签名（如果存在密钥）
-         使用 10 秒超时发送 POST 请求
-         遇到 5xx / 网络错误时最多重试 3 次
+         build payload { event, timestamp, data }
+         sign body with HMAC-SHA256 (if secret present)
+         POST with 10s timeout
+         retry up to 3 times on 5xx / network error
        recordWebhookDelivery(id, status, success)
     -> disableWebhooksWithHighFailures(10)
 ```
 
-对于调用方，调度采用即发即弃模式：`Promise.allSettled` 会吞掉每个 webhook 的错误，因此一个有问题的接收端不会阻塞其他接收端。
+对于调用者来说，调度是一劳永逸的： `Promise.allSettled`会吞下每个 Webhook 错误，因此一个坏接收器无法阻止其他接收器。
 
-## HMAC 签名
+## HMAC签名
 
-当 webhook 配置了 `secret` 时，OmniRoute 会对 JSON 正文进行签名并发送：
+当 webhook 具有`secret`时， OmniRoute签署JSON正文并发送：
 
 ```
 Content-Type: application/json
@@ -57,11 +59,11 @@ X-Webhook-Timestamp: <ISO-8601>
 X-Webhook-Signature: sha256=<hex HMAC-SHA256(secret, body)>
 ```
 
-> 标头名称使用 `X-Webhook-*` 前缀（而不是 `X-OmniRoute-*`）。签名值为 `sha256=<hex>`——请验证完整前缀。
+> 标头名称使用`X-Webhook-*`前缀（而不是`X-OmniRoute-*`）。签名值为`sha256=<hex>` —验证的完整前缀。
 
-如果调用 `createWebhook` 时未提供密钥，数据库模块会生成一个密钥（`whsec_<48 hex>`），因此默认情况下所有 webhook 都会被签名。
+如果在没有秘密的情况下调用`createWebhook` ，则DB模块会生成一个 (`whsec_<48 hex>`)，因此默认情况下所有 Webhooks 都会进行签名。
 
-### 在接收端验证
+### 在接收器上验证
 
 ```typescript
 import { createHmac, timingSafeEqual } from "node:crypto";
@@ -74,65 +76,57 @@ function verify(rawBody: string, signature: string, secret: string) {
 }
 ```
 
-始终应在进行任何 JSON 解析之前，使用**原始**请求正文进行验证。
+始终验证**生的**请求正文，在任何JSON解析之前。
 
-## 重试与失败策略
+## 重试和失败政策
 
-`deliverWebhook(url, payload, secret, maxRetries = 3)`：
+`deliverWebhook(url, payload, secret, maxRetries = 3)`:
 
-- 每次尝试的超时时间为 10 秒（`AbortController`）。
-- HTTP 2xx 视为成功。
-- HTTP 3xx/4xx 视为不可重试的最终状态——记录为已投递，
-  其中 `success = res.ok`。
-- HTTP 5xx 和网络错误会使用指数退避进行重试：
-  `2^attempt * 1000 ms`（1 秒、2 秒、4 秒）。
-- 达到 `maxRetries` 后，该次投递将记录为失败。
-- 每次投递都会更新 `last_triggered_at`、`last_status`，并重置
-  或递增 `failure_count`。
-- 分发器会在每次扇出后调用 `disableWebhooksWithHighFailures(10)`，
-  因此任何 `failure_count >= 10` 的 webhook 都会被自动禁用。
+- 每次尝试 10 秒超时 (`AbortController`)。
+- HTTP 2xx 算作成功。
+- HTTP 3xx/4xx被视为与`success = res.ok`一起交付时记录的不可重试的最终状态— 。
+- HTTP 5xx 和网络错误以指数退避重试： `2^attempt * 1000 ms` （1s、2s、4s）。
+- `maxRetries`之后，交付被记录为失败。
+- 每次交付都会更新`last_triggered_at`、 `last_status`，并重置或递增`failure_count`。
+- 调度程序在每次扇出后调用`disableWebhooksWithHighFailures(10)` ，因此任何带有`failure_count >= 10`的 Webhook 都会自动禁用。
 
 ## 数据库
 
-表 `webhooks`（迁移 `011_webhooks.sql`）：
+表`webhooks` （迁移`011_webhooks.sql`）：
 
-| 列                  | 类型    | 说明                                   |
-| ------------------- | ------- | -------------------------------------- |
-| `id`                | TEXT PK | UUID                                   |
-| `url`               | TEXT    | 目标 URL                               |
-| `events`            | TEXT    | JSON 数组；默认为 `["*"]`              |
-| `secret`            | TEXT    | HMAC 密钥（未提供时自动生成）          |
-| `enabled`           | INT     | 0/1；默认为 1                          |
-| `description`       | TEXT    | 可选的人类可读标签                     |
-| `created_at`        | TEXT    | `datetime('now')`                      |
-| `last_triggered_at` | TEXT    | 每次投递尝试时更新                     |
-| `last_status`       | INT     | 上次尝试的 HTTP 状态码（0 = 网络错误） |
-| `failure_count`     | INT     | 成功时重置为 0，失败时 +1              |
+| 柱子                | 类型    | 笔记                              |
+| ------------------- | ------- | --------------------------------- |
+| `id`                | TEXT PK | UUID                              |
+| `url`               | TEXT    | 目的地URL                         |
+| `events`            | TEXT    | JSON阵列；默认`["*"]`             |
+| `secret`            | TEXT    | HMAC秘密（如果未给出则自动生成）  |
+| `enabled`           | INT     | 0/1；默认为 1                     |
+| `description`       | TEXT    | 可选的人体标签                    |
+| `created_at`        | TEXT    | `datetime('now')`                 |
+| `last_triggered_at` | TEXT    | 每次交付尝试都会更新              |
+| `last_status`       | INT     | 最后一次尝试的HTTP状态（0 =网络） |
+| `failure_count`     | INT     | 成功时重置为 0，失败时重置为+ 1   |
 
-除了 `webhooks` 行上的聚合计数器外，投递历史还会持久化到专用的 `webhook_deliveries` 表中
-（迁移 `069_webhook_deliveries.sql`，每次尝试时通过
-`src/lib/db/webhookDeliveries.ts::insertDelivery` 写入）。类型元数据（Slack / Discord /
-Telegram / 自定义有效载荷转换器）由 `070_webhooks_kind_metadata.sql` 添加。
+除了`webhooks`行上的聚合计数器之外，交付历史记录也保存在专用`webhook_deliveries`表（迁移`069_webhook_deliveries.sql`，每次尝试时通过`src/lib/db/webhookDeliveries.ts::insertDelivery`写入）中。种类元数据（Slack / Discord / Telegram / 自定义有效负载转换器）由`070_webhooks_kind_metadata.sql`添加。
 
 ## REST API
 
 所有端点都需要管理身份验证（`requireManagementAuth`）。
 
-| 端点                            | 方法   | 说明                            |
-| ------------------------------- | ------ | ------------------------------- |
-| `/api/webhooks`                 | GET    | 列出 webhook（密钥已掩码）      |
-| `/api/webhooks`                 | POST   | 创建 webhook                    |
-| `/api/webhooks/[id]`            | GET    | webhook 详情（完整密钥）        |
-| `/api/webhooks/[id]`            | PUT    | 更新字段                        |
-| `/api/webhooks/[id]`            | DELETE | 删除                            |
-| `/api/webhooks/[id]/test`       | POST   | 触发一次 `test.ping`（不重试）  |
-| `/api/webhooks/[id]/deliveries` | GET    | 获取某个 webhook 最近的投递尝试 |
-| `/api/webhooks/validate-url`    | POST   | 预先验证 URL（SSRF 防护）       |
+| 端点                            | 方法   | 描述                         |
+| ------------------------------- | ------ | ---------------------------- |
+| `/api/webhooks`                 | GET    | 列出 webhooks（隐藏秘密）    |
+| `/api/webhooks`                 | POST   | 创建网络钩子                 |
+| `/api/webhooks/[id]`            | GET    | Webhook 详细信息（完全秘密） |
+| `/api/webhooks/[id]`            | PUT    | 更新字段                     |
+| `/api/webhooks/[id]`            | DELETE | 消除                         |
+| `/api/webhooks/[id]/test`       | POST   | 触发`test.ping` （不重试）   |
+| `/api/webhooks/[id]/deliveries` | GET    | 最近尝试传送一个 Webhook     |
+| `/api/webhooks/validate-url`    | POST   | 飞行前URL验证（SSRF守卫）    |
 
-`GET /api/webhooks` 会将密钥掩码为 `<前 10 个字符>...`，以避免
-在列表页面上泄露。仅在确实需要密钥时使用 `[id]` GET。
+`GET /api/webhooks`向`<first 10 chars>...`隐藏秘密，以避免在列表页面上泄露。当您确实需要秘密时，请使用`[id]` GET 。
 
-### 创建 webhook
+### 创建网络钩子
 
 ```bash
 curl -X POST http://localhost:20128/api/webhooks \
@@ -146,32 +140,29 @@ curl -X POST http://localhost:20128/api/webhooks \
   }'
 ```
 
-如果省略 `secret`，服务器会生成一个 `whsec_<hex>` 密钥，并在
-响应中返回该密钥。
+如果省略`secret` ，服务器会生成`whsec_<hex>`密钥并在响应中返回它。
 
-### 测试 webhook
+### 测试网络钩子
 
 ```bash
 curl -X POST http://localhost:20128/api/webhooks/<id>/test \
   -H "Cookie: auth_token=..."
 ```
 
-返回 `{ delivered, status, error }`。不会进行重试——这有助于
-快速验证接收方是否接受有效载荷和签名。
+返回`{ delivered, status, error }`。不尝试重试—对于快速验证接收器是否接受有效负载和签名很有用。
 
 ## 仪表板
 
-位于 `/dashboard/webhooks` 的仪表板页面（参见
-`src/app/(dashboard)/dashboard/webhooks/page.tsx`）提供以下功能：
+`/dashboard/webhooks`的仪表板页面（参见`src/app/(dashboard)/dashboard/webhooks/page.tsx`）提供：
 
-- 使用事件选择器创建/编辑 webhook
-- 根据 `enabled`、`failure_count` 和 `last_status` 显示状态指示器（活跃 / 未激活 / 错误）
-- 一键测试投递
-- 手动启用/禁用切换
+- 带有事件选择器的Create/edit Webhooks
+- 基于`enabled`、 `failure_count`和`last_status`的状态指示器（活动/非活动/错误）
+- 一键测试交付
+- 手动enable/disable切换
 
-## 载荷示例
+## 有效负载示例
 
-### request.completed
+### 请求.完成
 
 ```json
 {
@@ -190,32 +181,32 @@ curl -X POST http://localhost:20128/api/webhooks/<id>/test \
 }
 ```
 
-### test.ping
+### 测试.ping
 
 ```json
 {
   "event": "test.ping",
   "timestamp": "2026-05-13T20:32:00.000Z",
   "data": {
-    "message": "来自 OmniRoute 的测试 webhook 投递",
+    "message": "Test webhook delivery from OmniRoute",
     "webhookId": "<uuid>"
   }
 }
 ```
 
-非 `test.ping` 事件的字段结构由发出这些事件的调用位置定义；请将 `data` 对象视为向前兼容（可以添加字段，不要依赖字段不存在这一特性）。
+非`test.ping`事件的字段形状由发出它们的调用站点定义；将`data`对象视为向前兼容（添加字段，不依赖于缺失）。
 
 ## 最佳实践
 
-- **验证每次投递的签名**，并与原始正文进行比对——这样可防止任何猜到你的 webhook URL 的人发送伪造的 POST 请求。
-- **在约 5 秒内响应 2xx**——分发器的超时时间为 10 秒。响应缓慢的接收方会消耗重试次数，并使 `failure_count` 增加。
-- **确保处理程序具有幂等性**——重试和至少一次投递语义意味着可能出现重复投递。
-- **尽量减少订阅**——仅列出你实际使用的事件；`"*"` 会增加你无法控制的接收方的开销。
-- **监控 `failure_count`**——端点连续失败 10 次后会自动禁用；修复接收方后，通过调用 `PUT /api/webhooks/[id]` 并设置 `enabled: true` 来重置。
-- **定期轮换密钥**——通过 `PUT` 设置新的 `secret`，将新值部署到接收方，然后通过测试端点进行确认。
+- **验证每次交付时的签名**针对原始主体—可以防止任何猜测您的 webhook URL人欺骗POSTs 。
+- **~ 5 秒内响应 2xx** —调度程序在 10 秒时超时。慢速接收者会吃掉重试并导致`failure_count`膨胀。
+- **使处理程序具有幂等性**—重试和至少一次传递语义意味着重复是可能的。
+- **最低限度订阅**—仅列出您实际消费的事件； `"*"`会增加您无法控制的接收器的成本。
+- **观看`failure_count`** —端点连续10次失败后自动禁用；修复接收器后，通过使用`enabled: true`调用`PUT /api/webhooks/[id]`进行重置。
+- **定期轮换秘密**— `PUT`一个新的`secret`，将新值部署到接收器，并通过测试端点进行确认。
 
-## 另请参阅
+## 参见
 
-- [API_REFERENCE.md](../reference/API_REFERENCE.md) — 完整的管理 API 接口
-- [RESILIENCE_GUIDE.md](../architecture/RESILIENCE_GUIDE.md) — 通过 `request.failed` 暴露的提供者故障背后的断路器 / 冷却语义
-- 源代码：`src/lib/webhookDispatcher.ts`、`src/lib/db/webhooks.ts`
+- [API_REFERENCE.md](../reference/API_REFERENCE.md) —全管理API面
+- [RESILIENCE_GUIDE.md](../architecture/RESILIENCE_GUIDE.md) —断路器/冷却语义通过`request.failed`浮出水面
+- 资料来源： `src/lib/webhookDispatcher.ts`、 `src/lib/db/webhooks.ts`

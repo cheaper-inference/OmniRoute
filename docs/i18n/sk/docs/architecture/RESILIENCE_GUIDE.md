@@ -147,6 +147,45 @@ Tieto stavy pretrvávajú, kým sa nezmenia prihlasovacie údaje alebo ich oper�
 Regresné ochrany: `tests/unit/claude-low-priority-mode.test.ts`,
 `tests/unit/claude-limit-reset.test.ts`, `tests/unit/claude-low-priority-executor.test.ts`.
 
+### Automaticky použiť bankové resety
+
+**Rozsah:** Pripojenia predplatného Codex a Claude (OAuth).**Prihlásiť sa** : nastavenie `bankedResetAutoApply` je predvolene vypnuté a v režime `dry-run` (Nastavenia → AI → Automatická aplikácia bankových resetov).
+
+**Účel:** utrácať bankové resety samy o sebe, keď účet narazí na obmedzenie používania, namiesto toho, aby ste čakali, kým operátor stlačí tlačidlo „Uplatniť“ na stránke Limity poskytovateľa.
+
+| Typ kreditu (`creditTypes`) | Čo je vykúpené                                      | Kde to beží                                                                         |
+| --------------------------- | --------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| `codexCredits`              | Codex resetovať kredity                             | práca na pozadí, každých 60 s                                                       |
+| `claudeCredits`             | Bankové granty Claude (kredity `GRANT` )            | práca na pozadí, každých 60 s                                                       |
+| `claudeSessionReset`        | Obnovenie týždenného limitu relácie Claude (vyššie) | cestu žiadosti prostredníctvom rovnakých pravidiel ako prepínač pre jednotlivé účty |
+
+**Implementácia:**
+
+- Čisté rozhodnutie (jedno pravidlo nastavené pre obe cesty): `src/lib/usage/bankedResetPolicy.ts::decideBankedReset()`
+- Úloha na pozadí: `src/lib/services/bankedResetAutoApply.ts` (začatá v `src/instrumentation-node.ts`)
+- Brána cesty požiadavky Claude : `src/lib/usage/claudeSessionResetPolicy.ts`, zaregistrovaná prostredníctvom `setClaudeLimitResetPolicy()` v `open-sse/services/claudeLimitReset.ts`
+- História, čiapky a webhook: `src/lib/usage/bankedResetAudit.ts`
+- História API: `GET /api/settings/banked-reset-auto/history?limit=50` (autorizácia správy)
+
+**Poradie rozhodovania** (prvé chybné pravidlo je zaznamenaný dôvod):
+
+1. Funkcia je vypnutá, typ kreditu je vypnutý alebo účet je mimo rozsahu (`accountScope` `all` / `selected` plus mapa `connections` pre jednotlivé účty).
+2. Mimo voliteľného harmonogramu UTC (`startHourUtc` > `endHourUtc` prekročí polnoc).
+3. Limity za posledných 24 hodín: `maxPerAccountPerDay` (1), `maxPerDay` (3) a `minSpacingMinutes` (30) medzi akýmikoľvek dvoma odkúpeniami.
+4. Spúšťač: zamurované okno `session` alebo `weekly` (prečítané zo `getQuotaWindowStatus().reachedThreshold`, nie `isAccountQuotaExhausted()`, ktoré hlási účet iba s každým stráveným oknom) alebo kredit, ktorý vyprší v rámci `expiringCreditHours` (24) na účte, ktorý použil aspoň `expiringCreditMinUsedPercent` (50).
+5. Ochrana s prirodzeným resetom: preskočte, keď sa zamurované 5-hodinové okno resetuje v rámci `sessionResetGuardMinutes` (90), alebo zamurované týždenné okno v rámci `weeklyResetGuardHours` (12).
+6. Týždenné minimum: preskočte 5-hodinový reset, keď je týždenný zostávajúci čas pod `weeklyFloorPercent` (10).
+7. Režim `last-resort` : preskočte, kým na inom účte v rozsahu od rovnakého poskytovateľa zostáva v oboch oknách aspoň `poolHeadroomPercent` (10). Spúšťače uplynutia platnosti kreditu to obchádzajú.
+8. `dry-run` zaznamená rad a nevykúpi nič; Uplatnenie `last-resort` a `eager`.
+
+Chýbajúce údaje o kvóte nikdy neumožnia uplatnenie: preskočí neznámy čas resetovania alebo týždenné používanie.
+
+**Reset relácie Claude :** s vypnutou funkciou alebo vypnutou `claudeSessionReset` sa prepínač `autoLimitReset` pre jednotlivé účty rozhoduje presne ako predtým. Keď sú obe zapnuté, táto funkcia nahrádza prepínače pre jednotlivé účty: príslušný účet si môže nárokovať len vtedy, keď to pravidlá umožňujú, a v režime `dry-run` nevzniká žiadny nárok.
+
+**Bezpečnosť:** úloha preplatí najviac jeden kredit na jeden tick, rozhodne sa pred uvedením kreditov (vynechaný účet sa nikdy neuvádza), používa kľúče idempotencie `auto-reset:<connectionId>:<yyyy-mm-dd>:<n>` a po neúspešnom zaradení alebo preplatení odloží účet na 1 hodinu. Každé rozhodnutie o spätnom odkúpení, neúspechu a suchom teste sa zapíše do `audit_log` (`action: "bankedReset.redeem"`, žiadne tokeny alebo ID kreditu); čiapky sa počítajú z týchto riadkov, takže prežijú reštarty. Úspešné odkúpenia tiež spúšťajú webhook `provider.reset_redeemed`.
+
+Regresné stráže: `tests/unit/banked-reset-policy.test.ts`, `tests/unit/banked-reset-auto-apply.test.ts`, `tests/unit/claude-limit-reset-policy-gate.test.ts`, `tests/unit/banked-reset-history-route.test.ts`.
+
 ### Afinitné väzby relácie (#7274)
 
 **Rozsah:** jedna klientska relácia (`X-Session-Id` / `x-codex-session-id` / `x-omniroute-session` hlavička) pripnutá k jednému pripojeniu pre **ľubovoľného poskytovateľa**.

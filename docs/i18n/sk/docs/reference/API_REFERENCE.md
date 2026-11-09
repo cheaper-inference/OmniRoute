@@ -1018,14 +1018,14 @@ serveri: ChatGPT vracia `codex.rate_limits` + `response.created` a streamuje dok
 
 ---
 
-## Hlásenie kvót a problémov
+## Kvóty a nahlasovanie problémov
 
-| Metóda | Cesta               | Popis                                                                                           |
-| ------ | ------------------- | ----------------------------------------------------------------------------------------------- |
-| GET    | `/v1/quotas/check`  | Predbežne overí kvótu pre kombináciu `provider` + `accountId` pred vydaním registrovaného kľúča |
-| POST   | `/v1/issues/report` | Nahlási zlyhanie kvóty/vydania kľúča do GitHubu (vyžaduje `GITHUB_ISSUES_REPO` + token)         |
+| Metóda | Cesta               | Popis                                                                               |
+| ------ | ------------------- | ----------------------------------------------------------------------------------- |
+| GET    | `/v1/quotas/check`  | Pred vydaním registrovaného kľúča vopred overte kvótu pre `provider` + `accountId`  |
+| POST   | `/v1/issues/report` | Nahláste zlyhanie vydania quota/key GitHub (vyžaduje token `GITHUB_ISSUES_REPO` + ) |
 
-**Autentifikácia:** Bearer API kľúč (`isAuthenticated`).
+**Auth:** `/v1/quotas/check` vezme nosný kľúč API (`isAuthenticated`). `/v1/issues/report` je len pre správu (`requireManagementAuth`), podobne ako `/api/v1/registered-keys`: relácia dashboardu, lokálny token CLI alebo kľúč API s rozsahom `manage`/`admin` ; Kľúče API len na odvodenie získajú `403`.
 
 ### Obnovenie relácie kvóty (voliteľné)
 
@@ -1852,17 +1852,21 @@ Odchádzajúce odbery webhookov pre udalosti OmniRoute (dokončenie požiadavky,
 
 ## Registrované kľúče (automatická správa)
 
-Používa sa podsystémom automatickej správy kľúčov na vydávanie a rotáciu kľúčov API voči poskytovateľovi/účtu na pozadí s dennými/hodinovými kvótami.
+Používa sa podsystémom správy automatických kľúčov na vydávanie a otáčanie kľúčov API oproti podpornému provider/account s kvótami daily/hourly.
 
-| Method | Path                                  | Description                                                                                                                                                                                                   |
-| ------ | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/api/v1/registered-keys`             | Zoznam registrovaných kľúčov (iba maskovaný prefix)                                                                                                                                                           |
-| POST   | `/api/v1/registered-keys`             | Vydanie nového registrovaného kľúča — telo: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Surový kľúč sa vráti **iba raz**. Pri odmietnutí kvóty sa vráti `429`. |
-| GET    | `/api/v1/registered-keys/[id]`        | Načítanie metadát registrovaného kľúča (bez surového kľúča)                                                                                                                                                   |
-| DELETE | `/api/v1/registered-keys/[id]`        | Odvolanie registrovaného kľúča                                                                                                                                                                                |
-| POST   | `/api/v1/registered-keys/[id]/revoke` | Explicitný koncový bod na odvolanie (rovnaký účinok ako DELETE)                                                                                                                                               |
+| Metóda | Cesta                                 | Popis                                                                                                                                                                                                 |
+| ------ | ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/v1/registered-keys`             | Zoznam registrovaných kľúčov (len maskovaná predpona)                                                                                                                                                 |
+| POST   | `/api/v1/registered-keys`             | Vydajte nový registrovaný kľúč — telo: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Vráti nespracovaný kľúč **raz** . Vráti `429` pri odmietnutí kvóty. |
+| GET    | `/api/v1/registered-keys/[id]`        | Získať metadáta registrovaného kľúča (žiadne suroviny)                                                                                                                                                |
+| DELETE | `/api/v1/registered-keys/[id]`        | Zrušte zaregistrovaný kľúč                                                                                                                                                                            |
+| POST   | `/api/v1/registered-keys/[id]/revoke` | Explicitné zrušenie koncového bodu (rovnaký účinok ako DELETE)                                                                                                                                        |
+| GET    | `/api/v1/providers/[provider]/limits` | Prečítajte si limity vydávania poskytovateľa                                                                                                                                                          |
+| PUT    | `/api/v1/providers/[provider]/limits` | Nastavte limity vydávania poskytovateľa — telo: `{maxActiveKeys?, dailyIssueLimit?, hourlyIssueLimit?}`                                                                                               |
+| GET    | `/api/v1/accounts/[id]/limits`        | Prečítajte si limity na vydanie účtu                                                                                                                                                                  |
+| PUT    | `/api/v1/accounts/[id]/limits`        | Nastavte limity vydania účtu — na rovnaké telo ako na trase poskytovateľa                                                                                                                             |
 
-**Autentifikácia:** relácia/klúč API na správu (`requireManagementAuth`) — rovnaká ochrana ako pri `/api/keys`: relácia dashboardu, lokálny token CLI alebo kľúč API s rozsahom `manage`/`admin`; kľúče API určené iba na inferenciu dostanú `403`. Pozrite si tiež `/v1/quotas/check` a `/v1/issues/report`.
+**Auth:** manažérsky kľúč session/API (`requireManagementAuth`) — rovnaký strážca ako `/api/keys`: relácia dashboardu, lokálny token CLI alebo kľúč API s rozsahom `manage`/`admin` ; Kľúče API iba na odvodenie získajú `403`. Pozri tiež `/v1/quotas/check` a `/v1/issues/report`.
 
 ---
 

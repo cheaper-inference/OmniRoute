@@ -215,6 +215,45 @@ forbindelse** (Rediger forbindelse → Claude-sektion → `lowPriorityMode` / `a
 Regressionssikringer: `tests/unit/claude-low-priority-mode.test.ts`,
 `tests/unit/claude-limit-reset.test.ts`, `tests/unit/claude-low-priority-executor.test.ts`.
 
+### Anvend automatisk bankede nulstillinger
+
+**Omfang:** Codex og Claude -abonnementsforbindelser (OAuth).**Tilmeld dig** : `bankedResetAutoApply` indstillingen er slået fra og i `dry-run` tilstand som standard (Indstillinger → AI → Anvend automatisk banknulstilling).
+
+**Formål:** bruge bankede nulstillinger på egen hånd, når en konto rammer en brugsvæg, i stedet for at vente på, at en operatør trykker på "Indløs" på siden Udbydergrænser.
+
+| Kredittype (`creditTypes`) | Hvad er forløst                                   | Hvor den kører                                                    |
+| -------------------------- | ------------------------------------------------- | ----------------------------------------------------------------- |
+| `codexCredits`             | Codex nulstil kreditter                           | baggrundsjob, hver 60. s                                          |
+| `claudeCredits`            | Claude -banktilskud (`GRANT` -kreditter)          | baggrundsjob, hver 60. s                                          |
+| `claudeSessionReset`       | Claude ugentlig session-grænse nulstilling (over) | anmodningssti via den samme politik som til/fra-knappen pr. konto |
+
+**Implementering:**
+
+- Ren beslutning (én regelsæt for begge veje): `src/lib/usage/bankedResetPolicy.ts::decideBankedReset()`
+- Baggrundsjob: `src/lib/services/bankedResetAutoApply.ts` (startet i `src/instrumentation-node.ts`)
+- Claude request-path gate: `src/lib/usage/claudeSessionResetPolicy.ts`, registreret gennem `setClaudeLimitResetPolicy()` i `open-sse/services/claudeLimitReset.ts`
+- Historie, caps og webhook: `src/lib/usage/bankedResetAudit.ts`
+- Historie API: `GET /api/settings/banked-reset-auto/history?limit=50` (administrationsgodkendelse)
+
+**Beslutningsrækkefølge** (den første fejlregel er den registrerede årsag):
+
+1. Funktion fra, kredittype fra eller konto uden for rækkevidde (`accountScope` `all` / `selected` plus `connections` -kortet pr. konto).
+2. Uden for den valgfrie UTC tidsplan (`startHourUtc` > `endHourUtc` krydser midnat).
+3. Caps over de sidste 24 timer: `maxPerAccountPerDay` (1), `maxPerDay` (3) og `minSpacingMinutes` (30) mellem to vilkårlige indløsninger.
+4. Udløser: et vægbelagt `session` eller `weekly` vindue (læst fra `getQuotaWindowStatus().reachedThreshold`, ikke `isAccountQuotaExhausted()`, som kun rapporterer en konto med hvert brugt vindue), eller en kredit, der udløber inden for `expiringCreditHours` (24) på en konto, der har brugt mindst `expiringCreditMinUsedPercent` (50).
+5. Naturlig nulstillingsbeskyttelse: Spring over, når det vægbeklædte 5-timers vindue nulstilles inden for `sessionResetGuardMinutes` (90), eller det væggede ugentlige vindue inden for `weeklyResetGuardHours` (12).
+6. Ugentlig bund: Spring over en 5-timers nulstilling, når den resterende uge er under `weeklyFloorPercent` (10).
+7. `last-resort` tilstand: spring over, mens en anden konto inden for rammerne af samme udbyder har mindst `poolHeadroomPercent` (10) tilbage i begge vinduer. Udløbende kredittriggere omgår dette.
+8. `dry-run` optager en række og indløser intet; `last-resort` og `eager` indløses.
+
+Manglende kvotedata låser aldrig op for en indløsning: et ukendt nulstillingstidspunkt eller ugentlig brug springer over.
+
+**Claude session nulstilling:** med funktionen slået fra, eller `claudeSessionReset` slået fra, bestemmer `autoLimitReset` -knappen pr. konto nøjagtigt som før. Når begge er slået til, erstatter funktionen per-konto-skiftene: en konto inden for rammerne kan kun gøre krav, når politikken tillader det, og i `dry-run` tilstand fremsættes intet krav.
+
+**Sikkerhed:** jobbet indløser højst én kredit pr. kryds, beslutter sig inden notering af kreditter (en spranget konto er aldrig opført), bruger idempotensnøgler `auto-reset:<connectionId>:<yyyy-mm-dd>:<n>` og bakker en konto tilbage i 1 time efter en mislykket notering eller indløsning. Hver indløsning, fiasko og tør-run-beslutning skrives til `audit_log` (`action: "bankedReset.redeem"`, ingen tokens eller kredit-id'er); hætterne tælles fra disse rækker, så de overlever genstarter. Vellykkede indløsninger affyrer også `provider.reset_redeemed` webhook.
+
+Regressionsvagter: `tests/unit/banked-reset-policy.test.ts`, `tests/unit/banked-reset-auto-apply.test.ts`, `tests/unit/claude-limit-reset-policy-gate.test.ts`, `tests/unit/banked-reset-history-route.test.ts`.
+
 ### Sessionsaffinitet (#7274)
 
 **Omfang:** én klientsession (`X-Session-Id` / `x-codex-session-id` / `x-omniroute-session`-header) fastlåst til én forbindelse, for **enhver** udbyder.

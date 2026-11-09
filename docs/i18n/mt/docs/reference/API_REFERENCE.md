@@ -929,14 +929,14 @@ Il-CLI jaġġorna `base_url + /responses` għal WebSocket u OmniRoute jibgħatha
 
 ---
 
-## Rappurtar tal-Kwoti u l-Kwistjonijiet
+## Kwoti u Rappurtar ta' Kwistjonijiet
 
-| Metodu | Mogħdija            | Deskrizzjoni                                                                                      |
-| ------ | ------------------- | ------------------------------------------------------------------------------------------------- |
-| GET    | `/v1/quotas/check`  | Ivvalida minn qabel il-kwota għal `provider` + `accountId` qabel tinħareġ ċavetta rreġistrata     |
-| POST   | `/v1/issues/report` | Irrapporta falliment fil-ħruġ ta’ kwota/ċavetta lil GitHub (jeħtieġ `GITHUB_ISSUES_REPO` + token) |
+| Metodu | Mogħdija            | Deskrizzjoni                                                                                   |
+| ------ | ------------------- | ---------------------------------------------------------------------------------------------- |
+| GET    | `/v1/quotas/check`  | Ivvalida minn qabel il-kwota għal `provider` + `accountId` qabel ma toħroġ ċavetta rreġistrata |
+| POST   | `/v1/issues/report` | Irrapporta nuqqas ta' ħruġ ta' quota/key lil GitHub (jeħtieġ token `GITHUB_ISSUES_REPO` + )    |
 
-**Awtentikazzjoni:** Ċavetta API Bearer (`isAuthenticated`).
+**Awth:** `/v1/quotas/check` jieħu ċavetta Bearer API (`isAuthenticated`). `/v1/issues/report` huwa ġestjoni biss (`requireManagementAuth`), bħal `/api/v1/registered-keys`: sessjoni dashboard, it-token CLI lokali, jew ċavetta API b'ambitu `manage`/`admin` ; Iċ-ċwievet API ta' inferenza biss jiksbu `403`.
 
 ### Irkupru tas-sessjoni tal-kwota (opt-in)
 
@@ -1716,19 +1716,23 @@ Abbonamenti għal webhooks ħerġin għall-avvenimenti ta' OmniRoute (tlestija t
 
 ---
 
-## Ċwievet Reġistrati (Ġestjoni Awtomatika)
+## Ċwievet Reġistrati (Immaniġġjar Awtomatiku)
 
-Użati mis-sottosistema tal-ġestjoni awtomatika taċ-ċwievet biex toħroġ u ddawwar iċ-ċwievet API kontra fornitur/kont ta' appoġġ, bi kwoti ta' kuljum/kull siegħa.
+Użat mis-subsistema ta' ġestjoni taċ-ċavetta awtomatika biex toħroġ u ddawwar ċwievet API kontra provider/account ta' appoġġ, bi kwoti daily/hourly.
 
-| Metodu | Mogħdija                              | Deskrizzjoni                                                                                                                                                                                                                             |
-| ------ | ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/api/v1/registered-keys`             | Elenka ċ-ċwievet reġistrati (il-prefiss mgħotti biss)                                                                                                                                                                                    |
-| POST   | `/api/v1/registered-keys`             | Oħroġ ċavetta reġistrata ġdida — korp: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Tirritorna ċ-ċavetta mhux ipproċessata **darba waħda**. Tirritorna `429` meta l-kwota tiġi rrifjutata. |
-| GET    | `/api/v1/registered-keys/[id]`        | Irkupra l-metadejta taċ-ċavetta reġistrata (l-ebda materjal mhux ipproċessat)                                                                                                                                                            |
-| DELETE | `/api/v1/registered-keys/[id]`        | Irrivoka ċavetta reġistrata                                                                                                                                                                                                              |
-| POST   | `/api/v1/registered-keys/[id]/revoke` | Punt tat-tmiem tar-revoka espliċitu (l-istess effett bħal DELETE)                                                                                                                                                                        |
+| Metodu | Mogħdija                              | Deskrizzjoni                                                                                                                                                                                                             |
+| ------ | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| GET    | `/api/v1/registered-keys`             | Elenka ċwievet irreġistrati (prefiss mgħotti biss)                                                                                                                                                                       |
+| POST   | `/api/v1/registered-keys`             | Ħruġ korp — ewlieni reġistrat ġdid: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Jirritorna ċ-ċavetta mhux ipproċessata **darba** . Jirritorna `429` fuq rifjut tal-kwota. |
+| GET    | `/api/v1/registered-keys/[id]`        | Irkupra l-metadejta taċ-ċavetta rreġistrata (l-ebda materja prima)                                                                                                                                                       |
+| DELETE | `/api/v1/registered-keys/[id]`        | Irrevoka ċavetta reġistrata                                                                                                                                                                                              |
+| POST   | `/api/v1/registered-keys/[id]/revoke` | Endpoint ta' revoka espliċita (l-istess effett bħal DELETE)                                                                                                                                                              |
+| GET    | `/api/v1/providers/[provider]/limits` | Aqra l-limiti tal-ħruġ tal-fornitur                                                                                                                                                                                      |
+| PUT    | `/api/v1/providers/[provider]/limits` | Issettja l-limiti tal-ħruġ tal-fornitur — body: `{maxActiveKeys?, dailyIssueLimit?, hourlyIssueLimit?}`                                                                                                                  |
+| GET    | `/api/v1/accounts/[id]/limits`        | Aqra l-limiti tal-ħruġ tal-kont                                                                                                                                                                                          |
+| PUT    | `/api/v1/accounts/[id]/limits`        | Issettja l-limiti tal-ħruġ tal-kont — istess korp bħar-rotta tal-fornitur                                                                                                                                                |
 
-**Awtentikazzjoni:** sessjoni ta' ġestjoni/ċavetta API (`requireManagementAuth`) — l-istess kontroll bħal `/api/keys`: sessjoni tad-dashboard, token CLI lokali, jew ċavetta API bl-ambitu `manage`/`admin`; iċ-ċwievet API għall-inferenza biss jirċievu `403`. Ara wkoll `/v1/quotas/check` u `/v1/issues/report`.
+**Awth:** ġestjoni session/API key (`requireManagementAuth`) — l-istess gwardja bħal `/api/keys`: sessjoni dashboard, it-token CLI lokali, jew ċavetta API b'ambitu `manage`/`admin` ; Iċ-ċwievet API ta' inferenza biss jiksbu `403`. Ara wkoll `/v1/quotas/check` u `/v1/issues/report`.
 
 ---
 

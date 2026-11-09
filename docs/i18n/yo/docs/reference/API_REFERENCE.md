@@ -950,14 +950,14 @@ lọ sí ìsopọ̀ OAuth codex tí a yàn. A ti fọwọ́sí rẹ̀ láti ìb�
 
 ---
 
-## Rírọ̀rùn àti Ìròyìn Àwọn Ìṣòro
+## Quotas & Ijabọ Awọn ọran
 
-| Ọ̀nà  | Ọ̀nà URL             | Àlàyé                                                                                   |
-| ---- | ------------------- | --------------------------------------------------------------------------------------- |
-| GET  | `/v1/quotas/check`  | Ṣàyẹ̀wò quota ṣáájú fún `provider` + `accountId` kí o tó fúnni ní kọ́kọ́rọ́ tí a forúkọsílẹ̀ |
-| POST | `/v1/issues/report` | Ròyìn ìkùnà fífúnni ní quota/kọ́kọ́rọ́ sí GitHub (ó nílò `GITHUB_ISSUES_REPO` + token)     |
+| Ọna  | Ona                 | Apejuwe                                                                                  |
+| ---- | ------------------- | ---------------------------------------------------------------------------------------- |
+| GET  | `/v1/quotas/check`  | Ipin-ipin-iṣaaju fun `provider` + `accountId` ṣaaju ki o to fifun bọtini ti a forukọsilẹ |
+| POST | `/v1/issues/report` | Jabọ ikuna ipinfunni quota/key kan si GitHub (nilo ami ami `GITHUB_ISSUES_REPO` + )      |
 
-**Ìfọwọ́sí:** Kọ́kọ́rọ́ API Bearer (`isAuthenticated`).
+**Ifọwọsi:** `/v1/quotas/check` gba bọtini API Bearer (`isAuthenticated`). `/v1/issues/report` jẹ iṣakoso-nikan (`requireManagementAuth`), bii `/api/v1/registered-keys`: igba dasibodu kan, aami CLI agbegbe, tabi bọtini API kan pẹlu iwọn `manage`/`admin` ; inference-nikan awọn bọtini API gba `403`.
 
 ### Ìmúpadà ìgbà quota (aṣàyàn)
 
@@ -1742,19 +1742,23 @@ DELETE /api/usage/token-limits?id=tl-abc
 
 ---
 
-## Àwọn Bọtìnì Tí A Forúkọ Sílẹ̀ (Ìṣàkóso Aládàáṣiṣẹ́)
+## Awọn bọtini Iforukọsilẹ (Iṣakoso-laifọwọyi)
 
-A máa ń lò ó fún ètò ìṣàkóso bọtìnì aládàáṣiṣẹ́ láti pèsè àti yí àwọn bọtìnì API padà lòdì sí olùpèsè/àkọọlẹ̀ ẹ̀yìn, pẹ̀lú àwọn quota ojoojúmọ́/àkókò wákàtí.
+Ti a lo nipasẹ eto iṣakoso bọtini aifọwọyi lati gbejade ati yiyi awọn bọtini API pada si provider/account ti o ti n ṣe atilẹyin, pẹlu awọn ipin daily/hourly.
 
-| Method | Path                                  | Description                                                                                                                                                                                                                    |
-| ------ | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| GET    | `/api/v1/registered-keys`             | Ṣàkójọ àwọn bọtìnì tí a forúkọ sílẹ̀ (prefix tí a bo mọ́lẹ̀ nìkan)                                                                                                                                                                |
-| POST   | `/api/v1/registered-keys`             | Pèsè bọtìnì tí a forúkọ sílẹ̀ tuntun — ara ìbéèrè: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Ó da bọtìnì aise padà **lẹ́ẹ̀kan ṣoṣo**. Ó da `429` padà tí quota bá kọ ìbéèrè náà. |
-| GET    | `/api/v1/registered-keys/[id]`        | Gba metadata bọtìnì tí a forúkọ sílẹ̀ padà (kò sí ohun aise)                                                                                                                                                                    |
-| DELETE | `/api/v1/registered-keys/[id]`        | Fagi bọtìnì tí a forúkọ sílẹ̀                                                                                                                                                                                                   |
-| POST   | `/api/v1/registered-keys/[id]/revoke` | Endpoint fagi tí ó ṣe kedere (ipa kan náà pẹ̀lú DELETE)                                                                                                                                                                         |
+| Ọna    | Ona                                   | Apejuwe                                                                                                                                                                                                          |
+| ------ | ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/v1/registered-keys`             | Ṣe atokọ awọn bọtini ti a forukọsilẹ (iṣaaju ti o boju-boju nikan)                                                                                                                                               |
+| POST   | `/api/v1/registered-keys`             | Ṣe agbejade bọtini tuntun ti a forukọsilẹ ti ara — : `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Da bọtini aise pada **lẹẹkan** . Pada `429` pada lori kiko ipin. |
+| GET    | `/api/v1/registered-keys/[id]`        | Gba metadata bọtini ti o forukọsilẹ (ko si ohun elo aise)                                                                                                                                                        |
+| DELETE | `/api/v1/registered-keys/[id]`        | Fagilee bọtini ti a forukọsilẹ                                                                                                                                                                                   |
+| POST   | `/api/v1/registered-keys/[id]/revoke` | Ifagile ti o han gbangba aaye ipari (ipa kanna bi DELETE)                                                                                                                                                        |
+| GET    | `/api/v1/providers/[provider]/limits` | Ka awọn bọtini ipinfunni ti olupese                                                                                                                                                                              |
+| PUT    | `/api/v1/providers/[provider]/limits` | Ṣeto awọn bọtini ipinfunni olupese ti ara — : `{maxActiveKeys?, dailyIssueLimit?, hourlyIssueLimit?}`                                                                                                            |
+| GET    | `/api/v1/accounts/[id]/limits`        | Ka awọn bọtini ipinfunni akọọlẹ naa                                                                                                                                                                              |
+| PUT    | `/api/v1/accounts/[id]/limits`        | Ṣeto awọn bọtini ipinfunni akọọlẹ — ara kanna gẹgẹbi ipa ọna olupese                                                                                                                                             |
 
-**Ìfọwọ́sí:** ìpàdé ìṣàkóso/bọtìnì API (`requireManagementAuth`) — ẹ̀ṣọ́ kan náà pẹ̀lú `/api/keys`: ìpàdé dashboard, token CLI agbègbè, tàbí bọtìnì API kan pẹ̀lú scope `manage`/`admin`; àwọn bọtìnì API tí ó jẹ́ fún inference nìkan máa ń gba `403`. Wo `/v1/quotas/check` àti `/v1/issues/report` pẹ̀lú.
+**Ifọwọsi:** Bọtini session/API iṣakoso (`requireManagementAuth`) — oluso kanna bi `/api/keys`: igba dasibodu kan, ami CLI agbegbe, tabi bọtini API pẹlu iwọn `manage`/`admin` ; inference-nikan awọn bọtini API gba `403`. Wo tun `/v1/quotas/check` ati `/v1/issues/report`.
 
 ---
 

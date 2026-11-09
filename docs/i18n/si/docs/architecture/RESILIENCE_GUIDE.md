@@ -195,6 +195,45 @@ Signature එක forward නොකරයි. Metadata, අසම්පූර්�
 
 Regression guards: `tests/unit/claude-low-priority-mode.test.ts`, `tests/unit/claude-limit-reset.test.ts`, `tests/unit/claude-low-priority-executor.test.ts`.
 
+### බැංකු යළි පිහිටුවීම් ස්වයංක්‍රීයව යොදන්න
+
+**විෂය පථය:** Codex සහ Claude දායකත්ව (OAuth) සම්බන්ධතා.**ඇතුළු වීම** : `bankedResetAutoApply` සැකසුම අක්‍රිය වී ඇති අතර පෙරනිමියෙන් `dry-run` මාදිලියේ ඇත (සැකසීම් → AI → ස්වයංක්‍රීයව බැංකු යළි පිහිටුවීම් යොදන්න).
+
+**අරමුණ:** ගිණුමක් භාවිත බිත්තියකට පහර දුන් විට, සැපයුම්කරුගේ සීමාවන් පිටුවේ "මුදවා ගන්න" ඔබන තෙක් බලා සිටීම වෙනුවට බැංකුගත යළි පිහිටුවීම් තනිවම වියදම් කරන්න.
+
+| ණය වර්ගය (`creditTypes`) | මුදවාගත් දේ                                 | දුවන තැන                                                   |
+| ------------------------ | ------------------------------------------- | ---------------------------------------------------------- |
+| `codexCredits`           | Codex යළි පිහිටුවීමේ ණය                     | පසුබිම් කාර්යය, සෑම තත්පර 60 කට වරක්                       |
+| `claudeCredits`          | Claude බැංකු ආධාර (`GRANT` බැර)             | පසුබිම් කාර්යය, සෑම තත්පර 60 කට වරක්                       |
+| `claudeSessionReset`     | Claude සතිපතා සැසි-සීමා යළි පිහිටුවීම (ඉහළ) | ඉල්ලීම් මාර්ගය, එක් ගිණුමකට ටොගල ලෙස එකම ප්‍රතිපත්තිය හරහා |
+
+**ක්රියාත්මක කිරීම:**
+
+- පිරිසිදු තීරණය (මාර්ග දෙකම සඳහා එක් රීතියක් සකසා ඇත): `src/lib/usage/bankedResetPolicy.ts::decideBankedReset()`
+- පසුබිම් කාර්යය: `src/lib/services/bankedResetAutoApply.ts` ( `src/instrumentation-node.ts` හි ආරම්භ විය)
+- Claude ඉල්ලීම්-මාර්ග ද්වාරය: `src/lib/usage/claudeSessionResetPolicy.ts`, `open-sse/services/claudeLimitReset.ts` හි `setClaudeLimitResetPolicy()` හරහා ලියාපදිංචි වී ඇත
+- ඉතිහාසය, කැප්ස් සහ webhook: `src/lib/usage/bankedResetAudit.ts`
+- ඉතිහාසය API: `GET /api/settings/banked-reset-auto/history?limit=50` (කළමනාකරණ සත්‍යාපනය)
+
+**තීරණ නියෝගය** (පළමු අසාර්ථක රීතිය වාර්තාගත හේතුවයි):
+
+1. විශේෂාංගය අක්‍රිය, ණය වර්ගය අක්‍රිය, හෝ විෂය පථයෙන් බැහැර ගිණුම (`accountScope` `all` / `selected` සහ එක් ගිණුමකට `connections` සිතියම).
+2. විකල්ප UTC කාලසටහනෙන් පිටත (`startHourUtc` > `endHourUtc` මධ්‍යම රාත්‍රිය පසු කරයි).
+3. අවසන් පැය 24 පුරා සීමාවන්: ඕනෑම මුදාගැනීම් දෙකක් අතර `maxPerAccountPerDay` (1), `maxPerDay` (3), සහ `minSpacingMinutes` (30).
+4. ප්‍රේරකය: බිත්ති සහිත `session` හෝ `weekly` කවුළුවක් ( `getQuotaWindowStatus().reachedThreshold` නොව `isAccountQuotaExhausted()` වෙතින් කියවන්න, වියදම් කළ සෑම කවුළුවක් සමඟම ගිණුමක් පමණක් වාර්තා කරයි), හෝ අවම වශයෙන් `expiringCreditMinUsedPercent` (50) භාවිත කර ඇති ගිණුමක `expiringCreditHours` (24) තුළ කල් ඉකුත් වන ණයක්.
+5. ස්වභාවික යළි පිහිටුවීමේ ආරක්ෂකය: `sessionResetGuardMinutes` (90) තුළ බිත්ති සහිත පැය 5ක කවුළුව යළි පිහිටුවන විට හෝ `weeklyResetGuardHours` (12) තුළ බිත්ති සහිත සතිපතා කවුළුව ප්‍රතිස්ථාපනය කරන විට මඟ හරින්න.
+6. සතිපතා මහල: සතිපතා ඉතිරිව ඇති `weeklyFloorPercent` (10) ට වඩා අඩු වූ විට පැය 5ක යළි පිහිටුවීම මඟ හරින්න.
+7. `last-resort` ප්‍රකාරය: එකම සැපයුම්කරුගේ තවත් විෂය පථය ගිණුමක අවම වශයෙන් `poolHeadroomPercent` (10) කවුළු දෙකෙහිම ඉතිරිව තිබියදී මඟ හරින්න. කල් ඉකුත්වන ණය ප්‍රේරක මෙය මග හරියි.
+8. `dry-run` පේළියක් වාර්තා කර කිසිවක් මුදා නොගනී; `last-resort` සහ `eager` මුදාගැනීම.
+
+අස්ථානගත වූ කෝටා දත්ත කිසිවිටෙක මුදා හැරීමක් අගුළු හරිනු නොලැබේ: නොදන්නා යළි පිහිටුවීමේ වේලාවක් හෝ සතිපතා භාවිතය මඟ හැරේ.
+
+**Claude සැසි යළි පිහිටුවීම:** විශේෂාංගය ක්‍රියාවිරහිත හෝ `claudeSessionReset` ක්‍රියාවිරහිත වූ විට, එක් ගිණුමකට `autoLimitReset` ටොගලය පෙර පරිදිම තීරණය කරයි. දෙකම ක්‍රියාත්මක වීමත් සමඟ, විශේෂාංගය එක් ගිණුමකට ටොගල් ප්‍රතිස්ථාපනය කරයි: විෂය පථය තුළ ගිණුමකට හිමිකම් පෑ හැක්කේ ප්‍රතිපත්තිය එයට ඉඩ දෙන විට පමණක් වන අතර `dry-run` ප්‍රකාරයේදී හිමිකම් පෑමක් සිදු නොවේ.
+
+**ආරක්ෂාව:** රැකියාව ටික් එකකට වැඩිම ණයක් ලබා ගනී, ණය ලැයිස්තුගත කිරීමට පෙර තීරණය කරයි (මඟ හැරිය ගිණුමක් කිසිවිටෙක ලැයිස්තුගත නොකෙරේ), idempotency යතුරු `auto-reset:<connectionId>:<yyyy-mm-dd>:<n>` භාවිතා කරයි, සහ අසාර්ථක ලැයිස්තුගත කිරීමකින් හෝ මුදාගැනීමකින් පසු පැය 1කට ගිණුමක් අක්‍රිය කරයි. සෑම මිදීමක්ම, අසාර්ථකත්වය සහ වියළි ධාවන තීරණය `audit_log` වෙත ලියා ඇත (`action: "bankedReset.redeem"`, ටෝකන හෝ ණය හැඳුනුම්පත් නැත); එම පේළි වලින් හිස්වැසුම් ගණන් කරනු ලැබේ, එබැවින් ඒවා නැවත ආරම්භ කිරීමෙන් බේරී ඇත. සාර්ථක මුදාගැනීම් `provider.reset_redeemed` webhook ද ගිනි දමයි.
+
+ප්‍රතිගාමී ආරක්ෂකයින්: `tests/unit/banked-reset-policy.test.ts`, `tests/unit/banked-reset-auto-apply.test.ts`, `tests/unit/claude-limit-reset-policy-gate.test.ts`, `tests/unit/banked-reset-history-route.test.ts`.
+
 ### Session affinity (#7274)
 
 **Scope:** ඕනෑම provider එකක් සඳහා, එක් client session එකක් (`X-Session-Id` / `x-codex-session-id` / `x-omniroute-session` header) එක් සම්බන්ධතාවයකට pin කරයි.

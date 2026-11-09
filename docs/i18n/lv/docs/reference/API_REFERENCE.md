@@ -975,14 +975,14 @@ ChatGPT atgriež `codex.rate_limits` + `response.created` un straumē pabeigto a
 
 ---
 
-## Kvotu un problēmu ziņošana
+## Ziņošana par kvotām un problēmām
 
-| Metode | Ceļš                | Apraksts                                                                                               |
-| ------ | ------------------- | ------------------------------------------------------------------------------------------------------ |
-| GET    | `/v1/quotas/check`  | Iepriekš pārbaudīt kvotu `provider` + `accountId` kombinācijai pirms reģistrētas atslēgas izsniegšanas |
-| POST   | `/v1/issues/report` | Ziņot par kvotas/atslēgas izsniegšanas kļūmi GitHub (nepieciešams `GITHUB_ISSUES_REPO` + marķieris)    |
+| Metode | Ceļš                | Apraksts                                                                                      |
+| ------ | ------------------- | --------------------------------------------------------------------------------------------- |
+| GET    | `/v1/quotas/check`  | Pirms reģistrētas atslēgas izsniegšanas iepriekš apstipriniet `provider` + `accountId` kvotu  |
+| POST   | `/v1/issues/report` | Ziņojiet par quota/key izdošanas kļūmi GitHub (nepieciešams `GITHUB_ISSUES_REPO` + marķieris) |
 
-**Autentifikācija:** Bearer API atslēga (`isAuthenticated`).
+**Auth:** `/v1/quotas/check` paņem nesēja API atslēgu (`isAuthenticated`). `/v1/issues/report` ir paredzēts tikai pārvaldībai (`requireManagementAuth`), piemēram, `/api/v1/registered-keys`: informācijas paneļa sesija, lokālais CLI marķieris vai API atslēga ar `manage`/`admin` tvērumu; API atslēgas, kas paredzētas tikai secinājumiem, iegūst `403`.
 
 ### Kvotas sesijas atkopšana (pēc izvēles)
 
@@ -1808,17 +1808,21 @@ Izejošo tīmekļa āķu abonementi OmniRoute notikumiem (pieprasījuma pabeigš
 
 ## Reģistrētās atslēgas (automātiskā pārvaldība)
 
-Izmanto automātiskās atslēgu pārvaldības apakšsistēma, lai izsniegtu un rotētu API atslēgas pret atbalsta pakalpojumu sniedzēju/kontu, ar dienas/stundas kvotām.
+Automātiskās atslēgu pārvaldības apakšsistēma izmanto, lai izdotu un rotētu API atslēgas pret papildu provider/account, ar daily/hourly kvotām.
 
-| Metode | Ceļš                                  | Apraksts                                                                                                                                                                                                                                      |
-| ------ | ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/api/v1/registered-keys`             | Uzskaitīt reģistrētās atslēgas (tikai maskēts prefikss)                                                                                                                                                                                       |
-| POST   | `/api/v1/registered-keys`             | Izsniegt jaunu reģistrētu atslēgu — pamatteksts: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Neapstrādātā atslēga tiek atgriezta **vienreiz**. Kvotas atteikuma gadījumā tiek atgriezts `429`. |
-| GET    | `/api/v1/registered-keys/[id]`        | Iegūt reģistrētās atslēgas metadatus (bez neapstrādātās atslēgas)                                                                                                                                                                             |
-| DELETE | `/api/v1/registered-keys/[id]`        | Atsaukt reģistrētu atslēgu                                                                                                                                                                                                                    |
-| POST   | `/api/v1/registered-keys/[id]/revoke` | Skaidras atsaukšanas galapunkts (tāds pats rezultāts kā DELETE)                                                                                                                                                                               |
+| Metode | Ceļš                                  | Apraksts                                                                                                                                                                                                                    |
+| ------ | ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/v1/registered-keys`             | Reģistrēto atslēgu saraksts (tikai maskēts prefikss)                                                                                                                                                                        |
+| POST   | `/api/v1/registered-keys`             | Izdodiet jaunu reģistrēto atslēgu — pamattekstu: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Atgriež neapstrādāto atslēgu **vienreiz** . Atgriež `429` par kvotas atteikumu. |
+| GET    | `/api/v1/registered-keys/[id]`        | Reģistrētās atslēgas metadatu izgūšana (bez izejmateriāla)                                                                                                                                                                  |
+| DELETE | `/api/v1/registered-keys/[id]`        | Atsaukt reģistrēto atslēgu                                                                                                                                                                                                  |
+| POST   | `/api/v1/registered-keys/[id]/revoke` | Skaidrs atsaukšanas galapunkts (tāds pats efekts kā DELETE)                                                                                                                                                                 |
+| GET    | `/api/v1/providers/[provider]/limits` | Izlasiet pakalpojumu sniedzēja izdošanas ierobežojumus                                                                                                                                                                      |
+| PUT    | `/api/v1/providers/[provider]/limits` | Iestatiet nodrošinātāja izdošanas griestus — pamatteksts: `{maxActiveKeys?, dailyIssueLimit?, hourlyIssueLimit?}`                                                                                                           |
+| GET    | `/api/v1/accounts/[id]/limits`        | Izlasiet konta izdošanas ierobežojumus                                                                                                                                                                                      |
+| PUT    | `/api/v1/accounts/[id]/limits`        | Iestatiet konta izdošanas griestus — tādu pašu pamattekstu kā nodrošinātāja maršrutam                                                                                                                                       |
 
-**Autentifikācija:** pārvaldības sesija/API atslēga (`requireManagementAuth`) — tas pats aizsargs, kas tiek izmantots `/api/keys`: informācijas panelī izveidota sesija, lokālais CLI marķieris vai API atslēga ar `manage`/`admin` tvērumu; tikai secināšanai paredzētās API atslēgas saņem `403`. Skatiet arī `/v1/quotas/check` un `/v1/issues/report`.
+**Auth:** pārvaldība session/API atslēga (`requireManagementAuth`) — tāds pats aizsargs kā `/api/keys`: informācijas paneļa sesija, vietējā CLI marķiera vai API atslēga ar `manage`/`admin` darbības jomu; API atslēgas, kas paredzētas tikai secinājumiem, iegūst `403`. Skatiet arī `/v1/quotas/check` un `/v1/issues/report`.
 
 ---
 

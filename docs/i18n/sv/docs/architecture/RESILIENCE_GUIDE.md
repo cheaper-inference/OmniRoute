@@ -214,6 +214,45 @@ anslutning** (Redigera anslutning → Claude-avsnittet → `lowPriorityMode` / `
 Regressionsskydd: `tests/unit/claude-low-priority-mode.test.ts`,
 `tests/unit/claude-limit-reset.test.ts`, `tests/unit/claude-low-priority-executor.test.ts`.
 
+### Tillämpa bankåterställningar automatiskt
+
+**Omfattning:** Codex och Claude -abonnemangsanslutningar (OAuth).**Välj att delta** : `bankedResetAutoApply` inställningen är avstängd och i `dry-run` -läge som standard (Inställningar → AI → Autotillämpa bankåterställningar).
+
+**Ändamål:** spendera bankåterställningar på egen hand när ett konto träffar en användningsvägg, istället för att vänta på att en operatör ska trycka på "Lös in" på sidan Leverantörsgränser.
+
+| Kredittyp (`creditTypes`) | Vad är inlöst                                         | Där det går                                       |
+| ------------------------- | ----------------------------------------------------- | ------------------------------------------------- |
+| `codexCredits`            | Codex återställ krediter                              | bakgrundsjobb, var 60:e s                         |
+| `claudeCredits`           | Claude -anslag (`GRANT` -krediter)                    | bakgrundsjobb, var 60:e s                         |
+| `claudeSessionReset`      | Claude återställning av veckovis sessionsgräns (ovan) | sökväg genom samma policy som växlingen per konto |
+
+**Genomförande:**
+
+- Rent beslut (en regeluppsättning för båda vägarna): `src/lib/usage/bankedResetPolicy.ts::decideBankedReset()`
+- Bakgrundsjobb: `src/lib/services/bankedResetAutoApply.ts` (startade i `src/instrumentation-node.ts`)
+- Claude request-path gate: `src/lib/usage/claudeSessionResetPolicy.ts`, registrerad genom `setClaudeLimitResetPolicy()` i `open-sse/services/claudeLimitReset.ts`
+- Historik, kepsar och webhook: `src/lib/usage/bankedResetAudit.ts`
+- Historik API: `GET /api/settings/banked-reset-auto/history?limit=50` (hanteringsautentisering)
+
+**Beslutsordning** (den första felaktiga regeln är den registrerade orsaken):
+
+1. Funktion av, kredittyp av eller konto utanför räckvidd (`accountScope` `all` / `selected` plus `connections` -kartan per konto).
+2. Utanför det valfria UTC schemat (`startHourUtc` > `endHourUtc` passerar midnatt).
+3. Caps under de senaste 24 timmarna: `maxPerAccountPerDay` (1), `maxPerDay` (3) och `minSpacingMinutes` (30) mellan två valfria inlösen.
+4. Utlösare: ett murat `session` eller `weekly` fönster (läs från `getQuotaWindowStatus().reachedThreshold`, inte `isAccountQuotaExhausted()`, som bara rapporterar ett konto med varje fönster förbrukat), eller en kredit som löper ut inom `expiringCreditHours` (24) på ett konto som har använt minst `expiringCreditMinUsedPercent` (50).
+5. Naturlig återställningsskydd: hoppa över när det murade 5-timmarsfönstret återställs inom `sessionResetGuardMinutes` (90), eller det murade veckofönstret inom `weeklyResetGuardHours` (12).
+6. Veckogolv: hoppa över en 5-timmars återställning när den återstående veckan är lägre än `weeklyFloorPercent` (10).
+7. `last-resort` läge: hoppa över medan ett annat konto inom scope från samma leverantör har minst `poolHeadroomPercent` (10) kvar i båda fönstren. Utlösande kreditutlösare förbigår detta.
+8. `dry-run` spelar in en rad och löser in ingenting; `last-resort` och `eager` löser in.
+
+Saknade kvotdata låser aldrig upp en inlösen: en okänd återställningstid eller veckovis användning hoppar över.
+
+**Claude session återställning:** med funktionen av, eller `claudeSessionReset` av, bestämmer `autoLimitReset` -växlingen per konto exakt som tidigare. Med båda på, ersätter funktionen växlingarna per konto: ett konto inom scope kan göra anspråk endast när policyn tillåter det, och i `dry-run` läge görs inget anspråk.
+
+**Säkerhet:** jobbet löser in högst en kredit per bock, bestämmer sig innan krediter noteras (ett överhoppat konto listas aldrig), använder idempotensnycklar `auto-reset:<connectionId>:<yyyy-mm-dd>:<n>` och backar ett konto i 1 timme efter en misslyckad notering eller inlösen. Varje inlösen, misslyckande och torrkörningsbeslut skrivs till `audit_log` (`action: "bankedReset.redeem"`, inga tokens eller kredit-ID); kepsarna räknas från dessa rader, så de överlever omstarter. Framgångsrika inlösen aktiverar även `provider.reset_redeemed` webhook.
+
+Regressionsskydd: `tests/unit/banked-reset-policy.test.ts`, `tests/unit/banked-reset-auto-apply.test.ts`, `tests/unit/claude-limit-reset-policy-gate.test.ts`, `tests/unit/banked-reset-history-route.test.ts`.
+
 ### Sessionsaffinitet (#7274)
 
 **Omfattning:** en klientsession (`X-Session-Id` / `x-codex-session-id` / `x-omniroute-session`-header) binds till en anslutning, för **valfri** provider.

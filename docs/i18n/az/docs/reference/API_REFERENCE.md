@@ -946,14 +946,14 @@ CLI `base_url + /responses` ünvanını WebSocket-ə yüksəldir və OmniRoute o
 
 ---
 
-## Kvotalar və Problemlər üzrə Hesabat
+## Kvotalar və Məsələlər Hesabatı
 
-| Metod | Yol                 | Təsvir                                                                                                    |
-| ----- | ------------------- | --------------------------------------------------------------------------------------------------------- |
-| GET   | `/v1/quotas/check`  | Qeydiyyatdan keçmiş açarı təqdim etməzdən əvvəl `provider` + `accountId` üçün kvotanı əvvəlcədən yoxlayır |
-| POST  | `/v1/issues/report` | GitHub-a kvota/açar təqdimetmə xətası barədə məlumat verir (`GITHUB_ISSUES_REPO` + token tələb olunur)    |
+| Metod | Yol                 | Təsvir                                                                                                  |
+| ----- | ------------------- | ------------------------------------------------------------------------------------------------------- |
+| GET   | `/v1/quotas/check`  | Qeydə alınmış açarı verməzdən əvvəl `provider` + `accountId` üçün kvotanı əvvəlcədən təsdiqləyin        |
+| POST  | `/v1/issues/report` | GitHub -yə quota/key buraxılışının uğursuzluğunu bildirin ( `GITHUB_ISSUES_REPO` + nişanı tələb olunur) |
 
-**Autentifikasiya:** Bearer API açarı (`isAuthenticated`).
+**Auth:** `/v1/quotas/check` daşıyıcı API açarını (`isAuthenticated`) alır. `/v1/issues/report` `requireManagementAuth` kimi yalnız idarəetmə üçündür ( `/api/v1/registered-keys`: idarə paneli sessiyası, yerli CLI nişanı və ya `manage`/`admin` əhatə dairəsi olan API açarı; yalnız nəticə çıxaran API açarları `403` əldə edir.
 
 ### Kvota sessiyasının bərpası (istəyə bağlı)
 
@@ -1726,19 +1726,23 @@ OmniRoute hadisələri üçün çıxan vebhuk abunəlikləri (sorğunun tamamlan
 
 ---
 
-## Qeydiyyatdan Keçirilmiş Açarlar (Avtomatik İdarəetmə)
+## Qeydiyyatlı Açarlar (Avtomatik İdarəetmə)
 
-Gündəlik/saatlıq kvotalarla dəstəkləyici provayderə/hesaba qarşı API açarlarının verilməsi və rotasiyası üçün avtomatik açar idarəetməsi altsistemi tərəfindən istifadə olunur.
+Avtomatik açar idarəetmə alt sistemi tərəfindən daily/hourly kvotaları ilə dəstəklənən provider/account qarşı API açarlarını buraxmaq və çevirmək üçün istifadə olunur.
 
-| Metod  | Yol                                   | Təsvir                                                                                                                                                                                                                  |
-| ------ | ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/api/v1/registered-keys`             | Qeydiyyatdan keçirilmiş açarları siyahıla (yalnız maskalanmış prefiks)                                                                                                                                                  |
-| POST   | `/api/v1/registered-keys`             | Yeni qeydiyyatdan keçirilmiş açar ver — gövdə: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Xam açarı **yalnız bir dəfə** qaytarır. Kvota imtinası zamanı `429` qaytarır. |
-| GET    | `/api/v1/registered-keys/[id]`        | Qeydiyyatdan keçirilmiş açarın metadatasını əldə et (xam material yoxdur)                                                                                                                                               |
-| DELETE | `/api/v1/registered-keys/[id]`        | Qeydiyyatdan keçirilmiş açarı ləğv et                                                                                                                                                                                   |
-| POST   | `/api/v1/registered-keys/[id]/revoke` | Açıq ləğvetmə endpoint-i (DELETE ilə eyni təsirə malikdir)                                                                                                                                                              |
+| Metod  | Yol                                   | Təsvir                                                                                                                                                                                                                |
+| ------ | ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/v1/registered-keys`             | Qeydiyyatdan keçmiş açarların siyahısı (yalnız maskalı prefiks)                                                                                                                                                       |
+| POST   | `/api/v1/registered-keys`             | Yeni qeydiyyatdan keçmiş əsas — orqanını buraxın: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Xam açarı qaytarır **bir dəfə** . Kvotadan imtina zamanı `429` qaytarır. |
+| GET    | `/api/v1/registered-keys/[id]`        | Qeydə alınmış açarın metadatasını əldə edin (xammal yoxdur)                                                                                                                                                           |
+| DELETE | `/api/v1/registered-keys/[id]`        | Qeydə alınmış açarı ləğv edin                                                                                                                                                                                         |
+| POST   | `/api/v1/registered-keys/[id]/revoke` | Aydın ləğv son nöqtəsi ( DELETE ilə eyni təsir)                                                                                                                                                                       |
+| GET    | `/api/v1/providers/[provider]/limits` | Provayderin buraxılış qapaqlarını oxuyun                                                                                                                                                                              |
+| PUT    | `/api/v1/providers/[provider]/limits` | Provayderin buraxılış qapaqlarını təyin edin — orqanı: `{maxActiveKeys?, dailyIssueLimit?, hourlyIssueLimit?}`                                                                                                        |
+| GET    | `/api/v1/accounts/[id]/limits`        | Hesabın buraxılış qapaqlarını oxuyun                                                                                                                                                                                  |
+| PUT    | `/api/v1/accounts/[id]/limits`        | Provayder marşrutu ilə eyni orqan — hesabının buraxılış qapaqlarını təyin edin                                                                                                                                        |
 
-**Autentifikasiya:** idarəetmə sessiyası/API açarı (`requireManagementAuth`) — `/api/keys` ilə eyni qoruyucu: idarə paneli sessiyası, lokal CLI tokeni və ya `manage`/`admin` əhatə dairəsinə malik API açarı; yalnız inference üçün olan API açarları `403` alır. Həmçinin `/v1/quotas/check` və `/v1/issues/report` bölmələrinə baxın.
+**Auth:** idarəetmə session/API açarı (`requireManagementAuth`) — `/api/keys` ilə eyni qoruyucudur: idarə paneli sessiyası, yerli CLI nişanı və ya `manage`/`admin` əhatə dairəsi olan API açarı; yalnız nəticə çıxaran API açarları `403` alır. Həmçinin baxın `/v1/quotas/check` və `/v1/issues/report`.
 
 ---
 

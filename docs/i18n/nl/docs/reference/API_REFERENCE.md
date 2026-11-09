@@ -982,14 +982,14 @@ De CLI upgradet `base_url + /responses` naar een WebSocket en OmniRoute zet een 
 
 ---
 
-## Rapportage van quota's en problemen
+## Rapportage van quota en problemen
 
-| Methode | Pad                 | Beschrijving                                                                                                 |
-| ------- | ------------------- | ------------------------------------------------------------------------------------------------------------ |
-| GET     | `/v1/quotas/check`  | Quota vooraf valideren voor een `provider` + `accountId` voordat een geregistreerde sleutel wordt uitgegeven |
-| POST    | `/v1/issues/report` | Een mislukte quota-/sleuteluitgifte rapporteren aan GitHub (vereist `GITHUB_ISSUES_REPO` + token)            |
+| Methode | Pad                 | Beschrijving                                                                                               |
+| ------- | ------------------- | ---------------------------------------------------------------------------------------------------------- |
+| GET     | `/v1/quotas/check`  | Valideer het quotum voor een `provider` + `accountId` vooraf voordat u een geregistreerde sleutel uitgeeft |
+| POST    | `/v1/issues/report` | Rapporteer een quota/key uitgiftefout aan GitHub (vereist `GITHUB_ISSUES_REPO` + token)                    |
 
-**Authenticatie:** Bearer API-sleutel (`isAuthenticated`).
+**Autorisatie:** `/v1/quotas/check` neemt een Bearer API sleutel (`isAuthenticated`). `/v1/issues/report` is alleen voor beheer (`requireManagementAuth`), zoals `/api/v1/registered-keys`: een dashboardsessie, het lokale CLI token of een API sleutel met `manage`/`admin` bereik; API -sleutels met alleen gevolgtrekking krijgen `403`.
 
 ### Herstel van quotasessies (opt-in)
 
@@ -1794,17 +1794,21 @@ Uitgaande webhook-abonnementen voor OmniRoute-gebeurtenissen (voltooide aanvrage
 
 ## Geregistreerde sleutels (automatisch beheer)
 
-Wordt gebruikt door het subsysteem voor automatisch sleutelbeheer om API-sleutels uit te geven en te roteren bij een achterliggende provider/account, met dagelijkse/uurquota.
+Wordt gebruikt door het subsysteem voor automatisch sleutelbeheer om API sleutels uit te geven en te roteren tegen een ondersteunende provider/account, met daily/hourly quota.
 
-| Methode | Pad                                   | Beschrijving                                                                                                                                                                                                                                  |
-| ------- | ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET     | `/api/v1/registered-keys`             | Geregistreerde sleutels weergeven (alleen gemaskeerd voorvoegsel)                                                                                                                                                                             |
-| POST    | `/api/v1/registered-keys`             | Een nieuwe geregistreerde sleutel uitgeven — body: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Retourneert de onbewerkte sleutel **eenmalig**. Retourneert `429` bij weigering vanwege quotum. |
-| GET     | `/api/v1/registered-keys/[id]`        | Metagegevens van een geregistreerde sleutel ophalen (geen onbewerkte gegevens)                                                                                                                                                                |
-| DELETE  | `/api/v1/registered-keys/[id]`        | Een geregistreerde sleutel intrekken                                                                                                                                                                                                          |
-| POST    | `/api/v1/registered-keys/[id]/revoke` | Expliciet eindpunt voor intrekking (hetzelfde effect als DELETE)                                                                                                                                                                              |
+| Methode | Pad                                   | Beschrijving                                                                                                                                                                                                                             |
+| ------- | ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET     | `/api/v1/registered-keys`             | Lijst met geregistreerde sleutels (alleen gemaskeerd voorvoegsel)                                                                                                                                                                        |
+| POST    | `/api/v1/registered-keys`             | Geef een nieuwe geregistreerde sleutel — body uit: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Retourneert de onbewerkte sleutel **eenmaal** . Retourneert `429` bij weigering van quota. |
+| GET     | `/api/v1/registered-keys/[id]`        | Haal de metadata van een geregistreerde sleutel op (geen ruw materiaal)                                                                                                                                                                  |
+| DELETE  | `/api/v1/registered-keys/[id]`        | Een geregistreerde sleutel intrekken                                                                                                                                                                                                     |
+| POST    | `/api/v1/registered-keys/[id]/revoke` | Expliciet intrekkingseindpunt (hetzelfde effect als DELETE)                                                                                                                                                                              |
+| GET     | `/api/v1/providers/[provider]/limits` | Lees de uitgiftelimieten van de aanbieder                                                                                                                                                                                                |
+| PUT     | `/api/v1/providers/[provider]/limits` | Stel de uitgiftelimieten van de aanbieder in — body: `{maxActiveKeys?, dailyIssueLimit?, hourlyIssueLimit?}`                                                                                                                             |
+| GET     | `/api/v1/accounts/[id]/limits`        | Lees de uitgiftelimieten van de rekening                                                                                                                                                                                                 |
+| PUT     | `/api/v1/accounts/[id]/limits`        | Stel de uitgiftelimieten van de rekening — in, dezelfde inhoud als de providerroute                                                                                                                                                      |
 
-**Authenticatie:** beheersessie/API-sleutel (`requireManagementAuth`) — dezelfde beveiliging als `/api/keys`: een dashboardsessie, het lokale CLI-token of een API-sleutel met de scope `manage`/`admin`; API-sleutels die alleen voor inferentie zijn krijgen `403`. Zie ook `/v1/quotas/check` en `/v1/issues/report`.
+**Autorisatie:** beheer session/API sleutel (`requireManagementAuth`) — dezelfde bewaker als `/api/keys`: een dashboardsessie, het lokale CLI token of een API sleutel met `manage`/`admin` -scope; API -sleutels met alleen inferentie krijgen `403`. Zie ook `/v1/quotas/check` en `/v1/issues/report`.
 
 ---
 

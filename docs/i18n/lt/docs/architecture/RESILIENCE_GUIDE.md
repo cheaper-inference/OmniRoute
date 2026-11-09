@@ -186,6 +186,45 @@ turinio biudžeto iš naujo; nepriklausomas aktyvaus srauto skirtasis laikas ir 
 Regresijos apsaugos: `tests/unit/claude-low-priority-mode.test.ts`,
 `tests/unit/claude-limit-reset.test.ts`, `tests/unit/claude-low-priority-executor.test.ts`.
 
+### Automatiškai taikyti banko nustatymų atkūrimą
+
+**Taikymo sritis:** Codex ir Claude prenumeratos (OAuth) jungtys.**Pasirinkti** : `bankedResetAutoApply` nustatymas yra išjungtas ir pagal numatytuosius nustatymus veikia `dry-run` režimu (Nustatymai → AI → Automatiškai taikyti bankinius nustatymus).
+
+**Paskirtis:** išleidžia banko nustatymų atstatymą, kai sąskaita atsitrenkia į naudojimo sieną, užuot laukę, kol operatorius paspaus „Išpirkti“ teikėjo limitų puslapyje.
+
+| Kredito tipas (`creditTypes`) | Kas išpirkta                                                 | Kur bėga                                                                  |
+| ----------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------------------- |
+| `codexCredits`                | Codex atstatyti kreditus                                     | foninis darbas, kas 60 s                                                  |
+| `claudeCredits`               | Claude banko dotacijos (`GRANT` kreditai)                    | foninis darbas, kas 60 s                                                  |
+| `claudeSessionReset`          | Claude savaitės seanso limito nustatymas iš naujo (aukščiau) | užklausos kelias, taikant tą pačią politiką kaip ir paskyros perjungiklis |
+
+**Įgyvendinimas:**
+
+- Grynas sprendimas (viena taisyklė nustatyta abiem keliams): `src/lib/usage/bankedResetPolicy.ts::decideBankedReset()`
+- Fono darbas: `src/lib/services/bankedResetAutoApply.ts` (pradėta `src/instrumentation-node.ts`)
+- Claude užklausos kelio vartai: `src/lib/usage/claudeSessionResetPolicy.ts`, užregistruoti per `setClaudeLimitResetPolicy()` `open-sse/services/claudeLimitReset.ts`
+- Istorija, dangteliai ir „webhook“: `src/lib/usage/bankedResetAudit.ts`
+- Istorija API: `GET /api/settings/banked-reset-auto/history?limit=50` (valdymo autentifikavimas)
+
+**Sprendimo tvarka** (pirmoji nesėkminga taisyklė yra įrašyta priežastis):
+
+1. Funkcija išjungta, kredito tipas išjungtas arba paskyra nepatenka į taikymo sritį (`accountScope` `all` / `selected` ir sąskaitos `connections` žemėlapis).
+2. Už pasirenkamo UTC tvarkaraščio ribų (`startHourUtc` > `endHourUtc` kerta vidurnaktį).
+3. Apribojimai per pastarąsias 24 valandas: `maxPerAccountPerDay` (1), `maxPerDay` (3) ir `minSpacingMinutes` (30) tarp bet kurių dviejų išpirkimų.
+4. Trigeris: uždengtas `session` arba `weekly` langas (skaitykite iš `getQuotaWindowStatus().reachedThreshold`, o ne `isAccountQuotaExhausted()`, kuris praneša tik apie sąskaitą su kiekvienu išleistu langu) arba kreditas, kurio galiojimo laikas baigiasi `expiringCreditHours` (24) paskyroje, kuri naudojo bent `expiringCreditMinUsedPercent` (50).
+5. Natūralaus atstatymo apsauga: praleiskite, kai 5 valandų langas atsistato `sessionResetGuardMinutes` (90) arba sieninis savaitinis langas `weeklyResetGuardHours` (12).
+6. Savaitės minimumas: praleiskite 5 valandų nustatymą iš naujo, kai savaitės likutis yra mažesnis nei `weeklyFloorPercent` (10).
+7. `last-resort` režimas: praleiskite, kol kitoje to paties teikėjo paskyroje abiejuose languose liko bent `poolHeadroomPercent` (10). Kredito galiojimo pabaigos aktyvikliai tai apeina.
+8. `dry-run` įrašo eilutę ir nieko neišperka; `last-resort` ir `eager` išpirkti.
+
+Trūksta kvotos duomenų niekada neatrakina išpirkimo: nežinomas nustatymo iš naujo laikas arba savaitinis naudojimas praleidžiamas.
+
+**Claude seanso nustatymas iš naujo:** išjungus funkciją arba išjungus `claudeSessionReset`, paskyros `autoLimitReset` perjungiklis nusprendžia tiksliai taip, kaip anksčiau. Kai abi įjungtos, ši funkcija pakeičia paskyros perjungiklius: į taikymo sritį patenkanti paskyra gali pareikšti teises tik tada, kai tai leidžia politika, o `dry-run` režimu paraiška nepateikiama.
+
+**Sauga:** darbas išperka ne daugiau kaip vieną kreditą už vieną varnelę, nusprendžia prieš įtraukdamas kreditus (praleista sąskaita niekada neįtraukiama į sąrašą), naudoja idempotencijos raktus `auto-reset:<connectionId>:<yyyy-mm-dd>:<n>` ir grąžina sąskaitą 1 valandai po nesėkmingo įtraukimo į sąrašą arba išpirkimo. Kiekvienas išpirkimo, nesėkmės ir sauso paleidimo sprendimas yra parašytas `audit_log` (`action: "bankedReset.redeem"`, jokių žetonų ar kredito ID); kepurės skaičiuojamos iš tų eilučių, todėl jos išgyvena iš naujo. Sėkmingas išpirkimas taip pat suaktyvina `provider.reset_redeemed` žiniatinklio kabliuką.
+
+Regreso apsauga: `tests/unit/banked-reset-policy.test.ts`, `tests/unit/banked-reset-auto-apply.test.ts`, `tests/unit/claude-limit-reset-policy-gate.test.ts`, `tests/unit/banked-reset-history-route.test.ts`.
+
 ### Seanso susiejimas (#7274)
 
 **Taikymo sritis:** viena kliento sesija (`X-Session-Id` / `x-codex-session-id` / `x-omniroute-session` antraštė) susiejama su vienu ryšiu, nepriklausomai nuo teikėjo.

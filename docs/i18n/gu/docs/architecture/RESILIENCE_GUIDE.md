@@ -228,6 +228,45 @@ limit", GLM `并发数过高`) દર્શાવવામાં આવે છ�
 રીગ્રેશન ગાર્ડ્સ: `tests/unit/claude-low-priority-mode.test.ts`,
 `tests/unit/claude-limit-reset.test.ts`, `tests/unit/claude-low-priority-executor.test.ts`.
 
+### બેંક્ડ રીસેટ્સ સ્વતઃ લાગુ કરો
+
+**અવકાશ:** Codex અને Claude સબ્સ્ક્રિપ્શન (OAuth) જોડાણો.**પસંદ કરો** : `bankedResetAutoApply` સેટિંગ બંધ છે અને ડિફૉલ્ટ રૂપે `dry-run` મોડમાં છે (સેટિંગ્સ → AI → ઑટો-એપ્લાય બેંક્ડ રીસેટ્સ).
+
+**હેતુ:** પ્રદાતાની મર્યાદાઓ પૃષ્ઠ પર "રિડીમ" દબાવવા માટે ઓપરેટરની રાહ જોવાને બદલે, જ્યારે એકાઉન્ટ વપરાશની દિવાલ સાથે અથડાતું હોય ત્યારે તેમના પોતાના પર બેંક રીસેટનો ખર્ચ કરો.
+
+| ક્રેડિટ પ્રકાર (`creditTypes`) | શું રિડીમ કરવામાં આવે છે                  | જ્યાં તે ચાલે છે                                 |
+| ------------------------------ | ----------------------------------------- | ------------------------------------------------ |
+| `codexCredits`                 | Codex રીસેટ ક્રેડિટ્સ                     | બેકગ્રાઉન્ડ જોબ, દર 60 સે                        |
+| `claudeCredits`                | Claude બેંક્ડ અનુદાન (`GRANT` ક્રેડિટ્સ)  | બેકગ્રાઉન્ડ જોબ, દર 60 સે                        |
+| `claudeSessionReset`           | Claude સાપ્તાહિક સત્ર-મર્યાદા રીસેટ (ઉપર) | પ્રતિ-એકાઉન્ટ ટૉગલ જેવી જ નીતિ દ્વારા વિનંતી પાથ |
+
+**અમલીકરણ:**
+
+- શુદ્ધ નિર્ણય (બંને પાથ માટે એક નિયમ સેટ): `src/lib/usage/bankedResetPolicy.ts::decideBankedReset()`
+- પૃષ્ઠભૂમિ નોકરી: `src/lib/services/bankedResetAutoApply.ts` ( `src/instrumentation-node.ts` માં શરૂ)
+- Claude વિનંતી-પાથ ગેટ: `src/lib/usage/claudeSessionResetPolicy.ts`, `open-sse/services/claudeLimitReset.ts` માં `setClaudeLimitResetPolicy()` દ્વારા નોંધાયેલ
+- ઇતિહાસ, કેપ્સ અને વેબહૂક: `src/lib/usage/bankedResetAudit.ts`
+- ઇતિહાસ API: `GET /api/settings/banked-reset-auto/history?limit=50` (મેનેજમેન્ટ ઓથ)
+
+**નિર્ણય ઓર્ડર** (પ્રથમ નિષ્ફળ નિયમ રેકોર્ડ કરેલ કારણ છે):
+
+1. સુવિધા બંધ, ક્રેડિટ પ્રકાર બંધ અથવા ખાતાની બહાર (`accountScope` `all` / `selected` વત્તા એકાઉન્ટ દીઠ `connections` નકશો).
+2. વૈકલ્પિક UTC શેડ્યૂલની બહાર (`startHourUtc` > `endHourUtc` મધ્યરાત્રિને પાર કરે છે).
+3. છેલ્લા 24 કલાકમાં કેપ્સ: `maxPerAccountPerDay` (1), `maxPerDay` (3), અને `minSpacingMinutes` (30) કોઈપણ બે રિડેમ્પશન વચ્ચે.
+4. ટ્રિગર: દિવાલવાળી `session` અથવા `weekly` વિન્ડો ( `getQuotaWindowStatus().reachedThreshold` માંથી વાંચો, `isAccountQuotaExhausted()` નહીં, જે દરેક વિન્ડો સાથે ખર્ચવામાં આવેલા એકાઉન્ટની જાણ કરે છે), અથવા ઓછામાં ઓછા `expiringCreditMinUsedPercent` (50) નો ઉપયોગ કર્યો હોય તેવા ખાતા પર `expiringCreditHours` (24) ની અંદર સમાપ્ત થતી ક્રેડિટ.
+5. નેચરલ-રીસેટ ગાર્ડ: જ્યારે દિવાલવાળી 5-કલાકની વિન્ડો `sessionResetGuardMinutes` (90) ની અંદર ફરીથી સેટ થાય ત્યારે છોડો અથવા `weeklyResetGuardHours` (12) ની અંદર દિવાલવાળી સાપ્તાહિક વિન્ડો.
+6. સાપ્તાહિક માળ: જ્યારે સાપ્તાહિક બાકી રહેલું `weeklyFloorPercent` (10) ની નીચે હોય ત્યારે 5-કલાકનું રીસેટ છોડો.
+7. `last-resort` મોડ: છોડો જ્યારે સમાન પ્રદાતાના અન્ય ઇન-સ્કોપ એકાઉન્ટમાં બંને વિન્ડોમાં ઓછામાં ઓછું `poolHeadroomPercent` (10) બાકી હોય. એક્સપાયરિંગ-ક્રેડિટ ટ્રિગર્સ આને બાયપાસ કરે છે.
+8. `dry-run` એક પંક્તિ રેકોર્ડ કરે છે અને કંઈપણ રિડીમ કરતું નથી; `last-resort` અને `eager` રિડીમ.
+
+ખૂટતો ક્વોટા ડેટા ક્યારેય રિડેમ્પશનને અનલૉક કરતું નથી: અજ્ઞાત રીસેટ સમય અથવા સાપ્તાહિક ઉપયોગ છોડે છે.
+
+**Claude સત્ર રીસેટ:** સુવિધા બંધ અથવા `claudeSessionReset` બંધ સાથે, એકાઉન્ટ દીઠ `autoLimitReset` ટૉગલ પહેલાની જેમ બરાબર નક્કી કરે છે. બંને ચાલુ સાથે, સુવિધા એકાઉન્ટ દીઠ ટૉગલ્સને બદલે છે: ઇન-સ્કોપ એકાઉન્ટ માત્ર ત્યારે જ દાવો કરી શકે છે જ્યારે નીતિ તેને મંજૂરી આપે છે, અને `dry-run` મોડમાં કોઈ દાવો કરવામાં આવતો નથી.
+
+**સલામતી:** જોબ ટિક દીઠ વધુમાં વધુ એક ક્રેડિટ રિડીમ કરે છે, લિસ્ટિંગ ક્રેડિટ પહેલાં નક્કી કરે છે (છોડી ગયેલું ખાતું ક્યારેય સૂચિબદ્ધ થતું નથી), આઇડમ્પોટન્સી કીઝ `auto-reset:<connectionId>:<yyyy-mm-dd>:<n>` ઉપયોગ કરે છે, અને નિષ્ફળ લિસ્ટિંગ અથવા રિડેમ્પશન પછી 1 કલાક માટે એકાઉન્ટ બંધ કરે છે. દરેક રિડેમ્પશન, નિષ્ફળતા અને ડ્રાય-રન નિર્ણય `audit_log` (`action: "bankedReset.redeem"`, કોઈ ટોકન્સ અથવા ક્રેડિટ ids નથી); તે પંક્તિઓમાંથી કેપ્સની ગણતરી કરવામાં આવે છે, તેથી તે પુનઃપ્રારંભ થતાં બચી જાય છે. સફળ રીડેમ્પશન `provider.reset_redeemed` વેબહૂકને પણ ફાયર કરે છે.
+
+રીગ્રેશન ગાર્ડ્સ: `tests/unit/banked-reset-policy.test.ts`, `tests/unit/banked-reset-auto-apply.test.ts`, `tests/unit/claude-limit-reset-policy-gate.test.ts`, `tests/unit/banked-reset-history-route.test.ts`.
+
 ### સેશન એફિનિટી (#7274)
 
 **સ્કોપ:** કોઈપણ પ્રોવાઇડર માટે, એક ક્લાયન્ટ સેશન (`X-Session-Id` / `x-codex-session-id` /

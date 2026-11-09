@@ -4,52 +4,52 @@
 
 ---
 
-> **Zdroj pravdy:** `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`, `src/app/api/webhooks/`
-> **Posledná aktualizácia:** 2026-06-28 — v3.8.40
+> **Zdroj pravdy:** `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`, `src/app/api/webhooks/`**Posledná aktualizácia:** 2026-06-28 — v3.8.40
 
-OmniRoute môže pri udalostiach platformy odosielať webhooky HTTP. Použite ich na integráciu so službami Slack, PagerDuty, Datadog, internými službami upozornení alebo ľubovoľným prijímačom HTTP.
+OmniRoute môže spúšťať webhooky HTTP na udalostiach platformy. Použite ich na integráciu so Slack, PagerDuty, Datadog, internými výstražnými službami alebo akýmkoľvek prijímačom HTTP.
 
-Dispečer podpisuje každé doručenie pomocou HMAC-SHA256, opakuje pokusy pri dočasných zlyhaniach, sleduje stav doručovania jednotlivých webhookov a automaticky deaktivuje koncové body, ktoré opakovane zlyhávajú.
+Dispečer podpíše každú dodávku pomocou HMAC-SHA256, zopakuje prechodné zlyhania, sleduje stav doručenia podľa webhooku a automaticky deaktivuje koncové body, ktoré stále zlyhávajú.
 
 ## Podporované udalosti
 
-Typ `WebhookEvent` (`src/lib/webhooks/eventDescriptions.ts`, používaný súborom `src/lib/webhookDispatcher.ts`) v súčasnosti modeluje presne štyri udalosti:
+Typ `WebhookEvent` (`src/lib/webhooks/eventDescriptions.ts`, spotrebovaný `src/lib/webhookDispatcher.ts`) v súčasnosti modeluje sedem udalostí:
 
-| Udalosť             | Spustí sa, keď                                                       |
-| ------------------- | -------------------------------------------------------------------- |
-| `request.completed` | Proxy požiadavka sa úspešne dokončí                                  |
-| `request.failed`    | Proxy požiadavka zlyhá po všetkých opakovaniach/náhradných postupoch |
-| `quota.exceeded`    | Kľúč API prekročí prah rozpočtu/kvóty                                |
-| `test.ping`         | Syntetická udalosť používaná testovacím koncovým bodom               |
+| Udalosť                   | Požiare, keď                                                                                             |
+| ------------------------- | -------------------------------------------------------------------------------------------------------- |
+| `request.completed`       | Žiadosť cez proxy sa úspešne dokončí                                                                     |
+| `request.failed`          | Žiadosť cez proxy zlyhá po všetkých retries/fallback                                                     |
+| `quota.exceeded`          | Kľúč API prekračuje prah budget/quota                                                                    |
+| `proxy.set_aside`         | Po opakovaných odmietnutiach je člen skupiny proxy vyčlenený (iba prechod)                               |
+| `proxy.pool.exhausted`    | Každý člen rozsahu proxy poolu je vyčlenený                                                              |
+| `provider.reset_redeemed` | Automaticky aplikované bankové resety využili resetovaný kredit alebo resetovali týždennú reláciu Claude |
+| `test.ping`               | Syntetická udalosť používaná koncovým bodom testu                                                        |
 
-Odbery prijímajú literál `"*"` na prijímanie každej udalosti. Neznáme názvy udalostí v `events` sa počas odosielania ignorujú.
+Predplatné akceptuje doslovné `"*"`, aby ste dostali každú udalosť. Neznáme názvy udalostí v `events` sú v čase odoslania ignorované.
 
-> Poznámka: API dispečera je zapojené, ale produkčné miesta volania pre niektoré
-> udalosti iné ako `test.ping` sa ešte stále dopĺňajú. Pomocou `grep dispatchEvent`
-> skontrolujte, ktoré cesty vo vašom vydaní aktuálne volajú dispečer.
+> Poznámka: Dispečer API je pripojený, ale miesta volania produkcie pre niektoré udalosti, ktoré nie sú `test.ping`, stále pristávajú. Skontrolujte `grep dispatchEvent`, aby ste videli, ktoré cesty momentálne vyvolávajú dispečera vo vašom vydaní.
 
 ## Architektúra
 
 ```
-Volajúci (obslužná rutina, služba, monitor)
+Caller (handler, service, monitor)
   dispatchEvent(event, data)            [src/lib/webhookDispatcher.ts]
     -> getEnabledWebhooks()             [src/lib/db/webhooks.ts]
-    -> filtrovanie podľa webhook.events
-    -> pre každú zhodu (paralelne):
+    -> filter by webhook.events
+    -> for each match (in parallel):
        deliverWebhook(url, payload, secret)
-         zostavenie dát { event, timestamp, data }
-         podpísanie tela pomocou HMAC-SHA256 (ak je prítomný secret)
-         POST s časovým limitom 10 s
-         až 3 opakované pokusy pri chybe 5xx alebo chybe siete
+         build payload { event, timestamp, data }
+         sign body with HMAC-SHA256 (if secret present)
+         POST with 10s timeout
+         retry up to 3 times on 5xx / network error
        recordWebhookDelivery(id, status, success)
     -> disableWebhooksWithHighFailures(10)
 ```
 
-Odosielanie je pre volajúceho typu „spusti a zabudni“: `Promise.allSettled` potlačí chyby jednotlivých webhookov, takže jeden nefunkčný prijímač nemôže blokovať ostatné.
+Odoslanie je pre volajúceho prvoradé: `Promise.allSettled` prehltne chyby na webhook, takže jeden zlý prijímač nemôže blokovať ostatné.
 
-## Podpisovanie HMAC
+## Podpis HMAC
 
-Ak má webhook hodnotu `secret`, OmniRoute podpíše telo JSON a odošle:
+Keď má webhook `secret`, OmniRoute podpíše telo JSON a odošle:
 
 ```
 Content-Type: application/json
@@ -59,13 +59,11 @@ X-Webhook-Timestamp: <ISO-8601>
 X-Webhook-Signature: sha256=<hex HMAC-SHA256(secret, body)>
 ```
 
-> Názvy hlavičiek používajú predponu `X-Webhook-*` (nie `X-OmniRoute-*`). Hodnota
-> podpisu je `sha256=<hex>` — overujte celú hodnotu vrátane predpony.
+> Názvy hlavičiek používajú predponu `X-Webhook-*` (nie `X-OmniRoute-*`). Hodnota podpisu je `sha256=<hex>` — overte celú predponu.
 
-Ak sa `createWebhook` zavolá bez tajného kľúča, modul DB ho vygeneruje
-(`whsec_<48 hex>`), takže všetky webhooky sú predvolene podpísané.
+Ak sa volá `createWebhook` bez tajomstva, modul DB ho vygeneruje (`whsec_<48 hex>`), takže všetky webhooky sú štandardne podpísané.
 
-### Overenie na strane prijímača
+### Overenie na prijímači
 
 ```typescript
 import { createHmac, timingSafeEqual } from "node:crypto";
@@ -78,67 +76,57 @@ function verify(rawBody: string, signature: string, secret: string) {
 }
 ```
 
-Overenie vždy vykonávajte voči **surovému** telu požiadavky, ešte pred akýmkoľvek spracovaním JSON.
+Vždy overte oproti **surové** telo žiadosti pred akoukoľvek analýzou JSON.
 
-## Zásady opakovania a zlyhania
+## Zásady opätovného pokusu a zlyhania
 
 `deliverWebhook(url, payload, secret, maxRetries = 3)`:
 
-- Časový limit 10 sekúnd na každý pokus (`AbortController`).
-- HTTP 2xx sa považuje za úspech.
-- HTTP 3xx/4xx sa považuje za konečný stav bez opakovania — zaznamená sa ako doručený
-  s hodnotou `success = res.ok`.
-- Pri HTTP 5xx a sieťových chybách sa pokus zopakuje s exponenciálnym oneskorením:
-  `2^attempt * 1000 ms` (1 s, 2 s, 4 s).
-- Po `maxRetries` sa doručenie zaznamená ako neúspešné.
-- Každé doručenie aktualizuje `last_triggered_at`, `last_status` a buď vynuluje,
-  alebo zvýši `failure_count`.
-- Dispečer po každom hromadnom rozoslaní zavolá `disableWebhooksWithHighFailures(10)`,
-  takže každý webhook s `failure_count >= 10` sa automaticky deaktivuje.
+- 10-sekundový časový limit na pokus (`AbortController`).
+- HTTP 2xx sa počíta ako úspech.
+- HTTP 3xx/4xx sa počíta ako neopakovateľný konečný stav — zaznamenaný ako doručený so `success = res.ok`.
+- HTTP 5xx a sieťové chyby sa opakujú s exponenciálnym stiahnutím: `2^attempt * 1000 ms` (1s, 2s, 4s).
+- Po `maxRetries` sa dodávka zaznamená ako neúspešná.
+- Každá dodávka aktualizuje `last_triggered_at`, `last_status` a buď resetuje alebo zvýši `failure_count`.
+- Dispečer volá `disableWebhooksWithHighFailures(10)` po každom rozvetvení, takže každý webhook so `failure_count >= 10` je automaticky zakázaný.
 
 ## Databáza
 
 Tabuľka `webhooks` (migrácia `011_webhooks.sql`):
 
-| Stĺpec              | Typ     | Poznámky                                                     |
-| ------------------- | ------- | ------------------------------------------------------------ |
-| `id`                | TEXT PK | UUID                                                         |
-| `url`               | TEXT    | Cieľová URL                                                  |
-| `events`            | TEXT    | Pole JSON; predvolená hodnota `["*"]`                        |
-| `secret`            | TEXT    | Tajný kľúč HMAC (automaticky vygenerovaný, ak nie je zadaný) |
-| `enabled`           | INT     | 0/1; predvolená hodnota je 1                                 |
-| `description`       | TEXT    | Voliteľný zrozumiteľný názov                                 |
-| `created_at`        | TEXT    | `datetime('now')`                                            |
-| `last_triggered_at` | TEXT    | Aktualizuje sa pri každom pokuse o doručenie                 |
-| `last_status`       | INT     | Stav HTTP posledného pokusu (0 = sieť)                       |
-| `failure_count`     | INT     | Pri úspechu sa vynuluje, pri zlyhaní sa zvýši o 1            |
+| Stĺpec              | Typ     | Poznámky                                                  |
+| ------------------- | ------- | --------------------------------------------------------- |
+| `id`                | TEXT PK | UUID                                                      |
+| `url`               | TEXT    | Destinácia URL                                            |
+| `events`            | TEXT    | pole JSON ; predvolené `["*"]`                            |
+| `secret`            | TEXT    | Tajomstvo HMAC (automaticky generované, ak nie je zadané) |
+| `enabled`           | INT     | 0/1; predvolene je 1                                      |
+| `description`       | TEXT    | Voliteľné označenie človeka                               |
+| `created_at`        | TEXT    | `datetime('now')`                                         |
+| `last_triggered_at` | TEXT    | Aktualizované pri každom pokuse o doručenie               |
+| `last_status`       | INT     | Stav HTTP posledného pokusu (0 sieť = )                   |
+| `failure_count`     | INT     | Resetuje sa na 0 pri úspechu, + 1 pri neúspechu           |
 
-História doručení sa okrem súhrnných počítadiel v riadku tabuľky `webhooks`
-ukladá do vyhradenej tabuľky `webhook_deliveries`
-(migrácia `069_webhook_deliveries.sql`, pri každom pokuse sa zapisuje prostredníctvom
-`src/lib/db/webhookDeliveries.ts::insertDelivery`). Metadáta typu (Slack / Discord /
-Telegram / vlastné transformátory dát) boli pridané migráciou `070_webhooks_kind_metadata.sql`.
+História doručenia sa uchováva vo vyhradenej tabuľke `webhook_deliveries` (migrácia `069_webhook_deliveries.sql`, zapísaná cez `src/lib/db/webhookDeliveries.ts::insertDelivery` pri každom pokuse), okrem súhrnných počítadiel v riadku `webhooks`. Druhové metadáta (Slack / Discord / Telegram / vlastné transformátory užitočného zaťaženia) pridal `070_webhooks_kind_metadata.sql`.
 
 ## REST API
 
-Všetky koncové body vyžadujú overenie pre správu (`requireManagementAuth`).
+Všetky koncové body vyžadujú autorizáciu správy (`requireManagementAuth`).
 
 | Koncový bod                     | Metóda | Popis                                        |
 | ------------------------------- | ------ | -------------------------------------------- |
-| `/api/webhooks`                 | GET    | Zoznam webhookov (tajné kľúče sú maskované)  |
-| `/api/webhooks`                 | POST   | Vytvorenie webhooku                          |
-| `/api/webhooks/[id]`            | GET    | Podrobnosti webhooku (úplný tajný kľúč)      |
-| `/api/webhooks/[id]`            | PUT    | Aktualizácia polí                            |
-| `/api/webhooks/[id]`            | DELETE | Odstránenie                                  |
-| `/api/webhooks/[id]/test`       | POST   | Odoslanie `test.ping` (bez opakovaní)        |
+| `/api/webhooks`                 | GET    | Zoznam webhookov (skryté tajomstvá)          |
+| `/api/webhooks`                 | POST   | Vytvorte webhook                             |
+| `/api/webhooks/[id]`            | GET    | Podrobnosti webhooku (úplné tajomstvo)       |
+| `/api/webhooks/[id]`            | PUT    | Aktualizujte polia                           |
+| `/api/webhooks/[id]`            | DELETE | Odstrániť                                    |
+| `/api/webhooks/[id]/test`       | POST   | Spustite `test.ping` (žiadne pokusy)         |
 | `/api/webhooks/[id]/deliveries` | GET    | Nedávne pokusy o doručenie pre jeden webhook |
-| `/api/webhooks/validate-url`    | POST   | Predbežné overenie URL (ochrana proti SSRF)  |
+| `/api/webhooks/validate-url`    | POST   | Predletová validácia URL (ochrana SSRF )     |
 
-`GET /api/webhooks` maskuje tajný kľúč vo formáte `<prvých 10 znakov>...`, aby sa zabránilo
-jeho úniku na stránkach so zoznamom. Keď tajný kľúč skutočne potrebujete, použite
-požiadavku GET na `[id]`.
+`GET /api/webhooks` maskuje tajomstvo `<first 10 chars>...`, aby sa zabránilo úniku na stránkach so zoznamom. Použite `[id]` GET keď skutočne potrebujete tajomstvo.
 
-### Vytvorenie webhooku
+### Vytvorte webhook
 
 ```bash
 curl -X POST http://localhost:20128/api/webhooks \
@@ -152,33 +140,29 @@ curl -X POST http://localhost:20128/api/webhooks \
   }'
 ```
 
-Ak je `secret` vynechaný, server vygeneruje tajný kľúč `whsec_<hex>` a vráti
-ho v odpovedi.
+Ak sa vynechá `secret`, server vygeneruje tajný kľúč `whsec_<hex>` a vráti ho v odpovedi.
 
-### Testovanie webhooku
+### Testovací webhook
 
 ```bash
 curl -X POST http://localhost:20128/api/webhooks/<id>/test \
   -H "Cookie: auth_token=..."
 ```
 
-Vráti `{ delivered, status, error }`. Nevykonávajú sa žiadne opakované pokusy — je to užitočné
-na rýchle overenie, či príjemca akceptuje dáta a podpis.
+Vráti `{ delivered, status, error }`. Nepokúšajú sa žiadne pokusy. — je užitočné na rýchle overenie, či prijímač akceptuje užitočné zaťaženie a podpis.
 
-## Ovládací panel
+## Dashboard
 
-Stránka ovládacieho panela na adrese `/dashboard/webhooks` (pozri
-`src/app/(dashboard)/dashboard/webhooks/page.tsx`) poskytuje:
+Stránka dashboard na `/dashboard/webhooks` (pozri `src/app/(dashboard)/dashboard/webhooks/page.tsx`) poskytuje:
 
-- Vytváranie a úpravu webhookov s výberom udalostí
-- Indikátor stavu (aktívny / neaktívny / chybový) založený na `enabled`,
-  `failure_count` a `last_status`
-- Testovacie doručenie jedným kliknutím
-- Manuálne zapnutie/vypnutie
+- Webhooky Create/edit s výberom udalostí
+- Indikátor stavu (aktívny / neaktívny / chybný) na základe `enabled`, `failure_count` a `last_status`
+- Doručenie testu jedným kliknutím
+- Manuálne prepínanie enable/disable
 
-## Príklady dátovej časti
+## Príklady užitočného zaťaženia
 
-### request.completed
+### žiadosť.vybavená
 
 ```json
 {
@@ -204,39 +188,25 @@ Stránka ovládacieho panela na adrese `/dashboard/webhooks` (pozri
   "event": "test.ping",
   "timestamp": "2026-05-13T20:32:00.000Z",
   "data": {
-    "message": "Testovacie doručenie webhooku zo služby OmniRoute",
+    "message": "Test webhook delivery from OmniRoute",
     "webhookId": "<uuid>"
   }
 }
 ```
 
-Štruktúry polí pre udalosti iné než `test.ping` sú definované miestami volania,
-ktoré ich vysielajú; objekt `data` považujte za dopredne kompatibilný (polia
-pridávajte, nespoliehajte sa na ich neprítomnosť).
+Tvary polí pre udalosti, ktoré nie sú `test.ping` sú definované miestami volania, ktoré ich vysielajú; zaobchádzať s objektom `data` ako s dopredne kompatibilným (pridajte polia, nezávisia od neprítomnosti).
 
-## Osvedčené postupy
+## osvedčené postupy
 
-- **Overujte podpis pri každom doručení** voči nespracovanému telu požiadavky —
-  zabráni sa tým podvrhnutým požiadavkám POST od kohokoľvek, kto uhádne URL
-  vášho webhooku.
-- **Odpovedzte stavom 2xx približne do 5 sekúnd** — časový limit dispečera je
-  10 s. Pomalí príjemcovia vyčerpajú opakované pokusy a zvýšia
-  `failure_count`.
-- **Zaistite idempotentnosť obslužných funkcií** — opakované pokusy a sémantika
-  doručenia aspoň raz znamenajú, že sa môžu vyskytnúť duplikáty.
-- **Prihlasujte sa len na nevyhnutné udalosti** — uveďte iba udalosti, ktoré
-  skutočne spracúvate; `"*"` zvýši náklady príjemcov, ktorých nemáte pod
-  kontrolou.
-- **Sledujte `failure_count`** — koncové body sa automaticky vypnú po 10 po sebe
-  idúcich zlyhaniach; po oprave príjemcu ich znova aktivujte zavolaním
-  `PUT /api/webhooks/[id]` s `enabled: true`.
-- **Pravidelne meňte tajné kľúče** — pomocou `PUT` nastavte nový `secret`,
-  nasaďte novú hodnotu na strane príjemcu a overte ju prostredníctvom
-  testovacieho koncového bodu.
+- **Overte podpis na každej zásielke** proti surovému telu — bráni falošnému POSTs každému, kto uhádne váš webhook URL.
+- **Odpovedzte 2xx do 5 sekúnd ~** — dispečer vyprší o 10 s. Pomalé prijímače zjedia pokusy a nafúknu `failure_count`.
+- **Urobte manipulátorov idempotentnými** Opakované pokusy — a sémantika doručenia aspoň raz znamenajú, že sú možné duplikáty.
+- **Odoberajte minimálne** — uvádza iba udalosti, ktoré skutočne konzumujete; `"*"` zvýši náklady na prijímače, ktoré neovládate.
+- **Sledujte `failure_count`** Koncové body — sa automaticky deaktivujú pri 10 po sebe nasledujúcich zlyhaniach; resetujte volaním `PUT /api/webhooks/[id]` so `enabled: true` po upevnení prijímača.
+- **Pravidelne otáčajte tajomstvá** — `PUT` nové `secret`, nasaďte novú hodnotu do prijímača a potvrďte prostredníctvom testovacieho koncového bodu.
 
 ## Pozri tiež
 
-- [API_REFERENCE.md](../reference/API_REFERENCE.md) — úplný rozsah API na správu
-- [RESILIENCE_GUIDE.md](../architecture/RESILIENCE_GUIDE.md) — sémantika ističa / čakacej
-  lehoty pri zlyhaniach poskytovateľa, ktoré sa zobrazujú prostredníctvom `request.failed`
+- [API_REFERENCE.md](../reference/API_REFERENCE.md) — plná správa API povrch
+- [RESILIENCE_GUIDE.md](../architecture/RESILIENCE_GUIDE.md) Sémantika ističa/chladenia — za zlyhaniami poskytovateľa sa objavila prostredníctvom `request.failed`
 - Zdroj: `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`

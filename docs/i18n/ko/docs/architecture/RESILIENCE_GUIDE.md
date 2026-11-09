@@ -215,6 +215,45 @@ limit", GLM `并发数过高`)가 포함된 `429`는 계정이 정상 상태이�
 회귀 방지 테스트: `tests/unit/claude-low-priority-mode.test.ts`,
 `tests/unit/claude-limit-reset.test.ts`, `tests/unit/claude-low-priority-executor.test.ts`.
 
+### 은행 재설정 자동 적용
+
+**범위:** Codex 및 Claude 구독(OAuth) 연결.**선택** : `bankedResetAutoApply` 설정은 꺼져 있고 기본적으로 `dry-run` 모드입니다(설정 → AI → 자동 적용 뱅크 재설정).
+
+**목적:** 운영자가 공급자 한도 페이지에서 "사용"을 누를 때까지 기다리지 않고 계정이 사용 한계에 도달할 때 자체적으로 은행 재설정을 소비합니다.
+
+| 신용 유형(`creditTypes`) | 무엇이 구속되었는가                | 실행되는 곳                                |
+| ------------------------ | ---------------------------------- | ------------------------------------------ |
+| `codexCredits`           | Codex 재설정 크레딧                | 백그라운드 작업, 60초마다                  |
+| `claudeCredits`          | Claude 은행 보조금(`GRANT` 크레딧) | 백그라운드 작업, 60초마다                  |
+| `claudeSessionReset`     | Claude 주간 세션 제한 재설정(위)   | 계정별 토글과 동일한 정책을 통해 요청 경로 |
+
+**구현:**
+
+- 순수 결정(두 경로 모두에 대해 하나의 규칙 세트): `src/lib/usage/bankedResetPolicy.ts::decideBankedReset()`
+- 백그라운드 작업: `src/lib/services/bankedResetAutoApply.ts` ( `src/instrumentation-node.ts` 에서 시작됨)
+- Claude 요청 경로 게이트: `src/lib/usage/claudeSessionResetPolicy.ts`, `open-sse/services/claudeLimitReset.ts` 에서 `setClaudeLimitResetPolicy()` 통해 등록됨
+- 역사, 캡, 웹훅: `src/lib/usage/bankedResetAudit.ts`
+- 연혁 API: `GET /api/settings/banked-reset-auto/history?limit=50` (관리인증)
+
+**결정 순서** (첫 번째 실패한 규칙은 기록된 이유입니다):
+
+1. 기능 해제, 신용 유형 해제 또는 범위를 벗어난 계정(`accountScope` `all` / `selected` 및 계정별 `connections` 맵)
+2. 선택적 UTC 일정 외부(`startHourUtc` > `endHourUtc` 자정을 넘음).
+3. 지난 24시간 동안의 한도: 두 상환 사이의 `maxPerAccountPerDay` (1), `maxPerDay` (3) 및 `minSpacingMinutes` (30).
+4. 트리거: 벽으로 둘러싸인 `session` 또는 `weekly` 창( `isAccountQuotaExhausted()` 아닌 `getQuotaWindowStatus().reachedThreshold` 에서 읽음) 또는 최소 `expiringCreditMinUsedPercent` (50)를 사용한 계정의 `expiringCreditHours` (24) 내에서 만료되는 크레딧.
+5. 자연 재설정 가드: `sessionResetGuardMinutes` (90) 내에서 벽으로 둘러싸인 5시간 창이 재설정되거나 `weeklyResetGuardHours` (12) 내에서 벽으로 둘러싸인 주간 창이 재설정되면 건너뜁니다.
+6. 주간 하한: 주간 남은 금액이 `weeklyFloorPercent` (10) 미만인 경우 5시간 재설정을 건너뜁니다.
+7. `last-resort` 모드: 동일한 공급자의 다른 범위 내 계정에 두 창 모두에 최소 `poolHeadroomPercent` (10)가 남아 있는 동안 건너뜁니다. 만료되는 크레딧 트리거는 이를 우회합니다.
+8. `dry-run` 행을 기록하고 아무것도 상환하지 않습니다. `last-resort` 및 `eager` 사용됩니다.
+
+할당량 데이터가 누락되어도 상환이 잠금 해제되지 않습니다. 재설정 시간을 알 수 없거나 주간 사용량이 건너뛰기 때문입니다.
+
+**Claude 세션 재설정:** 기능을 끄거나 `claudeSessionReset` 끄면 계정별 `autoLimitReset` 토글이 이전과 똑같이 결정됩니다. 두 가지 기능을 모두 활성화하면 이 기능은 계정별 토글을 대체합니다. 범위 내 계정은 정책에서 허용하는 경우에만 청구할 수 있으며 `dry-run` 모드에서는 청구가 이루어지지 않습니다.
+
+**안전:** 작업은 틱당 최대 1개의 크레딧을 상환하고, 크레딧을 나열하기 전에 결정하고(건너뛴 계정은 나열되지 않음), 멱등성 키 `auto-reset:<connectionId>:<yyyy-mm-dd>:<n>` 사용하고, 나열 또는 상환 실패 후 1시간 동안 계정을 백업합니다. 모든 상환, 실패 및 시험 실행 결정은 `audit_log` (`action: "bankedReset.redeem"`, 토큰 또는 신용 ID 없음)에 기록됩니다. 한도는 해당 행에서 계산되므로 다시 시작해도 유지됩니다. 성공적인 상환은 `provider.reset_redeemed` 웹훅도 실행합니다.
+
+회귀 가드: `tests/unit/banked-reset-policy.test.ts`, `tests/unit/banked-reset-auto-apply.test.ts`, `tests/unit/claude-limit-reset-policy-gate.test.ts`, `tests/unit/banked-reset-history-route.test.ts`.
+
 ### 세션 고정 (#7274)
 
 **범위:** 하나의 클라이언트 세션(`X-Session-Id` / `x-codex-session-id` / `x-omniroute-session` 헤더)을

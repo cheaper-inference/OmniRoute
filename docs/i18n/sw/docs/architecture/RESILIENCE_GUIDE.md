@@ -207,6 +207,45 @@ muunganisho** (Hariri muunganisho → sehemu ya Claude → `lowPriorityMode` / `
 Vilinda urejeshaji: `tests/unit/claude-low-priority-mode.test.ts`,
 `tests/unit/claude-limit-reset.test.ts`, `tests/unit/claude-low-priority-executor.test.ts`.
 
+### Omba otomatiki uwekaji upya wa benki
+
+**Upeo:** Viunganisho vya usajili wa Codex na Claude (OAuth).**Jijumuishe** : mpangilio wa `bankedResetAutoApply` umezimwa na uko katika hali ya `dry-run` kwa chaguo-msingi (Mipangilio → AI → Tumia uwekaji upya wa benki kiotomatiki).
+
+**Kusudi:** kutumia uwekaji upya uliowekwa kwenye benki peke yao wakati akaunti inapogonga ukuta wa matumizi, badala ya kungoja opereta abonyeze "Komboa" kwenye ukurasa wa Mipaka ya Watoa Huduma.
+
+| Aina ya mkopo (`creditTypes`) | Ni nini kilichokombolewa                                       | Ambapo inaendesha                                               |
+| ----------------------------- | -------------------------------------------------------------- | --------------------------------------------------------------- |
+| `codexCredits`                | Codex weka upya mikopo                                         | kazi ya nyuma, kila 60 s                                        |
+| `claudeCredits`               | Ruzuku za benki za Claude ( mikopo `GRANT` )                   | kazi ya nyuma, kila 60 s                                        |
+| `claudeSessionReset`          | Kuweka upya kikomo cha kipindi cha kila wiki Claude (hapo juu) | njia ya ombi, kupitia sera sawa na ubadilishaji wa kila akaunti |
+
+**Utekelezaji:**
+
+- Uamuzi safi (sheria moja iliyowekwa kwa njia zote mbili): `src/lib/usage/bankedResetPolicy.ts::decideBankedReset()`
+- Kazi ya usuli: `src/lib/services/bankedResetAutoApply.ts` (ilianza `src/instrumentation-node.ts`)
+- Lango la njia ya ombi la Claude : `src/lib/usage/claudeSessionResetPolicy.ts`, limesajiliwa kupitia `setClaudeLimitResetPolicy()` katika `open-sse/services/claudeLimitReset.ts`
+- Historia, kofia na mtandao: `src/lib/usage/bankedResetAudit.ts`
+- Historia API: `GET /api/settings/banked-reset-auto/history?limit=50` (hati ya usimamizi)
+
+**Agizo la uamuzi** (kanuni ya kwanza iliyoshindwa ni sababu iliyorekodiwa):
+
+1. Kipengele kimezimwa, aina ya mkopo imezimwa, au akaunti nje ya upeo (`accountScope` `all` / `selected` pamoja na ramani `connections` ya kila akaunti).
+2. Nje ya ratiba ya hiari ya UTC (`startHourUtc` > `endHourUtc` inavuka usiku wa manane).
+3. Caps zaidi ya saa 24 zilizopita: `maxPerAccountPerDay` (1), `maxPerDay` (3), na `minSpacingMinutes` (30) kati ya ukombozi wowote mbili.
+4. Anzisha: dirisha la `session` au `weekly` lenye ukuta (lisomwa kutoka `getQuotaWindowStatus().reachedThreshold`, si `isAccountQuotaExhausted()`, ambalo huripoti tu akaunti yenye kila dirisha lililotumika), au muda wa mkopo unaoisha ndani ya `expiringCreditHours` (24) kwenye akaunti ambayo imetumia angalau `expiringCreditMinUsedPercent` (50).
+5. Kilinzi kilichowekwa upya: ruka dirisha la ukuta la saa 5 likiwekwa upya ndani ya `sessionResetGuardMinutes` (90), au dirisha la kila wiki lenye ukuta ndani ya `weeklyResetGuardHours` (12).
+6. Sakafu ya kila wiki: ruka uwekaji upya wa saa 5 wakati iliyosalia kwa wiki iko chini ya `weeklyFloorPercent` (10).
+7. Hali ya `last-resort` : ruka wakati akaunti nyingine ya ndani ya mtoa huduma sawa ina angalau `poolHeadroomPercent` (10) iliyosalia katika madirisha yote mawili. Vichochezi vya mkopo unaokwisha hupita hii.
+8. `dry-run` hurekodi safu na haikomboi chochote; `last-resort` na `eager` zinakomboa.
+
+Data ya mgao inayokosekana haifungui kamwe ukombozi: muda usiojulikana wa kuweka upya au kuruka kwa matumizi ya kila wiki.
+
+**Kuweka upya kipindi cha Claude :** kipengele kikiwa kimezimwa, au `claudeSessionReset` imezimwa, kigeuzi cha `autoLimitReset` kwa kila akaunti huamua kama hapo awali. Kwa kuwasha zote mbili, kipengele hiki kinachukua nafasi ya vigeuza kwa kila akaunti: akaunti ya ndani inaweza kudai tu wakati sera inaruhusu, na katika hali ya `dry-run` hakuna dai linalofanywa.
+
+**Usalama:** kazi itakomboa zaidi ya salio moja kwa kila tiki, huamua kabla ya kuorodhesha salio (akaunti iliyorukwa haijaorodheshwa), hutumia vitufe vya kutambua uwezo `auto-reset:<connectionId>:<yyyy-mm-dd>:<n>`, na kuzima akaunti kwa saa 1 baada ya kushindwa kuorodheshwa au kukomboa. Kila uamuzi wa ukombozi, kushindwa na kukauka huandikwa kwa `audit_log` (`action: "bankedReset.redeem"`, hakuna ishara au vitambulisho vya mkopo); kofia huhesabiwa kutoka kwa safu hizo, ili ziweze kuishi kuanza tena. Ukombozi uliofaulu pia huzima mtandao `provider.reset_redeemed`.
+
+Walinzi wa kurudi nyuma: `tests/unit/banked-reset-policy.test.ts`, `tests/unit/banked-reset-auto-apply.test.ts`, `tests/unit/claude-limit-reset-policy-gate.test.ts`, `tests/unit/banked-reset-history-route.test.ts`.
+
 ### Uhusiano wa kipindi (#7274)
 
 **Wigo:** kipindi kimoja cha mteja (`X-Session-Id` / `x-codex-session-id` / `x-omniroute-session` header) hubandikwa kwenye muunganisho mmoja, kwa **mtoa huduma yeyote**.

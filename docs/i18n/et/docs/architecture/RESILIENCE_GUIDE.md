@@ -215,6 +215,45 @@ Need tõrked püsivad seni, kuni mandaadid muutuvad või operaator need lähtest
 Regressioonikaitsed: `tests/unit/claude-low-priority-mode.test.ts`,
 `tests/unit/claude-limit-reset.test.ts`, `tests/unit/claude-low-priority-executor.test.ts`.
 
+### Rakenda panga lähtestused automaatselt
+
+**Ulatus:** Codex ja Claude abonemendi (OAuth) ühendused.**Lubatud** : `bankedResetAutoApply` säte on vaikimisi välja lülitatud ja `dry-run` -režiimis (Settings → AI → Rakenda panga lähtestused automaatselt).
+
+**Eesmärk:** kulutavad panga lähtestamisi ise, kui konto satub kasutusseinale, selle asemel, et oodata, kuni operaator vajutab teenusepakkuja piirangute lehel nuppu "Lunasta".
+
+| Krediidi tüüp (`creditTypes`) | Mis on lunastatud                               | Kus see jookseb                                          |
+| ----------------------------- | ----------------------------------------------- | -------------------------------------------------------- |
+| `codexCredits`                | Codex lähtesta krediit                          | taustatöö, iga 60 s                                      |
+| `claudeCredits`               | Claude pangatoetused (`GRANT` krediidid)        | taustatöö, iga 60 s                                      |
+| `claudeSessionReset`          | Claude nädalaseansi limiidi lähtestamine (ülal) | päringu tee sama poliitika kaudu nagu kontopõhine lüliti |
+
+**Rakendamine:**
+
+- Puhas otsus (üks reegel seatud mõlemale teele): `src/lib/usage/bankedResetPolicy.ts::decideBankedReset()`
+- Taustatöö: `src/lib/services/bankedResetAutoApply.ts` (algas `src/instrumentation-node.ts`)
+- Claude päringu tee värav: `src/lib/usage/claudeSessionResetPolicy.ts`, registreeritud `setClaudeLimitResetPolicy()` kaudu `open-sse/services/claudeLimitReset.ts` s
+- Ajalugu, kaaned ja veebihaak: `src/lib/usage/bankedResetAudit.ts`
+- API ajalugu: `GET /api/settings/banked-reset-auto/history?limit=50` (halduse autentimine)
+
+**Otsuse järjekord** (esimene ebaõnnestunud reegel on registreeritud põhjus):
+
+1. Funktsioon on välja lülitatud, krediidi tüüp on välja lülitatud või konto väljaspool rakendust (`accountScope` `all` / `selected` pluss kontopõhine `connections` kaart).
+2. Väljaspool valikulist UTC ajakava (`startHourUtc` > `endHourUtc` ületab keskööd).
+3. Viimase 24 tunni piirmäärad: `maxPerAccountPerDay` (1), `maxPerDay` (3) ja `minSpacingMinutes` (30) mis tahes kahe lunastamise vahel.
+4. Päästik: seinaga ümbritsetud `session` või `weekly` aken (loe `getQuotaWindowStatus().reachedThreshold`, mitte `isAccountQuotaExhausted()`, mis kajastab ainult kontot iga kulutatud aknaga) või krediit, mis aegub `expiringCreditHours` (24) piires kontol, mis on kasutanud vähemalt `expiringCreditMinUsedPercent` (50).
+5. Loomuliku lähtestamise kaitse: jätke vahele, kui seinaga 5-tunnine aken lähtestub `sessionResetGuardMinutes` (90) või seinaga iganädalane aken `weeklyResetGuardHours` (12).
+6. Nädala alammäär: jätke vahele 5-tunnine lähtestamine, kui nädalane jääk on alla `weeklyFloorPercent` (10).
+7. `last-resort` režiim: jätke vahele, kui sama teenusepakkuja teisel kohaldamisalasse kuuluval kontol on mõlemas aknas vähemalt `poolHeadroomPercent` (10). Krediidi aegumise käivitajad mööduvad sellest.
+8. `dry-run` salvestab rea ja ei lunasta midagi; `last-resort` ja `eager` lunastada.
+
+Puuduvad kvoodiandmed ei võimalda kunagi lunastada: teadmata lähtestamisaeg või iganädalane kasutus jäetakse vahele.
+
+**Claude seansi lähtestamine:** kui funktsioon on välja lülitatud või `claudeSessionReset` välja lülitatud, otsustab kontopõhine `autoLimitReset` lüliti täpselt nagu varem. Kui mõlemad on sisse lülitatud, asendab funktsioon kontopõhised lülitid: kohaldamisalasse kuuluv konto võib nõuda ainult siis, kui poliitika seda lubab, ja `dry-run` režiimis nõuet ei esitata.
+
+**Ohutus:** töö lunastab maksimaalselt ühe krediidi linnukese kohta, otsustab enne krediitide lisamist (vahele jäetud kontot ei ole kunagi loendis), kasutab idempotentsusklahve `auto-reset:<connectionId>:<yyyy-mm-dd>:<n>` ja tühistab konto 1 tunni jooksul pärast ebaõnnestunud kandmist või lunastamist. Iga lunastamise, ebaõnnestumise ja kuivkäivitusotsus kirjutatakse `audit_log` (`action: "bankedReset.redeem"`, ilma žetoonide või krediidi ID-deta); mütsid loetakse nendest ridadest, nii et need jäävad taaskäivitamise ellu. Edukad lunastamised käivitavad ka `provider.reset_redeemed` veebihaagi.
+
+Regressioonikaitsjad: `tests/unit/banked-reset-policy.test.ts`, `tests/unit/banked-reset-auto-apply.test.ts`, `tests/unit/claude-limit-reset-policy-gate.test.ts`, `tests/unit/banked-reset-history-route.test.ts`.
+
 ### Seansi külgetõmme (#7274)
 
 **Ulatus:** üks kliendiseanss (`X-Session-Id` / `x-codex-session-id` / `x-omniroute-session` päis) seotakse ühe ühendusega, **mis tahes** teenusepakkuja puhul.

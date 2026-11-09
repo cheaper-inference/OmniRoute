@@ -201,6 +201,45 @@
 `tests/unit/claude-limit-reset.test.ts`،
 `tests/unit/claude-low-priority-executor.test.ts`.
 
+### التطبيق التلقائي لعمليات إعادة التعيين المتراكمة
+
+**نِطَاق:** اتصالات اشتراك Codex و Claude (OAuth).**الاشتراك** : إعداد `bankedResetAutoApply` متوقف عن التشغيل وفي وضع `dry-run` افتراضيًا (الإعدادات → AI → تطبيق عمليات إعادة التعيين المخزنة تلقائيًا).
+
+**غاية:** إنفاق عمليات إعادة التعيين المخزنة من تلقاء نفسها عندما يصل الحساب إلى حد الاستخدام، بدلاً من انتظار عامل التشغيل للضغط على "استرداد" في صفحة حدود الموفر.
+
+| نوع الائتمان (`creditTypes`) | ما يتم استرداده                              | حيث يتم تشغيله                                              |
+| ---------------------------- | -------------------------------------------- | ----------------------------------------------------------- |
+| `codexCredits`               | إعادة تعيين الاعتمادات Codex                 | وظيفة الخلفية، كل 60 ثانية                                  |
+| `claudeCredits`              | المنح المتراكمة Claude (اعتمادات `GRANT` )   | وظيفة الخلفية، كل 60 ثانية                                  |
+| `claudeSessionReset`         | إعادة تعيين حد جلسة Claude الأسبوعية (أعلاه) | مسار الطلب، من خلال نفس السياسة المتبعة في التبديل لكل حساب |
+
+**تطبيق:**
+
+- قرار خالص (تم تعيين قاعدة واحدة لكلا المسارين): `src/lib/usage/bankedResetPolicy.ts::decideBankedReset()`
+- الوظيفة الخلفية: `src/lib/services/bankedResetAutoApply.ts` (بدأت في `src/instrumentation-node.ts`)
+- بوابة مسار طلب Claude : `src/lib/usage/claudeSessionResetPolicy.ts`، مسجلة من خلال `setClaudeLimitResetPolicy()` في `open-sse/services/claudeLimitReset.ts`
+- السجل والحدود وخطاف الويب: `src/lib/usage/bankedResetAudit.ts`
+- التاريخ API: `GET /api/settings/banked-reset-auto/history?limit=50` (مصادقة الإدارة)
+
+**أمر القرار** (القاعدة الأولى الفاشلة هي السبب المسجل):
+
+1. تم إيقاف الميزة، أو إيقاف نوع الائتمان، أو الحساب خارج النطاق (`accountScope` `all` / `selected` بالإضافة إلى خريطة `connections` لكل حساب).
+2. خارج جدول UTC الاختياري (`startHourUtc` > `endHourUtc` يعبر منتصف الليل).
+3. الحد الأقصى خلال آخر 24 ساعة: `maxPerAccountPerDay` (1)، `maxPerDay` (3)، و `minSpacingMinutes` (30) بين أي عمليتي استرداد.
+4. المشغل: نافذة `session` أو `weekly` مسورة (اقرأ من `getQuotaWindowStatus().reachedThreshold`، وليس `isAccountQuotaExhausted()`، والتي تبلغ فقط عن حساب مع كل نافذة يتم إنفاقها)، أو رصيد تنتهي صلاحيته داخل `expiringCreditHours` (24) على حساب استخدم `expiringCreditMinUsedPercent` (50) على الأقل.
+5. حماية إعادة الضبط الطبيعية: قم بالتخطي عند إعادة ضبط النافذة المسورة لمدة 5 ساعات داخل `sessionResetGuardMinutes` (90)، أو النافذة الأسبوعية المسورة داخل `weeklyResetGuardHours` (12).
+6. الحد الأسبوعي: تخطي إعادة التعيين لمدة 5 ساعات عندما يكون الأسبوع المتبقي أقل من `weeklyFloorPercent` (10).
+7. وضع `last-resort` : قم بالتخطي أثناء وجود حساب آخر داخل النطاق لنفس الموفر على الأقل `poolHeadroomPercent` (10) في كلا النافذتين. تتجاوز مشغلات انتهاء صلاحية الائتمان هذا.
+8. تسجل `dry-run` صفًا ولا تسترد أي شيء؛ استرداد `last-resort` و `eager`.
+
+لا تسمح بيانات الحصة المفقودة باسترداد الرصيد: إذا كان وقت إعادة التعيين أو الاستخدام الأسبوعي اللازم لاتخاذ القرار غير معروف، تتخطى السياسة الحساب.
+
+**إعادة تعيين جلسة Claude :** مع إيقاف تشغيل الميزة، أو إيقاف تشغيل `claudeSessionReset` ، يقرر تبديل `autoLimitReset` لكل حساب تمامًا كما كان من قبل. مع تشغيل كليهما، تحل الميزة محل عمليات التبديل لكل حساب: لا يجوز للحساب داخل النطاق المطالبة إلا عندما تسمح السياسة بذلك، وفي وضع `dry-run` لا يتم تقديم أي مطالبة.
+
+**أمان:** تسترد الوظيفة رصيدًا واحدًا على الأكثر لكل علامة، وتقرر قبل إدراج الاعتمادات (لا يتم إدراج الحساب الذي تم تخطيه أبدًا)، وتستخدم مفاتيح عدم تكرار العملية `auto-reset:<connectionId>:<yyyy-mm-dd>:<n>`، وتدعم إيقاف الحساب لمدة ساعة واحدة بعد الإدراج أو الاسترداد الفاشلين. تتم كتابة كل قرار استرداد وفشل وقرار تجريبي إلى `audit_log` (`action: "bankedReset.redeem"`، بدون رموز مميزة أو معرفات ائتمانية)؛ تُحسب الحدود من تلك السجلات، ولذلك تبقى سارية بعد إعادة التشغيل. تعمل عمليات الاسترداد الناجحة أيضًا على تشغيل خطاف الويب `provider.reset_redeemed`.
+
+حراس الانحدار: `tests/unit/banked-reset-policy.test.ts`، `tests/unit/banked-reset-auto-apply.test.ts`، `tests/unit/claude-limit-reset-policy-gate.test.ts`، `tests/unit/banked-reset-history-route.test.ts`.
+
 ### تقارب الجلسة (#7274)
 
 **النطاق:** جلسة عميل واحدة (ترويسة `X-Session-Id` / `x-codex-session-id` / `x-omniroute-session`)

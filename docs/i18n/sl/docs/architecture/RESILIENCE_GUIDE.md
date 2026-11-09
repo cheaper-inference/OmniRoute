@@ -178,6 +178,45 @@ omogočeni obe funkciji):
 Regresijski varovali: `tests/unit/claude-low-priority-mode.test.ts`,
 `tests/unit/claude-limit-reset.test.ts`, `tests/unit/claude-low-priority-executor.test.ts`.
 
+### Samodejna uporaba bančnih ponastavitev
+
+**Področje uporabe:** Naročniške povezave Codex in Claude (OAuth).**Prijavite se** : nastavitev `bankedResetAutoApply` je privzeto izklopljena in v načinu `dry-run` (Nastavitve → AI → Auto-apply banked resets).
+
+**Namen:** sami porabijo bančne ponastavitve, ko račun naleti na zid uporabe, namesto da čakajo, da operater pritisne »Unovči« na strani z omejitvami ponudnika.
+
+| Vrsta kredita (`creditTypes`) | Kaj je odkupljeno                                    | Kjer teče                                                          |
+| ----------------------------- | ---------------------------------------------------- | ------------------------------------------------------------------ |
+| `codexCredits`                | Codex ponastavi kredite                              | delo v ozadju, vsakih 60 s                                         |
+| `claudeCredits`               | Bančna nepovratna sredstva Claude (krediti `GRANT` ) | delo v ozadju, vsakih 60 s                                         |
+| `claudeSessionReset`          | Ponastavitev tedenske omejitve sej Claude (zgoraj)   | pot zahteve, prek istega pravilnika kot preklop za posamezni račun |
+
+**Izvedba:**
+
+- Čista odločitev (eno pravilo za obe poti): `src/lib/usage/bankedResetPolicy.ts::decideBankedReset()`
+- Posel v ozadju: `src/lib/services/bankedResetAutoApply.ts` (začetek v `src/instrumentation-node.ts`)
+- Vrata poti zahteve Claude : `src/lib/usage/claudeSessionResetPolicy.ts`, registrirana prek `setClaudeLimitResetPolicy()` v `open-sse/services/claudeLimitReset.ts`
+- Zgodovina, zgornje meje in webhook: `src/lib/usage/bankedResetAudit.ts`
+- Zgodovina API: `GET /api/settings/banked-reset-auto/history?limit=50` (avtor upravljanja)
+
+**Vrstni red sklepa** (prvo neuspešno pravilo je zabeleženi razlog):
+
+1. Funkcija izklopljena, vrsta kredita izklopljena ali račun izven obsega (`accountScope` `all` / `selected` plus zemljevid `connections` za posamezen račun).
+2. Zunaj izbirnega urnika UTC (`startHourUtc` > `endHourUtc` prečka polnoč).
+3. Omejitve v zadnjih 24 urah: `maxPerAccountPerDay` (1), `maxPerDay` (3) in `minSpacingMinutes` (30) med katerima koli dvema odkupoma.
+4. Sprožilec: zaprto okno `session` ali `weekly` (brano iz `getQuotaWindowStatus().reachedThreshold`, ne `isAccountQuotaExhausted()`, ki poroča samo o računu z vsakim porabljenim oknom) ali kredit, ki poteče znotraj `expiringCreditHours` (24) na računu, ki je uporabil vsaj `expiringCreditMinUsedPercent` (50).
+5. Zaščita naravne ponastavitve: preskoči, ko se zazidano 5-urno okno ponastavi znotraj `sessionResetGuardMinutes` (90) ali zazidano tedensko okno znotraj `weeklyResetGuardHours` (12).
+6. Tedenska spodnja meja: preskočite 5-urno ponastavitev, ko je preostala tedenska vrednost pod `weeklyFloorPercent` (10).
+7. Način `last-resort` : preskoči, medtem ko ima drug v obsegu račun istega ponudnika v obeh oknih še vsaj `poolHeadroomPercent` (10). Sprožilci poteka kredita to obidejo.
+8. `dry-run` zabeleži vrstico in ne unovči ničesar; `last-resort` in `eager` odkup.
+
+Manjkajoči podatki o kvoti nikoli ne odklenejo unovčitve: neznani čas ponastavitve ali tedenski preskoki uporabe.
+
+**Ponastavitev seje Claude :** ko je funkcija izklopljena ali `claudeSessionReset` izklopljena, preklop `autoLimitReset` za posamezen račun odloča točno tako kot prej. Ko sta oba vklopljena, funkcija nadomesti preklope za posamezne račune: račun v obsegu lahko zahteva le, če pravilnik to dovoljuje, v načinu `dry-run` pa zahtevek ni vložen.
+
+**Varnost:** delo unovči največ en kredit na kljukico, odloči se pred uvrstitvijo kreditov (preskočeni račun ni nikoli naveden), uporablja ključe za idempotenco `auto-reset:<connectionId>:<yyyy-mm-dd>:<n>` in izklopi račun za 1 uro po neuspešnem kotiranju ali unovčenju. Vsaka odločitev o unovčenju, neuspehu in brezplačni uporabi se zapiše v `audit_log` (`action: "bankedReset.redeem"`, brez žetonov ali kreditnih ID-jev); zgornje meje se štejejo iz teh vrstic, tako da preživijo ponovne zagone. Uspešni odkupi sprožijo tudi spletni kavelj `provider.reset_redeemed`.
+
+Regresijska varovala: `tests/unit/banked-reset-policy.test.ts`, `tests/unit/banked-reset-auto-apply.test.ts`, `tests/unit/claude-limit-reset-policy-gate.test.ts`, `tests/unit/banked-reset-history-route.test.ts`.
+
 ### Afiniteta seje (#7274)
 
 **Obseg:** ena seja odjemalca (`X-Session-Id` / `x-codex-session-id` /

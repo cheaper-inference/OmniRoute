@@ -4,57 +4,52 @@
 
 ---
 
-> **Źródło prawdy:** `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`, `src/app/api/webhooks/`
-> **Ostatnia aktualizacja:** 2026-06-28 — v3.8.40
+> **Źródło prawdy:** `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`, `src/app/api/webhooks/`**Ostatnia aktualizacja:** 2026-06-28 — v3.8.40
 
-OmniRoute może wywoływać webhooki HTTP w odpowiedzi na zdarzenia platformy. Używaj ich do integracji ze
-Slackiem, PagerDuty, Datadogiem, wewnętrznymi usługami alertów lub dowolnym odbiornikiem HTTP.
+OmniRoute może uruchamiać webhooki HTTP na zdarzeniach na platformie. Użyj ich do integracji z Slack, PagerDuty, Datadog, wewnętrznymi usługami alarmowymi lub dowolnym odbiornikiem HTTP.
 
-Dyspozytor podpisuje każde żądanie za pomocą HMAC-SHA256, ponawia je w przypadku
-przejściowych błędów, śledzi stan dostarczania dla każdego webhooka i automatycznie wyłącza punkty końcowe,
-które stale zgłaszają błędy.
+Dyspozytor podpisuje każdą dostawę za pomocą HMAC-SHA256, ponawia próby w przypadku przejściowych błędów, śledzi stan dostarczania dla każdego elementu webhook i automatycznie wyłącza punkty końcowe, które ciągle ulegają awariom.
 
-## Obsługiwane zdarzenia
+## Obsługiwane wydarzenia
 
-Typ `WebhookEvent` (`src/lib/webhooks/eventDescriptions.ts`, używany przez `src/lib/webhookDispatcher.ts`) modeluje obecnie dokładnie cztery zdarzenia:
+Typ `WebhookEvent` (`src/lib/webhooks/eventDescriptions.ts`, konsumowany przez `src/lib/webhookDispatcher.ts`) obecnie modeluje siedem zdarzeń:
 
-| Zdarzenie           | Kiedy jest wyzwalane                                                                         |
-| ------------------- | -------------------------------------------------------------------------------------------- |
-| `request.completed` | Żądanie proxy kończy się powodzeniem                                                         |
-| `request.failed`    | Żądanie proxy kończy się niepowodzeniem po wszystkich ponowieniach/przełączeniach awaryjnych |
-| `quota.exceeded`    | Klucz API przekracza próg budżetu/limitu                                                     |
-| `test.ping`         | Zdarzenie syntetyczne używane przez testowy punkt końcowy                                    |
+| Wydarzenie                | Pali, kiedy                                                                                                                      |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `request.completed`       | Żądanie proxy zostało zakończone pomyślnie                                                                                       |
+| `request.failed`          | Żądanie proxy kończy się niepowodzeniem po wykonaniu wszystkich retries/fallback                                                 |
+| `quota.exceeded`          | Klucz API przekracza próg budget/quota                                                                                           |
+| `proxy.set_aside`         | Członek puli proxy jest odkładany w przypadku wielokrotnych odmów (tylko w przypadku przejścia)                                  |
+| `proxy.pool.exhausted`    | Każdy członek zakresu puli proxy jest odkładany                                                                                  |
+| `provider.reset_redeemed` | Automatyczne zastosowanie resetów bankowych umożliwiło wykorzystanie kredytu resetującego lub cotygodniowego resetu sesji Claude |
+| `test.ping`               | Zdarzenie syntetyczne używane przez punkt końcowy testu                                                                          |
 
-Subskrypcje akceptują literał `"*"`, aby odbierać każde zdarzenie. Nieznane nazwy
-zdarzeń w `events` są ignorowane podczas wysyłania.
+Subskrypcje akceptują dosłowne `"*"`, aby otrzymywać każde wydarzenie. Nieznane nazwy zdarzeń w `events` są ignorowane w momencie wysyłki.
 
-> Uwaga: interfejs API dyspozytora jest podłączony, ale produkcyjne miejsca wywołań dla niektórych
-> zdarzeń innych niż `test.ping` są nadal wdrażane. Sprawdź `grep dispatchEvent`, aby zobaczyć,
-> które ścieżki obecnie wywołują dyspozytor w Twojej wersji.
+> Uwaga: dyspozytor API jest podłączony, ale strony wezwań produkcyjnych dla niektórych zdarzeń innych niż `test.ping` wciąż lądują. Sprawdź `grep dispatchEvent`, aby zobaczyć, które ścieżki aktualnie wywołują dyspozytora w Twojej wersji.
 
 ## Architektura
 
 ```
-Wywołujący (procedura obsługi, usługa, monitor)
+Caller (handler, service, monitor)
   dispatchEvent(event, data)            [src/lib/webhookDispatcher.ts]
     -> getEnabledWebhooks()             [src/lib/db/webhooks.ts]
-    -> filtrowanie według webhook.events
-    -> dla każdego dopasowania (równolegle):
+    -> filter by webhook.events
+    -> for each match (in parallel):
        deliverWebhook(url, payload, secret)
-         utworzenie ładunku { event, timestamp, data }
-         podpisanie treści za pomocą HMAC-SHA256 (jeśli podano sekret)
-         POST z limitem czasu 10 s
-         maksymalnie 3 ponowienia w przypadku błędu 5xx / błędu sieciowego
+         build payload { event, timestamp, data }
+         sign body with HMAC-SHA256 (if secret present)
+         POST with 10s timeout
+         retry up to 3 times on 5xx / network error
        recordWebhookDelivery(id, status, success)
     -> disableWebhooksWithHighFailures(10)
 ```
 
-Wysyłanie działa dla wywołującego na zasadzie „wyślij i zapomnij”: `Promise.allSettled` przechwytuje
-błędy poszczególnych webhooków, dzięki czemu jeden wadliwy odbiornik nie może blokować pozostałych.
+Wysyłanie jest błyskawiczne dla dzwoniącego: `Promise.allSettled` przechwytuje błędy poszczególnych elementów webhook, dzięki czemu jeden zły odbiorca nie może blokować pozostałych.
 
-## Podpisywanie HMAC
+## Podpisanie HMAC
 
-Gdy webhook ma `secret`, OmniRoute podpisuje treść JSON i wysyła:
+Kiedy webhook ma `secret`, OmniRoute podpisuje treść JSON i wysyła:
 
 ```
 Content-Type: application/json
@@ -64,13 +59,11 @@ X-Webhook-Timestamp: <ISO-8601>
 X-Webhook-Signature: sha256=<hex HMAC-SHA256(secret, body)>
 ```
 
-> Nazwy nagłówków używają prefiksu `X-Webhook-*` (a nie `X-OmniRoute-*`). Wartość podpisu
-> ma postać `sha256=<hex>` — zweryfikuj ją wraz z pełnym prefiksem.
+> Nazwy nagłówków używają przedrostka `X-Webhook-*` (nie `X-OmniRoute-*`). Wartość podpisu to `sha256=<hex>` — sprawdź pełny prefiks.
 
-Jeśli funkcja `createWebhook` zostanie wywołana bez sekretu, moduł bazy danych wygeneruje go
-(`whsec_<48 hex>`), dlatego wszystkie webhooki są domyślnie podpisywane.
+Jeśli `createWebhook` zostanie wywołane bez sekretu, moduł DB wygeneruje go (`whsec_<48 hex>`), więc wszystkie webhooki będą domyślnie podpisane.
 
-### Weryfikacja po stronie odbiornika
+### Weryfikacja na odbiorniku
 
 ```typescript
 import { createHmac, timingSafeEqual } from "node:crypto";
@@ -83,66 +76,57 @@ function verify(rawBody: string, signature: string, secret: string) {
 }
 ```
 
-Zawsze przeprowadzaj weryfikację względem **surowej** treści żądania, przed jej przetworzeniem jako JSON.
+Zawsze sprawdzaj zgodnie z **surowy** treść żądania, przed jakąkolwiek analizą JSON.
 
-## Zasady ponawiania i obsługi błędów
+## Polityka ponawiania prób i niepowodzeń
 
 `deliverWebhook(url, payload, secret, maxRetries = 3)`:
 
-- Limit czasu każdej próby wynosi 10 sekund (`AbortController`).
-- Kod HTTP 2xx jest uznawany za sukces.
-- Kod HTTP 3xx/4xx jest uznawany za niepodlegający ponowieniu status końcowy — dostarczenie jest rejestrowane
-  z wartością `success = res.ok`.
-- W przypadku kodów HTTP 5xx i błędów sieciowych próby są ponawiane z wykładniczo rosnącym opóźnieniem:
-  `2^attempt * 1000 ms` (1 s, 2 s, 4 s).
-- Po `maxRetries` dostarczenie jest rejestrowane jako nieudane.
-- Każde dostarczenie aktualizuje `last_triggered_at`, `last_status` oraz odpowiednio zeruje
-  lub zwiększa `failure_count`.
-- Po każdym rozesłaniu dyspozytor wywołuje `disableWebhooksWithHighFailures(10)`,
-  dlatego każdy webhook z `failure_count >= 10` jest automatycznie wyłączany.
+- 10 sekund przerwy na próbę (`AbortController`).
+- HTTP 2xx liczy się jako sukces.
+- HTTP 3xx/4xx liczy się jako ostateczny status — którego nie można powtórzyć, zarejestrowany jako dostarczony wraz z `success = res.ok`.
+- HTTP 5xx i błędy sieciowe są ponawiane z wykładniczym wycofywaniem: `2^attempt * 1000 ms` (1s, 2s, 4s).
+- Po `maxRetries` dostawa jest rejestrowana jako nieudana.
+- Każda dostawa aktualizuje `last_triggered_at`, `last_status` i resetuje lub zwiększa `failure_count`.
+- Dyspozytor wywołuje `disableWebhooksWithHighFailures(10)` po każdym rozwinięciu, więc każdy webhook z `failure_count >= 10` jest automatycznie wyłączany.
 
 ## Baza danych
 
 Tabela `webhooks` (migracja `011_webhooks.sql`):
 
-| Kolumna             | Typ     | Uwagi                                                       |
-| ------------------- | ------- | ----------------------------------------------------------- |
-| `id`                | TEXT PK | UUID                                                        |
-| `url`               | TEXT    | Docelowy URL                                                |
-| `events`            | TEXT    | Tablica JSON; domyślnie `["*"]`                             |
-| `secret`            | TEXT    | Sekret HMAC (generowany automatycznie, jeśli go nie podano) |
-| `enabled`           | INT     | 0/1; domyślnie 1                                            |
-| `description`       | TEXT    | Opcjonalna etykieta czytelna dla użytkownika                |
-| `created_at`        | TEXT    | `datetime('now')`                                           |
-| `last_triggered_at` | TEXT    | Aktualizowane przy każdej próbie dostarczenia               |
-| `last_status`       | INT     | Status HTTP ostatniej próby (0 = błąd sieciowy)             |
-| `failure_count`     | INT     | Zerowane po sukcesie, +1 po niepowodzeniu                   |
+| Kolumna             | Typ     | Notatki                                                                 |
+| ------------------- | ------- | ----------------------------------------------------------------------- |
+| `id`                | TEXT PK | UUID                                                                    |
+| `url`               | TEXT    | Miejsce docelowe URL                                                    |
+| `events`            | TEXT    | tablica JSON ; domyślny `["*"]`                                         |
+| `secret`            | TEXT    | Sekret HMAC (wygenerowany automatycznie, jeśli nie został podany)       |
+| `enabled`           | INT     | 0/1; domyślnie 1                                                        |
+| `description`       | TEXT    | Opcjonalna etykieta z człowiekiem                                       |
+| `created_at`        | TEXT    | `datetime('now')`                                                       |
+| `last_triggered_at` | TEXT    | Aktualizowane przy każdej próbie dostarczenia                           |
+| `last_status`       | INT     | Status HTTP ostatniej próby (0 sieci = )                                |
+| `failure_count`     | INT     | Resetuje się do 0 w przypadku powodzenia, + 1 w przypadku niepowodzenia |
 
-Historia dostarczeń jest utrwalana w dedykowanej tabeli `webhook_deliveries`
-(migracja `069_webhook_deliveries.sql`, zapisywana przy każdej próbie za pośrednictwem
-`src/lib/db/webhookDeliveries.ts::insertDelivery`), niezależnie od zagregowanych
-liczników w wierszu `webhooks`. Metadane rodzaju (Slack / Discord /
-Telegram / niestandardowe transformatory ładunku) zostały dodane przez `070_webhooks_kind_metadata.sql`.
+Historia dostaw zapisywana jest w dedykowanej tabeli `webhook_deliveries` (migracja `069_webhook_deliveries.sql`, zapisywana przy każdej próbie poprzez `src/lib/db/webhookDeliveries.ts::insertDelivery` ), oprócz liczników zbiorczych w wierszu `webhooks`. Rodzaje metadanych (Slack / Discord / Telegram / niestandardowe transformatory ładunku) zostały dodane przez `070_webhooks_kind_metadata.sql`.
 
 ## REST API
 
-Wszystkie punkty końcowe wymagają uwierzytelniania zarządzającego (`requireManagementAuth`).
+Wszystkie punkty końcowe wymagają autoryzacji zarządzania (`requireManagementAuth`).
 
 | Punkt końcowy                   | Metoda | Opis                                             |
 | ------------------------------- | ------ | ------------------------------------------------ |
 | `/api/webhooks`                 | GET    | Lista webhooków (sekrety zamaskowane)            |
-| `/api/webhooks`                 | POST   | Utworzenie webhooka                              |
+| `/api/webhooks`                 | POST   | Utwórz webhooka                                  |
 | `/api/webhooks/[id]`            | GET    | Szczegóły webhooka (pełny sekret)                |
-| `/api/webhooks/[id]`            | PUT    | Aktualizacja pól                                 |
-| `/api/webhooks/[id]`            | DELETE | Usunięcie                                        |
-| `/api/webhooks/[id]/test`       | POST   | Wysłanie `test.ping` (bez ponownych prób)        |
+| `/api/webhooks/[id]`            | PUT    | Aktualizuj pola                                  |
+| `/api/webhooks/[id]`            | DELETE | Usunąć                                           |
+| `/api/webhooks/[id]/test`       | POST   | Wystrzel `test.ping` (bez ponownych prób)        |
 | `/api/webhooks/[id]/deliveries` | GET    | Ostatnie próby dostarczenia dla jednego webhooka |
-| `/api/webhooks/validate-url`    | POST   | Wstępna walidacja URL-a (ochrona przed SSRF)     |
+| `/api/webhooks/validate-url`    | POST   | Walidacja URL przed lotem (strażnik SSRF )       |
 
-`GET /api/webhooks` maskuje sekret do postaci `<pierwsze 10 znaków>...`, aby zapobiec jego
-ujawnieniu na stronach z listami. Gdy rzeczywiście potrzebujesz sekretu, użyj żądania GET dla `[id]`.
+`GET /api/webhooks` maskuje sekret `<first 10 chars>...`, aby uniknąć wycieków na stronach z listami. Użyj `[id]` GET kiedy naprawdę potrzebujesz sekretu.
 
-### Tworzenie webhooka
+### Utwórz webhooka
 
 ```bash
 curl -X POST http://localhost:20128/api/webhooks \
@@ -152,37 +136,33 @@ curl -X POST http://localhost:20128/api/webhooks \
     "url": "https://hooks.slack.com/services/...",
     "secret": "whsec_my_shared_secret",
     "events": ["quota.exceeded", "request.failed"],
-    "description": "Alerty Slack"
+    "description": "Slack alerts"
   }'
 ```
 
-Jeśli `secret` zostanie pominięty, serwer wygeneruje sekret `whsec_<hex>` i zwróci
-go w odpowiedzi.
+Jeżeli `secret` zostanie pominięte, serwer generuje sekret `whsec_<hex>` i zwraca go w odpowiedzi.
 
-### Testowanie webhooka
+### Przetestuj webhook
 
 ```bash
 curl -X POST http://localhost:20128/api/webhooks/<id>/test \
   -H "Cookie: auth_token=..."
 ```
 
-Zwraca `{ delivered, status, error }`. Ponowne próby nie są podejmowane — jest to przydatne do
-szybkiego sprawdzenia, czy odbiorca akceptuje ładunek i podpis.
+Zwraca `{ delivered, status, error }`. Nie są podejmowane żadne ponowne próby. — jest przydatne do szybkiego sprawdzania, czy odbiorca akceptuje ładunek i podpis.
 
 ## Panel
 
-Strona panelu pod adresem `/dashboard/webhooks` (zobacz
-`src/app/(dashboard)/dashboard/webhooks/page.tsx`) umożliwia:
+Strona panelu kontrolnego w `/dashboard/webhooks` (patrz `src/app/(dashboard)/dashboard/webhooks/page.tsx`) zawiera:
 
-- Tworzenie/edytowanie webhooków z selektorem zdarzeń
-- Wyświetlanie wskaźnika stanu (aktywny / nieaktywny / z błędem) na podstawie `enabled`,
-  `failure_count` i `last_status`
-- Wysyłanie testowe jednym kliknięciem
-- Ręczne włączanie/wyłączanie
+- Webhooki Create/edit z selektorem zdarzeń
+- Wskaźnik stanu (aktywny/nieaktywny/błędny) oparty na `enabled`, `failure_count` i `last_status`
+- Dostawa testowa jednym kliknięciem
+- Ręczny przełącznik enable/disable
 
 ## Przykłady ładunków
 
-### request.completed
+### żądanie.ukończone
 
 ```json
 {
@@ -208,34 +188,25 @@ Strona panelu pod adresem `/dashboard/webhooks` (zobacz
   "event": "test.ping",
   "timestamp": "2026-05-13T20:32:00.000Z",
   "data": {
-    "message": "Testowe wysłanie webhooka z OmniRoute",
+    "message": "Test webhook delivery from OmniRoute",
     "webhookId": "<uuid>"
   }
 }
 ```
 
-Struktury pól dla zdarzeń innych niż `test.ping` są definiowane przez miejsca wywołań, które je
-emitują; obiekt `data` należy traktować jako zgodny z przyszłymi wersjami (można dodawać pola, nie należy polegać na
-ich braku).
+Kształty pól dla zdarzeń innych niż `test.ping` są definiowane przez miejsca wywołań, które je emitują; traktuj obiekt `data` jako kompatybilny w przód (dodaj pola, nie zależą od nieobecności).
 
 ## Najlepsze praktyki
 
-- **Weryfikuj podpis przy każdym wysłaniu** względem nieprzetworzonej treści żądania — zapobiega to
-  fałszywym żądaniom POST od każdego, kto odgadnie adres URL webhooka.
-- **Odpowiadaj kodem 2xx w ciągu około 5 sekund** — limit czasu dyspozytora wynosi 10 s. Powolne
-  odbiorniki będą zużywać ponowne próby i zwiększać `failure_count`.
-- **Zapewnij idempotentność procedur obsługi** — ponowne próby i semantyka dostarczania co najmniej raz
-  oznaczają, że mogą wystąpić duplikaty.
-- **Subskrybuj tylko niezbędne zdarzenia** — wymieniaj wyłącznie zdarzenia, które rzeczywiście obsługujesz; `"*"` zwiększy
-  obciążenie odbiorników, których nie kontrolujesz.
-- **Monitoruj `failure_count`** — punkty końcowe są automatycznie wyłączane po 10 kolejnych
-  niepowodzeniach; po naprawieniu odbiornika zresetuj licznik, wywołując `PUT /api/webhooks/[id]` z `enabled: true`.
-- **Okresowo zmieniaj sekrety** — ustaw nowy `secret` za pomocą `PUT`, wdróż nową wartość
-  po stronie odbiornika i potwierdź jej działanie za pomocą testowego punktu końcowego.
+- **Sprawdź podpis na każdej dostawie** przeciwko surowemu ciału — zapobiega sfałszowaniu POSTs przez każdego, kto odgadnie Twój webhook URL.
+- **Odpowiedz 2xx w ciągu ~ w ciągu 5 sekund** — dyspozytor przekroczył limit czasu wynoszący 10 s. Powolni odbiorcy będą jeść ponowne próby i zawyżać `failure_count`.
+- **Spraw, aby procedury obsługi były idempotentne** Ponowne próby — i semantyka dostawy co najmniej raz oznaczają, że możliwe są duplikaty.
+- **Subskrybuj minimalnie** — wyświetla tylko te wydarzenia, z których faktycznie korzystasz; `"*"` doda koszty do odbiorników, których nie kontrolujesz.
+- **Obejrzyj `failure_count`** Punkty końcowe — są automatycznie wyłączane po 10 kolejnych awariach; zresetować, wywołując `PUT /api/webhooks/[id]` za pomocą `enabled: true` po naprawieniu odbiornika.
+- **Okresowo zmieniaj sekrety** — `PUT` nowy `secret`, wdróż nową wartość w odbiorniku i potwierdź za pośrednictwem testowego punktu końcowego.
 
 ## Zobacz także
 
-- [API_REFERENCE.md](../reference/API_REFERENCE.md) — pełny zakres interfejsu API do zarządzania
-- [RESILIENCE_GUIDE.md](../architecture/RESILIENCE_GUIDE.md) — semantyka mechanizmu circuit breaker / okresu wyciszenia
-  dla błędów dostawców ujawnianych przez `request.failed`
+- [API_REFERENCE.md](../reference/API_REFERENCE.md) — pełne zarządzanie powierzchnią API
+- [RESILIENCE_GUIDE.md](../architecture/RESILIENCE_GUIDE.md) Semantyka wyłącznika / przestoju — stojąca za błędami dostawcy ujawniona za pośrednictwem `request.failed`
 - Źródło: `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`

@@ -4,57 +4,52 @@
 
 ---
 
-> **Foinse na fírinne:** `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`, `src/app/api/webhooks/`
-> **Nuashonraithe go deireanach:** 2026-06-28 — v3.8.40
+> **Foinse na fírinne:** `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`, `src/app/api/webhooks/`**Nuashonraithe is déanaí:** 2026-06-28 — v3.8.40
 
-Is féidir le OmniRoute glaonna gréasáin HTTP a sheoladh nuair a tharlaíonn teagmhais ardáin. Úsáid iad chun comhtháthú a dhéanamh le
-Slack, PagerDuty, Datadog, seirbhísí foláirimh inmheánacha, nó aon ghlacadóir HTTP.
+Is féidir le OmniRoute cipíní gréasáin HTTP a dhó ar imeachtaí ardáin. Úsáid iad chun comhtháthú le Slack, PagerDuty, Datadog , seirbhísí foláirimh inmheánacha, nó aon ghlacadóir HTTP.
 
-Síníonn an seoltóir gach seachadadh le HMAC-SHA256, déanann sé iarracht eile tar éis
-teipeanna sealadacha, rianaíonn sé sláinte seachadta gach glao gréasáin, agus díchumasaíonn sé go huathoibríoch críochphointí
-a leanann orthu ag teip.
+Síníonn an seoltóir gach seachadadh le HMAC-SHA256, déanann sé iarracht ar theipeanna díomuana, rianaíonn sé sláinte an tseachadta in aghaidh na cuaiche gréasáin, agus díchumasaíonn sé críochphointí a leanann teip.
 
-## Teagmhais a dTacaítear Leo
+## Imeachtaí Tacaithe
 
-Samhlaíonn an cineál `WebhookEvent` (`src/lib/webhooks/eventDescriptions.ts`, arna úsáid ag `src/lib/webhookDispatcher.ts`) ceithre theagmhas go díreach faoi láthair:
+Múnlaíonn an cineál `WebhookEvent` (`src/lib/webhooks/eventDescriptions.ts`, arna thomhailt ag `src/lib/webhookDispatcher.ts`) seacht n-imeacht faoi láthair:
 
-| Teagmhas            | Seoltar é nuair a                                                    |
-| ------------------- | -------------------------------------------------------------------- |
-| `request.completed` | A chríochnaíonn iarratas seachfhreastail go rathúil                  |
-| `request.failed`    | A theipeann ar iarratas seachfhreastail tar éis gach atriail/cúltaca |
-| `quota.exceeded`    | A sháraíonn eochair API tairseach buiséid/cuóta                      |
-| `test.ping`         | Teagmhas sintéiseach a úsáideann an críochphointe tástála            |
+| Imeacht                   | Tinte nuair                                                                                                                                 |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `request.completed`       | Críochnaíonn iarratas seachfhreastalaí go rathúil                                                                                           |
+| `request.failed`          | Teipeann ar iarratas seachfhreastalaí tar éis gach retries/fallback                                                                         |
+| `quota.exceeded`          | Trasnaíonn eochair API tairseach budget/quota                                                                                               |
+| `proxy.set_aside`         | Cuirtear ball comhthiomsaithe seachfhreastalaí ar leataobh tar éis diúltú arís agus arís eile (aistriú amháin)                              |
+| `proxy.pool.exhausted`    | Cuirtear raon feidhme comhthiomsaithe seachfhreastalaí ar leataobh do gach ball                                                             |
+| `provider.reset_redeemed` | D’fhuascail athshocraithe bainc a cuireadh i bhfeidhm go huathoibríoch creidmheas athshocraithe nó athshocrú seisiúin sheachtainiúil Claude |
+| `test.ping`               | Ócáid shintéiseach a úsáideann críochphointe na tástála                                                                                     |
 
-Glacann síntiúis leis an luach litriúil `"*"` chun gach teagmhas a fháil. Déantar neamhaird d’ainmneacha
-teagmhas anaithnid in `events` tráth an tseolta.
+Glacann síntiúis leis an `"*"` litriúil chun gach imeacht a fháil. Ní thugtar aird ar ainmneacha teagmhais anaithnid in `events` ag am seolta.
 
-> Nóta: tá API an tseoltóra nasctha, ach tá suíomhanna glao táirgthe do chuid de na
-> teagmhais nach `test.ping` iad fós á gcur i bhfeidhm. Seiceáil `grep dispatchEvent` chun a fháil amach
-> cé na conairí a agraíonn an seoltóir i d’eisiúint faoi láthair.
+> Tabhair faoi deara: tá an seoltóir API sreangaithe, ach tá suíomhanna glaonna táirgeachta do chuid de na himeachtaí neamh-`test.ping` fós ag teacht i dtír. Seiceáil `grep dispatchEvent` chun a fháil amach cé na cosáin a n-úsáideann an seoltóir i do scaoileadh faoi láthair.
 
 ## Ailtireacht
 
 ```
-Glaoiteoir (láimhseálaí, seirbhís, monatóir)
+Caller (handler, service, monitor)
   dispatchEvent(event, data)            [src/lib/webhookDispatcher.ts]
     -> getEnabledWebhooks()             [src/lib/db/webhooks.ts]
-    -> scagadh de réir webhook.events
-    -> do gach meaitseáil (go comhthreomhar):
+    -> filter by webhook.events
+    -> for each match (in parallel):
        deliverWebhook(url, payload, secret)
-         tóg pálasta { event, timestamp, data }
-         sínigh an corp le HMAC-SHA256 (má tá rún ann)
-         POST le teorainn ama 10s
-         bain triail eile as suas le 3 huaire i gcás 5xx / earráid líonra
+         build payload { event, timestamp, data }
+         sign body with HMAC-SHA256 (if secret present)
+         POST with 10s timeout
+         retry up to 3 times on 5xx / network error
        recordWebhookDelivery(id, status, success)
     -> disableWebhooksWithHighFailures(10)
 ```
 
-Is próiseas seol-agus-déan-dearmad é an seoladh don ghlaoiteoir: slogann `Promise.allSettled`
-earráidí gach glao gréasáin ionas nach féidir le glacadóir lochtach amháin bac a chur ar na cinn eile.
+Ní féidir leis an nglaoiteoir dearmad a dhéanamh ar an tseoladh: fáinleogaíonn `Promise.allSettled` earráidí in aghaidh an chuardaigh gréasáin mar sin ní féidir le droch-ghlacadóir amháin bac a chur ar na cinn eile.
 
 ## Síniú HMAC
 
-Nuair a bhíonn `secret` ag glao gréasáin, síníonn OmniRoute an corp JSON agus seolann sé:
+Nuair a bhíonn `secret` ag crúca gréasáin, síníonn OmniRoute an corp JSON agus seolann sé:
 
 ```
 Content-Type: application/json
@@ -64,13 +59,11 @@ X-Webhook-Timestamp: <ISO-8601>
 X-Webhook-Signature: sha256=<hex HMAC-SHA256(secret, body)>
 ```
 
-> Úsáideann ainmneacha na gceanntásca an réimír `X-Webhook-*` (ní `X-OmniRoute-*`). Is é luach
-> an tsínithe `sha256=<hex>` — fíoraigh an réimír iomlán.
+> Úsáideann ainmneacha ceanntásca an réimír `X-Webhook-*` (ní `X-OmniRoute-*`). Is é an luach sínithe `sha256=<hex>` — fíoraigh an réimír iomlán.
 
-Má ghlaoitear `createWebhook` gan rún, gineann modúl an bhunachair sonraí ceann
-(`whsec_<48 hex>`) ionas go sínítear gach glao gréasáin de réir réamhshocraithe.
+Má thugtar `createWebhook` gan rún, gineann an modúl DB ceann (`whsec_<48 hex>`) agus mar sin sínítear gach crúca gréasáin de réir réamhshocraithe.
 
-### Fíorú ar an nglacadóir
+### Ag fíorú ar an nglacadóir
 
 ```typescript
 import { createHmac, timingSafeEqual } from "node:crypto";
@@ -83,66 +76,57 @@ function verify(rawBody: string, signature: string, secret: string) {
 }
 ```
 
-Fíoraigh i gcónaí in aghaidh chorp **amh** an iarratais, roimh aon pharsáil JSON.
+Fíoraigh i gcónaí i gcoinne an **amh** comhlacht iarratais, roimh aon pharsáil JSON.
 
-## Polasaí Atrialacha & Teipeanna
+## Beartas Athiarrachta & Teip
 
 `deliverWebhook(url, payload, secret, maxRetries = 3)`:
 
-- Teorainn ama 10 soicind in aghaidh na hiarrachta (`AbortController`).
+- Teorainn ama 10 soicind in aghaidh an iarracht (`AbortController`).
 - Áirítear HTTP 2xx mar rath.
-- Áirítear HTTP 3xx/4xx mar stádas deiridh nach féidir a atriail — déantar é a thaifeadadh mar sheachadadh
-  le `success = res.ok`.
-- Déantar HTTP 5xx agus earráidí líonra a atriail le cúlscoitheadh easpónantúil:
-  `2^attempt * 1000 ms` (1s, 2s, 4s).
+- HTTP Áirítear 3xx/4xx mar stádas deiridh neamh-in-triail — taifeadta mar a sheachadtar le `success = res.ok`.
+- Aisghabhtar earráidí HTTP 5xx agus líonra le haisíoc easpónantúil: `2^attempt * 1000 ms` (1s, 2s, 4s).
 - Tar éis `maxRetries`, déantar an seachadadh a thaifeadadh mar theip.
-- Nuashonraíonn gach seachadadh `last_triggered_at`, `last_status`, agus athshocraíonn
-  nó incrimintíonn sé `failure_count`.
-- Glaonn an seoltóir ar `disableWebhooksWithHighFailures(10)` tar éis gach scaipthe,
-  mar sin díchumasaítear go huathoibríoch aon webhook a bhfuil `failure_count >= 10` aige.
+- Nuashonraíonn gach seachadadh `last_triggered_at`, `last_status`, agus athshocraíonn nó méadaíonn sé `failure_count`.
+- Glaonn an seoltóir ar `disableWebhooksWithHighFailures(10)` tar éis gach fean-amach, agus mar sin díchumasaítear aon chuaille gréasáin le `failure_count >= 10` go huathoibríoch.
 
 ## Bunachar Sonraí
 
-Tábla `webhooks` (aistriú `011_webhooks.sql`):
+Tábla `webhooks` (imirce `011_webhooks.sql`):
 
-| Colún               | Cineál  | Nótaí                                             |
-| ------------------- | ------- | ------------------------------------------------- |
-| `id`                | TEXT PK | UUID                                              |
-| `url`               | TEXT    | URL ceann scríbe                                  |
-| `events`            | TEXT    | Eagar JSON; réamhshocrú `["*"]`                   |
-| `secret`            | TEXT    | Rún HMAC (gintar go huathoibríoch mura dtugtar é) |
-| `enabled`           | INT     | 0/1; is é 1 an réamhshocrú                        |
-| `description`       | TEXT    | Lipéad roghnach inléite ag daoine                 |
-| `created_at`        | TEXT    | `datetime('now')`                                 |
-| `last_triggered_at` | TEXT    | Nuashonraithe le gach iarracht seachadta          |
-| `last_status`       | INT     | Stádas HTTP na hiarrachta deireanaí (0 = líonra)  |
-| `failure_count`     | INT     | Athshocraítear go 0 ar rath, +1 ar theip          |
+| Colún               | Cineál  | Nótaí                                           |
+| ------------------- | ------- | ----------------------------------------------- |
+| `id`                | TEXT PK | UUID                                            |
+| `url`               | TEXT    | Ceann Scríbe URL                                |
+| `events`            | TEXT    | eagar JSON ; `["*"]` réamhshocraithe            |
+| `secret`            | TEXT    | Rún HMAC (uathghinte mura dtugtar é)            |
+| `enabled`           | INT     | 0/1; réamhshocraithe go 1                       |
+| `description`       | TEXT    | Lipéad daonna roghnach                          |
+| `created_at`        | TEXT    | `datetime('now')`                               |
+| `last_triggered_at` | TEXT    | Nuashonraithe ar gach iarracht seachadta        |
+| `last_status`       | INT     | Stádas HTTP na hiarrachta deiridh (0 líonra = ) |
+| `failure_count`     | INT     | Athshocraigh go 0 ar rath, + 1 ar theip         |
 
-Coinnítear stair na seachadtaí sa tábla tiomnaithe `webhook_deliveries`
-(aistriú `069_webhook_deliveries.sql`, scríofa trí
-`src/lib/db/webhookDeliveries.ts::insertDelivery` le gach iarracht), chomh maith
-leis na cuntair chomhiomlána ar an ró `webhooks`. Cuireadh meiteashonraí cineáil (Slack / Discord /
-Telegram / claochladáin pálasta saincheaptha) leis trí `070_webhooks_kind_metadata.sql`.
+Tá stair seachadta fós sa tábla tiomnaithe `webhook_deliveries` (imirce `069_webhook_deliveries.sql`, scríofa trí `src/lib/db/webhookDeliveries.ts::insertDelivery` ar gach iarracht), chomh maith leis na cuntair chomhiomlán ar an tsraith `webhooks`. Chuir `070_webhooks_kind_metadata.sql` meiteashonraí cineálta (Slack / Discord / Telegram / claochladáin pálasta saincheaptha) leis.
 
-## API REST
+## REST API
 
-Teastaíonn fíordheimhniú bainistíochta (`requireManagementAuth`) ó gach críochphointe.
+Tá údarás bainistíochta (`requireManagementAuth`) ag teastáil ó gach críochphointe.
 
-| Críochphointe                   | Modh   | Cur Síos                                         |
-| ------------------------------- | ------ | ------------------------------------------------ |
-| `/api/webhooks`                 | GET    | Liostaigh webhooks (rúin folaithe)               |
-| `/api/webhooks`                 | POST   | Cruthaigh webhook                                |
-| `/api/webhooks/[id]`            | GET    | Sonraí webhook (rún iomlán)                      |
-| `/api/webhooks/[id]`            | PUT    | Nuashonraigh réimsí                              |
-| `/api/webhooks/[id]`            | DELETE | Bain                                             |
-| `/api/webhooks/[id]/test`       | POST   | Seol `test.ping` (gan atrialacha)                |
-| `/api/webhooks/[id]/deliveries` | GET    | Iarrachtaí seachadta le déanaí do webhook amháin |
-| `/api/webhooks/validate-url`    | POST   | Bailíochtú URL réamheitilte (cosaint SSRF)       |
+| Críochphointe                   | Modh   | Cur síos                                                           |
+| ------------------------------- | ------ | ------------------------------------------------------------------ |
+| `/api/webhooks`                 | GET    | Liostaigh cuaillí gréasáin (rúin faoi cheilt)                      |
+| `/api/webhooks`                 | POST   | Cruthaigh crúca gréasáin                                           |
+| `/api/webhooks/[id]`            | GET    | Mionsonraí ar an gcuar gréasáin (rún iomlán)                       |
+| `/api/webhooks/[id]`            | PUT    | Réimsí cothrom le dáta                                             |
+| `/api/webhooks/[id]`            | DELETE | Bain                                                               |
+| `/api/webhooks/[id]/test`       | POST   | Dóiteáin `test.ping` (gan atriall)                                 |
+| `/api/webhooks/[id]/deliveries` | GET    | Iarrachtaí seachadta le déanaí le haghaidh cuaille gréasáin amháin |
+| `/api/webhooks/validate-url`    | POST   | Bailíochtú URL réamh-eitilte (garda SSRF )                         |
 
-Folaíonn `GET /api/webhooks` an rún mar `<first 10 chars>...` chun sceitheadh
-ar leathanaigh liostaithe a sheachaint. Úsáid an GET `[id]` nuair a bhíonn an rún de dhíth ort i ndáiríre.
+Cuimsíonn `GET /api/webhooks` an rún do `<first 10 chars>...` chun sceitheadh ar leathanaigh liostála a sheachaint. Bain úsáid as an `[id]` GET nuair is gá duit an rún.
 
-### Cruthaigh webhook
+### Cruthaigh crúca gréasáin
 
 ```bash
 curl -X POST http://localhost:20128/api/webhooks \
@@ -152,37 +136,33 @@ curl -X POST http://localhost:20128/api/webhooks \
     "url": "https://hooks.slack.com/services/...",
     "secret": "whsec_my_shared_secret",
     "events": ["quota.exceeded", "request.failed"],
-    "description": "Foláirimh Slack"
+    "description": "Slack alerts"
   }'
 ```
 
-Má fhágtar `secret` ar lár, gineann an freastalaí rún `whsec_<hex>` agus seolann
-sé ar ais sa fhreagra é.
+Má fhágtar `secret` ar lár, gineann an freastalaí rún `whsec_<hex>` agus seolann sé ar ais sa fhreagra é.
 
-### Tástáil webhook
+### Cabhrán gréasáin a thástáil
 
 ```bash
 curl -X POST http://localhost:20128/api/webhooks/<id>/test \
   -H "Cookie: auth_token=..."
 ```
 
-Seoltar `{ delivered, status, error }` ar ais. Ní dhéantar aon atrialacha — tá sé seo úsáideach chun
-a dheimhniú go tapa go nglacann an glacadóir leis an bpálasta agus leis an síniú.
+Filleann `{ delivered, status, error }`. Ní dhéantar aon iarracht — atá úsáideach chun a dheimhniú go tapa go nglacann an glacadóir leis an bpálasta agus leis an síniú.
 
-## Painéal
+## Deais
 
-Soláthraíonn leathanach an phainéil ag `/dashboard/webhooks` (féach
-`src/app/(dashboard)/dashboard/webhooks/page.tsx`) na gnéithe seo a leanas:
+Soláthraíonn leathanach an deais ag `/dashboard/webhooks` (féach `src/app/(dashboard)/dashboard/webhooks/page.tsx`):
 
-- Crúcaí gréasáin a chruthú/a chur in eagar le roghnóir teagmhas
-- Táscaire stádais (gníomhach / neamhghníomhach / earráideach) bunaithe ar `enabled`,
-  `failure_count`, agus `last_status`
-- Seachadadh tástála le clic amháin
-- Scorán láimhe chun cumasú/díchumasú
+- Buaicíní gréasáin Create/edit le roghnóir imeachtaí
+- Táscaire stádais (gníomhach / neamhghníomhach / earráideach) bunaithe ar `enabled`, `failure_count`, agus `last_status`
+- Seachadadh tástála aon-cliceáil
+- Lámhleabhar enable/disable scoránaigh
 
-## Samplaí Pálasta
+## Samplaí de phárolla
 
-### request.completed
+### iarratas.críochnaithe
 
 ```json
 {
@@ -201,7 +181,7 @@ Soláthraíonn leathanach an phainéil ag `/dashboard/webhooks` (féach
 }
 ```
 
-### test.ping
+### tástáil.ping
 
 ```json
 {
@@ -214,29 +194,19 @@ Soláthraíonn leathanach an phainéil ag `/dashboard/webhooks` (féach
 }
 ```
 
-Sainítear cruthanna na réimsí do theagmhais seachas `test.ping` ag na suíomhanna glao a astaíonn
-iad; caith leis an réad `data` mar réad atá comhoiriúnach chun cinn (cuir réimsí leis, ná bí ag brath ar
-a n-éagmais).
+Sainítear cruthanna allamuigh le haghaidh imeachtaí neamh-`test.ping` ag na suíomhanna glaonna a astaíonn iad; caitheamh leis an oibiacht `data` mar rud atá comhoiriúnach chun tosaigh (cuir réimsí leis, ná bí ag brath ar neamhláithreacht).
 
-## Dea-Chleachtais
+## Cleachtais is Fearr
 
-- **Fíoraigh an síniú ar gach seachadadh** i gcoinne an amhchoirp — cuireann sé seo cosc ar
-  iarratais POST bréagaithe ó dhuine ar bith a thomhaiseann URL do chrúca gréasáin.
-- **Freagair le 2xx laistigh de ~5 shoicind** — téann an seoltóir thar am tar éis 10 s. Ídeoidh
-  glacadóirí malla atrialacha agus méadóidh siad `failure_count`.
-- **Déan láimhseálaithe idémpatach** — ciallaíonn atrialacha agus séimeantaic seachadta
-  uair amháin ar a laghad go bhféadfadh dúblaigh a bheith ann.
-- **Liostáil go híosmhéideach** — ná liostaigh ach na teagmhais a úsáideann tú i ndáiríre; cuirfidh `"*"`
-  costas le glacadóirí nach bhfuil faoi do smacht.
-- **Coinnigh súil ar `failure_count`** — díchumasaítear críochphointí go huathoibríoch tar éis 10
-  dteip as a chéile; athshocraigh é trí `PUT /api/webhooks/[id]` a ghlaoch le `enabled: true`
-  tar éis an glacadóir a dheisiú.
-- **Rothlaigh rúin go tréimhsiúil** — déan `PUT` ar `secret` nua, imlonnaigh an luach nua
-  chuig an nglacadóir, agus deimhnigh é tríd an gcríochphointe tástála.
+- **Fíoraigh an síniú ar gach seachadadh** in aghaidh an choirp amh — cosc POSTs spoofed ó dhuine ar bith a buille faoi thuairim do whook URL.
+- **Freagair 2xx laistigh de ~ 5 soicind** — amanna an seoltaí amach ag 10 s. Déanfaidh glacadóirí mall atriail a ithe agus inflate `failure_count`.
+- **Déan láimhseálaithe díomhaoin** Ciallaíonn atrialltaí — agus ar a laghad uair amháin semantics seachadta gur féidir dúbailt.
+- **Liostáil íosta** Ní liostaíonn — ach na himeachtaí a itheann tú; Cuirfidh `"*"` costas ar ghlacadóirí nach bhfuil á rialú agat.
+- **Féach ar `failure_count`** Tá críochphointí — faoi mhíchumas uathoibríoch ag 10 teip as a chéile; athshocrú trí ghlaoch a chur ar `PUT /api/webhooks/[id]` le `enabled: true` tar éis an glacadóir a shocrú.
+- **Rothlaigh rúin go tréimhsiúil** — `PUT` `secret` nua , imscaradh an luach nua chuig an nglacadóir, agus deimhnigh tríd an gcríochphointe tástála.
 
-## Féach Freisin
+## Féach Chomh maith leis sin
 
-- [API_REFERENCE.md](../reference/API_REFERENCE.md) — dromchla iomlán an API bainistíochta
-- [RESILIENCE_GUIDE.md](../architecture/RESILIENCE_GUIDE.md) — séimeantaic an scoradáin chiorcaid / an fhuaraithe
-  taobh thiar de theipeanna soláthraithe a nochtar trí `request.failed`
+- [API_REFERENCE.md](../reference/API_REFERENCE.md) — bainistíochta iomlán dromchla API
+- [RESILIENCE_GUIDE.md](../architecture/RESILIENCE_GUIDE.md) Scoradán ciorcaid — / séimeantaice fuarú taobh thiar de theipeanna soláthraithe a ndearnadh dromchla orthu trí `request.failed`
 - Foinse: `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`

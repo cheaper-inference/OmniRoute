@@ -4,57 +4,52 @@
 
 ---
 
-> **Orísun òtítọ́:** `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`, `src/app/api/webhooks/`
-> **Ìgbà ìmúdójúìwọ̀n tó kẹ́yìn:** 2026-06-28 — v3.8.40
+> **Orisun otitọ:** `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`, `src/app/api/webhooks/`**Imudojuiwọn to kẹhin:** 2026-06-28 — v3.8.40
 
-OmniRoute lè fi àwọn webhook HTTP ránṣẹ́ nígbà tí àwọn ìṣẹ̀lẹ̀ bá ṣẹlẹ̀ lórí pèpéle. Lo wọn láti so pọ̀ mọ́
-Slack, PagerDuty, Datadog, àwọn iṣẹ́ ìkìlọ̀ inú ètò, tàbí olùgbà HTTP èyíkéyìí.
+OmniRoute le ina HTTP webhooks lori awọn iṣẹlẹ Syeed. Lo wọn lati ṣepọ pẹlu Slack, PagerDuty, Datadog, awọn iṣẹ titaniji inu, tabi eyikeyi olugba HTTP.
 
-Olùpín náà máa ń fi ìfọwọ́sí HMAC-SHA256 sí ìfiránṣẹ́ kọ̀ọ̀kan, ó máa ń tún gbìyànjú nígbà
-ìkùnà fún ìgbà díẹ̀, ó máa ń tọpinpin ìlera ìfiránṣẹ́ fún webhook kọ̀ọ̀kan, ó sì máa ń pa àwọn endpoint
-tí ìkùnà wọn ń bá a lọ láìfọwọ́sí.
+Awọn dispatcher ami kọọkan ifijiṣẹ pẹlu HMAC-SHA256, retries on transient ikuna, orin ilera ifijiṣẹ fun webhook, ati auto-disables endpoints ti o pa aise.
 
-## Àwọn Ìṣẹ̀lẹ̀ Tí A Ṣàtìlẹ́yìn Fún
+## Awọn iṣẹlẹ atilẹyin
 
-Irú `WebhookEvent` (`src/lib/webhooks/eventDescriptions.ts`, tí `src/lib/webhookDispatcher.ts` ń lò) ń ṣàpẹẹrẹ àwọn ìṣẹ̀lẹ̀ mẹ́rin péré lọ́wọ́lọ́wọ́:
+Iru `WebhookEvent` (`src/lib/webhooks/eventDescriptions.ts`, ti o jẹ nipasẹ `src/lib/webhookDispatcher.ts`) lọwọlọwọ ṣe apẹẹrẹ awọn iṣẹlẹ meje:
 
-| Ìṣẹ̀lẹ̀               | Ó máa ń ṣẹlẹ̀ nígbà tí                                              |
-| ------------------- | ------------------------------------------------------------------ |
-| `request.completed` | Ìbéèrè tí a gba kọjá bá parí láṣeyọrí                              |
-| `request.failed`    | Ìbéèrè tí a gba kọjá bá kùnà lẹ́yìn gbogbo àtúngbìyànjú/ọ̀nà àfidípò |
-| `quota.exceeded`    | Kọ́kọ́rọ́ API kan bá kọjá ààlà ìnáwó/quota                            |
-| `test.ping`         | Ìṣẹ̀lẹ̀ àfarawé tí endpoint ìdánwò ń lò                              |
+| Iṣẹlẹ                     | Ina nigbati                                                                                 |
+| ------------------------- | ------------------------------------------------------------------------------------------- |
+| `request.completed`       | Ibere asoju kan pari ni aṣeyọri                                                             |
+| `request.failed`          | Ibeere aṣoju kuna lẹhin gbogbo retries/fallback                                             |
+| `quota.exceeded`          | Bọtini API kan kọja iloro budget/quota kan                                                  |
+| `proxy.set_aside`         | Ọmọ ẹgbẹ adagun-aṣoju kan ti ya sọtọ lẹhin awọn ijusilẹ leralera (iyipada nikan)            |
+| `proxy.pool.exhausted`    | Gbogbo ọmọ ẹgbẹ ti aaye adagun aṣoju aṣoju ti ṣeto si apakan                                |
+| `provider.reset_redeemed` | Awọn atunto ile-ifowo lo ni aifọwọyi ṣe irapada kirẹditi atunto tabi atunto igba ọsẹ Claude |
+| `test.ping`               | Iṣẹlẹ sintetiki lo nipasẹ aaye ipari idanwo                                                 |
 
-Àwọn subscription gba literal `"*"` láti gba gbogbo ìṣẹ̀lẹ̀. Àwọn orúkọ ìṣẹ̀lẹ̀
-tí a kò mọ̀ nínú `events` ni a máa kọjú sí nígbà ìpínkiri.
+Awọn iforukọsilẹ gba `"*"` gangan lati gba gbogbo iṣẹlẹ. Awọn orukọ iṣẹlẹ ti a ko mọ ni `events` ni a kọbikita ni akoko fifiranṣẹ.
 
-> Àkíyèsí: a ti so API olùpín náà pọ̀, ṣùgbọ́n àwọn ibi ìpè production fún díẹ̀ lára
-> àwọn ìṣẹ̀lẹ̀ tí kì í ṣe `test.ping` ṣì ń dé. Ṣàyẹ̀wò `grep dispatchEvent` láti rí
-> àwọn ọ̀nà tí ó ń pe olùpín náà lọ́wọ́lọ́wọ́ nínú ẹ̀dà rẹ.
+> Akiyesi: Olufiranṣẹ API ti firanṣẹ, ṣugbọn awọn aaye ipe iṣelọpọ fun diẹ ninu awọn iṣẹlẹ ti kii ṣe `test.ping` tun wa ni ibalẹ. Ṣayẹwo `grep dispatchEvent` lati rii iru awọn ipa-ọna ti o pe olufiranṣẹ lọwọlọwọ ninu itusilẹ rẹ.
 
-## Ìṣètò Ẹ̀rọ
+## Faaji
 
 ```
-Olùpè (handler, service, monitor)
+Caller (handler, service, monitor)
   dispatchEvent(event, data)            [src/lib/webhookDispatcher.ts]
     -> getEnabledWebhooks()             [src/lib/db/webhooks.ts]
-    -> ṣe àlẹ̀mọ́ nípasẹ̀ webhook.events
-    -> fún ìbámu kọ̀ọ̀kan (ní ìfẹ̀gbẹ́kẹ̀gbẹ́):
+    -> filter by webhook.events
+    -> for each match (in parallel):
        deliverWebhook(url, payload, secret)
-         kọ payload { event, timestamp, data }
-         fi HMAC-SHA256 fọwọ́ sí body (bí secret bá wà)
-         ṣe POST pẹ̀lú timeout 10s
-         tún gbìyànjú tó ìgbà mẹ́ta lórí 5xx / àṣìṣe nẹ́tíwọ́ọ̀kì
+         build payload { event, timestamp, data }
+         sign body with HMAC-SHA256 (if secret present)
+         POST with 10s timeout
+         retry up to 3 times on 5xx / network error
        recordWebhookDelivery(id, status, success)
     -> disableWebhooksWithHighFailures(10)
 ```
 
-Ìpínkiri jẹ́ fí-ránṣẹ́-kí-o-sì-má-dúró fún olùpè: `Promise.allSettled` máa ń gbé
-àwọn àṣìṣe webhook kọ̀ọ̀kan mì, kí olùgbà búburú kan má bàa dí àwọn yòókù lọ́wọ́.
+Dispatch jẹ ina-ati-igbagbe fun olupe: `Promise.allSettled` gbe awọn aṣiṣe webhook mì nitoribẹẹ olugba buburu ko le di awọn miiran duro.
 
-## Ìfọwọ́sí HMAC
+## Ibuwọlu HMAC
 
-Nígbà tí webhook kan bá ní `secret`, OmniRoute máa ń fọwọ́ sí JSON body, yóò sì fi èyí ránṣẹ́:
+Nigbati kio wẹẹbu kan ba ni `secret`, OmniRoute ṣe ami si ara JSON ati firanṣẹ:
 
 ```
 Content-Type: application/json
@@ -64,13 +59,11 @@ X-Webhook-Timestamp: <ISO-8601>
 X-Webhook-Signature: sha256=<hex HMAC-SHA256(secret, body)>
 ```
 
-> Àwọn orúkọ header ń lo ìpele `X-Webhook-*` (kì í ṣe `X-OmniRoute-*`). Iye signature
-> jẹ́ `sha256=<hex>` — ṣàyẹ̀wò gbogbo ìpele náà.
+> Awọn orukọ akọsori lo ìpele `X-Webhook-*` (kii ṣe `X-OmniRoute-*`). Iye Ibuwọlu jẹ `sha256=<hex>` — ṣe idaniloju ìpele kikun.
 
-Bí a bá pe `createWebhook` láìsí secret, module DB máa dá ọ̀kan sílẹ̀
-(`whsec_<48 hex>`) nítorí náà, a máa ń fọwọ́ sí gbogbo webhook ní àìpé.
+Ti a ba pe `createWebhook` laisi aṣiri, module DB n ṣe agbejade ọkan (`whsec_<48 hex>`) nitorinaa gbogbo awọn oju opo wẹẹbu ti fowo si nipasẹ aiyipada.
 
-### Ṣíṣàyẹ̀wò lórí olùgbà
+### Ijẹrisi lori olugba
 
 ```typescript
 import { createHmac, timingSafeEqual } from "node:crypto";
@@ -83,66 +76,57 @@ function verify(rawBody: string, signature: string, secret: string) {
 }
 ```
 
-Ṣàyẹ̀wò lòdì sí **raw** request body nígbà gbogbo, kí parsing JSON èyíkéyìí tó wáyé.
+Nigbagbogbo daju lodi si awọn **aise** ara beere, ṣaaju ṣiṣe itupalẹ JSON eyikeyi.
 
-## Ìlànà Àtúngbìyànjú & Ìkùnà
+## Tun gbiyanju & Ilana Ikuna
 
 `deliverWebhook(url, payload, secret, maxRetries = 3)`:
 
-- Àkókò ìdádúró ìṣẹ́jú-àáyá 10 fún ìgbìyànjú kọ̀ọ̀kan (`AbortController`).
-- HTTP 2xx ni a kà sí àṣeyọrí.
-- HTTP 3xx/4xx ni a kà sí ipò ìkẹyìn tí kò ṣeé tún gbìyànjú — a sì ṣàkọsílẹ̀ rẹ̀ gẹ́gẹ́ bí èyí tí a ti fi jíṣẹ́
-  pẹ̀lú `success = res.ok`.
-- HTTP 5xx àti àwọn àṣìṣe nẹ́tíwọ́ọ̀kì ni a tún máa ń gbìyànjú pẹ̀lú àkókò ìdádúró tó ń pọ̀ sí i:
-  `2^attempt * 1000 ms` (1s, 2s, 4s).
-- Lẹ́yìn `maxRetries`, a ṣàkọsílẹ̀ fífi jíṣẹ́ náà gẹ́gẹ́ bí èyí tó kùnà.
-- Fífi jíṣẹ́ kọ̀ọ̀kan máa ń ṣe ìmúdójúìwọ̀n `last_triggered_at`, `last_status`, ó sì máa ń tún
-  `failure_count` padà sí ìbẹ̀rẹ̀ tàbí mú un pọ̀ sí i.
-- Olùpínṣẹ́ máa ń pe `disableWebhooksWithHighFailures(10)` lẹ́yìn ìpínká kọ̀ọ̀kan,
-  nítorí náà, webhook èyíkéyìí tó ní `failure_count >= 10` ni a máa pa láìfọwọ́yí.
+- 10 akoko akoko keji fun igbiyanju (`AbortController`).
+- HTTP 2xx ka bi aṣeyọri.
+- HTTP 3xx/4xx ṣe iṣiro bi ipo ikẹhin ti kii ṣe atunwi — ti o gbasilẹ bi jiṣẹ pẹlu `success = res.ok`.
+- HTTP 5xx ati awọn aṣiṣe nẹtiwọọki ni a tun gbiyanju pẹlu ifẹhinti ipari: `2^attempt * 1000 ms` (1s, 2s, 4s).
+- Lẹhin `maxRetries`, ifijiṣẹ ti wa ni igbasilẹ bi kuna.
+- Ifijiṣẹ kọọkan ṣe imudojuiwọn `last_triggered_at`, `last_status`, ati boya tunto tabi awọn afikun `failure_count`.
+- Olupin naa n pe `disableWebhooksWithHighFailures(10)` lẹhin igbafẹfẹ kọọkan, nitorinaa eyikeyi webhook pẹlu `failure_count >= 10` jẹ alaabo laifọwọyi.
 
-## Ibùdó dátà
+## Aaye data
 
-Tábìlì `webhooks` (ìṣíkiri `011_webhooks.sql`):
+Tabili `webhooks` (Iṣikiri `011_webhooks.sql`):
 
-| Ọ̀wọ̀n                | Irú     | Àwọn àkíyèsí                                              |
-| ------------------- | ------- | --------------------------------------------------------- |
-| `id`                | TEXT PK | UUID                                                      |
-| `url`               | TEXT    | URL ibi tí a ń fi ránṣẹ́ sí                                |
-| `events`            | TEXT    | Àkójọpọ̀ JSON; àìyípadà `["*"]`                            |
-| `secret`            | TEXT    | Àṣírí HMAC (a máa dá a sílẹ̀ láìfọwọ́yí bí a kò bá pèsè rẹ̀) |
-| `enabled`           | INT     | 0/1; àìyípadà rẹ̀ jẹ́ 1                                     |
-| `description`       | TEXT    | Àmì ìdánimọ̀ fún ènìyàn tí kò pọndandan                    |
-| `created_at`        | TEXT    | `datetime('now')`                                         |
-| `last_triggered_at` | TEXT    | A máa ṣe ìmúdójúìwọ̀n rẹ̀ ní gbogbo ìgbìyànjú fífi jíṣẹ́     |
-| `last_status`       | INT     | Ipò HTTP ti ìgbìyànjú tó kẹ́yìn (0 = nẹ́tíwọ́ọ̀kì)            |
-| `failure_count`     | INT     | A tún un padà sí 0 nígbà àṣeyọrí, +1 nígbà ìkùnà          |
+| Àwọ̀n                | Iru     | Awọn akọsilẹ                                   |
+| ------------------- | ------- | ---------------------------------------------- |
+| `id`                | TEXT PK | UUID                                           |
+| `url`               | TEXT    | Ibugbe URL                                     |
+| `events`            | TEXT    | Eto JSON ; aiyipada `["*"]`                    |
+| `secret`            | TEXT    | Aṣiri HMAC (ti ipilẹṣẹ laifọwọyi ti ko ba fun) |
+| `enabled`           | INT     | 0/1; aipe si 1                                 |
+| `description`       | TEXT    | Iyan eniyan aami                               |
+| `created_at`        | TEXT    | `datetime('now')`                              |
+| `last_triggered_at` | TEXT    | Imudojuiwọn lori gbogbo igbiyanju ifijiṣẹ      |
+| `last_status`       | INT     | Ipo HTTP ti igbiyanju kẹhin (0 = nẹtiwọki)     |
+| `failure_count`     | INT     | Tunto si 0 lori aṣeyọri, + 1 lori ikuna        |
 
-A máa ń tọ́jú ìtàn fífi jíṣẹ́ sínú tábìlì pàtó `webhook_deliveries`
-(ìṣíkiri `069_webhook_deliveries.sql`, tí a kọ sínú rẹ̀ nípasẹ̀
-`src/lib/db/webhookDeliveries.ts::insertDelivery` ní gbogbo ìgbìyànjú), ní àfikún
-sí àwọn òǹkà àkójọpọ̀ lórí ìlà `webhooks`. Àlàyé-àfikún irú (Slack / Discord /
-Telegram / àwọn olùyí payload àdáni) ni a fi kún un nípasẹ̀ `070_webhooks_kind_metadata.sql`.
+Itan ifijiṣẹ wa ni iduro ni tabili iyasọtọ `webhook_deliveries` (ijira `069_webhook_deliveries.sql`, ti a kọ nipasẹ `src/lib/db/webhookDeliveries.ts::insertDelivery` lori gbogbo igbiyanju), ni afikun si awọn iṣiro apapọ lori ila `webhooks`. Awọn metadata oninuure (Slack / Discord / Telegram / awọn oluyipada isanwo isanwo aṣa) jẹ afikun nipasẹ `070_webhooks_kind_metadata.sql`.
 
-## API REST
+## REST API
 
-Gbogbo àwọn endpoint nílò ìfàṣẹsí ìṣàkóso (`requireManagementAuth`).
+Gbogbo awọn aaye ipari nilo ijẹrisi iṣakoso (`requireManagementAuth`).
 
-| Endpoint                        | Ọ̀nà    | Àpèjúwe                                       |
-| ------------------------------- | ------ | --------------------------------------------- |
-| `/api/webhooks`                 | GET    | Ṣe àtòjọ àwọn webhook (a bo àwọn àṣírí mọ́lẹ̀)  |
-| `/api/webhooks`                 | POST   | Ṣẹ̀dá webhook                                  |
-| `/api/webhooks/[id]`            | GET    | Àlàyé webhook (àṣírí kíkún)                   |
-| `/api/webhooks/[id]`            | PUT    | Ṣe ìmúdójúìwọ̀n àwọn ààyè                      |
-| `/api/webhooks/[id]`            | DELETE | Yọ ọ́ kúrò                                     |
-| `/api/webhooks/[id]/test`       | POST   | Fi `test.ping` ránṣẹ́ (láìsí àtúngbìyànjú)     |
-| `/api/webhooks/[id]/deliveries` | GET    | Àwọn ìgbìyànjú fífi jíṣẹ́ àìpẹ́ fún webhook kan |
-| `/api/webhooks/validate-url`    | POST   | Ìfàṣẹsí URL ṣáájú ìbéèrè (ààbò SSRF)          |
+| Opin ojuami                     | Ọna    | Apejuwe                                                |
+| ------------------------------- | ------ | ------------------------------------------------------ |
+| `/api/webhooks`                 | GET    | Ṣe atokọ awọn kio wẹẹbu (awọn aṣiri ti a boju)         |
+| `/api/webhooks`                 | POST   | Ṣẹda webhook                                           |
+| `/api/webhooks/[id]`            | GET    | Awọn alaye Webhook (aṣiri kikun)                       |
+| `/api/webhooks/[id]`            | PUT    | Awọn aaye imudojuiwọn                                  |
+| `/api/webhooks/[id]`            | DELETE | Yọ kuro                                                |
+| `/api/webhooks/[id]/test`       | POST   | Ina kan `test.ping` (ko si awọn atunwo)                |
+| `/api/webhooks/[id]/deliveries` | GET    | Awọn igbiyanju ifijiṣẹ aipẹ fun webhook kan            |
+| `/api/webhooks/validate-url`    | POST   | Ifọwọsi URL ti ọkọ ofurufu ṣaaju-ofurufu (oluṣọ SSRF ) |
 
-`GET /api/webhooks` máa ń bo àṣírí náà mọ́lẹ̀ sí `<first 10 chars>...` láti dènà
-jíjò ó jáde lórí àwọn ojú-ewé àtòjọ. Lo GET `[id]` nígbà tí o bá nílò àṣírí náà gan-an.
+`GET /api/webhooks` bo aṣiri si `<first 10 chars>...` lati yago fun jijo lori awọn oju-iwe atokọ. Lo `[id]` GET nigba ti o ba nilo aṣiri gangan.
 
-### Ṣẹ̀dá webhook
+### Ṣẹda webhook
 
 ```bash
 curl -X POST http://localhost:20128/api/webhooks \
@@ -156,33 +140,29 @@ curl -X POST http://localhost:20128/api/webhooks \
   }'
 ```
 
-Bí a bá yọ `secret` sílẹ̀, server náà máa dá àṣírí `whsec_<hex>` sílẹ̀, yóò sì dá
-a padà nínú èsì náà.
+Ti o ba jẹ pe `secret` ti yọkuro, olupin naa ṣe ipilẹṣẹ aṣiri `whsec_<hex>` kan ati da pada ni idahun.
 
-### Dán webhook wò
+### Idanwo webhook
 
 ```bash
 curl -X POST http://localhost:20128/api/webhooks/<id>/test \
   -H "Cookie: auth_token=..."
 ```
 
-Ó dá `{ delivered, status, error }` padà. Kò sí àtúngbìyànjú tí a ṣe — èyí wúlò fún
-ṣíṣàyẹ̀wò ní kíákíá pé olùgbà náà gba payload àti ìbuwọ́lu náà.
+Pada `{ delivered, status, error }`. Ko si awọn igbiyanju igbiyanju — ti o wulo fun idaniloju ni kiakia pe olugba gba fifuye isanwo ati ibuwọlu.
 
-## Pátákó Ìṣàkóso
+## Dasibodu
 
-Ojú-ìwé pátákó ìṣàkóso ní `/dashboard/webhooks` (wo
-`src/app/(dashboard)/dashboard/webhooks/page.tsx`) pèsè:
+Oju-iwe dasibodu ni `/dashboard/webhooks` (wo `src/app/(dashboard)/dashboard/webhooks/page.tsx`) pese:
 
-- Ṣíṣẹ̀dá/ṣíṣàtúnṣe àwọn webhook pẹ̀lú ohun-yan ìṣẹ̀lẹ̀
-- Atọ́ka ipò (ń ṣiṣẹ́ / kò ṣiṣẹ́ / ní àṣìṣe) tí a gbé karí `enabled`,
-  `failure_count`, àti `last_status`
-- Ìfijiṣẹ́ àdánwò pẹ̀lú ẹ̀ẹ̀kan-tẹ̀
-- Yíyan láti mú ṣiṣẹ́/mú kúrò ní ṣíṣe pẹ̀lú ọwọ́
+- Create/edit webhooks pẹlu ohun iṣẹlẹ picker
+- Atọka ipo (lọwọ / aiṣiṣẹ / aṣiṣe) da lori `enabled`, `failure_count`, ati `last_status`
+- Ọkan-tẹ igbeyewo ifijiṣẹ
+- Afọwọṣe enable/disable toggle
 
-## Àwọn Àpẹẹrẹ Payload
+## Payload Apeere
 
-### request.completed
+### ìbéèrè.pari
 
 ```json
 {
@@ -201,7 +181,7 @@ Ojú-ìwé pátákó ìṣàkóso ní `/dashboard/webhooks` (wo
 }
 ```
 
-### test.ping
+### idanwo.ping
 
 ```json
 {
@@ -214,29 +194,19 @@ Ojú-ìwé pátákó ìṣàkóso ní `/dashboard/webhooks` (wo
 }
 ```
 
-Àwọn ìrísí field fún àwọn ìṣẹ̀lẹ̀ tí kì í ṣe `test.ping` ni àwọn ibi ìpè tí ń ṣe
-àgbéjáde wọn ń ṣàlàyé; ka object `data` sí èyí tó bá ìbámu-ọjọ́-iwaju mu (ṣàfikún àwọn field, má ṣe gbára lé
-àìsí wọn).
+Awọn apẹrẹ aaye fun awọn iṣẹlẹ ti kii ṣe `test.ping` jẹ asọye nipasẹ awọn aaye ipe ti o jade wọn; tọju nkan `data` bi ibaramu siwaju (fi awọn aaye kun, maṣe dale lori isansa).
 
-## Àwọn Ìlànà Tó Dára Jù
+## Awọn iṣe ti o dara julọ
 
-- **Ṣàyẹ̀wò signature lórí gbogbo ìfijiṣẹ́** pẹ̀lú raw body — èyí ń dènà
-  àwọn POST èké láti ọ̀dọ̀ ẹnikẹ́ni tó bá mọ̀ URL webhook rẹ.
-- **Fèsì pẹ̀lú 2xx láàárín ~5 ìṣẹ́jú-àáyá** — dispatcher máa dáwọ́ dúró lẹ́yìn 10 s. Àwọn
-  receiver tó lọ́ra yóò jẹ àwọn ìgbìyànjú-àtúnṣe, wọn yóò sì mú `failure_count` pọ̀.
-- **Mú kí àwọn handler jẹ́ idempotent** — àwọn ìgbìyànjú-àtúnṣe àti ìtumọ̀ ìfijiṣẹ́
-  ó-kéré-tán-ẹ̀ẹ̀kan túmọ̀ sí pé àwọn ẹ̀dà àdáwò lè wáyé.
-- **Ṣe subscription níwọ̀nba díẹ̀** — ṣe àkójọ àwọn ìṣẹ̀lẹ̀ tí o ń lò nìkan; `"*"` yóò
-  ṣàfikún ìnáwó lórí àwọn receiver tí o kò ṣàkóso.
-- **Ṣọ́ `failure_count`** — endpoints máa di pípa láìfọwọ́ṣe lẹ́yìn àwọn ìkùnà
-  mẹ́wàá léraléra; tún un ṣe nípa pípè `PUT /api/webhooks/[id]` pẹ̀lú `enabled: true`
-  lẹ́yìn títún receiver náà ṣe.
-- **Máa yí secrets padà lẹ́ẹ̀kọ̀ọ̀kan** — fi `PUT` ránṣẹ́ pẹ̀lú `secret` tuntun, deploy iye tuntun náà
-  sí receiver, kí o sì fi endpoint àdánwò mú un dájú.
+- **Daju awọn Ibuwọlu lori gbogbo ifijiṣẹ** lodi si awọn aise body — idilọwọ awọn spoofed POSTs lati ẹnikẹni ti o gboju rẹ webhook URL.
+- **Dahun 2xx laarin ~ 5 iṣẹju-aaya** — awọn dispatcher igba jade ni 10 s. Awọn olugba ti o lọra yoo jẹ awọn igbiyanju ati fifun `failure_count`.
+- **Ṣe awọn olutọju ara lagbara** Awọn igbiyanju — ati awọn itumọ-itumọ ifijiṣẹ ni o kere ju-ẹẹkan tumọ si awọn ẹda-ẹda jẹ ṣeeṣe.
+- **Alabapin iwonba** — ṣe atokọ awọn iṣẹlẹ nikan ti o jẹ gangan; `"*"` yoo ṣafikun iye owo lori awọn olugba ti o ko ṣakoso.
+- **Wo `failure_count`** Awọn aaye ipari — jẹ alaabo-laifọwọyi ni awọn ikuna itẹlera 10; tunto nipa pipe `PUT /api/webhooks/[id]` pẹlu `enabled: true` lẹhin titunṣe olugba.
+- **Yi awọn asiri lorekore** — `PUT` a titun `secret`, ran awọn titun iye si awọn olugba, ki o si jẹrisi nipasẹ awọn igbeyewo opin ojuami.
 
-## Tún Wo
+## Wo Tun
 
-- [API_REFERENCE.md](../reference/API_REFERENCE.md) — gbogbo ààyè API ìṣàkóso
-- [RESILIENCE_GUIDE.md](../architecture/RESILIENCE_GUIDE.md) — ìtumọ̀ circuit breaker / cooldown
-  lẹ́yìn àwọn ìkùnà provider tí a fi hàn nípasẹ̀ `request.failed`
-- Source: `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`
+- [API_REFERENCE.md](../reference/API_REFERENCE.md) — kikun isakoso API dada
+- [RESILIENCE_GUIDE.md](../architecture/RESILIENCE_GUIDE.md) — Circuit fifọ / atunmọ itutu lẹhin awọn ikuna olupese ti farahan nipasẹ `request.failed`
+- Orisun: `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`

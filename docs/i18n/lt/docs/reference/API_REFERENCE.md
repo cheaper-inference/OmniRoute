@@ -971,12 +971,12 @@ CLI pakeičia `base_url + /responses` į WebSocket, o „OmniRoute“ perduoda j
 
 ## Kvotų ir problemų ataskaitos
 
-| Metodas | Kelias              | Aprašymas                                                                                             |
-| ------- | ------------------- | ----------------------------------------------------------------------------------------------------- |
-| GET     | `/v1/quotas/check`  | Iš anksto patikrinti `provider` + `accountId` kvotą prieš išduodant registruotą raktą                 |
-| POST    | `/v1/issues/report` | Pranešti apie kvotos / rakto išdavimo nesėkmę „GitHub“ (reikia `GITHUB_ISSUES_REPO` + prieigos rakto) |
+| Metodas | Kelias              | Aprašymas                                                                                 |
+| ------- | ------------------- | ----------------------------------------------------------------------------------------- |
+| GET     | `/v1/quotas/check`  | Prieš išduodant registruotą raktą, iš anksto patvirtinkite `provider` + `accountId` kvotą |
+| POST    | `/v1/issues/report` | Pranešti apie quota/key išdavimo nesėkmę GitHub (reikia `GITHUB_ISSUES_REPO` + rakto)     |
 
-**Autentifikavimas:** „Bearer“ API raktas (`isAuthenticated`).
+**Auth:** `/v1/quotas/check` paima nešiklio API raktą (`isAuthenticated`). `/v1/issues/report` yra skirtas tik valdymui (`requireManagementAuth`), kaip ir `/api/v1/registered-keys`: prietaisų skydelio seansas, vietinis CLI raktas arba API raktas su `manage`/`admin` apimtimi; Tik išvadoms skirti API raktai gauna `403`.
 
 ### Kvotos seanso atkūrimas (pasirenkama funkcija)
 
@@ -1782,19 +1782,23 @@ Išeinančios žiniatinklio kabliukų prenumeratos, skirtos „OmniRoute“ įvy
 
 ---
 
-## Užregistruoti raktai (automatinis valdymas)
+## Registruoti raktai (automatinis valdymas)
 
-Naudojama automatiniam raktų valdymo posistemiui, kad išduotų ir pasuktų API raktus pagalbinio teikėjo / paskyros atžvilgiu, taikant dienos / valandos kvotas.
+Naudoja automatinio raktų valdymo posistemė, kad išduotų ir pasuktų API raktus prieš pagrindinį provider/account su daily/hourly kvotomis.
 
-| Method | Path                                  | Description                                                                                                                                                                                                           |
-| ------ | ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/api/v1/registered-keys`             | Išvardyti užregistruotus raktus (tik užmaskuotas prefiksas)                                                                                                                                                           |
-| POST   | `/api/v1/registered-keys`             | Išduoti naują užregistruotą raktą — body: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Neapdorotas raktas grąžinamas **vieną kartą**. Kvotai neleidus, grąžinama `429`. |
-| GET    | `/api/v1/registered-keys/[id]`        | Gauti užregistruoto rakto metaduomenis (be neapdorotos medžiagos)                                                                                                                                                     |
-| DELETE | `/api/v1/registered-keys/[id]`        | Atšaukti užregistruotą raktą                                                                                                                                                                                          |
-| POST   | `/api/v1/registered-keys/[id]/revoke` | Aiškus atšaukimo galinis taškas (poveikis toks pats kaip DELETE)                                                                                                                                                      |
+| Metodas | Kelias                                | Aprašymas                                                                                                                                                                                                        |
+| ------- | ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET     | `/api/v1/registered-keys`             | Užregistruotų raktų sąrašas (tik užmaskuotas priešdėlis)                                                                                                                                                         |
+| POST    | `/api/v1/registered-keys`             | Išduokite naują registruotą raktą — : `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Grąžina neapdorotą raktą **vieną kartą** . Grąžina `429` dėl kvotos atsisakymo. |
+| GET     | `/api/v1/registered-keys/[id]`        | Gauti registruoto rakto metaduomenis (be žaliavos)                                                                                                                                                               |
+| DELETE  | `/api/v1/registered-keys/[id]`        | Atšaukti registruotą raktą                                                                                                                                                                                       |
+| POST    | `/api/v1/registered-keys/[id]/revoke` | Aiškus atšaukimo galutinis taškas (tas pats poveikis kaip DELETE)                                                                                                                                                |
+| GET     | `/api/v1/providers/[provider]/limits` | Perskaitykite teikėjo išdavimo ribas                                                                                                                                                                             |
+| PUT     | `/api/v1/providers/[provider]/limits` | Nustatykite teikėjo išdavimo viršutines ribas — body: `{maxActiveKeys?, dailyIssueLimit?, hourlyIssueLimit?}`                                                                                                    |
+| GET     | `/api/v1/accounts/[id]/limits`        | Perskaitykite sąskaitos išdavimo viršutines ribas                                                                                                                                                                |
+| PUT     | `/api/v1/accounts/[id]/limits`        | Nustatykite paskyros išdavimo viršutines ribas — kaip teikėjo maršrutą                                                                                                                                           |
 
-**Autentifikavimas:** valdymo sesija / API raktas (`requireManagementAuth`) — ta pati apsauga kaip `/api/keys`: prietaisų skydelio sesija, vietinis CLI prieigos raktas arba API raktas su `manage` / `admin` apimtimi; tik išvadoms skirti API raktai gauna `403`. Taip pat žr. `/v1/quotas/check` ir `/v1/issues/report`.
+**Auth:** valdymas session/API raktas (`requireManagementAuth`) — ta pati apsauga kaip ir `/api/keys`: prietaisų skydelio sesija, vietinis CLI raktas arba API raktas su `manage`/`admin` apimtimi; Tik išvadoms skirti API raktai gauna `403`. Taip pat žr. `/v1/quotas/check` ir `/v1/issues/report`.
 
 ---
 

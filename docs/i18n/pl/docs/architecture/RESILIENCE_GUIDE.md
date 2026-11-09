@@ -156,6 +156,45 @@ Obowiązują one do momentu zmiany danych uwierzytelniających lub zresetowania 
 Testy regresyjne: `tests/unit/claude-low-priority-mode.test.ts`,
 `tests/unit/claude-limit-reset.test.ts`, `tests/unit/claude-low-priority-executor.test.ts`.
 
+### Automatycznie stosuj resety bankowe
+
+**Zakres:** Połączenia w ramach subskrypcji Codex i Claude (OAuth).**Zapisz się** : ustawienie `bankedResetAutoApply` jest wyłączone i domyślnie w trybie `dry-run` (Ustawienia → AI → Automatyczne stosowanie resetów bankowych).
+
+**Zamiar:** samodzielnie wydawaj resety bankowe, gdy konto osiągnie próg wykorzystania, zamiast czekać, aż operator naciśnie przycisk „Zrealizuj” na stronie Limity dostawcy.
+
+| Rodzaj kredytu (`creditTypes`) | Co jest odkupione                                      | Gdzie biegnie                                                                                         |
+| ------------------------------ | ------------------------------------------------------ | ----------------------------------------------------------------------------------------------------- |
+| `codexCredits`                 | Kredyty resetujące Codex                               | praca w tle, co 60 s                                                                                  |
+| `claudeCredits`                | Dotacje bankowe Claude (kredyty `GRANT` )              | praca w tle, co 60 s                                                                                  |
+| `claudeSessionReset`           | Resetowanie tygodniowego limitu sesji Claude (powyżej) | ścieżkę żądania, korzystając z tych samych zasad, co w przypadku przełączania dla poszczególnych kont |
+
+**Realizacja:**
+
+- Czysta decyzja (jedna reguła dla obu ścieżek): `src/lib/usage/bankedResetPolicy.ts::decideBankedReset()`
+- Praca w tle: `src/lib/services/bankedResetAutoApply.ts` (rozpoczęta w `src/instrumentation-node.ts`)
+- Brama ścieżki żądania Claude : `src/lib/usage/claudeSessionResetPolicy.ts`, zarejestrowana przez `setClaudeLimitResetPolicy()` w `open-sse/services/claudeLimitReset.ts`
+- Historia, czapki i webhook: `src/lib/usage/bankedResetAudit.ts`
+- Historia API: `GET /api/settings/banked-reset-auto/history?limit=50` (uwierzytelnienie zarządzające)
+
+**Kolejność decyzji** (pierwszą błędną zasadą jest odnotowany powód):
+
+1. Funkcja wyłączona, typ kredytu wyłączony lub konto poza zakresem (`accountScope` `all` / `selected` plus mapa `connections` dla każdego konta).
+2. Poza opcjonalnym harmonogramem UTC (`startHourUtc` > `endHourUtc` przekracza północ).
+3. Limity w ciągu ostatnich 24 godzin: `maxPerAccountPerDay` (1), `maxPerDay` (3) i `minSpacingMinutes` (30) pomiędzy dowolnymi dwoma umorzeniami.
+4. Wyzwalacz: zamurowane okno `session` lub `weekly` (odczytywane z `getQuotaWindowStatus().reachedThreshold`, a nie `isAccountQuotaExhausted()`, które raportuje tylko konto przy każdym wydanym oknie) lub kredyt wygasający w ramach `expiringCreditHours` (24) na koncie, które wykorzystało co najmniej `expiringCreditMinUsedPercent` (50).
+5. Strażnik naturalnego resetu: pomiń, gdy zamurowane 5-godzinne okno resetuje się w `sessionResetGuardMinutes` (90) lub zamurowane cotygodniowe okno w `weeklyResetGuardHours` (12).
+6. Tygodniowy minimalny poziom: pomiń 5-godzinny reset, gdy tygodniowy pozostały poziom jest poniżej `weeklyFloorPercent` (10).
+7. Tryb `last-resort` : pomiń, dopóki na innym koncie objętym zakresem tego samego dostawcy pozostało co najmniej `poolHeadroomPercent` (10) w obu oknach. Wyzwalacze wygaśnięcia kredytu omijają to.
+8. `dry-run` rejestruje awanturę i niczego nie rekompensuje; `last-resort` i `eager` wykupują.
+
+Brakujące dane dotyczące przydziału nigdy nie odblokowują wykorzystania: nieznany czas resetowania lub cotygodniowe pominięcia wykorzystania.
+
+**Reset sesji Claude :** przy wyłączonej tej funkcji lub wyłączonym `claudeSessionReset`, przełącznik `autoLimitReset` dla każdego konta decyduje dokładnie tak samo jak poprzednio. Gdy oba są włączone, funkcja zastępuje przełączniki dotyczące poszczególnych kont: konto objęte zakresem może składać roszczenia tylko wtedy, gdy pozwalają na to zasady, a w trybie `dry-run` nie zgłasza się żadnych roszczeń.
+
+**Bezpieczeństwo:** zadanie wykorzystuje maksymalnie jeden kredyt na tick, decyduje przed wystawieniem kredytów na aukcję (pominięte konto nigdy nie jest wystawiane na listę), używa kluczy idempotencji `auto-reset:<connectionId>:<yyyy-mm-dd>:<n>` i wycofuje konto na 1 godzinę po nieudanej aukcji lub wykupieniu. Każda decyzja dotycząca wykupu, niepowodzenia i próby próbnej jest zapisywana w `audit_log` (`action: "bankedReset.redeem"`, bez tokenów i identyfikatorów kredytowych); czapki są liczone od tych wierszy, więc przetrwają ponowne uruchomienie. Pomyślne wykorzystanie środków powoduje również uruchomienie webhooka `provider.reset_redeemed`.
+
+Strażnicy regresji: `tests/unit/banked-reset-policy.test.ts`, `tests/unit/banked-reset-auto-apply.test.ts`, `tests/unit/claude-limit-reset-policy-gate.test.ts`, `tests/unit/banked-reset-history-route.test.ts`.
+
 ### Powiązanie sesji (#7274)
 
 **Zakres:** jedna sesja klienta (nagłówek `X-Session-Id` / `x-codex-session-id` / `x-omniroute-session`) przypięta do jednego połączenia, dla **dowolnego** dostawcy.

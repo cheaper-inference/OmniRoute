@@ -162,6 +162,45 @@ Kiro-ovi binarni `reasoningContentEvent` okviri sa nepraznim potpisom čuvaju ov
 Регресиони заштитни тестови: `tests/unit/claude-low-priority-mode.test.ts`,
 `tests/unit/claude-limit-reset.test.ts`, `tests/unit/claude-low-priority-executor.test.ts`.
 
+### Аутоматска примена банковних ресетовања
+
+**Обим:** Codex и Claude претплатничке (OAuth) везе.**Опт-ин** : поставка `bankedResetAutoApply` је искључена и подразумевано је у `dry-run` режиму (Подешавања → AI → Ауто-аппли банкед ресет).
+
+**сврха:** сами троше банковне ресетове када налог наиђе на зид коришћења, уместо да чека да оператер притисне „Искупи“ на страници Ограничења добављача.
+
+| Врста кредита (`creditTypes`) | Оно што се откупљује                                | Где трчи                                                       |
+| ----------------------------- | --------------------------------------------------- | -------------------------------------------------------------- |
+| `codexCredits`                | Codex ресетује кредите                              | позадински посао, сваких 60 с                                  |
+| `claudeCredits`               | Claude банковни грантови (`GRANT` кредити)          | позадински посао, сваких 60 с                                  |
+| `claudeSessionReset`          | Claude недељно ресетовање ограничења сесије (изнад) | путању захтева, кроз исту политику као и пребацивање по налогу |
+
+**Имплементација:**
+
+- Чиста одлука (један скуп правила за оба пута): `src/lib/usage/bankedResetPolicy.ts::decideBankedReset()`
+- Позадински посао: `src/lib/services/bankedResetAutoApply.ts` (започето у `src/instrumentation-node.ts`)
+- Claude капија путање захтева: `src/lib/usage/claudeSessionResetPolicy.ts`, регистрована преко `setClaudeLimitResetPolicy()` у `open-sse/services/claudeLimitReset.ts`
+- Историја, капи и веб-хук: `src/lib/usage/bankedResetAudit.ts`
+- Историја API: `GET /api/settings/banked-reset-auto/history?limit=50` (ауторизација управљања)
+
+**Редослед одлуке** (прво неуспешно правило је забележени разлог):
+
+1. Функција је искључена, тип кредита искључен или налог ван опсега (`accountScope` `all` / `selected` плус `connections` мапа по налогу).
+2. Изван опционог UTC распореда (`startHourUtc` > `endHourUtc` прелази поноћ).
+3. Ограничења у последња 24 х: `maxPerAccountPerDay` (1), `maxPerDay` (3) и `minSpacingMinutes` (30) између било која два откупа.
+4. Окидач: ограђени `session` или `weekly` прозор (читано из `getQuotaWindowStatus().reachedThreshold`, не `isAccountQuotaExhausted()`, који само извештава о налогу са сваким потрошеним прозором), или кредит који истиче унутар `expiringCreditHours` (24) на налогу који је користио најмање `expiringCreditMinUsedPercent` (50).
+5. Заштита природног ресетовања: прескочите када се 5-часовни прозор са зидом ресетује унутар `sessionResetGuardMinutes` (90), или зазидани недељни прозор унутар `weeklyResetGuardHours` (12).
+6. Недељни праг: прескочите 5-часовно ресетовање када је недељни преостали део испод `weeklyFloorPercent` (10).
+7. `last-resort` режим: прескочите док други налог у оквиру истог провајдера има најмање `poolHeadroomPercent` (10) преостало у оба прозора. Окидачи кредита који истичу ово заобилазе.
+8. `dry-run` снима ред и ништа не откупљује; `last-resort` и `eager` откупљују.
+
+Недостајући подаци о квоти никада не откључавају откуп: непознато време ресетовања или недељна употреба прескаче.
+
+**Ресетовање Claude сесије:** када је функција искључена или `claudeSessionReset` искључен, `autoLimitReset` прекидач по налогу одлучује тачно као и раније. Када су оба укључена, ова функција замењује прекидаче по налогу: налог у оквиру опсега може захтевати само када смернице то дозвољавају, а у `dry-run` режиму нема захтева.
+
+**безбедност:** посао откупљује највише један кредит по тику, одлучује пре него што наведе кредите (прескочени налог никада није наведен), користи кључеве идемпотенције `auto-reset:<connectionId>:<yyyy-mm-dd>:<n>` и повлачи налог на 1 х након неуспешног листинга или откупа. Свака одлука о откупу, неуспеху и одлуци о сувом раду се уписује у `audit_log` (`action: "bankedReset.redeem"`, без токена или кредитних ИД-ова); капице се рачунају из тих редова, тако да преживљавају поновно покретање. Успешна искоришћавања такође активирају `provider.reset_redeemed` веб-хук.
+
+Регресиони чувари: `tests/unit/banked-reset-policy.test.ts`, `tests/unit/banked-reset-auto-apply.test.ts`, `tests/unit/claude-limit-reset-policy-gate.test.ts`, `tests/unit/banked-reset-history-route.test.ts`.
+
 ### Везивање сесије (#7274)
 
 **Опсег:** једна клијентска сесија (`X-Session-Id` / `x-codex-session-id` / `x-omniroute-session` заглавље) везана за једну везу, за **било ког** провајдера.

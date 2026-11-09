@@ -915,14 +915,14 @@ CLI 会将 `base_url + /responses` 升级为 WebSocket，OmniRoute 再将其隧�
 
 ---
 
-## 配额与问题报告
+## 配额和问题报告
 
-| 方法 | 路径                | 描述                                                                  |
-| ---- | ------------------- | --------------------------------------------------------------------- |
-| GET  | `/v1/quotas/check`  | 在签发已注册密钥之前，预先验证 `provider` + `accountId` 的配额        |
-| POST | `/v1/issues/report` | 将配额/密钥签发失败报告到 GitHub（需要 `GITHUB_ISSUES_REPO` + token） |
+| 方法 | 小路                | 描述                                                            |
+| ---- | ------------------- | --------------------------------------------------------------- |
+| GET  | `/v1/quotas/check`  | 在发布注册密钥之前预先验证`provider` + `accountId`的配额        |
+| POST | `/v1/issues/report` | 向GitHub报告quota/key发行失败（需要`GITHUB_ISSUES_REPO` +代币） |
 
-**身份验证：**Bearer API 密钥（`isAuthenticated`）。
+**授权：** `/v1/quotas/check`采用承载API密钥 (`isAuthenticated`)。 `/v1/issues/report`仅用于管理（`requireManagementAuth`），如`/api/v1/registered-keys`：仪表板会话、本地CLI令牌或具有`manage`/`admin`范围的API密钥；仅推理API密钥获得`403`。
 
 ### 配额会话恢复（选择启用）
 
@@ -1708,19 +1708,23 @@ DELETE /api/usage/token-limits?id=tl-abc
 
 ---
 
-## 已注册密钥（自动管理）
+## 注册密钥（自动管理）
 
-由自动密钥管理子系统使用，用于针对后端提供者/账户签发和轮换 API 密钥，并设置每日/每小时配额。
+由自动密钥管理子系统使用，通过daily/hourly配额针对支持provider/account颁发和轮换API密钥。
 
-| Method | Path                                  | Description                                                                                                                                                            |
-| ------ | ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/api/v1/registered-keys`             | 列出已注册密钥（仅显示掩码后的前缀）                                                                                                                                   |
-| POST   | `/api/v1/registered-keys`             | 签发新的已注册密钥 — 请求体：`{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`。原始密钥仅返回**一次**。配额拒绝时返回 `429`。 |
-| GET    | `/api/v1/registered-keys/[id]`        | 获取已注册密钥的元数据（不包含原始密钥内容）                                                                                                                           |
-| DELETE | `/api/v1/registered-keys/[id]`        | 撤销已注册密钥                                                                                                                                                         |
-| POST   | `/api/v1/registered-keys/[id]/revoke` | 显式撤销端点（效果与 `DELETE` 相同）                                                                                                                                   |
+| 方法   | 小路                                  | 描述                                                                                                                                                            |
+| ------ | ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/v1/registered-keys`             | 列出已注册的键（仅限屏蔽前缀）                                                                                                                                  |
+| POST   | `/api/v1/registered-keys`             | 发布新的注册密钥—主体： `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`。返回原始密钥**一次**。配额拒绝时返回`429` 。 |
+| GET    | `/api/v1/registered-keys/[id]`        | 检索已注册密钥的元数据（无原材料）                                                                                                                              |
+| DELETE | `/api/v1/registered-keys/[id]`        | 撤销已注册的密钥                                                                                                                                                |
+| POST   | `/api/v1/registered-keys/[id]/revoke` | 显式撤销端点（与DELETE效果相同）                                                                                                                                |
+| GET    | `/api/v1/providers/[provider]/limits` | 阅读提供者的发行上限                                                                                                                                            |
+| PUT    | `/api/v1/providers/[provider]/limits` | 设置提供者的发行上限—主体： `{maxActiveKeys?, dailyIssueLimit?, hourlyIssueLimit?}`                                                                             |
+| GET    | `/api/v1/accounts/[id]/limits`        | 查看账户的发行上限                                                                                                                                              |
+| PUT    | `/api/v1/accounts/[id]/limits`        | 设置账户的发行上限—与提供者路由相同                                                                                                                             |
 
-**身份验证：**管理会话/API 密钥（`requireManagementAuth`）— 与 `/api/keys` 使用相同的保护机制：仪表板会话、本地 CLI 令牌，或具有 `manage`/`admin` 作用域的 API 密钥；仅推理 API 密钥将获得 `403`。另请参阅 `/v1/quotas/check` 和 `/v1/issues/report`。
+**授权：**管理session/API密钥 (`requireManagementAuth`) —与`/api/keys`相同：仪表板会话、本地CLI令牌或具有`manage`/`admin`范围的API密钥；仅推理API密钥获得`403`。另请参见`/v1/quotas/check`和`/v1/issues/report`。
 
 ---
 

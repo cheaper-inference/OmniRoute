@@ -159,6 +159,45 @@ Maireann siad seo go dtí go n-athraítear na dintiúir nó go n-athshocraíonn 
 Cosaintí aischéimnithe: `tests/unit/claude-low-priority-mode.test.ts`,
 `tests/unit/claude-limit-reset.test.ts`, `tests/unit/claude-low-priority-executor.test.ts`.
 
+### Athshocraíochtaí bainc a chur i bhfeidhm go huathoibríoch
+
+**Scóip:** Naisc síntiús Codex agus Claude (OAuth).**Diúltú isteach** : tá an socrú `bankedResetAutoApply` múchta agus i mód `dry-run` de réir réamhshocraithe (Socruithe → AI → Athshocraigh bainc a chur i bhfeidhm go huathoibríoch).
+
+**Cuspóir:** athshocraigh bainc a chaitheamh ina n-aonar nuair a bhuaileann cuntas balla úsáide, in ionad fanacht ar oibreoir "Fuascailt" a bhrú ar an leathanach Teorainneacha Soláthraí.
+
+| Cineál creidmheasa (`creditTypes`) | Cad atá fuascailte                                         | I gcás ina ritheann sé                                                         |
+| ---------------------------------- | ---------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| `codexCredits`                     | Creidmheasanna athshocraithe Codex                         | post cúlra, gach 60 s                                                          |
+| `claudeCredits`                    | Deontais bhainc Claude (creidmheasanna `GRANT` )           | post cúlra, gach 60 s                                                          |
+| `claudeSessionReset`               | Athshocrú teorainn sheisiúin sheachtainiúil Claude (thuas) | cosán iarratais, tríd an mbeartas céanna leis an scorán in aghaidh an chuntais |
+
+**Cur i bhfeidhm:**
+
+- Cinneadh glan (riail amháin socraithe don dá chonair): `src/lib/usage/bankedResetPolicy.ts::decideBankedReset()`
+- Post cúlra: `src/lib/services/bankedResetAutoApply.ts` (tosaíodh i `src/instrumentation-node.ts`)
+- Geata cosán iarratais Claude : `src/lib/usage/claudeSessionResetPolicy.ts`, cláraithe trí `setClaudeLimitResetPolicy()` i `open-sse/services/claudeLimitReset.ts`
+- Stair, caipíní agus gréasán: `src/lib/usage/bankedResetAudit.ts`
+- Stair API: `GET /api/settings/banked-reset-auto/history?limit=50` (údar bainistíochta)
+
+**Ordú breithe** (is é an chéad riail a theipeann ar an gcúis taifeadta):
+
+1. Gné as, cineál creidmheasa as, nó cuntas as raon feidhme (`accountScope` `all` / `selected` móide an léarscáil `connections` in aghaidh an chuntais).
+2. Lasmuigh de sceideal roghnach UTC (trasnaíonn `startHourUtc` > `endHourUtc` meán oíche).
+3. Teorainneacha le 24 h anuas: `maxPerAccountPerDay` (1), `maxPerDay` (3), agus `minSpacingMinutes` (30) idir dhá fhuascailt ar bith.
+4. Truicear: fuinneog le ballaí `session` nó `weekly` (léamh ó `getQuotaWindowStatus().reachedThreshold`, ní `isAccountQuotaExhausted()`, nach dtuairiscíonn ach cuntas a bhfuil gach fuinneog caite), nó creidmheas ag dul in éag laistigh de `expiringCreditHours` (24) ar chuntas a d’úsáid `expiringCreditMinUsedPercent` (50) ar a laghad.
+5. Garda athshocraithe nádúrtha: scipeáil nuair a athshocraíonn an fhuinneog le ballaí 5 uaire laistigh de `sessionResetGuardMinutes` (90), nó an fhuinneog sheachtainiúil le ballaí laistigh de `weeklyResetGuardHours` (12).
+6. Urlár seachtainiúil: scipeáil athshocrú 5 uaire nuair a bhíonn an fuílleach seachtainiúil faoi bhun `weeklyFloorPercent` (10).
+7. Modh `last-resort` : scipeáil agus tá ar a laghad `poolHeadroomPercent` (10) fágtha sa dá fhuinneog ag cuntas laistigh de raon feidhme eile an tsoláthraí céanna. Spreagann creidmheas dul in éag é seo.
+8. Taifeadann `dry-run` as a chéile agus ní fhuasclaíonn sé rud ar bith; Fuasclaíonn `last-resort` agus `eager`.
+
+Ní dhíghlasálann sonraí cuóta atá ar iarraidh fuascailt riamh: ní fios am athshocraithe nó scipeann úsáid sheachtainiúil.
+
+**Athshocrú seisiúin Claude :** agus an ghné as, nó `claudeSessionReset` as, cinneann an scoránaigh `autoLimitReset` in aghaidh an chuntais díreach mar a rinneadh cheana. Agus an dá cheann ar aghaidh, cuirtear an ghné in ionad na scoránaigh in aghaidh an chuntais: ní fhéadfaidh cuntas laistigh den raon feidhme éileamh a dhéanamh ach amháin nuair a cheadaíonn an polasaí é, agus i mód `dry-run` ní dhéantar aon éileamh.
+
+**Sábháilteacht:** fuasclaíonn an post creidmheas amháin ar a mhéad in aghaidh an tic, socraíonn sé roimh chreidmheasanna a liostú (ní liostaítear cuntas scipeála riamh), úsáideann eochracha díomuachta `auto-reset:<connectionId>:<yyyy-mm-dd>:<n>`, agus tacaíonn sé le cuntas ar feadh 1 uaire tar éis liostú teipthe nó fuascailte. Scríobhtar gach cinneadh maidir le fuascailt, teip agus rith tirim chuig `audit_log` (`action: "bankedReset.redeem"`, gan aon comharthaí nó aitheantas creidmheasa); déantar na caipíní a chomhaireamh ó na sraitheanna sin, ionas go mairfidh siad atosú. Cuireann fuascailtí rathúla tine ar chuar gréasáin `provider.reset_redeemed` freisin.
+
+Gardaí aischéimnithí: `tests/unit/banked-reset-policy.test.ts`, `tests/unit/banked-reset-auto-apply.test.ts`, `tests/unit/claude-limit-reset-policy-gate.test.ts`, `tests/unit/banked-reset-history-route.test.ts`.
+
 ### Cleamhnas seisiúin (#7274)
 
 **Raon feidhme:** seisiún cliaint amháin (ceanntásc `X-Session-Id` / `x-codex-session-id` / `x-omniroute-session`) pionnáilte le nasc amháin, d’aon soláthraí.

@@ -4,57 +4,52 @@
 
 ---
 
-> **Pinagmumulan ng katotohanan:** `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`, `src/app/api/webhooks/`
-> **Huling na-update:** 2026-06-28 — v3.8.40
+> **Pinagmulan ng katotohanan:** `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`, `src/app/api/webhooks/`**Huling na-update:** 2026-06-28 — v3.8.40
 
-Maaaring magpadala ang OmniRoute ng mga HTTP webhook kapag may mga event sa platform. Gamitin ang mga ito upang mag-integrate sa
-Slack, PagerDuty, Datadog, mga internal na serbisyo sa pag-alerto, o anumang HTTP receiver.
+Maaaring magpagana OmniRoute ng mga webhook HTTP sa mga kaganapan sa platform. Gamitin ang mga ito upang isama sa Slack, PagerDuty, Datadog, panloob na mga serbisyo sa pag-aalerto, o anumang HTTP receiver.
 
-Nilalagdaan ng dispatcher ang bawat delivery gamit ang HMAC-SHA256, muling sinusubukan kapag may mga pansamantalang
-pagkabigo, sinusubaybayan ang kalagayan ng delivery ng bawat webhook, at awtomatikong dini-disable ang mga endpoint na
-patuloy na nabibigo.
+Pipirmahan ng dispatcher ang bawat paghahatid gamit ang HMAC-SHA256, muling sumusubok sa mga lumilipas na pagkabigo, sinusubaybayan ang kalusugan ng paghahatid sa bawat webhook, at awtomatikong hindi pinapagana ang mga endpoint na patuloy na nabigo.
 
-## Mga Sinusuportahang Event
+## Mga Sinusuportahang Kaganapan
 
-Ang uri na `WebhookEvent` (`src/lib/webhooks/eventDescriptions.ts`, na ginagamit ng `src/lib/webhookDispatcher.ts`) ay kasalukuyang nagmomodelo ng eksaktong apat na event:
+Ang uri ng `WebhookEvent` (`src/lib/webhooks/eventDescriptions.ts`, ginagamit ng `src/lib/webhookDispatcher.ts`) ay kasalukuyang nagmomodelo ng pitong kaganapan:
 
-| Event               | Nati-trigger kapag                                                     |
-| ------------------- | ---------------------------------------------------------------------- |
-| `request.completed` | Matagumpay na nakumpleto ang isang proxied request                     |
-| `request.failed`    | Nabigo ang isang proxied request pagkatapos ng lahat ng retry/fallback |
-| `quota.exceeded`    | Lumampas ang isang API key sa threshold ng budget/quota                |
-| `test.ping`         | Sintetikong event na ginagamit ng test endpoint                        |
+| Kaganapan                 | Sunog kapag                                                                                                          |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `request.completed`       | Matagumpay na nakumpleto ang isang proxy na kahilingan                                                               |
+| `request.failed`          | Nabigo ang isang proxy na kahilingan pagkatapos ng lahat ng retries/fallback                                         |
+| `quota.exceeded`          | Ang isang API key ay tumatawid sa isang budget/quota threshold                                                       |
+| `proxy.set_aside`         | Ang isang miyembro ng proxy pool ay isinantabi pagkatapos ng paulit-ulit na pagtanggi (transition lang)              |
+| `proxy.pool.exhausted`    | Ang bawat miyembro ng saklaw ng proxy pool ay inilalaan                                                              |
+| `provider.reset_redeemed` | Ang awtomatikong pag-apply ng mga banked reset ay nag-redeem ng isang reset credit o ang Claude weekly session reset |
+| `test.ping`               | Sintetikong kaganapan na ginagamit ng endpoint ng pagsubok                                                           |
 
-Tinatanggap ng mga subscription ang literal na `"*"` upang matanggap ang bawat event. Ang mga hindi kilalang pangalan ng event
-sa `events` ay binabalewala sa oras ng dispatch.
+Tinatanggap ng mga subscription ang literal `"*"` upang matanggap ang bawat kaganapan. Ang mga hindi kilalang pangalan ng kaganapan sa `events` ay binabalewala sa oras ng pagpapadala.
 
-> Tandaan: nakakonekta na ang dispatcher API, ngunit ipinapatupad pa rin ang mga production call site para sa ilan sa mga
-> event na hindi `test.ping`. Suriin ang `grep dispatchEvent` upang makita
-> kung aling mga path ang kasalukuyang tumatawag sa dispatcher sa iyong release.
+> Tandaan: ang dispatcher API ay naka-wire, ngunit ang mga production call site para sa ilan sa mga hindi `test.ping` na kaganapan ay lumalapag pa rin. Suriin `grep dispatchEvent` upang makita kung aling mga path ang kasalukuyang humihimok sa dispatcher sa iyong release.
 
 ## Arkitektura
 
 ```
-Tumatawag (handler, serbisyo, monitor)
+Caller (handler, service, monitor)
   dispatchEvent(event, data)            [src/lib/webhookDispatcher.ts]
     -> getEnabledWebhooks()             [src/lib/db/webhooks.ts]
-    -> salain ayon sa webhook.events
-    -> para sa bawat tugma (nang magkaparallel):
+    -> filter by webhook.events
+    -> for each match (in parallel):
        deliverWebhook(url, payload, secret)
-         buuin ang payload { event, timestamp, data }
-         lagdaan ang body gamit ang HMAC-SHA256 (kung may secret)
-         POST na may 10s timeout
-         subukang muli nang hanggang 3 beses kapag may 5xx / network error
+         build payload { event, timestamp, data }
+         sign body with HMAC-SHA256 (if secret present)
+         POST with 10s timeout
+         retry up to 3 times on 5xx / network error
        recordWebhookDelivery(id, status, success)
     -> disableWebhooksWithHighFailures(10)
 ```
 
-Ang dispatch ay fire-and-forget para sa tumatawag: nilulunok ng `Promise.allSettled` ang
-mga error ng bawat webhook upang hindi ma-block ng isang may problemang receiver ang iba.
+Ang dispatch ay fire-and-forget para sa tumatawag: Nilulunok `Promise.allSettled` ang mga error sa bawat webhook kaya hindi ma-block ng isang masamang receiver ang iba.
 
-## Paglagda gamit ang HMAC
+## Pagpirma ng HMAC
 
-Kapag may `secret` ang isang webhook, nilalagdaan ng OmniRoute ang JSON body at ipinapadala ang:
+Kapag ang isang webhook ay may `secret`, pinipirmahan ng OmniRoute ang katawan JSON at ipinapadala ang:
 
 ```
 Content-Type: application/json
@@ -64,11 +59,9 @@ X-Webhook-Timestamp: <ISO-8601>
 X-Webhook-Signature: sha256=<hex HMAC-SHA256(secret, body)>
 ```
 
-> Ginagamit ng mga pangalan ng header ang prefix na `X-Webhook-*` (hindi `X-OmniRoute-*`). Ang value ng signature
-> ay `sha256=<hex>` — i-verify ang buong prefix.
+> Ginagamit ng mga pangalan ng header ang prefix `X-Webhook-*` (hindi `X-OmniRoute-*`). Ang signature value ay `sha256=<hex>` — i-verify ang buong prefix.
 
-Kung tinawag ang `createWebhook` nang walang secret, bubuo ang DB module ng isa
-(`whsec_<48 hex>`) kaya nilalagdaan bilang default ang lahat ng webhook.
+Kung `createWebhook` ay tinatawag na walang lihim, ang DB module ay bubuo ng isa (`whsec_<48 hex>`) kaya lahat ng webhooks ay nilagdaan bilang default.
 
 ### Pag-verify sa receiver
 
@@ -83,66 +76,57 @@ function verify(rawBody: string, signature: string, secret: string) {
 }
 ```
 
-Palaging mag-verify gamit ang **raw** na request body bago magsagawa ng anumang JSON parsing.
+Palaging i-verify laban sa **hilaw** humiling ng katawan, bago ang anumang pag-parse ng JSON.
 
-## Patakaran sa Muling Pagsubok at Pagkabigo
+## Subukan muli at Patakaran sa Pagkabigo
 
 `deliverWebhook(url, payload, secret, maxRetries = 3)`:
 
-- 10 segundong timeout sa bawat pagtatangka (`AbortController`).
-- Itinuturing na matagumpay ang HTTP 2xx.
-- Itinuturing ang HTTP 3xx/4xx bilang pinal na status na hindi na muling susubukan — itinatala bilang naihatid
-  na may `success = res.ok`.
-- Muling sinusubukan ang HTTP 5xx at mga error sa network gamit ang exponential backoff:
-  `2^attempt * 1000 ms` (1s, 2s, 4s).
-- Pagkatapos ng `maxRetries`, itinatala ang paghahatid bilang nabigo.
-- Ina-update ng bawat paghahatid ang `last_triggered_at`, `last_status`, at nire-reset
-  o dinaragdagan ang `failure_count`.
-- Tinatawag ng dispatcher ang `disableWebhooksWithHighFailures(10)` pagkatapos ng bawat fan-out,
-  kaya awtomatikong dini-disable ang anumang webhook na may `failure_count >= 10`.
+- 10 segundong timeout bawat pagsubok (`AbortController`).
+- HTTP 2xx ay binibilang bilang tagumpay.
+- Binibilang ang HTTP 3xx/4xx bilang isang hindi nasusubukang panghuling katayuan na naitala ng — bilang naihatid sa `success = res.ok`.
+- HTTP 5xx at mga error sa network ay muling sinusubukang may exponential backoff: `2^attempt * 1000 ms` (1s, 2s, 4s).
+- Pagkatapos ng `maxRetries`, ang paghahatid ay naitala bilang nabigo.
+- Ang bawat paghahatid ay nag-a-update ng `last_triggered_at`, `last_status`, at alinman sa pag-reset o pagtaas `failure_count`.
+- Ang dispatcher ay tumatawag sa `disableWebhooksWithHighFailures(10)` pagkatapos ng bawat fan-out, kaya ang anumang webhook na may `failure_count >= 10` ay awtomatikong hindi pinagana.
 
 ## Database
 
-Talahanayang `webhooks` (migration `011_webhooks.sql`):
+Talahanayan `webhooks` (migration `011_webhooks.sql`):
 
-| Column              | Type    | Notes                                                  |
-| ------------------- | ------- | ------------------------------------------------------ |
-| `id`                | TEXT PK | UUID                                                   |
-| `url`               | TEXT    | Patutunguhang URL                                      |
-| `events`            | TEXT    | JSON array; default na `["*"]`                         |
-| `secret`            | TEXT    | HMAC secret (awtomatikong binubuo kung hindi ibinigay) |
-| `enabled`           | INT     | 0/1; default na 1                                      |
-| `description`       | TEXT    | Opsyonal na label na madaling maunawaan ng tao         |
-| `created_at`        | TEXT    | `datetime('now')`                                      |
-| `last_triggered_at` | TEXT    | Ina-update sa bawat pagtatangka ng paghahatid          |
-| `last_status`       | INT     | HTTP status ng huling pagtatangka (0 = network)        |
-| `failure_count`     | INT     | Nire-reset sa 0 kapag matagumpay, +1 kapag nabigo      |
+| Kolum               | Uri     | Mga Tala                                             |
+| ------------------- | ------- | ---------------------------------------------------- |
+| `id`                | TEXT PK | UUID                                                 |
+| `url`               | TEXT    | Patutunguhan URL                                     |
+| `events`            | TEXT    | hanay JSON ; default `["*"]`                         |
+| `secret`            | TEXT    | HMAC secret (awtomatikong nabuo kung hindi ibinigay) |
+| `enabled`           | INT     | 0/1; default sa 1                                    |
+| `description`       | TEXT    | Opsyonal na label ng tao                             |
+| `created_at`        | TEXT    | `datetime('now')`                                    |
+| `last_triggered_at` | TEXT    | Na-update sa bawat pagtatangka sa paghahatid         |
+| `last_status`       | INT     | HTTP status ng huling pagtatangka (0 = network)      |
+| `failure_count`     | INT     | Ni-reset sa 0 sa tagumpay, + 1 sa pagkabigo          |
 
-Nakaimbak ang kasaysayan ng paghahatid sa nakalaang talahanayang `webhook_deliveries`
-(migration `069_webhook_deliveries.sql`, isinusulat sa pamamagitan ng
-`src/lib/db/webhookDeliveries.ts::insertDelivery` sa bawat pagtatangka), bukod pa
-sa pinagsama-samang mga counter sa row ng `webhooks`. Ang metadata ng uri (Slack / Discord /
-Telegram / mga custom na transformer ng payload) ay idinagdag ng `070_webhooks_kind_metadata.sql`.
+Ang kasaysayan ng paghahatid ay nananatili sa nakalaang `webhook_deliveries` table (migration `069_webhook_deliveries.sql`, nakasulat sa pamamagitan ng `src/lib/db/webhookDeliveries.ts::insertDelivery` sa bawat pagsubok), bilang karagdagan sa mga pinagsama-samang counter sa `webhooks` row. Ang uri ng metadata (Slack / Discord / Telegram / custom na payload transformer) ay idinagdag ng `070_webhooks_kind_metadata.sql`.
 
 ## REST API
 
-Nangangailangan ang lahat ng endpoint ng management auth (`requireManagementAuth`).
+Ang lahat ng endpoint ay nangangailangan ng management auth (`requireManagementAuth`).
 
-| Endpoint                        | Method | Description                                                     |
-| ------------------------------- | ------ | --------------------------------------------------------------- |
-| `/api/webhooks`                 | GET    | Ilista ang mga webhook (nakatago ang mga secret)                |
-| `/api/webhooks`                 | POST   | Gumawa ng webhook                                               |
-| `/api/webhooks/[id]`            | GET    | Mga detalye ng webhook (buong secret)                           |
-| `/api/webhooks/[id]`            | PUT    | I-update ang mga field                                          |
-| `/api/webhooks/[id]`            | DELETE | Alisin                                                          |
-| `/api/webhooks/[id]/test`       | POST   | Magpadala ng `test.ping` (walang muling pagsubok)               |
-| `/api/webhooks/[id]/deliveries` | GET    | Mga kamakailang pagtatangka ng paghahatid para sa isang webhook |
-| `/api/webhooks/validate-url`    | POST   | Paunang pagpapatunay ng URL (proteksiyon laban sa SSRF)         |
+| Endpoint                        | Pamamaraan | Paglalarawan                                                    |
+| ------------------------------- | ---------- | --------------------------------------------------------------- |
+| `/api/webhooks`                 | GET        | Maglista ng mga webhook (nakamaskara ang mga lihim)             |
+| `/api/webhooks`                 | POST       | Lumikha ng webhook                                              |
+| `/api/webhooks/[id]`            | GET        | Detalye ng webhook (buong sikreto)                              |
+| `/api/webhooks/[id]`            | PUT        | I-update ang mga field                                          |
+| `/api/webhooks/[id]`            | DELETE     | Alisin                                                          |
+| `/api/webhooks/[id]/test`       | POST       | Paganahin ang isang `test.ping` (walang muling pagsubok)        |
+| `/api/webhooks/[id]/deliveries` | GET        | Kamakailang mga pagtatangka sa paghahatid para sa isang webhook |
+| `/api/webhooks/validate-url`    | POST       | Pre-flight URL validation (SSRF guard)                          |
 
-Itinatago ng `GET /api/webhooks` ang secret bilang `<unang 10 character>...` upang maiwasan ang paglantad nito
-sa mga pahina ng listahan. Gamitin ang `[id]` GET kapag talagang kailangan mo ang secret.
+Tinatakpan `GET /api/webhooks` ang sikreto sa `<first 10 chars>...` upang maiwasan ang pagtulo sa mga pahina ng listahan. Gamitin ang `[id]` GET kapag talagang kailangan mo ang sikreto.
 
-### Gumawa ng webhook
+### Lumikha ng webhook
 
 ```bash
 curl -X POST http://localhost:20128/api/webhooks \
@@ -152,12 +136,11 @@ curl -X POST http://localhost:20128/api/webhooks \
     "url": "https://hooks.slack.com/services/...",
     "secret": "whsec_my_shared_secret",
     "events": ["quota.exceeded", "request.failed"],
-    "description": "Mga alerto sa Slack"
+    "description": "Slack alerts"
   }'
 ```
 
-Kung hindi isinama ang `secret`, bubuo ang server ng `whsec_<hex>` na secret at ibabalik
-ito sa response.
+Kung aalisin ang `secret`, bubuo ang server ng lihim `whsec_<hex>` at ibabalik ito sa tugon.
 
 ### Subukan ang webhook
 
@@ -166,23 +149,20 @@ curl -X POST http://localhost:20128/api/webhooks/<id>/test \
   -H "Cookie: auth_token=..."
 ```
 
-Ibinabalik ang `{ delivered, status, error }`. Walang isinasagawang muling pagsubok — kapaki-pakinabang ito para
-mabilis na mapatunayan na tinatanggap ng receiver ang payload at signature.
+Ibinabalik ang `{ delivered, status, error }`. Walang muling pagsubok na tinangka — na kapaki-pakinabang para sa mabilis na pagpapatunay na tinatanggap ng receiver ang payload at lagda.
 
 ## Dashboard
 
-Ang pahina ng dashboard sa `/dashboard/webhooks` (tingnan ang
-`src/app/(dashboard)/dashboard/webhooks/page.tsx`) ay nagbibigay ng:
+Ang pahina ng dashboard sa `/dashboard/webhooks` (tingnan `src/app/(dashboard)/dashboard/webhooks/page.tsx`) ay nagbibigay ng:
 
-- Paggawa/pag-edit ng mga webhook gamit ang event picker
-- Indicator ng status (aktibo / hindi aktibo / may error) batay sa `enabled`,
-  `failure_count`, at `last_status`
-- Test delivery sa isang pag-click
-- Manu-manong toggle para i-enable/i-disable
+- Mga webhook Create/edit na may tagapili ng kaganapan
+- Status indicator (aktibo / hindi aktibo / nagkamali) batay sa `enabled`, `failure_count`, at `last_status`
+- Isang-click na pagsubok na paghahatid
+- Manu-manong enable/disable toggle
 
 ## Mga Halimbawa ng Payload
 
-### request.completed
+### kahilingan.nakumpleto
 
 ```json
 {
@@ -201,7 +181,7 @@ Ang pahina ng dashboard sa `/dashboard/webhooks` (tingnan ang
 }
 ```
 
-### test.ping
+### pagsubok.ping
 
 ```json
 {
@@ -214,29 +194,19 @@ Ang pahina ng dashboard sa `/dashboard/webhooks` (tingnan ang
 }
 ```
 
-Ang mga anyo ng field para sa mga event na hindi `test.ping` ay tinutukoy ng mga call site na
-naglalabas ng mga ito; ituring ang object na `data` bilang forward-compatible (magdagdag ng mga field, huwag umasa sa
-kawalan ng mga ito).
+Ang mga hugis ng field para sa mga kaganapang hindi `test.ping` ay tinutukoy ng mga site ng tawag na naglalabas ng mga ito; ituring ang `data` object bilang forward-compatible (magdagdag ng mga field, huwag umasa sa kawalan).
 
-## Pinakamahuhusay na Kasanayan
+## Pinakamahusay na Kasanayan
 
-- **I-verify ang signature sa bawat delivery** laban sa raw body — pinipigilan nito ang mga
-  spoofed POST mula sa sinumang makahula sa URL ng iyong webhook.
-- **Tumugon ng 2xx sa loob ng ~5 segundo** — nagti-timeout ang dispatcher pagkalipas ng 10 s. Uubusin ng mababagal na
-  receiver ang mga retry at palalakihin ang `failure_count`.
-- **Gawing idempotent ang mga handler** — dahil sa mga retry at at-least-once delivery semantics,
-  posibleng magkaroon ng mga duplicate.
-- **Mag-subscribe nang minimal** — ilista lamang ang mga event na aktwal mong ginagamit; magdaragdag ang `"*"` ng
-  gastos sa mga receiver na hindi mo kontrolado.
-- **Subaybayan ang `failure_count`** — awtomatikong dini-disable ang mga endpoint pagkatapos ng 10 magkakasunod na
-  pagkabigo; i-reset sa pamamagitan ng pagtawag sa `PUT /api/webhooks/[id]` gamit ang `enabled: true`
-  pagkatapos ayusin ang receiver.
-- **Pana-panahong palitan ang mga secret** — mag-`PUT` ng bagong `secret`, i-deploy ang bagong value
-  sa receiver, at kumpirmahin gamit ang test endpoint.
+- **I-verify ang lagda sa bawat paghahatid** laban sa hilaw na katawan pinipigilan ng — ang spoofed POSTs mula sa sinumang mahulaan ang iyong webhook URL.
+- **Tumugon ng 2xx sa loob ng ~ 5 segundo** — ang dispatcher ay nag-time out sa 10 s. Ang mga mabagal na receiver ay kakain ng mga muling pagsubok at magpapalaki `failure_count`.
+- **Gawing idempotent ang mga humahawak** Ang mga muling pagsubok — at hindi bababa sa isang beses na delivery semantics ay nangangahulugang posible ang mga duplicate.
+- **Mag-subscribe nang kaunti** — ay naglilista lamang ng mga kaganapan na aktwal mong kinokonsumo; Magdaragdag `"*"` ng gastos sa mga receiver na hindi mo kontrolado.
+- **Manood ng `failure_count`** Ang mga endpoint — ay awtomatikong hindi pinagana sa 10 magkakasunod na pagkabigo; i-reset sa pamamagitan ng pagtawag `PUT /api/webhooks/[id]` sa `enabled: true` pagkatapos ayusin ang receiver.
+- **Paikutin ang mga lihim nang pana-panahon** — `PUT` isang bagong `secret`, i-deploy ang bagong value sa receiver, at kumpirmahin sa pamamagitan ng test endpoint.
 
-## Tingnan Din
+## Tingnan din
 
-- [API_REFERENCE.md](../reference/API_REFERENCE.md) — kumpletong saklaw ng management API
-- [RESILIENCE_GUIDE.md](../architecture/RESILIENCE_GUIDE.md) — mga semantics ng circuit breaker / cooldown
-  sa likod ng mga pagkabigo ng provider na inilalantad sa pamamagitan ng `request.failed`
-- Source: `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`
+- [API_REFERENCE.md](../reference/API_REFERENCE.md) — full management API surface
+- [RESILIENCE_GUIDE.md](../architecture/RESILIENCE_GUIDE.md) — circuit breaker / cooldown semantics sa likod ng mga pagkabigo ng provider na lumabas sa pamamagitan ng `request.failed`
+- Pinagmulan: `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`

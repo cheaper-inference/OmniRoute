@@ -213,6 +213,45 @@ connection** ਹਨ (Edit connection → Claude section → `lowPriorityMode` / 
 Regression guards: `tests/unit/claude-low-priority-mode.test.ts`,
 `tests/unit/claude-limit-reset.test.ts`, `tests/unit/claude-low-priority-executor.test.ts`.
 
+### ਬੈਂਕਡ ਰੀਸੈੱਟਾਂ ਨੂੰ ਆਟੋ-ਲਾਗੂ ਕਰੋ
+
+**ਸਕੋਪ:** Codex ਅਤੇ Claude ਗਾਹਕੀ (OAuth) ਕਨੈਕਸ਼ਨ।**ਆਪਟ-ਇਨ ਕਰੋ** : `bankedResetAutoApply` ਸੈਟਿੰਗ ਬੰਦ ਹੈ ਅਤੇ ਮੂਲ ਰੂਪ ਵਿੱਚ `dry-run` ਮੋਡ ਵਿੱਚ ਹੈ (ਸੈਟਿੰਗਾਂ → AI → ਆਟੋ-ਲਾਗੂ ਬੈਂਕਡ ਰੀਸੈਟਸ)।
+
+**ਉਦੇਸ਼:** ਪ੍ਰਦਾਤਾ ਸੀਮਾਵਾਂ ਪੰਨੇ 'ਤੇ "ਰਿਡੀਮ" ਨੂੰ ਦਬਾਉਣ ਲਈ ਕਿਸੇ ਓਪਰੇਟਰ ਦੀ ਉਡੀਕ ਕਰਨ ਦੀ ਬਜਾਏ, ਜਦੋਂ ਕੋਈ ਖਾਤਾ ਵਰਤੋਂ ਦੀ ਕੰਧ ਨਾਲ ਟਕਰਾ ਜਾਂਦਾ ਹੈ ਤਾਂ ਬੈਂਕ ਕੀਤੇ ਰੀਸੈਟ ਆਪਣੇ ਆਪ ਖਰਚ ਕਰੋ।
+
+| ਕ੍ਰੈਡਿਟ ਕਿਸਮ (`creditTypes`) | ਕੀ ਛੁਡਾਇਆ ਹੈ                            | ਜਿੱਥੇ ਇਹ ਚੱਲਦਾ ਹੈ                                      |
+| ---------------------------- | --------------------------------------- | ------------------------------------------------------ |
+| `codexCredits`               | Codex ਕ੍ਰੈਡਿਟ ਰੀਸੈਟ ਕਰੋ                 | ਪਿਛੋਕੜ ਦੀ ਨੌਕਰੀ, ਹਰ 60 ਸਕਿੰਟ                           |
+| `claudeCredits`              | Claude ਬੈਂਕ ਗ੍ਰਾਂਟਾਂ (`GRANT` ਕ੍ਰੈਡਿਟ)  | ਪਿਛੋਕੜ ਦੀ ਨੌਕਰੀ, ਹਰ 60 ਸਕਿੰਟ                           |
+| `claudeSessionReset`         | Claude ਹਫ਼ਤਾਵਾਰ ਸੈਸ਼ਨ-ਸੀਮਾ ਰੀਸੈਟ (ਉੱਪਰ) | ਬੇਨਤੀ ਮਾਰਗ, ਪ੍ਰਤੀ-ਖਾਤਾ ਟੌਗਲ ਦੇ ਰੂਪ ਵਿੱਚ ਉਸੇ ਨੀਤੀ ਰਾਹੀਂ |
+
+**ਲਾਗੂ ਕਰਨਾ:**
+
+- ਸ਼ੁੱਧ ਫੈਸਲਾ (ਦੋਵੇਂ ਮਾਰਗਾਂ ਲਈ ਇੱਕ ਨਿਯਮ ਸੈੱਟ): `src/lib/usage/bankedResetPolicy.ts::decideBankedReset()`
+- ਬੈਕਗ੍ਰਾਊਂਡ ਜੌਬ: `src/lib/services/bankedResetAutoApply.ts` ( `src/instrumentation-node.ts` ਵਿੱਚ ਸ਼ੁਰੂ)
+- Claude ਬੇਨਤੀ-ਪਾਥ ਗੇਟ: `src/lib/usage/claudeSessionResetPolicy.ts`, `open-sse/services/claudeLimitReset.ts` ਵਿੱਚ `setClaudeLimitResetPolicy()` ਰਾਹੀਂ ਰਜਿਸਟਰ ਕੀਤਾ ਗਿਆ
+- ਇਤਿਹਾਸ, ਕੈਪਸ ਅਤੇ ਵੈਬਹੁੱਕ: `src/lib/usage/bankedResetAudit.ts`
+- ਇਤਿਹਾਸ API: `GET /api/settings/banked-reset-auto/history?limit=50` (ਪ੍ਰਬੰਧਨ ਪ੍ਰਮਾਣਿਕਤਾ)
+
+**ਫੈਸਲੇ ਦਾ ਆਦੇਸ਼** (ਪਹਿਲਾ ਅਸਫਲ ਨਿਯਮ ਦਰਜ ਕੀਤਾ ਗਿਆ ਕਾਰਨ ਹੈ):
+
+1. ਵਿਸ਼ੇਸ਼ਤਾ ਬੰਦ, ਕ੍ਰੈਡਿਟ ਕਿਸਮ ਬੰਦ, ਜਾਂ ਖਾਤਾ ਦਾਇਰੇ ਤੋਂ ਬਾਹਰ (`accountScope` `all` / `selected` ਪਲੱਸ ਪ੍ਰਤੀ-ਖਾਤਾ `connections` ਨਕਸ਼ਾ)।
+2. ਵਿਕਲਪਿਕ UTC ਅਨੁਸੂਚੀ ਤੋਂ ਬਾਹਰ (`startHourUtc` > `endHourUtc` ਅੱਧੀ ਰਾਤ ਨੂੰ ਪਾਰ ਕਰਦਾ ਹੈ)।
+3. ਪਿਛਲੇ 24 ਘੰਟਿਆਂ ਵਿੱਚ ਕੈਪਸ: `maxPerAccountPerDay` (1), `maxPerDay` (3), ਅਤੇ `minSpacingMinutes` (30) ਕਿਸੇ ਵੀ ਦੋ ਰਿਡੀਮਸ਼ਨਾਂ ਵਿਚਕਾਰ।
+4. ਟਰਿੱਗਰ: ਇੱਕ ਕੰਧ ਵਾਲੀ `session` ਜਾਂ `weekly` ਵਿੰਡੋ ( `getQuotaWindowStatus().reachedThreshold` ਤੋਂ ਪੜ੍ਹੋ, `isAccountQuotaExhausted()` ਨਹੀਂ, ਜੋ ਸਿਰਫ ਖਰਚੀ ਗਈ ਹਰੇਕ ਵਿੰਡੋ ਦੇ ਨਾਲ ਇੱਕ ਖਾਤੇ ਦੀ ਰਿਪੋਰਟ ਕਰਦਾ ਹੈ), ਜਾਂ `expiringCreditHours` (24) ਦੇ ਅੰਦਰ ਇੱਕ ਕ੍ਰੈਡਿਟ ਦੀ ਮਿਆਦ ਖਤਮ ਹੋ ਰਹੀ ਇੱਕ ਖਾਤੇ 'ਤੇ ਜਿਸ ਨੇ ਘੱਟੋ-ਘੱਟ `expiringCreditMinUsedPercent` (50) ਦੀ ਵਰਤੋਂ ਕੀਤੀ ਹੈ।
+5. ਕੁਦਰਤੀ-ਰੀਸੈਟ ਗਾਰਡ: ਜਦੋਂ ਕੰਧ ਵਾਲੀ 5-ਘੰਟੇ ਦੀ ਵਿੰਡੋ `sessionResetGuardMinutes` (90) ਦੇ ਅੰਦਰ ਰੀਸੈਟ ਹੁੰਦੀ ਹੈ, ਜਾਂ `weeklyResetGuardHours` (12) ਦੇ ਅੰਦਰ ਦੀਵਾਰ ਵਾਲੀ ਹਫਤਾਵਾਰੀ ਵਿੰਡੋ ਰੀਸੈਟ ਹੁੰਦੀ ਹੈ ਤਾਂ ਛੱਡੋ।
+6. ਹਫ਼ਤਾਵਾਰੀ ਮੰਜ਼ਿਲ: ਜਦੋਂ ਹਫ਼ਤਾਵਾਰ ਬਾਕੀ `weeklyFloorPercent` (10) ਤੋਂ ਹੇਠਾਂ ਹੋਵੇ ਤਾਂ 5-ਘੰਟੇ ਦੇ ਰੀਸੈਟ ਨੂੰ ਛੱਡ ਦਿਓ।
+7. `last-resort` ਮੋਡ: ਛੱਡੋ ਜਦੋਂ ਕਿ ਉਸੇ ਪ੍ਰਦਾਤਾ ਦੇ ਇੱਕ ਹੋਰ ਇਨ-ਸਕੋਪ ਖਾਤੇ ਵਿੱਚ ਦੋਵਾਂ ਵਿੰਡੋਜ਼ ਵਿੱਚ ਘੱਟੋ-ਘੱਟ `poolHeadroomPercent` (10) ਬਚੇ ਹਨ। ਮਿਆਦ ਪੁੱਗਣ ਵਾਲੇ ਕ੍ਰੈਡਿਟ ਟ੍ਰਿਗਰਸ ਇਸ ਨੂੰ ਬਾਈਪਾਸ ਕਰਦੇ ਹਨ।
+8. `dry-run` ਇੱਕ ਕਤਾਰ ਨੂੰ ਰਿਕਾਰਡ ਕਰਦਾ ਹੈ ਅਤੇ ਕੁਝ ਵੀ ਰੀਡੀਮ ਨਹੀਂ ਕਰਦਾ; `last-resort` ਅਤੇ `eager` ਰੀਡੀਮ ਕਰੋ।
+
+ਗੁੰਮ ਕੋਟਾ ਡੇਟਾ ਕਦੇ ਵੀ ਰੀਡੈਂਪਸ਼ਨ ਨੂੰ ਅਨਲੌਕ ਨਹੀਂ ਕਰਦਾ: ਇੱਕ ਅਣਜਾਣ ਰੀਸੈਟ ਸਮਾਂ ਜਾਂ ਹਫਤਾਵਾਰੀ ਵਰਤੋਂ ਛੱਡ ਦਿੱਤੀ ਜਾਂਦੀ ਹੈ।
+
+**Claude ਸੈਸ਼ਨ ਰੀਸੈੱਟ:** ਵਿਸ਼ੇਸ਼ਤਾ ਬੰਦ, ਜਾਂ `claudeSessionReset` ਬੰਦ ਦੇ ਨਾਲ, ਪ੍ਰਤੀ-ਖਾਤਾ `autoLimitReset` ਟੌਗਲ ਪਹਿਲਾਂ ਵਾਂਗ ਹੀ ਫੈਸਲਾ ਕਰਦਾ ਹੈ। ਦੋਵਾਂ ਦੇ ਚਾਲੂ ਹੋਣ ਦੇ ਨਾਲ, ਵਿਸ਼ੇਸ਼ਤਾ ਪ੍ਰਤੀ-ਖਾਤਾ ਟੌਗਲਾਂ ਨੂੰ ਬਦਲ ਦਿੰਦੀ ਹੈ: ਇੱਕ ਇਨ-ਸਕੋਪ ਖਾਤਾ ਉਦੋਂ ਹੀ ਦਾਅਵਾ ਕਰ ਸਕਦਾ ਹੈ ਜਦੋਂ ਨੀਤੀ ਇਸਦੀ ਇਜਾਜ਼ਤ ਦਿੰਦੀ ਹੈ, ਅਤੇ `dry-run` ਮੋਡ ਵਿੱਚ ਕੋਈ ਦਾਅਵਾ ਨਹੀਂ ਕੀਤਾ ਜਾਂਦਾ ਹੈ।
+
+**ਸੁਰੱਖਿਆ:** ਨੌਕਰੀ ਪ੍ਰਤੀ ਟਿੱਕ 'ਤੇ ਵੱਧ ਤੋਂ ਵੱਧ ਇੱਕ ਕ੍ਰੈਡਿਟ ਰੀਡੀਮ ਕਰਦੀ ਹੈ, ਕ੍ਰੈਡਿਟ ਸੂਚੀਬੱਧ ਕਰਨ ਤੋਂ ਪਹਿਲਾਂ ਫੈਸਲਾ ਕਰਦੀ ਹੈ (ਇੱਕ ਛੱਡਿਆ ਖਾਤਾ ਕਦੇ ਸੂਚੀਬੱਧ ਨਹੀਂ ਹੁੰਦਾ), ਜ਼ੈਡਮਪੋਟੈਂਸੀ ਕੁੰਜੀਆਂ `auto-reset:<connectionId>:<yyyy-mm-dd>:<n>` ਦੀ ਵਰਤੋਂ ਕਰਦਾ ਹੈ, ਅਤੇ ਇੱਕ ਅਸਫਲ ਸੂਚੀ ਜਾਂ ਰੀਡੈਂਪਸ਼ਨ ਤੋਂ ਬਾਅਦ 1 ਘੰਟੇ ਲਈ ਖਾਤੇ ਨੂੰ ਬੰਦ ਕਰਦਾ ਹੈ। ਹਰ ਛੁਟਕਾਰਾ, ਅਸਫਲਤਾ ਅਤੇ ਡਰਾਈ-ਰਨ ਦਾ ਫੈਸਲਾ `audit_log` (`action: "bankedReset.redeem"`, ਕੋਈ ਟੋਕਨ ਜਾਂ ਕ੍ਰੈਡਿਟ ਆਈਡੀ ਨਹੀਂ) ਨੂੰ ਲਿਖਿਆ ਜਾਂਦਾ ਹੈ; ਕੈਪਸ ਉਹਨਾਂ ਕਤਾਰਾਂ ਵਿੱਚੋਂ ਗਿਣੇ ਜਾਂਦੇ ਹਨ, ਇਸਲਈ ਉਹ ਮੁੜ ਚਾਲੂ ਹੋਣ ਤੋਂ ਬਚ ਜਾਂਦੇ ਹਨ। ਸਫਲ ਛੁਟਕਾਰਾ `provider.reset_redeemed` ਵੈਬਹੁੱਕ ਨੂੰ ਵੀ ਚਾਲੂ ਕਰਦਾ ਹੈ।
+
+ਰਿਗਰੈਸ਼ਨ ਗਾਰਡ: `tests/unit/banked-reset-policy.test.ts`, `tests/unit/banked-reset-auto-apply.test.ts`, `tests/unit/claude-limit-reset-policy-gate.test.ts`, `tests/unit/banked-reset-history-route.test.ts`।
+
 ### Session affinity (#7274)
 
 **Scope:** ਇੱਕ client session (`X-Session-Id` / `x-codex-session-id` / `x-omniroute-session` header)

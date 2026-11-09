@@ -1033,14 +1033,14 @@ CLI nâng cấp `base_url + /responses` thành một WebSocket và OmniRoute t�
 
 ---
 
-## Báo cáo hạn ngạch & sự cố
+## Báo cáo hạn ngạch & vấn đề
 
-| Phương thức | Đường dẫn           | Mô tả                                                                                   |
-| ----------- | ------------------- | --------------------------------------------------------------------------------------- |
-| GET         | `/v1/quotas/check`  | Xác thực trước hạn ngạch cho một `provider` + `accountId` trước khi cấp khóa đã đăng ký |
-| POST        | `/v1/issues/report` | Báo cáo lỗi cấp hạn ngạch/khóa lên GitHub (yêu cầu `GITHUB_ISSUES_REPO` + token)        |
+| Phương pháp | Con đường           | Sự miêu tả                                                                                |
+| ----------- | ------------------- | ----------------------------------------------------------------------------------------- |
+| GET         | `/v1/quotas/check`  | Xác thực trước hạn ngạch cho `provider` + `accountId` trước khi cấp khóa đã đăng ký       |
+| POST        | `/v1/issues/report` | Báo cáo lỗi phát hành quota/key cho GitHub (yêu cầu mã thông báo `GITHUB_ISSUES_REPO` + ) |
 
-**Xác thực:** Khóa API Bearer (`isAuthenticated`).
+**Xác thực:** `/v1/quotas/check` lấy khóa API của Bearer (`isAuthenticated`). `/v1/issues/report` chỉ dành cho quản lý (`requireManagementAuth`), giống như `/api/v1/registered-keys`: phiên bảng điều khiển, mã thông báo CLI cục bộ hoặc khóa API có phạm vi `manage`/`admin` ; Các khóa API chỉ suy luận nhận được `403`.
 
 ### Khôi phục phiên hạn ngạch (tùy chọn)
 
@@ -1871,19 +1871,23 @@ Các gói đăng ký webhook gửi đi cho các sự kiện của OmniRoute (ho�
 
 ---
 
-## Các khóa đã đăng ký (Tự động quản lý)
+## Khóa đã đăng ký (Quản lý tự động)
 
-Được sử dụng bởi hệ thống quản lý khóa tự động để cấp và xoay vòng API key cho một provider/tài khoản phía sau, với hạn mức theo ngày/giờ.
+Được sử dụng bởi hệ thống con quản lý khóa tự động để phát hành và xoay khóa API dựa trên provider/account dự phòng, với hạn ngạch daily/hourly.
 
-| Phương thức | Đường dẫn                             | Mô tả                                                                                                                                                                                                 |
-| ----------- | ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET         | `/api/v1/registered-keys`             | Liệt kê các khóa đã đăng ký (chỉ hiển thị tiền tố đã che)                                                                                                                                             |
-| POST        | `/api/v1/registered-keys`             | Cấp khóa đã đăng ký mới — body: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Trả về khóa thô **một lần duy nhất**. Trả về `429` khi từ chối do hạn mức. |
-| GET         | `/api/v1/registered-keys/[id]`        | Lấy siêu dữ liệu của khóa đã đăng ký (không có khóa thô)                                                                                                                                              |
-| DELETE      | `/api/v1/registered-keys/[id]`        | Thu hồi một khóa đã đăng ký                                                                                                                                                                           |
-| POST        | `/api/v1/registered-keys/[id]/revoke` | Endpoint thu hồi rõ ràng (có tác dụng giống DELETE)                                                                                                                                                   |
+| Phương pháp | Con đường                             | Sự miêu tả                                                                                                                                                                                             |
+| ----------- | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| GET         | `/api/v1/registered-keys`             | Liệt kê các khóa đã đăng ký (chỉ tiền tố bị che)                                                                                                                                                       |
+| POST        | `/api/v1/registered-keys`             | Phát hành nội dung — khóa đã đăng ký mới: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Trả về khóa thô **một lần** . Trả về `429` khi từ chối hạn ngạch. |
+| GET         | `/api/v1/registered-keys/[id]`        | Truy xuất siêu dữ liệu của khóa đã đăng ký (không có nguyên liệu thô)                                                                                                                                  |
+| DELETE      | `/api/v1/registered-keys/[id]`        | Thu hồi key đã đăng ký                                                                                                                                                                                 |
+| POST        | `/api/v1/registered-keys/[id]/revoke` | Điểm cuối thu hồi rõ ràng (tác dụng tương tự như DELETE)                                                                                                                                               |
+| GET         | `/api/v1/providers/[provider]/limits` | Đọc giới hạn phát hành của nhà cung cấp                                                                                                                                                                |
+| PUT         | `/api/v1/providers/[provider]/limits` | Đặt giới hạn phát hành của nhà cung cấp Phần thân — : `{maxActiveKeys?, dailyIssueLimit?, hourlyIssueLimit?}`                                                                                          |
+| GET         | `/api/v1/accounts/[id]/limits`        | Đọc giới hạn phát hành của tài khoản                                                                                                                                                                   |
+| PUT         | `/api/v1/accounts/[id]/limits`        | Đặt giới hạn phát hành của tài khoản — giống với lộ trình của nhà cung cấp                                                                                                                             |
 
-**Xác thực:** phiên/API key quản lý (`requireManagementAuth`) — cùng cơ chế bảo vệ như `/api/keys`: phiên dashboard, token CLI cục bộ hoặc API key có phạm vi `manage`/`admin`; API key chỉ dành cho suy luận sẽ nhận `403`. Xem thêm `/v1/quotas/check` và `/v1/issues/report`.
+**Xác thực:** quản lý khóa session/API (`requireManagementAuth`) — bảo vệ giống như `/api/keys`: phiên bảng điều khiển, mã thông báo CLI cục bộ hoặc khóa API có phạm vi `manage`/`admin` ; Các khóa API chỉ suy luận sẽ nhận được `403`. Xem thêm `/v1/quotas/check` và `/v1/issues/report`.
 
 ---
 

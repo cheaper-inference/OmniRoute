@@ -4,204 +4,119 @@
 
 ---
 
-OmniRoute riadi, ktoré **zdroje prehliadača** môžu čítať odpovede medzi rôznymi zdrojmi
-pomocou jediného centralizovaného zoznamu povolených zdrojov. Model je **predvolene uzavretý**:
-žiadny zdroj nie je povolený, kým ho výslovne nepovolíte. Táto stránka dokumentuje, ako sa zoznam povolených zdrojov
-vyhodnocuje, čo `CORS_ALLOW_ALL=true` v skutočnosti sprístupňuje (a čo, čo je dôležité,
-**nesprístupňuje**), ako bezpečne konfigurovať vývojové a produkčné prostredie a aké upozornenie počas behu
-zobrazuje ovládací panel, keď je aktívny zástupný znak.
+OmniRoute ovláda ktoré **pôvod prehliadača** môže čítať krížové odpovede z jedného centralizovaného zoznamu povolených. Model je **predvolene zatvorené pri poruche** : žiadny pôvod nie je povolený, kým sa neprihlásite. Táto stránka dokumentuje, ako sa rieši zoznam povolených, čo `CORS_ALLOW_ALL=true` skutočne odhaľuje (a čo je dôležité, čo robí **nie** ), ako bezpečne nakonfigurovať dev vs production a varovanie za behu, ktoré sa zobrazí na paneli, keď je aktívny zástupný znak.
 
-**Zdroj pravdy:** `src/server/cors/origins.ts` (`resolveAllowedOrigin`,
-`applyCorsHeaders`, `getCorsStatus`). Zoznam povolených zdrojov sa aplikuje iba raz, v
-middleware (`src/server/authz/pipeline.ts`) — obslužné rutiny jednotlivých trás samy nenastavujú
-`Access-Control-Allow-Origin`.
+**Zdroj pravdy:** `src/server/cors/origins.ts` (`resolveAllowedOrigin`, `applyCorsHeaders`, `getCorsStatus`). Zoznam povolených sa použije raz, v middlevéri (`src/server/authz/pipeline.ts`) — per-route handlery nenastavujú `Access-Control-Allow-Origin` sami.
 
-## Ako sa zdroj vyhodnocuje
+## Ako sa rieši pôvod
 
-Middleware pre každú požiadavku vypočíta hodnotu `Access-Control-Allow-Origin`
-v tomto poradí:
+Pre každú požiadavku middleware vypočíta hodnotu `Access-Control-Allow-Origin` v tomto poradí:
 
-1. **`CORS_ALLOW_ALL=true`** (alebo staršie `CORS_ORIGIN=*`) → vráti hodnotu
-   `Origin` volajúceho (alebo `*`, ak hlavička `Origin` chýba) spolu s `Vary: Origin`,
-   aby vyrovnávacie pamäte fungovali správne. Rovnaký centrálny bod `applyCorsHeaders()` tiež pridáva
-   `Vary: Accept-Encoding` ku každej odpovedi 2xx s telom na rozhraní
-   `/v1*`/`/v1beta*` autentifikovanom tokenom (`relaxForTokenAuth`, RFC 9110 §12.5.5, problém #6737), aby
-   následné/zdieľané vyrovnávacie pamäte mohli správne rozlišovať komprimované a nekomprimované
-   varianty.
-2. V opačnom prípade sa `Origin` požiadavky normalizuje (prevedie na malé písmená a odstráni sa
-   koncová lomka) a porovná sa so **zlúčeným zoznamom povolených zdrojov**:
-   - premenná prostredia **`CORS_ALLOWED_ORIGINS`** — zoznam oddelený čiarkami a
-   - nastavenie **`corsOrigins`** počas behu (Ovládací panel → Zabezpečenie → _Povolené zdroje
-     CORS_), vložené prostredníctvom `setRuntimeAllowedOrigins()` zo súboru
-     `src/lib/config/runtimeSettings.ts`.
-3. Žiadna zhoda → **hlavička `Access-Control-Allow-Origin` sa neodošle**. Prehliadač
-   zablokuje čítanie medzi rôznymi zdrojmi. Toto je zamýšľané predvolené uzavreté správanie.
+1. **`CORS_ALLOW_ALL=true`** (alebo staršie `CORS_ORIGIN=*`) → odzrkadľuje `Origin` volajúceho späť (alebo `*`, keď neexistuje hlavička `Origin` ), so `Vary: Origin`, takže vyrovnávacie pamäte zostávajú správne. Rovnaký škrtiaci bod `applyCorsHeaders()` tiež pripojí `Vary: Accept-Encoding` ku každej odpovedi 2xx-with-body na povrchu `/v1*`/`/v1beta*` overenom tokenom (`relaxForTokenAuth`, RFC 9110 §12.5.5, vydanie #6737), takže vyrovnávacie pamäte downstream/shared dokážu správne rozlíšiť komprimované a nekomprimované varianty.
+2. V opačnom prípade sa požiadavka `Origin` normalizuje (malé písmená, koncová lomka sa odstráni) a porovná sa s **zlúčený zoznam povolených** :
+   - env **`CORS_ALLOWED_ORIGINS`** — zoznam oddelený čiarkami a
+   - čas spustenia **`corsOrigins`** nastavenie (Dashboard → Security → _CORS Allowed Origins_), vstrekované cez `setRuntimeAllowedOrigins()` od `src/lib/config/runtimeSettings.ts`.
+3. Žiadny zápas →**nevysiela sa hlavička `Access-Control-Allow-Origin`** . Prehliadač blokuje čítanie krížového pôvodu. Toto je zamýšľaná predvolená hodnota so zatvorením zlyhania.
 
-| Premenná prostredia    | Význam                                                                                                        |
-| ---------------------- | ------------------------------------------------------------------------------------------------------------- |
-| `CORS_ALLOWED_ORIGINS` | Zoznam presných povolených zdrojov vo formáte CSV (odporúčané).                                               |
-| `CORS_ALLOW_ALL`       | `true`/`1` → vráti ľubovoľný zdroj (zástupný znak). Iba pre vývoj.                                            |
-| `CORS_ORIGIN`          | Staršie nastavenie. `*` sa správa ako `CORS_ALLOW_ALL`; jedna hodnota sa pridá do zoznamu povolených zdrojov. |
+| Env var                | Význam                                                                                       |
+| ---------------------- | -------------------------------------------------------------------------------------------- |
+| `CORS_ALLOWED_ORIGINS` | Povoliť CSV presného pôvodu (odporúča sa).                                                   |
+| `CORS_ALLOW_ALL`       | `true`/`1` → odráža akýkoľvek pôvod (zástupný znak). Iba pre vývojárov.                      |
+| `CORS_ORIGIN`          | Dedičstvo. `*` sa správa ako `CORS_ALLOW_ALL`; do zoznamu povolených sa pridá jedna hodnota. |
 
-## Model hrozieb — čo `CORS_ALLOW_ALL=true` skutočne sprístupňuje
+## Model ohrozenia — to, čo `CORS_ALLOW_ALL=true` skutočne odhaľuje
 
-Všeobecné varovanie OWASP („CORS so zástupným znakom = ľubovoľná lokalita môže volať vaše API“) treba
-brať vážne, no rozsah vystavenia OmniRoute je **užší než vo všeobecnom prípade**
-vďaka jednému konkrétnemu implementačnému faktu:
+Všeobecné varovanie OWASP („zástupná karta CORS = môže každá stránka volať vaše API“) sa oplatí brať vážne, ale vystavenie OmniRoute je **užší ako všeobecný prípad** z dôvodu jednej konkrétnej implementačnej skutočnosti:
 
-> **Centrálny `applyCorsHeaders()` nikdy neposiela
-> `Access-Control-Allow-Credentials`.** Prehliadač nesprístupní _autentifikovanú_
-> odpoveď medzi rôznymi zdrojmi (obsahujúcu súbory cookie), pokiaľ server neodošle
-> `Access-Control-Allow-Credentials: true`. Zdieľaná cesta CORS v OmniRoute to nikdy
-> nerobí.
+> **Centrálna `applyCorsHeaders()` nikdy nevyžaruje `Access-Control-Allow-Credentials`.** Prehliadač nevystaví _credentialed_ (súborom cookie) odpoveď krížového pôvodu, pokiaľ server nepošle `Access-Control-Allow-Credentials: true`. Zdieľaná cesta CORS OmniRoute nikdy nerobí.
 
-Čo to znamená pre jednotlivé rozhrania aj pri `CORS_ALLOW_ALL=true`:
+Čo to znamená pre každý povrch, dokonca aj so `CORS_ALLOW_ALL=true`:
 
-| Rozhranie                                  | Mechanizmus autentifikácie     | Účinok CORS so zástupným znakom                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| ------------------------------------------ | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Ovládací panel / SPRÁVA `/api/*`           | Relácia prostredníctvom cookie | Zdroj sa vráti, ale **bez `Allow-Credentials`** prehliadač **zablokuje** autentifikované čítanie. Škodlivá lokalita z iného zdroja **nemôže čítať** vaše autentifikované odpovede ovládacieho panela a súbor cookie relácie sa nesprístupní.                                                                                                                                                                                                                                                                                                                              |
-| Klientské API `/v1/*`, `/v1beta/*`         | Hlavička Bearer / `x-api-key`  | Už je zámerne prístupné (`relaxForTokenAuth`): prehliadače nikdy automaticky nepripájajú `Authorization`/`x-api-key`, takže stránka útočníka nemôže poskytnúť váš kľúč. Vrátenie pôvodu podľa uvoľneného pravidla vyžaduje autentifikovaný subjekt (overený API kľúč alebo overenú reláciu ovládacieho panela), nie iba hlavičku s prihlasovacími údajmi, a nikdy nezahŕňa `Access-Control-Allow-Credentials`. Anonymné odpovede (`REQUIRE_API_KEY=false`) používajú nakonfigurovaný zoznam povolených pôvodov vrátane výslovného zapnutia pomocou `CORS_ALLOW_ALL=true`. |
-| Verejné, iba na čítanie (`/api/health`, …) | Žiadny                         | Necitlivé; zástupný znak je neškodný.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| Povrch                                    | Mechanizmus autorizácie      | Účinok zástupného znaku CORS                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| ----------------------------------------- | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Prístrojová doska / MANAGEMENT `/api/*`   | Relácia cookies              | Pôvod sa ozýva, ale **bez `Allow-Credentials`** prehliadač **bloky** overené čítanie. Škodlivá stránka s viacerými pôvodmi **nevie čítať** vaše overené odpovede ovládacieho panela a súbor cookie relácie nebude odhalený.                                                                                                                                                                                                                                                                          |
+| Klient API `/v1/*`, `/v1beta/*`           | Nosič / hlavička `x-api-key` | Už povoľný **podľa návrhu** (`relaxForTokenAuth`): prehliadače nikdy automaticky nepripájajú `Authorization`/`x-api-key`, takže stránka útočníka nemôže poskytnúť váš kľúč. Uvoľnená odozva vyžaduje overený subjekt (overený kľúč API alebo reláciu dashboardu), nielen hlavičku poverení, a nikdy nezahŕňa `Access-Control-Allow-Credentials`. Anonymné odpovede (`REQUIRE_API_KEY=false`) používajú nakonfigurovaný zoznam povolených zdrojov vrátane explicitného súhlasu `CORS_ALLOW_ALL=true`. |
+| Verejné iba na čítanie (`/api/health`, …) | žiadne                       | Necitlivé; zástupný znak je neškodný.                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
 
-**Zvyškové** vystavenie pri `CORS_ALLOW_ALL=true` je teda obmedzené na: (a)
-neautentifikované čítanie už verejne dostupných údajov medzi rôznymi zdrojmi a (b)
-povolenie úspešného CORS **preflightu** na trasách správy — tie však stále vyžadujú autentifikáciu,
-ktorú stránka z iného zdroja nedokáže poskytnúť. Na zdieľanej ceste CORS **nejde** o vektor na
-únos relácie ani krádež prihlasovacích údajov.
+Takže **zvyškový** vystavenie `CORS_ALLOW_ALL=true` je obmedzené na: (a) nekreditovaný krížový pôvod **číta** už neoverených údajov a (b) prenechanie CORS**predletový preukaz** na riadiacich cestách —, ktoré stále vyžadujú overenie, ktoré stránka s krížovým pôvodom nemôže poskytnúť. je to tak **nie** vektor únosu relácie alebo krádeže poverení na zdieľanej ceste CORS.
 
 ### Jedna skutočná výnimka — `/api/v1/agents/`
 
-Trasy Cloud-Agent (`/api/v1/agents/{health,credentials,tasks,tasks/[id]}`) nastavujú
-**vlastné** hlavičky CORS
-(`src/lib/cloudAgent/api.ts`, `getCloudAgentCorsHeaders`) a **odosielajú**
-`Access-Control-Allow-Origin: <origin>|*` spolu s
-`Access-Control-Allow-Credentials: true`. Ide o jediné rozhranie, kde
-vrátenie zdroja a prihlasovacie údaje existujú súčasne, pričom je **nezávislé od
-`CORS_ALLOW_ALL`**. Tieto trasy sú autentifikované pre správu
-(`requireManagementAuth`); prevádzkovatelia, ktorí sprístupňujú ovládací panel mimo hostiteľa, by si mali
-uvedomiť, že ide o jediné miesto, kde hlavičky odpovede povoľujú autentifikované čítanie
-medzi rôznymi zdrojmi. Jeho obmedzenie na explicitný zoznam povolených zdrojov sa sleduje
-oddelene od týchto usmernení pre CORS.
+Cesty Cloud-Agent (`/api/v1/agents/{health,credentials,tasks,tasks/[id]}`) nastavujú svoje **vlastné** CORS hlavičky (`src/lib/cloudAgent/api.ts`, `getCloudAgentCorsHeaders`) a **robiť** emitujú `Access-Control-Allow-Origin: <origin>|*` spolu so `Access-Control-Allow-Credentials: true`. Toto je jediný povrch, kde koexistujú pôvodná odozva a poverenia, a to je **nezávislé od `CORS_ALLOW_ALL`** . Tieto cesty sú overené manažmentom (`requireManagementAuth`); Operátori, ktorí odhaľujú dashboard mimo hostiteľa, by si mali byť vedomí toho, že toto je jediné miesto, kde je povolené čítanie s krížovým pôvodom v hlavičkách odpovede. Jeho utiahnutie do explicitného zoznamu povolených sa sleduje oddelene od tohto usmernenia CORS.
 
-## Kontrolný zoznam pre produkciu
+## Kontrolný zoznam výroby
 
-- **V produkcii nikdy nenastavujte `CORS_ALLOW_ALL=true`.** Ponechajte túto premennú nenastavenú.
-- Nastavte **explicitný** zoznam pôvodov — buď pomocou premennej prostredia, alebo poľa na karte Security:
+- **Nikdy nenastavujte `CORS_ALLOW_ALL=true` vo výrobe.** Nechajte ho nenastavené.
+- Nastaviť **explicitné** zoznam pôvodu — buď pole env var alebo pole na karte Zabezpečenie:
 
   ```bash
   CORS_ALLOWED_ORIGINS="https://app.example.com, https://admin.example.com"
   ```
 
-- Ak OmniRoute beží za reverzným proxy serverom alebo tunelom (nginx, Caddy, Cloudflare
-  Tunnel, Tailscale), CORS **nie je** jediným ochranným mechanizmom — ochrana trás
-  pre loopback naďalej chráni trasy umožňujúce spúšťanie procesov (pozrite
-  [ROUTE_GUARD_TIERS](./ROUTE_GUARD_TIERS.md)). Nepodvrhujte
-  `X-Forwarded-For: 127.0.0.1`, aby ste „opravili“ chybu 403; tým by ste znova otvorili triedu
-  zraniteľností RCE, ktorú ochrana trás uzatvára.
-- Overte stav za behu: ovládací panel zobrazuje **trvalý oranžový banner**
-  v časti Dashboard → Security → Authorization Inventory vždy, keď je aktívne
-  `CORS_ALLOW_ALL=true`, a `/api/settings/authz-inventory` vracia obálku
-  `cors: { allowAll, allowedOrigins }`, ktorú môžu monitorovacie nástroje pravidelne kontrolovať.
+- Ak OmniRoute beží za reverzným proxy / tunelom (nginx, Caddy, Cloudflare tunel, Tailscale), CORS je **nie** vaša jediná kontrola — chránič trasy so spätnou slučkou stále chráni trasy schopné spúšťania (pozri [ROUTE_GUARD_TIERS](./ROUTE_GUARD_TIERS.md) ). Nefalšujte `X-Forwarded-For: 127.0.0.1` na "opravu" 403; čím sa znovu otvorí trieda RCE strážnik sa zatvorí.
+- Potvrďte stav runtime: na ovládacom paneli sa zobrazí a **perzistentný jantárový banner** pod Dashboard → Security → Autorizačný inventár vždy, keď je `CORS_ALLOW_ALL=true` v prevádzke, a `/api/settings/authz-inventory` vráti nástroj na monitorovanie obálok `cors: { allowAll, allowedOrigins }`, ktorý môžu získať.
 
-## Pohodlie pri vývoji — povoľte konkrétne lokálne pôvody
+## Pohodlie vývoja — umožňuje špecifický miestny pôvod
 
-Dokonca aj pri vývoji potrebujete zástupný znak len zriedka. Povoľte iba vývojové servery, ktoré používate:
+Zriedkavo potrebujete zástupný znak aj vo vývoji. Povoľte iba servery pre vývojárov, ktoré používate:
 
 ```bash
-# Vývojové servery Vite (5173) + Next.js (3000), ktoré volajú lokálny OmniRoute
+# Vite (5173) + Next.js (3000) dev servers calling a local OmniRoute
 CORS_ALLOWED_ORIGINS="http://localhost:5173, http://localhost:3000"
 ```
 
-Pri porovnávaní pôvodov sa nerozlišujú veľké a malé písmená a koncová lomka sa ignoruje, takže
-`http://localhost:3000` a `http://localhost:3000/` sú ekvivalentné. Rovnakú hodnotu CSV
-možno za behu bez reštartu nastaviť v časti **Dashboard → Security → CORS Allowed Origins**.
+Počiatky sa priraďujú bez ohľadu na veľkosť písmen a ignoruje sa koncová lomka, takže `http://localhost:3000` a `http://localhost:3000/` sú ekvivalentné. Rovnaké CSV je možné nastaviť za behu v **Dashboard → Security → CORS Povolené pôvody** bez reštartu.
 
-## Kľúče API verzus relácie používajúce súbory cookie
+## Kľúče API verzus relácie súborov cookie
 
-- **Bearer / `x-api-key` (inferenčné rozhranie `/v1/*`):** prehliadače ich nikdy nepripájajú
-  automaticky. CORS tu nepredstavuje účinnú bariéru — bariérou je kľúč API
-  — preto je toto rozhranie zámerne permisívne, aby si klienti v prehliadači a
-  Electron mohli čítať odpovede, na ktoré už majú oprávnenie.
-  Vrátenie pôvodu podľa uvoľneného pravidla vyžaduje autentifikovaný subjekt (overený API kľúč alebo overenú reláciu ovládacieho panela), nie iba hlavičku s prihlasovacími údajmi, a nikdy nezahŕňa `Access-Control-Allow-Credentials`. Anonymné odpovede (`REQUIRE_API_KEY=false`) používajú nakonfigurovaný zoznam povolených pôvodov vrátane výslovného zapnutia pomocou `CORS_ALLOW_ALL=true`. Zamietnutia overenia (401) zostávajú
-  čitateľné, aby klienti mohli zobraziť odvolaný alebo nesprávne zadaný kľúč (#5242):
-  vlastná odpoveď 401 z pipeline vrátenie zdroja zachováva a trasa, ktorá kľúč sama
-  odmietne po tom, čo ho pipeline obslúžila ako anonymný (`/v1/models` a
-  `/v1beta/models` s nakonfigurovaným overovaním správy, trasy obmedzené na vlastníka
-  `/v1/files`, `/v1/batches`, `/v1/media`, `/v1/session-leases` a trasy kandidátov
-  auto-combo), pridá vrátenie zdroja k tejto odpovedi 401 pomocou
-  `credentialRejectionHeaders()`. Vrátenie zdroja závisí od toho, či požiadavka nesie
-  hlavičku s prihlasovacími údajmi (`Authorization`, `x-api-key`, `x-goog-api-key` alebo
-  súbor cookie `auth_token`), nie od toho, ktorú z nich trasa skontrolovala, a nikdy sa
-  nekombinuje s `Access-Control-Allow-Credentials`; telo je pevná chybová obálka. Trasy
-  správy pod `/api/v1/` chránené pomocou `requireManagementAuth()`
-  (`/api/v1/management/*`, `/api/v1/registered-keys`) nepoužívajú túto výnimku pre odmietnutie prihlasovacích údajov: pri `REQUIRE_API_KEY=false` sa ich odpovede 401/403 riadia nakonfigurovanou politikou CORS pre pôvod.
-- **Relácia používajúca súbor cookie (ovládací panel):** je chránená predvoleným nastavením uzavretým pri zlyhaní **a**
-  absenciou hlavičky `Access-Control-Allow-Credentials` na zdieľanej ceste. Nezahŕňajte
-  pôvody pre správu a ovládací panel do žiadnej permisívnej konfigurácie; musia zostať striktne
-  uzavreté pri zlyhaní.
+- **Nosič / `x-api-key` (inferenčný povrch `/v1/*` ):** prehliadače ich nikdy nepripájajú automaticky. CORS tu nie je zmysluplná bariéra — kľúč API je bariéra —, a preto je tento povrch zámerne povolený, takže klienti prehliadača a Electron môžu čítať odpovede, na ktoré už majú nárok. Uvoľnená odozva vyžaduje overený subjekt (overený kľúč API alebo reláciu dashboardu), nielen hlavičku poverení, a nikdy nezahŕňa `Access-Control-Allow-Credentials`. Anonymné odpovede (`REQUIRE_API_KEY=false`) používajú nakonfigurovaný zoznam povolených zdrojov vrátane explicitného súhlasu `CORS_ALLOW_ALL=true`. Odmietnutia autorizácie (401) zostávajú čitateľné, takže klienti môžu zobraziť odvolaný alebo chybne zadaný kľúč (#5242): vlastný kanál 401 uchováva odozvu a trasa, ktorá odmietne samotný kľúč po tom, čo kanál poslúži ako anonymný (`/v1/models` a `/v1beta/models` s nakonfigurovaným overením správy, smerovanie v rozsahu vlastníka `/v1/files`, `/v1/batches` `/v1/media`) autocom `/v1/session-leases` pridá sa echo do toho 401 cez `credentialRejectionHeaders()`. Odozva je kľúčovaná na požiadavku nesúcu hlavičku poverenia (`Authorization`, `x-api-key`, `x-goog-api-key` alebo cookie `auth_token` ), nie na tom, na ktorej z nich bola trasa kontrolovaná, a nikdy sa nespáruje so `Access-Control-Allow-Credentials`; telo je obálka s pevnou chybou. Riadiace cesty pod `/api/v1/` strážené `requireManagementAuth()` (`/api/v1/management/*`, `/api/v1/registered-keys`, `/api/v1/providers/[provider]/limits`, `/api/v1/accounts/[id]/limits`, `/api/v1/issues/report`) nepoužívajú túto výnimku odmietnutia poverenia: pri `REQUIRE_API_KEY=false` sa ich odpovede 401/403 riadia nakonfigurovanou politikou pôvodu CORS.
+- **Relácia súboru cookie (hlavný panel):** chránené predvolenou chybou zatvorenia **a** absenciou `Access-Control-Allow-Credentials` na zdieľanej ceste. Udržujte pôvod management/dashboard mimo akejkoľvek povolenej konfigurácie; musia zostať presne zatvorené.
 
-## Handshaky WebSocket (`/v1/responses`, `/v1/ws`)
+## WebSocket handshake (`/v1/responses`, `/v1/ws`)
 
-Prehliadače na WebSocket CORS neuplatňujú, preto transporty WebSocket, ktoré vracajú
-výstup inferencie, kontrolujú hlavičku `Origin` handshaku samy
-(`src/server/origin/wsOrigin.ts`): WebSocket pre Responses (`/v1/responses`) a,
-keď OmniRoute beží cez `npm start` / `npm run dev`, aj most `/v1/ws` a
-`/api/v1/ws`, ktorý streamuje `/v1/chat/completions`, `/v1/messages` a
-`/v1/responses` ako rámce. Most si od `/api/v1/ws?handshake=1` vyžiada verdikt a
-upgrade odmietne, ak táto trasa kontrolu nevykonala. Požiadavky na autentifikáciu naďalej platia samostatne. Kontrola pôvodu prejde, keď:
+Prehliadače neaplikujú CORS na WebSocket, takže prenosy WebSocket, ktoré vracajú odvodený výstup, kontrolujú samotné handshake `Origin` (`src/server/origin/wsOrigin.ts`): odpovede WebSocket (`/v1/responses`) a keď OmniRoute prechádza cez `npm start` / `npm run dev`, most `/v1/ws` a `/api/v1/ws`, ktorý streamuje snímky `/v1/chat/completions`, `/v1/messages` a `/v1/responses`. Most žiada `/api/v1/ws?handshake=1` o verdikt a odmietne aktualizovať, pokiaľ táto trasa neprebehla kontrolou. Požiadavky na autentizáciu stále platia samostatne. Kontrola pôvodu prebehne, keď:
 
-- nemá hlavičku `Origin` (Codex CLI, SDK a ďalší klienti mimo prehliadača);
-- hlavičku `Origin` pripúšťa vyššie uvedený zoznam povolených zdrojov
-  (`CORS_ALLOWED_ORIGINS`, nastavenie `corsOrigins`, `CORS_ORIGIN`, `CORS_ALLOW_ALL`);
-- hlavička `Origin` je jedným z vlastných verejných zdrojov OmniRoute (nakonfigurovaná
-  verejná základná URL, preposlaný zdroj dôveryhodného proxy alebo priamy hostiteľ
-  loopback/LAN zadaný ako IP literál alebo `localhost` — tie isté kandidáty, ktoré
-  používa kontrola mutácií ovládacieho panela); alebo
-- nesie platný kľúč API, rovnako ako na rozhraní HTTP `/v1/*`.
+- nemá hlavičku `Origin` (Codex CLI, SDKs a iní klienti mimo prehliadača);
+- `Origin` je povolená vyššie uvedeným zoznamom povolených (`CORS_ALLOWED_ORIGINS`, nastavenie `corsOrigins`, `CORS_ORIGIN`, `CORS_ALLOW_ALL`);
+- `Origin` je jedným z vlastných verejných zdrojov OmniRoute(konfigurovaná verejná základňa URL, preposielaný pôvod dôveryhodného proxy alebo priamy hostiteľ loopback/LAN daný ako literál IP alebo `localhost` — rovnakých kandidátov, ktorých používa kontrola mutácie na dashboarde); alebo
+- nesie platný kľúč API, ako na povrchu HTTP `/v1/*`.
 
-Čokoľvek iné dostane `403 ws_origin_forbidden`. Súbor cookie relácie ovládacieho panela
-nerobí z cudzieho `Origin` výnimku, pretože ho prehliadač pripojí k socketu akejkoľvek
-stránky. `localhost` na inom porte sa nepovažuje za rovnaký zdroj; takéto vývojové
-zdroje pridajte do `CORS_ALLOWED_ORIGINS`.
+Čokoľvek iné dostane `403 ws_origin_forbidden`. Súbor cookie relácie dashboardu neoslobodzuje cudzí `Origin`, pretože ho prehliadač pripojí k soketu ľubovoľnej stránky. `localhost` na inom porte sa nepovažuje za rovnaký pôvod; pridajte takýto pôvod pre vývojárov do `CORS_ALLOWED_ORIGINS`.
 
-## Príklad: reverzný proxy server pred OmniRoute
+## Príklad: reverzný proxy pred OmniRoute
 
-CORS vynucuje samotný OmniRoute, takže proxy server by vo všeobecnosti **nemal** pridávať ani
-prepisovať hlavičky `Access-Control-*` (duplicitné hlavičky spôsobujú problémy v prehliadačoch). Ukončite TLS
-a požiadavky prepošlite — odpoveď na predbežnú požiadavku nechajte na OmniRoute:
+CORS je presadzovaný samotným OmniRoute, takže proxy by vo všeobecnosti mal **nie** pridať alebo prepísať hlavičky `Access-Control-*` (dvojité hlavičky prerušia prehliadače). Ukončite TLS a pošlite ďalej — nechajte OmniRoute odpovedať na predletovú kontrolu:
 
 ```nginx
-# nginx — preposielanie do OmniRoute; tu NEVKLADAJTE hlavičky Access-Control-*
+# nginx — forward to OmniRoute; do NOT inject Access-Control-* here
 location / {
     proxy_pass http://127.0.0.1:20128;
     proxy_set_header Host $host;
     proxy_set_header X-Real-IP $remote_addr;
     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     proxy_set_header X-Forwarded-Proto $scheme;
-    # Zachovajte hlavičky preposielania: proxy server na rovnakom hostiteľovi sa pripája zo spätnej slučky a práve
-    # tieto hlavičky oznamujú OmniRoute, že volajúci nie je lokálny operátor. Ak ich proxy server nepridá,
-    # každý vzdialený volajúci sa bude javiť ako lokálny. Nikdy nenastavujte ani X-Forwarded-For na 127.0.0.1.
+    # Keep the forwarding headers: a proxy on the same host connects from loopback, and they are
+    # what tells OmniRoute the caller is not the local operator. A proxy that adds none of them
+    # makes every remote caller look local. Never set X-Forwarded-For to 127.0.0.1 either.
 }
 ```
 
-Povolené zdroje prehliadača nastavte v OmniRoute (`CORS_ALLOWED_ORIGINS` alebo na
-karte Zabezpečenie), nie na proxy serveri.
+Nastavte povolený pôvod prehliadača v OmniRoute (`CORS_ALLOWED_ORIGINS` alebo karta Zabezpečenie), nie v serveri proxy.
 
 ## Zdrojové súbory
 
-| Oblasť                                                      | Súbor                                                                |
-| ----------------------------------------------------------- | -------------------------------------------------------------------- |
-| Vyhodnotenie zoznamu povolených pôvodov + `getCorsStatus()` | `src/server/cors/origins.ts`                                         |
-| Použitie middleware (jediný zdroj pravdy)                   | `src/server/authz/pipeline.ts`                                       |
-| Settings → vloženie pôvodov za behu                         | `src/lib/config/runtimeSettings.ts`                                  |
-| Stav za behu pre ovládací panel                             | `src/app/api/settings/authz-inventory/route.ts`                      |
-| Výstražný banner ovládacieho panela                         | `src/app/(dashboard)/dashboard/settings/components/AuthzSection.tsx` |
-| Pole CORS Allowed Origins                                   | `src/app/(dashboard)/dashboard/settings/components/SecurityTab.tsx`  |
-| CORS služby Cloud-Agent pre jednotlivé trasy (výnimka)      | `src/lib/cloudAgent/api.ts`                                          |
-| Kontrola hlavičky `Origin` pri handshaku WebSocket          | `src/server/origin/wsOrigin.ts`                                      |
+| Obavy                                             | Súbor                                                                |
+| ------------------------------------------------- | -------------------------------------------------------------------- |
+| Rozlíšenie zoznamu povolených + `getCorsStatus()` | `src/server/cors/origins.ts`                                         |
+| Aplikácia Middleware (jediný zdroj pravdy)        | `src/server/authz/pipeline.ts`                                       |
+| Nastavenia Vloženie pôvodu runtime →              | `src/lib/config/runtimeSettings.ts`                                  |
+| Stav spustenia pre dashboard                      | `src/app/api/settings/authz-inventory/route.ts`                      |
+| Výstražný banner na palubnej doske                | `src/app/(dashboard)/dashboard/settings/components/AuthzSection.tsx` |
+| Pole povoleného pôvodu CORS                       | `src/app/(dashboard)/dashboard/settings/components/SecurityTab.tsx`  |
+| Cloud-Agent na trase CORS (výnimka)               | `src/lib/cloudAgent/api.ts`                                          |
+| WebSocket handshake Kontrola `Origin`             | `src/server/origin/wsOrigin.ts`                                      |
 
-## Pozrite tiež
+## Pozri tiež
 
-- [Úrovne ochrany trás](./ROUTE_GUARD_TIERS.md) — vynútenie rozhrania loopback pre
-  trasy schopné spúšťania procesov (samostatný, doplnkový kontrolný mechanizmus).
-- [Sprievodca autorizáciou](../architecture/AUTHZ_GUIDE.md) — kompletný proces autorizácie.
+- [Route Guard Tiers](./ROUTE_GUARD_TIERS.md) Vynútenie spätnej väzby — pre trasy schopné spúšťania (samostatná, doplnková kontrola).
+- [Autorizačná príručka](../architecture/AUTHZ_GUIDE.md) — úplná autorizácia.

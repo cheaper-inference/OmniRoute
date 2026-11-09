@@ -974,12 +974,12 @@ sa napiling codex OAuth connection. Na-validate ito end-to-end laban sa lokal na
 
 ## Pag-uulat ng Mga Quota at Isyu
 
-| Paraan | Path                | Paglalarawan                                                                                             |
-| ------ | ------------------- | -------------------------------------------------------------------------------------------------------- |
-| GET    | `/v1/quotas/check`  | Paunang pagpapatunay ng quota para sa `provider` + `accountId` bago mag-isyu ng nakarehistrong key       |
-| POST   | `/v1/issues/report` | Iulat sa GitHub ang pagkabigo sa pag-isyu ng quota/key (nangangailangan ng `GITHUB_ISSUES_REPO` + token) |
+| Pamamaraan | Daan                | Paglalarawan                                                                                               |
+| ---------- | ------------------- | ---------------------------------------------------------------------------------------------------------- |
+| GET        | `/v1/quotas/check`  | Paunang i-validate ang quota para sa isang `provider` + `accountId` bago mag-isyu ng nakarehistrong key    |
+| POST       | `/v1/issues/report` | Mag-ulat ng pagkabigo sa pag-isyu ng quota/key sa GitHub (nangangailangan ng `GITHUB_ISSUES_REPO` + token) |
 
-**Auth:** Bearer API key (`isAuthenticated`).
+**Awth:** Kinukuha `/v1/quotas/check` ang isang Bearer API key (`isAuthenticated`). `/v1/issues/report` ay management-only (`requireManagementAuth`), tulad ng `/api/v1/registered-keys`: isang dashboard session, ang lokal na CLI token, o isang API key na may `manage`/`admin` scope; Ang mga inference-only API key ay nakakakuha ng `403`.
 
 ### Pagbawi ng quota session (opsyonal)
 
@@ -1774,19 +1774,23 @@ Mga outbound na subscription ng webhook para sa mga event ng OmniRoute (pagkumpl
 
 ---
 
-## Mga Nakarehistrong Key (Awtomatikong Pamamahala)
+## Mga Rehistradong Susi (Auto-Pamamahala)
 
-Ginagamit ng subsystem ng awtomatikong pamamahala ng key upang mag-isyu at magpaikot ng mga API key laban sa isang backing provider/account, na may mga quota bawat araw/oras.
+Ginagamit ng auto-key management subsystem para mag-isyu at mag-rotate ng mga API key laban sa isang backing provider/account, na may mga daily/hourly quota.
 
-| Paraan | Path                                  | Paglalarawan                                                                                                                                                                                                                                          |
-| ------ | ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/api/v1/registered-keys`             | Ilista ang mga nakarehistrong key (masked prefix lamang)                                                                                                                                                                                              |
-| POST   | `/api/v1/registered-keys`             | Mag-isyu ng bagong nakarehistrong key — katawan: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Ibinabalik ang raw key **nang isang beses lamang**. Nagbabalik ng `429` kapag tinanggihan dahil sa quota. |
-| GET    | `/api/v1/registered-keys/[id]`        | Kunin ang metadata ng isang nakarehistrong key (walang raw material)                                                                                                                                                                                  |
-| DELETE | `/api/v1/registered-keys/[id]`        | Bawiin ang isang nakarehistrong key                                                                                                                                                                                                                   |
-| POST   | `/api/v1/registered-keys/[id]/revoke` | Tiyak na endpoint para sa pagbawi (kapareho ng epekto ng DELETE)                                                                                                                                                                                      |
+| Pamamaraan | Daan                                  | Paglalarawan                                                                                                                                                                                                             |
+| ---------- | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| GET        | `/api/v1/registered-keys`             | Ilista ang mga nakarehistrong key (masked prefix lang)                                                                                                                                                                   |
+| POST       | `/api/v1/registered-keys`             | Mag-isyu ng bagong rehistradong key — body: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Ibinabalik ang hilaw na susi **minsan** . Ibinabalik `429` sa pagtanggi sa quota. |
+| GET        | `/api/v1/registered-keys/[id]`        | Kunin ang metadata ng rehistradong key (walang raw material)                                                                                                                                                             |
+| DELETE     | `/api/v1/registered-keys/[id]`        | Bawiin ang isang nakarehistrong susi                                                                                                                                                                                     |
+| POST       | `/api/v1/registered-keys/[id]/revoke` | Ang tahasang pagbawi ng endpoint (parehong epekto ng DELETE)                                                                                                                                                             |
+| GET        | `/api/v1/providers/[provider]/limits` | Basahin ang mga limitasyon ng pagpapalabas ng provider                                                                                                                                                                   |
+| PUT        | `/api/v1/providers/[provider]/limits` | Itakda ang mga takip ng pagpapalabas ng provider — body: `{maxActiveKeys?, dailyIssueLimit?, hourlyIssueLimit?}`                                                                                                         |
+| GET        | `/api/v1/accounts/[id]/limits`        | Basahin ang mga limitasyon ng pagpapalabas ng account                                                                                                                                                                    |
+| PUT        | `/api/v1/accounts/[id]/limits`        | Itakda ang mga limitasyon ng pagpapalabas ng account — sa parehong katawan bilang ruta ng provider                                                                                                                       |
 
-**Pagpapatunay:** management session/API key (`requireManagementAuth`) — kaparehong guard ng `/api/keys`: isang dashboard session, ang lokal na CLI token, o isang API key na may `manage`/`admin` scope; ang mga API key na para lamang sa inference ay nakakakuha ng `403`. Tingnan din ang `/v1/quotas/check` at `/v1/issues/report`.
+**Awth:** pamamahala session/API key (`requireManagementAuth`) — ang parehong bantay bilang `/api/keys`: isang dashboard session, ang lokal na CLI token, o isang API key na may `manage`/`admin` scope; Ang mga API key na inference-only ay nakakakuha ng `403`. Tingnan din ang `/v1/quotas/check` at `/v1/issues/report`.
 
 ---
 

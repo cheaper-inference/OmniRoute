@@ -942,14 +942,14 @@ na njikọ OAuth codex ahọpụtara. A nwalechara ya site na mmalite ruo na nje
 
 ---
 
-## Akụkụ Quota na Nkọpụta Nsogbu
+## Oke & Mkpesa Okwu
 
-| Usoro | Ụzọ                 | Nkọwa                                                                                    |
-| ----- | ------------------- | ---------------------------------------------------------------------------------------- |
-| GET   | `/v1/quotas/check`  | Nyochaa quota tupu oge eruo maka `provider` + `accountId` tupu ịnye igodo edebanyere aha |
-| POST  | `/v1/issues/report` | Kọọ ọdịda quota/ịnye igodo na GitHub (chọrọ `GITHUB_ISSUES_REPO` + token)                |
+| Usoro | Ụzọ                 | Nkọwa                                                                         |
+| ----- | ------------------- | ----------------------------------------------------------------------------- |
+| GET   | `/v1/quotas/check`  | Kwadoro oke maka `provider` + `accountId` tupu ịnye igodo edebanyere aha      |
+| POST  | `/v1/issues/report` | Kpesa ọdịda nbipụta quota/key na GitHub (chọrọ akara `GITHUB_ISSUES_REPO` + ) |
 
-**Nyocha:** Igodo API Bearer (`isAuthenticated`).
+**Nyocha:** `/v1/quotas/check` na-ewere igodo Bearer API (`isAuthenticated`). `/v1/issues/report` bụ naanị njikwa (`requireManagementAuth`), dị ka `/api/v1/registered-keys`: nnọkọ dashboard, akara ngosi CLI mpaghara, ma ọ bụ igodo API nwere oke `manage`/`admin` ; naanị igodo API na-enweta `403`.
 
 ### Mweghachi nnọkọ quota (nhọrọ)
 
@@ -1712,19 +1712,23 @@ Ndebanye aha webhook ndị na-apụ apụ maka ihe omume OmniRoute (mmecha arị
 
 ---
 
-## Igodo Edebanyere (Nlekọta Akpaaka)
+## Igodo edebanyere aha (njikwa akpaaka)
 
-A na-eji ya n’usoro nlekọta igodo akpaaka iji wepụta ma tụgharịa igodo API megide onye na-eweta/akaụntụ nkwado, yana oke kwa ụbọchị/kwa elekere.
+Nke subsystem njikwa igodo akpaaka na-eji wepụta ma tụgharịa igodo API megide nkwado provider/account, yana oke daily/hourly.
 
-| Usoro  | Ụzọ                                   | Nkọwa                                                                                                                                                                                                                    |
-| ------ | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| GET    | `/api/v1/registered-keys`             | Depụta igodo edebanyere (naanị prefix e kpuchiri)                                                                                                                                                                        |
-| POST   | `/api/v1/registered-keys`             | Wepụta igodo edebanyere ọhụrụ — body: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Ọ na-eweghachi igodo mbụ **otu ugboro**. Ọ na-eweghachi `429` mgbe a jụrụ ya n’ihi oke. |
-| GET    | `/api/v1/registered-keys/[id]`        | Nweta metadata igodo edebanyere (enweghị igodo mbụ)                                                                                                                                                                      |
-| DELETE | `/api/v1/registered-keys/[id]`        | Kagbuo igodo edebanyere                                                                                                                                                                                                  |
-| POST   | `/api/v1/registered-keys/[id]/revoke` | Ebe njedebe ịkagbu nke doro anya (otu mmetụta ahụ na DELETE)                                                                                                                                                             |
+| Usoro  | Ụzọ                                   | Nkọwa                                                                                                                                                                                                         |
+| ------ | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/v1/registered-keys`             | Depụta igodo edebanyere aha (naanị prefix nwere mkpuchi)                                                                                                                                                      |
+| POST   | `/api/v1/registered-keys`             | Wepụta igodo edebanyere aha ọhụrụ ahụ — : `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Na-eweghachi igodo raw **otu ugboro** . Na-eweghachi `429` na ọjụjụ oke. |
+| GET    | `/api/v1/registered-keys/[id]`        | Weghachite metadata igodo edebanyere aha (enweghị akụrụngwa)                                                                                                                                                  |
+| DELETE | `/api/v1/registered-keys/[id]`        | Kagbuo igodo edebanyere aha                                                                                                                                                                                   |
+| POST   | `/api/v1/registered-keys/[id]/revoke` | Nkwụsị nkwụsị nke ọma (otu mmetụta dị ka DELETE)                                                                                                                                                              |
+| GET    | `/api/v1/providers/[provider]/limits` | Gụọ akwụkwọ nbipụta nke onye na-eweta ya                                                                                                                                                                      |
+| PUT    | `/api/v1/providers/[provider]/limits` | Tọọ okpu nbipụta nke onye na-eweta ahụ — : `{maxActiveKeys?, dailyIssueLimit?, hourlyIssueLimit?}`                                                                                                            |
+| GET    | `/api/v1/accounts/[id]/limits`        | Gụọ okpu nbipụta akaụntụ ahụ                                                                                                                                                                                  |
+| PUT    | `/api/v1/accounts/[id]/limits`        | Tọọ ikike ịwepụta akaụntụ — otu ahụ dị ka ụzọ onye na-eweta ya                                                                                                                                                |
 
-**Nyocha ikike:** nnọkọ/API key njikwa (`requireManagementAuth`) — otu nchedo ahụ dị ka `/api/keys`: nnọkọ dashboard, token CLI mpaghara, ma ọ bụ API key nwere oke `manage`/`admin`; igodo API ndị bụ naanị maka inference na-enweta `403`. Hụkwa `/v1/quotas/check` na `/v1/issues/report`.
+**Nyocha:** njikwa session/API igodo (`requireManagementAuth`) — otu nchekwa dị ka `/api/keys`: nnọkọ dashboard, akara CLI mpaghara, ma ọ bụ igodo API nwere oghere `manage`/`admin` ; mbinye aka-naanị igodo API nweta `403`. Hụkwa `/v1/quotas/check` na `/v1/issues/report`.
 
 ---
 

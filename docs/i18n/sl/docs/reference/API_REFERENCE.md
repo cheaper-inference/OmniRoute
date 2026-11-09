@@ -979,10 +979,10 @@ CLI nadgradi `base_url + /responses` v WebSocket, OmniRoute pa povezavo tunelira
 
 | Metoda | Pot                 | Opis                                                                                  |
 | ------ | ------------------- | ------------------------------------------------------------------------------------- |
-| GET    | `/v1/quotas/check`  | Predhodno preveri kvoto za `provider` + `accountId` pred izdajo registriranega ključa |
-| POST   | `/v1/issues/report` | Prijavi neuspešno izdajo kvote/ključa v GitHub (zahteva `GITHUB_ISSUES_REPO` + žeton) |
+| GET    | `/v1/quotas/check`  | Vnaprej preverite kvoto za `provider` + `accountId` pred izdajo registriranega ključa |
+| POST   | `/v1/issues/report` | Prijavite napako pri izdaji quota/key GitHub (zahteva žeton `GITHUB_ISSUES_REPO` + )  |
 
-**Overjanje:** API-ključ Bearer (`isAuthenticated`).
+**Auth:** `/v1/quotas/check` vzame nosilni ključ API (`isAuthenticated`). `/v1/issues/report` je samo za upravljanje (`requireManagementAuth`), tako kot `/api/v1/registered-keys`: seja nadzorne plošče, lokalni žeton CLI ali ključ API z obsegom `manage`/`admin` ; Ključi API samo za sklepanje dobijo `403`.
 
 ### Obnovitev seje kvote (izbirno)
 
@@ -1781,17 +1781,21 @@ Odhodne naročnine na spletne kavlje za dogodke OmniRoute (dokončanje zahtevka,
 
 ## Registrirani ključi (samodejno upravljanje)
 
-Uporablja ga podsistem za samodejno upravljanje ključev za izdajanje in rotacijo ključev API pri zalednem ponudniku/računu, z dnevnimi/urnimi kvotami.
+Uporablja ga podsistem za samodejno upravljanje ključev za izdajo in rotacijo ključev API glede na podporni provider/account s kvotami daily/hourly.
 
 | Metoda | Pot                                   | Opis                                                                                                                                                                                                |
 | ------ | ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/api/v1/registered-keys`             | Seznam registriranih ključev (prikazana je samo maskirana predpona)                                                                                                                                 |
-| POST   | `/api/v1/registered-keys`             | Izdaj nov registrirani ključ — telo: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Vrne surovi ključ **enkrat**. Ob zavrnitvi zaradi kvote vrne `429`. |
-| GET    | `/api/v1/registered-keys/[id]`        | Pridobi metapodatke registriranega ključa (brez surovega ključa)                                                                                                                                    |
-| DELETE | `/api/v1/registered-keys/[id]`        | Prekliči registrirani ključ                                                                                                                                                                         |
-| POST   | `/api/v1/registered-keys/[id]/revoke` | Izrecna končna točka za preklic (enak učinek kot DELETE)                                                                                                                                            |
+| GET    | `/api/v1/registered-keys`             | Seznam registriranih ključev (samo maskirana predpona)                                                                                                                                              |
+| POST   | `/api/v1/registered-keys`             | Izdajte nov registrirani ključ — telo: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Vrne neobdelani ključ **enkrat** . Vrne `429` ob zavrnitvi kvote. |
+| GET    | `/api/v1/registered-keys/[id]`        | Pridobite metapodatke registriranega ključa (brez surovine)                                                                                                                                         |
+| DELETE | `/api/v1/registered-keys/[id]`        | Preklic registriranega ključa                                                                                                                                                                       |
+| POST   | `/api/v1/registered-keys/[id]/revoke` | Končna točka eksplicitnega preklica (enak učinek kot DELETE)                                                                                                                                        |
+| GET    | `/api/v1/providers/[provider]/limits` | Preberite omejitve izdaje ponudnika                                                                                                                                                                 |
+| PUT    | `/api/v1/providers/[provider]/limits` | Nastavite zgornje meje izdaje ponudnika — telo: `{maxActiveKeys?, dailyIssueLimit?, hourlyIssueLimit?}`                                                                                             |
+| GET    | `/api/v1/accounts/[id]/limits`        | Preberite omejitve izdaje računa                                                                                                                                                                    |
+| PUT    | `/api/v1/accounts/[id]/limits`        | Nastavite zgornje meje izdaje — računa na isto telo kot pot ponudnika                                                                                                                               |
 
-**Preverjanje pristnosti:** upravljavska seja/ključ API (`requireManagementAuth`) — isti varnostni mehanizem kot pri `/api/keys`: seja nadzorne plošče, lokalni žeton CLI ali ključ API z obsegom `manage`/`admin`; ključi API, namenjeni samo sklepanju, prejmejo `403`. Oglejte si tudi `/v1/quotas/check` in `/v1/issues/report`.
+**Auth:** upravljalni ključ session/API (`requireManagementAuth`) — isti čuvaj kot `/api/keys`: seja nadzorne plošče, lokalni žeton CLI ali ključ API z obsegom `manage`/`admin` ; ključi API samo za sklepanje dobijo `403`. Glej tudi `/v1/quotas/check` in `/v1/issues/report`.
 
 ---
 

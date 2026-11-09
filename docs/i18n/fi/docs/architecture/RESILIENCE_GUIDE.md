@@ -177,6 +177,45 @@ normaalia jäähdytyspolkua pitkin.
 Regressiosuojat: `tests/unit/claude-low-priority-mode.test.ts`,
 `tests/unit/claude-limit-reset.test.ts`, `tests/unit/claude-low-priority-executor.test.ts`.
 
+### Käytä automaattisesti talletettuja nollauksia
+
+**Laajuus:** Codex ja Claude -liittymät (OAuth).**Osallistu** : `bankedResetAutoApply` asetus on pois päältä ja oletusarvoisesti `dry-run` -tilassa (Asetukset → AI → Käytä pankkiasetusten palautuksia automaattisesti).
+
+**Tarkoitus:** kuluttavat pankin palautuksia itsekseen, kun tili osuu käyttöseinään, sen sijaan, että odottaisi operaattorin painavan "Lunasta" Palveluntarjoajan rajoitukset -sivulla.
+
+| Luottotyyppi (`creditTypes`) | Mitä lunastetaan                                   | Missä se juoksee                                                   |
+| ---------------------------- | -------------------------------------------------- | ------------------------------------------------------------------ |
+| `codexCredits`               | Codex nollaa hyvitykset                            | taustatyö, 60s välein                                              |
+| `claudeCredits`              | Claude -pankkiavustukset (`GRANT` -hyvitykset)     | taustatyö, 60s välein                                              |
+| `claudeSessionReset`         | Claude n viikoittainen istuntorajan nollaus (yllä) | pyyntöpolun kautta saman käytännön kuin tilikohtainen vaihtokytkin |
+
+**Toteutus:**
+
+- Puhdas päätös (yksi sääntö asetettu molemmille poluille): `src/lib/usage/bankedResetPolicy.ts::decideBankedReset()`
+- Taustatyö: `src/lib/services/bankedResetAutoApply.ts` (aloitettu `src/instrumentation-node.ts` ssä)
+- Claude -pyyntöpolkuportti: `src/lib/usage/claudeSessionResetPolicy.ts`, rekisteröity `setClaudeLimitResetPolicy()` kautta `open-sse/services/claudeLimitReset.ts` ssä
+- Historia, caps ja webhook: `src/lib/usage/bankedResetAudit.ts`
+- Historia API: `GET /api/settings/banked-reset-auto/history?limit=50` (hallinnon todennus)
+
+**Päätösjärjestys** (ensimmäinen epäonnistunut sääntö on tallennettu syy):
+
+1. Ominaisuus pois käytöstä, luottotyyppi pois käytöstä tai tili ei kuulu soveltamisalaan (`accountScope` `all` / `selected` plus tilikohtainen `connections` kartta).
+2. Valinnaisen UTC aikataulun ulkopuolella (`startHourUtc` > `endHourUtc` ylittää keskiyön).
+3. Rajat viimeisen 24 tunnin ajalta: `maxPerAccountPerDay` (1), `maxPerDay` (3) ja `minSpacingMinutes` (30) kahden lunastuksen välillä.
+4. Trigger: aidattu `session` tai `weekly` ikkuna (lue `getQuotaWindowStatus().reachedThreshold` stä, ei `isAccountQuotaExhausted()`, joka raportoi vain tilin jokaisella kulutetulla ikkunalla) tai `expiringCreditHours` (24) sisällä vanhentuva luotto tilillä, joka on käyttänyt vähintään `expiringCreditMinUsedPercent` (50).
+5. Luonnollinen nollaussuoja: ohita, kun aidattu 5 tunnin ikkuna nollautuu `sessionResetGuardMinutes` ssa (90) tai aidattu viikoittainen ikkuna `weeklyResetGuardHours` sisällä (12).
+6. Viikoittainen kerros: ohita 5 tunnin nollaus, kun viikoittainen jäljellä oleva aika on alle `weeklyFloorPercent` (10).
+7. `last-resort` -tila: ohita, kun saman palveluntarjoajan toisella soveltamisalaan kuuluvalla tilillä on vähintään `poolHeadroomPercent` (10) jäljellä molemmissa ikkunoissa. Vanhenevan luotto-laukaisimet ohittavat tämän.
+8. `dry-run` tallentaa rivin eikä lunasta mitään; `last-resort` ja `eager` lunastaa.
+
+Puuttuvat kiintiötiedot eivät koskaan avaa lunastusta: tuntematon palautusaika tai viikoittainen käyttö ohittaa.
+
+**Claude -istunnon nollaus:** Kun ominaisuus on pois päältä tai `claudeSessionReset` pois päältä, tilikohtainen `autoLimitReset` -kytkin päättää täsmälleen kuten ennenkin. Kun molemmat ovat käytössä, ominaisuus korvaa tilikohtaiset valinnat: soveltamisalaan kuuluva tili voi vaatia vain, kun käytäntö sallii sen, ja `dry-run` tilassa vaatimuksia ei tehdä.
+
+**Turvallisuus:** työ lunastaa korkeintaan yhden pisteen per rasti, tekee päätöksen ennen hyvitysten listaamista (ohitettua tiliä ei koskaan listata), käyttää idempotenssiavaimia `auto-reset:<connectionId>:<yyyy-mm-dd>:<n>` ja peruuttaa tilin 1 tunnin ajan epäonnistuneen listauksen tai lunastuksen jälkeen. Jokainen lunastus, epäonnistuminen ja kuivakäyntipäätös kirjoitetaan `audit_log` lle (`action: "bankedReset.redeem"`, ei tunnuksia tai luottotunnuksia); caps lasketaan noilta riveiltä, joten ne selviävät uudelleenkäynnistyksistä. Onnistuneet lunastukset käynnistävät myös `provider.reset_redeemed` webhookin.
+
+Regressiovartijat: `tests/unit/banked-reset-policy.test.ts`, `tests/unit/banked-reset-auto-apply.test.ts`, `tests/unit/claude-limit-reset-policy-gate.test.ts`, `tests/unit/banked-reset-history-route.test.ts`.
+
 ### Istunnon affiniteetti (#7274)
 
 **Laajuus:** yksi asiakasistunto (`X-Session-Id` / `x-codex-session-id` /

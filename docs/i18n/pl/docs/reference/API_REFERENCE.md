@@ -994,14 +994,14 @@ uzupełnienie.
 
 ---
 
-## Raportowanie limitów i problemów
+## Raportowanie przydziałów i problemów
 
-| Metoda | Ścieżka             | Opis                                                                                                    |
-| ------ | ------------------- | ------------------------------------------------------------------------------------------------------- |
-| GET    | `/v1/quotas/check`  | Wstępna walidacja limitu dla kombinacji `provider` + `accountId` przed wydaniem zarejestrowanego klucza |
-| POST   | `/v1/issues/report` | Zgłoszenie do GitHub niepowodzenia wydania limitu/klucza (wymaga `GITHUB_ISSUES_REPO` + tokenu)         |
+| Metoda | Ścieżka             | Opis                                                                                          |
+| ------ | ------------------- | --------------------------------------------------------------------------------------------- |
+| GET    | `/v1/quotas/check`  | Wstępnie zweryfikuj limit dla `provider` + `accountId` przed wydaniem zarejestrowanego klucza |
+| POST   | `/v1/issues/report` | Zgłoś błąd wydania quota/key do GitHub (wymaga tokena + `GITHUB_ISSUES_REPO`                  |
 
-**Uwierzytelnianie:** klucz API Bearer (`isAuthenticated`).
+**Autoryzacja:** `/v1/quotas/check` pobiera klucz API na okaziciela (`isAuthenticated`). `/v1/issues/report` jest przeznaczony tylko do zarządzania (`requireManagementAuth`), podobnie jak `/api/v1/registered-keys`: sesja dashboardu, lokalny token CLI lub klucz API z zakresem `manage`/`admin` ; Klucze API służące wyłącznie do wnioskowania otrzymują `403`.
 
 ### Odzyskiwanie sesji limitu (opcjonalne)
 
@@ -1821,17 +1821,21 @@ Subskrypcje wychodzących webhooków dla zdarzeń OmniRoute (zakończenie żąda
 
 ## Zarejestrowane klucze (automatyczne zarządzanie)
 
-Używane przez podsystem automatycznego zarządzania kluczami do wydawania i rotacji kluczy API względem dostawcy/konta bazowego, z dziennymi/godzinowymi limitami.
+Używany przez podsystem automatycznego zarządzania kluczami do wydawania i rotacji kluczy API względem zapasowego provider/account z limitami daily/hourly.
 
-| Metoda | Ścieżka                               | Opis                                                                                                                                                                                                                               |
-| ------ | ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/api/v1/registered-keys`             | Lista zarejestrowanych kluczy (wyłącznie zamaskowany prefiks)                                                                                                                                                                      |
-| POST   | `/api/v1/registered-keys`             | Wydaje nowy zarejestrowany klucz — treść: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Zwraca klucz w postaci jawnej **tylko raz**. Zwraca `429` w przypadku odmowy z powodu limitu. |
-| GET    | `/api/v1/registered-keys/[id]`        | Pobiera metadane zarejestrowanego klucza (bez materiału klucza w postaci jawnej)                                                                                                                                                   |
-| DELETE | `/api/v1/registered-keys/[id]`        | Unieważnia zarejestrowany klucz                                                                                                                                                                                                    |
-| POST   | `/api/v1/registered-keys/[id]/revoke` | Jawny endpoint unieważniania (ten sam efekt co DELETE)                                                                                                                                                                             |
+| Metoda | Ścieżka                               | Opis                                                                                                                                                                                                           |
+| ------ | ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/v1/registered-keys`             | Lista zarejestrowanych kluczy (tylko zamaskowany prefiks)                                                                                                                                                      |
+| POST   | `/api/v1/registered-keys`             | Wydaj nowy zarejestrowany klucz organ — : `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Zwraca surowy klucz **raz** . Zwraca `429` w przypadku odmowy przydziału. |
+| GET    | `/api/v1/registered-keys/[id]`        | Pobierz metadane zarejestrowanego klucza (bez surowców)                                                                                                                                                        |
+| DELETE | `/api/v1/registered-keys/[id]`        | Unieważnij zarejestrowany klucz                                                                                                                                                                                |
+| POST   | `/api/v1/registered-keys/[id]/revoke` | Jawny punkt końcowy unieważnienia (ten sam efekt co DELETE)                                                                                                                                                    |
+| GET    | `/api/v1/providers/[provider]/limits` | Przeczytaj ograniczenia emisji dostawcy                                                                                                                                                                        |
+| PUT    | `/api/v1/providers/[provider]/limits` | Ustaw limity wydawania dostawcy — Organ: `{maxActiveKeys?, dailyIssueLimit?, hourlyIssueLimit?}`                                                                                                               |
+| GET    | `/api/v1/accounts/[id]/limits`        | Przeczytaj limity emisji konta                                                                                                                                                                                 |
+| PUT    | `/api/v1/accounts/[id]/limits`        | Ustaw limity emisji konta — w tym samym organie, co trasa dostawcy                                                                                                                                             |
 
-**Uwierzytelnianie:** sesja/klucz API zarządzania (`requireManagementAuth`) — ta sama kontrola co w przypadku `/api/keys`: sesja panelu, lokalny token CLI lub klucz API z zakresem `manage`/`admin`; klucze API wyłącznie do wnioskowania otrzymują `403`. Zobacz także `/v1/quotas/check` i `/v1/issues/report`.
+**Autoryzacja:** zarządzanie kluczem session/API (`requireManagementAuth`) — ten sam strażnik co `/api/keys`: sesja dashboardu, lokalny token CLI lub klucz API z zakresem `manage`/`admin` ; Klucze API służące wyłącznie do wnioskowania otrzymują `403`. Zobacz także `/v1/quotas/check` i `/v1/issues/report`.
 
 ---
 

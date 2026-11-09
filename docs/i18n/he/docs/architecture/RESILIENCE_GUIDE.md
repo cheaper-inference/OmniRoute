@@ -192,6 +192,45 @@ limit", GLM `并发数过高`) פירושו שהחשבון תקין אך עסו�
 בדיקות רגרסיה: `tests/unit/claude-low-priority-mode.test.ts`,
 `tests/unit/claude-limit-reset.test.ts`, `tests/unit/claude-low-priority-executor.test.ts`.
 
+### החל אוטומטית איפוסים בנקאיים
+
+**תְחוּם:** חיבורי מנוי Codex ו- Claude (OAuth).**הצטרפות** : הגדרת `bankedResetAutoApply` כבויה ובמצב `dry-run` כברירת מחדל (הגדרות → AI → החלה אוטומטית של איפוסים בנקאיים).
+
+**מַטָרָה:** להוציא איפוסים בנקאיים בעצמם כאשר חשבון פוגע בקיר שימוש, במקום לחכות למפעיל שילחץ על "פדה" בדף מגבלות הספק.
+
+| סוג אשראי (`creditTypes`) | מה נגאל                                     | איפה זה רץ                                               |
+| ------------------------- | ------------------------------------------- | -------------------------------------------------------- |
+| `codexCredits`            | Codex איפוס קרדיטים                         | עבודת רקע, כל 60 שניות                                   |
+| `claudeCredits`           | מענקים בנקאיים של Claude (זיכויים `GRANT` ) | עבודת רקע, כל 60 שניות                                   |
+| `claudeSessionReset`      | איפוס מגבלת ההפעלה השבועית Claude (מעל)     | נתיב הבקשה, באמצעות אותה מדיניות כמו החלפת מצב לכל חשבון |
+
+**יישום:**
+
+- החלטה טהורה (חוק אחד נקבע לשני הנתיבים): `src/lib/usage/bankedResetPolicy.ts::decideBankedReset()`
+- עבודת רקע: `src/lib/services/bankedResetAutoApply.ts` (החל ב- `src/instrumentation-node.ts`)
+- שער בקשה-נתיב Claude : `src/lib/usage/claudeSessionResetPolicy.ts`, רשום דרך `setClaudeLimitResetPolicy()` ב- `open-sse/services/claudeLimitReset.ts`
+- היסטוריה, מכסים ו-webhook: `src/lib/usage/bankedResetAudit.ts`
+- היסטוריה API: `GET /api/settings/banked-reset-auto/history?limit=50` (אישור ניהול)
+
+**צו החלטה** (הכלל הכושל הראשון הוא הסיבה הרשומה):
+
+1. כבוי תכונה, השבתת סוג אשראי או חשבון מחוץ לתחום (`accountScope` `all` / `selected` בתוספת מפת `connections` לכל חשבון).
+2. מחוץ ללוח הזמנים האופציונלי UTC (`startHourUtc` > `endHourUtc` חוצה חצות).
+3. מכסים במהלך 24 השעות האחרונות: `maxPerAccountPerDay` (1), `maxPerDay` (3) ו- `minSpacingMinutes` (30) בין כל שני מימושים.
+4. טריגר: חלון `session` או `weekly` מוקף חומה (קרא מ- `getQuotaWindowStatus().reachedThreshold`, לא `isAccountQuotaExhausted()`, שמדווח רק על חשבון עם כל חלון שהוצא), או זיכוי שיפוג בתוך `expiringCreditHours` (24) בחשבון שהשתמש `expiringCreditMinUsedPercent` לפחות (50).
+5. שומר איפוס טבעי: דלג כאשר חלון 5 השעות המוקף חומה מתאפס בתוך `sessionResetGuardMinutes` (90), או החלון השבועי המוקף חומה בתוך `weeklyResetGuardHours` (12).
+6. קומה שבועית: דלג על איפוס של 5 שעות כשהנותר השבועי הוא מתחת `weeklyFloorPercent` (10).
+7. מצב `last-resort` : דלג בעוד חשבון אחר בהיקף של אותו ספק נשאר לפחות `poolHeadroomPercent` (10) בשני החלונות. מפעילי אשראי שפג תוקפו עוקפים זאת.
+8. `dry-run` מקליט שורה ולא פודה דבר; `last-resort` ו- `eager` לפדות.
+
+נתוני מכסה חסרים אף פעם לא פותחים מימוש: זמן איפוס לא ידוע או שימוש שבועי מדלגים.
+
+**איפוס הפעלה Claude :** כשהתכונה כבויה, או `claudeSessionReset` כבויה, החלפת ה- `autoLimitReset` לכל חשבון מחליטה בדיוק כמו קודם. כאשר שניהם מופעלים, התכונה מחליפה את החלפת מצבים לפי חשבון: חשבון בהיקף יכול לתבוע רק כאשר המדיניות מאפשרת זאת, ובמצב `dry-run` לא מוגשת תביעה.
+
+**בְּטִיחוּת:** המשרה מממשת לכל היותר זיכוי אחד לכל סימון, מחליטה לפני רישום זיכויים (חשבון שדילג עליו לעולם לא מופיע ברשימה), משתמשת במפתחות אימפוטנציה `auto-reset:<connectionId>:<yyyy-mm-dd>:<n>`, ומחזירה חשבון למשך שעה אחת לאחר רישום או מימוש שנכשל. כל פדיון, כישלון והחלטה יבשה נכתבת ל- `audit_log` (`action: "bankedReset.redeem"`, ללא אסימונים או מזהי אשראי); המכסים נספרים מהשורות האלה, כך שהם שורדים הפעלה מחדש. מימושים מוצלחים גם מפעילים את ה- `provider.reset_redeemed` webhook.
+
+משמרות רגרסיה: `tests/unit/banked-reset-policy.test.ts`, `tests/unit/banked-reset-auto-apply.test.ts`, `tests/unit/claude-limit-reset-policy-gate.test.ts`, `tests/unit/banked-reset-history-route.test.ts`.
+
 ### זיקה לסשן (#7274)
 
 **היקף:** סשן לקוח אחד (`X-Session-Id` / `x-codex-session-id` / `x-omniroute-session` header) מוצמד לחיבור אחד, עבור **כל** ספק.

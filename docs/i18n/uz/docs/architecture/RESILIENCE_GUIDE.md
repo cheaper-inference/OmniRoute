@@ -175,6 +175,45 @@ Bular hisob maʼlumotlari oʻzgartirilmaguncha yoki operator ularni qayta tiklam
 Regressiya himoyalari: `tests/unit/claude-low-priority-mode.test.ts`,
 `tests/unit/claude-limit-reset.test.ts`, `tests/unit/claude-low-priority-executor.test.ts`.
 
+### Bank o'rnatilgan tiklashlarni avtomatik qo'llash
+
+**Qo'llash doirasi:** Codex va Claude obuna (OAuth) ulanishlari.**Ro‘yxatdan o‘tish** : `bankedResetAutoApply` sozlamasi oʻchirilgan va sukut boʻyicha `dry-run` rejimida (Sozlamalar → AI → avtomatik qoʻllash banklangan qayta oʻrnatish).
+
+**Maqsad:** Operatorning Provayder chegaralari sahifasida “Qabul qilish” tugmasini bosishini kutish o‘rniga, hisob foydalanish devoriga tushganda, bank o‘rnatilgan resetlarni mustaqil ravishda sarflang.
+
+| Kredit turi (`creditTypes`) | Qaytarilgan narsa                                   | Qayerda yuradi                                                              |
+| --------------------------- | --------------------------------------------------- | --------------------------------------------------------------------------- |
+| `codexCredits`              | Codex kreditlarini tiklash                          | fon ishi, har 60 soniyada                                                   |
+| `claudeCredits`             | Claude bank grantlari (`GRANT` kreditlari)          | fon ishi, har 60 soniyada                                                   |
+| `claudeSessionReset`        | Claude haftalik sessiya limitini tiklash (yuqorida) | so'rov yo'li, har bir hisob uchun almashtirish bilan bir xil siyosat orqali |
+
+**Amalga oshirish:**
+
+- Sof qaror (har ikkala yo'l uchun bitta qoida o'rnatilgan): `src/lib/usage/bankedResetPolicy.ts::decideBankedReset()`
+- Asosiy vazifa: `src/lib/services/bankedResetAutoApply.ts` ( `src/instrumentation-node.ts` da boshlangan)
+- Claude so'rov yo'li eshigi: `src/lib/usage/claudeSessionResetPolicy.ts`, `open-sse/services/claudeLimitReset.ts` `setClaudeLimitResetPolicy()` orqali ro'yxatdan o'tgan
+- Tarix, katta harflar va veb-huk: `src/lib/usage/bankedResetAudit.ts`
+- API tarixi: `GET /api/settings/banked-reset-auto/history?limit=50` (boshqaruv autentsiyasi)
+
+**Qaror qabul qilish tartibi** (birinchi muvaffaqiyatsiz qoida - bu qayd etilgan sabab):
+
+1. Xususiyat oʻchirilgan, kredit turi oʻchirilgan yoki hisob taʼminlanmagan (`accountScope` `all` / `selected` va har bir hisob uchun `connections` xaritasi).
+2. Ixtiyoriy UTC jadvalidan tashqari (`startHourUtc` > `endHourUtc` yarim tunni kesib o'tadi).
+3. Oxirgi 24 soat ichida chegaralar: `maxPerAccountPerDay` (1), `maxPerDay` (3) va `minSpacingMinutes` (30) har qanday ikkita xarid o‘rtasida.
+4. Trigger: devor bilan o'ralgan `session` yoki `weekly` oynasi ( `getQuotaWindowStatus().reachedThreshold` dan o'qing, `isAccountQuotaExhausted()` emas, u faqat har bir sarflangan oyna bilan hisob haqida xabar beradi) yoki kamida `expiringCreditMinUsedPercent` (50) ishlatgan hisobda `expiringCreditHours` (24) ichida muddati tugaydigan kredit.
+5. Tabiiy qayta o'rnatish himoyasi: devor bilan o'ralgan 5 soatlik oyna `sessionResetGuardMinutes` (90) ichida yoki `weeklyResetGuardHours` (12) ichida haftalik devor bilan o'rnatilgan oyna o'rnatilganda o'tkazib yuboring.
+6. Haftalik qavat: haftalik qolgan vaqt `weeklyFloorPercent` (10) dan past bo'lsa, 5 soatlik tiklashni o'tkazib yuboring.
+7. `last-resort` rejimi: bir xil provayderning boshqa hisob qaydnomasi ikkala oynada kamida `poolHeadroomPercent` (10) qolganda o‘tkazib yuboring. Muddati tugagan kredit tetiklari buni chetlab o'tadi.
+8. `dry-run` qatorni yozadi va hech narsani qaytarib bermaydi; `last-resort` va `eager` sotib olinadi.
+
+Yo'qolgan kvota ma'lumotlari to'lovni hech qachon ochmaydi: noma'lum tiklash vaqti yoki haftalik foydalanish o'tkazib yuboriladi.
+
+**Claude sessiyasini tiklash:** xususiyat o'chirilgan yoki `claudeSessionReset` o'chirilgan bo'lsa, har bir hisob uchun `autoLimitReset` o'tish tugmasi avvalgidek qaror qiladi. Ikkalasi ham yoqilgan bo‘lsa, funksiya har bir hisob uchun almashtirishlarni almashtiradi: amaldagi hisob faqat siyosat ruxsat bergan taqdirdagina da’vo qilishi mumkin va `dry-run` rejimida hech qanday da’vo berilmaydi.
+
+**Xavfsizlik:** Ish har bir belgi uchun koʻpi bilan bitta kreditni toʻlaydi, kreditlarni roʻyxatga olishdan oldin qaror qiladi (oʻtkazib yuborilgan hisob hech qachon roʻyxatga kiritilmaydi), `auto-reset:<connectionId>:<yyyy-mm-dd>:<n>` identifikator kalitlaridan foydalanadi va roʻyxat muvaffaqiyatsiz tugashi yoki sotib olinganidan keyin 1 soat davomida hisobni oʻchirib qoʻyadi. Har bir sotib olish, muvaffaqiyatsizlik va quruq ishga tushirish qarori `audit_log` ga yoziladi (`action: "bankedReset.redeem"`, tokenlar yoki kredit identifikatorlari yo'q); qalpoqchalar o'sha qatorlardan hisoblanadi, shuning uchun ular qayta ishga tushirilganda omon qoladilar. Muvaffaqiyatli sotib olish `provider.reset_redeemed` veb-hukni ham ishga tushiradi.
+
+Regressiya himoyachilari: `tests/unit/banked-reset-policy.test.ts`, `tests/unit/banked-reset-auto-apply.test.ts`, `tests/unit/claude-limit-reset-policy-gate.test.ts`, `tests/unit/banked-reset-history-route.test.ts`.
+
 ### Sessiya affiniteti (#7274)
 
 **Qamrov:** istalgan provider uchun bitta mijoz sessiyasi (`X-Session-Id` / `x-codex-session-id` / `x-omniroute-session` headerʼi) bitta ulanishga biriktiriladi.

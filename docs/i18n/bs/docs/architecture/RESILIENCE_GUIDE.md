@@ -164,6 +164,45 @@ Oni ostaju aktivni sve dok se vjerodajnice ne promijene ili ih operater ne reset
 Regresione zaštite: `tests/unit/claude-low-priority-mode.test.ts`,
 `tests/unit/claude-limit-reset.test.ts`, `tests/unit/claude-low-priority-executor.test.ts`.
 
+### Automatska primjena bankovnih reseta
+
+**Opseg:** Codex i Claude pretplatničke (OAuth) veze.**Opt-in** : postavka `bankedResetAutoApply` je isključena i po defaultu je u `dry-run` modu (Postavke → AI → Automatska primjena bankovnih resetovanja).
+
+**svrha:** trošite bankovne resetove sami kada račun naiđe na zid upotrebe, umjesto da čekate da operater pritisne "Otkupi" na stranici Ograničenja dobavljača.
+
+| Vrsta kredita (`creditTypes`) | Šta se otkupljuje                                       | Gde ide                                                           |
+| ----------------------------- | ------------------------------------------------------- | ----------------------------------------------------------------- |
+| `codexCredits`                | Codex reset kredite                                     | pozadinski posao, svakih 60 s                                     |
+| `claudeCredits`               | Claude bankovni grantovi (`GRANT` krediti)              | pozadinski posao, svakih 60 s                                     |
+| `claudeSessionReset`          | Claude sedmično poništavanje ograničenja sesije (iznad) | putanju zahtjeva, kroz istu politiku kao i prebacivanje po računu |
+
+**Implementacija:**
+
+- Čista odluka (jedan skup pravila za oba puta): `src/lib/usage/bankedResetPolicy.ts::decideBankedReset()`
+- Pozadinski posao: `src/lib/services/bankedResetAutoApply.ts` (započeto u `src/instrumentation-node.ts`)
+- Claude ulaz putanje zahtjeva: `src/lib/usage/claudeSessionResetPolicy.ts`, registriran preko `setClaudeLimitResetPolicy()` u `open-sse/services/claudeLimitReset.ts`
+- Povijest, kapice i webhook: `src/lib/usage/bankedResetAudit.ts`
+- Istorijat API: `GET /api/settings/banked-reset-auto/history?limit=50` (upravljanje auth)
+
+**Odluka** (prvo neuspješno pravilo je zabilježeni razlog):
+
+1. Funkcija isključena, vrsta kredita isključena ili račun izvan opsega (`accountScope` `all` / `selected` plus `connections` mapa po računu).
+2. Izvan opcionog UTC rasporeda (`startHourUtc` > `endHourUtc` prelazi ponoć).
+3. Ograničenja u posljednja 24 h: `maxPerAccountPerDay` (1), `maxPerDay` (3) i `minSpacingMinutes` (30) između bilo koja dva otkupa.
+4. Okidač: zazidani `session` ili `weekly` prozor (čitano iz `getQuotaWindowStatus().reachedThreshold`, a ne `isAccountQuotaExhausted()`, koji samo prijavljuje račun sa svakim potrošenim prozorom), ili kredit koji ističe unutar `expiringCreditHours` (24) na računu koji je koristio najmanje `expiringCreditMinUsedPercent` (50).
+5. Zaštita prirodnog resetovanja: preskočite kada se zazidani 5-satni prozor resetuje unutar `sessionResetGuardMinutes` (90), ili zazidani sedmični prozor unutar `weeklyResetGuardHours` (12).
+6. Sedmični prag: preskočite 5-satno resetiranje kada je sedmični preostali ispod `weeklyFloorPercent` (10).
+7. `last-resort` način: preskočite dok drugi in-scope nalog istog provajdera ima najmanje `poolHeadroomPercent` (10) preostalo u oba prozora. Okidači kredita koji ističu ovo zaobilaze.
+8. `dry-run` snima red i ništa ne otkupljuje; `last-resort` i `eager` otkupljuju.
+
+Nedostajući podaci o kvoti nikada ne otključavaju otkup: nepoznato vrijeme poništavanja ili nedjeljno korištenje preskače.
+
+**Resetovanje Claude sesije:** sa isključenom funkcijom ili isključenim `claudeSessionReset` om, `autoLimitReset` prekidač po nalogu odlučuje tačno kao i ranije. Kada su oba uključena, funkcija zamjenjuje prekidače po nalogu: račun u okviru opsega može potraživati samo kada to politika dozvoljava, au `dry-run` modu nema potraživanja.
+
+**sigurnost:** posao otkupljuje najviše jedan kredit po tiku, odlučuje prije nego što navede kredite (preskočeni račun nikada nije naveden), koristi ključeve idempotencije `auto-reset:<connectionId>:<yyyy-mm-dd>:<n>` i povlači račun na 1 h nakon neuspješnog listinga ili otkupa. Svaka odluka o otkupu, neuspjehu i suhoj vožnji se upisuje u `audit_log` (`action: "bankedReset.redeem"`, bez tokena ili kreditnih ID-ova); kapice se broje od tih redova, tako da prežive ponovno pokretanje. Uspješno iskorištavanje također pokreće `provider.reset_redeemed` webhook.
+
+Regresioni čuvari: `tests/unit/banked-reset-policy.test.ts`, `tests/unit/banked-reset-auto-apply.test.ts`, `tests/unit/claude-limit-reset-policy-gate.test.ts`, `tests/unit/banked-reset-history-route.test.ts`.
+
 ### Afinitet sesije (#7274)
 
 **Opseg:** jedna klijentska sesija (`X-Session-Id` / `x-codex-session-id` / `x-omniroute-session` zaglavlje) vezana za jednu vezu, za **bilo kojeg** pružaoca.

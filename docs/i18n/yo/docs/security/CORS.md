@@ -4,204 +4,119 @@
 
 ---
 
-OmniRoute ń ṣàkóso àwọn **orisun aṣàwákiri** tí a yọ̀ǹda fún láti ka àwọn ìdáhùn láti orísun mìíràn
-láti inú àtòjọ ìyọ̀ǹda àárín gbùngbùn kan ṣoṣo. Àwòṣe náà jẹ́ **kíkọ̀ ààyè sílẹ̀ nípa àìyẹsẹ̀**:
-kò sí orísun kankan tí a yọ̀ǹda títí tí o fi yan láti fi í kún un. Ojú-ìwé yìí ṣe àkọsílẹ̀ bí àtòjọ ìyọ̀ǹda
-ṣe ń yanjú, ohun tí `CORS_ALLOW_ALL=true` ń ṣí sílẹ̀ gan-an (àti, ní pàtàkì, ohun tí
-kò **ṣí sílẹ̀**), bí a ṣe lè ṣètò àyíká ìdàgbàsókè àti ti iṣelọpọ láìléwu, àti ìkìlọ̀ ní àkókò ìṣiṣẹ́
-tí pátákó ìṣàkóso ń fi hàn nígbà tí àmì gbogbogbò bá ń ṣiṣẹ́.
+OmniRoute idari eyi ti **browser origins** le ka awọn idahun orisun-agbelebu lati inu ẹyọkan, akojọ iyọọda aarin. Awọn awoṣe jẹ **kuna-ni pipade nipa aiyipada** : Ko `CORS_ALLOW_ALL=true` orisun ti a gba laaye titi ti o fi yọ ọkan wọle **kii ṣe** ), bawo ni a ṣe le tunto dev vs iṣelọpọ lailewu, ati ikilọ akoko asiko ti dasibodu fihan nigbati kaadi igbẹ ba wa laaye.
 
-**Orísun òtítọ́:** `src/server/cors/origins.ts` (`resolveAllowedOrigin`,
-`applyCorsHeaders`, `getCorsStatus`). A máa lo àtòjọ ìyọ̀ǹda náà lẹ́ẹ̀kan ṣoṣo, nínú
-middleware (`src/server/authz/pipeline.ts`) — àwọn olùṣàkóso ọ̀nà kọ̀ọ̀kan kò ṣètò
-`Access-Control-Allow-Origin` fúnra wọn.
+**Orisun otitọ:** `src/server/cors/origins.ts` (`resolveAllowedOrigin`, `applyCorsHeaders`, `getCorsStatus`). A lo akojọ iyọọda ni ẹẹkan, ni agbedemeji (`src/server/authz/pipeline.ts`) — fun awọn olutọju ipa-ọna ko ṣeto `Access-Control-Allow-Origin` funrararẹ.
 
-## Bí a ṣe ń yanjú orísun kan
+## Bawo ni ipilẹṣẹ kan ṣe yanju
 
-Fún ìbéèrè kọ̀ọ̀kan, middleware máa ń ṣírò iye `Access-Control-Allow-Origin`
-ní ìtòlẹ́sẹẹsẹ yìí:
+Fun ibeere kọọkan arinware ṣe iṣiro iye `Access-Control-Allow-Origin` ni aṣẹ yii:
 
-1. **`CORS_ALLOW_ALL=true`** (tàbí `CORS_ORIGIN=*` àtijọ́) → dá
-   `Origin` olùpè náà padà (tàbí `*` nígbà tí kò bá sí akọlé `Origin`), pẹ̀lú `Vary: Origin`
-   kí àwọn cache lè dúró ní títọ́. Kókó ìṣàkóso `applyCorsHeaders()` kan náà tún máa ń fi
-   `Vary: Accept-Encoding` kún gbogbo ìdáhùn 2xx-tí-ó-ní-àkóónú lórí ojú-iṣẹ́
-   `/v1*`/`/v1beta*` tí a fi token jẹ́rìí sí (`relaxForTokenAuth`, RFC 9110 §12.5.5, issue #6737), kí
-   àwọn cache ìpele-isalẹ/tí a pín lè ṣe ìyàtọ̀ tó tọ́ láàárín àwọn ẹ̀dà tí a fún pọ̀ àti èyí tí a kò fún pọ̀.
-2. Bí bẹ́ẹ̀ kọ́, a máa ṣe `Origin` ìbéèrè náà déédéé (yí i sí lẹ́tà kékeré, yọ slash
-   ìparí kúrò), a sì máa fi wé **àtòjọ ìyọ̀ǹda tí a dapọ̀**:
-   - env **`CORS_ALLOWED_ORIGINS`** — àtòjọ tí comma pín, àti
-   - ètò **`corsOrigins`** ní àkókò ìṣiṣẹ́ (Pátákó Ìṣàkóso → Ààbò → _Àwọn Orísun Tí CORS Yọ̀ǹda
-     Fún_), tí a fi sílẹ̀ nípasẹ̀ `setRuntimeAllowedOrigins()` láti
-     `src/lib/config/runtimeSettings.ts`.
-3. Kò sí ìbámu → **a kò ní fi akọlé `Access-Control-Allow-Origin` ránṣẹ́**. Aṣàwákiri
-   máa dí kíkà láti orísun mìíràn náà. Èyí ni ìhùwàsí àìyẹsẹ̀ tí a pinnu láti kọ ààyè sílẹ̀.
+1. **`CORS_ALLOW_ALL=true`** (tabi `CORS_ORIGIN=*` julọ) → ṣe iwoyi `Origin` olupe naa pada (tabi `*` nigbati ko si akọsori `Origin` ), pẹlu `Vary: Origin` nitorina awọn caches duro ti o tọ. `applyCorsHeaders()` chokepoint kanna tun ṣe afikun `Vary: Accept-Encoding` si gbogbo idahun 2xx-with-body lori aaye `/v1*`/`/v1beta*` ti o jẹri ti o jẹri (`relaxForTokenAuth`, RFC 9110 §12.5.5, atejade #6737), nitorinaa awọn caches downstream/shared le ṣe iyatọ ti o tọ ni fisinuirindigbindigbin vs awọn iyatọ ti a ko fi sii.
+2. Bibẹẹkọ, ibeere `Origin` ti wa ni deede (awọn apoti kekere, titọpa slash ti o yọ kuro) ati pe o baamu si **dapọ allowlist** :
+   - env **`CORS_ALLOWED_ORIGINS`** — koma-niya akojọ, ati
+   - akoko asiko **`corsOrigins`** eto (Dasibodu → Aabo → _CORS Laaye Origins_), itasi nipasẹ `setRuntimeAllowedOrigins()` lati `src/lib/config/runtimeSettings.ts`.
+3. Ko si → ti o baamu **ko si `Access-Control-Allow-Origin` akọsori ti wa ni emitted** . Ẹrọ aṣawakiri naa ṣe idiwọ orisun-agbelebu kika. Eyi ni aiyipada ti a pinnu kuna-pipade.
 
-| Env var                | Ìtumọ̀                                                                             |
-| ---------------------- | --------------------------------------------------------------------------------- |
-| `CORS_ALLOWED_ORIGINS` | CSV àwọn orísun pàtó tí a fẹ́ yọ̀ǹda fún (a dámọ̀ràn rẹ̀).                            |
-| `CORS_ALLOW_ALL`       | `true`/`1` → dá orísun èyíkéyìí padà (àmì gbogbogbò). Fún ìdàgbàsókè nìkan.       |
-| `CORS_ORIGIN`          | Ti àtijọ́. `*` ń ṣiṣẹ́ bí `CORS_ALLOW_ALL`; a máa fi iye kan ṣoṣo kún àtòjọ ìyọ̀ǹda. |
+| Env var                | Itumo                                                                              |
+| ---------------------- | ---------------------------------------------------------------------------------- |
+| `CORS_ALLOWED_ORIGINS` | CSV ti awọn ipilẹṣẹ gangan lati gba laaye (niyanju).                               |
+| `CORS_ALLOW_ALL`       | `true`/`1` → ṣe iwoyi eyikeyi ipilẹṣẹ (kaadi egan). Dev nikan.                     |
+| `CORS_ORIGIN`          | Ogún. `*` huwa bi `CORS_ALLOW_ALL`; a nikan iye ti wa ni afikun si awọn allowlist. |
 
-## Àwòṣe ewu — ohun tí `CORS_ALLOW_ALL=true` ń ṣí sílẹ̀ gan-an
+## Awoṣe Irokeke — kini `CORS_ALLOW_ALL=true` ṣafihan gaan
 
-Ó yẹ kí a fi ìkìlọ̀ gbogbogbò OWASP ("CORS àmì gbogbogbò = ojúlé èyíkéyìí lè pe API rẹ") sí
-ọkàn dáadáa, ṣùgbọ́n ohun tí OmniRoute ń ṣí sílẹ̀ **kéré ju ipò gbogbogbò lọ**,
-nítorí òtítọ́ kan pàtó nípa ìmúṣẹ:
+Ikilọ OWASP jeneriki ("wildcard CORS = aaye eyikeyi le pe API rẹ") tọ lati mu ni pataki, ṣugbọn ifihan OmniRoute jẹ **dín ju jeneriki nla** , nitori ti ọkan nja imuse o daju:
 
-> **`applyCorsHeaders()` àárín gbùngbùn kò fi
-> `Access-Control-Allow-Credentials` ránṣẹ́ láéláé.** Aṣàwákiri kò ní fi ìdáhùn láti orísun mìíràn tí ó _ní ẹ̀rí ìdánimọ̀_
-> (tí ó gbé cookie) hàn àfi tí olupin bá fi
-> `Access-Control-Allow-Credentials: true` ránṣẹ́. Ọ̀nà CORS tí OmniRoute ń pín kò ṣe
-> bẹ́ẹ̀ láéláé.
+> **Aaringbungbun `applyCorsHeaders()` ko jade `Access-Control-Allow-Credentials`.** Ẹrọ aṣawakiri kan kii yoo ṣe afihan esi agbekọja _credentialed_ (kuki-ti nso) ayafi ti olupin ba fi `Access-Control-Allow-Credentials: true` ranṣẹ. OmniRoute's pín CORS ona kò ṣe.
 
-Ohun tí ìyẹn túmọ̀ sí fún ojú-iṣẹ́ kọ̀ọ̀kan, àní pẹ̀lú `CORS_ALLOW_ALL=true`:
+Kini iyẹn tumọ si fun dada, paapaa pẹlu `CORS_ALLOW_ALL=true`:
 
-| Ojú-iṣẹ́                                         | Ọ̀nà ìfàṣẹsí                | Ipa CORS àmì gbogbogbò                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| ----------------------------------------------- | -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Pátákó Ìṣàkóso / MANAGEMENT `/api/*`            | Ìgbà cookie                | A dá orísun padà, ṣùgbọ́n **láìsí `Allow-Credentials`** aṣàwákiri máa **dí** kíkà tí ó ní ẹ̀rí ìdánimọ̀. Ojúlé oníjàngbọ̀n láti orísun mìíràn **kò lè ka** àwọn ìdáhùn pátákó ìṣàkóso rẹ tí a ti jẹ́rìí sí, a kò sì ṣí cookie ìgbà náà sílẹ̀.                                                                                                                                                                                                                                                                                                                                                       |
-| API Oníbàárà `/v1/*`, `/v1beta/*`               | Akọlé Bearer / `x-api-key` | Ó ti gba ààyè tẹ́lẹ̀ **gẹ́gẹ́ bí a ṣe ṣe àpẹrẹ rẹ̀** (`relaxForTokenAuth`): àwọn aṣàwákiri kì í so `Authorization`/`x-api-key` mọ́ ìbéèrè fúnra wọn, nítorí náà ojú-ìwé akóbíni kò lè pèsè kọ́kọ́rọ́ rẹ. Fífi orísun hàn padà lábẹ́ òfin tí a tú sílẹ̀ nílò ẹni tí a ti fìdí ìdánimọ̀ rẹ̀ múlẹ̀ (kọ́kọ́rọ́ API tí a ti ṣàyẹ̀wò tàbí ìgbà dashboard tí a ti ṣàyẹ̀wò), kì í ṣe akọlé ìjẹ́rìísí nìkan, kò sì ní `Access-Control-Allow-Credentials` nínú láéláé. Àwọn ìdáhùn aláìlórúkọ (`REQUIRE_API_KEY=false`) ń lo àkójọ àwọn orísun tí a ti ṣètò láti gba láàyè, pẹ̀lú fífi `CORS_ALLOW_ALL=true` ṣiṣẹ́ ní kedere. |
-| Ti gbogbo ènìyàn, kíkà-nìkan (`/api/health`, …) | Kò sí                      | Kò ní ìsọfúnni àṣírí; àmì gbogbogbò kò léwu.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| Dada                                          | Ilana ijẹrisi                | Ipa ti wildcard CORS                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| --------------------------------------------- | ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Dasibodu / MANAGEMENT `/api/*`                | Igba kukisi                  | Oti ti wa ni iwoyi, ṣugbọn **laisi `Allow-Credentials`** kiri ayelujara **ohun amorindun** awọn credentialed kika. Aaye orisun agbelebu irira **ko le ka** awọn idahun Dasibodu ti o jẹri, ati pe kuki igba ko ṣe afihan.                                                                                                                                                                                                                                            |
+| Onibara API `/v1/*`, `/v1beta/*`              | Bearer / `x-api-key` akọsori | Tẹlẹ iyọọda **nipa oniru** (`relaxForTokenAuth`): awọn aṣawakiri ko le so `Authorization`/`x-api-key` ni adaṣe, nitorinaa oju-iwe ikọlu ko le pese bọtini rẹ. Iwoyi isinmi nilo koko-ọrọ ti o jẹri (bọtini API ti a fọwọsi tabi igba dasibodu), kii ṣe akọsori ijẹrisi nikan, ati pe ko pẹlu `Access-Control-Allow-Credentials` rara. Awọn idahun Ailorukọ (`REQUIRE_API_KEY=false`) lo atunto ipilẹṣẹ ipilẹṣẹ, pẹlu ijade-iwọle `CORS_ALLOW_ALL=true` ti o fojuhan. |
+| Kika-nikan ti gbogbo eniyan (`/api/health`,…) | Ko si                        | Ti kii ṣe ifarabalẹ; wildcard jẹ laiseniyan.                                                                                                                                                                                                                                                                                                                                                                                                                         |
 
-Nítorí náà, ìṣípayá **tó ṣẹ́kù** láti inú `CORS_ALLOW_ALL=true` ní ààlà sí: (a)
-kíkà láti orísun mìíràn **tí kò ní ẹ̀rí ìdánimọ̀** fún dátà tí kò nílò ìfàṣẹsí tẹ́lẹ̀, àti (b)
-jíjẹ́ kí **preflight** CORS kọjá lórí àwọn ọ̀nà ìṣàkóso — tí ó ṣì nílò ìfàṣẹsí
-tí ojú-ìwé láti orísun mìíràn kò lè pèsè. Èyí **kì í ṣe** ọ̀nà jíjà gbà ìgbà
-tàbí jíjí ẹ̀rí ìdánimọ̀ lórí ọ̀nà CORS tí a pín.
+Nitorina awọn **iyokù** ifihan ti `CORS_ALLOW_ALL=true` wa ni opin si: (a) orisun-agbelebu ti ko ni ẹri **ka** ti data ti a ko ti sọ tẹlẹ, ati (b) jẹ ki CORS**preflight kọja** lori awọn ipa ọna iṣakoso — eyiti o tun nilo auth ti oju-iwe orisun-agbelebu ko le pese. O jẹ **kii ṣe** a igba-hijack tabi eri-ole fekito lori awọn pín CORS ona.
 
-### Ìyàtọ̀ gidi kan — `/api/v1/agents/`
+### Iyatọ gidi kan — `/api/v1/agents/`
 
-Àwọn ọ̀nà Cloud-Agent (`/api/v1/agents/{health,credentials,tasks,tasks/[id]}`) máa ń ṣètò
-àwọn akọlé CORS **tiwọn fúnra wọn**
-(`src/lib/cloudAgent/api.ts`, `getCloudAgentCorsHeaders`) wọ́n sì **máa ń** fi
-`Access-Control-Allow-Origin: <origin>|*` ránṣẹ́ papọ̀ pẹ̀lú
-`Access-Control-Allow-Credentials: true`. Èyí ni ojú-iṣẹ́ kan ṣoṣo níbi tí
-dídá orísun padà àti ẹ̀rí ìdánimọ̀ ti wà papọ̀, ó sì jẹ́ **òmìnira kúrò lọ́dọ̀
-`CORS_ALLOW_ALL`**. Àwọn ọ̀nà wọ̀nyí nílò ìfàṣẹsí ìṣàkóso
-(`requireManagementAuth`); àwọn olùṣàkóso tí wọ́n ṣí pátákó ìṣàkóso sílẹ̀ níta ẹ̀rọ agbàlejò gbọ́dọ̀
-mọ̀ pé ibí yìí nìkan ni àwọn akọlé ìdáhùn ti yọ̀ǹda fún kíkà láti orísun mìíràn tí ó ní ẹ̀rí ìdánimọ̀.
-Ṣíṣe ààlà rẹ̀ sí àtòjọ ìyọ̀ǹda pàtó ni a ń tọpinpin
-lọ́tọ̀ sí ìtọ́sọ́nà CORS yìí.
+Awọn ipa-ọna Aṣoju-Awọsanma (`/api/v1/agents/{health,credentials,tasks,tasks/[id]}`) ṣeto wọn **ti ara** Awọn akọle CORS (`src/lib/cloudAgent/api.ts`, `getCloudAgentCorsHeaders`) ati **ṣe** gbejade `Access-Control-Allow-Origin: <origin>|*` papọ pẹlu `Access-Control-Allow-Credentials: true`. Eleyi jẹ awọn nikan dada ibi ti Oti-iwoyi ati awọn iwe eri ibagbepo, ati awọn ti o jẹ **ominira ti `CORS_ALLOW_ALL`** . Awọn ipa-ọna wọnyi jẹ iṣakoso-ifọwọsi (`requireManagementAuth`); awọn oniṣẹ ti o ṣafihan dasibodu ni pipa-ogun yẹ ki o mọ pe eyi ni aaye kan ti iwe-ẹri orisun-agbelebu ti gba laaye nipasẹ awọn akọle idahun. Titọpa rẹ si atokọ ti o han gbangba jẹ tọpinpin lọtọ lati itọsọna CORS yii.
 
-## Àtòjọ àyẹ̀wò fún production
+## Ayẹwo iṣelọpọ
 
-- **Má ṣe ṣètò `CORS_ALLOW_ALL=true` ní production láéláé.** Fi sílẹ̀ láìṣètò.
-- Ṣètò àtòjọ àwọn origin ní **kedere** — yálà env var tàbí ààyè inú Security tab:
+- **Maṣe ṣeto `CORS_ALLOW_ALL=true` ni iṣelọpọ.** Jẹ ki a ko ṣeto.
+- Ṣeto kan **fojuhan** Atokọ ipilẹṣẹ — boya env var tabi aaye Aabo-taabu:
 
   ```bash
   CORS_ALLOWED_ORIGINS="https://app.example.com, https://admin.example.com"
   ```
 
-- Bí OmniRoute bá ń ṣiṣẹ́ lẹ́yìn reverse proxy / tunnel (nginx, Caddy, Cloudflare
-  Tunnel, Tailscale), CORS **kì í ṣe** ìṣàkóso rẹ kan ṣoṣo — olùṣọ́ route loopback
-  ṣì ń dáàbò bo àwọn route tó lè ṣe spawn (wo
-  [ROUTE_GUARD_TIERS](./ROUTE_GUARD_TIERS.md)). Má ṣe ṣe
-  `X-Forwarded-For: 127.0.0.1` èké láti “ṣàtúnṣe” 403; ìyẹn yóò tún ṣí irú RCE tí
-  olùṣọ́ route ti ti pa.
-- Jẹ́rìí ipò runtime: dashboard máa ń ṣàfihàn **àsìá amber tí kò parẹ́**
-  lábẹ́ Dashboard → Security → Authorization Inventory nígbàkigbà tí
-  `CORS_ALLOW_ALL=true` bá ń ṣiṣẹ́, `/api/settings/authz-inventory` sì máa ń dá
-  àpò `cors: { allowAll, allowedOrigins }` padà, èyí tí àwọn irinṣẹ́ monitoring lè máa ṣàyẹ̀wò.
+- Ti OmniRoute ba nṣiṣẹ lẹhin aṣoju iyipada / oju eefin (nginx, Caddy, Tunnel Cloudflare, Tailscale), CORS jẹ **kii ṣe** iṣakoso rẹ nikan — oluso ipa ọna loopback tun ṣe aabo awọn ipa-ọna ti o ni agbara (wo [ROUTE_GUARD_TIERS](./ROUTE_GUARD_TIERS.md) ). Maa ko Forge `X-Forwarded-For: 127.0.0.1` to "fix" a 403; ti o tun-ṣii kilasi RCE oluso ipa ọna tilekun.
+- Jẹrisi ipo asiko asiko: dasibodu fihan a **jubẹẹlo Amber asia** labẹ Dashboard → Aabo → Iwe-aṣẹ Iwe-aṣẹ nigbakugba ti `CORS_ALLOW_ALL=true` ba wa laaye, ati pe `/api/settings/authz-inventory` da pada awọn irinṣẹ ibojuwo apoowe `cors: { allowAll, allowedOrigins }` le ṣe ibo.
 
-## Ìrọ̀rùn development — gba àwọn origin local pàtó láàyè
+## Irọrun idagbasoke — gba awọn orisun agbegbe kan pato
 
-O kì í sábà nílò wildcard àní ní dev. Gba àwọn dev server tí o ń lò nìkan láàyè:
+O ṣọwọn nilo wildcard paapaa ni dev. Gba laaye awọn olupin dev nikan ti o lo:
 
 ```bash
-# Àwọn dev server Vite (5173) + Next.js (3000) tí ń pe OmniRoute local kan
+# Vite (5173) + Next.js (3000) dev servers calling a local OmniRoute
 CORS_ALLOWED_ORIGINS="http://localhost:5173, http://localhost:3000"
 ```
 
-A máa ń fi àwọn origin wé ara wọn láìka bóyá lẹ́tà jẹ́ ńlá tàbí kékeré, a sì máa ń foju
-fo slash tó wà ní ìparí, nítorí náà `http://localhost:3000` àti
-`http://localhost:3000/` jẹ́ ọ̀kan náà. A tún lè ṣètò CSV kan náà ní runtime nínú
-**Dashboard → Security → CORS Allowed Origins** láì ṣe restart.
+Awọn ipilẹṣẹ ti baamu ọran-aibikita pẹlu aibikita slash itọpa, nitorinaa `http://localhost:3000` ati `http://localhost:3000/` jẹ deede. CSV kanna ni a le ṣeto ni akoko ṣiṣe ni **Dasibodu → → CORS Laaye Origins** lai a tun.
 
-## Àwọn API key ní ìfiwéra pẹ̀lú cookie session
+## Awọn bọtini API vs awọn akoko kuki
 
-- **Bearer / `x-api-key` (ojú inference `/v1/*`):** àwọn browser kì í so
-  ìwọ̀nyí mọ́ request fúnra wọn láéláé. CORS kì í ṣe ìdènà tó nítumọ̀ níbí — API key ni
-  ìdènà náà — ìdí nìyẹn tí ojú yìí fi mọ̀ọ́mọ̀ jẹ́ permissive kí àwọn client
-  browser àti Electron lè ka àwọn response tí wọ́n ti ní ẹ̀tọ́ sí.
-  Fífi orísun hàn padà lábẹ́ òfin tí a tú sílẹ̀ nílò ẹni tí a ti fìdí ìdánimọ̀ rẹ̀ múlẹ̀ (kọ́kọ́rọ́ API tí a ti ṣàyẹ̀wò tàbí ìgbà dashboard tí a ti ṣàyẹ̀wò), kì í ṣe akọlé ìjẹ́rìísí nìkan, kò sì ní `Access-Control-Allow-Credentials` nínú láéláé. Àwọn ìdáhùn aláìlórúkọ (`REQUIRE_API_KEY=false`) ń lo àkójọ àwọn orísun tí a ti ṣètò láti gba láàyè, pẹ̀lú fífi `CORS_ALLOW_ALL=true` ṣiṣẹ́ ní kedere. Àwọn ìkọ̀sílẹ̀ auth (401) ṣì máa ń ṣeé
-  kà kí àwọn client lè fi key tí a ti fagilé tàbí tí a tẹ̀ ní àṣìṣe hàn (#5242): 401 ti
-  pipeline fúnra rẹ̀ máa ń pa echo mọ́, àti route kan tí ó fúnra rẹ̀ kọ key náà lẹ́yìn tí
-  pipeline ti sin ín gẹ́gẹ́ bí aláìlórúkọ (`/v1/models` àti `/v1beta/models` nígbà tí a
-  ti ṣètò management auth, àwọn route tí ó jẹ́ ti olóhun nìkan `/v1/files`,
-  `/v1/batches`, `/v1/media`, `/v1/session-leases` àti àwọn candidate route auto-combo)
-  máa ń fi echo kún 401 náà nípasẹ̀ `credentialRejectionHeaders()`. Echo náà dá lórí bóyá
-  request náà gbé credential header kan (`Authorization`, `x-api-key`, `x-goog-api-key`
-  tàbí cookie `auth_token`), kì í ṣe lórí èwo nínú wọn ni route náà ṣàyẹ̀wò, a kì í sì
-  so ó pọ̀ mọ́ `Access-Control-Allow-Credentials` láéláé; body rẹ̀ jẹ́ error envelope tí
-  kò yí padà. Àwọn management route lábẹ́ `/api/v1/` tí `requireManagementAuth()` ń dáàbò
-  bò (`/api/v1/management/*`, `/api/v1/registered-keys`) kì í lo ìyàsọ́tọ̀ yìí fún kíkọ ìjẹ́rìísí: nígbà tí `REQUIRE_API_KEY=false`, àwọn ìdáhùn 401/403 wọn ń tẹ̀ lé ìlànà orísun CORS tí a ti ṣètò.
-- **Cookie session (dashboard):** default **fail-closed** ń dáàbò bò ó, àti pé
-  `Access-Control-Allow-Credentials` kò sí lórí shared path náà. Má ṣe fi àwọn origin
-  management/dashboard sínú config permissive èyíkéyìí; wọ́n gbọ́dọ̀ dúró gẹ́gẹ́ bí
-  fail-closed pátápátá.
+- **Oluso / `x-api-key` (awọn `/v1/*` dada itọkasi):** aṣàwákiri kò so awọn wọnyi laifọwọyi. CORS kii ṣe idena ti o nilari nibi — awọn API bọtini ni idena — ti o jẹ idi ti awọn dada ni imomose permissive ki browser ati Electron awọn onibara le ka awọn idahun ti wọn ti ni ẹtọ tẹlẹ. Iwoyi ti o ni ihuwasi nilo koko-ọrọ ti o jẹri (ifọwọsi API bọtini tabi igba dasibodu), kii ṣe akọsori ijẹrisi nikan, ati pe ko pẹlu `Access-Control-Allow-Credentials`. Awọn idahun alailorukọ (`REQUIRE_API_KEY=false`) lo akojọ idasilẹ orisun atunto, pẹlu ohun ti ko boju mu `CORS_ALLOW_ALL=true` jáde. Awọn ijusile (401) duro ni kika ki awọn alabara le ṣe afihan bọtini ti a fagile tabi ti ko tọ (#5242): opo gigun ti ara 401 ntọju iwoyi, ati ipa-ọna ti o kọ bọtini funrararẹ lẹhin opo gigun ti epo yoo ṣiṣẹ bi ailorukọ (`/v1/models` ati `/v1beta/models` pẹlu isakoso auth ni tunto, awọn eni-scoped `/v1/files`, `/v1/batches`, `/v1/media`, `/v1/session-leases` ati awọn ipa ọna oludije konbo auto) ṣe afikun iwoyi si 401 yẹn nipasẹ `credentialRejectionHeaders()`. Iwoyi jẹ bọtini lori ibeere ti o gbe akọsori iwe-ẹri (`Authorization`, `x-api-key`, `x-goog-api-key` tabi awọn `auth_token` kuki), kii ṣe lori ewo ninu wọn ni ipa ọna ti a ṣayẹwo, ati pe ko ni so pọ pẹlu `Access-Control-Allow-Credentials`; ara jẹ apoowe aṣiṣe ti o wa titi. Awọn ọna iṣakoso labẹ `/api/v1/` oluso nipa `requireManagementAuth()` (`/api/v1/management/*`, `/api/v1/registered-keys`, `/api/v1/providers/[provider]/limits`, `/api/v1/accounts/[id]/limits`, `/api/v1/issues/report`) ma ṣe lo yi ẹrí-ijusile: pẹlu `REQUIRE_API_KEY=false`, wọn 401/403 awọn idahun tẹle atunto CORS ipilẹṣẹ eto imulo.
+- **Igba kuki (dasibodu):** ni aabo nipasẹ awọn kuna-pipade aiyipada **ati** nipa isansa ti `Access-Control-Allow-Credentials` lori ọna ti o pin. Pa management/dashboard origins jade ti eyikeyi iyọọda konfigi; wọn gbọdọ duro gangan kuna-pipade.
 
-## Àwọn handshake WebSocket (`/v1/responses`, `/v1/ws`)
+## Imu ọwọ WebSocket (`/v1/responses`, `/v1/ws`)
 
-Àwọn browser kì í lo CORS fún WebSocket, nítorí náà àwọn WebSocket transport tí ń dá
-inference output padà máa ń ṣàyẹ̀wò `Origin` handshake náà fúnra wọn
-(`src/server/origin/wsOrigin.ts`): Responses WebSocket (`/v1/responses`) àti, nígbà tí
-OmniRoute bá ń ṣiṣẹ́ nípasẹ̀ `npm start` / `npm run dev`, bridge `/v1/ws` àti
-`/api/v1/ws`, tí ń stream `/v1/chat/completions`, `/v1/messages` àti
-`/v1/responses` gẹ́gẹ́ bí frame. Bridge náà máa ń béèrè ìpinnu lọ́wọ́
-`/api/v1/ws?handshake=1`, ó sì máa ń kọ̀ láti upgrade àyàfi tí route yẹn bá ti ṣe àyẹ̀wò
-náà. Àwọn ohun tí a béèrè fún ìfìdímúlẹ̀ ìdánimọ̀ ṣì ń kan ọ̀ràn náà lọ́tọ̀. Àyẹ̀wò orísun máa ń yọrí sí rere nígbà tí:
+Awọn ẹrọ aṣawakiri ko lo CORS si WebSocket, nitorinaa awọn gbigbe WebSocket ti o pada abajade inference ṣayẹwo ọwọ ọwọ `Origin` funrara wọn (`src/server/origin/wsOrigin.ts`): Awọn idahun WebSocket (`/v1/responses`) ati, nigbati OmniRoute gbalaye nipasẹ `npm start` / `npm run dev`, `/v1/ws` ati `/api/v1/ws` Afara, eyiti o san `/v1/chat/completions`, fireemu `/v1/messages` ati `/v1/responses`. Afara naa beere `/api/v1/ws?handshake=1` fun idajọ ati kọ lati ṣe igbesoke ayafi ti ipa-ọna naa ba ṣayẹwo. Awọn ibeere ijẹrisi ṣi waye lọtọ. Ayẹwo ipilẹṣẹ n kọja nigbati:
 
-- kò ní header `Origin` (Codex CLI, àwọn SDK àti àwọn client mìíràn tí kì í ṣe browser);
-- allowlist tó wà lókè gba `Origin` náà láàyè (`CORS_ALLOWED_ORIGINS`, ètò
-  `corsOrigins`, `CORS_ORIGIN`, `CORS_ALLOW_ALL`);
-- `Origin` náà jẹ́ ọ̀kan lára àwọn public origin ti OmniRoute fúnra rẹ̀ (public base URL
-  tí a ṣètò, forwarded origin ti proxy tí a gbẹ́kẹ̀lé, tàbí loopback/LAN host tààrà tí a
-  fún gẹ́gẹ́ bí IP literal tàbí `localhost` — àwọn candidate kan náà tí àyẹ̀wò mutation
-  ti dashboard ń lò); tàbí
-- ó gbé API key tó wúlò, bí ó ti rí lórí ojú HTTP `/v1/*`.
+- ko ni akọsori `Origin` (Codex CLI, SDKs ati awọn alabara miiran ti kii ṣe lilọ kiri ayelujara);
+- `Origin` ti gba wọle nipasẹ awọn allowlist loke (`CORS_ALLOWED_ORIGINS`, awọn `corsOrigins` eto, `CORS_ORIGIN`, `CORS_ALLOW_ALL`);
+- `Origin` jẹ ọkan ninu awọn orisun gbangba ti OmniRoute ti ara ẹni (tunto ipilẹ gbangba URL, orisun ti o ti firanṣẹ aṣoju ti o ni igbẹkẹle, tabi agbalejo loopback/LAN taara ti a fun gẹgẹbi IP gangan tabi `localhost` — awọn oludije kanna ni ayẹwo iyipada dasibodu ti nlo); tabi
+- o gbe bọtini API ti o wulo, bi lori dada HTTP `/v1/*`.
 
-Ohunkóhun mìíràn máa ń gba `403 ws_origin_forbidden`. Session cookie ti dashboard kò
-yọ `Origin` àjèjì sílẹ̀, nítorí browser máa ń so ó mọ́ socket ojú-ìwé èyíkéyìí.
-A kì í ka `localhost` lórí port mìíràn sí origin kan náà; fi irú àwọn dev origin bẹ́ẹ̀
-kún `CORS_ALLOWED_ORIGINS`.
+Ohunkohun miiran n gba `403 ws_origin_forbidden`. Kuki igba dasibodu kan ko yọkuro `Origin` ajeji, nitori ẹrọ aṣawakiri naa so mọ iho oju-iwe eyikeyi. `localhost` lori miiran ibudo ti wa ni ko mu bi kanna-Oti; ṣafikun iru awọn ipilẹṣẹ dev si `CORS_ALLOWED_ORIGINS`.
 
-## Àpẹẹrẹ: reverse proxy ní iwájú OmniRoute
+## Apẹẹrẹ: yiyipada aṣoju iwaju OmniRoute
 
-OmniRoute fúnra rẹ̀ ló ń fipá mú CORS ṣiṣẹ́, nítorí náà, ní gbogbogbòò, proxy náà kò yẹ kí ó **ṣàfikún** tàbí
-tún àwọn header `Access-Control-*` kọ (àwọn header oníbejì máa ń fa ìṣòro fún àwọn browser). Parí TLS
-kí o sì forward — jẹ́ kí OmniRoute dá preflight lóhùn:
+CORS ti fi agbara mu nipasẹ OmniRoute funrararẹ, nitorinaa aṣoju gbogbogbo yẹ **kii ṣe** ṣafikun tabi tunkọ awọn akọle `Access-Control-*` (awọn akọle meji fifọ awọn aṣawakiri). Pari TLS ati siwaju — jẹ ki OmniRoute dahun iṣaju iṣaaju:
 
 ```nginx
-# nginx — forward sí OmniRoute; MÁ ṢE fi Access-Control-* síbí
+# nginx — forward to OmniRoute; do NOT inject Access-Control-* here
 location / {
     proxy_pass http://127.0.0.1:20128;
     proxy_set_header Host $host;
     proxy_set_header X-Real-IP $remote_addr;
     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     proxy_set_header X-Forwarded-Proto $scheme;
-    # Pa àwọn header forwarding náà mọ́: proxy kan lórí host kan náà máa ń sopọ̀ láti loopback, àwọn náà sì ni
-    # ó ń sọ fún OmniRoute pé olùpè náà kì í ṣe local operator. Proxy tí kò ṣàfikún èyíkéyìí nínú wọn
-    # máa ń jẹ́ kí gbogbo olùpè jíjìn dà bí ẹni pé wọ́n jẹ́ local. Má ṣe ṣètò X-Forwarded-For sí 127.0.0.1 pẹ̀lú.
+    # Keep the forwarding headers: a proxy on the same host connects from loopback, and they are
+    # what tells OmniRoute the caller is not the local operator. A proxy that adds none of them
+    # makes every remote caller look local. Never set X-Forwarded-For to 127.0.0.1 either.
 }
 ```
 
-Ṣètò àwọn origin browser tí a gbà láàyè nínú OmniRoute (`CORS_ALLOWED_ORIGINS` tàbí
-taabu Security), kì í ṣe nínú proxy.
+Ṣeto awọn orisun aṣawakiri ti a gba laaye ni OmniRoute (`CORS_ALLOWED_ORIGINS` tabi taabu Aabo), kii ṣe ni aṣoju.
 
-## Àwọn fáìlì orísun
+## Awọn faili orisun
 
-| Ohun tó kan                                 | Fáìlì                                                                |
-| ------------------------------------------- | -------------------------------------------------------------------- |
-| Ìpinnu allowlist + `getCorsStatus()`        | `src/server/cors/origins.ts`                                         |
-| Ìmúlò middleware (orísun òtítọ́ kan ṣoṣo)    | `src/server/authz/pipeline.ts`                                       |
-| Settings → fífi origin sínú runtime         | `src/lib/config/runtimeSettings.ts`                                  |
-| Ipò runtime fún dashboard                   | `src/app/api/settings/authz-inventory/route.ts`                      |
-| Àsìá ìkìlọ̀ dashboard                        | `src/app/(dashboard)/dashboard/settings/components/AuthzSection.tsx` |
-| Ààyè CORS Allowed Origins                   | `src/app/(dashboard)/dashboard/settings/components/SecurityTab.tsx`  |
-| CORS Cloud-Agent fún route kọ̀ọ̀kan (ìyàsọ́tọ̀) | `src/lib/cloudAgent/api.ts`                                          |
-| Àyẹ̀wò `Origin` handshake WebSocket          | `src/server/origin/wsOrigin.ts`                                      |
+| Ifarabalẹ                              | Faili                                                                |
+| -------------------------------------- | -------------------------------------------------------------------- |
+| Allowlist ipinnu + `getCorsStatus()`   | `src/server/cors/origins.ts`                                         |
+| Ohun elo Middleware (orisun otitọ kan) | `src/server/authz/pipeline.ts`                                       |
+| Eto → asiko isise abẹrẹ                | `src/lib/config/runtimeSettings.ts`                                  |
+| Ipo asiko isise fun dasibodu naa       | `src/app/api/settings/authz-inventory/route.ts`                      |
+| Dasibodu ìkìlọ asia                    | `src/app/(dashboard)/dashboard/settings/components/AuthzSection.tsx` |
+| Aaye Awọn orisun ti a gba laaye CORS   | `src/app/(dashboard)/dashboard/settings/components/SecurityTab.tsx`  |
+| Aṣoju awọsanma fun ọna CORS (iyasoto)  | `src/lib/cloudAgent/api.ts`                                          |
+| Ṣayẹwo ọwọ ọwọ WebSocket `Origin`      | `src/server/origin/wsOrigin.ts`                                      |
 
-## Wo pẹ̀lú
+## Wo tun
 
-- [Àwọn Ìpele Olùṣọ́ Ọ̀nà](./ROUTE_GUARD_TIERS.md) — ìmúṣẹ loopback fún
-  àwọn ọ̀nà tí ó lè ṣe spawn (ìṣàkóso ọ̀tọ̀ kan tí ó sì ń ṣe àfikún).
-- [Ìtọ́sọ́nà Ìfúnni-láṣẹ](../architecture/AUTHZ_GUIDE.md) — gbogbo pipeline ìfàṣẹsí.
+- [Ipa ọna oluso Tiers](./ROUTE_GUARD_TIERS.md) — imuduro loopback fun awọn ipa-ọna ti o ni agbara (iyatọ, iṣakoso ibaramu).
+- [Itọsọna aṣẹ](../architecture/AUTHZ_GUIDE.md) — opo gigun ti epo ni kikun.

@@ -221,6 +221,45 @@ forward केली जात नाही. Metadata, incomplete frames आण�
 रिग्रेशन गार्ड्स: `tests/unit/claude-low-priority-mode.test.ts`,
 `tests/unit/claude-limit-reset.test.ts`, `tests/unit/claude-low-priority-executor.test.ts`.
 
+### स्वयं-लागू बँक केलेले रीसेट
+
+**व्याप्ती:** Codex आणि Claude सदस्यता (OAuth) कनेक्शन.**निवड करा** : `bankedResetAutoApply` सेटिंग बंद आहे आणि डीफॉल्टनुसार `dry-run` मोडमध्ये आहे (सेटिंग्ज → AI → स्वयं-लागू बँक केलेले रीसेट).
+
+**उद्देश:** प्रदाता मर्यादा पृष्ठावरील "रिडीम" दाबण्यासाठी ऑपरेटरची वाट पाहण्याऐवजी जेव्हा खाते वापराच्या भिंतीवर आदळते तेव्हा बँक केलेले रीसेट स्वतःच खर्च करा.
+
+| क्रेडिट प्रकार (`creditTypes`) | कशाची पूर्तता केली जाते                    | कुठे चालते                                     |
+| ------------------------------ | ------------------------------------------ | ---------------------------------------------- |
+| `codexCredits`                 | Codex क्रेडिट रीसेट करा                    | बॅकग्राउंड जॉब, प्रत्येक ६० से                 |
+| `claudeCredits`                | Claude बँक अनुदान (`GRANT` क्रेडिट)        | बॅकग्राउंड जॉब, प्रत्येक ६० से                 |
+| `claudeSessionReset`           | Claude साप्ताहिक सत्र-मर्यादा रीसेट (वरील) | प्रति-खाते टॉगल सारख्याच धोरणाद्वारे विनंती पथ |
+
+**अंमलबजावणी:**
+
+- शुद्ध निर्णय (दोन्ही मार्गांसाठी एक नियम सेट): `src/lib/usage/bankedResetPolicy.ts::decideBankedReset()`
+- पार्श्वभूमी नोकरी: `src/lib/services/bankedResetAutoApply.ts` ( `src/instrumentation-node.ts` मध्ये सुरू झाले)
+- Claude विनंती-पाथ गेट: `src/lib/usage/claudeSessionResetPolicy.ts`, `open-sse/services/claudeLimitReset.ts` मध्ये `setClaudeLimitResetPolicy()` द्वारे नोंदणीकृत
+- इतिहास, कॅप्स आणि वेबहुक: `src/lib/usage/bankedResetAudit.ts`
+- इतिहास API: `GET /api/settings/banked-reset-auto/history?limit=50` (व्यवस्थापन प्रमाणीकरण)
+
+**निर्णयाचा आदेश** (पहिला अयशस्वी नियम रेकॉर्ड केलेले कारण आहे):
+
+1. वैशिष्ट्य बंद, क्रेडिट प्रकार बंद, किंवा खाते व्याप्तीबाहेर (`accountScope` `all` / `selected` अधिक प्रति खाते `connections` नकाशा).
+2. पर्यायी UTC शेड्यूलच्या बाहेर (`startHourUtc` > `endHourUtc` मध्यरात्री पार करते).
+3. गेल्या 24 तासांमधले कॅप्स: `maxPerAccountPerDay` (1), `maxPerDay` (3), आणि `minSpacingMinutes` (30) कोणत्याही दोन रिडेम्शन दरम्यान.
+4. ट्रिगर: भिंत असलेली `session` किंवा `weekly` विंडो ( `getQuotaWindowStatus().reachedThreshold` वरून वाचा, `isAccountQuotaExhausted()` नाही, जे फक्त प्रत्येक विंडो खर्च केलेल्या खात्याचा अहवाल देते), किंवा कमीतकमी `expiringCreditMinUsedPercent` (50) वापरलेल्या खात्यावर `expiringCreditHours` (24) मध्ये कालबाह्य होणारी क्रेडिट.
+5. नैसर्गिक-रीसेट गार्ड: `sessionResetGuardMinutes` (90) मध्ये भिंतीची 5-तास विंडो रीसेट होते तेव्हा वगळा, किंवा `weeklyResetGuardHours` (12) मध्ये भिंती असलेली साप्ताहिक विंडो.
+6. साप्ताहिक मजला: जेव्हा साप्ताहिक शिल्लक `weeklyFloorPercent` (10) च्या खाली असेल तेव्हा 5-तासांचा रीसेट वगळा.
+7. `last-resort` मोड: त्याच प्रदात्याच्या दुसऱ्या इन-स्कोप खात्यात दोन्ही विंडोमध्ये किमान `poolHeadroomPercent` (10) शिल्लक असताना वगळा. एक्सपायरींग-क्रेडिट ट्रिगर याला बायपास करतात.
+8. `dry-run` पंक्ती रेकॉर्ड करते आणि काहीही रिडीम करत नाही; `last-resort` आणि `eager` रिडीम.
+
+गहाळ कोटा डेटा कधीही विमोचन अनलॉक करत नाही: अज्ञात रीसेट वेळ किंवा साप्ताहिक वापर वगळला जातो.
+
+**Claude सत्र रीसेट:** वैशिष्ट्य बंद किंवा `claudeSessionReset` बंद सह, प्रति खाते `autoLimitReset` टॉगल पूर्वीप्रमाणेच ठरवते. दोन्ही चालू असताना, वैशिष्ट्य प्रति-खाते टॉगलची जागा घेते: एक इन-स्कोप खाते जेव्हा पॉलिसी परवानगी देते तेव्हाच दावा करू शकते आणि `dry-run` मोडमध्ये कोणताही दावा केला जात नाही.
+
+**सुरक्षितता:** जॉब प्रति टिक जास्तीत जास्त एक क्रेडिट रिडीम करते, क्रेडिट सूचीबद्ध करण्यापूर्वी निर्णय घेते (वगळलेले खाते कधीही सूचीबद्ध केले जात नाही), इडेम्पोटेंसी की `auto-reset:<connectionId>:<yyyy-mm-dd>:<n>` वापरते आणि अयशस्वी सूची किंवा रिडीम्शन नंतर 1 तासासाठी खाते बंद करते. प्रत्येक पूर्तता, अयशस्वी आणि ड्राय-रन निर्णय `audit_log` (`action: "bankedReset.redeem"`, कोणतेही टोकन किंवा क्रेडिट आयडी नाहीत); टोप्या त्या पंक्तींमधून मोजल्या जातात, त्यामुळे ते पुन्हा सुरू झाल्यावर टिकून राहतात. यशस्वी विमोचन `provider.reset_redeemed` वेबहुक देखील सक्रिय करते.
+
+प्रतिगमन रक्षक: `tests/unit/banked-reset-policy.test.ts`, `tests/unit/banked-reset-auto-apply.test.ts`, `tests/unit/claude-limit-reset-policy-gate.test.ts`, `tests/unit/banked-reset-history-route.test.ts`.
+
 ### सत्र संलग्नता (#7274)
 
 **व्याप्ती:** कोणत्याही provider साठी, एक client session (`X-Session-Id` / `x-codex-session-id` / `x-omniroute-session` header)

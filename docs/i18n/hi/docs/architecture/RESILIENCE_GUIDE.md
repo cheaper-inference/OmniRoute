@@ -186,6 +186,45 @@ limit", GLM `并发数过高`) बताता है, इसका अर्थ
 रीग्रेशन सुरक्षा: `tests/unit/claude-low-priority-mode.test.ts`,
 `tests/unit/claude-limit-reset.test.ts`, `tests/unit/claude-low-priority-executor.test.ts`.
 
+### बैंक्ड रीसेट स्वतः लागू करें
+
+**दायरा:** Codex और Claude सदस्यता (OAuth) कनेक्शन।**में चुनें** : `bankedResetAutoApply` सेटिंग बंद है और डिफ़ॉल्ट रूप से `dry-run` मोड में है (सेटिंग्स → AI → ऑटो-लागू बैंक्ड रीसेट)।
+
+**उद्देश्य:** जब कोई खाता उपयोग की दीवार से टकराता है, तो प्रदाता सीमा पृष्ठ पर "रिडीम" दबाने के लिए ऑपरेटर की प्रतीक्षा करने के बजाय, बैंक किए गए रीसेट को स्वयं खर्च करें।
+
+| क्रेडिट प्रकार (`creditTypes`) | क्या छुड़ाया जाता है                     | यह कहां चलता है                                     |
+| ------------------------------ | ---------------------------------------- | --------------------------------------------------- |
+| `codexCredits`                 | Codex क्रेडिट रीसेट करें                 | पृष्ठभूमि कार्य, हर 60 सेकंड में                    |
+| `claudeCredits`                | Claude बैंकीकृत अनुदान (`GRANT` क्रेडिट) | पृष्ठभूमि कार्य, हर 60 सेकंड में                    |
+| `claudeSessionReset`           | Claude साप्ताहिक सत्र-सीमा रीसेट (ऊपर)   | प्रति-खाता टॉगल के समान नीति के माध्यम से अनुरोध पथ |
+
+**कार्यान्वयन:**
+
+- शुद्ध निर्णय (दोनों पथों के लिए एक नियम निर्धारित): `src/lib/usage/bankedResetPolicy.ts::decideBankedReset()`
+- पृष्ठभूमि कार्य: `src/lib/services/bankedResetAutoApply.ts` ( `src/instrumentation-node.ts` में प्रारंभ)
+- Claude अनुरोध-पथ गेट: `src/lib/usage/claudeSessionResetPolicy.ts`, `open-sse/services/claudeLimitReset.ts` में `setClaudeLimitResetPolicy()` के माध्यम से पंजीकृत
+- इतिहास, कैप्स और वेबहुक: `src/lib/usage/bankedResetAudit.ts`
+- इतिहास API: `GET /api/settings/banked-reset-auto/history?limit=50` (प्रबंधन प्राधिकरण)
+
+**निर्णय आदेश** (पहला असफल नियम दर्ज कारण है):
+
+1. सुविधा बंद, क्रेडिट प्रकार बंद, या खाता दायरे से बाहर (`accountScope` `all` / `selected` प्लस प्रति-खाता `connections` मानचित्र)।
+2. वैकल्पिक UTC शेड्यूल के बाहर (`startHourUtc` > `endHourUtc` आधी रात को पार करता है)।
+3. पिछले 24 घंटों में कैप्स: `maxPerAccountPerDay` (1), `maxPerDay` (3), और `minSpacingMinutes` (30) किन्हीं दो मोचनों के बीच।
+4. ट्रिगर: एक दीवार वाली `session` या `weekly` विंडो ( `getQuotaWindowStatus().reachedThreshold` से पढ़ें, `isAccountQuotaExhausted()` से नहीं, जो केवल खर्च की गई प्रत्येक विंडो के साथ एक खाते की रिपोर्ट करती है), या उस खाते पर `expiringCreditHours` (24) के भीतर समाप्त होने वाला क्रेडिट जिसने कम से कम `expiringCreditMinUsedPercent` (50) का उपयोग किया है।
+5. प्राकृतिक-रीसेट गार्ड: जब दीवार वाली 5-घंटे की विंडो `sessionResetGuardMinutes` (90), या दीवार वाली साप्ताहिक विंडो `weeklyResetGuardHours` (12) के भीतर रीसेट हो जाती है, तो छोड़ें।
+6. साप्ताहिक तल: जब साप्ताहिक शेष `weeklyFloorPercent` (10) से कम हो तो 5 घंटे का रीसेट छोड़ दें।
+7. `last-resort` मोड: छोड़ें जबकि उसी प्रदाता के किसी अन्य इन-स्कोप खाते में दोनों विंडो में कम से कम `poolHeadroomPercent` (10) बचा हो। एक्सपायरिंग-क्रेडिट ट्रिगर्स इसे बायपास कर देते हैं।
+8. `dry-run` एक पंक्ति रिकॉर्ड करता है और कुछ भी रिडीम नहीं करता; `last-resort` और `eager` रिडीम करें।
+
+गुम कोटा डेटा कभी भी मोचन को अनलॉक नहीं करता है: एक अज्ञात रीसेट समय या साप्ताहिक उपयोग स्किप हो जाता है।
+
+**Claude सत्र रीसेट:** सुविधा बंद होने पर, या `claudeSessionReset` बंद होने पर, प्रति-खाता `autoLimitReset` टॉगल बिल्कुल पहले की तरह ही निर्णय लेता है। दोनों के चालू होने पर, यह सुविधा प्रति-खाता टॉगल को प्रतिस्थापित कर देती है: एक इन-स्कोप खाता केवल तभी दावा कर सकता है जब पॉलिसी इसकी अनुमति देती है, और `dry-run` मोड में कोई दावा नहीं किया जाता है।
+
+**सुरक्षा:** कार्य प्रति टिक अधिकतम एक क्रेडिट को भुनाता है, क्रेडिट को सूचीबद्ध करने से पहले निर्णय लेता है (एक छोड़े गए खाते को कभी भी सूचीबद्ध नहीं किया जाता है), निष्क्रियता कुंजी `auto-reset:<connectionId>:<yyyy-mm-dd>:<n>` का उपयोग करता है, और असफल लिस्टिंग या मोचन के बाद 1 घंटे के लिए खाते को बंद कर देता है। प्रत्येक मोचन, विफलता और ड्राई-रन निर्णय `audit_log` को लिखा जाता है (`action: "bankedReset.redeem"`, कोई टोकन या क्रेडिट आईडी नहीं); कैप्स को उन पंक्तियों से गिना जाता है, इसलिए वे पुनरारंभ होने से बचे रहते हैं। सफल रिडेम्प्शन `provider.reset_redeemed` वेबहुक को भी सक्रिय करता है।
+
+प्रतिगमन गार्ड: `tests/unit/banked-reset-policy.test.ts`, `tests/unit/banked-reset-auto-apply.test.ts`, `tests/unit/claude-limit-reset-policy-gate.test.ts`, `tests/unit/banked-reset-history-route.test.ts`।
+
 ### सत्र संबद्धता (#7274)
 
 **दायरा:** कोई एक क्लाइंट सत्र (`X-Session-Id` / `x-codex-session-id` / `x-omniroute-session` हेडर)

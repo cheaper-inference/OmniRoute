@@ -198,6 +198,45 @@ verbinding** (Verbinding bewerken → Claude-sectie → `lowPriorityMode` / `aut
 Regressiebewaking: `tests/unit/claude-low-priority-mode.test.ts`,
 `tests/unit/claude-limit-reset.test.ts`, `tests/unit/claude-low-priority-executor.test.ts`.
 
+### Bankresets automatisch toepassen
+
+**Domein:** Codex en Claude -abonnementsverbindingen (OAuth).**Aanmelden** : de `bankedResetAutoApply` instelling is standaard uitgeschakeld en bevindt zich in `dry-run` modus (Instellingen → AI → Banked resets automatisch toepassen).
+
+**Doel:** voer zelf bankresets uit wanneer een account een gebruikslimiet bereikt, in plaats van te wachten tot een operator op "Inwisselen" drukt op de pagina Providerlimieten.
+
+| Krediettype (`creditTypes`) | Wat wordt verzilverd                                     | Waar het draait                                                |
+| --------------------------- | -------------------------------------------------------- | -------------------------------------------------------------- |
+| `codexCredits`              | Codex resetten                                           | achtergrondtaak, elke 60 s                                     |
+| `claudeCredits`             | Claude -subsidies (`GRANT` credits)                      | achtergrondtaak, elke 60 s                                     |
+| `claudeSessionReset`        | Claude wekelijkse sessielimiet opnieuw instellen (boven) | verzoekpad, via hetzelfde beleid als de schakelaar per account |
+
+**Uitvoering:**
+
+- Pure beslissing (één regelset voor beide paden): `src/lib/usage/bankedResetPolicy.ts::decideBankedReset()`
+- Achtergrondbaan: `src/lib/services/bankedResetAutoApply.ts` (gestart in `src/instrumentation-node.ts`)
+- Claude -verzoekpadpoort: `src/lib/usage/claudeSessionResetPolicy.ts`, geregistreerd via `setClaudeLimitResetPolicy()` in `open-sse/services/claudeLimitReset.ts`
+- Geschiedenis, hoofdletters en webhook: `src/lib/usage/bankedResetAudit.ts`
+- Geschiedenis API: `GET /api/settings/banked-reset-auto/history?limit=50` (managementauthenticatie)
+
+**Beslissingsvolgorde** (de eerste falende regel is de geregistreerde reden):
+
+1. Functie uitgeschakeld, krediettype uitgeschakeld of account buiten bereik (`accountScope` `all` / `selected` plus de `connections` -kaart per account).
+2. Buiten het optionele UTC schema (`startHourUtc` > `endHourUtc` overschrijdt middernacht).
+3. Maximaal aantal over de afgelopen 24 uur: `maxPerAccountPerDay` (1), `maxPerDay` (3) en `minSpacingMinutes` (30) tussen twee willekeurige inwisselingen.
+4. Trigger: een ommuurd `session` of `weekly` venster (gelezen uit `getQuotaWindowStatus().reachedThreshold`, niet `isAccountQuotaExhausted()`, dat alleen een account rapporteert bij elk uitgegeven venster), of een tegoed dat binnen `expiringCreditHours` (24) vervalt op een account dat minimaal `expiringCreditMinUsedPercent` (50) heeft gebruikt.
+5. Beveiliging met natuurlijke reset: overslaan wanneer het ommuurde 5-uursvenster binnen `sessionResetGuardMinutes` (90) wordt gereset, of het ommuurde wekelijkse venster binnen `weeklyResetGuardHours` (12).
+6. Wekelijkse bodem: sla een reset van 5 uur over als de resterende week lager is dan `weeklyFloorPercent` (10).
+7. `last-resort` modus: overslaan terwijl een ander binnen het bereik vallend account van dezelfde provider in beide vensters minimaal `poolHeadroomPercent` (10) over heeft. Triggers voor aflopende kredieten omzeilen dit.
+8. `dry-run` registreert een rij en verlost niets; `last-resort` en `eager` verzilveren.
+
+Ontbrekende quotagegevens ontgrendelen nooit een inwisseling: een onbekende resettijd of wekelijks gebruik wordt overgeslagen.
+
+**Claude sessie opnieuw instellen:** als de functie is uitgeschakeld of `claudeSessionReset` is uitgeschakeld, beslist de `autoLimitReset` schakelaar per account precies zoals voorheen. Als beide zijn ingeschakeld, vervangt de functie de schakelaars per account: een account binnen het bereik kan alleen een claim indienen als het beleid dit toestaat, en in `dry-run` modus wordt er geen claim gemaakt.
+
+**Veiligheid:** de baan wisselt maximaal één credit per tick in, beslist voordat credits worden aangeboden (een overgeslagen account wordt nooit vermeld), gebruikt idempotentiesleutels `auto-reset:<connectionId>:<yyyy-mm-dd>:<n>` en zet een account gedurende 1 uur terug na een mislukte aanbieding of inwisseling. Elke inwisselings-, mislukkings- en proefbeslissing wordt naar `audit_log` geschreven (`action: "bankedReset.redeem"`, geen tokens of krediet-ID's); de caps worden vanaf die rijen geteld, zodat ze een herstart overleven. Succesvolle inwisselingen activeren ook de `provider.reset_redeemed` webhook.
+
+Regressiewachters: `tests/unit/banked-reset-policy.test.ts`, `tests/unit/banked-reset-auto-apply.test.ts`, `tests/unit/claude-limit-reset-policy-gate.test.ts`, `tests/unit/banked-reset-history-route.test.ts`.
+
 ### Sessie-affiniteit (#7274)
 
 **Bereik:** één clientsessie (`X-Session-Id` / `x-codex-session-id` / `x-omniroute-session`-header)

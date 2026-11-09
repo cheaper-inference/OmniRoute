@@ -209,6 +209,45 @@ active-stream timeout এবং client cancellation এখনও প্রযো
 Regression guards: `tests/unit/claude-low-priority-mode.test.ts`,
 `tests/unit/claude-limit-reset.test.ts`, `tests/unit/claude-low-priority-executor.test.ts`.
 
+### ব্যাঙ্কড রিসেট স্বয়ংক্রিয়ভাবে প্রয়োগ করুন
+
+**সুযোগ:** Codex এবং Claude সাবস্ক্রিপশন (OAuth) সংযোগ।**অপ্ট-ইন** : `bankedResetAutoApply` সেটিং বন্ধ এবং ডিফল্টরূপে `dry-run` মোডে আছে (সেটিংস → AI → স্বয়ংক্রিয়ভাবে ব্যাঙ্কড রিসেট প্রয়োগ করুন)।
+
+**উদ্দেশ্য:** কোনো অপারেটর প্রদানকারীর সীমা পৃষ্ঠায় "রিডিম" চাপার জন্য অপেক্ষা না করে, যখন কোনো অ্যাকাউন্ট কোনো ব্যবহারের দেয়ালে আঘাত করে তখন ব্যাঙ্কড রিসেটগুলি নিজেরাই খরচ করে।
+
+| ক্রেডিট প্রকার (`creditTypes`) | কি খালাস হয়                             | যেখানে চলে                                               |
+| ------------------------------ | ---------------------------------------- | -------------------------------------------------------- |
+| `codexCredits`                 | Codex ক্রেডিট রিসেট করুন                 | ব্যাকগ্রাউন্ড জব, প্রতি 60 সেকেন্ডে                      |
+| `claudeCredits`                | Claude ব্যাঙ্কড অনুদান (`GRANT` ক্রেডিট) | ব্যাকগ্রাউন্ড জব, প্রতি 60 সেকেন্ডে                      |
+| `claudeSessionReset`           | Claude সাপ্তাহিক সেশন-সীমা রিসেট (উপরে)  | প্রতি-অ্যাকাউন্ট টগলের মতো একই নীতির মাধ্যমে অনুরোধের পথ |
+
+**বাস্তবায়ন:**
+
+- বিশুদ্ধ সিদ্ধান্ত (একটি নিয়ম উভয় পথের জন্য সেট): `src/lib/usage/bankedResetPolicy.ts::decideBankedReset()`
+- পটভূমির কাজ: `src/lib/services/bankedResetAutoApply.ts` ( `src/instrumentation-node.ts` তে শুরু হয়েছে)
+- Claude অনুরোধ-পাথ গেট: `src/lib/usage/claudeSessionResetPolicy.ts`, `open-sse/services/claudeLimitReset.ts` এ `setClaudeLimitResetPolicy()` এর মাধ্যমে নিবন্ধিত
+- ইতিহাস, ক্যাপস এবং ওয়েবহুক: `src/lib/usage/bankedResetAudit.ts`
+- ইতিহাস API: `GET /api/settings/banked-reset-auto/history?limit=50` (ম্যানেজমেন্ট অথ)
+
+**সিদ্ধান্তের আদেশ** (প্রথম ব্যর্থ নিয়মটি রেকর্ড করা কারণ):
+
+1. ফিচার অফ, ক্রেডিট টাইপ অফ, অথবা অ্যাকাউন্ট অফ স্কোপ (`accountScope` `all` / `selected` প্লাস প্রতি অ্যাকাউন্ট `connections` ম্যাপ)।
+2. ঐচ্ছিক UTC সময়সূচীর বাইরে (`startHourUtc` > `endHourUtc` মধ্যরাত অতিক্রম করে)।
+3. গত 24 ঘন্টার ক্যাপস: `maxPerAccountPerDay` (1), `maxPerDay` (3), এবং `minSpacingMinutes` (30) যেকোনো দুটি রিডিমশনের মধ্যে।
+4. ট্রিগার: একটি প্রাচীরযুক্ত `session` বা `weekly` উইন্ডো ( `getQuotaWindowStatus().reachedThreshold` থেকে পড়ুন, `isAccountQuotaExhausted()` নয়, যেটি শুধুমাত্র খরচ করা প্রতিটি উইন্ডোর সাথে একটি অ্যাকাউন্টের রিপোর্ট করে), অথবা এমন একটি অ্যাকাউন্টে যেটি কমপক্ষে `expiringCreditMinUsedPercent` (50) ব্যবহার করেছে `expiringCreditHours` (24) এর মধ্যে মেয়াদ শেষ হয়ে যাচ্ছে।
+5. প্রাকৃতিক-রিসেট গার্ড: `sessionResetGuardMinutes` (90) এর মধ্যে প্রাচীরযুক্ত 5-ঘন্টা উইন্ডো রিসেট হলে এড়িয়ে যান, বা `weeklyResetGuardHours` (12) এর মধ্যে প্রাচীরযুক্ত সাপ্তাহিক উইন্ডো পুনরায় সেট করুন।
+6. সাপ্তাহিক ফ্লোর: যখন সাপ্তাহিক অবশিষ্ট `weeklyFloorPercent` (10) এর নিচে থাকে তখন 5-ঘন্টা রিসেট এড়িয়ে যান।
+7. `last-resort` মোড: এড়িয়ে যান যখন একই প্রদানকারীর অন্য একটি ইন-স্কোপ অ্যাকাউন্টের উভয় উইন্ডোতে কমপক্ষে `poolHeadroomPercent` (10) বাকি থাকে। মেয়াদোত্তীর্ণ-ক্রেডিট ট্রিগার এটিকে বাইপাস করে।
+8. `dry-run` একটি সারি রেকর্ড করে এবং কিছুই রিডিম করে না; `last-resort` এবং `eager` রিডিম।
+
+অনুপস্থিত কোটা ডেটা কখনই একটি রিডেম্পশন আনলক করে না: একটি অজানা রিসেট সময় বা সাপ্তাহিক ব্যবহার এড়িয়ে যায়।
+
+**Claude সেশন রিসেট:** ফিচার অফ বা `claudeSessionReset` অফ থাকলে, প্রতি-অ্যাকাউন্ট `autoLimitReset` টগল ঠিক আগের মতই সিদ্ধান্ত নেয়। উভয়ই চালু থাকলে, বৈশিষ্ট্যটি প্রতি-অ্যাকাউন্ট টগলগুলিকে প্রতিস্থাপন করে: একটি ইন-স্কোপ অ্যাকাউন্ট শুধুমাত্র তখনই দাবি করতে পারে যখন নীতি অনুমতি দেয় এবং `dry-run` মোডে কোনও দাবি করা হয় না।
+
+**নিরাপত্তা:** চাকরিটি প্রতি টিক সর্বাধিক একটি ক্রেডিট রিডিম করে, ক্রেডিট তালিকাভুক্ত করার আগে সিদ্ধান্ত নেয় (একটি এড়িয়ে যাওয়া অ্যাকাউন্ট কখনও তালিকাভুক্ত করা হয় না), আইডেমপোটেন্সি কী `auto-reset:<connectionId>:<yyyy-mm-dd>:<n>` ব্যবহার করে এবং একটি ব্যর্থ তালিকা বা রিডেম্পশনের পরে 1 ঘন্টার জন্য অ্যাকাউন্ট বন্ধ করে দেয়। প্রতিটি খালাস, ব্যর্থতা এবং ড্রাই-রান সিদ্ধান্ত `audit_log` (`action: "bankedReset.redeem"`, টোকেন বা ক্রেডিট আইডি নেই); ক্যাপগুলি সেই সারিগুলি থেকে গণনা করা হয়, তাই তারা পুনরায় আরম্ভ করে বেঁচে থাকে। সফল রিডিমশন `provider.reset_redeemed` ওয়েবহুককেও ফায়ার করে।
+
+রিগ্রেশন গার্ড: `tests/unit/banked-reset-policy.test.ts`, `tests/unit/banked-reset-auto-apply.test.ts`, `tests/unit/claude-limit-reset-policy-gate.test.ts`, `tests/unit/banked-reset-history-route.test.ts`।
+
 ### সেশন অ্যাফিনিটি (#7274)
 
 **পরিসর:** একটি ক্লায়েন্ট সেশন (`X-Session-Id` / `x-codex-session-id` / `x-omniroute-session` হেডার)

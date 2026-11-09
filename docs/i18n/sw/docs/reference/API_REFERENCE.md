@@ -939,14 +939,14 @@ CLI huboresha `base_url + /responses` kuwa WebSocket na OmniRoute huunganisha kw
 
 ---
 
-## Ripoti ya Kiwango cha Matumizi na Matatizo
+## Kuripoti Nafasi na Masuala
 
-| Method | Path                | Description                                                                                                         |
-| ------ | ------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/v1/quotas/check`  | Kuthibitisha mapema kiwango cha matumizi kwa `provider` + `accountId` kabla ya kutoa ufunguo uliosajiliwa           |
-| POST   | `/v1/issues/report` | Kuripoti kushindwa kwa utoaji wa ufunguo/kiwango cha matumizi kwa GitHub (inahitajika `GITHUB_ISSUES_REPO` + token) |
+| Mbinu | Njia                | Maelezo                                                                                           |
+| ----- | ------------------- | ------------------------------------------------------------------------------------------------- |
+| GET   | `/v1/quotas/check`  | Thibitisha mapema mgao wa `provider` + `accountId` kabla ya kutoa ufunguo uliosajiliwa            |
+| POST  | `/v1/issues/report` | Ripoti kutofaulu kwa utoaji wa quota/key kwa GitHub (inahitaji tokeni ya `GITHUB_ISSUES_REPO` + ) |
 
-**Uthibitishaji:** Ufunguo wa API wa Bearer (`isAuthenticated`).
+**Uthibitishaji:** `/v1/quotas/check` inachukua kitufe cha Bearer API (`isAuthenticated`). `/v1/issues/report` ni ya usimamizi pekee (`requireManagementAuth`), kama vile `/api/v1/registered-keys`: kipindi cha dashibodi, tokeni ya ndani CLI, au kitufe cha API chenye upeo wa `manage`/`admin` ; funguo za API za inference tu pata `403`.
 
 ### Urejeshaji wa kipindi cha kiwango cha matumizi (kwa kuchagua)
 
@@ -1755,19 +1755,23 @@ Usajili wa vijihamishi vya wavuti vinavyotoka kwa matukio ya OmniRoute (ukamilis
 
 ---
 
-## Funguo Zilizosajiliwa (Usimamizi Otomatiki)
+## Funguo Zilizosajiliwa (Usimamizi wa Kiotomatiki)
 
-Hutumika na mfumo wa usimamizi wa funguo otomatiki kutoa na kuzungusha funguo za API dhidi ya mtoa huduma/akaunti inayounga mkono, zikiwa na mgao wa kila siku/kila saa.
+Inatumiwa na mfumo mdogo wa usimamizi wa ufunguo-otomatiki kutoa na kuzungusha funguo za API dhidi ya provider/account inayoungwa mkono, yenye migao daily/hourly.
 
-| Mbinu  | Njia                                  | Maelezo                                                                                                                                                                                                          |
-| ------ | ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/api/v1/registered-keys`             | Orodhesha funguo zilizosajiliwa (kiambishi awali kilichofichwa pekee)                                                                                                                                            |
-| POST   | `/api/v1/registered-keys`             | Toa ufunguo mpya uliosajiliwa — mwili: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Hurejesha ufunguo ghafi **mara moja**. Hurejesha `429` iwapo mgao umekataliwa. |
-| GET    | `/api/v1/registered-keys/[id]`        | Pata metadata ya ufunguo uliosajiliwa (hakuna nyenzo ghafi)                                                                                                                                                      |
-| DELETE | `/api/v1/registered-keys/[id]`        | Batilisha ufunguo uliosajiliwa                                                                                                                                                                                   |
-| POST   | `/api/v1/registered-keys/[id]/revoke` | Mwisho wa wazi wa kubatilisha (athari sawa na DELETE)                                                                                                                                                            |
+| Mbinu  | Njia                                  | Maelezo                                                                                                                                                                                                               |
+| ------ | ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/v1/registered-keys`             | Orodhesha funguo zilizosajiliwa (kiambishi awali kilichofichwa pekee)                                                                                                                                                 |
+| POST   | `/api/v1/registered-keys`             | Toa ufunguo mpya uliosajiliwa wa chombo cha — : `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Hurejesha ufunguo ghafi **mara moja** . Hurejesha `429` kwa kukataa kiasi. |
+| GET    | `/api/v1/registered-keys/[id]`        | Rejesha metadata ya ufunguo uliosajiliwa (hakuna malighafi)                                                                                                                                                           |
+| DELETE | `/api/v1/registered-keys/[id]`        | Batilisha ufunguo uliosajiliwa                                                                                                                                                                                        |
+| POST   | `/api/v1/registered-keys/[id]/revoke` | Batilisha hatua ya mwisho (athari sawa na DELETE)                                                                                                                                                                     |
+| GET    | `/api/v1/providers/[provider]/limits` | Soma kofia za utoaji za mtoa huduma                                                                                                                                                                                   |
+| PUT    | `/api/v1/providers/[provider]/limits` | Weka vifuniko vya utoaji vya mtoa huduma mwili wa — : `{maxActiveKeys?, dailyIssueLimit?, hourlyIssueLimit?}`                                                                                                         |
+| GET    | `/api/v1/accounts/[id]/limits`        | Soma vikomo vya utoaji wa akaunti                                                                                                                                                                                     |
+| PUT    | `/api/v1/accounts/[id]/limits`        | Weka vifuniko vya utoaji vya akaunti — kama njia ya mtoa huduma                                                                                                                                                       |
 
-**Uthibitishaji:** session/ufunguo wa API wa usimamizi (`requireManagementAuth`) — kizuizi sawa na `/api/keys`: session ya dashibodi, tokeni ya CLI ya ndani, au ufunguo wa API wenye wigo wa `manage`/`admin`; funguo za API za inferensi pekee hupata `403`. Tazama pia `/v1/quotas/check` na `/v1/issues/report`.
+**Uthibitishaji:** usimamizi ufunguo wa session/API (`requireManagementAuth`) — mlinzi sawa na `/api/keys`: kikao cha dashibodi, tokeni ya ndani CLI, au kitufe cha API chenye upeo wa `manage`/`admin` ; funguo za API za inference tu pata `403`. Tazama pia `/v1/quotas/check` na `/v1/issues/report`.
 
 ---
 

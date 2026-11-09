@@ -4,73 +4,66 @@
 
 ---
 
-> **Izvor istine:** `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`, `src/app/api/webhooks/`
-> **Posljednje ažuriranje:** 2026-06-28 — v3.8.40
+> **Izvor istine:** `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`, `src/app/api/webhooks/`**Zadnje ažuriranje:** 2026-06-28 — v3.8.40
 
-OmniRoute može slati HTTP webhookove pri događajima na platformi. Upotrijebite ih za integraciju sa
-Slackom, PagerDutyjem, Datadogom, internim servisima za upozoravanje ili bilo kojim HTTP primateljem.
+OmniRoute može aktivirati HTTP webhookove na događajima platforme. Koristite ih za integraciju sa Slack, PagerDuty, Datadogom, internim servisima za uzbunjivanje ili bilo kojim HTTP prijemnikom.
 
-Dispečer potpisuje svaku isporuku pomoću HMAC-SHA256, ponavlja pokušaje pri privremenim
-pogreškama, prati pouzdanost isporuke za svaki webhook i automatski onemogućuje krajnje točke koje
-nastavljaju otkazivati.
+Dispečer potpisuje svaku isporuku pomoću HMAC-SHA256, ponovno pokušava kod prolaznih kvarova, prati ispravnost isporuke po web-dojavniku i automatski onemogućuje krajnje točke koje stalno ne uspijevaju.
 
 ## Podržani događaji
 
-Tip `WebhookEvent` (`src/lib/webhooks/eventDescriptions.ts`, koristi ga `src/lib/webhookDispatcher.ts`) trenutačno modelira točno četiri događaja:
+Vrsta `WebhookEvent` (`src/lib/webhooks/eventDescriptions.ts`, koristi `src/lib/webhookDispatcher.ts`) trenutno modelira sedam događaja:
 
-| Događaj             | Aktivira se kada                                                            |
-| ------------------- | --------------------------------------------------------------------------- |
-| `request.completed` | Posredovani zahtjev uspješno završi                                         |
-| `request.failed`    | Posredovani zahtjev ne uspije nakon svih ponovnih pokušaja/rezervnih opcija |
-| `quota.exceeded`    | API ključ prijeđe prag proračuna/kvote                                      |
-| `test.ping`         | Sintetički događaj koji koristi testna krajnja točka                        |
+| Događaj                   | Pali kada                                                                                                        |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `request.completed`       | Proxy zahtjev uspješno je dovršen                                                                                |
+| `request.failed`          | Proxy zahtjev ne uspijeva nakon svih retries/fallback                                                            |
+| `quota.exceeded`          | API ključ prelazi budget/quota prag                                                                              |
+| `proxy.set_aside`         | Član proxy skupa izdvaja se nakon opetovanih odbijanja (samo prijelaz)                                           |
+| `proxy.pool.exhausted`    | Svaki član opsega proxy skupa je izdvojen                                                                        |
+| `provider.reset_redeemed` | Automatska primjena bankovnih resetiranja iskoristio je kredit za resetiranje ili resetirao Claude tjednu sesiju |
+| `test.ping`               | Sintetički događaj koji koristi krajnja točka testa                                                              |
 
-Pretplate prihvaćaju doslovnu vrijednost `"*"` za primanje svakog događaja. Nepoznati nazivi događaja
-u `events` zanemaruju se tijekom slanja.
+Pretplate prihvaćaju doslovni `"*"` za primanje svakog događaja. Nazivi nepoznatih događaja u `events` u zanemaruju se u vrijeme slanja.
 
-> Napomena: API dispečera je povezan, ali produkcijska mjesta poziva za neke od
-> događaja koji nisu `test.ping` još se uvode. Provjerite `grep dispatchEvent` kako biste vidjeli
-> koji putovi trenutačno pozivaju dispečer u vašem izdanju.
+> Napomena: dispečerski API je ožičen, ali proizvodne pozivne stranice za neke od događaja koji nisu `test.ping` još uvijek slijeću. Provjerite `grep dispatchEvent` da vidite koji putovi trenutno pozivaju dispečera u vašem izdanju.
 
 ## Arhitektura
 
 ```
-Pozivatelj (rukovatelj, servis, nadzornik)
+Caller (handler, service, monitor)
   dispatchEvent(event, data)            [src/lib/webhookDispatcher.ts]
     -> getEnabledWebhooks()             [src/lib/db/webhooks.ts]
-    -> filtriranje prema webhook.events
-    -> za svako podudaranje (paralelno):
+    -> filter by webhook.events
+    -> for each match (in parallel):
        deliverWebhook(url, payload, secret)
-         izradi korisni sadržaj { event, timestamp, data }
-         potpiši tijelo s HMAC-SHA256 (ako postoji tajna)
-         POST s vremenskim ograničenjem od 10 s
-         ponovi do 3 puta pri pogreškama 5xx / mrežnim pogreškama
+         build payload { event, timestamp, data }
+         sign body with HMAC-SHA256 (if secret present)
+         POST with 10s timeout
+         retry up to 3 times on 5xx / network error
        recordWebhookDelivery(id, status, success)
     -> disableWebhooksWithHighFailures(10)
 ```
 
-Slanje je za pozivatelja tipa „pokreni i zaboravi”: `Promise.allSettled` zanemaruje
-pogreške pojedinačnih webhookova kako jedan neispravan primatelj ne bi mogao blokirati ostale.
+Slanje je za pozivatelja "pokreni i zaboravi": `Promise.allSettled` guta pogreške po web-dojavniku tako da jedan loš primatelj ne može blokirati ostale.
 
-## Potpisivanje HMAC-om
+## Potpisivanje HMAC
 
-Kada webhook ima `secret`, OmniRoute potpisuje JSON tijelo i šalje:
+Kada web-dojavnik ima `secret`, OmniRoute potpisuje JSON tijelo i šalje:
 
 ```
 Content-Type: application/json
 User-Agent: OmniRoute-Webhook/1.0
-X-Webhook-Event: <događaj>
+X-Webhook-Event: <event>
 X-Webhook-Timestamp: <ISO-8601>
-X-Webhook-Signature: sha256=<heksadecimalni HMAC-SHA256(tajna, tijelo)>
+X-Webhook-Signature: sha256=<hex HMAC-SHA256(secret, body)>
 ```
 
-> Nazivi zaglavlja koriste prefiks `X-Webhook-*` (ne `X-OmniRoute-*`). Vrijednost potpisa
-> je `sha256=<hex>` — provjerite cijeli prefiks.
+> Imena zaglavlja koriste `X-Webhook-*` prefiks (ne `X-OmniRoute-*`). Vrijednost potpisa je `sha256=<hex>` — provjerite puni prefiks.
 
-Ako se `createWebhook` pozove bez tajne, DB modul generira jednu
-(`whsec_<48 hex>`) pa su svi webhookovi prema zadanim postavkama potpisani.
+Ako se `createWebhook` pozove bez tajne, DB modul generira tajnu (`whsec_<48 hex>`) tako da su svi web-dojavnici potpisani prema zadanim postavkama.
 
-### Provjera na primatelju
+### Provjera na prijemniku
 
 ```typescript
 import { createHmac, timingSafeEqual } from "node:crypto";
@@ -83,66 +76,57 @@ function verify(rawBody: string, signature: string, secret: string) {
 }
 ```
 
-Uvijek provjeravajte prema **sirovom** tijelu zahtjeva, prije bilo kakvog parsiranja JSON-a.
+Uvijek provjerite prema **sirovo** tijelo zahtjeva, prije bilo kakvog JSON analiziranja.
 
-## Pravila ponovnih pokušaja i neuspjeha
+## Politika ponovnog pokušaja i neuspjeha
 
 `deliverWebhook(url, payload, secret, maxRetries = 3)`:
 
-- Vremensko ograničenje od 10 sekundi po pokušaju (`AbortController`).
-- HTTP 2xx smatra se uspjehom.
-- HTTP 3xx/4xx smatra se konačnim statusom bez ponovnog pokušaja — bilježi se kao isporučeno
-  uz `success = res.ok`.
-- Za HTTP 5xx i mrežne pogreške pokušaj se ponavlja uz eksponencijalno odgađanje:
-  `2^attempt * 1000 ms` (1 s, 2 s, 4 s).
-- Nakon `maxRetries`, isporuka se bilježi kao neuspješna.
-- Svaka isporuka ažurira `last_triggered_at`, `last_status` te poništava
-  ili povećava `failure_count`.
-- Dispečer poziva `disableWebhooksWithHighFailures(10)` nakon svakog slanja svim primateljima,
-  pa se svaki webhook s `failure_count >= 10` automatski onemogućuje.
+- 10 sekundi čekanja po pokušaju (`AbortController`).
+- HTTP 2xx se računa kao uspjeh.
+- HTTP 3xx/4xx računa se kao konačni status bez ponovnog pokušaja — zabilježen kao isporučen sa `success = res.ok`.
+- HTTP 5xx i mrežne pogreške ponovno se pokušavaju s eksponencijalnim odmakom: `2^attempt * 1000 ms` (1s, 2s, 4s).
+- Nakon `maxRetries` isporuka se bilježi kao neuspjela.
+- Svaka isporuka ažurira `last_triggered_at`, `last_status` i poništava ili povećava `failure_count`.
+- Dispečer poziva `disableWebhooksWithHighFailures(10)` nakon svakog fan-outa, tako da je svaki webhook sa `failure_count >= 10` automatski onemogućen.
 
 ## Baza podataka
 
 Tablica `webhooks` (migracija `011_webhooks.sql`):
 
-| Stupac              | Vrsta   | Napomene                                             |
-| ------------------- | ------- | ---------------------------------------------------- |
-| `id`                | TEXT PK | UUID                                                 |
-| `url`               | TEXT    | Odredišni URL                                        |
-| `events`            | TEXT    | JSON polje; zadano `["*"]`                           |
-| `secret`            | TEXT    | HMAC tajna (automatski generirana ako nije navedena) |
-| `enabled`           | INT     | 0/1; zadano 1                                        |
-| `description`       | TEXT    | Neobavezna oznaka čitljiva ljudima                   |
-| `created_at`        | TEXT    | `datetime('now')`                                    |
-| `last_triggered_at` | TEXT    | Ažurira se pri svakom pokušaju isporuke              |
-| `last_status`       | INT     | HTTP status posljednjeg pokušaja (0 = mreža)         |
-| `failure_count`     | INT     | Vraća se na 0 pri uspjehu, +1 pri neuspjehu          |
+| stupac              | Tip     | Bilješke                                                 |
+| ------------------- | ------- | -------------------------------------------------------- |
+| `id`                | TEXT PK | UUID                                                     |
+| `url`               | TEXT    | Odredište URL                                            |
+| `events`            | TEXT    | JSON niz; zadani `["*"]`                                 |
+| `secret`            | TEXT    | HMAC tajna (automatski generirana ako nije dana)         |
+| `enabled`           | INT     | 0/1; zadano je 1                                         |
+| `description`       | TEXT    | Izborna ljudska oznaka                                   |
+| `created_at`        | TEXT    | `datetime('now')`                                        |
+| `last_triggered_at` | TEXT    | Ažurira se pri svakom pokušaju isporuke                  |
+| `last_status`       | INT     | HTTP status posljednjeg pokušaja (0 = mreža)             |
+| `failure_count`     | INT     | Resetira na 0 u slučaju uspjeha, + 1 u slučaju neuspjeha |
 
-Povijest isporuka pohranjuje se u namjenskoj tablici `webhook_deliveries`
-(migracija `069_webhook_deliveries.sql`, zapisuje se putem
-`src/lib/db/webhookDeliveries.ts::insertDelivery` pri svakom pokušaju), uz
-zbirne brojače u retku tablice `webhooks`. Metapodaci o vrsti (Slack / Discord /
-Telegram / prilagođeni transformatori korisnog sadržaja) dodani su migracijom `070_webhooks_kind_metadata.sql`.
+Povijest isporuke čuva se u namjenskoj tablici `webhook_deliveries` (migracija `069_webhook_deliveries.sql`, ispisana putem `src/lib/db/webhookDeliveries.ts::insertDelivery` pri svakom pokušaju), uz skupne brojače u retku `webhooks`. Metapodatke vrste (Slack / Discord / Telegram / prilagođeni transformatori nosivosti) dodao je `070_webhooks_kind_metadata.sql`.
 
 ## REST API
 
-Sve krajnje točke zahtijevaju autentifikaciju za upravljanje (`requireManagementAuth`).
+Sve krajnje točke zahtijevaju autorizaciju upravljanja (`requireManagementAuth`).
 
-| Krajnja točka                   | Metoda | Opis                                                |
-| ------------------------------- | ------ | --------------------------------------------------- |
-| `/api/webhooks`                 | GET    | Popis webhookova (tajne su maskirane)               |
-| `/api/webhooks`                 | POST   | Stvaranje webhooka                                  |
-| `/api/webhooks/[id]`            | GET    | Pojedinosti webhooka (cijela tajna)                 |
-| `/api/webhooks/[id]`            | PUT    | Ažuriranje polja                                    |
-| `/api/webhooks/[id]`            | DELETE | Uklanjanje                                          |
-| `/api/webhooks/[id]/test`       | POST   | Slanje događaja `test.ping` (bez ponovnih pokušaja) |
-| `/api/webhooks/[id]/deliveries` | GET    | Nedavni pokušaji isporuke za jedan webhook          |
-| `/api/webhooks/validate-url`    | POST   | Prethodna provjera URL-a (zaštita od SSRF-a)        |
+| Krajnja točka                   | metoda | Opis                                            |
+| ------------------------------- | ------ | ----------------------------------------------- |
+| `/api/webhooks`                 | GET    | Popis webdojavnika (maskirane tajne)            |
+| `/api/webhooks`                 | POST   | Stvorite web-dojavnik                           |
+| `/api/webhooks/[id]`            | GET    | Pojedinosti o web-dojavniku (potpuna tajna)     |
+| `/api/webhooks/[id]`            | PUT    | Ažurirajte polja                                |
+| `/api/webhooks/[id]`            | DELETE | Ukloniti                                        |
+| `/api/webhooks/[id]/test`       | POST   | Ispali `test.ping` (bez ponovnih pokušaja)      |
+| `/api/webhooks/[id]/deliveries` | GET    | Nedavni pokušaji isporuke za jedan web-dojavnik |
+| `/api/webhooks/validate-url`    | POST   | URL validacija prije leta (SSRF čuvar)          |
 
-`GET /api/webhooks` maskira tajnu u obliku `<prvih 10 znakova>...` kako bi se izbjeglo njezino
-otkrivanje na stranicama s popisima. Upotrijebite GET za `[id]` kada vam je tajna doista potrebna.
+`GET /api/webhooks` skriva tajnu `<first 10 chars>...` u kako bi se izbjeglo curenje na stranicama popisa. Koristite `[id]` GET kada stvarno trebate tajnu.
 
-### Stvaranje webhooka
+### Stvorite web-dojavnik
 
 ```bash
 curl -X POST http://localhost:20128/api/webhooks \
@@ -156,33 +140,29 @@ curl -X POST http://localhost:20128/api/webhooks \
   }'
 ```
 
-Ako je `secret` izostavljen, poslužitelj generira tajnu `whsec_<hex>` i vraća
-je u odgovoru.
+Ako je `secret` izostavljen, poslužitelj generira `whsec_<hex>` tajnu i vraća je u odgovoru.
 
-### Testiranje webhooka
+### Testiraj webdojavnik
 
 ```bash
 curl -X POST http://localhost:20128/api/webhooks/<id>/test \
   -H "Cookie: auth_token=..."
 ```
 
-Vraća `{ delivered, status, error }`. Ne izvode se ponovni pokušaji — korisno za
-brzu provjeru prihvaća li primatelj korisni sadržaj i potpis.
+Vraća `{ delivered, status, error }`. Nema ponovnih pokušaja. — je koristan za brzu provjeru prihvaća li primatelj korisni teret i potpis.
 
 ## Nadzorna ploča
 
-Stranica nadzorne ploče na `/dashboard/webhooks` (pogledajte
-`src/app/(dashboard)/dashboard/webhooks/page.tsx`) omogućuje:
+Stranica nadzorne ploče na `/dashboard/webhooks` (vidi `src/app/(dashboard)/dashboard/webhooks/page.tsx`) pruža:
 
-- Stvaranje/uređivanje webhookova s izbornikom događaja
-- Pokazatelj statusa (aktivan / neaktivan / s pogreškom) na temelju vrijednosti `enabled`,
-  `failure_count` i `last_status`
-- Testnu isporuku jednim klikom
-- Ručno uključivanje/isključivanje
+- Create/edit web-dojavnici s biračem događaja
+- Indikator statusa (aktivno/neaktivno/pogreška) na temelju `enabled`, `failure_count` i `last_status`
+- Isporuka testa jednim klikom
+- Ručni enable/disable prekidač
 
-## Primjeri korisnog sadržaja
+## Primjeri nosivosti
 
-### request.completed
+### zahtjev.dovršeno
 
 ```json
 {
@@ -208,35 +188,25 @@ Stranica nadzorne ploče na `/dashboard/webhooks` (pogledajte
   "event": "test.ping",
   "timestamp": "2026-05-13T20:32:00.000Z",
   "data": {
-    "message": "Testna isporuka webhooka iz OmniRoutea",
+    "message": "Test webhook delivery from OmniRoute",
     "webhookId": "<uuid>"
   }
 }
 ```
 
-Strukture polja za događaje koji nisu `test.ping` definirane su mjestima poziva koja ih
-emitiraju; objekt `data` smatrajte kompatibilnim s budućim verzijama (dodajte polja, nemojte se oslanjati na
-njihovu odsutnost).
+Oblici polja za događaje koji nisu `test.ping` definirani su pozivnim mjestima koja ih emitiraju; tretirajte `data` objekt kao kompatibilan prema naprijed (dodajte polja, ne ovisite o odsutnosti).
 
-## Najbolje prakse
+## Najbolji primjeri iz prakse
 
-- **Provjerite potpis pri svakoj isporuci** u odnosu na neobrađeno tijelo — time se sprječavaju
-  lažirani POST zahtjevi od bilo koga tko pogodi URL vašeg webhooka.
-- **Odgovorite statusom 2xx unutar ~5 sekundi** — dispečer prekida čekanje nakon 10 s. Spori
-  primatelji trošit će ponovne pokušaje i povećavati `failure_count`.
-- **Učinite rukovatelje idempotentnima** — ponovni pokušaji i semantika isporuke najmanje jednom
-  znače da su duplikati mogući.
-- **Pretplaćujte se minimalno** — navedite samo događaje koje doista obrađujete; `"*"` će
-  povećati troškove na primateljima koje ne kontrolirate.
-- **Pratite `failure_count`** — krajnje točke automatski se onemogućuju nakon 10 uzastopnih
-  neuspjeha; ponovno ih postavite pozivom `PUT /api/webhooks/[id]` s `enabled: true`
-  nakon ispravka primatelja.
-- **Povremeno rotirajte tajne** — pošaljite novi `secret` metodom `PUT`, implementirajte novu vrijednost
-  na primatelju i potvrdite je putem testne krajnje točke.
+- **Ovjerite potpis na svakoj dostavi** protiv sirovog tijela — sprječava lažni POSTs od bilo koga tko pogodi vaš webhook URL.
+- **Odgovorite 2xx unutar ~ 5 sekundi** — dispečer istekne na 10 s. Spori primatelji će jesti ponovne pokušaje i napuhati `failure_count`.
+- **Učinite rukovatelje idempotentnima** — ponovni pokušaji i semantika isporuke barem jednom znače da su mogući duplikati.
+- **Pretplatite se minimalno** — navodi samo događaje koje stvarno konzumirate; `"*"` će povećati troškove na prijemnicima koje ne kontrolirate.
+- **Gledajte `failure_count`** — krajnje točke automatski se onemogućuju pri 10 uzastopnih kvarova; resetirati pozivanjem `PUT /api/webhooks/[id]` sa `enabled: true` nakon popravljanja prijemnika.
+- **Povremeno mijenjajte tajne** — `PUT` novi `secret`, implementirajte novu vrijednost na prijamniku i potvrdite putem testne krajnje točke.
 
-## Pogledajte i
+## Vidi također
 
-- [API_REFERENCE.md](../reference/API_REFERENCE.md) — cjelovito sučelje API-ja za upravljanje
-- [RESILIENCE_GUIDE.md](../architecture/RESILIENCE_GUIDE.md) — semantika prekidača strujnog kruga / razdoblja čekanja
-  iza neuspjeha pružatelja prikazanih putem `request.failed`
+- [API_REFERENCE.md](../reference/API_REFERENCE.md) — potpuno upravljanje API površinom
+- [RESILIENCE_GUIDE.md](../architecture/RESILIENCE_GUIDE.md) — prekidač/semantika hlađenja koja stoji iza kvarova pružatelja isplivanih putem `request.failed`
 - Izvor: `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`

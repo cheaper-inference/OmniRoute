@@ -1008,12 +1008,12 @@ A CLI a `base_url + /responses` címet WebSocketté alakítja, az OmniRoute pedi
 
 ## Kvóták és problémák jelentése
 
-| Metódus | Elérési út          | Leírás                                                                                               |
-| ------- | ------------------- | ---------------------------------------------------------------------------------------------------- |
-| GET     | `/v1/quotas/check`  | Kvóta előzetes ellenőrzése egy `provider` + `accountId` pároshoz regisztrált kulcs kiadása előtt     |
-| POST    | `/v1/issues/report` | Kvóta- vagy kulcskibocsátási hiba jelentése a GitHub felé (a `GITHUB_ISSUES_REPO` + token szükséges) |
+| Módszer | Útvonal             | Leírás                                                                                    |
+| ------- | ------------------- | ----------------------------------------------------------------------------------------- |
+| GET     | `/v1/quotas/check`  | A regisztrált kulcs kiadása előtt ellenőrizze a `provider` + `accountId` kvótáját         |
+| POST    | `/v1/issues/report` | quota/key kibocsátási hiba bejelentése a GitHub ( `GITHUB_ISSUES_REPO` + token szükséges) |
 
-**Hitelesítés:** Bearer API-kulcs (`isAuthenticated`).
+**Auth:** `/v1/quotas/check` egy Bearer API kulcsot (`isAuthenticated`) vesz fel. `/v1/issues/report` csak felügyeleti (`requireManagementAuth`), mint `/api/v1/registered-keys`: egy műszerfali munkamenet, a helyi CLI token vagy egy API kulcs `manage`/`admin` hatókörrel; A csak következtetést biztosító API kulcsok `403` kapnak.
 
 ### Kvótamunkamenet helyreállítása (opt-in)
 
@@ -1824,19 +1824,23 @@ Kimenő webhook-előfizetések az OmniRoute eseményeihez (kérés befejezése, 
 
 ---
 
-## Regisztrált kulcsok (automatikus kezelés)
+## Regisztrált kulcsok (automatikus felügyelet)
 
-Az automatikus kulcskezelő alrendszer használja API-kulcsok kibocsátására és rotálására egy háttérszolgáltató/-fiók ellenében, napi/óránkénti kvótákkal.
+Az automatikus kulcskezelési alrendszer API kulcsok kibocsátására és elforgatására használja a háttér- provider/account vel szemben, daily/hourly kvótákkal.
 
-| Method | Path                                  | Description                                                                                                                                                                                                                   |
-| ------ | ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/api/v1/registered-keys`             | Regisztrált kulcsok listázása (csak a maszkolt előtag)                                                                                                                                                                        |
-| POST   | `/api/v1/registered-keys`             | Új regisztrált kulcs kibocsátása — törzs: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. A nyers kulcsot **egyszer** adja vissza. Kvótaelutasítás esetén `429` értéket ad vissza. |
-| GET    | `/api/v1/registered-keys/[id]`        | Egy regisztrált kulcs metaadatainak lekérése (nyers kulcsanyag nélkül)                                                                                                                                                        |
-| DELETE | `/api/v1/registered-keys/[id]`        | Regisztrált kulcs visszavonása                                                                                                                                                                                                |
-| POST   | `/api/v1/registered-keys/[id]/revoke` | Explicit visszavonási végpont (ugyanaz a hatása, mint a DELETE-nek)                                                                                                                                                           |
+| Módszer | Útvonal                               | Leírás                                                                                                                                                                                                                  |
+| ------- | ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET     | `/api/v1/registered-keys`             | Regisztrált kulcsok listázása (csak maszkolt előtag)                                                                                                                                                                    |
+| POST    | `/api/v1/registered-keys`             | Új regisztrált kulcs — törzs kiadása: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Visszaadja a nyers kulcsot **egyszer** . Visszaküldi `429` a kvóta elutasítása esetén. |
+| GET     | `/api/v1/registered-keys/[id]`        | Regisztrált kulcs metaadatainak lekérése (nincs nyersanyag)                                                                                                                                                             |
+| DELETE  | `/api/v1/registered-keys/[id]`        | Regisztrált kulcs visszavonása                                                                                                                                                                                          |
+| POST    | `/api/v1/registered-keys/[id]/revoke` | Explicit visszavonási végpont (ugyanaz a hatás, mint DELETE)                                                                                                                                                            |
+| GET     | `/api/v1/providers/[provider]/limits` | Olvassa el a szolgáltató kibocsátási felső határait                                                                                                                                                                     |
+| PUT     | `/api/v1/providers/[provider]/limits` | Állítsa be a szolgáltató kibocsátási felső határait — törzs: `{maxActiveKeys?, dailyIssueLimit?, hourlyIssueLimit?}`                                                                                                    |
+| GET     | `/api/v1/accounts/[id]/limits`        | Olvassa el a számla kibocsátási felső határát                                                                                                                                                                           |
+| PUT     | `/api/v1/accounts/[id]/limits`        | Állítsa be a számla kibocsátási felső határait — törzsét, mint a szolgáltató útvonalát                                                                                                                                  |
 
-**Hitelesítés:** kezelési munkamenet/API-kulcs (`requireManagementAuth`) — ugyanaz az ellenőrzés, mint a `/api/keys` esetében: dashboard-munkamenet, helyi CLI-token vagy `manage`/`admin` hatókörrel rendelkező API-kulcs; csak következtetésre használható API-kulcsok `403` hibát kapnak. Lásd még: `/v1/quotas/check` és `/v1/issues/report`.
+**Auth:** menedzsment session/API kulcs (`requireManagementAuth`) — ugyanaz, mint `/api/keys`: egy műszerfali munkamenet, a helyi CLI token vagy egy API kulcs `manage`/`admin` hatókörrel; A csak következtetést biztosító API kulcsok `403` kapnak. Lásd még: `/v1/quotas/check` és `/v1/issues/report`.
 
 ---
 

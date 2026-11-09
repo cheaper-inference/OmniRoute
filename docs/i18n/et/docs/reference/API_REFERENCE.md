@@ -1010,12 +1010,12 @@ ChatGPT tagastab `codex.rate_limits` + `response.created` ning voogedastab lõpe
 
 ## Kvootide ja probleemide aruandlus
 
-| Meetod | Tee                 | Kirjeldus                                                                                                |
-| ------ | ------------------- | -------------------------------------------------------------------------------------------------------- |
-| GET    | `/v1/quotas/check`  | Kvoodi eelvalideerimine kombinatsioonile `provider` + `accountId` enne registreeritud võtme väljastamist |
-| POST   | `/v1/issues/report` | Kvoodi või võtme väljastamise tõrke teatamine GitHubile (nõuab `GITHUB_ISSUES_REPO` + tokenit)           |
+| meetod | Tee                 | Kirjeldus                                                                                       |
+| ------ | ------------------- | ----------------------------------------------------------------------------------------------- |
+| GET    | `/v1/quotas/check`  | Enne registreeritud võtme väljastamist eelkinnitage `provider` + `accountId` kvoot              |
+| POST   | `/v1/issues/report` | Teatage quota/key väljastamise ebaõnnestumisest GitHub (vajalik on `GITHUB_ISSUES_REPO` + märk) |
 
-**Autentimine:** Bearer API-võti (`isAuthenticated`).
+**Auth:** `/v1/quotas/check` võtab kandja API võtme (`isAuthenticated`). `/v1/issues/report` on ainult halduse jaoks mõeldud (`requireManagementAuth`), nagu `/api/v1/registered-keys`: armatuurlaua seanss, kohalik CLI luba või `manage`/`admin` ulatusega API võti; ainult järelduste tegemiseks mõeldud API võtmed saavad `403`.
 
 ### Kvoodiseansi taastamine (valikuline)
 
@@ -1819,19 +1819,23 @@ OmniRoute'i sündmuste (päringu lõpuleviimine, kvoodi ammendumine, võtme rota
 
 ---
 
-## Registreeritud võtmed (automaatne haldus)
+## Registreeritud võtmed (automaatne haldamine)
 
-Kasutatakse automaatse võtmehalduse alamsüsteemis API-võtmete väljastamiseks ja rotatsiooniks varupakkuja/-konto vastu, koos päeva- ja tunnipõhiste kvootidega.
+Kasutatakse automaatse võtmehalduse alamsüsteemis API võtmete väljastamiseks ja pööramiseks daily/hourly -kvootidega vastu provider/account d.
 
-| Meetod | Tee                                   | Kirjeldus                                                                                                                                                                                                                |
-| ------ | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| GET    | `/api/v1/registered-keys`             | Loetleb registreeritud võtmed (näidatakse ainult maskeeritud prefiksit)                                                                                                                                                  |
-| POST   | `/api/v1/registered-keys`             | Väljastab uue registreeritud võtme — keha: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Tagastab töötlemata võtme **üks kord**. Kvoodist keeldumise korral tagastab `429`. |
-| GET    | `/api/v1/registered-keys/[id]`        | Hangib registreeritud võtme metaandmed (töötlemata võtit ei tagastata)                                                                                                                                                   |
-| DELETE | `/api/v1/registered-keys/[id]`        | Tühistab registreeritud võtme                                                                                                                                                                                            |
-| POST   | `/api/v1/registered-keys/[id]/revoke` | Selgesõnaline tühistamise lõpp-punkt (sama toime nagu DELETE)                                                                                                                                                            |
+| meetod | Tee                                   | Kirjeldus                                                                                                                                                                                                              |
+| ------ | ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/v1/registered-keys`             | Registreeritud võtmete loend (ainult maskeeritud eesliide)                                                                                                                                                             |
+| POST   | `/api/v1/registered-keys`             | Väljasta uus registreeritud võti — keha: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Tagastab töötlemata võtme **üks kord** . Tagastab kvoodist keeldumise kohta `429`. |
+| GET    | `/api/v1/registered-keys/[id]`        | Registreeritud võtme metaandmete toomine (toormaterjali pole)                                                                                                                                                          |
+| DELETE | `/api/v1/registered-keys/[id]`        | Registreeritud võtme tühistamine                                                                                                                                                                                       |
+| POST   | `/api/v1/registered-keys/[id]/revoke` | Selgesõnaline tühistamise lõpp-punkt (sama efekt kui DELETE)                                                                                                                                                           |
+| GET    | `/api/v1/providers/[provider]/limits` | Lugege teenusepakkuja väljastamise piirmäärasid                                                                                                                                                                        |
+| PUT    | `/api/v1/providers/[provider]/limits` | Määrake teenusepakkuja väljastamise ülempiirid — body: `{maxActiveKeys?, dailyIssueLimit?, hourlyIssueLimit?}`                                                                                                         |
+| GET    | `/api/v1/accounts/[id]/limits`        | Lugege konto väljastamise piirmäärasid                                                                                                                                                                                 |
+| PUT    | `/api/v1/accounts/[id]/limits`        | Määrake konto väljastamise ülempiirid — sama sisu kui teenusepakkuja marsruudil                                                                                                                                        |
 
-**Autentimine:** haldussessioon/API-võti (`requireManagementAuth`) — sama kontroll nagu `/api/keys` puhul: armatuurlaua sessioon, lokaalne CLI-luba või `manage`/`admin` ulatusega API-võti; ainult järeldamiseks mõeldud API-võtmed saavad vastuseks `403`. Vt ka `/v1/quotas/check` ja `/v1/issues/report`.
+**Auth:** juhtimine session/API võti (`requireManagementAuth`) — sama valvur nagu `/api/keys`: armatuurlaua seanss, kohalik CLI märk või API võti koos `manage`/`admin` ulatusega; ainult järelduste tegemiseks mõeldud API võtmed saavad `403`. Vaata ka `/v1/quotas/check` ja `/v1/issues/report`.
 
 ---
 

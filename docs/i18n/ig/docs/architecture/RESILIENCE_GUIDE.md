@@ -166,6 +166,45 @@ Nchedo regression: `tests/unit/claude-low-priority-mode.test.ts`,
 `tests/unit/claude-limit-reset.test.ts`,
 `tests/unit/claude-low-priority-executor.test.ts`.
 
+### Tinyegharịa ntọala ụlọ akụ na-akpaghị aka
+
+**Oke:** Njikọ Codex na Claude (OAuth) njikọ.**Ịbanye** : agbanyụrụ ntọala `bankedResetAutoApply` yana na ọnọdụ `dry-run` na ndabara (Ntọala → AI → Auto-tinye ụlọ akụ).
+
+**Ebumnuche:** na-emefu resets bank n'onwe ha mgbe akaụntụ dara mgbidi ojiji, kama ichere onye ọrụ ka ọ pịa "Napụta" na ibe oke ndị na-enye.
+
+| Ụdị kredit (`creditTypes`) | Ihe agbapụtara                            | Ebe ọ na-agba ọsọ                                           |
+| -------------------------- | ----------------------------------------- | ----------------------------------------------------------- |
+| `codexCredits`             | Codex tọgharịa kredit                     | ọrụ ndabere, ọ bụla 60 s                                    |
+| `claudeCredits`            | Enyemaka ụlọ akụ Claude (kredit `GRANT` ) | ọrụ ndabere, ọ bụla 60 s                                    |
+| `claudeSessionReset`       | Ntọgharị oke nnọkọ izu izu Claude (n'elu) | ụzọ arịrịọ, site n'otu amụma ahụ ka ntụgharị akaụntụ ọ bụla |
+
+**Mmejuputa:**
+
+- Mkpebi dị ọcha (otu iwu edobere maka ụzọ abụọ): `src/lib/usage/bankedResetPolicy.ts::decideBankedReset()`
+- Ọrụ ndabere: `src/lib/services/bankedResetAutoApply.ts` (malitere na `src/instrumentation-node.ts`)
+- Ọnụ ụzọ arịrịọ Claude : `src/lib/usage/claudeSessionResetPolicy.ts`, edebanye aha site na `setClaudeLimitResetPolicy()` na `open-sse/services/claudeLimitReset.ts`
+- Akụkọ ihe mere eme, okpu na webhook: `src/lib/usage/bankedResetAudit.ts`
+- Akụkọ ihe mere eme API: `GET /api/settings/banked-reset-auto/history?limit=50` (auth njikwa)
+
+**Usoro mkpebi** (Iwu nke mbụ na-ada ada bụ ihe e dekọrọ):
+
+1. Agbanyụọ, ụdị kredit, ma ọ bụ akaụntụ agbasaghị (`accountScope` `all` / `selected` gbakwunyere maapụ `connections` otu akaụntụ).
+2. N'èzí usoro UTC nhọrọ (`startHourUtc` > `endHourUtc` gafere etiti abalị).
+3. Okpu n'ime awa 24 gara aga: `maxPerAccountPerDay` (1), `maxPerDay` (3), na `minSpacingMinutes` (30) n'etiti mgbapụta abụọ ọ bụla.
+4. Mkpali: windo `session` ma ọ bụ `weekly` nwere mgbidi (gụọ site na `getQuotaWindowStatus().reachedThreshold`, ọ bụghị `isAccountQuotaExhausted()`, nke na-akọ naanị akaụntụ na windo ọ bụla ejiri), ma ọ bụ kredit na-agwụ n'ime `expiringCreditHours` (24) na akaụntụ ejirila `expiringCreditMinUsedPercent` (50).
+5. Nchedo nrụpụta eke: gaa n'ihu mgbe windo elekere ise nwere mgbidi na-emegharị n'ime `sessionResetGuardMinutes` (90), ma ọ bụ windo nwere mgbidi kwa izu n'ime `weeklyResetGuardHours` (12).
+6. Ala kwa izu: kwugharịa nrụpụta elekere 5 mgbe izu ụka fọdụrụ dị n'okpuru `weeklyFloorPercent` (10).
+7. Ụdị `last-resort` : kwupụ ebe akaụntụ ọzọ dị n'okirikiri nke otu onye na-eweta nwere opekata mpe `poolHeadroomPercent` (10) hapụrụ na windo abụọ ahụ. kredit na-agwụ ike na-akpalite nke a.
+8. `dry-run` na-edekọ ahịrị wee gbapụta ihe ọ bụla; `last-resort` na `eager` gbapụta.
+
+Data oke na-efu efu anaghị emeghe mgbapụta: oge ntọgharị amabeghị ma ọ bụ mwụda ojiji kwa izu.
+
+**Tọgharia nnọkọ Claude :** na njirimara kwụsịrị, ma ọ bụ `claudeSessionReset` kwụsịrị, ntụgharị `autoLimitReset` nke ọ bụla na-ekpebi kpọmkwem dịka ọ dị na mbụ. Na ha abụọ na-aga n'ihu, njirimara ahụ na-edochi mkpagharị akaụntụ ọ bụla: akaụntụ dị n'ime ya nwere ike ịza naanị mgbe iwu na-enye ya ohere, na na ọnọdụ `dry-run` enweghị nkwupụta ọ bụla.
+
+**Nchekwa:** ọrụ ahụ na-agbapụta n'ọtụtụ otu kredit kwa akara, kpebie tupu edepụta kredit (a naghị edepụta akaụntụ awụpụ), na-eji igodo idempotency `auto-reset:<connectionId>:<yyyy-mm-dd>:<n>`, wee kwado akaụntụ maka 1 h mgbe ndepụta dara ada ma ọ bụ mgbapụta. A na-edere mkpebi mgbapụta ọ bụla, ọdịda na akọrọ akọrọ na `audit_log` (`action: "bankedReset.redeem"`, enweghị akara ngosi ma ọ bụ kredit ids); A na-agụ okpu ndị ahụ site na ahịrị ndị ahụ, ya mere ha na-adị ndụ malitegharịa. Mgbapụta ndị na-aga nke ọma na-agbakwa webhook `provider.reset_redeemed` ọkụ.
+
+Ndị nche mgbagha: `tests/unit/banked-reset-policy.test.ts`, `tests/unit/banked-reset-auto-apply.test.ts`, `tests/unit/claude-limit-reset-policy-gate.test.ts`, `tests/unit/banked-reset-history-route.test.ts`.
+
 ### Mmasị nnọkọ (#7274)
 
 **Oke:** otu nnọkọ client (`X-Session-Id` / `x-codex-session-id` / `x-omniroute-session` header) a kpọgidere n’otu njikọ, maka **provider ọ bụla**.

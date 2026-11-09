@@ -200,6 +200,45 @@ conexiune** (Editare conexiune → secțiunea Claude → `lowPriorityMode` / `au
 Protecții de regresie: `tests/unit/claude-low-priority-mode.test.ts`,
 `tests/unit/claude-limit-reset.test.ts`, `tests/unit/claude-low-priority-executor.test.ts`.
 
+### Aplicați automat resetările bancare
+
+**Domeniu de aplicare:** Conexiuni cu abonament Codex și Claude (OAuth).**Înscrieți-vă** : setarea `bankedResetAutoApply` este dezactivată și în modul `dry-run` în mod implicit (Setări → AI → Aplicare automată a resetărilor bancare).
+
+**Scop:** cheltuiește resetările bancare pe cont propriu atunci când un cont lovește un perete de utilizare, în loc să aștepți ca un operator să apese „Valorați” pe pagina Limitele furnizorului.
+
+| Tip de credit (`creditTypes`) | Ceea ce este răscumpărat                                   | Unde rulează                                                    |
+| ----------------------------- | ---------------------------------------------------------- | --------------------------------------------------------------- |
+| `codexCredits`                | Codex resetează creditele                                  | job de fundal, la fiecare 60 de secunde                         |
+| `claudeCredits`               | Granturi bancare Claude (credite `GRANT` )                 | job de fundal, la fiecare 60 de secunde                         |
+| `claudeSessionReset`          | Resetare săptămânală a limitei de sesiune Claude (mai sus) | calea cererii, prin aceeași politică ca și comutatorul per cont |
+
+**Implementare:**
+
+- Decizie pură (un set de reguli pentru ambele căi): `src/lib/usage/bankedResetPolicy.ts::decideBankedReset()`
+- Lucrări de fundal: `src/lib/services/bankedResetAutoApply.ts` (început în `src/instrumentation-node.ts`)
+- Claude request-path gate: `src/lib/usage/claudeSessionResetPolicy.ts`, înregistrată prin `setClaudeLimitResetPolicy()` în `open-sse/services/claudeLimitReset.ts`
+- Istoric, limite și webhook: `src/lib/usage/bankedResetAudit.ts`
+- Istoric API: `GET /api/settings/banked-reset-auto/history?limit=50` (auth management)
+
+**Ordin de decizie** (prima regulă eșuată este motivul înregistrat):
+
+1. Funcție dezactivată, tip de credit dezactivat sau cont în afara domeniului de aplicare (`accountScope` `all` / `selected` plus harta `connections` per cont).
+2. În afara programului opțional UTC (`startHourUtc` > `endHourUtc` traversează miezul nopții).
+3. Limite în ultimele 24 de ore: `maxPerAccountPerDay` (1), `maxPerDay` (3) și `minSpacingMinutes` (30) între oricare două răscumpărări.
+4. Declanșator: o fereastră `session` sau `weekly` cu perete (citit din `getQuotaWindowStatus().reachedThreshold`, nu `isAccountQuotaExhausted()`, care raportează doar un cont cu fiecare fereastră cheltuită) sau un credit care expiră în `expiringCreditHours` (24) pe un cont care a folosit cel puțin `expiringCreditMinUsedPercent` (50).
+5. Apărător cu resetare naturală: săriți când fereastra cu pereți de 5 ore se resetează în `sessionResetGuardMinutes` (90) sau fereastra săptămânală cu pereți în `weeklyResetGuardHours` (12).
+6. Etajul săptămânal: sări peste o resetare de 5 ore când rămâne săptămânal este sub `weeklyFloorPercent` (10).
+7. Modul `last-resort` : săriți în timp ce un alt cont din domeniul de aplicare al aceluiași furnizor are cel puțin `poolHeadroomPercent` (10) rămas în ambele ferestre. Declanșatoarele de credit care expiră ocolesc acest lucru.
+8. `dry-run` înregistrează un rând și nu răscumpără nimic; `last-resort` și `eager` răscumpără.
+
+Lipsa datelor de cotă nu deblochează niciodată o răscumpărare: o oră de resetare necunoscută sau o utilizare săptămânală omisă.
+
+**Resetarea sesiunii Claude :** cu funcția dezactivată sau `claudeSessionReset` dezactivată, comutatorul `autoLimitReset` per cont decide exact ca înainte. Cu ambele activate, funcția înlocuiește comutarile per cont: un cont în domeniu poate revendica numai atunci când politica o permite, iar în modul `dry-run` nu se face nicio revendicare.
+
+**Siguranţă:** jobul valorifică cel mult un credit pe bifă, decide înainte de a lista credite (un cont omis nu este niciodată listat), folosește cheile de idempotence `auto-reset:<connectionId>:<yyyy-mm-dd>:<n>` și respinge un cont timp de 1 oră după o listare sau o răscumpărare eșuată. Fiecare decizie de răscumpărare, de eșec și de executare în mod uscat este scrisă la `audit_log` (`action: "bankedReset.redeem"`, fără simboluri sau coduri de credit); limitele sunt numărate din acele rânduri, astfel încât să supraviețuiască repornirilor. Răscumpărările reușite declanșează, de asemenea, webhook-ul `provider.reset_redeemed`.
+
+Aparate de regresie: `tests/unit/banked-reset-policy.test.ts`, `tests/unit/banked-reset-auto-apply.test.ts`, `tests/unit/claude-limit-reset-policy-gate.test.ts`, `tests/unit/banked-reset-history-route.test.ts`.
+
 ### Afinitatea sesiunii (#7274)
 
 **Domeniu:** o sesiune client (`X-Session-Id` / `x-codex-session-id` /

@@ -951,14 +951,14 @@ CLI `base_url + /responses` manzilini WebSocket’ga yangilaydi va OmniRoute uni
 
 ---
 
-## Kvotalar va muammolar haqida hisobot berish
+## Kvotalar va muammolar haqida hisobot
 
-| Usul | Yo‘l                | Tavsif                                                                                                     |
-| ---- | ------------------- | ---------------------------------------------------------------------------------------------------------- |
-| GET  | `/v1/quotas/check`  | Ro‘yxatdan o‘tkazilgan kalitni berishdan oldin `provider` + `accountId` uchun kvotani oldindan tekshirish  |
-| POST | `/v1/issues/report` | GitHub’ga kvota/kalit berishdagi xatolik haqida xabar berish (`GITHUB_ISSUES_REPO` + token talab qilinadi) |
+| Usul | Yo'l                | Tavsif                                                                                                  |
+| ---- | ------------------- | ------------------------------------------------------------------------------------------------------- |
+| GET  | `/v1/quotas/check`  | Roʻyxatdan oʻtgan kalitni chiqarishdan oldin `provider` + `accountId` uchun kvotani oldindan tasdiqlang |
+| POST | `/v1/issues/report` | quota/key emissiyasi xatosi haqida GitHub xabar bering ( `GITHUB_ISSUES_REPO` + tokeni talab qilinadi)  |
 
-**Autentifikatsiya:** Bearer API kaliti (`isAuthenticated`).
+**Muallif:** `/v1/quotas/check` Bearer API kalitini (`isAuthenticated`) oladi. `/v1/issues/report` faqat boshqaruv uchun mo'ljallangan (`requireManagementAuth`), masalan, `/api/v1/registered-keys`: asboblar paneli seansi, mahalliy CLI tokeni yoki `manage`/`admin` qamroviga ega API kaliti; faqat xulosa chiqarish uchun API kalitlari `403` oladi.
 
 ### Kvota sessiyasini tiklash (ixtiyoriy)
 
@@ -1768,19 +1768,23 @@ OmniRoute hodisalari (so‘rov yakunlanishi, kvota tugashi, kalitni almashtirish
 
 ---
 
-## Ro‘yxatdan o‘tkazilgan kalitlar (avtomatik boshqaruv)
+## Ro'yxatdan o'tgan kalitlar (avtomatik boshqaruv)
 
-Avtomatik kalitlarni boshqarish quyi tizimi tomonidan zaxira provayder/hisobga qarshi API kalitlarini chiqarish va almashtirish, shuningdek kunlik/soatlik kvotalarni boshqarish uchun foydalaniladi.
+Avtomatik kalitlarni boshqarish quyi tizimi tomonidan daily/hourly kvotalari bilan qo'llab-quvvatlanadigan provider/account ga qarshi API kalitlarini chiqarish va aylantirish uchun foydalaniladi.
 
-| Method | Path                                  | Description                                                                                                                                                                                                                       |
-| ------ | ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/api/v1/registered-keys`             | Ro‘yxatdan o‘tkazilgan kalitlar ro‘yxati (faqat niqoblangan prefiks)                                                                                                                                                              |
-| POST   | `/api/v1/registered-keys`             | Yangi ro‘yxatdan o‘tkazilgan kalit chiqarish — tana: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Xom kalit **faqat bir marta** qaytariladi. Kvota rad etilganda `429` qaytariladi. |
-| GET    | `/api/v1/registered-keys/[id]`        | Ro‘yxatdan o‘tkazilgan kalit metama’lumotlarini olish (xom kalit materiali mavjud emas)                                                                                                                                           |
-| DELETE | `/api/v1/registered-keys/[id]`        | Ro‘yxatdan o‘tkazilgan kalitni bekor qilish                                                                                                                                                                                       |
-| POST   | `/api/v1/registered-keys/[id]/revoke` | Kalitni bekor qilishning aniq endpointi (`DELETE` bilan bir xil ta’sir)                                                                                                                                                           |
+| Usul   | Yo'l                                  | Tavsif                                                                                                                                                                                                                    |
+| ------ | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/v1/registered-keys`             | Roʻyxatdan oʻtgan kalitlar roʻyxati (faqat niqoblangan prefiks)                                                                                                                                                           |
+| POST   | `/api/v1/registered-keys`             | Yangi ro'yxatdan o'tgan kalit — tanasini chiqaring: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Xom kalitni qaytaradi **bir marta** . Kvota rad etilganda `429` qaytaradi. |
+| GET    | `/api/v1/registered-keys/[id]`        | Roʻyxatdan oʻtgan kalitning metamaʼlumotlarini olish (xom ashyosiz)                                                                                                                                                       |
+| DELETE | `/api/v1/registered-keys/[id]`        | Ro'yxatdan o'tgan kalitni bekor qilish                                                                                                                                                                                    |
+| POST   | `/api/v1/registered-keys/[id]/revoke` | Aniq bekor qilish yakuniy nuqtasi ( DELETE bilan bir xil effekt)                                                                                                                                                          |
+| GET    | `/api/v1/providers/[provider]/limits` | Provayderning emissiya chegaralarini o'qing                                                                                                                                                                               |
+| PUT    | `/api/v1/providers/[provider]/limits` | Provayderning emissiya chegaralarini o'rnating — tanasi: `{maxActiveKeys?, dailyIssueLimit?, hourlyIssueLimit?}`                                                                                                          |
+| GET    | `/api/v1/accounts/[id]/limits`        | Hisobning emissiya chegaralarini o'qing                                                                                                                                                                                   |
+| PUT    | `/api/v1/accounts/[id]/limits`        | Hisobning emissiya chegaralarini — provayder marshruti bilan bir xil qilib belgilang                                                                                                                                      |
 
-**Autentifikatsiya:** boshqaruv sessiyasi/API kaliti (`requireManagementAuth`) — `/api/keys` dagi kabi tekshiruv: dashboard sessiyasi, mahalliy CLI tokeni yoki `manage`/`admin` qamroviga ega API kaliti; faqat inference uchun mo‘ljallangan API kalitlari uchun `403` qaytariladi. Shuningdek, `/v1/quotas/check` va `/v1/issues/report` ga qarang.
+**Muallif:** boshqaruv session/API kaliti (`requireManagementAuth`) — `/api/keys` bilan bir xil himoya: asboblar paneli seansi, mahalliy CLI tokeni yoki `manage`/`admin` qamroviga ega API kaliti; faqat xulosa chiqarish uchun API kalitlari `403` oladi. Shuningdek qarang `/v1/quotas/check` va `/v1/issues/report`.
 
 ---
 

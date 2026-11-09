@@ -4,64 +4,66 @@
 
 ---
 
-> **信頼できる唯一の情報源:** `src/lib/webhookDispatcher.ts`、`src/lib/db/webhooks.ts`、`src/app/api/webhooks/`
-> **最終更新:** 2026-06-28 — v3.8.40
+> **真実の情報源:** `src/lib/webhookDispatcher.ts`、 `src/lib/db/webhooks.ts`、 `src/app/api/webhooks/`**最終更新日:** 2026-06-28 — v3.8.40
 
-OmniRoute は、プラットフォームイベントの発生時に HTTP Webhook を送信できます。Slack、PagerDuty、Datadog、社内アラートサービス、その他の HTTP レシーバーとの統合に使用できます。
+OmniRoute 、プラットフォーム イベントでHTTP Webhook を起動できます。これらを使用して、 Slack、 PagerDuty、 Datadog 、内部アラート サービス、または任意のHTTPレシーバーと統合します。
 
-ディスパッチャーは各配信を HMAC-SHA256 で署名し、一時的な障害が発生した場合に再試行し、Webhook ごとに配信状態を追跡します。また、失敗が続くエンドポイントを自動的に無効化します。
+ディスパッチャは、各配信にHMAC-SHA256で署名し、一時的な障害が発生した場合は再試行し、Webhook ごとに配信の正常性を追跡し、失敗し続けるエンドポイントを自動的に無効にします。
 
 ## サポートされているイベント
 
-`WebhookEvent` 型（`src/lib/webhooks/eventDescriptions.ts`。`src/lib/webhookDispatcher.ts` から使用）は、現在、次の4つのイベントのみをモデル化しています。
+`WebhookEvent`タイプ (`src/lib/webhooks/eventDescriptions.ts`、 `src/lib/webhookDispatcher.ts`によって消費される) は現在 7 つのイベントをモデル化しています。
 
-| イベント            | 発生条件                                                                 |
-| ------------------- | ------------------------------------------------------------------------ |
-| `request.completed` | プロキシされたリクエストが正常に完了したとき                             |
-| `request.failed`    | すべての再試行／フォールバック後にプロキシされたリクエストが失敗したとき |
-| `quota.exceeded`    | API キーが予算／クォータのしきい値を超えたとき                           |
-| `test.ping`         | テストエンドポイントで使用される合成イベント                             |
+| イベント                  | 発火時期                                                                                                    |
+| ------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `request.completed`       | プロキシされたリクエストが正常に完了しました                                                                |
+| `request.failed`          | すべてのretries/fallbackの後にプロキシされたリクエストが失敗する                                            |
+| `quota.exceeded`          | APIキーがbudget/quotaしきい値を超える                                                                       |
+| `proxy.set_aside`         | プロキシ プール メンバーは、拒否が繰り返された後に確保されます (移行のみ)                                   |
+| `proxy.pool.exhausted`    | プロキシ プール スコープのすべてのメンバーが確保されます                                                    |
+| `provider.reset_redeemed` | バンク リセットの自動適用により、リセット クレジットまたはClaude毎週のセッション リセットが引き換えられます |
+| `test.ping`               | テストエンドポイントによって使用される合成イベント                                                          |
 
-サブスクリプションでは、すべてのイベントを受信するためにリテラル `"*"` を指定できます。`events` 内の不明なイベント名は、ディスパッチ時に無視されます。
+サブスクリプションは、リテラルの`"*"`を受け入れて、すべてのイベントを受信します。 `events`内の不明なイベント名はディスパッチ時に無視されます。
 
-> 注: ディスパッチャー API は接続済みですが、一部の `test.ping` 以外のイベントについては、本番環境の呼び出し元がまだ実装途上です。お使いのリリースで現在どのパスがディスパッチャーを呼び出しているかを確認するには、`grep dispatchEvent` を実行してください。
+> 注: ディスパッチャーAPIは有線ですが、一部の非`test.ping`イベントのプロダクション コール サイトはまだ着陸中です。 `grep dispatchEvent`をチェックして、リリースで現在ディスパッチャーを呼び出しているパスを確認してください。
 
-## アーキテクチャ
+## 建築
 
 ```
-呼び出し元（ハンドラー、サービス、モニター）
+Caller (handler, service, monitor)
   dispatchEvent(event, data)            [src/lib/webhookDispatcher.ts]
     -> getEnabledWebhooks()             [src/lib/db/webhooks.ts]
-    -> webhook.events でフィルタリング
-    -> 一致する各 Webhook に対して（並列実行）:
+    -> filter by webhook.events
+    -> for each match (in parallel):
        deliverWebhook(url, payload, secret)
-         ペイロード { event, timestamp, data } を構築
-         HMAC-SHA256 で本文に署名（secret が存在する場合）
-         10秒のタイムアウトで POST
-         5xx／ネットワークエラー時に最大3回再試行
+         build payload { event, timestamp, data }
+         sign body with HMAC-SHA256 (if secret present)
+         POST with 10s timeout
+         retry up to 3 times on 5xx / network error
        recordWebhookDelivery(id, status, success)
     -> disableWebhooksWithHighFailures(10)
 ```
 
-ディスパッチは、呼び出し元にとってファイア・アンド・フォーゲット方式です。`Promise.allSettled` が Webhook ごとのエラーを吸収するため、1つの不正なレシーバーが他のレシーバーをブロックすることはありません。
+ディスパッチは発信者にとってはファイアアンドフォーゲットです。 `Promise.allSettled` は Webhook ごとのエラーを飲み込むため、1 つの悪い受信者が他の受信者をブロックすることはできません。
 
-## HMAC 署名
+## HMAC署名
 
-Webhook に `secret` が設定されている場合、OmniRoute は JSON 本文に署名し、次のヘッダーを送信します。
+Webhook に`secret`がある場合、 OmniRoute JSON本文に署名し、以下を送信します。
 
 ```
 Content-Type: application/json
 User-Agent: OmniRoute-Webhook/1.0
-X-Webhook-Event: <イベント>
+X-Webhook-Event: <event>
 X-Webhook-Timestamp: <ISO-8601>
-X-Webhook-Signature: sha256=<16進数の HMAC-SHA256(secret, body)>
+X-Webhook-Signature: sha256=<hex HMAC-SHA256(secret, body)>
 ```
 
-> ヘッダー名には `X-Webhook-*` プレフィックスを使用します（`X-OmniRoute-*` ではありません）。署名値は `sha256=<16進数>` です。プレフィックスを含む値全体を検証してください。
+> ヘッダー名には ( `X-OmniRoute-*`ではなく) `X-Webhook-*`プレフィックスが使用されます。署名値は`sha256=<hex>` —であり、完全なプレフィックスを検証します。
 
-secret を指定せずに `createWebhook` を呼び出した場合、DB モジュールが secret（`whsec_<48桁の16進数>`）を生成するため、デフォルトですべての Webhookが署名されます。
+`createWebhook`がシークレットなしで呼び出された場合、 DBモジュールはシークレット (`whsec_<48 hex>`) を生成するため、すべての Webhook がデフォルトで署名されます。
 
-### レシーバー側での検証
+### 受信機で確認する
 
 ```typescript
 import { createHmac, timingSafeEqual } from "node:crypto";
@@ -74,56 +76,55 @@ function verify(rawBody: string, signature: string, secret: string) {
 }
 ```
 
-JSON を解析する前に、必ず**未加工の**リクエスト本文に対して検証してください。
+常に照合して検証してください**生**JSON解析前のリクエスト本文。
 
-## 再試行と失敗に関するポリシー
+## 再試行と失敗のポリシー
 
 `deliverWebhook(url, payload, secret, maxRetries = 3)`:
 
-- 各試行のタイムアウトは10秒です（`AbortController`）。
-- HTTP 2xx は成功として扱われます。
-- HTTP 3xx/4xx は再試行不可の最終ステータスとして扱われ、`success = res.ok` として配信結果が記録されます。
-- HTTP 5xx とネットワークエラーは、指数バックオフを使用して再試行されます:
-  `2^attempt * 1000 ms`（1秒、2秒、4秒）。
-- `maxRetries` を超えると、配信は失敗として記録されます。
-- 配信のたびに `last_triggered_at`、`last_status` が更新され、`failure_count` はリセットまたは増加されます。
-- ディスパッチャーは各ファンアウト後に `disableWebhooksWithHighFailures(10)` を呼び出すため、`failure_count >= 10` の Webhook は自動的に無効化されます。
+- 試行ごとに 10 秒のタイムアウト (`AbortController`)。
+- HTTP 2xx は成功としてカウントされます。
+- HTTP 3xx/4xx 、 `success = res.ok`で提供されたものとして記録された再試行不可能な最終ステータス—としてカウントされます。
+- HTTP 5xx およびネットワーク エラーは、指数バックオフ: `2^attempt * 1000 ms` (1 秒、2 秒、4 秒) で再試行されます。
+- `maxRetries`の後、配信は失敗として記録されます。
+- 配信ごとに`last_triggered_at`、 `last_status`更新され、 `failure_count`がリセットまたはインクリメントされます。
+- ディスパッチャは各ファンアウト後に`disableWebhooksWithHighFailures(10)`を呼び出すため、 `failure_count >= 10`を使用した Webhook は自動的に無効になります。
 
 ## データベース
 
-テーブル `webhooks`（マイグレーション `011_webhooks.sql`）:
+テーブル`webhooks` (移行`011_webhooks.sql`):
 
-| 列                  | 型      | 備考                                             |
-| ------------------- | ------- | ------------------------------------------------ |
-| `id`                | TEXT PK | UUID                                             |
-| `url`               | TEXT    | 配信先 URL                                       |
-| `events`            | TEXT    | JSON 配列。デフォルトは `["*"]`                  |
-| `secret`            | TEXT    | HMAC シークレット（未指定の場合は自動生成）      |
-| `enabled`           | INT     | 0/1。デフォルトは1                               |
-| `description`       | TEXT    | 任意の人間向けラベル                             |
-| `created_at`        | TEXT    | `datetime('now')`                                |
-| `last_triggered_at` | TEXT    | 配信試行のたびに更新                             |
-| `last_status`       | INT     | 最後の試行の HTTP ステータス（0 = ネットワーク） |
-| `failure_count`     | INT     | 成功時に0へリセット、失敗時に+1                  |
+| カラム              | タイプ  | 注意事項                                                        |
+| ------------------- | ------- | --------------------------------------------------------------- |
+| `id`                | TEXT PK | UUID                                                            |
+| `url`               | TEXT    | 宛先URL                                                         |
+| `events`            | TEXT    | JSONアレイ。デフォルトの`["*"]`                                 |
+| `secret`            | TEXT    | HMACシークレット (指定しない場合は自動生成)                     |
+| `enabled`           | INT     | 0/1;デフォルトは 1                                              |
+| `description`       | TEXT    | オプションの人間ラベル                                          |
+| `created_at`        | TEXT    | `datetime('now')`                                               |
+| `last_triggered_at` | TEXT    | 配信を試みるたびに更新されます                                  |
+| `last_status`       | INT     | 最後の試行のHTTPステータス (0 =ネットワーク)                    |
+| `failure_count`     | INT     | 成功すると 0 にリセットされ、失敗すると+ 1 にリセットされます。 |
 
-配信履歴は、`webhooks` 行の集計カウンターに加えて、専用の `webhook_deliveries` テーブルに永続化されます（マイグレーション `069_webhook_deliveries.sql`。試行のたびに `src/lib/db/webhookDeliveries.ts::insertDelivery` を介して書き込まれます）。種別メタデータ（Slack / Discord / Telegram / カスタムペイロード変換処理）は、`070_webhooks_kind_metadata.sql` によって追加されました。
+配信履歴は、 `webhooks`行の集計カウンターに加えて、専用の`webhook_deliveries`テーブル (試行ごとに`src/lib/db/webhookDeliveries.ts::insertDelivery`経由で書き込まれる移行`069_webhook_deliveries.sql`) に保持されます。種類メタデータ (Slack / Discord / Telegram / カスタム ペイロード トランスフォーマー) は`070_webhooks_kind_metadata.sql`によって追加されました。
 
 ## REST API
 
-すべてのエンドポイントで管理認証（`requireManagementAuth`）が必要です。
+すべてのエンドポイントには管理認証 (`requireManagementAuth`) が必要です。
 
-| エンドポイント                  | メソッド | 説明                                       |
-| ------------------------------- | -------- | ------------------------------------------ |
-| `/api/webhooks`                 | GET      | Webhook の一覧（シークレットはマスク済み） |
-| `/api/webhooks`                 | POST     | Webhook を作成                             |
-| `/api/webhooks/[id]`            | GET      | Webhook の詳細（完全なシークレット）       |
-| `/api/webhooks/[id]`            | PUT      | フィールドを更新                           |
-| `/api/webhooks/[id]`            | DELETE   | 削除                                       |
-| `/api/webhooks/[id]/test`       | POST     | `test.ping` を送信（再試行なし）           |
-| `/api/webhooks/[id]/deliveries` | GET      | 1つの Webhook の最近の配信試行             |
-| `/api/webhooks/validate-url`    | POST     | 事前 URL 検証（SSRF ガード）               |
+| 終点                            | 方法   | 説明                                        |
+| ------------------------------- | ------ | ------------------------------------------- |
+| `/api/webhooks`                 | GET    | Webhook のリスト (マスクされたシークレット) |
+| `/api/webhooks`                 | POST   | Webhook の作成                              |
+| `/api/webhooks/[id]`            | GET    | Webhook の詳細 (完全な秘密)                 |
+| `/api/webhooks/[id]`            | PUT    | フィールドを更新する                        |
+| `/api/webhooks/[id]`            | DELETE | 取り除く                                    |
+| `/api/webhooks/[id]/test`       | POST   | `test.ping`を起動します (再試行なし)        |
+| `/api/webhooks/[id]/deliveries` | GET    | 1 つの Webhook に対する最近の配信試行       |
+| `/api/webhooks/validate-url`    | POST   | 飛行前URL検証 (SSRFガード)                  |
 
-`GET /api/webhooks` は、一覧ページでの漏えいを防ぐため、シークレットを `<先頭10文字>...` にマスクします。実際にシークレットが必要な場合は、`[id]` の GET を使用してください。
+`GET /api/webhooks`リスト ページでの漏洩を避けるために、 `<first 10 chars>...`に対して秘密をマスクします。実際にシークレットが必要な場合は、 `[id]` GET使用してください。
 
 ### Webhook の作成
 
@@ -139,30 +140,29 @@ curl -X POST http://localhost:20128/api/webhooks \
   }'
 ```
 
-`secret` を省略した場合、サーバーは `whsec_<hex>` 形式のシークレットを生成し、レスポンスで返します。
+`secret`が省略された場合、サーバーは`whsec_<hex>`シークレットを生成し、応答でそれを返します。
 
-### Webhook のテスト
+### Webhook をテストする
 
 ```bash
 curl -X POST http://localhost:20128/api/webhooks/<id>/test \
   -H "Cookie: auth_token=..."
 ```
 
-`{ delivered, status, error }` を返します。再試行は行われません。受信側がペイロードと署名を受け入れるかどうかを素早く検証する場合に便利です。
+`{ delivered, status, error }`を返します。再試行は行われません—は、受信者がペイロードと署名を受け入れるかどうかを迅速に検証するのに役立ちます。
 
 ## ダッシュボード
 
-`/dashboard/webhooks` のダッシュボードページ（
-`src/app/(dashboard)/dashboard/webhooks/page.tsx` を参照）では、以下の機能を提供します。
+`/dashboard/webhooks`のダッシュボード ページ ( `src/app/(dashboard)/dashboard/webhooks/page.tsx`」を参照) には次のものが含まれます。
 
-- イベントピッカーを使用した Webhook の作成・編集
-- `enabled`、`failure_count`、`last_status` に基づくステータス表示（有効 / 無効 / エラー）
-- ワンクリックでのテスト配信
-- 手動での有効化・無効化切り替え
+- イベントピッカーを備えたCreate/edit Webhook
+- `enabled`、 `failure_count`、および`last_status`に基づくステータス インジケーター (アクティブ / 非アクティブ / エラー)
+- ワンクリックでテスト配信
+- 手動enable/disable切り替え
 
 ## ペイロードの例
 
-### request.completed
+### リクエスト.完了
 
 ```json
 {
@@ -181,32 +181,32 @@ curl -X POST http://localhost:20128/api/webhooks/<id>/test \
 }
 ```
 
-### test.ping
+### テスト.ping
 
 ```json
 {
   "event": "test.ping",
   "timestamp": "2026-05-13T20:32:00.000Z",
   "data": {
-    "message": "OmniRoute からのテスト Webhook 配信",
+    "message": "Test webhook delivery from OmniRoute",
     "webhookId": "<uuid>"
   }
 }
 ```
 
-`test.ping` 以外のイベントのフィールド構造は、それらを発行する呼び出し元によって定義されます。`data` オブジェクトは前方互換性があるものとして扱ってください（フィールドは追加し、フィールドが存在しないことに依存しないでください）。
+非`test.ping`イベントのフィールド形状は、それらを発行する呼び出しサイトによって定義されます。 `data`オブジェクトを上位互換性があるものとして扱います (フィールドを追加し、不在に依存しません)。
 
 ## ベストプラクティス
 
-- **配信ごとに署名を検証する** — 必ず未加工のリクエストボディに対して検証してください。Webhook URL を推測した第三者による偽装 POST を防止できます。
-- **約 5 秒以内に 2xx で応答する** — ディスパッチャーは 10 秒でタイムアウトします。受信側の処理が遅いと再試行回数を消費し、`failure_count` が増加します。
-- **ハンドラーを冪等にする** — 再試行と少なくとも 1 回の配信セマンティクスにより、重複が発生する可能性があります。
-- **必要最小限のイベントのみを購読する** — 実際に使用するイベントだけを指定してください。`"*"` を指定すると、管理下にない受信側にもコストが発生します。
-- **`failure_count` を監視する** — エンドポイントは 10 回連続で失敗すると自動的に無効化されます。受信側を修正した後、`enabled: true` を指定して `PUT /api/webhooks/[id]` を呼び出すことでリセットできます。
-- **シークレットを定期的にローテーションする** — 新しい `secret` を `PUT` し、その新しい値を受信側にデプロイしたうえで、テストエンドポイントを使用して確認してください。
+- **配達ごとに署名を確認する**生の本体—に対して、Webhook URLを推測する誰かによるなりすましPOSTs防ぎます。
+- **~ 5 秒以内に 2xx を応答する**—ディスパッチャは 10 秒でタイムアウトします。遅い受信者は再試行を消費し、 `failure_count`を増大させます。
+- **ハンドラーを冪等にする**—再試行と少なくとも 1 回の配信セマンティクスにより、重複が発生する可能性があります。
+- **購読は最小限に**— 、実際に消費するイベントのみをリストします。 `"*"` 、あなたが制御していない受信機にコストを追加します。
+- **`failure_count`見る**—エンドポイントは、10 回連続して失敗すると自動的に無効になります。受信機を固定した後、 `enabled: true`で`PUT /api/webhooks/[id]`を呼び出すことでリセットします。
+- **シークレットを定期的にローテーションする**— `PUT`新しい`secret`、新しい値を受信機にデプロイし、テスト エンドポイント経由で確認します。
 
 ## 関連項目
 
-- [API_REFERENCE.md](../reference/API_REFERENCE.md) — 管理 API の全仕様
-- [RESILIENCE_GUIDE.md](../architecture/RESILIENCE_GUIDE.md) — `request.failed` を通じて通知されるプロバイダー障害の背後にあるサーキットブレーカー / クールダウンのセマンティクス
-- ソース: `src/lib/webhookDispatcher.ts`、`src/lib/db/webhooks.ts`
+- [API_REFERENCE.md](../reference/API_REFERENCE.md) —完全管理APIサーフェス
+- [RESILIENCE_GUIDE.md](../architecture/RESILIENCE_GUIDE.md) —サーキット ブレーカー/プロバイダー障害の背後にあるクールダウン セマンティクスが`request.failed`経由で表面化
+- 出典: `src/lib/webhookDispatcher.ts`、 `src/lib/db/webhooks.ts`

@@ -190,6 +190,45 @@ connection** (Edit connection → Claude section → `lowPriorityMode` / `autoLi
 Mga regression guard: `tests/unit/claude-low-priority-mode.test.ts`,
 `tests/unit/claude-limit-reset.test.ts`, `tests/unit/claude-low-priority-executor.test.ts`.
 
+### Awtomatikong ilapat ang mga banked reset
+
+**Saklaw:** Codex at Claude subscription (OAuth) na koneksyon.**Mag-opt-in** : ang setting ng `bankedResetAutoApply` ay naka-off at nasa `dry-run` mode bilang default (Mga Setting → AI → Auto-apply banked resets).
+
+**Layunin:** gumastos ng mga naka-banked na pag-reset nang mag-isa kapag ang isang account ay tumama sa isang pader ng paggamit, sa halip na maghintay para sa isang operator na pindutin ang "Redeem" sa pahina ng Mga Limitasyon ng Provider.
+
+| Uri ng kredito (`creditTypes`) | Ano ang natubos                                  | Kung saan ito tumatakbo                                                                 |
+| ------------------------------ | ------------------------------------------------ | --------------------------------------------------------------------------------------- |
+| `codexCredits`                 | Codex reset credits                              | trabaho sa background, tuwing 60 s                                                      |
+| `claudeCredits`                | Claude banked grants (`GRANT` credits)           | trabaho sa background, tuwing 60 s                                                      |
+| `claudeSessionReset`           | Claude lingguhang session-limit reset (sa itaas) | path ng kahilingan, sa pamamagitan ng parehong patakaran bilang toggle sa bawat account |
+
+**Pagpapatupad:**
+
+- Purong desisyon (isang panuntunang itinakda para sa parehong landas): `src/lib/usage/bankedResetPolicy.ts::decideBankedReset()`
+- Trabaho sa background: `src/lib/services/bankedResetAutoApply.ts` (nagsimula sa `src/instrumentation-node.ts`)
+- Claude request-path gate: `src/lib/usage/claudeSessionResetPolicy.ts`, nakarehistro sa pamamagitan ng `setClaudeLimitResetPolicy()` sa `open-sse/services/claudeLimitReset.ts`
+- History, caps at webhook: `src/lib/usage/bankedResetAudit.ts`
+- Kasaysayan API: `GET /api/settings/banked-reset-auto/history?limit=50` (pamamahala ng auth)
+
+**Order ng desisyon** (ang unang bagsak na panuntunan ay ang naitala na dahilan):
+
+1. I-feature off, credit type off, o account out of scope (`accountScope` `all` / `selected` kasama ang per-account `connections` na mapa).
+2. Sa labas ng opsyonal na iskedyul UTC (`startHourUtc` > `endHourUtc` tumatawid ng hatinggabi).
+3. Mga cap sa nakalipas na 24 na oras: `maxPerAccountPerDay` (1), `maxPerDay` (3), at `minSpacingMinutes` (30) sa pagitan ng alinmang dalawang redemption.
+4. Trigger: isang naka-walled na `session` o `weekly` window (basahin mula sa `getQuotaWindowStatus().reachedThreshold`, hindi `isAccountQuotaExhausted()`, na nag-uulat lamang ng account sa bawat window na ginastos), o isang credit na mag-e-expire sa loob ng `expiringCreditHours` (24) sa isang account na gumamit ng hindi bababa sa `expiringCreditMinUsedPercent` (50).
+5. Natural-reset guard: laktawan kapag ang naka-wall na 5-oras na window ay nag-reset sa loob ng `sessionResetGuardMinutes` (90), o ang naka-wall na lingguhang window sa loob ng `weeklyResetGuardHours` (12).
+6. Lingguhang palapag: laktawan ang 5 oras na pag-reset kapag ang lingguhang natitira ay mas mababa sa `weeklyFloorPercent` (10).
+7. `last-resort` mode: laktawan habang ang isa pang in-scope na account ng parehong provider ay may hindi bababa sa `poolHeadroomPercent` (10) na natitira sa parehong mga window. Na-bypass ito ng mga nag-trigger ng expiring-credit.
+8. Nagre-record `dry-run` ng isang row at walang tinubos; I-redeem `last-resort` at `eager`.
+
+Ang nawawalang data ng quota ay hindi kailanman nag-a-unlock ng isang redemption: isang hindi kilalang oras ng pag-reset o lingguhang paggamit ay lumalaktaw.
+
+**Pag-reset ng session Claude :** kapag naka-off ang feature, o naka-off ang `claudeSessionReset`, ang per-account `autoLimitReset` toggle ay nagpapasya nang eksakto tulad ng dati. Sa parehong naka-on, pinapalitan ng feature ang mga toggle sa bawat account: ang isang nasa saklaw na account ay maaari lang mag-claim kapag pinayagan ito ng patakaran, at sa `dry-run` mode walang ginawang claim.
+
+**Kaligtasan:** ang trabaho ay nagre-redeem ng hindi hihigit sa isang credit sa bawat tik, nagpasya bago maglista ng mga credit (ang isang nilaktawan na account ay hindi kailanman nakalista), gumagamit ng mga idempotency key `auto-reset:<connectionId>:<yyyy-mm-dd>:<n>`, at nag-back off ng isang account sa loob ng 1 h pagkatapos ng isang nabigong listahan o pagkuha. Ang bawat redemption, failure at dry-run na desisyon ay isinulat sa `audit_log` (`action: "bankedReset.redeem"`, walang mga token o credit id); ang mga takip ay binibilang mula sa mga row na iyon, kaya nakaligtas ang mga ito sa pag-restart. Pinapatakbo din ng mga matagumpay na pagkuha ang `provider.reset_redeemed` webhook.
+
+Mga bantay ng regression: `tests/unit/banked-reset-policy.test.ts`, `tests/unit/banked-reset-auto-apply.test.ts`, `tests/unit/claude-limit-reset-policy-gate.test.ts`, `tests/unit/banked-reset-history-route.test.ts`.
+
 ### Session affinity (#7274)
 
 **Saklaw:** isang client session (`X-Session-Id` / `x-codex-session-id` / `x-omniroute-session` header) na naka-pin sa isang connection, para sa **anumang** provider.

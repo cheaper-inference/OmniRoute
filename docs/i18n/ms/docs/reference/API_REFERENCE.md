@@ -974,12 +974,12 @@ CLI menaik taraf `base_url + /responses` kepada WebSocket dan OmniRoute membuat 
 
 ## Pelaporan Kuota & Isu
 
-| Kaedah | Laluan              | Perihalan                                                                                          |
-| ------ | ------------------- | -------------------------------------------------------------------------------------------------- |
-| GET    | `/v1/quotas/check`  | Pra-pengesahan kuota untuk `provider` + `accountId` sebelum mengeluarkan kunci berdaftar           |
-| POST   | `/v1/issues/report` | Laporkan kegagalan pengeluaran kuota/kunci kepada GitHub (memerlukan `GITHUB_ISSUES_REPO` + token) |
+| Kaedah | Laluan              | Penerangan                                                                                        |
+| ------ | ------------------- | ------------------------------------------------------------------------------------------------- |
+| GET    | `/v1/quotas/check`  | Pra-sahkan kuota untuk `provider` + `accountId` sebelum mengeluarkan kunci berdaftar              |
+| POST   | `/v1/issues/report` | Laporkan kegagalan pengeluaran quota/key kepada GitHub (memerlukan token `GITHUB_ISSUES_REPO` + ) |
 
-**Pengesahan:** Kunci API Bearer (`isAuthenticated`).
+**Pengesahan:** `/v1/quotas/check` mengambil kunci API Pembawa (`isAuthenticated`). `/v1/issues/report` ialah pengurusan sahaja (`requireManagementAuth`), seperti `/api/v1/registered-keys`: sesi papan pemuka, token CLI setempat atau kunci API dengan skop `manage`/`admin` ; kunci API inferens sahaja mendapat `403`.
 
 ### Pemulihan sesi kuota (pilihan)
 
@@ -1762,19 +1762,23 @@ Langganan webhook keluar untuk acara OmniRoute (penyelesaian permintaan, kehabis
 
 ---
 
-## Kunci Berdaftar (Pengurusan Automatik)
+## Kunci Berdaftar (Pengurusan Auto)
 
-Digunakan oleh subsistem pengurusan kunci automatik untuk mengeluarkan dan menggil ir kunci API terhadap pembekal/akaun sokongan, dengan kuota harian/jam.
+Digunakan oleh subsistem pengurusan kunci automatik untuk mengeluarkan dan memutar kunci API terhadap provider/account sandaran, dengan kuota daily/hourly.
 
-| Kaedah | Laluan                                | Perihalan                                                                                                                                                                                                              |
-| ------ | ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/api/v1/registered-keys`             | Senaraikan kunci berdaftar (hanya awalan yang disamarkan)                                                                                                                                                              |
-| POST   | `/api/v1/registered-keys`             | Keluarkan kunci berdaftar baharu — badan: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Mengembalikan kunci mentah **sekali**. Mengembalikan `429` apabila kuota ditolak. |
-| GET    | `/api/v1/registered-keys/[id]`        | Dapatkan metadata kunci berdaftar (tiada nilai mentah)                                                                                                                                                                 |
-| DELETE | `/api/v1/registered-keys/[id]`        | Batalkan kunci berdaftar                                                                                                                                                                                               |
-| POST   | `/api/v1/registered-keys/[id]/revoke` | Titik akhir pembatalan eksplisit (kesan yang sama seperti DELETE)                                                                                                                                                      |
+| Kaedah | Laluan                                | Penerangan                                                                                                                                                                                                              |
+| ------ | ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/v1/registered-keys`             | Senaraikan kunci berdaftar (awalan bertopeng sahaja)                                                                                                                                                                    |
+| POST   | `/api/v1/registered-keys`             | Keluarkan badan — kunci berdaftar baharu: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Mengembalikan kunci mentah **sekali** . Mengembalikan `429` atas keengganan kuota. |
+| GET    | `/api/v1/registered-keys/[id]`        | Dapatkan semula metadata kunci berdaftar (tiada bahan mentah)                                                                                                                                                           |
+| DELETE | `/api/v1/registered-keys/[id]`        | Batalkan kunci berdaftar                                                                                                                                                                                                |
+| POST   | `/api/v1/registered-keys/[id]/revoke` | Titik akhir pembatalan eksplisit (kesan yang sama seperti DELETE)                                                                                                                                                       |
+| GET    | `/api/v1/providers/[provider]/limits` | Baca had pengeluaran pembekal                                                                                                                                                                                           |
+| PUT    | `/api/v1/providers/[provider]/limits` | Tetapkan had pengeluaran penyedia badan — : `{maxActiveKeys?, dailyIssueLimit?, hourlyIssueLimit?}`                                                                                                                     |
+| GET    | `/api/v1/accounts/[id]/limits`        | Baca had pengeluaran akaun                                                                                                                                                                                              |
+| PUT    | `/api/v1/accounts/[id]/limits`        | Tetapkan had pengeluaran akaun — badan yang sama dengan laluan pembekal                                                                                                                                                 |
 
-**Pengesahan:** sesi/kunci API pengurusan (`requireManagementAuth`) — pengawal yang sama seperti `/api/keys`: sesi papan pemuka, token CLI setempat atau kunci API dengan skop `manage`/`admin`; kunci API khusus inferens menerima `403`. Lihat juga `/v1/quotas/check` dan `/v1/issues/report`.
+**Pengesahan:** kunci session/API pengurusan (`requireManagementAuth`) — pengawal yang sama seperti `/api/keys`: sesi papan pemuka, token CLI tempatan atau kunci API dengan skop `manage`/`admin` ; kunci API inferens sahaja mendapat `403`. Lihat juga `/v1/quotas/check` dan `/v1/issues/report`.
 
 ---
 
