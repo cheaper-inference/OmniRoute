@@ -10,7 +10,10 @@ import {
   createClaudeTailCacheControl,
   createDefaultClaudeCacheControl,
 } from "../helpers/claudeHelper.ts";
-import { restoreClaudeThinkingBlocks } from "../../services/claudeThinkingStore.ts";
+import {
+  dropTrailingHistoricalThinking,
+  restoreClaudeThinkingBlocks,
+} from "../../services/claudeThinkingStore.ts";
 import {
   getDefaultThinkingBudget,
   isAdaptiveThinkingOnly,
@@ -458,6 +461,9 @@ export function openaiToClaudeRequest(
     }
 
     flushCurrentMessage();
+
+    // Anthropic 400s on a past assistant turn that ends in thinking; an emptied turn goes below.
+    result.messages = dropTrailingHistoricalThinking(result.messages);
 
     // Remove assistant messages with empty content (can happen when all tool_use blocks were skipped)
     result.messages = result.messages.filter((msg) => {
