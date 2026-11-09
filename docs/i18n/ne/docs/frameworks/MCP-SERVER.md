@@ -10,35 +10,30 @@
 
 ## स्थापना
 
-OmniRoute MCP अन्तर्निर्मित छ। यसलाई यसरी सुरु गर्नुहोस्:
+OmniRoute MCP बिल्ट-इन छ। यसलाई सुरु गर्नुहोस्:
 
 ```bash
 omniroute --mcp
 ```
 
-वा open-sse ट्रान्सपोर्टमार्फत:
+वा खुला-sse यातायात मार्फत:
 
 ```bash
-# HTTP स्ट्रिम गर्न मिल्ने ट्रान्सपोर्ट (पोर्ट 20130)
-omniroute --dev  # MCP /mcp एन्डपोइन्टमा स्वतः सुरु हुन्छ
+# Streamable HTTP transport (default port 20128, in-process on the dashboard server)
+# Client endpoint: http://localhost:20128/api/mcp/stream
+# stdio: omniroute --mcp
 ```
 
-HTTP ट्रान्सपोर्टहरू (`sse` / `streamable-http`, ड्यासबोर्ड सर्भरद्वारा सोही प्रोसेसभित्र सेवा प्रदान गरिने) पूर्वनिर्धारित रूपमा
-बन्द हुन्छन् र पहिले `/dashboard/mcp` पृष्ठबाट मात्र टगल गर्न सकिन्थ्यो। v3.8.51 देखि
-CLI मा पनि समान सुविधा उपलब्ध छ:
+HTTP यातायातहरू (`sse` / `streamable-http`, ड्यासबोर्ड सर्भर द्वारा प्रक्रियामा सेवा गरिएको) पूर्वनिर्धारित रूपमा बन्द छन् र पहिले `/dashboard/mcp` पृष्ठबाट मात्र टगल गर्न मिल्ने थिए। v3.8.51 को रूपमा CLI समानता छ:
 
 ```bash
-omniroute mcp status                                  # सक्षम/अनलाइन, ट्रान्सपोर्ट, टुल सङ्ख्या
+omniroute mcp status                                  # enabled/online, transport, tool count
 omniroute mcp enable [--transport stdio|sse|streamable-http]
 omniroute mcp disable
-omniroute mcp restart                                 # सक्रिय sse/streamable-http सत्रहरू रिसेट गर्छ
+omniroute mcp restart                                 # resets active sse/streamable-http sessions
 ```
 
-`mcp enable`/`mcp disable` ले ड्यासबोर्डले `/api/settings` मार्फत टगल गर्ने उही `mcpEnabled`
-(र वैकल्पिक रूपमा `mcpTransport`) सेटिङलाई PATCH गर्छ। `mcp restart` ले `POST /api/mcp/restart`
-कल गर्छ: यसले सक्रिय `sse`/`streamable-http` सत्रहरू बन्द गर्छ, जसले गर्दा अर्को अनुरोध पुनः सफा रूपमा प्रारम्भ हुन्छ;
-MCP असक्षम भएमा `409`, र `stdio` ट्रान्सपोर्टका लागि `501` फर्काउँछ (stdio क्लाइन्टहरूले आफ्नै
-सबप्रोसेस सञ्चालन गर्छन् — पुनः सुरु गर्नका लागि कुनै इन-प्रोसेस ह्यान्डल हुँदैन)।
+`mcp enable`/`mcp disable` PATCH उही `mcpEnabled` (र वैकल्पिक रूपमा `mcpTransport`) `/api/settings` मार्फत ड्यासबोर्ड टगलहरू सेट गर्दै। `mcp restart` `POST /api/mcp/restart` कल गर्दछ: यसले सक्रिय `sse`/`streamable-http` सत्रहरूलाई टुक्राउँछ त्यसैले अर्को अनुरोध सफा रूपमा पुन: प्रारम्भ हुन्छ, MCP असक्षम भएमा `409` फिर्ता गर्छ, र `stdio` यातायातको लागि `501` (stdio क्लाइन्टहरूको आफ्नै सबप्रोसेस — स्वामित्व हुन्छ त्यहाँ पुन: सुरु गर्न कुनै इन-प्रोसेस ह्यान्डल छैन)।
 
 ## ट्रान्सपोर्टहरू
 
@@ -130,51 +125,42 @@ Claude Desktop, Cursor, Cline, र मिल्दो MCP क्लाइन्�
 | `omniroute_cache_stats` | `read:cache`  | सिमान्टिक क्यास, प्रम्प्ट-क्यास र आइडेम्पोटेन्सी तथ्याङ्कहरू   |
 | `omniroute_cache_flush` | `write:cache` | विश्वव्यापी रूपमा वा सिग्नेचर/मोडेलअनुसार क्यास फ्लस गर्नुहोस् |
 
-## कम्प्रेसन उपकरणहरू (13)
+## सङ्कुचन उपकरण (१३)
 
-| उपकरण                               | स्कोपहरू            | विवरण                                                                                                               |
-| :---------------------------------- | :------------------ | :------------------------------------------------------------------------------------------------------------------ |
-| `omniroute_compression_status`      | `read:compression`  | कम्प्रेसन सेटिङहरू, एनालिटिक्स सारांश र क्यास-सचेत तथ्याङ्कहरू (`analytics.mcpDescriptionCompression` मेटाडेटासहित) |
-| `omniroute_compression_configure`   | `write:compression` | कम्प्रेसन मोड, थ्रेसहोल्ड, लक्षित अनुपात, सिस्टम-प्रम्प्ट संरक्षण र MCP विवरण कम्प्रेसन टगल कन्फिगर गर्नुहोस्       |
-| `omniroute_set_compression_engine`  | `write:compression` | सक्रिय इन्जिन (off/caveman/rtk/stacked) र Caveman/RTK तीव्रता चयन गर्नुहोस्                                         |
-| `omniroute_list_compression_combos` | `read:compression`  | नाम दिइएका कम्प्रेसन कम्बोहरू र तिनका इन्जिन पाइपलाइनहरू सूचीबद्ध गर्नुहोस्                                         |
-| `omniroute_compression_combo_stats` | `read:compression`  | कम्प्रेसन कम्बो र इन्जिनअनुसार समूहबद्ध एनालिटिक्स                                                                  |
-| `omniroute_ccr_store`               | `write:compression` | सीमित इन-मेमोरी CCR स्टोरमा कलर-पृथक सामग्री भण्डारण गरी मार्कर र `ccr://` रेफरेन्स फर्काउनुहोस्                    |
-| `omniroute_ccr_retrieve`            | `read:compression`  | CCR सामग्री पूर्ण रूपमा वा हेड, टेल, लाइन, grep र तथ्याङ्क मोडहरूमा पुनःप्राप्त गर्नुहोस्                           |
-| `omniroute_ccr_inspect`             | `read:compression`  | सामग्री नफर्काई कलर-स्वामित्वको CCR मेटाडेटा निरीक्षण गर्नुहोस्                                                     |
-| `omniroute_ccr_list`                | `read:compression`  | कलर-स्वामित्वका CCR ब्लकहरूको पृष्ठाङ्कित मेटाडेटा सूचीबद्ध गर्नुहोस्                                               |
-| `omniroute_ccr_delete`              | `write:compression` | कलर-स्वामित्वको CCR ब्लक मेटाउनुहोस्                                                                                |
-| `omniroute_ccr_stats`               | `read:compression`  | कलर-स्कोप गरिएको मेमोरी प्रयोग, जीवनचक्र काउन्टरहरू र स्टोर सीमाहरू रिपोर्ट गर्नुहोस्                               |
-| `omniroute_rtk_discover`            | `read:compression`  | अप्ट-इन RTK आउटपुट नमुनाहरूमा दोहोरिने न्वाइज पत्ता लगाउनुहोस्                                                      |
-| `omniroute_rtk_learn`               | `read:compression`  | अप्ट-इन नमुनाहरूबाट समीक्षा गर्न मिल्ने RTK फिल्टर मस्यौदा उत्पन्न गर्नुहोस्                                        |
+| उपकरण                               | स्कोपहरू            | विवरण                                                                                                                         |
+| :---------------------------------- | :------------------ | :---------------------------------------------------------------------------------------------------------------------------- |
+| `omniroute_compression_status`      | `read:compression`  | कम्प्रेसन सेटिङ्हरू, विश्लेषण सारांश, र क्यास-सचेत तथ्याङ्कहरू ( `analytics.mcpDescriptionCompression` मेटाडेटा समावेश गर्दछ) |
+| `omniroute_compression_configure`   | `write:compression` | कम्प्रेसन मोड, थ्रेसहोल्ड, लक्ष्य अनुपात, प्रणाली-प्रम्प्ट संरक्षण, MCP विवरण कम्प्रेसन टगल कन्फिगर गर्नुहोस्                 |
+| `omniroute_set_compression_engine`  | `write:compression` | सक्रिय इन्जिन (off/caveman/rtk/stacked) र Caveman/RTK तीव्रता छान्नुहोस्                                                      |
+| `omniroute_list_compression_combos` | `read:compression`  | नाम कम्प्रेसन कम्बो र तिनीहरूको इन्जिन पाइपलाइनहरू सूची गर्नुहोस्                                                             |
+| `omniroute_compression_combo_stats` | `read:compression`  | एनालिटिक्स कम्प्रेसन कम्बो र इन्जिन द्वारा समूहबद्ध                                                                           |
+| `omniroute_ccr_store`               | `write:compression` | बाउन्डेड इन-मेमोरी CCR स्टोरमा कलर-पृथक सामग्री भण्डार गर्नुहोस् र मार्कर प्लस `ccr://` सन्दर्भ फिर्ता गर्नुहोस्              |
+| `omniroute_ccr_retrieve`            | `read:compression`  | CCR सामग्री पूर्ण रूपमा वा हेड, टेल, लाइनहरू, grep, र तथ्याङ्क मोडहरूको साथ पुन: प्राप्त गर्नुहोस्                            |
+| `omniroute_ccr_inspect`             | `read:compression`  | सामग्री फिर्ता नगरी कलरको स्वामित्वमा रहेको CCR मेटाडेटा निरीक्षण गर्नुहोस्                                                   |
+| `omniroute_ccr_list`                | `read:compression`  | कलरको स्वामित्वमा रहेको CCR ब्लकहरूको लागि पृष्ठन गरिएको मेटाडेटा सूची गर्नुहोस्                                              |
+| `omniroute_ccr_delete`              | `write:compression` | कलरको स्वामित्वमा रहेको CCR ब्लक मेटाउनुहोस्                                                                                  |
+| `omniroute_ccr_stats`               | `read:compression`  | कलर-स्कोप गरिएको मेमोरी उपयोग, जीवनचक्र काउन्टरहरू, र भण्डार सीमाहरू रिपोर्ट गर्नुहोस्                                        |
+| `omniroute_rtk_discover`            | `read:compression`  | अप्ट-इन RTK आउटपुट नमूनाहरूमा आवर्ती आवाज पत्ता लगाउनुहोस्                                                                    |
+| `omniroute_rtk_learn`               | `read:compression`  | अप्ट-इन नमूनाहरूबाट समीक्षायोग्य RTK फिल्टर ड्राफ्ट उत्पन्न गर्नुहोस्                                                         |
 
-CCR प्रविष्टिहरू इन-मेमोरी मात्र हुन्छन् र पुनः सुरु गर्दा हराउँछन्। प्रत्येक ब्लक 2 MiB मा, प्रत्येक
-प्रिन्सिपल 16 MiB मा र ग्लोबल स्टोर 64 MiB मा सीमित हुन्छ। प्रविष्टिहरूको पूर्वनिर्धारित TTL 24 घण्टा हुन्छ (अधिकतम
-सात दिन)। पूर्ण MCP पुनःप्राप्ति 256 KiB मा सीमित हुन्छ; ठूला ब्लकहरू रेन्ज्ड र
-grep मोडहरूमार्फत उपलब्ध रहन्छन्। भण्डारण, पुनःप्राप्ति, सूचीकरण, निरीक्षण, मेटाउने कार्य र तथ्याङ्कहरू
-प्रमाणीकृत API-key प्रिन्सिपलद्वारा पृथक गरिएका हुन्छन्। अडिट रेकर्डहरूमा ह्यास र आकारसम्बन्धी मेटाडेटा हुन्छन्, सामग्री कहिल्यै हुँदैन।
+CCR entries use a two-tier store: a hot in-memory tier backed, on local non-cloud runtimes, by a durable SQLite tier (`ccr_blocks`, on by default) so a block survives eviction or a restart until its TTL runs out — except blocks over 512 KB and cloud runtimes, which stay memory-only. Each block is limited to 2 MiB, each principal to 16 MiB, and the global store to 64 MiB. Entries default to a 24-hour TTL (maximum seven days). Full MCP retrieval is limited to 256 KiB; larger blocks remain available through the ranged and grep modes. Storage, retrieval, listing, inspection, deletion, and stats are isolated by the authenticated API-key principal. Audit records contain hashes and size metadata, never content. Operator-facing details (the two markers, client prerequisites, `codemode:false`, per-tool scopes, pagination, and a diagnostic matrix) live in [Compression Engines → Prerequisites / operator guide](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
 
-`omniroute_compression_status` ले MCP विवरण कम्प्रेसनलाई
-`analytics.mcpDescriptionCompression` अन्तर्गत छुट्टै रिपोर्ट गर्छ। ती मानहरू MCP मा सूचीबद्ध गर्न मिल्ने
-विवरणहरू (`tools`, `prompts`, `resources`, र `resourceTemplates`) का मेटाडेटा-आकार अनुमान हुन्; ती प्रदायक प्रयोगका
-रसिदहरू होइनन् र `source: "mcp_metadata_estimate"` द्वारा चिन्हित गरिएका हुन्छन्।
+`omniroute_compression_status` `analytics.mcpDescriptionCompression` अन्तर्गत MCP विवरण सङ्कुचनलाई छुट्टै रिपोर्ट गर्दछ। ती मानहरू MCP सूचीयोग्य विवरणहरूका लागि मेटाडेटा-आकार अनुमानहरू हुन् (`tools`, `prompts`, `resources`, र `resourceTemplates`); तिनीहरू प्रदायक प्रयोग रसिदहरू होइनन् र `source: "mcp_metadata_estimate"` सँग चिन्ह लगाइएका छन्।
 
-### MCP पहुँचयोग्यता ट्री फिल्टर (v3.8.0)
+### MCP एक्सेसिबिलिटी ट्री फिल्टर (v3.8.0)
 
-माथिका कम्प्रेसन टुलहरूभन्दा अलग रूपमा, OmniRoute मा कार्यान्वयनपछिको एउटा फिल्टर समावेश छ जसले MCP ब्राउजर/पहुँचयोग्यता टुलहरूका **टुल परिणामहरू** एजेन्टलाई फर्काइनुअघि कम्प्रेस गर्छ। यो फिल्टर आफैँमा टुल होइन — विस्तृत पहुँचयोग्यता-ट्री वा ब्राउजर-स्न्यापसट पाठ (≥2000 अक्षर) समावेश भएको कुनै पनि टुल परिणाममा यो पारदर्शी रूपमा चल्छ।
+माथिको कम्प्रेसन उपकरणहरूबाट अलग, OmniRoute पोस्ट-एक्सिक्युसन फिल्टर समावेश गर्दछ जसले कम्प्रेस गर्दछ।** उपकरण परिणाम** MCP browser/accessibility उपकरणहरू एजेन्टलाई फिर्ता गर्नु अघि। यो फिल्टर आफैंमा एक उपकरण — होइन यो कुनै पनि उपकरण परिणाममा पारदर्शी रूपमा चल्छ जसमा भर्बोज एक्सेसिबिलिटी-ट्री वा ब्राउजर-स्न्यापसट टेक्स्ट (≥ 2000 chars) समावेश छ।
 
-मुख्य व्यवहारहरू:
+मुख्य व्यवहार:
 
-- लगातार दोहोरिएका ≥30 सहोदर पङ्क्तिहरूलाई सुरु + अन्त्यको सारांशमा संक्षिप्त गर्छ
-- Playwright/computer-use का लागि आवश्यक `[ref=eXX]` एङ्करहरू सुरक्षित राख्छ
-- अत्यधिक ठूलो पाठ (>50,000 अक्षर) लाई नेभिगेसन सङ्केतसहित अनिवार्य रूपमा काट्छ
-- अपेक्षित बचत: ब्राउजर स्न्यापसट पेलोडहरूमा **60–80%**
+- हेड + टेल सारांशमा ≥ 30 लगातार दोहोरिने भाइबहिनी रेखाहरूलाई संक्षिप्त गर्दछ
+- Playwright/computer-use द्वारा आवश्यक `[ref=eXX]` एङ्करहरू सुरक्षित गर्दछ
+- नेभिगेसन सङ्केतको साथ ठूला आकारको पाठ (> 50,000 क्यारेक्टरहरू) हार्ड-ट्रन्केट गर्दछ
+- अपेक्षित बचत:** ६०–८०%** ब्राउजर स्न्यापसट पेलोडहरूमा
 
-कन्फिगरेसन: ग्लोबल सेटिङहरूमा `compression.mcpAccessibility` (माइग्रेसन 056)।
-कार्यान्वयन: `open-sse/services/compression/engines/mcpAccessibility/`।
-पूर्ण दस्तावेज: [कम्प्रेसन इन्जिनहरू — MCP पहुँचयोग्यता ट्री फिल्टर](../compression/COMPRESSION_ENGINES.md#mcp-accessibility-tree-filter)।
+कन्फिगरेसन: ग्लोबल सेटिङहरूमा `compression.mcpAccessibility` (माइग्रेसन 056)। कार्यान्वयन: `open-sse/services/compression/engines/mcpAccessibility/`। पूर्ण कागजातहरू: [कम्प्रेसन इन्जिनहरू — MCP पहुँच ट्री फिल्टर](../compression/COMPRESSION_ENGINES.md#mcp-accessibility-tree-filter) ।
 
-यी टुलहरूको पछाडिको रनटाइम कम्प्रेसन मोडेलका लागि [कम्प्रेसन इन्जिनहरू](../compression/COMPRESSION_ENGINES.md) र [RTK कम्प्रेसन](../compression/RTK_COMPRESSION.md) हेर्नुहोस्।
+यी उपकरणहरूको पछाडि रनटाइम कम्प्रेसन मोडेलको लागि [कम्प्रेसन इन्जिनहरू](../compression/COMPRESSION_ENGINES.md) र [RTK कम्प्रेसन](../compression/RTK_COMPRESSION.md) हेर्नुहोस्।
 
 ## 1Proxy उपकरणहरू (3)
 

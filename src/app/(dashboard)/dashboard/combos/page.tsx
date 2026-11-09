@@ -3682,6 +3682,7 @@ function ComboFormModal({
           {showIntelligentSection && (
             <BuilderIntelligentStep
               t={t}
+              strategy={strategy}
               config={config}
               activeProviders={builderProviders}
               stepModels={decisionPreviewModels}

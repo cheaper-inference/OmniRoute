@@ -1,4 +1,15 @@
 {
+  "accountPreferences": {
+    "title": "Àwọn ààyò àkọọ́lẹ̀",
+    "description": "Yan ọ̀pọ̀ àkọọ́lẹ̀ gẹ́gẹ́ bí èyí tí a ó lò kọ́kọ́, tàbí pa wọ́n mọ́ sí ìpamọ́ fún ìṣètò ìtọ́sọ́nà yìí. Ìtọ́sọ́nà aládàáṣiṣẹ́ máa ń ṣe ìṣètò àwọn àkọọ́lẹ̀ nínú ẹ̀ka kọ̀ọ̀kan. Àwọn àkọọ́lẹ̀ tí kò sí nínú àkójọ yóò ṣiṣẹ́ déédéé. Àwọn àṣẹ, ààlà ìpín àti àwọn ìdè àkọọ́lẹ̀ tó ti wà fún ìyípo ṣì kan náà.",
+    "preferred": "Èyí tí a ó lò kọ́kọ́",
+    "normal": "Déédéé",
+    "reserve": "Ìpamọ́",
+    "excluded": "A kò ní lò",
+    "loading": "Ń ṣí àwọn àkọọ́lẹ̀…",
+    "error": "A kò lè ṣí àwọn àkọọ́lẹ̀. Ṣí olóòtú náà lẹ́ẹ̀kan sí i láti tún gbìyànjú.",
+    "missing": "Àkọọ́lẹ̀ kò sí ({id})"
+  },
   "codexKeyServiceMode": {
     "title": "Ìpo iṣẹ́ Codex fún kọ́kọ́rọ́ API yìí",
     "description": "Ó kan àwọn ìbéèrè Codex, pẹ̀lú àwọn àwòṣe Codex inú àwọn àkójọpọ̀. Àwọn ìpo tí a fi tipátipá yan máa borí ètò oníbàárà, àwọn ètò àgbáyé àti àwọn àiyípadà ìbẹ̀rẹ̀ ìsopọ̀. Àwọn olùpèsè mìíràn kò ní yí padà.",
@@ -5722,6 +5733,7 @@
     "filterError": "Àṣìṣe",
     "filterBanned": "Ti Dina",
     "filterCreditsExhausted": "Kírẹ́díìtì Ti Tán",
+    "filterVerificationRequired": "Ó nílò ìfìdímúlẹ̀",
     "accountSearchPlaceholder": "Ṣàwárí àwọn àkọọ́lẹ̀…",
     "noFilteredConnections": "Kò sí ìsopọ̀ tó bá àlẹ̀mọ́ lọ́wọ́lọ́wọ́ mu.",
     "failedSetAlias": "Ṣíṣètò orúkọ àpèjẹ kùnà",
@@ -7084,7 +7096,16 @@
     "chatgptConnectorLabel": "Oju iṣẹ akoran ChatGPT",
     "doctorChecking": "Nṣayẹwo ipo…",
     "doctorCheck": "Ṣayẹwo ipo dokita",
-    "fallbackRetryBackendTitle": "Oníṣẹ́ àsọtẹ́lẹ́ ìṣọ̀ṣe"
+    "fallbackRetryBackendTitle": "Oníṣẹ́ àsọtẹ́lẹ́ ìṣọ̀ṣe",
+    "quotaRefreshCurrent": "Ṣe àtúnṣe ìwọ̀n lílo lọwọlọwọ",
+    "quotaRefreshCurrentHint": "Ó ń ṣàyẹ̀wò ìwọ̀n lílo àkọọ́lẹ̀ yìí lọwọlọwọ láì ná kírẹ́dítì àtúntò.",
+    "quotaRefreshing": "A ń ṣàyẹ̀wò ìwọ̀n lílo…",
+    "quotaRefreshFresh": "A ti ṣàyẹ̀wò ìwọ̀n lílo. Sẹ́fà ló ń pinnu bóyá àkọọ́lẹ̀ náà wà fún lílo.",
+    "quotaRefreshFailed": "Àyẹ̀wò ìwọ̀n lílo kùnà. Dátà tẹ́lẹ̀ kò yí padà.",
+    "quotaRefreshStale": "Sẹ́fà dá dátà ìwọ̀n lílo àtijọ́ padà. Èyí kì í ṣe àkíyèsí tuntun.",
+    "quotaRefreshPartial": "Apá kan nínú dátà ìwọ̀n lílo nìkan ló wà.",
+    "quotaWindowUnavailable": "Ìwọ̀n lílo fún {window} kò sí",
+    "quotaConnectionRefreshFailed": "Àyẹ̀wò ìwọ̀n lílo ti parí, ṣùgbọ́n a kò lè ṣe àtúnṣe àtòjọ àwọn àkọọ́lẹ̀."
   },
   "settings": {
     "title": "Àwọn Ààtò",
@@ -7976,6 +7997,11 @@
     "pricingShowingProviders": "Ń ṣàfihàn {visible} nínú {total}",
     "pricingFilteredFrom": "(tí a ti fi àsẹ̀ yọ lára {count})",
     "pricingShowMoreProviders": "Ṣàfihàn {count} síi ({remaining} ló kù)",
+    "pricingView": "Wo",
+    "pricingViewByProvider": "Nípasẹ̀ olùpèsè",
+    "pricingViewCompare": "Ṣe àfiwé àwọn àwòṣe",
+    "pricingUnpriced": "Láìní iye owó",
+    "pricingCompareEmpty": "Kò sí àwòṣe tí ó ju ẹyọ ọ̀kan lọ nínú àwọn olùpèsè wọ̀nyí tí ń pèsè rẹ̀. Ṣe àwárí àwòṣe kan láti rí àwọn ìfilọ́wọ́ ẹyọ ọ̀kan.",
     "modelOverridesTitle": "Àwọn Ìṣàtúnṣe Awoṣe",
     "modelOverridesDesc": "Ṣàtúnṣe àwọn agbára provider/model tí ìdarí ipa àti ìṣàkóso ìbéèrè ń lò. Àwọn àfojúsùn ń lo fọ́ọ̀mù provider/model kan náà bí àwọn àkópọ̀.",
     "searchModelOverrideTargets": "Ṣàwárí provider/model...",
@@ -9257,7 +9283,12 @@
       "statsTitle": "Àwọn àwárí láti ìgbà àtúnbẹ̀rẹ̀",
       "statsEmpty": "Kò sí àwárí kankan síbẹ̀.",
       "statsRequest": "Àwọn ìbéèrè"
-    }
+    },
+    "modalityBridgeVideoDrilldownEnabled": "Pa àwọn férémù fídíò tí a yọ jáde mọ́",
+    "modalityBridgeVideoDrilldownEnabledDesc": "Fàyè gba pípa JPEG fún ìgbà díẹ̀ mọ́ nígbà tí ìbéèrè tí a ti fìdí rẹ̀ múlẹ̀ bá tún ṣètò drilldown: true nìkan. A kì í pa àwọn fídíò gidi mọ́ láéláé.",
+    "modalityBridgeVideoDrilldownRemoteEnabled": "Fàyè gba ìṣàwárí férémù jinlẹ̀ tí a ti fìdí rẹ̀ múlẹ̀",
+    "modalityBridgeVideoDrilldownRemoteEnabledDesc": "Fàyè gba àwọn kọ́kọ́rọ́ API láti ka àti pa àwọn àmì ìdánimọ̀ àìhàn tiwọn nìkan. Kò sí ààyè fún ìwọlé aláìlórúkọ tàbí ìwọlé láti ọ̀dọ̀ kọ́kọ́rọ́ mìíràn.",
+    "modalityBridgeVideoDrilldownUsage": "Àwọn JPEG / báìtì tí a pa mọ́"
   },
   "contextRtk": {
     "title": "Ẹ́ńjìnnì RTK",
@@ -11753,7 +11784,30 @@
     "copilotPolicyAcknowledge": "Mo ye, so",
     "tabPasteSetupToken": "Àmì ìṣètò",
     "claudeSetupTokenDescription": "Ṣiṣẹ́ `claude setup-token` nínú tẹ́mínà kí o sì lẹ àmì tí ó tẹ̀ jáde. Ó wúlò fún ọdún kan kò sì ní àmì ìsọdọ̀tun. OmniRoute ń fi ìbéèrè ìdánwò kan ránṣẹ́ sí Anthropic kí ó tó fi pamọ́.",
-    "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
+    "claudeSetupTokenPlaceholder": "sk-ant-oat01-...",
+    "tabPasteRefreshToken": "Sọ àmi",
+    "antigravityRefreshTokenDescription": "Lẹẹmọ ami isọdọtun OAuth Google rẹ fun Antigravity. OmniRoute fọwọsi ati paarọ rẹ ṣaaju fifipamọ.",
+    "antigravityRefreshTokenPlaceholder": "1//...",
+    "m365Title": "Wíwọlé Microsoft 365 Copilot",
+    "m365UrlExpiredHint": "Bẹ̀rẹ̀ ìgbìyànjú tuntun tí àkókò rẹ̀ bá parí kí o tó parí.",
+    "m365UrlExpires": "Àkókò lílò URL ìfúniláṣẹ yìí yóò parí ní aago",
+    "m365AuthUrlCopyHint": "Yan gbogbo URL ìfúniláṣẹ náà, kí o sì ṣe àdàkọ rẹ̀ pẹ̀lú Ctrl+C (Command+C lórí Mac), tàbí lo àṣàyàn Ṣe àdàkọ nínú àkójọ aṣàwákiri rẹ. Lẹ̀ ẹ́ sínú taabu òfo náà kìkì lẹ́yìn tí o bá tan Preserve log.",
+    "m365AuthUrlLabel": "URL ìfúniláṣẹ (ṣe àdàkọ sí taabu tí a ti pèsè)",
+    "m365StepNavigate": "Ṣe àdàkọ URL ìfúniláṣẹ tó wà nísàlẹ̀, kí o sì lẹ̀ ẹ́ sínú ọ̀pá àdírẹ́sì taabu tí a ti pèsè, lẹ́yìn náà tẹ Enter láti wọlé.",
+    "m365StepPrepare": "Pèsè wíwọlé Microsoft láti dá ìgbìyànjú tuntun sílẹ̀.",
+    "m365StepOpen": "Ṣí taabu òfo kan nínú aṣàwákiri tirẹ nípasẹ̀ ìjápọ̀ tó wà nísàlẹ̀. Má tíì lọ sí Microsoft.",
+    "m365StepNetwork": "Nínú taabu òfo yẹn, ṣí DevTools → Network, kí o sì tan Preserve log kí o tó lọ sí ojú ìwé náà. Jẹ́ kí DevTools ṣí sílẹ̀.",
+    "m365StepCopy": "Lẹ́yìn wíwọlé, wá ìbéèrè sí https://login.microsoftonline.com/common/oauth2/nativeclient nínú Network, kí o sì ṣe àdàkọ gbogbo Request URL rẹ̀. Má ṣe ṣe àdàkọ URL wrongplace tó wà ní ìkẹyìn lórí ọ̀pá àdírẹ́sì.",
+    "m365PrivateUrlHint": "URL ìbéèrè náà ní ẹ̀rí ìdánimọ̀ tí a lè lò lẹ́ẹ̀kan ṣoṣo. Lẹ̀ ẹ́ síbí nìkan; má ṣe pín in tàbí fi sínú àwọn àkọsílẹ̀ ìṣẹ̀lẹ̀ láé.",
+    "m365Prepare": "Pèsè wíwọlé Microsoft",
+    "m365Preparing": "Ń pèsè wíwọlé…",
+    "m365OpenSignIn": "Ṣí taabu òfo",
+    "m365CallbackLabel": "Gbogbo Request URL ti nativeclient",
+    "m365Connecting": "Ń sopọ̀…",
+    "m365NewAttempt": "Bẹ̀rẹ̀ ìgbìyànjú tuntun",
+    "m365PrepareError": "Kò ṣeé ṣe láti pèsè wíwọlé Microsoft. Gbìyànjú lẹ́ẹ̀kan sí i.",
+    "m365ExchangeError": "Kò ṣeé ṣe láti parí wíwọlé Microsoft. Bẹ̀rẹ̀ ìgbìyànjú tuntun.",
+    "m365InvalidCallback": "Lẹ gbogbo Request URL ti nativeclient tí ó ní ẹyọ kan ti párámítà code àti párámítà state tó bá a mu láti inú ìgbìyànjú yìí. A kò gba àwọn kóòdù nìkan tàbí àwọn URL wrongplace."
   },
   "cursorAuthModal": {
     "title": "So Cursor pọ̀",
@@ -15196,6 +15250,63 @@
       "saved": "A ti fi àwọn òfin ìdádúró pamọ́",
       "saveFailed": "Kò lè fi àwọn òfin ìdádúró pamọ́"
     },
+    "errorRules": {
+      "title": "Àwọn òfin ìdádúró fún àṣìṣe",
+      "subtitle": "Dá àwọn àṣìṣe olùpèsè mọ̀ nípa ipò HTTP, ọ̀rọ̀ àṣìṣe, tàbí méjèèjì, kí o sì yan ohun tí a ó dá dúró àti fún ìgbà mélòó. Àwọn òfin wọ̀nyí ń ṣiṣẹ́ ṣáájú àwọn tí a kọ́ sínú rẹ̀.",
+      "rulesHeading": "Àwọn òfin",
+      "rulesEmpty": "Kò sí òfin kankan síbẹ̀.",
+      "addRule": "Ṣàfikún òfin",
+      "provider": "Olùpèsè",
+      "providerPlaceholder": "àpẹẹrẹ openai",
+      "status": "Ipò HTTP",
+      "statusPlaceholder": "Èyíkéyìí",
+      "match": "Ọ̀rọ̀ àṣìṣe ní",
+      "matchPlaceholder": "Ọ̀rọ̀ èyíkéyìí",
+      "matchHint": "Òfin àkọ́kọ́ tí ó bá mu ni a ó lò. Ọ̀rọ̀ àṣìṣe jẹ́ ọ̀rọ̀ lásán tí kò ka lẹ́tà ńlá àti kékeré sí, kì í ṣe ìfihàn déédéé (regex). Àyè òfìfo bá ohun gbogbo mu.",
+      "scope": "Dá dúró",
+      "scopes": {
+        "connection": "Ìsopọ̀ yìí",
+        "model": "Àwòṣe yìí nìkan",
+        "provider": "Gbogbo olùpèsè"
+      },
+      "reason": "Ìdí",
+      "reasonAuto": "Aládàáṣe",
+      "reasons": {
+        "quota_exhausted": "Ìpín ti tán",
+        "rate_limit_exceeded": "Ó ti kọjá ààlà ìyára",
+        "auth_error": "Àṣìṣe ìfàṣẹsí",
+        "model_capacity": "Àwòṣe ti kún",
+        "server_error": "Àṣìṣe olùpín",
+        "unknown": "Òmíràn"
+      },
+      "duration": "Ìgbà",
+      "durations": {
+        "auto": "Àìyípadà",
+        "30m": "Ìṣẹ́jú 30",
+        "1h": "Wákàtí 1",
+        "5h": "Wákàtí 5",
+        "24h": "Wákàtí 24",
+        "custom": "Àdáni"
+      },
+      "customMinutes": "Ìṣẹ́jú (1 sí 43200)",
+      "remove": "Yọ kúrò",
+      "defaultsHeading": "Àìyípadà fún ìkùnà tí kò ní òfin",
+      "defaultsHint": "Àṣàyàn, fún olùpèsè kọ̀ọ̀kan. A máa lò ó nìkan nígbà tí kò sí òfin tí ó bá àṣìṣe 402, 403, 408, 429 tàbí 5xx mu. Àwọn àṣìṣe ìbéèrè bíi 400 kì í ní ipa rárá.",
+      "defaultsEmpty": "A kò ṣètò àìyípadà. Àwọn àṣìṣe tí kò ní òfin máa ń tẹ̀lé ìhùwàsí tí a kọ́ sínú rẹ̀.",
+      "addDefault": "Ṣàfikún àìyípadà",
+      "errors": {
+        "provider": "Tẹ olùpèsè sí i.",
+        "condition": "Ṣètò ipò HTTP, ọ̀rọ̀ àṣìṣe, tàbí méjèèjì.",
+        "status": "Lo ipò láàárín 100 àti 599.",
+        "duration": "Tẹ ìṣẹ́jú 1 sí 43200.",
+        "duplicateDefault": "Olùpèsè yìí ti ní àìyípadà tẹ́lẹ̀.",
+        "tooMany": "Òfin 50 ní pàtàkì jùlọ."
+      },
+      "save": "Fi àwọn òfin àṣìṣe pamọ́",
+      "saved": "A ti fi àwọn òfin àṣìṣe pamọ́",
+      "saveFailed": "A kò lè fi àwọn òfin àṣìṣe pamọ́",
+      "loadFailed": "A kò lè gbé àwọn òfin àṣìṣe wọlé"
+    },
     "list": {
       "title": "Àwọn ìsopọ̀ tí kò sí nínú ìtọ́sọ́nà",
       "subtitle": "Àwọn ìdádúró àti títìpa àwòṣe máa ń parí fúnra wọn. Pa wọ́n rẹ́ láti mú ìsopọ̀ padà sí ìtọ́sọ́nà ní báyìí.",
@@ -16029,5 +16140,28 @@
     "greetingFallbackName": "yìí",
     "errNoReply": "⚠️ Kò sí ìdáhùn láti ọwọ́ gateway.",
     "btnSend": "Fún"
+  },
+  "falNative": {
+    "title": "Fal abinibi awọn awoṣe",
+    "description": "Ṣe afẹri aaye ipari kan, gbe ero rẹ, ki o mu awọn igbewọle ti o ni akọsilẹ ṣiṣẹ. Ipo isinyi ati ṣiṣanwọle abinibi wa lọtọ.",
+    "connectionRequired": "Ṣafikun asopọ bọtini Fal API akọkọ.",
+    "category": "Ẹka",
+    "endpoint": "Ipari ID",
+    "reasoning": "Iṣakoso idi",
+    "input": "Iṣagbewọle JSON abinibi (awọn akojọpọ ṣe idaduro aṣẹ wọn)",
+    "transport": "Gbigbe",
+    "run": "Ṣiṣe awoṣe",
+    "job": "Ti fipamọ iṣẹ ID",
+    "register": "Iforukọsilẹ aaye ipari tabi idalẹnu eto",
+    "schema": "OpenAPI 3 eto",
+    "download": "Download artifact",
+    "newGeneration": "Titun iran",
+    "submissionUnknown": "SUBMISSION_UNKNOWN: iṣẹ oke le tun nṣiṣẹ. Bọsipọ iwe atilẹba ṣaaju ki o to bẹrẹ iran miiran.",
+    "recover": "Bọsipọ ifisilẹ atilẹba",
+    "recoveryRecord": "Ifisilẹ ti o fipamọ",
+    "recoveryMismatch": "Imularada nilo asopọ atilẹba ati apẹrẹ ti o baamu deede lẹhin ti o tun gbejade. Ko si ibeere tuntun ti a firanṣẹ.",
+    "recoveryHelp": "Imularada tun lo fifuye atilẹba ati bọtini. Lẹhin ti tun gbejade, mu pada ipari ipari gangan, asopọ, gbigbe ati titẹ sii. Titun iran bẹrẹ kan lọtọ billable ìbéèrè. O to awọn owo-owo 20 ti wa ni ipamọ ni taabu yii.",
+    "streamIncomplete": "ṣiṣan naa pari laisi iṣẹlẹ ipari pipe. Ipari ti oke jẹ aimọ.",
+    "streamError": "Omi ti o wa ni oke royin aṣiṣe kan. Awọn faili ti o gba wa wa."
   }
 }

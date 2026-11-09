@@ -1,4 +1,15 @@
 {
+  "accountPreferences": {
+    "title": "Zaɓuɓɓukan asusu",
+    "description": "Zaɓi asusu da dama don amfani da su da farko ko ajiye su a madadin wannan combo. Tsarin sarrafa hanya ta atomatik yana jera asusu a cikin kowane mataki. Asusun da ba a lissafo ba na al’ada ne. Izini, iyakokin ƙima da kuma haɗin da aka riga aka ɗaure ga zagayen magana har yanzu suna aiki.",
+    "preferred": "Za a fara amfani da shi",
+    "normal": "Na al’ada",
+    "reserve": "A madadin",
+    "excluded": "Ba za a yi amfani da shi ba",
+    "loading": "Ana loda asusu…",
+    "error": "An kasa loda asusu. Sake buɗe editan don sake gwadawa.",
+    "missing": "Asusun da babu shi ({id})"
+  },
   "codexKeyServiceMode": {
     "title": "Yanayin sabis na Codex don wannan maɓallin API",
     "description": "Yana aiki ga buƙatun Codex, har da samfurorin Codex da ke cikin haɗaɗɗun tsare-tsare. Yanayin da aka tilasta suna rinjayar saitunan abokin hulɗa, saitunan gaba ɗaya da tsoffin saitunan haɗi. Sauran masu samarwa ba sa canzawa.",
@@ -5722,6 +5733,7 @@
     "filterError": "Kuskure",
     "filterBanned": "An hana",
     "filterCreditsExhausted": "Kiredit Sun Ƙare",
+    "filterVerificationRequired": "Ana bukatar tantancewa",
     "accountSearchPlaceholder": "Nemo asusu…",
     "noFilteredConnections": "Babu haɗin da ya dace da matatar yanzu.",
     "failedSetAlias": "An kasa saita laƙabi",
@@ -7084,7 +7096,16 @@
     "chatgptConnectorLabel": "Mahaɗin ChatGPT na musamman",
     "doctorChecking": "Ana duban yanke…",
     "doctorCheck": "Duba yanke doctor",
-    "fallbackRetryBackendTitle": "Baya mara da maganin maimaitawa"
+    "fallbackRetryBackendTitle": "Baya mara da maganin maimaitawa",
+    "quotaRefreshCurrent": "Sabunta iyakar amfani ta yanzu",
+    "quotaRefreshCurrentHint": "Yana duba iyakar amfani ta wannan asusun ta yanzu ba tare da kashe maki na sake saiti ba.",
+    "quotaRefreshing": "Ana duba iyakar amfani…",
+    "quotaRefreshFresh": "An duba iyakar amfani. Sabar ce ke tantance samuwar asusun.",
+    "quotaRefreshFailed": "An kasa duba iyakar amfani. Bayanai na baya ba su canza ba.",
+    "quotaRefreshStale": "Sabar ta dawo da tsoffin bayanan iyakar amfani. Wannan ba sabon bayani ba ne.",
+    "quotaRefreshPartial": "Wani ɓangare na bayanan iyakar amfani kaɗai yake samuwa.",
+    "quotaWindowUnavailable": "Babu bayanin iyakar amfani na {window}",
+    "quotaConnectionRefreshFailed": "An gama duba iyakar amfani, amma an kasa sabunta jerin asusu."
   },
   "settings": {
     "title": "Saituna",
@@ -7976,6 +7997,11 @@
     "pricingShowingProviders": "Ana nuna {visible} cikin {total}",
     "pricingFilteredFrom": "(an tace daga {count})",
     "pricingShowMoreProviders": "Nuna ƙarin {count} ({remaining} sun rage)",
+    "pricingView": "Duba",
+    "pricingViewByProvider": "Ta mai bayarwa",
+    "pricingViewCompare": "Kwatanta samfura",
+    "pricingUnpriced": "Ba a saka farashi ba",
+    "pricingCompareEmpty": "Babu samfurin da fiye da ɗaya daga cikin waɗannan masu bayarwa ke bayarwa. Nemo samfurin don ganin tayin guda ɗaya.",
     "modelOverridesTitle": "Sauye-sauyen Samfuri",
     "modelOverridesDesc": "Sauya ƙwarewar provider/model da tsarin zaɓin hanya da tsara buƙata ke amfani da su. Abubuwan da ake nufi suna amfani da tsarin provider/model iri ɗaya da combos.",
     "searchModelOverrideTargets": "Nemi provider/model...",
@@ -9257,7 +9283,12 @@
       "statsTitle": "Ganowa tun sake farawa",
       "statsEmpty": "Babu ganowa tukuna.",
       "statsRequest": "Buƙatu"
-    }
+    },
+    "modalityBridgeVideoDrilldownEnabled": "Riƙe firamomin bidiyo da aka samo",
+    "modalityBridgeVideoDrilldownEnabledDesc": "Ba da izinin riƙe JPEG na ɗan lokaci kawai idan ingantacciyar buƙatar ta kuma saita drilldown: true. Ba a taɓa riƙe bidiyoyin asali ba.",
+    "modalityBridgeVideoDrilldownRemoteEnabled": "Ba da izinin zurfafa binciken firam ga waɗanda aka tantance",
+    "modalityBridgeVideoDrilldownRemoteEnabledDesc": "Ba da izinin maɓallan API su karanta kuma su share alamomin sarrafawarsu marasa bayyana kawai. Ba a yarda da shiga ba tare da tantancewa ba ko ta wani maɓalli daban.",
+    "modalityBridgeVideoDrilldownUsage": "JPEG da aka riƙe / baitoci"
   },
   "contextRtk": {
     "title": "Injin RTK",
@@ -11753,7 +11784,30 @@
     "copilotPolicyAcknowledge": "Na fahimta, haɗa",
     "tabPasteSetupToken": "Alamar saitin",
     "claudeSetupTokenDescription": "Gudanar da `claude setup-token` a cikin tasha kuma liƙa alamar da ya buga. Tana aiki na shekara ɗaya kuma ba ta da alamar sabuntawa. OmniRoute yana aika buƙatar gwaji ɗaya zuwa Anthropic kafin ya adana ta.",
-    "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
+    "claudeSetupTokenPlaceholder": "sk-ant-oat01-...",
+    "tabPasteRefreshToken": "Refresh Token",
+    "antigravityRefreshTokenDescription": "Manna alamar refresh na Google OAuth don Antigravity. OmniRoute ya inganta kuma ya musanya shi kafin ajiyewa.",
+    "antigravityRefreshTokenPlaceholder": "1//...",
+    "m365Title": "Shiga Microsoft 365 Copilot",
+    "m365UrlExpiredHint": "Fara sabon yunƙuri idan wa'adinsa ya ƙare kafin ka gama.",
+    "m365UrlExpires": "Wa'adin wannan URL na izini zai ƙare da ƙarfe",
+    "m365AuthUrlCopyHint": "Zaɓi cikakken URL na izini ka kwafa shi da Ctrl+C (Command+C a kan Mac), ko ka yi amfani da menu na kwafa na burauzarka. Ka liƙa shi cikin tab marar komai sai bayan ka kunna Preserve log.",
+    "m365AuthUrlLabel": "URL na izini (kwafa zuwa tab ɗin da aka shirya)",
+    "m365StepNavigate": "Kwafa URL na izini da ke ƙasa ka liƙa shi a sandar adireshin tab ɗin da aka shirya, sannan ka danna Enter don shiga.",
+    "m365StepPrepare": "Shirya shiga ta Microsoft don ƙirƙirar sabon yunƙuri.",
+    "m365StepOpen": "Buɗe tab marar komai a burauzarka ta amfani da mahaɗin da ke ƙasa. Kada ka je Microsoft tukuna.",
+    "m365StepNetwork": "A wannan tab marar komai, buɗe DevTools → Network ka kunna Preserve log kafin ka je wani adireshi. Ka bar DevTools a buɗe.",
+    "m365StepCopy": "Bayan ka shiga, nemo buƙatar zuwa https://login.microsoftonline.com/common/oauth2/nativeclient a Network ka kwafa cikakken Request URL nata. Kada ka kwafa URL na wrongplace na ƙarshe daga sandar adireshin.",
+    "m365PrivateUrlHint": "URL na buƙatar yana ɗauke da shaidar shiga ta amfani sau ɗaya. Ka liƙa shi a nan kawai; kada ka taɓa raba shi ko saka shi cikin rajistocin aiki.",
+    "m365Prepare": "Shirya shiga ta Microsoft",
+    "m365Preparing": "Ana shirya shiga…",
+    "m365OpenSignIn": "Buɗe tab marar komai",
+    "m365CallbackLabel": "Cikakken Request URL na nativeclient",
+    "m365Connecting": "Ana haɗawa…",
+    "m365NewAttempt": "Fara sabon yunƙuri",
+    "m365PrepareError": "An kasa shirya shiga ta Microsoft. Sake gwadawa.",
+    "m365ExchangeError": "An kasa kammala shiga ta Microsoft. Fara sabon yunƙuri.",
+    "m365InvalidCallback": "Liƙa cikakken Request URL na nativeclient mai ɗauke da code guda ɗaya da state da ya dace daga wannan yunƙurin. Ba a karɓar lambobin kaɗai ko URL na wrongplace."
   },
   "cursorAuthModal": {
     "title": "Haɗa Cursor",
@@ -15196,6 +15250,63 @@
       "saved": "An ajiye ƙa'idojin dakatawa",
       "saveFailed": "An kasa ajiye ƙa'idojin dakatawa"
     },
+    "errorRules": {
+      "title": "Ƙa'idojin dakatawa saboda kurakurai",
+      "subtitle": "Gane kurakuran mai bayarwa ta matsayin HTTP, rubutun kuskure ko duka biyun, kuma zaɓi abin da za a dakatar da tsawon lokaci. Waɗannan ƙa'idoji suna aiki kafin ginannun ƙa'idoji.",
+      "rulesHeading": "Ƙa'idoji",
+      "rulesEmpty": "Babu ƙa'idoji tukuna.",
+      "addRule": "Ƙara ƙa'ida",
+      "provider": "Mai bayarwa",
+      "providerPlaceholder": "misali openai",
+      "status": "Matsayin HTTP",
+      "statusPlaceholder": "Kowane",
+      "match": "Rubutun kuskure ya ƙunshi",
+      "matchPlaceholder": "Kowane rubutu",
+      "matchHint": "Ƙa'ida ta farko da ta dace ce ke aiki. Rubutun kuskure rubutu ne mai sauƙi wanda baya bambanta manya da ƙananan haruffa, ba furuci na yau da kullum ba ne. Fili mara komai yana dacewa da komai.",
+      "scope": "Dakatar",
+      "scopes": {
+        "connection": "Wannan haɗin",
+        "model": "Wannan samfurin kawai",
+        "provider": "Duk mai bayarwa"
+      },
+      "reason": "Dalili",
+      "reasonAuto": "Ta atomatik",
+      "reasons": {
+        "quota_exhausted": "Adadin izini ya ƙare",
+        "rate_limit_exceeded": "An wuce iyakar gudu",
+        "auth_error": "Kuskuren tantancewa",
+        "model_capacity": "Samfurin ya cika",
+        "server_error": "Kuskuren sabar",
+        "unknown": "Wani"
+      },
+      "duration": "Tsawon lokaci",
+      "durations": {
+        "auto": "Tsoho",
+        "30m": "Minti 30",
+        "1h": "Awa 1",
+        "5h": "Awa 5",
+        "24h": "Awa 24",
+        "custom": "Na musamman"
+      },
+      "customMinutes": "Mintuna (1 zuwa 43200)",
+      "remove": "Cire",
+      "defaultsHeading": "Tsoho don gazawar da babu ƙa'ida",
+      "defaultsHint": "Na zaɓi, ga kowane mai bayarwa. Yana aiki ne kawai idan babu ƙa'idar da ta dace da kuskuren 402, 403, 408, 429 ko 5xx. Kurakuran buƙata kamar 400 ba a taɓa shafar su.",
+      "defaultsEmpty": "Ba a saita tsoho ba. Kurakuran da babu ƙa'ida suna riƙe da ginannen hali.",
+      "addDefault": "Ƙara tsoho",
+      "errors": {
+        "provider": "Shigar da mai bayarwa.",
+        "condition": "Saita matsayin HTTP, rubutun kuskure ko duka biyun.",
+        "status": "Yi amfani da matsayi tsakanin 100 da 599.",
+        "duration": "Shigar da minti 1 zuwa 43200.",
+        "duplicateDefault": "Wannan mai bayarwa yana da tsoho tuni.",
+        "tooMany": "Ƙa'idoji 50 a mafi yawa."
+      },
+      "save": "Ajiye ƙa'idojin kuskure",
+      "saved": "An ajiye ƙa'idojin kuskure",
+      "saveFailed": "Ba a iya ajiye ƙa'idojin kuskure ba",
+      "loadFailed": "Ba a iya loda ƙa'idojin kuskure ba"
+    },
     "list": {
       "title": "Hanyoyin haɗi da ke wajen routing",
       "subtitle": "Lokutan dakatawa da kullen samfuri suna ƙarewa da kansu. Share su don mayar da hanyar haɗi cikin routing yanzu.",
@@ -16029,5 +16140,28 @@
     "greetingFallbackName": "a nan",
     "errNoReply": "⚠️ Babu amsa daga shafin.",
     "btnSend": "Aika"
+  },
+  "falNative": {
+    "title": "Samfuran Fal na asali",
+    "description": "Nemo wurin ƙarshe, loda tsarin bayanansa, sannan gudanar da shi da abubuwan shigarwa da aka bayyana a takardunsa. Matsayin layin jira da watsa bayanai kai tsaye na Fal suna nan dabam.",
+    "connectionRequired": "Fara da ƙara haɗi mai maɓallin API na Fal.",
+    "category": "Rukuni",
+    "endpoint": "ID na wurin ƙarshe",
+    "reasoning": "Sarrafa tunani",
+    "input": "Abin shigarwa na JSON a tsarin Fal (jerin bayanai suna riƙe da tsarinsu)",
+    "transport": "Hanyar aika buƙata",
+    "run": "Gudanar da samfuri",
+    "job": "ID na aikin da aka adana",
+    "register": "Yi rajistar wurin ƙarshe ko madadin tsarin bayanai",
+    "schema": "Tsarin bayanai na OpenAPI 3",
+    "download": "Sauke fayil ɗin sakamako",
+    "newGeneration": "__MISSING__",
+    "submissionUnknown": "__MISSING__",
+    "recover": "__MISSING__",
+    "recoveryRecord": "__MISSING__",
+    "recoveryMismatch": "__MISSING__",
+    "recoveryHelp": "__MISSING__",
+    "streamIncomplete": "__MISSING__",
+    "streamError": "__MISSING__"
   }
 }

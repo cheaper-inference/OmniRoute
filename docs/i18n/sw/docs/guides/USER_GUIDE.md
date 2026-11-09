@@ -353,82 +353,82 @@ Muundo: cc/claude-opus-4-7
 
 ---
 
-## 🚀 Usambazaji
+## 🚀 Upelekaji
 
-### Usakinishaji wa kimataifa wa npm (Unapendekezwa)
+### Usakinishaji wa npm wa kimataifa (Inapendekezwa)
 
 ```bash
 npm install -g omniroute
 
-# Unda saraka ya usanidi
+# Create config directory
 mkdir -p ~/.omniroute
 
-# Unda faili la .env (angalia .env.example)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# Anzisha seva
+# Start server
 omniroute
-# Au kwa port maalum:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI hupakia `.env` kiotomatiki kutoka `~/.omniroute/.env` au `./.env`.
+CLI hupakia `.env` kiotomatiki kutoka `~/.omniroute/.env` au `./.env`. `./.env` katika saraka ya kufanya kazi inaweza kuweka tu orodha fupi ya ruhusa ya funguo (bandari, `REQUIRE_API_KEY`, eneo na mipangilio ya rangi); weka kila kitu kingine `~/.omniroute/.env`. Tazama [mikataba ya uzinduzi CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### Hali ya trei
 
-Anzisha OmniRoute katika trei ya mfumo:
+Anzisha OmniRoute kwenye tray ya mfumo:
 
 ```bash
 omniroute serve --tray
 ```
 
-Amri hukamilika baada ya seva na trei kuwa tayari.
+Amri inarudi baada ya seva na tray kuwa tayari.
 
-Seva huendelea kufanya kazi bila terminali.
+Seva inaendelea bila terminal.
 
-Hali ya trei inatumia macOS, Windows na vipindi vya Linux vyenye kiolesura cha picha. Hali ya trei haifungui dashibodi kiotomatiki.
+Hali ya trei inasaidia macOS, Windows, na vipindi vya picha Linux. Hali ya trei haifungui dashibodi kiotomatiki.
 
-Tumia menyu ya trei kutekeleza vitendo hivi:
+Tumia menyu ya trei kwa vitendo hivi:
 
 - Fungua dashibodi.
 - Fungua `/dashboard/logs`.
-- Badilisha uanzishaji otomatiki.
-- Simamisha OmniRoute.
+- Badilisha kuanza-otomatiki.
+- Acha OmniRoute.
 
-Usichanganye `--tray` na chaguo hizi:
+Usichanganye `--tray` na chaguzi hizi:
 
 - `--daemon`
 - `--log`
 - `--no-recovery`
 
-Hali hizi zinahitaji umiliki tofauti wa mchakato.
+Njia hizi zinahitaji umiliki tofauti wa mchakato.
 
-Washa uanzishaji wakati wa kuingia kwenye mashine mara inayofuata:
+Washa uanzishaji kwa kuingia kwa mashine inayofuata:
 
 ```bash
 omniroute autostart enable
 ```
 
-Uanzishaji otomatiki hutumia hali ya trei kwenye macOS, Windows na vipindi vya Linux vyenye kiolesura cha picha. Linux isiyo na kiolesura cha picha hutumia huduma iliyopo ya mtumiaji ya systemd.
+Kuanzisha kiotomatiki hutumia hali ya trei kwenye macOS, Windows, na vipindi vya picha Linux. Linux isiyo na kichwa hutumia huduma ya mtumiaji iliyopo ya mfumo.
 
-Zima uanzishaji wakati wa kuingia:
+Lemaza kuanza wakati wa kuingia:
 
 ```bash
 omniroute autostart disable
 ```
 
-### Kuondoa Usakinishaji
+### Inaondoa
 
-Usipohitaji tena OmniRoute, tunatoa hati mbili za haraka za kuiondoa kabisa:
+Wakati hauitaji tena OmniRoute, tunatoa hati mbili za haraka za uondoaji safi:
 
-| Amri                     | Kitendo                                                                                  |
-| ------------------------ | ---------------------------------------------------------------------------------------- |
-| `npm run uninstall`      | Huondoa programu ya mfumo lakini **huhifadhi DB na usanidi wako** katika `~/.omniroute`. |
-| `npm run uninstall:full` | Huondoa programu NA **hufuta kabisa usanidi, funguo na hifadhidata zote**.               |
+| Amri                     | Kitendo                                                                               |
+| ------------------------ | ------------------------------------------------------------------------------------- |
+| `npm run uninstall`      | Huondoa programu ya mfumo lakini** huweka DB na usanidi wako** katika `~/.omniroute`. |
+| `npm run uninstall:full` | Huondoa programu AND kabisa** hufuta usanidi, funguo na hifadhidata zote** .          |
 
-> Kumbuka: Ili kutekeleza amri hizi, nenda kwenye folda ya mradi wa OmniRoute (ikiwa uliinakili kwa clone) na uzitekeleze. Vinginevyo, ikiwa ilisakinishwa kimataifa, unaweza kutekeleza tu `npm uninstall -g omniroute`.
+> Kumbuka: Ili kutekeleza amri hizi, nenda kwenye folda ya mradi wa OmniRoute (ikiwa umeiunda) na uiendeshe. Vinginevyo, ikiwa imewekwa kimataifa, unaweza kukimbia tu `npm uninstall -g omniroute`.
 
-### Usambazaji wa VPS
+### VPS Upelekaji
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -444,21 +444,21 @@ export NEXT_PUBLIC_BASE_URL="http://localhost:20128"
 export API_KEY_SECRET="endpoint-proxy-api-key-secret"
 
 npm run start
-# Au: pm2 start npm --name omniroute -- start
+# Or: pm2 start npm --name omniroute -- start
 ```
 
-### Usambazaji wa PM2 (Kumbukumbu Ndogo)
+### Usambazaji wa PM2 (Kumbukumbu ya Chini)
 
-Kwa seva zenye RAM ndogo, tumia chaguo la kikomo cha kumbukumbu:
+Kwa seva zilizo na kikomo RAM, tumia chaguo la kikomo cha kumbukumbu:
 
 ```bash
-# Kwa kikomo cha 512MB (chaguomsingi)
+# With 512MB limit (default)
 pm2 start npm --name omniroute -- start
 
-# Au kwa kikomo maalum cha kumbukumbu
+# Or with custom memory limit
 OMNIROUTE_MEMORY_MB=512 pm2 start npm --name omniroute -- start
 
-# Au ukitumia ecosystem.config.js
+# Or using ecosystem.config.js
 pm2 start ecosystem.config.js
 ```
 
@@ -487,30 +487,30 @@ module.exports = {
 ### Docker
 
 ```bash
-# Unda image (chaguomsingi = runner-cli yenye codex/claude/droid zilizosakinishwa mapema)
+# Build image (default = runner-cli with codex/claude/droid preinstalled)
 docker build -t omniroute:cli .
 
-# Hali inayohamishika (inapendekezwa)
+# Portable mode (recommended)
 docker run -d --name omniroute -p 20128:20128 --env-file ./.env -v omniroute-data:/app/data omniroute:cli
 ```
 
-Kwa hali iliyounganishwa na mfumo mwenyeji pamoja na faili tekelezi za CLI, angalia sehemu ya Docker katika nyaraka kuu.
+Kwa hali iliyounganishwa ya seva pangishi na jozi za CLI, angalia sehemu ya Docker katika hati kuu.
 
-### Void Linux (xbps-src)
+### Linux tupu (xbps-src)
 
-Watumiaji wa Void Linux wanaweza kufungasha na kusakinisha OmniRoute kwa njia asilia kwa kutumia mfumo wa ukalimani mtambuka wa `xbps-src`. Hii huendesha kiotomatiki uundaji wa pekee wa Node.js pamoja na viunganishi asilia vinavyohitajika vya `better-sqlite3`.
+Watumiaji wa Linux tupu wanaweza kufunga na kusakinisha OmniRoute asili kwa kutumia mfumo mtambuka `xbps-src`. Hii inaboresha muundo wa Node.js unaojitegemea pamoja na vifungo asilia `better-sqlite3` vinavyohitajika.
 
 <details>
 <summary><b>Tazama kiolezo cha xbps-src</b></summary>
 
 ```bash
-# Faili ya kiolezo ya 'omniroute'
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
 hostmakedepends="nodejs python3 make"
 depends="openssl"
-short_desc="Lango jumuishi la AI lenye uelekezaji mahiri kwa watoa huduma wengi wa LLM"
+short_desc="Universal AI gateway with smart routing for multiple LLM providers"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
@@ -525,7 +525,7 @@ export npm_config_fund=false
 export npm_config_audit=false
 
 do_build() {
-	# Tambua usanifu lengwa wa CPU kwa node-gyp
+	# Determine target CPU arch for node-gyp
 	local _gyp_arch
 	case "$XBPS_TARGET_MACHINE" in
 		aarch64*) _gyp_arch=arm64 ;;
@@ -534,29 +534,29 @@ do_build() {
 		*) _gyp_arch=x64 ;;
 	esac
 
-	# 1) Sakinisha vitegemezi vyote – ruka hati
+	# 1) Install all deps – skip scripts
 	NODE_ENV=development npm ci --ignore-scripts
 
-	# 2) Unda kifurushi cha pekee cha Next.js
+	# 2) Build the Next.js standalone bundle
 	npm run build
 
-	# 3) Nakili rasilimali tuli kwenye kifurushi cha pekee
+	# 3) Copy static assets into standalone
 	cp -r .next/static .next/standalone/.next/static
 	[ -d public ] && cp -r public .next/standalone/public || true
 
-	# 4) Kalimani kiunganishi asilia cha better-sqlite3
+	# 4) Compile better-sqlite3 native binding
 	local _node_gyp=/usr/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js
 	(cd node_modules/better-sqlite3 && node "$_node_gyp" rebuild --arch="$_gyp_arch")
 
-	# 5) Weka kiunganishi kilichokalimaniwa kwenye kifurushi cha pekee
+	# 5) Place the compiled binding into the standalone bundle
 	local _bs3_release=.next/standalone/node_modules/better-sqlite3/build/Release
 	mkdir -p "$_bs3_release"
 	cp node_modules/better-sqlite3/build/Release/better_sqlite3.node "$_bs3_release/"
 
-	# 6) Ondoa vifurushi vya sharp vinavyotegemea usanifu
+	# 6) Remove arch-specific sharp bundles
 	rm -rf .next/standalone/node_modules/@img
 
-	# 7) Nakili vitegemezi vya wakati wa utekelezaji vya pino vilivyoachwa na uchanganuzi tuli wa Next.js:
+	# 7) Copy pino runtime deps omitted by Next.js static analysis:
 	for _mod in pino-abstract-transport split2 process-warning; do
 		cp -r "node_modules/$_mod" .next/standalone/node_modules/
 	done
@@ -570,7 +570,7 @@ do_install() {
 	vmkdir usr/lib/omniroute/.next
 	vcopy .next/standalone/. usr/lib/omniroute/.next/standalone
 
-	# Zuia uondoaji wa saraka tupu za kipanga njia cha programu cha Next.js na kitendo cha baada ya usakinishaji
+	# Prevent removal of empty Next.js app router dirs by the post-install hook
 	for _d in \
 		.next/standalone/.next/server/app/dashboard \
 		.next/standalone/.next/server/app/dashboard/settings \
@@ -598,30 +598,30 @@ post_install() {
 
 ### Vigezo vya Mazingira
 
-| Kigezo                                  | Chaguo-msingi                             | Maelezo                                                                                                                                                  |
-| --------------------------------------- | ----------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `JWT_SECRET`                            | `omniroute-default-secret-change-me`      | Siri ya kusaini JWT (**ibadilishe katika mazingira ya uzalishaji**)                                                                                      |
-| `INITIAL_PASSWORD`                      | `CHANGEME`                                | Nenosiri la kuingia kwa mara ya kwanza                                                                                                                   |
-| `DATA_DIR`                              | `~/.omniroute`                            | Saraka ya data (hifadhidata, matumizi, kumbukumbu)                                                                                                       |
-| `PORT`                                  | chaguo-msingi la mfumo                    | Porti ya huduma (`20128` katika mifano)                                                                                                                  |
-| `HOSTNAME`                              | chaguo-msingi la mfumo                    | Seva pangishi ya kuunganisha (chaguo-msingi la Docker ni `0.0.0.0`)                                                                                      |
-| `NODE_ENV`                              | chaguo-msingi la mazingira ya utekelezaji | Weka `production` kwa ajili ya upelekaji                                                                                                                 |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`                  | URL ya msingi ya umma inayoonyeshwa kwenye dashibodi na kufichuliwa kwa seva (inachukua nafasi ya `BASE_URL` ya zamani)                                  |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`                   | URL ya msingi ya kituo cha usawazishaji wa wingu (inachukua nafasi ya `CLOUD_URL` ya zamani)                                                             |
-| `API_KEY_SECRET`                        | `endpoint-proxy-api-key-secret`           | Siri ya HMAC kwa funguo za API zinazozalishwa                                                                                                            |
-| `REQUIRE_API_KEY`                       | `false`                                   | Lazimisha ufunguo wa API wa Bearer kwenye `/v1/*`                                                                                                        |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                                   | Ruhusu watumiaji wa dashibodi waliothibitishwa kufichua thamani kamili za funguo za API zilizohifadhiwa wanapohitaji                                     |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                      | Ratiba ya kuonyesha upya data iliyohifadhiwa ya Provider Limits upande wa seva; vitufe vya kuonyesha upya kwenye UI bado huanzisha usawazishaji mwenyewe |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                                   | Zima vijipicha vya kiotomatiki vya SQLite kabla ya uandishi/uletaji/urejeshaji; hifadhi rudufu za mikono bado hufanya kazi                               |
-| `APP_LOG_TO_FILE`                       | `true`                                    | Huwezesha kuandika kumbukumbu za programu na ukaguzi kwenye diski                                                                                        |
-| `AUTH_COOKIE_SECURE`                    | `false`                                   | Lazimisha kidakuzi cha uthibitishaji cha `Secure` (nyuma ya proksi geuzi ya HTTPS)                                                                       |
-| `CLOUDFLARED_BIN`                       | haijawekwa                                | Tumia faili tekelezi iliyopo ya `cloudflared` badala ya upakuaji unaodhibitiwa                                                                           |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                                   | Usafirishaji kwa Quick Tunnels zinazodhibitiwa (`http2`, `quic`, au `auto`)                                                                              |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                                     | Kikomo cha heap cha Node.js katika MB                                                                                                                    |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                      | Idadi ya juu zaidi ya maingizo ya akiba ya prompt                                                                                                        |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                     | Idadi ya juu zaidi ya maingizo ya akiba ya kisemantiki                                                                                                   |
+| Inaweza kubadilika                      | Chaguomsingi                        | Maelezo                                                                                                                                                              |
+| --------------------------------------- | ----------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `JWT_SECRET`                            | _(iliyotengenezwa kiotomatiki)_     | JWT ya kutia saini kwa siri — ilitolewa kiotomatiki kwa mara ya kwanza na kuendelea hadi `server.env`; iweke kwa uwazi wakati saraka ya data ni ya muda mfupi        |
+| `INITIAL_PASSWORD`                      | _(haijawekwa)_                      | Nenosiri la kwanza la kuingia. usakinishaji wa npm/source huanza na `CHANGEME`: ubadilishe. Haijawekwa: mchawi wa kuabiri                                            |
+| `DATA_DIR`                              | `~/.omniroute`                      | Saraka ya data (db, matumizi, kumbukumbu)                                                                                                                            |
+| `PORT`                                  | msingi wa mfumo                     | Bandari ya huduma (`20128` katika mifano)                                                                                                                            |
+| `HOSTNAME`                              | msingi wa mfumo                     | Unganisha seva pangishi (Docker chaguomsingi kwa `0.0.0.0`)                                                                                                          |
+| `NODE_ENV`                              | chaguo-msingi ya wakati wa kukimbia | Weka `production` kwa kupelekwa                                                                                                                                      |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`            | Msingi wa umma URL ulijitokeza kwenye dashibodi na kufichuliwa kwa seva (inachukua nafasi ya legacy `BASE_URL`)                                                      |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`             | URL ya msingi ya usawazishaji wa wingu (inachukua nafasi `CLOUD_URL` ya urithi)                                                                                      |
+| `API_KEY_SECRET`                        | _(iliyotengenezwa kiotomatiki)_     | Siri HMAC ya funguo za API zinazozalishwa — zinazozalishwa kiotomatiki mara ya kwanza na kuendelea hadi `server.env`                                                 |
+| `REQUIRE_API_KEY`                       | `false`                             | Tekeleza kitufe cha Bearer API kwenye `/v1/*`                                                                                                                        |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                             | Ruhusu watumiaji wa dashibodi walioidhinishwa kufichua thamani kamili za API zilizohifadhiwa wanapohitaji                                                            |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                | Mwanguko wa kuonyesha upya upande wa seva kwa data iliyohifadhiwa ya Vikomo vya Mtoa Huduma; UI vibonye vya kuonyesha upya bado vinasababisha usawazishaji wa mikono |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                             | Zima vijipicha otomatiki SQLite kabla ya writes/import/restore; chelezo za mikono bado zinafanya kazi                                                                |
+| `APP_LOG_TO_FILE`                       | `true`                              | Huwasha matokeo ya programu na ukaguzi wa kumbukumbu kwenye diski                                                                                                    |
+| `AUTH_COOKIE_SECURE`                    | `false`                             | Lazimisha kidakuzi cha `Secure` auth (nyuma ya proksi HTTPS ya kinyume)                                                                                              |
+| `CLOUDFLARED_BIN`                       | haijawekwa                          | Tumia `cloudflared` binary iliyopo badala ya upakuaji unaodhibitiwa                                                                                                  |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                             | Usafiri wa Njia za Haraka zinazosimamiwa (`http2`, `quic`, au `auto`)                                                                                                |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                               | kikomo cha lundo la Node.js katika MB                                                                                                                                |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                | Maingizo ya akiba ya haraka zaidi                                                                                                                                    |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                               | Maingizo ya juu zaidi ya akiba ya semantic                                                                                                                           |
 
-Kwa marejeleo kamili ya vigezo vya mazingira, angalia [README](../README.md).
+Kwa rejeleo kamili la kutofautisha la mazingira, angalia [README](../README.md).
 
 ---
 
