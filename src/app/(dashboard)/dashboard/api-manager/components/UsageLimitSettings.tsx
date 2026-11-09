@@ -59,7 +59,7 @@ export function UsageLimitSettings({
           placeholder="0.00"
         />
       </div>
-      <p className="mt-2 text-[11px] text-text-muted">{t("quotaWindowDescription")}</p>
+      <p className="mt-2 text-xs text-text-muted">{t("quotaWindowDescription")}</p>
     </div>
   );
 }

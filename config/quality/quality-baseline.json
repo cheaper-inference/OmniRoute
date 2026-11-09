@@ -385,6 +385,20 @@
       "eps": 0,
       "_seeded_2026_07_28": "Measured by scripts/check/check-rtl-ratchet.mjs. tests/unit/ui/rtl-logical-classes.test.tsx pins four components and states it is partial (#3541); this bounds the remainder.",
       "_tighten_2026_10_22_kea7886": "1214 -> 843. Measured rtlPhysicalClasses=702 by scripts/check/check-rtl-ratchet.mjs on feat/new-uikit-task42 (feat/new-uikit af385849 + docs): the UI kit migration (KEA-7886) replaced physical left/right utilities across the dashboard. 843 = ceil(702 * 1.2), keeping the velocity-phase 20% headroom (_policy) instead of freezing at the live count."
+    },
+    "typeScaleSubFloorSizes": {
+      "value": 914,
+      "direction": "down",
+      "eps": 0,
+      "dedicatedGate": true,
+      "_seeded_2026_11_09": "#19066 block 7. Measured by scripts/check/check-type-scale-ratchet.mjs (text-[8px]..text-[11px], fractions included, in src/): 971 on release/v3.8.54 565dda8d, 914 after the same PR moved 57 non-dense hints and empty states from text-[11px] to text-xs. Ceiling = the live count, without the velocity 20% headroom, on the owner's instruction: it may only go down. Enforced by the pre-commit hook and tests/unit/check-type-scale-ratchet.test.ts."
+    },
+    "typeScaleFontBold": {
+      "value": 254,
+      "direction": "down",
+      "eps": 0,
+      "dedicatedGate": true,
+      "_seeded_2026_11_09": "#19066 block 7. Measured by scripts/check/check-type-scale-ratchet.mjs (font-bold in src/; the kit's bold weight is 600, font-semibold): 254 on release/v3.8.54 565dda8d. Ceiling = the live count, without the velocity 20% headroom, on the owner's instruction: it may only go down."
     }
   },
   "_coverage_note": "Pisos anti-flake ~2pt abaixo do real do CI mergeado MEDIDO COM os 135 testes religados (run 27247237268: statements 78.4 / lines 78.4 / functions 83.84 / branches 75.73). O religamento da 6A.1 HONESTIFICOU a regua: os ~82.5 anteriores eram inflados porque modulos nunca importados ficavam fora do denominador do c8. Apertar via --require-tighten na Fase 6A (2026-06-16).",
