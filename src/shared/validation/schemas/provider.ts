@@ -19,6 +19,7 @@ import {
   customHeadersSchema,
 } from "./misc.ts";
 import { isValidProviderIconUrl } from "@/shared/validation/iconUrl";
+import { THINKING_REPLAY_MODES } from "@/shared/constants/modelCompat";
 import {
   MODEL_CONCURRENCY_MAX_CAP,
   MODEL_CONCURRENCY_MAX_KEY_LENGTH,
@@ -318,6 +319,10 @@ export const providerModelMutationSchema = z.object({
   // the same flag flows through `getCustomVisionCapabilityFields()` in the /v1/models
   // catalog. `null` clears a manual override back to the id-based heuristic.
   supportsVision: z.boolean().nullable().optional(),
+  // #18739: per-node thinking-replay contract persisted on the modelCompatOverrides
+  // entry (see open-sse/translator/helpers/thinkingReplayMode.ts). `null` unsets it
+  // back to the default provider-derived handling.
+  thinkingReplay: z.enum(THINKING_REPLAY_MODES).nullable().optional(),
   dimensions: z.number().int().positive().nullable().optional(),
   supportedInputTypes: z.array(z.string()).optional(),
   modelType: z.enum(["chat", "embedding", "image", "rerank"]).optional(),

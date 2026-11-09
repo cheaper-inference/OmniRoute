@@ -222,7 +222,7 @@ describe("catalog collision dedupe", () => {
       });
       assert.deepEqual(res, { models: 1, combos: 1 });
       assert.ok(!c.warns.some((w) => w.includes("collides")));
-      assert.equal(c.models.get("omniroute/Mirror Combo")?.name, "Mirror Combo");
+      assert.equal(c.models.get("omniroute/Mirror Combo")?.name, "combo - Mirror Combo");
     } finally {
       c.restore();
     }
