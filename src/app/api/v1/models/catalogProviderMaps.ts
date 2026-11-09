@@ -167,6 +167,45 @@ function normalizeProviderNodeModelPrefix(
   return modelStr;
 }
 
+/** Resolve only prefixes present in this model, avoiding a registry scan per target. */
+function matchingProviderPrefix(
+  maps: AliasMaps,
+  providerId: string,
+  rawProvider: string,
+  modelStr: string
+): string | null {
+  // Keep the explicit prefix order used by getProviderPrefixes. In particular,
+  // canonical routing validation must still reject alias collisions.
+  for (const prefix of [providerId, rawProvider, maps.providerIdToAlias[providerId]]) {
+    if (
+      prefix &&
+      modelStr.startsWith(`${prefix}/`) &&
+      prefixRoutesToCanonicalProvider(prefix, providerId)
+    ) {
+      return prefix;
+    }
+  }
+
+  let mappedPrefix: string | null = null;
+  for (let slash = modelStr.indexOf("/"); slash > 0; slash = modelStr.indexOf("/", slash + 1)) {
+    const prefix = modelStr.slice(0, slash);
+    if (maps.aliasToProviderId[prefix] !== providerId) continue;
+    if (mappedPrefix !== null) {
+      // Unusual maps may contain overlapping slash-qualified aliases. Preserve
+      // their insertion precedence instead of choosing the shortest prefix.
+      return (
+        getProviderPrefixes(maps, providerId, rawProvider).find((candidate) =>
+          modelStr.startsWith(`${candidate}/`)
+        ) ?? null
+      );
+    }
+    mappedPrefix = prefix;
+  }
+  return mappedPrefix && prefixRoutesToCanonicalProvider(mappedPrefix, providerId)
+    ? mappedPrefix
+    : null;
+}
+
 /**
  * Strip a provider/alias prefix off a combo target's `modelStr` and resolve its
  * canonical providerId, so downstream registry/spec/synced-capability lookups
@@ -201,13 +240,8 @@ export function getComboTargetModelId(
   if (!providerId || providerId === "unknown") return null;
 
   let modelId = modelStr;
-  for (const prefix of getProviderPrefixes(maps, providerId, rawProvider)) {
-    const prefixWithSlash = `${prefix}/`;
-    if (modelStr.startsWith(prefixWithSlash)) {
-      modelId = modelStr.slice(prefixWithSlash.length).trim();
-      break;
-    }
-  }
+  const prefix = matchingProviderPrefix(maps, providerId, rawProvider, modelStr);
+  if (prefix) modelId = modelStr.slice(prefix.length + 1).trim();
 
   if (!modelId) return null;
   const canonical = resolveCanonicalProviderModel(providerId, modelId);

@@ -127,6 +127,27 @@ Pinipili ng auto-scoring ang pinakamahusay na provider/model kada kahilingan
 | `src/sse/handlers/chat.ts`                                | Integrasyon: auto prefix short-circuit              |
 | `src/shared/constants/providers.ts`                       | `SYSTEM_PROVIDERS.auto` system entry                |
 
+## Mga kagustuhan sa account para sa mga naka-save na Auto combo
+
+Nag-aalok ang editor ng Intelligent Auto ng opsyonal** Mga kagustuhan sa account** seksyon. Ang bawat koneksyon ay maaaring Preferred, Normal (ang default), Reserve, o Ibinukod. Maaaring magbahagi ng tier ang maraming koneksyon. Awtomatikong pumipili sa loob ng unang karapat-dapat na tier, pinapanatili ang gawi ng scoring/router doon; Ang mga nabigong pagtatangka ay nahuhulog sa natitirang mga kongkretong account, mas gusto bago ang normal bago magreserba. Ang mga hindi kasamang koneksyon ay hindi kailanman ginagamit ng combo na ito.
+
+Ang setting ay naka-imbak bilang `config.accountPreferences`, naka-key sa pamamagitan ng koneksyon ID:
+
+```json
+{
+  "accountPreferences": {
+    "connection-a": "preferred",
+    "connection-b": "preferred",
+    "connection-c": "reserve",
+    "connection-d": "excluded"
+  }
+}
+```
+
+Ang isang tinanggal o walang laman na mapa ay nagpapanatili ng kasalukuyang pagruruta. Hindi pinapagana ng mga kagustuhan ang mga naka-disable na koneksyon, nagbibigay ng access sa key ng API, nagpapanumbalik ng mga kandidatong na-block sa quota, o nag-bypass ng mga pagsusuri sa badyet. Ang bawat pagtatangka ay limitado sa konkretong koneksyon nito, kaya ang fallback ng account ay hindi maaaring tumalon sa mga tier sa likod ng combo router. Ang kasalukuyang affinity ng session ay maaaring magpanatili ng isang karapat-dapat na account; ang pagbubukod ng account na nakatali sa isang katutubong pagliko ay humihinto sa pagliko sa halip na tahimik na magpalit ng mga account.
+
+Ginagamit ng mga na-configure na kagustuhan ang Auto path na alam ng account: hindi naipapadala ang hindi nakatali na context-cache, smart-pipeline, kaguluhan at mga shortcut ng anino. Ang speculative hedging ay hindi pinagana para sa mga kahilingang ito kaya ang mga reserbang account ay hindi maaaring makipagkarera sa mga gusto. Hindi binibigyang-kahulugan ng ibang mga diskarte sa combo ang setting na ito. Ang pagpapalit ng combo palayo sa Auto ay nagpapanatili sa mga naka-save na kagustuhan para sa isang paglipat pabalik sa ibang pagkakataon.
+
 ## Mga Pangalan ng Combo na Tumutugma sa Tunay na Model Id
 
 Ang combo na ang `name` ay kapareho ng isang bare model id (hal. combo na

@@ -151,17 +151,35 @@ aiwashe (`src/server/auth/dashboardMfa.ts`).
      `secondFactor: "recovery_switch"`.
   4. Ondoa `OMNIROUTE_DISABLE_MFA`, anzisha tena, na ujiandikishe upya ikihitajika.
 
-## Aina za Route
+## Madarasa ya Njia
 
-`src/server/authz/types.ts` inafafanua madarasa matatu; route yoyote isiyoweza kuainishwa kwa uhakika inarudi kwenye `MANAGEMENT`.
+`src/server/authz/types.ts` inafafanua madarasa matatu; njia yoyote ambayo haiwezi kuainishwa kwa uhakika hurejeshwa kwenye `MANAGEMENT`.
 
-| Darasa       | Maelezo                                                                                                                                                            | Uthibitishaji unaohitajika                                                           |
-| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------ |
-| `PUBLIC`     | Route salama waziwazi: kuingia, kutoka, hali, init, health, bootstrap ya onboarding.                                                                               | Hakuna                                                                               |
-| `CLIENT_API` | Vituo vya kuhudumia modeli: `/api/v1/*`, `/api/v1beta/*`, pamoja na majina mbadala `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | Ufunguo wa Bearer wakati feature flag ya `REQUIRE_API_KEY` inayofanya kazi imewashwa |
-| `MANAGEMENT` | Kurasa za dashboard, mipangilio, watoa huduma, funguo, vituo vya admin na uchunguzi.                                                                               | Kipindi cha dashboard AU Bearer yenye wigo wa `manage`                               |
+| Darasa       | Maelezo                                                                                                                                                                | Uthibitishaji unaohitajika                                                         |
+| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| `PUBLIC`     | Njia zilizo salama waziwazi — kuingia, kutoka, hali, afya, uanzishaji wa mwanzo.                                                                                       | Hakuna                                                                             |
+| `CLIENT_API` | Vituo vya mwisho vya kuhudumia modeli — `/api/v1/*`, `/api/v1beta/*`, pamoja na lakabu `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | Ufunguo wa Bearer wakati alama tekelezi ya `REQUIRE_API_KEY` inayotumika imewashwa |
+| `MANAGEMENT` | Kurasa za dashibodi, mipangilio, watoa huduma, funguo, pamoja na vituo vya mwisho vya usimamizi na uchunguzi.                                                          | Kikao cha dashibodi AU Bearer yenye wigo wa `manage`                               |
 
-Vitendo kadhaa vya `MANAGEMENT` ni **vya operator pekee**: ufunguo wa `manage` hautoshi. Kusafirisha credentials zilizohifadhiwa (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), kurejesha backup juu ya data hai (`POST /api/db-backups/import` ikiwemo `dryRun=true`, `POST /api/db-backups` restore kwa id, `POST /api/settings/import-json`), na kuharibu pointi za kurejesha (`DELETE /api/db-backups` cleanup, na `PATCH /api/db-backups` kwa sababu retention inayohifadhi ndiyo inayoendesha pruning ya kiotomatiki baada ya kila backup) vinahitaji kipindi cha dashboard, somo la CLI la ndani, au kuingia kukiwa kumezimwa. Kutoa sync token (`POST /api/sync/tokens`) na kutengeneza `admin` CLI access token (`POST /api/cli/tokens`) vinahitaji kipindi cha dashboard au somo la CLI la ndani katika kila hali ya kuingia. Funguo za API za wigo wowote na access tokens za `oma_` si credentials za operator: hupata `403` wakati wowote inapohitajika. Ukaguzi huu uko katika `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`). Kubadilisha mipangilio ya kuingia pia ni kwa operator pekee: `POST /api/settings/require-login` (kuweka nenosiri la usimamizi / kugeuza `requireLogin`) inakubali credentials hizo pekee mara nenosiri linapokuwepo. Dirisha la bootstrap la uendeshaji wa kwanza (bila nenosiri bado) halibadiliki, na kipindi cha dashboard lazima kituma `currentPassword` ili kubadilisha nenosiri (`403` pale kisipokuwepo au ni kibaya, na kinakaguliwa kama `settings.update_failed`). CLI ya ndani na instance yenye kuingia kumezimwa zinabaki na njia ya urejeshaji na zinaweza kuweka nenosiri bila hilo, kwa sababu zote mbili zimefungamana na host inayomiliki data directory.
+Baadhi ya vitendo vya `MANAGEMENT` ni vya **mwendeshaji pekee**: ufunguo wa `manage` hautoshi. Kuhamisha vitambulisho
+vilivyohifadhiwa (`GET /api/settings/export-json`, `GET /api/db-backups/export`,
+`GET /api/db-backups/exportAll`), kurejesha nakala rudufu juu ya data inayotumika
+(`POST /api/db-backups/import` ikijumuisha `dryRun=true`, urejeshaji wa `POST /api/db-backups` kwa kitambulisho,
+`POST /api/settings/import-json`), kuharibu sehemu za urejeshaji (`DELETE /api/db-backups` kwa usafishaji,
+na `PATCH /api/db-backups` kwa sababu muda wa uhifadhi unaodumishwa nao huendesha upogoaji wa kiotomatiki baada ya
+kila nakala rudufu) kunahitaji kikao cha dashibodi, mhusika wa CLI wa ndani, au kuingia kuzimwa. Kutoa
+tokeni ya ulandanishi (`POST /api/sync/tokens`) na kuunda tokeni ya ufikiaji ya CLI ya `admin`
+(`POST /api/cli/tokens`) kunahitaji kikao cha dashibodi au mhusika wa CLI wa ndani katika kila hali ya kuingia.
+Funguo za API za wigo wowote na tokeni za ufikiaji za `oma_` si vitambulisho vya mwendeshaji: hupata `403`
+wakati wowote vinapohitajika. Ukaguzi huu
+unapatikana katika `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` /
+`requireOperatorCredential()`). Kubadilisha mipangilio ya kuingia pia ni kwa mwendeshaji pekee:
+`POST /api/settings/require-login` (kuweka nenosiri la usimamizi / kugeuza `requireLogin`) hukubali
+vitambulisho hivyo pekee baada ya nenosiri kuwepo — dirisha la uanzishaji wa matumizi ya kwanza (wakati hakuna nenosiri bado)
+halijabadilika — na kikao cha dashibodi lazima kitume `currentPassword` ili kubadilisha nenosiri
+(`403` linapokosekana au kuwa si sahihi, na kurekodiwa katika ukaguzi kama `settings.update_failed`). CLI ya ndani na
+mfano ambao kuingia kumezimwa hudumisha njia ya urejeshaji na unaweza kuweka nenosiri bila hilo, kwa kuwa zote
+zimefungamanishwa na seva inayomiliki saraka ya data.
 
 ## Bomba
 
@@ -194,15 +212,15 @@ Sera iliyofanikiwa inarudisha `AuthSubject` kwa `kind ∈ { client_api_key, dash
 
 ## Orodha ya Njia za Umma
 
-`src/shared/constants/publicApiRoutes.ts` ni orodha iliyoruhusiwa wazi:
+`src/shared/constants/publicApiRoutes.ts` ni allowlist iliyoainishwa wazi:
 
-Orodha imegawanywa kwa **muundo**, na mgawanyo huo ni muhimu kwa utendaji (GHSA-74g9-q8f6-793h): kiambishi awali
-hulinganishwa kwa kutumia `startsWith()`, hivyo pia hulingana na kila njia iliyo karibu inayoshiriki herufi zake za mwanzo.
-`/api/usage/om-usage` kama kiambishi awali huweka `/api/usage/om-usage<anything>` kuwa PUBLIC, na Next hutatua
-hilo kuwa `/api/usage/[connectionId]` — kidhibiti kisicho na uthibitishaji wake.
+Orodha imegawanywa kwa **umbo**, na mgawanyo huo ni muhimu kwa utekelezaji (GHSA-74g9-q8f6-793h): kiambishi awali
+hulinganishwa kwa kutumia `startsWith()`, kwa hiyo pia hulinganisha kila njia iliyo karibu inayoshiriki herufi zake za mwanzo.
+`/api/usage/om-usage` kama kiambishi awali huwekwa alama ya `/api/usage/om-usage<anything>` kuwa PUBLIC, na Next hutatua
+hilo kuwa `/api/usage/[connectionId]` — handler ambayo haina uthibitishaji wake.
 
 ```ts
-// Miti halisi ya njia. Kila ingizo LAZIMA liishie kwa "/" (inathibitishwa na jaribio la unit).
+// Miti ndogo halisi. Kila ingizo LAZIMA liishie kwa "/" (huthibitishwa na jaribio la unit).
 PUBLIC_API_ROUTE_PREFIXES = [
   "/api/auth/oidc/",
   "/api/v1/", // huchukuliwa kama CLIENT_API katika classify, si kama "no-auth public"
@@ -212,33 +230,32 @@ PUBLIC_API_ROUTE_PREFIXES = [
   "/api/cursor-cli/",
 ];
 
-// Njia moja, zinazolinganishwa KAMILI (zikiwa na au bila slash ya mwisho).
+// Njia moja moja, zinazolinganishwa HASA (zikiwa na au bila slash ya mwisho).
 PUBLIC_API_ROUTES_EXACT = new Set([
   "/api/auth/login",
   "/api/auth/logout",
   "/api/auth/status",
-  "/api/auth/mfa/verify", // hatua ya 2 ya kuingia kwa TOTP ya hiari; inahitaji kidakuzi cha MFA-pending
-  "/api/init",
+  "/api/auth/mfa/verify", // hatua ya 2 ya kuingia kwa TOTP ya hiari; inahitaji cookie ya MFA-pending
   "/api/sync/bundle",
   "/api/cli/connect",
   "/api/usage/om-usage",
   "/api/skills/collect/chaos",
 ]);
 
-// Njia moja za kusoma tu ambazo pia hupokea kulegezwa kwa asili ya CORS.
+// Njia moja moja za kusoma pekee ambazo pia hupokea kulegezwa kwa asili ya CORS.
 PUBLIC_READONLY_CORS_API_ROUTES = [
   "/api/health/ping",
   "/api/monitoring/health",
   "/api/settings/require-login",
 ];
 
-// Njia moja ya kusoma tu BILA kulegezwa kwa CORS.
+// Njia moja ya kusoma pekee ISIYOPATA kulegezwa kwa CORS.
 PUBLIC_READONLY_API_ROUTES_EXACT = new Set(["/api/health"]);
 
 PUBLIC_READONLY_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 ```
 
-Njia za kusoma tu ni za umma **peke yake** kwa mbinu salama. Kumbuka: `classifyRoute()` huondoa `/api/v1/*` na `/api/v1beta/*` kwenye mkondo wa PUBLIC — hizo daima ni `CLIENT_API`, kwa hivyo sera ya ufunguo wa Bearer bado inatumika.
+Njia za kusoma pekee ni za umma **kwa mbinu salama pekee**. Kumbuka: `classifyRoute()` huondoa `/api/v1/*` na `/api/v1beta/*` kwenye njia ya PUBLIC fall-through — hizo daima ni `CLIENT_API`, kwa hiyo sera ya ufunguo wa Bearer bado inatumika.
 
 ## Kuongeza Njia Mpya
 
@@ -315,15 +332,19 @@ kutatua wigo kutoka kwa maelezo ya uthibitishaji wa MCP, metadata ya ombi, au
 (`src/lib/accessTokens/scopes.ts`). Cheo hiki kinatumika tu kwa kitambulisho cha
 tokeni ya ufikiaji. Angalia [Uthibitishaji wa Usimamizi](../guides/MANAGEMENT-AUTH.md).
 
-## Kigeuzi cha Uthibitishaji Unaohitajika
+## Kigeuzi cha Kuhitaji Uthibitishaji
 
-`isAuthRequired()` katika `src/shared/utils/apiAuth.ts` ndiyo inayoamua kama uthibitishaji wowote unatekelezwa kwa ombi:
+`isAuthRequired()` katika `src/shared/utils/apiAuth.ts` huamua ikiwa **uthibitishaji wowote** unahitajika kwa ombi:
 
-- `settings.requireLogin === false` → uthibitishaji umezimwa kwa ujumla, isipokuwa ngazi ya ulinzi wa kudumu (tazama [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md)) na miito inayotoa credential inayokubaliwa nayo, ambayo inahitaji credential ile ile kama kuingia kukiwa kumewashwa: kutoa sync tokens, kutengeneza CLI access tokens kwa wigo wowote, na kuunda ufunguo wa API wenye wigo wa `manage`/`admin`, kutoa wigo huo kwa ufunguo, au kuzalisha upya au kuonyesha ufunguo wa aina hiyo (`requireCredentialForManagementScopedKey()` katika `src/lib/api/requireManagementAuth.ts`). Funguo za inference pekee zinabaki wazi.
-- Hakuna nenosiri lililosanidiwa **na** hakuna env var ya `INITIAL_PASSWORD` → hali ya bootstrap: inaruhusu onboarding wizard na maombi ya loopback, lakini maombi ya mtandao wa wazi bado yanahitaji credentials.
-- Hitilafu yoyote ya DB → inashindwa kwa kufunga (secure-by-default).
+- `settings.requireLogin === false` → uthibitishaji umezimwa kimataifa, isipokuwa kwa kiwango kinacholindwa kila wakati (tazama [Viwango vya Walinzi wa Njia](../security/ROUTE_GUARD_TIERS.md)) na miito inayotoa kitambulisho kinachokubali, ambayo inahitaji kitambulisho kilekile kama kuingia kumewezeshwa: kutoa tokeni za usawazishaji, kutengeneza tokeni za ufikiaji za CLI katika wigo wowote, na kuunda ufunguo wa API wenye wigo wa `manage`/`admin`, kutoa wigo huo kwa ufunguo, au kutengeneza upya au kufichua ufunguo huo
+  (`requireCredentialForManagementScopedKey()` katika `src/lib/api/requireManagementAuth.ts`).
+  Vifunguo vya inference-only hubaki wazi. Kuandika alama ya kipengele inayolindwa (`REQUIRE_API_KEY`, alama nyingine za Usalama, na alama za SSRF / TLS / wigo wa MCP / sandbox zilizoorodheshwa katika
+  [Alama za Vipengele](../reference/FEATURE_FLAGS.md#rest-api)) na kuhifadhi mipangilio ya kuficha PII
+  (`PUT /api/settings/pii`) bado kunahitaji kitambulisho.
+- Hakuna nenosiri lililowekwa **na** hakuna kigezo cha mazingira cha `INITIAL_PASSWORD` → hali ya kuanzisha huruhusu kichawi cha kuanza na maombi ya loopback, lakini maombi ya mtandao yaliyo wazi bado yanahitaji vitambulisho. Isipokuwa: kuandika alama ya kipengele inayolindwa na kuhifadhi mipangilio ya kuficha PII (`PUT /api/settings/pii`) kunahitaji kitambulisho hata kutoka kwa loopback, kwa hivyo loopback pekee haitoshi katika hali hizo.
+- Hitilafu yoyote ya DB → hufeli kwa kufunga (usalama kwa chaguo-msingi).
 
-Uthibitishaji wa ufunguo wa API wa mteja unatumia `isRequireApiKeyEnabled()` katika `src/shared/utils/featureFlags.ts`, si usomaji wa moja kwa moja wa `process.env.REQUIRE_API_KEY`. Hili ni muhimu kwa instances zilizosambazwa: kubadilisha `REQUIRE_API_KEY` katika Dashboard → Feature Flags kunahifadhi DB override na mara moja kunaathiri `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*`, na ukaguzi mwingine wa uthibitishaji wa API ya mteja unaotumia msaidizi huyu. Ikiwa feature flag store haiwezi kusomwa, uthibitishaji wa API ya mteja unashindwa kwa kufunga na unadai ufunguo.
+Utekelezaji wa mahitaji ya ufunguo wa API wa mteja hutumia `isRequireApiKeyEnabled()` katika `src/shared/utils/featureFlags.ts`, si usomaji wa moja kwa moja wa `process.env.REQUIRE_API_KEY`. Hili ni muhimu kwa matukio yaliyowekwa kwenye uzalishaji: kubadilisha `REQUIRE_API_KEY` katika Dashibodi → Alama za Vipengele huhifadhi ubatilishaji wa DB na huathiri mara moja `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*`, na ukaguzi mwingine wa uthibitishaji wa API ya mteja unaotumia msaidizi huyu. Ikiwa hifadhi ya alama za vipengele haiwezi kusomwa, uthibitishaji wa API ya mteja hufeli kwa kufunga na huhitaji ufunguo.
 
 ## Mabadiliko Yasiyooana — v3.8.0
 
