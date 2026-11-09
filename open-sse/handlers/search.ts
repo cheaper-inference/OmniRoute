@@ -161,6 +161,15 @@ function resolveGlobalTimeoutMs(override?: number): number {
 // Non-retriable HTTP status codes — fail immediately, don't try alternate
 const NON_RETRIABLE = new Set([400, 401, 403, 404]);
 
+/**
+ * Only auto-select passes an alternate, so this never applies to a provider requested by name.
+ * A self-hosted engine's 4xx describes that instance (its JSON output left off, a wrong path),
+ * not the request, so the keyed failover still has a chance of answering it.
+ */
+function isFailoverStatus(primary: SearchProviderConfig, status: number | undefined): boolean {
+  return primary.primaryWhenConfigured === true || !NON_RETRIABLE.has(status || 0);
+}
+
 // ── Input Sanitization ──────────────────────────────────────────────────
 
 // Control characters that should never appear in search queries
@@ -1624,7 +1633,7 @@ export async function handleSearch(options: SearchHandlerOptions): Promise<Searc
   if (
     alternateConfig &&
     alternateCredentials &&
-    !NON_RETRIABLE.has(result.status || 0) &&
+    isFailoverStatus(primaryConfig, result.status) &&
     Date.now() - startTime < globalTimeoutMs
   ) {
     if (log) {

@@ -77,7 +77,8 @@ function recordStreamingBillableTokens(
         ctx.apiKeyInfo.id,
         ctx.provider || "unknown",
         ctx.model || "unknown",
-        billable
+        billable,
+        ctx.startTime
       );
   } catch {
     // never block the stream on counter recording

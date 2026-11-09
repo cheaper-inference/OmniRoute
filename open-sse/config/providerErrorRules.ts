@@ -46,6 +46,19 @@ export type ProviderErrorRuleMatch = {
   scope: "model" | "provider" | "connection";
   /** Optional explicit cooldown; falls back to the existing per-reason defaults. */
   cooldownMs?: number;
+  /**
+   * Set by the operator catch-all default when it carries no explicit `reason`, so the
+   * reason was only inferred from the HTTP status. `classifyError()` then lets the
+   * error-text classification win, as it does without a default.
+   */
+  reasonFromStatus?: true;
+  /**
+   * Set when the match came from the operator catch-all default. `checkFallbackError()`
+   * then uses the LONGER of `cooldownMs` and the provider's own retry hint
+   * (Retry-After / x-ratelimit-reset / body hint), so the default never cuts a real
+   * upstream reset short. Explicit rules keep their exact `cooldownMs`.
+   */
+  fromOperatorDefault?: true;
 };
 
 /**
@@ -57,17 +70,80 @@ export type ProviderErrorRuleMatch = {
  * a RegExp — so an operator-supplied pattern can never introduce a ReDoS on the
  * error-classification hot path. Bounded to <= 50 rules total by the settings
  * schema. An operator rule is consulted BEFORE the built-in `providerRuleRegistry`
- * and wins on the first status+substring match for a provider.
+ * and wins on the first match for a provider — AND over its populated fields
+ * (`status` omitted = any status; `match` omitted = any body).
  */
 export type OperatorProviderErrorRule = {
-  status: number;
-  match: string;
+  /** Omitted = any status. At least one of `status` / `match` is required (schema-enforced). */
+  status?: number;
+  /** Omitted/empty = any body. When both are set, BOTH must match (AND). */
+  match?: string;
   scope: "model" | "provider" | "connection";
   reason?: ConfiguredErrorReason;
   cooldownMs?: number;
 };
 
+/**
+ * Operator-declared per-provider catch-all, applied only when neither an
+ * operator rule nor a built-in catalog rule matched. Opt-in: absent = the
+ * pre-existing behavior. Limited to `CATCH_ALL_STATUSES` so request-shape 4xx
+ * errors (400/404/409/413/422) and bare 401 auth failures keep their own paths.
+ */
+export type OperatorProviderErrorDefault = {
+  cooldownMs: number;
+  scope?: "model" | "provider" | "connection";
+  reason?: ConfiguredErrorReason;
+};
+
 let operatorProviderErrorRules: Record<string, OperatorProviderErrorRule[]> = {};
+let operatorProviderErrorDefaults: Record<string, OperatorProviderErrorDefault> = {};
+
+/** Inject the operator catch-all defaults (same lifecycle as `setOperatorProviderErrorRules`). */
+export function setOperatorProviderErrorDefaults(
+  defaults: Record<string, OperatorProviderErrorDefault> | undefined | null
+): void {
+  operatorProviderErrorDefaults = {};
+  if (!defaults) return;
+  for (const [provider, value] of Object.entries(defaults)) {
+    if (value && typeof value.cooldownMs === "number" && value.cooldownMs > 0) {
+      operatorProviderErrorDefaults[provider.toLowerCase()] = value;
+    }
+  }
+}
+
+/** True when an operator rule's populated fields all match (AND over status + substring). */
+function operatorRuleMatches(rule: OperatorProviderErrorRule, status: number, lowered: string) {
+  if (rule.status === undefined && !rule.match) return false;
+  if (rule.status !== undefined && rule.status !== status) return false;
+  return !rule.match || lowered.includes(rule.match.toLowerCase());
+}
+
+const CATCH_ALL_STATUSES = new Set([402, 403, 408, 429]);
+
+/** Status-derived reason for a catch-all hit — mirrors classifyError's status fallback. */
+function catchAllReason(status: number): ConfiguredErrorReason {
+  if (status === 402) return "quota_exhausted";
+  if (status === 403) return "auth_error";
+  if (status === 429) return "rate_limit_exceeded";
+  if (status === 503 || status === 529) return "model_capacity";
+  return "server_error";
+}
+
+function matchOperatorDefault(
+  key: string,
+  status: number,
+  defaults: Record<string, OperatorProviderErrorDefault>
+): ProviderErrorRuleMatch | null {
+  const fallback = defaults[key];
+  if (!fallback || !(CATCH_ALL_STATUSES.has(status) || status >= 500)) return null;
+  return {
+    reason: fallback.reason ?? catchAllReason(status),
+    scope: fallback.scope ?? "connection",
+    cooldownMs: fallback.cooldownMs,
+    fromOperatorDefault: true,
+    ...(fallback.reason ? {} : { reasonFromStatus: true as const }),
+  };
+}
 
 /**
  * Inject operator-declared rules. Called from the runtime-settings applier
@@ -603,8 +679,9 @@ function usesFullTextRuleBody(key: string): boolean {
  */
 export function hasOperatorRuleForProvider(provider: string | null | undefined): boolean {
   if (!provider) return false;
-  const rules = operatorProviderErrorRules[provider.toLowerCase()];
-  return !!rules && rules.length > 0;
+  const key = provider.toLowerCase();
+  const rules = operatorProviderErrorRules[key];
+  return (!!rules && rules.length > 0) || !!operatorProviderErrorDefaults[key];
 }
 
 /**
@@ -638,7 +715,8 @@ export function getProviderErrorRuleMatch(
   status: number,
   headers: Headers | Record<string, string> | null | undefined,
   body?: unknown,
-  operatorRules?: Record<string, OperatorProviderErrorRule[]>
+  operatorRules?: Record<string, OperatorProviderErrorRule[]>,
+  operatorDefaults?: Record<string, OperatorProviderErrorDefault>
 ): ProviderErrorRuleMatch | null {
   if (!provider) return null;
   const key = provider.toLowerCase();
@@ -652,7 +730,7 @@ export function getProviderErrorRuleMatch(
     const text = typeof body === "string" ? body : JSON.stringify(body ?? "");
     const lowered = text.toLowerCase();
     for (const r of opRules) {
-      if (r.status === status && lowered.includes(r.match.toLowerCase())) {
+      if (operatorRuleMatches(r, status, lowered)) {
         return {
           reason: r.reason ?? "quota_exhausted",
           scope: r.scope,
@@ -662,8 +740,9 @@ export function getProviderErrorRuleMatch(
     }
   }
 
+  const defaults = operatorDefaults ?? operatorProviderErrorDefaults;
   const rules = providerRuleRegistry.get(key);
-  if (!rules) return null;
+  if (!rules) return matchOperatorDefault(key, status, defaults);
   // Normalize headers: accept either a `Headers` object (from `fetch()`) or
   // a plain record. Provider rules access headers via plain object indexing.
   const safeHeaders: Record<string, string> = !headers
@@ -680,7 +759,7 @@ export function getProviderErrorRuleMatch(
     const match = rule.match({ status, headers: safeHeaders, body });
     if (match) return match;
   }
-  return null;
+  return matchOperatorDefault(key, status, defaults);
 }
 
 /**

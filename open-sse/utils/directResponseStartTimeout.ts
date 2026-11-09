@@ -185,9 +185,9 @@ export function resolveDirectRetryTimeoutMs(
 }
 
 function createDirectResponseStartTimeout(timeoutMs: number): Error & { code: string } {
-  const err = new Error(
-    `Direct response did not start within ${timeoutMs}ms — retrying on a fresh socket`
-  ) as Error & { code: string };
+  const err = new Error(`Direct response did not start within ${timeoutMs}ms`) as Error & {
+    code: string;
+  };
   err.name = "TimeoutError";
   err.code = DIRECT_RESPONSE_START_TIMEOUT_CODE;
   return err;
