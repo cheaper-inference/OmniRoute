@@ -1,0 +1,1 @@
+- **fix(a2a):** cancelling an A2A task now aborts the task's signal and a task that finishes after a cancel is refused with a clear "cancelled" error, instead of failing with "Invalid transition: cancelled → completed".

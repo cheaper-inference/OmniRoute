@@ -130,6 +130,8 @@ const VALID_TRANSITIONS: Record<TaskState, TaskState[]> = {
 
 export class A2ATaskManager {
   private tasks = new Map<string, A2ATask>();
+  // One controller per live task. Kept out of A2ATask: that object is serialized to clients.
+  private aborts = new Map<string, AbortController>();
   private readonly ttlMs: number;
   private readonly persistence: A2APersistence;
   private cleanupInterval: ReturnType<typeof setInterval>;
@@ -214,6 +216,7 @@ export class A2ATaskManager {
       ...(owner !== undefined ? { owner } : {}),
     };
     this.tasks.set(task.id, task);
+    this.aborts.set(task.id, new AbortController());
     emitAgentTaskUpdated("a2a", task.id, "submitted");
     this.persist(task, "state:submitted");
     return task;
@@ -249,6 +252,12 @@ export class A2ATaskManager {
     const task = this.tasks.get(taskId);
     if (!task) throw new Error(`Task ${taskId} not found`);
 
+    // Work that was told to stop can still report in. A failure is moot; a result is refused.
+    if (task.state === "cancelled") {
+      if (state === "failed") return task;
+      if (state === "completed") throw new Error(`Task ${taskId} was cancelled`);
+    }
+
     const valid = VALID_TRANSITIONS[task.state];
     if (!valid.includes(state)) {
       throw new Error(`Invalid transition: ${task.state} → ${state}`);
@@ -260,9 +269,17 @@ export class A2ATaskManager {
     task.events.push({ timestamp: now, state, message });
     if (artifacts) task.artifacts.push(...artifacts);
 
+    if (state === "cancelled") this.aborts.get(taskId)?.abort();
+    if (TERMINAL.has(state)) this.aborts.delete(taskId);
+
     emitAgentTaskUpdated("a2a", taskId, state);
     this.persist(task, `state:${state}`, message);
     return task;
+  }
+
+  /** Aborts when the task is cancelled. `undefined` once the task is finished or unknown. */
+  getTaskSignal(taskId: string): AbortSignal | undefined {
+    return this.aborts.get(taskId)?.signal;
   }
 
   cancelTask(taskId: string, owner?: string): A2ATask {
@@ -345,6 +362,7 @@ export class A2ATaskManager {
         task.state !== "cancelled"
       ) {
         task.state = "failed";
+        this.aborts.delete(id);
         task.updatedAt = now.toISOString();
         task.events.push({ timestamp: now.toISOString(), state: "failed", message: "TTL expired" });
         emitAgentTaskUpdated("a2a", id, "failed");
