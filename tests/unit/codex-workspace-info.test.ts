@@ -139,7 +139,18 @@ test("syncCodexWorkspaceInfoIfNeeded stores workspace info and returns the updat
     workspaceRole: "owner",
     workspaceInfoFetchedAt: "2026-10-28T10:00:00.000Z",
   };
-  assert.deepEqual(writes, [{ id: "conn-1", psd: expected }]);
+  // Only the workspace keys are written; the store merges them onto the row.
+  assert.deepEqual(writes, [
+    {
+      id: "conn-1",
+      psd: {
+        workspaceName: "Acme Ltd",
+        workspaceStructure: "workspace",
+        workspaceRole: "owner",
+        workspaceInfoFetchedAt: "2026-10-28T10:00:00.000Z",
+      },
+    },
+  ]);
   assert.deepEqual(result.providerSpecificData, expected);
 });
 
@@ -226,7 +237,7 @@ test("syncCodexWorkspaceInfoIfNeeded backs off after a failed lookup instead of 
   assert.equal((synced.providerSpecificData as Record<string, unknown>).workspaceName, "Acme Ltd");
 });
 
-test("syncCodexWorkspaceInfoIfNeeded merges the workspace keys onto the row as it is at write time", async () => {
+test("syncCodexWorkspaceInfoIfNeeded never writes back the providerSpecificData read before the lookup", async () => {
   const writes: Array<Record<string, unknown>> = [];
   const connection = {
     id: "conn-1",
@@ -234,26 +245,21 @@ test("syncCodexWorkspaceInfoIfNeeded merges the workspace keys onto the row as i
     accessToken: "token-1",
     providerSpecificData: { workspaceId: "ws-business", cooldownUntil: null },
   };
-  const result = await syncCodexWorkspaceInfoIfNeeded(connection, {
-    persist: async (_id, psd) => {
-      writes.push(psd);
+  await syncCodexWorkspaceInfoIfNeeded(connection, {
+    persist: async (_id, fields) => {
+      writes.push(fields);
     },
     fetchInfo: async () => INFO,
-    // Another path stored a field while the lookup was in flight.
-    loadProviderSpecificData: async (id) => {
-      assert.equal(id, "conn-1");
-      return { workspaceId: "ws-business", cooldownUntil: "2026-10-28T11:00:00.000Z" };
-    },
     now: () => NOW,
   });
-  const expected = {
-    workspaceId: "ws-business",
-    cooldownUntil: "2026-10-28T11:00:00.000Z",
-    workspaceName: "Acme Ltd",
-    workspaceStructure: "workspace",
-    workspaceRole: "owner",
-    workspaceInfoFetchedAt: "2026-10-28T10:00:00.000Z",
-  };
-  assert.deepEqual(writes, [expected]);
-  assert.deepEqual(result.providerSpecificData, expected);
+  // A stale cooldownUntil: null from the snapshot would overwrite a cooldown another
+  // path stored while the lookup was in flight.
+  assert.deepEqual(writes, [
+    {
+      workspaceName: "Acme Ltd",
+      workspaceStructure: "workspace",
+      workspaceRole: "owner",
+      workspaceInfoFetchedAt: "2026-10-28T10:00:00.000Z",
+    },
+  ]);
 });

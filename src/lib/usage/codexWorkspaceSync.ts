@@ -31,22 +31,18 @@ interface CodexConnectionLike {
 }
 
 export interface CodexWorkspaceSyncDeps {
-  persist: (
-    connectionId: string,
-    providerSpecificData: Record<string, unknown>
-  ) => Promise<unknown>;
+  /**
+   * Merges the workspace keys into the connection's stored providerSpecificData.
+   * It receives only those keys, never the snapshot read before the lookup, so a
+   * field another path stored while the request was in flight is kept.
+   */
+  persist: (connectionId: string, workspaceFields: Record<string, unknown>) => Promise<unknown>;
   fetchInfo?: (
     accessToken: string,
     workspaceId: string | null,
     options: { connectionId?: string }
   ) => Promise<CodexWorkspaceInfo | null>;
   now?: () => number;
-  /**
-   * Reads the connection's current providerSpecificData right before the write,
-   * so fields another path stored during the lookup are kept: only the
-   * workspace keys are merged onto it.
-   */
-  loadProviderSpecificData?: (connectionId: string) => Promise<unknown>;
 }
 
 /**
@@ -93,13 +89,8 @@ export async function syncCodexWorkspaceInfoIfNeeded<T extends CodexConnectionLi
     workspaceRole: info.workspaceRole,
     workspaceInfoFetchedAt: new Date(now).toISOString(),
   };
-  let nextPsd: Record<string, unknown> = { ...psd, ...workspaceFields };
   try {
-    if (deps.loadProviderSpecificData) {
-      const latest = asRecord(await deps.loadProviderSpecificData(connection.id));
-      nextPsd = { ...latest, ...workspaceFields };
-    }
-    await deps.persist(connection.id, nextPsd);
+    await deps.persist(connection.id, workspaceFields);
   } catch (error) {
     console.warn(
       "[ProviderLimits] Could not store Codex workspace info for %s: %s",
@@ -108,5 +99,5 @@ export async function syncCodexWorkspaceInfoIfNeeded<T extends CodexConnectionLi
     );
     return connection;
   }
-  return { ...connection, providerSpecificData: nextPsd };
+  return { ...connection, providerSpecificData: { ...psd, ...workspaceFields } };
 }

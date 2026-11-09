@@ -4,6 +4,7 @@ import { isCompleteUsageReading } from "@/lib/usage/usageReading";
 import {
   getProviderConnectionById,
   getProviderConnections,
+  mergeConnectionProviderSpecificData,
   updateProviderConnection,
 } from "@/lib/db/providers";
 import { getSettings, resolveProxyForConnection, updateSettings } from "@/lib/db/settings";
@@ -1104,12 +1105,10 @@ async function fetchLiveProviderLimitsWithOptions(
       // Display-only workspace label (personal plan vs. Business seat), fetched once
       // the token has just proven itself on the usage request.
       if (conn.provider === "codex" && !usageData?.message) {
+        // Merged in one transaction onto the row as stored now, so fields another
+        // path wrote during the lookup are not overwritten by this snapshot.
         conn = await syncCodexWorkspaceInfoIfNeeded(conn, {
-          persist: (id, providerSpecificData) =>
-            updateProviderConnection(id, { providerSpecificData }),
-          loadProviderSpecificData: async (id) =>
-            ((await getProviderConnectionById(id)) as unknown as ProviderConnectionLike | null)
-              ?.providerSpecificData,
+          persist: mergeConnectionProviderSpecificData,
         });
       }
 
