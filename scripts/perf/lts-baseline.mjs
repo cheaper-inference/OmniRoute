@@ -12,6 +12,9 @@
  *   serverBoot     spawn → first /api/health/ping 200 (only when a server is booted here)
  *   ttft           time-to-first-byte (response headers) per endpoint: median + p95 of
  *                  --runs requests after 3 discarded warmup requests
+ *   streamTtft     (only with --stream-url) time to the first SEMANTIC stream event (text,
+ *                  reasoning or tool call) of a real streaming request, next to the first body
+ *                  byte; a run counts only after the terminal event. Needs --stream-model.
  *
  * Every measurement is `{ status: ok|skipped|failed, durationMs, summary, raw? }`. A failed
  * or skipped measurement is DATA, not a crash: the script still writes the report and
@@ -53,6 +56,7 @@ export const DEFAULT_TTFB_ENDPOINTS = Object.freeze([
 ]);
 export const WARMUP_REQUESTS = 3;
 const DEFAULT_RUNS = 20;
+const STREAM_FORMATS = Object.freeze(["openai", "claude", "responses"]);
 const DEFAULT_HEAP_TIMEOUT_MS = 15 * 60_000;
 const BENCH_TIMEOUT_MS = 10 * 60_000;
 const BUILD_TIMEOUT_MS = 60 * 60_000;
@@ -74,6 +78,10 @@ const USAGE = `Usage: node scripts/perf/lts-baseline.mjs [flags]
   --md                    print a Markdown table to stdout (progress goes to stderr)
   --data-dir <path>       parent dir for the isolated per-measurement DATA_DIRs
   --heap-timeout-min <n>  abort test:heap after n minutes and mark it skipped (default 15)
+  --stream-url <url>      also measure time to the first semantic stream event of this endpoint
+                          (sends real streaming requests; the key comes from OMNIROUTE_API_KEY)
+  --stream-format <f>     wire format of --stream-url: openai (default), claude or responses
+  --stream-model <id>     model id to request (required with --stream-url)
   -h, --help              show this help`;
 
 // ── statistics ───────────────────────────────────────────────────────────────
@@ -134,6 +142,9 @@ export function parseArgs(argv) {
     url: null,
     dataDir: null,
     heapTimeoutMs: DEFAULT_HEAP_TIMEOUT_MS,
+    streamUrl: null,
+    streamFormat: "openai",
+    streamModel: null,
     help: false,
   };
   let sawSkip = false;
@@ -167,6 +178,24 @@ export function parseArgs(argv) {
       case "--heap-timeout-min":
         out.heapTimeoutMs = positiveInt(requireValue(argv, i++, flag), flag) * 60_000;
         break;
+      case "--stream-url": {
+        const raw = requireValue(argv, i++, flag);
+        if (!/^https?:\/\/[^\s/]+/.test(raw))
+          throw new Error("--stream-url must be an http(s) URL");
+        out.streamUrl = raw;
+        break;
+      }
+      case "--stream-format": {
+        const raw = requireValue(argv, i++, flag);
+        if (!STREAM_FORMATS.includes(raw)) {
+          throw new Error(`--stream-format must be one of ${STREAM_FORMATS.join(", ")}`);
+        }
+        out.streamFormat = raw;
+        break;
+      }
+      case "--stream-model":
+        out.streamModel = requireValue(argv, i++, flag);
+        break;
       case "-h":
       case "--help":
         out.help = true;
@@ -178,6 +207,7 @@ export function parseArgs(argv) {
   if (sawSkip && out.withBuild) {
     throw new Error("--skip-build and --with-build are mutually exclusive");
   }
+  if (out.streamUrl && !out.streamModel) throw new Error("--stream-url needs --stream-model");
   return out;
 }
 
@@ -400,6 +430,175 @@ export async function measureTtfb({ baseUrl, endpoints, runs, warmup, fetchImpl,
   return results;
 }
 
+// ── stream TTFT (first semantic event) ───────────────────────────────────────
+
+const hasText = (v) => typeof v === "string" && v.length > 0;
+
+/**
+ * Class of one parsed SSE payload across the OpenAI chat, Claude Messages and Responses wire
+ * formats: "text" | "reasoning" | "tool" | "done" | "error", or null for metadata (role-only
+ * deltas, message_start, response.created, usage-only frames, empty deltas).
+ */
+export function classifySsePayload(p) {
+  if (!p || typeof p !== "object") return null;
+  const type = typeof p.type === "string" ? p.type : "";
+  if (p.error || type === "error" || type === "response.failed") return "error";
+  // Claude Messages
+  if (type === "content_block_delta") {
+    const d = p.delta ?? {};
+    if (d.type === "text_delta" && hasText(d.text)) return "text";
+    if (d.type === "thinking_delta" && hasText(d.thinking)) return "reasoning";
+    if (d.type === "input_json_delta") return "tool";
+    return null;
+  }
+  if (type === "content_block_start") return p.content_block?.type === "tool_use" ? "tool" : null;
+  if (type === "message_stop") return "done";
+  // Responses
+  if (type === "response.output_text.delta") return hasText(p.delta) ? "text" : null;
+  if (type.startsWith("response.reasoning") && type.endsWith(".delta")) {
+    return hasText(p.delta) ? "reasoning" : null;
+  }
+  if (type === "response.output_item.added")
+    return p.item?.type === "function_call" ? "tool" : null;
+  if (type === "response.completed" || type === "response.incomplete") return "done";
+  // OpenAI chat
+  const choice = Array.isArray(p.choices) ? p.choices[0] : null;
+  if (!choice) return null;
+  const delta = choice.delta ?? {};
+  if (Array.isArray(delta.tool_calls) && delta.tool_calls.length > 0) return "tool";
+  if (hasText(delta.content)) return "text";
+  if (hasText(delta.reasoning_content) || hasText(delta.reasoning)) return "reasoning";
+  return choice.finish_reason ? "done" : null;
+}
+
+/**
+ * One streaming request. TTFT is the time to the first text, reasoning or tool event; the first
+ * body byte is reported next to it because it is usually only metadata. A run is `ok` only after
+ * a terminal event (`done` class or `data: [DONE]`) and with no error frame.
+ * shortcut: an OpenAI chunk that carries both content and finish_reason counts as content only,
+ * so such a stream needs its `data: [DONE]` line; OmniRoute always sends it.
+ */
+export async function measureStreamTtft({ url, init, fetchImpl, now }) {
+  const t0 = now();
+  let res;
+  try {
+    res = await fetchImpl(url, init);
+  } catch (e) {
+    return { ok: false, reason: `request failed: ${errorMessage(e)}` };
+  }
+  if (res.status < 200 || res.status >= 300) {
+    await res.arrayBuffer().catch(() => undefined);
+    return { ok: false, reason: `HTTP ${res.status} (expected 2xx)` };
+  }
+  if (!res.body) return { ok: false, reason: "response has no body" };
+  const decoder = new TextDecoder();
+  let pending = "";
+  let firstByteMs = null;
+  let ttftMs = null;
+  let firstClass = null;
+  let terminal = false;
+  let errored = false;
+  const onFrame = (frame) => {
+    for (const line of frame.split(/\r?\n/)) {
+      if (!line.startsWith("data:")) continue;
+      const data = line.slice(5).trim();
+      if (data === "[DONE]") {
+        terminal = true;
+        continue;
+      }
+      let payload;
+      try {
+        payload = JSON.parse(data);
+      } catch {
+        continue;
+      }
+      const cls = classifySsePayload(payload);
+      if (cls === "error") errored = true;
+      else if (cls === "done") terminal = true;
+      else if (cls && ttftMs === null) {
+        ttftMs = now() - t0;
+        firstClass = cls;
+      }
+    }
+  };
+  try {
+    for await (const chunk of res.body) {
+      if (firstByteMs === null) firstByteMs = now() - t0;
+      pending += decoder.decode(chunk, { stream: true });
+      let at;
+      while ((at = pending.search(/\r?\n\r?\n/)) !== -1) {
+        onFrame(pending.slice(0, at));
+        pending = pending.slice(at).replace(/^\r?\n\r?\n/, "");
+      }
+    }
+    if (pending.trim()) onFrame(pending);
+  } catch (e) {
+    return { ok: false, reason: `stream failed: ${errorMessage(e)}` };
+  }
+  if (errored) return { ok: false, reason: "stream carried an error event" };
+  if (ttftMs === null)
+    return { ok: false, reason: "stream ended with no text, reasoning or tool event" };
+  if (!terminal) return { ok: false, reason: "stream ended without a terminal event" };
+  return { ok: true, firstByteMs, ttftMs, firstClass, totalMs: now() - t0 };
+}
+
+/** The request each wire format expects: a tiny prompt, so the run measures latency, not output. */
+function buildStreamRequest({ streamFormat, streamModel }, apiKey) {
+  const prompt = "Reply with the single word: ok";
+  const bodies = {
+    openai: {
+      model: streamModel,
+      stream: true,
+      max_tokens: 16,
+      messages: [{ role: "user", content: prompt }],
+    },
+    claude: {
+      model: streamModel,
+      stream: true,
+      max_tokens: 16,
+      messages: [{ role: "user", content: prompt }],
+    },
+    responses: { model: streamModel, stream: true, max_output_tokens: 16, input: prompt },
+  };
+  return {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      accept: "text/event-stream",
+      ...(apiKey ? { authorization: `Bearer ${apiKey}` } : {}),
+    },
+    body: JSON.stringify(bodies[streamFormat]),
+  };
+}
+
+async function measureStreamRuns({ options, apiKey, fetchImpl, now }) {
+  const init = buildStreamRequest(options, apiKey);
+  const ttft = [];
+  const firstByte = [];
+  let failure = null;
+  for (let i = 0; i < WARMUP_REQUESTS + options.runs && !failure; i++) {
+    const r = await measureStreamTtft({ url: options.streamUrl, init, fetchImpl, now });
+    if (!r.ok) failure = r.reason;
+    else if (i >= WARMUP_REQUESTS) {
+      ttft.push(r.ttftMs);
+      firstByte.push(r.firstByteMs);
+    }
+  }
+  const raw = { format: options.streamFormat, ok: ttft.length, failed: failure ? 1 : 0 };
+  if (ttft.length === 0) return measurement("failed", 0, failure ?? "no timed runs", raw);
+  const t = summarizeSamples(ttft);
+  const b = summarizeSamples(firstByte);
+  const summary =
+    `first semantic event: median ${t.medianMs} ms · p95 ${t.p95Ms} ms; ` +
+    `first body byte: median ${b.medianMs} ms · p95 ${b.p95Ms} ms (n=${t.n}, ${options.streamFormat})`;
+  return measurement(
+    failure ? "failed" : "ok",
+    ttft.reduce((a, c) => a + c, 0),
+    failure ? `${failure} — ${summary}` : summary,
+    { ...raw, ttft: t, firstByte: b }
+  );
+}
+
 // ── orchestration ────────────────────────────────────────────────────────────
 
 const npmRun = (script, extra = []) => [
@@ -533,6 +732,16 @@ export async function runBaseline(options, deps) {
     } finally {
       if (server) await server.stop();
     }
+  }
+
+  if (options.streamUrl) {
+    log(`streamTtft: ${options.streamFormat} stream at ${options.streamUrl}`);
+    measurements.streamTtft = await measureStreamRuns({
+      options,
+      apiKey: deps.baseEnv?.OMNIROUTE_API_KEY,
+      fetchImpl,
+      now,
+    });
   }
 
   return buildReport({
