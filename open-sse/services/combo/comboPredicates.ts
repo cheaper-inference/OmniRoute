@@ -207,13 +207,21 @@ export function clampDeadlineFailureBudget(value: unknown): number {
 
 /**
  * Classify a failed combo attempt as a stream-readiness deadline failure.
- * Matches the stable STREAM_READINESS_TIMEOUT marker raised by the readiness
- * watchdog (StreamReadinessReadTimeout) when no first non-ping SSE event
- * arrives within the readiness window — distinct from fast upstream
- * rejections (429/5xx) and from slow-but-alive streams.
+ * Reads the STRUCTURED `error.code` of the failure body (`structuredError.code`
+ * from readAttemptFailure), never the human message: the readiness watchdog
+ * (open-sse/utils/streamReadiness.ts) puts the STREAM_READINESS_TIMEOUT marker
+ * only in `error.code`, while `errorText` carries `error.message`
+ * ("Stream produced no non-ping SSE event within …"). The same code also
+ * covers a source stream that failed before its first non-ping event (an
+ * executor watchdog giving up on a stalled upstream) — both are stalls.
+ * Distinct from fast upstream rejections (429/5xx), from other 504 shapes and
+ * from STREAM_EARLY_EOF (a fast close, which keeps its own retry path).
  */
-export function isReadinessDeadlineFailure(status: number, errorText: string): boolean {
-  return status === 504 && errorText.includes("STREAM_READINESS_TIMEOUT");
+export function isReadinessDeadlineFailure(
+  status: number,
+  code: string | null | undefined
+): boolean {
+  return status === 504 && code === "STREAM_READINESS_TIMEOUT";
 }
 
 /** Minimum recorded requests before the predictive-TTFT breaker trusts the average. */

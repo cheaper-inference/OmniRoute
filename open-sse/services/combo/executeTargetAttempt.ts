@@ -1305,23 +1305,17 @@ export async function executeTargetAttempt(
     // for fast failures) still has plenty of headroom. With the budget set,
     // exhausting it terminates the combo with a clean 504 instead of
     // rotating further targets. Unset (default) = disabled, zero change.
-    if (isReadinessDeadlineFailure(result.status, errorText || "")) {
+    // The exit itself happens below, AFTER the model-lockout and provider-
+    // cooldown recording, so the target that exhausts the budget is charged
+    // exactly like every earlier one.
+    let deadlineFailureBudgetExhausted = 0;
+    if (isReadinessDeadlineFailure(result.status, structuredError?.code)) {
       state.deadlineFailures++;
       const deadlineFailureBudget = clampDeadlineFailureBudget(
         process.env.OMNIROUTE_COMBO_MAX_DEADLINE_FAILURES
       );
       if (deadlineFailureBudget > 0 && state.deadlineFailures >= deadlineFailureBudget) {
-        deps.log.warn(
-          "COMBO",
-          `Readiness-deadline failure budget (${deadlineFailureBudget}) exhausted — terminating combo instead of rotating further targets`
-        );
-        return {
-          ok: false,
-          response: errorResponse(
-            504,
-            `Stream readiness deadline failed on ${state.deadlineFailures} targets — terminating to avoid amplifying a stalled upstream; retry shortly`
-          ),
-        };
+        deadlineFailureBudgetExhausted = deadlineFailureBudget;
       }
     }
     state.fallbackCount++;
@@ -1385,6 +1379,20 @@ export async function executeTargetAttempt(
         targetWithConnection.connectionId ?? undefined,
         deps.resilienceSettings
       );
+    }
+
+    if (deadlineFailureBudgetExhausted > 0) {
+      deps.log.warn(
+        "COMBO",
+        `Readiness-deadline failure budget (${deadlineFailureBudgetExhausted}) exhausted — terminating combo instead of rotating further targets`
+      );
+      return {
+        ok: false,
+        response: errorResponse(
+          504,
+          `Stream readiness deadline failed on ${state.deadlineFailures} targets — terminating to avoid amplifying a stalled upstream; retry shortly`
+        ),
+      };
     }
 
     const fallbackWaitMs =
