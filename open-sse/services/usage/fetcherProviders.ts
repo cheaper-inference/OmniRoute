@@ -123,6 +123,8 @@ export const USAGE_FETCHER_PROVIDERS = [
   "cloudflare-ai",
   // xKiro daily free-token quota only, never the paid wallet (GET /v1/usage)
   "xkiro",
+  // Zed Hosted Models USD credit from an optional Orb billing portal link
+  "zed-hosted",
 ] as const;
 
 export type UsageFetcherProvider = (typeof USAGE_FETCHER_PROVIDERS)[number];

@@ -118,4 +118,6 @@ export const USAGE_SUPPORTED_PROVIDERS: readonly string[] = [
   "cloudflare-ai",
   // xKiro daily free-token quota (GET /v1/usage → free_tokens; wallet ignored)
   "xkiro",
+  // Zed Hosted Models USD credit (optional Orb billing portal link)
+  "zed-hosted",
 ];
