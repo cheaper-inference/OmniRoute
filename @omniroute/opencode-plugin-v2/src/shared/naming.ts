@@ -1,13 +1,18 @@
 /**
- * Universal model naming template for the OmniRoute plugin.
+ * Compact model naming for the plugin picker.
  *
- * Naming pipeline:
- *   [tag] <provider-label><separator><display-name><suffix>
+ * Published rule:
+ *   [🆓 ]Provider - Model[ (Editor)][ · budget][ (route)]
  *
- *   [Free] <provider> - <name> · <budget>     ← free model
- *   Auto: <variant> (<N>p)                     ← auto combo
- *   Combo: <name>                              ← DB combo
- *   <provider> - <name>                        ← regular model
+ * The provider (the route that serves the model) is shown whenever one is
+ * known: it comes from the enrichment `providerDisplayName`, else from a
+ * `Provider - ` prefix on the enrichment name, else from the first segment of
+ * the raw id (a slash-less id renders without a prefix). The editor comes only
+ * from an explicit `Editor: Model` name. A free entry with a known `freeType`
+ * keeps its budget suffix (`· 1M tokens/month`).
+ * Free entries carry the `🆓 ` prefix (combos never do); combos render as
+ * `combo - <slug>` with no free icon; `auto/*` strategies keep their slug.
+ * A route suffix appears only when two published entries share the name.
  */
 
 // ── Constants ────────────────────────────────────────────────────────────
@@ -104,24 +109,9 @@ export function shortProviderLabel(
 
 // ── Free Label ────────────────────────────────────────────────────────────
 
-/**
- * Normalise display name so free-tier models get a consistent `[Free] ` prefix.
- *
- * "GPT-4.1 (Free)"          → "[Free] GPT-4.1"
- * "DeepSeek V4 Flash Free"  → "[Free] DeepSeek V4 Flash"
- * "Claude Opus 4.7"         → "Claude Opus 4.7"  (unchanged)
- */
-export function normaliseFreeLabel(name: string): string {
-  // Bounded whitespace quantifiers ({0,8}/{1,8}) avoid the polynomial-ReDoS
-  // backtracking that unbounded \s* before an anchored \s*$ would allow on
-  // attacker-influenced display names. 8 covers any realistic label spacing.
-  const cleaned = name
-    .replace(/\s{0,8}\(free\)\s{0,8}$/i, "")
-    .replace(/[\s-]{1,8}free\s{0,8}$/i, "")
-    .trim();
-  const wasFree = cleaned.length < name.trim().length;
-  if (!wasFree) return name;
-  return `[Free] ${cleaned}`;
+/** A routing strategy id: `auto` or `auto/...`, named by its slug. */
+function isAutoStrategyId(id: string): boolean {
+  return id === "auto" || id.startsWith("auto/");
 }
 
 // ── Free Budget Formatting ────────────────────────────────────────────────
@@ -232,19 +222,21 @@ export interface ModelDisplayNameParams {
   rawId: string;
   /** Enrichment display name (e.g. "Claude Sonnet 4.6"). */
   enrichmentName?: string;
-  /** Provider tag enrichment. */
+  /** Upstream provider label enrichment. */
   providerAlias?: string;
   /** Human-readable upstream provider label. */
   providerDisplayName?: string;
+  /** Whether to render the editor in a trailing parenthesis (default true). */
+  providerTag?: boolean;
   /** Whether model is free tier. */
   isFree?: boolean;
   /** Free model budget info. */
   freeType?: FreeModelFreeType;
-  /** Monthly token budget (for recurring free models). */
+  /** Monthly token budget for recurring free models. */
   monthlyTokens?: number;
-  /** Credit token budget (for credit-based free models). */
+  /** Credit token budget for credit-based free models. */
   creditTokens?: number;
-  /** Whether this is a combo entry (skip provider tag). */
+  /** Whether this is a combo entry (`combo - <slug>`, no free icon). */
   isCombo?: boolean;
   /** Whether this is an auto combo entry. */
   isAutoCombo?: boolean;
@@ -255,17 +247,39 @@ export interface ModelDisplayNameParams {
 }
 
 /**
- * Build the final display name following the universal template.
+ * Strip every known free marker form from a display text. Returns the cleaned
+ * text and whether any marker was found.
+ */
+function stripFreeMarkers(text: string): { text: string; wasFree: boolean } {
+  let cleaned = text.trim();
+  let wasFree = false;
+  const withoutPrefix = cleaned.replace(/^\[free\]\s{0,8}/i, "");
+  if (withoutPrefix.length !== cleaned.length) {
+    wasFree = true;
+    cleaned = withoutPrefix.trim();
+  }
+  for (const pattern of [
+    /\s{0,8}\(free\)\s{0,8}$/i,
+    /[\s-]{1,8}free\s{0,8}$/i,
+    /\s{1,8}\[F\]\s{0,8}$/,
+  ]) {
+    const next = cleaned.replace(pattern, "").trim();
+    if (next.length !== cleaned.length) {
+      wasFree = true;
+      cleaned = next;
+    }
+  }
+  return { text: cleaned.length > 0 ? cleaned : text.trim(), wasFree };
+}
+
+/**
+ * Build the display name for one entry.
  *
- * Priority:
- *   1. Auto combo → "Auto: <variant> (<N>p)"
- *   2. DB combo → "Combo: <name>"
- *   3. Free + enrichment + provider tag → "[Free] <label> - <name> · <budget>"
- *   4. Free + enrichment → "[Free] <name> · <budget>"
- *   5. Free + raw → "[Free] <rawId> · <budget>"
- *   6. Enrichment + provider tag → "<label> - <name>"
- *   7. Enrichment only → "<name>"
- *   8. Raw fallback → normaliseFreeLabel(rawId)
+ * Format: `[🆓 ]<Provider> - <Model>[ (<Editor>)][ · <budget>][ (<route>)]`
+ *   - free models carry the `🆓 ` prefix (except combos);
+ *   - combos render as `combo - <slug>` with no free icon;
+ *   - auto strategies keep their slug;
+ *   - auto combos keep `Auto: <variant> (<N>p)`.
  */
 export function buildModelDisplayName(params: ModelDisplayNameParams): string {
   // Auto combos
@@ -273,50 +287,177 @@ export function buildModelDisplayName(params: ModelDisplayNameParams): string {
     return formatAutoComboName(params.autoVariant, params.autoCandidateCount);
   }
 
-  // Determine base name — strip any existing free suffix first
+  // A routing strategy is named by its slug, never by an enrichment name.
+  if (isAutoStrategyId(params.rawId)) {
+    return params.rawId;
+  }
+
+  // Combos: `combo - <slug>`, no free icon.
+  if (params.isCombo) {
+    const slugSource =
+      params.enrichmentName && params.enrichmentName.trim().length > 0
+        ? params.enrichmentName
+        : params.rawId;
+    const { text: slug } = stripFreeMarkers(slugSource);
+    return `combo - ${slug}`;
+  }
+
+  // Provider: upstream label, else enrichment-name prefix, else first id segment.
+  let provider = "";
+  if (
+    typeof params.providerDisplayName === "string" &&
+    params.providerDisplayName.trim().length > 0
+  ) {
+    provider = params.providerDisplayName.trim();
+  }
+
   const rawBase =
     params.enrichmentName && params.enrichmentName.trim().length > 0
       ? params.enrichmentName
       : params.rawId;
-  const cleanedBase = rawBase
-    .replace(/\s*\(free\)\s*$/i, "")
-    .replace(/[\s-]+free\s*$/i, "")
-    .trim();
-  const wasFree = cleanedBase.length < rawBase.trim().length;
+
+  // Split off a leading provider prefix (`Provider - rest`) when present.
+  let work = rawBase.trim();
+  const dashMatch = work.match(/^(.+?)\s+-\s+(.+)$/);
+  if (dashMatch) {
+    if (!provider) provider = dashMatch[1]!.trim();
+    // Remove a leading [Free] from provider if present.
+    const pm = stripFreeMarkers(provider);
+    provider = pm.text;
+    work = dashMatch[2]!.trim();
+  }
+
+  // Derive provider from the raw id's first segment when still missing. A
+  // slash-less id has no route segment: it renders without a prefix rather
+  // than repeating itself (`gpt-4o - gpt-4o`).
+  if (!provider && params.rawId.includes("/")) {
+    provider = params.rawId.slice(0, params.rawId.indexOf("/"));
+  }
+
+  // Editor: only the explicit `Editor: Model` form (colon then whitespace, no
+  // slash in the editor). Guessing an editor from capitalisation cuts real
+  // names (`Deepseek chat`), and a bare colon is a tag inside an id
+  // (`qwen3:8b`, `...:free`), not an editor.
+  let editor = "";
+  const colonMatch = work.match(/^([^:/]+?):\s+(.+)$/);
+  if (colonMatch) {
+    editor = colonMatch[1]!.trim();
+    work = colonMatch[2]!.trim();
+  }
+
+  // Free markers.
+  const { text: cleanedModel, wasFree } = stripFreeMarkers(work);
+  const model = cleanedModel.length > 0 ? cleanedModel : work;
   const isFree = !!params.isFree || wasFree;
 
-  let baseName = cleanedBase;
+  if (
+    editor &&
+    (editor.toLowerCase() === provider.toLowerCase() ||
+      editor.toLowerCase() === model.toLowerCase())
+  )
+    editor = "";
 
-  // Provider tag (skip for combos)
-  if (!params.isCombo) {
-    const label = shortProviderLabel({
-      providerDisplayName: params.providerDisplayName,
-      providerAlias: params.providerAlias,
-    });
-    if (label) {
-      const prefix = `${label}${PROVIDER_TAG_SEPARATOR}`;
-      if (!baseName.startsWith(prefix)) {
-        baseName = `${prefix}${baseName}`;
-      }
-    }
-  }
-
-  // Prepend [Free] if applicable (AFTER provider tag for correct ordering)
-  if (isFree) {
-    baseName = `[Free] ${baseName}`;
-  }
-
-  // Free budget suffix
+  const freePrefix = isFree ? "🆓 " : "";
+  const head = provider.length > 0 ? `${provider}${PROVIDER_TAG_SEPARATOR}` : "";
+  let name = `${freePrefix}${head}${model}`;
+  if (editor && params.providerTag !== false) name = `${name} (${editor})`;
   if (isFree && params.freeType) {
     const budget = formatFreeBudget({
       freeType: params.freeType,
       monthlyTokens: params.monthlyTokens,
       creditTokens: params.creditTokens,
     });
-    if (budget) {
-      baseName = `${baseName} · ${budget}`;
+    if (budget) name = `${name} · ${budget}`;
+  }
+  return name;
+}
+
+export function disambiguateDisplayNames(
+  entries: ReadonlyArray<{ id: string; name: string }>
+): Map<string, string> {
+  const renamed = new Map<string, string>();
+  const bareId = (key: string): string => {
+    const slash = key.indexOf("/");
+    return slash >= 0 ? key.slice(slash + 1) : key;
+  };
+  const byName = new Map<string, Array<{ id: string; name: string }>>();
+  for (const entry of entries) {
+    const group = byName.get(entry.name);
+    if (group) group.push(entry);
+    else byName.set(entry.name, [entry]);
+  }
+  for (const group of byName.values()) {
+    if (group.length < 2) continue;
+    const segments = group.map((entry) => bareId(entry.id).split("/"));
+    let commonCount = 0;
+    const minLength = Math.min(...segments.map((parts) => parts.length));
+    for (let depth = 1; depth <= minLength; depth++) {
+      const tail = segments[0]!.slice(segments[0]!.length - depth).join("/");
+      if (segments.every((parts) => parts.slice(parts.length - depth).join("/") === tail)) {
+        commonCount = depth;
+      } else {
+        break;
+      }
+    }
+    const common = commonCount > 0 ? segments[0]!.slice(-commonCount).join("/") : "";
+    const routes = new Map<string, string>();
+    if (common.length === 0) {
+      for (let i = 0; i < group.length; i++) {
+        const parts = segments[i]!;
+        let route = parts.join("/");
+        for (let length = 1; length <= parts.length; length++) {
+          const prefix = parts.slice(0, length).join("/");
+          const shared = segments.some(
+            (other, j) => j !== i && other.slice(0, length).join("/") === prefix
+          );
+          if (!shared) {
+            route = prefix;
+            break;
+          }
+        }
+        routes.set(group[i]!.id, route);
+      }
+    } else {
+      for (let i = 0; i < group.length; i++) {
+        const bare = bareId(group[i]!.id);
+        if (bare === common) {
+          routes.set(group[i]!.id, "");
+        } else if (bare.endsWith(`/${common}`)) {
+          routes.set(group[i]!.id, bare.slice(0, bare.length - common.length - 1));
+        } else {
+          routes.set(group[i]!.id, bare);
+        }
+      }
+    }
+    const seen = new Set<string>();
+    for (const entry of group) {
+      const route = routes.get(entry.id) ?? "";
+      let next = entry.name;
+      if (route.length > 0 && route !== entry.name) {
+        next = `${entry.name} (${route})`;
+      }
+      if (seen.has(next)) {
+        next = `${entry.name} (${entry.id})`;
+      }
+      seen.add(next);
+      if (next !== entry.name) {
+        renamed.set(entry.id, next);
+      }
     }
   }
-
-  return baseName;
+  // The route step dedups within a group only; a renamed entry may still land
+  // on a name another group keeps (e.g. two routes collide, or one route
+  // equals a name a single entry already carries). Walk every entry in order
+  // and give any late duplicate its publication key as the suffix so the
+  // published names stay unique.
+  const globalSeen = new Set<string>();
+  for (const entry of entries) {
+    let name = renamed.get(entry.id) ?? entry.name;
+    if (globalSeen.has(name)) {
+      name = `${entry.name} (${entry.id})`;
+      renamed.set(entry.id, name);
+    }
+    globalSeen.add(name);
+  }
+  return renamed;
 }

@@ -109,6 +109,8 @@ export type ClaudeUsageLimitConfig = {
 
 export type ClaudeLowPriorityWait = {
   current: { sinceMs: number; attempts: number; nextTryAtMs: number } | null;
+  /** The session-limit reset already sent this request back once; never loop on it. */
+  limitResetUsed?: boolean;
 };
 
 export type ClaudeUsageLimitDecision =
@@ -617,7 +619,13 @@ export async function handleClaudeUsageLimitResponse(opts: {
     config.lowPriorityMode || config.autoLimitReset || opts.limitResetGate !== undefined;
   if (response.status !== 429 || !optedIn || !atWall) return { kind: "none" };
 
-  if (await shouldClaimLimitReset(config, headers, opts.claimLimitReset, opts.limitResetGate)) {
+  // The reset grant is memoised for 60 s, so a wall that persists after a granted reset
+  // would otherwise be re-sent with zero delay until the memo expires.
+  if (
+    !wait.limitResetUsed &&
+    (await shouldClaimLimitReset(config, headers, opts.claimLimitReset, opts.limitResetGate))
+  ) {
+    wait.limitResetUsed = true;
     return { kind: "retry", delayMs: 0, via: "limit-reset" };
   }
 
