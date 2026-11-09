@@ -87,6 +87,28 @@ describe("Sidebar rendered with the kit Sidebar family", () => {
     expect(navEl.querySelectorAll("svg.oi-icon").length).toBeGreaterThan(5);
   });
 
+  // #19066: subgroup headers ("Compression Context") were hand-made disclosure buttons; they are
+  // the kit Disclosure now, with the same compact row and the panel wired by the kit.
+  it("renders subgroups as kit Disclosures that mount their links only while open", async () => {
+    const user = userEvent.setup();
+    render(<Harness />);
+    const navEl = await screen.findByRole("navigation", { name: "Main navigation" });
+    await user.click(within(navEl).getByRole("button", { name: "OmniProxy", exact: true }));
+    const group = within(navEl).getByRole("button", { name: "Compression Context" });
+    expect(group.getAttribute("data-slot")).toBe("disclosure-trigger");
+    expect(group.className).toContain("text-xs");
+    expect(group.getAttribute("aria-expanded")).toBe("false");
+    const panel = document.getElementById(group.getAttribute("aria-controls")!)!;
+    expect(panel.getAttribute("data-slot")).toBe("disclosure-content");
+    expect(panel.hidden).toBe(true);
+    expect(within(navEl).queryByRole("link", { name: "Caveman" })).toBeNull();
+    await user.click(group);
+    expect(group.getAttribute("aria-expanded")).toBe("true");
+    expect(panel.hidden).toBe(false);
+    expect(panel.contains(within(navEl).getByRole("link", { name: "Caveman" }))).toBe(true);
+    expect(group.closest("[data-slot=sidebar-menu-item]")).not.toBeNull();
+  });
+
   it("puts the search at the top of SidebarContent, sticky above the scrolling nav (spec §3.7)", async () => {
     render(<Harness />);
     const navEl = await screen.findByRole("navigation", { name: "Main navigation" });

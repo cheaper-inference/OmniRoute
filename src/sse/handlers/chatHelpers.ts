@@ -476,6 +476,7 @@ export async function executeChatWithBreaker({
   // non-video request. Passed straight through to handleChatCore; see its own destructure default.
   videoBridgeLog = undefined,
   fallbackAttempts = undefined,
+  requestUpstreamStartTimeoutMs = undefined,
   forcedConnectionId = null,
   allowedConnections = null,
   // optional resume flag from a rehydrated previous_response_id —
@@ -555,6 +556,7 @@ export async function executeChatWithBreaker({
             videoBridgeLog,
             previousResponseResumed,
             fallbackAttempts,
+            requestUpstreamStartTimeoutMs,
             forcedConnectionId,
             allowedConnections,
             skipResourcePressureGuard: true,
