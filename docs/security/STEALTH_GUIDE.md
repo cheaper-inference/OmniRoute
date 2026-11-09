@@ -171,6 +171,35 @@ The upstream enforcement is on **Google's side**, not anything OmniRoute can pre
 
 The environment reference documents the account and spend implications of each credits mode.
 
+#### Not only `=always`: Antigravity OAuth routing in general
+
+The suspensions are not limited to credit overages. Reports in November 2026 (#19223, #19266)
+describe several Google accounts suspended while routing through the `antigravity`
+and `agy` (Antigravity CLI) providers, with:
+
+```
+403: This service has been disabled in this account for violation of Terms of Service.
+Please submit an appeal to continue using this product.
+```
+
+Both providers authenticate with the Antigravity product OAuth session, which is the case the
+dashboard's risk notice ("This provider uses your official product session/OAuth, which is not
+authorized for proxy/router use") warns about before a connection is added. None of the
+recommendations above make that usage authorized; they only reduce how much traffic one account
+carries.
+
+**ToS-compliant alternative for Gemini models.** Google's sanctioned path for programmatic access
+is an API key, which OmniRoute supports as ordinary API-key providers:
+
+| Provider id | Dashboard name            | Credential                                                                  |
+| ----------- | ------------------------- | --------------------------------------------------------------------------- |
+| `gemini`    | Gemini (Google AI Studio) | Gemini API key from Google AI Studio (free tier available)                  |
+| `vertex`    | Vertex AI                 | Service Account JSON, OAuth access token or Vertex Express API key (Gemini) |
+
+Pricing and quotas follow Google's API terms rather than an Antigravity subscription. Operators who
+cannot risk a Google account suspension should route Gemini traffic through one of these
+providers instead of `antigravity` / `agy`.
+
 Touch points:
 
 - `open-sse/executors/antigravity.ts` — reads `process.env.ANTIGRAVITY_CREDITS`
@@ -246,14 +275,14 @@ All MITM endpoints require management auth (`requireCliToolsAuth`). The sudo pas
 
 ## User-Agent Overrides — env vars (`.env.example` section 12)
 
-| Variable                 | Default                                                         |
-| ------------------------ | --------------------------------------------------------------- |
-| `CLAUDE_USER_AGENT`      | `claude-cli/2.1.280 (external, cli)`                            |
-| `CODEX_USER_AGENT`       | `codex-cli/0.155.0 (Windows 10.0.26200; x64)`                   |
-| `GITHUB_USER_AGENT`      | `GitHubCopilotChat/0.54.0`                                      |
-| `KIRO_USER_AGENT`        | `AWS-SDK-JS/3.0.0 kiro-ide/1.0.0`                               |
-| `QODER_USER_AGENT`       | `Qoder-Cli`                                                     |
-| `CURSOR_USER_AGENT`      | `Cursor/3.4`                                                    |
+| Variable            | Default                                       |
+| ------------------- | --------------------------------------------- |
+| `CLAUDE_USER_AGENT` | `claude-cli/2.1.280 (external, cli)`          |
+| `CODEX_USER_AGENT`  | `codex-cli/0.155.0 (Windows 10.0.26200; x64)` |
+| `GITHUB_USER_AGENT` | `GitHubCopilotChat/0.54.0`                    |
+| `KIRO_USER_AGENT`   | `AWS-SDK-JS/3.0.0 kiro-ide/1.0.0`             |
+| `QODER_USER_AGENT`  | `Qoder-Cli`                                   |
+| `CURSOR_USER_AGENT` | `Cursor/3.4`                                  |
 
 Consumed by `open-sse/executors/base.ts::buildHeaders()` via dynamic lookup. **Bump these when providers release new CLI versions** — stale UA strings start getting rejected as outdated clients.
 
