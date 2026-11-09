@@ -22,29 +22,41 @@ export function getLegacyDotDataDir(homeDir = safeHomeDir()) {
   return path.join(homeDir, `.${APP_NAME}`);
 }
 
+function hasDatabase(dir) {
+  try {
+    return fs.statSync(path.join(dir, "storage.sqlite")).isFile();
+  } catch {
+    return false;
+  }
+}
+
 export function getDefaultDataDir() {
   const homeDir = safeHomeDir();
   const legacyDir = getLegacyDotDataDir(homeDir);
 
-  if (fs.existsSync(legacyDir)) {
-    try {
-      if (fs.statSync(legacyDir).isDirectory()) {
-        return legacyDir;
-      }
-    } catch {
-      // Ignore stat errors and continue to the platform default.
-    }
+  let legacyIsDir = false;
+  try {
+    legacyIsDir = fs.statSync(legacyDir).isDirectory();
+  } catch {
+    // Ignore stat errors and continue to the platform default.
   }
 
+  let platformDir = null;
   if (process.platform === "win32") {
     const appData = process.env.APPDATA || path.join(homeDir, "AppData", "Roaming");
-    return path.join(appData, APP_NAME);
+    platformDir = path.join(appData, APP_NAME);
+  } else {
+    const xdgConfigHome = normalizeConfiguredPath(process.env.XDG_CONFIG_HOME);
+    if (xdgConfigHome) platformDir = path.join(xdgConfigHome, APP_NAME);
   }
 
-  const xdgConfigHome = normalizeConfiguredPath(process.env.XDG_CONFIG_HOME);
-  if (xdgConfigHome) return path.join(xdgConfigHome, APP_NAME);
-
-  return legacyDir;
+  // An existing legacy dir wins, unless the platform dir holds the database and the legacy dir
+  // does not: other code creates ~/.omniroute/<sub> directly, and that alone must not move an
+  // XDG/APPDATA install to an empty database.
+  if (legacyIsDir && !(platformDir && !hasDatabase(legacyDir) && hasDatabase(platformDir))) {
+    return legacyDir;
+  }
+  return platformDir ?? legacyDir;
 }
 
 export function resolveDataDir() {
