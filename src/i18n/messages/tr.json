@@ -4073,6 +4073,8 @@
     "builderAddComboRef": "Kombinasyon referansı ekle",
     "builderComboRefStep": "Kombinasyon referansı ekle",
     "builderPinnedAccount": "Sabitlenmiş Hesap",
+    "builderRestrictAccounts": "Hesaplarla sınırla (isteğe bağlı)",
+    "builderRestrictAccountsHint": "Tüm etkin hesapları kullanmak için boş bırakın. Hesap seçildiğinde otomatik yönlendirme yalnızca bu hesaplarla sınırlı kalır.",
     "builderLegacyEntry": "Eski kayıt",
     "builderStaleModel": "Canlı katalogda yok",
     "reviewName": "Ad",

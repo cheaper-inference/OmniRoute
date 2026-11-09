@@ -4073,6 +4073,8 @@
     "builderAddComboRef": "Dodaj referencję combo",
     "builderComboRefStep": "Dodaj referencję combo",
     "builderPinnedAccount": "Przypięte konto",
+    "builderRestrictAccounts": "Ogranicz do kont (opcjonalnie)",
+    "builderRestrictAccountsHint": "Pozostaw puste, aby używać wszystkich aktywnych kont. Jeśli wybierzesz konta, automatyczne kierowanie będzie korzystać tylko z tych kont.",
     "builderLegacyEntry": "Wpis legacy",
     "builderStaleModel": "Brak w katalogu na żywo",
     "reviewName": "Nazwa",

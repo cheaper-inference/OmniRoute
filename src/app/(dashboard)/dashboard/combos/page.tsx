@@ -36,6 +36,8 @@ import InfoTooltip from "@/shared/components/InfoTooltip";
 import Input from "@/shared/components/Input";
 import Modal from "@/shared/components/Modal";
 import Select from "@/shared/components/Select";
+import SearchableSelectField from "@/shared/components/SearchableSelectField";
+import ComboStepSelectors from "./ComboStepSelectors";
 import Textarea from "@/shared/components/Textarea";
 import Toggle from "@/shared/components/Toggle";
 import Tooltip from "@/shared/components/Tooltip";
@@ -2374,6 +2376,7 @@ function ComboFormModal({
   const [builderOptions, setBuilderOptions] = useState({ providers: [], comboRefs: [] });
   const [staleModels, setStaleModels] = useState<Set<string>>(() => new Set());
   const [builderLoading, setBuilderLoading] = useState(false);
+  const [builderLoadError, setBuilderLoadError] = useState(false);
   const [builderProviderId, setBuilderProviderId] = useState("");
   const [builderModelId, setBuilderModelId] = useState("");
   const [builderConnectionId, setBuilderConnectionId] = useState(COMBO_BUILDER_AUTO_CONNECTION);
@@ -2711,6 +2714,7 @@ function ComboFormModal({
 
   const fetchModalData = async () => {
     setBuilderLoading(true);
+    setBuilderLoadError(false);
     try {
       const [aliasesRes, nodesRes, pricingRes, builderRes] = await Promise.all([
         fetch("/api/models/alias"),
@@ -2719,9 +2723,9 @@ function ComboFormModal({
         fetch("/api/combos/builder/options"),
       ]);
 
-      if (!aliasesRes.ok || !nodesRes.ok) {
+      if (!aliasesRes.ok || !nodesRes.ok || !builderRes.ok) {
         throw new Error(
-          `Failed to fetch data: aliases=${aliasesRes.status}, nodes=${nodesRes.status}`
+          `Failed to fetch data: aliases=${aliasesRes.status}, nodes=${nodesRes.status}, builder=${builderRes.status}`
         );
       }
       const pricingData = pricingRes.ok ? await pricingRes.json() : {};
@@ -2742,6 +2746,7 @@ function ComboFormModal({
       setStaleModels(buildStaleModelSet(builderData.staleComboRefs));
     } catch (error) {
       console.error("Error fetching modal data:", error);
+      setBuilderLoadError(true);
       setBuilderOptions({ providers: [], comboRefs: [] });
       setStaleModels(new Set());
     } finally {
@@ -2865,8 +2870,7 @@ function ComboFormModal({
     else setNameError("");
   };
 
-  const handleBuilderProviderChange = (e) => {
-    const nextProviderId = e.target.value;
+  const handleBuilderProviderChange = (nextProviderId: string) => {
     setBuilderProviderId(nextProviderId);
     setBuilderModelId("");
     setBuilderConnectionId(COMBO_BUILDER_AUTO_CONNECTION);
@@ -2883,8 +2887,7 @@ function ComboFormModal({
     setBuilderError("");
   };
 
-  const handleBuilderModelChange = (e) => {
-    const nextModelId = e.target.value;
+  const handleBuilderModelChange = (nextModelId: string) => {
     setBuilderModelId(nextModelId);
     setBuilderError("");
 
@@ -2903,8 +2906,8 @@ function ComboFormModal({
     );
   };
 
-  const handleBuilderConnectionChange = (e) => {
-    setBuilderConnectionId(e.target.value || COMBO_BUILDER_AUTO_CONNECTION);
+  const handleBuilderConnectionChange = (value: string) => {
+    setBuilderConnectionId(value || COMBO_BUILDER_AUTO_CONNECTION);
     setBuilderError("");
   };
 
@@ -3794,114 +3797,21 @@ function ComboFormModal({
 
                 {builderSelectionMode === "step" && (
                   <>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mt-3">
-                      {/* Native-mode Select adapter (kit NativeSelect): long dynamic lists, and
-                          the builder e2e specs drive these three with selectOption(). */}
-                      <Select
-                        label={`1. ${getI18nOrFallback(t, "builderProvider", "Provider")}`}
-                        value={builderProviderId}
-                        onChange={handleBuilderProviderChange}
-                        data-testid="combo-builder-provider"
-                      >
-                        <option value="">
-                          {builderLoading
-                            ? getI18nOrFallback(t, "builderLoadingProviders", "Loading providers…")
-                            : getI18nOrFallback(t, "builderSelectProvider", "Select provider")}
-                        </option>
-                        {builderProviders.map((provider) => (
-                          <option key={provider.providerId} value={provider.providerId}>
-                            {provider.displayName} ({provider.connectionCount} acct
-                            {provider.connectionCount === 1 ? "" : "s"})
-                          </option>
-                        ))}
-                      </Select>
-
-                      <Select
-                        label={`2. ${getI18nOrFallback(t, "builderModel", "Model")}`}
-                        value={builderModelId}
-                        onChange={handleBuilderModelChange}
-                        disabled={!selectedBuilderProvider}
-                        data-testid="combo-builder-model"
-                      >
-                        <option value="">
-                          {selectedBuilderProvider
-                            ? getI18nOrFallback(t, "builderSelectModel", "Select model")
-                            : getI18nOrFallback(t, "builderProviderFirst", "Choose provider first")}
-                        </option>
-                        {(selectedBuilderProvider?.models || []).map((model) => (
-                          <option key={model.id} value={model.id}>
-                            {model.name}
-                            {model.source ? ` · ${model.source}` : ""}
-                          </option>
-                        ))}
-                      </Select>
-
-                      <Select
-                        label={`3. ${getI18nOrFallback(t, "builderAccount", "Account")}`}
-                        value={builderConnectionId}
-                        onChange={handleBuilderConnectionChange}
-                        disabled={!selectedBuilderModel}
-                        data-testid="combo-builder-account"
-                      >
-                        <option value={COMBO_BUILDER_AUTO_CONNECTION}>
-                          {getI18nOrFallback(
-                            t,
-                            "autoSelectAccount",
-                            "Auto-select account at runtime"
-                          )}
-                        </option>
-                        {selectedBuilderConnections.map((connection) => (
-                          <option key={connection.id} value={connection.id}>
-                            {pickDisplayValue([connection.label], emailsVisible, connection.label)}
-                            {connection.status !== "active" ? ` · ${connection.status}` : ""}
-                          </option>
-                        ))}
-                      </Select>
-                    </div>
-
-                    {builderConnectionId === COMBO_BUILDER_AUTO_CONNECTION &&
-                    selectedBuilderConnections.length > 1 ? (
-                      <div className="mt-2 rounded-md border border-border bg-surface px-2.5 py-2">
-                        <p className="text-xs font-medium uppercase tracking-wide text-text-muted mb-1.5">
-                          {getI18nOrFallback(
-                            t,
-                            "builderRestrictAccounts",
-                            "Restrict to accounts (optional)"
-                          )}
-                        </p>
-                        <div
-                          className="flex flex-wrap gap-1.5"
-                          data-testid="combo-builder-allowlist"
-                        >
-                          {selectedBuilderConnections.map((connection) => {
-                            const checked = builderAllowedConnectionIds.includes(connection.id);
-                            return (
-                              <Button
-                                key={connection.id}
-                                size="sm"
-                                variant={checked ? "secondary" : "outline"}
-                                onClick={() => handleBuilderAllowedConnectionToggle(connection.id)}
-                                aria-pressed={checked}
-                                icon={checked ? "check" : undefined}
-                              >
-                                {pickDisplayValue(
-                                  [connection.label],
-                                  emailsVisible,
-                                  connection.label
-                                )}
-                              </Button>
-                            );
-                          })}
-                        </div>
-                        <p className="text-[10px] text-text-muted mt-1.5">
-                          {getI18nOrFallback(
-                            t,
-                            "builderRestrictAccountsHint",
-                            "Leave empty to use the whole active pool. When selected, round-robin / weighted picks stay within this subset of accounts."
-                          )}
-                        </p>
-                      </div>
-                    ) : null}
+                    <ComboStepSelectors
+                      key={`${combo?.id ?? "new"}:${isOpen}`}
+                      providers={builderProviders}
+                      providerId={builderProviderId}
+                      modelId={builderModelId}
+                      connectionId={builderConnectionId}
+                      loading={builderLoading}
+                      error={builderLoadError ? tc("failedToLoad") : undefined}
+                      emailsVisible={emailsVisible}
+                      allowedConnectionIds={builderEffectiveAllowedConnectionIds}
+                      onProviderChange={handleBuilderProviderChange}
+                      onModelChange={handleBuilderModelChange}
+                      onConnectionChange={handleBuilderConnectionChange}
+                      onAllowedConnectionToggle={handleBuilderAllowedConnectionToggle}
+                    />
 
                     {isExpertMode ? (
                       <div className="mt-2 flex flex-wrap items-center gap-2">
@@ -3961,11 +3871,13 @@ function ComboFormModal({
 
                     <div className="mt-3 pt-3 border-t border-border">
                       <div className="flex flex-col sm:flex-row sm:items-end gap-2">
-                        <Select
+                        <SearchableSelectField
                           className="flex-1"
                           label={getI18nOrFallback(t, "builderComboRef", "Reference another combo")}
                           value={builderComboRefName}
-                          onChange={(e) => setBuilderComboRefName(e.target.value)}
+                          onValueChange={setBuilderComboRefName}
+                          data-testid="combo-builder-reference"
+                          resetKey={`${combo?.id ?? "new"}:${isOpen}`}
                           placeholder={getI18nOrFallback(
                             t,
                             "selectComboToReference",
@@ -3973,9 +3885,9 @@ function ComboFormModal({
                           )}
                           options={builderComboRefs.map((comboRef) => ({
                             value: comboRef.name,
-                            label: `${comboRef.name} · ${comboRef.strategy} · ${comboRef.stepCount} step${
-                              comboRef.stepCount === 1 ? "" : "s"
-                            }`,
+                            label: comboRef.name,
+                            description: `${comboRef.strategy} · ${t("reviewSteps")}: ${comboRef.stepCount}`,
+                            keywords: [comboRef.strategy],
                           }))}
                         />
                         <Button

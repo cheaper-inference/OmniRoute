@@ -4073,6 +4073,8 @@
     "builderAddComboRef": "콤보 참조 추가",
     "builderComboRefStep": "콤보 참조 추가",
     "builderPinnedAccount": "고정된 계정",
+    "builderRestrictAccounts": "사용할 계정 제한 (선택 사항)",
+    "builderRestrictAccountsHint": "모든 활성 계정을 사용하려면 비워 두세요. 계정을 선택하면 자동 라우팅은 선택한 계정만 사용합니다.",
     "builderLegacyEntry": "레거시 항목",
     "builderStaleModel": "라이브 카탈로그에 없음",
     "reviewName": "이름",

@@ -4073,6 +4073,8 @@
     "builderAddComboRef": "కాంబో సూచనను జోడించండి",
     "builderComboRefStep": "కాంబో సూచనను జోడించండి",
     "builderPinnedAccount": "పిన్ చేసిన ఖాతా",
+    "builderRestrictAccounts": "ఎంచుకున్న ఖాతాలకు పరిమితం చేయండి (ఐచ్ఛికం)",
+    "builderRestrictAccountsHint": "సక్రియంగా ఉన్న అన్ని ఖాతాలను ఉపయోగించడానికి ఖాళీగా ఉంచండి. ఖాతాలను ఎంచుకున్నప్పుడు ఆటోమేటిక్ రూటింగ్ ఆ ఖాతాలకు మాత్రమే పరిమితమవుతుంది.",
     "builderLegacyEntry": "లెగసీ ఎంట్రీ",
     "builderStaleModel": "లైవ్ కేటలాగ్‌లో లేదు",
     "reviewName": "పేరు",

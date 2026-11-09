@@ -4073,6 +4073,8 @@
     "builderAddComboRef": "Legg til kombinasjonsreferanse",
     "builderComboRefStep": "Legg til kombinasjonsreferanse",
     "builderPinnedAccount": "Festet konto",
+    "builderRestrictAccounts": "Begrens til kontoer (valgfritt)",
+    "builderRestrictAccountsHint": "La feltet stå tomt for å bruke alle aktive kontoer. Hvis du velger kontoer, bruker automatisk ruting bare disse kontoene.",
     "builderLegacyEntry": "Eldre oppføring",
     "builderStaleModel": "Ikke i live-katalogen",
     "reviewName": "Navn",

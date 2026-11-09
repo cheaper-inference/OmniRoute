@@ -4073,6 +4073,8 @@
     "builderAddComboRef": "הוספת הפניה לשילוב",
     "builderComboRefStep": "הוספת הפניה לשילוב",
     "builderPinnedAccount": "חשבון מוצמד",
+    "builderRestrictAccounts": "הגבלה לחשבונות מסוימים (אופציונלי)",
+    "builderRestrictAccountsHint": "יש להשאיר ריק כדי להשתמש בכל החשבונות הפעילים. לאחר בחירת חשבונות, הניתוב האוטומטי יוגבל לחשבונות אלה בלבד.",
     "builderLegacyEntry": "רשומה מדור קודם",
     "builderStaleModel": "לא נמצא בקטלוג החי",
     "reviewName": "שם",

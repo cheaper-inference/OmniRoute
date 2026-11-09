@@ -111,9 +111,12 @@ describe("ProxyConfigModal saved-proxy sort + default tab (#7643)", () => {
     const container = makeContainer();
     await renderModal(container);
 
-    const select = document.body.querySelector("select");
+    const select = document.body.querySelector<HTMLButtonElement>(
+      'button[aria-haspopup="listbox"]'
+    );
     expect(select).not.toBeNull();
-    const optionLabels = Array.from(select!.querySelectorAll("option"))
+    await act(async () => select!.click());
+    const optionLabels = Array.from(document.body.querySelectorAll('[role="option"]'))
       .map((opt) => opt.textContent || "")
       .filter((text) => text.trim().length > 0 && text !== "selectSavedProxyPlaceholder");
     expect(optionLabels[0]).toContain("Apple");
@@ -132,7 +135,9 @@ describe("ProxyConfigModal saved-proxy sort + default tab (#7643)", () => {
 
     // The Saved tab is active exactly when the saved-proxy <select> is rendered
     // (mode === "saved" gates that block in ProxyConfigModal.tsx).
-    expect(document.body.querySelector("select")).not.toBeNull();
+    expect(
+      document.body.querySelector<HTMLButtonElement>('button[aria-haspopup="listbox"]')
+    ).not.toBeNull();
     expect(document.body.querySelector('input[placeholder="hostPlaceholder"]')).toBeNull();
   });
 
@@ -145,7 +150,9 @@ describe("ProxyConfigModal saved-proxy sort + default tab (#7643)", () => {
     const container = makeContainer();
     await renderModal(container);
 
-    expect(document.body.querySelector("select")).toBeNull();
+    expect(
+      document.body.querySelector<HTMLButtonElement>('button[aria-haspopup="listbox"]')
+    ).toBeNull();
     expect(document.body.querySelector('input[placeholder="hostPlaceholder"]')).not.toBeNull();
   });
 
@@ -167,7 +174,9 @@ describe("ProxyConfigModal saved-proxy sort + default tab (#7643)", () => {
     const container = makeContainer();
     await renderModal(container);
 
-    expect(document.body.querySelector("select")).toBeNull();
+    expect(
+      document.body.querySelector<HTMLButtonElement>('button[aria-haspopup="listbox"]')
+    ).toBeNull();
     expect(document.body.querySelector('input[placeholder="hostPlaceholder"]')).not.toBeNull();
   });
 });

@@ -4150,6 +4150,8 @@
     "builderAddComboRef": "കോംബോ റഫറൻസ് ചേർക്കുക",
     "builderComboRefStep": "കോംബോ റഫറൻസ് ചേർക്കുക",
     "builderPinnedAccount": "പിൻ ചെയ്ത അക്കൗണ്ട്",
+    "builderRestrictAccounts": "തിരഞ്ഞെടുത്ത അക്കൗണ്ടുകളിലേക്ക് പരിമിതപ്പെടുത്തുക (ഐച്ഛികം)",
+    "builderRestrictAccountsHint": "സജീവമായ എല്ലാ അക്കൗണ്ടുകളും ഉപയോഗിക്കാൻ ശൂന്യമായി വിടുക. അക്കൗണ്ടുകൾ തിരഞ്ഞെടുക്കുമ്പോൾ സ്വയമേവയുള്ള റൂട്ടിംഗ് ആ അക്കൗണ്ടുകളിൽ മാത്രമായി പരിമിതപ്പെടും.",
     "builderLegacyEntry": "ലെഗസി എൻട്രി",
     "builderStaleModel": "ലൈവ് കാറ്റലോഗിൽ ഇല്ല",
     "reviewName": "പേര്",

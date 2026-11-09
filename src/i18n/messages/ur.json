@@ -4073,6 +4073,8 @@
     "builderAddComboRef": "کومبو حوالہ شامل کریں",
     "builderComboRefStep": "کومبو حوالہ شامل کریں",
     "builderPinnedAccount": "پن شدہ اکاؤنٹ",
+    "builderRestrictAccounts": "اکاؤنٹس تک محدود کریں (اختیاری)",
+    "builderRestrictAccountsHint": "تمام فعال اکاؤنٹس استعمال کرنے کے لیے خالی چھوڑ دیں۔ اکاؤنٹس منتخب کرنے پر خودکار روٹنگ صرف انہی اکاؤنٹس تک محدود رہتی ہے۔",
     "builderLegacyEntry": "لیگیسی اندراج",
     "builderStaleModel": "لائیو کیٹلاگ میں نہیں ہے",
     "reviewName": "نام",

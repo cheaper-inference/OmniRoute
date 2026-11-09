@@ -4073,6 +4073,8 @@
     "builderAddComboRef": "Thêm tham chiếu combo",
     "builderComboRefStep": "Thêm tham chiếu combo",
     "builderPinnedAccount": "Tài khoản được ghim",
+    "builderRestrictAccounts": "Giới hạn trong các tài khoản (không bắt buộc)",
+    "builderRestrictAccountsHint": "Để trống để sử dụng tất cả tài khoản đang hoạt động. Khi chọn tài khoản, việc định tuyến tự động chỉ sử dụng các tài khoản đó.",
     "builderLegacyEntry": "Mục nhập cũ",
     "builderStaleModel": "Không có trong danh mục trực tiếp",
     "reviewName": "Tên",

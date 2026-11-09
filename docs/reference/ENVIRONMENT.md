@@ -1801,6 +1801,16 @@ value below unset in production deployments.
 | `ELECTRON_SMOKE_COLD_RESTART`          | `0`                              | `scripts/dev/smoke-electron-packaged.mjs` | #7592: relaunch against the same data dir and assert the second launch selects the native SQLite driver.                                                                                                                                   |
 | `CLI_DEVIN_BIN`                        | _(PATH lookup)_                  | `open-sse/executors/devin-cli.ts`         | Override the Devin CLI binary path.                                                                                                                                                                                                        |
 
+### Searchable selector browser fixture
+
+The optional local fixture builder reads this variable from its process environment;
+it does not load `.env`. Leave it unset in production. See the
+[fixture instructions](../../scripts/perf/searchable-select-browser/README.md) for usage and scope.
+
+| Variable | Default | Source File | Description |
+| --- | --- | --- | --- |
+| `FIXTURE_BASELINE` | _(unset)_ | `scripts/perf/searchable-select-browser/build.mjs` | Local Git commit/ref used to replace only the selector module for a baseline comparison. Unset or empty uses the working-tree selector. An unavailable ref fails the build; no checkout or application configuration is changed. |
+
 ### Docs translation pipeline
 
 Used by `scripts/i18n/run-translation.mjs` (the `npm run i18n:run` command).

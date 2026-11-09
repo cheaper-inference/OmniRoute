@@ -4073,6 +4073,8 @@
     "builderAddComboRef": "Lisa kombo viide",
     "builderComboRefStep": "Lisa kombo viide",
     "builderPinnedAccount": "Fikseeritud konto",
+    "builderRestrictAccounts": "Piira kontodega (valikuline)",
+    "builderRestrictAccountsHint": "Jätke tühjaks, et kasutada kõiki aktiivseid kontosid. Kui valite kontod, kasutab automaatne marsruutimine ainult neid kontosid.",
     "builderLegacyEntry": "Pärandkirje",
     "builderStaleModel": "Pole reaalajas kataloogis",
     "reviewName": "Nimi",

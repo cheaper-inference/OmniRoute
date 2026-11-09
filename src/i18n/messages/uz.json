@@ -4073,6 +4073,8 @@
     "builderAddComboRef": "Kombo havolasini qo‘shish",
     "builderComboRefStep": "Kombo havolasini qo‘shish",
     "builderPinnedAccount": "Mahkamlangan hisob",
+    "builderRestrictAccounts": "Hisoblar bilan cheklash (ixtiyoriy)",
+    "builderRestrictAccountsHint": "Barcha faol hisoblardan foydalanish uchun boʻsh qoldiring. Hisoblar tanlansa, avtomatik yoʻnaltirish faqat shu hisoblar bilan cheklanadi.",
     "builderLegacyEntry": "Eski yozuv",
     "builderStaleModel": "Jonli katalogda yoʻq",
     "reviewName": "Nomi",

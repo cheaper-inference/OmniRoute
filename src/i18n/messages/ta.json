@@ -4073,6 +4073,8 @@
     "builderAddComboRef": "Combo குறிப்பைச் சேர்க்கவும்",
     "builderComboRefStep": "Combo குறிப்பைச் சேர்க்கவும்",
     "builderPinnedAccount": "நிலையாகப் பொருத்தப்பட்ட கணக்கு",
+    "builderRestrictAccounts": "தேர்ந்தெடுத்த கணக்குகளுக்கு வரம்பிடு (விருப்பத்தேர்வு)",
+    "builderRestrictAccountsHint": "செயலில் உள்ள அனைத்துக் கணக்குகளையும் பயன்படுத்த காலியாக விடவும். கணக்குகளைத் தேர்ந்தெடுத்தால், தானியங்கி வழித்தடத் தேர்வு அந்தக் கணக்குகளுக்கு மட்டுமே வரம்பிடப்படும்.",
     "builderLegacyEntry": "பழைய பதிவு",
     "builderStaleModel": "நேரடி பட்டியலில் இல்லை",
     "reviewName": "பெயர்",

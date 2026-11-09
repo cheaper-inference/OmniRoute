@@ -4073,6 +4073,8 @@
     "builderAddComboRef": "Pridať referenciu kombinácie",
     "builderComboRefStep": "Pridať referenciu kombinácie",
     "builderPinnedAccount": "Pripnutý účet",
+    "builderRestrictAccounts": "Obmedziť na účty (voliteľné)",
+    "builderRestrictAccountsHint": "Ak chcete používať všetky aktívne účty, nechajte pole prázdne. Po výbere účtov sa automatické smerovanie obmedzí iba na tieto účty.",
     "builderLegacyEntry": "Staršia položka",
     "builderStaleModel": "Nie je v aktuálnom katalógu",
     "reviewName": "Názov",

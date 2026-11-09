@@ -4073,6 +4073,8 @@
     "builderAddComboRef": "Tinye ntụaka combo",
     "builderComboRefStep": "Tinye ntụaka combo",
     "builderPinnedAccount": "Account a kpọgidere",
+    "builderRestrictAccounts": "Kpaara ya na akaụntụ ụfọdụ (nhọrọ)",
+    "builderRestrictAccountsHint": "Hapụ ya oghere iji akaụntụ niile na-arụ ọrụ. Ọ bụrụ na ịhọrọ akaụntụ, ntụgharị ụzọ na-akpaghị aka ga-eji naanị akaụntụ ndị ahụ.",
     "builderLegacyEntry": "Ndenye ochie",
     "builderStaleModel": "Ọ nọghị na katalọgụ dị ndụ",
     "reviewName": "Aha",

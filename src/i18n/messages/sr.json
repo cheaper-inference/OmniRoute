@@ -4073,6 +4073,8 @@
     "builderAddComboRef": "Додај референцу комбинације",
     "builderComboRefStep": "Додај референцу комбинације",
     "builderPinnedAccount": "Фиксирани налог",
+    "builderRestrictAccounts": "Ограничи на налоге (опционо)",
+    "builderRestrictAccountsHint": "Оставите празно да бисте користили све активне налоге. Ако изаберете налоге, аутоматско рутирање је ограничено само на те налоге.",
     "builderLegacyEntry": "Застарели унос",
     "builderStaleModel": "Није у активном каталогу",
     "reviewName": "Назив",

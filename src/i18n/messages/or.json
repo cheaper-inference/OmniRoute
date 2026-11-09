@@ -4073,6 +4073,8 @@
     "builderAddComboRef": "କମ୍ବୋ ସନ୍ଦର୍ଭ ଯୋଡ଼ନ୍ତୁ",
     "builderComboRefStep": "କମ୍ବୋ ରେଫରେନ୍ସ ଯୋଡ଼ନ୍ତୁ",
     "builderPinnedAccount": "ପିନ୍ କରାଯାଇଥିବା ଆକାଉଣ୍ଟ",
+    "builderRestrictAccounts": "ଚୟନିତ ଆକାଉଣ୍ଟଗୁଡ଼ିକରେ ସୀମିତ ରଖନ୍ତୁ (ଇଚ୍ଛାଧୀନ)",
+    "builderRestrictAccountsHint": "ସମସ୍ତ ସକ୍ରିୟ ଆକାଉଣ୍ଟ ବ୍ୟବହାର କରିବାକୁ ଖାଲି ରଖନ୍ତୁ। ଆକାଉଣ୍ଟ ଚୟନ କଲେ ସ୍ୱୟଂଚାଳିତ ରାଉଟିଂ କେବଳ ସେହି ଆକାଉଣ୍ଟଗୁଡ଼ିକରେ ସୀମିତ ରହିବ।",
     "builderLegacyEntry": "ଲେଗେସି ଏଣ୍ଟ୍ରି",
     "builderStaleModel": "ଲାଇଭ୍ କ୍ୟାଟାଲଗରେ ନାହିଁ",
     "reviewName": "ନାମ",

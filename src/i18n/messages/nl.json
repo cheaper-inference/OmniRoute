@@ -4073,6 +4073,8 @@
     "builderAddComboRef": "Comboreferentie toevoegen",
     "builderComboRefStep": "Comboreferentie toevoegen",
     "builderPinnedAccount": "Vastgezet account",
+    "builderRestrictAccounts": "Beperken tot accounts (optioneel)",
+    "builderRestrictAccountsHint": "Laat dit leeg om alle actieve accounts te gebruiken. Als je accounts selecteert, gebruikt automatische routering alleen die accounts.",
     "builderLegacyEntry": "Verouderde invoer",
     "builderStaleModel": "Niet in de live-catalogus",
     "reviewName": "Naam",

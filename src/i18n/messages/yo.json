@@ -4073,6 +4073,8 @@
     "builderAddComboRef": "Ṣàfikún ìtọ́kasí àkójọpọ̀",
     "builderComboRefStep": "Ṣàfikún ìtọ́kasí àkójọpọ̀",
     "builderPinnedAccount": "Àkọọ́lẹ̀ Tí A Dè Mọ́",
+    "builderRestrictAccounts": "Fi ààlà sí àwọn àkọọ́lẹ̀ (àṣàyàn)",
+    "builderRestrictAccountsHint": "Fi sílẹ̀ láìkún láti lo gbogbo àwọn àkọọ́lẹ̀ tó ń ṣiṣẹ́. Tí a bá yan àwọn àkọọ́lẹ̀, ìdarí ipa-ọ̀nà láìfọwọ́ṣe yóò lo àwọn àkọọ́lẹ̀ wọ̀nyí nìkan.",
     "builderLegacyEntry": "Àkọsílẹ̀ àtijọ́",
     "builderStaleModel": "Kò sí nínú katalọ́gì tààrà",
     "reviewName": "Orúkọ",

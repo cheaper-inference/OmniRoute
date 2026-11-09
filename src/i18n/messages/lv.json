@@ -4073,6 +4073,8 @@
     "builderAddComboRef": "Pievienot kombinācijas atsauci",
     "builderComboRefStep": "Pievienot kombinācijas atsauci",
     "builderPinnedAccount": "Fiksēts konts",
+    "builderRestrictAccounts": "Ierobežot līdz kontiem (neobligāti)",
+    "builderRestrictAccountsHint": "Atstājiet tukšu, lai izmantotu visus aktīvos kontus. Ja atlasīsiet kontus, automātiskā maršrutēšana izmantos tikai šos kontus.",
     "builderLegacyEntry": "Mantotais ieraksts",
     "builderStaleModel": "Nav tiešsaistes katalogā",
     "reviewName": "Nosaukums",

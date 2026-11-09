@@ -4150,6 +4150,8 @@
     "builderAddComboRef": "إضافة مرجع مجموعة",
     "builderComboRefStep": "إضافة مرجع مجموعة",
     "builderPinnedAccount": "الحساب المثبّت",
+    "builderRestrictAccounts": "الاقتصار على حسابات محددة (اختياري)",
+    "builderRestrictAccountsHint": "اتركه فارغًا لاستخدام جميع الحسابات النشطة. عند تحديد حسابات، يقتصر التوجيه التلقائي على هذه الحسابات.",
     "builderLegacyEntry": "إدخال قديم",
     "builderStaleModel": "غير موجود في الكتالوج المباشر",
     "reviewName": "الاسم",

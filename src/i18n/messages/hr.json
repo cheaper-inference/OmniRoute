@@ -4073,6 +4073,8 @@
     "builderAddComboRef": "Dodaj referencu kombinacije",
     "builderComboRefStep": "Dodaj referencu kombinacije",
     "builderPinnedAccount": "Prikvačeni račun",
+    "builderRestrictAccounts": "Ograniči na račune (neobavezno)",
+    "builderRestrictAccountsHint": "Ostavite prazno za korištenje svih aktivnih računa. Ako odaberete račune, automatsko usmjeravanje koristit će samo te račune.",
     "builderLegacyEntry": "Naslijeđeni unos",
     "builderStaleModel": "Nije u aktualnom katalogu",
     "reviewName": "Naziv",

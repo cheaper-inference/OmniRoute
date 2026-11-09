@@ -4073,6 +4073,8 @@
     "builderAddComboRef": "Kombinációhivatkozás hozzáadása",
     "builderComboRefStep": "Kombinációhivatkozás hozzáadása",
     "builderPinnedAccount": "Rögzített fiók",
+    "builderRestrictAccounts": "Korlátozás fiókokra (nem kötelező)",
+    "builderRestrictAccountsHint": "Hagyja üresen az összes aktív fiók használatához. Ha kiválaszt fiókokat, az automatikus útválasztás csak ezeket a fiókokat használja.",
     "builderLegacyEntry": "Örökölt bejegyzés",
     "builderStaleModel": "Nincs az élő katalógusban",
     "reviewName": "Név",

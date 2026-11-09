@@ -4150,6 +4150,8 @@
     "builderAddComboRef": "ਕੌਂਬੋ ਹਵਾਲਾ ਸ਼ਾਮਲ ਕਰੋ",
     "builderComboRefStep": "ਕੌਂਬੋ ਹਵਾਲਾ ਸ਼ਾਮਲ ਕਰੋ",
     "builderPinnedAccount": "ਪਿੰਨ ਕੀਤਾ ਖਾਤਾ",
+    "builderRestrictAccounts": "ਚੁਣੇ ਹੋਏ ਖਾਤਿਆਂ ਤੱਕ ਸੀਮਤ ਕਰੋ (ਵਿਕਲਪਿਕ)",
+    "builderRestrictAccountsHint": "ਸਾਰੇ ਸਰਗਰਮ ਖਾਤੇ ਵਰਤਣ ਲਈ ਖਾਲੀ ਛੱਡੋ। ਖਾਤੇ ਚੁਣਨ ਤੇ ਆਟੋਮੈਟਿਕ ਰੂਟਿੰਗ ਸਿਰਫ਼ ਉਹਨਾਂ ਖਾਤਿਆਂ ਤੱਕ ਸੀਮਤ ਰਹੇਗੀ।",
     "builderLegacyEntry": "ਪੁਰਾਣੀ ਐਂਟਰੀ",
     "builderStaleModel": "ਲਾਈਵ ਕੈਟਾਲਾਗ ਵਿੱਚ ਨਹੀਂ",
     "reviewName": "ਨਾਮ",

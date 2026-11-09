@@ -4073,6 +4073,8 @@
     "builderAddComboRef": "සංයෝජන යොමුව එක් කරන්න",
     "builderComboRefStep": "කොම්බෝ යොමුව එක් කරන්න",
     "builderPinnedAccount": "ස්ථිර කළ ගිණුම",
+    "builderRestrictAccounts": "තෝරාගත් ගිණුම්වලට සීමා කරන්න (විකල්ප)",
+    "builderRestrictAccountsHint": "සියලුම සක්‍රිය ගිණුම් භාවිතා කිරීමට හිස්ව තබන්න. ගිණුම් තෝරාගත් විට ස්වයංක්‍රීය මාර්ගගත කිරීම එම ගිණුම්වලට පමණක් සීමා වේ.",
     "builderLegacyEntry": "පැරණි ඇතුළත් කිරීම",
     "builderStaleModel": "සජීවී නාමාවලියේ නැත",
     "reviewName": "නම",

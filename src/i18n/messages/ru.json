@@ -4073,6 +4073,8 @@
     "builderAddComboRef": "Добавить ссылку на комбо",
     "builderComboRefStep": "Добавить ссылку на комбо",
     "builderPinnedAccount": "Закреплённая учётная запись",
+    "builderRestrictAccounts": "Ограничить аккаунтами (необязательно)",
+    "builderRestrictAccountsHint": "Оставьте пустым, чтобы использовать все активные аккаунты. Если выбраны аккаунты, автоматическая маршрутизация ограничивается только ими.",
     "builderLegacyEntry": "Устаревшая запись",
     "builderStaleModel": "Нет в актуальном каталоге",
     "reviewName": "Название",
