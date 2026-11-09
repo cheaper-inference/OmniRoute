@@ -100,6 +100,7 @@ describe("resilience/settings normalize split-guard", () => {
     const keys = Object.keys(DEFAULT_RESILIENCE_SETTINGS).sort();
     assert.deepEqual(keys, [
       "antigravityAdaptiveHealth",
+      "antigravityTimingTelemetry",
       "comboCooldownWait",
       "connectionCooldown",
       // Global default cadence for the background credential health check sweep.

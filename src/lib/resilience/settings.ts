@@ -51,7 +51,6 @@ export type {
   WaitForCooldownSettings,
   ComboCooldownWaitSettings,
   QuotaShareConcurrencyLimitSettings,
-  P2CLatencySettings,
   ProviderCooldownSettings,
   QuotaPreflightSettings,
   StreamRecoverySettings,
@@ -87,6 +86,9 @@ export const DEFAULT_REQUEST_QUEUE_MAX_DEPTH = (() => {
 export const DEFAULT_RESILIENCE_SETTINGS: ResilienceSettings = {
   antigravityAdaptiveHealth: {
     enabled: process.env.OMNIROUTE_ANTIGRAVITY_ADAPTIVE_HEALTH_ENABLED === "true",
+  },
+  antigravityTimingTelemetry: {
+    enabled: process.env.OMNIROUTE_ANTIGRAVITY_TIMING_TELEMETRY === "true",
   },
   requestQueue: {
     autoEnableApiKeyProviders: true,
@@ -366,6 +368,7 @@ function buildLegacyFallback(settings: JsonRecord): ResilienceSettings {
     providerQuotaOverrides: DEFAULT_RESILIENCE_SETTINGS.providerQuotaOverrides,
     credentialHealthCheck: DEFAULT_RESILIENCE_SETTINGS.credentialHealthCheck,
     antigravityAdaptiveHealth: DEFAULT_RESILIENCE_SETTINGS.antigravityAdaptiveHealth,
+    antigravityTimingTelemetry: DEFAULT_RESILIENCE_SETTINGS.antigravityTimingTelemetry,
   };
 }
 
@@ -409,6 +412,11 @@ export function resolveResilienceSettings(
       current.antigravityAdaptiveHealth,
       legacyAntigravitySettings.adaptiveHealthEnabled,
       fallback.antigravityAdaptiveHealth.enabled
+    ),
+    antigravityTimingTelemetry: normalizeAntigravityToggle(
+      current.antigravityTimingTelemetry,
+      legacyAntigravitySettings.timingTelemetryEnabled,
+      fallback.antigravityTimingTelemetry.enabled
     ),
     requestQueue: normalizeRequestQueueSettings(current.requestQueue, fallback.requestQueue),
     connectionCooldown: normalizeCooldownProfiles(
@@ -469,7 +477,14 @@ export function mergeResilienceSettings(
 ): ResilienceSettings {
   return {
     antigravityAdaptiveHealth: normalizeAntigravityToggle(
-      updates.antigravityAdaptiveHealth, undefined, current.antigravityAdaptiveHealth.enabled
+      updates.antigravityAdaptiveHealth,
+      undefined,
+      current.antigravityAdaptiveHealth.enabled
+    ),
+    antigravityTimingTelemetry: normalizeAntigravityToggle(
+      updates.antigravityTimingTelemetry,
+      undefined,
+      current.antigravityTimingTelemetry.enabled
     ),
     requestQueue: normalizeRequestQueueSettings(updates.requestQueue, current.requestQueue),
     connectionCooldown: normalizeCooldownProfiles(

@@ -14,6 +14,9 @@ import { throwIfResilienceSaveFailed } from "./resilienceSaveError";
 import AntigravityAdaptiveHealthCard, {
   type AntigravityAdaptiveHealthValue,
 } from "./AntigravityAdaptiveHealthCard";
+import AntigravityTimingTelemetryCard, {
+  type AntigravityTimingTelemetryValue,
+} from "./AntigravityTimingTelemetryCard";
 
 type RequestQueueSettings = {
   autoEnableApiKeyProviders: boolean;
@@ -69,6 +72,7 @@ export type ProviderCooldownSettings = {
 
 type ResilienceResponse = {
   antigravityAdaptiveHealth?: AntigravityAdaptiveHealthValue;
+  antigravityTimingTelemetry?: AntigravityTimingTelemetryValue;
   requestQueue: RequestQueueSettings;
   connectionCooldown: {
     oauth: ConnectionCooldownProfileSettings;
@@ -89,6 +93,7 @@ type ResilienceResponse = {
 function toResilienceResponse(json: ResilienceResponse): ResilienceResponse {
   return {
     antigravityAdaptiveHealth: json.antigravityAdaptiveHealth,
+    antigravityTimingTelemetry: json.antigravityTimingTelemetry,
     requestQueue: json.requestQueue,
     connectionCooldown: json.connectionCooldown,
     providerBreaker: json.providerBreaker,
@@ -1225,6 +1230,15 @@ export default function ResilienceTab() {
           saving={savingSection === "antigravityAdaptiveHealth"}
           onSave={(antigravityAdaptiveHealth) =>
             savePatch("antigravityAdaptiveHealth", { antigravityAdaptiveHealth })
+          }
+        />
+      )}
+      {data.antigravityTimingTelemetry && (
+        <AntigravityTimingTelemetryCard
+          value={data.antigravityTimingTelemetry}
+          saving={savingSection === "antigravityTimingTelemetry"}
+          onSave={(antigravityTimingTelemetry) =>
+            savePatch("antigravityTimingTelemetry", { antigravityTimingTelemetry })
           }
         />
       )}

@@ -145,6 +145,7 @@ export async function GET() {
 
     return NextResponse.json({
       antigravityAdaptiveHealth: resilience.antigravityAdaptiveHealth,
+      antigravityTimingTelemetry: resilience.antigravityTimingTelemetry,
       requestQueue: resilience.requestQueue,
       connectionCooldown: resilience.connectionCooldown,
       providerBreaker: resilience.providerBreaker,
@@ -215,6 +216,12 @@ export async function PATCH(request) {
         ? {
             antigravityAdaptiveHealth:
               body.antigravityAdaptiveHealth as ResilienceSettingsPatch["antigravityAdaptiveHealth"],
+          }
+        : {}),
+      ...(body.antigravityTimingTelemetry
+        ? {
+            antigravityTimingTelemetry:
+              body.antigravityTimingTelemetry as ResilienceSettingsPatch["antigravityTimingTelemetry"],
           }
         : {}),
       ...(body.requestQueue
@@ -319,6 +326,7 @@ export async function PATCH(request) {
     return NextResponse.json({
       ok: true,
       antigravityAdaptiveHealth: nextResilience.antigravityAdaptiveHealth,
+      antigravityTimingTelemetry: nextResilience.antigravityTimingTelemetry,
       requestQueue: nextResilience.requestQueue,
       connectionCooldown: nextResilience.connectionCooldown,
       providerBreaker: nextResilience.providerBreaker,

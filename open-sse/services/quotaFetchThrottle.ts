@@ -75,9 +75,13 @@ export class MinIntervalThrottle {
         this.lastStart === null
           ? now
           : Math.max(now, this.lastStart + this.minIntervalMs + this.nextJitter());
-      this.lastStart = startAt;
       const wait = startAt - now;
       if (wait > 0) await this.clock.sleep(wait);
+      // Spacing is measured between real starts. A timer that wakes late (a
+      // loaded CI box, a paused process) would otherwise shorten the next gap,
+      // because the next caller computes its wait from the scheduled instant
+      // rather than from when this fetch actually began.
+      this.lastStart = Math.max(startAt, this.clock.now());
     } finally {
       release();
     }
