@@ -11,6 +11,7 @@
  */
 
 import { isJsonObject } from "../utils/kieTask.ts";
+import { stripTrailingSlashes } from "../utils/urlSanitize.ts";
 
 type JsonObject = Record<string, unknown>;
 
@@ -46,7 +47,8 @@ export function buildCloudflareTranscriptionUrl(
   accountId: string,
   modelId: string
 ): URL {
-  const base = baseUrl.replace("{accountId}", encodeURIComponent(accountId)).replace(/\/+$/, "");
+  // Linear-time trailing-slash trim (no `/\/+$/` regex: CodeQL js/polynomial-redos).
+  const base = stripTrailingSlashes(baseUrl.replace("{accountId}", encodeURIComponent(accountId)));
   return new URL(`${base}/${modelId}`);
 }
 

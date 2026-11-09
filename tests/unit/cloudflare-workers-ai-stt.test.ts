@@ -16,7 +16,7 @@ import assert from "node:assert/strict";
 const { handleAudioTranscription } = await import("../../open-sse/handlers/audioTranscription.ts");
 const { parseTranscriptionModel, getTranscriptionProvider, getAllAudioModels } =
   await import("../../open-sse/config/audioRegistry.ts");
-const { cloudflareNova3ToVerboseJson } =
+const { cloudflareNova3ToVerboseJson, buildCloudflareTranscriptionUrl } =
   await import("../../open-sse/handlers/cloudflareWorkersAiTranscription.ts");
 
 const MODEL = "cloudflare-ai/@cf/deepgram/nova-3";
@@ -304,4 +304,38 @@ test("missing credentials short-circuit with 401 before any upstream call", asyn
   const { calls, status } = await run({}, { credentials: {} });
   assert.equal(status, 401);
   assert.equal(calls.length, 0);
+});
+
+test("buildCloudflareTranscriptionUrl splices the account id and trims trailing slashes", () => {
+  const base = "https://api.cloudflare.com/client/v4/accounts/{accountId}/ai/run";
+  const expected =
+    "https://api.cloudflare.com/client/v4/accounts/acct-TEST/ai/run/@cf/deepgram/nova-3";
+  for (const suffix of ["", "/", "///"]) {
+    const url = buildCloudflareTranscriptionUrl(base + suffix, "acct-TEST", "@cf/deepgram/nova-3");
+    assert.equal(url.href, expected);
+  }
+  // A slash inside the id is encoded, never trimmed or treated as a path separator.
+  const encoded = buildCloudflareTranscriptionUrl(`${base}/`, "a/b", "@cf/deepgram/nova-3");
+  assert.equal(encoded.pathname, "/client/v4/accounts/a%2Fb/ai/run/@cf/deepgram/nova-3");
+});
+
+test("buildCloudflareTranscriptionUrl stays linear on a long run of slashes (CodeQL #1228)", () => {
+  // `/\/+$/` backtracks quadratically on many slashes followed by a non-slash; both shapes
+  // must finish well under the bound.
+  const slashes = "/".repeat(50_000);
+  const started = performance.now();
+  const trimmed = buildCloudflareTranscriptionUrl(
+    `https://h.example/run${slashes}`,
+    "acct",
+    "@cf/deepgram/nova-3"
+  );
+  const notTrailing = buildCloudflareTranscriptionUrl(
+    `https://h.example/run${slashes}x`,
+    "acct",
+    "@cf/deepgram/nova-3"
+  );
+  const elapsed = performance.now() - started;
+  assert.equal(trimmed.href, "https://h.example/run/@cf/deepgram/nova-3");
+  assert.ok(notTrailing.pathname.endsWith("x/@cf/deepgram/nova-3"));
+  assert.ok(elapsed < 500, `expected linear time, took ${elapsed.toFixed(1)} ms`);
 });
