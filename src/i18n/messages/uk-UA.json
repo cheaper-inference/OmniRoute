@@ -7910,6 +7910,7 @@
     "systemActor": "система",
     "ipAccessControl": "Контроль IP доступу",
     "ipAccessControlDesc": "Блокувати або дозволяти певні IP-адреси",
+    "ipAccessMode": "Режим доступу",
     "ipModeDisabled": "Вимкнено",
     "ipModeBlacklist": "Чорний список",
     "ipModeWhitelist": "Білий список",

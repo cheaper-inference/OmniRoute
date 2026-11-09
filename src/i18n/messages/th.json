@@ -7910,6 +7910,7 @@
     "systemActor": "ระบบ",
     "ipAccessControl": "การควบคุมการเข้าถึงไอพี",
     "ipAccessControlDesc": "บล็อกหรืออนุญาตที่อยู่ IP ที่ระบุ",
+    "ipAccessMode": "โหมดการเข้าถึง",
     "ipModeDisabled": "ปิดการใช้งาน",
     "ipModeBlacklist": "บัญชีดำ",
     "ipModeWhitelist": "ไวท์ลิสต์",

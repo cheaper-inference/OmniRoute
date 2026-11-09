@@ -7910,6 +7910,7 @@
     "systemActor": "sistema",
     "ipAccessControl": "Kontroll tal-Aċċess bl-IP",
     "ipAccessControlDesc": "Imblokka jew ippermetti indirizzi IP speċifiċi",
+    "ipAccessMode": "Modalità ta' aċċess",
     "ipModeDisabled": "Diżattivat",
     "ipModeBlacklist": "Lista Sewda",
     "ipModeWhitelist": "Lista ta' Permessi",

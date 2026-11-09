@@ -7910,6 +7910,7 @@
     "systemActor": "ସିଷ୍ଟମ୍",
     "ipAccessControl": "IP ପ୍ରବେଶ ନିୟନ୍ତ୍ରଣ",
     "ipAccessControlDesc": "ନିର୍ଦ୍ଦିଷ୍ଟ IP ଠିକଣାଗୁଡ଼ିକୁ ଅବରୋଧ କିମ୍ବା ଅନୁମତି ଦିଅନ୍ତୁ",
+    "ipAccessMode": "ଆକ୍ସେସ୍ ମୋଡ୍",
     "ipModeDisabled": "ଅକ୍ଷମ",
     "ipModeBlacklist": "ବ୍ଲାକ୍ଲିଷ୍ଟ",
     "ipModeWhitelist": "ହ୍ୱାଇଟ୍ଲିଷ୍ଟ",

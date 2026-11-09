@@ -7910,6 +7910,7 @@
     "systemActor": "systemet",
     "ipAccessControl": "IP-tilgangskontroll",
     "ipAccessControlDesc": "Blokker eller tillat bestemte IP-adresser",
+    "ipAccessMode": "Tilgangsmodus",
     "ipModeDisabled": "Deaktivert",
     "ipModeBlacklist": "Svarteliste",
     "ipModeWhitelist": "Hviteliste",
