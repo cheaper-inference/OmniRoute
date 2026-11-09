@@ -1,4 +1,15 @@
 {
+  "accountPreferences": {
+    "title": "Sainroghanna cuntais",
+    "description": "Tabhair tosaíocht do chuntais iolracha nó coinnigh mar chúltaca iad don chumraíocht seo. Rangaíonn an ródú uathoibríoch na cuntais laistigh de gach sraith. Is gnáthchuntais iad na cuntais nach bhfuil liostaithe. Tá ceadanna, teorainneacha cuóta agus ceangail shealanna atá ann cheana fós i bhfeidhm.",
+    "preferred": "Tosaíochta",
+    "normal": "Gnáth",
+    "reserve": "Cúltaca",
+    "excluded": "Eisiata",
+    "loading": "Cuntais á lódáil…",
+    "error": "Níorbh fhéidir na cuntais a lódáil. Oscail an t-eagarthóir arís chun triail eile a bhaint as.",
+    "missing": "Cuntas neamh-inúsáidte ({id})"
+  },
   "codexKeyServiceMode": {
     "title": "Mód seirbhíse Codex don eochair API seo",
     "description": "Baineann sé seo le hiarratais Codex, lena n-áirítear samhlacha Codex laistigh de chomhcheangail. Sáraíonn móid éigeantacha socruithe an chliaint, socruithe domhanda agus réamhshocruithe naisc. Ní athraítear soláthraithe eile.",
