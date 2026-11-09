@@ -8,37 +8,32 @@
 >
 > Izvor istine: `open-sse/mcp-server/server.ts` izračunava **110 jedinstvenih alata** sa `countUniqueMcpTools()`: 45 kanonskih definicija (uključujući šest CCR alata životnog ciklusa, trio alata za veštine agenta, `omniroute_radar_catalog` i `omniroute_x_search`), plus memorija (3), veštine (4), GitHub veštine (3), pul (6), gamifikacija (8), dodaci (8), Notion (6), Obsidian (22), lokalni korpus (3) i dva alata za kompresiju samo za RTK.
 
-## Instalacija
+## Инсталација
 
-OmniRoute MCP je ugrađen. Pokrenite ga sa:
+OmniRoute MCP је уграђен. Започните са:
 
 ```bash
 omniroute --mcp
 ```
 
-Ili putem open-sse transporta:
+Или преко опен-ссе транспорта:
 
 ```bash
-# HTTP streamable transport (port 20130)
-omniroute --dev  # MCP se automatski pokreće na /mcp krajnjoj tački
+# Streamable HTTP transport (default port 20128, in-process on the dashboard server)
+# Client endpoint: http://localhost:20128/api/mcp/stream
+# stdio: omniroute --mcp
 ```
 
-HTTP transporti (`sse` / `streamable-http`, servirani unutar procesa od strane dashboard servera) su
-podrazumevano isključeni i ranije su se mogli uključivati/isključivati samo sa `/dashboard/mcp` stranice. Od v3.8.51
-CLI ima paritet:
+HTTP транспорти (`sse` / `streamable-http`, које сервер контролне табле сервира у процесу) су подразумевано искључени и раније су се могли мењати само са `/dashboard/mcp` странице. Од верзије 3.8.51 CLI има паритет:
 
 ```bash
-omniroute mcp status                                  # omogućen/online, transport, broj alata
+omniroute mcp status                                  # enabled/online, transport, tool count
 omniroute mcp enable [--transport stdio|sse|streamable-http]
 omniroute mcp disable
-omniroute mcp restart                                 # resetuje aktivne sse/streamable-http sesije
+omniroute mcp restart                                 # resets active sse/streamable-http sessions
 ```
 
-`mcp enable`/`mcp disable` PATCH-uju isto `mcpEnabled` (i opciono `mcpTransport`) podešavanje
-koje dashboard prebacuje putem `/api/settings`. `mcp restart` poziva `POST /api/mcp/restart`: on
-prekida aktivne `sse`/`streamable-http` sesije tako da se sledeći zahtev čisto re-inicijalizuje, vraća
-`409` ako je MCP onemogućen, i `501` za `stdio` transport (stdio klijenti poseduju sopstveni
-podproces — ne postoji in-process ručka za restartovanje).
+`mcp enable`/`mcp disable` PATCH исти `mcpEnabled` (и опционо `mcpTransport`) подешавање контролне табле се пребацује преко `/api/settings`. `mcp restart` позива `POST /api/mcp/restart`: руши активне `sse`/`streamable-http` сесије тако да се следећи захтев поново иницијализује чисто, враћа `409` ако је MCP онемогућен, и `501` за `stdio` транспорт (стдио клијенти поседују сопствени подпроцес — нема ручке у процесу за поновно покретање).
 
 ## Transporti
 
@@ -131,44 +126,42 @@ Cursor, Cline i kompatibilno podešavanje MCP klijenta.
 | `omniroute_cache_stats` | `read:cache`  | Semantički keš, keš upita i statistika idempotentnosti |
 | `omniroute_cache_flush` | `write:cache` | Brisanje keša globalno ili po potpisu/modelu           |
 
-## Alati za kompresiju (13)
+## Алати за компресију (13)
 
-| Alat                                | Opsezi              | Opis                                                                                                                              |
-| :---------------------------------- | :------------------ | :-------------------------------------------------------------------------------------------------------------------------------- |
-| `omniroute_compression_status`      | `read:compression`  | Podešavanja kompresije, analitički pregled i statistika svesna keša (uključuje `analytics.mcpDescriptionCompression` metapodatke) |
-| `omniroute_compression_configure`   | `write:compression` | Konfigurisanje režima kompresije, praga, ciljnog odnosa, očuvanja sistemskog upita, preklopnika kompresije opisa MCP-a            |
-| `omniroute_set_compression_engine`  | `write:compression` | Odabir aktivnog mehanizma (isključeno/caveman/rtk/stacked) i intenziteta Caveman/RTK                                              |
-| `omniroute_list_compression_combos` | `read:compression`  | Lista imenovanih kombinacija kompresije i njihovih mehanizama                                                                     |
-| `omniroute_compression_combo_stats` | `read:compression`  | Analitika grupisana po kombinaciji kompresije i mehanizmu                                                                         |
-| `omniroute_ccr_store`               | `write:compression` | Skladištenje sadržaja izolovanog po pozivaocu u ograničenom CCR skladištu u memoriji i vraćanje markera plus `ccr://` reference   |
-| `omniroute_ccr_retrieve`            | `read:compression`  | Preuzimanje CCR sadržaja u celosti ili sa režimima glave, repa, linija, grep-a i statistike                                       |
-| `omniroute_ccr_inspect`             | `read:compression`  | Pregled metapodataka CCR-a u vlasništvu pozivaoca bez vraćanja sadržaja                                                           |
-| `omniroute_ccr_list`                | `read:compression`  | Lista paginiranih metapodataka za CCR blokove u vlasništvu pozivaoca                                                              |
-| `omniroute_ccr_delete`              | `write:compression` | Brisanje CCR bloka u vlasništvu pozivaoca                                                                                         |
-| `omniroute_ccr_stats`               | `read:compression`  | Izveštavanje o korišćenju memorije u opsegu pozivaoca, brojačima životnog ciklusa i ograničenjima skladišta                       |
-| `omniroute_rtk_discover`            | `read:compression`  | Otkrivanje ponavljajućeg šuma u opt-in RTK izlaznim uzorcima                                                                      |
-| `omniroute_rtk_learn`               | `read:compression`  | Generisanje nacrta RTK filtera za pregled iz opt-in uzoraka                                                                       |
+| Алат                                | Сцопес              | Опис                                                                                                                                  |
+| :---------------------------------- | :------------------ | :------------------------------------------------------------------------------------------------------------------------------------ |
+| `omniroute_compression_status`      | `read:compression`  | Подешавања компресије, резиме аналитике и статистика која је свесна кеша (укључује `analytics.mcpDescriptionCompression` метаподатке) |
+| `omniroute_compression_configure`   | `write:compression` | Конфигуришите режим компресије, праг, циљни однос, очување системског одзива, преклоп компресије MCP описа                            |
+| `omniroute_set_compression_engine`  | `write:compression` | Изаберите активни мотор (off/caveman/rtk/stacked) и Caveman/RTK интензитет                                                            |
+| `omniroute_list_compression_combos` | `read:compression`  | Листа именованих комбо компресија и њихових цевовода мотора                                                                           |
+| `omniroute_compression_combo_stats` | `read:compression`  | Аналитика груписана по комбо компресији и машини                                                                                      |
+| `omniroute_ccr_store`               | `write:compression` | Чувајте садржај изолован од позиваоца у CCR складишту ограничене у меморији и вратите маркер плус `ccr://` референцу                  |
+| `omniroute_ccr_retrieve`            | `read:compression`  | Преузмите CCR садржај у потпуности или са режимима главе, репа, линија, греп и статистике                                             |
+| `omniroute_ccr_inspect`             | `read:compression`  | Прегледајте CCR метаподатке у власништву позиваоца без враћања садржаја                                                               |
+| `omniroute_ccr_list`                | `read:compression`  | Наведите пагиниране метаподатке за CCR блокове у власништву позиваоца                                                                 |
+| `omniroute_ccr_delete`              | `write:compression` | Избришите CCR блок у власништву позиваоца                                                                                             |
+| `omniroute_ccr_stats`               | `read:compression`  | Пријавите коришћење меморије у опсегу позиваоца, бројаче животног циклуса и ограничења складишта                                      |
+| `omniroute_rtk_discover`            | `read:compression`  | Откријте понављајућу буку у изборним RTK излазним узорцима                                                                            |
+| `omniroute_rtk_learn`               | `read:compression`  | Генеришите нацрт RTK филтера који се може прегледати из узорака за избор                                                              |
 
-CCR unosi su samo u memoriji i nestaju pri ponovnom pokretanju. Svaki blok je ograničen na 2 MiB, svaki princip na 16 MiB, a globalno skladište na 64 MiB. Unosi podrazumevano imaju TTL od 24 sata (maksimalno sedam dana). Potpuno preuzimanje MCP-a je ograničeno na 256 KiB; veći blokovi ostaju dostupni putem režima opsega i grep-a. Skladištenje, preuzimanje, listanje, inspekcija, brisanje i statistika su izolovani po autentifikovanom API-ključu principala. Zapisi revizije sadrže heševe i metapodatke o veličini, nikada sadržaj.
+CCR уноси користе двослојно складиште: врући ниво у меморији подржан, на локалним временима извођења без облака, издржљивим SQLite нивоом (`ccr_blocks`, подразумевано укључен), тако да блок преживљава избацивање или поновно покретање док његов TTL не понестане — осим блокова преко 512 KB који остају укључени у меморији. Сваки блок је ограничен на 2 MiB, сваки принципал на 16 MiB, а глобално складиште на 64 MiB. Уноси су подразумевани на 24-часовни TTL (максимално седам дана). Потпуно MCP преузимање је ограничено на 256 KiB; већи блокови остају доступни кроз режиме рангирања и греп. Складиштење, преузимање, листање, инспекција, брисање и статистика су изоловани од стране ауторизованог принципала АПИ кључа. Ревизорски записи садрже хешове и метаподатке о величини, никада садржај. Детаљи окренути оператеру (два маркера, предуслови за клијента, `codemode:false`, опсег по алату, пагинација и дијагностичка матрица) налазе се у [Цомпрессион Енгинес → Предуслови / водич за оператера](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
 
-`omniroute_compression_status` izveštava o kompresiji MCP opisa zasebno pod `analytics.mcpDescriptionCompression`. Te vrednosti su procene veličine metapodataka za MCP opise koji se mogu listati (`tools`, `prompts`, `resources` i `resourceTemplates`); one nisu potvrde o korišćenju provajdera i označene su sa `source: "mcp_metadata_estimate"`.
+`omniroute_compression_status` пријављује компресију описа MCP одвојено под `analytics.mcpDescriptionCompression`. Те вредности су процене величине метаподатака за MCP пописиве описе (`tools`, `prompts`, `resources` и `resourceTemplates`); нису признанице о коришћењу добављача и означене су са `source: "mcp_metadata_estimate"`.
 
-### MCP Filter stabla pristupačnosti (v3.8.0)
+### MCP филтер стабла приступачности (в3.8.0)
 
-Odvojeno od gore navedenih alata za kompresiju, OmniRoute uključuje filter koji se izvršava nakon izvršenja, a koji kompresuje **rezultate alata** MCP alata za pretraživač/pristupačnost pre nego što se vrate agentu. Ovaj filter sam po sebi nije alat — on se transparentno pokreće na bilo kom rezultatu alata koji sadrži opširan tekst stabla pristupačnosti ili snimka pretraživača (≥2000 karaktera).
+Одвојено од алата за компресију изнад, OmniRoute укључује филтер након извршења који компримира** резултати алата** MCP browser/accessibility алата пре него што се врате агенту. Овај филтер сам по себи није алатка — он ради транспарентно на било ком резултату алата који садржи опширно стабло приступачности или текст снимка прегледача (≥ 2000 знакова).
 
-Ključna ponašanja:
+Кључна понашања:
 
-- Sažima ≥30 uzastopnih ponovljenih sestrinskih linija u sažetak glave + repa
-- Čuva `[ref=eXX]` sidra potrebna za Playwright/korišćenje računara
-- Nasilno skraćuje preveliki tekst (>50.000 karaktera) sa savetom za navigaciju
-- Očekivane uštede: **60–80%** na opterećenjima snimaka pretraživača
+- Сажима ≥ 30 узастопних поновљених сродничких редова у главни + резиме
+- Чува `[ref=eXX]` сидра која захтева Playwright/computer-use
+- Тешко скраћује превелики текст (> 50.000 знакова) са наговештајем за навигацију
+- Очекивана уштеда:** 60–80%** на корисним оптерећењима прегледача
 
-Konfiguracija: `compression.mcpAccessibility` u globalnim podešavanjima (migracija 056).
-Implementacija: `open-sse/services/compression/engines/mcpAccessibility/`.
-Kompletna dokumentacija: [Mašine za kompresiju — MCP Filter stabla pristupačnosti](../compression/COMPRESSION_ENGINES.md#mcp-accessibility-tree-filter).
+Конфигурација: `compression.mcpAccessibility` у глобалним подешавањима (миграција 056). Имплементација: `open-sse/services/compression/engines/mcpAccessibility/`. Комплетни документи: [Компресијски мотори — MCP Филтер стабла приступачности](../compression/COMPRESSION_ENGINES.md#mcp-accessibility-tree-filter).
 
-Pogledajte [Mašine za kompresiju](../compression/COMPRESSION_ENGINES.md) i [RTK Kompresija](../compression/RTK_COMPRESSION.md) za model kompresije u toku izvršavanja koji stoji iza ovih alata.
+Погледајте [Компресијски мотори](../compression/COMPRESSION_ENGINES.md) и [RTK компресију](../compression/RTK_COMPRESSION.md) за модел компресије током извршавања који стоји иза ових алата.
 
 ## 1Proxy alati (3)
 

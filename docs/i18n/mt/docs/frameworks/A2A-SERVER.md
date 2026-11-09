@@ -163,7 +163,7 @@ OmniRoute jesponi 6 ħiliet A2A fili `src/lib/a2a/taskExecution.ts::A2A_SKILL_HA
 | Rapport tas-Saħħa     | `health-report`      | Aggregati circuit breaker, cooldown, lockout state għal kull fornitur                                                                                                                | saħħa, reżiljenza          | "Uri l-istat tas-saħħa tal-fornituri kollha"    |
 | Lista Kapaċitajiet    | `list-capabilities`  | Jirritorna l-katalgu sħiħ tal-Ħiliet tal-Aġenti b'45 entrata (23 API + 21 CLI + 1 konfigurazzjoni) bħala tabella ta' markdown URLs SKILL.md ipproċessat għall-injezzjoni tal-kuntest | katalogu, skoperta, ħiliet | "Elenka l-kapaċitajiet kollha OmniRoute "       |
 
-> Il-Karta tal-Aġent għandha tinżamm allinjata mal-katalgu ta' 380 fornitur dirett; l-għadd tal-fornituri u l-metadata free/no-auth jinxtraw mir-reġistru tar-runtime.
+> Il-Karta tal-Aġent għandha tinżamm allinjata mal-katalgu 381-fornitur dirett; l-għadd tal-fornituri u l-metadata free/no-auth jinxtraw mir-reġistru tar-runtime.
 
 ### `list-capabilities` Skill Detail
 
@@ -182,18 +182,26 @@ Kull ringiela tinkludi l-kolonna `rawUrl` sabiex l-aġenti jkunu jistgħu jġibu
 
 ## REST API (awżiljarju)
 
-Il-punt ta' dħul JSON-RPC `/a2a` huwa l-punt A2A kanoniku. L-estremitajiet REST t'hawn taħt jipprovdu aċċess awżiljarju għal dashboardijiet u għodod esterni:
+L-endpoint JSON-RPC `/a2a` huwa l-punt tad-dħul kanoniku A2A. L-endpoints REST hawn taħt jipprovdu aċċess awżiljarju għal dashboards u għodda esterna:
 
-| Estremità                    | Metodu | Deskrizzjoni                                                          | Awtentikazzjoni                              |
-| :--------------------------- | :----- | :-------------------------------------------------------------------- | :------------------------------------------- |
-| `/api/a2a/status`            | GET    | Status tas-servers, ħiliet irreġistrati                               | (pubbliku)                                   |
-| `/api/a2a/tasks`             | GET    | Lista ta' impjiegi b'filtri                                           | management                                   |
-| `/api/a2a/tasks/[id]`        | GET    | Ħu impjieg bl-ID                                                      | management                                   |
-| `/api/a2a/tasks/[id]/cancel` | POST   | Ikkanċella impjieg li qed jitħaddem                                   | management                                   |
-| `/.well-known/agent.json`    | GET    | Kard tal-Aġent (scoperta A2A)                                         | (pubbliku, cached 3600s)                     |
-| `/api/a2a/tasks`             | POST   | Deleġazzjoni inbound lejn il-frotta OmniConductor (Conductor PRD RF5) | Bearer vs `OMNIROUTE_API_KEY` + `a2aEnabled` |
+| Endpoint                     | Metodu | Deskrizzjoni                                                      | Awt                                                                                                                 |
+| :--------------------------- | :----- | :---------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------ |
+| `/api/a2a/status`            | GET    | L-istatus tas-server, il-ħiliet irreġistrati                      | (pubbliku)                                                                                                          |
+| `/api/a2a/tasks`             | GET    | Elenka l-kompiti bil-filtri                                       | management jew API key (ara hawn taħt)                                                                              |
+| `/api/a2a/tasks/[id]`        | GET    | Get task by ID                                                    | management jew API key (ara hawn taħt)                                                                              |
+| `/api/a2a/tasks/[id]/cancel` | POST   | Ikkanċella l-kompitu tat-tħaddim                                  | management jew API key (ara hawn taħt)                                                                              |
+| `/.well-known/agent.json`    | GET    | Karta tal-Agent (A2A discovery)                                   | (pubbliku, 3600s fil-cache)                                                                                         |
+| `/api/a2a/tasks`             | POST   | Delegazzjoni deħlin lill-flotta OmniConductor (Konduttur PRD RF5) | l-istess bħal `GET`, flimkien ma `OMNIROUTE_API_KEY` jekk issettjat waqt `REQUIRE_API_KEY` huwa mitfi; `a2aEnabled` |
 
-**Deleġazzjoni inbound Conductor (`POST /api/a2a/tasks`):** aġenti A2A esterni jiddelegaw xogħol tal-kodifikazzjoni lill-frotta OmniConductor permezz ta' OmniRoute. Korpus: `{ skill: "conductor" | "conductor-cli-<profile>", messages: [{role, content}], metadata: { conductor: { repo: { url, base_ref? }, mode?, cli?, model? } } }` — biss il-ħiliet tal-frotta Conductor (dawk imħabbar fil-Kard tal-Aġent) huma delegabbli; `metadata.conductor.repo.url` meħtieġa (il-frotta taħdem fuq repos git). It-traduzzjoni ssir lejn il-`POST /v1/tasks` tal-hub billi juża l-`CONDUCTOR_ORCHESTRATOR_TOKEN` tal-server (fallback `CONDUCTOR_HUB_TOKEN`) u jirritorna `201 { conductor_task_id, state: "submitted" }`; l-istati tal-impjieġ jiġbru lura permezz tal-mirja SSE→A2A (RF1) u huma viżibbli permezz ta' `GET /api/a2a/tasks?skill=conductor`.
+Min jgħaddi għar-rotot `/api/a2a/tasks*` jiddependi fuq is-settings tal-login u l-API-key:
+
+- `requireLogin=true` (default): il-middleware jammetti biss kredenzjali ta' ġestjoni (sessjoni tad-dashboard, `manage` -scope API key, `oma_` access token) u `OMNIROUTE_API_KEY`. A ċavetta inferenza sempliċi gets `403`. Fil-header `Authorization` il-middleware jieħu biss `OMNIROUTE_API_KEY` bħala `Bearer <key>`; ċavetta vojta jew tab wara `Bearer` gets `401`.
+- `requireLogin=false`, jew it-tieqa tal-loopback qabel l-onboarding: `REQUIRE_API_KEY=true` kwalunkwe ċavetta valida OmniRoute API jew kredenzjali ta' ġestjoni hija aċċettata u dawk li jċemplu anonimi jiksbu `401`; bi `REQUIRE_API_KEY` barra r-rotot huma miftuha.
+- `POST /api/a2a/tasks` jirrikjedi wkoll `OMNIROUTE_API_KEY` fl-intestatura `Authorization` meta dik il-varjabbli tkun issettjata u `REQUIRE_API_KEY` ikun mitfi. Headers oħra, bħal `x-api-key`, ma jgħoddux hemm. Bil-login off jew qabel l-onboarding iċ-ċavetta tgħaddi bi jew mingħajr prefiss `Bearer` ; bil-login mixgħul, `Bearer <key>` biss jgħaddi mill-middleware.
+
+Fejn tkun meħtieġa kredenzjali, token `read` -scope `oma_` jaħdem biss għal `GET`.
+
+**Delegazzjoni ta' Konduttur Inbound (`POST /api/a2a/tasks`):** aġenti esterni A2A jiddelegaw xogħol ta 'kodifikazzjoni lill-flotta OmniConductor permezz ta OmniRoute. Korp: `{ skill: "conductor" | "conductor-cli-<profile>", messages: [{role, content}], metadata: { conductor: { repo: { url, base_ref? }, mode?, cli?, model? } } }` — biss Il-ħiliet tal-flotta tal-Kondutturi (dawk imħabbra fuq il-Karta tal-Aġent) huma delegati; `metadata.conductor.repo.url` huwa meħtieġ (il-flotta taħdem fuq git repos). Ir-rotta tittraduċi `POST /v1/tasks` tal-hub bl-użu tas-server-side `CONDUCTOR_ORCHESTRATOR_TOKEN` (fallback `CONDUCTOR_HUB_TOKEN`) u jirritorna `201 { conductor_task_id, state: "submitted" }`; l-istati tal-kompitu jgħaddu lura mill-mera SSE→A2A (RF1) u huma viżibbli permezz ta' `GET /api/a2a/tasks?skill=conductor`.
 
 ---
 
@@ -201,16 +209,16 @@ Il-punt ta' dħul JSON-RPC `/a2a` huwa l-punt A2A kanoniku. L-estremitajiet REST
 
 1. **Oħloq fajl tal-ħiliet:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   Esporta funzjoni asinkronika `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Segwi l-forma ta 'ħiliet eżistenti bħal `smartRouting.ts`.
+   Esporta funzjoni asinkronika `(task: A2ATask, caller?: A2ACallerContext) => Promise<{ artifacts, metadata }>`. Segwi l-forma ta 'ħiliet eżistenti bħal `smartRouting.ts`. Jekk il-ħila ssejjaħ lura OmniRoute fuq HTTP, ibni l-headers `buildSelfLoopHeaders(caller)` minn `src/lib/a2a/selfLoopAuth.ts` sabiex is-sejħa taħdem biċ-ċavetta ta' min iċempel A2A, mhux `OMNIROUTE_API_KEY`, u għaddi `redirect: "error"` għal `fetch` sabiex redirect qatt ma jieħu ċ-ċavetta. Il-helper jibni biss headers; kull ħila tistabbilixxi l-politika ta' direzzjoni mill-ġdid innifsu. Jarmi `UnsafeSelfLoopTargetError` aktar milli tehmeż ċavetta meta URL bażi solvuta hija http sempliċi barra n-netwerk privat (loopback, kontenitur jew isem ta 'servizz, u indirizzi privati huma tajbin) jew iżomm kredenzjali, għalhekk ħila li tibla' sejħiet miċħuda trid terġa' titfa' dak l-iżball.
 
 2. **Reġistru handler:** `src/lib/a2a/taskExecution.ts`, żid entrata ma' `A2A_SKILL_HANDLERS`:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
      // ...existing skills
-     "your-skill": async (task) => {
+     "your-skill": async (task, caller) => {
        const skillModule = await import("./skills/yourSkill");
-       return skillModule.executeYourSkill(task);
+       return skillModule.executeYourSkill(task, caller);
      },
    };
    ```
