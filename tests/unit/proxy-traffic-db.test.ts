@@ -26,7 +26,7 @@ process.env.OMNIROUTE_PLUGINS_DIR = path.join(fixtureDir, "plugins");
 const { trafficRoute, recordTrafficDelta, getProxyTraffic } =
   await import("../../src/lib/db/proxyTraffic.ts");
 const sql = fs.readFileSync(
-  new URL("../../src/lib/db/migrations/229_proxy_payload_traffic.sql", import.meta.url),
+  new URL("../../src/lib/db/migrations/232_proxy_payload_traffic.sql", import.meta.url),
   "utf8"
 );
 test.after(() => {

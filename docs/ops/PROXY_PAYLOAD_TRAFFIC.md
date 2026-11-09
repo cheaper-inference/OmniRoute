@@ -50,7 +50,7 @@ direct; automatic fallback proxy sends use the actual fallback identity.
 - Redirects and retries hidden inside a fetch implementation are not distinct invocations at this
   seam. Transports that bypass this fetch layer (for example independent WebSocket/browser transports)
   are not measured. The panel is not complete machine-wide traffic accounting.
-- Totals are additive in `proxy_payload_traffic`, created by migration 229, and survive process
+- Totals are additive in `proxy_payload_traffic`, created by migration 232, and survive process
   restart. Previously applied traffic migrations 206, 207, 213, 214, 215, 217, 218, 223, 224, 225, 226
   and 228 are reconciled to 229 without changing counters, freeing those slots for the upstream
   migrations.
