@@ -82,6 +82,9 @@ describe("combo builder stage tiles on the kit Tile", { timeout: 90_000 }, () =>
 
     // Named by the stage label, described by its description and status line.
     expect(basics).toHaveAccessibleName("Basics");
+    expect(steps).toHaveAccessibleName("Steps");
+    // The tiles are reachable by role and name, not only by test id.
+    expect(within(dialog).getByRole("button", { name: "Basics" })).toBe(basics);
     expect(basics.getAttribute("aria-describedby")).toBeTruthy();
     expect(basics).toHaveAccessibleDescription(/Current/);
     expect(steps).toHaveAccessibleDescription(/Locked/);
