@@ -528,9 +528,14 @@ type ClaudeEmptyResponseLifecycle = {
   stopReason: string | null;
   syntheticContentInjected: boolean;
   warningLogged: boolean;
+  /** Native Claude upstream (passthrough): a clean empty end_turn is a real answer. A translated
+   * upstream (for example an empty OpenAI stop) keeps the mid-stream empty_response error. */
+  trustCleanEmptyStop?: boolean;
 };
 
 const SYNTHETIC_CLAUDE_EMPTY_RESPONSE_TEXT = "";
+// Same set as CLEAN_EMPTY_STOP_REASONS in streamClaudeEmptyBody.ts (not exported there).
+const CLEAN_EMPTY_CLAUDE_STOP_REASONS = new Set(["end_turn", "stop_sequence", "refusal"]);
 
 export function createClaudeEmptyResponseLifecycle(): ClaudeEmptyResponseLifecycle {
   return {
@@ -605,11 +610,15 @@ function shouldInjectClaudeEmptyResponseBeforeCurrentEvent(
   const delta = (payload as JsonRecord).delta;
   // A bare `event: message_delta` line: its data line carries the stop_reason and decides.
   if (type === "message_delta" && !delta) return false;
-  // A refusal has no content by design; forward it so the client sees why.
+  // A refusal has no content by design; forward it so the client sees why. A clean
+  // end_turn / stop_sequence is a real empty answer: flush still aborts when
+  // message_stop never arrives (shouldAbortEmptyClaudeStream).
   const stopReason =
     (delta && typeof delta === "object" ? (delta as JsonRecord).stop_reason : null) ??
     lifecycle.stopReason;
   if (stopReason === "refusal") return false;
+  if (lifecycle.trustCleanEmptyStop && CLEAN_EMPTY_CLAUDE_STOP_REASONS.has(stopReason as string))
+    return false;
   return type === "message_delta" || type === "message_stop";
 }
 
@@ -1104,6 +1113,7 @@ export function createSSEStream(options: StreamOptions = {}) {
   let idleTimer: ReturnType<typeof setInterval> | null = null;
   let streamTimedOut = false;
   const claudeEmptyResponseLifecycle = createClaudeEmptyResponseLifecycle();
+  claudeEmptyResponseLifecycle.trustCleanEmptyStop = mode === STREAM_MODE.PASSTHROUGH;
   // #12398: `timing.firstByteAt` doubles as "any upstream chunk ever arrived".
   const shouldAbortClaudeStream = () =>
     clientExpectsClaudeStream &&
