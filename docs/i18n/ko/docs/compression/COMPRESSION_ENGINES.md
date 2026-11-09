@@ -283,6 +283,95 @@ open-sse/services/compression/engines/mcpAccessibility/
 
 대시보드 위치: `Dashboard -> Context & Cache -> Compression Combos`.
 
+## 전제조건/운영자 가이드(CCR & session-dedup)
+
+CCR (`ccr`) 및 `session-dedup` 텍스트를 바꾸거나 삭제하고** 채점자** 뒤에. 이 섹션은 클라이언트 연결, 두 마커 읽기, 누락된 콘텐츠 검색 또는 진단을 위한 운영자 참조입니다. 각 엔진의 메커니즘은 위에 설명되어 있습니다. 이것은 "어떻게 실행합니까?" 레이어입니다.
+
+### 전송 및 엔드포인트
+
+CCR 도구를 노출하는 MCP 서버는 세 가지 방법으로 접근할 수 있습니다. 기본 기본 URL 는 `http://localhost:20128` (`OMNIROUTE_BASE_URL`)입니다.
+
+| 수송                                    | URL / 명령                              | 메모                                                                                                                                                   |
+| --------------------------------------- | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 스트리밍 가능한 HTTP (클라이언트, 권장) | `http://localhost:20128/api/mcp/stream` | 현재 MCP 클라이언트가 대화하는 엔드포인트입니다.                                                                                                       |
+| 레거시 SSE 싱글톤                       | `http://localhost:20128/api/mcp/sse`    | 이전 싱글톤 전송. 그것** 닫는다** 스트리밍 가능한 세션; `/api/mcp/stream` 에 대해 `streamable-http` 클라이언트를 사용하세요. 이 클라이언트는 아닙니다. |
+| 스튜디오                                | `omniroute --mcp`                       | 프로세스를 생성하는 IDE MCP 구성의 경우. `--dev` 플래그가 없습니다. `omniroute --mcp` 는 stdio 진입점입니다.                                           |
+
+### 스토리지 계층(다시 시작해도 유지되는 계층)
+
+CCR 는** 2층** 메모리 전용이 아닌 저장:
+
+- **핫 인메모리 계층** — 블록당 한도 2 MiB, 주체당 16 MiB, 전역 64 MiB. 항목은 기본적으로 24시간 TTL (최대 7일)로 설정됩니다. 메모리에서 전체 MCP 검색은 256 KiB 로 제한됩니다. 더 큰 것은 여전히 ranged/grep 모드를 통해 접근할 수 있습니다.
+- **내구성이 뛰어난 SQLite 계층** ( 기본적으로 `ccr_blocks`, `COMPRESSION_CCR_DURABLE_STORE`, on) — 인 메모리 계층을 지원하므로 블록은 LRU 제거, 재시작 또는 다른 인스턴스에 대한 검색 착륙에서 살아남습니다. 행은 블록의 TTL 유지하므로 해당 TTL 지나는 블록은 두 계층 모두에서 사라집니다.
+
+세 명의 가드가 내구성 계층 — 제한적으로 유지합니다. 다음과 같은 경우 블록은 메모리 전용으로 유지됩니다.
+
+1. 블록이 끝났어** 512 KB** (`MAX_DURABLE_BLOCK_BYTES`);
+2. 런타임은 클라우드 런타임입니다(로컬 디스크 없음).
+3. `COMPRESSION_CCR_DURABLE_STORE=false`.
+
+따라서 "블록이 사라졌습니다"는 포괄적인 재시작 이야기가 아닙니다. 클라우드가 아닌 로컬 런타임의 sub-512 KB 블록은 해당 TTL 소진될 때까지 내구성 계층을 통해 재시작 후에도 유지됩니다. 변수에 대한 [환경 참조를](../reference/ENVIRONMENT.md) 참조하세요.
+
+### 두 개의 마커
+
+| 채점자                                | 의미                                                                                                                                      | 모델이 해야 할 일                                                                                                                                                                                   |
+| ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `[CCR retrieve hash=<24hex> chars=N]` | 큰 블록이 콘텐츠 주소로 저장되었습니다.                                                                                                   | 다음과 같이 `omniroute_ccr_retrieve` 에 전화하세요.** 24-16진수 해시가 그대로 복사됨** 원본 텍스트를 다시 얻으려면.                                                                                 |
+| `[dedup:ref sha=…]`                   | `session-dedup` 동일한 세션의 이전 단계에서 이미 전송된 텍스트를 삭제했습니다. 이것은** 의도적인 뒤돌아보기** , 손실이나 오류가 아닙니다. | 하다** ~ 아니다** 어떤 도구를 호출하고 수행** ~ 아니다** 그것을 "재구성"하려고 노력하십시오. 텍스트의 첫 번째 항목은 정식 사본입니다. 현재 턴은 다시 작성되지 않으며 이후 턴에서 중복이 제거됩니다. |
+
+`[dedup:ref]` 룩백은 의도적인 프로토콜 결정입니다. — 사전 전송 재구성이 없습니다. "이 정확한 텍스트는 이 세션 초기에 이미 전송되었습니다."로 처리하세요.
+
+### 클라이언트 전제조건
+
+- **키(stdio):** stdio 호출자는 요청별 ID를 전달하지 않으므로 `OMNIROUTE_API_KEY` ( MCP 서버의 `env` 에 설정됨)로 인증합니다. 이것이 없으면 호출자는 익명이 되며 주체가 필요한 도구의 성능이 저하될 수 있습니다.
+- **`tools[]` 는 주입 전제조건입니다.** CCR 검색 프로토콜 명령(#8033)이 삽입됩니다.** 오직** 요청의 광고된 `tools[]` 클라이언트가 실제로 `omniroute_ccr_retrieve` 에 도달할 수 있음을 증명할 때. 일치는 구분 기호(`__`, `.`, `/`, `:`)로 묶인 후행 세그먼트 일치입니다. — 절대 하위 문자열 — 아니므로 `mcp__gateway__omniroute_ccr_retrieve` 과 같은 네임스페이스 이름은 여전히 계산됩니다. `tools[]` 이 없거나 일치하지 않는다는 것은 의도적으로 명령어가 주입되지 _않았다_는 것을 의미합니다.
+- **`codemode:false` (OpenCode 클라이언트).** OpenCode 기본적으로 코드 모드로 설정되어 있으며, 기본 도구만 모델에 광고하고** 그렇지 않다** MCP 도구를 기본 `tools[]` 목록에 추가하세요. `omniroute_ccr_*` 도구가 보급되도록 MCP 서버 항목에 `codemode: false` 설정합니다. 이것은** 고객** 설정은 OmniRoute 설정이 아닙니다. 아직 CCR 명령어가 삽입되지 않았습니다. OpenCode 도구에 `<server>_<tool>` 이름을 지정하므로 `omniroute` 이라는 서버는 `omniroute_omniroute_ccr_retrieve` 노출하고 `_` 일치하는 구분 기호 중 하나가 아닙니다.
+- **교장.** 저장 및 검색은 인증된 주체별로( API 키별로) 격리됩니다. 키는 자체 블록만 볼 수 있습니다.
+
+### 도구별 범위
+
+범위가 좁은 HTTP/SSE 호출자에 대해서는 범위 적용이 항상 켜져 있습니다. `omniroute_` CCR 도구에는 다음이 필요합니다.
+
+| 도구                     | 범위                |
+| ------------------------ | ------------------- |
+| `omniroute_ccr_store`    | `write:compression` |
+| `omniroute_ccr_delete`   | `write:compression` |
+| `omniroute_ccr_retrieve` | `read:compression`  |
+| `omniroute_ccr_inspect`  | `read:compression`  |
+| `omniroute_ccr_list`     | `read:compression`  |
+| `omniroute_ccr_stats`    | `read:compression`  |
+
+누락된 범위는 다음을 반환합니다.**MCP 도구 오류 결과** (`isError: true`, HTTP 403 — 아님 `403 LOCAL_ONLY` 는 별도의 루프백 경로 보호 인증입니다.): `Error: Insufficient MCP scopes for <tool>. Missing: <scope>.` 최소 원격 키는 `mcp:connect` ( `/api/mcp/` 로컬 전용 분할 승인)와 필요한 특정 read/write 범위를 보유할 수 있습니다.
+
+### 클라이언트 매트릭스
+
+| 고객           | 수송                               | 사용할 구성                                                                                                                                                                                                                       | `tools[]` 광고했어? (→ CCR 명령어 삽입됨)                                                                                                                                           |
+| -------------- | ---------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Claude 코드    | 스트리밍 가능-http                 | `claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream`                                                                                                                                                 | 예 — MCP 가능; 주입.                                                                                                                                                                |
+| Cursor / Cline | `stdio`** 또는** `streamable-http` | stdio: `env` 에 `OMNIROUTE_API_KEY` 있는 `omniroute --mcp` ; 또는 `http://localhost:20128/api/mcp/stream` 를 가리키는 원격 MCP 항목( [설정 가이드 → MCP 클라이언트 구성](../guides/SETUP_GUIDE.md#mcp-client-configuration) 참조) | 예 — `omniroute_ccr_*` 도구를 광고합니다.                                                                                                                                           |
+| OpenCode       | 스트리밍 가능-http                 | `opencode mcp add omniroute --url http://localhost:20128/api/mcp/stream`, 플러스 `codemode: false`                                                                                                                                | `codemode: false` 로만 광고되는 도구; `omniroute_omniroute_ccr_retrieve` 일치하지 않기 때문에 명령이 여전히 주입되지 않습니다( [클라이언트 전제 조건](#client-prerequisites) 참조). |
+| OpenAI 호환    | OpenAI 호환 HTTP (채팅 완료)       | OpenAI 호환 엔드포인트에 대한 표준 채팅 완료 클라이언트                                                                                                                                                                           | **절대** 일반 OpenAI 호환 호출자 — 도구를 호출하라는 지시가 전혀 전달되지 않으며 명령도 주입되지 않습니다.                                                                          |
+
+### 검색 제한 및 페이지 매기기
+
+MCP 도구 텍스트 결과는 `mcpAccessibility.maxTextChars` 주위에서 잘립니다(기본값 `50000`). 블록의 `full` 검색은 256 KiB — 로 제한됩니다.** 무제한의 전체 검색이 없습니다.** . 블록의 `chars=N` 큰 경우 전체를 가져오는 대신 페이징하세요.
+
+- 경험 법칙:**`chars > 40000` → `mode` 사용하세요** , 결코 꽉 차 있지 않습니다.
+- `mode:"grep"` — regex `pattern` 한 줄씩 일치하며 최대 1,000개의 일치하는 줄(`unique: true` 반복 삭제), "필요한 한 줄 찾기"에 가장 저렴합니다.
+- `mode:"lines"` — 1 인덱스 라인 범위; `start` 와 `end` 모두 필요합니다.
+- `mode:"head"` / `mode:"tail"` — first/last `n` 라인.
+- `mode:"stats"` — 본문 없이 행, 문자 및 바이트 수를 계산합니다.
+
+`start`/`end` 와 함께 `mode:"lines"` 사용하면 한 번에 모든 것을 요청하는 대신 페이지 단위로 긴 블록을 탐색할 수 있습니다.
+
+### 도구 이름 지정
+
+검색 도구의 이름은 현재 `omniroute_ccr_retrieve` 입니다( `omniroute_` 접두사는 서버 간 이름 충돌에 대한 오래된 해결 방법입니다). 더 깔끔한 경계 접미사 도구 이름과 MCP JSON 결과 잘린 중간 문자열에 대한 수정 사항은 업스트림 후속 조치로 추적됩니다. 이 페이지에는 현재 제공된 동작만 문서화되어 있습니다.
+
+### 세션 수명주기
+
+스트리밍 가능한 HTTP 세션이 유휴 상태가 되면 서버가 해당 세션을 확보합니다. 유휴 기간은 `OMNIROUTE_MCP_SESSION_IDLE_MS` 로 구성되며 `open-sse/mcp-server/httpTransport.ts` 의 `DEFAULT_MCP_SESSION_IDLE_MS` 로 대체됩니다. 유휴 회수 세션의 증상은 `Unknown Mcp-Session-Id` — 가 포함된 HTTP 404입니다. 해결 방법은 세션을 다시 연결하거나 다시 시작하는 것입니다.** ~ 아니다** 키를 회전하거나, 범위를 변경하거나, 도구 이름을 바꾸려면
+
 ## API 인터페이스
 
 | 경로                                   | 용도                                         |
@@ -366,9 +455,9 @@ open-sse/services/compression/engines/mcpAccessibility/
   "실행됨, 0%"과 "건너뜀"을 구분하려면 분석 모델을 변경해야 하므로 추후로
   연기되었습니다.
 
-## 유효성 검사
+## 확인
 
-이 영역에 대한 집중 게이트는 다음과 같습니다:
+이 영역의 집중 게이트는 다음과 같습니다.
 
 ```bash
 node --import tsx/esm --test tests/unit/compression/rtk-*.test.ts tests/unit/compression/pipeline-integration.test.ts tests/unit/compression/context-compression-api.test.ts

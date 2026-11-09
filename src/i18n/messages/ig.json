@@ -1,4 +1,15 @@
 {
+  "accountPreferences": {
+    "title": "Mmasị akaụntụ",
+    "description": "Mee ka ọtụtụ akaụntụ bụrụ ndị a ga-eji mbụ ma ọ bụ debe ha dị ka ndị ndabere maka combo a. Nhazi ụzọ akpaaka na-ahazi akaụntụ n'ime ọkwa nke ọ bụla. Akaụntụ ndị na-adịghị na ndepụta ahụ bụ ndị nkịtị. Ikike, oke oke ojiji, na njikọ ntụgharị dị adị ka na-arụ ọrụ.",
+    "preferred": "A ga-eji mbụ",
+    "normal": "Nkịtị",
+    "reserve": "Ndabere",
+    "excluded": "Ewepụrụ",
+    "loading": "Na-ebunye akaụntụ…",
+    "error": "Enweghị ike ibunye akaụntụ. Mepee ndezi ahụ ọzọ ka ị nwaa ọzọ.",
+    "missing": "Akaụntụ adịghị ({id})"
+  },
   "codexKeyServiceMode": {
     "title": "Ọnọdụ ọrụ Codex maka igodo API a",
     "description": "Ọ metụtara arịrịọ Codex, gụnyere ụdị Codex dị n'ime ngwakọta. Ọnọdụ amanyere iwu na-akagbu ntọala nke klayenti, ntọala zuru ụwa ọnụ na ndabara njikọ. Ndị na-eweta ọrụ ndị ọzọ agaghị agbanwe.",
@@ -7099,6 +7110,31 @@
     "quotaConnectionRefreshFailed": "Nnyocha oke ojiji agwụla, mana enweghị ike imelite ndepụta akaụntụ."
   },
   "settings": {
+    "proxyTraffic": {
+      "persistenceIncomplete": "Enweghị ike ichekwa ụfọdụ njem data n'ime usoro a. Ngụkọta echekwara ezughị ezu; lelee ozi nyocha sava.",
+      "title": "Njem data bụ isi nke OmniRoute",
+      "description": "Ọdịnaya bulite e nyere maka iziga na bait nke nbudata OmniRoute gụrụ. Nke a abụghị njem netwọk n'elu njikọ ma ọ bụ ụgwọ onye na-enye ọrụ. Ngụkọta gụnyere njem kpọmkwem na njem a na-amaghị ebe e kenyere ya, nke nwere akara dị iche iche.",
+      "coverageNote": "Ngụkọta gbakọtara kemgbe a malitere ịtụ. Bulite ndị a na-amaghị nha ha (iyi data, FormData, ọdịnaya Request) esoghị na ngụkọta bait. Nbudata a na-agụghị ma ọ bụ nke a na-emechabeghị ezughị ezu; iziga dara ada anaghị egosi na bulite ruru ebe ọ na-aga. A naghị atụ mgbanwe ụzọ/ịnwale ọzọ n'ime usoro mbufe na mbufe na-agafe usoro ịtụ iche iche.",
+      "refresh": "Mee ka ọ dị ọhụrụ",
+      "overall": "Ngụkọta (ụzọ niile a hụrụ)",
+      "proxied": "Ngụkọta nta proksi (na-enweghị njem kpọmkwem/a na-amaghị ebe e kenyere ya)",
+      "direct": "Kpọmkwem (na-enweghị proksi)",
+      "unattributed": "Onye nkesa a na-amaghị ebe e kenyere ya",
+      "removed": "Proksi e wepụrụ ({id})",
+      "legacy": "Proksi ochie/sitere na ntọala gburugburu ({id})",
+      "route": "Ụzọ",
+      "upload": "Bulite e nyere maka iziga",
+      "download": "Nbudata a gụrụ",
+      "attempts": "Mgbalị",
+      "knownUpload": "Bulite a maara nha ha / mgbalị",
+      "completed": "Nbudata zuru ezu / mgbalị",
+      "failed": "Iziga dara ada",
+      "cancelled": "Nbudata a kagburu",
+      "errored": "Njehie nbudata",
+      "loading": "A na-ebunye ozi njem data bụ isi…",
+      "empty": "A tụbeghị njem data bụ isi.",
+      "error": "Enweghị ike ibunye ozi njem data bụ isi. Nwaa ime ka ọ dị ọhụrụ."
+    },
     "title": "Ntọala",
     "general": "Izugbe",
     "security": "Nchedo",
@@ -14642,6 +14678,8 @@
     "usdUsageQuotaDescription": "Na-egbochi igodo a site na njehie 400 API mgbe mmefu USD mpaghara ya ruru oke kwa ụbọchị ma ọ bụ kwa izu ahaziri.",
     "dailyQuotaUsd": "Oke kwa ụbọchị (USD)",
     "weeklyQuotaUsd": "Oke kwa izu (USD)",
+    "fiveHourQuotaUsd": "Oke awa 5 (USD)",
+    "fiveHourQuotaHint": "Windo na-agagharị: a na-agụ mmefu nke arịrịọ ọ bụla ruo awa 5, mgbe ahụ a tọhapụ ya.",
     "quotaWindowDescription": "Oke kwa izu na-agbaso nrụgharị Claude kwa izu echekwara mgbe ọ dị; ma ọ bụghị ya, ọ na-eji windo ụbọchị 7 na-agagharị. Oke kwa ụbọchị na-eji ụbọchị kalenda nke Fortaleza.",
     "apiKeyUsdQuota": "Oke USD nke igodo API",
     "apiKeyUsdQuotaDescription": "Mgbe agbanyere ya, @@om-usage na-eweghachi oke kwa ụbọchị, oke kwa izu, mmefu kwa ụbọchị, na mmefu kwa izu na USD. Nke kwa izu na-agbaso nrụgharị Claude echekwara mgbe ọ dị.",

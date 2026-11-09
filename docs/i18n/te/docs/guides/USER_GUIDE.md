@@ -362,19 +362,19 @@ API కీ: [డ్యాష్బోర్డ్ నుండి]
 ```bash
 npm install -g omniroute
 
-# కాన్ఫిగ్ డైరెక్టరీని సృష్టించండి
+# Create config directory
 mkdir -p ~/.omniroute
 
-# .env ఫైల్ను సృష్టించండి (.env.example చూడండి)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# సర్వర్ను ప్రారంభించండి
+# Start server
 omniroute
-# లేదా అనుకూల పోర్ట్తో:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI స్వయంచాలకంగా `~/.omniroute/.env` లేదా `./.env` నుండి `.env`ను లోడ్ చేస్తుంది.
+CLI స్వయంచాలకంగా `~/.omniroute/.env` లేదా `./.env` నుండి `.env` ని లోడ్ చేస్తుంది. వర్కింగ్ డైరెక్టరీలో ఒక `./.env` కీల యొక్క చిన్న అనుమతి జాబితాను మాత్రమే సెట్ చేయవచ్చు (పోర్ట్లు, `REQUIRE_API_KEY`, లొకేల్ మరియు రంగు సెట్టింగ్లు); మిగతావన్నీ `~/.omniroute/.env` లో ఉంచండి. [CLI ప్రయోగ ఒప్పందాలను](CLI-LAUNCH-CONTRACTS.md#working-directory-env) చూడండి.
 
 ### ట్రే మోడ్
 

@@ -484,15 +484,15 @@ Se käsittelee seuraavat:
 
 ## Kokoonpano
 
-`open-sse/config/` sisältää määrityskerroksen:
+`open-sse/config/` sisältää konfigurointikerroksen:
 
-| Tiedosto                      | Tarkoitus                                             |
-| ----------------------------- | ----------------------------------------------------- |
-| `providerRegistry.ts`         | Chat-mallirekisteri 381-palveluntarjoajan luettelossa |
-| `providerModels.ts`           | Mallialiakset, muotojen kartoitus                     |
-| `constants.ts`                | Aikakatkaisut, rajat, tilakoodit                      |
-| `defaultThinkingSignature.ts` | Oletusarvoinen Claude ajatteleva allekirjoitus        |
-| `modelStrip.ts` (palveluissa) | Palveluntarjoajakohtainen kentän kuorinta             |
+| Tiedosto                      | Tarkoitus                                                  |
+| ----------------------------- | ---------------------------------------------------------- |
+| `providerRegistry.ts`         | Chat-mallirekisteri 382-palveluntarjoajan luettelon kautta |
+| `providerModels.ts`           | Mallialiakset, muotojen kartoitus                          |
+| `constants.ts`                | Aikakatkaisut, rajat, tilakoodit                           |
+| `defaultThinkingSignature.ts` | Oletusarvoinen Claude ajatteleva allekirjoitus             |
+| `modelStrip.ts` (palveluissa) | Palveluntarjoajakohtainen kentän kuorinta                  |
 
 ### Palveluntarjoajan rekisterikaavio
 

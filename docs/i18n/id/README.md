@@ -15,7 +15,7 @@
 
 **Dibuat oleh [Diego Souza](https://github.com/diegosouzapw)**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Never stop coding. Every AI tool → 381 providers — 150+ free — through one endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity into FREE Claude / GPT / Gemini with auto-fallback. RTK + Caveman stacked compression saves 15–95% tokens (~89% avg) — never hit limits. 381 AI providers · 150+ free tiers · ~1.62B free tokens/mo · 20 routing strategies · $0 to start."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Never stop coding. Every AI tool → 382 providers — 150+ free — through one endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity into FREE Claude / GPT / Gemini with auto-fallback. RTK + Caveman stacked compression saves 15–95% tokens (~89% avg) — never hit limits. 382 AI providers · 150+ free tiers · ~1.62B free tokens/mo · 20 routing strategies · $0 to start."/>
 
 </div>
 
@@ -51,18 +51,13 @@
 
 ### 💬 Bergabunglah dengan komunitas
 
-**👋 Ikuti maintainer — dapatkan provider, rilis, dan kiat terbaru lebih dulu:**
+**👋 Ikuti pengelola — dapatkan penyedia, rilis & tips baru terlebih dahulu:**
 
-[![Ikuti Diego di LinkedIn](https://img.shields.io/badge/Follow_Diego_on-LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/diegosouzapw/)
-[![Ikuti @diegosouzapw di GitHub](https://img.shields.io/github/followers/diegosouzapw?style=for-the-badge&logo=github&logoColor=white&label=Follow%20on%20GitHub&color=181717)](https://github.com/diegosouzapw)
+[![Ikuti Diego di LinkedIn](https://img.shields.io/badge/Follow_Diego_on-LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white) ](https://www.linkedin.com/in/diegosouzapw/) [![Ikuti @diegosouzapw di GitHub](https://img.shields.io/github/followers/diegosouzapw?style=for-the-badge&logo=github&logoColor=white&label=Follow%20on%20GitHub&color=181717) ](https://github.com/diegosouzapw)
 
-[![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/U47eFqAXCn)
-[![Telegram](https://img.shields.io/badge/Telegram-26A5E4?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/omnirouteOficial)
-[![WhatsApp Global](https://img.shields.io/badge/WhatsApp_Global-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4)
-[![WhatsApp Brasil](https://img.shields.io/badge/WhatsApp_Brasil-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)
-[![Situs web](https://img.shields.io/badge/Website-omniroute.online-blue?logo=google-chrome&logoColor=white)](https://omniroute.online)
+[![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white) ](https://discord.gg/U47eFqAXCn) [![Telegram](https://img.shields.io/badge/Telegram-26A5E4?style=for-the-badge&logo=telegram&logoColor=white) ](https://t.me/omnirouteOficial) [![WhatsApp Global](https://img.shields.io/badge/WhatsApp_Global-25D366?style=for-the-badge&logo=whatsapp&logoColor=white) ](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) [![WhatsApp Brasil](https://img.shields.io/badge/WhatsApp_Brasil-25D366?style=for-the-badge&logo=whatsapp&logoColor=white) ](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) [![Situs Web](https://img.shields.io/badge/Website-omniroute.online-blue?logo=google-chrome&logoColor=white) ](https://omniroute.online)
 
-**Pertanyaan, kiat provider, roadmap & dukungan → [Discord](https://discord.gg/U47eFqAXCn) · [Telegram](https://t.me/omnirouteOficial) · WhatsApp [🌍 Global](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) / [🇧🇷 Brasil](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) / [Portal](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)**
+**Pertanyaan, kiat penyedia, peta jalan & dukungan → [Discord](https://discord.gg/U47eFqAXCn) · [Telegram](https://t.me/omnirouteOficial) · WhatsApp [🌍 Global](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) / [🇧🇷 Brasil](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) / [📢 Saluran Resmi](https://whatsapp.com/channel/0029VbDwC7A3wtb5PN6a5t2R) / [Pintu gerbang](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)**
 
 <br/>
 
@@ -72,17 +67,17 @@
 
 |                            |         v3.8.50         | **v3.8.51** |      `v3.8.54+`       |
 | -------------------------- | :---------------------: | :---------: | :-------------------: |
-| Penyedia 🌐                |           352           |   **358**   |          381          |
-| 🧠 Model obrolan unik IDs  |          1320           |  **1374**   |         1519          |
-| 🖼️ Jembatan Modalitas      | 🆕 visi + audio + video |      ✓      |           ✓           |
-| Katalog gratis 📡 Radar    |      🆕 ikut serta      |      ✓      |           ✓           |
-| ⚖️ Penjadwalan sadar kuota |    🆕 Kuota-Bagikan     |      ✓      |           ✓           |
-| 📊 Kuota telemetri         |        🆕 hidup         |      ✓      |           ✓           |
-| 🧰 Mode tanpa kepala       |            —            |      —      | 🆕 `serve --headless` |
-| 🛤️ LTS rel infra           |            —            |      —      |   saluran rilis 🆕    |
-| 🔎 Penemuan model API      |            —            |      —      | 🆕 `/v1/models/query` |
+| Penyedia 🌐                |           352           |   **358**   |          382          |
+| 🧠 Model obrolan unik IDs  |          1320           |  **1374**   |         1524          |
+| Jembatan Modalitas 🖼️      | Visi 🆕 + audio + video |      ✓      |           ✓           |
+| Katalog gratis 📡 Radar    |    Keikutsertaan 🆕     |      ✓      |           ✓           |
+| Penjadwalan sadar Kuota ⚖️ |   Pembagian Kuota 🆕    |      ✓      |           ✓           |
+| Telemetri Kuota 📊         |        🆕 hidup         |      ✓      |           ✓           |
+| Mode Tanpa Kepala 🧰       |            —            |      —      | 🆕 `serve --headless` |
+| Infra rel 🛤️ LTS           |            —            |      —      |   Saluran rilis 🆕    |
+| Penemuan Model 🔎 API      |            —            |      —      | 🆕 `/v1/models/query` |
 
-**→ [Roadmap](ROADMAP.md) — menaiki rel ke `v3.9.0 LTS`**
+**→ [Roadmap](ROADMAP.md) — menaiki rel menuju `v3.9.0 LTS`**
 
 </div>
 
@@ -108,7 +103,7 @@
   <tr>
     <td align="right"><b>⚙️ Features</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 Combos</a></td>
-    <td align="center"><a href="#-381-ai-providers--156-catalog-marked-free">🌐 Providers</a></td>
+    <td align="center"><a href="#-382-ai-providers--156-catalog-marked-free">🌐 Providers</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI &amp; MCP</a></td>
   </tr>
   <tr>
@@ -232,7 +227,7 @@ curl http://localhost:20128/v1/chat/completions \
   -d '{"model":"auto","messages":[{"role":"user","content":"Hello!"}]}'
 ```
 
-<sub>`auto` membutuhkan rute yang memenuhi syarat. Instalasi baru tidak boleh memiliki target tanpa kunci yang memenuhi syarat, dan penyedia tanpa kunci dapat menolak klien pihak ketiga. Penyedia yang ditandai `tos: avoid`, termasuk Kiro, dikecualikan dari perutean otomatis secara default; menghubungkan akun tidak mengesampingkan pengaturan itu. Lihat [Panduan Tingkat Gratis](docs/getting-started/FREE-TIERS-GUIDE.md) sebelum memilih penyedia.</sub>
+<sub>`auto` membutuhkan rute yang memenuhi syarat. Instalasi baru tidak boleh memiliki target tanpa kunci yang memenuhi syarat, dan penyedia tanpa kunci dapat menolak klien pihak ketiga. Penyedia bertanda `tos: avoid`, termasuk Kiro, dikecualikan dari perutean otomatis secara default; menghubungkan akun tidak mengesampingkan pengaturan itu. Lihat [Panduan Tingkat Gratis](docs/getting-started/FREE-TIERS-GUIDE.md) sebelum memilih penyedia.</sub>
 
 <sub>📦 Salin-tempel skrip mulai cepat untuk **Python, Node.js, PHP, dan cURL** → [`examples/quickstart/`](examples/quickstart/)</sub>
 
@@ -244,7 +239,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="The Promise — One endpoint and 381 providers. Automatic fallback keeps routing while another healthy target is available. Six pillars: resilient fallback across 381 providers · up to 95% token savings on eligible workloads · $0 to start with 150+ free tiers and 52 recurring/keyless free-forever providers · 39 CLI/agent integrations through one config · OpenAI, Claude, Gemini and Responses API compatibility at /v1 · production controls including circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals and 56,000+ static test declarations across 7,800+ tracked test files."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="The Promise — One endpoint and 382 providers. Automatic fallback keeps routing while another healthy target is available. Six pillars: resilient fallback across 382 providers · up to 95% token savings on eligible workloads · $0 to start with 150+ free tiers and 52 recurring/keyless free-forever providers · 39 CLI/agent integrations through one config · OpenAI, Claude, Gemini and Responses API compatibility at /v1 · production controls including circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals and 56,000+ static test declarations across 7,800+ tracked test files."/>
 
 <br/>
 <br/>
@@ -504,7 +499,7 @@ Seluruh **20** strategi — padukan sesuai kebutuhan pada setiap langkah combo:
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Apa yang membuat OmniRoute berbeda — snapshot fitur terkini vs 9router, OpenRouter, CLIProxyAPI dan LiteLLM di 13 kapabilitas. OmniRoute: 381 penyedia, 150+ free tier bawaan, 20 strategi routing, kompresi token 12-engine, server MCP bawaan dengan 110 tools, protokol agen A2A, memori persisten, guardrails, cloud agents, stealth fingerprint TLS, Desktop/Termux/PWA dan 67 lokal UI i18n. OmniRoute berlisensi MIT dan dapat di-host sendiri. Kapabilitas dan jumlah pesaing dapat berubah; lihat metodologi yang ditautkan."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Apa yang membuat OmniRoute berbeda — snapshot fitur terkini vs 9router, OpenRouter, CLIProxyAPI dan LiteLLM di 13 kapabilitas. OmniRoute: 382 penyedia, 150+ free tier bawaan, 20 strategi routing, kompresi token 12-engine, server MCP bawaan dengan 110 tools, protokol agen A2A, memori persisten, guardrails, cloud agents, stealth fingerprint TLS, Desktop/Termux/PWA dan 67 lokal UI i18n. OmniRoute berlisensi MIT dan dapat di-host sendiri. Kapabilitas dan jumlah pesaing dapat berubah; lihat metodologi yang ditautkan."/>
 
 <sub>📊 Metodologi lengkap &amp; detail per fitur vs 9router, OpenRouter, CLIProxyAPI &amp; LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -576,33 +571,33 @@ Radar bersifat pilihan dan hanya menggunakan GET. Klien OmniRoute tidak mengungg
 
 > Sorotan terkini dari **v3.8.20 → v3.8.54** . Sejarah lengkap di [`CHANGELOG.md`](CHANGELOG.md).
 
-- **perutean ⚖️ `quota-weighted`** — strategi kombo ke-20 melewatkan akun-akun yang sudah habis, lalu menggunakan akun-akun lainnya secara proporsional dengan sisa kuota ÷ muatan dalam penerbangan, sehingga percakapan yang sudah ada tetap dipasangi pin. → [Kombo Otomatis](docs/routing/AUTO-COMBO.md)
-- **🧰 Mode tanpa kepala** — `omniroute serve --headless` (atau `OMNIROUTE_HEADLESS=1`) hanya menjalankan mesin proksi `/v1/*`, dengan dasbor dan subsistem khusus dasbor tidak aktif. → [Mode Tanpa Kepala](docs/guides/HEADLESS.md)
-- **🔎 Penemuan model** — `/v1/models` menyaring berdasarkan kemampuan, konteks, jenis dan teks, dan `POST /v1/models/query` mengembalikan daftar pendek deterministik dengan visibilitas per tombol yang sama. → [API Referensi](docs/reference/API_REFERENCE.md)
-- **🔑 Kontrol perutean per tombol** — sematkan kunci API ke satu model atau kombo dengan `forcedModel`, dan tambahkan atau hapus model dan kombo kunci secara atom (`/api/keys/{id}/access`). → [API Referensi](docs/reference/API_REFERENCE.md) · [OpenAPI](docs/openapi.yaml)
-- **🛡️ Kontrol PII yang lebih halus** — pemilihan per jenis, hingga 20 pola penyembunyian khusus yang divalidasi dan penghitung deteksi per jenis; masking itu sendiri tetap ikut serta. → [Pagar Pembatas](docs/security/GUARDRAILS.md)
-- **🌍 67 bahasa** — dashboard, docs mirror dan CLI, dengan `npm run i18n:add-locale` menambahkan bahasa di mana saja dalam satu perintah. [Panduan](docs/guides/I18N.md) → i18n
-- **🎛️ OmniConductor** — delegasi A2A masuk ke armada agen Anda, keterampilan Konduktor pada Kartu Agen, dan panel dasbor dengan obrolan suara push-to-talk Faro. → [A2A Server](docs/frameworks/A2A-SERVER.md)
-- **🛂 Penerimaan adaptif & perlindungan kelebihan beban** antrian permintaan obrolan kelas berat — alih-alih 503ing, dengan sewa bergulir RPM atom per koneksi. → [Panduan Ketahanan](docs/architecture/RESILIENCE_GUIDE.md)
-- **🗂️ Pemesanan `/v1/models` kanonik** — satu blok yang dikelompokkan penyedia yang berdekatan per penyedia (kombo disematkan terlebih dahulu), stabil di setiap sumber katalog. → [API Referensi](docs/reference/API_REFERENCE.md)
-- **🗜️ Pengerasan kompresi** — penjaga inflasi default-on, paket Caveman untuk DE / FR / JA + Chinese (wényán), filter RTK untuk Gradle & .NET. → [Kompresi](docs/compression/COMPRESSION_ENGINES.md)
-- **💸 Biaya tarif tetap yang jujur** — berlangganan / penyedia paket coding membaca **$0** dalam analisis biaya; anggaran, kuota & perutean terus memperkirakan. → [API Referensi](docs/reference/API_REFERENCE.md)
-- **⚖️ Perutean Kuota-Bagikan** — membagi kuota akun bersama secara adil di seluruh kunci yang dikumpulkan, menghemat pekerjaan sehingga potongan yang menganggur dipinjamkan. → [Panduan Ketahanan](docs/architecture/RESILIENCE_GUIDE.md)
-- **🤖 Pengaturan CLI/agent satu perintah** — 15 perintah `setup-*` terdaftar; `omniroute run` meluncurkan 7 CLIs ( Kode Claude, Codex, Aider, Goose, OpenCode, Kode Qwen, Gemini CLI); `omniroute configure` mendukung 11 target dengan pemilih model + penyedia interaktif dan favorit per konteks. → [CLI Integrasi](docs/guides/CLI-INTEGRATIONS.md)
-- **🛰️ Mode jarak jauh** — menggerakkan OmniRoute jarak jauh dengan token tercakup (`connect` / `contexts` / `tokens`) + dan `antigravity` OAuth helper untuk pemasangan VPS. → [Mode Jarak Jauh](docs/guides/REMOTE-MODE.md)
-- **🧭 Perutean otomatis yang lebih cerdas** kombo — `auto/<category>:<tier>`,**Fusi** (panel model + juri), perutean sadar tugas, model/mode per permintaan/penggantian anggaran USD. → [Kombo Otomatis](docs/routing/AUTO-COMBO.md)
-- **🗜️ Kompresi yang dapat dicolokkan** — 12 mesin yang dapat dikomposisi + Compression Studios: LLMLingua-2, Ultra dua tingkat, omniglyph, gerbang fidelitas per langkah, GCF v3.2, editor penyusunan ulang seret. → [Kompresi](docs/compression/COMPRESSION_ENGINES.md)
-- **🕵️ Transparan MITM mendekripsi (TPROXY)** — menangkap CLIs yang mengabaikan proxy env vars, dengan penginstal toko kepercayaan per-SNI CA +. → [MITM/TPROXY](docs/security/MITM-TPROXY-DECRYPT.md)
-- **💸 Biaya telemetri di mana-mana** — `X-OmniRoute-*` cost/usage header di setiap titik akhir, header penghematan HIT cache, kuota pembelanjaan USD per kunci. → [API Referensi](docs/reference/API_REFERENCE.md)
-- **🧠 Memori yang Anda kendalikan** — nonaktif secara default, ikut serta dalam kuantisasi vektor int8 peluruhan yang diketik +, per permintaan `x-omniroute-no-memory`. → [Memori](docs/frameworks/MEMORY.md)
-- **🛡️ Keamanan** — prompt-injection guard di setiap rute LLM (red-team suite), opt-in credential-masking guardrail (redaksi bocor API keys/secrets di kedua arah), pencarian web pilihan terakhir DuckDuckGo gratis, dan gerbang masuk OIDC opsional untuk dasbor (login kata sandi selalu tersedia). → [Pagar Pembatas](docs/security/GUARDRAILS.md)
-- **🖼️ Titik akhir baru** — `/v1/ocr` (Mistral OCR) dan `/v1/audio/translations` (Gaya Bisikan) melengkapi permukaan media. → [API Referensi](docs/reference/API_REFERENCE.md)
-- **🎨 Image / video / audio generation** — one API for media: xAI Grok Imagine & Novita AI video, ComfyUI, Magnific, Adobe Firefly, Segmind, and speech providers such as ElevenLabs. → [API Reference](docs/reference/API_REFERENCE.md)
-- **🌍 Penerapan & operasi** — reverse-proxy `basePath`, deteksi otomatis bahasa browser, pelacakan perangkat per kunci, kepercayaan MITM tanpa root, lokalisasi zh-TW. → [Lingkungan](docs/reference/ENVIRONMENT.md)
-- **🤝 Lebih banyak penyedia & agen** agen cloud — (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) dengan browser + OAuth login, Ollama kartu kelas satu, Claude Opus 5 & Sonnet 5, kemitraan resmi Kimi (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… dan yang disegarkan **Katalog penyedia 381** . [Penyedia](docs/reference/PROVIDER_REFERENCE.md) →
-- **📡 Transparansi perutean** — setiap respons membawa header `X-OmniRoute-Decision` yang memberi nama strategy/provider/latency yang menyajikannya, strategi kombo `cache-optimized` baru + Kombo Otomatis `cacheAffinity` faktor rute permintaan pengulangan kembali ke koneksi yang menyimpan awalan cache, dan titik akhir `/v1/auto-combo/{channel}/candidates` hanya-baca mengekspos kumpulan kandidat langsung saluran `auto/*`. → [Kombo Otomatis](docs/routing/AUTO-COMBO.md)
-- **⚡ Kinerja lokal & infra** — satu-klik lokal Redis, Cloudflare Workers / Deno Deploy relay deployer, Bifrost & Mux sebagai layanan tertanam yang diawasi. → [Layanan Tertanam](docs/frameworks/EMBEDDED-SERVICES.md)
-- **🧩 Juga di dalam kotak** kerangka plugin — pasar +, kerangka keterampilan Omni/Agent/GitHub, integrasi Obsidian vault (22 alat MCP ), Batch & File yang kompatibel dengan OpenAI APIs, cache respons semantik, gamifikasi dengan papan peringkat, penemuan agen ACP (15 agen bawaan), ekspor log terjadwal ke BigQuery, fan-out multi-model paralel `auto/chaos`, jembatan bot Telegram, manajer versi dalam aplikasi, dan peringkat penyedia gratis LMArena-ELO. → [Dokumen](docs/README.md)
+- **Perutean ⚖️ `quota-weighted`** — strategi kombo ke-20 melewatkan akun-akun yang sudah habis, lalu menggunakan akun-akun lainnya secara proporsional dengan sisa kuota ÷ dalam penerbangan, sehingga percakapan yang ada tetap disematkan. [Kombo Otomatis](docs/routing/AUTO-COMBO.md) →
+- **Mode Tanpa Kepala 🧰** — `omniroute serve --headless` (atau `OMNIROUTE_HEADLESS=1`) hanya menjalankan mesin proksi `/v1/*`, dengan dasbor dan subsistem khusus dasbor tidak aktif. [Mode Tanpa Kepala](docs/guides/HEADLESS.md) →
+- **🔎 Penemuan model** — `/v1/models` filter berdasarkan kemampuan, konteks, jenis dan teks, dan `POST /v1/models/query` mengembalikan daftar pendek deterministik dengan visibilitas per kunci yang sama. → [API Referensi](docs/reference/API_REFERENCE.md)
+- **🔑 Kontrol perutean per tombol** — sematkan sebuah API kunci untuk satu model atau kombo dengan `forcedModel`, dan menambah atau menghapus model dan kombo kunci secara atom (`/api/keys/{id}/access`). → [API Referensi](docs/reference/API_REFERENCE.md) · [OpenAPI](docs/openapi.yaml)
+- **Kontrol 🛡️ PII yang lebih halus** Pemilihan — per jenis, hingga 20 pola penyembunyian khusus yang divalidasi dan penghitung deteksi per jenis; masking itu sendiri tetap ikut serta. [Pagar Pembatas](docs/security/GUARDRAILS.md) →
+- **🌍 67 bahasa** Dasbor —, cermin dokumen, dan CLI, dengan `npm run i18n:add-locale` menambahkan bahasa di mana saja dalam satu perintah. [Panduan](docs/guides/I18N.md) → i18n
+- **🎛️ OmniConductor** — masuk A2A delegasi ke armada agen Anda, keterampilan Konduktor pada Kartu Agen, dan panel dasbor dengan obrolan suara push-to-talk Faro. → [A2A pelayan](docs/frameworks/A2A-SERVER.md)
+- **🛂 Penerimaan adaptif & perlindungan kelebihan beban** Antrean permintaan obrolan kelas berat — alih-alih 503, dengan sewa bergulir RPM atomik per koneksi. [Panduan Ketahanan](docs/architecture/RESILIENCE_GUIDE.md) →
+- **🗂️ Resmi `/v1/models` pemesanan** — satu blok yang dikelompokkan penyedia yang berdekatan per penyedia (kombo disematkan terlebih dahulu), stabil di setiap sumber katalog. → [API Referensi](docs/reference/API_REFERENCE.md)
+- **Pengerasan kompresi 🗜️** Penjaga inflasi default-on —, paket Caveman untuk DE / FR / JA + Cina (wényán), filter RTK untuk Gradle & .NET. [Kompresi](docs/compression/COMPRESSION_ENGINES.md) →
+- **💸 Biaya tetap yang jujur** — penyedia langganan / paket pengkodean membaca **$0** dalam analisis biaya; anggaran, kuota & perutean terus memperkirakan. → [API Referensi](docs/reference/API_REFERENCE.md)
+- **Perutean Pembagian Kuota ⚖️** — membagi kuota akun bersama secara adil ke seluruh kunci yang dikumpulkan, sehingga menghemat pekerjaan sehingga potongan yang menganggur dipinjamkan. [Panduan Ketahanan](docs/architecture/RESILIENCE_GUIDE.md) →
+- **🤖 Satu perintah CLI/agent pengaturan** — 15 terdaftar `setup-*` perintah; `omniroute run` meluncurkan 7 CLIs (Claude Kode, Codex, Pembantu, Angsa, OpenCode, Qwen Kode, Gemini CLI); `omniroute configure` mendukung 11 target dengan penyedia interaktif+pemilih model dan favorit per konteks. → [CLI Integrasi](docs/guides/CLI-INTEGRATIONS.md)
+- **Mode Jarak Jauh 🛰️** — menggerakkan OmniRoute jarak jauh dengan token cakupan (`connect` / `contexts` / `tokens`) + dan pembantu `antigravity` OAuth untuk pemasangan VPS. [Mode Jarak Jauh](docs/guides/REMOTE-MODE.md) →
+- **🧭 Perutean otomatis yang lebih cerdas** Kombo — `auto/<category>:<tier>`,**Fusi** (panel model + juri), perutean sadar tugas, model / mode per permintaan / penggantian anggaran USD. [Kombo Otomatis](docs/routing/AUTO-COMBO.md) →
+- **Kompresi 🗜️ yang dapat dicolokkan** Mesin komposisi — 12 + Compression Studios: LLMLingua-2, Ultra dua tingkat, omniglyph, gerbang fidelitas per langkah, GCF v3.2, editor penyusunan ulang tarik. [Kompresi](docs/compression/COMPRESSION_ENGINES.md) →
+- **Dekripsi 🕵️ Transparan MITM (TPROXY)** — menangkap CLIs yang mengabaikan proxy env vars, dengan penginstal toko kepercayaan per-SNI CA +. → [MITM/TPROXY](docs/security/MITM-TPROXY-DECRYPT.md)
+- **💸 Telemetri biaya di mana-mana** — `X-OmniRoute-*` cost/usage header di setiap titik akhir, header penghematan cache-HIT, per kunci USD menghabiskan kuota. → [API Referensi](docs/reference/API_REFERENCE.md)
+- **Memori 🧠 yang Anda kendalikan** — dinonaktifkan secara default, ikut serta dalam kuantisasi vektor int8 peluruhan yang diketik +, per permintaan `x-omniroute-no-memory`. [Memori](docs/frameworks/MEMORY.md) →
+- **Keamanan 🛡️** Penjaga injeksi cepat — di setiap rute LLM (rangkaian tim merah), pagar pembatas penyamaran kredensial yang disertakan (redaksi membocorkan API keys/secrets di kedua arah), pencarian web pilihan terakhir DuckDuckGo gratis, dan gerbang masuk OIDC opsional untuk dasbor (login kata sandi selalu tersedia). [Pagar Pembatas](docs/security/GUARDRAILS.md) →
+- **🖼️ Titik akhir baru** — `/v1/ocr` (Mistral OCR) Dan `/v1/audio/translations` (Gaya bisikan) melengkapi permukaan media. → [API Referensi](docs/reference/API_REFERENCE.md)
+- **🎨 Pembuatan gambar / video / audio** — satu API untuk media: xAI Grok Bayangkan & Novita AI video, ComfyUI, Magnific, Adobe Firefly, Segmind, dan penyedia ucapan seperti ElevenLabs. → [API Referensi](docs/reference/API_REFERENCE.md)
+- **Penerapan & operasi 🌍** — reverse-proxy `basePath`, deteksi otomatis bahasa browser, pelacakan perangkat per kunci, kepercayaan MITM tanpa root, lokalisasi zh-TW. [Lingkungan](docs/reference/ENVIRONMENT.md) →
+- **🤝 Lebih banyak penyedia & agen** Agen cloud — (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) dengan browser + OAuth login, kartu kelas satu Ollama, Claude Opus 5 & Sonnet 5, kemitraan resmi Kimi (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… dan yang disegarkan **Katalog penyedia 382** . [Penyedia](docs/reference/PROVIDER_REFERENCE.md) →
+- **Transparansi Perutean 📡** Setiap respons — membawa header `X-OmniRoute-Decision` yang memberi nama strategy/provider/latency yang menyajikannya, strategi kombo `cache-optimized` baru + Auto-Combo `cacheAffinity` merutekan permintaan pengulangan kembali ke koneksi yang menyimpan awalan cache, dan titik akhir `/v1/auto-combo/{channel}/candidates` hanya-baca mengekspos kumpulan kandidat langsung saluran `auto/*`. [Kombo Otomatis](docs/routing/AUTO-COMBO.md) →
+- **⚡ Kinerja lokal & infra** — Redis lokal sekali klik, Cloudflare Workers / Deno Deploy relay deployer, Bifrost & Mux sebagai layanan tersemat yang diawasi. [Layanan Tertanam](docs/frameworks/EMBEDDED-SERVICES.md) →
+- **🧩 Juga di dalam kotak** Kerangka plugin — Pasar +, kerangka keterampilan Omni/Agent/GitHub, integrasi brankas Obsidian (22 alat MCP ), Batch & File APIs yang kompatibel dengan OpenAI, cache respons semantik, gamifikasi dengan papan peringkat, penemuan agen ACP (15 agen bawaan), ekspor log terjadwal ke BigQuery, fan-out multi-model paralel `auto/chaos`, jembatan bot Telegram, manajer versi dalam aplikasi, dan peringkat penyedia gratis LMArena-ELO. [Dokumen](docs/README.md) →
 
 <br/>
 
@@ -683,11 +678,11 @@ tetap aman dari riwayat shell Anda. → [Integrasi CLI](docs/guides/CLI-INTEGRAT
 
 <div align="center">
 
-## 🌐 381 Penyedia AI — 156 Ditandai Katalog Gratis
+## 🌐 382 Penyedia AI — 156 Ditandai Katalog Gratis
 
 </div>
 
-> **381 penyedia terdaftar** di seluruh obrolan kanonik, media, pencarian, lokal, agen cloud, dan koleksi sistem, termasuk **156 membawa metadata penemuan `hasFree: true`** . Registri model obrolan mencakup **242 penyedia / 3.148 pasangan model penyedia berbeda / 1.519 model mentah IDs** ; katalog anggaran bebas terpisah memilikinya **466 baris per model** ,**34 kumpulan berulang** Dan **52 penyedia recurring/keyless gratis selamanya** . Ini adalah penyebut yang berbeda berdasarkan desain; definisi dan penghitungan kumpulan yang dikurangkan ada di [Referensi Penyedia](docs/reference/PROVIDER_REFERENCE.md) dan [Tingkat Gratis](docs/reference/FREE_TIERS.md).
+> **382 penyedia terdaftar** di seluruh obrolan kanonik, media, pencarian, lokal, agen cloud, dan koleksi sistem, termasuk **156 membawa metadata penemuan `hasFree: true`** . Registri model obrolan mencakup **243 penyedia / 3.155 pasangan model penyedia berbeda / 1.524 model mentah IDs** ; katalog anggaran bebas terpisah memilikinya **466 baris per model** ,**34 kumpulan berulang** Dan **52 penyedia recurring/keyless gratis selamanya** . Ini adalah penyebut yang berbeda berdasarkan desain; definisi dan penghitungan kumpulan yang dikurangkan ada di [Referensi Penyedia](docs/reference/PROVIDER_REFERENCE.md) dan [Tingkat Gratis](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
@@ -720,7 +715,7 @@ tetap aman dari riwayat shell Anda. → [Integrasi CLI](docs/guides/CLI-INTEGRAT
   </tr>
 </table>
 
-<sub>…dan 350 + lebih — setiap ikon diselesaikan secara langsung dari katalog penyedia dasbor. [Referensi Penyedia](docs/reference/PROVIDER_REFERENCE.md) 📖</sub>
+<sub>…dan 350 + lebih banyak — yang setiap ikon diselesaikan secara langsung dari katalog penyedia dasbor. [Referensi Penyedia](docs/reference/PROVIDER_REFERENCE.md) 📖</sub>
 
 <br/>
 
@@ -1299,7 +1294,7 @@ Metrik kanonis pada 2026-10-18: **1.976 video unik** · **20.220.289 tayangan ya
   <tr><td nowrap><b>Runtime</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Bahasa</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> di seluruh <code>src/</code> dan <code>open-sse/</code> (tanpa <code>any</code> di inti sejak v2.0)</td></tr>
   <tr><td nowrap><b>Framework</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Basis data</b></td><td>better-sqlite3 (SQLite, jurnal WAL) + LowDB (JSON lama) — 147 modul domain, 225 migrasi</td></tr>
+  <tr><td nowrap><b>Basis data</b></td><td>better-sqlite3 (SQLite, jurnal WAL) + LowDB (JSON lama) — 147 modul domain, 229 migrasi</td></tr>
   <tr><td nowrap><b>Memori</b></td><td>teks penuh SQLite FTS5 + embedding vektor terkuantisasi int8, peluruhan bertipe</td></tr>
   <tr><td nowrap><b>Skema</b></td><td>Zod 4 — validasi I/O alat MCP + kontrak API</td></tr>
   <tr><td nowrap><b>Protokol</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

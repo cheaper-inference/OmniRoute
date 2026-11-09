@@ -354,24 +354,24 @@ Samfuri: cc/claude-opus-4-7
 
 ## 🚀 Turawa
 
-### Shigarwa ta npm na gaba ɗaya (An Ba da Shawara)
+### Global npm shigar (An bada shawarar)
 
 ```bash
 npm install -g omniroute
 
-# Ƙirƙiri kundin daidaitawa
+# Create config directory
 mkdir -p ~/.omniroute
 
-# Ƙirƙiri fayil ɗin .env (duba .env.example)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# Fara uwar garken
+# Start server
 omniroute
-# Ko tare da port na musamman:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI yana loda `.env` kai tsaye daga `~/.omniroute/.env` ko `./.env`.
+CLI loda `.env` ta atomatik daga `~/.omniroute/.env` ko `./.env`. `./.env` a cikin kundin aiki na iya saita ɗan gajeren jerin izini na maɓallai (mashigai, `REQUIRE_API_KEY`, saitunan gida da launi); sanya komai a `~/.omniroute/.env`. Duba [kwangilolin ƙaddamar da CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### Yanayin tray
 

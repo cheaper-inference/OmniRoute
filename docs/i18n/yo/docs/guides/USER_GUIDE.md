@@ -354,24 +354,24 @@ Mọ́dẹ́lì: cc/claude-opus-4-7
 
 ## 🚀 Ìmúṣiṣẹ́
 
-### Fífi npm sí gbogbo ètò (A Dámọ̀ràn)
+### Fi sori ẹrọ npm agbaye (Ti ṣeduro)
 
 ```bash
 npm install -g omniroute
 
-# Ṣẹ̀dá àpò ìṣètò
+# Create config directory
 mkdir -p ~/.omniroute
 
-# Ṣẹ̀dá fáìlì .env (wo .env.example)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# Bẹ̀rẹ̀ olupin
+# Start server
 omniroute
-# Tàbí pẹ̀lú port àkànṣe:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI máa ń kojọpọ̀ `.env` láti `~/.omniroute/.env` tàbí `./.env` láìfọwọ́yí.
+CLI naa n gbe `.env` laifọwọyi lati `~/.omniroute/.env` tabi `./.env`. A `./.env` ninu iwe ilana iṣẹ le ṣeto atokọ iyọọda kukuru ti awọn bọtini (awọn ibudo, `REQUIRE_API_KEY`, agbegbe ati awọn eto awọ); fi ohun gbogbo miiran sinu `~/.omniroute/.env`. Wo [awọn adehun ifilọlẹ CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### Ipò tray
 

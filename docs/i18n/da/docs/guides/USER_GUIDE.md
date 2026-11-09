@@ -339,24 +339,24 @@ Model: cc/claude-opus-4-7
 
 ## 🚀 Implementering
 
-### Global npm-installation (anbefalet)
+### Global npm installation (anbefales)
 
 ```bash
 npm install -g omniroute
 
-# Opret konfigurationsmappe
+# Create config directory
 mkdir -p ~/.omniroute
 
-# Opret .env-fil (se .env.example)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# Start serveren
+# Start server
 omniroute
-# Eller med en brugerdefineret port:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI'en indlæser automatisk `.env` fra `~/.omniroute/.env` eller `./.env`.
+CLI indlæser automatisk `.env` fra `~/.omniroute/.env` eller `./.env`. En `./.env` i arbejdsbiblioteket kan kun angive en kort tilladelsesliste med nøgler (porte, `REQUIRE_API_KEY`, lokalitet og farveindstillinger); læg alt andet i `~/.omniroute/.env`. Se [CLI lanceringskontrakter](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### Systembakketilstand
 

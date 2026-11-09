@@ -242,7 +242,7 @@ src/
 | -------------------------------- | ---------------------------------------------------------------------------------------------------------- |
 | `components/`                    | API àkójọpọ̀ èròjà dashboard: àwọn adapter lórí `packages/ui-kit` — wo `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: àwọn orúkọ àmì tí àwọn screen ń lò → àwọn èròjà Lucide (`<Icon>`)                              |
-| `constants/providers.ts`         | **Àwọn provider 380** pẹ̀lú ìfọwọ́sí Zod (orísun òtítọ́)                                                      |
+| `constants/providers.ts`         | **Àwọn provider 382** pẹ̀lú ìfọwọ́sí Zod (orísun òtítọ́)                                                      |
 | `constants/cliTools.ts`          | Ìforúkọsílẹ̀ irinṣẹ́ CLI ìta                                                                                 |
 | `constants/routingStrategies.ts` | **Àwọn ọ̀nà ìdarí 20** pẹ̀lú àwọn ipò ààyò                                                                   |
 | `constants/publicApiRoutes.ts`   | Àwọn route tí ó nílò ìfàṣẹsí Bearer (dípò ti ìṣàkóso)                                                      |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Àwọn ìsopọ̀ CLI òde + CLI OmniRoute inú                                                          |
 | `I18N.md`                   | Ìṣètò-ẹ̀rọ i18n, ìfikún èdè, àwọn agbègbè 67                                                     |
 | `UNINSTALL.md`              | Àwọn ìgbésẹ̀ ìyọkúrò mímọ́                                                                        |
-| `PROVIDER_REFERENCE.md`     | Kátálógì **tí wọ́n ṣe fúnra ẹ̀rọ** ti àwọn olùpèsè 380 (tún-ṣe: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | Kátálógì **tí wọ́n ṣe fúnra ẹ̀rọ** ti àwọn olùpèsè 382 (tún-ṣe: `npm run gen:provider-reference`) |
 
 ### Ìwádìí jinlẹ̀ àwọn abẹ́-ètò
 

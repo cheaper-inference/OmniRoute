@@ -52,15 +52,11 @@ exit 0, wanda ba ya tabbatar da cewa dependencies sun wuce scan ɗin. Matakin Tr
 mai toshewa kuma yana buƙatar auna sakamako cikin nasara: tools da ba su samuwa, jobs da suka gaza
 da rashin shaidar image ba za su iya tabbatar da cewa image ɗin ba shi da matsala ba.
 
-## Haɗarin dogaron da aka daina amfani da shi
+## Hadarin dogaro mai ritaya
 
-Babban lockfile ba ya ƙara haɗawa da `extract-zip` ko hanyar dogaro zuwa gare shi bayan
-haɓaka kayan aikin ci gaba na promptfoo da aka tsayar da sigarsa. Wannan ya kawo ƙarshen jerin
-`promptfoo` → `@openai/codex-security` → `extract-zip` da aka amince da shi a baya kuma ake bibiyarsa a #14482.
-Gwaje-gwajen hana komawar matsalar da ke cikin `tests/unit/extract-zip-14482-exposure.test.ts` suna ƙin
-sake shigar da shi kuma suna ci gaba da hana shigo da shi daga lambar samarwa.
+Tushen kulle fayil ɗin baya haɗawa da `extract-zip` ko abin dogaro da shi bayan haɓaka kayan aikin haɓakawa da sauri. Wannan yana janye sarkar da aka karɓa a baya `promptfoo` → `@openai/codex-security` → `extract-zip` sarkar da aka sa ido a cikin #14482. Binciken koma baya a cikin `tests/unit/extract-zip-14482-exposure.test.ts` ya ƙi sake shigar da shi kuma ya riƙe haramcin shigo da kaya daga lambar samarwa.
 
-Gyaran dogaro na yanzu ya haɗa da tilasta daidaituwa ga abokin cinikin MSAL na Azure identity, abokin cinikin FTP na get-uri, da kuma Zod a cikin fakitin plugin na OpenCode guda biyu. An gwada samun token na Azure da karɓo bayanai ta FTP ta amfani da hanyoyin sufuri da ake sarrafawa; duk fakitin OpenCode biyun suna gudanar da nasu tsarin ginawa da jerin gwaje-gwaje. Ƙididdigar shawarwarin tsaro na registry ma'aunai ne na wani lokaci takamaimai, kuma suna iya canzawa bayan an commit ɗin lockfile.
+Gyaran abin dogaro na yanzu kuma yana da iyakacin dacewa ya wuce zuwa abokin ciniki na MSAL na Azure da abokin ciniki na FTP na get-uri. Ana gwada sayan alamar Azure da dawo da FTP tare da jigilar kayayyaki masu sarrafawa; duka fakitin OpenCode suna gudanar da nasu gini da gwajin suites. Ƙididdigar shawarwarin rajista ma'aunai ne a lokaci guda kuma suna iya canzawa bayan ƙaddamar da fayil ɗin kulle.
 
 ## Baya: Shawarwarin Scorecard → toshewa
 

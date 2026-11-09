@@ -356,24 +356,24 @@ Model: cc/claude-opus-4-7
 
 ## 🚀 Ανάπτυξη
 
-### Καθολική εγκατάσταση npm (Προτεινόμενη)
+### Καθολική εγκατάσταση npm (Συνιστάται)
 
 ```bash
 npm install -g omniroute
 
-# Δημιουργία καταλόγου ρυθμίσεων
+# Create config directory
 mkdir -p ~/.omniroute
 
-# Δημιουργία αρχείου .env (δείτε .env.example)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# Εκκίνηση διακομιστή
+# Start server
 omniroute
-# Ή με προσαρμοσμένη θύρα:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-Το CLI φορτώνει αυτόματα το `.env` από `~/.omniroute/.env` ή `./.env`.
+Το CLI φορτώνει αυτόματα `.env` από `~/.omniroute/.env` ή `./.env`. Ένα `./.env` στον κατάλογο εργασίας μπορεί να ορίσει μόνο μια σύντομη λίστα επιτρεπόμενων κλειδιών (θύρες, `REQUIRE_API_KEY`, τοπικές ρυθμίσεις και ρυθμίσεις χρώματος). βάλε όλα τα άλλα στο `~/.omniroute/.env`. Δείτε [συμβόλαια εκκίνησης CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### Λειτουργία δίσκου συστήματος (Tray)
 

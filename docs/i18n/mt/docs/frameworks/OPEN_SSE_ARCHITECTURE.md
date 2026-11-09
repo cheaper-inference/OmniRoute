@@ -484,11 +484,11 @@ Dan jittratta:
 
 ## Konfigurazzjoni
 
-`open-sse/config/` iżomm is-saff tal-konfigurazzjoni:
+`open-sse/config/` żżomm is-saff ta 'konfigurazzjoni:
 
 | Fajl                           | Għan                                                         |
 | ------------------------------ | ------------------------------------------------------------ |
-| `providerRegistry.ts`          | Reġistru tal-mudell taċ-chat fuq il-katalgu ta' 381 fornitur |
+| `providerRegistry.ts`          | Reġistru tal-mudell taċ-chat fuq il-katalgu ta' 382 fornitur |
 | `providerModels.ts`            | Psewdonimi tal-mudell, mapping tal-format                    |
 | `constants.ts`                 | Timeouts, limiti, kodiċi tal-istatus                         |
 | `defaultThinkingSignature.ts`  | Default Claude thinking firma                                |

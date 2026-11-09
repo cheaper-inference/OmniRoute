@@ -339,36 +339,22 @@ Content-Type: application/json
 }
 ```
 
-Pieejamie nodrošinātāji ietver OpenAI (GPT Image 2), xAI (Grok Image), Together AI (FLUX), Fireworks AI, Nebius (FLUX), Hyperbolic, NanoBanana, **OpenRouter**, **ZenMux**, SD WebUI (lokāls), ComfyUI (lokāls).
+Pieejamie pakalpojumu sniedzēji ietver OpenAI (GPT Image 2 ), xAI (Grok Image ), Together AI (FLUX), Fireworks AI, Nebius (FLUX), Hyperbolic, NanoBanana,**OpenRouter** ,**ZenMux** , SD WebUI (lokālais), ComfyUI (lokālais).
 
-`n` atgriež `n` attēlus laukā `data[]`. Nodrošinātāji, kuru augšupējā API katrā izsaukumā atgriež vienu attēlu
-(Black Forest Labs, Stability AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik,
-NVIDIA NIM, Cloudflare Workers AI), saņem `n` atsevišķus augšupējos izsaukumus, no kuriem
-vienlaikus tiek izpildīti ne vairāk kā 4. Fiksētais `seed` tiek nobīdīts par izsaukuma indeksu
-(`seed`, `seed + 1`, …), tāpēc attēli atšķiras, bet paliek reproducējami. `n` maksimālā vērtība ir 10. Ja kāds izsaukums neizdodas, viss pieprasījums tiek uzskatīts par neveiksmīgu. Izvēršanas formātu saraksts ir `SINGLE_IMAGE_FANOUT_FORMATS` failā
-`open-sse/handlers/imageGeneration/fanOut.ts`.
+`n` atgriež `n` attēlus `data[]`. Pakalpojumu sniedzēji, kuru augšējais API atgriež vienu attēlu katrā izsaukumā (Black Forest Labs, Stabilitātes AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik, NVIDIA NIM, Cloudflare Workers AI), saņem `n` atsevišķus augšupējus zvanus, ne vairāk kā 4 lidojuma laikā. Fiksētais `seed` tiek kompensēts ar izsaukuma indeksu (`seed`, `seed + 1`, …), tāpēc attēli atšķiras, bet joprojām ir reproducējami. `n` ierobežojums ir 10. Ja kāds zvans neizdodas, pieprasījums kopumā neizdodas. Fan-out formātu saraksts ir `SINGLE_IMAGE_FANOUT_FORMATS` formātā `open-sse/handlers/imageGeneration/fanOut.ts`.
 
 ZenMux atkārtoti izmanto esošo API atslēgas savienojumu un pieņem `zenmux/` vai `zm/` prefiksus:
 
-- `zenmux/openai/gpt-image-2` izmanto ZenMux OpenAI Images API. Pieejamās opcijas ietver `size`,
-  `quality`, `n`, `output_format`, `output_compression`, `background` un `response_format`.
-- Citi izdevēji, piemēram, `zm/meta/muse-image-1.0`, izmanto ZenMux Vertex AI `:predict`
-  galapunktu. `n` tiek kartēts uz `sampleCount`, `aspect_ratio` — uz `aspectRatio`, bet `image_size`
-  (`1K`, `2K`, `4K`) — uz `sampleImageSize`. Pikseļu `size` nodrošina tikai proporciju,
-  nevis garantētus pikseļu izmērus. Atbalstītās proporcijas, izšķirtspējas un skaiti atšķiras atkarībā no modeļa.
-- `zm/inclusionai/ming-image-0.1-design` pats izvēlas izmērus. Izlaidiet `size`,
-  `aspect_ratio` un `image_size`; norādītas vērtības atgriež HTTP 400. Izmantojot `output_format`,
-  var pieprasīt PNG, JPEG un WebP.
+- `zenmux/openai/gpt-image-2` izmanto ZenMuxOpenAI attēlus API. Iespējas ietver `size`, `quality`, `n`, `output_format`, `output_compression`, `background` un `response_format`.
+- Citi izdevēji, piemēram, `zm/meta/muse-image-1.0`, izmanto ZenMux galapunktu Vertex AI `:predict`. `n` kartē uz `sampleCount`, `aspect_ratio` uz `aspectRatio` un `image_size` (`1K`, `2K`, `4K`) uz `sampleImageSize`. Pikseļu `size` nodrošina tikai malu attiecību, nevis garantētus pikseļu izmērus. Atbalstītās proporcijas, izšķirtspējas un skaitļi atšķiras atkarībā no modeļa.
+- `zm/inclusionai/ming-image-0.1-design` izvēlas savus izmērus. Izlaist `size`, `aspect_ratio` un `image_size`; skaidras vērtības atgriež HTTP 400. PNG, JPEG un WebP var pieprasīt ar `output_format`.
 
-Šī integrācija atbalsta teksta pārveidošanu attēlā, bet ne atsauces attēlu rediģēšanu. Vertex
-izvade tiek normalizēta uz `data[].b64_json`; `response_format: "url"` atgriež augšupēju
-HTTPS URL vai base64 datu URL, ja pieejami tikai attēla baiti. Tukšas vai filtrētas izvades
-atgriež kļūdu, nevis veiksmīgu atbildi ar tukšu rezultātu. Piekļuve modeļiem ir atkarīga no ZenMux konta.
-Skatiet [ZenMux Vertex API](https://docs.zenmux.ai/api/vertexai/generate-images) un
-[OpenAI Images API](https://docs.zenmux.ai/api/openai/generate-an-image).
+Šī integrācija atbalsta teksta pārveidošanu attēlā, nevis atsauces attēlu rediģēšanu. Virsotnes izvade tiek normalizēta uz `data[].b64_json`; `response_format: "url"` atgriež augšējo HTTPS URL vai base64 datu URL ja ir pieejami tikai attēla baiti. Empty/filtered izvadi atgriež kļūdu, nevis tukšu panākumu. Modeļa piekļuve ir atkarīga no ZenMux konta. Skatiet [ZenMux virsotnes API](https://docs.zenmux.ai/api/vertexai/generate-images) un [OpenAI attēlus API](https://docs.zenmux.ai/api/openai/generate-an-image).
+
+Microsoft 365 Copilot pierakstīšanās savienojums nodrošina `copilot-m365-web/m365-copilot-image` izmantojot Copilot iebūvēto attēlu rīku: viens Copilot pagrieziens katrā attēlā (`n` 1–4), `size` nosaka tikai orientāciju un attēli tiek atgriezti iekļauti (`b64_json` vai datu URL `response_format: "url"`). Skatiet [Microsoft 365 Copilot](../providers/COPILOT-M365.md#image-generation).
 
 ```bash
-# Uzskaitīt visus attēlu modeļus
+# List all image models
 GET /v1/images/generations
 ```
 
@@ -825,17 +811,19 @@ tiek liegti ikvienam zvanītājam, kas nav sesija (iegūšana, dzēšana, atcel�
 
 ---
 
-## Meklēšanas API
+## Meklēt API
 
-Tīmekļa/meklēšanas pakalpojumu sniedzēju abstrakcija (Tavily, Brave, Exa, Serper u. c.).
+Web/search sniedzēja abstrakcija (Tavily, Brave, Exa, Serper utt.).
 
-| Metode | Ceļš                   | Apraksts                                                                                                           |
-| ------ | ---------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| GET    | `/v1/search`           | Konfigurēto meklēšanas pakalpojumu sniedzēju un iespēju uzskaitījums                                               |
-| POST   | `/v1/search`           | Meklēšanas vaicājuma izpilde — pamattekstu validē `v1SearchSchema`, tiek atbalstīta kešošana/vaicājumu apvienošana |
-| GET    | `/v1/search/analytics` | Katram pakalpojumu sniedzējam paredzēta trāpījumu/latentuma/kešatmiņas statistika                                  |
+| Metode | Ceļš                   | Apraksts                                                                                              |
+| ------ | ---------------------- | ----------------------------------------------------------------------------------------------------- |
+| GET    | `/v1/search`           | Uzskaitiet konfigurēto meklēšanas pakalpojumu sniedzēju + iespējas                                    |
+| POST   | `/v1/search`           | Palaidiet meklēšanas vaicājumu — body, ko apstiprinājis `v1SearchSchema`, atbalsta caching/coalescing |
+| GET    | `/v1/search/analytics` | hit/latency/cache statistika katram pakalpojumu sniedzējam                                            |
 
-**Autentifikācija:** Bearer API atslēga (`extractApiKey` + `isValidApiKey`). Meklēšanas politika tiek piemērota, izmantojot `enforceApiKeyPolicy`.
+**Auth:** Nesēja API atslēga (`extractApiKey` + `isValidApiKey`). Meklēšanas politika tiek īstenota, izmantojot `enforceApiKeyPolicy`.
+
+**Automātiskā atlase:** bez `provider` lētākais pakalpojumu sniedzējs ar konfigurētu savienojumu darbojas pirmais, un nākamais lētākais ir kļūmjpārlēce. Bezmaksas pēdējās iespējas nodrošinātāji (`duckduckgo-free`) tiek izmantoti tikai tad, ja nekas cits nav konfigurēts. Pašmitinātais SearXNG tiek uzskatīts par konfigurētu, tiklīdz tā savienojumā tiek saglabāts īsts `baseUrl` (nevis kataloga noklusējuma `http://localhost:8888/search`): pēc tam tas tiek ierindots kā 0 dolāru nodrošinātājs, apsteidzot atslēgas nodrošinātājus, bet lētākais nodrošinātājs ar atslēgām ir kļūmjpārlēce, tostarp gadījumos, `baseUrl` SearXNG atbild uz 400, 401, 403 vai 404. Tas nav derīgs `http(s)` vai 404 punktos URL mākoņa metadatu adrese netiek skaitīta. SearXNG savienojums, kurā tiek glabāts marķieris, šādā veidā tiek ierindots tikai `https://` vai loopback `http://` vietā. Izmantojot attālo vienkāršu `http://` tas nekad nav kļūmjpārlēce un ir pēdējais līdzeklis, ko izmanto tikai tad, ja nav konfigurēts neviens cits pakalpojumu sniedzējs vai kad tas tiek pieprasīts pēc nosaukuma, tāpēc šajos divos gadījumos tas nosūta pilnvaru skaidrā tekstā.
 
 ### Exa un Tavily `provider_options`
 
@@ -1019,31 +1007,28 @@ API atslēgai, kas tās izveidoja. Ja atkārtojuma iznākums ir neskaidrs, tas b
 
 ---
 
-## Pašapkalpošanās lietojums (`/api/usage/om-usage`)
+## Pašapkalpošanās izmantošana (`/api/usage/om-usage`)
 
-Jebkura API atslēga var nolasīt **savu** lietojumu un kvotas — pārvaldības autentifikācija nav nepieciešama.
-Šo galapunktu klients (CLI, OmniCopilot panelis) izmanto, lai atslēgas turētājam parādītu viņa izdevumus.
+Jebkura API atslēga var lasīt **savs** lietojums un kvotas — bez pārvaldības autentifikācijas. Šis ir galapunkts, ko klients (CLI, OmniCopilot panelis) izmanto, lai parādītu atslēgu turētājam savus tēriņus.
 
 ```bash
-# Teksta forma (vēsturiskais līgums — vienkāršs teksts terminālim)
+# Text form (the historical contract — plain text for a terminal)
 curl -H "Authorization: Bearer <your-api-key>" \
   http://localhost:20128/api/usage/om-usage
 
-# Strukturēta forma — to patērē lietotāja saskarne
+# Structured form — what a UI consumes
 curl -H "Authorization: Bearer <your-api-key>" \
   "http://localhost:20128/api/usage/om-usage?format=json"
 ```
 
-Atslēgai jābūt iespējotai **`allowUsageCommand`** (pēc noklusējuma atspējots — informācijas paneļa
-API atslēgu pārvaldnieks to pārslēdz katrai atslēgai). Ja tas nav iespējots, galapunkts atbild ar `403`.
+Atslēgai jābūt **`allowUsageCommand`** iespējots (pēc noklusējuma izslēgts. — informācijas paneļa API atslēgas pārvaldnieks to pārslēdz katrai atslēgai). Bez tā galapunkts atbild `403`.
 
-`?format=json` atgriež diferencētu struktūru, lai izsaucējam nekad nebūtu jālasa datu lauks no atteikuma.
-Veiksmīga rezultāta gadījumā:
+`?format=json` atgriež atšķirīgu formu, tāpēc zvanītājs nekad neizlasa datu lauku no atteikuma. Par panākumiem:
 
 ```jsonc
 {
   "allowed": true,
-  // pieejams tikai tad, ja atslēga ir izvēlējusies katras atslēgas lietojuma ierobežojumus (dienas/nedēļas USD):
+  // present only when the key opted into per-key usage limits (daily/weekly/5-hour USD):
   "personal": {
     "dailySpentUsd": 1.25,
     "dailyLimitUsd": 5,
@@ -1052,9 +1037,9 @@ Veiksmīga rezultāta gadījumā:
     "weeklyLimitUsd": 20,
     "weeklyResetAtIso": "…" /* … */,
   },
-  // atlasītā nodrošinātāja kvotas momentuzņēmums vai null, ja nekas vēl nav saglabāts kešatmiņā:
+  // the selected provider quota snapshot, or null when nothing is cached yet:
   "provider": { "connectionId": "…", "provider": "claude", "plan": "…", "quotas": {/* … */} },
-  // katra savienojuma momentuzņēmums, lai lietotāja saskarne varētu attēlot vairākus nodrošinātājus līdzās:
+  // every connection's snapshot, so a UI can render several providers side by side:
   "providers": [
     { "connectionId": "…", "provider": "claude" /* … */ },
     { "provider": "codex" /* … */ },
@@ -1062,13 +1047,9 @@ Veiksmīga rezultāta gadījumā:
 }
 ```
 
-Atteikuma gadījumā (`401` nederīga atslēga / `403` nav atļauts) tas pats maršruts atgriež
-`{ "allowed": false, "error": { "message": "…" } }` — esošs, bet tukšs `personal`/`provider`
-(atslēga ir atļauta, taču vēl nekas nav noskaidrots) ir atšķirīgs stāvoklis no atteikuma, un tikai JSON forma
-tos nošķir.
+Atteikuma gadījumā (`401` slikta atslēga / `403` nav atļauts) tas pats maršruts atgriež `{ "allowed": false, "error": { "message": "…" } }` — esošu, bet tukšu `personal`/`provider` (atslēga atļauta, vēl nekas nav apgūts) ir stāvoklis, kas atšķiras no atteikuma, un tos atšķir tikai JSON forma.
 
-**Autentifikācija:** izsaucēja paša Bearer API atslēga, kas tiek validēta ar `isValidApiKey` — tas _nav_
-pārvaldības interfeiss (`/api/keys/…`), kas joprojām ir aiz `requireManagementAuth`.
+**Auth:** paša zvanītāja nesēja API atslēga, kas apstiprināta ar `isValidApiKey` — šī _nav_ pārvaldības virsma (`/api/keys/…`), kas paliek aiz `requireManagementAuth`.
 
 ### Neapstrādāti un sliekšņa koriģēti kvotu procenti
 
@@ -1340,40 +1321,41 @@ un prioritāšu ķēdes failā `src/lib/modelCapabilityLimits.ts`.
 | `/api/usage/model-latency-stats` | GET             | Slīdošs latentuma apkopojums katram nodrošinātāja/modela pārim (vid., p50/p95/p99, veiksmju līmenis); filtri: `windowHours`/`minSamples`/`maxRows`/`provider`/`model` (#6873)                                                                                                                                                                                      |
 | `/api/usage/cache-health`        | GET             | Uzvedņu kešatmiņas stāvokļa kopsavilkums par `call_logs` — rakstīšanas/lasīšanas attiecība, p50/p90/p99 rakstīšanas izmēra sadalījums, intensīvas rakstīšanas koncentrācija, sadalījums pēc modeļa un `healthy`/`degraded`/`thrash`/`no-data` novērtējums; vaicājuma parametri `range` (`1h`\|`24h`\|`7d`\|`30d`, noklusējums `24h`) un neobligāts `model` (#8827) |
 
-### API atslēgu atļaujas
+### API atslēgas atļaujas
 
-`PATCH /api/keys/{id}` atjaunina esošas atslēgas atļaujas. Tāpat kā jebkuram `/api/keys*` maršrutam, tam nepieciešama pārvaldības autorizācija (skatiet [Pārvaldības autentifikācija](../guides/MANAGEMENT-AUTH.md)), nevis inference atslēga. Nosūtiet tikai tos laukus, kurus vēlaties mainīt; pieprasījums bez neviena no tiem tiek noraidīts ar `No valid fields to update`. Pieņemamos laukus definē `updateKeyPermissionsSchema` failā `src/shared/validation/schemas/keys.ts`.
+`PATCH /api/keys/{id}` atjaunina esošās atslēgas atļaujas. Tāpat kā katram `/api/keys*` maršrutam, tam ir nepieciešama pārvaldības atļauja (skatiet [Pārvaldības autentifikāciju](../guides/MANAGEMENT-AUTH.md) ), nevis secinājuma atslēga. Nosūtiet tikai tos laukus, kurus vēlaties mainīt; pieprasījums, kurā nav neviena no tiem, tiek noraidīts ar `No valid fields to update`. Pieņemtos laukus `updateKeyPermissionsSchema` definē `src/shared/validation/schemas/keys.ts`.
 
-| Lauks                                       | Tips                                                                        | Piezīmes                                                                                                                                             |
-| ------------------------------------------- | --------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `name`                                      | teksts, 1–200 rakstzīmes                                                    |                                                                                                                                                      |
-| `isActive`                                  | būla vērtība                                                                |                                                                                                                                                      |
-| `isBanned`                                  | būla vērtība                                                                |                                                                                                                                                      |
-| `expiresAt`                                 | ISO 8601 datums un laiks vai `null`                                         | `null` notīra beigu termiņu                                                                                                                          |
-| `modelAccessMode`                           | `all` \| `restricted`                                                       | `allowedModels` jābūt tukšam, ja režīms ir `all`                                                                                                     |
-| `allowedModels`, `blockedModels`            | virkņu masīvs, līdz 1000                                                    |                                                                                                                                                      |
-| `allowedCombos`                             | virkņu masīvs, līdz 500                                                     | Nosaka, kuras kombinācijas atslēga drīkst izsaukt; tiešos modeļus nosaka `modelAccessMode` / `allowedModels`                                         |
-| `connectionAccessMode`                      | `all` \| `restricted`                                                       | `allowedConnections` jābūt netukšam, ja režīms ir `restricted`, un tukšam, ja režīms ir `all`                                                        |
-| `allowedConnections`                        | UUID masīvs, līdz 100                                                       |                                                                                                                                                      |
-| `allowAutoCombos`                           | būla vērtība                                                                | `false` noraida pieprasījumus `auto/*` modeļiem ar šo atslēgu; atslēgas, kurām tas nekad nav iestatīts, ir atļautas                                  |
-| `catalogScope`                              | `all` \| `combos` \| `models`                                               | Ko `GET /v1/models` uzskaita šai atslēgai (tikai kombinācijas, tikai modeļus vai abus); tas nemaina, ko atslēga drīkst izsaukt                       |
-| `forcedModel`                               | teksts, līdz 300 rakstzīmēm, vai `null`                                     | Maršrutē tērzēšanas pieprasījumus uz šo modeli/kombināciju, ignorējot `X-Route-Model` un `body.model`; atslēgas ierobežojumi joprojām tiek piemēroti |
-| `noLog`, `autoResolve`                      | būla vērtība                                                                |                                                                                                                                                      |
-| `throttleDelayMs`                           | vesels skaitlis, 0–300000                                                   |                                                                                                                                                      |
-| `maxSessions`                               | vesels skaitlis, 0–10000                                                    |                                                                                                                                                      |
-| `rateLimits`                                | masīvs ar `{ limit, window }` (pozitīvi veseli skaitļi, līdz 50) vai `null` | `null` notīra ierobežojumus                                                                                                                          |
-| `accessSchedule`                            | grafika objekts vai `null`                                                  | `null` notīra grafiku                                                                                                                                |
-| `scopes`                                    | virkņu masīvs, līdz 32                                                      |                                                                                                                                                      |
-| `allowedEndpoints`                          | virkņu masīvs, līdz 20                                                      |                                                                                                                                                      |
-| `streamDefaultMode`                         | `legacy` \| `json`                                                          |                                                                                                                                                      |
-| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                        | Skatiet [kešatmiņas apiešana katrai atslēgai](#per-key-cache-bypass)                                                                                 |
-| `compressionEnabled`                        | būla vērtība                                                                |                                                                                                                                                      |
-| `codexServiceMode`                          | viens no Codex pakalpojuma režīmiem                                         |                                                                                                                                                      |
-| `disableNonPublicModels`                    | boolean                                                                     |                                                                                                                                                      |
-| `allowUsageCommand`                         | boolean                                                                     |                                                                                                                                                      |
-| `usageLimitEnabled`                         | boolean                                                                     |                                                                                                                                                      |
-| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | number >= 0 or `null`                                                       |                                                                                                                                                      |
-| `chaosModeEnabled`                          | boolean                                                                     |                                                                                                                                                      |
+| Lauks                                       | Tips                                                                        | Piezīmes                                                                                                                                                                                                                                                          |
+| ------------------------------------------- | --------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`                                      | teksts, 1–200 rakstzīmes                                                    |                                                                                                                                                                                                                                                                   |
+| `isActive`                                  | būla vērtība                                                                |                                                                                                                                                                                                                                                                   |
+| `isBanned`                                  | būla vērtība                                                                |                                                                                                                                                                                                                                                                   |
+| `expiresAt`                                 | ISO 8601 datums un laiks vai `null`                                         | `null` notīra beigu termiņu                                                                                                                                                                                                                                       |
+| `modelAccessMode`                           | `all` \| `restricted`                                                       | `allowedModels` jābūt tukšam, ja režīms ir `all`                                                                                                                                                                                                                  |
+| `allowedModels`, `blockedModels`            | virkņu masīvs, līdz 1000                                                    |                                                                                                                                                                                                                                                                   |
+| `allowedCombos`                             | virkņu masīvs, līdz 500                                                     | Nosaka, kuras kombinācijas atslēga drīkst izsaukt; tiešos modeļus nosaka `modelAccessMode` / `allowedModels`                                                                                                                                                      |
+| `connectionAccessMode`                      | `all` \| `restricted`                                                       | `allowedConnections` jābūt netukšam, ja režīms ir `restricted`, un tukšam, ja režīms ir `all`                                                                                                                                                                     |
+| `allowedConnections`                        | UUID masīvs, līdz 100                                                       |                                                                                                                                                                                                                                                                   |
+| `allowAutoCombos`                           | būla vērtība                                                                | `false` noraida pieprasījumus `auto/*` modeļiem ar šo atslēgu; atslēgas, kurām tas nekad nav iestatīts, ir atļautas                                                                                                                                               |
+| `catalogScope`                              | `all` \| `combos` \| `models`                                               | Ko `GET /v1/models` uzskaita šai atslēgai (tikai kombinācijas, tikai modeļus vai abus); tas nemaina, ko atslēga drīkst izsaukt                                                                                                                                    |
+| `forcedModel`                               | teksts, līdz 300 rakstzīmēm, vai `null`                                     | Maršrutē tērzēšanas pieprasījumus uz šo modeli/kombināciju, ignorējot `X-Route-Model` un `body.model`; atslēgas ierobežojumi joprojām tiek piemēroti                                                                                                              |
+| `noLog`, `autoResolve`                      | Būla                                                                        |                                                                                                                                                                                                                                                                   |
+| `throttleDelayMs`                           | vesels skaitlis, 0–300000                                                   |                                                                                                                                                                                                                                                                   |
+| `maxSessions`                               | vesels skaitlis, 0–10000                                                    |                                                                                                                                                                                                                                                                   |
+| `rateLimits`                                | masīvs ar `{ limit, window }` (pozitīvi veseli skaitļi, līdz 50) vai `null` | `null` notīra ierobežojumus                                                                                                                                                                                                                                       |
+| `accessSchedule`                            | grafika objekts vai `null`                                                  | `null` notīra grafiku                                                                                                                                                                                                                                             |
+| `scopes`                                    | virkņu masīvs, līdz 32                                                      |                                                                                                                                                                                                                                                                   |
+| `allowedEndpoints`                          | virkņu masīvs, līdz 20                                                      |                                                                                                                                                                                                                                                                   |
+| `streamDefaultMode`                         | `legacy` \| `json`                                                          |                                                                                                                                                                                                                                                                   |
+| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                        | Skatiet [kešatmiņas apiešana katrai atslēgai](#per-key-cache-bypass)                                                                                                                                                                                              |
+| `compressionEnabled`                        | būla vērtība                                                                |                                                                                                                                                                                                                                                                   |
+| `codexServiceMode`                          | viens no Codex pakalpojuma režīmiem                                         |                                                                                                                                                                                                                                                                   |
+| `disableNonPublicModels`                    | boolean                                                                     |                                                                                                                                                                                                                                                                   |
+| `allowUsageCommand`                         | boolean                                                                     |                                                                                                                                                                                                                                                                   |
+| `usageLimitEnabled`                         | boolean                                                                     |                                                                                                                                                                                                                                                                   |
+| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | numurs >= 0 vai `null`                                                      |                                                                                                                                                                                                                                                                   |
+| `fiveHourUsageLimitUsd`                     | numurs >= 0 vai `null`                                                      | Ritošais 5 stundu USD budžets, kas tiek piemērots kā dienas un nedēļas ierobežojumi (`usageLimitEnabled`, `UNPRICED_USAGE_BUDGET_POLICY`). `retry-after` ir laiks, kad vecākais loga tēriņš noveco, un atslēga var tikt bloķēta, kas ievērojami pārsniedz limitu. |
+| `chaosModeEnabled`                          | boolean                                                                     |                                                                                                                                                                                                                                                                   |
 
 ```bash
 curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
@@ -1423,6 +1405,14 @@ curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
 | `/api/modality-bridge/stats`         | GET        | Atmiņā esošie `attempts`, veiksmīgie pieprasījumi/`bridged`, kļūmes, kešatmiņas trāpījumi, `totalLatencyMs`, `latencySamples`, pēc paraugu skaita aprēķinātais `averageLatencyMs` un pēdējās izmantošanas laiks (atiestatīts pēc restartēšanas; nepieciešama administrēšanas autentifikācija)                                                                                                                                                                 |
 | `/api/modality-bridge/video/runtime` | GET        | Stingra uzticamas lokālās atgriezeniskās saites pārbaude pirms administrēšanas autentifikācijas/pārbaudes; sanitizēta FFmpeg/ffprobe pieejamība un versijas (no-store)                                                                                                                                                                                                                                                                                        |
 | `/api/modality-bridge/video/extract` | POST       | Iekšējs autentificēts uzticamas lokālās atgriezeniskās saites baitu starpnieks; 50 MiB ievade, ierobežota rinda/32 MiB izvade, `503` jauda, `499` atvienošanās, `504` termiņš; nav publiska augšupielādes API                                                                                                                                                                                                                                                 |
+
+### Video kadra urbšana
+
+`GET /api/v1/video-bridge/drilldown` nolasa nomnieka necaurredzamu rokturi, kas tika atgriezts `x-omniroute-video-drilldown` pēc nepārprotamas piekrišanas Video Bridge pieprasījuma. Gan lasīšanai, gan `DELETE` vienmēr ir nepieciešama derīga API atslēga un operatora neatkarīga `modalityBridgeVideoDrilldownRemoteEnabled` atļauja. Ražošanas saglabāšanai papildus ir nepieciešams `modalityBridgeVideoDrilldownEnabled` un stingrs katrai daļai `drilldown: true`. Ja atslēgai ir tukšs beigu punktu atļaušanas saraksts, tajā ir jāietver `video` gan GET, gan DELETE neatkarīgi no tā, vai zvanītājs izmanto `/v1` vai `/api/v1`.
+
+GET vaicājums: nepieciešams `handle`; neobligāts `variant` (`preview`, `standard`, `detail`), `limit` (1–8; mantotais `frames` ir pieņemts, taču to nevar apvienot ar `limit`), nulles `page` un `start`/`end` sekundes. Ja tiek nodrošinātas abas fokusa robežas, `end` ir jābūt lielākam par `start`. Duplicate/unknown vaicājuma atslēgas tiek noraidītas. Veiksmīgās atbildes satur `derivation`, `durationSeconds`, `frames`, `hasMore`, `page`, `variant` un izvēles `focusWindow`; JSON bez veikala ir 32 MiB, ieskaitot Base64. Negabarīta produkcija atgriež 413; pieprasīt mazāk kadru.
+
+`DELETE /api/v1/video-bridge/drilldown?handle=...` atgriež `{ "removed": 0|1 }`. Nezināmas, beidzies derīguma termiņš un krusteniskās atslēgas GETs ir neatšķiramas 404 atbildes; krusteniskā atslēga DELETE nevar noņemt īpašnieka ierakstu. Atspējota piekļuve atgriež 403, missing/invalid autentifikāciju 401, nederīgus vaicājumus 400, atcelšanu 499 un pagaidu kļūdas 503. Rokturi ir procesa lokāli, to derīguma termiņš beidzas pēc desmit minūtēm, un tie neiztur restartēšanu. Jaunajos rokturos tiek izmantots `v1.` plus 32 baitu izlases Base64URL marķieris; tiek saglabātas tikai marķieru jaucējzīmes. Mantotie 64 heksu marķieri joprojām ir sintaktiski lasāmi saderības nodrošināšanai. Skatiet [Video Bridge aizsargmargas,](../security/GUARDRAILS.md#video-bridge-videobridgets-videobridgepipelinets) lai iegūtu informāciju par piekrišanu, kvotām un variantu atvasināšanu.
 
 ### Dublēšana un eksportēšana/importēšana
 
@@ -1526,19 +1516,19 @@ GET response includes `agents[]` (id, name, binary, version, installed, protocol
 
 Šie galapunkti atveido Gemini API formātu klientiem, kuriem nepieciešama vietējā Gemini SDK saderība.
 
-### Iekšējās / sistēmas API
+### Iekšējā / System APIs
 
-| Endpoint                 | Metode | Apraksts                                                                              |
-| ------------------------ | ------ | ------------------------------------------------------------------------------------- |
-| `/api/init`              | GET    | Lietojumprogrammas inicializācijas pārbaude (tiek izmantota pirmajā palaišanas reizē) |
-| `/api/tags`              | GET    | Ar Ollama saderīgas modeļu atzīmes (Ollama klientiem)                                 |
-| `/api/restart`           | POST   | Aktivizēt kontrolētu servera restartēšanu                                             |
-| `/api/shutdown`          | POST   | Aktivizēt kontrolētu servera apturēšanu                                               |
-| `/api/system/env/repair` | POST   | Labot OAuth pakalpojumu sniedzēju vides mainīgos                                      |
-| `/api/system/version`    | GET    | Pašreizējā/jaunākā versija, atjaunināšanas statuss, laidienu kanāls                   |
-| `/api/system/version`    | POST   | Sākt uz izvietošanu orientētu atjaunināšanu uz jaunāko versiju                        |
+| Galapunkts               | Metode | Apraksts                                                             |
+| ------------------------ | ------ | -------------------------------------------------------------------- |
+| `/api/init`              | GET    | Sākt fona sinhronizācijas pakalpojumus (pārvaldības autentifikācija) |
+| `/api/tags`              | GET    | Ar Ollama saderīgi modeļu tagi ( Ollama klientiem)                   |
+| `/api/restart`           | POST   | Iedarbiniet graciozu servera restartēšanu                            |
+| `/api/shutdown`          | POST   | Iedarbiniet graciozu servera izslēgšanu                              |
+| `/api/system/env/repair` | POST   | Labojiet OAuth nodrošinātāja vides mainīgos                          |
+| `/api/system/version`    | GET    | Current/latest versija, atjaunināšanas statuss, izlaišanas kanāls    |
+| `/api/system/version`    | POST   | Sāciet izvietošanai atbilstošu atjauninājumu uz jaunāko versiju      |
 
-> **Piezīme:** Šos galapunktus sistēma izmanto iekšēji vai Ollama klientu saderībai. Parasti galalietotāji tos neizsauc.
+> **Piezīme:** Šos galapunktus sistēma izmanto iekšēji vai Ollama klienta saderībai. Tos parasti nezvana galalietotāji.
 
 ### OAuth vides labošana _(v3.6.1+)_
 

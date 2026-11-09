@@ -50,11 +50,11 @@ Exit-Code 0 melden; dies weist jedoch nicht nach, dass die Abhängigkeiten den S
 Trivy-Schritt erfordert eine erfolgreiche Messung: Nicht verfügbare Tools, fehlgeschlagene Jobs
 und fehlende Image-Nachweise können nicht bestätigen, dass ein Image frei von Schwachstellen ist.
 
-## Risiko durch eingestellte Abhängigkeit
+## Abhängigkeitsrisiko im Ruhestand
 
-Das Root-Lockfile enthält nach dem Upgrade des festgeschriebenen promptfoo-Entwicklungswerkzeugs weder `extract-zip` noch eine Abhängigkeitskante dorthin. Dadurch wird die zuvor akzeptierte, in #14482 nachverfolgte Kette `promptfoo` → `@openai/codex-security` → `extract-zip` entfernt. Die Regressionstests in `tests/unit/extract-zip-14482-exposure.test.ts` verhindern deren erneute Einführung und behalten das Verbot von Importen aus Produktionscode bei.
+Die Root-Sperrdatei enthält nach dem Upgrade des angehefteten Promptfoo-Entwicklungstools kein `extract-zip` oder eine Abhängigkeitskante mehr dazu. Dadurch wird die zuvor akzeptierte `promptfoo` → `@openai/codex-security` → `extract-zip` -Kette, die in #14482 verfolgt wird, zurückgezogen. Die Regressionsprüfungen in `tests/unit/extract-zip-14482-exposure.test.ts` lehnen seine Wiedereinführung ab und behalten das Importverbot aus Produktionscode bei.
 
-Die aktuelle Reparatur der Abhängigkeiten umfasst Kompatibilitätsüberschreibungen für den MSAL-Client von Azure Identity, den FTP-Client von get-uri und Zod in beiden OpenCode-Plugin-Paketen. Der Abruf von Azure-Token und der FTP-Abruf werden mit kontrollierten Transporten getestet; beide OpenCode-Pakete führen ihre eigenen Build- und Testsuiten aus. Die Anzahl der Sicherheitshinweise in der Registry ist eine Momentaufnahme und kann sich nach dem Commit der Lockdatei ändern.
+Die aktuelle Abhängigkeitsreparatur erstreckt sich auch auf Kompatibilitätsüberschreibungen für MSAL Client von Azure Identity und FTP -Client von get-uri. Der Azure-Token-Erwerb und FTP Abruf werden mit kontrollierten Transporten getestet. Beide OpenCode Pakete führen ihre eigenen Build- und Testsuiten aus. Die Anzahl der Registrierungshinweise ist eine Messung zu einem bestimmten Zeitpunkt und kann sich ändern, nachdem die Sperrdatei festgeschrieben wurde.
 
 ## Backlog: Scorecard-Hinweis → blockierend
 

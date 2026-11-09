@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 import path from "node:path";
 import test from "node:test";
 import { parse } from "yaml";
+import { assertCodeqlTarget } from "../../../scripts/quality/codeql-producer-evidence.mjs";
 import {
   assertCodeqlSetup,
   assertCurrentContext,
@@ -16,6 +17,7 @@ const policy = JSON.parse(
   fs.readFileSync(path.join(root, "config/quality/codeql-admission-policy.json"), "utf8")
 );
 const workflow = parse(fs.readFileSync(path.join(root, ".github/workflows/codeql.yml"), "utf8"));
+const activeRelease = `release/v${JSON.parse(fs.readFileSync(path.join(root, "package.json"), "utf8")).version}`;
 const env = {
   GITHUB_REPOSITORY: "cheaper-inference/OmniRoute",
   GITHUB_SHA: "a".repeat(40),
@@ -30,7 +32,7 @@ const pr = {
 
 test("the reusable scan preserves four languages and finite activation targets", () => {
   assert.deepEqual(Object.keys(workflow.on), ["workflow_call"]);
-  assert.deepEqual(policy.targetBranches, ["main", "release/v3.8.53"]);
+  assert.deepEqual(policy.targetBranches, ["main", activeRelease]);
   assert.deepEqual(workflow.jobs.analyze.strategy.matrix.language, [
     "actions",
     "c-cpp",
@@ -40,6 +42,46 @@ test("the reusable scan preserves four languages and finite activation targets",
   assert.equal(workflow.jobs.analyze.strategy["fail-fast"], false);
   assert.equal(workflow.on.pull_request_target, undefined);
   assert.equal(workflow.on.workflow_dispatch, undefined);
+});
+
+for (const target of ["main", activeRelease]) {
+  test(`the current finite CodeQL targets admit PR, push and merge-group events for ${target}`, () => {
+    assert.doesNotThrow(() =>
+      assertCodeqlTarget(
+        { GITHUB_EVENT_NAME: "pull_request" },
+        { pull_request: { base: { ref: target } } },
+        policy
+      )
+    );
+    assert.doesNotThrow(() =>
+      assertCodeqlTarget(
+        { GITHUB_EVENT_NAME: "push", GITHUB_REF: `refs/heads/${target}` },
+        {},
+        policy
+      )
+    );
+    assert.doesNotThrow(() =>
+      assertCodeqlTarget(
+        { GITHUB_EVENT_NAME: "merge_group" },
+        { merge_group: { base_ref: `refs/heads/${target}` } },
+        policy
+      )
+    );
+  });
+}
+
+test("onboarding the active release does not admit arbitrary release or feature branches", () => {
+  for (const target of ["release/v0.0.0", "release/v999.0.0", "feat/unreviewed"]) {
+    assert.throws(
+      () =>
+        assertCodeqlTarget(
+          { GITHUB_EVENT_NAME: "pull_request" },
+          { pull_request: { base: { ref: target } } },
+          policy
+        ),
+      /SCAN_BRANCH_NOT_ONBOARDED/
+    );
+  }
 });
 
 test("fork extraction uses a hosted runner with no project build or inherited secrets", () => {

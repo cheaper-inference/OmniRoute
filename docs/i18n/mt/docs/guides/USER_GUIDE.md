@@ -339,24 +339,24 @@ Model: cc/claude-opus-4-7
 
 ## 🚀 Twaqqif
 
-### npm globali install (Rikomandat)
+### Installa npm globali (Rakkomandat)
 
 ```bash
 npm install -g omniroute
 
-# Oħloq direttorju tal-konfigurazzjoni
+# Create config directory
 mkdir -p ~/.omniroute
 
-# Oħloq fajl .env (ara .env.example)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# Beda s-server
+# Start server
 omniroute
-# Jew b'port abbinali:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-L-CLI awtomatikament jgħabbi `.env` minn `~/.omniroute/.env` jew `./.env`.
+CLI awtomatikament jgħabbi `.env` minn `~/.omniroute/.env` jew `./.env`. `./.env` fid-direttorju tax-xogħol jista' jistabbilixxi biss lista qasira ta' ċwievet (portijiet, `REQUIRE_API_KEY`, settings tal-lokal u tal-kulur); poġġi kull ħaġa oħra `~/.omniroute/.env`. Ara [CLI launch contracts](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### Triq il-tray
 

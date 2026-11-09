@@ -375,33 +375,22 @@ Content-Type: application/json
 }
 ```
 
-उपलब्ध प्रदात्यांमध्ये OpenAI (GPT Image 2), xAI (Grok Image), Together AI (FLUX), Fireworks AI, Nebius (FLUX), Hyperbolic, NanoBanana, **OpenRouter**, **ZenMux**, SD WebUI (स्थानिक), ComfyUI (स्थानिक) यांचा समावेश आहे.
+उपलब्ध प्रदात्यांमध्ये OpenAI (GPT प्रतिमा 2), xAI (Grok प्रतिमा), Together AI (FLUX), Fireworks AI, नेबियस (FLUX), हायपरबोलिक, NanoBanana,**OpenRouter** ,**ZenMux** , SD WebUI (स्थानिक), ComfyUI (स्थानिक).
 
-`n` मुळे `data[]` मध्ये `n` प्रतिमा परत केल्या जातात. ज्यांच्या अपस्ट्रीम API मधून प्रत्येक कॉलला एकच प्रतिमा परत केली जाते अशा प्रदात्यांसाठी
-(Black Forest Labs, Stability AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik,
-NVIDIA NIM, Cloudflare Workers AI) `n` स्वतंत्र अपस्ट्रीम कॉल केले जातात; त्यापैकी जास्तीत जास्त 4 कॉल एकाच वेळी सुरू असतात. निश्चित
-`seed` ला कॉल इंडेक्सने ऑफसेट केले जाते (`seed`, `seed + 1`, …), त्यामुळे प्रतिमा वेगवेगळ्या असतात, परंतु पुनरुत्पादनीय राहतात. `n` ची कमाल मर्यादा 10 आहे. कोणताही कॉल अयशस्वी झाल्यास संपूर्ण विनंती अयशस्वी होते. फॅन-आउट फॉरमॅट्सची यादी
-`open-sse/handlers/imageGeneration/fanOut.ts` मधील `SINGLE_IMAGE_FANOUT_FORMATS` मध्ये आहे.
+`n` `data[]` मध्ये `n` प्रतिमा परत करते. ज्या प्रदात्यांचे अपस्ट्रीम API प्रति कॉल एक इमेज रिटर्न करते (ब्लॅक फॉरेस्ट लॅब्स, स्टॅबिलिटी AI, लिओनार्डो, आयडियोग्राम, हायपर, हायपरबोलिक, Magnific/Freepik, NVIDIA NIM, Cloudflare Workers AI) त्यांना फ्लाइटमध्ये `n` वेगळे अपस्ट्रीम कॉल मिळतात. कॉल इंडेक्स (`seed`, `seed + 1`, …) द्वारे निश्चित `seed` ऑफसेट केले जाते, त्यामुळे प्रतिमा भिन्न असतात परंतु पुनरुत्पादित राहतात. `n` 10 वर मर्यादित आहे. कोणताही कॉल अयशस्वी झाल्यास विनंती संपूर्णपणे अयशस्वी होते. फॅन-आउट फॉरमॅटची यादी `open-sse/handlers/imageGeneration/fanOut.ts` मध्ये `SINGLE_IMAGE_FANOUT_FORMATS` आहे.
 
-ZenMux विद्यमान API-key कनेक्शनचा पुनर्वापर करते आणि `zenmux/` किंवा `zm/` प्रीफिक्स स्वीकारते:
+ZenMux विद्यमान API-की कनेक्शन पुन्हा वापरतो आणि `zenmux/` किंवा `zm/` उपसर्ग स्वीकारतो:
 
-- `zenmux/openai/gpt-image-2` ZenMux च्या OpenAI Images API चा वापर करते. पर्यायांमध्ये `size`,
-  `quality`, `n`, `output_format`, `output_compression`, `background`, आणि `response_format` यांचा समावेश आहे.
-- `zm/meta/muse-image-1.0` सारखे इतर प्रकाशक ZenMux च्या Vertex AI `:predict`
-  एंडपॉइंटचा वापर करतात. `n` चे मॅपिंग `sampleCount` वर, `aspect_ratio` चे `aspectRatio` वर, आणि `image_size`
-  (`1K`, `2K`, `4K`) चे `sampleImageSize` वर केले जाते. पिक्सेलमधील `size` केवळ आस्पेक्ट रेशो देते; पिक्सेल परिमाणांची हमी देत नाही. समर्थित रेशो, रिझोल्यूशन आणि संख्या मॉडेलनुसार बदलतात.
-- `zm/inclusionai/ming-image-0.1-design` स्वतःची परिमाणे निवडते. `size`,
-  `aspect_ratio`, आणि `image_size` वगळा; स्पष्ट मूल्ये दिल्यास HTTP 400 परत केला जातो. `output_format` वापरून PNG, JPEG आणि WebP मागवता येतात.
+- `zenmux/openai/gpt-image-2` ZenMux च्या OpenAI प्रतिमा API वापरते. पर्यायांमध्ये `size`, `quality`, `n`, `output_format`, `output_compression`, `background`, आणि `response_format` यांचा समावेश आहे.
+- इतर प्रकाशक, जसे की `zm/meta/muse-image-1.0`, ZenMux चे Vertex AI `:predict` एंडपॉइंट वापरतात. `n` नकाशे `sampleCount`, `aspect_ratio` ते `aspectRatio`, आणि `image_size` (`1K`, `2K`, `4K`) ते `sampleImageSize`. पिक्सेल `size` फक्त एक आस्पेक्ट रेशो पुरवतो, पिक्सेल परिमाणांची हमी देत नाही. समर्थित गुणोत्तर, ठराव आणि संख्या मॉडेलनुसार बदलतात.
+- `zm/inclusionai/ming-image-0.1-design` स्वतःचे परिमाण निवडते. `size`, `aspect_ratio`, आणि `image_size` वगळा ; स्पष्ट मूल्ये HTTP 400 परत करतात. PNG, JPEG आणि WebP विनंती `output_format` सह केली जाऊ शकते.
 
-या एकत्रीकरणामध्ये मजकूर-ते-प्रतिमा निर्मिती समर्थित आहे; संदर्भ-प्रतिमा संपादन समर्थित नाही. Vertex
-आउटपुट `data[].b64_json` मध्ये सामान्यीकृत केले जाते; `response_format: "url"` दिल्यास अपस्ट्रीम
-HTTPS URL परत केला जातो किंवा केवळ प्रतिमा बाइट्स उपलब्ध असल्यास base64 डेटा URL परत केला जातो. रिक्त/फिल्टर केलेले आउटपुट
-रिक्त यशस्वी प्रतिसादाऐवजी त्रुटी परत करतात. मॉडेलचा प्रवेश ZenMux खात्यावर अवलंबून असतो.
-[ZenMux's Vertex API](https://docs.zenmux.ai/api/vertexai/generate-images) आणि
-[OpenAI Images API](https://docs.zenmux.ai/api/openai/generate-an-image) पहा.
+हे एकत्रीकरण मजकूर-ते-प्रतिमा निर्मितीला समर्थन देते, संदर्भ-प्रतिमा संपादन नाही. व्हर्टेक्स आउटपुट `data[].b64_json` वर सामान्यीकृत केले जाते; फक्त इमेज बाइट्स उपलब्ध असताना `response_format: "url"` अपस्ट्रीम HTTPS URL किंवा बेस64 डेटा URL परत करते. Empty/filtered आउटपुट रिक्त यशाऐवजी त्रुटी परत करतात. मॉडेल प्रवेश ZenMux खात्यावर अवलंबून असतो. [ZenMux च्या व्हर्टेक्स API](https://docs.zenmux.ai/api/vertexai/generate-images) आणि [OpenAI प्रतिमा API](https://docs.zenmux.ai/api/openai/generate-an-image) पहा.
+
+Microsoft 365 Copilot साइन-इन कनेक्शन Copilot च्या अंगभूत इमेज टूलद्वारे `copilot-m365-web/m365-copilot-image` सेवा देते: प्रति इमेज एक Copilot टर्न (`n` 1–4), `size` स्टीयरिंग फक्त ओरिएंटेशन, आणि इमेज इनलाइन परत केल्या जातात (`b64_json`, किंवा `response_format: "url"` साठी डेटा URL ). [Microsoft 365 Copilot](../providers/COPILOT-M365.md#image-generation) पहा.
 
 ```bash
-# सर्व प्रतिमा मॉडेलची यादी करा
+# List all image models
 GET /v1/images/generations
 ```
 
@@ -812,17 +801,19 @@ OpenAI-सुसंगत बॅच प्रक्रिया.
 
 ---
 
-## शोध API
+## API शोधा
 
-वेब/शोध प्रदाता अमूर्तता (Tavily, Brave, Exa, Serper इत्यादी).
+Web/search प्रदाता अमूर्तता (Tavily, Brave, Exa, Serper, इ.).
 
-| पद्धत | पथ                     | वर्णन                                                                                                |
-| ----- | ---------------------- | ---------------------------------------------------------------------------------------------------- |
-| GET   | `/v1/search`           | कॉन्फिगर केलेले शोध प्रदाते + क्षमता सूचीबद्ध करते                                                   |
-| POST  | `/v1/search`           | शोध क्वेरी चालवते — मुख्य भाग `v1SearchSchema` द्वारे प्रमाणित केला जातो, कॅशिंग/कोअॅलिसिंगला समर्थन |
-| GET   | `/v1/search/analytics` | प्रत्येक प्रदात्याची हिट/विलंबता/कॅशे आकडेवारी                                                       |
+| पद्धत | मार्ग                  | वर्णन                                                                                              |
+| ----- | ---------------------- | -------------------------------------------------------------------------------------------------- |
+| GET   | `/v1/search`           | कॉन्फिगर केलेल्या शोध प्रदाते + क्षमतांची यादी करा                                                 |
+| POST  | `/v1/search`           | `v1SearchSchema` द्वारे प्रमाणित केलेली — बॉडी शोध क्वेरी चालवा, caching/coalescing ला समर्थन देते |
+| GET   | `/v1/search/analytics` | प्रति-प्रदाता hit/latency/cache आकडेवारी                                                           |
 
-**प्रमाणीकरण:** Bearer API key (`extractApiKey` + `isValidApiKey`). शोध धोरण `enforceApiKeyPolicy` द्वारे लागू केले जाते.
+**प्रमाण:** बेअरर API की (`extractApiKey` + `isValidApiKey`). `enforceApiKeyPolicy` द्वारे शोध धोरण लागू केले.
+
+**स्वयं-निवडा:** `provider` शिवाय, कॉन्फिगर केलेल्या कनेक्शनसह सर्वात स्वस्त प्रदाता प्रथम चालतो आणि पुढील सर्वात स्वस्त फेलओव्हर आहे. मोफत अंतिम-रिसॉर्ट प्रदाते (`duckduckgo-free`) फक्त तेव्हाच वापरले जातात जेव्हा दुसरे काहीही कॉन्फिगर केलेले नसते. सेल्फ-होस्ट केलेले SearXNG एकदा त्याचे कनेक्शन वास्तविक `baseUrl` (कॅटलॉग डीफॉल्ट `http://localhost:8888/search` नाही) संचयित केल्यावर कॉन्फिगर केले म्हणून मोजले जाते: ते नंतर $0 प्रदाता म्हणून कीडच्या पुढे, सर्वात स्वस्त कीड प्रदाता म्हणून फेलओव्हर म्हणून, ज्यामध्ये SearXNG 400, 401, 04gval 40gval किंवा 40gval नाही असे उत्तर देते तेव्हा `baseUrl`. `http(s)` URL किंवा क्लाउड-मेटाडेटा पत्त्यावरील बिंदू मोजले जात नाहीत. टोकन संचयित करणारे SearXNG कनेक्शन केवळ `https://` किंवा लूपबॅक `http://` वर अशा प्रकारे रँक करते. रिमोट प्लेन `http://` वर तो कधीही फेलओव्हर नसतो आणि शेवटचा उपाय राहतो, जेव्हा इतर प्रदात्याने कॉन्फिगर केलेले नसते किंवा जेव्हा नावाने विनंती केली जाते तेव्हाच वापरली जाते, म्हणून ते त्या दोन प्रकरणांमध्ये स्पष्ट मजकूरात टोकन पाठवते.
 
 ### Exa आणि Tavily `provider_options`
 
@@ -1002,31 +993,28 @@ recovered body सह `200`) किंवा `DELETE` वापरून रद�
 
 ---
 
-## स्वयंसेवा वापर (`/api/usage/om-usage`)
+## स्वयं-सेवा वापर (`/api/usage/om-usage`)
 
-कोणतीही API key — management auth शिवाय — **स्वतःचा** वापर आणि कोटा वाचू शकते. एखाद्या key धारकाला त्याचा खर्च
-दाखवण्यासाठी client (CLI, OmniCopilot panel) वापरत असलेला हा endpoint आहे.
+कोणतीही API की वाचू शकते**स्वतःचे** वापर आणि कोटा — कोणतेही व्यवस्थापन प्रमाणीकरण नाही. हा एक क्लायंट (CLI, OmniCopilot पॅनेल) मुख्य धारकाला त्यांचा खर्च दाखवण्यासाठी वापरतो.
 
 ```bash
-# मजकूर स्वरूप (ऐतिहासिक contract — terminal साठी plain text)
+# Text form (the historical contract — plain text for a terminal)
 curl -H "Authorization: Bearer <your-api-key>" \
   http://localhost:20128/api/usage/om-usage
 
-# संरचित स्वरूप — UI जे वापरते
+# Structured form — what a UI consumes
 curl -H "Authorization: Bearer <your-api-key>" \
   "http://localhost:20128/api/usage/om-usage?format=json"
 ```
 
-Key साठी **`allowUsageCommand`** सक्षम असणे आवश्यक आहे (डीफॉल्टनुसार बंद — dashboard मधील API-key
-manager प्रत्येक key साठी ते toggle करतो). ते सक्षम नसल्यास endpoint `403` परत करतो.
+की असणे आवश्यक आहे**`allowUsageCommand`** सक्षम (डिफॉल्ट — डॅशबोर्डचा API-की व्यवस्थापक प्रति की टॉगल करतो). त्याशिवाय एंडपॉइंट `403` उत्तर देतो.
 
-`?format=json` असा discriminated shape परत करतो की caller ने refusal मधून data field कधीही वाचू नये. यशस्वी
-स्थितीत:
+`?format=json` एक भेदभावपूर्ण आकार परत करतो म्हणून कॉलर कधीही नकार दिल्यावर डेटा फील्ड वाचत नाही. यशावर:
 
 ```jsonc
 {
   "allowed": true,
-  // key ने per-key usage limits (daily/weekly USD) स्वीकारले असतील तेव्हाच उपस्थित:
+  // present only when the key opted into per-key usage limits (daily/weekly/5-hour USD):
   "personal": {
     "dailySpentUsd": 1.25,
     "dailyLimitUsd": 5,
@@ -1035,9 +1023,9 @@ manager प्रत्येक key साठी ते toggle करतो). �
     "weeklyLimitUsd": 20,
     "weeklyResetAtIso": "…" /* … */,
   },
-  // निवडलेल्या provider चा quota snapshot, अद्याप काहीही cache केलेले नसल्यास null:
+  // the selected provider quota snapshot, or null when nothing is cached yet:
   "provider": { "connectionId": "…", "provider": "claude", "plan": "…", "quotas": {/* … */} },
-  // प्रत्येक connection चा snapshot, ज्यामुळे UI अनेक providers शेजारी शेजारी render करू शकते:
+  // every connection's snapshot, so a UI can render several providers side by side:
   "providers": [
     { "connectionId": "…", "provider": "claude" /* … */ },
     { "provider": "codex" /* … */ },
@@ -1045,13 +1033,9 @@ manager प्रत्येक key साठी ते toggle करतो). �
 }
 ```
 
-Refusal (`401` चुकीची key / `403` परवानगी नाही) स्थितीत हाच route
-`{ "allowed": false, "error": { "message": "…" } }` परत करतो — उपस्थित पण रिकामे `personal`/`provider`
-(key ला परवानगी आहे, मात्र अद्याप काहीही समजलेले नाही) हे refusal पेक्षा वेगळे state आहे आणि फक्त JSON स्वरूप
-हा फरक दाखवते.
+नकार दिल्यावर (`401` बॅड की / `403` परवानगी नाही) हाच मार्ग `{ "allowed": false, "error": { "message": "…" } }` — एक वर्तमान-परंतु-रिक्त `personal`/`provider` (की परवानगी आहे, अद्याप काहीही शिकलेले नाही) ही नकारापासून वेगळी स्थिती आहे आणि फक्त JSON फॉर्म त्यांना वेगळे करतो.
 
-**प्रमाणीकरण:** `isValidApiKey` ने पडताळलेली caller ची स्वतःची Bearer API key — हा management surface
-(`/api/keys/…`) **नाही**, जो `requireManagementAuth` मागेच राहतो.
+**प्रमाण:** कॉलरची स्वतःची बेअरर API की, `isValidApiKey` — सह प्रमाणित केलेली ही व्यवस्थापन पृष्ठभाग (`/api/keys/…`) नाही, जी `requireManagementAuth` मागे राहते.
 
 ### Raw विरुद्ध Cutoff-Adjusted कोटा टक्केवारी
 
@@ -1305,38 +1289,39 @@ Implementation: `getResolvedModelCapabilitiesWithLimitSources()` in `src/lib/mod
 
 ### API की परवानग्या
 
-`PATCH /api/keys/{id}` विद्यमान कीच्या परवानग्या अद्ययावत करते. प्रत्येक `/api/keys*` रूटप्रमाणे, यासाठी व्यवस्थापन अधिकृतता आवश्यक आहे ([व्यवस्थापन प्रमाणीकरण](../guides/MANAGEMENT-AUTH.md) पहा), अनुमान की नाही. तुम्हाला बदलायची असलेली फक्त फील्ड पाठवा; यापैकी एकही फील्ड नसलेली विनंती `No valid fields to update` संदेशासह नाकारली जाते. स्वीकारलेल्या फील्डची व्याख्या `src/shared/validation/schemas/keys.ts` मधील `updateKeyPermissionsSchema` द्वारे केली आहे.
+`PATCH /api/keys/{id}` विद्यमान कीच्या परवानग्या अपडेट करते. प्रत्येक `/api/keys*` मार्गाप्रमाणे त्याला व्यवस्थापन अधिकृतता आवश्यक आहे ( [व्यवस्थापन प्रमाणीकरण](../guides/MANAGEMENT-AUTH.md) पहा), अनुमान की नाही. तुम्ही बदलू इच्छित असलेले फील्ड पाठवा; त्यापैकी एकही विनंती `No valid fields to update` सह नाकारली जात नाही. स्वीकृत फील्ड `src/shared/validation/schemas/keys.ts` मध्ये `updateKeyPermissionsSchema` द्वारे परिभाषित केले आहेत.
 
-| फील्ड                                       | प्रकार                                                          | नोंदी                                                                                                                                  |
-| ------------------------------------------- | --------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| `name`                                      | string, 1-200 अक्षरे                                            |                                                                                                                                        |
-| `isActive`                                  | boolean                                                         |                                                                                                                                        |
-| `isBanned`                                  | boolean                                                         |                                                                                                                                        |
-| `expiresAt`                                 | ISO 8601 दिनांक-वेळ किंवा `null`                                | `null` कालबाह्यता साफ करते                                                                                                             |
-| `modelAccessMode`                           | `all` \| `restricted`                                           | मोड `all` असताना `allowedModels` रिक्त असणे आवश्यक आहे                                                                                 |
-| `allowedModels`, `blockedModels`            | स्ट्रिंगचा अॅरे, कमाल 1000                                      |                                                                                                                                        |
-| `allowedCombos`                             | स्ट्रिंगचा अॅरे, कमाल 500                                       | ही की कोणते कॉम्बो कॉल करू शकते ते नियंत्रित करते; थेट मॉडेल्स `modelAccessMode` / `allowedModels` द्वारे नियंत्रित होतात              |
-| `connectionAccessMode`                      | `all` \| `restricted`                                           | `restricted` असताना `allowedConnections` रिक्त नसणे आणि `all` असताना रिक्त असणे आवश्यक आहे                                             |
-| `allowedConnections`                        | UUID चा अॅरे, कमाल 100                                          |                                                                                                                                        |
-| `allowAutoCombos`                           | boolean                                                         | `false` या कीसह `auto/*` मॉडेल्ससाठीच्या विनंत्या नाकारते; ज्यांनी हे कधीही सेट केलेले नाही अशा कींना परवानगी असते                     |
-| `catalogScope`                              | `all` \| `combos` \| `models`                                   | या कीसाठी `GET /v1/models` मध्ये काय सूचीबद्ध होते (फक्त कॉम्बो, फक्त मॉडेल्स किंवा दोन्ही); यामुळे की कोणते कॉल करू शकते ते बदलत नाही |
-| `forcedModel`                               | कमाल 300 अक्षरांची स्ट्रिंग किंवा `null`                        | `X-Route-Model` आणि `body.model` वर प्राधान्य देऊन चॅट विनंत्या या मॉडेल/कॉम्बोकडे रूट करते; कीच्या मर्यादा अद्याप लागू राहतात         |
-| `noLog`, `autoResolve`                      | boolean                                                         |                                                                                                                                        |
-| `throttleDelayMs`                           | पूर्णांक, 0-300000                                              |                                                                                                                                        |
-| `maxSessions`                               | पूर्णांक, 0-10000                                               |                                                                                                                                        |
-| `rateLimits`                                | `{ limit, window }` चा अॅरे (धन पूर्णांक, कमाल 50) किंवा `null` | `null` मर्यादा साफ करते                                                                                                                |
-| `accessSchedule`                            | शेड्यूल ऑब्जेक्ट किंवा `null`                                   | `null` शेड्यूल साफ करते                                                                                                                |
-| `scopes`                                    | स्ट्रिंगचा अॅरे, कमाल 32                                        |                                                                                                                                        |
-| `allowedEndpoints`                          | स्ट्रिंगचा अॅरे, कमाल 20                                        |                                                                                                                                        |
-| `streamDefaultMode`                         | `legacy` \| `json`                                              |                                                                                                                                        |
-| `cacheDefaultMode`                          | `legacy` \| `bypass`                                            | [प्रति-की कॅशे बायपास](#per-key-cache-bypass) पहा                                                                                      |
-| `compressionEnabled`                        | boolean                                                         |                                                                                                                                        |
-| `codexServiceMode`                          | Codex सेवा मोडपैकी एक                                           |                                                                                                                                        |
-| `disableNonPublicModels`                    | boolean                                                         |                                                                                                                                        |
-| `allowUsageCommand`                         | boolean                                                         |                                                                                                                                        |
-| `usageLimitEnabled`                         | boolean                                                         |                                                                                                                                        |
-| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | number >= 0 or `null`                                           |                                                                                                                                        |
-| `chaosModeEnabled`                          | boolean                                                         |                                                                                                                                        |
+| फील्ड                                       | प्रकार                                                          | नोंदी                                                                                                                                                                                                                                                       |
+| ------------------------------------------- | --------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`                                      | string, 1-200 अक्षरे                                            |                                                                                                                                                                                                                                                             |
+| `isActive`                                  | boolean                                                         |                                                                                                                                                                                                                                                             |
+| `isBanned`                                  | boolean                                                         |                                                                                                                                                                                                                                                             |
+| `expiresAt`                                 | ISO 8601 दिनांक-वेळ किंवा `null`                                | `null` कालबाह्यता साफ करते                                                                                                                                                                                                                                  |
+| `modelAccessMode`                           | `all` \| `restricted`                                           | मोड `all` असताना `allowedModels` रिक्त असणे आवश्यक आहे                                                                                                                                                                                                      |
+| `allowedModels`, `blockedModels`            | 1000 पर्यंत स्ट्रिंग्सचा ॲरे                                    |                                                                                                                                                                                                                                                             |
+| `allowedCombos`                             | स्ट्रिंगचा अॅरे, कमाल 500                                       | ही की कोणते कॉम्बो कॉल करू शकते ते नियंत्रित करते; थेट मॉडेल्स `modelAccessMode` / `allowedModels` द्वारे नियंत्रित होतात                                                                                                                                   |
+| `connectionAccessMode`                      | `all` \| `restricted`                                           | `restricted` असताना `allowedConnections` रिक्त नसणे आणि `all` असताना रिक्त असणे आवश्यक आहे                                                                                                                                                                  |
+| `allowedConnections`                        | UUID चा अॅरे, कमाल 100                                          |                                                                                                                                                                                                                                                             |
+| `allowAutoCombos`                           | boolean                                                         | `false` या कीसह `auto/*` मॉडेल्ससाठीच्या विनंत्या नाकारते; ज्यांनी हे कधीही सेट केलेले नाही अशा कींना परवानगी असते                                                                                                                                          |
+| `catalogScope`                              | `all` \| `combos` \| `models`                                   | या कीसाठी `GET /v1/models` मध्ये काय सूचीबद्ध होते (फक्त कॉम्बो, फक्त मॉडेल्स किंवा दोन्ही); यामुळे की कोणते कॉल करू शकते ते बदलत नाही                                                                                                                      |
+| `forcedModel`                               | कमाल 300 अक्षरांची स्ट्रिंग किंवा `null`                        | `X-Route-Model` आणि `body.model` वर प्राधान्य देऊन चॅट विनंत्या या मॉडेल/कॉम्बोकडे रूट करते; कीच्या मर्यादा अद्याप लागू राहतात                                                                                                                              |
+| `noLog`, `autoResolve`                      | बुलियन                                                          |                                                                                                                                                                                                                                                             |
+| `throttleDelayMs`                           | पूर्णांक, 0-300000                                              |                                                                                                                                                                                                                                                             |
+| `maxSessions`                               | पूर्णांक, 0-10000                                               |                                                                                                                                                                                                                                                             |
+| `rateLimits`                                | `{ limit, window }` चा अॅरे (धन पूर्णांक, कमाल 50) किंवा `null` | `null` मर्यादा साफ करते                                                                                                                                                                                                                                     |
+| `accessSchedule`                            | शेड्यूल ऑब्जेक्ट किंवा `null`                                   | `null` शेड्यूल साफ करते                                                                                                                                                                                                                                     |
+| `scopes`                                    | स्ट्रिंगचा अॅरे, कमाल 32                                        |                                                                                                                                                                                                                                                             |
+| `allowedEndpoints`                          | स्ट्रिंगचा अॅरे, कमाल 20                                        |                                                                                                                                                                                                                                                             |
+| `streamDefaultMode`                         | `legacy` \| `json`                                              |                                                                                                                                                                                                                                                             |
+| `cacheDefaultMode`                          | `legacy` \| `bypass`                                            | [प्रति-की कॅशे बायपास](#per-key-cache-bypass) पहा                                                                                                                                                                                                           |
+| `compressionEnabled`                        | boolean                                                         |                                                                                                                                                                                                                                                             |
+| `codexServiceMode`                          | Codex सेवा मोडपैकी एक                                           |                                                                                                                                                                                                                                                             |
+| `disableNonPublicModels`                    | boolean                                                         |                                                                                                                                                                                                                                                             |
+| `allowUsageCommand`                         | boolean                                                         |                                                                                                                                                                                                                                                             |
+| `usageLimitEnabled`                         | boolean                                                         |                                                                                                                                                                                                                                                             |
+| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | क्रमांक >= 0 किंवा `null`                                       |                                                                                                                                                                                                                                                             |
+| `fiveHourUsageLimitUsd`                     | क्रमांक >= 0 किंवा `null`                                       | रोलिंग 5-तास USD बजेट, दैनंदिन आणि साप्ताहिक मर्यादा (`usageLimitEnabled`, `UNPRICED_USAGE_BUDGET_POLICY`) प्रमाणे लागू. `retry-after` म्हणजे जेव्हा विंडोमधील सर्वात जुना खर्च कालबाह्य होतो, जो त्याच्या मर्यादेपेक्षा जास्त की अद्याप अवरोधित ठेवू शकतो. |
+| `chaosModeEnabled`                          | boolean                                                         |                                                                                                                                                                                                                                                             |
 
 ```bash
 curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
@@ -1386,6 +1371,14 @@ curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
 | `/api/modality-bridge/stats`         | GET        | इन-मेमरी `attempts`, यश/`bridged`, अपयश, कॅशे हिट्स, `totalLatencyMs`, `latencySamples`, नमुन्यांवर आधारित `averageLatencyMs`, आणि शेवटच्या वापराची वेळ (पुन्हा सुरू केल्यावर रीसेट; व्यवस्थापन प्रमाणीकरण आवश्यक)                                                                                                                                                                                        |
 | `/api/modality-bridge/video/runtime` | GET        | व्यवस्थापन प्रमाणीकरण/प्रोबपूर्वी कठोर विश्वसनीय-लूपबॅक तपासणी; स्वच्छ केलेली FFmpeg/ffprobe उपलब्धता आणि आवृत्त्या (no-store)                                                                                                                                                                                                                                                                            |
 | `/api/modality-bridge/video/extract` | POST       | अंतर्गत प्रमाणीकरण केलेला विश्वसनीय-लूपबॅक बाइट ब्रोकर; 50 MiB इनपुट, मर्यादित रांग/32 MiB आउटपुट, क्षमतेसाठी `503`, डिस्कनेक्टसाठी `499`, अंतिम मुदतीसाठी `504`; हे सार्वजनिक अपलोड API नाही                                                                                                                                                                                                             |
+
+### व्हिडिओ फ्रेम ड्रिल-डाउन
+
+`GET /api/v1/video-bridge/drilldown` स्पष्टपणे संमती दिलेल्या व्हिडिओ ब्रिज विनंतीनंतर `x-omniroute-video-drilldown` मध्ये परत आलेले भाडेकरू-बाउंड अपारदर्शक हँडल वाचते. दोन्ही रीड्स आणि `DELETE` नेहमी वैध API की आणि ऑपरेटरची स्वतंत्र `modalityBridgeVideoDrilldownRemoteEnabled` परवानगी आवश्यक असते. उत्पादन धारणा अतिरिक्तपणे `modalityBridgeVideoDrilldownEnabled` आणि कठोर प्रति-भाग `drilldown: true` आवश्यक आहे. की मध्ये रिक्त नसलेली एंडपॉइंट अनुमत सूची असल्यास, त्यात GET आणि DELETE दोन्हीसाठी `video` समाविष्ट करणे आवश्यक आहे, कॉलरने `/v1` किंवा `/api/v1` वापरत असला तरीही.
+
+GET क्वेरी: आवश्यक `handle`; पर्यायी `variant` (`preview`, `standard`, `detail`), `limit` (1–8; वारसा `frames` स्वीकारला जातो परंतु `limit` सोबत जोडला जाऊ शकत नाही), शून्य-आधारित `page` आणि `start`/`end` सेकंद. जेव्हा दोन्ही फोकस सीमा पुरवल्या जातात, तेव्हा `end` `start` पेक्षा जास्त असणे आवश्यक आहे. Duplicate/unknown क्वेरी की नाकारल्या आहेत. यशस्वी प्रतिसादांमध्ये `derivation`, `durationSeconds`, `frames`, `hasMore`, `page`, `variant`, आणि पर्यायी `focusWindow`; नो-स्टोअर JSON बेस64 सह 32 MiB वर मर्यादित आहे. ओव्हरसाइज आउटपुट 413 रिटर्न; कमी फ्रेम्सची विनंती करा.
+
+`DELETE /api/v1/video-bridge/drilldown?handle=...` `{ "removed": 0|1 }` परत करतो. अज्ञात, कालबाह्य आणि क्रॉस-की GETs अभेद्य 404 प्रतिसाद आहेत; क्रॉस-की DELETE मालकाची नोंद काढू शकत नाही. अक्षम केलेले प्रवेश रिटर्न 403, missing/invalid प्रमाणीकरण 401, अवैध क्वेरी 400, रद्दीकरण 499 आणि तात्पुरत्या त्रुटी 503. हँडल प्रक्रिया-स्थानिक आहेत, दहा मिनिटांनंतर कालबाह्य होतात आणि रीस्टार्ट झाल्यानंतर टिकत नाहीत. नवीन हँडल `v1.` अधिक 32-बाइट यादृच्छिक Base64URL टोकन वापरतात; फक्त टोकन हॅश राखून ठेवले आहेत. लेगसी 64-हेक्स टोकन सुसंगततेसाठी सिंटॅक्टिकली वाचनीय राहतात. संमती, कोटा आणि व्हेरिएंट डेरिव्हेशन तपशीलांसाठी [व्हिडिओ ब्रिज रेलिंग](../security/GUARDRAILS.md#video-bridge-videobridgets-videobridgepipelinets) पहा.
 
 ### बॅकअप आणि निर्यात/आयात
 
@@ -1481,19 +1474,19 @@ GET प्रतिसादामध्ये `agents[]` (id, name, binary, ver
 
 हे एंडपॉइंट्स मूळ Gemini SDK सुसंगततेची अपेक्षा करणाऱ्या क्लायंट्ससाठी Gemini च्या API स्वरूपाची नक्कल करतात.
 
-### अंतर्गत / सिस्टम API
+### अंतर्गत / प्रणाली APIs
 
-| Endpoint                 | Method | Description                                           |
-| ------------------------ | ------ | ----------------------------------------------------- |
-| `/api/init`              | GET    | अनुप्रयोग प्रारंभ तपासणी (पहिल्या रनवेळी वापरले जाते) |
-| `/api/tags`              | GET    | Ollama-सुसंगत मॉडेल टॅग्ज (Ollama क्लायंट्ससाठी)      |
-| `/api/restart`           | POST   | सुरळीत सर्व्हर रीस्टार्ट सुरू करा                     |
-| `/api/shutdown`          | POST   | सुरळीत सर्व्हर शटडाउन सुरू करा                        |
-| `/api/system/env/repair` | POST   | OAuth प्रदाता पर्यावरणीय चल दुरुस्त करा               |
-| `/api/system/version`    | GET    | सध्याची/नवीनतम आवृत्ती, अद्यतन स्थिती, रिलीज चॅनेल    |
-| `/api/system/version`    | POST   | नवीनतम आवृत्तीकडे उपयोजन-जागरूक अद्यतन सुरू करा       |
+| शेवटचा बिंदू             | पद्धत | वर्णन                                                        |
+| ------------------------ | ----- | ------------------------------------------------------------ |
+| `/api/init`              | GET   | पार्श्वभूमी समक्रमण सेवा सुरू करा (व्यवस्थापन प्रमाणीकरण)    |
+| `/api/tags`              | GET   | ओलामा-सुसंगत मॉडेल टॅग्ज ( Ollama क्लायंटसाठी)               |
+| `/api/restart`           | POST  | सुरेख सर्व्हर रीस्टार्ट ट्रिगर करा                           |
+| `/api/shutdown`          | POST  | आकर्षक सर्व्हर शटडाउन ट्रिगर करा                             |
+| `/api/system/env/repair` | POST  | OAuth प्रदाता पर्यावरण व्हेरिएबल्स दुरुस्त करा               |
+| `/api/system/version`    | GET   | Current/latest आवृत्ती, स्थिती अद्यतनित करा, चॅनेल रिलीज करा |
+| `/api/system/version`    | POST  | नवीनतम आवृत्तीसाठी उपयोजन-जागरूक अपडेट सुरू करा              |
 
-> **टीप:** हे एंडपॉइंट्स सिस्टमद्वारे अंतर्गत वापरले जातात किंवा Ollama क्लायंट सुसंगततेसाठी वापरले जातात. अंतिम वापरकर्ते सामान्यतः त्यांना कॉल करत नाहीत.
+> **टीप:** हे एंडपॉइंट्स सिस्टमद्वारे किंवा Ollama क्लायंट सुसंगततेसाठी अंतर्गत वापरले जातात. त्यांना सामान्यतः अंतिम वापरकर्त्यांद्वारे कॉल केले जात नाही.
 
 ### OAuth पर्यावरण दुरुस्ती _(v3.6.1+)_
 

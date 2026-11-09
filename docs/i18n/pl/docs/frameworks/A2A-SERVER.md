@@ -152,18 +152,18 @@ curl -X POST http://localhost:20128/a2a \
 
 ## Dostępne umiejętności
 
-OmniRoute ujawnia 6 umiejętności A2A podłączonych do `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Każdy moduł umiejętności znajduje się w `src/lib/a2a/skills/`.
+OmniRoute ujawnia 6 umiejętności A2A podłączonych do `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Każdy moduł umiejętności żyje w `src/lib/a2a/skills/`.
 
-| Umiejętność                   | ID                   | Opis                                                                                                                                                                          | Tagi                            | Przykłady                                    |
-| :---------------------------- | :------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------ | :------------------------------------------- |
-| Inteligentne wyznaczanie tras | `smart-routing`      | Kieruje monit przez optymalną provider/combo przy użyciu punktacji + silnika combo OmniRoute                                                                                  | routing, dostawcy               | „Przekieruj ten monit przez najlepszy model” |
-| Zarządzanie kwotami           | `quota-management`   | Raportuje stan limitu dla każdego dostawcy, pomaga dzwoniącym zdecydować, kiedy throttle/switch                                                                               | kontyngent, dostawcy            | „Sprawdź kwotę antropiczną”                  |
-| Wykrywanie dostawcy           | `provider-discovery` | Wyświetla listę zainstalowanych dostawców z możliwościami, flagami poziomu bezpłatnego i statusem OAuth                                                                       | dostawcy, odkrycie              | „Jaki dostawcy są dostępni?”                 |
-| Analiza kosztów               | `cost-analysis`      | Szacuje koszt request/conversation biorąc pod uwagę niedawne użycie katalogu +                                                                                                | koszt, zużycie                  | „Oszacuj koszt tej rozmowy”                  |
-| Raport o stanie zdrowia       | `health-report`      | Łączy wyłącznik automatyczny, czas odnowienia i stan blokady według dostawcy                                                                                                  | zdrowie, odporność              | „Pokaż stan zdrowia wszystkich dostawców”    |
-| Lista możliwości              | `list-capabilities`  | Zwraca pełny katalog umiejętności agenta składający się z 45 wpisów (23 API + 21 CLI + 1 konfiguracja) jako tabelę przecen z surowym SKILL.md URLs do wstrzykiwania kontekstu | katalog, odkrycie, umiejętności | „Wyświetl wszystkie możliwości OmniRoute ”   |
+| Umiejętność                   | ID                   | Opis                                                                                                                                                          | Tagi                            | Przykłady                                    |
+| :---------------------------- | :------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------ | :------------------------------ | :------------------------------------------- |
+| Inteligentne wyznaczanie tras | `smart-routing`      | Kieruje monit przez optymalną provider/combo przy użyciu punktacji + silnika combo OmniRoute                                                                  | routing, dostawcy               | „Przekieruj ten monit przez najlepszy model” |
+| Zarządzanie kwotami           | `quota-management`   | Raportuje stan limitów poszczególnych dostawców, pomaga dzwoniącym zdecydować, kiedy skorzystać z throttle/switch                                             | kontyngent, dostawcy            | „Sprawdź kwotę antropiczną”                  |
+| Wykrywanie dostawcy           | `provider-discovery` | Wyświetla listę zainstalowanych dostawców z możliwościami, flagami poziomu bezpłatnego i statusem OAuth                                                       | dostawcy, odkrycie              | „Jaki dostawcy są dostępni?”                 |
+| Analiza kosztów               | `cost-analysis`      | Szacuje koszt request/conversation, biorąc pod uwagę najnowsze użycie katalogu +                                                                              | koszt, zużycie                  | „Oszacuj koszt tej rozmowy”                  |
+| Raport o stanie zdrowia       | `health-report`      | Łączy wyłącznik automatyczny, czas odnowienia i stan blokady według dostawcy                                                                                  | zdrowie, odporność              | „Pokaż stan zdrowia wszystkich dostawców”    |
+| Lista możliwości              | `list-capabilities`  | Zwraca pełny 45-wpisowy katalog umiejętności agenta (konfiguracja 23 API + 21 CLI + 1) jako tabelę przecen z surowym SKILL.md URLs do wstrzykiwania kontekstu | katalog, odkrycie, umiejętności | „Wymień wszystkie możliwości OmniRoute ”     |
 
-> Karta agenta powinna być zgodna z aktualnym katalogiem dostawców 381; liczba dostawców i metadane free/no-auth pochodzą z rejestru wykonawczego.
+> Karta agenta powinna być zgodna z aktualnym katalogiem dostawców 382; liczba dostawców i metadane free/no-auth pochodzą z rejestru środowiska wykonawczego.
 
 ### `list-capabilities` Szczegóły umiejętności
 

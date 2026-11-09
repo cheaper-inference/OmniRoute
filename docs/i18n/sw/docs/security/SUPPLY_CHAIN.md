@@ -45,11 +45,11 @@ msimbo wa kutoka 0, jambo ambalo halithibitishi kuwa vitegemezi vilifaulu uchang
 Trivy pia inahitaji kipimo kilichofaulu: zana zisizopatikana, kazi zilizoshindwa
 na ushahidi unaokosekana wa taswira haviwezi kuthibitisha kuwa taswira haina udhaifu.
 
-## Hatari ya utegemezi uliostaafishwa
+## Hatari ya utegemezi mstaafu
 
-Faili kuu ya kufunga matoleo haijumuishi tena `extract-zip` wala kiungo cha utegemezi kinachoielekeza baada ya kusasisha zana ya usanidi ya promptfoo yenye toleo lililobainishwa. Hatua hii inastaafisha mnyororo uliokubaliwa awali wa `promptfoo` → `@openai/codex-security` → `extract-zip` unaofuatiliwa katika #14482. Ukaguzi wa urejeshi katika `tests/unit/extract-zip-14482-exposure.test.ts` unakataa kurejeshwa kwake na unaendeleza marufuku ya uingizaji kutoka kwenye msimbo wa uzalishaji.
+Faili ya kufunga mizizi haijumuishi tena `extract-zip` au kingo tegemezi kwake baada ya kusasisha zana ya ukuzaji ya promptfoo iliyobandikwa. Hii inaondoa msururu wa `promptfoo` → `@openai/codex-security` → `extract-zip` uliokubaliwa hapo awali uliofuatiliwa katika #14482. Ukaguzi wa kurudi nyuma katika `tests/unit/extract-zip-14482-exposure.test.ts` unakataa kuletwa kwake tena na kubakiza marufuku ya uagizaji kutoka kwa msimbo wa uzalishaji.
 
-Urekebishaji wa sasa wa vitegemezi unajumuisha ubatilishaji wa uoanifu kwa kiteja cha MSAL cha Azure identity, kiteja cha FTP cha get-uri, na Zod katika vifurushi vyote viwili vya programu-jalizi vya OpenCode. Upatikanaji wa tokeni ya Azure na urejeshaji wa FTP hujaribiwa kwa kutumia njia za usafirishaji zinazodhibitiwa; vifurushi vyote viwili vya OpenCode huendesha mchakato wao wenyewe wa ujenzi na majaribio. Idadi za tahadhari za rejista ni vipimo vya wakati fulani na zinaweza kubadilika baada ya lockfile kuwasilishwa.
+Marekebisho ya sasa ya utegemezi pia yanabatilisha wigo wa uoanifu kwa mteja wa MSAL wa kitambulisho cha Azure na mteja wa FTP wa get-uri. Upataji wa ishara ya Azure na urejeshaji wa FTP hujaribiwa na usafirishaji uliodhibitiwa; vifurushi vyote OpenCode vinaendesha vyumba vyao vya kujenga na vya majaribio. Hesabu za ushauri wa Usajili ni vipimo kwa wakati mmoja na zinaweza kubadilika baada ya faili ya kufuli kutekelezwa.
 
 ## Backlog: Ushauri wa Scorecard → kuzuia
 

@@ -15,7 +15,7 @@
 
 **Criado por [Diego Souza](https://github.com/diegosouzapw)**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Never stop coding. Every AI tool → 381 providers — 150+ free — through one endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity into FREE Claude / GPT / Gemini with auto-fallback. RTK + Caveman stacked compression saves 15–95% tokens (~89% avg) — never hit limits. 381 AI providers · 150+ free tiers · ~1.62B free tokens/mo · 20 routing strategies · $0 to start."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Never stop coding. Every AI tool → 382 providers — 150+ free — through one endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity into FREE Claude / GPT / Gemini with auto-fallback. RTK + Caveman stacked compression saves 15–95% tokens (~89% avg) — never hit limits. 382 AI providers · 150+ free tiers · ~1.62B free tokens/mo · 20 routing strategies · $0 to start."/>
 
 </div>
 
@@ -51,18 +51,13 @@
 
 ### 💬 Junte-se à comunidade
 
-**👋 Siga o responsável pela manutenção — seja o primeiro a conhecer novos fornecedores, lançamentos e dicas:**
+**👋 Siga o mantenedor — para obter primeiro novos fornecedores, lançamentos e dicas:**
 
-[![Siga o Diego no LinkedIn](https://img.shields.io/badge/Follow_Diego_on-LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/diegosouzapw/)
-[![Siga @diegosouzapw no GitHub](https://img.shields.io/github/followers/diegosouzapw?style=for-the-badge&logo=github&logoColor=white&label=Follow%20on%20GitHub&color=181717)](https://github.com/diegosouzapw)
+[![Siga o Diego no LinkedIn](https://img.shields.io/badge/Follow_Diego_on-LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white) ](https://www.linkedin.com/in/diegosouzapw/) [![Siga o @diegosouzapw no GitHub](https://img.shields.io/github/followers/diegosouzapw?style=for-the-badge&logo=github&logoColor=white&label=Follow%20on%20GitHub&color=181717) ](https://github.com/diegosouzapw)
 
-[![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/U47eFqAXCn)
-[![Telegram](https://img.shields.io/badge/Telegram-26A5E4?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/omnirouteOficial)
-[![WhatsApp global](https://img.shields.io/badge/WhatsApp_Global-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4)
-[![WhatsApp Brasil](https://img.shields.io/badge/WhatsApp_Brasil-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)
-[![Website](https://img.shields.io/badge/Website-omniroute.online-blue?logo=google-chrome&logoColor=white)](https://omniroute.online)
+[![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white) ](https://discord.gg/U47eFqAXCn) [![Telegram](https://img.shields.io/badge/Telegram-26A5E4?style=for-the-badge&logo=telegram&logoColor=white) ](https://t.me/omnirouteOficial) [![WhatsApp Global](https://img.shields.io/badge/WhatsApp_Global-25D366?style=for-the-badge&logo=whatsapp&logoColor=white) ](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) [![WhatsApp Brasil](https://img.shields.io/badge/WhatsApp_Brasil-25D366?style=for-the-badge&logo=whatsapp&logoColor=white) ](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) [![Site](https://img.shields.io/badge/Website-omniroute.online-blue?logo=google-chrome&logoColor=white) ](https://omniroute.online)
 
-**Perguntas, sugestões sobre fornecedores, roteiro e suporte → [Discord](https://discord.gg/U47eFqAXCn) · [Telegram](https://t.me/omnirouteOficial) · WhatsApp [🌍 Global](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) / [🇧🇷 Brasil](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) / [Portal](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)**
+**Dúvidas, dicas de fornecedores, roteiro e suporte → [Discord](https://discord.gg/U47eFqAXCn) · [Telegram](https://t.me/omnirouteOficial) · WhatsApp [🌍 Global](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) / [🇧🇷 Brasil](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) / Canal / [Portal](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK) [Oficial 📢](https://whatsapp.com/channel/0029VbDwC7A3wtb5PN6a5t2R)**
 
 <br/>
 
@@ -72,8 +67,8 @@
 
 |                                            |         v3.8.50          | **v3.8.51** |       `v3.8.54+`        |
 | ------------------------------------------ | :----------------------: | :---------: | :---------------------: |
-| Fornecedores 🌐                            |           352            |   **358**   |           381           |
-| 🧠 Modelo de chat exclusivo IDs            |           1320           |  **1374**   |          1519           |
+| Fornecedores 🌐                            |           352            |   **358**   |           382           |
+| 🧠 Modelo de chat exclusivo IDs            |           1320           |  **1374**   |          1524           |
 | Ponte de modalidade 🖼️                     | Visão 🆕 Áudio + Vídeo + |      ✓      |            ✓            |
 | Catálogo gratuito do radar 📡              |       Ativação 🆕        |      ✓      |            ✓            |
 | Agendamento com reconhecimento de quota ⚖️ |    Quota-Partilha 🆕     |      ✓      |            ✓            |
@@ -108,7 +103,7 @@
   <tr>
     <td align="right"><b>⚙️ Features</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 Combos</a></td>
-    <td align="center"><a href="#-381-ai-providers--156-catalog-marked-free">🌐 Providers</a></td>
+    <td align="center"><a href="#-382-ai-providers--156-catalog-marked-free">🌐 Providers</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI &amp; MCP</a></td>
   </tr>
   <tr>
@@ -244,7 +239,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="The Promise — One endpoint and 381 providers. Automatic fallback keeps routing while another healthy target is available. Six pillars: resilient fallback across 381 providers · up to 95% token savings on eligible workloads · $0 to start with 150+ free tiers and 52 recurring/keyless free-forever providers · 39 CLI/agent integrations through one config · OpenAI, Claude, Gemini and Responses API compatibility at /v1 · production controls including circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals and 56,000+ static test declarations across 7,800+ tracked test files."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="The Promise — One endpoint and 382 providers. Automatic fallback keeps routing while another healthy target is available. Six pillars: resilient fallback across 382 providers · up to 95% token savings on eligible workloads · $0 to start with 150+ free tiers and 52 recurring/keyless free-forever providers · 39 CLI/agent integrations through one config · OpenAI, Claude, Gemini and Responses API compatibility at /v1 · production controls including circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals and 56,000+ static test declarations across 7,800+ tracked test files."/>
 
 <br/>
 <br/>
@@ -504,7 +499,7 @@ Todas as **20** estratégias — combine-as livremente em cada etapa do combo:
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="O que distingue o OmniRoute — uma comparação de funcionalidades datada vs 9router, OpenRouter, CLIProxyAPI e LiteLLM em 13 capacidades. OmniRoute: 381 fornecedores, mais de 150 planos gratuitos integrados, 20 estratégias de encaminhamento, compressão de tokens com 12 motores, servidor MCP integrado com 110 ferramentas, protocolo de agentes A2A, memória persistente, guardrails, agentes na cloud, stealth de impressão digital TLS, Desktop/Termux/PWA e 67 idiomas de interface. O OmniRoute tem licença MIT e pode ser auto-hospedado. As capacidades e contagens dos concorrentes podem mudar; consulte a metodologia ligada."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="O que distingue o OmniRoute — uma comparação de funcionalidades datada vs 9router, OpenRouter, CLIProxyAPI e LiteLLM em 13 capacidades. OmniRoute: 382 fornecedores, mais de 150 planos gratuitos integrados, 20 estratégias de encaminhamento, compressão de tokens com 12 motores, servidor MCP integrado com 110 ferramentas, protocolo de agentes A2A, memória persistente, guardrails, agentes na cloud, stealth de impressão digital TLS, Desktop/Termux/PWA e 67 idiomas de interface. O OmniRoute tem licença MIT e pode ser auto-hospedado. As capacidades e contagens dos concorrentes podem mudar; consulte a metodologia ligada."/>
 
 <sub>📊 Metodologia completa &amp; detalhe por funcionalidade vs 9router, OpenRouter, CLIProxyAPI &amp; LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -599,7 +594,7 @@ O Radar é opcional e utiliza apenas pedidos GET. O cliente OmniRoute não envia
 - **🖼️ Novos pontos de extremidade** — `/v1/ocr` (Mistral OCR) e `/v1/audio/translations` (estilo Whisper) completa a superfície do suporte. → [API Referência](docs/reference/API_REFERENCE.md)
 - **🎨 Geração de imagem/vídeo/áudio** — um API para os media: xAI Grok Imagine e Novita AI vídeo, ComfyUI, Magnific, Adobe Firefly, Segmind e fornecedores de voz, como ElevenLabs. → [API Referência](docs/reference/API_REFERENCE.md)
 - **Implantação e operações 🌍** — proxy reverso `basePath`, deteção automática de idioma do navegador, rastreio de dispositivos por chave, confiança MITM sem raiz, localização zh-TW. [Ambiente](docs/reference/ENVIRONMENT.md) →
-- **🤝 Mais fornecedores e agentes** Agentes de cloud — (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) com login do browser + OAuth, cartão de primeira classe Ollama, Claude Opus 5 e Sonnet 5, parceria oficial Kimi (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… e um atualizado **Catálogo de 381 fornecedores** . [Fornecedores](docs/reference/PROVIDER_REFERENCE.md) →
+- **🤝 Mais fornecedores e agentes** Agentes de cloud — (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) com login do browser + OAuth, cartão de primeira classe Ollama, Claude Opus 5 e Sonnet 5, parceria oficial Kimi (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… e um atualizado **Catálogo de 382 fornecedores** . [Fornecedores](docs/reference/PROVIDER_REFERENCE.md) →
 - **Transparência de encaminhamento 📡** Cada resposta — transporta um cabeçalho `X-OmniRoute-Decision` nomeando o strategy/provider/latency que a serviu, uma nova estratégia de combinação `cache-optimized` + Auto-Combo `cacheAffinity` factor rota request requests de volta para a ligação que contém o prefixo em cache, e um endpoint `/v1/auto-combo/{channel}/candidates` de leitura apenas expõe o pool de candidatos ao vivo de um canal `auto/*`. [Combinação automática](docs/routing/AUTO-COMBO.md) →
 - **⚡ Desempenho local e infra** — Redis local com um clique, Cloudflare Workers/Deno Deploy relé implantadores, Bifrost e Mux como serviços integrados supervisionados. [Serviços incorporados](docs/frameworks/EMBEDDED-SERVICES.md) →
 - **🧩 também na caixa** Estrutura de plug-in — Mercado +, estruturas de competências Omni/Agent/GitHub, integração de cofre Obsidian (22 ferramentas MCP ), Batch e ficheiros APIs compatíveis com OpenAI, cache de resposta semântica, gamificação com tabelas de classificação, descoberta de agentes ACP (15 agentes integrados), exportação de log agendada para BigQuery, fan-out paralelo de vários modelos `auto/chaos`, uma ponte de bot Telegram, um gestor de versões na aplicação e fornecedor gratuito LMArena-ELO classificações. [Documentos](docs/README.md) →
@@ -683,11 +678,11 @@ do histórico do seu shell. → [Integrações CLI](docs/guides/CLI-INTEGRATIONS
 
 <div align="center">
 
-## 🌐 381 Fornecedores AI — 156 marcados em catálogo como gratuitos
+## 🌐 382 Fornecedores AI — 156 marcados em catálogo como gratuitos
 
 </div>
 
-> **381 fornecedores registados** em todo o chat canónico, media, pesquisa, local, agente de nuvem e coleções de sistema, incluindo **156 carregando metadados de descoberta `hasFree: true`** . O registo do modelo de chat abrange **242 fornecedores/3.148 pares distintos de modelo-fornecedor/1.519 modelo bruto IDs** ; o catálogo separado de orçamento gratuito tem **466 linhas por modelo** ,**34 piscinas recorrentes** e **52 fornecedores recurring/keyless gratuitos para sempre** . Estes são denominadores diferentes por design; definições e cálculos deduplicados de pool ficam na [Referência do fornecedor](docs/reference/PROVIDER_REFERENCE.md) e [nos níveis gratuitos](docs/reference/FREE_TIERS.md).
+> **382 fornecedores registados** em todo o chat canónico, media, pesquisa, local, agente de nuvem e coleções de sistema, incluindo **156 carregando metadados de descoberta `hasFree: true`** . O registo do modelo de chat abrange **243 fornecedores/3.155 pares distintos de modelo-fornecedor/1.524 modelo bruto IDs** ; o catálogo separado de orçamento gratuito tem **466 linhas por modelo** ,**34 piscinas recorrentes** e **52 fornecedores recurring/keyless gratuitos para sempre** . Estes são denominadores diferentes por design; definições e cálculos deduplicados de pool ficam na [Referência do fornecedor](docs/reference/PROVIDER_REFERENCE.md) e [nos níveis gratuitos](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
@@ -1299,7 +1294,7 @@ Métricas canónicas em 2026-10-18: **1.976 vídeos únicos** · **20.220.289 vi
   <tr><td nowrap><b>Runtime</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Linguagem</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> em <code>src/</code> e <code>open-sse/</code> (zero <code>any</code> no núcleo desde a v2.0)</td></tr>
   <tr><td nowrap><b>Framework</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Base de dados</b></td><td>better-sqlite3 (SQLite, journaling WAL) + LowDB (JSON legado) — 147 módulos de domínio, 225 migrações</td></tr>
+  <tr><td nowrap><b>Base de dados</b></td><td>better-sqlite3 (SQLite, journaling WAL) + LowDB (JSON legado) — 147 módulos de domínio, 229 migrações</td></tr>
   <tr><td nowrap><b>Memória</b></td><td>Pesquisa de texto completo SQLite FTS5 + embeddings vetoriais quantizados em int8, decaimento tipado</td></tr>
   <tr><td nowrap><b>Esquemas</b></td><td>Zod 4 — validação de I/O de ferramentas MCP + contratos de API</td></tr>
   <tr><td nowrap><b>Protocolos</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

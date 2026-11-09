@@ -348,24 +348,24 @@ Samhail: cc/claude-opus-4-7
 
 ## 🚀 Imscaradh
 
-### npm suiteáil domhain (Molta)
+### Suiteáil npm domhanda (Molta)
 
 ```bash
 npm install -g omniroute
 
-# Cruthaigh eolaire cumraíochta
+# Create config directory
 mkdir -p ~/.omniroute
 
-# Cruthaigh comhad .env (féach .env.example)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# Tosaigh an freastalaí
+# Start server
 omniroute
-# Nó le port saincheaptha:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-Lódann an CLI `.env` go huathoibríoch ó `~/.omniroute/.env` nó `./.env`.
+Lódálann an CLI `.env` go huathoibríoch ó `~/.omniroute/.env` nó `./.env`. Ní féidir le `./.env` san eolaire oibre ach liosta ceadaithe gearr eochracha a shocrú (socruithe poirt, `REQUIRE_API_KEY`, locale agus dath); cuir gach rud eile i `~/.omniroute/.env`. Féach [conarthaí seolta CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### Mód trá
 

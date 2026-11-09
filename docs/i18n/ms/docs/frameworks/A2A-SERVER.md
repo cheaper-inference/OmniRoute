@@ -156,14 +156,14 @@ OmniRoute mendedahkan 6 kemahiran A2A berwayar dalam `src/lib/a2a/taskExecution.
 
 | Kemahiran            | ID                   | Penerangan                                                                                                                                                                   | Tag                          | Contoh                                      |
 | :------------------- | :------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--------------------------- | :------------------------------------------ |
-| Penghalaan Pintar    | `smart-routing`      | Halakan gesaan melalui provider/combo optimum menggunakan pemarkahan + enjin kombo OmniRoute                                                                                 | penghalaan, pembekal         | "Halakan gesaan ini melalui model terbaik"  |
-| Pengurusan Kuota     | `quota-management`   | Laporan menyatakan kuota setiap pembekal, membantu pemanggil memutuskan bila untuk throttle/switch                                                                           | kuota, pembekal              | "Semak kuota untuk antropik"                |
+| Penghalaan Pintar    | `smart-routing`      | Halakan gesaan melalui provider/combo optimum menggunakan pemarkahan OmniRoute enjin kombo +                                                                                 | penghalaan, pembekal         | "Halakan gesaan ini melalui model terbaik"  |
+| Pengurusan Kuota     | `quota-management`   | Melaporkan keadaan kuota setiap pembekal, membantu pemanggil memutuskan bila ke throttle/switch                                                                              | kuota, pembekal              | "Semak kuota untuk antropik"                |
 | Penemuan Pembekal    | `provider-discovery` | Menyenaraikan pembekal yang dipasang dengan keupayaan, bendera peringkat percuma, status OAuth                                                                               | pembekal, penemuan           | "Pembekal apa yang tersedia?"               |
-| Analisis Kos         | `cost-analysis`      | Anggaran kos request/conversation berdasarkan katalog + penggunaan terkini                                                                                                   | kos, penggunaan              | "Anggaran kos untuk perbualan ini"          |
+| Analisis Kos         | `cost-analysis`      | Anggaran kos request/conversation memandangkan katalog + penggunaan terkini                                                                                                  | kos, penggunaan              | "Anggaran kos untuk perbualan ini"          |
 | Laporan Kesihatan    | `health-report`      | Agregat pemutus litar, cooldown, keadaan kunci keluar bagi setiap pembekal                                                                                                   | kesihatan, daya tahan        | "Tunjukkan status kesihatan semua pembekal" |
 | Senaraikan Keupayaan | `list-capabilities`  | Mengembalikan katalog Kemahiran Ejen 45 penyertaan penuh (23 API + 21 CLI + 1 konfigurasi) sebagai jadual penurunan harga dengan SKILL.md URLs mentah untuk suntikan konteks | katalog, penemuan, kemahiran | "Senaraikan semua keupayaan OmniRoute "     |
 
-> Kad Ejen hendaklah sentiasa sejajar dengan katalog 381-pembekal langsung; kiraan pembekal dan metadata free/no-auth diperoleh daripada pendaftaran masa jalan.
+> Kad Ejen hendaklah sentiasa sejajar dengan katalog 382-pembekal langsung; kiraan pembekal dan metadata free/no-auth diperoleh daripada pendaftaran masa jalan.
 
 ### `list-capabilities` Butiran Kemahiran
 

@@ -127,6 +127,27 @@ Pinipili ng auto-scoring ang pinakamahusay na provider/model kada kahilingan
 | `src/sse/handlers/chat.ts`                                | Integrasyon: auto prefix short-circuit              |
 | `src/shared/constants/providers.ts`                       | `SYSTEM_PROVIDERS.auto` system entry                |
 
+## Mga kagustuhan sa account para sa mga naka-save na Auto combo
+
+Nag-aalok ang editor ng Intelligent Auto ng opsyonal** Mga kagustuhan sa account** seksyon. Ang bawat koneksyon ay maaaring Preferred, Normal (ang default), Reserve, o Ibinukod. Maaaring magbahagi ng tier ang maraming koneksyon. Awtomatikong pumipili sa loob ng unang karapat-dapat na tier, pinapanatili ang gawi ng scoring/router doon; Ang mga nabigong pagtatangka ay nahuhulog sa natitirang mga kongkretong account, mas gusto bago ang normal bago magreserba. Ang mga hindi kasamang koneksyon ay hindi kailanman ginagamit ng combo na ito.
+
+Ang setting ay naka-imbak bilang `config.accountPreferences`, naka-key sa pamamagitan ng koneksyon ID:
+
+```json
+{
+  "accountPreferences": {
+    "connection-a": "preferred",
+    "connection-b": "preferred",
+    "connection-c": "reserve",
+    "connection-d": "excluded"
+  }
+}
+```
+
+Ang isang tinanggal o walang laman na mapa ay nagpapanatili ng kasalukuyang pagruruta. Hindi pinapagana ng mga kagustuhan ang mga naka-disable na koneksyon, nagbibigay ng access sa key ng API, nagpapanumbalik ng mga kandidatong na-block sa quota, o nag-bypass ng mga pagsusuri sa badyet. Ang bawat pagtatangka ay limitado sa konkretong koneksyon nito, kaya ang fallback ng account ay hindi maaaring tumalon sa mga tier sa likod ng combo router. Ang kasalukuyang affinity ng session ay maaaring magpanatili ng isang karapat-dapat na account; ang pagbubukod ng account na nakatali sa isang katutubong pagliko ay humihinto sa pagliko sa halip na tahimik na magpalit ng mga account.
+
+Ginagamit ng mga na-configure na kagustuhan ang Auto path na alam ng account: hindi naipapadala ang hindi nakatali na context-cache, smart-pipeline, kaguluhan at mga shortcut ng anino. Ang speculative hedging ay hindi pinagana para sa mga kahilingang ito kaya ang mga reserbang account ay hindi maaaring makipagkarera sa mga gusto. Hindi binibigyang-kahulugan ng ibang mga diskarte sa combo ang setting na ito. Ang pagpapalit ng combo palayo sa Auto ay nagpapanatili sa mga naka-save na kagustuhan para sa isang paglipat pabalik sa ibang pagkakataon.
+
 ## Mga Pangalan ng Combo na Tumutugma sa Tunay na Model Id
 
 Ang combo na ang `name` ay kapareho ng isang bare model id (hal. combo na
@@ -186,36 +207,38 @@ Dalawang karaniwang problema:
 
 Tingnan ang [#7992](https://github.com/diegosouzapw/OmniRoute/issues/7992) at [#7111](https://github.com/diegosouzapw/OmniRoute/issues/7111) para sa orihinal na kalituhang nililinaw ng dokumentasyong ito.
 
-## Paano Ito Gumagana (Naka-persist na Mga Auto-Combo)
+## Paano Ito Gumagana (Persisted Auto-Combos)
 
-Dinamikong pinipili ng Auto-Combo Engine ang pinakamahusay na provider/model para sa bawat request gamit ang isang **16-factor scoring function** (tinukoy sa `open-sse/services/autoCombo/scoring.ts` → `DEFAULT_WEIGHTS`). Ang kabuuan ng mga default na weight ay `1.0`; muling ninonormalisa ang mga custom na weight ng `normalizeScoringWeights()`. Dalawa sa labing-anim — `cacheAffinity` at `resetWindowAffinity` — ang may default na weight na `0`; ang `reliability` ay may `0` sa `DEFAULT_WEIGHTS` ngunit `0.03` sa mga generic na pack at `0.04` sa `reliability-first`, at ang `quality` ay may `0.02` sa mga pack (`0.03` sa `quality-first`): kinukuwenta pa rin ang mga ito para sa bawat candidate, at kinokontrol ng `cacheAffinity` ang prompt-cache deduplication sa labas ng score, kaya sadyang hindi bumoboto bilang default ang mga factor na may zero-default habang bumoboto naman ang mga pack.
+Ang Auto-Combo Engine ay dynamic na pinipili ang pinakamahusay na provider/model para sa bawat kahilingan gamit ang a **16-factor scoring function** (tinukoy sa `open-sse/services/autoCombo/scoring.ts` → `DEFAULT_WEIGHTS`). Ang default na mga timbang ay sumama sa `1.0`; Ang mga custom na timbang ay na-renormalize ng `normalizeScoringWeights()`. Dalawa sa labing anim na — `cacheAffinity` at `resetWindowAffinity` — ang may default na timbang na `0`; `reliability` ay nagdadala ng `0` sa `DEFAULT_WEIGHTS` ngunit `0.03` sa mga generic na pack at `0.04` sa `reliability-first`, at `quality` ay nagdadala `0.02` sa mga pack (`0.03` sa `quality-first`): kinukuwenta pa rin ang mga ito para sa bawat kandidato, at `cacheAffinity` gates prompt-cache deduplication sa labas ng marka, kaya ang mga zero-default na salik ay hindi bumoto bilang default habang ang mga pack ay gumagawa.
 
-![16-factor scoring ng Auto-Combo](../diagrams/exported/auto-combo-scoring.svg)
+![Auto-Combo 16-factor scoring](../diagrams/exported/auto-combo-scoring.svg)
 
-> Pinagmulan: [diagrams/auto-combo-scoring.mmd](../diagrams/auto-combo-scoring.mmd) (muling buuin sa pamamagitan ng `npm run docs:render-diagrams`). Makasaysayan ang filename; ipinapakita ng source at na-render na diagram ang lahat ng 16 na factor na idineklara sa `DEFAULT_WEIGHTS`.
+> Pinagmulan: [diagrams/auto-combo-scoring.mmd](../diagrams/auto-combo-scoring.mmd) (regenerate sa pamamagitan ng `npm run docs:render-diagrams`). Makasaysayan ang filename; ang pinagmulan at nai-render na diagram ay nagpapakita ng lahat ng 16 na salik na idineklara sa `DEFAULT_WEIGHTS`.
 
-| Factor                | Default na Weight | Paglalarawan                                                                                                                                                                                                                                          |
-| :-------------------- | :---------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `quota`               | 0.1429            | Natitirang quota / espasyo bago maabot ang rate limit [0..1]                                                                                                                                                                                          |
-| `health`              | 0.1605            | Health score mula sa circuit breaker (CLOSED=1.0, HALF_OPEN=0.5, OPEN=0.0)                                                                                                                                                                            |
-| `costInv`             | 0.1429            | Kabaligtaran ng **pinagsamang** gastos (60% presyo ng input token + 40% presyo ng output token, na-normalize) — mas mura = mas mataas na score                                                                                                        |
-| `latencyInv`          | 0.1143            | Kabaligtaran ng p95 latency na na-normalize sa pool — mas mabilis = mas mataas na score                                                                                                                                                               |
-| `taskFit`             | 0.0762            | Pagiging angkop sa uri ng gawain (coding, review, planning, analysis, debugging, docs)                                                                                                                                                                |
-| `stability`           | 0.0476            | Stability na batay sa variance mula sa standard deviation ng latency — mas mababa ang score ng candidate na pabagu-bago ang response time                                                                                                             |
-| `tierPriority`        | 0.0476            | Priyoridad ng account tier — Ultra=1.0, Pro=0.67, Standard=0.33, Free=0.0                                                                                                                                                                             |
-| `tierAffinity`        | 0.0476            | Affinity sa pagitan ng tier ng candidate at ng tier na inirerekomenda ng manifest                                                                                                                                                                     |
-| `specificityMatch`    | 0.0476            | Pagtutugma sa pagitan ng specificity ng request (hint ng manifest) at tier ng model                                                                                                                                                                   |
-| `contextAffinity`     | 0.0476            | Affinity sa pagitan ng pangangailangan ng request sa context window at ng context window ng model                                                                                                                                                     |
-| `sessionAvailability` | 0.0476            | Availability ng OAuth session ng candidate connection para sa session na ito (`getOAuthSessionAvailability()`; may score na 1.0 ang mga non-OAuth na connection)                                                                                      |
-| `connectionDensity`   | 0.0476            | Ipinamamahagi ang load sa mga connection ng parehong provider (laban sa konsentrasyon)                                                                                                                                                                |
-| `cacheAffinity`       | 0.00              | Rendezvous-hash affinity patungo sa connection na pinakamalamang na mayroon na ng prompt-cache prefix ng request na ito (`open-sse/services/combo/promptCacheAffinity.ts`); naka-disable bilang default (#8008)                                       |
-| `resetWindowAffinity` | 0.00              | Pagkiling sa mga connection na may mas kanais-nais na window ng pag-reset ng quota (naka-disable bilang default)                                                                                                                                      |
-| `quality`             | 0.03              | Signal ng kalidad ng output na hinihimok ng feedback mula sa quality tracker ng routing event; nakatatanggap ng neutral na 0.5 ang mga candidate na walang observation                                                                                |
-| `reliability`         | 0.00              | Naobserbahang bahagi ng tagumpay, `1 - failureRate`, mula sa 24h ng history ng paggamit sa likod ng minimum na sampung sample (real-time metrics kung hindi); itinuturing na 1.0 ang mga candidate na walang observation. Naka-disable bilang default |
+| Factor                | Default na Weight | Paglalarawan                                                                                                                                                                                                                                                             |
+| :-------------------- | :---------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `quota`               | 0.1429            | Natitirang quota / rate-limit headroom [0..1]                                                                                                                                                                                                                            |
+| `health`              | 0.1605            | Marka ng kalusugan mula sa circuit breaker (CLOSED= 1.0, HALF_OPEN= 0.5, OPEN= 0.0)                                                                                                                                                                                      |
+| `costInv`             | 0.1429            | Baliktad **pinaghalo** gastos (60% input + 40% output token na presyo, na-normalize) — mas mura = mas mataas na marka                                                                                                                                                    |
+| `latencyInv`          | 0.1143            | Na-normalize ang inverse p95 latency para ma-pool — nang mas mabilis na mas mataas na marka =                                                                                                                                                                            |
+| `taskFit`             | 0.0762            | Task-type fitness (coding, pagsusuri, pagpaplano, pagsusuri, pag-debug, mga doc)                                                                                                                                                                                         |
+| `stability`           | 0.0476            | Variance-based stability mula sa latency standard deviation — isang kandidato na ang oras ng pagtugon ay umiiba ay mas mababa ang marka                                                                                                                                  |
+| `tierPriority`        | 0.0476            | Priyoridad ng account-tier — Ultra = 1.0, Pro = 0.67, Standard = 0.33, Libreng = 0.0                                                                                                                                                                                     |
+| `tierAffinity`        | 0.0476            | Affinity sa pagitan ng tier ng kandidato at ng manifest-recommended tier                                                                                                                                                                                                 |
+| `specificityMatch`    | 0.0476            | Itugma sa pagitan ng pagtitiyak ng kahilingan (manifest na pahiwatig) at tier ng modelo                                                                                                                                                                                  |
+| `contextAffinity`     | 0.0476            | Kaugnayan sa pagitan ng pangangailangan sa context-window ng kahilingan at sa context window ng modelo                                                                                                                                                                   |
+| `sessionAvailability` | 0.0476            | Ang pagkakaroon ng OAuth session ng koneksyon ng kandidato para sa session na ito (`getOAuthSessionAvailability()`; marka ng mga koneksyon na hindi OAuth 1.0)                                                                                                           |
+| `connectionDensity`   | 0.0476            | Nag-spread ng load sa mga koneksyon ng parehong provider (anti-concentration)                                                                                                                                                                                            |
+| `cacheAffinity`       | 0.00              | Rendezvous-hash affinity patungo sa connection na pinakamalamang na mayroon na ng prompt-cache prefix ng request na ito (`open-sse/services/combo/promptCacheAffinity.ts`); naka-disable bilang default (#8008)                                                          |
+| `resetWindowAffinity` | 0.00              | Pagkiling sa mga koneksyon na ang window ng pag-reset ng quota ay paborable (naka-disable bilang default)                                                                                                                                                                |
+| `quality`             | 0.03              | Feedback-driven na output-kalidad na signal mula sa routing-event quality tracker; ang mga kandidatong walang obserbasyon ay tumatanggap ng neutral na 0.5                                                                                                               |
+| `reliability`         | 0.00              | Naobserbahang bahagi ng tagumpay, `1 - failureRate`, mula sa 24h na kasaysayan ng paggamit sa likod ng isang sampung sample na palapag (mga real-time na sukatan kung hindi man); mga kandidatong walang obserbasyon na binasa bilang 1.0. Hindi pinagana bilang default |
 
-`quality` (`open-sse/services/routing/quality.ts`): `cold restart → ∅`; `observations = 0 → score 0.5`.
+Ang in-memory `quality` tracker (`open-sse/services/routing/quality.ts`) ay walang laman pagkatapos ng malamig na pag-restart, kaya ang bawat kandidato ay nakakakuha ng neutral `0.5` hanggang sa makarating ang mga unang obserbasyon.
 
-**Kabuuan:** `0.1429 + 0.1605 + 0.1429 + 0.1143 + 0.0762 + (7 × 0.0476) + 0.00 + 0.00 + 0.03 + 0.00 = 1.0` gaya ng idineklara sa `DEFAULT_WEIGHTS`; muling ninonormalisa ang mga weight na kino-configure ng user upang maging isang distribution ng `normalizeScoringWeights()` bago ang scoring.
+> **Hindi nababasang quota (#15347).** Kapag ang isang provider ay may quota fetcher ngunit wala itong naibalik na nababasa (nabigong makuha, nawawalang mga kredensyal, message-only na paggamit, o isang malformed snapshot na walang parseable `windows` at walang finite `percentUsed`, kabilang ang `percentUsed: null`), ang kandidato ay nagbibigay ng `0` sa `quota` axis at ang huling marka nito ay na-multiply sa parehong `UNREADABLE_QUOTA_SOFT_DEPRIORITIZE_FACTOR` - `autoStrategy.ts`. parusa sa katayuan ng koneksyon. Ang isang nabigong pagbasa sa paggamit ay katibayan tungkol sa telemetry, hindi sa provider, kaya mahigpit itong naranggo sa ibaba ng anumang tunay na pagbabasa, kabilang ang isang nakumpirmang 100%-used, ngunit hindi kailanman na-block o pinaalis. Ang isang provider na walang cap ay nag-uulat ng `unlimited: true` at mga marka bilang buong quota; ang provider na walang nakarehistrong quota fetcher ay walang telemetry source at pinapanatili ang default ng `100`.
+
+**Sum:** `0.1429 + 0.1605 + 0.1429 + 0.1143 + 0.0762 + (7 × 0.0476) + 0.00 + 0.00 + 0.03 + 0.00 = 1.0` gaya ng ipinahayag sa `DEFAULT_WEIGHTS`; Ang mga timbang na na-configure ng user ay na-renormalize sa isang pamamahagi ng `normalizeScoringWeights()` bago mag-iskor.
 
 ## Mga Mode Pack
 
@@ -328,20 +351,13 @@ Ang `weighted` ay isang **proporsyonal na random na pagpili sa bawat request**
 Para sa mahigpit na pag-ikot, gamitin ang `round-robin`; ang magkakapantay na timbang sa `weighted` ay nagbibigay ng estadistikal — hindi
 mahigpit — na pagbabalanse.
 
-### Agentic pipeline mode
+### Mode ng ahente ng pipeline
 
-Ang isang `pipeline` combo na may hindi bababa sa dalawang modelo ay maaaring gumamit ng planner/executor routing sa pamamagitan ng
-`config.agenticOrchestration.enabled`. Ang unang target ang nangangasiwa sa pagpaplano at mga panghuling sagot;
-ang pangalawang target ang naglalabas ng mga client-native na tool call. Tinutukoy ng OmniRoute ang mga pagpapatuloy na
-may tool-result mula sa protocol ng kahilingan, tinatanong ang planner kung kailangan pa ng panibagong tool round,
-at dinamikong ginagawang panghuling hakbang na nakaharap sa client ang executor o ang planner.
+Ang `pipeline` combo na may hindi bababa sa dalawang modelo ay maaaring mag-opt in sa planner/executor routing gamit ang `config.agenticOrchestration.enabled`. Ang unang target ay nagmamay-ari ng pagpaplano at mga huling sagot; ang pangalawang target ay naglalabas ng mga tawag sa tool na native ng kliyente. Nakikita OmniRoute ang mga pagpapatuloy ng resulta ng tool mula sa protocol ng kahilingan, tinanong ang tagaplano kung kailangan ng isa pang pag-ikot ng tool, at dynamic na ginagawa ang alinman sa tagapagpatupad o tagaplano bilang huling hakbang na nakaharap sa kliyente.
 
-Ang mga karagdagang modelo pagkatapos ng pangalawang target ay inayos bilang mga backup na executor. Kapag nabigo ang isang
-HTTP response o nagkaroon ng transport exception, lilipat sa susunod na executor, habang dinadala ang
-parehong desisyon ng planner at mga native tool ngunit ginagamit ang sariling step prompt at
-naresolbang koneksyon ng executor na iyon. Ang unang matagumpay na tugon ay ibinabalik nang walang pagbabago, kabilang ang
-SSE streaming; ang mga pagkabigo pagkatapos magsimula ang isang matagumpay na stream ay hindi na maaaring subukang muli rito.
-Kung mabigo ang lahat ng executor, ibinabalik ang huling pagkabigo. Ihihinto ng mga client abort ang pagpapadala.
+Sa mga pagpapatuloy ng resulta ng tool, ihihinto din OmniRoute ang pagpapatupad kapag ang dalawang magkasunod na nakumpletong round ay inuulit ang parehong mga tawag sa tool na may hindi nabagong mga resulta, o kapag ang bawat tahasang minarkahan ay nagresulta sa dalawang magkasunod na round na nabigo. Pinahihintulutan ng mga binagong resulta ang mga paulit-ulit na tawag (halimbawa, pagboto). Nagre-reset ang guard sa isang bagong kahilingan ng user, pinapangkat ang magkakatulad na tawag sa isang round, at sinusuportahan ang mga kasaysayan ng Anthropic, Mga Pagkumpleto ng Chat, Mga Tugon at Gemini. Natatanggap ng tagaplano ang dahilan at nagmamay-ari ng huling sagot kahit na humiling ito ng isa pang tool round.
+
+Ang mga karagdagang modelo pagkatapos ng pangalawang target ay iniutos na mga backup ng executor. Ang isang nabigong tugon HTTP o pagbubukod sa transportasyon ay umuusad sa susunod na tagapagpatupad, dala ang parehong desisyon ng tagaplano at mga katutubong tool ngunit ang sariling hakbang ng tagapagpatupad na iyon ay nag-udyok at nalutas ang koneksyon. Ang unang matagumpay na tugon ay ibinalik nang hindi nagbabago, kabilang ang SSE streaming; Ang mga pagkabigo pagkatapos magsimula ang isang matagumpay na stream ay hindi maaaring muling subukan dito. Kung nabigo ang lahat ng tagapagpatupad, ibabalik ang huling kabiguan. Ipinaabort ng kliyente ang paghinto ng pagpapadala.
 
 ```json
 {
@@ -353,11 +369,7 @@ Kung mabigo ang lahat ng executor, ibinabalik ang huling pagkabigo. Ihihinto ng 
 }
 ```
 
-Maaaring maglabas ang executor ng maraming magkakahiwalay na call sa isang tugon. Ang mga magkakaugnay na call ay
-pinangangasiwaan sa mga susunod na client tool-result turn, at sinusuri ng planner ang bawat resulta.
-Ang default ng `maxToolRounds` ay `8` at tumatanggap ito ng `1`–`32`; kapag naabot na ito, dapat
-ibigay ng planner ang pinakamahusay na panghuling sagot na available. Binu-buffer ang mga panloob na desisyon ng planner, habang
-pinapanatili ng napiling tugon na nakaharap sa client ang orihinal na kagustuhan sa streaming.
+Ang tagapagpatupad ay maaaring maglabas ng maraming independiyenteng tawag sa isang tugon. Ang mga dependent na tawag ay pinangangasiwaan sa mga susunod na pagliko ng tool-resulta ng kliyente, na sinusuri ng tagaplano ang bawat resulta. Nagde-default `maxToolRounds` sa `8` at tinatanggap ang `1`–`32`; kapag naabot na, ang tagaplano ay dapat gumawa ng pinakamahusay na magagamit na panghuling sagot. Bina-buffer ang mga desisyon sa panloob na tagaplano, habang pinapanatili ng napiling tugon na nakaharap sa kliyente ang orihinal na kagustuhan sa streaming.
 
 ### `round-robin` sticky batch at pagpapalawak ng account
 

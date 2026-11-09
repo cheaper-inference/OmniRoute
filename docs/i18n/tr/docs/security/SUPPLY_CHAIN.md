@@ -37,11 +37,11 @@ osv veya Trivy yeni açıklanan bir CVE nedeniyle başarısız olduğunda çöz�
 
 Zorunlu OSV yürütmeleri (`check:vuln-ratchet -- --ratchet`), tarayıcı, rapor veya temel değer doğrulanamadığında güvenli biçimde başarısız olur; `INCOMPLETE` ile çıkış kodu 2 döndürür. Ölçülen bir regresyon, çıkış kodu 1 döndürür. Tavsiye niteliğindeki yürütme yine de `SKIP` bildirip çıkış kodu 0 döndürebilir; bu, bağımlılıkların taramayı geçtiğini kanıtlamaz. Engelleyici Trivy adımı da başarılı bir ölçüm gerektirir: kullanılamayan araçlar, başarısız işler ve eksik imaj kanıtları, bir imajın temiz olduğunu doğrulayamaz.
 
-## Kullanımdan kaldırılmış bağımlılık riski
+## Emekli bağımlılık riski
 
-Sabitlenmiş promptfoo geliştirme aracının yükseltilmesinin ardından kök kilit dosyası artık `extract-zip` paketini veya ona yönelik bir bağımlılık bağlantısını içermiyor. Bu değişiklik, #14482 kapsamında izlenen ve daha önce kabul edilmiş olan `promptfoo` → `@openai/codex-security` → `extract-zip` zincirini kullanımdan kaldırıyor. `tests/unit/extract-zip-14482-exposure.test.ts` içindeki regresyon kontrolleri, bu zincirin yeniden eklenmesini engelliyor ve üretim kodundan içe aktarma yasağını sürdürüyor.
+Kök kilit dosyası, sabitlenmiş Promptfoo geliştirme aracının yükseltilmesinden sonra artık `extract-zip` veya ona bir bağımlılık kenarı içermiyor. Bu, #14482 içinde izlenen daha önce kabul edilen `promptfoo` → `@openai/codex-security` → `extract-zip` zincirini kullanımdan kaldırır. `tests/unit/extract-zip-14482-exposure.test.ts` regresyon kontrolleri, yeniden uygulanmasını reddeder ve üretim kodundan ithalat yasağını korur.
 
-Mevcut bağımlılık düzeltmesi, Azure identity'nin MSAL istemcisi, get-uri'nin FTP istemcisi ve her iki OpenCode eklenti paketindeki Zod için uyumluluk geçersiz kılmaları içerir. Azure belirteci edinimi ve FTP üzerinden alma işlemi, kontrollü taşıma mekanizmalarıyla test edilir; her iki OpenCode paketi de kendi derleme ve test paketlerini çalıştırır. Kayıt defteri güvenlik uyarılarının sayısı, belirli bir andaki ölçümleri temsil eder ve kilit dosyası commit edildikten sonra değişebilir.
+Mevcut bağımlılık onarımı aynı zamanda Azure kimliğinin MSAL istemcisine ve get-uri'nin FTP istemcisine yönelik uyumluluk geçersiz kılmalarını da kapsar. Azure belirteci alımı ve FTP alımı, kontrollü aktarımlarla test edilmiştir; her iki OpenCode paketi de kendi derleme ve test paketlerini çalıştırır. Kayıt defteri tavsiye sayımları belirli bir zamanda yapılan ölçümlerdir ve kilit dosyası kaydedildikten sonra değişebilir.
 
 ## Bekleyenler: Scorecard danışmanlığı → engelleme
 

@@ -315,7 +315,7 @@ GET /v1/embeddings
 
 ---
 
-## የምስል ማመንጨት
+## ምስል ማመንጨት
 
 ```bash
 POST /v1/images/generations
@@ -329,30 +329,22 @@ Content-Type: application/json
 }
 ```
 
-የሚገኙ አቅራቢዎች OpenAI (GPT Image 2)፣ xAI (Grok Image)፣ Together AI (FLUX)፣ Fireworks AI፣ Nebius (FLUX)፣ Hyperbolic፣ NanoBanana፣ **OpenRouter**፣ **ZenMux**፣ SD WebUI (አካባቢያዊ) እና ComfyUI (አካባቢያዊ) ያካትታሉ።
+የሚገኙ አቅራቢዎች OpenAI (GPT ምስል 2)፣ xAI (Grok ምስል)፣ Together AI (FLUX)፣ Fireworks AI፣ ኔቢየስ (FLUX)፣ ሃይፐርቦሊክ፣ NanoBanana፣**OpenRouter** ,**ZenMux** , SD WebUI (አካባቢያዊ)፣ ComfyUI (አካባቢያዊ)።
 
-`n` በ`data[]` ውስጥ `n` ምስሎችን ይመልሳል። የአቅራቢዎች upstream API በእያንዳንዱ ጥሪ አንድ ምስል የሚመልሱ
-(Black Forest Labs፣ Stability AI፣ Leonardo፣ Ideogram፣ Haiper፣ Hyperbolic፣ Magnific/Freepik፣
-NVIDIA NIM፣ Cloudflare Workers AI) እስከ 4 በተመሳሳይ ጊዜ በሂደት ላይ ሆነው `n` የተለያዩ upstream ጥሪዎችን ያደርጋሉ። ቋሚ
-`seed` በጥሪ ኢንዴክስ (`seed`፣ `seed + 1`፣ …) ይጨምራል፤ ስለዚህ ምስሎቹ የተለያዩ ቢሆኑም እንደገና ሊመነጩ ይችላሉ። `n` ከ10 አይበልጥም። ማንኛውም ጥሪ ካልተሳካ ጥያቄው በአጠቃላይ አይሳካም። የfan-out ቅርጸቶች ዝርዝር በ
-`open-sse/handlers/imageGeneration/fanOut.ts` ውስጥ `SINGLE_IMAGE_FANOUT_FORMATS` ነው።
+`n` `n` ምስሎችን በ `data[]` ይመልሳል። ወደ ላይ ያለው API በአንድ ጥሪ አንድ ምስል የሚመልስ አቅራቢዎች (ጥቁር የደን ላብስ፣ መረጋጋት AI፣ ሊዮናርዶ፣ አይዲዮግራም፣ ሃይፐር፣ ሃይፐርቦሊክ፣ Magnific/Freepik፣ NVIDIA NIM፣ Cloudflare Workers AI) `n` በቀጥታ የሚተላለፉ ጥሪዎችን ያገኛሉ፣ ቢበዛ 4 በረራ። ቋሚ `seed` በጥሪ መረጃ ጠቋሚ (`seed`፣ `seed + 1`፣…) ተሽጧል፣ ስለዚህ ምስሎቹ ይለያያሉ ነገር ግን መባዛት የሚችሉ ሆነው ይቆያሉ። `n` በ 10 ተይዟል. ማንኛውም ጥሪ ካልተሳካ ጥያቄው በአጠቃላይ አይሳካም. የደጋፊ-ውጭ ቅርጸቶች ዝርዝር `SINGLE_IMAGE_FANOUT_FORMATS` በ `open-sse/handlers/imageGeneration/fanOut.ts` ነው።
 
-ZenMux ነባሩን የAPI-ቁልፍ ግንኙነት እንደገና ይጠቀማል፤ እንዲሁም `zenmux/` ወይም `zm/` ቅድመ-ቅጥያዎችን ይቀበላል፦
+ZenMux ያለውን የኤፒአይ-ቁልፍ ግንኙነት እንደገና ይጠቀማል እና `zenmux/` ወይም `zm/` ቅድመ ቅጥያዎችን ይቀበላል
 
-- `zenmux/openai/gpt-image-2` የZenMux OpenAI Images APIን ይጠቀማል። አማራጮቹ `size`፣
-  `quality`፣ `n`፣ `output_format`፣ `output_compression`፣ `background` እና `response_format` ያካትታሉ።
-- እንደ `zm/meta/muse-image-1.0` ያሉ ሌሎች አታሚዎች የZenMux Vertex AI `:predict`
-  ኤንድፖይንትን ይጠቀማሉ። `n` ወደ `sampleCount`፣ `aspect_ratio` ወደ `aspectRatio` እና `image_size`
-  (`1K`፣ `2K`፣ `4K`) ወደ `sampleImageSize` ይተረጎማሉ። የፒክሰል `size` የሚያቀርበው የምስል ገጽታ ሬሾ ብቻ ነው፤ የተወሰነ የፒክሰል መጠን እንደሚሰጥ ዋስትና የለም። የሚደገፉ ሬሾዎች፣ ጥራቶች እና ብዛቶች እንደ ሞዴሉ ይለያያሉ።
-- `zm/inclusionai/ming-image-0.1-design` የራሱን መጠኖች ይመርጣል። `size`፣
-  `aspect_ratio` እና `image_size` ይተዉ፤ ግልጽ እሴቶች ከተሰጡ HTTP 400 ይመልሳሉ። PNG፣ JPEG እና WebP
-  በ`output_format` ሊጠየቁ ይችላሉ።
+- `zenmux/openai/gpt-image-2` ZenMux's OpenAI ምስሎችን ይጠቀማል API. አማራጮች `size`, `quality`, `n`, `output_format`, `output_compression`, `background` እና `response_format` ያካትታሉ።
+- እንደ `zm/meta/muse-image-1.0` ያሉ ሌሎች አታሚዎች የ ZenMux's Vertex AI `:predict` የመጨረሻ ነጥብን ይጠቀማሉ። `n` ካርታዎች ወደ `sampleCount`, `aspect_ratio` ወደ `aspectRatio`, እና `image_size` (`1K`, `2K`, `4K`) ወደ `sampleImageSize`. አንድ ፒክሰል `size` ምጥጥን ብቻ ነው የሚያቀርበው እንጂ ዋስትና ያለው የፒክሰል ልኬቶች አይደለም። የሚደገፉ ሬሾዎች፣ ጥራቶች እና ቆጠራዎች እንደ ሞዴል ይለያያሉ።
+- `zm/inclusionai/ming-image-0.1-design` የራሱን ልኬቶች ይመርጣል. `size`፣ `aspect_ratio` እና `image_size`; ግልጽ የሆኑ እሴቶችን መመለስ HTTP 400. PNG, JPEG, እና WebP በ `output_format` ሊጠየቁ ይችላሉ.
 
-ይህ ውህደት ከጽሑፍ ወደ ምስል ማመንጨትን ይደግፋል፤ የማጣቀሻ ምስል ማርትዕን አይደግፍም። የVertex ውጤት ወደ `data[].b64_json` መደበኛ ይደረጋል፤ `response_format: "url"` የupstream HTTPS URL ወይም የምስል ባይቶች ብቻ በሚገኙበት ጊዜ base64 data URL ይመልሳል። ባዶ ወይም የተጣሩ ውጤቶች ባዶ ስኬት ከመመለስ ይልቅ ስህተት ያስከትላሉ። የሞዴል መዳረሻ በZenMux መለያ ላይ ይመሰረታል። [የZenMux Vertex API](https://docs.zenmux.ai/api/vertexai/generate-images) እና
-[የOpenAI Images API](https://docs.zenmux.ai/api/openai/generate-an-image) ይመልከቱ።
+ይህ ውህደት የጽሑፍ-ወደ-ምስል ማመንጨትን ይደግፋል እንጂ የማጣቀሻ-ምስል ማስተካከያ አይደለም። የቬርቴክስ ውፅዓት ወደ `data[].b64_json` የተለመደ ነው; የምስል ባይት ብቻ ሲገኝ `response_format: "url"` የላይኛውን HTTPS URL ወይም ቤዝ64 ዳታ URL ይመልሳል። Empty/filtered ውጤቶች ከባዶ ስኬት ይልቅ ስህተትን ይመልሳሉ። የሞዴል መዳረሻ በ ZenMux መለያ ይወሰናል። [ZenMux's Vertex API](https://docs.zenmux.ai/api/vertexai/generate-images) እና [OpenAI ምስሎች API](https://docs.zenmux.ai/api/openai/generate-an-image) ይመልከቱ።
+
+የ Microsoft 365 Copilot መግቢያ ግንኙነት `copilot-m365-web/m365-copilot-image` በ Copilot አብሮ በተሰራው የምስል መሳሪያ በኩል ያገለግላል፡ በአንድ ምስል አንድ Copilot መታጠፊያ (`n` 1–4)፣ `size` አቅጣጫውን ብቻ በመምራት እና ምስሎች ወደ ውስጥ ተመልሰዋል (`b64_json`፣ ወይም የውሂብ URL ለ `response_format: "url"`)። [Microsoft 365 Copilot](../providers/COPILOT-M365.md#image-generation) ይመልከቱ።
 
 ```bash
-# ሁሉንም የምስል ሞዴሎች ይዘርዝሩ
+# List all image models
 GET /v1/images/generations
 ```
 
@@ -729,17 +721,19 @@ POST /v1/providers/{provider}/images/generations
 
 ---
 
-## የፍለጋ API
+## API ፈልግ
 
-የድር/የፍለጋ አቅራቢዎች አብስትራክሽን (Tavily፣ Brave፣ Exa፣ Serper እና ሌሎች)።
+Web/search አቅራቢ ማጠቃለያ (Tavily, Brave, Exa, Serper, ወዘተ.)
 
-| Method | Path                   | Description                                                     |
-| ------ | ---------------------- | --------------------------------------------------------------- |
-| GET    | `/v1/search`           | የተዋቀሩ የፍለጋ አቅራቢዎችን እና ችሎታዎቻቸውን ይዘርዝሩ                            |
-| POST   | `/v1/search`           | የፍለጋ ጥያቄን ያስኬዱ — አካሉ በ`v1SearchSchema` ይረጋገጣል፣ መሸጎጥ/ማጣመርን ይደግፋል |
-| GET    | `/v1/search/analytics` | በአቅራቢ ደረጃ የሚገኙ የውጤት/መዘግየት/መሸጎጫ ስታቲስቲክስ                          |
+| ዘዴ   | መንገድ                   | መግለጫ                                                                    |
+| ---- | ---------------------- | ----------------------------------------------------------------------- |
+| GET  | `/v1/search`           | የተዋቀሩ የፍለጋ አቅራቢዎች + ችሎታዎችን ይዘርዝሩ                                        |
+| POST | `/v1/search`           | የፍለጋ ጥያቄን ያሂዱ — አካል በ `v1SearchSchema` የተረጋገጠ፣ caching/coalescing ይደግፋል |
+| GET  | `/v1/search/analytics` | በአንድ አቅራቢ hit/latency/cache ስታቲስቲክስ                                     |
 
-**ማረጋገጫ:** Bearer API ቁልፍ (`extractApiKey` + `isValidApiKey`)። የፍለጋ ፖሊሲ በ`enforceApiKeyPolicy` ይተገበራል።
+**ማረጋገጫ፡** ተሸካሚ API ቁልፍ (`extractApiKey` + `isValidApiKey`)። የፍለጋ መመሪያ በ `enforceApiKeyPolicy` ተፈጻሚ ነው።
+
+**ራስ-ሰር ይምረጡ፡** ያለ `provider`፣ የተዋቀረው ግንኙነት ያለው በጣም ርካሹ አቅራቢ በመጀመሪያ ይሰራል እና ቀጣዩ ርካሽ የሆነው ውድቀት ነው። ነጻ የመጨረሻ ሪዞርት አቅራቢዎች (`duckduckgo-free`) ጥቅም ላይ የሚውሉት ምንም ነገር ካልተዋቀረ ብቻ ነው። በራሱ የሚስተናገድ SearXNG አንዴ እንደተዋቀረ ይቆጥራል ግንኙነቱ ትክክለኛ `baseUrl` (ካታሎግ ነባሪ `http://localhost:8888/search` አይደለም) `baseUrl` ፡ ከዛ እንደ $0 አቅራቢ ከቁልፍ ቀድመው ያስቀምጣል፣ በጣም ርካሹ የቁልፍ አቅራቢው URL `http(s)` SearXNG 400፣ 401፣ 403 ወይም 404 ሲመልስ ጨምሮ። መቁጠር. ማስመሰያ የሚያከማች የ SearXNG ግንኙነት በዚህ መንገድ ደረጃ የሚሰጠው `https://` ወይም loopback `http://` ብቻ ነው። ከርቀት `http://` በላይ በጭራሽ አይሳካም እና የመጨረሻ አማራጭ ሆኖ ይቆያል ፣ ሌላ አቅራቢ ካልተዋቀረ ወይም በስም ሲጠየቅ ብቻ ጥቅም ላይ ይውላል ፣ ስለዚህ በእነዚያ ሁለት ጉዳዮች ላይ ቶክን በንፁህ ጽሑፍ ውስጥ ይልካል ።
 
 ### የExa እና Tavily `provider_options`
 
@@ -890,30 +884,28 @@ CLIው `base_url + /responses`ን ወደ WebSocket ያሳድጋል፣ OmniRoute�
 
 ---
 
-## ራስ-አገልግሎት አጠቃቀም (`/api/usage/om-usage`)
+## የራስ አገልግሎት አጠቃቀም (`/api/usage/om-usage`)
 
-ማንኛውም API key የራሱን አጠቃቀም እና ኮታዎች ማንበብ ይችላል — የአስተዳደር ማረጋገጫ አያስፈልግም። ይህ የደንበኛ
-(CLI፣ የOmniCopilot ፓነል) ቁልፍ ባለቤቱ ያወጣውን ወጪ ለማሳየት የሚጠቀምበት የመጨረሻ ነጥብ ነው።
+ማንኛውም API ቁልፍ ማንበብ ይችላል።**የራሱ ነው።** አጠቃቀም እና ኮታዎች — ምንም የአስተዳደር ማረጋገጫ የለም። ይህ አንድ ደንበኛ (CLI፣ የ OmniCopilot ፓነል) ቁልፍ መያዣውን ወጪያቸውን ለማሳየት የሚጠቀመው የመጨረሻ ነጥብ ነው።
 
 ```bash
-# የጽሑፍ ቅርጽ (ታሪካዊው ውል — ለተርሚናል የሚሆን ግልጽ ጽሑፍ)
+# Text form (the historical contract — plain text for a terminal)
 curl -H "Authorization: Bearer <your-api-key>" \
   http://localhost:20128/api/usage/om-usage
 
-# የተዋቀረ ቅርጽ — UI የሚጠቀምበት
+# Structured form — what a UI consumes
 curl -H "Authorization: Bearer <your-api-key>" \
   "http://localhost:20128/api/usage/om-usage?format=json"
 ```
 
-ቁልፉ **`allowUsageCommand`** የነቃለት መሆን አለበት (በነባሪ ዝግ ነው — የዳሽቦርዱ API-key
-አስተዳዳሪ ይህን በእያንዳንዱ ቁልፍ ላይ ያቀያይራል)። ይህ ካልሆነ የመጨረሻ ነጥቡ `403` ይመልሳል።
+ቁልፉ ሊኖረው ይገባል **`allowUsageCommand`** ነቅቷል (በነባሪነት — የዳሽቦርዱ ኤፒአይ-ቁልፍ አስተዳዳሪ በቁልፍ ይቀይረዋል)። ያለ እሱ የመጨረሻ ነጥብ መልስ ይሰጣል `403`.
 
-`?format=json` ጠሪው ከእምቢታ ምላሽ ላይ የውሂብ መስክ እንዳያነብ የሚያደርግ የተለየ ቅርጽ ይመልሳል። በስኬት፦
+`?format=json` አድልዎ የተደረገበትን ቅርጽ ይመልሳል ስለዚህ ደዋዩ ከእምቢታ ውጭ የውሂብ መስክን በጭራሽ አያነብም። በስኬት ላይ፡-
 
 ```jsonc
 {
   "allowed": true,
-  // ቁልፉ በእያንዳንዱ ቁልፍ የአጠቃቀም ገደቦችን (ዕለታዊ/ሳምንታዊ USD) ለመጠቀም ሲመርጥ ብቻ ይኖራል፦
+  // present only when the key opted into per-key usage limits (daily/weekly/5-hour USD):
   "personal": {
     "dailySpentUsd": 1.25,
     "dailyLimitUsd": 5,
@@ -922,9 +914,9 @@ curl -H "Authorization: Bearer <your-api-key>" \
     "weeklyLimitUsd": 20,
     "weeklyResetAtIso": "…" /* … */,
   },
-  // የተመረጠው የአቅራቢ ኮታ ቅጽበታዊ መረጃ፣ እስካሁን ምንም ካልተሸመጠ ነው፦
+  // the selected provider quota snapshot, or null when nothing is cached yet:
   "provider": { "connectionId": "…", "provider": "claude", "plan": "…", "quotas": {/* … */} },
-  // UI በርካታ አቅራቢዎችን ጎን ለጎን ማሳየት እንዲችል የእያንዳንዱ ግንኙነት ቅጽበታዊ መረጃ፦
+  // every connection's snapshot, so a UI can render several providers side by side:
   "providers": [
     { "connectionId": "…", "provider": "claude" /* … */ },
     { "provider": "codex" /* … */ },
@@ -932,13 +924,9 @@ curl -H "Authorization: Bearer <your-api-key>" \
 }
 ```
 
-በእምቢታ (`401` የተሳሳተ ቁልፍ / `403` ያልተፈቀደ) ተመሳሳይ መንገድ
-`{ "allowed": false, "error": { "message": "…" } }` ይመልሳል — የተገኘ ነገር ግን ባዶ `personal`/`provider`
-(ቁልፉ የተፈቀደ ሲሆን እስካሁን ምንም ያልተገኘ) ከእምቢታ የተለየ ሁኔታ ነው፣ እና ይህንን ልዩነት
-የሚያሳየው የJSON ቅርጽ ብቻ ነው።
+በእምቢታ (`401` መጥፎ ቁልፍ / `403` አይፈቀድም) ተመሳሳይ መንገድ `{ "allowed": false, "error": { "message": "…" } }` — ይመልሳል አሁን-ግን ባዶ `personal`/`provider` (ቁልፍ አይፈቀድም፣ እስካሁን ምንም አልተማረም) ከእምቢታ የተለየ ሁኔታ ነው፣ እና የ JSON ቅጽ ብቻ ይለያቸዋል።
 
-**ማረጋገጫ:** የጠሪው የራሱ Bearer API key፣ በ`isValidApiKey` የተረጋገጠ — ይህ
-የአስተዳደር ገጽ (`/api/keys/…`) አይደለም፣ ይህም ከ`requireManagementAuth` ጥበቃ ስር ይቆያል።
+**ማረጋገጫ፡** የደዋዩ የራሱ ተሸካሚ API ቁልፍ፣ በ `isValidApiKey` — የተረጋገጠ ይህ _አይደለም_የአስተዳደር ወለል (`/api/keys/…`)፣ ከ `requireManagementAuth` በስተጀርባ የሚቆይ።
 
 ### ጥሬ እና በመቁረጫ የተስተካከሉ የኮታ መቶኛዎች
 
@@ -1180,40 +1168,41 @@ https://chatgpt.com/backend-api/wham/usage`፣ `GET .../wham/rate-limit-reset-cr
 | `/api/usage/model-latency-stats` | GET             | በአቅራቢ/ሞዴል የተለያየ በተከታታይ የሚሰበሰብ የመዘግየት አጠቃላይ መረጃ (አማካይ/p50/p95/p99፣ የስኬት መጠን)፤ ማጣሪያዎች፦ `windowHours`/`minSamples`/`maxRows`/`provider`/`model` (#6873)                                                                                                       |
 | `/api/usage/cache-health`        | GET             | በ`call_logs` ላይ የተመሠረተ የፕሮምፕት መሸጎጫ ጤና ማጠቃለያ — የመጻፍ/የማንበብ ሬሾ፣ የp50/p90/p99 የመጻፍ መጠን ስርጭት፣ የከባድ መጻፍ ትኩረት፣ በሞዴል የተከፋፈለ መረጃ እና `healthy`/`degraded`/`thrash`/`no-data` ውሳኔ፤ የጥያቄ መለኪያዎች `range` (`1h`\|`24h`\|`7d`\|`30d`፣ ነባሪው `24h`) እና አማራጭ `model` (#8827) |
 
-### የAPI ቁልፍ ፈቃዶች
+### API ቁልፍ ፈቃዶች
 
-`PATCH /api/keys/{id}` የነባር ቁልፍ ፈቃዶችን ያዘምናል። እንደማንኛውም `/api/keys*` መንገድ፣ የአስተዳደር ፈቃድ ያስፈልገዋል ( [የአስተዳደር ማረጋገጫ](../guides/MANAGEMENT-AUTH.md)ን ይመልከቱ)፤ የመገመቻ ቁልፍ አይደለም። ሊቀይሯቸው የሚፈልጓቸውን መስኮች ብቻ ይላኩ፤ ከእነዚህ ውስጥ አንዳቸውም የሌሉበት ጥያቄ `No valid fields to update` በሚል ውድቅ ይደረጋል። የሚቀበላቸው መስኮች በ`src/shared/validation/schemas/keys.ts` ውስጥ ባለው `updateKeyPermissionsSchema` ይገለጻሉ።
+`PATCH /api/keys/{id}` ነባር የቁልፍ ፈቃዶችን ያዘምናል። እንደ ማንኛውም `/api/keys*` መንገድ የአስተዳደር ፈቃድ ያስፈልገዋል ( [የአስተዳደር ማረጋገጫን](../guides/MANAGEMENT-AUTH.md) ይመልከቱ)፣ የማጣቀሻ ቁልፍ አይደለም። መለወጥ የሚፈልጉትን መስኮች ብቻ ይላኩ; ከአንዳቸውም ጋር የቀረበ ጥያቄ ከ `No valid fields to update` ጋር ውድቅ ይደረጋል. ተቀባይነት ያላቸው መስኮች በ `src/shared/validation/schemas/keys.ts` ውስጥ በ `updateKeyPermissionsSchema` ተገልጸዋል.
 
-| መስክ                                         | አይነት                                                        | ማስታወሻ                                                                                                      |
-| ------------------------------------------- | ----------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| `name`                                      | ሕብረቁምፊ፣ 1-200 ቁምፊዎች                                         |                                                                                                            |
-| `isActive`                                  | ቡሊያን                                                        |                                                                                                            |
-| `isBanned`                                  | ቡሊያን                                                        |                                                                                                            |
-| `expiresAt`                                 | ISO 8601 የቀን እና ሰዓት ወይም `null`                              | `null` የማብቂያ ጊዜውን ያጠፋል                                                                                     |
-| `modelAccessMode`                           | `all` \| `restricted`                                       | ሁነታው `all` ሲሆን `allowedModels` ባዶ መሆን አለበት                                                                 |
-| `allowedModels`, `blockedModels`            | እስከ 1000 የሚደርሱ የሕብረቁምፊዎች ድርድር                               |                                                                                                            |
-| `allowedCombos`                             | እስከ 500 የሚደርሱ የሕብረቁምፊዎች ድርድር                                | ቁልፉ ሊጠራቸው የሚችላቸውን combos ይወስናል፤ ቀጥተኛ ሞዴሎች በ`modelAccessMode` / `allowedModels` ይተዳደራሉ                      |
-| `connectionAccessMode`                      | `all` \| `restricted`                                       | `restricted` ሲሆን `allowedConnections` ባዶ መሆን የለበትም፣ `all` ሲሆን ግን ባዶ መሆን አለበት                               |
-| `allowedConnections`                        | እስከ 100 የሚደርሱ UUIDዎች ድርድር                                   |                                                                                                            |
-| `allowAutoCombos`                           | ቡሊያን                                                        | `false` በዚህ ቁልፍ `auto/*` ሞዴሎች የሚጠይቁ ጥያቄዎችን ውድቅ ያደርጋል፤ ይህን ቅንብር በጭራሽ ያላስቀመጡ ቁልፎች ይፈቀድላቸዋል                   |
-| `catalogScope`                              | `all` \| `combos` \| `models`                               | `GET /v1/models` ለዚህ ቁልፍ ምን እንደሚዘረዝር ይወስናል (combos ብቻ፣ models ብቻ ወይም ሁለቱም)፤ ቁልፉ ሊጠራው የሚችለውን ነገር አይቀይርም     |
-| `forcedModel`                               | እስከ 300 ቁምፊዎች የሚሆን ሕብረቁምፊ ወይም `null`                        | የውይይት ጥያቄዎችን ወደዚህ ሞዴል/combo ይመራል፣ ከ`X-Route-Model` እና `body.model` በላይ ቅድሚያ ይኖረዋል፤ የቁልፉ ገደቦች አሁንም ተፈጻሚ ናቸው |
-| `noLog`, `autoResolve`                      | ቡሊያን                                                        |                                                                                                            |
-| `throttleDelayMs`                           | ኢንቲጀር፣ 0-300000                                             |                                                                                                            |
-| `maxSessions`                               | ኢንቲጀር፣ 0-10000                                              |                                                                                                            |
-| `rateLimits`                                | የ`{ limit, window }` ድርድር (አዎንታዊ ኢንቲጀሮች፣ እስከ 50) ወይም `null` | `null` ገደቦቹን ያጠፋል                                                                                          |
-| `accessSchedule`                            | የጊዜ ሰሌዳ ነገር ወይም `null`                                      | `null` የጊዜ ሰሌዳውን ያጠፋል                                                                                      |
-| `scopes`                                    | እስከ 32 የሚደርሱ የሕብረቁምፊዎች ድርድር                                 |                                                                                                            |
-| `allowedEndpoints`                          | እስከ 20 የሚደርሱ የሕብረቁምፊዎች ድርድር                                 |                                                                                                            |
-| `streamDefaultMode`                         | `legacy` \| `json`                                          |                                                                                                            |
-| `cacheDefaultMode`                          | `legacy` \| `bypass`                                        | [በእያንዳንዱ ቁልፍ የመሸጎጫ ማለፊያ](#per-key-cache-bypass) ይመልከቱ                                                      |
-| `compressionEnabled`                        | ቡሊያን                                                        |                                                                                                            |
-| `codexServiceMode`                          | ከCodex የአገልግሎት ሁነታዎች አንዱ                                    |                                                                                                            |
-| `disableNonPublicModels`                    | boolean                                                     |                                                                                                            |
-| `allowUsageCommand`                         | boolean                                                     |                                                                                                            |
-| `usageLimitEnabled`                         | boolean                                                     |                                                                                                            |
-| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | number >= 0 or `null`                                       |                                                                                                            |
-| `chaosModeEnabled`                          | boolean                                                     |                                                                                                            |
+| መስክ                                         | አይነት                                                        | ማስታወሻ                                                                                                                                                                                                    |
+| ------------------------------------------- | ----------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`                                      | ሕብረቁምፊ፣ 1-200 ቁምፊዎች                                         |                                                                                                                                                                                                          |
+| `isActive`                                  | ቡሊያን                                                        |                                                                                                                                                                                                          |
+| `isBanned`                                  | ቡሊያን                                                        |                                                                                                                                                                                                          |
+| `expiresAt`                                 | ISO 8601 የቀን እና ሰዓት ወይም `null`                              | `null` የማብቂያ ጊዜውን ያጠፋል                                                                                                                                                                                   |
+| `modelAccessMode`                           | `all` \| `restricted`                                       | ሁነታው `all` ሲሆን `allowedModels` ባዶ መሆን አለበት                                                                                                                                                               |
+| `allowedModels`, `blockedModels`            | የሕብረቁምፊዎች ድርድር፣ እስከ 1000                                    |                                                                                                                                                                                                          |
+| `allowedCombos`                             | እስከ 500 የሚደርሱ የሕብረቁምፊዎች ድርድር                                | ቁልፉ ሊጠራቸው የሚችላቸውን combos ይወስናል፤ ቀጥተኛ ሞዴሎች በ`modelAccessMode` / `allowedModels` ይተዳደራሉ                                                                                                                    |
+| `connectionAccessMode`                      | `all` \| `restricted`                                       | `restricted` ሲሆን `allowedConnections` ባዶ መሆን የለበትም፣ `all` ሲሆን ግን ባዶ መሆን አለበት                                                                                                                             |
+| `allowedConnections`                        | እስከ 100 የሚደርሱ UUIDዎች ድርድር                                   |                                                                                                                                                                                                          |
+| `allowAutoCombos`                           | ቡሊያን                                                        | `false` በዚህ ቁልፍ `auto/*` ሞዴሎች የሚጠይቁ ጥያቄዎችን ውድቅ ያደርጋል፤ ይህን ቅንብር በጭራሽ ያላስቀመጡ ቁልፎች ይፈቀድላቸዋል                                                                                                                 |
+| `catalogScope`                              | `all` \| `combos` \| `models`                               | `GET /v1/models` ለዚህ ቁልፍ ምን እንደሚዘረዝር ይወስናል (combos ብቻ፣ models ብቻ ወይም ሁለቱም)፤ ቁልፉ ሊጠራው የሚችለውን ነገር አይቀይርም                                                                                                   |
+| `forcedModel`                               | እስከ 300 ቁምፊዎች የሚሆን ሕብረቁምፊ ወይም `null`                        | የውይይት ጥያቄዎችን ወደዚህ ሞዴል/combo ይመራል፣ ከ`X-Route-Model` እና `body.model` በላይ ቅድሚያ ይኖረዋል፤ የቁልፉ ገደቦች አሁንም ተፈጻሚ ናቸው                                                                                               |
+| `noLog`, `autoResolve`                      | ቡሊያን                                                        |                                                                                                                                                                                                          |
+| `throttleDelayMs`                           | ኢንቲጀር፣ 0-300000                                             |                                                                                                                                                                                                          |
+| `maxSessions`                               | ኢንቲጀር፣ 0-10000                                              |                                                                                                                                                                                                          |
+| `rateLimits`                                | የ`{ limit, window }` ድርድር (አዎንታዊ ኢንቲጀሮች፣ እስከ 50) ወይም `null` | `null` ገደቦቹን ያጠፋል                                                                                                                                                                                        |
+| `accessSchedule`                            | የጊዜ ሰሌዳ ነገር ወይም `null`                                      | `null` የጊዜ ሰሌዳውን ያጠፋል                                                                                                                                                                                    |
+| `scopes`                                    | እስከ 32 የሚደርሱ የሕብረቁምፊዎች ድርድር                                 |                                                                                                                                                                                                          |
+| `allowedEndpoints`                          | እስከ 20 የሚደርሱ የሕብረቁምፊዎች ድርድር                                 |                                                                                                                                                                                                          |
+| `streamDefaultMode`                         | `legacy` \| `json`                                          |                                                                                                                                                                                                          |
+| `cacheDefaultMode`                          | `legacy` \| `bypass`                                        | [በእያንዳንዱ ቁልፍ የመሸጎጫ ማለፊያ](#per-key-cache-bypass) ይመልከቱ                                                                                                                                                    |
+| `compressionEnabled`                        | ቡሊያን                                                        |                                                                                                                                                                                                          |
+| `codexServiceMode`                          | ከCodex የአገልግሎት ሁነታዎች አንዱ                                    |                                                                                                                                                                                                          |
+| `disableNonPublicModels`                    | boolean                                                     |                                                                                                                                                                                                          |
+| `allowUsageCommand`                         | boolean                                                     |                                                                                                                                                                                                          |
+| `usageLimitEnabled`                         | boolean                                                     |                                                                                                                                                                                                          |
+| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | ቁጥር >= 0 ወይም `null`                                         |                                                                                                                                                                                                          |
+| `fiveHourUsageLimitUsd`                     | ቁጥር >= 0 ወይም `null`                                         | የ5-ሰዓት USD ባጀት ማሽከርከር፣ እንደ ዕለታዊ እና ሳምንታዊ ገደቦች (`usageLimitEnabled`፣ `UNPRICED_USAGE_BUDGET_POLICY`) ተፈጻሚ ነው። `retry-after` በመስኮቱ ውስጥ በጣም የቆየው ወጪ የሚያረጅበት ሲሆን ይህም ቁልፉን ከገደቡ በላይ ሊተው የሚችለው አሁንም እንደታገደ ነው። |
+| `chaosModeEnabled`                          | boolean                                                     |                                                                                                                                                                                                          |
 
 ```bash
 curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
@@ -1263,6 +1252,14 @@ curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
 | `/api/modality-bridge/stats`         | GET        | በማስታወሻ ውስጥ ያሉ `attempts`፣ ስኬቶች/`bridged`፣ ውድቀቶች፣ የመሸጎጫ ግኝቶች፣ `totalLatencyMs`፣ `latencySamples`፣ በናሙና የተመዘነ `averageLatencyMs`፣ እና የመጨረሻ አጠቃቀም ጊዜ (እንደገና ሲጀመር ይቀናበራል፤ የአስተዳደር ማረጋገጫ)                                                                                                                                                                                          |
 | `/api/modality-bridge/video/runtime` | GET        | ከአስተዳደር ማረጋገጫ/ምርመራ በፊት ጥብቅ የታመነ loopback ምርመራ፤ የተጣራ የFFmpeg/ffprobe መኖር እና ስሪቶች (no-store)                                                                                                                                                                                                                                                                                    |
 | `/api/modality-bridge/video/extract` | POST       | የውስጥ ማረጋገጫ ያለው የታመነ loopback ባይት አስተላላፊ፤ 50 MiB ግብዓት፣ የተገደበ ወረፋ/32 MiB ውጤት፣ `503` አቅም፣ `499` ግንኙነት መቋረጥ፣ `504` የጊዜ ገደብ፤ ይህ ይፋዊ የሰቀላ API አይደለም                                                                                                                                                                                                                                 |
+
+### የቪዲዮ ፍሬም መሰርሰሪያ
+
+`GET /api/v1/video-bridge/drilldown` በግልጽ ከተስማማ የቪዲዮ ድልድይ ጥያቄ በኋላ በ `x-omniroute-video-drilldown` የተመለሰ በተከራይ የታሰረ ግልጽ ያልሆነ እጀታ ያነባል። ሁለቱም ንባብ እና `DELETE` ሁል ጊዜ የሚሰራ API ቁልፍ እና ከዋኝ ነፃ `modalityBridgeVideoDrilldownRemoteEnabled` ፍቃድ ያስፈልጋቸዋል። የምርት ማቆየት በተጨማሪ `modalityBridgeVideoDrilldownEnabled` እና ጥብቅ በክፍል `drilldown: true` ያስፈልገዋል። ቁልፉ ባዶ ያልሆነ የመጨረሻ ነጥብ ፍቃድ ዝርዝር ካለው፣ ጠሪው `/v1` ወይም DELETE ቢጠቀም ለሁለቱም GET እና `video` ማካተት አለበት `/api/v1`
+
+GET መጠይቅ: ያስፈልጋል `handle`; አማራጭ `variant` (`preview`፣ `standard`፣ `detail`)፣ `limit` (1–8፣ ቅርስ `frames` ተቀባይነት አለው ግን ከ `limit` ጋር ሊጣመር አይችልም)፣ ዜሮ ላይ የተመሰረተ `page` እና `start`/`end` ሰከንዶች። ሁለቱም የትኩረት ወሰኖች ሲቀርቡ፣ `end` ከ `start` የበለጠ መሆን አለበት። Duplicate/unknown የመጠይቅ ቁልፎች ውድቅ ሆነዋል። የተሳካላቸው ምላሾች `derivation`፣ `durationSeconds`፣ `frames`፣ `hasMore`፣ `page`፣ `variant` እና አማራጭ `focusWindow` ይይዛሉ። ምንም መደብር JSON Base64ን ጨምሮ በ32 MiB ተሸፍኗል። ከመጠን በላይ የሆነ ምርት 413 ይመለሳል. ያነሱ ፍሬሞችን ይጠይቁ።
+
+`DELETE /api/v1/video-bridge/drilldown?handle=...` ይመልሳል `{ "removed": 0|1 }`. ያልታወቀ፣ ጊዜው ያለፈበት እና የመስቀል ቁልፍ GETs የማይለዩ 404 ምላሾች ናቸው። መስቀለኛ ቁልፍ DELETE የባለቤቱን ግቤት ማስወገድ አይችልም። የተሰናከለ መዳረሻ 403፣ missing/invalid ማረጋገጫ 401፣ ልክ ያልሆኑ መጠይቆች 400፣ ስረዛ 499 እና ጊዜያዊ ስህተቶች 503. እጀታዎች ሂደት-አካባቢያዊ ናቸው፣ ከአስር ደቂቃዎች በኋላ ጊዜው ያልፍባቸዋል፣ እና እንደገና ሲጀመር አይተርፉም። አዲስ እጀታዎች `v1.` እና ባለ 32-ባይት የዘፈቀደ Base64URL ማስመሰያ ይጠቀማሉ። ማስመሰያ hashes ብቻ ነው የሚቆዩት። የቆዩ ባለ 64-ሄክስ ቶከኖች ለተኳኋኝነት በአገባብ ሊነበቡ እንደሚችሉ ይቆያሉ። ለፈቃድ፣ ለኮታዎች እና ለተለዋዋጭ የመነሻ ዝርዝሮች [የቪዲዮ ድልድይ መከላከያ መንገዶችን](../security/GUARDRAILS.md#video-bridge-videobridgets-videobridgepipelinets) ይመልከቱ።
 
 ### ምትኬ እና ወደ ውጭ መላክ/ከውጭ ማስገባት
 
@@ -1367,19 +1364,19 @@ curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
 
 እነዚህ መጨረሻ ነጥቦች ቤተኛ የGemini SDK ተኳሃኝነትን ለሚጠብቁ ደንበኞች የGemini የAPI ቅርጸትን ይከተላሉ።
 
-### ውስጣዊ / የስርዓት APIs
+### የውስጥ / የስርዓት APIs
 
-| Endpoint                 | Method | Description                                    |
-| ------------------------ | ------ | ---------------------------------------------- |
-| `/api/init`              | GET    | የመተግበሪያ ማስነሻ ምርመራ (በመጀመሪያ አጠቃቀም ላይ የሚውል)       |
-| `/api/tags`              | GET    | ከOllama ጋር ተኳሃኝ የሆኑ የሞዴል መለያዎች (ለOllama ደንበኞች) |
-| `/api/restart`           | POST   | በሥርዓት የተሟላ የአገልጋይ ዳግም ማስጀመርን ማስነሳት             |
-| `/api/shutdown`          | POST   | በሥርዓት የተሟላ የአገልጋይ መዝጋትን ማስነሳት                  |
-| `/api/system/env/repair` | POST   | የOAuth አቅራቢ የአካባቢ ተለዋዋጮችን መጠገን                 |
-| `/api/system/version`    | GET    | የአሁኑ/የቅርብ ጊዜ ስሪት፣ የማዘመኛ ሁኔታ፣ የልቀት ቻናል          |
-| `/api/system/version`    | POST   | ከማሰማራት ጋር የተያያዘ ወደ የቅርብ ጊዜ ስሪት ማዘመንን ማስጀመር     |
+| የመጨረሻ ነጥብ                | ዘዴ   | መግለጫ                                        |
+| ------------------------ | ---- | ------------------------------------------- |
+| `/api/init`              | GET  | የጀርባ ማመሳሰል አገልግሎቶችን ይጀምሩ (የአስተዳደር ማረጋገጫ)    |
+| `/api/tags`              | GET  | ከኦላማ ጋር ተኳሃኝ ሞዴል መለያዎች (ለ Ollama ደንበኞች)     |
+| `/api/restart`           | POST | ግርማ ሞገስ ያለው አገልጋይ እንደገና እንዲጀምር አስነሳ         |
+| `/api/shutdown`          | POST | ግርማ ሞገስ ያለው የአገልጋይ መዘጋት ቀስቅሰው               |
+| `/api/system/env/repair` | POST | የ OAuth አቅራቢ አካባቢ ተለዋዋጮችን መጠገን              |
+| `/api/system/version`    | GET  | Current/latest እትም ፣ ሁኔታን አዘምን ፣ የተለቀቀው ጣቢያ |
+| `/api/system/version`    | POST | ወደ የቅርብ ጊዜው ስሪት ማሰማራትን የሚያውቅ ዝማኔ ይጀምሩ       |
 
-> **ማስታወሻ፦** እነዚህ መጨረሻ ነጥቦች በስርዓቱ ውስጥ ወይም ከOllama ደንበኛ ጋር ለመኳሃኘት ይጠቅማሉ። በአብዛኛው በዋና ተጠቃሚዎች አይጠሩም።
+> **ማስታወሻ፡-** እነዚህ የመጨረሻ ነጥቦች በሲስተሙ ወይም ለ Ollama ደንበኛ ተኳሃኝነት ከውስጥ ጥቅም ላይ ይውላሉ። በተለምዶ በዋና ተጠቃሚዎች አይጠሩም።
 
 ### OAuth የአካባቢ ጥገና _(v3.6.1+)_
 

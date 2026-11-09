@@ -326,7 +326,7 @@ GET /v1/embeddings
 
 ---
 
-## Mmepụta Onyonyo
+## Ọgbọ onyonyo
 
 ```bash
 POST /v1/images/generations
@@ -340,35 +340,22 @@ Content-Type: application/json
 }
 ```
 
-Ndị na-enye ọrụ dịnụ gụnyere OpenAI (GPT Image 2), xAI (Grok Image), Together AI (FLUX), Fireworks AI, Nebius (FLUX), Hyperbolic, NanoBanana, **OpenRouter**, **ZenMux**, SD WebUI (local), ComfyUI (local).
+Ndị na-enye ndị dịnụ gụnyere OpenAI (GPT Image 2), xAI (Grok Image), Together AI (FLUX), Fireworks AI, Nebius (FLUX), Hyperbolic, NanoBanana,**OpenRouter** ,**ZenMux** , SD WebUI (mpaghara), ComfyUI (mpaghara).
 
-`n` na-eweghachi onyonyo `n` n'ime `data[]`. Ndị na-enye ọrụ nke API upstream ha na-eweghachi otu onyonyo kwa oku
-(Black Forest Labs, Stability AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik,
-NVIDIA NIM, Cloudflare Workers AI) na-eme oku upstream dị iche iche `n`, nke kachasị bụ 4 na-arụ ọrụ n'otu oge. A na-agbanwe
-`seed` a kapịrị ọnụ site na index oku (`seed`, `seed + 1`, …), ya mere onyonyo ndị ahụ na-adị iche mana ha na-anọgide na-enwe ike ịmegharị. A na-amachi
-`n` na 10. Arịrịọ ahụ dum na-ada ma ọ bụrụ na oku ọ bụla daa. Ndepụta usoro fan-out dị na
-`SINGLE_IMAGE_FANOUT_FORMATS` na
-`open-sse/handlers/imageGeneration/fanOut.ts`.
+`n` weghachiri onyonyo `n` na `data[]`. Ndị na-enye ndị API elu na-eweghachite otu onyonyo kwa oku (Black Forest Labs, Stability AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik, NVIDIA NIM, Cloudflare Workers AI) nweta `n` iche iche oku elu, na kacha 4 na ụgbọ elu. A na-ewepụ `seed` a kapịrị ọnụ site na ndeksi oku (`seed`, `seed + 1`,…), yabụ onyonyo ndị a dị iche mana ka enwere ike imepụtagharị ya. `n` bụ capped na 10. Arịrịọ na-ada n'ozuzu ma ọ bụrụ na oku ọ bụla daa. Ndepụta nke usoro fan-out bụ `SINGLE_IMAGE_FANOUT_FORMATS` na `open-sse/handlers/imageGeneration/fanOut.ts`.
 
-ZenMux na-eji njikọ API-key dị adị eme ihe ọzọ ma na-anabata prefixes `zenmux/` ma ọ bụ `zm/`:
+ZenMux jikwa njikọ igodo API dị ugbu a wee nabata `zenmux/` ma ọ bụ `zm/` prefixes:
 
-- `zenmux/openai/gpt-image-2` na-eji OpenAI Images API nke ZenMux. Nhọrọ gụnyere `size`,
-  `quality`, `n`, `output_format`, `output_compression`, `background`, na `response_format`.
-- Ndị nkwusa ndị ọzọ, dịka `zm/meta/muse-image-1.0`, na-eji endpoint Vertex AI `:predict` nke ZenMux. `n` na-aga na `sampleCount`, `aspect_ratio` na-aga na `aspectRatio`, `image_size`
-  (`1K`, `2K`, `4K`) na-aga na `sampleImageSize`. `size` pixel na-enye naanị ratio akụkụ,
-  ọ naghị ekwe nkwa nha pixel a kapịrị ọnụ. Ratio ndị akwadoro, mkpebi, na ọnụọgụ dị iche iche dabere na model.
-- `zm/inclusionai/ming-image-0.1-design` na-ahọrọ nha nke ya. Wepụ `size`,
-  `aspect_ratio`, na `image_size`; ụkpụrụ doro anya na-eweghachi HTTP 400. Enwere ike ịrịọ
-  PNG, JPEG, na WebP site na `output_format`.
+- `zenmux/openai/gpt-image-2` na-eji ZenMux's OpenAI Images API. Nhọrọ gụnyere `size`, `quality`, `n`, `output_format`, `output_compression`, `background`, na `response_format`.
+- Ndị mbipụta ọzọ, dị ka `zm/meta/muse-image-1.0`, na-eji ebe njedebe ZenMux's Vertex AI `:predict`. `n` map ka `sampleCount`, `aspect_ratio` ka `aspectRatio`, na `image_size` (`1K`, `2K`, `4K`) ka `sampleImageSize`. Otu pikselụ `size` na-enye naanị otu akụkụ, ọ bụghị akụkụ pixel ekwenyere n'ezie. Oke akwadoro, mkpebi na ọnụ ọgụgụ dị iche iche site na ụdị.
+- `zm/inclusionai/ming-image-0.1-design` na-ahọrọ akụkụ nke ya. Hapụ `size`, `aspect_ratio`, na `image_size`; ụkpụrụ pụtara ìhè weghachi HTTP 400. Enwere ike ịrịọ PNG, JPEG, na WebP na `output_format`.
 
-Njikọ a na-akwado mmepụta text-to-image, ọ bụghị ndezi onyonyo ntụaka. A na-ahazi nsonaazụ
-Vertex ka ọ bụrụ `data[].b64_json`; `response_format: "url"` na-eweghachi URL HTTPS upstream ma ọ bụ URL data base64 mgbe naanị bytes onyonyo dị.
-Nsonaazụ efu/achọpụtara ma kpochapụ na-eweghachi njehie kama ịga nke ọma efu. Ịnweta model dabere na akaụntụ ZenMux.
-Lee [Vertex API nke ZenMux](https://docs.zenmux.ai/api/vertexai/generate-images) na
-[OpenAI Images API](https://docs.zenmux.ai/api/openai/generate-an-image).
+Mwekota a na-akwado ọgbọ ederede gaa na onyonyo, ọ bụghị ndezi ntụaka. A na-eme ka mmepụta vertex dị ka `data[].b64_json`; `response_format: "url"` na-eweghachi HTTPS URL elu ma ọ bụ base64 data URL mgbe naanị bytes onyonyo dị. nsonaazụ Empty/filtered na-eweghachi mperi kama ịga nke ọma efu. Ịnweta ihe nlereanya dabere na akaụntụ ZenMux. Hụ [ZenMux's Vertex API](https://docs.zenmux.ai/api/vertexai/generate-images) na [OpenAI API](https://docs.zenmux.ai/api/openai/generate-an-image).
+
+Njikọ nbanye Microsoft 365 Copilot na-eje ozi `copilot-m365-web/m365-copilot-image` na ngwa onyonyo arụnyere n'ime Copilot: otu ntụgharị Copilot kwa onyonyo (`n` 1–4), `size` na-eduzi naanị nghazi, na onyonyo eweghachitere n'ịntanetị (`b64_json`, ma ọ bụ data URL maka `response_format: "url"`). Lee [Microsoft 365 Copilot](../providers/COPILOT-M365.md#image-generation).
 
 ```bash
-# Depụta model onyonyo niile
+# List all image models
 GET /v1/images/generations
 ```
 
@@ -813,17 +800,19 @@ Nhazi batch dakọtara na OpenAI.
 
 ---
 
-## API Ọchụchọ
+## Chọọ API
 
-Nchịkọta ndị na-eweta webụ/ọchụchọ (Tavily, Brave, Exa, Serper, wdg.).
+onye na-enye Web/search abstraction (Tavily, Brave, Exa, Serper, wdg).
 
-| Method | Path                   | Description                                                                            |
-| ------ | ---------------------- | -------------------------------------------------------------------------------------- |
-| GET    | `/v1/search`           | Depụta ndị na-eweta ọchụchọ ahaziri + ikike ha                                         |
-| POST   | `/v1/search`           | Gbaa ajụjụ ọchụchọ — `v1SearchSchema` na-enyocha body, ma na-akwado caching/coalescing |
-| GET    | `/v1/search/analytics` | Ọnụọgụ hit/latency/cache nke onye na-eweta ọ bụla                                      |
+| Usoro | Ụzọ                    | Nkọwa                                                                               |
+| ----- | ---------------------- | ----------------------------------------------------------------------------------- |
+| GET   | `/v1/search`           | Ndepụta ahaziri ndị na-eweta ọchụchọ + ike                                          |
+| POST  | `/v1/search`           | Gbaa ajụjụ ọchụchọ — ahụ nke `v1SearchSchema` kwadoro, na-akwado caching/coalescing |
+| GET   | `/v1/search/analytics` | Onye na-eweta hit/latency/cache stats                                               |
 
-**Nkwenye:** Igodo API Bearer (`extractApiKey` + `isValidApiKey`). A na-akwado iwu ọchụchọ site na `enforceApiKeyPolicy`.
+**Nyocha:** Igodo API onye na-ebu (`extractApiKey` + `isValidApiKey`). Amụma ọchụchọ kwadoro site na `enforceApiKeyPolicy`.
+
+**Họrọ akpaaka:** enweghị `provider`, onye na-eweta dị ọnụ ala nke nwere njikọ ahaziri na-ebu ụzọ na nke ọzọ dị ọnụ ala bụ ọdịda. A na-eji ndị na-eweta ebe ezumike ikpeazụ n'efu (`duckduckgo-free`) naanị mgbe ahazighị ihe ọzọ. SearXNG na-akwado onwe ya na-agụta dị ka ahaziri ozugbo njikọ ya na-echekwa ezigbo `baseUrl` (ọ bụghị katalọgụ ndabara `http://localhost:8888/search`): ọ ga-abụkwa ọkwa dị ka onye na-eweta $0 n'ihu ndị keyed, yana onye na URL eweta `baseUrl` `http(s)` ọnụ ala dị ka ọdịda, gụnyere mgbe SearXNG zara 400, 401, 403 ma ọ bụ 404. gụọ. Njikọ SearXNG nke na-echekwa akara ngosi na-adabere otu a naanị `https://` ma ọ bụ loopback `http://`. N'ime `http://` dịpụrụ adịpụ, ọ dịghị mgbe ọ ga-adaba ma na-anọ ebe ikpeazụ, a na-eji ya naanị mgbe ahazighị onye na-eweta ọrụ ọzọ ma ọ bụ mgbe a rịọrọ ya aha, yabụ ọ na-eziga akara ngosi na ederede doro anya n'okwu abụọ ahụ.
 
 ### `provider_options` nke Exa na Tavily
 
@@ -976,28 +965,28 @@ Naanị ntụgharị nwere `stream: false` nke na-enweghị ngwaọrụ, akụk�
 
 ---
 
-## Ojiji nke onwe (`/api/usage/om-usage`)
+## Ojiji ọrụ onwe (`/api/usage/om-usage`)
 
-Igodo API ọ bụla nwere ike ịgụ ojiji na quota **nke ya** — a chọghị ikike nchịkwa. Nke a bụ endpoint onye ahịa (CLI, panel OmniCopilot) na-eji egosi onye ji igodo ego o jirila.
+Igodo API ọ bụla nwere ike ịgụ **nke ya** ojiji na oke — enweghị njikwa auth. Nke a bụ njedebe njedebe onye ahịa (CLI, panel OmniCopilot ) na-eji egosi onye na-ejide isi ihe ha na-emefu.
 
 ```bash
-# Ụdị ederede (nkwekọrịta akụkọ ihe mere eme — ederede nkịtị maka terminal)
+# Text form (the historical contract — plain text for a terminal)
 curl -H "Authorization: Bearer <your-api-key>" \
   http://localhost:20128/api/usage/om-usage
 
-# Ụdị ahaziri ahazi — ihe UI na-eji
+# Structured form — what a UI consumes
 curl -H "Authorization: Bearer <your-api-key>" \
   "http://localhost:20128/api/usage/om-usage?format=json"
 ```
 
-Igodo ahụ ga-enwerịrị **`allowUsageCommand`** agbanyere (a na-emechi ya na mbụ — onye njikwa igodo API nke dashboard na-agbanwe ya maka igodo ọ bụla). Ọ bụrụ na ọ nweghị ya, endpoint ahụ na-aza `403`.
+Igodo ga-enwerịrị **`allowUsageCommand`** agbanyụrụ (gbanyụọ na ndabara — njikwa igodo API dashboard na-atụgharị ya kwa igodo). Na-enweghị ya, njedebe na-aza `403`.
 
-`?format=json` na-eweghachi nhazi a pụrụ ịmata ọdịiche ka onye na-akpọ ọrụ ahụ ghara ịgụ ubi data site na nzaghachi jụrụ arịrịọ. Mgbe ihe gara nke ọma:
+`?format=json` na-eweghachi ụdị ịkpa ókè nke mere na onye na-akpọ oku anaghị agụ ebe data na ọjụjụ. Na ihe ịga nke ọma:
 
 ```jsonc
 {
   "allowed": true,
-  // dị naanị mgbe igodo ahụ họọrọ oke ojiji nke igodo ọ bụla (USD kwa ụbọchị/izu):
+  // present only when the key opted into per-key usage limits (daily/weekly/5-hour USD):
   "personal": {
     "dailySpentUsd": 1.25,
     "dailyLimitUsd": 5,
@@ -1006,9 +995,9 @@ Igodo ahụ ga-enwerịrị **`allowUsageCommand`** agbanyere (a na-emechi ya na
     "weeklyLimitUsd": 20,
     "weeklyResetAtIso": "…" /* … */,
   },
-  // snapshot quota nke provider a họọrọ, ma ọ bụ null mgbe enweghị ihe echekwara:
+  // the selected provider quota snapshot, or null when nothing is cached yet:
   "provider": { "connectionId": "…", "provider": "claude", "plan": "…", "quotas": {/* … */} },
-  // snapshot nke njikọ ọ bụla, ka UI nwee ike igosi ọtụtụ providers n'akụkụ ibe ha:
+  // every connection's snapshot, so a UI can render several providers side by side:
   "providers": [
     { "connectionId": "…", "provider": "claude" /* … */ },
     { "provider": "codex" /* … */ },
@@ -1016,13 +1005,9 @@ Igodo ahụ ga-enwerịrị **`allowUsageCommand`** agbanyere (a na-emechi ya na
 }
 ```
 
-Mgbe a jụrụ arịrịọ (`401` igodo adịghị mma / `403` anaghị ekwe), ụzọ ahụ na-eweghachikwa
-`{ "allowed": false, "error": { "message": "…" } }` — `personal`/`provider` dị ma tọgbọ chakoo
-(igodo kwere, mana enwebeghị ihe a mụtara) bụ ọnọdụ dị iche na ịjụ arịrịọ, naanị ụdị JSON
-na-eme ka a mata ọdịiche ahụ.
+Na ọjụjụ (`401` ọjọọ igodo / `403` adịghị ekwe) otu ụzọ na-alaghachi `{ "allowed": false, "error": { "message": "…" } }` — a ugbu-ma-efu `personal`/`provider` (isi ekwe, ọ dịghị ihe mụtara ma) bụ a dị iche iche ala si a jụrụ, na naanị JSON ụdị na-egosi ọdịiche ha.
 
-**Nyocha:** igodo API Bearer nke onye na-akpọ ọrụ ahụ, nke ejiri `isValidApiKey` nyochaa — nke a abụghị
-ebe nchịkwa (`/api/keys/…`), nke ka dị n'okpuru `requireManagementAuth`.
+**Nyocha:** Igodo API nke onye na-akpọ oku, kwadoro ya na `isValidApiKey` — nke a bụ _not_ the management surface (`/api/keys/…`), nke na-anọ n'azụ `requireManagementAuth`.
 
 ### Pasent Quota Raw na nke Emeziri Site na Cutoff
 
@@ -1260,38 +1245,39 @@ na usoro mkpa dị na `src/lib/modelCapabilityLimits.ts`.
 
 ### Ikikere igodo API
 
-`PATCH /api/keys/{id}` na-emelite ikikere igodo dị adị. Dị ka ụzọ `/api/keys*` niile, ọ chọrọ ikike nchịkwa (lee [Nyocha njirimara nchịkwa](../guides/MANAGEMENT-AUTH.md)), ọ bụghị igodo inference. Ziga naanị mpaghara ndị ịchọrọ ịgbanwe; a ga-ajụ arịrịọ na-enweghị nke ọ bụla n'ime ha site na `No valid fields to update`. A na-akọwa mpaghara ndị a nabatara site na `updateKeyPermissionsSchema` dị na `src/shared/validation/schemas/keys.ts`.
+`PATCH /api/keys/{id}` na-emelite ikike igodo dị adị. Dị ka ụzọ `/api/keys*` ọ bụla ọ chọrọ ikike njikwa (lee [njikwa njikwa](../guides/MANAGEMENT-AUTH.md) ), ọ bụghị igodo ntinye. Ziga naanị mpaghara ịchọrọ ịgbanwe; Arịrịọ na-enweghị nke ọ bụla n'ime ha ka a jụrụ ya na `No valid fields to update`. Ọ `updateKeyPermissionsSchema` kọwapụtara mpaghara anabatara na `src/shared/validation/schemas/keys.ts`.
 
-| Ubi                                         | Ụdị                                                                      | Ihe ndetu                                                                                                                             |
-| ------------------------------------------- | ------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------- |
-| `name`                                      | string, mkpụrụedemede 1-200                                              |                                                                                                                                       |
-| `isActive`                                  | boolean                                                                  |                                                                                                                                       |
-| `isBanned`                                  | boolean                                                                  |                                                                                                                                       |
-| `expiresAt`                                 | ISO 8601 datetime ma ọ bụ `null`                                         | `null` na-ewepụ oge ngafe                                                                                                             |
-| `modelAccessMode`                           | `all` \| `restricted`                                                    | `allowedModels` ga-abụrịrị efu mgbe mode bụ `all`                                                                                     |
-| `allowedModels`, `blockedModels`            | array of strings, ruo 1000                                               |                                                                                                                                       |
-| `allowedCombos`                             | array of strings, ruo 500                                                | Na-achịkwa combos nke igodo ahụ nwere ike ịkpọ; ụdị ndị e nyere ozugbo bụ `modelAccessMode` / `allowedModels` na-achịkwa              |
-| `connectionAccessMode`                      | `all` \| `restricted`                                                    | `allowedConnections` agaghị abụrịrị efu mgbe `restricted` ma ga-abụrịrị efu mgbe `all`                                                |
-| `allowedConnections`                        | array of UUIDs, ruo 100                                                  |                                                                                                                                       |
-| `allowAutoCombos`                           | boolean                                                                  | `false` na-ajụ arịrịọ maka ụdị `auto/*` jiri igodo a; a na-ahapụ igodo ndị na-edobeghị ya                                             |
-| `catalogScope`                              | `all` \| `combos` \| `models`                                            | Ihe `GET /v1/models` na-edepụta maka igodo a (combos naanị, ụdị naanị, ma ọ bụ ha abụọ); ọ naghị agbanwe ihe igodo ahụ nwere ike ịkpọ |
-| `forcedModel`                               | string ruo mkpụrụedemede 300, ma ọ bụ `null`                             | Na-eziga arịrịọ nkata na ụdị/combo a, karịa `X-Route-Model` na `body.model`; oke igodo ahụ ka na-arụ ọrụ                              |
-| `noLog`, `autoResolve`                      | boolean                                                                  |                                                                                                                                       |
-| `throttleDelayMs`                           | integer, 0-300000                                                        |                                                                                                                                       |
-| `maxSessions`                               | integer, 0-10000                                                         |                                                                                                                                       |
-| `rateLimits`                                | array nke `{ limit, window }` (positive integers, ruo 50) ma ọ bụ `null` | `null` na-ewepụ oke ndị ahụ                                                                                                           |
-| `accessSchedule`                            | schedule object ma ọ bụ `null`                                           | `null` na-ewepụ nhazi oge ahụ                                                                                                         |
-| `scopes`                                    | array of strings, ruo 32                                                 |                                                                                                                                       |
-| `allowedEndpoints`                          | array of strings, ruo 20                                                 |                                                                                                                                       |
-| `streamDefaultMode`                         | `legacy` \| `json`                                                       |                                                                                                                                       |
-| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                     | Lee [Per-key cache bypass](#per-key-cache-bypass)                                                                                     |
-| `compressionEnabled`                        | boolean                                                                  |                                                                                                                                       |
-| `codexServiceMode`                          | otu n'ime ụdị ọrụ Codex                                                  |                                                                                                                                       |
-| `disableNonPublicModels`                    | boolean                                                                  |                                                                                                                                       |
-| `allowUsageCommand`                         | boolean                                                                  |                                                                                                                                       |
-| `usageLimitEnabled`                         | boolean                                                                  |                                                                                                                                       |
-| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | number >= 0 or `null`                                                    |                                                                                                                                       |
-| `chaosModeEnabled`                          | boolean                                                                  |                                                                                                                                       |
+| Ubi                                         | Ụdị                                                                      | Ihe ndetu                                                                                                                                                                                                                                                       |
+| ------------------------------------------- | ------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`                                      | string, mkpụrụedemede 1-200                                              |                                                                                                                                                                                                                                                                 |
+| `isActive`                                  | boolean                                                                  |                                                                                                                                                                                                                                                                 |
+| `isBanned`                                  | boolean                                                                  |                                                                                                                                                                                                                                                                 |
+| `expiresAt`                                 | ISO 8601 datetime ma ọ bụ `null`                                         | `null` na-ewepụ oge ngafe                                                                                                                                                                                                                                       |
+| `modelAccessMode`                           | `all` \| `restricted`                                                    | `allowedModels` ga-abụrịrị efu mgbe mode bụ `all`                                                                                                                                                                                                               |
+| `allowedModels`, `blockedModels`            | ọtụtụ eriri, ruo 1000                                                    |                                                                                                                                                                                                                                                                 |
+| `allowedCombos`                             | array of strings, ruo 500                                                | Na-achịkwa combos nke igodo ahụ nwere ike ịkpọ; ụdị ndị e nyere ozugbo bụ `modelAccessMode` / `allowedModels` na-achịkwa                                                                                                                                        |
+| `connectionAccessMode`                      | `all` \| `restricted`                                                    | `allowedConnections` agaghị abụrịrị efu mgbe `restricted` ma ga-abụrịrị efu mgbe `all`                                                                                                                                                                          |
+| `allowedConnections`                        | array of UUIDs, ruo 100                                                  |                                                                                                                                                                                                                                                                 |
+| `allowAutoCombos`                           | boolean                                                                  | `false` na-ajụ arịrịọ maka ụdị `auto/*` jiri igodo a; a na-ahapụ igodo ndị na-edobeghị ya                                                                                                                                                                       |
+| `catalogScope`                              | `all` \| `combos` \| `models`                                            | Ihe `GET /v1/models` na-edepụta maka igodo a (combos naanị, ụdị naanị, ma ọ bụ ha abụọ); ọ naghị agbanwe ihe igodo ahụ nwere ike ịkpọ                                                                                                                           |
+| `forcedModel`                               | string ruo mkpụrụedemede 300, ma ọ bụ `null`                             | Na-eziga arịrịọ nkata na ụdị/combo a, karịa `X-Route-Model` na `body.model`; oke igodo ahụ ka na-arụ ọrụ                                                                                                                                                        |
+| `noLog`, `autoResolve`                      | boolean                                                                  |                                                                                                                                                                                                                                                                 |
+| `throttleDelayMs`                           | integer, 0-300000                                                        |                                                                                                                                                                                                                                                                 |
+| `maxSessions`                               | integer, 0-10000                                                         |                                                                                                                                                                                                                                                                 |
+| `rateLimits`                                | array nke `{ limit, window }` (positive integers, ruo 50) ma ọ bụ `null` | `null` na-ewepụ oke ndị ahụ                                                                                                                                                                                                                                     |
+| `accessSchedule`                            | schedule object ma ọ bụ `null`                                           | `null` na-ewepụ nhazi oge ahụ                                                                                                                                                                                                                                   |
+| `scopes`                                    | array of strings, ruo 32                                                 |                                                                                                                                                                                                                                                                 |
+| `allowedEndpoints`                          | array of strings, ruo 20                                                 |                                                                                                                                                                                                                                                                 |
+| `streamDefaultMode`                         | `legacy` \| `json`                                                       |                                                                                                                                                                                                                                                                 |
+| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                     | Lee [Per-key cache bypass](#per-key-cache-bypass)                                                                                                                                                                                                               |
+| `compressionEnabled`                        | boolean                                                                  |                                                                                                                                                                                                                                                                 |
+| `codexServiceMode`                          | otu n'ime ụdị ọrụ Codex                                                  |                                                                                                                                                                                                                                                                 |
+| `disableNonPublicModels`                    | boolean                                                                  |                                                                                                                                                                                                                                                                 |
+| `allowUsageCommand`                         | boolean                                                                  |                                                                                                                                                                                                                                                                 |
+| `usageLimitEnabled`                         | boolean                                                                  |                                                                                                                                                                                                                                                                 |
+| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | nọmba >= 0 ma ọ bụ `null`                                                |                                                                                                                                                                                                                                                                 |
+| `fiveHourUsageLimitUsd`                     | nọmba >= 0 ma ọ bụ `null`                                                | Ntugharị mmefu ego USD nke awa 5, nke etinyere dị ka oke kwa ụbọchị na kwa izu (`usageLimitEnabled`, `UNPRICED_USAGE_BUDGET_POLICY`). `retry-after` bụ mgbe ego kacha ochie na windo gafeworo, nke nwere ike ịhapụ igodo tere aka karịa oke ya ka egbochiri ya. |
+| `chaosModeEnabled`                          | boolean                                                                  |                                                                                                                                                                                                                                                                 |
 
 ```bash
 curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
@@ -1341,6 +1327,14 @@ curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
 | `/api/modality-bridge/stats`         | GET        | `attempts` dị na ebe nchekwa, ihe ịga nke ọma/`bridged`, ọdịda, cache hits, `totalLatencyMs`, `latencySamples`, `averageLatencyMs` nke a tụrụ site na sample, na oge eji ikpeazụ (a na-amalitegharịa ya mgbe a malitegharịrị; njirimara nchịkwa)                                                                                                                                                          |
 | `/api/modality-bridge/video/runtime` | GET        | Nlele trusted-loopback siri ike tupu ikike nchịkwa/nlele; nnweta na ụdị FFmpeg/ffprobe e sachara (no-store)                                                                                                                                                                                                                                                                                               |
 | `/api/modality-bridge/video/extract` | POST       | Onye na-ebufe bytes n'ime sistemụ nke chọrọ nkwenye trusted-loopback; ntinye 50 MiB, kwụ n'ahịrị nwere oke/mmepụta 32 MiB, ikike `503`, nkwụsị `499`, oge ngwụcha `504`; ọ bụghị API maka ibugo ọha                                                                                                                                                                                                       |
+
+### Igwe onyonyo vidiyo gbatuo ala
+
+`GET /api/v1/video-bridge/drilldown` na-agụ aka opaque na-ejide onye nwe ụlọ eweghachiri na `x-omniroute-video-drilldown` ka ekwenyechara nke ọma Video Bridge arịrịọ. Abụọ agụ na `DELETE` na-achọ igodo API ziri ezi yana ikike `modalityBridgeVideoDrilldownRemoteEnabled` nọọrọ onye ọrụ. Ndowe mmepụta na-achọkwa `modalityBridgeVideoDrilldownEnabled` na `drilldown: true` siri ike kwa akụkụ. Ọ bụrụ na igodo ahụ nwere ndepụta nkwụsị njedebe na-adịghị efu, ọ ghaghị ịgụnye `video` maka ma GET na DELETE, ma onye na-akpọ oku na-eji `/v1` ma ọ bụ `/api/v1`.
+
+ajụjụ GET : achọrọ `handle`; nhọrọ `variant` (`preview`, `standard`, `detail`), `limit` (1–8; anabatara `frames` nketa mana enweghị ike ijikọ ya na `limit`), `page` dabere na efu, na nkeji `start`/`end`. Mgbe ewepụtara oke nlebara anya abụọ ahụ, `end` ga-adịrịrị karịa `start`. Ajụjụ igodo ajụjụ Duplicate/unknown. Ọzịza ndị gara nke ọma nwere `derivation`, `durationSeconds`, `frames`, `hasMore`, `page`, `variant`, na nhọrọ `focusWindow`; JSON enweghị ụlọ ahịa na-echekwa na 32 MiB gụnyere Base64. Nnukwu ihe nrụpụta na-alaghachi 413; Rịọ okpokolo agba ole na ole.
+
+`DELETE /api/v1/video-bridge/drilldown?handle=...` laghachi `{ "removed": 0|1 }`. GETs 404 amaghị ama, kubie ume yana cross-key bụ nke enweghị ike ịmata; cross-key DELETE enweghị ike iwepu ntinye onye nwe ya. Nnweta nkwarụ weghachiri 403, nyocha missing/invalid 401, ajụjụ 400 na-ezighi ezi, kagbuo 499 na mperi nwa oge 503. Aka bụ usoro-mgbe, na-ekubi ume mgbe nkeji iri gachara, ma ghara ịlanarị ma malitegharịa. Aka ọhụrụ na-eji `v1.` gbakwunyere akara Base64URL nke 32-byte random; Naanị hashes token ka edobere. Token 64-hex Legacy ka nwere ike ịgụta ọnụ maka ndakọrịta. Hụ [ihe nche okporo ụzọ vidiyo](../security/GUARDRAILS.md#video-bridge-videobridgets-videobridgepipelinets) maka nkwenye, oke na nkọwa mpụta dị iche iche.
 
 ### Ndabere & Mbupụ/Mbubata
 
@@ -1437,19 +1431,19 @@ Azịza GET gụnyere `agents[]` (id, name, binary, version, installed, protocol
 
 Endpoints ndị a na-eṅomi usoro API Gemini maka ndị ahịa na-atụ anya ndakọrịta SDK Gemini nke ala ya.
 
-### API dị n'ime / Sistemụ
+### Ime / Sistem APIs
 
-| Endpoint                 | Method | Description                                                |
-| ------------------------ | ------ | ---------------------------------------------------------- |
-| `/api/init`              | GET    | Nlele mbido ngwa (a na-eji ya na mbido mbụ)                |
-| `/api/tags`              | GET    | Tags model dakọtara na Ollama (maka ndị ahịa Ollama)       |
-| `/api/restart`           | POST   | Kpalite ịmalitegharịa sava n'ụzọ dị nro                    |
-| `/api/shutdown`          | POST   | Kpalite mechie sava n'ụzọ dị nro                           |
-| `/api/system/env/repair` | POST   | Mezie mgbanwe gburugburu OAuth provider                    |
-| `/api/system/version`    | GET    | Ụdị dị ugbu a/kacha ọhụrụ, ọnọdụ mmelite, ọwa mwepụta      |
-| `/api/system/version`    | POST   | Malite mmelite maara maka deployment gaa n'ụdị kacha ọhụrụ |
+| Ebe njedebe              | Usoro | Nkọwa                                                 |
+| ------------------------ | ----- | ----------------------------------------------------- |
+| `/api/init`              | GET   | Malite ọrụ mmekọrịta n'okirikiri (auth njikwa)        |
+| `/api/tags`              | GET   | Mkpado ụdị Ollama dakọtara (maka ndị ahịa Ollama )    |
+| `/api/restart`           | POST  | Malitegharịa ekwentị nkesa mara mma                   |
+| `/api/shutdown`          | POST  | kpalite mmechi nkesa mara mma                         |
+| `/api/system/env/repair` | POST  | Dozie ndị na-eweta OAuth mgbanwe gburugburu ebe obibi |
+| `/api/system/version`    | GET   | ụdị Current/latest, ọkwa melite, ọwa mwepụta          |
+| `/api/system/version`    | POST  | Bido nwelite-maara nke ọma na ụdị kachasị ọhụrụ       |
 
-> **Rịba ama:** Sistemụ na-eji endpoints ndị a n'ime ya ma ọ bụ maka ndakọrịta ndị ahịa Ollama. Ndị ọrụ ikpeazụ anaghị akpọkarị ha.
+> **Mara:** A na-eji ihe njedebe ndị a eme ihe n'ime sistemụ ma ọ bụ maka ndakọrịta ndị ahịa Ollama. Ọ bụghị ndị ọrụ njedebe na-akpọkarị ha.
 
 ### Mmezi Gburugburú OAuth _(v3.6.1+)_
 

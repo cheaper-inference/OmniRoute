@@ -512,28 +512,25 @@ git add quality-baseline.json
 업데이트하지 않은 PR은 `--require-tighten`에서 감지됩니다(Fase 6A.5,
 구현 예정).
 
-### CodeQL 래칫: 후보 승인과 저장소 목록
+### CodeQL 래칫: 후보자 승인 및 저장소 목록
 
-CI는 명시적인 의존성 체인을 통해 후보의 CodeQL 승인을 담당합니다. `codeql-scan`은 `codeql.yml`의 네 언어 매트릭스를 호출하고, 이후 `codeql-admission`은 `node scripts/check/check-codeql-ratchet.mjs --candidate`를 실행합니다. `Gate / CI`는 두 결과를 모두 요구합니다. Quality는 자체 수치 검사를 유지하지만, 생산 작업이 끝나기 전에 스캐너에 질의하지 않습니다. `Gate / Quality`만으로는 후보 승인이 완료되지 않습니다. 문서만 변경하는 후보에도 CodeQL이 필수입니다.
+CI 명시적인 종속성 체인을 통해 후보 CodeQL 승인을 소유합니다. `codeql-scan` `codeql.yml` 에서 4개 언어 매트릭스를 호출한 다음 `codeql-admission` `node scripts/check/check-codeql-ratchet.mjs --candidate` 실행합니다. `Gate / CI` 두 가지 결과가 모두 필요합니다. 품질은 자체 수치 검사를 유지하지만 생산자가 작업을 완료하기 전에 스캐너에 쿼리하지 않습니다. `Gate / Quality` 만으로는 완전한 후보자 입학이 불가능합니다. 문서 전용 후보자에게는 CodeQL 계속 필요합니다.
 
-`config/quality/codeql-admission-policy.json`의 정책은 Actions, C/C++, JavaScript/TypeScript, Python을 선택하고, 쿼리 모음 default, 위협 모델 remote, 빌드 모드 none을 사용합니다. 생산자 사전 검사는 활성화 대기 기록과 명시적 대상 목록 밖의 브랜치를 거부합니다. 초기 대상은 main과 release/v3.8.53입니다. 다음 release는 검토된 등록 절차가 필요합니다. CI의 기존 더 넓은 release PR 트리거는 유지하지만, 아직 등록되지 않은 대상은 측정되지 않은 PASS를 얻는 대신 추출 전에 HOLD를 보고합니다.
+`config/quality/codeql-admission-policy.json` 의 정책은 작업, C/C++, JavaScript/TypeScript 및 Python, 쿼리 제품군 기본값, 원격 위협 모델 및 빌드 모드 없음을 선택합니다. 생산자 프리플라이트는 보류 중인 활성화 레코드를 거부하고 명시적인 대상 목록 외부로 분기합니다. 현재 대상은 기본이며 release/v3.8.54. 계약 테스트는 이 유한 목록과 유지 관리 푸시 트리거를 패키지 버전과 비교합니다. 다음 릴리스에서는 온보딩을 검토해야 합니다. CI 의 기존 광범위한 릴리스 PR 트리거는 유지되지만, 탑재되지 않은 대상은 측정되지 않은 PASS 획득하는 대신 추출 전에 HOLD 보고합니다.
 
-각 매트릭스 작업은 실제 SARIF 업로드 ID, 언어, 범주, 실행과 시도, 호출 워크플로 식별 정보, 이벤트의 ref/head/base/merge SHA 및 정책 해시를 기록합니다. 후속 작업은 이번 실행의 증빙만 다운로드하고 아티팩트 다이제스트를 검증합니다. 네 범주 모두, 성공한 생산 작업, 각 정확한 업로드의 처리 완료를 요구합니다. 브랜치에서 찾은 최신 분석이 아니라 API의 sarif_id 필터를 사용합니다. 부분 재실행은 같은 실행과 같은 후보의 이전 시도에서 성공한 범주를 재사용할 수 있으며 생산 시도 정보를 보존합니다. 현재 생산 작업이 실패했다면 이전의 성공 증거를 재사용할 수 없습니다.
+각 매트릭스 작업은 실제 SARIF 업로드 ID, 언어, 범주, 실행 및 시도, 호출자 워크플로 ID, 이벤트 ref/head/base/merge SHA 및 정책 해시를 기록합니다. 종속 작업은 이 실행의 영수증만 다운로드하고 아티팩트 다이제스트의 유효성을 검사합니다. 이를 위해서는 네 가지 범주가 모두 필요하며, 성공적인 제작자와 각각의 정확한 업로드 처리가 완료되어야 합니다. 이는 지점에서 발견된 최신 분석이 아닌 API 의 sarif_id 필터를 사용합니다. 부분 재실행은 동일한 실행 및 후보의 이전 시도에서 성공한 카테고리를 재사용하여 제작 시도를 보존할 수 있습니다. 실패한 현재 생산자는 이전의 친환경 증거를 재사용할 수 없습니다.
 
-CodeQL action은 처리를 기다리지만, 고정된 구현은 상태 읽기 실패나 대기 한도 소진 후 경고를 내고 계속 진행할 수 있습니다. 따라서 승인 단계에서 처리 상태를 다시 검증합니다. 범주 누락, 처리 대기, 실패하거나 취소된 작업, 오래된 신원, 불완전한 페이지 순회 또는 사용할 수 없는 API는 HOLD와 종료 코드 2를 발생시킵니다. 독립적인 스캐너 워크플로를 위한 고정 대기는 더 이상 없습니다. 스캔되지 않은 PR은 경고 질의가 0을 반환했다는 이유로 통과할 수 없습니다. 측정 수가 `metrics.codeqlAlerts.value`를 넘으면 종료 코드 1을 반환하며, 다른 브랜치의 경고를 흡수하려고 기준선을 높이지 않습니다. [업로드 상태와 분석 조회](https://docs.github.com/en/rest/code-scanning/code-scanning).
+CodeQL 작업은 처리를 기다리지만 고정된 구현은 상태 읽기 실패 또는 대기 소진 후에 경고하고 계속할 수 있습니다. 따라서 입학 허가는 처리 과정을 다시 확인합니다. 누락된 범주, 보류 중인 처리, 실패하거나 취소된 작업, 오래된 ID, 불완전한 페이지 매김 또는 사용할 수 없는 APIs HOLD 생성하고 2를 종료합니다. 독립적인 스캐너 작업 흐름에 대한 고정된 대기는 남아 있지 않습니다. 경고 쿼리가 0을 반환했기 때문에 스캔되지 않은 PR 통과할 수 없습니다. `metrics.codeqlAlerts.value` 초과하는 측정된 개수는 1을 종료합니다. 다른 지점의 경고를 흡수하기 위해 기준선이 올라가지 않습니다. [업로드 상태 및 분석 조회](https://docs.github.com/en/rest/code-scanning/code-scanning).
 
-증빙에는 업로드 및 분석 ID, 범주, 도구 버전, ref/SHA, 기준선과 경고 수를 기록합니다. SARIF 신원/결과 수, 최소 규칙 수, 정확한 경고 인스턴스는 계속 필수입니다. 승인 전에 PR/분석 신원을 다시 확인합니다. 이 검사는 구성된 범주의 포함 여부를 확립하며, 추출된 모든 소스 파일의 목록을 확립하지는 않습니다. C/C++의 빌드 없는 추출은 프로젝트 빌드 중 생성된 코드를 포함하지 않습니다. 소스 제외는 여전히 검토가 필요하며, 기여자 귀속 판단에는 비교 가능한 정확한 기준 버전의 증거가 필요합니다.
+영수증 기록은 IDs, 카테고리, 도구 버전, ref/SHA, 기준선 및 경고 번호를 업로드하고 분석합니다. SARIF identity/result 수, 최소 규칙 수 및 정확한 경고 인스턴스는 여전히 필수입니다. 수락하기 전에 PR/analysis 신원을 다시 확인합니다. 이러한 검사는 추출된 모든 소스 파일의 인벤토리가 아닌 구성된 범주 적용 범위를 설정합니다. C/C++ 비빌드 추출에는 프로젝트 빌드 중에 생성된 코드가 포함되지 않습니다. 소스 제외에는 여전히 검토가 필요하며, 기여자 귀속에는 비교 가능한 정확한 근거 증거가 필요합니다.
 
-`codeql-maintenance.yml`은 PR/main 생산 작업을 중복하지 않으면서 활성 release의 푸시 스캔과 주간 일정을 제공합니다. `nightly-codeql-inventory.yml`은 `--strict-measurement`를 사용하여 저장소 전체 기준선을 별도로 유지하고, 측정할 수 없으면 실패합니다. 로컬 구형 수집기의 관대한 건너뛰기는 후보 승인이 아닙니다. 전체 수치가 낮아졌음을 검증한 뒤에만 명시적인 `--update`로 기준을 강화합니다.
+`codeql-maintenance.yml` PR/main 생산자를 복제하지 않고 활성 릴리스 푸시 스캔과 주간 일정을 제공합니다. `nightly-codeql-inventory.yml` `--strict-measurement` 와 함께 저장소 전체 기준을 별도로 유지하며 측정을 사용할 수 없는 경우 오류를 발생시킵니다. 로컬 레거시 수집가의 우아한 건너뛰기는 후보자 승인이 아닙니다. 글로벌 수치가 낮아진 것으로 확인된 후에도 조임은 명시적인 `--update` 로 유지됩니다.
 
-Default Setup이 구성되어 있으면 Advanced 워크플로를 게시해서는 안 됩니다. GitHub는 이 조합을 거부합니다. 검토된 관리 전환을 다시 조회해 확인할 때까지 버전 관리되는 정책은 대기 상태를 유지합니다. 게시 전에 운영자는 저장소, head/base/tree, 정책/패치/롤백 해시 및 관찰한 설정 상태를 고정합니다. `node scripts/quality/codeql-producer.mjs verify-admin-readback`은 제공된 예상 및 실제 JSON 기록을 확인합니다. 이는 기술적 보호 장치이지 운영자 승인이나 최신 상태 재조회의 대체 수단이 아닙니다. PR 토큰은 Administration 접근 권한을 요청하지 않습니다. 배포 및 모든 스캐너 변경에는 별도의 재조회 증빙과 실제 PR, fork, 병합 그룹의 호환성 증거가 필요합니다.
+기본 설정이 구성된 동안에는 고급 작업 흐름을 게시하면 안 됩니다. GitHub 해당 조합을 거부합니다. 버전이 지정된 정책은 검토된 관리 전환을 다시 읽을 때까지 보류 상태로 유지됩니다. 게시하기 전에 운영자는 저장소, head/base/tree, policy/patch/rollback 해시를 고정하고 설정 상태를 관찰합니다. `node scripts/quality/codeql-producer.mjs verify-admin-readback` 제공된 예상 및 실제 JSON 레코드를 확인합니다. 이는 운영자 승인이나 새로운 리드백을 가져오기 위한 대체가 아닌 기술 보호입니다. PR 토큰은 관리 액세스를 요청하지 않습니다. 롤아웃 및 모든 스캐너 변경에는 별도의 리드백과 실제 PR, 포크 및 병합 그룹 호환성 증거가 필요합니다.
 
-Fork는 호스팅 러너를 사용하며, 체크아웃 시 자격 증명을 저장하지 않고, 생산 작업에서 프로젝트를 설치하거나 빌드하지 않으며, 저장소 비밀 정보를 상속하지 않습니다. GitHub는 제한된 fork 토큰으로 pull_request 이벤트에서 SARIF를 업로드하는 것을 지원합니다. 최초 기여의 실행 승인은 여전히 GitHub 정책을 따릅니다. 신뢰할 수 없는 코드를 실행하는 데 pull_request_target을 사용하면 안 됩니다. 마이그레이션이 완료되었다고 판단하기 전에 통제된 카나리 검증에서 실제 토큰 권한, analysis_key 및 모든 범주 환경을 확인하세요. [Fork 업로드 규칙](https://docs.github.com/en/code-security/reference/code-scanning/troubleshoot-analysis-errors/resource-not-accessible), [충돌하는 설정 모드](https://docs.github.com/en/code-security/reference/code-scanning/troubleshoot-analysis-errors/two-codeql-workflows).
+포크는 호스팅된 실행기를 사용하고, 지속 자격 증명 없이 결제하고, 생산자에 프로젝트 install/build 없고, 상속된 저장소 비밀이 없습니다. GitHub 축소된 포크 토큰을 사용하여 pull_request 이벤트에 대한 SARIF 업로드를 지원합니다. 최초 기여 실행 승인은 GitHub 정책으로 유지됩니다. 신뢰할 수 없는 코드를 실행하기 위해 pull_request_target을 사용하지 마십시오. 마이그레이션 완료를 고려하기 전에 제어된 카나리아의 실제 토큰 권한, analyze_key 및 모든 카테고리 환경을 확인하세요. [포크 업로드 규칙](https://docs.github.com/en/code-security/reference/code-scanning/troubleshoot-analysis-errors/resource-not-accessible), [설정 모드 충돌](https://docs.github.com/en/code-security/reference/code-scanning/troubleshoot-analysis-errors/two-codeql-workflows).
 
-**해제 여부는 운영자가 결정합니다(엄격한 규칙 #14)** — 해제 코멘트에 기술적 근거를
-기록하지 않고 CodeQL 경고를 해제해서는 안 됩니다. 업스트림 프로토콜 요구 사항에는
-`won't fix`, 테스트 픽스처에는 `used in tests`, CodeQL이 인식할 수 없는 새니타이저에는
-`false positive`를 사용하세요(선례: `docs/security/ERROR_SANITIZATION.md`).
+**해고는 교환원의 요청입니다(엄격한 규칙 #14).** — 해제 의견에 기술적인 정당성을 기록하지 않고 CodeQL 경고를 해제하지 않습니다. 업스트림 프로토콜 요구 사항에 대한 `won't fix`, 테스트 설비에 대한 `used in tests`, 소독제에 대한 `false positive` CodeQL 볼 수 없습니다(선례: `docs/security/ERROR_SANITIZATION.md`).
 
 ---
 

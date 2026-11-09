@@ -357,7 +357,7 @@ GET /v1/embeddings
 
 ---
 
-## Generisanje slika
+## Image Generation
 
 ```bash
 POST /v1/images/generations
@@ -371,38 +371,22 @@ Content-Type: application/json
 }
 ```
 
-Dostupni pružaoci uključuju OpenAI (GPT Image 2), xAI (Grok Image), Together AI (FLUX), Fireworks AI, Nebius (FLUX), Hyperbolic, NanoBanana, **OpenRouter**, **ZenMux**, SD WebUI (lokalno), ComfyUI (lokalno).
+Dostupni provajderi uključuju OpenAI (GPT slika 2), xAI (Grok slika), Together AI (FLUX), Fireworks AI, Nebius (FLUX), hiperbolični, NanoBanana,**OpenRouter** ,**ZenMux** , SD WebUI (lokalno), ComfyUI (lokalno).
 
-`n` vraća `n` slika u nizu `data[]`. Pružaoci čiji upstream API vraća jednu sliku po pozivu
-(Black Forest Labs, Stability AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik,
-NVIDIA NIM, Cloudflare Workers AI) upućuju `n` zasebnih upstream poziva, pri čemu su najviše 4
-poziva istovremeno aktivna. Fiksni `seed` se pomjera za indeks poziva (`seed`, `seed + 1`, …), tako
-da se slike razlikuju, ali ostaju ponovljive. `n` je ograničen na 10. Zahtjev u cjelini ne uspijeva
-ako bilo koji poziv ne uspije. Lista formata za fan-out je `SINGLE_IMAGE_FANOUT_FORMATS` u
-`open-sse/handlers/imageGeneration/fanOut.ts`.
+`n` vraća `n` slike u `data[]`. Provajderi čiji upstream API vraća jednu sliku po pozivu (Black Forest Labs, Stability AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik, NVIDIA NIM, Cloudflare Workers AI) dobijaju `n` odvojena upstream poziva, najviše 4 u letu. Fiksni `seed` se kompenzira indeksom poziva (`seed`, `seed + 1`, …), tako da se slike razlikuju, ali ostaju reproducibilne. `n` je ograničen na 10. Zahtjev ne uspijeva u cjelini ako bilo koji poziv ne uspije. Lista formata koji se izvijaju je `SINGLE_IMAGE_FANOUT_FORMATS` u `open-sse/handlers/imageGeneration/fanOut.ts`.
 
-ZenMux ponovo koristi postojeću vezu API ključa i prihvata prefikse `zenmux/` ili `zm/`:
+ZenMux ponovo koristi postojeću vezu s API ključem i prihvaća `zenmux/` ili `zm/` prefikse:
 
-- `zenmux/openai/gpt-image-2` koristi ZenMux OpenAI Images API. Opcije uključuju `size`,
-  `quality`, `n`, `output_format`, `output_compression`, `background` i `response_format`.
-- Drugi izdavači, kao što je `zm/meta/muse-image-1.0`, koriste ZenMux Vertex AI `:predict`
-  endpoint. `n` se mapira na `sampleCount`, `aspect_ratio` na `aspectRatio`, a `image_size`
-  (`1K`, `2K`, `4K`) na `sampleImageSize`. Vrijednost `size` u pikselima daje samo omjer
-  stranica, a ne garantovane dimenzije u pikselima. Podržani omjeri, rezolucije i brojevi
-  razlikuju se u zavisnosti od modela.
-- `zm/inclusionai/ming-image-0.1-design` sam bira svoje dimenzije. Izostavite `size`,
-  `aspect_ratio` i `image_size`; eksplicitne vrijednosti vraćaju HTTP 400. PNG, JPEG i WebP
-  mogu se zatražiti pomoću `output_format`.
+- `zenmux/openai/gpt-image-2` koristi ZenMuxOpenAI slike API. Opcije uključuju `size`, `quality`, `n`, `output_format`, `output_compression`, `background` i `response_format`.
+- Drugi izdavači, kao što je `zm/meta/muse-image-1.0`, koriste ZenMux-ovu krajnju tačku AI `:predict` Vertex. `n` mapira u `sampleCount`, `aspect_ratio` u `aspectRatio`, i `image_size` (`1K`, `2K`, `4K`) u `sampleImageSize`. Piksel `size` daje samo omjer širine i visine, a ne garantirane dimenzije piksela. Podržani omjeri, rezolucije i broj se razlikuju u zavisnosti od modela.
+- `zm/inclusionai/ming-image-0.1-design` bira svoje dimenzije. Izostavite `size`, `aspect_ratio` i `image_size`; eksplicitne vrijednosti vraćaju HTTP 400. PNG, JPEG i WebP se mogu zahtijevati sa `output_format`.
 
-Ova integracija podržava generisanje slike iz teksta, ali ne i uređivanje referentne slike. Vertex
-izlaz se normalizuje u `data[].b64_json`; `response_format: "url"` vraća upstream
-HTTPS URL ili base64 URL podataka kada su dostupni samo bajtovi slike. Prazni/filtrirani izlazi
-vraćaju grešku umjesto uspješnog odgovora bez sadržaja. Pristup modelima zavisi od ZenMux naloga.
-Pogledajte [ZenMux Vertex API](https://docs.zenmux.ai/api/vertexai/generate-images) i
-[OpenAI Images API](https://docs.zenmux.ai/api/openai/generate-an-image).
+Ova integracija podržava generiranje teksta u sliku, a ne uređivanje referentne slike. Izlaz vrha je normaliziran na `data[].b64_json`; `response_format: "url"` vraća upstream HTTPS URL ili base64 podatke URL kada su dostupni samo bajtovi slike. Empty/filtered izlazi vraćaju grešku, a ne prazan uspjeh. Pristup modelu zavisi od ZenMux naloga. Pogledajte [ZenMux-ove vrhove API](https://docs.zenmux.ai/api/vertexai/generate-images) i [OpenAI slike API](https://docs.zenmux.ai/api/openai/generate-an-image).
+
+Microsoft 365 Copilot veza za prijavu služi `copilot-m365-web/m365-copilot-image` preko ugrađenog alata za slike Copilot: jedan Copilot okret po slici (`n` 1–4), `size` upravlja samo orijentacijom, a slike se vraćaju u liniji (`b64_json`, ili podaci URL za `response_format: "url"`). Vidi [Microsoft 365 Copilot](../providers/COPILOT-M365.md#image-generation).
 
 ```bash
-# Izlistaj sve modele za slike
+# List all image models
 GET /v1/images/generations
 ```
 
@@ -856,17 +840,19 @@ pozivaocu koji nije sesija (dohvatanje, brisanje, otkazivanje i provjera `input_
 
 ---
 
-## API za pretragu
+## Search API
 
-Apstrakcija pružatelja web/pretrage (Tavily, Brave, Exa, Serper itd.).
+apstrakcija Web/search provajdera (Tavily, Brave, Exa, Serper, itd.).
 
-| Metoda | Putanja                | Opis                                                                                               |
-| ------ | ---------------------- | -------------------------------------------------------------------------------------------------- |
-| GET    | `/v1/search`           | Navodi konfigurirane pružatelje pretrage + mogućnosti                                              |
-| POST   | `/v1/search`           | Pokreće upit za pretragu — tijelo se validira pomoću `v1SearchSchema`, podržava keširanje/spajanje |
-| GET    | `/v1/search/analytics` | Statistika pogodaka/latencije/keširanja po pružatelju                                              |
+| Metoda | Put                    | Opis                                                                                           |
+| ------ | ---------------------- | ---------------------------------------------------------------------------------------------- |
+| GET    | `/v1/search`           | Navedite mogućnosti konfiguriranih provajdera pretraživanja +                                  |
+| POST   | `/v1/search`           | Pokrenite upit za pretragu — tijelo potvrđeno od `v1SearchSchema`, podržava caching/coalescing |
+| GET    | `/v1/search/analytics` | hit/latency/cache statistika po provajderu                                                     |
 
-**Autentifikacija:** Bearer API ključ (`extractApiKey` + `isValidApiKey`). Pravila pretrage primjenjuju se putem `enforceApiKeyPolicy`.
+**Auth:** Nosilac API ključa (`extractApiKey` + `isValidApiKey`). Politika pretraživanja nametnuta preko `enforceApiKeyPolicy`.
+
+**Auto-select:** without `provider`, the cheapest provider with a configured connection runs first and the next cheapest is the failover. Free last-resort providers (`duckduckgo-free`) are used only when nothing else is configured. A self-hosted SearXNG counts as configured once its connection stores a real `baseUrl` (not the catalog default `http://localhost:8888/search`): it then ranks as a $0 provider ahead of keyed ones, with the cheapest keyed provider as failover, including when SearXNG answers 400, 401, 403 or 404. A `baseUrl` that is not a valid `http(s)` URL or that points at a cloud-metadata address does not count. A SearXNG connection that stores a token ranks this way only over `https://` or loopback `http://`. Over remote plain `http://` it is never a failover and stays a last resort, used only when no other provider is configured or when requested by name, so it does send the token in cleartext in those two cases.
 
 ### Exa i Tavily `provider_options`
 
@@ -1042,30 +1028,28 @@ ključu koji ih je kreirao. Reprodukcija čiji je ishod neizvjestan završava u 
 
 ---
 
-## Samostalno korištenje (`/api/usage/om-usage`)
+## Samouslužna upotreba (`/api/usage/om-usage`)
 
-Svaki API ključ može čitati **vlastitu** upotrebu i kvote — nije potrebna upravljačka autentifikacija. Ovo je krajnja tačka koju
-klijent (CLI, OmniCopilot panel) koristi da bi vlasniku ključa prikazao njegovu potrošnju.
+Svaki API ključ može čitati **svoj vlastiti** korištenje i kvote — bez upravljanja aut. Ovo je krajnja tačka koju klijent (CLI, OmniCopilot panel) koristi da pokaže vlasniku ključeva njihovu potrošnju.
 
 ```bash
-# Tekstualni oblik (historijski ugovor — običan tekst za terminal)
+# Text form (the historical contract — plain text for a terminal)
 curl -H "Authorization: Bearer <your-api-key>" \
   http://localhost:20128/api/usage/om-usage
 
-# Strukturirani oblik — ono što UI koristi
+# Structured form — what a UI consumes
 curl -H "Authorization: Bearer <your-api-key>" \
   "http://localhost:20128/api/usage/om-usage?format=json"
 ```
 
-Ključ mora imati omogućenu opciju **`allowUsageCommand`** (podrazumijevano isključena — upravljač API ključeva na kontrolnoj tabli
-uključuje je ili isključuje za svaki ključ). Bez nje krajnja tačka vraća `403`.
+Ključ mora imati **`allowUsageCommand`** omogućeno (podrazumevano isključeno — API-upravljač ključevima kontrolne table ga prebacuje po ključu). Bez toga krajnja tačka odgovara `403`.
 
-`?format=json` vraća diferencirani oblik, tako da pozivalac nikada ne čita polje podataka iz odbijenog odgovora. U slučaju uspjeha:
+`?format=json` vraća diskriminisani oblik tako da pozivalac nikada ne čita polje podataka sa odbijanja. o uspjehu:
 
 ```jsonc
 {
   "allowed": true,
-  // prisutno samo kada je ključ uključio ograničenja upotrebe po ključu (dnevni/sedmični USD):
+  // present only when the key opted into per-key usage limits (daily/weekly/5-hour USD):
   "personal": {
     "dailySpentUsd": 1.25,
     "dailyLimitUsd": 5,
@@ -1074,9 +1058,9 @@ uključuje je ili isključuje za svaki ključ). Bez nje krajnja tačka vraća `4
     "weeklyLimitUsd": 20,
     "weeklyResetAtIso": "…" /* … */,
   },
-  // snimak kvote izabranog provajdera ili null kada još ništa nije keširano:
+  // the selected provider quota snapshot, or null when nothing is cached yet:
   "provider": { "connectionId": "…", "provider": "claude", "plan": "…", "quotas": {/* … */} },
-  // snimak svake konekcije, kako bi UI mogao prikazati više provajdera uporedno:
+  // every connection's snapshot, so a UI can render several providers side by side:
   "providers": [
     { "connectionId": "…", "provider": "claude" /* … */ },
     { "provider": "codex" /* … */ },
@@ -1084,13 +1068,9 @@ uključuje je ili isključuje za svaki ključ). Bez nje krajnja tačka vraća `4
 }
 ```
 
-U slučaju odbijanja (`401` neispravan ključ / `403` nije dozvoljeno), ista ruta vraća
-`{ "allowed": false, "error": { "message": "…" } }` — prisutan, ali prazan `personal`/`provider`
-(ključ je dozvoljen, ali još ništa nije poznato) predstavlja drugo stanje u odnosu na odbijanje, a samo JSON oblik
-ih razlikuje.
+Kod odbijanja (`401` loš ključ / `403` nije dozvoljen) ista ruta vraća `{ "allowed": false, "error": { "message": "…" } }` — sadašnji, ali prazan `personal`/`provider` (ključ dozvoljen, ništa još nije naučeno) je drugačije stanje od odbijanja, i samo ih JSON forma razlikuje.
 
-**Autentifikacija:** vlastiti Bearer API ključ pozivaoca, validiran pomoću `isValidApiKey` — ovo _nije_
-upravljačka površina (`/api/keys/…`), koja ostaje zaštićena pomoću `requireManagementAuth`.
+**Auth:** API ključ nosioca pozivatelja, potvrđen sa `isValidApiKey` — ovo _nije_ upravljačka površina (`/api/keys/…`), koja ostaje iza `requireManagementAuth`.
 
 ### Sirovi procenti kvote u odnosu na procente prilagođene graničnoj vrijednosti
 
@@ -1336,40 +1316,41 @@ i lanci prioriteta u `src/lib/modelCapabilityLimits.ts`.
 | `/api/usage/model-latency-stats` | GET             | Pokretni zbirni podaci o kašnjenju po pružaocu/modelu (prosjek/p50/p95/p99, stopa uspješnosti); filteri: `windowHours`/`minSamples`/`maxRows`/`provider`/`model` (#6873)                                                                                                                                            |
 | `/api/usage/cache-health`        | GET             | Sažetak stanja predmemorije upita kroz `call_logs` — omjer upisa/čitanja, distribucija veličine upisa p50/p90/p99, koncentracija velikih upisa, podjela po modelu i procjena `healthy`/`degraded`/`thrash`/`no-data`; parametri upita `range` (`1h`\|`24h`\|`7d`\|`30d`, zadano `24h`) i opcionalni `model` (#8827) |
 
-### Dozvole API ključa
+### API ključne dozvole
 
-`PATCH /api/keys/{id}` ažurira dozvole postojećeg ključa. Kao i svaka ruta `/api/keys*`, zahtijeva autorizaciju za upravljanje (pogledajte [Autentifikacija za upravljanje](../guides/MANAGEMENT-AUTH.md)), a ne ključ za zaključivanje. Pošaljite samo polja koja želite promijeniti; zahtjev bez ijednog od njih odbija se porukom `No valid fields to update`. Prihvaćena polja definirana su u `updateKeyPermissionsSchema` u datoteci `src/shared/validation/schemas/keys.ts`.
+`PATCH /api/keys/{id}` ažurira dozvole postojećeg ključa. Kao i svaka `/api/keys*` ruta, potrebna joj je autorizacija upravljanja (pogledajte [Upravljačka autentikacija](../guides/MANAGEMENT-AUTH.md) ), a ne ključ zaključivanja. Pošaljite samo polja koja želite da promenite; zahtjev sa nijednim od njih se odbija sa `No valid fields to update`. Prihvaćena polja su definirana `updateKeyPermissionsSchema` u `src/shared/validation/schemas/keys.ts`.
 
-| Polje                                       | Tip                                                                              | Napomene                                                                                                                                  |
-| ------------------------------------------- | -------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| `name`                                      | string, 1-200 znakova                                                            |                                                                                                                                           |
-| `isActive`                                  | boolean                                                                          |                                                                                                                                           |
-| `isBanned`                                  | boolean                                                                          |                                                                                                                                           |
-| `expiresAt`                                 | ISO 8601 datum i vrijeme ili `null`                                              | `null` briše datum isteka                                                                                                                 |
-| `modelAccessMode`                           | `all` \| `restricted`                                                            | `allowedModels` mora biti prazan kada je način rada `all`                                                                                 |
-| `allowedModels`, `blockedModels`            | niz stringova, do 1000                                                           |                                                                                                                                           |
-| `allowedCombos`                             | niz stringova, do 500                                                            | Određuje koje kombinacije ključ može pozivati; direktnim modelima upravljaju `modelAccessMode` / `allowedModels`                          |
-| `connectionAccessMode`                      | `all` \| `restricted`                                                            | `allowedConnections` mora biti neprazan kada je `restricted`, a prazan kada je `all`                                                      |
-| `allowedConnections`                        | niz UUID-ova, do 100                                                             |                                                                                                                                           |
-| `allowAutoCombos`                           | boolean                                                                          | `false` odbija zahtjeve za modele `auto/*` s ovim ključem; ključevi kod kojih ovo nikad nije postavljeno su dozvoljeni                    |
-| `catalogScope`                              | `all` \| `combos` \| `models`                                                    | Određuje šta `GET /v1/models` navodi za ovaj ključ (samo kombinacije, samo modele ili oboje); ne mijenja šta ključ može pozivati          |
-| `forcedModel`                               | string do 300 znakova ili `null`                                                 | Usmjerava zahtjeve za razgovor na ovaj model/kombinaciju, iznad `X-Route-Model` i `body.model`; ograničenja ključa i dalje se primjenjuju |
-| `noLog`, `autoResolve`                      | boolean                                                                          |                                                                                                                                           |
-| `throttleDelayMs`                           | cijeli broj, 0-300000                                                            |                                                                                                                                           |
-| `maxSessions`                               | cijeli broj, 0-10000                                                             |                                                                                                                                           |
-| `rateLimits`                                | niz vrijednosti `{ limit, window }` (pozitivni cijeli brojevi, do 50) ili `null` | `null` briše ograničenja                                                                                                                  |
-| `accessSchedule`                            | objekt rasporeda ili `null`                                                      | `null` briše raspored                                                                                                                     |
-| `scopes`                                    | niz stringova, do 32                                                             |                                                                                                                                           |
-| `allowedEndpoints`                          | niz stringova, do 20                                                             |                                                                                                                                           |
-| `streamDefaultMode`                         | `legacy` \| `json`                                                               |                                                                                                                                           |
-| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                             | Pogledajte [Zaobilaženje predmemorije po ključu](#per-key-cache-bypass)                                                                   |
-| `compressionEnabled`                        | boolean                                                                          |                                                                                                                                           |
-| `codexServiceMode`                          | jedan od načina rada Codex servisa                                               |                                                                                                                                           |
-| `disableNonPublicModels`                    | boolean                                                                          |                                                                                                                                           |
-| `allowUsageCommand`                         | boolean                                                                          |                                                                                                                                           |
-| `usageLimitEnabled`                         | boolean                                                                          |                                                                                                                                           |
-| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | number >= 0 or `null`                                                            |                                                                                                                                           |
-| `chaosModeEnabled`                          | boolean                                                                          |                                                                                                                                           |
+| Polje                                       | Tip                                                                              | Napomene                                                                                                                                                                                                                                                          |
+| ------------------------------------------- | -------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`                                      | string, 1-200 znakova                                                            |                                                                                                                                                                                                                                                                   |
+| `isActive`                                  | boolean                                                                          |                                                                                                                                                                                                                                                                   |
+| `isBanned`                                  | boolean                                                                          |                                                                                                                                                                                                                                                                   |
+| `expiresAt`                                 | ISO 8601 datum i vrijeme ili `null`                                              | `null` briše datum isteka                                                                                                                                                                                                                                         |
+| `modelAccessMode`                           | `all` \| `restricted`                                                            | `allowedModels` mora biti prazan kada je način rada `all`                                                                                                                                                                                                         |
+| `allowedModels`, `blockedModels`            | niz nizova, do 1000                                                              |                                                                                                                                                                                                                                                                   |
+| `allowedCombos`                             | niz stringova, do 500                                                            | Određuje koje kombinacije ključ može pozivati; direktnim modelima upravljaju `modelAccessMode` / `allowedModels`                                                                                                                                                  |
+| `connectionAccessMode`                      | `all` \| `restricted`                                                            | `allowedConnections` mora biti neprazan kada je `restricted`, a prazan kada je `all`                                                                                                                                                                              |
+| `allowedConnections`                        | niz UUID-ova, do 100                                                             |                                                                                                                                                                                                                                                                   |
+| `allowAutoCombos`                           | boolean                                                                          | `false` odbija zahtjeve za modele `auto/*` s ovim ključem; ključevi kod kojih ovo nikad nije postavljeno su dozvoljeni                                                                                                                                            |
+| `catalogScope`                              | `all` \| `combos` \| `models`                                                    | Određuje šta `GET /v1/models` navodi za ovaj ključ (samo kombinacije, samo modele ili oboje); ne mijenja šta ključ može pozivati                                                                                                                                  |
+| `forcedModel`                               | string do 300 znakova ili `null`                                                 | Usmjerava zahtjeve za razgovor na ovaj model/kombinaciju, iznad `X-Route-Model` i `body.model`; ograničenja ključa i dalje se primjenjuju                                                                                                                         |
+| `noLog`, `autoResolve`                      | boolean                                                                          |                                                                                                                                                                                                                                                                   |
+| `throttleDelayMs`                           | cijeli broj, 0-300000                                                            |                                                                                                                                                                                                                                                                   |
+| `maxSessions`                               | cijeli broj, 0-10000                                                             |                                                                                                                                                                                                                                                                   |
+| `rateLimits`                                | niz vrijednosti `{ limit, window }` (pozitivni cijeli brojevi, do 50) ili `null` | `null` briše ograničenja                                                                                                                                                                                                                                          |
+| `accessSchedule`                            | objekt rasporeda ili `null`                                                      | `null` briše raspored                                                                                                                                                                                                                                             |
+| `scopes`                                    | niz stringova, do 32                                                             |                                                                                                                                                                                                                                                                   |
+| `allowedEndpoints`                          | niz stringova, do 20                                                             |                                                                                                                                                                                                                                                                   |
+| `streamDefaultMode`                         | `legacy` \| `json`                                                               |                                                                                                                                                                                                                                                                   |
+| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                             | Pogledajte [Zaobilaženje predmemorije po ključu](#per-key-cache-bypass)                                                                                                                                                                                           |
+| `compressionEnabled`                        | boolean                                                                          |                                                                                                                                                                                                                                                                   |
+| `codexServiceMode`                          | jedan od načina rada Codex servisa                                               |                                                                                                                                                                                                                                                                   |
+| `disableNonPublicModels`                    | boolean                                                                          |                                                                                                                                                                                                                                                                   |
+| `allowUsageCommand`                         | boolean                                                                          |                                                                                                                                                                                                                                                                   |
+| `usageLimitEnabled`                         | boolean                                                                          |                                                                                                                                                                                                                                                                   |
+| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | broj >= 0 ili `null`                                                             |                                                                                                                                                                                                                                                                   |
+| `fiveHourUsageLimitUsd`                     | broj >= 0 ili `null`                                                             | Pokretni 5-satni USD budžet, nametnut poput dnevnih i sedmičnih ograničenja (`usageLimitEnabled`, `UNPRICED_USAGE_BUDGET_POLICY`). `retry-after` je kada najstarija potrošnja u prozoru stari, što može ostaviti ključ daleko iznad svog limita i dalje blokiran. |
+| `chaosModeEnabled`                          | boolean                                                                          |                                                                                                                                                                                                                                                                   |
 
 ```bash
 curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
@@ -1419,6 +1400,14 @@ curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
 | `/api/modality-bridge/stats`         | GET        | U memoriji pohranjeni `attempts`, uspjesi/`bridged`, neuspjesi, pogoci predmemorije, `totalLatencyMs`, `latencySamples`, `averageLatencyMs` izražen u uzorcima i vrijeme posljednje upotrebe (resetuje se pri ponovnom pokretanju; autentifikacija upravljanja)                                                                                                                                                                     |
 | `/api/modality-bridge/video/runtime` | GET        | Stroga provjera pouzdane povratne petlje prije autentifikacije/provjere upravljanja; pročišćena dostupnost i verzije FFmpeg/ffprobe (no-store)                                                                                                                                                                                                                                                                                      |
 | `/api/modality-bridge/video/extract` | POST       | Interni autentifikovani posrednik bajtova za pouzdanu povratnu petlju; ulaz od 50 MiB, ograničeni red čekanja/izlaz od 32 MiB, `503` za kapacitet, `499` za prekid veze, `504` za rok; nije javni API za otpremanje                                                                                                                                                                                                                 |
+
+### Snimanje video okvira
+
+`GET /api/v1/video-bridge/drilldown` čita neprozirnu ručku vezanu za stanara vraćenu u `x-omniroute-video-drilldown` nakon izričito odobrenog zahtjeva za Video Bridge. I reads i `DELETE` uvijek zahtijevaju važeći API ključ i operatorovu nezavisnu `modalityBridgeVideoDrilldownRemoteEnabled` dozvolu. Zadržavanje proizvodnje dodatno zahtijeva `modalityBridgeVideoDrilldownEnabled` i strogi `drilldown: true` po dijelu. Ako ključ ima nepraznu listu dozvoljenih krajnjih tačaka, mora uključivati `video` i za GET i DELETE, bez obzira da li pozivalac koristi `/v1` ili `/api/v1`.
+
+GET upit: potreban `handle`; opcioni `variant` (`preview`, `standard`, `detail`), `limit` (1–8; naslijeđeni `frames` je prihvaćen, ali se ne može kombinirati sa `limit`), `page` na nuli i `start`/`end` sekunde. Kada su dostavljene obje granice fokusa, `end` mora biti veći od `start`. Duplicate/unknown ključevi upita su odbijeni. Uspješni odgovori sadrže `derivation`, `durationSeconds`, `frames`, `hasMore`, `page`, `variant` i opciono `focusWindow`; no-store JSON je ograničen na 32 MiB uključujući Base64. Predimenzionirani izlaz vraća 413; zatražite manje okvira.
+
+`DELETE /api/v1/video-bridge/drilldown?handle=...` vraća `{ "removed": 0|1 }`. Nepoznati, istekli i GETs s unakrsnim ključem se ne mogu razlikovati 404 odgovora; križni ključ DELETE ne može ukloniti unos vlasnika. Onemogućeni pristup vraća 403, missing/invalid autentifikaciju 401, nevažeće upite 400, otkazivanje 499 i privremene greške 503. Ručke su procesne lokalne, ističu nakon deset minuta i ne preživljavaju ponovno pokretanje. Nove ručke koriste `v1.` plus 32-bajtni nasumični Base64URL token; zadržavaju se samo heševi tokena. Naslijeđeni 64-hex tokeni ostaju sintaktički čitljivi radi kompatibilnosti. Pogledajte [zaštitne ograde Video Bridgea](../security/GUARDRAILS.md#video-bridge-videobridgets-videobridgepipelinets) za detalje o saglasnosti, kvotama i varijantama.
 
 ### Sigurnosna kopija i izvoz/uvoz
 
@@ -1522,19 +1511,19 @@ GET odgovor uključuje `agents[]` (id, name, binary, version, installed, protoco
 
 Ove krajnje tačke preslikavaju format Gemini API-ja za klijente koji očekuju izvornu kompatibilnost s Gemini SDK-om.
 
-### Interni / sistemski API-ji
+### Interni / Sistem APIs
 
-| Endpoint                 | Metoda | Opis                                                                  |
-| ------------------------ | ------ | --------------------------------------------------------------------- |
-| `/api/init`              | GET    | Provjera inicijalizacije aplikacije (koristi se pri prvom pokretanju) |
-| `/api/tags`              | GET    | Oznake modela kompatibilne s Ollamom (za Ollama klijente)             |
-| `/api/restart`           | POST   | Pokreni kontrolisano ponovno pokretanje servera                       |
-| `/api/shutdown`          | POST   | Pokreni kontrolisano gašenje servera                                  |
-| `/api/system/env/repair` | POST   | Popravi varijable okruženja OAuth pružaoca                            |
-| `/api/system/version`    | GET    | Trenutna/najnovija verzija, status ažuriranja, kanal izdanja          |
-| `/api/system/version`    | POST   | Pokreni ažuriranje na najnoviju verziju uz uvažavanje implementacije  |
+| Krajnja tačka            | Metoda | Opis                                                             |
+| ------------------------ | ------ | ---------------------------------------------------------------- |
+| `/api/init`              | GET    | Pokreni usluge pozadinske sinhronizacije (upravljanje auth)      |
+| `/api/tags`              | GET    | Oznake modela kompatibilne s Ollama (za Ollama klijente)         |
+| `/api/restart`           | POST   | Pokreni graciozno ponovno pokretanje servera                     |
+| `/api/shutdown`          | POST   | Aktivirajte graciozno gašenje servera                            |
+| `/api/system/env/repair` | POST   | Popravite varijable okruženja OAuth provajdera                   |
+| `/api/system/version`    | GET    | Current/latest verzija, status ažuriranja, kanal izdanja         |
+| `/api/system/version`    | POST   | Započnite ažuriranje na najnoviju verziju svjesno implementacije |
 
-> **Napomena:** Ove krajnje tačke sistem koristi interno ili služe za kompatibilnost s Ollama klijentima. Krajnji korisnici ih obično ne pozivaju.
+> **Napomena:** Ove krajnje tačke sistem koristi interno ili za kompatibilnost Ollama klijenta. Krajnji korisnici ih obično ne zovu.
 
 ### Popravka OAuth okruženja _(v3.6.1+)_
 

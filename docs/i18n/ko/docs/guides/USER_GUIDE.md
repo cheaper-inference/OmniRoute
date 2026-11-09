@@ -347,19 +347,19 @@ API 키: [대시보드에서 가져오기]
 ```bash
 npm install -g omniroute
 
-# 구성 디렉터리 생성
+# Create config directory
 mkdir -p ~/.omniroute
 
-# .env 파일 생성(.env.example 참조)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# 서버 시작
+# Start server
 omniroute
-# 또는 사용자 지정 포트 사용:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI는 `~/.omniroute/.env` 또는 `./.env`에서 `.env`를 자동으로 로드합니다.
+CLI `~/.omniroute/.env` 또는 `./.env` 에서 `.env` 자동으로 로드합니다. 작업 디렉터리의 `./.env` 짧은 키 허용 목록(포트, `REQUIRE_API_KEY`, 로케일 및 색상 설정)만 설정할 수 있습니다. 다른 모든 것을 `~/.omniroute/.env` 에 넣으십시오. [CLI 출시 계약을](CLI-LAUNCH-CONTRACTS.md#working-directory-env) 참조하세요.
 
 ### 트레이 모드
 

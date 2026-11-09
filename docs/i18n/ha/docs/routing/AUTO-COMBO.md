@@ -127,6 +127,27 @@ handleComboChat (inji iri ɗaya da na combo da aka adana)
 | `src/sse/handlers/chat.ts`                                | Haɗawa: gajeriyar hanyar prefix na atomatik              |
 | `src/shared/constants/providers.ts`                       | Shigarwar tsarin `SYSTEM_PROVIDERS.auto`                 |
 
+## Zaɓuɓɓukan asusu don ajiyayyun combos ta atomatik
+
+Editan atomatik mai hankali yana ba da zaɓi na zaɓi** Abubuwan da ake so asusu** sashe. Kowace haɗin za a iya Fi so, Na al'ada (tsoho), Ajiye, ko Keɓe. Haɗin kai da yawa na iya raba matakin. Auto yana zaɓar tsakanin matakin farko na cancanta, yana riƙe da halayen scoring/router a can; yunƙurin da suka gaza sun faɗo zuwa sauran asusun kankare, waɗanda aka fi so kafin al'ada kafin ajiya. Wannan haɗakarwa ba ta taɓa amfani da haɗin da ba a haɗa ba.
+
+Ana adana saitin azaman `config.accountPreferences`, an buɗe ta hanyar haɗin ID:
+
+```json
+{
+  "accountPreferences": {
+    "connection-a": "preferred",
+    "connection-b": "preferred",
+    "connection-c": "reserve",
+    "connection-d": "excluded"
+  }
+}
+```
+
+Taswirar da aka tsallake ko babu komai tana riƙe da hanyoyin da ke akwai. Zaɓuɓɓuka ba sa kunna haɗin haɗin da aka kashe, ba da damar maɓalli na API, maido da ƴan takarar da aka katange keɓaɓɓu, ko ketare binciken kasafin kuɗi. Kowane yunƙuri yana iyakance ga haɗin kai na kankare, don haka faɗuwar asusun ba zai iya tsallake matakan bayan na'ura mai ba da hanya tsakanin hanyoyin sadarwa ba. Dangantakar zaman na iya riƙe da asusun da ya cancanta; ban da asusun da ke daure zuwa juyi na asali yana tsayawa wanda ya juya maimakon yin shiru yana canza asusun.
+
+Zaɓuɓɓukan da aka tsara suna amfani da hanyar sane da asusu: ba a aika mahallin mahallin mara iyaka, bututu mai wayo, hargitsi da gajerun hanyoyin inuwa. An kashe shingen hasashe don waɗannan buƙatun don haka ajiyar asusun ba zai iya tseren waɗanda aka fi so ba. Sauran dabarun haɗin gwiwa ba sa fassara wannan saitin. Canza haduwa daga Atomatik yana adana abubuwan da aka ajiye don juyawa baya.
+
 ## Sunayen Combo Masu Daidai da Ainihin Model Id
 
 Combo wanda `name` ɗinsa yake daidai da ainihin model id kai tsaye (misali, combo mai suna
@@ -186,36 +207,38 @@ Kurakurai biyu da aka fi yi:
 
 Duba [#7992](https://github.com/diegosouzapw/OmniRoute/issues/7992) da [#7111](https://github.com/diegosouzapw/OmniRoute/issues/7111) domin ruɗanin farko da wannan rubutun ke fayyacewa.
 
-## Yadda Yake Aiki (Auto-Combos Masu Dorewa)
+## Yadda Yake Aiki (Nau'i na Auto-Combos)
 
-Injin Auto-Combo yana zaɓar mafi kyawun mai samarwa/samfuri a kai a kai ga kowace buƙata ta amfani da **aikin ƙididdiga mai ma'auni 16** (wanda aka ayyana a `open-sse/services/autoCombo/scoring.ts` → `DEFAULT_WEIGHTS`). Jimillar tsoffin nauye-nauyen ita ce `1.0`; ana sake daidaita nauye-nauyen da aka keɓance ta hanyar `normalizeScoringWeights()`. Biyu daga cikin goma sha shida ɗin — `cacheAffinity` da `resetWindowAffinity` — suna da tsohon nauyi na `0`; `reliability` yana da `0` a cikin `DEFAULT_WEIGHTS` amma `0.03` a cikin fakiti na gama-gari da `0.04` a cikin `reliability-first`, sannan `quality` yana da `0.02` a cikin fakiti (`0.03` a cikin `quality-first`): duk da haka ana ƙididdige su ga kowane ɗan takara, kuma `cacheAffinity` yana sarrafa cire maimaituwar prompt-cache a wajen makin, don haka abubuwan da tsohon nauyinsu sifili ne kawai ba sa bayar da tasiri ta tsohuwa, yayin da fakiti suke yi.
+Injin Haɗin Haɗa kai tsaye yana zaɓar mafi kyawun provider/model don kowace buƙata ta amfani da a **Ayyukan maki 16-factor** (wanda aka bayyana a cikin `open-sse/services/autoCombo/scoring.ts` → `DEFAULT_WEIGHTS`). Tsohuwar ma'aunin nauyi zuwa `1.0`; `normalizeScoringWeights()` ya sake daidaita ma'aunin nauyi na al'ada. Biyu daga cikin — `cacheAffinity` goma sha shida da `resetWindowAffinity` — suna ɗauke da ma'aunin nauyi na `0`; `reliability` yana ɗaukar `0` a cikin `DEFAULT_WEIGHTS` amma `0.03` a cikin fakitin jigilar kayayyaki da `0.04` a cikin `reliability-first`, kuma `quality` yana ɗaukar `0.02` a cikin fakiti (`0.03` a cikin `quality-first`): har yanzu ana lissafta su ga kowane ɗan takara, kuma zazzagewar cache mai sauri na `cacheAffinity` a waje da maki, don haka abubuwan sifili-default kawai ba sa jefa ƙuri'a ta tsohuwa yayin fakitin kawai ba sa jefa kuri'a ta tsohuwa yayin fakitin.
 
-![Ƙididdigar Auto-Combo mai ma'auni 16](../diagrams/exported/auto-combo-scoring.svg)
+![Auto-Combo 16-factor scoring](../diagrams/exported/auto-combo-scoring.svg)
 
-> Tushe: [diagrams/auto-combo-scoring.mmd](../diagrams/auto-combo-scoring.mmd) (sake samarwa ta hanyar `npm run docs:render-diagrams`). Sunan fayil ɗin na tarihi ne; tushen da zanen da aka samar suna nuna dukkan ma'aunai 16 da aka ayyana a cikin `DEFAULT_WEIGHTS`.
+> Source: [diagrams/auto-combo-scoring.mmd](../diagrams/auto-combo-scoring.mmd) (sake haifuwa ta hanyar `npm run docs:render-diagrams`). Sunan fayil na tarihi ne; tushen da zanen da aka yi ya nuna duk abubuwan 16 da aka bayyana a cikin `DEFAULT_WEIGHTS`.
 
-| Ma'auni               | Tsohon Nauyi | Bayani                                                                                                                                                                                                                                                               |
-| :-------------------- | :----------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `quota`               | 0.1429       | Ragowar kaso / sararin iyakar ƙimar amfani [0..1]                                                                                                                                                                                                                    |
-| `health`              | 0.1605       | Makin lafiya daga circuit breaker (CLOSED=1.0, HALF_OPEN=0.5, OPEN=0.0)                                                                                                                                                                                              |
-| `costInv`             | 0.1429       | Akasin kuɗin da aka **haɗa** (60% farashin token na shigarwa + 40% farashin token na fitarwa, an daidaita) — mafi arha = mafi girman maki                                                                                                                            |
-| `latencyInv`          | 0.1143       | Akasin jinkirin p95 da aka daidaita da rukunin — mafi sauri = mafi girman maki                                                                                                                                                                                       |
-| `taskFit`             | 0.0762       | Dacewa da nau'in aiki (rubuta lamba, bita, tsarawa, nazari, gyaran kurakurai, takardu)                                                                                                                                                                               |
-| `stability`           | 0.0476       | Kwanciyar hankali bisa bambanci daga daidaitaccen karkatar jinkiri — ɗan takarar da lokacin amsawarsa ke yawan canzawa yana samun ƙaramin maki                                                                                                                       |
-| `tierPriority`        | 0.0476       | Fifikon matakin asusu — Ultra=1.0, Pro=0.67, Standard=0.33, Free=0.0                                                                                                                                                                                                 |
-| `tierAffinity`        | 0.0476       | Dacewa tsakanin matakin ɗan takara da matakin da manifest ya ba da shawara                                                                                                                                                                                           |
-| `specificityMatch`    | 0.0476       | Daidaituwa tsakanin takamaiman buƙatar (alamu daga manifest) da matakin samfurin                                                                                                                                                                                     |
-| `contextAffinity`     | 0.0476       | Dacewa tsakanin buƙatar girman taga mahallin da tagar mahallin samfurin                                                                                                                                                                                              |
-| `sessionAvailability` | 0.0476       | Samuwar zaman OAuth na haɗin ɗan takara ga wannan zaman (`getOAuthSessionAvailability()`; haɗe-haɗen da ba na OAuth ba suna samun maki 1.0)                                                                                                                          |
-| `connectionDensity`   | 0.0476       | Yana rarraba nauyi tsakanin haɗe-haɗen mai samarwa ɗaya (hana taruwa a wuri guda)                                                                                                                                                                                    |
-| `cacheAffinity`       | 0.00         | Dacewar rendezvous-hash zuwa haɗin da ya fi yiwuwa ya riga ya riƙe prefix na prompt-cache na wannan buƙatar (`open-sse/services/combo/promptCacheAffinity.ts`); a kashe yake ta tsohuwa (#8008)                                                                      |
-| `resetWindowAffinity` | 0.00         | Nuna fifiko ga haɗe-haɗen da tagar sake saita kasonsu ta fi dacewa (a kashe yake ta tsohuwa)                                                                                                                                                                         |
-| `quality`             | 0.03         | Alamar ingancin fitarwa bisa ra'ayoyin masu amfani daga mai bin diddigin ingancin routing-event; 'yan takarar da ba su da bayanan lura suna karɓar matsakaicin 0.5                                                                                                   |
-| `reliability`         | 0.00         | Adadin nasarar da aka lura, `1 - failureRate`, daga tarihin amfani na awa 24 bayan cika mafi ƙarancin samfura goma (in ba haka ba ana amfani da ma'aunin ainihin lokaci); 'yan takarar da ba su da bayanan lura ana ɗaukarsu a matsayin 1.0. A kashe yake ta tsohuwa |
+| Ma'auni               | Tsohon Nauyi | Bayani                                                                                                                                                                                                                     |
+| :-------------------- | :----------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `quota`               | 0.1429       | Matsayin da ya rage / iyakan iyaka [0..1]                                                                                                                                                                                  |
+| `health`              | 0.1605       | Makin lafiya daga mai watsewar kewayawa (CLOSED= 1.0, HALF_OPEN= 0.5, OPEN= 0.0)                                                                                                                                           |
+| `costInv`             | 0.1429       | Juyawa **hade** farashi (60% shigar da + 40% farashin alamar fitarwa, an daidaita shi) — mai rahusa = mafi girma                                                                                                           |
+| `latencyInv`          | 0.1143       | Inverse p95 latency an daidaita shi zuwa tafkin — mafi sauri = mafi girma                                                                                                                                                  |
+| `taskFit`             | 0.0762       | Nau'in dacewa da aiki (ƙididdigewa, bita, tsarawa, bincike, gyara kuskure, takardu)                                                                                                                                        |
+| `stability`           | 0.0476       | bambance-bambancen kwanciyar hankali daga daidaitattun daidaiton latency — ɗan takara wanda lokacin amsawa ya ƙasƙantar da ƙima.                                                                                           |
+| `tierPriority`        | 0.0476       | fifikon matakin asusu — Ultra = 1.0, Pro = 0.67, Standard = 0.33,= 0.0 Kyauta                                                                                                                                              |
+| `tierAffinity`        | 0.0476       | Dangantaka tsakanin matakin ɗan takara da matakin da aka ba da shawarar bayyananne                                                                                                                                         |
+| `specificityMatch`    | 0.0476       | Daidaita tsakanin ƙayyadaddun buƙata (bayyanannun alamar) da matakin ƙirar ƙira                                                                                                                                            |
+| `contextAffinity`     | 0.0476       | Dangantaka tsakanin buƙatun mahallin-taga na buƙatar da taga mahallin samfurin                                                                                                                                             |
+| `sessionAvailability` | 0.0476       | Samar da zaman OAuth na haɗin ɗan takara na wannan zaman (`getOAuthSessionAvailability()`; maki 1.0 ba na OAuth)                                                                                                           |
+| `connectionDensity`   | 0.0476       | Yana yada kaya a kan haɗin kai na mai bada iri ɗaya (anti-natsuwa)                                                                                                                                                         |
+| `cacheAffinity`       | 0.00         | Dacewar rendezvous-hash zuwa haɗin da ya fi yiwuwa ya riga ya riƙe prefix na prompt-cache na wannan buƙatar (`open-sse/services/combo/promptCacheAffinity.ts`); a kashe yake ta tsohuwa (#8008)                            |
+| `resetWindowAffinity` | 0.00         | Nuna son haɗin kai waɗanda taga sake saitin keɓaɓɓun keɓaɓɓen ke da kyau (an kashe su ta tsohuwa)                                                                                                                          |
+| `quality`             | 0.03         | Sigina mai inganci mai fitar da martani daga mai sa ido mai inganci na taron; 'yan takara ba tare da lura ba suna karɓar tsaka tsaki 0.5                                                                                   |
+| `reliability`         | 0.00         | Raba rabon nasara da aka lura, `1 - failureRate`, daga 24h na tarihin amfani a bayan bene-samfurin (ma'auni na ainihin lokacin in ba haka ba); 'yan takarar da ba su lura da su sun karanta kamar 1.0. An kashe ta tsohuwa |
 
-`quality` (`open-sse/services/routing/quality.ts`): `cold restart → ∅`; `observations = 0 → score 0.5`.
+`quality` tracker in-memories (`open-sse/services/routing/quality.ts`) ba komai bane bayan an sake farawa sanyi, don haka kowane ɗan takara ya ƙididdige `0.5` tsaka tsaki har sai abin lura na farko ya sauka.
 
-**Jimilla:** `0.1429 + 0.1605 + 0.1429 + 0.1143 + 0.0762 + (7 × 0.0476) + 0.00 + 0.00 + 0.03 + 0.00 = 1.0` kamar yadda aka ayyana a cikin `DEFAULT_WEIGHTS`; ana sake daidaita nauye-nauyen da mai amfani ya saita zuwa rabon ƙididdiga ta hanyar `normalizeScoringWeights()` kafin a ƙididdige maki.
+> **Ƙididdigar da ba za a iya karantawa ba (#15347).** Lokacin da mai bayarwa yana da ƙididdiga masu ƙididdiga amma ba ya mayar da wani abu mai iya karantawa (wanda bai gaza ba, bayanan da aka rasa, amfani da saƙo kawai, ko hoto mara kyau ba tare da `windows` mai sauƙi ba kuma babu iyaka `percentUsed`, ciki har da `percentUsed: null`), ɗan takarar ya zira kwallaye `0` akan ma'aunin `quota` kuma sakamakon ƙarshe yana ninka ta hanyar `UNREADABLE_QUOTA_SOFT_DEPRIORITIZE_FACTOR` mai laushi kamar yadda `autoStrategy.ts`-0. hukuncin haɗin kai-halin. Karatun rashin amfani da shi shaida ne game da na'urar sadarwa, ba mai bayarwa ba, don haka yana da matsayi a ƙasa da kowane karatu na gaske, gami da tabbataccen 100%-used ɗaya, amma ba a taɓa toshewa ko fitar da shi ba. Mai badawa wanda ba shi da iyaka yana ba da rahoton `unlimited: true` da maki a matsayin cikakken keɓaɓɓen keɓaɓɓen; mai bada wanda ba shi da madaidaicin keɓaɓɓen rajista ba shi da tushen telemetry kwata-kwata kuma yana kiyaye tsohowar `100`.
+
+**Jimlar:** `0.1429 + 0.1605 + 0.1429 + 0.1143 + 0.0762 + (7 × 0.0476) + 0.00 + 0.00 + 0.03 + 0.00 = 1.0` kamar yadda aka bayyana a cikin `DEFAULT_WEIGHTS`; An daidaita ma'aunin ma'aunin mai amfani zuwa rarraba ta `normalizeScoringWeights()` kafin zura kwallo.
 
 ## Fakitin Yanayi
 
@@ -325,20 +348,13 @@ Injin haɗa-hadar OmniRoute yana goyon bayan **dabarun turowa guda 20** (waɗand
 Don juyawa mai tsauri yi amfani da `round-robin`; nauyi iri ɗaya a kan `weighted` yana ba da daidaito na ƙididdiga — ba
 mai tsauri ba.
 
-### Yanayin bututun wakili
+### Yanayin bututun mai
 
-Haɗin `pipeline` mai aƙalla samfura biyu zai iya kunna rabawar mai tsarawa/mai aiwatarwa ta hanyar
-`config.agenticOrchestration.enabled`. Manufa ta farko ce ke da alhakin tsarawa da amsoshin ƙarshe;
-manufa ta biyu tana fitar da kiran kayan aiki na asalin abokin ciniki. OmniRoute yana gano ci gaban
-sakamakon kayan aiki daga ƙa'idar buƙatar, yana tambayar mai tsarawa ko ana buƙatar wani zagayen kayan aiki,
-sannan a sauƙaƙe yana sanya ko dai mai aiwatarwa ko mai tsarawa ya zama matakin ƙarshe da abokin ciniki zai gani.
+Haɗin `pipeline` tare da aƙalla samfura biyu na iya ficewa zuwa hanyar planner/executor tare da `config.agenticOrchestration.enabled`. Makasudin farko yana da tsare-tsare da amsoshi na ƙarshe; manufa ta biyu tana fitar da kiran kayan aiki na abokin ciniki. OmniRoute yana gano ci gaba da sakamakon kayan aiki daga ƙa'idar buƙatar, ya tambayi mai tsara ko ana buƙatar wani zagaye na kayan aiki, kuma yana mai da ko dai mai zartarwa ko mai tsarawa matakin ƙarshe na fuskantar abokin ciniki.
 
-Ƙarin samfuran da ke bayan manufa ta biyu ana jera su a matsayin madadin masu aiwatarwa. Amsar
-HTTP da ta gaza ko keɓantacciyar matsalar sufuri tana matsawa zuwa mai aiwatarwa na gaba, tare da
-ɗaukar shawarar mai tsarawa iri ɗaya da kayan aiki na asali, amma da umarnin matakin wannan mai aiwatarwar da
-haɗin da aka warware. Ana dawo da amsa ta farko da ta yi nasara ba tare da canji ba, ciki har da
-watsawar SSE; gazawar da ta faru bayan fara watsa bayanan da ya yi nasara ba za a iya sake gwadawa a nan ba.
-Idan duk masu aiwatarwa sun gaza, ana dawo da gazawa ta ƙarshe. Katsewar abokin ciniki yana dakatar da aikawa.
+A kan ci gaba da sakamakon kayan aiki, OmniRoute kuma yana dakatar da aiwatarwa lokacin da zagaye biyu da aka kammala a jere suna maimaita kiran kayan aiki iri ɗaya tare da sakamakon da bai canza ba, ko kuma lokacin da kowane sakamako mai alama a zagaye biyu jere ya gaza. Canje-canjen sakamako yana ba da izinin kira akai-akai (misali, zabe). Mai gadin yana sake saita sabon buƙatun mai amfani, ƙungiyoyi masu layi ɗaya suna kira zuwa zagaye ɗaya, kuma suna goyan bayan Anthropic, Cikakkun Taɗi, Amsoshi da tarihin Gemini. Mai tsarawa yana karɓar dalili kuma ya mallaki amsar ƙarshe ko da ta nemi wani zagaye na kayan aiki.
+
+Ƙarin samfura bayan manufa ta biyu ana ba da odar madodin masu zartarwa. Amsar HTTP da ta gaza ko kuma ta keɓantawar jigilar kayayyaki zuwa mai zartarwa na gaba, ɗauke da shawarar mai tsara iri ɗaya da kayan aikin ɗan ƙasa amma matakin mai aiwatar da kansa ya yi sauri da warware haɗin kai. An mayar da martanin nasara na farko ba canzawa, gami da yawo SSE ; Ba za a iya sake gwada gazawar bayan rafi mai nasara ba a nan. Idan duk masu zartarwa sun gaza, za a dawo da gazawar ƙarshe. Abokin zubar da ciki yana dakatar da aikawa.
 
 ```json
 {
@@ -350,11 +366,7 @@ Idan duk masu aiwatarwa sun gaza, ana dawo da gazawa ta ƙarshe. Katsewar abokin
 }
 ```
 
-Mai aiwatarwa na iya fitar da kiraye-kiraye masu zaman kansu da yawa a cikin amsa ɗaya. Kiraye-kirayen da suka dogara da juna
-ana sarrafa su a zagayen sakamakon kayan aiki na abokin ciniki na gaba, inda mai tsarawa yake duba kowane sakamako.
-`maxToolRounds` yana amfani da `8` a matsayin tsoho kuma yana karɓar `1`–`32`; da zarar an kai iyakar, dole ne mai tsarawa
-ya samar da mafi kyawun amsar ƙarshe da ake da ita. Ana ajiyar shawarwarin mai tsarawa na ciki, yayin da
-amsar da aka zaɓa don abokin ciniki take kiyaye zaɓin watsawa na asali.
+Mai aiwatarwa na iya aika kiraye-kiraye masu zaman kansu da yawa a cikin amsa ɗaya. Ana sarrafa kira masu dogara a cikin sakamakon aikin abokin ciniki daga baya, tare da mai tsarawa yana duba kowane sakamako. `maxToolRounds` ya sabawa `8` kuma ya karɓi `1`–`32`; da zarar an kai, dole ne mai tsarawa ya samar da mafi kyawun amsa ta ƙarshe. An kayyade yanke shawara mai tsarawa na ciki, yayin da zaɓin amsawar abokin ciniki yana kiyaye ainihin zaɓin yawo.
 
 ### Rukunin manne na `round-robin` da faɗaɗa asusu
 

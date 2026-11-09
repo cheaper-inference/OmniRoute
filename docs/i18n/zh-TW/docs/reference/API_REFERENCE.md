@@ -339,7 +339,7 @@ GET /v1/embeddings
 
 ---
 
-## 圖像生成
+## 影像生成
 
 ```bash
 POST /v1/images/generations
@@ -355,33 +355,38 @@ Content-Type: application/json
 
 可用的提供者包括 OpenAI（GPT Image 2）、xAI（Grok Image）、Together AI（FLUX）、Fireworks AI、Nebius（FLUX）、Hyperbolic、NanoBanana、**OpenRouter**、**ZenMux**、SD WebUI（本機）、ComfyUI（本機）。
 
-`n` 會在 `data[]` 中返回 `n` 張圖像。其上游 API 每次呼叫返回一張圖像的提供者
+`n` 會在 `data[]` 中傳回 `n` 張影像。上游 API 每次呼叫只傳回一張影像的提供者
 （Black Forest Labs、Stability AI、Leonardo、Ideogram、Haiper、Hyperbolic、Magnific/Freepik、
-NVIDIA NIM、Cloudflare Workers AI）會發出 `n` 次獨立的上游呼叫，最多同時執行 4 次。固定的
-`seed` 會依呼叫索引偏移（`seed`、`seed + 1`、…），因此圖像會有所不同，但仍可重現。
-`n` 的上限為 10。只要任何一次呼叫失敗，整個請求就會失敗。扇出格式的清單位於
+NVIDIA NIM、Cloudflare Workers AI）會分別進行 `n` 次上游呼叫，同時最多執行 4 次。固定的
+`seed` 會依呼叫索引偏移（`seed`、`seed + 1`、…），因此影像會有所不同，但仍可重現。
+`n` 的上限為 10。如果任何一次呼叫失敗，整個請求就會失敗。扇出格式清單位於
 `open-sse/handlers/imageGeneration/fanOut.ts` 中的 `SINGLE_IMAGE_FANOUT_FORMATS`。
 
 ZenMux 會重複使用現有的 API 金鑰連線，並接受 `zenmux/` 或 `zm/` 前綴：
 
 - `zenmux/openai/gpt-image-2` 使用 ZenMux 的 OpenAI Images API。選項包括 `size`、
   `quality`、`n`、`output_format`、`output_compression`、`background` 和 `response_format`。
-- 其他發行者（例如 `zm/meta/muse-image-1.0`）使用 ZenMux 的 Vertex AI `:predict`
+- 其他發布者（例如 `zm/meta/muse-image-1.0`）使用 ZenMux 的 Vertex AI `:predict`
   端點。`n` 對應至 `sampleCount`，`aspect_ratio` 對應至 `aspectRatio`，而 `image_size`
-  （`1K`、`2K`、`4K`）對應至 `sampleImageSize`。像素 `size` 僅提供長寬比，
+  （`1K`、`2K`、`4K`）對應至 `sampleImageSize`。像素 `size` 僅提供外觀比例，
   不保證像素尺寸。支援的比例、解析度和數量會因模型而異。
 - `zm/inclusionai/ming-image-0.1-design` 會自行選擇尺寸。請省略 `size`、
-  `aspect_ratio` 和 `image_size`；明確指定這些值會返回 HTTP 400。可透過
-  `output_format` 要求 PNG、JPEG 和 WebP。
+  `aspect_ratio` 和 `image_size`；明確指定這些值會傳回 HTTP 400。透過
+  `output_format` 可要求 PNG、JPEG 和 WebP。
 
-此整合支援文字轉圖像生成，不支援參考圖像編輯。Vertex 輸出會標準化為
-`data[].b64_json`；`response_format: "url"` 會返回上游 HTTPS URL，或在只有圖像位元組
-可用時返回 base64 資料 URL。空的／經過篩選的輸出會返回錯誤，而非空白的成功回應。模型存取權
-取決於 ZenMux 帳戶。請參閱 [ZenMux 的 Vertex API](https://docs.zenmux.ai/api/vertexai/generate-images) 和
-[OpenAI Images API](https://docs.zenmux.ai/api/openai/generate-an-image)。
+此整合支援文字轉影像生成，不支援參考影像編輯。Vertex 輸出會正規化為
+`data[].b64_json`；`response_format: "url"` 會傳回上游 HTTPS URL，或在只有影像位元組
+可用時傳回 base64 資料 URL。空的／經篩選的輸出會傳回錯誤，而不是空白的成功回應。
+模型存取權取決於 ZenMux 帳戶。請參閱 [ZenMux 的 Vertex API](https://docs.zenmux.ai/api/vertexai/generate-images) 和
+[OpenAI 影像 API](https://docs.zenmux.ai/api/openai/generate-an-image)。
+
+Microsoft 365 Copilot 登入連線會透過 Copilot 內建的影像工具提供
+`copilot-m365-web/m365-copilot-image`：每張影像進行一次 Copilot 回合（`n` 為 1–4），
+`size` 僅用於引導方向，影像會以內嵌方式傳回（`b64_json`，或在
+`response_format: "url"` 時傳回資料 URL）。請參閱 [Microsoft 365 Copilot](../providers/COPILOT-M365.md#image-generation)。
 
 ```bash
-# 列出所有圖像模型
+# 列出所有影像模型
 GET /v1/images/generations
 ```
 
@@ -813,13 +818,15 @@ POST /v1/providers/{provider}/images/generations
 
 Web／搜尋提供者抽象層（Tavily、Brave、Exa、Serper 等）。
 
-| 方法 | 路徑                   | 說明                                                            |
-| ---- | ---------------------- | --------------------------------------------------------------- |
-| GET  | `/v1/search`           | 列出已設定的搜尋提供者及其功能                                  |
-| POST | `/v1/search`           | 執行搜尋查詢 — 由 `v1SearchSchema` 驗證主體，支援快取／合併請求 |
-| GET  | `/v1/search/analytics` | 各提供者的命中／延遲／快取統計                                  |
+| 方法 | 路徑                   | 描述                                                                |
+| ---- | ---------------------- | ------------------------------------------------------------------- |
+| GET  | `/v1/search`           | 列出已設定的搜尋提供者及其功能                                      |
+| POST | `/v1/search`           | 執行搜尋查詢 — 要求內容由 `v1SearchSchema` 驗證，支援快取／合併請求 |
+| GET  | `/v1/search/analytics` | 各提供者的命中率／延遲／快取統計                                    |
 
-**驗證：** Bearer API 金鑰（`extractApiKey` + `isValidApiKey`）。搜尋原則透過 `enforceApiKeyPolicy` 強制執行。
+**驗證：** Bearer API 金鑰（`extractApiKey` + `isValidApiKey`）。搜尋政策透過 `enforceApiKeyPolicy` 強制執行。
+
+**自動選擇：** 未指定 `provider` 時，會先使用已設定連線中最便宜的提供者，下一個最便宜的提供者則作為故障轉移。免費的最終備援提供者（`duckduckgo-free`）只會在沒有設定其他提供者時使用。自架的 SearXNG 一旦其連線儲存了實際的 `baseUrl`（而非目錄預設值 `http://localhost:8888/search`），就會被視為已設定；接著它會以 $0 提供者的身分排在具金鑰提供者之前，並以最便宜的具金鑰提供者作為故障轉移，即使 SearXNG 回應 400、401、403 或 404 也是如此。不是有效 `http(s)` URL 或指向雲端中繼資料位址的 `baseUrl` 不會被視為已設定。儲存了權杖的 SearXNG 連線只有在使用 `https://` 或迴路 `http://` 時才會以此方式排序。對遠端純 `http://` 而言，它永遠不會作為故障轉移，並維持為最終備援；只有在未設定其他提供者或按名稱要求時才會使用，因此在這兩種情況下確實會以明文傳送權杖。
 
 ### Exa 和 Tavily 的 `provider_options`
 
@@ -960,28 +967,28 @@ CLI 會將 `base_url + /responses` 升級為 WebSocket，而 OmniRoute 會將其
 
 ---
 
-## 自助式使用量（`/api/usage/om-usage`）
+## 自助服務使用（`/api/usage/om-usage`）
 
-任何 API 金鑰都可以讀取**自己的**使用量與配額，不需要管理驗證。這是用戶端（CLI、OmniCopilot 面板）用來向金鑰持有者顯示其支出的端點。
+任何API密鑰都可以讀取**它自己的**使用和配額—無管理授權。這是客戶端（CLI、 OmniCopilot面板）用來向金鑰持有者顯示其支出的端點。
 
 ```bash
-# 文字格式（歷史合約 — 終端機使用的純文字）
+# Text form (the historical contract — plain text for a terminal)
 curl -H "Authorization: Bearer <your-api-key>" \
   http://localhost:20128/api/usage/om-usage
 
-# 結構化格式 — UI 使用的格式
+# Structured form — what a UI consumes
 curl -H "Authorization: Bearer <your-api-key>" \
   "http://localhost:20128/api/usage/om-usage?format=json"
 ```
 
-金鑰必須啟用 **`allowUsageCommand`**（預設關閉 — 儀表板的 API 金鑰管理器可逐一切換此設定）。若未啟用，端點會回應 `403`。
+鑰匙必須有**`allowUsageCommand`**啟用（預設關閉， —儀表板的 API 金鑰管理員會根據金鑰切換它）。如果沒有它，端點就會回答`403`。
 
-`?format=json` 會回傳具辨識性的結構，因此呼叫端不會從拒絕回應中讀取資料欄位。成功時：
+`?format=json`會傳回一個可區分的形狀，因此呼叫者永遠不會讀取拒絕的資料欄位。關於成功：
 
 ```jsonc
 {
   "allowed": true,
-  // 僅在金鑰選擇啟用每金鑰使用量限制（日／週 USD）時存在：
+  // present only when the key opted into per-key usage limits (daily/weekly/5-hour USD):
   "personal": {
     "dailySpentUsd": 1.25,
     "dailyLimitUsd": 5,
@@ -990,9 +997,9 @@ curl -H "Authorization: Bearer <your-api-key>" \
     "weeklyLimitUsd": 20,
     "weeklyResetAtIso": "…" /* … */,
   },
-  // 所選提供者的配額快照；尚未快取任何資料時為 null：
+  // the selected provider quota snapshot, or null when nothing is cached yet:
   "provider": { "connectionId": "…", "provider": "claude", "plan": "…", "quotas": {/* … */} },
-  // 每個連線的快照，讓 UI 可以並排呈現多個提供者：
+  // every connection's snapshot, so a UI can render several providers side by side:
   "providers": [
     { "connectionId": "…", "provider": "claude" /* … */ },
     { "provider": "codex" /* … */ },
@@ -1000,11 +1007,9 @@ curl -H "Authorization: Bearer <your-api-key>" \
 }
 ```
 
-拒絕時（`401` 金鑰無效／`403` 未獲允許），相同路由會回傳
-`{ "allowed": false, "error": { "message": "…" } }` — 存在但為空的 `personal`／`provider`
-（已允許金鑰，但尚未取得任何資料）與拒絕是不同狀態，只有 JSON 格式能區分這兩者。
+拒絕時（`401`錯誤密鑰/不允許`403` ），相同的路由返回`{ "allowed": false, "error": { "message": "…" } }` —存在但為空的`personal`/`provider` （允許密鑰，尚未學到任何內容）是與拒絕不同的狀態，只有JSON形式區分它們。
 
-**驗證：** 呼叫端自己的 Bearer API 金鑰，使用 `isValidApiKey` 驗證 — 這**不是**管理介面（`/api/keys/…`），後者仍受 `requireManagementAuth` 保護。
+**授權：**呼叫者自己的承載API密鑰，透過`isValidApiKey` —進行驗證，這不是管理表面 (`/api/keys/…`)，它位於`requireManagementAuth`後面。
 
 ### 原始配額百分比與截止值調整後的配額百分比
 
@@ -1239,40 +1244,41 @@ Claude Code 自動模式分類器請求在未包含明確推理控制項時，�
 | `/api/usage/model-latency-stats` | GET             | 依提供者／模型彙總的滾動延遲統計（平均值／p50／p95／p99、成功率）；篩選條件：`windowHours`／`minSamples`／`maxRows`／`provider`／`model` (#6873)                                                                                                             |
 | `/api/usage/cache-health`        | GET             | 針對 `call_logs` 的提示快取健康狀態摘要 — 寫入／讀取比例、p50／p90／p99 寫入大小分布、高寫入集中度、依模型拆分，以及 `healthy`／`degraded`／`thrash`／`no-data` 判定結果；查詢參數 `range`（`1h`\|`24h`\|`7d`\|`30d`，預設為 `24h`）和選用的 `model` (#8827) |
 
-### API 金鑰權限
+### API關鍵權限
 
-`PATCH /api/keys/{id}` 會更新現有金鑰的權限。與每個 `/api/keys*` 路由一樣，它需要管理授權（請參閱[管理驗證](../guides/MANAGEMENT-AUTH.md)），而非推論金鑰。僅傳送您想要變更的欄位；若一個欄位都未提供，請求會遭拒，並顯示 `No valid fields to update`。可接受的欄位由 `src/shared/validation/schemas/keys.ts` 中的 `updateKeyPermissionsSchema` 定義。
+`PATCH /api/keys/{id}`更新現有金鑰的權限。與每個`/api/keys*`路由一樣，它需要管理授權（請參閱[管理驗證](../guides/MANAGEMENT-AUTH.md)），而不是推理金鑰。僅發送您要更改的欄位；沒有其中任何一個的請求將被`No valid fields to update`拒絕。接受的欄位由`src/shared/validation/schemas/keys.ts`中的`updateKeyPermissionsSchema`定義。
 
-| 欄位                                        | 類型                                                    | 備註                                                                                           |
-| ------------------------------------------- | ------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
-| `name`                                      | 字串，1-200 個字元                                      |                                                                                                |
-| `isActive`                                  | 布林值                                                  |                                                                                                |
-| `isBanned`                                  | 布林值                                                  |                                                                                                |
-| `expiresAt`                                 | ISO 8601 日期時間或 `null`                              | `null` 會清除到期時間                                                                          |
-| `modelAccessMode`                           | `all` \| `restricted`                                   | 模式為 `all` 時，`allowedModels` 必須為空                                                      |
-| `allowedModels`, `blockedModels`            | 字串陣列，最多 1000 個                                  |                                                                                                |
-| `allowedCombos`                             | 字串陣列，最多 500 個                                   | 控制金鑰可呼叫的組合；直接模型則由 `modelAccessMode` / `allowedModels` 控制                    |
-| `connectionAccessMode`                      | `all` \| `restricted`                                   | 模式為 `restricted` 時，`allowedConnections` 必須為非空；模式為 `all` 時則必須為空             |
-| `allowedConnections`                        | UUID 陣列，最多 100 個                                  |                                                                                                |
-| `allowAutoCombos`                           | 布林值                                                  | `false` 會拒絕使用此金鑰對 `auto/*` 模型提出的請求；從未設定此值的金鑰則允許                   |
-| `catalogScope`                              | `all` \| `combos` \| `models`                           | 此金鑰透過 `GET /v1/models` 列出的內容（僅組合、僅模型，或兩者皆有）；不會變更金鑰可呼叫的內容 |
-| `forcedModel`                               | 最多 300 個字元的字串，或 `null`                        | 將聊天請求路由至此模型／組合，優先於 `X-Route-Model` 和 `body.model`；金鑰的限制仍然適用       |
-| `noLog`, `autoResolve`                      | 布林值                                                  |                                                                                                |
-| `throttleDelayMs`                           | 整數，0-300000                                          |                                                                                                |
-| `maxSessions`                               | 整數，0-10000                                           |                                                                                                |
-| `rateLimits`                                | `{ limit, window }` 陣列（正整數，最多 50 個）或 `null` | `null` 會清除限制                                                                              |
-| `accessSchedule`                            | 排程物件或 `null`                                       | `null` 會清除排程                                                                              |
-| `scopes`                                    | 字串陣列，最多 32 個                                    |                                                                                                |
-| `allowedEndpoints`                          | 字串陣列，最多 20 個                                    |                                                                                                |
-| `streamDefaultMode`                         | `legacy` \| `json`                                      |                                                                                                |
-| `cacheDefaultMode`                          | `legacy` \| `bypass`                                    | 請參閱[每個金鑰的快取略過](#per-key-cache-bypass)                                              |
-| `compressionEnabled`                        | 布林值                                                  |                                                                                                |
-| `codexServiceMode`                          | Codex 服務模式之一                                      |                                                                                                |
-| `disableNonPublicModels`                    | boolean                                                 |                                                                                                |
-| `allowUsageCommand`                         | boolean                                                 |                                                                                                |
-| `usageLimitEnabled`                         | boolean                                                 |                                                                                                |
-| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | number >= 0 or `null`                                   |                                                                                                |
-| `chaosModeEnabled`                          | boolean                                                 |                                                                                                |
+| 欄位                                        | 類型                                                    | 備註                                                                                                                                                                                       |
+| ------------------------------------------- | ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `name`                                      | 字串，1-200 個字元                                      |                                                                                                                                                                                            |
+| `isActive`                                  | 布林值                                                  |                                                                                                                                                                                            |
+| `isBanned`                                  | 布林值                                                  |                                                                                                                                                                                            |
+| `expiresAt`                                 | ISO 8601 日期時間或 `null`                              | `null` 會清除到期時間                                                                                                                                                                      |
+| `modelAccessMode`                           | `all` \| `restricted`                                   | 模式為 `all` 時，`allowedModels` 必須為空                                                                                                                                                  |
+| `allowedModels`, `blockedModels`            | 字串數組，最多 1000 個                                  |                                                                                                                                                                                            |
+| `allowedCombos`                             | 字串陣列，最多 500 個                                   | 控制金鑰可呼叫的組合；直接模型則由 `modelAccessMode` / `allowedModels` 控制                                                                                                                |
+| `connectionAccessMode`                      | `all` \| `restricted`                                   | 模式為 `restricted` 時，`allowedConnections` 必須為非空；模式為 `all` 時則必須為空                                                                                                         |
+| `allowedConnections`                        | UUID 陣列，最多 100 個                                  |                                                                                                                                                                                            |
+| `allowAutoCombos`                           | 布林值                                                  | `false` 會拒絕使用此金鑰對 `auto/*` 模型提出的請求；從未設定此值的金鑰則允許                                                                                                               |
+| `catalogScope`                              | `all` \| `combos` \| `models`                           | 此金鑰透過 `GET /v1/models` 列出的內容（僅組合、僅模型，或兩者皆有）；不會變更金鑰可呼叫的內容                                                                                             |
+| `forcedModel`                               | 最多 300 個字元的字串，或 `null`                        | 將聊天請求路由至此模型／組合，優先於 `X-Route-Model` 和 `body.model`；金鑰的限制仍然適用                                                                                                   |
+| `noLog`, `autoResolve`                      | 布林值                                                  |                                                                                                                                                                                            |
+| `throttleDelayMs`                           | 整數，0-300000                                          |                                                                                                                                                                                            |
+| `maxSessions`                               | 整數，0-10000                                           |                                                                                                                                                                                            |
+| `rateLimits`                                | `{ limit, window }` 陣列（正整數，最多 50 個）或 `null` | `null` 會清除限制                                                                                                                                                                          |
+| `accessSchedule`                            | 排程物件或 `null`                                       | `null` 會清除排程                                                                                                                                                                          |
+| `scopes`                                    | 字串陣列，最多 32 個                                    |                                                                                                                                                                                            |
+| `allowedEndpoints`                          | 字串陣列，最多 20 個                                    |                                                                                                                                                                                            |
+| `streamDefaultMode`                         | `legacy` \| `json`                                      |                                                                                                                                                                                            |
+| `cacheDefaultMode`                          | `legacy` \| `bypass`                                    | 請參閱[每個金鑰的快取略過](#per-key-cache-bypass)                                                                                                                                          |
+| `compressionEnabled`                        | 布林值                                                  |                                                                                                                                                                                            |
+| `codexServiceMode`                          | Codex 服務模式之一                                      |                                                                                                                                                                                            |
+| `disableNonPublicModels`                    | boolean                                                 |                                                                                                                                                                                            |
+| `allowUsageCommand`                         | boolean                                                 |                                                                                                                                                                                            |
+| `usageLimitEnabled`                         | boolean                                                 |                                                                                                                                                                                            |
+| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | 編號>= 0 或`null`                                       |                                                                                                                                                                                            |
+| `fiveHourUsageLimitUsd`                     | 編號>= 0 或`null`                                       | 滾動 5 小時USD預算，像每日和每週限制（`usageLimitEnabled`、 `UNPRICED_USAGE_BUDGET_POLICY`）一樣強制執行。 `retry-after`是指視窗中最舊的支出過期，這可能會使遠超過其限制的金鑰仍然被阻止。 |
+| `chaosModeEnabled`                          | boolean                                                 |                                                                                                                                                                                            |
 
 ```bash
 curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
@@ -1322,6 +1328,33 @@ curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
 | `/api/modality-bridge/stats`         | GET        | 記憶體內的 `attempts`、成功次數/`bridged`、失敗次數、快取命中次數、`totalLatencyMs`、`latencySamples`、以樣本為單位的 `averageLatencyMs`，以及最後使用時間（重新啟動時重設；需要管理驗證）                                                                                                                                                                          |
 | `/api/modality-bridge/video/runtime` | GET        | 管理驗證/探測前的嚴格受信任迴路檢查；經過清理的 FFmpeg/ffprobe 可用性與版本（no-store）                                                                                                                                                                                                                                                                             |
 | `/api/modality-bridge/video/extract` | POST       | 內部已驗證的受信任迴路位元組代理；輸入上限為 50 MiB、佇列受限/輸出上限為 32 MiB、容量不足時回傳 `503`、中斷時回傳 `499`、逾時期限時回傳 `504`；不是公開上傳 API                                                                                                                                                                                                     |
+
+### 影片影格深入檢視
+
+`GET /api/v1/video-bridge/drilldown` 會讀取在明確獲得同意的 Video Bridge 請求後，
+於 `x-omniroute-video-drilldown` 中傳回、與租戶綁定的不透明控制代碼。
+讀取與 `DELETE` 一律需要有效的 API 金鑰，以及操作員個別的
+`modalityBridgeVideoDrilldownRemoteEnabled` 權限。正式環境的保留功能另外需要
+`modalityBridgeVideoDrilldownEnabled`，且每個部分都必須嚴格設定 `drilldown: true`。
+如果金鑰具有非空的端點允許清單，則無論呼叫端使用 `/v1` 或 `/api/v1`，
+GET 與 DELETE 都必須包含 `video`。
+
+GET 查詢：必要的 `handle`；選用的 `variant`（`preview`、`standard`、`detail`）、
+`limit`（1–8；接受舊版 `frames`，但不可與 `limit` 一併使用）、
+從零開始計算的 `page`，以及以秒為單位的 `start`/`end`。如果同時提供兩個焦點界限，
+`end` 必須大於 `start`。重複或未知的查詢鍵會遭拒。成功的回應包含
+`derivation`、`durationSeconds`、`frames`、`hasMore`、`page`、`variant`，以及選用的
+`focusWindow`；no-store JSON（包括 Base64）上限為 32 MiB。輸出過大時會回傳 413；
+請求較少的影格。
+
+`DELETE /api/v1/video-bridge/drilldown?handle=...` 會回傳 `{ "removed": 0|1 }`。
+未知、已過期及跨金鑰的 GET 都會回傳無法區分的 404；跨金鑰 DELETE 無法移除擁有者的項目。
+停用的存取會回傳 403，缺少或無效的驗證會回傳 401，無效查詢會回傳 400，
+取消會回傳 499，暫時性錯誤會回傳 503。控制代碼僅限處理程序內使用，十分鐘後過期，
+且重新啟動後不會保留。新控制代碼使用 `v1.` 加上 32 位元組的隨機 Base64URL 權杖；
+僅會保留權杖雜湊。為保持相容性，舊版 64 位十六進位權杖仍可依語法讀取。
+請參閱[Video Bridge 防護措施](../security/GUARDRAILS.md#video-bridge-videobridgets-videobridgepipelinets)，
+以取得同意、配額及變體衍生的詳細資訊。
 
 ### 備份與匯出/匯入
 
@@ -1429,15 +1462,15 @@ GET 回應包含 `agents[]`（id、name、binary、version、installed、protoco
 
 | Endpoint                 | Method | Description                                      |
 | ------------------------ | ------ | ------------------------------------------------ |
-| `/api/init`              | GET    | 應用程式初始化檢查（首次執行時使用）             |
+| `/api/init`              | GET    | 啟動背景同步服務（管理驗證）                     |
 | `/api/tags`              | GET    | 與 Ollama 相容的模型標籤（供 Ollama 用戶端使用） |
 | `/api/restart`           | POST   | 觸發正常伺服器重新啟動                           |
 | `/api/shutdown`          | POST   | 觸發正常伺服器關閉                               |
 | `/api/system/env/repair` | POST   | 修復 OAuth 提供者環境變數                        |
-| `/api/system/version`    | GET    | 目前/最新版本、更新狀態、發行通道                |
-| `/api/system/version`    | POST   | 開始部署感知的更新至最新版本                     |
+| `/api/system/version`    | GET    | 目前／最新版本、更新狀態、發行通道               |
+| `/api/system/version`    | POST   | 啟動部署感知的更新至最新版本                     |
 
-> **注意：** 這些端點由系統內部使用，或用於 Ollama 用戶端相容性。一般終端使用者通常不會呼叫這些端點。
+> **注意：** 這些端點由系統內部使用，或用於 Ollama 用戶端相容性。一般終端使用者通常不會呼叫它們。
 
 ### OAuth 環境修復 _(v3.6.1+)_
 

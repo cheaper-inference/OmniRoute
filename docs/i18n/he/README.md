@@ -11,11 +11,11 @@
 <br/>
 <br/>
 
-# 🚀 OmniRoute — AI החינמי
+# 🚀 OmniRoute — שער AI החינמי
 
 **נוצר על ידי [דייגו סוזה](https://github.com/diegosouzapw)**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Never stop coding. Every AI tool → 381 providers — 150+ free — through one endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity into FREE Claude / GPT / Gemini with auto-fallback. RTK + Caveman stacked compression saves 15–95% tokens (~89% avg) — never hit limits. 381 AI providers · 150+ free tiers · ~1.62B free tokens/mo · 20 routing strategies · $0 to start."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Never stop coding. Every AI tool → 382 providers — 150+ free — through one endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity into FREE Claude / GPT / Gemini with auto-fallback. RTK + Caveman stacked compression saves 15–95% tokens (~89% avg) — never hit limits. 382 AI providers · 150+ free tiers · ~1.62B free tokens/mo · 20 routing strategies · $0 to start."/>
 
 </div>
 
@@ -49,20 +49,15 @@
 <a href="https://trendshift.io/repositories/23589" target="_blank"><img src="https://trendshift.io/api/badge/repositories/23589" alt="diegosouzapw%2FOmniRoute | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
 [![דירוג היסטוריית הכוכבים](https://api.star-history.com/badge?repo=diegosouzapw/OmniRoute&theme=dark) ](https://www.star-history.com/diegosouzapw/omniroute) [![olud.ai](https://olud.ai/badge.php?tool=diegosouzapw-omniroute) ](https://olud.ai/project/diegosouzapw-omniroute.html)
 
-### 💬 הצטרפו לקהילה
+### 💬 הצטרף לקהילה
 
-**👋 עקבו אחר המתחזק — קבלו ראשונים ספקים חדשים, גרסאות וטיפים:**
+**👋 עקוב אחר המתחזק — קבל ספקים חדשים, מהדורות וטיפים תחילה:**
 
-[![Follow Diego on LinkedIn](https://img.shields.io/badge/Follow_Diego_on-LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/diegosouzapw/)
-[![Follow @diegosouzapw on GitHub](https://img.shields.io/github/followers/diegosouzapw?style=for-the-badge&logo=github&logoColor=white&label=Follow%20on%20GitHub&color=181717)](https://github.com/diegosouzapw)
+[![עקוב אחרי דייגו ב- LinkedIn](https://img.shields.io/badge/Follow_Diego_on-LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white) ](https://www.linkedin.com/in/diegosouzapw/) [![עקוב אחרי @diegosouzapw ב- GitHub](https://img.shields.io/github/followers/diegosouzapw?style=for-the-badge&logo=github&logoColor=white&label=Follow%20on%20GitHub&color=181717) ](https://github.com/diegosouzapw)
 
-[![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/U47eFqAXCn)
-[![Telegram](https://img.shields.io/badge/Telegram-26A5E4?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/omnirouteOficial)
-[![WhatsApp Global](https://img.shields.io/badge/WhatsApp_Global-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4)
-[![WhatsApp Brasil](https://img.shields.io/badge/WhatsApp_Brasil-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)
-[![Website](https://img.shields.io/badge/Website-omniroute.online-blue?logo=google-chrome&logoColor=white)](https://omniroute.online)
+[![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white) ](https://discord.gg/U47eFqAXCn) [![Telegram](https://img.shields.io/badge/Telegram-26A5E4?style=for-the-badge&logo=telegram&logoColor=white) ](https://t.me/omnirouteOficial) [![WhatsApp Global](https://img.shields.io/badge/WhatsApp_Global-25D366?style=for-the-badge&logo=whatsapp&logoColor=white) ](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) [![WhatsApp Brasil](https://img.shields.io/badge/WhatsApp_Brasil-25D366?style=for-the-badge&logo=whatsapp&logoColor=white) ](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) [![אתר](https://img.shields.io/badge/Website-omniroute.online-blue?logo=google-chrome&logoColor=white) ](https://omniroute.online)
 
-**שאלות, טיפים על ספקים, מפת דרכים ותמיכה → [Discord](https://discord.gg/U47eFqAXCn) · [Telegram](https://t.me/omnirouteOficial) · WhatsApp [🌍 גלובלי](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) / [🇧🇷 Brasil](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) / [פורטל](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)**
+**שאלות, טיפים לספקים, מפת דרכים ותמיכה → [Discord](https://discord.gg/U47eFqAXCn) · [Telegram](https://t.me/omnirouteOficial) · WhatsApp [🌍 Global](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) / [🇧🇷 Brasil](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) / [📢 הערוץ הרשמי](https://whatsapp.com/channel/0029VbDwC7A3wtb5PN6a5t2R) / [פורטל](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)**
 
 <br/>
 
@@ -72,17 +67,17 @@
 
 |                        |          v3.8.50          | **v3.8.51** |      `v3.8.54+`       |
 | ---------------------- | :-----------------------: | :---------: | :-------------------: |
-| ספקי 🌐                |            352            |   **358**   |          381          |
-| 🧠 דגם צ'אט ייחודי IDs |           1320            |  **1374**   |         1519          |
+| ספקי 🌐                |            352            |   **358**   |          382          |
+| 🧠 דגם צ'אט ייחודי IDs |           1320            |  **1374**   |         1524          |
 | גשר אופנות 🖼️          | 🆕 vision + audio + וידאו |      ✓      |           ✓           |
-| 📡 Radar קטלוג חינם    |         🆕 opt-in         |      ✓      |           ✓           |
-| ⚖️ תזמון מודע למכסה    |      🆕 Quota-Share       |      ✓      |           ✓           |
-| 📊 Quota טלמטריה       |       🆕 בשידור חי        |      ✓      |           ✓           |
+| קטלוג חינם של 📡 Radar |       הצטרפות ל-🆕        |      ✓      |           ✓           |
+| תזמון מודע למכסות ⚖️   |      🆕 Quota-Share       |      ✓      |           ✓           |
+| טלמטריית מכסת 📊       |       🆕 בשידור חי        |      ✓      |           ✓           |
 | מצב 🧰 ללא ראש         |             —             |      —      | 🆕 `serve --headless` |
-| 🛤️ LTS rail infra      |             —             |      —      |    ערוצי שחרור 🆕     |
-| 🔎 גילוי מודל API      |             —             |      —      | 🆕 `/v1/models/query` |
+| 🛤️ LTS מסילה אינפרא    |             —             |      —      |    ערוצי שחרור 🆕     |
+| גילוי מודל 🔎 API      |             —             |      —      | 🆕 `/v1/models/query` |
 
-**→ [מפת הדרכים](ROADMAP.md) — רוכבת על המסילה ל- `v3.9.0 LTS`**
+**[מפת הדרכים](ROADMAP.md)→ — רוכבת על המסילה ל- `v3.9.0 LTS`**
 
 </div>
 
@@ -108,7 +103,7 @@
   <tr>
     <td align="right"><b>⚙️ Features</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 Combos</a></td>
-    <td align="center"><a href="#-381-ai-providers--156-catalog-marked-free">🌐 Providers</a></td>
+    <td align="center"><a href="#-382-ai-providers--156-catalog-marked-free">🌐 Providers</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI &amp; MCP</a></td>
   </tr>
   <tr>
@@ -218,7 +213,7 @@
 
 <a id="first-run"></a>
 
-## 🆓 התקן, חבר ספק ואז נתב דרך נקודת קצה אחת
+## התקן 🆓, חבר ספק ואז נתב דרך נקודת קצה אחת
 
 </div>
 
@@ -244,7 +239,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="The Promise — One endpoint and 381 providers. Automatic fallback keeps routing while another healthy target is available. Six pillars: resilient fallback across 381 providers · up to 95% token savings on eligible workloads · $0 to start with 150+ free tiers and 52 recurring/keyless free-forever providers · 39 CLI/agent integrations through one config · OpenAI, Claude, Gemini and Responses API compatibility at /v1 · production controls including circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals and 56,000+ static test declarations across 7,800+ tracked test files."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="The Promise — One endpoint and 382 providers. Automatic fallback keeps routing while another healthy target is available. Six pillars: resilient fallback across 382 providers · up to 95% token savings on eligible workloads · $0 to start with 150+ free tiers and 52 recurring/keyless free-forever providers · 39 CLI/agent integrations through one config · OpenAI, Claude, Gemini and Responses API compatibility at /v1 · production controls including circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals and 56,000+ static test declarations across 7,800+ tracked test files."/>
 
 <br/>
 <br/>
@@ -504,7 +499,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="מה מייחד את OmniRoute — צילום מצב תכונות עדכני מול 9router, OpenRouter, CLIProxyAPI ו-LiteLLM ב-13 יכולות. OmniRoute: 381 ספקים, מעל 150 שכבות חינמיות מובנות, 20 אסטרטגיות ניתוב, דחיסת טוקנים ב-12 מנועים, שרת MCP מובנה עם 110 כלים, פרוטוקול סוכנים A2A, זיכרון מתמשך, מסילות הגנה, סוכנים בענן, הסוואת טביעת אצבע TLS, Desktop/Termux/PWA ו-67 שפות ממשק משתמש. OmniRoute ברישיון MIT וניתן לאירוח עצמי. יכולות ומתחרים עשויים להשתנות; ראו את המתודולוגיה המקושרת."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="מה מייחד את OmniRoute — צילום מצב תכונות עדכני מול 9router, OpenRouter, CLIProxyAPI ו-LiteLLM ב-13 יכולות. OmniRoute: 382 ספקים, מעל 150 שכבות חינמיות מובנות, 20 אסטרטגיות ניתוב, דחיסת טוקנים ב-12 מנועים, שרת MCP מובנה עם 110 כלים, פרוטוקול סוכנים A2A, זיכרון מתמשך, מסילות הגנה, סוכנים בענן, הסוואת טביעת אצבע TLS, Desktop/Termux/PWA ו-67 שפות ממשק משתמש. OmniRoute ברישיון MIT וניתן לאירוח עצמי. יכולות ומתחרים עשויים להשתנות; ראו את המתודולוגיה המקושרת."/>
 
 <sub>📊 מתודולוגיה מלאה &amp; פירוט לפי תכונה מול 9router, OpenRouter, CLIProxyAPI &amp; LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -576,33 +571,33 @@ Radar הוא שירות אופציונלי המבוסס על GET בלבד. לק�
 
 > דגשים אחרונים מ **v3.8.20 → v3.8.54** . היסטוריה מלאה ב- [`CHANGELOG.md`](CHANGELOG.md).
 
-- **⚖️ `quota-weighted`** — האסטרטגיה המשולבת ה-20 מדלגת על חשבונות מותשים, ואז מושכת בין השאר בפרופורציה לשארית המכסה ÷ בטיסה, תוך שמירה על שיחות קיימות מוצמדות. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
-- **מצב 🧰 ללא ראש** — `omniroute serve --headless` (או `OMNIROUTE_HEADLESS=1`) מריץ רק את מנוע ה-proxy `/v1/*`, כאשר לוח המחוונים ולוח המחוונים בלבד כבויים. → [מצב ללא ראש](docs/guides/HEADLESS.md)
-- **גילוי מודל 🔎** — `/v1/models` מסנן לפי יכולת, הקשר, סוג וטקסט, ו- `POST /v1/models/query` מחזיר רשימה קצרה דטרמיניסטית עם אותה נראות לכל מפתח. → [API](docs/reference/API_REFERENCE.md)
-- **🔑 בקרת ניתוב לכל מפתח** — הצמד מפתח API לדגם אחד או שילוב עם `forcedModel`, והוסף או הסר את הדגמים והשילובים של המפתח בצורה אטומית (`/api/keys/{id}/access`). → [API הפניה](docs/reference/API_REFERENCE.md) · [OpenAPI](docs/openapi.yaml)
-- **🛡️ Finer PII בקרות** בחירת — לכל סוג, עד 20 תבניות מיסוך מותאמות אישית מאומתות ומדדי זיהוי לפי סוג; המיסוך עצמו נשאר בבחירה. [מעקות בטיחות](docs/security/GUARDRAILS.md) →
-- **🌍 67 שפות** לוח המחוונים —, מראות docs ו- CLI, כאשר `npm run i18n:add-locale` מוסיף שפה בכל מקום בפקודה אחת. [מדריך](docs/guides/I18N.md) → i18n
-- **🎛️ OmniConductor** האצלת — נכנסת A2A לצי הסוכנים שלך, כישורי מנצח בכרטיס הסוכן, ולוח מחוונים עם צ'אט קולי של Faro בדחיפה-לדיבור. → [A2A](docs/frameworks/A2A-SERVER.md)
-- **🛂 הגנת כניסה ועומס יתר** תור בקשות צ'אט במשקל כבד — במקום 503ing, עם חוזי חכירה מתגלגלים של אטומי RPM לכל חיבור. [מדריך חוסן](docs/architecture/RESILIENCE_GUIDE.md) →
-- **🗂️ Canonical `/v1/models`** — בלוק אחד רציף מקובץ ספק לכל ספק (שילובים מוצמדים ראשונים), יציב בכל מקור קטלוג. → [API](docs/reference/API_REFERENCE.md)
-- **🗜️ התקשות דחיסה** ברירת המחדל של — מגן אינפלציה, חבילות Caveman עבור DE / FR / JA + סינית (wényán), מסנני RTK עבור Gradle &.NET. [דחיסה](docs/compression/COMPRESSION_ENGINES.md) →
-- **💸 עלות כנה קבועה** ספקי מנוי / תוכנית קידוד — קראו **$0** בניתוח עלויות; תקציב, מכסה וניתוב המשיכו להעריך. → [API](docs/reference/API_REFERENCE.md)
-- **⚖️ Quota-Share ניתוב** — חילקה את מכסת החשבון המשותף בצורה הוגנת בין מפתחות מאוחדים, חוסכת עבודה ולכן מושאלות פרוסות סרק. → [מדריך חוסן](docs/architecture/RESILIENCE_GUIDE.md)
-- **הגדרת 🤖 CLI/agent אחת** — 15 פקודות `setup-*` רשומות; `omniroute run` משיק 7 CLIs (Claude Code, Codex, Aider, Goose, OpenCode, Qwen Code, Gemini CLI); `omniroute configure` תומך ב-11 יעדים עם ספק אינטראקטיבי בוחר דגמים של + ומועדפים לפי הקשר. → [CLI שילובים](docs/guides/CLI-INTEGRATIONS.md)
-- **מצב מרחוק 🛰️** — כונן OmniRoute מרוחק עם אסימוני scoped (`connect` / `contexts` / `tokens`) + an `antigravity` OAuth עוזר להתקנות VPS. [מצב מרחוק](docs/guides/REMOTE-MODE.md) →
-- **🧭 ניתוב אוטומטי חכם יותר** — `auto/<category>:<tier>` שילובים,**הַתָכָה** (פאנל מודל + שופט), ניתוב מודע למשימות, מודל / מצב / תקציב לפי בקשה לפי בקשה. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
-- **🗜️ דחיסה ניתנת לחיבור** — 12 מנועים ניתנים לחיבור + Compression Studios: LLMLingua-2, אולטרה דו-שכבתי, אומניglyph, שער נאמנות לפי שלב, GCF v3.2, עורך גרירה-סדר מחדש. [דחיסה](docs/compression/COMPRESSION_ENGINES.md) →
-- **🕵️ שקוף MITM פענוח (TPROXY)** — לכידת CLIs שמתעלמת מ-proxy env vars, עם מתקין ל-SNI CA + trust-store. → [MITM/TPROXY](docs/security/MITM-TPROXY-DECRYPT.md)
-- **💸 עלות טלמטריה בכל מקום** כותרות — `X-OmniRoute-*` cost/usage בכל נקודת קצה, כותרת חיסכון במטמון-HIT, מכסות הוצאות USD לכל מפתח. → [API הפניה](docs/reference/API_REFERENCE.md)
-- **🧠 זיכרון שאתה שולט בו** — כבוי כברירת מחדל, opt-in int8 קוונטיזציה וקטורית + הקלדה דעיכה, לפי בקשה `x-omniroute-no-memory`. → [זיכרון](docs/frameworks/MEMORY.md)
-- **🛡️ Security** שמירה על הזרקת הנחיות — בכל מסלול LLM (חבילת צוות אדום), מעקה בטיחות למסיכת אישורים (מפרסמים דלפו API keys/secrets לשני הכיוונים), חיפוש אחרון בחינם DuckDuckGo באינטרנט, ושער כניסה אופציונלי OIDC ללוח המחוונים (כניסה לסיסמה תמיד נשארת זמינה). → [מעקות בטיחות](docs/security/GUARDRAILS.md)
-- **🖼️ נקודות קצה חדשות** — `/v1/ocr` (Mistral OCR) ו- `/v1/audio/translations` (בסגנון Whisper) מסגלים את פני המדיה. → [API הפניה](docs/reference/API_REFERENCE.md)
-- **🎨 ייצור תמונה / וידאו / אודיו** — one API למדיה: xAI Grok Imagine & Novita AI video, ComfyUI, Magnific, Adobe Firefly, Segmind וספקי דיבור כגון ElevenLabs. → [API](docs/reference/API_REFERENCE.md)
-- **🌍 פריסה ופעולות** — -proxy הפוך `basePath`, זיהוי אוטומטי בשפת הדפדפן, מעקב אחר מכשיר לכל מפתח, אמון MITM ללא שורש, לוקליזציה של zh-TW. → [סביבה](docs/reference/ENVIRONMENT.md)
-- **🤝 ספקים וסוכנים נוספים** סוכני ענן — (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) עם כניסת דפדפן + OAuth, כרטיס Ollama מחלקה ראשונה, Claude Opus 5 & Sonnet 5, שותפות רשמית Kimi (Code/Web/Moonshot), Zed, Requesty, SenseNova Agnesbahed AI...**קטלוג 381 ספקים** . [ספקי](docs/reference/PROVIDER_REFERENCE.md) →
-- **📡 Routing transparency** — every response carries an `X-OmniRoute-Decision` header naming the strategy/provider/latency that served it, a new `cache-optimized` combo strategy + Auto-Combo `cacheAffinity` factor route repeat requests back to the connection holding the cached prefix, and a read-only `/v1/auto-combo/{channel}/candidates` endpoint exposes an `auto/*` channel's live candidate pool. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
-- **⚡ ביצועים מקומיים ואינפרא** — בלחיצה אחת מקומית Redis, Cloudflare Workers / Deno פריס מפרסי ממסר, Bifrost & Mux כשירותים משובצים מפוקחים. → [שירותים משובצים](docs/frameworks/EMBEDDED-SERVICES.md)
-- **🧩 גם בקופסה** — plugin framework + marketplace, Omni/Agent/GitHub skills frameworks, Obsidian vault שילוב (22 כלים MCP ), אצווה וקבצים תואמי OpenAI APIs, מטמון תגובה סמנטי, gamification עם Leaderboards, ACP agent discovery (15 סוכנים מובנים), ייצוא יומן מתוזמן ל- BigQuery, `auto/chaos` out parallel an multi-model manager, zq-out an Telegram -model manager דירוגי ספקים בחינם של LMArena-ELO. → [Docs](docs/README.md)
+- **ניתוב ⚖️ `quota-weighted`** אסטרטגיית השילוב ה-20 — מדלגת על חשבונות מותשים, ואז מושכת בין השאר בפרופורציה לשארית המכסה ÷ בטיסה, תוך שמירה על שיחות קיימות מוצמדות. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
+- **מצב 🧰 ללא ראש** — `omniroute serve --headless` (או `OMNIROUTE_HEADLESS=1`) מפעיל רק את מנוע ה-proxy `/v1/*`, כאשר לוח המחוונים ותתי המערכות כבויים בלבד. [מצב](docs/guides/HEADLESS.md) → ללא ראש
+- **גילוי מודל 🔎** — `/v1/models` מסנן לפי יכולת, הקשר, סוג וטקסט, ו- `POST /v1/models/query` מחזיר רשימה קצרה דטרמיניסטית עם אותה נראות לכל מפתח. → [API הפניה](docs/reference/API_REFERENCE.md)
+- **בקרת ניתוב לכל מפתח 🔑** — הצמד מפתח API לדגם אחד או שילוב עם `forcedModel`, והוסף או הסר את הדגמים והשילובים של המפתח בצורה אטומית (`/api/keys/{id}/access`). → [API הפניה](docs/reference/API_REFERENCE.md) · [OpenAPI](docs/openapi.yaml)
+- **בקרות 🛡️ Finer PII** בחירת — לכל סוג, עד 20 דפוסי מיסוך מאומתים ומדידי זיהוי לפי סוג; המיסוך עצמו נשאר בבחירה. [מעקות בטיחות](docs/security/GUARDRAILS.md) →
+- **🌍 67 שפות** לוח מחוונים —, מראות מסמכים ו- CLI, כאשר `npm run i18n:add-locale` מוסיף שפה בכל מקום בפקודה אחת. [מדריך](docs/guides/I18N.md) → i18n
+- **🎛️ OmniConductor** משלחת — נכנסת של A2A לצי הסוכנים שלך, כישורי מנצח בכרטיס הסוכן ופאנל לוח מחוונים עם צ'אט קולי של Faro לדחוף-לדיבור. שרת → [A2A](docs/frameworks/A2A-SERVER.md)
+- **🛂 אדפטיבית והגנת עומס יתר** תור בקשות צ'אט במשקל כבד — במקום 503ing, עם חוזי חכירה אטומיים RPM לכל חיבור. [מדריך חוסן](docs/architecture/RESILIENCE_GUIDE.md) →
+- **הזמנת 🗂️ Canonical `/v1/models`** — בלוק אחד רציף מקובץ ספק לכל ספק (שילובים מוצמדים ראשונים), יציב בכל מקור קטלוג. → [API הפניה](docs/reference/API_REFERENCE.md)
+- **🗜️ התקשות דחיסה** מגן ניפוח ברירת מחדל —, חבילות Caveman עבור DE / FR / JA + סינית (wényán), מסנני RTK עבור Gradle &.NET. [דחיסת](docs/compression/COMPRESSION_ENGINES.md) →
+- **💸 הוגנת בתעריף אחיד** ספקי מנוי / תוכנית קידוד — קוראים **$0** בניתוח עלויות; תקציב, מכסה וניתוב המשיכו להעריך. → [API הפניה](docs/reference/API_REFERENCE.md)
+- **ניתוב מכסת שיתוף ⚖️** — חילקה את מכסת החשבון המשותף בצורה הוגנת בין מפתחות מאוחדים, חוסכת עבודה ולכן מושאלות פרוסות סרק. [מדריך חוסן](docs/architecture/RESILIENCE_GUIDE.md) →
+- **🤖 פקודה אחת CLI/agent הגדרה** — 15 נרשמו `setup-*` פקודות; `omniroute run` משיקה 7 CLIs (Claude קוד, Codex, עוזר, אווז, OpenCode, Qwen קוד, Gemini CLI); `omniroute configure` תומך ב-11 יעדים עם ספק אינטראקטיבי+בוחר דגמים ומועדפים לפי הקשר. → [CLI אינטגרציות](docs/guides/CLI-INTEGRATIONS.md)
+- **מצב מרחוק 🛰️** — כונן OmniRoute מרוחק עם אסימונים בהיקף (`connect` / `contexts` / `tokens`) + עוזר `antigravity` OAuth עבור התקנות VPS. [מצב מרחוק](docs/guides/REMOTE-MODE.md) →
+- **🧭 ניתוב אוטומטי חכם יותר** שילובי — `auto/<category>:<tier>`,**הַתָכָה** (שופט בפאנל דגם + ), ניתוב מודע למשימה, עקיפת מודל / מצב / תקציב לפי בקשה לפי בקשה. → [אוטומטי קומבו](docs/routing/AUTO-COMBO.md)
+- **דחיסה ניתנת לחיבור 🗜️** — 12 מנועי קומפוזיציה + Compression Studios: LLMLingua-2, אולטרה דו-שכבתי, אומניglyph, שער נאמנות לפי שלב, GCF v3.2, עורך גרירה לסדר מחדש. [דחיסה של](docs/compression/COMPRESSION_ENGINES.md) →
+- **🕵️ Transparent MITM פענוח (TPROXY)** — לכידת CLIs שמתעלמת מ-proxy env vars, עם מתקין לכל SNI CA + חנות אמון. → [MITM/TPROXY](docs/security/MITM-TPROXY-DECRYPT.md)
+- **טלמטריית עלות 💸 בכל מקום** כותרות — `X-OmniRoute-*` cost/usage בכל נקודת קצה, כותרת חיסכון ב-Cache-HIT, מכסות הוצאות USD לכל מפתח. → [API הפניה](docs/reference/API_REFERENCE.md)
+- **זיכרון 🧠 שאתה שולט בו** — כבוי כברירת מחדל, הצטרפות לכימות וקטור int8 + הקלדה, לפי בקשה `x-omniroute-no-memory`. [זיכרון](docs/frameworks/MEMORY.md) →
+- **🛡️ Security** מגן הזרקה מיידית — בכל נתיב LLM (חבילת צוות אדום), מעקה בטיחות למסיכת אישורים (מפרסמים הדלפת API keys/secrets לשני הכיוונים), חיפוש אחרון בחינם DuckDuckGo באינטרנט, ושער כניסה אופציונלי OIDC ללוח המחוונים (כניסה לסיסמה תמיד נשארת זמינה). [מעקות בטיחות](docs/security/GUARDRAILS.md) →
+- **🖼️ נקודות קצה חדשות** — `/v1/ocr` (Mistral OCR) ו- `/v1/audio/translations` (בסגנון לחישה) מסגרות את פני המדיה. → [API הפניה](docs/reference/API_REFERENCE.md)
+- **🎨 ייצור תמונה / וידאו / אודיו** — one API למדיה: xAI Grok Imagine & Novita AI video, ComfyUI, Magnific, Adobe Firefly, Segmind וספקי דיבור כגון ElevenLabs. → [API הפניה](docs/reference/API_REFERENCE.md)
+- **פריסה ופעולות 🌍** — פרוקסי הפוך `basePath`, זיהוי אוטומטי בשפת הדפדפן, מעקב אחר מכשיר לכל מפתח, אמון MITM ללא שורש, לוקליזציה של zh-TW. [סביבת](docs/reference/ENVIRONMENT.md) →
+- **🤝 עוד ספקים וסוכנים** סוכני ענן של — (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) עם כניסה לדפדפן + OAuth, כרטיס Ollama מחלקה ראשונה, Claude Opus 5 & Sonnet 5, שותפות רשמית Kimi (Code/Web/Moonshot), Zed, Requesty, SenseNova ו-Requesty, AI...**קטלוג 382 ספקים** . [ספקי](docs/reference/PROVIDER_REFERENCE.md) →
+- **שקיפות ניתוב 📡** כל תגובה — נושאת כותרת `X-OmniRoute-Decision` ששמה את ה- strategy/provider/latency ששירתה אותה, אסטרטגיית `cache-optimized` משולבת חדשה + Auto-Combo `cacheAffinity` factor מסלול בקשות חוזרות חזרה לחיבור המחזיק את הקידומת השמורה, ונקודת קצה `/v1/auto-combo/{channel}/candidates` לקריאה בלבד חושפת את מאגר המועמדים החי של ערוץ `auto/*`. → [אוטומטי קומבו](docs/routing/AUTO-COMBO.md)
+- **⚡ Local Performance & Infra** — בלחיצה אחת מקומית Redis, Cloudflare Workers / Deno Deploy מפרסי ממסר, Bifrost & Mux כשירותים משובצים מפוקחים. [שירותים משובצים](docs/frameworks/EMBEDDED-SERVICES.md) →
+- **🧩 גם בקופסה** — מסגרת תוסף + שוק, Omni/Agent/GitHub מסגרות מיומנויות, Obsidian אינטגרציה של כספת (22 MCP כלים), אצווה וקבצים תואמי OpenAI APIs, מטמון תגובות סמנטיות, משחקיות עם לוחות הישגים, ACP גילוי סוכן (15 סוכנים מובנים), ייצוא יומן מתוזמן ל BigQuery, `auto/chaos` מניפה מקבילה מרובה דגמים, א Telegram bot bridge, מנהל גרסאות בתוך האפליקציה ודירוגי ספקים בחינם של LMArena-ELO. → [מסמכים](docs/README.md)
 
 <br/>
 
@@ -682,11 +677,11 @@ omniroute configure codex          # גם: claude opencode qwen aider goose gemi
 
 <div align="center">
 
-## 🌐 381 AI ספקי — 156 מסומן בחינם
+## 🌐 382 AI ספקי — 156 בקטלוג מסומן בחינם
 
 </div>
 
-> **381 ספקים רשומים** על פני הצ'אט הקנוני, המדיה, החיפוש, האוספים המקומיים, סוכני הענן והמערכת, כולל **156 נושא מטא נתונים של גילוי `hasFree: true`** . רישום מודל הצ'אט מכסה **242 ספקים / 3,148 זוגות ספק-מודל נפרדים / 1,519 מודל גולמי IDs** ; לקטלוג הנפרד של תקציב חינם יש **466 שורות לכל דגם** ,**34 בריכות שחוזרות על עצמן** ו **52 recurring/keyless בחינם לנצח** . אלה הם מכנים שונים בעיצובם; הגדרות וחישובים נטולי מומים מופיעים ב- [Provider Reference](docs/reference/PROVIDER_REFERENCE.md) ו- [Free Triers](docs/reference/FREE_TIERS.md).
+> **382 ספקים רשומים** על פני הצ'אט הקנוני, המדיה, החיפוש, האוספים המקומיים, סוכני הענן והמערכת, כולל **156 נושא מטא נתונים של גילוי `hasFree: true`** . רישום מודל הצ'אט מכסה **243 ספקים / 3,155 זוגות ספק-מודל נפרדים / 1,524 מודל גולמי IDs** ; לקטלוג הנפרד של תקציב חינם יש **466 שורות לכל דגם** ,**34 בריכות שחוזרות על עצמן** ו **52 ספקי recurring/keyless בחינם לנצח** . אלה הם מכנים שונים בעיצובם; הגדרות וחישובים נטולי מומים מופיעים ב- [Provider Reference](docs/reference/PROVIDER_REFERENCE.md) ו- [Free Triers](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
@@ -719,7 +714,7 @@ omniroute configure codex          # גם: claude opencode qwen aider goose gemi
   </tr>
 </table>
 
-<sub>...ועוד 350 + — כל אייקון נפתר בשידור חי מקטלוג הספקים של לוח המחוונים. [הפנייה לספק](docs/reference/PROVIDER_REFERENCE.md) 📖</sub>
+<sub>...ועוד 350 + — כל סמל נפתר בשידור חי מקטלוג הספקים של לוח המחוונים. [התייחסות לספק](docs/reference/PROVIDER_REFERENCE.md) 📖</sub>
 
 <br/>
 
@@ -1290,7 +1285,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # גם CI=1 גורם ל�
   <tr><td nowrap><b>סביבת ריצה</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>שפה</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> בכל <code>src/</code> ו-<code>open-sse/</code> (אפס <code>any</code> בליבה מאז v2.0)</td></tr>
   <tr><td nowrap><b>מסגרת</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>מסד נתונים</b></td><td>better-sqlite3 (SQLite, יומן WAL) + LowDB (JSON מדור קודם) — 147 מודולי תחום, 225 מיגרציות</td></tr>
+  <tr><td nowrap><b>מסד נתונים</b></td><td>better-sqlite3 (SQLite, יומן WAL) + LowDB (JSON מדור קודם) — 147 מודולי תחום, 229 מיגרציות</td></tr>
   <tr><td nowrap><b>זיכרון</b></td><td>חיפוש טקסט מלא SQLite FTS5 + הטמעות וקטוריות עם כימות int8, דעיכה עם טיפוסים</td></tr>
   <tr><td nowrap><b>סכמות</b></td><td>Zod 4 — אימות קלט/פלט של כלי MCP + חוזי API</td></tr>
   <tr><td nowrap><b>פרוטוקולים</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

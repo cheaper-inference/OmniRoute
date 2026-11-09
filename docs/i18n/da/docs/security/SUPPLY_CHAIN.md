@@ -45,11 +45,11 @@ afslutningskode 0, hvilket ikke dokumenterer, at afhængighederne bestod scannin
 Trivy-trin kræver også en vellykket måling: utilgængelige værktøjer, mislykkede jobs
 og manglende image-evidens kan ikke certificere et image som rent.
 
-## Risiko ved udfaset afhængighed
+## Pensioneret afhængighedsrisiko
 
-Rodprojektets lockfil indeholder ikke længere `extract-zip` eller en afhængighedsrelation til den efter opgraderingen af det fastlåste promptfoo-udviklingsværktøj. Dette udfaser den tidligere accepterede kæde `promptfoo` → `@openai/codex-security` → `extract-zip`, som spores i #14482. Regressionstestene i `tests/unit/extract-zip-14482-exposure.test.ts` afviser, at den genindføres, og fastholder forbuddet mod import fra produktionskode.
+Rodlåsefilen inkluderer ikke længere `extract-zip` eller en afhængighedskant til den efter opgradering af det fastgjorte promptfoo-udviklingsværktøj. Dette trækker den tidligere accepterede `promptfoo` → `@openai/codex-security` → `extract-zip` -kæde tilbage i #14482. Regressionskontrollen i `tests/unit/extract-zip-14482-exposure.test.ts` afviser dens genindførelse og bevarer forbuddet mod import fra produktionskode.
 
-Den aktuelle afhængighedsreparation omfatter kompatibilitetstilsidesættelser for Azure Identitys MSAL-klient, get-uris FTP-klient og Zod i begge OpenCode-pluginpakker. Hentning af Azure-tokens og FTP-data er testet med kontrollerede transporter; begge OpenCode-pakker kører deres egne build- og testsuiter. Antallet af sikkerhedsmeddelelser i registreringsdatabasen er øjebliksbilleder og kan ændre sig, efter at lockfilen er blevet committed.
+Den aktuelle afhængighedsreparation omfatter også kompatibilitetstilsidesættelser til Azure-identitets MSAL klient og get-uri's FTP klient. Azure-tokenopsamling og FTP hentning testes med kontrollerede transporter; begge OpenCode -pakker kører deres egne build- og testpakker. Registry-adviserende tællinger er målinger på et tidspunkt og kan ændre sig, efter at låsefilen er begået.
 
 ## Restance: Scorecard-rådgivning → blokerende
 

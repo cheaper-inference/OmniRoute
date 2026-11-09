@@ -242,7 +242,7 @@ src/
 | -------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
 | `components/`                    | Gösterge paneli bileşen API'si: `packages/ui-kit` üzerinde adaptörler — bkz. `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: ekranlar tarafından kullanılan simge adları → Lucide bileşenleri (`<Icon>`)                           |
-| `constants/providers.ts`         | Zod doğrulamalı **380 sağlayıcı** (tek doğruluk kaynağı)                                                          |
+| `constants/providers.ts`         | Zod doğrulamalı **382 sağlayıcı** (tek doğruluk kaynağı)                                                          |
 | `constants/cliTools.ts`          | Harici CLI aracı kayıt defteri                                                                                    |
 | `constants/routingStrategies.ts` | Öncelikleriyle birlikte **20 yönlendirme stratejisi**                                                             |
 | `constants/publicApiRoutes.ts`   | Yönetim kimlik doğrulaması yerine Bearer kimlik doğrulaması gerektiren rotalar                                    |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Harici CLI entegrasyonları + dahili OmniRoute CLI'ı                                                      |
 | `I18N.md`                   | i18n mimarisi, dil ekleme, 67 yerel ayar                                                                 |
 | `UNINSTALL.md`              | Temiz kaldırma adımları                                                                                  |
-| `PROVIDER_REFERENCE.md`     | 380 sağlayıcının **otomatik oluşturulan** kataloğu (yeniden oluşturma: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | 382 sağlayıcının **otomatik oluşturulan** kataloğu (yeniden oluşturma: `npm run gen:provider-reference`) |
 
 ### Alt sistem derinlemesine incelemeler
 

@@ -353,27 +353,22 @@ Content-Type: application/json
 }
 ```
 
-ارائهدهندگان موجود شامل OpenAI (GPT Image 2)، xAI (Grok Image)، Together AI (FLUX)، Fireworks AI، Nebius (FLUX)، Hyperbolic، NanoBanana، **OpenRouter**، **ZenMux**، SD WebUI (محلی) و ComfyUI (محلی) هستند.
+ارائه دهندگان موجود عبارتند از OpenAI (GPT Image 2)، xAI (Grok Image)، Together AI (FLUX)، Fireworks AI، nebius (FLUX)، Hyperbolic، NanoBanana،**OpenRouter** ،**ZenMux** ، SD WebUI (محلی)، ComfyUI (محلی).
 
-`n` تعداد `n` تصویر را در `data[]` برمیگرداند. ارائهدهندگانی که API بالادستی آنها در هر فراخوانی یک تصویر برمیگرداند
-(Black Forest Labs، Stability AI، Leonardo، Ideogram، Haiper، Hyperbolic، Magnific/Freepik،
-NVIDIA NIM، Cloudflare Workers AI)، برای هر تصویر `n` فراخوانی جداگانه به API بالادستی انجام میدهند؛ در هر لحظه حداکثر 4 فراخوانی در حال اجراست. یک `seed` ثابت بر اساس شاخص فراخوانی (`seed`، `seed + 1`، …) افزایش مییابد؛ بنابراین تصاویر متفاوت هستند، اما قابلیت بازتولید دارند. مقدار `n` حداکثر 10 است. اگر هر فراخوانی با خطا مواجه شود، کل درخواست ناموفق خواهد بود. فهرست قالبهای fan-out در
-`open-sse/handlers/imageGeneration/fanOut.ts` و با نام `SINGLE_IMAGE_FANOUT_FORMATS` قرار دارد.
+`n` تصاویر `n` را در `data[]` برمیگرداند. ارائهدهندگانی که API بالادست آنها یک تصویر در هر تماس برمیگرداند (آزمایشگاههای جنگل سیاه، پایداری AI، لئوناردو، ایدهگرام، هایپر، هایپربولیک، Magnific/Freepik، NVIDIA NIM، Cloudflare کارگران AI) `n` تماسهای بالادستی جداگانه، حداکثر 4 مورد در پرواز دریافت میکنند. یک `seed` ثابت با شاخص فراخوانی (`seed`، `seed + 1`، …) جبران میشود، بنابراین تصاویر متفاوت هستند اما قابل تکرار میمانند. `n` روی 10 محدود شده است. اگر هر تماسی ناموفق باشد، درخواست به طور کلی ناموفق است. فهرست فرمتهای فنآوت `SINGLE_IMAGE_FANOUT_FORMATS` در `open-sse/handlers/imageGeneration/fanOut.ts` است.
 
-ZenMux از اتصال کلید API موجود استفاده مجدد میکند و پیشوندهای `zenmux/` یا `zm/` را میپذیرد:
+ZenMux از اتصال کلید API موجود مجددا استفاده می کند و پیشوندهای `zenmux/` یا `zm/` را می پذیرد:
 
-- `zenmux/openai/gpt-image-2` از Images API مربوط به OpenAI در ZenMux استفاده میکند. گزینهها شامل `size`،
-  `quality`، `n`، `output_format`، `output_compression`، `background` و `response_format` هستند.
-- سایر ناشران، مانند `zm/meta/muse-image-1.0`، از نقطه پایانی `:predict` مربوط به Vertex AI در ZenMux استفاده میکنند. `n` به `sampleCount`، `aspect_ratio` به `aspectRatio` و `image_size`
-  (`1K`، `2K`، `4K`) به `sampleImageSize` نگاشت میشود. یک `size` پیکسلی تنها نسبت ابعاد را مشخص میکند و تضمینکننده ابعاد پیکسلی نیست. نسبتهای ابعاد، وضوحها و تعدادهای پشتیبانیشده بسته به مدل متفاوت هستند.
-- `zm/inclusionai/ming-image-0.1-design` ابعاد خود را انتخاب میکند. `size`،
-  `aspect_ratio` و `image_size` را حذف کنید؛ مقادیر صریح باعث بازگشت HTTP 400 میشوند. قالبهای PNG، JPEG و WebP را میتوان با `output_format` درخواست کرد.
+- `zenmux/openai/gpt-image-2` از ZenMux's OpenAI Images API استفاده می کند. گزینه ها عبارتند از `size`, `quality`, `n`, `output_format`, `output_compression`, `background`, `response_format`.
+- ناشران دیگر، مانند `zm/meta/muse-image-1.0`، از نقطه پایانی ZenMux's Vertex AI `:predict` استفاده می کنند. `n` به `sampleCount` `aspect_ratio` به `aspectRatio` و `image_size` (`1K` و `2K` و `4K`) به `sampleImageSize` نقشه می دهد. یک پیکسل `size` فقط یک نسبت تصویر را ارائه می دهد، نه ابعاد پیکسل تضمین شده را. نسبتها، وضوحها و تعداد پشتیبانیشده براساس مدل متفاوت است.
+- `zm/inclusionai/ming-image-0.1-design` ابعاد خود را انتخاب می کند. حذف `size` و `aspect_ratio` و `image_size`; مقادیر صریح HTTP 400 را برمی گرداند. PNG، JPEG و WebP را می توان با `output_format` درخواست کرد.
 
-این یکپارچهسازی از تولید تصویر بر اساس متن پشتیبانی میکند، نه ویرایش تصویر مرجع. خروجی Vertex به شکل `data[].b64_json` نرمالسازی میشود؛ `response_format: "url"` یک URL بالادستی HTTPS یا در صورت در دسترس نبودن چیزی جز بایتهای تصویر، یک URL دادهای base64 را برمیگرداند. خروجیهای خالی یا فیلترشده بهجای موفقیت خالی، خطا برمیگردانند. دسترسی به مدل به حساب ZenMux بستگی دارد. به [Vertex API مربوط به ZenMux](https://docs.zenmux.ai/api/vertexai/generate-images) و
-[OpenAI Images API](https://docs.zenmux.ai/api/openai/generate-an-image) مراجعه کنید.
+این ادغام از تولید متن به تصویر پشتیبانی می کند، نه ویرایش تصویر مرجع. خروجی راس به `data[].b64_json` نرمال شده است. `response_format: "url"` یک HTTPS URL بالادستی یا URL داده base64 را زمانی که فقط بایت های تصویر در دسترس باشد برمی گرداند. خروجی های Empty/filtered یک خطا را به جای موفقیت خالی برمی گرداند. دسترسی مدل به حساب ZenMux بستگی دارد. [ZenMux's Vertex API](https://docs.zenmux.ai/api/vertexai/generate-images) و [OpenAI Images API](https://docs.zenmux.ai/api/openai/generate-an-image) ببینید.
+
+یک اتصال ورود به سیستم Microsoft 365 Copilot `copilot-m365-web/m365-copilot-image` از طریق ابزار تصویر داخلی Copilot ارائه میکند: یک چرخش Copilot در هر تصویر (`n` 1-4)، `size` فقط جهتگیری را هدایت میکند، و تصاویری که به صورت درون خطی برگردانده میشوند (`b64_json` یا یک داده URL برای `response_format: "url"`). [Microsoft 365 Copilot](../providers/COPILOT-M365.md#image-generation) را ببینید.
 
 ```bash
-# فهرست همه مدلهای تصویر
+# List all image models
 GET /v1/images/generations
 ```
 
@@ -805,17 +800,19 @@ Resolve نمیشود — را با `401` رد میکند، حتی وقتی `REQU
 
 ---
 
-## API جستوجو
+## جستجوی API
 
-انتزاع ارائهدهنده وب/جستوجو (Tavily، Brave، Exa، Serper و غیره).
+انتزاع ارائه دهنده Web/search (Tavily، Brave، Exa، Serper و غیره).
 
-| روش  | مسیر                   | توضیح                                                                                                |
-| ---- | ---------------------- | ---------------------------------------------------------------------------------------------------- |
-| GET  | `/v1/search`           | فهرست ارائهدهندگان جستوجوی پیکربندیشده + قابلیتها                                                    |
-| POST | `/v1/search`           | اجرای یک پرسوجوی جستوجو — بدنه توسط `v1SearchSchema` اعتبارسنجی میشود و از کش/همتجمیع پشتیبانی میکند |
-| GET  | `/v1/search/analytics` | آمار بازدید/تأخیر/کش به تفکیک ارائهدهنده                                                             |
+| روش  | مسیر                   | توضیحات                                                                                                      |
+| ---- | ---------------------- | ------------------------------------------------------------------------------------------------------------ |
+| GET  | `/v1/search`           | قابلیت های + ارائه دهندگان جستجوی پیکربندی شده را فهرست کنید                                                 |
+| POST | `/v1/search`           | یک عبارت جستجوی — را اجرا کنید که توسط `v1SearchSchema` تأیید شده است، از caching/coalescing پشتیبانی می کند |
+| GET  | `/v1/search/analytics` | آمار hit/latency/cache هر ارائه دهنده                                                                        |
 
-**احراز هویت:** کلید API از نوع Bearer (`extractApiKey` + `isValidApiKey`). سیاست جستوجو از طریق `enforceApiKeyPolicy` اعمال میشود.
+**احراز هویت:** کلید حامل API (`extractApiKey` + `isValidApiKey`). سیاست جستجو از طریق `enforceApiKeyPolicy` اجرا شد.
+
+**انتخاب خودکار:** بدون `provider`، ارزانترین ارائهدهنده با اتصال پیکربندیشده ابتدا اجرا میشود و ارزانترین ارائهدهنده بعدی Failover است. ارائه دهندگان آخرین راه حل رایگان (`duckduckgo-free`) تنها زمانی استفاده می شوند که هیچ چیز دیگری پیکربندی نشده باشد. یک SearXNG خود میزبان زمانی که اتصال آن یک `baseUrl` واقعی (نه `http://localhost:8888/search` پیشفرض کاتالوگ) را ذخیره میکند، پیکربندی میشود: سپس بهعنوان ارائهدهنده 0 دلاری جلوتر از ارائهدهندههای کلیددار قرار میگیرد، با ارزانترین ارائهدهنده کلیددار بهعنوان failover، از جمله زمانی که SearXNG `http(s)` 400، 401، 400، 401، 403 یا 40 `baseUrl` URL میدهد. آدرس ابرداده به حساب نمی آید. یک اتصال SearXNG که یک توکن را ذخیره میکند به این ترتیب فقط در `https://` یا `http://` حلقه بک رتبهبندی میشود. از طریق `http://` ساده از راه دور، هرگز یک خطا نیست و آخرین راه حل باقی میماند، تنها زمانی استفاده میشود که هیچ ارائهدهنده دیگری پیکربندی نشده باشد یا زمانی که با نام درخواست شود، استفاده میشود، بنابراین در آن دو مورد، توکن را به صورت متن واضح ارسال میکند.
 
 ### `provider_options` در Exa و Tavily
 
@@ -962,33 +959,28 @@ CLI، `base_url + /responses` را به یک WebSocket ارتقا میدهد و 
 
 ---
 
-## مصرف سلفسرویس (`/api/usage/om-usage`)
+## استفاده از سلف سرویس (`/api/usage/om-usage`)
 
-هر کلید API میتواند مصرف و سهمیههای **خود** را بخواند — بدون نیاز به احراز هویت مدیریتی. این
-همان نقطه پایانی است که یک کلاینت (CLI، پنل OmniCopilot) برای نمایش هزینه کلید به صاحب آن
-استفاده میکند.
+هر کلید API می تواند بخواند **خودش** استفاده و سهمیه — بدون مجوز مدیریت. این نقطه پایانی است که مشتری (CLI، پنل OmniCopilot ) برای نشان دادن هزینههای خود به دارنده کلید استفاده میکند.
 
 ```bash
-# قالب متنی (قرارداد تاریخی — متن ساده برای پایانه)
+# Text form (the historical contract — plain text for a terminal)
 curl -H "Authorization: Bearer <your-api-key>" \
   http://localhost:20128/api/usage/om-usage
 
-# قالب ساختاریافته — چیزی که رابط کاربری مصرف میکند
+# Structured form — what a UI consumes
 curl -H "Authorization: Bearer <your-api-key>" \
   "http://localhost:20128/api/usage/om-usage?format=json"
 ```
 
-کلید باید گزینه **`allowUsageCommand`** را فعال داشته باشد (بهصورت پیشفرض غیرفعال است — مدیر
-کلیدهای API در داشبورد آن را برای هر کلید تغییر میدهد). در غیر این صورت، نقطه پایانی پاسخ
-`403` میدهد.
+کلید باید داشته باشد **`allowUsageCommand`** فعال است (به طور پیش فرض — خاموش است، مدیر کلید API داشبورد آن را در هر کلید تغییر می دهد). بدون آن نقطه پایانی به `403` پاسخ می دهد.
 
-`?format=json` شکلی تفکیکشده برمیگرداند تا فراخوان هرگز فیلد داده را از یک پاسخ ردشده نخواند.
-در صورت موفقیت:
+`?format=json` یک شکل متمایز را برمی گرداند، بنابراین تماس گیرنده هرگز یک فیلد داده را از یک رد نمی خواند. در مورد موفقیت:
 
 ```jsonc
 {
   "allowed": true,
-  // فقط زمانی وجود دارد که کلید، محدودیتهای مصرف بهازای هر کلید (روزانه/هفتگی برحسب USD) را فعال کرده باشد:
+  // present only when the key opted into per-key usage limits (daily/weekly/5-hour USD):
   "personal": {
     "dailySpentUsd": 1.25,
     "dailyLimitUsd": 5,
@@ -997,9 +989,9 @@ curl -H "Authorization: Bearer <your-api-key>" \
     "weeklyLimitUsd": 20,
     "weeklyResetAtIso": "…" /* … */,
   },
-  // تصویر لحظهای سهمیه ارائهدهنده انتخابشده، یا null اگر هنوز چیزی در حافظه موقت ذخیره نشده باشد:
+  // the selected provider quota snapshot, or null when nothing is cached yet:
   "provider": { "connectionId": "…", "provider": "claude", "plan": "…", "quotas": {/* … */} },
-  // تصویر لحظهای هر اتصال، تا رابط کاربری بتواند چند ارائهدهنده را در کنار هم نمایش دهد:
+  // every connection's snapshot, so a UI can render several providers side by side:
   "providers": [
     { "connectionId": "…", "provider": "claude" /* … */ },
     { "provider": "codex" /* … */ },
@@ -1007,13 +999,9 @@ curl -H "Authorization: Bearer <your-api-key>" \
 }
 ```
 
-در صورت رد شدن (`401` برای کلید نامعتبر / `403` برای مجاز نبودن)، همین مسیر
-`{ "allowed": false, "error": { "message": "…" } }` را برمیگرداند — وجود یک
-`personal`/`provider` حاضر اما خالی (کلید مجاز است، اما هنوز چیزی به دست نیامده) با رد شدن
-متفاوت است و فقط قالب JSON این دو حالت را از هم متمایز میکند.
+JSON صورت `provider` (کلید بد `401` / `403` مجاز نیست) همان مسیر `{ "allowed": false, "error": { "message": "…" } }` — `personal` برمیگرداند.
 
-**احراز هویت:** کلید API Bearer خود فراخوان که با `isValidApiKey` اعتبارسنجی میشود — این
-سطح مدیریتی (`/api/keys/…`) نیست؛ سطح مدیریتی همچنان پشت `requireManagementAuth` قرار دارد.
+**احراز هویت:** کلید API حامل خود تماسگیرنده `requireManagementAuth` تأیید شده با `isValidApiKey` — `/api/keys/…`
 
 ### درصدهای سهمیه خام در برابر درصدهای تعدیلشده بر اساس حد آستانه
 
@@ -1256,40 +1244,41 @@ wrapperهای شفاف سازگار با OpenAI ممکن است ورودی اص�
 | `/api/usage/model-latency-stats` | GET             | تجمیع چرخشی تأخیر بهازای هر ارائهدهنده/مدل (میانگین/p50/p95/p99، نرخ موفقیت)؛ فیلترها: `windowHours`/`minSamples`/`maxRows`/`provider`/`model` (#6873)                                                                                                                                 |
 | `/api/usage/cache-health`        | GET             | خلاصه سلامت کش پرامپت در `call_logs` — نسبت نوشتن/خواندن، توزیع اندازه نوشتن p50/p90/p99، تمرکز نوشتنهای سنگین، تفکیک بهازای هر مدل، و نتیجهگیری `healthy`/`degraded`/`thrash`/`no-data`؛ پارامترهای پرسوجو `range` (`1h`\|`24h`\|`7d`\|`30d`، پیشفرض `24h`) و `model` اختیاری (#8827) |
 
-### مجوزهای کلید API
+### مجوزهای کلیدی API
 
-`PATCH /api/keys/{id}` مجوزهای یک کلید موجود را بهروزرسانی میکند. مانند هر مسیر `/api/keys*`، این مسیر به مجوز مدیریت نیاز دارد (به [احراز هویت مدیریت](../guides/MANAGEMENT-AUTH.md) مراجعه کنید)، نه یک کلید استنتاج. فقط فیلدهایی را ارسال کنید که میخواهید تغییر دهید؛ درخواستی که هیچکدام از آنها را نداشته باشد با `No valid fields to update` رد میشود. فیلدهای پذیرفتهشده توسط `updateKeyPermissionsSchema` در `src/shared/validation/schemas/keys.ts` تعریف شدهاند.
+`PATCH /api/keys/{id}` مجوزهای یک کلید موجود را به روز می کند. مانند هر مسیر `/api/keys*` به مجوز مدیریت نیاز دارد (به [تأیید اعتبار مدیریت](../guides/MANAGEMENT-AUTH.md) مراجعه کنید)، نه یک کلید استنتاج. فقط فیلدهایی را که می خواهید تغییر دهید ارسال کنید. درخواستی که هیچ یک از آنها با `No valid fields to update` رد نمی شود. فیلدهای پذیرفته شده توسط `updateKeyPermissionsSchema` در `src/shared/validation/schemas/keys.ts` تعریف می شوند.
 
-| Field                                       | Type                                                                       | Notes                                                                                                                                                               |
-| ------------------------------------------- | -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `name`                                      | رشته، ۱-۲۰۰ نویسه                                                          |                                                                                                                                                                     |
-| `isActive`                                  | بولی                                                                       |                                                                                                                                                                     |
-| `isBanned`                                  | بولی                                                                       |                                                                                                                                                                     |
-| `expiresAt`                                 | تاریخوزمان ISO 8601 یا `null`                                              | `null` زمان انقضا را پاک میکند                                                                                                                                      |
-| `modelAccessMode`                           | `all` \| `restricted`                                                      | وقتی حالت `all` است، `allowedModels` باید خالی باشد                                                                                                                 |
-| `allowedModels`, `blockedModels`            | آرایهای از رشتهها، حداکثر ۱۰۰۰ مورد                                        |                                                                                                                                                                     |
-| `allowedCombos`                             | آرایهای از رشتهها، حداکثر ۵۰۰ مورد                                         | تعیین میکند کلید کدام ترکیبها را میتواند فراخوانی کند؛ مدلهای مستقیم توسط `modelAccessMode` / `allowedModels` کنترل میشوند                                          |
-| `connectionAccessMode`                      | `all` \| `restricted`                                                      | وقتی `restricted` است، `allowedConnections` باید غیرخالی باشد و وقتی `all` است باید خالی باشد                                                                       |
-| `allowedConnections`                        | آرایهای از UUIDها، حداکثر ۱۰۰ مورد                                         |                                                                                                                                                                     |
-| `allowAutoCombos`                           | بولی                                                                       | مقدار `false` درخواستهای مدلهای `auto/*` با این کلید را رد میکند؛ کلیدهایی که هرگز این مقدار را تنظیم نکردهاند مجاز هستند                                           |
-| `catalogScope`                              | `all` \| `combos` \| `models`                                              | مشخص میکند `GET /v1/models` برای این کلید چه مواردی را فهرست میکند (فقط ترکیبها، فقط مدلها یا هر دو)؛ این گزینه مواردی را که کلید میتواند فراخوانی کند تغییر نمیدهد |
-| `forcedModel`                               | رشتهای با حداکثر ۳۰۰ نویسه، یا `null`                                      | درخواستهای گفتوگو را به این مدل/ترکیب هدایت میکند و بر `X-Route-Model` و `body.model` اولویت دارد؛ محدودیتهای کلید همچنان اعمال میشوند                              |
-| `noLog`, `autoResolve`                      | بولی                                                                       |                                                                                                                                                                     |
-| `throttleDelayMs`                           | عدد صحیح، ۰-۳۰۰۰۰۰                                                         |                                                                                                                                                                     |
-| `maxSessions`                               | عدد صحیح، ۰-۱۰۰۰۰                                                          |                                                                                                                                                                     |
-| `rateLimits`                                | آرایهای از `{ limit, window }` (اعداد صحیح مثبت، حداکثر ۵۰ مورد) یا `null` | `null` محدودیتها را پاک میکند                                                                                                                                       |
-| `accessSchedule`                            | شیء زمانبندی یا `null`                                                     | `null` زمانبندی را پاک میکند                                                                                                                                        |
-| `scopes`                                    | آرایهای از رشتهها، حداکثر ۳۲ مورد                                          |                                                                                                                                                                     |
-| `allowedEndpoints`                          | آرایهای از رشتهها، حداکثر ۲۰ مورد                                          |                                                                                                                                                                     |
-| `streamDefaultMode`                         | `legacy` \| `json`                                                         |                                                                                                                                                                     |
-| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                       | به [دور زدن کش برای هر کلید](#per-key-cache-bypass) مراجعه کنید                                                                                                     |
-| `compressionEnabled`                        | بولی                                                                       |                                                                                                                                                                     |
-| `codexServiceMode`                          | یکی از حالتهای سرویس Codex                                                 |                                                                                                                                                                     |
-| `disableNonPublicModels`                    | boolean                                                                    |                                                                                                                                                                     |
-| `allowUsageCommand`                         | boolean                                                                    |                                                                                                                                                                     |
-| `usageLimitEnabled`                         | boolean                                                                    |                                                                                                                                                                     |
-| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | number >= 0 or `null`                                                      |                                                                                                                                                                     |
-| `chaosModeEnabled`                          | boolean                                                                    |                                                                                                                                                                     |
+| Field                                       | Type                                                                       | Notes                                                                                                                                                                                                                                                                  |
+| ------------------------------------------- | -------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`                                      | رشته، ۱-۲۰۰ نویسه                                                          |                                                                                                                                                                                                                                                                        |
+| `isActive`                                  | بولی                                                                       |                                                                                                                                                                                                                                                                        |
+| `isBanned`                                  | بولی                                                                       |                                                                                                                                                                                                                                                                        |
+| `expiresAt`                                 | تاریخوزمان ISO 8601 یا `null`                                              | `null` زمان انقضا را پاک میکند                                                                                                                                                                                                                                         |
+| `modelAccessMode`                           | `all` \| `restricted`                                                      | وقتی حالت `all` است، `allowedModels` باید خالی باشد                                                                                                                                                                                                                    |
+| `allowedModels`, `blockedModels`            | آرایه رشته ها، تا 1000                                                     |                                                                                                                                                                                                                                                                        |
+| `allowedCombos`                             | آرایهای از رشتهها، حداکثر ۵۰۰ مورد                                         | تعیین میکند کلید کدام ترکیبها را میتواند فراخوانی کند؛ مدلهای مستقیم توسط `modelAccessMode` / `allowedModels` کنترل میشوند                                                                                                                                             |
+| `connectionAccessMode`                      | `all` \| `restricted`                                                      | وقتی `restricted` است، `allowedConnections` باید غیرخالی باشد و وقتی `all` است باید خالی باشد                                                                                                                                                                          |
+| `allowedConnections`                        | آرایهای از UUIDها، حداکثر ۱۰۰ مورد                                         |                                                                                                                                                                                                                                                                        |
+| `allowAutoCombos`                           | بولی                                                                       | مقدار `false` درخواستهای مدلهای `auto/*` با این کلید را رد میکند؛ کلیدهایی که هرگز این مقدار را تنظیم نکردهاند مجاز هستند                                                                                                                                              |
+| `catalogScope`                              | `all` \| `combos` \| `models`                                              | مشخص میکند `GET /v1/models` برای این کلید چه مواردی را فهرست میکند (فقط ترکیبها، فقط مدلها یا هر دو)؛ این گزینه مواردی را که کلید میتواند فراخوانی کند تغییر نمیدهد                                                                                                    |
+| `forcedModel`                               | رشتهای با حداکثر ۳۰۰ نویسه، یا `null`                                      | درخواستهای گفتوگو را به این مدل/ترکیب هدایت میکند و بر `X-Route-Model` و `body.model` اولویت دارد؛ محدودیتهای کلید همچنان اعمال میشوند                                                                                                                                 |
+| `noLog`, `autoResolve`                      | بولی                                                                       |                                                                                                                                                                                                                                                                        |
+| `throttleDelayMs`                           | عدد صحیح، ۰-۳۰۰۰۰۰                                                         |                                                                                                                                                                                                                                                                        |
+| `maxSessions`                               | عدد صحیح، ۰-۱۰۰۰۰                                                          |                                                                                                                                                                                                                                                                        |
+| `rateLimits`                                | آرایهای از `{ limit, window }` (اعداد صحیح مثبت، حداکثر ۵۰ مورد) یا `null` | `null` محدودیتها را پاک میکند                                                                                                                                                                                                                                          |
+| `accessSchedule`                            | شیء زمانبندی یا `null`                                                     | `null` زمانبندی را پاک میکند                                                                                                                                                                                                                                           |
+| `scopes`                                    | آرایهای از رشتهها، حداکثر ۳۲ مورد                                          |                                                                                                                                                                                                                                                                        |
+| `allowedEndpoints`                          | آرایهای از رشتهها، حداکثر ۲۰ مورد                                          |                                                                                                                                                                                                                                                                        |
+| `streamDefaultMode`                         | `legacy` \| `json`                                                         |                                                                                                                                                                                                                                                                        |
+| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                       | به [دور زدن کش برای هر کلید](#per-key-cache-bypass) مراجعه کنید                                                                                                                                                                                                        |
+| `compressionEnabled`                        | بولی                                                                       |                                                                                                                                                                                                                                                                        |
+| `codexServiceMode`                          | یکی از حالتهای سرویس Codex                                                 |                                                                                                                                                                                                                                                                        |
+| `disableNonPublicModels`                    | boolean                                                                    |                                                                                                                                                                                                                                                                        |
+| `allowUsageCommand`                         | boolean                                                                    |                                                                                                                                                                                                                                                                        |
+| `usageLimitEnabled`                         | boolean                                                                    |                                                                                                                                                                                                                                                                        |
+| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | شماره >= 0 یا `null`                                                       |                                                                                                                                                                                                                                                                        |
+| `fiveHourUsageLimitUsd`                     | شماره >= 0 یا `null`                                                       | بودجه 5 ساعته USD که مانند محدودیت های روزانه و هفتگی (`usageLimitEnabled`، `UNPRICED_USAGE_BUDGET_POLICY`) اجرا می شود. `retry-after` زمانی است که قدیمیترین هزینه در پنجره به پایان میرسد، که میتواند کلیدی را که بسیار بیشتر از حد مجازش است همچنان مسدود نگه دارد. |
+| `chaosModeEnabled`                          | boolean                                                                    |                                                                                                                                                                                                                                                                        |
 
 ```bash
 curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
@@ -1339,6 +1328,14 @@ curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
 | `/api/modality-bridge/stats`         | GET        | `attempts` در حافظه، موفقیتها/`bridged`، شکستها، برخوردهای حافظهٔ پنهان، `totalLatencyMs`، `latencySamples`، `averageLatencyMs` بر مبنای نمونهها، و زمان آخرین استفاده (با راهاندازی مجدد بازنشانی میشود؛ نیازمند احراز هویت مدیریتی)                                                                                                                                                                                  |
 | `/api/modality-bridge/video/runtime` | GET        | بررسی سختگیرانهٔ حلقهٔ بازگشت مورداعتماد پیش از احراز هویت مدیریتی/بررسی؛ دسترسپذیری و نسخههای FFmpeg/ffprobe پاکسازیشده (no-store)                                                                                                                                                                                                                                                                                    |
 | `/api/modality-bridge/video/extract` | POST       | واسط داخلی احراز هویتشده و حلقهٔ بازگشت مورداعتماد برای انتقال بایت؛ ورودی 50 MiB، صف محدودشده/خروجی 32 MiB، `503` برای ظرفیت، `499` برای قطع اتصال، `504` برای پایان مهلت؛ API عمومی بارگذاری نیست                                                                                                                                                                                                                    |
+
+### آموزش قاب ویدیویی
+
+`GET /api/v1/video-bridge/drilldown` یک دستگیره غیرشفاف مستاجر را میخواند که پس از موافقت صریح درخواست پل ویدیویی به زبان `x-omniroute-video-drilldown` بازگردانده شده است. هر دو خواندن و `DELETE` همیشه به یک کلید API معتبر و مجوز `modalityBridgeVideoDrilldownRemoteEnabled` مستقل اپراتور نیاز دارند. حفظ تولید علاوه بر این به `modalityBridgeVideoDrilldownEnabled` و `drilldown: true` دقیق در هر قسمت نیاز دارد. اگر کلید دارای یک لیست مجاز نقطه پایانی غیرخالی باشد، باید `video` برای GET و DELETE در بر گیرد، چه تماس گیرنده `/v1` یا `/api/v1` استفاده کند.
+
+پرس و جو GET : `handle` مورد نیاز ; `variant` اختیاری (`preview`، `standard`، `detail`)، `limit` (1-8؛ `frames` میراث پذیرفته شده است اما نمیتواند با `limit` ترکیب شود)، `page` مبتنی بر صفر، و `start`/`end` ثانیه. وقتی هر دو محدوده فوکوس ارائه می شود، `end` باید بزرگتر از `start` باشد. کلیدهای جستجوی Duplicate/unknown رد می شوند. پاسخ های موفق شامل `derivation`، `durationSeconds`، `frames`، `hasMore`، `page`، `variant` و `focusWindow` اختیاری هستند. JSON بدون فروشگاه روی 32 MiB از جمله Base64 محدود شده است. خروجی بزرگ بازده 413; فریم های کمتری درخواست کنید
+
+`DELETE /api/v1/video-bridge/drilldown?handle=...` `{ "removed": 0|1 }` را برمی گرداند. 404 پاسخ ناشناخته، منقضی شده و GETs متقاطع قابل تشخیص نیستند. کلید متقاطع DELETE نمی تواند ورودی مالک را حذف کند. دسترسی غیرفعال 403، احراز هویت missing/invalid 401، جستارهای نامعتبر 400، لغو 499 و خطاهای موقت 503 را برمیگرداند. دستهها فرآیندی محلی هستند، پس از ده دقیقه منقضی میشوند و پس از راهاندازی مجدد زنده نمیمانند. دسته های جدید از `v1.` به اضافه یک توکن تصادفی 32 بایتی Base64URL استفاده می کنند. فقط هش توکن حفظ می شود. توکن های قدیمی 64 هگز برای سازگاری از نظر نحوی خوانا باقی می مانند. برای کسب رضایت، سهمیهها و جزئیات مشتقات مختلف [، نردههای محافظ پل ویدیو](../security/GUARDRAILS.md#video-bridge-videobridgets-videobridgepipelinets) را ببینید.
 
 ### پشتیبانگیری و صادرات/واردات
 
@@ -1434,19 +1431,19 @@ curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
 
 این نقاط پایانی قالب API جمینی را برای کلاینتهایی که انتظار سازگاری بومی با SDK جمینی را دارند، شبیهسازی میکنند.
 
-### APIهای داخلی / سیستمی
+### داخلی / سیستم APIs
 
-| Endpoint                 | Method | Description                                           |
-| ------------------------ | ------ | ----------------------------------------------------- |
-| `/api/init`              | GET    | بررسی راهاندازی برنامه (در اولین اجرا استفاده میشود)  |
-| `/api/tags`              | GET    | برچسبهای مدل سازگار با Ollama (برای کلاینتهای Ollama) |
-| `/api/restart`           | POST   | آغاز راهاندازی مجدد تدریجی سرور                       |
-| `/api/shutdown`          | POST   | آغاز خاموششدن تدریجی سرور                             |
-| `/api/system/env/repair` | POST   | تعمیر متغیرهای محیطی ارائهدهنده OAuth                 |
-| `/api/system/version`    | GET    | نسخه فعلی/آخرین نسخه، وضعیت بهروزرسانی، کانال انتشار  |
-| `/api/system/version`    | POST   | آغاز بهروزرسانی آگاه از استقرار به آخرین نسخه         |
+| نقطه پایانی              | روش  | توضیحات                                                  |
+| ------------------------ | ---- | -------------------------------------------------------- |
+| `/api/init`              | GET  | شروع خدمات همگام سازی پس زمینه (مدیریت احراز هویت)       |
+| `/api/tags`              | GET  | برچسبهای مدل سازگار با Olama (برای مشتریان Ollama )      |
+| `/api/restart`           | POST | راه اندازی مجدد سرور برازنده                             |
+| `/api/shutdown`          | POST | ماشه خاموش شدن برازنده سرور                              |
+| `/api/system/env/repair` | POST | تعمیر متغیرهای محیط ارائه دهنده OAuth                    |
+| `/api/system/version`    | GET  | نسخه Current/latest ، وضعیت به روز رسانی، کانال انتشار   |
+| `/api/system/version`    | POST | یک بهروزرسانی آگاه از استقرار را به آخرین نسخه شروع کنید |
 
-> **توجه:** این نقاط پایانی بهصورت داخلی توسط سیستم یا برای سازگاری با کلاینت Ollama استفاده میشوند. کاربران نهایی معمولاً آنها را فراخوانی نمیکنند.
+> **توجه:** این نقاط پایانی به صورت داخلی توسط سیستم یا برای سازگاری مشتری Ollama استفاده می شود. آنها معمولاً توسط کاربران نهایی فراخوانی نمی شوند.
 
 ### تعمیر محیط OAuth _(v3.6.1+)_
 

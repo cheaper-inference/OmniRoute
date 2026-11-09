@@ -45,15 +45,11 @@ Rigressjoni mkejla toħroġ b’1. Eżekuzzjoni konsultattiva xorta tista’ tir
 li jimblokka jeħtieġ ukoll kejl li jirnexxi: għodod mhux disponibbli, kompiti li fallew
 u evidenza nieqsa tal-immaġni ma jistgħux jiċċertifikaw immaġni bħala nadifa.
 
-## Riskju minn dipendenza rtirata
+## Riskju ta' dipendenza rtirati
 
-Il-lockfile ewlieni ma għadux jinkludi `extract-zip` jew rabta ta’ dipendenza miegħu wara
-l-aġġornament tal-għodda tal-iżvilupp promptfoo bil-verżjoni ffissata. Dan jirtira l-katina
-`promptfoo` → `@openai/codex-security` → `extract-zip` li kienet ġiet aċċettata qabel u li hija traċċata f’#14482.
-Il-kontrolli ta’ rigressjoni f’`tests/unit/extract-zip-14482-exposure.test.ts` jirrifjutaw
-l-introduzzjoni mill-ġdid tagħha u jżommu l-projbizzjoni fuq importazzjonijiet mill-kodiċi tal-produzzjoni.
+Il-lockfile tal-għeruq m'għadux jinkludi `extract-zip` jew xifer ta' dipendenza miegħu wara li jaġġorna l-għodda tal-iżvilupp promptfoo ippinjat. Dan jirtira l-katina `promptfoo` → `@openai/codex-security` → `extract-zip` aċċettata qabel ittraċċata #14482. Il-kontrolli tar-rigressjoni `tests/unit/extract-zip-14482-exposure.test.ts` jirrifjutaw l-introduzzjoni mill-ġdid tiegħu u jżommu l-projbizzjoni fuq l-importazzjonijiet mill-kodiċi tal-produzzjoni.
 
-It-tiswija attwali tad-dipendenzi tinkludi sostituzzjonijiet ta’ kompatibbiltà għall-klijent MSAL tal-identità Azure, għall-klijent FTP ta’ get-uri, u għal Zod fiż-żewġ pakketti tal-plugin OpenCode. Il-kisba tat-token ta’ Azure u l-irkupru permezz tal-FTP jiġu ttestjati bi trasporti kkontrollati; iż-żewġ pakketti OpenCode iħaddmu s-settijiet tagħhom stess ta’ testijiet u tal-bini. L-għadd ta’ avviżi fir-reġistru huwa kejl f’mument partikolari u jista’ jinbidel wara li jiġi kkommitjat il-lockfile.
+It-tiswija tad-dipendenza attwali tikkorrispondi wkoll għall-kompatibilità għall-klijent MSAL ta' Azure identity u għall-klijent FTP ta' get-uri. L-akkwist ta 'tokens Azure u l-irkupru ta FTP huma ttestjati bi trasporti kkontrollati; iż-żewġ pakketti OpenCode imexxu l-bini u t-test suites tagħhom stess. L-għadd tal-konsulenza tar-reġistru huma kejl f'punt fiż-żmien u jistgħu jinbidlu wara li jitwettaq il-lockfile.
 
 ## Backlog: Parir ta' Scorecard → imblukkar
 

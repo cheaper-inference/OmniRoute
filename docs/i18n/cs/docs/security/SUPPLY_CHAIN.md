@@ -45,11 +45,11 @@ s návratovým kódem 0, což nepotvrzuje, že závislosti kontrolou prošly. Bl
 krok Trivy rovněž vyžaduje úspěšné měření: nedostupné nástroje, neúspěšné úlohy
 a chybějící důkazy o obrazu nemohou potvrdit, že obraz neobsahuje zranitelnosti.
 
-## Riziko vyřazené závislosti
+## Riziko závislosti v důchodu
 
-Kořenový lockfile již po upgradu nástroje promptfoo připnutého pro vývoj neobsahuje `extract-zip` ani hranu závislosti, která by k němu vedla. Tím se vyřazuje dříve akceptovaný řetězec `promptfoo` → `@openai/codex-security` → `extract-zip` sledovaný v #14482. Regresní kontroly v `tests/unit/extract-zip-14482-exposure.test.ts` odmítají jeho opětovné zavedení a nadále zakazují importy z produkčního kódu.
+Po upgradu připnutého vývojového nástroje promptfoo již kořenový soubor zámku neobsahuje `extract-zip` ani okraj závislostí. Tím se zruší dříve přijatý řetězec `promptfoo` → `@openai/codex-security` → `extract-zip` sledovaný v #14482. Regresní kontroly v `tests/unit/extract-zip-14482-exposure.test.ts` odmítají jeho znovuzavedení a zachovávají zákaz dovozu z výrobního kódu.
 
-Aktuální oprava závislostí zahrnuje přepsání kvůli kompatibilitě pro klienta MSAL služby Azure identity, klienta FTP balíčku get-uri a knihovnu Zod v obou balíčcích pluginu OpenCode. Získávání tokenů Azure a načítání přes FTP jsou testovány pomocí řízených přenosových vrstev; oba balíčky OpenCode spouštějí vlastní sady sestavení a testů. Počty upozornění registru jsou měření k určitému časovému okamžiku a po potvrzení souboru lockfile se mohou změnit.
+Aktuální oprava závislostí také zahrnuje přepsání kompatibility pro klienta MSAL Azure identity a klienta FTP get-uri. Získávání tokenů Azure a načítání FTP se testují s řízenými přenosy; oba balíčky OpenCode mají své vlastní sestavy a testovací sady. Poradní počty registru jsou měření v určitém okamžiku a mohou se změnit po potvrzení souboru zámku.
 
 ## Backlog: Doporučení Scorecard → blokování
 

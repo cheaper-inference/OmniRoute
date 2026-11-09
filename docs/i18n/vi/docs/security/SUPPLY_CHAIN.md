@@ -44,11 +44,11 @@ mã thoát 0, nhưng điều này không xác nhận rằng các dependency đã
 chặn cũng yêu cầu phép đo thành công: công cụ không khả dụng, job thất bại
 và thiếu bằng chứng về image không thể chứng nhận một image là sạch.
 
-## Rủi ro từ dependency đã ngừng sử dụng
+## Rủi ro phụ thuộc khi nghỉ hưu
 
-Lockfile gốc không còn bao gồm `extract-zip` hoặc cạnh dependency dẫn đến nó sau khi nâng cấp công cụ phát triển promptfoo được ghim phiên bản. Thay đổi này loại bỏ chuỗi `promptfoo` → `@openai/codex-security` → `extract-zip` đã được chấp nhận trước đây và được theo dõi trong #14482. Các kiểm tra hồi quy trong `tests/unit/extract-zip-14482-exposure.test.ts` ngăn việc đưa dependency này trở lại, đồng thời duy trì lệnh cấm import nó từ mã production.
+Tệp khóa gốc không còn bao gồm `extract-zip` hoặc cạnh phụ thuộc vào nó sau khi nâng cấp công cụ phát triển nhắc nhở được ghim. Điều này sẽ loại bỏ chuỗi `promptfoo` → `@openai/codex-security` → `extract-zip` đã được chấp nhận trước đó được theo dõi trong #14482. Kiểm tra hồi quy trong `tests/unit/extract-zip-14482-exposure.test.ts` từ chối việc giới thiệu lại nó và giữ nguyên lệnh cấm nhập khẩu từ mã sản xuất.
 
-Việc sửa chữa các phần phụ thuộc hiện tại bao gồm các cơ chế ghi đè tương thích cho ứng dụng khách MSAL của Azure identity, ứng dụng khách FTP của get-uri và Zod trong cả hai gói plugin OpenCode. Quá trình lấy token Azure và truy xuất qua FTP được kiểm thử bằng các phương thức truyền tải có kiểm soát; cả hai gói OpenCode đều chạy bộ quy trình build và kiểm thử riêng. Số lượng cảnh báo từ registry là các phép đo tại một thời điểm và có thể thay đổi sau khi lockfile được commit.
+Bản sửa lỗi phụ thuộc hiện tại cũng có phạm vi ghi đè khả năng tương thích với ứng dụng khách MSAL của Azure nhận dạng và ứng dụng khách FTP của get-uri. Việc thu thập mã thông báo Azure và truy xuất FTP được thử nghiệm bằng các phương thức vận chuyển có kiểm soát; cả hai gói OpenCode đều chạy bộ thử nghiệm và xây dựng riêng. Số lượng tư vấn đăng ký là số đo tại một thời điểm và có thể thay đổi sau khi tệp khóa được cam kết.
 
 ## Backlog: Cảnh báo Scorecard → chặn
 

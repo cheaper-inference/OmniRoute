@@ -361,19 +361,19 @@ Malli: cc/claude-opus-4-7
 ```bash
 npm install -g omniroute
 
-# Luo määrityshakemisto
+# Create config directory
 mkdir -p ~/.omniroute
 
-# Luo .env-tiedosto (katso .env.example)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# Käynnistä palvelin
+# Start server
 omniroute
-# Tai mukautetulla portilla:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI lataa `.env`-tiedoston automaattisesti sijainnista `~/.omniroute/.env` tai `./.env`.
+CLI lataa `.env` automaattisesti `~/.omniroute/.env` tai `./.env`. Työhakemiston `./.env` voi asettaa vain lyhyen sallittujen näppäinluettelon (portit, `REQUIRE_API_KEY`, alue- ja väriasetukset); laita kaikki muu `~/.omniroute/.env`. Katso [CLI käynnistyssopimukset](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### Ilmoitusaluetila
 

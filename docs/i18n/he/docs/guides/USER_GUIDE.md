@@ -355,24 +355,24 @@ codex "your prompt"
 
 ## 🚀 פריסה
 
-### התקנת npm גלובלית (מומלץ)
+### התקנה גלובלית npm (מומלץ)
 
 ```bash
 npm install -g omniroute
 
-# יצירת תיקיית תצורה
+# Create config directory
 mkdir -p ~/.omniroute
 
-# יצירת קובץ .env (ראו .env.example)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# הפעלת השרת
+# Start server
 omniroute
-# או עם יציאה מותאמת אישית:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-ה-CLI טוען אוטומטית את `.env` מתוך `~/.omniroute/.env` או `./.env`.
+ה- CLI טוען אוטומטית `.env` מ- `~/.omniroute/.env` או `./.env`. `./.env` בספריית העבודה עשויה להגדיר רק רשימת הרשאות קצרה של מפתחות (יציאות, `REQUIRE_API_KEY`, מיקום והגדרות צבע); שים את כל השאר ב- `~/.omniroute/.env`. ראה [חוזי השקה של CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### מצב מגש מערכת
 

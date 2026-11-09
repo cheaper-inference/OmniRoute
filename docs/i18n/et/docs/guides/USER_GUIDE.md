@@ -354,24 +354,24 @@ Model: cc/claude-opus-4-7
 
 ## 🚀 Juurutamine
 
-### Globaalne npm-paigaldus (soovitatav)
+### Globaalne npm installimine (soovitatav)
 
 ```bash
 npm install -g omniroute
 
-# Loo konfiguratsioonikataloog
+# Create config directory
 mkdir -p ~/.omniroute
 
-# Loo .env fail (vaata .env.example)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# Käivita server
+# Start server
 omniroute
-# Või kohandatud pordiga:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI laadib automaatselt faili `.env` asukohast `~/.omniroute/.env` või `./.env`.
+CLI laadib `.env` automaatselt `~/.omniroute/.env` või `./.env`. Töökataloogis olev `./.env` võib määrata vaid lühikese lubatud võtmete loendi (pordid, `REQUIRE_API_KEY`, lokaadi ja värvi sätted); pane kõik muu `~/.omniroute/.env` sse. Vaadake [CLI käivituslepinguid](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### Salveraadi (tray) režiim
 

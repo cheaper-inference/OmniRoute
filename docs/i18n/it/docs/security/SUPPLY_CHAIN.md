@@ -52,15 +52,11 @@ codice di uscita 0, il che non dimostra che le dipendenze abbiano superato la sc
 Trivy bloccante richiede una misurazione riuscita: strumenti non disponibili, job non riusciti
 e prove mancanti relative all'immagine non possono certificare un'immagine come pulita.
 
-## Rischio relativo a dipendenze ritirate
+## Rischio di dipendenza dei pensionati
 
-Il lockfile radice non include più `extract-zip` né una relazione di dipendenza verso di esso dopo
-l'aggiornamento dello strumento di sviluppo promptfoo con versione fissata. Questo elimina la catena
-`promptfoo` → `@openai/codex-security` → `extract-zip`, precedentemente accettata
-e tracciata in #14482. I controlli di regressione in `tests/unit/extract-zip-14482-exposure.test.ts`
-ne impediscono la reintroduzione e mantengono il divieto di importazione dal codice di produzione.
+Il file di lock root non include più `extract-zip` o un bordo di dipendenza dopo l'aggiornamento dello strumento di sviluppo promptfoo bloccato. Questo ritira la catena `promptfoo` → `@openai/codex-security` → `extract-zip` precedentemente accettata e tracciata in #14482. I controlli di regressione in `tests/unit/extract-zip-14482-exposure.test.ts` ne respingono la reintroduzione e mantengono il divieto di importazione da codice di produzione.
 
-L'attuale correzione delle dipendenze include override di compatibilità per il client MSAL di Azure Identity, il client FTP di get-uri e Zod in entrambi i pacchetti plugin OpenCode. L'acquisizione dei token Azure e il recupero tramite FTP vengono testati con trasporti controllati; entrambi i pacchetti OpenCode eseguono le proprie suite di compilazione e test. I conteggi degli avvisi del registro sono rilevazioni effettuate in un determinato momento e possono cambiare dopo il commit del lockfile.
+L'attuale ripristino delle dipendenze copre anche l'ambito delle sostituzioni di compatibilità con il client MSAL dell'identità di Azure e il client FTP di get-uri. L'acquisizione dei token di Azure e il recupero FTP vengono testati con trasporti controllati; entrambi i pacchetti OpenCode eseguono le proprie suite di build e test. I conteggi consultivi del registro sono misurazioni in un determinato momento e possono cambiare dopo il commit del file di blocco.
 
 ## Backlog: Avviso Scorecard → bloccante
 

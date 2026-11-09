@@ -346,24 +346,24 @@ API কী: [ড্যাশবোর্ড থেকে]
 
 ## 🚀 ডিপ্লয়মেন্ট
 
-### গ্লোবাল npm ইনস্টল (প্রস্তাবিত)
+### গ্লোবাল এনপিএম ইনস্টল (প্রস্তাবিত)
 
 ```bash
 npm install -g omniroute
 
-# কনফিগারেশন ডিরেক্টরি তৈরি করুন
+# Create config directory
 mkdir -p ~/.omniroute
 
-# .env ফাইল তৈরি করুন (.env.example দেখুন)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# সার্ভার চালু করুন
+# Start server
 omniroute
-# অথবা কাস্টম পোর্টসহ:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI স্বয়ংক্রিয়ভাবে `~/.omniroute/.env` অথবা `./.env` থেকে `.env` লোড করে।
+CLI স্বয়ংক্রিয়ভাবে `~/.omniroute/.env` বা `./.env` থেকে `.env` লোড করে। ওয়ার্কিং ডাইরেক্টরিতে একটি `./.env` শুধুমাত্র কীগুলির একটি সংক্ষিপ্ত অনুমোদিত তালিকা সেট করতে পারে (পোর্ট, `REQUIRE_API_KEY`, লোকেল এবং রঙ সেটিংস); অন্য সবকিছু `~/.omniroute/.env` এ রাখুন। [CLI লঞ্চ চুক্তি](CLI-LAUNCH-CONTRACTS.md#working-directory-env) দেখুন।
 
 ### ট্রে মোড
 

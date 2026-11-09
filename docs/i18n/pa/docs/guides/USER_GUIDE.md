@@ -352,24 +352,24 @@ API ਕੁੰਜੀ: [ਡੈਸ਼ਬੋਰਡ ਤੋਂ]
 
 ## 🚀 ਡਿਪਲੌਇਮੈਂਟ
 
-### ਗਲੋਬਲ npm ਇੰਸਟਾਲੇਸ਼ਨ (ਸਿਫ਼ਾਰਸ਼ੀ)
+### ਗਲੋਬਲ npm ਸਥਾਪਨਾ (ਸਿਫਾਰਸ਼ੀ)
 
 ```bash
 npm install -g omniroute
 
-# ਸੰਰਚਨਾ ਡਾਇਰੈਕਟਰੀ ਬਣਾਓ
+# Create config directory
 mkdir -p ~/.omniroute
 
-# .env ਫ਼ਾਈਲ ਬਣਾਓ (.env.example ਵੇਖੋ)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# ਸਰਵਰ ਸ਼ੁਰੂ ਕਰੋ
+# Start server
 omniroute
-# ਜਾਂ ਕਸਟਮ ਪੋਰਟ ਨਾਲ:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI ਆਪਣੇ-ਆਪ `.env` ਨੂੰ `~/.omniroute/.env` ਜਾਂ `./.env` ਤੋਂ ਲੋਡ ਕਰਦਾ ਹੈ।
+CLI ਆਪਣੇ ਆਪ `.env` `~/.omniroute/.env` ਜਾਂ `./.env` ਤੋਂ ਲੋਡ ਕਰਦਾ ਹੈ। ਵਰਕਿੰਗ ਡਾਇਰੈਕਟਰੀ ਵਿੱਚ ਇੱਕ `./.env` ਕੁੰਜੀਆਂ (ਪੋਰਟ, `REQUIRE_API_KEY`, ਲੋਕੇਲ ਅਤੇ ਰੰਗ ਸੈਟਿੰਗਾਂ) ਦੀ ਸਿਰਫ ਇੱਕ ਛੋਟੀ ਅਨੁਮਤੀ ਸੂਚੀ ਸੈਟ ਕਰ ਸਕਦਾ ਹੈ; ਬਾਕੀ ਸਭ ਕੁਝ `~/.omniroute/.env` ਵਿੱਚ ਪਾਓ। [CLI ਲਾਂਚ ਕੰਟਰੈਕਟ](CLI-LAUNCH-CONTRACTS.md#working-directory-env) ਦੇਖੋ।
 
 ### ਟਰੇ ਮੋਡ
 

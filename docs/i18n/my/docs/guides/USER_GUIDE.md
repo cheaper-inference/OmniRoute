@@ -350,19 +350,19 @@ API သော့: [ဒက်ရှ်ဘုတ်မှ]
 ```bash
 npm install -g omniroute
 
-# ဖွဲ့စည်းမှုလမ်းညွှန်ကို ဖန်တီးပါ
+# Create config directory
 mkdir -p ~/.omniroute
 
-# .env ဖိုင်ကို ဖန်တီးပါ (.env.example ကို ကြည့်ပါ)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# ဆာဗာကို စတင်ပါ
+# Start server
 omniroute
-# သို့မဟုတ် စိတ်ကြိုက် port ဖြင့်:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI သည် `~/.omniroute/.env` သို့မဟုတ် `./.env` မှ `.env` ကို အလိုအလျောက် ဖွင့်ပေးသည်။
+CLI သည် `.env` `~/.omniroute/.env` သို့မဟုတ် `./.env` မှ အလိုအလျောက်တင်ပေးသည်။ အလုပ်လုပ်သောလမ်းညွှန်ရှိ `./.env` သည် သော့များ၏ခွင့်ပြုချက်စာရင်းတို (ports၊ `REQUIRE_API_KEY`၊ ဒေသနှင့် အရောင်ဆက်တင်များ) ကိုသာ သတ်မှတ်နိုင်သည်။ အခြားအရာအားလုံးကို `~/.omniroute/.env` တွင်ထည့်ပါ။ [CLI မိတ်ဆက်စာချုပ်များကို](CLI-LAUNCH-CONTRACTS.md#working-directory-env) ကြည့်ပါ။
 
 ### Tray မုဒ်
 

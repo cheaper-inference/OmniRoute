@@ -316,7 +316,7 @@ GET /v1/embeddings
 
 ---
 
-## ಚಿತ್ರ ರಚನೆ
+## ಇಮೇಜ್ ಜನರೇಷನ್
 
 ```bash
 POST /v1/images/generations
@@ -330,35 +330,22 @@ Content-Type: application/json
 }
 ```
 
-ಲಭ್ಯವಿರುವ providerಗಳಲ್ಲಿ OpenAI (GPT Image 2), xAI (Grok Image), Together AI (FLUX), Fireworks AI, Nebius (FLUX), Hyperbolic, NanoBanana, **OpenRouter**, **ZenMux**, SD WebUI (ಸ್ಥಳೀಯ), ComfyUI (ಸ್ಥಳೀಯ) ಸೇರಿವೆ.
+ಲಭ್ಯವಿರುವ ಪೂರೈಕೆದಾರರು OpenAI (GPT ಚಿತ್ರ 2), xAI (Grok ಚಿತ್ರ), Together AI (FLUX), Fireworks AI, Nebius (FLUX), ಹೈಪರ್ಬೋಲಿಕ್, NanoBanana,**OpenRouter** ,**ZenMux** , SD WebUI (ಸ್ಥಳೀಯ), ComfyUI (ಸ್ಥಳೀಯ).
 
-`n` `data[]` ನಲ್ಲಿ `n` ಚಿತ್ರಗಳನ್ನು ಹಿಂತಿರುಗಿಸುತ್ತದೆ. upstream API ಪ್ರತಿ ಕರೆಯಲ್ಲಿ ಒಂದು ಚಿತ್ರವನ್ನು ಹಿಂತಿರುಗಿಸುವ providerಗಳಿಗೆ
-(Black Forest Labs, Stability AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik,
-NVIDIA NIM, Cloudflare Workers AI) ಗರಿಷ್ಠ 4 ಕರೆಗಳು ಒಂದೇ ಸಮಯದಲ್ಲಿ ನಡೆಯುವಂತೆ, `n` ಪ್ರತ್ಯೇಕ upstream ಕರೆಗಳನ್ನು ಮಾಡಲಾಗುತ್ತದೆ. ಸ್ಥಿರ
-`seed` ಅನ್ನು ಕರೆ ಸೂಚ್ಯಂಕದಿಂದ (`seed`, `seed + 1`, …) offset ಮಾಡಲಾಗುತ್ತದೆ; ಹೀಗಾಗಿ ಚಿತ್ರಗಳು ವಿಭಿನ್ನವಾಗಿದ್ದರೂ ಪುನರುತ್ಪಾದಿಸಬಹುದಾಗಿರುತ್ತವೆ. `n` ಗರಿಷ್ಠ 10ಕ್ಕೆ ಸೀಮಿತವಾಗಿದೆ. ಯಾವುದೇ ಕರೆ ವಿಫಲವಾದರೆ ಸಂಪೂರ್ಣ ವಿನಂತಿಯೇ ವಿಫಲವಾಗುತ್ತದೆ. Fan-out formatಗಳ ಪಟ್ಟಿಯು
-`open-sse/handlers/imageGeneration/fanOut.ts` ನಲ್ಲಿರುವ `SINGLE_IMAGE_FANOUT_FORMATS` ಆಗಿದೆ.
+`n` `n` ಚಿತ್ರಗಳನ್ನು `data[]` ನಲ್ಲಿ ಹಿಂತಿರುಗಿಸುತ್ತದೆ. ಅಪ್ಸ್ಟ್ರೀಮ್ API ಪ್ರತಿ ಕರೆಗೆ ಒಂದು ಚಿತ್ರವನ್ನು ಹಿಂತಿರುಗಿಸುವ ಪೂರೈಕೆದಾರರು (ಬ್ಲ್ಯಾಕ್ ಫಾರೆಸ್ಟ್ ಲ್ಯಾಬ್ಸ್, ಸ್ಟೆಬಿಲಿಟಿ AI, ಲಿಯೊನಾರ್ಡೊ, ಐಡಿಯೊಗ್ರಾಮ್, ಹೈಪರ್, ಹೈಪರ್ಬೋಲಿಕ್, Magnific/Freepik, NVIDIA NIM, Cloudflare ವರ್ಕರ್ಸ್ AI) ಗರಿಷ್ಠ 4 ವಿಮಾನಗಳಲ್ಲಿ `n` ಪ್ರತ್ಯೇಕ ಅಪ್ಸ್ಟ್ರೀಮ್ ಕರೆಗಳನ್ನು ಪಡೆಯುತ್ತಾರೆ. ಸ್ಥಿರ `seed` ಕರೆ ಸೂಚ್ಯಂಕದಿಂದ ಸರಿದೂಗಿಸಲಾಗುತ್ತದೆ (`seed`, `seed + 1`, …), ಆದ್ದರಿಂದ ಚಿತ್ರಗಳು ಭಿನ್ನವಾಗಿರುತ್ತವೆ ಆದರೆ ಪುನರುತ್ಪಾದಿಸಲ್ಪಡುತ್ತವೆ. `n` ಅನ್ನು 10 ಕ್ಕೆ ಮಿತಿಗೊಳಿಸಲಾಗಿದೆ. ಯಾವುದೇ ಕರೆ ವಿಫಲವಾದರೆ ವಿನಂತಿಯು ಒಟ್ಟಾರೆಯಾಗಿ ವಿಫಲಗೊಳ್ಳುತ್ತದೆ. ಫ್ಯಾನ್-ಔಟ್ ಫಾರ್ಮ್ಯಾಟ್ಗಳ ಪಟ್ಟಿಯು `open-sse/handlers/imageGeneration/fanOut.ts` ನಲ್ಲಿ `SINGLE_IMAGE_FANOUT_FORMATS` ಆಗಿದೆ.
 
-ZenMux ಈಗಿರುವ API-key ಸಂಪರ್ಕವನ್ನು ಮರುಬಳಕೆ ಮಾಡುತ್ತದೆ ಮತ್ತು `zenmux/` ಅಥವಾ `zm/` prefixಗಳನ್ನು ಸ್ವೀಕರಿಸುತ್ತದೆ:
+ZenMux ಅಸ್ತಿತ್ವದಲ್ಲಿರುವ API-ಕೀ ಸಂಪರ್ಕವನ್ನು ಮರುಬಳಕೆ ಮಾಡುತ್ತದೆ ಮತ್ತು `zenmux/` ಅಥವಾ `zm/` ಪೂರ್ವಪ್ರತ್ಯಯಗಳನ್ನು ಸ್ವೀಕರಿಸುತ್ತದೆ:
 
-- `zenmux/openai/gpt-image-2` ZenMux ನ OpenAI Images API ಅನ್ನು ಬಳಸುತ್ತದೆ. ಆಯ್ಕೆಗಳಲ್ಲಿ `size`,
-  `quality`, `n`, `output_format`, `output_compression`, `background`, ಮತ್ತು `response_format` ಸೇರಿವೆ.
-- `zm/meta/muse-image-1.0` ನಂತಹ ಇತರ publisherಗಳು ZenMux ನ Vertex AI `:predict`
-  endpoint ಅನ್ನು ಬಳಸುತ್ತವೆ. `n` ಅನ್ನು `sampleCount` ಗೆ, `aspect_ratio` ಅನ್ನು `aspectRatio` ಗೆ, ಮತ್ತು `image_size`
-  (`1K`, `2K`, `4K`) ಅನ್ನು `sampleImageSize` ಗೆ mapping ಮಾಡಲಾಗುತ್ತದೆ. pixel `size` ಕೇವಲ aspect ratio ಅನ್ನು ಒದಗಿಸುತ್ತದೆ;
-  ಖಚಿತವಾದ pixel ಆಯಾಮಗಳನ್ನು ಖಚಿತಪಡಿಸುವುದಿಲ್ಲ. ಬೆಂಬಲಿತ ratios, resolutions, ಮತ್ತು counts ಮಾದರಿಯ ಪ್ರಕಾರ ಬದಲಾಗುತ್ತವೆ.
-- `zm/inclusionai/ming-image-0.1-design` ತನ್ನದೇ ಆದ ಆಯಾಮಗಳನ್ನು ಆಯ್ಕೆಮಾಡುತ್ತದೆ. `size`,
-  `aspect_ratio`, ಮತ್ತು `image_size` ಅನ್ನು ಬಿಟ್ಟುಬಿಡಿ; ಸ್ಪಷ್ಟ ಮೌಲ್ಯಗಳನ್ನು ನೀಡಿದರೆ HTTP 400 ಹಿಂತಿರುಗುತ್ತದೆ. `output_format` ಬಳಸಿ
-  PNG, JPEG, ಮತ್ತು WebP ಅನ್ನು ವಿನಂತಿಸಬಹುದು.
+- `zenmux/openai/gpt-image-2` ZenMux ನ OpenAI ಚಿತ್ರಗಳನ್ನು API ಬಳಸುತ್ತದೆ. ಆಯ್ಕೆಗಳಲ್ಲಿ `size`, `quality`, `n`, `output_format`, `output_compression`, `background`, ಮತ್ತು `response_format` ಸೇರಿವೆ.
+- `zm/meta/muse-image-1.0` ನಂತಹ ಇತರ ಪ್ರಕಾಶಕರು ZenMux ನ ವರ್ಟೆಕ್ಸ್ AI `:predict` ಅಂತ್ಯಬಿಂದುವನ್ನು ಬಳಸುತ್ತಾರೆ. `n` ನಕ್ಷೆಗಳು `sampleCount` ಗೆ, `aspect_ratio` ನಿಂದ `aspectRatio` ಗೆ ಮತ್ತು `image_size` (`1K`, `2K`, `4K`) ಗೆ `sampleImageSize`. ಪಿಕ್ಸೆಲ್ `size` ಕೇವಲ ಆಕಾರ ಅನುಪಾತವನ್ನು ಪೂರೈಸುತ್ತದೆ, ಪಿಕ್ಸೆಲ್ ಆಯಾಮಗಳನ್ನು ಖಾತರಿಪಡಿಸುವುದಿಲ್ಲ. ಬೆಂಬಲಿತ ಅನುಪಾತಗಳು, ನಿರ್ಣಯಗಳು ಮತ್ತು ಎಣಿಕೆಗಳು ಮಾದರಿಯಿಂದ ಬದಲಾಗುತ್ತವೆ.
+- `zm/inclusionai/ming-image-0.1-design` ತನ್ನದೇ ಆದ ಆಯಾಮಗಳನ್ನು ಆರಿಸಿಕೊಳ್ಳುತ್ತದೆ. `size`, `aspect_ratio` ಮತ್ತು `image_size` ಅನ್ನು ಬಿಟ್ಟುಬಿಡಿ; ಸ್ಪಷ್ಟ ಮೌಲ್ಯಗಳು HTTP 400 ಹಿಂತಿರುಗಿಸುತ್ತವೆ. PNG, JPEG, ಮತ್ತು WebP `output_format` ನೊಂದಿಗೆ ವಿನಂತಿಸಬಹುದು.
 
-ಈ integration text-to-image generation ಅನ್ನು ಬೆಂಬಲಿಸುತ್ತದೆ; reference-image editing ಅನ್ನು ಅಲ್ಲ. Vertex
-output ಅನ್ನು `data[].b64_json` ಗೆ normalize ಮಾಡಲಾಗುತ್ತದೆ; `response_format: "url"` upstream
-HTTPS URL ಅನ್ನು ಹಿಂತಿರುಗಿಸುತ್ತದೆ, ಅಥವಾ image bytes ಮಾತ್ರ ಲಭ್ಯವಿದ್ದಾಗ base64 data URL ಅನ್ನು ಹಿಂತಿರುಗಿಸುತ್ತದೆ. ಖಾಲಿ/filtered outputs
-ಖಾಲಿ success ನೀಡುವ ಬದಲು error ಅನ್ನು ಹಿಂತಿರುಗಿಸುತ್ತವೆ. Model access ZenMux ಖಾತೆಯ ಮೇಲೆ ಅವಲಂಬಿತವಾಗಿದೆ.
-[ZenMux ನ Vertex API](https://docs.zenmux.ai/api/vertexai/generate-images) ಮತ್ತು
-[OpenAI Images API](https://docs.zenmux.ai/api/openai/generate-an-image) ನೋಡಿ.
+ಈ ಏಕೀಕರಣವು ಪಠ್ಯದಿಂದ ಚಿತ್ರ ರಚನೆಯನ್ನು ಬೆಂಬಲಿಸುತ್ತದೆ, ಉಲ್ಲೇಖ-ಚಿತ್ರ ಸಂಪಾದನೆ ಅಲ್ಲ. ವರ್ಟೆಕ್ಸ್ ಔಟ್ಪುಟ್ ಅನ್ನು `data[].b64_json` ಗೆ ಸಾಮಾನ್ಯಗೊಳಿಸಲಾಗಿದೆ; ಚಿತ್ರ ಬೈಟ್ಗಳು ಮಾತ್ರ ಲಭ್ಯವಿದ್ದಾಗ `response_format: "url"` ಅಪ್ಸ್ಟ್ರೀಮ್ HTTPS URL ಅಥವಾ ಬೇಸ್64 ಡೇಟಾ URL ಹಿಂತಿರುಗಿಸುತ್ತದೆ. Empty/filtered ಔಟ್ಪುಟ್ಗಳು ಖಾಲಿ ಯಶಸ್ಸಿಗಿಂತ ದೋಷವನ್ನು ಹಿಂತಿರುಗಿಸುತ್ತವೆ. ಮಾದರಿ ಪ್ರವೇಶವು ZenMux ಖಾತೆಯನ್ನು ಅವಲಂಬಿಸಿರುತ್ತದೆ. [ZenMux ನ ವರ್ಟೆಕ್ಸ್ API](https://docs.zenmux.ai/api/vertexai/generate-images) ಮತ್ತು [OpenAI ಚಿತ್ರಗಳನ್ನು ನೋಡಿ API](https://docs.zenmux.ai/api/openai/generate-an-image).
+
+Microsoft 365 Copilot ಸೈನ್-ಇನ್ ಸಂಪರ್ಕವು Copilot ನ ಬಿಲ್ಟ್-ಇನ್ ಇಮೇಜ್ ಟೂಲ್ ಮೂಲಕ `copilot-m365-web/m365-copilot-image` ಸೇವೆ ಸಲ್ಲಿಸುತ್ತದೆ: ಪ್ರತಿ ಚಿತ್ರಕ್ಕೆ ಒಂದು Copilot ತಿರುವು (`n` 1–4), `size` ಸ್ಟೀರಿಂಗ್ ಮಾತ್ರ ಓರಿಯಂಟೇಶನ್, ಮತ್ತು ಚಿತ್ರಗಳು ಇನ್ಲೈನ್ಗೆ ಹಿಂತಿರುಗುತ್ತವೆ (`b64_json`, ಅಥವಾ `response_format: "url"` ಗಾಗಿ ಡೇಟಾ URL ). [Microsoft 365 Copilot](../providers/COPILOT-M365.md#image-generation) ನೋಡಿ.
 
 ```bash
-# ಎಲ್ಲಾ ಚಿತ್ರ ಮಾದರಿಗಳನ್ನು ಪಟ್ಟಿ ಮಾಡಿ
+# List all image models
 GET /v1/images/generations
 ```
 
@@ -786,17 +773,19 @@ OpenAI-ಹೊಂದಾಣಿಕೆಯ ಬ್ಯಾಚ್ ಪ್ರಕ್ರಿ�
 
 ---
 
-## ಹುಡುಕಾಟ API
+## API ಹುಡುಕಿ
 
-ವೆಬ್/ಹುಡುಕಾಟ ಪೂರೈಕೆದಾರರ ಅಮೂರ್ತೀಕರಣ (Tavily, Brave, Exa, Serper ಇತ್ಯಾದಿ).
+Web/search ಪೂರೈಕೆದಾರರ ಅಮೂರ್ತತೆ (ಟವಿಲಿ, ಬ್ರೇವ್, ಎಕ್ಸಾ, ಸರ್ಪರ್, ಇತ್ಯಾದಿ).
 
-| ವಿಧಾನ | ಮಾರ್ಗ                  | ವಿವರಣೆ                                                                                                        |
-| ----- | ---------------------- | ------------------------------------------------------------------------------------------------------------- |
-| GET   | `/v1/search`           | ಕಾನ್ಫಿಗರ್ ಮಾಡಿರುವ ಹುಡುಕಾಟ ಪೂರೈಕೆದಾರರು + ಸಾಮರ್ಥ್ಯಗಳ ಪಟ್ಟಿ                                                      |
-| POST  | `/v1/search`           | ಹುಡುಕಾಟ ಪ್ರಶ್ನೆಯನ್ನು ನಡೆಸಿ — ಬಾಡಿಯನ್ನು `v1SearchSchema` ಮೂಲಕ ಮಾನ್ಯಗೊಳಿಸಲಾಗುತ್ತದೆ, ಕ್ಯಾಶಿಂಗ್/ಕೋಯಲಸಿಂಗ್ಗೆ ಬೆಂಬಲ |
-| GET   | `/v1/search/analytics` | ಪ್ರತಿ ಪೂರೈಕೆದಾರರ ಹಿಟ್/ವಿಳಂಬ/ಕ್ಯಾಶ್ ಅಂಕಿಅಂಶಗಳು                                                                 |
+| ವಿಧಾನ | ಮಾರ್ಗ                  | ವಿವರಣೆ                                                                                                    |
+| ----- | ---------------------- | --------------------------------------------------------------------------------------------------------- |
+| GET   | `/v1/search`           | ಕಾನ್ಫಿಗರ್ ಮಾಡಲಾದ ಹುಡುಕಾಟ ಪೂರೈಕೆದಾರರ + ಸಾಮರ್ಥ್ಯಗಳನ್ನು ಪಟ್ಟಿ ಮಾಡಿ                                           |
+| POST  | `/v1/search`           | `v1SearchSchema` ನಿಂದ ಮೌಲ್ಯೀಕರಿಸಲಾದ ಹುಡುಕಾಟ ಪ್ರಶ್ನೆ — ದೇಹವನ್ನು ರನ್ ಮಾಡಿ, caching/coalescing ಬೆಂಬಲಿಸುತ್ತದೆ |
+| GET   | `/v1/search/analytics` | ಪ್ರತಿ-ಒದಗಿಸುವವರ hit/latency/cache ಅಂಕಿಅಂಶಗಳು                                                              |
 
-**ದೃಢೀಕರಣ:** Bearer API ಕೀ (`extractApiKey` + `isValidApiKey`). ಹುಡುಕಾಟ ನೀತಿಯನ್ನು `enforceApiKeyPolicy` ಮೂಲಕ ಜಾರಿಗೊಳಿಸಲಾಗುತ್ತದೆ.
+**ದೃಢೀಕರಣ:** ಬೇರರ್ API ಕೀ (`extractApiKey` + `isValidApiKey`). ಹುಡುಕಾಟ ನೀತಿಯನ್ನು `enforceApiKeyPolicy` ಮೂಲಕ ಜಾರಿಗೊಳಿಸಲಾಗಿದೆ.
+
+**Auto-select:** without `provider`, the cheapest provider with a configured connection runs first and the next cheapest is the failover. Free last-resort providers (`duckduckgo-free`) are used only when nothing else is configured. A self-hosted SearXNG counts as configured once its connection stores a real `baseUrl` (not the catalog default `http://localhost:8888/search`): it then ranks as a $0 provider ahead of keyed ones, with the cheapest keyed provider as failover, including when SearXNG answers 400, 401, 403 or 404. A `baseUrl` that is not a valid `http(s)` URL or that points at a cloud-metadata address does not count. A SearXNG connection that stores a token ranks this way only over `https://` or loopback `http://`. Over remote plain `http://` it is never a failover and stays a last resort, used only when no other provider is configured or when requested by name, so it does send the token in cleartext in those two cases.
 
 ### Exa ಮತ್ತು Tavily `provider_options`
 
@@ -969,31 +958,28 @@ server ವಿರುದ್ಧ end-to-end validate ಮಾಡಲಾಗಿದೆ: Ch
 
 ---
 
-## ಸ್ವಯಂ-ಸೇವಾ ಬಳಕೆ (`/api/usage/om-usage`)
+## ಸ್ವಯಂ ಸೇವಾ ಬಳಕೆ (`/api/usage/om-usage`)
 
-ಯಾವುದೇ API key ತನ್ನದೇ ಆದ ಬಳಕೆ ಮತ್ತು ಕೋಟಾಗಳನ್ನು ಓದಬಹುದು — management auth ಅಗತ್ಯವಿಲ್ಲ. ಕೀಲಿ ಹೊಂದಿರುವವರ
-ಖರ್ಚನ್ನು ತೋರಿಸಲು client (CLI, OmniCopilot panel) ಬಳಸುವ endpoint ಇದಾಗಿದೆ.
+ಯಾವುದೇ API ಕೀ ಓದಬಹುದು**ತನ್ನದೇ ಆದ** ಬಳಕೆ ಮತ್ತು ಕೋಟಾಗಳು — ಯಾವುದೇ ನಿರ್ವಹಣೆ ದೃಢೀಕರಣವಿಲ್ಲ. ಕ್ಲೈಂಟ್ (CLI, OmniCopilot ಪ್ಯಾನೆಲ್) ಕೀ ಹೋಲ್ಡರ್ಗೆ ಅವರ ಖರ್ಚು ತೋರಿಸಲು ಬಳಸುವ ಅಂತಿಮ ಬಿಂದು ಇದು.
 
 ```bash
-# ಪಠ್ಯ ರೂಪ (ಐತಿಹಾಸಿಕ ಒಪ್ಪಂದ — terminal ಗಾಗಿ ಸರಳ ಪಠ್ಯ)
+# Text form (the historical contract — plain text for a terminal)
 curl -H "Authorization: Bearer <your-api-key>" \
   http://localhost:20128/api/usage/om-usage
 
-# ರಚನಾತ್ಮಕ ರೂಪ — UI ಬಳಸುವ ರೂಪ
+# Structured form — what a UI consumes
 curl -H "Authorization: Bearer <your-api-key>" \
   "http://localhost:20128/api/usage/om-usage?format=json"
 ```
 
-ಕೀಲಿಯಲ್ಲಿ **`allowUsageCommand`** ಸಕ್ರಿಯವಾಗಿರಬೇಕು (ಪೂರ್ವನಿಯೋಜಿತವಾಗಿ ನಿಷ್ಕ್ರಿಯ — dashboard ನ API-key
-manager ಇದನ್ನು ಪ್ರತಿ ಕೀಲಿಗೆ toggle ಮಾಡುತ್ತದೆ). ಇದು ಸಕ್ರಿಯವಾಗಿರದಿದ್ದರೆ endpoint `403` ಹಿಂತಿರುಗಿಸುತ್ತದೆ.
+ಕೀಲಿಯು ಹೊಂದಿರಬೇಕು**`allowUsageCommand`** ಸಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ (ಡೀಫಾಲ್ಟ್ ಆಗಿ ಆಫ್ — ಡ್ಯಾಶ್ಬೋರ್ಡ್ನ API-ಕೀ ಮ್ಯಾನೇಜರ್ ಪ್ರತಿ ಕೀಲಿಯನ್ನು ಟಾಗಲ್ ಮಾಡುತ್ತದೆ). ಇದು ಇಲ್ಲದೆ ಅಂತ್ಯಬಿಂದು `403` ಉತ್ತರಿಸುತ್ತದೆ.
 
-`?format=json` ಒಂದು discriminated shape ಅನ್ನು ಹಿಂತಿರುಗಿಸುತ್ತದೆ, ಆದ್ದರಿಂದ caller ಎಂದಿಗೂ refusal ನಿಂದ
-data field ಅನ್ನು ಓದುವುದಿಲ್ಲ. ಯಶಸ್ಸಿನ ಸಂದರ್ಭದಲ್ಲಿ:
+`?format=json` ತಾರತಮ್ಯದ ಆಕಾರವನ್ನು ಹಿಂದಿರುಗಿಸುತ್ತದೆ, ಆದ್ದರಿಂದ ಕರೆ ಮಾಡುವವರು ಎಂದಿಗೂ ನಿರಾಕರಣೆಯಿಂದ ಡೇಟಾ ಕ್ಷೇತ್ರವನ್ನು ಓದುವುದಿಲ್ಲ. ಯಶಸ್ಸಿನ ಮೇಲೆ:
 
 ```jsonc
 {
   "allowed": true,
-  // ಕೀಲಿಯು ಪ್ರತಿ-ಕೀ ಬಳಕೆ ಮಿತಿಗಳಿಗೆ (ದೈನಂದಿನ/ವಾರದ USD) opt in ಮಾಡಿದಾಗ ಮಾತ್ರ ಇರುತ್ತದೆ:
+  // present only when the key opted into per-key usage limits (daily/weekly/5-hour USD):
   "personal": {
     "dailySpentUsd": 1.25,
     "dailyLimitUsd": 5,
@@ -1002,9 +988,9 @@ data field ಅನ್ನು ಓದುವುದಿಲ್ಲ. ಯಶಸ್ಸಿನ
     "weeklyLimitUsd": 20,
     "weeklyResetAtIso": "…" /* … */,
   },
-  // ಆಯ್ಕೆಮಾಡಿದ provider quota snapshot, ಇನ್ನೂ ಯಾವುದನ್ನೂ cache ಮಾಡದಿದ್ದಾಗ null:
+  // the selected provider quota snapshot, or null when nothing is cached yet:
   "provider": { "connectionId": "…", "provider": "claude", "plan": "…", "quotas": {/* … */} },
-  // ಪ್ರತಿ connection ನ snapshot, ಇದರಿಂದ UI ಹಲವಾರು providers ಅನ್ನು ಪಕ್ಕಪಕ್ಕದಲ್ಲಿ ತೋರಿಸಬಹುದು:
+  // every connection's snapshot, so a UI can render several providers side by side:
   "providers": [
     { "connectionId": "…", "provider": "claude" /* … */ },
     { "provider": "codex" /* … */ },
@@ -1012,13 +998,9 @@ data field ಅನ್ನು ಓದುವುದಿಲ್ಲ. ಯಶಸ್ಸಿನ
 }
 ```
 
-ನಿರಾಕರಣೆಯ ಸಂದರ್ಭದಲ್ಲಿ (`401` ಕೆಟ್ಟ key / `403` ಅನುಮತಿಯಿಲ್ಲ) ಅದೇ route
-`{ "allowed": false, "error": { "message": "…" } }` ಅನ್ನು ಹಿಂತಿರುಗಿಸುತ್ತದೆ — ಖಾಲಿಯಾಗಿದ್ದರೂ ಇರುವ
-`personal`/`provider` (ಕೀಲಿ ಅನುಮತಿಸಲಾಗಿದೆ, ಆದರೆ ಇನ್ನೂ ಯಾವುದೇ ಮಾಹಿತಿ ಕಲಿತಿಲ್ಲ) ಎಂಬುದು ನಿರಾಕರಣೆಯಿಂದ
-ಬೇರೆ ಸ್ಥಿತಿ. ಈ ಎರಡನ್ನು ವಿಭೇದಿಸುವುದು JSON ರೂಪದಲ್ಲಷ್ಟೇ ಸಾಧ್ಯ.
+ನಿರಾಕರಣೆಯಲ್ಲಿ (`401` ಕೆಟ್ಟ ಕೀ / `403` ಅನುಮತಿಸಲಾಗಿಲ್ಲ) ಅದೇ ಮಾರ್ಗವು `{ "allowed": false, "error": { "message": "…" } }` — ಅನ್ನು ಪ್ರಸ್ತುತ-ಆದರೆ-ಖಾಲಿ `personal`/`provider` (ಕೀಲಿಯನ್ನು ಅನುಮತಿಸಲಾಗಿದೆ, ಇನ್ನೂ ಏನನ್ನೂ ಕಲಿತಿಲ್ಲ) ನಿರಾಕರಣೆಯಿಂದ ವಿಭಿನ್ನ ಸ್ಥಿತಿಯಾಗಿದೆ ಮತ್ತು JSON ಫಾರ್ಮ್ ಮಾತ್ರ ಅವುಗಳನ್ನು ಪ್ರತ್ಯೇಕಿಸುತ್ತದೆ.
 
-**ದೃಢೀಕರಣ:** caller ನ ಸ್ವಂತ Bearer API key, `isValidApiKey` ಮೂಲಕ ಮೌಲ್ಯೀಕರಿಸಲಾಗುತ್ತದೆ — ಇದು management
-surface (`/api/keys/…`) ಅಲ್ಲ; ಅದು `requireManagementAuth` ಹಿಂದೆ ಮುಂದುವರಿಯುತ್ತದೆ.
+**ದೃಢೀಕರಣ:** `isValidApiKey` — ಯೊಂದಿಗೆ ಮೌಲ್ಯೀಕರಿಸಲಾದ ಕಾಲರ್ನ ಸ್ವಂತ ಬೇರರ್ API ಕೀ, ಇದು _not_ ನಿರ್ವಹಣಾ ಮೇಲ್ಮೈ (`/api/keys/…`), ಇದು `requireManagementAuth` ಹಿಂದೆ ಇರುತ್ತದೆ.
 
 ### ಕಚ್ಚಾ ಮತ್ತು Cutoff-Adjusted ಕೋಟಾ ಶೇಕಡಾವಾರುಗಳು
 
@@ -1302,38 +1284,39 @@ precedence chainಗಳು.
 
 ### API ಕೀ ಅನುಮತಿಗಳು
 
-`PATCH /api/keys/{id}` ಅಸ್ತಿತ್ವದಲ್ಲಿರುವ ಕೀಯ ಅನುಮತಿಗಳನ್ನು ನವೀಕರಿಸುತ್ತದೆ. ಪ್ರತಿಯೊಂದು `/api/keys*` ಮಾರ್ಗದಂತೆ ಇದಕ್ಕೆ ನಿರ್ವಹಣಾ ದೃಢೀಕರಣದ ಅಗತ್ಯವಿದೆ ([ನಿರ್ವಹಣಾ ದೃಢೀಕರಣ](../guides/MANAGEMENT-AUTH.md) ನೋಡಿ), ಇನ್ಫರೆನ್ಸ್ ಕೀಯದ್ದಲ್ಲ. ನೀವು ಬದಲಾಯಿಸಲು ಬಯಸುವ ಕ್ಷೇತ್ರಗಳನ್ನು ಮಾತ್ರ ಕಳುಹಿಸಿ; ಅವುಗಳಲ್ಲಿ ಯಾವುದನ್ನೂ ಹೊಂದಿರದ ವಿನಂತಿಯನ್ನು `No valid fields to update` ಎಂಬ ಸಂದೇಶದೊಂದಿಗೆ ತಿರಸ್ಕರಿಸಲಾಗುತ್ತದೆ. ಸ್ವೀಕರಿಸಲಾದ ಕ್ಷೇತ್ರಗಳನ್ನು `src/shared/validation/schemas/keys.ts` ನಲ್ಲಿರುವ `updateKeyPermissionsSchema` ವ್ಯಾಖ್ಯಾನಿಸುತ್ತದೆ.
+`PATCH /api/keys/{id}` ಅಸ್ತಿತ್ವದಲ್ಲಿರುವ ಕೀಲಿಯ ಅನುಮತಿಗಳನ್ನು ನವೀಕರಿಸುತ್ತದೆ. ಪ್ರತಿಯೊಂದು `/api/keys*` ಮಾರ್ಗದಂತೆ ಇದಕ್ಕೆ ನಿರ್ವಹಣಾ ದೃಢೀಕರಣದ ಅಗತ್ಯವಿದೆ ( [ನಿರ್ವಹಣೆ ದೃಢೀಕರಣವನ್ನು](../guides/MANAGEMENT-AUTH.md) ನೋಡಿ), ಒಂದು ತೀರ್ಮಾನದ ಕೀ ಅಲ್ಲ. ನೀವು ಬದಲಾಯಿಸಲು ಬಯಸುವ ಕ್ಷೇತ್ರಗಳನ್ನು ಮಾತ್ರ ಕಳುಹಿಸಿ; ಅವುಗಳಲ್ಲಿ ಯಾವುದೂ ಇಲ್ಲದ ವಿನಂತಿಯನ್ನು `No valid fields to update` ಯೊಂದಿಗೆ ತಿರಸ್ಕರಿಸಲಾಗಿದೆ. ಸ್ವೀಕರಿಸಿದ ಕ್ಷೇತ್ರಗಳನ್ನು `src/shared/validation/schemas/keys.ts` ನಲ್ಲಿ `updateKeyPermissionsSchema` ನಿಂದ ವ್ಯಾಖ್ಯಾನಿಸಲಾಗಿದೆ.
 
-| ಕ್ಷೇತ್ರ                                     | ಪ್ರಕಾರ                                                                  | ಟಿಪ್ಪಣಿಗಳು                                                                                                                                       |
-| ------------------------------------------- | ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `name`                                      | ಸ್ಟ್ರಿಂಗ್, 1-200 ಅಕ್ಷರಗಳು                                               |                                                                                                                                                  |
-| `isActive`                                  | ಬೂಲಿಯನ್                                                                 |                                                                                                                                                  |
-| `isBanned`                                  | ಬೂಲಿಯನ್                                                                 |                                                                                                                                                  |
-| `expiresAt`                                 | ISO 8601 ದಿನಾಂಕ-ಸಮಯ ಅಥವಾ `null`                                         | `null` ಅವಧಿ ಮುಕ್ತಾಯವನ್ನು ತೆರವುಗೊಳಿಸುತ್ತದೆ                                                                                                        |
-| `modelAccessMode`                           | `all` \| `restricted`                                                   | ಮೋಡ್ `all` ಆಗಿರುವಾಗ `allowedModels` ಖಾಲಿಯಾಗಿರಬೇಕು                                                                                                |
-| `allowedModels`, `blockedModels`            | ಸ್ಟ್ರಿಂಗ್ಗಳ ಅರೇ, ಗರಿಷ್ಠ 1000                                            |                                                                                                                                                  |
-| `allowedCombos`                             | ಸ್ಟ್ರಿಂಗ್ಗಳ ಅರೇ, ಗರಿಷ್ಠ 500                                             | ಕೀ ಯಾವ ಕಾಂಬೊಗಳನ್ನು ಕರೆಯಬಹುದು ಎಂಬುದನ್ನು ನಿಯಂತ್ರಿಸುತ್ತದೆ; ನೇರ ಮಾದರಿಗಳನ್ನು `modelAccessMode` / `allowedModels` ನಿಯಂತ್ರಿಸುತ್ತವೆ                      |
-| `connectionAccessMode`                      | `all` \| `restricted`                                                   | `restricted` ಆಗಿರುವಾಗ `allowedConnections` ಖಾಲಿಯಾಗಿರಬಾರದು ಮತ್ತು `all` ಆಗಿರುವಾಗ ಖಾಲಿಯಾಗಿರಬೇಕು                                                     |
-| `allowedConnections`                        | UUID ಗಳ ಅರೇ, ಗರಿಷ್ಠ 100                                                 |                                                                                                                                                  |
-| `allowAutoCombos`                           | ಬೂಲಿಯನ್                                                                 | `false` ಈ ಕೀಯೊಂದಿಗೆ `auto/*` ಮಾದರಿಗಳ ವಿನಂತಿಗಳನ್ನು ತಿರಸ್ಕರಿಸುತ್ತದೆ; ಇದನ್ನು ಎಂದಿಗೂ ಹೊಂದಿಸದ ಕೀಗಳಿಗೆ ಅನುಮತಿ ಇರುತ್ತದೆ                                 |
-| `catalogScope`                              | `all` \| `combos` \| `models`                                           | ಈ ಕೀಗಾಗಿ `GET /v1/models` ಏನನ್ನು ಪಟ್ಟಿ ಮಾಡುತ್ತದೆ (ಕಾಂಬೊಗಳು ಮಾತ್ರ, ಮಾದರಿಗಳು ಮಾತ್ರ, ಅಥವಾ ಎರಡೂ); ಕೀ ಯಾವುದನ್ನು ಕರೆಯಬಹುದು ಎಂಬುದನ್ನು ಇದು ಬದಲಿಸುವುದಿಲ್ಲ |
-| `forcedModel`                               | ಗರಿಷ್ಠ 300 ಅಕ್ಷರಗಳ ಸ್ಟ್ರಿಂಗ್, ಅಥವಾ `null`                               | `X-Route-Model` ಮತ್ತು `body.model` ಗಿಂತ ಆದ್ಯತೆಯಿಂದ ಚಾಟ್ ವಿನಂತಿಗಳನ್ನು ಈ ಮಾದರಿ/ಕಾಂಬೊಗೆ ಮಾರ್ಗಗೊಳಿಸುತ್ತದೆ; ಕೀಯ ಮಿತಿಗಳು ಇನ್ನೂ ಅನ್ವಯಿಸುತ್ತವೆ           |
-| `noLog`, `autoResolve`                      | ಬೂಲಿಯನ್                                                                 |                                                                                                                                                  |
-| `throttleDelayMs`                           | ಪೂರ್ಣಾಂಕ, 0-300000                                                      |                                                                                                                                                  |
-| `maxSessions`                               | ಪೂರ್ಣಾಂಕ, 0-10000                                                       |                                                                                                                                                  |
-| `rateLimits`                                | `{ limit, window }` ಗಳ ಅರೇ (ಧನಾತ್ಮಕ ಪೂರ್ಣಾಂಕಗಳು, ಗರಿಷ್ಠ 50) ಅಥವಾ `null` | `null` ಮಿತಿಗಳನ್ನು ತೆರವುಗೊಳಿಸುತ್ತದೆ                                                                                                               |
-| `accessSchedule`                            | ವೇಳಾಪಟ್ಟಿ ಆಬ್ಜೆಕ್ಟ್ ಅಥವಾ `null`                                         | `null` ವೇಳಾಪಟ್ಟಿಯನ್ನು ತೆರವುಗೊಳಿಸುತ್ತದೆ                                                                                                           |
-| `scopes`                                    | ಸ್ಟ್ರಿಂಗ್ಗಳ ಅರೇ, ಗರಿಷ್ಠ 32                                              |                                                                                                                                                  |
-| `allowedEndpoints`                          | ಸ್ಟ್ರಿಂಗ್ಗಳ ಅರೇ, ಗರಿಷ್ಠ 20                                              |                                                                                                                                                  |
-| `streamDefaultMode`                         | `legacy` \| `json`                                                      |                                                                                                                                                  |
-| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                    | [ಪ್ರತಿ-ಕೀ ಕ್ಯಾಶ್ ಬೈಪಾಸ್](#per-key-cache-bypass) ನೋಡಿ                                                                                             |
-| `compressionEnabled`                        | ಬೂಲಿಯನ್                                                                 |                                                                                                                                                  |
-| `codexServiceMode`                          | Codex ಸೇವಾ ಮೋಡ್ಗಳಲ್ಲಿ ಒಂದು                                              |                                                                                                                                                  |
-| `disableNonPublicModels`                    | boolean                                                                 |                                                                                                                                                  |
-| `allowUsageCommand`                         | boolean                                                                 |                                                                                                                                                  |
-| `usageLimitEnabled`                         | boolean                                                                 |                                                                                                                                                  |
-| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | number >= 0 or `null`                                                   |                                                                                                                                                  |
-| `chaosModeEnabled`                          | boolean                                                                 |                                                                                                                                                  |
+| ಕ್ಷೇತ್ರ                                     | ಪ್ರಕಾರ                                                                  | ಟಿಪ್ಪಣಿಗಳು                                                                                                                                                                                                                                         |
+| ------------------------------------------- | ----------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`                                      | ಸ್ಟ್ರಿಂಗ್, 1-200 ಅಕ್ಷರಗಳು                                               |                                                                                                                                                                                                                                                    |
+| `isActive`                                  | ಬೂಲಿಯನ್                                                                 |                                                                                                                                                                                                                                                    |
+| `isBanned`                                  | ಬೂಲಿಯನ್                                                                 |                                                                                                                                                                                                                                                    |
+| `expiresAt`                                 | ISO 8601 ದಿನಾಂಕ-ಸಮಯ ಅಥವಾ `null`                                         | `null` ಅವಧಿ ಮುಕ್ತಾಯವನ್ನು ತೆರವುಗೊಳಿಸುತ್ತದೆ                                                                                                                                                                                                          |
+| `modelAccessMode`                           | `all` \| `restricted`                                                   | ಮೋಡ್ `all` ಆಗಿರುವಾಗ `allowedModels` ಖಾಲಿಯಾಗಿರಬೇಕು                                                                                                                                                                                                  |
+| `allowedModels`, `blockedModels`            | ತಂತಿಗಳ ಶ್ರೇಣಿ, 1000 ವರೆಗೆ                                               |                                                                                                                                                                                                                                                    |
+| `allowedCombos`                             | ಸ್ಟ್ರಿಂಗ್ಗಳ ಅರೇ, ಗರಿಷ್ಠ 500                                             | ಕೀ ಯಾವ ಕಾಂಬೊಗಳನ್ನು ಕರೆಯಬಹುದು ಎಂಬುದನ್ನು ನಿಯಂತ್ರಿಸುತ್ತದೆ; ನೇರ ಮಾದರಿಗಳನ್ನು `modelAccessMode` / `allowedModels` ನಿಯಂತ್ರಿಸುತ್ತವೆ                                                                                                                        |
+| `connectionAccessMode`                      | `all` \| `restricted`                                                   | `restricted` ಆಗಿರುವಾಗ `allowedConnections` ಖಾಲಿಯಾಗಿರಬಾರದು ಮತ್ತು `all` ಆಗಿರುವಾಗ ಖಾಲಿಯಾಗಿರಬೇಕು                                                                                                                                                       |
+| `allowedConnections`                        | UUID ಗಳ ಅರೇ, ಗರಿಷ್ಠ 100                                                 |                                                                                                                                                                                                                                                    |
+| `allowAutoCombos`                           | ಬೂಲಿಯನ್                                                                 | `false` ಈ ಕೀಯೊಂದಿಗೆ `auto/*` ಮಾದರಿಗಳ ವಿನಂತಿಗಳನ್ನು ತಿರಸ್ಕರಿಸುತ್ತದೆ; ಇದನ್ನು ಎಂದಿಗೂ ಹೊಂದಿಸದ ಕೀಗಳಿಗೆ ಅನುಮತಿ ಇರುತ್ತದೆ                                                                                                                                   |
+| `catalogScope`                              | `all` \| `combos` \| `models`                                           | ಈ ಕೀಗಾಗಿ `GET /v1/models` ಏನನ್ನು ಪಟ್ಟಿ ಮಾಡುತ್ತದೆ (ಕಾಂಬೊಗಳು ಮಾತ್ರ, ಮಾದರಿಗಳು ಮಾತ್ರ, ಅಥವಾ ಎರಡೂ); ಕೀ ಯಾವುದನ್ನು ಕರೆಯಬಹುದು ಎಂಬುದನ್ನು ಇದು ಬದಲಿಸುವುದಿಲ್ಲ                                                                                                   |
+| `forcedModel`                               | ಗರಿಷ್ಠ 300 ಅಕ್ಷರಗಳ ಸ್ಟ್ರಿಂಗ್, ಅಥವಾ `null`                               | `X-Route-Model` ಮತ್ತು `body.model` ಗಿಂತ ಆದ್ಯತೆಯಿಂದ ಚಾಟ್ ವಿನಂತಿಗಳನ್ನು ಈ ಮಾದರಿ/ಕಾಂಬೊಗೆ ಮಾರ್ಗಗೊಳಿಸುತ್ತದೆ; ಕೀಯ ಮಿತಿಗಳು ಇನ್ನೂ ಅನ್ವಯಿಸುತ್ತವೆ                                                                                                             |
+| `noLog`, `autoResolve`                      | ಬೂಲಿಯನ್                                                                 |                                                                                                                                                                                                                                                    |
+| `throttleDelayMs`                           | ಪೂರ್ಣಾಂಕ, 0-300000                                                      |                                                                                                                                                                                                                                                    |
+| `maxSessions`                               | ಪೂರ್ಣಾಂಕ, 0-10000                                                       |                                                                                                                                                                                                                                                    |
+| `rateLimits`                                | `{ limit, window }` ಗಳ ಅರೇ (ಧನಾತ್ಮಕ ಪೂರ್ಣಾಂಕಗಳು, ಗರಿಷ್ಠ 50) ಅಥವಾ `null` | `null` ಮಿತಿಗಳನ್ನು ತೆರವುಗೊಳಿಸುತ್ತದೆ                                                                                                                                                                                                                 |
+| `accessSchedule`                            | ವೇಳಾಪಟ್ಟಿ ಆಬ್ಜೆಕ್ಟ್ ಅಥವಾ `null`                                         | `null` ವೇಳಾಪಟ್ಟಿಯನ್ನು ತೆರವುಗೊಳಿಸುತ್ತದೆ                                                                                                                                                                                                             |
+| `scopes`                                    | ಸ್ಟ್ರಿಂಗ್ಗಳ ಅರೇ, ಗರಿಷ್ಠ 32                                              |                                                                                                                                                                                                                                                    |
+| `allowedEndpoints`                          | ಸ್ಟ್ರಿಂಗ್ಗಳ ಅರೇ, ಗರಿಷ್ಠ 20                                              |                                                                                                                                                                                                                                                    |
+| `streamDefaultMode`                         | `legacy` \| `json`                                                      |                                                                                                                                                                                                                                                    |
+| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                    | [ಪ್ರತಿ-ಕೀ ಕ್ಯಾಶ್ ಬೈಪಾಸ್](#per-key-cache-bypass) ನೋಡಿ                                                                                                                                                                                               |
+| `compressionEnabled`                        | ಬೂಲಿಯನ್                                                                 |                                                                                                                                                                                                                                                    |
+| `codexServiceMode`                          | Codex ಸೇವಾ ಮೋಡ್ಗಳಲ್ಲಿ ಒಂದು                                              |                                                                                                                                                                                                                                                    |
+| `disableNonPublicModels`                    | boolean                                                                 |                                                                                                                                                                                                                                                    |
+| `allowUsageCommand`                         | boolean                                                                 |                                                                                                                                                                                                                                                    |
+| `usageLimitEnabled`                         | boolean                                                                 |                                                                                                                                                                                                                                                    |
+| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | ಸಂಖ್ಯೆ >= 0 ಅಥವಾ `null`                                                 |                                                                                                                                                                                                                                                    |
+| `fiveHourUsageLimitUsd`                     | ಸಂಖ್ಯೆ >= 0 ಅಥವಾ `null`                                                 | ರೋಲಿಂಗ್ 5-ಗಂಟೆಗಳ USD ಬಜೆಟ್, ದೈನಂದಿನ ಮತ್ತು ಸಾಪ್ತಾಹಿಕ ಮಿತಿಗಳಂತೆ ಜಾರಿಗೊಳಿಸಲಾಗಿದೆ (`usageLimitEnabled`, `UNPRICED_USAGE_BUDGET_POLICY`). `retry-after` ಎಂದರೆ ವಿಂಡೋದಲ್ಲಿ ಹಳೆಯ ಖರ್ಚುಗಳು ವಯಸ್ಸಾದಾಗ, ಅದರ ಮಿತಿಗಿಂತ ಹೆಚ್ಚಿನ ಕೀಲಿಯನ್ನು ಇನ್ನೂ ನಿರ್ಬಂಧಿಸಲಾಗಿದೆ. |
+| `chaosModeEnabled`                          | boolean                                                                 |                                                                                                                                                                                                                                                    |
 
 ```bash
 curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
@@ -1383,6 +1366,14 @@ curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
 | `/api/modality-bridge/stats`         | GET        | ಮೆಮೊರಿಯಲ್ಲಿನ `attempts`, ಯಶಸ್ಸುಗಳು/`bridged`, ವೈಫಲ್ಯಗಳು, ಕ್ಯಾಶ್ ಹಿಟ್ಗಳು, `totalLatencyMs`, `latencySamples`, ಮಾದರಿ-ಆಧಾರಿತ `averageLatencyMs`, ಮತ್ತು ಕೊನೆಯ ಬಳಕೆಯ ಸಮಯ (ಪುನರಾರಂಭದಲ್ಲಿ ಮರುಹೊಂದಿಸಲಾಗುತ್ತದೆ; ನಿರ್ವಹಣಾ ದೃಢೀಕರಣ)                                                                                                                                                                                      |
 | `/api/modality-bridge/video/runtime` | GET        | ನಿರ್ವಹಣಾ ದೃಢೀಕರಣ/ಪ್ರೋಬ್ಗೆ ಮೊದಲು ಕಟ್ಟುನಿಟ್ಟಾದ ವಿಶ್ವಾಸಾರ್ಹ-ಲೂಪ್ಬ್ಯಾಕ್ ಪರಿಶೀಲನೆ; ಶುದ್ಧೀಕರಿಸಿದ FFmpeg/ffprobe ಲಭ್ಯತೆ ಮತ್ತು ಆವೃತ್ತಿಗಳು (no-store)                                                                                                                                                                                                                                                                  |
 | `/api/modality-bridge/video/extract` | POST       | ಆಂತರಿಕ ದೃಢೀಕೃತ ವಿಶ್ವಾಸಾರ್ಹ-ಲೂಪ್ಬ್ಯಾಕ್ ಬೈಟ್ ಬ್ರೋಕರ್; 50 MiB ಇನ್ಪುಟ್, ಮಿತಿಗೊಳಿಸಿದ ಕ್ಯೂ/32 MiB ಔಟ್ಪುಟ್, ಸಾಮರ್ಥ್ಯಕ್ಕೆ `503`, ಡಿಸ್ಕನೆಕ್ಟ್ಗೆ `499`, ಡೆಡ್ಲೈನ್ಗೆ `504`; ಇದು ಸಾರ್ವಜನಿಕ ಅಪ್ಲೋಡ್ API ಅಲ್ಲ                                                                                                                                                                                                                |
+
+### ವೀಡಿಯೊ ಫ್ರೇಮ್ ಡ್ರಿಲ್-ಡೌನ್
+
+`GET /api/v1/video-bridge/drilldown` ಸ್ಪಷ್ಟವಾಗಿ ಒಪ್ಪಿಗೆ ನೀಡಿದ ವೀಡಿಯೊ ಬ್ರಿಡ್ಜ್ ವಿನಂತಿಯ ನಂತರ `x-omniroute-video-drilldown` ನಲ್ಲಿ ಹಿಡುವಳಿದಾರ-ಬೌಂಡ್ ಅಪಾರದರ್ಶಕ ಹ್ಯಾಂಡಲ್ ಅನ್ನು ಓದುತ್ತದೆ. ರೀಡ್ಗಳು ಮತ್ತು `DELETE` ಎರಡಕ್ಕೂ ಯಾವಾಗಲೂ ಮಾನ್ಯವಾದ API ಕೀ ಮತ್ತು ಆಪರೇಟರ್ನ ಸ್ವತಂತ್ರ `modalityBridgeVideoDrilldownRemoteEnabled` ಅನುಮತಿ ಅಗತ್ಯವಿರುತ್ತದೆ. ಉತ್ಪಾದನೆಯ ಧಾರಣಕ್ಕೆ ಹೆಚ್ಚುವರಿಯಾಗಿ `modalityBridgeVideoDrilldownEnabled` ಮತ್ತು ಕಟ್ಟುನಿಟ್ಟಾದ ಪ್ರತಿ ಭಾಗ `drilldown: true` ಅಗತ್ಯವಿರುತ್ತದೆ. ಕೀಲಿಯು ಖಾಲಿಯಿಲ್ಲದ ಎಂಡ್ಪಾಯಿಂಟ್ ಅನುಮತಿಪಟ್ಟಿಯನ್ನು ಹೊಂದಿದ್ದರೆ, ಅದು GET ಮತ್ತು DELETE ಎರಡಕ್ಕೂ `video` ಒಳಗೊಂಡಿರಬೇಕು, ಕಾಲರ್ `/v1` ಅಥವಾ `/api/v1` ಬಳಸುತ್ತಿರಲಿ.
+
+GET ಪ್ರಶ್ನೆ: ಅಗತ್ಯವಿದೆ `handle`; ಐಚ್ಛಿಕ `variant` (`preview`, `standard`, `detail`), `limit` (1–8; ಪರಂಪರೆ `frames` ಸ್ವೀಕರಿಸಲಾಗಿದೆ ಆದರೆ `limit` ನೊಂದಿಗೆ ಸಂಯೋಜಿಸಲಾಗುವುದಿಲ್ಲ), ಶೂನ್ಯ ಆಧಾರಿತ `page`, ಮತ್ತು `start`/`end` ಸೆಕೆಂಡುಗಳು. ಎರಡೂ ಫೋಕಸ್ ಬೌಂಡ್ಗಳನ್ನು ಪೂರೈಸಿದಾಗ, `end` `start` ಗಿಂತ ಹೆಚ್ಚಿರಬೇಕು. Duplicate/unknown ಪ್ರಶ್ನೆ ಕೀಗಳನ್ನು ತಿರಸ್ಕರಿಸಲಾಗಿದೆ. ಯಶಸ್ವಿ ಪ್ರತಿಕ್ರಿಯೆಗಳು `derivation`, `durationSeconds`, `frames`, `hasMore`, `page`, `variant`, ಮತ್ತು ಐಚ್ಛಿಕ `focusWindow`; ಯಾವುದೇ-ಸ್ಟೋರ್ JSON ಅನ್ನು Base64 ಸೇರಿದಂತೆ 32 MiB ನಲ್ಲಿ ಮುಚ್ಚಲಾಗಿದೆ. ಗಾತ್ರದ ಔಟ್ಪುಟ್ 413 ಹಿಂತಿರುಗಿಸುತ್ತದೆ; ಕಡಿಮೆ ಫ್ರೇಮ್ಗಳನ್ನು ವಿನಂತಿಸಿ.
+
+`DELETE /api/v1/video-bridge/drilldown?handle=...` `{ "removed": 0|1 }` ಹಿಂದಿರುಗಿಸುತ್ತದೆ. ಅಜ್ಞಾತ, ಅವಧಿ ಮುಗಿದ ಮತ್ತು ಕ್ರಾಸ್-ಕೀ GETs ಪ್ರತ್ಯೇಕಿಸಲಾಗದ 404 ಪ್ರತಿಕ್ರಿಯೆಗಳು; ಕ್ರಾಸ್-ಕೀ DELETE ಮಾಲೀಕರ ಪ್ರವೇಶವನ್ನು ತೆಗೆದುಹಾಕಲು ಸಾಧ್ಯವಿಲ್ಲ. ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿದ ಪ್ರವೇಶವು 403, missing/invalid ದೃಢೀಕರಣ 401, ಅಮಾನ್ಯವಾದ ಪ್ರಶ್ನೆಗಳು 400, ರದ್ದತಿ 499 ಮತ್ತು ತಾತ್ಕಾಲಿಕ ದೋಷಗಳು 503. ಹ್ಯಾಂಡಲ್ಗಳು ಪ್ರಕ್ರಿಯೆ-ಸ್ಥಳೀಯವಾಗಿರುತ್ತವೆ, ಹತ್ತು ನಿಮಿಷಗಳ ನಂತರ ಅವಧಿ ಮುಗಿಯುತ್ತವೆ ಮತ್ತು ಮರುಪ್ರಾರಂಭದಿಂದ ಬದುಕುಳಿಯುವುದಿಲ್ಲ. ಹೊಸ ಹ್ಯಾಂಡಲ್ಗಳು `v1.` ಜೊತೆಗೆ 32-ಬೈಟ್ ಯಾದೃಚ್ಛಿಕ Base64URL ಟೋಕನ್ ಅನ್ನು ಬಳಸುತ್ತವೆ; ಟೋಕನ್ ಹ್ಯಾಶ್ಗಳನ್ನು ಮಾತ್ರ ಉಳಿಸಿಕೊಳ್ಳಲಾಗುತ್ತದೆ. ಲೆಗಸಿ 64-ಹೆಕ್ಸ್ ಟೋಕನ್ಗಳು ಹೊಂದಾಣಿಕೆಗಾಗಿ ವಾಕ್ಯರಚನೆಯಿಂದ ಓದಬಲ್ಲವು. ಸಮ್ಮತಿ, ಕೋಟಾಗಳು ಮತ್ತು ರೂಪಾಂತರದ ವ್ಯುತ್ಪತ್ತಿ ವಿವರಗಳಿಗಾಗಿ [ವೀಡಿಯೊ ಬ್ರಿಡ್ಜ್ ಗಾರ್ಡ್ರೈಲ್ಗಳನ್ನು](../security/GUARDRAILS.md#video-bridge-videobridgets-videobridgepipelinets) ನೋಡಿ.
 
 ### ಬ್ಯಾಕಪ್ ಮತ್ತು ರಫ್ತು/ಆಮದು
 
@@ -1478,19 +1469,19 @@ GET ಪ್ರತಿಕ್ರಿಯೆಯು `agents[]` (id, name, binary, versio
 
 ಸ್ಥಳೀಯ Gemini SDK ಹೊಂದಾಣಿಕೆಯನ್ನು ನಿರೀಕ್ಷಿಸುವ ಕ್ಲೈಂಟ್ಗಳಿಗಾಗಿ ಈ ಎಂಡ್ಪಾಯಿಂಟ್ಗಳು Gemini ಯ API ಸ್ವರೂಪವನ್ನು ಅನುಕರಿಸುತ್ತವೆ.
 
-### ಆಂತರಿಕ / ಸಿಸ್ಟಮ್ APIಗಳು
+### ಆಂತರಿಕ / ಸಿಸ್ಟಮ್ APIs
 
-| Endpoint                 | Method | Description                                                  |
-| ------------------------ | ------ | ------------------------------------------------------------ |
-| `/api/init`              | GET    | ಅಪ್ಲಿಕೇಶನ್ ಪ್ರಾರಂಭೀಕರಣ ಪರಿಶೀಲನೆ (ಮೊದಲ ರನ್ನಲ್ಲಿ ಬಳಸಲಾಗುತ್ತದೆ) |
-| `/api/tags`              | GET    | Ollama-ಹೊಂದಾಣಿಕೆಯ ಮಾದರಿ ಟ್ಯಾಗ್ಗಳು (Ollama ಕ್ಲೈಂಟ್ಗಳಿಗಾಗಿ)    |
-| `/api/restart`           | POST   | ಸರ್ವರ್ನ ಸುಗಮ ಮರುಪ್ರಾರಂಭವನ್ನು ಪ್ರಚೋದಿಸುವುದು                   |
-| `/api/shutdown`          | POST   | ಸರ್ವರ್ನ ಸುಗಮ ಸ್ಥಗಿತಗೊಳಿಸುವಿಕೆಯನ್ನು ಪ್ರಚೋದಿಸುವುದು             |
-| `/api/system/env/repair` | POST   | OAuth ಪೂರೈಕೆದಾರ ಪರಿಸರ ವೇರಿಯಬಲ್ಗಳನ್ನು ಸರಿಪಡಿಸುವುದು            |
-| `/api/system/version`    | GET    | ಪ್ರಸ್ತುತ/ಇತ್ತೀಚಿನ ಆವೃತ್ತಿ, ನವೀಕರಣ ಸ್ಥಿತಿ, ಬಿಡುಗಡೆ ಚಾನಲ್      |
-| `/api/system/version`    | POST   | ಇತ್ತೀಚಿನ ಆವೃತ್ತಿಗೆ ನಿಯೋಜನೆ-ಜಾಗೃತ ನವೀಕರಣವನ್ನು ಪ್ರಾರಂಭಿಸುವುದು  |
+| ಅಂತ್ಯಬಿಂದು               | ವಿಧಾನ | ವಿವರಣೆ                                                     |
+| ------------------------ | ----- | ---------------------------------------------------------- |
+| `/api/init`              | GET   | ಹಿನ್ನೆಲೆ ಸಿಂಕ್ ಸೇವೆಗಳನ್ನು ಪ್ರಾರಂಭಿಸಿ (ನಿರ್ವಹಣೆ ದೃಢೀಕರಣ)    |
+| `/api/tags`              | GET   | Ollama-ಹೊಂದಾಣಿಕೆಯ ಮಾದರಿ ಟ್ಯಾಗ್ಗಳು ( Ollama ಕ್ಲೈಂಟ್ಗಳಿಗಾಗಿ) |
+| `/api/restart`           | POST  | ಆಕರ್ಷಕವಾದ ಸರ್ವರ್ ಮರುಪ್ರಾರಂಭವನ್ನು ಪ್ರಚೋದಿಸಿ                 |
+| `/api/shutdown`          | POST  | ಆಕರ್ಷಕವಾದ ಸರ್ವರ್ ಸ್ಥಗಿತಗೊಳಿಸುವಿಕೆಯನ್ನು ಪ್ರಚೋದಿಸಿ           |
+| `/api/system/env/repair` | POST  | OAuth ಪೂರೈಕೆದಾರರ ಪರಿಸರದ ಅಸ್ಥಿರಗಳನ್ನು ಸರಿಪಡಿಸಿ              |
+| `/api/system/version`    | GET   | Current/latest ಆವೃತ್ತಿ, ನವೀಕರಣ ಸ್ಥಿತಿ, ಬಿಡುಗಡೆ ಚಾನಲ್       |
+| `/api/system/version`    | POST  | ಇತ್ತೀಚಿನ ಆವೃತ್ತಿಗೆ ನಿಯೋಜನೆ-ಜಾಗೃತ ನವೀಕರಣವನ್ನು ಪ್ರಾರಂಭಿಸಿ    |
 
-> **ಗಮನಿಸಿ:** ಈ ಎಂಡ್ಪಾಯಿಂಟ್ಗಳನ್ನು ಸಿಸ್ಟಮ್ ಆಂತರಿಕವಾಗಿ ಅಥವಾ Ollama ಕ್ಲೈಂಟ್ ಹೊಂದಾಣಿಕೆಗಾಗಿ ಬಳಸುತ್ತದೆ. ಅಂತಿಮ ಬಳಕೆದಾರರು ಸಾಮಾನ್ಯವಾಗಿ ಇವುಗಳನ್ನು ಕರೆಯುವುದಿಲ್ಲ.
+> **ಗಮನಿಸಿ:** ಈ ಅಂತಿಮ ಬಿಂದುಗಳನ್ನು ಆಂತರಿಕವಾಗಿ ಸಿಸ್ಟಮ್ ಅಥವಾ Ollama ಕ್ಲೈಂಟ್ ಹೊಂದಾಣಿಕೆಗಾಗಿ ಬಳಸಲಾಗುತ್ತದೆ. ಅವುಗಳನ್ನು ಸಾಮಾನ್ಯವಾಗಿ ಅಂತಿಮ ಬಳಕೆದಾರರಿಂದ ಕರೆಯಲಾಗುವುದಿಲ್ಲ.
 
 ### OAuth ಪರಿಸರ ದುರಸ್ತಿ _(v3.6.1+)_
 

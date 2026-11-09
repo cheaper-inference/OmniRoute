@@ -15,7 +15,7 @@
 
 **Ṣẹda nipasẹ [Diego Souza](https://github.com/diegosouzapw)**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Never stop coding. Every AI tool → 381 providers — 150+ free — through one endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity into FREE Claude / GPT / Gemini with auto-fallback. RTK + Caveman stacked compression saves 15–95% tokens (~89% avg) — never hit limits. 381 AI providers · 150+ free tiers · ~1.62B free tokens/mo · 20 routing strategies · $0 to start."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Never stop coding. Every AI tool → 382 providers — 150+ free — through one endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity into FREE Claude / GPT / Gemini with auto-fallback. RTK + Caveman stacked compression saves 15–95% tokens (~89% avg) — never hit limits. 382 AI providers · 150+ free tiers · ~1.62B free tokens/mo · 20 routing strategies · $0 to start."/>
 
 </div>
 
@@ -49,20 +49,15 @@
 <a href="https://trendshift.io/repositories/23589" target="_blank"><img src="https://trendshift.io/api/badge/repositories/23589" alt="diegosouzapw%2FOmniRoute | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
 [![Ipo Itan Irawọ](https://api.star-history.com/badge?repo=diegosouzapw/OmniRoute&theme=dark) ](https://www.star-history.com/diegosouzapw/omniroute) [![olud.ai](https://olud.ai/badge.php?tool=diegosouzapw-omniroute) ](https://olud.ai/project/diegosouzapw-omniroute.html)
 
-### 💬 Darapọ̀ mọ́ àwùjọ
+### 💬 Darapọ mọ agbegbe
 
-**👋 Tẹ̀lé olùtọ́jú náà — gba àwọn olupèsè tuntun, àwọn ìtújáde àti àwọn ìmọ̀ràn kíákíá:**
+**👋 Tẹle olutọju — gba awọn olupese titun, awọn idasilẹ & awọn imọran ni akọkọ:**
 
-[![Tẹ̀lé Diego lórí LinkedIn](https://img.shields.io/badge/Follow_Diego_on-LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/diegosouzapw/)
-[![Tẹ̀lé @diegosouzapw lórí GitHub](https://img.shields.io/github/followers/diegosouzapw?style=for-the-badge&logo=github&logoColor=white&label=Follow%20on%20GitHub&color=181717)](https://github.com/diegosouzapw)
+[![Tẹle Diego lori LinkedIn](https://img.shields.io/badge/Follow_Diego_on-LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white) ](https://www.linkedin.com/in/diegosouzapw/) [![Tẹle @diegosouzapw lori GitHub](https://img.shields.io/github/followers/diegosouzapw?style=for-the-badge&logo=github&logoColor=white&label=Follow%20on%20GitHub&color=181717) ](https://github.com/diegosouzapw)
 
-[![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/U47eFqAXCn)
-[![Telegram](https://img.shields.io/badge/Telegram-26A5E4?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/omnirouteOficial)
-[![WhatsApp Agbáyé](https://img.shields.io/badge/WhatsApp_Global-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4)
-[![WhatsApp Brasil](https://img.shields.io/badge/WhatsApp_Brasil-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)
-[![Ojú-ìwé](https://img.shields.io/badge/Website-omniroute.online-blue?logo=google-chrome&logoColor=white)](https://omniroute.online)
+[![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white) ](https://discord.gg/U47eFqAXCn) [![Telegram](https://img.shields.io/badge/Telegram-26A5E4?style=for-the-badge&logo=telegram&logoColor=white) ](https://t.me/omnirouteOficial) [![WhatsApp Global](https://img.shields.io/badge/WhatsApp_Global-25D366?style=for-the-badge&logo=whatsapp&logoColor=white) ](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) [![WhatsApp Brasil](https://img.shields.io/badge/WhatsApp_Brasil-25D366?style=for-the-badge&logo=whatsapp&logoColor=white) ](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) [![ Aaye ayelujara](https://img.shields.io/badge/Website-omniroute.online-blue?logo=google-chrome&logoColor=white) ](https://omniroute.online)
 
-**Àwọn ìbéèrè, ìmọ̀ràn nípa olupèsè, ètò ọ̀nà & àtìlẹ́yìn → [Discord](https://discord.gg/U47eFqAXCn) · [Telegram](https://t.me/omnirouteOficial) · WhatsApp [🌍 Agbáyé](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) / [🇧🇷 Brasil](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) / [Portal](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)**
+**Awọn ibeere, awọn imọran olupese, maapu ọna & atilẹyin → [Discord](https://discord.gg/U47eFqAXCn) · [Telegram](https://t.me/omnirouteOficial) · WhatsApp [🌍 Agbaye](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) / [🇧🇷 Brasil](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) / [ikanni Ibùṣe 📢](https://whatsapp.com/channel/0029VbDwC7A3wtb5PN6a5t2R) / [Portal](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)**
 
 <br/>
 
@@ -72,8 +67,8 @@
 
 |                           |        v3.8.50        | **v3.8.51** |       `v3.8.54+`       |
 | ------------------------- | :-------------------: | :---------: | :--------------------: |
-| Awọn olupese 🌐           |          352          |   **358**   |          381           |
-| 🧠 Oto iwiregbe awoṣe IDs |         1320          |  **1374**   |          1519          |
+| Awọn olupese 🌐           |          352          |   **358**   |          382           |
+| 🧠 Oto iwiregbe awoṣe IDs |         1320          |  **1374**   |          1524          |
 | 🖼️ Modality Bridge        | 🆕 iran + iwe + fidio |      ✓      |           ✓            |
 | 📡 Reda free katalogi     |    Ijade-iwọle 🆕     |      ✓      |           ✓            |
 | ⚖️ Quota-mọ siseto        |     🆕 Quota-Pin      |      ✓      |           ✓            |
@@ -108,7 +103,7 @@
   <tr>
     <td align="right"><b>⚙️ Features</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 Combos</a></td>
-    <td align="center"><a href="#-381-ai-providers--156-catalog-marked-free">🌐 Providers</a></td>
+    <td align="center"><a href="#-382-ai-providers--156-catalog-marked-free">🌐 Providers</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI &amp; MCP</a></td>
   </tr>
   <tr>
@@ -244,7 +239,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="The Promise — One endpoint and 381 providers. Automatic fallback keeps routing while another healthy target is available. Six pillars: resilient fallback across 381 providers · up to 95% token savings on eligible workloads · $0 to start with 150+ free tiers and 52 recurring/keyless free-forever providers · 39 CLI/agent integrations through one config · OpenAI, Claude, Gemini and Responses API compatibility at /v1 · production controls including circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals and 56,000+ static test declarations across 7,800+ tracked test files."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="The Promise — One endpoint and 382 providers. Automatic fallback keeps routing while another healthy target is available. Six pillars: resilient fallback across 382 providers · up to 95% token savings on eligible workloads · $0 to start with 150+ free tiers and 52 recurring/keyless free-forever providers · 39 CLI/agent integrations through one config · OpenAI, Claude, Gemini and Responses API compatibility at /v1 · production controls including circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals and 56,000+ static test declarations across 7,800+ tracked test files."/>
 
 <br/>
 <br/>
@@ -504,7 +499,7 @@ Gbogbo ọgbọ́n **20** náà — parapọ̀ wọn bí o ṣe fẹ́ fún ìgb
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Ohun tí ó yà OmniRoute kúrò — àkótán àwọn ẹ̀yà tó ní ọjọ́ sílẹ̀ tí a fi wé 9router, OpenRouter, CLIProxyAPI àti LiteLLM ní gbogbo agbára 13. OmniRoute: àwọn olupèsè 381, àwọn ìpele ọ̀fẹ́ 150+ tí a ti kọ́ sínú rẹ̀, àwọn ọgbọ́n ìtọ́sọ́nà 20, ìfúnpọ̀ token pẹ̀lú ẹ́ńjìnì 12, olupèsè MCP tí a ti kọ́ sínú rẹ̀ pẹ̀lú àwọn irinṣẹ́ 110, ìlànà aṣojú A2A, ìrántí aláìgbéyìn, àwọn ìdènà ààbò, àwọn aṣojú awọ̀n, ìfarapamọ́ àpẹẹrẹ TLS, Desktop/Termux/PWA àti àwọn locale UI i18n 67. OmniRoute ní ìwé-aṣẹ MIT, ó sì lè gbàlejò fúnra rẹ. Àwọn agbára àti iye àwọn olùdíje lè yí padà; wo ìlànà tí a so mọ́."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Ohun tí ó yà OmniRoute kúrò — àkótán àwọn ẹ̀yà tó ní ọjọ́ sílẹ̀ tí a fi wé 9router, OpenRouter, CLIProxyAPI àti LiteLLM ní gbogbo agbára 13. OmniRoute: àwọn olupèsè 382, àwọn ìpele ọ̀fẹ́ 150+ tí a ti kọ́ sínú rẹ̀, àwọn ọgbọ́n ìtọ́sọ́nà 20, ìfúnpọ̀ token pẹ̀lú ẹ́ńjìnì 12, olupèsè MCP tí a ti kọ́ sínú rẹ̀ pẹ̀lú àwọn irinṣẹ́ 110, ìlànà aṣojú A2A, ìrántí aláìgbéyìn, àwọn ìdènà ààbò, àwọn aṣojú awọ̀n, ìfarapamọ́ àpẹẹrẹ TLS, Desktop/Termux/PWA àti àwọn locale UI i18n 67. OmniRoute ní ìwé-aṣẹ MIT, ó sì lè gbàlejò fúnra rẹ. Àwọn agbára àti iye àwọn olùdíje lè yí padà; wo ìlànà tí a so mọ́."/>
 
 <sub>📊 Ìlànà kíkún àti àlàyé ẹ̀yà kọ̀ọ̀kan ní ìfiwéra pẹ̀lú 9router, OpenRouter, CLIProxyAPI àti LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -608,7 +603,7 @@ tẹlifíṣọ̀nù lílò, tàbí ipò ìkọ̀sílẹ̀ ìkéde abẹ́lẹ̀
 - **🖼️ New endpoints** — `/v1/ocr` (Mistral OCR) ati `/v1/audio/translations` (Whisper-ara) yika awọn media dada. → [API itọkasi](docs/reference/API_REFERENCE.md)
 - **Aworan 🎨 / fidio / iran ohun** — ọkan API fun media: xAI Grok Fojuinu & Novita AI fidio, ComfyUI, Magnific, Adobe Firefly, Segmind, ati awọn olupese ọrọ gẹgẹbi ElevenLabs. → [API Itọkasi](docs/reference/API_REFERENCE.md)
 - **🌍 imuṣiṣẹ & ops** — aṣoju-aṣoju `basePath`, wiwa aifọwọyi-ede aṣawakiri, ipasẹ ẹrọ-bọtini, igbẹkẹle MITM ti ko ni gbongbo, agbegbe zh-TW. → [Ayika](docs/reference/ENVIRONMENT.md)
-- **🤝 Awọn olupese diẹ sii & awọn aṣoju** Awọn aṣoju awọsanma — (Codex Cloud, Cursor, Devin, Jules), Grok Kọ (xAI) pẹlu iwọle + OAuth ẹrọ aṣawakiri, kaadi Ollama akọkọ-kilasi, Claude Opus 5 & Sonnet 5, Kimi ajọṣepọ osise (Code/Web/Moonshot), Zed, Ibeere, SenseNova, Agfrey AI, Ag Yuannes **381-olupese katalogi** . [Awọn olupese](docs/reference/PROVIDER_REFERENCE.md) →
+- **🤝 Awọn olupese diẹ sii & awọn aṣoju** Awọn aṣoju awọsanma — (Codex Cloud, Cursor, Devin, Jules), Grok Kọ (xAI) pẹlu iwọle + OAuth ẹrọ aṣawakiri, kaadi Ollama akọkọ-kilasi, Claude Opus 5 & Sonnet 5, Kimi ajọṣepọ osise (Code/Web/Moonshot), Zed, Ibeere, SenseNova, Agfrey AI, Ag Yuannes **382-olupese katalogi** . [Awọn olupese](docs/reference/PROVIDER_REFERENCE.md) →
 - **📡 afisona akoyawo** — gbogbo idahun n gbe akọsori `X-OmniRoute-Decision` kan ti o n sọ orukọ strategy/provider/latency ti o ṣe iranṣẹ rẹ, ilana tuntun `cache-optimized` konbo + Auto-Combo `cacheAffinity` ifosiwewe ipa tun awọn ibeere pada si asopọ ti o ni imuduro iṣaaju ti a fi pamọ, ati ipari ipari `/v1/auto-combo/{channel}/candidates` kika-nikan ṣafihan adagun-idije ifiwe laaye ikanni `auto/*` kan. → [Aifọwọyi-Konbo](docs/routing/AUTO-COMBO.md)
 - **⚡ Agbegbe išẹ & infra** — ọkan-tẹ agbegbe Redis, Cloudflare Workers / Deno Deploy relay deployers, Bifrost & Mux bi abojuto awọn iṣẹ ifibọ. [Awọn iṣẹ ifibọ](docs/frameworks/EMBEDDED-SERVICES.md) →
 - **🧩 Tun ninu apoti** — itanna ilana + ọjà, Omni/Agent/GitHub ogbon nílẹ, Obsidian ifinkan Integration (22 MCP irinṣẹ), OpenAI-ibaramu Batch & Faili APIs, atunmọ idahun kaṣe, gamification pẹlu leaderboards, ACP oluranlowo Awari (15-itumọ ti ni òjíṣẹ 15), eto okeere log to BigQuery, `auto/chaos` -apapọ-pupọ-bot app, afara-pupọ Telegram ni app. oluṣakoso ẹya ati LMArena-ELO awọn ipo olupese ọfẹ. [Awọn iwe aṣẹ](docs/README.md) →
@@ -692,11 +687,11 @@ nínú ìtàn shell rẹ. → [Àwọn Ìṣọ̀kan CLI](docs/guides/CLI-INTEGR
 
 <div align="center">
 
-## 🌐 381 AI Olupese — 156 Katalogi-Sami Ọfẹ
+## 🌐 382 AI Olupese — 156 Katalogi-Sami Ọfẹ
 
 </div>
 
-> **381 awọn olupese ti a forukọsilẹ** kọja iwiregbe canonical, media, wiwa, agbegbe, aṣoju-awọsanma ati awọn akojọpọ eto, pẹlu **156 ti n gbe metadata iwari `hasFree: true`** . Iforukọsilẹ awoṣe iwiregbe ni wiwa **Awọn olupese 242 / 3,148 awọn orisii olupese-awoṣe pato / 1,519 awoṣe aise IDs** ; awọn lọtọ free-isuna katalogi ni o ni **466 fun-awoṣe kana** ,**34 loorekoore adagun** ati **52 recurring/keyless awọn olupese ọfẹ-lailai** . Awọn wọnyi ni o yatọ si iyeida nipa oniru; awọn asọye ati awọn iṣiro ti a yọkuro adagun n gbe ni [Itọkasi Olupese](docs/reference/PROVIDER_REFERENCE.md) ati [Awọn ipele Ọfẹ](docs/reference/FREE_TIERS.md).
+> **382 awọn olupese ti o forukọsilẹ** kọja iwiregbe canonical, media, wiwa, agbegbe, aṣoju-awọsanma ati awọn akojọpọ eto, pẹlu **156 ti n gbe metadata iwari `hasFree: true`** . Iforukọsilẹ awoṣe iwiregbe ni wiwa **Awọn olupese 243 / 3,155 awọn orisii olupese-awoṣe pato / 1,524 awoṣe aise IDs** ; awọn lọtọ free-isuna katalogi ni o ni **466 fun-awoṣe kana** ,**34 loorekoore adagun** ati **52 recurring/keyless awọn olupese ọfẹ-lailai** . Awọn wọnyi ni o yatọ si iyeida nipa oniru; awọn asọye ati awọn iṣiro ti a yọkuro adagun n gbe ni [Itọkasi Olupese](docs/reference/PROVIDER_REFERENCE.md) ati [Awọn ipele Ọfẹ](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
@@ -1307,7 +1302,7 @@ lórí port kan, nítorí náà kò sí package CLI-nìkan lọ́wọ́lọ́w�
   <tr><td nowrap><b>Àkókò ìṣiṣẹ́</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Èdè</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> ní gbogbo <code>src/</code> àti <code>open-sse/</code> (àìsí <code>any</code> nínú mojú-kókó láti v2.0)</td></tr>
   <tr><td nowrap><b>Framework</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Àkójọpọ̀ data</b></td><td>better-sqlite3 (SQLite, ìkọ̀wé WAL) + LowDB (JSON ogún àtijọ́) — àwọn modulu àgbègbè 147, àwọn ìṣípadà 225</td></tr>
+  <tr><td nowrap><b>Àkójọpọ̀ data</b></td><td>better-sqlite3 (SQLite, ìkọ̀wé WAL) + LowDB (JSON ogún àtijọ́) — àwọn modulu àgbègbè 147, àwọn ìṣípadà 229</td></tr>
   <tr><td nowrap><b>Ìrántí</b></td><td>Ìṣàwárí ọ̀rọ̀-kíkún SQLite FTS5 + àwọn ìṣàpẹẹrẹ fekito tí a ṣe quantization sí int8, ìdínkù tí a tẹ̀</td></tr>
   <tr><td nowrap><b>Àwọn àwòṣe</b></td><td>Zod 4 — ìmúdájú I/O irinṣẹ́ MCP + àwọn àdéhùn API</td></tr>
   <tr><td nowrap><b>Àwọn ìlànà ibánisọ̀rọ̀</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

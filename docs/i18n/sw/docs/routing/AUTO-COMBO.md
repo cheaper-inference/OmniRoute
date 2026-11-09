@@ -127,6 +127,27 @@ Uwekaji alama kiotomatiki huchagua mtoa huduma/muundo bora kwa kila ombi
 | `src/sse/handlers/chat.ts`                                | Ujumuishaji: njia ya mkato ya kiambishi awali cha auto     |
 | `src/shared/constants/providers.ts`                       | Ingizo la mfumo la `SYSTEM_PROVIDERS.auto`                 |
 
+## Mapendeleo ya akaunti kwa michanganyiko ya Kiotomatiki iliyohifadhiwa
+
+Kihariri cha Intelligent Auto kinatoa hiari** Mapendeleo ya akaunti** sehemu. Kila muunganisho unaweza kuwa Unaopendelea, Kawaida (chaguo-msingi), Hifadhi, au Kutengwa. Miunganisho mingi inaweza kushiriki kiwango. Huchagua kiotomatiki ndani ya kiwango cha kwanza kinachostahiki, na kubakiza tabia yake scoring/router hapo; majaribio yaliyoshindwa yanaangukia kwenye akaunti madhubuti zilizosalia, zinazopendekezwa kabla ya kawaida kabla ya hifadhi. Miunganisho isiyojumuishwa haitumiwi kamwe na mchanganyiko huu.
+
+Mpangilio umehifadhiwa kama `config.accountPreferences`, umewekwa na unganisho ID:
+
+```json
+{
+  "accountPreferences": {
+    "connection-a": "preferred",
+    "connection-b": "preferred",
+    "connection-c": "reserve",
+    "connection-d": "excluded"
+  }
+}
+```
+
+Ramani iliyoachwa au tupu huhifadhi uelekezaji uliopo. Mapendeleo hayawashi miunganisho iliyozimwa, kutoa ufikiaji wa ufunguo wa API, kurejesha wagombeaji waliozuiwa, au kupita ukaguzi wa bajeti. Kila jaribio limezuiwa kwa muunganisho wake madhubuti, kwa hivyo urejeshaji wa akaunti hauwezi kuruka viwango nyuma ya kipanga njia cha mseto. Uhusiano wa kipindi uliopo unaweza kuhifadhi akaunti inayostahiki; ukiondoa akaunti inayofungamana na zamu ya asili ambayo hugeuka badala ya kubadilisha akaunti kimya kimya.
+
+Mapendeleo yaliyosanidiwa hutumia njia ya kiotomatiki inayotambua akaunti: akiba ya muktadha isiyofungamana, bomba-bomba mahiri, fujo na njia za mkato za vivuli hazijatumwa. Uzio wa kubahatisha umezimwa kwa maombi haya kwa hivyo akaunti za akiba haziwezi kushindana na zile zinazopendelewa. Mikakati mingine ya mchanganyiko haifasiri mpangilio huu. Kubadilisha mchanganyiko kutoka kwa Otomatiki huweka mapendeleo yaliyohifadhiwa kwa urejeshaji wa baadaye.
+
 ## Majina ya Combo Yanayolingana na Kitambulisho Halisi cha Modeli
 
 Combo ambayo `name` yake inafanana kabisa na kitambulisho tupu cha modeli (k.m. combo inayoitwa
@@ -186,36 +207,38 @@ Mitego miwili ya kawaida:
 
 Angalia [#7992](https://github.com/diegosouzapw/OmniRoute/issues/7992) na [#7111](https://github.com/diegosouzapw/OmniRoute/issues/7111) kuhusu mkanganyiko wa awali unaofafanuliwa hapa.
 
-## Jinsi Inavyofanya Kazi (Auto-Combos Zinazohifadhiwa)
+## Jinsi Inavyofanya Kazi (Michanganyiko otomatiki inayoendelea)
 
-Auto-Combo Engine huchagua kwa nguvu mtoa huduma/modeli bora kwa kila ombi kwa kutumia **funksia ya ukadiriaji yenye vipengele 16** (iliyofafanuliwa katika `open-sse/services/autoCombo/scoring.ts` → `DEFAULT_WEIGHTS`). Jumla ya uzani chaguomsingi ni `1.0`; uzani maalum husawazishwa upya na `normalizeScoringWeights()`. Vipengele viwili kati ya kumi na sita — `cacheAffinity` na `resetWindowAffinity` — vina uzani chaguomsingi wa `0`; `reliability` ina `0` katika `DEFAULT_WEIGHTS` lakini `0.03` katika vifurushi vya jumla na `0.04` katika `reliability-first`, na `quality` ina `0.02` katika vifurushi (`0.03` katika `quality-first`): bado vinakokotolewa kwa kila mgombea, na `cacheAffinity` hudhibiti uondoaji wa nakala za akiba ya prompt nje ya alama, kwa hivyo vipengele vyenye uzani chaguomsingi wa sifuri havichangii kwa chaguomsingi, ilhali vifurushi huchangia.
+Injini ya Mchanganyiko Kiotomatiki huchagua kwa nguvu provider/model bora kwa kila ombi kwa kutumia a **Kitendaji cha alama 16** (imefafanuliwa katika `open-sse/services/autoCombo/scoring.ts` → `DEFAULT_WEIGHTS`). Uzito chaguo-msingi ni jumla ya `1.0`; uzani maalum hurekebishwa na `normalizeScoringWeights()`. Mbili kati ya kumi na sita — `cacheAffinity` na `resetWindowAffinity` — hubeba uzito wa kawaida wa `0`; `reliability` hubeba `0` katika `DEFAULT_WEIGHTS` lakini `0.03` katika vifurushi vya kawaida na `0.04` katika `reliability-first`, na `quality` hubeba `0.02` katika vifurushi (`0.03` katika `quality-first`): bado zinakokotolewa kwa kila mgombea, na milango ya `cacheAffinity` ya utenganishaji wa akiba ya haraka nje ya alama, kwa hivyo vipengele-msingi sufuri havipigi kura kwa chaguo-msingi.
 
-![Ukadiriaji wa Auto-Combo wenye vipengele 16](../diagrams/exported/auto-combo-scoring.svg)
+![Auto-Combo 16-factor scoring](../diagrams/exported/auto-combo-scoring.svg)
 
-> Chanzo: [diagrams/auto-combo-scoring.mmd](../diagrams/auto-combo-scoring.mmd) (zalisha upya kupitia `npm run docs:render-diagrams`). Jina la faili ni la kihistoria; chanzo na mchoro uliozalishwa huonyesha vipengele vyote 16 vilivyotangazwa katika `DEFAULT_WEIGHTS`.
+> Chanzo: [diagrams/auto-combo-scoring.mmd](../diagrams/auto-combo-scoring.mmd) (tengeneza upya kupitia `npm run docs:render-diagrams`). Jina la faili ni la kihistoria; chanzo na mchoro uliotolewa unaonyesha mambo yote 16 yaliyotangazwa katika `DEFAULT_WEIGHTS`.
 
-| Kipengele             | Uzani Chaguomsingi | Maelezo                                                                                                                                                                                                                                                          |
-| :-------------------- | :----------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `quota`               | 0.1429             | Nafasi iliyobaki ya mgao / kikomo cha kasi [0..1]                                                                                                                                                                                                                |
-| `health`              | 0.1605             | Alama ya afya kutoka kwa circuit breaker (CLOSED=1.0, HALF_OPEN=0.5, OPEN=0.0)                                                                                                                                                                                   |
-| `costInv`             | 0.1429             | Kinyume cha gharama **iliyochanganywa** (60% bei ya tokeni za ingizo + 40% bei ya tokeni za towe, iliyosawazishwa) — bei nafuu = alama ya juu                                                                                                                    |
-| `latencyInv`          | 0.1143             | Ucheleweshaji wa p95 uliogeuzwa na kusawazishwa kwa kundi — kasi zaidi = alama ya juu                                                                                                                                                                            |
-| `taskFit`             | 0.0762             | Ufaafu kwa aina ya kazi (uandishi wa msimbo, ukaguzi, upangaji, uchanganuzi, utatuzi wa hitilafu, nyaraka)                                                                                                                                                       |
-| `stability`           | 0.0476             | Uthabiti unaotegemea tofauti kutoka kwa mkengeuko sanifu wa ucheleweshaji — mgombea ambaye muda wake wa kujibu hubadilika sana hupata alama ya chini                                                                                                             |
-| `tierPriority`        | 0.0476             | Kipaumbele cha daraja la akaunti — Ultra=1.0, Pro=0.67, Standard=0.33, Free=0.0                                                                                                                                                                                  |
-| `tierAffinity`        | 0.0476             | Ulinganifu kati ya daraja la mgombea na daraja linalopendekezwa na manifest                                                                                                                                                                                      |
-| `specificityMatch`    | 0.0476             | Ulinganifu kati ya umahususi wa ombi (kidokezo cha manifest) na daraja la modeli                                                                                                                                                                                 |
-| `contextAffinity`     | 0.0476             | Ulinganifu kati ya hitaji la dirisha la muktadha la ombi na dirisha la muktadha la modeli                                                                                                                                                                        |
-| `sessionAvailability` | 0.0476             | Upatikanaji wa kipindi cha OAuth wa muunganisho wa mgombea kwa kipindi hiki (`getOAuthSessionAvailability()`; miunganisho isiyotumia OAuth hupata alama 1.0)                                                                                                     |
-| `connectionDensity`   | 0.0476             | Husambaza mzigo katika miunganisho ya mtoa huduma yuleyule (kuzuia mkusanyiko)                                                                                                                                                                                   |
-| `cacheAffinity`       | 0.00               | Ulinganifu wa rendezvous-hash kuelekea muunganisho unaoelekea zaidi kuwa tayari una kiambishi awali cha akiba ya prompt ya ombi hili (`open-sse/services/combo/promptCacheAffinity.ts`); umezimwa kwa chaguomsingi (#8008)                                       |
-| `resetWindowAffinity` | 0.00               | Upendeleo kwa miunganisho ambayo dirisha lake la kuweka upya mgao linafaa (umezimwa kwa chaguomsingi)                                                                                                                                                            |
-| `quality`             | 0.03               | Ishara ya ubora wa towe inayoongozwa na maoni kutoka kwa kifuatiliaji cha ubora wa matukio ya uelekezaji; wagombea wasio na uchunguzi hupokea alama ya kati ya 0.5                                                                                               |
-| `reliability`         | 0.00               | Sehemu ya mafanikio iliyozingatiwa, `1 - failureRate`, kutoka saa 24 za historia ya matumizi baada ya kufikia kiwango cha chini cha sampuli kumi (vinginevyo vipimo vya wakati halisi); wagombea wasio na uchunguzi husomwa kama 1.0. Kimezimwa kwa chaguomsingi |
+| Kipengele             | Uzani Chaguomsingi | Maelezo                                                                                                                                                                                                                                 |
+| :-------------------- | :----------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `quota`               | 0.1429             | Kiasi kilichosalia / chumba cha kichwa cha kikomo cha bei [0..1]                                                                                                                                                                        |
+| `health`              | 0.1605             | Alama ya afya kutoka kwa kivunja mzunguko (CLOSED= 1.0, HALF_OPEN= 0.5, OPEN= 0.0)                                                                                                                                                      |
+| `costInv`             | 0.1429             | Inverse **iliyochanganywa** gharama (60% pembejeo + 40% tokeni bei ya tokeni, kawaida) — nafuu = alama ya juu                                                                                                                           |
+| `latencyInv`          | 0.1143             | Muda mchache wa p95 ulisawazishwa ili kuongeza alama za juu zaidi za — =                                                                                                                                                                |
+| `taskFit`             | 0.0762             | Usaha wa aina ya kazi (kuandika, kukagua, kupanga, uchanganuzi, utatuzi, hati)                                                                                                                                                          |
+| `stability`           | 0.0476             | Uthabiti unaotegemea tofauti kutoka kwa mkengeuko wa muda wa kusubiri — mtahiniwa ambaye muda wake wa kujibu hubadilika kuwa wa chini zaidi                                                                                             |
+| `tierPriority`        | 0.0476             | Kipaumbele cha kiwango cha akaunti — Ultra = 1.0, Pro = 0.67,= Kawaida 0.33,= 0.0 Isiyolipishwa                                                                                                                                         |
+| `tierAffinity`        | 0.0476             | Uhusiano kati ya kiwango cha mgombea na kiwango kinachopendekezwa na faili ya maelezo                                                                                                                                                   |
+| `specificityMatch`    | 0.0476             | Linganisha kati ya umaalum wa ombi (kidokezo cha dhihirisho) na kiwango cha mfano                                                                                                                                                       |
+| `contextAffinity`     | 0.0476             | Uhusiano kati ya hitaji la muktadha-dirisha la ombi na dirisha la muktadha wa mfano                                                                                                                                                     |
+| `sessionAvailability` | 0.0476             | Upatikanaji wa kipindi cha OAuth cha muunganisho wa mtahiniwa wa kipindi hiki (`getOAuthSessionAvailability()`; alama za miunganisho isiyo ya OAuth 1.0)                                                                                |
+| `connectionDensity`   | 0.0476             | Hueneza mzigo kwenye miunganisho ya mtoaji sawa (kinga-kuzingatia)                                                                                                                                                                      |
+| `cacheAffinity`       | 0.00               | Ulinganifu wa rendezvous-hash kuelekea muunganisho unaoelekea zaidi kuwa tayari una kiambishi awali cha akiba ya prompt ya ombi hili (`open-sse/services/combo/promptCacheAffinity.ts`); umezimwa kwa chaguomsingi (#8008)              |
+| `resetWindowAffinity` | 0.00               | Upendeleo kwa miunganisho ambayo dirisha la uwekaji upya wa sehemu yake ni nzuri (imezimwa kwa chaguo-msingi)                                                                                                                           |
+| `quality`             | 0.03               | mawimbi ya ubora wa matokeo yanayotokana na maoni kutoka kwa kifuatilia ubora wa tukio; watahiniwa bila uchunguzi hupokea 0.5 ya upande wowote                                                                                          |
+| `reliability`         | 0.00               | Ushiriki wa mafanikio uliozingatiwa, `1 - failureRate`, kutoka 24h ya historia ya matumizi nyuma ya sakafu ya sampuli kumi (vinginevyo vipimo vya muda halisi); watahiniwa bila uchunguzi unaosomwa kama 1.0. Imezimwa kwa chaguomsingi |
 
-`quality` (`open-sse/services/routing/quality.ts`): `cold restart → ∅`; `observations = 0 → score 0.5`.
+Kifuatiliaji cha kumbukumbu `quality` (`open-sse/services/routing/quality.ts`) hakina kitu baada ya kuanza tena kwa baridi, kwa hivyo kila mtahiniwa atapata `0.5` isiyoegemea upande wowote hadi uchunguzi wa kwanza utue.
 
-**Jumla:** `0.1429 + 0.1605 + 0.1429 + 0.1143 + 0.0762 + (7 × 0.0476) + 0.00 + 0.00 + 0.03 + 0.00 = 1.0` kama ilivyotangazwa katika `DEFAULT_WEIGHTS`; uzani uliosanidiwa na mtumiaji husawazishwa upya kuwa mgawanyo na `normalizeScoringWeights()` kabla ya ukadiriaji.
+> **Kiasi kisichoweza kusomeka (#15347).** Mtoa huduma anapokuwa na kichujio cha mgao lakini hakirudishi chochote kinachosomeka (imeshindwa kuleta, hati tambulishi, matumizi ya ujumbe pekee, au muhtasari wa `percentUsed` usioweza kuchanganuliwa na `windows` isiyo na kikomo, ikiwa ni pamoja na `percentUsed: null`), mtahiniwa anapata `0` kwenye mhimili wa `quota` na alama yake ya mwisho, `UNREADABLE_QUOTA_SOFT_DEPRIORITIZE_FACTOR` ( `autoStrategy.ts`). muundo wa adhabu laini kama adhabu ya hali ya unganisho. Usomaji usiofaulu wa matumizi ni ushahidi kuhusu telemetry, sio mtoaji, kwa hivyo iko chini ya usomaji wowote wa kweli, pamoja na -used iliyothibitishwa 100%, lakini haizuiwi kwa bidii au kufukuzwa. Mtoa huduma asiye na kikomo anaripoti `unlimited: true` na alama kama mgawo kamili; mtoa huduma asiye na kichujio kilichosajiliwa hana chanzo cha telemetry hata kidogo na anaweka chaguomsingi la `100`.
+
+**Jumla:** `0.1429 + 0.1605 + 0.1429 + 0.1143 + 0.0762 + (7 × 0.0476) + 0.00 + 0.00 + 0.03 + 0.00 = 1.0` kama ilivyotangazwa katika `DEFAULT_WEIGHTS`; uzani uliosanidiwa na mtumiaji hurekebishwa kuwa usambazaji na `normalizeScoringWeights()` kabla ya kufunga.
 
 ## Vifurushi vya Modi
 
@@ -328,21 +351,13 @@ Injini ya michanganyiko ya OmniRoute inatumia **mikakati 20 ya uelekezaji** (ili
 Kwa mzunguko mkali tumia `round-robin`; uzani sawa kwenye `weighted` hutoa usawazishaji wa kitakwimu — si
 mkali.
 
-### Modi ya bomba la kiwakala
+### Hali ya bomba la mawakala
 
-Mchanganyiko wa `pipeline` wenye angalau modeli mbili unaweza kuwasha uelekezaji wa kipangaji/kitekelezaji kupitia
-`config.agenticOrchestration.enabled`. Lengo la kwanza linashughulikia upangaji na majibu ya mwisho;
-lengo la pili hutoa miito ya zana katika umbizo asilia la mteja. OmniRoute hutambua
-mwendelezo wa matokeo ya zana kutoka kwenye itifaki ya ombi, huuliza kipangaji ikiwa duru nyingine ya zana
-inahitajika, na kwa namna inayobadilika hufanya ama kitekelezaji au kipangaji kuwa hatua ya mwisho
-inayowasilishwa kwa mteja.
+Mchanganyiko `pipeline` ulio na angalau miundo miwili unaweza kuchagua kutumia planner/executor ukitumia `config.agenticOrchestration.enabled`. Mlengwa wa kwanza anamiliki mipango na majibu ya mwisho; lengo la pili linatoa simu za zana asilia za mteja. OmniRoute hutambua mwendelezo wa matokeo ya zana kutoka kwa itifaki ya ombi, huuliza mpangaji ikiwa mzunguko mwingine wa zana unahitajika, na kwa nguvu humfanya mtekelezaji au mpangaji kuwa hatua ya mwisho inayomkabili mteja.
 
-Modeli za ziada baada ya lengo la pili hupangwa kama vitekelezaji vya akiba. Jibu la
-HTTP lililoshindikana au hitilafu ya usafirishaji husogeza mchakato hadi kitekelezaji kinachofuata, huku likibeba
-uamuzi uleule wa kipangaji na zana asilia lakini likitumia kidokezo cha hatua cha kitekelezaji hicho chenyewe pamoja na
-muunganisho wake uliotatuliwa. Jibu la kwanza lililofanikiwa hurejeshwa bila kubadilishwa, ikiwa ni pamoja na
-utiririshaji wa SSE; hitilafu baada ya utiririshaji uliofanikiwa kuanza haziwezi kujaribiwa tena hapa.
-Ikiwa vitekelezaji vyote vitashindwa, hitilafu ya mwisho hurejeshwa. Ukatishaji wa mteja husitisha usambazaji.
+Katika mwendelezo wa matokeo ya zana, OmniRoute pia inasimamisha utekelezaji wakati mizunguko miwili iliyokamilishwa ikirudia simu zile zile za zana bila kubadilishwa matokeo, au wakati kila matokeo yaliyowekwa alama katika raundi mbili mfululizo yaliposhindikana. Matokeo yaliyobadilishwa huruhusu simu zinazorudiwa (kwa mfano, upigaji kura). Mlinzi huweka upya ombi jipya la mtumiaji, hupanga simu sambamba katika mzunguko mmoja, na kuauni Anthropic, Ukamilishaji wa Gumzo, Majibu na historia za Gemini. Mpangaji hupokea sababu na anamiliki jibu la mwisho hata kama ataomba duru nyingine ya zana.
+
+Aina za ziada baada ya lengo la pili zimeagizwa chelezo za watekelezaji. Jibu lisilofanikiwa la HTTP au ubaguzi wa usafiri unasonga mbele kwa msimamizi anayefuata, akiwa na uamuzi uleule wa mpangaji na zana asilia lakini hatua ya mtekelezaji huyo mwenyewe kuharakishwa na muunganisho uliosuluhishwa. Jibu la kwanza lililofanikiwa limerudishwa bila kubadilika, pamoja na utiririshaji wa SSE ; kushindwa baada ya kutiririsha kwa mafanikio kuanza hakuwezi kujaribiwa tena hapa. Ikiwa watekelezaji wote watashindwa, kushindwa kwa mwisho kunarejeshwa. Mteja anaacha kutuma.
 
 ```json
 {
@@ -354,11 +369,7 @@ Ikiwa vitekelezaji vyote vitashindwa, hitilafu ya mwisho hurejeshwa. Ukatishaji 
 }
 ```
 
-Kitekelezaji kinaweza kutoa miito mingi inayojitegemea katika jibu moja. Miito inayotegemeana
-hushughulikiwa katika zamu zinazofuata za matokeo ya zana ya mteja, huku kipangaji kikikagua kila tokeo.
-`maxToolRounds` ina thamani chaguo-msingi ya `8` na hukubali `1`–`32`; kikomo hicho kikifikiwa, kipangaji lazima
-kitoe jibu bora zaidi la mwisho linalopatikana. Maamuzi ya ndani ya kipangaji huwekwa kwenye bafa, huku
-jibu lililochaguliwa la kuelekezwa kwa mteja likihifadhi mapendeleo ya awali ya utiririshaji.
+Mtekelezaji anaweza kutoa simu nyingi za kujitegemea katika jibu moja. Simu tegemezi hushughulikiwa katika zamu za matokeo ya zana za mteja baadaye, huku mpangaji akikagua kila matokeo. `maxToolRounds` inabadilika kuwa `8` na inakubali `1`–`32`; inapofikiwa, mpangaji lazima atoe jibu bora zaidi la mwisho. Maamuzi ya mpangaji wa ndani yanaakibishwa, huku jibu linalomkabili mteja lililochaguliwa huhifadhi mapendeleo asilia ya utiririshaji.
 
 ### Bechi thabiti ya `round-robin` na upanuzi wa akaunti
 
@@ -386,37 +397,17 @@ kikisonga mbele.
 
 ## Mkakati wa Fusion
 
-`fusion` ni mkakati pekee ambao **hauchagui** lengo moja. Husambaza ombi kwa
-**kila modeli ya paneli kwa sambamba**, kisha **modeli ya mwamuzi** inayoweza kusanidiwa huunganisha
-jibu moja la mwisho kutoka kwa majibu yote ya paneli. Umehamishwa kutoka `decolua/9router`
-ya awali (muundo wa Fusion wa OpenRouter); utekelezaji upo katika `open-sse/services/fusion.ts`.
+`fusion` ni mkakati mmoja unaofanya **sivyo** chagua lengo moja. Inashabikia ombi **kila mfano wa paneli sambamba** , kisha inayoweza kusanidiwa **jaji mfano** huunganisha jibu moja la mwisho kutoka kwa majibu yote ya paneli. Imeshushwa kutoka `decolua/9router` ya juu ( Muundo wa Fusion wa OpenRouter); utekelezaji katika `open-sse/services/fusion.ts`.
 
-Jinsi unavyofanya kazi:
+Jinsi inavyofanya kazi:
 
-0. **Kupita moja kwa moja kwa maombi yenye zana** — ombi lenye safu isiyo tupu ya `tools` huku
-   `tool_choice` haijawekwa wazi kuwa `"none"` huruka paneli kabisa: huelekezwa moja kwa moja kwa
-   modeli moja (mwamuzi aliyesanidiwa, au `panel[0]`) huku `tools`/`tool_choice`
-   zikipitishwa bila kubadilishwa. Wanachama wa paneli hawana ufikiaji wa zana na maelekezo ya
-   uunganishaji ya mwamuzi hayahimizi utoaji wa miito ya zana, kwa hivyo viteja vya kiwakala/vinavyoita zana
-   hupata uamuzi halisi wa kuitwa kwa zana badala ya maandishi yaliyounganishwa (#6771).
-1. **Usambazaji mpana** (kwa maombi yasiyo na zana pekee) — ombi hutumwa kwa kila modeli ya
-   paneli kwa wakati mmoja, huku utiririshaji ukizimwa kwa lazima na zana zikiondolewa (mwamuzi anahitaji
-   maandishi kamili ili kuyaunganisha).
-2. **Ukusanyaji wa akidi wenye kipindi cha ziada** — mara tu majibu `minPanel` yanapowasili, kipima muda
-   kifupi cha kipindi cha ziada huanza kwa ajili ya waliochelewa, kisha fusion huendelea kwa kutumia chochote kilichokusanywa.
-   Hii huweka kikomo kwa athari ya modeli iliyo polepole zaidi kwenye muda halisi, ndani ya kikomo kisichoweza kuvukwa cha muda.
-3. **Uunganishaji wa mwamuzi** — majibu ya paneli huondolewa utambulisho (`Chanzo 1`, `Chanzo 2`, … — ili
-   mwamuzi apime maudhui, si chapa ya modeli) na kukabidhiwa mwamuzi, ambaye huchanganua
-   makubaliano / migongano / ushughulikiaji wa sehemu / maarifa ya kipekee / mambo yaliyopuuzwa, kisha
-   huandika jibu **moja** lenye mamlaka. Mwito wa mwamuzi huhifadhi thamani asili ya
-   `stream` ya kiteja pamoja na zana, kwa hivyo utiririshaji na matumizi ya zana katika hatua zinazofuata bado hufanya kazi.
-4. **Kushuka kwa utendaji kwa ustahimilivu** — majibu 0 ya paneli → `503`; jibu 1 pekee lililosalia → jibu hilo
-   hurejeshwa moja kwa moja (hakuna cha kuunganisha); paneli yenye modeli moja hujibu moja kwa moja.
+0. **Njia ya kukwepa yenye zana** — ombi ambalo hubeba safu ya `tools` isiyo tupu na `tool_choice` bila kubainisha `"none"` inaruka paneli kabisa: inaelekeza moja kwa moja kwa modeli moja (jaji iliyosanidiwa, au `panel[0]`) na `tools`/`tool_choice` iliyopitishwa bila kubadilishwa. Wanachama wa jopo hawana ufikiaji wa zana na maagizo ya awali ya jaji hukatisha tamaa utoaji wa simu ya zana, kwa hivyo wateja wa agentic/tool-calling hupata uamuzi halisi wa kupiga simu badala ya nathari iliyosanisishwa (#6771).
+1. **Shabiki-nje** (maombi yasiyo na zana pekee) — kidokezo kinatumwa kwa kila modeli ya paneli mara moja, kulazimishwa kutotiririsha na zana zilizovuliwa (hakimu anahitaji nathari kamili ili kusanisi).
+2. **Mkusanyiko wa neema ya akidi** — punde tu majibu `minPanel` yanapowasili, kipima saa kifupi kinaanza kwa wanaojificha, kisha muunganisho unaendelea na chochote kilichokusanywa. Hii hufunika adhabu ya mtindo wa polepole zaidi kwenye muda wa ukuta, inayofungwa na muda mgumu wa kuisha.
+3. **Jaji awali** Majibu ya jopo la — hayatambuliwi (`Source 1`, `Source 2`, … — kwa hivyo jaji apime kitu, sio chapa ya mfano) na kukabidhiwa kwa jaji, ambayo inachambua makubaliano / kinzani / chanjo ya sehemu / ufahamu wa kipekee / matangazo yasiyoonekana, kisha anaandika.**moja** jibu lenye mamlaka. Simu ya hakimu huweka zana asili za `stream` bendera ya mteja +, kwa hivyo utiririshaji na utumiaji wa zana za chini bado hufanya kazi.
+4. **Udhalilishaji wa neema** Jopo la — 0 linajibu → `503`; haswa 1 aliyenusurika → jibu hilo hurejeshwa moja kwa moja (hakuna cha kuunganisha); jopo la mfano mmoja hujibu moja kwa moja.
 
-Mwanachama wa paneli anaweza pia kuwa hatua ya `combo-ref` (`{kind: "combo-ref", comboName: "..."}`) inayorejelea
-combo nyingine — hutatuliwa kama **sauti moja ya paneli ya kisanduku cheusi** (usambazaji kamili unaojirudia ndani ya
-combo inayorejelewa, si usambazaji mpana kwa malengo ya combo hiyo yenyewe), ikiwa na ulinzi uleule wa kina/mizunguko
-ambao tayari unatumiwa na kila mkakati mwingine unaotumia combo-ref (#6764).
+Mjumbe wa jopo pia anaweza kuwa hatua ya `combo-ref` (`{kind: "combo-ref", comboName: "..."}`) akirejelea mchanganyiko mwingine — ambayo itasuluhisha kama **sauti moja ya paneli nyeusi** (utumaji kamili wa kujirudia katika mseto uliorejelewa, si shabiki-nje ya shabaha za mseto huo), kwa ulinzi ule ule depth/cycle kila mkakati mwingine wa kutumia ref-rejelea tayari unatumia (#6764).
 
 ### Usanidi
 

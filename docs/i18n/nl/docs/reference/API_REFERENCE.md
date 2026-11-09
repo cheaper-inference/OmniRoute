@@ -358,7 +358,7 @@ GET /v1/embeddings
 
 ---
 
-## Afbeeldingen genereren
+## Beeld genereren
 
 ```bash
 POST /v1/images/generations
@@ -372,36 +372,22 @@ Content-Type: application/json
 }
 ```
 
-Beschikbare providers zijn onder andere OpenAI (GPT Image 2), xAI (Grok Image), Together AI (FLUX), Fireworks AI, Nebius (FLUX), Hyperbolic, NanoBanana, **OpenRouter**, **ZenMux**, SD WebUI (lokaal) en ComfyUI (lokaal).
+Beschikbare providers zijn onder meer OpenAI (GPT Image 2), xAI (Grok Image), Together AI (FLUX), Fireworks AI, Nebius (FLUX), Hyperbolic, NanoBanana,**OpenRouter** ,**ZenMux** , SD WebUI (lokaal), ComfyUI (lokaal).
 
-`n` retourneert `n` afbeeldingen in `data[]`. Providers waarvan de upstream-API één afbeelding per aanroep retourneert
-(Black Forest Labs, Stability AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik,
-NVIDIA NIM, Cloudflare Workers AI) krijgen `n` afzonderlijke upstream-aanroepen, met maximaal 4 gelijktijdige aanroepen. Een
-vaste `seed` wordt verschoven met de aanroepindex (`seed`, `seed + 1`, …), zodat de afbeeldingen verschillen maar reproduceerbaar blijven. `n` is begrensd op 10. De aanvraag mislukt als geheel als een van de aanroepen mislukt. De lijst met fan-out-indelingen staat in `SINGLE_IMAGE_FANOUT_FORMATS` in
-`open-sse/handlers/imageGeneration/fanOut.ts`.
+`n` retourneert `n` afbeeldingen in `data[]`. Providers waarvan de upstream API één afbeelding per oproep retourneert (Black Forest Labs, Stability AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik, NVIDIA NIM, Cloudflare Workers AI) krijgen `n` afzonderlijke upstream-oproepen, maximaal 4 tijdens de vlucht. Een vaste `seed` wordt gecompenseerd door de oproepindex (`seed`, `seed + 1`, …), dus de afbeeldingen verschillen maar blijven reproduceerbaar. `n` is beperkt tot 10. Het verzoek mislukt als geheel als een oproep mislukt. De lijst met fan-outformaten is `SINGLE_IMAGE_FANOUT_FORMATS` in `open-sse/handlers/imageGeneration/fanOut.ts`.
 
-ZenMux hergebruikt de bestaande API-key-verbinding en accepteert de voorvoegsels
-`zenmux/` of `zm/`:
+ZenMux hergebruikt de bestaande API-sleutelverbinding en accepteert `zenmux/` of `zm/` voorvoegsels:
 
-- `zenmux/openai/gpt-image-2` gebruikt de OpenAI Images API van ZenMux. Opties zijn onder andere `size`,
-  `quality`, `n`, `output_format`, `output_compression`, `background` en `response_format`.
-- Andere publishers, zoals `zm/meta/muse-image-1.0`, gebruiken het Vertex AI-` :predict`
-  -endpoint van ZenMux. `n` wordt toegewezen aan `sampleCount`, `aspect_ratio` aan `aspectRatio` en `image_size`
-  (`1K`, `2K`, `4K`) aan `sampleImageSize`. Een pixelwaarde voor `size` levert alleen een beeldverhouding,
-  geen gegarandeerde pixelafmetingen. Ondersteunde verhoudingen, resoluties en aantallen verschillen per model.
-- `zm/inclusionai/ming-image-0.1-design` kiest zijn eigen afmetingen. Laat `size`,
-  `aspect_ratio` en `image_size` weg; expliciete waarden retourneren HTTP 400. PNG, JPEG en WebP
-  kunnen worden aangevraagd met `output_format`.
+- `zenmux/openai/gpt-image-2` gebruikt ZenMux's OpenAI Images API. Opties zijn onder meer `size`, `quality`, `n`, `output_format`, `output_compression`, `background` en `response_format`.
+- Andere uitgevers, zoals `zm/meta/muse-image-1.0`, gebruiken het Vertex AI `:predict` eindpunt van ZenMux. `n` wordt toegewezen aan `sampleCount`, `aspect_ratio` aan `aspectRatio`, en `image_size` (`1K`, `2K`, `4K`) aan `sampleImageSize`. Een pixel `size` levert alleen een beeldverhouding, geen gegarandeerde pixelafmetingen. Ondersteunde verhoudingen, resoluties en aantallen variëren per model.
+- `zm/inclusionai/ming-image-0.1-design` kiest haar eigen dimensies. Laat `size`, `aspect_ratio` en `image_size` weg; expliciete waarden retourneren HTTP 400. PNG, JPEG en WebP kunnen worden aangevraagd met `output_format`.
 
-Deze integratie ondersteunt tekst-naar-afbeelding-generatie, niet het bewerken van referentieafbeeldingen. Vertex-
-uitvoer wordt genormaliseerd naar `data[].b64_json`; `response_format: "url"` retourneert een upstream-
-HTTPS-URL of een base64-data-URL wanneer alleen afbeeldingsbytes beschikbaar zijn. Lege of gefilterde uitvoer
-retourneert een fout in plaats van een lege geslaagde respons. Toegang tot modellen is afhankelijk van het ZenMux-account.
-Zie [de Vertex API van ZenMux](https://docs.zenmux.ai/api/vertexai/generate-images) en
-[de OpenAI Images API](https://docs.zenmux.ai/api/openai/generate-an-image).
+Deze integratie ondersteunt het genereren van tekst naar afbeeldingen, niet het bewerken van referentieafbeeldingen. Vertex-uitvoer wordt genormaliseerd naar `data[].b64_json`; `response_format: "url"` retourneert een stroomopwaartse HTTPS URL of een base64-gegevens URL wanneer alleen afbeeldingsbytes beschikbaar zijn. Empty/filtered -uitvoer retourneert een fout in plaats van een leeg succes. Toegang tot modellen is afhankelijk van het ZenMux account. Zie [ZenMux's Vertex API](https://docs.zenmux.ai/api/vertexai/generate-images) en [OpenAI afbeeldingen API](https://docs.zenmux.ai/api/openai/generate-an-image).
+
+Een Microsoft 365 Copilot -inlogverbinding bedient `copilot-m365-web/m365-copilot-image` via de ingebouwde afbeeldingstool van Copilot: één Copilot -beurt per afbeelding (`n` 1–4), `size` stuurt alleen de oriëntatie, en afbeeldingen worden inline geretourneerd (`b64_json`, of een data URL voor `response_format: "url"`). Zie [Microsoft 365 Copilot](../providers/COPILOT-M365.md#image-generation).
 
 ```bash
-# Alle afbeeldingsmodellen weergeven
+# List all image models
 GET /v1/images/generations
 ```
 
@@ -853,17 +839,19 @@ niet-sessie-aanroeper geweigerd (ophalen, verwijderen, annuleren en de controle 
 
 ---
 
-## Zoek-API
+## Zoek API
 
-Abstractie voor web-/zoekproviders (Tavily, Brave, Exa, Serper, enzovoort).
+Web/search provider abstractie (Tavily, Brave, Exa, Serper, etc.).
 
-| Methode | Pad                    | Beschrijving                                                                                          |
-| ------- | ---------------------- | ----------------------------------------------------------------------------------------------------- |
-| GET     | `/v1/search`           | Geconfigureerde zoekproviders + mogelijkheden weergeven                                               |
-| POST    | `/v1/search`           | Een zoekopdracht uitvoeren — body gevalideerd door `v1SearchSchema`, ondersteunt caching/samenvoeging |
-| GET     | `/v1/search/analytics` | Statistieken per provider voor treffers/latentie/cache                                                |
+| Methode | Pad                    | Beschrijving                                                                                   |
+| ------- | ---------------------- | ---------------------------------------------------------------------------------------------- |
+| GET     | `/v1/search`           | Lijst met geconfigureerde + -mogelijkheden van zoekmachines                                    |
+| POST    | `/v1/search`           | Voer een zoekopdracht — body gevalideerd door `v1SearchSchema`, ondersteunt caching/coalescing |
+| GET     | `/v1/search/analytics` | hit/latency/cache -statistieken per provider                                                   |
 
-**Authenticatie:** Bearer-API-sleutel (`extractApiKey` + `isValidApiKey`). Zoekbeleid wordt afgedwongen via `enforceApiKeyPolicy`.
+**Autorisatie:** Drager API sleutel (`extractApiKey` + `isValidApiKey`). Zoekbeleid wordt afgedwongen via `enforceApiKeyPolicy`.
+
+**Automatische selectie:** zonder `provider` draait de goedkoopste aanbieder met een geconfigureerde verbinding als eerste en de volgende goedkoopste is de failover. Gratis last-resort providers (`duckduckgo-free`) worden alleen gebruikt als er niets anders is geconfigureerd. Een zelf-gehoste SearXNG telt zoals geconfigureerd zodra de verbinding een echte `baseUrl` opslaat (niet de standaard `http://localhost:8888/search` uit de catalogus): het wordt dan gerangschikt als een $0-provider vóór de ingetoetste providers, met de goedkoopste ingetoetste provider als failover, ook wanneer SearXNG 400, 401, 403 of 404 antwoordt. Een `baseUrl` die geen geldige `http(s)` URL is of die naar een cloud-metadata-adres verwijst, telt niet. Een SearXNG verbinding die een token opslaat, scoort op deze manier alleen boven `https://` of loopback `http://`. Via gewone `http://` op afstand is het nooit een failover en blijft het een laatste redmiddel, het wordt alleen gebruikt als er geen andere provider is geconfigureerd of als er op naam wordt gevraagd, dus het verzendt het token in die twee gevallen wel in leesbare tekst.
 
 ### `provider_options` voor Exa en Tavily
 
@@ -1025,30 +1013,28 @@ in plaats van tweemaal te worden verzonden. Bron: `src/lib/quota/quotaSessionRec
 
 ---
 
-## Zelfbedieningsgebruik (`/api/usage/om-usage`)
+## Selfservicegebruik (`/api/usage/om-usage`)
 
-Elke API-sleutel kan zijn **eigen** gebruik en quota lezen — zonder beheerdersauthenticatie. Dit is het endpoint dat een
-client (CLI, het OmniCopilot-paneel) gebruikt om de uitgaven van een sleutelhouder weer te geven.
+Elke API -sleutel kan lezen **zijn eigen** gebruik en quota — geen beheerauthenticatie. Dit is het eindpunt dat een klant (CLI, het OmniCopilot paneel) gebruikt om de uitgaven van een sleutelhouder te tonen.
 
 ```bash
-# Tekstvorm (het historische contract — platte tekst voor een terminal)
+# Text form (the historical contract — plain text for a terminal)
 curl -H "Authorization: Bearer <your-api-key>" \
   http://localhost:20128/api/usage/om-usage
 
-# Gestructureerde vorm — wat een UI gebruikt
+# Structured form — what a UI consumes
 curl -H "Authorization: Bearer <your-api-key>" \
   "http://localhost:20128/api/usage/om-usage?format=json"
 ```
 
-Voor de sleutel moet **`allowUsageCommand`** zijn ingeschakeld (standaard uitgeschakeld — de API-sleutelbeheerder van
-het dashboard schakelt dit per sleutel in of uit). Zonder deze optie antwoordt het endpoint met `403`.
+De sleutel moet hebben **`allowUsageCommand`** ingeschakeld (standaard uitgeschakeld — de API-sleutelbeheerder van het dashboard schakelt dit per sleutel). Zonder dit antwoord antwoordt het eindpunt `403`.
 
-`?format=json` retourneert een gediscrimineerde structuur, zodat een aanroeper nooit een gegevensveld uit een weigering leest. Bij succes:
+`?format=json` retourneert een gediscrimineerde vorm, zodat een beller nooit een gegevensveld van een weigering leest. Over succes:
 
 ```jsonc
 {
   "allowed": true,
-  // alleen aanwezig wanneer de sleutel heeft gekozen voor gebruikslimieten per sleutel (dagelijkse/wekelijkse USD):
+  // present only when the key opted into per-key usage limits (daily/weekly/5-hour USD):
   "personal": {
     "dailySpentUsd": 1.25,
     "dailyLimitUsd": 5,
@@ -1057,9 +1043,9 @@ het dashboard schakelt dit per sleutel in of uit). Zonder deze optie antwoordt h
     "weeklyLimitUsd": 20,
     "weeklyResetAtIso": "…" /* … */,
   },
-  // de quota-snapshot van de geselecteerde provider, of null wanneer er nog niets in de cache staat:
+  // the selected provider quota snapshot, or null when nothing is cached yet:
   "provider": { "connectionId": "…", "provider": "claude", "plan": "…", "quotas": {/* … */} },
-  // de snapshot van elke verbinding, zodat een UI verschillende providers naast elkaar kan weergeven:
+  // every connection's snapshot, so a UI can render several providers side by side:
   "providers": [
     { "connectionId": "…", "provider": "claude" /* … */ },
     { "provider": "codex" /* … */ },
@@ -1067,13 +1053,9 @@ het dashboard schakelt dit per sleutel in of uit). Zonder deze optie antwoordt h
 }
 ```
 
-Bij een weigering (`401` ongeldige sleutel / `403` niet toegestaan) retourneert dezelfde route
-`{ "allowed": false, "error": { "message": "…" } }` — een aanwezige maar lege `personal`/`provider`
-(sleutel toegestaan, maar er is nog niets bekend) is een andere status dan een weigering, en alleen de JSON-vorm
-maakt dit onderscheid.
+Bij weigering (`401` slechte sleutel / `403` niet toegestaan) retourneert dezelfde route `{ "allowed": false, "error": { "message": "…" } }` — een huidige maar lege `personal`/`provider` (sleutel toegestaan, nog niets geleerd) is een andere status dan een weigering, en alleen het JSON -formulier onderscheidt ze.
 
-**Authenticatie:** de eigen Bearer API-sleutel van de aanroeper, gevalideerd met `isValidApiKey` — dit is _niet_ het
-beheeroppervlak (`/api/keys/…`), dat achter `requireManagementAuth` blijft.
+**Autorisatie:** de eigen Bearer API sleutel van de beller, gevalideerd met `isValidApiKey` — dit is _niet_ het beheeroppervlak (`/api/keys/…`), dat achter `requireManagementAuth` blijft.
 
 ### Ruwe versus cutoff-aangepaste quotapercentages
 
@@ -1333,40 +1315,41 @@ en de prioriteitsketens in `src/lib/modelCapabilityLimits.ts`.
 | `/api/usage/model-latency-stats` | GET             | Voortschrijdend aggregaat van latentie per provider/model (gemiddelde/p50/p95/p99, slagingspercentage); filters: `windowHours`/`minSamples`/`maxRows`/`provider`/`model` (#6873)                                                                                                                                                                          |
 | `/api/usage/cache-health`        | GET             | Overzicht van de prompt-cachegezondheid over `call_logs` — schrijf-/leesverhouding, p50/p90/p99-verdeling van schrijfgroottes, concentratie van zware schrijfbewerkingen, uitsplitsing per model en een oordeel `healthy`/`degraded`/`thrash`/`no-data`; queryparameters `range` (`1h`\|`24h`\|`7d`\|`30d`, standaard `24h`) en optioneel `model` (#8827) |
 
-### API-sleutelrechten
+### API -sleutelmachtigingen
 
-`PATCH /api/keys/{id}` werkt de rechten van een bestaande sleutel bij. Net als elke `/api/keys*`-route vereist deze route beheerdersautorisatie (zie [Beheerdersauthenticatie](../guides/MANAGEMENT-AUTH.md)), geen inferentiesleutel. Stuur alleen de velden die je wilt wijzigen; een verzoek zonder een van deze velden wordt afgewezen met `No valid fields to update`. De geaccepteerde velden worden gedefinieerd door `updateKeyPermissionsSchema` in `src/shared/validation/schemas/keys.ts`.
+`PATCH /api/keys/{id}` werkt de machtigingen van een bestaande sleutel bij. Zoals elke `/api/keys*` route heeft deze beheerautorisatie nodig (zie [Beheerauthenticatie](../guides/MANAGEMENT-AUTH.md) ), geen inferentiesleutel. Stuur alleen de velden die u wilt wijzigen; een verzoek met geen van deze wordt afgewezen bij `No valid fields to update`. De geaccepteerde velden worden gedefinieerd door `updateKeyPermissionsSchema` in `src/shared/validation/schemas/keys.ts`.
 
-| Veld                                        | Type                                                                             | Opmerkingen                                                                                                                                           |
-| ------------------------------------------- | -------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `name`                                      | tekenreeks, 1-200 tekens                                                         |                                                                                                                                                       |
-| `isActive`                                  | boolean                                                                          |                                                                                                                                                       |
-| `isBanned`                                  | boolean                                                                          |                                                                                                                                                       |
-| `expiresAt`                                 | ISO 8601-datum/tijd of `null`                                                    | Met `null` wordt de vervaldatum verwijderd                                                                                                            |
-| `modelAccessMode`                           | `all` \| `restricted`                                                            | `allowedModels` moet leeg zijn wanneer de modus `all` is                                                                                              |
-| `allowedModels`, `blockedModels`            | array met tekenreeksen, maximaal 1000                                            |                                                                                                                                                       |
-| `allowedCombos`                             | array met tekenreeksen, maximaal 500                                             | Bepaalt welke combo's de sleutel mag aanroepen; voor directe modellen zijn `modelAccessMode` / `allowedModels` bepalend                               |
-| `connectionAccessMode`                      | `all` \| `restricted`                                                            | `allowedConnections` moet niet-leeg zijn bij `restricted` en leeg bij `all`                                                                           |
-| `allowedConnections`                        | array met UUID's, maximaal 100                                                   |                                                                                                                                                       |
-| `allowAutoCombos`                           | boolean                                                                          | `false` weigert aanvragen voor `auto/*`-modellen met deze sleutel; sleutels waarvoor dit nooit is ingesteld, zijn toegestaan                          |
-| `catalogScope`                              | `all` \| `combos` \| `models`                                                    | Bepaalt wat `GET /v1/models` voor deze sleutel weergeeft (alleen combo's, alleen modellen of beide); dit verandert niet wat de sleutel mag aanroepen  |
-| `forcedModel`                               | tekenreeks van maximaal 300 tekens of `null`                                     | Stuurt chatverzoeken naar dit model/deze combo, met voorrang op `X-Route-Model` en `body.model`; de beperkingen van de sleutel blijven van toepassing |
-| `noLog`, `autoResolve`                      | boolean                                                                          |                                                                                                                                                       |
-| `throttleDelayMs`                           | geheel getal, 0-300000                                                           |                                                                                                                                                       |
-| `maxSessions`                               | geheel getal, 0-10000                                                            |                                                                                                                                                       |
-| `rateLimits`                                | array van `{ limit, window }` (positieve gehele getallen, maximaal 50) of `null` | Met `null` worden de limieten verwijderd                                                                                                              |
-| `accessSchedule`                            | planningsobject of `null`                                                        | Met `null` wordt de planning verwijderd                                                                                                               |
-| `scopes`                                    | array met tekenreeksen, maximaal 32                                              |                                                                                                                                                       |
-| `allowedEndpoints`                          | array met tekenreeksen, maximaal 20                                              |                                                                                                                                                       |
-| `streamDefaultMode`                         | `legacy` \| `json`                                                               |                                                                                                                                                       |
-| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                             | Zie [Cache-omzeiling per sleutel](#per-key-cache-bypass)                                                                                              |
-| `compressionEnabled`                        | boolean                                                                          |                                                                                                                                                       |
-| `codexServiceMode`                          | een van de Codex-servicemodi                                                     |                                                                                                                                                       |
-| `disableNonPublicModels`                    | boolean                                                                          |                                                                                                                                                       |
-| `allowUsageCommand`                         | boolean                                                                          |                                                                                                                                                       |
-| `usageLimitEnabled`                         | boolean                                                                          |                                                                                                                                                       |
-| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | number >= 0 or `null`                                                            |                                                                                                                                                       |
-| `chaosModeEnabled`                          | boolean                                                                          |                                                                                                                                                       |
+| Veld                                        | Type                                                                             | Opmerkingen                                                                                                                                                                                                                                                                                       |
+| ------------------------------------------- | -------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`                                      | tekenreeks, 1-200 tekens                                                         |                                                                                                                                                                                                                                                                                                   |
+| `isActive`                                  | boolean                                                                          |                                                                                                                                                                                                                                                                                                   |
+| `isBanned`                                  | boolean                                                                          |                                                                                                                                                                                                                                                                                                   |
+| `expiresAt`                                 | ISO 8601-datum/tijd of `null`                                                    | Met `null` wordt de vervaldatum verwijderd                                                                                                                                                                                                                                                        |
+| `modelAccessMode`                           | `all` \| `restricted`                                                            | `allowedModels` moet leeg zijn wanneer de modus `all` is                                                                                                                                                                                                                                          |
+| `allowedModels`, `blockedModels`            | reeks tekenreeksen, maximaal 1000                                                |                                                                                                                                                                                                                                                                                                   |
+| `allowedCombos`                             | array met tekenreeksen, maximaal 500                                             | Bepaalt welke combo's de sleutel mag aanroepen; voor directe modellen zijn `modelAccessMode` / `allowedModels` bepalend                                                                                                                                                                           |
+| `connectionAccessMode`                      | `all` \| `restricted`                                                            | `allowedConnections` moet niet-leeg zijn bij `restricted` en leeg bij `all`                                                                                                                                                                                                                       |
+| `allowedConnections`                        | array met UUID's, maximaal 100                                                   |                                                                                                                                                                                                                                                                                                   |
+| `allowAutoCombos`                           | boolean                                                                          | `false` weigert aanvragen voor `auto/*`-modellen met deze sleutel; sleutels waarvoor dit nooit is ingesteld, zijn toegestaan                                                                                                                                                                      |
+| `catalogScope`                              | `all` \| `combos` \| `models`                                                    | Bepaalt wat `GET /v1/models` voor deze sleutel weergeeft (alleen combo's, alleen modellen of beide); dit verandert niet wat de sleutel mag aanroepen                                                                                                                                              |
+| `forcedModel`                               | tekenreeks van maximaal 300 tekens of `null`                                     | Stuurt chatverzoeken naar dit model/deze combo, met voorrang op `X-Route-Model` en `body.model`; de beperkingen van de sleutel blijven van toepassing                                                                                                                                             |
+| `noLog`, `autoResolve`                      | Booleaans                                                                        |                                                                                                                                                                                                                                                                                                   |
+| `throttleDelayMs`                           | geheel getal, 0-300000                                                           |                                                                                                                                                                                                                                                                                                   |
+| `maxSessions`                               | geheel getal, 0-10000                                                            |                                                                                                                                                                                                                                                                                                   |
+| `rateLimits`                                | array van `{ limit, window }` (positieve gehele getallen, maximaal 50) of `null` | Met `null` worden de limieten verwijderd                                                                                                                                                                                                                                                          |
+| `accessSchedule`                            | planningsobject of `null`                                                        | Met `null` wordt de planning verwijderd                                                                                                                                                                                                                                                           |
+| `scopes`                                    | array met tekenreeksen, maximaal 32                                              |                                                                                                                                                                                                                                                                                                   |
+| `allowedEndpoints`                          | array met tekenreeksen, maximaal 20                                              |                                                                                                                                                                                                                                                                                                   |
+| `streamDefaultMode`                         | `legacy` \| `json`                                                               |                                                                                                                                                                                                                                                                                                   |
+| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                             | Zie [Cache-omzeiling per sleutel](#per-key-cache-bypass)                                                                                                                                                                                                                                          |
+| `compressionEnabled`                        | boolean                                                                          |                                                                                                                                                                                                                                                                                                   |
+| `codexServiceMode`                          | een van de Codex-servicemodi                                                     |                                                                                                                                                                                                                                                                                                   |
+| `disableNonPublicModels`                    | boolean                                                                          |                                                                                                                                                                                                                                                                                                   |
+| `allowUsageCommand`                         | boolean                                                                          |                                                                                                                                                                                                                                                                                                   |
+| `usageLimitEnabled`                         | boolean                                                                          |                                                                                                                                                                                                                                                                                                   |
+| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | nummer >= 0 of `null`                                                            |                                                                                                                                                                                                                                                                                                   |
+| `fiveHourUsageLimitUsd`                     | nummer >= 0 of `null`                                                            | Doorlopend USD budget van 5 uur, afgedwongen zoals de dagelijkse en wekelijkse limieten (`usageLimitEnabled`, `UNPRICED_USAGE_BUDGET_POLICY`). `retry-after` is wanneer de oudste uitgaven in de periode verouderen, waardoor een sleutel ver boven de limiet nog steeds geblokkeerd kan blijven. |
+| `chaosModeEnabled`                          | boolean                                                                          |                                                                                                                                                                                                                                                                                                   |
 
 ```bash
 curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
@@ -1416,6 +1399,14 @@ curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
 | `/api/modality-bridge/stats`         | GET        | In-memory `attempts`, successen/`bridged`, fouten, cache-hits, `totalLatencyMs`, `latencySamples`, op samples gebaseerde `averageLatencyMs` en tijdstip van laatste gebruik (wordt bij opnieuw starten gereset; beheerauthenticatie)                                                                                                                                                                         |
 | `/api/modality-bridge/video/runtime` | GET        | Strikte controle van een vertrouwde loopback vóór beheerauthenticatie/probe; geschoonde beschikbaarheid en versies van FFmpeg/ffprobe (no-store)                                                                                                                                                                                                                                                             |
 | `/api/modality-bridge/video/extract` | POST       | Interne, geauthenticeerde bytebroker voor vertrouwde loopback; invoer van 50 MiB, begrensde wachtrij/uitvoer van 32 MiB, `503` bij capaciteitsproblemen, `499` bij verbroken verbinding, `504` bij overschreden deadline; geen openbare upload-API                                                                                                                                                           |
+
+### Videoframe inzoomen
+
+`GET /api/v1/video-bridge/drilldown` leest een tenant-gebonden ondoorzichtige handle die wordt geretourneerd in `x-omniroute-video-drilldown` na een expliciet goedgekeurde Video Bridge-aanvraag. Zowel leesbewerkingen als `DELETE` vereisen altijd een geldige API sleutel en de onafhankelijke `modalityBridgeVideoDrilldownRemoteEnabled` toestemming van de operator. Productiebehoud vereist bovendien `modalityBridgeVideoDrilldownEnabled` en strikte `drilldown: true` per onderdeel. Als de sleutel een niet-lege toelatingslijst voor eindpunten heeft, moet deze `video` bevatten voor zowel GET als DELETE, ongeacht of de aanroeper `/v1` of `/api/v1` gebruikt.
+
+GET query: vereist `handle`; optionele `variant` (`preview`, `standard`, `detail`), `limit` (1–8; oudere `frames` wordt geaccepteerd maar kan niet worden gecombineerd met `limit`), op nul gebaseerde `page` en `start`/`end` seconden. Wanneer beide focusgrenzen worden opgegeven, moet `end` groter zijn dan `start`. Duplicate/unknown -querysleutels worden afgewezen. Succesvolle antwoorden bevatten `derivation`, `durationSeconds`, `frames`, `hasMore`, `page`, `variant` en optioneel `focusWindow`; JSON zonder winkel is beperkt tot 32 MiB inclusief Base64. Overmaatse uitvoer retourneert 413; minder frames aanvragen.
+
+`DELETE /api/v1/video-bridge/drilldown?handle=...` retourneert `{ "removed": 0|1 }`. Onbekende, verlopen en cross-key GETs zijn niet van elkaar te onderscheiden 404-reacties; cross-key DELETE kan de invoer van de eigenaar niet verwijderen. Uitgeschakelde toegang retourneert 403, missing/invalid -authenticatie 401, ongeldige zoekopdrachten 400, annulering 499 en tijdelijke fouten 503. Handles zijn proceslokaal, verlopen na tien minuten en overleven een herstart niet. Nieuwe handvatten gebruiken `v1.` plus een willekeurig Base64URL -token van 32 bytes; alleen token-hashes worden behouden. Verouderde 64-hexade tokens blijven syntactisch leesbaar voor compatibiliteit. Zie [Video Bridge-vangrails](../security/GUARDRAILS.md#video-bridge-videobridgets-videobridgepipelinets) voor toestemming, quota's en details over variantafleiding.
 
 ### Back-up en export/import
 
@@ -1511,19 +1502,19 @@ De GET-reactie bevat `agents[]` (id, name, binary, version, installed, protocol,
 
 Deze eindpunten weerspiegelen de API-indeling van Gemini voor clients die native compatibiliteit met de Gemini SDK verwachten.
 
-### Interne systeem-API's
+### Intern / Systeem APIs
 
-| Endpoint                 | Methode | Beschrijving                                                                 |
-| ------------------------ | ------- | ---------------------------------------------------------------------------- |
-| `/api/init`              | GET     | Controle van de toepassingsinitialisatie (gebruikt bij de eerste uitvoering) |
-| `/api/tags`              | GET     | Met Ollama compatibele modeltags (voor Ollama-clients)                       |
-| `/api/restart`           | POST    | Een gecontroleerde serverherstart starten                                    |
-| `/api/shutdown`          | POST    | Een gecontroleerde serverafsluiting starten                                  |
-| `/api/system/env/repair` | POST    | Omgevingsvariabelen van OAuth-providers herstellen                           |
-| `/api/system/version`    | GET     | Huidige/nieuwste versie, updatestatus, releasekanaal                         |
-| `/api/system/version`    | POST    | Een deploymentbewuste update naar de nieuwste versie starten                 |
+| Eindpunt                 | Methode | Beschrijving                                                         |
+| ------------------------ | ------- | -------------------------------------------------------------------- |
+| `/api/init`              | GET     | Start synchronisatieservices op de achtergrond (beheerauthenticatie) |
+| `/api/tags`              | GET     | Ollama-compatibele modeltags (voor Ollama clients)                   |
+| `/api/restart`           | POST    | Activeer een correcte herstart van de server                         |
+| `/api/shutdown`          | POST    | Zorg voor een correcte afsluiting van de server                      |
+| `/api/system/env/repair` | POST    | Repareer de omgevingsvariabelen van OAuth provider                   |
+| `/api/system/version`    | GET     | Current/latest versie, updatestatus, releasekanaal                   |
+| `/api/system/version`    | POST    | Start een implementatiebewuste update naar de nieuwste versie        |
 
-> **Opmerking:** Deze eindpunten worden intern door het systeem gebruikt of zijn bedoeld voor compatibiliteit met Ollama-clients. Ze worden doorgaans niet door eindgebruikers aangeroepen.
+> **Opmerking:** Deze eindpunten worden intern door het systeem gebruikt of voor Ollama clientcompatibiliteit. Ze worden doorgaans niet door eindgebruikers gebeld.
 
 ### Herstel van de OAuth-omgeving _(v3.6.1+)_
 

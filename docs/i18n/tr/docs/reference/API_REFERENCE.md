@@ -341,7 +341,7 @@ GET /v1/embeddings
 
 ---
 
-## Görüntü Oluşturma
+## Görüntü Üretimi
 
 ```bash
 POST /v1/images/generations
@@ -355,38 +355,22 @@ Content-Type: application/json
 }
 ```
 
-Kullanılabilir sağlayıcılar arasında OpenAI (GPT Image 2), xAI (Grok Image), Together AI (FLUX), Fireworks AI, Nebius (FLUX), Hyperbolic, NanoBanana, **OpenRouter**, **ZenMux**, SD WebUI (yerel) ve ComfyUI (yerel) bulunur.
+Mevcut sağlayıcılar arasında OpenAI (GPT Image 2), xAI (Grok Image), Together AI (FLUX), Fireworks AI, Nebius (FLUX), Hyperbolik, NanoBanana,**OpenRouter** ,**ZenMux** , SD WebUI (yerel), ComfyUI (yerel).
 
-`n`, `data[]` içinde `n` görüntü döndürür. Üst seviye API'si çağrı başına tek bir görüntü döndüren sağlayıcılar
-(Black Forest Labs, Stability AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik,
-NVIDIA NIM, Cloudflare Workers AI) için, aynı anda en fazla 4 çağrı çalışacak şekilde
-üst seviyeye `n` ayrı çağrı yapılır. Sabit bir `seed`, çağrı dizinine göre (`seed`, `seed + 1`, …)
-artırılır; böylece görüntüler farklı olur ancak yeniden üretilebilirlik korunur. `n` değeri en fazla 10 olabilir. Herhangi
-bir çağrı başarısız olursa istek bütünüyle başarısız olur. Fan-out biçimlerinin listesi
-`open-sse/handlers/imageGeneration/fanOut.ts` içindeki `SINGLE_IMAGE_FANOUT_FORMATS` değeridir.
+`n` `n` görüntülerini `data[]` biçiminde döndürür. Yukarı akış API çağrı başına bir görüntü döndüren sağlayıcılar (Black Forest Labs, Stability AI, Leonardo, Ideogram, Haiper, Hyperbolik, Magnific/Freepik, NVIDIA NIM, Cloudflare Workers AI), uçuş sırasında en fazla 4 olmak üzere `n` ayrı yukarı akış çağrıları alır. Sabit bir `seed` çağrı dizini (`seed`, `seed + 1`, …) ile dengelenir, böylece görüntüler farklılık gösterir ancak tekrarlanabilir kalır. `n` sınırı 10'dur. Herhangi bir çağrı başarısız olursa istek bir bütün olarak başarısız olur. Yayılma formatlarının listesi `open-sse/handlers/imageGeneration/fanOut.ts` içindeki `SINGLE_IMAGE_FANOUT_FORMATS` şeklindedir.
 
-ZenMux, mevcut API anahtarı bağlantısını yeniden kullanır ve `zenmux/` veya `zm/` ön eklerini kabul eder:
+ZenMux mevcut API anahtarı bağlantısını yeniden kullanır ve `zenmux/` veya `zm/` öneklerini kabul eder:
 
-- `zenmux/openai/gpt-image-2`, ZenMux'un OpenAI Images API'sini kullanır. Seçenekler arasında `size`,
-  `quality`, `n`, `output_format`, `output_compression`, `background` ve `response_format` bulunur.
-- `zm/meta/muse-image-1.0` gibi diğer yayıncılar, ZenMux'un Vertex AI `:predict`
-  uç noktasını kullanır. `n`, `sampleCount` değerine; `aspect_ratio`, `aspectRatio` değerine ve
-  `image_size` (`1K`, `2K`, `4K`), `sampleImageSize` değerine eşlenir. Piksel cinsinden bir `size` yalnızca
-  en-boy oranını sağlar; piksel boyutlarının garanti edildiği anlamına gelmez. Desteklenen oranlar,
-  çözünürlükler ve adetler modele göre değişir.
-- `zm/inclusionai/ming-image-0.1-design`, boyutlarını kendi seçer. `size`,
-  `aspect_ratio` ve `image_size` değerlerini belirtmeyin; açıkça belirtilen değerler HTTP 400 döndürür. PNG, JPEG ve WebP
-  `output_format` ile istenebilir.
+- `zenmux/openai/gpt-image-2`, ZenMuxOpenAI Görüntüleri API kullanır. Seçenekler arasında `size`, `quality`, `n`, `output_format`, `output_compression`, `background` ve `response_format` bulunur.
+- `zm/meta/muse-image-1.0` gibi diğer yayıncılar ZenMux Vertex AI `:predict` uç noktasını kullanır. `n`, `sampleCount` ile, `aspect_ratio`, `aspectRatio` ile ve `image_size` (`1K`, `2K`, `4K`) `sampleImageSize` ile eşleşir. Bir piksel `size` yalnızca en boy oranını sağlar, piksel boyutlarını garanti etmez. Desteklenen oranlar, çözünürlükler ve sayımlar modele göre değişir.
+- `zm/inclusionai/ming-image-0.1-design` kendi boyutlarını seçer. `size`, `aspect_ratio` ve `image_size` atlayın; açık değerler HTTP 400 değerini döndürür. PNG, JPEG ve WebP `output_format` ile istenebilir.
 
-Bu entegrasyon, referans görüntü düzenlemeyi değil, metinden görüntü oluşturmayı destekler. Vertex
-çıktısı `data[].b64_json` biçiminde normalleştirilir; `response_format: "url"`, üst seviyeden bir
-HTTPS URL'si veya yalnızca görüntü baytları kullanılabiliyorsa base64 veri URL'si döndürür. Boş/filtrelenmiş çıktılar
-boş bir başarı yanıtı yerine hata döndürür. Model erişimi ZenMux hesabına bağlıdır.
-Bkz. [ZenMux Vertex API'si](https://docs.zenmux.ai/api/vertexai/generate-images) ve
-[OpenAI Images API'si](https://docs.zenmux.ai/api/openai/generate-an-image).
+Bu entegrasyon, referans görüntü düzenlemeyi değil, metinden görüntüye oluşturmayı destekler. Vertex çıktısı `data[].b64_json` normalleştirildi; `response_format: "url"` yalnızca görüntü baytları mevcut olduğunda yukarı akışlı bir HTTPS URL veya bir base64 verisi URL döndürür. Empty/filtered çıktıları boş başarı yerine hata döndürür. Model erişimi ZenMux hesabına bağlıdır. [ZenMux Vertex API](https://docs.zenmux.ai/api/vertexai/generate-images) ve [OpenAI Görüntülerine bakın API](https://docs.zenmux.ai/api/openai/generate-an-image).
+
+Microsoft 365 Copilot oturum açma bağlantısı, Copilot yerleşik görüntü aracı aracılığıyla `copilot-m365-web/m365-copilot-image` hizmet eder: görüntü başına bir Copilot dönüşü (`n` 1–4), `size` yalnızca yönlendirmeyi yönlendirir ve satır içi döndürülen görüntüler (`b64_json` veya `response_format: "url"` için bir veri URL ). Bkz. [Microsoft 365 Copilot](../providers/COPILOT-M365.md#image-generation).
 
 ```bash
-# Tüm görüntü modellerini listele
+# List all image models
 GET /v1/images/generations
 ```
 
@@ -812,18 +796,19 @@ OpenAI uyumlu toplu işleme.
 
 ---
 
-## Search API’si
+## API
 
-Web/arama sağlayıcısı soyutlaması (Tavily, Brave, Exa, Serper vb.).
+Web/search sağlayıcı soyutlaması (Tavily, Brave, Exa, Serper, vb.).
 
-| Yöntem | Yol                    | Açıklama                                                                                                     |
+| Yöntem | Yol                    | Tanım                                                                                                        |
 | ------ | ---------------------- | ------------------------------------------------------------------------------------------------------------ |
-| GET    | `/v1/search`           | Yapılandırılmış arama sağlayıcılarını ve yeteneklerini listeler                                              |
-| POST   | `/v1/search`           | Bir arama sorgusu çalıştırır — gövde `v1SearchSchema` ile doğrulanır, önbelleğe alma/birleştirmeyi destekler |
-| GET    | `/v1/search/analytics` | Sağlayıcı başına isabet/gecikme/önbellek istatistikleri                                                      |
+| GET    | `/v1/search`           | Yapılandırılmış arama sağlayıcılarının + yeteneklerini listeleyin                                            |
+| POST   | `/v1/search`           | `v1SearchSchema` tarafından doğrulanmış bir — gövdesi arama sorgusu çalıştırın, caching/coalescing destekler |
+| GET    | `/v1/search/analytics` | Sağlayıcı başına hit/latency/cache istatistikleri                                                            |
 
-**Kimlik doğrulama:** Bearer API anahtarı (`extractApiKey` + `isValidApiKey`). Arama ilkesi
-`enforceApiKeyPolicy` aracılığıyla uygulanır.
+**Yetki:** Taşıyıcı API anahtarı (`extractApiKey` + `isValidApiKey`). `enforceApiKeyPolicy` aracılığıyla uygulanan arama politikası.
+
+**Otomatik seç:** `provider` olmadan, yapılandırılmış bağlantısı olan en ucuz sağlayıcı ilk önce çalışır ve sonraki en ucuz sağlayıcı yük devretmedir. Ücretsiz son çare sağlayıcılar (`duckduckgo-free`) yalnızca başka hiçbir şey yapılandırılmadığında kullanılır. Şirket içinde barındırılan bir SearXNG bağlantısı gerçek bir `baseUrl` (katalog varsayılanı `http://localhost:8888/search` değil) depoladığında yapılandırılmış olarak sayılır: bu durumda, SearXNG 400, 401, 403 veya 404'e yanıt vermesi de dahil olmak üzere, en ucuz anahtarlı sağlayıcı yük devretme olarak anahtarlı olanların önünde 0 $ sağlayıcı olarak sıralanır. Geçerli bir `http(s)` URL olmayan veya bir bulut meta veri adresini işaret eden bir `baseUrl` sayılmaz. Bir belirteci depolayan bir SearXNG bağlantısı, yalnızca `https://` veya geri döngü `http://` üzerinden bu şekilde sıralanır. Uzak düz `http://` üzerinden bu asla bir yük devretme değildir ve son çare olarak kalır, yalnızca başka hiçbir sağlayıcı yapılandırılmadığında veya isimle istendiğinde kullanılır, dolayısıyla bu iki durumda belirteci açık metin olarak gönderir.
 
 ### Exa ve Tavily `provider_options`
 
@@ -1012,31 +997,26 @@ anahtarına görünür. Sonucu belirsiz olan bir yeniden oynatma, iki kez gönde
 
 ## Self servis kullanımı (`/api/usage/om-usage`)
 
-Her API anahtarı **kendi** kullanımını ve kotalarını okuyabilir — yönetim kimlik doğrulaması
-gerekmez. Bu uç nokta, bir istemcinin (CLI veya OmniCopilot paneli) anahtar sahibine
-harcamasını göstermesini sağlar.
+Herhangi bir API anahtarı okuyabilir **kendi** kullanım ve kotalar — yönetim yetkilendirmesi yok. Bu, bir müşterinin (CLI, OmniCopilot paneli) anahtar sahibine harcamalarını göstermek için kullandığı uç noktadır.
 
 ```bash
-# Metin biçimi (geçmiş sözleşme — bir terminal için düz metin)
+# Text form (the historical contract — plain text for a terminal)
 curl -H "Authorization: Bearer <your-api-key>" \
   http://localhost:20128/api/usage/om-usage
 
-# Yapılandırılmış biçim — bir kullanıcı arayüzünün tükettiği biçim
+# Structured form — what a UI consumes
 curl -H "Authorization: Bearer <your-api-key>" \
   "http://localhost:20128/api/usage/om-usage?format=json"
 ```
 
-Anahtarda **`allowUsageCommand`** etkin olmalıdır (varsayılan olarak kapalıdır — kontrol
-panelinin API anahtarı yöneticisi bunu anahtar başına değiştirir). Etkin değilse uç nokta
-`403` döndürür.
+Anahtarın olması gerekir **`allowUsageCommand`** etkindir (varsayılan olarak kapalıdır — kontrol panelinin API anahtarı yöneticisi bunu anahtar başına değiştirir). Bu olmadan uç nokta `403` yanıt verir.
 
-`?format=json`, çağıranın bir ret durumunda hiçbir veri alanını okumamasını sağlayan ayırt
-edici bir yapı döndürür. Başarılı durumda:
+`?format=json` ayırt edilmiş bir şekil döndürür, böylece arayan kişi hiçbir zaman reddedilen bir veri alanını okumaz. Başarı üzerine:
 
 ```jsonc
 {
   "allowed": true,
-  // yalnızca anahtar, anahtar başına kullanım limitlerini (günlük/haftalık USD) etkinleştirdiğinde bulunur:
+  // present only when the key opted into per-key usage limits (daily/weekly/5-hour USD):
   "personal": {
     "dailySpentUsd": 1.25,
     "dailyLimitUsd": 5,
@@ -1045,9 +1025,9 @@ edici bir yapı döndürür. Başarılı durumda:
     "weeklyLimitUsd": 20,
     "weeklyResetAtIso": "…" /* … */,
   },
-  // seçilen sağlayıcının kota anlık görüntüsü veya henüz hiçbir şey önbelleğe alınmadığında null:
+  // the selected provider quota snapshot, or null when nothing is cached yet:
   "provider": { "connectionId": "…", "provider": "claude", "plan": "…", "quotas": {/* … */} },
-  // her bağlantının anlık görüntüsü; böylece kullanıcı arayüzü birkaç sağlayıcıyı yan yana görüntüleyebilir:
+  // every connection's snapshot, so a UI can render several providers side by side:
   "providers": [
     { "connectionId": "…", "provider": "claude" /* … */ },
     { "provider": "codex" /* … */ },
@@ -1055,14 +1035,9 @@ edici bir yapı döndürür. Başarılı durumda:
 }
 ```
 
-Ret durumunda (`401` hatalı anahtar / `403` izin verilmedi) aynı rota
-`{ "allowed": false, "error": { "message": "…" } }` döndürür — mevcut ancak boş bir
-`personal`/`provider` (anahtara izin verilmiş, henüz hiçbir bilgi edinilmemiş) ret durumundan
-farklı bir durumdur ve bu ikisini yalnızca JSON biçimi ayırt eder.
+Reddetme durumunda (`401` hatalı anahtar / `403` izin verilmiyor) aynı rota `{ "allowed": false, "error": { "message": "…" } }` — döndürür, ancak boş bir `personal`/`provider` (anahtara izin verilir, henüz hiçbir şey öğrenilmemiştir) reddetmeden farklı bir durumdur ve yalnızca JSON formu bunları ayırt eder.
 
-**Kimlik doğrulama:** çağıranın `isValidApiKey` ile doğrulanan kendi Bearer API anahtarıdır —
-bu, `requireManagementAuth` arkasında kalmaya devam eden yönetim yüzeyi
-(`/api/keys/…`) **değildir**.
+**Yetki:** arayanın `isValidApiKey` — ile doğrulanan kendi Taşıyıcı API anahtarı, bu `requireManagementAuth` arkasında kalan yönetim yüzeyi (`/api/keys/…`) değildir.
 
 ### Ham ve Kesme Noktasına Göre Ayarlanmış Kota Yüzdeleri
 
@@ -1308,40 +1283,41 @@ Uygulama: `src/lib/modelCapabilities.ts` içindeki `getResolvedModelCapabilities
 | `/api/usage/model-latency-stats` | GET             | Sağlayıcı/model başına kayan gecikme toplulaştırması (ortalama/p50/p95/p99, başarı oranı); filtreler: `windowHours`/`minSamples`/`maxRows`/`provider`/`model` (#6873)                                                                                                                                                           |
 | `/api/usage/cache-health`        | GET             | `call_logs` üzerindeki istem önbelleği sağlık özeti — yazma/okuma oranı, p50/p90/p99 yazma boyutu dağılımı, yoğun yazma konsantrasyonu, model başına ayrım ve `healthy`/`degraded`/`thrash`/`no-data` değerlendirmesi; sorgu parametreleri `range` (`1h`\|`24h`\|`7d`\|`30d`, varsayılan `24h`) ve isteğe bağlı `model` (#8827) |
 
-### API anahtarı izinleri
+### API anahtar izinleri
 
-`PATCH /api/keys/{id}`, mevcut bir anahtarın izinlerini günceller. Her `/api/keys*` rotası gibi bu işlem için de bir çıkarım anahtarı değil, yönetim yetkilendirmesi gerekir (bkz. [Yönetim Kimlik Doğrulaması](../guides/MANAGEMENT-AUTH.md)). Yalnızca değiştirmek istediğiniz alanları gönderin; bu alanların hiçbirini içermeyen bir istek `No valid fields to update` hatasıyla reddedilir. Kabul edilen alanlar, `src/shared/validation/schemas/keys.ts` içindeki `updateKeyPermissionsSchema` tarafından tanımlanır.
+`PATCH /api/keys/{id}` mevcut bir anahtarın izinlerini günceller. Her `/api/keys*` rotası gibi, bir çıkarım anahtarına değil, yönetim yetkilendirmesine (bkz. [Yönetim Kimlik Doğrulaması](../guides/MANAGEMENT-AUTH.md) ) ihtiyaç duyar. Yalnızca değiştirmek istediğiniz alanları gönderin; bunların hiçbirini içermeyen bir istek `No valid fields to update` ile reddedilir. Kabul edilen alanlar `src/shared/validation/schemas/keys.ts` `updateKeyPermissionsSchema` tarafından tanımlanır.
 
-| Alan                                        | Tür                                                                      | Notlar                                                                                                                                                                        |
-| ------------------------------------------- | ------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `name`                                      | string, 1-200 karakter                                                   |                                                                                                                                                                               |
-| `isActive`                                  | boolean                                                                  |                                                                                                                                                                               |
-| `isBanned`                                  | boolean                                                                  |                                                                                                                                                                               |
-| `expiresAt`                                 | ISO 8601 tarih-saat veya `null`                                          | `null`, sona erme tarihini temizler                                                                                                                                           |
-| `modelAccessMode`                           | `all` \| `restricted`                                                    | Mod `all` olduğunda `allowedModels` boş olmalıdır                                                                                                                             |
-| `allowedModels`, `blockedModels`            | dize dizisi, en fazla 1000                                               |                                                                                                                                                                               |
-| `allowedCombos`                             | dize dizisi, en fazla 500                                                | Anahtarın çağırabileceği kombinasyonları sınırlar; doğrudan modeller `modelAccessMode` / `allowedModels` tarafından belirlenir                                                |
-| `connectionAccessMode`                      | `all` \| `restricted`                                                    | `restricted` olduğunda `allowedConnections` boş olmamalı, `all` olduğunda ise boş olmalıdır                                                                                   |
-| `allowedConnections`                        | UUID dizisi, en fazla 100                                                |                                                                                                                                                                               |
-| `allowAutoCombos`                           | boolean                                                                  | `false`, bu anahtarla `auto/*` modellerine yönelik istekleri reddeder; bunu hiç ayarlamayan anahtarlara izin verilir                                                          |
-| `catalogScope`                              | `all` \| `combos` \| `models`                                            | Bu anahtar için `GET /v1/models` tarafından listelenenleri belirler (yalnızca kombinasyonlar, yalnızca modeller veya her ikisi); anahtarın çağırabileceği şeyleri değiştirmez |
-| `forcedModel`                               | en fazla 300 karakterlik dize veya `null`                                | Sohbet isteklerini `X-Route-Model` ve `body.model` değerlerinin üzerine çıkarak bu model/kombinasyona yönlendirir; anahtarın sınırları yine geçerlidir                        |
-| `noLog`, `autoResolve`                      | boolean                                                                  |                                                                                                                                                                               |
-| `throttleDelayMs`                           | tamsayı, 0-300000                                                        |                                                                                                                                                                               |
-| `maxSessions`                               | tamsayı, 0-10000                                                         |                                                                                                                                                                               |
-| `rateLimits`                                | `{ limit, window }` dizisi (pozitif tamsayılar, en fazla 50) veya `null` | `null`, sınırları temizler                                                                                                                                                    |
-| `accessSchedule`                            | zamanlama nesnesi veya `null`                                            | `null`, zamanlamayı temizler                                                                                                                                                  |
-| `scopes`                                    | dize dizisi, en fazla 32                                                 |                                                                                                                                                                               |
-| `allowedEndpoints`                          | dize dizisi, en fazla 20                                                 |                                                                                                                                                                               |
-| `streamDefaultMode`                         | `legacy` \| `json`                                                       |                                                                                                                                                                               |
-| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                     | [Anahtar başına önbellek atlama](#per-key-cache-bypass) bölümüne bakın                                                                                                        |
-| `compressionEnabled`                        | boolean                                                                  |                                                                                                                                                                               |
-| `codexServiceMode`                          | Codex hizmet modlarından biri                                            |                                                                                                                                                                               |
-| `disableNonPublicModels`                    | boolean                                                                  |                                                                                                                                                                               |
-| `allowUsageCommand`                         | boolean                                                                  |                                                                                                                                                                               |
-| `usageLimitEnabled`                         | boolean                                                                  |                                                                                                                                                                               |
-| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | number >= 0 or `null`                                                    |                                                                                                                                                                               |
-| `chaosModeEnabled`                          | boolean                                                                  |                                                                                                                                                                               |
+| Alan                                        | Tür                                                                      | Notlar                                                                                                                                                                                                                                                                                             |
+| ------------------------------------------- | ------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`                                      | string, 1-200 karakter                                                   |                                                                                                                                                                                                                                                                                                    |
+| `isActive`                                  | boolean                                                                  |                                                                                                                                                                                                                                                                                                    |
+| `isBanned`                                  | boolean                                                                  |                                                                                                                                                                                                                                                                                                    |
+| `expiresAt`                                 | ISO 8601 tarih-saat veya `null`                                          | `null`, sona erme tarihini temizler                                                                                                                                                                                                                                                                |
+| `modelAccessMode`                           | `all` \| `restricted`                                                    | Mod `all` olduğunda `allowedModels` boş olmalıdır                                                                                                                                                                                                                                                  |
+| `allowedModels`, `blockedModels`            | dize dizisi, 1000'e kadar                                                |                                                                                                                                                                                                                                                                                                    |
+| `allowedCombos`                             | dize dizisi, en fazla 500                                                | Anahtarın çağırabileceği kombinasyonları sınırlar; doğrudan modeller `modelAccessMode` / `allowedModels` tarafından belirlenir                                                                                                                                                                     |
+| `connectionAccessMode`                      | `all` \| `restricted`                                                    | `restricted` olduğunda `allowedConnections` boş olmamalı, `all` olduğunda ise boş olmalıdır                                                                                                                                                                                                        |
+| `allowedConnections`                        | UUID dizisi, en fazla 100                                                |                                                                                                                                                                                                                                                                                                    |
+| `allowAutoCombos`                           | boolean                                                                  | `false`, bu anahtarla `auto/*` modellerine yönelik istekleri reddeder; bunu hiç ayarlamayan anahtarlara izin verilir                                                                                                                                                                               |
+| `catalogScope`                              | `all` \| `combos` \| `models`                                            | Bu anahtar için `GET /v1/models` tarafından listelenenleri belirler (yalnızca kombinasyonlar, yalnızca modeller veya her ikisi); anahtarın çağırabileceği şeyleri değiştirmez                                                                                                                      |
+| `forcedModel`                               | en fazla 300 karakterlik dize veya `null`                                | Sohbet isteklerini `X-Route-Model` ve `body.model` değerlerinin üzerine çıkarak bu model/kombinasyona yönlendirir; anahtarın sınırları yine geçerlidir                                                                                                                                             |
+| `noLog`, `autoResolve`                      | boolean                                                                  |                                                                                                                                                                                                                                                                                                    |
+| `throttleDelayMs`                           | tamsayı, 0-300000                                                        |                                                                                                                                                                                                                                                                                                    |
+| `maxSessions`                               | tamsayı, 0-10000                                                         |                                                                                                                                                                                                                                                                                                    |
+| `rateLimits`                                | `{ limit, window }` dizisi (pozitif tamsayılar, en fazla 50) veya `null` | `null`, sınırları temizler                                                                                                                                                                                                                                                                         |
+| `accessSchedule`                            | zamanlama nesnesi veya `null`                                            | `null`, zamanlamayı temizler                                                                                                                                                                                                                                                                       |
+| `scopes`                                    | dize dizisi, en fazla 32                                                 |                                                                                                                                                                                                                                                                                                    |
+| `allowedEndpoints`                          | dize dizisi, en fazla 20                                                 |                                                                                                                                                                                                                                                                                                    |
+| `streamDefaultMode`                         | `legacy` \| `json`                                                       |                                                                                                                                                                                                                                                                                                    |
+| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                     | [Anahtar başına önbellek atlama](#per-key-cache-bypass) bölümüne bakın                                                                                                                                                                                                                             |
+| `compressionEnabled`                        | boolean                                                                  |                                                                                                                                                                                                                                                                                                    |
+| `codexServiceMode`                          | Codex hizmet modlarından biri                                            |                                                                                                                                                                                                                                                                                                    |
+| `disableNonPublicModels`                    | boolean                                                                  |                                                                                                                                                                                                                                                                                                    |
+| `allowUsageCommand`                         | boolean                                                                  |                                                                                                                                                                                                                                                                                                    |
+| `usageLimitEnabled`                         | boolean                                                                  |                                                                                                                                                                                                                                                                                                    |
+| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | sayı >= 0 veya `null`                                                    |                                                                                                                                                                                                                                                                                                    |
+| `fiveHourUsageLimitUsd`                     | sayı >= 0 veya `null`                                                    | Günlük ve haftalık limitler (`usageLimitEnabled`, `UNPRICED_USAGE_BUDGET_POLICY`) gibi uygulanan 5 saatlik USD bütçesi. `retry-after` penceredeki en eski harcamanın geçerliliğini yitirdiği zamandır ve bu, limitinin çok üzerinde bir anahtarın hâlâ engellenmiş halde kalmasına neden olabilir. |
+| `chaosModeEnabled`                          | boolean                                                                  |                                                                                                                                                                                                                                                                                                    |
 
 ```bash
 curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
@@ -1391,6 +1367,14 @@ curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
 | `/api/modality-bridge/stats`         | GET        | Bellek içi `attempts`, başarılar/`bridged`, hatalar, önbellek isabetleri, `totalLatencyMs`, `latencySamples`, örnek bazlı `averageLatencyMs` ve son kullanım zamanı (yeniden başlatmada sıfırlanır; yönetim kimlik doğrulaması gerekir)                                                                                                                                                                                               |
 | `/api/modality-bridge/video/runtime` | GET        | Yönetim kimlik doğrulaması/yoklamasından önce katı güvenilir loopback denetimi; temizlenmiş FFmpeg/ffprobe kullanılabilirliği ve sürümleri (no-store)                                                                                                                                                                                                                                                                                 |
 | `/api/modality-bridge/video/extract` | POST       | Dahili, kimlik doğrulamalı güvenilir loopback bayt aracısı; 50 MiB girdi, sınırlı kuyruk/32 MiB çıktı, kapasite için `503`, bağlantı kesilmesi için `499`, zaman aşımı için `504`; herkese açık bir yükleme API'si değildir                                                                                                                                                                                                           |
+
+### Video karesi detayına inme
+
+`GET /api/v1/video-bridge/drilldown` açıkça izin verilen bir Video Köprüsü isteğinden sonra `x-omniroute-video-drilldown` döndürülen, kiracıya bağlı opak bir tanıtıcıyı okur. Hem okuma hem de `DELETE` her zaman geçerli bir API anahtarı ve operatörün bağımsız `modalityBridgeVideoDrilldownRemoteEnabled` iznini gerektirir. Üretimin korunması ayrıca `modalityBridgeVideoDrilldownEnabled` ve parça başına katı `drilldown: true` gerektirir. Anahtarın boş olmayan bir uç nokta izin verilenler listesi varsa, arayanın `/v1` veya `/api/v1` kullanmasına bakılmaksızın hem GET hem de DELETE için `video` içermesi gerekir.
+
+GET sorgusu: gerekli `handle`; isteğe bağlı `variant` (`preview`, `standard`, `detail`), `limit` (1–8; eski `frames` kabul edilir ancak `limit` ile birleştirilemez), sıfır tabanlı `page` ve `start`/`end` saniye. Her iki odak sınırı da sağlandığında `end`, `start` büyük olmalıdır. Duplicate/unknown sorgu anahtarları reddedilir. Başarılı yanıtlar `derivation`, `durationSeconds`, `frames`, `hasMore`, `page`, `variant` ve isteğe bağlı `focusWindow` içerir; mağazasız JSON Base64 dahil 32 MiB ile sınırlıdır. Büyük boyutlu çıktı 413 değerini döndürür; daha az kare isteyin.
+
+`DELETE /api/v1/video-bridge/drilldown?handle=...` `{ "removed": 0|1 }` döndürür. Bilinmeyen, süresi dolmuş ve çapraz anahtar GETs birbirinden ayırt edilemeyen 404 yanıtlarıdır; çapraz anahtar DELETE sahibinin girişini kaldıramaz. Devre dışı bırakılan erişim 403, missing/invalid kimlik doğrulaması 401, geçersiz sorgular 400, iptal 499 ve geçici hatalar 503'ü döndürür. Tanıtıcılar süreç yereldir, on dakika sonra sona erer ve yeniden başlatmadan sağ çıkamaz. Yeni tanıtıcılar `v1.` yanı sıra 32 baytlık rastgele Base64URL jetonunu kullanır; yalnızca belirteç karmaları korunur. Eski 64-hex belirteçleri uyumluluk açısından sözdizimsel olarak okunabilir durumda kalır. İzin, kotalar ve varyant türetme ayrıntıları için [Video Köprüsü korkuluklarına](../security/GUARDRAILS.md#video-bridge-videobridgets-videobridgepipelinets) bakın.
 
 ### Yedekleme ve Dışa Aktarma/İçe Aktarma
 
@@ -1496,19 +1480,19 @@ GET yanıtı `agents[]` (id, name, binary, version, installed, protocol, isCusto
 
 Bu uç noktalar, yerel Gemini SDK uyumluluğu bekleyen istemciler için Gemini API biçimini yansıtır.
 
-### Dahili / Sistem API'leri
+### Dahili / Sistem APIs
 
-| Endpoint                 | Method | Açıklama                                                 |
-| ------------------------ | ------ | -------------------------------------------------------- |
-| `/api/init`              | GET    | Uygulama başlatma denetimi (ilk çalıştırmada kullanılır) |
-| `/api/tags`              | GET    | Ollama uyumlu model etiketleri (Ollama istemcileri için) |
-| `/api/restart`           | POST   | Sorunsuz sunucu yeniden başlatmasını tetikleme           |
-| `/api/shutdown`          | POST   | Sorunsuz sunucu kapatmasını tetikleme                    |
-| `/api/system/env/repair` | POST   | OAuth sağlayıcısı ortam değişkenlerini onarma            |
-| `/api/system/version`    | GET    | Geçerli/en son sürüm, güncelleme durumu, yayın kanalı    |
-| `/api/system/version`    | POST   | En son sürüme dağıtım farkındalıklı güncelleme başlatma  |
+| Uç nokta                 | Yöntem | Tanım                                                                         |
+| ------------------------ | ------ | ----------------------------------------------------------------------------- |
+| `/api/init`              | GET    | Arka planda senkronizasyon hizmetlerini başlatın (yönetim kimlik doğrulaması) |
+| `/api/tags`              | GET    | Ollama uyumlu model etiketleri ( Ollama istemcileri için)                     |
+| `/api/restart`           | POST   | Sunucunun zarif bir şekilde yeniden başlatılmasını tetikleyin                 |
+| `/api/shutdown`          | POST   | Sunucunun zarif bir şekilde kapatılmasını tetikleyin                          |
+| `/api/system/env/repair` | POST   | OAuth sağlayıcı ortam değişkenlerini onarın                                   |
+| `/api/system/version`    | GET    | Current/latest sürümü, güncelleme durumu, yayın kanalı                        |
+| `/api/system/version`    | POST   | En son sürüme dağıtıma duyarlı bir güncelleme başlatın                        |
 
-> **Not:** Bu uç noktalar sistem tarafından dahili olarak veya Ollama istemci uyumluluğu için kullanılır. Genellikle son kullanıcılar tarafından çağrılmaz.
+> **Not:** Bu uç noktalar sistem tarafından dahili olarak veya Ollama istemci uyumluluğu için kullanılır. Genellikle son kullanıcılar tarafından çağrılmazlar.
 
 ### OAuth Ortam Onarımı _(v3.6.1+)_
 

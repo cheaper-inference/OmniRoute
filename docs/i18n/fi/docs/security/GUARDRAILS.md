@@ -272,304 +272,97 @@ Jaettua välimuistia ohjaavat edelleen asetukset `modalityBridgeCacheEnabled`,
 
 ### Video Bridge (`videoBridge.ts`, `videoBridgePipeline.ts`)
 
-Saa kiinni ylätason video-osat Chat Completions -pyyntöjen `messages`-kentästä ja Responses
-API:n `input`-kentästä ennen kohteen kutsumista, kun kohteelta ei tunneta natiivia videotukea.
-Tuetut muodot ovat `input_video`, `video_url`, `video_source`, HTTPS-URL-osoitteet
-ja `data:video/*;base64,...`-data-URI:t. Pelkkiä tiedostonimiä tekstissä ei käsitellä
-videona.
+Kaappaa huipputason videon osat Chat Completions `messages` ja Responses API `input` ennen kuin kohdetta, jolla ei ole tunnettua alkuperäistä videotukea, kutsutaan. Tuetut muodot ovat `input_video`, `video_url`, `video_source`, HTTPS URLs ja `data:video/*;base64,...` data URIs. Tekstissä olevia tavallisia tiedostonimiä ei käsitellä videona.
 
-`VideoBridgeGuardrail.preCall` (`videoBridge.ts`) omistaa pyyntöjen läpikäynnin,
-kyky-/käytäntötarkistuksen, pyyntökohtaisen kokoamisen ja vastausdatan.
-Videokohtainen työ — hankinta, kokonaistuloksen välimuisti, ruutusekvenssin kuvaaminen
-(joka yhdistää mahdollisen kutsujan ilmoittaman äänitranskription) sekä yrityskohtaiset
-mittarit/keskeytykset/siivous — on piilotettu `videoBridgePipeline.ts`-tiedoston
-`processVideoPart`-funktion taakse, jota kutsutaan kerran per video-osa `preCall`-metodin
-silmukassa. Kyseinen moduuli määrittelee myös eksplisiittiset porttirajat `VideoMediaBrokerPort`
-(tavujen hankinta ja näytteistettyjen ruutujen erottaminen), `VideoAudioTranscriptionPort`
-(kutsujan ilmoittaman äänitranskription yhdistäminen näytteistettyihin kuvateksteihin) ja
-`VideoDrilldownPort` (ruutukohtaisen syventävän analyysin pysyvyystraja; ei vielä kytketty
-`processVideoPart`-funktioon — vain erillinen `/api/modality-bridge/video/drilldown`-reitti
-kirjoittaa drill-down-merkintöjä tällä hetkellä).
+`VideoBridgeGuardrail.preCall` (`videoBridge.ts`) omistaa pyynnön läpikäynnin, capability/policy -tarkistuksen, pyyntökohtaisen koosteen ja vastauksen hyötykuorman. Videokohtainen työ — hankinta, koko tuloksen välimuisti, joka kuvaa kehyssekvenssiä (joka sulattaa minkä tahansa soittajan ilmoittaman äänitranskription) ja yrityskohtainen metrics/abort/cleanup — on piilotettu `processVideoPart` taakse `videoBridgePipeline.ts`, jota kutsutaan kerran `preCall`:n silmukan sisällä olevaa videoosaa kohden. Tämä moduuli määrittää myös eksplisiittiset porttirajat `VideoMediaBrokerPort` (tavujen hankinta ja näytteistettyjen kehysten poimiminen), `VideoAudioTranscriptionPort` (soittajan ilmoittaman äänitranskription yhdistäminen näytteistettyjen kuvatekstien kanssa) ja `VideoDrilldownPort` (vanha raaka-myymälämuoto). Tuotanto STT ja rungon säilytys muodostuvat kuvaavan portin ympärille `createVideoSttAdapter` ja `createVideoDrilldownAdapter` kautta; jälkimmäinen käyttää jaettua läpinäkymättömän kahvan elinkaarta.
 
-Julkinen `/v1`-pyyntöpolku ei koskaan tuo tai kutsu aliprosessia. Etävideot
-ladataan 50 MiB:n rajalla; sisäisillä base64-videoilla on konservatiivinen 36 MiB:n
-purettu videokohtainen kattoraja, jotta malli/viestit/kehystyskirjekuori pysyy julkisen
-JSON-pyyntöjen hyväksymisrajan 50 MiB sisällä. Sisäinen pituus ja puretun koon
-arviot tarkistetaan ennen allokointia. HTTPS vaaditaan alkuperäiselle etä-URL-osoitteelle
-ja jokaiselle uudelleenohjaukselle, käyttäen olemassa olevaa vain julkisiin osoitteisiin
-rajoittuvaa lähtevää suojausta DNS-kiinnityksellä. Tavut kulkevat sitten tarkan sisäisen
-`POST /api/modality-bridge/video/extract`-välitysrajan yli. Tämä reitti on sekä
-`LOCAL_ONLY` että `SPAWN_CAPABLE`, hyväksyy vain prosessikohtaisesti autentikoidun
-luotetun loopback-pyynnön, eikä koskaan hyväksy URL-osoitetta, tiedostopolkua, ajettavaa
-tiedostoa tai argumenttilistaa. API:n body-kokoputki ja käsittelijän inkrementaalinen
-body-lukija valvovat itsenäisesti 50 MiB:n välityssyöterajaa. Sen rajallinen jono ajaa
-yhden erotuksen kerrallaan, sallii neljä odottavaa työtä ja rajoittaa odottavan syötteen
-kokonaismäärän 100 MiB:iin.
+Julkinen `/v1` -pyyntöpolku ei koskaan tuo tai kutsu aliprosessia. Etävideot ladataan 50 MiB n rajoituksella; inline base64-videoissa on konservatiivinen 36 MiB dekoodattu videokohtainen yläraja, joten model/messages/framing kirjekuori voi pysyä julkisen JSON pyynnön 50 MiB:n sisäänpääsyrajan sisällä. Inline-pituus ja dekoodatun koon arviot tarkistetaan ennen allokointia. HTTPS vaaditaan alkuperäisessä etä- URL ssa ja jokaisessa uudelleenohjauksessa käyttämällä olemassa olevaa vain julkista lähtevää suojausta DNS kiinnityksellä. Tavut ylittävät sitten tarkan sisäisen `POST /api/modality-bridge/video/extract` välittäjärajan. Tämä reitti on sekä `LOCAL_ONLY` että `SPAWN_CAPABLE`, hyväksyy vain prosessikohtaisen autentikoidun, luotetun silmukan paluupyynnön, eikä koskaan hyväksy URL, tiedostojärjestelmän polkua, suoritettavaa tiedostoa tai argumenttiluetteloa. API -runkokokoinen putkisto ja käsittelijän inkrementaalinen runko-lukija valvovat itsenäisesti 50 MiB välittäjän syöttörajaa. Sen rajattu jono suorittaa yhden purkamisen kerrallaan, sallii neljä odottavaa työtä ja rajoittaa odottavaa syötettä 100 MiB llä.
 
-Välittäjän sisällä `ffprobe` lukee yksityisen paikallisen tiedoston; kiinteä sallittujen muotojen luettelo sulkee pois soittolista- ja manifestimuodot. Sallituissa MOV-tuoteperheen säilöissä ulkoiset MOV-dataviittaukset ovat oletusarvoisesti poissa käytöstä, eikä kiinteä komento ota niitä käyttöön. Sekä `ffprobe` että `ffmpeg` käyttävät vain `file`-protokollan sallivaa luetteloa, yhtä säiettä ja kiinteitä argumenttitaulukoita ilman komentotulkkia, ja suoritettavat ohjelmat etsitään muuttujan `PATH` kautta. Liitettyjä kansikuvia sisältävät kuvavirrat eivät kelpaa toistettaviksi ehdokkaiksi. Kaikkien toistettavien virtojen on täytettävä rajoitukset, ja eksplisiittinen oletusvirta valitaan ensisijaisesti ennen determinististä pienimmän indeksin varavalintaa. Videoiden enimmäiskesto on 600 sekuntia, enimmäiskoko 8 192 pikseliä ulottuvuutta kohden ja lähdekuvan enimmäiskoko 33 554 432 pikseliä. FFmpeg poimii 1–16 JPEG-kuvaa aikavälien keskipisteistä, pienentää pitkän sivun enintään 1 024 pikseliin suurentamatta pienempiä syötteitä eikä koskaan vastaanota URL-osoitetta. Näytteenoton oletuskäytäntö on `uniform`. Valinnaiset `scene_aware`- ja kokeelliset `segment_aware`-käytännöt suorittavat yhden kiinteän FFmpeg-lisäajon jo validoidulle paikalliselle virralle, valitsevat rajatut `showinfo`-kohtausten aikaleimat ja palaavat deterministisesti samoihin tasaisesti jaettujen aikavälien keskipisteisiin, jos tunnistus epäonnistuu tai aikakatkaistaan, tuloste on virheellinen tai ehdokasjoukko on tyhjä. Segmenttitietoinen tila jakaa keskipistenäytteet suhteessa validoituihin kohtausväleihin; segmenttitietoinen näyttö ja varatoiminta kuvataan jäljempänä. Kiinteää 16 kuvan enimmäisrajaa sovelletaan valinnan jälkeen kaikissa käytännöissä. Kun kohtaustietoisella pyynnöllä on vain yhden kuvan budjetti, se käyttää aktiivisen koko videon tai kohdistusikkunan tasaisesti määritettyä keskipistettä ja ilmoittaa `policyEffective: uniform`: yksi valittu kohtauskuva ei voi säilyttää aikajanan molempia päitä. Kutsuja voi halutessaan antaa äärellisen kohdistusikkunan (`start`/`end` sekunteina); rajat sovitetaan median kestoon, käänteiset tai ei-äärelliset ikkunat hylätään ja kaikki näytteenottokäytännöt suoritetaan vain normalisoidun aikavälin sisällä. Tuloksena saatava ikkuna sisällytetään näytteenoton metatietoihin ja epäluotetun kuvauksen etuliitteeseen, jotta myöhemmät mallit voivat erottaa kohdistetun otteen koko aikajanasta.
+Välittäjässä `ffprobe` lukee yksityisen paikallisen tiedoston; kiinteän muodon sallittujen luettelo ei sisällä soittolista- ja luettelomuotoja. Sallittujen MOV-perheen säilöjen ulkoiset MOV -tietoviitteet pysyvät oletusarvoisesti poissa käytöstä, eikä kiinteä komento ota niitä käyttöön. Sekä `ffprobe` että `ffmpeg` käyttävät `file` -only -protokollan sallittujen luetteloa, yhtä säiettä, kiinteitä argumenttitaulukoita, ei shelliä ja `PATH` stä ratkaistuja suoritettavia tiedostoja. Liitteenä olevat kansikuvat eivät ole toistettavia ehdokkaita. Kaikkien toistettavien streamien on täytettävä rajat, ja eksplisiittinen oletusvirta on suositeltava ennen determinististä alimman indeksin varoitusta. Videoiden pituus on rajoitettu 600 sekuntiin, 8 192 pikseliä ulottuvuutta kohden ja 33 554 432 lähdepikseliä. FFmpeg ottaa näytteitä 1–16 keskipisteen JPEG kehyksestä, skaalaa pitkän reunan enintään 1 024 pikseliin ilman pienempiä tuloja skaalaamatta, eikä se koskaan vastaanota URL. Näytteenotto on oletuksena `uniform`. Valinnaiset `scene_aware` ja kokeelliset `segment_aware` käytännöt suorittavat yhden kiinteän FFmpeg lisäsiirron jo vahvistetulle paikalliselle virralle, valitsevat rajatut `showinfo` kohtauksen aikaleimat ja palaavat deterministisesti samoihin yhtenäisiin keskipisteisiin ilmaisimen vian, aikakatkaisun, virheellisen lähdön tai tyhjän ehdokasjoukon yhteydessä. Segmenttitietoinen tila allokoi keskipistenäytteet suhteessa vahvistettuihin kohtausväleihin; segmenttitietoinen näyttö ja varakäyttäytyminen on kuvattu alla. Kova 16 kehyksen yläraja on käytössä valinnan jälkeen jokaisessa käytännössä. Kun kohtaustietoisella pyynnöllä on vain yhden ruudun budjetti, se käyttää aktiivisen koko videon tai tarkennusikkunan yhtenäistä keskipistettä ja raportoi `policyEffective: uniform`:n: yksi valittu kohtauskehys ei voi säilyttää molempia ajallisia päitä. Soittaja voi valinnaisesti tarjota rajallisen tarkennusikkunan (`start`/`end` sekuntia); rajat kiinnitetään median kestoon, käänteiset tai ei-äärelliset ikkunat hylätään ja kaikki näytteenottokäytännöt suoritetaan vain normalisoidun aikavälin sisällä. Tuloksena oleva ikkuna sisältyy otannan metatietoihin ja epäluotettavaan kuvausetuliitteeseen, jotta loppupään mallit voivat erottaa kohdistetun otteen koko aikajanasta.
 
-Semanttinen kuvatekstin kohdistus on erillinen, eksplisiittinen asetus. Oletusarvoinen `full`-analyysitila säilyttää nykyisen kuvakehotteen eikä koskaan välitä pyyntötekstiä kuvatekstimallille. `focused`-tilassa silta lukee vain uusimman ei-tyhjän käyttäjän laatiman `text`/`input_text`-sisällön samasta Chat- tai Responses-säilöstä, normalisoi sen NFC-muotoon, tiivistää ohjausmerkit ja tyhjämerkit sekä rajoittaa sen 500 Unicode-koodipisteeseen. Tyhjä tulos käyttää varavaihtoehtona täsmälleen `full`-kehotetta. Käyttökelpoinen vihje sarjallistetaan JSON-muotoon erilliseen epäluotetun käyttäjäkontekstin lohkoon, ja se saa vain priorisoida havaittavia yksityiskohtia; se ei voi ohittaa erillistä varoitusta siitä, ettei mediassa näkyviä tai kuuluvia ohjeita pidä noudattaa. Tekstuaalinen kohdistus ei koskaan päättele arvoja `start`/`end` eikä muuta ajallista näytteenotinta.
+Semanttisen kuvatekstin fokus on erillinen, selkeä asetus. Oletusarvoinen `full` analyysitila säilyttää olemassa olevan kehyskehotteen eikä koskaan välitä pyyntötekstiä kuvatekstimalliin. `focused` tilassa silta lukee vain uusimmat ei-tyhjät käyttäjän kirjoittamat `text`/`input_text` samasta Chat- tai Responses-säiliöstä, normalisoi sen arvoon NFC, tiivistää ohjausmerkit ja välilyönnit ja rajoittaa sen 500 Unicode-koodipisteeseen. Tyhjä tulos palautuu tarkalleen `full` kehotteeseen. Käyttökelpoinen vihje sarjoitetaan JSON ksi erillisessä epäluotettavan käyttäjän kontekstilohkossa, ja se voi priorisoida vain havaittavissa olevia yksityiskohtia; se ei voi ohittaa erillistä varoitusta ohjeiden noudattamisesta, jotka näkyvät tai kuuluvat tiedotusvälineissä. Tekstitarkennus ei koskaan päättele `start`/`end` tai muuta temporaalista näytteenottajaa.
 
-#### FU-07:n rakenteellinen segmenttinäyttö
+#### FU-07 rakennesegmentin todisteita
 
-`segment_aware` käyttää yhden rajatun esianalyysiajon jo validoidulle paikalliselle videovirralle. Kiinteä suodatinketju pienentää ensin leveyden enintään 320 pikseliin, tunnistaa kohtausten vaihdokset ja pysähtyneet aikavälit ja ottaa sitten yhden näytekuvan sekunnissa epäterävyyden, keskimääräisen luminanssin sekä spatiaalisen ja ajallisen informaation analysointia varten. Ajo on rajoitettu 600 rakenteelliseen näytteeseen, yhteen FFmpeg-/suodatinsäikeeseen, samoihin vain `file`-protokollan salliviin protokolla- ja säilöluetteloihin, 1 MiB:n prosessitulosterajaan ja enintään 30 sekuntiin välittäjän yhteisen keskeytys-/määräaikarajan sisällä. Se ei koskaan hyväksy pyynnöstä komentoa, suodatinta, polkua tai URL-osoitetta.
+`segment_aware` käyttää yhtä rajoitettua esianalyysia jo validoidun paikallisen videovirran yli. Kiinteä suodinketju skaalautuu ensin enintään 320 pikselin leveyteen, havaitsee kohtauksen muutokset ja jäädytetyt intervallit ja ottaa sitten näytteitä 1 ruudulla sekunnissa sumennus-, keskimääräisen luman ja spatial/temporal tietojen saamiseksi. Pääsy on rajoitettu 600 rakennenäytteeseen, yhteen FFmpeg/filter säikeeseen, samaan `file` -only -protokollaan ja säilön sallittuihin luetteloihin, 1 MiB prosessitulostussidontaan ja enintään 30 sekuntiin välittäjän jaetun abort/deadline. n sisällä. Se ei koskaan hyväksy komentoa, suodatinta, polkua tai URL pyyntöä.
 
-Rakenteelliset arvot ovat determinististä näytteenottotodistusaineistoa, eivät videon semanttista ymmärtämistä. Niiden perusteella ei päätellä kohteita, toimintoja, kuvatekstejä, puhetta tai käyttäjän aikomuksia. Kohtaus- ja pysähtymisrajat muodostavat segmentit; pysähtymisen kattavuus, epäterävyys, valotus, spatiaalinen yksityiskohtaisuus ja ajallinen muutos vaikuttavat vain siihen, miten nykyinen 1–16 kuvan budjetti jaetaan. Täysin pysähtynyt segmentti rajataan yhteen kuvaan, kun taas pysähtymättömät segmentit kilpailevat jäljellä olevasta budjetista. Kun rajoja on enemmän kuin kuvia, aikajanan tasainen kattavuus säilytetään, jotta nopeat leikkaukset videon alussa eivät voi peittää pitkää loppusegmenttiä. Kohtausrajat, jotka ovat yhden sekunnin analyysitarkkuuden sisällä pysähtymisrajasta, yhdistetään.
+Rakennearvot ovat deterministisiä otantatodisteita, eivät semanttista videon ymmärtämistä. Ne eivät päättele aiheita, toimia, kuvatekstejä, puhetta tai käyttäjän tarkoitusta. Kohtauksen ja jäädytyksen rajat muodostavat segmenttejä; pysäytyspeitto, sumennus, valotus, tilayksityiskohdat ja ajallinen muutos vaikuttavat vain siihen, miten nykyinen 1–16 kuvan budjetti kohdistetaan. Täysin jäädytetty segmentti on rajoitettu yhteen kehykseen, kun taas jäädytetyt segmentit kilpailevat jäljellä olevasta budjetista. Kun rajoja on enemmän kuin kehyksiä, yhtenäinen aikajanan kattavuus säilyy, joten nopeat varhaiset leikkaukset eivät voi piilottaa pitkää perässä olevaa segmenttiä. Kohtauksen rajat 1 sekunnin analyysiresoluutiolla jäädytysrajan sisällä yhdistyvät.
 
-Puuttuvat suodattimet, virheellinen tai tyhjä näyttö, tunnistusvirhe tai rajatun esianalyysin aikakatkaisu johtavat hallitusti täsmälleen tasaisesti jaettujen aikavälien keskipisteitä käyttävään käytäntöön. Kutsujan tekemä keskeytys tai välittäjän määräaika ei johda tällaiseen varatoimintaan: se lopettaa käynnissä olevan aliprosessin, estää myöhemmän kuvien poiminnan ja poistaa yksityisen väliaikaisen hakemistopuun `finally`-lohkossa.
+Puuttuvat suodattimet, malformed/empty -todisteet, ilmaisinvirhe tai rajoitettu esianalyysin aikakatkaisu epäonnistuvat täsmälleen yhtenäisen keskipistekäytännön mukaisesti. Soittajan keskeytys tai välittäjän määräaika ei epäonnistu: se lopettaa lennon aikana tapahtuvan aliprosessin, estää myöhemmän kehyksen purkamisen ja yksityinen väliaikainen puu poistetaan `finally` ssä.
 
-`scripts/perf/video-bridge-fu07-eval.ts` luo deterministisiä, aidolla FFmpegillä tuotettuja testiaineistoja deduplikoinnin jälkeisten kuvatekstimallikutsujen säästöille, tiheän liikkeen budjetinjaolle, epäterävyys-, valotus- ja SI-TI-näytölle, nopeille leikkauksille ja pitkälle loppuosuudelle sekä asteittaisten häivytysten väärille positiivisille tuloksille. Se tallentaa esianalyysin seinäkelloajan sekä, jos `/usr/bin/time` on käytettävissä, aliprosessin suoritinajan ja RSS-muistin huippukäytön. Sen laatutarkistukset ovat vain rakenteellisia oraakkeleita. Todellisen kuvatekstimallin laatu pysyy tilassa `HOLD`, koska tällä testikehyksellä ei ole valtuutettua päätepistettä tai jäädytettyä arvioijaa. Myös rahalliset säästöt pysyvät tilassa `HOLD`, ellei `--caption-cost-per-call-usd` anna eksplisiittistä positiivista kutsukohtaista kustannusarviota; komentosarja ei koskaan sepitä kumpaakaan tulosta.
+`scripts/perf/video-bridge-fu07-eval.ts` tuottaa deterministisiä todellisia FFmpeg valaisimia, jotka säästävät tekstityskutsujen jälkeisiä säästöjä, tiheän liikkeen budjetin allokointia, blur/exposure/SI-TI todisteita, nopeita leikkauksia pitkällä hännän kanssa ja asteittaista haalistumista vääriä positiivisia. Se tallentaa esianalyysin seinän ajan ja, jos `/usr/bin/time` on saatavilla, lapsi- CPU ja huippu- RSS. Sen laatutarkastukset ovat vain rakenteellisia oraakkeleita. Todellinen kuvatekstimallin laatu on edelleen `HOLD`, koska tällä valjaalla ei ole valtuutettua päätepistettä tai jäädytettyä tuomaria. Rahasäästöt pysyvät myös `HOLD`, ellei `--caption-cost-per-call-usd` toimita selkeää positiivista puhelukohtaista arviota; käsikirjoitus ei koskaan valmista kumpaakaan tulosta.
 
-Kunkin kehyksen koko on rajoitettu 4 MiB:iin, kaikkien raakamuotoisten kehysten
-yhteiskoko 23 MiB:iin ja serialisoidun välittäjän vastauksen koko 32 MiB:iin.
-Yksityinen tilapäishakemisto poistetaan `finally`-lohkossa. OmniRoute ei sisällä
-FFmpeg:iä eikä hyväksy mukautettua suoritettavan tiedoston polkua. Ennen
-kuvatekstien muodostamista silta suorittaa varovaisen visuaalisen
-duplikaattien poistovaiheen: kukin JPEG pienennetään 16×16-kokoiseksi
-harmaasävypuskuriksi ja sitä verrataan vain viimeisimpään säilytettyyn kehykseen.
-Kun pyydetty kuvatekstibudjetti on suurempi kuin yksi kehys, poiminta tuottaa
-rajatun ehdokasjoukon, jonka koko on enintään kaksi kertaa budjetti eikä koskaan
-yli 16 kehystä. Pyydettyä enimmäismäärää sovelletaan vasta duplikaattien
-poistamisen jälkeen, ja ensimmäinen sekä viimeinen valittu ehdokas säilytetään
-lopullisessa harvennuksessa, kun budjetti on vähintään kaksi. Versioitu
-`grayscale-16x16-mean-cells-v2`-käytäntö käyttää suurempaa seuraavista: luminanssin
-keskimääräinen muutos tai niiden pienoiskuvan solujen osuus, joiden normalisoitu
-muutos on vähintään 0,05. Duplikaattikynnys on vakio 0,04, joka on valittu
-ennustettavuuden vuoksi sen sijaan, että se tarjottaisiin ajonaikaisena
-asetuksena. Tämä toissijainen suuren kontrastin signaali säilyttää pienet liikkeet
-ja näkyvän tekstin muutokset, jotka pelkkään keskiarvoon perustuva vertailu voi
-piilottaa. Vertailu- tai dekoodausvirheissä toiminta jatkuu sallivasti kattavuuden
-säilyttämiseksi. Tulosteen metadata erottaa poimitut ehdokkaat, onnistuneesti
-käytetyt kehykset ja pois jätetyt visuaaliset duplikaatit.
+Jokainen kehys on rajoitettu arvoon 4 MiB, kaikki raakakehykset yhdessä 23 MiB iin ja sarjoitetun välittäjän vaste 32 MiB hen. Yksityinen väliaikainen hakemisto poistetaan `finally`. OmniRoute ei niputa FFmpeg eikä hyväksy mukautettua suoritettavaa polkua. Ennen tekstitystä silta käyttää konservatiivista visuaalista duplikointia: jokainen JPEG pienennetään 16 × 16 harmaasävypuskuriin ja sitä verrataan vain viimeiseen säilytettyyn kehykseen. Pyydetylle tekstitysbudjetille, joka ylittää yhden kehyksen, poiminta tarjoaa rajoitetun ehdokasjoukon, joka on jopa kaksinkertainen budjettiin verrattuna, mutta ei koskaan enempää kuin 16 kehystä. Pyydettyä ylärajaa sovelletaan vasta päällekkäisyyksien poistamisen jälkeen, ja ensimmäiset ja viimeiset valitut ehdokkaat säilyvät lopullisessa harvennuksessa, kun budjetti on vähintään kaksi. Versioitu `grayscale-16x16-mean-cells-v2` -käytäntö käyttää suurempaa keskimääräistä luma-deltaa ja pikkukuvasolujen suhdetta, joiden normalisoitu delta on vähintään 0,05. Kopiointikynnys on vakio 0,04, joka valitaan ennustettavuuden vuoksi sen sijaan, että se olisi näkyvissä ajonaikaisena asetuksena. Tämä toissijainen korkeakontrastinen signaali säilyttää pienet liikkeet ja näkyvän tekstin muutokset, jotka pelkkä vertailu voi piilottaa. Vertailun tai dekooderin virheet epäonnistuvat ja pitävät peiton. Tulosteen metatiedot erottavat poimitut ehdokkaat, onnistuneesti käytetyt kehykset ja poistetut visuaaliset kaksoiskappaleet.
 
-Nimenomaisesti merkitty video-osa voi pyytää aikaleimoilla varustettua
-kontaktikopiota. Silta muodostaa enintään 4 sarakkeen ja 16 kehyksen JPEG-ruudukon.
-Jokainen 512 pikselin solu upottaa lähteensä aikaleiman suurikontrastiseen
-alapalkkiin, ja samat aikaleimat säilyvät tekstimuotoisessa metadatassa myöhempää
-yhdistämistä ja auditointia varten. Koko JPEG-tiedoston koko on edelleen rajoitettu
-32 MiB:iin. Jos `sharp` ei pysty dekoodaamaan tai koostamaan ruudukkoa, silta
-palaa käyttämään yksittäisiä JPEG-kehyksiä; asiakkaan tekemä keskeytys välittyy
-silti kontaktikopion käsittelyyn.
+Eksplisiittisesti merkitty videoosa voi pyytää aikaleimattua yhteystietolomaketta. Silta rakentaa enintään 4-pylväisen, 16-kehyksen JPEG ruudukon. Jokainen 512 pikselin solu polttaa lähteen aikaleiman suuren kontrastin alakaistalle, kun taas samat aikaleimat säilyvät tekstin metadatassa myöhempää yhdistämistä ja tarkastusta varten. Täydellinen JPEG on edelleen rajattu arvoon 32 MiB. Jos `sharp` ei pysty purkamaan tai muodostamaan ruudukkoa, silta palaa yksittäisiin JPEG kehyksiin; asiakkaan keskeytys etenee edelleen taulukkotoiminnon kautta.
 
-Tuotantoon siirtämistä tukeva näyttö pidetään tarkoituksellisesti erillään
-synteettisestä koostamisen mikrosuorituskykytestistä.
-`scripts/perf/video-bridge-contact-sheet-eval.ts` määrittää skeemaversioidun
-A/B-testikehyksen todellisille OpenAI-yhteensopiville konenäkömalleille. Se mittaa
-palveluntarjoajan ilmoittamat tokenit, päästä päähän -viiveen (mukaan lukien
-kontaktikopion koostaminen), mallikutsujen määrän ja manifestissa määritettyjen
-faktojen säilymisen. Mallien raakavastauksia ei kirjoiteta raporttiin; vain
-SHA-256-tiivisteet ja täsmänneiden faktojen tunnisteet säilytetään.
-Testikehys ei tee verkko- tai maksullista mallikutsua, ellei `--execute-real`
-ole annettu ja `--model`, `OMNIROUTE_BASE_URL` sekä `OMNIROUTE_API_KEY` ole
-määritetty. Ilman tällaista nimenomaista todellista ajoa sen koneluettava päätös
-pysyy arvossa `HOLD`; pelkät synteettiset hyötykuorman ja kutsumäärän mittaukset
-eivät kelpaa tuotantoon siirtämistä tukevaksi näytöksi.
+Promootiotodistus on tarkoituksella erillään synteettisen koostumuksen mikrovertailuarvosta. `scripts/perf/video-bridge-contact-sheet-eval.ts` määrittelee skeemaversion A/B -valjaat oikeille OpenAI-yhteensopiville näkömalleille. Se mittaa palveluntarjoajan ilmoittamia tunnuksia, päästä päähän seinään ulottuvaa latenssia (mukaan lukien arkin koostumus), mallin puheluiden määrää ja manifestin määrittelemää tosiasian säilyttämistä. Raakamallivastauksia ei kirjoiteta raporttiin; vain SHA-256 tiivistelmät ja täsmäytystieto IDs säilytetään. Valjaat eivät soita verkko- tai maksulliseen malliin, ellei `--execute-real` ole hyväksytty ja `--model`, `OMNIROUTE_BASE_URL` ja `OMNIROUTE_API_KEY` on määritetty. Ilman tätä nimenomaista reaaliajoa sen koneellisesti luettava tuomio pysyy `HOLD`; synteettiset payload/call-count -mittaukset eivät yksin ole edistämistodisteita.
 
-Kutsujat voivat liittää valinnaisen `transcript.cues`-taulukon tuettuun
-video-osaan, jos niillä on jo ajallisesti kohdistettu teksti. Jokaisessa vihjeessä
-on oltava `text`, äärellinen `start`/`end`-aikaväli tarkistetun keston sisällä
-sekä sallittujen arvojen luetteloon kuuluva `source` (`client`, `embedded` tai
-`audio-bridge`); `confidence`-arvon oletus on `1`, ja sen on pysyttävä välillä
-`0`–`1`. Täsmälleen samat vihjeet yhdistetään. OmniRoute ei koskaan käynnistä
-litterointia tämän metadatan perusteella: validoidut vihjeet kopioidaan kuvattuun
-tulokseen yhdessä lähteen, luottamustason ja aikavälin kanssa, ja ne esitetään
-epäluotettuina havaintoina kehysten kuvatekstien rinnalla. Virheellinen,
-sallitun alueen ulkopuolinen tai alkuperätiedoton teksti hylätään sen sijaan,
-että se sekoitettaisiin kuvatekstivirtaan. Molemmat pyyntörungon litterointikanavat
-normalisoivat annetun alkuperän arvoksi `client`, mukaan lukien itse ilmoitetut
-`embedded`- tai `audio-bridge`-merkinnät. Vain palvelimen hallitsema sovitin voi
-määrittää nämä luotetut merkinnät vain koodista käytettävän `trustedSource`-argumentin
-kautta; pyynnön JSON-kenttä ei voi välittyä tähän argumenttiin. Litterointiteksti
-on alkuperästään riippumatta epäluotettua, mediasta johdettua sisältöä, eikä se
-saa koskaan määrittää valtuutusta.
+Soittajat voivat liittää valinnaisen `transcript.cues` -ryhmän tuettuun videoosaan, kun heillä on jo kohdistettua tekstiä. Jokaisessa vihjeessä on oltava `text`, rajallinen `start`/`end` -väli koetusajan sisällä ja sallittujen luettelossa oleva `source` (`client`, `embedded` tai `audio-bridge`); `confidence` on oletuksena `1` ja sen on pysyttävä `0` ja `1` välillä. Tarkat päällekkäiset vihjeet tiivistetään. OmniRoute ei koskaan aloita transkriptiota näistä metatiedoista: validoidut vihjeet kopioidaan kuvattuun tulokseen lähteen, luotettavuuden ja aikavälin kanssa, ja ne esitetään epäluotettavina havaintoja kehysten kuvatekstien rinnalla. Virheellinen, alueen ulkopuolella tai alkuperästä vapaa teksti hylätään sen sijaan, että se sekoitetaan kuvatekstivirtaan. Molemmat pyynnön tekstiosan transkriptiokanavat normalisoivat `client` toimitetun alkuperän, mukaan lukien itse vahvistaneet `embedded` tai `audio-bridge` tunnisteet. Vain palvelimen omistama sovitin voi määrittää nämä luotetut tunnisteet vain koodia sisältävän `trustedSource` -argumentin kautta; pyyntö JSON -kenttä ei voi saavuttaa tätä argumenttia. Litteraattiteksti pysyy epäluotettavana mediaperäisenä sisältönä sen alkuperästä riippumatta, eikä se saa koskaan määrittää valtuutusta.
 
-Edistynyt kutsuja voi antaa samalle videolle `audioTranscript`-raidan; sitä
-käsitellään asiakkaan toimittamana tekstinä, ei todisteena palvelimen tekemästä
-litteroinnista. Yhdistämisrajapinta käsittelee visuaaliset ja äänihavainnot
-yhden määräajan ja keskeytyssignaalin alaisina, järjestää ne yhteiselle
-aikajanalle, yhdistää täsmälleen samat havainnot ja raportoi osittaisen tuloksen,
-kun vain toinen puoli onnistuu. Virheellinen `audioTranscript` tuottaa tämän
-osittaisen tuloksen — visuaalinen kuvaus säilytetään ja äänihaara kirjaa
-sanitoidun virhekoodin — koko videon käsittelyn epäonnistumisen sijaan.
-Haarakohtainen saatavuus, osittaisuuden ilmaisin ja sanitoidut virhekoodit
-säilytetään kuvatussa tuloksessa, suojakaidemetatiedoissa
-(`audioFusionRuns`/`audioFusionPartials`/
-`audioFusionFailureCodes`), tulosvälimuistin metatiedoissa ja sillan
-yhdistämislaskureissa. Video Bridgen oletuspolku ei käynnistä puheen muuntamista
-tekstiksi eikä lataa toista mediakopiota; ilman nimenomaisesti annettua raitaa
-se käsittelee edelleen vain videota.
+Edistynyt soittaja voi tarjota `audioTranscript` raidan samalle videolle; sitä käsitellään asiakkaan toimittamana tekstinä, ei todisteena palvelimen transkriptiosta. Fuusio-sauma suorittaa visuaalisia ja äänihavaintoja yhden määräajan ja keskeytyssignaalin mukaisesti, tilaa ne yhteiselle aikajanalle, tiivistää tarkat kaksoiskappaleet ja raportoi osittaisen tuloksen, kun vain toinen osapuoli onnistuu. Virheellinen `audioTranscript` muuttuu osittaiseksi tulokseksi — Visuaalinen kuvaus säilytetään ja äänihaara tallentaa puhtaan virhekoodin — koko videon epäonnistumisen sijaan. Haarakohtainen saatavuus, osittainen lippu ja puhtaat vikakoodit säilyvät kuvatussa tuloksessa, suojakaiteen metatiedoissa (`audioFusionRuns`/`audioFusionPartials`/ `audioFusionFailureCodes`), tulosvälimuistin metatiedoissa ja siltafuusiolaskureissa. Videosillan oletuspolku ei kutsu puheesta tekstiksi tai lataa toista mediakopiota. ilman tätä nimenomaista raitaa se pysyy vain videona.
 
-**Transkriptien säilytys (#12150 P1).** Tätä sovelletaan automaattisesti aina, kun
-Video Bridge (joka on itsessään valinnainen) hahmontaa transkriptivihjeen — erillistä
-säilytyslippua ei ole. Kun pyyntö hahmontaa minkä tahansa transkriptivihjeen (kutsujan ilmoittaman
-`transcript`-kentän tai yhdistetyn `audioTranscript`-kentän), suojamekanismi merkitsee sen
-`videoBridgeObserved`-tilaan ja tuottaa videokuvauksesta peitetyn varjokopion —
-identtisen hahmonnuksen, jossa jokaisen vihjeen vapaamuotoinen tekstisisältö korvataan arvolla
-`[redacted-video-transcript]`. Tämä tehdään korvaamalla rakenteinen vihjekenttä
-ennen merkkijonon koostamista (ei koskaan jäsentämällä litistettyä tekstiä, joten mikään vihjeen
-sisältö — haitallinen tai tavallinen, mukaan lukien merkkejä `]` sisältävät tekstit, kuten
-`[inaudible]`/`[music]` — ei voi säilyä). Tallennetun kutsulokin pyyntörungossa
-jokainen videosta johdettu tekstiosa vaihdetaan tähän peitettyyn varjokopioon sisällön
-yhtäsuuruuden perusteella; `fullText`-ankkuri luetaan uudelleen valmiista kutsua edeltävästä
-suojamekanismin hyötykuormasta, joten täsmäytys onnistuu edelleen sen jälkeen, kun ketjun myöhemmät
-suojamekanismit (henkilötieto- ja tunnistetietopeittimet, prioriteetit 10/95) ovat muokanneet
-kuvaustekstiä paikallaan, sekä sen jälkeen, kun järjestelmäkehotteen, luovutuksen tai Muistin
-lisäys on muotoillut viestitaulukon uudelleen. Mallille ylävirtaan lähetettävä runko ei muutu.
-Havaittu pyyntö ei myöskään lisää mitään pysyvään Muistiin (sekä pyynnöstä että vastauksesta
-johdettu poiminta ohitetaan), joten mallin oma vastaus ei voi kaiuttaa transkriptitekstiä Muistiin.
+**Transkription säilyttäminen (#12150 P1).** Tämä pätee automaattisesti aina, kun Video Bridge (itse opt-in) tekee transkriptiomerkinnän — erillistä säilytyslippua ei ole. Kun pyyntö tekee minkä tahansa transkriptiomerkin (soittajan ilmoittaman `transcript` tai sulautetun `audioTranscript`), suojakaide merkitsee sen `videoBridgeObserved` ja tuottaa redaktoidun varjon videokuvauksesta — identtisen renderöinnin, jossa jokaisen vihjeen vapaan tekstin runko korvataan `[redacted-video-transcript]` llä, ennen kuin rakennetaan parannalla kenttään. litistetty teksti, joten mitään vihjeitä sisältö — kilpaileva tai tavallinen, mukaan lukien kappaleet sisältävät `]`, kuten `[inaudible]`/`[music]` — voi selviytyä). Pysyvä puhelulokipyynnön runko vaihtaa jokaisen videosta johdetun tekstiosan kyseiseen redusoituun varjoon, joka vastaa sisällön tasa-arvoa. `fullText` ankkuri luetaan uudelleen valmiista puhelua edeltävästä suojakaiteen hyötykuormasta, joten täsmääminen onnistuu silti, kun myöhemmät ketjusuojakaiteet ( PII ja valtuustietojen maskerit, prioriteetit 10/95) kirjoittavat kuvaustekstin uudelleen paikoilleen ja system-prompt/handoff/memory injektion jälkeen muotoilevat viestiryhmän uudelleen. Malliin vastavirtaan lähetetty runko on muuttumaton. Havaittu pyyntö ei myöskään täytä pysyvää muistia (sekä pyyntö- että vastausperäinen purkaminen ohitetaan), joten mallin oma vastaus ei voi kaikua transkriptiotekstiä muistiin.
 
-**Raakavideokentät (#12430).** Kun silta on käytössä ja natiivi videotuki on tuntematon tai puuttuu, määritetyt `transcript`-/`audioTranscript`-kentät aktivoivat myös `videoBridgeObserved`-tilan, vaikka kuvauksen muodostaminen olisi epäonnistunut tai `maxVideos`-raja ylittynyt. `null` ja tyhjät merkkijonot huomioidaan; puuttuvia kenttiä ja muuhun kuin videoon liittyviä metatietoja ei huomioida. Säilytetyistä kopioista nämä kentät peitetään tai pyyntö jätetään pois, ja välimuistit sekä Muisti ohitetaan.
+**Raakavideokentät (#12430).** Kun silta on käytössä ja natiivivideotuki on tuntematon tai puuttuu, määritetyt `transcript`/`audioTranscript` -kentät aktivoivat myös `videoBridgeObserved`, vaikka kuvaus epäonnistuisi tai `maxVideos` raja olisi asetettu. `null` ja tyhjät merkkijonot laskevat; puuttuvat kentät ja muut kuin videon metatiedot eivät. Säilytetyt kopiot poistavat nämä kentät tai jättävät pyynnön pois, ja caches/Memory ohitetaan.
 
-Näillä varapoluilla kutsujan kelvollisista vihjeistä tulee tuettuja `text`-/`input_text`-
-osia epästandardien palveluntarjoajakenttien sijaan. Molemmat pyynnössä toimitetut raidat
-säilyvät epäluotettuina `client`-havaintoina, ja niihin liitetään nimenomainen varoitus siitä, ettei videota
-kuvailtu eikä aikaleimoja vahvistettu mediaa vasten. Nykyisiä 256 vihjeen / 64 KiB:n kokonais-
-ja vihjekohtaisia budjetteja sovelletaan kahteen raitaan yhdessä;
-aikaleimojen on mahduttava välittäjän 600 sekunnin enimmäisrajaan ja mahdolliseen annettuun kohdistus-
-ikkunaan. Virheelliset raidat hylätään eikä niitä välitetä mielivaltaisena tekstinä; kelvollista
-rinnakkaisraitaa voidaan silti käyttää, ellei niiden yhteinen budjetti ylity. Null-arvoiset tai tyhjät
-kentät eivät lisää tekstiä. Tämä varamenettely ei lisää median noutoa eikä transkriptiota.
-Transkription laajennuskentät poistetaan varapolun videokantajasta ja sen
-`video_url`-/`source`-objekteista. OpenAI-siirtomuodon sallittujen kenttien luettelo pysyy tiukkana; tuntemattoman natiivituen
-videokantajat pysyvät käytettävissä, ja tunnetut vain tekstiä tukevat kohteet säilyttävät turvalliset merkinnät.
-Rakenteiset peitetyt varjokopiot suojaavat lisättyä transkriptitekstiä, kun taas
-kutsujan omistama alkuperäinen pyyntö säilyy muuttumattomana. Natiivia tukea tarjoavat kohteet ja
-käytöstä poistetut sillat säilyttävät nykyisen ohitustoimintansa.
+Näillä varapoluilla kelvollisista soittajan vihjeistä tulee tuettuja `text`/`input_text` -osia ei-standardien tarjoajakenttien sijaan. Molemmat pyynnöstä toimitetut raidat ovat edelleen epäluotettavia `client` havaintoja, ja niissä varoitetaan nimenomaisesti, että videota ei kuvattu eikä aikaleimoja ole tarkistettu mediaa vastaan. Nykyiset 256-cue/64-KiB -kokonais- ja per-cue-budjetit koskevat kaikkia kahta kappaletta yhdessä; aikaleimojen tulee sopia välittäjän 600 sekunnin kattoon ja kaikkiin toimitettuihin tarkennusikkunaan. Virheelliset raidat hylätään, ei välitetä mielivaltaisena tekstinä; kelvollista sisarusta voidaan silti käyttää, ellei heidän yhteisbudjettinsa ylity. Null/empty -kentät eivät lisää tekstiä. Tämä varavaihtoehto ei lisää median hakua tai transkriptiota. Transkriptiolaajennuskentät poistetaan varavideon kantajasta ja sen `video_url`/`source` -objekteista. OpenAI langan sallittu luettelo pysyy tiukkana; Tuntemattomat alkuperäiset videovälittäjät ovat edelleen saatavilla, ja tunnetut tekstikohteet pitävät turvallisia merkkejä. Strukturoidut muokkausvarjot suojaavat liitettyä transkriptiotekstiä, kun taas alkuperäinen soittajan omistama pyyntö pysyy ennallaan. Alkuperäiset tuetut kohteet ja vammaiset sillat säilyttävät nykyisen ohituskäyttäytymisensä.
 
-Säilytettävät lisäkopiot käyttävät samaa havaitun pyynnön signaalia. Raaka
-suojamekanismeja edeltävä asiakaspyynnön tilannevedos, muistissa oleva odottava pyyntö ja aikainen
-hylätyn pyynnön loki korvaavat videon osien transkriptiokentät rakenteisesti;
-putkiston vaiheiden ja kontekstin luovutuksen muodostamat merkkijonokehotteet peitetään
-tallennetun pyyntörungon vastaanottopisteessä. Tallennettu `video_content_removed`-merkintä
-saa `previous_response_id`-jatkamisen epäonnistumaan turvallisesti sen sijaan, että tarkoituksella
-hylätty teksti muodostettaisiin uudelleen. Jos havaitun pyynnön osakohtainen
-peitetty varjokopio katoaa ennen lokitusta tai yksikin useista videon varjokopioista
-ei täsmää pyynnön myöhempien muutosten jälkeen, säilytettävä pyyntörunko
-jätetään kokonaan pois osittain peitetyn transkriptin säilyttämisen sijaan.
+Säilytetyt lisäkopiot käyttävät samaa havaitun pyynnön signaalia. Raaka esisuojakaiteen asiakaspyynnön tilannevedos, muistissa odottava pyyntö ja aikaisin hylättyjen pyyntöjen loki korvaavat rakenteellisesti transkriptiokentät videon osissa; liukuhihnavaiheiden ja kontekstin vaihdon syntetisoimat merkkijonokehotteet redaktoidaan jatkuvan pyynnön rungon nielussa. Pysyvä `video_content_removed` merkki saa `previous_response_id` jatkoa epäonnistumaan sulkeutumaan sen sijaan, että se rekonstruoisi tarkoituksellisesti hylätyn tekstin. Jos havaittu pyyntö menettää osakohtaisen muokkausvarjon ennen lokiin kirjaamista tai jopa yksi useista videovarjoista ei täsmää myöhempien pyyntömutaatioiden jälkeen, säilytetty pyynnön runko jätetään kokonaan pois sen sijaan, että säilytettäisiin osittain muokattu transkriptio.
 
-Havaitun pyynnön tapauksessa mallin vastaus voi lainata mitä tahansa transkriptin osaa
-ilman rakenteista vihjerajaa. Siksi sen kutsulokiin tallennettava
-`responseBody` korvataan poisjättömerkinnällä; yksityiskohtaista
-putkistoartefaktia (joka voi sisältää ylävirran ja asiakkaan rungot sekä suoratoiston osat)
-ei säilytetä. Semanttiset, idempotenssi- ja päättelyn toistovälimuistit ohittavat
-sekä luvut että kirjoitukset kyseisen pyynnön osalta. Palveluntarjoajapyyntö ja asiakkaalle näkyvä
-vastaus säilyvät muuttumattomina. Varhaiset yhteyden ylläpitotavut poistetaan väliaikaisesta
-puskurista, kun yksityiskohtainen artefakti jätetään pois. Kiron virheellistä EventStream-muotoa koskeva
-varoitus ilmoittaa vain hyötykuorman tavumäärän, ei koskaan sen sisältöä tai JSON-
-jäsentimen raakaa virhettä.
-Tämä ei tarkoita, että kaikki asiaan liittymättömät palveluntarjoajien tai liitännäisten diagnostiikat olisi
-auditoitu; säilyttävien vastaanottopisteiden laajemman tarkistuksen etenemistä seurataan kohdassa #11658.
+Havaitun pyynnön tapauksessa mallivastaus voi lainata mitä tahansa transkription osaa ilman strukturoitua vihjerajaa. Sen pysynyt puhelulokin `responseBody` korvataan siksi laiminlyönnillä; yksityiskohtaista liukuhihnan artefaktia (joka voi sisältää upstream/client kappaleita ja stream-kappaleita) ei säilytetä. Semanttinen, idempotenssi ja päättelyn toistovälimuisti ohittavat tämän pyynnön luku- ja kirjoitustoiminnot. Palveluntarjoajan pyyntö ja asiakkaan näkyvä vastaus pysyvät ennallaan. Varhaiset säilytystavut tyhjennetään väliaikaisesta puskurista, kun yksityiskohtainen artefakti jätetään pois. Kiro:n väärin muotoiltu EventStream varoitus ilmoittaa vain hyötykuorman tavumäärän, ei koskaan sen sisältöä tai JSON -jäsentimen raakavirhettä. Tämä ei väitä, että jokainen asiaankuulumaton provider/plugin -diagnostiikka on auditoitu; laajempaa säilytetyn nielun pyyhkäisyä seurataan #11658 muodossa.
 
-Sisäinen `/api/modality-bridge/video/drilldown`-elinkaari on erillinen,
-loopback-/tunnistetodennettu välimuistialusta. Jokainen toiminto edellyttää myös
-kanonista läpinäkymätöntä toimijatunnusta. Ennen tuotantokutsujan käyttöönottoa sen on
-johdettava tämä tunnus todennetusta vuokraajasta, eikä se saa koskaan välittää
-asiakkaan valitsemaa arvoa. Välimuistiavaimet sitovat kyseisen toimijan kanonisiin istunto- ja
-videoviitetunnuksiin, tallentavat vain niiden SHA-256-johdetut avaimet ja rajaavat sekä luvut
-että poistot samaan toimijaan. Välimuisti tallentaa enintään 16 johdettua JPEG-
-kuvaruutua merkintää kohden, vanhentaa ne kymmenen minuutin kuluttua ja tukee rajattuja
-`start`-/`end`-lukuja tai istunnon nimenomaista poistamista.
+Sisäinen `/api/modality-bridge/video/drilldown` elinkaari on erillinen loopback/token-authenticated välimuistisubstraatti. Jokainen operaatio vaatii myös kanonisen opaakin pääperiaatteen ID. Ennen kuin tuotantokutsuja otetaan käyttöön, sen on johdettava tämä ID todennetulta vuokraajalta, eikä se saa koskaan lähettää eteenpäin asiakkaan valitsemaa arvoa. Välimuistiavaimet sitovat tämän pääasiallisen kanoniseen istuntoon ja videoviittaukseen IDs, tallentavat vain niiden SHA-256-derived avaimet ja kattavat sekä lukemisen että poiston samaan pääasialliseen. Välimuisti tallentaa enintään 16 johdettua JPEG kehystä merkintää kohti, vanhenee ne kymmenen minuutin kuluttua ja tukee rajoitettua `start`/`end` -lukua tai eksplisiittistä istunnon poistamista.
 
-Kullakin toimijalla voi olla enintään 16 merkintää ja 64 MiB kanonista JPEG-dataa. Nämä
-rajat ovat riippumattomia yleisestä 64 merkinnän / 256 MiB:n enimmäisrajasta: toimijakohtaisen kiintiön
-paine poistaa vain kyseisen toimijan vähiten äskettäin käytetyt merkinnät ennen kuin yleistä
-LRU-poistoa harkitaan. Vanhentuneet merkinnät poistetaan sekä toimijakohtaisesta että
-yleisestä kirjanpidosta välimuistitoiminnan yhteydessä, kun taas peruutus ja validoinnin epäonnistuminen eivät
-tallenna osittaista korvausta.
+Jokainen pääasiallinen on rajoitettu 16 merkintään ja 64 MiB kanonista JPEG dataa. Nämä rajat ovat riippumattomia maailmanlaajuisesta 64-entry/256 MiB -katosta: päämiehen kiintiöpaine häätää vain kyseisen päämiehen vähiten käyttämät merkinnät ennen kuin globaali LRU häätö otetaan huomioon. Vanhentuneet merkinnät pyyhkäistään sekä pääasiallisesta että yleisestä välimuistitoiminnan kirjanpidosta, kun taas peruutus- ja vahvistusvirheet eivät aiheuta osittaista korvaamista.
 
-Välimuisti hylkää ei-kanonisen Base64-datan, ylimääräisen täytteen, muun kuin JPEG-median, virheelliset tai
-katkenneet JPEG-kuvat sekä JPEG-kuvat, jotka aiheuttavat varoituksen rajatun koko kuvan `sharp`-purun
-aikana. Se uudelleenkoodaa jokaisen hyväksytyn kuvan kanoniseksi JPEG-kuvaksi, määrittää leveyden ja korkeuden
-puretuista tavuista sen sijaan, että luottaisi kutsujan kenttiin, ja hylkää kaikki lopussa olevat
-polyglottitavut niiden säilyttämisen sijaan. Vain rajattu kanoninen pakattu puskuri
-lasketaan mukaan kumpaankin kiintiöön. JSON-siirtoraja sisältää Base64-yleiskulun 32 MiB:n
-puretun syötteen enimmäismäärälle. Jokainen
-tallennettu johdannainen sisältää validoidun JPEG-muotonsa ja -resoluutionsa, näytteenottokäytännön,
-johdannaisversion, luontiajan, palvelimen laskeman sisältötiivisteen sekä tiivistetyn viittauksen
-ylätason kohteeseen ja luotetun kutsujan antaman ylätason sisältötiivisteen. Peruutus tarkistetaan
-asynkronisten purku- ja tiivistevaiheiden välissä ennen atomista välimuistiin tallennusta.
+Välimuisti hylkää ei-kanonisen Base64:n, ylimääräisen täytön, ei-JPEG-median, virheellisen tai katkaistun JPEGs ja JPEGs, jotka tuottavat varoituksen rajoitetun täyden kuvan `sharp` dekoodauksen aikana. Se koodaa jokaisen hyväksytyn kuvan uudelleen kanoniseksi JPEG ksi, saa leveyden ja korkeuden dekoodatuista tavuista sen sijaan, että luottaisi soittajan kenttiin, ja hylkää kaikki jäljessä olevat polyglottitavut sen sijaan, että säilyttäisi ne. Vain rajoitettu kanoninen pakattu puskuri veloitetaan molemmista kiintiöistä. JSON johtorajoitus sisältää Base64-ylimäärän 32 MiB dekoodatun sisääntulon katolle. Jokainen tallennettu johdannainen tallentaa sen validoidun JPEG format/resolution, näytteenottokäytännön, johtamisversion, luontiajan, palvelimen laskeman sisällön hajautusarvon ja tiivistetyn yläviitteen sekä luotetun soittajan yläsisällön tiivisteen. Peruutus tarkistetaan asynkronisten decode/hash vaiheiden välillä ennen atomivälimuistin sitoutumista.
 
-Tämä vaihekokonaisuus ei vielä yhdistä tuotantokäyttöön tarkoitettua tuottajaa reittiin eikä
-tarjoa moniresoluutioisten varianttien valintaa. Läpinäkyvä Video Bridge -pyyntöpolku
-ei siksi aiheuta lisätyötä, kun taas vuokralaiseen sidotun toimijan johtaminen ja
-koko FU-08-moniresoluutioelinkaari ovat edelleen nimenomaisia jatkotoimia sen sijaan,
-että ne dokumentoitaisiin valmiiksi toiminnallisuudeksi.
+Tuotantotuottaja käyttää uudelleen jo johdettuja välittäjäkehyksiä vasta onnistuneen visuaalisen analyysin jälkeen ilman toista videota download/extraction. Se vaatii operaattorin `modalityBridgeVideoDrilldownEnabled=true`, tiukat osakohtaiset `drilldown: true` ja todennettu API-avaintietue ID. Asiakkaan ilmoittamat principal/session arvot eivät koskaan muodosta omistusta. Ilman kaikkia kolmea ehtoa se ei hajauta, muuta kokoa tai säilytä lisäkehyksiä. Säilytysvirhe säilyttää käyttökelpoisen visuaalisen vasteen. Hyväksytyt pyynnöt ohittavat koko videon tulosten välimuistin, joten välimuistissa olevia tuloksia ei koskaan toisteta.
 
-Kehykset tekstitetään järjestyksessä määritetyllä Video-mallilla. Tyhjä
-Video-ohitus perii Vision-asetuksen; jos kumpikin on tyhjä, Visionin
-automaattinen reititin valitsee käytettävän näkökykyisen mallin. Onnistuneet kuvatekstit
-korvaavat alkuperäisen osan vakaalla `[Video description:`-etuliitteellä, joka myös
-merkitsee tekstin epäluotetuksi, mediasta johdetuksi havainnoksi ja ohjeistaa myöhempiä
-malleja olemaan noudattamatta mediasta löytyviä ohjeita. Kehyskuvatekstien välimuistiavaimet
-sisältävät JPEG-tavut, kehotteen, aikaleiman ja käytettävän mallin; vain onnistuneet
-kuvatekstit tallennetaan välimuistiin. Välimuistimerkinnät säilyttävät toteutuneen onnistuneen tuottajamallin,
-myös varamallin; silta ilmoittaa arvon `mixed`, kun eri kehykset
-ovat eri mallien tuottamia. Välimuistiosuma käyttää uudelleen kyseistä tuottajaidentiteettiä
-sen sijaan, että se nimettäisiin uudelleen pyydetyn reitityssuunnitelman mukaiseksi. Koko videon tuloksen
-välimuistiavain muodostetaan jokaisesta tulosta muuttavasta syötteestä — kehotteesta, käytettävästä
-mallista, näytteenottokäytännöstä, kehysten määrästä, semanttisen analyysin tilasta, normalisoidun
-tarkennusvihjeen SHA-256-sormenjäljestä, tarkennusikkunasta, `transcript`-arvosta,
-`audioTranscript`-arvosta ja yhteystaulukkokuvan lipusta — joten minkä tahansa näistä
-ulottuvuuksista muuttaminen aiheuttaa välimuistiohituksen eikä koskaan vanhentuneen tuloksen uudelleenkäyttöä.
-Visuaalisen duplikaattien poiston käytäntöversio, kynnysarvo ja rajattu ehdokaskehysten määrä
-sisältyvät myös nimenomaisesti tulosvälimuistin avaimeen ja metatietoihin; käytännön muutos ei
-siten voi käyttää uudelleen vanhentunutta koko videon kuvausta. Tulosvälimuistin v4-metatiedot
-säilyttävät tilan ja sormenjäljen, eivät koskaan raakaa käyttäjän tehtävää. Suojakaiteiden metatiedot
-ilmoittavat sekä pyydetyn että käytettävän analyysitilan; pyydetty `focused`-tila ilman
-käyttökelpoista käyttäjätekstiä ilmoitetaan käytännössä `full`-tilaksi.
+Onnistuneet JSON ja SSE -vastaukset paljastavat enintään neljä läpinäkymätöntä kahvaa rajoitetussa `x-omniroute-video-drilldown` otsikossa. Valtuutetut selaimen alkuperät voivat lukea tämän otsikon laajentamatta CORS alkuperäkäytäntöä. Uudet kahvat käyttävät `v1.<32-byte random base64url token>`, ja rekisteri säilyttää vain niiden SHA-256 -tiivisteet. reader/header jäsennin hyväksyy myös vanhat 64-heksadesimaaliset tunnukset. Todennettu julkinen kuluttaja on `GET /api/v1/video-bridge/drilldown?handle=...`, jonka `modalityBridgeVideoDrilldownRemoteEnabled=true` aidattaa itsenäisesti. Eksplisiittinen pysynyt false peruuttaa pääsyn, vaikka vanha `OMNIROUTE_VIDEO_BRIDGE_DRILLDOWN_REMOTE_ENABLED` env -varavaraus on käytössä. Tuotannon säilyttämisellä on analoginen perintö `OMNIROUTE_VIDEO_BRIDGE_DRILLDOWN_ENABLED` varasääntö. Molemmat varavaihtoehdot ovat oletuksena pois päältä.
 
-Suojakaide poimii kaikki tuetut video-osat, mutta kuvailee enintään
-`modalityBridgeVideoMaxVideos` videota. Jos kohteen on todistettu käyttävän asetusta
-`supportsVideo === false`, epäonnistuneet ja rajan ylittävät videot muutetaan nimenomaisiksi turvallisiksi
-tekstimerkinnöiksi, jotta raakavideota ei säily. Kun suorituskykyä ei tunneta, kyseiset osat
-säilyttävät videosäiliönsä; mahdollinen varatranskriptio noudattaa edellä kuvattua rajattua
-tekstimuunnosta. Kohteet, joilla on `supportsVideo === true`, ohittavat sillan.
-Asiakaspyynnön keskeytyssignaali välittyy latauksen, välittäjäjonon,
-aliprosessien ja kuvatekstikutsujen läpi; keskeytykset pysäyttävät käsittelyn videoiden välissä eivätkä koskaan
-jätä raakaa mediaa avoimeksi käsittelyn epäonnistuessa.
+Kuluttaja saa omistajuuden todennetusta avaimesta ja soveltaa avainkäytäntöä: sekä GET että DELETE kuuluvat `video` päätepisteluokkaan, mukaan lukien `/v1` ja `/api/v1` -aliakset. Avainten, joiden päätepisteiden sallittu luettelo ei ole tyhjä, on sisällettävä `video`; rajoittamattomat avaimet ovat yhteensopivia. Kuluttaja palauttaa saman 404:n tuntemattomasta, vanhentuneesta ja toisen avaimen kahvoista. Se hyväksyy `variant=preview|standard|detail` (maksimi JPEG mitta 320/640/1280, ei koskaan skaalattu), `limit=1..8` (tai vanha `frames` alias, ei koskaan molempia), nollapohjainen `page` ja valinnainen `start`/`end` tarkennussekunti. Päällekkäiset kyselyavaimet ja käänteiset tarkennusikkunat hylätään. Jokaisella palautetulla versiolla on tiiviste sen todellisesta sisällöstä ja todellisesta resoluution metadatasta, joka on linkitetty säilytettyyn lähteeseen. Variantit johdetaan luettaessa sen sijaan, että niitä tallennettaisiin ylimääräisinä säilytettyinä kopioina. JSON -vaste, mukaan lukien Base64/envelope, on rajoitettu arvoon 32 MiB; ylisuuri sivu palauttaa 413 ja asiakkaan on pyydettävä vähemmän kehyksiä. Lukee tarkistuksen peruutuksen jokaisen koon muutoksen ympäriltä ja tarkistaa kahvan voimassaolon ennen palauttamista. `DELETE` omistajan mukaan on idempotentti; poisto tai TTL expiry vapauttaa säilytetyn lähde- ja käyttökirjanpidon.
 
-Ajoaikaiset asetukset tallennetaan tietokantaan ja validoidaan Zodilla:
+Jaettu varasto on prosessipaikallinen: kahvat vanhenevat uudelleenkäynnistyksen yhteydessä, eikä niitä voi siirtää itsenäisten OmniRoute prosessien välillä. Hallintatilastot paljastavat tehokkaan säilytys-/etäkäytännön ja vain säilytetyt entries/bytes, eivät koskaan mediaa, viittauksia, pääasiallisia IDs tai kahvoja. Videoasetukset-paneeli näyttää kyseiset arvot ja voi säilyttää molemmat suostumuskytkimet. Tämä toteutusdokumentaatio ei ole reaaliaikainen käyttöönotto- tai promootiotodistus; todellisen mallin hyväksyntää seurataan erikseen.
 
-| Avain                               | Oletusarvo  | Alue / toiminta                                                                                             |
-| ----------------------------------- | ----------- | ----------------------------------------------------------------------------------------------------------- |
-| `modalityBridgeVideoEnabled`        | `false`     | Valinnainen ajoaikainen toiminto, erikseen käyttöön otettava                                                |
-| `modalityBridgeVideoAnalysisMode`   | `"full"`    | `full` säilyttää yleiset kuvatekstit; `focused` käyttää rajattua, epäluotettua uusinta käyttäjäkontekstia   |
-| `modalityBridgeVideoModel`          | `""`        | Perii Vision Bridge -mallin                                                                                 |
-| `modalityBridgeVideoFrameCount`     | `8`         | 1–16                                                                                                        |
-| `modalityBridgeVideoSamplingPolicy` | `"uniform"` | `uniform`, `scene_aware` tai suhteellinen `segment_aware`; tunnistimen virhe käyttää varana arvoa `uniform` |
-| `modalityBridgeVideoMaxVideos`      | `1`         | 1–4                                                                                                         |
-| `modalityBridgeVideoTimeout`        | `120000`    | 1000–120000 ms                                                                                              |
+Kehykset tekstitetään peräkkäin määritetyn videomallin kanssa. Tyhjä videon ohitus perii Vision-asetuksen; Jos molemmat ovat tyhjiä, Vision-automaattinen reititin valitsee tehokkaan näkökykyisen mallin. Onnistuneet kuvatekstit korvaavat alkuperäisen osan vakaalla `[Video description:` etuliitteellä, joka myös merkitsee tekstin epäluotettavaksi mediapohjaiseksi havainnon ja käskee loppupään malleja olemaan noudattamatta tiedotusvälineistä löytyviä ohjeita. Kehystekstityksen välimuistiavaimet sisältävät JPEG -tavut, kehotteen, aikaleiman ja tehokkaan mallin; vain onnistuneet tekstitykset tallennetaan välimuistiin. Välimuistimerkinnät säilyttävät todellisen onnistuneen tuottajamallin, mukaan lukien varamallin; silta ilmoittaa `mixed` kun eri malleilla valmistettiin erilaisia kehyksiä. Välimuistiosuma käyttää uudelleen tuota tuottajaidentiteettiä sen sijaan, että se nimeäisi sen uudelleen pyydetyksi reitityssuunnitelmaksi. Koko videon tulosten välimuisti on näppäilty jokaiseen tuloon, joka muuttaa tulosteen — -kehotetta, tehokasta mallia, näytteenottokäytäntöä, kehysten määrää, semanttista analyysitilaa, normalisoidun tarkennusvihjeen SHA-256 sormenjälkeä, tarkennusikkunaa, `transcript`, `audioTranscript` ja yhteystietoarkin lippua —, joten näiden mittojen muuttaminen ei ole koskaan välimuistin väärinkäyttöä. Visuaalinen dedup-käytännön versio, kynnys ja rajattu ehdokaskehysten määrä ovat myös eksplisiittisiä tulosvälimuistiavaimessa ja metatiedoissa. Käytännön muutos ei siis voi käyttää vanhentunutta koko videon kuvausta uudelleen. Result-cache v4 metadata säilyttää tilan ja sormenjäljen, ei koskaan raakaa käyttäjän tehtävää. Guardrailin metatiedot raportoivat sekä pyydetyt että tehokkaat analyysitilat; pyydetty `focused` -tila ilman käyttökelpoista käyttäjätekstiä raportoidaan tehokkaasti `full`.
 
-Vanhat tallennetut Video-aikakatkaisuarvot, jotka ylittävät 120 sekuntia, rajataan
-välittäjän määräaikaan; uudet tämän rajan ylittävät asetusmuutokset hylätään.
-`GET /api/modality-bridge/video/runtime` edellyttää luotettavasti leimattua loopback-paikallisuutta
-ennen todennusta tai ajoaikaisen ympäristön tutkimista ja sen jälkeen hallintatason
-todennusta. Se palauttaa vain kentät `available`, siistityt FFmpeg/ffprobe-versiot ja kiinteän
-syyn silloin, kun ajoaikainen ympäristö ei ole käytettävissä. Sisäinen poimintapäätepiste ei ole
-julkinen latausrajapinta: jonon täyttyminen palauttaa arvon `503` ja `Retry-After`-otsakkeen, kutsujan
-yhteyden katkeaminen palauttaa arvon `499`, ja välittäjän kiinteä määräaika palauttaa arvon `504`. Muunnetut vastaukset lisäävät
-arvon `video->text;model=<visionModel>;parts=<videos>` keskitettyyn
-`x-omniroute-modality-bridge`-otsakkeeseen poistamatta Vision- tai Audio-segmenttejä.
+Suojakaide poimii jokaisen tuetun videon osan, mutta kuvaa vain `modalityBridgeVideoMaxVideos`. Jos kohteella on osoitettu olevan `supportsVideo === false`, epäonnistuneista ja ylirajoista videoista tulee eksplisiittisiä turvallisia tekstimerkkejä, joten mikään raakavideo ei säily. Kun kykyä ei tunneta, nämä osat säilyttävät videotelineensä; mikä tahansa varatranskriptio noudattaa yllä olevaa rajoitetun tekstin muuntamista. Kohteet `supportsVideo === true` :llä ohittavat sillan. Asiakaspyynnön keskeytyssignaali etenee latauksen, välittäjäjonon, aliprosessien ja tekstityskutsujen kautta; keskeyttää pysähdyksen videoiden välillä ja koskaan epäonnistua avoin raakamedialle.
 
-### PII-maskaus (`piiMasker.ts`)
+Ajonaikaiset asetukset ovat DB-tukea ja Zod-validoituja:
 
-Suoritetaan **molemmissa** vaiheissa.
+| Avain                               | Oletus      | Alue / käyttäytyminen                                                                                              |
+| ----------------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------ |
+| `modalityBridgeVideoEnabled`        | `false`     | Valinnainen suoritusaika, valinnainen                                                                              |
+| `modalityBridgeVideoAnalysisMode`   | `"full"`    | `full` säilyttää yleiset tekstitykset; `focused` käyttää rajoitettua, epäluotettavaa uusimman käyttäjän kontekstia |
+| `modalityBridgeVideoModel`          | `""`        | Peri Vision Bridge -malli                                                                                          |
+| `modalityBridgeVideoFrameCount`     | `8`         | 1–16                                                                                                               |
+| `modalityBridgeVideoSamplingPolicy` | `"uniform"` | `uniform`, `scene_aware` tai suhteellinen `segment_aware`; ilmaisimen vika palaa `uniform`:hen                     |
+| `modalityBridgeVideoMaxVideos`      | `1`         | 1–4                                                                                                                |
+| `modalityBridgeVideoTimeout`        | `120000`    | 1000–120000 ms                                                                                                     |
 
-- **`preCall`** kloonaa hyötykuorman, käy läpi kentät `system`, `messages`, `input` ja `prompt` (mukaan lukien pelkät merkkijonoalkiot) ja soveltaa `processPII()`-funktiota (moduulista `@/shared/utils/inputSanitizer`) merkkijonotyyppisiin `content`/`text`-kenttiin. Kun `PII_REDACTION_ENABLED=true`, havaitut henkilötiedot peitetään lähtevässä hyötykuormassa. Tämä on riippumaton asetuksesta `INPUT_SANITIZER_MODE` (joka ohjaa vain kehoteinjektion käytäntöä). Kun peittäminen on pois päältä, kutsu kirjaa havaintolukumäärät kirjoittamatta sisältöä uudelleen.
-- **`postCall`** syväkloonaa vastauksen ja suorittaa `sanitizePIIResponse()`-funktion sekä Responses-API-muodon peittäjän (`maskResponsesOutput` — kattaa kentät `output_text` ja `output[].content[].text`). Jos peittoja tapahtuu, muokattu vastaus korvaa alkuperäisen.
+Vanhat videon aikakatkaisuarvot, jotka ovat yli 120 sekuntia, on kiinnitetty välittäjän määräaikaan; uudet asetukset kirjoittavat tämän rajan yläpuolelle, hylätään. `GET /api/modality-bridge/video/runtime` vaatii luotetun leimatun silmukkapaikan ennen todennusta tai ajonaikaista luokitusta, minkä jälkeen se vaatii hallinnan todennuksen. Se palauttaa vain `available`, puhtaat FFmpeg/ffprobe -versiot ja kiinteän syyn, kun suoritusaika ei ole käytettävissä. Sisäinen purkupäätepiste ei ole julkinen lataus API: jonon kylläisyys palauttaa arvon `503` plus `Retry-After`, soittajan katkaisu palauttaa arvon `499` ja kiinteä välittäjän määräaika palauttaa `504`. Muunnetut vastaukset lisäävät `video->text;model=<visionModel>;parts=<videos>` keskeiseen `x-omniroute-modality-bridge` otsikkoon poistamatta Vision- tai Audio-segmenttejä.
 
-Suojaus ei koskaan estä; se ainoastaan merkitsee (`meta.detections`, `meta.redacted`) tai kirjoittaa uudelleen.
+### PII Masker (`piiMasker.ts`)
 
-#### Tyypikohtainen valinta, mukautetut kaavat ja havaintolaskurit
+Juoksee eteenpäin **molemmat** vaiheet.
 
-**Dashboard → Settings → Security → PII masking** valitsee _mitä_ peitetään. Se ei kytke peittoa päälle: se tapahtuu edelleen asetuksilla `PII_REDACTION_ENABLED` (pyyntö) ja `PII_RESPONSE_SANITIZATION` (vastaus + SSE), jotka molemmat ovat oletuksena pois päältä.
+- **`preCall`** kloonaa hyötykuorman, kulkee `system`, `messages`, `input` ja `prompt` (mukaan lukien pelkät merkkijonokohteet) ja käyttää `processPII()` ( `@/shared/utils/inputSanitizer`) merkkijono- `content`/`text` kenttiin. Kun `PII_REDACTION_ENABLED=true`, havaittu PII poistetaan lähtevästä hyötykuormasta. Tämä on riippumaton `INPUT_SANITIZER_MODE` (joka ohjaa vain pikainjektiokäytäntöä). Kun editointi on pois päältä, puhelu tallentaa tunnistusmäärät ilman sisällön uudelleenkirjoittamista.
+- **`postCall`** syväkloonaa vastauksen, suorittaa `sanitizePIIResponse()` ja Responses-API-muodon maskerin (`maskResponsesOutput` — kattaa `output_text` ja `output[].content[].text`). Jos muokkaus tapahtuu, muokattu vastaus korvaa alkuperäisen.
 
-- **Tyypikohtainen valinta** — sisäänrakennetut tunnisteet on lueteltu tiedostossa `src/shared/constants/piiTypes.ts` (`PII_BUILTIN_TYPES`). Asettamaton arvo tarkoittaa kaikkia tyyppejä (käyttäytyminen ennen tämän asetuksen olemassaoloa). Pyyntömoottorin `ssn_us`-kaava vastaa tyyppiä `ssn`. Mallipohjat (Minimal, Standard, Financial, Brazilian, USA, GDPR, POPIA, Full) vain täyttävät valintaruudut käyttöliittymässä.
-- **GDPR- ja POPIA-tunnisteet** — kaksitoista sisäänrakennettua tunnistetta EU:n ja Etelä-Afrikan henkilötunnisteille (taulukko alla). Niiden säännölliset lausekkeet, validaattorit ja lainkäyttöaluetunnisteet ovat yhdessä taulukossa, `src/shared/utils/piiPatterns.ts`, jota sekä vastausten puhdistin (`src/lib/piiSanitizer.ts`) että pyyntöjen peittäjä (`src/shared/utils/inputSanitizer.ts`) käyttävät. Osuma peitetään vain, kun validaattori hyväksyy sen; pelkkä numerosarja ei koskaan riitä. Ennen näiden tunnisteiden olemassaoloa rajatun valinnan tallentaneen ylläpitäjän aiempi toiminta säilyy, kunnes uudet tunnisteet valitaan.
-- **Mukautetut kaavat** — enintään 20 säännöllisen lausekkeen tai jokerimerkin kaavaa (`*` = enintään 64 muuta kuin tyhjämerkkiä, `?` = yksi). Osumista tulee `[CUSTOM_REDACTED]`. Jokainen kaava käy läpi `compilePiiCustomPattern()`-funktion (`src/shared/utils/piiCustomPatterns.ts`): enintään 500 merkkiä, liput rajoitettu arvoihin `g i m s u`, täytyy kääntyä, täytyy läpäistä `safe-regex`-tarkistus (katastrofaalinen takaisinperäytyminen) eikä se saa täsmätä tyhjään merkkijonoon tai peittämismerkkiin. Epäonnistuva kaava hylätään tallennettaessa ja testattaessa, ja tallennettu rivi, joka epäonnistuu, ohitetaan ajonaikaisesti sen sijaan että se käännettäisiin. Mukautetut kaavat suoritetaan vain peiton ollessa päällä.
-- **Havaintolaskurit** — tyypikohtaiset lukumäärät (ei koskaan täsmänneitä arvoja), pidetään muistissa ja nollataan uudelleenkäynnistyksessä (`src/lib/pii/piiDetectionStats.ts`). Ne kasvavat vain peiton ollessa päällä.
+Suojakaide ei koskaan tukkeudu; se vain merkitsee (`meta.detections`, `meta.redacted`) tai kirjoittaa uudelleen.
 
-Asetukset sijaitsevat `key_value`-taulussa (nimiavaruus `pii_settings`, `src/lib/db/piiSettings.ts`) ja niitä luetaan 1 s:n välimuistin kautta. API:
+#### Tyyppikohtainen valinta, mukautetut kuviot ja tunnistuslaskurit
+
+**Dashboard → Settings → Security → PII masking** valitsee _mitä_ peitetään. Se ei kytke maskausta päälle: se on edelleen `PII_REDACTION_ENABLED` (pyyntö) ja `PII_RESPONSE_SANITIZATION` (vastaus + SSE), molemmat oletuksena pois päältä.
+
+- **Tyyppikohtainen valinta** — Sisäänrakennetut tunnukset on lueteltu `src/shared/constants/piiTypes.ts` ssä (`PII_BUILTIN_TYPES`). Unset tarkoittaa jokaista tyyppiä (käyttäytyminen ennen tätä asetusta). Pyyntömoottorin `ssn_us` -kuvio kohdistetaan `ssn`. Mallit (Minimal, Standard, Financial, Brazilian, USA, GDPR, POPIA, Full) täyttävät vain UI:n valintaruudut.
+- **GDPR ja POPIA -tunnisteet** — kaksitoista sisäänrakennettua tunnusta, jotka kattavat EU ja Etelä-Afrikan henkilökohtaiset tunnisteet (taulukko alla). Niiden regexes, validaattorit ja lainkäyttöaluetunnisteet sijaitsevat yhdessä `src/shared/utils/piiPatterns.ts` taulukossa, jonka sekä vastauspuhdistaja (`src/lib/piiSanitizer.ts`) että pyynnön peittäjä (`src/shared/utils/inputSanitizer.ts`) kuluttavat. Osuma poistetaan vain, kun sen vahvistaja hyväksyy sen; pelkkä numerosarja ei koskaan riitä. Operaattori, joka on tallentanut kavennetun valinnan ennen näiden tunnusten olemassaoloa, säilyttää käyttäytymisensä, kunnes uudet tunnukset on valittu.
+- **Mukautetut kuviot** — enintään 20 regex- tai jokerimerkkikuviota (`*` = enintään 64 muuta kuin välilyöntimerkkiä, `?` = yksi). Otteluista tulee `[CUSTOM_REDACTED]`. Jokainen kuvio kulkee `compilePiiCustomPattern()` (`src/shared/utils/piiCustomPatterns.ts`) läpi: enintään 500 merkkiä, liput on rajoitettu `g i m s u`, on käännettävä, täytyy läpäistä `safe-regex` (katastrofaalinen paluu), eikä se saa vastata tyhjää merkkijonoa tai muokkauspaikkamerkkiä. Epäonnistunut malli hylätään, kun se tallennetaan ja testataan, ja tallennettu rivi, joka epäonnistuu, ohitetaan ajon aikana sen sijaan, että se käännetään. Mukautetut kuviot toimivat vain maskauksen ollessa päällä.
+- **Havaitsemislaskurit** — tyyppikohtaiset määrät (ei koskaan täsmääviä arvoja), säilytetään muistissa ja nollataan uudelleenkäynnistyksen yhteydessä (`src/lib/pii/piiDetectionStats.ts`). Ne lisääntyvät vain maskin ollessa päällä.
+
+Asetukset ovat `key_value` taulukossa (nimitila `pii_settings`, `src/lib/db/piiSettings.ts`) ja ne luetaan 1 s välimuistin kautta. API:
 
 | Method | Path                     | Purpose                                                                            |
 | ------ | ------------------------ | ---------------------------------------------------------------------------------- |
@@ -577,9 +370,9 @@ Asetukset sijaitsevat `key_value`-taulussa (nimiavaruus `pii_settings`, `src/lib
 | `PUT`  | `/api/settings/pii`      | Korvaa `enabledTypes`-arvon (`null` = kaikki) ja/tai `customPatterns`-arvon        |
 | `POST` | `/api/settings/pii/test` | Kuivaharjoittelu yhdelle kaavalle enintään 8 Kt:n näytteellä; mitään ei tallenneta |
 
-Kaikki kolme vaativat hallintatodennuksen ja validoivat rungon Zod:lla (`src/shared/validation/schemas/piiSettings.ts`).
+Kaikki kolme vaativat hallinnan todennusta ja vahvistavat kehon Zod :lla (`src/shared/validation/schemas/piiSettings.ts`). Kun sisäänkirjautuminen on estetty (`requireLogin=false`), `GET` ja testipäätepiste ovat auki, mutta `PUT` tarvitsee silti kojelautaistunnon, `manage` -scope API -avaimen, `oma_` käyttötunnisteen, jolla on kirjoitusalue tai suurempi, tai CLI tunnuksen tai sisäisen palvelun tunnuksen, joka lähetetään silmukasta.
 
-#### GDPR- (EU) ja POPIA-tunnisteet (Etelä-Afrikka)
+#### GDPR (EU) ja POPIA (Etelä-Afrikka) tunnisteet
 
 | Tunnus              | Tunniste                    | Validointi                                                                                      |
 | ------------------- | --------------------------- | ----------------------------------------------------------------------------------------------- |
@@ -596,7 +389,7 @@ Kaikki kolme vaativat hallintatodennuksen ja validoivat rungon Zod:lla (`src/sha
 | `za_vat`            | Etelä-Afrikan ALV-numero    | 10 numeroa, joiden alussa on `4`, **ja** "VAT" / "BTW" edeltävissä 48 merkissä                  |
 | `za_tax_ref`        | Etelä-Afrikan veroviite     | 10 numeroa, joiden alussa on `0`-`3`, Luhn **ja** "tax" / "SARS" edeltävissä 48 merkissä        |
 
-Koska pelkistä numeroista koostuvat muodot osuvat myös tilausnumeroihin, koostenumeroihin ja aikaleimoihin, heikoimmat (`za_vat`, `za_tax_ref`) tarvitsevat avainsanavihjeen, eikä pelkkää kymmenen numeron `0..`-lukua käsitellä Etelä-Afrikan puhelinnumerona. Välilyönneillä erotettuja IBANeja (`GB29 NWBK ...`) ei tunnisteta. Suoratoistopolulla vihjettä etsitään vain nykyisestä lohkosta. Tunnisteet ovat ennen yleisiä puhelinmalleja, joten validoitu tunniste säilyttää oman paikkamerkkinsä (`[IBAN_REDACTED]`, `[NL_BSN_REDACTED]`, ...). Mallipohjat `gdpr` ja `popia` valitsevat vastaavasti EU:n ja Etelä-Afrikan tunnisteet. Peittäminen pysyy erikseen käyttöön otettavana (Hard Rule #20): mikään tässä ei muuta ominaisuuslipun oletusarvoa.
+Koska pelkät numerot sisältävät muodot törmäävät tilausnumeroihin, koontinumeroihin ja aikaleimoihin, heikoimmat (`za_vat`, `za_tax_ref`) tarvitsevat avainsanamerkin, eikä paljaaa kymmennumeroista `0..` -numeroa käsitellä Etelä-Afrikan puhelinnumerona. Välilliset IBANs (`GB29 NWBK ...`) eivät täsmää. Suoratoistopolulla vihjettä tarkastellaan vain nykyisen palan sisältä. Tunnukset ovat yleisten puhelinmallien edellä, joten vahvistettu tunniste säilyttää oman paikkamerkkinsä (`[IBAN_REDACTED]`, `[NL_BSN_REDACTED]`, ...). `gdpr` ja `popia` -mallit valitsevat vastaavasti EU ja Etelä-Afrikan tunnukset. Itse peittäminen pysyy valinnaisena (Hard Rule #20): mikään tässä ei muuta ominaisuuden lipun oletusarvoa.
 
 ### Kehoteinjektio (`promptInjection.ts`)
 

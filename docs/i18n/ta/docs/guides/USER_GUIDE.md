@@ -365,19 +365,19 @@ API விசை: [கட்டுப்பாட்டுப் பலகைய
 ```bash
 npm install -g omniroute
 
-# உள்ளமைவு கோப்பகத்தை உருவாக்கவும்
+# Create config directory
 mkdir -p ~/.omniroute
 
-# .env கோப்பை உருவாக்கவும் (.env.example-ஐப் பார்க்கவும்)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# சேவையகத்தைத் தொடங்கவும்
+# Start server
 omniroute
-# அல்லது தனிப்பயன் போர்ட்டுடன்:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI ஆனது `~/.omniroute/.env` அல்லது `./.env`-இலிருந்து `.env`-ஐத் தானாக ஏற்றும்.
+CLI தானாகவே `~/.omniroute/.env` அல்லது `./.env` இலிருந்து `.env` ஏற்றுகிறது. வேலை செய்யும் கோப்பகத்தில் ஒரு `./.env` விசைகளின் குறுகிய அனுமதிப் பட்டியலை மட்டுமே அமைக்கலாம் (போர்ட்கள், `REQUIRE_API_KEY`, லோகேல் மற்றும் வண்ண அமைப்புகள்); மற்ற அனைத்தையும் `~/.omniroute/.env` இல் வைக்கவும். [CLI வெளியீட்டு ஒப்பந்தங்களைப்](CLI-LAUNCH-CONTRACTS.md#working-directory-env) பார்க்கவும்.
 
 ### தட்டு முறை
 

@@ -31,20 +31,11 @@ Quando o osv ou o Trivy ficarem vermelhos devido a uma CVE recém-divulgada, a s
 
 As execuções obrigatórias do OSV (`check:vuln-ratchet -- --ratchet`) falham de forma restritiva com `INCOMPLETE` e código de saída 2 quando o scanner, o relatório ou o baseline não podem ser validados. Uma regressão medida resulta no código de saída 1. Uma execução consultiva ainda pode relatar `SKIP` com código de saída 0, o que não comprova que as dependências passaram pela verificação. A etapa bloqueante do Trivy também exige uma medição bem-sucedida: ferramentas indisponíveis, jobs com falha e ausência de evidências da imagem não podem certificar uma imagem como limpa.
 
-## Risco de dependência descontinuada
+## Risco de dependência de aposentados
 
-O lockfile raiz não inclui mais `extract-zip` nem uma aresta de dependência para ele após
-a atualização da ferramenta de desenvolvimento promptfoo fixada. Isso elimina a cadeia
-`promptfoo` → `@openai/codex-security` → `extract-zip` anteriormente aceita e rastreada em #14482.
-As verificações de regressão em `tests/unit/extract-zip-14482-exposure.test.ts` rejeitam sua
-reintrodução e mantêm a proibição de importações provenientes do código de produção.
+O lockfile raiz não inclui mais `extract-zip` ou uma borda de dependência após atualizar a ferramenta de desenvolvimento promptfoo fixada. Isso retira a cadeia `promptfoo` → `@openai/codex-security` → `extract-zip` anteriormente aceita rastreada em #14482. As verificações de regressão em `tests/unit/extract-zip-14482-exposure.test.ts` rejeitam a sua reintrodução e mantêm a proibição de importações a partir do código de produção.
 
-O reparo atual de dependências inclui substituições de compatibilidade para o cliente
-MSAL do Azure Identity, o cliente FTP do get-uri e o Zod em ambos os pacotes de plug-in
-do OpenCode. A obtenção de tokens do Azure e a recuperação via FTP são testadas com
-transportes controlados; ambos os pacotes do OpenCode executam seus próprios conjuntos
-de compilação e testes. As contagens de avisos de segurança do registro são medições
-feitas em um determinado momento e podem mudar após o commit do lockfile.
+A reparação de dependência atual também abrange substituições de compatibilidade para o cliente MSAL da identidade do Azure e para o cliente FTP do get-uri. A aquisição de tokens do Azure e a recuperação FTP são testadas com transportes controlados; ambos os pacotes OpenCode executam seus próprios conjuntos de construção e teste. As contagens de avisos do registro são medidas em um determinado momento e podem mudar após o commit do arquivo de bloqueio.
 
 ## Backlog: Aviso do Scorecard → bloqueio
 

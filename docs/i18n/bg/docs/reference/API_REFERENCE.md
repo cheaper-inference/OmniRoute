@@ -341,39 +341,22 @@ Content-Type: application/json
 }
 ```
 
-Наличните доставчици включват OpenAI (GPT Image 2), xAI (Grok Image), Together AI (FLUX), Fireworks AI, Nebius (FLUX), Hyperbolic, NanoBanana, **OpenRouter**, **ZenMux**, SD WebUI (локален), ComfyUI (локален).
+Наличните доставчици включват OpenAI (GPT Изображение 2), xAI (Grok Изображение), Together AI (FLUX), Fireworks AI, Nebius (FLUX), Hyperbolic, NanoBanana,**OpenRouter** ,**ZenMux** , SD WebUI (локален), ComfyUI (локален).
 
-`n` връща `n` изображения в `data[]`. Доставчиците, чиито upstream API връща по едно изображение на извикване
-(Black Forest Labs, Stability AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik,
-NVIDIA NIM, Cloudflare Workers AI), получават `n` отделни upstream извиквания, като едновременно
-се изпълняват най-много 4. Фиксираният `seed` се увеличава с индекса на извикването
-(`seed`, `seed + 1`, …), така че изображенията да се различават, но да остават възпроизводими.
-`n` е ограничено до 10. Заявката се проваля изцяло, ако някое извикване се провали. Списъкът с
-форматите за fan-out е `SINGLE_IMAGE_FANOUT_FORMATS` в
-`open-sse/handlers/imageGeneration/fanOut.ts`.
+`n` връща `n` изображения в `data[]`. Доставчиците, чийто API нагоре връща едно изображение на повикване (Black Forest Labs, Stability AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik, NVIDIA NIM, Cloudflare Workers AI), получават `n` отделни повиквания нагоре, най-много 4 в полет. Фиксираният `seed` се компенсира от индекса на повикване (`seed`, `seed + 1`, …), така че изображенията се различават, но остават възпроизводими. `n` е ограничен до 10. Заявката е неуспешна като цяло, ако някое извикване е неуспешно. Списъкът с разклонени формати е `SINGLE_IMAGE_FANOUT_FORMATS` в `open-sse/handlers/imageGeneration/fanOut.ts`.
 
-ZenMux използва повторно съществуващата връзка с API ключ и приема префикси `zenmux/` или `zm/`:
+ZenMux използва повторно съществуващата връзка с API ключ и приема `zenmux/` или `zm/` префикси:
 
-- `zenmux/openai/gpt-image-2` използва Images API на OpenAI чрез ZenMux. Опциите включват `size`,
-  `quality`, `n`, `output_format`, `output_compression`, `background` и `response_format`.
-- Други издатели, като `zm/meta/muse-image-1.0`, използват Vertex AI `:predict`
-  endpoint. `n` се преобразува към `sampleCount`, `aspect_ratio` към `aspectRatio`, а `image_size`
-  (`1K`, `2K`, `4K`) към `sampleImageSize`. Пикселен `size` задава само съотношение на страните,
-  но не гарантира размери в пиксели. Поддържаните съотношения, резолюции и брой изображения
-  варират според модела.
-- `zm/inclusionai/ming-image-0.1-design` избира собствените си размери. Пропуснете `size`,
-  `aspect_ratio` и `image_size`; задаването на изрични стойности връща HTTP 400. PNG, JPEG и WebP
-  могат да бъдат заявени чрез `output_format`.
+- `zenmux/openai/gpt-image-2` използва ZenMux изображенията на OpenAI API. Опциите включват `size`, `quality`, `n`, `output_format`, `output_compression`, `background` и `response_format`.
+- Други издатели, като `zm/meta/muse-image-1.0`, използват крайната точка Vertex AI `:predict` на ZenMux. `n` се преобразува в `sampleCount`, `aspect_ratio` в `aspectRatio` и `image_size` (`1K`, `2K`, `4K`) в `sampleImageSize`. Пикселът `size` предоставя само съотношение на страните, а не гарантирани размери на пикселите. Поддържаните съотношения, разделителни способности и броя варират според модела.
+- `zm/inclusionai/ming-image-0.1-design` избира свои собствени размери. Пропуснете `size`, `aspect_ratio` и `image_size`; изричните стойности връщат HTTP 400. PNG, JPEG и WebP могат да бъдат поискани с `output_format`.
 
-Тази интеграция поддържа генериране на изображения от текст, но не и редактиране на изображения по референция. Изходът от Vertex
-се нормализира до `data[].b64_json`; `response_format: "url"` връща upstream
-HTTPS URL или base64 URL за данни, когато са налични само байтове на изображението. Празни или филтрирани резултати
-връщат грешка, а не успешен отговор без съдържание. Достъпът до моделите зависи от акаунта в ZenMux.
-Вижте [Vertex API на ZenMux](https://docs.zenmux.ai/api/vertexai/generate-images) и
-[Images API на OpenAI](https://docs.zenmux.ai/api/openai/generate-an-image).
+Тази интеграция поддържа генериране на текст към изображение, а не редактиране на референтно изображение. Изходът на Vertex се нормализира към `data[].b64_json`; `response_format: "url"` връща upstream HTTPS URL или base64 данни URL когато са налични само байтове за изображение. Empty/filtered изходите връщат грешка, а не празен успех. Достъпът до модела зависи от ZenMux акаунта. Вижте [ZenMux's Vertex API](https://docs.zenmux.ai/api/vertexai/generate-images) и [OpenAI Изображения API](https://docs.zenmux.ai/api/openai/generate-an-image).
+
+Връзка за влизане Microsoft 365 Copilot обслужва `copilot-m365-web/m365-copilot-image` чрез вградения инструмент за изображения Copilot: едно Copilot завъртане на изображение (`n` 1–4), `size` управлява само ориентацията и изображенията се връщат вградени (`b64_json` или данни URL за `response_format: "url"`). Вижте [Microsoft 365 Copilot](../providers/COPILOT-M365.md#image-generation).
 
 ```bash
-# Изброяване на всички модели за изображения
+# List all image models
 GET /v1/images/generations
 ```
 
@@ -832,17 +815,19 @@ POST /v1/providers/{provider}/images/generations
 
 ---
 
-## API за търсене
+## Търсете API
 
-Абстракция за доставчици на уеб търсене (Tavily, Brave, Exa, Serper и др.).
+абстракция на доставчик Web/search (Tavily, Brave, Exa, Serper и др.).
 
-| Метод | Път                    | Описание                                                                                            |
-| ----- | ---------------------- | --------------------------------------------------------------------------------------------------- |
-| GET   | `/v1/search`           | Изброява конфигурираните доставчици на търсене + възможностите им                                   |
-| POST  | `/v1/search`           | Изпълнява заявка за търсене — тялото се валидира от `v1SearchSchema`, поддържа кеширане/обединяване |
-| GET   | `/v1/search/analytics` | Статистики за попаденията/латентността/кеша по доставчик                                            |
+| Метод | Пътека                 | Описание                                                                                        |
+| ----- | ---------------------- | ----------------------------------------------------------------------------------------------- |
+| GET   | `/v1/search`           | Избройте конфигурирани доставчици на търсене + възможности                                      |
+| POST  | `/v1/search`           | Изпълнете заявка за търсене — тяло, валидирано от `v1SearchSchema`, поддържа caching/coalescing |
+| GET   | `/v1/search/analytics` | hit/latency/cache статистика за всеки доставчик                                                 |
 
-**Удостоверяване:** Bearer API ключ (`extractApiKey` + `isValidApiKey`). Политиката за търсене се прилага чрез `enforceApiKeyPolicy`.
+**Удостоверяване:** Носител API ключ (`extractApiKey` + `isValidApiKey`). Политика за търсене, наложена чрез `enforceApiKeyPolicy`.
+
+**Автоматичен избор:** без `provider`, най-евтиният доставчик с конфигурирана връзка работи първи, а следващият най-евтин е файлоувърът. Безплатни доставчици от последна инстанция (`duckduckgo-free`) се използват само когато нищо друго не е конфигурирано. Самостоятелно хостван SearXNG се счита за конфигуриран, след като връзката му съхрани реален `baseUrl` (а не каталожния `http://localhost:8888/search` по подразбиране): след това той се класира като $0 доставчик пред ключовите, като най-евтиният ключов доставчик е преходен, включително когато SearXNG отговаря на 400, 401, 403 или 404. `baseUrl` който не е валиден `http(s)` URL или който сочи към адресът на облачни метаданни не се брои. SearXNG връзка, която съхранява токен, се класира по този начин само пред `https://` или loopback `http://`. Над отдалечен обикновен `http://` никога не е преход при срив и остава последна мярка, използвана само когато не е конфигуриран друг доставчик или когато е поискано по име, така че изпраща токена в чист текст в тези два случая.
 
 ### `provider_options` за Exa и Tavily
 
@@ -1013,33 +998,28 @@ CLI надгражда `base_url + /responses` до WebSocket, а OmniRoute ту
 
 ---
 
-## Самостоятелно обслужване на използването (`/api/usage/om-usage`)
+## Използване на самообслужване (`/api/usage/om-usage`)
 
-Всеки API ключ може да прочете **собственото си** използване и квоти — без административно
-удостоверяване. Това е крайната точка, която клиент (CLI, панелът OmniCopilot) използва, за да
-покаже на притежателя на ключа неговите разходи.
+Всеки API ключ може да чете **своя собствена** използване и квоти — без удостоверение за управление. Това е крайната точка, която клиентът (CLI, OmniCopilot панелът) използва, за да покаже на притежател на ключ своите разходи.
 
 ```bash
-# Текстов формат (историческият договор — обикновен текст за терминал)
+# Text form (the historical contract — plain text for a terminal)
 curl -H "Authorization: Bearer <your-api-key>" \
   http://localhost:20128/api/usage/om-usage
 
-# Структуриран формат — това, което използва потребителският интерфейс
+# Structured form — what a UI consumes
 curl -H "Authorization: Bearer <your-api-key>" \
   "http://localhost:20128/api/usage/om-usage?format=json"
 ```
 
-Ключът трябва да има активирана настройка **`allowUsageCommand`** (по подразбиране е изключена —
-мениджърът на API ключовете в таблото я превключва за всеки ключ). Без нея крайната точка отговаря с
-`403`.
+Ключът трябва да има **`allowUsageCommand`** активирано (изключено по подразбиране — мениджърът на API ключове на таблото за управление го превключва за всеки ключ). Без него крайната точка отговаря `403`.
 
-`?format=json` връща разграничена структура, така че извикващият никога да не прочита поле с данни
-от отказ. При успех:
+`?format=json` връща дискриминирана форма, така че повикващият никога не чете поле с данни от отказ. При успех:
 
 ```jsonc
 {
   "allowed": true,
-  // присъства само когато ключът е активирал ограничения за използване на ниво ключ (дневни/седмични USD):
+  // present only when the key opted into per-key usage limits (daily/weekly/5-hour USD):
   "personal": {
     "dailySpentUsd": 1.25,
     "dailyLimitUsd": 5,
@@ -1048,9 +1028,9 @@ curl -H "Authorization: Bearer <your-api-key>" \
     "weeklyLimitUsd": 20,
     "weeklyResetAtIso": "…" /* … */,
   },
-  // моментната снимка на квотата на избрания доставчик или null, когато все още няма кеширани данни:
+  // the selected provider quota snapshot, or null when nothing is cached yet:
   "provider": { "connectionId": "…", "provider": "claude", "plan": "…", "quotas": {/* … */} },
-  // моментната снимка на всяка връзка, за да може потребителският интерфейс да визуализира няколко доставчика един до друг:
+  // every connection's snapshot, so a UI can render several providers side by side:
   "providers": [
     { "connectionId": "…", "provider": "claude" /* … */ },
     { "provider": "codex" /* … */ },
@@ -1058,14 +1038,9 @@ curl -H "Authorization: Bearer <your-api-key>" \
 }
 ```
 
-При отказ (`401` невалиден ключ / `403` не е разрешено) същият маршрут връща
-`{ "allowed": false, "error": { "message": "…" } }` — налично, но празно `personal`/`provider`
-(ключът е разрешен, но все още няма получени данни) е различно състояние от отказ, а само JSON форматът
-разграничава тези случаи.
+При отказ (`401` лош ключ / `403` не е позволено) същият маршрут връща `{ "allowed": false, "error": { "message": "…" } }` — присъстващ, но празен `personal`/`provider` (разрешен ключ, все още нищо не е научено) е различно състояние от отказ и само формата JSON ги отличава.
 
-**Удостоверяване:** собственият Bearer API ключ на извикващия, валидиран с `isValidApiKey` — това
-_не_ е административният интерфейс (`/api/keys/…`), който остава защитен чрез
-`requireManagementAuth`.
+**Удостоверяване:** собственият API ключ на носителя на повикващия, валидиран с `isValidApiKey` — това _не_ е повърхността за управление (`/api/keys/…`), която остава зад `requireManagementAuth`.
 
 ### Проценти на квотата в суров вид спрямо коригирани спрямо прага
 
@@ -1309,40 +1284,41 @@ https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-cred
 | `/api/usage/model-latency-stats` | GET             | Агрегирана плаваща статистика за латентността по доставчик/модел (средна стойност/p50/p95/p99, процент успешни заявки); филтри: `windowHours`/`minSamples`/`maxRows`/`provider`/`model` (#6873)                                                                                                                                                                               |
 | `/api/usage/cache-health`        | GET             | Обобщение на състоянието на кеша за подсказки в `call_logs` — съотношение на записване/прочитане, разпределение на размера на записите p50/p90/p99, концентрация на интензивните записи, разбивка по модел и оценка `healthy`/`degraded`/`thrash`/`no-data`; параметри на заявката `range` (`1h`\|`24h`\|`7d`\|`30d`, по подразбиране `24h`) и незадължителен `model` (#8827) |
 
-### Разрешения за API ключове
+### Ключови разрешения API
 
-`PATCH /api/keys/{id}` актуализира разрешенията на съществуващ ключ. Както всеки маршрут `/api/keys*`, той изисква оторизация за управление (вижте [Удостоверяване за управление](../guides/MANAGEMENT-AUTH.md)), а не ключ за извеждане. Изпращайте само полетата, които искате да промените; заявка без нито едно от тях се отхвърля с `No valid fields to update`. Приетите полета са дефинирани от `updateKeyPermissionsSchema` в `src/shared/validation/schemas/keys.ts`.
+`PATCH /api/keys/{id}` актуализира разрешенията на съществуващ ключ. Както всеки `/api/keys*` маршрут, той се нуждае от разрешение за управление (вижте [Удостоверяване на управление](../guides/MANAGEMENT-AUTH.md) ), а не ключ за извод. Изпратете само полетата, които искате да промените; заявка с нито един от тях не се отхвърля със `No valid fields to update`. Приетите полета са определени от `updateKeyPermissionsSchema` в `src/shared/validation/schemas/keys.ts`.
 
-| Поле                                        | Тип                                                                     | Бележки                                                                                                                                                |
-| ------------------------------------------- | ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `name`                                      | низ, 1–200 знака                                                        |                                                                                                                                                        |
-| `isActive`                                  | булева стойност                                                         |                                                                                                                                                        |
-| `isBanned`                                  | булева стойност                                                         |                                                                                                                                                        |
-| `expiresAt`                                 | дата и час във формат ISO 8601 или `null`                               | `null` изчиства срока на валидност                                                                                                                     |
-| `modelAccessMode`                           | `all` \| `restricted`                                                   | `allowedModels` трябва да е празно, когато режимът е `all`                                                                                             |
-| `allowedModels`, `blockedModels`            | масив от низове, до 1000                                                |                                                                                                                                                        |
-| `allowedCombos`                             | масив от низове, до 500                                                 | Определя до кои комбинации ключът може да прави заявки; директните модели се управляват от `modelAccessMode` / `allowedModels`                         |
-| `connectionAccessMode`                      | `all` \| `restricted`                                                   | `allowedConnections` трябва да е непразно при `restricted` и празно при `all`                                                                          |
-| `allowedConnections`                        | масив от UUID, до 100                                                   |                                                                                                                                                        |
-| `allowAutoCombos`                           | булева стойност                                                         | `false` отхвърля заявки за модели `auto/*` с този ключ; ключовете, които никога не са задавали тази опция, са разрешени                                |
-| `catalogScope`                              | `all` \| `combos` \| `models`                                           | Какво извежда `GET /v1/models` за този ключ (само комбинации, само модели или и двете); не променя това, до което ключът може да прави заявки          |
-| `forcedModel`                               | низ до 300 знака или `null`                                             | Насочва заявките за чат към този модел/комбинация, с предимство пред `X-Route-Model` и `body.model`; ограниченията на ключа продължават да се прилагат |
-| `noLog`, `autoResolve`                      | булева стойност                                                         |                                                                                                                                                        |
-| `throttleDelayMs`                           | цяло число, 0–300000                                                    |                                                                                                                                                        |
-| `maxSessions`                               | цяло число, 0–10000                                                     |                                                                                                                                                        |
-| `rateLimits`                                | масив от `{ limit, window }` (положителни цели числа, до 50) или `null` | `null` изчиства ограниченията                                                                                                                          |
-| `accessSchedule`                            | обект за график или `null`                                              | `null` изчиства графика                                                                                                                                |
-| `scopes`                                    | масив от низове, до 32                                                  |                                                                                                                                                        |
-| `allowedEndpoints`                          | масив от низове, до 20                                                  |                                                                                                                                                        |
-| `streamDefaultMode`                         | `legacy` \| `json`                                                      |                                                                                                                                                        |
-| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                    | Вижте [Заобикаляне на кеша за отделен ключ](#per-key-cache-bypass)                                                                                     |
-| `compressionEnabled`                        | булева стойност                                                         |                                                                                                                                                        |
-| `codexServiceMode`                          | един от режимите на услугата Codex                                      |                                                                                                                                                        |
-| `disableNonPublicModels`                    | boolean                                                                 |                                                                                                                                                        |
-| `allowUsageCommand`                         | boolean                                                                 |                                                                                                                                                        |
-| `usageLimitEnabled`                         | boolean                                                                 |                                                                                                                                                        |
-| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | number >= 0 or `null`                                                   |                                                                                                                                                        |
-| `chaosModeEnabled`                          | boolean                                                                 |                                                                                                                                                        |
+| Поле                                        | Тип                                                                     | Бележки                                                                                                                                                                                                                                                           |
+| ------------------------------------------- | ----------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`                                      | низ, 1–200 знака                                                        |                                                                                                                                                                                                                                                                   |
+| `isActive`                                  | булева стойност                                                         |                                                                                                                                                                                                                                                                   |
+| `isBanned`                                  | булева стойност                                                         |                                                                                                                                                                                                                                                                   |
+| `expiresAt`                                 | дата и час във формат ISO 8601 или `null`                               | `null` изчиства срока на валидност                                                                                                                                                                                                                                |
+| `modelAccessMode`                           | `all` \| `restricted`                                                   | `allowedModels` трябва да е празно, когато режимът е `all`                                                                                                                                                                                                        |
+| `allowedModels`, `blockedModels`            | масив от низове, до 1000                                                |                                                                                                                                                                                                                                                                   |
+| `allowedCombos`                             | масив от низове, до 500                                                 | Определя до кои комбинации ключът може да прави заявки; директните модели се управляват от `modelAccessMode` / `allowedModels`                                                                                                                                    |
+| `connectionAccessMode`                      | `all` \| `restricted`                                                   | `allowedConnections` трябва да е непразно при `restricted` и празно при `all`                                                                                                                                                                                     |
+| `allowedConnections`                        | масив от UUID, до 100                                                   |                                                                                                                                                                                                                                                                   |
+| `allowAutoCombos`                           | булева стойност                                                         | `false` отхвърля заявки за модели `auto/*` с този ключ; ключовете, които никога не са задавали тази опция, са разрешени                                                                                                                                           |
+| `catalogScope`                              | `all` \| `combos` \| `models`                                           | Какво извежда `GET /v1/models` за този ключ (само комбинации, само модели или и двете); не променя това, до което ключът може да прави заявки                                                                                                                     |
+| `forcedModel`                               | низ до 300 знака или `null`                                             | Насочва заявките за чат към този модел/комбинация, с предимство пред `X-Route-Model` и `body.model`; ограниченията на ключа продължават да се прилагат                                                                                                            |
+| `noLog`, `autoResolve`                      | булево                                                                  |                                                                                                                                                                                                                                                                   |
+| `throttleDelayMs`                           | цяло число, 0–300000                                                    |                                                                                                                                                                                                                                                                   |
+| `maxSessions`                               | цяло число, 0–10000                                                     |                                                                                                                                                                                                                                                                   |
+| `rateLimits`                                | масив от `{ limit, window }` (положителни цели числа, до 50) или `null` | `null` изчиства ограниченията                                                                                                                                                                                                                                     |
+| `accessSchedule`                            | обект за график или `null`                                              | `null` изчиства графика                                                                                                                                                                                                                                           |
+| `scopes`                                    | масив от низове, до 32                                                  |                                                                                                                                                                                                                                                                   |
+| `allowedEndpoints`                          | масив от низове, до 20                                                  |                                                                                                                                                                                                                                                                   |
+| `streamDefaultMode`                         | `legacy` \| `json`                                                      |                                                                                                                                                                                                                                                                   |
+| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                    | Вижте [Заобикаляне на кеша за отделен ключ](#per-key-cache-bypass)                                                                                                                                                                                                |
+| `compressionEnabled`                        | булева стойност                                                         |                                                                                                                                                                                                                                                                   |
+| `codexServiceMode`                          | един от режимите на услугата Codex                                      |                                                                                                                                                                                                                                                                   |
+| `disableNonPublicModels`                    | boolean                                                                 |                                                                                                                                                                                                                                                                   |
+| `allowUsageCommand`                         | boolean                                                                 |                                                                                                                                                                                                                                                                   |
+| `usageLimitEnabled`                         | boolean                                                                 |                                                                                                                                                                                                                                                                   |
+| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | номер >= 0 или `null`                                                   |                                                                                                                                                                                                                                                                   |
+| `fiveHourUsageLimitUsd`                     | номер >= 0 или `null`                                                   | Подвижен 5-часов USD бюджет, наложен като дневните и седмичните лимити (`usageLimitEnabled`, `UNPRICED_USAGE_BUDGET_POLICY`). `retry-after` е, когато най-старите разходи в прозореца изтекат, което може да остави ключ, далеч над своя лимит, все още блокиран. |
+| `chaosModeEnabled`                          | boolean                                                                 |                                                                                                                                                                                                                                                                   |
 
 ```bash
 curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
@@ -1392,6 +1368,14 @@ curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
 | `/api/modality-bridge/stats`         | GET        | Съхранявани в паметта `attempts`, успехи/`bridged`, неуспехи, попадения в кеша, `totalLatencyMs`, `latencySamples`, `averageLatencyMs`, изразено чрез броя на извадките, и времето на последното използване (нулира се при рестартиране; удостоверяване за управление)                                                                                                                                                                                 |
 | `/api/modality-bridge/video/runtime` | GET        | Строга проверка на `trusted-loopback` преди удостоверяване/проверка за управление; санирана наличност и версии на FFmpeg/ffprobe (no-store)                                                                                                                                                                                                                                                                                                            |
 | `/api/modality-bridge/video/extract` | POST       | Вътрешен удостоверен брокер на байтове чрез `trusted-loopback`; вход от 50 MiB, ограничена опашка/изход от 32 MiB, `503` при достигнат капацитет, `499` при прекъсване, `504` при изтичане на крайния срок; не е публичен API за качване                                                                                                                                                                                                               |
+
+### Детайлиране на видео рамка
+
+`GET /api/v1/video-bridge/drilldown` чете непрозрачен манипулатор, обвързан с клиента, върнат в `x-omniroute-video-drilldown` след изрично одобрена заявка за Video Bridge. И reads, и `DELETE` винаги изискват валиден API ключ и независимо `modalityBridgeVideoDrilldownRemoteEnabled` разрешение на оператора. Задържането на производството допълнително изисква `modalityBridgeVideoDrilldownEnabled` и строг `drilldown: true` за част. Ако ключът има непразен списък с разрешени крайни точки, той трябва да включва `video` както за GET, така и DELETE, независимо дали повикващият използва `/v1` или `/api/v1`.
+
+GET заявка: задължително `handle`; незадължителен `variant` (`preview`, `standard`, `detail`), `limit` (1–8; наследеният `frames` се приема, но не може да се комбинира с `limit`), `page` на база нула и `start`/`end` секунди. Когато са предоставени и двете граници на фокуса, `end` трябва да е по-голямо от `start`. Duplicate/unknown ключовете за заявка са отхвърлени. Успешните отговори съдържат `derivation`, `durationSeconds`, `frames`, `hasMore`, `page`, `variant` и незадължително `focusWindow`; no-store JSON е ограничен до 32 MiB, включително Base64. Прекомерният изход връща 413; поискайте по-малко кадри.
+
+`DELETE /api/v1/video-bridge/drilldown?handle=...` връща `{ "removed": 0|1 }`. Неизвестен, с изтекъл срок на годност и с кръстосан ключ GETs са неразличими 404 отговора; cross-key DELETE не може да премахне записа на собственика. Деактивираният достъп връща 403, missing/invalid удостоверяване 401, невалидни заявки 400, анулиране 499 и временни грешки 503. Дръжките са локални за процеса, изтичат след десет минути и не преживяват рестартиране. Новите манипулатори използват `v1.` плюс 32-байтов произволен Base64URL токен; запазват се само хешове на токени. Наследените 64-hex токени остават синтактично четими за съвместимост. Вижте [предпазните парапети на Video Bridge](../security/GUARDRAILS.md#video-bridge-videobridgets-videobridgepipelinets) за подробности за съгласието, квотите и извличането на варианти.
 
 ### Архивиране и експортиране/импортиране
 
@@ -1495,19 +1479,19 @@ curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
 
 Тези крайни точки отразяват формата на API на Gemini за клиенти, които очакват съвместимост с естествения Gemini SDK.
 
-### Вътрешни / системни API
+### Вътрешен / системен APIs
 
 | Крайна точка             | Метод | Описание                                                                     |
 | ------------------------ | ----- | ---------------------------------------------------------------------------- |
-| `/api/init`              | GET   | Проверка за инициализация на приложението (използва се при първо стартиране) |
-| `/api/tags`              | GET   | Съвместими с Ollama тагове на модели (за клиенти на Ollama)                  |
-| `/api/restart`           | POST  | Задействане на плавно рестартиране на сървъра                                |
-| `/api/shutdown`          | POST  | Задействане на плавно изключване на сървъра                                  |
-| `/api/system/env/repair` | POST  | Поправяне на променливите на средата на OAuth доставчика                     |
-| `/api/system/version`    | GET   | Текуща/последна версия, състояние на актуализацията, канал на изданията      |
-| `/api/system/version`    | POST  | Стартиране на актуализация с отчитане на внедряването до последната версия   |
+| `/api/init`              | GET   | Стартиране на услуги за фоново синхронизиране (удостоверяване на управление) |
+| `/api/tags`              | GET   | Тагове за модели, съвместими с Ollama (за клиенти Ollama )                   |
+| `/api/restart`           | POST  | Задействайте грациозно рестартиране на сървъра                               |
+| `/api/shutdown`          | POST  | Задействайте грациозно изключване на сървъра                                 |
+| `/api/system/env/repair` | POST  | Поправете променливите на средата на доставчика OAuth                        |
+| `/api/system/version`    | GET   | Current/latest версия, състояние на актуализация, канал за издаване          |
+| `/api/system/version`    | POST  | Стартирайте актуализация, съобразена с внедряването, до най-новата версия    |
 
-> **Забележка:** Тези крайни точки се използват вътрешно от системата или за съвместимост с клиенти на Ollama. Обикновено не се извикват от крайните потребители.
+> **Забележка:** Тези крайни точки се използват вътрешно от системата или за съвместимост на Ollama клиент. Те обикновено не се извикват от крайните потребители.
 
 ### Поправяне на OAuth средата _(v3.6.1+)_
 

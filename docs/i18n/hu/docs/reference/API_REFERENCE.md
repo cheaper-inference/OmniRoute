@@ -380,37 +380,22 @@ Content-Type: application/json
 }
 ```
 
-Az elérhető szolgáltatók közé tartozik az OpenAI (GPT Image 2), az xAI (Grok Image), a Together AI (FLUX), a Fireworks AI, a Nebius (FLUX), a Hyperbolic, a NanoBanana, az **OpenRouter**, a **ZenMux**, az SD WebUI (helyi) és a ComfyUI (helyi).
+Az elérhető szolgáltatók közé tartozik OpenAI (GPT Image 2 ), xAI (Grok Image ), Together AI (FLUX), Fireworks AI, Nebius (FLUX), Hyperbolic, NanoBanana,**OpenRouter** ,**ZenMux** , SD WebUI (helyi), ComfyUI (helyi).
 
-Az `n` értéke `n` képet ad vissza a `data[]` tömbben. Azok a szolgáltatók, amelyek upstream API-ja hívásonként egy képet ad vissza
-(Black Forest Labs, Stability AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik,
-NVIDIA NIM, Cloudflare Workers AI), `n` különálló upstream hívást indítanak, egyszerre legfeljebb 4-et. A rögzített
-`seed` értéket a hívás indexével növeli (`seed`, `seed + 1`, …), így a képek különböznek, de továbbra is reprodukálhatók. Az
-`n` értéke legfeljebb 10 lehet. A teljes kérés sikertelen, ha bármelyik hívás meghiúsul. A fan-out formátumok listája a
-`SINGLE_IMAGE_FANOUT_FORMATS` az
-`open-sse/handlers/imageGeneration/fanOut.ts` fájlban.
+`n` `n` képeket ad vissza `data[]`. Azok a szolgáltatók, akiknek az upstream API hívásonként egy képet ad vissza (Black Forest Labs, Stabilitás AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik, NVIDIA NIM, Cloudflare Workers AI) `n` külön felfelé irányuló hívást kapnak, legfeljebb 4-et repülés közben. A rögzített `seed` a hívásindex (`seed`, `seed + 1`, …) eltolja, így a képek különböznek, de reprodukálhatók maradnak. `n` felső határa 10. A kérés összességében meghiúsul, ha bármelyik hívás meghiúsul. A fan-out formátumok listája a `SINGLE_IMAGE_FANOUT_FORMATS` `open-sse/handlers/imageGeneration/fanOut.ts`.
 
-A ZenMux újra felhasználja a meglévő API-kulcsos kapcsolatot, és elfogadja a `zenmux/` vagy `zm/` előtagokat:
+ZenMux újrafelhasználja a meglévő API-kulcs kapcsolatot, és elfogadja `zenmux/` vagy `zm/` előtagokat:
 
-- A `zenmux/openai/gpt-image-2` a ZenMux OpenAI Images API-ját használja. A lehetőségek közé tartozik a `size`,
-  a `quality`, az `n`, az `output_format`, az `output_compression`, a `background` és a `response_format`.
-- Más kiadók, például a `zm/meta/muse-image-1.0`, a ZenMux Vertex AI `:predict`
-  végpontját használják. Az `n` a `sampleCount` értékre, az `aspect_ratio` az `aspectRatio` értékre, az `image_size`
-  (`1K`, `2K`, `4K`) pedig a `sampleImageSize` értékre képeződik le. A képpontban megadott `size` csak a képarányt adja meg,
-  a képpontméretek nem garantáltak. A támogatott képarányok, felbontások és darabszámok modellenként eltérnek.
-- A `zm/inclusionai/ming-image-0.1-design` maga választja ki a méreteit. Hagyd el a `size`,
-  az `aspect_ratio` és az `image_size` értékét; a megadott értékek HTTP 400-as hibát eredményeznek. PNG, JPEG és WebP
-  formátum kérhető az `output_format` használatával.
+- `zenmux/openai/gpt-image-2` ZenMuxOpenAI API képeit használja. A lehetőségek közé tartozik `size`, `quality`, `n`, `output_format`, `output_compression`, `background` és `response_format`.
+- Más kiadók, például `zm/meta/muse-image-1.0`, a ZenMux Vertex AI `:predict` végpontját használják. `n` leképez `sampleCount`, `aspect_ratio` t `aspectRatio` és `image_size` (`1K`, `2K`, `4K`) `sampleImageSize`. A pixel `size` csak képarányt biztosít, nem garantált pixelméreteket. A támogatott arányok, felbontások és számok típusonként változnak.
+- `zm/inclusionai/ming-image-0.1-design` saját maga választja ki a méreteit. `size`, `aspect_ratio` és `image_size` kihagyása; Az explicit értékek HTTP 400-at adnak vissza. PNG, JPEG és WebP `output_format`-vel kérhető.
 
-Ez az integráció szövegből képgenerálást támogat, referencia-képes szerkesztést nem. A Vertex
-kimenete `data[].b64_json` formátumra normalizálódik; a `response_format: "url"` upstream
-HTTPS URL-t ad vissza, vagy base64 adat-URL-t, ha csak a képbájtok állnak rendelkezésre. Az üres/szűrt kimenetek
-hiba visszaadását eredményezik, nem pedig üres sikeres választ. A modellhez való hozzáférés a ZenMux-fióktól függ.
-Lásd a [ZenMux Vertex API-ját](https://docs.zenmux.ai/api/vertexai/generate-images) és az
-[OpenAI Images API-t](https://docs.zenmux.ai/api/openai/generate-an-image).
+Ez az integráció támogatja a szöveg-kép létrehozását, nem pedig a referencia-képszerkesztést. A csúcs kimenete `data[].b64_json`-ra normalizálva; `response_format: "url"` egy upstream HTTPS URL vagy egy base64 adat URL ad vissza, ha csak képbájtok állnak rendelkezésre. Empty/filtered kimenetek inkább hibát adnak vissza, mint üres sikert. A modellelérés a ZenMux fióktól függ. Lásd [ZenMux Vertex API](https://docs.zenmux.ai/api/vertexai/generate-images) és [OpenAI Images API](https://docs.zenmux.ai/api/openai/generate-an-image).
+
+A Microsoft 365 Copilot bejelentkezési kapcsolat `copilot-m365-web/m365-copilot-image` szolgálja ki Copilot beépített képeszközén keresztül: képenként egy Copilot fordulat (`n` 1–4), `size` csak a tájolást irányítja, és a képeket inline küldi vissza (`b64_json` vagy egy URL adat `response_format: "url"` esetén). Lásd: [Microsoft 365 Copilot](../providers/COPILOT-M365.md#image-generation).
 
 ```bash
-# Az összes képi modell listázása
+# List all image models
 GET /v1/images/generations
 ```
 
@@ -865,17 +850,19 @@ OpenAI-kompatibilis kötegelt feldolgozás.
 
 ---
 
-## Keresési API
+## Keresés API
 
-Webes/keresési szolgáltatói absztrakció (Tavily, Brave, Exa, Serper stb.).
+Web/search szolgáltató absztrakció (Tavily, Brave, Exa, Serper stb.).
 
-| Metódus | Útvonal                | Leírás                                                                                                       |
-| ------- | ---------------------- | ------------------------------------------------------------------------------------------------------------ |
-| GET     | `/v1/search`           | A konfigurált keresési szolgáltatók és képességeik felsorolása                                               |
-| POST    | `/v1/search`           | Keresési lekérdezés futtatása — a törzset a `v1SearchSchema` ellenőrzi, gyorsítótárazást/összevonást támogat |
-| GET     | `/v1/search/analytics` | Szolgáltatónkénti találati/sebesség-/gyorsítótár-statisztikák                                                |
+| Módszer | Útvonal                | Leírás                                                        |
+| ------- | ---------------------- | ------------------------------------------------------------- |
+| GET     | `/v1/search`           | Sorolja fel a konfigurált keresési szolgáltatók + képességeit |
+| POST    | `/v1/search`           | `v1SearchSchema` le caching/coalescing keresési —             |
+| GET     | `/v1/search/analytics` | Szolgáltatónkénti hit/latency/cache statisztika               |
 
-**Hitelesítés:** Bearer API-kulcs (`extractApiKey` + `isValidApiKey`). A keresési házirendet az `enforceApiKeyPolicy` érvényesíti.
+**Auth:** Tartó API kulcs (`extractApiKey` + `isValidApiKey`). A keresési szabályzat `enforceApiKeyPolicy` keresztül érvényesítve.
+
+**Automatikus kiválasztás:** `provider` nélkül a legolcsóbb, konfigurált kapcsolattal rendelkező szolgáltató fut először, és a következő legolcsóbb a feladatátvétel. Az ingyenes utolsó szolgáltatók (`duckduckgo-free`) csak akkor használatosak, ha semmi más nincs beállítva. A saját üzemeltetésű SearXNG konfiguráltnak számít, ha a kapcsolata valódi `baseUrl` (nem a katalógus alapértelmezett `http://localhost:8888/search` `baseUrl` ) tárolja: ezután 0 dolláros szolgáltatóként szerepel a kulcsos szolgáltatók előtt, a legolcsóbb kulcsos szolgáltató pedig feladatátvételként, beleértve azt is, ha SearXNG 400, 401, 403 vagy 404 URL válaszol. `http(s)` -metaadat cím nem számít. A tokent tároló SearXNG kapcsolat csak `https://` vagy loopback `http://` felett rangsorolható. A távoli sima `http://` en soha nem jelent feladatátvételt, és csak az utolsó lehetőség marad, csak akkor használják, ha nincs más szolgáltató konfigurálva, vagy ha név szerint kérik, tehát ebben a két esetben egyértelmű szöveggel küldi el a tokent.
 
 ### Exa és Tavily `provider_options`
 
@@ -1055,31 +1042,26 @@ Forrás: `src/lib/quota/quotaSessionRecovery.ts`.
 
 ## Önkiszolgáló használat (`/api/usage/om-usage`)
 
-Bármely API-kulcs lekérdezheti a **saját** használatát és kvótáit — kezelői hitelesítés nélkül. Ezt a
-végpontot használja egy kliens (CLI, az OmniCopilot panel) annak megjelenítésére, hogy egy
-kulcstulajdonos mennyit költött.
+Bármelyik API kulcs képes olvasni **a sajátja** felhasználás és kvóták — nincs kezelési hitelesítés. Ez az a végpont, amelyet az ügyfél (CLI, a OmniCopilot panel) használ arra, hogy a kulcstulajdonosnak mutassa a ráfordítását.
 
 ```bash
-# Szöveges forma (a korábbi szerződés — egyszerű szöveg terminálhoz)
+# Text form (the historical contract — plain text for a terminal)
 curl -H "Authorization: Bearer <your-api-key>" \
   http://localhost:20128/api/usage/om-usage
 
-# Strukturált forma — ezt használja a felhasználói felület
+# Structured form — what a UI consumes
 curl -H "Authorization: Bearer <your-api-key>" \
   "http://localhost:20128/api/usage/om-usage?format=json"
 ```
 
-A kulcsnál engedélyezve kell lennie az **`allowUsageCommand`** beállításnak (alapértelmezés szerint ki
-van kapcsolva — a vezérlőpult API-kulcskezelője kulcsonként kapcsolja be és ki). Enélkül a végpont
-`403` választ ad.
+A kulcsnak meg kell lennie **`allowUsageCommand`** engedélyezve (alapértelmezés szerint kikapcsolt — az irányítópult API-kulcskezelője kulcsonként kapcsolja át). Enélkül a végpont `403` válaszolja meg.
 
-A `?format=json` diszkriminált struktúrát ad vissza, így a hívó soha nem olvas adatmezőt egy
-elutasításból. Sikeres válasz esetén:
+`?format=json` megkülönböztetett alakzatot ad vissza, így a hívó soha nem olvas le egy adatmezőt az elutasításról. A sikerről:
 
 ```jsonc
 {
   "allowed": true,
-  // csak akkor van jelen, ha a kulcs bekapcsolta a kulcsonkénti használati korlátokat (napi/heti USD):
+  // present only when the key opted into per-key usage limits (daily/weekly/5-hour USD):
   "personal": {
     "dailySpentUsd": 1.25,
     "dailyLimitUsd": 5,
@@ -1088,9 +1070,9 @@ elutasításból. Sikeres válasz esetén:
     "weeklyLimitUsd": 20,
     "weeklyResetAtIso": "…" /* … */,
   },
-  // a kiválasztott szolgáltatói kvóta pillanatképe, vagy null, ha még semmi nincs gyorsítótárazva:
+  // the selected provider quota snapshot, or null when nothing is cached yet:
   "provider": { "connectionId": "…", "provider": "claude", "plan": "…", "quotas": {/* … */} },
-  // minden kapcsolat pillanatképe, hogy a felhasználói felület több szolgáltatót is egymás mellett jeleníthessen meg:
+  // every connection's snapshot, so a UI can render several providers side by side:
   "providers": [
     { "connectionId": "…", "provider": "claude" /* … */ },
     { "provider": "codex" /* … */ },
@@ -1098,14 +1080,9 @@ elutasításból. Sikeres válasz esetén:
 }
 ```
 
-Elutasítás esetén (`401` hibás kulcs / `403` nincs engedélyezve) ugyanaz az útvonal a következőt adja
-vissza: `{ "allowed": false, "error": { "message": "…" } }` — a jelen lévő, de üres
-`personal`/`provider` mező (a kulcs engedélyezett, de még semmilyen adat nem került lekérdezésre)
-más állapotot jelent, mint az elutasítás, és ezt csak a JSON-forma különbözteti meg.
+Visszautasításkor (`401` rossz kulcs / `403` nem engedélyezett) ugyanaz az útvonal `{ "allowed": false, "error": { "message": "…" } }` — adja vissza, egy jelenlévő, de üres `personal`/`provider` (kulcs engedélyezett, még nem tanult semmit) különbözik az elutasítástól, és csak a JSON űrlap különbözteti meg őket.
 
-**Hitelesítés:** a hívó saját Bearer API-kulcsa, amelyet az `isValidApiKey` segítségével ellenőriz a
-rendszer — ez **nem** a kezelői felület (`/api/keys/…`), amely továbbra is a
-`requireManagementAuth` mögött marad.
+**Auth:** a hívó saját Bearer API kulcsa, `isValidApiKey` — vel érvényesítve ez _nem_ a kezelési felület (`/api/keys/…`), amely `requireManagementAuth` mögött marad.
 
 ### Nyers és cutoff alapján korrigált kvótaszázalékok
 
@@ -1360,40 +1337,41 @@ Implementáció: `getResolvedModelCapabilitiesWithLimitSources()` a `src/lib/mod
 | `/api/usage/model-latency-stats` | GET             | Gördülő, szolgáltató/modell szerinti késleltetési összesítés (átlag/p50/p95/p99, sikerességi arány); szűrők: `windowHours`/`minSamples`/`maxRows`/`provider`/`model` (#6873)                                                                                                                                                                                           |
 | `/api/usage/cache-health`        | GET             | A prompt-gyorsítótár állapotának összefoglalása a `call_logs` alapján — írási/olvasási arány, az írási méretek p50/p90/p99 eloszlása, a nagy írások koncentrációja, modellenkénti bontás, valamint `healthy`/`degraded`/`thrash`/`no-data` minősítés; lekérdezési paraméterek: `range` (`1h`\|`24h`\|`7d`\|`30d`, alapértelmezés: `24h`) és opcionális `model` (#8827) |
 
-### API-kulcs jogosultságai
+### API kulcsengedélyek
 
-A `PATCH /api/keys/{id}` egy meglévő kulcs jogosultságait frissíti. Mint minden `/api/keys*` útvonalnak, ehhez is kezelési jogosultság szükséges (lásd: [Kezelési hitelesítés](../guides/MANAGEMENT-AUTH.md)), nem pedig inferencia-kulcs. Csak a módosítani kívánt mezőket küldje el; ha egyiket sem adja meg, a kérés elutasításra kerül a `No valid fields to update` üzenettel. Az elfogadott mezőket a `src/shared/validation/schemas/keys.ts` fájlban található `updateKeyPermissionsSchema` határozza meg.
+`PATCH /api/keys/{id}` frissíti a meglévő kulcsok engedélyeit. Mint minden `/api/keys*` útvonalnak, ennek is felügyeleti jogosultságra van szüksége (lásd: [Kezelői hitelesítés](../guides/MANAGEMENT-AUTH.md) ), nem pedig következtetési kulcsra. Csak a módosítani kívánt mezőket küldje el; az egyiket sem tartalmazó kérést `No valid fields to update` elutasítja. Az elfogadott mezőket `updateKeyPermissionsSchema` határozza meg `src/shared/validation/schemas/keys.ts`-ben.
 
-| Mező                                        | Típus                                                                                     | Megjegyzések                                                                                                                                                    |
-| ------------------------------------------- | ----------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `name`                                      | karakterlánc, 1–200 karakter                                                              |                                                                                                                                                                 |
-| `isActive`                                  | logikai                                                                                   |                                                                                                                                                                 |
-| `isBanned`                                  | logikai                                                                                   |                                                                                                                                                                 |
-| `expiresAt`                                 | ISO 8601 dátum és idő vagy `null`                                                         | A `null` törli a lejáratot                                                                                                                                      |
-| `modelAccessMode`                           | `all` \| `restricted`                                                                     | Az `allowedModels` értékének üresnek kell lennie, ha a mód `all`                                                                                                |
-| `allowedModels`, `blockedModels`            | karakterláncok tömbje, legfeljebb 1000                                                    |                                                                                                                                                                 |
-| `allowedCombos`                             | karakterláncok tömbje, legfeljebb 500                                                     | Meghatározza, hogy a kulcs mely kombinációkat hívhatja; a közvetlen modelleket a `modelAccessMode` / `allowedModels` szabályozza                                |
-| `connectionAccessMode`                      | `all` \| `restricted`                                                                     | Az `allowedConnections` értékének nem üresnek kell lennie `restricted` esetén, és üresnek `all` esetén                                                          |
-| `allowedConnections`                        | UUID-k tömbje, legfeljebb 100                                                             |                                                                                                                                                                 |
-| `allowAutoCombos`                           | logikai                                                                                   | A `false` elutasítja az `auto/*` modellekre vonatkozó kéréseket ezzel a kulccsal; azok a kulcsok, amelyek ezt soha nem állították be, engedélyezettek           |
-| `catalogScope`                              | `all` \| `combos` \| `models`                                                             | Meghatározza, hogy a `GET /v1/models` mit listáz ehhez a kulcshoz (csak kombinációkat, csak modelleket vagy mindkettőt); nem módosítja, hogy a kulcs mit hívhat |
-| `forcedModel`                               | legfeljebb 300 karakteres karakterlánc vagy `null`                                        | A csevegési kéréseket erre a modellre/kombinációra irányítja az `X-Route-Model` és a `body.model` elé helyezve; a kulcs korlátozásai továbbra is érvényesek     |
-| `noLog`, `autoResolve`                      | logikai                                                                                   |                                                                                                                                                                 |
-| `throttleDelayMs`                           | egész szám, 0–300000                                                                      |                                                                                                                                                                 |
-| `maxSessions`                               | egész szám, 0–10000                                                                       |                                                                                                                                                                 |
-| `rateLimits`                                | `{ limit, window }` elemekből álló tömb (pozitív egész számok, legfeljebb 50) vagy `null` | A `null` törli a korlátozásokat                                                                                                                                 |
-| `accessSchedule`                            | ütemezési objektum vagy `null`                                                            | A `null` törli az ütemezést                                                                                                                                     |
-| `scopes`                                    | karakterláncok tömbje, legfeljebb 32                                                      |                                                                                                                                                                 |
-| `allowedEndpoints`                          | karakterláncok tömbje, legfeljebb 20                                                      |                                                                                                                                                                 |
-| `streamDefaultMode`                         | `legacy` \| `json`                                                                        |                                                                                                                                                                 |
-| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                                      | Lásd: [Kulcsonkénti gyorsítótár-megkerülés](#per-key-cache-bypass)                                                                                              |
-| `compressionEnabled`                        | logikai                                                                                   |                                                                                                                                                                 |
-| `codexServiceMode`                          | a Codex szolgáltatási módok egyike                                                        |                                                                                                                                                                 |
-| `disableNonPublicModels`                    | boolean                                                                                   |                                                                                                                                                                 |
-| `allowUsageCommand`                         | boolean                                                                                   |                                                                                                                                                                 |
-| `usageLimitEnabled`                         | boolean                                                                                   |                                                                                                                                                                 |
-| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | number >= 0 or `null`                                                                     |                                                                                                                                                                 |
-| `chaosModeEnabled`                          | boolean                                                                                   |                                                                                                                                                                 |
+| Mező                                        | Típus                                                                                     | Megjegyzések                                                                                                                                                                                                                                                                         |
+| ------------------------------------------- | ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `name`                                      | karakterlánc, 1–200 karakter                                                              |                                                                                                                                                                                                                                                                                      |
+| `isActive`                                  | logikai                                                                                   |                                                                                                                                                                                                                                                                                      |
+| `isBanned`                                  | logikai                                                                                   |                                                                                                                                                                                                                                                                                      |
+| `expiresAt`                                 | ISO 8601 dátum és idő vagy `null`                                                         | A `null` törli a lejáratot                                                                                                                                                                                                                                                           |
+| `modelAccessMode`                           | `all` \| `restricted`                                                                     | Az `allowedModels` értékének üresnek kell lennie, ha a mód `all`                                                                                                                                                                                                                     |
+| `allowedModels`, `blockedModels`            | karakterláncok tömbje, 1000-ig                                                            |                                                                                                                                                                                                                                                                                      |
+| `allowedCombos`                             | karakterláncok tömbje, legfeljebb 500                                                     | Meghatározza, hogy a kulcs mely kombinációkat hívhatja; a közvetlen modelleket a `modelAccessMode` / `allowedModels` szabályozza                                                                                                                                                     |
+| `connectionAccessMode`                      | `all` \| `restricted`                                                                     | Az `allowedConnections` értékének nem üresnek kell lennie `restricted` esetén, és üresnek `all` esetén                                                                                                                                                                               |
+| `allowedConnections`                        | UUID-k tömbje, legfeljebb 100                                                             |                                                                                                                                                                                                                                                                                      |
+| `allowAutoCombos`                           | logikai                                                                                   | A `false` elutasítja az `auto/*` modellekre vonatkozó kéréseket ezzel a kulccsal; azok a kulcsok, amelyek ezt soha nem állították be, engedélyezettek                                                                                                                                |
+| `catalogScope`                              | `all` \| `combos` \| `models`                                                             | Meghatározza, hogy a `GET /v1/models` mit listáz ehhez a kulcshoz (csak kombinációkat, csak modelleket vagy mindkettőt); nem módosítja, hogy a kulcs mit hívhat                                                                                                                      |
+| `forcedModel`                               | legfeljebb 300 karakteres karakterlánc vagy `null`                                        | A csevegési kéréseket erre a modellre/kombinációra irányítja az `X-Route-Model` és a `body.model` elé helyezve; a kulcs korlátozásai továbbra is érvényesek                                                                                                                          |
+| `noLog`, `autoResolve`                      | logikai érték                                                                             |                                                                                                                                                                                                                                                                                      |
+| `throttleDelayMs`                           | egész szám, 0–300000                                                                      |                                                                                                                                                                                                                                                                                      |
+| `maxSessions`                               | egész szám, 0–10000                                                                       |                                                                                                                                                                                                                                                                                      |
+| `rateLimits`                                | `{ limit, window }` elemekből álló tömb (pozitív egész számok, legfeljebb 50) vagy `null` | A `null` törli a korlátozásokat                                                                                                                                                                                                                                                      |
+| `accessSchedule`                            | ütemezési objektum vagy `null`                                                            | A `null` törli az ütemezést                                                                                                                                                                                                                                                          |
+| `scopes`                                    | karakterláncok tömbje, legfeljebb 32                                                      |                                                                                                                                                                                                                                                                                      |
+| `allowedEndpoints`                          | karakterláncok tömbje, legfeljebb 20                                                      |                                                                                                                                                                                                                                                                                      |
+| `streamDefaultMode`                         | `legacy` \| `json`                                                                        |                                                                                                                                                                                                                                                                                      |
+| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                                      | Lásd: [Kulcsonkénti gyorsítótár-megkerülés](#per-key-cache-bypass)                                                                                                                                                                                                                   |
+| `compressionEnabled`                        | logikai                                                                                   |                                                                                                                                                                                                                                                                                      |
+| `codexServiceMode`                          | a Codex szolgáltatási módok egyike                                                        |                                                                                                                                                                                                                                                                                      |
+| `disableNonPublicModels`                    | boolean                                                                                   |                                                                                                                                                                                                                                                                                      |
+| `allowUsageCommand`                         | boolean                                                                                   |                                                                                                                                                                                                                                                                                      |
+| `usageLimitEnabled`                         | boolean                                                                                   |                                                                                                                                                                                                                                                                                      |
+| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | szám >= 0 vagy `null`                                                                     |                                                                                                                                                                                                                                                                                      |
+| `fiveHourUsageLimitUsd`                     | szám >= 0 vagy `null`                                                                     | Gördülő 5 órás USD költségvetés, a napi és heti limitekhez hasonlóan (`usageLimitEnabled`, `UNPRICED_USAGE_BUDGET_POLICY`) érvényesítve. `retry-after` az, amikor a legrégebbi költés az ablakban elévül, ami miatt a korlátot jóval meghaladó kulcs továbbra is blokkolva maradhat. |
+| `chaosModeEnabled`                          | boolean                                                                                   |                                                                                                                                                                                                                                                                                      |
 
 ```bash
 curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
@@ -1443,6 +1421,14 @@ curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
 | `/api/modality-bridge/stats`         | GET        | A memóriában tárolt `attempts`, sikerek/`bridged`, hibák, gyorsítótár-találatok, `totalLatencyMs`, `latencySamples`, mintánként meghatározott `averageLatencyMs` és az utolsó használat időpontja (újraindításkor visszaáll; kezelői hitelesítés szükséges)                                                                                                                                                                                                             |
 | `/api/modality-bridge/video/runtime` | GET        | Szigorú, megbízható loopback-ellenőrzés a kezelői hitelesítés/ellenőrzés előtt; az FFmpeg/ffprobe elérhetőségének és verzióinak megtisztított adatai (no-store)                                                                                                                                                                                                                                                                                                         |
 | `/api/modality-bridge/video/extract` | POST       | Belső, hitelesített, megbízható loopback byte-bróker; 50 MiB bemenet, korlátozott sor és 32 MiB kimenet, `503` kapacitáshiány, `499` kapcsolatbontás, `504` határidő; nem nyilvános feltöltési API                                                                                                                                                                                                                                                                      |
+
+### Videó képkocka lefúrása
+
+`GET /api/v1/video-bridge/drilldown` beolvas egy bérlőhöz kötött átlátszatlan leírót, amely `x-omniroute-video-drilldown` ben kapott vissza egy kifejezetten jóváhagyott Video Bridge kérés után. Mind az olvasáshoz, mind `DELETE` mindig érvényes API kulcsra és az operátor független `modalityBridgeVideoDrilldownRemoteEnabled` engedélyére van szükség. A termelés megtartásához emellett `modalityBridgeVideoDrilldownEnabled` és szigorú alkatrészenkénti `drilldown: true` is szükséges. Ha a kulcsnak nincs üres végpont-engedélyezőlistája, akkor `video` is tartalmaznia kell GET és DELETE esetében, függetlenül attól, hogy a hívó `/v1` vagy `/api/v1` használja.
+
+GET lekérdezés: kötelező `handle`; opcionális `variant` (`preview`, `standard`, `detail`), `limit` (1–8; az örökölt `frames` elfogadott, de nem kombinálható `limit` vel), nulla alapú `page` és `start`/`end` másodperc. Ha mindkét fókuszhatár meg van adva, `end` nagyobbnak kell lennie, mint `start`. Duplicate/unknown lekérdezési kulcsok elutasítva. A sikeres válaszok a következőket tartalmazzák: `derivation`, `durationSeconds`, `frames`, `hasMore`, `page`, `variant` és opcionális `focusWindow`; A no-store JSON 32 MiB felső határa, beleértve a Base64-et is. Túlméretezett kimenet 413; kérjen kevesebb képkockát.
+
+`DELETE /api/v1/video-bridge/drilldown?handle=...` `{ "removed": 0|1 }` adja vissza. Az ismeretlen, lejárt és keresztkulcsos GETs válaszok megkülönböztethetetlenek; keresztbillentyűs DELETE nem tudja eltávolítani a tulajdonos bejegyzését. A letiltott hozzáférés 403-at, missing/invalid hitelesítést 401, az érvénytelen lekérdezéseket 400, a törlést 499 és az 503-as ideiglenes hibákat adja vissza. A fogantyúk folyamat-helyiek, tíz perc után lejárnak, és nem élik túl az újraindítást. Az új leírók `v1.` és egy 32 bájtos véletlenszerű Base64URL tokent használják; csak a token hashek maradnak meg. A régi 64 hexadecimális tokenek szintaktikailag olvashatóak maradnak a kompatibilitás érdekében. Tekintse meg [a Video Bridge védőkorlátjait](../security/GUARDRAILS.md#video-bridge-videobridgets-videobridgepipelinets) a beleegyezés, a kvóták és a változatok származtatásának részleteiért.
 
 ### Biztonsági mentés és exportálás/importálás
 
@@ -1550,19 +1536,19 @@ A GET-válasz tartalmazza az `agents[]` elemet (id, name, binary, version, insta
 
 Ezek a végpontok a Gemini API-formátumát tükrözik azon kliensek számára, amelyek natív Gemini SDK-kompatibilitást várnak.
 
-### Belső / rendszer-API-k
+### Belső / Rendszer APIs
 
-| Endpoint                 | Method | Leírás                                                                       |
-| ------------------------ | ------ | ---------------------------------------------------------------------------- |
-| `/api/init`              | GET    | Alkalmazásinicializálási ellenőrzés (az első futtatáskor használatos)        |
-| `/api/tags`              | GET    | Ollama-kompatibilis modellcímkék (Ollama-kliensekhez)                        |
-| `/api/restart`           | POST   | A kiszolgáló szabályos újraindításának kezdeményezése                        |
-| `/api/shutdown`          | POST   | A kiszolgáló szabályos leállításának kezdeményezése                          |
-| `/api/system/env/repair` | POST   | Az OAuth-szolgáltatói környezeti változók javítása                           |
-| `/api/system/version`    | GET    | Jelenlegi/legújabb verzió, frissítési állapot, kiadási csatorna              |
-| `/api/system/version`    | POST   | A legújabb verzióra történő, telepítést figyelembe vevő frissítés elindítása |
+| Végpont                  | Módszer | Leírás                                                                   |
+| ------------------------ | ------- | ------------------------------------------------------------------------ |
+| `/api/init`              | GET     | Háttér szinkronizálási szolgáltatások indítása (felügyeleti hitelesítés) |
+| `/api/tags`              | GET     | Ollama-kompatibilis modellcímkék ( Ollama ügyfelek számára)              |
+| `/api/restart`           | POST    | Indítsa el a kecses szerver újraindítást                                 |
+| `/api/shutdown`          | POST    | Indítsa el a kecses szerverleállást                                      |
+| `/api/system/env/repair` | POST    | Javítsa meg OAuth szolgáltató környezeti változóit                       |
+| `/api/system/version`    | GET     | Current/latest verzió, frissítés állapota, kiadási csatorna              |
+| `/api/system/version`    | POST    | Indítson el egy üzembe helyezés-tudatos frissítést a legújabb verzióra   |
 
-> **Megjegyzés:** Ezeket a végpontokat a rendszer belsőleg, illetve az Ollama-kliensek kompatibilitása érdekében használja. A végfelhasználók jellemzően nem hívják meg őket.
+> **Jegyzet:** Ezeket a végpontokat a rendszer belsőleg vagy Ollama -kliens-kompatibilitás érdekében használja. Általában nem hívják a végfelhasználók.
 
 ### OAuth-környezeti javítás _(v3.6.1+)_
 

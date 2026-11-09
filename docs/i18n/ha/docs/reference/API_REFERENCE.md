@@ -352,7 +352,7 @@ GET /v1/embeddings
 
 ---
 
-## Samar da Hoto
+## Samar da Hotuna
 
 ```bash
 POST /v1/images/generations
@@ -366,28 +366,32 @@ Content-Type: application/json
 }
 ```
 
-Masu samarwa da ake da su sun haɗa da OpenAI (GPT Image 2), xAI (Grok Image), Together AI (FLUX), Fireworks AI, Nebius (FLUX), Hyperbolic, NanoBanana, **OpenRouter**, **ZenMux**, SD WebUI (na gida), ComfyUI (na gida).
+Masu samarwa da ake da su sun haɗa da OpenAI (GPT Image 2), xAI (Grok Image), Together AI (FLUX), Fireworks AI, Nebius (FLUX), Hyperbolic, NanoBanana, **OpenRouter**, **ZenMux**, SD WebUI (na gida), da ComfyUI (na gida).
 
-`n` yana mayar da hotuna `n` a cikin `data[]`. Masu samarwa waɗanda API ɗinsu na sama ke mayar da hoto guda ɗaya a kowane kira
+`n` yana mayar da hotuna `n` a cikin `data[]`. Masu samarwa waɗanda API ɗinsu na sama ke mayar da hoto guda ɗaya a kowace kira
 (Black Forest Labs, Stability AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik,
-NVIDIA NIM, Cloudflare Workers AI) ana yi musu kiran sama `n` daban-daban, tare da iyakar kira 4 da ke gudana lokaci guda. Ana ƙara `seed` da aka kayyade da ma’aunin index na kira (`seed`, `seed + 1`, …), don haka hotunan su bambanta amma su kasance masu sake samarwa iri ɗaya. An takaita `n` zuwa 10. Buƙatar gaba ɗaya tana fuskantar gazawa idan kowane kira ya gaza. Jerin tsarin fan-out yana cikin `SINGLE_IMAGE_FANOUT_FORMATS` a
+NVIDIA NIM, Cloudflare Workers AI) ana yi musu kira daban-daban na sama `n`, tare da aƙalla kira 4 da ke gudana lokaci guda. `seed` da aka kayyade ana ƙara masa lambar kiran (`seed`, `seed + 1`, …), don haka hotunan suna bambanta amma suna ci gaba da kasancewa masu sake samarwa iri ɗaya. An taƙaita `n` zuwa 10. Buƙatar gaba ɗaya tana gazawa idan wani kira ya gaza. Jerin tsarin fan-out yana cikin `SINGLE_IMAGE_FANOUT_FORMATS` a
 `open-sse/handlers/imageGeneration/fanOut.ts`.
 
-ZenMux yana sake amfani da haɗin API-key da ake da shi kuma yana karɓar prefixes na `zenmux/` ko `zm/`:
+ZenMux yana sake amfani da haɗin maɓallin API da ke akwai kuma yana karɓar prefix na `zenmux/` ko `zm/`:
 
 - `zenmux/openai/gpt-image-2` yana amfani da OpenAI Images API na ZenMux. Zaɓuɓɓuka sun haɗa da `size`,
   `quality`, `n`, `output_format`, `output_compression`, `background`, da `response_format`.
-- Sauran masu wallafawa, kamar `zm/meta/muse-image-1.0`, suna amfani da ƙarshen Vertex AI `:predict` na ZenMux. `n` yana komawa zuwa `sampleCount`, `aspect_ratio` zuwa `aspectRatio`, kuma `image_size`
-  (`1K`, `2K`, `4K`) zuwa `sampleImageSize`. `size` na pixel yana samar da rabon fuska ne kawai,
-  ba a tabbatar da girman pixel ba. Ratayen fuska, ƙuduri, da adadin da ake tallafawa sun bambanta bisa samfurin.
-- `zm/inclusionai/ming-image-0.1-design` yana zaɓar nasa girma. A bar `size`,
-  `aspect_ratio`, da `image_size` ba tare da bayarwa ba; ƙayyadaddun ƙimomi suna mayar da HTTP 400. Ana iya neman PNG, JPEG, da WebP ta amfani da `output_format`.
+- Sauran masu wallafawa, kamar `zm/meta/muse-image-1.0`, suna amfani da wurin ƙarshen Vertex AI `:predict` na ZenMux. `n` yana komawa zuwa `sampleCount`, `aspect_ratio` zuwa `aspectRatio`, sannan `image_size`
+  (`1K`, `2K`, `4K`) zuwa `sampleImageSize`. `size` na pixel yana samar da yanayin faɗi da tsawo ne kawai,
+  ba ya tabbatar da ainihin girman pixel ba. Matsakaicin faɗi da tsawo, ƙuduri, da adadin da ake tallafawa sun bambanta bisa ga samfurin.
+- `zm/inclusionai/ming-image-0.1-design` yana zaɓar girmansa da kansa. A bar `size`,
+  `aspect_ratio`, da `image_size` ba tare da bayar da su ba; ƙimomin da aka bayar kai tsaye suna mayar da HTTP 400. Ana iya neman PNG, JPEG, da WebP ta amfani da `output_format`.
 
-Wannan haɗin yana tallafawa samar da hoto daga rubutu, ba gyaran hoto na misali ba. Ana daidaita fitowar Vertex zuwa `data[].b64_json`; `response_format: "url"` yana mayar da URL na HTTPS daga sama ko URL na bayanan base64 idan bytes na hoton kaɗai ake da su. Fitowar da babu komai ko aka tace tana mayar da kuskure maimakon nasara marar komai. Samun samfurin ya dogara da asusun ZenMux. Duba [Vertex API na ZenMux](https://docs.zenmux.ai/api/vertexai/generate-images) da
+Wannan haɗin yana tallafawa samar da hoto daga rubutu, ba gyaran hoto na tunani ba. Ana daidaita fitowar Vertex zuwa `data[].b64_json`; `response_format: "url"` yana mayar da URL na HTTPS daga sama ko URL ɗin bayanan base64 idan bytes ɗin hoto kawai ake da su. Fitowar da ba ta da komai ko wadda aka tace tana mayar da kuskure maimakon nasarar da ba ta da komai. Samun damar samfurin ya dogara da asusun ZenMux. Duba [Vertex API na ZenMux](https://docs.zenmux.ai/api/vertexai/generate-images) da
 [OpenAI Images API](https://docs.zenmux.ai/api/openai/generate-an-image).
 
+Haɗin shiga na Microsoft 365 Copilot yana samar da `copilot-m365-web/m365-copilot-image`
+ta kayan aikin hoton da ke cikin Copilot: juya Copilot guda ɗaya a kowane hoto (`n` 1–4), `size` yana jagorantar yanayin tsayuwa ko kwance kawai, kuma ana mayar da hotuna kai tsaye (`b64_json`, ko URL ɗin bayanai ga
+`response_format: "url"`). Duba [Microsoft 365 Copilot](../providers/COPILOT-M365.md#image-generation).
+
 ```bash
-# Jerin duk samfuran hoto
+# Jera dukkan samfuran hotuna
 GET /v1/images/generations
 ```
 
@@ -828,15 +832,17 @@ Ayyukan batch masu dacewa da OpenAI.
 
 ## API ɗin Bincike
 
-Ƙyalli na masu samar da binciken yanar gizo (Tavily, Brave, Exa, Serper, da sauransu).
+Ƙyamar mai samar da binciken yanar gizo/bincike (Tavily, Brave, Exa, Serper, da sauransu).
 
-| Hanya | Hanya                  | Bayani                                                                                                  |
-| ----- | ---------------------- | ------------------------------------------------------------------------------------------------------- |
-| GET   | `/v1/search`           | Jerin masu samar da bincike da aka tsara + damar da suke da ita                                         |
-| POST  | `/v1/search`           | Gudanar da tambayar bincike — `v1SearchSchema` ne ke tantance jiki, yana goyon bayan caching/coalescing |
-| GET   | `/v1/search/analytics` | Ƙididdigar hits/latency/cache ga kowane mai samarwa                                                     |
+| Method | Path                   | Description                                                                                                 |
+| ------ | ---------------------- | ----------------------------------------------------------------------------------------------------------- |
+| GET    | `/v1/search`           | Jera masu samar da binciken da aka saita + damar su                                                         |
+| POST   | `/v1/search`           | Gudanar da tambayar bincike — `v1SearchSchema` ne ke tantance jiki, yana goyan bayan adanawa da haɗa buƙatu |
+| GET    | `/v1/search/analytics` | Ƙididdigar sakamako/jinkiri/ma’ajiyar kowane mai samarwa                                                    |
 
-**Tabbatarwa:** Maɓallin API na Bearer (`extractApiKey` + `isValidApiKey`). Ana tabbatar da manufofin bincike ta `enforceApiKeyPolicy`.
+**Auth:** Maɓallin API na Bearer (`extractApiKey` + `isValidApiKey`). Ana tilasta manufar bincike ta `enforceApiKeyPolicy`.
+
+**Auto-select:** idan babu `provider`, mai samarwa mafi arha da ke da haɗin da aka saita shi ne ke fara aiki, sannan na gaba mafi arha shi ne na madadin idan na farko ya gaza. Ana amfani da masu samarwa kyauta na madadin ƙarshe (`duckduckgo-free`) ne kawai idan ba a saita wani abu dabam ba. Ana ɗaukar SearXNG mai karɓar kansa a matsayin wanda aka saita da zarar haɗinsa ya adana ainihin `baseUrl` (ba tsohon adireshin kundin `http://localhost:8888/search` ba): daga nan sai ya kasance mai samarwa na $0 a matsayi na gaba bayan masu maɓalli, yayin da mai samarwa mafi arha mai maɓalli yake zama na madadin, har ma idan SearXNG ya amsa da 400, 401, 403 ko 404. `baseUrl` da ba ingantaccen adireshin `http(s)` ba ne ko kuma ya nuna adireshin metadata na gajimare ba ya ƙirga. Haɗin SearXNG da ke adana alama yana matsayi haka ne kawai a kan `https://` ko `http://` na loopback. A kan `http://` na nesa mara kariya, ba ya taɓa zama na madadin kuma yana kasancewa na madadin ƙarshe, ana amfani da shi ne kawai idan ba a saita wani mai samarwa ba ko kuma an nema da suna; saboda haka yana aika alamar ba tare da ɓoyewa ba a waɗannan lokuta biyu.
 
 ### `provider_options` na Exa da Tavily
 
@@ -1006,30 +1012,28 @@ ga maɓallin API da ya ƙirƙire su. Sake kunna request ɗin da ba a tabbatar da
 
 ---
 
-## Amfani da kai-da-kai (`/api/usage/om-usage`)
+## Amfani da sabis na kai (`/api/usage/om-usage`)
 
-Duk wani maɓallin API na iya karanta amfaninsa da quotas ɗinsa — ba a buƙatar ikon gudanarwa. Wannan shi ne endpoint ɗin da
-client (CLI, ko allon OmniCopilot) ke amfani da shi don nuna wa mai maɓalli yawan kuɗin da ya kashe.
+Kowane maɓallin API na iya karantawa **nata** amfani da ƙayyadaddun ƙididdiga — babu amintaccen gudanarwa. Wannan shine ƙarshen ƙarshen abokin ciniki (CLI, kwamitin OmniCopilot ) yana amfani da shi don nuna mai riƙe da maɓalli na kashewa.
 
 ```bash
-# Tsarin rubutu (yarjejeniyar tarihi — rubutu tsantsa don tashar umarni)
+# Text form (the historical contract — plain text for a terminal)
 curl -H "Authorization: Bearer <your-api-key>" \
   http://localhost:20128/api/usage/om-usage
 
-# Tsari mai siffa — abin da UI ke amfani da shi
+# Structured form — what a UI consumes
 curl -H "Authorization: Bearer <your-api-key>" \
   "http://localhost:20128/api/usage/om-usage?format=json"
 ```
 
-Dole maɓallin ya sami **`allowUsageCommand`** a kunne (a kashe yake ta tsohuwa — mai sarrafa maɓallan API
-na dashboard yana kunna ko kashe shi ga kowane maɓalli). Idan ba haka ba, endpoint ɗin yana amsa da `403`.
+Dole ne maɓalli ya kasance **`allowUsageCommand`** an kunna (kashe ta hanyar tsoho — mai sarrafa maɓallin API na dashboard yana jujjuya shi kowane maɓalli). Ba tare da shi ba ƙarshen ya amsa `403`.
 
-`?format=json` yana dawo da tsari mai nuna bambanci domin mai kira kada ya taɓa karanta filin bayanai daga amsar ƙin amincewa. Idan an yi nasara:
+`?format=json` yana dawo da sifar wariya don haka mai kira ba zai taɓa karanta filin bayanai ba akan ƙi. Kan nasara:
 
 ```jsonc
 {
   "allowed": true,
-  // yana bayyana ne kawai idan maɓallin ya zaɓi iyakokin amfani na kowane maɓalli (USD na yau/mako):
+  // present only when the key opted into per-key usage limits (daily/weekly/5-hour USD):
   "personal": {
     "dailySpentUsd": 1.25,
     "dailyLimitUsd": 5,
@@ -1038,9 +1042,9 @@ na dashboard yana kunna ko kashe shi ga kowane maɓalli). Idan ba haka ba, endpo
     "weeklyLimitUsd": 20,
     "weeklyResetAtIso": "…" /* … */,
   },
-  // hoton quota na provider da aka zaɓa, ko null idan har yanzu babu abin da aka adana:
+  // the selected provider quota snapshot, or null when nothing is cached yet:
   "provider": { "connectionId": "…", "provider": "claude", "plan": "…", "quotas": {/* … */} },
-  // hoton kowace connection, domin UI ta iya nuna providers da yawa gefe da gefe:
+  // every connection's snapshot, so a UI can render several providers side by side:
   "providers": [
     { "connectionId": "…", "provider": "claude" /* … */ },
     { "provider": "codex" /* … */ },
@@ -1048,13 +1052,9 @@ na dashboard yana kunna ko kashe shi ga kowane maɓalli). Idan ba haka ba, endpo
 }
 ```
 
-Idan an ƙi amincewa (`401` maɓalli mara kyau / `403` ba a yarda ba), wannan hanya tana dawo da
-`{ "allowed": false, "error": { "message": "…" } }` — `personal`/`provider` da yake nan amma babu komai
-(maɓallin ya sami izini, ba a gano komai ba tukuna) yanayi ne dabam da ƙin amincewa, kuma tsarin JSON ne kawai
-ke bambanta su.
+A kan ƙi (`401` bad maɓalli / `403` ba a yarda ba) hanya ɗaya ta dawo `{ "allowed": false, "error": { "message": "…" } }` — `personal`/`provider` na yanzu-amma mara kyau (maɓallin da aka yarda, babu abin da aka koya tukuna) yanayi ne daban da ƙi, kuma kawai nau'in JSON ne ke bambanta su.
 
-**Tabbatarwa:** maɓallin API na Bearer na mai kiran, wanda aka inganta da `isValidApiKey` — wannan _ba_ wurin
-gudanarwa ba ne (`/api/keys/…`), wanda ke ci gaba da kasancewa a bayan `requireManagementAuth`.
+**Gaskiya:** Maɓallin API ɗin mai kiran kansa, wanda aka inganta tare da `isValidApiKey` — wannan _ba_ filin gudanarwa ba ne (`/api/keys/…`), wanda ke tsayawa a bayan `requireManagementAuth`.
 
 ### Kashi na Raw da na Cutoff-Adjusted na Quota
 
@@ -1298,40 +1298,41 @@ Aiwatarwa: `getResolvedModelCapabilitiesWithLimitSources()` a cikin `src/lib/mod
 | `/api/usage/model-latency-stats` | GET             | Tarin jinkiri mai ci gaba na kowane mai samarwa/model (avg/p50/p95/p99, ƙimar nasara); matatun: `windowHours`/`minSamples`/`maxRows`/`provider`/`model` (#6873)                                                                                                                                                          |
 | `/api/usage/cache-health`        | GET             | Taƙaitaccen lafiyar prompt-cache a kan `call_logs` — rabon rubutu/karatu, rarraba girman rubutu na p50/p90/p99, yawan rubuce-rubuce masu nauyi, rarrabuwa ta kowane model, da hukuncin `healthy`/`degraded`/`thrash`/`no-data`; sigogin tambaya `range` (`1h`\|`24h`\|`7d`\|`30d`, tsoho `24h`) da zaɓin `model` (#8827) |
 
-### Izinin maɓallin API
+### Izinin maɓalli na API
 
-`PATCH /api/keys/{id}` yana sabunta izinin maɓallin da yake akwai. Kamar kowace hanya ta `/api/keys*`, tana buƙatar izinin gudanarwa (duba [Ingantaccen Gudanarwa](../guides/MANAGEMENT-AUTH.md)), ba maɓallin inference ba. Aika filayen da kake son canzawa kawai; za a ƙi buƙatar da ba ta ƙunshi ko ɗaya daga cikinsu ba da `No valid fields to update`. Filayen da aka amince da su an ayyana su a cikin `updateKeyPermissionsSchema` na `src/shared/validation/schemas/keys.ts`.
+`PATCH /api/keys/{id}` yana sabunta izini na maɓallin da ke akwai. Kamar kowace hanyar `/api/keys*` tana buƙatar izinin gudanarwa (duba [Tabbatar da Gudanarwa](../guides/MANAGEMENT-AUTH.md) ), ba maɓalli ba. Aika kawai filayen da kake son canzawa; buqatar babu ɗayansu da aka ƙi tare da `No valid fields to update`. `updateKeyPermissionsSchema` yana bayyana filayen da aka karɓa a cikin `src/shared/validation/schemas/keys.ts`.
 
-| Filin                                       | Nau'i                                                                          | Bayanan kula                                                                                                                               |
-| ------------------------------------------- | ------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| `name`                                      | kirtani, haruffa 1-200                                                         |                                                                                                                                            |
-| `isActive`                                  | boolean                                                                        |                                                                                                                                            |
-| `isBanned`                                  | boolean                                                                        |                                                                                                                                            |
-| `expiresAt`                                 | kwanan wata da lokaci na ISO 8601 ko `null`                                    | `null` yana share lokacin ƙarewa                                                                                                           |
-| `modelAccessMode`                           | `all` \| `restricted`                                                          | `allowedModels` dole ne ya kasance fanko idan yanayin `all` ne                                                                             |
-| `allowedModels`, `blockedModels`            | jerin kirtani, har zuwa 1000                                                   |                                                                                                                                            |
-| `allowedCombos`                             | jerin kirtani, har zuwa 500                                                    | Yana ƙayyade waɗanne combos maɓallin zai iya kira; samfura kai tsaye suna ƙarƙashin `modelAccessMode` / `allowedModels`                    |
-| `connectionAccessMode`                      | `all` \| `restricted`                                                          | `allowedConnections` dole ne ya kasance ba fanko ba idan `restricted` ne, kuma ya kasance fanko idan `all` ne                              |
-| `allowedConnections`                        | jerin UUIDs, har zuwa 100                                                      |                                                                                                                                            |
-| `allowAutoCombos`                           | boolean                                                                        | `false` yana ƙin buƙatun samfuran `auto/*` da wannan maɓalli; maɓallan da ba su taɓa saita shi ba ana ba su izini                          |
-| `catalogScope`                              | `all` \| `combos` \| `models`                                                  | Abin da `GET /v1/models` ke jera wa wannan maɓalli (combos kawai, samfura kawai, ko duka biyun); ba ya canza abin da maɓallin zai iya kira |
-| `forcedModel`                               | kirtani har zuwa haruffa 300, ko `null`                                        | Yana tura buƙatun tattaunawa zuwa wannan samfuri/combo, a gaban `X-Route-Model` da `body.model`; iyakokin maɓallin har yanzu suna aiki     |
-| `noLog`, `autoResolve`                      | boolean                                                                        |                                                                                                                                            |
-| `throttleDelayMs`                           | lamba cikakkiya, 0-300000                                                      |                                                                                                                                            |
-| `maxSessions`                               | lamba cikakkiya, 0-10000                                                       |                                                                                                                                            |
-| `rateLimits`                                | jeri na `{ limit, window }` (lambobi cikakku masu kyau, har zuwa 50) ko `null` | `null` yana share iyakokin                                                                                                                 |
-| `accessSchedule`                            | abin tsara lokaci ko `null`                                                    | `null` yana share tsarin lokaci                                                                                                            |
-| `scopes`                                    | jerin kirtani, har zuwa 32                                                     |                                                                                                                                            |
-| `allowedEndpoints`                          | jerin kirtani, har zuwa 20                                                     |                                                                                                                                            |
-| `streamDefaultMode`                         | `legacy` \| `json`                                                             |                                                                                                                                            |
-| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                           | Duba [Kewayar cache ta kowane maɓalli](#per-key-cache-bypass)                                                                              |
-| `compressionEnabled`                        | boolean                                                                        |                                                                                                                                            |
-| `codexServiceMode`                          | ɗaya daga cikin yanayin sabis na Codex                                         |                                                                                                                                            |
-| `disableNonPublicModels`                    | boolean                                                                        |                                                                                                                                            |
-| `allowUsageCommand`                         | boolean                                                                        |                                                                                                                                            |
-| `usageLimitEnabled`                         | boolean                                                                        |                                                                                                                                            |
-| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | number >= 0 or `null`                                                          |                                                                                                                                            |
-| `chaosModeEnabled`                          | boolean                                                                        |                                                                                                                                            |
+| Filin                                       | Nau'i                                                                          | Bayanan kula                                                                                                                                                                                                                                                                                                  |
+| ------------------------------------------- | ------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`                                      | kirtani, haruffa 1-200                                                         |                                                                                                                                                                                                                                                                                                               |
+| `isActive`                                  | boolean                                                                        |                                                                                                                                                                                                                                                                                                               |
+| `isBanned`                                  | boolean                                                                        |                                                                                                                                                                                                                                                                                                               |
+| `expiresAt`                                 | kwanan wata da lokaci na ISO 8601 ko `null`                                    | `null` yana share lokacin ƙarewa                                                                                                                                                                                                                                                                              |
+| `modelAccessMode`                           | `all` \| `restricted`                                                          | `allowedModels` dole ne ya kasance fanko idan yanayin `all` ne                                                                                                                                                                                                                                                |
+| `allowedModels`, `blockedModels`            | tsararrun igiyoyi, har zuwa 1000                                               |                                                                                                                                                                                                                                                                                                               |
+| `allowedCombos`                             | jerin kirtani, har zuwa 500                                                    | Yana ƙayyade waɗanne combos maɓallin zai iya kira; samfura kai tsaye suna ƙarƙashin `modelAccessMode` / `allowedModels`                                                                                                                                                                                       |
+| `connectionAccessMode`                      | `all` \| `restricted`                                                          | `allowedConnections` dole ne ya kasance ba fanko ba idan `restricted` ne, kuma ya kasance fanko idan `all` ne                                                                                                                                                                                                 |
+| `allowedConnections`                        | jerin UUIDs, har zuwa 100                                                      |                                                                                                                                                                                                                                                                                                               |
+| `allowAutoCombos`                           | boolean                                                                        | `false` yana ƙin buƙatun samfuran `auto/*` da wannan maɓalli; maɓallan da ba su taɓa saita shi ba ana ba su izini                                                                                                                                                                                             |
+| `catalogScope`                              | `all` \| `combos` \| `models`                                                  | Abin da `GET /v1/models` ke jera wa wannan maɓalli (combos kawai, samfura kawai, ko duka biyun); ba ya canza abin da maɓallin zai iya kira                                                                                                                                                                    |
+| `forcedModel`                               | kirtani har zuwa haruffa 300, ko `null`                                        | Yana tura buƙatun tattaunawa zuwa wannan samfuri/combo, a gaban `X-Route-Model` da `body.model`; iyakokin maɓallin har yanzu suna aiki                                                                                                                                                                        |
+| `noLog`, `autoResolve`                      | boolean                                                                        |                                                                                                                                                                                                                                                                                                               |
+| `throttleDelayMs`                           | lamba cikakkiya, 0-300000                                                      |                                                                                                                                                                                                                                                                                                               |
+| `maxSessions`                               | lamba cikakkiya, 0-10000                                                       |                                                                                                                                                                                                                                                                                                               |
+| `rateLimits`                                | jeri na `{ limit, window }` (lambobi cikakku masu kyau, har zuwa 50) ko `null` | `null` yana share iyakokin                                                                                                                                                                                                                                                                                    |
+| `accessSchedule`                            | abin tsara lokaci ko `null`                                                    | `null` yana share tsarin lokaci                                                                                                                                                                                                                                                                               |
+| `scopes`                                    | jerin kirtani, har zuwa 32                                                     |                                                                                                                                                                                                                                                                                                               |
+| `allowedEndpoints`                          | jerin kirtani, har zuwa 20                                                     |                                                                                                                                                                                                                                                                                                               |
+| `streamDefaultMode`                         | `legacy` \| `json`                                                             |                                                                                                                                                                                                                                                                                                               |
+| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                           | Duba [Kewayar cache ta kowane maɓalli](#per-key-cache-bypass)                                                                                                                                                                                                                                                 |
+| `compressionEnabled`                        | boolean                                                                        |                                                                                                                                                                                                                                                                                                               |
+| `codexServiceMode`                          | ɗaya daga cikin yanayin sabis na Codex                                         |                                                                                                                                                                                                                                                                                                               |
+| `disableNonPublicModels`                    | boolean                                                                        |                                                                                                                                                                                                                                                                                                               |
+| `allowUsageCommand`                         | boolean                                                                        |                                                                                                                                                                                                                                                                                                               |
+| `usageLimitEnabled`                         | boolean                                                                        |                                                                                                                                                                                                                                                                                                               |
+| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | lambar >= 0 ko `null`                                                          |                                                                                                                                                                                                                                                                                                               |
+| `fiveHourUsageLimitUsd`                     | lambar >= 0 ko `null`                                                          | Mirgine kasafin kudin USD na awa 5, ana aiwatar da shi kamar iyakokin yau da kullun da na mako-mako (`usageLimitEnabled`, `UNPRICED_USAGE_BUDGET_POLICY`). `retry-after` shine lokacin da mafi tsufan kashewa a cikin taga ya ƙare, wanda zai iya barin maɓalli mai nisa akan iyakar sa har yanzu yana toshe. |
+| `chaosModeEnabled`                          | boolean                                                                        |                                                                                                                                                                                                                                                                                                               |
 
 ```bash
 curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
@@ -1381,6 +1382,31 @@ curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
 | `/api/modality-bridge/stats`         | GET        | `attempts` na cikin ƙwaƙwalwa, nasarori/`bridged`, gazawa, nasarar amfani da ma'ajiya, `totalLatencyMs`, `latencySamples`, `averageLatencyMs` da aka ƙididdige bisa samfurori, da lokacin amfani na ƙarshe (ana sake saita su bayan sake farawa; izinin gudanarwa)                                                                                                                                                                                      |
 | `/api/modality-bridge/video/runtime` | GET        | Tsauraran binciken amintaccen madaukin gida kafin izinin gudanarwa/bincike; samuwa da sigogin FFmpeg/ffprobe da aka tsabtace (ba a adanawa)                                                                                                                                                                                                                                                                                                             |
 | `/api/modality-bridge/video/extract` | POST       | Dillalin baiti na ciki mai ingantaccen amintaccen madaukin gida; shigarwar 50 MiB, jerin aiki mai iyaka/fitarwa 32 MiB, `503` idan ƙarfin aiki ya cika, `499` idan an katse haɗin, `504` idan wa'adin ya wuce; ba API ba ne na loda bayanan jama'a                                                                                                                                                                                                      |
+
+### Binciken zurfi na firam ɗin bidiyo
+
+`GET /api/v1/video-bridge/drilldown` yana karanta handle mara bayyanannen da aka ɗaure da tenant wanda aka mayar a cikin
+`x-omniroute-video-drilldown` bayan buƙatar Video Bridge da aka ba da izini a sarari.
+Duk karatu da `DELETE` koyaushe suna buƙatar ingantaccen maɓallin API da kuma izinin mai aiki mai zaman kansa na
+`modalityBridgeVideoDrilldownRemoteEnabled`. Riƙewa a samarwa yana kuma buƙatar
+`modalityBridgeVideoDrilldownEnabled` da tsauraran `drilldown: true` ga kowane sashe.
+Idan maɓallin yana da jerin izinin endpoints da ba fanko ba, dole ne ya ƙunshi `video` ga duka
+GET da DELETE, ko mai kira ya yi amfani da `/v1` ko `/api/v1`.
+
+Tambayar GET: `handle` wajibi ne; `variant` na zaɓi (`preview`, `standard`, `detail`),
+`limit` (1–8; ana karɓar `frames` na gado amma ba za a haɗa shi da `limit` ba),
+`page` mai farawa daga sifili, da daƙiƙun `start`/`end`. Idan an samar da iyakokin mayar da hankali duka,
+`end` dole ya fi `start`. Ana ƙin maɓallan tambaya masu maimaituwa/waɗanda ba a sani ba.
+Amsoshin nasara suna ƙunshe da `derivation`, `durationSeconds`, `frames`,
+`hasMore`, `page`, `variant`, da `focusWindow` na zaɓi; JSON marar adanawa yana da iyakar
+32 MiB har da Base64. Fitowar da ta fi girma tana mayar da 413; a nemi ƙarancin frames.
+
+`DELETE /api/v1/video-bridge/drilldown?handle=...` yana mayar da `{ "removed": 0|1 }`.
+GET na waɗanda ba a sani ba, waɗanda wa’adinsu ya ƙare da kuma waɗanda suka fito daga wani maɓalli suna da amsar 404 iri ɗaya; DELETE na wani maɓalli ba zai iya cire shigarwar mai ita ba. Samun dama da aka kashe yana mayar da 403, rashin ingantaccen tantancewa ko wanda ya ɓace 401, tambayoyi marasa inganci 400, sokewa 499, sannan kurakurai na wucin gadi 503.
+Handles na cikin tsarin aiki ne kawai, suna ƙarewa bayan mintuna goma, kuma ba sa tsira bayan sake farawa.
+Sabbin handles suna amfani da `v1.` tare da bazuwar alamar Base64URL mai girman bytes 32; hashes na tokens kaɗai ake adanawa. Tsoffin tokens masu haruffan hex 64 suna ci gaba da zama masu iya karantawa ta nahawu don dacewa.
+Duba [Ka’idojin kariya na Video Bridge](../security/GUARDRAILS.md#video-bridge-videobridgets-videobridgepipelinets)
+don cikakkun bayanai kan yarda, ƙididdigar iyaka da ƙirƙirar variant.
 
 ### Ajiyar Ajiyayyen & Fitarwa/Shigarwa
 
@@ -1484,17 +1510,17 @@ Waɗannan hanyoyi suna kwaikwayon tsarin API na Gemini don abokan ciniki da ke b
 
 ### API na Ciki / Tsarin
 
-| Endpoint                 | Hanya | Bayani                                                                |
-| ------------------------ | ----- | --------------------------------------------------------------------- |
-| `/api/init`              | GET   | Binciken fara aikace-aikacen (ana amfani da shi a farkon gudanarwa)   |
-| `/api/tags`              | GET   | Alamar samfura mai dacewa da Ollama (don abokan cinikin Ollama)       |
-| `/api/restart`           | POST  | Ƙaddamar da sake farawa cikin ladabi na uwar garke                    |
-| `/api/shutdown`          | POST  | Ƙaddamar da kashe uwar garke cikin ladabi                             |
-| `/api/system/env/repair` | POST  | Gyara masu canjin muhalli na masu samar da OAuth                      |
-| `/api/system/version`    | GET   | Sigar yanzu/ta baya-bayan nan, matsayin ɗaukakawa, tashar sakin sigar |
-| `/api/system/version`    | POST  | Fara ɗaukakawa mai sanin yanayin turawa zuwa sigar baya-bayan nan     |
+| Endpoint                 | Method | Bayani                                                                |
+| ------------------------ | ------ | --------------------------------------------------------------------- |
+| `/api/init`              | GET    | Fara ayyukan daidaitawa na baya (tantancewar gudanarwa)               |
+| `/api/tags`              | GET    | Alamun samfura masu jituwa da Ollama (don abokan cinikin Ollama)      |
+| `/api/restart`           | POST   | Jawo sake farawa na uwar garke cikin tsari                            |
+| `/api/shutdown`          | POST   | Jawo rufe uwar garke cikin tsari                                      |
+| `/api/system/env/repair` | POST   | Gyara canje-canjen muhalli na masu bayar da OAuth                     |
+| `/api/system/version`    | GET    | Sigar yanzu/ta baya-bayan nan, matsayin sabuntawa, tashar sakin sigar |
+| `/api/system/version`    | POST   | Fara sabuntawa mai la'akari da turawa zuwa sabuwar sigar              |
 
-> **Lura:** Tsarin yana amfani da waɗannan hanyoyi a ciki ko don dacewa da abokin cinikin Ollama. Masu amfani na ƙarshe ba sa kiran su yawanci.
+> **Lura:** Tsarin yana amfani da waɗannan endpoints a cikin gida ko don dacewa da abokin ciniki na Ollama. Masu amfani na ƙarshe ba sa kiran su yawanci.
 
 ### Gyaran Muhallin OAuth _(v3.6.1+)_
 

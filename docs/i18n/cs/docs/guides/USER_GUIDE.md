@@ -356,24 +356,24 @@ Model: cc/claude-opus-4-7
 
 ## 🚀 Nasazení
 
-### Globální instalace přes npm (doporučeno)
+### Globální instalace npm (doporučeno)
 
 ```bash
 npm install -g omniroute
 
-# Vytvoření konfiguračního adresáře
+# Create config directory
 mkdir -p ~/.omniroute
 
-# Vytvoření souboru .env (viz .env.example)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# Spuštění serveru
+# Start server
 omniroute
-# Nebo s vlastním portem:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI automaticky načítá `.env` z `~/.omniroute/.env` nebo `./.env`.
+CLI automaticky načte `.env` z `~/.omniroute/.env` nebo `./.env`. `./.env` v pracovním adresáři může nastavit pouze krátký seznam povolených klíčů (porty, `REQUIRE_API_KEY`, národní prostředí a nastavení barev); vše ostatní vložte do `~/.omniroute/.env`. Viz [smlouvy na uvedení CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### Režim systémové lišty
 

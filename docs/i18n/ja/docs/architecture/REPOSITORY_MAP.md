@@ -242,7 +242,7 @@ src/
 | -------------------------------- | -------------------------------------------------------------------------------------------------------------- |
 | `components/`                    | ダッシュボードコンポーネント API：`packages/ui-kit` のアダプター — `docs/architecture/DESIGN_SYSTEM.md` を参照 |
 | `constants/iconMap.ts`           | `ICON_MAP`：画面で使用されるアイコン名 → Lucide コンポーネント（`<Icon>`）                                     |
-| `constants/providers.ts`         | Zod バリデーション付きの **380 プロバイダー**（信頼できる唯一の情報源）                                        |
+| `constants/providers.ts`         | Zod バリデーション付きの **382 プロバイダー**（信頼できる唯一の情報源）                                        |
 | `constants/cliTools.ts`          | 外部 CLI ツールレジストリ                                                                                      |
 | `constants/routingStrategies.ts` | 優先度付きの **20 ルーティング戦略**                                                                           |
 | `constants/publicApiRoutes.ts`   | （管理認証ではなく）Bearer 認証を必要とするルート                                                              |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | 外部 CLI 統合 + 内部 OmniRoute CLI                                               |
 | `I18N.md`                   | i18n アーキテクチャ、言語の追加、67 ロケール                                     |
 | `UNINSTALL.md`              | クリーンなアンインストール手順                                                   |
-| `PROVIDER_REFERENCE.md`     | 380 プロバイダーの**自動生成**カタログ(再生成: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | 382 プロバイダーの**自動生成**カタログ(再生成: `npm run gen:provider-reference`) |
 
 ### サブシステム詳細解説
 

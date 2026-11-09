@@ -52,15 +52,11 @@ avslutningskod 0, vilket inte fastställer att beroendena klarade skanningen. De
 Trivy-steget kräver också en lyckad mätning: otillgängliga verktyg, misslyckade jobb
 och saknade belägg för avbildningen kan inte intyga att en avbildning är ren.
 
-## Risk med utfasat beroende
+## Pensionerad beroenderisk
 
-Rotlåsfilen innehåller inte längre `extract-zip` eller en beroendekoppling till det efter
-uppgraderingen av det låsta utvecklingsverktyget promptfoo. Därmed utfasas den tidigare accepterade
-kedjan `promptfoo` → `@openai/codex-security` → `extract-zip` som spåras i #14482.
-Regressionstesterna i `tests/unit/extract-zip-14482-exposure.test.ts` förhindrar att det
-återinförs och bibehåller förbudet mot importer från produktionskod.
+Rotlåsfilen inkluderar inte längre `extract-zip` eller en beroendekant till den efter uppgradering av det fästa promptfoo-utvecklingsverktyget. Detta tar bort den tidigare accepterade `promptfoo` → `@openai/codex-security` → `extract-zip` -kedjan spårad i #14482. Regressionskontrollerna i `tests/unit/extract-zip-14482-exposure.test.ts` avvisar dess återinförande och behåller förbudet mot import från produktionskod.
 
-Den aktuella beroendereparationen inkluderar kompatibilitetsåsidosättningar för Azure Identitys MSAL-klient, get-uris FTP-klient och Zod i båda OpenCode-pluginpaketen. Hämtning av Azure-token och FTP-data testas med kontrollerade transporter. Båda OpenCode-paketen kör sina egna bygg- och testsviter. Antalet säkerhetsrekommendationer i registret är mätvärden från en viss tidpunkt och kan ändras efter att låsfilen har checkats in.
+Den aktuella beroendereparationen omfattar även kompatibilitetsåsidosättningar till Azure-identitets MSAL klient och get-uris FTP klient. Azure-tokenförvärv och FTP hämtning testas med kontrollerade transporter; båda OpenCode paketen kör sina egna bygg- och testsviter. Registerrådgivningsräkningar är mätningar vid en tidpunkt och kan ändras efter att låsfilen har begåtts.
 
 ## Eftersläpning: Scorecard-rådgivning → blockering
 

@@ -357,24 +357,24 @@ API-ის გასაღები: [მართვის პანელი�
 
 ## 🚀 განთავსება
 
-### გლობალური npm-ინსტალაცია (რეკომენდებული)
+### გლობალური npm ინსტალაცია (რეკომენდირებულია)
 
 ```bash
 npm install -g omniroute
 
-# შექმენით კონფიგურაციის დირექტორია
+# Create config directory
 mkdir -p ~/.omniroute
 
-# შექმენით .env ფაილი (იხილეთ .env.example)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# გაუშვით სერვერი
+# Start server
 omniroute
-# ან მორგებული პორტით:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI ავტომატურად ტვირთავს `.env`-ს `~/.omniroute/.env`-დან ან `./.env`-დან.
+CLI ავტომატურად იტვირთება `.env` `~/.omniroute/.env` დან ან `./.env`. სამუშაო დირექტორიაში `./.env` შეუძლია დააყენოს კლავიშების მხოლოდ მოკლე დაშვებული სია (პორტები, `REQUIRE_API_KEY`, ლოკალი და ფერის პარამეტრები); ყველაფერი დანარჩენი `~/.omniroute/.env` ში ჩადეთ. იხილეთ [CLI გაშვების კონტრაქტები](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### სისტემურ პანელში მუშაობის რეჟიმი
 

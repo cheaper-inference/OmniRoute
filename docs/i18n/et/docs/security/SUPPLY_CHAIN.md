@@ -45,11 +45,11 @@ ja lõppeda väljumiskoodiga 0, kuid see ei kinnita, et sõltuvused läbisid ska
 Trivy etapp nõuab samuti edukat mõõtmist: kättesaamatud tööriistad, nurjunud tööd
 ja puuduvad tõmmise tõendid ei võimalda tõendada, et tõmmis on puhas.
 
-## Kasutusest kõrvaldatud sõltuvuse risk
+## Pensionile jäämise oht
 
-Juur-lukufail ei sisalda pärast fikseeritud versiooniga promptfoo arendustööriista uuendamist enam paketti `extract-zip` ega selleni viivat sõltuvusseost. Sellega kõrvaldatakse varem aktsepteeritud ahel `promptfoo` → `@openai/codex-security` → `extract-zip`, mida jälgiti juhtumis #14482. Regressioonikontrollid failis `tests/unit/extract-zip-14482-exposure.test.ts` takistavad selle uuesti lisamist ja säilitavad keelu importida seda tootmiskoodist.
+Juurlukustusfail ei sisalda enam `extract-zip` ega selle sõltuvusserva pärast kinnitatud promptfoo arendustööriista täiendamist. See lõpetab varem aktsepteeritud `promptfoo` → `@openai/codex-security` → `extract-zip` ahela, mida on jälgitud #14482. `tests/unit/extract-zip-14482-exposure.test.ts` regressioonikontrollid lükkavad tagasi selle taaskehtestamise ja säilitavad tootmiskoodist impordi keelu.
 
-Praegune sõltuvuste parandus sisaldab ühilduvuse ülekirjutusi Azure Identity MSAL-i kliendi, get-uri FTP-kliendi ja Zodi jaoks mõlemas OpenCode'i pistikprogrammi paketis. Azure'i tõendi hankimist ja FTP kaudu andmete toomist testitakse kontrollitud transpordikihtidega; mõlemad OpenCode'i paketid käitavad omaenda kooste- ja testikomplekte. Registri turvanõuannete arvud on kindla ajahetke mõõtmistulemused ja võivad pärast lukufaili kinnitamist muutuda.
+Praegune sõltuvusparandus hõlmab ka ühilduvuse alistamisi Azure'i identiteedi MSAL kliendi ja get-uri FTP kliendiga. Azure'i märgi hankimist ja FTP otsimist testitakse kontrollitud transpordiga; mõlemad OpenCode paketid käitavad oma ehitus- ja testkomplekte. Registri soovituslikud loendused on mõõtmised teatud ajahetkel ja võivad muutuda pärast lukustusfaili kinnitamist.
 
 ## Tööjärjekord: Scorecard'i nõuanne → blokeerimine
 

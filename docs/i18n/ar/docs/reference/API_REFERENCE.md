@@ -331,7 +331,7 @@ GET /v1/embeddings
 
 ---
 
-## توليد الصور
+## إنشاء الصور
 
 ```bash
 POST /v1/images/generations
@@ -345,28 +345,29 @@ Content-Type: application/json
 }
 ```
 
-تشمل موفرو الخدمة المتاحون OpenAI (GPT Image 2) وxAI (Grok Image) وTogether AI (FLUX) وFireworks AI وNebius (FLUX) وHyperbolic وNanoBanana و**OpenRouter** و**ZenMux** وSD WebUI (محلي) وComfyUI (محلي).
+تشمل موفّرات الخدمة المتاحة OpenAI (GPT Image 2) وxAI (Grok Image) وTogether AI (FLUX) وFireworks AI وNebius (FLUX) وHyperbolic وNanoBanana و**OpenRouter** و**ZenMux** وSD WebUI (محلي) وComfyUI (محلي).
 
-تعيد `n` عددًا قدره `n` من الصور في `data[]`. أما موفرو الخدمة الذين تعيد واجهة برمجة التطبيقات الأولية لديهم صورة واحدة لكل استدعاء
+يعيد `n` عددًا قدره `n` من الصور في `data[]`. أما الموفّرون الذين تعيد واجهة برمجة التطبيقات الأساسية لديهم صورة واحدة لكل استدعاء
 (Black Forest Labs وStability AI وLeonardo وIdeogram وHaiper وHyperbolic وMagnific/Freepik
-وNVIDIA NIM وCloudflare Workers AI)، فيُجرى لهم `n` من الاستدعاءات الأولية المنفصلة، مع تنفيذ 4 استدعاءات كحد أقصى في الوقت نفسه. تتم إزاحة قيمة `seed` الثابتة وفق فهرس الاستدعاء (`seed` و`seed + 1`، …)، بحيث تختلف الصور مع بقائها قابلة لإعادة الإنتاج. الحد الأقصى لـ `n` هو 10. يفشل الطلب بالكامل إذا فشل أي استدعاء. توجد قائمة تنسيقات التوزيع المتعدد في
-`SINGLE_IMAGE_FANOUT_FORMATS` ضمن
+وNVIDIA NIM وCloudflare Workers AI)، فيحصلون على `n` استدعاءات منفصلة للواجهة الأساسية، بحد أقصى 4 استدعاءات قيد التنفيذ. تتم إزاحة `seed` ثابتة وفق فهرس الاستدعاء (`seed` و`seed + 1` و…)، بحيث تختلف الصور مع بقائها قابلة لإعادة الإنتاج. الحد الأقصى لـ`n` هو 10. يفشل الطلب بالكامل إذا فشل أي استدعاء. قائمة التنسيقات التي تستخدم التوزيع المتعدد هي `SINGLE_IMAGE_FANOUT_FORMATS` في
 `open-sse/handlers/imageGeneration/fanOut.ts`.
 
-يعيد ZenMux استخدام اتصال مفتاح واجهة برمجة التطبيقات الحالي ويقبل البادئتين `zenmux/` أو `zm/`:
+يعيد ZenMux استخدام اتصال مفتاح API الحالي ويقبل البادئات `zenmux/` أو `zm/`:
 
-- يستخدم `zenmux/openai/gpt-image-2` واجهة Images API الخاصة بـ OpenAI عبر ZenMux. تشمل الخيارات `size` و
-  `quality` و`n` و`output_format` و`output_compression` و`background` و`response_format`.
-- تستخدم الناشرات الأخرى، مثل `zm/meta/muse-image-1.0`، نقطة النهاية `:predict` الخاصة بـ Vertex AI عبر ZenMux. تُطابق `n` مع `sampleCount`، و`aspect_ratio` مع `aspectRatio`، و`image_size`
-  (`1K` و`2K` و`4K`) مع `sampleImageSize`. يحدد `size` بالبكسل نسبة العرض إلى الارتفاع فقط، ولا يضمن أبعادًا بالبكسل. تختلف النسب والدقة والأعداد المدعومة حسب النموذج.
-- يختار `zm/inclusionai/ming-image-0.1-design` أبعاده بنفسه. احذف `size` و
-  `aspect_ratio` و`image_size`؛ إذ تؤدي القيم الصريحة إلى إرجاع HTTP 400. يمكن طلب PNG وJPEG وWebP باستخدام `output_format`.
+- يستخدم `zenmux/openai/gpt-image-2` واجهة OpenAI Images API الخاصة بـZenMux. تشمل الخيارات `size`،
+  و`quality` و`n` و`output_format` و`output_compression` و`background` و`response_format`.
+- تستخدم الناشرات الأخرى، مثل `zm/meta/muse-image-1.0`، نقطة نهاية Vertex AI `:predict` الخاصة بـZenMux. تُحوَّل `n` إلى `sampleCount`، و`aspect_ratio` إلى `aspectRatio`، و`image_size`
+  (`1K` و`2K` و`4K`) إلى `sampleImageSize`. يوفّر `size` بالبكسل نسبة أبعاد فقط، ولا يضمن أبعادًا بالبكسل. تختلف النسب والدقة والأعداد المدعومة حسب النموذج.
+- يختار `zm/inclusionai/ming-image-0.1-design` أبعاده الخاصة. احذف `size`،
+  و`aspect_ratio` و`image_size`؛ إذ تعيد القيم الصريحة HTTP 400. يمكن طلب PNG وJPEG وWebP باستخدام `output_format`.
 
-يدعم هذا التكامل توليد الصور من النص، وليس تحرير الصور المرجعية. تتم تسوية مخرجات Vertex إلى `data[].b64_json`؛ ويعيد `response_format: "url"` عنوان URL أوليًا عبر HTTPS أو عنوان URL لبيانات base64 عندما تكون وحدات بايت الصورة هي المتاحة فقط. تؤدي المخرجات الفارغة أو التي تمت تصفيتها إلى إرجاع خطأ بدلًا من نجاح فارغ. يعتمد الوصول إلى النموذج على حساب ZenMux. راجع [واجهة Vertex API الخاصة بـ ZenMux](https://docs.zenmux.ai/api/vertexai/generate-images) و
-[واجهة OpenAI Images API](https://docs.zenmux.ai/api/openai/generate-an-image).
+يدعم هذا التكامل إنشاء الصور من النص، وليس تحرير الصور المرجعية. تتم تسوية مخرجات Vertex إلى `data[].b64_json`؛ ويعيد `response_format: "url"` عنوان URL للمصدر الأساسي باستخدام HTTPS أو عنوان URL لبيانات base64 عندما لا تتوفر إلا بايتات الصورة. تؤدي المخرجات الفارغة أو التي تمت تصفيتها إلى إرجاع خطأ بدلًا من نجاح فارغ. يعتمد الوصول إلى النماذج على حساب ZenMux. راجع [واجهة Vertex API الخاصة بـZenMux](https://docs.zenmux.ai/api/vertexai/generate-images) و[واجهة OpenAI Images API](https://docs.zenmux.ai/api/openai/generate-an-image).
+
+يتيح اتصال تسجيل الدخول إلى Microsoft 365 Copilot استخدام `copilot-m365-web/m365-copilot-image` عبر أداة الصور المضمنة في Copilot: دور Copilot واحد لكل صورة (`n` من 1 إلى 4)، مع استخدام `size` لتوجيه الاتجاه فقط، وإرجاع الصور مضمنة (`b64_json`، أو عنوان URL للبيانات عند استخدام
+`response_format: "url"`). راجع [Microsoft 365 Copilot](../providers/COPILOT-M365.md#image-generation).
 
 ```bash
-# List all image models
+# سرد جميع نماذج الصور
 GET /v1/images/generations
 ```
 
@@ -808,15 +809,28 @@ POST /v1/providers/{provider}/images/generations
 
 ## واجهة برمجة تطبيقات البحث
 
-تجريد لمزودي البحث عبر الويب (Tavily وBrave وExa وSerper وغيرهم).
+تجريد لمزوّدي الويب/البحث (Tavily وBrave وExa وSerper وغيرهم).
 
-| Method | Path                   | Description                                                                                  |
-| ------ | ---------------------- | -------------------------------------------------------------------------------------------- |
-| GET    | `/v1/search`           | عرض مزودي البحث المُهيّئين وإمكاناتهم                                                        |
-| POST   | `/v1/search`           | تنفيذ استعلام بحث — يتحقق من صحة body باستخدام `v1SearchSchema`، ويدعم التخزين المؤقت والدمج |
-| GET    | `/v1/search/analytics` | إحصاءات النتائج/زمن الاستجابة/التخزين المؤقت لكل مزود                                        |
+| Method | Path                   | Description                                                                                   |
+| ------ | ---------------------- | --------------------------------------------------------------------------------------------- |
+| GET    | `/v1/search`           | سرد مزوّدي البحث المُهيّئين وإمكاناتهم                                                        |
+| POST   | `/v1/search`           | تنفيذ استعلام بحث — يتحقق من صحة الجسم باستخدام `v1SearchSchema`، ويدعم التخزين المؤقت والدمج |
+| GET    | `/v1/search/analytics` | إحصاءات النتائج/زمن الاستجابة/التخزين المؤقت لكل مزوّد                                        |
 
-**المصادقة:** مفتاح API من نوع Bearer (`extractApiKey` + `isValidApiKey`). يتم فرض سياسة البحث باستخدام `enforceApiKeyPolicy`.
+**المصادقة:** مفتاح API لحامل الرمز (`extractApiKey` + `isValidApiKey`). يُفرَض نهج البحث عبر
+`enforceApiKeyPolicy`.
+
+**التحديد التلقائي:** عند عدم تحديد `provider`، يُشغَّل أولًا أرخص مزوّد لديه اتصال مُهيّأ،
+ويكون المزوّد التالي الأرخص هو البديل عند الفشل. لا تُستخدم المزوّدات المجانية التي تمثل
+الخيار الأخير (`duckduckgo-free`) إلا عند عدم تهيئة أي شيء آخر. يُعدّ SearXNG المستضاف ذاتيًا
+مُهيّأً بمجرد أن يخزّن اتصاله قيمة `baseUrl` حقيقية (وليست القيمة الافتراضية للفهرس
+`http://localhost:8888/search`): عندها يُصنَّف كمزوّد بتكلفة $0 قبل المزوّدات التي تتطلب مفاتيح،
+مع اعتبار أرخص مزوّد يتطلب مفتاحًا بديلًا له، بما في ذلك عندما يجيب SearXNG بالحالات 400 أو
+401 أو 403 أو 404. لا تُحتسب قيمة `baseUrl` التي ليست عنوان URL صالحًا من نوع `http(s)` أو التي
+تشير إلى عنوان بيانات وصفية سحابية. ويُصنَّف اتصال SearXNG الذي يخزّن رمزًا مميزًا بهذه الطريقة
+فقط عبر `https://` أو `http://` للحلقة المحلية. أما عبر `http://` البعيد غير المشفّر، فلا يكون
+بديلًا أبدًا ويبقى خيارًا أخيرًا، ولا يُستخدم إلا عند عدم تهيئة أي مزوّد آخر أو عند طلبه بالاسم؛
+وبذلك فإنه يرسل الرمز المميز بنص واضح في هاتين الحالتين.
 
 ### `provider_options` في Exa وTavily
 
@@ -995,30 +1009,28 @@ codex exec "Responda apenas: PONG"
 
 ---
 
-## الاستخدام بالخدمة الذاتية (`/api/usage/om-usage`)
+## استخدام الخدمة الذاتية (`/api/usage/om-usage`)
 
-يمكن لأي مفتاح API قراءة استخدامه وحصصه **الخاصة به** — دون مصادقة إدارية. هذه هي نقطة النهاية
-التي يستخدمها العميل (CLI ولوحة OmniCopilot) لعرض إنفاق صاحب المفتاح.
+يمكن قراءة أي مفتاح API**خاص بها** الاستخدام والحصص — لا مصادقة الإدارة. هذه هي نقطة النهاية التي يستخدمها العميل (CLI، لوحة OmniCopilot ) لإظهار إنفاق حامل المفتاح.
 
 ```bash
-# صيغة نصية (العقد التاريخي — نص عادي للمحطة الطرفية)
+# Text form (the historical contract — plain text for a terminal)
 curl -H "Authorization: Bearer <your-api-key>" \
   http://localhost:20128/api/usage/om-usage
 
-# صيغة منظمة — ما تستهلكه واجهة المستخدم
+# Structured form — what a UI consumes
 curl -H "Authorization: Bearer <your-api-key>" \
   "http://localhost:20128/api/usage/om-usage?format=json"
 ```
 
-يجب أن يكون المفتاح قد فعّل **`allowUsageCommand`** (وهو معطّل افتراضيًا — ويبدّله مدير مفاتيح
-API في لوحة المعلومات لكل مفتاح). ومن دونه تُرجع نقطة النهاية `403`.
+يجب أن يكون المفتاح **`allowUsageCommand`** ممكّن (متوقف عن التشغيل افتراضيًا — يقوم مدير مفتاح واجهة برمجة التطبيقات (API) بلوحة المعلومات بتبديله لكل مفتاح). بدونها تجيب نقطة النهاية على `403`.
 
-تعيد `?format=json` بنية مميّزة بحيث لا يقرأ المستدعي حقل بيانات من حالة رفض. عند النجاح:
+تقوم `?format=json` بإرجاع شكل مميز بحيث لا يقرأ المتصل مطلقًا حقل بيانات في حالة الرفض. على النجاح:
 
 ```jsonc
 {
   "allowed": true,
-  // يظهر فقط عندما يفعّل المفتاح حدود الاستخدام لكل مفتاح (بالدولار يوميًا/أسبوعيًا):
+  // present only when the key opted into per-key usage limits (daily/weekly/5-hour USD):
   "personal": {
     "dailySpentUsd": 1.25,
     "dailyLimitUsd": 5,
@@ -1027,9 +1039,9 @@ API في لوحة المعلومات لكل مفتاح). ومن دونه تُر�
     "weeklyLimitUsd": 20,
     "weeklyResetAtIso": "…" /* … */,
   },
-  // لقطة حصة الموفر المحدد، أو null عندما لا يكون أي شيء مخزّنًا مؤقتًا بعد:
+  // the selected provider quota snapshot, or null when nothing is cached yet:
   "provider": { "connectionId": "…", "provider": "claude", "plan": "…", "quotas": {/* … */} },
-  // لقطة كل اتصال، لكي تتمكن واجهة المستخدم من عرض عدة موفرين جنبًا إلى جنب:
+  // every connection's snapshot, so a UI can render several providers side by side:
   "providers": [
     { "connectionId": "…", "provider": "claude" /* … */ },
     { "provider": "codex" /* … */ },
@@ -1037,13 +1049,9 @@ API في لوحة المعلومات لكل مفتاح). ومن دونه تُر�
 }
 ```
 
-عند الرفض (مفتاح غير صالح `401` / غير مسموح `403`) يعيد المسار نفسه
-`{ "allowed": false, "error": { "message": "…" } }` — وتُعدّ حالة `personal`/`provider`
-الموجودة لكن الفارغة (المفتاح مسموح، ولم تُكتسب أي معلومات بعد) مختلفة عن حالة الرفض، ولا يميّز
-بينهما سوى صيغة JSON.
+عند الرفض (مفتاح `401` سيئ / `403` غير مسموح به) يُرجع نفس المسار `{ "allowed": false, "error": { "message": "…" } }` — `personal`/`provider` الحالي ولكن الفارغ (المفتاح مسموح به، لم يتم تعلم أي شيء بعد) هي حالة مختلفة عن الرفض، ولا يميزهما سوى نموذج JSON.
 
-**المصادقة:** مفتاح API لحامل الطلب الخاص بالمستدعي، مع التحقق باستخدام `isValidApiKey` — وهذا
-ليس سطح الإدارة (`/api/keys/…`)، الذي يظل محميًا خلف `requireManagementAuth`.
+**المصادقة:** مفتاح Bearer API الخاص بالمتصل، والذي تم التحقق من صحته باستخدام `isValidApiKey` — هذا ليس_سطح الإدارة (`/api/keys/…`)، الذي يبقى خلف `requireManagementAuth`.
 
 ### نسب الحصة الأولية مقابل المعدّلة وفق حد القطع
 
@@ -1288,40 +1296,41 @@ https://chatgpt.com/backend-api/wham/usage` و`GET .../wham/rate-limit-reset-cre
 | `/api/usage/model-latency-stats` | GET             | تجميع متداول لزمن الاستجابة لكل موفّر/نموذج (المتوسط وp50 وp95 وp99 ومعدل النجاح)؛ عوامل التصفية: `windowHours`/`minSamples`/`maxRows`/`provider`/`model` (#6873)                                                                                                                                                                 |
 | `/api/usage/cache-health`        | GET             | ملخص حالة ذاكرة التخزين المؤقت للمطالبات عبر `call_logs` — نسبة الكتابة/القراءة، وتوزيع أحجام الكتابة عند p50/p90/p99، وتركيز عمليات الكتابة الكثيفة، والتقسيم حسب النموذج، وحكم `healthy`/`degraded`/`thrash`/`no-data`؛ ومعلما الاستعلام `range` (`1h`\|`24h`\|`7d`\|`30d`، القيمة الافتراضية `24h`) و`model` الاختياري (#8827) |
 
-### أذونات مفاتيح API
+### أذونات مفتاح API
 
-يحدّث `PATCH /api/keys/{id}` أذونات مفتاح موجود. وكأي مسار `/api/keys*`، يتطلب تفويض الإدارة (راجع [مصادقة الإدارة](../guides/MANAGEMENT-AUTH.md))، وليس مفتاح استدلال. أرسل الحقول التي تريد تغييرها فقط؛ ويُرفض الطلب الذي لا يحتوي على أيٍّ منها مع `No valid fields to update`. تُحدَّد الحقول المقبولة بواسطة `updateKeyPermissionsSchema` في `src/shared/validation/schemas/keys.ts`.
+تقوم `PATCH /api/keys/{id}` بتحديث أذونات المفتاح الموجود. مثل كل مسار `/api/keys*` فإنه يحتاج إلى ترخيص الإدارة (راجع [مصادقة الإدارة](../guides/MANAGEMENT-AUTH.md) )، وليس إلى مفتاح الاستدلال. أرسل فقط الحقول التي تريد تغييرها؛ يتم رفض الطلب الذي لا يتضمن أيًا منهم من خلال `No valid fields to update`. يتم تعريف الحقول المقبولة بواسطة `updateKeyPermissionsSchema` في `src/shared/validation/schemas/keys.ts`.
 
-| الحقل                                       | النوع                                                                    | الملاحظات                                                                                                             |
-| ------------------------------------------- | ------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------- |
-| `name`                                      | سلسلة نصية، من 1 إلى 200 حرفًا                                           |                                                                                                                       |
-| `isActive`                                  | قيمة منطقية                                                              |                                                                                                                       |
-| `isBanned`                                  | قيمة منطقية                                                              |                                                                                                                       |
-| `expiresAt`                                 | تاريخ ووقت بتنسيق ISO 8601 أو `null`                                     | يؤدي `null` إلى مسح تاريخ الانتهاء                                                                                    |
-| `modelAccessMode`                           | `all` \| `restricted`                                                    | يجب أن تكون `allowedModels` فارغة عندما تكون الحالة `all`                                                             |
-| `allowedModels`, `blockedModels`            | مصفوفة من السلاسل النصية، بحد أقصى 1000                                  |                                                                                                                       |
-| `allowedCombos`                             | مصفوفة من السلاسل النصية، بحد أقصى 500                                   | تحدد التركيبات التي يمكن للمفتاح استدعاؤها؛ أما النماذج المباشرة فتخضع لـ `modelAccessMode` / `allowedModels`         |
-| `connectionAccessMode`                      | `all` \| `restricted`                                                    | يجب ألا تكون `allowedConnections` فارغة عند `restricted`، وأن تكون فارغة عند `all`                                    |
-| `allowedConnections`                        | مصفوفة من UUIDs، بحد أقصى 100                                            |                                                                                                                       |
-| `allowAutoCombos`                           | قيمة منطقية                                                              | تؤدي القيمة `false` إلى رفض طلبات نماذج `auto/*` باستخدام هذا المفتاح؛ وتُسمح المفاتيح التي لم تضبطها مطلقًا          |
-| `catalogScope`                              | `all` \| `combos` \| `models`                                            | ما يعرضه `GET /v1/models` لهذا المفتاح (التركيبات فقط، أو النماذج فقط، أو كليهما)؛ ولا يغيّر ما يمكن للمفتاح استدعاؤه |
-| `forcedModel`                               | سلسلة نصية بحد أقصى 300 حرف، أو `null`                                   | يوجّه طلبات الدردشة إلى هذا النموذج/التركيبة، متجاوزًا `X-Route-Model` و`body.model`؛ وتظل حدود المفتاح سارية         |
-| `noLog`, `autoResolve`                      | قيمة منطقية                                                              |                                                                                                                       |
-| `throttleDelayMs`                           | عدد صحيح، من 0 إلى 300000                                                |                                                                                                                       |
-| `maxSessions`                               | عدد صحيح، من 0 إلى 10000                                                 |                                                                                                                       |
-| `rateLimits`                                | مصفوفة من `{ limit, window }` (أعداد صحيحة موجبة، بحد أقصى 50) أو `null` | يؤدي `null` إلى مسح الحدود                                                                                            |
-| `accessSchedule`                            | كائن جدولة أو `null`                                                     | يؤدي `null` إلى مسح الجدولة                                                                                           |
-| `scopes`                                    | مصفوفة من السلاسل النصية، بحد أقصى 32                                    |                                                                                                                       |
-| `allowedEndpoints`                          | مصفوفة من السلاسل النصية، بحد أقصى 20                                    |                                                                                                                       |
-| `streamDefaultMode`                         | `legacy` \| `json`                                                       |                                                                                                                       |
-| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                     | راجع [تجاوز ذاكرة التخزين المؤقت لكل مفتاح](#per-key-cache-bypass)                                                    |
-| `compressionEnabled`                        | قيمة منطقية                                                              |                                                                                                                       |
-| `codexServiceMode`                          | أحد أوضاع خدمة Codex                                                     |                                                                                                                       |
-| `disableNonPublicModels`                    | boolean                                                                  |                                                                                                                       |
-| `allowUsageCommand`                         | boolean                                                                  |                                                                                                                       |
-| `usageLimitEnabled`                         | boolean                                                                  |                                                                                                                       |
-| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | number >= 0 or `null`                                                    |                                                                                                                       |
-| `chaosModeEnabled`                          | boolean                                                                  |                                                                                                                       |
+| الحقل                                       | النوع                                                                    | الملاحظات                                                                                                                                                                                                                                              |
+| ------------------------------------------- | ------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `name`                                      | سلسلة نصية، من 1 إلى 200 حرفًا                                           |                                                                                                                                                                                                                                                        |
+| `isActive`                                  | قيمة منطقية                                                              |                                                                                                                                                                                                                                                        |
+| `isBanned`                                  | قيمة منطقية                                                              |                                                                                                                                                                                                                                                        |
+| `expiresAt`                                 | تاريخ ووقت بتنسيق ISO 8601 أو `null`                                     | يؤدي `null` إلى مسح تاريخ الانتهاء                                                                                                                                                                                                                     |
+| `modelAccessMode`                           | `all` \| `restricted`                                                    | يجب أن تكون `allowedModels` فارغة عندما تكون الحالة `all`                                                                                                                                                                                              |
+| `allowedModels`, `blockedModels`            | مجموعة من السلاسل، تصل إلى 1000                                          |                                                                                                                                                                                                                                                        |
+| `allowedCombos`                             | مصفوفة من السلاسل النصية، بحد أقصى 500                                   | تحدد التركيبات التي يمكن للمفتاح استدعاؤها؛ أما النماذج المباشرة فتخضع لـ `modelAccessMode` / `allowedModels`                                                                                                                                          |
+| `connectionAccessMode`                      | `all` \| `restricted`                                                    | يجب ألا تكون `allowedConnections` فارغة عند `restricted`، وأن تكون فارغة عند `all`                                                                                                                                                                     |
+| `allowedConnections`                        | مصفوفة من UUIDs، بحد أقصى 100                                            |                                                                                                                                                                                                                                                        |
+| `allowAutoCombos`                           | قيمة منطقية                                                              | تؤدي القيمة `false` إلى رفض طلبات نماذج `auto/*` باستخدام هذا المفتاح؛ وتُسمح المفاتيح التي لم تضبطها مطلقًا                                                                                                                                           |
+| `catalogScope`                              | `all` \| `combos` \| `models`                                            | ما يعرضه `GET /v1/models` لهذا المفتاح (التركيبات فقط، أو النماذج فقط، أو كليهما)؛ ولا يغيّر ما يمكن للمفتاح استدعاؤه                                                                                                                                  |
+| `forcedModel`                               | سلسلة نصية بحد أقصى 300 حرف، أو `null`                                   | يوجّه طلبات الدردشة إلى هذا النموذج/التركيبة، متجاوزًا `X-Route-Model` و`body.model`؛ وتظل حدود المفتاح سارية                                                                                                                                          |
+| `noLog`, `autoResolve`                      | منطقية                                                                   |                                                                                                                                                                                                                                                        |
+| `throttleDelayMs`                           | عدد صحيح، من 0 إلى 300000                                                |                                                                                                                                                                                                                                                        |
+| `maxSessions`                               | عدد صحيح، من 0 إلى 10000                                                 |                                                                                                                                                                                                                                                        |
+| `rateLimits`                                | مصفوفة من `{ limit, window }` (أعداد صحيحة موجبة، بحد أقصى 50) أو `null` | يؤدي `null` إلى مسح الحدود                                                                                                                                                                                                                             |
+| `accessSchedule`                            | كائن جدولة أو `null`                                                     | يؤدي `null` إلى مسح الجدولة                                                                                                                                                                                                                            |
+| `scopes`                                    | مصفوفة من السلاسل النصية، بحد أقصى 32                                    |                                                                                                                                                                                                                                                        |
+| `allowedEndpoints`                          | مصفوفة من السلاسل النصية، بحد أقصى 20                                    |                                                                                                                                                                                                                                                        |
+| `streamDefaultMode`                         | `legacy` \| `json`                                                       |                                                                                                                                                                                                                                                        |
+| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                     | راجع [تجاوز ذاكرة التخزين المؤقت لكل مفتاح](#per-key-cache-bypass)                                                                                                                                                                                     |
+| `compressionEnabled`                        | قيمة منطقية                                                              |                                                                                                                                                                                                                                                        |
+| `codexServiceMode`                          | أحد أوضاع خدمة Codex                                                     |                                                                                                                                                                                                                                                        |
+| `disableNonPublicModels`                    | boolean                                                                  |                                                                                                                                                                                                                                                        |
+| `allowUsageCommand`                         | boolean                                                                  |                                                                                                                                                                                                                                                        |
+| `usageLimitEnabled`                         | boolean                                                                  |                                                                                                                                                                                                                                                        |
+| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | رقم >= 0 أو `null`                                                       |                                                                                                                                                                                                                                                        |
+| `fiveHourUsageLimitUsd`                     | رقم >= 0 أو `null`                                                       | ميزانية USD متجددة لمدة 5 ساعات، ويتم فرضها مثل الحدود اليومية والأسبوعية (`usageLimitEnabled`، `UNPRICED_USAGE_BUDGET_POLICY`). `retry-after` هو عندما ينتهي أقدم إنفاق في النافذة، مما قد يترك مفتاحًا يتجاوز الحد المسموح به بكثير لا يزال محظورًا. |
+| `chaosModeEnabled`                          | boolean                                                                  |                                                                                                                                                                                                                                                        |
 
 ```bash
 curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
@@ -1371,6 +1380,37 @@ curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
 | `/api/modality-bridge/stats`         | GET        | `attempts` داخل الذاكرة، وحالات النجاح/`bridged`، وحالات الفشل، ومرات الوصول إلى ذاكرة التخزين المؤقت، و`totalLatencyMs`، و`latencySamples`، و`averageLatencyMs` المحسوبة على أساس العينات، ووقت آخر استخدام (يُعاد ضبطه عند إعادة التشغيل؛ يتطلب مصادقة الإدارة)                                                                                                                                                       |
 | `/api/modality-bridge/video/runtime` | GET        | فحص صارم للحلقة الراجعة الموثوقة قبل مصادقة الإدارة/الفحص؛ وتوفّر إصدارات FFmpeg/ffprobe بعد تنقيتها (no-store)                                                                                                                                                                                                                                                                                                         |
 | `/api/modality-bridge/video/extract` | POST       | وسيط داخلي موثّق للبايتات عبر الحلقة الراجعة الموثوقة؛ إدخال بحجم 50 MiB، وقائمة انتظار محدودة/مخرجات بحجم 32 MiB، و`503` للسعة، و`499` لقطع الاتصال، و`504` لتجاوز الموعد النهائي؛ وليس واجهة برمجة تطبيقات عامة للرفع                                                                                                                                                                                                 |
+
+### التعمق في إطارات الفيديو
+
+`GET /api/v1/video-bridge/drilldown` يقرأ مُعرّفًا مبهمًا مرتبطًا بالمستأجر، وتتم إعادته في
+`x-omniroute-video-drilldown` بعد طلب Video Bridge تمت الموافقة عليه صراحةً.
+تتطلب عمليات القراءة و`DELETE` دائمًا مفتاح API صالحًا وإذن المشغّل المستقل
+`modalityBridgeVideoDrilldownRemoteEnabled`. ويتطلب الاحتفاظ في الإنتاج بالإضافة إلى ذلك
+`modalityBridgeVideoDrilldownEnabled` و`drilldown: true` بشكل صارم لكل جزء.
+إذا كانت قائمة السماح بنقاط النهاية للمفتاح غير فارغة، فيجب أن تتضمن `video` لكل من
+GET وDELETE، سواء استخدم المستدعي `/v1` أو `/api/v1`.
+
+استعلام GET: الحقل `handle` مطلوب؛ والحقول الاختيارية هي `variant` (`preview` و`standard` و`detail`)،
+و`limit` (من 1 إلى 8؛ يُقبل `frames` القديم، لكن لا يمكن دمجه مع `limit`)،
+و`page` الذي يبدأ من الصفر، وثواني `start`/`end`. عند توفير حدي التركيز معًا،
+يجب أن تكون قيمة `end` أكبر من `start`. تُرفض مفاتيح الاستعلام المكررة أو غير المعروفة.
+تتضمن الاستجابات الناجحة `derivation` و`durationSeconds` و`frames` و
+`hasMore` و`page` و`variant` و`focusWindow` الاختياري؛ ويُحدّد حجم JSON
+الذي لا يُخزّن بحد أقصى قدره 32 MiB، بما في ذلك Base64. تُعيد المخرجات التي تتجاوز الحجم 413؛
+اطلب عددًا أقل من الإطارات.
+
+يعيد `DELETE /api/v1/video-bridge/drilldown?handle=...` القيمة `{ "removed": 0|1 }`.
+لا يمكن تمييز استجابات 404 للمُعرّفات غير المعروفة والمنتهية الصلاحية والقادمة من مفتاح آخر؛
+ولا يمكن لعملية DELETE القادمة من مفتاح آخر إزالة إدخال المالك. يؤدي الوصول المعطّل إلى 403،
+وتؤدي المصادقة المفقودة أو غير الصالحة إلى 401، والاستعلامات غير الصالحة إلى 400،
+والإلغاء إلى 499، والأخطاء المؤقتة إلى 503.
+تكون المُعرّفات محلية للعملية، وتنتهي صلاحيتها بعد عشر دقائق، ولا تبقى بعد إعادة التشغيل.
+تستخدم المُعرّفات الجديدة `v1.` متبوعةً برمز عشوائي بطول 32 بايت بترميز Base64URL؛
+ولا يتم الاحتفاظ إلا بتجزئات الرموز. وتظل الرموز القديمة المكوّنة من 64 محرفًا سداسيًا عشرية
+قابلة للقراءة نحويًا للتوافق.
+راجع [ضوابط Video Bridge](../security/GUARDRAILS.md#video-bridge-videobridgets-videobridgepipelinets)
+للاطلاع على تفاصيل الموافقة والحصص واشتقاق المتغيرات.
 
 ### النسخ الاحتياطي والتصدير/الاستيراد
 
@@ -1477,19 +1517,19 @@ curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
 
 تحاكي نقاط النهاية هذه تنسيق API الخاص بـ Gemini للعملاء الذين يتوقعون توافقًا أصليًا مع SDK الخاص بـ Gemini.
 
-### واجهات برمجة التطبيقات الداخلية / واجهات برمجة تطبيقات النظام
+### واجهات برمجة التطبيقات الداخلية / واجهات النظام
 
-| Endpoint                 | Method | الوصف                                               |
+| Endpoint                 | Method | Description                                         |
 | ------------------------ | ------ | --------------------------------------------------- |
-| `/api/init`              | GET    | التحقق من تهيئة التطبيق (يُستخدم عند التشغيل الأول) |
-| `/api/tags`              | GET    | علامات نماذج متوافقة مع Ollama (لعملاء Ollama)      |
+| `/api/init`              | GET    | بدء خدمات المزامنة في الخلفية (مصادقة الإدارة)      |
+| `/api/tags`              | GET    | علامات النماذج المتوافقة مع Ollama (لعملاء Ollama)  |
 | `/api/restart`           | POST   | تشغيل إعادة تشغيل سلسة للخادم                       |
 | `/api/shutdown`          | POST   | تشغيل إيقاف تشغيل سلس للخادم                        |
-| `/api/system/env/repair` | POST   | إصلاح متغيرات بيئة مزوّد OAuth                      |
+| `/api/system/env/repair` | POST   | إصلاح متغيرات بيئة موفّر OAuth                      |
 | `/api/system/version`    | GET    | الإصدار الحالي/الأحدث، وحالة التحديث، وقناة الإصدار |
 | `/api/system/version`    | POST   | بدء تحديث يراعي عملية النشر إلى أحدث إصدار          |
 
-> **ملاحظة:** تُستخدم نقاط النهاية هذه داخليًا بواسطة النظام أو لتوفير التوافق مع عملاء Ollama. ولا يستدعيها المستخدمون النهائيون عادةً.
+> **ملاحظة:** تُستخدم نقاط النهاية هذه داخليًا بواسطة النظام أو لتوفير التوافق مع عميل Ollama. ولا يستدعيها المستخدمون النهائيون عادةً.
 
 ### إصلاح بيئة OAuth _(v3.6.1+)_
 

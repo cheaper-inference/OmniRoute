@@ -354,24 +354,24 @@ API Key: [จากแดชบอร์ด]
 
 ## 🚀 การปรับใช้
 
-### การติดตั้ง npm แบบส่วนกลาง (แนะนำ)
+### การติดตั้ง npm ทั่วโลก (แนะนำ)
 
 ```bash
 npm install -g omniroute
 
-# สร้างไดเรกทอรีการกำหนดค่า
+# Create config directory
 mkdir -p ~/.omniroute
 
-# สร้างไฟล์ .env (ดู .env.example)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# เริ่มต้นเซิร์ฟเวอร์
+# Start server
 omniroute
-# หรือใช้พอร์ตที่กำหนดเอง:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI จะโหลด `.env` จาก `~/.omniroute/.env` หรือ `./.env` โดยอัตโนมัติ
+CLI จะโหลด `.env` จาก `~/.omniroute/.env` หรือ `./.env` โดยอัตโนมัติ `./.env` ในไดเร็กทอรีการทำงานอาจตั้งค่าเฉพาะรายการคีย์ที่อนุญาตสั้นๆ เท่านั้น (การตั้งค่าพอร์ต, `REQUIRE_API_KEY`, ภาษา และสี) ใส่ทุกอย่างอื่นใน `~/.omniroute/.env` ดู [สัญญาการเปิดตัว CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env)
 
 ### โหมดถาดระบบ
 

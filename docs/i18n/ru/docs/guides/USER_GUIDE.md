@@ -356,24 +356,24 @@ codex "your prompt"
 
 ## 🚀 Развёртывание
 
-### Глобальная установка через npm (рекомендуется)
+### Глобальная установка npm (рекомендуется)
 
 ```bash
 npm install -g omniroute
 
-# Создайте каталог конфигурации
+# Create config directory
 mkdir -p ~/.omniroute
 
-# Создайте файл .env (см. .env.example)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# Запустите сервер
+# Start server
 omniroute
-# Или укажите пользовательский порт:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI автоматически загружает `.env` из `~/.omniroute/.env` или `./.env`.
+CLI автоматически загружает `.env` из `~/.omniroute/.env` или `./.env`. `./.env` в рабочем каталоге может устанавливать только короткий список разрешенных ключей (порты, `REQUIRE_API_KEY`, локаль и настройки цвета); все остальное поместите в `~/.omniroute/.env`. См. [контракты на запуск CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### Режим системного трея
 

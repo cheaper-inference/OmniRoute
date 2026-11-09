@@ -357,19 +357,19 @@ Model: cc/claude-opus-4-7
 ```bash
 npm install -g omniroute
 
-# Cipta direktori konfigurasi
+# Create config directory
 mkdir -p ~/.omniroute
 
-# Cipta fail .env (lihat .env.example)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# Mulakan pelayan
+# Start server
 omniroute
-# Atau dengan port tersuai:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI memuatkan `.env` secara automatik daripada `~/.omniroute/.env` atau `./.env`.
+CLI secara automatik memuatkan `.env` dari `~/.omniroute/.env` atau `./.env`. `./.env` dalam direktori kerja hanya boleh menetapkan senarai kekunci yang dibenarkan (port, `REQUIRE_API_KEY`, tempat dan tetapan warna); letak semua yang lain dalam `~/.omniroute/.env`. Lihat [kontrak pelancaran CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### Mod dulang
 

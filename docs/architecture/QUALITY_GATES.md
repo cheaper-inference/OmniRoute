@@ -594,8 +594,10 @@ complete candidate admission. CodeQL remains required on docs-only candidates.
 The policy in `config/quality/codeql-admission-policy.json` selects Actions,
 C/C++, JavaScript/TypeScript and Python, query suite default, remote threat model
 and build mode none. Producer preflight rejects a pending activation record and
-branches outside the explicit target list. The initial targets are main and
-release/v3.8.53; the next release needs reviewed onboarding. CI's existing broader
+branches outside the explicit target list. The current targets are main and
+release/v3.8.54. Contract tests compare this finite list and the maintenance push
+trigger with the package version; the next release needs reviewed onboarding.
+CI's existing broader
 release PR trigger is retained, but an unonboarded target reports HOLD before
 extraction rather than obtaining an unmeasured PASS.
 

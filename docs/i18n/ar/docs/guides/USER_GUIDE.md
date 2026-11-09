@@ -343,24 +343,24 @@ codex "your prompt"
 
 ## 🚀 النشر
 
-### التثبيت العام عبر npm (موصى به)
+### تثبيت npm عالمي (مستحسن)
 
 ```bash
 npm install -g omniroute
 
-# إنشاء دليل الإعدادات
+# Create config directory
 mkdir -p ~/.omniroute
 
-# إنشاء ملف .env (راجع .env.example)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# بدء تشغيل الخادم
+# Start server
 omniroute
-# أو باستخدام منفذ مخصص:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-تحمّل CLI ملف `.env` تلقائيًا من `~/.omniroute/.env` أو `./.env`.
+يقوم CLI تلقائيًا بتحميل `.env` من `~/.omniroute/.env` أو `./.env`. قد يقوم `./.env` في دليل العمل بتعيين قائمة مسموحة قصيرة فقط من المفاتيح (المنافذ، و `REQUIRE_API_KEY`، والإعدادات المحلية والألوان)؛ ضع كل شيء آخر في `~/.omniroute/.env`. انظر [عقود إطلاق CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### وضع صينية النظام
 

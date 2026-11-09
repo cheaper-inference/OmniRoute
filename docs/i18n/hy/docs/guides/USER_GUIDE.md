@@ -359,24 +359,24 @@ API բանալի՝ [կառավարման վահանակից]
 
 ## 🚀 Տեղակայում
 
-### npm-ի գլոբալ տեղադրում (խորհուրդ է տրվում)
+### Համաշխարհային npm տեղադրում (Առաջարկվում է)
 
 ```bash
 npm install -g omniroute
 
-# Ստեղծել կազմաձևման պանակը
+# Create config directory
 mkdir -p ~/.omniroute
 
-# Ստեղծել .env ֆայլը (տե՛ս .env.example)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# Գործարկել սերվերը
+# Start server
 omniroute
-# Կամ հատուկ պորտով՝
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI-ն ավտոմատ կերպով բեռնում է `.env`-ը `~/.omniroute/.env`-ից կամ `./.env`-ից։
+CLI ավտոմատ կերպով բեռնում է `.env` `~/.omniroute/.env` ից կամ `./.env`: Աշխատանքային գրացուցակում `./.env` կարող է սահմանել ստեղների միայն կարճ թույլատրելի ցուցակ (պորտ, `REQUIRE_API_KEY`, տեղայնություն և գույնի կարգավորումներ); մնացած ամեն ինչ դրեք `~/.omniroute/.env` ում: Տես [CLI գործարկման պայմանագրերը](CLI-LAUNCH-CONTRACTS.md#working-directory-env) :
 
 ### Համակարգային դարակի ռեժիմ
 

@@ -127,6 +127,27 @@ Avtomatik baholash har bir soʻrov uchun eng yaxshi provayder/modelni tanlaydi
 | `src/sse/handlers/chat.ts`                                | Integratsiya: auto prefiks uchun qisqa tutashuv        |
 | `src/shared/constants/providers.ts`                       | `SYSTEM_PROVIDERS.auto` tizim yozuvi                   |
 
+## Saqlangan avtomatik kombinatsiyalar uchun hisob sozlamalari
+
+Intelligent Auto muharriri ixtiyoriy taklif qiladi** Hisob sozlamalari** bo'limi. Har bir ulanish Afzal, Oddiy (standart), Zaxira yoki Cheklangan bo'lishi mumkin. Bir nechta ulanishlar bir darajani ulashishi mumkin. Avtomatik birinchi mos daraja ichida scoring/router xatti-harakatini saqlab qoladi; Muvaffaqiyatsiz urinishlar qolgan aniq hisoblarga to'g'ri keladi, zaxiradan oldin odatdagidan afzalroqdir. Cheklangan ulanishlar bu kombinatsiya tomonidan hech qachon ishlatilmaydi.
+
+Sozlama `config.accountPreferences` sifatida saqlanadi, ID ulanishi bilan kalitlanadi:
+
+```json
+{
+  "accountPreferences": {
+    "connection-a": "preferred",
+    "connection-b": "preferred",
+    "connection-c": "reserve",
+    "connection-d": "excluded"
+  }
+}
+```
+
+O'tkazib yuborilgan yoki bo'sh xarita mavjud marshrutni saqlab qoladi. Afzalliklar oʻchirilgan ulanishlarni yoqmaydi, API kalitiga ruxsat bermaydi, kvota boʻyicha bloklangan nomzodlarni tiklamaydi yoki byudjet tekshiruvlarini chetlab oʻtmaydi. Har bir urinish o'zining aniq ulanishi bilan cheklangan, shuning uchun hisobni qayta tiklash kombinatsiyalangan router orqasida bir darajaga o'ta olmaydi. Mavjud seans yaqinligi tegishli hisobni saqlab qolishi mumkin; hisoblarni jimgina o'zgartirish o'rniga aylanuvchi to'xtash joyiga bog'langan hisob bundan mustasno.
+
+Sozlangan afzalliklar hisob qaydnomasidan xabardor avtomatik yo'ldan foydalanadi: bog'lanmagan kontekst-kesh, smart-pipeline, tartibsizlik va soya yorliqlari yuborilmaydi. Bu soʻrovlar uchun spekulyativ xedjlash oʻchirib qoʻyilgan, shuning uchun zaxira hisoblar afzal qilinganlar bilan raqobatlasha olmaydi. Boshqa kombinatsiyalangan strategiyalar bu sozlamani izohlamaydi. Komboni Avtomatikdan uzoqroqqa o'zgartirish, keyinroq orqaga o'tish uchun saqlangan afzalliklarni saqlab qoladi.
+
 ## Haqiqiy Model Idʼiga Mos Keladigan Combo Nomlari
 
 `name` maydoni oddiy model idʼi bilan bir xil bo‘lgan combo (masalan,
@@ -193,36 +214,38 @@ Ikkita keng tarqalgan xato:
 
 Bu yerda hujjatlashtirilgan dastlabki chalkashlik haqida [#7992](https://github.com/diegosouzapw/OmniRoute/issues/7992) va [#7111](https://github.com/diegosouzapw/OmniRoute/issues/7111) ga qarang.
 
-## U qanday ishlaydi (saqlanadigan avtomatik kombinatsiyalar)
+## U qanday ishlaydi (doimiy avtomatik kombinatsiyalar)
 
-Avtomatik kombinatsiya mexanizmi har bir soʻrov uchun eng yaxshi provayder/modelni **16 omilli baholash funksiyasi** (`open-sse/services/autoCombo/scoring.ts` → `DEFAULT_WEIGHTS` ichida belgilangan) yordamida dinamik ravishda tanlaydi. Standart vaznlar yigʻindisi `1.0` ga teng; maxsus vaznlar `normalizeScoringWeights()` orqali qayta normallashtiriladi. Oʻn oltita omildan ikkitasi — `cacheAffinity` va `resetWindowAffinity` — standart holatda `0` vaznga ega; `reliability` `DEFAULT_WEIGHTS` ichida `0`, umumiy paketlarda esa `0.03` va `reliability-first` paketida `0.04` vaznga ega, `quality` esa paketlarda `0.02` (`quality-first` paketida `0.03`) vaznga ega: ular har bir nomzod uchun baribir hisoblanadi, `cacheAffinity` esa bahodan tashqarida prompt keshi deduplikatsiyasini boshqaradi, shu sababli standart vazni nol boʻlgan omillar sukut boʻyicha ovoz bermaydi, paketlarda esa ovoz beradi.
+Auto-Combo Engine dinamik ravishda a yordamida har bir so'rov uchun eng yaxshi provider/model tanlaydi **16 faktorli ball funksiyasi** ( `open-sse/services/autoCombo/scoring.ts` → `DEFAULT_WEIGHTS` da belgilangan). Standart og'irliklar `1.0` ga to'g'ri keladi; maxsus og'irliklar `normalizeScoringWeights()` tomonidan qayta normallashtiriladi. O'n oltita — `cacheAffinity` va `resetWindowAffinity` — ikkitasi `0` standart og'irligiga ega; `reliability` `DEFAULT_WEIGHTS` -da `0`, lekin `0.03` umumiy paketlarda va `0.04` `reliability-first`-da olib yuradi va `quality` `0.02` paketlarda olib boradi (`0.03` -da `quality-first`): ular hali ham har bir nomzod uchun hisoblab chiqiladi va `cacheAffinity` shlyuzlari baldan tashqari kesh-tekshirishni tezlashtiradi, shuning uchun nol-standart omillarni sukut bo'yicha ovoz bermaydi.
 
-![Avtomatik kombinatsiyaning 16 omilli baholash tizimi](../diagrams/exported/auto-combo-scoring.svg)
+![Auto-Combo 16-factor scoring](../diagrams/exported/auto-combo-scoring.svg)
 
-> Manba: [diagrams/auto-combo-scoring.mmd](../diagrams/auto-combo-scoring.mmd) (`npm run docs:render-diagrams` orqali qayta yarating). Fayl nomi tarixiy sabablarga koʻra shunday; manba va render qilingan diagrammada `DEFAULT_WEIGHTS` ichida eʼlon qilingan barcha 16 ta omil koʻrsatilgan.
+> Manba: [diagrams/auto-combo-scoring.mmd](../diagrams/auto-combo-scoring.mmd) ( `npm run docs:render-diagrams` orqali qayta tiklash). Fayl nomi tarixiy; manba va ko'rsatilgan diagramma `DEFAULT_WEIGHTS` da e'lon qilingan barcha 16 omillarni ko'rsatadi.
 
-| Omil                  | Standart vazn | Tavsif                                                                                                                                                                                                                                         |
-| :-------------------- | :------------ | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `quota`               | 0.1429        | Qolgan kvota / tezlik cheklovi zaxirasi [0..1]                                                                                                                                                                                                 |
-| `health`              | 0.1605        | Zanjir uzgichdan olingan holat bahosi (CLOSED=1.0, HALF_OPEN=0.5, OPEN=0.0)                                                                                                                                                                    |
-| `costInv`             | 0.1429        | **Aralash** xarajatning teskarisi (60% kirish + 40% chiqish tokeni narxi, normallashtirilgan) — arzonroq = yuqoriroq baho                                                                                                                      |
-| `latencyInv`          | 0.1143        | Pulga nisbatan normallashtirilgan p95 kechikishning teskarisi — tezroq = yuqoriroq baho                                                                                                                                                        |
-| `taskFit`             | 0.0762        | Vazifa turiga moslik (kodlash, tekshirish, rejalashtirish, tahlil, nosozliklarni tuzatish, hujjatlar)                                                                                                                                          |
-| `stability`           | 0.0476        | Kechikishning standart ogʻishiga asoslangan dispersiyaviy barqarorlik — javob vaqti keskin oʻzgarib turadigan nomzod pastroq baholanadi                                                                                                        |
-| `tierPriority`        | 0.0476        | Hisob darajasi ustuvorligi — Ultra=1.0, Pro=0.67, Standard=0.33, Free=0.0                                                                                                                                                                      |
-| `tierAffinity`        | 0.0476        | Nomzod darajasi va manifest tavsiya qilgan daraja oʻrtasidagi muvofiqlik                                                                                                                                                                       |
-| `specificityMatch`    | 0.0476        | Soʻrovning oʻziga xosligi (manifest koʻrsatmasi) va model darajasi oʻrtasidagi moslik                                                                                                                                                          |
-| `contextAffinity`     | 0.0476        | Soʻrovning kontekst oynasi ehtiyoji va modelning kontekst oynasi oʻrtasidagi muvofiqlik                                                                                                                                                        |
-| `sessionAvailability` | 0.0476        | Ushbu seans uchun nomzod ulanishining OAuth seansi mavjudligi (`getOAuthSessionAvailability()`; OAuth ishlatmaydigan ulanishlar 1.0 ball oladi)                                                                                                |
-| `connectionDensity`   | 0.0476        | Yuklamani bir xil provayder ulanishlari boʻylab taqsimlaydi (konsentratsiyaga qarshi)                                                                                                                                                          |
-| `cacheAffinity`       | 0.00          | Ushbu soʻrovning prompt keshi prefiksini saqlash ehtimoli eng yuqori boʻlgan ulanishga yoʻnaltiruvchi rendezvous-xesh muvofiqligi (`open-sse/services/combo/promptCacheAffinity.ts`); sukut boʻyicha oʻchirilgan (#8008)                       |
-| `resetWindowAffinity` | 0.00          | Kvotani tiklash oynasi qulay boʻlgan ulanishlar tomon ogʻish (sukut boʻyicha oʻchirilgan)                                                                                                                                                      |
-| `quality`             | 0.03          | Marshrutlash hodisalari sifati kuzatuvchisidan olingan, fikr-mulohazalarga asoslangan chiqish sifati signali; kuzatuvlarsiz nomzodlar neytral 0.5 qiymatini oladi                                                                              |
-| `reliability`         | 0.00          | Oʻnta namuna minimumidan keyingi 24 soatlik foydalanish tarixidan olingan kuzatilgan muvaffaqiyat ulushi, `1 - failureRate` (aks holda real vaqt koʻrsatkichlari); kuzatuvlarsiz nomzodlar 1.0 sifatida baholanadi. Sukut boʻyicha oʻchirilgan |
+| Omil                  | Standart vazn | Tavsif                                                                                                                                                                                                                                       |
+| :-------------------- | :------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `quota`               | 0.1429        | Qolgan kvota / tarif chegarasi bo'sh joy [0..1]                                                                                                                                                                                              |
+| `health`              | 0.1605        | O'chirish to'xtatuvchisidan olingan salomatlik ko'rsatkichi (CLOSED= 1,0, HALF_OPEN= 0,5, OPEN= 0,0)                                                                                                                                         |
+| `costInv`             | 0.1429        | Teskari **aralashtiriladi** xarajat (60% kirish + 40% chiqish tokeni narxi, normallashtirilgan) — arzonroq = yuqori ball                                                                                                                     |
+| `latencyInv`          | 0.1143        | — tezroq = yuqori ball olish uchun teskari p95 kechikish normallashtirildi                                                                                                                                                                   |
+| `taskFit`             | 0.0762        | Vazifa tipidagi fitnes (kodlash, ko'rib chiqish, rejalashtirish, tahlil qilish, disk raskadrovka, hujjatlar)                                                                                                                                 |
+| `stability`           | 0.0476        | Javob berish vaqti pastroq ballga ega bo'lgan nomzod uchun kechikish standart og'ishi — dan farqga asoslangan barqarorlik                                                                                                                    |
+| `tierPriority`        | 0.0476        | Hisob darajasidagi ustuvorlik — Ultra = 1.0, Pro = 0.67, Standard = 0.33, Bepul = 0.0                                                                                                                                                        |
+| `tierAffinity`        | 0.0476        | Nomzod darajasi va manifest tomonidan tavsiya etilgan daraja o'rtasidagi yaqinlik                                                                                                                                                            |
+| `specificityMatch`    | 0.0476        | So'rovning o'ziga xosligi (manifest maslahati) va model darajasi o'rtasidagi moslik                                                                                                                                                          |
+| `contextAffinity`     | 0.0476        | So'rovning kontekst oynasi ehtiyoji va modelning kontekst oynasi o'rtasidagi yaqinlik                                                                                                                                                        |
+| `sessionAvailability` | 0.0476        | OAuth sessiyasida ushbu sessiya uchun nomzod ulanishining mavjudligi (`getOAuthSessionAvailability()`; OAuth boʻlmagan ulanishlar balli 1.0)                                                                                                 |
+| `connectionDensity`   | 0.0476        | Bir xil provayderning ulanishlari bo'ylab yukni tarqatadi (kontsentratsiyaga qarshi)                                                                                                                                                         |
+| `cacheAffinity`       | 0.00          | Ushbu soʻrovning prompt keshi prefiksini saqlash ehtimoli eng yuqori boʻlgan ulanishga yoʻnaltiruvchi rendezvous-xesh muvofiqligi (`open-sse/services/combo/promptCacheAffinity.ts`); sukut boʻyicha oʻchirilgan (#8008)                     |
+| `resetWindowAffinity` | 0.00          | Kvotani tiklash oynasi qulay bo'lgan ulanishlarga nisbatan moyillik (sukut bo'yicha o'chirilgan)                                                                                                                                             |
+| `quality`             | 0.03          | Marshrutlash hodisasi sifati kuzatuvchisidan fikr-mulohazaga asoslangan chiqish sifati signali; Kuzatuvsiz nomzodlar neytral 0,5 ball oladi                                                                                                  |
+| `reliability`         | 0.00          | Kuzatilgan muvaffaqiyat ulushi, `1 - failureRate`, 24 soatlik foydalanish tarixidan o'nta namunali qavat ortida (real vaqt ko'rsatkichlari aks holda); hech qanday kuzatuvi bo'lmagan nomzodlar 1,0 deb o'qiladi. Sukut bo'yicha o'chirilgan |
 
-`quality` (`open-sse/services/routing/quality.ts`): `cold restart → ∅`; `observations = 0 → score 0.5`.
+Xotiradagi `quality` kuzatuvchisi (`open-sse/services/routing/quality.ts`) sovuq qayta ishga tushirilgandan so'ng bo'sh, shuning uchun har bir nomzod birinchi kuzatuvlar qo'nguncha neytral `0.5` ball oladi.
 
-**Yigʻindi:** `DEFAULT_WEIGHTS` ichida eʼlon qilinganidek, `0.1429 + 0.1605 + 0.1429 + 0.1143 + 0.0762 + (7 × 0.0476) + 0.00 + 0.00 + 0.03 + 0.00 = 1.0`; foydalanuvchi sozlagan vaznlar baholashdan oldin `normalizeScoringWeights()` orqali taqsimotga qayta normallashtiriladi.
+> **O'qib bo'lmaydigan kvota (#15347).** Agar provayderda kvota oluvchi bo‘lsa, lekin u o‘qib bo‘lmaydigan hech narsani qaytarmasa (muvaffaqiyatsiz qabul qilish, etishmayotgan hisobga olish ma’lumotlari, faqat xabardan foydalanish yoki tahlil qilinadigan `windows` va chekli `percentUsed` bo‘lmagan noto‘g‘ri shakllangan surat, shu jumladan `percentUsed: null`), nomzod `quota` o‘qi bo‘yicha `0` ball qo‘yadi va uning yakuniy bahosi `UNREADABLE_QUOTA_SOFT_DEPRIORITIZE_FACTOR` ga bir xil bo‘ladi ( `autoStrategy.ts`) ko‘paytiriladi. ulanish holati penalti sifatida yumshoq jazo namunasi. Muvaffaqiyatsiz foydalanish o'qilishi provayder emas, telemetriya haqida dalildir, shuning uchun u har qanday haqiqiy o'qishdan, jumladan, tasdiqlangan 100%-used qat'iy pastda turadi, lekin hech qachon qattiq bloklanmaydi yoki chiqarib tashlanmaydi. Cheksiz provayder `unlimited: true` hisobot beradi va to'liq kvota sifatida ball oladi; ro'yxatdan o'tgan kvota oluvchisi bo'lmagan provayderda telemetriya manbalari umuman yo'q va `100` standartini saqlaydi.
+
+**Yig'indi:** `DEFAULT_WEIGHTS` e'lon qilingan `0.1429 + 0.1605 + 0.1429 + 0.1143 + 0.0762 + (7 × 0.0476) + 0.00 + 0.00 + 0.03 + 0.00 = 1.0` ; foydalanuvchi tomonidan sozlangan og'irliklar ball qo'yishdan oldin `normalizeScoringWeights()` tomonidan taqsimotga qayta normallashtiriladi.
 
 ## Rejim paketlari
 
@@ -333,24 +356,13 @@ OmniRoute'ning kombinatsiya mexanizmi **20 ta marshrutlash strategiyasini** qoʻ
 Qatʼiy rotatsiya uchun `round-robin`dan foydalaning; `weighted`da teng vaznlar qatʼiy
 emas, statistik muvozanatni taʼminlaydi.
 
-### Agentik konveyer rejimi
+### Agent quvuri rejimi
 
-Kamida ikkita modelga ega `pipeline` kombinatsiyasi
-`config.agenticOrchestration.enabled` orqali rejalashtiruvchi/bajaruvchi marshrutlashini
-yoqishi mumkin. Birinchi maqsad rejalashtirish va yakuniy javoblar uchun javob beradi;
-ikkinchi maqsad mijozga xos vosita chaqiruvlarini chiqaradi. OmniRoute soʻrov
-protokolidan vosita natijasi davomlarini aniqlaydi, rejalashtiruvchidan yana bir vosita
-bosqichi kerak yoki kerak emasligini soʻraydi va mijozga koʻrinadigan yakuniy bosqich
-sifatida bajaruvchi yoki rejalashtiruvchini dinamik tarzda tanlaydi.
+Kamida ikkita modelga ega `pipeline` kombinati `config.agenticOrchestration.enabled` bilan planner/executor marshrutlashni tanlashi mumkin. Birinchi maqsad rejalashtirish va yakuniy javoblarga ega; ikkinchi maqsad mijozga tegishli vosita qo'ng'iroqlarini chiqaradi. OmniRoute so'rov protokolidan asbob-natijalar davomini aniqlaydi, rejalashtiruvchidan boshqa asboblar raundiga ehtiyoj bor-yo'qligini so'raydi va dinamik ravishda ijrochi yoki rejalashtiruvchini mijoz oldida turgan yakuniy bosqichga aylantiradi.
 
-Ikkinchi maqsaddan keyingi qoʻshimcha modellar tartiblangan zaxira bajaruvchilardir.
-Muvaffaqiyatsiz HTTP javobi yoki transport istisnosi keyingi bajaruvchiga oʻtadi va
-ayni rejalashtiruvchi qarori hamda mahalliy vositalarni saqlab qoladi, biroq oʻsha
-bajaruvchining oʻz bosqich koʻrsatmasi va aniqlangan ulanishidan foydalanadi. Birinchi
-muvaffaqiyatli javob oʻzgartirilmasdan qaytariladi, jumladan SSE oqimi ham; muvaffaqiyatli
-oqim boshlangandan keyingi xatoliklarni bu yerda qayta urinish orqali bajarib boʻlmaydi.
-Agar barcha bajaruvchilar muvaffaqiyatsiz boʻlsa, oxirgi xatolik qaytariladi. Mijoz
-tomonidan bekor qilish joʻnatishni toʻxtatadi.
+Asboblar natijalarini davom ettirishda OmniRoute, shuningdek, ketma-ket bajarilgan ikkita raund bir xil asbob qo'ng'iroqlarini o'zgarmagan natijalar bilan takrorlaganda yoki ketma-ket ikkita raundda har bir aniq belgilangan natija muvaffaqiyatsizlikka uchraganda bajarishni to'xtatadi. O'zgartirilgan natijalar takroriy qo'ng'iroqlarga ruxsat beradi (masalan, so'rov). Qo'riqchi yangi foydalanuvchi so'roviga ko'ra qayta tiklanadi, parallel qo'ng'iroqlarni bir turga guruhlaydi va Anthropic, Chat yakunlari, Javoblar va Gemini tarixini qo'llab-quvvatlaydi. Rejalashtiruvchi sababni oladi va boshqa vosita turini talab qilsa ham yakuniy javobga ega bo'ladi.
+
+Ikkinchi nishondan keyin qo'shimcha modellar buyurtma qilingan ijrochi zahiralari. Muvaffaqiyatsiz HTTP javobi yoki transport istisnosi keyingi ijrochiga o'tadi, u bir xil rejalashtiruvchi qarori va mahalliy vositalarni olib yuradi, lekin ijrochining o'z qadami tezkor va hal qilingan ulanish. Birinchi muvaffaqiyatli javob o'zgarmagan holda qaytariladi, shu jumladan SSE oqimi; Muvaffaqiyatli oqim boshlanganidan keyin yuzaga kelgan nosozliklarni bu yerda qayta urinib bo‘lmaydi. Agar barcha ijrochilar muvaffaqiyatsiz bo'lsa, oxirgi muvaffaqiyatsizlik qaytariladi. Mijoz jo'natishni to'xtatadi.
 
 ```json
 {
@@ -362,12 +374,7 @@ tomonidan bekor qilish joʻnatishni toʻxtatadi.
 }
 ```
 
-Bajaruvchi bitta javobda bir nechta mustaqil chaqiruv chiqarishi mumkin. Bogʻliq chaqiruvlar
-mijozning keyingi vosita natijasi bosqichlarida qayta ishlanadi va rejalashtiruvchi har bir
-natijani koʻrib chiqadi. `maxToolRounds`ning standart qiymati `8` boʻlib, `1`–`32`
-oraligʻidagi qiymatlarni qabul qiladi; chegaraga yetilgach, rejalashtiruvchi mavjud eng
-yaxshi yakuniy javobni yaratishi kerak. Rejalashtiruvchining ichki qarorlari buferlanadi,
-mijozga koʻrinadigan tanlangan javob esa asl oqim uzatish afzalligini saqlab qoladi.
+Ijrochi bir javobda bir nechta mustaqil qo'ng'iroqlarni chiqarishi mumkin. Bog'liq qo'ng'iroqlar mijozning asbob-natijalarining keyingi navbatlarida ko'rib chiqiladi, rejalashtiruvchi har bir natijani ko'rib chiqadi. `maxToolRounds` sukut bo'yicha `8` ga o'rnatiladi va `1`–`32` ni qabul qiladi; erishgandan so'ng, rejalashtiruvchi eng yaxshi mavjud yakuniy javobni ishlab chiqishi kerak. Ichki rejalashtirish qarorlari buferlanadi, tanlangan mijozga qaratilgan javob esa asl oqim afzalligini saqlab qoladi.
 
 ### `round-robin`ning biriktirilgan toʻplami va hisoblarni kengaytirish
 

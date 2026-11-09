@@ -351,37 +351,22 @@ Content-Type: application/json
 }
 ```
 
-Mavjud provayderlar qatoriga OpenAI (GPT Image 2), xAI (Grok Image), Together AI (FLUX), Fireworks AI, Nebius (FLUX), Hyperbolic, NanoBanana, **OpenRouter**, **ZenMux**, SD WebUI (mahalliy), ComfyUI (mahalliy) kiradi.
+Mavjud provayderlar orasida OpenAI (GPT Image 2), xAI (Grok Image), Together AI (FLUX), Fireworks AI, Nebius (FLUX), Hyperbolic, NanoBanana,**OpenRouter** ,**ZenMux** , SD WebUI (mahalliy), ComfyUI (mahalliy).
 
-`n` qiymati `data[]` ichida `n` ta tasvirni qaytaradi. Yuqori oqim APIʼsi har bir chaqiruvda bitta tasvir qaytaradigan provayderlar
-(Black Forest Labs, Stability AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik,
-NVIDIA NIM, Cloudflare Workers AI) uchun yuqori oqimga `n` ta alohida chaqiruv yuboriladi, bir vaqtda ko‘pi bilan 4 tasi bajariladi. Belgilangan
-`seed` qiymati chaqiruv indeksi bo‘yicha siljitiladi (`seed`, `seed + 1`, …), shuning uchun tasvirlar farq qiladi, ammo ularni
-qayta hosil qilish mumkin bo‘lib qoladi. `n` qiymati ko‘pi bilan 10 bo‘lishi mumkin. Agar chaqiruvlardan birortasi muvaffaqiyatsiz tugasa, butun so‘rov
-muvaffaqiyatsiz hisoblanadi. Parallel tarqatish formatlari ro‘yxati `open-sse/handlers/imageGeneration/fanOut.ts`
-faylidagi `SINGLE_IMAGE_FANOUT_FORMATS` ichida joylashgan.
+`n` `data[]` dagi `n` tasvirlarini qaytaradi. Yuqori oqim API har bir qo‘ng‘iroq uchun bitta tasvirni qaytaradigan provayderlar (Black Forest Labs, Stability AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik, NVIDIA NIM, Cloudflare Workers AI) parvozda `n` alohida yuqori oqim qo‘ng‘iroqlarini oladilar. Ruxsat etilgan `seed` qo'ng'iroq indeksi (`seed`, `seed + 1`, …) bilan ofset qilinadi, shuning uchun tasvirlar farqlanadi, lekin takrorlanishi mumkin. `n` 10 bilan chegaralangan. Har qanday qo'ng'iroq bajarilmasa, so'rov umuman bajarilmaydi. Fan-out formatlari ro'yxati `open-sse/handlers/imageGeneration/fanOut.ts` ichida `SINGLE_IMAGE_FANOUT_FORMATS`.
 
-ZenMux mavjud API kaliti ulanishidan qayta foydalanadi va `zenmux/` yoki `zm/` prefikslarini qabul qiladi:
+ZenMux mavjud API-kalit ulanishidan qayta foydalanadi va `zenmux/` yoki `zm/` prefikslarini qabul qiladi:
 
-- `zenmux/openai/gpt-image-2` ZenMuxʼning OpenAI Images APIʼsidan foydalanadi. Parametrlarga `size`,
-  `quality`, `n`, `output_format`, `output_compression`, `background` va `response_format` kiradi.
-- `zm/meta/muse-image-1.0` kabi boshqa nashriyotchilar ZenMuxʼning Vertex AI `:predict`
-  so‘nggi nuqtasidan foydalanadi. `n` — `sampleCount` ga, `aspect_ratio` — `aspectRatio` ga, `image_size`
-  (`1K`, `2K`, `4K`) esa `sampleImageSize` ga mos keladi. Piksellarda berilgan `size` faqat tomonlar nisbatini belgilaydi,
-  aniq piksel o‘lchamlari kafolatlanmaydi. Qo‘llab-quvvatlanadigan nisbatlar, aniqliklar va miqdorlar modelga qarab farq qiladi.
-- `zm/inclusionai/ming-image-0.1-design` o‘z o‘lchamlarini o‘zi tanlaydi. `size`,
-  `aspect_ratio` va `image_size` ni ko‘rsatmang; aniq qiymatlar HTTP 400 javobini qaytaradi. PNG, JPEG va WebP
-  formatlarini `output_format` orqali so‘rash mumkin.
+- `zenmux/openai/gpt-image-2` ZenMux ning OpenAI Tasvirlaridan API foydalanadi. Variantlar orasida `size`, `quality`, `n`, `output_format`, `output_compression`, `background` va `response_format` mavjud.
+- `zm/meta/muse-image-1.0` kabi boshqa noshirlar ZenMux ning Vertex AI `:predict` oxirgi nuqtasidan foydalanadilar. `n` xaritalarini `sampleCount`, `aspect_ratio` dan `aspectRatio` ga va `image_size` (`1K`, `2K`, `4K`) dan `sampleImageSize`. Piksel `size` kafolatlangan piksel o'lchamlarini emas, faqat tomonlar nisbatini ta'minlaydi. Qo'llab-quvvatlanadigan nisbatlar, ruxsatlar va hisoblashlar modelga qarab farq qiladi.
+- `zm/inclusionai/ming-image-0.1-design` o'zining o'lchamlarini tanlaydi. `size`, `aspect_ratio` va `image_size` tashlab qo'ying ; aniq qiymatlar HTTP 400 ni qaytaradi. PNG, JPEG va WebP `output_format` bilan so'ralishi mumkin.
 
-Bu integratsiya matndan tasvir yaratishni qo‘llab-quvvatlaydi, namuna tasvirni tahrirlashni emas. Vertex
-chiqishi `data[].b64_json` ko‘rinishiga meʼyorlashtiriladi; `response_format: "url"` yuqori oqimdagi
-HTTPS URLʼni yoki faqat tasvir baytlari mavjud bo‘lsa, base64 maʼlumotlar URLʼini qaytaradi. Bo‘sh yoki filtrlab tashlangan chiqishlar
-bo‘sh muvaffaqiyatli javob o‘rniga xato qaytaradi. Modellardan foydalanish imkoniyati ZenMux hisobiga bog‘liq.
-[ZenMux Vertex APIʼsi](https://docs.zenmux.ai/api/vertexai/generate-images) va
-[OpenAI Images API](https://docs.zenmux.ai/api/openai/generate-an-image) hujjatlariga qarang.
+Ushbu integratsiya mos yozuvlar tasvirini tahrirlashni emas, balki matndan tasvirga yaratishni qo'llab-quvvatlaydi. Vertex chiqishi `data[].b64_json` ga normallashtiriladi; `response_format: "url"` faqat tasvir baytlari mavjud bo'lganda yuqori oqim HTTPS URL yoki base64 ma'lumotlar URL qaytaradi. Empty/filtered natijalari bo'sh muvaffaqiyat emas, balki xatoni qaytaradi. Modelga kirish ZenMux hisobiga bog'liq. [ZenMux ning Vertex API](https://docs.zenmux.ai/api/vertexai/generate-images) va [OpenAI Tasvirlariga qarang API](https://docs.zenmux.ai/api/openai/generate-an-image).
+
+Microsoft 365 Copilot kirish ulanishi Copilot ning oʻrnatilgan tasvir vositasi orqali `copilot-m365-web/m365-copilot-image` xizmat qiladi: har bir rasm uchun bir Copilot burilish (`n` 1–4), `size` faqat yoʻnalishni boshqaradi va inline sifatida qaytarilgan tasvirlar (`b64_json` yoki `response_format: "url"` uchun maʼlumotlar URL ). Qarang: [Microsoft 365 Copilot](../providers/COPILOT-M365.md#image-generation).
 
 ```bash
-# Barcha tasvir modellarini ro‘yxatlash
+# List all image models
 GET /v1/images/generations
 ```
 
@@ -816,18 +801,19 @@ yaratish paytidagi `input_file_id` tekshiruvi uchun). `GET /v1/batches` anonim c
 
 ---
 
-## Qidiruv API’si
+## Qidiruv API
 
-Web/qidiruv provayderlari abstraksiyasi (Tavily, Brave, Exa, Serper va boshqalar).
+Web/search provayderi abstraktsiyasi (Tavily, Brave, Exa, Serper va boshqalar).
 
-| Metod | Yo‘l                   | Tavsif                                                                                                          |
-| ----- | ---------------------- | --------------------------------------------------------------------------------------------------------------- |
-| GET   | `/v1/search`           | Sozlangan qidiruv provayderlari va imkoniyatlarini ro‘yxatlash                                                  |
-| POST  | `/v1/search`           | Qidiruv so‘rovini bajarish — `v1SearchSchema` orqali tekshiriladi, keshlash/birlashtirishni qo‘llab-quvvatlaydi |
-| GET   | `/v1/search/analytics` | Har bir provayder bo‘yicha natija/kechikish/kesh statistikasi                                                   |
+| Usul | Yo'l                   | Tavsif                                                                                                                      |
+| ---- | ---------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| GET  | `/v1/search`           | Konfiguratsiya qilingan qidiruv provayderlarining + imkoniyatlarini ro'yxatlang                                             |
+| POST | `/v1/search`           | `v1SearchSchema` tomonidan tasdiqlangan — tanasi qidiruv so'rovini ishga tushiring , caching/coalescing qo'llab-quvvatlaydi |
+| GET  | `/v1/search/analytics` | Har bir provayder bo'yicha hit/latency/cache statistikasi                                                                   |
 
-**Autentifikatsiya:** Bearer API kaliti (`extractApiKey` + `isValidApiKey`). Qidiruv siyosati
-`enforceApiKeyPolicy` orqali qo‘llanadi.
+**Muallif:** Tashuvchi API kaliti (`extractApiKey` + `isValidApiKey`). Qidiruv siyosati `enforceApiKeyPolicy` orqali amalga oshiriladi.
+
+**Auto-select:** without `provider`, the cheapest provider with a configured connection runs first and the next cheapest is the failover. Free last-resort providers (`duckduckgo-free`) are used only when nothing else is configured. A self-hosted SearXNG counts as configured once its connection stores a real `baseUrl` (not the catalog default `http://localhost:8888/search`): it then ranks as a $0 provider ahead of keyed ones, with the cheapest keyed provider as failover, including when SearXNG answers 400, 401, 403 or 404. A `baseUrl` that is not a valid `http(s)` URL or that points at a cloud-metadata address does not count. A SearXNG connection that stores a token ranks this way only over `https://` or loopback `http://`. Over remote plain `http://` it is never a failover and stays a last resort, used only when no other provider is configured or when requested by name, so it does send the token in cleartext in those two cases.
 
 ### Exa va Tavily `provider_options`
 
@@ -998,32 +984,28 @@ ikki marta yuborilmasligi uchun `needs_confirmation` holatida yakunlanadi. Manba
 
 ---
 
-## O‘z-o‘ziga xizmat ko‘rsatishdan foydalanish (`/api/usage/om-usage`)
+## O'z-o'ziga xizmat ko'rsatish (`/api/usage/om-usage`)
 
-Har qanday API kaliti **o‘zining** foydalanishi va kvotalarini o‘qishi mumkin — boshqaruv autentifikatsiyasi
-talab qilinmaydi. Bu mijoz (CLI, OmniCopilot paneli) kalit egasiga uning sarf-xarajatlarini ko‘rsatish
-uchun foydalanadigan endpointdir.
+Har qanday API kaliti o'qiy oladi **o'zining** foydalanish va kvotalar — boshqaruv auth yo'q. Bu mijoz (CLI, OmniCopilot paneli) kalit egasiga sarflagan xarajatlarini ko'rsatish uchun foydalanadigan oxirgi nuqtadir.
 
 ```bash
-# Matnli shakl (tarixiy shartnoma — terminal uchun oddiy matn)
+# Text form (the historical contract — plain text for a terminal)
 curl -H "Authorization: Bearer <your-api-key>" \
   http://localhost:20128/api/usage/om-usage
 
-# Strukturaviy shakl — UI iste’mol qiladigan ko‘rinish
+# Structured form — what a UI consumes
 curl -H "Authorization: Bearer <your-api-key>" \
   "http://localhost:20128/api/usage/om-usage?format=json"
 ```
 
-Kalitda **`allowUsageCommand`** yoqilgan bo‘lishi kerak (sukut bo‘yicha o‘chiq — dashboard’dagi API-kalit
-menejeri uni har bir kalit uchun alohida o‘zgartiradi). U yoqilmagan bo‘lsa, endpoint `403` javobini qaytaradi.
+Kalitda bo'lishi kerak **`allowUsageCommand`** yoqilgan (standart bo'yicha o'chirilgan — asboblar panelidagi API-kalit menejeri uni har bir tugmachaga almashtiradi). Usiz oxirgi nuqta `403` javob beradi.
 
-`?format=json` ajratilgan shaklni qaytaradi, shuning uchun chaqiruvchi rad etilgan javobdan hech qachon
-ma’lumot maydonini o‘qimaydi. Muvaffaqiyatli javob:
+`?format=json` diskriminatsiyalangan shaklni qaytaradi, shuning uchun qo'ng'iroq qiluvchi hech qachon rad etilgan ma'lumotlar maydonini o'qimaydi. Muvaffaqiyat haqida:
 
 ```jsonc
 {
   "allowed": true,
-  // faqat kalit har bir kalit uchun foydalanish cheklovlarini (kunlik/haftalik USD) yoqqanida mavjud:
+  // present only when the key opted into per-key usage limits (daily/weekly/5-hour USD):
   "personal": {
     "dailySpentUsd": 1.25,
     "dailyLimitUsd": 5,
@@ -1032,9 +1014,9 @@ ma’lumot maydonini o‘qimaydi. Muvaffaqiyatli javob:
     "weeklyLimitUsd": 20,
     "weeklyResetAtIso": "…" /* … */,
   },
-  // tanlangan provayder kvotasi holati yoki hali hech narsa keshlanmaganida null:
+  // the selected provider quota snapshot, or null when nothing is cached yet:
   "provider": { "connectionId": "…", "provider": "claude", "plan": "…", "quotas": {/* … */} },
-  // har bir ulanishning holati, shunda UI bir nechta provayderni yonma-yon ko‘rsatishi mumkin:
+  // every connection's snapshot, so a UI can render several providers side by side:
   "providers": [
     { "connectionId": "…", "provider": "claude" /* … */ },
     { "provider": "codex" /* … */ },
@@ -1042,13 +1024,9 @@ ma’lumot maydonini o‘qimaydi. Muvaffaqiyatli javob:
 }
 ```
 
-Rad etilganda (`401` noto‘g‘ri kalit / `403` ruxsat berilmagan) xuddi shu yo‘nalish
-`{ "allowed": false, "error": { "message": "…" } }` javobini qaytaradi — mavjud, ammo bo‘sh
-`personal`/`provider` (kalitga ruxsat berilgan, hali hech narsa aniqlanmagan) rad etishdan boshqa holatdir
-va faqat JSON shakli ularni farqlaydi.
+Rad etilganda (`401` noto'g'ri kalit / `403` ruxsat etilmaydi) xuddi shu marshrut `{ "allowed": false, "error": { "message": "…" } }` — mavjud-lekin bo'sh `personal`/`provider` (kalitga ruxsat berilgan, hali hech narsa o'rganilmagan) qaytaradi rad etishdan boshqa holat va faqat JSON shakli ularni ajratib turadi.
 
-**Autentifikatsiya:** chaqiruvchining o‘z Bearer API kaliti, `isValidApiKey` bilan tekshiriladi — bu
-`requireManagementAuth` himoyasida qoladigan boshqaruv interfeysi (`/api/keys/…`) **emas**.
+**Muallif:** qo'ng'iroq qiluvchining o'z Bearer API kaliti, `isValidApiKey` — bilan tasdiqlangan, bu `requireManagementAuth` orqasida qoladigan boshqaruv yuzasi (`/api/keys/…`) emas.
 
 ### Xom va chegara bo‘yicha moslashtirilgan kvota foizlari
 
@@ -1301,40 +1279,41 @@ Implementatsiya: `src/lib/modelCapabilities.ts` ichidagi `getResolvedModelCapabi
 | `/api/usage/model-latency-stats` | GET             | Provayder/model bo‘yicha sirpanma kechikishlar yig‘indisi (avg/p50/p95/p99, muvaffaqiyat darajasi); filtrlar: `windowHours`/`minSamples`/`maxRows`/`provider`/`model` (#6873)                                                                                                                                                         |
 | `/api/usage/cache-health`        | GET             | `call_logs` bo‘yicha prompt-kesh holati xulosasi — yozish/o‘qish nisbati, p50/p90/p99 yozish hajmi taqsimoti, katta yozishlar konsentratsiyasi, model bo‘yicha ajratish va `healthy`/`degraded`/`thrash`/`no-data` bahosi; so‘rov parametrlari `range` (`1h`\|`24h`\|`7d`\|`30d`, standart qiymat `24h`) va ixtiyoriy `model` (#8827) |
 
-### API kaliti ruxsatlari
+### API kalit ruxsatnomalari
 
-`PATCH /api/keys/{id}` mavjud kalit ruxsatlarini yangilaydi. Har bir `/api/keys*` yo‘nalishi kabi, unga boshqaruv avtorizatsiyasi kerak ([Boshqaruv autentifikatsiyasi](../guides/MANAGEMENT-AUTH.md) bo‘limiga qarang), inference kaliti emas. Faqat o‘zgartirmoqchi bo‘lgan maydonlarni yuboring; ulardan hech biri bo‘lmagan so‘rov `No valid fields to update` xatosi bilan rad etiladi. Qabul qilinadigan maydonlar `src/shared/validation/schemas/keys.ts` dagi `updateKeyPermissionsSchema` tomonidan belgilanadi.
+`PATCH /api/keys/{id}` mavjud kalit ruxsatnomalarini yangilaydi. Har bir `/api/keys*` marshruti kabi, u xulosa kaliti emas, boshqaruv avtorizatsiyasiga muhtoj (qarang: [Boshqaruv autentifikatsiyasi](../guides/MANAGEMENT-AUTH.md) ). Faqat o'zgartirmoqchi bo'lgan maydonlarni yuboring; ularning hech biri bilan so'rov `No valid fields to update` bilan rad etiladi. Qabul qilingan maydonlar `src/shared/validation/schemas/keys.ts` da `updateKeyPermissionsSchema` tomonidan belgilanadi.
 
-| Maydon                                      | Turi                                                                                 | Izohlar                                                                                                                                                                          |
-| ------------------------------------------- | ------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `name`                                      | string, 1-200 ta belgi                                                               |                                                                                                                                                                                  |
-| `isActive`                                  | boolean                                                                              |                                                                                                                                                                                  |
-| `isBanned`                                  | boolean                                                                              |                                                                                                                                                                                  |
-| `expiresAt`                                 | ISO 8601 sana-vaqti yoki `null`                                                      | `null` amal qilish muddatini tozalaydi                                                                                                                                           |
-| `modelAccessMode`                           | `all` \| `restricted`                                                                | Rejim `all` bo‘lganda `allowedModels` bo‘sh bo‘lishi kerak                                                                                                                       |
-| `allowedModels`, `blockedModels`            | satrlar massivi, 1000 tagacha                                                        |                                                                                                                                                                                  |
-| `allowedCombos`                             | satrlar massivi, 500 tagacha                                                         | Kalit chaqirishi mumkin bo‘lgan kombinatsiyalarni cheklaydi; bevosita modellar `modelAccessMode` / `allowedModels` orqali boshqariladi                                           |
-| `connectionAccessMode`                      | `all` \| `restricted`                                                                | `restricted` bo‘lganda `allowedConnections` bo‘sh bo‘lmasligi, `all` bo‘lganda esa bo‘sh bo‘lishi kerak                                                                          |
-| `allowedConnections`                        | UUIDlar massivi, 100 tagacha                                                         |                                                                                                                                                                                  |
-| `allowAutoCombos`                           | boolean                                                                              | `false` ushbu kalit bilan `auto/*` modellariga yuborilgan so‘rovlarni rad etadi; buni hech qachon o‘rnatmagan kalitlarga ruxsat beriladi                                         |
-| `catalogScope`                              | `all` \| `combos` \| `models`                                                        | Ushbu kalit uchun `GET /v1/models` nimani ko‘rsatishini belgilaydi (faqat kombinatsiyalar, faqat modellar yoki ikkalasi); bu kalit nimani chaqirishi mumkinligini o‘zgartirmaydi |
-| `forcedModel`                               | 300 tagacha belgidan iborat satr yoki `null`                                         | Chat so‘rovlarini `X-Route-Model` va `body.model` ustidan ushbu model/kombinatsiyaga yo‘naltiradi; kalit cheklovlari baribir amal qiladi                                         |
-| `noLog`, `autoResolve`                      | boolean                                                                              |                                                                                                                                                                                  |
-| `throttleDelayMs`                           | butun son, 0-300000                                                                  |                                                                                                                                                                                  |
-| `maxSessions`                               | butun son, 0-10000                                                                   |                                                                                                                                                                                  |
-| `rateLimits`                                | `{ limit, window }` obyektlari massivi (musbat butun sonlar, 50 tagacha) yoki `null` | `null` cheklovlarni tozalaydi                                                                                                                                                    |
-| `accessSchedule`                            | jadval obyekti yoki `null`                                                           | `null` jadvalni tozalaydi                                                                                                                                                        |
-| `scopes`                                    | satrlar massivi, 32 tagacha                                                          |                                                                                                                                                                                  |
-| `allowedEndpoints`                          | satrlar massivi, 20 tagacha                                                          |                                                                                                                                                                                  |
-| `streamDefaultMode`                         | `legacy` \| `json`                                                                   |                                                                                                                                                                                  |
-| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                                 | [Kalit bo‘yicha keshni chetlab o‘tish](#per-key-cache-bypass) bo‘limiga qarang                                                                                                   |
-| `compressionEnabled`                        | boolean                                                                              |                                                                                                                                                                                  |
-| `codexServiceMode`                          | Codex xizmat rejimlaridan biri                                                       |                                                                                                                                                                                  |
-| `disableNonPublicModels`                    | boolean                                                                              |                                                                                                                                                                                  |
-| `allowUsageCommand`                         | boolean                                                                              |                                                                                                                                                                                  |
-| `usageLimitEnabled`                         | boolean                                                                              |                                                                                                                                                                                  |
-| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | number >= 0 or `null`                                                                |                                                                                                                                                                                  |
-| `chaosModeEnabled`                          | boolean                                                                              |                                                                                                                                                                                  |
+| Maydon                                      | Turi                                                                                 | Izohlar                                                                                                                                                                                                                                                                            |
+| ------------------------------------------- | ------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`                                      | string, 1-200 ta belgi                                                               |                                                                                                                                                                                                                                                                                    |
+| `isActive`                                  | boolean                                                                              |                                                                                                                                                                                                                                                                                    |
+| `isBanned`                                  | boolean                                                                              |                                                                                                                                                                                                                                                                                    |
+| `expiresAt`                                 | ISO 8601 sana-vaqti yoki `null`                                                      | `null` amal qilish muddatini tozalaydi                                                                                                                                                                                                                                             |
+| `modelAccessMode`                           | `all` \| `restricted`                                                                | Rejim `all` bo‘lganda `allowedModels` bo‘sh bo‘lishi kerak                                                                                                                                                                                                                         |
+| `allowedModels`, `blockedModels`            | satrlar massivi, 1000 tagacha                                                        |                                                                                                                                                                                                                                                                                    |
+| `allowedCombos`                             | satrlar massivi, 500 tagacha                                                         | Kalit chaqirishi mumkin bo‘lgan kombinatsiyalarni cheklaydi; bevosita modellar `modelAccessMode` / `allowedModels` orqali boshqariladi                                                                                                                                             |
+| `connectionAccessMode`                      | `all` \| `restricted`                                                                | `restricted` bo‘lganda `allowedConnections` bo‘sh bo‘lmasligi, `all` bo‘lganda esa bo‘sh bo‘lishi kerak                                                                                                                                                                            |
+| `allowedConnections`                        | UUIDlar massivi, 100 tagacha                                                         |                                                                                                                                                                                                                                                                                    |
+| `allowAutoCombos`                           | boolean                                                                              | `false` ushbu kalit bilan `auto/*` modellariga yuborilgan so‘rovlarni rad etadi; buni hech qachon o‘rnatmagan kalitlarga ruxsat beriladi                                                                                                                                           |
+| `catalogScope`                              | `all` \| `combos` \| `models`                                                        | Ushbu kalit uchun `GET /v1/models` nimani ko‘rsatishini belgilaydi (faqat kombinatsiyalar, faqat modellar yoki ikkalasi); bu kalit nimani chaqirishi mumkinligini o‘zgartirmaydi                                                                                                   |
+| `forcedModel`                               | 300 tagacha belgidan iborat satr yoki `null`                                         | Chat so‘rovlarini `X-Route-Model` va `body.model` ustidan ushbu model/kombinatsiyaga yo‘naltiradi; kalit cheklovlari baribir amal qiladi                                                                                                                                           |
+| `noLog`, `autoResolve`                      | mantiqiy                                                                             |                                                                                                                                                                                                                                                                                    |
+| `throttleDelayMs`                           | butun son, 0-300000                                                                  |                                                                                                                                                                                                                                                                                    |
+| `maxSessions`                               | butun son, 0-10000                                                                   |                                                                                                                                                                                                                                                                                    |
+| `rateLimits`                                | `{ limit, window }` obyektlari massivi (musbat butun sonlar, 50 tagacha) yoki `null` | `null` cheklovlarni tozalaydi                                                                                                                                                                                                                                                      |
+| `accessSchedule`                            | jadval obyekti yoki `null`                                                           | `null` jadvalni tozalaydi                                                                                                                                                                                                                                                          |
+| `scopes`                                    | satrlar massivi, 32 tagacha                                                          |                                                                                                                                                                                                                                                                                    |
+| `allowedEndpoints`                          | satrlar massivi, 20 tagacha                                                          |                                                                                                                                                                                                                                                                                    |
+| `streamDefaultMode`                         | `legacy` \| `json`                                                                   |                                                                                                                                                                                                                                                                                    |
+| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                                 | [Kalit bo‘yicha keshni chetlab o‘tish](#per-key-cache-bypass) bo‘limiga qarang                                                                                                                                                                                                     |
+| `compressionEnabled`                        | boolean                                                                              |                                                                                                                                                                                                                                                                                    |
+| `codexServiceMode`                          | Codex xizmat rejimlaridan biri                                                       |                                                                                                                                                                                                                                                                                    |
+| `disableNonPublicModels`                    | boolean                                                                              |                                                                                                                                                                                                                                                                                    |
+| `allowUsageCommand`                         | boolean                                                                              |                                                                                                                                                                                                                                                                                    |
+| `usageLimitEnabled`                         | boolean                                                                              |                                                                                                                                                                                                                                                                                    |
+| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | raqami >= 0 yoki `null`                                                              |                                                                                                                                                                                                                                                                                    |
+| `fiveHourUsageLimitUsd`                     | raqami >= 0 yoki `null`                                                              | Kundalik va haftalik chegaralar (`usageLimitEnabled`, `UNPRICED_USAGE_BUDGET_POLICY`) kabi joriy qilingan 5 soatlik USD byudjeti. `retry-after` - bu oynadagi eng qadimgi xarajat eskirib qolganda, kalit chegarasidan ancha oshib ketganda hamon bloklangan holda qolishi mumkin. |
+| `chaosModeEnabled`                          | boolean                                                                              |                                                                                                                                                                                                                                                                                    |
 
 ```bash
 curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
@@ -1384,6 +1363,14 @@ curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
 | `/api/modality-bridge/stats`         | GET        | Xotiradagi `attempts`, muvaffaqiyatlar/`bridged`, xatolar, keshdan foydalanishlar, `totalLatencyMs`, `latencySamples`, namunalar bilan ifodalangan `averageLatencyMs` va oxirgi foydalanish vaqti (qayta ishga tushirilganda tiklanadi; boshqaruv autentifikatsiyasi talab etiladi)                                                                                                                                                                |
 | `/api/modality-bridge/video/runtime` | GET        | Boshqaruv autentifikatsiyasi/tekshiruvidan oldin qat’iy ishonchli loopback tekshiruvi; FFmpeg/ffprobe mavjudligi va versiyalarining sanitarizatsiyalangan ma’lumotlari (saqlanmaydi)                                                                                                                                                                                                                                                               |
 | `/api/modality-bridge/video/extract` | POST       | Ichki autentifikatsiyalangan ishonchli loopback bayt brokeri; kirish hajmi 50 MiB, navbat 32 MiB chiqish bilan cheklangan, sig‘im uchun `503`, uzilish uchun `499`, muddat tugashi uchun `504`; ommaviy yuklash API’i emas                                                                                                                                                                                                                         |
+
+### Video ramkani pastga tushirish
+
+`GET /api/v1/video-bridge/drilldown` aniq rozilik berilgan Video Bridge soʻrovidan soʻng `x-omniroute-video-drilldown` da qaytarilgan ijarachiga bogʻlangan shaffof tutqichni oʻqiydi. Har ikkala o'qish va `DELETE` har doim haqiqiy API kaliti va operatorning mustaqil `modalityBridgeVideoDrilldownRemoteEnabled` ruxsatini talab qiladi. Ishlab chiqarishni ushlab turish qo'shimcha ravishda `modalityBridgeVideoDrilldownEnabled` va har bir qism uchun qat'iy `drilldown: true` talab qiladi. Agar kalitda boʻsh boʻlmagan oxirgi nuqta ruxsatnomalar roʻyxati boʻlsa, qoʻngʻiroq qiluvchi `/v1` yoki `/api/v1` foydalanishidan qatʼi nazar, u GET va DELETE uchun `video` oʻz ichiga olishi kerak.
+
+GET so'rovi: zarur `handle`; ixtiyoriy `variant` (`preview`, `standard`, `detail`), `limit` (1–8; eski `frames` qabul qilinadi, lekin `limit` bilan birlashtirilmaydi), nolga asoslangan `page` va `start`/`end` soniyalar. Ikkala fokus chegarasi ham berilganda, `end` `start` dan katta bo‘lishi kerak. Duplicate/unknown so'rov tugmalari rad etilgan. Muvaffaqiyatli javoblar `derivation`, `durationSeconds`, `frames`, `hasMore`, `page`, `variant` va ixtiyoriy `focusWindow` o'z ichiga oladi ; do'konsiz JSON 32 MiB bilan cheklangan, shu jumladan Base64. Katta o'lchamli chiqish 413; kamroq ramkalar so'rang.
+
+`DELETE /api/v1/video-bridge/drilldown?handle=...` `{ "removed": 0|1 }` ni qaytaradi. Noma'lum, muddati o'tgan va o'zaro faoliyat GETs 404 ta javobni ajratib bo'lmaydi; cross-key DELETE egasining yozuvini olib tashlay olmaydi. O'chirilgan kirish 403, missing/invalid autentifikatsiyasi 401, noto'g'ri so'rovlar 400, bekor qilish 499 va vaqtinchalik xatolar 503ni qaytaradi. Tutqichlar mahalliy jarayon bo'lib, o'n daqiqadan so'ng muddati tugaydi va qayta ishga tushirilsa ham omon qolmaydi. Yangi tutqichlar `v1.` va 32 bayt tasodifiy Base64URL tokenidan foydalanadi; faqat token xeshlari saqlanadi. Legacy 64-hex tokenlari moslik uchun sintaktik o'qilishi mumkin bo'lib qoladi. Rozilik, kvotalar va variantni chiqarish tafsilotlari uchun [Video Bridge toʻsiqlariga](../security/GUARDRAILS.md#video-bridge-videobridgets-videobridgepipelinets) qarang.
 
 ### Zaxiralash va eksport/import
 
@@ -1490,19 +1477,19 @@ GET javobi `agents[]` (id, name, binary, version, installed, protocol, isCustom)
 
 Bu yo‘nalishlar Gemini SDK’ining asl mosligini kutadigan mijozlar uchun Gemini API formatini aks ettiradi.
 
-### Ichki / Tizim API’lari
+### Ichki / Tizim APIs
 
-| Endpoint                 | Method | Tavsif                                                                        |
-| ------------------------ | ------ | ----------------------------------------------------------------------------- |
-| `/api/init`              | GET    | Ilovani ishga tushirish tekshiruvi (birinchi ishga tushirishda foydalaniladi) |
-| `/api/tags`              | GET    | Ollama bilan mos model teglari (Ollama mijozlari uchun)                       |
-| `/api/restart`           | POST   | Serverni to‘g‘ri yakunlab qayta ishga tushirish                               |
-| `/api/shutdown`          | POST   | Server ishini to‘g‘ri yakunlash                                               |
-| `/api/system/env/repair` | POST   | OAuth provayderi muhit o‘zgaruvchilarini tiklash                              |
-| `/api/system/version`    | GET    | Joriy/eng so‘nggi versiya, yangilanish holati, reliz kanali                   |
-| `/api/system/version`    | POST   | Eng so‘nggi versiyaga joylashtirishni hisobga olgan yangilanishni boshlash    |
+| Yakuniy nuqta            | Usul | Tavsif                                                                    |
+| ------------------------ | ---- | ------------------------------------------------------------------------- |
+| `/api/init`              | GET  | Fon sinxronizatsiya xizmatlarini ishga tushirish (boshqaruv autentsiyasi) |
+| `/api/tags`              | GET  | Ollama-mos model teglari ( Ollama mijozlari uchun)                        |
+| `/api/restart`           | POST | Zarif serverni qayta ishga tushirishni ishga tushiring                    |
+| `/api/shutdown`          | POST | Zarif serverni o'chirishni ishga tushiring                                |
+| `/api/system/env/repair` | POST | OAuth provayderining muhit o'zgaruvchilarini tuzatish                     |
+| `/api/system/version`    | GET  | Current/latest versiyasi, yangilanish holati, chiqarish kanali            |
+| `/api/system/version`    | POST | Oxirgi versiyaga tarqatishdan xabardor yangilanishni boshlang             |
 
-> **Eslatma:** Bu yo‘nalishlardan tizim ichki ravishda yoki Ollama mijozlari bilan moslik uchun foydalanadi. Odatda ular oxirgi foydalanuvchilar tomonidan chaqirilmaydi.
+> **Eslatma:** Ushbu so'nggi nuqtalar tizim tomonidan ichki yoki Ollama mijoz muvofiqligi uchun ishlatiladi. Ular odatda oxirgi foydalanuvchilar tomonidan chaqirilmaydi.
 
 ### OAuth muhitini tiklash _(v3.6.1+)_
 

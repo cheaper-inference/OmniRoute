@@ -11,11 +11,11 @@
 <br/>
 <br/>
 
-# 🚀 OmniRoute — دروازه AI رایگان
+# 🚀 OmniRoute — دروازه رایگان AI
 
 **ایجاد شده توسط [دیگو سوزا](https://github.com/diegosouzapw)**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Never stop coding. Every AI tool → 381 providers — 150+ free — through one endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity into FREE Claude / GPT / Gemini with auto-fallback. RTK + Caveman stacked compression saves 15–95% tokens (~89% avg) — never hit limits. 381 AI providers · 150+ free tiers · ~1.62B free tokens/mo · 20 routing strategies · $0 to start."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Never stop coding. Every AI tool → 382 providers — 150+ free — through one endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity into FREE Claude / GPT / Gemini with auto-fallback. RTK + Caveman stacked compression saves 15–95% tokens (~89% avg) — never hit limits. 382 AI providers · 150+ free tiers · ~1.62B free tokens/mo · 20 routing strategies · $0 to start."/>
 
 </div>
 
@@ -49,20 +49,15 @@
 <a href="https://trendshift.io/repositories/23589" target="_blank"><img src="https://trendshift.io/api/badge/repositories/23589" alt="diegosouzapw%2FOmniRoute | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
 [![رتبه تاریخ ستاره](https://api.star-history.com/badge?repo=diegosouzapw/OmniRoute&theme=dark) ](https://www.star-history.com/diegosouzapw/omniroute) [![olud.ai](https://olud.ai/badge.php?tool=diegosouzapw-omniroute) ](https://olud.ai/project/diegosouzapw-omniroute.html)
 
-### 💬 به جامعه ما بپیوندید
+### 💬 به انجمن بپیوندید
 
-**👋 توسعهدهنده نگهدارنده را دنبال کنید — ارائهدهندگان جدید، انتشارها و نکات را زودتر از همه دریافت کنید:**
+**👋 نگهدارنده — را دنبال کنید ابتدا ارائه دهندگان، نسخه ها و نکات جدید را دریافت کنید:**
 
-[![دیهگو را در LinkedIn دنبال کنید](https://img.shields.io/badge/Follow_Diego_on-LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/diegosouzapw/)
-[![@diegosouzapw را در GitHub دنبال کنید](https://img.shields.io/github/followers/diegosouzapw?style=for-the-badge&logo=github&logoColor=white&label=Follow%20on%20GitHub&color=181717)](https://github.com/diegosouzapw)
+[![دیگو را در LinkedIn دنبال کنید](https://img.shields.io/badge/Follow_Diego_on-LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white) ](https://www.linkedin.com/in/diegosouzapw/) [![ @diegosouzapw را در GitHub دنبال کنید](https://img.shields.io/github/followers/diegosouzapw?style=for-the-badge&logo=github&logoColor=white&label=Follow%20on%20GitHub&color=181717) ](https://github.com/diegosouzapw)
 
-[![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/U47eFqAXCn)
-[![Telegram](https://img.shields.io/badge/Telegram-26A5E4?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/omnirouteOficial)
-[![WhatsApp جهانی](https://img.shields.io/badge/WhatsApp_Global-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4)
-[![WhatsApp برزیل](https://img.shields.io/badge/WhatsApp_Brasil-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)
-[![وبسایت](https://img.shields.io/badge/Website-omniroute.online-blue?logo=google-chrome&logoColor=white)](https://omniroute.online)
+[![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white) ](https://discord.gg/U47eFqAXCn) [![Telegram](https://img.shields.io/badge/Telegram-26A5E4?style=for-the-badge&logo=telegram&logoColor=white) ](https://t.me/omnirouteOficial) [![WhatsApp Global](https://img.shields.io/badge/WhatsApp_Global-25D366?style=for-the-badge&logo=whatsapp&logoColor=white) ](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) [![WhatsApp Brasil](https://img.shields.io/badge/WhatsApp_Brasil-25D366?style=for-the-badge&logo=whatsapp&logoColor=white) ](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) [![Website](https://img.shields.io/badge/Website-omniroute.online-blue?logo=google-chrome&logoColor=white) ](https://omniroute.online)
 
-**پرسشها، نکات ارائهدهندگان، نقشه راه و پشتیبانی → [Discord](https://discord.gg/U47eFqAXCn) · [Telegram](https://t.me/omnirouteOficial) · WhatsApp [🌍 جهانی](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) / [🇧🇷 برزیل](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) / [پورتال](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)**
+**سوالات، نکات ارائه دهنده، نقشه راه و پشتیبانی → [Discord](https://discord.gg/U47eFqAXCn) · [Telegram](https://t.me/omnirouteOficial) · WhatsApp [🌍 Global](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) / [🇧🇷 Brasil](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) / [کانال رسمی 📢](https://whatsapp.com/channel/0029VbDwC7A3wtb5PN6a5t2R) / [پورتال](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)**
 
 <br/>
 
@@ -70,19 +65,19 @@
 
 <div align="center">
 
-|                            |        نسخه 3.8.50        | **نسخه 3.8.51** |      `v3.8.54+`       |
-| -------------------------- | :-----------------------: | :-------------: | :-------------------: |
-| ارائه دهندگان 🌐           |            352            |     **358**     |          381          |
-| 🧠 مدل چت منحصر به فرد IDs |           1320            |    **1374**     |         1519          |
-| پل مدالیتی 🖼️              | 🆕 vision + audio + video |        ✓        |           ✓           |
-| کاتالوگ رایگان رادار 📡    |      🆕 انتخاب کنید       |        ✓        |           ✓           |
-| زمانبندی آگاهی از سهمیه ⚖️ |      🆕 Quota-Share       |        ✓        |           ✓           |
-| تله متری سهمیه 📊          |          🆕 زنده          |        ✓        |           ✓           |
-| حالت هدلس 🧰               |             —             |        —        | 🆕 `serve --headless` |
-| 🛤️ LTS rail infra          |             —             |        —        |  کانال های انتشار 🆕  |
-| کشف مدل 🔎 API             |             —             |        —        | 🆕 `/v1/models/query` |
+|                            |      نسخه 3.8.50       | **نسخه 3.8.51** |      `v3.8.54+`       |
+| -------------------------- | :--------------------: | :-------------: | :-------------------: |
+| ارائه دهندگان 🌐           |          352           |     **358**     |          382          |
+| 🧠 چت یونیک مدل IDs        |          1320          |    **1374**     |         1524          |
+| پل مدالیتی 🖼️              | ویدیو 🆕 ویژن + صوتی + |        ✓        |           ✓           |
+| کاتالوگ رایگان رادار 📡    |           🆕           |        ✓        |           ✓           |
+| زمانبندی آگاهی از سهمیه ⚖️ |     🆕 Quota-Share     |        ✓        |           ✓           |
+| تله متری سهمیه 📊          |        🆕 زنده         |        ✓        |           ✓           |
+| حالت هدلس 🧰               |           —            |        —        | 🆕 `serve --headless` |
+| 🛤️ LTS راه آهن زیرین       |           —            |        —        |  کانال های انتشار 🆕  |
+| کشف مدل 🔎 API             |           —            |        —        | 🆕 `/v1/models/query` |
 
-**→ [نقشه راه](ROADMAP.md) — سوار بر راه آهن به `v3.9.0 LTS`**
+**[نقشه راه](ROADMAP.md)→ — سوار بر راه آهن به `v3.9.0 LTS`**
 
 </div>
 
@@ -90,7 +85,7 @@
 
 ## 🧩 موجود است
 
-[![npm version](https://img.shields.io/npm/v/omniroute?color=cb3837&logo=npm) ](https://www.npmjs.com/package/omniroute) ![NPM Monthly](https://img.shields.io/npm/dm/omniroute?label=npm/month&color=cb3837&logo=npm) [![Docker Hub](https://img.shields.io/docker/v/diegosouzapw/omniroute?label=Docker%20Hub&logo=docker&color=2496ED) ](https://hub.docker.com/r/diegosouzapw/omniroute) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square) ](LICENSE) ![Docker Pulls](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED) ![Electron Downloads](https://img.shields.io/github/downloads/diegosouzapw/omniroute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
+[![نسخه npm](https://img.shields.io/npm/v/omniroute?color=cb3837&logo=npm) ](https://www.npmjs.com/package/omniroute) ![NPM Monthly](https://img.shields.io/npm/dm/omniroute?label=npm/month&color=cb3837&logo=npm) [![Docker Hub](https://img.shields.io/docker/v/diegosouzapw/omniroute?label=Docker%20Hub&logo=docker&color=2496ED) ](https://hub.docker.com/r/diegosouzapw/omniroute) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square) ](LICENSE) ![Docker Pulls](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED) ![Electron Downloads](https://img.shields.io/github/downloads/diegosouzapw/omniroute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
 
 <table>
   <tr>
@@ -108,7 +103,7 @@
   <tr>
     <td align="right"><b>⚙️ Features</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 Combos</a></td>
-    <td align="center"><a href="#-381-ai-providers--156-catalog-marked-free">🌐 Providers</a></td>
+    <td align="center"><a href="#-382-ai-providers--156-catalog-marked-free">🌐 Providers</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI &amp; MCP</a></td>
   </tr>
   <tr>
@@ -218,7 +213,7 @@
 
 <a id="first-run"></a>
 
-## 🆓 را نصب کنید، یک ارائه دهنده را متصل کنید، سپس از یک نقطه پایانی مسیریابی کنید
+## 🆓 را نصب کنید، یک ارائه دهنده را متصل کنید، سپس از طریق یک نقطه پایانی مسیریابی کنید
 
 </div>
 
@@ -232,19 +227,19 @@ curl http://localhost:20128/v1/chat/completions \
   -d '{"model":"auto","messages":[{"role":"user","content":"Hello!"}]}'
 ```
 
-<sub>`auto` به یک مسیر واجد شرایط نیاز دارد. یک نصب جدید نمی تواند هیچ هدف بدون کلید واجد شرایطی داشته باشد و یک ارائه دهنده بدون کلید ممکن است مشتریان شخص ثالث را رد کند. ارائه دهندگان علامت گذاری شده به `tos: avoid`، از جمله Kiro، به طور پیش فرض از مسیریابی خودکار مستثنی هستند. اتصال یک حساب آن تنظیم را لغو نمی کند. قبل از انتخاب ارائهدهنده، [راهنمای ردیفهای رایگان را](docs/getting-started/FREE-TIERS-GUIDE.md) ببینید.</sub>
+<sub>`auto` به یک مسیر واجد شرایط نیاز دارد. یک نصب جدید نمی تواند هیچ هدف بدون کلید واجد شرایطی داشته باشد و یک ارائه دهنده بدون کلید ممکن است مشتریان شخص ثالث را رد کند. ارائه دهندگان با علامت `tos: avoid`، از جمله Kiro، به طور پیش فرض از مسیریابی خودکار مستثنی هستند. اتصال یک حساب آن تنظیم را لغو نمی کند. قبل از انتخاب ارائهدهنده، [راهنمای ردیفهای رایگان را](docs/getting-started/FREE-TIERS-GUIDE.md) ببینید.</sub>
 
-<sub>📦 اسکریپت های شروع سریع را کپی-پیست کنید **پایتون، Node.js، PHP و cURL** → [`examples/quickstart/`](examples/quickstart/)</sub>
+<sub>📦 اسکریپت های شروع سریع را کپی و جایگذاری کنید **پایتون، Node.js، PHP و cURL** → [`examples/quickstart/`](examples/quickstart/)</sub>
 
 <br/>
 
 <div align="center">
 
-# 💥 قول
+# 💥 The Promise
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="The Promise — One endpoint and 381 providers. Automatic fallback keeps routing while another healthy target is available. Six pillars: resilient fallback across 381 providers · up to 95% token savings on eligible workloads · $0 to start with 150+ free tiers and 52 recurring/keyless free-forever providers · 39 CLI/agent integrations through one config · OpenAI, Claude, Gemini and Responses API compatibility at /v1 · production controls including circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals and 56,000+ static test declarations across 7,800+ tracked test files."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="The Promise — One endpoint and 382 providers. Automatic fallback keeps routing while another healthy target is available. Six pillars: resilient fallback across 382 providers · up to 95% token savings on eligible workloads · $0 to start with 150+ free tiers and 52 recurring/keyless free-forever providers · 39 CLI/agent integrations through one config · OpenAI, Claude, Gemini and Responses API compatibility at /v1 · production controls including circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals and 56,000+ static test declarations across 7,800+ tracked test files."/>
 
 <br/>
 <br/>
@@ -504,7 +499,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="What sets OmniRoute apart — a dated feature snapshot vs 9router, OpenRouter, CLIProxyAPI and LiteLLM across 13 capabilities. OmniRoute: 381 providers, 150+ free tiers built in, 20 routing strategies, 12-engine token compression, built-in MCP server with 110 tools, A2A agent protocol, persistent memory, guardrails, cloud agents, TLS fingerprint stealth, Desktop/Termux/PWA and 67 i18n UI locales. OmniRoute is MIT-licensed and self-hostable. Competitor capabilities and counts may change; see the linked methodology."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="What sets OmniRoute apart — a dated feature snapshot vs 9router, OpenRouter, CLIProxyAPI and LiteLLM across 13 capabilities. OmniRoute: 382 providers, 150+ free tiers built in, 20 routing strategies, 12-engine token compression, built-in MCP server with 110 tools, A2A agent protocol, persistent memory, guardrails, cloud agents, TLS fingerprint stealth, Desktop/Termux/PWA and 67 i18n UI locales. OmniRoute is MIT-licensed and self-hostable. Competitor capabilities and counts may change; see the linked methodology."/>
 
 <sub>📊 روش کامل &amp; جزئیات هر ویژگی در مقابل 9 روتر، OpenRouter، CLIProxyAPI &amp; LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -574,35 +569,35 @@ OmniRoute دارای مجوز MIT است و بهصورت عمومی نگهدار
 
 </div>
 
-> نکات برجسته اخیر از **نسخه 3.8.20 → v3.8.54** . تاریخچه کامل در [`CHANGELOG.md`](CHANGELOG.md).
+> نکات برجسته اخیر از **نسخه 3.8.20 → نسخه 3.8.54** . تاریخچه کامل در [`CHANGELOG.md`](CHANGELOG.md).
 
-- **مسیریابی ⚖️ `quota-weighted`** — بیستمین استراتژی ترکیبی حسابهای تمامشده را نادیده میگیرد، سپس به نسبت سهمیه باقیمانده ÷ در حین پرواز، در میان بقیه حسابها ترسیم میکند و مکالمات موجود را پین میکند. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
+- **مسیریابی ⚖️ `quota-weighted`** — بیستمین استراتژی ترکیبی حسابهای تمامشده را نادیده میگیرد، سپس به نسبت سهمیه باقیمانده ÷ در حین پرواز، از میان بقیه استفاده میکند و مکالمات موجود را پین میکند. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **حالت هدلس 🧰** — `omniroute serve --headless` (یا `OMNIROUTE_HEADLESS=1`) فقط موتور پراکسی `/v1/*` را با داشبورد و زیرسیستمهای فقط داشبورد خاموش اجرا میکند. [حالت بدون سر](docs/guides/HEADLESS.md) →
-- **کشف مدل 🔎** — `/v1/models` بر اساس قابلیت، زمینه، نوع و متن فیلتر میکند، و `POST /v1/models/query` یک فهرست کوتاه قطعی را با همان قابلیت مشاهده هر کلید برمیگرداند. → [API مرجع](docs/reference/API_REFERENCE.md)
-- **کنترل مسیریابی به ازای هر کلید 🔑** — یک کلید API را به یک مدل یا ترکیبی با `forcedModel` پین کنید و مدلها و ترکیبهای یک کلید را به صورت اتمی (`/api/keys/{id}/access`) اضافه یا حذف کنید. → [API مرجع](docs/reference/API_REFERENCE.md) · [OpenAPI](docs/openapi.yaml)
-- **کنترل های 🛡️ Finer PII** — انتخاب هر نوع، تا 20 الگوی پوشش سفارشی معتبر و شمارنده های تشخیص هر نوع. پوشاندن خود به صورت انتخابی باقی می ماند. → [گاردریل](docs/security/GUARDRAILS.md)
-- **🌍 67 زبان** داشبورد — ، آینههای اسناد و CLI، با `npm run i18n:add-locale` یک زبان را در همه جا در یک دستور اضافه میکند. [راهنمای](docs/guides/I18N.md) → i18n
-- **🎛️ OmniConductor** — inbound A2A delegation to your agent fleet, Conductor skills on the Agent Card, and a dashboard panel with Faro push-to-talk voice chat. → [A2A Server](docs/frameworks/A2A-SERVER.md)
-- **🛂 پذیرش تطبیقی و حفاظت اضافه بار** درخواستهای چت سنگین — به جای 503ing، با اجارههای اتمی RPM به ازای هر اتصال. [راهنمای تاب آوری](docs/architecture/RESILIENCE_GUIDE.md) →
-- **سفارش 🗂️ متعارف `/v1/models`** — یک بلوک بههم پیوسته گروهبندیکننده ارائهدهنده برای هر ارائهدهنده (کمبوها ابتدا سنجاق میشوند)، در هر منبع کاتالوگ پایدار است. → [API مرجع](docs/reference/API_REFERENCE.md)
-- **سخت شدن فشاری 🗜️** — محافظ تورم پیشفرض، بستههای Caveman برای DE / FR / JA + چینی (wényán)، فیلترهای RTK برای Gradle و .NET. [فشرده سازی](docs/compression/COMPRESSION_ENGINES.md) →
-- **💸 هزینه با نرخ ثابت صادقانه** اشتراک — / ارائه دهندگان برنامه کدنویسی مطالعه می کنند **$0** در تجزیه و تحلیل هزینه؛ بودجه، سهمیه و مسیریابی را ادامه دهید. → [API](docs/reference/API_REFERENCE.md)
-- **⚖️ Quota-Share routing** — سهمیه حساب مشترک را به طور نسبتاً بین کلیدهای ادغام شده تقسیم میکند، بنابراین بخشهای بیحرکت در اختیار شما قرار میگیرد. [راهنمای تاب آوری](docs/architecture/RESILIENCE_GUIDE.md) →
-- **🤖 راه اندازی CLI/agent یک فرمان** — 15 دستور `setup-*` ثبت شده. `omniroute run` 7 CLIs را راه اندازی کرد (Claude Code, Codex, Aider, Goose, OpenCode, Qwen Code, Gemini CLI); `omniroute configure` از 11 هدف با ارائه دهنده تعاملی انتخاب کننده مدل + و موارد دلخواه در هر زمینه پشتیبانی می کند. ادغام → [CLI](docs/guides/CLI-INTEGRATIONS.md)
-- **حالت از راه دور 🛰️** — یک OmniRoute راه دور با توکنهای محدوده (`connect` / `contexts` / `tokens`) + یک کمک کننده `antigravity` OAuth برای نصب VPS درایو میکند. [حالت از راه دور](docs/guides/REMOTE-MODE.md) →
-- **🧭 مسیریابی خودکار هوشمندتر** ترکیبات — `auto/<category>:<tier>` ،**فیوژن** (مدل پنل + قاضی)، مسیریابی با آگاهی از وظایف، مدل هر درخواست / حالت / نادیده گرفتن بودجه USD. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
-- **فشرده سازی قابل اتصال 🗜️** — 12 موتورهای قابل ترکیب + استودیو فشرده سازی: LLMLingua-2، Ultra دو لایه، omniglyph، دروازه وفاداری در هر مرحله، GCF v3.2، ویرایشگر تغییر ترتیب کشیدن. [فشرده سازی](docs/compression/COMPRESSION_ENGINES.md) →
-- **رمزگشایی MITM شفاف 🕵️ (TPROXY)** — با نصبکننده فروشگاه اعتماد CA + ، CLIs را که پروکسی env vars را نادیده میگیرد، ضبط کنید. → [MITM/TPROXY](docs/security/MITM-TPROXY-DECRYPT.md)
-- **💸 هزینه تله متری در همه جا** سرصفحه — `X-OmniRoute-*` cost/usage در هر نقطه پایانی، هدر ذخیره کش-HIT، سهمیههای خرج هر کلید USD. → [API مرجع](docs/reference/API_REFERENCE.md)
-- **🧠 حافظه شما کنترل می شود** — خاموش به طور پیشفرض، انتخاب کردن در int8 بردار کمی کردن + تایپ واپاشی، هر درخواست `x-omniroute-no-memory`. [حافظه](docs/frameworks/MEMORY.md) →
-- **امنیت 🛡️** محافظ تزریق سریع — در هر مسیر LLM (مجموعه تیم قرمز)، نرده محافظ پوشاننده اعتبارنامه (از هر دو جهت، API keys/secrets به بیرون درز کرده است)، جستجوی رایگان آخرین گزینه DuckDuckGo در وب، و یک گیت ورود به سیستم OIDC اختیاری برای داشبورد (ورود رمز عبور همیشه در دسترس است). → [حفاظ](docs/security/GUARDRAILS.md)
-- **🖼️ نقاط پایانی جدید** — `/v1/ocr` (Mistral OCR) و `/v1/audio/translations` (سبک Whisper) سطح رسانه را گرد می کنند. → [API مرجع](docs/reference/API_REFERENCE.md)
-- **🎨 تولید تصویر / ویدیو / صدا** — one API برای رسانه: xAI Grok Imagine & Novita AI video، ComfyUI، Magnific، Adobe Firefly، Segmind و ارائه دهندگان گفتار مانند ElevenLabs. → [API مرجع](docs/reference/API_REFERENCE.md)
-- **🌍 Deployment & Ops** — معکوس پروکسی `basePath`، تشخیص خودکار به زبان مرورگر، ردیابی هر کلید دستگاه، اعتماد MITM بدون ریشه، محلیسازی zh-TW. [محیط زیست](docs/reference/ENVIRONMENT.md) →
-- **🤝 More providers & agents** — cloud agents (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) with browser + OAuth login, Ollama first-class card, Claude Opus 5 & Sonnet 5, Kimi official partnership (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… and a refreshed **381-provider catalog**. → [Providers](docs/reference/PROVIDER_REFERENCE.md)
-- **شفافیت مسیریابی 📡** — هر پاسخ دارای یک هدر `X-OmniRoute-Decision` با نام strategy/provider/latency است که به آن سرویس میدهد، یک استراتژی ترکیبی `cache-optimized` جدید + خودکار ترکیب `cacheAffinity` درخواستهای تکرار مسیر را به اتصالی که پیشوند ذخیرهشده را نگه میدارد، بازمیگردد، و یک نقطه پایانی `/v1/auto-combo/{channel}/candidates` فقط خواندنی استخر نامزد زنده کانال `auto/*` را نشان میدهد. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
-- **عملکرد محلی ⚡ & infra** — Redis محلی با یک کلیک، Cloudflare Workers / Deno Deploy relay deployers، Bifrost & Mux به عنوان سرویسهای تعبیهشده تحت نظارت. → [Embedded Services](docs/frameworks/EMBEDDED-SERVICES.md)
-- **🧩 همچنین در جعبه** چارچوب پلاگین — بازار + ، چارچوبهای مهارت Omni/Agent/GitHub ، ادغام Obsidian vault (22 ابزار MCP )، دسته و فایلهای سازگار با OpenAI APIs، حافظه پنهان پاسخ معنایی، گیمیفیکیشن با تابلوهای امتیازات، کشف عامل ACP (15 عامل داخلی)، صادرات برنامهریزیشده `auto/chaos` به BigQuery-fan-para. bridge، یک مدیر نسخه درون برنامه ای و رتبه بندی ارائه دهندگان Telegram LMARena-ELO. [اسناد](docs/README.md) →
+- **🔎 کشف مدل** — `/v1/models` فیلتر بر اساس قابلیت، زمینه، نوع و متن، و `POST /v1/models/query` یک لیست کوتاه قطعی با همان نمایان بودن هر کلید را برمیگرداند. → [API مرجع](docs/reference/API_REFERENCE.md)
+- **کنترل مسیریابی هر کلید 🔑** — یک کلید API را به یک مدل یا ترکیبی با `forcedModel` پین کنید و مدلها و ترکیبهای یک کلید را به صورت اتمی اضافه یا حذف کنید (`/api/keys/{id}/access`). [API](docs/reference/API_REFERENCE.md) → · [OpenAPI](docs/openapi.yaml)
+- **کنترل 🛡️ Finer PII** — انتخاب هر نوع، تا 20 الگوی پوشش سفارشی معتبر و شمارنده های تشخیص هر نوع؛ پوشاندن خود به صورت انتخابی باقی می ماند. [نرده های محافظ](docs/security/GUARDRAILS.md) →
+- **🌍 67 زبان** داشبورد — ، آینههای اسناد و CLI، با `npm run i18n:add-locale` که یک زبان را در همه جا در یک دستور اضافه میکند. [راهنمای](docs/guides/I18N.md) → i18n
+- **🎛️ OmniConductor** — ورودی A2A تفویض اختیار به ناوگان عامل خود، مهارتهای رهبر در کارت نماینده، و یک پنل داشبورد با چت صوتی فشار به صحبت Faro. → [A2A سرور](docs/frameworks/A2A-SERVER.md)
+- **پذیرش تطبیقی 🛂 و حفاظت از اضافه بار** — چت سنگین وزن به جای 503ing صف درخواست می کند، با اجاره نامه های اتمی RPM در هر اتصال. [راهنمای انعطاف پذیری](docs/architecture/RESILIENCE_GUIDE.md) →
+- **🗂️ متعارف `/v1/models` سفارش دادن** — یک بلوک گروهبندیکننده ارائهدهنده بههم پیوسته برای هر ارائهدهنده (کمبوها ابتدا سنجاق میشوند)، در هر منبع کاتالوگ پایدار است. → [API مرجع](docs/reference/API_REFERENCE.md)
+- **سخت شدن فشرده سازی 🗜️** محافظ باد پیشفرض — ، بستههای Caveman برای DE / FR / JA + چینی (wényán)، فیلترهای RTK برای Gradle و .NET. [فشرده سازی](docs/compression/COMPRESSION_ENGINES.md) →
+- **💸 هزینه ثابت صادقانه** — ارائه دهندگان برنامه اشتراک / برنامه نویسی می خوانند **$0** در تجزیه و تحلیل هزینه؛ بودجه، سهمیه و مسیریابی را ادامه دهید. → [API مرجع](docs/reference/API_REFERENCE.md)
+- **⚖️ Quota-Share Routing** — سهمیه حساب مشترک را به طور نسبتاً بین کلیدهای ادغام شده تقسیم میکند، بنابراین بخشهای بیحرکت در اختیار شما قرار میگیرد. [راهنمای انعطاف پذیری](docs/architecture/RESILIENCE_GUIDE.md) →
+- **🤖 تک فرمانی CLI/agent راه اندازی** — 15 ثبت نام کرد `setup-*` دستورات؛ `omniroute run` راه اندازی 7 CLIs (Claude کد، Codex، ایدر، غاز، OpenCode, Qwen کد، Gemini CLI); `omniroute configure` از 11 هدف با یک ارائه دهنده تعاملی پشتیبانی می کند+انتخابگر مدل و موارد دلخواه در هر زمینه. → [CLI ادغام ها](docs/guides/CLI-INTEGRATIONS.md)
+- **حالت از راه دور 🛰️** — یک OmniRoute از راه دور را با توکن های محدوده (`connect` / `contexts` / `tokens`) درایو + یک کمک کننده `antigravity` OAuth برای نصب VPS است. [حالت از راه دور](docs/guides/REMOTE-MODE.md) →
+- **مسیریابی خودکار هوشمندتر 🧭** ترکیبات — `auto/<category>:<tier>` ،**فیوژن** (مدل پنل + قاضی)، مسیریابی آگاهانه از وظایف، مدل هر درخواست / حالت / نادیده گرفتن بودجه USD. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
+- **فشرده سازی قابل اتصال 🗜️** — 12 موتورهای قابل ترکیب + Compression Studios: LLMLingua-2، Ultra دو لایه، omniglyph، دروازه وفاداری در هر مرحله، GCF نسخه 3.2، ویرایشگر کشیدن مجدد. [فشرده سازی](docs/compression/COMPRESSION_ENGINES.md) →
+- **رمزگشایی MITM شفاف 🕵️ (TPROXY)** — با نصبکننده فروشگاه اعتماد CA + که CLIs را نادیده میگیرد، ضبط میکند. → [MITM/TPROXY](docs/security/MITM-TPROXY-DECRYPT.md)
+- **💸 هزینه تله متری در همه جا** — `X-OmniRoute-*` cost/usage سرصفحه در هر نقطه پایانی، هدر ذخیره کش-HIT، هر کلید USD سهمیه ها را خرج کنید → [API مرجع](docs/reference/API_REFERENCE.md)
+- **حافظه 🧠 که شما کنترل می کنید** — به طور پیشفرض خاموش است، انتخاب کنید در int8 کوانتیزاسیون برداری + تایپ شده فروپاشی، هر درخواست `x-omniroute-no-memory`. [حافظه](docs/frameworks/MEMORY.md) →
+- **امنیت 🛡️** محافظ تزریق سریع — در هر مسیر LLM (مجموعه تیم قرمز)، نرده محافظ پنهانکننده اعتبار (تحقیقات API keys/secrets در هر دو جهت به بیرون درز کرده است)، جستجوی رایگان آخرین گزینه DuckDuckGo در وب، و یک گیت ورود به سیستم OIDC اختیاری برای داشبورد (ورود رمز عبور همیشه در دسترس است). [نرده های محافظ](docs/security/GUARDRAILS.md) →
+- **🖼️ نقاط پایانی جدید** — `/v1/ocr` (Mistral OCR) و `/v1/audio/translations` (به سبک Whisper) سطح رسانه را گرد کنید. → [API مرجع](docs/reference/API_REFERENCE.md)
+- **🎨 تولید تصویر / ویدیو / صدا** — یکی API برای رسانه ها: xAI Grok Imagine & Novita AI ویدئو، ComfyUI، Magnific، Adobe Firefly، Segmind و ارائه دهندگان گفتار مانند ElevenLabs. → [API مرجع](docs/reference/API_REFERENCE.md)
+- **استقرار و عملیات 🌍** — معکوس پروکسی `basePath`، تشخیص خودکار به زبان مرورگر، ردیابی هر کلید دستگاه، اعتماد MITM بدون ریشه، محلیسازی zh-TW. [محیط زیست](docs/reference/ENVIRONMENT.md) →
+- **🤝 ارائه دهندگان و نمایندگان بیشتر** — عوامل ابری (Codex ابر، Cursor, Devin, Jules), Grok ساخت (xAI) با مرورگر + OAuth ورود به سیستم، Ollama کارت درجه یک، Claude اپوس 5 و غزل 5، Kimi مشارکت رسمی (Code/Web/Moonshot), Zed، درخواست ، SenseNova، یوانبائو، اگنس AI... و تازه شده **کاتالوگ 382 ارائه دهنده**. → [ارائه دهندگان](docs/reference/PROVIDER_REFERENCE.md)
+- **شفافیت مسیریابی 📡** هر پاسخ — دارای یک هدر `X-OmniRoute-Decision` است که strategy/provider/latency را ارائه میکند، یک استراتژی ترکیبی `cache-optimized` جدید + Auto-Combo `cacheAffinity` فاکتور درخواستهای تکرار مسیر را به اتصال نگهدارنده پیشوند حافظه پنهان دارد، و یک نقطه پایانی `/v1/auto-combo/{channel}/candidates` فقط خواندنی استخر نامزد زنده یک کانال `auto/*` را نشان میدهد. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
+- **عملکرد محلی ⚡ و زیرساخت** — با یک کلیک Redis محلی، Cloudflare Workers / Deno Deploy relay deployers، Bifrost & Mux به عنوان سرویسهای تعبیهشده تحت نظارت. [خدمات جاسازی شده](docs/frameworks/EMBEDDED-SERVICES.md) →
+- **🧩 همچنین در جعبه** چارچوب پلاگین — بازار + ، چارچوبهای مهارتهای Omni/Agent/GitHub ، ادغام Obsidian vault (22 ابزار MCP )، Batch & Files APIs سازگار با OpenAI، حافظه پنهان پاسخ معنایی، گیمیفیکیشن با تابلوهای امتیازات، کشف عامل ACP (15 عامل داخلی)، خروجی برنامهریزیشده، صادرات چندگانه به BigQuery-Fan به `auto/chaos` Fan. Telegram bridge، یک مدیر نسخه درون برنامه ای و رتبه بندی ارائه دهندگان رایگان LMARena-ELO. [اسناد](docs/README.md) →
 
 <br/>
 
@@ -683,15 +678,15 @@ omniroute configure codex          # همچنین: claude opencode qwen aider go
 
 <div align="center">
 
-## ارائه دهندگان 🌐 381 AI — 156 Catalog-Marked Free
+## ارائه دهندگان 🌐 382 AI — 156 کاتالوگ رایگان
 
 </div>
 
-> **381 ارائه دهنده ثبت شده** در سراسر چت متعارف، رسانه، جستجو، محلی، عامل ابری و مجموعه های سیستمی، از جمله **156 حامل ابرداده کشف `hasFree: true`** . رجیستری مدل چت را پوشش می دهد **242 ارائه دهنده / 3148 جفت ارائه دهنده-مدل مجزا / 1519 مدل خام IDs** ; کاتالوگ مجزا با بودجه آزاد دارد **466 ردیف در هر مدل** ،**34 استخر تکراری** و **52 ارائه دهنده recurring/keyless رایگان برای همیشه** . اینها مخرج های مختلفی از نظر طراحی هستند. تعاریف و محاسبات حذف شده توسط استخر در [مرجع ارائه دهنده](docs/reference/PROVIDER_REFERENCE.md) و [ردیف های رایگان](docs/reference/FREE_TIERS.md) وجود دارد.
+> **382 ارائه دهنده ثبت شده** در سراسر چت متعارف، رسانه، جستجو، محلی، عامل ابری و مجموعه های سیستمی، از جمله **156 حامل ابرداده های کشف `hasFree: true`** . رجیستری مدل چت را پوشش می دهد **243 ارائه دهنده / 3155 جفت ارائه دهنده-مدل مجزا / 1524 مدل خام IDs** ; کاتالوگ مجزا با بودجه آزاد دارد **466 ردیف در هر مدل** ،**34 استخر تکراری** و **52 ارائه دهنده رایگان recurring/keyless برای همیشه** . اینها مخرج های مختلفی از نظر طراحی هستند. تعاریف و محاسبات حذف شده توسط استخر در [مرجع ارائه دهنده](docs/reference/PROVIDER_REFERENCE.md) و [ردیف های رایگان](docs/reference/FREE_TIERS.md) وجود دارد.
 
 <div align="center">
 
-### 🏢 هر آزمایشگاه اصلی — از طریق یک نقطه پایانی می گذرد
+### 🏢 هر آزمایشگاه اصلی — از طریق یک نقطه پایانی
 
 <table>
   <tr>
@@ -720,7 +715,7 @@ omniroute configure codex          # همچنین: claude opencode qwen aider go
   </tr>
 </table>
 
-<sub>... و 350 + — بیشتر هر نماد به صورت زنده از کاتالوگ ارائه دهنده داشبورد حل می شود. [مرجع ارائه دهنده](docs/reference/PROVIDER_REFERENCE.md) 📖</sub>
+<sub>... و 350 + بیشتر — هر نماد به صورت زنده از کاتالوگ ارائه دهنده داشبورد حل می شود. [مرجع ارائه دهنده](docs/reference/PROVIDER_REFERENCE.md) 📖</sub>
 
 <br/>
 
@@ -1299,7 +1294,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # مقدار CI=1 نیز
   <tr><td nowrap><b>زمان اجرا</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>زبان</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> در سراسر <code>src/</code> و <code>open-sse/</code> (صفر <code>any</code> در هسته از نسخه 2.0)</td></tr>
   <tr><td nowrap><b>چارچوب</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>پایگاه داده</b></td><td>better-sqlite3 (SQLite، WAL journaling) + LowDB (میراث JSON ) — 147 ماژول دامنه، 225 مهاجرت</td></tr>
+  <tr><td nowrap><b>پایگاه داده</b></td><td>better-sqlite3 (SQLite، WAL journaling) + LowDB (میراث JSON ) — 147 ماژول دامنه، 229 مهاجرت</td></tr>
   <tr><td nowrap><b>حافظه</b></td><td>SQLite FTS5 متن کامل + int8-quantized embeddings vector, typed cay</td></tr>
   <tr><td nowrap><b>طرحواره ها</b></td><td>Zod 4 — MCP ابزار I/O اعتبار سنجی قراردادهای + API</td></tr>
   <tr><td nowrap><b>پروتکل ها</b></td><td>MCP (stdio / HTTP / SSE) + A2A 0.3 (JSON-RPC 2.0 + SSE)</td></tr>

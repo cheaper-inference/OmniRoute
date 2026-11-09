@@ -358,24 +358,24 @@ Modelo: cc/claude-opus-4-7
 
 ## 🚀 Pag-deploy
 
-### Pandaigdigang pag-install gamit ang npm (Inirerekomenda)
+### Global npm install (Inirerekomenda)
 
 ```bash
 npm install -g omniroute
 
-# Gumawa ng directory para sa configuration
+# Create config directory
 mkdir -p ~/.omniroute
 
-# Gumawa ng .env file (tingnan ang .env.example)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# Simulan ang server
+# Start server
 omniroute
-# O gumamit ng custom na port:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-Awtomatikong nilo-load ng CLI ang `.env` mula sa `~/.omniroute/.env` o `./.env`.
+Ang CLI ay awtomatikong naglo-load `.env` mula sa `~/.omniroute/.env` o `./.env`. Ang isang `./.env` sa gumaganang direktoryo ay maaari lamang magtakda ng isang maikling allowlist ng mga susi (mga port, `REQUIRE_API_KEY`, lokal at mga setting ng kulay); ilagay ang lahat ng iba pa sa `~/.omniroute/.env`. Tingnan [ang mga kontrata sa paglulunsad CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### Tray mode
 

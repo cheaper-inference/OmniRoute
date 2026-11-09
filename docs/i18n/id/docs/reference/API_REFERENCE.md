@@ -357,29 +357,34 @@ Content-Type: application/json
 }
 ```
 
-Provider yang tersedia mencakup OpenAI (GPT Image 2), xAI (Grok Image), Together AI (FLUX), Fireworks AI, Nebius (FLUX), Hyperbolic, NanoBanana, **OpenRouter**, **ZenMux**, SD WebUI (lokal), dan ComfyUI (lokal).
+Provider yang tersedia mencakup OpenAI (GPT Image 2), xAI (Grok Image), Together AI (FLUX), Fireworks AI, Nebius (FLUX), Hyperbolic, NanoBanana, **OpenRouter**, **ZenMux**, SD WebUI (lokal), ComfyUI (lokal).
 
 `n` mengembalikan `n` gambar dalam `data[]`. Provider yang API upstream-nya mengembalikan satu gambar per panggilan
 (Black Forest Labs, Stability AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik,
-NVIDIA NIM, Cloudflare Workers AI) mendapatkan `n` panggilan upstream terpisah, dengan maksimum 4 panggilan yang berjalan bersamaan. `seed` tetap diimbangi berdasarkan indeks panggilan (`seed`, `seed + 1`, …), sehingga gambar berbeda tetapi tetap dapat direproduksi. `n` dibatasi hingga 10. Permintaan gagal secara keseluruhan jika ada panggilan yang gagal. Daftar format fan-out terdapat dalam `SINGLE_IMAGE_FANOUT_FORMATS` di
+NVIDIA NIM, Cloudflare Workers AI) mendapatkan `n` panggilan upstream terpisah, dengan maksimal 4 panggilan yang berjalan bersamaan. `seed`
+tetap digeser berdasarkan indeks panggilan (`seed`, `seed + 1`, …), sehingga gambarnya berbeda tetapi tetap dapat direproduksi. `n` dibatasi hingga 10. Permintaan gagal secara keseluruhan jika ada panggilan yang gagal. Daftar format fan-out adalah `SINGLE_IMAGE_FANOUT_FORMATS` dalam
 `open-sse/handlers/imageGeneration/fanOut.ts`.
 
-ZenMux menggunakan kembali koneksi kunci API yang ada dan menerima awalan `zenmux/` atau `zm/`:
+ZenMux menggunakan kembali koneksi kunci API yang ada dan menerima prefiks `zenmux/` atau `zm/`:
 
-- `zenmux/openai/gpt-image-2` menggunakan API OpenAI Images milik ZenMux. Opsi yang tersedia mencakup `size`,
+- `zenmux/openai/gpt-image-2` menggunakan API OpenAI Images milik ZenMux. Opsi mencakup `size`,
   `quality`, `n`, `output_format`, `output_compression`, `background`, dan `response_format`.
-- Publisher lain, seperti `zm/meta/muse-image-1.0`, menggunakan endpoint `:predict` Vertex AI milik ZenMux. `n` dipetakan ke `sampleCount`, `aspect_ratio` ke `aspectRatio`, dan `image_size`
-  (`1K`, `2K`, `4K`) ke `sampleImageSize`. `size` dalam piksel hanya menyediakan rasio aspek,
-  bukan dimensi piksel yang dijamin. Rasio, resolusi, dan jumlah yang didukung bervariasi menurut model.
-- `zm/inclusionai/ming-image-0.1-design` memilih dimensinya sendiri. Hilangkan `size`,
-  `aspect_ratio`, dan `image_size`; nilai yang ditentukan secara eksplisit akan mengembalikan HTTP 400. PNG, JPEG, dan WebP
+- Publisher lain, seperti `zm/meta/muse-image-1.0`, menggunakan endpoint Vertex AI `:predict` milik ZenMux. `n` dipetakan ke `sampleCount`, `aspect_ratio` ke `aspectRatio`, dan `image_size`
+  (`1K`, `2K`, `4K`) ke `sampleImageSize`. `size` dalam piksel hanya memberikan rasio aspek,
+  bukan dimensi piksel yang dijamin. Rasio, resolusi, dan jumlah yang didukung berbeda-beda menurut model.
+- `zm/inclusionai/ming-image-0.1-design` menentukan dimensinya sendiri. Hilangkan `size`,
+  `aspect_ratio`, dan `image_size`; nilai eksplisit akan menghasilkan HTTP 400. PNG, JPEG, dan WebP
   dapat diminta dengan `output_format`.
 
-Integrasi ini mendukung pembuatan teks-ke-gambar, bukan pengeditan gambar referensi. Output
-Vertex dinormalisasi menjadi `data[].b64_json`; `response_format: "url"` mengembalikan URL upstream HTTPS atau URL data base64 jika hanya byte gambar yang tersedia. Output yang kosong/tersaring
-mengembalikan error, bukan keberhasilan kosong. Akses model bergantung pada akun ZenMux.
+Integrasi ini mendukung pembuatan teks-ke-gambar, bukan pengeditan gambar referensi. Output Vertex dinormalisasi menjadi `data[].b64_json`; `response_format: "url"` mengembalikan URL HTTPS upstream atau URL data base64 jika hanya byte gambar yang tersedia. Output yang kosong/disaring
+menghasilkan error, bukan keberhasilan kosong. Akses model bergantung pada akun ZenMux.
 Lihat [API Vertex ZenMux](https://docs.zenmux.ai/api/vertexai/generate-images) dan
-[API Images OpenAI](https://docs.zenmux.ai/api/openai/generate-an-image).
+[API OpenAI Images](https://docs.zenmux.ai/api/openai/generate-an-image).
+
+Koneksi login Microsoft 365 Copilot menyediakan `copilot-m365-web/m365-copilot-image`
+melalui alat gambar bawaan Copilot: satu giliran Copilot per gambar (`n` 1–4), `size` hanya mengarahkan
+orientasi, dan gambar dikembalikan secara inline (`b64_json`, atau URL data untuk
+`response_format: "url"`). Lihat [Microsoft 365 Copilot](../providers/COPILOT-M365.md#image-generation).
 
 ```bash
 # Daftar semua model gambar
@@ -840,13 +845,25 @@ serta pemeriksaan `input_file_id` saat pembuatan). `GET /v1/batches` menolak pem
 
 Abstraksi penyedia web/pencarian (Tavily, Brave, Exa, Serper, dll.).
 
-| Method | Path                   | Description                                                                                      |
+| Metode | Path                   | Deskripsi                                                                                        |
 | ------ | ---------------------- | ------------------------------------------------------------------------------------------------ |
 | GET    | `/v1/search`           | Mencantumkan penyedia pencarian yang dikonfigurasi + kapabilitas                                 |
 | POST   | `/v1/search`           | Menjalankan kueri pencarian — isi divalidasi oleh `v1SearchSchema`, mendukung caching/coalescing |
 | GET    | `/v1/search/analytics` | Statistik hit/latensi/cache per penyedia                                                         |
 
-**Autentikasi:** Bearer API key (`extractApiKey` + `isValidApiKey`). Kebijakan pencarian diterapkan melalui `enforceApiKeyPolicy`.
+**Autentikasi:** Kunci API Bearer (`extractApiKey` + `isValidApiKey`). Kebijakan pencarian diterapkan melalui `enforceApiKeyPolicy`.
+
+**Pemilihan otomatis:** tanpa `provider`, penyedia termurah dengan koneksi yang dikonfigurasi akan digunakan
+terlebih dahulu dan penyedia termurah berikutnya menjadi failover. Penyedia gratis sebagai pilihan terakhir (`duckduckgo-free`) hanya
+digunakan ketika tidak ada penyedia lain yang dikonfigurasi. SearXNG yang di-host sendiri dihitung sebagai telah dikonfigurasi setelah
+koneksinya menyimpan `baseUrl` yang sebenarnya (bukan default katalog `http://localhost:8888/search`): penyedia ini
+kemudian diperingkatkan sebagai penyedia $0 di atas penyedia yang menggunakan kunci, dengan penyedia berkunci termurah sebagai failover,
+termasuk ketika SearXNG menjawab 400, 401, 403, atau 404. `baseUrl` yang bukan URL `http(s)` valid
+atau yang mengarah ke alamat metadata cloud tidak dihitung. Koneksi SearXNG yang menyimpan token
+diperingkatkan dengan cara ini hanya melalui `https://` atau `http://` loopback. Melalui `http://` plain jarak jauh,
+koneksi tersebut tidak pernah menjadi failover dan tetap menjadi pilihan terakhir, hanya digunakan ketika tidak ada
+penyedia lain yang dikonfigurasi atau ketika diminta berdasarkan nama, sehingga token memang dikirim dalam teks biasa pada
+kedua kasus tersebut.
 
 ### `provider_options` Exa dan Tavily
 
@@ -1008,30 +1025,28 @@ alih-alih dikirim dua kali. Sumber: `src/lib/quota/quotaSessionRecovery.ts`.
 
 ---
 
-## Penggunaan mandiri (`/api/usage/om-usage`)
+## Penggunaan layanan mandiri (`/api/usage/om-usage`)
 
-Kunci API apa pun dapat membaca penggunaan dan kuotanya **sendiri** — tanpa autentikasi manajemen. Ini adalah endpoint yang
-digunakan klien (CLI, panel OmniCopilot) untuk menampilkan pengeluaran pemegang kunci.
+Kunci API apa pun dapat dibaca **miliknya sendiri** penggunaan dan kuota — tanpa autentikasi manajemen. Ini adalah titik akhir yang digunakan klien (CLI, panel OmniCopilot ) untuk menunjukkan pembelanjaan mereka kepada pemegang kunci.
 
 ```bash
-# Bentuk teks (kontrak historis — teks biasa untuk terminal)
+# Text form (the historical contract — plain text for a terminal)
 curl -H "Authorization: Bearer <your-api-key>" \
   http://localhost:20128/api/usage/om-usage
 
-# Bentuk terstruktur — yang digunakan UI
+# Structured form — what a UI consumes
 curl -H "Authorization: Bearer <your-api-key>" \
   "http://localhost:20128/api/usage/om-usage?format=json"
 ```
 
-Kunci tersebut harus mengaktifkan **`allowUsageCommand`** (dinonaktifkan secara default — pengelola kunci API di dasbor
-mengubahnya per kunci). Jika tidak, endpoint mengembalikan `403`.
+Kuncinya harus ada **`allowUsageCommand`** diaktifkan (dinonaktifkan secara default — pengelola kunci API dasbor akan mengaktifkannya per kunci). Tanpanya, titik akhir akan menjawab `403`.
 
-`?format=json` mengembalikan bentuk yang dibedakan sehingga pemanggil tidak pernah membaca bidang data dari penolakan. Saat berhasil:
+`?format=json` mengembalikan bentuk yang didiskriminasi sehingga pemanggil tidak pernah membaca bidang data dari penolakan. Tentang kesuksesan:
 
 ```jsonc
 {
   "allowed": true,
-  // hanya ada jika kunci memilih ikut serta dalam batas penggunaan per kunci (USD harian/mingguan):
+  // present only when the key opted into per-key usage limits (daily/weekly/5-hour USD):
   "personal": {
     "dailySpentUsd": 1.25,
     "dailyLimitUsd": 5,
@@ -1040,9 +1055,9 @@ mengubahnya per kunci). Jika tidak, endpoint mengembalikan `403`.
     "weeklyLimitUsd": 20,
     "weeklyResetAtIso": "…" /* … */,
   },
-  // snapshot kuota provider yang dipilih, atau null jika belum ada yang di-cache:
+  // the selected provider quota snapshot, or null when nothing is cached yet:
   "provider": { "connectionId": "…", "provider": "claude", "plan": "…", "quotas": {/* … */} },
-  // snapshot setiap koneksi, sehingga UI dapat merender beberapa provider secara berdampingan:
+  // every connection's snapshot, so a UI can render several providers side by side:
   "providers": [
     { "connectionId": "…", "provider": "claude" /* … */ },
     { "provider": "codex" /* … */ },
@@ -1050,13 +1065,9 @@ mengubahnya per kunci). Jika tidak, endpoint mengembalikan `403`.
 }
 ```
 
-Saat ditolak (kunci `401` tidak valid / tidak diizinkan `403`), rute yang sama mengembalikan
-`{ "allowed": false, "error": { "message": "…" } }` — `personal`/`provider`
-yang ada tetapi kosong (kunci diizinkan, belum ada data yang diperoleh) merupakan keadaan yang berbeda dari penolakan, dan hanya bentuk JSON
-yang membedakan keduanya.
+Pada penolakan (`401` kunci buruk / `403` tidak diizinkan) rute yang sama mengembalikan `{ "allowed": false, "error": { "message": "…" } }` — `personal`/`provider` yang ada tetapi kosong (kunci diizinkan, belum ada yang dipelajari) adalah keadaan yang berbeda dari penolakan, dan hanya bentuk JSON yang membedakannya.
 
-**Auth:** kunci API Bearer milik pemanggil, divalidasi dengan `isValidApiKey` — ini _bukan_
-permukaan manajemen (`/api/keys/…`), yang tetap berada di balik `requireManagementAuth`.
+**Otentikasi:** kunci API Pembawa milik pemanggil, divalidasi dengan `isValidApiKey` — ini _bukan_ permukaan manajemen (`/api/keys/…`), yang tetap berada di belakang `requireManagementAuth`.
 
 ### Persentase Kuota Mentah vs. Disesuaikan dengan Batas
 
@@ -1324,38 +1335,39 @@ dan rantai prioritas di `src/lib/modelCapabilityLimits.ts`.
 
 ### Izin kunci API
 
-`PATCH /api/keys/{id}` memperbarui izin kunci yang sudah ada. Seperti setiap rute `/api/keys*`, rute ini memerlukan otorisasi manajemen (lihat [Autentikasi Manajemen](../guides/MANAGEMENT-AUTH.md)), bukan kunci inferensi. Kirim hanya kolom yang ingin Anda ubah; permintaan tanpa satu pun kolom tersebut ditolak dengan `No valid fields to update`. Kolom yang diterima ditentukan oleh `updateKeyPermissionsSchema` di `src/shared/validation/schemas/keys.ts`.
+`PATCH /api/keys/{id}` memperbarui izin kunci yang ada. Seperti setiap rute `/api/keys*` ia memerlukan otorisasi manajemen (lihat [Otentikasi Manajemen](../guides/MANAGEMENT-AUTH.md) ), bukan kunci inferensi. Kirim hanya kolom yang ingin Anda ubah; permintaan yang tidak ada satupun ditolak dengan `No valid fields to update`. Bidang yang diterima ditentukan oleh `updateKeyPermissionsSchema` di `src/shared/validation/schemas/keys.ts`.
 
-| Field                                       | Type                                                               | Notes                                                                                                                                                               |
-| ------------------------------------------- | ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `name`                                      | string, 1-200 karakter                                             |                                                                                                                                                                     |
-| `isActive`                                  | boolean                                                            |                                                                                                                                                                     |
-| `isBanned`                                  | boolean                                                            |                                                                                                                                                                     |
-| `expiresAt`                                 | datetime ISO 8601 atau `null`                                      | `null` menghapus waktu kedaluwarsa                                                                                                                                  |
-| `modelAccessMode`                           | `all` \| `restricted`                                              | `allowedModels` harus kosong ketika mode-nya `all`                                                                                                                  |
-| `allowedModels`, `blockedModels`            | array string, hingga 1000                                          |                                                                                                                                                                     |
-| `allowedCombos`                             | array string, hingga 500                                           | Menentukan combo yang dapat dipanggil oleh key; model langsung diatur oleh `modelAccessMode` / `allowedModels`                                                      |
-| `connectionAccessMode`                      | `all` \| `restricted`                                              | `allowedConnections` harus tidak kosong ketika `restricted` dan kosong ketika `all`                                                                                 |
-| `allowedConnections`                        | array UUID, hingga 100                                             |                                                                                                                                                                     |
-| `allowAutoCombos`                           | boolean                                                            | `false` menolak permintaan untuk model `auto/*` dengan key ini; key yang tidak pernah menetapkannya diizinkan                                                       |
-| `catalogScope`                              | `all` \| `combos` \| `models`                                      | Menentukan apa yang dicantumkan oleh `GET /v1/models` untuk key ini (hanya combo, hanya model, atau keduanya); ini tidak mengubah apa yang dapat dipanggil oleh key |
-| `forcedModel`                               | string hingga 300 karakter, atau `null`                            | Merutekan permintaan chat ke model/combo ini, mengesampingkan `X-Route-Model` dan `body.model`; batasan key tetap berlaku                                           |
-| `noLog`, `autoResolve`                      | boolean                                                            |                                                                                                                                                                     |
-| `throttleDelayMs`                           | integer, 0-300000                                                  |                                                                                                                                                                     |
-| `maxSessions`                               | integer, 0-10000                                                   |                                                                                                                                                                     |
-| `rateLimits`                                | array `{ limit, window }` (integer positif, hingga 50) atau `null` | `null` menghapus batas                                                                                                                                              |
-| `accessSchedule`                            | objek jadwal atau `null`                                           | `null` menghapus jadwal                                                                                                                                             |
-| `scopes`                                    | array string, hingga 32                                            |                                                                                                                                                                     |
-| `allowedEndpoints`                          | array string, hingga 20                                            |                                                                                                                                                                     |
-| `streamDefaultMode`                         | `legacy` \| `json`                                                 |                                                                                                                                                                     |
-| `cacheDefaultMode`                          | `legacy` \| `bypass`                                               | Lihat [Pelewatan cache per key](#per-key-cache-bypass)                                                                                                              |
-| `compressionEnabled`                        | boolean                                                            |                                                                                                                                                                     |
-| `codexServiceMode`                          | salah satu mode layanan Codex                                      |                                                                                                                                                                     |
-| `disableNonPublicModels`                    | boolean                                                            |                                                                                                                                                                     |
-| `allowUsageCommand`                         | boolean                                                            |                                                                                                                                                                     |
-| `usageLimitEnabled`                         | boolean                                                            |                                                                                                                                                                     |
-| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | number >= 0 or `null`                                              |                                                                                                                                                                     |
-| `chaosModeEnabled`                          | boolean                                                            |                                                                                                                                                                     |
+| Field                                       | Type                                                               | Notes                                                                                                                                                                                                                                                                                 |
+| ------------------------------------------- | ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`                                      | string, 1-200 karakter                                             |                                                                                                                                                                                                                                                                                       |
+| `isActive`                                  | boolean                                                            |                                                                                                                                                                                                                                                                                       |
+| `isBanned`                                  | boolean                                                            |                                                                                                                                                                                                                                                                                       |
+| `expiresAt`                                 | datetime ISO 8601 atau `null`                                      | `null` menghapus waktu kedaluwarsa                                                                                                                                                                                                                                                    |
+| `modelAccessMode`                           | `all` \| `restricted`                                              | `allowedModels` harus kosong ketika mode-nya `all`                                                                                                                                                                                                                                    |
+| `allowedModels`, `blockedModels`            | array string, hingga 1000                                          |                                                                                                                                                                                                                                                                                       |
+| `allowedCombos`                             | array string, hingga 500                                           | Menentukan combo yang dapat dipanggil oleh key; model langsung diatur oleh `modelAccessMode` / `allowedModels`                                                                                                                                                                        |
+| `connectionAccessMode`                      | `all` \| `restricted`                                              | `allowedConnections` harus tidak kosong ketika `restricted` dan kosong ketika `all`                                                                                                                                                                                                   |
+| `allowedConnections`                        | array UUID, hingga 100                                             |                                                                                                                                                                                                                                                                                       |
+| `allowAutoCombos`                           | boolean                                                            | `false` menolak permintaan untuk model `auto/*` dengan key ini; key yang tidak pernah menetapkannya diizinkan                                                                                                                                                                         |
+| `catalogScope`                              | `all` \| `combos` \| `models`                                      | Menentukan apa yang dicantumkan oleh `GET /v1/models` untuk key ini (hanya combo, hanya model, atau keduanya); ini tidak mengubah apa yang dapat dipanggil oleh key                                                                                                                   |
+| `forcedModel`                               | string hingga 300 karakter, atau `null`                            | Merutekan permintaan chat ke model/combo ini, mengesampingkan `X-Route-Model` dan `body.model`; batasan key tetap berlaku                                                                                                                                                             |
+| `noLog`, `autoResolve`                      | boolean                                                            |                                                                                                                                                                                                                                                                                       |
+| `throttleDelayMs`                           | integer, 0-300000                                                  |                                                                                                                                                                                                                                                                                       |
+| `maxSessions`                               | integer, 0-10000                                                   |                                                                                                                                                                                                                                                                                       |
+| `rateLimits`                                | array `{ limit, window }` (integer positif, hingga 50) atau `null` | `null` menghapus batas                                                                                                                                                                                                                                                                |
+| `accessSchedule`                            | objek jadwal atau `null`                                           | `null` menghapus jadwal                                                                                                                                                                                                                                                               |
+| `scopes`                                    | array string, hingga 32                                            |                                                                                                                                                                                                                                                                                       |
+| `allowedEndpoints`                          | array string, hingga 20                                            |                                                                                                                                                                                                                                                                                       |
+| `streamDefaultMode`                         | `legacy` \| `json`                                                 |                                                                                                                                                                                                                                                                                       |
+| `cacheDefaultMode`                          | `legacy` \| `bypass`                                               | Lihat [Pelewatan cache per key](#per-key-cache-bypass)                                                                                                                                                                                                                                |
+| `compressionEnabled`                        | boolean                                                            |                                                                                                                                                                                                                                                                                       |
+| `codexServiceMode`                          | salah satu mode layanan Codex                                      |                                                                                                                                                                                                                                                                                       |
+| `disableNonPublicModels`                    | boolean                                                            |                                                                                                                                                                                                                                                                                       |
+| `allowUsageCommand`                         | boolean                                                            |                                                                                                                                                                                                                                                                                       |
+| `usageLimitEnabled`                         | boolean                                                            |                                                                                                                                                                                                                                                                                       |
+| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | nomor >= 0 atau `null`                                             |                                                                                                                                                                                                                                                                                       |
+| `fiveHourUsageLimitUsd`                     | nomor >= 0 atau `null`                                             | Anggaran USD 5 jam bergulir, diberlakukan seperti batas harian dan mingguan (`usageLimitEnabled`, `UNPRICED_USAGE_BUDGET_POLICY`). `retry-after` adalah saat pembelanjaan terlama dalam jendela sudah habis, yang dapat menyebabkan kunci yang jauh melebihi batasnya masih diblokir. |
+| `chaosModeEnabled`                          | boolean                                                            |                                                                                                                                                                                                                                                                                       |
 
 ```bash
 curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
@@ -1405,6 +1417,33 @@ curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
 | `/api/modality-bridge/stats`         | GET        | `attempts` dalam memori, keberhasilan/`bridged`, kegagalan, cache hit, `totalLatencyMs`, `latencySamples`, `averageLatencyMs` yang dihitung berdasarkan sampel, dan waktu penggunaan terakhir (direset saat dimulai ulang; autentikasi manajemen)                                                                                                                                                              |
 | `/api/modality-bridge/video/runtime` | GET        | Pemeriksaan strict trusted-loopback sebelum autentikasi/probe manajemen; ketersediaan dan versi FFmpeg/ffprobe yang telah disanitasi (no-store)                                                                                                                                                                                                                                                                |
 | `/api/modality-bridge/video/extract` | POST       | Broker byte trusted-loopback internal yang telah diautentikasi; input 50 MiB, antrean yang dibatasi/output 32 MiB, kapasitas `503`, pemutusan `499`, tenggat `504`; bukan API unggah publik                                                                                                                                                                                                                    |
+
+### Penelusuran mendetail frame video
+
+`GET /api/v1/video-bridge/drilldown` membaca handle opak yang terikat tenant, yang dikembalikan dalam
+`x-omniroute-video-drilldown` setelah permintaan Video Bridge yang telah mendapatkan persetujuan eksplisit.
+Pembacaan maupun `DELETE` selalu memerlukan kunci API yang valid dan izin independen operator
+`modalityBridgeVideoDrilldownRemoteEnabled`. Retensi produksi juga memerlukan
+`modalityBridgeVideoDrilldownEnabled` dan `drilldown: true` yang ketat pada setiap bagian.
+Jika kunci memiliki daftar izin endpoint yang tidak kosong, daftar tersebut harus mencakup
+`video` untuk GET dan DELETE, baik pemanggil menggunakan `/v1` maupun `/api/v1`.
+
+Kueri GET: `handle` wajib diisi; `variant` bersifat opsional (`preview`, `standard`, `detail`),
+`limit` (1–8; `frames` lama diterima tetapi tidak dapat digabungkan dengan `limit`),
+`page` berbasis nol, serta detik `start`/`end`. Jika kedua batas fokus
+diberikan, `end` harus lebih besar daripada `start`. Kunci kueri duplikat/tidak dikenal
+ditolak. Respons yang berhasil berisi `derivation`, `durationSeconds`, `frames`,
+`hasMore`, `page`, `variant`, dan `focusWindow` opsional; JSON no-store dibatasi hingga
+32 MiB termasuk Base64. Output yang terlalu besar mengembalikan 413; minta lebih sedikit frame.
+
+`DELETE /api/v1/video-bridge/drilldown?handle=...` mengembalikan `{ "removed": 0|1 }`.
+GET untuk handle yang tidak dikenal, kedaluwarsa, dan lintas kunci tidak dapat dibedakan, semuanya mengembalikan
+respons 404; DELETE lintas kunci tidak dapat menghapus entri milik pemiliknya. Akses yang dinonaktifkan mengembalikan 403, autentikasi yang hilang/tidak valid 401, kueri tidak valid 400, pembatalan 499, dan galat sementara 503.
+Handle bersifat lokal proses, kedaluwarsa setelah sepuluh menit, dan tidak bertahan setelah proses dimulai ulang.
+Handle baru menggunakan `v1.` ditambah token Base64URL acak sepanjang 32 byte; hanya hash token yang disimpan.
+Token lama sepanjang 64 karakter heksadesimal tetap dapat dibaca secara sintaksis untuk kompatibilitas.
+Lihat [perlindungan Video Bridge](../security/GUARDRAILS.md#video-bridge-videobridgets-videobridgepipelinets)
+untuk detail persetujuan, kuota, dan derivasi varian.
 
 ### Pencadangan & Ekspor/Impor
 
@@ -1508,15 +1547,15 @@ Endpoint ini mencerminkan format API Gemini untuk klien yang mengharapkan kompat
 
 ### API Internal / Sistem
 
-| Endpoint                 | Method | Deskripsi                                                                  |
-| ------------------------ | ------ | -------------------------------------------------------------------------- |
-| `/api/init`              | GET    | Pemeriksaan inisialisasi aplikasi (digunakan saat pertama kali dijalankan) |
-| `/api/tags`              | GET    | Tag model yang kompatibel dengan Ollama (untuk klien Ollama)               |
-| `/api/restart`           | POST   | Memicu mulai ulang server secara graceful                                  |
-| `/api/shutdown`          | POST   | Memicu penghentian server secara graceful                                  |
-| `/api/system/env/repair` | POST   | Memperbaiki variabel lingkungan provider OAuth                             |
-| `/api/system/version`    | GET    | Versi saat ini/terbaru, status pembaruan, kanal rilis                      |
-| `/api/system/version`    | POST   | Memulai pembaruan yang memperhitungkan deployment ke versi terbaru         |
+| Endpoint                 | Method | Deskripsi                                                           |
+| ------------------------ | ------ | ------------------------------------------------------------------- |
+| `/api/init`              | GET    | Memulai layanan sinkronisasi latar belakang (autentikasi manajemen) |
+| `/api/tags`              | GET    | Tag model yang kompatibel dengan Ollama (untuk klien Ollama)        |
+| `/api/restart`           | POST   | Memicu mulai ulang server secara graceful                           |
+| `/api/shutdown`          | POST   | Memicu penghentian server secara graceful                           |
+| `/api/system/env/repair` | POST   | Memperbaiki variabel lingkungan provider OAuth                      |
+| `/api/system/version`    | GET    | Versi saat ini/terbaru, status pembaruan, saluran rilis             |
+| `/api/system/version`    | POST   | Memulai pembaruan yang menyadari deployment ke versi terbaru        |
 
 > **Catatan:** Endpoint ini digunakan secara internal oleh sistem atau untuk kompatibilitas klien Ollama. Endpoint ini biasanya tidak dipanggil oleh pengguna akhir.
 

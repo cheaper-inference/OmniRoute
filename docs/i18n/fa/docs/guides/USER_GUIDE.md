@@ -339,24 +339,24 @@ codex "your prompt"
 
 ## 🚀 استقرار
 
-### نصب سراسری npm (توصیهشده)
+### نصب جهانی npm (توصیه می شود)
 
 ```bash
 npm install -g omniroute
 
-# ایجاد پوشهٔ پیکربندی
+# Create config directory
 mkdir -p ~/.omniroute
 
-# ایجاد فایل .env (به .env.example مراجعه کنید)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# راهاندازی سرور
+# Start server
 omniroute
-# یا با درگاه سفارشی:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI بهطور خودکار `.env` را از `~/.omniroute/.env` یا `./.env` بارگذاری میکند.
+CLI به طور خودکار `.env` از `~/.omniroute/.env` یا `./.env` بارگیری می کند. یک `./.env` در دایرکتوری کاری ممکن است فقط یک لیست مجاز کوتاه از کلیدها (پورت ها، `REQUIRE_API_KEY`، محلی و تنظیمات رنگ) را تنظیم کند. بقیه چیزها را در `~/.omniroute/.env` قرار دهید. به [قراردادهای راه اندازی CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env) مراجعه کنید.
 
 ### حالت سینی سیستم
 

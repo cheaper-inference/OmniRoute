@@ -356,24 +356,24 @@ API कुञ्जी: [ड्यासबोर्डबाट]
 
 ## 🚀 परिनियोजन
 
-### ग्लोबल npm स्थापना (सिफारिस गरिएको)
+### ग्लोबल एनपीएम स्थापना (सिफारिस गरिएको)
 
 ```bash
 npm install -g omniroute
 
-# कन्फिग डाइरेक्टरी सिर्जना गर्नुहोस्
+# Create config directory
 mkdir -p ~/.omniroute
 
-# .env फाइल सिर्जना गर्नुहोस् (.env.example हेर्नुहोस्)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# सर्भर सुरु गर्नुहोस्
+# Start server
 omniroute
-# वा आफूअनुकूल पोर्टसहित:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI ले `~/.omniroute/.env` वा `./.env` बाट `.env` स्वतः लोड गर्छ।
+CLI स्वचालित रूपमा `~/.omniroute/.env` वा `./.env` बाट `.env` लोड गर्दछ। काम गर्ने डाइरेक्टरीमा रहेको `./.env` कुञ्जीहरूको छोटो अनुमति सूची मात्र सेट गर्न सक्छ (पोर्टहरू, `REQUIRE_API_KEY`, लोकेल र रङ सेटिङहरू); सबै कुरा `~/.omniroute/.env` मा राख्नुहोस्। [CLI सुरुवात सम्झौताहरू](CLI-LAUNCH-CONTRACTS.md#working-directory-env) हेर्नुहोस्।
 
 ### ट्रे मोड
 

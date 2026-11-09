@@ -129,6 +129,27 @@ A pontuação automática seleciona o melhor fornecedor/modelo para cada pedido
 | `src/sse/handlers/chat.ts`                                | Integração: curto-circuito do prefixo automático       |
 | `src/shared/constants/providers.ts`                       | Entrada de sistema `SYSTEM_PROVIDERS.auto`             |
 
+## Preferências de conta para combos automáticos guardados
+
+O editor Intelligent Auto oferece um opcional** Preferências da conta** secção. Cada ligação pode ser Preferencial, Normal (o predefinido), Reserva ou Eliminada. Várias ligações podem partilhar uma camada. A seleção automática ocorre no primeiro nível elegível, mantendo o seu comportamento scoring/router nesse local; as tentativas falhadas recaem nas restantes contas concretas, preferidas antes do normal antes da reserva. As ligações excluídas nunca são utilizadas por este combo.
+
+A configuração é guardada como `config.accountPreferences`, codificada pela ligação ID:
+
+```json
+{
+  "accountPreferences": {
+    "connection-a": "preferred",
+    "connection-b": "preferred",
+    "connection-c": "reserve",
+    "connection-d": "excluded"
+  }
+}
+```
+
+Um mapa omitido ou vazio mantém a rota existente. As preferências não permitem ligações desativadas, concedem acesso à chave API, restauram candidatos bloqueados por quotas ou ignoram verificações de orçamento. Cada tentativa é restrita à sua ligação concreta, pelo que o substituto da conta não pode saltar níveis atrás do router combinado. A afinidade de sessão existente pode manter uma conta elegível; eliminar a conta ligada a um turno nativo interrompe esse turno em vez de alterar as contas silenciosamente.
+
+As preferências configuradas utilizam o caminho automático com reconhecimento de conta: cache de contexto não ligado, pipeline inteligente, caos e atalhos de sombra não são despachados. A cobertura especulativa está desativada para estes pedidos, pelo que as contas de reserva não podem concorrer com as preferenciais. Outras estratégias de combinação não interpretam esta configuração. Alterar um combo para longe de Automático mantém as preferências guardadas para uma troca posterior.
+
 ## Nomes de combos que correspondem a um ID de modelo real
 
 Um combo cujo `name` é idêntico a um ID de modelo simples (por exemplo, um combo chamado
@@ -188,36 +209,38 @@ Dois problemas comuns:
 
 Consulte [#7992](https://github.com/diegosouzapw/OmniRoute/issues/7992) e [#7111](https://github.com/diegosouzapw/OmniRoute/issues/7111) para conhecer a confusão original aqui documentada.
 
-## Como Funciona (Auto-Combos Persistentes)
+## Como funciona (combos automáticos persistentes)
 
-O Motor de Auto-Combo seleciona dinamicamente o melhor fornecedor/modelo para cada pedido, utilizando uma **função de pontuação com 16 fatores** (definida em `open-sse/services/autoCombo/scoring.ts` → `DEFAULT_WEIGHTS`). A soma dos pesos predefinidos é `1.0`; os pesos personalizados são renormalizados por `normalizeScoringWeights()`. Dois dos dezasseis — `cacheAffinity` e `resetWindowAffinity` — têm um peso predefinido de `0`; `reliability` tem `0` em `DEFAULT_WEIGHTS`, mas `0.03` nos pacotes genéricos e `0.04` em `reliability-first`, e `quality` tem `0.02` nos pacotes (`0.03` em `quality-first`): estes fatores continuam a ser calculados para cada candidato, e `cacheAffinity` controla a desduplicação da cache de prompts fora da pontuação, pelo que os fatores com valor predefinido igual a zero simplesmente não têm influência por predefinição, enquanto os pacotes têm.
+O Auto-Combo Engine seleciona dinamicamente o melhor provider/model para cada pedido utilizando um **Função de pontuação de 16 fatores** (definido em `open-sse/services/autoCombo/scoring.ts` → `DEFAULT_WEIGHTS`). Os pesos padrão somam `1.0`; os pesos personalizados são renormalizados pelo `normalizeScoringWeights()`. Dois dos dezasseis — `cacheAffinity` e `resetWindowAffinity` — transportam um peso padrão de `0`; `reliability` carrega `0` em `DEFAULT_WEIGHTS`, mas `0.03` em pacotes genéricos e `0.04` em `reliability-first`, e `quality` carrega `0.02` em pacotes (`0.03` em `quality-first`): ainda são calculados para cada candidato, e `cacheAffinity` bloqueia a desduplicação imediata da cache fora da pontuação, pelo que os factores padrão zero simplesmente não votam por defeito, enquanto os pacotes o fazem.
 
-![Pontuação de 16 fatores do Auto-Combo](../diagrams/exported/auto-combo-scoring.svg)
+![Auto-Combo 16-factor scoring](../diagrams/exported/auto-combo-scoring.svg)
 
-> Fonte: [diagrams/auto-combo-scoring.mmd](../diagrams/auto-combo-scoring.mmd) (regenere através de `npm run docs:render-diagrams`). O nome do ficheiro é histórico; o código-fonte e o diagrama renderizado mostram todos os 16 fatores declarados em `DEFAULT_WEIGHTS`.
+> Fonte: [diagrams/auto-combo-scoring.mmd](../diagrams/auto-combo-scoring.mmd) (regenerar via `npm run docs:render-diagrams`). O nome do ficheiro é histórico; a fonte e o diagrama renderizado mostram todos os 16 fatores declarados no `DEFAULT_WEIGHTS`.
 
-| Fator                 | Peso Predefinido | Descrição                                                                                                                                                                                                                                                                           |
-| :-------------------- | :--------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `quota`               | 0.1429           | Quota restante / margem do limite de pedidos [0..1]                                                                                                                                                                                                                                 |
-| `health`              | 0.1605           | Pontuação de estado do disjuntor (CLOSED=1.0, HALF_OPEN=0.5, OPEN=0.0)                                                                                                                                                                                                              |
-| `costInv`             | 0.1429           | Custo **combinado** inverso (60% do preço dos tokens de entrada + 40% do preço dos tokens de saída, normalizado) — mais barato = pontuação mais elevada                                                                                                                             |
-| `latencyInv`          | 0.1143           | Latência p95 inversa normalizada relativamente ao conjunto — mais rápido = pontuação mais elevada                                                                                                                                                                                   |
-| `taskFit`             | 0.0762           | Adequação ao tipo de tarefa (programação, revisão, planeamento, análise, depuração, documentação)                                                                                                                                                                                   |
-| `stability`           | 0.0476           | Estabilidade baseada na variância do desvio-padrão da latência — um candidato cujo tempo de resposta oscila obtém uma pontuação mais baixa                                                                                                                                          |
-| `tierPriority`        | 0.0476           | Prioridade do nível da conta — Ultra=1.0, Pro=0.67, Standard=0.33, Free=0.0                                                                                                                                                                                                         |
-| `tierAffinity`        | 0.0476           | Afinidade entre o nível do candidato e o nível recomendado pelo manifesto                                                                                                                                                                                                           |
-| `specificityMatch`    | 0.0476           | Correspondência entre a especificidade do pedido (indicação do manifesto) e o nível do modelo                                                                                                                                                                                       |
-| `contextAffinity`     | 0.0476           | Afinidade entre a necessidade de janela de contexto do pedido e a janela de contexto do modelo                                                                                                                                                                                      |
-| `sessionAvailability` | 0.0476           | Disponibilidade da sessão OAuth da ligação candidata para esta sessão (`getOAuthSessionAvailability()`; as ligações que não utilizam OAuth obtêm uma pontuação de 1.0)                                                                                                              |
-| `connectionDensity`   | 0.0476           | Distribui a carga entre ligações do mesmo fornecedor (anticontenção)                                                                                                                                                                                                                |
-| `cacheAffinity`       | 0.00             | Afinidade de hash rendezvous com a ligação que tem maior probabilidade de já conter o prefixo da cache de prompts deste pedido (`open-sse/services/combo/promptCacheAffinity.ts`); desativada por predefinição (#8008)                                                              |
-| `resetWindowAffinity` | 0.00             | Favorece ligações cuja janela de reposição da quota seja favorável (desativada por predefinição)                                                                                                                                                                                    |
-| `quality`             | 0.03             | Sinal de qualidade do resultado, orientado por feedback, proveniente do monitor de qualidade de eventos de encaminhamento; os candidatos sem observações recebem um valor neutro de 0.5                                                                                             |
-| `reliability`         | 0.00             | Proporção de sucessos observada, `1 - failureRate`, com base em 24 horas de histórico de utilização e um mínimo de dez amostras (caso contrário, são utilizadas métricas em tempo real); os candidatos sem observações são considerados como tendo 1.0. Desativada por predefinição |
+| Fator                 | Peso Predefinido | Descrição                                                                                                                                                                                                                                     |
+| :-------------------- | :--------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `quota`               | 0.1429           | Cota restante/espaço limite de taxa [0..1]                                                                                                                                                                                                    |
+| `health`              | 0.1605           | Pontuação de integridade do disjuntor (CLOSED= 1.0, HALF_OPEN= 0.5, OPEN= 0.0)                                                                                                                                                                |
+| `costInv`             | 0.1429           | Inverso **misturado** custo (60% + de entrada 40% preço do token de saída, normalizado) — mais barato = pontuação mais elevada                                                                                                                |
+| `latencyInv`          | 0.1143           | Latência inversa do p95 normalizada para agrupar — mais rapidamente, pontuação mais elevada =                                                                                                                                                 |
+| `taskFit`             | 0.0762           | Aptidão do tipo de tarefa (codificação, revisão, planeamento, análise, depuração, documentação)                                                                                                                                               |
+| `stability`           | 0.0476           | Estabilidade baseada na variância do desvio padrão da latência — um candidato cujo tempo de resposta oscila com uma pontuação mais baixa                                                                                                      |
+| `tierPriority`        | 0.0476           | Prioridade ao nível da conta — Ultra = 1.0, Pro = 0.67, Standard = 0.33, Free = 0.0                                                                                                                                                           |
+| `tierAffinity`        | 0.0476           | Afinidade entre o nível do candidato e o nível recomendado pelo manifesto                                                                                                                                                                     |
+| `specificityMatch`    | 0.0476           | Correspondência entre a especificidade do pedido (dica manifestada) e a camada do modelo                                                                                                                                                      |
+| `contextAffinity`     | 0.0476           | Afinidade entre a necessidade da janela de contexto do pedido e a janela de contexto do modelo                                                                                                                                                |
+| `sessionAvailability` | 0.0476           | Disponibilidade da sessão OAuth da ligação candidata para esta sessão (`getOAuthSessionAvailability()`; pontuação das ligações não OAuth 1,0)                                                                                                 |
+| `connectionDensity`   | 0.0476           | Distribui a carga entre ligações do mesmo fornecedor (anticoncentração)                                                                                                                                                                       |
+| `cacheAffinity`       | 0.00             | Afinidade de hash rendezvous com a ligação que tem maior probabilidade de já conter o prefixo da cache de prompts deste pedido (`open-sse/services/combo/promptCacheAffinity.ts`); desativada por predefinição (#8008)                        |
+| `resetWindowAffinity` | 0.00             | Tendência para ligações cuja janela de reposição de cota é favorável (desativada por defeito)                                                                                                                                                 |
+| `quality`             | 0.03             | Sinal de qualidade de saída orientado por feedback do rastreador de qualidade de eventos de encaminhamento; os candidatos sem observações recebem um neutro 0,5                                                                               |
+| `reliability`         | 0.00             | Participação de sucesso observada, `1 - failureRate`, de 24 horas de histórico de utilização atrás de um piso de dez amostras (caso contrário, métricas em tempo real); candidatos sem observações são lidos como 1,0. Desativado por defeito |
 
-`quality` (`open-sse/services/routing/quality.ts`): `cold restart → ∅`; `observations = 0 → score 0.5`.
+O rastreador `quality` na memória (`open-sse/services/routing/quality.ts`) fica vazio após um reset a frio, pelo que cada candidato pontua um `0.5` neutro até que as primeiras observações cheguem.
 
-**Soma:** `0.1429 + 0.1605 + 0.1429 + 0.1143 + 0.0762 + (7 × 0.0476) + 0.00 + 0.00 + 0.03 + 0.00 = 1.0`, conforme declarado em `DEFAULT_WEIGHTS`; os pesos configurados pelo utilizador são renormalizados numa distribuição por `normalizeScoringWeights()` antes do cálculo da pontuação.
+> **Quota ilegível (#15347).** Quando um fornecedor tem um coletor de quotas, mas não devolve nada legível (falha na pesquisa, credenciais em falta, utilização apenas de mensagens ou um instantâneo malformado sem `windows` analisável e sem `percentUsed` finito, incluindo `percentUsed: null`), o candidato pontua `0` no eixo `quota` e a sua pontuação final é multiplicada por `UNREADABLE_QUOTA_SOFT_DEPRIORITIZE_FACTOR` (0,5, `autoStrategy.ts`), o mesmo padrão de penalização suave que a penalização do estado da ligação. Uma leitura de utilização com falha é uma evidência sobre a telemetria, não sobre o fornecedor, pelo que é classificada estritamente abaixo de qualquer leitura real, incluindo uma leitura 100%-used confirmada, mas nunca é bloqueada ou despejada. Um fornecedor sem limite reporta `unlimited: true` e pontua como quota total; um fornecedor sem coletor de quotas registado não possui qualquer fonte de telemetria e mantém o padrão `100`.
+
+**Sombra:** `0.1429 + 0.1605 + 0.1429 + 0.1143 + 0.0762 + (7 × 0.0476) + 0.00 + 0.00 + 0.03 + 0.00 = 1.0` conforme declarado em `DEFAULT_WEIGHTS`; os pesos configurados pelo utilizador são renormalizados numa distribuição pelo `normalizeScoringWeights()` antes da pontuação.
 
 ## Pacotes de modos
 
@@ -330,11 +353,13 @@ O motor de combinações do OmniRoute suporta **20 estratégias de encaminhament
 
 Para uma rotação estrita, utilize `round-robin`; ponderações iguais em `weighted` proporcionam um equilíbrio estatístico — não estrito.
 
-### Modo de pipeline agêntico
+### Modo de pipeline agente
 
-Um combo `pipeline` com pelo menos dois modelos pode ativar o encaminhamento entre planeador e executor através de `config.agenticOrchestration.enabled`. O primeiro destino é responsável pelo planeamento e pelas respostas finais; o segundo destino emite chamadas de ferramentas nativas do cliente. O OmniRoute deteta continuações de resultados de ferramentas a partir do protocolo do pedido, pergunta ao planeador se é necessária outra ronda de ferramentas e, dinamicamente, define o executor ou o planeador como o passo final apresentado ao cliente.
+Um combo `pipeline` com pelo menos dois modelos pode optar pelo encaminhamento planner/executor com `config.agenticOrchestration.enabled`. O primeiro alvo possui planeamento e respostas finais; o segundo alvo emite chamadas de ferramentas nativas do cliente. OmniRoute deteta continuações de resultados de ferramentas do protocolo de pedido, pergunta ao planeador se é necessária outra ronda de ferramentas e torna dinamicamente o executor ou o planeador a etapa final orientada para o cliente.
 
-Os modelos adicionais após o segundo destino são cópias de segurança ordenadas do executor. Uma resposta HTTP com falha ou uma exceção de transporte faz avançar para o executor seguinte, mantendo a mesma decisão do planeador e as mesmas ferramentas nativas, mas utilizando o próprio prompt de passo e a ligação resolvida desse executor. A primeira resposta bem-sucedida é devolvida sem alterações, incluindo streaming SSE; as falhas após o início de um stream bem-sucedido não podem ser repetidas aqui. Se todos os executores falharem, é devolvida a última falha. Os cancelamentos do cliente interrompem o encaminhamento.
+Nas continuações dos resultados da ferramenta, OmniRoute também interrompe a execução quando duas rondas consecutivas concluídas repetem as mesmas chamadas de ferramenta com resultados inalterados ou quando todos os resultados marcados explicitamente em duas rondas consecutivas falham. Os resultados alterados permitem chamadas repetidas (por exemplo, sondagens). A proteção é redefinida numa nova solicitação do utilizador, agrupa as chamadas paralelas numa ronda e suporta Anthropic, conclusões de chat, respostas e históricos Gemini. O planeador recebe o motivo e possui a resposta final, mesmo que solicite outra ronda de ferramentas.
+
+Os modelos adicionais após o segundo destino são backups de executores ordenados. Uma resposta HTTP com falha ou exceção de transporte avança para o próximo executor, transportando a mesma decisão do planeador e ferramentas nativas, mas o próprio passo do executor solicita e resolve a ligação. A primeira resposta bem-sucedida é devolvida inalterada, incluindo o streaming SSE ; falhas após o início de um fluxo bem-sucedido não podem ser aqui repetidas. Se todos os executores falharem, será devolvida a última falha. O cliente cancela o envio interrompido.
 
 ```json
 {
@@ -346,7 +371,7 @@ Os modelos adicionais após o segundo destino são cópias de segurança ordenad
 }
 ```
 
-O executor pode emitir várias chamadas independentes numa única resposta. As chamadas dependentes são processadas em turnos posteriores de resultados de ferramentas do cliente, com o planeador a rever cada resultado. `maxToolRounds` tem o valor predefinido `8` e aceita `1`–`32`; uma vez atingido o limite, o planeador tem de produzir a melhor resposta final disponível. As decisões internas do planeador são colocadas em memória intermédia, enquanto a resposta selecionada e apresentada ao cliente preserva a preferência de streaming original.
+O executor pode emitir múltiplas chamadas independentes numa resposta. As chamadas dependentes são tratadas em turnos posteriores de resultados da ferramenta do cliente, com o planeador a rever cada resultado. `maxToolRounds` é padronizado como `8` e aceita `1`–`32`; uma vez atingido, o planeador deve produzir a melhor resposta final disponível. As decisões internas do planeador são armazenadas em buffer, enquanto a resposta selecionada orientada para o cliente preserva a preferência de streaming original.
 
 ### Lote persistente e expansão de contas de `round-robin`
 

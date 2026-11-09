@@ -311,7 +311,7 @@ GET /v1/embeddings
 
 ---
 
-## රූප ජනනය
+## රූප උත්පාදනය
 
 ```bash
 POST /v1/images/generations
@@ -325,33 +325,22 @@ Content-Type: application/json
 }
 ```
 
-ලබා ගත හැකි providers අතර OpenAI (GPT Image 2), xAI (Grok Image), Together AI (FLUX), Fireworks AI, Nebius (FLUX), Hyperbolic, NanoBanana, **OpenRouter**, **ZenMux**, SD WebUI (දේශීය), ComfyUI (දේශීය) ඇතුළත් වේ.
+පවතින සැපයුම්කරුවන් අතර OpenAI (GPT Image 2), xAI (Grok Image), Together AI (FLUX), Fireworks AI, Nebius (FLUX), Hyperbolic, NanoBanana,**OpenRouter** ,**ZenMux** , SD WebUI (දේශීය), ComfyUI (දේශීය).
 
-`n` මඟින් `data[]` තුළ රූප `n`ක් ලබා දේ. upstream API මඟින් එක් call එකකට එක් රූපයක් ලබා දෙන providers
-(Black Forest Labs, Stability AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik,
-NVIDIA NIM, Cloudflare Workers AI) සඳහා වෙන වෙනම upstream calls `n`ක් සිදු කෙරෙන අතර, එකවර ක්රියාත්මක වන calls සංඛ්යාව 4කට සීමා වේ. ස්ථාවර
-`seed` එකක් call index එකෙන් (`seed`, `seed + 1`, …) offset කෙරෙන බැවින්, රූප වෙනස් වන නමුත් නැවත ජනනය කළ හැකි ලෙස පවතී. `n` අගය උපරිම 10කට සීමා වේ. කිසියම් call එකක් අසාර්ථක වුවහොත් සමස්ත request එකම අසාර්ථක වේ. fan-out formats ලැයිස්තුව
-`open-sse/handlers/imageGeneration/fanOut.ts` හි `SINGLE_IMAGE_FANOUT_FORMATS` වේ.
+`n` `data[]` හි `n` රූප ලබා දෙයි. එක් ඇමතුමකට upstream API එක් රූපයක් ලබා දෙන සැපයුම්කරුවන්ට (Black Forest Labs, Stability AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik, NVIDIA NIM, Cloudflare Workers AI) `n` වෙනම උඩුගං ඇමතුම් ලබා ගනී, වැඩිම 4 ගුවන් ගමන්වලදී. ස්ථාවර `seed` ඇමතුම් දර්ශකය (`seed`, `seed + 1`, …) මගින් හිලව් කරනු ලැබේ, එබැවින් රූප වෙනස් වන නමුත් නැවත ප්‍රතිනිෂ්පාදනය කළ හැකිය. `n` 10 ට සීමා කර ඇත. කිසියම් ඇමතුමක් අසාර්ථක වුවහොත් ඉල්ලීම සමස්තයක් ලෙස අසාර්ථක වේ. Fan-out ආකෘති ලැයිස්තුව `open-sse/handlers/imageGeneration/fanOut.ts` හි `SINGLE_IMAGE_FANOUT_FORMATS` වේ.
 
-ZenMux පවතින API-key connection එක නැවත භාවිත කරන අතර `zenmux/` හෝ `zm/` prefixes පිළිගනී:
+ZenMux දැනට පවතින API-යතුරු සම්බන්ධතාවය නැවත භාවිතා කරන අතර `zenmux/` හෝ `zm/` උපසර්ග පිළිගනී:
 
-- `zenmux/openai/gpt-image-2` මඟින් ZenMux හි OpenAI Images API භාවිත කරයි. විකල්ප අතර `size`,
-  `quality`, `n`, `output_format`, `output_compression`, `background`, සහ `response_format` ඇතුළත් වේ.
-- `zm/meta/muse-image-1.0` වැනි අනෙකුත් publishers, ZenMux හි Vertex AI `:predict`
-  endpoint භාවිත කරයි. `n` මඟින් `sampleCount` වෙතද, `aspect_ratio` මඟින් `aspectRatio` වෙතද, සහ `image_size`
-  (`1K`, `2K`, `4K`) මඟින් `sampleImageSize` වෙතද සිතියම්ගත කෙරේ. pixel `size` එකක් මඟින් සපයන්නේ aspect ratio එක පමණක් වන අතර, pixel dimensions සහතික නොවේ. සහාය දක්වන ratios, resolutions, සහ counts model එක අනුව වෙනස් වේ.
-- `zm/inclusionai/ming-image-0.1-design` තමන්ගේම dimensions තෝරා ගනී. `size`,
-  `aspect_ratio`, සහ `image_size` නොසපයන්න; පැහැදිලිව අගයන් සැපයුවහොත් HTTP 400 ලැබේ. `output_format` සමඟ PNG, JPEG, සහ WebP ඉල්ලා සිටිය හැක.
+- `zenmux/openai/gpt-image-2` ZenMux's OpenAI Images API භාවිතා කරයි. විකල්ප අතර `size`, `quality`, `n`, `output_format`, `output_compression`, `background`, සහ `response_format` ඇතුළත් වේ.
+- `zm/meta/muse-image-1.0` වැනි අනෙකුත් ප්‍රකාශකයින් ZenMux හි Vertex AI `:predict` අන්ත ලක්ෂ්‍යය භාවිතා කරයි. `n` සිතියම් `sampleCount` වෙත, `aspect_ratio` සිට `aspectRatio` දක්වා සහ `image_size` (`1K`, `2K`, `4K`) සිට `sampleImageSize` දක්වා. පික්සල් `size` සපයනු ලබන්නේ දර්ශන අනුපාතයක් පමණි, සහතික කළ පික්සල් මානයන් නොවේ. සහාය දක්වන අනුපාත, විභේදන සහ ගණන් මාදිලි අනුව වෙනස් වේ.
+- `zm/inclusionai/ming-image-0.1-design` තමන්ගේම මානයන් තෝරා ගනී. `size`, `aspect_ratio` සහ `image_size` අත්හැර දමන්න; පැහැදිලි අගයන් HTTP 400 ලබා දෙයි. PNG, JPEG, සහ WebP `output_format` සමඟ ඉල්ලා සිටිය හැක.
 
-මෙම integration මඟින් text-to-image generation සඳහා සහාය දක්වන අතර reference-image editing සඳහා සහාය නොදක්වයි. Vertex
-output `data[].b64_json` ලෙස සාමාන්යකරණය කෙරේ; `response_format: "url"` මඟින් upstream
-HTTPS URL එකක් හෝ image bytes පමණක් ලබා ගත හැකි විට base64 data URL එකක් ලබා දේ. හිස්/filtered outputs
-සඳහා හිස් success එකක් වෙනුවට error එකක් ලබා දේ. Model access එක ZenMux account එක මත රඳා පවතී.
-[ZenMux's Vertex API](https://docs.zenmux.ai/api/vertexai/generate-images) සහ
-[OpenAI Images API](https://docs.zenmux.ai/api/openai/generate-an-image) බලන්න.
+මෙම අනුකලනය පෙළ-පින්තූර උත්පාදනය සඳහා සහය දක්වයි, යොමු-රූප සංස්කරණයට නොවේ. Vertex ප්රතිදානය `data[].b64_json` වෙත සාමාන්යකරණය කර ඇත; `response_format: "url"` රූප බයිට් පමණක් ඇති විට upstream HTTPS URL හෝ base64 දත්ත URL ලබා දෙයි. Empty/filtered නිමැවුම් හිස් සාර්ථකත්වයට වඩා දෝෂයක් ලබා දෙයි. ආදර්ශ ප්රවේශය ZenMux ගිණුම මත රඳා පවතී. [ZenMux හි Vertex API](https://docs.zenmux.ai/api/vertexai/generate-images) සහ [OpenAI පින්තූර API](https://docs.zenmux.ai/api/openai/generate-an-image) බලන්න.
+
+Microsoft 365 Copilot පුරනය සම්බන්ධතාවක් Copilot හි බිල්ට් රූප මෙවලම හරහා `copilot-m365-web/m365-copilot-image` සේවය කරයි: එක් රූපයකට එක් Copilot හැරීමක් (`n` 1–4), `size` සුක්කානම පමණක් දිශානතිය, සහ රූප පේළිගතව ආපසු (`b64_json`, හෝ `response_format: "url"` සඳහා දත්ත URL ). [Microsoft 365 Copilot](../providers/COPILOT-M365.md#image-generation) බලන්න.
 
 ```bash
-# සියලුම image models ලැයිස්තුගත කරන්න
+# List all image models
 GET /v1/images/generations
 ```
 
@@ -768,17 +757,19 @@ OpenAI-අනුකූල කණ්ඩායම් සැකසීම.
 
 ---
 
-## සෙවුම් API
+## API සොයන්න
 
-වෙබ්/සෙවුම් සපයන්නන් සඳහා වන abstraction එක (Tavily, Brave, Exa, Serper ආදිය).
+Web/search සපයන්නා වියුක්ත කිරීම (Tavily, Brave, Exa, Serper, ආදිය).
 
-| Method | Path                   | Description                                                                                                       |
-| ------ | ---------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| GET    | `/v1/search`           | වින්යාස කර ඇති සෙවුම් සපයන්නන් සහ හැකියාවන් ලැයිස්තුගත කිරීම                                                      |
-| POST   | `/v1/search`           | සෙවුම් විමසුමක් ක්රියාත්මක කිරීම — `v1SearchSchema` මගින් body එක වලංගු කරයි; caching/coalescing සඳහා සහාය දක්වයි |
-| GET    | `/v1/search/analytics` | සෑම සපයන්නෙකුටම අදාළ hit/latency/cache සංඛ්යාලේඛන                                                                 |
+| ක්රමය | මාර්ගය                 | විස්තරය                                                                                                     |
+| ----- | ---------------------- | ----------------------------------------------------------------------------------------------------------- |
+| GET   | `/v1/search`           | වින්‍යාසගත සෙවුම් සපයන්නන්ගේ + හැකියාවන් ලැයිස්තුගත කරන්න                                                   |
+| POST  | `/v1/search`           | `v1SearchSchema` මගින් වලංගු කරන ලද සෙවුම් විමසුමක් — ශරීරය ධාවනය කරන්න, caching/coalescing සඳහා සහය දක්වයි |
+| GET   | `/v1/search/analytics` | එක්-සැපයුම්කරු hit/latency/cache සංඛ්යා ලේඛන                                                                |
 
-**සත්යාපනය:** Bearer API key (`extractApiKey` + `isValidApiKey`). සෙවුම් ප්රතිපත්තිය `enforceApiKeyPolicy` හරහා බලාත්මක කරයි.
+**සත්‍යාපනය:** දරන්නා API යතුර (`extractApiKey` + `isValidApiKey`). සෙවුම් ප්‍රතිපත්තිය `enforceApiKeyPolicy` හරහා බලාත්මක කර ඇත.
+
+**ස්වයං-තේරීම:** `provider` නොමැතිව, වින්‍යාසගත සම්බන්ධතාවයක් සහිත ලාභම සැපයුම්කරු පළමුව ක්‍රියාත්මක වන අතර ඊළඟ ලාභම අසාර්ථකත්වය වේ. නොමිලේ අවසන් සේවා සපයන්නන් (`duckduckgo-free`) භාවිතා කරනු ලබන්නේ වෙනත් කිසිවක් වින්‍යාස කර නොමැති විට පමණි. ස්වයං-සත්කාරක SearXNG එහි සම්බන්ධතාවය සැබෑ `baseUrl` ගබඩා කළ පසු වින්‍යාස කළ ලෙස ගණන් ගනු ලැබේ (නාමාවලිය පෙරනිමි `http://localhost:8888/search` නොවේ): එය පසුව යතුරු කරන ලද ඒවාට වඩා $0 සපයන්නෙකු ලෙස ශ්‍රේණිගත වේ, SearXNG 400, 401, 40403 වලංගු නොවන පිළිතුරු `baseUrl`, අසාර්ථක ලෙස ලාභම යතුරු සපයන්නා සමඟ ශ්‍රේණිගත වේ URL `http(s)` වලාකුළු-පාර-දත්ත ලිපිනයක ඇති ලකුණු ගණන් නොගනී. ටෝකනයක් ගබඩා කරන SearXNG සම්බන්ධතාවයක් මේ ආකාරයෙන් ශ්‍රේණිගත වන්නේ `https://` හෝ loopback `http://` හරහා පමණි. දුරස්ථ සරල `http://` හරහා එය කිසිවිටෙක අසාර්ථක නොවන අතර අවසාන විසඳුම ලෙස පවතී, වෙනත් කිසිදු සැපයුම්කරුවෙකු වින්‍යාස කර නොමැති විට හෝ නමෙන් ඉල්ලා සිටින විට පමණක් භාවිතා කරයි, එබැවින් එය එම අවස්ථා දෙකේදී පැහැදිලි පෙළකින් ටෝකනය යවයි.
 
 ### Exa සහ Tavily `provider_options`
 
@@ -942,31 +933,28 @@ CLI එක `base_url + /responses` WebSocket එකක් බවට upgrade ක�
 
 ---
 
-## ස්වයං-සේවා භාවිතය (`/api/usage/om-usage`)
+## ස්වයං සේවා භාවිතය (`/api/usage/om-usage`)
 
-ඕනෑම API යතුරකට තමන්ගේම භාවිතය සහ කෝටා කියවිය හැක — කළමනාකරණ සත්යාපනයක් අවශ්ය නොවේ. යතුරු හිමියාගේ
-වියදම පෙන්වීමට client එකක් (CLI, OmniCopilot panel එක) භාවිත කරන endpoint එක මෙයයි.
+ඕනෑම API යතුරක් කියවිය හැක **තමන්ගේම** භාවිතය සහ කෝටා — කළමනාකරණ සත්‍යාපනය නැත. සේවාදායකයා (CLI, OmniCopilot පැනලය) ප්‍රධාන දරන්නාට තම වියදම් පෙන්වීමට භාවිතා කරන අවසාන ලක්ෂ්‍යය මෙයයි.
 
 ```bash
-# පාඨ ආකාරය (ඉතිහාසගත ගිවිසුම — terminal එකක් සඳහා සරල පාඨය)
+# Text form (the historical contract — plain text for a terminal)
 curl -H "Authorization: Bearer <your-api-key>" \
   http://localhost:20128/api/usage/om-usage
 
-# ව්යුහගත ආකාරය — UI එකක් භාවිත කරන ආකාරය
+# Structured form — what a UI consumes
 curl -H "Authorization: Bearer <your-api-key>" \
   "http://localhost:20128/api/usage/om-usage?format=json"
 ```
 
-යතුරට **`allowUsageCommand`** සක්රීය කර තිබිය යුතුය (පෙරනිමියෙන් අක්රීයයි — dashboard හි API-key
-manager එක එක් එක් යතුර සඳහා මෙය වෙනස් කරයි). එය නොමැති විට endpoint එක `403` ලබා දෙයි.
+යතුර තිබිය යුතුය **`allowUsageCommand`** සබල කර ඇත (පෙරනිමියෙන් අක්‍රිය — උපකරණ පුවරුවේ API-යතුරු කළමනාකරු එය යතුරකට ටොගල් කරයි). එය නොමැතිව අවසාන ලක්ෂ්‍යය පිළිතුරු දෙයි `403`.
 
-`?format=json` මඟින් වෙනස් තත්ත්වයන් හඳුනාගත හැකි ආකෘතියක් ලබා දෙයි, එබැවින් ප්රතික්ෂේප කළ
-ප්රතිචාරයකින් data field එකක් කියවීමට caller කෙනෙකුට කිසිදා සිදු නොවේ. සාර්ථක වූ විට:
+`?format=json` වෙනස් කොට සැලකූ හැඩයක් ලබා දෙයි, එබැවින් ඇමතුමක් ලබා දෙන්නෙකු ප්‍රතික්ෂේප කිරීමකින් දත්ත ක්ෂේත්‍රයක් කිසි විටෙක කියවන්නේ නැත. සාර්ථකත්වය මත:
 
 ```jsonc
 {
   "allowed": true,
-  // යතුර එක් එක් යතුර සඳහා භාවිත සීමාවන්ට (දෛනික/සතිපතා USD) තෝරාගෙන ඇති විට පමණක් පවතී:
+  // present only when the key opted into per-key usage limits (daily/weekly/5-hour USD):
   "personal": {
     "dailySpentUsd": 1.25,
     "dailyLimitUsd": 5,
@@ -975,9 +963,9 @@ manager එක එක් එක් යතුර සඳහා මෙය වෙන
     "weeklyLimitUsd": 20,
     "weeklyResetAtIso": "…" /* … */,
   },
-  // තෝරාගත් provider කෝටා snapshot එක, කිසිවක් තවම cache කර නොමැති විට null:
+  // the selected provider quota snapshot, or null when nothing is cached yet:
   "provider": { "connectionId": "…", "provider": "claude", "plan": "…", "quotas": {/* … */} },
-  // සෑම connection එකකම snapshot එක, එවිට UI එකකට providers කිහිපයක් එකිනෙකට අසලින් පෙන්විය හැක:
+  // every connection's snapshot, so a UI can render several providers side by side:
   "providers": [
     { "connectionId": "…", "provider": "claude" /* … */ },
     { "provider": "codex" /* … */ },
@@ -985,13 +973,9 @@ manager එක එක් එක් යතුර සඳහා මෙය වෙන
 }
 ```
 
-ප්රතික්ෂේප කිරීමකදී (`401` නරක යතුර / `403` අවසර නොමැත) එම route එකම
-`{ "allowed": false, "error": { "message": "…" } }` ආපසු ලබා දෙයි — පවතින නමුත් හිස්
-`personal`/`provider` එකක් (යතුරට අවසර ඇත, තවම කිසිවක් දැනගෙන නොමැත) ප්රතික්ෂේප කිරීමකින් වෙනස්
-තත්ත්වයකි, එම තත්ත්වයන් දෙක වෙන්කර හඳුනාගත හැක්කේ JSON ආකෘතියෙන් පමණි.
+ප්‍රතික්ෂේප කිරීමේදී (`401` නරක යතුර / `403` අවසර නැත) එම මාර්ගයම `{ "allowed": false, "error": { "message": "…" } }` — වත්මන්-නමුත්-හිස් `personal`/`provider` (යතුර ඉඩ දී ඇත, තවම කිසිවක් ඉගෙන ගෙන නොමැත) ප්‍රතික්ෂේප කිරීමකින් වෙනස් තත්වයක් වන අතර JSON ආකෘතිය පමණක් ඒවා වෙන්කර හඳුනා ගනී.
 
-**සත්යාපනය:** `isValidApiKey` සමඟ වලංගු කරන caller ගේම Bearer API යතුර — මෙය
-`requireManagementAuth` පිටුපස පවතින කළමනාකරණ surface එක (`/api/keys/…`) නොවේ.
+**සත්‍යාපනය:** `isValidApiKey` — සමඟ වලංගු වන ඇමතුම්කරුගේම Bearer API යතුර මෙය _not_ කළමනාකරණ මතුපිට (`/api/keys/…`) වන අතර එය `requireManagementAuth` පිටුපසින් පවතී.
 
 ### අමු සහ සීමා-ගැළපූ කෝටා ප්රතිශත
 
@@ -1248,38 +1232,39 @@ Claude Code auto-mode classifier requests තුළ explicit reasoning controls 
 
 ### API යතුරු අවසර
 
-`PATCH /api/keys/{id}` මඟින් පවතින යතුරක අවසර යාවත්කාලීන කරයි. සෑම `/api/keys*` මාර්ගයක් මෙන්ම, මෙයටද කළමනාකරණ අවසරකරණය අවශ්ය වේ ([කළමනාකරණ සත්යාපනය](../guides/MANAGEMENT-AUTH.md) බලන්න), inference යතුරක් නොවේ. ඔබට වෙනස් කිරීමට අවශ්ය ක්ෂේත්ර පමණක් යවන්න; ඒ කිසිවක් නොමැති ඉල්ලීමක් `No valid fields to update` සමඟ ප්රතික්ෂේප කෙරේ. පිළිගනු ලබන ක්ෂේත්ර `src/shared/validation/schemas/keys.ts` හි `updateKeyPermissionsSchema` මඟින් නිර්වචනය කර ඇත.
+`PATCH /api/keys/{id}` දැනට පවතින යතුරක අවසර යාවත්කාලීන කරයි. සෑම `/api/keys*` මාර්ගයකටම මෙන් එයට කළමනාකරණ අවසරය අවශ්‍ය වේ ( [කළමනාකරණ සත්‍යාපනය](../guides/MANAGEMENT-AUTH.md) බලන්න), අනුමාන යතුරක් නොවේ. ඔබට වෙනස් කිරීමට අවශ්‍ය ක්ෂේත්‍ර පමණක් යවන්න; `No valid fields to update` සමඟින් ඔවුන්ගෙන් කිසිවෙකු සමඟ ඉල්ලීමක් ප්රතික්ෂේප කරනු ලැබේ. පිළිගත් ක්ෂේත්‍ර `src/shared/validation/schemas/keys.ts` හි `updateKeyPermissionsSchema` මගින් අර්ථ දක්වා ඇත.
 
-| ක්ෂේත්රය                                    | වර්ගය                                                               | සටහන්                                                                                                                      |
-| ------------------------------------------- | ------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| `name`                                      | string, අක්ෂර 1-200                                                 |                                                                                                                            |
-| `isActive`                                  | boolean                                                             |                                                                                                                            |
-| `isBanned`                                  | boolean                                                             |                                                                                                                            |
-| `expiresAt`                                 | ISO 8601 දිනය-වේලාව හෝ `null`                                       | `null` කල් ඉකුත්වීම ඉවත් කරයි                                                                                              |
-| `modelAccessMode`                           | `all` \| `restricted`                                               | මාදිලිය `all` වන විට `allowedModels` හිස් විය යුතුය                                                                        |
-| `allowedModels`, `blockedModels`            | string අරාවක්, උපරිම 1000ක්                                         |                                                                                                                            |
-| `allowedCombos`                             | string අරාවක්, උපරිම 500ක්                                          | මෙම යතුරට ඇමතීමට හැකි combos පාලනය කරයි; සෘජු models `modelAccessMode` / `allowedModels` මඟින් පාලනය වේ                    |
-| `connectionAccessMode`                      | `all` \| `restricted`                                               | `restricted` වන විට `allowedConnections` හිස් නොවිය යුතු අතර, `all` වන විට හිස් විය යුතුය                                  |
-| `allowedConnections`                        | UUID අරාවක්, උපරිම 100ක්                                            |                                                                                                                            |
-| `allowAutoCombos`                           | boolean                                                             | `false` මඟින් මෙම යතුර සමඟ `auto/*` models සඳහා වන ඉල්ලීම් ප්රතික්ෂේප කරයි; මෙය කිසිවිටෙක සකසා නොමැති යතුරුවලට අවසර ඇත     |
-| `catalogScope`                              | `all` \| `combos` \| `models`                                       | මෙම යතුර සඳහා `GET /v1/models` ලැයිස්තුගත කරන දේ (combos පමණක්, models පමණක් හෝ දෙකම); එය යතුරට ඇමතිය හැකි දේ වෙනස් නොකරයි |
-| `forcedModel`                               | අක්ෂර 300ක් දක්වා වූ string එකක් හෝ `null`                          | `X-Route-Model` සහ `body.model` අභිබවා chat ඉල්ලීම් මෙම model/combo වෙත යොමු කරයි; යතුරේ සීමා තවදුරටත් අදාළ වේ             |
-| `noLog`, `autoResolve`                      | boolean                                                             |                                                                                                                            |
-| `throttleDelayMs`                           | integer, 0-300000                                                   |                                                                                                                            |
-| `maxSessions`                               | integer, 0-10000                                                    |                                                                                                                            |
-| `rateLimits`                                | `{ limit, window }` අරාවක් (ධන integer අගයන්, උපරිම 50ක්) හෝ `null` | `null` සීමා ඉවත් කරයි                                                                                                      |
-| `accessSchedule`                            | schedule object එකක් හෝ `null`                                      | `null` schedule එක ඉවත් කරයි                                                                                               |
-| `scopes`                                    | string අරාවක්, උපරිම 32ක්                                           |                                                                                                                            |
-| `allowedEndpoints`                          | string අරාවක්, උපරිම 20ක්                                           |                                                                                                                            |
-| `streamDefaultMode`                         | `legacy` \| `json`                                                  |                                                                                                                            |
-| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                | [යතුරකට අදාළ cache bypass කිරීම](#per-key-cache-bypass) බලන්න                                                              |
-| `compressionEnabled`                        | boolean                                                             |                                                                                                                            |
-| `codexServiceMode`                          | Codex service modes වලින් එකක්                                      |                                                                                                                            |
-| `disableNonPublicModels`                    | boolean                                                             |                                                                                                                            |
-| `allowUsageCommand`                         | boolean                                                             |                                                                                                                            |
-| `usageLimitEnabled`                         | boolean                                                             |                                                                                                                            |
-| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | number >= 0 or `null`                                               |                                                                                                                            |
-| `chaosModeEnabled`                          | boolean                                                             |                                                                                                                            |
+| ක්ෂේත්රය                                    | වර්ගය                                                               | සටහන්                                                                                                                                                                                                                                                   |
+| ------------------------------------------- | ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`                                      | string, අක්ෂර 1-200                                                 |                                                                                                                                                                                                                                                         |
+| `isActive`                                  | boolean                                                             |                                                                                                                                                                                                                                                         |
+| `isBanned`                                  | boolean                                                             |                                                                                                                                                                                                                                                         |
+| `expiresAt`                                 | ISO 8601 දිනය-වේලාව හෝ `null`                                       | `null` කල් ඉකුත්වීම ඉවත් කරයි                                                                                                                                                                                                                           |
+| `modelAccessMode`                           | `all` \| `restricted`                                               | මාදිලිය `all` වන විට `allowedModels` හිස් විය යුතුය                                                                                                                                                                                                     |
+| `allowedModels`, `blockedModels`            | 1000 දක්වා වූ නූල් පෙළක්                                            |                                                                                                                                                                                                                                                         |
+| `allowedCombos`                             | string අරාවක්, උපරිම 500ක්                                          | මෙම යතුරට ඇමතීමට හැකි combos පාලනය කරයි; සෘජු models `modelAccessMode` / `allowedModels` මඟින් පාලනය වේ                                                                                                                                                 |
+| `connectionAccessMode`                      | `all` \| `restricted`                                               | `restricted` වන විට `allowedConnections` හිස් නොවිය යුතු අතර, `all` වන විට හිස් විය යුතුය                                                                                                                                                               |
+| `allowedConnections`                        | UUID අරාවක්, උපරිම 100ක්                                            |                                                                                                                                                                                                                                                         |
+| `allowAutoCombos`                           | boolean                                                             | `false` මඟින් මෙම යතුර සමඟ `auto/*` models සඳහා වන ඉල්ලීම් ප්රතික්ෂේප කරයි; මෙය කිසිවිටෙක සකසා නොමැති යතුරුවලට අවසර ඇත                                                                                                                                  |
+| `catalogScope`                              | `all` \| `combos` \| `models`                                       | මෙම යතුර සඳහා `GET /v1/models` ලැයිස්තුගත කරන දේ (combos පමණක්, models පමණක් හෝ දෙකම); එය යතුරට ඇමතිය හැකි දේ වෙනස් නොකරයි                                                                                                                              |
+| `forcedModel`                               | අක්ෂර 300ක් දක්වා වූ string එකක් හෝ `null`                          | `X-Route-Model` සහ `body.model` අභිබවා chat ඉල්ලීම් මෙම model/combo වෙත යොමු කරයි; යතුරේ සීමා තවදුරටත් අදාළ වේ                                                                                                                                          |
+| `noLog`, `autoResolve`                      | බූලියන්                                                             |                                                                                                                                                                                                                                                         |
+| `throttleDelayMs`                           | integer, 0-300000                                                   |                                                                                                                                                                                                                                                         |
+| `maxSessions`                               | integer, 0-10000                                                    |                                                                                                                                                                                                                                                         |
+| `rateLimits`                                | `{ limit, window }` අරාවක් (ධන integer අගයන්, උපරිම 50ක්) හෝ `null` | `null` සීමා ඉවත් කරයි                                                                                                                                                                                                                                   |
+| `accessSchedule`                            | schedule object එකක් හෝ `null`                                      | `null` schedule එක ඉවත් කරයි                                                                                                                                                                                                                            |
+| `scopes`                                    | string අරාවක්, උපරිම 32ක්                                           |                                                                                                                                                                                                                                                         |
+| `allowedEndpoints`                          | string අරාවක්, උපරිම 20ක්                                           |                                                                                                                                                                                                                                                         |
+| `streamDefaultMode`                         | `legacy` \| `json`                                                  |                                                                                                                                                                                                                                                         |
+| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                | [යතුරකට අදාළ cache bypass කිරීම](#per-key-cache-bypass) බලන්න                                                                                                                                                                                           |
+| `compressionEnabled`                        | boolean                                                             |                                                                                                                                                                                                                                                         |
+| `codexServiceMode`                          | Codex service modes වලින් එකක්                                      |                                                                                                                                                                                                                                                         |
+| `disableNonPublicModels`                    | boolean                                                             |                                                                                                                                                                                                                                                         |
+| `allowUsageCommand`                         | boolean                                                             |                                                                                                                                                                                                                                                         |
+| `usageLimitEnabled`                         | boolean                                                             |                                                                                                                                                                                                                                                         |
+| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | අංකය >= 0 හෝ `null`                                                 |                                                                                                                                                                                                                                                         |
+| `fiveHourUsageLimitUsd`                     | අංකය >= 0 හෝ `null`                                                 | දෛනික සහ සතිපතා සීමාවන් (`usageLimitEnabled`, `UNPRICED_USAGE_BUDGET_POLICY`) මෙන් බලාත්මක කරන ලද පැය 5ක USD අයවැය පෙරළීම. `retry-after` යනු කවුළුව තුළ පැරණිතම වියදම් කිරීම වයසින් මුහුකුරා ගිය විට, එහි සීමාව ඉක්මවා යතුරක් තවමත් අවහිර කර තිබිය හැක. |
+| `chaosModeEnabled`                          | boolean                                                             |                                                                                                                                                                                                                                                         |
 
 ```bash
 curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
@@ -1329,6 +1314,14 @@ curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
 | `/api/modality-bridge/stats`         | GET        | මතකයේ ඇති `attempts`, successes/`bridged`, failures, cache hits, `totalLatencyMs`, `latencySamples`, sample-පාදක `averageLatencyMs`, සහ අවසන් භාවිත වේලාව (නැවත ආරම්භ කිරීමේදී යළි සකසයි; කළමනාකරණ සත්යාපනය)                                                                                                                                                                                  |
 | `/api/modality-bridge/video/runtime` | GET        | කළමනාකරණ සත්යාපනය/පරීක්ෂණයට පෙර දැඩි trusted-loopback පරීක්ෂාව; පිරිසිදු කළ FFmpeg/ffprobe ලබාගත හැකි බව සහ අනුවාද (no-store)                                                                                                                                                                                                                                                                 |
 | `/api/modality-bridge/video/extract` | POST       | අභ්යන්තර සත්යාපිත trusted-loopback byte broker; 50 MiB ආදානය, සීමා කළ පෝලිම/32 MiB ප්රතිදානය, `503` ධාරිතාව, `499` විසන්ධි වීම, `504` අවසන් කාලසීමාව; පොදු upload API එකක් නොවේ                                                                                                                                                                                                               |
+
+### වීඩියෝ රාමු සරඹ-පහළ
+
+`GET /api/v1/video-bridge/drilldown` පැහැදිලිවම එකඟ වූ වීඩියෝ පාලම් ඉල්ලීමකින් පසුව `x-omniroute-video-drilldown` හි ආපසු ලබා දුන් කුලී නිවැසියන්-බැඳුණු පාරාන්ධ හසුරුව කියවයි. කියවීම් සහ `DELETE` යන දෙකටම සැමවිටම වලංගු API යතුරක් සහ ක්‍රියාකරුගේ ස්වාධීන `modalityBridgeVideoDrilldownRemoteEnabled` අවසරය අවශ්‍ය වේ. නිෂ්පාදන රඳවා තබා ගැනීම සඳහා අමතර වශයෙන් `modalityBridgeVideoDrilldownEnabled` සහ දැඩි එක් කොටසකට `drilldown: true` අවශ්‍ය වේ. යතුරට හිස් නොවන අන්ත ලක්ෂ්‍ය අවසර ලැයිස්තුවක් තිබේ නම්, එය අමතන්නා `/v1` හෝ `/api/v1` භාවිතා කළත් GET සහ DELETE යන දෙකටම `video` ඇතුළත් විය යුතුය.
+
+GET විමසුම: අවශ්‍ය `handle`; විකල්ප `variant` (`preview`, `standard`, `detail`), `limit` (1–8; උරුම `frames` පිළිගනු ලබන නමුත් `limit` සමඟ ඒකාබද්ධ කළ නොහැක), ශුන්‍ය පදනම් වූ `page`, සහ `start`/`end` තත්පර. නාභිගත සීමාවන් දෙකම සපයන විට, `end` `start` ට වඩා වැඩි විය යුතුය. Duplicate/unknown විමසුම් යතුරු ප්‍රතික්ෂේප වේ. සාර්ථක ප්‍රතිචාරවල `derivation`, `durationSeconds`, `frames`, `hasMore`, `page`, `variant`, සහ විකල්ප `focusWindow` අඩංගු වේ; ගබඩා රහිත JSON Base64 ඇතුළුව MiB 32 ට සීමා කර ඇත. අති විශාල ප්රතිදානය ප්රතිලාභ 413; අඩු රාමු ඉල්ලන්න.
+
+`DELETE /api/v1/video-bridge/drilldown?handle=...` `{ "removed": 0|1 }` ආපසු ලබා දෙයි. නොදන්නා, කල් ඉකුත් වූ සහ හරස් යතුර GETs වෙන්කර හඳුනාගත නොහැකි ප්‍රතිචාර 404; හරස් යතුර DELETE හිමිකරුගේ ප්‍රවේශය ඉවත් කළ නොහැක. ආබාධිත ප්‍රවේශය ප්‍රතිලාභ 403, missing/invalid සත්‍යාපනය 401, වලංගු නොවන විමසුම් 400, අවලංගු කිරීම 499 සහ තාවකාලික දෝෂ 503. හැන්ඩ්ල් ක්‍රියාවලි-දේශීය වේ, මිනිත්තු දහයකට පසු කල් ඉකුත් වන අතර නැවත ආරම්භ කිරීමෙන් නොනැසී පවතී. නව හැසිරවීම් `v1.` සහ 32-byte අහඹු Base64URL ටෝකනයක් භාවිතා කරයි; ටෝකන් හැෂ් පමණක් තබා ඇත. ලෙගසි 64-හෙක්ස් ටෝකන ගැළපුම සඳහා වාක්‍යානුකූලව කියවිය හැකිය. කැමැත්ත, කෝටා සහ ප්‍රභේද ව්‍යුත්පන්න විස්තර සඳහා [වීඩියෝ පාලම් ආරක්ෂක වැට](../security/GUARDRAILS.md#video-bridge-videobridgets-videobridgepipelinets) බලන්න.
 
 ### උපස්ථ සහ අපනයනය/ආනයනය
 
@@ -1435,19 +1428,19 @@ GET ප්රතිචාරයට `agents[]` (id, name, binary, version, instal
 
 ස්වදේශීය Gemini SDK අනුකූලතාව අපේක්ෂා කරන clients සඳහා මෙම endpoints Gemini හි API ආකෘතිය අනුකරණය කරයි.
 
-### අභ්යන්තර / පද්ධති APIs
+### අභ්‍යන්තර / පද්ධති APIs
 
-| Endpoint                 | Method | විස්තර                                                    |
-| ------------------------ | ------ | --------------------------------------------------------- |
-| `/api/init`              | GET    | යෙදුම් ආරම්භක පරීක්ෂාව (පළමු ධාවනයේදී භාවිත කෙරේ)         |
-| `/api/tags`              | GET    | Ollama-අනුකූල model tags (Ollama clients සඳහා)            |
-| `/api/restart`           | POST   | graceful server restart එකක් ආරම්භ කිරීම                  |
-| `/api/shutdown`          | POST   | graceful server shutdown එකක් ආරම්භ කිරීම                 |
-| `/api/system/env/repair` | POST   | OAuth provider පරිසර විචල්ය අලුත්වැඩියා කිරීම             |
-| `/api/system/version`    | GET    | වත්මන්/නවතම version එක, update තත්ත්වය, release channel   |
-| `/api/system/version`    | POST   | නවතම version වෙත deployment-aware update එකක් ආරම්භ කිරීම |
+| අන්ත ලක්ෂ්‍යය            | ක්රමය | විස්තරය                                                        |
+| ------------------------ | ----- | -------------------------------------------------------------- |
+| `/api/init`              | GET   | පසුබිම් සමමුහුර්ත සේවා ආරම්භ කරන්න (කළමනාකරණ සත්‍යාපනය)        |
+| `/api/tags`              | GET   | Ollama-අනුකූල ආකෘති ටැග් ( Ollama සේවාදායකයින් සඳහා)           |
+| `/api/restart`           | POST  | අලංකාර සේවාදායක නැවත ආරම්භ කිරීම ක්‍රියාරම්භ කරන්න             |
+| `/api/shutdown`          | POST  | අලංකාර සේවාදායක වසා දැමීම ප්‍රේරණය කරන්න                       |
+| `/api/system/env/repair` | POST  | OAuth සපයන්නාගේ පරිසර විචල්‍යයන් අලුත්වැඩියා කරන්න             |
+| `/api/system/version`    | GET   | Current/latest අනුවාදය, යාවත්කාලීන තත්ත්වය, නාලිකාව මුදා හැරීම |
+| `/api/system/version`    | POST  | නවතම අනුවාදය වෙත යෙදවීම-දැනුවත් යාවත්කාලීන කිරීම ආරම්භ කරන්න   |
 
-> **සටහන:** මෙම endpoints පද්ධතිය විසින් අභ්යන්තරව හෝ Ollama client අනුකූලතාව සඳහා භාවිත කෙරේ. සාමාන්යයෙන් අවසාන පරිශීලකයන් විසින් මේවා කැඳවන්නේ නැත.
+> **සටහන:** මෙම අන්ත ලක්ෂ්‍ය පද්ධතිය විසින් අභ්‍යන්තරව හෝ Ollama සේවාදායක අනුකූලතාව සඳහා භාවිතා කරයි. ඒවා සාමාන්‍යයෙන් අවසාන පරිශීලකයින් විසින් හඳුන්වනු නොලැබේ.
 
 ### OAuth පරිසර අලුත්වැඩියාව _(v3.6.1+)_
 

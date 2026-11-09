@@ -369,31 +369,19 @@ Content-Type: application/json
 }
 ```
 
-Tilgængelige udbydere omfatter OpenAI (GPT Image 2), xAI (Grok Image), Together AI (FLUX), Fireworks AI, Nebius (FLUX), Hyperbolic, NanoBanana, **OpenRouter**, **ZenMux**, SD WebUI (lokal), ComfyUI (lokal).
+Tilgængelige udbydere inkluderer OpenAI (GPT Image 2), xAI (Grok Image), Together AI (FLUX), Fireworks AI, Nebius (FLUX), Hyperbolic, NanoBanana,**OpenRouter** ,**ZenMux** , SD WebUI (lokal), ComfyUI (lokal).
 
-`n` returnerer `n` billeder i `data[]`. Udbydere, hvis upstream-API returnerer ét billede pr. kald
-(Black Forest Labs, Stability AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik,
-NVIDIA NIM, Cloudflare Workers AI), får `n` separate upstream-kald, hvor højst 4 er aktive
-samtidigt. En fast `seed` forskydes efter kaldets indeks (`seed`, `seed + 1`, …), så billederne
-er forskellige, men stadig reproducerbare. `n` er begrænset til 10. Hele anmodningen mislykkes,
-hvis et af kaldende mislykkes. Listen over fan-out-formater findes i
-`SINGLE_IMAGE_FANOUT_FORMATS` i
-`open-sse/handlers/imageGeneration/fanOut.ts`.
+`n` returnerer `n` billeder i `data[]`. Udbydere, hvis upstream- API returnerer ét billede pr. opkald (Black Forest Labs, Stability AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik, NVIDIA NIM, Cloudflare Workers AI) får `n` separate upstream-opkald, højst 4 under flyvning. En fast `seed` forskydes af opkaldsindeks (`seed`, `seed + 1`, …), så billederne er forskellige, men forbliver reproducerbare. `n` er begrænset til 10. Anmodningen mislykkes som helhed, hvis et opkald mislykkes. Listen over fan-out-formater er `SINGLE_IMAGE_FANOUT_FORMATS` i `open-sse/handlers/imageGeneration/fanOut.ts`.
 
-ZenMux genbruger den eksisterende API-nøgleforbindelse og accepterer præfikserne
-`zenmux/` eller `zm/`:
+ZenMux genbruger den eksisterende API-nøgleforbindelse og accepterer `zenmux/` eller `zm/` -præfikser:
 
-- `zenmux/openai/gpt-image-2` bruger ZenMux's OpenAI Images API. Mulighederne omfatter `size`,
-  `quality`, `n`, `output_format`, `output_compression`, `background` og `response_format`.
-- Andre udgivere, såsom `zm/meta/muse-image-1.0`, bruger ZenMux's Vertex AI-` :predict`-endpoint. `n` mappes til `sampleCount`, `aspect_ratio` til `aspectRatio`, og `image_size`
-  (`1K`, `2K`, `4K`) til `sampleImageSize`. En pixelbaseret `size` angiver kun et
-  billedformat, ikke garanterede pixeldimensioner. Understøttede billedformater, opløsninger og
-  antal varierer efter model.
-- `zm/inclusionai/ming-image-0.1-design` vælger selv dimensionerne. Undlad `size`,
-  `aspect_ratio` og `image_size`; eksplicitte værdier returnerer HTTP 400. PNG, JPEG og WebP
-  kan anmodes om med `output_format`.
+- `zenmux/openai/gpt-image-2` bruger ZenMux's OpenAI Images API. Valgmuligheder omfatter `size`, `quality`, `n`, `output_format`, `output_compression`, `background` og `response_format`.
+- Andre udgivere, såsom `zm/meta/muse-image-1.0`, bruger ZenMux Vertex AI `:predict` -slutpunkt. `n` kort til `sampleCount`, `aspect_ratio` til `aspectRatio` og `image_size` (`1K`, `2K`, `4K`) til `sampleImageSize`. En pixel `size` leverer kun et billedformat, ikke garanterede pixeldimensioner. Understøttede forhold, opløsninger og antal varierer efter model.
+- `zm/inclusionai/ming-image-0.1-design` vælger sine egne dimensioner. Udelad `size`, `aspect_ratio` og `image_size`; eksplicitte værdier returnerer HTTP 400. PNG, JPEG og WebP kan anmodes med `output_format`.
 
-Denne integration understøtter tekst-til-billede-generering, ikke redigering af referencebilleder. Vertex-output normaliseres til `data[].b64_json`; `response_format: "url"` returnerer en upstream-HTTPS-URL eller en base64-data-URL, når kun billedbytes er tilgængelige. Tomt eller filtreret output returnerer en fejl i stedet for en tom succes. Modeladgang afhænger af ZenMux-kontoen. Se [ZenMux's Vertex API](https://docs.zenmux.ai/api/vertexai/generate-images) og [OpenAI Images API](https://docs.zenmux.ai/api/openai/generate-an-image).
+Denne integration understøtter tekst-til-billede-generering, ikke reference-billedredigering. Vertex output er normaliseret til `data[].b64_json`; `response_format: "url"` returnerer en opstrøms HTTPS URL eller en base64 data URL når kun billedbytes er tilgængelige. Empty/filtered output returnerer en fejl snarere end en tom succes. Modeladgang afhænger af ZenMux kontoen. Se [ZenMux's Vertex API](https://docs.zenmux.ai/api/vertexai/generate-images) og [OpenAI billeder API](https://docs.zenmux.ai/api/openai/generate-an-image).
+
+En Microsoft 365 Copilot -log-in-forbindelse betjener `copilot-m365-web/m365-copilot-image` gennem Copilot's indbyggede billedværktøj: én Copilot drejning pr. billede (`n` 1–4), `size` styrer kun orienteringen, og billeder returneret inline (`b64_json`, eller en data URL for `response_format: "url"`). Se [Microsoft 365 Copilot](../providers/COPILOT-M365.md#image-generation).
 
 ```bash
 # List all image models
@@ -855,18 +843,19 @@ null-ejer nægtes alle kaldere, der ikke er sessioner (hent, slet, annuller og k
 
 ---
 
-## Søge-API
+## Søg API
 
-Abstraktion for web-/søgeudbydere (Tavily, Brave, Exa, Serper osv.).
+Web/search -udbyderabstraktion (Tavily, Brave, Exa, Serper osv.).
 
-| Metode | Sti                    | Beskrivelse                                                                                      |
-| ------ | ---------------------- | ------------------------------------------------------------------------------------------------ |
-| GET    | `/v1/search`           | Vis konfigurerede søgeudbydere + funktioner                                                      |
-| POST   | `/v1/search`           | Kør en søgeforespørgsel — body valideres af `v1SearchSchema`, understøtter caching/sammenlægning |
-| GET    | `/v1/search/analytics` | Statistik pr. udbyder for hits, latenstid og cache                                               |
+| Metode | Sti                    | Beskrivelse                                                                                   |
+| ------ | ---------------------- | --------------------------------------------------------------------------------------------- |
+| GET    | `/v1/search`           | Liste konfigurerede søgeudbyderes + funktioner                                                |
+| POST   | `/v1/search`           | Kør en søgeforespørgsel — body valideret af `v1SearchSchema`, understøtter caching/coalescing |
+| GET    | `/v1/search/analytics` | hit/latency/cache -statistikker pr. udbyder                                                   |
 
-**Godkendelse:** Bearer-API-nøgle (`extractApiKey` + `isValidApiKey`). Søgepolitik håndhæves via
-`enforceApiKeyPolicy`.
+**Auth:** Bærer API nøgle (`extractApiKey` + `isValidApiKey`). Søgepolitik håndhæves via `enforceApiKeyPolicy`.
+
+**Automatisk valg:** uden `provider` kører den billigste udbyder med en konfigureret forbindelse først, og den næstbilligste er failover. Gratis sidste udvej-udbydere (`duckduckgo-free`) bruges kun, når intet andet er konfigureret. En selv-hostet SearXNG tæller som konfigureret, når dens forbindelse lagrer en rigtig `baseUrl` (ikke katalogets standard `http://localhost:8888/search`): den rangerer derefter som en $0-udbyder foran de nøglede, med den billigste nøgleudbyder som failover, inklusive når SearXNG svarer 400, 401, 403 eller 404. A `baseUrl`, der ikke er a `http(s)` URL punkter cloud-metadata-adresse tæller ikke. En SearXNG forbindelse, der gemmer et token, rangerer kun på denne måde over `https://` eller loopback `http://`. Over remote plain `http://` er det aldrig en failover og forbliver en sidste udvej, der kun bruges, når ingen anden udbyder er konfigureret, eller når det anmodes om ved navn, så det sender tokenet i klartekst i disse to tilfælde.
 
 ### `provider_options` for Exa og Tavily
 
@@ -1042,31 +1031,28 @@ i stedet for at blive sendt to gange. Kilde: `src/lib/quota/quotaSessionRecovery
 
 ---
 
-## Selvbetjent forbrug (`/api/usage/om-usage`)
+## Selvbetjeningsbrug (`/api/usage/om-usage`)
 
-Enhver API-nøgle kan læse **sit eget** forbrug og sine egne kvoter — ingen administrationsgodkendelse. Dette er endpointet, som en
-klient (CLI, OmniCopilot-panelet) bruger til at vise en nøgleindehaver deres forbrug.
+Enhver API -nøgle kan læse **sin egen** brug og kvoter — ingen administrationsgodkendelse. Dette er det slutpunkt, en klient (CLI, OmniCopilot panelet) bruger til at vise en nøgleindehaver deres forbrug.
 
 ```bash
-# Tekstformat (den historiske kontrakt — almindelig tekst til en terminal)
+# Text form (the historical contract — plain text for a terminal)
 curl -H "Authorization: Bearer <your-api-key>" \
   http://localhost:20128/api/usage/om-usage
 
-# Struktureret format — det, som en brugergrænseflade bruger
+# Structured form — what a UI consumes
 curl -H "Authorization: Bearer <your-api-key>" \
   "http://localhost:20128/api/usage/om-usage?format=json"
 ```
 
-Nøglen skal have **`allowUsageCommand`** aktiveret (deaktiveret som standard — dashboardets API-nøgleadministrator
-slår det til pr. nøgle). Uden dette svarer endpointet med `403`.
+Nøglen skal have **`allowUsageCommand`** aktiveret (deaktiveret som standard — dashboardets API-nøglemanager skifter det pr. nøgle). Uden det svarer endepunktet `403`.
 
-`?format=json` returnerer en diskrimineret struktur, så en klient aldrig læser et datafelt fra et
-afslag. Ved succes:
+`?format=json` returnerer en diskrimineret form, så en opkalder aldrig læser et datafelt fra et afslag. Om succes:
 
 ```jsonc
 {
   "allowed": true,
-  // kun til stede, når nøglen har tilvalgt forbrugsgrænser pr. nøgle (daglige/ugentlige USD):
+  // present only when the key opted into per-key usage limits (daily/weekly/5-hour USD):
   "personal": {
     "dailySpentUsd": 1.25,
     "dailyLimitUsd": 5,
@@ -1075,9 +1061,9 @@ afslag. Ved succes:
     "weeklyLimitUsd": 20,
     "weeklyResetAtIso": "…" /* … */,
   },
-  // snapshot af den valgte udbyderkvote eller null, når intet endnu er cachet:
+  // the selected provider quota snapshot, or null when nothing is cached yet:
   "provider": { "connectionId": "…", "provider": "claude", "plan": "…", "quotas": {/* … */} },
-  // snapshot for hver forbindelse, så en brugergrænseflade kan gengive flere udbydere side om side:
+  // every connection's snapshot, so a UI can render several providers side by side:
   "providers": [
     { "connectionId": "…", "provider": "claude" /* … */ },
     { "provider": "codex" /* … */ },
@@ -1085,13 +1071,9 @@ afslag. Ved succes:
 }
 ```
 
-Ved afslag (`401` ugyldig nøgle / `403` ikke tilladt) returnerer den samme rute
-`{ "allowed": false, "error": { "message": "…" } }` — en tilstedeværende, men tom `personal`/`provider`
-(nøglen er tilladt, men intet er blevet fundet endnu) er en anden tilstand end et afslag, og kun JSON-formatet
-skelner mellem dem.
+Ved afvisning (`401` dårlig nøgle / `403` ikke tilladt) returnerer den samme rute `{ "allowed": false, "error": { "message": "…" } }` — en nuværende-men-tom `personal`/`provider` (nøgle tilladt, intet lært endnu) er en anden tilstand end et afslag, og kun JSON formen adskiller dem.
 
-**Godkendelse:** den kaldende parts egen Bearer-API-nøgle, valideret med `isValidApiKey` — dette er _ikke_
-administrationsfladen (`/api/keys/…`), som fortsat er beskyttet af `requireManagementAuth`.
+**Auth:** opkalderens egen Bærer API nøgle, valideret med `isValidApiKey` — dette er _ikke_ administrationsoverfladen (`/api/keys/…`), som forbliver bag `requireManagementAuth`.
 
 ### Rå kontra cutoff-justerede kvoteprocenter
 
@@ -1335,40 +1317,41 @@ og prioritetskæderne i `src/lib/modelCapabilityLimits.ts`.
 | `/api/usage/model-latency-stats` | GET             | Rullende aggregering af latenstid pr. udbyder/model (gennemsnit/p50/p95/p99, succesrate); filtre: `windowHours`/`minSamples`/`maxRows`/`provider`/`model` (#6873)                                                                                                                                                                                  |
 | `/api/usage/cache-health`        | GET             | Oversigt over prompt-cache-sundhed for `call_logs` — skrive-/læseforhold, p50/p90/p99-fordeling af skrivestørrelser, koncentration af omfattende skrivninger, opdeling pr. model samt en `healthy`/`degraded`/`thrash`/`no-data`-vurdering; forespørgselsparametrene `range` (`1h`\|`24h`\|`7d`\|`30d`, standard `24h`) og valgfri `model` (#8827) |
 
-### Tilladelser for API-nøgler
+### API -nøgletilladelser
 
-`PATCH /api/keys/{id}` opdaterer tilladelserne for en eksisterende nøgle. Som alle `/api/keys*`-ruter kræver den administratorgodkendelse (se [Administrationgodkendelse](../guides/MANAGEMENT-AUTH.md)), ikke en inferensnøgle. Send kun de felter, du vil ændre; en anmodning uden nogen af dem afvises med `No valid fields to update`. De accepterede felter er defineret af `updateKeyPermissionsSchema` i `src/shared/validation/schemas/keys.ts`.
+`PATCH /api/keys/{id}` opdaterer en eksisterende nøgles tilladelser. Som enhver `/api/keys*` rute har den brug for administrationsautorisation (se [Management Authentication](../guides/MANAGEMENT-AUTH.md) ), ikke en slutningsnøgle. Send kun de felter, du vil ændre; en anmodning med ingen af dem afvises med `No valid fields to update`. De accepterede felter er defineret af `updateKeyPermissionsSchema` i `src/shared/validation/schemas/keys.ts`.
 
-| Felt                                        | Type                                                                   | Bemærkninger                                                                                                                   |
-| ------------------------------------------- | ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| `name`                                      | streng, 1-200 tegn                                                     |                                                                                                                                |
-| `isActive`                                  | boolsk                                                                 |                                                                                                                                |
-| `isBanned`                                  | boolsk                                                                 |                                                                                                                                |
-| `expiresAt`                                 | ISO 8601-dato/klokkeslæt eller `null`                                  | `null` rydder udløbstidspunktet                                                                                                |
-| `modelAccessMode`                           | `all` \| `restricted`                                                  | `allowedModels` skal være tom, når tilstanden er `all`                                                                         |
-| `allowedModels`, `blockedModels`            | array af strenge, op til 1000                                          |                                                                                                                                |
-| `allowedCombos`                             | array af strenge, op til 500                                           | Angiver, hvilke combos nøglen må kalde; direkte modeller styres af `modelAccessMode` / `allowedModels`                         |
-| `connectionAccessMode`                      | `all` \| `restricted`                                                  | `allowedConnections` skal være ikke-tom, når tilstanden er `restricted`, og tom, når den er `all`                              |
-| `allowedConnections`                        | array af UUID'er, op til 100                                           |                                                                                                                                |
-| `allowAutoCombos`                           | boolsk                                                                 | `false` afviser forespørgsler efter `auto/*`-modeller med denne nøgle; nøgler, der aldrig har angivet den, er tilladt          |
-| `catalogScope`                              | `all` \| `combos` \| `models`                                          | Hvad `GET /v1/models` viser for denne nøgle (kun combos, kun modeller eller begge dele); det ændrer ikke, hvad nøglen må kalde |
-| `forcedModel`                               | streng på op til 300 tegn eller `null`                                 | Dirigerer chatforespørgsler til denne model/combo foran `X-Route-Model` og `body.model`; nøglens begrænsninger gælder stadig   |
-| `noLog`, `autoResolve`                      | boolsk                                                                 |                                                                                                                                |
-| `throttleDelayMs`                           | heltal, 0-300000                                                       |                                                                                                                                |
-| `maxSessions`                               | heltal, 0-10000                                                        |                                                                                                                                |
-| `rateLimits`                                | array af `{ limit, window }` (positive heltal, op til 50) eller `null` | `null` rydder begrænsningerne                                                                                                  |
-| `accessSchedule`                            | planlægningsobjekt eller `null`                                        | `null` rydder planen                                                                                                           |
-| `scopes`                                    | array af strenge, op til 32                                            |                                                                                                                                |
-| `allowedEndpoints`                          | array af strenge, op til 20                                            |                                                                                                                                |
-| `streamDefaultMode`                         | `legacy` \| `json`                                                     |                                                                                                                                |
-| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                   | Se [omgåelse af cache pr. nøgle](#per-key-cache-bypass)                                                                        |
-| `compressionEnabled`                        | boolsk                                                                 |                                                                                                                                |
-| `codexServiceMode`                          | en af Codex-tjenestetilstandene                                        |                                                                                                                                |
-| `disableNonPublicModels`                    | boolean                                                                |                                                                                                                                |
-| `allowUsageCommand`                         | boolean                                                                |                                                                                                                                |
-| `usageLimitEnabled`                         | boolean                                                                |                                                                                                                                |
-| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | number >= 0 or `null`                                                  |                                                                                                                                |
-| `chaosModeEnabled`                          | boolean                                                                |                                                                                                                                |
+| Felt                                        | Type                                                                   | Bemærkninger                                                                                                                                                                                                                                                         |
+| ------------------------------------------- | ---------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`                                      | streng, 1-200 tegn                                                     |                                                                                                                                                                                                                                                                      |
+| `isActive`                                  | boolsk                                                                 |                                                                                                                                                                                                                                                                      |
+| `isBanned`                                  | boolsk                                                                 |                                                                                                                                                                                                                                                                      |
+| `expiresAt`                                 | ISO 8601-dato/klokkeslæt eller `null`                                  | `null` rydder udløbstidspunktet                                                                                                                                                                                                                                      |
+| `modelAccessMode`                           | `all` \| `restricted`                                                  | `allowedModels` skal være tom, når tilstanden er `all`                                                                                                                                                                                                               |
+| `allowedModels`, `blockedModels`            | række af strenge, op til 1000                                          |                                                                                                                                                                                                                                                                      |
+| `allowedCombos`                             | array af strenge, op til 500                                           | Angiver, hvilke combos nøglen må kalde; direkte modeller styres af `modelAccessMode` / `allowedModels`                                                                                                                                                               |
+| `connectionAccessMode`                      | `all` \| `restricted`                                                  | `allowedConnections` skal være ikke-tom, når tilstanden er `restricted`, og tom, når den er `all`                                                                                                                                                                    |
+| `allowedConnections`                        | array af UUID'er, op til 100                                           |                                                                                                                                                                                                                                                                      |
+| `allowAutoCombos`                           | boolsk                                                                 | `false` afviser forespørgsler efter `auto/*`-modeller med denne nøgle; nøgler, der aldrig har angivet den, er tilladt                                                                                                                                                |
+| `catalogScope`                              | `all` \| `combos` \| `models`                                          | Hvad `GET /v1/models` viser for denne nøgle (kun combos, kun modeller eller begge dele); det ændrer ikke, hvad nøglen må kalde                                                                                                                                       |
+| `forcedModel`                               | streng på op til 300 tegn eller `null`                                 | Dirigerer chatforespørgsler til denne model/combo foran `X-Route-Model` og `body.model`; nøglens begrænsninger gælder stadig                                                                                                                                         |
+| `noLog`, `autoResolve`                      | boolesk                                                                |                                                                                                                                                                                                                                                                      |
+| `throttleDelayMs`                           | heltal, 0-300000                                                       |                                                                                                                                                                                                                                                                      |
+| `maxSessions`                               | heltal, 0-10000                                                        |                                                                                                                                                                                                                                                                      |
+| `rateLimits`                                | array af `{ limit, window }` (positive heltal, op til 50) eller `null` | `null` rydder begrænsningerne                                                                                                                                                                                                                                        |
+| `accessSchedule`                            | planlægningsobjekt eller `null`                                        | `null` rydder planen                                                                                                                                                                                                                                                 |
+| `scopes`                                    | array af strenge, op til 32                                            |                                                                                                                                                                                                                                                                      |
+| `allowedEndpoints`                          | array af strenge, op til 20                                            |                                                                                                                                                                                                                                                                      |
+| `streamDefaultMode`                         | `legacy` \| `json`                                                     |                                                                                                                                                                                                                                                                      |
+| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                   | Se [omgåelse af cache pr. nøgle](#per-key-cache-bypass)                                                                                                                                                                                                              |
+| `compressionEnabled`                        | boolsk                                                                 |                                                                                                                                                                                                                                                                      |
+| `codexServiceMode`                          | en af Codex-tjenestetilstandene                                        |                                                                                                                                                                                                                                                                      |
+| `disableNonPublicModels`                    | boolean                                                                |                                                                                                                                                                                                                                                                      |
+| `allowUsageCommand`                         | boolean                                                                |                                                                                                                                                                                                                                                                      |
+| `usageLimitEnabled`                         | boolean                                                                |                                                                                                                                                                                                                                                                      |
+| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | nummer >= 0 eller `null`                                               |                                                                                                                                                                                                                                                                      |
+| `fiveHourUsageLimitUsd`                     | nummer >= 0 eller `null`                                               | Rullende 5-timers USD budget, håndhævet som de daglige og ugentlige grænser (`usageLimitEnabled`, `UNPRICED_USAGE_BUDGET_POLICY`). `retry-after` er, når den ældste bruger i vinduet ældes ud, hvilket kan efterlade en nøgle langt over sin grænse stadig blokeret. |
+| `chaosModeEnabled`                          | boolean                                                                |                                                                                                                                                                                                                                                                      |
 
 ```bash
 curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
@@ -1418,6 +1401,14 @@ curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
 | `/api/modality-bridge/stats`         | GET        | In-memory `attempts`, succeser/`bridged`, fejl, cache-hits, `totalLatencyMs`, `latencySamples`, stikprøvebaseret `averageLatencyMs` og tidspunkt for seneste brug (nulstilles ved genstart; administrationsgodkendelse)                                                                                                                                                                                   |
 | `/api/modality-bridge/video/runtime` | GET        | Streng kontrol af betroet loopback før administrationsgodkendelse/probe; sanitiseret tilgængelighed af FFmpeg/ffprobe og versioner (no-store)                                                                                                                                                                                                                                                             |
 | `/api/modality-bridge/video/extract` | POST       | Intern godkendt broker for bytes via betroet loopback; input på 50 MiB, begrænset kø/output på 32 MiB, `503` ved kapacitet, `499` ved afbrydelse, `504` ved deadline; ikke en offentlig upload-API                                                                                                                                                                                                        |
+
+### Drill-down videoramme
+
+`GET /api/v1/video-bridge/drilldown` læser et lejer-bundet uigennemsigtigt håndtag, der returneres i `x-omniroute-video-drilldown` efter en eksplicit godkendt Video Bridge-anmodning. Både læser og `DELETE` kræver altid en gyldig API nøgle og operatørens uafhængige `modalityBridgeVideoDrilldownRemoteEnabled` tilladelse. Produktionsfastholdelse kræver desuden `modalityBridgeVideoDrilldownEnabled` og strenge per-part `drilldown: true`. Hvis nøglen har en ikke-tom slutpunkttilladelsesliste, skal den inkludere `video` for både GET og DELETE, uanset om den, der ringer, bruger `/v1` eller `/api/v1`.
+
+GET -forespørgsel: påkrævet `handle`; valgfri `variant` (`preview`, `standard`, `detail`), `limit` (1-8; legacy `frames` accepteres, men kan ikke kombineres med `limit`), nul-baseret `page` og `start`/`end` sekunder. Når begge fokusgrænser er angivet, skal `end` være større end `start`. Duplicate/unknown forespørgselsnøgler afvises. Succesfulde svar indeholder `derivation`, `durationSeconds`, `frames`, `hasMore`, `page`, `variant` og valgfri `focusWindow`; no-store JSON er begrænset til 32 MiB inklusive Base64. Overdimensioneret output returnerer 413; anmod om færre rammer.
+
+`DELETE /api/v1/video-bridge/drilldown?handle=...` returnerer `{ "removed": 0|1 }`. Ukendt, udløbet og krydsnøgle GETs er 404-svar, der ikke kan skelnes; cross-key DELETE kan ikke fjerne ejerens indtastning. Deaktiveret adgang returnerer 403, missing/invalid -godkendelse 401, ugyldige forespørgsler 400, annullering 499 og midlertidige fejl 503. Håndtagene er proceslokale, udløber efter ti minutter og overlever ikke en genstart. Nye håndtag bruger `v1.` plus et 32-byte tilfældigt Base64URL token; kun token-hashes bevares. Legacy 64-hex tokens forbliver syntaktisk læsbare for kompatibilitet. Se [videobroens autoværn](../security/GUARDRAILS.md#video-bridge-videobridgets-videobridgepipelinets) for oplysninger om samtykke, kvoter og variantafledning.
 
 ### Sikkerhedskopiering og eksport/import
 
@@ -1522,19 +1513,19 @@ GET-svaret inkluderer `agents[]` (id, name, binary, version, installed, protocol
 
 Disse endpoints afspejler Geminis API-format for klienter, der forventer indbygget kompatibilitet med Gemini SDK.
 
-### Interne / system-API'er
+### Intern / System APIs
 
-| Endpoint                 | Metode | Beskrivelse                                                   |
-| ------------------------ | ------ | ------------------------------------------------------------- |
-| `/api/init`              | GET    | Kontrol af programinitialisering (bruges ved første kørsel)   |
-| `/api/tags`              | GET    | Ollama-kompatible modeltags (til Ollama-klienter)             |
-| `/api/restart`           | POST   | Udløs en problemfri servergenstart                            |
-| `/api/shutdown`          | POST   | Udløs en problemfri servernedlukning                          |
-| `/api/system/env/repair` | POST   | Reparer miljøvariabler for OAuth-providere                    |
-| `/api/system/version`    | GET    | Aktuel/seneste version, opdateringsstatus, udgivelseskanal    |
-| `/api/system/version`    | POST   | Start en deploymentbevidst opdatering til den seneste version |
+| Slutpunkt                | Metode | Beskrivelse                                                              |
+| ------------------------ | ------ | ------------------------------------------------------------------------ |
+| `/api/init`              | GET    | Start synkroniseringstjenester i baggrunden (administrationsgodkendelse) |
+| `/api/tags`              | GET    | Ollama-kompatible modeltags (til Ollama klienter)                        |
+| `/api/restart`           | POST   | Udløs en yndefuld servergenstart                                         |
+| `/api/shutdown`          | POST   | Udløs en yndefuld serverlukning                                          |
+| `/api/system/env/repair` | POST   | Reparer OAuth udbyderens miljøvariabler                                  |
+| `/api/system/version`    | GET    | Current/latest version, opdateringsstatus, udgivelseskanal               |
+| `/api/system/version`    | POST   | Start en implementeringsbevidst opdatering til den seneste version       |
 
-> **Bemærk:** Disse endpoints bruges internt af systemet eller til kompatibilitet med Ollama-klienter. De kaldes typisk ikke af slutbrugere.
+> **Note:** Disse endepunkter bruges internt af systemet eller til Ollama klientkompatibilitet. De kaldes typisk ikke af slutbrugere.
 
 ### Reparation af OAuth-miljø _(v3.6.1+)_
 

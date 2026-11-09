@@ -45,15 +45,11 @@ codul de ieșire 0, ceea ce nu confirmă faptul că dependențele au trecut scan
 blocant necesită, de asemenea, o măsurare reușită: instrumentele indisponibile, joburile eșuate
 și lipsa dovezilor privind imaginea nu pot certifica o imagine drept curată.
 
-## Riscul dependenței retrase
+## Risc de dependență de pensionar
 
-Fișierul de blocare rădăcină nu mai include `extract-zip` și nicio legătură de dependență către acesta după
-actualizarea instrumentului de dezvoltare promptfoo fixat la o anumită versiune. Astfel este retras lanțul
-`promptfoo` → `@openai/codex-security` → `extract-zip`, acceptat anterior și urmărit în #14482.
-Verificările de regresie din `tests/unit/extract-zip-14482-exposure.test.ts` resping
-reintroducerea acestuia și mențin interdicția importurilor din codul de producție.
+Fișierul de blocare rădăcină nu mai include `extract-zip` sau o margine de dependență după actualizarea instrumentului de dezvoltare promptfoo fixat. Aceasta retrage lanțul `promptfoo` → `@openai/codex-security` → `extract-zip` acceptat anterior urmărit în #14482. Verificările de regresie din `tests/unit/extract-zip-14482-exposure.test.ts` resping reintroducerea acestuia și păstrează interdicția importurilor din codul de producție.
 
-Remedierea actuală a dependențelor include suprascrieri de compatibilitate pentru clientul MSAL al Azure Identity, clientul FTP al get-uri și Zod în ambele pachete de pluginuri OpenCode. Obținerea tokenurilor Azure și preluarea prin FTP sunt testate cu mecanisme de transport controlate; ambele pachete OpenCode rulează propriile suite de compilare și testare. Numărul avertismentelor din registru reprezintă măsurători la un moment dat și se poate modifica după includerea fișierului lockfile într-un commit.
+Reparația actuală a dependenței include, de asemenea, suprascrieri de compatibilitate pentru clientul MSAL al identității Azure și clientul FTP al lui get-uri. Achiziția de token Azure și recuperarea FTP sunt testate cu transporturi controlate; ambele pachete OpenCode rulează propriile suite de construire și testare. Numărările avizelor de registru sunt măsurători la un moment dat și se pot schimba după ce fișierul de blocare este comis.
 
 ## Restanțe: Avertisment Scorecard → blocare
 

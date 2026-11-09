@@ -127,6 +127,27 @@ Automaattinen pisteytys valitsee parhaan palveluntarjoajan/mallin kullekin pyynn
 | `src/sse/handlers/chat.ts`                                | Integraatio: auto-etuliitteen oikopolku            |
 | `src/shared/constants/providers.ts`                       | Järjestelmämerkintä `SYSTEM_PROVIDERS.auto`        |
 
+## Tallennettujen automaattisten yhdistelmien tiliasetukset
+
+Älykäs automaattinen editori tarjoaa valinnaisen** Tiliasetukset** osio. Jokainen yhteys voi olla ensisijainen, normaali (oletus), varata tai poissuljettu. Useat yhteydet voivat jakaa saman tason. Automaattinen valitsee ensimmäisestä kelvollisesta tasosta ja säilyttää scoring/router käyttäytymisensä siellä; epäonnistuneet yritykset jäävät jäljelle jääneisiin konkreettisiin tileihin, mieluiten ennen normaalia ennen varausta. Tämä yhdistelmä ei koskaan käytä poissuljettuja yhteyksiä.
+
+Asetus tallennetaan muodossa `config.accountPreferences`, joka on näppäilty liitännällä ID:
+
+```json
+{
+  "accountPreferences": {
+    "connection-a": "preferred",
+    "connection-b": "preferred",
+    "connection-c": "reserve",
+    "connection-d": "excluded"
+  }
+}
+```
+
+Pois jätetty tai tyhjä kartta säilyttää olemassa olevan reitityksen. Asetukset eivät salli käytöstä poistettuja yhteyksiä, myönnä API-avaimen käyttöoikeuksia, palauta kiintiöillä estettyjä ehdokkaita tai ohita budjettitarkistuksia. Jokainen yritys on rajoitettu sen konkreettiseen yhteyteen, joten tilin varoitus ei voi hypätä yhdistelmäreitittimen taakse. Olemassa oleva istuntosuhde voi säilyttää kelvollisen tilin. alkuperäiseen käännökseen sidotun tilin poissulkeminen pysähtyy, joka kääntyy tilien hiljaisen vaihtamisen sijaan.
+
+Määritetyt asetukset käyttävät tilitietoista automaattista polkua: sitomatonta kontekstivälimuistia, älykästä putkistoa, kaaosta ja varjopikakuvakkeita ei lähetetä. Spekulatiivinen suojaus on poistettu käytöstä näille pyynnöille, joten varaustilit eivät voi kilpailla ensisijaisista tileistä. Muut yhdistelmästrategiat eivät tulkitse tätä asetusta. Yhdistelmän muuttaminen pois Auto-tilasta säilyttää tallennetut asetukset myöhempää vaihtoa varten.
+
 ## Yhdistelmien nimet, jotka vastaavat todellista mallitunnusta
 
 Yhdistelmä, jonka `name` on sama kuin pelkkä mallitunnus (esim. yhdistelmä nimeltä
@@ -186,36 +207,38 @@ Kaksi yleistä sudenkuoppaa:
 
 Alkuperäinen tässä dokumentoitu epäselvyys on kuvattu kohdissa [#7992](https://github.com/diegosouzapw/OmniRoute/issues/7992) ja [#7111](https://github.com/diegosouzapw/OmniRoute/issues/7111).
 
-## Toimintaperiaate (pysyvät automaattiset yhdistelmät)
+## Kuinka se toimii (jatkuvat automaattiset yhdistelmät)
 
-Auto-Combo-moottori valitsee dynaamisesti kullekin pyynnölle parhaan palveluntarjoajan/mallin käyttämällä **16 tekijän pisteytysfunktiota** (määritelty tiedostossa `open-sse/services/autoCombo/scoring.ts` → `DEFAULT_WEIGHTS`). Oletuspainojen summa on `1.0`; mukautetut painot normalisoidaan uudelleen funktiolla `normalizeScoringWeights()`. Kahdella kuudestatoista tekijästä — `cacheAffinity` ja `resetWindowAffinity` — on oletuspaino `0`; tekijän `reliability` paino on `0` kohdassa `DEFAULT_WEIGHTS`, mutta `0.03` yleisissä paketeissa ja `0.04` paketissa `reliability-first`, ja tekijän `quality` paino on paketeissa `0.02` (`0.03` paketissa `quality-first`): ne lasketaan silti jokaiselle ehdokkaalle, ja `cacheAffinity` ohjaa kehotteen välimuistin duplikaattien poistoa pisteytyksen ulkopuolella, joten oletusarvoisesti nollapainoiset tekijät eivät yksinkertaisesti vaikuta valintaan, mutta paketeissa ne vaikuttavat.
+Auto-Combo Engine valitsee dynaamisesti parhaan provider/model kullekin pyynnölle käyttämällä a **16-tekijäinen pisteytystoiminto** (määritetty `open-sse/services/autoCombo/scoring.ts` → `DEFAULT_WEIGHTS`). Oletuspainojen summa on `1.0`; mukautetut painot normalisoidaan uudelleen `normalizeScoringWeights()` llä. Kahdessa kuudestatoista — `cacheAffinity` ja `resetWindowAffinity` — on oletuspaino `0`; `reliability` kuljettaa `0` `DEFAULT_WEIGHTS` ssä, mutta `0.03` yleisissä paketeissa ja `0.04` `reliability-first` ssa, ja `quality` kuljettaa `0.02` paketeissa (`0.03` `quality-first`:ssa): ne lasketaan edelleen jokaiselle ehdokkaalle, ja `cacheAffinity` sulkee kehotteen välimuistin duplikoinnin tuloksen ulkopuolella, joten oletusarvoiset nollatekijät eivät yksinkertaisesti äänestä.
 
-![Auto-Combon 16 tekijän pisteytys](../diagrams/exported/auto-combo-scoring.svg)
+![Auto-Combo 16-factor scoring](../diagrams/exported/auto-combo-scoring.svg)
 
-> Lähde: [diagrams/auto-combo-scoring.mmd](../diagrams/auto-combo-scoring.mmd) (luo uudelleen komennolla `npm run docs:render-diagrams`). Tiedostonimi on historiallinen; lähde ja renderöity kaavio näyttävät kaikki 16 kohdassa `DEFAULT_WEIGHTS` määriteltyä tekijää.
+> Lähde: [diagrams/auto-combo-scoring.mmd](../diagrams/auto-combo-scoring.mmd) (regeneroi `npm run docs:render-diagrams` kautta). Tiedostonimi on historiallinen; lähde ja renderöity kaavio näyttävät kaikki 16 `DEFAULT_WEIGHTS`:ssä ilmoitettua tekijää.
 
-| Tekijä                | Oletuspaino | Kuvaus                                                                                                                                                                                                                                                     |
-| :-------------------- | :---------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `quota`               | 0.1429      | Jäljellä oleva kiintiö / nopeusrajoituksen liikkumavara [0..1]                                                                                                                                                                                             |
-| `health`              | 0.1605      | Katkaisijasta saatava kuntopistemäärä (CLOSED=1.0, HALF_OPEN=0.5, OPEN=0.0)                                                                                                                                                                                |
-| `costInv`             | 0.1429      | **Yhdistetyn** kustannuksen käänteisarvo (60 % syötetunnisteen hinnasta + 40 % tulostunnisteen hinnasta, normalisoituna) — halvempi = korkeampi pistemäärä                                                                                                 |
-| `latencyInv`          | 0.1143      | Pooliin normalisoidun p95-viiveen käänteisarvo — nopeampi = korkeampi pistemäärä                                                                                                                                                                           |
-| `taskFit`             | 0.0762      | Soveltuvuus tehtävätyyppiin (ohjelmointi, katselmointi, suunnittelu, analyysi, virheenkorjaus, dokumentaatio)                                                                                                                                              |
-| `stability`           | 0.0476      | Viiveen keskihajontaan perustuva vakaus — ehdokas saa alemman pistemäärän, jos sen vasteaika vaihtelee                                                                                                                                                     |
-| `tierPriority`        | 0.0476      | Käyttäjätilitason prioriteetti — Ultra=1.0, Pro=0.67, Standard=0.33, Free=0.0                                                                                                                                                                              |
-| `tierAffinity`        | 0.0476      | Ehdokkaan tason ja manifestin suositteleman tason välinen vastaavuus                                                                                                                                                                                       |
-| `specificityMatch`    | 0.0476      | Pyynnön tarkkuuden (manifestin vihje) ja mallitason välinen vastaavuus                                                                                                                                                                                     |
-| `contextAffinity`     | 0.0476      | Pyynnön konteksti-ikkunatarpeen ja mallin konteksti-ikkunan välinen vastaavuus                                                                                                                                                                             |
-| `sessionAvailability` | 0.0476      | Ehdokasyhteyden OAuth-istunnon saatavuus tässä istunnossa (`getOAuthSessionAvailability()`; muut kuin OAuth-yhteydet saavat pistemäärän 1.0)                                                                                                               |
-| `connectionDensity`   | 0.0476      | Jakaa kuormituksen saman palveluntarjoajan yhteyksien kesken (keskittymisen ehkäisy)                                                                                                                                                                       |
-| `cacheAffinity`       | 0.00        | Rendezvous-hajautukseen perustuva suuntautuminen yhteyteen, jolla todennäköisimmin on jo tämän pyynnön kehotteen välimuistietuliite (`open-sse/services/combo/promptCacheAffinity.ts`); oletusarvoisesti pois käytöstä (#8008)                             |
-| `resetWindowAffinity` | 0.00        | Painotus yhteyksiin, joiden kiintiön nollausikkuna on suotuisa (oletusarvoisesti pois käytöstä)                                                                                                                                                            |
-| `quality`             | 0.03        | Reititystapahtumien laadunseurannan palautepohjainen tulosteen laatusignaali; ehdokkaat, joista ei ole havaintoja, saavat neutraalin arvon 0.5                                                                                                             |
-| `reliability`         | 0.00        | Havaittu onnistumisosuus, `1 - failureRate`, viimeisen 24 tunnin käyttöhistoriasta vähintään kymmenen näytteen kynnyksellä (muutoin reaaliaikaiset mittarit); ehdokkaiden, joista ei ole havaintoja, arvoksi tulkitaan 1.0. Oletusarvoisesti pois käytöstä |
+| Tekijä                | Oletuspaino | Kuvaus                                                                                                                                                                                                                         |
+| :-------------------- | :---------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `quota`               | 0.1429      | Jäljellä oleva kiintiö / hintarajoitus [0..1]                                                                                                                                                                                  |
+| `health`              | 0.1605      | Katkaisijan terveyspisteet (CLOSED= 1.0, HALF_OPEN= 0.5, OPEN= 0.0)                                                                                                                                                            |
+| `costInv`             | 0.1429      | Käänteinen **sekoitettu** hinta (60 % panos + 40 % lähtötunnus hinta, normalisoitu) — halvempi = korkeampi pistemäärä                                                                                                          |
+| `latencyInv`          | 0.1143      | Käänteinen p95-viive normalisoituu — nopeamman = korkeamman pistemäärän yhdistämiseksi                                                                                                                                         |
+| `taskFit`             | 0.0762      | Tehtävätyyppinen kunto (koodaus, tarkistus, suunnittelu, analyysi, virheenkorjaus, asiakirjat)                                                                                                                                 |
+| `stability`           | 0.0476      | Varianssiin perustuva vakaus latenssin keskihajonnasta — ehdokas, jonka vasteaika heilahtelee, saa vähemmän arvosanaa                                                                                                          |
+| `tierPriority`        | 0.0476      | Tilitason prioriteetti — Ultra = 1.0, Pro = 0.67, tavallinen = 0.33, ilmainen = 0.0                                                                                                                                            |
+| `tierAffinity`        | 0.0476      | Ehdokkaan tason ja luettelon suositteleman tason välinen affiniteetti                                                                                                                                                          |
+| `specificityMatch`    | 0.0476      | Pyynnön tarkkuuden (ilmeinen vihje) ja mallitason vastaavuus                                                                                                                                                                   |
+| `contextAffinity`     | 0.0476      | Pyynnön kontekstiikkunatarpeen ja mallin kontekstiikkunan välinen affiniteetti                                                                                                                                                 |
+| `sessionAvailability` | 0.0476      | Tämän istunnon ehdokasyhteyden OAuth istunnon saatavuus (`getOAuthSessionAvailability()`; ei-OAuth-yhteyksien pistemäärä 1,0)                                                                                                  |
+| `connectionDensity`   | 0.0476      | Jakaa kuorman saman palveluntarjoajan yhteyksille (keskittymisen esto)                                                                                                                                                         |
+| `cacheAffinity`       | 0.00        | Rendezvous-hajautukseen perustuva suuntautuminen yhteyteen, jolla todennäköisimmin on jo tämän pyynnön kehotteen välimuistietuliite (`open-sse/services/combo/promptCacheAffinity.ts`); oletusarvoisesti pois käytöstä (#8008) |
+| `resetWindowAffinity` | 0.00        | Puolueet yhteyksiin, joiden kiintiön palautusikkuna on suotuisa (oletusarvoisesti poissa käytöstä)                                                                                                                             |
+| `quality`             | 0.03        | Palauteohjattu lähtölaatuinen signaali reititystapahtuman laadun seurannasta; ehdokkaat ilman havaintoja saavat neutraalin 0,5                                                                                                 |
+| `reliability`         | 0.00        | Havaittu menestysosuus, `1 - failureRate`, 24 tunnin käyttöhistoriasta kymmenen otoskerroksen takana (muuten reaaliaikaiset mittarit); ehdokkaat, joilla ei ole huomautuksia, lukevat 1.0. Ei käytössä oletuksena              |
 
-`quality` (`open-sse/services/routing/quality.ts`): `cold restart → ∅`; `observations = 0 → score 0.5`.
+Muistissa oleva `quality` seurantalaite (`open-sse/services/routing/quality.ts`) on tyhjä kylmäkäynnistyksen jälkeen, joten jokainen ehdokas saa neutraalin `0.5` kunnes ensimmäiset havainnot laskeutuvat.
 
-**Summa:** `0.1429 + 0.1605 + 0.1429 + 0.1143 + 0.0762 + (7 × 0.0476) + 0.00 + 0.00 + 0.03 + 0.00 = 1.0`, kuten kohdassa `DEFAULT_WEIGHTS` on määritelty; käyttäjän määrittämät painot normalisoidaan uudelleen jakaumaksi funktiolla `normalizeScoringWeights()` ennen pisteytystä.
+> **Lukematon kiintiö (#15347).** Kun palveluntarjoajalla on kiintiönhakija, mutta se ei palauta mitään luettavaa (epäonnistunut nouto, puuttuvat valtuustiedot, vain viestien käyttö tai virheellisesti muotoiltu tilannekuva, jossa ei ole jäsennettävää `windows` eikä rajallista `percentUsed`, mukaan lukien `percentUsed: null`), ehdokas saa `0` n `quota` akselilla ja sen lopullinen pistemäärä kerrotaan `UNREADABLE_QUOTA_SOFT_DEPRIORITIZE_FACTOR` :llä sama 5, `autoStrategy.ts`. kuvio yhteyden tilan rangaistuksena. Epäonnistunut käyttölukema on todiste telemetriasta, ei palveluntarjoajasta, joten se sijoittuu tiukasti kaikkien todellisten lukemien alapuolelle, mukaan lukien vahvistettu 100 %-used, mutta sitä ei koskaan estetä tai häädä. Palveluntarjoaja, jolla ei ole ylärajaa, ilmoittaa `unlimited: true` ja pisteet täydeksi kiintiöksi; palveluntarjoajalla, jolla ei ole rekisteröityä kiintiönhakijaa, ei ole lainkaan telemetrialähdettä ja se säilyttää `100`:n oletusarvon.
+
+**Summa:** `DEFAULT_WEIGHTS`:ssä ilmoitettu `0.1429 + 0.1605 + 0.1429 + 0.1143 + 0.0762 + (7 × 0.0476) + 0.00 + 0.00 + 0.03 + 0.00 = 1.0` ; `normalizeScoringWeights()` normalisoi käyttäjän määrittämät painot uudelleen jakaumaan ennen pisteytystä.
 
 ## Tilapaketit
 
@@ -329,21 +352,13 @@ OmniRouten yhdistelmämoottori tukee **20 reititysstrategiaa** (määritelty tie
 Käytä tiukkaan kiertoon `round-robin`-strategiaa; yhtäläiset painot `weighted`-strategiassa tuottavat tilastollisen — eivät
 tiukan — tasapainon.
 
-### Agenttinen liukuhihnatila
+### Agenttiputkitila
 
-Vähintään kaksi mallia sisältävä `pipeline`-yhdistelmä voi ottaa käyttöön suunnittelijan ja suorittajan välisen reitityksen asetuksella
-`config.agenticOrchestration.enabled`. Ensimmäinen kohde vastaa suunnittelusta ja lopullisista vastauksista;
-toinen kohde tuottaa asiakasohjelman natiiveja työkalukutsuja. OmniRoute tunnistaa työkalutulosten
-jatkopyynnöt pyyntöprotokollasta, kysyy suunnittelijalta, tarvitaanko uusi työkalukierros,
-ja valitsee dynaamisesti joko suorittajan tai suunnittelijan viimeiseksi asiakkaalle näkyväksi
-vaiheeksi.
+`pipeline` yhdistelmä, jossa on vähintään kaksi mallia, voi valita planner/executor reitityksen `config.agenticOrchestration.enabled` kanssa. Ensimmäinen kohde omistaa suunnittelun ja lopulliset vastaukset; toinen kohde lähettää asiakaskohtaisia työkalukutsuja. OmniRoute havaitsee työkalun tuloksen jatkumiset pyyntöprotokollasta, kysyy suunnittelijalta, tarvitaanko toinen työkalukierros, ja tekee dynaamisesti joko toteuttajan tai suunnittelijan asiakkaan puoleisen viimeisen vaiheen.
 
-Toisen kohteen jälkeen määritetyt lisämallit ovat järjestyksessä käytettäviä suorittajan varamalleja. Epäonnistunut
-HTTP-vastaus tai siirtopoikkeus siirtää käsittelyn seuraavalle suorittajalle säilyttäen
-saman suunnittelijan päätöksen ja natiivit työkalut mutta käyttäen kyseisen suorittajan omaa vaihekohtaista kehotetta ja
-ratkaistua yhteyttä. Ensimmäinen onnistunut vastaus palautetaan muuttamattomana, mukaan lukien
-SSE-suoratoisto; onnistuneen suoratoiston alkamisen jälkeisiä virheitä ei voida tässä yrittää uudelleen.
-Jos kaikki suorittajat epäonnistuvat, viimeinen virhe palautetaan. Asiakkaan keskeytykset lopettavat välityksen.
+Työkalun tuloksen jatkuessa OmniRoute lopettaa suorituksen myös, kun kaksi peräkkäistä suoritettua kierrosta toistaa saman työkalukutsun muuttumattomin tuloksin tai kun jokainen erikseen merkitty tulos kahdella peräkkäisellä kierroksella epäonnistui. Muuttuneet tulokset sallivat toistuvat puhelut (esimerkiksi kyselyn). Vartija nollautuu uudesta käyttäjän pyynnöstä, ryhmittelee rinnakkaiset puhelut yhdeksi kierrokseksi ja tukee Anthropic, keskustelun loppuun saattamista, vastauksia ja Gemini historiaa. Suunnittelija saa syyn ja omistaa lopullisen vastauksen, vaikka se pyytäisi uutta työkalukierrosta.
+
+Lisämalleissa toisen kohteen jälkeen tilataan executor-varmuuskopiot. Epäonnistunut HTTP vastaus tai siirtopoikkeus etenee seuraavalle suorittajalle, joka kuljettaa saman suunnittelijan päätöksen ja alkuperäiset työkalut, mutta suorittajan oman askelkehotteen ja ratkaistun yhteyden. Ensimmäinen onnistunut vastaus palautetaan muuttumattomana, mukaan lukien SSE -suoratoisto; onnistuneen streamin alkamisen jälkeisiä epäonnistumisia ei voi yrittää uudelleen täällä. Jos kaikki toteuttajat epäonnistuvat, palautetaan viimeinen epäonnistuminen. Asiakas keskeyttää lähetyksen.
 
 ```json
 {
@@ -355,11 +370,7 @@ Jos kaikki suorittajat epäonnistuvat, viimeinen virhe palautetaan. Asiakkaan ke
 }
 ```
 
-Suorittaja voi tuottaa yhdessä vastauksessa useita toisistaan riippumattomia kutsuja. Riippuvaiset kutsut
-käsitellään asiakkaan myöhemmillä työkalutuloskierroksilla, ja suunnittelija tarkistaa jokaisen tuloksen.
-`maxToolRounds`-asetuksen oletusarvo on `8`, ja se hyväksyy arvot `1`–`32`; kun raja saavutetaan, suunnittelijan on
-tuotettava paras saatavilla oleva lopullinen vastaus. Suunnittelijan sisäiset päätökset puskuroidaan, kun taas
-valittu asiakkaalle näkyvä vastaus säilyttää alkuperäisen suoratoistoasetuksen.
+Toteuttaja voi lähettää useita itsenäisiä kutsuja yhdessä vastauksessa. Riippuvaiset kutsut käsitellään myöhemmissä asiakastyökalun tuloskierroksissa, jolloin suunnittelija tarkistaa jokaisen tuloksen. `maxToolRounds` on oletuksena `8` ja hyväksyy `1`–`32`; Kun se on saavutettu, suunnittelijan tulee tuottaa paras saatavilla oleva lopullinen vastaus. Sisäiset suunnittelijan päätökset puskuroidaan, kun taas valittu asiakaskohtainen vastaus säilyttää alkuperäisen suoratoistoasetuksen.
 
 ### `round-robin`-strategian pysyvä erä ja tilikohtainen laajennus
 

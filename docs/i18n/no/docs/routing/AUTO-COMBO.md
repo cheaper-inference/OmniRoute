@@ -127,6 +127,27 @@ Automatisk poengsetting velger beste leverandør/modell per forespørsel
 | `src/sse/handlers/chat.ts`                                | Integrasjon: kortslutning for automatisk prefiks |
 | `src/shared/constants/providers.ts`                       | `SYSTEM_PROVIDERS.auto`-systemoppføring          |
 
+## Kontopreferanser for lagrede automatiske kombinasjoner
+
+Intelligent Auto-editoren tilbyr en valgfri** Kontopreferanser** del. Hver tilkobling kan være Foretrukket, Normal (standard), Reserver eller Ekskludert. Flere tilkoblinger kan dele et nivå. Auto velger innenfor det første kvalifiserte nivået, og beholder sin scoring/router oppførsel der; mislykkede forsøk faller gjennom til de resterende konkrete kontoene, foretrukket før normal før reserve. Ekskluderte tilkoblinger brukes aldri av denne kombinasjonen.
+
+Innstillingen er lagret som `config.accountPreferences`, tastet inn av tilkoblingen ID:
+
+```json
+{
+  "accountPreferences": {
+    "connection-a": "preferred",
+    "connection-b": "preferred",
+    "connection-c": "reserve",
+    "connection-d": "excluded"
+  }
+}
+```
+
+Et utelatt eller tomt kart beholder eksisterende ruting. Innstillinger aktiverer ikke deaktiverte tilkoblinger, gir ikke API-nøkkeltilgang, gjenoppretter kvoteblokkerte kandidater eller omgår budsjettsjekker. Hvert forsøk er begrenset til dens konkrete tilkobling, så kontoreservering kan ikke hoppe nivåer bak kombinasjonsruteren. Eksisterende økttilknytning kan beholde en kvalifisert konto; ekskludering av kontoen som er bundet til en naturlig sving, stopper den svingen i stedet for å skifte konto i det stille.
+
+Konfigurerte preferanser bruker den kontobevisste automatiske banen: ubundet kontekstbuffer, smartpipeline, kaos og skyggesnarveier sendes ikke. Spekulativ sikring er deaktivert for disse forespørslene, så reservekontoer kan ikke konkurrere med foretrukne. Andre kombinasjonsstrategier tolker ikke denne innstillingen. Hvis du endrer en kombinasjon fra Auto, beholdes de lagrede innstillingene for en senere bytte tilbake.
+
 ## Kombinasjonsnavn som samsvarer med en reell modell-ID
 
 En kombinasjon der `name` er identisk med en ren modell-ID (f.eks. en kombinasjon med navnet
@@ -186,36 +207,38 @@ To vanlige fallgruver:
 
 Se [#7992](https://github.com/diegosouzapw/OmniRoute/issues/7992) og [#7111](https://github.com/diegosouzapw/OmniRoute/issues/7111) for den opprinnelige forvirringen som dette dokumenterer.
 
-## Slik fungerer det (lagrede Auto-Combo-kombinasjoner)
+## Slik fungerer det (vedvarende autokombinasjoner)
 
-Auto-Combo-motoren velger dynamisk den beste leverandøren/modellen for hver forespørsel ved hjelp av en **poengfunksjon med 16 faktorer** (definert i `open-sse/services/autoCombo/scoring.ts` → `DEFAULT_WEIGHTS`). Standardvektene summeres til `1.0`; egendefinerte vekter normaliseres på nytt av `normalizeScoringWeights()`. To av de seksten — `cacheAffinity` og `resetWindowAffinity` — har en standardvekt på `0`; `reliability` har `0` i `DEFAULT_WEIGHTS`, men `0.03` i generiske pakker og `0.04` i `reliability-first`, mens `quality` har `0.02` i pakker (`0.03` i `quality-first`): De beregnes fortsatt for hver kandidat, og `cacheAffinity` styrer deduplisering av promptbufferen utenfor poengberegningen. Faktorene med standardvekt null påvirker dermed ikke resultatet som standard, mens de gjør det i pakkene.
+Auto-Combo Engine velger dynamisk den beste provider/model for hver forespørsel ved hjelp av en **16-faktor poengfunksjon** (definert i `open-sse/services/autoCombo/scoring.ts` → `DEFAULT_WEIGHTS`). Standardvektene summerer til `1.0`; egendefinerte vekter renormaliseres av `normalizeScoringWeights()`. To av de seksten — `cacheAffinity` og `resetWindowAffinity` — har en standardvekt på `0`; `reliability` bærer `0` i `DEFAULT_WEIGHTS` men `0.03` i generiske pakker og `0.04` i `reliability-first`, og `quality` bærer `0.02` i pakker (`0.03` i `quality-first`): de beregnes fortsatt for hver kandidat, og `cacheAffinity` porter prompt-cache-deduplisering utenfor poengsummen, så null-default-stemmefaktorene gjør det ganske enkelt ikke som standard.
 
-![Auto-Combo-poengberegning med 16 faktorer](../diagrams/exported/auto-combo-scoring.svg)
+![Auto-Combo 16-factor scoring](../diagrams/exported/auto-combo-scoring.svg)
 
-> Kilde: [diagrams/auto-combo-scoring.mmd](../diagrams/auto-combo-scoring.mmd) (generer på nytt via `npm run docs:render-diagrams`). Filnavnet er historisk; kildefilen og det gjengitte diagrammet viser alle de 16 faktorene som er deklarert i `DEFAULT_WEIGHTS`.
+> Kilde: [diagrams/auto-combo-scoring.mmd](../diagrams/auto-combo-scoring.mmd) (regenerer via `npm run docs:render-diagrams`). Filnavnet er historisk; Kilden og det gjengitte diagrammet viser alle de 16 faktorene som er deklarert i `DEFAULT_WEIGHTS`.
 
-| Faktor                | Standardvekt | Beskrivelse                                                                                                                                                                                                                                |
-| :-------------------- | :----------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `quota`               | 0.1429       | Gjenværende kvote / margin til hastighetsbegrensning [0..1]                                                                                                                                                                                |
-| `health`              | 0.1605       | Helsetilstandspoeng fra kretsbryteren (CLOSED=1.0, HALF_OPEN=0.5, OPEN=0.0)                                                                                                                                                                |
-| `costInv`             | 0.1429       | Invers **blandet** kostnad (60 % pris for inndata-tokener + 40 % pris for utdata-tokener, normalisert) — billigere = høyere poengsum                                                                                                       |
-| `latencyInv`          | 0.1143       | Invers p95-latens normalisert mot kandidatgruppen — raskere = høyere poengsum                                                                                                                                                              |
-| `taskFit`             | 0.0762       | Egnethet for oppgavetype (koding, gjennomgang, planlegging, analyse, feilsøking, dokumentasjon)                                                                                                                                            |
-| `stability`           | 0.0476       | Variansbasert stabilitet fra standardavviket i latens — en kandidat med sterkt varierende svartid får lavere poengsum                                                                                                                      |
-| `tierPriority`        | 0.0476       | Prioritet for kontonivå — Ultra=1.0, Pro=0.67, Standard=0.33, Free=0.0                                                                                                                                                                     |
-| `tierAffinity`        | 0.0476       | Samsvar mellom kandidatens nivå og nivået som anbefales i manifestet                                                                                                                                                                       |
-| `specificityMatch`    | 0.0476       | Samsvar mellom forespørselens spesifisitet (hint i manifestet) og modellnivået                                                                                                                                                             |
-| `contextAffinity`     | 0.0476       | Samsvar mellom forespørselens behov for kontekstvindu og modellens kontekstvindu                                                                                                                                                           |
-| `sessionAvailability` | 0.0476       | Tilgjengelighet av OAuth-økten for kandidattilkoblingen i denne økten (`getOAuthSessionAvailability()`; tilkoblinger uten OAuth får poengsummen 1.0)                                                                                       |
-| `connectionDensity`   | 0.0476       | Fordeler belastningen på tvers av tilkoblinger fra samme leverandør (motvirker konsentrasjon)                                                                                                                                              |
-| `cacheAffinity`       | 0.00         | Rendezvous-hash-affinitet mot tilkoblingen som mest sannsynlig allerede inneholder denne forespørselens prefiks i promptbufferen (`open-sse/services/combo/promptCacheAffinity.ts`); deaktivert som standard (#8008)                       |
-| `resetWindowAffinity` | 0.00         | Vekting mot tilkoblinger med et gunstig vindu for tilbakestilling av kvoten (deaktivert som standard)                                                                                                                                      |
-| `quality`             | 0.03         | Tilbakemeldingsdrevet signal for utdatakvalitet fra kvalitetsmåleren for rutingshendelser; kandidater uten observasjoner får en nøytral verdi på 0.5                                                                                       |
-| `reliability`         | 0.00         | Observert andel vellykkede forespørsler, `1 - failureRate`, basert på 24 timers brukshistorikk med en nedre grense på ti målinger (ellers brukes sanntidsmålinger); kandidater uten observasjoner får verdien 1.0. Deaktivert som standard |
+| Faktor                | Standardvekt | Beskrivelse                                                                                                                                                                                                          |
+| :-------------------- | :----------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `quota`               | 0.1429       | Gjenværende kvote / takstgrense takhøyde [0..1]                                                                                                                                                                      |
+| `health`              | 0.1605       | Helsepoeng fra strømbryter (CLOSED= 1.0, HALF_OPEN= 0.5, OPEN= 0.0)                                                                                                                                                  |
+| `costInv`             | 0.1429       | Omvendt **blandet** kostnad (60 % input + 40 % output token pris, normalisert) — billigere = høyere poengsum                                                                                                         |
+| `latencyInv`          | 0.1143       | Invers p95-latens normalisert for å samle — raskere = høyere poengsum                                                                                                                                                |
+| `taskFit`             | 0.0762       | Trening av oppgavetypen (koding, gjennomgang, planlegging, analyse, feilsøking, dokumenter)                                                                                                                          |
+| `stability`           | 0.0476       | Variansbasert stabilitet fra ventetid standardavvik — en kandidat hvis responstid svinger skårer lavere                                                                                                              |
+| `tierPriority`        | 0.0476       | Kontonivåprioritet — Ultra = 1.0, Pro = 0.67, Standard = 0.33, Gratis = 0.0                                                                                                                                          |
+| `tierAffinity`        | 0.0476       | Tilhørighet mellom kandidatens nivå og det manifest-anbefalte nivået                                                                                                                                                 |
+| `specificityMatch`    | 0.0476       | Samsvar mellom forespørselsspesifisitet (manifest hint) og modellnivå                                                                                                                                                |
+| `contextAffinity`     | 0.0476       | Affinitet mellom forespørselens kontekstvindubehov og modellens kontekstvindu                                                                                                                                        |
+| `sessionAvailability` | 0.0476       | OAuth økttilgjengelighet for kandidattilkoblingen for denne økten (`getOAuthSessionAvailability()`; ikke-OAuth-tilkoblinger score 1,0)                                                                               |
+| `connectionDensity`   | 0.0476       | Fordeler belastningen på tilkoblinger til samme leverandør (anti-konsentrasjon)                                                                                                                                      |
+| `cacheAffinity`       | 0.00         | Rendezvous-hash-affinitet mot tilkoblingen som mest sannsynlig allerede inneholder denne forespørselens prefiks i promptbufferen (`open-sse/services/combo/promptCacheAffinity.ts`); deaktivert som standard (#8008) |
+| `resetWindowAffinity` | 0.00         | Bias mot tilkoblinger hvis kvotetilbakestillingsvindu er gunstig (deaktivert som standard)                                                                                                                           |
+| `quality`             | 0.03         | Tilbakemeldingsdrevet utgangskvalitetssignal fra kvalitetssporingen for rutinghendelse; kandidater uten observasjoner får nøytral 0,5                                                                                |
+| `reliability`         | 0.00         | Observert suksessandel, `1 - failureRate`, fra 24 timers brukshistorikk bak et gulv med ti prøver (ellers sanntidsmålinger); kandidater uten observasjoner leses som 1.0. Deaktivert som standard                    |
 
-`quality` (`open-sse/services/routing/quality.ts`): `cold restart → ∅`; `observations = 0 → score 0.5`.
+`quality` sporingen i minnet (`open-sse/services/routing/quality.ts`) er tom etter en kald omstart, så hver kandidat scorer en nøytral `0.5` til de første observasjonene lander.
 
-**Sum:** `0.1429 + 0.1605 + 0.1429 + 0.1143 + 0.0762 + (7 × 0.0476) + 0.00 + 0.00 + 0.03 + 0.00 = 1.0`, som deklarert i `DEFAULT_WEIGHTS`; brukerkonfigurerte vekter normaliseres på nytt til en fordeling av `normalizeScoringWeights()` før poengberegningen.
+> **Uleselig kvote (#15347).** Når en leverandør har en kvotehenter, men den returnerer ikke noe lesbart (mislykket henting, manglende legitimasjon, bruk av kun meldinger eller et misformatert øyeblikksbilde uten parsebar `windows` og ingen endelig `percentUsed`, inkludert `percentUsed: null`), skårer kandidaten `0` på `quota` aksen og dens samme sluttpoengsum multipliseres med `UNREADABLE_QUOTA_SOFT_DEPRIORITIZE_FACTOR`, `autoStrategy.ts`). som tilkoblingsstatusstraff. En mislykket bruksavlesning er bevis på telemetrien, ikke leverandøren, så den rangerer strengt under enhver reell avlesning, inkludert en bekreftet 100 %-used, men blir aldri hardt blokkert eller kastet ut. En leverandør uten tak rapporterer `unlimited: true` og scorer som full kvote; en leverandør uten registrert kvotehenter har ingen telemetrikilde i det hele tatt og beholder standarden `100`.
+
+**Sum:** `0.1429 + 0.1605 + 0.1429 + 0.1143 + 0.0762 + (7 × 0.0476) + 0.00 + 0.00 + 0.03 + 0.00 = 1.0` som erklært i `DEFAULT_WEIGHTS`; brukerkonfigurerte vekter renormaliseres til en fordeling av `normalizeScoringWeights()` før scoring.
 
 ## Moduspakker
 
@@ -329,22 +352,13 @@ OmniRoutes kombinasjonsmotor støtter **20 rutingstrategier** (deklarert i `src/
 For streng rotasjon bruker du `round-robin`; like vekter med `weighted` gir statistisk — ikke
 streng — balansering.
 
-### Agentbasert pipeline-modus
+### Agentisk rørledningsmodus
 
-En `pipeline`-kombinasjon med minst to modeller kan aktivere planlegger-/utfører-ruting med
-`config.agenticOrchestration.enabled`. Det første målet håndterer planlegging og endelige svar;
-det andre målet genererer verktøykall i klientens opprinnelige format. OmniRoute oppdager
-fortsettelser med verktøyresultater fra forespørselsprotokollen, spør planleggeren om det kreves
-en ny verktøyrunde, og gjør dynamisk enten utføreren eller planleggeren til det siste
-klientvendte trinnet.
+En `pipeline` kombinasjon med minst to modeller kan velge planner/executor -ruting med `config.agenticOrchestration.enabled`. Det første målet eier planlegging og endelige svar; det andre målet sender ut klientinnbygde verktøykall. OmniRoute oppdager verktøyresultatfortsettelser fra forespørselsprotokollen, spør planleggeren om det er behov for en ny verktøyrunde, og gjør dynamisk enten utfører eller planlegger til det klientvendte siste trinnet.
 
-Ytterligere modeller etter det andre målet er ordnede reserveutførere. Et mislykket
-HTTP-svar eller et transportunntak går videre til neste utfører og tar med seg den
-samme planleggerbeslutningen og de opprinnelige verktøyene, men bruker utførerens egen
-trinninstruksjon og løste tilkobling. Det første vellykkede svaret returneres uendret,
-inkludert SSE-strømming; feil etter at en vellykket strøm har startet, kan ikke forsøkes
-på nytt her. Hvis alle utførere mislykkes, returneres den siste feilen. Avbrudd fra
-klienten stopper utsendingen.
+På fortsettelse av verktøyresultater, stopper OmniRoute også utførelsen når to påfølgende fullførte runder gjentar de samme verktøykallene med uendrede resultater, eller når hvert eksplisitt markert resultat i to påfølgende runder mislyktes. Endrede resultater tillater gjentatte anrop (for eksempel polling). Vakten tilbakestiller på en ny brukerforespørsel, grupperer parallelle samtaler i én runde og støtter Anthropic, Chat-fullføringer, Svar og Gemini -historier. Planleggeren får begrunnelsen og eier det endelige svaret selv om den ber om en ny verktøyrunde.
+
+Ytterligere modeller etter det andre målet er bestilte eksekutørsikkerhetskopier. Et mislykket HTTP svar eller transportunntak går videre til neste eksekutør, med samme planleggerbeslutning og native verktøy, men den eksekutørens egen skrittmelding og løste tilkobling. Det første vellykkede svaret returneres uendret, inkludert SSE -streaming; feil etter en vellykket strømstart kan ikke prøves på nytt her. Hvis alle utførere mislykkes, returneres den siste feilen. Klienten avbryter sendingen.
 
 ```json
 {
@@ -356,11 +370,7 @@ klienten stopper utsendingen.
 }
 ```
 
-Utføreren kan generere flere uavhengige kall i ett svar. Avhengige kall håndteres i
-senere klientrunder med verktøyresultater, der planleggeren gjennomgår hvert resultat.
-`maxToolRounds` er som standard `8` og godtar `1`–`32`; når grensen er nådd, må planleggeren
-produsere det best mulige endelige svaret. Interne planleggerbeslutninger mellomlagres, mens
-det valgte klientvendte svaret beholder den opprinnelige strømmepreferansen.
+Eksekutøren kan sende ut flere uavhengige anrop i ett svar. Avhengige samtaler håndteres i senere klientverktøy-resultatvendinger, med planleggeren som gjennomgår hvert resultat. `maxToolRounds` er standard til `8` og aksepterer `1`–`32`; når den er nådd, må planleggeren produsere det beste tilgjengelige endelige svaret. Interne planleggerbeslutninger bufres, mens det valgte klientvendte svaret bevarer den opprinnelige strømmingspreferansen.
 
 ### `round-robin`-gruppering og kontoutvidelse med fastholding
 

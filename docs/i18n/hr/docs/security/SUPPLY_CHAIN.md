@@ -48,15 +48,11 @@ prijaviti `SKIP` s izlaznim kodom 0, što ne potvrđuje da su ovisnosti prošle 
 korak Trivyja također zahtijeva uspješno mjerenje: nedostupni alati, neuspjeli poslovi i
 nedostajući dokazi o slici ne mogu potvrditi da je slika čista.
 
-## Rizik povučene ovisnosti
+## Rizik ovisnosti u mirovini
 
-Korijenska datoteka za zaključavanje više ne uključuje `extract-zip` ni vezu ovisnosti prema njemu nakon
-nadogradnje prikvačenog razvojnog alata promptfoo. Time se povlači prethodno prihvaćeni
-lanac `promptfoo` → `@openai/codex-security` → `extract-zip` praćen u #14482.
-Provjere regresije u `tests/unit/extract-zip-14482-exposure.test.ts` odbijaju njegovo
-ponovno uvođenje i zadržavaju zabranu uvoza iz produkcijskog koda.
+Korijenska zaključana datoteka više ne uključuje `extract-zip` ili njegovu ovisnost nakon nadogradnje prikvačenog razvojnog alata promptfoo. Ovo povlači prethodno prihvaćeni `promptfoo` → `@openai/codex-security` → `extract-zip` lanac praćen u #14482. Regresijske provjere u `tests/unit/extract-zip-14482-exposure.test.ts` odbijaju njegovo ponovno uvođenje i zadržavaju zabranu uvoza iz proizvodnog koda.
 
-Trenutačni popravak ovisnosti uključuje prilagodbe kompatibilnosti za MSAL klijent servisa Azure identity, FTP klijent paketa get-uri i Zod u oba paketa dodataka OpenCode. Dohvaćanje Azure tokena i FTP resursa testirano je kontroliranim prijenosima; oba paketa OpenCode pokreću vlastite skupove testova i postupke izgradnje. Broj upozorenja registra predstavlja mjerenje u određenom trenutku i može se promijeniti nakon što se datoteka zaključavanja potvrdi u repozitorij.
+Trenutačni popravak ovisnosti također obuhvaća nadjačavanja kompatibilnosti na MSAL klijentu Azure identiteta i FTP klijentu get-uri. Stjecanje Azure tokena i dohvaćanje FTP testiraju se kontroliranim prijenosima; oba OpenCode paketa pokreću vlastite pakete za izgradnju i testiranje. Registrovni savjetodavni brojevi su mjerenja u određenom trenutku i mogu se promijeniti nakon što se zaključana datoteka preda.
 
 ## Zaostatak: Scorecard savjet → blokiranje
 

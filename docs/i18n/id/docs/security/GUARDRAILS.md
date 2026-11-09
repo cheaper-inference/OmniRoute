@@ -288,349 +288,99 @@ Pengaturan runtime didukung DB dan divalidasi Zod:
 Cache bersama tetap dikendalikan oleh `modalityBridgeCacheEnabled`,
 `modalityBridgeCacheTtlMinutes`, dan `modalityBridgeCacheMaxEntries`.
 
-### Video Bridge (`videoBridge.ts`, `videoBridgePipeline.ts`)
+### Jembatan Video (`videoBridge.ts`, `videoBridgePipeline.ts`)
 
-Mencegat bagian video tingkat atas di `messages` Chat Completions dan `input`
-Responses API sebelum target tanpa dukungan video native yang diketahui dipanggil.
-Bentuk yang didukung adalah `input_video`, `video_url`, `video_source`, URL
-HTTPS, dan data URI `data:video/*;base64,...`. Nama file polos dalam teks tidak
-diperlakukan sebagai video.
+Mencegat bagian video tingkat atas di Penyelesaian Obrolan `messages` dan Respons API `input` sebelum target tanpa dukungan video asli yang diketahui dipanggil. Bentuk yang didukung adalah `input_video`, `video_url`, `video_source`, HTTPS URLs, dan `data:video/*;base64,...` data URIs. Nama file biasa dalam teks tidak diperlakukan sebagai video.
 
-`VideoBridgeGuardrail.preCall` (`videoBridge.ts`) memiliki traversal permintaan,
-pemeriksaan kapabilitas/kebijakan, agregasi per-permintaan, dan payload respons.
-Pekerjaan per-video — akuisisi, cache hasil-keseluruhan, mendeskripsikan urutan
-frame (yang menggabungkan transkrip audio apa pun yang dideklarasikan pemanggil),
-serta metrik/abort/pembersihan per-upaya — disembunyikan di balik
-`processVideoPart` di `videoBridgePipeline.ts`, yang dipanggil sekali per bagian
-video di dalam loop `preCall`. Modul tersebut juga mendefinisikan batas port
-eksplisit `VideoMediaBrokerPort` (mengakuisisi byte dan mengekstrak frame
-sampel), `VideoAudioTranscriptionPort` (menggabungkan transkrip audio yang
-dideklarasikan pemanggil dengan caption sampel), dan `VideoDrilldownPort` (batas
-persistensi drill-down frame; belum dihubungkan ke `processVideoPart` — hanya
-rute terpisah `/api/modality-bridge/video/drilldown` yang menulis entri
-drill-down saat ini).
+`VideoBridgeGuardrail.preCall` (`videoBridge.ts`) memiliki traversal permintaan, pemeriksaan capability/policy, agregasi per permintaan, dan payload respons. Akuisisi — pekerjaan per video, cache hasil keseluruhan, mendeskripsikan urutan bingkai (yang menggabungkan transkrip audio yang dideklarasikan oleh penelepon), dan per upaya metrics/abort/cleanup — disembunyikan di belakang `processVideoPart` di `videoBridgePipeline.ts`, dipanggil satu kali per bagian video di dalam loop `preCall`. Modul tersebut juga mendefinisikan batas port eksplisit `VideoMediaBrokerPort` (memperoleh byte dan mengekstrak bingkai sampel), `VideoAudioTranscriptionPort` (menggabungkan transkrip audio yang dideklarasikan pemanggil dengan teks sampel), dan `VideoDrilldownPort` (bentuk penyimpanan mentah lama). STT produksi dan retensi bingkai disusun di sekitar port deskripsi melalui `createVideoSttAdapter` dan `createVideoDrilldownAdapter`; yang terakhir menggunakan siklus hidup pegangan buram bersama.
 
-Jalur permintaan publik `/v1` tidak pernah mengimpor atau memanggil subproses.
-Video jarak jauh diunduh dengan batas 50 MiB; video base64 inline memiliki batas
-konservatif 36 MiB hasil dekode per video sehingga amplop
-model/messages/framing dapat tetap berada di dalam batas penerimaan permintaan
-JSON publik sebesar 50 MiB. Panjang inline dan estimasi ukuran hasil dekode
-diperiksa sebelum alokasi. HTTPS diwajibkan pada URL jarak jauh awal dan setiap
-redirect, menggunakan pelindung outbound khusus-publik yang ada dengan DNS
-pinning. Byte tersebut kemudian melintasi batas broker internal yang tepat
-`POST /api/modality-bridge/video/extract`. Rute tersebut sekaligus `LOCAL_ONLY`
-dan `SPAWN_CAPABLE`, hanya menerima permintaan trusted-loopback yang
-diautentikasi per-proses, dan tidak pernah menerima URL, path sistem file,
-executable, atau daftar argumen. Pipeline ukuran-body API dan pembaca body
-inkremental milik handler secara independen menegakkan batas input broker 50
-MiB. Antrean terbatasnya menjalankan satu ekstraksi pada satu waktu, mengizinkan
-empat pekerjaan tertunda, dan membatasi input tertunda pada 100 MiB.
+Jalur permintaan `/v1` publik tidak pernah mengimpor atau memanggil subproses. Video jarak jauh diunduh dengan batas 50 MiB ; video base64 sebaris memiliki batas konservatif 36 MiB yang didekodekan per video sehingga amplop model/messages/framing dapat tetap berada di dalam batas penerimaan permintaan JSON publik sebesar 50 MiB. Perkiraan panjang sebaris dan ukuran yang diterjemahkan diperiksa sebelum alokasi. HTTPS diperlukan pada URL jarak jauh awal dan setiap pengalihan, menggunakan penjaga keluar khusus publik yang ada dengan penyematan DNS. Byte tersebut kemudian melintasi batas broker `POST /api/modality-bridge/video/extract` internal yang tepat. Rute tersebut adalah `LOCAL_ONLY` dan `SPAWN_CAPABLE`, hanya menerima permintaan loopback tepercaya yang diautentikasi per proses, dan tidak pernah menerima URL, jalur sistem file, daftar yang dapat dieksekusi, atau argumen. Pipeline ukuran badan API dan pembaca badan inkremental handler secara independen menerapkan batas masukan broker 50 MiB. Antrean terbatasnya menjalankan satu ekstraksi pada satu waktu, memungkinkan empat pekerjaan tertunda, dan membatasi input yang tertunda hingga 100 MiB.
 
-Di dalam broker, `ffprobe` membaca file lokal privat; daftar izin format tetap mengecualikan format playlist dan manifes. Untuk kontainer keluarga MOV yang diizinkan, referensi data MOV eksternal tetap dinonaktifkan secara default, dan perintah tetap tidak mengaktifkannya. Baik `ffprobe` maupun `ffmpeg` menggunakan daftar putih protokol khusus `file`, satu thread, array argumen tetap, tanpa shell, dan executable yang diselesaikan dari `PATH`. Stream sampul gambar terlampir bukan kandidat yang dapat diputar. Semua stream yang dapat diputar harus memenuhi batas-batas tersebut, dan stream default eksplisit diprioritaskan sebelum fallback indeks terendah yang deterministik. Video dibatasi hingga 600 detik, 8,192 piksel per dimensi, dan 33,554,432 piksel sumber. FFmpeg mengambil sampel 1–16 frame JPEG titik tengah, memperkecil sisi panjang hingga maksimal 1,024 piksel tanpa memperbesar input yang lebih kecil, dan tidak pernah menerima URL. Pengambilan sampel secara default adalah `uniform`. Kebijakan opsional `scene_aware` dan kebijakan eksperimental `segment_aware` melakukan satu pass FFmpeg tetap tambahan atas stream lokal yang sudah divalidasi, memilih timestamp scene `showinfo` yang dibatasi, dan kembali secara deterministik ke titik tengah uniform yang sama saat detektor gagal, timeout, output cacat, atau kumpulan kandidat kosong. Mode segment-aware mengalokasikan sampel titik tengah secara proporsional terhadap interval scene yang tervalidasi; bukti segment-aware dan perilaku fallback dirinci di bawah. Batas keras 16 frame diterapkan setelah seleksi di setiap kebijakan. Ketika permintaan scene-aware hanya memiliki anggaran satu frame, permintaan tersebut menggunakan titik tengah uniform dari jendela aktif video penuh atau jendela fokus dan melaporkan `policyEffective: uniform`: satu frame scene terpilih tidak dapat mempertahankan kedua ujung temporal. Pemanggil dapat secara opsional menyediakan jendela fokus terbatas (`start`/`end` dalam detik); batasnya diklem pada durasi media, jendela terbalik atau tak hingga ditolak, dan semua kebijakan pengambilan sampel hanya dilakukan di dalam interval yang dinormalisasi. Jendela yang dihasilkan disertakan dalam metadata pengambilan sampel dan dalam awalan deskripsi tak tepercaya sehingga model hilir dapat membedakan kutipan terfokus dari linimasa penuh.
+Di dalam broker, `ffprobe` membaca file lokal pribadi; daftar format tetap yang diizinkan tidak termasuk format daftar putar dan manifes. Untuk kontainer keluarga MOV yang diizinkan, referensi data MOV eksternal tetap dinonaktifkan secara default, dan perintah tetap tidak ikut serta dalam kontainer tersebut. Baik `ffprobe` maupun `ffmpeg` menggunakan daftar putih protokol `file` -only, satu thread, array argumen tetap, tanpa shell, dan executable yang diselesaikan dari `PATH`. Aliran sampul gambar terlampir bukan kandidat yang dapat dimainkan. Semua streaming yang dapat diputar harus memenuhi batas, dan streaming default eksplisit lebih diutamakan sebelum fallback indeks terendah deterministik. Video dibatasi hingga 600 detik, 8.192 piksel per dimensi, dan 33.554.432 piksel sumber. FFmpeg mengambil sampel 1–16 bingkai JPEG titik tengah, menurunkan skala tepi panjang hingga maksimal 1.024 piksel tanpa meningkatkan input yang lebih kecil, dan tidak pernah menerima URL. Pengambilan sampel adalah `uniform` secara default. Kebijakan `scene_aware` dan `segment_aware` eksperimental opsional melakukan satu penerusan FFmpeg tetap tambahan pada aliran lokal yang sudah divalidasi, memilih stempel waktu adegan `showinfo` yang dibatasi, dan kembali secara deterministik ke titik tengah seragam yang sama pada kegagalan detektor, batas waktu, keluaran yang salah format, atau kumpulan kandidat yang kosong. Mode sadar segmen mengalokasikan sampel titik tengah secara proporsional dengan interval adegan yang divalidasi; bukti sadar segmen dan perilaku fallback dirinci di bawah ini. Batasan 16 bingkai diterapkan setelah seleksi di setiap kebijakan. Jika permintaan yang peka terhadap adegan hanya memiliki anggaran satu frame, permintaan tersebut akan menggunakan titik tengah seragam dari jendela fokus atau video penuh yang aktif dan melaporkan `policyEffective: uniform`: satu frame adegan yang dipilih tidak dapat mempertahankan kedua ujung temporal. Penelepon secara opsional dapat menyediakan jendela fokus terbatas (`start`/`end` detik); batasan dibatasi pada durasi media, jendela terbalik atau tidak terbatas ditolak, dan semua kebijakan pengambilan sampel dilakukan hanya dalam interval yang dinormalisasi. Jendela yang dihasilkan disertakan dalam metadata pengambilan sampel dan awalan deskripsi tidak tepercaya sehingga model hilir dapat membedakan kutipan terfokus dari garis waktu penuh.
 
-Fokus kaption semantik adalah pengaturan eksplisit yang terpisah. Mode analisis default `full` mempertahankan prompt frame yang ada dan tidak pernah meneruskan teks permintaan ke model kaption. Dalam mode `focused`, bridge hanya membaca `text`/`input_text` terbaru yang tidak kosong dan ditulis oleh pengguna dari kontainer Chat atau Responses yang sama, menormalisasinya ke NFC, menggabungkan karakter kontrol dan spasi, dan membatasinya hingga 500 code point Unicode. Hasil kosong akan kembali ke prompt `full` yang sama persis. Petunjuk yang dapat digunakan diserialisasikan sebagai JSON dalam blok konteks-pengguna-tak-tepercaya khusus dan hanya boleh memprioritaskan detail yang dapat diamati; petunjuk tersebut tidak dapat menimpa peringatan terpisah tentang larangan mengikuti instruksi yang terlihat atau terdengar di media. Fokus tekstual tidak pernah menyimpulkan `start`/`end` atau mengubah pengambil sampel temporal.
+Fokus teks semantik adalah pengaturan yang terpisah dan eksplisit. Mode analisis `full` default mempertahankan prompt frame yang ada dan tidak pernah meneruskan teks permintaan ke model teks. Dalam mode `focused`, jembatan hanya membaca `text`/`input_text` terbaru yang tidak kosong yang ditulis pengguna dari wadah Obrolan atau Respons yang sama, menormalkannya menjadi NFC, menciutkan karakter kontrol dan spasi, dan membatasinya hingga 500 titik kode Unicode. Hasil yang kosong akan kembali ke prompt `full` yang tepat. Petunjuk yang dapat digunakan diserialkan sebagai JSON dalam blok konteks pengguna tidak tepercaya dan hanya dapat memprioritaskan detail yang dapat diamati; itu tidak dapat mengesampingkan peringatan terpisah terhadap instruksi yang terlihat atau terdengar di media. Fokus tekstual tidak pernah menyimpulkan `start`/`end` atau mengubah sampel temporal.
 
-#### Bukti segmen struktural FU-07
+#### bukti segmen struktural FU-07
 
-`segment_aware` menggunakan satu pass pra-analisis terbatas atas stream video lokal yang sudah divalidasi. Rantai filter tetap pertama-tama menskalakan hingga lebar maksimal 320 piksel, mendeteksi perubahan scene dan interval beku, lalu mengambil sampel pada 1 frame per detik untuk blur, luma rata-rata, dan informasi spasial/temporal. Pass ini dibatasi hingga 600 sampel struktural, satu thread FFmpeg/filter, daftar izin protokol khusus `file` dan kontainer yang sama, batas output proses 1 MiB, dan maksimal 30 detik di dalam abort/deadline bersama broker. Pass ini tidak pernah menerima perintah, filter, path, atau URL dari permintaan.
+`segment_aware` menggunakan satu pra-analisis terbatas yang melewati aliran video lokal yang sudah divalidasi. Rantai filter tetap pertama-tama menskalakan hingga lebar maksimal 320 piksel, mendeteksi perubahan pemandangan dan interval beku, lalu mengambil sampel pada 1 frame per detik untuk informasi blur, luma rata-rata, dan spatial/temporal. Pass ini dibatasi hingga 600 sampel struktural, satu thread FFmpeg/filter, protokol `file` -only dan daftar izin kontainer yang sama, batas output proses 1 MiB, dan paling lama 30 detik di dalam abort/deadline. bersama broker. Ia tidak pernah menerima perintah, filter, jalur, atau URL dari permintaan.
 
-Nilai-nilai struktural adalah bukti pengambilan sampel deterministik, bukan pemahaman video semantik. Nilai-nilai tersebut tidak menyimpulkan subjek, aksi, kaption, ucapan, atau maksud pengguna. Batas scene dan batas beku membentuk segmen; cakupan beku, blur, eksposur, detail spasial, dan perubahan temporal hanya memengaruhi bagaimana anggaran 1–16 frame yang ada dialokasikan. Segmen yang sepenuhnya beku dibatasi satu frame, sementara segmen tidak beku bersaing memperebutkan sisa anggaran. Ketika jumlah batas melebihi jumlah frame, cakupan linimasa uniform dipertahankan sehingga potongan cepat di awal tidak dapat menyembunyikan segmen panjang di akhir. Batas scene yang berada dalam resolusi analisis 1 detik dari batas beku digabungkan.
+Nilai-nilai struktural adalah bukti pengambilan sampel deterministik, bukan pemahaman video semantik. Mereka tidak menyimpulkan subjek, tindakan, keterangan, ucapan, atau maksud pengguna. Batas pemandangan dan pembekuan membentuk segmen; membekukan cakupan, mengaburkan, memaparkan, detail spasial, dan perubahan waktu hanya memengaruhi cara anggaran 1–16 frame yang ada dialokasikan. Segmen yang dibekukan sepenuhnya dibatasi pada satu frame, sedangkan segmen yang tidak dibekukan bersaing untuk mendapatkan sisa anggaran. Ketika batas melebihi jumlah frame, cakupan garis waktu yang seragam dipertahankan sehingga pemotongan awal yang cepat tidak dapat menyembunyikan segmen akhir yang panjang. Batas pemandangan dalam resolusi analisis 1 detik dari batas beku digabungkan.
 
-Filter yang hilang, bukti cacat/kosong, kesalahan detektor, atau timeout pra-analisis terbatas akan gagal terbuka (fail open) ke kebijakan titik tengah uniform yang sama persis. Abort pemanggil atau deadline broker tidak gagal terbuka: hal tersebut menghentikan subproses yang sedang berjalan, mencegah ekstraksi frame berikutnya, dan pohon sementara privat dihapus di `finally`.
+Filter yang hilang, bukti malformed/empty, kesalahan detektor, atau batas waktu pra-analisis yang dibatasi gagal membuka kebijakan titik tengah seragam yang tepat. Pembatalan pemanggil atau tenggat waktu broker tidak gagal dibuka: ini menghentikan subproses dalam penerbangan, mencegah ekstraksi bingkai di kemudian hari, dan pohon sementara pribadi dihapus di `finally`.
 
-`scripts/perf/video-bridge-fu07-eval.ts` menghasilkan fixture FFmpeg nyata yang deterministik untuk penghematan panggilan kaption pasca-dedup, alokasi anggaran gerakan padat, bukti blur/eksposur/SI-TI, potongan cepat dengan ekor panjang, dan false positive fade bertahap. Skrip ini mencatat wall time pra-analisis dan, jika `/usr/bin/time` tersedia, CPU anak serta RSS puncak. Pemeriksaan kualitasnya hanyalah oracle struktural. Kualitas model kaption nyata tetap `HOLD` karena harness ini tidak memiliki endpoint resmi atau judge yang dibekukan. Penghematan moneter juga tetap `HOLD` kecuali `--caption-cost-per-call-usd` menyediakan estimasi positif eksplisit per panggilan; skrip tidak pernah memalsukan salah satu hasil tersebut.
+`scripts/perf/video-bridge-fu07-eval.ts` menghasilkan perlengkapan FFmpeg nyata yang deterministik untuk penghematan panggilan teks pasca-dedup, alokasi anggaran gerak padat, bukti blur/exposure/SI-TI, pemotongan cepat dengan ekor panjang, dan positif palsu yang memudar secara bertahap. Ini mencatat waktu dinding pra-analisis dan, jika `/usr/bin/time` tersedia, CPU anak dan RSS puncak. Pemeriksaan kualitasnya hanyalah ramalan struktural saja. Kualitas model caption sebenarnya tetap `HOLD` karena harness ini tidak memiliki titik akhir resmi atau juri beku. Penghematan moneter juga tetap `HOLD` kecuali `--caption-cost-per-call-usd` memberikan estimasi per panggilan positif yang eksplisit; skrip tidak pernah membuat hasil apa pun.
 
-Setiap frame dibatasi hingga 4 MiB, semua frame mentah secara keseluruhan hingga 23 MiB, dan
-respons broker terserialisasi hingga 32 MiB. Direktori sementara privat dihapus
-di dalam `finally`. OmniRoute tidak membundel FFmpeg dan tidak menerima path
-executable kustom. Sebelum pemberian caption, bridge menerapkan satu tahap
-deduplikasi visual yang konservatif: setiap JPEG direduksi menjadi buffer
-grayscale 16×16 dan hanya dibandingkan dengan frame terakhir yang dipertahankan.
-Untuk anggaran caption yang diminta di atas satu frame, ekstraksi menyediakan
-pool kandidat terbatas hingga dua kali anggaran tersebut dan tidak pernah lebih
-dari 16 frame. Batas yang diminta diterapkan hanya setelah deduplikasi, dengan
-kandidat terpilih pertama dan terakhir dipertahankan selama penipisan akhir
-ketika anggaran setidaknya dua. Kebijakan berversi
-`grayscale-16x16-mean-cells-v2` menggunakan nilai yang lebih besar antara delta
-luma rata-rata dan rasio sel thumbnail yang delta ternormalisasinya setidaknya
-0.05. Ambang duplikat adalah konstanta 0.04, dipilih demi prediktabilitas
-daripada diekspos sebagai pengaturan runtime. Sinyal kontras tinggi sekunder
-ini mempertahankan gerakan kecil dan perubahan teks yang terlihat yang dapat
-tersembunyi oleh perbandingan hanya-rata-rata. Error komparator atau dekoder
-bersifat fail open dan mempertahankan cakupan. Metadata output memisahkan
-kandidat yang diekstrak, frame yang berhasil digunakan, dan duplikat visual
-yang dibuang.
+Setiap frame dibatasi hingga 4 MiB, semua frame mentah digabungkan menjadi 23 MiB, dan respons broker berseri hingga 32 MiB. Direktori sementara pribadi dihapus di `finally`. OmniRoute tidak menggabungkan FFmpeg dan tidak menerima jalur khusus yang dapat dieksekusi. Sebelum pemberian teks, jembatan menerapkan jalur deduplikasi visual konservatif: setiap JPEG dikurangi menjadi buffer skala abu-abu 16 × 16 dan hanya dibandingkan dengan frame terakhir yang dipertahankan. Untuk anggaran teks yang diminta di atas satu frame, ekstraksi menyediakan kumpulan kandidat terbatas hingga dua kali lipat anggaran tersebut dan tidak pernah lebih dari 16 frame. Batasan yang diminta diterapkan hanya setelah deduplikasi, dengan kandidat terpilih pertama dan terakhir dipertahankan selama penipisan akhir ketika anggarannya setidaknya dua. Kebijakan `grayscale-16x16-mean-cells-v2` berversi menggunakan rata-rata luma delta yang lebih besar dan rasio sel thumbnail yang delta normalnya setidaknya 0,05. Ambang batas duplikat adalah konstanta 0,04, dipilih untuk prediktabilitas, bukan diekspos sebagai pengaturan runtime. Sinyal kontras tinggi sekunder ini mempertahankan gerakan kecil dan perubahan teks yang terlihat yang hanya dapat disembunyikan oleh perbandingan rata-rata. Kesalahan komparator atau dekoder gagal terbuka dan mempertahankan cakupan. Metadata keluaran memisahkan kandidat yang diekstraksi, bingkai yang berhasil digunakan, dan duplikat visual yang dihilangkan.
 
-Bagian video yang ditandai secara eksplisit dapat meminta contact sheet
-berstempel waktu. Bridge membangun grid JPEG maksimal 4 kolom dan 16 frame.
-Setiap sel 512 piksel membakar stempel waktu sumbernya ke dalam pita bawah
-kontras tinggi, sementara stempel waktu yang sama tetap tersimpan dalam metadata
-tekstual untuk asosiasi dan audit downstream. JPEG lengkap tetap dibatasi pada
-32 MiB. Jika `sharp` tidak dapat mendekode atau menyusun grid, bridge beralih
-ke frame JPEG individual; abort klien tetap merambat melalui operasi sheet.
+Bagian video yang ditandai secara eksplisit dapat meminta lembar kontak yang diberi stempel waktu. Jembatan ini paling banyak membangun kisi JPEG 4 kolom, 16 bingkai. Setiap sel 512 piksel membakar stempel waktu sumbernya menjadi pita bawah dengan kontras tinggi, sementara stempel waktu yang sama tetap berada dalam metadata tekstual untuk asosiasi dan audit hilir. JPEG lengkap tetap dibatasi pada 32 MiB. Jika `sharp` tidak dapat memecahkan kode atau menyusun grid, jembatan akan kembali ke frame JPEG individual; pembatalan klien masih menyebar melalui operasi sheet.
 
-Bukti promosi sengaja dipisahkan dari microbenchmark komposisi sintetis.
-`scripts/perf/video-bridge-contact-sheet-eval.ts` mendefinisikan harness A/B
-berversi skema untuk model visi nyata yang kompatibel dengan OpenAI. Harness ini
-mengukur token yang dilaporkan provider, latensi wall end-to-end (termasuk
-komposisi sheet), jumlah pemanggilan model, dan retensi fakta yang didefinisikan
-manifest. Respons model mentah tidak ditulis ke laporan; hanya digest SHA-256
-dan ID fakta yang cocok yang dipertahankan. Harness tidak melakukan pemanggilan
-jaringan atau model berbayar kecuali `--execute-real` diberikan serta `--model`,
-`OMNIROUTE_BASE_URL`, dan `OMNIROUTE_API_KEY` dikonfigurasi. Tanpa proses nyata
-eksplisit tersebut, verdict yang dapat dibaca mesin tetap `HOLD`; pengukuran
-payload/jumlah pemanggilan sintetis saja bukan bukti promosi.
+Bukti promosi sengaja dipisahkan dari komposisi sintetik microbenchmark. `scripts/perf/video-bridge-contact-sheet-eval.ts` mendefinisikan harness A/B berversi skema untuk model visi nyata yang kompatibel dengan OpenAI. Ini mengukur token yang dilaporkan penyedia, latensi dinding end-to-end (termasuk komposisi sheet), jumlah panggilan model, dan retensi fakta yang ditentukan manifes. Respons model mentah tidak dituliskan ke dalam laporan; hanya intisari SHA-256 dan fakta yang cocok IDs yang dipertahankan. Harness tidak melakukan panggilan jaringan atau model berbayar kecuali `--execute-real` diteruskan dan `--model`, `OMNIROUTE_BASE_URL`, dan `OMNIROUTE_API_KEY` dikonfigurasi. Tanpa proses nyata yang eksplisit tersebut, keputusan yang dapat dibaca mesin tetap ada `HOLD`; pengukuran payload/call-count sintetis saja bukanlah bukti promosi.
 
-Pemanggil dapat melampirkan array `transcript.cues` opsional ke bagian video
-yang didukung ketika mereka sudah memiliki teks yang selaras. Setiap cue harus
-membawa `text`, interval `start`/`end` yang berhingga di dalam durasi yang
-di-probe, dan `source` yang termasuk daftar putih (`client`, `embedded`, atau
-`audio-bridge`); `confidence` secara default `1` dan harus tetap berada antara
-`0` dan `1`. Cue duplikat persis digabungkan. OmniRoute tidak pernah memulai
-transkripsi dari metadata ini: cue yang tervalidasi disalin ke hasil yang
-dideskripsikan beserta source, confidence, dan interval, dan dirender sebagai
-observasi tidak tepercaya di samping caption frame. Teks yang tidak valid, di
-luar rentang, atau tanpa provenance ditolak daripada dicampur ke dalam aliran
-caption. Kedua kanal transkrip request-body menormalisasi provenance yang
-diberikan ke `client`, termasuk label `embedded` atau `audio-bridge` yang
-diklaim sendiri. Hanya adapter milik server yang dapat menetapkan label
-tepercaya tersebut melalui argumen `trustedSource` yang khusus kode; field JSON
-request tidak dapat mencapai argumen tersebut. Teks transkrip tetap merupakan
-konten turunan media yang tidak tepercaya, terlepas dari provenance-nya, dan
-tidak boleh pernah menentukan otorisasi.
+Penelepon dapat melampirkan array `transcript.cues` opsional ke bagian video yang didukung ketika mereka sudah memiliki teks yang selaras. Setiap isyarat harus membawa `text`, interval `start`/`end` yang terbatas di dalam durasi yang diselidiki, dan `source` yang masuk daftar putih (`client`, `embedded`, atau `audio-bridge`); `confidence` defaultnya adalah `1` dan harus tetap berada di antara `0` dan `1`. Isyarat duplikat yang tepat diciutkan. OmniRoute tidak pernah memulai transkripsi dari metadata ini: isyarat yang divalidasi disalin ke dalam hasil yang dijelaskan dengan sumber, keyakinan, dan interval, dan dirender sebagai pengamatan tidak tepercaya di samping keterangan bingkai. Teks yang tidak valid, di luar jangkauan, atau bebas asal akan ditolak, bukan dicampur ke dalam aliran teks. Kedua saluran transkrip isi permintaan menormalkan sumber yang disediakan ke `client`, termasuk label `embedded` atau `audio-bridge` yang ditegaskan sendiri. Hanya adaptor milik server yang dapat menetapkan label tepercaya tersebut melalui argumen `trustedSource` khusus kode; bidang permintaan JSON tidak dapat mencapai argumen itu. Teks transkrip tetap merupakan konten turunan media yang tidak dapat dipercaya, apa pun asalnya, dan tidak boleh ditentukan otorisasinya.
 
-Pemanggil tingkat lanjut dapat menyediakan track `audioTranscript` untuk video
-yang sama; track ini diperlakukan sebagai teks yang disediakan klien, bukan
-bukti transkripsi server. Lapisan fusi menjalankan observasi visual dan audio
-di bawah satu deadline dan sinyal abort yang sama, mengurutkannya pada timeline
-bersama, menggabungkan duplikat persis, dan melaporkan hasil parsial ketika
-hanya satu sisi yang berhasil. `audioTranscript` yang tidak valid terdegradasi
-ke hasil parsial tersebut — deskripsi visual dipertahankan dan cabang audio
-mencatat kode kegagalan tersanitasi — alih-alih menggagalkan seluruh video.
-Ketersediaan per cabang, flag parsial, dan kode kegagalan tersanitasi
-dipertahankan dalam hasil yang dideskripsikan, dalam metadata guardrail
-(`audioFusionRuns`/`audioFusionPartials`/`audioFusionFailureCodes`), dalam
-metadata cache hasil, dan dalam counter fusi bridge. Jalur Video Bridge default
-tidak memanggil speech-to-text atau mengunduh salinan media kedua; tanpa track
-eksplisit tersebut, jalur ini tetap hanya-video.
+Penelepon tingkat lanjut mungkin menyediakan trek `audioTranscript` untuk video yang sama; itu diperlakukan sebagai teks yang disediakan klien, bukan bukti transkripsi server. Lapisan fusi menjalankan pengamatan visual dan audio di bawah satu tenggat waktu dan sinyal batalkan, mengurutkannya pada garis waktu yang sama, menciutkan duplikat yang tepat, dan melaporkan hasil parsial ketika hanya satu pihak yang berhasil. `audioTranscript` yang tidak valid menurunkan hasil parsial tersebut — deskripsi visual disimpan dan cabang audio mencatat kode kegagalan yang dibersihkan — alih-alih menggagalkan seluruh video. Ketersediaan per cabang, bendera parsial, dan kode kegagalan yang dibersihkan disimpan dalam hasil yang dijelaskan, dalam metadata pagar pembatas (`audioFusionRuns`/`audioFusionPartials`/ `audioFusionFailureCodes`), dalam metadata cache hasil, dan dalam penghitung fusi jembatan. Jalur Video Bridge default tidak meminta ucapan-ke-teks atau mengunduh salinan media kedua; tanpa trek eksplisit itu, itu tetap hanya video.
 
-**Retensi transkrip (#12150 P1).** Ini berlaku secara otomatis setiap kali
-Video Bridge (yang bersifat opt-in) merender cue transkrip — tidak ada flag
-retensi terpisah. Ketika sebuah permintaan merender cue transkrip apa pun
-(`transcript` yang dideklarasikan pemanggil atau `audioTranscript` yang
-digabungkan), guardrail menandainya `videoBridgeObserved` dan menghasilkan
-bayangan tersunting dari deskripsi video — rendering identik di mana setiap
-isi teks bebas cue digantikan oleh `[redacted-video-transcript]`, dibangun
-dengan mensubstitusi field cue terstruktur sebelum string dirangkai (tidak
-pernah dengan memparsing teks yang sudah diratakan, sehingga tidak ada konten
-cue — baik adversarial maupun biasa, termasuk isi yang mengandung `]` seperti
-`[inaudible]`/`[music]` — yang dapat bertahan). Body permintaan log-panggilan
-yang dipersistensikan menukar setiap bagian teks turunan video dengan bayangan
-tersunting tersebut, dicocokkan berdasarkan kesetaraan konten; jangkar
-`fullText` dibaca ulang dari payload guardrail pra-panggilan yang sudah
-selesai, sehingga pencocokan tetap berhasil setelah guardrail rantai berikutnya
-(pemasker PII dan kredensial, prioritas 10/95) menulis ulang teks deskripsi di
-tempatnya dan setelah injeksi system-prompt/handoff/memory membentuk ulang
-array pesan. Body yang dikirim upstream ke model tidak berubah. Permintaan yang
-diamati juga tidak mengisi Memory yang tahan lama (ekstraksi turunan permintaan
-maupun respons dilewati), sehingga balasan model itu sendiri tidak dapat
-menggemakan teks transkrip ke dalam Memory.
+**Retensi transkrip (#12150 P1).** Hal ini berlaku secara otomatis setiap kali Video Bridge (yang ikut serta) merender transkrip isyarat — tidak ada tanda retensi terpisah. Saat permintaan merender isyarat transkrip apa pun ( `transcript` yang dideklarasikan oleh penelepon atau `audioTranscript` yang digabungkan), pagar pembatas menandainya `videoBridgeObserved` dan menghasilkan bayangan deskripsi video yang disunting — rendering identik yang mana setiap isi teks bebas isyarat digantikan oleh `[redacted-video-transcript]`, dibuat dengan mengganti bidang isyarat terstruktur sebelum string dirakit (tidak pernah dengan mengurai teks yang diratakan, jadi tidak ada konten isyarat — permusuhan atau biasa, termasuk benda yang mengandung `]` seperti `[inaudible]`/`[music]` — dapat bertahan). Badan permintaan log panggilan yang ada menukar setiap bagian teks turunan video dengan bayangan yang telah disunting, disesuaikan dengan kesetaraan konten; jangkar `fullText` dibaca ulang dari payload pagar pembatas pra-panggilan yang telah selesai, sehingga pencocokan masih berhasil setelah pagar pembatas rantai selanjutnya ( PII dan masker kredensial, prioritas 10/95) menulis ulang teks deskripsi di tempatnya dan setelah injeksi system-prompt/handoff/memory membentuk ulang susunan pesan. Isi yang dikirim ke hulu ke model tidak berubah. Permintaan yang diamati juga tidak mengisi Memori yang tahan lama (ekstraksi turunan permintaan dan respons dilewati), sehingga balasan model tidak dapat menggemakan teks transkrip ke dalam Memori.
 
-**Field video mentah (#12430).** Ketika bridge diaktifkan dan dukungan video
-native tidak diketahui atau tidak ada, field `transcript`/`audioTranscript`
-yang terdefinisi juga mengaktifkan `videoBridgeObserved`, bahkan setelah
-kegagalan deskripsi atau batas `maxVideos`. `null` dan string kosong dihitung;
-field yang tidak ada dan metadata non-video tidak. Salinan yang diretensi
-menyunting field-field ini atau menghilangkan permintaan, dan cache/Memory
-dilewati.
+**Bidang video mentah (#12430).** Ketika jembatan diaktifkan dan dukungan video asli tidak diketahui atau tidak ada, bidang `transcript`/`audioTranscript` yang ditentukan juga mengaktifkan `videoBridgeObserved`, bahkan setelah deskripsi gagal atau batas `maxVideos`. `null` dan string kosong dihitung; bidang yang tidak ada dan metadata non-video tidak. Salinan yang disimpan menyunting bidang ini atau menghilangkan permintaan, dan caches/Memory dilewati.
 
-Pada jalur fallback tersebut, cue pemanggil yang valid menjadi bagian
-`text`/`input_text` yang didukung alih-alih field provider nonstandar. Kedua
-track yang disuplai permintaan tetap menjadi observasi `client` yang tidak
-dipercaya, dengan peringatan eksplisit bahwa video tidak dideskripsikan dan
-timestamp tidak diverifikasi terhadap media. Anggaran total 256-cue/64-KiB
-yang ada dan anggaran per-cue berlaku lintas kedua track secara bersama-sama;
-timestamp harus memenuhi batas 600 detik broker dan jendela fokus apa pun yang
-disuplai. Track yang tidak valid dibuang, tidak diteruskan sebagai teks
-arbitrer; sibling yang valid masih dapat digunakan kecuali anggaran
-gabungannya terlampaui. Field null/kosong tidak menambahkan teks. Tidak ada
-pengambilan media atau transkripsi yang ditambahkan oleh fallback ini. Field
-ekstensi transkrip dihapus dari carrier video fallback dan objek
-`video_url`/`source`-nya. Allowlist wire OpenAI tetap ketat; carrier video
-dengan native yang tidak dikenal tetap tersedia dan target khusus-teks yang
-dikenal mempertahankan marker aman. Bayangan penyuntingan terstruktur
-melindungi teks transkrip yang ditambahkan, sementara permintaan asli milik
-pemanggil tetap tidak berubah. Target yang didukung native dan bridge yang
-dinonaktifkan mempertahankan perilaku bypass mereka yang ada.
+Pada jalur fallback tersebut, isyarat pemanggil yang valid menjadi bagian `text`/`input_text` yang didukung, bukan bidang penyedia yang tidak standar. Kedua lagu yang disediakan berdasarkan permintaan tetap tidak dipercaya oleh pengamatan `client`, dengan peringatan eksplisit bahwa video tersebut tidak dijelaskan dan stempel waktunya tidak diverifikasi oleh media. Anggaran total dan per-isyarat 256-cue/64-KiB yang ada berlaku di kedua jalur secara bersamaan; stempel waktu harus sesuai dengan batas waktu 600 detik broker dan jendela fokus apa pun yang disediakan. Trek yang tidak valid dibuang, tidak diteruskan sebagai teks sembarangan; saudara kandung yang sah masih dapat digunakan kecuali anggaran gabungannya terlampaui. bidang Null/empty tidak menambahkan teks. Tidak ada pengambilan media atau transkripsi yang ditambahkan oleh fallback ini. Bidang ekstensi transkrip dihapus dari pembawa video cadangan dan objek `video_url`/`source` -nya. Daftar yang diizinkan kawat OpenAI tetap ketat; pembawa video asli yang tidak diketahui tetap tersedia dan target hanya teks yang diketahui tetap memiliki penanda yang aman. Bayangan redaksi terstruktur melindungi teks transkrip yang ditambahkan, sedangkan permintaan asli milik penelepon tetap tidak berubah. Target yang didukung asli dan jembatan yang dinonaktifkan mempertahankan perilaku bypass yang ada.
 
-Salinan retensi tambahan menggunakan sinyal permintaan-teramati yang sama.
-Snapshot permintaan klien pra-guardrail mentah, permintaan tertunda dalam
-memori, dan log permintaan yang ditolak lebih awal secara struktural
-menggantikan field transkrip dalam bagian video; prompt string yang
-disintesis oleh tahapan pipeline dan handoff konteks disunting di sink
-body-permintaan-yang-dipersistensikan. Marker `video_content_removed` yang
-dipersistensikan membuat kelanjutan `previous_response_id` gagal secara
-tertutup (fail closed) alih-alih merekonstruksi teks yang sengaja dibuang.
-Jika permintaan yang diamati kehilangan bayangan penyuntingan per-bagiannya
-sebelum logging, atau bahkan satu dari beberapa bayangan video gagal cocok
-setelah mutasi permintaan berikutnya, body permintaan yang diretensi
-dihilangkan sepenuhnya alih-alih mempertahankan transkrip yang disunting
-sebagian.
+Salinan tambahan yang disimpan menggunakan sinyal permintaan observasi yang sama. Snapshot permintaan klien pra-pagar pembatas mentah, permintaan tertunda dalam memori, dan log permintaan awal yang ditolak secara struktural menggantikan bidang transkrip di bagian video; perintah string yang disintesis oleh tahapan pipeline dan handoff konteks disunting di sink isi permintaan yang bertahan. Penanda `video_content_removed` yang bertahan membuat kelanjutan `previous_response_id` gagal ditutup daripada merekonstruksi teks yang sengaja dibuang. Jika permintaan yang diamati kehilangan bayangan redaksi per bagiannya sebelum dicatat, atau bahkan salah satu dari beberapa bayangan video gagal cocok setelah mutasi permintaan berikutnya, isi permintaan yang dipertahankan akan dihilangkan seluruhnya alih-alih mempertahankan transkrip yang telah disunting sebagian.
 
-Untuk permintaan yang diamati, respons model mungkin mengutip sebagian
-transkrip tanpa batas cue terstruktur. Oleh karena itu `responseBody`
-log-panggilan yang dipersistensikan digantikan oleh marker penghilangan;
-artefak pipeline terperinci (yang dapat menyertakan body upstream/klien dan
-potongan stream) tidak diretensi. Cache semantik, idempotensi, dan
-replay-penalaran melewati pembacaan dan penulisan untuk permintaan tersebut.
-Permintaan provider dan respons yang terlihat klien tetap tidak berubah. Byte
-keepalive awal dikuras dari buffer sementara ketika artefak terperinci
-dihilangkan. Peringatan EventStream rusak milik Kiro hanya melaporkan jumlah
-byte payload, tidak pernah isinya atau error mentah parser JSON.
-Ini tidak mengklaim bahwa setiap diagnostik provider/plugin yang tidak terkait
-telah diaudit; penyisiran sink-retensi yang lebih luas dilacak di #11658.
+Untuk permintaan yang diamati, respons model mungkin mengutip bagian mana pun dari transkrip tanpa batasan isyarat yang terstruktur. Oleh karena itu, log panggilannya yang tetap `responseBody` digantikan oleh penanda kelalaian; artefak saluran pipa terperinci (yang dapat mencakup badan upstream/client dan potongan aliran) tidak dipertahankan. Cache semantik, idempotensi, dan pemutaran ulang penalaran melewati proses baca dan tulis untuk permintaan tersebut. Permintaan penyedia dan respons yang terlihat oleh klien tetap tidak berubah. Byte keepalive awal akan terkuras dari buffer sementara ketika artefak detail dihilangkan. Peringatan EventStream Kiro yang salah hanya melaporkan jumlah byte payload, tidak pernah melaporkan isinya atau kesalahan mentah parser JSON. Hal ini tidak berarti bahwa setiap diagnostik provider/plugin yang tidak terkait telah diaudit; sapuan sisa wastafel yang lebih luas dilacak di #11658.
 
-Siklus hidup `/api/modality-bridge/video/drilldown` internal adalah substrat
-cache terpisah yang diautentikasi loopback/token. Setiap operasi juga
-memerlukan ID principal opak kanonis. Sebelum pemanggil produksi diaktifkan,
-ia harus menurunkan ID tersebut dari tenant terautentikasi dan tidak pernah
-boleh meneruskan nilai yang dipilih klien. Kunci cache mengikat principal
-tersebut ke ID sesi kanonis dan ID referensi video, hanya menyimpan kunci
-turunan SHA-256 mereka, dan membatasi lingkup pembacaan maupun penghapusan
-pada principal yang sama. Cache menyimpan paling banyak 16 frame JPEG turunan
-per entri, mengedaluwarsakannya setelah sepuluh menit, dan mendukung
-pembacaan terbatas `start`/`end` atau penghapusan sesi eksplisit.
+Siklus hidup `/api/modality-bridge/video/drilldown` internal adalah substrat cache loopback/token-authenticated yang terpisah. Setiap operasi juga memerlukan prinsip buram kanonik ID. Sebelum pemanggil produksi diaktifkan, pemanggil tersebut harus memperoleh ID tersebut dari penyewa yang diautentikasi dan tidak boleh meneruskan nilai yang dipilih klien. Kunci cache mengikat entitas utama tersebut ke sesi kanonik dan referensi video IDs, hanya menyimpan kunci SHA-256-derived -nya, dan mencakup pembacaan dan penghapusan ke entitas utama yang sama. Cache menyimpan paling banyak 16 frame JPEG turunan per entri, kedaluwarsa setelah sepuluh menit, dan mendukung pembacaan `start`/`end` terbatas atau penghapusan sesi eksplisit.
 
-Setiap principal dibatasi hingga 16 entri dan 64 MiB data JPEG kanonis.
-Batas-batas tersebut independen dari plafon global 64-entri/256 MiB: tekanan
-kuota principal hanya mengeluarkan entri least-recently-used milik principal
-tersebut sebelum eviksi LRU global dipertimbangkan. Entri yang kedaluwarsa
-disapu dari akuntansi principal maupun global saat ada aktivitas cache,
-sementara pembatalan dan kegagalan validasi tidak meng-commit penggantian
-parsial.
+Setiap kepala sekolah dibatasi hingga 16 entri dan 64 MiB data JPEG kanonik. Batasan tersebut tidak bergantung pada batas atas 64-entry/256 MiB global: tekanan kuota utama hanya akan mengeluarkan entri yang paling jarang digunakan sebelum penggusuran LRU global dipertimbangkan. Entri yang kedaluwarsa dihapus dari akuntansi utama dan global pada aktivitas cache, sementara kegagalan pembatalan dan validasi tidak melakukan penggantian sebagian.
 
-Cache menolak Base64 non-kanonik, padding berlebih, media non-JPEG, JPEG yang rusak atau
-terpotong, serta JPEG yang menghasilkan peringatan selama decode `sharp` gambar-penuh
-terbatas. Cache meng-encode ulang setiap gambar yang diterima sebagai JPEG kanonik,
-memperoleh lebar dan tinggi dari byte yang telah didekode alih-alih mempercayai field
-pemanggil, dan membuang byte poliglot yang tertinggal di akhir daripada menyimpannya.
-Hanya buffer terkompresi kanonik terbatas yang dibebankan ke kedua kuota. Batas wire JSON
-mencakup overhead Base64 untuk plafon input terdekode 32 MiB. Setiap derivasi yang
-tersimpan mencatat format/resolusi JPEG yang tervalidasi, kebijakan sampling, versi
-derivasi, waktu pembuatan, hash konten yang dihitung server, dan referensi induk ter-hash
-ditambah hash konten induk dari pemanggil tepercaya. Pembatalan diperiksa di antara fase
-decode/hash asinkron sebelum commit cache atomik.
+Cache menolak Base64 non-kanonik, padding berlebih, media non-JPEG, format JPEGs yang salah atau terpotong, dan JPEGs yang menghasilkan peringatan selama dekode `sharp` gambar penuh yang dibatasi. Ini mengkodekan ulang setiap gambar yang diterima sebagai JPEG kanonik, memperoleh lebar dan tinggi dari byte yang didekodekan alih-alih mempercayai bidang pemanggil, dan membuang byte poliglot yang tertinggal daripada menyimpannya. Hanya buffer terkompresi kanonik terbatas yang dibebankan ke kedua kuota. Batas kabel JSON mencakup overhead Base64 untuk batas atas input yang didekodekan 32 MiB. Setiap derivasi yang disimpan mencatat JPEG format/resolution yang divalidasi, kebijakan pengambilan sampel, versi derivasi, waktu pembuatan, hash konten yang dihitung server, dan referensi induk yang di-hash ditambah hash konten induk pemanggil tepercaya. Pembatalan diperiksa antara fase decode/hash asinkron sebelum cache atom diterapkan.
 
-Tahap ini belum menghubungkan producer produksi ke route dan belum menyediakan pemilihan
-varian multi-resolusi. Jalur permintaan Video Bridge yang transparan karenanya tidak
-menimbulkan pekerjaan tambahan, sementara derivasi principal terikat tenant dan siklus
-hidup multi-resolusi FU-08 penuh tetap menjadi pekerjaan lanjutan eksplisit alih-alih
-didokumentasikan sebagai perilaku yang sudah selesai.
+Produser produksi menggunakan kembali frame broker yang sudah diturunkan hanya setelah analisis visual berhasil, tanpa video kedua download/extraction. Hal ini memerlukan operator `modalityBridgeVideoDrilldownEnabled=true`, `drilldown: true` per bagian yang ketat, dan catatan kunci API yang diautentikasi ID. Nilai principal/session yang dideklarasikan klien tidak pernah membentuk kepemilikan. Tanpa ketiga kondisi tersebut, ia tidak akan melakukan hash, mengubah ukuran, atau mempertahankan frame tambahan. Kegagalan retensi mempertahankan respons visual yang dapat digunakan. Permintaan yang disetujui mengabaikan cache hasil seluruh video sehingga hasil yang di-cache tidak pernah dapat diputar ulang.
 
-Frame diberi caption secara berurutan dengan model Video yang dikonfigurasi. Override
-Video yang kosong mewarisi pengaturan Vision; jika keduanya kosong, auto-router Vision
-memilih model berkemampuan visi yang efektif. Caption yang berhasil menggantikan bagian
-asli dengan prefiks stabil `[Video description:` yang juga menandai teks sebagai observasi
-turunan media yang tidak tepercaya dan memberi tahu model hilir untuk tidak mengikuti
-instruksi yang ditemukan dalam media. Kunci cache caption frame mencakup byte JPEG,
-prompt, timestamp, dan model efektif; hanya caption yang berhasil yang di-cache. Entri
-cache mempertahankan model producer sukses yang sebenarnya, termasuk model fallback;
-bridge melaporkan `mixed` ketika frame yang berbeda diproduksi oleh model yang berbeda.
-Cache hit menggunakan kembali identitas producer tersebut alih-alih melabelinya ulang
-sebagai rencana routing yang diminta. Cache hasil seluruh-video dikunci berdasarkan setiap
-input yang mengubah output — prompt, model efektif, kebijakan sampling, jumlah frame,
-mode analisis semantik, fingerprint SHA-256 dari petunjuk fokus yang dinormalisasi,
-jendela fokus, `transcript`, `audioTranscript`, dan flag contact-sheet — sehingga mengubah
-salah satu dimensi tersebut adalah cache miss, tidak pernah penggunaan ulang yang basi.
-Versi kebijakan dedup visual, threshold, dan jumlah frame kandidat terbatas juga eksplisit
-dalam kunci dan metadata cache hasil; perubahan kebijakan karenanya tidak dapat menggunakan
-kembali deskripsi seluruh-video yang basi. Metadata cache hasil v4 menyimpan mode dan
-fingerprint, tidak pernah tugas pengguna mentah. Metadata guardrail melaporkan mode
-analisis yang diminta dan efektif; mode `focused` yang diminta tanpa teks pengguna yang
-dapat digunakan dilaporkan sebagai efektif `full`.
+Respons JSON dan SSE yang berhasil memperlihatkan paling banyak empat pegangan buram di header `x-omniroute-video-drilldown` yang dibatasi. Asal browser resmi dapat membaca header tersebut tanpa memperluas kebijakan asal CORS. Pegangan baru menggunakan `v1.<32-byte random base64url token>`, dan registri hanya menyimpan hash SHA-256. Parser reader/header juga menerima token 64-hex yang lama. Konsumen publik yang diautentikasi adalah `GET /api/v1/video-bridge/drilldown?handle=...`, yang diberi gerbang secara independen oleh `modalityBridgeVideoDrilldownRemoteEnabled=true`. False yang terus-menerus secara eksplisit mencabut akses bahkan ketika fallback `OMNIROUTE_VIDEO_BRIDGE_DRILLDOWN_REMOTE_ENABLED` env lama diaktifkan. Retensi produksi memiliki analogi warisan `OMNIROUTE_VIDEO_BRIDGE_DRILLDOWN_ENABLED` fallback. Kedua fallback dinonaktifkan secara default.
 
-Guardrail mengekstrak setiap bagian video yang didukung tetapi mendeskripsikan tidak lebih
-dari `modalityBridgeVideoMaxVideos`. Untuk target yang terbukti memiliki
-`supportsVideo === false`, video yang gagal dan melebihi batas menjadi penanda teks aman
-eksplisit sehingga tidak ada video mentah yang tersisa. Ketika kemampuan tidak diketahui,
-bagian-bagian tersebut mempertahankan pembawa video mereka; setiap transkrip fallback
-mengikuti konversi teks terbatas di atas. Target dengan `supportsVideo === true` melewati
-bridge. Sinyal abort permintaan klien merambat melalui unduhan, antrean broker, subproses,
-dan panggilan caption; abort berhenti di antara video dan tidak pernah gagal terbuka ke
-media mentah.
+Konsumen memperoleh kepemilikan dari kunci yang diautentikasi dan menerapkan kebijakan kunci: GET dan DELETE termasuk dalam kategori titik akhir `video`, termasuk alias `/v1` dan `/api/v1`. Kunci dengan daftar titik akhir yang tidak kosong harus menyertakan `video`; kunci yang tidak dibatasi tetap kompatibel. Konsumen mengembalikan 404 yang sama untuk pegangan kunci yang tidak diketahui, kedaluwarsa, dan lainnya. Ia menerima `variant=preview|standard|detail` (dimensi JPEG maksimum 320/640/1280, tidak pernah ditingkatkan), `limit=1..8` (atau alias `frames` lama, tidak pernah keduanya), `page` berbasis nol, dan detik fokus `start`/`end` opsional. Kunci kueri duplikat dan jendela fokus terbalik ditolak. Setiap varian yang ditampilkan memiliki hash konten aktual dan metadata resolusi aktual, yang ditautkan ke sumber yang dipertahankan. Varian diturunkan saat dibaca, bukan disimpan sebagai salinan tambahan yang disimpan. Respons JSON, termasuk Base64/envelope, dibatasi pada 32 MiB; halaman berukuran besar menghasilkan 413 dan klien harus meminta lebih sedikit bingkai. Membaca memeriksa pembatalan di sekitar setiap pengubahan ukuran dan memeriksa kembali validitas pegangan sebelum mengembalikan. `DELETE` menurut pemiliknya idempoten; penghapusan atau kedaluwarsa TTL melepaskan sumber yang dipertahankan dan akuntansi penggunaan.
+
+Penyimpanan bersama bersifat lokal proses: pegangan akan kedaluwarsa saat dimulai ulang dan tidak dapat ditransfer antar proses OmniRoute independen. Statistik manajemen hanya memperlihatkan kebijakan retensi/jarak jauh yang efektif dan entries/bytes agregat yang ditahan saja, tidak pernah media, referensi, IDs utama, atau pegangan. Panel setelan Video menampilkan nilai-nilai tersebut dan dapat mempertahankan kedua peralihan izin. Dokumentasi penerapan ini bukan merupakan bukti penerapan atau promosi secara langsung; penerimaan model nyata dilacak secara terpisah.
+
+Bingkai diberi teks secara berurutan dengan model Video yang dikonfigurasi. Penggantian Video yang kosong mewarisi pengaturan Vision; jika keduanya kosong, router otomatis Vision akan memilih model berkemampuan vision yang efektif. Teks yang berhasil menggantikan bagian asli dengan awalan `[Video description:` stabil yang juga menandai teks sebagai pengamatan yang berasal dari media yang tidak tepercaya dan memberi tahu model hilir untuk tidak mengikuti instruksi yang ditemukan di media. Kunci cache frame-caption mencakup byte JPEG, prompt, stempel waktu, dan model efektif; hanya teks yang berhasil yang di-cache. Entri cache mempertahankan model produsen sukses yang sebenarnya, termasuk model cadangan; jembatan melaporkan `mixed` ketika frame berbeda diproduksi oleh model berbeda. Cache hit menggunakan kembali identitas produsen tersebut alih-alih memberi label ulang sebagai rencana perutean yang diminta. Cache hasil seluruh video dikunci pada setiap masukan yang mengubah perintah — keluaran, model efektif, kebijakan pengambilan sampel, jumlah bingkai, mode analisis semantik, sidik jari SHA-256 dari petunjuk fokus yang dinormalisasi, jendela fokus, `transcript`, `audioTranscript`, dan tanda lembar kontak — sehingga mengubah salah satu dimensi tersebut adalah kehilangan cache, bukan penggunaan ulang yang basi. Versi kebijakan pengurangan visual, ambang batas, dan jumlah bingkai kandidat yang dibatasi juga eksplisit dalam kunci cache hasil dan metadata; Oleh karena itu, perubahan kebijakan tidak dapat menggunakan kembali deskripsi keseluruhan video yang sudah usang. Metadata Result-cache v4 mempertahankan mode dan sidik jari, bukan tugas pengguna mentah. Metadata pagar pembatas melaporkan mode analisis yang diminta dan efektif; mode `focused` yang diminta tanpa teks pengguna yang dapat digunakan dilaporkan secara efektif `full`.
+
+Pagar pembatas mengekstrak setiap bagian video yang didukung tetapi menjelaskan tidak lebih dari `modalityBridgeVideoMaxVideos`. Untuk target yang terbukti memiliki `supportsVideo === false`, video yang gagal dan melebihi batas menjadi penanda teks aman yang eksplisit sehingga tidak ada video mentah yang bertahan. Jika kemampuannya tidak diketahui, bagian-bagian tersebut tetap mempertahankan pembawa videonya; setiap transkrip cadangan mengikuti konversi teks terikat di atas. Target dengan `supportsVideo === true` melewati jembatan. Sinyal pembatalan permintaan klien menyebar melalui pengunduhan, antrian broker, subproses, dan panggilan teks; batalkan perhentian di antara video dan tidak pernah gagal terbuka untuk media mentah.
 
 Pengaturan runtime didukung DB dan divalidasi Zod:
 
-| Kunci                               | Default     | Rentang / perilaku                                                                                                  |
-| ----------------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------- |
-| `modalityBridgeVideoEnabled`        | `false`     | Runtime opsional, opt-in                                                                                            |
-| `modalityBridgeVideoAnalysisMode`   | `"full"`    | `full` mempertahankan caption generik; `focused` menggunakan konteks pengguna-terbaru terbatas yang tidak tepercaya |
-| `modalityBridgeVideoModel`          | `""`        | Mewarisi model Vision Bridge                                                                                        |
-| `modalityBridgeVideoFrameCount`     | `8`         | 1–16                                                                                                                |
-| `modalityBridgeVideoSamplingPolicy` | `"uniform"` | `uniform`, `scene_aware`, atau `segment_aware` proporsional; kegagalan detektor kembali ke `uniform`                |
-| `modalityBridgeVideoMaxVideos`      | `1`         | 1–4                                                                                                                 |
-| `modalityBridgeVideoTimeout`        | `120000`    | 1000–120000 ms                                                                                                      |
+| Kunci                               | Bawaan      | Rentang / perilaku                                                                                                |
+| ----------------------------------- | ----------- | ----------------------------------------------------------------------------------------------------------------- |
+| `modalityBridgeVideoEnabled`        | `false`     | Waktu proses opsional, ikut serta                                                                                 |
+| `modalityBridgeVideoAnalysisMode`   | `"full"`    | `full` mempertahankan teks umum; `focused` menggunakan konteks pengguna terbaru yang terbatas dan tidak tepercaya |
+| `modalityBridgeVideoModel`          | `""`        | Mewarisi model Vision Bridge                                                                                      |
+| `modalityBridgeVideoFrameCount`     | `8`         | 1–16                                                                                                              |
+| `modalityBridgeVideoSamplingPolicy` | `"uniform"` | `uniform`, `scene_aware`, atau proporsional `segment_aware`; kegagalan detektor kembali ke `uniform`              |
+| `modalityBridgeVideoMaxVideos`      | `1`         | 1–4                                                                                                               |
+| `modalityBridgeVideoTimeout`        | `120000`    | 1000–120000 mdtk                                                                                                  |
 
-Nilai timeout Video tersimpan lama di atas 120 detik dibatasi pada tenggat broker;
-penulisan pengaturan baru di atas batas tersebut ditolak.
-`GET /api/modality-bridge/video/runtime` memerlukan lokalitas loopback bertanda tepercaya
-sebelum autentikasi atau pemeriksaan runtime, kemudian memerlukan autentikasi manajemen.
-Endpoint ini hanya mengembalikan `available`, versi FFmpeg/ffprobe yang disanitasi, dan
-alasan tetap ketika runtime tidak tersedia. Endpoint ekstraksi internal bukan API unggahan
-publik: kejenuhan antrean mengembalikan `503` plus `Retry-After`, pemutusan pemanggil
-mengembalikan `499`, dan tenggat broker tetap mengembalikan `504`. Respons terkonversi
-menambahkan `video->text;model=<visionModel>;parts=<videos>` ke header pusat
-`x-omniroute-modality-bridge` tanpa menghapus segmen Vision atau Audio.
+Nilai batas waktu video yang bertahan lama di atas 120 detik disesuaikan dengan tenggat waktu broker; pengaturan baru yang menulis di atas batas itu ditolak. `GET /api/modality-bridge/video/runtime` memerlukan lokalitas loopback yang diberi stempel tepercaya sebelum autentikasi atau pemeriksaan runtime, kemudian memerlukan autentikasi manajemen. Ia hanya mengembalikan `available`, versi FFmpeg/ffprobe yang sudah dibersihkan, dan alasan tetap ketika runtime tidak tersedia. Titik akhir ekstraksi internal bukan unggahan publik API: saturasi antrean mengembalikan `503` plus `Retry-After`, pemutusan pemanggil mengembalikan `499`, dan tenggat waktu broker tetap mengembalikan `504`. Respons yang dikonversi menambahkan `video->text;model=<visionModel>;parts=<videos>` ke header `x-omniroute-modality-bridge` pusat tanpa menghapus segmen Vision atau Audio.
 
-### PII Masker (`piiMasker.ts`)
+### Masker PII (`piiMasker.ts`)
 
-Berjalan pada **kedua** tahap.
+Berjalan terus **keduanya** tahapan.
 
-- **`preCall`** menggandakan payload, menelusuri `system`, `messages`, `input`, dan
-  `prompt` (termasuk item string biasa), lalu menerapkan `processPII()` (dari
-  `@/shared/utils/inputSanitizer`) pada field string `content`/`text`. Saat
-  `PII_REDACTION_ENABLED=true`, PII yang terdeteksi disamarkan dalam payload
-  keluar. Ini independen dari `INPUT_SANITIZER_MODE` (yang hanya mengendalikan
-  kebijakan prompt-injection). Saat penyamaran nonaktif, pemanggilan mencatat
-  jumlah deteksi tanpa menulis ulang konten.
-- **`postCall`** menggandakan respons secara mendalam (deep-clone), menjalankan
-  `sanitizePIIResponse()` ditambah penyamar untuk bentuk Responses API
-  (`maskResponsesOutput` — mencakup `output_text` dan
-  `output[].content[].text`). Jika terjadi penyamaran, respons yang telah
-  dimodifikasi menggantikan respons asli.
+- **`preCall`** mengkloning payload, menjalankan `system`, `messages`, `input`, dan `prompt` (termasuk item string biasa), dan menerapkan `processPII()` (dari `@/shared/utils/inputSanitizer`) ke kolom string `content`/`text`. Ketika `PII_REDACTION_ENABLED=true`, PII yang terdeteksi disunting dalam payload keluar. Ini tidak bergantung pada `INPUT_SANITIZER_MODE` (yang hanya mengontrol kebijakan injeksi cepat). Saat redaksi dinonaktifkan, deteksi catatan panggilan dihitung tanpa menulis ulang konten.
+- **`postCall`** mengkloning respons secara mendalam, menjalankan `sanitizePIIResponse()` plus masker berbentuk Responses-API (`maskResponsesOutput` — mencakup `output_text` dan `output[].content[].text`). Jika ada redaksi yang terjadi, respons yang dimodifikasi akan menggantikan respons asli.
 
-Guardrail ini tidak pernah memblokir; ia hanya memberi anotasi
-(`meta.detections`, `meta.redacted`) atau menulis ulang.
+Pagar pembatas tidak pernah menghalangi; itu hanya memberi anotasi (`meta.detections`, `meta.redacted`) atau menulis ulang.
 
-#### Pemilihan per tipe, pola kustom, dan penghitung deteksi
+#### Pemilihan per jenis, pola khusus, dan penghitung deteksi
 
-**Dashboard → Settings → Security → PII masking** memilih _apa_ yang disamarkan.
-Pengaturan ini tidak mengaktifkan penyamaran: itu tetap diatur oleh
-`PII_REDACTION_ENABLED` (request) dan `PII_RESPONSE_SANITIZATION` (respons +
-SSE), keduanya nonaktif secara default.
+**Dasbor → Pengaturan → Keamanan → PII masking** memilih _apa_ yang disamarkan. Itu tidak mengaktifkan masking: itu masih `PII_REDACTION_ENABLED` (permintaan) dan `PII_RESPONSE_SANITIZATION` (respons + SSE), keduanya dinonaktifkan secara default.
 
-- **Pemilihan per tipe** — id bawaan tercantum di
-  `src/shared/constants/piiTypes.ts` (`PII_BUILTIN_TYPES`). Jika tidak diatur,
-  berarti semua tipe (perilaku sebelum pengaturan ini ada). Pola `ssn_us` pada
-  engine request dipetakan ke `ssn`. Template (Minimal, Standard, Financial,
-  Brazilian, USA, GDPR, POPIA, Full) hanya mengisi kotak centang di UI.
-- **Pengenal GDPR dan POPIA** — dua belas id bawaan yang mencakup pengenal pribadi Uni Eropa dan Afrika Selatan (tabel di bawah). Regex, validator, dan tag yurisdiksinya berada dalam satu tabel, `src/shared/utils/piiPatterns.ts`, yang dipakai baik oleh sanitizer respons (`src/lib/piiSanitizer.ts`) maupun penyamar permintaan (`src/shared/utils/inputSanitizer.ts`). Kecocokan hanya disamarkan jika validatornya menerimanya; deretan angka saja tidak pernah cukup. Operator yang menyimpan pilihan yang dipersempit sebelum id ini ada mempertahankan perilaku sebelumnya sampai id baru dicentang.
-- **Pola kustom** — hingga 20 pola regex atau wildcard (`*` = hingga 64 karakter
-  non-whitespace, `?` = satu karakter). Kecocokan menjadi `[CUSTOM_REDACTED]`.
-  Setiap pola melalui `compilePiiCustomPattern()`
-  (`src/shared/utils/piiCustomPatterns.ts`): maksimal 500 karakter, flag dibatasi
-  pada `g i m s u`, harus dapat dikompilasi, harus lulus `safe-regex`
-  (catastrophic backtracking), dan tidak boleh cocok dengan string kosong atau
-  placeholder penyamaran. Pola yang gagal ditolak saat disimpan dan saat diuji,
-  dan baris tersimpan yang gagal dilewati saat runtime alih-alih dikompilasi.
-  Pola kustom hanya berjalan saat penyamaran aktif.
-- **Penghitung deteksi** — jumlah per tipe (tidak pernah nilai yang cocok),
-  disimpan di memori dan direset saat restart
-  (`src/lib/pii/piiDetectionStats.ts`). Penghitung hanya bertambah saat penyamaran
-  aktif.
+- **Pilihan per jenis** — id bawaan tercantum di `src/shared/constants/piiTypes.ts` (`PII_BUILTIN_TYPES`). Tidak disetel berarti setiap jenis (perilaku sebelum pengaturan ini ada). Pola `ssn_us` mesin permintaan dipetakan ke `ssn`. Templat (Minimal, Standar, Keuangan, Brasil, USA, GDPR, POPIA, Penuh) hanya mengisi kotak centang di UI.
+- **Pengidentifikasi GDPR dan POPIA** — dua belas id bawaan yang mencakup EU dan pengenal pribadi Afrika Selatan (tabel di bawah). Regex, validator, dan tag yurisdiksinya berada dalam satu tabel, `src/shared/utils/piiPatterns.ts`, yang digunakan oleh pembersih respons (`src/lib/piiSanitizer.ts`) dan masker permintaan (`src/shared/utils/inputSanitizer.ts`). Kecocokan disunting hanya jika validatornya menerimanya; jumlah digit saja tidak pernah cukup. Operator yang menyimpan pilihan yang dipersempit sebelum id ini ada akan mempertahankan perilakunya hingga id baru dicentang.
+- **Pola khusus** — hingga 20 pola regex atau wildcard (`*` = hingga 64 karakter non-spasi, `?` = satu). Pertandingan menjadi `[CUSTOM_REDACTED]`. Setiap pola melewati `compilePiiCustomPattern()` (`src/shared/utils/piiCustomPatterns.ts`): paling banyak 500 karakter, bendera terbatas pada `g i m s u`, harus dikompilasi, harus melewati `safe-regex` (catastrophic backtracking), dan tidak boleh cocok dengan string kosong atau placeholder redaksi. Pola yang gagal ditolak saat disimpan dan diuji, dan baris tersimpan yang gagal dilewati saat runtime alih-alih dikompilasi. Pola khusus hanya berjalan saat penyembunyian aktif.
+- **Penghitung deteksi** — per jenis dihitung (nilai tidak pernah cocok), disimpan di memori dan disetel ulang saat restart (`src/lib/pii/piiDetectionStats.ts`). Mereka hanya meningkat saat masking aktif.
 
-Pengaturan disimpan di tabel `key_value` (namespace `pii_settings`,
-`src/lib/db/piiSettings.ts`) dan dibaca melalui cache 1 detik. API:
+Pengaturan berada di tabel `key_value` (namespace `pii_settings`, `src/lib/db/piiSettings.ts`) dan dibaca melalui cache 1 detik. API:
 
 | Method | Path                     | Tujuan                                                                    |
 | ------ | ------------------------ | ------------------------------------------------------------------------- |
@@ -638,10 +388,9 @@ Pengaturan disimpan di tabel `key_value` (namespace `pii_settings`,
 | `PUT`  | `/api/settings/pii`      | Mengganti `enabledTypes` (`null` = semua) dan/atau `customPatterns`       |
 | `POST` | `/api/settings/pii/test` | Uji coba satu pola terhadap sampel maksimal 8 KB; tidak ada yang disimpan |
 
-Ketiganya memerlukan autentikasi manajemen dan memvalidasi body dengan Zod
-(`src/shared/validation/schemas/piiSettings.ts`).
+Ketiganya memerlukan autentikasi manajemen dan memvalidasi isi dengan Zod (`src/shared/validation/schemas/piiSettings.ts`). Dengan login dinonaktifkan (`requireLogin=false`) `GET` dan titik akhir pengujian terbuka, namun `PUT` masih memerlukan sesi dasbor, kunci `manage` -scope API, token akses `oma_` dengan cakupan tulis atau lebih tinggi, atau token CLI atau token layanan internal yang dikirim dari loopback.
 
-#### Pengenal GDPR (Uni Eropa) dan POPIA (Afrika Selatan)
+#### Pengidentifikasi GDPR (EU) dan POPIA (Afrika Selatan).
 
 | Id                  | Pengenal                       | Validasi                                                                                     |
 | ------------------- | ------------------------------ | -------------------------------------------------------------------------------------------- |
@@ -658,7 +407,7 @@ Ketiganya memerlukan autentikasi manajemen dan memvalidasi body dengan Zod
 | `za_vat`            | Nomor VAT Afrika Selatan       | 10 angka yang diawali `4` **dan** "VAT" / "BTW" dalam 48 karakter sebelumnya                 |
 | `za_tax_ref`        | Referensi pajak Afrika Selatan | 10 angka yang diawali `0`-`3`, Luhn, **dan** "tax" / "SARS" dalam 48 karakter sebelumnya     |
 
-Karena format yang hanya berisi angka bertabrakan dengan nomor pesanan, nomor build, dan stempel waktu, format terlemah (`za_vat`, `za_tax_ref`) memerlukan petunjuk kata kunci; nomor `0..` sepuluh angka tanpa pemisah tidak dianggap sebagai nomor telepon Afrika Selatan. IBAN dengan spasi (`GB29 NWBK ...`) tidak dicocokkan. Pada jalur streaming, petunjuk hanya dicari dalam chunk saat ini. Id tersebut ditempatkan sebelum pola telepon generik, sehingga pengenal yang tervalidasi mempertahankan placeholder-nya sendiri (`[IBAN_REDACTED]`, `[NL_BSN_REDACTED]`, ...). Template `gdpr` dan `popia` masing-masing memilih id Uni Eropa dan Afrika Selatan. Penyamaran tetap opt-in (Hard Rule #20): tidak ada yang mengubah default feature flag di sini.
+Karena format hanya digit bertabrakan dengan nomor pesanan, nomor pembuatan, dan stempel waktu, format yang paling lemah (`za_vat`, `za_tax_ref`) memerlukan isyarat kata kunci, dan sepuluh digit nomor `0..` tidak diperlakukan sebagai nomor telepon Afrika Selatan. Spasi IBANs (`GB29 NWBK ...`) tidak cocok. Di jalur streaming, isyarat hanya dilihat di dalam potongan saat ini. Id berada di depan pola telepon umum, sehingga pengidentifikasi yang divalidasi menyimpan placeholdernya sendiri (`[IBAN_REDACTED]`, `[NL_BSN_REDACTED]`, ...). Templat `gdpr` dan `popia` masing-masing memilih id EU dan Afrika Selatan. Masking itu sendiri tetap ikut serta (Hard Rule #20): tidak ada apa pun di sini yang mengubah default tanda fitur.
 
 ### Prompt Injection (`promptInjection.ts`)
 

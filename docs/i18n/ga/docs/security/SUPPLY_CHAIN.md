@@ -47,9 +47,9 @@ ná fianaise íomhá atá in easnamh a dheimhniú go bhfuil íomhá glan.
 
 ## Riosca spleáchais scortha
 
-Ní áirítear `extract-zip` ná ciumhais spleáchais chuige sa bhfréamhchomhad glasála a thuilleadh tar éis uasghrádú a dhéanamh ar an uirlis forbartha promptfoo atá feannáilte. Leis seo, cuirtear deireadh leis an slabhra `promptfoo` → `@openai/codex-security` → `extract-zip` a glacadh roimhe seo agus a rianaítear in #14482. Diúltaíonn na seiceálacha aischéimnithe in `tests/unit/extract-zip-14482-exposure.test.ts` dá athabhairt isteach agus coinníonn siad an toirmeasc ar iompórtálacha ó chód táirgthe.
+Ní áirítear `extract-zip` nó imeall spleáchais leis an bhfréamh-chomhad glas a thuilleadh tar éis uasghrádú a dhéanamh ar an uirlis forbartha promptfoo pinned. Téann sé seo as an slabhra `promptfoo` → `@openai/codex-security` → `extract-zip` a rianaíodh i #14482 roimhe seo. Diúltaíonn na seiceálacha aischéimnithe in `tests/unit/extract-zip-14482-exposure.test.ts` é a thabhairt isteach arís agus coimeádann siad an toirmeasc ar allmhairí ón gcód táirgthe.
 
-Áirítear sa deisiú spleáchais reatha sáruithe comhoiriúnachta do chliant MSAL Azure identity, do chliant FTP get-uri, agus do Zod sa dá phacáiste breiseáin OpenCode. Déantar sealbhú comharthaí Azure agus aisghabháil FTP a thástáil le hiompróirí rialaithe; ritheann an dá phacáiste OpenCode a gcuid sraitheanna tógála agus tástála féin. Is tomhais ag pointe áirithe ama iad comhairimh na bhfógraí slándála sa chlárlann agus is féidir leo athrú tar éis an lockfile a chur faoi bhainistiú leaganacha.
+Déanann an deisiú spleáchais reatha scóip freisin sáruithe comhoiriúnachta do chliaint MSAL aitheantais Azure agus cliant FTP get-uri. Déantar éadáil chomhartha Azure agus aisghabháil FTP a thástáil le hiompar rialaithe; ritheann an dá phacáiste OpenCode a gcuid seomraí tógála agus tástála féin. Tomhais ag pointe ama is ea comhairimh chomhairleacha na clárlainne agus féadann siad athrú tar éis don ghlaschomhad a bheith déanta.
 
 ## Cúlra: Comhairle Scorecard → blocáil
 

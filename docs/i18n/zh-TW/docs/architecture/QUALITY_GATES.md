@@ -468,28 +468,25 @@ git add quality-baseline.json
 指標卻未更新基準線，`--require-tighten` 將會偵測到此情況（階段 6A.5，
 尚待實作）。
 
-### CodeQL 棘輪：候選版本准入與儲存庫清單
+### CodeQL棘輪：候選人准入和儲存庫清單
 
-CI 透過明確的相依鏈負責候選版本的 CodeQL 准入：`codeql-scan` 呼叫 `codeql.yml` 中的四語言矩陣，接著 `codeql-admission` 執行 `node scripts/check/check-codeql-ratchet.mjs --candidate`。`Gate / CI` 要求兩者的結果。Quality 保留自身的數值檢查，但不會在產生作業完成前查詢掃描器；單獨的 `Gate / Quality` 不構成完整的候選版本准入。僅修改文件的候選版本仍然必須執行 CodeQL。
+CI透過明確依賴鏈擁有候選CodeQL准入： `codeql-scan`呼叫`codeql.yml`中的四語言矩陣，然後`codeql-admission`運行`node scripts/check/check-codeql-ratchet.mjs --candidate`。 `Gate / CI`需要兩個結果。品質保留自己的數位檢查，但在生產者完成之前不會詢問掃描器；僅`Gate / Quality`並不能完成候選人錄取。對於僅提供文件的候選人， CodeQL仍然是必需的。
 
-`config/quality/codeql-admission-policy.json` 中的政策選擇 Actions、C/C++、JavaScript/TypeScript 和 Python，使用 default 查詢套件、remote 威脅模型及 none 建置模式。產生端預檢會拒絕待啟用記錄，以及明確目標清單之外的分支。初始目標是 main 和 release/v3.8.53；下一條 release 分支需要經過審查的納入程序。CI 既有、範圍較廣的 release PR 觸發規則維持不變，但尚未納入的目標會在擷取前回報 HOLD，而不會取得未經量測的 PASS。
+`config/quality/codeql-admission-policy.json`中的策略選擇 Actions、 C/C++、 JavaScript/TypeScript和 Python、查詢套件預設值、遠端威脅模型和建置模式 none。生產者預檢拒絕掛起的啟動記錄並在顯式目標清單之外進行分支。目前的目標是main， release/v3.8.54.合約測試將這個有限清單和維護推送觸發器與套件版本進行比較；下一個版本需要審核入職。 CI現有的更廣泛發布的PR觸發器被保留，但未登入的目標在提取之前報告HOLD而不是獲取未測量的PASS。
 
-每個矩陣作業都記錄實際的 SARIF 上傳 ID、語言、類別、執行及嘗試次數、呼叫端工作流程身分、事件的 ref/head/base/merge SHA，以及政策雜湊。相依作業只下載本次執行的收據並驗證產物摘要。它要求全部四個類別、成功的產生作業，以及每個確切上傳皆已完成處理。它使用 API 的 sarif_id 篩選器，而不是分支上找到的最新分析。部分重跑可重用同一次執行、同一候選版本中較早嘗試的成功類別，並保留產生嘗試記錄；目前的產生作業失敗時，不得重用先前的綠色證據。
+每個矩陣作業記錄其實際的SARIF上傳ID、語言、類別、運行和嘗試、呼叫者工作流程身分、事件ref/head/base/merge SHA和策略雜湊。相關作業僅下載本次運行的收據並驗證工件摘要。它需要所有四個類別、一個成功的製作者並完成每個精確上傳的處理。它使用API的 sarif_id 過濾器，而不是在分支上找到的最新分析。部分重新運行可能會重複使用同一運行和候選者的早期嘗試中的成功類別，從而保留生成嘗試；當前失敗的生產商無法重複使用先前的綠色證據。
 
-CodeQL action 會等待處理完成，但其固定版本的實作可能在狀態讀取失敗或等待次數耗盡後發出警告並繼續。因此，准入步驟會再次驗證處理狀態。類別缺漏、處理尚未完成、作業失敗或取消、身分過時、分頁不完整或 API 無法使用，都會產生 HOLD 並以 2 結束。不再為獨立掃描器工作流程設定固定等待時間。未掃描的 PR 不能因為警示查詢回傳 0 就通過。量測數量超過 `metrics.codeqlAlerts.value` 時以 1 結束；不會提高基線來吸收其他分支的警示。[上傳狀態與分析查詢](https://docs.github.com/en/rest/code-scanning/code-scanning)。
+CodeQL操作等待處理，但其固定實作可以在狀態讀取失敗或耗盡等待後發出警告並繼續。因此，入場需再次驗證處理。缺少類別、待處理、失敗或取消的作業、過時的身份、不完整的分頁或不可用的APIs產生HOLD並退出 2。獨立掃描器工作流程不存在固定等待。未掃描的PR無法通過，因為警報查詢傳回 0。高於`metrics.codeqlAlerts.value`測量計數退出 1；不會提高基線來吸收另一個分支的警報。[上傳狀態和分析查找](https://docs.github.com/en/rest/code-scanning/code-scanning)。
 
-收據記錄上傳與分析 ID、類別、工具版本、ref/SHA、基線及警示數量。SARIF 身分/結果數量、最低規則數量及確切的警示實例仍是必要項目。接受之前會重新檢查 PR/分析身分。這些檢查證明的是已設定類別的涵蓋範圍，而不是每個已擷取原始檔的清單。C/C++ 的免建置擷取不包含專案建置期間產生的程式碼。原始檔排除項目仍須審查，貢獻者歸因仍須具有可比較、綁定確切基準版本的證據。
+收據記錄上傳和分析IDs、類別、工具版本、 ref/SHA、基線和警報編號。 SARIF identity/result計數、最小規則計數和精確警報執行個體仍然是強制性的。在接受之前會重新檢查PR/analysis身份。這些檢查建立配置的類別覆蓋範圍，而不是每個提取的來源檔案的清單。 C/C++無建置提取不包括專案建置期間產生的程式碼。來源排除仍然需要審查，貢獻者歸因需要可比較的精確基礎證據。
 
-`codeql-maintenance.yml` 提供目前 release 分支的推送掃描及每週排程，不重複 PR/main 的產生作業。`nightly-codeql-inventory.yml` 獨立維護整個儲存庫的基線，使用 `--strict-measurement`，並在無法量測時失敗。本機舊版收集器的寬容略過不構成候選版本准入。只有確認全域數量降低後，才能透過明確的 `--update` 收緊基線。
+`codeql-maintenance.yml`提供主動發布的推播掃描和每週時間表，而無需重複PR/main生產者。 `nightly-codeql-inventory.yml`將儲存庫範圍的基線保持獨立，並在測量不可用時使用`--strict-measurement`和失敗。當地遺產收藏家的優雅跳過不是候選人入場。在驗證了較低的全球計數後，緊縮仍然是一個明確的`--update` 。
 
-設定了 Default Setup 時，不得發布 Advanced 工作流程：GitHub 會拒絕這種組合。在經過審查的管理切換取得回讀確認前，版本化政策仍維持待處理狀態。發布前，操作員固定儲存庫、head/base/tree、政策/修補程式/回復雜湊及觀察到的設定狀態；`node scripts/quality/codeql-producer.mjs verify-admin-readback` 檢查提供的預期與實際 JSON 記錄。這是技術性保護，不是操作員核准，也不能取代取得最新回讀結果。PR 權杖絕不要求 Administration 存取權。推出及任何掃描器變更，都需要這份獨立回讀證據，以及真實 PR、fork 和合併群組的相容性證據。
+配置預設設定時不得發布高階工作流程： GitHub拒絕此組合。其版本化策略仍處於待定狀態，直到回讀經過審查的管理過渡。在發布之前，操作員會固定儲存庫、 head/base/tree、 policy/patch/rollback雜湊值和觀察到的設定狀態； `node scripts/quality/codeql-producer.mjs verify-admin-readback`檢查提供的預期和實際JSON記錄。這是一個技術防護，而不是操作員批准或取得新讀回的替代品。 PR令牌從不請求管理存取權限。推出和任何掃描器更改都需要單獨的回讀以及真正的PR、分叉和合併組相容性證據。
 
-Fork 使用託管執行器，簽出時不保留憑證，產生作業不安裝或建置專案，也不繼承儲存庫機密。GitHub 支援在 pull_request 事件中，使用權限受限的 fork 權杖上傳 SARIF；首次貢獻的執行核准仍由 GitHub 政策決定。絕不可使用 pull_request_target 執行不受信任的程式碼。在認定遷移完成之前，必須在受控金絲雀驗證中確認實際權杖權限、analysis_key 及所有類別環境。[Fork 上傳規則](https://docs.github.com/en/code-security/reference/code-scanning/troubleshoot-analysis-errors/resource-not-accessible)、[互相衝突的設定模式](https://docs.github.com/en/code-security/reference/code-scanning/troubleshoot-analysis-errors/two-codeql-workflows)。
+分叉使用託管運行器，無需持久憑證即可簽出，生產者中沒有專案install/build ，也沒有繼承的儲存庫機密。 GitHub支援SARIF上傳pull_request事件及其減少的分叉令牌；首次出資執行批准仍然是GitHub政策。切勿使用 pull_request_target 執行不受信任的程式碼。在考慮遷移完成之前，請確認受控金絲雀中的實際令牌權限、analysis_key 和所有類別環境。[分叉上傳規則](https://docs.github.com/en/code-security/reference/code-scanning/troubleshoot-analysis-errors/resource-not-accessible)，[衝突的設定模式](https://docs.github.com/en/code-security/reference/code-scanning/troubleshoot-analysis-errors/two-codeql-workflows)。
 
-**是否駁回由操作者決定（硬性規則 #14）**——絕不可在未於駁回註解中
-記錄技術理由的情況下駁回 CodeQL 警示：若是上游通訊協定要求，使用 `won't fix`；
-若是測試固定資料，使用 `used in tests`；若是 CodeQL 無法辨識的清理程式，
-使用 `false positive`（先例：`docs/security/ERROR_SANITIZATION.md`）。
+**解僱由操作員決定（硬規則#14）** —絕不會在未在駁回評論中記錄技術理由的情況下駁回CodeQL警報： `won't fix`表示上游協議要求， `used in tests`表示測試夾具， `false positive`表示CodeQL無法看到的消毒劑（先例： `docs/security/ERROR_SANITIZATION.md`）。
 
 ---
 

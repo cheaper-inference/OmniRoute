@@ -351,36 +351,41 @@ Content-Type: application/json
 
 Mezi dostupné poskytovatele patří OpenAI (GPT Image 2), xAI (Grok Image), Together AI (FLUX), Fireworks AI, Nebius (FLUX), Hyperbolic, NanoBanana, **OpenRouter**, **ZenMux**, SD WebUI (lokální) a ComfyUI (lokální).
 
-`n` vrací `n` obrázků v `data[]`. Poskytovatelé, jejichž upstreamové API vrací jeden obrázek na volání
+`n` vrací `n` obrázků v `data[]`. Poskytovatelé, jejichž nadřazené API vrací jeden obrázek na volání
 (Black Forest Labs, Stability AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik,
-NVIDIA NIM, Cloudflare Workers AI), provedou `n` samostatných upstreamových volání, přičemž
-současně probíhají nejvýše 4. Pevný `seed` se posouvá podle indexu volání (`seed`, `seed + 1`, …),
-takže se obrázky liší, ale zůstávají reprodukovatelné. Hodnota `n` je omezena na 10. Celý
-požadavek selže, pokud selže kterékoli volání. Seznam formátů pro fan-out je
-`SINGLE_IMAGE_FANOUT_FORMATS` v
+NVIDIA NIM, Cloudflare Workers AI), provedou `n` samostatných volání nadřazeného API,
+přičemž současně probíhají nejvýše 4. Pevná hodnota `seed` se posouvá podle indexu volání
+(`seed`, `seed + 1`, …), takže se obrázky liší, ale zůstávají reprodukovatelné. Hodnota `n` je
+omezena na 10. Pokud některé volání selže, požadavek jako celek selže. Seznam formátů pro
+rozvětvení volání je uveden v `SINGLE_IMAGE_FANOUT_FORMATS` v
 `open-sse/handlers/imageGeneration/fanOut.ts`.
 
-ZenMux znovu používá existující připojení s API klíčem a přijímá prefixy `zenmux/` nebo `zm/`:
+ZenMux znovu používá existující připojení s klíčem API a přijímá předpony `zenmux/` nebo `zm/`:
 
-- `zenmux/openai/gpt-image-2` používá OpenAI Images API společnosti ZenMux. Možnosti zahrnují `size`,
+- `zenmux/openai/gpt-image-2` používá rozhraní OpenAI Images API společnosti ZenMux. Mezi možnosti patří `size`,
   `quality`, `n`, `output_format`, `output_compression`, `background` a `response_format`.
-- Ostatní vydavatelé, například `zm/meta/muse-image-1.0`, používají endpoint Vertex AI `:predict`
-  společnosti ZenMux. `n` se mapuje na `sampleCount`, `aspect_ratio` na `aspectRatio` a `image_size`
-  (`1K`, `2K`, `4K`) na `sampleImageSize`. Pixelová hodnota `size` poskytuje pouze poměr stran,
+- Ostatní vydavatelé, například `zm/meta/muse-image-1.0`, používají koncový bod Vertex AI
+  `:predict` společnosti ZenMux. `n` se mapuje na `sampleCount`, `aspect_ratio` na `aspectRatio` a
+  `image_size` (`1K`, `2K`, `4K`) na `sampleImageSize`. Hodnota `size` v pixelech poskytuje pouze poměr stran,
   nikoli zaručené rozměry v pixelech. Podporované poměry stran, rozlišení a počty se liší podle modelu.
-- `zm/inclusionai/ming-image-0.1-design` si volí vlastní rozměry. Vynechte `size`,
-  `aspect_ratio` a `image_size`; explicitně zadané hodnoty vrátí HTTP 400. Formáty PNG, JPEG a WebP
-  lze vyžádat pomocí `output_format`.
+- `zm/inclusionai/ming-image-0.1-design` volí vlastní rozměry. Vynechte `size`,
+  `aspect_ratio` a `image_size`; explicitní hodnoty vrátí HTTP 400. Pomocí `output_format` lze
+  vyžádat PNG, JPEG nebo WebP.
 
-Tato integrace podporuje generování obrázků z textu, nikoli úpravy referenčních obrázků. Výstup
-Vertexu se normalizuje na `data[].b64_json`; `response_format: "url"` vrací upstreamovou
-HTTPS URL nebo datovou URL s base64, pokud jsou k dispozici pouze bajty obrázku. Prázdné či filtrované
-výstupy vracejí chybu namísto úspěšné odpovědi bez obsahu. Přístup k modelům závisí na účtu ZenMux.
+Tato integrace podporuje generování obrázků z textu, nikoli úpravu referenčních obrázků. Výstup
+Vertex je normalizován na `data[].b64_json`; `response_format: "url"` vrací nadřazenou
+HTTPS URL nebo datovou URL base64, pokud jsou k dispozici pouze bajty obrázku. Prázdné nebo filtrované výstupy
+vracejí chybu namísto úspěšné odpovědi s prázdným obsahem. Přístup k modelům závisí na účtu ZenMux.
 Viz [Vertex API společnosti ZenMux](https://docs.zenmux.ai/api/vertexai/generate-images) a
-[OpenAI Images API](https://docs.zenmux.ai/api/openai/generate-an-image).
+[Images API společnosti OpenAI](https://docs.zenmux.ai/api/openai/generate-an-image).
+
+Připojení pro přihlášení k Microsoft 365 Copilot obsluhuje `copilot-m365-web/m365-copilot-image`
+prostřednictvím integrovaného nástroje Copilotu pro obrázky: jeden tah Copilotu na obrázek (`n` 1–4), přičemž `size` řídí
+pouze orientaci a obrázky se vracejí přímo v odpovědi (`b64_json` nebo datová URL pro
+`response_format: "url"`). Viz [Microsoft 365 Copilot](../providers/COPILOT-M365.md#image-generation).
 
 ```bash
-# Výpis všech modelů obrázků
+# Seznam všech modelů pro generování obrázků
 GET /v1/images/generations
 ```
 
@@ -844,13 +849,15 @@ volajícímu mimo relaci (načtení, odstranění, zrušení a kontrola `input_f
 
 Abstrakce poskytovatele webového vyhledávání (Tavily, Brave, Exa, Serper atd.).
 
-| Metoda | Cesta                  | Popis                                                                                                 |
-| ------ | ---------------------- | ----------------------------------------------------------------------------------------------------- |
-| GET    | `/v1/search`           | Výpis nakonfigurovaných poskytovatelů vyhledávání + jejich funkcí                                     |
-| POST   | `/v1/search`           | Spuštění vyhledávacího dotazu — tělo ověřované pomocí `v1SearchSchema`, podporuje cachování/slučování |
-| GET    | `/v1/search/analytics` | Statistiky zásahů/latence/cache podle poskytovatele                                                   |
+| Metoda | Cesta                  | Popis                                                                                                                |
+| ------ | ---------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/v1/search`           | Výpis nakonfigurovaných poskytovatelů vyhledávání + funkcí                                                           |
+| POST   | `/v1/search`           | Provedení vyhledávacího dotazu — tělo ověřované pomocí `v1SearchSchema`, s podporou ukládání do mezipaměti/slučování |
+| GET    | `/v1/search/analytics` | Statistiky zásahů, latence a mezipaměti pro jednotlivé poskytovatele                                                 |
 
-**Autorizace:** Bearer API klíč (`extractApiKey` + `isValidApiKey`). Zásady vyhledávání jsou vynucovány pomocí `enforceApiKeyPolicy`.
+**Autentizace:** Bearer API klíč (`extractApiKey` + `isValidApiKey`). Zásady vyhledávání se vynucují pomocí `enforceApiKeyPolicy`.
+
+**Automatický výběr:** bez parametru `provider` se nejprve použije nejlevnější poskytovatel s nakonfigurovaným připojením a dalším v pořadí je nejlevnější záložní poskytovatel. Bezplatní poskytovatelé poslední instance (`duckduckgo-free`) se použijí pouze v případě, že není nakonfigurováno nic jiného. SearXNG hostovaný svépomocí se považuje za nakonfigurovaný, jakmile jeho připojení obsahuje skutečnou hodnotu `baseUrl` (nikoli výchozí hodnotu katalogu `http://localhost:8888/search`): poté se řadí jako poskytovatel za $0 před poskytovatele vyžadující klíč, přičemž nejlevnější poskytovatel vyžadující klíč slouží jako záloha, a to i v případě, že SearXNG odpoví kódem 400, 401, 403 nebo 404. Hodnota `baseUrl`, která není platnou adresou URL `http(s)` nebo odkazuje na adresu metadat cloudu, se nezapočítává. Připojení SearXNG, které obsahuje token, se tímto způsobem řadí pouze pro `https://` nebo lokální `http://`. U vzdáleného nešifrovaného `http://` nikdy neslouží jako záloha a zůstává poskytovatelem poslední instance; použije se pouze v případě, že není nakonfigurován žádný jiný poskytovatel, nebo je-li vyžádán podle názvu, takže v těchto dvou případech odesílá token v otevřené podobě.
 
 ### `provider_options` pro Exa a Tavily
 
@@ -1031,32 +1038,28 @@ určit výsledek, skončí ve stavu `needs_confirmation`, místo aby bylo odesl�
 
 ---
 
-## Samoobslužné využití (`/api/usage/om-usage`)
+## Samoobslužné použití (`/api/usage/om-usage`)
 
-Každý API klíč může číst **vlastní** využití a kvóty — bez oprávnění pro správu. Toto je koncový
-bod, který klient (CLI, panel OmniCopilot) používá k zobrazení útraty držiteli klíče.
+Jakýkoli klíč API může číst **jeho vlastní** využití a kvóty — bez oprávnění pro správu. Toto je koncový bod, který klient (CLI, panel OmniCopilot ) používá k tomu, aby držiteli klíčů ukázal své výdaje.
 
 ```bash
-# Textová forma (historický kontrakt — prostý text pro terminál)
+# Text form (the historical contract — plain text for a terminal)
 curl -H "Authorization: Bearer <your-api-key>" \
   http://localhost:20128/api/usage/om-usage
 
-# Strukturovaná forma — to, co zpracovává uživatelské rozhraní
+# Structured form — what a UI consumes
 curl -H "Authorization: Bearer <your-api-key>" \
   "http://localhost:20128/api/usage/om-usage?format=json"
 ```
 
-Klíč musí mít povolenou možnost **`allowUsageCommand`** (ve výchozím nastavení vypnuto —
-správce API klíčů na řídicím panelu ji přepíná pro jednotlivé klíče). Bez této možnosti koncový
-bod odpoví `403`.
+Klíč musí mít **`allowUsageCommand`** povoleno (ve výchozím nastavení vypnuto — správce klíčů API řídicího panelu jej přepíná podle klíče). Bez něj koncový bod odpovídá `403`.
 
-`?format=json` vrací rozlišený tvar, takže volající nikdy nečte datové pole z odpovědi
-s odmítnutím. Při úspěchu:
+`?format=json` vrací diskriminovaný tvar, takže volající nikdy nečte datové pole z odmítnutí. O úspěchu:
 
 ```jsonc
 {
   "allowed": true,
-  // přítomno pouze v případě, že klíč aktivoval limity využití pro jednotlivé klíče (denní/týdenní USD):
+  // present only when the key opted into per-key usage limits (daily/weekly/5-hour USD):
   "personal": {
     "dailySpentUsd": 1.25,
     "dailyLimitUsd": 5,
@@ -1065,9 +1068,9 @@ s odmítnutím. Při úspěchu:
     "weeklyLimitUsd": 20,
     "weeklyResetAtIso": "…" /* … */,
   },
-  // snímek kvóty vybraného poskytovatele nebo null, pokud zatím není nic uloženo v mezipaměti:
+  // the selected provider quota snapshot, or null when nothing is cached yet:
   "provider": { "connectionId": "…", "provider": "claude", "plan": "…", "quotas": {/* … */} },
-  // snímek každého připojení, aby uživatelské rozhraní mohlo vykreslit několik poskytovatelů vedle sebe:
+  // every connection's snapshot, so a UI can render several providers side by side:
   "providers": [
     { "connectionId": "…", "provider": "claude" /* … */ },
     { "provider": "codex" /* … */ },
@@ -1075,14 +1078,9 @@ s odmítnutím. Při úspěchu:
 }
 ```
 
-Při odmítnutí (`401` neplatný klíč / `403` není povoleno) vrací stejná cesta
-`{ "allowed": false, "error": { "message": "…" } }` — přítomné, ale prázdné pole
-`personal`/`provider` (klíč je povolen, ale zatím nebyla zjištěna žádná data) představuje jiný stav
-než odmítnutí a pouze forma JSON tyto stavy rozlišuje.
+Při odmítnutí (chybný klíč `401` / `403` není povoleno) stejná cesta vrátí `{ "allowed": false, "error": { "message": "…" } }` — přítomný-ale prázdný `personal`/`provider` (klíč povolen, zatím se nic nenaučilo) je odlišný stav od odmítnutí a rozlišuje je pouze forma JSON.
 
-**Autentizace:** vlastní Bearer API klíč volajícího, ověřený pomocí `isValidApiKey` — toto
-není rozhraní pro správu (`/api/keys/…`), které zůstává chráněné pomocí
-`requireManagementAuth`.
+**Auth:** vlastní klíč API nositele volajícího, ověřený pomocí `isValidApiKey` — toto _není_ řídicí povrch (`/api/keys/…`), který zůstává za `requireManagementAuth`.
 
 ### Surová procenta kvóty vs. procenta upravená podle limitu
 
@@ -1326,40 +1324,41 @@ Implementace: `getResolvedModelCapabilitiesWithLimitSources()` v `src/lib/modelC
 | `/api/usage/model-latency-stats` | GET             | Průběžný agregovaný přehled latence podle poskytovatele/modelu (průměr/p50/p95/p99, míra úspěšnosti); filtry: `windowHours`/`minSamples`/`maxRows`/`provider`/`model` (#6873)                                                                                                                                       |
 | `/api/usage/cache-health`        | GET             | Souhrn stavu mezipaměti promptů nad `call_logs` — poměr zápisů/čtení, distribuce velikostí zápisů p50/p90/p99, koncentrace velkých zápisů, rozdělení podle modelu a verdikt `healthy`/`degraded`/`thrash`/`no-data`; parametry dotazu `range` (`1h`\|`24h`\|`7d`\|`30d`, výchozí `24h`) a volitelný `model` (#8827) |
 
-### Oprávnění klíče API
+### Klíčová oprávnění API
 
-`PATCH /api/keys/{id}` aktualizuje oprávnění existujícího klíče. Stejně jako každá trasa `/api/keys*` vyžaduje oprávnění ke správě (viz [Autentizace správy](../guides/MANAGEMENT-AUTH.md)), nikoli inferenční klíč. Odešlete pouze pole, která chcete změnit; požadavek bez kteréhokoli z nich je zamítnut s `No valid fields to update`. Přijatá pole jsou definována pomocí `updateKeyPermissionsSchema` v souboru `src/shared/validation/schemas/keys.ts`.
+`PATCH /api/keys/{id}` aktualizuje oprávnění stávajícího klíče. Jako každá trasa `/api/keys*` potřebuje autorizaci správy (viz [Ověření správy](../guides/MANAGEMENT-AUTH.md) ), nikoli inferenční klíč. Odešlete pouze pole, která chcete změnit; požadavek bez žádného z nich je zamítnut pomocí `No valid fields to update`. Přijatá pole jsou definována `updateKeyPermissionsSchema` v `src/shared/validation/schemas/keys.ts`.
 
-| Pole                                        | Typ                                                             | Poznámky                                                                                                                         |
-| ------------------------------------------- | --------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| `name`                                      | řetězec, 1–200 znaků                                            |                                                                                                                                  |
-| `isActive`                                  | boolean                                                         |                                                                                                                                  |
-| `isBanned`                                  | boolean                                                         |                                                                                                                                  |
-| `expiresAt`                                 | datum a čas ve formátu ISO 8601 nebo `null`                     | `null` zruší dobu platnosti                                                                                                      |
-| `modelAccessMode`                           | `all` \| `restricted`                                           | `allowedModels` musí být prázdné, když je režim `all`                                                                            |
-| `allowedModels`, `blockedModels`            | pole řetězců, až 1000                                           |                                                                                                                                  |
-| `allowedCombos`                             | pole řetězců, až 500                                            | Určuje, které kombinace může klíč volat; přímé modely se řídí nastavením `modelAccessMode` / `allowedModels`                     |
-| `connectionAccessMode`                      | `all` \| `restricted`                                           | `allowedConnections` nesmí být prázdné při režimu `restricted` a musí být prázdné při režimu `all`                               |
-| `allowedConnections`                        | pole UUID, až 100                                               |                                                                                                                                  |
-| `allowAutoCombos`                           | boolean                                                         | `false` odmítne požadavky na modely `auto/*` s tímto klíčem; klíče, u kterých tato hodnota nikdy nebyla nastavena, jsou povoleny |
-| `catalogScope`                              | `all` \| `combos` \| `models`                                   | Co `GET /v1/models` uvádí pro tento klíč (pouze kombinace, pouze modely nebo obojí); nemění, co může klíč volat                  |
-| `forcedModel`                               | řetězec o délce až 300 znaků nebo `null`                        | Směruje požadavky chatu na tento model/kombinaci před `X-Route-Model` a `body.model`; omezení klíče stále platí                  |
-| `noLog`, `autoResolve`                      | boolean                                                         |                                                                                                                                  |
-| `throttleDelayMs`                           | celé číslo, 0–300000                                            |                                                                                                                                  |
-| `maxSessions`                               | celé číslo, 0–10000                                             |                                                                                                                                  |
-| `rateLimits`                                | pole `{ limit, window }` (kladná celá čísla, až 50) nebo `null` | `null` zruší limity                                                                                                              |
-| `accessSchedule`                            | objekt plánu nebo `null`                                        | `null` zruší plán                                                                                                                |
-| `scopes`                                    | pole řetězců, až 32                                             |                                                                                                                                  |
-| `allowedEndpoints`                          | pole řetězců, až 20                                             |                                                                                                                                  |
-| `streamDefaultMode`                         | `legacy` \| `json`                                              |                                                                                                                                  |
-| `cacheDefaultMode`                          | `legacy` \| `bypass`                                            | Viz [Obcházení mezipaměti pro jednotlivé klíče](#per-key-cache-bypass)                                                           |
-| `compressionEnabled`                        | boolean                                                         |                                                                                                                                  |
-| `codexServiceMode`                          | jeden z režimů služby Codex                                     |                                                                                                                                  |
-| `disableNonPublicModels`                    | boolean                                                         |                                                                                                                                  |
-| `allowUsageCommand`                         | boolean                                                         |                                                                                                                                  |
-| `usageLimitEnabled`                         | boolean                                                         |                                                                                                                                  |
-| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | number >= 0 or `null`                                           |                                                                                                                                  |
-| `chaosModeEnabled`                          | boolean                                                         |                                                                                                                                  |
+| Pole                                        | Typ                                                             | Poznámky                                                                                                                                                                                                                                              |
+| ------------------------------------------- | --------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`                                      | řetězec, 1–200 znaků                                            |                                                                                                                                                                                                                                                       |
+| `isActive`                                  | boolean                                                         |                                                                                                                                                                                                                                                       |
+| `isBanned`                                  | boolean                                                         |                                                                                                                                                                                                                                                       |
+| `expiresAt`                                 | datum a čas ve formátu ISO 8601 nebo `null`                     | `null` zruší dobu platnosti                                                                                                                                                                                                                           |
+| `modelAccessMode`                           | `all` \| `restricted`                                           | `allowedModels` musí být prázdné, když je režim `all`                                                                                                                                                                                                 |
+| `allowedModels`, `blockedModels`            | pole řetězců, až 1000                                           |                                                                                                                                                                                                                                                       |
+| `allowedCombos`                             | pole řetězců, až 500                                            | Určuje, které kombinace může klíč volat; přímé modely se řídí nastavením `modelAccessMode` / `allowedModels`                                                                                                                                          |
+| `connectionAccessMode`                      | `all` \| `restricted`                                           | `allowedConnections` nesmí být prázdné při režimu `restricted` a musí být prázdné při režimu `all`                                                                                                                                                    |
+| `allowedConnections`                        | pole UUID, až 100                                               |                                                                                                                                                                                                                                                       |
+| `allowAutoCombos`                           | boolean                                                         | `false` odmítne požadavky na modely `auto/*` s tímto klíčem; klíče, u kterých tato hodnota nikdy nebyla nastavena, jsou povoleny                                                                                                                      |
+| `catalogScope`                              | `all` \| `combos` \| `models`                                   | Co `GET /v1/models` uvádí pro tento klíč (pouze kombinace, pouze modely nebo obojí); nemění, co může klíč volat                                                                                                                                       |
+| `forcedModel`                               | řetězec o délce až 300 znaků nebo `null`                        | Směruje požadavky chatu na tento model/kombinaci před `X-Route-Model` a `body.model`; omezení klíče stále platí                                                                                                                                       |
+| `noLog`, `autoResolve`                      | booleovský                                                      |                                                                                                                                                                                                                                                       |
+| `throttleDelayMs`                           | celé číslo, 0–300000                                            |                                                                                                                                                                                                                                                       |
+| `maxSessions`                               | celé číslo, 0–10000                                             |                                                                                                                                                                                                                                                       |
+| `rateLimits`                                | pole `{ limit, window }` (kladná celá čísla, až 50) nebo `null` | `null` zruší limity                                                                                                                                                                                                                                   |
+| `accessSchedule`                            | objekt plánu nebo `null`                                        | `null` zruší plán                                                                                                                                                                                                                                     |
+| `scopes`                                    | pole řetězců, až 32                                             |                                                                                                                                                                                                                                                       |
+| `allowedEndpoints`                          | pole řetězců, až 20                                             |                                                                                                                                                                                                                                                       |
+| `streamDefaultMode`                         | `legacy` \| `json`                                              |                                                                                                                                                                                                                                                       |
+| `cacheDefaultMode`                          | `legacy` \| `bypass`                                            | Viz [Obcházení mezipaměti pro jednotlivé klíče](#per-key-cache-bypass)                                                                                                                                                                                |
+| `compressionEnabled`                        | boolean                                                         |                                                                                                                                                                                                                                                       |
+| `codexServiceMode`                          | jeden z režimů služby Codex                                     |                                                                                                                                                                                                                                                       |
+| `disableNonPublicModels`                    | boolean                                                         |                                                                                                                                                                                                                                                       |
+| `allowUsageCommand`                         | boolean                                                         |                                                                                                                                                                                                                                                       |
+| `usageLimitEnabled`                         | boolean                                                         |                                                                                                                                                                                                                                                       |
+| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | číslo >= 0 nebo `null`                                          |                                                                                                                                                                                                                                                       |
+| `fiveHourUsageLimitUsd`                     | číslo >= 0 nebo `null`                                          | Pohyblivý 5hodinový rozpočet USD, vynucený jako denní a týdenní limity (`usageLimitEnabled`, `UNPRICED_USAGE_BUDGET_POLICY`). `retry-after` je, když nejstarší útrata v okně stárne, což může ponechat klíč daleko za jeho limitem stále zablokovaný. |
+| `chaosModeEnabled`                          | boolean                                                         |                                                                                                                                                                                                                                                       |
 
 ```bash
 curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
@@ -1409,6 +1408,34 @@ curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
 | `/api/modality-bridge/stats`         | GET        | In-memory `attempts`, úspěchy/`bridged`, selhání, zásahy do mezipaměti, `totalLatencyMs`, `latencySamples`, průměrná latence vyjádřená ve vzorcích `averageLatencyMs` a čas posledního použití (resetováno při restartu; autentizace pro správu)                                                                                                                                                               |
 | `/api/modality-bridge/video/runtime` | GET        | Přísná kontrola důvěryhodné zpětné smyčky před autentizací/sondou pro správu; dezinfikovaná dostupnost a verze FFmpeg/ffprobe (no-store)                                                                                                                                                                                                                                                                       |
 | `/api/modality-bridge/video/extract` | POST       | Interní autentizovaný zprostředkovatel bajtů pro důvěryhodnou zpětnou smyčku; vstup 50 MiB, omezená fronta/výstup 32 MiB, kapacita `503`, odpojení `499`, termín `504`; nejde o veřejné API pro nahrávání                                                                                                                                                                                                      |
+
+### Podrobný rozpis snímků videa
+
+`GET /api/v1/video-bridge/drilldown` načítá neprůhledný identifikátor vázaný na tenanta, vrácený v
+`x-omniroute-video-drilldown` po výslovně odsouhlaseném požadavku Video Bridge.
+Čtení i `DELETE` vždy vyžadují platný klíč API a nezávislé oprávnění operátora
+`modalityBridgeVideoDrilldownRemoteEnabled`. Uchovávání v produkci navíc vyžaduje
+`modalityBridgeVideoDrilldownEnabled` a striktní `drilldown: true` pro každou část.
+Pokud má klíč neprázdný seznam povolených endpointů, musí pro GET i DELETE obsahovat
+`video`, bez ohledu na to, zda volající používá `/v1`, nebo `/api/v1`.
+
+Dotaz GET: povinný `handle`; volitelné `variant` (`preview`, `standard`, `detail`),
+`limit` (1–8; starší `frames` je přijímán, ale nelze jej kombinovat s `limit`),
+zero-based `page` a sekundy `start`/`end`. Pokud jsou zadány obě hranice
+zaměření, `end` musí být větší než `start`. Duplicitní a neznámé klíče dotazu
+jsou odmítnuty. Úspěšné odpovědi obsahují `derivation`, `durationSeconds`, `frames`,
+`hasMore`, `page`, `variant` a volitelně `focusWindow`; JSON bez ukládání do mezipaměti
+je omezen na 32 MiB včetně Base64. Nadměrně velký výstup vrací 413; vyžádejte méně snímků.
+
+`DELETE /api/v1/video-bridge/drilldown?handle=...` vrací `{ "removed": 0|1 }`.
+Neznámé, expirované požadavky GET a požadavky GET s jiným klíčem vracejí nerozlišitelné
+odpovědi 404; DELETE s jiným klíčem nemůže odstranit záznam vlastníka. Zakázaný přístup
+vrací 403, chybějící nebo neplatná autentizace 401, neplatné dotazy 400, zrušení 499
+a dočasné chyby 503. Identifikátory jsou lokální pro proces, expirují po deseti minutách
+a nepřežijí restart. Nové identifikátory používají `v1.` a náhodný token Base64URL o délce
+32 bajtů; uchovávají se pouze hashe tokenů. Starší tokeny v podobě 64 hexadecimálních znaků
+zůstávají syntakticky čitelné kvůli kompatibilitě. Podrobnosti o souhlasu, kvótách
+a odvozování variant naleznete v dokumentu [ochranná opatření Video Bridge](../security/GUARDRAILS.md#video-bridge-videobridgets-videobridgepipelinets).
 
 ### Zálohování a export/import
 
@@ -1516,15 +1543,15 @@ Tyto koncové body kopírují formát API Gemini pro klienty, které očekávaj�
 
 | Endpoint                 | Metoda | Popis                                                           |
 | ------------------------ | ------ | --------------------------------------------------------------- |
-| `/api/init`              | GET    | Kontrola inicializace aplikace (používá se při prvním spuštění) |
-| `/api/tags`              | GET    | Značky modelů kompatibilní s Ollama (pro klienty Ollama)        |
+| `/api/init`              | GET    | Spustit služby synchronizace na pozadí (autentizace pro správu) |
+| `/api/tags`              | GET    | Značky modelů kompatibilní s Ollamou (pro klienty Ollama)       |
 | `/api/restart`           | POST   | Spustit řízený restart serveru                                  |
 | `/api/shutdown`          | POST   | Spustit řízené vypnutí serveru                                  |
 | `/api/system/env/repair` | POST   | Opravit proměnné prostředí poskytovatele OAuth                  |
 | `/api/system/version`    | GET    | Aktuální/nejnovější verze, stav aktualizace, kanál vydání       |
 | `/api/system/version`    | POST   | Spustit aktualizaci s ohledem na nasazení na nejnovější verzi   |
 
-> **Poznámka:** Tyto koncové body systém používá interně nebo zajišťují kompatibilitu s klienty Ollama. Koncoví uživatelé je obvykle nevolají.
+> **Poznámka:** Tyto endpointy systém používá interně nebo slouží ke kompatibilitě s klientem Ollama. Běžní koncoví uživatelé je obvykle nevolají.
 
 ### Oprava prostředí OAuth _(v3.6.1+)_
 

@@ -484,11 +484,11 @@ U quyidagilarni boshqaradi:
 
 ## Konfiguratsiya
 
-`open-sse/config/` konfiguratsiya qatlamini saqlaydi:
+`open-sse/config/` konfiguratsiya qatlamiga ega:
 
 | Fayl                          | Maqsad                                             |
 | ----------------------------- | -------------------------------------------------- |
-| `providerRegistry.ts`         | 381-provayder katalogi bo'yicha chat-model reestri |
+| `providerRegistry.ts`         | 382-provayder katalogi bo'yicha chat-model reestri |
 | `providerModels.ts`           | Model taxalluslari, formatni xaritalash            |
 | `constants.ts`                | Vaqt tugashi, chegaralar, holat kodlari            |
 | `defaultThinkingSignature.ts` | Standart Claude fikrlash imzosi                    |

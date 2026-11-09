@@ -15,7 +15,7 @@
 
 **Kreirao [Diego Souza](https://github.com/diegosouzapw)**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Never stop coding. Every AI tool → 381 providers — 150+ free — through one endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity into FREE Claude / GPT / Gemini with auto-fallback. RTK + Caveman stacked compression saves 15–95% tokens (~89% avg) — never hit limits. 381 AI providers · 150+ free tiers · ~1.62B free tokens/mo · 20 routing strategies · $0 to start."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Never stop coding. Every AI tool → 382 providers — 150+ free — through one endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity into FREE Claude / GPT / Gemini with auto-fallback. RTK + Caveman stacked compression saves 15–95% tokens (~89% avg) — never hit limits. 382 AI providers · 150+ free tiers · ~1.62B free tokens/mo · 20 routing strategies · $0 to start."/>
 
 </div>
 
@@ -51,18 +51,13 @@
 
 ### 💬 Pridružite se zajednici
 
-**👋 Pratite održavatelja — prvi saznajte za nove pružatelje, izdanja i savjete:**
+**👋 Slijedite održavatelja — prvi dođite do novih pružatelja usluga, izdanja i savjeta:**
 
-[![Pratite Diega na LinkedInu](https://img.shields.io/badge/Follow_Diego_on-LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/diegosouzapw/)
-[![Pratite @diegosouzapw na GitHubu](https://img.shields.io/github/followers/diegosouzapw?style=for-the-badge&logo=github&logoColor=white&label=Follow%20on%20GitHub&color=181717)](https://github.com/diegosouzapw)
+[![Pratite Diega na LinkedIn](https://img.shields.io/badge/Follow_Diego_on-LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white) ](https://www.linkedin.com/in/diegosouzapw/) [![Pratite @diegosouzapw na GitHub](https://img.shields.io/github/followers/diegosouzapw?style=for-the-badge&logo=github&logoColor=white&label=Follow%20on%20GitHub&color=181717) ](https://github.com/diegosouzapw)
 
-[![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/U47eFqAXCn)
-[![Telegram](https://img.shields.io/badge/Telegram-26A5E4?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/omnirouteOficial)
-[![WhatsApp Global](https://img.shields.io/badge/WhatsApp_Global-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4)
-[![WhatsApp Brazil](https://img.shields.io/badge/WhatsApp_Brasil-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)
-[![Web-mjesto](https://img.shields.io/badge/Website-omniroute.online-blue?logo=google-chrome&logoColor=white)](https://omniroute.online)
+[![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white) ](https://discord.gg/U47eFqAXCn) [![Telegram](https://img.shields.io/badge/Telegram-26A5E4?style=for-the-badge&logo=telegram&logoColor=white) ](https://t.me/omnirouteOficial) [![WhatsApp Global](https://img.shields.io/badge/WhatsApp_Global-25D366?style=for-the-badge&logo=whatsapp&logoColor=white) ](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) [![WhatsApp Brasil](https://img.shields.io/badge/WhatsApp_Brasil-25D366?style=for-the-badge&logo=whatsapp&logoColor=white) ](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) [![Web stranica](https://img.shields.io/badge/Website-omniroute.online-blue?logo=google-chrome&logoColor=white) ](https://omniroute.online)
 
-**Pitanja, savjeti o pružateljima, plan razvoja i podrška → [Discord](https://discord.gg/U47eFqAXCn) · [Telegram](https://t.me/omnirouteOficial) · WhatsApp [🌍 Global](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) / [🇧🇷 Brazil](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) / [Portal](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)**
+**Pitanja, savjeti pružatelja usluga, plan i podrška → [Discord](https://discord.gg/U47eFqAXCn) · [Telegram](https://t.me/omnirouteOficial) · WhatsApp [🌍 Global](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) / [🇧🇷 Brasil](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) / [📢 Službeni kanal](https://whatsapp.com/channel/0029VbDwC7A3wtb5PN6a5t2R) / [Portal](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)**
 
 <br/>
 
@@ -70,25 +65,25 @@
 
 <div align="center">
 
-|                                   |          v3.8.50          | **v3.8.51** |       `v3.8.54+`        |
-| --------------------------------- | :-----------------------: | :---------: | :---------------------: |
-| 🌐 pružatelji usluga              |            352            |   **358**   |           381           |
-| 🧠 Jedinstveni model chata IDs    |           1320            |  **1374**   |          1519           |
-| 🖼️ Modalni most                   | 🆕 vizija + audio + video |      ✓      |            ✓            |
-| 📡 Radar besplatni katalog        |      🆕 uključivanje      |      ✓      |            ✓            |
-| ⚖️ Zakazivanje s obzirom na kvote |    🆕 Dijeljenje kvote    |      ✓      |            ✓            |
-| 📊 Kvota telemetrija              |         🆕 uživo          |      ✓      |            ✓            |
-| 🧰 Način bez glave                |             —             |      —      |  🆕 `serve --headless`  |
-| 🛤️ LTS tračnica infra             |             —             |      —      | kanali za otpuštanje 🆕 |
-| 🔎 Otkrivanje modela API          |             —             |      —      |  🆕 `/v1/models/query`  |
+|                                   |          v3.8.50          | **v3.8.51** |       `v3.8.54+`       |
+| --------------------------------- | :-----------------------: | :---------: | :--------------------: |
+| Pružatelji 🌐                     |            352            |   **358**   |          382           |
+| 🧠 Jedinstveni chat model IDs     |           1320            |  **1374**   |          1524          |
+| 🖼️ Modality Bridge                | 🆕 vizija + audio + video |      ✓      |           ✓            |
+| 📡 Radar besplatni katalog        |     Uključivanje u 🆕     |      ✓      |           ✓            |
+| ⚖️ Zakazivanje s obzirom na kvote |    🆕 kvota-dijeljenje    |      ✓      |           ✓            |
+| 📊 Quota telemetrija              |         🆕 uživo          |      ✓      |           ✓            |
+| 🧰 Bezglavi način rada            |             —             |      —      | 🆕 `serve --headless`  |
+| 🛤️ LTS tračnica infra             |             —             |      —      | 🆕 kanali za izdavanje |
+| 🔎 Otkrivanje modela API          |             —             |      —      | 🆕 `/v1/models/query`  |
 
-**→ [Plan puta](ROADMAP.md) — vožnja željeznicom do `v3.9.0 LTS`**
+**→ [Plan puta](ROADMAP.md) — vozi željeznicom do `v3.9.0 LTS`**
 
 </div>
 
 <br/>
 
-## 🧩 Dostupan
+## 🧩 dostupan
 
 [![npm verzija](https://img.shields.io/npm/v/omniroute?color=cb3837&logo=npm) ](https://www.npmjs.com/package/omniroute) ![NPM Monthly](https://img.shields.io/npm/dm/omniroute?label=npm/month&color=cb3837&logo=npm) [![Docker Hub](https://img.shields.io/docker/v/diegosouzapw/omniroute?label=Docker%20Hub&logo=docker&color=2496ED) ](https://hub.docker.com/r/diegosouzapw/omniroute) [![Licenca: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square) ](LICENSE) ![Docker Pulls](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED) ![Electron Downloads](https://img.shields.io/github/downloads/diegosouzapw/omniroute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
 
@@ -108,7 +103,7 @@
   <tr>
     <td align="right"><b>⚙️ Features</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 Combos</a></td>
-    <td align="center"><a href="#-381-ai-providers--156-catalog-marked-free">🌐 Providers</a></td>
+    <td align="center"><a href="#-382-ai-providers--156-catalog-marked-free">🌐 Providers</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI &amp; MCP</a></td>
   </tr>
   <tr>
@@ -218,7 +213,7 @@
 
 <a id="first-run"></a>
 
-## 🆓 Instalirajte, povežite pružatelja usluga, zatim usmjerite kroz jednu krajnju točku
+## Instalirajte 🆓, povežite davatelja usluga, zatim usmjerite kroz jednu krajnju točku
 
 </div>
 
@@ -244,7 +239,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="The Promise — One endpoint and 381 providers. Automatic fallback keeps routing while another healthy target is available. Six pillars: resilient fallback across 381 providers · up to 95% token savings on eligible workloads · $0 to start with 150+ free tiers and 52 recurring/keyless free-forever providers · 39 CLI/agent integrations through one config · OpenAI, Claude, Gemini and Responses API compatibility at /v1 · production controls including circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals and 56,000+ static test declarations across 7,800+ tracked test files."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="The Promise — One endpoint and 382 providers. Automatic fallback keeps routing while another healthy target is available. Six pillars: resilient fallback across 382 providers · up to 95% token savings on eligible workloads · $0 to start with 150+ free tiers and 52 recurring/keyless free-forever providers · 39 CLI/agent integrations through one config · OpenAI, Claude, Gemini and Responses API compatibility at /v1 · production controls including circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals and 56,000+ static test declarations across 7,800+ tracked test files."/>
 
 <br/>
 <br/>
@@ -504,7 +499,7 @@ Svih **20** strategija — kombinirajte ih po koraku kombinacije:
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Što izdvaja OmniRoute — usporedba zastarjelih značajki s 9router, OpenRouter, CLIProxyAPI i LiteLLM kroz 13 mogućnosti. OmniRoute: 381 pružatelja, 150+ ugrađenih besplatnih paketa, 20 strategija usmjeravanja, 12-engine kompresija tokena, ugrađeni MCP poslužitelj sa 110 alata, A2A agent protokol, trajna memorija, zaštitne mjere, cloud agenti, TLS fingerprint stealth, Desktop/Termux/PWA i 67 i18n UI jezika. OmniRoute ima MIT licencu i može se samostalno hostati. Mogućnosti i brojke konkurenata mogu se mijenjati; pogledajte povezanu metodologiju."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Što izdvaja OmniRoute — usporedba zastarjelih značajki s 9router, OpenRouter, CLIProxyAPI i LiteLLM kroz 13 mogućnosti. OmniRoute: 382 pružatelja, 150+ ugrađenih besplatnih paketa, 20 strategija usmjeravanja, 12-engine kompresija tokena, ugrađeni MCP poslužitelj sa 110 alata, A2A agent protokol, trajna memorija, zaštitne mjere, cloud agenti, TLS fingerprint stealth, Desktop/Termux/PWA i 67 i18n UI jezika. OmniRoute ima MIT licencu i može se samostalno hostati. Mogućnosti i brojke konkurenata mogu se mijenjati; pogledajte povezanu metodologiju."/>
 
 <sub>📊 Cjelokupna metodologija i detalji po značajkama u odnosu na 9router, OpenRouter, CLIProxyAPI &amp; LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -584,33 +579,33 @@ trenutačnom katalogu na **[radar.omniroute.online/planos](https://radar.omnirou
 
 > Najnovije istaknute stavke iz **v3.8.20 → v3.8.54** . Cijela povijest u [`CHANGELOG.md`](CHANGELOG.md).
 
-- **⚖️ `quota-weighted` usmjeravanje** — 20. kombinirana strategija preskače iscrpljene račune, a zatim izvlači između ostalih proporcionalno preostaloj kvoti ÷ in-flight load, zadržavajući postojeće razgovore prikvačenim. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
-- **🧰 Način bez glave** — `omniroute serve --headless` (ili `OMNIROUTE_HEADLESS=1`) pokreće samo `/v1/*` proxy mehanizam, s isključenom nadzornom pločom i podsustavima samo za nadzornu ploču. → [Bezglavi način](docs/guides/HEADLESS.md)
-- **🔎 Otkrivanje modela** — `/v1/models` filtrira prema mogućnostima, kontekstu, vrsti i tekstu, a `POST /v1/models/query` vraća kratki deterministički uži izbor s istom vidljivošću po ključu. → [API Referenca](docs/reference/API_REFERENCE.md)
-- **🔑 Kontrola usmjeravanja po ključu** — prikvačite API ključ na jedan model ili kombinaciju pomoću `forcedModel` i atomski dodajte ili uklonite modele i kombinacije ključa (`/api/keys/{id}/access`). → [API Referenca](docs/reference/API_REFERENCE.md) · [OpenAPI](docs/openapi.yaml)
-- **🛡️ Finije PII kontrole** — odabir po tipu, do 20 validiranih prilagođenih maskirnih uzoraka i brojača otkrivanja po tipu; samo maskiranje ostaje uključeno. → [Zaštitne ograde](docs/security/GUARDRAILS.md)
-- **🌍 67 jezika** — nadzorna ploča, docs mirrors i CLI, sa `npm run i18n:add-locale` dodavanjem jezika posvuda u jednoj naredbi. → [i18n Vodič](docs/guides/I18N.md)
-- **🎛️ OmniConductor** — inbound A2A delegiranje na vašu agentsku flotu, vještine dirigenta na agentskoj kartici i nadzornu ploču s Faro push-to-talk glasovnim chatom. → [A2A poslužitelj](docs/frameworks/A2A-SERVER.md)
-- **🛂 Adaptivni ulaz i zaštita od preopterećenja** — teški chat zahtjevi čekaju u redu umjesto 503ing, s atomskim RPM rolling leases po vezi. → [Vodič za otpornost](docs/architecture/RESILIENCE_GUIDE.md)
-- **🗂️ Kanonski `/v1/models` poredak** — jedan kontinuirani blok grupiran prema pružatelju po pružatelju (kombinacije prikvačene prve), stabilne u svakom izvoru kataloga. → [API Referenca](docs/reference/API_REFERENCE.md)
-- **🗜️ Otvrdnjavanje pritiskom** — standardna zaštita za napuhavanje, paketi Caveman za DE / FR / JA + kineski (wényán), RTK filteri za Gradle & .NET. → [kompresija](docs/compression/COMPRESSION_ENGINES.md)
-- **💸 Iskreni paušalni trošak** — pretplata / plan kodiranja dobavljači čitati **$0** u analizi troškova; proračun, kvota i usmjeravanje nastavite s procjenom. → [API Referenca](docs/reference/API_REFERENCE.md)
-- **⚖️ Quota-Share usmjeravanje** — dijeli kvotu zajedničkog računa pravedno na skupljene ključeve, čuvajući rad tako da se prazni dijelovi posuđuju. → [vodič za otpornost](docs/architecture/RESILIENCE_GUIDE.md)
-- **🤖 Postavljanje CLI/agent -a jednom naredbom** — 15 registriranih `setup-*` naredbi; `omniroute run` lansira 7 CLIs (Claude Code, Codex, Aider, Goose, OpenCode, Qwen Code, Gemini CLI); `omniroute configure` podržava 11 ciljeva s interaktivnim biračem modela + pružatelja usluga i favoritima po kontekstu. → [CLI integracije](docs/guides/CLI-INTEGRATIONS.md)
-- **🛰️ Daljinski način rada** — pokreće udaljeni OmniRoute s ograničenim tokenima (`connect` / `contexts` / `tokens`) + `antigravity` OAuth pomoćnik za VPS instalacije. → [Remote Mode](docs/guides/REMOTE-MODE.md)
+- **⚖️ `quota-weighted` usmjeravanje** — 20. kombinirana strategija preskače iscrpljene račune, a zatim izvlači među ostalima proporcionalno preostaloj kvoti ÷ opterećenja tijekom leta, zadržavajući postojeće razgovore prikvačenim. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
+- **🧰 Bezglavi način rada** — `omniroute serve --headless` (ili `OMNIROUTE_HEADLESS=1`) pokreće samo `/v1/*` proxy mehanizam, s isključenom nadzornom pločom i podsustavima samo za nadzornu ploču. → [bezglavi način](docs/guides/HEADLESS.md)
+- **Otkrivanje 🔎 modela** — `/v1/models` filtrira prema mogućnostima, kontekstu, vrsti i tekstu, a `POST /v1/models/query` vraća kratki deterministički uži izbor s istom vidljivošću po ključu. → [API Referenca](docs/reference/API_REFERENCE.md)
+- **🔑 kontrola usmjeravanja po ključu** — prikvači API ključ na jedan model ili kombinaciju pomoću `forcedModel` i doda ili ukloni modele i kombinacije ključa atomski (`/api/keys/{id}/access`). → [API Referenca](docs/reference/API_REFERENCE.md) · [OpenAPI](docs/openapi.yaml)
+- **🛡️ Finije PII kontrole** Odabir — po tipu, do 20 validiranih prilagođenih uzoraka maskiranja i brojača detekcije po tipu; samo maskiranje ostaje uključeno. → [zaštitne ograde](docs/security/GUARDRAILS.md)
+- **🌍 67 jezika** Nadzorna ploča —, ogledala dokumenata i CLI, sa `npm run i18n:add-locale` dodavanjem jezika posvuda u jednoj naredbi. Vodič → [i18n](docs/guides/I18N.md)
+- **🎛️ OmniConductor** — dolazno A2A delegiranje vašoj agentskoj floti, vještine dirigenta na agentskoj kartici i nadzorna ploča s Faro push-to-talk glasovnim chatom. → [A2A poslužitelj](docs/frameworks/A2A-SERVER.md)
+- **🛂 Adaptivni pristup i zaštita od preopterećenja** — teški zahtjevi za chat stoje u redu umjesto 503inga, s atomskim RPM zakupom po vezi. → [vodič za otpornost](docs/architecture/RESILIENCE_GUIDE.md)
+- **🗂️ Canonical `/v1/models` poredak** — jedan kontinuirani blok grupiran prema pružatelju po pružatelju (kombinacije su prikvačene prve), stabilne u svakom izvoru kataloga. → [API Referenca](docs/reference/API_REFERENCE.md)
+- **🗜️ Otvrdnjavanje pritiskom** — zadana zaštita za napuhavanje, paketi Caveman za DE / FR / JA + kineski (wényán), RTK filteri za Gradle & .NET. → [kompresija](docs/compression/COMPRESSION_ENGINES.md)
+- **💸 Iskreni paušalni trošak** — pretplata / pružatelji planova kodiranja čitaju **$0** u analizi troškova; proračun, kvota i usmjeravanje nastavite s procjenom. → [API Referenca](docs/reference/API_REFERENCE.md)
+- **⚖️ Quota-Share usmjeravanje** — je podijelio kvotu dijeljenog računa pravedno na združene ključeve, čuvajući rad tako da se prazni dijelovi posuđuju. → [vodič za otpornost](docs/architecture/RESILIENCE_GUIDE.md)
+- **🤖 Postavljanje CLI/agent -a jednom naredbom** — 15 registriranih `setup-*` naredbi; `omniroute run` pokreće 7 CLIs (Claude Code, Codex, Aider, Goose, OpenCode, Qwen Code, Gemini CLI); `omniroute configure` podržava 11 ciljeva s interaktivnim biračem modela + pružatelja usluga i favoritima po kontekstu. → [CLI integracije](docs/guides/CLI-INTEGRATIONS.md)
+- **🛰️ daljinski način rada** — pokreće udaljeni OmniRoute s ograničenim tokenima (`connect` / `contexts` / `tokens`) + `antigravity` OAuth pomoćnik za VPS instalacije. → [Remote Mode](docs/guides/REMOTE-MODE.md)
 - **🧭 Pametnije automatsko usmjeravanje** — `auto/<category>:<tier>` kombinacije,**Fuzija** (model panel + sudac), usmjeravanje s obzirom na zadatak, model/način po zahtjevu/nadjačavanja proračuna u USD. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
-- **🗜️ Pluggable kompresija** — 12 komponirajućih motora + Compression Studios: LLMLingua-2, dvoslojni Ultra, omniglyph, per-step fidelity gate, GCF v3.2, uređivač preuređivanja povlačenja. → [Kompresija](docs/compression/COMPRESSION_ENGINES.md)
-- **🕵️ Transparent MITM decrypt (TPROXY)** — snimanje CLIs koji zanemaruje proxy env vars, s per-SNI CA + trust-store instalacijskim programom. → [MITM/TPROXY](docs/security/MITM-TPROXY-DECRYPT.md)
-- **💸 Troškovna telemetrija posvuda** — `X-OmniRoute-*` cost/usage zaglavlja na svakoj krajnjoj točki, cache-HIT zaglavlje za uštedu, po ključu USD kvote potrošnje. → [API Referenca](docs/reference/API_REFERENCE.md)
-- **🧠 Memorija koju kontrolirate** — isključeno prema zadanim postavkama, uključivanje int8 vektorske kvantizacije + upisano raspadanje, po zahtjevu `x-omniroute-no-memory`. → [Memorija](docs/frameworks/MEMORY.md)
-- **🛡️ Sigurnost** — prompt-injection guard na svakoj LLM ruti (paket crvenog tima), opt-in zaštitna ograda za maskiranje vjerodajnica (redakcije koje su procurile API keys/secrets u oba smjera), besplatna DuckDuckGo web pretraga u posljednjoj nuždi i izborna vrata za prijavu na OIDC za nadzornu ploču (prijava lozinkom uvijek ostaje dostupna). → [Zaštitne ograde](docs/security/GUARDRAILS.md)
-- **🖼️ Nove krajnje točke** — `/v1/ocr` (Mistral OCR) i `/v1/audio/translations` (Whisper stil) zaokružuju medijsku površinu. → [API Referenca](docs/reference/API_REFERENCE.md)
+- **🗜️ Pluggable kompresija** — 12 komponirajućih motora + Compression Studios: LLMLingua-2, dvoslojni Ultra, omniglif, vrata vjernosti po koraku, GCF v3.2, uređivač povlačenja i preuređivanja. → [kompresija](docs/compression/COMPRESSION_ENGINES.md)
+- **🕵️ Transparent MITM dekriptiranje (TPROXY)** — hvata CLIs koji zanemaruje proxy env vars, s per-SNI CA + trust-store instalacijskim programom. → [MITM/TPROXY](docs/security/MITM-TPROXY-DECRYPT.md)
+- **💸 Cost telemetrija posvuda** — `X-OmniRoute-*` cost/usage zaglavlja na svakoj krajnjoj točki, cache-HIT zaglavlje za uštedu, USD kvote potrošnje po ključu. → [API Referenca](docs/reference/API_REFERENCE.md)
+- **🧠 memorija koju kontrolirate** — isključen prema zadanim postavkama, uključivanje int8 vektorske kvantizacije + tipizirano opadanje, `x-omniroute-no-memory` po zahtjevu. → [memorija](docs/frameworks/MEMORY.md)
+- **🛡️ sigurnost** — prompt-injection guard na svakoj LLM ruti (paket crvenog tima), opt-in zaštitna ograda za maskiranje vjerodajnica (redakcija procurjelog API keys/secrets u oba smjera), besplatno DuckDuckGo pretraživanje weba u posljednjoj nuždi i izborna OIDC vrata za prijavu za nadzornu ploču (prijava lozinkom uvijek ostaje dostupna). → [Zaštitne ograde](docs/security/GUARDRAILS.md)
+- **🖼️ Nove krajnje točke** — `/v1/ocr` (Mistral OCR) i `/v1/audio/translations` (Whisper-style) zaokružuju medijsku površinu. → [API Referenca](docs/reference/API_REFERENCE.md)
 - **🎨 Generiranje slike/video/audija** — jedan API za medije: xAI Grok Imagine & Novita AI video, ComfyUI, Magnific, Adobe Firefly, Segmind i pružatelji usluga govora kao što je ElevenLabs. → [API Referenca](docs/reference/API_REFERENCE.md)
-- **🌍 Uvođenje i ops** — reverse-proxy `basePath`, automatsko otkrivanje jezika preglednika, praćenje uređaja po ključu, MITM povjerenje bez root-a, zh-TW lokalizacija. → [Okolina](docs/reference/ENVIRONMENT.md)
-- **🤝 Više pružatelja usluga i agenata** — agenti u oblaku (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) s preglednikom + OAuth login, Ollama prvoklasna kartica, Claude Opus 5 & Sonnet 5, Kimi službeno partnerstvo (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… i osvježeni **381-provider katalog** . → [pružatelji usluga](docs/reference/PROVIDER_REFERENCE.md)
-- **📡 Transparentnost usmjeravanja** — svaki odgovor nosi `X-OmniRoute-Decision` zaglavlje u kojem se imenuje strategy/provider/latency koji ga je poslužio, nova `cache-optimized` kombinirana strategija + Auto-Combo `cacheAffinity` faktor usmjerava ponovljene zahtjeve natrag na vezu koja drži predmemorirani prefiks, a krajnja točka `/v1/auto-combo/{channel}/candidates` samo za čitanje izlaže skup kandidata uživo `auto/*` kanala. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
+- **🌍 implementacija i ops** — reverse-proxy `basePath`, automatsko otkrivanje jezika preglednika, praćenje uređaja po ključu, MITM povjerenje bez root-a, zh-TW lokalizacija. → [okruženje](docs/reference/ENVIRONMENT.md)
+- **🤝 Više pružatelja usluga i agenata** — agenti u oblaku (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) s preglednikom + OAuth login, Ollama prvoklasna kartica, Claude Opus 5 & Sonnet 5, Kimi službeno partnerstvo (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… i osvježeni **382-provider katalog** . [Pružatelji](docs/reference/PROVIDER_REFERENCE.md) →
+- **Transparentnost 📡 usmjeravanja** — svaki odgovor nosi `X-OmniRoute-Decision` zaglavlje u kojem se imenuje strategy/provider/latency koji ga je poslužio, nova `cache-optimized` kombinirana strategija + Auto-Combo `cacheAffinity` faktor usmjerava ponovljene zahtjeve natrag na vezu koja drži predmemorirani prefiks, a `/v1/auto-combo/{channel}/candidates` krajnja točka samo za čitanje izlaže skup kandidata uživo `auto/*` kanala. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **⚡ Lokalna izvedba & infra** — lokalni Redis jednim klikom, Cloudflare radnici / Deno Deploy relay deployers, Bifrost & Mux kao nadzirane ugrađene usluge. → [ugrađene usluge](docs/frameworks/EMBEDDED-SERVICES.md)
-- **🧩 Također u kutiji** okvir — dodatka + marketplace, okviri Omni/Agent/GitHub vještina, integracija Obsidian trezora (22 MCP alata), Batch & Files APIs kompatibilan s OpenAI-jem, predmemorija semantičkog odgovora, gamifikacija s pločama s najboljim rezultatima, otkrivanje ACP agenata (15 ugrađenih agenata), planirani izvoz dnevnika u BigQuery, `auto/chaos` paralelno višemodelno fan-out, Telegram bot bridge, an In-app upravitelj verzija i LMArena-ELO ljestvica besplatnih pružatelja usluga. → [dokumenti](docs/README.md)
+- **🧩 Također u kutiji** — plugin framework + tržište, Omni/Agent/GitHub okviri vještina, Obsidian integracija trezora (22 MCP alata), OpenAI kompatibilan Batch & Files APIs, predmemorija semantičkog odgovora, gamifikacija s pločama s najboljim rezultatima, otkrivanje ACP agenata (15 ugrađenih agenata), zakazani izvoz dnevnika u BigQuery, `auto/chaos` paralelno višemodelno fan-out, Telegram bot bridge, an In-app upravitelj verzija i LMArena-ELO ljestvica besplatnih pružatelja usluga. → [dokumenti](docs/README.md)
 
 <br/>
 
@@ -691,11 +686,11 @@ povijesti vaše ljuske. → [CLI Integracije](docs/guides/CLI-INTEGRATIONS.md)
 
 <div align="center">
 
-## 🌐 381 AI pružatelji usluga — 156 Katalog s oznakom besplatno
+## 🌐 382 AI pružatelji usluga — 156 Katalog s oznakom besplatno
 
 </div>
 
-> **381 registrirani pružatelj usluga** preko kanonskih kolekcija chata, medija, pretraživanja, lokalnih, agenata u oblaku i sustava, uključujući **156 koji nosi metapodatke o otkrivanju `hasFree: true`** . Registar modela chata pokriva **242 pružatelja usluga / 3148 različitih parova pružatelja usluga i modela / 1519 neobrađenih modela IDs** ; zasebni katalog besplatnih proračuna ima **466 redaka po modelu** ,**34 ponavljajuća bazena** i **52 recurring/keyless free-forever pružatelja usluga** . To su različiti nazivnici po dizajnu; definicije i izračuni deduplicirani u skupu žive u referentnim i [besplatnim razinama](docs/reference/FREE_TIERS.md) [pružatelja usluga](docs/reference/PROVIDER_REFERENCE.md).
+> **382 registrirana pružatelja usluga** preko kanonskih kolekcija chata, medija, pretraživanja, lokalnih, agenata u oblaku i sustava, uključujući **156 koji nosi metapodatke o otkrivanju `hasFree: true`** . Registar modela chata pokriva **243 pružatelja usluga / 3155 različitih parova pružatelja usluga i modela / 1524 neobrađena modela IDs** ; zasebni katalog besplatnih proračuna ima **466 redaka po modelu** ,**34 ponavljajuća bazena** i **52 recurring/keyless besplatno-zauvijek pružatelja usluga** . To su različiti nazivnici po dizajnu; definicije i izračuni deduplicirani u skupu žive u referentnim i [besplatnim razinama](docs/reference/FREE_TIERS.md) [pružatelja usluga](docs/reference/PROVIDER_REFERENCE.md).
 
 <div align="center">
 
@@ -728,7 +723,7 @@ povijesti vaše ljuske. → [CLI Integracije](docs/guides/CLI-INTEGRATIONS.md)
   </tr>
 </table>
 
-<sub>…i još 350 + — svaka ikona se rješava uživo iz kataloga pružatelja nadzorne ploče. [Referenca pružatelja](docs/reference/PROVIDER_REFERENCE.md) 📖</sub>
+<sub>…i još 350 + — svaka ikona se rješava uživo iz kataloga pružatelja nadzorne ploče. [Referenca](docs/reference/PROVIDER_REFERENCE.md) 📖 pružatelja usluga</sub>
 
 <br/>
 
@@ -1307,7 +1302,7 @@ Kanonske metrike na dan 2026-10-18: **1.976 jedinstvenih videozapisa** · **20.2
   <tr><td nowrap><b>Izvršno okruženje</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Jezik</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> u <code>src/</code> i <code>open-sse/</code> (nula <code>any</code> u jezgri od v2.0)</td></tr>
   <tr><td nowrap><b>Okvir</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Baza podataka</b></td><td>better-sqlite3 (SQLite, WAL zapisivanje) + LowDB (naslijeđeni JSON) — 147 domenskih modula, 225 migracije</td></tr>
+  <tr><td nowrap><b>Baza podataka</b></td><td>better-sqlite3 (SQLite, WAL zapisivanje) + LowDB (naslijeđeni JSON) — 147 domenskih modula, 229 migracije</td></tr>
   <tr><td nowrap><b>Memorija</b></td><td>SQLite FTS5 pretraživanje punog teksta + vektorska ugrađivanja kvantizirana u int8, tipizirano opadanje</td></tr>
   <tr><td nowrap><b>Sheme</b></td><td>Zod 4 — MCP provjera valjanosti ulaza/izlaza alata + API ugovori</td></tr>
   <tr><td nowrap><b>Protokoli</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

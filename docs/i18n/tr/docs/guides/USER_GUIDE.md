@@ -347,19 +347,19 @@ Model: cc/claude-opus-4-7
 ```bash
 npm install -g omniroute
 
-# Yapılandırma dizinini oluşturun
+# Create config directory
 mkdir -p ~/.omniroute
 
-# .env dosyasını oluşturun (.env.example dosyasına bakın)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# Sunucuyu başlatın
+# Start server
 omniroute
-# Veya özel bir port ile:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI, `.env` dosyasını `~/.omniroute/.env` veya `./.env` konumundan otomatik olarak yükler.
+CLI `.env` `~/.omniroute/.env` veya `./.env` otomatik olarak yükler. Çalışma dizinindeki bir `./.env` anahtarların (bağlantı noktaları, `REQUIRE_API_KEY`, yerel ayar ve renk ayarları) yalnızca kısa bir izin verilenler listesini ayarlayabilir; geri kalan her şeyi `~/.omniroute/.env` koyun. [CLI lansman sözleşmelerine](CLI-LAUNCH-CONTRACTS.md#working-directory-env) bakın.
 
 ### Sistem tepsisi modu
 

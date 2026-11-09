@@ -356,24 +356,24 @@ Model: cc/claude-opus-4-7
 
 ## 🚀 Implementare
 
-### Instalare globală cu npm (recomandat)
+### Instalare globală npm (recomandat)
 
 ```bash
 npm install -g omniroute
 
-# Creează directorul de configurare
+# Create config directory
 mkdir -p ~/.omniroute
 
-# Creează fișierul .env (consultă .env.example)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# Pornește serverul
+# Start server
 omniroute
-# Sau cu un port personalizat:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI-ul încarcă automat `.env` din `~/.omniroute/.env` sau `./.env`.
+CLI încarcă automat `.env` din `~/.omniroute/.env` sau `./.env`. Un `./.env` din directorul de lucru poate seta doar o listă scurtă de chei permise (porturi, `REQUIRE_API_KEY`, setări locale și de culoare); pune totul în `~/.omniroute/.env`. Vezi [contractele de lansare CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### Modul bară de sistem
 

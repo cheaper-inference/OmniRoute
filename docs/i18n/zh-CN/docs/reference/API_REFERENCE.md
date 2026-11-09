@@ -359,15 +359,35 @@ Content-Type: application/json
 
 可用的提供者包括 OpenAI（GPT Image 2）、xAI（Grok Image）、Together AI（FLUX）、Fireworks AI、Nebius（FLUX）、Hyperbolic、NanoBanana、**OpenRouter**、**ZenMux**、SD WebUI（本地）和 ComfyUI（本地）。
 
-`n` 会在 `data[]` 中返回 `n` 张图像。其上游 API 每次调用仅返回一张图像的提供者（Black Forest Labs、Stability AI、Leonardo、Ideogram、Haiper、Hyperbolic、Magnific/Freepik、NVIDIA NIM、Cloudflare Workers AI）会分别发起 `n` 次上游调用，最多同时执行 4 次。固定的 `seed` 会根据调用索引进行偏移（`seed`、`seed + 1`……），因此图像会有所不同，但仍可复现。`n` 的上限为 10。如果任意一次调用失败，整个请求都会失败。扇出格式列表位于 `open-sse/handlers/imageGeneration/fanOut.ts` 中的 `SINGLE_IMAGE_FANOUT_FORMATS`。
+`n` 会在 `data[]` 中返回 `n` 张图像。对于上游 API 每次调用仅返回一张图像的提供者
+（Black Forest Labs、Stability AI、Leonardo、Ideogram、Haiper、Hyperbolic、Magnific/Freepik、
+NVIDIA NIM、Cloudflare Workers AI），系统会分别发起 `n` 次上游调用，同时最多有 4 次调用在执行。
+固定的 `seed` 会按调用索引进行偏移（`seed`、`seed + 1`、……），因此图像会有所不同，但仍可复现。
+`n` 的上限为 10。如果任意一次调用失败，整个请求都会失败。扇出格式列表位于
+`open-sse/handlers/imageGeneration/fanOut.ts` 中的 `SINGLE_IMAGE_FANOUT_FORMATS`。
 
 ZenMux 会复用现有的 API 密钥连接，并接受 `zenmux/` 或 `zm/` 前缀：
 
-- `zenmux/openai/gpt-image-2` 使用 ZenMux 的 OpenAI Images API。选项包括 `size`、`quality`、`n`、`output_format`、`output_compression`、`background` 和 `response_format`。
-- 其他发布商（例如 `zm/meta/muse-image-1.0`）使用 ZenMux 的 Vertex AI `:predict` 端点。`n` 映射到 `sampleCount`，`aspect_ratio` 映射到 `aspectRatio`，`image_size`（`1K`、`2K`、`4K`）映射到 `sampleImageSize`。像素 `size` 仅提供宽高比，并不保证像素尺寸。支持的宽高比、分辨率和数量因模型而异。
-- `zm/inclusionai/ming-image-0.1-design` 会自行选择尺寸。请省略 `size`、`aspect_ratio` 和 `image_size`；显式设置这些值会返回 HTTP 400。通过 `output_format` 可以请求 PNG、JPEG 和 WebP 格式。
+- `zenmux/openai/gpt-image-2` 使用 ZenMux 的 OpenAI Images API。选项包括 `size`、
+  `quality`、`n`、`output_format`、`output_compression`、`background` 和 `response_format`。
+- 其他发布者（例如 `zm/meta/muse-image-1.0`）使用 ZenMux 的 Vertex AI `:predict`
+  端点。`n` 映射到 `sampleCount`，`aspect_ratio` 映射到 `aspectRatio`，而 `image_size`
+  （`1K`、`2K`、`4K`）映射到 `sampleImageSize`。像素 `size` 仅提供宽高比，
+  不保证像素尺寸。支持的宽高比、分辨率和数量因模型而异。
+- `zm/inclusionai/ming-image-0.1-design` 会自行选择尺寸。请省略 `size`、
+  `aspect_ratio` 和 `image_size`；指定这些值会返回 HTTP 400。可以通过 `output_format`
+  请求 PNG、JPEG 和 WebP。
 
-此集成支持文生图，不支持参考图像编辑。Vertex 输出会规范化为 `data[].b64_json`；当 `response_format: "url"` 时，如果上游提供了 HTTPS URL，则返回该 URL，否则在仅有图像字节时返回 base64 数据 URL。空输出或被过滤的输出会返回错误，而不是空成功响应。模型访问权限取决于 ZenMux 账户。请参阅 [ZenMux 的 Vertex API](https://docs.zenmux.ai/api/vertexai/generate-images) 和 [OpenAI Images API](https://docs.zenmux.ai/api/openai/generate-an-image)。
+此集成支持文生图，不支持参考图像编辑。Vertex 输出会规范化为 `data[].b64_json`；
+当仅有图像字节可用时，`response_format: "url"` 会返回上游 HTTPS URL 或 Base64 数据 URL。
+空输出或经过过滤的输出会返回错误，而不是空的成功响应。模型访问权限取决于 ZenMux 账户。
+请参阅 [ZenMux 的 Vertex API](https://docs.zenmux.ai/api/vertexai/generate-images) 和
+[OpenAI Images API](https://docs.zenmux.ai/api/openai/generate-an-image)。
+
+Microsoft 365 Copilot 登录连接会通过 Copilot 的内置图像工具提供
+`copilot-m365-web/m365-copilot-image`：每张图像对应一次 Copilot 轮次（`n` 为 1–4），
+`size` 仅用于调整图像方向，图像以内联方式返回（`b64_json`，或者当
+`response_format: "url"` 时返回数据 URL）。请参阅 [Microsoft 365 Copilot](../providers/COPILOT-M365.md#image-generation)。
 
 ```bash
 # 列出所有图像模型
@@ -768,14 +788,15 @@ POST /v1/providers/{provider}/images/generations
 
 Web/搜索提供者抽象层（Tavily、Brave、Exa、Serper 等）。
 
-| 方法 | 路径                   | 描述                                                             |
-| ---- | ---------------------- | ---------------------------------------------------------------- |
-| GET  | `/v1/search`           | 列出已配置的搜索提供者及其功能                                   |
-| POST | `/v1/search`           | 执行搜索查询 — 请求体由 `v1SearchSchema` 验证，支持缓存/合并请求 |
-| GET  | `/v1/search/analytics` | 按提供者统计命中数/延迟/缓存数据                                 |
+| 方法 | 路径                   | 描述                                                               |
+| ---- | ---------------------- | ------------------------------------------------------------------ |
+| GET  | `/v1/search`           | 列出已配置的搜索提供者及其功能                                     |
+| POST | `/v1/search`           | 运行搜索查询 — 请求正文由 `v1SearchSchema` 验证，支持缓存/合并请求 |
+| GET  | `/v1/search/analytics` | 按提供者统计命中/延迟/缓存数据                                     |
 
-**身份验证：** Bearer API 密钥（`extractApiKey` + `isValidApiKey`）。搜索策略通过
-`enforceApiKeyPolicy` 强制执行。
+**身份验证：** Bearer API 密钥（`extractApiKey` + `isValidApiKey`）。搜索策略通过 `enforceApiKeyPolicy` 强制执行。
+
+**自动选择：** 未提供 `provider` 时，首先运行已配置连接中最便宜的提供者，下一家最便宜的提供者作为故障转移。免费的最终备用提供者（`duckduckgo-free`）仅在没有其他提供者配置时使用。自托管的 SearXNG 一旦其连接存储了真实的 `baseUrl`（而不是目录默认值 `http://localhost:8888/search`），就会被视为已配置：随后它会作为 $0 提供者排在带密钥的提供者之前，并以最便宜的带密钥提供者作为故障转移，包括 SearXNG 返回 400、401、403 或 404 时。无效的 `http(s)` URL 或指向云元数据地址的 `baseUrl` 不计入配置。存储了令牌的 SearXNG 连接仅在使用 `https://` 或回环 `http://` 时按此方式排序。对于远程的纯 `http://`，它永远不会作为故障转移提供者，而会保持为最终备用提供者，仅在没有其他提供者配置或按名称请求时使用，因此在这两种情况下都会以明文发送令牌。
 
 ### Exa 和 Tavily 的 `provider_options`
 
@@ -917,28 +938,28 @@ CLI 会将 `base_url + /responses` 升级为 WebSocket，OmniRoute 再将其隧�
 
 ---
 
-## 自助使用情况（`/api/usage/om-usage`）
+## 自助服务使用（`/api/usage/om-usage`）
 
-任何 API 密钥都可以读取**自身**的使用情况和配额 — 无需管理权限。这是客户端（CLI、OmniCopilot 面板）用于向密钥持有者显示其消费情况的端点。
+任何API密钥都可以读取**它自己的**使用和配额—无管理授权。这是客户端（CLI、 OmniCopilot面板）用来向密钥持有者显示其支出的端点。
 
 ```bash
-# 文本格式（历史契约 — 供终端使用的纯文本）
+# Text form (the historical contract — plain text for a terminal)
 curl -H "Authorization: Bearer <your-api-key>" \
   http://localhost:20128/api/usage/om-usage
 
-# 结构化格式 — UI 使用的格式
+# Structured form — what a UI consumes
 curl -H "Authorization: Bearer <your-api-key>" \
   "http://localhost:20128/api/usage/om-usage?format=json"
 ```
 
-密钥必须启用 **`allowUsageCommand`**（默认关闭 — 信息中心的 API 密钥管理器可针对每个密钥切换此选项）。未启用时，端点返回 `403`。
+钥匙必须有**`allowUsageCommand`**启用（默认情况下关闭， —仪表板的 API 密钥管理器会根据密钥切换它）。如果没有它，端点就会回答`403`。
 
-`?format=json` 返回一种可区分的结构，使调用方不会从拒绝响应中读取数据字段。成功时：
+`?format=json`返回一个可区分的形状，因此调用者永远不会读取拒绝的数据字段。关于成功：
 
 ```jsonc
 {
   "allowed": true,
-  // 仅当密钥选择启用按密钥设置的使用限制（每日/每周 USD）时存在：
+  // present only when the key opted into per-key usage limits (daily/weekly/5-hour USD):
   "personal": {
     "dailySpentUsd": 1.25,
     "dailyLimitUsd": 5,
@@ -947,9 +968,9 @@ curl -H "Authorization: Bearer <your-api-key>" \
     "weeklyLimitUsd": 20,
     "weeklyResetAtIso": "…" /* … */,
   },
-  // 选定的提供者配额快照；尚无缓存数据时为 null：
+  // the selected provider quota snapshot, or null when nothing is cached yet:
   "provider": { "connectionId": "…", "provider": "claude", "plan": "…", "quotas": {/* … */} },
-  // 每个连接的快照，以便 UI 并排呈现多个提供者：
+  // every connection's snapshot, so a UI can render several providers side by side:
   "providers": [
     { "connectionId": "…", "provider": "claude" /* … */ },
     { "provider": "codex" /* … */ },
@@ -957,11 +978,9 @@ curl -H "Authorization: Bearer <your-api-key>" \
 }
 ```
 
-拒绝时（`401` 密钥无效 / `403` 未获允许），同一路由返回
-`{ "allowed": false, "error": { "message": "…" } }` — 存在但为空的 `personal`/`provider`
-（密钥已获允许，但尚未获取任何数据）与拒绝是不同状态，只有 JSON 格式可以区分这两种状态。
+拒绝时（`401`错误密钥/不允许`403` ），相同的路由返回`{ "allowed": false, "error": { "message": "…" } }` —存在但为空的`personal`/`provider` （允许密钥，尚未学到任何内容）是与拒绝不同的状态，只有JSON形式区分它们。
 
-**身份验证：**调用方自己的 Bearer API 密钥，通过 `isValidApiKey` 验证 — 这不是管理接口（`/api/keys/…`），后者仍受 `requireManagementAuth` 保护。
+**授权：**调用者自己的承载API密钥，通过`isValidApiKey` —进行验证，这不是管理表面 (`/api/keys/…`)，它位于`requireManagementAuth`后面。
 
 ### 原始配额百分比与截止值调整后的配额百分比
 
@@ -1192,40 +1211,41 @@ https://chatgpt.com/backend-api/wham/usage`、`GET .../wham/rate-limit-reset-cre
 | `/api/usage/model-latency-stats` | GET             | 按提供者/模型滚动聚合的延迟统计（平均值/p50/p95/p99、成功率）；筛选条件：`windowHours`/`minSamples`/`maxRows`/`provider`/`model` (#6873)                                                                                                                   |
 | `/api/usage/cache-health`        | GET             | 基于 `call_logs` 的提示缓存健康状况摘要 — 写入/读取比率、p50/p90/p99 写入大小分布、高写入集中度、按模型划分的明细，以及 `healthy`/`degraded`/`thrash`/`no-data` 判定；查询参数 `range`（`1h`\|`24h`\|`7d`\|`30d`，默认值为 `24h`）和可选的 `model` (#8827) |
 
-### API 密钥权限
+### API关键权限
 
-`PATCH /api/keys/{id}` 可更新现有密钥的权限。与所有 `/api/keys*` 路由一样，它需要管理授权（请参阅[管理身份验证](../guides/MANAGEMENT-AUTH.md)），而不是推理密钥。仅发送需要更改的字段；如果一个字段都未提供，请求将被拒绝，并返回 `No valid fields to update`。接受的字段由 `src/shared/validation/schemas/keys.ts` 中的 `updateKeyPermissionsSchema` 定义。
+`PATCH /api/keys/{id}`更新现有密钥的权限。与每个`/api/keys*`路由一样，它需要管理授权（请参阅[管理身份验证](../guides/MANAGEMENT-AUTH.md)），而不是推理密钥。仅发送您要更改的字段；没有其中任何一个的请求将被`No valid fields to update`拒绝。接受的字段由`src/shared/validation/schemas/keys.ts`中的`updateKeyPermissionsSchema`定义。
 
-| 字段                                        | 类型                                                    | 说明                                                                                          |
-| ------------------------------------------- | ------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
-| `name`                                      | 字符串，1-200 个字符                                    |                                                                                               |
-| `isActive`                                  | 布尔值                                                  |                                                                                               |
-| `isBanned`                                  | 布尔值                                                  |                                                                                               |
-| `expiresAt`                                 | ISO 8601 日期时间或 `null`                              | `null` 清除过期时间                                                                           |
-| `modelAccessMode`                           | `all` \| `restricted`                                   | 当模式为 `all` 时，`allowedModels` 必须为空                                                   |
-| `allowedModels`、`blockedModels`            | 字符串数组，最多 1000 个                                |                                                                                               |
-| `allowedCombos`                             | 字符串数组，最多 500 个                                 | 限制此密钥可调用的组合；直接模型由 `modelAccessMode` / `allowedModels` 控制                   |
-| `connectionAccessMode`                      | `all` \| `restricted`                                   | 当模式为 `restricted` 时，`allowedConnections` 必须非空；当模式为 `all` 时必须为空            |
-| `allowedConnections`                        | UUID 数组，最多 100 个                                  |                                                                                               |
-| `allowAutoCombos`                           | 布尔值                                                  | `false` 会拒绝使用此密钥请求 `auto/*` 模型；从未设置此字段的密钥不受限制                      |
-| `catalogScope`                              | `all` \| `combos` \| `models`                           | 此密钥的 `GET /v1/models` 列出哪些内容（仅组合、仅模型或两者）；它不会改变此密钥可调用的内容  |
-| `forcedModel`                               | 最多 300 个字符的字符串，或 `null`                      | 将聊天请求路由到此模型/组合，优先级高于 `X-Route-Model` 和 `body.model`；此密钥的限制仍然适用 |
-| `noLog`、`autoResolve`                      | 布尔值                                                  |                                                                                               |
-| `throttleDelayMs`                           | 整数，0-300000                                          |                                                                                               |
-| `maxSessions`                               | 整数，0-10000                                           |                                                                                               |
-| `rateLimits`                                | `{ limit, window }` 数组（正整数，最多 50 个）或 `null` | `null` 清除限制                                                                               |
-| `accessSchedule`                            | 计划对象或 `null`                                       | `null` 清除计划                                                                               |
-| `scopes`                                    | 字符串数组，最多 32 个                                  |                                                                                               |
-| `allowedEndpoints`                          | 字符串数组，最多 20 个                                  |                                                                                               |
-| `streamDefaultMode`                         | `legacy` \| `json`                                      |                                                                                               |
-| `cacheDefaultMode`                          | `legacy` \| `bypass`                                    | 请参阅[按密钥绕过缓存](#per-key-cache-bypass)                                                 |
-| `compressionEnabled`                        | 布尔值                                                  |                                                                                               |
-| `codexServiceMode`                          | Codex 服务模式之一                                      |                                                                                               |
-| `disableNonPublicModels`                    | boolean                                                 |                                                                                               |
-| `allowUsageCommand`                         | boolean                                                 |                                                                                               |
-| `usageLimitEnabled`                         | boolean                                                 |                                                                                               |
-| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | number >= 0 or `null`                                   |                                                                                               |
-| `chaosModeEnabled`                          | boolean                                                 |                                                                                               |
+| 字段                                        | 类型                                                    | 说明                                                                                                                                                                                       |
+| ------------------------------------------- | ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `name`                                      | 字符串，1-200 个字符                                    |                                                                                                                                                                                            |
+| `isActive`                                  | 布尔值                                                  |                                                                                                                                                                                            |
+| `isBanned`                                  | 布尔值                                                  |                                                                                                                                                                                            |
+| `expiresAt`                                 | ISO 8601 日期时间或 `null`                              | `null` 清除过期时间                                                                                                                                                                        |
+| `modelAccessMode`                           | `all` \| `restricted`                                   | 当模式为 `all` 时，`allowedModels` 必须为空                                                                                                                                                |
+| `allowedModels`, `blockedModels`            | 字符串数组，最多 1000 个                                |                                                                                                                                                                                            |
+| `allowedCombos`                             | 字符串数组，最多 500 个                                 | 限制此密钥可调用的组合；直接模型由 `modelAccessMode` / `allowedModels` 控制                                                                                                                |
+| `connectionAccessMode`                      | `all` \| `restricted`                                   | 当模式为 `restricted` 时，`allowedConnections` 必须非空；当模式为 `all` 时必须为空                                                                                                         |
+| `allowedConnections`                        | UUID 数组，最多 100 个                                  |                                                                                                                                                                                            |
+| `allowAutoCombos`                           | 布尔值                                                  | `false` 会拒绝使用此密钥请求 `auto/*` 模型；从未设置此字段的密钥不受限制                                                                                                                   |
+| `catalogScope`                              | `all` \| `combos` \| `models`                           | 此密钥的 `GET /v1/models` 列出哪些内容（仅组合、仅模型或两者）；它不会改变此密钥可调用的内容                                                                                               |
+| `forcedModel`                               | 最多 300 个字符的字符串，或 `null`                      | 将聊天请求路由到此模型/组合，优先级高于 `X-Route-Model` 和 `body.model`；此密钥的限制仍然适用                                                                                              |
+| `noLog`, `autoResolve`                      | 布尔值                                                  |                                                                                                                                                                                            |
+| `throttleDelayMs`                           | 整数，0-300000                                          |                                                                                                                                                                                            |
+| `maxSessions`                               | 整数，0-10000                                           |                                                                                                                                                                                            |
+| `rateLimits`                                | `{ limit, window }` 数组（正整数，最多 50 个）或 `null` | `null` 清除限制                                                                                                                                                                            |
+| `accessSchedule`                            | 计划对象或 `null`                                       | `null` 清除计划                                                                                                                                                                            |
+| `scopes`                                    | 字符串数组，最多 32 个                                  |                                                                                                                                                                                            |
+| `allowedEndpoints`                          | 字符串数组，最多 20 个                                  |                                                                                                                                                                                            |
+| `streamDefaultMode`                         | `legacy` \| `json`                                      |                                                                                                                                                                                            |
+| `cacheDefaultMode`                          | `legacy` \| `bypass`                                    | 请参阅[按密钥绕过缓存](#per-key-cache-bypass)                                                                                                                                              |
+| `compressionEnabled`                        | 布尔值                                                  |                                                                                                                                                                                            |
+| `codexServiceMode`                          | Codex 服务模式之一                                      |                                                                                                                                                                                            |
+| `disableNonPublicModels`                    | boolean                                                 |                                                                                                                                                                                            |
+| `allowUsageCommand`                         | boolean                                                 |                                                                                                                                                                                            |
+| `usageLimitEnabled`                         | boolean                                                 |                                                                                                                                                                                            |
+| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | 编号>= 0 或`null`                                       |                                                                                                                                                                                            |
+| `fiveHourUsageLimitUsd`                     | 编号>= 0 或`null`                                       | 滚动 5 小时USD预算，像每日和每周限制（`usageLimitEnabled`、 `UNPRICED_USAGE_BUDGET_POLICY`）一样强制执行。 `retry-after`是指窗口中最旧的支出过期，这可能会使远超过其限制的密钥仍然被阻止。 |
+| `chaosModeEnabled`                          | boolean                                                 |                                                                                                                                                                                            |
 
 ```bash
 curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
@@ -1275,6 +1295,35 @@ curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
 | `/api/modality-bridge/stats`         | GET        | 内存中的 `attempts`、成功数/`bridged`、失败数、缓存命中次数、`totalLatencyMs`、`latencySamples`、以样本为单位的 `averageLatencyMs` 以及最后使用时间（重启时重置；需要管理身份验证）                                                                                                                                                                                   |
 | `/api/modality-bridge/video/runtime` | GET        | 管理身份验证/探测前的严格可信回环检查；已清理的 FFmpeg/ffprobe 可用性和版本信息（no-store）                                                                                                                                                                                                                                                                           |
 | `/api/modality-bridge/video/extract` | POST       | 内部经过身份验证的可信回环字节代理；输入上限为 50 MiB，队列有界/输出上限为 32 MiB，容量不足时返回 `503`，断开连接时返回 `499`，超时时限返回 `504`；不是公共上传 API                                                                                                                                                                                                   |
+
+### 视频帧深入分析
+
+`GET /api/v1/video-bridge/drilldown` 读取在明确同意的 Video Bridge 请求后，通过
+`x-omniroute-video-drilldown` 返回的租户绑定不透明句柄。
+读取和 `DELETE` 始终需要有效的 API 密钥，以及操作员独立拥有的
+`modalityBridgeVideoDrilldownRemoteEnabled` 权限。
+生产环境中的保留功能还需要 `modalityBridgeVideoDrilldownEnabled`，并且每个分段都必须严格设置
+`drilldown: true`。
+如果密钥具有非空的端点允许列表，则无论调用方使用 `/v1` 还是 `/api/v1`，
+该列表都必须包含 `video`，GET 和 DELETE 均是如此。
+
+GET 查询参数：必需的 `handle`；可选的 `variant`（`preview`、`standard`、`detail`）、
+`limit`（1–8；接受旧版参数 `frames`，但不能与 `limit` 组合）、
+从零开始计数的 `page`，以及以秒为单位的 `start`/`end`。
+同时提供两个焦点边界时，`end` 必须大于 `start`。
+重复或未知的查询键会被拒绝。
+成功响应包含 `derivation`、`durationSeconds`、`frames`、
+`hasMore`、`page`、`variant`，以及可选的 `focusWindow`；无存储 JSON（no-store JSON）大小上限为
+32 MiB，其中包括 Base64。
+输出过大时返回 413；请请求更少的帧。
+
+`DELETE /api/v1/video-bridge/drilldown?handle=...` 返回 `{ "removed": 0|1 }`。
+未知、过期以及跨密钥 GET 请求均返回无法区分的 404 响应；跨密钥 DELETE 无法删除所有者的条目。
+禁用访问返回 403，缺少或无效的身份验证返回 401，无效查询返回 400，取消操作返回 499，临时错误返回 503。
+句柄仅在进程本地有效，十分钟后过期，并且不会在重启后保留。
+新句柄使用 `v1.` 加上 32 字节的随机 Base64URL 令牌；仅保留令牌哈希。
+为兼容性，旧版 64 位十六进制令牌仍可按语法读取。
+有关同意、配额和变体派生的详细信息，请参阅[Video Bridge 防护措施](../security/GUARDRAILS.md#video-bridge-videobridgets-videobridgepipelinets)。
 
 ### 备份与导出/导入
 
@@ -1370,19 +1419,19 @@ GET 响应包括 `agents[]`（id、name、binary、version、installed、protoco
 
 这些端点采用与 Gemini API 相同的格式，适用于需要原生 Gemini SDK 兼容性的客户端。
 
-### 内部 / 系统 API
+### 内部/系统 API
 
-| Endpoint                 | Method | Description                                    |
-| ------------------------ | ------ | ---------------------------------------------- |
-| `/api/init`              | GET    | 应用程序初始化检查（首次运行时使用）           |
-| `/api/tags`              | GET    | 兼容 Ollama 的模型标签（供 Ollama 客户端使用） |
-| `/api/restart`           | POST   | 触发服务器优雅重启                             |
-| `/api/shutdown`          | POST   | 触发服务器优雅关闭                             |
-| `/api/system/env/repair` | POST   | 修复 OAuth 提供者环境变量                      |
-| `/api/system/version`    | GET    | 当前/最新版本、更新状态和发布渠道              |
-| `/api/system/version`    | POST   | 启动面向部署的最新版本更新                     |
+| 端点                     | 方法 | 描述                                           |
+| ------------------------ | ---- | ---------------------------------------------- |
+| `/api/init`              | GET  | 启动后台同步服务（需要管理身份验证）           |
+| `/api/tags`              | GET  | 兼容 Ollama 的模型标签（供 Ollama 客户端使用） |
+| `/api/restart`           | POST | 触发服务器正常重启                             |
+| `/api/shutdown`          | POST | 触发服务器正常关闭                             |
+| `/api/system/env/repair` | POST | 修复 OAuth 提供者环境变量                      |
+| `/api/system/version`    | GET  | 当前/最新版本、更新状态和发布渠道              |
+| `/api/system/version`    | POST | 启动面向部署的更新，将版本更新到最新版本       |
 
-> **注意：** 这些端点由系统内部使用，或用于兼容 Ollama 客户端。最终用户通常不会调用它们。
+> **注意：** 这些端点由系统内部使用，或用于 Ollama 客户端兼容性。终端用户通常不会调用它们。
 
 ### OAuth 环境修复 _(v3.6.1+)_
 

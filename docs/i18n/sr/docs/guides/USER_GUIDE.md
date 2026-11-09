@@ -353,26 +353,26 @@ Model: cc/claude-opus-4-7
 
 ---
 
-## 🚀 Deployment
+## 🚀 Деплоимент
 
-### Globalna npm instalacija (preporučeno)
+### Глобална нпм инсталација (препоручено)
 
 ```bash
 npm install -g omniroute
 
-# Kreirajte konfiguracioni direktorijum
+# Create config directory
 mkdir -p ~/.omniroute
 
-# Kreirajte .env fajl (pogledajte .env.example)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# Pokrenite server
+# Start server
 omniroute
-# Ili sa prilagođenim portom:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI automatski učitava `.env` iz `~/.omniroute/.env` ili `./.env`.
+CLI аутоматски учитава `.env` из `~/.omniroute/.env` или `./.env`. `./.env` у радном директоријуму може да постави само кратку листу дозвољених кључева (портови, `REQUIRE_API_KEY`, подешавања локализације и боје); све остало стави у `~/.omniroute/.env`. Погледајте [уговоре о покретању CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### Tray mod
 
@@ -428,7 +428,7 @@ Kada vam OmniRoute više nije potreban, obezbeđujemo dve brze skripte za čisto
 
 > Napomena: Da biste izvršili ove komande, idite u folder OmniRoute projekta (ako ste ga klonirali) i pokrenite ih. Alternativno, ako je instaliran globalno, možete jednostavno pokrenuti `npm uninstall -g omniroute`.
 
-### VPS Deployment
+### VPS Деплоимент
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -444,7 +444,7 @@ export NEXT_PUBLIC_BASE_URL="http://localhost:20128"
 export API_KEY_SECRET="endpoint-proxy-api-key-secret"
 
 npm run start
-# Ili: pm2 start npm --name omniroute -- start
+# Or: pm2 start npm --name omniroute -- start
 ```
 
 ### PM2 Deployment (Mala memorija)

@@ -359,7 +359,7 @@ GET /v1/embeddings
 
 ---
 
-## ছবি তৈরি
+## ইমেজ জেনারেশন
 
 ```bash
 POST /v1/images/generations
@@ -373,36 +373,22 @@ Content-Type: application/json
 }
 ```
 
-উপলভ্য providerগুলোর মধ্যে রয়েছে OpenAI (GPT Image 2), xAI (Grok Image), Together AI (FLUX), Fireworks AI, Nebius (FLUX), Hyperbolic, NanoBanana, **OpenRouter**, **ZenMux**, SD WebUI (local), ComfyUI (local)।
+উপলব্ধ প্রদানকারীদের মধ্যে রয়েছে OpenAI (GPT চিত্র 2), xAI (Grok চিত্র), Together AI (FLUX), Fireworks AI, নেবিয়াস (FLUX), হাইপারবোলিক, NanoBanana,**OpenRouter** ,**ZenMux** , SD WebUI (স্থানীয়), ComfyUI (স্থানীয়)।
 
-`n` `data[]`-এ `n`টি ছবি ফেরত দেয়। যেসব provider-এর upstream API প্রতি কলে একটি করে ছবি ফেরত দেয়
-(Black Forest Labs, Stability AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik,
-NVIDIA NIM, Cloudflare Workers AI), তাদের জন্য সর্বাধিক ৪টি একসঙ্গে চলমান রেখে `n`টি পৃথক upstream কল করা হয়। একটি
-নির্দিষ্ট `seed` কলের index দিয়ে offset করা হয় (`seed`, `seed + 1`, …), ফলে ছবিগুলো ভিন্ন হয়, কিন্তু
-পুনরুৎপাদনযোগ্য থাকে। `n`-এর সর্বোচ্চ সীমা 10। যেকোনো কল ব্যর্থ হলে সম্পূর্ণ request ব্যর্থ হয়। fan-out formatগুলোর
-তালিকা হলো `open-sse/handlers/imageGeneration/fanOut.ts`-এ থাকা `SINGLE_IMAGE_FANOUT_FORMATS`।
+`n` `data[]` এ `n` ছবি ফেরত দেয়। যেসব প্রদানকারীর আপস্ট্রিম API প্রতি কলে একটি ছবি ফেরত দেয় (ব্ল্যাক ফরেস্ট ল্যাবস, স্ট্যাবিলিটি AI, লিওনার্দো, আইডিওগ্রাম, হাইপার, হাইপারবোলিক, Magnific/Freepik, NVIDIA NIM, Cloudflare Workers AI) তারা `n` আলাদা আপস্ট্রিম কল পান, ফ্লাইটে সর্বাধিক 4টি। একটি স্থির `seed` কল সূচক (`seed`, `seed + 1`, …) দ্বারা অফসেট করা হয়, তাই চিত্রগুলি পৃথক হলেও পুনরুত্পাদনযোগ্য থাকে। `n` 10 এ ক্যাপ করা হয়েছে। কোনো কল ব্যর্থ হলে অনুরোধটি সম্পূর্ণরূপে ব্যর্থ হয়। ফ্যান-আউট ফরম্যাটের তালিকা হল `open-sse/handlers/imageGeneration/fanOut.ts` এ `SINGLE_IMAGE_FANOUT_FORMATS` ।
 
-ZenMux বিদ্যমান API-key connection পুনর্ব্যবহার করে এবং `zenmux/` বা `zm/` prefix গ্রহণ করে:
+ZenMux বিদ্যমান API-কী সংযোগ পুনরায় ব্যবহার করে এবং `zenmux/` বা `zm/` উপসর্গ গ্রহণ করে:
 
-- `zenmux/openai/gpt-image-2` ZenMux-এর OpenAI Images API ব্যবহার করে। বিকল্পগুলোর মধ্যে রয়েছে `size`,
-  `quality`, `n`, `output_format`, `output_compression`, `background`, এবং `response_format`।
-- `zm/meta/muse-image-1.0`-এর মতো অন্যান্য publisher ZenMux-এর Vertex AI `:predict`
-  endpoint ব্যবহার করে। `n` `sampleCount`-এ, `aspect_ratio` `aspectRatio`-এ, এবং `image_size`
-  (`1K`, `2K`, `4K`) `sampleImageSize`-এ ম্যাপ হয়। একটি pixel `size` কেবল aspect ratio সরবরাহ করে,
-  নির্দিষ্ট pixel dimension নিশ্চিত করে না। সমর্থিত ratio, resolution এবং count modelভেদে পরিবর্তিত হয়।
-- `zm/inclusionai/ming-image-0.1-design` নিজস্ব dimension নির্বাচন করে। `size`,
-  `aspect_ratio`, এবং `image_size` বাদ দিন; নির্দিষ্ট মান দিলে HTTP 400 ফেরত আসে। `output_format` দিয়ে
-  PNG, JPEG এবং WebP অনুরোধ করা যায়।
+- `zenmux/openai/gpt-image-2` ZenMux এর OpenAI ছবি API ব্যবহার করে। বিকল্পগুলির মধ্যে রয়েছে `size`, `quality`, `n`, `output_format`, `output_compression`, `background`, এবং `response_format` ৷
+- অন্যান্য প্রকাশক, যেমন `zm/meta/muse-image-1.0`, ZenMux এর Vertex AI `:predict` এন্ডপয়েন্ট ব্যবহার করে। `n` মানচিত্র `sampleCount`, `aspect_ratio` থেকে `aspectRatio`, এবং `image_size` (`1K`, `2K`, `4K`) থেকে `sampleImageSize`। একটি পিক্সেল `size` শুধুমাত্র একটি আকৃতির অনুপাত সরবরাহ করে, নিশ্চিত পিক্সেল মাত্রা নেই। সমর্থিত অনুপাত, রেজোলিউশন এবং গণনা মডেল অনুসারে পরিবর্তিত হয়।
+- `zm/inclusionai/ming-image-0.1-design` তার নিজস্ব মাত্রা বেছে নেয়। বাদ দিন `size`, `aspect_ratio`, এবং `image_size`; স্পষ্ট মান HTTP 400 প্রদান করে। PNG, JPEG, এবং WebP `output_format` দিয়ে অনুরোধ করা যেতে পারে।
 
-এই integration text-to-image generation সমর্থন করে, reference-image editing নয়। Vertex-এর
-output `data[].b64_json`-এ normalize করা হয়; `response_format: "url"` একটি upstream
-HTTPS URL ফেরত দেয়, অথবা যখন কেবল image bytes পাওয়া যায় তখন একটি base64 data URL ফেরত দেয়। খালি বা filter করা output
-খালি success-এর পরিবর্তে error ফেরত দেয়। Model access ZenMux account-এর ওপর নির্ভর করে।
-[ZenMux-এর Vertex API](https://docs.zenmux.ai/api/vertexai/generate-images) এবং
-[OpenAI Images API](https://docs.zenmux.ai/api/openai/generate-an-image) দেখুন।
+এই ইন্টিগ্রেশন টেক্সট-টু-ইমেজ জেনারেশন সমর্থন করে, রেফারেন্স-ইমেজ এডিটিং নয়। ভার্টেক্স আউটপুট `data[].b64_json` তে স্বাভাবিক করা হয়; `response_format: "url"` একটি আপস্ট্রিম HTTPS URL বা একটি base64 ডেটা URL প্রদান করে যখন শুধুমাত্র ইমেজ বাইট উপলব্ধ থাকে। Empty/filtered আউটপুট খালি সাফল্যের পরিবর্তে একটি ত্রুটি ফেরত দেয়। মডেল অ্যাক্সেস ZenMux অ্যাকাউন্টের উপর নির্ভর করে। [ZenMux এর Vertex API](https://docs.zenmux.ai/api/vertexai/generate-images) এবং [OpenAI ছবি API](https://docs.zenmux.ai/api/openai/generate-an-image) দেখুন।
+
+একটি Microsoft 365 Copilot সাইন-ইন সংযোগ Copilot এর অন্তর্নির্মিত ইমেজ টুলের মাধ্যমে `copilot-m365-web/m365-copilot-image` পরিবেশন করে: প্রতি চিত্রের জন্য একটি Copilot টার্ন (`n` 1-4), `size` শুধুমাত্র ওরিয়েন্টেশন স্টিয়ারিং, এবং ছবিগুলি ইনলাইনে ফিরে আসে (`b64_json`, বা `response_format: "url"` এর জন্য একটি ডেটা URL )। [Microsoft 365 Copilot](../providers/COPILOT-M365.md#image-generation) দেখুন।
 
 ```bash
-# সব image model তালিকাভুক্ত করুন
+# List all image models
 GET /v1/images/generations
 ```
 
@@ -847,17 +833,19 @@ OpenAI-সামঞ্জস্যপূর্ণ ব্যাচ প্রক�
 
 ---
 
-## সার্চ API
+## অনুসন্ধান API
 
-ওয়েব/সার্চ প্রদানকারী বিমূর্তীকরণ (Tavily, Brave, Exa, Serper, ইত্যাদি)।
+Web/search প্রদানকারী বিমূর্ততা (Tavily, Brave, Exa, Serper, ইত্যাদি)।
 
-| Method | Path                   | Description                                                                                         |
-| ------ | ---------------------- | --------------------------------------------------------------------------------------------------- |
-| GET    | `/v1/search`           | কনফিগার করা সার্চ প্রদানকারী এবং সক্ষমতার তালিকা                                                    |
-| POST   | `/v1/search`           | একটি সার্চ কোয়েরি চালান — বডি `v1SearchSchema` দ্বারা যাচাই করা হয়, ক্যাশিং/কোয়ালেসিং সমর্থন করে |
-| GET    | `/v1/search/analytics` | প্রদানকারীভিত্তিক হিট/লেটেন্সি/ক্যাশ পরিসংখ্যান                                                     |
+| পদ্ধতি | পথ                     | বর্ণনা                                                                                          |
+| ------ | ---------------------- | ----------------------------------------------------------------------------------------------- |
+| GET    | `/v1/search`           | তালিকা কনফিগার করা অনুসন্ধান প্রদানকারী + ক্ষমতা                                                |
+| POST   | `/v1/search`           | একটি অনুসন্ধান ক্যোয়ারী চালান — বডি `v1SearchSchema` দ্বারা বৈধ, caching/coalescing সমর্থন করে |
+| GET    | `/v1/search/analytics` | প্রতি-প্রদানকারী hit/latency/cache পরিসংখ্যান                                                   |
 
-**Auth:** Bearer API key (`extractApiKey` + `isValidApiKey`)। সার্চ নীতি `enforceApiKeyPolicy`-এর মাধ্যমে প্রয়োগ করা হয়।
+**প্রমাণ:** বহনকারী API কী (`extractApiKey` + `isValidApiKey`)। অনুসন্ধান নীতি `enforceApiKeyPolicy` এর মাধ্যমে প্রয়োগ করা হয়েছে।
+
+**স্বতঃ-নির্বাচন:** `provider` ব্যতীত, একটি কনফিগার করা সংযোগ সহ সবচেয়ে সস্তা প্রদানকারীটি প্রথমে চলে এবং পরবর্তী সবচেয়ে সস্তা হল ফেইলওভার। বিনামূল্যে শেষ অবলম্বন প্রদানকারী (`duckduckgo-free`) শুধুমাত্র তখনই ব্যবহার করা হয় যখন অন্য কিছু কনফিগার করা হয় না। একটি স্ব-হোস্টেড SearXNG কনফিগার করা হিসাবে গণনা করা হয় যখন এটির সংযোগ একটি আসল `baseUrl` (ক্যাটালগ ডিফল্ট `http://localhost:8888/search` নয়) সঞ্চয় করে : এটি তারপরে একটি $0 প্রদানকারী হিসাবে র‍্যাঙ্ক করে কীডের চেয়ে, সবচেয়ে সস্তা কীড প্রদানকারীকে ফেইলওভার হিসাবে অন্তর্ভুক্ত করে, যখন SearXNG উত্তর দেয় 400, 401, 40gval বা 40gval না হয় URL `baseUrl` `http(s)` -মেটাডেটা ঠিকানায় যে পয়েন্টগুলি গণনা করা হয় না। একটি SearXNG সংযোগ যা একটি টোকেন সঞ্চয় করে এইভাবে শুধুমাত্র `https://` বা লুপব্যাক `http://` উপরে। রিমোট প্লেইন `http://` এ এটি কখনই ব্যর্থ হয় না এবং একটি শেষ অবলম্বন থাকে, শুধুমাত্র তখনই ব্যবহার করা হয় যখন অন্য কোন প্রদানকারীকে কনফিগার করা হয় না বা যখন নাম দ্বারা অনুরোধ করা হয়, তাই এটি এই দুটি ক্ষেত্রে ক্লিয়ারটেক্সটে টোকেন পাঠায়।
 
 ### Exa এবং Tavily-এর `provider_options`
 
@@ -1021,29 +1009,26 @@ Ticket কেবল যে API key এটি তৈরি করেছে, স�
 
 ## স্ব-পরিষেবা ব্যবহার (`/api/usage/om-usage`)
 
-যেকোনো API key তার **নিজস্ব** usage এবং quota পড়তে পারে — management auth প্রয়োজন নেই। একটি
-client (CLI, OmniCopilot panel) কোনো key holder-কে তার খরচ দেখাতে এই endpoint ব্যবহার করে।
+যেকোনো API কী পড়তে পারে**তার নিজস্ব** ব্যবহার এবং কোটা — কোন ব্যবস্থাপনা প্রমাণীকরণ. এটি একটি ক্লায়েন্ট (CLI, OmniCopilot প্যানেল) একটি মূল হোল্ডারকে তাদের ব্যয় দেখানোর জন্য ব্যবহার করে শেষ পয়েন্ট।
 
 ```bash
-# টেক্সট ফর্ম (ঐতিহাসিক contract — terminal-এর জন্য plain text)
+# Text form (the historical contract — plain text for a terminal)
 curl -H "Authorization: Bearer <your-api-key>" \
   http://localhost:20128/api/usage/om-usage
 
-# Structured form — UI যে ফর্ম ব্যবহার করে
+# Structured form — what a UI consumes
 curl -H "Authorization: Bearer <your-api-key>" \
   "http://localhost:20128/api/usage/om-usage?format=json"
 ```
 
-Key-তে **`allowUsageCommand`** সক্রিয় থাকতে হবে (ডিফল্টভাবে বন্ধ — dashboard-এর API-key
-manager এটি প্রতি key-এর জন্য toggle করে)। এটি সক্রিয় না থাকলে endpoint `403` প্রদান করে।
+চাবি থাকতে হবে**`allowUsageCommand`** সক্রিয় (ডিফল্টরূপে — ড্যাশবোর্ডের API-কী ম্যানেজার এটি প্রতি কী টগল করে)। এটি ছাড়া শেষ পয়েন্ট `403` উত্তর দেয়।
 
-`?format=json` একটি discriminated shape ফেরত দেয়, যাতে caller কখনো refusal response থেকে
-data field পড়ে না। সফল হলে:
+`?format=json` একটি বৈষম্যপূর্ণ আকৃতি প্রদান করে যাতে একজন কলকারী কখনই একটি প্রত্যাখ্যানের বাইরে ডেটা ফিল্ড পড়ে না। সাফল্যের উপর:
 
 ```jsonc
 {
   "allowed": true,
-  // key প্রতি usage limit-এ (দৈনিক/সাপ্তাহিক USD) opt in করলেই কেবল উপস্থিত:
+  // present only when the key opted into per-key usage limits (daily/weekly/5-hour USD):
   "personal": {
     "dailySpentUsd": 1.25,
     "dailyLimitUsd": 5,
@@ -1052,9 +1037,9 @@ data field পড়ে না। সফল হলে:
     "weeklyLimitUsd": 20,
     "weeklyResetAtIso": "…" /* … */,
   },
-  // নির্বাচিত provider quota snapshot, অথবা এখনো কিছু cache না থাকলে null:
+  // the selected provider quota snapshot, or null when nothing is cached yet:
   "provider": { "connectionId": "…", "provider": "claude", "plan": "…", "quotas": {/* … */} },
-  // প্রতিটি connection-এর snapshot, যাতে UI পাশাপাশি একাধিক provider দেখাতে পারে:
+  // every connection's snapshot, so a UI can render several providers side by side:
   "providers": [
     { "connectionId": "…", "provider": "claude" /* … */ },
     { "provider": "codex" /* … */ },
@@ -1062,13 +1047,9 @@ data field পড়ে না। সফল হলে:
 }
 ```
 
-Refusal-এর ক্ষেত্রে (`401` bad key / `403` not allowed) একই route
-`{ "allowed": false, "error": { "message": "…" } }` ফেরত দেয় — উপস্থিত কিন্তু খালি
-`personal`/`provider` (key allowed, এখনো কিছু জানা যায়নি) refusal-এর থেকে আলাদা একটি
-অবস্থা, এবং কেবল JSON form-ই এই পার্থক্য দেখায়।
+প্রত্যাখ্যান করার সময় (`401` খারাপ কী / `403` অনুমোদিত নয়) একই রুট `{ "allowed": false, "error": { "message": "…" } }` — প্রদান করে একটি বর্তমান-কিন্তু-খালি `personal`/`provider` (কী অনুমোদিত, এখনও কিছুই শেখা হয়নি) একটি প্রত্যাখ্যান থেকে একটি ভিন্ন অবস্থা, এবং শুধুমাত্র JSON ফর্মটি তাদের আলাদা করে।
 
-**অথেন্টিকেশন:** caller-এর নিজস্ব Bearer API key, `isValidApiKey` দিয়ে যাচাইকৃত — এটি
-management surface (`/api/keys/…`) নয়, যা `requireManagementAuth`-এর পেছনেই থাকে।
+**প্রমাণ:** কলারের নিজস্ব বেয়ারার API কী, `isValidApiKey` — এর সাথে যাচাই করা এটি _not_ ম্যানেজমেন্ট সারফেস (`/api/keys/…`), যা `requireManagementAuth` পিছনে থাকে।
 
 ### Raw বনাম Cutoff-Adjusted Quota Percentage
 
@@ -1285,34 +1266,33 @@ Claude Code auto-mode classifier request-গুলোতে কোনো সু�
 | -------------------------------- | ------- | ----------------------- |
 | `/api/oauth/[provider]/[action]` | Various | Provider-specific OAuth |
 
-### Routing ও Config
+### রাউটিং এবং কনফিগারেশন
 
-| Endpoint              | Method   | Description                   |
-| --------------------- | -------- | ----------------------------- |
-| `/api/models`         | GET/PUT  | Model list / alias update     |
-| `/api/models/alias`   | GET/POST | Model aliases                 |
-| `/api/models/catalog` | GET      | All models by provider + type |
-| `/api/combos*`        | Various  | Combo management              |
-| `/api/keys*`          | Various  | API key management            |
-| `/api/pricing`        | GET      | Model pricing                 |
+| শেষবিন্দু             | পদ্ধতি   | বর্ণনা                              |
+| --------------------- | -------- | ----------------------------------- |
+| `/api/models`         | GET/PUT  | মডেল তালিকা / উপনাম আপডেট           |
+| `/api/models/alias`   | GET/POST | মডেল উপনাম                          |
+| `/api/models/catalog` | GET      | প্রদানকারী + টাইপ দ্বারা সমস্ত মডেল |
+| `/api/combos*`        | বিভিন্ন  | কম্বো ব্যবস্থাপনা                   |
+| `/api/keys*`          | বিভিন্ন  | API কী ব্যবস্থাপনা                  |
+| `/api/pricing`        | GET      | মডেল মূল্য                          |
 
-#### Model limit-এর উৎস
+#### মডেল সীমা উদ্ভব
 
-`GET /api/models?withLimits=1` (`true`-ও গ্রহণযোগ্য; `0`/`false`, অথবা এটি বাদ দিলে ডিফল্ট payload অপরিবর্তিত থাকে) প্রতিটি model row-তে `contextWindow`, `maxInputTokens`, `maxOutputTokens` এবং একটি `capsSource` object যোগ করে। `capsSource` প্রতিটি limit সরবরাহ করা rule-এর নাম উল্লেখ করে, তাই কোনো অপ্রত্যাশিত limit (উদাহরণস্বরূপ, 1M model-এ 128k) তার উৎস পর্যন্ত অনুসরণ করা যায়। Resolved value-গুলো routing যে value ব্যবহার করে সেগুলোরই সমান; এই flag কেবল field যোগ করে এবং কখনো কোনো value পরিবর্তন করে না। অন্য যেকোনো `withLimits` value `400` দিয়ে প্রত্যাখ্যাত হয়।
+`GET /api/models?withLimits=1` (এছাড়াও `true`; `0`/`false` বা বাদ দিলে ডিফল্ট পেলোড অপরিবর্তিত থাকে) প্রতিটি মডেল সারিতে `contextWindow`, `maxInputTokens`, `maxOutputTokens` এবং একটি `capsSource` অবজেক্ট যোগ করে। `capsSource` সেই নিয়মের নাম দেয় যা প্রতিটি সীমা সরবরাহ করেছিল, তাই একটি আশ্চর্যজনক সীমা (উদাহরণস্বরূপ 1M মডেলে 128k) এর উত্স খুঁজে পাওয়া যেতে পারে। সমাধানকৃত মান একই রাউটিং ব্যবহার করে; পতাকা শুধুমাত্র ক্ষেত্র যোগ করে এবং কোনো মান পরিবর্তন করে না। অন্য কোনো `withLimits` মান `400` দিয়ে প্রত্যাখ্যান করা হয়।
 
-| `capsSource` value                           | Origin                                                                 |
-| -------------------------------------------- | ---------------------------------------------------------------------- |
-| `override:context`                           | Persisted context-window override (`model_context_overrides`)          |
-| `override:max_input` / `override:max_output` | Persisted `max_input_tokens` / `max_output_tokens` capability override |
-| `static-authoritative:<provider>/<model>`    | Static authoritative context-window table                              |
-| `synced:<provider>/<model>`                  | models.dev synced capability row                                       |
-| `registry:<provider>/<model>`                | Provider registry entry                                                |
-| `spec:<model>`                               | Static model spec                                                      |
-| `effort-base:` prefix                        | Row borrowed from the base model of an effort-suffixed variant         |
-| `none`                                       | No source declares the limit (value is `null`)                         |
+| `capsSource` মান                             | উৎপত্তি                                                          |
+| -------------------------------------------- | ---------------------------------------------------------------- |
+| `override:context`                           | স্থায়ী প্রসঙ্গ-উইন্ডো ওভাররাইড (`model_context_overrides`)      |
+| `override:max_input` / `override:max_output` | স্থায়ী `max_input_tokens` / `max_output_tokens` ক্ষমতা ওভাররাইড |
+| `static-authoritative:<provider>/<model>`    | স্ট্যাটিক প্রামাণিক প্রসঙ্গ-উইন্ডো টেবিল                         |
+| `synced:<provider>/<model>`                  | models.dev সিঙ্ক করা ক্ষমতা সারি                                 |
+| `registry:<provider>/<model>`                | প্রদানকারী রেজিস্ট্রি এন্ট্রি                                    |
+| `spec:<model>`                               | স্ট্যাটিক মডেল স্পেস                                             |
+| `effort-base:` উপসর্গ                        | প্রচেষ্টা-প্রত্যয় ভেরিয়েন্টের বেস মডেল থেকে ধার করা সারি       |
+| `none`                                       | কোন উৎস সীমা ঘোষণা করে না (মান হল `null`)                        |
 
-Implementation: `getResolvedModelCapabilitiesWithLimitSources()` in `src/lib/modelCapabilities.ts`
-এবং `src/lib/modelCapabilityLimits.ts`-এর precedence chain-গুলো।
+বাস্তবায়ন: `src/lib/modelCapabilities.ts` এ `getResolvedModelCapabilitiesWithLimitSources()` এবং `src/lib/modelCapabilityLimits.ts` তে অগ্রাধিকার চেইন।
 
 ### ব্যবহার ও Analytics
 
@@ -1326,40 +1306,41 @@ Implementation: `getResolvedModelCapabilitiesWithLimitSources()` in `src/lib/mod
 | `/api/usage/model-latency-stats` | GET             | প্রতি-প্রোভাইডার/মডেলের চলমান লেটেন্সি সমষ্টি (avg/p50/p95/p99, সাফল্যের হার); ফিল্টার: `windowHours`/`minSamples`/`maxRows`/`provider`/`model` (#6873)                                                                                                                                                 |
 | `/api/usage/cache-health`        | GET             | `call_logs`-এর ওপর প্রম্পট-ক্যাশের স্বাস্থ্য-সারাংশ — লিখন/পঠন অনুপাত, p50/p90/p99 লিখন-আকারের বণ্টন, অতিরিক্ত লিখনের ঘনত্ব, প্রতি-মডেলের বিভাজন এবং `healthy`/`degraded`/`thrash`/`no-data` নির্ণয়; ক্যোয়েরি প্যারামিটার `range` (`1h`\|`24h`\|`7d`\|`30d`, ডিফল্ট `24h`) এবং ঐচ্ছিক `model` (#8827) |
 
-### API কী-এর অনুমতি
+### API কী অনুমতি
 
-`PATCH /api/keys/{id}` একটি বিদ্যমান কী-এর অনুমতি আপডেট করে। প্রতিটি `/api/keys*` রুটের মতো এটিতেও ব্যবস্থাপনা অনুমোদন প্রয়োজন (দেখুন [ব্যবস্থাপনা প্রমাণীকরণ](../guides/MANAGEMENT-AUTH.md)), ইনফারেন্স কী নয়। আপনি যে ক্ষেত্রগুলো পরিবর্তন করতে চান, শুধু সেগুলোই পাঠান; এর কোনোটিই না থাকলে অনুরোধটি `No valid fields to update` বার্তা দিয়ে প্রত্যাখ্যাত হয়। গ্রহণযোগ্য ক্ষেত্রগুলো `src/shared/validation/schemas/keys.ts`-এর `updateKeyPermissionsSchema` দ্বারা নির্ধারিত।
+`PATCH /api/keys/{id}` একটি বিদ্যমান কী এর অনুমতি আপডেট করে। প্রতিটি `/api/keys*` রুটের মতো এটিরও ম্যানেজমেন্ট অনুমোদন প্রয়োজন ( [ম্যানেজমেন্ট প্রমাণীকরণ](../guides/MANAGEMENT-AUTH.md) দেখুন), একটি অনুমান কী নয়। আপনি পরিবর্তন করতে চান শুধুমাত্র ক্ষেত্র পাঠান; তাদের কোনটির সাথে একটি অনুরোধ `No valid fields to update` এর সাথে প্রত্যাখ্যান করা হয় না। গৃহীত ক্ষেত্রগুলি `src/shared/validation/schemas/keys.ts` তে `updateKeyPermissionsSchema` দ্বারা সংজ্ঞায়িত করা হয়েছে।
 
-| ক্ষেত্র                                     | ধরন                                                                            | নোট                                                                                                                           |
-| ------------------------------------------- | ------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------- |
-| `name`                                      | স্ট্রিং, ১-২০০ অক্ষর                                                           |                                                                                                                               |
-| `isActive`                                  | বুলিয়ান                                                                       |                                                                                                                               |
-| `isBanned`                                  | বুলিয়ান                                                                       |                                                                                                                               |
-| `expiresAt`                                 | ISO 8601 তারিখ-সময় বা `null`                                                  | `null` মেয়াদ শেষ হওয়ার সময় পরিষ্কার করে                                                                                    |
-| `modelAccessMode`                           | `all` \| `restricted`                                                          | মোড `all` হলে `allowedModels` অবশ্যই খালি হতে হবে                                                                             |
-| `allowedModels`, `blockedModels`            | সর্বোচ্চ ১০০০টি স্ট্রিংয়ের অ্যারে                                             |                                                                                                                               |
-| `allowedCombos`                             | সর্বোচ্চ ৫০০টি স্ট্রিংয়ের অ্যারে                                              | এই কী কোন কম্বো কল করতে পারবে তা নির্ধারণ করে; সরাসরি মডেলগুলো `modelAccessMode` / `allowedModels` দ্বারা নিয়ন্ত্রিত হয়     |
-| `connectionAccessMode`                      | `all` \| `restricted`                                                          | `restricted` হলে `allowedConnections` অবশ্যই খালি না হতে হবে এবং `all` হলে খালি হতে হবে                                       |
-| `allowedConnections`                        | সর্বোচ্চ ১০০টি UUID-এর অ্যারে                                                  |                                                                                                                               |
-| `allowAutoCombos`                           | বুলিয়ান                                                                       | `false` হলে এই কী দিয়ে `auto/*` মডেলের অনুরোধ প্রত্যাখ্যান করা হয়; যারা কখনো এটি সেট করেনি তারা অনুমোদিত থাকে               |
-| `catalogScope`                              | `all` \| `combos` \| `models`                                                  | এই কী-এর জন্য `GET /v1/models` কী তালিকাভুক্ত করে (শুধু কম্বো, শুধু মডেল, অথবা উভয়); এটি কী কল করতে পারবে তা পরিবর্তন করে না |
-| `forcedModel`                               | সর্বোচ্চ ৩০০ অক্ষরের স্ট্রিং, অথবা `null`                                      | `X-Route-Model` এবং `body.model`-এর অগ্রাধিকার নিয়ে চ্যাট অনুরোধকে এই মডেল/কম্বোতে রাউট করে; কী-এর সীমাগুলো এখনও প্রযোজ্য    |
-| `noLog`, `autoResolve`                      | বুলিয়ান                                                                       |                                                                                                                               |
-| `throttleDelayMs`                           | পূর্ণসংখ্যা, ০-৩০০০০০                                                          |                                                                                                                               |
-| `maxSessions`                               | পূর্ণসংখ্যা, ০-১০০০০                                                           |                                                                                                                               |
-| `rateLimits`                                | `{ limit, window }`-এর অ্যারে (ধনাত্মক পূর্ণসংখ্যা, সর্বোচ্চ ৫০টি) অথবা `null` | `null` সীমাগুলো পরিষ্কার করে                                                                                                  |
-| `accessSchedule`                            | সময়সূচি অবজেক্ট অথবা `null`                                                   | `null` সময়সূচি পরিষ্কার করে                                                                                                  |
-| `scopes`                                    | সর্বোচ্চ ৩২টি স্ট্রিংয়ের অ্যারে                                               |                                                                                                                               |
-| `allowedEndpoints`                          | সর্বোচ্চ ২০টি স্ট্রিংয়ের অ্যারে                                               |                                                                                                                               |
-| `streamDefaultMode`                         | `legacy` \| `json`                                                             |                                                                                                                               |
-| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                           | [প্রতি-কী ক্যাশে বাইপাস](#per-key-cache-bypass) দেখুন                                                                         |
-| `compressionEnabled`                        | বুলিয়ান                                                                       |                                                                                                                               |
-| `codexServiceMode`                          | Codex পরিষেবা মোডগুলোর একটি                                                    |                                                                                                                               |
-| `disableNonPublicModels`                    | boolean                                                                        |                                                                                                                               |
-| `allowUsageCommand`                         | boolean                                                                        |                                                                                                                               |
-| `usageLimitEnabled`                         | boolean                                                                        |                                                                                                                               |
-| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | number >= 0 or `null`                                                          |                                                                                                                               |
-| `chaosModeEnabled`                          | boolean                                                                        |                                                                                                                               |
+| ক্ষেত্র                                     | ধরন                                                                            | নোট                                                                                                                                                                                                                                          |
+| ------------------------------------------- | ------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`                                      | স্ট্রিং, ১-২০০ অক্ষর                                                           |                                                                                                                                                                                                                                              |
+| `isActive`                                  | বুলিয়ান                                                                       |                                                                                                                                                                                                                                              |
+| `isBanned`                                  | বুলিয়ান                                                                       |                                                                                                                                                                                                                                              |
+| `expiresAt`                                 | ISO 8601 তারিখ-সময় বা `null`                                                  | `null` মেয়াদ শেষ হওয়ার সময় পরিষ্কার করে                                                                                                                                                                                                   |
+| `modelAccessMode`                           | `all` \| `restricted`                                                          | মোড `all` হলে `allowedModels` অবশ্যই খালি হতে হবে                                                                                                                                                                                            |
+| `allowedModels`, `blockedModels`            | স্ট্রিং এর অ্যারে, 1000 পর্যন্ত                                                |                                                                                                                                                                                                                                              |
+| `allowedCombos`                             | সর্বোচ্চ ৫০০টি স্ট্রিংয়ের অ্যারে                                              | এই কী কোন কম্বো কল করতে পারবে তা নির্ধারণ করে; সরাসরি মডেলগুলো `modelAccessMode` / `allowedModels` দ্বারা নিয়ন্ত্রিত হয়                                                                                                                    |
+| `connectionAccessMode`                      | `all` \| `restricted`                                                          | `restricted` হলে `allowedConnections` অবশ্যই খালি না হতে হবে এবং `all` হলে খালি হতে হবে                                                                                                                                                      |
+| `allowedConnections`                        | সর্বোচ্চ ১০০টি UUID-এর অ্যারে                                                  |                                                                                                                                                                                                                                              |
+| `allowAutoCombos`                           | বুলিয়ান                                                                       | `false` হলে এই কী দিয়ে `auto/*` মডেলের অনুরোধ প্রত্যাখ্যান করা হয়; যারা কখনো এটি সেট করেনি তারা অনুমোদিত থাকে                                                                                                                              |
+| `catalogScope`                              | `all` \| `combos` \| `models`                                                  | এই কী-এর জন্য `GET /v1/models` কী তালিকাভুক্ত করে (শুধু কম্বো, শুধু মডেল, অথবা উভয়); এটি কী কল করতে পারবে তা পরিবর্তন করে না                                                                                                                |
+| `forcedModel`                               | সর্বোচ্চ ৩০০ অক্ষরের স্ট্রিং, অথবা `null`                                      | `X-Route-Model` এবং `body.model`-এর অগ্রাধিকার নিয়ে চ্যাট অনুরোধকে এই মডেল/কম্বোতে রাউট করে; কী-এর সীমাগুলো এখনও প্রযোজ্য                                                                                                                   |
+| `noLog`, `autoResolve`                      | বুলিয়ান                                                                       |                                                                                                                                                                                                                                              |
+| `throttleDelayMs`                           | পূর্ণসংখ্যা, ০-৩০০০০০                                                          |                                                                                                                                                                                                                                              |
+| `maxSessions`                               | পূর্ণসংখ্যা, ০-১০০০০                                                           |                                                                                                                                                                                                                                              |
+| `rateLimits`                                | `{ limit, window }`-এর অ্যারে (ধনাত্মক পূর্ণসংখ্যা, সর্বোচ্চ ৫০টি) অথবা `null` | `null` সীমাগুলো পরিষ্কার করে                                                                                                                                                                                                                 |
+| `accessSchedule`                            | সময়সূচি অবজেক্ট অথবা `null`                                                   | `null` সময়সূচি পরিষ্কার করে                                                                                                                                                                                                                 |
+| `scopes`                                    | সর্বোচ্চ ৩২টি স্ট্রিংয়ের অ্যারে                                               |                                                                                                                                                                                                                                              |
+| `allowedEndpoints`                          | সর্বোচ্চ ২০টি স্ট্রিংয়ের অ্যারে                                               |                                                                                                                                                                                                                                              |
+| `streamDefaultMode`                         | `legacy` \| `json`                                                             |                                                                                                                                                                                                                                              |
+| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                           | [প্রতি-কী ক্যাশে বাইপাস](#per-key-cache-bypass) দেখুন                                                                                                                                                                                        |
+| `compressionEnabled`                        | বুলিয়ান                                                                       |                                                                                                                                                                                                                                              |
+| `codexServiceMode`                          | Codex পরিষেবা মোডগুলোর একটি                                                    |                                                                                                                                                                                                                                              |
+| `disableNonPublicModels`                    | boolean                                                                        |                                                                                                                                                                                                                                              |
+| `allowUsageCommand`                         | boolean                                                                        |                                                                                                                                                                                                                                              |
+| `usageLimitEnabled`                         | boolean                                                                        |                                                                                                                                                                                                                                              |
+| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | সংখ্যা >= 0 বা `null`                                                          |                                                                                                                                                                                                                                              |
+| `fiveHourUsageLimitUsd`                     | সংখ্যা >= 0 বা `null`                                                          | রোলিং 5-ঘন্টা USD বাজেট, দৈনিক এবং সাপ্তাহিক সীমার মতো বলবৎ (`usageLimitEnabled`, `UNPRICED_USAGE_BUDGET_POLICY`)। `retry-after` হল যখন উইন্ডোতে সবচেয়ে পুরানো খরচের বয়স শেষ হয়ে যায়, যা এখনও অবরুদ্ধ সীমার বেশি একটি কী রেখে যেতে পারে। |
+| `chaosModeEnabled`                          | boolean                                                                        |                                                                                                                                                                                                                                              |
 
 ```bash
 curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
@@ -1409,6 +1390,14 @@ curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
 | `/api/modality-bridge/stats`         | GET        | ইন-মেমরি `attempts`, সফলতা/`bridged`, ব্যর্থতা, ক্যাশ হিট, `totalLatencyMs`, `latencySamples`, স্যাম্পল-ভিত্তিক `averageLatencyMs`, এবং সর্বশেষ ব্যবহারের সময় (রিস্টার্টে রিসেট হয়; ম্যানেজমেন্ট অথেন্টিকেশন প্রয়োজন)                                                                                                                                                                           |
 | `/api/modality-bridge/video/runtime` | GET        | ম্যানেজমেন্ট অথেন্টিকেশন/প্রোবের আগে কঠোর বিশ্বস্ত-লুপব্যাক যাচাই; স্যানিটাইজ করা FFmpeg/ffprobe-এর প্রাপ্যতা ও সংস্করণ (no-store)                                                                                                                                                                                                                                                                 |
 | `/api/modality-bridge/video/extract` | POST       | অভ্যন্তরীণ অথেন্টিকেটেড বিশ্বস্ত-লুপব্যাক বাইট ব্রোকার; ৫০ MiB ইনপুট, সীমাবদ্ধ কিউ/৩২ MiB আউটপুট, ধারণক্ষমতা পূর্ণ হলে `503`, সংযোগ বিচ্ছিন্ন হলে `499`, ডেডলাইন অতিক্রম হলে `504`; এটি কোনো পাবলিক আপলোড API নয়                                                                                                                                                                                  |
+
+### ভিডিও ফ্রেম ড্রিল-ডাউন
+
+`GET /api/v1/video-bridge/drilldown` একটি স্পষ্টভাবে সম্মতিপ্রাপ্ত ভিডিও ব্রিজ অনুরোধের পরে `x-omniroute-video-drilldown` এ ফিরে আসা একটি ভাড়াটে-বাউন্ড অস্বচ্ছ হ্যান্ডেল পড়ে। উভয় reads এবং `DELETE` সর্বদা একটি বৈধ API কী এবং অপারেটরের স্বাধীন `modalityBridgeVideoDrilldownRemoteEnabled` অনুমতি প্রয়োজন। উত্পাদন ধরে রাখার জন্য অতিরিক্ত `modalityBridgeVideoDrilldownEnabled` এবং কঠোর প্রতি-অংশ `drilldown: true` প্রয়োজন। যদি কীটির একটি খালি এন্ডপয়েন্ট অনুমোদন তালিকা থাকে, তাহলে এটিতে অবশ্যই GET এবং DELETE উভয়ের জন্য `video` অন্তর্ভুক্ত থাকতে হবে, কলকারী `/v1` বা `/api/v1` ব্যবহার করুক না কেন।
+
+GET প্রশ্ন: প্রয়োজনীয় `handle`; ঐচ্ছিক `variant` (`preview`, `standard`, `detail`), `limit` (1–8; উত্তরাধিকার `frames` গ্রহণ করা হয় কিন্তু `limit`), শূন্য-ভিত্তিক `page` এবং `start`/`end` সেকেন্ডের সাথে একত্রিত করা যায় না। যখন উভয় ফোকাস সীমা সরবরাহ করা হয়, তখন `end` অবশ্যই `start` থেকে বড় হতে হবে। Duplicate/unknown ক্যোয়ারী কী প্রত্যাখ্যান করা হয়। সফল প্রতিক্রিয়াগুলিতে `derivation`, `durationSeconds`, `frames`, `hasMore`, `page`, `variant` এবং ঐচ্ছিক `focusWindow` রয়েছে; নো-স্টোর JSON বেস64 সহ 32 MiB এ সীমাবদ্ধ। ওভারসাইজড আউটপুট রিটার্ন 413; কম ফ্রেম অনুরোধ.
+
+`DELETE /api/v1/video-bridge/drilldown?handle=...` `{ "removed": 0|1 }` ফেরত দেয়। অজানা, মেয়াদোত্তীর্ণ এবং ক্রস-কি GETs হল অভেদযোগ্য 404 প্রতিক্রিয়া; ক্রস-কি DELETE মালিকের এন্ট্রি সরাতে পারে না। নিষ্ক্রিয় অ্যাক্সেস রিটার্ন 403, missing/invalid প্রমাণীকরণ 401, অবৈধ প্রশ্ন 400, বাতিলকরণ 499 এবং অস্থায়ী ত্রুটি 503। হ্যান্ডেলগুলি প্রক্রিয়া-স্থানীয়, দশ মিনিটের পরে মেয়াদ শেষ হয়ে যায় এবং পুনরায় চালু করা থেকে বাঁচে না। নতুন হ্যান্ডলগুলি `v1.` প্লাস একটি 32-বাইট র্যান্ডম Base64URL টোকেন ব্যবহার করে; শুধুমাত্র টোকেন হ্যাশ রাখা হয়. লিগ্যাসি 64-হেক্স টোকেনগুলি সামঞ্জস্যের জন্য সিনট্যাকটিকভাবে পাঠযোগ্য থাকে। সম্মতি, কোটা এবং বৈকল্পিক ডেরিভেশন বিশদ বিবরণের জন্য [ভিডিও ব্রিজ গার্ডেল](../security/GUARDRAILS.md#video-bridge-videobridgets-videobridgepipelinets) দেখুন।
 
 ### ব্যাকআপ ও এক্সপোর্ট/ইমপোর্ট
 
@@ -1515,19 +1504,19 @@ GET-এর প্রতিক্রিয়ায় `agents[]` (id, name, bina
 
 এই এন্ডপয়েন্টগুলো এমন ক্লায়েন্টের জন্য Gemini-এর API ফরম্যাট অনুসরণ করে, যারা নেটিভ Gemini SDK সামঞ্জস্য প্রত্যাশা করে।
 
-### অভ্যন্তরীণ / সিস্টেম API
+### অভ্যন্তরীণ / সিস্টেম APIs
 
-| Endpoint                 | Method | Description                                                          |
-| ------------------------ | ------ | -------------------------------------------------------------------- |
-| `/api/init`              | GET    | অ্যাপ্লিকেশন ইনিশিয়ালাইজেশন পরীক্ষা (প্রথমবার চালানোর সময় ব্যবহৃত) |
-| `/api/tags`              | GET    | Ollama-সামঞ্জস্যপূর্ণ মডেল ট্যাগ (Ollama ক্লায়েন্টের জন্য)          |
-| `/api/restart`           | POST   | গ্রেসফুল সার্ভার রিস্টার্ট শুরু করুন                                 |
-| `/api/shutdown`          | POST   | গ্রেসফুল সার্ভার শাটডাউন শুরু করুন                                   |
-| `/api/system/env/repair` | POST   | OAuth প্রদানকারীর পরিবেশ ভেরিয়েবল মেরামত করুন                       |
-| `/api/system/version`    | GET    | বর্তমান/সর্বশেষ সংস্করণ, আপডেটের অবস্থা, রিলিজ চ্যানেল               |
-| `/api/system/version`    | POST   | সর্বশেষ সংস্করণে ডিপ্লয়মেন্ট-সচেতন আপডেট শুরু করুন                  |
+| শেষবিন্দু                | পদ্ধতি | বর্ণনা                                                         |
+| ------------------------ | ------ | -------------------------------------------------------------- |
+| `/api/init`              | GET    | ব্যাকগ্রাউন্ড সিঙ্ক পরিষেবা শুরু করুন (ব্যবস্থাপনা প্রমাণীকরণ) |
+| `/api/tags`              | GET    | ওল্লামা-সামঞ্জস্যপূর্ণ মডেল ট্যাগ ( Ollama ক্লায়েন্টদের জন্য) |
+| `/api/restart`           | POST   | ট্রিগার করুণ সার্ভার পুনরায় চালু করুন                         |
+| `/api/shutdown`          | POST   | ট্রিগার করুণ সার্ভার শাটডাউন                                   |
+| `/api/system/env/repair` | POST   | OAuth প্রদানকারী পরিবেশ ভেরিয়েবল মেরামত                       |
+| `/api/system/version`    | GET    | Current/latest সংস্করণ, আপডেট অবস্থা, রিলিজ চ্যানেল            |
+| `/api/system/version`    | POST   | সর্বশেষ সংস্করণে একটি স্থাপনা-সচেতন আপডেট শুরু করুন            |
 
-> **দ্রষ্টব্য:** এই এন্ডপয়েন্টগুলো সিস্টেম অভ্যন্তরীণভাবে অথবা Ollama ক্লায়েন্টের সামঞ্জস্যের জন্য ব্যবহার করে। সাধারণত শেষ ব্যবহারকারীরা এগুলো কল করেন না।
+> **দ্রষ্টব্য:** এই শেষ পয়েন্টগুলি অভ্যন্তরীণভাবে সিস্টেম দ্বারা বা Ollama ক্লায়েন্ট সামঞ্জস্যের জন্য ব্যবহৃত হয়। তারা সাধারণত শেষ ব্যবহারকারীদের দ্বারা বলা হয় না.
 
 ### OAuth পরিবেশ মেরামত _(v3.6.1+)_
 

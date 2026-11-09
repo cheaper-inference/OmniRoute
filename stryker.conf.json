@@ -410,6 +410,7 @@
       "tests/unit/embedding-account-cooldown-10347.test.ts",
       "tests/unit/embedding-cooldown-integration-10347.test.ts",
       "tests/unit/embeddings-auth.test.ts",
+      "tests/unit/embeddings-custom-node-429-cooldown.test.ts",
       "tests/unit/error-classification.test.ts",
       "tests/unit/error-message-sanitization.test.ts",
       "tests/unit/error-path-redaction-route-truncation-13144.test.ts",
@@ -762,7 +763,8 @@
       "tests/unit/upstream-http-edge-selection.test.ts",
       "tests/unit/issue-18600-muse-request-dispatch.test.ts",
       "tests/unit/issue-18600-muse-followup-isolation.test.ts",
-      "tests/unit/universal-handoff-api-key-scope.test.ts"
+      "tests/unit/universal-handoff-api-key-scope.test.ts",
+      "tests/unit/combo-avoid-stalled-account.test.ts"
     ],
     "nodeArgs": [
       "--import",

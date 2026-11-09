@@ -355,24 +355,24 @@ API കീ: [ഡാഷ്ബോർഡിൽ നിന്ന്]
 
 ## 🚀 വിന്യാസം
 
-### ആഗോള npm ഇൻസ്റ്റാളേഷൻ (ശുപാർശ ചെയ്യുന്നത്)
+### ഗ്ലോബൽ npm ഇൻസ്റ്റാൾ ചെയ്യുക (ശുപാർശ ചെയ്യുന്നത്)
 
 ```bash
 npm install -g omniroute
 
-# കോൺഫിഗറേഷൻ ഡയറക്ടറി സൃഷ്ടിക്കുക
+# Create config directory
 mkdir -p ~/.omniroute
 
-# .env ഫയൽ സൃഷ്ടിക്കുക (.env.example കാണുക)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# സെർവർ ആരംഭിക്കുക
+# Start server
 omniroute
-# അല്ലെങ്കിൽ ഇഷ്ടാനുസൃത പോർട്ടോടെ:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI സ്വയമേവ `~/.omniroute/.env` അല്ലെങ്കിൽ `./.env` എന്നതിൽ നിന്ന് `.env` ലോഡ് ചെയ്യുന്നു.
+`~/.omniroute/.env` അല്ലെങ്കിൽ `./.env` ൽ നിന്ന് CLI യാന്ത്രികമായി `.env` ലോഡ് ചെയ്യുന്നു. വർക്കിംഗ് ഡയറക്ടറിയിലെ ഒരു `./.env` കീകളുടെ ഒരു ചെറിയ അനുവദനീയ ലിസ്റ്റ് (പോർട്ടുകൾ, `REQUIRE_API_KEY`, ലൊക്കേൽ, കളർ ക്രമീകരണങ്ങൾ) മാത്രമേ സജ്ജീകരിക്കൂ; ബാക്കി എല്ലാം `~/.omniroute/.env` ൽ ഇടുക. [CLI ലോഞ്ച് കരാറുകൾ](CLI-LAUNCH-CONTRACTS.md#working-directory-env) കാണുക.
 
 ### ട്രേ മോഡ്
 

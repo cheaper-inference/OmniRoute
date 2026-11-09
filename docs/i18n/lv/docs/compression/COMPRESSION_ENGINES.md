@@ -305,6 +305,95 @@ Saspiešanas kombinācijas ir nosaukti saspiešanas profili, kurus var piešķir
 
 Informācijas paneļa sadaļa: `Dashboard -> Context & Cache -> Compression Combos`.
 
+## Priekšnosacījumi / operatora rokasgrāmata (CCR & session-dedup)
+
+CCR (`ccr`) un `session-dedup` aizstāj vai atceļ tekstu un atstāj a** marķieris** aiz muguras. Šī sadaļa ir operatora atsauce, lai savienotu klientu, nolasītu divus marķierus un izgūtu vai diagnosticētu izdalītā satura. Katra dzinēja mehānika ir apskatīta iepriekš; šis ir slānis "kā to palaist".
+
+### Transports un galapunkti
+
+MCP serveri, kas atklāj CCR rīkus, var sasniegt trīs veidos. Noklusējuma bāze URL ir `http://localhost:20128` (`OMNIROUTE_BASE_URL`):
+
+| Transports                            | URL / komanda                           | Piezīmes                                                                                                                                       |
+| ------------------------------------- | --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| Straumējama HTTP (klients, ieteicams) | `http://localhost:20128/api/mcp/stream` | Galapunkts, ar kuru sarunājas pašreizējie MCP klienti.                                                                                         |
+| Mantotais SSE viengabals              | `http://localhost:20128/api/mcp/sse`    | Vecāks vienvietīgs transports. Tas** aizveras** straumējamas sesijas; izmantojiet `streamable-http` klientus pret `/api/mcp/stream`, nevis šo. |
+| stdio                                 | `omniroute --mcp`                       | IDE MCP konfigurācijai, kas rada procesu. Nav `--dev` karoga; `omniroute --mcp` ir stdio ievades punkts.                                       |
+
+### Krātuves līmeņi (kas izdzīvo pēc restartēšanas)
+
+CCR ir a** divpakāpju** veikals, nevis tikai atmiņā:
+
+- **Karsts atmiņas līmenis** — bloka vāciņš 2 MiB, vienam galvenajam 16 MiB, globālais 64 MiB. Ieraksti pēc noklusējuma ir 24 h TTL (maksimums 7 dienas). Pilna MCP izguve no atmiņas ir ierobežota līdz 256 KiB; viss lielāks joprojām ir sasniedzams, izmantojot diapazona / grep režīmus.
+- **Izturīgs SQLite līmenis** (`ccr_blocks`, `COMPRESSION_CCR_DURABLE_STORE`, ieslēgts pēc noklusējuma) — atbalsta atmiņas līmeni, lai bloks izturētu LRU izlikšanu, restartēšanu vai izguves nosēšanos citā instancē. Rinda saglabā bloka TTL, tāpēc bloks, kas pārsniedz tā TTL ir pazudis no abiem līmeņiem.
+
+Trīs aizsargi notur izturīgu līmeņu robežu — bloks paliek tikai atmiņā, ja:
+
+1. bloks ir beidzies** 512 KB** (`MAX_DURABLE_BLOCK_BYTES`);
+2. izpildlaiks ir mākoņa izpildlaiks (nav lokālā diska);
+3. `COMPRESSION_CCR_DURABLE_STORE=false`.
+
+Tātad "bloks pazuda" nav vispārējs restartēšanas stāsts: sub-512 KB bloks lokālā, ne mākoņa izpildlaikā iztur restartēšanu, izmantojot izturīgo līmeni, līdz izbeidzas tā TTL. Skatiet mainīgo [vides atsauci](../reference/ENVIRONMENT.md).
+
+### Divi marķieri
+
+| Marķieris                             | Nozīme                                                                                                                                             | Kas modelim jādara                                                                                                                                                                                                    |
+| ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `[CCR retrieve hash=<24hex> chars=N]` | Liels bloks tika saglabāts saturam adresēti.                                                                                                       | Zvaniet `omniroute_ccr_retrieve` ar** 24 heksadecimālais jauktais nokopēts burtiski** lai atgūtu sākotnējo tekstu.                                                                                                    |
+| `[dedup:ref sha=…]`                   | `session-dedup` elided teksts, kas jau nosūtīts tās pašas sesijas iepriekšējā pagriezienā. Tas ir an** tīšs atskats** , nevis zaudējumi vai kļūda. | Dariet** nē** piezvani uz jebkuru rīku un dari** nē** mēģināt to "rekonstruēt". Pirmā teksta sastopamība ir kanoniskā kopija; pašreizējais pagrieziens nekad netiek pārrakstīts, tas tiek noņemts vēlākā pagriezienā. |
+
+`[dedup:ref]` atskats ir apzināts protokola lēmums, — nav rekonstrukcijas pirms nosūtīšanas. Uztveriet to kā "šis precīzs teksts jau bija pieejams iepriekš šajā sesijā".
+
+### Klienta priekšnoteikumi
+
+- **Atslēga (stdio):** stdio zvanītājam nav pieprasījuma identitātes, tāpēc tas tiek autentificēts ar `OMNIROUTE_API_KEY` (iestatīts MCP servera `env`). Bez tā zvanītājs ir anonīms, un rīki, kuriem nepieciešams galvenais, var pasliktināties.
+- **`tools[]` ir injekcijas priekšnosacījums.** Tiek ievadīta CCR izguves protokola instrukcija (#8033).** tikai** kad pieprasījuma reklamētais `tools[]` pierāda, ka klients patiešām var sasniegt `omniroute_ccr_retrieve`. Atbilstība ir beigu segmenta atbilstība, ko ierobežo atdalītājs (`__`, `.`, `/`, `:`) — nekad nav tukša apakšvirkne — tāpēc nosaukums ar nosaukumiem, piemēram, `mcp__gateway__omniroute_ccr_retrieve` joprojām tiek ņemts vērā. Trūkstošs vai neatbilstošs `tools[]` nozīmē, ka instrukcija pēc konstrukcijas _nav_ ievadīta.
+- **`codemode:false` (OpenCode klienti).** OpenCode noklusējuma iestatījums ir koda režīms, kas modelim reklamē tikai savus vietējos rīkus** nav** ievietojiet MCP rīkus vietējā `tools[]` sarakstā. Iestatiet `codemode: false` MCP servera ierakstā, lai tiktu reklamēti `omniroute_ccr_*` rīki. Šis ir a** klients** iestatījums, nevis OmniRoute. Tas vēl nesaņem CCR instrukciju: OpenCode nosauc rīku `<server>_<tool>`, tāpēc serveris ar nosaukumu `omniroute` atklāj `omniroute_omniroute_ccr_retrieve`, un `_` nav viens no saskaņotajiem atdalītājiem.
+- **Direktori.** Uzglabāšana un izguve ir izolēti katram autentificētam principālam (katrai API atslēgai). Atslēga redz tikai savus blokus.
+
+### Darbības apjoms katram instrumentam
+
+Tvēruma izpilde vienmēr ir ieslēgta šauras darbības jomas HTTP/SSE zvanītājiem. `omniroute_` CCR rīkiem ir nepieciešams:
+
+| Rīks                     | Darbības joma       |
+| ------------------------ | ------------------- |
+| `omniroute_ccr_store`    | `write:compression` |
+| `omniroute_ccr_delete`   | `write:compression` |
+| `omniroute_ccr_retrieve` | `read:compression`  |
+| `omniroute_ccr_inspect`  | `read:compression`  |
+| `omniroute_ccr_list`     | `read:compression`  |
+| `omniroute_ccr_stats`    | `read:compression`  |
+
+Trūkstošais tvērums atgriež an**MCP instrumenta kļūdas rezultāts** (`isError: true`, nevis HTTP 403 — `403 LOCAL_ONLY` ir atsevišķa cilpas maršruta apsardzes autentifikācija): `Error: Insufficient MCP scopes for <tool>. Missing: <scope>.` Minimālā tālvadības atslēgā var būt `mcp:connect` (autorizē `/api/mcp/` lokālo izņemšanu) un tam nepieciešamo īpašo read/write tvērumu.
+
+### Klientu matrica
+
+| Klients            | Transports                                      | Lietošanas konfigurācija                                                                                                                                                                                                                                  | `tools[]` reklamēja? (injicēta → CCR instrukcija)                                                                                                                                             |
+| ------------------ | ----------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Claude kods        | straumējams-http                                | `claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream`                                                                                                                                                                         | Jā — MCP spējīgs; injicēts.                                                                                                                                                                   |
+| Cursor / Cline     | `stdio`** vai** `streamable-http`               | stdio: `omniroute --mcp` ar `OMNIROUTE_API_KEY` `env`; vai attālā MCP ievade, kas norāda uz `http://localhost:20128/api/mcp/stream` (skatiet [iestatīšanas rokasgrāmatu → MCP klienta konfigurācija](../guides/SETUP_GUIDE.md#mcp-client-configuration) ) | Jā — reklamē `omniroute_ccr_*` rīkus.                                                                                                                                                         |
+| OpenCode           | straumējams-http                                | `opencode mcp add omniroute --url http://localhost:20128/api/mcp/stream`, plus `codemode: false`                                                                                                                                                          | Rīki, kas reklamēti tikai ar `codemode: false`; instrukcija joprojām nav ievadīta, jo `omniroute_omniroute_ccr_retrieve` nesakrīt (skat. [Klienta priekšnosacījumi](#client-prerequisites) ). |
+| Saderīgs ar OpenAI | Ar OpenAI saderīga HTTP (tērzēšanas pabeigšana) | standarta tērzēšanas pabeigšanas klients ar OpenAI saderīgu galapunktu                                                                                                                                                                                    | **Nekad** — vienkāršam ar OpenAI saderīgam zvanītājam nekad netiek likts izsaukt rīku, un instrukcija netiek ievadīta.                                                                        |
+
+### Izguves ierobežojumi un lappušu skaits
+
+MCP rīka teksta rezultāti tiek apgriezti ap `mcpAccessibility.maxTextChars` (noklusējuma `50000`). Bloka `full` izguves ierobežojums ir 256 KiB —** nav neierobežotas pilnas izgūšanas** . Ja bloka `chars=N` ir liels, lapējiet to, nevis velciet visu:
+
+- Īkšķis:**`chars > 40000` → izmantojiet `mode`** , nekad kails pilns.
+- `mode:"grep"` — regex `pattern` saskaņota rindiņa pa rindiņai, līdz 1000 atbilstošām rindiņām (`unique: true` drops atkārtojas), lētākais “atrast vienu man vajadzīgo rindiņu”.
+- `mode:"lines"` — 1 indeksēta līniju diapazons; ir nepieciešams gan `start`, gan `end`.
+- `mode:"head"` / `mode:"tail"` — first/last `n` līnijas.
+- `mode:"stats"` — rindas, rakstzīmes un baiti tiek skaitīti bez pamatteksta.
+
+Izmantojiet `mode:"lines"` ar `start`/`end`, lai izietu garu bloku lapās, nevis pieprasītu visu uzreiz.
+
+### Instrumentu nosaukšana
+
+Izgūšanas rīks pašlaik ir nosaukts `omniroute_ccr_retrieve` ( `omniroute_` prefikss ir datēts risinājums starpserveru nosaukumu sadursmēm). Tīrāks ierobežota sufiksa rīka nosaukums un labojums MCP JSON rezultātiem, kas ir saīsināti vidējā virknē, tiek izsekoti kā augšupējie turpinājumi; šī lapa dokumentē tikai pašreizējo, nosūtīto darbību.
+
+### Sesijas dzīves cikls
+
+Straumējamās HTTP sesijas ir dīkstāves, un serveris tās iegūst; dīkstāves logu konfigurē `OMNIROUTE_MCP_SESSION_IDLE_MS`, atgriežoties uz `DEFAULT_MCP_SESSION_IDLE_MS` `open-sse/mcp-server/httpTransport.ts`. Dīkstāves sesijas simptoms ir HTTP 404 ar `Unknown Mcp-Session-Id` — lai novērstu sesijas atkārtotu savienojumu vai restartēšanu,**nē** lai pagrieztu atslēgu, mainītu darbības jomu vai pārdēvētu rīku.
+
 ## API saskarne
 
 | Maršruts                               | Nolūks                                                                     |
@@ -375,7 +464,7 @@ prefiksi u.c.).
 
 ## Validācija
 
-Šīs jomas galvenie pārbaudes punkti ir:
+Koncentrētie vārti šai zonai ir:
 
 ```bash
 node --import tsx/esm --test tests/unit/compression/rtk-*.test.ts tests/unit/compression/pipeline-integration.test.ts tests/unit/compression/context-compression-api.test.ts

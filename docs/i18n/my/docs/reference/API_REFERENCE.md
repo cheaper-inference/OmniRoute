@@ -354,7 +354,7 @@ GET /v1/embeddings
 
 ---
 
-## ပုံရိပ်ဖန်တီးခြင်း
+## ရုပ်ပုံမျိုးဆက်
 
 ```bash
 POST /v1/images/generations
@@ -368,37 +368,22 @@ Content-Type: application/json
 }
 ```
 
-ရရှိနိုင်သော provider များတွင် OpenAI (GPT Image 2), xAI (Grok Image), Together AI (FLUX), Fireworks AI, Nebius (FLUX), Hyperbolic, NanoBanana, **OpenRouter**, **ZenMux**, SD WebUI (local), ComfyUI (local) တို့ ပါဝင်သည်။
+ရနိုင်သောဝန်ဆောင်မှုပေးသူများတွင် OpenAI (GPT Image 2) ၊ xAI (Grok Image ) ၊ Together AI (FLUX) ၊ Fireworks AI၊ Nebius (FLUX) ၊ ဟိုက်ပါလစ်၊ NanoBanana၊**OpenRouter** ၊**ZenMux** , SD WebUI (ဒေသခံ), ComfyUI (ဒေသခံ).
 
-`n` သည် `data[]` အတွင်း ပုံရိပ် `n` ခုကို ပြန်ပေးသည်။ အထက်ပါ API မှ ခေါ်ဆိုမှုတစ်ကြိမ်လျှင် ပုံရိပ်တစ်ခုသာ ပြန်ပေးသော provider များ
-(Black Forest Labs, Stability AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik,
-NVIDIA NIM, Cloudflare Workers AI) အတွက် upstream ခေါ်ဆိုမှုများကို သီးခြား `n` ကြိမ် ပြုလုပ်ပြီး တစ်ချိန်တည်းတွင် အများဆုံး ၄ ကြိမ် လုပ်ဆောင်သည်။ သတ်မှတ်ထားသော
-`seed` ကို ခေါ်ဆိုမှုအညွှန်းဖြင့် (`seed`, `seed + 1`, …) အရွှေ့ပေးသဖြင့် ပုံရိပ်များကွဲပြားသော်လည်း
-ပြန်လည်ထုတ်လုပ်နိုင်စွမ်း ရှိနေမည်ဖြစ်သည်။ `n` ကို 10 အထိသာ သတ်မှတ်နိုင်သည်။ ခေါ်ဆိုမှုတစ်ခုခု မအောင်မြင်ပါက request တစ်ခုလုံး မအောင်မြင်ပါ။ fan-out format များစာရင်းကို
-`open-sse/handlers/imageGeneration/fanOut.ts` ရှိ
-`SINGLE_IMAGE_FANOUT_FORMATS` တွင် တွေ့နိုင်သည်။
+`n` `n` ပုံများကို `data[]` တွင် ပြန်ပေးသည်။ ခေါ်ဆိုမှုတစ်ခုလျှင် API အထက်ပိုင်းတွင် တစ်ပုံတစ်ပုံပြန်ပေးသည့် ဝန်ဆောင်မှုပေးသူများသည် (Black Forest Labs၊ Stability AI၊ Leonardo၊ Ideogram၊ Haiper၊ Hyperbolic၊ Magnific/Freepik၊ NVIDIA NIM၊ Cloudflare Workers AI) `n` သီးခြားအထက်ရေခေါ်ဆိုမှုများ၊ ပျံသန်းမှုတွင် အများဆုံး 4 ခု ရရှိသည်။ ပုံသေ `seed` ခေါ်ဆိုမှုအညွှန်း (`seed`, `seed + 1`, … ) ဖြင့် နှိမ်ထားသောကြောင့် ပုံများသည် ကွဲပြားသော်လည်း မျိုးပွားနိုင်သည်။ `n` 10 တွင် ကန့်သတ်ထားသည်။ ခေါ်ဆိုမှု ပျက်ကွက်ပါက တောင်းဆိုချက်တစ်ခုလုံး ပျက်ကွက်သည်။ fan-out ဖော်မတ်များစာရင်းသည် `open-sse/handlers/imageGeneration/fanOut.ts` တွင် `SINGLE_IMAGE_FANOUT_FORMATS` ဖြစ်သည်။
 
-ZenMux သည် ရှိပြီးသား API-key connection ကို ပြန်လည်အသုံးပြုပြီး `zenmux/` သို့မဟုတ် `zm/` prefix များကို လက်ခံသည်။
+ZenMux ရှိပြီးသား API-ကီးချိတ်ဆက်မှုကို ပြန်လည်အသုံးပြုပြီး `zenmux/` သို့မဟုတ် `zm/` ရှေ့ဆက်များကို လက်ခံသည်-
 
-- `zenmux/openai/gpt-image-2` သည် ZenMux ၏ OpenAI Images API ကို အသုံးပြုသည်။ ရွေးချယ်စရာများတွင် `size`,
-  `quality`, `n`, `output_format`, `output_compression`, `background` နှင့် `response_format` တို့ ပါဝင်သည်။
-- `zm/meta/muse-image-1.0` ကဲ့သို့သော အခြား publisher များသည် ZenMux ၏ Vertex AI `:predict`
-  endpoint ကို အသုံးပြုသည်။ `n` ကို `sampleCount`၊ `aspect_ratio` ကို `aspectRatio` နှင့် `image_size`
-  (`1K`, `2K`, `4K`) ကို `sampleImageSize` သို့ ပြောင်းလဲသတ်မှတ်သည်။ pixel `size` သည် aspect ratio ကိုသာ ပေးပြီး
-  pixel အတိုင်းအတာကို အာမခံပေးခြင်း မရှိပါ။ ပံ့ပိုးထားသော ratio များ၊ resolution များနှင့် count များသည် model အလိုက် ကွဲပြားသည်။
-- `zm/inclusionai/ming-image-0.1-design` သည် ၎င်း၏ ကိုယ်ပိုင်အတိုင်းအတာများကို ရွေးချယ်သည်။ `size`,
-  `aspect_ratio` နှင့် `image_size` တို့ကို မထည့်ပါနှင့်။ တန်ဖိုးများကို တိတိကျကျ သတ်မှတ်ပါက HTTP 400 ပြန်ပေးသည်။ PNG, JPEG နှင့် WebP
-  တို့ကို `output_format` ဖြင့် တောင်းဆိုနိုင်သည်။
+- `zenmux/openai/gpt-image-2` ZenMux၏ OpenAI Images API အသုံးပြုသည်။ ရွေးချယ်စရာများတွင် `size`၊ `quality`၊ `n`၊ `output_format`၊ `output_compression`၊ `background` နှင့် `response_format` တို့ ပါဝင်သည်။
+- `zm/meta/muse-image-1.0` ကဲ့သို့သော အခြားထုတ်ဝေသူများသည် ZenMux၏ Vertex AI `:predict` အဆုံးမှတ်ကို အသုံးပြုပါ။ `n` မြေပုံများကို `sampleCount`၊ `aspect_ratio` မှ `aspectRatio`၊ နှင့် `image_size` (`1K`, `2K`, `4K`) သို့ `sampleImageSize` pixel `size` တစ်ခုသည် အချိုးအစားတစ်ခုသာ ပံ့ပိုးပေးသည်၊၊ အာမခံချက်ရှိသော pixel အတိုင်းအတာများ။ ပံ့ပိုးထားသော အချိုးများ၊ ဆုံးဖြတ်ချက်များနှင့် အရေအတွက်များသည် မော်ဒယ်အလိုက် ကွဲပြားသည်။
+- `zm/inclusionai/ming-image-0.1-design` ၎င်း၏ကိုယ်ပိုင်အတိုင်းအတာကို ရွေးချယ်သည်။ `size`, `aspect_ratio`, နှင့် `image_size` ကို ချန်လှပ်ထားသည်။ တိကျပြတ်သားသောတန်ဖိုးများသည် HTTP 400 ကို ပြန်ပေးသည်။ PNG၊ JPEG နှင့် WebP `output_format` ဖြင့် တောင်းဆိုနိုင်သည်။
 
-ဤ integration သည် စာသားမှပုံရိပ် ဖန်တီးခြင်းကို ပံ့ပိုးသော်လည်း reference-image တည်းဖြတ်ခြင်းကို မပံ့ပိုးပါ။ Vertex
-output ကို `data[].b64_json` အဖြစ် ပုံစံတူညီအောင် ပြောင်းလဲထားသည်။ `response_format: "url"` သည် upstream
-HTTPS URL တစ်ခု သို့မဟုတ် image bytes များသာ ရရှိနိုင်သည့်အခါ base64 data URL တစ်ခုကို ပြန်ပေးသည်။ အလွတ် သို့မဟုတ် filter လုပ်ခံထားရသော output များအတွက်
-အောင်မြင်မှုအလွတ်တစ်ခုကို ပြန်ပေးမည့်အစား error တစ်ခုကို ပြန်ပေးသည်။ Model အသုံးပြုခွင့်သည် ZenMux account ပေါ်တွင် မူတည်သည်။
-[ZenMux's Vertex API](https://docs.zenmux.ai/api/vertexai/generate-images) နှင့်
-[OpenAI Images API](https://docs.zenmux.ai/api/openai/generate-an-image) ကို ကြည့်ပါ။
+ဤပေါင်းစပ်မှုသည် ရည်ညွှန်းပုံ-ပုံတည်းဖြတ်ခြင်းမဟုတ်ဘဲ စာသားမှပုံထုတ်လုပ်ခြင်းကို ပံ့ပိုးပေးသည်။ Vertex အထွက်အား `data[].b64_json` သို့ ပုံမှန်ဖြစ်အောင် ပြုလုပ်ထားသည်။ ပုံဘိုက်များသာရရှိနိုင်သောအခါ `response_format: "url"` အထက်စီးကြောင်း HTTPS URL သို့မဟုတ် base64 ဒေတာ URL ပြန်ပေးသည်။ Empty/filtered သည် အချည်းနှီးသော အောင်မြင်မှုထက် အမှားတစ်ခုကို ပြန်ပေးသည်။ မော်ဒယ်ဝင်ရောက်ခွင့်သည် ZenMux အကောင့်ပေါ်တွင်မူတည်သည်။ [ZenMux၏ Vertex API](https://docs.zenmux.ai/api/vertexai/generate-images) နှင့် [OpenAI ပုံများ API](https://docs.zenmux.ai/api/openai/generate-an-image) ကြည့်ပါ။
+
+Microsoft 365 Copilot အကောင့်ဝင်ခြင်းချိတ်ဆက်မှုသည် Copilot၏ built-in ပုံတူးလ်မှတစ်ဆင့် `copilot-m365-web/m365-copilot-image` ဆောင်ရွက်ပေးသည်- ပုံတစ်ပုံလျှင် Copilot တစ်လှည့် (`n` 1–4), `size` လမ်းကြောင်းကိုသာ ညွှန်ပြပြီး ပုံများကို inline ပြန်ပေးသည် (`b64_json`, သို့မဟုတ် `response_format: "url"` အတွက် ဒေတာ URL )။ [Microsoft 365 Copilot](../providers/COPILOT-M365.md#image-generation) ကြည့်ပါ။
 
 ```bash
-# ပုံရိပ် model အားလုံးကို စာရင်းပြုစုရန်
+# List all image models
 GET /v1/images/generations
 ```
 
@@ -788,17 +773,19 @@ OpenAI နှင့် ကိုက်ညီသော batch processing။
 
 ---
 
-## Search API
+## API ရှာပါ။
 
-ဝဘ်/ရှာဖွေရေး ဝန်ဆောင်မှုပေးသူများအတွက် abstraction (Tavily၊ Brave၊ Exa၊ Serper စသည်တို့)။
+Web/search ပံ့ပိုးပေးသူ abstraction (Tavily၊ Brave၊ Exa၊ Serper စသည်ဖြင့်)။
 
-| Method | Path                   | Description                                                                                                           |
-| ------ | ---------------------- | --------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/v1/search`           | သတ်မှတ်ထားသော ရှာဖွေရေးဝန်ဆောင်မှုပေးသူများနှင့် ၎င်းတို့၏ စွမ်းဆောင်ရည်များကို စာရင်းပြုစုရန်                        |
-| POST   | `/v1/search`           | ရှာဖွေမှုမေးမြန်းချက်ကို လုပ်ဆောင်ရန် — body ကို `v1SearchSchema` ဖြင့် အတည်ပြုပြီး caching/coalescing ကို ပံ့ပိုးသည် |
-| GET    | `/v1/search/analytics` | ဝန်ဆောင်မှုပေးသူတစ်ခုချင်းစီအလိုက် hit/latency/cache စာရင်းအင်းများ                                                   |
+| နည်းလမ်း | မဂ်                    | ဖော်ပြချက်                                                                                              |
+| -------- | ---------------------- | ------------------------------------------------------------------------------------------------------- |
+| GET      | `/v1/search`           | ပြင်ဆင်သတ်မှတ်ထားသော ရှာဖွေရေးဝန်ဆောင်မှုပေးသူများ + စွမ်းရည်များကို စာရင်းပြုစုပါ။                     |
+| POST     | `/v1/search`           | `v1SearchSchema` မှ အတည်ပြုထားသော ရှာဖွေမှု query — body ကိုဖွင့်ပါ၊ caching/coalescing ကို ပံ့ပိုးသည်။ |
+| GET      | `/v1/search/analytics` | ဝန်ဆောင်မှုပေးသူတိုင်း hit/latency/cache ကိန်းဂဏန်းများ                                                 |
 
-**Auth:** Bearer API key (`extractApiKey` + `isValidApiKey`)။ ရှာဖွေရေးမူဝါဒကို `enforceApiKeyPolicy` မှတစ်ဆင့် အကောင်အထည်ဖော်သည်။
+**အထောက်အထား-** ထမ်းသူ API သော့ (`extractApiKey` + `isValidApiKey`)။ ရှာဖွေမှုမူဝါဒကို `enforceApiKeyPolicy` မှတစ်ဆင့် ပြဋ္ဌာန်းထားသည်။
+
+**Auto-select:** without `provider`, the cheapest provider with a configured connection runs first and the next cheapest is the failover. Free last-resort providers (`duckduckgo-free`) are used only when nothing else is configured. A self-hosted SearXNG counts as configured once its connection stores a real `baseUrl` (not the catalog default `http://localhost:8888/search`): it then ranks as a $0 provider ahead of keyed ones, with the cheapest keyed provider as failover, including when SearXNG answers 400, 401, 403 or 404. A `baseUrl` that is not a valid `http(s)` URL or that points at a cloud-metadata address does not count. A SearXNG connection that stores a token ranks this way only over `https://` or loopback `http://`. Over remote plain `http://` it is never a failover and stays a last resort, used only when no other provider is configured or when requested by name, so it does send the token in cleartext in those two cases.
 
 ### Exa နှင့် Tavily `provider_options`
 
@@ -957,31 +944,28 @@ terminal quota error (`402`/`429`/`503` — body တွင် quota သို့
 
 ---
 
-## ကိုယ်တိုင်အသုံးပြုမှု စစ်ဆေးခြင်း (`/api/usage/om-usage`)
+## ကိုယ်ပိုင်ဝန်ဆောင်မှုအသုံးပြုမှု (`/api/usage/om-usage`)
 
-API key မည်သည့်ခုမဆို ၎င်း၏ **ကိုယ်ပိုင်** အသုံးပြုမှုနှင့် quota များကို ဖတ်ရှုနိုင်သည် — management auth မလိုအပ်ပါ။ ဤ endpoint ကို
-client (CLI၊ OmniCopilot panel) က key ကိုင်ဆောင်သူအား ၎င်းတို့၏ အသုံးစရိတ်ကို ပြသရန် အသုံးပြုသည်။
+မည်သည့် API သော့ကိုမဆို ဖတ်နိုင်သည်။**၎င်း၏ကိုယ်ပိုင်** အသုံးပြုမှုနှင့် ခွဲတမ်း — စီမံခန့်ခွဲမှု စစ်မှန်ကြောင်း မရှိပါ။ ဤသည်မှာ ကလိုင်းယင့် (CLI၊ OmniCopilot အကန့်) သည် သော့ကိုင်ဆောင်သူတစ်ဦး၏ အသုံးစရိတ်ကို ပြသရန် အသုံးပြုသည့် အဆုံးမှတ်ဖြစ်သည်။
 
 ```bash
-# စာသားပုံစံ (သမိုင်းကြောင်းအရ သတ်မှတ်ထားသော contract — terminal အတွက် plain text)
+# Text form (the historical contract — plain text for a terminal)
 curl -H "Authorization: Bearer <your-api-key>" \
   http://localhost:20128/api/usage/om-usage
 
-# ဖွဲ့စည်းတည်ဆောက်ထားသောပုံစံ — UI က အသုံးပြုသောပုံစံ
+# Structured form — what a UI consumes
 curl -H "Authorization: Bearer <your-api-key>" \
   "http://localhost:20128/api/usage/om-usage?format=json"
 ```
 
-Key တွင် **`allowUsageCommand`** ကို ဖွင့်ထားရမည် (မူလအားဖြင့် ပိတ်ထားသည် — dashboard ၏ API-key
-manager က key တစ်ခုချင်းစီအလိုက် ပြောင်းလဲပေးသည်)။ ၎င်းမရှိပါက endpoint သည် `403` ပြန်ပေးသည်။
+သော့ရှိရမယ်။**`allowUsageCommand`** ဖွင့်ထားပါသည် (ပုံမှန် — ဖြင့် ပိတ်ပါက ဒက်ရှ်ဘုတ်၏ API ကီးမန်နေဂျာက ၎င်းကို သော့တစ်ခုစီသို့ ပြောင်းပေးသည်)။ အဲဒါမရှိရင် အဆုံးမှတ်က `403` အဖြေပေးပါတယ်။
 
-`?format=json` သည် caller အနေဖြင့် refusal ဖြစ်နေချိန်တွင် data field မှ တန်ဖိုးဖတ်မိခြင်း မဖြစ်စေရန်
-ခွဲခြားသတ်မှတ်နိုင်သော shape တစ်ခုကို ပြန်ပေးသည်။ အောင်မြင်သောအခါ-
+`?format=json` ခွဲခြားထားသောပုံသဏ္ဍာန်ကို ပြန်ပေးသည် ထို့ကြောင့် ခေါ်ဆိုသူတစ်ဦးသည် ငြင်းဆိုချက်မှ ဒေတာအကွက်ကို ဘယ်သောအခါမှ မဖတ်ပါ။ အောင်မြင်မှုအပေါ်
 
 ```jsonc
 {
   "allowed": true,
-  // key က per-key usage limits (နေ့စဉ်/အပတ်စဉ် USD) ကို ရွေးချယ်ထားမှသာ ပါဝင်သည်-
+  // present only when the key opted into per-key usage limits (daily/weekly/5-hour USD):
   "personal": {
     "dailySpentUsd": 1.25,
     "dailyLimitUsd": 5,
@@ -990,9 +974,9 @@ manager က key တစ်ခုချင်းစီအလိုက် ပြေ
     "weeklyLimitUsd": 20,
     "weeklyResetAtIso": "…" /* … */,
   },
-  // ရွေးချယ်ထားသော provider quota snapshot၊ မည်သည့်အရာမျှ cache မလုပ်ရသေးပါက null ဖြစ်သည်-
+  // the selected provider quota snapshot, or null when nothing is cached yet:
   "provider": { "connectionId": "…", "provider": "claude", "plan": "…", "quotas": {/* … */} },
-  // UI က provider များစွာကို ဘေးချင်းယှဉ်၍ render ပြုလုပ်နိုင်ရန် connection တစ်ခုချင်းစီ၏ snapshot-
+  // every connection's snapshot, so a UI can render several providers side by side:
   "providers": [
     { "connectionId": "…", "provider": "claude" /* … */ },
     { "provider": "codex" /* … */ },
@@ -1000,13 +984,9 @@ manager က key တစ်ခုချင်းစီအလိုက် ပြေ
 }
 ```
 
-Refusal ဖြစ်သောအခါ (`401` မမှန်ကန်သော key / `403` ခွင့်မပြုထားခြင်း) ထို route သည်
-`{ "allowed": false, "error": { "message": "…" } }` ကို ပြန်ပေးသည် — ရှိနေသော်လည်း အလွတ်ဖြစ်သော
-`personal`/`provider` (key ကို ခွင့်ပြုထားသော်လည်း သိရှိထားသောအချက် မရှိသေးခြင်း) သည် refusal နှင့်
-ကွဲပြားသော အခြေအနေတစ်ခုဖြစ်ပြီး JSON ပုံစံကသာ ထိုအခြေအနေများကို ခွဲခြားပြသနိုင်သည်။
+ငြင်းဆိုမှုတွင် (`401` မကောင်းသောသော့ / `403` ခွင့်မပြု) တူညီသောလမ်းကြောင်းသည် `{ "allowed": false, "error": { "message": "…" } }` — သို့ပြန်ပို့သည် လက်ရှိ-သို့သော်လည်း-ဗလာ `personal`/`provider` (သော့ခွင့်ပြုထားသည်၊ ဘာမှမသင်ယူရသေး) သည် ငြင်းချက်တစ်ခုနှင့် မတူညီသောအခြေအနေဖြစ်ပြီး JSON ဖောင်မှသာလျှင် ၎င်းတို့ကို ခွဲခြားနိုင်သည်။
 
-**အထောက်အထားပြခြင်း:** ခေါ်ဆိုသူ၏ ကိုယ်ပိုင် Bearer API key ကို `isValidApiKey` ဖြင့် အတည်ပြုသည် — ၎င်းသည်
-`requireManagementAuth` နောက်ကွယ်တွင် ဆက်လက်ထားရှိသည့် management surface (`/api/keys/…`) မဟုတ်ပါ။
+**အထောက်အထား-** `isValidApiKey` — ဖြင့် အတည်ပြုထားသော ခေါ်ဆိုသူ၏ကိုယ်ပိုင် Bearer API သော့သည် ၎င်းသည် _not_ `requireManagementAuth` နောက်တွင်ရှိနေသော စီမံခန့်ခွဲမှုမျက်နှာပြင် (`/api/keys/…`) ဖြစ်သည်။
 
 ### Raw နှင့် Cutoff-Adjusted Quota ရာခိုင်နှုန်းများ
 
@@ -1292,40 +1272,41 @@ completion limit များ၊ stop sequence များနှင့် upstr
 | `/api/usage/model-latency-stats` | GET             | provider/model တစ်ခုချင်းစီအလိုက် ရွေ့လျား latency စုစုပေါင်းအချက်အလက် (avg/p50/p95/p99၊ အောင်မြင်မှုနှုန်း)၊ စစ်ထုတ်မှုများ: `windowHours`/`minSamples`/`maxRows`/`provider`/`model` (#6873)                                                                                                                                                                        |
 | `/api/usage/cache-health`        | GET             | `call_logs` အပေါ် အခြေခံသည့် prompt-cache ကျန်းမာရေးအကျဉ်းချုပ် — write/read အချိုး၊ p50/p90/p99 write-size ဖြန့်ဝေမှု၊ write အလွန်များသော အာရုံစူးစိုက်မှု၊ model တစ်ခုချင်းစီအလိုက် ခွဲခြမ်းချက်နှင့် `healthy`/`degraded`/`thrash`/`no-data` အဆုံးအဖြတ်၊ query params `range` (`1h`\|`24h`\|`7d`\|`30d`၊ မူလတန်ဖိုး `24h`) နှင့် ရွေးချယ်နိုင်သော `model` (#8827) |
 
-### API key ခွင့်ပြုချက်များ
+### API သော့ခွင့်ပြုချက်များ
 
-`PATCH /api/keys/{id}` သည် ရှိပြီးသား key တစ်ခု၏ ခွင့်ပြုချက်များကို အပ်ဒိတ်လုပ်သည်။ `/api/keys*` route တိုင်းကဲ့သို့ပင် ၎င်းတွင် inference key မဟုတ်ဘဲ စီမံခန့်ခွဲမှု authorization လိုအပ်သည် ([စီမံခန့်ခွဲမှု အထောက်အထားစစ်ဆေးခြင်း](../guides/MANAGEMENT-AUTH.md) ကို ကြည့်ပါ)။ ပြောင်းလဲလိုသော fields များကိုသာ ပေးပို့ပါ။ ထို fields များထဲမှ တစ်ခုမျှမပါသော request ကို `No valid fields to update` ဖြင့် ပယ်ချသည်။ လက်ခံသည့် fields များကို `src/shared/validation/schemas/keys.ts` ရှိ `updateKeyPermissionsSchema` က သတ်မှတ်ထားသည်။
+`PATCH /api/keys/{id}` ရှိပြီးသားကီး၏ခွင့်ပြုချက်များကို အပ်ဒိတ်လုပ်သည်။ `/api/keys*` လမ်းကြောင်းတိုင်းကဲ့သို့၎င်းသည် စီမံခန့်ခွဲမှုဆိုင်ရာခွင့်ပြုချက်လိုအပ်သည် ( [စီမံခန့်ခွဲမှုအထောက်အထားအထောက်အထားကို](../guides/MANAGEMENT-AUTH.md) ကြည့်ပါ)၊ ကောက်ချက်ချသောသော့မဟုတ်ပါ။ သင်ပြောင်းလဲလိုသော အကွက်များကိုသာ ပေးပို့ပါ။ ၎င်းတို့အနက်မှ တစ်ခုမျှ တောင်းဆိုချက်ကို `No valid fields to update` ဖြင့် ပယ်ချပါသည်။ လက်ခံထားသောအကွက်များကို `src/shared/validation/schemas/keys.ts` တွင် `updateKeyPermissionsSchema` မှသတ်မှတ်သည်။
 
-| Field                                       | Type                                                                                  | Notes                                                                                                                                                                 |
-| ------------------------------------------- | ------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `name`                                      | string, စာလုံး 1-200 လုံး                                                             |                                                                                                                                                                       |
-| `isActive`                                  | boolean                                                                               |                                                                                                                                                                       |
-| `isBanned`                                  | boolean                                                                               |                                                                                                                                                                       |
-| `expiresAt`                                 | ISO 8601 datetime သို့မဟုတ် `null`                                                    | `null` သည် သက်တမ်းကုန်ဆုံးချိန်ကို ဖယ်ရှားသည်                                                                                                                         |
-| `modelAccessMode`                           | `all` \| `restricted`                                                                 | မုဒ်သည် `all` ဖြစ်သောအခါ `allowedModels` သည် ဗလာဖြစ်ရမည်                                                                                                              |
-| `allowedModels`, `blockedModels`            | string များ၏ array၊ အများဆုံး 1000 ခု                                                 |                                                                                                                                                                       |
-| `allowedCombos`                             | string များ၏ array၊ အများဆုံး 500 ခု                                                  | ဤ key က ခေါ်ဆိုနိုင်သည့် combo များကို ကန့်သတ်သည်။ တိုက်ရိုက် model များကို `modelAccessMode` / `allowedModels` က ထိန်းချုပ်သည်                                       |
-| `connectionAccessMode`                      | `all` \| `restricted`                                                                 | `restricted` ဖြစ်သောအခါ `allowedConnections` သည် ဗလာမဖြစ်ရဘဲ `all` ဖြစ်သောအခါ ဗလာဖြစ်ရမည်                                                                             |
-| `allowedConnections`                        | UUID များ၏ array၊ အများဆုံး 100 ခု                                                    |                                                                                                                                                                       |
-| `allowAutoCombos`                           | boolean                                                                               | `false` ဖြစ်ပါက ဤ key ဖြင့် `auto/*` model များအတွက် တောင်းဆိုမှုများကို ငြင်းပယ်သည်။ ဤတန်ဖိုးကို မသတ်မှတ်ဖူးသော key များကို ခွင့်ပြုသည်                              |
-| `catalogScope`                              | `all` \| `combos` \| `models`                                                         | ဤ key အတွက် `GET /v1/models` က စာရင်းပြုစုပေးမည့်အရာ (combo များသာ၊ model များသာ သို့မဟုတ် နှစ်မျိုးလုံး) ဖြစ်သည်။ key က ခေါ်ဆိုနိုင်သည့်အရာကို မပြောင်းလဲစေပါ        |
-| `forcedModel`                               | string အများဆုံး 300 စာလုံး သို့မဟုတ် `null`                                          | `X-Route-Model` နှင့် `body.model` တို့ထက် ဦးစားပေး၍ chat တောင်းဆိုမှုများကို ဤ model/combo သို့ လမ်းကြောင်းပြောင်းပေးသည်။ key ၏ ကန့်သတ်ချက်များကို ဆက်လက်အသုံးပြုသည် |
-| `noLog`, `autoResolve`                      | boolean                                                                               |                                                                                                                                                                       |
-| `throttleDelayMs`                           | integer၊ 0-300000                                                                     |                                                                                                                                                                       |
-| `maxSessions`                               | integer၊ 0-10000                                                                      |                                                                                                                                                                       |
-| `rateLimits`                                | `{ limit, window }` ၏ array (အပေါင်းကိန်းပြည့်များ၊ အများဆုံး 50 ခု) သို့မဟုတ် `null` | `null` သည် ကန့်သတ်ချက်များကို ဖယ်ရှားသည်                                                                                                                              |
-| `accessSchedule`                            | schedule object သို့မဟုတ် `null`                                                      | `null` သည် schedule ကို ဖယ်ရှားသည်                                                                                                                                    |
-| `scopes`                                    | string များ၏ array၊ အများဆုံး 32 ခု                                                   |                                                                                                                                                                       |
-| `allowedEndpoints`                          | string များ၏ array၊ အများဆုံး 20 ခု                                                   |                                                                                                                                                                       |
-| `streamDefaultMode`                         | `legacy` \| `json`                                                                    |                                                                                                                                                                       |
-| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                                  | [Per-key cache bypass](#per-key-cache-bypass) ကို ကြည့်ပါ                                                                                                             |
-| `compressionEnabled`                        | boolean                                                                               |                                                                                                                                                                       |
-| `codexServiceMode`                          | Codex service mode များထဲမှ တစ်ခု                                                     |                                                                                                                                                                       |
-| `disableNonPublicModels`                    | boolean                                                                               |                                                                                                                                                                       |
-| `allowUsageCommand`                         | boolean                                                                               |                                                                                                                                                                       |
-| `usageLimitEnabled`                         | boolean                                                                               |                                                                                                                                                                       |
-| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | number >= 0 or `null`                                                                 |                                                                                                                                                                       |
-| `chaosModeEnabled`                          | boolean                                                                               |                                                                                                                                                                       |
+| Field                                       | Type                                                                                  | Notes                                                                                                                                                                                                                                                                                                                          |
+| ------------------------------------------- | ------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `name`                                      | string, စာလုံး 1-200 လုံး                                                             |                                                                                                                                                                                                                                                                                                                                |
+| `isActive`                                  | boolean                                                                               |                                                                                                                                                                                                                                                                                                                                |
+| `isBanned`                                  | boolean                                                                               |                                                                                                                                                                                                                                                                                                                                |
+| `expiresAt`                                 | ISO 8601 datetime သို့မဟုတ် `null`                                                    | `null` သည် သက်တမ်းကုန်ဆုံးချိန်ကို ဖယ်ရှားသည်                                                                                                                                                                                                                                                                                  |
+| `modelAccessMode`                           | `all` \| `restricted`                                                                 | မုဒ်သည် `all` ဖြစ်သောအခါ `allowedModels` သည် ဗလာဖြစ်ရမည်                                                                                                                                                                                                                                                                       |
+| `allowedModels`, `blockedModels`            | ကြိုးတန်းများ အခင်းအကျင်း 1000 အထိ                                                    |                                                                                                                                                                                                                                                                                                                                |
+| `allowedCombos`                             | string များ၏ array၊ အများဆုံး 500 ခု                                                  | ဤ key က ခေါ်ဆိုနိုင်သည့် combo များကို ကန့်သတ်သည်။ တိုက်ရိုက် model များကို `modelAccessMode` / `allowedModels` က ထိန်းချုပ်သည်                                                                                                                                                                                                |
+| `connectionAccessMode`                      | `all` \| `restricted`                                                                 | `restricted` ဖြစ်သောအခါ `allowedConnections` သည် ဗလာမဖြစ်ရဘဲ `all` ဖြစ်သောအခါ ဗလာဖြစ်ရမည်                                                                                                                                                                                                                                      |
+| `allowedConnections`                        | UUID များ၏ array၊ အများဆုံး 100 ခု                                                    |                                                                                                                                                                                                                                                                                                                                |
+| `allowAutoCombos`                           | boolean                                                                               | `false` ဖြစ်ပါက ဤ key ဖြင့် `auto/*` model များအတွက် တောင်းဆိုမှုများကို ငြင်းပယ်သည်။ ဤတန်ဖိုးကို မသတ်မှတ်ဖူးသော key များကို ခွင့်ပြုသည်                                                                                                                                                                                       |
+| `catalogScope`                              | `all` \| `combos` \| `models`                                                         | ဤ key အတွက် `GET /v1/models` က စာရင်းပြုစုပေးမည့်အရာ (combo များသာ၊ model များသာ သို့မဟုတ် နှစ်မျိုးလုံး) ဖြစ်သည်။ key က ခေါ်ဆိုနိုင်သည့်အရာကို မပြောင်းလဲစေပါ                                                                                                                                                                 |
+| `forcedModel`                               | string အများဆုံး 300 စာလုံး သို့မဟုတ် `null`                                          | `X-Route-Model` နှင့် `body.model` တို့ထက် ဦးစားပေး၍ chat တောင်းဆိုမှုများကို ဤ model/combo သို့ လမ်းကြောင်းပြောင်းပေးသည်။ key ၏ ကန့်သတ်ချက်များကို ဆက်လက်အသုံးပြုသည်                                                                                                                                                          |
+| `noLog`, `autoResolve`                      | ဘူလီယံ                                                                                |                                                                                                                                                                                                                                                                                                                                |
+| `throttleDelayMs`                           | integer၊ 0-300000                                                                     |                                                                                                                                                                                                                                                                                                                                |
+| `maxSessions`                               | integer၊ 0-10000                                                                      |                                                                                                                                                                                                                                                                                                                                |
+| `rateLimits`                                | `{ limit, window }` ၏ array (အပေါင်းကိန်းပြည့်များ၊ အများဆုံး 50 ခု) သို့မဟုတ် `null` | `null` သည် ကန့်သတ်ချက်များကို ဖယ်ရှားသည်                                                                                                                                                                                                                                                                                       |
+| `accessSchedule`                            | schedule object သို့မဟုတ် `null`                                                      | `null` သည် schedule ကို ဖယ်ရှားသည်                                                                                                                                                                                                                                                                                             |
+| `scopes`                                    | string များ၏ array၊ အများဆုံး 32 ခု                                                   |                                                                                                                                                                                                                                                                                                                                |
+| `allowedEndpoints`                          | string များ၏ array၊ အများဆုံး 20 ခု                                                   |                                                                                                                                                                                                                                                                                                                                |
+| `streamDefaultMode`                         | `legacy` \| `json`                                                                    |                                                                                                                                                                                                                                                                                                                                |
+| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                                  | [Per-key cache bypass](#per-key-cache-bypass) ကို ကြည့်ပါ                                                                                                                                                                                                                                                                      |
+| `compressionEnabled`                        | boolean                                                                               |                                                                                                                                                                                                                                                                                                                                |
+| `codexServiceMode`                          | Codex service mode များထဲမှ တစ်ခု                                                     |                                                                                                                                                                                                                                                                                                                                |
+| `disableNonPublicModels`                    | boolean                                                                               |                                                                                                                                                                                                                                                                                                                                |
+| `allowUsageCommand`                         | boolean                                                                               |                                                                                                                                                                                                                                                                                                                                |
+| `usageLimitEnabled`                         | boolean                                                                               |                                                                                                                                                                                                                                                                                                                                |
+| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | >= 0 သို့မဟုတ် `null` နံပါတ်                                                          |                                                                                                                                                                                                                                                                                                                                |
+| `fiveHourUsageLimitUsd`                     | >= 0 သို့မဟုတ် `null` နံပါတ်                                                          | နေ့စဉ်နှင့် အပတ်စဉ် ကန့်သတ်ချက်များ (`usageLimitEnabled`၊ `UNPRICED_USAGE_BUDGET_POLICY`) ကဲ့သို့ ပြဋ္ဌာန်းထားသည့် 5 နာရီ USD ဘတ်ဂျက်ကို လှိမ့်လိုက်သည်။ `retry-after` သည် window တွင်သက်တမ်းအရင့်ဆုံးအသုံးစရိတ်များကုန်ဆုံးသွားသောအခါတွင်၊ ၎င်းသည်၎င်း၏ကန့်သတ်ချက်ထက်အဆပေါင်းများစွာပိတ်ဆို့နေဆဲဖြစ်သောသော့ကိုထားခဲ့နိုင်သည်။ |
+| `chaosModeEnabled`                          | boolean                                                                               |                                                                                                                                                                                                                                                                                                                                |
 
 ```bash
 curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
@@ -1375,6 +1356,14 @@ curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
 | `/api/modality-bridge/stats`         | GET        | In-memory `attempts`၊ successes/`bridged`၊ failures၊ cache hits၊ `totalLatencyMs`၊ `latencySamples`၊ sample-denominated `averageLatencyMs` နှင့် နောက်ဆုံးအသုံးပြုချိန် (restart ပြုလုပ်သောအခါ ပြန်လည်သတ်မှတ်သည်၊ management auth လိုအပ်သည်)                                                                                                                                                                                       |
 | `/api/modality-bridge/video/runtime` | GET        | management auth/probe မတိုင်မီ တင်းကျပ်သော trusted-loopback စစ်ဆေးမှု၊ သန့်စင်ထားသော FFmpeg/ffprobe ရရှိနိုင်မှုနှင့် version များ (no-store)                                                                                                                                                                                                                                                                                      |
 | `/api/modality-bridge/video/extract` | POST       | Internal authenticated trusted-loopback byte broker; 50 MiB input၊ ကန့်သတ်ထားသော queue/32 MiB output၊ `503` capacity၊ `499` disconnect၊ `504` deadline; အများပြည်သူသုံး upload API မဟုတ်ပါ                                                                                                                                                                                                                                         |
+
+### ဗီဒီယိုဘောင်ကို တူးဆွခြင်း။
+
+`GET /api/v1/video-bridge/drilldown` reads a tenant-bound opaque handle returned in `x-omniroute-video-drilldown` after an explicitly consented Video Bridge request. Both reads and `DELETE` always require a valid API key and the operator's independent `modalityBridgeVideoDrilldownRemoteEnabled` permission. Production retention additionally requires `modalityBridgeVideoDrilldownEnabled` and strict per-part `drilldown: true`. If the key has a nonempty endpoint allowlist, it must include `video` for both GET and DELETE, whether the caller uses `/v1` or `/api/v1`.
+
+GET စုံစမ်းမှု- လိုအပ်သော `handle`; ရွေးချယ်နိုင်သော `variant` (`preview`, `standard`, `detail`), `limit` (1–8; အမွေအနှစ် `frames` လက်ခံသော်လည်း `limit`)၊ သုညအခြေခံ `page` နှင့် `start`/`end` စက္ကန့်တို့ကို ပေါင်းစပ်၍မရပါ။ အာရုံစူးစိုက်မှုဘောင်နှစ်ခုလုံးကို ဖြည့်သွင်းသောအခါ `end` `start` ထက်ကြီးနေရပါမည်။ Duplicate/unknown query keys များကို ငြင်းပယ်ထားသည်။ အောင်မြင်သော တုံ့ပြန်မှုများတွင် `derivation`၊ `durationSeconds`၊ `frames`၊ `hasMore`၊ `page`၊ `variant` နှင့် ရွေးချယ်နိုင်သော `focusWindow` ပါ၀င်သည် . no-store JSON Base64 အပါအဝင် 32 MiB တွင် ကန့်သတ်ထားသည်။ အဆမတန်ထွက်ရှိမှု 413 ကို ပြန်ပေးသည်။ ဘောင်နည်းနည်းတောင်းပါ။
+
+`DELETE /api/v1/video-bridge/drilldown?handle=...` `{ "removed": 0|1 }` ပြန်ပေးသည်။ အမည်မသိ၊ သက်တမ်းကုန်ပြီး သော့ဖြတ်ထားသော GETs များသည် ခွဲခြား၍မရသော 404 တုံ့ပြန်မှုများ၊ cross-key DELETE ပိုင်ရှင်၏ဝင်ရောက်မှုကို မဖယ်ရှားနိုင်ပါ။ ပိတ်ထားသောဝင်ရောက်ခွင့်သည် 403၊ missing/invalid စစ်မှန်ကြောင်းအထောက်အထားပြခြင်း 401၊ မမှန်ကန်သောမေးမြန်းချက် 400၊ ပယ်ဖျက်ခြင်း 499 နှင့် ယာယီအမှားများ 503 ကို ပြန်ပေးသည်။ လက်ကိုင်များသည် လုပ်ငန်းစဉ်အတွင်းမှဖြစ်ပြီး၊ ဆယ်မိနစ်အကြာတွင် သက်တမ်းကုန်ဆုံးကာ ပြန်လည်စတင်ခြင်းတွင် မရှင်သန်ပါ။ လက်ကိုင်အသစ်များသည် `v1.` နှင့် 32-byte ကျပန်း Base64URL တိုကင်ကို အသုံးပြုသည်။ တိုကင်နံပါတ်များကိုသာ သိမ်းဆည်းထားသည်။ Legacy 64-hex တိုကင်များသည် လိုက်ဖက်ညီမှုအတွက် အဓိပ္ပါယ်တူဖြင့် ဖတ်နိုင်သည်။ သဘောတူညီချက်၊ ခွဲတမ်းနှင့် ကွဲပြားသော ဆင်းသက်လာမှုအသေးစိတ်အတွက် [ဗီဒီယိုတံတားအကာအရံများကို](../security/GUARDRAILS.md#video-bridge-videobridgets-videobridgepipelinets) ကြည့်ပါ။
 
 ### Backup နှင့် Export/Import
 
@@ -1474,19 +1463,19 @@ GET response တွင် `agents[]` (id, name, binary, version, installed, prot
 
 ဤ endpoint များသည် မူရင်း Gemini SDK နှင့် ကိုက်ညီမှုကို မျှော်လင့်သော client များအတွက် Gemini ၏ API ဖော်မတ်ကို တုပပေးသည်။
 
-### အတွင်းပိုင်း / စနစ် API များ
+### အတွင်းပိုင်း / စနစ် APIs
 
-| Endpoint                 | Method | Description                                                                           |
-| ------------------------ | ------ | ------------------------------------------------------------------------------------- |
-| `/api/init`              | GET    | အပလီကေးရှင်း စတင်လုပ်ဆောင်မှု စစ်ဆေးခြင်း (ပထမဆုံးအကြိမ် လုပ်ဆောင်ရာတွင် အသုံးပြုသည်) |
-| `/api/tags`              | GET    | Ollama နှင့် ကိုက်ညီသော model tag များ (Ollama client များအတွက်)                      |
-| `/api/restart`           | POST   | ဆာဗာကို ချောမွေ့စွာ ပြန်လည်စတင်ရန် အမိန့်ပေးသည်                                       |
-| `/api/shutdown`          | POST   | ဆာဗာကို ချောမွေ့စွာ ပိတ်ရန် အမိန့်ပေးသည်                                              |
-| `/api/system/env/repair` | POST   | OAuth ပံ့ပိုးသူ environment variable များကို ပြုပြင်ရန်                               |
-| `/api/system/version`    | GET    | လက်ရှိ/နောက်ဆုံး version၊ အပ်ဒိတ်အခြေအနေ၊ release channel                             |
-| `/api/system/version`    | POST   | နောက်ဆုံး version သို့ deployment-aware အပ်ဒိတ်တစ်ခု စတင်ရန်                          |
+| အဆုံးမှတ်                | နည်းလမ်း | ဖော်ပြချက်                                                        |
+| ------------------------ | -------- | ----------------------------------------------------------------- |
+| `/api/init`              | GET      | နောက်ခံ စင့်ခ် ဝန်ဆောင်မှုများ စတင်ပါ (စီမံခန့်ခွဲမှု အထောက်အထား) |
+| `/api/tags`              | GET      | Ollama-သဟဇာတမော်ဒယ်တဂ်များ ( Ollama သုံးစွဲသူများအတွက်)           |
+| `/api/restart`           | POST     | လှပသောဆာဗာကို ပြန်လည်စတင်ရန် အစပျိုးပါ။                           |
+| `/api/shutdown`          | POST     | လှပသော ဆာဗာပိတ်ခြင်းကို အစပျိုးပါ။                                |
+| `/api/system/env/repair` | POST     | OAuth ဝန်ဆောင်မှုပေးသည့် ပတ်ဝန်းကျင် ကိန်းရှင်များကို ပြုပြင်ပါ။  |
+| `/api/system/version`    | GET      | Current/latest ဗားရှင်း၊ အပ်ဒိတ်အခြေအနေ၊ ချန်နယ်                  |
+| `/api/system/version`    | POST     | နောက်ဆုံးထွက်ဗားရှင်းသို့ ဖြန့်ကျက်အသိပေးအပ်ဒိတ်တစ်ခု စတင်ပါ။     |
 
-> **မှတ်ချက်:** ဤ endpoint များကို စနစ်အတွင်းပိုင်းတွင် သို့မဟုတ် Ollama client နှင့် ကိုက်ညီမှုအတွက် အသုံးပြုသည်။ ပုံမှန်အားဖြင့် end user များက ခေါ်ယူအသုံးပြုခြင်း မရှိပါ။
+> **မှတ်ချက် -** ဤအဆုံးမှတ်များကို စနစ် သို့မဟုတ် Ollama ကလိုင်းယင့် လိုက်ဖက်ညီမှုအတွက် အသုံးပြုပါသည်။ ၎င်းတို့ကို သုံးစွဲသူများက ယေဘုယျအားဖြင့် မခေါ်ပါ။
 
 ### OAuth Environment ပြုပြင်ခြင်း _(v3.6.1+)_
 

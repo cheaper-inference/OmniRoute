@@ -361,19 +361,19 @@ Modell: cc/claude-opus-4-7
 ```bash
 npm install -g omniroute
 
-# Opprett konfigurasjonsmappe
+# Create config directory
 mkdir -p ~/.omniroute
 
-# Opprett .env-fil (se .env.example)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# Start serveren
+# Start server
 omniroute
-# Eller med egendefinert port:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI-en laster automatisk `.env` fra `~/.omniroute/.env` eller `./.env`.
+CLI laster automatisk `.env` fra `~/.omniroute/.env` eller `./.env`. En `./.env` i arbeidskatalogen kan angi bare en kort tillatelsesliste med nøkler (porter, `REQUIRE_API_KEY`, lokalitet og fargeinnstillinger); legg alt annet i `~/.omniroute/.env`. Se [CLI lanseringskontrakter](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### Systemstatusfeltmodus
 

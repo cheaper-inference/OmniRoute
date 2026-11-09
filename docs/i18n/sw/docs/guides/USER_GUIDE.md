@@ -355,24 +355,24 @@ Muundo: cc/claude-opus-4-7
 
 ## 🚀 Usambazaji
 
-### Usakinishaji wa kimataifa wa npm (Unapendekezwa)
+### Usakinishaji wa npm wa kimataifa (Inapendekezwa)
 
 ```bash
 npm install -g omniroute
 
-# Unda saraka ya usanidi
+# Create config directory
 mkdir -p ~/.omniroute
 
-# Unda faili la .env (angalia .env.example)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# Anzisha seva
+# Start server
 omniroute
-# Au kwa port maalum:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI hupakia `.env` kiotomatiki kutoka `~/.omniroute/.env` au `./.env`.
+CLI hupakia `.env` kiotomatiki kutoka `~/.omniroute/.env` au `./.env`. `./.env` katika saraka ya kufanya kazi inaweza kuweka tu orodha fupi ya ruhusa ya funguo (bandari, `REQUIRE_API_KEY`, eneo na mipangilio ya rangi); weka kila kitu kingine `~/.omniroute/.env`. Tazama [mikataba ya uzinduzi CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### Hali ya trei
 

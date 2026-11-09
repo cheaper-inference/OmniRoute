@@ -45,11 +45,11 @@ ja palautuskoodin 0, mikä ei osoita, että riippuvuudet läpäisivät tarkistuk
 Trivy-vaihe edellyttää myös onnistunutta mittausta: työkalujen puuttuminen, epäonnistuneet työt
 ja puuttuva näyttö kuvasta eivät voi vahvistaa kuvaa puhtaaksi.
 
-## Poistetun riippuvuuden riski
+## Eläkkeellä oleva riippuvuusriski
 
-Juuritason lockfile ei enää sisällä `extract-zip`-riippuvuutta tai siihen johtavaa riippuvuussuhdetta kiinnitetyn promptfoo-kehitystyökalun päivittämisen jälkeen. Tämä poistaa käytöstä aiemmin hyväksytyn ketjun `promptfoo` → `@openai/codex-security` → `extract-zip`, jota seurattiin ongelmassa #14482. Regressiotarkistukset tiedostossa `tests/unit/extract-zip-14482-exposure.test.ts` estävät sen palauttamisen ja säilyttävät kiellon tuoda sitä tuotantokoodiin.
+Päälukkotiedosto ei enää sisällä `extract-zip` tai sen riippuvuusreunaa kiinnitetyn promptfoo-kehitystyökalun päivityksen jälkeen. Tämä poistaa käytöstä aiemmin hyväksytyn `promptfoo` → `@openai/codex-security` → `extract-zip` -ketjun, joka on jäljitetty #14482 ssä. `tests/unit/extract-zip-14482-exposure.test.ts` :n regressiotarkistukset hylkäävät sen uudelleen käyttöönoton ja säilyttävät tuotantokoodin tuontikiellon.
 
-Nykyinen riippuvuuksien korjaus sisältää yhteensopivuusohitukset Azure Identityn MSAL-asiakasohjelmalle, get-urin FTP-asiakasohjelmalle sekä Zodille molemmissa OpenCode-laajennuspaketeissa. Azure-tunnusten hankinta ja FTP-nouto testataan hallituilla siirtomekanismeilla, ja molemmat OpenCode-paketit suorittavat omat koonti- ja testisarjansa. Rekisterin tietoturvailmoitusten määrät ovat tiettynä ajankohtana tehtyjä mittauksia, ja ne voivat muuttua lukitustiedoston committaamisen jälkeen.
+Nykyinen riippuvuuden korjaus kattaa myös yhteensopivuuden ohitukset Azure-identiteetin MSAL asiakkaalle ja get-urin FTP asiakkaalle. Azure-tunnuksen hankinta ja FTP -haku testataan ohjatuilla kuljetuksilla; molemmat OpenCode -paketit käyttävät omia rakennus- ja testiohjelmistojaan. Rekisterin ohjearvot ovat mittauksia tietyllä hetkellä ja voivat muuttua sen jälkeen, kun lukitustiedosto on sitoutunut.
 
 ## Jatkokehitys: Scorecard-neuvonta → estävä
 

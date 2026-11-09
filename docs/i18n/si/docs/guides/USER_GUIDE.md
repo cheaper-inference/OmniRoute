@@ -358,24 +358,24 @@ API යතුර: [උපකරණ පුවරුවෙන්]
 
 ## 🚀 යෙදවීම
 
-### ගෝලීය npm ස්ථාපනය (නිර්දේශිතයි)
+### ගෝලීය npm ස්ථාපනය (නිර්දේශිත)
 
 ```bash
 npm install -g omniroute
 
-# වින්යාස නාමාවලිය සාදන්න
+# Create config directory
 mkdir -p ~/.omniroute
 
-# .env ගොනුව සාදන්න (.env.example බලන්න)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# සේවාදායකය ආරම්භ කරන්න
+# Start server
 omniroute
-# නැතහොත් අභිරුචි පෝට් එකක් සමඟ:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI විසින් `~/.omniroute/.env` හෝ `./.env` වෙතින් `.env` ස්වයංක්රීයව පූරණය කරයි.
+CLI ස්වයංක්‍රීයව `~/.omniroute/.env` හෝ `./.env` වෙතින් `.env` පූරණය කරයි. වැඩ කරන නාමාවලියෙහි ඇති `./.env` මඟින් යතුරු වල කෙටි අවසර ලැයිස්තුවක් පමණක් සැකසිය හැක (වරාය, `REQUIRE_API_KEY`, පෙදෙසි සහ වර්ණ සැකසුම්); අනිත් ඔක්කොම දාන්න `~/.omniroute/.env`. [CLI දියත් කිරීමේ ගිවිසුම්](CLI-LAUNCH-CONTRACTS.md#working-directory-env) බලන්න.
 
 ### පද්ධති තැටි ප්රකාරය
 

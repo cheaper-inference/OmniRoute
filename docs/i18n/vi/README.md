@@ -15,7 +15,7 @@
 
 **Tạo bởi [Diego Souza](https://github.com/diegosouzapw)**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Never stop coding. Every AI tool → 381 providers — 150+ free — through one endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity into FREE Claude / GPT / Gemini with auto-fallback. RTK + Caveman stacked compression saves 15–95% tokens (~89% avg) — never hit limits. 381 AI providers · 150+ free tiers · ~1.62B free tokens/mo · 20 routing strategies · $0 to start."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Never stop coding. Every AI tool → 382 providers — 150+ free — through one endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity into FREE Claude / GPT / Gemini with auto-fallback. RTK + Caveman stacked compression saves 15–95% tokens (~89% avg) — never hit limits. 382 AI providers · 150+ free tiers · ~1.62B free tokens/mo · 20 routing strategies · $0 to start."/>
 
 </div>
 
@@ -51,18 +51,13 @@
 
 ### 💬 Tham gia cộng đồng
 
-**👋 Theo dõi người duy trì — nhận thông tin về nhà cung cấp mới, bản phát hành & mẹo sớm nhất:**
+**👋 Theo dõi người bảo trì — trước tiên hãy nhận nhà cung cấp, bản phát hành và mẹo mới:**
 
-[![Follow Diego on LinkedIn](https://img.shields.io/badge/Follow_Diego_on-LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/diegosouzapw/)
-[![Follow @diegosouzapw on GitHub](https://img.shields.io/github/followers/diegosouzapw?style=for-the-badge&logo=github&logoColor=white&label=Follow%20on%20GitHub&color=181717)](https://github.com/diegosouzapw)
+[![Theo dõi Diego trên LinkedIn](https://img.shields.io/badge/Follow_Diego_on-LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white) ](https://www.linkedin.com/in/diegosouzapw/) [![Theo dõi @diegosouzapw trên GitHub](https://img.shields.io/github/followers/diegosouzapw?style=for-the-badge&logo=github&logoColor=white&label=Follow%20on%20GitHub&color=181717) ](https://github.com/diegosouzapw)
 
-[![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/U47eFqAXCn)
-[![Telegram](https://img.shields.io/badge/Telegram-26A5E4?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/omnirouteOficial)
-[![WhatsApp Global](https://img.shields.io/badge/WhatsApp_Global-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4)
-[![WhatsApp Brasil](https://img.shields.io/badge/WhatsApp_Brasil-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)
-[![Website](https://img.shields.io/badge/Website-omniroute.online-blue?logo=google-chrome&logoColor=white)](https://omniroute.online)
+[![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white) ](https://discord.gg/U47eFqAXCn) [![Telegram](https://img.shields.io/badge/Telegram-26A5E4?style=for-the-badge&logo=telegram&logoColor=white) ](https://t.me/omnirouteOficial) [![WhatsApp Global](https://img.shields.io/badge/WhatsApp_Global-25D366?style=for-the-badge&logo=whatsapp&logoColor=white) ](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) [![WhatsApp Brasil](https://img.shields.io/badge/WhatsApp_Brasil-25D366?style=for-the-badge&logo=whatsapp&logoColor=white) ](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) [![Trang web](https://img.shields.io/badge/Website-omniroute.online-blue?logo=google-chrome&logoColor=white) ](https://omniroute.online)
 
-**Câu hỏi, mẹo về nhà cung cấp, lộ trình & hỗ trợ → [Discord](https://discord.gg/U47eFqAXCn) · [Telegram](https://t.me/omnirouteOficial) · WhatsApp [🌍 Toàn cầu](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) / [🇧🇷 Brasil](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) / [Cổng thông tin](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)**
+**Câu hỏi, mẹo của nhà cung cấp, lộ trình & hỗ trợ → [Discord](https://discord.gg/U47eFqAXCn) · [Telegram](https://t.me/omnirouteOficial) · WhatsApp [🌍 Global](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) / [🇧🇷 Brasil](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) / Kênh chính thức / [Cổng thông tin](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK) [chính thức 📢](https://whatsapp.com/channel/0029VbDwC7A3wtb5PN6a5t2R)**
 
 <br/>
 
@@ -72,8 +67,8 @@
 
 |                                     |            v3.8.50             | **v3.8.51** |      `v3.8.54+`       |
 | ----------------------------------- | :----------------------------: | :---------: | :-------------------: |
-| Nhà cung cấp 🌐                     |              352               |   **358**   |          381          |
-| 🧠 Mô hình trò chuyện độc đáo IDs   |              1320              |  **1374**   |         1519          |
+| Nhà cung cấp 🌐                     |              352               |   **358**   |          382          |
+| 🧠 Mô hình trò chuyện độc đáo IDs   |              1320              |  **1374**   |         1524          |
 | Cầu phương thức 🖼️                  | Tầm nhìn 🆕 Âm thanh + Video + |      ✓      |           ✓           |
 | Danh mục miễn phí 📡 Radar          |        Chọn tham gia 🆕        |      ✓      |           ✓           |
 | Lập kế hoạch nhận biết hạn ngạch ⚖️ |      Chia sẻ hạn ngạch 🆕      |      ✓      |           ✓           |
@@ -108,7 +103,7 @@
   <tr>
     <td align="right"><b>⚙️ Features</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 Combos</a></td>
-    <td align="center"><a href="#-381-ai-providers--156-catalog-marked-free">🌐 Providers</a></td>
+    <td align="center"><a href="#-382-ai-providers--156-catalog-marked-free">🌐 Providers</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI &amp; MCP</a></td>
   </tr>
   <tr>
@@ -244,7 +239,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="The Promise — One endpoint and 381 providers. Automatic fallback keeps routing while another healthy target is available. Six pillars: resilient fallback across 381 providers · up to 95% token savings on eligible workloads · $0 to start with 150+ free tiers and 52 recurring/keyless free-forever providers · 39 CLI/agent integrations through one config · OpenAI, Claude, Gemini and Responses API compatibility at /v1 · production controls including circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals and 56,000+ static test declarations across 7,800+ tracked test files."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="The Promise — One endpoint and 382 providers. Automatic fallback keeps routing while another healthy target is available. Six pillars: resilient fallback across 382 providers · up to 95% token savings on eligible workloads · $0 to start with 150+ free tiers and 52 recurring/keyless free-forever providers · 39 CLI/agent integrations through one config · OpenAI, Claude, Gemini and Responses API compatibility at /v1 · production controls including circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals and 56,000+ static test declarations across 7,800+ tracked test files."/>
 
 <br/>
 <br/>
@@ -504,7 +499,7 @@ Tất cả **20** chiến lược — kết hợp tùy ý theo từng bước c�
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Điều gì khiến OmniRoute khác biệt — ảnh chụp nhanh các tính năng theo thời điểm so với 9router, OpenRouter, CLIProxyAPI và LiteLLM trên 13 khả năng. OmniRoute: 381 nhà cung cấp, tích hợp sẵn hơn 150 gói miễn phí, 20 chiến lược định tuyến, tính năng nén token trên 12 engine, máy chủ MCP tích hợp sẵn với 110 công cụ, giao thức tác tử A2A, bộ nhớ bền vững, các biện pháp bảo vệ, tác tử đám mây, cơ chế ẩn dấu vân tay TLS, Desktop/Termux/PWA và 67 ngôn ngữ giao diện i18n. OmniRoute được cấp phép MIT và có thể tự lưu trữ. Các khả năng và số lượng của đối thủ có thể thay đổi; xem phương pháp luận được liên kết."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Điều gì khiến OmniRoute khác biệt — ảnh chụp nhanh các tính năng theo thời điểm so với 9router, OpenRouter, CLIProxyAPI và LiteLLM trên 13 khả năng. OmniRoute: 382 nhà cung cấp, tích hợp sẵn hơn 150 gói miễn phí, 20 chiến lược định tuyến, tính năng nén token trên 12 engine, máy chủ MCP tích hợp sẵn với 110 công cụ, giao thức tác tử A2A, bộ nhớ bền vững, các biện pháp bảo vệ, tác tử đám mây, cơ chế ẩn dấu vân tay TLS, Desktop/Termux/PWA và 67 ngôn ngữ giao diện i18n. OmniRoute được cấp phép MIT và có thể tự lưu trữ. Các khả năng và số lượng của đối thủ có thể thay đổi; xem phương pháp luận được liên kết."/>
 
 <sub>📊 Phương pháp luận đầy đủ &amp; chi tiết từng tính năng so với 9router, OpenRouter, CLIProxyAPI &amp; LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -579,7 +574,7 @@ Radar hoạt động theo cơ chế chọn tham gia và chỉ sử dụng GET. �
 - **Định tuyến ⚖️ `quota-weighted`** Chiến lược kết hợp — thứ 20 bỏ qua các tài khoản đã cạn kiệt, sau đó rút ra những tài khoản còn lại theo tỷ lệ với hạn ngạch ÷ còn lại trong lượt tải trên chuyến bay, giữ cho các cuộc hội thoại hiện có được ghim. [Kết hợp tự động](docs/routing/AUTO-COMBO.md) →
 - **Chế độ không đầu 🧰** — `omniroute serve --headless` (hoặc `OMNIROUTE_HEADLESS=1`) chỉ chạy công cụ proxy `/v1/*`, tắt bảng điều khiển và các hệ thống con chỉ dành cho bảng điều khiển. [Chế độ không đầu](docs/guides/HEADLESS.md) →
 - **🔎 Khám phá mô hình** — `/v1/models` lọc theo khả năng, ngữ cảnh, loại và văn bản, và `POST /v1/models/query` trả về một danh sách rút gọn xác định ngắn có cùng khả năng hiển thị cho mỗi phím. → [API Thẩm quyền giải quyết](docs/reference/API_REFERENCE.md)
-- **🔑 Per-key routing control** — pin an API key to one model or combo with `forcedModel`, and add or remove a key's models and combos atomically (`/api/keys/{id}/access`). → [API Reference](docs/reference/API_REFERENCE.md) · [OpenAPI](docs/openapi.yaml)
+- **🔑 Kiểm soát định tuyến theo từng phím** — ghim một API chìa khóa cho một mô hình hoặc kết hợp với `forcedModel`và thêm hoặc xóa các mô hình và tổ hợp của khóa một cách nguyên tử (`/api/keys/{id}/access`). → [API Thẩm quyền giải quyết](docs/reference/API_REFERENCE.md) · [OpenAPI](docs/openapi.yaml)
 - **🛡️ Finer Điều khiển PII** Lựa chọn — theo từng loại, tối đa 20 mẫu mặt nạ tùy chỉnh được xác thực và bộ đếm phát hiện theo từng loại; việc che giấu chính nó vẫn được chọn tham gia. Lan [can](docs/security/GUARDRAILS.md) →
 - **🌍 67 ngôn ngữ** Trang tổng quan —, bản sao tài liệu và CLI, với `npm run i18n:add-locale` thêm ngôn ngữ ở mọi nơi chỉ bằng một lệnh. Hướng dẫn → [i18n](docs/guides/I18N.md)
 - **🎛️ OmniConductor** Ủy quyền — gửi đến A2A cho nhóm đại lý của bạn, các kỹ năng của Người chỉ huy trên Thẻ Đại lý và bảng điều khiển với tính năng trò chuyện bằng giọng nói nhấn để nói của Faro. Máy chủ → [A2A](docs/frameworks/A2A-SERVER.md)
@@ -599,7 +594,7 @@ Radar hoạt động theo cơ chế chọn tham gia và chỉ sử dụng GET. �
 - **🖼️ Điểm cuối mới** — `/v1/ocr` (Mistral OCR) Và `/v1/audio/translations` (kiểu thì thầm) làm tròn bề mặt phương tiện truyền thông. → [API Thẩm quyền giải quyết](docs/reference/API_REFERENCE.md)
 - **🎨 Tạo hình ảnh / video / âm thanh** — một API dành cho phương tiện truyền thông: xAI Grok Imagine & Novita AI video, ComfyUI, Magnific, Adobe Firefly, Segmind và các nhà cung cấp giọng nói như ElevenLabs. Tài liệu tham khảo → [API](docs/reference/API_REFERENCE.md)
 - **Triển khai & vận hành 🌍** — proxy ngược `basePath`, tự động phát hiện ngôn ngữ trình duyệt, theo dõi thiết bị theo từng phím, tin cậy MITM không cần root, bản địa hóa zh-TW. [Môi trường](docs/reference/ENVIRONMENT.md) →
-- **🤝 Thêm nhà cung cấp và đại lý** Các đại lý đám mây — (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) với trình duyệt đăng nhập + OAuth, thẻ hạng nhất Ollama, Claude Opus 5 & Sonnet 5, đối tác chính thức Kimi (Code/Web/Moonshot), Zed, Asky, SenseNova, Yuanbao, Agnes AI… và một bản làm mới **Danh mục nhà cung cấp 381** . [Nhà cung cấp](docs/reference/PROVIDER_REFERENCE.md) →
+- **🤝 Thêm nhà cung cấp và đại lý** Các đại lý đám mây — (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) với trình duyệt đăng nhập + OAuth, thẻ hạng nhất Ollama, Claude Opus 5 & Sonnet 5, đối tác chính thức Kimi (Code/Web/Moonshot), Zed, Asky, SenseNova, Yuanbao, Agnes AI… và một bản làm mới **Danh mục nhà cung cấp 382** . [Nhà cung cấp](docs/reference/PROVIDER_REFERENCE.md) →
 - **Tính minh bạch của định tuyến 📡** Mỗi phản hồi — đều mang tiêu đề `X-OmniRoute-Decision` đặt tên strategy/provider/latency phục vụ nó, chiến lược kết hợp `cache-optimized` mới + Auto-Combo tuyến yếu tố `cacheAffinity` lặp lại yêu cầu quay lại kết nối giữ tiền tố được lưu trong bộ nhớ đệm và điểm cuối `/v1/auto-combo/{channel}/candidates` chỉ đọc sẽ hiển thị nhóm ứng cử viên trực tiếp của kênh `auto/*`. [Tự động kết hợp](docs/routing/AUTO-COMBO.md) →
 - **⚡ Hiệu suất và cơ sở hạ tầng cục bộ** — chỉ bằng một cú nhấp chuột Redis cục bộ, Cloudflare Workers / Deno Triển khai các nhà triển khai chuyển tiếp, Biblast & Mux dưới dạng các dịch vụ nhúng được giám sát. [Dịch vụ nhúng](docs/frameworks/EMBEDDED-SERVICES.md) →
 - **🧩 Cũng có trong hộp** Khung plugin — Thị trường +, khung kỹ năng Omni/Agent/GitHub, tích hợp vault Obsidian (22 công cụ MCP ), Batch & Files APIs tương thích với OpenAI, bộ nhớ đệm phản hồi ngữ nghĩa, trò chơi hóa với bảng xếp hạng, khám phá tác nhân ACP (15 tác nhân tích hợp), xuất nhật ký theo lịch sang BigQuery, phân xuất đa mô hình song song `auto/chaos`, cầu nối bot Telegram, trình quản lý phiên bản trong ứng dụng và bảng xếp hạng nhà cung cấp miễn phí LMArena-ELO. [Tài liệu](docs/README.md) →
@@ -683,11 +678,11 @@ khỏi lịch sử shell của bạn. → [Tích hợp CLI](docs/guides/CLI-INTE
 
 <div align="center">
 
-## 🌐 381 Nhà cung cấp AI — 156 được đánh dấu danh mục miễn phí
+## 🌐 382 Nhà cung cấp AI — 156 được đánh dấu danh mục miễn phí
 
 </div>
 
-> **381 nhà cung cấp đã đăng ký** trên các bộ sưu tập hệ thống, phương tiện, tìm kiếm, cục bộ, tác nhân đám mây và hệ thống chuẩn, bao gồm **156 mang siêu dữ liệu khám phá `hasFree: true`** . Sổ đăng ký mô hình trò chuyện bao gồm **242 nhà cung cấp / 3.148 cặp mô hình nhà cung cấp riêng biệt / 1.519 mô hình thô IDs** ; danh mục ngân sách miễn phí riêng biệt có **466 hàng cho mỗi mô hình** ,**34 nhóm định kỳ** Và **52 nhà cung cấp recurring/keyless miễn phí mãi mãi** . Đây là những mẫu số khác nhau theo thiết kế; các định nghĩa và tính toán loại trừ nhóm có trong Tài [liệu tham khảo nhà cung cấp](docs/reference/PROVIDER_REFERENCE.md) và [Bậc miễn phí](docs/reference/FREE_TIERS.md).
+> **382 nhà cung cấp đã đăng ký** trên các bộ sưu tập hệ thống, phương tiện, tìm kiếm, cục bộ, tác nhân đám mây và hệ thống chuẩn, bao gồm **156 mang siêu dữ liệu khám phá `hasFree: true`** . Sổ đăng ký mô hình trò chuyện bao gồm **243 nhà cung cấp / 3.155 cặp mô hình nhà cung cấp riêng biệt / 1.524 mô hình thô IDs** ; danh mục ngân sách miễn phí riêng biệt có **466 hàng cho mỗi mô hình** ,**34 nhóm định kỳ** Và **52 nhà cung cấp recurring/keyless miễn phí mãi mãi** . Đây là những mẫu số khác nhau theo thiết kế; các định nghĩa và tính toán loại trừ nhóm có trong Tài [liệu tham khảo nhà cung cấp](docs/reference/PROVIDER_REFERENCE.md) và [Bậc miễn phí](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
@@ -1299,7 +1294,7 @@ Số liệu chuẩn vào 2026-10-18: **1.976 video duy nhất** · **20.220.289 
   <tr><td nowrap><b>Môi trường chạy</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Ngôn ngữ</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> trên <code>src/</code> và <code>open-sse/</code> (không có <code>any</code> trong lõi kể từ v2.0)</td></tr>
   <tr><td nowrap><b>Framework</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Cơ sở dữ liệu</b></td><td>better-sqlite3 (SQLite, ghi nhật ký WAL) + LowDB (JSON kế thừa) — 147 mô-đun miền, 225 migration</td></tr>
+  <tr><td nowrap><b>Cơ sở dữ liệu</b></td><td>better-sqlite3 (SQLite, ghi nhật ký WAL) + LowDB (JSON kế thừa) — 147 mô-đun miền, 229 migration</td></tr>
   <tr><td nowrap><b>Bộ nhớ</b></td><td>Tìm kiếm toàn văn SQLite FTS5 + các vector embedding được lượng tử hóa int8, suy giảm có kiểu</td></tr>
   <tr><td nowrap><b>Lược đồ</b></td><td>Zod 4 — xác thực I/O công cụ MCP + hợp đồng API</td></tr>
   <tr><td nowrap><b>Giao thức</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

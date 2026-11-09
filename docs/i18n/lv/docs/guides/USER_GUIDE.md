@@ -355,24 +355,24 @@ Model: cc/claude-opus-4-7
 
 ## 🚀 Ieviešana
 
-### Globāla npm instalācija (Ieteicams)
+### Globālā npm instalēšana (ieteicams)
 
 ```bash
 npm install -g omniroute
 
-# Izveidot konfigurācijas direktoriju
+# Create config directory
 mkdir -p ~/.omniroute
 
-# Izveidot .env failu (skatiet .env.example)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# Startēt serveri
+# Start server
 omniroute
-# Vai ar pielāgotu portu:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI automātiski ielādē `.env` no `~/.omniroute/.env` vai `./.env`.
+CLI automātiski ielādē `.env` no `~/.omniroute/.env` vai `./.env`. `./.env` darba direktorijā var iestatīt tikai īsu atslēgu sarakstu (porti, `REQUIRE_API_KEY`, lokalizācijas un krāsu iestatījumi); visu pārējo ieliec `~/.omniroute/.env`. Skatiet [CLI palaišanas līgumus](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### Tekstūras režīms
 

@@ -363,7 +363,7 @@ GET /v1/embeddings
 
 ---
 
-## చిత్రాల ఉత్పత్తి
+## ఇమేజ్ జనరేషన్
 
 ```bash
 POST /v1/images/generations
@@ -377,36 +377,22 @@ Content-Type: application/json
 }
 ```
 
-అందుబాటులో ఉన్న ప్రొవైడర్లలో OpenAI (GPT Image 2), xAI (Grok Image), Together AI (FLUX), Fireworks AI, Nebius (FLUX), Hyperbolic, NanoBanana, **OpenRouter**, **ZenMux**, SD WebUI (స్థానిక), ComfyUI (స్థానిక) ఉన్నాయి.
+అందుబాటులో ఉన్న ప్రొవైడర్లలో OpenAI (GPT చిత్రం 2), xAI (Grok చిత్రం), Together AI (FLUX), Fireworks AI, Nebius (FLUX), హైపర్బోలిక్, NanoBanana,**OpenRouter** ,**ZenMux** , SD WebUI (స్థానికం), ComfyUI (స్థానికం).
 
-`n` అనేది `data[]`లో `n` చిత్రాలను అందిస్తుంది. అప్స్ట్రీమ్ API ప్రతి కాల్కు ఒక చిత్రాన్ని మాత్రమే అందించే ప్రొవైడర్లకు
-(Black Forest Labs, Stability AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik,
-NVIDIA NIM, Cloudflare Workers AI) గరిష్ఠంగా ఒకేసారి 4 కాల్లు నడిచేలా `n` ప్రత్యేక అప్స్ట్రీమ్ కాల్లు చేయబడతాయి. స్థిరమైన
-`seed` కాల్ ఇండెక్స్తో సర్దుబాటు చేయబడుతుంది (`seed`, `seed + 1`, …), అందువల్ల చిత్రాలు భిన్నంగా ఉంటాయి, కానీ
-పునరుత్పత్తి చేయగలిగే విధంగా ఉంటాయి. `n` గరిష్ఠంగా 10కి పరిమితం చేయబడుతుంది. ఏదైనా కాల్ విఫలమైతే మొత్తం అభ్యర్థన విఫలమవుతుంది. ఫ్యాన్-అవుట్ ఫార్మాట్ల జాబితా
-`open-sse/handlers/imageGeneration/fanOut.ts`లోని `SINGLE_IMAGE_FANOUT_FORMATS`.
+`n` `data[]` లో `n` చిత్రాలను అందిస్తుంది. అప్స్ట్రీమ్ API ఒక్కో కాల్కు ఒక ఇమేజ్ని తిరిగి ఇచ్చే ప్రొవైడర్లు (బ్లాక్ ఫారెస్ట్ ల్యాబ్స్, స్టెబిలిటీ AI, లియోనార్డో, ఐడియోగ్రామ్, హైపర్, హైపర్బోలిక్, Magnific/Freepik, NVIDIA NIM, Cloudflare వర్కర్స్ AI) గరిష్టంగా 4 విమానాల్లో `n` ప్రత్యేక అప్స్ట్రీమ్ కాల్లను పొందుతారు. స్థిర `seed` కాల్ ఇండెక్స్ (`seed`, `seed + 1`, …) ద్వారా ఆఫ్సెట్ చేయబడుతుంది, కాబట్టి చిత్రాలు విభిన్నంగా ఉంటాయి కానీ పునరుత్పత్తి చేయగలవు. `n` 10కి పరిమితం చేయబడింది. ఏదైనా కాల్ విఫలమైతే అభ్యర్థన మొత్తం విఫలమవుతుంది. ఫ్యాన్ అవుట్ ఫార్మాట్ల జాబితా `open-sse/handlers/imageGeneration/fanOut.ts` లో `SINGLE_IMAGE_FANOUT_FORMATS`.
 
-ZenMux ఇప్పటికే ఉన్న API-కీ కనెక్షన్ను మళ్లీ ఉపయోగిస్తుంది మరియు `zenmux/` లేదా `zm/` ప్రీఫిక్స్లను అంగీకరిస్తుంది:
+ZenMux ఇప్పటికే ఉన్న API-కీ కనెక్షన్ని మళ్లీ ఉపయోగిస్తుంది మరియు `zenmux/` లేదా `zm/` ప్రిఫిక్స్లను అంగీకరిస్తుంది:
 
-- `zenmux/openai/gpt-image-2` ZenMux యొక్క OpenAI Images APIని ఉపయోగిస్తుంది. ఎంపికల్లో `size`,
-  `quality`, `n`, `output_format`, `output_compression`, `background`, మరియు `response_format` ఉన్నాయి.
-- `zm/meta/muse-image-1.0` వంటి ఇతర పబ్లిషర్లు ZenMux యొక్క Vertex AI `:predict`
-  ఎండ్పాయింట్ను ఉపయోగిస్తారు. `n` `sampleCount`కు, `aspect_ratio` `aspectRatio`కు, మరియు `image_size`
-  (`1K`, `2K`, `4K`) `sampleImageSize`కు మ్యాప్ అవుతాయి. పిక్సెల్ `size` కేవలం ఆస్పెక్ట్ రేషియోను అందిస్తుంది,
-  హామీ ఇవ్వబడిన పిక్సెల్ కొలతలను కాదు. మద్దతు ఉన్న రేషియోలు, రిజల్యూషన్లు, కౌంట్లు మోడల్ను బట్టి మారుతాయి.
-- `zm/inclusionai/ming-image-0.1-design` తన కొలతలను స్వయంగా ఎంచుకుంటుంది. `size`,
-  `aspect_ratio`, మరియు `image_size`లను వదిలివేయండి; స్పష్టమైన విలువలు HTTP 400ను అందిస్తాయి. `output_format`తో
-  PNG, JPEG, మరియు WebPలను అభ్యర్థించవచ్చు.
+- `zenmux/openai/gpt-image-2` ZenMux యొక్క OpenAI చిత్రాలు API ఉపయోగిస్తుంది. ఎంపికలలో `size`, `quality`, `n`, `output_format`, `output_compression`, `background` మరియు `response_format` ఉన్నాయి.
+- `zm/meta/muse-image-1.0` వంటి ఇతర ప్రచురణకర్తలు ZenMux యొక్క వెర్టెక్స్ AI `:predict` ముగింపు బిందువును ఉపయోగిస్తారు. `n` మ్యాప్లు `sampleCount`, `aspect_ratio` నుండి `aspectRatio` మరియు `image_size` (`1K`, `2K`, `4K`) నుండి `sampleImageSize`. పిక్సెల్ `size` ఒక కారక నిష్పత్తిని మాత్రమే అందిస్తుంది, పిక్సెల్ కొలతలు హామీ ఇవ్వబడవు. మద్దతు ఉన్న నిష్పత్తులు, తీర్మానాలు మరియు గణనలు మోడల్ను బట్టి మారుతూ ఉంటాయి.
+- `zm/inclusionai/ming-image-0.1-design` దాని స్వంత కొలతలు ఎంచుకుంటుంది. `size`, `aspect_ratio` మరియు `image_size` వదిలివేయండి; స్పష్టమైన విలువలు HTTP 400ని అందిస్తాయి. `output_format` తో PNG, JPEG, మరియు WebP అభ్యర్థించవచ్చు.
 
-ఈ ఇంటిగ్రేషన్ టెక్స్ట్-టు-ఇమేజ్ ఉత్పత్తికి మద్దతు ఇస్తుంది, రిఫరెన్స్-ఇమేజ్ ఎడిటింగ్కు కాదు. Vertex
-అవుట్పుట్ `data[].b64_json`గా సాధారణీకరించబడుతుంది; `response_format: "url"` అప్స్ట్రీమ్
-HTTPS URLను లేదా కేవలం ఇమేజ్ బైట్లు మాత్రమే అందుబాటులో ఉన్నప్పుడు base64 డేటా URLను అందిస్తుంది. ఖాళీ/ఫిల్టర్ చేయబడిన అవుట్పుట్లు
-ఖాళీ విజయవంతమైన ప్రతిస్పందనకు బదులుగా ఒక లోపాన్ని అందిస్తాయి. మోడల్ యాక్సెస్ ZenMux ఖాతాపై ఆధారపడి ఉంటుంది.
-[ZenMux యొక్క Vertex API](https://docs.zenmux.ai/api/vertexai/generate-images) మరియు
-[OpenAI Images API](https://docs.zenmux.ai/api/openai/generate-an-image) చూడండి.
+ఈ ఏకీకరణ టెక్స్ట్-టు-ఇమేజ్ జనరేషన్కు మద్దతు ఇస్తుంది, రిఫరెన్స్-ఇమేజ్ ఎడిటింగ్ కాదు. వెర్టెక్స్ అవుట్పుట్ `data[].b64_json` కి సాధారణీకరించబడింది; ఇమేజ్ బైట్లు మాత్రమే అందుబాటులో ఉన్నప్పుడు `response_format: "url"` అప్స్ట్రీమ్ HTTPS URL లేదా బేస్64 డేటా URL అందిస్తుంది. Empty/filtered అవుట్పుట్లు ఖాళీ విజయం కంటే దోషాన్ని అందిస్తాయి. మోడల్ యాక్సెస్ ZenMux ఖాతాపై ఆధారపడి ఉంటుంది. [ZenMux యొక్క వెర్టెక్స్ API](https://docs.zenmux.ai/api/vertexai/generate-images) మరియు [OpenAI చిత్రాలు API](https://docs.zenmux.ai/api/openai/generate-an-image) చూడండి.
+
+Microsoft 365 Copilot సైన్-ఇన్ కనెక్షన్ Copilot యొక్క అంతర్నిర్మిత చిత్ర సాధనం ద్వారా `copilot-m365-web/m365-copilot-image` అందిస్తుంది: ప్రతి చిత్రానికి ఒక Copilot టర్న్ (`n` 1–4), `size` స్టీరింగ్ మాత్రమే ఓరియంటేషన్, మరియు ఇమేజ్లు ఇన్లైన్లో రిటర్న్ చేయబడ్డాయి (`b64_json`, లేదా `response_format: "url"` కోసం డేటా URL ). [Microsoft 365 Copilot](../providers/COPILOT-M365.md#image-generation) చూడండి.
 
 ```bash
-# అన్ని ఇమేజ్ మోడళ్లను జాబితా చేయండి
+# List all image models
 GET /v1/images/generations
 ```
 
@@ -801,17 +787,19 @@ OpenAI-అనుకూల బ్యాచ్ ప్రాసెసింగ్.
 
 ---
 
-## Search API
+## API శోధించండి
 
-వెబ్/శోధన ప్రొవైడర్ అబ్స్ట్రాక్షన్ (Tavily, Brave, Exa, Serper మొదలైనవి).
+Web/search ప్రొవైడర్ సంగ్రహణ (తవిలీ, బ్రేవ్, ఎక్సా, సెర్పర్, మొదలైనవి).
 
-| Method | Path                   | Description                                                                                             |
-| ------ | ---------------------- | ------------------------------------------------------------------------------------------------------- |
-| GET    | `/v1/search`           | కాన్ఫిగర్ చేసిన శోధన ప్రొవైడర్లు + సామర్థ్యాల జాబితా                                                    |
-| POST   | `/v1/search`           | శోధన ప్రశ్నను అమలు చేయడం — బాడీ `v1SearchSchema` ద్వారా ధృవీకరించబడుతుంది, క్యాషింగ్/కోలెసింగ్కు మద్దతు |
-| GET    | `/v1/search/analytics` | ప్రతి ప్రొవైడర్కు సంబంధించిన హిట్లు/లేటెన్సీ/క్యాష్ గణాంకాలు                                            |
+| పద్ధతి | మార్గం                 | వివరణ                                                                                                         |
+| ------ | ---------------------- | ------------------------------------------------------------------------------------------------------------- |
+| GET    | `/v1/search`           | కాన్ఫిగర్ చేయబడిన శోధన ప్రొవైడర్ల + సామర్థ్యాలను జాబితా చేయండి                                                |
+| POST   | `/v1/search`           | `v1SearchSchema` ద్వారా ధృవీకరించబడిన శోధన ప్రశ్న — బాడీని అమలు చేయండి, caching/coalescing కి మద్దతు ఇస్తుంది |
+| GET    | `/v1/search/analytics` | ప్రతి ప్రొవైడర్ hit/latency/cache గణాంకాలు                                                                    |
 
-**Auth:** Bearer API కీ (`extractApiKey` + `isValidApiKey`). శోధన విధానం `enforceApiKeyPolicy` ద్వారా అమలు చేయబడుతుంది.
+**ప్రమాణీకరణ:** బేరర్ API కీ (`extractApiKey` + `isValidApiKey`). శోధన విధానం `enforceApiKeyPolicy` ద్వారా అమలు చేయబడింది.
+
+**స్వీయ-ఎంపిక:** `provider` లేకుండా, కాన్ఫిగర్ చేయబడిన కనెక్షన్తో చౌకైన ప్రొవైడర్ మొదట నడుస్తుంది మరియు తదుపరి చౌకైనది ఫెయిల్ఓవర్. ఏదీ కాన్ఫిగర్ చేయనప్పుడు మాత్రమే ఉచిత చివరి రిసార్ట్ ప్రొవైడర్లు (`duckduckgo-free`) ఉపయోగించబడుతుంది. స్వీయ-హోస్ట్ చేసిన SearXNG దాని కనెక్షన్ నిజమైన `baseUrl` (కేటలాగ్ డిఫాల్ట్ `http://localhost:8888/search` కాదు) నిల్వ చేసిన తర్వాత కాన్ఫిగర్ చేయబడినట్లుగా గణించబడుతుంది: ఇది కీ చేసిన వాటి కంటే $0 ప్రొవైడర్గా ర్యాంక్ను పొందుతుంది, SearXNG 400, 401, 40403 Ahqకి చెల్లుబాటు కాని సమాధానంతో సహా, చౌకైన `baseUrl` ప్రొవైడర్ ఫెయిల్ఓవర్గా ఉంటుంది. `http(s)` లేదా క్లౌడ్-మెటాడేటా చిరునామా వద్ద URL పాయింట్లు లెక్కించబడవు. టోకెన్ను నిల్వ చేసే SearXNG కనెక్షన్ ఈ విధంగా `https://` లేదా లూప్బ్యాక్ `http://` కంటే మాత్రమే ఉంటుంది. రిమోట్ ప్లెయిన్ `http://` లో ఇది ఎప్పుడూ విఫలం కాదు మరియు చివరి ప్రయత్నంగా ఉంటుంది, ఇతర ప్రొవైడర్ కాన్ఫిగర్ చేయనప్పుడు లేదా పేరు ద్వారా అభ్యర్థించబడినప్పుడు మాత్రమే ఉపయోగించబడుతుంది, కాబట్టి ఇది ఆ రెండు సందర్భాలలో స్పష్టమైన టెక్స్ట్లో టోకెన్ను పంపుతుంది.
 
 ### Exa మరియు Tavily `provider_options`
 
@@ -971,28 +959,28 @@ CLI `base_url + /responses`ను WebSocketగా upgrade చేస్తుం�
 
 ---
 
-## స్వయం-సేవ వినియోగం (`/api/usage/om-usage`)
+## స్వీయ-సేవ వినియోగం (`/api/usage/om-usage`)
 
-ఏ API కీ అయినా **తన స్వంత** వినియోగం మరియు కోటాలను చదవగలదు — నిర్వహణ ప్రామాణీకరణ అవసరం లేదు. ఒక కీ హోల్డర్ తన ఖర్చును చూపించడానికి క్లయెంట్ (CLI, OmniCopilot ప్యానెల్) ఉపయోగించే ఎండ్పాయింట్ ఇదే.
+ఏదైనా API కీ చదవగలదు**దాని స్వంత** వినియోగం మరియు కోటాలు — నిర్వహణ ప్రమాణీకరణ లేదు. ఇది క్లయింట్ (CLI, OmniCopilot ప్యానెల్) కీ హోల్డర్కు వారి ఖర్చును చూపించడానికి ఉపయోగించే ముగింపు స్థానం.
 
 ```bash
-# టెక్స్ట్ రూపం (చారిత్రక కాంట్రాక్ట్ — టెర్మినల్ కోసం సాదా టెక్స్ట్)
+# Text form (the historical contract — plain text for a terminal)
 curl -H "Authorization: Bearer <your-api-key>" \
   http://localhost:20128/api/usage/om-usage
 
-# నిర్మిత రూపం — UI వినియోగించేది
+# Structured form — what a UI consumes
 curl -H "Authorization: Bearer <your-api-key>" \
   "http://localhost:20128/api/usage/om-usage?format=json"
 ```
 
-కీకి **`allowUsageCommand`** ప్రారంభించి ఉండాలి (డిఫాల్ట్గా ఆఫ్ — డాష్బోర్డ్లోని API-కీ మేనేజర్ దీన్ని ఒక్కో కీకి టోగుల్ చేస్తుంది). ఇది లేకపోతే ఎండ్పాయింట్ `403`ను అందిస్తుంది.
+కీ తప్పనిసరిగా ఉండాలి**`allowUsageCommand`** ప్రారంభించబడింది (డిఫాల్ట్గా — డ్యాష్బోర్డ్ API-కీ మేనేజర్ ప్రతి కీని టోగుల్ చేస్తుంది). అది లేకుండా ఎండ్పాయింట్ `403` సమాధానం ఇస్తుంది.
 
-`?format=json` ఒక వివేచిత ఆకృతిని అందిస్తుంది, కాబట్టి తిరస్కరణ సందర్భంలో కాలర్ ఎప్పుడూ డేటా ఫీల్డ్ను చదవడు. విజయవంతమైన సందర్భంలో:
+`?format=json` వివక్షత ఆకారాన్ని అందిస్తుంది కాబట్టి కాలర్ తిరస్కరణ నుండి డేటా ఫీల్డ్ను ఎప్పటికీ చదవడు. విజయంపై:
 
 ```jsonc
 {
   "allowed": true,
-  // ఒక్కో కీ వినియోగ పరిమితులకు (రోజువారీ/వారంవారీ USD) కీ ఎంపిక చేసినప్పుడు మాత్రమే ఉంటుంది:
+  // present only when the key opted into per-key usage limits (daily/weekly/5-hour USD):
   "personal": {
     "dailySpentUsd": 1.25,
     "dailyLimitUsd": 5,
@@ -1001,9 +989,9 @@ curl -H "Authorization: Bearer <your-api-key>" \
     "weeklyLimitUsd": 20,
     "weeklyResetAtIso": "…" /* … */,
   },
-  // ఎంచుకున్న ప్రొవైడర్ కోటా స్నాప్షాట్, ఇంకా ఏదీ క్యాష్ కాకపోతే null:
+  // the selected provider quota snapshot, or null when nothing is cached yet:
   "provider": { "connectionId": "…", "provider": "claude", "plan": "…", "quotas": {/* … */} },
-  // ప్రతి కనెక్షన్కి సంబంధించిన స్నాప్షాట్, తద్వారా UI అనేక ప్రొవైడర్లను పక్కపక్కనే చూపించగలదు:
+  // every connection's snapshot, so a UI can render several providers side by side:
   "providers": [
     { "connectionId": "…", "provider": "claude" /* … */ },
     { "provider": "codex" /* … */ },
@@ -1011,11 +999,9 @@ curl -H "Authorization: Bearer <your-api-key>" \
 }
 ```
 
-తిరస్కరణ సందర్భంలో (`401` తప్పు కీ / `403` అనుమతి లేదు) అదే మార్గం
-`{ "allowed": false, "error": { "message": "…" } }`ను అందిస్తుంది — ఖాళీగా ఉన్నప్పటికీ కనిపించే `personal`/`provider`
-(కీకి అనుమతి ఉంది, ఇంకా ఏ సమాచారం లభించలేదు) తిరస్కరణకు భిన్నమైన స్థితి. ఈ రెండింటినీ వేరు చేసేది JSON రూపం మాత్రమే.
+తిరస్కరణపై (`401` చెడు కీ / `403` అనుమతించబడదు) అదే మార్గం `{ "allowed": false, "error": { "message": "…" } }` — ప్రస్తుత-కానీ-ఖాళీ `personal`/`provider` (కీ అనుమతించబడింది, ఇంకా ఏమీ నేర్చుకోలేదు) తిరస్కరణ నుండి భిన్నమైన స్థితి మరియు JSON ఫారమ్ మాత్రమే వాటిని వేరు చేస్తుంది.
 
-**ప్రామాణీకరణ:** కాలర్ యొక్క స్వంత Bearer API కీ, `isValidApiKey`తో ధృవీకరించబడుతుంది — ఇది నిర్వహణ ఉపరితలం (`/api/keys/…`) కాదు; అది `requireManagementAuth` వెనుకనే ఉంటుంది.
+**ప్రమాణీకరణ:** `isValidApiKey` — తో ధృవీకరించబడిన కాలర్ యొక్క స్వంత బేరర్ API కీ ఇది _not_ నిర్వహణ ఉపరితలం (`/api/keys/…`), ఇది `requireManagementAuth` వెనుక ఉంటుంది.
 
 ### ముడి వర్సెస్ కట్ఆఫ్-సర్దుబాటు చేసిన కోటా శాతాలు
 
@@ -1210,33 +1196,33 @@ Claude Code auto-mode classifier అభ్యర్థనల్లో స్ప�
 | -------------------------------- | ------- | ----------------------- |
 | `/api/oauth/[provider]/[action]` | Various | Provider-specific OAuth |
 
-### Routing & Config
+### రూటింగ్ & కాన్ఫిగర్
 
-| Endpoint              | Method   | Description                   |
-| --------------------- | -------- | ----------------------------- |
-| `/api/models`         | GET/PUT  | Model list / alias update     |
-| `/api/models/alias`   | GET/POST | Model aliases                 |
-| `/api/models/catalog` | GET      | All models by provider + type |
-| `/api/combos*`        | Various  | Combo management              |
-| `/api/keys*`          | Various  | API key management            |
-| `/api/pricing`        | GET      | Model pricing                 |
+| ఎండ్ పాయింట్          | పద్ధతి   | వివరణ                                |
+| --------------------- | -------- | ------------------------------------ |
+| `/api/models`         | GET/PUT  | మోడల్ జాబితా / మారుపేరు నవీకరణ       |
+| `/api/models/alias`   | GET/POST | మోడల్ మారుపేర్లు                     |
+| `/api/models/catalog` | GET      | ప్రొవైడర్ + రకం ద్వారా అన్ని మోడల్లు |
+| `/api/combos*`        | వివిధ    | కాంబో నిర్వహణ                        |
+| `/api/keys*`          | వివిధ    | API కీ నిర్వహణ                       |
+| `/api/pricing`        | GET      | మోడల్ ధర                             |
 
-#### Model limit మూలాధారం
+#### మోడల్ పరిమితి మూలాధారం
 
-`GET /api/models?withLimits=1` (`true` కూడా; `0`/`false` లేదా దాన్ని వదిలేయడం ద్వారా డిఫాల్ట్ payloadలో మార్పు ఉండదు) ప్రతి model rowకు `contextWindow`, `maxInputTokens`, `maxOutputTokens` మరియు `capsSource` objectను జోడిస్తుంది. ప్రతి limitను అందించిన ruleను `capsSource` పేర్కొంటుంది; అందువల్ల ఆశ్చర్యకరమైన limit (ఉదాహరణకు 1M modelపై 128k) దాని మూలానికి అనుసరించవచ్చు. Resolved values routing ఉపయోగించేవే; ఈ flag fieldsను మాత్రమే జోడిస్తుంది, valueను ఎప్పుడూ మార్చదు. ఇతర ఏ `withLimits` విలువనైనా `400`తో తిరస్కరిస్తారు.
+`GET /api/models?withLimits=1` ( `true`; `0`/`false` లేదా దానిని వదిలివేయడం డిఫాల్ట్ పేలోడ్ను మార్చకుండా ఉంచుతుంది) ప్రతి మోడల్ వరుసకు `contextWindow`, `maxInputTokens`, `maxOutputTokens` మరియు `capsSource` ఆబ్జెక్ట్ను జోడిస్తుంది. `capsSource` ప్రతి పరిమితిని అందించే నియమానికి పేరు పెట్టింది, కాబట్టి ఆశ్చర్యకరమైన పరిమితి (ఉదాహరణకు 1M మోడల్లో 128k) దాని మూలాన్ని గుర్తించవచ్చు. పరిష్కరించబడిన విలువలు అదే రూటింగ్ ఉపయోగాలు; ఫ్లాగ్ ఫీల్డ్లను మాత్రమే జోడిస్తుంది మరియు విలువను ఎప్పటికీ మార్చదు. ఏదైనా ఇతర `withLimits` విలువ `400` తో తిరస్కరించబడుతుంది.
 
-| `capsSource` value                           | Origin                                                                 |
-| -------------------------------------------- | ---------------------------------------------------------------------- |
-| `override:context`                           | Persisted context-window override (`model_context_overrides`)          |
-| `override:max_input` / `override:max_output` | Persisted `max_input_tokens` / `max_output_tokens` capability override |
-| `static-authoritative:<provider>/<model>`    | Static authoritative context-window table                              |
-| `synced:<provider>/<model>`                  | models.dev synced capability row                                       |
-| `registry:<provider>/<model>`                | Provider registry entry                                                |
-| `spec:<model>`                               | Static model spec                                                      |
-| `effort-base:` prefix                        | Row borrowed from the base model of an effort-suffixed variant         |
-| `none`                                       | No source declares the limit (value is `null`)                         |
+| `capsSource` విలువ                           | మూలం                                                                     |
+| -------------------------------------------- | ------------------------------------------------------------------------ |
+| `override:context`                           | నిరంతర సందర్భ-విండో ఓవర్రైడ్ (`model_context_overrides`)                 |
+| `override:max_input` / `override:max_output` | పెర్సిస్టెడ్ `max_input_tokens` / `max_output_tokens` సామర్ధ్యం ఓవర్రైడ్ |
+| `static-authoritative:<provider>/<model>`    | స్టాటిక్ అధీకృత సందర్భ-విండో పట్టిక                                      |
+| `synced:<provider>/<model>`                  | models.dev సమకాలీకరించబడిన సామర్థ్యం వరుస                                |
+| `registry:<provider>/<model>`                | ప్రొవైడర్ రిజిస్ట్రీ ఎంట్రీ                                              |
+| `spec:<model>`                               | స్టాటిక్ మోడల్ స్పెక్                                                    |
+| `effort-base:` ఉపసర్గ                        | ఎఫర్ట్-సఫిక్స్డ్ వేరియంట్ యొక్క బేస్ మోడల్ నుండి రో అరువు తీసుకోబడింది   |
+| `none`                                       | ఏ మూలమూ పరిమితిని ప్రకటించలేదు (విలువ `null`)                            |
 
-Implementation: `src/lib/modelCapabilities.ts`లోని `getResolvedModelCapabilitiesWithLimitSources()` మరియు `src/lib/modelCapabilityLimits.ts`లోని precedence chains.
+అమలు: `src/lib/modelCapabilities.ts` లో `getResolvedModelCapabilitiesWithLimitSources()` మరియు `src/lib/modelCapabilityLimits.ts` లో ప్రాధాన్యత గొలుసులు.
 
 ### వినియోగం & విశ్లేషణ
 
@@ -1252,38 +1238,39 @@ Implementation: `src/lib/modelCapabilities.ts`లోని `getResolvedModelCapa
 
 ### API కీ అనుమతులు
 
-`PATCH /api/keys/{id}` ఇప్పటికే ఉన్న కీ అనుమతులను నవీకరిస్తుంది. ప్రతి `/api/keys*` రూట్లాగే దీనికి ఇన్ఫరెన్స్ కీ కాకుండా నిర్వహణ అధికారం అవసరం ( [నిర్వహణ ప్రామాణీకరణ](../guides/MANAGEMENT-AUTH.md) చూడండి). మీరు మార్చాలనుకుంటున్న ఫీల్డ్లను మాత్రమే పంపండి; వాటిలో ఏదీ లేని అభ్యర్థన `No valid fields to update` తో తిరస్కరించబడుతుంది. అంగీకరించబడే ఫీల్డ్లు `src/shared/validation/schemas/keys.ts` లోని `updateKeyPermissionsSchema` ద్వారా నిర్వచించబడతాయి.
+`PATCH /api/keys/{id}` ఇప్పటికే ఉన్న కీ యొక్క అనుమతులను నవీకరిస్తుంది. ప్రతి `/api/keys*` మార్గం వలె దీనికి నిర్వహణ అధికారం అవసరం ( [నిర్వహణ ప్రమాణీకరణ](../guides/MANAGEMENT-AUTH.md) చూడండి), అనుమితి కీ కాదు. మీరు మార్చాలనుకుంటున్న ఫీల్డ్లను మాత్రమే పంపండి; వాటిలో ఏదీ లేని అభ్యర్థన `No valid fields to update` తో తిరస్కరించబడింది. ఆమోదించబడిన ఫీల్డ్లు `src/shared/validation/schemas/keys.ts` లో `updateKeyPermissionsSchema` చే నిర్వచించబడ్డాయి.
 
-| ఫీల్డ్                                      | రకం                                                                        | గమనికలు                                                                                                                                        |
-| ------------------------------------------- | -------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| `name`                                      | string, 1-200 అక్షరాలు                                                     |                                                                                                                                                |
-| `isActive`                                  | boolean                                                                    |                                                                                                                                                |
-| `isBanned`                                  | boolean                                                                    |                                                                                                                                                |
-| `expiresAt`                                 | ISO 8601 తేదీ-సమయం లేదా `null`                                             | గడువు ముగింపును తొలగించడానికి `null` ఉపయోగించండి                                                                                               |
-| `modelAccessMode`                           | `all` \| `restricted`                                                      | మోడ్ `all`గా ఉన్నప్పుడు `allowedModels` ఖాళీగా ఉండాలి                                                                                          |
-| `allowedModels`, `blockedModels`            | stringల array, గరిష్ఠంగా 1000                                              |                                                                                                                                                |
-| `allowedCombos`                             | stringల array, గరిష్ఠంగా 500                                               | ఈ కీ ఉపయోగించగల కాంబోల నియంత్రణ; నేరుగా ఉపయోగించే మోడళ్లను `modelAccessMode` / `allowedModels` నియంత్రిస్తాయి                                  |
-| `connectionAccessMode`                      | `all` \| `restricted`                                                      | `restricted`గా ఉన్నప్పుడు `allowedConnections` ఖాళీగా ఉండకూడదు, `all`గా ఉన్నప్పుడు ఖాళీగా ఉండాలి                                               |
-| `allowedConnections`                        | UUIDల array, గరిష్ఠంగా 100                                                 |                                                                                                                                                |
-| `allowAutoCombos`                           | boolean                                                                    | `false` అయితే ఈ కీతో `auto/*` మోడళ్ల కోసం చేసే అభ్యర్థనలు తిరస్కరించబడతాయి; దీన్ని ఎప్పుడూ సెట్ చేయని కీలకు అనుమతి ఉంటుంది                     |
-| `catalogScope`                              | `all` \| `combos` \| `models`                                              | ఈ కీ కోసం `GET /v1/models` ఏవి జాబితా చేస్తుందో నిర్ణయిస్తుంది (కాంబోలు మాత్రమే, మోడళ్లు మాత్రమే లేదా రెండూ); కీ ఉపయోగించగల వాటిని ఇది మార్చదు |
-| `forcedModel`                               | గరిష్ఠంగా 300 అక్షరాల string లేదా `null`                                   | `X-Route-Model` మరియు `body.model` కంటే ప్రాధాన్యతతో చాట్ అభ్యర్థనలను ఈ మోడల్/కాంబోకు రూట్ చేస్తుంది; కీ పరిమితులు వర్తిస్తూనే ఉంటాయి          |
-| `noLog`, `autoResolve`                      | boolean                                                                    |                                                                                                                                                |
-| `throttleDelayMs`                           | పూర్ణాంకం, 0-300000                                                        |                                                                                                                                                |
-| `maxSessions`                               | పూర్ణాంకం, 0-10000                                                         |                                                                                                                                                |
-| `rateLimits`                                | `{ limit, window }`ల array (ధనాత్మక పూర్ణాంకాలు, గరిష్ఠంగా 50) లేదా `null` | పరిమితులను తొలగించడానికి `null` ఉపయోగించండి                                                                                                    |
-| `accessSchedule`                            | షెడ్యూల్ ఆబ్జెక్ట్ లేదా `null`                                             | షెడ్యూల్ను తొలగించడానికి `null` ఉపయోగించండి                                                                                                    |
-| `scopes`                                    | stringల array, గరిష్ఠంగా 32                                                |                                                                                                                                                |
-| `allowedEndpoints`                          | stringల array, గరిష్ఠంగా 20                                                |                                                                                                                                                |
-| `streamDefaultMode`                         | `legacy` \| `json`                                                         |                                                                                                                                                |
-| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                       | [ప్రతి-కీ కాష్ బైపాస్](#per-key-cache-bypass) చూడండి                                                                                           |
-| `compressionEnabled`                        | boolean                                                                    |                                                                                                                                                |
-| `codexServiceMode`                          | Codex సేవా మోడ్లలో ఒకటి                                                    |                                                                                                                                                |
-| `disableNonPublicModels`                    | boolean                                                                    |                                                                                                                                                |
-| `allowUsageCommand`                         | boolean                                                                    |                                                                                                                                                |
-| `usageLimitEnabled`                         | boolean                                                                    |                                                                                                                                                |
-| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | number >= 0 or `null`                                                      |                                                                                                                                                |
-| `chaosModeEnabled`                          | boolean                                                                    |                                                                                                                                                |
+| ఫీల్డ్                                      | రకం                                                                        | గమనికలు                                                                                                                                                                                                                                                               |
+| ------------------------------------------- | -------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`                                      | string, 1-200 అక్షరాలు                                                     |                                                                                                                                                                                                                                                                       |
+| `isActive`                                  | boolean                                                                    |                                                                                                                                                                                                                                                                       |
+| `isBanned`                                  | boolean                                                                    |                                                                                                                                                                                                                                                                       |
+| `expiresAt`                                 | ISO 8601 తేదీ-సమయం లేదా `null`                                             | గడువు ముగింపును తొలగించడానికి `null` ఉపయోగించండి                                                                                                                                                                                                                      |
+| `modelAccessMode`                           | `all` \| `restricted`                                                      | మోడ్ `all`గా ఉన్నప్పుడు `allowedModels` ఖాళీగా ఉండాలి                                                                                                                                                                                                                 |
+| `allowedModels`, `blockedModels`            | తీగల శ్రేణి, 1000 వరకు                                                     |                                                                                                                                                                                                                                                                       |
+| `allowedCombos`                             | stringల array, గరిష్ఠంగా 500                                               | ఈ కీ ఉపయోగించగల కాంబోల నియంత్రణ; నేరుగా ఉపయోగించే మోడళ్లను `modelAccessMode` / `allowedModels` నియంత్రిస్తాయి                                                                                                                                                         |
+| `connectionAccessMode`                      | `all` \| `restricted`                                                      | `restricted`గా ఉన్నప్పుడు `allowedConnections` ఖాళీగా ఉండకూడదు, `all`గా ఉన్నప్పుడు ఖాళీగా ఉండాలి                                                                                                                                                                      |
+| `allowedConnections`                        | UUIDల array, గరిష్ఠంగా 100                                                 |                                                                                                                                                                                                                                                                       |
+| `allowAutoCombos`                           | boolean                                                                    | `false` అయితే ఈ కీతో `auto/*` మోడళ్ల కోసం చేసే అభ్యర్థనలు తిరస్కరించబడతాయి; దీన్ని ఎప్పుడూ సెట్ చేయని కీలకు అనుమతి ఉంటుంది                                                                                                                                            |
+| `catalogScope`                              | `all` \| `combos` \| `models`                                              | ఈ కీ కోసం `GET /v1/models` ఏవి జాబితా చేస్తుందో నిర్ణయిస్తుంది (కాంబోలు మాత్రమే, మోడళ్లు మాత్రమే లేదా రెండూ); కీ ఉపయోగించగల వాటిని ఇది మార్చదు                                                                                                                        |
+| `forcedModel`                               | గరిష్ఠంగా 300 అక్షరాల string లేదా `null`                                   | `X-Route-Model` మరియు `body.model` కంటే ప్రాధాన్యతతో చాట్ అభ్యర్థనలను ఈ మోడల్/కాంబోకు రూట్ చేస్తుంది; కీ పరిమితులు వర్తిస్తూనే ఉంటాయి                                                                                                                                 |
+| `noLog`, `autoResolve`                      | బూలియన్                                                                    |                                                                                                                                                                                                                                                                       |
+| `throttleDelayMs`                           | పూర్ణాంకం, 0-300000                                                        |                                                                                                                                                                                                                                                                       |
+| `maxSessions`                               | పూర్ణాంకం, 0-10000                                                         |                                                                                                                                                                                                                                                                       |
+| `rateLimits`                                | `{ limit, window }`ల array (ధనాత్మక పూర్ణాంకాలు, గరిష్ఠంగా 50) లేదా `null` | పరిమితులను తొలగించడానికి `null` ఉపయోగించండి                                                                                                                                                                                                                           |
+| `accessSchedule`                            | షెడ్యూల్ ఆబ్జెక్ట్ లేదా `null`                                             | షెడ్యూల్ను తొలగించడానికి `null` ఉపయోగించండి                                                                                                                                                                                                                           |
+| `scopes`                                    | stringల array, గరిష్ఠంగా 32                                                |                                                                                                                                                                                                                                                                       |
+| `allowedEndpoints`                          | stringల array, గరిష్ఠంగా 20                                                |                                                                                                                                                                                                                                                                       |
+| `streamDefaultMode`                         | `legacy` \| `json`                                                         |                                                                                                                                                                                                                                                                       |
+| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                       | [ప్రతి-కీ కాష్ బైపాస్](#per-key-cache-bypass) చూడండి                                                                                                                                                                                                                  |
+| `compressionEnabled`                        | boolean                                                                    |                                                                                                                                                                                                                                                                       |
+| `codexServiceMode`                          | Codex సేవా మోడ్లలో ఒకటి                                                    |                                                                                                                                                                                                                                                                       |
+| `disableNonPublicModels`                    | boolean                                                                    |                                                                                                                                                                                                                                                                       |
+| `allowUsageCommand`                         | boolean                                                                    |                                                                                                                                                                                                                                                                       |
+| `usageLimitEnabled`                         | boolean                                                                    |                                                                                                                                                                                                                                                                       |
+| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | సంఖ్య >= 0 లేదా `null`                                                     |                                                                                                                                                                                                                                                                       |
+| `fiveHourUsageLimitUsd`                     | సంఖ్య >= 0 లేదా `null`                                                     | రోలింగ్ 5-గంటల USD బడ్జెట్, రోజువారీ మరియు వారపు పరిమితుల (`usageLimitEnabled`, `UNPRICED_USAGE_BUDGET_POLICY`) వలె అమలు చేయబడుతుంది. `retry-after` అనేది విండోలో అత్యంత పురాతనమైన వ్యయానికి వృద్ధాప్యం, దాని పరిమితి కంటే ఎక్కువ కీని ఇప్పటికీ బ్లాక్ చేసి ఉంచవచ్చు. |
+| `chaosModeEnabled`                          | boolean                                                                    |                                                                                                                                                                                                                                                                       |
 
 ```bash
 curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
@@ -1333,6 +1320,14 @@ curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
 | `/api/modality-bridge/stats`         | GET        | మెమరీలోని `attempts`, విజయాలు/`bridged`, వైఫల్యాలు, క్యాష్ హిట్లు, `totalLatencyMs`, `latencySamples`, నమూనా-ఆధారిత `averageLatencyMs`, మరియు చివరి వినియోగ సమయం (పునఃప్రారంభంలో రీసెట్ అవుతుంది; మేనేజ్మెంట్ ఆథ్)                                                                                                                                                                                         |
 | `/api/modality-bridge/video/runtime` | GET        | మేనేజ్మెంట్ ఆథ్/ప్రోబ్కు ముందు కఠినమైన విశ్వసనీయ-లూప్బ్యాక్ తనిఖీ; శుద్ధి చేసిన FFmpeg/ffprobe లభ్యత మరియు వెర్షన్లు (no-store)                                                                                                                                                                                                                                                                            |
 | `/api/modality-bridge/video/extract` | POST       | అంతర్గతంగా ధృవీకరించబడిన విశ్వసనీయ-లూప్బ్యాక్ బైట్ బ్రోకర్; 50 MiB ఇన్పుట్, పరిమిత క్యూ/32 MiB అవుట్పుట్, `503` సామర్థ్యం, `499` డిస్కనెక్ట్, `504` గడువు; ఇది పబ్లిక్ అప్లోడ్ API కాదు                                                                                                                                                                                                                    |
+
+### వీడియో ఫ్రేమ్ డ్రిల్-డౌన్
+
+`GET /api/v1/video-bridge/drilldown` స్పష్టంగా సమ్మతించిన వీడియో బ్రిడ్జ్ అభ్యర్థన తర్వాత `x-omniroute-video-drilldown` లో అద్దెదారు-బౌండ్ అపారదర్శక హ్యాండిల్ను రీడ్ చేస్తుంది. రీడ్లు మరియు `DELETE` రెండింటికీ ఎల్లప్పుడూ చెల్లుబాటు అయ్యే API కీ మరియు ఆపరేటర్ యొక్క స్వతంత్ర `modalityBridgeVideoDrilldownRemoteEnabled` అనుమతి అవసరం. ఉత్పత్తి నిలుపుదలకి అదనంగా `modalityBridgeVideoDrilldownEnabled` మరియు ఖచ్చితమైన పర్-పార్ట్ `drilldown: true` అవసరం. కీ ఖాళీగా లేని ముగింపు పాయింట్ అనుమతి జాబితాను కలిగి ఉన్నట్లయితే, అది తప్పనిసరిగా GET మరియు DELETE రెండింటికీ `video` కలిగి ఉండాలి, కాలర్ `/v1` లేదా `/api/v1` ఉపయోగించినా.
+
+GET ప్రశ్న: అవసరమైన `handle`; ఐచ్ఛిక `variant` (`preview`, `standard`, `detail`), `limit` (1–8; లెగసీ `frames` ఆమోదించబడింది కానీ `limit` తో కలపడం సాధ్యం కాదు), సున్నా-ఆధారిత `page` మరియు `start`/`end` సెకన్లు. రెండు ఫోకస్ హద్దులు సరఫరా చేయబడినప్పుడు, `end` తప్పనిసరిగా `start` కంటే ఎక్కువగా ఉండాలి. Duplicate/unknown ప్రశ్న కీలు తిరస్కరించబడ్డాయి. విజయవంతమైన ప్రతిస్పందనలు `derivation`, `durationSeconds`, `frames`, `hasMore`, `page`, `variant`, మరియు ఐచ్ఛిక `focusWindow`; నో-స్టోర్ JSON బేస్64తో సహా 32 MiB వద్ద క్యాప్ చేయబడింది. ఓవర్సైజ్డ్ అవుట్పుట్ రిటర్న్స్ 413; తక్కువ ఫ్రేమ్లను అభ్యర్థించండి.
+
+`DELETE /api/v1/video-bridge/drilldown?handle=...` తిరిగి `{ "removed": 0|1 }`. తెలియని, గడువు ముగిసిన మరియు క్రాస్-కీ GETs వేరు చేయలేని 404 ప్రతిస్పందనలు; క్రాస్-కీ DELETE యజమాని ఎంట్రీని తీసివేయలేదు. డిసేబుల్ యాక్సెస్ రిటర్న్స్ 403, missing/invalid ప్రామాణీకరణ 401, చెల్లని ప్రశ్నలు 400, రద్దు 499 మరియు తాత్కాలిక లోపాలు 503. హ్యాండిల్స్ ప్రాసెస్-స్థానికమైనవి, పది నిమిషాల తర్వాత గడువు ముగుస్తాయి మరియు పునఃప్రారంభించబడవు. కొత్త హ్యాండిల్స్ `v1.` ప్లస్ 32-బైట్ యాదృచ్ఛిక Base64URL టోకెన్ను ఉపయోగిస్తాయి; టోకెన్ హాష్లు మాత్రమే ఉంచబడతాయి. లెగసీ 64-హెక్స్ టోకెన్లు అనుకూలత కోసం వాక్యనిర్మాణ రీడబుల్గా ఉంటాయి. సమ్మతి, కోటాలు మరియు వేరియంట్ డెరివేషన్ వివరాల కోసం [వీడియో బ్రిడ్జ్ గార్డ్రైల్లను](../security/GUARDRAILS.md#video-bridge-videobridgets-videobridgepipelinets) చూడండి.
 
 ### బ్యాకప్ & ఎగుమతి/దిగుమతి
 
@@ -1428,19 +1423,19 @@ GET ప్రతిస్పందనలో `agents[]` (id, name, binary, versio
 
 ఈ ఎండ్పాయింట్లు స్థానిక Gemini SDK అనుకూలతను ఆశించే క్లయింట్ల కోసం Gemini API ఫార్మాట్ను అనుకరిస్తాయి.
 
-### అంతర్గత / సిస్టమ్ APIలు
+### అంతర్గత / సిస్టమ్ APIs
 
-| Endpoint                 | Method | Description                                                 |
-| ------------------------ | ------ | ----------------------------------------------------------- |
-| `/api/init`              | GET    | అప్లికేషన్ ప్రారంభీకరణ తనిఖీ (మొదటి రన్లో ఉపయోగించబడుతుంది) |
-| `/api/tags`              | GET    | Ollama-అనుకూల మోడల్ ట్యాగ్లు (Ollama క్లయింట్ల కోసం)        |
-| `/api/restart`           | POST   | సర్వర్ను సురక్షితంగా పునఃప్రారంభించడాన్ని ప్రారంభించడం      |
-| `/api/shutdown`          | POST   | సర్వర్ను సురక్షితంగా నిలిపివేయడాన్ని ప్రారంభించడం           |
-| `/api/system/env/repair` | POST   | OAuth ప్రొవైడర్ ఎన్విరాన్మెంట్ వేరియబుల్లను సరిచేయడం        |
-| `/api/system/version`    | GET    | ప్రస్తుత/తాజా వెర్షన్, నవీకరణ స్థితి, విడుదల ఛానెల్         |
-| `/api/system/version`    | POST   | తాజా వెర్షన్కు డిప్లాయ్మెంట్-అవేర్ నవీకరణను ప్రారంభించడం    |
+| ఎండ్ పాయింట్             | పద్ధతి | వివరణ                                                      |
+| ------------------------ | ------ | ---------------------------------------------------------- |
+| `/api/init`              | GET    | నేపథ్య సమకాలీకరణ సేవలను ప్రారంభించండి (నిర్వహణ ప్రమాణీకరణ) |
+| `/api/tags`              | GET    | ఒల్లామా-అనుకూల మోడల్ ట్యాగ్లు ( Ollama క్లయింట్ల కోసం)     |
+| `/api/restart`           | POST   | ఆకర్షణీయమైన సర్వర్ పునఃప్రారంభాన్ని ట్రిగ్గర్ చేయండి       |
+| `/api/shutdown`          | POST   | ఆకర్షణీయమైన సర్వర్ షట్డౌన్ను ట్రిగ్గర్ చేయండి              |
+| `/api/system/env/repair` | POST   | OAuth ప్రొవైడర్ ఎన్విరాన్మెంట్ వేరియబుల్స్ రిపేర్ చేయండి   |
+| `/api/system/version`    | GET    | Current/latest వెర్షన్, అప్డేట్ స్థితి, విడుదల ఛానెల్      |
+| `/api/system/version`    | POST   | తాజా సంస్కరణకు విస్తరణ-అవగాహన నవీకరణను ప్రారంభించండి       |
 
-> **గమనిక:** ఈ ఎండ్పాయింట్లు సిస్టమ్ ద్వారా అంతర్గతంగా లేదా Ollama క్లయింట్ అనుకూలత కోసం ఉపయోగించబడతాయి. సాధారణంగా తుది వినియోగదారులు వీటిని పిలవరు.
+> **గమనిక:** ఈ ముగింపు బిందువులు సిస్టమ్ ద్వారా లేదా Ollama క్లయింట్ అనుకూలత కోసం అంతర్గతంగా ఉపయోగించబడతాయి. వారు సాధారణంగా తుది వినియోగదారులచే పిలవబడరు.
 
 ### OAuth ఎన్విరాన్మెంట్ రిపేర్ _(v3.6.1+)_
 

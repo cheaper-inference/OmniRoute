@@ -334,27 +334,31 @@ Printre furnizorii disponibili se numără OpenAI (GPT Image 2), xAI (Grok Image
 
 `n` returnează `n` imagini în `data[]`. Furnizorii ale căror API-uri upstream returnează câte o imagine per apel
 (Black Forest Labs, Stability AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik,
-NVIDIA NIM, Cloudflare Workers AI) efectuează `n` apeluri upstream separate, cu cel mult 4 în execuție simultană. O valoare
-fixă pentru `seed` este incrementată cu indexul apelului (`seed`, `seed + 1`, …), astfel încât imaginile să difere, dar să rămână reproductibile. `n` este limitat la 10. Întreaga solicitare eșuează dacă un apel eșuează. Lista formatelor pentru distribuirea apelurilor este `SINGLE_IMAGE_FANOUT_FORMATS` din
+NVIDIA NIM, Cloudflare Workers AI) efectuează `n` apeluri upstream separate, cu cel mult 4 în curs simultan. Un
+`seed` fix este incrementat cu indicele apelului (`seed`, `seed + 1`, …), astfel încât imaginile diferă, dar rămân reproductibile. `n` este limitat la 10. Întreaga solicitare eșuează dacă vreun apel eșuează. Lista formatelor pentru execuție distribuită este `SINGLE_IMAGE_FANOUT_FORMATS` din
 `open-sse/handlers/imageGeneration/fanOut.ts`.
 
 ZenMux reutilizează conexiunea existentă bazată pe cheia API și acceptă prefixele `zenmux/` sau `zm/`:
 
-- `zenmux/openai/gpt-image-2` utilizează API-ul OpenAI Images al ZenMux. Opțiunile includ `size`,
+- `zenmux/openai/gpt-image-2` utilizează API-ul Images al OpenAI oferit de ZenMux. Opțiunile includ `size`,
   `quality`, `n`, `output_format`, `output_compression`, `background` și `response_format`.
-- Alți editori, precum `zm/meta/muse-image-1.0`, utilizează endpointul `:predict` Vertex AI al ZenMux. `n` este mapat la `sampleCount`, `aspect_ratio` la `aspectRatio`, iar `image_size`
-  (`1K`, `2K`, `4K`) la `sampleImageSize`. O valoare în pixeli pentru `size` furnizează doar un raport de aspect,
-  nu dimensiuni garantate în pixeli. Rapoartele acceptate, rezoluțiile și numărul de imagini diferă în funcție de model.
-- `zm/inclusionai/ming-image-0.1-design` își alege propriile dimensiuni. Omiteți `size`,
+- Alți editori, precum `zm/meta/muse-image-1.0`, utilizează endpointul Vertex AI `:predict` al ZenMux. `n` este mapat la `sampleCount`, `aspect_ratio` la `aspectRatio`, iar `image_size`
+  (`1K`, `2K`, `4K`) la `sampleImageSize`. O valoare `size` exprimată în pixeli furnizează doar un raport de aspect,
+  nu dimensiuni în pixeli garantate. Raporturile, rezoluțiile și numărul de imagini acceptate variază în funcție de model.
+- `zm/inclusionai/ming-image-0.1-design` își alege propriile dimensiuni. Omite `size`,
   `aspect_ratio` și `image_size`; valorile explicite returnează HTTP 400. PNG, JPEG și WebP
   pot fi solicitate cu `output_format`.
 
-Această integrare acceptă generarea de imagini din text, nu editarea imaginilor de referință. Rezultatul Vertex
-este normalizat la `data[].b64_json`; `response_format: "url"` returnează un URL upstream
-HTTPS sau un URL de date base64 atunci când sunt disponibili doar octeții imaginii. Rezultatele goale/filtrate
-returnează o eroare, nu un răspuns de succes gol. Accesul la modele depinde de contul ZenMux.
-Consultați [API-ul Vertex al ZenMux](https://docs.zenmux.ai/api/vertexai/generate-images) și
-[API-ul OpenAI Images](https://docs.zenmux.ai/api/openai/generate-an-image).
+Această integrare acceptă generarea de imagini din text, nu și editarea imaginilor de referință. Ieșirea Vertex
+este normalizată la `data[].b64_json`; `response_format: "url"` returnează un URL HTTPS upstream sau un URL de date base64 atunci când sunt disponibile doar octeții imaginii. Ieșirile goale/filtrate
+returnează o eroare în locul unui succes fără conținut. Accesul la modele depinde de contul ZenMux.
+Consultă [API-ul Vertex al ZenMux](https://docs.zenmux.ai/api/vertexai/generate-images) și
+[API-ul Images al OpenAI](https://docs.zenmux.ai/api/openai/generate-an-image).
+
+O conexiune de autentificare Microsoft 365 Copilot oferă `copilot-m365-web/m365-copilot-image`
+prin instrumentul de imagini încorporat al Copilot: câte o interacțiune Copilot per imagine (`n` 1–4), `size` controlează
+doar orientarea, iar imaginile sunt returnate inline (`b64_json` sau un URL de date pentru
+`response_format: "url"`). Consultă [Microsoft 365 Copilot](../providers/COPILOT-M365.md#image-generation).
 
 ```bash
 # Listează toate modelele de imagini
@@ -801,15 +805,27 @@ Procesare de loturi compatibilă cu OpenAI.
 
 ## API de căutare
 
-Abstracție pentru furnizorii de căutare web (Tavily, Brave, Exa, Serper etc.).
+Abstracție pentru furnizorii web/de căutare (Tavily, Brave, Exa, Serper etc.).
 
 | Metodă | Cale                   | Descriere                                                                                                        |
 | ------ | ---------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| GET    | `/v1/search`           | Listează furnizorii de căutare configurați + capabilitățile acestora                                             |
+| GET    | `/v1/search`           | Listează furnizorii de căutare configurați + capabilitățile                                                      |
 | POST   | `/v1/search`           | Rulează o interogare de căutare — corpul este validat de `v1SearchSchema`, acceptă stocarea în cache/coalescența |
-| GET    | `/v1/search/analytics` | Statistici per furnizor privind accesările/latența/cache-ul                                                      |
+| GET    | `/v1/search/analytics` | Statistici per furnizor privind accesările/ latența/cache-ul                                                     |
 
-**Autentificare:** cheie API Bearer (`extractApiKey` + `isValidApiKey`). Politica de căutare este aplicată prin `enforceApiKeyPolicy`.
+**Autentificare:** cheie API Bearer (`extractApiKey` + `isValidApiKey`). Politica de căutare este impusă prin `enforceApiKeyPolicy`.
+
+**Selectare automată:** fără `provider`, rulează mai întâi furnizorul cel mai ieftin cu o conexiune configurată,
+iar următorul furnizor ca preț este alternativa. Furnizorii gratuiți de ultimă instanță (`duckduckgo-free`) sunt
+utilizați numai când nu este configurat nimic altceva. Un SearXNG găzduit autonom este considerat configurat
+atunci când conexiunea sa stochează un `baseUrl` real (nu valoarea implicită din catalog
+`http://localhost:8888/search`): acesta este apoi clasat ca furnizor cu cost de 0 USD înaintea celor care
+necesită cheie, furnizorul care necesită cheie cel mai ieftin fiind alternativa, inclusiv atunci când SearXNG
+răspunde cu 400, 401, 403 sau 404. Un `baseUrl` care nu este un URL `http(s)` valid sau care indică o adresă de
+metadate cloud nu este luat în considerare. O conexiune SearXNG care stochează un token este clasificată astfel
+numai pentru `https://` sau `http://` de loopback. Pentru `http://` simplu la distanță, nu este niciodată o
+alternativă și rămâne o opțiune de ultimă instanță, utilizată numai când nu este configurat niciun alt furnizor
+sau când este solicitată după nume; astfel, tokenul este trimis în clar în aceste două cazuri.
 
 ### `provider_options` pentru Exa și Tavily
 
@@ -973,31 +989,28 @@ este incert se încheie în `needs_confirmation`, în loc să fie trimisă de do
 
 ---
 
-## Utilizarea în regim self-service (`/api/usage/om-usage`)
+## Utilizare în autoservire (`/api/usage/om-usage`)
 
-Orice cheie API poate citi propria utilizare și propriile cote — fără autentificare de administrare. Acesta este endpointul pe care
-un client (CLI, panoul OmniCopilot) îl folosește pentru a afișa titularului unei chei cheltuielile sale.
+Orice cheie API poate citi **propriile sale** utilizare și cote — fără autorizare de gestionare. Acesta este punctul final pe care un client (CLI, panoul OmniCopilot ) îl folosește pentru a arăta unui deținător de cheie cheltuielile lor.
 
 ```bash
-# Format text (contractul istoric — text simplu pentru un terminal)
+# Text form (the historical contract — plain text for a terminal)
 curl -H "Authorization: Bearer <your-api-key>" \
   http://localhost:20128/api/usage/om-usage
 
-# Format structurat — cel consumat de o interfață de utilizator
+# Structured form — what a UI consumes
 curl -H "Authorization: Bearer <your-api-key>" \
   "http://localhost:20128/api/usage/om-usage?format=json"
 ```
 
-Cheia trebuie să aibă activată opțiunea **`allowUsageCommand`** (dezactivată implicit — managerul de chei API al
-tabloului de bord o comută pentru fiecare cheie). Fără aceasta, endpointul răspunde cu `403`.
+Cheia trebuie să aibă **`allowUsageCommand`** activat (dezactivat în mod implicit — managerul de chei API al tabloului de bord îl comută pe cheie). Fără el, punctul final răspunde `403`.
 
-`?format=json` returnează o structură discriminată, astfel încât apelantul să nu citească niciodată un câmp de date dintr-un
-răspuns de refuz. La succes:
+`?format=json` returnează o formă discriminată, astfel încât un apelant nu citește niciodată un câmp de date dintr-un refuz. Despre succes:
 
 ```jsonc
 {
   "allowed": true,
-  // prezent doar când cheia a optat pentru limite de utilizare per cheie (USD zilnic/săptămânal):
+  // present only when the key opted into per-key usage limits (daily/weekly/5-hour USD):
   "personal": {
     "dailySpentUsd": 1.25,
     "dailyLimitUsd": 5,
@@ -1006,9 +1019,9 @@ răspuns de refuz. La succes:
     "weeklyLimitUsd": 20,
     "weeklyResetAtIso": "…" /* … */,
   },
-  // instantaneul cotei furnizorului selectat sau null când încă nu există nimic în cache:
+  // the selected provider quota snapshot, or null when nothing is cached yet:
   "provider": { "connectionId": "…", "provider": "claude", "plan": "…", "quotas": {/* … */} },
-  // instantaneul fiecărei conexiuni, astfel încât o interfață să poată afișa mai mulți furnizori alături:
+  // every connection's snapshot, so a UI can render several providers side by side:
   "providers": [
     { "connectionId": "…", "provider": "claude" /* … */ },
     { "provider": "codex" /* … */ },
@@ -1016,13 +1029,9 @@ răspuns de refuz. La succes:
 }
 ```
 
-În caz de refuz (`401` cheie nevalidă / `403` nepermis), aceeași rută returnează
-`{ "allowed": false, "error": { "message": "…" } }` — un `personal`/`provider` prezent, dar gol
-(cheia este permisă, însă nu s-au obținut încă informații) reprezintă o stare diferită de un refuz, iar numai forma JSON
-le diferențiază.
+La refuz ( cheia `401` greșită / `403` nu este permis) aceeași rută returnează `{ "allowed": false, "error": { "message": "…" } }` — un `personal`/`provider` prezent-dar gol (cheie permisă, nimic învățat încă) este o stare diferită de un refuz și doar formularul JSON îi distinge.
 
-**Autentificare:** propria cheie API Bearer a apelantului, validată cu `isValidApiKey` — aceasta _nu_ este suprafața
-de administrare (`/api/keys/…`), care rămâne protejată de `requireManagementAuth`.
+**Auth:** propria cheie Bearer API a apelantului, validată cu `isValidApiKey` — aceasta _nu_ este suprafața de gestionare (`/api/keys/…`), care rămâne în spatele `requireManagementAuth`.
 
 ### Procentele cotelor brute vs. ajustate în funcție de prag
 
@@ -1272,40 +1281,41 @@ Implementare: `getResolvedModelCapabilitiesWithLimitSources()` din `src/lib/mode
 | `/api/usage/model-latency-stats` | GET             | Agregat glisant al latenței per furnizor/model (medie/p50/p95/p99, rata de succes); filtre: `windowHours`/`minSamples`/`maxRows`/`provider`/`model` (#6873)                                                                                                                                                                                                          |
 | `/api/usage/cache-health`        | GET             | Rezumatul stării cache-ului de prompturi pentru `call_logs` — raportul scrieri/citiri, distribuția dimensiunilor scrierilor p50/p90/p99, concentrarea scrierilor masive, separarea per model și un verdict `healthy`/`degraded`/`thrash`/`no-data`; parametri de interogare `range` (`1h`\|`24h`\|`7d`\|`30d`, valoarea implicită `24h`) și `model` opțional (#8827) |
 
-### Permisiunile cheilor API
+### Permisiunile cheii API
 
-`PATCH /api/keys/{id}` actualizează permisiunile unei chei existente. La fel ca orice rută `/api/keys*`, aceasta necesită autorizare de gestionare (consultați [Autentificarea pentru gestionare](../guides/MANAGEMENT-AUTH.md)), nu o cheie de inferență. Trimiteți doar câmpurile pe care doriți să le modificați; o solicitare fără niciunul dintre acestea este respinsă cu `No valid fields to update`. Câmpurile acceptate sunt definite de `updateKeyPermissionsSchema` în `src/shared/validation/schemas/keys.ts`.
+`PATCH /api/keys/{id}` actualizează permisiunile unei chei existente. La fel ca orice rută `/api/keys*` are nevoie de autorizație de gestionare (consultați [Autentificarea managementului](../guides/MANAGEMENT-AUTH.md) ), nu de o cheie de inferență. Trimiteți numai câmpurile pe care doriți să le modificați; o cerere cu niciunul dintre ele este respinsă cu `No valid fields to update`. Câmpurile acceptate sunt definite de `updateKeyPermissionsSchema` în `src/shared/validation/schemas/keys.ts`.
 
-| Câmp                                        | Tip                                                                                | Note                                                                                                                                                |
-| ------------------------------------------- | ---------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `name`                                      | string, 1-200 de caractere                                                         |                                                                                                                                                     |
-| `isActive`                                  | boolean                                                                            |                                                                                                                                                     |
-| `isBanned`                                  | boolean                                                                            |                                                                                                                                                     |
-| `expiresAt`                                 | dată și oră ISO 8601 sau `null`                                                    | `null` șterge expirarea                                                                                                                             |
-| `modelAccessMode`                           | `all` \| `restricted`                                                              | `allowedModels` trebuie să fie gol atunci când modul este `all`                                                                                     |
-| `allowedModels`, `blockedModels`            | matrice de șiruri, de până la 1000                                                 |                                                                                                                                                     |
-| `allowedCombos`                             | matrice de șiruri, de până la 500                                                  | Controlează combinațiile pe care cheia le poate apela; modelele directe sunt guvernate de `modelAccessMode` / `allowedModels`                       |
-| `connectionAccessMode`                      | `all` \| `restricted`                                                              | `allowedConnections` trebuie să fie nevid atunci când este `restricted` și gol atunci când este `all`                                               |
-| `allowedConnections`                        | matrice de UUID-uri, de până la 100                                                |                                                                                                                                                     |
-| `allowAutoCombos`                           | boolean                                                                            | `false` respinge solicitările pentru modelele `auto/*` cu această cheie; cheile care nu l-au setat niciodată sunt permise                           |
-| `catalogScope`                              | `all` \| `combos` \| `models`                                                      | Ce afișează `GET /v1/models` pentru această cheie (doar combinații, doar modele sau ambele); nu modifică ceea ce poate apela cheia                  |
-| `forcedModel`                               | șir de până la 300 de caractere sau `null`                                         | Direcționează solicitările de chat către acest model/combinație, înainte de `X-Route-Model` și `body.model`; limitele cheii se aplică în continuare |
-| `noLog`, `autoResolve`                      | boolean                                                                            |                                                                                                                                                     |
-| `throttleDelayMs`                           | întreg, 0-300000                                                                   |                                                                                                                                                     |
-| `maxSessions`                               | întreg, 0-10000                                                                    |                                                                                                                                                     |
-| `rateLimits`                                | matrice de `{ limit, window }` (numere întregi pozitive, de până la 50) sau `null` | `null` șterge limitele                                                                                                                              |
-| `accessSchedule`                            | obiect de programare sau `null`                                                    | `null` șterge programarea                                                                                                                           |
-| `scopes`                                    | matrice de șiruri, de până la 32                                                   |                                                                                                                                                     |
-| `allowedEndpoints`                          | matrice de șiruri, de până la 20                                                   |                                                                                                                                                     |
-| `streamDefaultMode`                         | `legacy` \| `json`                                                                 |                                                                                                                                                     |
-| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                               | Consultați [Ocolirea cache-ului per cheie](#per-key-cache-bypass)                                                                                   |
-| `compressionEnabled`                        | boolean                                                                            |                                                                                                                                                     |
-| `codexServiceMode`                          | unul dintre modurile de serviciu Codex                                             |                                                                                                                                                     |
-| `disableNonPublicModels`                    | boolean                                                                            |                                                                                                                                                     |
-| `allowUsageCommand`                         | boolean                                                                            |                                                                                                                                                     |
-| `usageLimitEnabled`                         | boolean                                                                            |                                                                                                                                                     |
-| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | number >= 0 or `null`                                                              |                                                                                                                                                     |
-| `chaosModeEnabled`                          | boolean                                                                            |                                                                                                                                                     |
+| Câmp                                        | Tip                                                                                | Note                                                                                                                                                                                                                                                                              |
+| ------------------------------------------- | ---------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`                                      | string, 1-200 de caractere                                                         |                                                                                                                                                                                                                                                                                   |
+| `isActive`                                  | boolean                                                                            |                                                                                                                                                                                                                                                                                   |
+| `isBanned`                                  | boolean                                                                            |                                                                                                                                                                                                                                                                                   |
+| `expiresAt`                                 | dată și oră ISO 8601 sau `null`                                                    | `null` șterge expirarea                                                                                                                                                                                                                                                           |
+| `modelAccessMode`                           | `all` \| `restricted`                                                              | `allowedModels` trebuie să fie gol atunci când modul este `all`                                                                                                                                                                                                                   |
+| `allowedModels`, `blockedModels`            | matrice de șiruri, până la 1000                                                    |                                                                                                                                                                                                                                                                                   |
+| `allowedCombos`                             | matrice de șiruri, de până la 500                                                  | Controlează combinațiile pe care cheia le poate apela; modelele directe sunt guvernate de `modelAccessMode` / `allowedModels`                                                                                                                                                     |
+| `connectionAccessMode`                      | `all` \| `restricted`                                                              | `allowedConnections` trebuie să fie nevid atunci când este `restricted` și gol atunci când este `all`                                                                                                                                                                             |
+| `allowedConnections`                        | matrice de UUID-uri, de până la 100                                                |                                                                                                                                                                                                                                                                                   |
+| `allowAutoCombos`                           | boolean                                                                            | `false` respinge solicitările pentru modelele `auto/*` cu această cheie; cheile care nu l-au setat niciodată sunt permise                                                                                                                                                         |
+| `catalogScope`                              | `all` \| `combos` \| `models`                                                      | Ce afișează `GET /v1/models` pentru această cheie (doar combinații, doar modele sau ambele); nu modifică ceea ce poate apela cheia                                                                                                                                                |
+| `forcedModel`                               | șir de până la 300 de caractere sau `null`                                         | Direcționează solicitările de chat către acest model/combinație, înainte de `X-Route-Model` și `body.model`; limitele cheii se aplică în continuare                                                                                                                               |
+| `noLog`, `autoResolve`                      | boolean                                                                            |                                                                                                                                                                                                                                                                                   |
+| `throttleDelayMs`                           | întreg, 0-300000                                                                   |                                                                                                                                                                                                                                                                                   |
+| `maxSessions`                               | întreg, 0-10000                                                                    |                                                                                                                                                                                                                                                                                   |
+| `rateLimits`                                | matrice de `{ limit, window }` (numere întregi pozitive, de până la 50) sau `null` | `null` șterge limitele                                                                                                                                                                                                                                                            |
+| `accessSchedule`                            | obiect de programare sau `null`                                                    | `null` șterge programarea                                                                                                                                                                                                                                                         |
+| `scopes`                                    | matrice de șiruri, de până la 32                                                   |                                                                                                                                                                                                                                                                                   |
+| `allowedEndpoints`                          | matrice de șiruri, de până la 20                                                   |                                                                                                                                                                                                                                                                                   |
+| `streamDefaultMode`                         | `legacy` \| `json`                                                                 |                                                                                                                                                                                                                                                                                   |
+| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                               | Consultați [Ocolirea cache-ului per cheie](#per-key-cache-bypass)                                                                                                                                                                                                                 |
+| `compressionEnabled`                        | boolean                                                                            |                                                                                                                                                                                                                                                                                   |
+| `codexServiceMode`                          | unul dintre modurile de serviciu Codex                                             |                                                                                                                                                                                                                                                                                   |
+| `disableNonPublicModels`                    | boolean                                                                            |                                                                                                                                                                                                                                                                                   |
+| `allowUsageCommand`                         | boolean                                                                            |                                                                                                                                                                                                                                                                                   |
+| `usageLimitEnabled`                         | boolean                                                                            |                                                                                                                                                                                                                                                                                   |
+| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | numărul >= 0 sau `null`                                                            |                                                                                                                                                                                                                                                                                   |
+| `fiveHourUsageLimitUsd`                     | numărul >= 0 sau `null`                                                            | Bugetul USD rulant de 5 ore, aplicat ca și limitele zilnice și săptămânale (`usageLimitEnabled`, `UNPRICED_USAGE_BUDGET_POLICY`). `retry-after` este momentul în care cea mai veche cheltuială din fereastră scade, ceea ce poate lăsa încă blocată o cheie cu mult peste limita. |
+| `chaosModeEnabled`                          | boolean                                                                            |                                                                                                                                                                                                                                                                                   |
 
 ```bash
 curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
@@ -1355,6 +1365,34 @@ curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
 | `/api/modality-bridge/stats`         | GET        | `attempts` în memorie, succese/`bridged`, eșecuri, accesări ale cache-ului, `totalLatencyMs`, `latencySamples`, `averageLatencyMs` exprimat în eșantioane și momentul ultimei utilizări (resetat la repornire; autentificare de administrare)                                                                                                                                                                                                             |
 | `/api/modality-bridge/video/runtime` | GET        | Verificare strictă a buclei locale de încredere înainte de autentificarea/sondarea de administrare; disponibilitatea și versiunile FFmpeg/ffprobe igienizate (no-store)                                                                                                                                                                                                                                                                                   |
 | `/api/modality-bridge/video/extract` | POST       | Broker intern autentificat pentru octeți, în bucla locală de încredere; intrare de 50 MiB, coadă limitată/ieșire de 32 MiB, `503` pentru capacitate, `499` pentru deconectare, `504` pentru depășirea termenului; nu este un API public pentru încărcări                                                                                                                                                                                                  |
+
+### Detaliere cadre video
+
+`GET /api/v1/video-bridge/drilldown` citește un handle opac asociat tenantului, returnat în
+`x-omniroute-video-drilldown` după o solicitare Video Bridge pentru care a fost acordat explicit consimțământul.
+Atât citirile, cât și `DELETE` necesită întotdeauna o cheie API validă și permisiunea independentă a operatorului
+`modalityBridgeVideoDrilldownRemoteEnabled`. Păstrarea în producție necesită suplimentar
+`modalityBridgeVideoDrilldownEnabled` și `drilldown: true` strict pentru fiecare parte.
+Dacă cheia are o listă de permisiuni pentru endpointuri care nu este goală, aceasta trebuie să includă
+`video` atât pentru GET, cât și pentru DELETE, indiferent dacă apelantul utilizează `/v1` sau `/api/v1`.
+
+Interogarea GET: `handle` este obligatoriu; `variant` este opțional (`preview`, `standard`, `detail`),
+la fel ca `limit` (1–8; `frames` este acceptat pentru compatibilitate, dar nu poate fi combinat cu `limit`),
+`page` bazat pe zero și secundele `start`/`end`. Când sunt furnizate ambele limite de focalizare,
+`end` trebuie să fie mai mare decât `start`. Cheile de interogare duplicate sau necunoscute sunt respinse.
+Răspunsurile reușite conțin `derivation`, `durationSeconds`, `frames`,
+`hasMore`, `page`, `variant` și opțional `focusWindow`; JSON-ul fără stocare este limitat la 32 MiB,
+inclusiv Base64. Rezultatele supradimensionate returnează 413; solicitați mai puține cadre.
+
+`DELETE /api/v1/video-bridge/drilldown?handle=...` returnează `{ "removed": 0|1 }`.
+GET-urile pentru handle-uri necunoscute, expirate și asociate unei alte chei produc răspunsuri 404 imposibil de diferențiat;
+un DELETE asociat unei alte chei nu poate elimina înregistrarea proprietarului. Accesul dezactivat returnează 403,
+autentificarea lipsă sau nevalidă returnează 401, interogările nevalide returnează 400, anularea returnează 499,
+iar erorile temporare returnează 503. Handle-urile sunt locale procesului, expiră după zece minute și nu supraviețuiesc
+unei reporniri. Handle-urile noi utilizează `v1.` urmat de un token Base64URL aleator de 32 de octeți; sunt păstrate
+doar hash-urile tokenurilor. Tokenurile vechi de 64 de caractere hexazecimale rămân lizibile sintactic pentru compatibilitate.
+Consultați [măsurile de protecție Video Bridge](../security/GUARDRAILS.md#video-bridge-videobridgets-videobridgepipelinets)
+pentru detalii despre consimțământ, cote și derivarea variantelor.
 
 ### Copiere de siguranță și export/import
 
@@ -1460,19 +1498,19 @@ Răspunsul GET include `agents[]` (id, name, binary, version, installed, protoco
 
 Aceste endpointuri reproduc formatul API Gemini pentru clienții care se așteaptă la compatibilitate nativă cu SDK-ul Gemini.
 
-### API-uri interne / de sistem
+### API-uri interne/de sistem
 
-| Endpoint                 | Method | Descriere                                                                        |
-| ------------------------ | ------ | -------------------------------------------------------------------------------- |
-| `/api/init`              | GET    | Verificarea inițializării aplicației (utilizată la prima rulare)                 |
-| `/api/tags`              | GET    | Etichete de modele compatibile cu Ollama (pentru clienții Ollama)                |
-| `/api/restart`           | POST   | Declanșează repornirea controlată a serverului                                   |
-| `/api/shutdown`          | POST   | Declanșează oprirea controlată a serverului                                      |
-| `/api/system/env/repair` | POST   | Repară variabilele de mediu ale furnizorului OAuth                               |
-| `/api/system/version`    | GET    | Versiunea curentă/cea mai recentă, starea actualizării, canalul de lansare       |
-| `/api/system/version`    | POST   | Inițiază o actualizare, ținând cont de implementare, la cea mai recentă versiune |
+| Endpoint                 | Metodă | Descriere                                                                       |
+| ------------------------ | ------ | ------------------------------------------------------------------------------- |
+| `/api/init`              | GET    | Pornește serviciile de sincronizare în fundal (autentificare de administrare)   |
+| `/api/tags`              | GET    | Etichete de modele compatibile cu Ollama (pentru clienții Ollama)               |
+| `/api/restart`           | POST   | Declanșează repornirea grațioasă a serverului                                   |
+| `/api/shutdown`          | POST   | Declanșează oprirea grațioasă a serverului                                      |
+| `/api/system/env/repair` | POST   | Repară variabilele de mediu ale furnizorului OAuth                              |
+| `/api/system/version`    | GET    | Versiunea curentă/cea mai recentă, starea actualizării, canalul de lansare      |
+| `/api/system/version`    | POST   | Pornește o actualizare la cea mai recentă versiune, ținând cont de implementare |
 
-> **Notă:** Aceste endpointuri sunt utilizate intern de sistem sau pentru compatibilitatea cu clienții Ollama. De regulă, nu sunt apelate de utilizatorii finali.
+> **Notă:** Aceste endpointuri sunt utilizate intern de sistem sau pentru compatibilitatea cu clientul Ollama. De obicei, nu sunt apelate de utilizatorii finali.
 
 ### Repararea mediului OAuth _(v3.6.1+)_
 

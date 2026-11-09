@@ -15,7 +15,7 @@
 
 **만든 사람 [Diego Souza](https://github.com/diegosouzapw)**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Never stop coding. Every AI tool → 381 providers — 150+ free — through one endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity into FREE Claude / GPT / Gemini with auto-fallback. RTK + Caveman stacked compression saves 15–95% tokens (~89% avg) — never hit limits. 381 AI providers · 150+ free tiers · ~1.62B free tokens/mo · 20 routing strategies · $0 to start."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Never stop coding. Every AI tool → 382 providers — 150+ free — through one endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity into FREE Claude / GPT / Gemini with auto-fallback. RTK + Caveman stacked compression saves 15–95% tokens (~89% avg) — never hit limits. 382 AI providers · 150+ free tiers · ~1.62B free tokens/mo · 20 routing strategies · $0 to start."/>
 
 </div>
 
@@ -49,20 +49,15 @@
 <a href="https://trendshift.io/repositories/23589" target="_blank"><img src="https://trendshift.io/api/badge/repositories/23589" alt="diegosouzapw%2FOmniRoute | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
 [![스타 히스토리 순위](https://api.star-history.com/badge?repo=diegosouzapw/OmniRoute&theme=dark) ](https://www.star-history.com/diegosouzapw/omniroute) [![olud.ai](https://olud.ai/badge.php?tool=diegosouzapw-omniroute) ](https://olud.ai/project/diegosouzapw-omniroute.html)
 
-### 💬 커뮤니티에 참여하세요
+### 💬 커뮤니티에 가입하기
 
-**👋 유지 관리자 팔로우 — 새로운 provider, 릴리스 및 팁을 가장 먼저 받아보세요:**
+**👋 관리자 — 를 따르십시오. 먼저 새로운 공급자, 릴리스 및 팁을 얻으십시오.**
 
-[![LinkedIn에서 Diego 팔로우](https://img.shields.io/badge/Follow_Diego_on-LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/diegosouzapw/)
-[![GitHub에서 @diegosouzapw 팔로우](https://img.shields.io/github/followers/diegosouzapw?style=for-the-badge&logo=github&logoColor=white&label=Follow%20on%20GitHub&color=181717)](https://github.com/diegosouzapw)
+[![ LinkedIn 에서 Diego 팔로우](https://img.shields.io/badge/Follow_Diego_on-LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white) ](https://www.linkedin.com/in/diegosouzapw/) [![ GitHub 에서 @diegosouzapw 팔로우](https://img.shields.io/github/followers/diegosouzapw?style=for-the-badge&logo=github&logoColor=white&label=Follow%20on%20GitHub&color=181717) ](https://github.com/diegosouzapw)
 
-[![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/U47eFqAXCn)
-[![Telegram](https://img.shields.io/badge/Telegram-26A5E4?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/omnirouteOficial)
-[![WhatsApp 글로벌](https://img.shields.io/badge/WhatsApp_Global-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4)
-[![WhatsApp 브라질](https://img.shields.io/badge/WhatsApp_Brasil-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)
-[![웹사이트](https://img.shields.io/badge/Website-omniroute.online-blue?logo=google-chrome&logoColor=white)](https://omniroute.online)
+[![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white) ](https://discord.gg/U47eFqAXCn) [![Telegram](https://img.shields.io/badge/Telegram-26A5E4?style=for-the-badge&logo=telegram&logoColor=white) ](https://t.me/omnirouteOficial) [![WhatsApp 글로벌](https://img.shields.io/badge/WhatsApp_Global-25D366?style=for-the-badge&logo=whatsapp&logoColor=white) ](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) [![WhatsApp 브라질](https://img.shields.io/badge/WhatsApp_Brasil-25D366?style=for-the-badge&logo=whatsapp&logoColor=white) ](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) [![웹사이트](https://img.shields.io/badge/Website-omniroute.online-blue?logo=google-chrome&logoColor=white) ](https://omniroute.online)
 
-**질문, provider 팁, 로드맵 및 지원 → [Discord](https://discord.gg/U47eFqAXCn) · [Telegram](https://t.me/omnirouteOficial) · WhatsApp [🌍 글로벌](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) / [🇧🇷 브라질](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) / [포털](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)**
+**질문, 공급자 팁, 로드맵 및 지원 → [Discord](https://discord.gg/U47eFqAXCn) · [Telegram](https://t.me/omnirouteOficial) · WhatsApp [🌍 글로벌](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) / [🇧🇷 브라질](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) / [📢 공식 채널](https://whatsapp.com/channel/0029VbDwC7A3wtb5PN6a5t2R) / [포털](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)**
 
 <br/>
 
@@ -72,23 +67,23 @@
 
 |                         |          v3.8.50          | **v3.8.51** |      `v3.8.54+`       |
 | ----------------------- | :-----------------------: | :---------: | :-------------------: |
-| 🌐 제공업체             |            352            |   **358**   |          381          |
-| 🧠 독특한 채팅 모델 IDs |           1320            |  **1374**   |         1519          |
-| 🖼️ 모달리티 브릿지      | 🆕 비전 + 오디오 + 비디오 |      ✓      |           ✓           |
-| 📡 Radar 무료 카탈로그  |          🆕 선택          |      ✓      |           ✓           |
+| 🌐 제공업체             |            352            |   **358**   |          382          |
+| 🧠 독특한 채팅 모델 IDs |           1320            |  **1374**   |         1524          |
+| 🖼️ 모달리티 브리지      | 🆕 비전 + 오디오 + 비디오 |      ✓      |           ✓           |
+| 📡 레이더 무료 카탈로그 |          🆕 동의          |      ✓      |           ✓           |
 | ⚖️ 할당량 인식 스케줄링 |      🆕 할당량-공유       |      ✓      |           ✓           |
 | 📊 할당량 원격 측정     |         🆕 라이브         |      ✓      |           ✓           |
 | 🧰 헤드리스 모드        |             —             |      —      | 🆕 `serve --headless` |
-| 🛤️ LTS 레일 인프라      |             —             |      —      |    🆕 릴리스 채널     |
-| 🔎 모델 검색 API        |             —             |      —      | 🆕 `/v1/models/query` |
+| 🛤️ LTS 레일 인프라      |             —             |      —      |     🆕 출시 채널      |
+| 🔎 모델 발견 API        |             —             |      —      | 🆕 `/v1/models/query` |
 
-**→ [로드맵](ROADMAP.md) `v3.9.0 LTS` 로 가는 철로를 타고 있는 —**
+**→ [로드맵](ROADMAP.md) `v3.9.0 LTS` 로 가는 철도를 타고 있는 —**
 
 </div>
 
 <br/>
 
-## 🧩 가능
+## 🧩 사용 가능
 
 [![npm 버전](https://img.shields.io/npm/v/omniroute?color=cb3837&logo=npm) ](https://www.npmjs.com/package/omniroute) ![NPM Monthly](https://img.shields.io/npm/dm/omniroute?label=npm/month&color=cb3837&logo=npm) [![Docker 허브](https://img.shields.io/docker/v/diegosouzapw/omniroute?label=Docker%20Hub&logo=docker&color=2496ED) ](https://hub.docker.com/r/diegosouzapw/omniroute) [![라이센스: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square) ](LICENSE) ![Docker Pulls](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED) ![Electron Downloads](https://img.shields.io/github/downloads/diegosouzapw/omniroute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
 
@@ -108,7 +103,7 @@
   <tr>
     <td align="right"><b>⚙️ Features</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 Combos</a></td>
-    <td align="center"><a href="#-381-ai-providers--156-catalog-marked-free">🌐 Providers</a></td>
+    <td align="center"><a href="#-382-ai-providers--156-catalog-marked-free">🌐 Providers</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI &amp; MCP</a></td>
   </tr>
   <tr>
@@ -140,7 +135,7 @@
 </div>
 
 <div align="center">
-  <b>🌐 67개 언어로 제공</b>
+  <b>🌐 67개 언어</b>
   <br/><br/>
   <a href="README.md"><img src="docs/assets/flags/us.svg" width="30" alt="English (en)" title="English (en)"></a>
   <a href="docs/i18n/pt-BR/README.md"><img src="docs/assets/flags/br.svg" width="30" alt="Português — Brasil (pt-BR)" title="Português — Brasil (pt-BR)"></a>
@@ -218,7 +213,7 @@
 
 <a id="first-run"></a>
 
-## 🆓 설치하고 공급자를 연결한 다음 하나의 엔드포인트를 통해 라우팅합니다.
+## 🆓 설치, 공급자 연결 후 하나의 엔드포인트를 통해 라우팅
 
 </div>
 
@@ -232,9 +227,9 @@ curl http://localhost:20128/v1/chat/completions \
   -d '{"model":"auto","messages":[{"role":"user","content":"Hello!"}]}'
 ```
 
-<sub>`auto` 적합한 경로가 필요합니다. 새로 설치하면 적합한 키 없는 대상이 없을 수 있으며, 키 없는 공급자는 타사 클라이언트를 거부할 수 있습니다. `tos: avoid` 를 포함하여 Kiro 로 표시된 공급자는 기본적으로 자동 라우팅에서 제외됩니다. 계정을 연결해도 해당 설정이 재정의되지 않습니다. 공급자를 선택하기 전에 [무료 계층 가이드를](docs/getting-started/FREE-TIERS-GUIDE.md) 참조하세요.</sub>
+<sub>`auto` 적격 경로가 필요합니다. 새로 설치하면 적합한 키 없는 대상이 없을 수 있으며, 키 없는 공급자는 타사 클라이언트를 거부할 수 있습니다. `tos: avoid` 를 포함하여 Kiro 로 표시된 제공자는 기본적으로 자동 라우팅에서 제외됩니다. 계정을 연결해도 해당 설정이 재정의되지 않습니다. 공급자를 선택하기 전에 [무료 계층 가이드를](docs/getting-started/FREE-TIERS-GUIDE.md) 참조하세요.</sub>
 
-<sub>📦 빠른 시작 스크립트 복사-붙여넣기 **파이썬, Node.js, PHP 및 cURL** → [`examples/quickstart/`](examples/quickstart/)</sub>
+<sub>📦 복사-붙여넣기 빠른 시작 스크립트 **파이썬, Node.js, PHP, cURL** → [`examples/quickstart/`](examples/quickstart/)</sub>
 
 <br/>
 
@@ -244,7 +239,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="The Promise — One endpoint and 381 providers. Automatic fallback keeps routing while another healthy target is available. Six pillars: resilient fallback across 381 providers · up to 95% token savings on eligible workloads · $0 to start with 150+ free tiers and 52 recurring/keyless free-forever providers · 39 CLI/agent integrations through one config · OpenAI, Claude, Gemini and Responses API compatibility at /v1 · production controls including circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals and 56,000+ static test declarations across 7,800+ tracked test files."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="The Promise — One endpoint and 382 providers. Automatic fallback keeps routing while another healthy target is available. Six pillars: resilient fallback across 382 providers · up to 95% token savings on eligible workloads · $0 to start with 150+ free tiers and 52 recurring/keyless free-forever providers · 39 CLI/agent integrations through one config · OpenAI, Claude, Gemini and Responses API compatibility at /v1 · production controls including circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals and 56,000+ static test declarations across 7,800+ tracked test files."/>
 
 <br/>
 <br/>
@@ -504,7 +499,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="What sets OmniRoute apart — a dated feature snapshot vs 9router, OpenRouter, CLIProxyAPI and LiteLLM across 13 capabilities. OmniRoute: 381 providers, 150+ free tiers built in, 20 routing strategies, 12-engine token compression, built-in MCP server with 110 tools, A2A agent protocol, persistent memory, guardrails, cloud agents, TLS fingerprint stealth, Desktop/Termux/PWA and 67 i18n UI locales. OmniRoute is MIT-licensed and self-hostable. Competitor capabilities and counts may change; see the linked methodology."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="What sets OmniRoute apart — a dated feature snapshot vs 9router, OpenRouter, CLIProxyAPI and LiteLLM across 13 capabilities. OmniRoute: 382 providers, 150+ free tiers built in, 20 routing strategies, 12-engine token compression, built-in MCP server with 110 tools, A2A agent protocol, persistent memory, guardrails, cloud agents, TLS fingerprint stealth, Desktop/Termux/PWA and 67 i18n UI locales. OmniRoute is MIT-licensed and self-hostable. Competitor capabilities and counts may change; see the linked methodology."/>
 
 <sub>📊 전체 방법론 &amp; 기능별 세부 정보 vs 9router, OpenRouter, CLIProxyAPI &amp; LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -570,39 +565,39 @@ Radar는 선택적으로 사용할 수 있으며 GET 전용입니다. OmniRoute 
 
 <div align="center">
 
-## 새로운 ✨
+## ✨ 새로운 소식
 
 </div>
 
 > 최근 하이라이트 **v3.8.20 → v3.8.54** . [`CHANGELOG.md`](CHANGELOG.md) 의 전체 기록.
 
-- **⚖️ `quota-weighted` 라우팅** — 20번째 콤보 전략은 소진된 계정을 건너뛴 다음 남은 할당량 ÷ 진행 중 로드에 비례하여 나머지 계정을 끌어와 기존 대화를 고정합니다. → [자동 콤보](docs/routing/AUTO-COMBO.md)
+- **⚖️ `quota-weighted` 라우팅** — 20번째 콤보 전략은 소진된 계정을 건너뛰고 남은 할당량 ÷ 기내 로드에 비례하여 나머지 계정을 끌어와 기존 대화를 고정합니다. → [자동 콤보](docs/routing/AUTO-COMBO.md)
 - **🧰 헤드리스 모드** — `omniroute serve --headless` (또는 `OMNIROUTE_HEADLESS=1`)는 대시보드 및 대시보드 전용 하위 시스템을 끄고 `/v1/*` 프록시 엔진만 실행합니다. → [헤드리스 모드](docs/guides/HEADLESS.md)
-- **🔎 모델 검색** — `/v1/models` 는 기능, 컨텍스트, 종류 및 텍스트별로 필터링하고 `POST /v1/models/query` 동일한 키별 가시성을 갖춘 짧은 결정론적 최종 후보 목록을 반환합니다. → [API 참조](docs/reference/API_REFERENCE.md)
+- **🔎 모델 발견** — `/v1/models` 기능, 컨텍스트, 종류 및 텍스트별로 필터링하며 `POST /v1/models/query` 동일한 키별 가시성을 갖춘 짧은 결정론적 최종 후보 목록을 반환합니다. → [API 참조](docs/reference/API_REFERENCE.md)
 - **🔑 키별 라우팅 제어** — `forcedModel` 를 사용하여 API 키를 하나의 모델 또는 콤보에 고정하고 키의 모델 및 콤보를 원자적으로 추가하거나 제거합니다(`/api/keys/{id}/access`). → [API 참조](docs/reference/API_REFERENCE.md) · [OpenAPI](docs/openapi.yaml)
-- **🛡️ 미세한 PII 컨트롤** — 유형별 선택, 최대 20개의 검증된 사용자 정의 마스킹 패턴 및 유형별 감지 카운터; 마스킹 자체는 선택적으로 유지됩니다. → [가드레일](docs/security/GUARDRAILS.md)
+- **🛡️ 더 미세한 PII 컨트롤** — 유형별 선택, 최대 20개의 검증된 맞춤형 마스킹 패턴 및 유형별 감지 카운터; 마스킹 자체는 선택적으로 유지됩니다. → [가드레일](docs/security/GUARDRAILS.md)
 - **🌍 67개 언어** — 대시보드, 문서 미러 및 CLI, `npm run i18n:add-locale` 는 하나의 명령으로 모든 곳에 언어를 추가합니다. → [i18n 가이드](docs/guides/I18N.md)
-- **🎛️ OmniConductor** 에이전트 함대에 대한 — 인바운드 A2A 위임, 에이전트 카드의 지휘자 기술 및 Faro PTT(Push-to-Talk) 음성 채팅이 포함된 대시보드 패널. → [A2A 서버](docs/frameworks/A2A-SERVER.md)
-- **🛂 적응형 허용 및 과부하 보호** — 헤비급 채팅은 연결당 원자적 RPM 롤링 임대를 사용하여 503ing 대신 대기열을 요청합니다. → [탄력성 가이드](docs/architecture/RESILIENCE_GUIDE.md)
-- **🗂️ 정식 `/v1/models` 순서** — 제공자당 하나의 연속된 제공자 그룹 블록(콤보가 먼저 고정됨), 모든 카탈로그 소스에서 안정적입니다. → [API 참조](docs/reference/API_REFERENCE.md)
-- **🗜️ 압축경화** — 기본 인플레이션 가드, DE / FR / JA + 중국어(wényán)용 RTK 팩, Gradle 및 .NET. → [압축](docs/compression/COMPRESSION_ENGINES.md)
+- **🎛️ OmniConductor** 에이전트 함대에 대한 — 인바운드 A2A 위임, 에이전트 카드의 지휘자 기술, Faro PTT(Push-to-Talk) 음성 채팅이 포함된 대시보드 패널. → [A2A 서버](docs/frameworks/A2A-SERVER.md)
+- **🛂 적응형 허용 및 과부하 보호** — 헤비급 채팅은 503ing 대신 연결당 원자 RPM 롤링 임대를 사용하여 대기열을 요청합니다. → [탄력성 가이드](docs/architecture/RESILIENCE_GUIDE.md)
+- **🗂️ 정식 `/v1/models` 주문** — 공급자당 하나의 인접한 공급자 그룹 블록(콤보가 먼저 고정됨)이며 모든 카탈로그 소스에서 안정적입니다. → [API 참조](docs/reference/API_REFERENCE.md)
+- **🗜️ 압축경화** — 기본 인플레이션 가드, DE / FR / JA + 중국어(wényán)용 Caveman 팩, Gradle용 RTK 필터 및 .NET. → [압축](docs/compression/COMPRESSION_ENGINES.md)
 - **💸 정직한 정액 비용** — 구독/코딩 계획 공급자 읽기 **$0** 비용 분석에서; 예산, 할당량 및 라우팅이 계속 추정됩니다. → [API 참조](docs/reference/API_REFERENCE.md)
-- **⚖️ Quota-Share 라우팅** — 공유 계정의 할당량을 풀링된 키에 공정하게 분할하여 작업을 절약하므로 유휴 조각을 빌려줍니다. → [탄력성 가이드](docs/architecture/RESILIENCE_GUIDE.md)
-- **🤖 단일 명령 CLI/agent 설정** — 15개의 `setup-*` 명령이 등록되었습니다. `omniroute run` 7개의 CLIs (Claude Code, Codex, Aider, Goose, OpenCode, Qwen Code, Gemini CLI)를 출시합니다. `omniroute configure` 대화형 제공자 + 모델 선택기 및 컨텍스트별 즐겨찾기를 통해 11개의 대상을 지원합니다. → [CLI 통합](docs/guides/CLI-INTEGRATIONS.md)
-- **🛰️ 원격 모드** — 범위가 지정된 토큰(`connect` / `contexts` / `tokens`)을 사용하여 원격 OmniRoute 구동합니다. + VPS 설치용 `antigravity` OAuth 도우미. → [원격 모드](docs/guides/REMOTE-MODE.md)
-- **🧭 더 스마트한 자동 라우팅** — `auto/<category>:<tier>` 콤보,**퓨전** (모델 패널 + 판단), 작업 인식 라우팅, 요청별 모델/모드/USD 예산 재정의. → [자동 콤보](docs/routing/AUTO-COMBO.md)
-- **🗜️ 플러그형 압축** — 12개의 구성 가능 엔진 + Compression Studios: LLMLingua-2, 2계층 Ultra, omniglyph, 단계별 충실도 게이트, GCF v3.2, 드래그 재정렬 편집기. → [압축](docs/compression/COMPRESSION_ENGINES.md)
-- **🕵️ 투명 MITM 복호화(TPROXY)** — SNI별 CA + trust-store 설치 프로그램을 사용하여 프록시 환경 변수를 무시하는 CLIs 캡처합니다. → [MITM/TPROXY](docs/security/MITM-TPROXY-DECRYPT.md)
-- **💸 어디서나 비용 원격 측정** 모든 엔드포인트의 — `X-OmniRoute-*` cost/usage 헤더, 캐시 HIT 절약 헤더, 키별 USD 지출 할당량. → [API 참조](docs/reference/API_REFERENCE.md)
-- **🧠 당신이 제어하는 메모리** 기본적으로 — 꺼짐, int8 벡터 양자화 + 유형 붕괴, 요청당 `x-omniroute-no-memory` 선택. → [메모리](docs/frameworks/MEMORY.md)
-- **🛡️ 보안** 모든 LLM 경로에 대한 — 프롬프트 삽입 가드(레드팀 제품군), 선택 자격 증명 마스킹 가드레일(양방향으로 유출된 API keys/secrets 수정), 무료 DuckDuckGo 최후 수단 웹 검색 및 대시보드용 선택적 OIDC 로그인 게이트(비밀번호 로그인은 항상 사용 가능). → [가드레일](docs/security/GUARDRAILS.md)
-- **🖼️ 새 엔드포인트** — `/v1/ocr` (Mistral OCR) 및 `/v1/audio/translations` (속삭임 스타일)는 미디어 표면을 마무리합니다. → [API 참조](docs/reference/API_REFERENCE.md)
-- **🎨 이미지/비디오/오디오 생성** 미디어용 — one API : xAI Grok Imagine & Novita AI video, ComfyUI, Magnific, Adobe Firefly, Segmind 및 ElevenLabs 와 같은 음성 제공자. → [API 참조](docs/reference/API_REFERENCE.md)
+- **⚖️ 할당량 공유 라우팅** — 공유 계정의 할당량을 풀링된 키에 공정하게 분할하여 작업을 절약하므로 유휴 조각을 빌려줍니다. → [탄력성 가이드](docs/architecture/RESILIENCE_GUIDE.md)
+- **🤖 원 명령 CLI/agent 설정** — 15 등록된 `setup-*` 명령; `omniroute run` 7개의 CLIs (Claude 코드, Codex, Aider, Goose, OpenCode, Qwen 코드, Gemini CLI)를 출시합니다. `omniroute configure` 대화형 제공자 + 모델 선택기 및 컨텍스트별 즐겨찾기를 통해 11개의 대상을 지원합니다. → [CLI 통합](docs/guides/CLI-INTEGRATIONS.md)
+- **🛰️ 원격 모드** — 범위가 지정된 토큰(`connect` / `contexts` / `tokens`)을 사용하여 원격 OmniRoute 구동합니다. + VPS 용 `antigravity` OAuth 도우미를 설치합니다. → [원격 모드](docs/guides/REMOTE-MODE.md)
+- **🧭 스마트한 자동 라우팅** — `auto/<category>:<tier>` 콤보,**퓨전** (모델 패널 + 심사위원), 작업 인식 라우팅, 요청별 모델/모드/USD 예산 재정의. → [자동 콤보](docs/routing/AUTO-COMBO.md)
+- **🗜️ 플러그형 압축** — 12 컴포저블 엔진 + Compression Studios: LLMLingua-2, 2계층 Ultra, omniglyph, 단계별 충실도 게이트, GCF v3.2, 드래그 재정렬 편집기. → [압축](docs/compression/COMPRESSION_ENGINES.md)
+- **🕵️ 투명 MITM 복호화(TPROXY)** — SNI별 CA + 신뢰 저장소 설치 프로그램을 사용하여 프록시 환경 변수를 무시하는 CLIs 캡처합니다. → [MITM/TPROXY](docs/security/MITM-TPROXY-DECRYPT.md)
+- **💸 비용 원격 측정** 모든 엔드포인트의 — `X-OmniRoute-*` cost/usage 헤더, 캐시 HIT 절약 헤더, 키별 USD 지출 할당량. → [API 참조](docs/reference/API_REFERENCE.md)
+- **당신이 제어하는 🧠 메모리** — 기본적으로 꺼져 있으며, int8 벡터 양자화 + 유형 붕괴, 요청별 `x-omniroute-no-memory` 선택합니다. → [메모리](docs/frameworks/MEMORY.md)
+- **🛡️ 보안** 모든 LLM 경로에 대한 — 프롬프트 주입 가드(레드팀 제품군), 선택 자격 증명 마스킹 가드레일(양방향으로 유출된 API keys/secrets 수정), 무료 DuckDuckGo 최후 수단 웹 검색 및 대시보드용 OIDC 로그인 게이트 옵션(비밀번호 로그인은 항상 사용 가능). → [난간](docs/security/GUARDRAILS.md)
+- **🖼️ 새로운 엔드포인트** — `/v1/ocr` (Mistral OCR) 및 `/v1/audio/translations` (속삭임 스타일)는 미디어 표면을 마무리합니다. → [API 참조](docs/reference/API_REFERENCE.md)
+- **🎨 이미지/비디오/오디오 생성** 미디어용 — one API : xAI Grok Imagine & Novita AI 비디오, ComfyUI, Magnific, Adobe Firefly, Segmind 및 ElevenLabs 와 같은 음성 제공업체. → [API 참조](docs/reference/API_REFERENCE.md)
 - **🌍 배포 및 운영** — 역방향 프록시 `basePath`, 브라우저 언어 자동 감지, 키별 장치 추적, 루트 없는 MITM 신뢰, zh-TW 현지화. → [환경](docs/reference/ENVIRONMENT.md)
-- **🤝 더 많은 제공자 및 에이전트** — 클라우드 에이전트(Codex Cloud, Cursor, Devin, Jules), 브라우저를 사용한 Grok 빌드(xAI) + OAuth 로그인, Ollama 일급 카드, Claude Opus 5 및 Sonnet 5, Kimi 공식 파트너십(Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… 및 새로 고침 **381 제공자 카탈로그** . → [공급자](docs/reference/PROVIDER_REFERENCE.md)
-- **📡 라우팅 투명성** — 모든 응답은 이를 제공한 strategy/provider/latency 명명하는 `X-OmniRoute-Decision` 헤더를 전달하고, 새로운 `cache-optimized` 콤보 전략인 + 자동 콤보 `cacheAffinity` 요소는 반복 요청을 캐시된 접두어를 보유한 연결로 다시 라우팅하며, 읽기 전용 `/v1/auto-combo/{channel}/candidates` 엔드포인트는 `auto/*` 채널의 라이브 후보 풀을 노출합니다. → [자동 콤보](docs/routing/AUTO-COMBO.md)
-- **⚡ 지역 실적 및 인프라** — 원클릭 로컬 Redis, Cloudflare Workers / Deno 릴레이 배포자, Bifrost 및 Mux를 감독되는 임베디드 서비스로 배포합니다. → [임베디드 서비스](docs/frameworks/EMBEDDED-SERVICES.md)
-- **🧩 상자에도 있음** — 플러그인 프레임워크 + 마켓플레이스, Omni/Agent/GitHub 기술 프레임워크, Obsidian Vault 통합(22개 MCP 도구), OpenAI 호환 배치 및 파일 APIs, 의미론적 응답 캐시, 리더보드를 사용한 게임화, ACP 에이전트 검색(15개 내장 에이전트), BigQuery 로 예약된 로그 내보내기, `auto/chaos` 병렬 다중 모델 팬아웃, Telegram 봇 브리지, 인앱 버전 관리자 및 LMArena-ELO 무료 제공자 순위. → [문서](docs/README.md)
+- **🤝 더 많은 제공자 및 대리인** — 클라우드 에이전트(Codex 구름, Cursor, Devin, Jules), Grok 짓다 (xAI) 브라우저 사용 + OAuth 로그인, Ollama 일류 카드, Claude Opus 5 & Sonnet 5, Kimi 공식 파트너십(Code/Web/Moonshot), Zed, 요청, SenseNova, 위안바오, 아그네스 AI… 그리고 상쾌한 **382 제공자 카탈로그**. → [공급자](docs/reference/PROVIDER_REFERENCE.md)
+- **📡 라우팅 투명성** — 모든 응답은 이를 제공한 strategy/provider/latency 명명하는 `X-OmniRoute-Decision` 헤더, 새로운 `cache-optimized` 콤보 전략 + 자동 콤보 `cacheAffinity` 요소 경로 반복 요청을 캐시된 접두사를 보유하는 연결로 다시 전달하며 읽기 전용 `/v1/auto-combo/{channel}/candidates` 엔드포인트는 `auto/*` 채널의 라이브 후보 풀을 노출합니다. → [자동 콤보](docs/routing/AUTO-COMBO.md)
+- **⚡ 현지 실적 및 인프라** — 원클릭 로컬 Redis, Cloudflare Workers/Deno 릴레이 배포자, Bifrost 및 Mux를 감독되는 임베디드 서비스로 배포합니다. → [임베디드 서비스](docs/frameworks/EMBEDDED-SERVICES.md)
+- **🧩 상자에도 들어있습니다.** — 플러그인 프레임워크 + 마켓플레이스, Omni/Agent/GitHub 기술 프레임워크, Obsidian 볼트 통합(22개 MCP 도구), OpenAI 호환 배치 및 파일 APIs, 의미론적 응답 캐시, 리더보드를 사용한 게임화, ACP 에이전트 검색(15개 내장 에이전트), BigQuery 로 예약된 로그 내보내기, `auto/chaos` 병렬 다중 모델 팬아웃, Telegram 봇 브리지, 인앱 버전 관리자 및 LMArena-ELO 무료 제공자 순위. → [문서](docs/README.md)
 
 <br/>
 
@@ -683,11 +678,11 @@ omniroute configure codex          # 또한: claude opencode qwen aider goose ge
 
 <div align="center">
 
-## 🌐 381 AI 공급자 — 156 카탈로그 표시 무료
+## 🌐 382 AI 공급자 — 156 카탈로그 표시 무료
 
 </div>
 
-> **381개의 등록된 제공업체** 다음을 포함하여 표준 채팅, 미디어, 검색, 로컬, 클라우드 에이전트 및 시스템 컬렉션 전반에 걸쳐 **156 `hasFree: true` 검색 메타데이터를 전달함** . 채팅 모델 레지스트리에는 다음이 포함됩니다.**242개의 공급자 / 3,148개의 개별 공급자-모델 쌍 / 1,519개의 원시 모델 IDs** ; 별도의 무료 예산 카탈로그에는 **모델별 행 466개** ,**34개의 반복 풀** 그리고 **52개의 recurring/keyless 영구 무료 공급자** . 이는 설계에 따라 서로 다른 분모입니다. 정의 및 풀 중복 제거 계산은 [공급자 참조](docs/reference/PROVIDER_REFERENCE.md) 및 [무료 계층](docs/reference/FREE_TIERS.md) 에 있습니다.
+> **382개의 등록된 제공업체** 다음을 포함하여 표준 채팅, 미디어, 검색, 로컬, 클라우드 에이전트 및 시스템 컬렉션 전반에 걸쳐 **156 `hasFree: true` 검색 메타데이터 전달** . 채팅 모델 레지스트리에는 다음이 포함됩니다.**243개의 공급자 / 3,155개의 개별 공급자-모델 쌍 / 1,524개의 원시 모델 IDs** ; 별도의 무료 예산 카탈로그에는 **모델별 행 466개** ,**34개의 반복 풀** 그리고 **52개의 recurring/keyless 영구 무료 제공업체** . 이는 설계에 따라 서로 다른 분모입니다. 정의 및 풀 중복 제거 계산은 [공급자 참조](docs/reference/PROVIDER_REFERENCE.md) 및 [무료 계층](docs/reference/FREE_TIERS.md) 에 있습니다.
 
 <div align="center">
 
@@ -720,7 +715,7 @@ omniroute configure codex          # 또한: claude opencode qwen aider goose ge
   </tr>
 </table>
 
-<sub>...그리고 350 + 이상 — 모든 아이콘은 대시보드의 공급자 카탈로그에서 실시간으로 확인됩니다. 📖 [공급자 참조](docs/reference/PROVIDER_REFERENCE.md)</sub>
+<sub>...그리고 350 + 이상의 — 모든 아이콘이 대시보드의 공급자 카탈로그에서 실시간으로 확인됩니다. 📖 [제공업체 참조](docs/reference/PROVIDER_REFERENCE.md)</sub>
 
 <br/>
 
@@ -1298,7 +1293,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1로 설정해도 �
   <tr><td nowrap><b>실행 시간</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>언어</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> <code>src/</code> 및 <code>open-sse/</code> 전체(v2.0 이후 코어에서는 <code>any</code> 가 0임)</td></tr>
   <tr><td nowrap><b>뼈대</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>데이터 베이스</b></td><td>better-sqlite3 (SQLite, WAL 저널링) + LowDB (JSON 레거시) — 147 도메인 모듈, 225 마이그레이션</td></tr>
+  <tr><td nowrap><b>데이터 베이스</b></td><td>better-sqlite3 (SQLite, WAL 저널링) + LowDB (JSON 레거시) — 147 도메인 모듈, 229 마이그레이션</td></tr>
   <tr><td nowrap><b>메모리</b></td><td>SQLite FTS5 전체 텍스트 + int8-quantized 벡터 임베딩, 유형화된 붕괴</td></tr>
   <tr><td nowrap><b>스키마</b></td><td>Zod 4 — MCP 도구 I/O 검증 + API 계약</td></tr>
   <tr><td nowrap><b>프로토콜</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

@@ -152,18 +152,18 @@ curl -X POST http://localhost:20128/a2a \
 
 ## Competenze disponibili
 
-OmniRoute espone 6 abilità A2A cablate in `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Ogni modulo di abilità risiede in `src/lib/a2a/skills/`.
+OmniRoute espone 6 abilità A2A cablate in `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Ogni modulo di abilità vive in `src/lib/a2a/skills/`.
 
 | Abilità                 | ID                   | Descrizione                                                                                                                                                                                         | Tag                            | Esempi                                                   |
 | :---------------------- | :------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------------------------- | :------------------------------------------------------- |
 | Itinerario intelligente | `smart-routing`      | Instrada un prompt attraverso lo provider/combo ottimale utilizzando il punteggio + del motore combinato di OmniRoute                                                                               | instradamento, fornitori       | "Indirizza questa richiesta tramite il modello migliore" |
-| Gestione delle quote    | `quota-management`   | Riporta lo stato della quota per fornitore e aiuta i chiamanti a decidere quando throttle/switch                                                                                                    | quota, fornitori               | "Verifica quota antropica"                               |
+| Gestione delle quote    | `quota-management`   | Segnala lo stato della quota per fornitore e aiuta i chiamanti a decidere quando throttle/switch                                                                                                    | quota, fornitori               | "Verifica quota antropica"                               |
 | Scoperta del fornitore  | `provider-discovery` | Elenca i provider installati con funzionalità, flag di livello gratuito e stato OAuth                                                                                                               | fornitori, scoperta            | "Quali fornitori sono disponibili?"                      |
-| Analisi dei costi       | `cost-analysis`      | Stima del costo di uno request/conversation dato l'utilizzo recente del catalogo +                                                                                                                  | costo, utilizzo                | "Costo stimato per questa conversazione"                 |
+| Analisi dei costi       | `cost-analysis`      | Stima del costo di uno request/conversation dato il recente utilizzo del catalogo +                                                                                                                 | costo, utilizzo                | "Costo stimato per questa conversazione"                 |
 | Rapporto sulla salute   | `health-report`      | Aggrega interruttore automatico, raffreddamento e stato di blocco per fornitore                                                                                                                     | salute, resilienza             | "Mostra lo stato di salute di tutti i fornitori"         |
 | Elenco funzionalità     | `list-capabilities`  | Restituisce il catalogo completo delle competenze dell'agente a 45 voci (23 API + 21 CLI + 1 configurazione) come tabella di ribasso con SKILL.md URLs non elaborato per l'inserimento del contesto | catalogo, scoperta, competenze | "Elenca tutte le funzionalità OmniRoute "                |
 
-> La Carta Agente deve essere mantenuta allineata al catalogo live del fornitore 381; i conteggi dei provider e i metadati free/no-auth provengono dal registro di runtime.
+> La Carta Agente deve essere mantenuta allineata al catalogo live del fornitore 382; i conteggi dei provider e i metadati free/no-auth provengono dal registro di runtime.
 
 ### `list-capabilities` Dettaglio abilità
 

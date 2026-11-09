@@ -353,24 +353,24 @@ API Key: [si na dashboard]
 
 ## 🚀 Mbugharị
 
-### Nwụnye npm zuru ụwa ọnụ (A tụrụ aro)
+### Nwụnye npm zuru ụwa ọnụ (A kwadoro)
 
 ```bash
 npm install -g omniroute
 
-# Mepụta ndekọ nhazi
+# Create config directory
 mkdir -p ~/.omniroute
 
-# Mepụta faịlụ .env (lee .env.example)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# Bido sava
+# Start server
 omniroute
-# Ma ọ bụ jiri ọdụ ụgbọ mmiri nke gị:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI na-ebunye `.env` na-akpaghị aka site na `~/.omniroute/.env` ma ọ bụ `./.env`.
+CLI na-ebunye `.env` na-akpaghị aka site na `~/.omniroute/.env` ma ọ bụ `./.env`. A `./.env` na ndekọ na-arụ ọrụ nwere ike ịtọ naanị obere ndepụta ikike nke igodo (ọdụ ụgbọ mmiri, `REQUIRE_API_KEY`, ntọala mpaghara na agba); tinye ihe ọ bụla ọzọ na `~/.omniroute/.env`. Lee [nkwekọrịta mmalite CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### Ọnọdụ tray
 

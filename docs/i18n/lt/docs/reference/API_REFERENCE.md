@@ -351,7 +351,7 @@ GET /v1/embeddings
 
 ---
 
-## Vaizdų generavimas
+## Vaizdo generavimas
 
 ```bash
 POST /v1/images/generations
@@ -365,39 +365,22 @@ Content-Type: application/json
 }
 ```
 
-Galimi teikėjai: OpenAI (GPT Image 2), xAI (Grok Image), Together AI (FLUX), Fireworks AI, Nebius (FLUX), Hyperbolic, NanoBanana, **OpenRouter**, **ZenMux**, SD WebUI (vietinis), ComfyUI (vietinis).
+Galimi tiekėjai: OpenAI (GPT 2 vaizdas ), xAI (Grok vaizdas ), Together AI (FLUX), Fireworks AI, Nebius (FLUX), hiperbolinis , NanoBanana,**OpenRouter** ,**ZenMux** , SD WebUI (vietinis), ComfyUI (vietinis).
 
-`n` grąžina `n` vaizdų masyve `data[]`. Teikėjams, kurių pirminė API grąžina po vieną vaizdą per iškvietimą
-(Black Forest Labs, Stability AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik,
-NVIDIA NIM, Cloudflare Workers AI), atliekami `n` atskiri pirminės API iškvietimai, vienu metu
-vykdoma ne daugiau kaip 4. Fiksuotas `seed` pakeičiamas pagal iškvietimo indeksą (`seed`, `seed + 1`, …),
-todėl vaizdai skiriasi, tačiau išlieka atkuriami. `n` ribojamas iki 10. Visa užklausa laikoma
-nepavykusia, jei nepavyksta bent vienas iškvietimas. Išsišakojimo formatų sąrašas yra
-`SINGLE_IMAGE_FANOUT_FORMATS` faile
-`open-sse/handlers/imageGeneration/fanOut.ts`.
+`n` grąžina `n` vaizdus `data[]`. Teikėjai, kurių API prieš srovę grąžina vieną vaizdą vienam skambučiui (Black Forest Labs, Stability AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik, NVIDIA NIM, Cloudflare Workers AI), gauna `n` atskirus skambučius prieš srovę, daugiausia 4 skrydžio metu. Fiksuotas `seed` yra kompensuojamas skambučio indeksu (`seed`, `seed + 1`, …), todėl vaizdai skiriasi, bet išlieka atkuriami. `n` yra 10. Jei nepavyksta skambučio, visa užklausa nepavyksta. Fan-out formatų sąrašas yra `SINGLE_IMAGE_FANOUT_FORMATS` `open-sse/handlers/imageGeneration/fanOut.ts`.
 
-ZenMux pakartotinai naudoja esamą API rakto ryšį ir priima `zenmux/` arba `zm/` prefiksus:
+ZenMux pakartotinai naudoja esamą API rakto ryšį ir priima `zenmux/` arba `zm/` priešdėlius:
 
-- `zenmux/openai/gpt-image-2` naudoja ZenMux OpenAI Images API. Galimos parinktys: `size`,
-  `quality`, `n`, `output_format`, `output_compression`, `background` ir `response_format`.
-- Kiti leidėjai, pvz., `zm/meta/muse-image-1.0`, naudoja ZenMux Vertex AI `:predict`
-  galinį tašką. `n` susiejamas su `sampleCount`, `aspect_ratio` – su `aspectRatio`, o `image_size`
-  (`1K`, `2K`, `4K`) – su `sampleImageSize`. Pikseliais nurodytas `size` pateikia tik kraštinių
-  santykį, o ne garantuojamus pikselių matmenis. Palaikomi santykiai, raiškos ir kiekiai priklauso
-  nuo modelio.
-- `zm/inclusionai/ming-image-0.1-design` pats pasirenka matmenis. Nenurodykite `size`,
-  `aspect_ratio` ir `image_size`; nurodžius aiškias reikšmes grąžinamas HTTP 400. PNG, JPEG ir WebP
-  galima užklausti naudojant `output_format`.
+- `zenmux/openai/gpt-image-2` naudoja ZenMuxOpenAI vaizdus API. Parinktys apima `size`, `quality`, `n`, `output_format`, `output_compression`, `background` ir `response_format`.
+- Kiti leidėjai, pvz., `zm/meta/muse-image-1.0`, naudoja ZenMux Vertex AI `:predict` galinį tašką. `n` susieja su `sampleCount`, `aspect_ratio` į `aspectRatio` ir `image_size` (`1K`, `2K`, `4K`) į `sampleImageSize`. Pikselis `size` pateikia tik kraštinių santykį, bet negarantuoja pikselių matmenų. Palaikomi koeficientai, skiriamoji geba ir skaičius skiriasi priklausomai nuo modelio.
+- `zm/inclusionai/ming-image-0.1-design` pasirenka savo matmenis. Praleisti `size`, `aspect_ratio` ir `image_size`; aiškios reikšmės grąžina HTTP 400. PNG, JPEG ir WebP galima pateikti su `output_format`.
 
-Ši integracija palaiko teksto pavertimą vaizdu, bet ne nuorodinių vaizdų redagavimą. Vertex
-išvestis normalizuojama į `data[].b64_json`; `response_format: "url"` grąžina pirminės API
-HTTPS URL arba base64 duomenų URL, kai pasiekiami tik vaizdo baitai. Tuščios arba filtruotos
-išvestys grąžina klaidą, o ne tuščią sėkmingą atsaką. Prieiga prie modelių priklauso nuo ZenMux
-paskyros. Žr. [ZenMux Vertex API](https://docs.zenmux.ai/api/vertexai/generate-images) ir
-[OpenAI Images API](https://docs.zenmux.ai/api/openai/generate-an-image).
+Ši integracija palaiko teksto į vaizdą generavimą, o ne nuorodos vaizdo redagavimą. Viršūnių išvestis normalizuojama į `data[].b64_json`; `response_format: "url"` grąžina HTTPS URL arba base64 duomenų URL kai yra tik vaizdo baitai. Empty/filtered išvestis grąžina klaidą, o ne tuščią sėkmę. Prieiga prie modelio priklauso nuo ZenMux paskyros. Žr. [ZenMux viršūnių API](https://docs.zenmux.ai/api/vertexai/generate-images) ir [OpenAI vaizdus API](https://docs.zenmux.ai/api/openai/generate-an-image).
+
+Microsoft 365 Copilot prisijungimo jungtis aptarnauja `copilot-m365-web/m365-copilot-image` per Copilot integruotą vaizdo įrankį: vienas Copilot posūkis kiekvienam vaizdui (`n` 1–4), `size` valdo tik orientaciją ir vaizdai grąžinami į eilutę (`b64_json`, arba duomenų URL `response_format: "url"`). Žr. [Microsoft 365 Copilot](../providers/COPILOT-M365.md#image-generation).
 
 ```bash
-# Išvardyti visus vaizdų modelius
+# List all image models
 GET /v1/images/generations
 ```
 
@@ -848,17 +831,19 @@ atšaukiant ir tikrinant `input_file_id` kuriant). `GET /v1/batches` atmeta anon
 
 ---
 
-## Paieškos API
+## Ieškoti API
 
-Žiniatinklio / paieškos teikėjų abstrakcija (Tavily, Brave, Exa, Serper ir kt.).
+Web/search teikėjo abstrakcija (Tavily, Brave, Exa, Serper ir kt.).
 
-| Metodas | Kelias                 | Aprašymas                                                                                                                                       |
-| ------- | ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET     | `/v1/search`           | Sukonfigūruotų paieškos teikėjų ir jų galimybių sąrašas                                                                                         |
-| POST    | `/v1/search`           | Vykdyti paieškos užklausą — užklausa tikrinama pagal `v1SearchSchema`, palaikomas spartinančiosios atmintinės naudojimas ir užklausų sujungimas |
-| GET     | `/v1/search/analytics` | Kiekvieno teikėjo rezultatų, delsos ir spartinančiosios atmintinės statistika                                                                   |
+| Metodas | Kelias                 | Aprašymas                                                                                    |
+| ------- | ---------------------- | -------------------------------------------------------------------------------------------- |
+| GET     | `/v1/search`           | Sukonfigūruotų paieškos paslaugų teikėjų + galimybių sąrašas                                 |
+| POST    | `/v1/search`           | Vykdykite paieškos užklausą — body, patvirtintą `v1SearchSchema`, palaiko caching/coalescing |
+| GET     | `/v1/search/analytics` | Teikėjo hit/latency/cache statistika                                                         |
 
-**Autentifikavimas:** „Bearer“ API raktas (`extractApiKey` + `isValidApiKey`). Paieškos politika užtikrinama naudojant `enforceApiKeyPolicy`.
+**Auth:** Nešiklio API raktas (`extractApiKey` + `isValidApiKey`). Paieškos politika vykdoma naudojant `enforceApiKeyPolicy`.
+
+**Automatinis pasirinkimas:** be `provider` pigiausias teikėjas su sukonfigūruotu ryšiu paleidžiamas pirmas, o kitas pigiausias yra perjungimas. Nemokami paskutinės galimybės teikėjai (`duckduckgo-free`) naudojami tik tada, kai nieko daugiau nesukonfigūruota. Savarankiškai priglobtas SearXNG laikomas sukonfigūruotu, kai jo ryšyje išsaugomas tikras `baseUrl` (ne numatytasis katalogo `http://localhost:8888/search`): tada jis yra 0 USD vertės tiekėjas, pranašesnis už raktinius tiekėjus, o pigiausias raktas turintis `baseUrl` yra perjungimas, URL kai SearXNG `http(s)` 400, 401, 403 arba 404 taškais. debesies metaduomenų adresas neįskaičiuojamas. SearXNG ryšys, kuriame saugomas atpažinimo ženklas, yra tik per `https://` arba loopback `http://`. Per nuotolinį paprastą `http://` tai niekada nėra perjungimas ir lieka paskutinė išeitis, naudojama tik tada, kai nesukonfigūruotas joks kitas teikėjas arba kai to prašoma pagal pavadinimą, todėl šiais dviem atvejais jis siunčia prieigos raktą aiškiu tekstu.
 
 ### Exa ir Tavily `provider_options`
 
@@ -1016,33 +1001,28 @@ sukūrusiam API raktui. Jei pakartotinio siuntimo rezultatas neaiškus, atkūrim
 
 ---
 
-## Naudojimas savitarnoje (`/api/usage/om-usage`)
+## Savitarnos naudojimas (`/api/usage/om-usage`)
 
-Bet kuris API raktas gali skaityti **savo** naudojimą ir kvotas — valdymo autentifikavimas
-nereikalingas. Tai yra galinis taškas, kurį klientas (CLI, „OmniCopilot“ skydelis) naudoja,
-kad rakto turėtojui parodytų jo išlaidas.
+Bet koks API raktas gali skaityti **savo** naudojimas ir kvotos — nėra valdymo autentifikavimo. Tai galutinis taškas, kurį naudoja klientas (CLI, OmniCopilot skydelis), kad parodytų rakto turėtojui savo išlaidas.
 
 ```bash
-# Teksto forma (istorinė sutartis — paprastas tekstas terminalui)
+# Text form (the historical contract — plain text for a terminal)
 curl -H "Authorization: Bearer <your-api-key>" \
   http://localhost:20128/api/usage/om-usage
 
-# Struktūrinė forma — tai, ką naudoja UI
+# Structured form — what a UI consumes
 curl -H "Authorization: Bearer <your-api-key>" \
   "http://localhost:20128/api/usage/om-usage?format=json"
 ```
 
-Raktui turi būti įjungta **`allowUsageCommand`** (pagal numatytuosius nustatymus išjungta —
-valdymo skydelio API raktų tvarkytuvė ją įjungia arba išjungia kiekvienam raktui). Jei ji
-neįjungta, galinis taškas atsako `403`.
+Raktas turi būti **`allowUsageCommand`** įjungta (pagal numatytuosius nustatymus išjungta. — prietaisų skydelio API raktų tvarkyklė perjungia jį pagal raktą). Be jo galutinis taškas atsako į `403`.
 
-`?format=json` grąžina diferencijuotą struktūrą, todėl skambinantysis niekada neskaito duomenų
-lauko iš atsisakymo atsakymo. Sėkmės atveju:
+`?format=json` grąžina išskirtinę formą, todėl skambinantysis niekada neskaito duomenų lauko apie atsisakymą. Apie sėkmę:
 
 ```jsonc
 {
   "allowed": true,
-  // pateikiama tik tada, kai raktas pasirinko konkrečiam raktui taikomus naudojimo limitus (dienos / savaitės USD):
+  // present only when the key opted into per-key usage limits (daily/weekly/5-hour USD):
   "personal": {
     "dailySpentUsd": 1.25,
     "dailyLimitUsd": 5,
@@ -1051,9 +1031,9 @@ lauko iš atsisakymo atsakymo. Sėkmės atveju:
     "weeklyLimitUsd": 20,
     "weeklyResetAtIso": "…" /* … */,
   },
-  // pasirinkto teikėjo kvotos momentinė kopija arba null, kai dar niekas neįrašyta į podėlį:
+  // the selected provider quota snapshot, or null when nothing is cached yet:
   "provider": { "connectionId": "…", "provider": "claude", "plan": "…", "quotas": {/* … */} },
-  // kiekvieno ryšio momentinė kopija, kad UI galėtų greta pateikti kelis teikėjus:
+  // every connection's snapshot, so a UI can render several providers side by side:
   "providers": [
     { "connectionId": "…", "provider": "claude" /* … */ },
     { "provider": "codex" /* … */ },
@@ -1061,14 +1041,9 @@ lauko iš atsisakymo atsakymo. Sėkmės atveju:
 }
 ```
 
-Atsisakymo atveju (`401` netinkamas raktas / `403` neleidžiama) tas pats maršrutas grąžina
-`{ "allowed": false, "error": { "message": "…" } }` — esama, bet tuščia `personal`/`provider`
-reikšmė (raktui leidžiama, tačiau dar nieko nesužinota) yra kita būsena nei atsisakymas, ir tik
-JSON forma leidžia jas atskirti.
+Atsisakius (`401` blogas raktas / `403` neleidžiamas) tas pats maršrutas grąžina `{ "allowed": false, "error": { "message": "…" } }` — esamą, bet tuščią `personal`/`provider` (raktas leidžiamas, dar nieko neišmoko) yra kitokia būsena, nei atsisakymas, ir tik JSON forma juos išskiria.
 
-**Autentifikavimas:** skambinančiojo nuosavas „Bearer“ API raktas, patikrintas naudojant
-`isValidApiKey` — tai _ne_ valdymo sąsaja (`/api/keys/…`), kuri ir toliau saugoma naudojant
-`requireManagementAuth`.
+**Auth:** paties skambinančiojo nešiklio API raktas, patvirtintas naudojant `isValidApiKey` — tai _nėra_ valdymo paviršius (`/api/keys/…`), kuris lieka už `requireManagementAuth`.
 
 ### Neapdoroti ir pagal ribą pakoreguoti kvotų procentai
 
@@ -1320,40 +1295,41 @@ ir prioritetų grandinės faile `src/lib/modelCapabilityLimits.ts`.
 | `/api/usage/model-latency-stats` | GET             | Slenkanti kiekvieno teikėjo / modelio delsos agregacija (vidurkis/p50/p95/p99, sėkmės rodiklis); filtrai: `windowHours`/`minSamples`/`maxRows`/`provider`/`model` (#6873)                                                                                                                                                                                           |
 | `/api/usage/cache-health`        | GET             | Raginimų podėlio būklės suvestinė pagal `call_logs` — įrašymo / skaitymo santykis, p50/p90/p99 įrašymo dydžio pasiskirstymas, didelės įrašymo apimties koncentracija, skaidymas pagal modelį ir `healthy`/`degraded`/`thrash`/`no-data` įvertis; užklausos parametrai `range` (`1h`\|`24h`\|`7d`\|`30d`, numatytoji reikšmė `24h`) ir pasirinktinis `model` (#8827) |
 
-### API rakto leidimai
+### API raktų leidimai
 
-`PATCH /api/keys/{id}` atnaujina esamo rakto leidimus. Kaip ir kiekvienam `/api/keys*` maršrutui, jam reikalingas valdymo autorizavimas (žr. [Valdymo autentifikavimas](../guides/MANAGEMENT-AUTH.md)), o ne išvadų raktas. Siųskite tik tuos laukus, kuriuos norite pakeisti; užklausa, kurioje nėra nė vieno iš jų, atmetama su klaida `No valid fields to update`. Priimami laukai apibrėžti faile `src/shared/validation/schemas/keys.ts`, naudojant `updateKeyPermissionsSchema`.
+`PATCH /api/keys/{id}` atnaujina esamo rakto leidimus. Kaip ir kiekvienam `/api/keys*` maršrutui, jam reikia valdymo įgaliojimo (žr. [Valdymo autentifikavimą](../guides/MANAGEMENT-AUTH.md) ), o ne išvados raktą. Siųskite tik tuos laukus, kuriuos norite pakeisti; prašymas, kuriame nėra nė vieno iš jų, atmetamas naudojant `No valid fields to update`. Priimtus laukus apibrėžia `updateKeyPermissionsSchema` `src/shared/validation/schemas/keys.ts`.
 
-| Field                                       | Type                                                                          | Notes                                                                                                                                               |
-| ------------------------------------------- | ----------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `name`                                      | eilutė, 1–200 simbolių                                                        |                                                                                                                                                     |
-| `isActive`                                  | loginė reikšmė                                                                |                                                                                                                                                     |
-| `isBanned`                                  | loginė reikšmė                                                                |                                                                                                                                                     |
-| `expiresAt`                                 | ISO 8601 data ir laikas arba `null`                                           | `null` panaikina galiojimo pabaigos laiką                                                                                                           |
-| `modelAccessMode`                           | `all` \| `restricted`                                                         | Kai režimas yra `all`, `allowedModels` turi būti tuščias                                                                                            |
-| `allowedModels`, `blockedModels`            | eilučių masyvas, iki 1000                                                     |                                                                                                                                                     |
-| `allowedCombos`                             | eilučių masyvas, iki 500                                                      | Nurodo, kuriuos derinius raktas gali iškviesti; tiesioginiams modeliams taikomi `modelAccessMode` / `allowedModels`                                 |
-| `connectionAccessMode`                      | `all` \| `restricted`                                                         | Kai reikšmė yra `restricted`, `allowedConnections` turi būti netuščias, o kai `all` – tuščias                                                       |
-| `allowedConnections`                        | UUID masyvas, iki 100                                                         |                                                                                                                                                     |
-| `allowAutoCombos`                           | loginė reikšmė                                                                | `false` atmeta šio rakto užklausas dėl `auto/*` modelių; raktams, kuriuose ši reikšmė niekada nenustatyta, leidžiama                                |
-| `catalogScope`                              | `all` \| `combos` \| `models`                                                 | Ką `GET /v1/models` pateikia šiam raktui (tik derinius, tik modelius arba abu); tai nekeičia, ką raktas gali iškviesti                              |
-| `forcedModel`                               | eilutė iki 300 simbolių arba `null`                                           | Nukreipia pokalbių užklausas į šį modelį / derinį, pirmenybę teikiant jam prieš `X-Route-Model` ir `body.model`; rakto apribojimai vis tiek taikomi |
-| `noLog`, `autoResolve`                      | loginė reikšmė                                                                |                                                                                                                                                     |
-| `throttleDelayMs`                           | sveikasis skaičius, 0–300000                                                  |                                                                                                                                                     |
-| `maxSessions`                               | sveikasis skaičius, 0–10000                                                   |                                                                                                                                                     |
-| `rateLimits`                                | `{ limit, window }` masyvas (teigiami sveikieji skaičiai, iki 50) arba `null` | `null` panaikina apribojimus                                                                                                                        |
-| `accessSchedule`                            | tvarkaraščio objektas arba `null`                                             | `null` panaikina tvarkaraštį                                                                                                                        |
-| `scopes`                                    | eilučių masyvas, iki 32                                                       |                                                                                                                                                     |
-| `allowedEndpoints`                          | eilučių masyvas, iki 20                                                       |                                                                                                                                                     |
-| `streamDefaultMode`                         | `legacy` \| `json`                                                            |                                                                                                                                                     |
-| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                          | Žr. [podėlio apėjimas vienam raktui](#per-key-cache-bypass)                                                                                         |
-| `compressionEnabled`                        | loginė reikšmė                                                                |                                                                                                                                                     |
-| `codexServiceMode`                          | vienas iš „Codex“ paslaugos režimų                                            |                                                                                                                                                     |
-| `disableNonPublicModels`                    | boolean                                                                       |                                                                                                                                                     |
-| `allowUsageCommand`                         | boolean                                                                       |                                                                                                                                                     |
-| `usageLimitEnabled`                         | boolean                                                                       |                                                                                                                                                     |
-| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | number >= 0 or `null`                                                         |                                                                                                                                                     |
-| `chaosModeEnabled`                          | boolean                                                                       |                                                                                                                                                     |
+| Field                                       | Type                                                                          | Notes                                                                                                                                                                                                                                                               |
+| ------------------------------------------- | ----------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`                                      | eilutė, 1–200 simbolių                                                        |                                                                                                                                                                                                                                                                     |
+| `isActive`                                  | loginė reikšmė                                                                |                                                                                                                                                                                                                                                                     |
+| `isBanned`                                  | loginė reikšmė                                                                |                                                                                                                                                                                                                                                                     |
+| `expiresAt`                                 | ISO 8601 data ir laikas arba `null`                                           | `null` panaikina galiojimo pabaigos laiką                                                                                                                                                                                                                           |
+| `modelAccessMode`                           | `all` \| `restricted`                                                         | Kai režimas yra `all`, `allowedModels` turi būti tuščias                                                                                                                                                                                                            |
+| `allowedModels`, `blockedModels`            | eilučių masyvas, iki 1000                                                     |                                                                                                                                                                                                                                                                     |
+| `allowedCombos`                             | eilučių masyvas, iki 500                                                      | Nurodo, kuriuos derinius raktas gali iškviesti; tiesioginiams modeliams taikomi `modelAccessMode` / `allowedModels`                                                                                                                                                 |
+| `connectionAccessMode`                      | `all` \| `restricted`                                                         | Kai reikšmė yra `restricted`, `allowedConnections` turi būti netuščias, o kai `all` – tuščias                                                                                                                                                                       |
+| `allowedConnections`                        | UUID masyvas, iki 100                                                         |                                                                                                                                                                                                                                                                     |
+| `allowAutoCombos`                           | loginė reikšmė                                                                | `false` atmeta šio rakto užklausas dėl `auto/*` modelių; raktams, kuriuose ši reikšmė niekada nenustatyta, leidžiama                                                                                                                                                |
+| `catalogScope`                              | `all` \| `combos` \| `models`                                                 | Ką `GET /v1/models` pateikia šiam raktui (tik derinius, tik modelius arba abu); tai nekeičia, ką raktas gali iškviesti                                                                                                                                              |
+| `forcedModel`                               | eilutė iki 300 simbolių arba `null`                                           | Nukreipia pokalbių užklausas į šį modelį / derinį, pirmenybę teikiant jam prieš `X-Route-Model` ir `body.model`; rakto apribojimai vis tiek taikomi                                                                                                                 |
+| `noLog`, `autoResolve`                      | loginis                                                                       |                                                                                                                                                                                                                                                                     |
+| `throttleDelayMs`                           | sveikasis skaičius, 0–300000                                                  |                                                                                                                                                                                                                                                                     |
+| `maxSessions`                               | sveikasis skaičius, 0–10000                                                   |                                                                                                                                                                                                                                                                     |
+| `rateLimits`                                | `{ limit, window }` masyvas (teigiami sveikieji skaičiai, iki 50) arba `null` | `null` panaikina apribojimus                                                                                                                                                                                                                                        |
+| `accessSchedule`                            | tvarkaraščio objektas arba `null`                                             | `null` panaikina tvarkaraštį                                                                                                                                                                                                                                        |
+| `scopes`                                    | eilučių masyvas, iki 32                                                       |                                                                                                                                                                                                                                                                     |
+| `allowedEndpoints`                          | eilučių masyvas, iki 20                                                       |                                                                                                                                                                                                                                                                     |
+| `streamDefaultMode`                         | `legacy` \| `json`                                                            |                                                                                                                                                                                                                                                                     |
+| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                          | Žr. [podėlio apėjimas vienam raktui](#per-key-cache-bypass)                                                                                                                                                                                                         |
+| `compressionEnabled`                        | loginė reikšmė                                                                |                                                                                                                                                                                                                                                                     |
+| `codexServiceMode`                          | vienas iš „Codex“ paslaugos režimų                                            |                                                                                                                                                                                                                                                                     |
+| `disableNonPublicModels`                    | boolean                                                                       |                                                                                                                                                                                                                                                                     |
+| `allowUsageCommand`                         | boolean                                                                       |                                                                                                                                                                                                                                                                     |
+| `usageLimitEnabled`                         | boolean                                                                       |                                                                                                                                                                                                                                                                     |
+| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | numeris >= 0 arba `null`                                                      |                                                                                                                                                                                                                                                                     |
+| `fiveHourUsageLimitUsd`                     | numeris >= 0 arba `null`                                                      | Slenkantis 5 valandų USD biudžetas, taikomas kaip dienos ir savaitės limitai (`usageLimitEnabled`, `UNPRICED_USAGE_BUDGET_POLICY`). `retry-after` yra tada, kai seniausios išlaidos lange pasensta, todėl raktas, gerokai viršijantis ribą, gali likti užblokuotas. |
+| `chaosModeEnabled`                          | boolean                                                                       |                                                                                                                                                                                                                                                                     |
 
 ```bash
 curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
@@ -1403,6 +1379,14 @@ curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
 | `/api/modality-bridge/stats`         | GET        | Atmintyje saugomi `attempts`, sėkmingi bandymai / `bridged`, nesėkmės, podėlio pataikymai, `totalLatencyMs`, `latencySamples`, imčių skaičiumi pagrįstas `averageLatencyMs` ir paskutinio naudojimo laikas (paleidus iš naujo nustatoma; reikalingas valdymo autentifikavimas)                                                                                                                                               |
 | `/api/modality-bridge/video/runtime` | GET        | Griežta patikimo grįžtamojo ryšio sąsajos patikra prieš valdymo autentifikavimą / bandymą; nuasmeninta FFmpeg/ffprobe pasiekiamumo ir versijų informacija (no-store)                                                                                                                                                                                                                                                         |
 | `/api/modality-bridge/video/extract` | POST       | Vidinis autentifikuotas patikimos grįžtamojo ryšio sąsajos baitų tarpininkas; 50 MiB įvestis, ribota eilė / 32 MiB išvestis, `503` dėl pajėgumo, `499` atsijungus, `504` viršijus terminą; ne viešoji įkėlimo API                                                                                                                                                                                                            |
+
+### Vaizdo įrašo kadro gręžimas
+
+`GET /api/v1/video-bridge/drilldown` nuskaito nuomininko nepermatomą rankenėlę, grąžintą `x-omniroute-video-drilldown` po aiškaus sutikimo dėl vaizdo tilto užklausos. Tiek skaitymui, tiek `DELETE` visada reikalingas galiojantis API raktas ir nepriklausomas operatoriaus `modalityBridgeVideoDrilldownRemoteEnabled` leidimas. Gamybos išlaikymui papildomai reikalingas `modalityBridgeVideoDrilldownEnabled` ir griežtas `drilldown: true` kiekvienai daliai. Jei raktas turi netuščią galinio taško leidžiamąjį sąrašą, jame turi būti `video` ir GET, ir DELETE, nesvarbu, ar skambinantysis naudoja `/v1` ar `/api/v1`.
+
+GET užklausa: reikalinga `handle`; pasirenkamas `variant` (`preview`, `standard`, `detail`), `limit` (1–8; senasis `frames` yra priimtas, bet negali būti derinamas su `limit`), nulinis `page` ir `start`/`end` sekundės. Kai pateikiamos abi židinio ribos, `end` turi būti didesnis nei `start`. Duplicate/unknown užklausos raktai atmetami. Sėkminguose atsakymuose yra `derivation`, `durationSeconds`, `frames`, `hasMore`, `page`, `variant` ir pasirenkami `focusWindow`; JSON neparduotuvėje yra 32 MiB, įskaitant Base64. Negabaritinis išvestis grąžina 413; prašyti mažiau kadrų.
+
+`DELETE /api/v1/video-bridge/drilldown?handle=...` grąžina `{ "removed": 0|1 }`. Nežinomi, pasibaigusio galiojimo ir kryžminio klavišo GETs yra neatskiriami 404 atsakymai; kryžminis DELETE negali pašalinti savininko įrašo. Išjungta prieiga grąžina 403, missing/invalid autentifikavimas 401, netinkamos užklausos 400, atšaukimas 499 ir laikinos klaidos 503. Rankenėlės yra procesų lokalios, jos galiojimo laikas baigiasi po dešimties minučių ir neišgyvena paleidus iš naujo. Naujose rankenose naudojamas `v1.` ir 32 baitų atsitiktinis Base64URL raktas; išsaugomos tik žetonų maišos. Dėl suderinamumo senieji 64 šešiakampių žetonų sintaksiniai ženklai lieka įskaitomi. Jei reikia sutikimo, kvotų ir variantų išvedimo informacijos, žr. [„Video Bridge“ apsauginius turėklus](../security/GUARDRAILS.md#video-bridge-videobridgets-videobridgepipelinets).
 
 ### Atsarginės kopijos ir eksportavimas / importavimas
 
@@ -1506,19 +1490,19 @@ GET atsakyme pateikiami `agents[]` (id, name, binary, version, installed, protoc
 
 Šie galiniai punktai atkartoja Gemini API formatą klientams, kuriems reikalingas vietinis suderinamumas su Gemini SDK.
 
-### Vidinės / sistemos API
+### Vidinis / Sistema APIs
 
-| Endpoint                 | Method | Aprašymas                                                        |
-| ------------------------ | ------ | ---------------------------------------------------------------- |
-| `/api/init`              | GET    | Programos inicijavimo patikra (naudojama pirmojo paleidimo metu) |
-| `/api/tags`              | GET    | Su Ollama suderinamos modelių žymos (Ollama klientams)           |
-| `/api/restart`           | POST   | Paleisti valdomą serverio paleidimą iš naujo                     |
-| `/api/shutdown`          | POST   | Paleisti valdomą serverio išjungimą                              |
-| `/api/system/env/repair` | POST   | Pataisyti OAuth teikėjo aplinkos kintamuosius                    |
-| `/api/system/version`    | GET    | Dabartinė / naujausia versija, naujinimo būsena, leidimų kanalas |
-| `/api/system/version`    | POST   | Pradėti diegimui pritaikytą naujinimą į naujausią versiją        |
+| Galutinis taškas         | Metodas | Aprašymas                                                         |
+| ------------------------ | ------- | ----------------------------------------------------------------- |
+| `/api/init`              | GET     | Pradėti sinchronizavimo fone paslaugas (valdymo autentifikavimas) |
+| `/api/tags`              | GET     | Su „Ollama“ suderinamos modelių žymos ( Ollama klientams)         |
+| `/api/restart`           | POST    | Suaktyvinkite grakštų serverio paleidimą iš naujo                 |
+| `/api/shutdown`          | POST    | Suaktyvinkite grakštų serverio išjungimą                          |
+| `/api/system/env/repair` | POST    | Pataisykite OAuth teikėjo aplinkos kintamuosius                   |
+| `/api/system/version`    | GET     | Current/latest versija, atnaujinimo būsena, išleidimo kanalas     |
+| `/api/system/version`    | POST    | Pradėkite diegimą atitinkantį naujinimą į naujausią versiją       |
 
-> **Pastaba:** Šie galiniai punktai sistemos naudojami viduje arba suderinamumui su Ollama klientais užtikrinti. Galutiniai naudotojai paprastai jų nekviečia.
+> **Pastaba:** Šie galiniai taškai naudojami sistemoje arba Ollama kliento suderinamumui užtikrinti. Paprastai galutiniai vartotojai jiems neskambina.
 
 ### OAuth aplinkos taisymas _(v3.6.1+)_
 

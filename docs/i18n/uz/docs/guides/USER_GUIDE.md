@@ -359,24 +359,24 @@ Model: cc/claude-opus-4-7
 
 ## 🚀 Joylashtirish
 
-### Global npm o‘rnatilishi (Tavsiya etiladi)
+### Global npm o'rnatish (Tavsiya etiladi)
 
 ```bash
 npm install -g omniroute
 
-# Konfiguratsiya katalogini yarating
+# Create config directory
 mkdir -p ~/.omniroute
 
-# .env faylini yarating (.env.example fayliga qarang)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# Serverni ishga tushiring
+# Start server
 omniroute
-# Yoki maxsus port bilan:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI `.env` faylini `~/.omniroute/.env` yoki `./.env` manzilidan avtomatik yuklaydi.
+CLI avtomatik ravishda `.env` `~/.omniroute/.env` yoki `./.env` dan yuklaydi. Ishchi katalogdagi `./.env` faqat kalitlarning qisqa ruxsat etilgan ro'yxatini o'rnatishi mumkin (portlar, `REQUIRE_API_KEY`, mahalliy va rang sozlamalari); qolgan hamma narsani `~/.omniroute/.env` ga qo'ying. [CLI ishga tushirish shartnomalariga](CLI-LAUNCH-CONTRACTS.md#working-directory-env) qarang.
 
 ### Tizim treyi rejimi
 

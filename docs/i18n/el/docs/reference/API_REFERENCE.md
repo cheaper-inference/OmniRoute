@@ -364,31 +364,22 @@ Content-Type: application/json
 }
 ```
 
-Οι διαθέσιμοι πάροχοι περιλαμβάνουν τους OpenAI (GPT Image 2), xAI (Grok Image), Together AI (FLUX), Fireworks AI, Nebius (FLUX), Hyperbolic, NanoBanana, **OpenRouter**, **ZenMux**, SD WebUI (τοπικά), ComfyUI (τοπικά).
+Οι διαθέσιμοι πάροχοι περιλαμβάνουν OpenAI (GPT Image 2), xAI (Grok Image), Together AI (FLUX), Fireworks AI, Nebius (FLUX), Hyperbolic, NanoBanana,**OpenRouter** ,**ZenMux** , SD WebUI (τοπικό), ComfyUI (τοπικό).
 
-Το `n` επιστρέφει `n` εικόνες στο `data[]`. Οι πάροχοι των οποίων το upstream API επιστρέφει μία εικόνα ανά κλήση
-(Black Forest Labs, Stability AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik,
-NVIDIA NIM, Cloudflare Workers AI) πραγματοποιούν `n` ξεχωριστές upstream κλήσεις, με έως 4
-ταυτόχρονες. Ένα σταθερό `seed` μετατοπίζεται κατά τον δείκτη της κλήσης (`seed`, `seed + 1`, …), ώστε οι εικόνες να διαφέρουν αλλά να παραμένουν αναπαραγώγιμες. Το `n` περιορίζεται σε 10. Το αίτημα αποτυγχάνει συνολικά αν αποτύχει οποιαδήποτε κλήση. Η λίστα των μορφών fan-out είναι η `SINGLE_IMAGE_FANOUT_FORMATS` στο
-`open-sse/handlers/imageGeneration/fanOut.ts`.
+`n` επιστρέφει εικόνες `n` σε `data[]`. Οι πάροχοι των οποίων το upstream API επιστρέφει μία εικόνα ανά κλήση (Black Forest Labs, Stability AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik, NVIDIA NIM, Cloudflare Workers AI) λαμβάνουν `n` ξεχωριστές ανοδικές κλήσεις, το πολύ 4 κατά την πτήση. Ένα σταθερό `seed` αντισταθμίζεται από τον δείκτη κλήσης (`seed`, `seed + 1`, …), επομένως οι εικόνες διαφέρουν αλλά παραμένουν αναπαραγώγιμες. `n` περιορίζεται στο 10. Το αίτημα αποτυγχάνει στο σύνολό του εάν κάποια κλήση αποτύχει. Η λίστα των μορφών fan-out είναι `SINGLE_IMAGE_FANOUT_FORMATS` σε `open-sse/handlers/imageGeneration/fanOut.ts`.
 
-Το ZenMux επαναχρησιμοποιεί την υπάρχουσα σύνδεση κλειδιού API και δέχεται προθέματα
-`zenmux/` ή `zm/`:
+ZenMux επαναχρησιμοποιεί την υπάρχουσα σύνδεση κλειδιού API και δέχεται προθέματα `zenmux/` ή `zm/` :
 
-- Το `zenmux/openai/gpt-image-2` χρησιμοποιεί το OpenAI Images API του ZenMux. Οι επιλογές περιλαμβάνουν τα `size`,
-  `quality`, `n`, `output_format`, `output_compression`, `background` και `response_format`.
-- Άλλοι εκδότες, όπως το `zm/meta/muse-image-1.0`, χρησιμοποιούν το endpoint `:predict` του Vertex AI. Το `n` αντιστοιχίζεται στο `sampleCount`, το `aspect_ratio` στο `aspectRatio` και το `image_size`
-  (`1K`, `2K`, `4K`) στο `sampleImageSize`. Ένα εικονοστοιχειακό `size` παρέχει μόνο αναλογία διαστάσεων και όχι εγγυημένες διαστάσεις σε εικονοστοιχεία. Οι υποστηριζόμενες αναλογίες, αναλύσεις και ποσότητες διαφέρουν ανά μοντέλο.
-- Το `zm/inclusionai/ming-image-0.1-design` επιλέγει τις δικές του διαστάσεις. Παραλείψτε τα `size`,
-  `aspect_ratio` και `image_size`· οι ρητές τιμές επιστρέφουν HTTP 400. Μπορείτε να ζητήσετε PNG, JPEG και WebP με το `output_format`.
+- `zenmux/openai/gpt-image-2` χρησιμοποιεί ZenMux Εικόνες OpenAI του API. Οι επιλογές περιλαμβάνουν `size`, `quality`, `n`, `output_format`, `output_compression`, `background` και `response_format`.
+- Άλλοι εκδότες, όπως `zm/meta/muse-image-1.0`, χρησιμοποιούν το τελικό σημείο Vertex AI `:predict` του ZenMux. `n` αντιστοιχίζεται σε `sampleCount`, `aspect_ratio` σε `aspectRatio` και `image_size` (`1K`, `2K`, `4K`) σε `sampleImageSize`. Ένα pixel `size` παρέχει μόνο έναν λόγο διαστάσεων, όχι εγγυημένες διαστάσεις pixel. Οι υποστηριζόμενες αναλογίες, αναλύσεις και μετρήσεις διαφέρουν ανάλογα με το μοντέλο.
+- `zm/inclusionai/ming-image-0.1-design` επιλέγει τις διαστάσεις του. Παραλείψτε `size`, `aspect_ratio` και `image_size`. Οι ρητές τιμές επιστρέφουν HTTP 400. PNG, JPEG και WebP μπορούν να ζητηθούν με `output_format`.
 
-Αυτή η ενσωμάτωση υποστηρίζει δημιουργία εικόνων από κείμενο και όχι επεξεργασία εικόνων αναφοράς. Η έξοδος του Vertex κανονικοποιείται σε `data[].b64_json`· το `response_format: "url"` επιστρέφει ένα upstream
-HTTPS URL ή ένα URL δεδομένων base64 όταν είναι διαθέσιμα μόνο τα byte της εικόνας. Οι κενές ή φιλτραρισμένες έξοδοι επιστρέφουν σφάλμα αντί για επιτυχή απόκριση χωρίς περιεχόμενο. Η πρόσβαση στα μοντέλα εξαρτάται από τον λογαριασμό ZenMux.
-Δείτε το [Vertex API του ZenMux](https://docs.zenmux.ai/api/vertexai/generate-images) και το
-[OpenAI Images API](https://docs.zenmux.ai/api/openai/generate-an-image).
+Αυτή η ενοποίηση υποστηρίζει τη δημιουργία κειμένου σε εικόνα και όχι επεξεργασία εικόνας αναφοράς. Η έξοδος Vertex κανονικοποιείται σε `data[].b64_json`. `response_format: "url"` επιστρέφει ένα upstream HTTPS URL ή ένα base64 data URL όταν είναι διαθέσιμα μόνο byte εικόνας. Οι έξοδοι Empty/filtered επιστρέφουν ένα σφάλμα αντί για μια κενή επιτυχία. Η πρόσβαση μοντέλου εξαρτάται από τον λογαριασμό ZenMux. Δείτε [ZenMux's Vertex API](https://docs.zenmux.ai/api/vertexai/generate-images) και [OpenAI Images API](https://docs.zenmux.ai/api/openai/generate-an-image).
+
+Μια σύνδεση εισόδου Microsoft 365 Copilot εξυπηρετεί `copilot-m365-web/m365-copilot-image` μέσω του ενσωματωμένου εργαλείου εικόνας του Copilot: μία στροφή Copilot ανά εικόνα (`n` 1–4), `size` που κατευθύνει μόνο τον προσανατολισμό και εικόνες που επιστρέφονται ενσωματωμένα (`b64_json` ή URL δεδομένων για `response_format: "url"`). Δείτε [Microsoft 365 Copilot](../providers/COPILOT-M365.md#image-generation).
 
 ```bash
-# Λίστα όλων των μοντέλων εικόνας
+# List all image models
 GET /v1/images/generations
 ```
 
@@ -828,17 +819,19 @@ POST /v1/providers/{provider}/images/generations
 
 ---
 
-## API αναζήτησης
+## Αναζήτηση API
 
-Αφαίρεση αφαίρεσης παρόχου Web/αναζήτησης (Tavily, Brave, Exa, Serper κ.λπ.).
+Αφαίρεση παρόχου Web/search (Tavily, Brave, Exa, Serper, κ.λπ.).
 
-| Μέθοδος | Διαδρομή               | Περιγραφή                                                                                                                  |
-| ------- | ---------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| GET     | `/v1/search`           | Λίστα διαμορφωμένων παρόχων αναζήτησης + δυνατοτήτων                                                                       |
-| POST    | `/v1/search`           | Εκτέλεση ερωτήματος αναζήτησης — το σώμα επικυρώνεται από το `v1SearchSchema`, υποστηρίζει προσωρινή αποθήκευση/συγχώνευση |
-| GET     | `/v1/search/analytics` | Στατιστικά επισκέψεων/καθυστέρησης/προσωρινής αποθήκευσης ανά πάροχο                                                       |
+| Μέθοδος | Μονοπάτι               | Περιγραφή                                                                                                |
+| ------- | ---------------------- | -------------------------------------------------------------------------------------------------------- |
+| GET     | `/v1/search`           | Καταχωρίστε τις δυνατότητες + διαμορφωμένων παρόχων αναζήτησης                                           |
+| POST    | `/v1/search`           | Εκτελέστε ένα ερώτημα αναζήτησης — σώμα επικυρωμένο από `v1SearchSchema`, υποστηρίζει caching/coalescing |
+| GET     | `/v1/search/analytics` | Στατιστικά hit/latency/cache ανά πάροχο                                                                  |
 
-**Έλεγχος ταυτότητας:** Κλειδί API Bearer (`extractApiKey` + `isValidApiKey`). Η πολιτική αναζήτησης επιβάλλεται μέσω του `enforceApiKeyPolicy`.
+**Auth:** Κλειδί API φορέα (`extractApiKey` + `isValidApiKey`). Η πολιτική αναζήτησης επιβάλλεται μέσω `enforceApiKeyPolicy`.
+
+**Αυτόματη επιλογή:** χωρίς `provider`, ο φθηνότερος πάροχος με διαμορφωμένη σύνδεση τρέχει πρώτα και ο επόμενος φθηνότερος είναι το failover. Οι δωρεάν πάροχοι τελευταίας λύσης (`duckduckgo-free`) χρησιμοποιούνται μόνο όταν δεν έχει ρυθμιστεί τίποτα άλλο. Ένας αυτο-φιλοξενούμενος SearXNG μετράει ως διαμορφωμένος μόλις η σύνδεσή του αποθηκεύσει ένα πραγματικό `baseUrl` (όχι την προεπιλεγμένη `http://localhost:8888/search`): στη συνέχεια κατατάσσεται ως πάροχος $0 μπροστά από αυτούς με κλειδί, με τον φθηνότερο πάροχο με κλειδί ως failover, ακόμη και όταν `baseUrl` SearXNG απαντά σε 400, 401, 403 ή 40 `http(s)` σημεία URL Η διεύθυνση σύννεφο μεταδεδομένων δεν μετράει. Μια σύνδεση SearXNG που αποθηκεύει ένα διακριτικό κατατάσσεται με αυτόν τον τρόπο μόνο πάνω από `https://` ή loopback `http://`. Μέσω απομακρυσμένου απλού `http://` δεν είναι ποτέ ανακατεύθυνση και παραμένει η τελευταία λύση, χρησιμοποιείται μόνο όταν δεν έχει ρυθμιστεί άλλος πάροχος ή όταν ζητηθεί ονομαστικά, επομένως στέλνει το διακριτικό σε καθαρό κείμενο σε αυτές τις δύο περιπτώσεις.
 
 ### `provider_options` των Exa και Tavily
 
@@ -1007,30 +1000,28 @@ key που τα δημιούργησε. Μια επανάληψη της οπο�
 
 ---
 
-## Αυτοεξυπηρέτηση χρήσης (`/api/usage/om-usage`)
+## Χρήση αυτοεξυπηρέτησης (`/api/usage/om-usage`)
 
-Οποιοδήποτε API key μπορεί να διαβάσει τη **δική του** χρήση και τα quota — χωρίς authentication διαχείρισης. Αυτό είναι το endpoint που χρησιμοποιεί ένας
-client (CLI, το panel του OmniCopilot) για να εμφανίσει στον κάτοχο ενός key τη δαπάνη του.
+Οποιοδήποτε κλειδί API μπορεί να διαβάσει **δικό του** χρήση και ποσοστώσεις — χωρίς διαχείριση auth. Αυτό είναι το τελικό σημείο που χρησιμοποιεί ένας πελάτης (CLI, ο πίνακας OmniCopilot ) για να δείξει στον κάτοχο του κλειδιού τις δαπάνες του.
 
 ```bash
-# Μορφή κειμένου (το ιστορικό contract — απλό κείμενο για terminal)
+# Text form (the historical contract — plain text for a terminal)
 curl -H "Authorization: Bearer <your-api-key>" \
   http://localhost:20128/api/usage/om-usage
 
-# Δομημένη μορφή — αυτό που καταναλώνει ένα UI
+# Structured form — what a UI consumes
 curl -H "Authorization: Bearer <your-api-key>" \
   "http://localhost:20128/api/usage/om-usage?format=json"
 ```
 
-Το key πρέπει να έχει ενεργοποιημένο το **`allowUsageCommand`** (απενεργοποιημένο από προεπιλογή — ο
-διαχειριστής API key του dashboard το ενεργοποιεί ξεχωριστά για κάθε key). Χωρίς αυτό, το endpoint επιστρέφει `403`.
+Το κλειδί πρέπει να έχει **`allowUsageCommand`** ενεργοποιημένο (απενεργοποιημένο από προεπιλογή — ο διαχειριστής κλειδιών API του πίνακα ελέγχου το εναλλάσσει ανά κλειδί). Χωρίς αυτό το τελικό σημείο απαντά `403`.
 
-Το `?format=json` επιστρέφει ένα διακριτό shape, ώστε ένας caller να μην διαβάζει ποτέ ένα πεδίο δεδομένων από μια απόρριψη. Σε περίπτωση επιτυχίας:
+`?format=json` επιστρέφει ένα διακριτικό σχήμα, έτσι ο καλών δεν διαβάζει ποτέ ένα πεδίο δεδομένων από μια άρνηση. Για την επιτυχία:
 
 ```jsonc
 {
   "allowed": true,
-  // υπάρχει μόνο όταν το key έχει επιλέξει όρια χρήσης ανά key (USD ανά ημέρα/εβδομάδα):
+  // present only when the key opted into per-key usage limits (daily/weekly/5-hour USD):
   "personal": {
     "dailySpentUsd": 1.25,
     "dailyLimitUsd": 5,
@@ -1039,9 +1030,9 @@ curl -H "Authorization: Bearer <your-api-key>" \
     "weeklyLimitUsd": 20,
     "weeklyResetAtIso": "…" /* … */,
   },
-  // το snapshot quota του επιλεγμένου provider ή null όταν δεν έχει αποθηκευτεί ακόμη τίποτα:
+  // the selected provider quota snapshot, or null when nothing is cached yet:
   "provider": { "connectionId": "…", "provider": "claude", "plan": "…", "quotas": {/* … */} },
-  // το snapshot κάθε connection, ώστε ένα UI να μπορεί να αποδώσει πολλούς providers δίπλα-δίπλα:
+  // every connection's snapshot, so a UI can render several providers side by side:
   "providers": [
     { "connectionId": "…", "provider": "claude" /* … */ },
     { "provider": "codex" /* … */ },
@@ -1049,13 +1040,9 @@ curl -H "Authorization: Bearer <your-api-key>" \
 }
 ```
 
-Σε περίπτωση απόρριψης (`401` μη έγκυρο key / `403` μη επιτρεπτό), η ίδια διαδρομή επιστρέφει
-`{ "allowed": false, "error": { "message": "…" } }` — ένα `personal`/`provider`
-που υπάρχει αλλά είναι κενό (το key επιτρέπεται, δεν έχει διαγνωστεί ακόμη τίποτα)
-είναι διαφορετική κατάσταση από μια απόρριψη, και μόνο η μορφή JSON τις διακρίνει.
+Σε περίπτωση άρνησης (`401` κακό κλειδί / `403` δεν επιτρέπεται) η ίδια διαδρομή επιστρέφει `{ "allowed": false, "error": { "message": "…" } }` — ένα παρόν-αλλά-άδειο `personal`/`provider` (το κλειδί επιτρέπεται, τίποτα δεν έχει μάθει ακόμα) είναι μια διαφορετική κατάσταση από μια άρνηση και μόνο η φόρμα JSON τα διακρίνει.
 
-**Auth:** το Bearer API key του ίδιου του caller, επικυρωμένο με `isValidApiKey` — αυτή **δεν** είναι η
-επιφάνεια διαχείρισης (`/api/keys/…`), η οποία παραμένει προστατευμένη από το `requireManagementAuth`.
+**Auth:** το κλειδί Bearer API του καλούντος, επικυρωμένο με `isValidApiKey` — αυτό είναι _not_ η επιφάνεια διαχείρισης (`/api/keys/…`), η οποία παραμένει πίσω από `requireManagementAuth`.
 
 ### Ακατέργαστα ποσοστά quota έναντι ποσοστών προσαρμοσμένων στο cutoff
 
@@ -1300,40 +1287,41 @@ https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-cred
 | `/api/usage/model-latency-stats` | GET             | Κυλιόμενη συγκεντρωτική καθυστέρηση ανά πάροχο/μοντέλο (avg/p50/p95/p99, ποσοστό επιτυχίας)· φίλτρα: `windowHours`/`minSamples`/`maxRows`/`provider`/`model` (#6873)                                                                                                                                                                                               |
 | `/api/usage/cache-health`        | GET             | Σύνοψη της κατάστασης της προσωρινής μνήμης προτροπών στο `call_logs` — αναλογία εγγραφών/αναγνώσεων, κατανομή μεγέθους εγγραφών p50/p90/p99, συγκέντρωση μεγάλων εγγραφών, ανάλυση ανά μοντέλο και ετυμηγορία `healthy`/`degraded`/`thrash`/`no-data`· παράμετροι ερωτήματος `range` (`1h`\|`24h`\|`7d`\|`30d`, προεπιλογή `24h`) και προαιρετικό `model` (#8827) |
 
-### Δικαιώματα κλειδιών API
+### Δικαιώματα κλειδιού API
 
-Το `PATCH /api/keys/{id}` ενημερώνει τα δικαιώματα ενός υπάρχοντος κλειδιού. Όπως κάθε διαδρομή `/api/keys*`, απαιτεί εξουσιοδότηση διαχείρισης (δείτε [Έλεγχος ταυτότητας διαχείρισης](../guides/MANAGEMENT-AUTH.md)), όχι κλειδί inference. Αποστείλετε μόνο τα πεδία που θέλετε να αλλάξετε· ένα αίτημα χωρίς κανένα από αυτά απορρίπτεται με το `No valid fields to update`. Τα αποδεκτά πεδία ορίζονται από το `updateKeyPermissionsSchema` στο `src/shared/validation/schemas/keys.ts`.
+`PATCH /api/keys/{id}` ενημερώνει τα δικαιώματα ενός υπάρχοντος κλειδιού. Όπως κάθε διαδρομή `/api/keys*` χρειάζεται εξουσιοδότηση διαχείρισης (δείτε [Έλεγχος ταυτότητας διαχείρισης](../guides/MANAGEMENT-AUTH.md) ), όχι κλειδί συμπερασμάτων. Στείλτε μόνο τα πεδία που θέλετε να αλλάξετε. ένα αίτημα με κανένα από αυτά δεν απορρίπτεται με `No valid fields to update`. Τα αποδεκτά πεδία ορίζονται από `updateKeyPermissionsSchema` στο `src/shared/validation/schemas/keys.ts`.
 
-| Πεδίο                                       | Τύπος                                                               | Σημειώσεις                                                                                                                                                                    |
-| ------------------------------------------- | ------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `name`                                      | συμβολοσειρά, 1-200 χαρακτήρες                                      |                                                                                                                                                                               |
-| `isActive`                                  | λογική τιμή                                                         |                                                                                                                                                                               |
-| `isBanned`                                  | λογική τιμή                                                         |                                                                                                                                                                               |
-| `expiresAt`                                 | ημερομηνία και ώρα ISO 8601 ή `null`                                | Το `null` καταργεί τη λήξη                                                                                                                                                    |
-| `modelAccessMode`                           | `all` \| `restricted`                                               | Το `allowedModels` πρέπει να είναι κενό όταν η λειτουργία είναι `all`                                                                                                         |
-| `allowedModels`, `blockedModels`            | πίνακας συμβολοσειρών, έως 1000                                     |                                                                                                                                                                               |
-| `allowedCombos`                             | πίνακας συμβολοσειρών, έως 500                                      | Καθορίζει ποια combos μπορεί να καλεί το κλειδί· τα άμεσα μοντέλα διέπονται από τα `modelAccessMode` / `allowedModels`                                                        |
-| `connectionAccessMode`                      | `all` \| `restricted`                                               | Το `allowedConnections` πρέπει να είναι μη κενό όταν είναι `restricted` και κενό όταν είναι `all`                                                                             |
-| `allowedConnections`                        | πίνακας UUID, έως 100                                               |                                                                                                                                                                               |
-| `allowAutoCombos`                           | λογική τιμή                                                         | Το `false` απορρίπτει αιτήματα για μοντέλα `auto/*` με αυτό το κλειδί· τα κλειδιά που δεν το ορίζουν ποτέ επιτρέπονται                                                        |
-| `catalogScope`                              | `all` \| `combos` \| `models`                                       | Τι εμφανίζει το `GET /v1/models` για αυτό το κλειδί (μόνο combos, μόνο μοντέλα ή και τα δύο)· δεν αλλάζει τι μπορεί να καλέσει το κλειδί                                      |
-| `forcedModel`                               | συμβολοσειρά έως 300 χαρακτήρες ή `null`                            | Δρομολογεί τα αιτήματα συνομιλίας σε αυτό το μοντέλο/combo, με προτεραιότητα έναντι των `X-Route-Model` και `body.model`· εξακολουθούν να ισχύουν οι περιορισμοί του κλειδιού |
-| `noLog`, `autoResolve`                      | λογική τιμή                                                         |                                                                                                                                                                               |
-| `throttleDelayMs`                           | ακέραιος, 0-300000                                                  |                                                                                                                                                                               |
-| `maxSessions`                               | ακέραιος, 0-10000                                                   |                                                                                                                                                                               |
-| `rateLimits`                                | πίνακας από `{ limit, window }` (θετικοί ακέραιοι, έως 50) ή `null` | Το `null` καταργεί τα όρια                                                                                                                                                    |
-| `accessSchedule`                            | αντικείμενο προγραμματισμού ή `null`                                | Το `null` καταργεί τον προγραμματισμό                                                                                                                                         |
-| `scopes`                                    | πίνακας συμβολοσειρών, έως 32                                       |                                                                                                                                                                               |
-| `allowedEndpoints`                          | πίνακας συμβολοσειρών, έως 20                                       |                                                                                                                                                                               |
-| `streamDefaultMode`                         | `legacy` \| `json`                                                  |                                                                                                                                                                               |
-| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                | Δείτε [Παράκαμψη cache ανά κλειδί](#per-key-cache-bypass)                                                                                                                     |
-| `compressionEnabled`                        | λογική τιμή                                                         |                                                                                                                                                                               |
-| `codexServiceMode`                          | μία από τις λειτουργίες υπηρεσίας του Codex                         |                                                                                                                                                                               |
-| `disableNonPublicModels`                    | boolean                                                             |                                                                                                                                                                               |
-| `allowUsageCommand`                         | boolean                                                             |                                                                                                                                                                               |
-| `usageLimitEnabled`                         | boolean                                                             |                                                                                                                                                                               |
-| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | number >= 0 or `null`                                               |                                                                                                                                                                               |
-| `chaosModeEnabled`                          | boolean                                                             |                                                                                                                                                                               |
+| Πεδίο                                       | Τύπος                                                               | Σημειώσεις                                                                                                                                                                                                                                                                                               |
+| ------------------------------------------- | ------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`                                      | συμβολοσειρά, 1-200 χαρακτήρες                                      |                                                                                                                                                                                                                                                                                                          |
+| `isActive`                                  | λογική τιμή                                                         |                                                                                                                                                                                                                                                                                                          |
+| `isBanned`                                  | λογική τιμή                                                         |                                                                                                                                                                                                                                                                                                          |
+| `expiresAt`                                 | ημερομηνία και ώρα ISO 8601 ή `null`                                | Το `null` καταργεί τη λήξη                                                                                                                                                                                                                                                                               |
+| `modelAccessMode`                           | `all` \| `restricted`                                               | Το `allowedModels` πρέπει να είναι κενό όταν η λειτουργία είναι `all`                                                                                                                                                                                                                                    |
+| `allowedModels`, `blockedModels`            | συστοιχία χορδών, έως 1000                                          |                                                                                                                                                                                                                                                                                                          |
+| `allowedCombos`                             | πίνακας συμβολοσειρών, έως 500                                      | Καθορίζει ποια combos μπορεί να καλεί το κλειδί· τα άμεσα μοντέλα διέπονται από τα `modelAccessMode` / `allowedModels`                                                                                                                                                                                   |
+| `connectionAccessMode`                      | `all` \| `restricted`                                               | Το `allowedConnections` πρέπει να είναι μη κενό όταν είναι `restricted` και κενό όταν είναι `all`                                                                                                                                                                                                        |
+| `allowedConnections`                        | πίνακας UUID, έως 100                                               |                                                                                                                                                                                                                                                                                                          |
+| `allowAutoCombos`                           | λογική τιμή                                                         | Το `false` απορρίπτει αιτήματα για μοντέλα `auto/*` με αυτό το κλειδί· τα κλειδιά που δεν το ορίζουν ποτέ επιτρέπονται                                                                                                                                                                                   |
+| `catalogScope`                              | `all` \| `combos` \| `models`                                       | Τι εμφανίζει το `GET /v1/models` για αυτό το κλειδί (μόνο combos, μόνο μοντέλα ή και τα δύο)· δεν αλλάζει τι μπορεί να καλέσει το κλειδί                                                                                                                                                                 |
+| `forcedModel`                               | συμβολοσειρά έως 300 χαρακτήρες ή `null`                            | Δρομολογεί τα αιτήματα συνομιλίας σε αυτό το μοντέλο/combo, με προτεραιότητα έναντι των `X-Route-Model` και `body.model`· εξακολουθούν να ισχύουν οι περιορισμοί του κλειδιού                                                                                                                            |
+| `noLog`, `autoResolve`                      | boolean                                                             |                                                                                                                                                                                                                                                                                                          |
+| `throttleDelayMs`                           | ακέραιος, 0-300000                                                  |                                                                                                                                                                                                                                                                                                          |
+| `maxSessions`                               | ακέραιος, 0-10000                                                   |                                                                                                                                                                                                                                                                                                          |
+| `rateLimits`                                | πίνακας από `{ limit, window }` (θετικοί ακέραιοι, έως 50) ή `null` | Το `null` καταργεί τα όρια                                                                                                                                                                                                                                                                               |
+| `accessSchedule`                            | αντικείμενο προγραμματισμού ή `null`                                | Το `null` καταργεί τον προγραμματισμό                                                                                                                                                                                                                                                                    |
+| `scopes`                                    | πίνακας συμβολοσειρών, έως 32                                       |                                                                                                                                                                                                                                                                                                          |
+| `allowedEndpoints`                          | πίνακας συμβολοσειρών, έως 20                                       |                                                                                                                                                                                                                                                                                                          |
+| `streamDefaultMode`                         | `legacy` \| `json`                                                  |                                                                                                                                                                                                                                                                                                          |
+| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                | Δείτε [Παράκαμψη cache ανά κλειδί](#per-key-cache-bypass)                                                                                                                                                                                                                                                |
+| `compressionEnabled`                        | λογική τιμή                                                         |                                                                                                                                                                                                                                                                                                          |
+| `codexServiceMode`                          | μία από τις λειτουργίες υπηρεσίας του Codex                         |                                                                                                                                                                                                                                                                                                          |
+| `disableNonPublicModels`                    | boolean                                                             |                                                                                                                                                                                                                                                                                                          |
+| `allowUsageCommand`                         | boolean                                                             |                                                                                                                                                                                                                                                                                                          |
+| `usageLimitEnabled`                         | boolean                                                             |                                                                                                                                                                                                                                                                                                          |
+| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | αριθμός >= 0 ή `null`                                               |                                                                                                                                                                                                                                                                                                          |
+| `fiveHourUsageLimitUsd`                     | αριθμός >= 0 ή `null`                                               | Κυλιόμενος προϋπολογισμός USD 5 ωρών, που επιβάλλεται όπως τα ημερήσια και εβδομαδιαία όρια (`usageLimitEnabled`, `UNPRICED_USAGE_BUDGET_POLICY`). `retry-after` είναι όταν η παλαιότερη δαπάνη στο παράθυρο γερνάει, κάτι που μπορεί να αφήσει ένα κλειδί πολύ πάνω από το όριο του ακόμα αποκλεισμένο. |
+| `chaosModeEnabled`                          | boolean                                                             |                                                                                                                                                                                                                                                                                                          |
 
 ```bash
 curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
@@ -1383,6 +1371,14 @@ curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
 | `/api/modality-bridge/stats`         | GET        | Αποθηκευμένα στη μνήμη `attempts`, επιτυχίες/`bridged`, αποτυχίες, επιτυχίες προσωρινής μνήμης, `totalLatencyMs`, `latencySamples`, `averageLatencyMs` σε δείγματα και χρόνος τελευταίας χρήσης (επαναφέρεται κατά την επανεκκίνηση· έλεγχος ταυτότητας διαχείρισης)                                                                                                                                                                        |
 | `/api/modality-bridge/video/runtime` | GET        | Αυστηρός έλεγχος αξιόπιστου loopback πριν από τον έλεγχο ταυτότητας/την ανίχνευση διαχείρισης· απολυμασμένη διαθεσιμότητα και εκδόσεις FFmpeg/ffprobe (no-store)                                                                                                                                                                                                                                                                            |
 | `/api/modality-bridge/video/extract` | POST       | Εσωτερικός, ελεγμένος με ταυτότητα broker byte αξιόπιστου loopback· είσοδος 50 MiB, περιορισμένη ουρά/έξοδος 32 MiB, χωρητικότητα `503`, αποσύνδεση `499`, προθεσμία `504`· δεν αποτελεί δημόσιο API μεταφόρτωσης                                                                                                                                                                                                                           |
+
+### Ανασκόπηση καρέ βίντεο
+
+`GET /api/v1/video-bridge/drilldown` διαβάζει μια αδιαφανή λαβή συνδεδεμένη με τον ενοικιαστή που επιστράφηκε σε `x-omniroute-video-drilldown` μετά από ένα αίτημα με τη ρητή συναίνεση του Video Bridge. Τόσο η ανάγνωση όσο και `DELETE` απαιτούν πάντα ένα έγκυρο κλειδί API και την ανεξάρτητη άδεια `modalityBridgeVideoDrilldownRemoteEnabled` του χειριστή. Η διατήρηση της παραγωγής απαιτεί επιπλέον `modalityBridgeVideoDrilldownEnabled` και αυστηρό `drilldown: true` ανά μέρος. Εάν το κλειδί έχει μια μη κενή λίστα επιτρεπόμενων τελικών σημείων, πρέπει να περιλαμβάνει `video` τόσο για GET όσο και για DELETE, είτε ο καλών χρησιμοποιεί `/v1` είτε `/api/v1`.
+
+ερώτημα GET : απαιτείται `handle`; προαιρετικό `variant` (`preview`, `standard`, `detail`), `limit` (1–8, κληρονομικό `frames` είναι αποδεκτό αλλά δεν μπορεί να συνδυαστεί με `limit`), `page` με βάση το μηδέν και `start`/`end` δευτερόλεπτα. Όταν παρέχονται και τα δύο όρια εστίασης, `end` πρέπει να είναι μεγαλύτερο από `start`. Τα κλειδιά ερωτήματος Duplicate/unknown απορρίπτονται. Οι επιτυχείς απαντήσεις περιέχουν `derivation`, `durationSeconds`, `frames`, `hasMore`, `page`, `variant` και προαιρετικά `focusWindow`. Το no-store JSON περιορίζεται στα 32 MiB συμπεριλαμβανομένου του Base64. Η υπερμεγέθης παραγωγή επιστρέφει 413; ζητήστε λιγότερα καρέ.
+
+`DELETE /api/v1/video-bridge/drilldown?handle=...` επιστρέφει `{ "removed": 0|1 }`. Άγνωστες, ληγμένες και διασταυρούμενες GETs δεν διακρίνονται 404 απαντήσεις. Το cross-key DELETE δεν μπορεί να αφαιρέσει την καταχώριση του κατόχου. Η απενεργοποιημένη πρόσβαση επιστρέφει το 403, ο έλεγχος ταυτότητας missing/invalid 401, τα μη έγκυρα ερωτήματα 400, η ακύρωση 499 και τα προσωρινά σφάλματα 503. Οι λαβές είναι τοπικές στη διαδικασία, λήγουν μετά από δέκα λεπτά και δεν επιβιώνουν από επανεκκίνηση. Οι νέες λαβές χρησιμοποιούν `v1.` συν ένα τυχαίο διακριτικό Base64URL 32 byte. διατηρούνται μόνο διακριτικά κατακερματισμένα. Τα παλαιού τύπου διακριτικά 64-hex παραμένουν συντακτικά αναγνώσιμα για συμβατότητα. Δείτε [τα προστατευτικά κιγκλιδώματα Video Bridge](../security/GUARDRAILS.md#video-bridge-videobridgets-videobridgepipelinets) για λεπτομέρειες συναίνεσης, ποσοστώσεων και παραλλαγών.
 
 ### Δημιουργία αντιγράφων ασφαλείας & Εξαγωγή/Εισαγωγή
 
@@ -1490,19 +1486,19 @@ curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
 
 Αυτά τα τελικά σημεία αντικατοπτρίζουν τη μορφή API του Gemini για πελάτες που αναμένουν εγγενή συμβατότητα με το Gemini SDK.
 
-### Εσωτερικά API / API συστήματος
+### Εσωτερικό / Σύστημα APIs
 
-| Endpoint                 | Μέθοδος | Περιγραφή                                                                 |
-| ------------------------ | ------- | ------------------------------------------------------------------------- |
-| `/api/init`              | GET     | Έλεγχος αρχικοποίησης εφαρμογής (χρησιμοποιείται κατά την πρώτη εκτέλεση) |
-| `/api/tags`              | GET     | Ετικέτες μοντέλων συμβατές με το Ollama (για πελάτες Ollama)              |
-| `/api/restart`           | POST    | Έναρξη ομαλής επανεκκίνησης διακομιστή                                    |
-| `/api/shutdown`          | POST    | Έναρξη ομαλού τερματισμού διακομιστή                                      |
-| `/api/system/env/repair` | POST    | Επιδιόρθωση μεταβλητών περιβάλλοντος παρόχου OAuth                        |
-| `/api/system/version`    | GET     | Τρέχουσα/τελευταία έκδοση, κατάσταση ενημέρωσης, κανάλι έκδοσης           |
-| `/api/system/version`    | POST    | Έναρξη ενημέρωσης με επίγνωση ανάπτυξης στην τελευταία έκδοση             |
+| Τελικό σημείο            | Μέθοδος | Περιγραφή                                                             |
+| ------------------------ | ------- | --------------------------------------------------------------------- |
+| `/api/init`              | GET     | Έναρξη υπηρεσιών συγχρονισμού παρασκηνίου (διαχείριση εξουσιοδότησης) |
+| `/api/tags`              | GET     | Ετικέτες μοντέλου συμβατές με Ollama (για πελάτες Ollama )            |
+| `/api/restart`           | POST    | Ενεργοποίηση χαριτωμένης επανεκκίνησης διακομιστή                     |
+| `/api/shutdown`          | POST    | Ενεργοποιήστε τον χαριτωμένο τερματισμό του διακομιστή                |
+| `/api/system/env/repair` | POST    | Επιδιόρθωση μεταβλητών περιβάλλοντος παρόχου OAuth                    |
+| `/api/system/version`    | GET     | Έκδοση Current/latest, κατάσταση ενημέρωσης, κανάλι κυκλοφορίας       |
+| `/api/system/version`    | POST    | Ξεκινήστε μια ενημέρωση με γνώση ανάπτυξης στην πιο πρόσφατη έκδοση   |
 
-> **Σημείωση:** Αυτά τα τελικά σημεία χρησιμοποιούνται εσωτερικά από το σύστημα ή για συμβατότητα με πελάτες Ollama. Συνήθως δεν καλούνται από τελικούς χρήστες.
+> **Σημείωμα:** Αυτά τα τελικά σημεία χρησιμοποιούνται εσωτερικά από το σύστημα ή για συμβατότητα πελάτη Ollama. Συνήθως δεν καλούνται από τους τελικούς χρήστες.
 
 ### Επιδιόρθωση περιβάλλοντος OAuth _(v3.6.1+)_
 

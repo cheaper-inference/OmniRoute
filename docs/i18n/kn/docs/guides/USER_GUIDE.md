@@ -361,19 +361,19 @@ API ಕೀ: [ಡ್ಯಾಶ್ಬೋರ್ಡ್ನಿಂದ]
 ```bash
 npm install -g omniroute
 
-# ಕಾನ್ಫಿಗ್ ಡೈರೆಕ್ಟರಿಯನ್ನು ರಚಿಸಿ
+# Create config directory
 mkdir -p ~/.omniroute
 
-# .env ಫೈಲ್ ರಚಿಸಿ (.env.example ನೋಡಿ)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# ಸರ್ವರ್ ಪ್ರಾರಂಭಿಸಿ
+# Start server
 omniroute
-# ಅಥವಾ ಕಸ್ಟಮ್ ಪೋರ್ಟ್ನೊಂದಿಗೆ:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI ಸ್ವಯಂಚಾಲಿತವಾಗಿ `~/.omniroute/.env` ಅಥವಾ `./.env` ನಿಂದ `.env` ಅನ್ನು ಲೋಡ್ ಮಾಡುತ್ತದೆ.
+CLI ಸ್ವಯಂಚಾಲಿತವಾಗಿ `~/.omniroute/.env` ಅಥವಾ `./.env` ನಿಂದ `.env` ಲೋಡ್ ಮಾಡುತ್ತದೆ. ವರ್ಕಿಂಗ್ ಡೈರೆಕ್ಟರಿಯಲ್ಲಿನ `./.env` ಕೀಲಿಗಳ ಕಿರು ಅನುಮತಿ ಪಟ್ಟಿಯನ್ನು ಮಾತ್ರ ಹೊಂದಿಸಬಹುದು (ಪೋರ್ಟ್ಗಳು, `REQUIRE_API_KEY`, ಲೊಕೇಲ್ ಮತ್ತು ಬಣ್ಣ ಸೆಟ್ಟಿಂಗ್ಗಳು); ಎಲ್ಲವನ್ನೂ `~/.omniroute/.env` ನಲ್ಲಿ ಇರಿಸಿ. [CLI ಉಡಾವಣಾ ಒಪ್ಪಂದಗಳನ್ನು](CLI-LAUNCH-CONTRACTS.md#working-directory-env) ನೋಡಿ.
 
 ### ಟ್ರೇ ಮೋಡ್
 

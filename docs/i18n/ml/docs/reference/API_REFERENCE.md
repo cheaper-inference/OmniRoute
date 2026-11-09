@@ -367,37 +367,22 @@ Content-Type: application/json
 }
 ```
 
-ലഭ്യമായ ദാതാക്കളിൽ OpenAI (GPT Image 2), xAI (Grok Image), Together AI (FLUX), Fireworks AI, Nebius (FLUX), Hyperbolic, NanoBanana, **OpenRouter**, **ZenMux**, SD WebUI (local), ComfyUI (local) എന്നിവ ഉൾപ്പെടുന്നു.
+ലഭ്യമായ ദാതാക്കളിൽ OpenAI (GPT ഇമേജ് 2), xAI (Grok ഇമേജ്), Together AI (FLUX), Fireworks AI, Nebius (FLUX), ഹൈപ്പർബോളിക്, NanoBanana,**OpenRouter** ,**ZenMux** , SD WebUI (ലോക്കൽ), ComfyUI (ലോക്കൽ).
 
-`n` `data[]`-ൽ `n` ചിത്രങ്ങൾ നൽകുന്നു. അപ്സ്ട്രീം API ഓരോ കോളിലും ഒരു ചിത്രം മാത്രം നൽകുന്ന ദാതാക്കൾക്ക്
-(Black Forest Labs, Stability AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik,
-NVIDIA NIM, Cloudflare Workers AI) `n` വ്യത്യസ്ത അപ്സ്ട്രീം കോളുകൾ നടത്തുന്നു; ഒരേസമയം പരമാവധി 4 എണ്ണം. ഒരു
-സ്ഥിരമായ `seed` കോളിന്റെ ഇൻഡക്സ് ഉപയോഗിച്ച് ഓഫ്സെറ്റ് ചെയ്യുന്നു (`seed`, `seed + 1`, …), അതിനാൽ ചിത്രങ്ങൾ
-വ്യത്യസ്തമായിരിക്കും, എന്നാൽ പുനർനിർമ്മിക്കാവുന്നതായിരിക്കും. `n`-ന്റെ പരമാവധി 10 ആണ്. ഏതെങ്കിലും കോളിൽ പരാജയം
-സംഭവിച്ചാൽ മുഴുവൻ അഭ്യർത്ഥനയും പരാജയപ്പെടും. ഫാൻ-ഔട്ട് ഫോർമാറ്റുകളുടെ പട്ടിക
-`open-sse/handlers/imageGeneration/fanOut.ts`-ലെ `SINGLE_IMAGE_FANOUT_FORMATS` ആണ്.
+`n` `data[]` ൽ `n` ഇമേജുകൾ നൽകുന്നു. ഓരോ കോളിനും ഒരു ചിത്രം നൽകുന്ന അപ്സ്ട്രീം API ദാതാക്കൾക്ക് (Black Forest Labs, Stability AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik, NVIDIA NIM, Cloudflare Workers AI) `n` പ്രത്യേക അപ്സ്ട്രീം കോളുകൾ ലഭിക്കും, പരമാവധി 4 ഫ്ലൈറ്റിൽ. ഒരു നിശ്ചിത `seed` കോൾ സൂചിക (`seed`, `seed + 1`, …) വഴി ഓഫ്സെറ്റ് ചെയ്യുന്നു, അതിനാൽ ചിത്രങ്ങൾ വ്യത്യസ്തമാണെങ്കിലും പുനർനിർമ്മിക്കാവുന്നതായിരിക്കും. `n` എന്നതിൻ്റെ പരിധി 10 ആണ്. ഏതെങ്കിലും കോൾ പരാജയപ്പെടുകയാണെങ്കിൽ അഭ്യർത്ഥന മൊത്തത്തിൽ പരാജയപ്പെടും. ഫാൻ ഔട്ട് ഫോർമാറ്റുകളുടെ ലിസ്റ്റ് `open-sse/handlers/imageGeneration/fanOut.ts` ൽ `SINGLE_IMAGE_FANOUT_FORMATS` ആണ്.
 
-ZenMux നിലവിലുള്ള API-key കണക്ഷൻ വീണ്ടും ഉപയോഗിക്കുകയും `zenmux/` അല്ലെങ്കിൽ `zm/` പ്രിഫിക്സുകൾ സ്വീകരിക്കുകയും ചെയ്യുന്നു:
+ZenMux നിലവിലുള്ള API-കീ കണക്ഷൻ വീണ്ടും ഉപയോഗിക്കുകയും `zenmux/` അല്ലെങ്കിൽ `zm/` പ്രിഫിക്സുകൾ സ്വീകരിക്കുകയും ചെയ്യുന്നു:
 
-- `zenmux/openai/gpt-image-2` ZenMux-ന്റെ OpenAI Images API ഉപയോഗിക്കുന്നു. ഓപ്ഷനുകളിൽ `size`,
-  `quality`, `n`, `output_format`, `output_compression`, `background`, `response_format` എന്നിവ ഉൾപ്പെടുന്നു.
-- `zm/meta/muse-image-1.0` പോലുള്ള മറ്റ് പബ്ലിഷർമാർ ZenMux-ന്റെ Vertex AI `:predict`
-  എൻഡ്പോയിന്റ് ഉപയോഗിക്കുന്നു. `n` `sampleCount`-ലേക്കും, `aspect_ratio` `aspectRatio`-ലേക്കും, `image_size`
-  (`1K`, `2K`, `4K`) `sampleImageSize`-ലേക്കും മാപ്പ് ചെയ്യുന്നു. ഒരു പിക്സൽ `size` ഒരു ആസ്പെക്റ്റ് റേഷ്യോ മാത്രം
-  നൽകുന്നു; പിക്സൽ അളവുകൾ ഉറപ്പുനൽകുന്നില്ല. പിന്തുണയ്ക്കുന്ന റേഷ്യോകളും റെസല്യൂഷനുകളും എണ്ണങ്ങളും മോഡലിനെ
-  ആശ്രയിച്ച് വ്യത്യാസപ്പെടുന്നു.
-- `zm/inclusionai/ming-image-0.1-design` സ്വന്തം അളവുകൾ തിരഞ്ഞെടുക്കുന്നു. `size`, `aspect_ratio`, `image_size`
-  എന്നിവ ഒഴിവാക്കുക; വ്യക്തമായി നൽകിയ മൂല്യങ്ങൾ HTTP 400 തിരികെ നൽകും. `output_format` ഉപയോഗിച്ച് PNG, JPEG,
-  WebP എന്നിവ അഭ്യർത്ഥിക്കാം.
+- `zenmux/openai/gpt-image-2` ZenMux ൻ്റെ OpenAI ഇമേജുകൾ API ഉപയോഗിക്കുന്നു. ഓപ്ഷനുകളിൽ `size`, `quality`, `n`, `output_format`, `output_compression`, `background`, `response_format` എന്നിവ ഉൾപ്പെടുന്നു.
+- `zm/meta/muse-image-1.0` പോലുള്ള മറ്റ് പ്രസാധകർ ZenMux ൻ്റെ Vertex AI `:predict` എൻഡ്പോയിൻ്റ് ഉപയോഗിക്കുന്നു. `n` മാപ്പുകൾ `sampleCount`, `aspect_ratio` മുതൽ `aspectRatio`, `image_size` (`1K`, `2K`, `4K`) `sampleImageSize`. ഒരു പിക്സൽ `size` ഒരു വീക്ഷണാനുപാതം മാത്രമേ നൽകുന്നുള്ളൂ, പിക്സൽ അളവുകൾ ഉറപ്പുനൽകുന്നില്ല. പിന്തുണയ്ക്കുന്ന അനുപാതങ്ങൾ, റെസല്യൂഷനുകൾ, എണ്ണങ്ങൾ എന്നിവ മോഡൽ അനുസരിച്ച് വ്യത്യാസപ്പെടുന്നു.
+- `zm/inclusionai/ming-image-0.1-design` അതിൻ്റേതായ അളവുകൾ തിരഞ്ഞെടുക്കുന്നു. `size`, `aspect_ratio`, `image_size` എന്നിവ ഒഴിവാക്കുക; വ്യക്തമായ മൂല്യങ്ങൾ HTTP 400 നൽകുന്നു. `output_format` ഉപയോഗിച്ച് PNG, JPEG, WebP എന്നിവ അഭ്യർത്ഥിക്കാം.
 
-ഈ ഇന്റഗ്രേഷൻ ടെക്സ്റ്റ്-ടു-ഇമേജ് ജനറേഷൻ പിന്തുണയ്ക്കുന്നു; റഫറൻസ്-ഇമേജ് എഡിറ്റിംഗ് പിന്തുണയ്ക്കുന്നില്ല. Vertex
-ഔട്ട്പുട്ട് `data[].b64_json` ആയി നോർമലൈസ് ചെയ്യുന്നു; `response_format: "url"` ഒരു അപ്സ്ട്രീം
-HTTPS URL നൽകും, അല്ലെങ്കിൽ ചിത്ര ബൈറ്റുകൾ മാത്രമേ ലഭ്യമാകുന്നുള്ളൂ എങ്കിൽ ഒരു base64 ഡാറ്റാ URL നൽകും. ശൂന്യമായോ
-ഫിൽട്ടർ ചെയ്തതോ ആയ ഔട്ട്പുട്ടുകൾ ശൂന്യമായ വിജയമായി നൽകാതെ ഒരു പിശക് തിരികെ നൽകും. മോഡൽ ആക്സസ് ZenMux അക്കൗണ്ടിനെ
-ആശ്രയിച്ചിരിക്കുന്നു. [ZenMux-ന്റെ Vertex API](https://docs.zenmux.ai/api/vertexai/generate-images), [OpenAI Images API](https://docs.zenmux.ai/api/openai/generate-an-image) എന്നിവ കാണുക.
+ഈ സംയോജനം ടെക്സ്റ്റ്-ടു-ഇമേജ് ജനറേഷൻ പിന്തുണയ്ക്കുന്നു, റഫറൻസ്-ഇമേജ് എഡിറ്റിംഗ് അല്ല. വെർട്ടെക്സ് ഔട്ട്പുട്ട് `data[].b64_json` ആയി നോർമലൈസ് ചെയ്തു; ഇമേജ് ബൈറ്റുകൾ മാത്രം ലഭ്യമാകുമ്പോൾ `response_format: "url"` ഒരു അപ്സ്ട്രീം HTTPS URL അല്ലെങ്കിൽ ഒരു base64 ഡാറ്റ URL നൽകുന്നു. Empty/filtered ഔട്ട്പുട്ടുകൾ ശൂന്യമായ വിജയത്തിനു പകരം ഒരു പിശക് നൽകുന്നു. മോഡൽ ആക്സസ് ZenMux അക്കൗണ്ടിനെ ആശ്രയിച്ചിരിക്കുന്നു. [ZenMux ൻ്റെ വെർട്ടെക്സ് API](https://docs.zenmux.ai/api/vertexai/generate-images), [OpenAI ഇമേജുകൾ API എന്നിവ](https://docs.zenmux.ai/api/openai/generate-an-image) കാണുക.
+
+Copilot ൻ്റെ ബിൽറ്റ്-ഇൻ ഇമേജ് ടൂൾ വഴി ഒരു Microsoft 365 Copilot സൈൻ-ഇൻ കണക്ഷൻ `copilot-m365-web/m365-copilot-image` നൽകുന്നു: ഓരോ ചിത്രത്തിനും ഒരു Copilot ടേൺ (`n` 1–4), `size` സ്റ്റിയറിംഗ് ഓറിയൻ്റേഷൻ മാത്രം, കൂടാതെ ഇൻലൈനിൽ മടങ്ങിയ ചിത്രങ്ങൾ (`b64_json`, അല്ലെങ്കിൽ `response_format: "url"` ന് ഒരു ഡാറ്റ URL ). [Microsoft 365 Copilot](../providers/COPILOT-M365.md#image-generation) കാണുക.
 
 ```bash
-# എല്ലാ ഇമേജ് മോഡലുകളും പട്ടികപ്പെടുത്തുക
+# List all image models
 GET /v1/images/generations
 ```
 
@@ -844,17 +829,19 @@ OpenAI-അനുയോജ്യമായ ബാച്ച് പ്രോസസ�
 
 ---
 
-## തിരയൽ API
+## API തിരയുക
 
-വെബ്/തിരയൽ പ്രൊവൈഡർ അബ്സ്ട്രാക്ഷൻ (Tavily, Brave, Exa, Serper മുതലായവ).
+Web/search ദാതാവിൻ്റെ സംഗ്രഹം (തവിലി, ബ്രേവ്, എക്സാ, സെർപ്പർ മുതലായവ).
 
-| മെത്തേഡ് | പാത                    | വിവരണം                                                                                                                |
-| -------- | ---------------------- | --------------------------------------------------------------------------------------------------------------------- |
-| GET      | `/v1/search`           | കോൺഫിഗർ ചെയ്ത തിരയൽ പ്രൊവൈഡറുകളും ശേഷികളും പട്ടികപ്പെടുത്തുന്നു                                                       |
-| POST     | `/v1/search`           | ഒരു തിരയൽ ചോദ്യം നടത്തുന്നു — ബോഡി `v1SearchSchema` ഉപയോഗിച്ച് സാധൂകരിക്കുന്നു, കാഷിംഗും കോയലസിംഗും പിന്തുണയ്ക്കുന്നു |
-| GET      | `/v1/search/analytics` | ഓരോ പ്രൊവൈഡറിനുമുള്ള ഹിറ്റുകൾ/ലേറ്റൻസി/കാഷ് സ്ഥിതിവിവരക്കണക്കുകൾ                                                      |
+| രീതി | പാത                    | വിവരണം                                                                                                         |
+| ---- | ---------------------- | -------------------------------------------------------------------------------------------------------------- |
+| GET  | `/v1/search`           | ക്രമീകരിച്ച തിരയൽ ദാതാക്കളുടെ + കഴിവുകൾ ലിസ്റ്റ് ചെയ്യുക                                                       |
+| POST | `/v1/search`           | `v1SearchSchema` സാധൂകരിച്ച ഒരു തിരയൽ അന്വേഷണം — ബോഡി പ്രവർത്തിപ്പിക്കുക, caching/coalescing പിന്തുണയ്ക്കുന്നു |
+| GET  | `/v1/search/analytics` | ഓരോ ദാതാവിൻ്റെയും hit/latency/cache സ്ഥിതിവിവരക്കണക്കുകൾ                                                       |
 
-**പ്രാമാണീകരണം:** Bearer API കീ (`extractApiKey` + `isValidApiKey`). തിരയൽ നയം `enforceApiKeyPolicy` വഴി നടപ്പാക്കുന്നു.
+**അംഗീകാരം:** ബെയറർ API കീ (`extractApiKey` + `isValidApiKey`). തിരയൽ നയം `enforceApiKeyPolicy` വഴി നടപ്പിലാക്കി.
+
+**സ്വയമേവ തിരഞ്ഞെടുക്കൂ:** `provider` ഇല്ലാതെ, കോൺഫിഗർ ചെയ്ത കണക്ഷനുള്ള ഏറ്റവും വിലകുറഞ്ഞ ദാതാവ് ആദ്യം പ്രവർത്തിക്കുന്നു, അടുത്ത വിലകുറഞ്ഞത് പരാജയമാണ്. മറ്റൊന്നും കോൺഫിഗർ ചെയ്യാത്തപ്പോൾ മാത്രമാണ് സൗജന്യ ലാസ്റ്റ് റിസോർട്ട് പ്രൊവൈഡർമാർ (`duckduckgo-free`) ഉപയോഗിക്കുന്നത്. ഒരു സ്വയം-ഹോസ്റ്റ് ചെയ്ത SearXNG അതിൻ്റെ കണക്ഷൻ ഒരു യഥാർത്ഥ `baseUrl` (കാറ്റലോഗ് ഡിഫോൾട്ട് `http://localhost:8888/search` അല്ല) സംഭരിച്ചുകഴിഞ്ഞാൽ കോൺഫിഗർ ചെയ്തതായി കണക്കാക്കുന്നു: അത് കീ ചെയ്തവയെക്കാൾ $0 ദാതാവായി റാങ്ക് ചെയ്യുന്നു, ഏറ്റവും വിലകുറഞ്ഞ കീ ചെയ്ത ദാതാവിനെ പരാജയമായി കണക്കാക്കുന്നു `http(s)` SearXNG 400, 401, 40403 Ahzq URL `baseUrl` ക്ലൗഡ്-മെറ്റാഡാറ്റ വിലാസത്തിലെ പോയിൻ്റുകൾ കണക്കാക്കില്ല. ഒരു ടോക്കൺ സംഭരിക്കുന്ന ഒരു SearXNG കണക്ഷൻ `https://` അല്ലെങ്കിൽ loopback `http://` ൽ മാത്രമേ ഈ രീതിയിൽ റാങ്ക് ചെയ്യുന്നുള്ളൂ. റിമോട്ട് പ്ലെയിൻ `http://` ൽ ഇത് ഒരിക്കലും പരാജയമല്ല, അവസാന ആശ്രയമായി തുടരുന്നു, മറ്റേതെങ്കിലും ദാതാവ് കോൺഫിഗർ ചെയ്യാത്തപ്പോഴോ പേര് ആവശ്യപ്പെടുമ്പോഴോ മാത്രം ഉപയോഗിക്കുന്നു, അതിനാൽ ആ രണ്ട് സന്ദർഭങ്ങളിലും ഇത് വ്യക്തമായ ടെക്സ്റ്റിൽ ടോക്കൺ അയയ്ക്കുന്നു.
 
 ### Exa, Tavily എന്നിവയിലെ `provider_options`
 
@@ -1040,26 +1027,26 @@ server-നെതിരെ end-to-end ആയി സാധൂകരിച്ചി
 
 ## സ്വയം സേവന ഉപയോഗം (`/api/usage/om-usage`)
 
-ഏത് API കീയ്ക്കും **സ്വന്തം** ഉപയോഗവും ക്വോട്ടകളും വായിക്കാം — മാനേജ്മെന്റ് ഓതന്റിക്കേഷൻ ആവശ്യമില്ല. ഒരു കീ ഉടമയ്ക്ക് അവരുടെ ചെലവ് കാണിക്കാൻ ക്ലയന്റ് (CLI, OmniCopilot പാനൽ) ഉപയോഗിക്കുന്ന എൻഡ്പോയിന്റാണിത്.
+ഏത് API കീയും വായിക്കാനാകും**സ്വന്തം** ഉപയോഗവും ക്വാട്ടകളും — മാനേജ്മെൻ്റ് അംഗീകാരമില്ല. ഒരു ക്ലയൻ്റ് (CLI, OmniCopilot പാനൽ) ഒരു കീ ഹോൾഡറെ അവരുടെ ചെലവ് കാണിക്കാൻ ഉപയോഗിക്കുന്ന അവസാന പോയിൻ്റാണിത്.
 
 ```bash
-# ടെക്സ്റ്റ് രൂപം (ചരിത്രപരമായ കരാർ — ടെർമിനലിനായുള്ള പ്ലെയിൻ ടെക്സ്റ്റ്)
+# Text form (the historical contract — plain text for a terminal)
 curl -H "Authorization: Bearer <your-api-key>" \
   http://localhost:20128/api/usage/om-usage
 
-# ഘടനാപരമായ രൂപം — UI ഉപയോഗിക്കുന്ന രൂപം
+# Structured form — what a UI consumes
 curl -H "Authorization: Bearer <your-api-key>" \
   "http://localhost:20128/api/usage/om-usage?format=json"
 ```
 
-കീയിൽ **`allowUsageCommand`** പ്രവർത്തനക്ഷമമാക്കിയിരിക്കണം (സ്ഥിരസ്ഥിതിയായി ഓഫാണ് — ഡാഷ്ബോർഡിലെ API-കീ മാനേജർ ഓരോ കീയ്ക്കും ഇത് ടോഗിൾ ചെയ്യുന്നു). ഇത് ഇല്ലെങ്കിൽ എൻഡ്പോയിന്റ് `403` നൽകും.
+താക്കോൽ ഉണ്ടായിരിക്കണം**`allowUsageCommand`** പ്രവർത്തനക്ഷമമാക്കി (ഡിഫോൾട്ടായി ഓഫ് — ഡാഷ്ബോർഡിൻ്റെ API-കീ മാനേജർ ഓരോ കീയിലും ഇത് ടോഗിൾ ചെയ്യുന്നു). അതില്ലാതെ അവസാന പോയിൻ്റ് `403` ഉത്തരം നൽകുന്നു.
 
-`?format=json` വിവേചിതമായ ഒരു ഘടന തിരികെ നൽകുന്നു, അതിനാൽ നിരസിക്കപ്പെട്ട പ്രതികരണത്തിൽ നിന്ന് കോളർ ഒരിക്കലും ഒരു ഡാറ്റാ ഫീൽഡ് വായിക്കില്ല. വിജയകരമായപ്പോൾ:
+`?format=json` ഒരു വിവേചനപരമായ രൂപം നൽകുന്നു, അതിനാൽ ഒരു കോളർ ഒരിക്കലും നിരസിച്ചതിൻ്റെ ഒരു ഡാറ്റ ഫീൽഡ് വായിക്കില്ല. വിജയത്തെക്കുറിച്ച്:
 
 ```jsonc
 {
   "allowed": true,
-  // ഓരോ കീയ്ക്കുമുള്ള ഉപയോഗ പരിധികളിലേക്ക് കീ ഓപ്റ്റ്-ഇൻ ചെയ്താൽ മാത്രം കാണും (ദൈനംദിന/ആഴ്ചതോറുമുള്ള USD):
+  // present only when the key opted into per-key usage limits (daily/weekly/5-hour USD):
   "personal": {
     "dailySpentUsd": 1.25,
     "dailyLimitUsd": 5,
@@ -1068,9 +1055,9 @@ curl -H "Authorization: Bearer <your-api-key>" \
     "weeklyLimitUsd": 20,
     "weeklyResetAtIso": "…" /* … */,
   },
-  // തിരഞ്ഞെടുത്ത പ്രൊവൈഡറിന്റെ ക്വോട്ട സ്നാപ്ഷോട്ട്, ഇതുവരെ ഒന്നും കാഷ് ചെയ്തിട്ടില്ലെങ്കിൽ null:
+  // the selected provider quota snapshot, or null when nothing is cached yet:
   "provider": { "connectionId": "…", "provider": "claude", "plan": "…", "quotas": {/* … */} },
-  // ഓരോ കണക്ഷന്റെയും സ്നാപ്ഷോട്ട്, അതുവഴി UI-ക്ക് നിരവധി പ്രൊവൈഡറുകളെ വശങ്ങളിലായി റെൻഡർ ചെയ്യാം:
+  // every connection's snapshot, so a UI can render several providers side by side:
   "providers": [
     { "connectionId": "…", "provider": "claude" /* … */ },
     { "provider": "codex" /* … */ },
@@ -1078,12 +1065,9 @@ curl -H "Authorization: Bearer <your-api-key>" \
 }
 ```
 
-നിരസിക്കപ്പെട്ടപ്പോൾ (`401` തെറ്റായ കീ / `403` അനുവദിച്ചിട്ടില്ല) അതേ റൂട്ട്
-`{ "allowed": false, "error": { "message": "…" } }` തിരികെ നൽകും — ഉണ്ടായിട്ടും ശൂന്യമായ `personal`/`provider`
-(കീ അനുവദിച്ചിരിക്കുന്നു, ഇതുവരെ ഒന്നും ലഭിച്ചിട്ടില്ല) എന്നത് നിരസിക്കലിൽ നിന്ന് വ്യത്യസ്തമായ അവസ്ഥയാണ്, JSON രൂപം മാത്രമാണ്
-ഈ വ്യത്യാസം വ്യക്തമാക്കുന്നത്.
+നിരസിക്കുമ്പോൾ (`401` മോശം കീ / `403` അനുവദനീയമല്ല) അതേ റൂട്ട് `{ "allowed": false, "error": { "message": "…" } }` — നൽകുന്നു, നിലവിലുള്ളതും എന്നാൽ ശൂന്യവുമായ `personal`/`provider` (കീ അനുവദിച്ചിരിക്കുന്നു, ഇതുവരെ ഒന്നും പഠിച്ചിട്ടില്ല) നിരസിക്കുന്നതിൽ നിന്ന് വ്യത്യസ്തമായ അവസ്ഥയാണ്, JSON ഫോം മാത്രമേ അവയെ വേർതിരിച്ചറിയൂ.
 
-**ഓതന്റിക്കേഷൻ:** കോളറുടെ സ്വന്തം Bearer API കീ, `isValidApiKey` ഉപയോഗിച്ച് സാധൂകരിക്കുന്നത് — ഇത് _മാനേജ്മെന്റ് ഉപരിതലം_ (`/api/keys/…`) അല്ല; അത് `requireManagementAuth`-ന് പിന്നിൽ തന്നെ തുടരും.
+**അംഗീകാരം:** വിളിക്കുന്നയാളുടെ സ്വന്തം ബെയറർ API കീ, `isValidApiKey` — ഉപയോഗിച്ച് സാധൂകരിച്ചിരിക്കുന്നു, ഇത് `requireManagementAuth` പിന്നിൽ നിൽക്കുന്ന മാനേജ്മെൻ്റ് ഉപരിതലമാണ് (`/api/keys/…`).
 
 ### റോയും കട്ട്ഓഫ്-ക്രമീകരിച്ചതുമായ ക്വോട്ട ശതമാനങ്ങൾ
 
@@ -1271,11 +1255,11 @@ Custom Chat Completions നോഡുകൾ വ്യക്തമായ reasoning
 
 Claude Code auto-mode classifier requests-ൽ explicit reasoning controls ഒന്നുമില്ലെങ്കിൽ native thinking disabled ആയി default ചെയ്യുന്നു. Model names-ലോ completion limits-ലോ അല്ല, Claude-format requests-ിലെ classifier system marker ഉപയോഗിച്ചാണ് detection നടത്തുന്നത്. Explicit body controls, supported effort/thinking headers, routing rules, resolved model effort എന്നിവയ്ക്ക് നിലവിലുള്ള priority തന്നെ തുടരും. രണ്ട് classifier stages-ുകളും അവയുടെ prompts, completion limits, stop sequences, യഥാർത്ഥ upstream permission verdicts എന്നിവ നിലനിർത്തുന്നു; രണ്ടാമത്തെ stage-ന് അഭ്യർത്ഥിച്ച visible reasoning സാധാരണ text ആയി ഇപ്പോഴും സൃഷ്ടിക്കാനാകും.
 
-### OAuth Flows
+### OAuth ഒഴുകുന്നു
 
-| Endpoint                         | Method  | Description             |
-| -------------------------------- | ------- | ----------------------- |
-| `/api/oauth/[provider]/[action]` | Various | Provider-specific OAuth |
+| അവസാന പോയിൻ്റ്                   | രീതി  | വിവരണം                  |
+| -------------------------------- | ----- | ----------------------- |
+| `/api/oauth/[provider]/[action]` | വിവിധ | ദാതാവ്-നിർദ്ദിഷ്ട OAuth |
 
 ### Routing & Config
 
@@ -1320,38 +1304,39 @@ and the precedence chains in `src/lib/modelCapabilityLimits.ts`.
 
 ### API കീ അനുമതികൾ
 
-`PATCH /api/keys/{id}` നിലവിലുള്ള ഒരു കീയുടെ അനുമതികൾ അപ്ഡേറ്റ് ചെയ്യുന്നു. എല്ലാ `/api/keys*` റൂട്ടുകളെയും പോലെ ഇതിന് മാനേജ്മെന്റ് ഓതറൈസേഷൻ ആവശ്യമാണ് ([മാനേജ്മെന്റ് ഓതന്റിക്കേഷൻ](../guides/MANAGEMENT-AUTH.md) കാണുക), ഇൻഫറൻസ് കീ അല്ല. മാറ്റേണ്ട ഫീൽഡുകൾ മാത്രം അയയ്ക്കുക; അവയിൽ ഒന്നും ഉൾപ്പെടാത്ത അഭ്യർത്ഥന `No valid fields to update` എന്ന സന്ദേശത്തോടെ നിരസിക്കപ്പെടും. സ്വീകരിക്കുന്ന ഫീൽഡുകൾ `src/shared/validation/schemas/keys.ts` ലെ `updateKeyPermissionsSchema` നിർവചിക്കുന്നു.
+`PATCH /api/keys/{id}` നിലവിലുള്ള ഒരു കീയുടെ അനുമതികൾ അപ്ഡേറ്റ് ചെയ്യുന്നു. എല്ലാ `/api/keys*` റൂട്ടിനെയും പോലെ ഇതിന് മാനേജുമെൻ്റ് അംഗീകാരം ആവശ്യമാണ് ( [മാനേജ്മെൻ്റ് ആധികാരികത](../guides/MANAGEMENT-AUTH.md) കാണുക), ഒരു അനുമാന കീ അല്ല. നിങ്ങൾ മാറ്റാൻ ആഗ്രഹിക്കുന്ന ഫീൽഡുകൾ മാത്രം അയയ്ക്കുക; അവയൊന്നും ഇല്ലാത്ത ഒരു അഭ്യർത്ഥന `No valid fields to update` ഉപയോഗിച്ച് നിരസിക്കപ്പെട്ടു. സ്വീകാര്യമായ ഫീൽഡുകൾ `src/shared/validation/schemas/keys.ts` ൽ `updateKeyPermissionsSchema` നിർവ്വചിച്ചിരിക്കുന്നു.
 
-| ഫീൽഡ്                                       | തരം                                                                                    | കുറിപ്പുകൾ                                                                                                                                                                    |
-| ------------------------------------------- | -------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `name`                                      | string, 1-200 chars                                                                    |                                                                                                                                                                               |
-| `isActive`                                  | boolean                                                                                |                                                                                                                                                                               |
-| `isBanned`                                  | boolean                                                                                |                                                                                                                                                                               |
-| `expiresAt`                                 | ISO 8601 datetime അല്ലെങ്കിൽ `null`                                                    | `null` കാലഹരണപ്പെടൽ നീക്കം ചെയ്യുന്നു                                                                                                                                         |
-| `modelAccessMode`                           | `all` \| `restricted`                                                                  | മോഡ് `all` ആയിരിക്കുമ്പോൾ `allowedModels` ശൂന്യമായിരിക്കണം                                                                                                                    |
-| `allowedModels`, `blockedModels`            | സ്ട്രിംഗുകളുടെ അറേ, പരമാവധി 1000                                                       |                                                                                                                                                                               |
-| `allowedCombos`                             | സ്ട്രിംഗുകളുടെ അറേ, പരമാവധി 500                                                        | കീക്ക് വിളിക്കാവുന്ന കോമ്പോകൾ നിയന്ത്രിക്കുന്നു; നേരിട്ടുള്ള മോഡലുകൾ `modelAccessMode` / `allowedModels` അനുസരിച്ചാണ് നിയന്ത്രിക്കുന്നത്                                      |
-| `connectionAccessMode`                      | `all` \| `restricted`                                                                  | `restricted` ആയിരിക്കുമ്പോൾ `allowedConnections` ശൂന്യമല്ലാത്തതും `all` ആയിരിക്കുമ്പോൾ ശൂന്യമായതുമായിരിക്കണം                                                                  |
-| `allowedConnections`                        | UUID-കളുടെ അറേ, പരമാവധി 100                                                            |                                                                                                                                                                               |
-| `allowAutoCombos`                           | boolean                                                                                | `false` ആയാൽ ഈ കീ ഉപയോഗിച്ചുള്ള `auto/*` മോഡലുകൾക്കായുള്ള അഭ്യർത്ഥനകൾ നിരസിക്കുന്നു; ഇത് ഒരിക്കലും സജ്ജീകരിക്കാത്ത കീകൾ അനുവദനീയമാണ്                                          |
-| `catalogScope`                              | `all` \| `combos` \| `models`                                                          | ഈ കീക്കായി `GET /v1/models` എന്താണ് ലിസ്റ്റ് ചെയ്യുന്നതെന്ന് നിർണ്ണയിക്കുന്നു (കോമ്പോകൾ മാത്രം, മോഡലുകൾ മാത്രം, അല്ലെങ്കിൽ രണ്ടും); കീക്ക് വിളിക്കാവുന്നവയെ ഇത് മാറ്റുന്നില്ല |
-| `forcedModel`                               | പരമാവധി 300 അക്ഷരങ്ങളുള്ള സ്ട്രിംഗ്, അല്ലെങ്കിൽ `null`                                 | `X-Route-Model`-നും `body.model`-നും മുകളിൽ ഈ മോഡൽ/കോമ്പോയിലേക്ക് ചാറ്റ് അഭ്യർത്ഥനകൾ റൂട്ട് ചെയ്യുന്നു; കീയുടെ പരിധികൾ തുടർന്നും ബാധകമാണ്                                     |
-| `noLog`, `autoResolve`                      | boolean                                                                                |                                                                                                                                                                               |
-| `throttleDelayMs`                           | പൂർണ്ണസംഖ്യ, 0-300000                                                                  |                                                                                                                                                                               |
-| `maxSessions`                               | പൂർണ്ണസംഖ്യ, 0-10000                                                                   |                                                                                                                                                                               |
-| `rateLimits`                                | `{ limit, window }`-കളുടെ അറേ (പോസിറ്റീവ് പൂർണ്ണസംഖ്യകൾ, പരമാവധി 50) അല്ലെങ്കിൽ `null` | `null` പരിധികൾ നീക്കം ചെയ്യുന്നു                                                                                                                                              |
-| `accessSchedule`                            | ഷെഡ്യൂൾ ഒബ്ജക്റ്റ് അല്ലെങ്കിൽ `null`                                                   | `null` ഷെഡ്യൂൾ നീക്കം ചെയ്യുന്നു                                                                                                                                              |
-| `scopes`                                    | സ്ട്രിംഗുകളുടെ അറേ, പരമാവധി 32                                                         |                                                                                                                                                                               |
-| `allowedEndpoints`                          | സ്ട്രിംഗുകളുടെ അറേ, പരമാവധി 20                                                         |                                                                                                                                                                               |
-| `streamDefaultMode`                         | `legacy` \| `json`                                                                     |                                                                                                                                                                               |
-| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                                   | [ഓരോ കീയ്ക്കുമുള്ള കാഷെ ബൈപാസ്](#per-key-cache-bypass) കാണുക                                                                                                                  |
-| `compressionEnabled`                        | boolean                                                                                |                                                                                                                                                                               |
-| `codexServiceMode`                          | Codex സേവന മോഡുകളിലൊന്ന്                                                               |                                                                                                                                                                               |
-| `disableNonPublicModels`                    | boolean                                                                                |                                                                                                                                                                               |
-| `allowUsageCommand`                         | boolean                                                                                |                                                                                                                                                                               |
-| `usageLimitEnabled`                         | boolean                                                                                |                                                                                                                                                                               |
-| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | number >= 0 or `null`                                                                  |                                                                                                                                                                               |
-| `chaosModeEnabled`                          | boolean                                                                                |                                                                                                                                                                               |
+| ഫീൽഡ്                                       | തരം                                                                                    | കുറിപ്പുകൾ                                                                                                                                                                                                                                                                             |
+| ------------------------------------------- | -------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`                                      | string, 1-200 chars                                                                    |                                                                                                                                                                                                                                                                                        |
+| `isActive`                                  | boolean                                                                                |                                                                                                                                                                                                                                                                                        |
+| `isBanned`                                  | boolean                                                                                |                                                                                                                                                                                                                                                                                        |
+| `expiresAt`                                 | ISO 8601 datetime അല്ലെങ്കിൽ `null`                                                    | `null` കാലഹരണപ്പെടൽ നീക്കം ചെയ്യുന്നു                                                                                                                                                                                                                                                  |
+| `modelAccessMode`                           | `all` \| `restricted`                                                                  | മോഡ് `all` ആയിരിക്കുമ്പോൾ `allowedModels` ശൂന്യമായിരിക്കണം                                                                                                                                                                                                                             |
+| `allowedModels`, `blockedModels`            | 1000 വരെ സ്ട്രിംഗുകളുടെ നിര                                                            |                                                                                                                                                                                                                                                                                        |
+| `allowedCombos`                             | സ്ട്രിംഗുകളുടെ അറേ, പരമാവധി 500                                                        | കീക്ക് വിളിക്കാവുന്ന കോമ്പോകൾ നിയന്ത്രിക്കുന്നു; നേരിട്ടുള്ള മോഡലുകൾ `modelAccessMode` / `allowedModels` അനുസരിച്ചാണ് നിയന്ത്രിക്കുന്നത്                                                                                                                                               |
+| `connectionAccessMode`                      | `all` \| `restricted`                                                                  | `restricted` ആയിരിക്കുമ്പോൾ `allowedConnections` ശൂന്യമല്ലാത്തതും `all` ആയിരിക്കുമ്പോൾ ശൂന്യമായതുമായിരിക്കണം                                                                                                                                                                           |
+| `allowedConnections`                        | UUID-കളുടെ അറേ, പരമാവധി 100                                                            |                                                                                                                                                                                                                                                                                        |
+| `allowAutoCombos`                           | boolean                                                                                | `false` ആയാൽ ഈ കീ ഉപയോഗിച്ചുള്ള `auto/*` മോഡലുകൾക്കായുള്ള അഭ്യർത്ഥനകൾ നിരസിക്കുന്നു; ഇത് ഒരിക്കലും സജ്ജീകരിക്കാത്ത കീകൾ അനുവദനീയമാണ്                                                                                                                                                   |
+| `catalogScope`                              | `all` \| `combos` \| `models`                                                          | ഈ കീക്കായി `GET /v1/models` എന്താണ് ലിസ്റ്റ് ചെയ്യുന്നതെന്ന് നിർണ്ണയിക്കുന്നു (കോമ്പോകൾ മാത്രം, മോഡലുകൾ മാത്രം, അല്ലെങ്കിൽ രണ്ടും); കീക്ക് വിളിക്കാവുന്നവയെ ഇത് മാറ്റുന്നില്ല                                                                                                          |
+| `forcedModel`                               | പരമാവധി 300 അക്ഷരങ്ങളുള്ള സ്ട്രിംഗ്, അല്ലെങ്കിൽ `null`                                 | `X-Route-Model`-നും `body.model`-നും മുകളിൽ ഈ മോഡൽ/കോമ്പോയിലേക്ക് ചാറ്റ് അഭ്യർത്ഥനകൾ റൂട്ട് ചെയ്യുന്നു; കീയുടെ പരിധികൾ തുടർന്നും ബാധകമാണ്                                                                                                                                              |
+| `noLog`, `autoResolve`                      | ബൂളിയൻ                                                                                 |                                                                                                                                                                                                                                                                                        |
+| `throttleDelayMs`                           | പൂർണ്ണസംഖ്യ, 0-300000                                                                  |                                                                                                                                                                                                                                                                                        |
+| `maxSessions`                               | പൂർണ്ണസംഖ്യ, 0-10000                                                                   |                                                                                                                                                                                                                                                                                        |
+| `rateLimits`                                | `{ limit, window }`-കളുടെ അറേ (പോസിറ്റീവ് പൂർണ്ണസംഖ്യകൾ, പരമാവധി 50) അല്ലെങ്കിൽ `null` | `null` പരിധികൾ നീക്കം ചെയ്യുന്നു                                                                                                                                                                                                                                                       |
+| `accessSchedule`                            | ഷെഡ്യൂൾ ഒബ്ജക്റ്റ് അല്ലെങ്കിൽ `null`                                                   | `null` ഷെഡ്യൂൾ നീക്കം ചെയ്യുന്നു                                                                                                                                                                                                                                                       |
+| `scopes`                                    | സ്ട്രിംഗുകളുടെ അറേ, പരമാവധി 32                                                         |                                                                                                                                                                                                                                                                                        |
+| `allowedEndpoints`                          | സ്ട്രിംഗുകളുടെ അറേ, പരമാവധി 20                                                         |                                                                                                                                                                                                                                                                                        |
+| `streamDefaultMode`                         | `legacy` \| `json`                                                                     |                                                                                                                                                                                                                                                                                        |
+| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                                   | [ഓരോ കീയ്ക്കുമുള്ള കാഷെ ബൈപാസ്](#per-key-cache-bypass) കാണുക                                                                                                                                                                                                                           |
+| `compressionEnabled`                        | boolean                                                                                |                                                                                                                                                                                                                                                                                        |
+| `codexServiceMode`                          | Codex സേവന മോഡുകളിലൊന്ന്                                                               |                                                                                                                                                                                                                                                                                        |
+| `disableNonPublicModels`                    | boolean                                                                                |                                                                                                                                                                                                                                                                                        |
+| `allowUsageCommand`                         | boolean                                                                                |                                                                                                                                                                                                                                                                                        |
+| `usageLimitEnabled`                         | boolean                                                                                |                                                                                                                                                                                                                                                                                        |
+| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | നമ്പർ >= 0 അല്ലെങ്കിൽ `null`                                                           |                                                                                                                                                                                                                                                                                        |
+| `fiveHourUsageLimitUsd`                     | നമ്പർ >= 0 അല്ലെങ്കിൽ `null`                                                           | റോളിംഗ് 5 മണിക്കൂർ USD ബജറ്റ്, ദൈനംദിന, പ്രതിവാര പരിധികൾ (`usageLimitEnabled`, `UNPRICED_USAGE_BUDGET_POLICY`) പോലെ നടപ്പിലാക്കുന്നു. `retry-after` എന്നത് വിൻഡോയിലെ ഏറ്റവും പഴയ ചിലവുകൾക്ക് പ്രായമാകുമ്പോഴാണ്, അത് അതിൻ്റെ പരിധിക്കപ്പുറമുള്ള ഒരു താക്കോൽ ഇപ്പോഴും തടഞ്ഞുവെച്ചേക്കാം. |
+| `chaosModeEnabled`                          | boolean                                                                                |                                                                                                                                                                                                                                                                                        |
 
 ```bash
 curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
@@ -1401,6 +1386,14 @@ curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
 | `/api/modality-bridge/stats`         | GET        | മെമ്മറിയിലുള്ള `attempts`, വിജയങ്ങൾ/`bridged`, പരാജയങ്ങൾ, കാഷെ ഹിറ്റുകൾ, `totalLatencyMs`, `latencySamples`, സാമ്പിൾ അടിസ്ഥാനമാക്കിയുള്ള `averageLatencyMs`, അവസാന ഉപയോഗ സമയം എന്നിവ (റീസ്റ്റാർട്ടിൽ റീസെറ്റ് ചെയ്യും; മാനേജ്മെന്റ് ഓതന്റിക്കേഷൻ ആവശ്യമാണ്)                                                                                                                                                                    |
 | `/api/modality-bridge/video/runtime` | GET        | മാനേജ്മെന്റ് ഓതന്റിക്കേഷൻ/പ്രോബിന് മുമ്പുള്ള കർശനമായ വിശ്വസനീയ-ലൂപ്പ്ബാക്ക് പരിശോധന; ശുദ്ധീകരിച്ച FFmpeg/ffprobe ലഭ്യതയും പതിപ്പുകളും (no-store)                                                                                                                                                                                                                                                                               |
 | `/api/modality-bridge/video/extract` | POST       | ആന്തരികമായി ഓതന്റിക്കേറ്റ് ചെയ്ത വിശ്വസനീയ-ലൂപ്പ്ബാക്ക് ബൈറ്റ് ബ്രോക്കർ; 50 MiB ഇൻപുട്ട്, പരിധിയുള്ള ക്യൂ/32 MiB ഔട്ട്പുട്ട്, ശേഷിക്കായി `503`, വിച്ഛേദനത്തിന് `499`, ഡെഡ്ലൈനിന് `504`; പൊതുവായ അപ്ലോഡ് API അല്ല                                                                                                                                                                                                               |
+
+### വീഡിയോ ഫ്രെയിം ഡ്രിൽ-ഡൗൺ
+
+വ്യക്തമായ സമ്മതമുള്ള വീഡിയോ ബ്രിഡ്ജ് അഭ്യർത്ഥനയ്ക്ക് ശേഷം `x-omniroute-video-drilldown` യിൽ തിരിച്ചെത്തിയ കുടിയാൻ ബന്ധിത അതാര്യമായ ഹാൻഡിൽ `GET /api/v1/video-bridge/drilldown` വായിക്കുന്നു. റീഡിനും `DELETE` എപ്പോഴും സാധുവായ ഒരു API കീയും ഓപ്പറേറ്ററുടെ സ്വതന്ത്ര `modalityBridgeVideoDrilldownRemoteEnabled` അനുമതിയും ആവശ്യമാണ്. ഉൽപ്പാദനം നിലനിർത്തുന്നതിന് `modalityBridgeVideoDrilldownEnabled` ഉം കർശനമായ ഓരോ ഭാഗവും `drilldown: true` ആവശ്യമാണ്. കീയ്ക്ക് ശൂന്യമല്ലാത്ത എൻഡ്പോയിൻ്റ് അനുവദിക്കൽ ലിസ്റ്റ് ഉണ്ടെങ്കിൽ, കോളർ `/v1` അല്ലെങ്കിൽ `/api/v1` ഉപയോഗിച്ചാലും GET, DELETE എന്നിവയ്ക്കായി അതിൽ `video` ഉൾപ്പെടുത്തണം.
+
+GET അന്വേഷണം: ആവശ്യമായ `handle`; ഓപ്ഷണൽ `variant` (`preview`, `standard`, `detail`), `limit` (1-8; ലെഗസി `frames` സ്വീകാര്യമാണ് എന്നാൽ `limit` യുമായി സംയോജിപ്പിക്കാൻ കഴിയില്ല), പൂജ്യം അടിസ്ഥാനമാക്കിയുള്ള `page`, `start`/`end` സെക്കൻഡ്. രണ്ട് ഫോക്കസ് ബൗണ്ടുകളും നൽകുമ്പോൾ, `end` `start` നേക്കാൾ വലുതായിരിക്കണം. Duplicate/unknown അന്വേഷണ കീകൾ നിരസിച്ചു. വിജയകരമായ പ്രതികരണങ്ങളിൽ `derivation`, `durationSeconds`, `frames`, `hasMore`, `page`, `variant`, ഓപ്ഷണൽ `focusWindow` എന്നിവ അടങ്ങിയിരിക്കുന്നു; നോ-സ്റ്റോർ JSON Base64 ഉൾപ്പെടെ 32 MiB ആണ്. ഓവർസൈസ്ഡ് ഔട്ട്പുട്ട് റിട്ടേൺസ് 413; കുറച്ച് ഫ്രെയിമുകൾ അഭ്യർത്ഥിക്കുക.
+
+`DELETE /api/v1/video-bridge/drilldown?handle=...` `{ "removed": 0|1 }` തിരികെ നൽകുന്നു. അജ്ഞാതവും കാലഹരണപ്പെട്ടതും ക്രോസ്-കീ GETs വേർതിരിച്ചറിയാൻ കഴിയാത്ത 404 പ്രതികരണങ്ങളാണ്; ക്രോസ്-കീ DELETE ഉടമയുടെ എൻട്രി നീക്കം ചെയ്യാൻ കഴിയില്ല. അപ്രാപ്തമാക്കിയ ആക്സസ്സ് 403, missing/invalid പ്രാമാണീകരണം 401, അസാധുവായ അന്വേഷണങ്ങൾ 400, റദ്ദാക്കൽ 499, താൽക്കാലിക പിശകുകൾ 503. ഹാൻഡിലുകൾ പ്രോസസ്-ലോക്കൽ ആണ്, പത്ത് മിനിറ്റിന് ശേഷം കാലഹരണപ്പെടും, പുനരാരംഭിച്ചാൽ അത് നിലനിൽക്കില്ല. പുതിയ ഹാൻഡിലുകൾ `v1.` കൂടാതെ 32-ബൈറ്റ് റാൻഡം Base64URL ടോക്കൺ ഉപയോഗിക്കുന്നു; ടോക്കൺ ഹാഷുകൾ മാത്രം നിലനിർത്തുന്നു. ലെഗസി 64-ഹെക്സ് ടോക്കണുകൾ അനുയോജ്യതയ്ക്കായി വാക്യഘടനാപരമായി വായിക്കാൻ കഴിയുന്നവയായി തുടരുന്നു. സമ്മതം, ക്വാട്ട, വേരിയൻറ് ഡെറിവേഷൻ വിശദാംശങ്ങൾ എന്നിവയ്ക്കായി [വീഡിയോ ബ്രിഡ്ജ് ഗാർഡ്റെയിലുകൾ](../security/GUARDRAILS.md#video-bridge-videobridgets-videobridgepipelinets) കാണുക.
 
 ### ബാക്കപ്പും എക്സ്പോർട്ട്/ഇംപോർട്ടും
 
@@ -1496,19 +1489,19 @@ GET പ്രതികരണത്തിൽ `agents[]` (id, name, binary, versio
 
 നേറ്റീവ് Gemini SDK അനുയോജ്യത പ്രതീക്ഷിക്കുന്ന ക്ലയന്റുകൾക്കായി ഈ എൻഡ്പോയിന്റുകൾ Gemini-യുടെ API ഫോർമാറ്റിനെ അനുകരിക്കുന്നു.
 
-### ആന്തരികം / സിസ്റ്റം API-കൾ
+### ആന്തരിക / സിസ്റ്റം APIs
 
-| Endpoint                 | Method | വിവരണം                                                                        |
-| ------------------------ | ------ | ----------------------------------------------------------------------------- |
-| `/api/init`              | GET    | ആപ്ലിക്കേഷൻ ആരംഭിക്കൽ പരിശോധന (ആദ്യ റണ്ണിൽ ഉപയോഗിക്കുന്നു)                    |
-| `/api/tags`              | GET    | Ollama-അനുയോജ്യമായ മോഡൽ ടാഗുകൾ (Ollama ക്ലയന്റുകൾക്കായി)                      |
-| `/api/restart`           | POST   | സൗമ്യമായ സെർവർ പുനരാരംഭം ആരംഭിക്കുക                                           |
-| `/api/shutdown`          | POST   | സൗമ്യമായ സെർവർ അടച്ചുപൂട്ടൽ ആരംഭിക്കുക                                        |
-| `/api/system/env/repair` | POST   | OAuth പ്രൊവൈഡർ പരിസ്ഥിതി വേരിയബിളുകൾ പരിഹരിക്കുക                              |
-| `/api/system/version`    | GET    | നിലവിലെ/ഏറ്റവും പുതിയ പതിപ്പ്, അപ്ഡേറ്റ് നില, റിലീസ് ചാനൽ                     |
-| `/api/system/version`    | POST   | ഏറ്റവും പുതിയ പതിപ്പിലേക്കുള്ള ഡിപ്ലോയ്മെന്റ്-അവബോധമുള്ള അപ്ഡേറ്റ് ആരംഭിക്കുക |
+| അവസാന പോയിൻ്റ്           | രീതി | വിവരണം                                                             |
+| ------------------------ | ---- | ------------------------------------------------------------------ |
+| `/api/init`              | GET  | പശ്ചാത്തല സമന്വയ സേവനങ്ങൾ ആരംഭിക്കുക (മാനേജ്മെൻ്റ് ഓത്ത്)          |
+| `/api/tags`              | GET  | ഒല്ലാമ-അനുയോജ്യമായ മോഡൽ ടാഗുകൾ ( Ollama ക്ലയൻ്റുകൾക്ക്)            |
+| `/api/restart`           | POST | മനോഹരമായ സെർവർ പുനരാരംഭിക്കുക                                      |
+| `/api/shutdown`          | POST | മനോഹരമായ സെർവർ ഷട്ട്ഡൗൺ ട്രിഗർ ചെയ്യുക                             |
+| `/api/system/env/repair` | POST | OAuth പ്രൊവൈഡർ എൻവയോൺമെൻ്റ് വേരിയബിളുകൾ നന്നാക്കുക                 |
+| `/api/system/version`    | GET  | Current/latest പതിപ്പ്, അപ്ഡേറ്റ് സ്റ്റാറ്റസ്, റിലീസ് ചാനൽ         |
+| `/api/system/version`    | POST | ഏറ്റവും പുതിയ പതിപ്പിലേക്ക് ഒരു വിന്യാസ-അറിയൽ അപ്ഡേറ്റ് ആരംഭിക്കുക |
 
-> **കുറിപ്പ്:** ഈ എൻഡ്പോയിന്റുകൾ സിസ്റ്റം ആന്തരികമായി അല്ലെങ്കിൽ Ollama ക്ലയന്റ് അനുയോജ്യതയ്ക്കായി ഉപയോഗിക്കുന്നു. അന്തിമ ഉപയോക്താക്കൾ സാധാരണയായി ഇവ വിളിക്കാറില്ല.
+> **കുറിപ്പ്:** ഈ എൻഡ് പോയിൻ്റുകൾ സിസ്റ്റം ആന്തരികമായി അല്ലെങ്കിൽ Ollama ക്ലയൻ്റ് അനുയോജ്യതയ്ക്കായി ഉപയോഗിക്കുന്നു. അന്തിമ ഉപയോക്താക്കൾ അവരെ സാധാരണയായി വിളിക്കാറില്ല.
 
 ### OAuth പരിസ്ഥിതി പരിഹാരം _(v3.6.1+)_
 

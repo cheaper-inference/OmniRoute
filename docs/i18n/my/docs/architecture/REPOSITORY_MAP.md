@@ -242,7 +242,7 @@ src/
 | -------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
 | `components/`                    | Dashboard component API: `packages/ui-kit` အပေါ် adapter များ — `docs/architecture/DESIGN_SYSTEM.md` ကို ကြည့်ပါ |
 | `constants/iconMap.ts`           | `ICON_MAP`: ဖန်သားပြင်များတွင် အသုံးပြုသည့် icon အမည်များ → Lucide component များ (`<Icon>`)                     |
-| `constants/providers.ts`         | Zod validation ပါဝင်သော **provider 380 ခု** (အမှန်တရား၏ မူလရင်းမြစ်)                                             |
+| `constants/providers.ts`         | Zod validation ပါဝင်သော **provider 382 ခု** (အမှန်တရား၏ မူလရင်းမြစ်)                                             |
 | `constants/cliTools.ts`          | ပြင်ပ CLI tool registry                                                                                          |
 | `constants/routingStrategies.ts` | ဦးစားပေးအဆင့်များပါဝင်သော **routing strategy 20 ခု**                                                             |
 | `constants/publicApiRoutes.ts`   | (management auth နှင့် နှိုင်းယှဉ်၍) Bearer auth လိုအပ်သော route များ                                            |
@@ -393,26 +393,26 @@ open-sse/
 
 ## `docs/` — အများပြည်သူအသုံးပြု စာရွက်စာတမ်းများ (root files ၇ ခု + subdirs ၁၇ ခု)
 
-### အထက်အဆင့် လမ်းညွှန်ချက်များ
+### ထိပ်တန်းလမ်းညွှန်များ
 
-| စာရွက်စာတမ်း                | ရည်ရွယ်ချက်                                                                                                   |
-| --------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| `ARCHITECTURE.md`           | အဆင့်မြင့်ဗိသုကာ၊ subsystem မြေပုံ၊ dashboard မျက်နှာပြင်                                                     |
-| `CODEBASE_DOCUMENTATION.md` | အင်ဂျင်နီယာရေးရာ ရည်ညွှန်းချက်: directory များ၊ module များ၊ convention များ                                  |
-| `FEATURES.md`               | v3.8 အထူးခြားချက်များပါဝင်သည့် feature matrix                                                                 |
-| `USER_GUIDE.md`             | နောက်ဆုံးအသုံးပြုသူ လက်စွဲ (setup၊ models၊ combos၊ CLIs၊ audio စသည်တို့)                                      |
-| `API_REFERENCE.md`          | auth model ပါဝင်သည့် API endpoint ရည်ညွှန်းချက်                                                               |
-| `openapi.yaml`              | OpenAPI 3.0 spec (paths ၁၂၁ ခု)                                                                               |
-| `SETUP_GUIDE.md`            | ထည့်သွင်းနည်းလမ်းများ (npm, npx, Docker, Electron, Termux, source)                                            |
-| `ENVIRONMENT.md`            | env vars အားလုံး (ခန့်မှန်း ၈၀၀ ခု မှတ်တမ်းတင်ထား၊ `.env.example` ခန့်မှန်း လိုင်း ၃၀၅၀)                      |
-| `TROUBLESHOOTING.md`        | အဖြစ်များသော error များ + v3.8.0 သိထားပြီးသား ပြဿနာများ                                                       |
-| `RELEASE_CHECKLIST.md`      | release flow အပြည့်အစုံ (skills၊ husky၊ conventional commits၊ deploy)                                         |
-| `COVERAGE_PLAN.md`          | coverage ပန်းတိုင်များနှင့် လက်ရှိအခြေအနေ                                                                     |
-| `FREE_TIERS.md`             | စိတ်ကြိုက်ရွေးချယ်ထားသော free-tier provider များ (အခမဲ့ ၄၈+ ခု + OAuth ၁၁ ခု)                                 |
-| `CLI-TOOLS.md`              | ပြင်ပ CLI integration များ + အတွင်းပိုင်း OmniRoute CLI                                                       |
-| `I18N.md`                   | i18n ဗိသုကာ၊ ဘာသာစကားအသစ်ထည့်သွင်းနည်း၊ locales ၆၇ ခု                                                         |
-| `UNINSTALL.md`              | သန့်ရှင်းစွာ ဖယ်ရှားထုတ်သွင်းခြင်း အဆင့်များ                                                                  |
-| `PROVIDER_REFERENCE.md`     | providers ၃၈၀ ခု၏ **အလိုအလျောက်ပြုလုပ်ထားသော** catalog (ပြန်လည်ထုတ်လုပ်ရန်: `npm run gen:provider-reference`) |
+| စာရွက်စာတမ်း                | ရည်ရွယ်ချက်                                                                                             |
+| --------------------------- | ------------------------------------------------------------------------------------------------------- |
+| `ARCHITECTURE.md`           | အဆင့်မြင့်ဗိသုကာ၊ subsystem မြေပုံ၊ dashboard မျက်နှာပြင်                                               |
+| `CODEBASE_DOCUMENTATION.md` | အင်ဂျင်နီယာရေးရာ ရည်ညွှန်းချက်: directory များ၊ module များ၊ convention များ                            |
+| `FEATURES.md`               | v3.8 အထူးခြားချက်များပါဝင်သည့် feature matrix                                                           |
+| `USER_GUIDE.md`             | နောက်ဆုံးအသုံးပြုသူ လက်စွဲ (setup၊ models၊ combos၊ CLIs၊ audio စသည်တို့)                                |
+| `API_REFERENCE.md`          | auth model ပါဝင်သည့် API endpoint ရည်ညွှန်းချက်                                                         |
+| `openapi.yaml`              | OpenAPI 3.0 spec (paths ၁၂၁ ခု)                                                                         |
+| `SETUP_GUIDE.md`            | ထည့်သွင်းနည်းလမ်းများ (npm, npx, Docker, Electron, Termux, source)                                      |
+| `ENVIRONMENT.md`            | env vars အားလုံး (ခန့်မှန်း ၈၀၀ ခု မှတ်တမ်းတင်ထား၊ `.env.example` ခန့်မှန်း လိုင်း ၃၀၅၀)                |
+| `TROUBLESHOOTING.md`        | အဖြစ်များသော error များ + v3.8.0 သိထားပြီးသား ပြဿနာများ                                                 |
+| `RELEASE_CHECKLIST.md`      | release flow အပြည့်အစုံ (skills၊ husky၊ conventional commits၊ deploy)                                   |
+| `COVERAGE_PLAN.md`          | coverage ပန်းတိုင်များနှင့် လက်ရှိအခြေအနေ                                                               |
+| `FREE_TIERS.md`             | စိတ်ကြိုက်ရွေးချယ်ထားသော free-tier provider များ (အခမဲ့ ၄၈+ ခု + OAuth ၁၁ ခု)                           |
+| `CLI-TOOLS.md`              | ပြင်ပ CLI integration များ + အတွင်းပိုင်း OmniRoute CLI                                                 |
+| `I18N.md`                   | i18n ဗိသုကာ၊ ဘာသာစကားအသစ်ထည့်သွင်းနည်း၊ locales ၆၇ ခု                                                   |
+| `UNINSTALL.md`              | သန့်ရှင်းစွာ ဖယ်ရှားထုတ်သွင်းခြင်း အဆင့်များ                                                            |
+| `PROVIDER_REFERENCE.md`     | **အလိုအလျောက်ထုတ်ပေးသည်။** ဝန်ဆောင်မှုပေးသူ ၃၈၂ ဦး၏ ကတ်တလောက် (regen- `npm run gen:provider-reference`) |
 
 ### Subsystem အသေးစိတ် လေ့လာသုံးသပ်ချက်များ
 

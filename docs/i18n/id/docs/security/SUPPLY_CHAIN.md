@@ -45,15 +45,11 @@ kode keluar 0, yang tidak membuktikan bahwa dependensi telah lolos pemindaian. L
 memblokir juga memerlukan pengukuran yang berhasil: alat yang tidak tersedia, pekerjaan yang gagal,
 dan bukti image yang tidak ada tidak dapat menyatakan bahwa image tersebut bersih.
 
-## Risiko dependensi yang dihentikan
+## Risiko ketergantungan pensiunan
 
-Lockfile root tidak lagi menyertakan `extract-zip` atau jalur dependensi menuju paket tersebut setelah
-peningkatan versi alat pengembangan promptfoo yang disematkan. Hal ini menghentikan rantai
-`promptfoo` → `@openai/codex-security` → `extract-zip` yang sebelumnya diterima dan dilacak dalam #14482.
-Pemeriksaan regresi dalam `tests/unit/extract-zip-14482-exposure.test.ts` menolak pengenalan
-ulangnya dan mempertahankan larangan impor dari kode produksi.
+File kunci root tidak lagi menyertakan `extract-zip` atau tepi ketergantungan setelah memutakhirkan alat pengembangan promptfoo yang disematkan. Ini menghentikan rantai `promptfoo` → `@openai/codex-security` → `extract-zip` yang diterima sebelumnya yang dilacak di #14482. Pemeriksaan regresi di `tests/unit/extract-zip-14482-exposure.test.ts` menolak pemberlakuan kembali dan mempertahankan larangan impor dari kode produksi.
 
-Perbaikan dependensi saat ini mencakup penggantian kompatibilitas untuk klien MSAL Azure Identity, klien FTP get-uri, dan Zod dalam kedua paket plugin OpenCode. Akuisisi token Azure dan pengambilan melalui FTP diuji dengan transportasi terkontrol; kedua paket OpenCode menjalankan rangkaian build dan pengujiannya masing-masing. Jumlah advisori registri merupakan hasil pengukuran pada suatu titik waktu dan dapat berubah setelah lockfile di-commit.
+Perbaikan ketergantungan saat ini juga mencakup penggantian kompatibilitas ke klien MSAL identitas Azure dan klien FTP get-uri. Akuisisi token Azure dan pengambilan FTP diuji dengan transportasi terkontrol; kedua paket OpenCode menjalankan rangkaian build dan pengujiannya sendiri. Jumlah saran registri adalah pengukuran pada suatu titik waktu dan dapat berubah setelah lockfile diterapkan.
 
 ## Backlog: Saran Scorecard → pemblokiran
 

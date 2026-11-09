@@ -22,5 +22,5 @@
   },
   "activationStatus": "PENDING_DEFAULT_SETUP_TRANSITION",
   "producerReceiptsRequired": true,
-  "targetBranches": ["main", "release/v3.8.53"]
+  "targetBranches": ["main", "release/v3.8.54"]
 }

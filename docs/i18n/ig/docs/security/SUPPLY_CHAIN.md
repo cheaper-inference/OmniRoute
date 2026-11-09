@@ -45,15 +45,11 @@ exit 0, nke na-adịghị egosi na ndabere gafere scan ahụ. Nzọụkwụ Triv
 chọkwara nha gara nke ọma: tools ndị adịghị, jobs dara ada, na enweghị ihe akaebe image
 enweghị ike ikwenye na image ahụ dị ọcha.
 
-## Ihe ize ndụ nke ndabere e wepụrụ n’ọrụ
+## Ihe egwu ndabere ezumike nka
 
-Faịlụ mkpọchi mgbọrọgwụ anaghịzi etinye `extract-zip` ma ọ bụ njikọ ndabere na ya mgbe
-emelitere ngwá ọrụ mmepe promptfoo nke a kpọgidere n’ụdị a kapịrị ọnụ. Nke a na-ewepụ njikọ
-`promptfoo` → `@openai/codex-security` → `extract-zip` nke a nabatara na mbụ ma soro na #14482.
-Nnyocha mgbochi nlọghachi dị na `tests/unit/extract-zip-14482-exposure.test.ts` na-ajụ
-iweghachite ya ma na-ejigide mmachibido ibubata ya site na koodu mmepụta.
+Mkpọchi mgbọrọgwụ anaghịzi agụnye `extract-zip` ma ọ bụ ihe ndabere na ya ka emelitechara ngwa ọrụ mmepe ngwa ngwa. Nke a lara ezumike nka `promptfoo` → `@openai/codex-security` → `extract-zip` a nabataburu na #14482. Nlebaghachi azụ na `tests/unit/extract-zip-14482-exposure.test.ts` jụrụ mweghachi ya ma jigide mmachi na mbubata site na koodu mmepụta.
 
-Ndozi ndabere dị ugbu a gụnyere nhazi ndakọrịta maka MSAL client nke Azure identity, FTP client nke get-uri, na Zod n’ime ngwugwu plugin OpenCode abụọ ahụ. A na-eji usoro mbufe a na-achịkwa anwale inweta token Azure na iweghachite data site na FTP; ngwugwu OpenCode abụọ ahụ na-eme usoro build na test nke ha. Ọnụọgụ ịdọ aka ná ntị sitere na registry bụ nha e mere n’otu oge kpọmkwem, ya mere ọ nwere ike ịgbanwe mgbe e tinyesịrị lockfile na commit.
+Ndozi nkwado ndabere ugbu a na-emetụtakwa ndakọrịta gabigara onye ahịa MSAL nke Azure yana onye ahịa FTP get-uri. A na-anwale nnweta Azure token na nweghachi FTP site na njem ndị a na-achịkwa; Ngwugwu OpenCode abụọ na-arụ ụlọ ụlọ na nnwale nke ha. Ọnụọgụgụ ndụmọdụ ndekọ aha bụ nha n'otu oge ma nwee ike ịgbanwe mgbe emechara faịlụ mkpọchi.
 
 ## Nchịkọta ọrụ: Ndụmọdụ Scorecard → igbochi
 

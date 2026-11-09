@@ -156,14 +156,14 @@ OmniRoute ṣafihan awọn ọgbọn A2A 6 ti a firanṣẹ ni `src/lib/a2a/task
 
 | Ogbon             | ID                   | Apejuwe                                                                                                                           | Awọn afi               | Awọn apẹẹrẹ                              |
 | :---------------- | :------------------- | :-------------------------------------------------------------------------------------------------------------------------------- | :--------------------- | :--------------------------------------- |
-| Smart afisona     | `smart-routing`      | Awọn ipa ọna kiakia nipasẹ provider/combo to dara julọ nipa lilo igbelewọn konbo engine OmniRoute+                                | afisona, awọn olupese  | "Pa ọna yii nipasẹ awoṣe ti o dara julọ" |
-| Quota Management  | `quota-management`   | Awọn ijabọ fun ipinlẹ ipin ipin-olupese, ṣe iranlọwọ fun awọn olupe lati pinnu igba lati throttle/switch                          | ipin, awọn olupese     | "Ṣayẹwo ipin fun anthropic"              |
-| Awari Olupese     | `provider-discovery` | Awọn atokọ ti awọn olupese ti fi sori ẹrọ pẹlu awọn agbara, awọn asia ipele-ọfẹ, ipo OAuth                                        | olupese, Awari         | "Awọn olupese wo ni o wa?"               |
-| Iye owo Analysis  | `cost-analysis`      | Iṣiro iye owo ti request/conversation ti a fun ni katalogi + lilo aipẹ                                                            | iye owo, lilo          | "Iro idiyele fun ibaraẹnisọrọ yii"       |
+| Smart afisona     | `smart-routing`      | Awọn ipa ọna kiakia nipasẹ provider/combo ti o dara julọ nipa lilo igbelewọn konbo engine + ti OmniRoute                          | afisona, awọn olupese  | "Pa ọna yii nipasẹ awoṣe ti o dara julọ" |
+| Quota Management  | `quota-management`   | Awọn ijabọ fun ipinlẹ ipin ipin-olupese, ṣe iranlọwọ fun awọn olupe lati pinnu nigbati lati throttle/switch                       | ipin, awọn olupese     | "Ṣayẹwo ipin fun anthropic"              |
+| Awari Olupese     | `provider-discovery` | Awọn atokọ ti awọn olupese ti a fi sori ẹrọ pẹlu awọn agbara, awọn asia ipele-ọfẹ, ipo OAuth                                      | olupese, Awari         | "Awọn olupese wo ni o wa?"               |
+| Iye owo Analysis  | `cost-analysis`      | Awọn idiyele idiyele ti request/conversation kan ti a fun ni katalogi + lilo aipẹ                                                 | iye owo, lilo          | "Iro idiyele fun ibaraẹnisọrọ yii"       |
 | Iroyin Ilera      | `health-report`      | Aggregates Circuit fifọ, cooldown, lockout ipinle fun olupese                                                                     | ilera, resilience      | "Fi ipo ilera han gbogbo awọn olupese"   |
 | Awọn agbara Akojọ | `list-capabilities`  | Pada ni kikun 45-iwọle Agent Skills katalogi (23 API + 21 CLI + 1 atunto) bi tabili isamisi pẹlu SKILL.md URLs aise fun abẹrẹ ọrọ | katalogi, Awari, ogbon | "Akojọ gbogbo awọn agbara OmniRoute "    |
 
-> Kaadi Aṣoju yẹ ki o wa ni ibamu pẹlu katalogi Olupese 381 laaye; Awọn iṣiro olupese ati awọn metadata free/no-auth jẹ orisun lati iforukọsilẹ akoko asiko.
+> Kaadi Aṣoju yẹ ki o wa ni ibamu pẹlu katalogi Olupese 382 laaye; Awọn iṣiro olupese ati awọn metadata free/no-auth jẹ orisun lati iforukọsilẹ akoko asiko.
 
 ### `list-capabilities` Skill Apejuwe
 

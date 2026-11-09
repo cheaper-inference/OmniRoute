@@ -355,24 +355,24 @@ API کلید: [ڈیش بورڈ سے]
 
 ## 🚀 تعیناتی
 
-### عالمی npm انسٹالیشن (تجویز کردہ)
+### گلوبل این پی ایم انسٹال (تجویز کردہ)
 
 ```bash
 npm install -g omniroute
 
-# کنفیگریشن ڈائریکٹری بنائیں
+# Create config directory
 mkdir -p ~/.omniroute
 
-# .env فائل بنائیں (.env.example دیکھیں)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# سرور شروع کریں
+# Start server
 omniroute
-# یا حسبِ ضرورت پورٹ کے ساتھ:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI خودکار طور پر `~/.omniroute/.env` یا `./.env` سے `.env` لوڈ کرتا ہے۔
+CLI خود بخود `.env` `~/.omniroute/.env` یا `./.env` سے لوڈ کرتا ہے۔ ورکنگ ڈائرکٹری میں ایک `./.env` کلیدوں کی صرف ایک مختصر اجازت کی فہرست ترتیب دے سکتا ہے (بندرگاہیں، `REQUIRE_API_KEY`، locale اور رنگ کی ترتیبات)؛ باقی سب کچھ `~/.omniroute/.env` میں ڈالیں۔ [CLI لانچ کے معاہدے](CLI-LAUNCH-CONTRACTS.md#working-directory-env) دیکھیں۔
 
 ### ٹرے موڈ
 

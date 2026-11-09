@@ -355,24 +355,24 @@ Model: cc/claude-opus-4-7
 
 ## 🚀 Penerapan
 
-### Instalasi npm global (Disarankan)
+### Pemasangan npm global (Disarankan)
 
 ```bash
 npm install -g omniroute
 
-# Buat direktori konfigurasi
+# Create config directory
 mkdir -p ~/.omniroute
 
-# Buat file .env (lihat .env.example)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# Mulai server
+# Start server
 omniroute
-# Atau dengan port khusus:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI secara otomatis memuat `.env` dari `~/.omniroute/.env` atau `./.env`.
+CLI secara otomatis memuat `.env` dari `~/.omniroute/.env` atau `./.env`. `./.env` di direktori kerja hanya dapat menyetel daftar pendek kunci yang diizinkan (port, `REQUIRE_API_KEY`, pengaturan lokal dan warna); masukkan semuanya ke dalam `~/.omniroute/.env`. Lihat [kontrak peluncuran CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### Mode baki sistem
 

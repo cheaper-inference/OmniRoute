@@ -15,7 +15,7 @@
 
 **ابتكرها [دييغو سوزا](https://github.com/diegosouzapw)**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Never stop coding. Every AI tool → 381 providers — 150+ free — through one endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity into FREE Claude / GPT / Gemini with auto-fallback. RTK + Caveman stacked compression saves 15–95% tokens (~89% avg) — never hit limits. 381 AI providers · 150+ free tiers · ~1.62B free tokens/mo · 20 routing strategies · $0 to start."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Never stop coding. Every AI tool → 382 providers — 150+ free — through one endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity into FREE Claude / GPT / Gemini with auto-fallback. RTK + Caveman stacked compression saves 15–95% tokens (~89% avg) — never hit limits. 382 AI providers · 150+ free tiers · ~1.62B free tokens/mo · 20 routing strategies · $0 to start."/>
 
 </div>
 
@@ -51,18 +51,13 @@
 
 ### 💬 انضم إلى المجتمع
 
-**👋 تابع المشرف — واحصل أولًا على المزوّدين الجدد والإصدارات والنصائح:**
+**👋 اتبع المشرف — واحصل على مقدمي الخدمات والإصدارات والنصائح الجديدة أولاً:**
 
-[![تابع Diego على LinkedIn](https://img.shields.io/badge/Follow_Diego_on-LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/diegosouzapw/)
-[![تابع @diegosouzapw على GitHub](https://img.shields.io/github/followers/diegosouzapw?style=for-the-badge&logo=github&logoColor=white&label=Follow%20on%20GitHub&color=181717)](https://github.com/diegosouzapw)
+[![تابع دييغو على LinkedIn](https://img.shields.io/badge/Follow_Diego_on-LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white) ](https://www.linkedin.com/in/diegosouzapw/) [![تابع @diegosouzapw على GitHub](https://img.shields.io/github/followers/diegosouzapw?style=for-the-badge&logo=github&logoColor=white&label=Follow%20on%20GitHub&color=181717) ](https://github.com/diegosouzapw)
 
-[![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/U47eFqAXCn)
-[![Telegram](https://img.shields.io/badge/Telegram-26A5E4?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/omnirouteOficial)
-[![WhatsApp Global](https://img.shields.io/badge/WhatsApp_Global-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4)
-[![WhatsApp Brasil](https://img.shields.io/badge/WhatsApp_Brasil-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)
-[![الموقع الإلكتروني](https://img.shields.io/badge/Website-omniroute.online-blue?logo=google-chrome&logoColor=white)](https://omniroute.online)
+[![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white) ](https://discord.gg/U47eFqAXCn) [![Telegram](https://img.shields.io/badge/Telegram-26A5E4?style=for-the-badge&logo=telegram&logoColor=white) ](https://t.me/omnirouteOficial) [![WhatsApp Global](https://img.shields.io/badge/WhatsApp_Global-25D366?style=for-the-badge&logo=whatsapp&logoColor=white) ](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) [![WhatsApp Brasil](https://img.shields.io/badge/WhatsApp_Brasil-25D366?style=for-the-badge&logo=whatsapp&logoColor=white) ](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) [![موقع ويب](https://img.shields.io/badge/Website-omniroute.online-blue?logo=google-chrome&logoColor=white) ](https://omniroute.online)
 
-**الأسئلة، ونصائح المزوّدين، وخارطة الطريق، والدعم ← [Discord](https://discord.gg/U47eFqAXCn) · [Telegram](https://t.me/omnirouteOficial) · WhatsApp [🌍 العالمي](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) / [🇧🇷 Brasil](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) / [البوابة](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)**
+**الأسئلة ونصائح المزود وخريطة الطريق والدعم → [Discord](https://discord.gg/U47eFqAXCn) · [Telegram](https://t.me/omnirouteOficial) · WhatsApp [🌍 Global](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) / [🇧🇷 Brasil](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) / قناة / [بوابة](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK) [📢 الرسمية](https://whatsapp.com/channel/0029VbDwC7A3wtb5PN6a5t2R)**
 
 <br/>
 
@@ -72,8 +67,8 @@
 
 |                                   |        v3.8.50        | **v3.8.51** |      `v3.8.54+`       |
 | --------------------------------- | :-------------------: | :---------: | :-------------------: |
-| مقدمي 🌐                          |          352          |   **358**   |          381          |
-| 🧠 نموذج الدردشة الفريد IDs       |         1320          |  **1374**   |         1519          |
+| مقدمي 🌐                          |          352          |   **358**   |          382          |
+| 🧠 نموذج الدردشة الفريد IDs       |         1320          |  **1374**   |         1524          |
 | جسر طريقة 🖼️                      | رؤية 🆕 + صوت + فيديو |      ✓      |           ✓           |
 | كتالوج 📡 الرادار المجاني         |    الاشتراك في 🆕     |      ✓      |           ✓           |
 | ⚖️ جدولة مدركة للحصص              |     🆕 حصة الحصص      |      ✓      |           ✓           |
@@ -108,7 +103,7 @@
   <tr>
     <td align="right"><b>⚙️ Features</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 Combos</a></td>
-    <td align="center"><a href="#-381-ai-providers--156-catalog-marked-free">🌐 Providers</a></td>
+    <td align="center"><a href="#-382-ai-providers--156-catalog-marked-free">🌐 Providers</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI &amp; MCP</a></td>
   </tr>
   <tr>
@@ -244,7 +239,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="The Promise — One endpoint and 381 providers. Automatic fallback keeps routing while another healthy target is available. Six pillars: resilient fallback across 381 providers · up to 95% token savings on eligible workloads · $0 to start with 150+ free tiers and 52 recurring/keyless free-forever providers · 39 CLI/agent integrations through one config · OpenAI, Claude, Gemini and Responses API compatibility at /v1 · production controls including circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals and 56,000+ static test declarations across 7,800+ tracked test files."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="The Promise — One endpoint and 382 providers. Automatic fallback keeps routing while another healthy target is available. Six pillars: resilient fallback across 382 providers · up to 95% token savings on eligible workloads · $0 to start with 150+ free tiers and 52 recurring/keyless free-forever providers · 39 CLI/agent integrations through one config · OpenAI, Claude, Gemini and Responses API compatibility at /v1 · production controls including circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals and 56,000+ static test declarations across 7,800+ tracked test files."/>
 
 <br/>
 <br/>
@@ -504,7 +499,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="ما الذي يميز OmniRoute — لقطة ميزات مؤرخة مقابل 9router و OpenRouter و CLIProxyAPI و LiteLLM عبر 13 قدرة. OmniRoute: 381 مزودًا، أكثر من 150 طبقة مجانية مدمجة، 20 استراتيجية توجيه، ضغط رموز بـ 12 محركًا، خادم MCP مدمج مع 110 أدوات، بروتوكول وكيل A2A، ذاكرة دائمة، حواجز أمان، وكلاء سحابة، إخفاء بصمة TLS، سطح مكتب/Termux/PWA و67 لغة لواجهة المستخدم. OmniRoute مرخصة بترخيص MIT وقابلة للاستضافة الذاتية. قد تتغير قدرات وأعداد المنافسين؛ راجع المنهجية المرتبطة."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="ما الذي يميز OmniRoute — لقطة ميزات مؤرخة مقابل 9router و OpenRouter و CLIProxyAPI و LiteLLM عبر 13 قدرة. OmniRoute: 382 مزودًا، أكثر من 150 طبقة مجانية مدمجة، 20 استراتيجية توجيه، ضغط رموز بـ 12 محركًا، خادم MCP مدمج مع 110 أدوات، بروتوكول وكيل A2A، ذاكرة دائمة، حواجز أمان، وكلاء سحابة، إخفاء بصمة TLS، سطح مكتب/Termux/PWA و67 لغة لواجهة المستخدم. OmniRoute مرخصة بترخيص MIT وقابلة للاستضافة الذاتية. قد تتغير قدرات وأعداد المنافسين؛ راجع المنهجية المرتبطة."/>
 
 <sub>📊 المنهجية الكاملة وتفاصيل كل ميزة مقابل 9router و OpenRouter و CLIProxyAPI و LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -599,7 +594,7 @@ Radar اختياري ويستخدم طلبات GET فقط. لا يرفع عمي�
 - **🖼️ نقاط نهاية جديدة** — `/v1/ocr` (Mistral OCR) و `/v1/audio/translations` (نمط الهمس) يدور حول سطح الوسائط. → [API مرجع](docs/reference/API_REFERENCE.md)
 - **🎨 توليد الصورة / الفيديو / الصوت** — واحد API لوسائل الإعلام: xAI Grok تخيل ونوفيتا AI فيديو، ComfyUIو Magnific و Adobe Firefly و Segmind وموفرو الكلام مثل ElevenLabs. → [API مرجع](docs/reference/API_REFERENCE.md)
 - **نشر 🌍 والعمليات** — الوكيل العكسي `basePath`، والاكتشاف التلقائي للغة المتصفح، وتتبع الجهاز لكل مفتاح، وثقة MITM بدون جذر، وتوطين zh-TW. [بيئة](docs/reference/ENVIRONMENT.md) →
-- **🤝 المزيد من مقدمي الخدمات والوكلاء** وكلاء — السحابي (Codex Cloud، Cursor، Devin، Jules)، Grok Build (xAI) مع تسجيل الدخول للمتصفح + OAuth ، بطاقة Ollama من الدرجة الأولى، Claude Opus 5 & Sonnet 5، شراكة Kimi الرسمية (Code/Web/Moonshot)، Zed، Requesty، SenseNova، Yuanbao، Agnes AI... وتحديث **381 - كتالوج الموفر** . [مقدمي](docs/reference/PROVIDER_REFERENCE.md) →
+- **🤝 المزيد من مقدمي الخدمات والوكلاء** وكلاء — السحابي (Codex Cloud، Cursor، Devin، Jules)، Grok Build (xAI) مع تسجيل الدخول للمتصفح + OAuth ، بطاقة Ollama من الدرجة الأولى، Claude Opus 5 & Sonnet 5، شراكة Kimi الرسمية (Code/Web/Moonshot)، Zed، Requesty، SenseNova، Yuanbao، Agnes AI... وتحديث **382-كتالوج الموفر** . [مقدمي](docs/reference/PROVIDER_REFERENCE.md) →
 - **شفافية توجيه 📡** تحمل كل استجابة — رأس `X-OmniRoute-Decision` يسمي strategy/provider/latency الذي يخدمها، وإستراتيجية تحرير وسرد `cache-optimized` جديدة، توجيه عامل + Auto-Combo `cacheAffinity` يكرر الطلبات مرة أخرى إلى الاتصال الذي يحمل البادئة المخزنة مؤقتًا، وتكشف نقطة نهاية `/v1/auto-combo/{channel}/candidates` للقراءة فقط عن تجمع المرشحين المباشر لقناة `auto/*`. مجموعة → [التلقائية](docs/routing/AUTO-COMBO.md)
 - **⚡ الأداء المحلي والبنية التحتية** — بنقرة واحدة، Redis و Cloudflare Workers / Deno نشر أجهزة نشر الترحيل وBifrost وMux كخدمات مدمجة خاضعة للإشراف. [خدمات](docs/frameworks/EMBEDDED-SERVICES.md) → المدمجة
 - **🧩 موجود أيضًا في الصندوق** إطار عمل — الإضافي، سوق + ، وأطر مهارات Omni/Agent/GitHub ، وتكامل Obsidian vault (22 أداة MCP )، والملفات والدُفعات المتوافقة مع OpenAI APIs، وذاكرة التخزين المؤقت للاستجابة الدلالية، واللعب مع لوحات المتصدرين، واكتشاف وكيل ACP (15 وكيلًا مدمجًا)، وتصدير السجل المجدول إلى BigQuery، وتوزيع `auto/chaos` المتوازي متعدد النماذج، وجسر روبوت Telegram ، ومدير إصدار داخل التطبيق و تصنيفات المزودين المجانيين لـ LMArena-ELO. [مستندات](docs/README.md) →
@@ -683,11 +678,11 @@ omniroute configure codex          # أيضًا: claude opencode qwen aider goos
 
 <div align="center">
 
-## 🌐 381 مقدمو خدمات AI — 156 بدون علامة كتالوج
+## 🌐 382 مقدمو خدمات AI — 156 بدون علامة كتالوج
 
 </div>
 
-> **381 مقدمي الخدمات المسجلين** عبر الدردشة الأساسية والوسائط والبحث والمجموعات المحلية والوكلاء السحابيين ومجموعات النظام، بما في ذلك **156 يحمل البيانات الوصفية لاكتشاف `hasFree: true`** . يغطي سجل نموذج الدردشة **242 مزودًا / 3,148 زوجًا متميزًا من نماذج المزودين / 1,519 نموذجًا أوليًا IDs** ; يحتوي كتالوج الميزانية الحرة المنفصل على **466 صفًا لكل نموذج** ,**34 حمامات متكررة** و **52 من مقدمي خدمة recurring/keyless مجانًا إلى الأبد** . هذه قواسم مختلفة حسب التصميم؛ التعريفات والحسابات المحذوفة موجودة في [مرجع الموفر](docs/reference/PROVIDER_REFERENCE.md) [والطبقات المجانية](docs/reference/FREE_TIERS.md).
+> **382 مقدمي الخدمات المسجلين** عبر الدردشة الأساسية والوسائط والبحث والمجموعات المحلية والوكلاء السحابيين ومجموعات النظام، بما في ذلك **156 يحمل البيانات الوصفية لاكتشاف `hasFree: true`** . يغطي سجل نموذج الدردشة **243 مزودًا / 3,155 زوجًا متميزًا من نماذج المزودين / 1,524 نموذجًا أوليًا IDs** ; يحتوي كتالوج الميزانية الحرة المنفصل على **466 صفًا لكل نموذج** ,**34 حمامات متكررة** و **52 من مقدمي خدمة recurring/keyless مجانًا إلى الأبد** . هذه قواسم مختلفة حسب التصميم؛ التعريفات والحسابات المحذوفة موجودة في [مرجع الموفر](docs/reference/PROVIDER_REFERENCE.md) [والطبقات المجانية](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
@@ -1299,7 +1294,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # تؤدي CI=1 أيضً
   <tr><td nowrap><b>وقت التشغيل</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>لغة</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> عبر <code>src/</code> و <code>open-sse/</code> (لا يوجد <code>any</code> في المركز منذ الإصدار 2.0)</td></tr>
   <tr><td nowrap><b>نطاق</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>قاعدة البيانات</b></td><td>better-sqlite3 (SQLite، WAL Journal) + LowDB (تراث JSON ) — 147 وحدة نطاق، 225 عملية ترحيل</td></tr>
+  <tr><td nowrap><b>قاعدة البيانات</b></td><td>better-sqlite3 (SQLite، WAL Journal) + LowDB (تراث JSON ) — 147 وحدة نطاق، 229 عملية ترحيل</td></tr>
   <tr><td nowrap><b>ذاكرة</b></td><td>SQLite FTS5 النص الكامل + int8-quantized التضمين المتجهي، الاضمحلال المكتوب</td></tr>
   <tr><td nowrap><b>المخططات</b></td><td>Zod 4 — MCP أداة I/O التحقق من صحة عقود + API</td></tr>
   <tr><td nowrap><b>البروتوكولات</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

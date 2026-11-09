@@ -355,24 +355,24 @@ Mô hình: cc/claude-opus-4-7
 
 ## 🚀 Triển khai
 
-### Cài đặt npm toàn cục (Khuyến nghị)
+### Cài đặt npm toàn cầu (Được khuyến nghị)
 
 ```bash
 npm install -g omniroute
 
-# Tạo thư mục cấu hình
+# Create config directory
 mkdir -p ~/.omniroute
 
-# Tạo tệp .env (xem .env.example)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# Khởi động máy chủ
+# Start server
 omniroute
-# Hoặc với cổng tùy chỉnh:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI tự động tải `.env` từ `~/.omniroute/.env` hoặc `./.env`.
+CLI tự động tải `.env` từ `~/.omniroute/.env` hoặc `./.env`. Một `./.env` trong thư mục làm việc chỉ có thể đặt một danh sách ngắn các khóa được phép (cài đặt cổng, `REQUIRE_API_KEY`, ngôn ngữ và màu sắc); đặt mọi thứ khác vào `~/.omniroute/.env`. Xem [hợp đồng ra mắt CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### Chế độ khay hệ thống
 

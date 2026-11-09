@@ -127,6 +127,27 @@ Automatische Bewertung wählt pro Anfrage den besten Anbieter/das beste Modell a
 | `src/sse/handlers/chat.ts`                                | Integration: Kurzschlussverarbeitung für automatische Präfixe |
 | `src/shared/constants/providers.ts`                       | `SYSTEM_PROVIDERS.auto`-Systemeintrag                         |
 
+## Kontoeinstellungen für gespeicherte Auto-Combos
+
+Der Intelligent Auto Editor bietet eine optionale Option** Kontoeinstellungen** Abschnitt. Jede Verbindung kann bevorzugt, normal (Standard), reserviert oder ausgeschlossen sein. Mehrere Verbindungen können sich eine Ebene teilen. Wählt automatisch innerhalb der ersten berechtigten Stufe aus und behält dort sein scoring/router Verhalten bei; Fehlversuche fallen auf die verbleibenden konkreten Konten durch, bevorzugt vor normal vor Reserve. Ausgeschlossene Verbindungen werden von dieser Kombination niemals verwendet.
+
+Die Einstellung wird als `config.accountPreferences` gespeichert, verschlüsselt durch die Verbindung ID:
+
+```json
+{
+  "accountPreferences": {
+    "connection-a": "preferred",
+    "connection-b": "preferred",
+    "connection-c": "reserve",
+    "connection-d": "excluded"
+  }
+}
+```
+
+Eine weggelassene oder leere Karte behält die vorhandene Routenführung bei. Die Einstellungen aktivieren keine deaktivierten Verbindungen, gewähren keinen API-Schlüsselzugriff, stellen durch Kontingente blockierte Kandidaten nicht wieder her und umgehen keine Budgetprüfungen. Jeder Versuch ist auf die konkrete Verbindung beschränkt, sodass beim Konto-Fallback keine Stufen hinter dem Combo-Router übersprungen werden können. Bestehende Sitzungsaffinität kann ein berechtigtes Konto behalten; Durch das Ausschließen des an eine native Runde gebundenen Kontos wird diese Runde gestoppt, anstatt die Konten stillschweigend zu ändern.
+
+Konfigurierte Einstellungen verwenden den kontobewussten Auto-Pfad: Ungebundener Kontext-Cache, Smart-Pipeline, Chaos und Schattenverknüpfungen werden nicht gesendet. Die spekulative Absicherung ist für diese Anfragen deaktiviert, sodass Reservekonten nicht mit bevorzugten Konten konkurrieren können. Andere Combo-Strategien interpretieren diese Einstellung nicht. Wenn Sie eine Kombination von „Automatisch“ ändern, bleiben die gespeicherten Einstellungen für einen späteren Wechsel zurück erhalten.
+
 ## Combo-Namen, die einer echten Modell-ID entsprechen
 
 Eine Combo, deren `name` mit einer reinen Modell-ID identisch ist (z. B. eine Combo namens
@@ -182,36 +203,38 @@ Zwei häufige Stolperfallen:
 
 Siehe [#7992](https://github.com/diegosouzapw/OmniRoute/issues/7992) und [#7111](https://github.com/diegosouzapw/OmniRoute/issues/7111) zu den ursprünglichen Missverständnissen, die hier dokumentiert werden.
 
-## Funktionsweise (persistierte Auto-Combos)
+## So funktioniert es (Persistente Auto-Combos)
 
-Die Auto-Combo-Engine wählt mithilfe einer **Bewertungsfunktion mit 16 Faktoren** (definiert in `open-sse/services/autoCombo/scoring.ts` → `DEFAULT_WEIGHTS`) dynamisch den besten Anbieter bzw. das beste Modell für jede Anfrage aus. Die Standardgewichtungen ergeben in Summe `1.0`; benutzerdefinierte Gewichtungen werden durch `normalizeScoringWeights()` neu normalisiert. Zwei der sechzehn Faktoren — `cacheAffinity` und `resetWindowAffinity` — haben standardmäßig eine Gewichtung von `0`; `reliability` hat in `DEFAULT_WEIGHTS` die Gewichtung `0`, aber `0.03` in allgemeinen Paketen und `0.04` in `reliability-first`, während `quality` in Paketen die Gewichtung `0.02` hat (`0.03` in `quality-first`): Sie werden dennoch für jeden Kandidaten berechnet, und `cacheAffinity` steuert die Prompt-Cache-Deduplizierung außerhalb der Bewertung. Daher fließen die standardmäßig mit null gewichteten Faktoren lediglich standardmäßig nicht in die Entscheidung ein, während sie dies bei Paketen tun.
+Die Auto-Combo Engine wählt mithilfe von a dynamisch die beste provider/model für jede Anfrage aus **16-Faktor-Bewertungsfunktion** (definiert in `open-sse/services/autoCombo/scoring.ts` → `DEFAULT_WEIGHTS`). Die Standardgewichte summieren sich zu `1.0`; Benutzerdefinierte Gewichte werden durch `normalizeScoringWeights()` renormiert. Zwei der sechzehn — `cacheAffinity` und `resetWindowAffinity` — tragen standardmäßig die Gewichtung `0`; `reliability` trägt `0` in `DEFAULT_WEIGHTS` aber `0.03` in generischen Paketen und `0.04` in `reliability-first`, und `quality` trägt `0.02` in Paketen (`0.03` in `quality-first`): Sie werden weiterhin für jeden Kandidaten berechnet, und `cacheAffinity` grenzt die Prompt-Cache-Deduplizierung außerhalb des Scores ein, sodass die Zero-Default-Faktoren einfach nicht standardmäßig stimmen, während dies bei Paketen der Fall ist.
 
-![Auto-Combo-Bewertung mit 16 Faktoren](../diagrams/exported/auto-combo-scoring.svg)
+![Auto-Combo 16-factor scoring](../diagrams/exported/auto-combo-scoring.svg)
 
-> Quelle: [diagrams/auto-combo-scoring.mmd](../diagrams/auto-combo-scoring.mmd) (Neugenerierung über `npm run docs:render-diagrams`). Der Dateiname ist historisch bedingt; die Quelle und das gerenderte Diagramm zeigen alle 16 in `DEFAULT_WEIGHTS` deklarierten Faktoren.
+> Quelle: [diagrams/auto-combo-scoring.mmd](../diagrams/auto-combo-scoring.mmd) (Neugenerierung über `npm run docs:render-diagrams`). Der Dateiname ist historisch; Die Quelle und das gerenderte Diagramm zeigen alle 16 in `DEFAULT_WEIGHTS` deklarierten Faktoren.
 
-| Faktor                | Standardgewichtung | Beschreibung                                                                                                                                                                                                                                             |
-| :-------------------- | :----------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `quota`               | 0.1429             | Verbleibendes Kontingent bzw. verbleibender Spielraum bis zum Ratenlimit [0..1]                                                                                                                                                                          |
-| `health`              | 0.1605             | Zustandswert des Circuit Breakers (CLOSED=1.0, HALF_OPEN=0.5, OPEN=0.0)                                                                                                                                                                                  |
-| `costInv`             | 0.1429             | Inverse **kombinierte** Kosten (60 % Preis für Eingabe- + 40 % Preis für Ausgabetoken, normalisiert) — günstiger = höhere Bewertung                                                                                                                      |
-| `latencyInv`          | 0.1143             | Inverse p95-Latenz, auf den Pool normalisiert — schneller = höhere Bewertung                                                                                                                                                                             |
-| `taskFit`             | 0.0762             | Eignung für den Aufgabentyp (Programmierung, Review, Planung, Analyse, Debugging, Dokumentation)                                                                                                                                                         |
-| `stability`           | 0.0476             | Varianzbasierte Stabilität anhand der Standardabweichung der Latenz — ein Kandidat mit stark schwankender Antwortzeit erhält eine niedrigere Bewertung                                                                                                   |
-| `tierPriority`        | 0.0476             | Priorität der Kontostufe — Ultra=1.0, Pro=0.67, Standard=0.33, Free=0.0                                                                                                                                                                                  |
-| `tierAffinity`        | 0.0476             | Affinität zwischen der Stufe des Kandidaten und der im Manifest empfohlenen Stufe                                                                                                                                                                        |
-| `specificityMatch`    | 0.0476             | Übereinstimmung zwischen der Spezifität der Anfrage (Manifest-Hinweis) und der Modellstufe                                                                                                                                                               |
-| `contextAffinity`     | 0.0476             | Affinität zwischen dem Kontextfensterbedarf der Anfrage und dem Kontextfenster des Modells                                                                                                                                                               |
-| `sessionAvailability` | 0.0476             | Verfügbarkeit der OAuth-Sitzung der Kandidatenverbindung für diese Sitzung (`getOAuthSessionAvailability()`; Nicht-OAuth-Verbindungen erhalten die Bewertung 1.0)                                                                                        |
-| `connectionDensity`   | 0.0476             | Verteilt die Last auf Verbindungen desselben Anbieters (gegen Konzentration)                                                                                                                                                                             |
-| `cacheAffinity`       | 0.00               | Rendezvous-Hash-Affinität zu der Verbindung, die höchstwahrscheinlich bereits das Prompt-Cache-Präfix dieser Anfrage enthält (`open-sse/services/combo/promptCacheAffinity.ts`); standardmäßig deaktiviert (#8008)                                       |
-| `resetWindowAffinity` | 0.00               | Bevorzugung von Verbindungen mit einem günstigen Zeitfenster für die Kontingentzurücksetzung (standardmäßig deaktiviert)                                                                                                                                 |
-| `quality`             | 0.03               | Feedbackgesteuertes Signal für die Ausgabequalität aus dem Qualitäts-Tracker für Routing-Ereignisse; Kandidaten ohne Beobachtungen erhalten den neutralen Wert 0.5                                                                                       |
-| `reliability`         | 0.00               | Beobachteter Erfolgsanteil, `1 - failureRate`, aus dem Nutzungsverlauf der letzten 24 Stunden ab einer Mindestanzahl von zehn Stichproben (andernfalls Echtzeitmetriken); Kandidaten ohne Beobachtungen erhalten den Wert 1.0. Standardmäßig deaktiviert |
+| Faktor                | Standardgewichtung | Beschreibung                                                                                                                                                                                                                              |
+| :-------------------- | :----------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `quota`               | 0.1429             | Verbleibender Kontingent-/Ratenlimit-Spielraum [0..1]                                                                                                                                                                                     |
+| `health`              | 0.1605             | Zustandsbewertung des Leistungsschalters (CLOSED= 1,0, HALF_OPEN= 0,5, OPEN= 0,0)                                                                                                                                                         |
+| `costInv`             | 0.1429             | Invers **vermischt** Kosten (60 % Eingabe- + 40 % Ausgabe-Token-Preis, normalisiert) — günstiger = höhere Punktzahl                                                                                                                       |
+| `latencyInv`          | 0.1143             | Die inverse p95-Latenz wurde normalisiert, um — schneller und = mit höherer Punktzahl zu bündeln                                                                                                                                          |
+| `taskFit`             | 0.0762             | Eignung des Aufgabentyps (Codierung, Überprüfung, Planung, Analyse, Debugging, Dokumentation)                                                                                                                                             |
+| `stability`           | 0.0476             | Varianzbasierte Stabilität aus Latenzstandardabweichung — Ein Kandidat, dessen Antwortzeitschwankungen schlechter abschneiden                                                                                                             |
+| `tierPriority`        | 0.0476             | Kontostufenpriorität — Ultra = 1.0, Pro = 0,67, Standard = 0,33, Free = 0,0                                                                                                                                                               |
+| `tierAffinity`        | 0.0476             | Affinität zwischen der Stufe des Kandidaten und der im Manifest empfohlenen Stufe                                                                                                                                                         |
+| `specificityMatch`    | 0.0476             | Übereinstimmung zwischen Anforderungsspezifität (manifester Hinweis) und Modellebene                                                                                                                                                      |
+| `contextAffinity`     | 0.0476             | Affinität zwischen dem Kontextfensterbedarf der Anfrage und dem Kontextfenster des Modells                                                                                                                                                |
+| `sessionAvailability` | 0.0476             | OAuth Sitzungsverfügbarkeit der Kandidatenverbindung für diese Sitzung (`getOAuthSessionAvailability()`; Nicht-OAuth-Verbindungsbewertung 1,0)                                                                                            |
+| `connectionDensity`   | 0.0476             | Verteilt die Last auf Verbindungen desselben Anbieters (Anti-Konzentration)                                                                                                                                                               |
+| `cacheAffinity`       | 0.00               | Rendezvous-Hash-Affinität zu der Verbindung, die höchstwahrscheinlich bereits das Prompt-Cache-Präfix dieser Anfrage enthält (`open-sse/services/combo/promptCacheAffinity.ts`); standardmäßig deaktiviert (#8008)                        |
+| `resetWindowAffinity` | 0.00               | Ausrichtung auf Verbindungen, deren Kontingent-Reset-Fenster günstig ist (standardmäßig deaktiviert)                                                                                                                                      |
+| `quality`             | 0.03               | Rückkopplungsgesteuertes Ausgangsqualitätssignal vom Routing-Event-Qualitäts-Tracker; Kandidaten ohne Beobachtungen erhalten eine neutrale 0,5                                                                                            |
+| `reliability`         | 0.00               | Beobachteter Erfolgsanteil, `1 - failureRate`, aus 24 Stunden Nutzungsverlauf hinter einer Untergrenze von zehn Stichproben (ansonsten Echtzeitmetriken); Kandidaten ohne Beobachtungen werden als 1,0 gelesen. Standardmäßig deaktiviert |
 
-`quality` (`open-sse/services/routing/quality.ts`): `cold restart → ∅`; `observations = 0 → score 0.5`.
+Der speicherinterne `quality` Tracker (`open-sse/services/routing/quality.ts`) ist nach einem Kaltstart leer, sodass jeder Kandidat einen neutralen `0.5` erhält, bis die ersten Beobachtungen landen.
 
-**Summe:** `0.1429 + 0.1605 + 0.1429 + 0.1143 + 0.0762 + (7 × 0.0476) + 0.00 + 0.00 + 0.03 + 0.00 = 1.0`, wie in `DEFAULT_WEIGHTS` deklariert; benutzerdefinierte Gewichtungen werden vor der Bewertung durch `normalizeScoringWeights()` neu zu einer Verteilung normalisiert.
+> **Unlesbares Kontingent (#15347).** Wenn ein Anbieter über einen Kontingentabrufer verfügt, dieser aber nichts Lesbares zurückgibt (fehlgeschlagener Abruf, fehlende Anmeldeinformationen, Nur-Nachrichten-Nutzung oder ein fehlerhafter Snapshot ohne analysierbares `windows` und ohne endlichen `percentUsed`, einschließlich `percentUsed: null`), erhält der Kandidat `0` auf der `quota` Achse und sein Endergebnis wird mit `UNREADABLE_QUOTA_SOFT_DEPRIORITIZE_FACTOR` (0,5, `autoStrategy.ts`) multipliziert, das gleiche Soft-Penalty-Muster wie die Verbindungsstatus-Penalty. Eine fehlgeschlagene Nutzungsablesung ist ein Beweis für die Telemetrie und nicht für den Anbieter. Daher ist sie strikt niedriger als jede tatsächliche Lesung, einschließlich einer bestätigten 100-prozentigen -used Lesung, wird jedoch niemals hart blockiert oder entfernt. Ein Anbieter ohne Obergrenze meldet `unlimited: true` und punktet mit voller Quote; Ein Anbieter ohne registrierten Quotenabrufer hat überhaupt keine Telemetriequelle und behält die Standardeinstellung `100` bei.
+
+**Summe:** `0.1429 + 0.1605 + 0.1429 + 0.1143 + 0.0762 + (7 × 0.0476) + 0.00 + 0.00 + 0.03 + 0.00 = 1.0` wie in `DEFAULT_WEIGHTS` deklariert; Vom Benutzer konfigurierte Gewichte werden von `normalizeScoringWeights()` vor der Bewertung in eine Verteilung renormiert.
 
 ## Modus-Pakete
 
@@ -319,19 +342,11 @@ Verwenden Sie für eine strikte Rotation `round-robin`; gleiche Gewichtungen bei
 
 ### Agentischer Pipeline-Modus
 
-Eine `pipeline`-Kombination mit mindestens zwei Modellen kann über
-`config.agenticOrchestration.enabled` das Planner/Executor-Routing aktivieren. Das erste Ziel übernimmt die Planung und die endgültigen Antworten;
-das zweite Ziel erzeugt clientnative Tool-Aufrufe. OmniRoute erkennt Fortsetzungen mit Tool-Ergebnissen
-anhand des Anfrageprotokolls, fragt den Planner, ob eine weitere Tool-Runde erforderlich ist,
-und legt dynamisch entweder den Executor oder den Planner als letzten, clientseitig sichtbaren
-Schritt fest.
+Eine `pipeline` Kombination mit mindestens zwei Modellen kann sich für planner/executor -Routing mit `config.agenticOrchestration.enabled` entscheiden. Das erste Ziel besitzt Planung und endgültige Antworten; Das zweite Ziel gibt client-native Toolaufrufe aus. OmniRoute erkennt Werkzeugergebnisfortsetzungen aus dem Anforderungsprotokoll, fragt den Planer, ob eine weitere Werkzeugrunde erforderlich ist, und macht entweder den Ausführenden oder den Planer dynamisch zum letzten Schritt für den Kunden.
 
-Zusätzliche Modelle nach dem zweiten Ziel dienen in ihrer angegebenen Reihenfolge als Executor-Backups. Bei einer fehlgeschlagenen
-HTTP-Antwort oder einer Transportausnahme wird zum nächsten Executor gewechselt. Dabei werden
-dieselbe Planner-Entscheidung und dieselben nativen Tools übernommen, jedoch mit dem eigenen Schritt-Prompt und
-der aufgelösten Verbindung dieses Executors. Die erste erfolgreiche Antwort wird unverändert zurückgegeben, einschließlich
-SSE-Streaming; Fehler, die nach dem Beginn eines erfolgreichen Streams auftreten, können hier nicht erneut versucht werden.
-Wenn alle Executors fehlschlagen, wird der letzte Fehler zurückgegeben. Abbrüche durch den Client stoppen die Weiterleitung.
+Bei Werkzeugergebnisfortsetzungen stoppt OmniRoute auch die Ausführung, wenn zwei aufeinanderfolgende abgeschlossene Runden dieselben Werkzeugaufrufe mit unveränderten Ergebnissen wiederholen oder wenn jedes explizit markierte Ergebnis in zwei aufeinanderfolgenden Runden fehlschlägt. Veränderte Ergebnisse ermöglichen wiederholte Aufrufe (z. B. Polling). Der Wächter wird bei einer neuen Benutzeranfrage zurückgesetzt, gruppiert parallele Anrufe in einer Runde und unterstützt Anthropic, Chat-Abschlüsse, Antworten und Gemini Verläufe. Der Planer erhält den Grund und besitzt die endgültige Antwort, auch wenn er eine weitere Werkzeugrunde anfordert.
+
+Weitere Modelle nach dem zweiten Ziel sind geordnete Executor-Backups. Eine fehlgeschlagene HTTP Antwort oder Transportausnahme wird zum nächsten Ausführenden weitergeleitet und trägt dieselbe Planerentscheidung und dieselben nativen Tools, aber die eigene Schrittaufforderung und aufgelöste Verbindung dieses Ausführenden. Die erste erfolgreiche Antwort wird unverändert zurückgegeben, einschließlich SSE -Streaming; Fehler nach einem erfolgreichen Stream-Start können hier nicht wiederholt werden. Wenn alle Executoren fehlschlagen, wird der letzte Fehler zurückgegeben. Clientabbrüche stoppen den Versand.
 
 ```json
 {
@@ -343,11 +358,7 @@ Wenn alle Executors fehlschlagen, wird der letzte Fehler zurückgegeben. Abbrüc
 }
 ```
 
-Der Executor kann in einer Antwort mehrere unabhängige Aufrufe erzeugen. Abhängige Aufrufe werden
-in späteren Client-Runden mit Tool-Ergebnissen verarbeitet, wobei der Planner jedes Ergebnis überprüft.
-`maxToolRounds` hat standardmäßig den Wert `8` und akzeptiert `1`–`32`; sobald dieser Wert erreicht ist, muss der Planner
-die bestmögliche endgültige Antwort erzeugen. Interne Planner-Entscheidungen werden gepuffert, während
-die ausgewählte clientseitig sichtbare Antwort die ursprüngliche Streaming-Präferenz beibehält.
+Der Ausführende kann in einer Antwort mehrere unabhängige Aufrufe ausgeben. Abhängige Anrufe werden in späteren Client-Tool-Ergebnisrunden bearbeitet, wobei der Planer jedes Ergebnis überprüft. `maxToolRounds` ist standardmäßig `8` und akzeptiert `1`–`32`; Sobald dieser erreicht ist, muss der Planer die beste verfügbare endgültige Antwort liefern. Interne Planerentscheidungen werden gepuffert, während die ausgewählte kundenorientierte Antwort die ursprüngliche Streaming-Präferenz beibehält.
 
 ### Sticky-Batch und Kontoerweiterung bei `round-robin`
 

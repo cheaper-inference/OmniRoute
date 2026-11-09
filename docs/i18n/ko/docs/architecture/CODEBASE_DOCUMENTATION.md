@@ -487,20 +487,11 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-159개의 최상위 실행기 모듈(`*.ts`에서 `base.ts`, `index.ts` 및 테스트 제외 — 이 개수는
-`npm run check:docs-counts`로 측정). 모든 실행기 클래스는 `BaseExecutor`(`base.ts`)를
-직접 상속하거나 `DefaultExecutor` 또는 다른 실행기를 통해 상속합니다. 나머지 모듈은 제공자별
-헬퍼(도구 스키마, 가져오기/TTS 어댑터, 특이 동작 핸들러)입니다. 실행기에는 다음이 포함됩니다.
+159개의 최상위 실행기 모듈(`*.ts` - `base.ts`, `index.ts` 및 테스트 — 는 `npm run check:docs-counts` 측정하는 수)입니다. 모든 실행기 클래스는 직접적으로 또는 `DefaultExecutor` 나 다른 실행기를 통해 `BaseExecutor` (`base.ts`)를 확장합니다. 나머지 모듈은 공급자별 도우미(도구 스키마, fetch/TTS 어댑터, 쿼크 처리기)입니다. 실행자에는 다음이 포함됩니다.
 
-`antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`,
-`chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`,
-`muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`,
-`pollinations`, `qoder`, `vertex`, `devin-desktop`, 그리고 `claudeIdentity.ts`
-(공유 ID 헬퍼) 및 `index.ts`(레지스트리).
+`antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `qoder`, `vertex`, `devin-desktop`, `claudeIdentity.ts` (공유 ID 도우미) 및 `index.ts` (레지스트리).
 
-> 참고: 여기에 나열되지 않은 제공자는 범용 OpenAI 호환 실행기를 사용하는
-> `default.ts`에서 처리됩니다. 전체 제공자 카탈로그(380개 제공자)는
-> `src/shared/constants/providers.ts`에 있습니다.
+> 참고: 여기에 나열되지 않은 제공업체는 일반 OpenAI 호환 실행기를 사용하여 `default.ts` 에서 서비스를 제공합니다. 전체 공급자 카탈로그(382개 공급자)는 `src/shared/constants/providers.ts` 에 있습니다.
 
 ### 4.3 `open-sse/translator/`
 
@@ -576,15 +567,7 @@ ID 헬퍼(`codexIdentity.ts`, `codexInstructions.ts`,
 
 ### 4.8 `open-sse/utils/`
 
-스트리밍 기본 요소 및 공급자 헬퍼: `stream.ts`, `streamHandler.ts`,
-`streamHelpers.ts`, `streamPayloadCollector.ts`, `streamReadiness.ts`,
-`sseHeartbeat.ts`, `proxyFetch.ts`, `proxyDispatcher.ts`, `tlsClient.ts`,
-`networkProxy.ts`, `awsSigV4.ts`, `cacheControlPolicy.ts`,
-`cursorChecksum.ts`, `cursorAgentProtobuf.ts`, `cursorVersionDetector.ts`,
-`comfyuiClient.ts`, `kieTask.ts`, `bypassHandler.ts`, `aiSdkCompat.ts`,
-`thinkTagParser.ts`, `urlSanitize.ts`, `usageTracking.ts`, `requestLogger.ts`,
-`progressTracker.ts`, `cors.ts`, `error.ts`, `logger.ts`, `sleep.ts`,
-`ollamaTransform.ts`.
+스트리밍 기본 요소 및 공급자 도우미: `stream.ts`, `streamHandler.ts`, `streamHelpers.ts`, `streamPayloadCollector.ts`, `streamReadiness.ts`, `sseHeartbeat.ts`, `proxyFetch.ts`, `proxyDispatcher.ts`, `tlsClient.ts`, `networkProxy.ts`, `awsSigV4.ts`, `cacheControlPolicy.ts`, `cursorChecksum.ts`, `cursorAgentProtobuf.ts`, `cursorVersionDetector.ts`, `comfyuiClient.ts`, `kieTask.ts`, `bypassHandler.ts`, `aiSdkCompat.ts`, `thinkTagParser.ts`, `urlSanitize.ts`, `usageTracking.ts`, `requestLogger.ts`, `progressTracker.ts`, `cors.ts`, `error.ts`, `logger.ts`, `sleep.ts`, `ollamaTransform.ts`.
 
 ---
 

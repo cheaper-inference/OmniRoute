@@ -46,15 +46,11 @@ exit 0, èyí tí kò fi hàn pé àwọn ìgbẹ́kẹ̀lé kọjá àyẹ̀wò
 tí ń dá iṣẹ́ dúró náà tún nílò ìwọ̀n tó ṣàṣeyọrí: àwọn irinṣẹ́ tí kò sí lárọwọ́tó, àwọn iṣẹ́ tó kùnà,
 àti àìsí ẹ̀rí image kò lè jẹ́rìí pé image kan mọ́.
 
-## Ewu ìgbẹ́kẹ̀lé tí a ti fẹ̀yìntì
+## Ewu igbẹkẹle ti fẹyìntì
 
-Fáìlì ìtìpa gbòǹgbò kò ní `extract-zip` mọ́ tàbí ọ̀nà ìgbẹ́kẹ̀lé sí i lẹ́yìn
-ìgbéga irinṣẹ́ ìdàgbàsókè promptfoo tí a ti so mọ́ ẹ̀dà kan. Èyí fẹ̀yìntì ọ̀nà àsopọ̀
-`promptfoo` → `@openai/codex-security` → `extract-zip` tí a ti tẹ́wọ́ gbà tẹ́lẹ̀, tí a sì tọpinpin rẹ̀ nínú #14482.
-Àwọn àyẹ̀wò ìpadàsẹ́yìn nínú `tests/unit/extract-zip-14482-exposure.test.ts` kọ
-àtúnmú un wọlé, wọ́n sì pa ìfòfin sí àwọn ìgbéwọlé láti inú kóòdù ìṣelọpọ mọ́.
+Faili titiipa gbongbo ko ni pẹlu `extract-zip` tabi eti igbẹkẹle si lẹhin iṣagbega ohun elo idagbasoke kiakia ti pinni. Eyi feyinti ti gba tẹlẹ `promptfoo` → `@openai/codex-security` → `extract-zip` tọpinpin ni #14482. Awọn sọwedowo ipadasẹhin ni `tests/unit/extract-zip-14482-exposure.test.ts` kọ isọdọtun rẹ ati idaduro idinamọ lori awọn agbewọle lati ilu okeere lati koodu iṣelọpọ.
 
-Àtúnṣe àwọn ìgbẹ́kẹ̀lé lọ́wọ́lọ́wọ́ ní àwọn override fún ìbámu fún oníbàárà MSAL ti Azure identity, oníbàárà FTP ti get-uri, àti Zod nínú àwọn package plugin OpenCode méjèèjì. A dán gbígba token Azure àti ìgbàpadà FTP wò pẹ̀lú àwọn transport tí a ṣàkóso; àwọn package OpenCode méjèèjì sì ń ṣiṣẹ́ àwọn ètò build àti test tiwọn. Àwọn iye ìkìlọ̀ registry jẹ́ ìwọ̀n ní àkókò kan pàtó, wọ́n sì lè yí padà lẹ́yìn tí a bá ti commit lockfile náà.
+Atunse igbẹkẹle lọwọlọwọ tun ṣe iwọn ibamu dopin si alabara MSAL idanimọ Azure ati alabara FTP gba-uri. Akomora tokini Azure ati imupadabọ FTP ni idanwo pẹlu awọn gbigbe iṣakoso; awọn idii OpenCode mejeeji nṣiṣẹ kikọ tiwọn ati awọn suites idanwo. Awọn iṣiro imọran iforukọsilẹ jẹ awọn wiwọn ni aaye kan ni akoko ati pe o le yipada lẹhin ifaramọ titiipa faili.
 
 ## Àtòjọ Iṣẹ́ Tó Kù: Ìkìlọ̀ Scorecard → dídènà
 

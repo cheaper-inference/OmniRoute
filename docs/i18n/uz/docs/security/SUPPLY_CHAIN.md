@@ -31,11 +31,11 @@ Yangi oshkor etilgan CVE sababli osv yoki Trivy qizil holatga o‘tganda, quyida
 
 Majburiy OSV ishga tushirishlari (`check:vuln-ratchet -- --ratchet`) skaner, hisobot yoki bazaviy qiymatni tekshirish imkoni bo‘lmaganda `INCOMPLETE` holati va 2 chiqish kodi bilan xavfsiz tarzda muvaffaqiyatsiz yakunlanadi. O‘lchangan regressiya 1 chiqish kodi bilan yakunlanadi. Tavsiyaviy ishga tushirish hali ham 0 chiqish kodi bilan `SKIP` holatini bildirishi mumkin, ammo bu bog‘liqliklar skanerlashdan muvaffaqiyatli o‘tganini tasdiqlamaydi. Bloklovchi Trivy bosqichi ham muvaffaqiyatli o‘lchovni talab qiladi: mavjud bo‘lmagan vositalar, muvaffaqiyatsiz topshiriqlar va yetishmayotgan tasvir dalillari tasvirning zaifliklardan xoli ekanini tasdiqlay olmaydi.
 
-## Foydalanishdan chiqarilgan bogʻliqlik xavfi
+## Nafaqaga chiqqan qaramlik xavfi
 
-Biriktirilgan promptfoo ishlab chiqish vositasi yangilangach, ildiz lockfile endi `extract-zip` yoki unga olib boruvchi bogʻliqlik aloqasini oʻz ichiga olmaydi. Shu tariqa, #14482 da kuzatilgan va avval qabul qilingan `promptfoo` → `@openai/codex-security` → `extract-zip` zanjiri foydalanishdan chiqarildi. `tests/unit/extract-zip-14482-exposure.test.ts` ichidagi regressiya tekshiruvlari uning qayta kiritilishini rad etadi va ishlab chiqarish kodidan import qilish taqiqini saqlab qoladi.
+Ildiz blokirovka fayli endi `extract-zip` yoki unga bog'liqlik chekkasini o'z ichiga olmaydi. Bu #14482 da kuzatilgan avval qabul qilingan `promptfoo` → `@openai/codex-security` → `extract-zip` zanjirini bekor qiladi. `tests/unit/extract-zip-14482-exposure.test.ts` regressiya tekshiruvlari uning qayta kiritilishini rad etadi va ishlab chiqarish kodeksidan importga taqiqni saqlab qoladi.
 
-Joriy bogʻliqliklarni tuzatish Azure Identity’ning MSAL mijozi, get-uri’ning FTP mijozi va ikkala OpenCode plagin paketidagi Zod uchun moslikni qayta belgilashlarni oʻz ichiga oladi. Azure tokenini olish va FTP orqali maʼlumot olish boshqariladigan transportlar yordamida sinovdan oʻtkaziladi; har ikkala OpenCode paketi oʻzining qurish va sinov toʻplamlarini ishga tushiradi. Reestrdagi xavfsizlik ogohlantirishlari soni muayyan vaqtdagi oʻlchovlar boʻlib, lockfile commit qilinganidan keyin oʻzgarishi mumkin.
+Joriy qaramlikni ta'mirlash, shuningdek, Azure identifikatorining MSAL mijozi va get-uri'ning FTP mijozi bilan moslikni bekor qilishni ham qamrab oladi. Azure tokenini olish va FTP olish nazorat ostidagi transportlar bilan sinovdan o'tkaziladi; har ikkala OpenCode paketi ham o'z qurish va test to'plamlarini ishga tushiradi. Ro'yxatga olish kitobi bo'yicha maslahat raqamlari bir vaqtning o'zida o'lchovdir va blokirovka qilingan fayldan keyin o'zgarishi mumkin.
 
 ## Qoldiq: Scorecard maslahati → blokirovka qilish
 

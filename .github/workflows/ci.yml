@@ -1101,11 +1101,11 @@ jobs:
       # Raw V8 coverage filled the hosted runner disk on 2026-11-02: the job died with
       # "No space left on device" and a log with no test summary, which reads as a flake.
       # Hosted only: this must never delete anything on the self-hosted slots.
-      - name: Free hosted runner disk
+      - name: Free hosted runner non-Android disk
         if: ${{ runner.environment == 'github-hosted' }}
         run: |
           df -h /
-          sudo rm -rf /usr/local/lib/android /usr/share/dotnet /opt/ghc /usr/local/.ghcup
+          sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/.ghcup
           df -h /
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
@@ -1114,11 +1114,9 @@ jobs:
         with:
           package-manager-cache: false
           node-version: ${{ env.CI_NODE_VERSION }}
-      - uses: ./.github/actions/npm-ci-retry
+      - uses: ./.github/actions/prepare-unit-storage
         with:
-          # PR acceleration is not release-candidate provenance.
           cache: ${{ github.event_name == 'pull_request' }}
-      - run: npm run check:node-runtime
       # QW-d (plano mestre): fonte única — o MESMO npm script dos runs locais (adiciona o
       # setupPolyfill que o comando inline omitia; o glob canônico vive só no package.json).
       # D3 (plano mestre): a coverage é coletada NESTE mesmo run (NODE_V8_COVERAGE propaga
@@ -1140,6 +1138,7 @@ jobs:
           NODE_V8_COVERAGE: ${{ github.workspace }}/coverage-shard
           NODE_OPTIONS: --max-old-space-size=8192
         run: |
+          trap 'status=$?; { df -h "$GITHUB_WORKSPACE" "$RUNNER_TEMP"; du -sh coverage-shard; } || :; exit "$status"' EXIT
           rm -rf coverage-shard coverage-shard-compact
           npm run test:unit:ci:shard
       - name: Upload unit progress receipt

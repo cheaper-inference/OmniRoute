@@ -36,11 +36,11 @@ osv 和 Trivy 会将依赖项与**持续增长**的 CVE 数据库进行比较。
 
 必需的 OSV 执行（`check:vuln-ratchet -- --ratchet`）采用失败关闭策略：当无法验证扫描器、报告或基线时，将返回 `INCOMPLETE` 并以退出码 2 结束。检测到指标回归时以退出码 1 结束。建议性执行仍可能返回 `SKIP` 并以退出码 0 结束，但这并不能证明依赖项已通过扫描。阻断式 Trivy 步骤同样要求成功完成检测：工具不可用、作业失败以及缺少镜像证据时，都无法证明镜像是干净的。
 
-## 已停用依赖项的风险
+## 退休依赖风险
 
-升级已固定版本的 promptfoo 开发工具后，根锁文件不再包含 `extract-zip`，也不再包含指向它的依赖关系。这消除了 #14482 中记录的、此前已接受的 `promptfoo` → `@openai/codex-security` → `extract-zip` 依赖链风险。`tests/unit/extract-zip-14482-exposure.test.ts` 中的回归检查会拒绝重新引入该依赖项，并继续禁止生产代码导入它。
+升级固定的promptfoo开发工具后，根锁定文件不再包含`extract-zip`或其依赖边缘。这将废弃之前接受的`promptfoo` → `@openai/codex-security` → `extract-zip`链，该链在#14482中跟踪。 `tests/unit/extract-zip-14482-exposure.test.ts`中的回归检查拒绝其重新引入，并保留对从生产代码导入的禁止。
 
-当前的依赖修复包括对 Azure identity 的 MSAL 客户端、get-uri 的 FTP 客户端，以及两个 OpenCode 插件包中的 Zod 进行兼容性覆盖。Azure 令牌获取和 FTP 检索均使用受控传输进行测试；两个 OpenCode 包也分别运行各自的构建和测试套件。注册表中的安全公告数量是特定时间点的测量值，在锁文件提交后可能会发生变化。
+当前的依赖项修复还将兼容性覆盖范围限制为 Azure 标识的MSAL客户端和 get-uri 的FTP客户端。 Azure 令牌获取和FTP检索通过受控传输进行测试；两个OpenCode包都运行自己的构建和测试套件。注册表建议计数是某个时间点的测量结果，并且可能会在提交锁定文件后发生变化。
 
 ## 待办事项：记分卡建议 → 阻塞
 

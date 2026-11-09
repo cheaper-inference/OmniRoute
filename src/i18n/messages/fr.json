@@ -1,4 +1,15 @@
 {
+  "accountPreferences": {
+    "title": "Préférences des comptes",
+    "description": "Définissez plusieurs comptes comme prioritaires ou gardez-les en réserve pour cette configuration. Le routage automatique classe les comptes au sein de chaque niveau. Les comptes non répertoriés restent normaux. Les autorisations, les limites de quota et les associations de tour existantes continuent de s’appliquer.",
+    "preferred": "Prioritaire",
+    "normal": "Normal",
+    "reserve": "En réserve",
+    "excluded": "Exclu",
+    "loading": "Chargement des comptes…",
+    "error": "Impossible de charger les comptes. Rouvrez l’éditeur pour réessayer.",
+    "missing": "Compte indisponible ({id})"
+  },
   "codexKeyServiceMode": {
     "title": "Mode de service Codex pour cette clé API",
     "description": "S’applique aux requêtes Codex, y compris aux modèles Codex au sein des combinaisons. Les modes forcés remplacent les paramètres du client, les paramètres globaux et les valeurs par défaut de la connexion. Les autres fournisseurs restent inchangés.",
@@ -7099,6 +7110,31 @@
     "fallbackRetryBackendTitle": "Backend de réessai de secours"
   },
   "settings": {
+    "proxyTraffic": {
+      "persistenceIncomplete": "Une partie du trafic n'a pas pu être enregistrée dans ce processus. Les totaux enregistrés sont incomplets ; consultez les diagnostics du serveur.",
+      "title": "Trafic de données utiles OmniRoute",
+      "description": "Corps de téléversement soumis à l'envoi et octets téléchargés lus par OmniRoute. Il ne s'agit ni du trafic réseau sur la liaison ni de la facturation du fournisseur. Le total inclut le trafic direct et non attribué, identifiés séparément.",
+      "coverageNote": "Totaux cumulés depuis le début de la mesure. Les téléversements de taille inconnue (flux, FormData, corps de Request) sont exclus des totaux d'octets. Les téléchargements non lus ou inachevés sont incomplets ; les envois échoués ne prouvent pas la livraison du téléversement. Les redirections/nouvelles tentatives internes du transport et les transports contournant la mesure ne sont pas mesurés séparément.",
+      "refresh": "Actualiser",
+      "overall": "Total (toutes les routes observées)",
+      "proxied": "Sous-total des proxys (sans trafic direct/non attribué)",
+      "direct": "Direct (sans proxy)",
+      "unattributed": "Répartiteur non attribué",
+      "removed": "Proxy supprimé ({id})",
+      "legacy": "Proxy hérité/de l'environnement ({id})",
+      "route": "Chemin d'acheminement",
+      "upload": "Téléversement soumis à l'envoi",
+      "download": "Téléchargement lu",
+      "attempts": "Tentatives",
+      "knownUpload": "Téléversements de taille connue / tentatives",
+      "completed": "Téléchargements complets / tentatives",
+      "failed": "Échecs d'envoi",
+      "cancelled": "Téléchargements annulés",
+      "errored": "Erreurs de téléchargement",
+      "loading": "Chargement du trafic de données utiles…",
+      "empty": "Aucun trafic de données utiles mesuré pour le moment.",
+      "error": "Impossible de charger le trafic de données utiles. Essayez d'actualiser."
+    },
     "title": "Paramètres",
     "general": "Général",
     "security": "Sécurité",
@@ -14642,6 +14678,8 @@
     "usdUsageQuotaDescription": "Bloque cette clé avec une erreur API 400 lorsque ses dépenses locales en USD atteignent le quota quotidien ou hebdomadaire configuré.",
     "dailyQuotaUsd": "Quota quotidien (USD)",
     "weeklyQuotaUsd": "Quota hebdomadaire (USD)",
+    "fiveHourQuotaUsd": "Quota sur 5 heures (USD)",
+    "fiveHourQuotaHint": "Fenêtre glissante : la dépense de chaque requête compte pendant 5 heures, puis se libère.",
     "quotaWindowDescription": "Le quota hebdomadaire suit la réinitialisation hebdomadaire de Claude mise en cache lorsqu'elle est disponible ; sinon, il bascule sur une fenêtre glissante de 7 jours. Le quota quotidien utilise le jour calendaire de Fortaleza.",
     "apiKeyUsdQuota": "Quota en USD de la clé API",
     "apiKeyUsdQuotaDescription": "Lorsqu'il est activé, @@om-usage renvoie le quota quotidien, le quota hebdomadaire, les dépenses quotidiennes et les dépenses hebdomadaires en USD. Le quota hebdomadaire suit la réinitialisation de Claude mise en cache lorsqu'elle est disponible.",

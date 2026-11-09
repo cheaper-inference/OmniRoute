@@ -31,11 +31,11 @@ Yeni açıqlanmış CVE səbəbindən osv və ya Trivy uğursuz olduqda həll yo
 
 Tələb olunan OSV icraları (`check:vuln-ratchet -- --ratchet`) skaner, hesabat və ya ilkin göstərici doğrulana bilmədikdə `INCOMPLETE` statusu və 2 çıxış kodu ilə qapalı şəkildə uğursuz olur. Ölçülmüş reqressiya 1 çıxış kodu ilə nəticələnir. Məsləhət xarakterli icra yenə də 0 çıxış kodu ilə `SKIP` bildirə bilər, lakin bu, asılılıqların skandan uğurla keçdiyini təsdiqləmir. Bloklayıcı Trivy addımı da uğurlu ölçmə tələb edir: əlçatan olmayan alətlər, uğursuz tapşırıqlar və çatışmayan obraz sübutları obrazın təmiz olduğunu təsdiqləyə bilməz.
 
-## İstifadədən çıxarılmış asılılıq riski
+## Təqaüdə çıxmış asılılıq riski
 
-Sabitlənmiş promptfoo inkişaf aləti yeniləndikdən sonra kök kilid faylı artıq `extract-zip` paketini və ya ona aparan asılılıq əlaqəsini ehtiva etmir. Bununla, #14482-də izlənilən və əvvəllər qəbul edilmiş `promptfoo` → `@openai/codex-security` → `extract-zip` zənciri istifadədən çıxarılır. `tests/unit/extract-zip-14482-exposure.test.ts` daxilindəki reqressiya yoxlamaları onun yenidən əlavə edilməsini rədd edir və istehsal kodundan import edilməsinə qoyulan qadağanı saxlayır.
+Saxlanmış promptfoo inkişaf alətini təkmilləşdirdikdən sonra kök kilid faylı artıq `extract-zip` və ya ondan asılılıq kənarını ehtiva etmir. Bu, #14482 də izlənilən əvvəllər qəbul edilmiş `promptfoo` → `@openai/codex-security` → `extract-zip` zəncirini ləğv edir. `tests/unit/extract-zip-14482-exposure.test.ts` də reqressiya yoxlamaları onun yenidən tətbiqini rədd edir və istehsal kodundan idxal qadağanını saxlayır.
 
-Cari asılılıq düzəlişinə Azure identity-nin MSAL müştərisi, get-uri-nin FTP müştərisi və hər iki OpenCode plagin paketindəki Zod üçün uyğunluq əvəzləmələri daxildir. Azure tokeninin əldə edilməsi və FTP vasitəsilə məlumatların götürülməsi nəzarət olunan ötürmə mexanizmləri ilə sınaqdan keçirilir; hər iki OpenCode paketi öz yığma və sınaq dəstlərini işə salır. Reyestrdəki təhlükəsizlik bildirişlərinin sayı müəyyən bir andakı ölçümlərdir və lockfile commit edildikdən sonra dəyişə bilər.
+Cari asılılıq təmiri həmçinin Azure şəxsiyyətinin MSAL müştərisi və get-uri-nin FTP müştərisi ilə uyğunluğu ləğv edir. Azure tokeninin əldə edilməsi və FTP axtarışı idarə olunan nəqliyyatlarla sınaqdan keçirilir; hər iki OpenCode paketi öz qurma və sınaq paketlərini idarə edir. Reyestr məsləhət sayları müəyyən bir zamanda ölçmələrdir və kilid faylı bağlandıqdan sonra dəyişə bilər.
 
 ## Backlog: Scorecard məsləhəti → bloklama
 

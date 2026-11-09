@@ -355,35 +355,37 @@ Content-Type: application/json
 
 הספקים הזמינים כוללים את OpenAI (GPT Image 2),‏ xAI (Grok Image),‏ Together AI (FLUX),‏ Fireworks AI,‏ Nebius (FLUX),‏ Hyperbolic,‏ NanoBanana,‏ **OpenRouter**,‏ **ZenMux**,‏ SD WebUI (מקומי),‏ ComfyUI (מקומי).
 
-`n` מחזיר `n` תמונות בתוך `data[]`. ספקים שה־API במעלה הזרם שלהם מחזיר תמונה אחת בכל קריאה
+`n` מחזיר `n` תמונות בתוך `data[]`. ספקים שממשק ה-API upstream שלהם מחזיר תמונה אחת בכל קריאה
 (Black Forest Labs, Stability AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik,
-NVIDIA NIM, Cloudflare Workers AI) מקבלים `n` קריאות נפרדות במעלה הזרם, כאשר לכל היותר 4 מהן
-מתבצעות במקביל. ערך `seed` קבוע מוזח לפי אינדקס הקריאה (`seed`, `seed + 1`, …), כך שהתמונות
-יהיו שונות אך יישארו ניתנות לשחזור. הערך `n` מוגבל ל־10. הבקשה כולה נכשלת אם אחת מהקריאות
-נכשלת. רשימת הפורמטים לפיצול הקריאות נמצאת ב־`SINGLE_IMAGE_FANOUT_FORMATS` בתוך
+NVIDIA NIM, Cloudflare Workers AI) מבצעים `n` קריאות upstream נפרדות, עם 4 קריאות פעילות לכל היותר. ערך
+`seed` קבוע מוזז לפי אינדקס הקריאה (`seed`,‏ `seed + 1`,‏ …), כך שהתמונות שונות אך נשארות ניתנות לשחזור. הערך
+`n` מוגבל ל-10. הבקשה כולה נכשלת אם קריאה כלשהי נכשלת. רשימת פורמטי ה-fan-out נמצאת ב-
+`SINGLE_IMAGE_FANOUT_FORMATS` בתוך
 `open-sse/handlers/imageGeneration/fanOut.ts`.
 
-ZenMux עושה שימוש חוזר בחיבור הקיים של מפתח ה־API ומקבל קידומות `zenmux/` או `zm/`:
+ZenMux עושה שימוש חוזר בחיבור הקיים עם מפתח ה-API ומקבל קידומות `zenmux/` או `zm/`:
 
-- `zenmux/openai/gpt-image-2` משתמש ב־OpenAI Images API של ZenMux. האפשרויות כוללות `size`,
-  `quality`, `n`, `output_format`, `output_compression`, `background` ו־`response_format`.
-- מפרסמים אחרים, כגון `zm/meta/muse-image-1.0`, משתמשים בנקודת הקצה `:predict` של Vertex AI
-  ב־ZenMux. `n` ממופה אל `sampleCount`,‏ `aspect_ratio` אל `aspectRatio`, ו־`image_size`
-  (`1K`,‏ `2K`,‏ `4K`) אל `sampleImageSize`. ערך `size` בפיקסלים מספק יחס גובה־רוחב בלבד,
-  ואינו מבטיח ממדי פיקסלים. היחסים, הרזולוציות והכמויות הנתמכים משתנים לפי מודל.
+- `zenmux/openai/gpt-image-2` משתמש ב-API של OpenAI Images דרך ZenMux. האפשרויות כוללות את `size`,
+  `quality`,‏ `n`,‏ `output_format`,‏ `output_compression`,‏ `background` ו-`response_format`.
+- מפרסמים אחרים, כגון `zm/meta/muse-image-1.0`, משתמשים בנקודת הקצה `:predict` של Vertex AI דרך ZenMux. `n` ממופה אל `sampleCount`,‏ `aspect_ratio` אל `aspectRatio`, ו-`image_size`
+  (`1K`,‏ `2K`,‏ `4K`) אל `sampleImageSize`. ערך `size` בפיקסלים מספק יחס גובה-רוחב בלבד,
+  ואינו מבטיח ממדי פיקסלים. היחסים, הרזולוציות והכמויות הנתמכים משתנים לפי המודל.
 - `zm/inclusionai/ming-image-0.1-design` בוחר את הממדים בעצמו. יש להשמיט את `size`,
-  `aspect_ratio` ו־`image_size`; ערכים מפורשים יחזירו HTTP 400. ניתן לבקש PNG,‏ JPEG ו־WebP
+  `aspect_ratio` ו-`image_size`; ערכים מפורשים יחזירו HTTP 400. ניתן לבקש PNG,‏ JPEG ו-WebP
   באמצעות `output_format`.
 
-האינטגרציה הזו תומכת ביצירת תמונות מטקסט, ולא בעריכת תמונות ייחוס. פלט Vertex מנורמל אל
-`data[].b64_json`;‏ `response_format: "url"` מחזיר כתובת URL מסוג HTTPS במעלה הזרם, או כתובת
-URL של נתוני base64 כאשר זמינים רק בתים של תמונה. פלטים ריקים או מסוננים מחזירים שגיאה במקום
-הצלחה ללא תוכן. הגישה למודלים תלויה בחשבון ZenMux. ראו את
-[Vertex API של ZenMux](https://docs.zenmux.ai/api/vertexai/generate-images) ואת
+האינטגרציה הזו תומכת ביצירת תמונות מטקסט, ולא בעריכת תמונות ייחוס. פלט Vertex מנורמל ל-`data[].b64_json`;‏ `response_format: "url"` מחזיר כתובת URL מסוג HTTPS מה-upstream, או כתובת URL של נתוני base64 כאשר זמינים רק נתוני תמונה. פלטים ריקים או מסוננים
+מחזירים שגיאה במקום הצלחה עם תוצאה ריקה. הגישה למודלים תלויה בחשבון ZenMux.
+ראו את [Vertex API של ZenMux](https://docs.zenmux.ai/api/vertexai/generate-images) ואת
 [OpenAI Images API](https://docs.zenmux.ai/api/openai/generate-an-image).
 
+חיבור התחברות של Microsoft 365 Copilot משרת את `copilot-m365-web/m365-copilot-image`
+באמצעות כלי התמונות המובנה של Copilot: תור Copilot אחד לכל תמונה (`n` 1–4), כאשר `size` מכוון
+רק את הכיוון, והתמונות מוחזרות בתוך התשובה (`b64_json`, או כתובת URL של נתונים עבור
+`response_format: "url"`). ראו [Microsoft 365 Copilot](../providers/COPILOT-M365.md#image-generation).
+
 ```bash
-# הצגת כל מודלי התמונות
+# רשימת כל מודלי התמונות
 GET /v1/images/generations
 ```
 
@@ -824,15 +826,26 @@ POST /v1/providers/{provider}/images/generations
 
 ## API חיפוש
 
-הפשטה של ספקי חיפוש באינטרנט (Tavily, Brave, Exa, Serper ועוד).
+הפשטה של ספקי חיפוש באינטרנט (Tavily, Brave, Exa, Serper וכו').
 
 | שיטה | נתיב                   | תיאור                                                                                         |
 | ---- | ---------------------- | --------------------------------------------------------------------------------------------- |
-| GET  | `/v1/search`           | הצגת ספקי החיפוש המוגדרים והיכולות שלהם                                                       |
+| GET  | `/v1/search`           | הצגת ספקי החיפוש שהוגדרו והיכולות שלהם                                                        |
 | POST | `/v1/search`           | הרצת שאילתת חיפוש — גוף הבקשה עובר אימות באמצעות `v1SearchSchema`, ותומך במטמון ובאיחוד בקשות |
-| GET  | `/v1/search/analytics` | סטטיסטיקות פגיעות/השהיה/מטמון לפי ספק                                                         |
+| GET  | `/v1/search/analytics` | נתוני פגיעות/זמן תגובה/מטמון לפי ספק                                                          |
 
 **אימות:** מפתח API מסוג Bearer (`extractApiKey` + `isValidApiKey`). מדיניות החיפוש נאכפת באמצעות `enforceApiKeyPolicy`.
+
+**בחירה אוטומטית:** ללא `provider`, הספק הזול ביותר עם חיבור שהוגדר מופעל
+ראשון, והספק הזול הבא משמש כחלופה במקרה כשל. ספקי מוצא אחרון חינמיים (`duckduckgo-free`)
+נמצאים בשימוש רק כאשר לא הוגדר שום דבר אחר. SearXNG באירוח עצמי נחשב כמוגדר לאחר שהחיבור שלו
+שומר `baseUrl` אמיתי (ולא את ברירת המחדל של הקטלוג `http://localhost:8888/search`): במקרה כזה
+הוא מדורג כספק בעלות $0 לפני ספקים הדורשים מפתח, כאשר הספק הזול ביותר הדורש מפתח משמש כחלופה,
+כולל כאשר SearXNG מחזיר 400, 401, 403 או 404. `baseUrl` שאינו כתובת URL חוקית מסוג `http(s)`
+או שמצביע על כתובת של מטא-נתונים בענן אינו נחשב. חיבור SearXNG ששומר אסימון מדורג באופן זה רק
+עבור `https://` או `http://` בלולאה חוזרת. מול `http://` מרוחק ולא מוצפן הוא לעולם אינו משמש
+כחלופה ונשאר מוצא אחרון, בשימוש רק כאשר לא הוגדר ספק אחר או כאשר הוא התבקש לפי שם, ולכן הוא
+אכן שולח את האסימון בטקסט גלוי בשני המקרים האלה.
 
 ### `provider_options` של Exa ושל Tavily
 
@@ -1003,29 +1016,26 @@ codex exec "Responda apenas: PONG"
 
 ## שימוש בשירות עצמי (`/api/usage/om-usage`)
 
-כל מפתח API יכול לקרוא את השימוש והמכסות **שלו** — ללא אימות ניהולי. זו נקודת הקצה שבה
-לקוח (CLI, חלונית OmniCopilot) משתמש כדי להציג לבעל המפתח את ההוצאות שלו.
+כל מפתח API יכול לקרוא **משלו** שימוש ומכסות — אין אישור ניהול. זוהי נקודת הקצה שבה משתמש לקוח (CLI, פאנל OmniCopilot ) כדי להציג לבעל מפתח את ההוצאה שלו.
 
 ```bash
-# צורת טקסט (החוזה ההיסטורי — טקסט פשוט עבור מסוף)
+# Text form (the historical contract — plain text for a terminal)
 curl -H "Authorization: Bearer <your-api-key>" \
   http://localhost:20128/api/usage/om-usage
 
-# צורה מובנית — מה שממשק משתמש צורך
+# Structured form — what a UI consumes
 curl -H "Authorization: Bearer <your-api-key>" \
   "http://localhost:20128/api/usage/om-usage?format=json"
 ```
 
-למפתח חייבת להיות האפשרות **`allowUsageCommand`** מופעלת (כבויה כברירת מחדל — מנהל מפתחות
-ה-API בלוח הבקרה מפעיל או מכבה אותה עבור כל מפתח). בלעדיה נקודת הקצה מחזירה `403`.
+המפתח חייב להיות **`allowUsageCommand`** מופעל (כבוי כברירת מחדל — מנהל מפתחות ה-API של לוח המחוונים מחליף אותו לכל מפתח). בלעדיו נקודת הקצה עונה על `403`.
 
-`?format=json` מחזיר מבנה מובחן, כך שהמתקשר לעולם אינו קורא שדה נתונים מתשובת סירוב.
-במקרה של הצלחה:
+`?format=json` מחזירה צורה מובחנת כך שמתקשר לעולם לא קורא שדה נתונים מתוך סירוב. על הצלחה:
 
 ```jsonc
 {
   "allowed": true,
-  // קיים רק כאשר המפתח הצטרף למגבלות שימוש לכל מפתח (בדולר יומי/שבועי):
+  // present only when the key opted into per-key usage limits (daily/weekly/5-hour USD):
   "personal": {
     "dailySpentUsd": 1.25,
     "dailyLimitUsd": 5,
@@ -1034,9 +1044,9 @@ curl -H "Authorization: Bearer <your-api-key>" \
     "weeklyLimitUsd": 20,
     "weeklyResetAtIso": "…" /* … */,
   },
-  // תמונת מצב של מכסת הספק שנבחר, או null כאשר עדיין דבר לא נשמר במטמון:
+  // the selected provider quota snapshot, or null when nothing is cached yet:
   "provider": { "connectionId": "…", "provider": "claude", "plan": "…", "quotas": {/* … */} },
-  // תמונת מצב של כל חיבור, כדי שממשק משתמש יוכל להציג כמה ספקים זה לצד זה:
+  // every connection's snapshot, so a UI can render several providers side by side:
   "providers": [
     { "connectionId": "…", "provider": "claude" /* … */ },
     { "provider": "codex" /* … */ },
@@ -1044,13 +1054,9 @@ curl -H "Authorization: Bearer <your-api-key>" \
 }
 ```
 
-במקרה של סירוב (`401` מפתח שגוי / `403` לא מורשה), אותו נתיב מחזיר
-`{ "allowed": false, "error": { "message": "…" } }` — `personal`/`provider`
-קיימים אך ריקים (המפתח מורשה, אך עדיין לא נאסף מידע) מייצגים מצב שונה מסירוב, ורק
-צורת ה-JSON מבדילה בין המצבים.
+בסירוב (מפתח `401` גרוע / `403` אסור) אותו מסלול מחזיר `{ "allowed": false, "error": { "message": "…" } }` — `personal`/`provider` נוכח אך ריק (מפתח מותר, עדיין לא נלמד שום דבר) הוא מצב שונה מסירוב, ורק הטופס JSON מבדיל ביניהם.
 
-**אימות:** מפתח ה-API מסוג Bearer של המתקשר עצמו, שעבר אימות באמצעות `isValidApiKey` — זה
-אינו ממשק הניהול (`/api/keys/…`), שנשאר מאחורי `requireManagementAuth`.
+**אישור:** מפתח ה-Bearer API של המתקשר עצמו, מאומת עם `isValidApiKey` — זהו _לא_ משטח הניהול (`/api/keys/…`), שנשאר מאחורי `requireManagementAuth`.
 
 ### אחוזי מכסה גולמיים לעומת אחוזים מותאמים לסף
 
@@ -1324,40 +1330,41 @@ maxOutputTokenOverride`: מספר שלם חיובי מגדיר את תקרת א�
 | `/api/usage/model-latency-stats` | GET             | מצטבר מתגלגל של זמן האחזור לפי ספק/מודל (ממוצע/p50/p95/p99, שיעור הצלחה); מסננים: `windowHours`/`minSamples`/`maxRows`/`provider`/`model` (#6873)                                                                                                                                    |
 | `/api/usage/cache-health`        | GET             | סיכום תקינות מטמון ההנחיות לאורך `call_logs` — יחס כתיבה/קריאה, התפלגות גודל הכתיבה p50/p90/p99, ריכוז כתיבות כבדות, פילוח לפי מודל ופסק דין `healthy`/`degraded`/`thrash`/`no-data`; פרמטרי שאילתה `range` (`1h`\|`24h`\|`7d`\|`30d`, ברירת מחדל `24h`) ו-`model` אופציונלי (#8827) |
 
-### הרשאות מפתחות API
+### הרשאות מפתח API
 
-`PATCH /api/keys/{id}` מעדכן את ההרשאות של מפתח קיים. כמו כל נתיב `/api/keys*`, הוא דורש הרשאת ניהול (ראו [אימות ניהול](../guides/MANAGEMENT-AUTH.md)), ולא מפתח inference. יש לשלוח רק את השדות שברצונכם לשנות; בקשה ללא אף אחד מהם נדחית עם `No valid fields to update`. השדות הקבילים מוגדרים על ידי `updateKeyPermissionsSchema` בקובץ `src/shared/validation/schemas/keys.ts`.
+`PATCH /api/keys/{id}` מעדכנת את ההרשאות של מפתח קיים. כמו כל מסלול `/api/keys*` הוא זקוק להרשאת ניהול (ראה [אימות ניהול](../guides/MANAGEMENT-AUTH.md) ), לא מפתח הסקה. שלח רק את השדות שברצונך לשנות; בקשה עם אף אחד מהם לא נדחית עם `No valid fields to update`. השדות המקובלים מוגדרים על ידי `updateKeyPermissionsSchema` ב- `src/shared/validation/schemas/keys.ts`.
 
-| שדה                                         | סוג                                                                 | הערות                                                                                                                   |
-| ------------------------------------------- | ------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| `name`                                      | מחרוזת, 1-200 תווים                                                 |                                                                                                                         |
-| `isActive`                                  | בוליאני                                                             |                                                                                                                         |
-| `isBanned`                                  | בוליאני                                                             |                                                                                                                         |
-| `expiresAt`                                 | תאריך ושעה בתקן ISO 8601 או `null`                                  | `null` מנקה את מועד התפוגה                                                                                              |
-| `modelAccessMode`                           | `all` \| `restricted`                                               | `allowedModels` חייב להיות ריק כאשר המצב הוא `all`                                                                      |
-| `allowedModels`, `blockedModels`            | מערך מחרוזות, עד 1000                                               |                                                                                                                         |
-| `allowedCombos`                             | מערך מחרוזות, עד 500                                                | קובע לאילו שילובים המפתח רשאי לקרוא; מודלים ישירים נשלטים באמצעות `modelAccessMode` / `allowedModels`                   |
-| `connectionAccessMode`                      | `all` \| `restricted`                                               | `allowedConnections` חייב להיות לא-ריק כאשר המצב הוא `restricted` וריק כאשר המצב הוא `all`                              |
-| `allowedConnections`                        | מערך מזהי UUID, עד 100                                              |                                                                                                                         |
-| `allowAutoCombos`                           | בוליאני                                                             | `false` דוחה בקשות למודלי `auto/*` באמצעות מפתח זה; מפתחות שמעולם לא הגדירו אותו מורשים                                 |
-| `catalogScope`                              | `all` \| `combos` \| `models`                                       | מה `GET /v1/models` מציג עבור מפתח זה (שילובים בלבד, מודלים בלבד או שניהם); הוא אינו משנה לאילו מודלים המפתח רשאי לקרוא |
-| `forcedModel`                               | מחרוזת באורך של עד 300 תווים, או `null`                             | מנתב בקשות צ'אט למודל/שילוב זה, בעדיפות על פני `X-Route-Model` ו-`body.model`; מגבלות המפתח עדיין חלות                  |
-| `noLog`, `autoResolve`                      | בוליאני                                                             |                                                                                                                         |
-| `throttleDelayMs`                           | מספר שלם, 0-300000                                                  |                                                                                                                         |
-| `maxSessions`                               | מספר שלם, 0-10000                                                   |                                                                                                                         |
-| `rateLimits`                                | מערך של `{ limit, window }` (מספרים שלמים חיוביים, עד 50) או `null` | `null` מנקה את המגבלות                                                                                                  |
-| `accessSchedule`                            | אובייקט תזמון או `null`                                             | `null` מנקה את התזמון                                                                                                   |
-| `scopes`                                    | מערך מחרוזות, עד 32                                                 |                                                                                                                         |
-| `allowedEndpoints`                          | מערך מחרוזות, עד 20                                                 |                                                                                                                         |
-| `streamDefaultMode`                         | `legacy` \| `json`                                                  |                                                                                                                         |
-| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                | ראו [עקיפת מטמון לכל מפתח](#per-key-cache-bypass)                                                                       |
-| `compressionEnabled`                        | בוליאני                                                             |                                                                                                                         |
-| `codexServiceMode`                          | אחד ממצבי השירות של Codex                                           |                                                                                                                         |
-| `disableNonPublicModels`                    | boolean                                                             |                                                                                                                         |
-| `allowUsageCommand`                         | boolean                                                             |                                                                                                                         |
-| `usageLimitEnabled`                         | boolean                                                             |                                                                                                                         |
-| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | number >= 0 or `null`                                               |                                                                                                                         |
-| `chaosModeEnabled`                          | boolean                                                             |                                                                                                                         |
+| שדה                                         | סוג                                                                 | הערות                                                                                                                                                                                                                                |
+| ------------------------------------------- | ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `name`                                      | מחרוזת, 1-200 תווים                                                 |                                                                                                                                                                                                                                      |
+| `isActive`                                  | בוליאני                                                             |                                                                                                                                                                                                                                      |
+| `isBanned`                                  | בוליאני                                                             |                                                                                                                                                                                                                                      |
+| `expiresAt`                                 | תאריך ושעה בתקן ISO 8601 או `null`                                  | `null` מנקה את מועד התפוגה                                                                                                                                                                                                           |
+| `modelAccessMode`                           | `all` \| `restricted`                                               | `allowedModels` חייב להיות ריק כאשר המצב הוא `all`                                                                                                                                                                                   |
+| `allowedModels`, `blockedModels`            | מערך מחרוזות, עד 1000                                               |                                                                                                                                                                                                                                      |
+| `allowedCombos`                             | מערך מחרוזות, עד 500                                                | קובע לאילו שילובים המפתח רשאי לקרוא; מודלים ישירים נשלטים באמצעות `modelAccessMode` / `allowedModels`                                                                                                                                |
+| `connectionAccessMode`                      | `all` \| `restricted`                                               | `allowedConnections` חייב להיות לא-ריק כאשר המצב הוא `restricted` וריק כאשר המצב הוא `all`                                                                                                                                           |
+| `allowedConnections`                        | מערך מזהי UUID, עד 100                                              |                                                                                                                                                                                                                                      |
+| `allowAutoCombos`                           | בוליאני                                                             | `false` דוחה בקשות למודלי `auto/*` באמצעות מפתח זה; מפתחות שמעולם לא הגדירו אותו מורשים                                                                                                                                              |
+| `catalogScope`                              | `all` \| `combos` \| `models`                                       | מה `GET /v1/models` מציג עבור מפתח זה (שילובים בלבד, מודלים בלבד או שניהם); הוא אינו משנה לאילו מודלים המפתח רשאי לקרוא                                                                                                              |
+| `forcedModel`                               | מחרוזת באורך של עד 300 תווים, או `null`                             | מנתב בקשות צ'אט למודל/שילוב זה, בעדיפות על פני `X-Route-Model` ו-`body.model`; מגבלות המפתח עדיין חלות                                                                                                                               |
+| `noLog`, `autoResolve`                      | בוליאני                                                             |                                                                                                                                                                                                                                      |
+| `throttleDelayMs`                           | מספר שלם, 0-300000                                                  |                                                                                                                                                                                                                                      |
+| `maxSessions`                               | מספר שלם, 0-10000                                                   |                                                                                                                                                                                                                                      |
+| `rateLimits`                                | מערך של `{ limit, window }` (מספרים שלמים חיוביים, עד 50) או `null` | `null` מנקה את המגבלות                                                                                                                                                                                                               |
+| `accessSchedule`                            | אובייקט תזמון או `null`                                             | `null` מנקה את התזמון                                                                                                                                                                                                                |
+| `scopes`                                    | מערך מחרוזות, עד 32                                                 |                                                                                                                                                                                                                                      |
+| `allowedEndpoints`                          | מערך מחרוזות, עד 20                                                 |                                                                                                                                                                                                                                      |
+| `streamDefaultMode`                         | `legacy` \| `json`                                                  |                                                                                                                                                                                                                                      |
+| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                | ראו [עקיפת מטמון לכל מפתח](#per-key-cache-bypass)                                                                                                                                                                                    |
+| `compressionEnabled`                        | בוליאני                                                             |                                                                                                                                                                                                                                      |
+| `codexServiceMode`                          | אחד ממצבי השירות של Codex                                           |                                                                                                                                                                                                                                      |
+| `disableNonPublicModels`                    | boolean                                                             |                                                                                                                                                                                                                                      |
+| `allowUsageCommand`                         | boolean                                                             |                                                                                                                                                                                                                                      |
+| `usageLimitEnabled`                         | boolean                                                             |                                                                                                                                                                                                                                      |
+| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | מספר >= 0 או `null`                                                 |                                                                                                                                                                                                                                      |
+| `fiveHourUsageLimitUsd`                     | מספר >= 0 או `null`                                                 | תקציב USD מתגלגל של 5 שעות, נאכף כמו המגבלות היומיות והשבועיות (`usageLimitEnabled`, `UNPRICED_USAGE_BUDGET_POLICY`). `retry-after` הוא כאשר ההוצאה הוותיקה ביותר בחלון מזדקנת, מה שיכול להשאיר מפתח הרחק מעבר לגבול שלו עדיין חסום. |
+| `chaosModeEnabled`                          | boolean                                                             |                                                                                                                                                                                                                                      |
 
 ```bash
 curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
@@ -1407,6 +1414,35 @@ curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
 | `/api/modality-bridge/stats`         | GET        | `attempts` בזיכרון, הצלחות/`bridged`, כשלים, פגיעות במטמון, `totalLatencyMs`, `latencySamples`, `averageLatencyMs` המחושב לפי דגימות, וזמן השימוש האחרון (מתאפס לאחר הפעלה מחדש; נדרש אימות ניהול)                                                                                                                                                                                                 |
 | `/api/modality-bridge/video/runtime` | GET        | בדיקת trusted-loopback מחמירה לפני אימות/בדיקה של הניהול; זמינות וגרסאות של FFmpeg/ffprobe לאחר סינון (no-store)                                                                                                                                                                                                                                                                                   |
 | `/api/modality-bridge/video/extract` | POST       | מתווך בתים פנימי ומאומת של trusted-loopback; קלט בנפח 50 MiB, תור מוגבל ופלט בנפח 32 MiB, קיבולת `503`, ניתוק `499`, מועד אחרון `504`; אינו ממשק API ציבורי להעלאות                                                                                                                                                                                                                                |
+
+### פירוט מסגרות וידאו
+
+`GET /api/v1/video-bridge/drilldown` קורא ידית אטומה הקשורה לדייר, שהוחזרה ב־
+`x-omniroute-video-drilldown` לאחר בקשה מפורשת ומאושרת ל־Video Bridge.
+גם קריאות וגם `DELETE` דורשות תמיד מפתח API תקף ואת ההרשאה העצמאית של המפעיל
+`modalityBridgeVideoDrilldownRemoteEnabled`. שמירה בסביבת Production דורשת בנוסף
+את `modalityBridgeVideoDrilldownEnabled` ואת `drilldown: true` המחמיר עבור כל חלק.
+אם למפתח קיימת רשימת היתרים לא ריקה של נקודות קצה, היא חייבת לכלול את
+`video` עבור GET וגם עבור DELETE, ללא קשר לשאלה אם הלקוח משתמש ב־`/v1` או ב־`/api/v1`.
+
+שאילתת GET: `handle` נדרש; `variant` אופציונלי (`preview`, `standard`, `detail`),
+`limit` (1–8; הפרמטר הישן `frames` מתקבל, אך לא ניתן לשלב אותו עם `limit`),
+`page` מבוסס־אפס, וכן שניות `start`/`end`. כאשר שני גבולות המיקוד
+מסופקים, `end` חייב להיות גדול מ־`start`. מפתחות שאילתה כפולים או לא מוכרים
+נדחים. תגובות מוצלחות מכילות את `derivation`, `durationSeconds`, `frames`,
+`hasMore`, `page`, `variant`, ו־`focusWindow` אופציונלי; JSON ללא אחסון במטמון
+מוגבל ל־32 MiB כולל Base64. פלט שחורג מהגודל מחזיר 413; יש לבקש פחות פריימים.
+
+`DELETE /api/v1/video-bridge/drilldown?handle=...` מחזיר `{ "removed": 0|1 }`.
+GET עבור ידיות לא מוכרות, שפג תוקפן או שנעשה בהן שימוש ממפתח אחר מחזיר תמיד תגובת 404
+בלתי ניתנת להבחנה; DELETE ממפתח אחר אינו יכול להסיר את הרשומה של הבעלים. גישה מושבתת
+מחזירה 403, אימות חסר או לא תקף מחזיר 401, שאילתות לא תקינות מחזירות 400,
+ביטול מחזיר 499 ושגיאות זמניות מחזירות 503.
+הידיות הן מקומיות לתהליך, פגות לאחר עשר דקות ואינן שורדות הפעלה מחדש.
+ידיות חדשות משתמשות ב־`v1.` בתוספת אסימון אקראי מסוג Base64URL באורך 32 בתים;
+רק גיבובי אסימונים נשמרים. אסימוני 64-hex ישנים נותרים ניתנים לקריאה תחבירית לצורכי תאימות.
+ראו [אמצעי ההגנה של Video Bridge](../security/GUARDRAILS.md#video-bridge-videobridgets-videobridgepipelinets)
+לפרטים על הסכמה, מכסות וגזירת וריאנטים.
 
 ### גיבוי וייצוא/ייבוא
 
@@ -1510,19 +1546,19 @@ curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
 
 נקודות קצה אלה משקפות את תבנית ה־API של Gemini עבור לקוחות המצפים לתאימות מקורית ל־SDK של Gemini.
 
-### ממשקי API פנימיים / מערכתיים
+### ממשקי API פנימיים / של המערכת
 
-| Endpoint                 | Method | תיאור                                             |
+| Endpoint                 | Method | Description                                       |
 | ------------------------ | ------ | ------------------------------------------------- |
-| `/api/init`              | GET    | בדיקת אתחול היישום (בשימוש בהרצה הראשונה)         |
+| `/api/init`              | GET    | הפעלת שירותי סנכרון ברקע (אימות ניהול)            |
 | `/api/tags`              | GET    | תגיות מודלים תואמות ל־Ollama (עבור לקוחות Ollama) |
 | `/api/restart`           | POST   | הפעלת הפעלה מחדש תקינה של השרת                    |
-| `/api/shutdown`          | POST   | הפעלת כיבוי תקין של השרת                          |
-| `/api/system/env/repair` | POST   | תיקון משתני הסביבה של ספק OAuth                   |
+| `/api/shutdown`          | POST   | הפעלת השבתה תקינה של השרת                         |
+| `/api/system/env/repair` | POST   | תיקון משתני סביבה של ספקי OAuth                   |
 | `/api/system/version`    | GET    | הגרסה הנוכחית/האחרונה, מצב העדכון וערוץ ההפצה     |
 | `/api/system/version`    | POST   | התחלת עדכון מודע לפריסה לגרסה האחרונה             |
 
-> **הערה:** נקודות קצה אלה משמשות את המערכת באופן פנימי או עבור תאימות ללקוחות Ollama. בדרך כלל משתמשי קצה אינם קוראים להן.
+> **הערה:** נקודות קצה אלה משמשות את המערכת באופן פנימי או לצורך תאימות ללקוח Ollama. משתמשי קצה בדרך כלל אינם קוראים להן.
 
 ### תיקון סביבת OAuth _(v3.6.1+)_
 

@@ -351,272 +351,97 @@ Den delade cachen styrs fortfarande av `modalityBridgeCacheEnabled`,
 
 ### Video Bridge (`videoBridge.ts`, `videoBridgePipeline.ts`)
 
-Fångar upp videodelar på toppnivå i Chat Completions `messages` och Responses
-API `input` innan ett mål utan känt inbyggt videostöd anropas. Format som
-stöds är `input_video`, `video_url`, `video_source`, HTTPS-URL:er och
-data-URI:er av typen `data:video/*;base64,...`. Vanliga filnamn i text
-behandlas inte som video.
+Fångar upp videodelar på toppnivå i Chat Completions `messages` och Responses API `input` innan ett mål utan känt inbyggt videostöd anropas. Former som stöds är `input_video`, `video_url`, `video_source`, HTTPS URLs och `data:video/*;base64,...` data URIs. Vanliga filnamn i text behandlas inte som video.
 
-`VideoBridgeGuardrail.preCall` (`videoBridge.ts`) ansvarar för
-förfrågningstraverseringen, kapacitets-/policykontrollen, aggregeringen per
-förfrågan och svarsnyttolasten. Arbetet per video — hämtning, cachen för hela
-resultatet, beskrivningen av en bildrutesekvens (som slår samman eventuellt
-anropardeklarerat ljudtranskript) samt mätvärden/avbrott/rensning per försök —
-är dolt bakom `processVideoPart` i `videoBridgePipeline.ts`, som anropas en
-gång per videodel i `preCall`:s loop. Modulen definierar också de explicita
-portgränserna `VideoMediaBrokerPort` (hämta byte och extrahera samplade
-bildrutor), `VideoAudioTranscriptionPort` (slå samman ett anropardeklarerat
-ljudtranskript med de samplade bildtexterna) och `VideoDrilldownPort`
-(persistensgränsen för drilldown av bildrutor; ännu inte inkopplad i
-`processVideoPart` — bara den separata routen
-`/api/modality-bridge/video/drilldown` skriver drilldownposter i dag).
+`VideoBridgeGuardrail.preCall` (`videoBridge.ts`) äger förfrågningsövergång, capability/policy -kontrollen, aggregering per begäran och svarsnyttolasten. — -inhämtning per videoverk, hela resultatcachen, som beskriver en bildsekvens (som smälter ihop alla anropsdeklarerade ljudtranskript) och metrics/abort/cleanup — per försök göms bakom `processVideoPart` i `videoBridgePipeline.ts`, anropad en gång per videodel inuti `preCall` loop. Den modulen definierar också de explicita portgränserna `VideoMediaBrokerPort` (skaffa bytes och extrahera samplade ramar), `VideoAudioTranscriptionPort` (sammansmälta ett anropsdeklarerat ljudtranskript med de samplade bildtexterna) och `VideoDrilldownPort` (den äldre råa butiksformen). Produktion STT och frame retention är sammansatta runt den beskrivande porten genom `createVideoSttAdapter` och `createVideoDrilldownAdapter`; den senare använder den delade livscykeln med ogenomskinligt handtag.
 
-Den publika `/v1`-förfrågningsvägen importerar eller anropar aldrig en
-underprocess. Fjärrvideor laddas ner inom en gräns på 50 MiB; inbäddade
-base64-videor har ett konservativt tak på 36 MiB avkodat per video så att
-kuvertet med modell/meddelanden/inramning kan hålla sig inom den publika
-gränsen på 50 MiB för godkännande av JSON-förfrågningar. Inbäddad längd och
-uppskattningar av avkodad storlek kontrolleras före allokering. HTTPS krävs
-för den ursprungliga fjärr-URL:en och varje omdirigering, med det befintliga
-utgående skyddet som endast tillåter publika adresser, med DNS-pinning. Datan
-passerar sedan den exakta interna mäklargränsen
-`POST /api/modality-bridge/video/extract`. Den routen är både `LOCAL_ONLY` och
-`SPAWN_CAPABLE`, accepterar endast en per process autentiserad, betrodd
-loopback-förfrågan och accepterar aldrig en URL, filsystemssökväg, körbar fil
-eller argumentlista. API:ts pipeline för body-storlek och hanterarens
-inkrementella body-läsare upprätthåller oberoende av varandra ett tak på
-50 MiB för mäklarens indata. Dess begränsade kö kör en extraktion åt gången,
-tillåter fyra väntande jobb och sätter ett tak för väntande indata på 100 MiB.
+Den offentliga sökvägen för `/v1` -begäran importerar eller anropar aldrig en underprocess. Fjärrvideor laddas ner under en gräns på 50 MiB ; inline base64-videor har ett konservativt 36 MiB avkodat lock per video så att model/messages/framing kuvertet kan förbli inom den offentliga JSON begäran-tillträdesgränsen på 50 MiB. Uppskattningar av inlinelängd och avkodad storlek kontrolleras före tilldelning. HTTPS krävs på den initiala fjärranslutna URL och varje omdirigering, med hjälp av den befintliga utgående skyddet som endast är offentligt och med DNS pinning. Byten passerar sedan den exakta interna `POST /api/modality-bridge/video/extract` mäklarens gräns. Den rutten är både `LOCAL_ONLY` och `SPAWN_CAPABLE`, accepterar endast en per-process autentiserad, betrodd återkopplingsbegäran och accepterar aldrig en URL, filsystemsökväg, körbar fil eller argumentlista. API -rörledningen i kroppsstorlek och hanterarens inkrementella kroppsläsare tvingar oberoende av varandra ett 50 MiB mäklarinmatningstak. Dess avgränsade kö kör en extraktion i taget, tillåter fyra väntande jobb och begränsar väntande inmatning vid 100 MiB.
 
-Inuti brokern läser `ffprobe` en privat lokal fil; den fasta
-formattillåtelselistan exkluderar spelliste- och manifestformat. För tillåtna
-containrar i MOV-familjen förblir externa MOV-datareferenser inaktiverade som
-standard, och det fasta kommandot aktiverar dem inte. Både `ffprobe` och
-`ffmpeg` använder protokolltillåtelselistan med endast `file`, en tråd, fasta
-argumentarrayer, inget skal, och körbara filer som slås upp via `PATH`.
-Strömmar med bifogade omslagsbilder är inte spelbara kandidater. Alla spelbara
-strömmar måste uppfylla gränserna, och en explicit standardström föredras före
-den deterministiska återgången till lägsta index. Videor är begränsade till
-600 sekunder, 8 192 pixlar per dimension och 33 554 432 källpixlar. FFmpeg
-samplar 1–16 JPEG-bildrutor vid mittpunkter, skalar ner långsidan till högst
-1 024 pixlar utan att skala upp mindre indata, och tar aldrig emot en URL.
-Samplingsläget är `uniform` som standard. De valfria policyerna `scene_aware`
-och experimentella `segment_aware` utför ytterligare ett fast FFmpeg-pass över
-den redan validerade lokala strömmen, väljer avgränsade
-`showinfo`-scentidsstämplar, och faller deterministiskt tillbaka till samma
-uniforma mittpunkter vid detektorfel, timeout, felaktig utdata eller en tom
-kandidatmängd. Segmentmedvetet läge fördelar mittpunktssamplingarna
-proportionellt mot de validerade scenintervallen; segmentmedveten evidens och
-återgångsbeteende beskrivs i detalj nedan. Det hårda taket på 16 bildrutor
-tillämpas efter urvalet i varje policy. När en scenmedveten förfrågan bara har
-en budget på en bildruta använder den den uniforma mittpunkten för det aktiva
-helvideofönstret eller fokusfönstret och rapporterar `policyEffective:
-uniform`: en enda vald scenbildruta kan inte bevara båda temporala ändpunkter.
-En anropare kan valfritt ange ett ändligt fokusfönster (`start`/`end`-sekunder);
-gränserna begränsas till medielängden, omvända eller icke-ändliga fönster
-avvisas, och alla samplingspolicyer utförs endast inom det normaliserade
-intervallet. Det resulterande fönstret inkluderas i samplingsmetadata och i
-prefixet för den otillförlitliga beskrivningen så att nedströmsmodeller kan
-skilja ett fokuserat utdrag från hela tidslinjen.
+Inuti mäklaren läser `ffprobe` en privat lokal fil; godkännandelistan med fast format utesluter spellist- och manifestformat. För tillåtna MOV-familjcontainrar förblir externa MOV datareferenser inaktiverade som standard, och det fasta kommandot väljer inte in dem. Både `ffprobe` och `ffmpeg` använder `file` -only -protokollets vitlista, en tråd, fixerade argumentmatriser, inget skal och körbara filer lösta från `PATH`. Omslagsströmmar med bifogade bilder är inte spelbara kandidater. Alla spelbara strömmar måste uppfylla gränserna, och en explicit standardström är att föredra före det deterministiska lägsta indexets fallback. Videor är begränsade till 600 sekunder, 8 192 pixlar per dimension och 33 554 432 källpixlar. FFmpeg samplar 1–16 mittpunkts JPEG ramar, skalar ner långsidan till högst 1 024 pixlar utan att skala upp mindre indata och får aldrig en URL. Sampling är `uniform` som standard. De valfria `scene_aware` och experimentella `segment_aware` policyerna utför ytterligare en fixerad FFmpeg pass över den redan validerade lokala strömmen, väljer avgränsade `showinfo` scentidsstämplar och faller tillbaka deterministiskt till samma enhetliga mittpunkter på detektorfel, timeout, felaktig utdata eller en tom kandidatuppsättning. Segmentmedvetet läge allokerar mittpunktssampel proportionellt mot de validerade scenintervallen; segmentmedvetna bevis och reservbeteende beskrivs nedan. Det hårda 16-ramars locket tillämpas efter val i varje policy. När en scenmedveten begäran endast har en budget för en bildruta använder den den enhetliga mittpunkten av det aktiva fullvideo- eller fokusfönstret och rapporterar `policyEffective: uniform`: en enda vald scenbild kan inte bevara båda tidsändarna. En uppringare kan valfritt tillhandahålla ett ändligt fokusfönster (`start`/`end` sekunder); gränser kläms fast till mediavaraktigheten, omvända eller icke-ändliga fönster avvisas och alla samplingsprinciper utförs endast inom det normaliserade intervallet. Det resulterande fönstret ingår i samplingsmetadata och i det opålitliga beskrivningsprefixet så att nedströmsmodeller kan skilja ett fokuserat utdrag från hela tidslinjen.
 
-Semantiskt bildtextfokus är en separat, explicit inställning. Standardanalysläget
-`full` bevarar den befintliga bildrutsprompten och vidarebefordrar aldrig
-förfrågningstext till bildtextsmodellen. I läget `focused` läser bryggan endast
-det senaste icke-tomma användarskrivna `text`/`input_text` från samma Chat-
-eller Responses-container, normaliserar det till NFC, slår ihop kontrolltecken
-och blanksteg, och begränsar det till 500 Unicode-kodpunkter. Ett tomt resultat
-faller tillbaka till exakt `full`-prompten. En användbar ledtråd serialiseras
-som JSON i ett dedikerat block för otillförlitlig användarkontext och får
-endast prioritera observerbara detaljer; den kan inte åsidosätta den separata
-varningen mot att följa instruktioner som är synliga eller hörbara i mediet.
-Textuellt fokus härleder aldrig `start`/`end` och ändrar inte den temporala
-sampleraren.
+Semantisk bildtextfokus är en separat, explicit inställning. Standard `full` analysläget bevarar den befintliga ramprompten och vidarebefordrar aldrig förfrågningstext till bildtextmodellen. I `focused` läge läser bryggan endast den senaste icke-tomma användarförfattade `text`/`input_text` från samma chatt- eller svarsbehållare, normaliserar den till NFC, kollapsar kontrolltecken och blanksteg och begränsar den till 500 Unicode-kodpunkter. Ett tomt resultat faller tillbaka till den exakta `full` prompten. En användbar ledtråd serialiseras som JSON i ett dedikerat untrusted-user-context-block och kan bara prioritera observerbara detaljer; den kan inte åsidosätta den separata varningen mot att följa instruktioner som är synliga eller hörbara i media. Textfokus leder aldrig till `start`/`end` eller ändrar den tidsmässiga samplern.
 
-#### FU-07 strukturell segmentevidens
+#### FU-07 strukturella segment bevis
 
-`segment_aware` använder ett avgränsat föranalyspass över den redan validerade
-lokala videoströmmen. Den fasta filterkedjan skalar först till högst 320
-pixlar i bredd, detekterar scenbyten och frysta intervall, och samplar sedan
-med 1 bildruta per sekund för oskärpa, genomsnittlig luma samt
-rumslig/temporal information. Passet är begränsat till 600 strukturella
-samplingar, en FFmpeg-/filtertråd, samma protokoll- och
-containertillåtelselistor med endast `file`, en gräns på 1 MiB för
-processutdata, och högst 30 sekunder inom brokerns delade
-avbrotts-/deadline-ram. Den accepterar aldrig ett kommando, filter, en sökväg
-eller en URL från förfrågan.
+`segment_aware` använder ett begränsat föranalyspass över den redan validerade lokala videoströmmen. Den fasta filterkedjan skalas först till högst 320 pixlar bred, upptäcker scenförändringar och frysta intervall och samplar sedan med 1 bildruta per sekund för oskärpa, genomsnittlig luma och spatial/temporal information. Passet är begränsat till 600 strukturella prover, en FFmpeg/filter tråd, samma `file` -only protokoll och containergodkännandelistor, en 1 MiB process-output bunden, och högst 30 sekunder inuti mäklarens delade abort/deadline. Den accepterar aldrig ett kommando, filter, sökväg eller URL från begäran.
 
-De strukturella värdena är deterministisk samplingsevidens, inte semantisk
-videoförståelse. De härleder inte motiv, handlingar, bildtexter, tal eller
-användaravsikt. Scen- och frysgränser bildar segment; frystäckning, oskärpa,
-exponering, rumslig detaljrikedom och temporal förändring påverkar endast hur
-den befintliga budgeten på 1–16 bildrutor fördelas. Ett helt fryst segment
-begränsas till en bildruta, medan icke-frysta segment konkurrerar om den
-återstående budgeten. När gränserna är fler än bildrutorna behålls uniform
-tidslinjetäckning så att snabba tidiga klipp inte kan dölja ett långt
-avslutande segment. Scengränser som ligger inom analysupplösningen på 1 sekund
-från en frysgräns slås samman.
+De strukturella värdena är deterministiska provtagningsbevis, inte semantisk videoförståelse. De härleder inte ämnen, handlingar, bildtexter, tal eller användaravsikter. Scen- och frysgränser bildar segment; frystäckning, oskärpa, exponering, rumsliga detaljer och tidsmässiga förändringar påverkar bara hur den befintliga budgeten på 1–16 ramar allokeras. Ett helt fruset segment är begränsat till en bildruta, medan icke-frysta segment konkurrerar om den återstående budgeten. När gränserna är fler än ramar, bibehålls enhetlig tidslinjetäckning så att snabba tidiga klipp inte kan dölja ett långt efterföljande segment. Scengränser inom 1-sekunds analysupplösningen för en frysgräns koaleseras.
 
-Saknade filter, felaktig/tom evidens, ett detektorfel eller timeout för det
-avgränsade föranalyspasset leder till en öppen återgång till exakt den
-uniforma mittpunktspolicyn. Ett anropsavbrott eller en broker-deadline leder
-inte till öppen återgång: det avslutar den pågående delprocessen, förhindrar
-senare bildrutesextraktion, och det privata temporära katalogträdet tas bort i
-`finally`.
+Saknade filter, malformed/empty -bevis, ett detektorfel eller den begränsade pre-analys timeout misslyckas med den exakta enhetliga mittpunktspolicyn. En uppringare avbryter eller en mäklardeadline misslyckas inte: den avslutar underprocessen under flygning, förhindrar senare ramextraktion och det privata tillfälliga trädet tas bort i `finally`.
 
-`scripts/perf/video-bridge-fu07-eval.ts` genererar deterministiska, riktiga
-FFmpeg-fixturer för besparingar på bildtextsanrop efter deduplicering,
-budgetfördelning vid tät rörelse, evidens för oskärpa/exponering/SI-TI, snabba
-klipp med en lång svans, samt falskt positiva utslag vid gradvisa toningar.
-Den registrerar föranalysens väggtid och, där `/usr/bin/time` är tillgänglig,
-delprocessens CPU-tid och högsta RSS. Dess kvalitetskontroller är endast
-strukturella orakel. Verklig bildtextsmodellkvalitet förblir `HOLD` eftersom
-detta testramverk saknar en auktoriserad endpoint eller fryst domare. Monetära
-besparingar förblir också `HOLD` om inte `--caption-cost-per-call-usd` anger
-en explicit positiv uppskattning per anrop; skriptet fabricerar aldrig något
-av resultaten.
+`scripts/perf/video-bridge-fu07-eval.ts` genererar deterministiska verkliga FFmpeg fixturer för post-dedup caption-call besparingar, dense-motion budgetallokering, blur/exposure/SI-TI bevis, snabba nedskärningar med en lång svans och gradvis-fade falska positiva. Den registrerar väggtid före analys och, där `/usr/bin/time` är tillgängligt, underordnad CPU och peak RSS. Dess kvalitetskontroller är endast strukturella orakel. Den riktiga bildtextmodellens kvalitet förblir `HOLD` eftersom denna sele inte har någon auktoriserad endpoint eller frusen domare. Monetära besparingar förblir också `HOLD` om inte `--caption-cost-per-call-usd` tillhandahåller en explicit positiv uppskattning per samtal; manuset tillverkar aldrig något av resultaten.
 
-Varje bildruta är begränsad till 4 MiB, alla råa bildrutor tillsammans till 23 MiB och det serialiserade broker-svaret till 32 MiB. En privat temporär katalog tas bort i `finally`. OmniRoute buntar inte in FFmpeg och accepterar inte en anpassad sökväg till en körbar fil. Före textning tillämpar bryggan ett konservativt visuellt dubblettrensningspass: varje JPEG reduceras till en 16×16-gråskalebuffert och jämförs endast med den senast behållna bildrutan. För en begärd textbudget över en bildruta tillhandahåller extraheringen en begränsad kandidatpool på upp till det dubbla av budgeten och aldrig fler än 16 bildrutor. Det begärda taket tillämpas först efter dubblettrensningen, med den första och den sista valda kandidaten bevarade under den slutliga gallringen när budgeten är minst två. Den versionerade policyn `grayscale-16x16-mean-cells-v2` använder det större av genomsnittligt lumadelta och andelen miniatyrbildsceller vars normaliserade delta är minst 0.05. Dubbletttröskeln är konstanten 0.04, vald för förutsägbarhet snarare än exponerad som en körningsinställning. Denna sekundära högkontrastsignal bevarar små rörelser och synliga textändringar som en jämförelse av enbart medelvärde kan dölja. Fel i komparatorn eller avkodaren misslyckas öppet och behåller täckningen. Utmatningsmetadatan skiljer på extraherade kandidater, framgångsrikt använda bildrutor och borttagna visuella dubbletter.
+Varje ram är begränsad till 4 MiB, alla råa ramar tillsammans till 23 MiB och det serialiserade mäklarsvaret till 32 MiB. En privat tillfällig katalog tas bort i `finally`. OmniRoute paketerar inte FFmpeg och accepterar inte en anpassad körbar sökväg. Före bildtexter tillämpar bryggan ett konservativt visuellt dedupliceringspass: varje JPEG reduceras till en 16 × 16 gråskalebuffert och jämförs endast med den sista bilden som behölls. För en begärd bildtextbudget över en bildruta tillhandahåller extrahering en begränsad kandidatpool på upp till två gånger den budgeten och aldrig mer än 16 bildrutor. Det begärda taket tillämpas först efter deduplicering, med de första och sista utvalda kandidaterna bevarade under slutlig gallring när budgeten är minst två. Den versionerade `grayscale-16x16-mean-cells-v2` policyn använder det största av medelluma-delta och förhållandet mellan miniatyrceller vars normaliserade delta är minst 0,05. Dubbletttröskeln är konstanten 0,04, vald för förutsägbarhet snarare än exponerad som en körtidsinställning. Den här sekundära högkontrastsignalen bevarar små rörelser och synliga textförändringar som endast en genomsnittlig jämförelse kan dölja. Komparator- eller avkodarfel misslyckas öppna och behåller täckningen. Utdatametadata separerar extraherade kandidater, framgångsrikt använda ramar och visuella dubbletter som tappats.
 
-En uttryckligen markerad videodel kan begära ett tidsstämplat kontaktark. Bryggan bygger som mest ett JPEG-rutnät med 4 kolumner och 16 bildrutor. Varje cell på 512 pixlar bränner in sin källtidsstämpel i ett högkontrastband längst ned, medan samma tidsstämplar finns kvar i textuell metadata för nedströmsassociation och granskning. Den fullständiga JPEG:en förblir begränsad till 32 MiB. Om `sharp` inte kan avkoda eller sätta samman rutnätet faller bryggan tillbaka på de enskilda JPEG-bildrutorna; ett klientavbrott propagerar fortfarande genom arkoperationen.
+En explicit markerad videodel kan begära ett tidsstämplat kontaktblad. Bron bygger högst ett 4-kolonn, 16-ramar JPEG rutnät. Varje cell på 512 pixlar bränner sin källtidsstämpel till ett bottenband med hög kontrast, medan samma tidsstämplar finns kvar i textmetadata för nedströmsassociering och granskning. Den fullständiga JPEG förblir begränsad till 32 MiB. Om `sharp` inte kan avkoda eller komponera rutnätet, faller bryggan tillbaka till de individuella JPEG ramarna; ett klientavbrott sprider sig fortfarande genom arkoperationen.
 
-Befordringsbevis är avsiktligt åtskilda från det syntetiska sammansättningsmikrobenchmarket. `scripts/perf/video-bridge-contact-sheet-eval.ts` definierar en schemaversionerad A/B-testsele för riktiga OpenAI-kompatibla visionsmodeller. Den mäter leverantörsrapporterade tokens, total väggtidsfördröjning (inklusive arksammansättning), antal modellanrop och manifestdefinierad faktaretention. Råa modellsvar skrivs inte till rapporten; endast SHA-256-sammanfattningar och matchade fakta-ID:n bevaras. Testselen gör inga nätverks- eller betalda modellanrop om inte `--execute-real` skickas och `--model`, `OMNIROUTE_BASE_URL` och `OMNIROUTE_API_KEY` är konfigurerade. Utan den uttryckliga verkliga körningen förblir dess maskinläsbara utlåtande `HOLD`; syntetiska mätningar av nyttolast och anropsantal är ensamma inte befordringsbevis.
+Marknadsföringsbevis är medvetet åtskilt från mikrobenchmark för syntetisk sammansättning. `scripts/perf/video-bridge-contact-sheet-eval.ts` definierar en schemaversionerad A/B -sele för riktiga OpenAI-kompatibla visionmodeller. Den mäter leverantörsrapporterade tokens, änd-till-ände vägglatens (inklusive arksammansättning), antal modellsamtal och manifestdefinierad faktaretention. Svar från råmodeller skrivs inte till rapporten; endast SHA-256 sammandrag och matchade fakta IDs behålls. Kabelnätet ringer inget nätverk eller betald modell om inte `--execute-real` skickas och `--model`, `OMNIROUTE_BASE_URL` och `OMNIROUTE_API_KEY` är konfigurerade. Utan den explicita verkliga körningen förblir dess maskinläsbara dom `HOLD`; syntetiska payload/call-count -mätningar enbart är inte marknadsföringsbevis.
 
-Anropare kan bifoga en valfri `transcript.cues`-array till en stödd videodel när de redan har tidsjusterad text. Varje cue måste bära `text`, ett ändligt `start`/`end`-intervall inom den undersökta varaktigheten och en vitlistad `source` (`client`, `embedded` eller `audio-bridge`); `confidence` är som standard `1` och måste förbli mellan `0` och `1`. Exakta dubblett-cues slås samman. OmniRoute startar aldrig transkribering utifrån denna metadata: validerade cues kopieras in i det beskrivna resultatet med källa, konfidens och intervall, och renderas som opålitliga observationer vid sidan av bildrutetexterna. Ogiltig text, text utanför intervallet eller text utan proveniens avvisas i stället för att blandas in i textströmmen. Båda transkriptkanalerna i begärans brödtext normaliserar angiven proveniens till `client`, inklusive självdeklarerade `embedded`- eller `audio-bridge`-etiketter. Endast en serverägd adapter kan tilldela dessa betrodda etiketter via argumentet `trustedSource`, som endast kan nås från kod; ett JSON-fält i begäran kan inte nå det argumentet. Transkripttext förblir opålitligt mediehärlett innehåll, oavsett sin proveniens, och får aldrig avgöra auktorisering.
+Uppringare kan koppla en valfri `transcript.cues` matris till en videodel som stöds när de redan har justerad text. Varje cue måste ha `text`, ett ändligt `start`/`end` -intervall inom den undersökta varaktigheten och en vitlistad `source` (`client`, `embedded` eller `audio-bridge`); `confidence` har som standard `1` och måste ligga mellan `0` och `1`. Exakta dubbletter av signaler är kollapsade. OmniRoute startar aldrig transkription från denna metadata: validerade ledtrådar kopieras till det beskrivna resultatet med källa, konfidens och intervall och renderas som opålitliga observationer vid sidan av bildtexterna. Ogiltig, utanför intervallet eller härkomstfri text avvisas i stället för att blandas in i bildtextflödet. Båda förfrågningskroppens transkriptionskanaler normaliserar den angivna härkomsten till `client`, inklusive självhävdande `embedded` eller `audio-bridge` etiketter. Endast en serverägd adapter kan tilldela dessa betrodda etiketter genom argumentet `trustedSource` endast för kod; ett request JSON -fält kan inte nå det argumentet. Transkriptionstext förblir opålitligt mediehärlett innehåll, oavsett ursprung, och får aldrig avgöra auktorisation.
 
-En avancerad anropare kan tillhandahålla ett `audioTranscript`-spår för samma video; det behandlas som klienttillhandahållen text, inte som bevis på servertranskribering. Fusionssömmen kör visuella observationer och ljudobservationer under samma tidsgräns och avbrottssignal, ordnar dem på en gemensam tidslinje, slår samman exakta dubbletter och rapporterar ett delresultat när endast ena sidan lyckas. Ett ogiltigt `audioTranscript` degraderar till det delresultatet — den visuella beskrivningen behålls och ljudgrenen registrerar en sanerad felkod — i stället för att hela videon ska misslyckas. Tillgänglighet per gren, delflaggan och de sanerade felkoderna bevaras i det beskrivna resultatet, i guardrail-metadatan (`audioFusionRuns`/`audioFusionPartials`/`audioFusionFailureCodes`), i metadata för resultatcachen och i bryggans fusionsräknare. Standardvägen för Video Bridge anropar inte tal-till-text och laddar inte ned en andra mediekopia; utan det uttryckliga spåret förblir den endast video.
+En avancerad uppringare kan tillhandahålla ett `audioTranscript` spår för samma video; den behandlas som klienttillhandahållen text, inte bevis på servertranskription. Fusionssömmen kör visuella och ljudobservationer under en deadline och avbrytsignal, beställer dem på en gemensam tidslinje, kollapsar exakta dubbletter och rapporterar ett delresultat när bara en sida lyckas. En ogiltig `audioTranscript` försämrar det partiella resultatet — den visuella beskrivningen bevaras och ljudgrenen registrerar en sanerad felkod — istället för att misslyckas med hela videon. Tillgänglighet per gren, den partiella flaggan och de sanerade felkoderna bevaras i det beskrivna resultatet, i skyddsräckets metadata (`audioFusionRuns`/`audioFusionPartials`/ `audioFusionFailureCodes`), i resultatcache-metadata och i bryggfusionsräknare. Standardsökvägen för Video Bridge anropar inte tal-till-text eller laddar ner en andra mediakopia; utan det explicita spåret förblir det endast video.
 
-**Kvarhållande av transkript (#12150 P1).** Detta tillämpas automatiskt närhelst Video Bridge (som i sig är ett tillval) renderar en transkript-cue — det finns ingen separat flagga för kvarhållande. När en begäran renderar någon transkript-cue (en `transcript` deklarerad av anroparen eller en sammanslagen `audioTranscript`) markerar guardrailen den som `videoBridgeObserved` och skapar en redigerad skugga av videobeskrivningen — en identisk rendering där varje cues fritextinnehåll ersätts med `[redacted-video-transcript]`, som byggs genom att det strukturerade cue-fältet ersätts innan strängen sätts samman (aldrig genom att tolka den tillplattade texten, så att inget cue-innehåll — fientligt eller vanligt, inklusive innehåll som innehåller `]`, såsom `[inaudible]`/`[music]` — kan överleva). Den sparade begärandekroppen i anropsloggen byter ut varje videohärledd textdel mot den redigerade skuggan, matchad via innehållslikhet; `fullText`-ankaret läses om från den färdiga guardrail-nyttolasten före anropet, så att matchningen fortfarande lyckas efter att senare guardrails i kedjan (maskerarna för PII och inloggningsuppgifter, prioriteter 10/95) skriver om beskrivningstexten på plats och efter att injektion av systemprompt/handoff/minne omformat meddelandearrayen. Kroppen som skickas uppströms till modellen är oförändrad. En observerad begäran fyller inte heller i något bestående Memory (både begärings- och svarshärledd extraktion hoppas över), så att modellens eget svar inte kan eka in transkripttext i Memory.
+**Avskriftsretention (#12150 P1).** Detta gäller automatiskt när Video Bridge (själv opt-in) återger en transkriptions-cue — finns det ingen separat retentionsflagga. När en begäran återger en transkriptionssignal (en anropar-deklarerad `transcript` eller en fused `audioTranscript`), markerar skyddsräcket det `videoBridgeObserved` och producerar en redigerad skugga av videobeskrivningen — en identisk rendering där varje ledtråds fritexttext ersätts av `[redacted-video-transcript]`, byggd genom att ersätta fältet som är strukturerat före den strukturerade strängen (nevering) tillplattad text, så inget cue innehåll — kontradiktoriskt eller vanligt, inklusive kroppar som innehåller `]` som `[inaudible]`/`[music]` — kan överleva). Texten i kvarstående samtalsloggförfrågan byter ut varje videohärledd textdel mot den redigerade skuggan, matchad av innehållslikhet; `fullText` ankaret läses om från den färdiga nyttolasten för skyddsräcket före anropet, så matchningen lyckas fortfarande efter att senare kedjeräcken ( PII och legitimationsmaskerna, priorities 10/95) har skrivit om beskrivningstexten på plats och efter system-prompt/handoff/memory injektion omformar meddelandeuppsättningen. Kroppen som skickas uppströms till modellen är oförändrad. En observerad begäran fyller inte heller något hållbart minne (både begäran- och svarshärledd extraktion hoppas över), så modellens eget svar kan inte eka transkriptionstext till Memory.
 
-**Råa videofält (#12430).** När bron är aktiverad och inbyggt videostöd är okänt eller saknas aktiverar definierade `transcript`/`audioTranscript`-fält också `videoBridgeObserved`, även efter misslyckad beskrivning eller en `maxVideos`-gräns. `null` och tomma strängar räknas; frånvarande fält och metadata som inte rör video gör det inte. Kvarhållna kopior redigerar dessa fält eller utelämnar begäran, och cacher/Memory kringgås.
+**Råvideofält (#12430).** När bryggan är aktiverad och inbyggt videostöd är okänt eller saknas, aktiveras även definierade `transcript`/`audioTranscript` -fält `videoBridgeObserved`, även efter beskrivningsfel eller en `maxVideos` gräns. `null` och tomma strängar räknas; frånvarande fält och icke-videometadata gör det inte. Behållna kopior redigerar dessa fält eller utelämnar begäran, och caches/Memory förbigås.
 
-På dessa reservvägar blir giltiga cues från anroparen stödda `text`/`input_text`-delar i stället för icke-standardiserade leverantörsfält. Båda spåren som tillhandahålls i begäran förblir obetrodda `client`-observationer, med en uttrycklig varning om att videon inte har beskrivits och att tidsstämplarna inte har verifierats mot mediet. De befintliga budgetarna — totalt 256 cues/64 KiB samt per cue — gäller för de två spåren gemensamt; tidsstämplar måste rymmas inom brokerns tak på 600 sekunder och eventuellt angivet fokusfönster. Ogiltiga spår kasseras och vidarebefordras inte som godtycklig text; ett giltigt syskonspår kan fortfarande användas om inte deras sammanlagda budget överskrids. Fält som är null eller tomma tillför ingen text. Ingen mediehämtning eller transkribering läggs till av denna reservväg. Transkriptets tilläggsfält tas bort från reservvägens videobärare och dess `video_url`/`source`-objekt. OpenAI:s tillåtelselista för wire-formatet förblir strikt; videobärare med okänt inbyggt stöd förblir tillgängliga och kända mål som endast hanterar text behåller sina säkra markörer. Strukturerade redigeringsskuggor skyddar den tillagda transkripttexten, medan anroparens ursprungliga begäran förblir oförändrad. Mål med inbyggt stöd och inaktiverade broar behåller sitt befintliga kringgående beteende.
+På dessa reservvägar blir giltiga anropssignaler stödda `text`/`input_text` -delar snarare än icke-standardiserade leverantörsfält. Båda spåren som tillhandahålls av begäran förblir otillförlitliga `client` observationer, med en uttrycklig varning om att videon inte beskrevs och tidsstämplar inte verifierades mot media. De befintliga 256-cue/64-KiB total- och per-cue-budgetarna gäller över de två spåren tillsammans; tidsstämplar måste passa mäklarens 600-sekunders tak och eventuellt medföljande fokusfönster. Ogiltiga spår slängs, inte vidarebefordras som godtycklig text; ett giltigt syskon kan fortfarande användas om inte deras sammanlagda budget överskrids. Null/empty -fält lägger till ingen text. Ingen mediehämtning eller transkription läggs till av denna reserv. Avskriftstilläggsfält tas bort från reservvideobäraren och dess `video_url`/`source` -objekt. Tillståndslistan för OpenAI wire förblir strikt; okända infödda videobärare förblir tillgängliga och kända textmål behåller säkra markörer. Strukturerade redigeringsskuggor skyddar den bifogade transkriptionstexten, medan den ursprungliga anropsägda begäran förblir oförändrad. Inbyggda mål och broar med funktionshinder behåller sitt befintliga bypass-beteende.
 
-Ytterligare kvarhållna kopior använder samma signal för observerade begäranden. Den råa ögonblicksbilden av klientbegäran före guardrail, den väntande begäran i minnet och den tidiga loggen över avvisade begäranden ersätter strukturellt transkriptfält i videodelar; strängprompter som syntetiseras av pipelinesteg och kontextöverlämning redigeras vid sänkan för sparade begärandekroppar. Den sparade markören `video_content_removed` gör att fortsättning via `previous_response_id` fallerar i stängt läge i stället för att rekonstruera text som avsiktligt har kasserats. Om en observerad begäran förlorar sin redigeringsskugga per del före loggning, eller om till och med en av flera videoskuggor inte matchar efter senare ändringar av begäran, utelämnas den kvarhållna begärandekroppen helt i stället för att behålla ett delvis redigerat transkript.
+Ytterligare bevarade kopior använder samma observerade förfrågningssignal. Den råa ögonblicksbilden av klientbegäran före skyddsräcket, väntande begäran i minnet och loggen för tidigt avvisad begäran ersätter strukturellt transkriptionsfält i videodelar; strängprompter syntetiserade av pipeline-steg och kontextöverlämning redigeras vid persisted-request-body-sinken. Den kvarstående `video_content_removed` markören gör att `previous_response_id` fortsättningen misslyckas stängs snarare än att rekonstruera text som avsiktligt förkastades. Om en observerad begäran förlorar sin redigeringsskugga per del före loggning, eller ens en av flera videoskuggor inte matchar efter senare begärandemutationer, utelämnas den bibehållna begärandekroppen helt istället för att behålla ett delvis redigerat transkript.
 
-För en observerad begäran kan ett modellsvar citera vilken del som helst av transkriptet utan någon strukturerad cue-gräns. Dess sparade `responseBody` i anropsloggen ersätts därför av en utelämnandemarkör; den detaljerade pipeline-artefakten (som kan innehålla uppströms- och klientkroppar samt strömmade chunkar) kvarhålls inte. Semantiska cacher, idempotenscacher och reasoning-replay-cacher kringgår läsningar och skrivningar för den begäran. Leverantörsbegäran och det för klienten synliga svaret förblir oförändrade. Tidiga keepalive-byte töms ur den tillfälliga bufferten när den detaljerade artefakten utelämnas. Kiros varning om felformaterad EventStream rapporterar endast nyttolastens byteantal, aldrig dess innehåll eller JSON-tolkens råa fel.
-Detta innebär inte ett påstående att all orelaterad leverantörs-/plugin-diagnostik har granskats; den bredare genomgången av kvarhållna sänkor följs i #11658.
+För en observerad begäran kan ett modellsvar citera vilken del av transkriptet som helst utan en strukturerad cue-gräns. Dess ihållande call-log `responseBody` ersätts därför av en utelämnande markör; den detaljerade rörledningsartefakten (som kan inkludera upstream/client kroppar och strömbitar) behålls inte. Semantisk, idempotens och resonemang-replay-cacher förbigår läsning och skrivning för den begäran. Leverantörsbegäran och kundsynligt svar förblir oförändrade. Tidiga keepalive-bytes dräneras från den tillfälliga bufferten när den detaljerade artefakten utelämnas. Kiro felaktiga EventStream -varning rapporterar endast antalet byte av nyttolast, aldrig dess innehåll eller JSON -parserns råfel. Detta gör inte anspråk på att varje orelaterade provider/plugin diagnostik har granskats; det bredare retained-sink-svepet spåras i #11658.
 
-Livscykeln för den interna `/api/modality-bridge/video/drilldown` är ett separat cacheunderlag som autentiseras via loopback/token. Varje åtgärd kräver dessutom ett kanoniskt, opakt principal-ID. Innan en produktionsanropare aktiveras måste den härleda detta ID från den autentiserade tenanten och får aldrig vidarebefordra ett värde som valts av klienten. Cachenycklar binder den principalen till kanoniska sessions- och videoreferens-ID:n, lagrar endast deras SHA-256-härledda nycklar och begränsar både läsning och radering till samma principal. Cachen lagrar högst 16 härledda JPEG-bildrutor per post, låter dem förfalla efter tio minuter och stödjer avgränsade `start`/`end`-läsningar eller uttrycklig radering av en session.
+Den interna `/api/modality-bridge/video/drilldown` livscykeln är ett separat, loopback/token-authenticated cachesubstrat. Varje operation kräver också en kanonisk opak principal ID. Innan en produktionsanropare aktiveras måste den härleda ID från den autentiserade klienten och får aldrig vidarebefordra ett klientvalt värde. Cache-nycklar binder den principen till kanonisk session och videoreferens IDs, lagrar endast deras SHA-256-derived nycklar och omfångar både läsningar och radering till samma principal. Cachen lagrar högst 16 härledda JPEG ramar per post, förfaller dem efter tio minuter och stöder avgränsade `start`/`end` -läsningar eller explicit sessionsborttagning.
 
-Varje principal är begränsad till 16 poster och 64 MiB kanonisk JPEG-data. Dessa gränser är oberoende av det globala taket på 64 poster/256 MiB: kvottryck för en principal avlägsnar endast den principalens minst nyligen använda poster innan global LRU-avlägsning övervägs. Utgångna poster rensas bort från både principal- och global bokföring vid cacheaktivitet, medan avbrott och valideringsfel inte genomför en partiell ersättning.
+Varje huvudperson är begränsad till 16 poster och 64 MiB kanoniska JPEG data. Dessa gränser är oberoende av det globala 64-entry/256 MiB taket: rektorskvotstrycket avhyser endast den rektors minst nyligen använda poster innan global LRU vräkning. Utgångna poster sopas från både principiell och global redovisning av cacheaktivitet, medan annullering och misslyckande med validering inte begår en partiell ersättning.
 
-Cachen avvisar icke-kanonisk Base64, överflödig utfyllnad, media som inte är JPEG, felaktiga eller trunkerade JPEG-bilder samt JPEG-bilder som ger en varning under en begränsad `sharp`-avkodning av hela bilden. Den omkodar varje accepterad bild som en kanonisk JPEG, härleder bredd och höjd från de avkodade bytena istället för att lita på anroparens fält, och kasserar eventuella efterföljande polyglottbyte istället för att behålla dem. Endast den begränsade kanoniska komprimerade bufferten räknas mot båda kvoterna. JSON-gränsen för överföringen inkluderar Base64-overhead för taket på 32 MiB avkodad indata. Varje
-lagrad härledning registrerar sitt validerade JPEG-format/sin upplösning, samplingspolicy,
-härledningsversion, skapandetid, serverberäknad innehållshash och hashad
-föräldrareferens plus den betrodda anroparens hash för föräldrainnehåll. Avbrott kontrolleras
-mellan asynkrona avkodnings-/hashfaser före den atomära cache-commit:en.
+Cachen avvisar icke-kanonisk Base64, överflödig utfyllnad, icke-JPEG-media, felaktiga eller trunkerade JPEGs och JPEGs som ger en varning under en avkodning av en avgränsad helbilds `sharp`. Den kodar om varje accepterad bild som en kanonisk JPEG, härleder bredd och höjd från de avkodade byten istället för att lita på anropsfälten, och kasserar alla efterföljande polyglotbytes istället för att behålla dem. Endast den avgränsade kanoniska komprimerade bufferten debiteras båda kvoterna. JSON -ledningsgränsen inkluderar Base64-overhead för taket för 32 MiB avkodad ingång. Varje lagrad härledning registrerar dess validerade JPEG format/resolution, samplingspolicy, härledningsversion, skapelsetid, serverberäknat innehållshash och hashad överordnad referens plus den betrodda uppringarens överordnade innehålls-hash. Avbrytning kontrolleras mellan asynkrona decode/hash faser innan atomcache-commit.
 
-Den här delleveransen ansluter ännu inte en produktionsproducent till rutten och
-tillhandahåller inte val av flerupplösningsvarianter. Den transparenta begärandevägen
-för Video Bridge medför därför inget extra arbete, medan tenantbunden
-principalhärledning och hela FU-08-livscykeln för flera upplösningar förblir
-explicit uppföljningsarbete snarare än dokumenterat som färdigt beteende.
+Produktionsproducenten återanvänder redan härledda mäklarramar först efter framgångsrik visuell analys, utan andra video download/extraction. Det kräver operatör `modalityBridgeVideoDrilldownEnabled=true`, strikt per-part `drilldown: true` och en autentiserad API-nyckelpost ID. Klientdeklarerade principal/session värden etablerar aldrig ägande. Utan alla tre villkoren hash, ändrar storlek eller behåller inte ytterligare ramar. Retentionsfel bevarar det användbara visuella svaret. Godkända förfrågningar kringgår hela videoresultatcachen så cachade resultat spelar aldrig upp handtag.
 
-Bildrutor textas sekventiellt med den konfigurerade Video-modellen. En tom
-Video-åsidosättning ärver Vision-inställningen; om båda är tomma väljer
-Vision-autoroutern den effektiva synkapabla modellen. Lyckade texter
-ersätter originaldelen med ett stabilt `[Video description:`-prefix som också
-markerar texten som en otillförlitlig mediahärledd observation och instruerar nedströms
-modeller att inte följa instruktioner som hittas i mediet. Cachenycklarna för
-bildrutetexter inkluderar JPEG-bytena, prompten, tidsstämpeln och den effektiva modellen;
-endast lyckade texter cachas. Cacheposter behåller den faktiska lyckade
-producentmodellen, inklusive en reservmodell; bron rapporterar `mixed` när olika bildrutor
-producerats av olika modeller. En cacheträff återanvänder den producentidentiteten
-istället för att ommärka den som den begärda routingplanen. Resultatcachen för
-hela videon är nycklad på varje indata som ändrar utdata — prompt, effektiv
-modell, samplingspolicy, antal bildrutor, semantiskt analysläge, SHA-256
--fingeravtrycket av den normaliserade fokusledtråden, fokusfönster, `transcript`,
-`audioTranscript` och kontaktarksflaggan — så att ändring av någon av dessa
-dimensioner är en cachemiss, aldrig en föråldrad återanvändning. Den visuella
-dedupliceringspolicys version, tröskelvärde och begränsade antal
-kandidatbildrutor är också explicita i resultatcachets nyckel och metadata;
-en policyändring kan därför inte återanvända en föråldrad
-beskrivning av hela videon. Resultatcachets v4-metadata behåller läget och
-fingeravtrycket, aldrig den råa användaruppgiften. Guardrail-metadata rapporterar både det
-begärda och effektiva analysläget; ett begärt `focused`-läge utan
-användbar användartext rapporteras som effektivt `full`.
+Framgångsrika JSON och SSE -svar exponerar högst fyra ogenomskinliga handtag i den avgränsade `x-omniroute-video-drilldown` huvudet. Auktoriserade webbläsarursprung kan läsa den rubriken utan att bredda CORS ursprungspolicy. Nya handtag använder `v1.<32-byte random base64url token>`, och registret behåller endast sina SHA-256 hashar. reader/header parsern accepterar också äldre 64-hex-tokens. Den autentiserade offentliga konsumenten är `GET /api/v1/video-bridge/drilldown?handle=...`, oberoende gated av `modalityBridgeVideoDrilldownRemoteEnabled=true`. Explicit kvarstående falskt återkallar åtkomst även när den äldre `OMNIROUTE_VIDEO_BRIDGE_DRILLDOWN_REMOTE_ENABLED` env fallback är aktiverad. Produktionsretention har den analoga gamla `OMNIROUTE_VIDEO_BRIDGE_DRILLDOWN_ENABLED` -backen. Båda reserverna är avstängda som standard.
 
-Guardrailen extraherar varje videodel som stöds men beskriver inte fler än
-`modalityBridgeVideoMaxVideos`. För ett mål som bevisats ha
-`supportsVideo === false` blir misslyckade videor och videor över gränsen explicita säkra
-textmarkörer så att ingen rå video överlever. När kapaciteten är okänd
-behåller dessa delar sin videobärare; eventuella reservtranskript följer den begränsade
-textkonverteringen ovan. Mål med `supportsVideo === true` kringgår bron.
-Klientbegärans avbrottssignal propagerar genom nedladdning, broker-kö,
-subprocesser och textningsanrop; avbrott stannar mellan videor och misslyckas aldrig öppet
-mot rå media.
+Konsumenten härleder äganderätten från den autentiserade nyckeln och tillämpar nyckelpolicy: både GET och DELETE tillhör kategorin `video` slutpunkt, inklusive `/v1` och `/api/v1` -aliasen. Nycklar med en icke-tom slutpunktsgodkännandelista måste innehålla `video`; obegränsade nycklar förblir kompatibla. Konsumenten returnerar samma 404 för okända, utgångna och en annan nyckels handtag. Den accepterar `variant=preview|standard|detail` (maximal JPEG dimension 320/640/1280, aldrig uppskalad), `limit=1..8` (eller det äldre `frames` aliaset, aldrig båda), nollbaserad `page` och valfria `start`/`end` -fokussekunder. Dubbletter av frågetycklar och fönster med omvänd fokusering avvisas. Varje returnerad variant har en hash av dess faktiska innehåll och faktiska upplösningsmetadata, länkade till den behållna källan. Varianter härleds vid läsning snarare än lagras som extra bevarade kopior. JSON -svaret, inklusive Base64/envelope, är begränsat till 32 MiB; en överdimensionerad sida returnerar 413 och klienten måste begära färre ramar. Läser avbokning av checkar runt varje storleksändring och kontrollerar handtagets giltighet innan de returneras. `DELETE` av ägaren är idempotent; radering eller TTL utgång släpper den bibehållna källan och användningsredovisningen.
 
-Körtidsinställningar är DB-backade och Zod-validerade:
+Den delade butiken är processlokal: handtagen löper ut vid omstart och kan inte överföras mellan oberoende OmniRoute processer. Hanteringsstatistik avslöjar effektiv lagring/fjärrpolicy och samlar endast bibehållna entries/bytes, aldrig media, referenser, principiella IDs eller handtag. Panelen Videoinställningar visar dessa värden och kan bevara båda samtyckesväxlarna. Denna implementeringsdokumentation är inte bevis för livedistribution eller marknadsföring; Acceptans av riktig modell spåras separat.
 
-| Nyckel                              | Standardvärde | Intervall / beteende                                                                                   |
-| ----------------------------------- | ------------- | ------------------------------------------------------------------------------------------------------ |
-| `modalityBridgeVideoEnabled`        | `false`       | Valfri körtid, opt-in                                                                                  |
-| `modalityBridgeVideoAnalysisMode`   | `"full"`      | `full` bevarar generiska texter; `focused` använder begränsad, otillförlitlig senaste-användar-kontext |
-| `modalityBridgeVideoModel`          | `""`          | Ärver Vision Bridge-modellen                                                                           |
-| `modalityBridgeVideoFrameCount`     | `8`           | 1–16                                                                                                   |
-| `modalityBridgeVideoSamplingPolicy` | `"uniform"`   | `uniform`, `scene_aware` eller proportionell `segment_aware`; detektorfel faller tillbaka på `uniform` |
-| `modalityBridgeVideoMaxVideos`      | `1`           | 1–4                                                                                                    |
-| `modalityBridgeVideoTimeout`        | `120000`      | 1000–120000 ms                                                                                         |
+Bildrutor är textade sekventiellt med den konfigurerade videomodellen. En tom Video-åsidosättning ärver Vision-inställningen; om båda är tomma väljer Vision auto-router den effektiva vision-kapabla modellen. Framgångsrika bildtexter ersätter originaldelen med ett stabilt `[Video description:` prefix som också markerar texten som en opålitlig mediehärledd observation och säger åt nedströmsmodeller att inte följa instruktioner som finns i media. Frame-caption cache-nycklar inkluderar JPEG bytes, prompt, tidsstämpel och effektiv modell; endast framgångsrika bildtexter cachelagras. Cacheposter behåller den faktiska framgångsrika producentmodellen, inklusive en reservmodell; bron rapporterar `mixed` när olika ramar producerades av olika modeller. En cacheträff återanvänder producentidentiteten istället för att märka om den som den begärda ruttplanen. Hela videoresultatcachen knappas in på varje ingång som ändrar utdata — prompten, effektiv modell, samplingspolicy, bildruteantal, semantiskt analysläge, SHA-256 fingeravtrycket för den normaliserade fokustipset, fokusfönstret, `transcript`, `audioTranscript`, och kontaktbladets flagga — så att ändra någon av dessa dimensioner är en gammal miss, aldrig en cache-återanvändning. Den visuella dedup-policyversionen, tröskeln och antalet avgränsade kandidatbilder är också explicita i resultatcache-nyckeln och metadata; en policyändring kan därför inte återanvända en inaktuell helvideobeskrivning. Result-cache v4-metadata behåller läget och fingeravtrycket, aldrig den råa användaruppgiften. Guardrail-metadata rapporterar både begärda och effektiva analyslägen; ett begärt `focused` läge utan användbar användartext rapporteras som effektivt `full`.
 
-Äldre lagrade Video-timeoutvärden över 120 sekunder kläms av mot
-broker-deadlinen; nya inställningsskrivningar över den gränsen avvisas.
-`GET /api/modality-bridge/video/runtime` kräver betrodd stämplad loopback
--lokalitet före autentisering eller körtidsavsökning, och kräver därefter hanterings
-autentisering. Den returnerar endast `available`, sanerade FFmpeg/ffprobe-versioner och en fast
-orsak när körtiden är otillgänglig. Den interna extraktionsendpointen är inte
-ett offentligt uppladdnings-API: kömättnad returnerar `503` plus `Retry-After`, en anropares
-frånkoppling returnerar `499`, och den fasta broker-deadlinen returnerar `504`. Konverterade svar lägger till
-`video->text;model=<visionModel>;parts=<videos>` i den centrala
-`x-omniroute-modality-bridge`-headern utan att ta bort Vision- eller Audio-segment.
+Skyddsräcket extraherar varje stödd videodel men beskriver inte mer än `modalityBridgeVideoMaxVideos`. För ett mål som har visat sig ha `supportsVideo === false`, blir misslyckade och övergränsade videor explicita säkra textmarkörer så att ingen rå video överlever. När kapaciteten är okänd behåller dessa delar sin videobärare; eventuell reservtranskription följer den avgränsade textkonverteringen ovan. Mål med `supportsVideo === true` går förbi bron. Avbrytsignalen för klientbegäran sprids genom nedladdning, mäklarkö, underprocesser och anrop av textning; avbryter stopp mellan videor och misslyckas aldrig öppna för råmedia.
 
-### PII-maskering (`piiMasker.ts`)
+Körtidsinställningar är DB-stödda och Zod-validerade:
 
-Körs på **båda** stegen.
+| Nyckel                              | Standard    | Räckvidd / beteende                                                                                      |
+| ----------------------------------- | ----------- | -------------------------------------------------------------------------------------------------------- |
+| `modalityBridgeVideoEnabled`        | `false`     | Valfri körtid, opt-in                                                                                    |
+| `modalityBridgeVideoAnalysisMode`   | `"full"`    | `full` bevarar generiska bildtexter; `focused` använder avgränsad, opålitlig senaste-användarkontext     |
+| `modalityBridgeVideoModel`          | `""`        | Ärva Vision Bridge-modellen                                                                              |
+| `modalityBridgeVideoFrameCount`     | `8`         | 1–16                                                                                                     |
+| `modalityBridgeVideoSamplingPolicy` | `"uniform"` | `uniform`, `scene_aware` eller proportionell `segment_aware`; detektorfel faller tillbaka till `uniform` |
+| `modalityBridgeVideoMaxVideos`      | `1`         | 1–4                                                                                                      |
+| `modalityBridgeVideoTimeout`        | `120000`    | 1000–120000 ms                                                                                           |
 
-- **`preCall`** klonar nyttolasten, går igenom `system`, `messages`, `input` och
-  `prompt` (inklusive enkla strängelement) och tillämpar `processPII()` (från
-  `@/shared/utils/inputSanitizer`) på strängfälten `content`/`text`. När
-  `PII_REDACTION_ENABLED=true` maskeras upptäckt PII i den utgående
-  nyttolasten. Detta är oberoende av `INPUT_SANITIZER_MODE` (som endast styr
-  policyn för prompt-injektion). När maskering är avstängd registrerar anropet
-  antalet detektioner utan att skriva om innehållet.
-- **`postCall`** djupklonar svaret, kör `sanitizePIIResponse()` plus
-  maskeringsfunktionen för Responses-API-formen (`maskResponsesOutput` — täcker
-  `output_text` och `output[].content[].text`). Om någon maskering sker ersätter
-  det modifierade svaret originalet.
+Äldre beständiga videotimeoutvärden över 120 sekunder kläms till mäklarens deadline; nya inställningar skriver över den gränsen avvisas. `GET /api/modality-bridge/video/runtime` kräver betrodd stämplad loopback-lokalitet före autentisering eller runtime probing, kräver sedan hanteringsautentisering. Den returnerar endast `available`, sanerade FFmpeg/ffprobe versioner och en fast anledning när körtiden inte är tillgänglig. Den interna extraheringsändpunkten är inte en offentlig uppladdning API: kömättnad returnerar `503` plus `Retry-After`, en uppringares frånkoppling returnerar `499` och den fasta mäklarens deadline returnerar `504`. Konverterade svar lägger till `video->text;model=<visionModel>;parts=<videos>` till den centrala `x-omniroute-modality-bridge` huvudet utan att ta bort Vision- eller Audio-segment.
 
-Guardrailen blockerar aldrig; den antecknar bara (`meta.detections`,
-`meta.redacted`) eller skriver om.
+### PII Masker (`piiMasker.ts`)
 
-#### Per-typ-val, anpassade mönster och detektionsräknare
+Kör på **både** etapper.
 
-**Dashboard → Settings → Security → PII masking** väljer _vad_ som maskeras. Den
-slår inte på maskering: det är fortfarande `PII_REDACTION_ENABLED` (förfrågan)
-och `PII_RESPONSE_SANITIZATION` (svar + SSE), båda avstängda som standard.
+- **`preCall`** klonar nyttolasten, går `system`, `messages`, `input` och `prompt` (inklusive vanliga strängobjekt) och tillämpar `processPII()` (från `@/shared/utils/inputSanitizer`) på sträng `content`/`text` -fält. När `PII_REDACTION_ENABLED=true`, detekterad PII redigeras i den utgående nyttolasten. Detta är oberoende av `INPUT_SANITIZER_MODE` (som endast styr policyn för prompt-injektion). När redigering är avstängd räknas detekteringen av samtalsposterna utan att innehållet skrivs om.
+- **`postCall`** djupklonar svaret, kör `sanitizePIIResponse()` plus Responses-API-formmaskeraren (`maskResponsesOutput` — täcker `output_text` och `output[].content[].text`). Om någon redigering sker ersätter det modifierade svaret originalet.
 
-- **Per-typ-val** — de inbyggda id:na listas i
-  `src/shared/constants/piiTypes.ts` (`PII_BUILTIN_TYPES`). Om inget är valt
-  innebär det att alla typer används (beteendet innan den här inställningen
-  fanns). Förfrågningsmotorns mönster `ssn_us` mappas till `ssn`. Mallarna
-  (Minimal, Standard, Financial, Brazilian, USA, GDPR, POPIA, Full) fyller bara i
-  kryssrutorna i gränssnittet.
-- **GDPR- och POPIA-identifikatorer** — tolv inbyggda ID:n som täcker personidentifierare från EU och Sydafrika (tabellen nedan). Deras reguljära uttryck, validatorer och jurisdiktionsetiketter finns i en tabell, `src/shared/utils/piiPatterns.ts`, som både svarssaneringen (`src/lib/piiSanitizer.ts`) och begäransmaskeringen (`src/shared/utils/inputSanitizer.ts`) använder. En träff maskeras endast om dess validator godkänner den; en ren sifferrad räcker aldrig. En operatör som sparade ett begränsat urval innan dessa ID:n fanns behåller tidigare beteende tills de nya ID:na kryssas i.
-- **Anpassade mönster** — upp till 20 regex- eller jokerteckenmönster (`*` = upp
-  till 64 tecken som inte är blanksteg, `?` = ett). Träffar blir
-  `[CUSTOM_REDACTED]`. Varje mönster går genom `compilePiiCustomPattern()`
-  (`src/shared/utils/piiCustomPatterns.ts`): högst 500 tecken, flaggor
-  begränsade till `g i m s u`, måste kunna kompileras, måste klara `safe-regex`
-  (katastrofal backtracking) och får inte matcha en tom sträng eller en
-  maskeringsplatshållare. Ett mönster som misslyckas avvisas när det sparas och
-  när det testas, och en lagrad rad som misslyckas hoppas över vid körning
-  istället för att kompileras. Anpassade mönster körs endast när maskering är
-  på.
-- **Detektionsräknare** — antal per typ (aldrig matchade värden), hålls i minnet
-  och återställs vid omstart (`src/lib/pii/piiDetectionStats.ts`). De ökar
-  endast när maskering är på.
+Skyddsräcket blockerar aldrig; det bara kommenterar (`meta.detections`, `meta.redacted`) eller skriver om.
 
-Inställningarna lagras i tabellen `key_value` (namnrymd `pii_settings`,
-`src/lib/db/piiSettings.ts`) och läses via en cache på 1 s. API:
+#### Val per typ, anpassade mönster och detektionsräknare
+
+**Dashboard → Inställningar → Säkerhet → PII maskering** väljer _vad_ som är maskerat. Den slår inte på maskering: det är fortfarande `PII_REDACTION_ENABLED` (begäran) och `PII_RESPONSE_SANITIZATION` (svar + SSE), båda avstängda som standard.
+
+- **Val per typ** — de inbyggda ID:n listas i `src/shared/constants/piiTypes.ts` (`PII_BUILTIN_TYPES`). Unset betyder varje typ (beteendet innan den här inställningen fanns). Förfrågningsmotorns `ssn_us` -mönster mappas till `ssn`. Mallar (Minimal, Standard, Financial, Brazilian, USA, GDPR, POPIA, Full) fyller bara i kryssrutorna i UI.
+- **GDPR och POPIA -identifierare** — tolv inbyggda ID som täcker EU och sydafrikanska personliga identifierare (tabell nedan). Deras regexes, validatorer och jurisdiktionstaggar finns i en tabell, `src/shared/utils/piiPatterns.ts`, som både response sanitizer (`src/lib/piiSanitizer.ts`) och request-masker (`src/shared/utils/inputSanitizer.ts`) använder. En matchning redigeras endast när dess validator accepterar den; bara siffror är aldrig tillräckligt. En operatör som sparade ett begränsat urval innan dessa ID:n fanns behåller sitt beteende tills de nya ID:n är markerade.
+- **Anpassade mönster** — upp till 20 regex- eller jokerteckenmönster (`*` = upp till 64 tecken utan blanksteg, `?` = en). Matcher blir `[CUSTOM_REDACTED]`. Varje mönster går igenom `compilePiiCustomPattern()` (`src/shared/utils/piiCustomPatterns.ts`): högst 500 tecken, flaggor begränsade till `g i m s u`, måste kompileras, måste passera `safe-regex` (katastrofisk bakåtspårning) och får inte matcha en tom sträng eller en redigeringsplatshållare. Ett mönster som misslyckas nekas när det sparas och testas, och en lagrad rad som misslyckas hoppas över under körning istället för att kompileras. Anpassade mönster körs bara medan maskering är på.
+- **Detektionsräknare** — per typ räknas (aldrig matchade värden), hålls i minnet och återställs vid omstart (`src/lib/pii/piiDetectionStats.ts`). De ökar bara medan maskering är på.
+
+Inställningarna finns i `key_value` tabellen (namnutrymme `pii_settings`, `src/lib/db/piiSettings.ts`) och läses genom en 1 s cache. API:
 
 | Metod  | Sökväg                   | Syfte                                                               |
 | ------ | ------------------------ | ------------------------------------------------------------------- |
@@ -624,10 +449,9 @@ Inställningarna lagras i tabellen `key_value` (namnrymd `pii_settings`,
 | `PUT`  | `/api/settings/pii`      | Ersätt `enabledTypes` (`null` = alla) och/eller `customPatterns`    |
 | `POST` | `/api/settings/pii/test` | Torrkör ett mönster mot ett prov på högst 8 KB; inget lagras        |
 
-Alla tre kräver hanteringsautentisering och validerar brödtexten med Zod
-(`src/shared/validation/schemas/piiSettings.ts`).
+Alla tre kräver hanteringsautentisering och validerar kroppen med Zod (`src/shared/validation/schemas/piiSettings.ts`). Med inloggning inaktiverad (`requireLogin=false`) är `GET` och testslutpunkten öppna, men `PUT` behöver fortfarande en instrumentpanelsession, en `manage` -scope API nyckel, en `oma_` åtkomsttoken med skrivomfattning eller högre, eller CLI -token eller interntjänsttoken som skickas från loopback.
 
-#### GDPR-identifierare (EU) och POPIA-identifierare (Sydafrika)
+#### GDPR (EU) och POPIA (Sydafrika) identifierare
 
 | ID                  | Identifierare               | Validering                                                                                      |
 | ------------------- | --------------------------- | ----------------------------------------------------------------------------------------------- |
@@ -644,7 +468,7 @@ Alla tre kräver hanteringsautentisering och validerar brödtexten med Zod
 | `za_vat`            | Sydafrikanskt momsnummer    | 10 siffror som börjar med `4` **och** "VAT" / "BTW" bland de 48 föregående tecknen              |
 | `za_tax_ref`        | Sydafrikansk skattereferens | 10 siffror som börjar med `0`-`3`, Luhn, **och** "tax" / "SARS" bland de 48 föregående tecknen  |
 
-Eftersom formaten med enbart siffror krockar med ordernummer, byggnummer och tidsstämplar kräver de svagaste (`za_vat`, `za_tax_ref`) nyckelordet som ledtråd, och ett rent tiosiffrigt `0..`-nummer behandlas inte som ett sydafrikanskt telefonnummer. IBAN med mellanslag (`GB29 NWBK ...`) matchas inte. Vid strömning söks ledtråden bara i den aktuella delen. ID:na ligger före de generiska telefonmönstren, så att en validerad identifierare behåller sin egen platshållare (`[IBAN_REDACTED]`, `[NL_BSN_REDACTED]`, ...). Mallarna `gdpr` och `popia` väljer EU-ID:na respektive de sydafrikanska ID:na. Själva maskeringen kräver fortfarande uttrycklig aktivering (Hard Rule #20): ingenting här ändrar ett standardvärde för en funktionsflagga.
+Eftersom formaten med endast siffror kolliderar med ordernummer, byggnummer och tidsstämplar, behöver de svagaste (`za_vat`, `za_tax_ref`) nyckelordet, och ett blott tiosiffrigt `0..` nummer behandlas inte som ett sydafrikanskt telefonnummer. Mellanslag IBANs (`GB29 NWBK ...`) matchas inte. På streamingbanan letas köet upp endast i den aktuella biten. ID:n ligger före de generiska telefonmönstren, så en validerad identifierare behåller sin egen platshållare (`[IBAN_REDACTED]`, `[NL_BSN_REDACTED]`, ...). `gdpr` och `popia` mallarna väljer EU respektive Sydafrikanska ID. Maskeringen i sig förblir opt-in (Hård regel #20): ingenting här ändrar en standard för funktionsflagga.
 
 ### Prompt Injection (`promptInjection.ts`)
 

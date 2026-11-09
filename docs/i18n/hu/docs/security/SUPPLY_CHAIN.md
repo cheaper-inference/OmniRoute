@@ -45,11 +45,11 @@ A mért regresszió 1-es kilépési kódot eredményez. A tájékoztató jelleg�
 Trivy-lépéshez is sikeres mérés szükséges: a nem elérhető eszközök, a sikertelen feladatok
 és a hiányzó image-bizonyítékok alapján az image nem minősíthető tisztának.
 
-## Kivezetett függőség kockázata
+## Nyugdíjas függőségi kockázat
 
-A gyökérszintű lockfile a rögzített promptfoo fejlesztői eszköz frissítése után már nem tartalmazza az `extract-zip` csomagot, sem az arra mutató függőségi kapcsolatot. Ezzel kivezetésre került a #14482-ben nyomon követett, korábban elfogadott `promptfoo` → `@openai/codex-security` → `extract-zip` lánc. A `tests/unit/extract-zip-14482-exposure.test.ts` regressziós ellenőrzései megakadályozzák az újbóli bevezetését, és továbbra is tiltják a produkciós kódból történő importálását.
+A rögzített promptfoo fejlesztőeszköz frissítése után a gyökérzárfájl már nem tartalmazza `extract-zip` vagy annak függőségi élét. Ezzel megszűnik a korábban elfogadott `promptfoo` → `@openai/codex-security` → `extract-zip` lánc, amely #14482 ben van nyomon. A `tests/unit/extract-zip-14482-exposure.test.ts` regressziós ellenőrzései elutasítják az újbóli bevezetését, és megtartják a termelési kódból történő behozatal tilalmát.
 
-A jelenlegi függőségjavítás kompatibilitási felülírásokat tartalmaz az Azure Identity MSAL-klienséhez, a get-uri FTP-klienséhez, valamint a Zodhoz mindkét OpenCode-bővítménycsomagban. Az Azure-tokenek lekérése és az FTP-n keresztüli letöltés ellenőrzött átviteli rétegekkel van tesztelve; mindkét OpenCode-csomag a saját buildelési és tesztelési folyamatait futtatja. A registry biztonsági figyelmeztetéseinek száma egy adott időpontban végzett mérés eredménye, és a lockfile véglegesítése után változhat.
+A jelenlegi függőségi javítás kiterjed a kompatibilitás felülbírálására is az Azure Identitás MSAL ügyfelére és a get-uri FTP ügyfelére. Az Azure-jogkivonat-beszerzést és FTP lekérést ellenőrzött szállításokkal tesztelték; mindkét OpenCode csomag saját build- és tesztcsomagot futtat. A regisztrációs tájékoztató számlálók egy adott időpontban mért értékek, és a zárolási fájl véglegesítése után változhatnak.
 
 ## Hátralék: Scorecard tanács → blokkoló
 

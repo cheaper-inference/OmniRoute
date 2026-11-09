@@ -486,13 +486,13 @@ createResponsesApiTransformStream(): TransformStream
 
 `open-sse/config/`持有配置层：
 
-| 文件                          | 目的                           |
-| ----------------------------- | ------------------------------ |
-| `providerRegistry.ts`         | 381 提供者目录上的聊天模型注册 |
-| `providerModels.ts`           | 模型别名、格式映射             |
-| `constants.ts`                | 超时、限制、状态代码           |
-| `defaultThinkingSignature.ts` | 默认Claude思维签名             |
-| `modelStrip.ts` （服务中）    | 每个提供者的字段剥离           |
+| 文件                          | 目的                             |
+| ----------------------------- | -------------------------------- |
+| `providerRegistry.ts`         | 382 个提供者目录上的聊天模型注册 |
+| `providerModels.ts`           | 模型别名、格式映射               |
+| `constants.ts`                | 超时、限制、状态代码             |
+| `defaultThinkingSignature.ts` | 默认Claude思维签名               |
+| `modelStrip.ts` （服务）      | 每个提供者的字段剥离             |
 
 ### 提供者注册架构
 

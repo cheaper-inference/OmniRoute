@@ -45,11 +45,11 @@ exitcode 0, maar dat toont niet aan dat de afhankelijkheden de scan hebben doors
 Trivy-stap vereist eveneens een geslaagde meting: niet-beschikbare tools, mislukte jobs
 en ontbrekend bewijs voor de image kunnen niet certificeren dat een image schoon is.
 
-## Risico van buiten gebruik gestelde afhankelijkheid
+## Gepensioneerde afhankelijkheidsrisico
 
-Het hoofdlockbestand bevat niet langer `extract-zip` of een afhankelijkheidsrelatie ernaartoe na het upgraden van de vastgezette promptfoo-ontwikkelingstool. Hiermee wordt de eerder geaccepteerde keten `promptfoo` → `@openai/codex-security` → `extract-zip`, die in #14482 werd bijgehouden, buiten gebruik gesteld. De regressiecontroles in `tests/unit/extract-zip-14482-exposure.test.ts` wijzen de herintroductie ervan af en handhaven het verbod op imports vanuit productiecode.
+Het root-lockbestand bevat niet langer `extract-zip` of een afhankelijkheidsrand na het upgraden van de vastgezette promptfoo-ontwikkeltool. Hiermee wordt de eerder geaccepteerde `promptfoo` → `@openai/codex-security` → `extract-zip` -keten, bijgehouden in #14482 buiten gebruik gesteld. De regressiecontroles in `tests/unit/extract-zip-14482-exposure.test.ts` verwerpen de herinvoering ervan en handhaven het verbod op invoer uit de productiecode.
 
-De huidige reparatie van afhankelijkheden omvat compatibiliteitsoverschrijvingen voor de MSAL-client van Azure Identity, de FTP-client van get-uri en Zod in beide OpenCode-pluginpakketten. Het verkrijgen van Azure-tokens en het ophalen via FTP worden getest met gecontroleerde transportmechanismen; beide OpenCode-pakketten voeren hun eigen build- en testsuites uit. De aantallen beveiligingsadviezen in het register zijn momentopnamen en kunnen veranderen nadat het lockbestand is vastgelegd.
+De huidige afhankelijkheidsreparatie omvat ook compatibiliteitsoverschrijvingen voor MSAL client van Azure Identity en FTP -client van get-uri. Het verwerven van Azure-tokens en het ophalen FTP worden getest met gecontroleerde transporten; beide OpenCode pakketten draaien hun eigen build- en testsuites. Registeradviestellingen zijn metingen op een bepaald tijdstip en kunnen veranderen nadat het lockfile is vastgelegd.
 
 ## Backlog: Scorecard-advies → blokkerend
 

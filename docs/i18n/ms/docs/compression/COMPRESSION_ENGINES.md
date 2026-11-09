@@ -305,6 +305,95 @@ Gabungan pemampatan ialah profil pemampatan bernama yang boleh ditetapkan kepada
 
 Antara muka papan pemuka: `Dashboard -> Context & Cache -> Compression Combos`.
 
+## Prasyarat / panduan pengendali (CCR & sesi-dedup)
+
+CCR (`ccr`) dan `session-dedup` menggantikan atau memadam teks dan meninggalkan a** penanda** belakang. Bahagian ini ialah rujukan pengendali untuk pendawaian pelanggan, membaca dua penanda dan mendapatkan semula atau mendiagnosis kandungan yang hilang. Mekanik setiap enjin dibincangkan di atas; ini ialah lapisan "bagaimana saya menjalankannya".
+
+### Pengangkutan & titik akhir
+
+Pelayan MCP yang mendedahkan alat CCR boleh dicapai dengan tiga cara. URL asas lalai ialah `http://localhost:20128` (`OMNIROUTE_BASE_URL`):
+
+| Pengangkutan                            | URL / perintah                          | Nota                                                                                                                                                      |
+| --------------------------------------- | --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| HTTP boleh strim (pelanggan, disyorkan) | `http://localhost:20128/api/mcp/stream` | Titik akhir pelanggan MCP semasa bercakap dengan.                                                                                                         |
+| Legacy SSE singleton                    | `http://localhost:20128/api/mcp/sse`    | Pengangkutan singleton yang lebih tua. Ia** menutup** sesi boleh distrim; gunakan pelanggan `streamable-http` terhadap `/api/mcp/stream`, bukan yang ini. |
+| stdio                                   | `omniroute --mcp`                       | Untuk konfigurasi IDE MCP yang menghasilkan proses. Tiada bendera `--dev` ; `omniroute --mcp` ialah titik masuk stdio.                                    |
+
+### Peringkat storan (apa yang kekal apabila dimulakan semula)
+
+CCR ialah a** dua peringkat** simpan, bukan dalam ingatan sahaja:
+
+- **Tahap dalam ingatan panas** — setiap blok had 2 MiB, setiap prinsipal 16 MiB, global 64 MiB. Entri lalai kepada TTL 24 jam (maksimum 7 hari). Pengambilan MCP penuh dari ingatan dihadkan pada 256 KiB; apa-apa yang lebih besar masih boleh dicapai melalui mod julat / grep.
+- **Tier SQLite tahan lasak** (`ccr_blocks`, `COMPRESSION_CCR_DURABLE_STORE`, dihidupkan secara lalai) — menyandarkan peringkat dalam ingatan supaya satu blok bertahan dengan pengusiran LRU, mulakan semula atau pendaratan mendapatkan semula pada kejadian lain. Baris mengekalkan TTL blok itu, jadi blok melepasi TTL hilang dari kedua-dua peringkat.
+
+Tiga pengawal mengekalkan tier bounded tahan lama — a blok kekal ingatan apabila:
+
+1. blok sudah tamat** 512 KB** (`MAX_DURABLE_BLOCK_BYTES`);
+2. masa jalan ialah masa jalan awan (tiada cakera tempatan);
+3. `COMPRESSION_CCR_DURABLE_STORE=false`.
+
+Jadi "blok hilang" bukanlah cerita mulakan semula secara menyeluruh: blok sub-512 KB pada masa jalan bukan awan tempatan kekal apabila dimulakan semula melalui peringkat tahan lama sehingga TTL habis. Lihat [rujukan Persekitaran](../reference/ENVIRONMENT.md) untuk pembolehubah.
+
+### Dua penanda
+
+| Penanda                               | Maknanya                                                                                                                                                                          | Apa yang patut dilakukan oleh model                                                                                                                                                                                 |
+| ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `[CCR retrieve hash=<24hex> chars=N]` | Satu blok besar disimpan beralamat kandungan.                                                                                                                                     | Panggil `omniroute_ccr_retrieve` dengan** Cincang 24-hex disalin kata kerja** untuk mendapatkan semula teks asal.                                                                                                   |
+| `[dedup:ref sha=…]`                   | `session-dedup` menghapuskan teks yang telah dihantar pada giliran awal sesi yang sama. Ini adalah sebuah** pandang belakang yang disengajakan** , bukan kerugian atau kesilapan. | buat** bukan** panggil sebarang alat dan lakukan** bukan** cuba "membina semula"nya. Kejadian pertama teks ialah salinan kanonik; giliran semasa tidak pernah ditulis semula, ia dikurangkan pada giliran kemudian. |
+
+Tinjauan ke belakang `[dedup:ref]` ialah keputusan protokol yang disengajakan — tiada pembinaan semula pra-hantaran. Anggap ia sebagai "teks tepat ini sudah ada pada wayar lebih awal dalam sesi ini."
+
+### Prasyarat pelanggan
+
+- **Kunci (stdio):** pemanggil stdio tidak membawa identiti setiap permintaan, jadi ia mengesahkan dengan `OMNIROUTE_API_KEY` (ditetapkan dalam `env` pelayan MCP ). Tanpa itu pemanggil adalah tanpa nama dan alat yang memerlukan pengetua mungkin merendahkan.
+- **`tools[]` adalah prasyarat suntikan.** Arahan protokol ambil semula CCR (#8033) disuntik** sahaja** apabila `tools[]` yang diiklankan permintaan itu membuktikan pelanggan benar-benar boleh mencapai `omniroute_ccr_retrieve`. Padanan ialah padanan segmen mengekori yang dibatasi oleh pemisah (`__`, `.`, `/`, `:`) — tidak pernah subrentetan kosong — jadi nama ruang nama seperti `mcp__gateway__omniroute_ccr_retrieve` masih dikira. `tools[]` yang tidak hadir atau tidak sepadan bermakna arahan _tidak_ disuntik, mengikut reka bentuk.
+- **`codemode:false` (pelanggan OpenCode ).** OpenCode lalai kepada Mod Kod, yang mengiklankan hanya alat asalnya kepada model dan** tidak** letakkan alat MCP pada senarai `tools[]` asli. Tetapkan `codemode: false` pada entri pelayan MCP supaya alat `omniroute_ccr_*` diiklankan. Ini adalah a** pelanggan** tetapan, bukan satu OmniRoute. Ia belum mendapat arahan CCR yang disuntik lagi: OpenCode menamakan alat `<server>_<tool>`, jadi pelayan yang dipanggil `omniroute` mendedahkan `omniroute_omniroute_ccr_retrieve`, dan `_` bukanlah salah satu pemisah yang dipadankan.
+- **Pengetua.** Penyimpanan dan pengambilan diasingkan setiap prinsipal yang disahkan (setiap kunci API ). Kunci melihat bloknya sendiri sahaja.
+
+### Skop setiap alat
+
+Penguatkuasaan skop sentiasa dihidupkan untuk pemanggil HTTP/SSE berskop sempit. Alat `omniroute_` CCR memerlukan:
+
+| alat                     | Skop                |
+| ------------------------ | ------------------- |
+| `omniroute_ccr_store`    | `write:compression` |
+| `omniroute_ccr_delete`   | `write:compression` |
+| `omniroute_ccr_retrieve` | `read:compression`  |
+| `omniroute_ccr_inspect`  | `read:compression`  |
+| `omniroute_ccr_list`     | `read:compression`  |
+| `omniroute_ccr_stats`    | `read:compression`  |
+
+Skop yang hilang mengembalikan an** hasil ralat alat MCP** (`isError: true`, bukan HTTP 403 — `403 LOCAL_ONLY` ialah auth pengawal laluan gelung balik yang berasingan): `Error: Insufficient MCP scopes for <tool>. Missing: <scope>.` Kunci jauh minimum boleh menahan `mcp:connect` (membenarkan ukiran tempatan sahaja `/api/mcp/` ) serta skop read/write khusus yang diperlukannya.
+
+### Matriks pelanggan
+
+| Pelanggan      | Pengangkutan                              | Konfigurasi untuk digunakan                                                                                                                                                                                                                           | `tools[]` diiklankan? ( arahan → CCR disuntik)                                                                                                                                                   |
+| -------------- | ----------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Kod Claude     | boleh strim-http                          | `claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream`                                                                                                                                                                     | Ya — MCP-mampu; disuntik.                                                                                                                                                                        |
+| Cursor / Cline | `stdio`** atau** `streamable-http`        | stdio: `omniroute --mcp` dengan `OMNIROUTE_API_KEY` dalam `env`; atau entri MCP jauh menghala ke `http://localhost:20128/api/mcp/stream` (lihat [Panduan Persediaan → MCP Konfigurasi Pelanggan](../guides/SETUP_GUIDE.md#mcp-client-configuration) ) | Ya — mengiklankan alat `omniroute_ccr_*`.                                                                                                                                                        |
+| OpenCode       | boleh strim-http                          | `opencode mcp add omniroute --url http://localhost:20128/api/mcp/stream`, tambah `codemode: false`                                                                                                                                                    | Alat yang diiklankan hanya dengan `codemode: false`; arahan masih tidak disuntik, kerana `omniroute_omniroute_ccr_retrieve` tidak sepadan (lihat [prasyarat Pelanggan](#client-prerequisites) ). |
+| Serasi OpenAI  | HTTP serasi OpenAI (penyelesaian sembang) | pelanggan pelengkap sembang standard terhadap titik akhir serasi OpenAI                                                                                                                                                                               | **tidak pernah** — pemanggil biasa yang serasi dengan OpenAI tidak pernah diberitahu untuk memanggil alat dan arahan tidak disuntik.                                                             |
+
+### Had pengambilan & penomboran
+
+hasil teks alat MCP digunting di sekeliling `mcpAccessibility.maxTextChars` (lalai `50000`). Satu `full` mendapatkan blok dihadkan pada 256 KiB —** tiada pengambilan penuh tanpa had** . Apabila `chars=N` blok adalah besar, halamannya dan bukannya menarik keseluruhannya:
+
+- Peraturan biasa:**`chars > 40000` → guna `mode`** , tidak pernah kosong kosong.
+- `mode:"grep"` — regex `pattern` dipadankan baris demi baris, sehingga 1,000 baris yang sepadan (`unique: true` jatuh berulang), paling murah untuk "cari satu baris yang saya perlukan."
+- `mode:"lines"` — julat baris 1 diindeks; memerlukan kedua-dua `start` dan `end`.
+- `mode:"head"` / `mode:"tail"` — first/last `n` baris.
+- kiraan baris `mode:"stats"` —, aksara dan bait tanpa badan.
+
+Gunakan `mode:"lines"` dengan `start`/`end` untuk berjalan blok panjang dalam halaman dan bukannya meminta semuanya sekaligus.
+
+### Penamaan alat
+
+Alat mendapatkan semula pada masa ini dinamakan `omniroute_ccr_retrieve` (awalan `omniroute_` ialah penyelesaian bertarikh untuk perlanggaran nama silang pelayan). Nama alat akhiran sempadan yang lebih bersih dan pembetulan untuk hasil MCP JSON yang dipotong rentetan tengah dijejaki sebagai susulan huluan; halaman ini mendokumenkan tingkah laku semasa yang dihantar sahaja.
+
+### Kitaran hayat sesi
+
+Sesi boleh strim-HTTP melahu dan pelayan menuainya; tetingkap melahu dikonfigurasikan oleh `OMNIROUTE_MCP_SESSION_IDLE_MS`, jatuh kembali ke `DEFAULT_MCP_SESSION_IDLE_MS` dalam `open-sse/mcp-server/httpTransport.ts`. Gejala sesi terbiar adalah HTTP 404 dengan `Unknown Mcp-Session-Id` — ubatnya ialah menyambung semula atau memulakan semula sesi,**bukan** untuk memutar kunci, menukar skop atau menamakan semula alat.
+
 ## Antara Muka API
 
 | Laluan                                 | Tujuan                                                              |
@@ -388,7 +477,7 @@ cache dan sebagainya).
 
 ## Pengesahan
 
-Gerbang tumpuan untuk kawasan ini adalah:
+Pintu yang difokuskan untuk kawasan ini ialah:
 
 ```bash
 node --import tsx/esm --test tests/unit/compression/rtk-*.test.ts tests/unit/compression/pipeline-integration.test.ts tests/unit/compression/context-compression-api.test.ts

@@ -45,20 +45,11 @@ código de saída 0, o que não comprova que as dependências passaram na análi
 Trivy também exige uma medição bem-sucedida: ferramentas indisponíveis, tarefas falhadas
 e a ausência de provas relativas à imagem não permitem certificar uma imagem como limpa.
 
-## Risco de dependências descontinuadas
+## Risco de dependência de reformados
 
-O ficheiro de bloqueio raiz já não inclui `extract-zip` nem uma relação de dependência com o mesmo, após
-a atualização da ferramenta de desenvolvimento promptfoo para a versão fixada. Isto elimina a cadeia anteriormente aceite
-`promptfoo` → `@openai/codex-security` → `extract-zip`, monitorizada em #14482.
-As verificações de regressão em `tests/unit/extract-zip-14482-exposure.test.ts` impedem a sua
-reintrodução e mantêm a proibição de importações a partir de código de produção.
+O lockfile raiz já não inclui `extract-zip` ou uma borda de dependência após a atualização da ferramenta de desenvolvimento promptfoo fixada. Isto retira a cadeia `promptfoo` → `@openai/codex-security` → `extract-zip` anteriormente aceite rastreada em #14482. As verificações de regressão em `tests/unit/extract-zip-14482-exposure.test.ts` rejeitam a sua reintrodução e mantêm a proibição de importações a partir do código de produção.
 
-A reparação atual de dependências inclui substituições de compatibilidade para o cliente
-MSAL do Azure Identity, o cliente FTP do get-uri e o Zod em ambos os pacotes de plug-in
-OpenCode. A obtenção de tokens do Azure e a recuperação por FTP são testadas com transportes
-controlados; ambos os pacotes OpenCode executam os seus próprios conjuntos de compilação e
-testes. As contagens de avisos de segurança do registo são medições efetuadas num determinado
-momento e podem mudar após o lockfile ser submetido.
+A reparação de dependências atual também abrange substituições de compatibilidade para o cliente MSAL da identidade do Azure e para o cliente FTP do get-uri. A aquisição de tokens Azure e a recuperação FTP são testadas com transportes controlados; ambos os pacotes OpenCode executam os seus próprios conjuntos de construção e teste. As contagens de avisos do registo são medidas num determinado momento e podem mudar após o commit do ficheiro de bloqueio.
 
 ## Backlog: Aviso do Scorecard → bloqueio
 

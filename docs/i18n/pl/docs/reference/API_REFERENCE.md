@@ -373,38 +373,31 @@ Content-Type: application/json
 }
 ```
 
-Dostępni dostawcy obejmują OpenAI (GPT Image 2), xAI (Grok Image), Together AI (FLUX), Fireworks AI, Nebius (FLUX), Hyperbolic, NanoBanana, **OpenRouter**, **ZenMux**, SD WebUI (lokalnie), ComfyUI (lokalnie).
+Dostępni dostawcy obejmują OpenAI (GPT Image 2), xAI (Grok Image), Together AI (FLUX), Fireworks AI, Nebius (FLUX), Hyperbolic, NanoBanana, **OpenRouter**, **ZenMux**, SD WebUI (lokalne), ComfyUI (lokalne).
 
 `n` zwraca `n` obrazów w `data[]`. Dostawcy, których nadrzędne API zwraca jeden obraz na wywołanie
 (Black Forest Labs, Stability AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik,
-NVIDIA NIM, Cloudflare Workers AI), otrzymują `n` oddzielnych wywołań nadrzędnego API, z maksymalnie 4
-wywołaniami wykonywanymi jednocześnie. Stała wartość `seed` jest przesuwana o indeks wywołania
-(`seed`, `seed + 1`, …), dzięki czemu obrazy różnią się od siebie, ale pozostają powtarzalne. Wartość
-`n` jest ograniczona do 10. Żądanie kończy się niepowodzeniem jako całość, jeśli którekolwiek wywołanie
-zakończy się błędem. Lista formatów obsługujących rozdzielanie wywołań znajduje się w
-`SINGLE_IMAGE_FANOUT_FORMATS` w
+NVIDIA NIM, Cloudflare Workers AI), wykonują `n` oddzielnych wywołań nadrzędnego API, maksymalnie 4 jednocześnie. Stała wartość `seed` jest zwiększana o indeks wywołania (`seed`, `seed + 1`, …), dzięki czemu obrazy różnią się, ale pozostają odtwarzalne. Wartość `n` jest ograniczona do 10. Żądanie kończy się niepowodzeniem w całości, jeśli którekolwiek wywołanie zakończy się niepowodzeniem. Lista formatów obsługujących rozdzielanie wywołań znajduje się w `SINGLE_IMAGE_FANOUT_FORMATS` w
 `open-sse/handlers/imageGeneration/fanOut.ts`.
 
 ZenMux ponownie wykorzystuje istniejące połączenie z kluczem API i akceptuje prefiksy
 `zenmux/` lub `zm/`:
 
-- `zenmux/openai/gpt-image-2` używa API OpenAI Images firmy ZenMux. Opcje obejmują `size`,
-  `quality`, `n`, `output_format`, `output_compression`, `background` i `response_format`.
-- Inni wydawcy, tacy jak `zm/meta/muse-image-1.0`, używają punktu końcowego Vertex AI `:predict`
-  firmy ZenMux. `n` jest mapowane na `sampleCount`, `aspect_ratio` na `aspectRatio`, a `image_size`
-  (`1K`, `2K`, `4K`) na `sampleImageSize`. Wartość `size` w pikselach dostarcza wyłącznie współczynnika
-  proporcji, a nie gwarantowanych wymiarów w pikselach. Obsługiwane współczynniki proporcji,
-  rozdzielczości i liczby obrazów różnią się w zależności od modelu.
+- `zenmux/openai/gpt-image-2` korzysta z API obrazów OpenAI w ZenMux. Opcje obejmują `size`,
+  `quality`, `n`, `output_format`, `output_compression`, `background` oraz `response_format`.
+- Inni wydawcy, tacy jak `zm/meta/muse-image-1.0`, korzystają z punktu końcowego Vertex AI `:predict` w ZenMux. `n` jest mapowane na `sampleCount`, `aspect_ratio` na `aspectRatio`, a `image_size`
+  (`1K`, `2K`, `4K`) na `sampleImageSize`. Pikselowy parametr `size` określa wyłącznie współczynnik proporcji,
+  a nie gwarantowane wymiary w pikselach. Obsługiwane proporcje, rozdzielczości i liczby obrazów różnią się w zależności od modelu.
 - `zm/inclusionai/ming-image-0.1-design` samodzielnie wybiera wymiary. Pomiń `size`,
-  `aspect_ratio` i `image_size`; jawne wartości powodują zwrócenie HTTP 400. Za pomocą
-  `output_format` można zażądać formatu PNG, JPEG lub WebP.
+  `aspect_ratio` i `image_size`; podanie jawnych wartości zwraca HTTP 400. Za pomocą `output_format` można zażądać formatu PNG, JPEG lub WebP.
 
-Ta integracja obsługuje generowanie obrazów na podstawie tekstu, ale nie edycję obrazów referencyjnych. Wynik
-Vertex jest normalizowany do `data[].b64_json`; `response_format: "url"` zwraca nadrzędny adres URL
-HTTPS lub adres URL danych base64, gdy dostępne są wyłącznie bajty obrazu. Puste lub odfiltrowane wyniki
-zwracają błąd zamiast pustej odpowiedzi zakończonej powodzeniem. Dostęp do modelu zależy od konta ZenMux.
-Zobacz [Vertex API firmy ZenMux](https://docs.zenmux.ai/api/vertexai/generate-images) oraz
-[API OpenAI Images](https://docs.zenmux.ai/api/openai/generate-an-image).
+Ta integracja obsługuje generowanie obrazów na podstawie tekstu, ale nie edycję obrazów referencyjnych. Wynik Vertex jest normalizowany do `data[].b64_json`; `response_format: "url"` zwraca nadrzędny adres URL HTTPS lub adres URL danych base64, gdy dostępne są wyłącznie bajty obrazu. Puste lub odfiltrowane wyniki zwracają błąd zamiast pomyślnego wyniku bez danych. Dostęp do modeli zależy od konta ZenMux.
+Zobacz [API Vertex firmy ZenMux](https://docs.zenmux.ai/api/vertexai/generate-images) oraz
+[API obrazów OpenAI](https://docs.zenmux.ai/api/openai/generate-an-image).
+
+Połączenie logowania Microsoft 365 Copilot udostępnia `copilot-m365-web/m365-copilot-image`
+za pośrednictwem wbudowanego narzędzia obrazów Copilot: jedna tura Copilot na obraz (`n` 1–4), parametr `size` steruje wyłącznie orientacją, a obrazy są zwracane bezpośrednio (`b64_json` lub adres URL danych dla
+`response_format: "url"`). Zobacz [Microsoft 365 Copilot](../providers/COPILOT-M365.md#image-generation).
 
 ```bash
 # Wyświetl listę wszystkich modeli obrazów
@@ -849,15 +842,17 @@ Zgodne z OpenAI przetwarzanie wsadowe.
 
 ## API wyszukiwania
 
-Abstrakcja dostawcy usług internetowych/wyszukiwania (Tavily, Brave, Exa, Serper itd.).
+Abstrakcja dostawców wyszukiwania w sieci (Tavily, Brave, Exa, Serper itp.).
 
 | Metoda | Ścieżka                | Opis                                                                                                                    |
 | ------ | ---------------------- | ----------------------------------------------------------------------------------------------------------------------- |
 | GET    | `/v1/search`           | Lista skonfigurowanych dostawców wyszukiwania i ich możliwości                                                          |
-| POST   | `/v1/search`           | Wykonanie zapytania wyszukiwania — treść jest weryfikowana przez `v1SearchSchema`, obsługuje buforowanie/łączenie żądań |
+| POST   | `/v1/search`           | Wykonanie zapytania wyszukiwania — treść jest walidowana przez `v1SearchSchema`, obsługuje buforowanie i łączenie żądań |
 | GET    | `/v1/search/analytics` | Statystyki trafień/opóźnień/buforowania dla poszczególnych dostawców                                                    |
 
 **Uwierzytelnianie:** klucz API Bearer (`extractApiKey` + `isValidApiKey`). Zasady wyszukiwania są egzekwowane za pomocą `enforceApiKeyPolicy`.
+
+**Automatyczny wybór:** bez `provider` najpierw uruchamiany jest najtańszy dostawca z skonfigurowanym połączeniem, a kolejny najtańszy jest używany awaryjnie. Darmowi dostawcy ostatniej szansy (`duckduckgo-free`) są używani tylko wtedy, gdy nic innego nie jest skonfigurowane. Samodzielnie hostowany SearXNG jest uznawany za skonfigurowany, gdy jego połączenie przechowuje rzeczywisty `baseUrl` (a nie domyślny adres katalogu `http://localhost:8888/search`): wtedy jest klasyfikowany jako dostawca za $0 przed dostawcami wymagającymi klucza, a najtańszy dostawca wymagający klucza jest używany awaryjnie, także gdy SearXNG odpowiada kodem 400, 401, 403 lub 404. Wartość `baseUrl`, która nie jest prawidłowym adresem URL `http(s)` lub wskazuje adres metadanych chmurowych, nie jest uwzględniana. Połączenie SearXNG, w którym przechowywany jest token, jest klasyfikowane w ten sposób tylko dla adresów `https://` lub lokalnych `http://`. W przypadku zdalnego, nieszyfrowanego `http://` nigdy nie jest używane awaryjnie i pozostaje dostawcą ostatniej szansy — jest używane tylko wtedy, gdy żaden inny dostawca nie jest skonfigurowany lub gdy zostanie wskazane z nazwy, więc w tych dwóch przypadkach token jest wysyłany jawnym tekstem.
 
 ### `provider_options` Exa i Tavily
 
@@ -1031,31 +1026,28 @@ klucza API, który je utworzył. Odtworzenie, którego wynik jest niepewny, koń
 
 ---
 
-## Użycie w trybie samoobsługowym (`/api/usage/om-usage`)
+## Korzystanie z samoobsługi (`/api/usage/om-usage`)
 
-Dowolny klucz API może odczytywać **własne** użycie i limity — bez uwierzytelniania administracyjnego. Jest to endpoint, którego
-klient (CLI, panel OmniCopilot) używa do wyświetlania posiadaczowi klucza informacji o jego wydatkach.
+Można odczytać dowolny klucz API**własne** wykorzystanie i limity — brak autoryzacji zarządzania. Jest to punkt końcowy, którego klient (CLI, panel OmniCopilot ) używa, aby pokazać posiadaczowi klucza swoje wydatki.
 
 ```bash
-# Forma tekstowa (historyczny kontrakt — zwykły tekst dla terminala)
+# Text form (the historical contract — plain text for a terminal)
 curl -H "Authorization: Bearer <your-api-key>" \
   http://localhost:20128/api/usage/om-usage
 
-# Forma strukturalna — używana przez interfejs użytkownika
+# Structured form — what a UI consumes
 curl -H "Authorization: Bearer <your-api-key>" \
   "http://localhost:20128/api/usage/om-usage?format=json"
 ```
 
-Klucz musi mieć włączoną opcję **`allowUsageCommand`** (domyślnie wyłączona — menedżer kluczy API
-w panelu przełącza ją dla poszczególnych kluczy). Bez niej endpoint zwraca `403`.
+Klucz musi mieć **`allowUsageCommand`** włączone (domyślnie wyłączone — menedżer kluczy API pulpitu nawigacyjnego przełącza je dla każdego klawisza). Bez tego punkt końcowy odpowiada `403`.
 
-`?format=json` zwraca rozróżnialną strukturę, dzięki czemu wywołujący nigdy nie odczytuje pola
-danych z odmowy. W przypadku powodzenia:
+`?format=json` zwraca dyskryminowany kształt, więc osoba dzwoniąca nigdy nie odczytuje pola danych z odmowy. O sukcesie:
 
 ```jsonc
 {
   "allowed": true,
-  // obecne wyłącznie wtedy, gdy klucz włączył limity użycia dla siebie (dzienne/tygodniowe USD):
+  // present only when the key opted into per-key usage limits (daily/weekly/5-hour USD):
   "personal": {
     "dailySpentUsd": 1.25,
     "dailyLimitUsd": 5,
@@ -1064,9 +1056,9 @@ danych z odmowy. W przypadku powodzenia:
     "weeklyLimitUsd": 20,
     "weeklyResetAtIso": "…" /* … */,
   },
-  // migawka limitu wybranego dostawcy lub null, gdy nic nie jest jeszcze zapisane w pamięci podręcznej:
+  // the selected provider quota snapshot, or null when nothing is cached yet:
   "provider": { "connectionId": "…", "provider": "claude", "plan": "…", "quotas": {/* … */} },
-  // migawka każdego połączenia, aby interfejs użytkownika mógł wyświetlać kilku dostawców obok siebie:
+  // every connection's snapshot, so a UI can render several providers side by side:
   "providers": [
     { "connectionId": "…", "provider": "claude" /* … */ },
     { "provider": "codex" /* … */ },
@@ -1074,14 +1066,9 @@ danych z odmowy. W przypadku powodzenia:
 }
 ```
 
-W przypadku odmowy (`401` — nieprawidłowy klucz / `403` — brak uprawnień) ta sama trasa zwraca
-`{ "allowed": false, "error": { "message": "…" } }` — obecne, lecz puste pole `personal`/`provider`
-(klucz ma uprawnienia, ale nie uzyskano jeszcze żadnych danych) oznacza inny stan niż odmowa, a
-tylko forma JSON pozwala je rozróżnić.
+W przypadku odmowy (zły klucz `401` / `403` niedozwolone) ta sama trasa zwraca `{ "allowed": false, "error": { "message": "…" } }` — obecny, ale pusty `personal`/`provider` (klucz dozwolony, jeszcze nic się nie nauczono) to inny stan niż odmowa i tylko formularz JSON je rozróżnia.
 
-**Uwierzytelnianie:** własny klucz API Bearer wywołującego, weryfikowany za pomocą `isValidApiKey` —
-nie jest to powierzchnia administracyjna (`/api/keys/…`), która nadal pozostaje chroniona przez
-`requireManagementAuth`.
+**Autoryzacja:** własny klucz na okaziciela API dzwoniącego, zatwierdzony za pomocą `isValidApiKey` — nie jest to powierzchnia zarządzania (`/api/keys/…`), która pozostaje za `requireManagementAuth`.
 
 ### Surowe wartości procentowe limitu a wartości skorygowane o próg odcięcia
 
@@ -1323,40 +1310,41 @@ Implementacja: `getResolvedModelCapabilitiesWithLimitSources()` w `src/lib/model
 | `/api/usage/model-latency-stats` | GET             | Kroczące zagregowane statystyki opóźnień według dostawcy/modelu (średnia/p50/p95/p99, współczynnik powodzenia); filtry: `windowHours`/`minSamples`/`maxRows`/`provider`/`model` (#6873)                                                                                                                                                              |
 | `/api/usage/cache-health`        | GET             | Podsumowanie stanu pamięci podręcznej promptów w `call_logs` — stosunek zapisów do odczytów, rozkład rozmiarów zapisów p50/p90/p99, koncentracja dużych zapisów, podział według modelu oraz werdykt `healthy`/`degraded`/`thrash`/`no-data`; parametry zapytania `range` (`1h`\|`24h`\|`7d`\|`30d`, domyślnie `24h`) oraz opcjonalny `model` (#8827) |
 
-### Uprawnienia kluczy API
+### Uprawnienia klucza API
 
-`PATCH /api/keys/{id}` aktualizuje uprawnienia istniejącego klucza. Tak jak każda trasa `/api/keys*`, wymaga autoryzacji zarządzania (zobacz [Uwierzytelnianie zarządzania](../guides/MANAGEMENT-AUTH.md)), a nie klucza wnioskowania. Wyślij tylko pola, które chcesz zmienić; żądanie bez żadnego z nich zostanie odrzucone z komunikatem `No valid fields to update`. Akceptowane pola są zdefiniowane przez `updateKeyPermissionsSchema` w `src/shared/validation/schemas/keys.ts`.
+`PATCH /api/keys/{id}` aktualizuje uprawnienia istniejącego klucza. Jak każda trasa `/api/keys*` wymaga autoryzacji zarządzania (patrz [Uwierzytelnianie zarządzania](../guides/MANAGEMENT-AUTH.md) ), a nie klucza wnioskowania. Wyślij tylko te pola, które chcesz zmienić; żądanie bez żadnego z nich jest odrzucane przez `No valid fields to update`. Akceptowane pola są definiowane przez `updateKeyPermissionsSchema` w `src/shared/validation/schemas/keys.ts`.
 
-| Pole                                        | Typ                                                                                    | Uwagi                                                                                                                                        |
-| ------------------------------------------- | -------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| `name`                                      | string, 1-200 znaków                                                                   |                                                                                                                                              |
-| `isActive`                                  | boolean                                                                                |                                                                                                                                              |
-| `isBanned`                                  | boolean                                                                                |                                                                                                                                              |
-| `expiresAt`                                 | data i godzina w formacie ISO 8601 lub `null`                                          | `null` usuwa termin wygaśnięcia                                                                                                              |
-| `modelAccessMode`                           | `all` \| `restricted`                                                                  | `allowedModels` musi być puste, gdy tryb to `all`                                                                                            |
-| `allowedModels`, `blockedModels`            | tablica ciągów znaków, maks. 1000                                                      |                                                                                                                                              |
-| `allowedCombos`                             | tablica ciągów znaków, maks. 500                                                       | Określa, które kombinacje może wywoływać klucz; modelami bezpośrednimi zarządzają `modelAccessMode` / `allowedModels`                        |
-| `connectionAccessMode`                      | `all` \| `restricted`                                                                  | `allowedConnections` musi być niepuste, gdy tryb to `restricted`, i puste, gdy tryb to `all`                                                 |
-| `allowedConnections`                        | tablica identyfikatorów UUID, maks. 100                                                |                                                                                                                                              |
-| `allowAutoCombos`                           | boolean                                                                                | `false` odrzuca żądania dotyczące modeli `auto/*` z użyciem tego klucza; klucze, dla których nigdy tego nie ustawiono, są dozwolone          |
-| `catalogScope`                              | `all` \| `combos` \| `models`                                                          | Określa, co `GET /v1/models` wyświetla dla tego klucza (tylko kombinacje, tylko modele lub oba); nie zmienia tego, co klucz może wywoływać   |
-| `forcedModel`                               | ciąg znaków o długości do 300 znaków lub `null`                                        | Kieruje żądania czatu do tego modelu/kombinacji, z pierwszeństwem przed `X-Route-Model` i `body.model`; ograniczenia klucza nadal obowiązują |
-| `noLog`, `autoResolve`                      | boolean                                                                                |                                                                                                                                              |
-| `throttleDelayMs`                           | liczba całkowita, 0-300000                                                             |                                                                                                                                              |
-| `maxSessions`                               | liczba całkowita, 0-10000                                                              |                                                                                                                                              |
-| `rateLimits`                                | tablica elementów `{ limit, window }` (dodatnie liczby całkowite, maks. 50) lub `null` | `null` usuwa limity                                                                                                                          |
-| `accessSchedule`                            | obiekt harmonogramu lub `null`                                                         | `null` usuwa harmonogram                                                                                                                     |
-| `scopes`                                    | tablica ciągów znaków, maks. 32                                                        |                                                                                                                                              |
-| `allowedEndpoints`                          | tablica ciągów znaków, maks. 20                                                        |                                                                                                                                              |
-| `streamDefaultMode`                         | `legacy` \| `json`                                                                     |                                                                                                                                              |
-| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                                   | Zobacz [Pomijanie pamięci podręcznej dla poszczególnych kluczy](#per-key-cache-bypass)                                                       |
-| `compressionEnabled`                        | boolean                                                                                |                                                                                                                                              |
-| `codexServiceMode`                          | jeden z trybów usługi Codex                                                            |                                                                                                                                              |
-| `disableNonPublicModels`                    | boolean                                                                                |                                                                                                                                              |
-| `allowUsageCommand`                         | boolean                                                                                |                                                                                                                                              |
-| `usageLimitEnabled`                         | boolean                                                                                |                                                                                                                                              |
-| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | number >= 0 or `null`                                                                  |                                                                                                                                              |
-| `chaosModeEnabled`                          | boolean                                                                                |                                                                                                                                              |
+| Pole                                        | Typ                                                                                    | Uwagi                                                                                                                                                                                                                                                                                             |
+| ------------------------------------------- | -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`                                      | string, 1-200 znaków                                                                   |                                                                                                                                                                                                                                                                                                   |
+| `isActive`                                  | boolean                                                                                |                                                                                                                                                                                                                                                                                                   |
+| `isBanned`                                  | boolean                                                                                |                                                                                                                                                                                                                                                                                                   |
+| `expiresAt`                                 | data i godzina w formacie ISO 8601 lub `null`                                          | `null` usuwa termin wygaśnięcia                                                                                                                                                                                                                                                                   |
+| `modelAccessMode`                           | `all` \| `restricted`                                                                  | `allowedModels` musi być puste, gdy tryb to `all`                                                                                                                                                                                                                                                 |
+| `allowedModels`, `blockedModels`            | tablica ciągów, do 1000                                                                |                                                                                                                                                                                                                                                                                                   |
+| `allowedCombos`                             | tablica ciągów znaków, maks. 500                                                       | Określa, które kombinacje może wywoływać klucz; modelami bezpośrednimi zarządzają `modelAccessMode` / `allowedModels`                                                                                                                                                                             |
+| `connectionAccessMode`                      | `all` \| `restricted`                                                                  | `allowedConnections` musi być niepuste, gdy tryb to `restricted`, i puste, gdy tryb to `all`                                                                                                                                                                                                      |
+| `allowedConnections`                        | tablica identyfikatorów UUID, maks. 100                                                |                                                                                                                                                                                                                                                                                                   |
+| `allowAutoCombos`                           | boolean                                                                                | `false` odrzuca żądania dotyczące modeli `auto/*` z użyciem tego klucza; klucze, dla których nigdy tego nie ustawiono, są dozwolone                                                                                                                                                               |
+| `catalogScope`                              | `all` \| `combos` \| `models`                                                          | Określa, co `GET /v1/models` wyświetla dla tego klucza (tylko kombinacje, tylko modele lub oba); nie zmienia tego, co klucz może wywoływać                                                                                                                                                        |
+| `forcedModel`                               | ciąg znaków o długości do 300 znaków lub `null`                                        | Kieruje żądania czatu do tego modelu/kombinacji, z pierwszeństwem przed `X-Route-Model` i `body.model`; ograniczenia klucza nadal obowiązują                                                                                                                                                      |
+| `noLog`, `autoResolve`                      | wartość logiczna                                                                       |                                                                                                                                                                                                                                                                                                   |
+| `throttleDelayMs`                           | liczba całkowita, 0-300000                                                             |                                                                                                                                                                                                                                                                                                   |
+| `maxSessions`                               | liczba całkowita, 0-10000                                                              |                                                                                                                                                                                                                                                                                                   |
+| `rateLimits`                                | tablica elementów `{ limit, window }` (dodatnie liczby całkowite, maks. 50) lub `null` | `null` usuwa limity                                                                                                                                                                                                                                                                               |
+| `accessSchedule`                            | obiekt harmonogramu lub `null`                                                         | `null` usuwa harmonogram                                                                                                                                                                                                                                                                          |
+| `scopes`                                    | tablica ciągów znaków, maks. 32                                                        |                                                                                                                                                                                                                                                                                                   |
+| `allowedEndpoints`                          | tablica ciągów znaków, maks. 20                                                        |                                                                                                                                                                                                                                                                                                   |
+| `streamDefaultMode`                         | `legacy` \| `json`                                                                     |                                                                                                                                                                                                                                                                                                   |
+| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                                   | Zobacz [Pomijanie pamięci podręcznej dla poszczególnych kluczy](#per-key-cache-bypass)                                                                                                                                                                                                            |
+| `compressionEnabled`                        | boolean                                                                                |                                                                                                                                                                                                                                                                                                   |
+| `codexServiceMode`                          | jeden z trybów usługi Codex                                                            |                                                                                                                                                                                                                                                                                                   |
+| `disableNonPublicModels`                    | boolean                                                                                |                                                                                                                                                                                                                                                                                                   |
+| `allowUsageCommand`                         | boolean                                                                                |                                                                                                                                                                                                                                                                                                   |
+| `usageLimitEnabled`                         | boolean                                                                                |                                                                                                                                                                                                                                                                                                   |
+| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | numer >= 0 lub `null`                                                                  |                                                                                                                                                                                                                                                                                                   |
+| `fiveHourUsageLimitUsd`                     | numer >= 0 lub `null`                                                                  | Rolling 5-godzinny budżet USD, egzekwowany jak limity dzienne i tygodniowe (`usageLimitEnabled`, `UNPRICED_USAGE_BUDGET_POLICY`). `retry-after` ma miejsce, gdy najstarsze wydatki w danym oknie wygasają, co może sprawić, że klucz znacznie przekraczający jego limit będzie nadal zablokowany. |
+| `chaosModeEnabled`                          | boolean                                                                                |                                                                                                                                                                                                                                                                                                   |
 
 ```bash
 curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
@@ -1406,6 +1394,34 @@ curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
 | `/api/modality-bridge/stats`         | GET        | Przechowywane w pamięci `attempts`, udane operacje/`bridged`, niepowodzenia, trafienia pamięci podręcznej, `totalLatencyMs`, `latencySamples`, `averageLatencyMs` określane na podstawie próbek oraz czas ostatniego użycia (resetowane po ponownym uruchomieniu; uwierzytelnianie zarządzania)                                                                                                                                                 |
 | `/api/modality-bridge/video/runtime` | GET        | Ścisłe sprawdzenie zaufanej pętli zwrotnej przed uwierzytelnianiem/sondowaniem zarządzania; oczyszczone informacje o dostępności i wersjach FFmpeg/ffprobe (no-store)                                                                                                                                                                                                                                                                           |
 | `/api/modality-bridge/video/extract` | POST       | Wewnętrzny uwierzytelniony broker bajtów zaufanej pętli zwrotnej; wejście 50 MiB, ograniczona kolejka/wyjście 32 MiB, `503` przy braku pojemności, `499` przy rozłączeniu, `504` po przekroczeniu terminu; nie jest publicznym interfejsem API przesyłania plików                                                                                                                                                                               |
+
+### Szczegółowa analiza klatek wideo
+
+`GET /api/v1/video-bridge/drilldown` odczytuje powiązany z tenantem nieprzezroczysty uchwyt zwrócony w
+`x-omniroute-video-drilldown` po uprzednio wyrażonej zgodzie na żądanie Video Bridge.
+Zarówno odczyt, jak i `DELETE` zawsze wymagają prawidłowego klucza API oraz niezależnego uprawnienia operatora
+`modalityBridgeVideoDrilldownRemoteEnabled`. Przechowywanie produkcyjne wymaga dodatkowo
+`modalityBridgeVideoDrilldownEnabled` oraz ścisłego `drilldown: true` dla każdej części.
+Jeśli klucz ma niepustą listę dozwolonych endpointów, musi ona zawierać `video` zarówno dla
+GET, jak i DELETE, niezależnie od tego, czy wywołujący używa `/v1`, czy `/api/v1`.
+
+Zapytanie GET: wymagany `handle`; opcjonalne `variant` (`preview`, `standard`, `detail`),
+`limit` (1–8; starszy parametr `frames` jest akceptowany, ale nie można go łączyć z `limit`),
+zero-indeksowana `page` oraz sekundy `start`/`end`. Gdy podane są obie granice zakresu,
+`end` musi być większe niż `start`. Zduplikowane lub nieznane klucze zapytania są odrzucane.
+Pomyślne odpowiedzi zawierają `derivation`, `durationSeconds`, `frames`,
+`hasMore`, `page`, `variant` oraz opcjonalne `focusWindow`; JSON bez przechowywania jest ograniczony do 32 MiB wraz z Base64.
+Zbyt duży wynik zwraca 413; należy zażądać mniejszej liczby klatek.
+
+`DELETE /api/v1/video-bridge/drilldown?handle=...` zwraca `{ "removed": 0|1 }`.
+Nieznane, wygasłe i pochodzące z innego klucza żądania GET są nierozróżnialnymi odpowiedziami 404; DELETE
+pochodzący z innego klucza nie może usunąć wpisu właściciela. Dostęp wyłączony zwraca 403, brak uwierzytelnienia lub nieprawidłowe
+uwierzytelnienie 401, nieprawidłowe zapytania 400, anulowanie 499, a błędy tymczasowe 503.
+Uchwyty są lokalne dla procesu, wygasają po dziesięciu minutach i nie przetrwają ponownego uruchomienia.
+Nowe uchwyty używają prefiksu `v1.` oraz losowego tokenu Base64URL o długości 32 bajtów; przechowywane są wyłącznie skróty tokenów.
+Starsze tokeny w formacie 64 znaków szesnastkowych pozostają możliwe do odczytu składniowego w celu zapewnienia zgodności.
+Zobacz [reguły ochronne Video Bridge](../security/GUARDRAILS.md#video-bridge-videobridgets-videobridgepipelinets)
+— informacje o zgodzie, limitach i szczegółach wyprowadzania wariantów.
 
 ### Kopia zapasowa i eksport/import
 
@@ -1515,17 +1531,17 @@ Te endpointy odwzorowują format API Gemini dla klientów oczekujących natywnej
 
 ### Wewnętrzne / systemowe interfejsy API
 
-| Endpoint                 | Metoda | Opis                                                                      |
-| ------------------------ | ------ | ------------------------------------------------------------------------- |
-| `/api/init`              | GET    | Sprawdzenie inicjalizacji aplikacji (używane przy pierwszym uruchomieniu) |
-| `/api/tags`              | GET    | Tagi modeli zgodne z Ollama (dla klientów Ollama)                         |
-| `/api/restart`           | POST   | Wyzwól kontrolowany restart serwera                                       |
-| `/api/shutdown`          | POST   | Wyzwól kontrolowane wyłączenie serwera                                    |
-| `/api/system/env/repair` | POST   | Napraw zmienne środowiskowe dostawcy OAuth                                |
-| `/api/system/version`    | GET    | Bieżąca/najnowsza wersja, stan aktualizacji, kanał wydań                  |
-| `/api/system/version`    | POST   | Rozpocznij aktualizację do najnowszej wersji z uwzględnieniem wdrożenia   |
+| Endpoint                 | Method | Description                                                             |
+| ------------------------ | ------ | ----------------------------------------------------------------------- |
+| `/api/init`              | GET    | Uruchom usługi synchronizacji w tle (uwierzytelnianie zarządzania)      |
+| `/api/tags`              | GET    | Tagi modeli zgodne z Ollama (dla klientów Ollama)                       |
+| `/api/restart`           | POST   | Uruchom kontrolowany restart serwera                                    |
+| `/api/shutdown`          | POST   | Uruchom kontrolowane wyłączenie serwera                                 |
+| `/api/system/env/repair` | POST   | Napraw zmienne środowiskowe dostawcy OAuth                              |
+| `/api/system/version`    | GET    | Bieżąca/najnowsza wersja, stan aktualizacji, kanał wydań                |
+| `/api/system/version`    | POST   | Rozpocznij aktualizację do najnowszej wersji z uwzględnieniem wdrożenia |
 
-> **Uwaga:** Te endpointy są używane wewnętrznie przez system lub w celu zapewnienia zgodności z klientami Ollama. Zwykle nie są wywoływane przez użytkowników końcowych.
+> **Uwaga:** Te endpointy są używane wewnętrznie przez system lub w celu zapewnienia zgodności z klientem Ollama. Zwykle nie są wywoływane przez użytkowników końcowych.
 
 ### Naprawa środowiska OAuth _(v3.6.1+)_
 

@@ -356,27 +356,35 @@ Content-Type: application/json
 
 I measc na soláthraithe atá ar fáil tá OpenAI (GPT Image 2), xAI (Grok Image), Together AI (FLUX), Fireworks AI, Nebius (FLUX), Hyperbolic, NanoBanana, **OpenRouter**, **ZenMux**, SD WebUI (áitiúil), agus ComfyUI (áitiúil).
 
-Seolann `n` `n` íomhá in `data[]`. Déanann soláthraithe a gcuireann a n-API réamhtheachtach íomhá amháin ar ais in aghaidh glao
+Tugann `n` `n` íomhá ar ais in `data[]`. Déantar `n` glao ar leith in aghaidh srutha do sholáthraithe a dtugann a n-API in aghaidh srutha íomhá amháin ar ais
 (Black Forest Labs, Stability AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik,
-NVIDIA NIM, Cloudflare Workers AI) `n` glao réamhtheachtach ar leith, agus bíonn 4 ghlao ar a mhéad ar siúl ag an am céanna. Déantar `seed` socraithe a fhritháireamh de réir innéacs an ghlao (`seed`, `seed + 1`, …), ionas go mbeidh na híomhánna éagsúil ach in-athghinte. Tá `n` teoranta do 10. Teipeann ar an iarratas ina iomláine má theipeann ar aon ghlao. Tá liosta na bhformáidí a úsáideann leathadh glaonna in `SINGLE_IMAGE_FANOUT_FORMATS` in
+NVIDIA NIM, Cloudflare Workers AI), agus bíonn 4 ghlao ar a mhéad ar bun ag an am céanna. Déantar
+`seed` seasta a fhritháireamh de réir innéacs an ghlao (`seed`, `seed + 1`, …), ionas go mbeidh na híomhánna difriúil ach in-athghinte. Tá teorainn 10 ar `n`. Teipeann ar an iarratas ina iomláine má theipeann ar aon ghlao. Tá liosta na bhformáidí fan-out in `SINGLE_IMAGE_FANOUT_FORMATS` i
 `open-sse/handlers/imageGeneration/fanOut.ts`.
 
-Athúsáideann ZenMux an nasc reatha leis an eochair API agus glacann sé le réimíreanna `zenmux/` nó `zm/`:
+Athúsáideann ZenMux an nasc atá ann cheana leis an eochair API agus glacann sé le réimíreanna
+`zenmux/` nó `zm/`:
 
 - Úsáideann `zenmux/openai/gpt-image-2` API Íomhánna OpenAI de chuid ZenMux. I measc na roghanna tá `size`,
   `quality`, `n`, `output_format`, `output_compression`, `background`, agus `response_format`.
-- Úsáideann foilsitheoirí eile, amhail `zm/meta/muse-image-1.0`, críochphointe Vertex AI `:predict` de chuid ZenMux. Mapálann `n` go `sampleCount`, mapálann `aspect_ratio` go `aspectRatio`, agus mapálann `image_size`
-  (`1K`, `2K`, `4K`) go `sampleImageSize`. Soláthraíonn `size` picteilíneach cóimheas gné amháin,
-  agus ní ráthaíonn sé toisí picteilíneacha. Athraíonn na cóimheasa tacaithe, na taifigh, agus na comhaireamh de réir na samhla.
+- Úsáideann foilsitheoirí eile, amhail `zm/meta/muse-image-1.0`, críochphointe Vertex AI `:predict` ZenMux. Mapáiltear `n` chuig `sampleCount`, `aspect_ratio` chuig `aspectRatio`, agus
+  `image_size` (`1K`, `2K`, `4K`) chuig `sampleImageSize`. Ní sholáthraíonn `size` picteilín ach cóimheas gné,
+  agus ní ráthaítear toisí picteilín leis. Athraíonn na cóimheasa tacaithe, na rúin, agus na comhaireamh de réir na samhla.
 - Roghnaíonn `zm/inclusionai/ming-image-0.1-design` a thoisí féin. Fág `size`,
-  `aspect_ratio`, agus `image_size` ar lár; seolann luachanna sonraithe HTTP 400 ar ais. Is féidir PNG, JPEG, agus WebP
+  `aspect_ratio`, agus `image_size` ar lár; seolann luachanna sainráite HTTP 400 ar ais. Is féidir PNG, JPEG, agus WebP
   a iarraidh le `output_format`.
 
-Tacaíonn an comhtháthú seo le giniúint téacs-go-íomhá, seachas eagarthóireacht íomhá thagartha. Déantar aschur Vertex a normalú go `data[].b64_json`; cuireann `response_format: "url"` URL HTTPS réamhtheachtach nó URL sonraí base64 ar ais nuair nach bhfuil ar fáil ach bearta íomhá. Cuireann aschuir fholmha/scagtha earráid ar ais seachas rath folamh. Braitheann rochtain ar an tsamhail ar chuntas ZenMux. Féach [API Vertex ZenMux](https://docs.zenmux.ai/api/vertexai/generate-images) agus
+Tacaíonn an comhtháthú seo le giniúint téacs-go-íomhá, seachas eagarthóireacht íomhá thagartha. Déantar aschur Vertex a normalú chuig `data[].b64_json`; tugann `response_format: "url"` URL HTTPS ón tseirbhís in aghaidh srutha ar ais, nó URL sonraí base64 nuair nach mbíonn ach beartais íomhá ar fáil. Tugann aschuir fholmha/scagtha earráid ar ais seachas rath folamh. Braitheann rochtain ar an tsamhail ar chuntas ZenMux.
+Féach [Vertex API ZenMux](https://docs.zenmux.ai/api/vertexai/generate-images) agus
 [API Íomhánna OpenAI](https://docs.zenmux.ai/api/openai/generate-an-image).
 
+Freastalaíonn nasc sínithe isteach Microsoft 365 Copilot ar `copilot-m365-web/m365-copilot-image`
+trí uirlis íomhánna ionsuite Copilot: seal Copilot amháin in aghaidh na híomhá (`n` 1–4), agus `size` á stiúradh
+ag an treoshuíomh amháin, agus íomhánna á dtabhairt ar ais inlíne (`b64_json`, nó URL sonraí le haghaidh
+`response_format: "url"`). Féach [Microsoft 365 Copilot](../providers/COPILOT-M365.md#image-generation).
+
 ```bash
-# Liostaigh na samhlacha íomhá go léir
+# Liostaigh gach samhail íomhánna
 GET /v1/images/generations
 ```
 
@@ -800,15 +808,28 @@ Diúltaíonn `GET /v1/batches` do ghlaoiteoir gan ainm le `401` fiú nuair atá
 
 ## API Cuardaigh
 
-Astarraingt soláthraithe Gréasáin/cuardaigh (Tavily, Brave, Exa, Serper, etc.).
+Astarraingt soláthraithe gréasáin/cuardaigh (Tavily, Brave, Exa, Serper, etc.).
 
-| Modh | Cosán                  | Cur síos                                                                                                        |
-| ---- | ---------------------- | --------------------------------------------------------------------------------------------------------------- |
-| GET  | `/v1/search`           | Liosta de na soláthraithe cuardaigh cumraithe + cumais                                                          |
-| POST | `/v1/search`           | Rith fiosrúchán cuardaigh — déanann `v1SearchSchema` an corp a bhailíochtú; tacaítear le taisceadh/comhcheangal |
-| GET  | `/v1/search/analytics` | Staitisticí amas/moille/taisce de réir soláthraí                                                                |
+| Modh | Conair                 | Cur síos                                                                                                         |
+| ---- | ---------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| GET  | `/v1/search`           | Liosta de na soláthraithe cuardaigh cumraithe + na cumais atá acu                                                |
+| POST | `/v1/search`           | Rith fiosrúchán cuardaigh — bailíochtaítear an corp le `v1SearchSchema`, agus tacaítear le taisceadh/comhchumasc |
+| GET  | `/v1/search/analytics` | Staitisticí amas/moille/taisce in aghaidh an tsoláthraí                                                          |
 
-**Fíordheimhniú:** Eochair API Bearer (`extractApiKey` + `isValidApiKey`). Cuirtear beartas cuardaigh i bhfeidhm trí `enforceApiKeyPolicy`.
+**Fíordheimhniú:** Eochair API Bearer (`extractApiKey` + `isValidApiKey`). Cuirtear an beartas cuardaigh i bhfeidhm trí `enforceApiKeyPolicy`.
+
+**Uathroghnú:** gan `provider`, ritheann an soláthraí is saoire a bhfuil nasc cumraithe aige ar
+dtús, agus is é an chéad cheann eile is saoire an soláthraí cúltaca. Ní úsáidtear soláthraithe
+saora mar rogha dheireanach (`duckduckgo-free`) ach nuair nach bhfuil aon rud eile cumraithe.
+Áirítear SearXNG féinóstáilte mar rud cumraithe a luaithe a stórálann a nasc `baseUrl` fíor (seachas
+an réamhshocrú catalóige `http://localhost:8888/search`): ansin rangaítear é mar sholáthraí $0
+roimh na soláthraithe a bhfuil eochair acu, agus is é an soláthraí is saoire a bhfuil eochair aige
+an cúltaca, lena n-áirítear nuair a fhreagraíonn SearXNG le 400, 401, 403 nó 404. Ní áirítear
+`baseUrl` nach URL bailí `http(s)` é nó a dhíríonn ar sheoladh meiteashonraí néil. Déantar nasc
+SearXNG a stórálann comhartha a rangú ar an mbealach seo ach amháin thar `https://` nó loopback
+`http://`. Thar `http://` iargúlta simplí ní úsáidtear mar chúltaca riamh é agus fanann sé ina
+rogha dheireanach, gan é a úsáid ach nuair nach bhfuil aon soláthraí eile cumraithe nó nuair a
+iarrtar é de réir ainm; mar sin seoltar an comhartha i ngnáth-théacs sa dá chás sin.
 
 ### `provider_options` Exa agus Tavily
 
@@ -998,27 +1019,26 @@ eochair API a chruthaigh iad. Críochnaíonn athsheinm a bhfuil a thoradh éigin
 
 ## Úsáid féinseirbhíse (`/api/usage/om-usage`)
 
-Is féidir le haon eochair API a húsáid agus a cuótaí **féin** a léamh — níl aon údarú bainistíochta i gceist. Is é seo an pointe deiridh a
-úsáideann cliant (CLI, painéal OmniCopilot) chun a chaiteachas a thaispeáint do shealbhóir na heochrach.
+Is féidir aon eochair API a léamh **a chuid féin** úsáid agus cuótaí — gan údarás bainistíochta. Is é seo an críochphointe a úsáideann cliant (CLI, an painéal OmniCopilot ) chun a gcaiteachas a thaispeáint do shealbhóir eochrach.
 
 ```bash
-# Foirm téacs (an conradh stairiúil — gnáth-théacs do theirminéal)
+# Text form (the historical contract — plain text for a terminal)
 curl -H "Authorization: Bearer <your-api-key>" \
   http://localhost:20128/api/usage/om-usage
 
-# Foirm struchtúrtha — an méid a ídíonn comhéadan úsáideora
+# Structured form — what a UI consumes
 curl -H "Authorization: Bearer <your-api-key>" \
   "http://localhost:20128/api/usage/om-usage?format=json"
 ```
 
-Ní mór **`allowUsageCommand`** a bheith cumasaithe don eochair (múchta de réir réamhshocraithe — scoránaíonn bainisteoir eochracha API an deais é in aghaidh na heochrach). Gan é, freagraíonn an pointe deiridh le `403`.
+Ní mór go mbeadh an eochair **`allowUsageCommand`** cumasaithe (amach de réir réamhshocraithe — déanann bainisteoir eochair API an deais é a scoránaigh in aghaidh na heochrach). Gan é freagraíonn an críochphointe `403`.
 
-Tugann `?format=json` cruth idirdhealaithe ar ais ionas nach léifidh glaoiteoir réimse sonraí ó dhiúltú choíche. Ar éirigh leis:
+Tugann `?format=json` cruth idirdhealaithe ar ais agus mar sin ní léann glaoiteoir réimse sonraí de bharr diúltú. Ar rath:
 
 ```jsonc
 {
   "allowed": true,
-  // i láthair ach nuair a roghnaigh an eochair teorainneacha úsáide in aghaidh na heochrach (USD laethúil/seachtainiúil):
+  // present only when the key opted into per-key usage limits (daily/weekly/5-hour USD):
   "personal": {
     "dailySpentUsd": 1.25,
     "dailyLimitUsd": 5,
@@ -1027,9 +1047,9 @@ Tugann `?format=json` cruth idirdhealaithe ar ais ionas nach léifidh glaoiteoir
     "weeklyLimitUsd": 20,
     "weeklyResetAtIso": "…" /* … */,
   },
-  // pictiúr cuóta an tsoláthraí roghnaithe, nó null nuair nach bhfuil aon rud i dtaisce fós:
+  // the selected provider quota snapshot, or null when nothing is cached yet:
   "provider": { "connectionId": "…", "provider": "claude", "plan": "…", "quotas": {/* … */} },
-  // pictiúr gach naisc, ionas gur féidir le comhéadan úsáideora roinnt soláthraithe a léiriú taobh le taobh:
+  // every connection's snapshot, so a UI can render several providers side by side:
   "providers": [
     { "connectionId": "…", "provider": "claude" /* … */ },
     { "provider": "codex" /* … */ },
@@ -1037,13 +1057,9 @@ Tugann `?format=json` cruth idirdhealaithe ar ais ionas nach léifidh glaoiteoir
 }
 ```
 
-Ar dhiúltú (`401` eochair mhícheart / `403` níl cead ann), tugann an bealach céanna
-`{ "allowed": false, "error": { "message": "…" } }` ar ais — is staid dhifriúil ó dhiúltú é
-`personal`/`provider` a bheith i láthair ach folamh (ceadaítear an eochair, níl aon rud foghlamtha fós), agus is é an fhoirm JSON amháin
-a dhéanann idirdhealú eatarthu.
+Ar dhiúltú (`401` olc eochair / `403` ní cheadaítear) ar ais ar an mbealach céanna `{ "allowed": false, "error": { "message": "…" } }` — `personal`/`provider` láthair-ach-folamh (eochair ceadaithe, níl aon foghlamtha fós) stát difriúil ó dhiúltú, agus ní dhéanann ach an fhoirm JSON idirdhealú orthu.
 
-**Údarú:** eochair API Bearer an ghlaoiteora féin, bailíochtaithe le `isValidApiKey` — ní hé seo an
-dromchla bainistíochta (`/api/keys/…`), a fhanann taobh thiar de `requireManagementAuth`.
+**Údar:** eochair Iompróir API an ghlaoiteora féin, arna bhailíochtú le `isValidApiKey` — is é seo _not_ an dromchla bainistíochta (`/api/keys/…`), a fhanann taobh thiar `requireManagementAuth`.
 
 ### Céatadáin Chuóta Amh vs. Coigeartaithe de réir na Tairsí
 
@@ -1280,40 +1296,41 @@ agus na slabhraí tosaíochta in `src/lib/modelCapabilityLimits.ts`.
 | `/api/usage/model-latency-stats` | GET             | Comhiomlán rollach ar fholúsacht in aghaidh an tsoláthraí/mhúnla (meán/p50/p95/p99, ráta ratha); scagairí: `windowHours`/`minSamples`/`maxRows`/`provider`/`model` (#6873)                                                                                                                                                                                       |
 | `/api/usage/cache-health`        | GET             | Achoimre ar shláinte taisce na leideanna thar `call_logs` — cóimheas scríofa/léite, dáileadh mhéid na scríbhinní p50/p90/p99, tiúchan na scríbhinní troma, miondealú in aghaidh an mhúnla, agus breithiúnas `healthy`/`degraded`/`thrash`/`no-data`; paraiméadair fiosraithe `range` (`1h`\|`24h`\|`7d`\|`30d`, réamhshocrú `24h`) agus `model` roghnach (#8827) |
 
-### Ceadanna eochracha API
+### Eochaircheadanna API
 
-Nuashonraíonn `PATCH /api/keys/{id}` ceadanna eochair atá ann cheana. Cosúil le gach bealach `/api/keys*`, teastaíonn údarú bainistíochta uaidh (féach [Fíordheimhniú Bainistíochta](../guides/MANAGEMENT-AUTH.md)), seachas eochair thátail. Seol na réimsí amháin is mian leat a athrú; diúltaítear d’iarratas nach bhfuil aon cheann acu ann le `No valid fields to update`. Sainmhínítear na réimsí inghlactha le `updateKeyPermissionsSchema` in `src/shared/validation/schemas/keys.ts`.
+Nuashonraíonn `PATCH /api/keys/{id}` ceadanna eochrach reatha. Cosúil le gach bealach `/api/keys*` teastaíonn údarú bainistíochta uaidh (féach [Fíordheimhniú Bainistíochta](../guides/MANAGEMENT-AUTH.md) ), ní eochair tátail. Ná seol ach na réimsí is mian leat a athrú; ní dhiúltaítear iarratas nach bhfuil aon cheann acu le `No valid fields to update`. Sainmhínítear na réimsí glactha ag `updateKeyPermissionsSchema` in `src/shared/validation/schemas/keys.ts`.
 
-| Field                                       | Type                                                                          | Notes                                                                                                                                                                         |
-| ------------------------------------------- | ----------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `name`                                      | teaghrán, 1-200 carachtar                                                     |                                                                                                                                                                               |
-| `isActive`                                  | boolean                                                                       |                                                                                                                                                                               |
-| `isBanned`                                  | boolean                                                                       |                                                                                                                                                                               |
-| `expiresAt`                                 | dáta agus am ISO 8601 nó `null`                                               | Glanann `null` an t-éaga                                                                                                                                                      |
-| `modelAccessMode`                           | `all` \| `restricted`                                                         | Caithfidh `allowedModels` a bheith folamh nuair atá an mód `all`                                                                                                              |
-| `allowedModels`, `blockedModels`            | eagar teaghrán, suas le 1000                                                  |                                                                                                                                                                               |
-| `allowedCombos`                             | eagar teaghrán, suas le 500                                                   | Rialaíonn sé cé na teaglamaí is féidir leis an eochair a ghlaoch; rialaíonn `modelAccessMode` / `allowedModels` na samhlacha díreacha                                         |
-| `connectionAccessMode`                      | `all` \| `restricted`                                                         | Caithfidh `allowedConnections` a bheith neamhfholamh nuair atá sé `restricted` agus folamh nuair atá sé `all`                                                                 |
-| `allowedConnections`                        | eagar UUIDanna, suas le 100                                                   |                                                                                                                                                                               |
-| `allowAutoCombos`                           | boolean                                                                       | Diúltaíonn `false` d'iarratais ar shamhlacha `auto/*` leis an eochair seo; ceadaítear eochracha nár shocraigh é riamh                                                         |
-| `catalogScope`                              | `all` \| `combos` \| `models`                                                 | Sonraíonn sé cad a liostaíonn `GET /v1/models` don eochair seo (teaglamaí amháin, samhlacha amháin, nó an dá cheann); ní athraíonn sé cad is féidir leis an eochair a ghlaoch |
-| `forcedModel`                               | teaghrán suas le 300 carachtar, nó `null`                                     | Treoraíonn sé iarratais chomhrá chuig an tsamhail/teaglama seo, thar `X-Route-Model` agus `body.model`; tá teorainneacha na heochrach fós i bhfeidhm                          |
-| `noLog`, `autoResolve`                      | boolean                                                                       |                                                                                                                                                                               |
-| `throttleDelayMs`                           | slánuimhir, 0-300000                                                          |                                                                                                                                                                               |
-| `maxSessions`                               | slánuimhir, 0-10000                                                           |                                                                                                                                                                               |
-| `rateLimits`                                | eagar de `{ limit, window }` (slánuimhreacha dearfacha, suas le 50) nó `null` | Glanann `null` na teorainneacha                                                                                                                                               |
-| `accessSchedule`                            | réad sceidil nó `null`                                                        | Glanann `null` an sceideal                                                                                                                                                    |
-| `scopes`                                    | eagar teaghrán, suas le 32                                                    |                                                                                                                                                                               |
-| `allowedEndpoints`                          | eagar teaghrán, suas le 20                                                    |                                                                                                                                                                               |
-| `streamDefaultMode`                         | `legacy` \| `json`                                                            |                                                                                                                                                                               |
-| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                          | Féach [Seachbhóthar taisce in aghaidh na heochrach](#per-key-cache-bypass)                                                                                                    |
-| `compressionEnabled`                        | boolean                                                                       |                                                                                                                                                                               |
-| `codexServiceMode`                          | ceann de mhóid seirbhíse Codex                                                |                                                                                                                                                                               |
-| `disableNonPublicModels`                    | boolean                                                                       |                                                                                                                                                                               |
-| `allowUsageCommand`                         | boolean                                                                       |                                                                                                                                                                               |
-| `usageLimitEnabled`                         | boolean                                                                       |                                                                                                                                                                               |
-| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | number >= 0 or `null`                                                         |                                                                                                                                                                               |
-| `chaosModeEnabled`                          | boolean                                                                       |                                                                                                                                                                               |
+| Field                                       | Type                                                                          | Notes                                                                                                                                                                                                                                                                                                                                       |
+| ------------------------------------------- | ----------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`                                      | teaghrán, 1-200 carachtar                                                     |                                                                                                                                                                                                                                                                                                                                             |
+| `isActive`                                  | boolean                                                                       |                                                                                                                                                                                                                                                                                                                                             |
+| `isBanned`                                  | boolean                                                                       |                                                                                                                                                                                                                                                                                                                                             |
+| `expiresAt`                                 | dáta agus am ISO 8601 nó `null`                                               | Glanann `null` an t-éaga                                                                                                                                                                                                                                                                                                                    |
+| `modelAccessMode`                           | `all` \| `restricted`                                                         | Caithfidh `allowedModels` a bheith folamh nuair atá an mód `all`                                                                                                                                                                                                                                                                            |
+| `allowedModels`, `blockedModels`            | sraith teaghráin, suas le 1000                                                |                                                                                                                                                                                                                                                                                                                                             |
+| `allowedCombos`                             | eagar teaghrán, suas le 500                                                   | Rialaíonn sé cé na teaglamaí is féidir leis an eochair a ghlaoch; rialaíonn `modelAccessMode` / `allowedModels` na samhlacha díreacha                                                                                                                                                                                                       |
+| `connectionAccessMode`                      | `all` \| `restricted`                                                         | Caithfidh `allowedConnections` a bheith neamhfholamh nuair atá sé `restricted` agus folamh nuair atá sé `all`                                                                                                                                                                                                                               |
+| `allowedConnections`                        | eagar UUIDanna, suas le 100                                                   |                                                                                                                                                                                                                                                                                                                                             |
+| `allowAutoCombos`                           | boolean                                                                       | Diúltaíonn `false` d'iarratais ar shamhlacha `auto/*` leis an eochair seo; ceadaítear eochracha nár shocraigh é riamh                                                                                                                                                                                                                       |
+| `catalogScope`                              | `all` \| `combos` \| `models`                                                 | Sonraíonn sé cad a liostaíonn `GET /v1/models` don eochair seo (teaglamaí amháin, samhlacha amháin, nó an dá cheann); ní athraíonn sé cad is féidir leis an eochair a ghlaoch                                                                                                                                                               |
+| `forcedModel`                               | teaghrán suas le 300 carachtar, nó `null`                                     | Treoraíonn sé iarratais chomhrá chuig an tsamhail/teaglama seo, thar `X-Route-Model` agus `body.model`; tá teorainneacha na heochrach fós i bhfeidhm                                                                                                                                                                                        |
+| `noLog`, `autoResolve`                      | Boole                                                                         |                                                                                                                                                                                                                                                                                                                                             |
+| `throttleDelayMs`                           | slánuimhir, 0-300000                                                          |                                                                                                                                                                                                                                                                                                                                             |
+| `maxSessions`                               | slánuimhir, 0-10000                                                           |                                                                                                                                                                                                                                                                                                                                             |
+| `rateLimits`                                | eagar de `{ limit, window }` (slánuimhreacha dearfacha, suas le 50) nó `null` | Glanann `null` na teorainneacha                                                                                                                                                                                                                                                                                                             |
+| `accessSchedule`                            | réad sceidil nó `null`                                                        | Glanann `null` an sceideal                                                                                                                                                                                                                                                                                                                  |
+| `scopes`                                    | eagar teaghrán, suas le 32                                                    |                                                                                                                                                                                                                                                                                                                                             |
+| `allowedEndpoints`                          | eagar teaghrán, suas le 20                                                    |                                                                                                                                                                                                                                                                                                                                             |
+| `streamDefaultMode`                         | `legacy` \| `json`                                                            |                                                                                                                                                                                                                                                                                                                                             |
+| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                          | Féach [Seachbhóthar taisce in aghaidh na heochrach](#per-key-cache-bypass)                                                                                                                                                                                                                                                                  |
+| `compressionEnabled`                        | boolean                                                                       |                                                                                                                                                                                                                                                                                                                                             |
+| `codexServiceMode`                          | ceann de mhóid seirbhíse Codex                                                |                                                                                                                                                                                                                                                                                                                                             |
+| `disableNonPublicModels`                    | boolean                                                                       |                                                                                                                                                                                                                                                                                                                                             |
+| `allowUsageCommand`                         | boolean                                                                       |                                                                                                                                                                                                                                                                                                                                             |
+| `usageLimitEnabled`                         | boolean                                                                       |                                                                                                                                                                                                                                                                                                                                             |
+| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | uimhir >= 0 nó `null`                                                         |                                                                                                                                                                                                                                                                                                                                             |
+| `fiveHourUsageLimitUsd`                     | uimhir >= 0 nó `null`                                                         | Buiséad USD 5 uair an chloig rollta, arna fhorfheidhmiú cosúil leis na teorainneacha laethúla agus seachtainiúla (`usageLimitEnabled`, `UNPRICED_USAGE_BUDGET_POLICY`). Is é `retry-after` ná nuair a théann an caiteachas is sine san fhuinneog in aois, rud a fhágann gur féidir eochair a fhágáil i bhfad thar a teorainn fós faoi bhac. |
+| `chaosModeEnabled`                          | boolean                                                                       |                                                                                                                                                                                                                                                                                                                                             |
 
 ```bash
 curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
@@ -1363,6 +1380,32 @@ curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
 | `/api/modality-bridge/stats`         | GET        | `attempts` sa chuimhne, éachtaí/`bridged`, teipeanna, amas taisce, `totalLatencyMs`, `latencySamples`, `averageLatencyMs` ainmnithe de réir samplaí, agus am na húsáide deireanaí (athshocraítear é ar atosú; údarú bainistíochta)                                                                                                                                                                                              |
 | `/api/modality-bridge/video/runtime` | GET        | Seiceáil dhocht lúb-aiseolais iontaofa roimh údarú bainistíochta/promhaidh; infhaighteacht agus leaganacha FFmpeg/ffprobe sláintithe (no-store)                                                                                                                                                                                                                                                                                 |
 | `/api/modality-bridge/video/extract` | POST       | Bróicéir beart inmheánach fíordheimhnithe lúb-aiseolais iontaofa; ionchur 50 MiB, scuaine teoranta/aschur 32 MiB, acmhainn `503`, dícheangal `499`, sprioc-am `504`; ní API uaslódála poiblí é                                                                                                                                                                                                                                  |
+
+### Miondealú ar fhrámaí físeáin
+
+Léann `GET /api/v1/video-bridge/drilldown` láimhseálaí teimhneach atá ceangailte le tionónta agus a chuirtear ar ais in
+`x-omniroute-video-drilldown` tar éis iarratas Video Bridge ar tugadh toiliú sainráite dó.
+Teastaíonn eochair API bhailí i gcónaí le haghaidh na léitheoireachta agus `DELETE` araon, chomh maith le cead neamhspleách an oibreora
+`modalityBridgeVideoDrilldownRemoteEnabled`. Éilíonn coinneáil táirgeachta freisin
+`modalityBridgeVideoDrilldownEnabled` agus `drilldown: true` docht in aghaidh na coda.
+Má tá liosta ceadaithe críochphointí neamhfholamh ag an eochair, ní mór `video` a bheith ann le haghaidh
+GET agus DELETE araon, is cuma an n-úsáideann an glaoiteoir `/v1` nó `/api/v1`.
+
+Iarratas GET: `handle` riachtanach; `variant` roghnach (`preview`, `standard`, `detail`),
+`limit` (1–8; glactar le `frames` oidhreachta ach ní féidir é a chomhcheangal le `limit`),
+`page` nialasbhunaithe, agus soicind `start`/`end`. Nuair a sholáthraítear an dá theorainn fócais,
+ní mór `end` a bheith níos mó ná `start`. Diúltaítear eochracha fiosraithe dúblacha nó anaithnide.
+Bíonn `derivation`, `durationSeconds`, `frames`,
+`hasMore`, `page`, `variant`, agus `focusWindow` roghnach sna freagraí rathúla; tá JSON gan stóráil teoranta do 32 MiB lena n-áirítear Base64. Filleann aschur atá rómhór 413; iarr níos lú frámaí.
+
+Filleann `DELETE /api/v1/video-bridge/drilldown?handle=...` `{ "removed": 0|1 }`.
+Ní féidir idirdhealú a dhéanamh idir freagraí 404 maidir le GET anaithnid, éagtha agus tras-eochrach; ní féidir le DELETE tras-eochrach iontráil an úinéara a bhaint.
+Filleann rochtain dhíchumasaithe 403, fíordheimhniú ar iarraidh nó neamhbhailí 401, fiosruithe neamhbhailí 400, cealú 499 agus earráidí sealadacha 503.
+Tá na láimhseálaithe áitiúil don phróiseas, téann siad in éag tar éis deich nóiméad, agus ní mhaireann siad tar éis atosú.
+Úsáideann láimhseálaithe nua `v1.` móide comhartha randamach Base64URL 32 beart; ní choinnítear ach haisí na gcomharthaí.
+Fanann comharthaí oidhreachta 64-heicsidheachúlacha inléite go comhréireach ar mhaithe le comhoiriúnacht.
+Féach ar [chosaintí Video Bridge](../security/GUARDRAILS.md#video-bridge-videobridgets-videobridgepipelinets)
+chun sonraí a fháil faoi thoiliú, cuótaí agus díorthú malairtí.
 
 ### Cúltaca agus Easpórtáil/Iompórtáil
 
@@ -1461,17 +1504,17 @@ Déanann na críochphointí seo formáid API Gemini a léiriú do chliaint a bhf
 
 ### APIanna Inmheánacha / Córais
 
-| Endpoint                 | Method | Description                                                          |
-| ------------------------ | ------ | -------------------------------------------------------------------- |
-| `/api/init`              | GET    | Seiceáil thúsú an fheidhmchláir (a úsáidtear ar an gcéad rith)       |
-| `/api/tags`              | GET    | Clibeanna samhlacha atá comhoiriúnach le Ollama (do chliaint Ollama) |
-| `/api/restart`           | POST   | Spreag atosú galánta an fhreastalaí                                  |
-| `/api/shutdown`          | POST   | Spreag múchadh galánta an fhreastalaí                                |
-| `/api/system/env/repair` | POST   | Deisigh athróga timpeallachta soláthraithe OAuth                     |
-| `/api/system/version`    | GET    | Leagan reatha/is déanaí, stádas an nuashonraithe, cainéal eisiúna    |
-| `/api/system/version`    | POST   | Tosaigh nuashonrú atá feasach ar imscaradh chuig an leagan is déanaí |
+| Críochphointe            | Modh | Cur síos                                                                               |
+| ------------------------ | ---- | -------------------------------------------------------------------------------------- |
+| `/api/init`              | GET  | Cuir tús le seirbhísí sioncronaithe cúlra (fíordheimhniú bainistíochta)                |
+| `/api/tags`              | GET  | Clibeanna samhlacha atá comhoiriúnach le Ollama (do chliaint Ollama)                   |
+| `/api/restart`           | POST | Spreag atosú galánta an fhreastalaí                                                    |
+| `/api/shutdown`          | POST | Spreag múchadh galánta an fhreastalaí                                                  |
+| `/api/system/env/repair` | POST | Deisigh athróga timpeallachta soláthraithe OAuth                                       |
+| `/api/system/version`    | GET  | Leagan reatha/is déanaí, stádas nuashonraithe, cainéal eisiúna                         |
+| `/api/system/version`    | POST | Cuir tús le nuashonrú a chuireann an t-imscaradh san áireamh chuig an leagan is déanaí |
 
-> **Nóta:** Úsáideann an córas na críochphointí seo go hinmheánach nó ar mhaithe le comhoiriúnacht le cliaint Ollama. De ghnáth ní ghlaonn úsáideoirí deiridh orthu.
+> **Nóta:** Úsáideann an córas na críochphointí seo go hinmheánach nó ar mhaithe le comhoiriúnacht le cliaint Ollama. Ní ghlaonn úsáideoirí deiridh orthu de ghnáth.
 
 ### Deisiú Timpeallachta OAuth _(v3.6.1+)_
 

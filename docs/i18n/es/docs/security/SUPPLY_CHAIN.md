@@ -46,15 +46,11 @@ el código de salida 0, lo que no demuestra que las dependencias hayan superado 
 de Trivy también requiere una medición correcta: las herramientas no disponibles, los trabajos fallidos
 y la falta de evidencias de la imagen no permiten certificar que una imagen esté limpia.
 
-## Riesgo de dependencias retiradas
+## Riesgo de dependencia de jubilados
 
-El archivo de bloqueo raíz ya no incluye `extract-zip` ni ninguna dependencia directa hacia él tras
-actualizar la herramienta de desarrollo promptfoo fijada. Esto retira la cadena previamente aceptada
-`promptfoo` → `@openai/codex-security` → `extract-zip` registrada en #14482.
-Las comprobaciones de regresión en `tests/unit/extract-zip-14482-exposure.test.ts` rechazan su
-reintroducción y mantienen la prohibición de importaciones desde el código de producción.
+El archivo de bloqueo raíz ya no incluye `extract-zip` ni una ventaja de dependencia después de actualizar la herramienta de desarrollo de Promptfoo anclada. Esto retira la cadena `promptfoo` → `@openai/codex-security` → `extract-zip` previamente aceptada rastreada en #14482. Los controles de regresión en `tests/unit/extract-zip-14482-exposure.test.ts` rechazan su reintroducción y mantienen la prohibición de importar desde el código de producción.
 
-La reparación actual de dependencias incluye anulaciones de compatibilidad para el cliente MSAL de Azure Identity, el cliente FTP de get-uri y Zod en ambos paquetes de complementos de OpenCode. La adquisición de tokens de Azure y la recuperación mediante FTP se prueban con transportes controlados; ambos paquetes de OpenCode ejecutan sus propios conjuntos de compilación y pruebas. Los recuentos de avisos de seguridad del registro son mediciones realizadas en un momento concreto y pueden cambiar después de confirmar el archivo de bloqueo.
+La reparación de dependencia actual también abarca las anulaciones de compatibilidad para el cliente MSAL de identidad de Azure y el cliente FTP de get-uri. La adquisición de tokens de Azure y la recuperación FTP se prueban con transportes controlados; Ambos paquetes OpenCode ejecutan sus propios conjuntos de compilación y prueba. Los recuentos de avisos de registro son mediciones en un momento dado y pueden cambiar después de que se confirma el archivo de bloqueo.
 
 ## Pendiente: Aviso de Scorecard → bloqueo
 

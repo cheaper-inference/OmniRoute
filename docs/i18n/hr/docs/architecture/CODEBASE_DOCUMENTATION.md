@@ -499,7 +499,7 @@ po pružatelju (sheme alata, adapteri za dohvaćanje/TTS, obrađivači specifič
 (zajednički pomoćni modul za identitet) i `index.ts` (registar).
 
 > Napomena: pružatelje koji ovdje nisu navedeni poslužuje `default.ts` pomoću generičkog
-> izvršitelja kompatibilnog s OpenAI-jem. Cjeloviti katalog pružatelja (380 pružatelja) nalazi se u
+> izvršitelja kompatibilnog s OpenAI-jem. Cjeloviti katalog pružatelja (382 pružatelja) nalazi se u
 > `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`

@@ -52,11 +52,11 @@ izejas kodu 0, taču tas neapliecina, ka atkarības ir sekmīgi izturējušas sk
 Trivy darbībai ir nepieciešams sekmīgs mērījums: nepieejami rīki, neizdevušies uzdevumi
 un trūkstoši attēla pārbaudes dati nevar apliecināt, ka attēls ir tīrs.
 
-## Noņemtas atkarības risks
+## Atkarības risks pensijā
 
-Pēc piesaistītā promptfoo izstrādes rīka jaunināšanas saknes bloķēšanas failā vairs nav iekļauts `extract-zip` vai atkarības saite uz to. Tādējādi tiek noņemta iepriekš akceptētā `promptfoo` → `@openai/codex-security` → `extract-zip` ķēde, kas izsekota #14482. Regresijas pārbaudes failā `tests/unit/extract-zip-14482-exposure.test.ts` nepieļauj tās atkārtotu ieviešanu un saglabā aizliegumu veikt importēšanu no produkcijas koda.
+Pēc piespraustā promptfoo izstrādes rīka jaunināšanas saknes bloķēšanas failā vairs nav iekļauts `extract-zip` vai atkarības mala. Tādējādi tiek pārtraukta iepriekš pieņemtā `promptfoo` → `@openai/codex-security` → `extract-zip` ķēde, kas izsekota #14482. Regresijas pārbaudes `tests/unit/extract-zip-14482-exposure.test.ts` noraida tā atkārtotu ieviešanu un saglabā aizliegumu importēt no ražošanas koda.
 
-Pašreizējā atkarību labošana ietver saderības pārrakstīšanu Azure Identity MSAL klientam, get-uri FTP klientam un Zod abās OpenCode spraudņu pakotnēs. Azure pilnvaru iegūšana un FTP izguve tiek testēta ar kontrolētiem transportiem; abas OpenCode pakotnes izpilda savus būvēšanas un testēšanas komplektus. Reģistra drošības paziņojumu skaits ir konkrētā laika brīdī veikts mērījums un var mainīties pēc bloķēšanas faila iesūtīšanas repozitorijā.
+Pašreizējais atkarības labojums attiecas arī uz saderības ignorēšanu uz Azure identitātes MSAL klientu un get-uri FTP klientu. Azure marķiera iegūšana un FTP izguve tiek pārbaudīta ar kontrolētiem transportiem; abās OpenCode pakotnēs darbojas savas būvēšanas un testēšanas komplekti. Reģistra konsultatīvie skaitļi ir mērījumi noteiktā brīdī un var mainīties pēc bloķēšanas faila izveidošanas.
 
 ## Atpalicība: Scorecard brīdinājums → bloķēšana
 

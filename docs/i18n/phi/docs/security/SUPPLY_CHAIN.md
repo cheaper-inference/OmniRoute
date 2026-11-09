@@ -32,15 +32,11 @@ Kapag pumalya ang osv o Trivy dahil sa isang bagong isiniwalat na CVE, ang solus
 
 Ang mga kinakailangang pagpapatakbo ng OSV (`check:vuln-ratchet -- --ratchet`) ay pumapalya nang sarado gamit ang `INCOMPLETE` at exit 2 kapag hindi ma-validate ang scanner, ulat, o baseline. Ang nasukat na regression ay nagbabalik ng exit 1. Maaari pa ring mag-ulat ang advisory na pagpapatakbo ng `SKIP` na may exit 0, ngunit hindi nito pinatutunayang nakapasa ang mga dependency sa pag-scan. Nangangailangan din ang humaharang na hakbang ng Trivy ng matagumpay na pagsukat: hindi mapatutunayang malinis ang isang image kapag hindi available ang mga tool, pumalya ang mga job, o nawawala ang ebidensya ng image.
 
-## Panganib ng retiradong dependency
+## Panganib sa retiradong dependency
 
-Hindi na kasama sa root lockfile ang `extract-zip` o ang isang dependency edge patungo rito matapos
-i-upgrade ang naka-pin na promptfoo development tool. Inireretiro nito ang dati nang tinanggap na
-`promptfoo` → `@openai/codex-security` → `extract-zip` chain na sinusubaybayan sa #14482.
-Tinatanggihan ng mga regression check sa `tests/unit/extract-zip-14482-exposure.test.ts` ang
-muling pagpapakilala nito at pinananatili ang pagbabawal sa mga import mula sa production code.
+Hindi na kasama sa root lockfile `extract-zip` o isang dependency edge dito pagkatapos i-upgrade ang naka-pin na promptfoo development tool. Ihihinto nito ang dating tinatanggap `promptfoo` → `@openai/codex-security` → `extract-zip` chain na sinusubaybayan sa #14482. Ang regression checks sa `tests/unit/extract-zip-14482-exposure.test.ts` ay tinatanggihan ang muling pagpapakilala nito at pinapanatili ang pagbabawal sa mga pag-import mula sa production code.
 
-Kasama sa kasalukuyang pag-aayos ng dependency ang mga compatibility override para sa MSAL client ng Azure identity, FTP client ng get-uri, at Zod sa parehong OpenCode plugin package. Sinusubukan ang pagkuha ng Azure token at pagkuha sa pamamagitan ng FTP gamit ang mga kontroladong transport; parehong nagpapatakbo ang dalawang OpenCode package ng sarili nilang build at test suite. Ang mga bilang ng advisory sa registry ay mga sukat sa isang partikular na sandali at maaaring magbago pagkatapos ma-commit ang lockfile.
+Ang kasalukuyang pag-aayos ng dependency ay sumasaklaw din sa mga override ng compatibility sa MSAL client ng Azure identity at FTP client ng get-uri. Ang Azure token acquisition at FTP retrieval ay nasubok sa mga kinokontrol na transportasyon; parehong OpenCode packages ay nagpapatakbo ng kanilang sariling build at test suite. Ang mga bilang ng pagpapayo sa rehistro ay mga sukat sa isang punto ng oras at maaaring magbago pagkatapos maisagawa ang lockfile.
 
 ## Backlog: Scorecard advisory → pagharang
 

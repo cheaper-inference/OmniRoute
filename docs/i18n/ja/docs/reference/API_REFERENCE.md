@@ -319,34 +319,22 @@ Content-Type: application/json
 }
 ```
 
-利用可能なプロバイダーには、OpenAI（GPT Image 2）、xAI（Grok Image）、Together AI（FLUX）、Fireworks AI、Nebius（FLUX）、Hyperbolic、NanoBanana、**OpenRouter**、**ZenMux**、SD WebUI（ローカル）、ComfyUI（ローカル）が含まれます。
+利用可能なプロバイダーには、 OpenAI (GPT Image 2)、 xAI (Grok Image)、 Together AI (FLUX)、 Fireworks AI、Nebius (FLUX)、Hyperbolic、 NanoBanana、**OpenRouter** 、**ZenMux** 、 SD WebUI (ローカル)、 ComfyUI (ローカル)。
 
-`n` は `data[]` に `n` 個の画像を返します。上流 API が 1 回の呼び出しにつき 1 つの画像を返すプロバイダー
-（Black Forest Labs、Stability AI、Leonardo、Ideogram、Haiper、Hyperbolic、Magnific/Freepik、
-NVIDIA NIM、Cloudflare Workers AI）では、上流への呼び出しを `n` 回個別に行い、同時実行数は最大 4 です。
-固定された `seed` は呼び出しインデックス（`seed`、`seed + 1`、…）によってオフセットされるため、画像は異なりますが再現性は維持されます。
-`n` の上限は 10 です。いずれかの呼び出しが失敗すると、リクエスト全体が失敗します。ファンアウト形式の一覧は
-`open-sse/handlers/imageGeneration/fanOut.ts` の `SINGLE_IMAGE_FANOUT_FORMATS` です。
+`n` `data[]`内の`n`イメージを返します。アップストリームAPIが呼び出しごとに 1 つの画像を返すプロバイダー (Black Forest Labs、Stability AI、Leonardo、Ideogram、Haiper、Hyperbolic、 Magnific/Freepik、 NVIDIA NIM、 Cloudflare Workers AI) は、 `n`の個別のアップストリーム呼び出し (最大 4 つが実行中) を取得します。固定`seed`は呼び出しインデックス (`seed`、 `seed + 1`、…) によってオフセットされるため、イメージは異なりますが、再現可能です。 `n`上限は 10 です。いずれかの呼び出しが失敗すると、リクエストは全体として失敗します。ファンアウト形式のリストは、 `open-sse/handlers/imageGeneration/fanOut.ts`の`SINGLE_IMAGE_FANOUT_FORMATS`です。
 
-ZenMux は既存の API キー接続を再利用し、`zenmux/` または `zm/` プレフィックスを受け付けます。
+ZenMux既存の API キー接続を再利用し、 `zenmux/`または`zm/`プレフィックスを受け入れます。
 
-- `zenmux/openai/gpt-image-2` は ZenMux の OpenAI Images API を使用します。オプションには `size`、
-  `quality`、`n`、`output_format`、`output_compression`、`background`、`response_format` が含まれます。
-- `zm/meta/muse-image-1.0` などの他のパブリッシャーは、ZenMux の Vertex AI `:predict`
-  エンドポイントを使用します。`n` は `sampleCount` に、`aspect_ratio` は `aspectRatio` に、
-  `image_size`（`1K`、`2K`、`4K`）は `sampleImageSize` にマッピングされます。ピクセル単位の `size` は
-  アスペクト比のみを指定し、ピクセル寸法が保証されるわけではありません。サポートされる比率、解像度、個数はモデルによって異なります。
-- `zm/inclusionai/ming-image-0.1-design` は独自に寸法を選択します。`size`、`aspect_ratio`、`image_size` は省略してください。
-  明示的に値を指定すると HTTP 400 が返されます。`output_format` で PNG、JPEG、WebP をリクエストできます。
+- `zenmux/openai/gpt-image-2` 、 ZenMuxのOpenAIイメージAPIを使用します。オプションには、 `size`、 `quality`、 `n`、 `output_format`、 `output_compression`、 `background`、および`response_format`が含まれます。
+- `zm/meta/muse-image-1.0`などの他のパブリッシャーは、 ZenMuxの Vertex AI `:predict`エンドポイントを使用します。 `n` `sampleCount`に、 `aspect_ratio` `aspectRatio`に、 `image_size` (`1K`、 `2K`、 `4K`) は`sampleImageSize`にマップされます。ピクセル`size`はアスペクト比のみを提供し、ピクセル寸法は保証されません。サポートされる比率、解像度、およびカウントはモデルによって異なります。
+- `zm/inclusionai/ming-image-0.1-design`独自のディメンションを選択します。 `size`、 `aspect_ratio`、および`image_size`は省略します。明示的な値はHTTP 400 を返します。 PNG、 JPEG、およびWebP `output_format`でリクエストできます。
 
-この統合はテキストから画像を生成する機能をサポートしており、参照画像の編集には対応していません。Vertex の出力は
-`data[].b64_json` に正規化されます。`response_format: "url"` は、上流の HTTPS URL、または画像バイトのみが利用可能な場合は
-base64 データ URL を返します。空の出力やフィルタリングされた出力の場合は、空の成功レスポンスではなくエラーを返します。
-モデルへのアクセスは ZenMux アカウントによって異なります。[ZenMux の Vertex API](https://docs.zenmux.ai/api/vertexai/generate-images) および
-[OpenAI Images API](https://docs.zenmux.ai/api/openai/generate-an-image) を参照してください。
+この統合は、参照画像の編集ではなく、テキストから画像への生成をサポートします。頂点の出力は`data[].b64_json`に正規化されます。 `response_format: "url"` 、イメージ バイトのみが利用可能な場合、アップストリームHTTPS URLまたは Base64 データURLを返します。 Empty/filtered出力は空の成功ではなくエラーを返します。モデルへのアクセスは、 ZenMuxアカウントによって異なります。 [ZenMuxの頂点API](https://docs.zenmux.ai/api/vertexai/generate-images)および[OpenAIイメージAPI](https://docs.zenmux.ai/api/openai/generate-an-image)参照してください。
+
+Microsoft 365 Copilotサインイン接続は、 Copilotの組み込みイメージ ツールを通じて`copilot-m365-web/m365-copilot-image`サービスを提供します。つまり、イメージごとに 1 つのCopilotターン (`n` 1 ～ 4)、 `size`方向のみをステアリングし、イメージはインラインで返されます (`b64_json`、または`response_format: "url"`のデータURL )。 [Microsoft 365 Copilot](../providers/COPILOT-M365.md#image-generation)を参照してください。
 
 ```bash
-# すべての画像モデルを一覧表示
+# List all image models
 GET /v1/images/generations
 ```
 
@@ -759,17 +747,19 @@ OpenAI 互換のバッチ処理。
 
 ---
 
-## 検索 API
+## API検索
 
-Web/検索プロバイダーの抽象化（Tavily、Brave、Exa、Serper など）。
+Web/searchプロバイダーの抽象化 (Tavily、Brave、Exa、Serper など)。
 
-| メソッド | パス                   | 説明                                                                                          |
-| -------- | ---------------------- | --------------------------------------------------------------------------------------------- |
-| GET      | `/v1/search`           | 設定済みの検索プロバイダーと機能を一覧表示                                                    |
-| POST     | `/v1/search`           | 検索クエリを実行 — 本文は `v1SearchSchema` により検証され、キャッシュとリクエストの統合に対応 |
-| GET      | `/v1/search/analytics` | プロバイダーごとのヒット数・レイテンシー・キャッシュ統計                                      |
+| 方法 | パス                   | 説明                                                                                                    |
+| ---- | ---------------------- | ------------------------------------------------------------------------------------------------------- |
+| GET  | `/v1/search`           | 構成された検索プロバイダーの+機能をリストする                                                           |
+| POST | `/v1/search`           | 検索クエリを実行します。 —本体は`v1SearchSchema`によって検証され、 caching/coalescingをサポートします。 |
+| GET  | `/v1/search/analytics` | プロバイダーごとのhit/latency/cache統計                                                                 |
 
-**認証:** Bearer API キー（`extractApiKey` + `isValidApiKey`）。検索ポリシーは `enforceApiKeyPolicy` により適用されます。
+**認証:**ベアラーAPIキー (`extractApiKey` + `isValidApiKey`)。検索ポリシーは`enforceApiKeyPolicy`経由で適用されます。
+
+**自動選択:** `provider`使用しない場合、接続が構成されている最も安価なプロバイダーが最初に実行され、次に安価なプロバイダーがフェイルオーバーになります。無料の最終手段プロバイダー (`duckduckgo-free`) は、他に何も構成されていない場合にのみ使用されます。セルフホストSearXNG 、その接続が実際の`baseUrl` (カタログのデフォルトの`http://localhost:8888/search`ではない) を保存すると、設定済みとしてカウントされます。その後、 SearXNG 400、401、403、または 404 で応答した場合を含め、最も安価なキー付きプロバイダーをフェイルオーバーとして、キー付きプロバイダーよりも $0 プロバイダーとしてランク付けされます。有効な`http(s)` URLではない、またはクラウド メタデータ アドレスをポイントする`baseUrl` 、数えません。トークンを保存するSearXNG接続は、 `https://`またはループバック`http://`よりもこのようにランク付けされます。リモートのプレーン`http://`では、これはフェイルオーバーではなく最後の手段であり、他のプロバイダーが構成されていない場合、または名前で要求された場合にのみ使用されます。そのため、これら 2 つのケースではトークンをクリアテキストで送信します。
 
 ### Exa と Tavily の `provider_options`
 
@@ -919,28 +909,28 @@ CLI は `base_url + /responses` を WebSocket にアップグレードし、Omni
 
 ---
 
-## セルフサービスの使用状況（`/api/usage/om-usage`）
+## セルフサービス使用 (`/api/usage/om-usage`)
 
-任意の API キーで、**自身の**使用状況とクォータを読み取れます。管理者認証は不要です。これは、クライアント（CLI、OmniCopilot パネル）がキー所有者に使用額を表示するために使用するエンドポイントです。
+任意のAPIキーを読み取ることができます**独自の**使用量とクォータ—管理認証なし。これは、クライアント (CLI、 OmniCopilotパネル) がキーホルダーに支出を示すために使用するエンドポイントです。
 
 ```bash
-# テキスト形式（従来の契約 — ターミナル向けのプレーンテキスト）
+# Text form (the historical contract — plain text for a terminal)
 curl -H "Authorization: Bearer <your-api-key>" \
   http://localhost:20128/api/usage/om-usage
 
-# 構造化形式 — UI が消費する形式
+# Structured form — what a UI consumes
 curl -H "Authorization: Bearer <your-api-key>" \
   "http://localhost:20128/api/usage/om-usage?format=json"
 ```
 
-キーでは **`allowUsageCommand`** が有効になっている必要があります（デフォルトでは無効 — ダッシュボードの API キーマネージャーでキーごとに切り替えます）。無効の場合、エンドポイントは `403` を返します。
+キーには次のものが必要です**`allowUsageCommand`**有効 (デフォルトではオフ—は、ダッシュボードの API キー マネージャーによってキーごとに切り替えられます)。これがないと、エンドポイントは`403`と応答します。
 
-`?format=json` は判別可能な形式を返すため、呼び出し元が拒否レスポンスからデータフィールドを読み取ることはありません。成功時:
+`?format=json`識別された形状を返すため、呼び出し元が拒否からデータ フィールドを読み取ることはありません。成功時:
 
 ```jsonc
 {
   "allowed": true,
-  // キーがキーごとの使用制限（日次/月次 USD）をオプトインした場合のみ存在します:
+  // present only when the key opted into per-key usage limits (daily/weekly/5-hour USD):
   "personal": {
     "dailySpentUsd": 1.25,
     "dailyLimitUsd": 5,
@@ -949,9 +939,9 @@ curl -H "Authorization: Bearer <your-api-key>" \
     "weeklyLimitUsd": 20,
     "weeklyResetAtIso": "…" /* … */,
   },
-  // 選択されたプロバイダーのクォータスナップショット。まだキャッシュされていない場合は null:
+  // the selected provider quota snapshot, or null when nothing is cached yet:
   "provider": { "connectionId": "…", "provider": "claude", "plan": "…", "quotas": {/* … */} },
-  // 各接続のスナップショット。UI は複数のプロバイダーを横並びで表示できます:
+  // every connection's snapshot, so a UI can render several providers side by side:
   "providers": [
     { "connectionId": "…", "provider": "claude" /* … */ },
     { "provider": "codex" /* … */ },
@@ -959,10 +949,9 @@ curl -H "Authorization: Bearer <your-api-key>" \
 }
 ```
 
-拒否時（無効なキーによる `401` / 許可されていない場合の `403`）も同じルートが
-`{ "allowed": false, "error": { "message": "…" } }` を返します。`personal`/`provider` が存在するものの空である状態（キーは許可されているが、まだ取得できる情報がない）は拒否とは異なる状態であり、これらを区別できるのは JSON 形式のみです。
+拒否（`401`不正なキー / `403`許可されない）の場合、同じルートは`{ "allowed": false, "error": { "message": "…" } }` —を返しますが、存在するが空の`personal`/`provider` （キーは許可されていますが、まだ何も学習されていません）は拒否とは異なる状態であり、 JSON形式のみがそれらを区別します。
 
-**認証:** 呼び出し元自身の Bearer API キーを `isValidApiKey` で検証します。これは管理サーフェス（`/api/keys/…`）ではなく、管理サーフェスは引き続き `requireManagementAuth` の背後にあります。
+**認証:**呼び出し元自身のベアラーAPIキー`isValidApiKey`で検証されます。 —これは、 `requireManagementAuth`背後にある管理サーフェス (`/api/keys/…`) ではありません。
 
 ### 生のクォータ割合とカットオフ調整済みクォータ割合
 
@@ -1211,38 +1200,39 @@ effort/thinking ヘッダー、ルーティングルール、解決済みモデ�
 
 ### APIキーの権限
 
-`PATCH /api/keys/{id}` は、既存のキーの権限を更新します。すべての `/api/keys*` ルートと同様に、推論キーではなく管理認証が必要です（[管理認証](../guides/MANAGEMENT-AUTH.md)を参照）。変更するフィールドのみを送信してください。いずれのフィールドも含まれていないリクエストは、`No valid fields to update` というエラーで拒否されます。受け付けられるフィールドは、`src/shared/validation/schemas/keys.ts` の `updateKeyPermissionsSchema` で定義されています。
+`PATCH /api/keys/{id}`既存のキーの権限を更新します。すべての`/api/keys*`ルートと同様に、推論キーではなく、管理承認 ( [「管理認証](../guides/MANAGEMENT-AUTH.md)」を参照) が必要です。変更したいフィールドのみを送信してください。これらのいずれも含まれないリクエストは`No valid fields to update`で拒否されます。受け入れられるフィールドは、 `src/shared/validation/schemas/keys.ts`の`updateKeyPermissionsSchema`によって定義されます。
 
-| フィールド                                  | 型                                                            | 備考                                                                                                                                           |
-| ------------------------------------------- | ------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| `name`                                      | 文字列、1～200文字                                            |                                                                                                                                                |
-| `isActive`                                  | 真偽値                                                        |                                                                                                                                                |
-| `isBanned`                                  | 真偽値                                                        |                                                                                                                                                |
-| `expiresAt`                                 | ISO 8601日時または `null`                                     | `null` は有効期限を解除します                                                                                                                  |
-| `modelAccessMode`                           | `all` \| `restricted`                                         | モードが `all` の場合、`allowedModels` は空でなければなりません                                                                                |
-| `allowedModels`, `blockedModels`            | 文字列の配列、最大1000個                                      |                                                                                                                                                |
-| `allowedCombos`                             | 文字列の配列、最大500個                                       | このキーで呼び出せるコンボを制限します。直接モデルは `modelAccessMode` / `allowedModels` によって制御されます                                  |
-| `connectionAccessMode`                      | `all` \| `restricted`                                         | `restricted` の場合は `allowedConnections` が空でなく、`all` の場合は空でなければなりません                                                    |
-| `allowedConnections`                        | UUIDの配列、最大100個                                         |                                                                                                                                                |
-| `allowAutoCombos`                           | 真偽値                                                        | `false` の場合、このキーによる `auto/*` モデルへのリクエストを拒否します。この値を一度も設定していないキーは許可されます                       |
-| `catalogScope`                              | `all` \| `combos` \| `models`                                 | このキーに対して `GET /v1/models` が一覧表示する対象（コンボのみ、モデルのみ、または両方）。キーが呼び出せる対象は変更しません                 |
-| `forcedModel`                               | 最大300文字の文字列、または `null`                            | `X-Route-Model` と `body.model` より優先して、チャットリクエストをこのモデルまたはコンボにルーティングします。キーの制限は引き続き適用されます |
-| `noLog`, `autoResolve`                      | 真偽値                                                        |                                                                                                                                                |
-| `throttleDelayMs`                           | 整数、0～300000                                               |                                                                                                                                                |
-| `maxSessions`                               | 整数、0～10000                                                |                                                                                                                                                |
-| `rateLimits`                                | `{ limit, window }` の配列（正の整数、最大50個）または `null` | `null` は制限を解除します                                                                                                                      |
-| `accessSchedule`                            | スケジュールオブジェクトまたは `null`                         | `null` はスケジュールを解除します                                                                                                              |
-| `scopes`                                    | 文字列の配列、最大32個                                        |                                                                                                                                                |
-| `allowedEndpoints`                          | 文字列の配列、最大20個                                        |                                                                                                                                                |
-| `streamDefaultMode`                         | `legacy` \| `json`                                            |                                                                                                                                                |
-| `cacheDefaultMode`                          | `legacy` \| `bypass`                                          | [キーごとのキャッシュバイパス](#per-key-cache-bypass) を参照                                                                                   |
-| `compressionEnabled`                        | 真偽値                                                        |                                                                                                                                                |
-| `codexServiceMode`                          | Codexサービスモードのいずれか                                 |                                                                                                                                                |
-| `disableNonPublicModels`                    | boolean                                                       |                                                                                                                                                |
-| `allowUsageCommand`                         | boolean                                                       |                                                                                                                                                |
-| `usageLimitEnabled`                         | boolean                                                       |                                                                                                                                                |
-| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | number >= 0 or `null`                                         |                                                                                                                                                |
-| `chaosModeEnabled`                          | boolean                                                       |                                                                                                                                                |
+| フィールド                                  | 型                                                            | 備考                                                                                                                                                                                                                                                                           |
+| ------------------------------------------- | ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `name`                                      | 文字列、1～200文字                                            |                                                                                                                                                                                                                                                                                |
+| `isActive`                                  | 真偽値                                                        |                                                                                                                                                                                                                                                                                |
+| `isBanned`                                  | 真偽値                                                        |                                                                                                                                                                                                                                                                                |
+| `expiresAt`                                 | ISO 8601日時または `null`                                     | `null` は有効期限を解除します                                                                                                                                                                                                                                                  |
+| `modelAccessMode`                           | `all` \| `restricted`                                         | モードが `all` の場合、`allowedModels` は空でなければなりません                                                                                                                                                                                                                |
+| `allowedModels`, `blockedModels`            | 文字列の配列、最大 1000                                       |                                                                                                                                                                                                                                                                                |
+| `allowedCombos`                             | 文字列の配列、最大500個                                       | このキーで呼び出せるコンボを制限します。直接モデルは `modelAccessMode` / `allowedModels` によって制御されます                                                                                                                                                                  |
+| `connectionAccessMode`                      | `all` \| `restricted`                                         | `restricted` の場合は `allowedConnections` が空でなく、`all` の場合は空でなければなりません                                                                                                                                                                                    |
+| `allowedConnections`                        | UUIDの配列、最大100個                                         |                                                                                                                                                                                                                                                                                |
+| `allowAutoCombos`                           | 真偽値                                                        | `false` の場合、このキーによる `auto/*` モデルへのリクエストを拒否します。この値を一度も設定していないキーは許可されます                                                                                                                                                       |
+| `catalogScope`                              | `all` \| `combos` \| `models`                                 | このキーに対して `GET /v1/models` が一覧表示する対象（コンボのみ、モデルのみ、または両方）。キーが呼び出せる対象は変更しません                                                                                                                                                 |
+| `forcedModel`                               | 最大300文字の文字列、または `null`                            | `X-Route-Model` と `body.model` より優先して、チャットリクエストをこのモデルまたはコンボにルーティングします。キーの制限は引き続き適用されます                                                                                                                                 |
+| `noLog`, `autoResolve`                      | ブール値                                                      |                                                                                                                                                                                                                                                                                |
+| `throttleDelayMs`                           | 整数、0～300000                                               |                                                                                                                                                                                                                                                                                |
+| `maxSessions`                               | 整数、0～10000                                                |                                                                                                                                                                                                                                                                                |
+| `rateLimits`                                | `{ limit, window }` の配列（正の整数、最大50個）または `null` | `null` は制限を解除します                                                                                                                                                                                                                                                      |
+| `accessSchedule`                            | スケジュールオブジェクトまたは `null`                         | `null` はスケジュールを解除します                                                                                                                                                                                                                                              |
+| `scopes`                                    | 文字列の配列、最大32個                                        |                                                                                                                                                                                                                                                                                |
+| `allowedEndpoints`                          | 文字列の配列、最大20個                                        |                                                                                                                                                                                                                                                                                |
+| `streamDefaultMode`                         | `legacy` \| `json`                                            |                                                                                                                                                                                                                                                                                |
+| `cacheDefaultMode`                          | `legacy` \| `bypass`                                          | [キーごとのキャッシュバイパス](#per-key-cache-bypass) を参照                                                                                                                                                                                                                   |
+| `compressionEnabled`                        | 真偽値                                                        |                                                                                                                                                                                                                                                                                |
+| `codexServiceMode`                          | Codexサービスモードのいずれか                                 |                                                                                                                                                                                                                                                                                |
+| `disableNonPublicModels`                    | boolean                                                       |                                                                                                                                                                                                                                                                                |
+| `allowUsageCommand`                         | boolean                                                       |                                                                                                                                                                                                                                                                                |
+| `usageLimitEnabled`                         | boolean                                                       |                                                                                                                                                                                                                                                                                |
+| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | 数値>= 0 または`null`                                         |                                                                                                                                                                                                                                                                                |
+| `fiveHourUsageLimitUsd`                     | 数値>= 0 または`null`                                         | ローリング 5 時間のUSD予算。日次および週次の制限 (`usageLimitEnabled`、 `UNPRICED_USAGE_BUDGET_POLICY`) と同様に適用されます。 `retry-after`は、ウィンドウ内で最も古い支出が期限切れになるときであり、その制限をはるかに超えたキーがブロックされたままになる可能性があります。 |
+| `chaosModeEnabled`                          | boolean                                                       |                                                                                                                                                                                                                                                                                |
 
 ```bash
 curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
@@ -1292,6 +1282,14 @@ curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
 | `/api/modality-bridge/stats`         | GET        | メモリ内の `attempts`、成功数/`bridged`、失敗数、キャッシュヒット数、`totalLatencyMs`、`latencySamples`、サンプル単位の `averageLatencyMs`、および最終使用時刻（再起動時にリセット、管理認証が必要）                                                                                                                                                                                                                                                          |
 | `/api/modality-bridge/video/runtime` | GET        | 管理認証/プローブの前に厳格な信頼済みループバックチェックを実行し、FFmpeg/ffprobe の可用性とバージョンをサニタイズして返す（no-store）                                                                                                                                                                                                                                                                                                                        |
 | `/api/modality-bridge/video/extract` | POST       | 内部認証済みの信頼済みループバックバイトブローカー。入力は 50 MiB、キューは上限付き、出力は 32 MiB、`503` は容量超過、`499` は切断、`504` は期限超過を示します。公開アップロード API ではありません                                                                                                                                                                                                                                                           |
+
+### ビデオフレームのドリルダウン
+
+`GET /api/v1/video-bridge/drilldown` 、明示的に同意されたビデオ ブリッジ リクエストの後に`x-omniroute-video-drilldown`に返されたテナントにバインドされた不透明なハンドルを読み取ります。読み取りと`DELETE`両方には、常に有効なAPIキーとオペレーターの独立した`modalityBridgeVideoDrilldownRemoteEnabled`権限が必要です。本番環境の保持には、さらに`modalityBridgeVideoDrilldownEnabled`と厳密なパーツごとの`drilldown: true`が必要です。キーに空ではないエンドポイント許可リストがある場合は、呼び出し元が`/v1`使用するか`/api/v1`使用するかに関係なく、 GETとDELETEの両方に`video`含める必要があります。
+
+GETクエリ: `handle`が必要です。オプションの`variant` (`preview`、 `standard`、 `detail`)、 `limit` (1 ～ 8。従来の`frames`は受け入れられますが、 `limit`と組み合わせることはできません)、ゼロベースの`page`、および`start`/`end`秒。両方のフォーカス境界が指定されている場合、 `end` `start`より大きくなければなりません。 Duplicate/unknownクエリ キーは拒否されます。成功した応答には、 `derivation`、 `durationSeconds`、 `frames`、 `hasMore`、 `page`、 `variant`、およびオプションの`focusWindow`が含まれます。 no-store JSONは、Base64 を含む 32 MiBに制限されます。サイズが大きい出力は 413 を返します。より少ないフレームを要求します。
+
+`DELETE /api/v1/video-bridge/drilldown?handle=...` `{ "removed": 0|1 }`を返します。不明、期限切れ、十字キーGETsは区別できない 404 応答です。十字キーDELETE所有者のエントリを削除できません。無効なアクセスは 403、 missing/invalid認証 401、無効なクエリ 400、キャンセル 499、および一時エラー 503 を返します。ハンドルはプロセスローカルであり、10 分後に期限切れになり、再起動すると存続しません。新しいハンドルは、 `v1.`と 32 バイトのランダムなBase64URLトークンを使用します。トークン ハッシュのみが保持されます。従来の 64 16 進トークンは、互換性のために構文的に読み取り可能なままです。同意、クォータ、バリアント導出の詳細については、 [Video Bridge のガードレールを](../security/GUARDRAILS.md#video-bridge-videobridgets-videobridgepipelinets)参照してください。
 
 ### バックアップとエクスポート/インポート
 
@@ -1387,19 +1385,19 @@ GET のレスポンスには `agents[]`（id、name、binary、version、install
 
 これらのエンドポイントは、ネイティブ Gemini SDK 互換性を想定したクライアント向けに、Gemini の API 形式をミラーリングします。
 
-### 内部／システム API
+### 内部/システムAPIs
 
-| Endpoint                 | Method | 説明                                                   |
-| ------------------------ | ------ | ------------------------------------------------------ |
-| `/api/init`              | GET    | アプリケーションの初期化チェック（初回実行時に使用）   |
-| `/api/tags`              | GET    | Ollama 互換のモデルタグ（Ollama クライアント向け）     |
-| `/api/restart`           | POST   | サーバーの正常な再起動を実行                           |
-| `/api/shutdown`          | POST   | サーバーの正常なシャットダウンを実行                   |
-| `/api/system/env/repair` | POST   | OAuth プロバイダーの環境変数を修復                     |
-| `/api/system/version`    | GET    | 現在／最新バージョン、更新ステータス、リリースチャネル |
-| `/api/system/version`    | POST   | 最新バージョンへのデプロイ対応更新を開始               |
+| 終点                     | 方法 | 説明                                                        |
+| ------------------------ | ---- | ----------------------------------------------------------- |
+| `/api/init`              | GET  | バックグラウンド同期サービスの開始 (管理認証)               |
+| `/api/tags`              | GET  | Ollama 互換モデル タグ ( Ollamaクライアント用)              |
+| `/api/restart`           | POST | サーバーの正常な再起動をトリガーする                        |
+| `/api/shutdown`          | POST | サーバーの正常なシャットダウンをトリガーする                |
+| `/api/system/env/repair` | POST | OAuthプロバイダーの環境変数を修復する                       |
+| `/api/system/version`    | GET  | Current/latestバージョン、更新ステータス、リリース チャネル |
+| `/api/system/version`    | POST | 最新バージョンへの展開を意識したアップデートを開始する      |
 
-> **注:** これらのエンドポイントは、システム内部または Ollama クライアントとの互換性のために使用されます。通常、エンドユーザーが呼び出すことはありません。
+> **注記：**これらのエンドポイントは、システムによって内部的に使用されるか、 Ollamaクライアントの互換性のために使用されます。通常、これらはエンド ユーザーによって呼び出されることはありません。
 
 ### OAuth 環境の修復 _(v3.6.1+)_
 

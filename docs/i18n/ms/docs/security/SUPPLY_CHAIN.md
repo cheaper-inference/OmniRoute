@@ -52,15 +52,11 @@ kod keluar 0, yang tidak membuktikan bahawa kebergantungan telah lulus imbasan. 
 Trivy yang menyekat juga memerlukan pengukuran yang berjaya: alat yang tidak tersedia, tugas yang gagal
 dan bukti imej yang tiada tidak boleh memperakui imej sebagai bersih.
 
-## Risiko kebergantungan yang telah ditamatkan
+## Risiko pergantungan bersara
 
-Fail kunci akar tidak lagi menyertakan `extract-zip` atau pautan kebergantungan kepadanya selepas
-alat pembangunan promptfoo yang ditetapkan versinya dinaik taraf. Ini menamatkan rantaian
-`promptfoo` → `@openai/codex-security` → `extract-zip` yang diterima sebelum ini dan dijejaki dalam #14482.
-Semakan regresi dalam `tests/unit/extract-zip-14482-exposure.test.ts` menolak pengenalannya
-semula dan mengekalkan larangan import daripada kod pengeluaran.
+Fail kunci akar tidak lagi menyertakan `extract-zip` atau kelebihan pergantungan padanya selepas menaik taraf alat pembangunan promptfoo yang disematkan. Ini menghentikan rantaian `promptfoo` → `@openai/codex-security` → `extract-zip` yang diterima sebelum ini yang dijejaki dalam #14482. Semakan regresi dalam `tests/unit/extract-zip-14482-exposure.test.ts` menolak pengenalan semulanya dan mengekalkan larangan import daripada kod pengeluaran.
 
-Pembaikan kebergantungan semasa merangkumi penggantian keserasian untuk klien MSAL Azure identity, klien FTP get-uri dan Zod dalam kedua-dua pakej pemalam OpenCode. Pemerolehan token Azure dan pengambilan melalui FTP diuji menggunakan pengangkutan terkawal; kedua-dua pakej OpenCode menjalankan suite binaan dan ujian masing-masing. Bilangan advisori registri ialah ukuran pada sesuatu masa dan boleh berubah selepas fail kunci dikomit.
+Pembaikan pergantungan semasa juga merangkumi penggantian keserasian kepada klien MSAL identiti Azure dan klien FTP get-uri. Pemerolehan token Azure dan pengambilan FTP diuji dengan pengangkutan terkawal; kedua-dua pakej OpenCode menjalankan binaan dan suite ujian mereka sendiri. Kiraan nasihat pendaftaran ialah ukuran pada satu masa dan boleh berubah selepas fail kunci dilakukan.
 
 ## Tunggakan: nasihat Scorecard → penyekatan
 

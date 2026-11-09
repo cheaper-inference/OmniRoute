@@ -95,15 +95,10 @@ test("fast-gates carries the deterministic ratchets and security scanners from t
     ),
     "oasdiff must receive the origin-prefixed base ref fetched by actions/checkout"
   );
-  for (const version of [
-    "GITLEAKS_VERSION=v",
-    "OSV_SCANNER_VERSION=v",
-    "ACTIONLINT_VERSION=v",
-    "ZIZMOR_VERSION=",
-    "OASDIFF_VERSION=v",
-  ]) {
+  for (const version of ["GITLEAKS_VERSION=v", "OSV_SCANNER_VERSION=v", "OASDIFF_VERSION=v"]) {
     assert.ok(block.includes(version), `fast-gates must pin ${version.split("=")[0]}`);
   }
+  assert.ok(block.includes("bash scripts/ci/install-workflow-scanners.sh"));
   assert.doesNotMatch(
     block,
     /download-actionlint\.bash\) latest/,

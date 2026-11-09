@@ -48,11 +48,11 @@ prestale pregled. Tudi blokirni korak Trivy zahteva uspešno meritev: nerazpolo�
 orodja, neuspešna opravila in manjkajoči dokazi o sliki ne morejo potrditi, da je slika
 brez ranljivosti.
 
-## Tveganje opuščene odvisnosti
+## Tveganje odvisnosti upokojencev
 
-Korenska zaklepna datoteka po nadgradnji pripetega razvojnega orodja promptfoo ne vključuje več paketa `extract-zip` ali povezave odvisnosti do njega. S tem je opuščena predhodno sprejeta veriga `promptfoo` → `@openai/codex-security` → `extract-zip`, spremljana v #14482. Regresijska preverjanja v `tests/unit/extract-zip-14482-exposure.test.ts` preprečujejo njeno ponovno uvedbo in ohranjajo prepoved uvozov iz produkcijske kode.
+Korenska zaklepna datoteka po nadgradnji pripetega razvojnega orodja promptfoo ne vključuje več `extract-zip` ali njegove odvisnosti. S tem se umakne predhodno sprejeta veriga `promptfoo` → `@openai/codex-security` → `extract-zip` sledena v #14482. Regresijsko preverjanje v `tests/unit/extract-zip-14482-exposure.test.ts` zavrača njegovo ponovno uvedbo in ohranja prepoved uvoza iz proizvodne kode.
 
-Trenutno popravilo odvisnosti vključuje preglasitve združljivosti za odjemalca MSAL storitve Azure identity, odjemalca FTP paketa get-uri in Zod v obeh paketih vtičnika OpenCode. Pridobivanje žetonov Azure in prenos prek FTP sta preizkušena z nadzorovanimi transportnimi mehanizmi; oba paketa OpenCode izvajata lastna sklopa za gradnjo in preizkušanje. Števila varnostnih opozoril registra so meritve v določenem trenutku in se lahko po potrditvi datoteke zaklepa spremenijo.
+Trenutno popravilo odvisnosti obsega tudi preglasitve združljivosti za odjemalca MSAL identitete Azure in odjemalca FTP get-uri. Pridobivanje žetonov Azure in pridobivanje FTP sta testirana z nadzorovanimi transporti; oba paketa OpenCode poganjata lastne zbirke za gradnjo in preskušanje. Število nasvetov registra je meritev v določenem trenutku in se lahko spremeni, ko je zaklenjena datoteka odobrena.
 
 ## Zaostanek: Opozorilo Scorecard → blokiranje
 

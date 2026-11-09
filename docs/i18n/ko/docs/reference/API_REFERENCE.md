@@ -345,38 +345,22 @@ Content-Type: application/json
 }
 ```
 
-사용 가능한 제공업체에는 OpenAI (GPT Image 2), xAI (Grok Image), Together AI (FLUX), Fireworks AI, Nebius (FLUX), Hyperbolic, NanoBanana, **OpenRouter**, **ZenMux**, SD WebUI (로컬), ComfyUI (로컬)가 포함됩니다.
+사용 가능한 공급자에는 OpenAI (GPT 이미지 2), xAI (Grok 이미지), Together AI (FLUX), Fireworks AI, Nebius(FLUX), Hyperbolic, NanoBanana,**OpenRouter** ,**ZenMux** , SD WebUI (로컬), ComfyUI (로컬).
 
-`n`은 `data[]`에 `n`개의 이미지를 반환합니다. 업스트림 API가 호출당 하나의 이미지만 반환하는 제공업체
-(Black Forest Labs, Stability AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik,
-NVIDIA NIM, Cloudflare Workers AI)는 최대 4개의 동시 실행으로 `n`번의 별도 업스트림 호출을 수행합니다.
-고정된 `seed`는 호출 인덱스(`seed`, `seed + 1`, …)만큼 오프셋되므로 이미지가 서로 다르면서도
-재현 가능합니다. `n`의 최대값은 10입니다. 호출 중 하나라도 실패하면 요청 전체가 실패합니다. 팬아웃
-형식 목록은 `open-sse/handlers/imageGeneration/fanOut.ts`의
-`SINGLE_IMAGE_FANOUT_FORMATS`입니다.
+`n` `data[]` 에 `n` 이미지를 반환합니다. 업스트림 API 호출당 하나의 이미지를 반환하는 제공자(Black Forest Labs, Stability AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik, NVIDIA NIM, Cloudflare Workers AI)는 최대 4개의 `n` 별도 업스트림 호출을 수신합니다. 고정된 `seed` 은 호출 인덱스(`seed`, `seed + 1`, …)에 의해 오프셋되므로 이미지는 다르지만 재현 가능합니다. `n` 는 10으로 제한됩니다. 호출이 실패하면 요청이 전체적으로 실패합니다. 팬아웃 형식 목록은 `open-sse/handlers/imageGeneration/fanOut.ts` 의 `SINGLE_IMAGE_FANOUT_FORMATS` 입니다.
 
-ZenMux는 기존 API 키 연결을 재사용하며 `zenmux/` 또는 `zm/` 접두사를 허용합니다.
+ZenMux 기존 API 키 연결을 재사용하고 `zenmux/` 또는 `zm/` 접두사를 허용합니다.
 
-- `zenmux/openai/gpt-image-2`는 ZenMux의 OpenAI Images API를 사용합니다. 옵션에는 `size`,
-  `quality`, `n`, `output_format`, `output_compression`, `background`, `response_format`이 포함됩니다.
-- `zm/meta/muse-image-1.0`과 같은 다른 게시자는 ZenMux의 Vertex AI `:predict`
-  엔드포인트를 사용합니다. `n`은 `sampleCount`로, `aspect_ratio`는 `aspectRatio`로,
-  `image_size`(`1K`, `2K`, `4K`)는 `sampleImageSize`로 매핑됩니다. 픽셀 단위의 `size`는
-  픽셀 크기를 보장하지 않고 화면 비율만 제공합니다. 지원되는 비율, 해상도, 생성 개수는 모델에
-  따라 다릅니다.
-- `zm/inclusionai/ming-image-0.1-design`은 자체적으로 크기를 선택합니다. `size`,
-  `aspect_ratio`, `image_size`를 생략해야 하며, 값을 명시하면 HTTP 400이 반환됩니다. `output_format`을
-  사용하여 PNG, JPEG, WebP를 요청할 수 있습니다.
+- `zenmux/openai/gpt-image-2` ZenMux 의 OpenAI 이미지 API 사용합니다. 옵션에는 `size`, `quality`, `n`, `output_format`, `output_compression`, `background` 및 `response_format` 포함됩니다.
+- `zm/meta/muse-image-1.0` 와 같은 다른 게시자는 ZenMux 의 Vertex AI `:predict` 엔드포인트를 사용합니다. `n` `sampleCount`, `aspect_ratio` `aspectRatio`, `image_size` (`1K`, `2K`, `4K`)는 `sampleImageSize` 에 매핑됩니다. 픽셀 `size` 보장된 픽셀 크기가 아닌 종횡비만 제공합니다. 지원되는 비율, 해상도 및 개수는 모델에 따라 다릅니다.
+- `zm/inclusionai/ming-image-0.1-design` 자체 차원을 선택합니다. `size`, `aspect_ratio` 및 `image_size` 생략합니다. 명시적 값은 HTTP 400을 반환합니다. PNG, JPEG 및 WebP `output_format` 로 요청할 수 있습니다.
 
-이 통합은 참조 이미지 편집이 아닌 텍스트-이미지 생성을 지원합니다. Vertex 출력은
-`data[].b64_json`으로 정규화됩니다. `response_format: "url"`은 업스트림 HTTPS URL을 반환하며,
-이미지 바이트만 사용할 수 있는 경우에는 base64 데이터 URL을 반환합니다. 비어 있거나 필터링된 출력은
-빈 성공 응답이 아닌 오류를 반환합니다. 모델 접근 권한은 ZenMux 계정에 따라 달라집니다.
-[ZenMux의 Vertex API](https://docs.zenmux.ai/api/vertexai/generate-images) 및
-[OpenAI Images API](https://docs.zenmux.ai/api/openai/generate-an-image)를 참조하세요.
+이 통합은 참조 이미지 편집이 아닌 텍스트-이미지 생성을 지원합니다. 정점 출력은 `data[].b64_json` 로 정규화됩니다. `response_format: "url"` 이미지 바이트만 사용할 수 있는 경우 업스트림 HTTPS URL 또는 base64 데이터 URL 반환합니다. Empty/filtered 출력은 빈 성공이 아닌 오류를 반환합니다. 모델 액세스는 ZenMux 계정에 따라 다릅니다. [ZenMux 의 정점 API](https://docs.zenmux.ai/api/vertexai/generate-images) 및 [OpenAI 이미지 API](https://docs.zenmux.ai/api/openai/generate-an-image) 참조하세요.
+
+Microsoft 365 Copilot 로그인 연결은 Copilot 의 내장 이미지 도구를 통해 `copilot-m365-web/m365-copilot-image` 제공합니다. 즉, 이미지당 하나의 Copilot 회전(`n` 1–4), `size` 방향만 조정하고 인라인으로 반환된 이미지(`b64_json` 또는 `response_format: "url"` 의 경우 데이터 URL )입니다. [Microsoft 365 Copilot](../providers/COPILOT-M365.md#image-generation) 참조하세요.
 
 ```bash
-# 모든 이미지 모델 나열
+# List all image models
 GET /v1/images/generations
 ```
 
@@ -816,17 +800,19 @@ OpenAI 호환 배치 처리입니다.
 
 ---
 
-## Search API
+## API 검색
 
-웹/검색 제공업체 추상화(Tavily, Brave, Exa, Serper 등).
+Web/search 공급자 추상화(Tavily, Brave, Exa, Serper 등).
 
-| Method | Path                   | Description                                                               |
-| ------ | ---------------------- | ------------------------------------------------------------------------- |
-| GET    | `/v1/search`           | 구성된 검색 제공업체 및 기능 나열                                         |
-| POST   | `/v1/search`           | 검색 쿼리 실행 — 본문은 `v1SearchSchema`로 검증되며 캐싱/통합 요청을 지원 |
-| GET    | `/v1/search/analytics` | 제공업체별 적중/지연 시간/캐시 통계                                       |
+| 방법 | 길                     | 설명                                                                                  |
+| ---- | ---------------------- | ------------------------------------------------------------------------------------- |
+| GET  | `/v1/search`           | 구성된 검색 공급자 + 기능 나열                                                        |
+| POST | `/v1/search`           | `v1SearchSchema` 로 검증된 — 본문 검색 쿼리를 실행하고 caching/coalescing 지원합니다. |
+| GET  | `/v1/search/analytics` | 공급자별 hit/latency/cache 통계                                                       |
 
-**인증:** Bearer API 키(`extractApiKey` + `isValidApiKey`). 검색 정책은 `enforceApiKeyPolicy`를 통해 적용됩니다.
+**인증:** 베어러 API 키(`extractApiKey` + `isValidApiKey`). `enforceApiKeyPolicy` 통해 시행되는 검색 정책.
+
+**자동 선택:** `provider` 없으면 연결이 구성된 가장 저렴한 공급자가 먼저 실행되고 다음으로 가장 저렴한 공급자가 장애 조치입니다. 무료 최후의 수단 공급자(`duckduckgo-free`)는 아무것도 구성되지 않은 경우에만 사용됩니다. 자체 호스팅 SearXNG 연결이 실제 `baseUrl` (카탈로그 기본값 `http://localhost:8888/search` 아님)를 저장하면 구성된 것으로 계산됩니다. 그런 다음 SearXNG 400, 401, 403 또는 404로 응답하는 경우를 포함하여 가장 저렴한 키 공급자를 장애 조치로 사용하여 키 공급자보다 $0 공급자로 순위를 매깁니다. 유효한 `http(s)` URL 아니거나 클라우드 메타데이터 주소를 가리키는 `baseUrl` 는 계산되지 않습니다. 토큰을 저장하는 SearXNG 연결은 `https://` 또는 루프백 `http://` 에 대해서만 이러한 방식으로 순위를 매깁니다. 원격 일반 `http://` 에서는 결코 장애 조치가 아니며 최후의 수단으로 유지되며 다른 공급자가 구성되지 않거나 이름으로 요청될 때만 사용되므로 이 두 경우에 일반 텍스트로 토큰을 보냅니다.
 
 ### Exa 및 Tavily `provider_options`
 
@@ -982,32 +968,28 @@ CLI는 `base_url + /responses`를 WebSocket으로 업그레이드하고, OmniRou
 
 ---
 
-## 셀프 서비스 사용량 (`/api/usage/om-usage`)
+## 셀프 서비스 사용(`/api/usage/om-usage`)
 
-모든 API 키는 관리 인증 없이 **자신의** 사용량과 할당량을 읽을 수 있습니다. 이 엔드포인트는
-클라이언트(CLI, OmniCopilot 패널)가 키 보유자에게 사용 금액을 표시할 때 사용합니다.
+모든 API 키는 읽을 수 있습니다.**그 자체의** 사용량 및 할당량 — 관리 인증 없음. 이는 클라이언트(CLI, OmniCopilot 패널)가 키 보유자에게 지출 내역을 보여주기 위해 사용하는 엔드포인트입니다.
 
 ```bash
-# 텍스트 형식 (기존 계약 — 터미널용 일반 텍스트)
+# Text form (the historical contract — plain text for a terminal)
 curl -H "Authorization: Bearer <your-api-key>" \
   http://localhost:20128/api/usage/om-usage
 
-# 구조화된 형식 — UI가 사용하는 형식
+# Structured form — what a UI consumes
 curl -H "Authorization: Bearer <your-api-key>" \
   "http://localhost:20128/api/usage/om-usage?format=json"
 ```
 
-키에는 **`allowUsageCommand`**가 활성화되어 있어야 합니다(기본값은 비활성화되어 있으며
-대시보드의 API 키 관리자가 키별로 전환함). 활성화되지 않은 경우 엔드포인트는 `403`으로
-응답합니다.
+키에는 다음이 있어야 합니다.**`allowUsageCommand`** 활성화됩니다(기본적으로 꺼져 있는 — 대시보드의 API 키 관리자가 키별로 토글합니다). 이것이 없으면 엔드포인트는 `403` 응답합니다.
 
-`?format=json`은 호출자가 거부 응답에서 데이터 필드를 읽지 않도록 판별 가능한 형태를
-반환합니다. 성공 시:
+`?format=json` 식별된 모양을 반환하므로 발신자는 거부 시 데이터 필드를 읽지 않습니다. 성공 시:
 
 ```jsonc
 {
   "allowed": true,
-  // 키가 키별 사용량 제한(일일/주간 USD)을 선택한 경우에만 존재:
+  // present only when the key opted into per-key usage limits (daily/weekly/5-hour USD):
   "personal": {
     "dailySpentUsd": 1.25,
     "dailyLimitUsd": 5,
@@ -1016,9 +998,9 @@ curl -H "Authorization: Bearer <your-api-key>" \
     "weeklyLimitUsd": 20,
     "weeklyResetAtIso": "…" /* … */,
   },
-  // 선택된 제공자의 할당량 스냅샷. 아직 캐시된 값이 없으면 null:
+  // the selected provider quota snapshot, or null when nothing is cached yet:
   "provider": { "connectionId": "…", "provider": "claude", "plan": "…", "quotas": {/* … */} },
-  // 모든 연결의 스냅샷. UI에서 여러 제공자를 나란히 렌더링할 수 있음:
+  // every connection's snapshot, so a UI can render several providers side by side:
   "providers": [
     { "connectionId": "…", "provider": "claude" /* … */ },
     { "provider": "codex" /* … */ },
@@ -1026,13 +1008,9 @@ curl -H "Authorization: Bearer <your-api-key>" \
 }
 ```
 
-거부 시(`401` 잘못된 키 / `403` 허용되지 않음) 동일한 경로가
-`{ "allowed": false, "error": { "message": "…" } }`를 반환합니다. 값이 있지만 비어 있는
-`personal`/`provider`(키는 허용되었으나 아직 확인된 정보가 없음)는 거부와 다른 상태이며,
-두 상태를 구분할 수 있는 것은 JSON 형식뿐입니다.
+거부 시(`401` 잘못된 키/ `403` 허용되지 않음) 동일한 경로는 `{ "allowed": false, "error": { "message": "…" } }` — 반환하지만 존재하지만 비어 있는 `personal`/`provider` (키 허용됨, 아직 학습된 항목 없음)는 거부와 다른 상태이며 JSON 형식만 이를 구별합니다.
 
-**인증:** `isValidApiKey`로 검증된 호출자 자신의 Bearer API 키를 사용합니다. 이는
-`requireManagementAuth` 뒤에 유지되는 관리 영역(`/api/keys/…`)이 **아닙니다**.
+**인증:** `isValidApiKey` — 로 검증된 호출자 자신의 Bearer API 키는 `requireManagementAuth` 뒤에 있는 관리 표면(`/api/keys/…`)이 _아닙니다_.
 
 ### 원시 할당량 백분율과 기준선 조정 할당량 백분율
 
@@ -1274,38 +1252,39 @@ Claude Code 자동 모드 분류기 요청은 명시적인 추론 제어가 포�
 
 ### API 키 권한
 
-`PATCH /api/keys/{id}`는 기존 키의 권한을 업데이트합니다. 모든 `/api/keys*` 경로와 마찬가지로 추론 키가 아닌 관리 권한 부여가 필요합니다([관리 인증](../guides/MANAGEMENT-AUTH.md) 참조). 변경하려는 필드만 전송하세요. 해당 필드가 하나도 없는 요청은 `No valid fields to update`로 거부됩니다. 허용되는 필드는 `src/shared/validation/schemas/keys.ts`의 `updateKeyPermissionsSchema`에 정의되어 있습니다.
+`PATCH /api/keys/{id}` 기존 키의 권한을 업데이트합니다. 모든 `/api/keys*` 경로와 마찬가지로 추론 키가 아닌 관리 인증( [관리 인증](../guides/MANAGEMENT-AUTH.md) 참조)이 필요합니다. 변경하려는 필드만 보냅니다. 그 중 아무것도 없는 요청은 `No valid fields to update` 로 거부됩니다. 허용되는 필드는 `src/shared/validation/schemas/keys.ts` 의 `updateKeyPermissionsSchema` 에 의해 정의됩니다.
 
-| Field                                       | Type                                                       | Notes                                                                                                                             |
-| ------------------------------------------- | ---------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| `name`                                      | 문자열, 1~200자                                            |                                                                                                                                   |
-| `isActive`                                  | boolean                                                    |                                                                                                                                   |
-| `isBanned`                                  | boolean                                                    |                                                                                                                                   |
-| `expiresAt`                                 | ISO 8601 날짜/시간 또는 `null`                             | `null`은 만료를 해제합니다                                                                                                        |
-| `modelAccessMode`                           | `all` \| `restricted`                                      | 모드가 `all`인 경우 `allowedModels`는 비어 있어야 합니다                                                                          |
-| `allowedModels`, `blockedModels`            | 문자열 배열, 최대 1000개                                   |                                                                                                                                   |
-| `allowedCombos`                             | 문자열 배열, 최대 500개                                    | 이 키가 호출할 수 있는 콤보를 제한합니다. 직접 모델은 `modelAccessMode` / `allowedModels`에 의해 관리됩니다                       |
-| `connectionAccessMode`                      | `all` \| `restricted`                                      | `restricted`인 경우 `allowedConnections`는 비어 있지 않아야 하며, `all`인 경우 비어 있어야 합니다                                 |
-| `allowedConnections`                        | UUID 배열, 최대 100개                                      |                                                                                                                                   |
-| `allowAutoCombos`                           | boolean                                                    | `false`는 이 키를 사용한 `auto/*` 모델 요청을 거부합니다. 한 번도 설정하지 않은 키는 허용됩니다                                   |
-| `catalogScope`                              | `all` \| `combos` \| `models`                              | 이 키에 대해 `GET /v1/models`에 표시할 항목(콤보만, 모델만 또는 둘 다)을 지정합니다. 키가 호출할 수 있는 항목은 변경하지 않습니다 |
-| `forcedModel`                               | 최대 300자의 문자열 또는 `null`                            | `X-Route-Model` 및 `body.model`보다 우선하여 채팅 요청을 이 모델/콤보로 라우팅합니다. 키의 제한은 계속 적용됩니다                 |
-| `noLog`, `autoResolve`                      | boolean                                                    |                                                                                                                                   |
-| `throttleDelayMs`                           | 정수, 0~300000                                             |                                                                                                                                   |
-| `maxSessions`                               | 정수, 0~10000                                              |                                                                                                                                   |
-| `rateLimits`                                | `{ limit, window }` 배열(양의 정수, 최대 50개) 또는 `null` | `null`은 제한을 해제합니다                                                                                                        |
-| `accessSchedule`                            | 스케줄 객체 또는 `null`                                    | `null`은 스케줄을 해제합니다                                                                                                      |
-| `scopes`                                    | 문자열 배열, 최대 32개                                     |                                                                                                                                   |
-| `allowedEndpoints`                          | 문자열 배열, 최대 20개                                     |                                                                                                                                   |
-| `streamDefaultMode`                         | `legacy` \| `json`                                         |                                                                                                                                   |
-| `cacheDefaultMode`                          | `legacy` \| `bypass`                                       | [키별 캐시 우회](#per-key-cache-bypass) 참조                                                                                      |
-| `compressionEnabled`                        | boolean                                                    |                                                                                                                                   |
-| `codexServiceMode`                          | Codex 서비스 모드 중 하나                                  |                                                                                                                                   |
-| `disableNonPublicModels`                    | boolean                                                    |                                                                                                                                   |
-| `allowUsageCommand`                         | boolean                                                    |                                                                                                                                   |
-| `usageLimitEnabled`                         | boolean                                                    |                                                                                                                                   |
-| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | number >= 0 or `null`                                      |                                                                                                                                   |
-| `chaosModeEnabled`                          | boolean                                                    |                                                                                                                                   |
+| Field                                       | Type                                                       | Notes                                                                                                                                                                                                                                   |
+| ------------------------------------------- | ---------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`                                      | 문자열, 1~200자                                            |                                                                                                                                                                                                                                         |
+| `isActive`                                  | boolean                                                    |                                                                                                                                                                                                                                         |
+| `isBanned`                                  | boolean                                                    |                                                                                                                                                                                                                                         |
+| `expiresAt`                                 | ISO 8601 날짜/시간 또는 `null`                             | `null`은 만료를 해제합니다                                                                                                                                                                                                              |
+| `modelAccessMode`                           | `all` \| `restricted`                                      | 모드가 `all`인 경우 `allowedModels`는 비어 있어야 합니다                                                                                                                                                                                |
+| `allowedModels`, `blockedModels`            | 문자열 배열(최대 1000개)                                   |                                                                                                                                                                                                                                         |
+| `allowedCombos`                             | 문자열 배열, 최대 500개                                    | 이 키가 호출할 수 있는 콤보를 제한합니다. 직접 모델은 `modelAccessMode` / `allowedModels`에 의해 관리됩니다                                                                                                                             |
+| `connectionAccessMode`                      | `all` \| `restricted`                                      | `restricted`인 경우 `allowedConnections`는 비어 있지 않아야 하며, `all`인 경우 비어 있어야 합니다                                                                                                                                       |
+| `allowedConnections`                        | UUID 배열, 최대 100개                                      |                                                                                                                                                                                                                                         |
+| `allowAutoCombos`                           | boolean                                                    | `false`는 이 키를 사용한 `auto/*` 모델 요청을 거부합니다. 한 번도 설정하지 않은 키는 허용됩니다                                                                                                                                         |
+| `catalogScope`                              | `all` \| `combos` \| `models`                              | 이 키에 대해 `GET /v1/models`에 표시할 항목(콤보만, 모델만 또는 둘 다)을 지정합니다. 키가 호출할 수 있는 항목은 변경하지 않습니다                                                                                                       |
+| `forcedModel`                               | 최대 300자의 문자열 또는 `null`                            | `X-Route-Model` 및 `body.model`보다 우선하여 채팅 요청을 이 모델/콤보로 라우팅합니다. 키의 제한은 계속 적용됩니다                                                                                                                       |
+| `noLog`, `autoResolve`                      | 부울                                                       |                                                                                                                                                                                                                                         |
+| `throttleDelayMs`                           | 정수, 0~300000                                             |                                                                                                                                                                                                                                         |
+| `maxSessions`                               | 정수, 0~10000                                              |                                                                                                                                                                                                                                         |
+| `rateLimits`                                | `{ limit, window }` 배열(양의 정수, 최대 50개) 또는 `null` | `null`은 제한을 해제합니다                                                                                                                                                                                                              |
+| `accessSchedule`                            | 스케줄 객체 또는 `null`                                    | `null`은 스케줄을 해제합니다                                                                                                                                                                                                            |
+| `scopes`                                    | 문자열 배열, 최대 32개                                     |                                                                                                                                                                                                                                         |
+| `allowedEndpoints`                          | 문자열 배열, 최대 20개                                     |                                                                                                                                                                                                                                         |
+| `streamDefaultMode`                         | `legacy` \| `json`                                         |                                                                                                                                                                                                                                         |
+| `cacheDefaultMode`                          | `legacy` \| `bypass`                                       | [키별 캐시 우회](#per-key-cache-bypass) 참조                                                                                                                                                                                            |
+| `compressionEnabled`                        | boolean                                                    |                                                                                                                                                                                                                                         |
+| `codexServiceMode`                          | Codex 서비스 모드 중 하나                                  |                                                                                                                                                                                                                                         |
+| `disableNonPublicModels`                    | boolean                                                    |                                                                                                                                                                                                                                         |
+| `allowUsageCommand`                         | boolean                                                    |                                                                                                                                                                                                                                         |
+| `usageLimitEnabled`                         | boolean                                                    |                                                                                                                                                                                                                                         |
+| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | 번호 >= 0 또는 `null`                                      |                                                                                                                                                                                                                                         |
+| `fiveHourUsageLimitUsd`                     | 번호 >= 0 또는 `null`                                      | 5시간 롤링 USD 예산은 일일 및 주간 한도(`usageLimitEnabled`, `UNPRICED_USAGE_BUDGET_POLICY`)처럼 시행됩니다. `retry-after` 는 기간 중 가장 오래된 지출이 만료되어 한도를 훨씬 초과한 키가 여전히 차단된 상태로 남을 수 있는 경우입니다. |
+| `chaosModeEnabled`                          | boolean                                                    |                                                                                                                                                                                                                                         |
 
 ```bash
 curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
@@ -1355,6 +1334,14 @@ curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
 | `/api/modality-bridge/stats`         | GET        | 메모리 내 `attempts`, 성공/`bridged`, 실패, 캐시 적중, `totalLatencyMs`, `latencySamples`, 샘플 기준 `averageLatencyMs`, 마지막 사용 시간(재시작 시 초기화; 관리 인증 필요)                                                                                                                                                                                                                             |
 | `/api/modality-bridge/video/runtime` | GET        | 관리 인증/프로브 전에 수행되는 엄격한 신뢰된 루프백 확인, 삭제된 FFmpeg/ffprobe 사용 가능 여부 및 버전(no-store)                                                                                                                                                                                                                                                                                        |
 | `/api/modality-bridge/video/extract` | POST       | 내부 인증 신뢰된 루프백 바이트 브로커; 입력 50MiB, 제한된 대기열/출력 32MiB, 용량 초과 시 `503`, 연결 해제 시 `499`, 기한 초과 시 `504`; 공개 업로드 API가 아님                                                                                                                                                                                                                                         |
+
+### 비디오 프레임 드릴다운
+
+`GET /api/v1/video-bridge/drilldown` 명시적으로 동의된 Video Bridge 요청 후 `x-omniroute-video-drilldown` 에 반환된 테넌트 바인딩 불투명 핸들을 읽습니다. 읽기와 `DELETE` 모두 항상 유효한 API 키와 운영자의 독립적인 `modalityBridgeVideoDrilldownRemoteEnabled` 권한이 필요합니다. 생산 유지에는 추가로 `modalityBridgeVideoDrilldownEnabled` 및 엄격한 부품별 `drilldown: true` 필요합니다. 키에 비어 있지 않은 엔드포인트 허용 목록이 있는 경우 호출자가 `/v1` 또는 `/api/v1` 사용하는지 여부에 관계없이 GET 및 DELETE 모두에 대해 `video` 포함해야 합니다.
+
+GET 쿼리: 필수 `handle`; 선택적 `variant` (`preview`, `standard`, `detail`), `limit` (1–8; 레거시 `frames` 는 허용되지만 `limit` 와 결합될 수 없음), 0부터 시작하는 `page` 및 `start`/`end` 초. 두 포커스 범위가 모두 제공되면 `end` `start` 보다 커야 합니다. Duplicate/unknown 쿼리 키가 거부됩니다. 성공적인 응답에는 `derivation`, `durationSeconds`, `frames`, `hasMore`, `page`, `variant` 및 선택적 `focusWindow` 포함됩니다. 무점포 JSON 는 Base64를 포함하여 32 MiB 로 제한됩니다. 대형 출력은 413을 반환합니다. 더 적은 수의 프레임을 요청하세요.
+
+`DELETE /api/v1/video-bridge/drilldown?handle=...` `{ "removed": 0|1 }` 반환합니다. 알 수 없음, 만료됨 및 크로스 키 GETs 는 구별할 수 없는 404 응답입니다. 크로스 키 DELETE 소유자 항목을 제거할 수 없습니다. 비활성화된 액세스는 403, missing/invalid 인증 401, 잘못된 쿼리 400, 취소 499 및 임시 오류 503을 반환합니다. 핸들은 프로세스 로컬이며 10분 후에 만료되며 다시 시작해도 유지되지 않습니다. 새로운 핸들은 `v1.` 와 32바이트 임의 Base64URL 토큰을 사용합니다. 토큰 해시만 유지됩니다. 레거시 64-16진수 토큰은 호환성을 위해 구문적으로 읽을 수 있는 상태로 유지됩니다. 동의, 할당량 및 변형 파생 세부 정보는 [Video Bridge 가드레일을](../security/GUARDRAILS.md#video-bridge-videobridgets-videobridgepipelinets) 참조하세요.
 
 ### 백업 및 내보내기/가져오기
 
@@ -1450,19 +1437,19 @@ GET 응답에는 `agents[]`(id, name, binary, version, installed, protocol, isCu
 
 이러한 엔드포인트는 기본 Gemini SDK 호환성을 요구하는 클라이언트를 위해 Gemini의 API 형식을 그대로 따릅니다.
 
-### 내부 / 시스템 API
+### 내부/시스템 APIs
 
-| Endpoint                 | Method | Description                                 |
-| ------------------------ | ------ | ------------------------------------------- |
-| `/api/init`              | GET    | 애플리케이션 초기화 확인(최초 실행 시 사용) |
-| `/api/tags`              | GET    | Ollama 호환 모델 태그(Ollama 클라이언트용)  |
-| `/api/restart`           | POST   | 정상적인 서버 재시작 수행                   |
-| `/api/shutdown`          | POST   | 정상적인 서버 종료 수행                     |
-| `/api/system/env/repair` | POST   | OAuth 제공자 환경 변수 복구                 |
-| `/api/system/version`    | GET    | 현재/최신 버전, 업데이트 상태, 릴리스 채널  |
-| `/api/system/version`    | POST   | 최신 버전으로 배포를 인식하는 업데이트 시작 |
+| 엔드포인트               | 방법 | 설명                                            |
+| ------------------------ | ---- | ----------------------------------------------- |
+| `/api/init`              | GET  | 백그라운드 동기화 서비스 시작(관리 인증)        |
+| `/api/tags`              | GET  | Ollama 호환 모델 태그( Ollama 클라이언트용)     |
+| `/api/restart`           | POST | 정상적인 서버 다시 시작 트리거                  |
+| `/api/shutdown`          | POST | 정상적인 서버 종료 트리거                       |
+| `/api/system/env/repair` | POST | OAuth 공급자 환경 변수 복구                     |
+| `/api/system/version`    | GET  | Current/latest 버전, 업데이트 상태, 릴리스 채널 |
+| `/api/system/version`    | POST | 최신 버전으로 배포 인식 업데이트 시작           |
 
-> **참고:** 이러한 엔드포인트는 시스템 내부에서 사용되거나 Ollama 클라이언트 호환성을 위해 사용됩니다. 일반적으로 최종 사용자가 호출하지 않습니다.
+> **메모:** 이러한 엔드포인트는 시스템 내부적으로 또는 Ollama 클라이언트 호환성을 위해 사용됩니다. 일반적으로 최종 사용자는 호출하지 않습니다.
 
 ### OAuth 환경 복구 _(v3.6.1+)_
 

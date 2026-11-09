@@ -52,15 +52,11 @@ le code de sortie 0, ce qui ne permet pas d’établir que les dépendances ont 
 bloquante exige également une mesure réussie : des outils indisponibles, des tâches échouées
 et l’absence de preuves relatives à l’image ne permettent pas de certifier qu’une image est exempte de vulnérabilités.
 
-## Risque lié à une dépendance abandonnée
+## Risque de dépendance des retraités
 
-Le fichier de verrouillage racine n’inclut plus `extract-zip` ni aucune arête de dépendance vers celle-ci depuis
-la mise à niveau de l’outil de développement promptfoo épinglé. Cela supprime la chaîne précédemment acceptée
-`promptfoo` → `@openai/codex-security` → `extract-zip` suivie dans #14482.
-Les contrôles de régression dans `tests/unit/extract-zip-14482-exposure.test.ts` empêchent sa
-réintroduction et maintiennent l’interdiction des importations depuis le code de production.
+Le fichier de verrouillage racine n'inclut plus `extract-zip` ou un bord de dépendance après la mise à niveau de l'outil de développement promptfoo épinglé. Cela supprime la chaîne `promptfoo` → `@openai/codex-security` → `extract-zip` précédemment acceptée et suivie dans #14482. Les contrôles de régression dans `tests/unit/extract-zip-14482-exposure.test.ts` rejettent sa réintroduction et maintiennent l'interdiction d'importer du code de production.
 
-La réparation actuelle des dépendances inclut des substitutions de compatibilité pour le client MSAL d’Azure Identity, le client FTP de get-uri et Zod dans les deux packages de plugins OpenCode. L’acquisition de jetons Azure et la récupération via FTP sont testées avec des transports contrôlés ; les deux packages OpenCode exécutent leurs propres suites de compilation et de tests. Le nombre d’avis de sécurité du registre correspond à des mesures effectuées à un instant donné et peut changer après la validation du fichier de verrouillage.
+La réparation de dépendance actuelle étend également les remplacements de compatibilité au client MSAL de l’identité Azure et au client FTP de get-uri. L'acquisition de jetons Azure et la récupération FTP sont testées avec des transports contrôlés ; les deux packages OpenCode exécutent leurs propres suites de build et de tests. Les décomptes consultatifs du registre sont des mesures à un moment donné et peuvent changer après la validation du fichier de verrouillage.
 
 ## Backlog : avis Scorecard → blocage
 

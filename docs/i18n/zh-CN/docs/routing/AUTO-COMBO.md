@@ -113,6 +113,27 @@ handleComboChat（与持久化组合使用相同的引擎）
 | `src/sse/handlers/chat.ts`                                | 集成：自动前缀短路处理           |
 | `src/shared/constants/providers.ts`                       | `SYSTEM_PROVIDERS.auto` 系统条目 |
 
+## 保存的自动组合的帐户首选项
+
+智能自动编辑器提供了一个可选的**账户偏好**部分。每个连接都可以是首选、正常（默认）、保留或排除。多个连接可以共享一个层。自动在第一个符合条件的层中选择，保留其scoring/router行为；失败的尝试会落入剩余的具体账户，优先于正常账户，然后再保留。此组合从不使用排除的连接。
+
+该设置存储为`config.accountPreferences`，由连接ID键入：
+
+```json
+{
+  "accountPreferences": {
+    "connection-a": "preferred",
+    "connection-b": "preferred",
+    "connection-c": "reserve",
+    "connection-d": "excluded"
+  }
+}
+```
+
+省略或空的地图会保留现有的路线。首选项不会启用已禁用的连接、授予 API 密钥访问权限、恢复配额阻止的候选者或绕过预算检查。每次尝试都仅限于其具体连接，因此帐户后备无法跳转组合路由器后面的层。现有的会话关联性可能会保留符合条件的帐户；排除绑定到本机回合的帐户会停止该回合，而不是默默地更改帐户。
+
+配置的首选项使用帐户感知自动路径：未调度未绑定的上下文缓存、智能管道、混乱和影子快捷方式。这些请求的投机对冲被禁用，因此储备账户无法与首选账户竞争。其他组合策略不解释此设置。将组合从“自动”更改为保留已保存的首选项以供以后切换回来。
+
 ## 与真实模型 ID 匹配的组合名称
 
 `name` 与裸模型 ID 相同的组合（例如名为 `gpt-5.5` 的组合）是一种**有意设计且受支持的模式**，并非错误：这是 [#6940](https://github.com/diegosouzapw/OmniRoute/issues/6940) 中记录的按模型 ID 进行提供者回退的机制。由于组合解析先于裸模型 ID 解析执行（`src/sse/services/model.ts` 中的 `getComboForModel()`），对裸 ID `gpt-5.5` 的请求会通过该组合的目标（例如 `acme-responses/gpt-5.5`、`backup-responses/gpt-5.5`）进行路由，而不是直接路由到单个提供者——这复用了为 [#3227/#3233](https://github.com/diegosouzapw/OmniRoute/issues/3227) 构建的“组合先于重写”优先级，并通过 `tests/unit/responses-combo-resolution-3227.test.ts` 和 `tests/unit/combo-name-codex-responses-rewrite.test.ts` 进行回归测试。
@@ -153,36 +174,38 @@ curl -X POST http://localhost:20128/v1/chat/completions \
 
 有关本文所记录的最初困惑，请参阅 [#7992](https://github.com/diegosouzapw/OmniRoute/issues/7992) 和 [#7111](https://github.com/diegosouzapw/OmniRoute/issues/7111)。
 
-## 工作原理（持久化自动组合）
+## 它是如何工作的（持久自动组合）
 
-自动组合引擎使用一个**包含 16 个因素的评分函数**（定义于 `open-sse/services/autoCombo/scoring.ts` → `DEFAULT_WEIGHTS`），为每个请求动态选择最佳提供者/模型。默认权重之和为 `1.0`；自定义权重由 `normalizeScoringWeights()` 重新归一化。在这 16 个因素中，`cacheAffinity` 和 `resetWindowAffinity` 的默认权重为 `0`；`reliability` 在 `DEFAULT_WEIGHTS` 中为 `0`，但在通用包中为 `0.03`，在 `reliability-first` 中为 `0.04`；而 `quality` 在包中为 `0.02`（在 `quality-first` 中为 `0.03`）：系统仍会为每个候选项计算这些因素，并且 `cacheAffinity` 会在评分之外控制提示词缓存去重，因此默认权重为零的因素默认不参与评分，而在包中则会参与。
+自动组合引擎使用以下参数动态地为每个请求选择最佳的provider/model ：**16因素评分功能**（在`open-sse/services/autoCombo/scoring.ts` → `DEFAULT_WEIGHTS`中定义）。默认权重总和为`1.0`；自定义权重由`normalizeScoringWeights()`重新标准化。十六个— `cacheAffinity`和`resetWindowAffinity` —中的两个携带默认权重`0`； `reliability`在`DEFAULT_WEIGHTS`中携带`0` ，但在通用包中`0.03` ，在`reliability-first`中携带`0.04` ，而`quality`在包中携带`0.02` （ `quality-first`中携带`0.03` ）：它们仍然针对每个候选者进行计算，并且`cacheAffinity`在分数之外门控提示缓存重复数据删除，因此默认情况下，零默认因子不会投票，而包则默认投票。
 
-![自动组合的 16 因素评分](../diagrams/exported/auto-combo-scoring.svg)
+![Auto-Combo 16-factor scoring](../diagrams/exported/auto-combo-scoring.svg)
 
-> 来源：[diagrams/auto-combo-scoring.mmd](../diagrams/auto-combo-scoring.mmd)（通过 `npm run docs:render-diagrams` 重新生成）。文件名是历史遗留名称；源文件和渲染后的图表展示了 `DEFAULT_WEIGHTS` 中声明的全部 16 个因素。
+> 来源： [diagrams/auto-combo-scoring.mmd](../diagrams/auto-combo-scoring.mmd) （通过`npm run docs:render-diagrams`重新生成）。文件名是历史的；源图和渲染图显示了`DEFAULT_WEIGHTS`中声明的所有 16 个因素。
 
 | 因素                  | 默认权重 | 说明                                                                                                                                                  |
 | :-------------------- | :------- | :---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `quota`               | 0.1429   | 剩余配额/速率限制余量 [0..1]                                                                                                                          |
-| `health`              | 0.1605   | 来自断路器的健康评分（CLOSED=1.0、HALF_OPEN=0.5、OPEN=0.0）                                                                                           |
-| `costInv`             | 0.1429   | **混合**成本的倒数（60% 输入 token 价格 + 40% 输出 token 价格，并进行归一化）— 越便宜，评分越高                                                       |
-| `latencyInv`          | 0.1143   | 相对于候选池进行归一化的 p95 延迟倒数 — 越快，评分越高                                                                                                |
-| `taskFit`             | 0.0762   | 任务类型适配度（编码、审查、规划、分析、调试、文档）                                                                                                  |
-| `stability`           | 0.0476   | 基于延迟标准差计算的方差稳定性 — 响应时间波动越大的候选项评分越低                                                                                     |
-| `tierPriority`        | 0.0476   | 账户层级优先级 — Ultra=1.0、Pro=0.67、Standard=0.33、Free=0.0                                                                                         |
-| `tierAffinity`        | 0.0476   | 候选项层级与清单建议层级之间的亲和度                                                                                                                  |
-| `specificityMatch`    | 0.0476   | 请求特异性（清单提示）与模型层级之间的匹配度                                                                                                          |
-| `contextAffinity`     | 0.0476   | 请求所需上下文窗口与模型上下文窗口之间的亲和度                                                                                                        |
-| `sessionAvailability` | 0.0476   | 当前会话中候选连接的 OAuth 会话可用性（`getOAuthSessionAvailability()`；非 OAuth 连接的评分为 1.0）                                                   |
-| `connectionDensity`   | 0.0476   | 将负载分散到同一提供者的不同连接上（避免集中）                                                                                                        |
+| `quota`               | 0.1429   | 剩余配额/速率限制空间 [0..1]                                                                                                                          |
+| `health`              | 0.1605   | 断路器的健康评分（CLOSED= 1.0、 HALF_OPEN= 0.5、 OPEN= 0.0）                                                                                          |
+| `costInv`             | 0.1429   | 逆**混合**成本（60% 输入+ 40% 输出代币价格，标准化） —更便宜=得分更高                                                                                 |
+| `latencyInv`          | 0.1143   | 反向 p95 延迟归一化为池—更快=得分更高                                                                                                                 |
+| `taskFit`             | 0.0762   | 任务类型适应性（编码、审查、规划、分析、调试、文档）                                                                                                  |
+| `stability`           | 0.0476   | 延迟标准差的基于方差的稳定性—响应时间波动得分较低的候选者                                                                                             |
+| `tierPriority`        | 0.0476   | 账户级别优先级— Ultra = 1.0、Pro = 0.67、Standard = 0.33、Free = 0.0                                                                                  |
+| `tierAffinity`        | 0.0476   | 候选人层级与清单推荐层级之间的亲和度                                                                                                                  |
+| `specificityMatch`    | 0.0476   | 请求特异性（清单提示）和模型层之间的匹配                                                                                                              |
+| `contextAffinity`     | 0.0476   | 请求的上下文窗口需求与模型的上下文窗口之间的关联性                                                                                                    |
+| `sessionAvailability` | 0.0476   | 此会话的候选连接的OAuth会话可用性（`getOAuthSessionAvailability()`；非 OAuth 连接得分 1.0）                                                           |
+| `connectionDensity`   | 0.0476   | 在同一提供者的连接之间分散负载（反集中）                                                                                                              |
 | `cacheAffinity`       | 0.00     | 通过 Rendezvous 哈希，使请求倾向于选择最有可能已保存该请求提示词缓存前缀的连接（`open-sse/services/combo/promptCacheAffinity.ts`）；默认禁用（#8008） |
-| `resetWindowAffinity` | 0.00     | 倾向于选择配额重置窗口更有利的连接（默认禁用）                                                                                                        |
-| `quality`             | 0.03     | 来自路由事件质量跟踪器、由反馈驱动的输出质量信号；没有观测数据的候选项会获得中性值 0.5                                                                |
-| `reliability`         | 0.00     | 基于过去 24 小时使用历史记录，在至少十个样本的门槛下计算观测成功占比 `1 - failureRate`（否则使用实时指标）；没有观测数据的候选项视为 1.0。默认禁用    |
+| `resetWindowAffinity` | 0.00     | 偏向于配额重置窗口有利的连接（默认禁用）                                                                                                              |
+| `quality`             | 0.03     | 来自路由事件质量跟踪器的反馈驱动的输出质量信号；没有观察结果的候选人得到中性 0.5                                                                      |
+| `reliability`         | 0.00     | 根据 10 个样本楼层的 24 小时使用历史记录观察到的成功份额`1 - failureRate`（否则为实时指标）；没有观察结果的候选读作 1.0。默认禁用                     |
 
-`quality` (`open-sse/services/routing/quality.ts`): `cold restart → ∅`; `observations = 0 → score 0.5`.
+冷启动后，内存中的`quality`跟踪器 (`open-sse/services/routing/quality.ts`) 为空，因此每个候选者都会获得中立的`0.5`直到第一个观察结果落地。
 
-**总和：** `0.1429 + 0.1605 + 0.1429 + 0.1143 + 0.0762 + (7 × 0.0476) + 0.00 + 0.00 + 0.03 + 0.00 = 1.0`，与 `DEFAULT_WEIGHTS` 中的声明一致；用户配置的权重在评分前会由 `normalizeScoringWeights()` 重新归一化为一个分布。
+> **不可读的配额（#15347）。**当提供者有配额获取器但它没有返回任何可读内容（获取失败、缺少凭据、仅使用消息或没有可解析的`windows`且没有有限`percentUsed`格式错误快照，包括`percentUsed: null`）时，候选者在`quota`轴上对`0`进行评分，其最终得分乘以`UNREADABLE_QUOTA_SOFT_DEPRIORITIZE_FACTOR` (0.5, `autoStrategy.ts`)，与连接状态惩罚相同的软惩罚模式。失败的使用读取是有关遥测的证据，而不是提供者的证据，因此它的排名严格低于任何实际读数，包括已确认的 100%-used读数，但绝不会被硬阻止或驱逐。没有上限的提供者报告`unlimited: true`和分数为完整配额；没有注册配额获取器的提供者根本没有遥测源，并保留默认值`100`。
+
+**和：** `0.1429 + 0.1605 + 0.1429 + 0.1143 + 0.0762 + (7 × 0.0476) + 0.00 + 0.00 + 0.03 + 0.00 = 1.0`如`DEFAULT_WEIGHTS`中声明的那样；用户配置的权重在评分之前由`normalizeScoringWeights()`重新归一化为分布。
 
 ## 模式包
 
@@ -285,19 +308,13 @@ OmniRoute 的组合引擎支持 **20 种路由策略**（声明于 `src/shared/c
 
 如需严格轮换，请使用 `round-robin`；在 `weighted` 中使用相等权重只能实现统计意义上的均衡，而非严格均衡。
 
-### 智能体流水线模式
+### 代理管道模式
 
-包含至少两个模型的 `pipeline` 组合可通过
-`config.agenticOrchestration.enabled` 启用规划器/执行器路由。第一个目标负责规划和最终回答；
-第二个目标发出客户端原生工具调用。OmniRoute 会从请求协议中检测工具结果
-续传，请规划器判断是否需要新一轮工具调用，并动态选择执行器或规划器作为面向客户端的
-最终步骤。
+具有至少两个模型的`pipeline`组合可以选择使用`config.agenticOrchestration.enabled`进行planner/executor路由。第一个目标有规划和最终答案；第二个目标发出客户端本机工具调用。 OmniRoute从请求协议中检测工具结果延续，询问规划器是否需要另一轮工具，并动态地使执行器或规划器成为面向客户的最后一步。
 
-第二个目标之后的其他模型会按顺序充当执行器备选。HTTP 响应失败或传输异常时，
-系统会切换到下一个执行器，并沿用相同的规划器决策和原生工具，但使用该执行器自己的
-步骤提示词和解析后的连接。第一个成功的响应会原样返回，包括 SSE 流式传输；
-成功的流式传输开始后发生的失败无法在此处重试。如果所有执行器均失败，则返回最后一次
-失败。客户端中止请求时会停止分派。
+在工具结果延续上，当两个连续完成的轮次重复相同的工具调用且结果不变时，或者当两个连续轮次中的每个显式标记结果失败时， OmniRoute也会停止执行。更改的结果允许重复调用（例如轮询）。该防护根据新的用户请求进行重置，将并行调用分组为一轮，并支持Anthropic、聊天完成、响应和Gemini历史记录。规划者收到原因并拥有最终答案，即使它请求另一轮工具也是如此。
+
+第二个目标之后的其他模型是有序执行程序备份。失败的HTTP响应或传输异常将前进到下一个执行器，携带相同的规划器决策和本机工具，但该执行器自己的步骤提示和已解决的连接。第一个成功响应原样返回，包括SSE流；成功启动流后出现的失败无法在此处重试。如果所有执行器都失败，则返回最后一个失败的执行器。客户端中止停止调度。
 
 ```json
 {
@@ -309,10 +326,7 @@ OmniRoute 的组合引擎支持 **20 种路由策略**（声明于 `src/shared/c
 }
 ```
 
-执行器可以在一个响应中发出多个相互独立的调用。存在依赖关系的调用会在后续客户端
-工具结果轮次中处理，规划器会审查每个结果。`maxToolRounds` 默认为 `8`，可接受
-`1`–`32`；达到上限后，规划器必须生成当前可得的最佳最终回答。规划器的内部决策会被缓冲，
-而选定的面向客户端的响应会保留原始流式传输偏好。
+执行器可以在一个响应中发出多个独立的调用。相关调用在稍后的客户端工具结果轮流中进行处理，规划人员会审查每个结果。 `maxToolRounds`默认为`8` ，接受`1`–`32`；一旦达成，规划者必须给出最佳的最终答案。内部规划器决策被缓冲，而选定的面向客户的响应保留原始的流首选项。
 
 ### `round-robin` 粘性批处理与账户扩展
 

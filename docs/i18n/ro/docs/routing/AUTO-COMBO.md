@@ -127,6 +127,27 @@ Evaluarea automată selectează cel mai bun furnizor/model pentru fiecare cerere
 | `src/sse/handlers/chat.ts`                                | Integrare: scurtcircuitarea prefixului auto                          |
 | `src/shared/constants/providers.ts`                       | Intrarea de sistem `SYSTEM_PROVIDERS.auto`                           |
 
+## Preferințele contului pentru combinațiile automate salvate
+
+Editorul automat inteligent oferă opțional** Preferințele contului** secțiune. Fiecare conexiune poate fi Preferată, Normală (implicit), Rezervată sau Exclusă. Conexiunile multiple pot partaja un nivel. Selectează automat în primul nivel eligibil, păstrându-și comportamentul scoring/router acolo; încercările eșuate revin la conturile concrete rămase, de preferat înaintea normalului înainte de rezervă. Conexiunile excluse nu sunt niciodată folosite de acest combo.
+
+Setarea este stocată ca `config.accountPreferences`, tastată de conexiunea ID:
+
+```json
+{
+  "accountPreferences": {
+    "connection-a": "preferred",
+    "connection-b": "preferred",
+    "connection-c": "reserve",
+    "connection-d": "excluded"
+  }
+}
+```
+
+O hartă omise sau goală păstrează ruta existentă. Preferințele nu permit conexiunile dezactivate, nu acordă acces la cheia API, nu restabilește candidații blocați de cote sau nu ocolesc verificările bugetare. Fiecare încercare este limitată la conexiunea sa concretă, astfel încât back-ul de rezervă a contului nu poate sări trepte în spatele routerului combo. Afinitatea de sesiune existentă poate păstra un cont eligibil; excluderea contului legat de un turn nativ se oprește care se rotesc în loc să schimbe în tăcere conturile.
+
+Preferințele configurate folosesc calea automată conștientă de cont: comenzile rapide nelegate de context-cache, smart-pipeline, haos și umbră nu sunt trimise. Acoperirea speculativă este dezactivată pentru aceste solicitări, astfel încât conturile de rezervă nu pot concura cu cele preferate. Alte strategii combinate nu interpretează această setare. Schimbarea unei combinații de la Auto păstrează preferințele salvate pentru o comutare ulterioară înapoi.
+
 ## Nume de combo-uri care corespund unui ID real de model
 
 Un combo al cărui `name` este identic cu un ID simplu de model (de exemplu, un combo numit
@@ -188,34 +209,36 @@ Consultați [#7992](https://github.com/diegosouzapw/OmniRoute/issues/7992) și [
 
 ## Cum funcționează (combinații automate persistente)
 
-Motorul Auto-Combo selectează dinamic cel mai bun furnizor/model pentru fiecare solicitare, utilizând o **funcție de evaluare cu 16 factori** (definită în `open-sse/services/autoCombo/scoring.ts` → `DEFAULT_WEIGHTS`). Suma ponderilor implicite este `1.0`; ponderile personalizate sunt renormalizate de `normalizeScoringWeights()`. Doi dintre cei șaisprezece factori — `cacheAffinity` și `resetWindowAffinity` — au o pondere implicită de `0`; `reliability` are `0` în `DEFAULT_WEIGHTS`, dar `0.03` în pachetele generice și `0.04` în `reliability-first`, iar `quality` are `0.02` în pachete (`0.03` în `quality-first`): aceștia sunt totuși calculați pentru fiecare candidat, iar `cacheAffinity` controlează deduplicarea cache-ului de prompturi în afara scorului, astfel încât factorii cu valoare implicită zero pur și simplu nu contribuie implicit, în timp ce pachetele îi utilizează.
+Motorul Auto-Combo selectează dinamic cel mai bun provider/model pentru fiecare solicitare folosind a **Funcția de punctare cu 16 factori** (definit în `open-sse/services/autoCombo/scoring.ts` → `DEFAULT_WEIGHTS`). Suma ponderilor implicite este `1.0`; Greutățile personalizate sunt renormalizate de `normalizeScoringWeights()`. Două dintre cele șaisprezece — `cacheAffinity` și `resetWindowAffinity` — poartă o pondere implicită de `0`; `reliability` poartă `0` în `DEFAULT_WEIGHTS` dar `0.03` în pachete generice și `0.04` în `reliability-first`, iar `quality` poartă `0.02` în pachete (`0.03` în `quality-first`): acestea sunt încă calculate pentru fiecare candidat, iar `cacheAffinity` porți deduplicarea prompt-cache în afara scorului, astfel încât factorii zero implicit pur și simplu nu votează în mod implicit în timp ce pachetele.
 
-![Evaluarea Auto-Combo cu 16 factori](../diagrams/exported/auto-combo-scoring.svg)
+![Auto-Combo 16-factor scoring](../diagrams/exported/auto-combo-scoring.svg)
 
-> Sursă: [diagrams/auto-combo-scoring.mmd](../diagrams/auto-combo-scoring.mmd) (regenerați prin `npm run docs:render-diagrams`). Numele fișierului este istoric; sursa și diagrama randată prezintă toți cei 16 factori declarați în `DEFAULT_WEIGHTS`.
+> Sursa: [diagrams/auto-combo-scoring.mmd](../diagrams/auto-combo-scoring.mmd) (regenerare prin `npm run docs:render-diagrams`). Numele fișierului este istoric; sursa și diagrama redată arată toți cei 16 factori declarați în `DEFAULT_WEIGHTS`.
 
-| Factor                | Pondere implicită | Descriere                                                                                                                                                                                                                                                            |
-| :-------------------- | :---------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `quota`               | 0.1429            | Cotă rămasă / marjă disponibilă până la limita de rată [0..1]                                                                                                                                                                                                        |
-| `health`              | 0.1605            | Scor de sănătate de la întrerupătorul de circuit (CLOSED=1.0, HALF_OPEN=0.5, OPEN=0.0)                                                                                                                                                                               |
-| `costInv`             | 0.1429            | Cost **combinat** invers (60% prețul tokenurilor de intrare + 40% prețul tokenurilor de ieșire, normalizat) — mai ieftin = scor mai mare                                                                                                                             |
-| `latencyInv`          | 0.1143            | Latență p95 inversă normalizată la grup — mai rapid = scor mai mare                                                                                                                                                                                                  |
-| `taskFit`             | 0.0762            | Potrivire cu tipul sarcinii (programare, revizuire, planificare, analiză, depanare, documentație)                                                                                                                                                                    |
-| `stability`           | 0.0476            | Stabilitate bazată pe varianța abaterii standard a latenței — un candidat al cărui timp de răspuns fluctuează obține un scor mai mic                                                                                                                                 |
-| `tierPriority`        | 0.0476            | Prioritatea nivelului contului — Ultra=1.0, Pro=0.67, Standard=0.33, Free=0.0                                                                                                                                                                                        |
-| `tierAffinity`        | 0.0476            | Afinitatea dintre nivelul candidatului și nivelul recomandat de manifest                                                                                                                                                                                             |
-| `specificityMatch`    | 0.0476            | Potrivirea dintre specificitatea solicitării (indiciul din manifest) și nivelul modelului                                                                                                                                                                            |
-| `contextAffinity`     | 0.0476            | Afinitatea dintre necesarul de fereastră de context al solicitării și fereastra de context a modelului                                                                                                                                                               |
-| `sessionAvailability` | 0.0476            | Disponibilitatea sesiunii OAuth a conexiunii candidate pentru această sesiune (`getOAuthSessionAvailability()`; conexiunile non-OAuth primesc scorul 1.0)                                                                                                            |
-| `connectionDensity`   | 0.0476            | Distribuie sarcina între conexiunile aceluiași furnizor (anti-concentrare)                                                                                                                                                                                           |
-| `cacheAffinity`       | 0.00              | Afinitate bazată pe hash rendezvous față de conexiunea cu cea mai mare probabilitate de a deține deja prefixul cache-ului de prompturi al acestei solicitări (`open-sse/services/combo/promptCacheAffinity.ts`); dezactivată implicit (#8008)                        |
-| `resetWindowAffinity` | 0.00              | Favorizează conexiunile a căror fereastră de resetare a cotei este avantajoasă (dezactivată implicit)                                                                                                                                                                |
-| `quality`             | 0.03              | Semnal privind calitatea rezultatului, bazat pe feedback de la instrumentul de urmărire a calității evenimentelor de rutare; candidații fără observații primesc valoarea neutră 0.5                                                                                  |
-| `reliability`         | 0.00              | Proporția observată de reușite, `1 - failureRate`, din istoricul de utilizare pe 24h, cu un prag minim de zece eșantioane (în caz contrar, se folosesc metrici în timp real); candidații fără observații sunt considerați ca având valoarea 1.0. Dezactivat implicit |
+| Factor                | Pondere implicită | Descriere                                                                                                                                                                                                                                     |
+| :-------------------- | :---------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `quota`               | 0.1429            | Cotă rămasă/limită de rate [0..1]                                                                                                                                                                                                             |
+| `health`              | 0.1605            | Scorul de sănătate de la întrerupător (CLOSED= 1.0, HALF_OPEN= 0.5, OPEN= 0.0)                                                                                                                                                                |
+| `costInv`             | 0.1429            | Invers **amestecate** cost (60% intrare + 40% preț jeton de ieșire, normalizat) — mai ieftin = scor mai mare                                                                                                                                  |
+| `latencyInv`          | 0.1143            | Latența inversă p95 s-a normalizat pentru un scor mai mare — = mai rapid                                                                                                                                                                      |
+| `taskFit`             | 0.0762            | Fitness-tip de sarcină (codificare, revizuire, planificare, analiză, depanare, documente)                                                                                                                                                     |
+| `stability`           | 0.0476            | Stabilitate bazată pe varianță de la abaterea standard a latenței — un candidat al cărui timp de răspuns variază scoruri mai mici                                                                                                             |
+| `tierPriority`        | 0.0476            | Prioritate la nivelul contului — Ultra = 1.0, Pro = 0.67, Standard = 0.33,= gratuit 0.0                                                                                                                                                       |
+| `tierAffinity`        | 0.0476            | Afinitate între nivelul candidatului și nivelul recomandat de manifest                                                                                                                                                                        |
+| `specificityMatch`    | 0.0476            | Potrivire între specificul cererii (hint manifest) și nivelul modelului                                                                                                                                                                       |
+| `contextAffinity`     | 0.0476            | Afinitate între nevoia de fereastră de context a cererii și fereastra de context a modelului                                                                                                                                                  |
+| `sessionAvailability` | 0.0476            | Disponibilitatea sesiunii OAuth a conexiunii candidate pentru această sesiune (`getOAuthSessionAvailability()`; conexiunile non-OAuth scor 1,0)                                                                                               |
+| `connectionDensity`   | 0.0476            | Împrăștie sarcina între conexiunile aceluiași furnizor (anti-concentrare)                                                                                                                                                                     |
+| `cacheAffinity`       | 0.00              | Afinitate bazată pe hash rendezvous față de conexiunea cu cea mai mare probabilitate de a deține deja prefixul cache-ului de prompturi al acestei solicitări (`open-sse/services/combo/promptCacheAffinity.ts`); dezactivată implicit (#8008) |
+| `resetWindowAffinity` | 0.00              | Prejudecăți față de conexiunile a căror fereastră de resetare a cotei este favorabilă (dezactivată implicit)                                                                                                                                  |
+| `quality`             | 0.03              | Semnal de calitate de ieșire bazat pe feedback de la instrumentul de urmărire a calității evenimentului de rutare; candidații fără observații primesc un 0,5 neutru                                                                           |
+| `reliability`         | 0.00              | Cota de succes observată, `1 - failureRate`, din 24 de ore de istoric de utilizare în spatele unui etaj de zece mostre (valori în timp real altfel); candidații fără observații citesc ca 1.0. Dezactivat implicit                            |
 
-`quality` (`open-sse/services/routing/quality.ts`): `cold restart → ∅`; `observations = 0 → score 0.5`.
+Trackerul `quality` din memorie (`open-sse/services/routing/quality.ts`) este gol după o repornire la rece, astfel încât fiecare candidat obține un punctaj `0.5` neutru până când primele observații aterizează.
 
-**Sumă:** `0.1429 + 0.1605 + 0.1429 + 0.1143 + 0.0762 + (7 × 0.0476) + 0.00 + 0.00 + 0.03 + 0.00 = 1.0`, așa cum este declarat în `DEFAULT_WEIGHTS`; ponderile configurate de utilizator sunt renormalizate într-o distribuție de `normalizeScoringWeights()` înainte de calcularea scorului.
+> **Cotă imposibil de citit (#15347).** Când un furnizor are o cotă de preluare, dar nu returnează nimic care poate fi citit (preluare eșuată, acreditări lipsă, utilizare numai pentru mesaje sau un instantaneu incorect fără `windows` analizabil și fără `percentUsed` finit, inclusiv `percentUsed: null`), candidatul obține scoruri `0` pe axa `quota` și scorul său final este înmulțit cu `UNREADABLE_QUOTA_SOFT_DEPRIORITIZE_FACTOR` - `autoStrategy.ts`. penalizare pentru starea conexiunii. O citire de utilizare eșuată este o dovadă despre telemetrie, nu despre furnizor, așa că se clasează strict sub orice citire reală, inclusiv una confirmată 100%-used, dar nu este niciodată blocată sau evacuată. Un furnizor fără plafon raportează `unlimited: true` și punctează ca cotă completă; un furnizor fără cotă de preluare înregistrată nu are deloc sursă de telemetrie și păstrează valoarea implicită a `100`.
+
+**Sumă:** `0.1429 + 0.1605 + 0.1429 + 0.1143 + 0.0762 + (7 × 0.0476) + 0.00 + 0.00 + 0.03 + 0.00 = 1.0` așa cum este declarat în `DEFAULT_WEIGHTS`; Greutățile configurate de utilizator sunt renormalizate într-o distribuție de către `normalizeScoringWeights()` înainte de scor.
 
 ## Pachete de moduri
 
@@ -326,21 +349,13 @@ Motorul de combinații OmniRoute acceptă **20 de strategii de rutare** (declara
 Pentru rotație strictă, utilizați `round-robin`; ponderile egale pentru `weighted` oferă un echilibru statistic — nu
 strict.
 
-### Modul de pipeline agentic
+### Mod pipeline agentic
 
-O combinație `pipeline` cu cel puțin două modele poate activa rutarea planificator/executor prin
-`config.agenticOrchestration.enabled`. Prima țintă gestionează planificarea și răspunsurile finale;
-a doua țintă emite apeluri de instrumente native pentru client. OmniRoute detectează continuările
-cu rezultate ale instrumentelor din protocolul cererii, întreabă planificatorul dacă este necesară
-încă o rundă de instrumente și stabilește dinamic dacă executorul sau planificatorul reprezintă
-etapa finală transmisă clientului.
+Un combo `pipeline` cu cel puțin două modele poate opta pentru rutarea planner/executor cu `config.agenticOrchestration.enabled`. Prima țintă deține planificarea și răspunsurile finale; a doua țintă emite apeluri de instrumente native client. OmniRoute detectează continuarea rezultatelor sculei din protocolul de solicitare, întreabă planificatorul dacă este nevoie de o altă rundă de scule și transformă în mod dinamic fie executant, fie planificator, pasul final orientat către client.
 
-Modelele suplimentare de după a doua țintă sunt copii de rezervă ordonate ale executorului. Un răspuns
-HTTP eșuat sau o excepție de transport determină trecerea la următorul executor, păstrând aceeași
-decizie a planificatorului și aceleași instrumente native, dar utilizând propriul prompt de etapă și
-propria conexiune rezolvată ale executorului respectiv. Primul răspuns reușit este returnat nemodificat, inclusiv
-streamingul SSE; eșecurile survenite după începerea unui flux reușit nu pot fi reîncercate aici.
-Dacă toți executorii eșuează, este returnat ultimul eșec. Anulările efectuate de client opresc distribuirea.
+În continuarea rezultatelor instrumentului, OmniRoute oprește, de asemenea, execuția atunci când două runde finalizate consecutive repetă aceleași apeluri de instrumente cu rezultate neschimbate sau când fiecare rezultat marcat în mod explicit din două runde consecutive a eșuat. Rezultatele modificate permit apeluri repetate (de exemplu, sondaje). Gardianul se resetează la o nouă solicitare a utilizatorului, grupează apelurile paralele într-o singură rundă și acceptă istoricul Anthropic, Finalizări de chat, Răspunsuri și Gemini. Planificatorul primește motivul și deține răspunsul final chiar dacă solicită o altă rundă de instrumente.
+
+Modelele suplimentare după a doua țintă sunt comandate de copii de siguranță ale executorului. Un răspuns HTTP eșuat sau o excepție de transport înaintează la următorul executant, purtând aceeași decizie a planificatorului și instrumente native, dar propriul pas al executantului prompt și conexiunea rezolvată. Primul răspuns de succes este returnat neschimbat, inclusiv fluxul SSE ; eșecurile după începerea cu succes a unui flux nu pot fi reîncercate aici. Dacă toți executanții eșuează, ultimul eșec este returnat. Clientul anulează oprirea expedierii.
 
 ```json
 {
@@ -352,11 +367,7 @@ Dacă toți executorii eșuează, este returnat ultimul eșec. Anulările efectu
 }
 ```
 
-Executorul poate emite mai multe apeluri independente într-un singur răspuns. Apelurile dependente sunt
-gestionate în interacțiunile ulterioare ale clientului cu rezultate ale instrumentelor, planificatorul examinând fiecare rezultat.
-`maxToolRounds` are valoarea implicită `8` și acceptă `1`–`32`; odată ce limita este atinsă, planificatorul trebuie
-să producă cel mai bun răspuns final disponibil. Deciziile interne ale planificatorului sunt păstrate într-un buffer, iar
-răspunsul selectat pentru client păstrează preferința inițială de streaming.
+Executorul poate emite mai multe apeluri independente într-un singur răspuns. Apelurile dependente sunt gestionate în rândurile ulterioare ale instrumentului clientului, planificatorul revizuind fiecare rezultat. `maxToolRounds` este implicit `8` și acceptă `1`–`32`; odată ajuns, planificatorul trebuie să producă cel mai bun răspuns final disponibil. Deciziile planificatorului intern sunt tamponate, în timp ce răspunsul selectat orientat către client păstrează preferința de streaming inițială.
 
 ### Loturi persistente `round-robin` și extinderea conturilor
 

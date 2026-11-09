@@ -361,30 +361,31 @@ Los proveedores disponibles incluyen OpenAI (GPT Image 2), xAI (Grok Image), Tog
 
 `n` devuelve `n` imágenes en `data[]`. Los proveedores cuya API ascendente devuelve una imagen por llamada
 (Black Forest Labs, Stability AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik,
-NVIDIA NIM, Cloudflare Workers AI) realizan `n` llamadas ascendentes independientes, con un máximo de 4 simultáneas. Una
-`seed` fija se incrementa según el índice de la llamada (`seed`, `seed + 1`, …), por lo que las imágenes difieren, pero siguen siendo reproducibles. `n` está limitado a 10. La solicitud falla por completo si alguna llamada falla. La lista de formatos con expansión es `SINGLE_IMAGE_FANOUT_FORMATS` en
+NVIDIA NIM, Cloudflare Workers AI) realizan `n` llamadas ascendentes independientes, con un máximo de 4
+en curso. Un `seed` fijo se incrementa según el índice de la llamada (`seed`, `seed + 1`, …), por lo que las imágenes son diferentes, pero reproducibles. `n` está limitado a 10. La solicitud falla por completo si alguna llamada falla. La lista de formatos con distribución de llamadas es `SINGLE_IMAGE_FANOUT_FORMATS` en
 `open-sse/handlers/imageGeneration/fanOut.ts`.
 
-ZenMux reutiliza la conexión existente basada en la clave de API y acepta los prefijos
+ZenMux reutiliza la conexión existente mediante clave de API y acepta los prefijos
 `zenmux/` o `zm/`:
 
 - `zenmux/openai/gpt-image-2` utiliza la API de imágenes de OpenAI de ZenMux. Las opciones incluyen `size`,
   `quality`, `n`, `output_format`, `output_compression`, `background` y `response_format`.
-- Otros editores, como `zm/meta/muse-image-1.0`, utilizan el endpoint `:predict` de Vertex AI de ZenMux. `n` se asigna a `sampleCount`, `aspect_ratio` a `aspectRatio` y `image_size`
-  (`1K`, `2K`, `4K`) a `sampleImageSize`. Un `size` expresado en píxeles solo proporciona una relación de aspecto,
-  no dimensiones de píxeles garantizadas. Las relaciones, resoluciones y cantidades compatibles varían según el modelo.
+- Otros publicadores, como `zm/meta/muse-image-1.0`, utilizan el endpoint `:predict` de Vertex AI de ZenMux. `n` se asigna a `sampleCount`, `aspect_ratio` a `aspectRatio` e `image_size`
+  (`1K`, `2K`, `4K`) a `sampleImageSize`. Un `size` en píxeles solo proporciona una relación de aspecto,
+  no dimensiones en píxeles garantizadas. Las relaciones de aspecto, resoluciones y cantidades admitidas varían según el modelo.
 - `zm/inclusionai/ming-image-0.1-design` elige sus propias dimensiones. Omite `size`,
-  `aspect_ratio` e `image_size`; los valores explícitos devuelven HTTP 400. Se puede solicitar PNG, JPEG y WebP
-  mediante `output_format`.
+  `aspect_ratio` e `image_size`; los valores explícitos devuelven HTTP 400. Se pueden solicitar
+  PNG, JPEG y WebP con `output_format`.
 
-Esta integración admite la generación de texto a imagen, no la edición de imágenes de referencia. La salida de Vertex
-se normaliza a `data[].b64_json`; `response_format: "url"` devuelve una URL HTTPS ascendente o una URL de datos en base64 cuando solo están disponibles los bytes de la imagen. Las salidas vacías o filtradas
-devuelven un error en lugar de una respuesta correcta vacía. El acceso a los modelos depende de la cuenta de ZenMux.
-Consulta [API de Vertex de ZenMux](https://docs.zenmux.ai/api/vertexai/generate-images) y
+Esta integración admite la generación de imágenes a partir de texto, no la edición de imágenes de referencia. La salida de Vertex se normaliza a `data[].b64_json`; `response_format: "url"` devuelve una URL HTTPS ascendente o una URL de datos en base64 cuando solo están disponibles los bytes de la imagen. Las salidas vacías o filtradas devuelven un error en lugar de una respuesta correcta vacía. El acceso a los modelos depende de la cuenta de ZenMux. Consulta la [API de Vertex de ZenMux](https://docs.zenmux.ai/api/vertexai/generate-images) y la
 [API de imágenes de OpenAI](https://docs.zenmux.ai/api/openai/generate-an-image).
 
+Una conexión de inicio de sesión de Microsoft 365 Copilot proporciona `copilot-m365-web/m365-copilot-image`
+a través de la herramienta de imágenes integrada de Copilot: un turno de Copilot por imagen (`n` de 1 a 4), donde `size` solo orienta la orientación, y las imágenes se devuelven insertadas (`b64_json` o una URL de datos para
+`response_format: "url"`). Consulta [Microsoft 365 Copilot](../providers/COPILOT-M365.md#image-generation).
+
 ```bash
-# Lista todos los modelos de imágenes
+# Listar todos los modelos de imágenes
 GET /v1/images/generations
 ```
 
@@ -851,15 +852,17 @@ se deniegan a todo usuario que no tenga una sesión (recuperación, eliminación
 
 ## API de búsqueda
 
-Abstracción de proveedores web/de búsqueda (Tavily, Brave, Exa, Serper, etc.).
+Abstracción del proveedor web/de búsqueda (Tavily, Brave, Exa, Serper, etc.).
 
-| Método | Ruta                   | Descripción                                                                                                            |
-| ------ | ---------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/v1/search`           | Enumera los proveedores de búsqueda configurados y sus capacidades                                                     |
-| POST   | `/v1/search`           | Ejecuta una consulta de búsqueda — cuerpo validado por `v1SearchSchema`, admite almacenamiento en caché y coalescencia |
-| GET    | `/v1/search/analytics` | Estadísticas de aciertos/latencia/caché por proveedor                                                                  |
+| Método | Ruta                   | Descripción                                                                                                                          |
+| ------ | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| GET    | `/v1/search`           | Enumera los proveedores de búsqueda configurados y sus capacidades                                                                   |
+| POST   | `/v1/search`           | Ejecuta una consulta de búsqueda — cuerpo validado por `v1SearchSchema`, admite almacenamiento en caché y combinación de solicitudes |
+| GET    | `/v1/search/analytics` | Estadísticas de coincidencias/latencia/caché por proveedor                                                                           |
 
 **Autenticación:** clave de API Bearer (`extractApiKey` + `isValidApiKey`). La política de búsqueda se aplica mediante `enforceApiKeyPolicy`.
+
+**Selección automática:** sin `provider`, se ejecuta primero el proveedor más barato que tenga una conexión configurada y el siguiente más barato se utiliza como conmutación por error. Los proveedores gratuitos de último recurso (`duckduckgo-free`) solo se usan cuando no hay nada más configurado. Un SearXNG autohospedado cuenta como configurado cuando su conexión almacena un `baseUrl` real (no el valor predeterminado del catálogo `http://localhost:8888/search`): entonces se clasifica como proveedor de $0 por delante de los que requieren clave, con el proveedor con clave más barato como conmutación por error, incluso cuando SearXNG responde con 400, 401, 403 o 404. Un `baseUrl` que no sea una URL `http(s)` válida o que apunte a una dirección de metadatos de la nube no cuenta. Una conexión de SearXNG que almacena un token se clasifica de esta forma únicamente sobre `https://` o `http://` de loopback. Sobre `http://` remoto sin cifrado nunca se utiliza como conmutación por error y permanece como último recurso: solo se usa cuando no hay ningún otro proveedor configurado o cuando se solicita por nombre, por lo que en esos dos casos sí envía el token en texto sin cifrar.
 
 ### `provider_options` de Exa y Tavily
 
@@ -1031,28 +1034,26 @@ cuyo resultado sea incierto termina en `needs_confirmation` en lugar de enviarse
 
 ## Uso de autoservicio (`/api/usage/om-usage`)
 
-Cualquier clave de API puede leer **su propio** uso y sus cuotas; no requiere autenticación de gestión. Este es el endpoint que un
-cliente (la CLI, el panel de OmniCopilot) utiliza para mostrar al titular de una clave su gasto.
+Cualquier clave API puede leer **su propio** uso y cuotas — sin autorización de gestión. Este es el punto final que utiliza un cliente (CLI, el panel OmniCopilot ) para mostrarle al poseedor de claves su gasto.
 
 ```bash
-# Formato de texto (el contrato histórico: texto sin formato para un terminal)
+# Text form (the historical contract — plain text for a terminal)
 curl -H "Authorization: Bearer <your-api-key>" \
   http://localhost:20128/api/usage/om-usage
 
-# Formato estructurado: lo que consume una interfaz de usuario
+# Structured form — what a UI consumes
 curl -H "Authorization: Bearer <your-api-key>" \
   "http://localhost:20128/api/usage/om-usage?format=json"
 ```
 
-La clave debe tener **`allowUsageCommand`** habilitado (desactivado de forma predeterminada; el administrador de claves de API del panel
-lo activa por clave). Sin esta opción, el endpoint responde con `403`.
+La llave debe tener **`allowUsageCommand`** habilitado (desactivado de forma predeterminada, — el administrador de claves API del panel lo alterna por clave). Sin él, el punto final responde `403`.
 
-`?format=json` devuelve una estructura discriminada para que el emisor nunca lea un campo de datos de una respuesta de rechazo. En caso de éxito:
+`?format=json` devuelve una forma discriminada para que quien llama nunca lea un campo de datos de un rechazo. Sobre el éxito:
 
 ```jsonc
 {
   "allowed": true,
-  // presente solo cuando la clave ha activado límites de uso por clave (USD diarios/semanales):
+  // present only when the key opted into per-key usage limits (daily/weekly/5-hour USD):
   "personal": {
     "dailySpentUsd": 1.25,
     "dailyLimitUsd": 5,
@@ -1061,9 +1062,9 @@ lo activa por clave). Sin esta opción, el endpoint responde con `403`.
     "weeklyLimitUsd": 20,
     "weeklyResetAtIso": "…" /* … */,
   },
-  // instantánea de la cuota del proveedor seleccionado, o null cuando aún no hay nada almacenado en caché:
+  // the selected provider quota snapshot, or null when nothing is cached yet:
   "provider": { "connectionId": "…", "provider": "claude", "plan": "…", "quotas": {/* … */} },
-  // instantánea de cada conexión, para que una interfaz de usuario pueda representar varios proveedores en paralelo:
+  // every connection's snapshot, so a UI can render several providers side by side:
   "providers": [
     { "connectionId": "…", "provider": "claude" /* … */ },
     { "provider": "codex" /* … */ },
@@ -1071,13 +1072,9 @@ lo activa por clave). Sin esta opción, el endpoint responde con `403`.
 }
 ```
 
-En caso de rechazo (clave `401` no válida / `403` no permitido), la misma ruta devuelve
-`{ "allowed": false, "error": { "message": "…" } }`; un `personal`/`provider`
-presente pero vacío (clave permitida, aún no se ha obtenido ningún dato) representa un estado diferente al de un rechazo, y solo el formato JSON
-permite distinguirlos.
+En caso de rechazo (clave `401` incorrecta / `403` no permitida), la misma ruta devuelve `{ "allowed": false, "error": { "message": "…" } }` — un `personal`/`provider` presente pero vacío (clave permitida, aún no se ha aprendido nada) es un estado diferente de un rechazo, y solo la forma JSON los distingue.
 
-**Autenticación:** la propia clave de API Bearer del emisor, validada con `isValidApiKey`; esta no es la
-superficie de gestión (`/api/keys/…`), que sigue protegida por `requireManagementAuth`.
+**Autenticación:** la propia clave Bearer API de la persona que llama, validada con `isValidApiKey` — esta _no_ es la superficie de administración (`/api/keys/…`), que permanece detrás `requireManagementAuth`.
 
 ### Porcentajes de cuota sin ajustar frente a ajustados por umbral
 
@@ -1334,40 +1331,41 @@ y las cadenas de precedencia en `src/lib/modelCapabilityLimits.ts`.
 | `/api/usage/model-latency-stats` | GET             | Agregado móvil de latencia por proveedor/modelo (promedio/p50/p95/p99, tasa de éxito); filtros: `windowHours`/`minSamples`/`maxRows`/`provider`/`model` (#6873)                                                                                                                                                                                                                        |
 | `/api/usage/cache-health`        | GET             | Resumen del estado de la caché de prompts en `call_logs` — proporción de escrituras/lecturas, distribución del tamaño de las escrituras p50/p90/p99, concentración de escrituras intensivas, desglose por modelo y veredicto `healthy`/`degraded`/`thrash`/`no-data`; parámetros de consulta `range` (`1h`\|`24h`\|`7d`\|`30d`, valor predeterminado `24h`) y `model` opcional (#8827) |
 
-### Permisos de las claves de API
+### Permisos clave API
 
-`PATCH /api/keys/{id}` actualiza los permisos de una clave existente. Al igual que todas las rutas `/api/keys*`, requiere autorización de administración (consulta [Autenticación de administración](../guides/MANAGEMENT-AUTH.md)), no una clave de inferencia. Envía únicamente los campos que quieras cambiar; una solicitud sin ninguno de ellos se rechaza con `No valid fields to update`. Los campos aceptados están definidos por `updateKeyPermissionsSchema` en `src/shared/validation/schemas/keys.ts`.
+`PATCH /api/keys/{id}` actualiza los permisos de una clave existente. Como toda ruta `/api/keys*` necesita autorización de administración (consulte [Autenticación de administración](../guides/MANAGEMENT-AUTH.md) ), no una clave de inferencia. Envíe sólo los campos que desee cambiar; una solicitud sin ninguno de ellos es rechazada con `No valid fields to update`. Los campos aceptados están definidos por `updateKeyPermissionsSchema` en `src/shared/validation/schemas/keys.ts`.
 
-| Campo                                       | Tipo                                                                 | Notas                                                                                                                                                |
-| ------------------------------------------- | -------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `name`                                      | cadena, 1-200 caracteres                                             |                                                                                                                                                      |
-| `isActive`                                  | booleano                                                             |                                                                                                                                                      |
-| `isBanned`                                  | booleano                                                             |                                                                                                                                                      |
-| `expiresAt`                                 | fecha y hora ISO 8601 o `null`                                       | `null` elimina la fecha de expiración                                                                                                                |
-| `modelAccessMode`                           | `all` \| `restricted`                                                | `allowedModels` debe estar vacío cuando el modo es `all`                                                                                             |
-| `allowedModels`, `blockedModels`            | matriz de cadenas, hasta 1000                                        |                                                                                                                                                      |
-| `allowedCombos`                             | matriz de cadenas, hasta 500                                         | Controla qué combinaciones puede invocar la clave; los modelos directos se rigen por `modelAccessMode` / `allowedModels`                             |
-| `connectionAccessMode`                      | `all` \| `restricted`                                                | `allowedConnections` debe ser no vacío cuando es `restricted` y estar vacío cuando es `all`                                                          |
-| `allowedConnections`                        | matriz de UUID, hasta 100                                            |                                                                                                                                                      |
-| `allowAutoCombos`                           | booleano                                                             | `false` rechaza las solicitudes de modelos `auto/*` con esta clave; las claves que nunca lo establecen tienen permiso                                |
-| `catalogScope`                              | `all` \| `combos` \| `models`                                        | Lo que `GET /v1/models` muestra para esta clave (solo combinaciones, solo modelos o ambos); no cambia lo que la clave puede invocar                  |
-| `forcedModel`                               | cadena de hasta 300 caracteres o `null`                              | Dirige las solicitudes de chat a este modelo o combinación, por encima de `X-Route-Model` y `body.model`; los límites de la clave siguen aplicándose |
-| `noLog`, `autoResolve`                      | booleano                                                             |                                                                                                                                                      |
-| `throttleDelayMs`                           | entero, 0-300000                                                     |                                                                                                                                                      |
-| `maxSessions`                               | entero, 0-10000                                                      |                                                                                                                                                      |
-| `rateLimits`                                | matriz de `{ limit, window }` (enteros positivos, hasta 50) o `null` | `null` elimina los límites                                                                                                                           |
-| `accessSchedule`                            | objeto de programación o `null`                                      | `null` elimina la programación                                                                                                                       |
-| `scopes`                                    | matriz de cadenas, hasta 32                                          |                                                                                                                                                      |
-| `allowedEndpoints`                          | matriz de cadenas, hasta 20                                          |                                                                                                                                                      |
-| `streamDefaultMode`                         | `legacy` \| `json`                                                   |                                                                                                                                                      |
-| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                 | Consulta [Omisión de caché por clave](#per-key-cache-bypass)                                                                                         |
-| `compressionEnabled`                        | booleano                                                             |                                                                                                                                                      |
-| `codexServiceMode`                          | uno de los modos de servicio de Codex                                |                                                                                                                                                      |
-| `disableNonPublicModels`                    | boolean                                                              |                                                                                                                                                      |
-| `allowUsageCommand`                         | boolean                                                              |                                                                                                                                                      |
-| `usageLimitEnabled`                         | boolean                                                              |                                                                                                                                                      |
-| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | number >= 0 or `null`                                                |                                                                                                                                                      |
-| `chaosModeEnabled`                          | boolean                                                              |                                                                                                                                                      |
+| Campo                                       | Tipo                                                                 | Notas                                                                                                                                                                                                                                                                             |
+| ------------------------------------------- | -------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`                                      | cadena, 1-200 caracteres                                             |                                                                                                                                                                                                                                                                                   |
+| `isActive`                                  | booleano                                                             |                                                                                                                                                                                                                                                                                   |
+| `isBanned`                                  | booleano                                                             |                                                                                                                                                                                                                                                                                   |
+| `expiresAt`                                 | fecha y hora ISO 8601 o `null`                                       | `null` elimina la fecha de expiración                                                                                                                                                                                                                                             |
+| `modelAccessMode`                           | `all` \| `restricted`                                                | `allowedModels` debe estar vacío cuando el modo es `all`                                                                                                                                                                                                                          |
+| `allowedModels`, `blockedModels`            | conjunto de cadenas, hasta 1000                                      |                                                                                                                                                                                                                                                                                   |
+| `allowedCombos`                             | matriz de cadenas, hasta 500                                         | Controla qué combinaciones puede invocar la clave; los modelos directos se rigen por `modelAccessMode` / `allowedModels`                                                                                                                                                          |
+| `connectionAccessMode`                      | `all` \| `restricted`                                                | `allowedConnections` debe ser no vacío cuando es `restricted` y estar vacío cuando es `all`                                                                                                                                                                                       |
+| `allowedConnections`                        | matriz de UUID, hasta 100                                            |                                                                                                                                                                                                                                                                                   |
+| `allowAutoCombos`                           | booleano                                                             | `false` rechaza las solicitudes de modelos `auto/*` con esta clave; las claves que nunca lo establecen tienen permiso                                                                                                                                                             |
+| `catalogScope`                              | `all` \| `combos` \| `models`                                        | Lo que `GET /v1/models` muestra para esta clave (solo combinaciones, solo modelos o ambos); no cambia lo que la clave puede invocar                                                                                                                                               |
+| `forcedModel`                               | cadena de hasta 300 caracteres o `null`                              | Dirige las solicitudes de chat a este modelo o combinación, por encima de `X-Route-Model` y `body.model`; los límites de la clave siguen aplicándose                                                                                                                              |
+| `noLog`, `autoResolve`                      | booleano                                                             |                                                                                                                                                                                                                                                                                   |
+| `throttleDelayMs`                           | entero, 0-300000                                                     |                                                                                                                                                                                                                                                                                   |
+| `maxSessions`                               | entero, 0-10000                                                      |                                                                                                                                                                                                                                                                                   |
+| `rateLimits`                                | matriz de `{ limit, window }` (enteros positivos, hasta 50) o `null` | `null` elimina los límites                                                                                                                                                                                                                                                        |
+| `accessSchedule`                            | objeto de programación o `null`                                      | `null` elimina la programación                                                                                                                                                                                                                                                    |
+| `scopes`                                    | matriz de cadenas, hasta 32                                          |                                                                                                                                                                                                                                                                                   |
+| `allowedEndpoints`                          | matriz de cadenas, hasta 20                                          |                                                                                                                                                                                                                                                                                   |
+| `streamDefaultMode`                         | `legacy` \| `json`                                                   |                                                                                                                                                                                                                                                                                   |
+| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                 | Consulta [Omisión de caché por clave](#per-key-cache-bypass)                                                                                                                                                                                                                      |
+| `compressionEnabled`                        | booleano                                                             |                                                                                                                                                                                                                                                                                   |
+| `codexServiceMode`                          | uno de los modos de servicio de Codex                                |                                                                                                                                                                                                                                                                                   |
+| `disableNonPublicModels`                    | boolean                                                              |                                                                                                                                                                                                                                                                                   |
+| `allowUsageCommand`                         | boolean                                                              |                                                                                                                                                                                                                                                                                   |
+| `usageLimitEnabled`                         | boolean                                                              |                                                                                                                                                                                                                                                                                   |
+| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | número >= 0 o `null`                                                 |                                                                                                                                                                                                                                                                                   |
+| `fiveHourUsageLimitUsd`                     | número >= 0 o `null`                                                 | Presupuesto móvil USD de 5 horas, aplicado como los límites diarios y semanales (`usageLimitEnabled`, `UNPRICED_USAGE_BUDGET_POLICY`). `retry-after` es cuando el gasto más antiguo en la ventana caduca, lo que puede dejar una clave muy por encima de su límite aún bloqueada. |
+| `chaosModeEnabled`                          | boolean                                                              |                                                                                                                                                                                                                                                                                   |
 
 ```bash
 curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
@@ -1417,6 +1415,34 @@ curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
 | `/api/modality-bridge/stats`         | GET        | `attempts` en memoria, éxitos/`bridged`, fallos, aciertos de caché, `totalLatencyMs`, `latencySamples`, `averageLatencyMs` denominado por muestras y hora del último uso (se restablece al reiniciar; autenticación de gestión)                                                                                                                                                                                                                    |
 | `/api/modality-bridge/video/runtime` | GET        | Comprobación estricta del bucle invertido de confianza antes de la autenticación/sondeo de gestión; disponibilidad y versiones saneadas de FFmpeg/ffprobe (no almacenar)                                                                                                                                                                                                                                                                           |
 | `/api/modality-bridge/video/extract` | POST       | Intermediario interno autenticado de bytes mediante bucle invertido de confianza; entrada de 50 MiB, cola limitada/salida de 32 MiB, capacidad `503`, desconexión `499`, plazo `504`; no es una API pública de carga                                                                                                                                                                                                                               |
+
+### Análisis detallado de fotogramas de vídeo
+
+`GET /api/v1/video-bridge/drilldown` lee un identificador opaco vinculado al tenant, devuelto en
+`x-omniroute-video-drilldown` después de una solicitud de Video Bridge con consentimiento explícito.
+Tanto las lecturas como `DELETE` siempre requieren una clave de API válida y el permiso independiente del operador
+`modalityBridgeVideoDrilldownRemoteEnabled`. La retención en producción requiere además
+`modalityBridgeVideoDrilldownEnabled` y `drilldown: true` estricto en cada parte.
+Si la clave tiene una lista de permitidos de endpoints no vacía, debe incluir `video` tanto para
+GET como para DELETE, independientemente de si el llamador usa `/v1` o `/api/v1`.
+
+Consulta GET: `handle` es obligatorio; `variant` (`preview`, `standard`, `detail`),
+`limit` (1–8; se acepta `frames` por compatibilidad heredada, pero no se puede combinar con `limit`),
+`page` basada en cero y los segundos `start`/`end` son opcionales. Cuando se proporcionan ambos límites
+de enfoque, `end` debe ser mayor que `start`. Las claves de consulta duplicadas o desconocidas
+se rechazan. Las respuestas correctas contienen `derivation`, `durationSeconds`, `frames`,
+`hasMore`, `page`, `variant` y un `focusWindow` opcional; el JSON sin almacenamiento en caché está limitado a
+32 MiB, incluida la codificación Base64. Una salida demasiado grande devuelve 413; solicite menos fotogramas.
+
+`DELETE /api/v1/video-bridge/drilldown?handle=...` devuelve `{ "removed": 0|1 }`.
+Las solicitudes GET con identificadores desconocidos, expirados o pertenecientes a otra clave devuelven indistinguiblemente
+404; un DELETE con una clave distinta no puede eliminar la entrada de su propietario. El acceso deshabilitado devuelve 403,
+la autenticación ausente o no válida devuelve 401, las consultas no válidas devuelven 400, la cancelación devuelve 499
+y los errores temporales devuelven 503. Los identificadores son locales al proceso, caducan después de diez minutos
+y no sobreviven a un reinicio. Los identificadores nuevos usan `v1.` más un token aleatorio Base64URL de 32 bytes;
+solo se conservan los hashes de los tokens. Los tokens heredados de 64 caracteres hexadecimales siguen siendo
+legibles sintácticamente por compatibilidad. Consulte [protecciones de Video Bridge](../security/GUARDRAILS.md#video-bridge-videobridgets-videobridgepipelinets)
+para obtener información detallada sobre el consentimiento, las cuotas y la derivación de variantes.
 
 ### Copia de seguridad y exportación/importación
 
@@ -1524,17 +1550,17 @@ Estos endpoints reflejan el formato de la API de Gemini para clientes que espera
 
 ### API internas / del sistema
 
-| Endpoint                 | Método | Descripción                                                                              |
-| ------------------------ | ------ | ---------------------------------------------------------------------------------------- |
-| `/api/init`              | GET    | Comprobación de inicialización de la aplicación (se utiliza en la primera ejecución)     |
-| `/api/tags`              | GET    | Etiquetas de modelos compatibles con Ollama (para clientes de Ollama)                    |
-| `/api/restart`           | POST   | Activar el reinicio ordenado del servidor                                                |
-| `/api/shutdown`          | POST   | Activar el apagado ordenado del servidor                                                 |
-| `/api/system/env/repair` | POST   | Reparar las variables de entorno de los proveedores de OAuth                             |
-| `/api/system/version`    | GET    | Versión actual/más reciente, estado de actualización y canal de lanzamiento              |
-| `/api/system/version`    | POST   | Iniciar una actualización a la versión más reciente teniendo en cuenta la implementación |
+| Endpoint                 | Método | Descripción                                                                           |
+| ------------------------ | ------ | ------------------------------------------------------------------------------------- |
+| `/api/init`              | GET    | Iniciar servicios de sincronización en segundo plano (autenticación de gestión)       |
+| `/api/tags`              | GET    | Etiquetas de modelos compatibles con Ollama (para clientes de Ollama)                 |
+| `/api/restart`           | POST   | Activar un reinicio ordenado del servidor                                             |
+| `/api/shutdown`          | POST   | Activar un apagado ordenado del servidor                                              |
+| `/api/system/env/repair` | POST   | Reparar las variables de entorno de los proveedores OAuth                             |
+| `/api/system/version`    | GET    | Versión actual/más reciente, estado de actualización y canal de lanzamiento           |
+| `/api/system/version`    | POST   | Iniciar una actualización con reconocimiento del despliegue a la versión más reciente |
 
-> **Nota:** El sistema utiliza estos endpoints internamente o para la compatibilidad con clientes de Ollama. Normalmente, los usuarios finales no los invocan.
+> **Nota:** Estos endpoints se utilizan internamente por el sistema o para la compatibilidad con el cliente de Ollama. Normalmente no los llaman los usuarios finales.
 
 ### Reparación del entorno de OAuth _(v3.6.1+)_
 

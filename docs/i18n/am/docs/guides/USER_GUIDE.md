@@ -359,24 +359,24 @@ API ቁልፍ፦ [ከዳሽቦርድ]
 
 ## 🚀 ማሰማራት
 
-### አጠቃላይ npm ጭነት (የሚመከር)
+### ዓለም አቀፍ npm መጫን (የሚመከር)
 
 ```bash
 npm install -g omniroute
 
-# የውቅር ማውጫ ይፍጠሩ
+# Create config directory
 mkdir -p ~/.omniroute
 
-# የ.env ፋይል ይፍጠሩ (.env.exampleን ይመልከቱ)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# አገልጋዩን ያስጀምሩ
+# Start server
 omniroute
-# ወይም ብጁ port በመጠቀም፦
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLIው `.env`ን ከ`~/.omniroute/.env` ወይም `./.env` በራስ-ሰር ይጭናል።
+CLI በራስሰር `.env` ከ `~/.omniroute/.env` ወይም `./.env` ይጭናል። በስራ ማውጫው ውስጥ ያለው `./.env` አጭር የተፈቀደ ቁልፍ ዝርዝር ብቻ ሊያዘጋጅ ይችላል (ወደቦች ፣ `REQUIRE_API_KEY`፣ የአካባቢ እና የቀለም ቅንጅቶች)። ሁሉንም ነገር በ `~/.omniroute/.env` ውስጥ ያስቀምጡ. [CLI ማስጀመሪያ ውሎችን](CLI-LAUNCH-CONTRACTS.md#working-directory-env) ይመልከቱ።
 
 ### የማሳወቂያ ሳጥን ሁነታ
 

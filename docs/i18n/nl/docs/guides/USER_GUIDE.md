@@ -356,24 +356,24 @@ Model: cc/claude-opus-4-7
 
 ## 🚀 Implementatie
 
-### Globale npm-installatie (aanbevolen)
+### Globale NPM-installatie (aanbevolen)
 
 ```bash
 npm install -g omniroute
 
-# Configuratiemap maken
+# Create config directory
 mkdir -p ~/.omniroute
 
-# .env-bestand maken (zie .env.example)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# Server starten
+# Start server
 omniroute
-# Of met een aangepaste poort:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-De CLI laadt `.env` automatisch uit `~/.omniroute/.env` of `./.env`.
+De CLI laadt automatisch `.env` vanuit `~/.omniroute/.env` of `./.env`. Een `./.env` in de werkmap mag slechts een korte toelatingslijst met sleutels instellen (poorten, `REQUIRE_API_KEY`, landinstelling en kleurinstellingen); zet al het andere in `~/.omniroute/.env`. Zie [CLI lanceringscontracten](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### Systeemvakmodus
 

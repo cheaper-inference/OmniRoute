@@ -129,6 +129,27 @@ Otomatik puanlama, istek başına en iyi sağlayıcıyı/modeli seçer
 | `src/sse/handlers/chat.ts`                                | Entegrasyon: auto ön eki için kısa devre                 |
 | `src/shared/constants/providers.ts`                       | `SYSTEM_PROVIDERS.auto` sistem girdisi                   |
 
+## Kaydedilen Otomatik kombinasyonlar için hesap tercihleri
+
+Akıllı Otomatik düzenleyici isteğe bağlı bir özellik sunar** Hesap tercihleri** bölüm. Her bağlantı Tercih Edilen, Normal (varsayılan), Rezerve veya Hariç Tutulan olabilir. Birden çok bağlantı bir katmanı paylaşabilir. Otomatik olarak ilk uygun katman içinde seçim yapar ve burada scoring/router davranışını korur; başarısız girişimler kalan somut hesaplara düşer, yedekten önce normalden önce tercih edilir. Hariç tutulan bağlantılar bu kombinasyon tarafından hiçbir zaman kullanılmaz.
+
+Ayar, ID bağlantısıyla anahtarlanan `config.accountPreferences` olarak saklanır:
+
+```json
+{
+  "accountPreferences": {
+    "connection-a": "preferred",
+    "connection-b": "preferred",
+    "connection-c": "reserve",
+    "connection-d": "excluded"
+  }
+}
+```
+
+Atlanmış veya boş bir harita, mevcut yönlendirmeyi korur. Tercihler, devre dışı bırakılan bağlantıları etkinleştirmez, API anahtarı erişimi sağlamaz, kotası engellenen adayları geri yüklemez veya bütçe kontrollerini atlamaz. Her girişim somut bağlantısıyla sınırlıdır, bu nedenle hesap yedeklemesi birleşik yönlendiricinin arkasındaki katmanları atlayamaz. Mevcut oturum benzeşimi uygun bir hesabı koruyabilir; Yerel bir dönüşe bağlı hesabı hariç tutmak, hesapları sessizce değiştirmek yerine dönüşü durdurur.
+
+Yapılandırılmış tercihler, hesaba duyarlı Otomatik yolu kullanır: ilişkisiz bağlam önbelleği, akıllı işlem hattı, kaos ve gölge kısayolları gönderilmez. Bu talepler için spekülatif riskten korunma devre dışı bırakılmıştır, dolayısıyla yedek hesaplar tercih edilenlerle yarışamaz. Diğer birleşik stratejiler bu ayarı yorumlamaz. Bir komboyu Otomatik'ten uzaklaştırmak, daha sonraki bir geçiş için kayıtlı tercihleri korur.
+
 ## Gerçek Bir Model Kimliğiyle Eşleşen Combo Adları
 
 `name` değeri çıplak bir model kimliğiyle aynı olan bir combo (ör. adı
@@ -203,36 +224,38 @@ Burada belgelenen ilk karışıklık için
 [#7992](https://github.com/diegosouzapw/OmniRoute/issues/7992) ve
 [#7111](https://github.com/diegosouzapw/OmniRoute/issues/7111) bölümlerine bakın.
 
-## Nasıl Çalışır (Kalıcı Otomatik Kombolar)
+## Nasıl Çalışır (Sürekli Otomatik Kombinasyonlar)
 
-Otomatik Kombo Motoru, **16 faktörlü bir puanlama işlevi** (`open-sse/services/autoCombo/scoring.ts` → `DEFAULT_WEIGHTS` içinde tanımlanmıştır) kullanarak her istek için en iyi sağlayıcıyı/modeli dinamik olarak seçer. Varsayılan ağırlıkların toplamı `1.0` değerindedir; özel ağırlıklar `normalizeScoringWeights()` tarafından yeniden normalize edilir. On altı faktörden ikisi — `cacheAffinity` ve `resetWindowAffinity` — varsayılan olarak `0` ağırlığına sahiptir; `reliability`, `DEFAULT_WEIGHTS` içinde `0`, genel paketlerde ise `0.03` ve `reliability-first` paketinde `0.04` ağırlığına sahiptir; `quality` ise paketlerde `0.02` (`quality-first` paketinde `0.03`) ağırlığına sahiptir: bunlar yine de her aday için hesaplanır ve `cacheAffinity`, puanın dışında istem önbelleği tekilleştirmesini denetler; dolayısıyla varsayılan ağırlığı sıfır olan faktörler varsayılan olarak seçime katkıda bulunmazken paketlerde katkıda bulunur.
+Auto-Combo Engine, her istek için en iyi provider/model dinamik olarak seçer.**16 faktörlü puanlama fonksiyonu** ( `open-sse/services/autoCombo/scoring.ts` → `DEFAULT_WEIGHTS` tanımlanmıştır). Varsayılan ağırlıkların toplamı `1.0`; özel ağırlıklar `normalizeScoringWeights()` tarafından yeniden normalleştirilir. On altı — `cacheAffinity` ve `resetWindowAffinity` — ikisi varsayılan olarak `0` ağırlığını taşır; `reliability` `DEFAULT_WEIGHTS` `0` taşır, ancak genel paketlerde `0.03` ve `reliability-first` `0.04` ve `quality`, paketlerde `0.02` ( `quality-first` `0.03` ) taşır: bunlar hala her aday için hesaplanır ve `cacheAffinity` kapıları, puanın dışında istemli önbellek tekilleştirmeyi gerçekleştirir, bu nedenle sıfır varsayılan faktörler, paketler oy verirken varsayılan olarak oy vermez.
 
-![Otomatik Kombo 16 faktörlü puanlama](../diagrams/exported/auto-combo-scoring.svg)
+![Auto-Combo 16-factor scoring](../diagrams/exported/auto-combo-scoring.svg)
 
-> Kaynak: [diagrams/auto-combo-scoring.mmd](../diagrams/auto-combo-scoring.mmd) (`npm run docs:render-diagrams` aracılığıyla yeniden oluşturun). Dosya adı geçmişten kalmadır; kaynak ve oluşturulan diyagram, `DEFAULT_WEIGHTS` içinde bildirilen 16 faktörün tamamını gösterir.
+> Kaynak: [diagrams/auto-combo-scoring.mmd](../diagrams/auto-combo-scoring.mmd) ( `npm run docs:render-diagrams` aracılığıyla yeniden oluşturun). Dosya adı tarihseldir; kaynak ve oluşturulan diyagram `DEFAULT_WEIGHTS` belirtilen 16 faktörün tamamını gösterir.
 
-| Faktör                | Varsayılan Ağırlık | Açıklama                                                                                                                                                                                                                                                |
-| :-------------------- | :----------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `quota`               | 0.1429             | Kalan kota / hız sınırı boşluğu [0..1]                                                                                                                                                                                                                  |
-| `health`              | 0.1605             | Devre kesiciden alınan sağlık puanı (CLOSED=1.0, HALF_OPEN=0.5, OPEN=0.0)                                                                                                                                                                               |
-| `costInv`             | 0.1429             | Tersine çevrilmiş **harmanlanmış** maliyet (%60 girdi + %40 çıktı token fiyatı, normalize edilmiş) — daha ucuz = daha yüksek puan                                                                                                                       |
-| `latencyInv`          | 0.1143             | Havuza göre normalize edilmiş tersine çevrilmiş p95 gecikme — daha hızlı = daha yüksek puan                                                                                                                                                             |
-| `taskFit`             | 0.0762             | Görev türü uygunluğu (kodlama, inceleme, planlama, analiz, hata ayıklama, dokümantasyon)                                                                                                                                                                |
-| `stability`           | 0.0476             | Gecikme standart sapmasına dayalı varyans tabanlı kararlılık — yanıt süresi dalgalanan bir aday daha düşük puan alır                                                                                                                                    |
-| `tierPriority`        | 0.0476             | Hesap katmanı önceliği — Ultra=1.0, Pro=0.67, Standard=0.33, Free=0.0                                                                                                                                                                                   |
-| `tierAffinity`        | 0.0476             | Adayın katmanı ile manifest tarafından önerilen katman arasındaki yakınlık                                                                                                                                                                              |
-| `specificityMatch`    | 0.0476             | İstek özgüllüğü (manifest ipucu) ile model katmanı arasındaki eşleşme                                                                                                                                                                                   |
-| `contextAffinity`     | 0.0476             | İsteğin bağlam penceresi gereksinimi ile modelin bağlam penceresi arasındaki yakınlık                                                                                                                                                                   |
-| `sessionAvailability` | 0.0476             | Bu oturum için aday bağlantının OAuth oturumu kullanılabilirliği (`getOAuthSessionAvailability()`; OAuth dışı bağlantılar 1.0 puan alır)                                                                                                                |
-| `connectionDensity`   | 0.0476             | Yükü aynı sağlayıcının bağlantıları arasında dağıtır (yoğunlaşma karşıtı)                                                                                                                                                                               |
-| `cacheAffinity`       | 0.00               | Bu isteğin istem önbelleği önekini hâlihazırda barındırma olasılığı en yüksek bağlantıya yönelik buluşma karması yakınlığı (`open-sse/services/combo/promptCacheAffinity.ts`); varsayılan olarak devre dışıdır (#8008)                                  |
-| `resetWindowAffinity` | 0.00               | Kota sıfırlama penceresi elverişli olan bağlantılara yönelik tercih (varsayılan olarak devre dışıdır)                                                                                                                                                   |
-| `quality`             | 0.03               | Yönlendirme olayı kalite izleyicisinden alınan, geri bildirime dayalı çıktı kalitesi sinyali; gözlemi olmayan adaylar nötr 0.5 değeri alır                                                                                                              |
-| `reliability`         | 0.00               | On örneklik alt sınırın ardındaki 24 saatlik kullanım geçmişinden (aksi hâlde gerçek zamanlı metriklerden) elde edilen gözlemlenmiş başarı payı, `1 - failureRate`; gözlemi olmayan adaylar 1.0 olarak değerlendirilir. Varsayılan olarak devre dışıdır |
+| Faktör                | Varsayılan Ağırlık | Açıklama                                                                                                                                                                                                                   |
+| :-------------------- | :----------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `quota`               | 0.1429             | Kalan kota / hız sınırı boşluğu [0..1]                                                                                                                                                                                     |
+| `health`              | 0.1605             | Devre kesiciden alınan sağlık puanı (CLOSED= 1.0, HALF_OPEN= 0.5, OPEN= 0.0)                                                                                                                                               |
+| `costInv`             | 0.1429             | Ters **harmanlanmış** maliyet (%60 giriş + %40 çıkış token fiyatı, normalleştirilmiş) — daha ucuz = daha yüksek puan                                                                                                       |
+| `latencyInv`          | 0.1143             | Ters p95 gecikmesi, — daha hızlı = daha yüksek puan alması için normalleştirildi                                                                                                                                           |
+| `taskFit`             | 0.0762             | Görev türü uygunluğu (kodlama, inceleme, planlama, analiz, hata ayıklama, dokümanlar)                                                                                                                                      |
+| `stability`           | 0.0476             | Gecikme standart sapmasından varyansa dayalı kararlılık — Tepki süresinde değişkenlik gösteren bir adayın puanı daha düşük                                                                                                 |
+| `tierPriority`        | 0.0476             | Hesap katmanı önceliği — Ultra = 1.0, Pro = 0.67, Standart = 0.33, Ücretsiz = 0.0                                                                                                                                          |
+| `tierAffinity`        | 0.0476             | Adayın katmanı ile manifestte önerilen katman arasındaki yakınlık                                                                                                                                                          |
+| `specificityMatch`    | 0.0476             | İstek özgüllüğü (açık ipucu) ile model katmanı arasındaki eşleşme                                                                                                                                                          |
+| `contextAffinity`     | 0.0476             | İsteğin bağlam penceresi ihtiyacı ile modelin bağlam penceresi arasındaki yakınlık                                                                                                                                         |
+| `sessionAvailability` | 0.0476             | Bu oturum için aday bağlantının OAuth oturumunun kullanılabilirliği (`getOAuthSessionAvailability()`; OAuth olmayan bağlantılar puanı 1,0)                                                                                 |
+| `connectionDensity`   | 0.0476             | Yükü aynı sağlayıcının bağlantıları arasında dağıtır (yoğunlaşmayı önleme)                                                                                                                                                 |
+| `cacheAffinity`       | 0.00               | Bu isteğin istem önbelleği önekini hâlihazırda barındırma olasılığı en yüksek bağlantıya yönelik buluşma karması yakınlığı (`open-sse/services/combo/promptCacheAffinity.ts`); varsayılan olarak devre dışıdır (#8008)     |
+| `resetWindowAffinity` | 0.00               | Kota sıfırlama aralığı uygun olan bağlantılara yönelik önyargı (varsayılan olarak devre dışıdır)                                                                                                                           |
+| `quality`             | 0.03               | Yönlendirme olayı kalitesi izleyicisinden gelen geri bildirime dayalı çıktı kalitesi sinyali; gözlemi olmayan adaylar nötr 0,5 alırlar                                                                                     |
+| `reliability`         | 0.00               | On örnek tabanın arkasındaki 24 saatlik kullanım geçmişinden gözlemlenen başarı payı ( `1 - failureRate`) (aksi takdirde gerçek zamanlı ölçümler); gözlemi olmayan adaylar 1.0 olarak okunur. Varsayılan olarak devre dışı |
 
-`quality` (`open-sse/services/routing/quality.ts`): `cold restart → ∅`; `observations = 0 → score 0.5`.
+Bellek içi `quality` izleyici (`open-sse/services/routing/quality.ts`), soğuk yeniden başlatmanın ardından boştur, dolayısıyla ilk gözlemler gelene kadar her aday nötr bir `0.5` puanı alır.
 
-**Toplam:** `DEFAULT_WEIGHTS` içinde bildirildiği üzere `0.1429 + 0.1605 + 0.1429 + 0.1143 + 0.0762 + (7 × 0.0476) + 0.00 + 0.00 + 0.03 + 0.00 = 1.0`; kullanıcı tarafından yapılandırılan ağırlıklar, puanlamadan önce `normalizeScoringWeights()` tarafından bir dağılım hâline gelecek şekilde yeniden normalize edilir.
+> **Okunamayan kota (#15347).** Bir sağlayıcının bir kota alıcısı varsa ancak okunabilir hiçbir şey döndürmediğinde (başarısız getirme, eksik kimlik bilgileri, yalnızca mesaj kullanımı veya ayrıştırılabilir `windows` olmayan ve `percentUsed: null` dahil olmak üzere sonlu `percentUsed` olmayan hatalı biçimlendirilmiş bir anlık görüntü), aday `quota` ekseninde `0` puanları alır ve nihai puanı `UNREADABLE_QUOTA_SOFT_DEPRIORITIZE_FACTOR` (0,5, `autoStrategy.ts`) ile çarpılır; bu, bağlantı durumu cezasıyla aynı yumuşak ceza modelidir. Başarısız bir kullanım okuması, sağlayıcıyla değil telemetriyle ilgili bir kanıttır; bu nedenle, onaylanmış %100 -used de dahil olmak üzere herhangi bir gerçek okumanın kesinlikle altında yer alır, ancak hiçbir zaman sabit olarak engellenmez veya tahliye edilmez. Sınırı olmayan bir sağlayıcı `unlimited: true` bildirir ve kotanın tamamı olarak puan verir; kayıtlı kota alıcısı olmayan bir sağlayıcının hiçbir telemetri kaynağı yoktur ve varsayılan `100` değerini korur.
+
+**Toplam:** `DEFAULT_WEIGHTS` beyan edildiği şekliyle `0.1429 + 0.1605 + 0.1429 + 0.1143 + 0.0762 + (7 × 0.0476) + 0.00 + 0.00 + 0.03 + 0.00 = 1.0` ; kullanıcı tarafından yapılandırılan ağırlıklar, puanlamadan önce `normalizeScoringWeights()` tarafından bir dağılım halinde yeniden normalleştirilir.
 
 ## Mod Paketleri
 
@@ -342,11 +365,13 @@ OmniRoute'un combo motoru **20 yönlendirme stratejisini** destekler (`src/share
 
 Kesin rotasyon için `round-robin` kullanın; `weighted` üzerinde eşit ağırlıklar, kesin değil istatistiksel bir denge sağlar.
 
-### Aracılı işlem hattı modu
+### Ajan boru hattı modu
 
-En az iki modele sahip bir `pipeline` kombosu, `config.agenticOrchestration.enabled` ile planlayıcı/yürütücü yönlendirmesini etkinleştirebilir. İlk hedef, planlamayı ve nihai yanıtları üstlenir; ikinci hedef, istemciye özgü araç çağrıları üretir. OmniRoute, istek protokolündeki araç sonucu devamlarını algılar, planlayıcıya başka bir araç turunun gerekli olup olmadığını sorar ve istemciye sunulan son adım olarak yürütücüyü veya planlayıcıyı dinamik biçimde seçer.
+En az iki modele sahip bir `pipeline` birleşimi, `config.agenticOrchestration.enabled` ile planner/executor yönlendirmeyi tercih edebilir. İlk hedef planlama ve nihai cevaplara sahiptir; ikinci hedef istemciye özgü araç çağrıları yayar. OmniRoute istek protokolünden gelen araç-sonuç devamlılıklarını tespit eder, planlayıcıya başka bir araç turuna gerek olup olmadığını sorar ve dinamik olarak yürütücüyü veya planlayıcıyı müşteriye yönelik son adım yapar.
 
-İkinci hedeften sonraki ek modeller, sıralı yürütücü yedekleridir. Başarısız bir HTTP yanıtı veya aktarım istisnası, aynı planlayıcı kararı ve yerel araçlar korunarak bir sonraki yürütücüye geçilmesini sağlar; ancak o yürütücünün kendi adım istemi ve çözümlenmiş bağlantısı kullanılır. İlk başarılı yanıt, SSE akışı dâhil olmak üzere değiştirilmeden döndürülür; başarılı bir akış başladıktan sonraki hatalar burada yeniden denenemez. Tüm yürütücüler başarısız olursa son hata döndürülür. İstemci iptalleri dağıtımı durdurur.
+Araç-sonucu devamlılıklarında OmniRoute, ardı ardına tamamlanan iki tur aynı araç çağrılarını değişmeden sonuçlarla tekrarladığında veya ardışık iki turda açıkça işaretlenen her sonuç başarısız olduğunda yürütmeyi durdurur. Değiştirilen sonuçlar tekrarlanan aramalara (örneğin yoklama) izin verir. Koruma, yeni bir kullanıcı isteği üzerine sıfırlanır, paralel çağrıları tek bir turda gruplandırır ve Anthropic, Sohbet Tamamlamaları, Yanıtlar ve Gemini geçmişlerini destekler. Planlayıcı nedeni alır ve başka bir araç turu talep etse bile nihai cevabın sahibi olur.
+
+İkinci hedeften sonraki ek modeller, sipariş edilen yürütücü yedeklemeleridir. Başarısız bir HTTP yanıtı veya aktarım istisnası, aynı planlayıcı kararını ve yerel araçları taşıyarak bir sonraki yürütücüye ilerler ancak bu yürütücünün kendi adım istemini ve çözülmüş bağlantısını taşır. İlk başarılı yanıt, SSE akışı da dahil olmak üzere değişmeden döndürülür; Başarılı bir yayın başlatıldıktan sonraki hatalar burada yeniden denenemez. Tüm uygulayıcılar başarısız olursa, son başarısızlık döndürülür. İstemci durdurma gönderimini iptal eder.
 
 ```json
 {
@@ -358,7 +383,7 @@ En az iki modele sahip bir `pipeline` kombosu, `config.agenticOrchestration.enab
 }
 ```
 
-Yürütücü, tek bir yanıtta birden fazla bağımsız çağrı üretebilir. Bağımlı çağrılar, sonraki istemci araç sonucu turlarında işlenir ve planlayıcı her sonucu inceler. `maxToolRounds` varsayılan olarak `8` değerini kullanır ve `1`–`32` aralığını kabul eder; sınıra ulaşıldığında planlayıcı, mevcut en iyi nihai yanıtı üretmelidir. Dahili planlayıcı kararları arabelleğe alınırken istemciye sunulmak üzere seçilen yanıt, özgün akış tercihini korur.
+Yürütücü tek bir yanıtta birden fazla bağımsız çağrı yapabilir. Bağımlı çağrılar, planlayıcının her sonucu gözden geçirmesiyle daha sonraki istemci aracı-sonuç dönüşlerinde ele alınır. `maxToolRounds` varsayılan olarak `8` kullanır ve `1`–`32` kabul eder; Bir kez ulaşıldığında planlamacı mevcut en iyi nihai cevabı üretmelidir. Dahili planlayıcının kararları arabelleğe alınırken seçilen müşteriye yönelik yanıt orijinal akış tercihini korur.
 
 ### `round-robin` yapışkan gruplama ve hesap genişletme
 

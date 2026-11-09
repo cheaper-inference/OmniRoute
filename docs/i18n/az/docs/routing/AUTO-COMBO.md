@@ -127,6 +127,27 @@ Avtomatik qiymətləndirmə hər sorğu üçün ən yaxşı provayderi/modeli se
 | `src/sse/handlers/chat.ts`                                | İnteqrasiya: auto prefiksi üzrə qısaqapanma              |
 | `src/shared/constants/providers.ts`                       | `SYSTEM_PROVIDERS.auto` sistem qeydi                     |
 
+## Saxlanmış Avtomatik kombinlər üçün hesab tərcihləri
+
+Ağıllı Avto redaktor isteğe bağlı təklif edir** Hesab üstünlükləri** bölmə. Hər bir əlaqə Üstünlüklü, Normal (standart), Ehtiyat və ya Xaric edilə bilər. Birdən çox əlaqə bir səviyyəni paylaşa bilər. Avtomatik birinci uyğun səviyyə daxilində scoring/router davranışını saxlayaraq seçir; uğursuz cəhdlər qalan konkret hesablara düşür, ehtiyatdan əvvəl normaldan əvvəl üstünlük verilir. İstisna edilən bağlantılar bu kombin tərəfindən heç vaxt istifadə edilmir.
+
+Parametr `config.accountPreferences` kimi saxlanılır, ID bağlantısı ilə açar:
+
+```json
+{
+  "accountPreferences": {
+    "connection-a": "preferred",
+    "connection-b": "preferred",
+    "connection-c": "reserve",
+    "connection-d": "excluded"
+  }
+}
+```
+
+Buraxılmış və ya boş xəritə mövcud marşrutu saxlayır. Tərcihlər deaktiv edilmiş əlaqələri aktivləşdirmir, API açarı girişi vermir, kvota ilə bloklanmış namizədləri bərpa etmir və ya büdcə yoxlamalarını keçmir. Hər cəhd onun konkret əlaqəsi ilə məhdudlaşır, ona görə də hesabın geri qaytarılması kombo marşrutlaşdırıcının arxasına keçə bilməz. Mövcud sessiya yaxınlığı uyğun hesabı saxlaya bilər; yerli növbəyə bağlı hesab istisna olmaqla, hesabları səssizcə dəyişmək əvəzinə dönən dayanacaqlar.
+
+Konfiqurasiya edilmiş üstünlüklər hesabdan xəbərdar olan Avto yolundan istifadə edir: bağlanmamış kontekst-keş, smart-pipeline, xaos və kölgə qısa yolları göndərilmir. Spekulyativ hedcinq bu sorğular üçün deaktiv edilib, ona görə də ehtiyat hesablar üstünlük verilən hesablarla yarışa bilməz. Digər kombinasiya strategiyaları bu parametri şərh etmir. Kombo-nun Avtomatikdən uzağa dəyişdirilməsi daha sonra geriyə keçid üçün yadda saxlanmış üstünlükləri saxlayır.
+
 ## Real Model Id-si ilə Uyğun Gələn Combo Adları
 
 `name` dəyəri prefikssiz model id-si ilə eyni olan combo (məsələn, `gpt-5.5`
@@ -201,36 +222,38 @@ Burada sənədləşdirilən ilkin anlaşılmazlıq üçün
 [#7992](https://github.com/diegosouzapw/OmniRoute/issues/7992) və
 [#7111](https://github.com/diegosouzapw/OmniRoute/issues/7111)-ə baxın.
 
-## Necə İşləyir (Davamlı Saxlanılan Avtomatik Kombinasiyalar)
+## Necə işləyir (Davamlı Avtokombolar)
 
-Avtomatik Kombinasiya Mühərriki **16 amilli qiymətləndirmə funksiyasından** (`open-sse/services/autoCombo/scoring.ts` → `DEFAULT_WEIGHTS` daxilində müəyyən edilib) istifadə edərək hər sorğu üçün ən yaxşı provayderi/modeli dinamik şəkildə seçir. Standart çəkilərin cəmi `1.0`-dır; fərdi çəkilər `normalizeScoringWeights()` vasitəsilə yenidən normallaşdırılır. On altı amildən ikisinin — `cacheAffinity` və `resetWindowAffinity` — standart çəkisi `0`-dır; `reliability` üçün `DEFAULT_WEIGHTS` daxilində çəki `0`, ümumi paketlərdə `0.03`, `reliability-first` paketində isə `0.04`-dür və `quality` üçün paketlərdə çəki `0.02` (`quality-first` paketində `0.03`) təşkil edir: buna baxmayaraq, onlar hər namizəd üçün hesablanır və `cacheAffinity` qiymətləndirmədən kənarda prompt keşinin dublikatdan təmizlənməsini idarə edir. Beləliklə, standart çəkisi sıfır olan amillər standart halda seçimə təsir göstərmir, paketlərdə isə göstərir.
+Auto-Combo Engine a-dan istifadə edərək hər sorğu üçün ən yaxşı provider/model dinamik olaraq seçir **16 faktorlu qiymətləndirmə funksiyası** ( `open-sse/services/autoCombo/scoring.ts` → `DEFAULT_WEIGHTS`-də müəyyən edilmişdir). Defolt çəkilər `1.0` yə bərabərdir; xüsusi çəkilər `normalizeScoringWeights()` tərəfindən yenidən normallaşdırılır. On altı — `cacheAffinity` və `resetWindowAffinity` — dən ikisi standart `0` çəkisini daşıyır; `reliability` `DEFAULT_WEIGHTS` -də `0`, lakin `0.03` ümumi paketlərdə və `0.04` `reliability-first`-da daşıyır və `quality` `0.02` paketlərdə daşıyır ( `quality-first`-da `0.03` ): onlar hələ də hər bir namizəd üçün hesablanır və `cacheAffinity` xaldan kənarda keş-keş deuplikasiyasını tezləşdirir, ona görə də sıfır defolt faktoru standart olaraq səs vermir.
 
-![Avtomatik Kombinasiyanın 16 amilli qiymətləndirilməsi](../diagrams/exported/auto-combo-scoring.svg)
+![Auto-Combo 16-factor scoring](../diagrams/exported/auto-combo-scoring.svg)
 
-> Mənbə: [diagrams/auto-combo-scoring.mmd](../diagrams/auto-combo-scoring.mmd) (`npm run docs:render-diagrams` vasitəsilə yenidən yaradın). Fayl adı tarixən belə qalıb; mənbə və yaradılmış diaqram `DEFAULT_WEIGHTS` daxilində elan edilmiş bütün 16 amili göstərir.
+> Mənbə: [diagrams/auto-combo-scoring.mmd](../diagrams/auto-combo-scoring.mmd) ( `npm run docs:render-diagrams` vasitəsilə bərpa edin). Fayl adı tarixidir; mənbə və göstərilən diaqram `DEFAULT_WEIGHTS` də elan edilmiş bütün 16 amili göstərir.
 
-| Amil                  | Standart Çəki | Təsvir                                                                                                                                                                                                                                                                 |
-| :-------------------- | :------------ | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `quota`               | 0.1429        | Qalan kvota / sürət məhdudiyyəti ehtiyatı [0..1]                                                                                                                                                                                                                       |
-| `health`              | 0.1605        | Dövrə kəsicisindən alınan sağlamlıq balı (CLOSED=1.0, HALF_OPEN=0.5, OPEN=0.0)                                                                                                                                                                                         |
-| `costInv`             | 0.1429        | **Qarışıq** dəyərin tərsi (60% giriş + 40% çıxış tokeninin qiyməti, normallaşdırılıb) — daha ucuz = daha yüksək bal                                                                                                                                                    |
-| `latencyInv`          | 0.1143        | Hovuz üzrə normallaşdırılmış p95 gecikməsinin tərsi — daha sürətli = daha yüksək bal                                                                                                                                                                                   |
-| `taskFit`             | 0.0762        | Tapşırıq növünə uyğunluq (kodlaşdırma, nəzərdən keçirmə, planlaşdırma, təhlil, sazlama, sənədləşdirmə)                                                                                                                                                                 |
-| `stability`           | 0.0476        | Gecikmənin standart kənarlaşmasına əsaslanan dəyişkənlik yönümlü sabitlik — cavab müddəti dəyişkən olan namizəd daha aşağı bal alır                                                                                                                                    |
-| `tierPriority`        | 0.0476        | Hesab səviyyəsinin prioriteti — Ultra=1.0, Pro=0.67, Standard=0.33, Free=0.0                                                                                                                                                                                           |
-| `tierAffinity`        | 0.0476        | Namizədin səviyyəsi ilə manifestin tövsiyə etdiyi səviyyə arasındakı uyğunluq                                                                                                                                                                                          |
-| `specificityMatch`    | 0.0476        | Sorğunun spesifikliyi (manifest ipucu) ilə model səviyyəsi arasındakı uyğunluq                                                                                                                                                                                         |
-| `contextAffinity`     | 0.0476        | Sorğunun kontekst pəncərəsi ehtiyacı ilə modelin kontekst pəncərəsi arasındakı uyğunluq                                                                                                                                                                                |
-| `sessionAvailability` | 0.0476        | Namizəd bağlantının bu sessiya üçün OAuth sessiyası əlçatanlığı (`getOAuthSessionAvailability()`; OAuth olmayan bağlantılar 1.0 bal alır)                                                                                                                              |
-| `connectionDensity`   | 0.0476        | Yükü eyni provayderin bağlantıları arasında paylayır (təmərküzləşmənin qarşısını alır)                                                                                                                                                                                 |
-| `cacheAffinity`       | 0.00          | Bu sorğunun prompt-keş prefiksini artıq saxlaması ən çox ehtimal olunan bağlantıya doğru rendezvous-heş uyğunluğu (`open-sse/services/combo/promptCacheAffinity.ts`); standart olaraq deaktivdir (#8008)                                                               |
-| `resetWindowAffinity` | 0.00          | Kvota sıfırlama pəncərəsi əlverişli olan bağlantılara üstünlük verir (standart olaraq deaktivdir)                                                                                                                                                                      |
-| `quality`             | 0.03          | Marşrutlaşdırma hadisələrinin keyfiyyət izləyicisindən alınan, rəyə əsaslanan çıxış keyfiyyəti siqnalı; müşahidəsi olmayan namizədlər neytral 0.5 alır                                                                                                                 |
-| `reliability`         | 0.00          | On nümunəlik minimum hədd nəzərə alınmaqla 24 saatlıq istifadə tarixçəsindən əldə edilən müşahidə olunmuş uğur payı, `1 - failureRate` (əks halda real vaxt metrikaları); müşahidəsi olmayan namizədlər üçün bu göstərici 1.0 hesab olunur. Standart olaraq deaktivdir |
+| Amil                  | Standart Çəki | Təsvir                                                                                                                                                                                                                                  |
+| :-------------------- | :------------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `quota`               | 0.1429        | Qalan kvota / tarif limiti hüdudları [0..1]                                                                                                                                                                                             |
+| `health`              | 0.1605        | Elektrik açarından sağlamlıq balı (CLOSED= 1.0, HALF_OPEN= 0.5, OPEN= 0.0)                                                                                                                                                              |
+| `costInv`             | 0.1429        | Tərs **qarışdırılır** xərc (60% giriş + 40% çıxış əlaməti qiyməti, normallaşdırılmış) — daha ucuz = daha yüksək xal                                                                                                                     |
+| `latencyInv`          | 0.1143        | — daha sürətli = yüksək xalını toplamaq üçün tərs p95 gecikməsi normallaşdırıldı                                                                                                                                                        |
+| `taskFit`             | 0.0762        | Tapşırıq tipli uyğunluq (kodlaşdırma, nəzərdən keçirmə, planlaşdırma, təhlil, sazlama, sənədlər)                                                                                                                                        |
+| `stability`           | 0.0476        | Cavab müddəti daha aşağı olan namizəd — gecikmə standart sapmasından dəyişkənliyə əsaslanan sabitlik                                                                                                                                    |
+| `tierPriority`        | 0.0476        | Hesab səviyyəli prioritet — Ultra = 1.0, Pro = 0.67, Standart = 0.33, Pulsuz = 0.0                                                                                                                                                      |
+| `tierAffinity`        | 0.0476        | Namizədin səviyyəsi ilə manifest tərəfindən tövsiyə olunan səviyyə arasında yaxınlıq                                                                                                                                                    |
+| `specificityMatch`    | 0.0476        | Sorğu spesifikliyi (açıq göstəriş) və model səviyyəsi arasında uyğunluq                                                                                                                                                                 |
+| `contextAffinity`     | 0.0476        | Sorğunun kontekst pəncərəsi ehtiyacı ilə modelin kontekst pəncərəsi arasında yaxınlıq                                                                                                                                                   |
+| `sessionAvailability` | 0.0476        | Bu sessiya üçün namizəd bağlantısının OAuth sessiyasının mövcudluğu (`getOAuthSessionAvailability()`; qeyri-OAuth bağlantıları balı 1.0)                                                                                                |
+| `connectionDensity`   | 0.0476        | Yükü eyni provayderin əlaqələri arasında yayır (anti-konsentrasiya)                                                                                                                                                                     |
+| `cacheAffinity`       | 0.00          | Bu sorğunun prompt-keş prefiksini artıq saxlaması ən çox ehtimal olunan bağlantıya doğru rendezvous-heş uyğunluğu (`open-sse/services/combo/promptCacheAffinity.ts`); standart olaraq deaktivdir (#8008)                                |
+| `resetWindowAffinity` | 0.00          | Kvota sıfırlama pəncərəsi əlverişli olan əlaqələrə meyl (defolt olaraq qeyri-aktivdir)                                                                                                                                                  |
+| `quality`             | 0.03          | Marşrutlaşdırma-hadisə keyfiyyət izləyicisindən rəylə idarə olunan çıxış keyfiyyət siqnalı; müşahidəsi olmayan namizədlər neytral 0,5 bal alırlar                                                                                       |
+| `reliability`         | 0.00          | Müşahidə edilmiş müvəffəqiyyət payı, `1 - failureRate`, on nümunəli mərtəbə arxasında 24 saatlıq istifadə tarixçəsindən (əgər real vaxt göstəriciləri); heç bir müşahidəsi olmayan namizədlər 1.0 kimi oxunur. Defolt olaraq deaktivdir |
 
-`quality` (`open-sse/services/routing/quality.ts`): `cold restart → ∅`; `observations = 0 → score 0.5`.
+Yaddaşdaxili `quality` izləyicisi (`open-sse/services/routing/quality.ts`) soyuq yenidən işə saldıqdan sonra boşdur, ona görə də hər bir namizəd ilk müşahidələr yerə düşənə qədər neytral `0.5` xalını alır.
 
-**Cəm:** `DEFAULT_WEIGHTS` daxilində elan edildiyi kimi `0.1429 + 0.1605 + 0.1429 + 0.1143 + 0.0762 + (7 × 0.0476) + 0.00 + 0.00 + 0.03 + 0.00 = 1.0`; istifadəçi tərəfindən konfiqurasiya edilmiş çəkilər qiymətləndirmədən əvvəl `normalizeScoringWeights()` vasitəsilə paylanma şəklində yenidən normallaşdırılır.
+> **Oxunmaz kvota (#15347).** Provayderin kvota alıcısı olduqda, lakin o, oxuna bilən heç nə vermədikdə (uğursuz gətirmə, çatışmayan etimadnamələr, yalnız mesajdan istifadə və ya təhlil edilə bilən `windows` və sonlu `percentUsed` olmayan, `percentUsed: null` daxil olmaqla, səhv formalaşdırılmış snapshot ), namizəd `quota` oxunda `0` balını qoyur və onun yekun balı `UNREADABLE_QUOTA_SOFT_DEPRIORITIZE_FACTOR` ilə eynidir (ZG5, `autoStrategy.ts`) vurulur. əlaqə statusu cəzası kimi yumşaq cəza nümunəsi. Uğursuz istifadə oxunması provayder deyil, telemetriya haqqında sübutdur, ona görə də o, təsdiqlənmiş 100%-used daxil olmaqla, hər hansı real oxunuşdan ciddi şəkildə aşağıda yer alır, lakin heç vaxt sərt şəkildə bloklanmır və ya çıxarılmır. Sıxlığı olmayan provayder `unlimited: true` və balları tam kvota kimi bildirir; qeydiyyatdan keçmiş kvota alıcısı olmayan provayderin ümumiyyətlə telemetriya mənbəyi yoxdur və `100` defoltunu saxlayır.
+
+**Cəmi:** `DEFAULT_WEIGHTS`-də elan edildiyi kimi `0.1429 + 0.1605 + 0.1429 + 0.1143 + 0.0762 + (7 × 0.0476) + 0.00 + 0.00 + 0.03 + 0.00 = 1.0` ; istifadəçi tərəfindən konfiqurasiya edilmiş çəkilər hesablamadan əvvəl `normalizeScoringWeights()` tərəfindən paylanmaya yenidən normallaşdırılır.
 
 ## Rejim Paketləri
 
@@ -334,21 +357,13 @@ OmniRoute-un kombinasiya mühərriki **20 marşrutlaşdırma strategiyasını** 
 
 Sərt rotasiya üçün `round-robin` istifadə edin; `weighted` strategiyasında bərabər çəkilər statistik — sərt deyil — balans təmin edir.
 
-### Agent əsaslı pipeline rejimi
+### Agent boru kəməri rejimi
 
-Ən azı iki modeli olan `pipeline` kombinasiyası
-`config.agenticOrchestration.enabled` vasitəsilə planlaşdırıcı/işə salıcı marşrutlaşdırmasını aktivləşdirə bilər. Birinci hədəf planlaşdırmaya və yekun cavablara cavabdehdir;
-ikinci hədəf isə müştərinin doğma formatında alət çağırışları yaradır. OmniRoute sorğu protokolundan alət nəticələrinin
-davamlarını aşkarlayır, planlaşdırıcıdan başqa bir alət raundunun lazım olub-olmadığını
-soruşur və dinamik şəkildə ya işə salıcını, ya da planlaşdırıcını müştəriyə təqdim olunan yekun
-mərhələyə çevirir.
+Ən azı iki modeli olan `pipeline` kombinatı `config.agenticOrchestration.enabled` ilə planner/executor marşrutlamasına qoşula bilər. Birinci hədəf planlaşdırma və yekun cavablara sahibdir; ikinci hədəf müştəri-doğma alət zənglərini yayır. OmniRoute sorğu protokolundan alət nəticələrinin davamını aşkarlayır, planlaşdırıcıdan başqa alət dövrəsinə ehtiyac olub-olmadığını soruşur və dinamik olaraq ya icraçı, ya da planlaşdırıcını müştərinin üzləşdiyi son addım edir.
 
-İkinci hədəfdən sonrakı əlavə modellər ardıcıllıqla işə salıcının ehtiyat variantlarıdır. Uğursuz
-HTTP cavabı və ya nəqliyyat istisnası növbəti işə salıcıya keçir və bu zaman
-eyni planlaşdırıcı qərarı və doğma alətlər saxlanılır, lakin həmin işə salıcının öz mərhələ sorğusu və
-müəyyən edilmiş bağlantısı istifadə olunur. İlk uğurlu cavab dəyişdirilmədən, o cümlədən
-SSE axını ilə birlikdə qaytarılır; uğurlu axın başladıqdan sonrakı xətaları burada təkrar sınamaq
-mümkün deyil. Bütün işə salıcılar uğursuz olarsa, son xəta qaytarılır. Müştərinin ləğvetmə sorğuları göndərişi dayandırır.
+Alət nəticələrinin davamında OmniRoute həmçinin iki ardıcıl tamamlanmış raund eyni alət çağırışlarını dəyişməz nəticələrlə təkrar etdikdə və ya ardıcıl iki raundda açıq şəkildə qeyd olunan hər bir nəticə uğursuz olduqda icranı dayandırır. Dəyişən nəticələr təkrar zənglərə icazə verir (məsələn, sorğu). Mühafizəçi yeni istifadəçi tələbi ilə sıfırlanır, paralel zəngləri bir raundda qruplaşdırır və Anthropic, Söhbət Tamamlamaları, Cavablar və Gemini tarixçələrini dəstəkləyir. Planlaşdırıcı səbəbi alır və başqa bir alət turu tələb etsə belə, yekun cavabın sahibidir.
+
+İkinci hədəfdən sonra əlavə modellərə icraçı ehtiyat nüsxələri sifariş edilir. Uğursuz HTTP cavabı və ya nəqliyyat istisnası eyni planlaşdırıcı qərarını və yerli alətləri daşıyan, lakin həmin icraçının öz addımı tez və həll edilmiş əlaqəni daşıyan növbəti icraçıya doğru irəliləyir. İlk uğurlu cavab SSE axını da daxil olmaqla dəyişməz olaraq qaytarılır; uğurlu yayımdan sonra uğursuzluqlar burada təkrar sınana bilməz. Bütün icraçılar uğursuz olarsa, sonuncu uğursuzluq qaytarılır. Müştəri göndərməni dayandırır.
 
 ```json
 {
@@ -360,11 +375,7 @@ mümkün deyil. Bütün işə salıcılar uğursuz olarsa, son xəta qaytarılı
 }
 ```
 
-İşə salıcı bir cavabda bir neçə müstəqil çağırış yarada bilər. Asılı çağırışlar
-müştərinin sonrakı alət nəticəsi addımlarında işlənir və planlaşdırıcı hər nəticəni nəzərdən keçirir.
-`maxToolRounds` üçün standart dəyər `8`-dir və `1`–`32` qəbul edir; həddə çatdıqda planlaşdırıcı
-mövcud olan ən yaxşı yekun cavabı hazırlamalıdır. Daxili planlaşdırıcı qərarları buferlənir, seçilmiş
-müştəriyə təqdim olunan cavab isə ilkin axın seçimini qoruyur.
+İcraçı bir cavabda çoxlu müstəqil zənglər verə bilər. Asılı zənglər sonradan müştəri aləti-nəticə növbələrində idarə olunur, planlaşdırıcı hər bir nəticəni nəzərdən keçirir. `maxToolRounds` defolt olaraq `8` yə uyğundur və `1`–`32` qəbul edir; çatdıqdan sonra planlayıcı ən yaxşı mövcud yekun cavabı verməlidir. Daxili planlaşdırıcı qərarları buferlənir, seçilmiş müştəri ilə bağlı cavab isə ilkin axın üstünlüklərini qoruyur.
 
 ### `round-robin` yapışqan paketi və hesab genişləndirilməsi
 

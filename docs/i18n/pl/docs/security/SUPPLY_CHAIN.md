@@ -53,11 +53,11 @@ z kodem wyjścia 0, co nie potwierdza, że zależności pomyślnie przeszły ska
 krok Trivy również wymaga pomyślnego wykonania pomiaru: niedostępne narzędzia, nieudane zadania
 i brak dowodów dotyczących obrazu nie pozwalają poświadczyć, że obraz jest wolny od luk.
 
-## Ryzyko związane z wycofaną zależnością
+## Ryzyko uzależnienia na emeryturze
 
-Po zaktualizowaniu przypiętej wersji narzędzia deweloperskiego promptfoo główny plik blokady nie zawiera już `extract-zip` ani prowadzącej do niego krawędzi zależności. Tym samym wycofano wcześniej zaakceptowany łańcuch `promptfoo` → `@openai/codex-security` → `extract-zip`, śledzony w #14482. Testy regresji w `tests/unit/extract-zip-14482-exposure.test.ts` zapobiegają jego ponownemu wprowadzeniu i nadal zabraniają importowania tej zależności przez kod produkcyjny.
+Główny plik blokujący nie zawiera już `extract-zip` ani krawędzi zależności po aktualizacji przypiętego narzędzia programistycznego Promptfoo. Spowoduje to wycofanie wcześniej zaakceptowanego łańcucha `promptfoo` → `@openai/codex-security` → `extract-zip` śledzonego w #14482. Kontrole regresji w `tests/unit/extract-zip-14482-exposure.test.ts` odrzucają jego ponowne wprowadzenie i utrzymują zakaz importu z kodu produkcyjnego.
 
-Bieżąca naprawa zależności obejmuje nadpisania zgodności dla klienta MSAL usługi Azure Identity, klienta FTP pakietu get-uri oraz biblioteki Zod w obu pakietach wtyczek OpenCode. Pozyskiwanie tokenów Azure i pobieranie danych przez FTP są testowane przy użyciu kontrolowanych warstw transportowych; oba pakiety OpenCode uruchamiają własne zestawy kompilacji i testów. Liczba ostrzeżeń w rejestrze jest pomiarem wykonanym w określonym momencie i może ulec zmianie po zatwierdzeniu pliku blokady.
+Bieżąca naprawa zależności obejmuje również zastąpienia zgodności z klientem MSAL tożsamości platformy Azure i klientem FTP get-uri. Pozyskiwanie tokenów platformy Azure i pobieranie FTP są testowane przy użyciu kontrolowanych transportów; oba pakiety OpenCode obsługują własne zestawy kompilacji i testów. Liczby doradcze rejestru są pomiarami dokonywanymi w danym momencie i mogą ulec zmianie po zatwierdzeniu pliku blokującego.
 
 ## Backlog: Zalecenie Scorecard → blokowanie
 

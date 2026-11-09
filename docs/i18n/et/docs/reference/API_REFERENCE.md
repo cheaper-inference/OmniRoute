@@ -356,7 +356,7 @@ GET /v1/embeddings
 
 ---
 
-## Piltide genereerimine
+## Pildi genereerimine
 
 ```bash
 POST /v1/images/generations
@@ -370,36 +370,22 @@ Content-Type: application/json
 }
 ```
 
-Saadaolevate pakkujate hulka kuuluvad OpenAI (GPT Image 2), xAI (Grok Image), Together AI (FLUX), Fireworks AI, Nebius (FLUX), Hyperbolic, NanoBanana, **OpenRouter**, **ZenMux**, SD WebUI (kohalik), ComfyUI (kohalik).
+Saadaolevate pakkujate hulka kuuluvad OpenAI (GPT pilt 2), xAI (Grok pilt), Together AI (FLUX), Fireworks AI, Nebius (FLUX), hüperboolne, NanoBanana,**OpenRouter** ,**ZenMux** , SD WebUI (kohalik), ComfyUI (kohalik).
 
-`n` tagastab `data[]`-is `n` pilti. Pakkujate puhul, kelle ülesvoolu API tagastab ühe pildi päringu kohta
-(Black Forest Labs, Stability AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik,
-NVIDIA NIM, Cloudflare Workers AI), tehakse `n` eraldi ülesvoolu päringut, millest korraga on käigus
-kuni 4. Fikseeritud `seed` nihutatakse päringu indeksi võrra (`seed`, `seed + 1`, …), nii et pildid erinevad,
-kuid jäävad korratavateks. `n` ülempiir on 10. Kui ükskõik milline päring ebaõnnestub, nurjub kogu päring. Hajutatud vormingute loend on `SINGLE_IMAGE_FANOUT_FORMATS` failis
-`open-sse/handlers/imageGeneration/fanOut.ts`.
+`n` tagastab `n` pildid `data[]`. Pakkujad, kelle ülesvoolu API tagastab ühe pildi kõne kohta (Black Forest Labs, Stability AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik, NVIDIA NIM, Cloudflare Workers AI), saavad `n` eraldi ülesvoolu kõnet, maksimaalselt 4 lennu ajal. Fikseeritud `seed` kompenseeritakse kõneindeksiga (`seed`, `seed + 1`, …), nii et pildid erinevad, kuid jäävad reprodutseeritavaks. `n` ülempiir on 10. Taotlus ebaõnnestub tervikuna, kui mõni kõne ebaõnnestub. Väljapuhutavate vormingute loend on `SINGLE_IMAGE_FANOUT_FORMATS` ja `open-sse/handlers/imageGeneration/fanOut.ts`.
 
-ZenMux kasutab olemasolevat API-võtme ühendust ja aktsepteerib eesliiteid `zenmux/` või `zm/`:
+ZenMux kasutab uuesti olemasolevat API-võtme ühendust ja aktsepteerib `zenmux/` või `zm/` eesliiteid:
 
-- `zenmux/openai/gpt-image-2` kasutab ZenMuxi OpenAI Images API-t. Valikute hulka kuuluvad `size`,
-  `quality`, `n`, `output_format`, `output_compression`, `background` ja `response_format`.
-- Teised avaldajad, näiteks `zm/meta/muse-image-1.0`, kasutavad ZenMuxi Vertex AI `:predict`
-  lõpp-punkti. `n` vastendab väärtuse `sampleCount`-iga, `aspect_ratio` väärtuse `aspectRatio`-iga ja `image_size`
-  (`1K`, `2K`, `4K`) väärtuse `sampleImageSize`-iga. Pikslites määratud `size` edastab ainult kuvasuhte,
-  mitte garanteeritud pikslimõõtmeid. Toetatud suhtarvud, eraldusvõimed ja arvud sõltuvad mudelist.
-- `zm/inclusionai/ming-image-0.1-design` valib oma mõõtmed. Jäta `size`,
-  `aspect_ratio` ja `image_size` välja; määratud väärtused tagastavad HTTP 400. PNG-d, JPEG-id ja WebP
-  saab taotleda suvandi `output_format` abil.
+- `zenmux/openai/gpt-image-2` kasutab ZenMuxOpenAI API. Valikud hõlmavad `size`, `quality`, `n`, `output_format`, `output_compression`, `background` ja `response_format`.
+- Teised väljaandjad, näiteks `zm/meta/muse-image-1.0`, kasutavad ZenMux lõpp-punkti Vertex AI `:predict`. `n` vastendab `sampleCount`, `aspect_ratio` `aspectRatio` ja `image_size` (`1K`, `2K`, `4K`) `sampleImageSize`. Piksli `size` pakub ainult kuvasuhet, mitte garanteeritud pikslite mõõtmeid. Toetatud suhted, eraldusvõimed ja arvud on mudeliti erinevad.
+- `zm/inclusionai/ming-image-0.1-design` valib oma mõõdud ise. `size`, `aspect_ratio` ja `image_size` välja jätta; selgesõnalised väärtused tagastavad HTTP 400. PNG, JPEG ja WebP saab taotleda `output_format` abil.
 
-See integratsioon toetab tekstist pildi genereerimist, mitte viitepildi redigeerimist. Vertexi
-väljund normaliseeritakse kujule `data[].b64_json`; `response_format: "url"` tagastab ülesvoolu
-HTTPS-URL-i või base64-andme-URL-i, kui saadaval on ainult pildi baidid. Tühjad/filtreeritud väljundid
-tagastavad vea, mitte tühja eduka vastuse. Juurdepääs mudelitele sõltub ZenMuxi kontost.
-Vt [ZenMuxi Vertex API](https://docs.zenmux.ai/api/vertexai/generate-images) ja
-[OpenAI Images API](https://docs.zenmux.ai/api/openai/generate-an-image).
+See integratsioon toetab tekstist pildiks genereerimist, mitte viitekujutise redigeerimist. Tipu väljund normaliseeritakse väärtusele `data[].b64_json`; `response_format: "url"` tagastab ülesvoolu HTTPS URL või base64 andme URL kui saadaval on ainult pildibaidid. Empty/filtered väljundid tagastavad pigem vea kui tühja õnnestumise. Juurdepääs mudelile sõltub ZenMux kontost. Vaadake [ZenMux's Vertex API](https://docs.zenmux.ai/api/vertexai/generate-images) ja [OpenAI Images API](https://docs.zenmux.ai/api/openai/generate-an-image).
+
+Microsoft 365 Copilot sisselogimisühendus teenindab `copilot-m365-web/m365-copilot-image` Copilot pilditööriista kaudu: üks Copilot pööre pildi kohta (`n` 1–4), `size` juhib ainult orientatsiooni ja kujutised tagastatakse reasiseselt (`b64_json` või andme- URL `response_format: "url"` jaoks). Vaadake [Microsoft 365 Copilot](../providers/COPILOT-M365.md#image-generation).
 
 ```bash
-# Loetle kõik pildimudelid
+# List all image models
 GET /v1/images/generations
 ```
 
@@ -854,17 +840,19 @@ seansivälisele kutsujale (toomine, kustutamine, tühistamine ja loomisel tehtav
 
 ---
 
-## Otsingu API
+## API
 
-Veebiotsingu pakkujate abstraktsioon (Tavily, Brave, Exa, Serper jne).
+Web/search pakkuja abstraktsioon (Tavily, Brave, Exa, Serper jne).
 
-| Meetod | Tee                    | Kirjeldus                                                                                                                     |
-| ------ | ---------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/v1/search`           | Konfigureeritud otsingupakkujate ja võimaluste loend                                                                          |
-| POST   | `/v1/search`           | Otsingupäringu käivitamine — keha valideeritakse `v1SearchSchema` abil, toetab vahemällu salvestamist ja päringute koondamist |
-| GET    | `/v1/search/analytics` | Pakkujate kaupa päringute õnnestumise, latentsuse ja vahemälu statistika                                                      |
+| meetod | Tee                    | Kirjeldus                                                                                  |
+| ------ | ---------------------- | ------------------------------------------------------------------------------------------ |
+| GET    | `/v1/search`           | Loetlege konfigureeritud otsingupakkujate + võimalused                                     |
+| POST   | `/v1/search`           | Käivitage otsingupäring — body, mille kinnitas `v1SearchSchema`, toetab caching/coalescing |
+| GET    | `/v1/search/analytics` | Pakkujapõhine hit/latency/cache statistika                                                 |
 
-**Autentimine:** Beareri API-võti (`extractApiKey` + `isValidApiKey`). Otsingupoliitikat jõustatakse `enforceApiKeyPolicy` abil.
+**Auth:** Kandja API võti (`extractApiKey` + `isValidApiKey`). Otsingupoliitika jõustatakse `enforceApiKeyPolicy` kaudu.
+
+**Automaatne valimine:** ilma `provider` töötab esimesena odavaim konfigureeritud ühendusega pakkuja ja odavaim on tõrkesiirde. Tasuta viimase võimaluse pakkujaid (`duckduckgo-free`) kasutatakse ainult siis, kui midagi muud pole seadistatud. Isehostitud SearXNG loetakse konfigureerituks, kui selle ühendus salvestab tõelise `baseUrl` (mitte kataloogi vaikimisi `http://localhost:8888/search`): siis on see 0-dollarine teenusepakkuja võtmega pakkujatest ees, odavaima võtmega pakkuja on tõrkeotsas, sealhulgas `baseUrl`, URL SearXNG `http(s)` 400, 401, 403 või 404 punktile. pilve metaandmete aadress ei lähe arvesse. SearXNG -ühendus, mis salvestab märgi, paikneb sel viisil ainult `https://` või loopback- `http://` kohal. Tavalise kaug- `http://` kaudu ei ole see kunagi tõrkeotsing ja see jääb viimaseks abinõuks, mida kasutatakse ainult siis, kui ühtegi teist pakkujat pole konfigureeritud või kui seda küsitakse nime järgi, seega saadab see luba neil kahel juhul selgetekstis.
 
 ### Exa ja Tavily `provider_options`
 
@@ -1052,31 +1040,28 @@ Piletid on nähtavad ainult need loonud API-võtmele. Taasesitus, mille tulemus 
 
 ---
 
-## Iseteeninduslik kasutus (`/api/usage/om-usage`)
+## Iseteeninduse kasutamine (`/api/usage/om-usage`)
 
-Iga API-võti saab lugeda **enda** kasutust ja kvoote — haldusautentimist pole vaja. See on lõpp-punkt,
-mida klient (CLI, OmniCopiloti paneel) kasutab, et näidata võtme omanikule tema kulutusi.
+Iga API -võti saab lugeda **oma** kasutus ja kvoodid — haldamise autentimine puudub. This is the endpoint a client (CLI, the OmniCopilot panel) uses to show a key holder their spend.
 
 ```bash
-# Tekstivorm (ajalooline leping — terminali jaoks lihttekst)
+# Text form (the historical contract — plain text for a terminal)
 curl -H "Authorization: Bearer <your-api-key>" \
   http://localhost:20128/api/usage/om-usage
 
-# Struktureeritud vorm — seda kasutajaliides tarbib
+# Structured form — what a UI consumes
 curl -H "Authorization: Bearer <your-api-key>" \
   "http://localhost:20128/api/usage/om-usage?format=json"
 ```
 
-Võtmel peab olema lubatud **`allowUsageCommand`** (vaikimisi välja lülitatud — juhtpaneeli API-võtmete
-haldur lülitab selle võtme kaupa sisse või välja). Ilma selleta vastab lõpp-punkt olekuga `403`.
+Võtmel peab olema **`allowUsageCommand`** enabled (off by default — the dashboard's API-key manager toggles it per key). Ilma selleta vastab lõpp-punkt `403` le.
 
-`?format=json` tagastab eristatava struktuuri, nii et helistaja ei loe keeldumise korral kunagi
-andmevälja. Eduka vastuse korral:
+`?format=json` returns a discriminated shape so a caller never reads a data field off a refusal. Edu kohta:
 
 ```jsonc
 {
   "allowed": true,
-  // olemas ainult siis, kui võti lubas võtmekohased kasutuspiirangud (päevased/nädalased USD):
+  // present only when the key opted into per-key usage limits (daily/weekly/5-hour USD):
   "personal": {
     "dailySpentUsd": 1.25,
     "dailyLimitUsd": 5,
@@ -1085,9 +1070,9 @@ andmevälja. Eduka vastuse korral:
     "weeklyLimitUsd": 20,
     "weeklyResetAtIso": "…" /* … */,
   },
-  // valitud teenusepakkuja kvoodi hetktõmmis või null, kui midagi pole veel vahemällu salvestatud:
+  // the selected provider quota snapshot, or null when nothing is cached yet:
   "provider": { "connectionId": "…", "provider": "claude", "plan": "…", "quotas": {/* … */} },
-  // iga ühenduse hetktõmmis, et kasutajaliides saaks kuvada mitut teenusepakkujat kõrvuti:
+  // every connection's snapshot, so a UI can render several providers side by side:
   "providers": [
     { "connectionId": "…", "provider": "claude" /* … */ },
     { "provider": "codex" /* … */ },
@@ -1095,13 +1080,9 @@ andmevälja. Eduka vastuse korral:
 }
 ```
 
-Keeldumise korral (`401` vigane võti / `403` pole lubatud) tagastab sama marsruut
-`{ "allowed": false, "error": { "message": "…" } }` — olemasolev, kuid tühi `personal`/`provider`
-(võti on lubatud, kuid midagi pole veel teada) tähistab keeldumisest erinevat olekut ja ainult JSON-vorm
-eristab neid.
+Keeldumisel (`401` halb võti / `403` pole lubatud) tagastab sama marsruut `{ "allowed": false, "error": { "message": "…" } }` — olek, kuid tühi `personal`/`provider` (võti lubatud, midagi pole veel õpitud) on keeldumisest erinev olek ja ainult JSON vorm eristab neid.
 
-**Autentimine:** helistaja enda Bearer API-võti, mida valideeritakse funktsiooniga `isValidApiKey` — see ei ole
-haldusliides (`/api/keys/…`), mis jääb `requireManagementAuth`-i kaitse alla.
+**Auth:** the caller's own Bearer API key, validated with `isValidApiKey` — this is _not_ the management surface (`/api/keys/…`), which stays behind `requireManagementAuth`.
 
 ### Toored ja läviväärtusega korrigeeritud kvoodiprotsendid
 
@@ -1350,40 +1331,41 @@ ja prioriteediahelad failis `src/lib/modelCapabilityLimits.ts`.
 | `/api/usage/model-latency-stats` | GET             | Libisev teenusepakkuja/mudeli põhine latentsuse koond (keskmine/p50/p95/p99, õnnestumise määr); filtrid: `windowHours`/`minSamples`/`maxRows`/`provider`/`model` (#6873)                                                                                                                                                                                 |
 | `/api/usage/cache-health`        | GET             | Prompti vahemälu seisundi kokkuvõte `call_logs` põhjal — kirjutamise/lugemise suhe, kirjutamissuuruste p50/p90/p99 jaotus, intensiivse kirjutamise kontsentratsioon, mudelite kaupa jaotus ning `healthy`/`degraded`/`thrash`/`no-data` hinnang; päringuparameetrid `range` (`1h`\|`24h`\|`7d`\|`30d`, vaikeväärtus `24h`) ja valikuline `model` (#8827) |
 
-### API-võtmete õigused
+### API võtmeõigused
 
-`PATCH /api/keys/{id}` uuendab olemasoleva võtme õigusi. Nagu kõik `/api/keys*` marsruudid, vajab see haldusautoriseerimist (vt [Haldusautentimine](../guides/MANAGEMENT-AUTH.md)), mitte inferentsivõtit. Saatke ainult väljad, mida soovite muuta; ilma ühegi sellise väljata päring lükatakse tagasi teatega `No valid fields to update`. Aktsepteeritavad väljad on määratletud `updateKeyPermissionsSchema` abil failis `src/shared/validation/schemas/keys.ts`.
+`PATCH /api/keys/{id}` värskendab olemasoleva võtme õigusi. Nagu iga `/api/keys*` marsruut, vajab see haldusvolitust (vt [Halduse autentimine](../guides/MANAGEMENT-AUTH.md) ), mitte järeldusvõtit. Saatke ainult need väljad, mida soovite muuta; taotlus, milles ükski neist pole, lükatakse `No valid fields to update` ga tagasi. Aktsepteeritud väljad määratleb `updateKeyPermissionsSchema` `src/shared/validation/schemas/keys.ts`.
 
-| Väli                                        | Tüüp                                                                    | Märkused                                                                                                                                        |
-| ------------------------------------------- | ----------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| `name`                                      | string, 1–200 märki                                                     |                                                                                                                                                 |
-| `isActive`                                  | boolean                                                                 |                                                                                                                                                 |
-| `isBanned`                                  | boolean                                                                 |                                                                                                                                                 |
-| `expiresAt`                                 | ISO 8601 kuupäev-kellaaeg või `null`                                    | `null` eemaldab aegumise                                                                                                                        |
-| `modelAccessMode`                           | `all` \| `restricted`                                                   | `allowedModels` peab olema tühi, kui režiim on `all`                                                                                            |
-| `allowedModels`, `blockedModels`            | stringide massiiv, kuni 1000                                            |                                                                                                                                                 |
-| `allowedCombos`                             | stringide massiiv, kuni 500                                             | Määrab, milliseid kombinatsioone võti võib kutsuda; otsemudeleid juhivad `modelAccessMode` / `allowedModels`                                    |
-| `connectionAccessMode`                      | `all` \| `restricted`                                                   | `allowedConnections` peab olema režiimi `restricted` korral mittetühi ja režiimi `all` korral tühi                                              |
-| `allowedConnections`                        | UUID-de massiiv, kuni 100                                               |                                                                                                                                                 |
-| `allowAutoCombos`                           | boolean                                                                 | `false` lükkab selle võtmega tehtud `auto/*` mudelite päringud tagasi; võtmed, mille puhul seda kunagi ei määrata, on lubatud                   |
-| `catalogScope`                              | `all` \| `combos` \| `models`                                           | Mida `GET /v1/models` selle võtme puhul loetleb (ainult kombinatsioonid, ainult mudelid või mõlemad); see ei muuda seda, mida võti võib kutsuda |
-| `forcedModel`                               | string, kuni 300 märki, või `null`                                      | Suunab vestluspäringud sellele mudelile/kombinatsioonile, eelistades `X-Route-Model`-i ja `body.model`-it; võtme piirangud kehtivad endiselt    |
-| `noLog`, `autoResolve`                      | boolean                                                                 |                                                                                                                                                 |
-| `throttleDelayMs`                           | täisarv, 0–300000                                                       |                                                                                                                                                 |
-| `maxSessions`                               | täisarv, 0–10000                                                        |                                                                                                                                                 |
-| `rateLimits`                                | `{ limit, window }` massiiv (positiivsed täisarvud, kuni 50) või `null` | `null` eemaldab piirangud                                                                                                                       |
-| `accessSchedule`                            | ajastuse objekt või `null`                                              | `null` eemaldab ajastuse                                                                                                                        |
-| `scopes`                                    | stringide massiiv, kuni 32                                              |                                                                                                                                                 |
-| `allowedEndpoints`                          | stringide massiiv, kuni 20                                              |                                                                                                                                                 |
-| `streamDefaultMode`                         | `legacy` \| `json`                                                      |                                                                                                                                                 |
-| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                    | Vt [võtmepõhine vahemälu möödaviik](#per-key-cache-bypass)                                                                                      |
-| `compressionEnabled`                        | boolean                                                                 |                                                                                                                                                 |
-| `codexServiceMode`                          | üks Codexi teenuserežiimidest                                           |                                                                                                                                                 |
-| `disableNonPublicModels`                    | boolean                                                                 |                                                                                                                                                 |
-| `allowUsageCommand`                         | boolean                                                                 |                                                                                                                                                 |
-| `usageLimitEnabled`                         | boolean                                                                 |                                                                                                                                                 |
-| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | number >= 0 or `null`                                                   |                                                                                                                                                 |
-| `chaosModeEnabled`                          | boolean                                                                 |                                                                                                                                                 |
+| Väli                                        | Tüüp                                                                    | Märkused                                                                                                                                                                                                                                                     |
+| ------------------------------------------- | ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `name`                                      | string, 1–200 märki                                                     |                                                                                                                                                                                                                                                              |
+| `isActive`                                  | boolean                                                                 |                                                                                                                                                                                                                                                              |
+| `isBanned`                                  | boolean                                                                 |                                                                                                                                                                                                                                                              |
+| `expiresAt`                                 | ISO 8601 kuupäev-kellaaeg või `null`                                    | `null` eemaldab aegumise                                                                                                                                                                                                                                     |
+| `modelAccessMode`                           | `all` \| `restricted`                                                   | `allowedModels` peab olema tühi, kui režiim on `all`                                                                                                                                                                                                         |
+| `allowedModels`, `blockedModels`            | stringide massiiv, kuni 1000                                            |                                                                                                                                                                                                                                                              |
+| `allowedCombos`                             | stringide massiiv, kuni 500                                             | Määrab, milliseid kombinatsioone võti võib kutsuda; otsemudeleid juhivad `modelAccessMode` / `allowedModels`                                                                                                                                                 |
+| `connectionAccessMode`                      | `all` \| `restricted`                                                   | `allowedConnections` peab olema režiimi `restricted` korral mittetühi ja režiimi `all` korral tühi                                                                                                                                                           |
+| `allowedConnections`                        | UUID-de massiiv, kuni 100                                               |                                                                                                                                                                                                                                                              |
+| `allowAutoCombos`                           | boolean                                                                 | `false` lükkab selle võtmega tehtud `auto/*` mudelite päringud tagasi; võtmed, mille puhul seda kunagi ei määrata, on lubatud                                                                                                                                |
+| `catalogScope`                              | `all` \| `combos` \| `models`                                           | Mida `GET /v1/models` selle võtme puhul loetleb (ainult kombinatsioonid, ainult mudelid või mõlemad); see ei muuda seda, mida võti võib kutsuda                                                                                                              |
+| `forcedModel`                               | string, kuni 300 märki, või `null`                                      | Suunab vestluspäringud sellele mudelile/kombinatsioonile, eelistades `X-Route-Model`-i ja `body.model`-it; võtme piirangud kehtivad endiselt                                                                                                                 |
+| `noLog`, `autoResolve`                      | tõeväärtus                                                              |                                                                                                                                                                                                                                                              |
+| `throttleDelayMs`                           | täisarv, 0–300000                                                       |                                                                                                                                                                                                                                                              |
+| `maxSessions`                               | täisarv, 0–10000                                                        |                                                                                                                                                                                                                                                              |
+| `rateLimits`                                | `{ limit, window }` massiiv (positiivsed täisarvud, kuni 50) või `null` | `null` eemaldab piirangud                                                                                                                                                                                                                                    |
+| `accessSchedule`                            | ajastuse objekt või `null`                                              | `null` eemaldab ajastuse                                                                                                                                                                                                                                     |
+| `scopes`                                    | stringide massiiv, kuni 32                                              |                                                                                                                                                                                                                                                              |
+| `allowedEndpoints`                          | stringide massiiv, kuni 20                                              |                                                                                                                                                                                                                                                              |
+| `streamDefaultMode`                         | `legacy` \| `json`                                                      |                                                                                                                                                                                                                                                              |
+| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                    | Vt [võtmepõhine vahemälu möödaviik](#per-key-cache-bypass)                                                                                                                                                                                                   |
+| `compressionEnabled`                        | boolean                                                                 |                                                                                                                                                                                                                                                              |
+| `codexServiceMode`                          | üks Codexi teenuserežiimidest                                           |                                                                                                                                                                                                                                                              |
+| `disableNonPublicModels`                    | boolean                                                                 |                                                                                                                                                                                                                                                              |
+| `allowUsageCommand`                         | boolean                                                                 |                                                                                                                                                                                                                                                              |
+| `usageLimitEnabled`                         | boolean                                                                 |                                                                                                                                                                                                                                                              |
+| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | number >= 0 või `null`                                                  |                                                                                                                                                                                                                                                              |
+| `fiveHourUsageLimitUsd`                     | number >= 0 või `null`                                                  | Jooksev 5-tunnine USD eelarve, mida jõustatakse nagu päeva- ja nädalapiirangud (`usageLimitEnabled`, `UNPRICED_USAGE_BUDGET_POLICY`). `retry-after` on siis, kui akna vanim kulumine aegub, mistõttu võib võti, mis ületab oma limiidi, endiselt blokeerida. |
+| `chaosModeEnabled`                          | boolean                                                                 |                                                                                                                                                                                                                                                              |
 
 ```bash
 curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
@@ -1433,6 +1415,14 @@ curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
 | `/api/modality-bridge/stats`         | GET        | Mälusisesed `attempts`, õnnestumised/`bridged`, tõrked, vahemälu tabamused, `totalLatencyMs`, `latencySamples`, valimite arvul põhinev `averageLatencyMs` ja viimase kasutuse aeg (taaskäivitamisel lähtestatakse; halduse autentimine)                                                                                                                                                                       |
 | `/api/modality-bridge/video/runtime` | GET        | Range usaldusväärse loopback-ühenduse kontroll enne halduse autentimist/sondi; FFmpegi/ffprobei puhastatud saadavus ja versioonid (no-store)                                                                                                                                                                                                                                                                  |
 | `/api/modality-bridge/video/extract` | POST       | Sisemine autentitud usaldusväärse loopback-ühenduse baitide vahendaja; sisend 50 MiB, piiratud järjekord/32 MiB väljund, `503` mahuületuse korral, `499` ühenduse katkemise korral, `504` tähtaja ületamise korral; ei ole avalik üleslaadimise API                                                                                                                                                           |
+
+### Videokaadri puurimine
+
+`GET /api/v1/video-bridge/drilldown` loeb üürnikuga seotud läbipaistmatut käepidet, mis tagastati `x-omniroute-video-drilldown` pärast selgesõnalise nõusolekuga Video Bridge'i taotlust. Nii lugemiseks kui ka `DELETE` on alati vaja kehtivat API -võtit ja operaatori sõltumatut `modalityBridgeVideoDrilldownRemoteEnabled` luba. Tootmise säilitamine nõuab lisaks `modalityBridgeVideoDrilldownEnabled` ja ranget osade `drilldown: true`. Kui võtmel on tühi lõpp-punktide lubatud loend, peab see sisaldama `video` nii GET kui ka DELETE jaoks, olenemata sellest, kas helistaja kasutab `/v1` või `/api/v1`.
+
+GET päring: nõutav `handle`; valikuline `variant` (`preview`, `standard`, `detail`), `limit` (1–8; pärand `frames` on aktsepteeritud, kuid seda ei saa `limit` kombineerida), nullipõhine `page` ja `start`/`end` sekundid. Kui mõlemad fookuspiirid on esitatud, peab `end` olema suurem kui `start`. Duplicate/unknown päringuvõtmed lükatakse tagasi. Edukad vastused sisaldavad `derivation`, `durationSeconds`, `frames`, `hasMore`, `page`, `variant` ja valikulisi `focusWindow`; poevaba JSON piirang on 32 MiB, sealhulgas Base64. Ülegabariidiline väljund tagastab 413; taotleda vähem kaadreid.
+
+`DELETE /api/v1/video-bridge/drilldown?handle=...` tagastab `{ "removed": 0|1 }`. Tundmatu, aegunud ja ristklahviga GETs on eristamatud 404 vastused; ristklahviga DELETE ei saa omaniku kirjet eemaldada. Keelatud juurdepääs tagastab 403, missing/invalid autentimise 401, kehtetud päringud 400, tühistamise 499 ja ajutised vead 503. Käepidemed on protsessipõhised, aeguvad kümne minuti pärast ega pea taaskäivitamist üle. Uued käepidemed kasutavad `v1.` pluss 32-baidist juhuslikku Base64URL märki; säilitatakse ainult märgiräsi. Pärand 64-kuueteistkümnendmärgid jäävad ühilduvuse tagamiseks süntaktiliselt loetavaks. Nõusoleku, kvootide ja variantide tuletamise üksikasjade kohta vaadake [videosilla kaitsepiirdeid](../security/GUARDRAILS.md#video-bridge-videobridgets-videobridgepipelinets).
 
 ### Varundamine ja eksport/import
 
@@ -1538,19 +1528,19 @@ GET-vastus sisaldab `agents[]`-i (id, nimi, binaarfail, versioon, installitud, p
 
 Need lõpp-punktid järgivad Gemini API vormingut klientide jaoks, mis eeldavad Gemini SDK loomulikku ühilduvust.
 
-### Sisesed / süsteemi API-d
+### Sisemine / Süsteem APIs
 
-| Endpoint                 | Meetod | Kirjeldus                                                           |
-| ------------------------ | ------ | ------------------------------------------------------------------- |
-| `/api/init`              | GET    | Rakenduse lähtestamise kontroll (kasutatakse esimesel käivitamisel) |
-| `/api/tags`              | GET    | Ollama-ühilduvad mudelisildid (Ollama klientidele)                  |
-| `/api/restart`           | POST   | Sujuva serveri taaskäivitamise käivitamine                          |
-| `/api/shutdown`          | POST   | Sujuva serveri seiskamise käivitamine                               |
-| `/api/system/env/repair` | POST   | OAuth-teenusepakkuja keskkonnamuutujate parandamine                 |
-| `/api/system/version`    | GET    | Praegune/uusim versioon, uuenduse olek, väljalaskekanal             |
-| `/api/system/version`    | POST   | Juurutust arvestava uuenduse käivitamine uusimale versioonile       |
+| Lõpp-punkt               | meetod | Kirjeldus                                                      |
+| ------------------------ | ------ | -------------------------------------------------------------- |
+| `/api/init`              | GET    | Taustal sünkroonimisteenuste käivitamine (halduse autentimine) |
+| `/api/tags`              | GET    | Ollama-ühilduvad mudelisildid ( Ollama klientidele)            |
+| `/api/restart`           | POST   | Käivitage graatsiline serveri taaskäivitamine                  |
+| `/api/shutdown`          | POST   | Käivitage graatsiline serveri sulgemine                        |
+| `/api/system/env/repair` | POST   | Parandage OAuth pakkuja keskkonnamuutujad                      |
+| `/api/system/version`    | GET    | Current/latest versioon, värskenduse olek, väljalaskekanal     |
+| `/api/system/version`    | POST   | Käivitage juurutusteadlik värskendus uusimale versioonile      |
 
-> **Märkus:** Neid lõpp-punkte kasutab süsteem sisemiselt või Ollama kliendi ühilduvuse tagamiseks. Lõppkasutajad neid tavaliselt ei kutsu.
+> **Märkus.** Neid lõpp-punkte kasutab süsteem sisemiselt või Ollama kliendi ühilduvuse tagamiseks. Tavaliselt lõppkasutajad neile ei helista.
 
 ### OAuth-keskkonna parandamine _(v3.6.1+)_
 

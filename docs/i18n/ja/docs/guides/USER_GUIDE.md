@@ -342,24 +342,24 @@ API キー: [ダッシュボードから取得]
 
 ## 🚀 デプロイ
 
-### グローバル npm インストール（推奨）
+### グローバル npm インストール (推奨)
 
 ```bash
 npm install -g omniroute
 
-# 設定ディレクトリを作成
+# Create config directory
 mkdir -p ~/.omniroute
 
-# .env ファイルを作成（.env.example を参照）
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# サーバーを起動
+# Start server
 omniroute
-# またはカスタムポートを指定:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI は `~/.omniroute/.env` または `./.env` から `.env` を自動的に読み込みます。
+CLI 、 `~/.omniroute/.env`または`./.env`から`.env`自動的にロードします。作業ディレクトリ内の`./.env`は、キーの短い許可リスト (ポート、 `REQUIRE_API_KEY`、ロケール、および色の設定) のみを設定できます。他のすべてを`~/.omniroute/.env`に入れます。 [CLI起動コントラクト」](CLI-LAUNCH-CONTRACTS.md#working-directory-env)を参照してください。
 
 ### トレイモード
 

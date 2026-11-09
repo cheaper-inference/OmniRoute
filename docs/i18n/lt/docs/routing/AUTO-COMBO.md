@@ -128,6 +128,27 @@ Automatinis vertinimas kiekvienai užklausai parenka geriausią teikėją / mode
 | `src/sse/handlers/chat.ts`                                | Integracija: spartusis automatinio prefikso kelias |
 | `src/shared/constants/providers.ts`                       | `SYSTEM_PROVIDERS.auto` sistemos įrašas            |
 
+## Išsaugotų automatinių kombinacijų paskyros nuostatos
+
+Išmanusis automatinis redaktorius siūlo pasirinktinai** Paskyros nuostatos** skyrių. Kiekvienas ryšys gali būti pageidaujamas, įprastas (numatytasis), rezervuotas arba neįtrauktas. Keli ryšiai gali dalytis lygiu. Automatiškai pasirenka pirmoje tinkamoje pakopoje, išlaikant scoring/router elgseną ten; nesėkmingi bandymai patenka į likusias konkrečias sąskaitas, pirmenybę teikiant įprastai prieš rezervą. Išskirtos jungtys niekada nenaudojamos šiame derinyje.
+
+Nustatymas išsaugomas kaip `config.accountPreferences`, pažymėtas jungtimi ID:
+
+```json
+{
+  "accountPreferences": {
+    "connection-a": "preferred",
+    "connection-b": "preferred",
+    "connection-c": "reserve",
+    "connection-d": "excluded"
+  }
+}
+```
+
+Praleistas arba tuščias žemėlapis išlaiko esamą maršrutą. Nuostatos neįgalina išjungtų ryšių, nesuteikia API rakto prieigos, neatkuria kvotų užblokuotų kandidatų arba apeina biudžeto patikras. Kiekvienas bandymas apsiriboja konkrečiu ryšiu, todėl paskyros atsarginė dalis negali pereiti aukštų už kombinuoto maršrutizatoriaus. Esama seanso bendrija gali išlaikyti tinkamą paskyrą; neįskaitant paskyros, susietos su savuoju posūkiu, sustojimai, kurie apsisuka, o ne tyliai keičia paskyras.
+
+Sukonfigūruotose nuostatose naudojamas automatinis kelias nuo paskyros: nesusietas konteksto talpykla, išmanusis vamzdynas, chaosas ir šešėliniai spartieji klavišai nesiunčiami. Spekuliatyvus apsidraudimas šioms užklausoms išjungtas, todėl rezervinės sąskaitos negali varžytis su pageidaujamomis. Kitos kombinuotos strategijos neaiškina šio nustatymo. Pakeitus kombinaciją iš Auto, išsaugomos išsaugotos nuostatos, kad vėliau būtų galima grįžti atgal.
+
 ## Kombinacijų pavadinimai, sutampantys su tikru modelio ID
 
 Kombinacija, kurios `name` yra identiškas nepapildytam modelio ID (pvz., kombinacija, pavadinta
@@ -188,36 +209,38 @@ Dvi dažnos klaidos:
 
 Pirminė painiava, kurią paaiškina šis dokumentas, aprašyta [#7992](https://github.com/diegosouzapw/OmniRoute/issues/7992) ir [#7111](https://github.com/diegosouzapw/OmniRoute/issues/7111).
 
-## Kaip tai veikia (išsaugomi automatiniai deriniai)
+## Kaip tai veikia (išlikę automatiniai deriniai)
 
-Automatinių derinių variklis dinamiškai parenka geriausią paslaugų teikėją ir modelį kiekvienai užklausai, naudodamas **16 veiksnių vertinimo funkciją** (apibrėžtą `open-sse/services/autoCombo/scoring.ts` → `DEFAULT_WEIGHTS`). Numatytųjų svorių suma yra `1.0`; pasirinktiniai svoriai iš naujo normalizuojami naudojant `normalizeScoringWeights()`. Dviejų iš šešiolikos veiksnių — `cacheAffinity` ir `resetWindowAffinity` — numatytasis svoris yra `0`; `reliability` svoris `DEFAULT_WEIGHTS` yra `0`, tačiau bendruosiuose rinkiniuose jis yra `0.03`, o rinkinyje `reliability-first` — `0.04`; `quality` svoris rinkiniuose yra `0.02` (rinkinyje `quality-first` — `0.03`). Jie vis tiek apskaičiuojami kiekvienam kandidatui, o `cacheAffinity` už vertinimo funkcijos ribų valdo raginimų podėlio dubliavimo šalinimą, todėl veiksniai, kurių numatytasis svoris lygus nuliui, pagal numatytuosius nustatymus tiesiog nedalyvauja vertinant, tačiau rinkiniuose yra naudojami.
+„Auto-Combo Engine“ dinamiškai parenka geriausią provider/model kiekvienai užklausai, naudodamas a **16 koeficientų balų funkcija** (apibrėžta `open-sse/services/autoCombo/scoring.ts` → `DEFAULT_WEIGHTS`). Numatytųjų svorių suma yra `1.0`; pasirinktinius svorius renormalizuoja `normalizeScoringWeights()`. Dviejų iš šešiolikos — `cacheAffinity` ir `resetWindowAffinity` — numatytasis svoris yra `0`; `reliability` turi `0` `DEFAULT_WEIGHTS` o `0.03` bendruosiuose paketuose ir `0.04` `reliability-first`, o `quality` neša `0.02` paketuose (`0.03` `quality-first`): jie vis tiek apskaičiuojami kiekvienam kandidatui, o `cacheAffinity` užkerta kelią greitosios talpyklos dedublikavimui už balo ribų, todėl nuliniai numatytieji veiksniai pagal numatytuosius nustatymus tiesiog nebalsuoja.
 
-![Automatinio derinio 16 veiksnių vertinimas](../diagrams/exported/auto-combo-scoring.svg)
+![Auto-Combo 16-factor scoring](../diagrams/exported/auto-combo-scoring.svg)
 
-> Šaltinis: [diagrams/auto-combo-scoring.mmd](../diagrams/auto-combo-scoring.mmd) (sugeneruokite iš naujo naudodami `npm run docs:render-diagrams`). Failo pavadinimas yra istorinis; pirminiame faile ir sugeneruotoje diagramoje rodomi visi 16 veiksnių, deklaruotų `DEFAULT_WEIGHTS`.
+> Šaltinis: [diagrams/auto-combo-scoring.mmd](../diagrams/auto-combo-scoring.mmd) (atkurti per `npm run docs:render-diagrams`). Failo pavadinimas yra istorinis; šaltinis ir pateikta diagrama rodo visus 16 veiksnių, deklaruotų `DEFAULT_WEIGHTS`.
 
-| Veiksnys              | Numatytasis svoris | Aprašymas                                                                                                                                                                                                                                                                                  |
-| :-------------------- | :----------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `quota`               | 0.1429             | Likusi kvota / dažnio apribojimo rezervas [0..1]                                                                                                                                                                                                                                           |
-| `health`              | 0.1605             | Būklės įvertis iš grandinės pertraukiklio (CLOSED=1.0, HALF_OPEN=0.5, OPEN=0.0)                                                                                                                                                                                                            |
-| `costInv`             | 0.1429             | Atvirkštinė **mišrioji** kaina (60 % įvesties ir 40 % išvesties žetonų kainos, normalizuota) — pigiau = aukštesnis įvertis                                                                                                                                                                 |
-| `latencyInv`          | 0.1143             | Atvirkštinė p95 delsa, normalizuota pagal telkinį — greičiau = aukštesnis įvertis                                                                                                                                                                                                          |
-| `taskFit`             | 0.0762             | Tinkamumas užduoties tipui (programavimui, peržiūrai, planavimui, analizei, derinimui, dokumentacijai)                                                                                                                                                                                     |
-| `stability`           | 0.0476             | Dispersija pagrįstas stabilumas pagal delsos standartinį nuokrypį — kandidatas, kurio atsako trukmė smarkiai svyruoja, gauna mažesnį įvertį                                                                                                                                                |
-| `tierPriority`        | 0.0476             | Paskyros lygio prioritetas — Ultra=1.0, Pro=0.67, Standard=0.33, Free=0.0                                                                                                                                                                                                                  |
-| `tierAffinity`        | 0.0476             | Kandidato lygio ir manifeste rekomenduojamo lygio atitiktis                                                                                                                                                                                                                                |
-| `specificityMatch`    | 0.0476             | Užklausos konkretumo (manifesto užuominos) ir modelio lygio atitiktis                                                                                                                                                                                                                      |
-| `contextAffinity`     | 0.0476             | Užklausai reikalingo konteksto lango ir modelio konteksto lango atitiktis                                                                                                                                                                                                                  |
-| `sessionAvailability` | 0.0476             | Kandidato ryšio OAuth seanso prieinamumas šiame seanse (`getOAuthSessionAvailability()`; ne OAuth ryšiai gauna 1.0 įvertį)                                                                                                                                                                 |
-| `connectionDensity`   | 0.0476             | Paskirsto apkrovą tarp to paties paslaugų teikėjo ryšių (apsauga nuo koncentracijos)                                                                                                                                                                                                       |
-| `cacheAffinity`       | 0.00               | Rendezvous maišos atitiktis ryšiui, kuriame greičiausiai jau yra šios užklausos raginimo podėlio prefiksas (`open-sse/services/combo/promptCacheAffinity.ts`); pagal numatytuosius nustatymus išjungta (#8008)                                                                             |
-| `resetWindowAffinity` | 0.00               | Pirmenybė ryšiams, kurių kvotos nustatymo iš naujo langas yra palankus (pagal numatytuosius nustatymus išjungta)                                                                                                                                                                           |
-| `quality`             | 0.03               | Grįžtamuoju ryšiu pagrįstas išvesties kokybės signalas iš maršruto parinkimo įvykių kokybės stebėjimo priemonės; kandidatai, neturintys stebėjimų, gauna neutralų 0.5 įvertį                                                                                                               |
-| `reliability`         | 0.00               | Stebėta sėkmingų rezultatų dalis, `1 - failureRate`, apskaičiuota pagal 24 val. naudojimo istoriją, taikant mažiausiai dešimties imčių ribą (kitu atveju naudojami realiojo laiko rodikliai); laikoma, kad kandidatų be stebėjimų reikšmė yra 1.0. Pagal numatytuosius nustatymus išjungta |
+| Veiksnys              | Numatytasis svoris | Aprašymas                                                                                                                                                                                                                    |
+| :-------------------- | :----------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `quota`               | 0.1429             | Likusios kvotos / tarifo ribos erdvė [0..1]                                                                                                                                                                                  |
+| `health`              | 0.1605             | Sveikatos balas iš grandinės pertraukiklio (CLOSED= 1.0, HALF_OPEN= 0.5, OPEN= 0.0)                                                                                                                                          |
+| `costInv`             | 0.1429             | Atvirkščiai **sumaišytas** kaina (60 % įvesties + 40 % išvesties prieigos rakto kaina, normalizuota) — pigiau = didesnis balas                                                                                               |
+| `latencyInv`          | 0.1143             | Atvirkštinis p95 delsos laikas normalizuotas, kad būtų galima surinkti — greitesnį = aukštesnį balą                                                                                                                          |
+| `taskFit`             | 0.0762             | Užduočių tipo tinkamumas (kodavimas, peržiūra, planavimas, analizė, derinimas, dokumentai)                                                                                                                                   |
+| `stability`           | 0.0476             | Variantu pagrįstas stabilumas nuo delsos standartinio nuokrypio — kandidato, kurio reakcijos laikas svyruoja, balai mažesni                                                                                                  |
+| `tierPriority`        | 0.0476             | Paskyros lygio prioritetas — Ultra = 1.0, Pro = 0.67, standartinis = 0.33, nemokamas = 0.0                                                                                                                                   |
+| `tierAffinity`        | 0.0476             | Artimumas tarp kandidato pakopos ir manifeste rekomenduojamos pakopos                                                                                                                                                        |
+| `specificityMatch`    | 0.0476             | Atitikimas tarp užklausos konkretumo (akivaizdžios užuominos) ir modelio pakopos                                                                                                                                             |
+| `contextAffinity`     | 0.0476             | Užklausos kontekstinio lango poreikio ir modelio kontekstinio lango giminingumas                                                                                                                                             |
+| `sessionAvailability` | 0.0476             | Galimybė prisijungti prie šios sesijos OAuth seanso (`getOAuthSessionAvailability()`; ne OAuth ryšių balas 1,0)                                                                                                              |
+| `connectionDensity`   | 0.0476             | Paskirsto apkrovą to paties teikėjo ryšiams (antikoncentracija)                                                                                                                                                              |
+| `cacheAffinity`       | 0.00               | Rendezvous maišos atitiktis ryšiui, kuriame greičiausiai jau yra šios užklausos raginimo podėlio prefiksas (`open-sse/services/combo/promptCacheAffinity.ts`); pagal numatytuosius nustatymus išjungta (#8008)               |
+| `resetWindowAffinity` | 0.00               | Polinkis į ryšius, kurių kvotos nustatymo iš naujo langas yra palankus (išjungta pagal numatytuosius nustatymus)                                                                                                             |
+| `quality`             | 0.03               | Grįžtamuoju ryšiu pagrįstas išvesties kokybės signalas iš maršruto parinkimo įvykių kokybės stebėjimo priemonės; kandidatai be pastabų gauna neutralų 0,5                                                                    |
+| `reliability`         | 0.00               | Pastebėta sėkmės dalis, `1 - failureRate`, naudojant 24 val. naudojimo istoriją už dešimties pavyzdžių (kitaip realiojo laiko metrika); kandidatai be pastabų yra skaitomi kaip 1,0. Išjungta pagal numatytuosius nustatymus |
 
-`quality` (`open-sse/services/routing/quality.ts`): `cold restart → ∅`; `observations = 0 → score 0.5`.
+Atmintyje esantis `quality` sekiklis (`open-sse/services/routing/quality.ts`) yra tuščias po šalto paleidimo iš naujo, todėl kiekvienas kandidatas gauna neutralų `0.5` kol pasieks pirmieji stebėjimai.
 
-**Suma:** `0.1429 + 0.1605 + 0.1429 + 0.1143 + 0.0762 + (7 × 0.0476) + 0.00 + 0.00 + 0.03 + 0.00 = 1.0`, kaip deklaruota `DEFAULT_WEIGHTS`; naudotojo sukonfigūruoti svoriai prieš vertinimą iš naujo normalizuojami į skirstinį naudojant `normalizeScoringWeights()`.
+> **Nenuskaitoma kvota (#15347).** Kai teikėjas turi kvotų gavimo priemonę, bet nepateikia nieko įskaitomo (nepavyko gauti, trūksta kredencialų, naudojamas tik pranešimams arba netinkamai suformuotas momentinis vaizdas be analizuojamo `windows` ir baigtinio `percentUsed`, įskaitant `percentUsed: null`), kandidatas `UNREADABLE_QUOTA_SOFT_DEPRIORITIZE_FACTOR` ašyje įvertina `0`, o jo galutinis balas padauginamas iš `quota`, 0,5 `autoStrategy.ts`. modelis kaip ryšio būsenos bauda. Nesėkmingas naudojimo skaitymas yra telemetrijos, o ne teikėjo įrodymas, todėl jis yra griežtai žemesnis už bet kokį tikrąjį rodmenį, įskaitant patvirtintą 100 %-used, bet niekada nėra sunkiai užblokuojamas ar iškeldinamas. Teikėjas, neturintis viršutinės ribos, praneša apie `unlimited: true` ir vertina kaip visą kvotą; teikėjas, neturintis registruotos kvotos gavimo priemonės, iš viso neturi telemetrijos šaltinio ir išlaiko numatytąjį `100`.
+
+**Suma:** `0.1429 + 0.1605 + 0.1429 + 0.1143 + 0.0762 + (7 × 0.0476) + 0.00 + 0.00 + 0.03 + 0.00 = 1.0` kaip nurodyta `DEFAULT_WEIGHTS`; vartotojo sukonfigūruoti svoriai `normalizeScoringWeights()` pernormalizuojami į paskirstymą prieš įvertinant balus.
 
 ## Režimų paketai
 
@@ -331,21 +354,13 @@ nustatytos reikšmės perduodamos esamoms variklio `config.modePack` / `config.b
 Griežtai rotacijai naudokite `round-robin`; vienodi `weighted` svoriai suteikia statistinį, o ne
 griežtą balansą.
 
-### Agentinio konvejerio režimas
+### Agento dujotiekio režimas
 
-`pipeline` derinys, turintis bent du modelius, gali įjungti planuotojo / vykdytojo maršruto parinkimą
-naudojant `config.agenticOrchestration.enabled`. Pirmasis tikslas atsakingas už planavimą ir galutinius atsakymus;
-antrasis tikslas generuoja kliento vietinio formato įrankių iškvietimus. „OmniRoute“ pagal užklausos protokolą aptinka
-tęsinius su įrankių rezultatais, klausia planuotojo, ar reikia dar vieno įrankių vykdymo ciklo,
-ir dinamiškai parenka vykdytoją arba planuotoją kaip galutinį klientui skirtą
-etapą.
+`pipeline` derinys su mažiausiai dviem modeliais gali pasirinkti planner/executor maršrutą su `config.agenticOrchestration.enabled`. Pirmajam taikiniui priklauso planavimas ir galutiniai atsakymai; antrasis tikslas siunčia kliento įrankio iškvietimus. OmniRoute aptinka įrankio rezultato tęsinius iš užklausos protokolo, klausia planuotojo, ar reikalingas kitas įrankio ciklas, ir dinamiškai paverčia vykdytoją arba planuotoją galutiniu klientui skirtu žingsniu.
 
-Po antrojo tikslo nurodyti papildomi modeliai yra iš eilės naudojami kaip atsarginiai vykdytojai. Gavus nesėkmingą
-HTTP atsakymą arba įvykus transporto išimčiai pereinama prie kito vykdytojo, išlaikant
-tą patį planuotojo sprendimą bei vietinius įrankius, tačiau naudojant to vykdytojo etapo instrukciją ir
-nustatytą ryšį. Pirmasis sėkmingas atsakymas grąžinamas nepakeistas, įskaitant
-SSE srautinį perdavimą; prasidėjus sėkmingam srautui, vėlesnių trikčių čia pakartotinai apdoroti negalima.
-Jei visi vykdytojai patiria triktį, grąžinama paskutinė triktis. Klientui nutraukus užklausą, siuntimas sustabdomas.
+Tęsiant įrankio rezultatą, OmniRoute taip pat sustabdo vykdymą, kai du iš eilės užbaigti raundai pakartoja tuos pačius įrankio iškvietimus su nepakitusiais rezultatais arba kai kiekvienas aiškiai pažymėtas rezultatas per du raundus iš eilės nepavyko. Pasikeitę rezultatai leidžia pakartotinai skambinti (pavyzdžiui, apklausa). Apsauga iš naujo nustatoma pagal naują vartotojo užklausą, sugrupuoja lygiagrečius skambučius į vieną raundą ir palaiko Anthropic, pokalbių užbaigimus, atsakymus ir Gemini istorijas. Planuotojas gauna priežastį ir jam priklauso galutinis atsakymas, net jei jis prašo kito įrankio etapo.
+
+Papildomi modeliai po antrojo tikslo yra užsakomos vykdytojo atsarginės kopijos. Nepavykęs HTTP atsakymas arba transportavimo išimtis perduodama kitam vykdytojui, turinčiam tą patį planuotojo sprendimą ir vietinius įrankius, tačiau paties vykdytojo veiksmų raginimas ir išspręstas ryšys. Pirmasis sėkmingas atsakymas grąžinamas nepakitęs, įskaitant SSE srautinį perdavimą; gedimų po sėkmingo srauto pradžios čia negalima bandyti iš naujo. Jei nepavyksta visiems vykdytojams, grąžinamas paskutinis gedimas. Klientas nutraukia siuntimo sustabdymą.
 
 ```json
 {
@@ -357,11 +372,7 @@ Jei visi vykdytojai patiria triktį, grąžinama paskutinė triktis. Klientui nu
 }
 ```
 
-Vykdytojas viename atsakyme gali pateikti kelis nepriklausomus iškvietimus. Priklausomi iškvietimai
-apdorojami vėlesniuose kliento įrankių rezultatų cikluose, planuotojui peržiūrint kiekvieną rezultatą.
-Numatytoji `maxToolRounds` reikšmė yra `8`, o priimamas intervalas — `1`–`32`; pasiekus šią ribą, planuotojas turi
-pateikti geriausią įmanomą galutinį atsakymą. Vidiniai planuotojo sprendimai kaupiami buferyje, o
-pasirinktame klientui skirtame atsakyme išlaikoma pradinė srautinio perdavimo nuostata.
+Vykdytojas vienu atsakymu gali išsiųsti kelis nepriklausomus skambučius. Priklausomi skambučiai tvarkomi vėlesniais kliento įrankio rezultato posūkiais, planuotojui peržiūrint kiekvieną rezultatą. `maxToolRounds` numatytasis `8` ir priima `1`–`32`; pasiekęs planuotojas turi pateikti geriausią galimą galutinį atsakymą. Vidiniai planuotojo sprendimai saugomi buferyje, o pasirinktas kliento atsakymas išsaugo pirminę srautinio perdavimo nuostatas.
 
 ### `round-robin` susietas paketinis apdorojimas ir paskyrų išplėtimas
 

@@ -11,11 +11,11 @@
 <br/>
 <br/>
 
-# 🚀 OmniRoute — AI Percuma
+# 🚀 OmniRoute — Gerbang AI Percuma
 
 **Dicipta oleh [Diego Souza](https://github.com/diegosouzapw)**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Never stop coding. Every AI tool → 381 providers — 150+ free — through one endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity into FREE Claude / GPT / Gemini with auto-fallback. RTK + Caveman stacked compression saves 15–95% tokens (~89% avg) — never hit limits. 381 AI providers · 150+ free tiers · ~1.62B free tokens/mo · 20 routing strategies · $0 to start."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Never stop coding. Every AI tool → 382 providers — 150+ free — through one endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity into FREE Claude / GPT / Gemini with auto-fallback. RTK + Caveman stacked compression saves 15–95% tokens (~89% avg) — never hit limits. 382 AI providers · 150+ free tiers · ~1.62B free tokens/mo · 20 routing strategies · $0 to start."/>
 
 </div>
 
@@ -51,18 +51,13 @@
 
 ### 💬 Sertai komuniti
 
-**👋 Ikuti penyelenggara — dapatkan penyedia baharu, keluaran dan petua terlebih dahulu:**
+**👋 Ikuti penyelenggara — dapatkan pembekal, keluaran & petua baharu dahulu:**
 
-[![Ikuti Diego di LinkedIn](https://img.shields.io/badge/Follow_Diego_on-LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/diegosouzapw/)
-[![Ikuti @diegosouzapw di GitHub](https://img.shields.io/github/followers/diegosouzapw?style=for-the-badge&logo=github&logoColor=white&label=Follow%20on%20GitHub&color=181717)](https://github.com/diegosouzapw)
+[![Ikuti Diego di LinkedIn](https://img.shields.io/badge/Follow_Diego_on-LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white) ](https://www.linkedin.com/in/diegosouzapw/) [![Ikuti @diegosouzapw di GitHub](https://img.shields.io/github/followers/diegosouzapw?style=for-the-badge&logo=github&logoColor=white&label=Follow%20on%20GitHub&color=181717) ](https://github.com/diegosouzapw)
 
-[![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/U47eFqAXCn)
-[![Telegram](https://img.shields.io/badge/Telegram-26A5E4?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/omnirouteOficial)
-[![WhatsApp Global](https://img.shields.io/badge/WhatsApp_Global-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4)
-[![WhatsApp Brasil](https://img.shields.io/badge/WhatsApp_Brasil-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)
-[![Laman Web](https://img.shields.io/badge/Website-omniroute.online-blue?logo=google-chrome&logoColor=white)](https://omniroute.online)
+[![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white) ](https://discord.gg/U47eFqAXCn) [![Telegram](https://img.shields.io/badge/Telegram-26A5E4?style=for-the-badge&logo=telegram&logoColor=white) ](https://t.me/omnirouteOficial) [![WhatsApp Global](https://img.shields.io/badge/WhatsApp_Global-25D366?style=for-the-badge&logo=whatsapp&logoColor=white) ](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) [![WhatsApp Brasil](https://img.shields.io/badge/WhatsApp_Brasil-25D366?style=for-the-badge&logo=whatsapp&logoColor=white) ](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) [![Laman web](https://img.shields.io/badge/Website-omniroute.online-blue?logo=google-chrome&logoColor=white) ](https://omniroute.online)
 
-**Soalan, petua penyedia, hala tuju & sokongan → [Discord](https://discord.gg/U47eFqAXCn) · [Telegram](https://t.me/omnirouteOficial) · WhatsApp [🌍 Global](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) / [🇧🇷 Brasil](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) / [Portal](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)**
+**Soalan, petua pembekal, peta jalan & sokongan → [Discord](https://discord.gg/U47eFqAXCn) · [Telegram](https://t.me/omnirouteOficial) · WhatsApp [🌍 Global](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) / [🇧🇷 Brazil](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) / [📢 Saluran Rasmi](https://whatsapp.com/channel/0029VbDwC7A3wtb5PN6a5t2R) / [Portal](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)**
 
 <br/>
 
@@ -72,17 +67,17 @@
 
 |                            |          v3.8.50          | **v3.8.51** |      `v3.8.54+`       |
 | -------------------------- | :-----------------------: | :---------: | :-------------------: |
-| Pembekal 🌐                |            352            |   **358**   |          381          |
-| 🧠 Model sembang unik IDs  |           1320            |  **1374**   |         1519          |
-| 🖼️ Modality Bridge         | 🆕 vision + audio + video |      ✓      |           ✓           |
-| katalog percuma 📡 Radar   |       🆕 ikut serta       |      ✓      |           ✓           |
-| ⚖️ Penjadualan sedar Kuota |      🆕 Quota-Share       |      ✓      |           ✓           |
-| 📊 Kuota telemetri         |         🆕 hidup          |      ✓      |           ✓           |
-| 🧰 Mod tanpa kepala        |             —             |      —      | 🆕 `serve --headless` |
-| 🛤️ LTS rail infra          |             —             |      —      |  saluran keluaran 🆕  |
-| 🔎 Penemuan model API      |             —             |      —      | 🆕 `/v1/models/query` |
+| Pembekal 🌐                |            352            |   **358**   |          382          |
+| 🧠 Model sembang unik IDs  |           1320            |  **1374**   |         1524          |
+| Jambatan Modaliti 🖼️       | 🆕 vision + audio + video |      ✓      |           ✓           |
+| Katalog percuma Radar 📡   |       🆕 ikut serta       |      ✓      |           ✓           |
+| Penjadualan sedar Kuota ⚖️ |   Perkongsian Kuota 🆕    |      ✓      |           ✓           |
+| Telemetri Kuota 📊         |    🆕 secara langsung     |      ✓      |           ✓           |
+| Mod tanpa kepala 🧰        |             —             |      —      | 🆕 `serve --headless` |
+| Infra rel 🛤️ LTS           |             —             |      —      |  Saluran keluaran 🆕  |
+| Penemuan Model 🔎 API      |             —             |      —      | 🆕 `/v1/models/query` |
 
-**→ [Roadmap](ROADMAP.md) — menaiki rel ke `v3.9.0 LTS`**
+**[Pelan Hala Tuju](ROADMAP.md)→ — menaiki rel ke `v3.9.0 LTS`**
 
 </div>
 
@@ -108,7 +103,7 @@
   <tr>
     <td align="right"><b>⚙️ Features</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 Combos</a></td>
-    <td align="center"><a href="#-381-ai-providers--156-catalog-marked-free">🌐 Providers</a></td>
+    <td align="center"><a href="#-382-ai-providers--156-catalog-marked-free">🌐 Providers</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI &amp; MCP</a></td>
   </tr>
   <tr>
@@ -232,7 +227,7 @@ curl http://localhost:20128/v1/chat/completions \
   -d '{"model":"auto","messages":[{"role":"user","content":"Hello!"}]}'
 ```
 
-<sub>`auto` memerlukan laluan yang layak. Pemasangan baharu tidak boleh mempunyai sasaran tanpa kunci yang layak, dan pembekal tanpa kunci boleh menolak pelanggan pihak ketiga. Pembekal bertanda `tos: avoid`, termasuk Kiro, dikecualikan daripada penghalaan automatik secara lalai; menyambungkan akaun tidak mengatasi tetapan itu. Lihat [Panduan Peringkat Percuma](docs/getting-started/FREE-TIERS-GUIDE.md) sebelum memilih pembekal.</sub>
+<sub>`auto` memerlukan laluan yang layak. Pemasangan baharu tidak boleh mempunyai sasaran tanpa kunci yang layak, dan pembekal tanpa kunci boleh menolak pelanggan pihak ketiga. Penyedia bertanda `tos: avoid`, termasuk Kiro, dikecualikan daripada penghalaan automatik secara lalai; menyambungkan akaun tidak mengatasi tetapan itu. Lihat [Panduan Peringkat Percuma](docs/getting-started/FREE-TIERS-GUIDE.md) sebelum memilih pembekal.</sub>
 
 <sub>📦 Salin-tampal skrip mula pantas untuk **Python, Node.js, PHP dan cURL** → [`examples/quickstart/`](examples/quickstart/)</sub>
 
@@ -244,7 +239,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="The Promise — One endpoint and 381 providers. Automatic fallback keeps routing while another healthy target is available. Six pillars: resilient fallback across 381 providers · up to 95% token savings on eligible workloads · $0 to start with 150+ free tiers and 52 recurring/keyless free-forever providers · 39 CLI/agent integrations through one config · OpenAI, Claude, Gemini and Responses API compatibility at /v1 · production controls including circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals and 56,000+ static test declarations across 7,800+ tracked test files."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="The Promise — One endpoint and 382 providers. Automatic fallback keeps routing while another healthy target is available. Six pillars: resilient fallback across 382 providers · up to 95% token savings on eligible workloads · $0 to start with 150+ free tiers and 52 recurring/keyless free-forever providers · 39 CLI/agent integrations through one config · OpenAI, Claude, Gemini and Responses API compatibility at /v1 · production controls including circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals and 56,000+ static test declarations across 7,800+ tracked test files."/>
 
 <br/>
 <br/>
@@ -504,7 +499,7 @@ Kesemua **20** strategi — campur & padankan bagi setiap langkah kombo:
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Apa yang membezakan OmniRoute — gambaran ciri bertarikh vs 9router, OpenRouter, CLIProxyAPI dan LiteLLM merentasi 13 keupayaan. OmniRoute: 381 penyedia, lebih 150 pelan percuma terbina dalam, 20 strategi penghalaan, pemampatan token 12-enjin, pelayan MCP terbina dalam dengan 110 alat, protokol ejen A2A, memori berterusan, pagar keselamatan, ejen awan, penyamaran cap jari TLS, Desktop/Termux/PWA dan 67 lokal UI i18n. OmniRoute dilesenkan MIT dan boleh dihoskan sendiri. Keupayaan dan bilangan pesaing mungkin berubah; lihat metodologi yang dipautkan."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Apa yang membezakan OmniRoute — gambaran ciri bertarikh vs 9router, OpenRouter, CLIProxyAPI dan LiteLLM merentasi 13 keupayaan. OmniRoute: 382 penyedia, lebih 150 pelan percuma terbina dalam, 20 strategi penghalaan, pemampatan token 12-enjin, pelayan MCP terbina dalam dengan 110 alat, protokol ejen A2A, memori berterusan, pagar keselamatan, ejen awan, penyamaran cap jari TLS, Desktop/Termux/PWA dan 67 lokal UI i18n. OmniRoute dilesenkan MIT dan boleh dihoskan sendiri. Keupayaan dan bilangan pesaing mungkin berubah; lihat metodologi yang dipautkan."/>
 
 <sub>📊 Metodologi penuh &amp; perincian setiap ciri berbanding 9router, OpenRouter, CLIProxyAPI &amp; LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -576,33 +571,33 @@ Radar adalah secara ikut serta dan GET sahaja. Klien OmniRoute tidak memuat naik
 
 > Sorotan terkini daripada **v3.8.20 → v3.8.54** . Sejarah penuh dalam [`CHANGELOG.md`](CHANGELOG.md).
 
-- **penghalaan ⚖️ `quota-weighted`** — strategi kombo ke-20 melangkau akaun yang telah habis, kemudian menarik antara yang lain mengikut perkadaran dengan baki kuota ÷ beban dalam penerbangan, memastikan perbualan sedia ada disematkan. → [Auto-Kombo](docs/routing/AUTO-COMBO.md)
-- **🧰 Mod tanpa kepala** — `omniroute serve --headless` (atau `OMNIROUTE_HEADLESS=1`) hanya menjalankan enjin proksi `/v1/*`, dengan subsistem papan pemuka dan papan pemuka sahaja dimatikan. → [Mod Tanpa Kepala](docs/guides/HEADLESS.md)
-- **🔎 Penemuan model** — `/v1/models` menapis mengikut keupayaan, konteks, jenis dan teks, dan `POST /v1/models/query` mengembalikan senarai pendek deterministik pendek dengan keterlihatan setiap kekunci yang sama. → [API Rujukan](docs/reference/API_REFERENCE.md)
-- **🔑 Kawalan penghalaan Per-kunci** — sematkan kekunci API pada satu model atau kombo dengan `forcedModel`, dan tambah atau alih keluar model dan kombo kunci secara atom (`/api/keys/{id}/access`). → [API Rujukan](docs/reference/API_REFERENCE.md) · [OpenAPI](docs/openapi.yaml)
-- **🛡️ Kawalan PII yang lebih halus** — pemilihan setiap jenis, sehingga 20 corak pelekat tersuai yang disahkan dan kaunter pengesanan setiap jenis; masking itu sendiri kekal ikut serta. → [Pengawal](docs/security/GUARDRAILS.md)
-- **🌍 67 bahasa** papan pemuka —, cermin dokumen dan CLI, dengan `npm run i18n:add-locale` menambahkan bahasa di mana-mana dalam satu arahan. [Panduan](docs/guides/I18N.md) → i18n
-- **🎛️ OmniConductor** — delegasi A2A masuk ke kumpulan ejen anda, Kemahiran konduktor pada Kad Ejen dan panel papan pemuka dengan sembang suara push-to-talk Faro. → [A2A Pelayan](docs/frameworks/A2A-SERVER.md)
-- **🛂 Kemasukan adaptif & perlindungan lebihan** — heavyweight chat meminta baris gilir dan bukannya 503ing, dengan atomic RPM rolling pajakan setiap sambungan. → [Panduan Ketahanan](docs/architecture/RESILIENCE_GUIDE.md)
-- **pesanan 🗂️ Canonical `/v1/models`** — satu blok kumpulan pembekal bersebelahan bagi setiap pembekal (kombo disematkan dahulu), stabil merentas setiap sumber katalog. → [API Rujukan](docs/reference/API_REFERENCE.md)
-- **🗜️ Pengerasan mampatan** — pengawal inflasi lalai, pek Caveman untuk DE / FR / JA + Cina (wényán), penapis RTK untuk Gradle & .NET. → [Mampatan](docs/compression/COMPRESSION_ENGINES.md)
-- **💸 Kos kadar rata yang jujur** Pembekal langganan / pelan pengekodan — dibaca **$0** dalam analisis kos; bajet, kuota & routing terus buat anggaran. → [API Rujukan](docs/reference/API_REFERENCE.md)
-- **⚖️ Quota-Perkongsian penghalaan** — membahagikan kuota akaun kongsi dengan saksama merentas kunci terkumpul, menjimatkan kerja supaya potongan terbiar dipinjamkan. [Panduan Ketahanan](docs/architecture/RESILIENCE_GUIDE.md) →
-- **🤖 Persediaan CLI/agent satu arahan** — 15 perintah `setup-*` berdaftar; `omniroute run` melancarkan 7 CLIs (Claude Code, Codex, Aider, Goose, OpenCode, Qwen Code, Gemini CLI); `omniroute configure` menyokong 11 sasaran dengan penyedia interaktif pemilih model + dan kegemaran setiap konteks. → [CLI Integrasi](docs/guides/CLI-INTEGRATIONS.md)
-- **🛰️ Mod jauh** — memandu OmniRoute jauh dengan token berskop (`connect` / `contexts` / `tokens`) + pembantu OAuth `antigravity` pemasangan VPS. → [Mod Jauh](docs/guides/REMOTE-MODE.md)
-- **🧭 Penghalaan automatik yang lebih bijak** gabungan — `auto/<category>:<tier>`,**Gabungan** (panel model hakim + ), penghalaan sedar tugas, model / mod setiap permintaan / penggantian belanjawan USD. → [Auto-Kombo](docs/routing/AUTO-COMBO.md)
-- **🗜️ Mampatan boleh pasang** — 12 enjin boleh gubah + Compression Studios: LLMLingua-2, Ultra dua peringkat, omniglyph, get fidelity per-step, GCF v3.2, editor susunan semula seret. → [Mampatan](docs/compression/COMPRESSION_ENGINES.md)
+- **penghalaan ⚖️ `quota-weighted`** Strategi kombo ke-20 — melangkau akaun yang telah habis, kemudian menarik antara yang lain mengikut perkadaran dengan baki kuota ÷ dalam muatan dalam penerbangan, memastikan perbualan sedia ada disematkan. [Kombo Auto](docs/routing/AUTO-COMBO.md) →
+- **Mod tanpa kepala 🧰** — `omniroute serve --headless` (atau `OMNIROUTE_HEADLESS=1`) hanya menjalankan enjin proksi `/v1/*`, dengan subsistem papan pemuka dan papan pemuka sahaja dimatikan. [Mod Tanpa Kepala](docs/guides/HEADLESS.md) →
+- **🔎 Penemuan model** — `/v1/models` penapis mengikut keupayaan, konteks, jenis dan teks, dan `POST /v1/models/query` mengembalikan senarai pendek deterministik pendek dengan keterlihatan setiap kekunci yang sama. → [API Rujukan](docs/reference/API_REFERENCE.md)
+- **🔑 Kawalan penghalaan per-kunci** — pin an API kunci kepada satu model atau kombo dengan `forcedModel`, dan tambah atau alih keluar model dan kombo kunci secara atom (`/api/keys/{id}/access`). → [API Rujukan](docs/reference/API_REFERENCE.md) · [OpenAPI](docs/openapi.yaml)
+- **Kawalan 🛡️ Finer PII** Pemilihan setiap jenis —, sehingga 20 corak pelekat tersuai yang disahkan dan kaunter pengesanan setiap jenis; masking itu sendiri kekal ikut serta. [Pengawal](docs/security/GUARDRAILS.md) →
+- **🌍 67 bahasa** Papan pemuka —, cermin dokumen dan CLI, dengan `npm run i18n:add-locale` menambahkan bahasa di mana-mana dalam satu arahan. [Panduan](docs/guides/I18N.md) → i18n
+- **🎛️ OmniConductor** — masuk A2A delegasi kepada kumpulan ejen anda, kemahiran konduktor pada Kad Ejen dan panel papan pemuka dengan sembang suara tekan-untuk-cakap Faro. → [A2A pelayan](docs/frameworks/A2A-SERVER.md)
+- **🛂 Kemasukan adaptif & perlindungan lebihan** Sembang kelas berat — meminta baris gilir dan bukannya 503ing, dengan pajakan bergolek RPM atom setiap sambungan. [Panduan Ketahanan](docs/architecture/RESILIENCE_GUIDE.md) →
+- **🗂️ Kanonik `/v1/models` memesan** — satu blok kumpulan pembekal bersebelahan bagi setiap pembekal (kombo disematkan dahulu), stabil merentas setiap sumber katalog. → [API Rujukan](docs/reference/API_REFERENCE.md)
+- **Pengerasan mampatan 🗜️** Pengawal inflasi lalai —, pek Caveman untuk DE / FR / JA + Cina (wényán), penapis RTK untuk Gradle & .NET. [Mampatan](docs/compression/COMPRESSION_ENGINES.md) →
+- **💸 Kos kadar rata yang jujur** — pembekal langganan / pelan pengekodan membaca **$0** dalam analisis kos; bajet, kuota & routing terus buat anggaran. → [API Rujukan](docs/reference/API_REFERENCE.md)
+- **Penghalaan Kuota-Perkongsian ⚖️** — membahagikan kuota akaun kongsi dengan saksama merentas kunci terkumpul, menjimatkan kerja supaya potongan terbiar dipinjamkan. [Panduan Ketahanan](docs/architecture/RESILIENCE_GUIDE.md) →
+- **🤖 Satu arahan CLI/agent persediaan** — 15 berdaftar `setup-*` arahan; `omniroute run` pelancaran 7 CLIs (Claude kod, Codex, Penolong, Angsa, OpenCode, Qwen kod, Gemini CLI); `omniroute configure` menyokong 11 sasaran dengan pembekal interaktif+pemilih model dan kegemaran setiap konteks. → [CLI Integrasi](docs/guides/CLI-INTEGRATIONS.md)
+- **Mod Jauh 🛰️** — memacu OmniRoute jauh dengan token berskop (`connect` / `contexts` / `tokens`) + dan pembantu OAuth `antigravity` pemasangan VPS. [Mod Jauh](docs/guides/REMOTE-MODE.md) →
+- **🧭 Penghalaan automatik yang lebih bijak** Gabungan — `auto/<category>:<tier>`,**Gabungan** (panel model hakim + ), penghalaan sedar tugas, model / mod setiap permintaan / penggantian belanjawan USD. [Kombo Auto](docs/routing/AUTO-COMBO.md) →
+- **🗜️ Mampatan boleh pasang** Enjin boleh gubah — 12 + Compression Studios: LLMLingua-2, Ultra dua peringkat, omniglyph, get fidelity per-step, GCF v3.2, editor susunan semula seret. [Mampatan](docs/compression/COMPRESSION_ENGINES.md) →
 - **🕵️ Telus MITM nyahsulit (TPROXY)** — menangkap CLIs yang mengabaikan proksi env vars, dengan pemasang kedai amanah CA + per-SNI. → [MITM/TPROXY](docs/security/MITM-TPROXY-DECRYPT.md)
-- **💸 Kos telemetri di mana-mana** pengepala — `X-OmniRoute-*` cost/usage pada setiap titik akhir, pengepala simpanan cache-HIT, kuota perbelanjaan USD setiap kekunci. → [API Rujukan](docs/reference/API_REFERENCE.md)
-- **🧠 Memori yang anda kawal** — dimatikan secara lalai, ikut serta int8 kuantiti vektor + taip pereputan, setiap permintaan `x-omniroute-no-memory`. → [Memori](docs/frameworks/MEMORY.md)
-- **🛡️ Keselamatan** pengawal suntikan segera — pada setiap laluan LLM (suite pasukan merah), ikut serta pagar pelindung penutup kelayakan (menyingkirkan API keys/secrets yang bocor di kedua-dua arah), carian web pilihan terakhir DuckDuckGo percuma dan pintu masuk OIDC pilihan untuk papan pemuka (log masuk kata laluan sentiasa tersedia). → [Pengawal](docs/security/GUARDRAILS.md)
-- **🖼️ Titik akhir baharu** — `/v1/ocr` (Mistral OCR) dan `/v1/audio/translations` (gaya berbisik) membulatkan permukaan media. → [API Rujukan](docs/reference/API_REFERENCE.md)
-- **🎨 Penjanaan imej / video / audio** — one API untuk media: xAI Grok Bayangkan & Novita AI video, ComfyUI, Magnific, Adobe Firefly, Segmind dan penyedia pertuturan seperti ElevenLabs. → [API Rujukan](docs/reference/API_REFERENCE.md)
-- **🌍 Deployment & ops** — reverse-proxy `basePath`, auto-pengesan bahasa pelayar, penjejakan peranti setiap kekunci, kepercayaan MITM tanpa akar, penyetempatan zh-TW. → [Persekitaran](docs/reference/ENVIRONMENT.md)
-- **🤝 Lebih banyak pembekal & ejen** ejen awan — ( Awan Codex, Cursor, Devin, Jules), Grok Build (xAI) dengan log masuk + OAuth penyemak imbas, Ollama kad kelas pertama, Claude Opus 5 & Sonnet 5, perkongsian rasmi Kimi (Code/Web/Moonshot), Zed, Requesty, SenseNova, AI… dan a refreshed **381-katalog pembekal** . [Pembekal](docs/reference/PROVIDER_REFERENCE.md) →
-- **📡 Ketelusan penghalaan** — setiap respons membawa pengepala `X-OmniRoute-Decision` yang menamakan strategy/provider/latency yang menyampaikannya, strategi kombo `cache-optimized` baharu + Auto-Kombo laluan faktor `cacheAffinity` meminta kembali kepada sambungan yang memegang awalan cache dan titik akhir `/v1/auto-combo/{channel}/candidates` baca sahaja mendedahkan kumpulan calon langsung saluran `auto/*`. → [Auto-Kombo](docs/routing/AUTO-COMBO.md)
-- **⚡ Prestasi & infra tempatan** — satu klik Redis tempatan , Cloudflare Workers / Deno Deploy penggembur geganti, Bifrost & Mux sebagai perkhidmatan terbenam yang diselia. [Perkhidmatan Terbenam](docs/frameworks/EMBEDDED-SERVICES.md) →
-- **🧩 Juga di dalam kotak** rangka kerja pemalam — pasaran +, rangka kerja kemahiran Omni/Agent/GitHub, penyepaduan bilik kebal Obsidian (22 alat MCP ), Kumpulan & Fail serasi OpenAI APIs, cache respons semantik, gamifikasi dengan papan pendahulu, penemuan ejen ACP (15 ejen terbina dalam), eksport log berjadual ke BigQuery, `auto/chaos` versi selari Telegram pengurus dan kedudukan penyedia percuma LMArena-ELO. → [Dokumen](docs/README.md)
+- **💸 Telemetri kos di mana-mana** — `X-OmniRoute-*` cost/usage pengepala pada setiap titik akhir, pengepala simpanan cache-HIT, per-kunci USD menghabiskan kuota. → [API Rujukan](docs/reference/API_REFERENCE.md)
+- **Memori 🧠 yang anda kawal** — dimatikan secara lalai, ikut serta kuantisasi vektor int8 + taip pereputan, setiap permintaan `x-omniroute-no-memory`. [Memori](docs/frameworks/MEMORY.md) →
+- **Keselamatan 🛡️** Pengawal suntikan segera — pada setiap laluan LLM (suite pasukan merah), pagar pelindung penutup kelayakan ikut serta (menyingkirkan API keys/secrets yang bocor dalam kedua-dua arah), carian web pilihan terakhir DuckDuckGo percuma dan gerbang log masuk OIDC pilihan untuk papan pemuka (log masuk kata laluan sentiasa tersedia). [Pengawal](docs/security/GUARDRAILS.md) →
+- **🖼️ Titik akhir baharu** — `/v1/ocr` (Mistral OCR) dan `/v1/audio/translations` (gaya berbisik) bulatkan permukaan media. → [API Rujukan](docs/reference/API_REFERENCE.md)
+- **🎨 Penjanaan imej / video / audio** — satu API untuk media: xAI Grok Bayangkan & Novita AI video, ComfyUI, Magnific, Adobe Firefly, Segmind, dan penyedia pertuturan seperti ElevenLabs. → [API Rujukan](docs/reference/API_REFERENCE.md)
+- **🌍 Deployment & ops** — proksi terbalik `basePath`, pengesanan automatik bahasa penyemak imbas, penjejakan peranti setiap kekunci, kepercayaan MITM tanpa akar, penyetempatan zh-TW. [Persekitaran](docs/reference/ENVIRONMENT.md) →
+- **🤝 Lebih banyak pembekal & ejen** Ejen awan — ( Awan Codex, Cursor, Devin, Jules), Grok Build (xAI) dengan log masuk + OAuth penyemak imbas, kad kelas pertama Ollama, Claude Opus 5 & Sonnet 5, perkongsian rasmi Kimi (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao yang disegarkan semula, AI, Yuanbao ...**382-katalog pembekal** . [Pembekal](docs/reference/PROVIDER_REFERENCE.md) →
+- **Ketelusan penghalaan 📡** Setiap respons — membawa pengepala `X-OmniRoute-Decision` yang menamakan strategy/provider/latency yang menyediakannya, strategi kombo `cache-optimized` baharu + Auto-Kombo laluan faktor `cacheAffinity` meminta kembali kepada sambungan yang memegang awalan cache dan titik akhir `/v1/auto-combo/{channel}/candidates` baca sahaja mendedahkan kumpulan calon langsung saluran `auto/*`. [Kombo Auto](docs/routing/AUTO-COMBO.md) →
+- **⚡ Prestasi & infra** — satu klik Redis tempatan , Pekerja Cloudflare / Penyedia geganti Deno Deploy, Bifrost & Mux sebagai perkhidmatan terbenam yang diselia. [Perkhidmatan Terbenam](docs/frameworks/EMBEDDED-SERVICES.md) →
+- **🧩 Juga di dalam kotak** Rangka kerja pemalam — Pasaran +, rangka kerja kemahiran Omni/Agent/GitHub, penyepaduan bilik kebal Obsidian (22 alatan MCP ), Batch & Fail APIs yang serasi OpenAI , cache respons semantik, gamifikasi dengan papan pendahulu, penemuan ejen ACP (15 ejen terbina dalam), eksport log berjadual ke BigQuery, `auto/chaos` fan-appel Telegram model pengurus versi dan kedudukan penyedia percuma LMArena-ELO. [Dokumen](docs/README.md) →
 
 <br/>
 
@@ -683,11 +678,11 @@ masuk dalam sejarah shell anda. → [Integrasi CLI](docs/guides/CLI-INTEGRATIONS
 
 <div align="center">
 
-## 🌐 381 AI Pembekal — 156 Bertanda Katalog Percuma
+## Pembekal 🌐 382 AI — 156 Percuma Bertanda Katalog
 
 </div>
 
-> **381 pembekal berdaftar** merentasi sembang kanonik, media, carian, tempatan, ejen awan dan koleksi sistem, termasuk **156 membawa metadata penemuan `hasFree: true`** . Pendaftaran model sembang meliputi **242 pembekal / 3,148 pasangan model pembekal berbeza / 1,519 model mentah IDs** ; katalog belanjawan percuma yang berasingan mempunyai **466 baris setiap model** ,**34 kolam berulang** dan **52 recurring/keyless penyedia percuma-selama-lamanya** . Ini adalah penyebut yang berbeza mengikut reka bentuk; takrifan dan pengiraan yang didepositkan oleh kumpulan hidup dalam [Rujukan Pembekal](docs/reference/PROVIDER_REFERENCE.md) dan [Peringkat Percuma](docs/reference/FREE_TIERS.md).
+> **382 pembekal berdaftar** merentasi sembang kanonik, media, carian, tempatan, ejen awan dan koleksi sistem, termasuk **156 membawa metadata penemuan `hasFree: true`** . Pendaftaran model sembang meliputi **243 pembekal / 3,155 pasangan model pembekal berbeza / 1,524 model mentah IDs** ; katalog belanjawan percuma yang berasingan mempunyai **466 baris setiap model** ,**34 kolam berulang** dan **52 recurring/keyless pembekal percuma selamanya** . Ini adalah penyebut yang berbeza mengikut reka bentuk; takrifan dan pengiraan yang didepositkan oleh kumpulan hidup dalam [Rujukan Pembekal](docs/reference/PROVIDER_REFERENCE.md) dan [Peringkat Percuma](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
@@ -720,7 +715,7 @@ masuk dalam sejarah shell anda. → [Integrasi CLI](docs/guides/CLI-INTEGRATIONS
   </tr>
 </table>
 
-<sub>…dan 350 + lebih — setiap ikon diselesaikan secara langsung daripada katalog pembekal papan pemuka. 📖 [Rujukan Pembekal](docs/reference/PROVIDER_REFERENCE.md)</sub>
+<sub>…dan 350 + lagi — setiap ikon diselesaikan secara langsung daripada katalog pembekal papan pemuka. [Rujukan Pembekal](docs/reference/PROVIDER_REFERENCE.md) 📖</sub>
 
 <br/>
 
@@ -1299,7 +1294,7 @@ Metrik kanonik pada 2026-10-18: **1.976 video unik** · **20.220.289 tontonan ya
   <tr><td nowrap><b>Masa jalan</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Bahasa</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> merentasi <code>src/</code> dan <code>open-sse/</code> (sifar <code>any</code> dalam teras sejak v2.0)</td></tr>
   <tr><td nowrap><b>Rangka kerja</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Pangkalan data</b></td><td>better-sqlite3 (SQLite, pengelogan WAL) + LowDB (JSON legasi) — 147 modul domain, 225 migrasi</td></tr>
+  <tr><td nowrap><b>Pangkalan data</b></td><td>better-sqlite3 (SQLite, pengelogan WAL) + LowDB (JSON legasi) — 147 modul domain, 229 migrasi</td></tr>
   <tr><td nowrap><b>Memori</b></td><td>SQLite FTS5 teks penuh + pembenaman vektor terkuantum int8, pereputan bertype</td></tr>
   <tr><td nowrap><b>Skema</b></td><td>Zod 4 — pengesahan I/O alat MCP + kontrak API</td></tr>
   <tr><td nowrap><b>Protokol</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

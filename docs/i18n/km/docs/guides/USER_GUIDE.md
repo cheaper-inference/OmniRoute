@@ -355,24 +355,24 @@ API Key: [ពីផ្ទាំងគ្រប់គ្រង]
 
 ## 🚀 ការដាក់ឱ្យដំណើរការ
 
-### ការដំឡើង npm ជាសកល (បានណែនាំ)
+### ការដំឡើង npm សកល (បានណែនាំ)
 
 ```bash
 npm install -g omniroute
 
-# បង្កើតថតកំណត់រចនាសម្ព័ន្ធ
+# Create config directory
 mkdir -p ~/.omniroute
 
-# បង្កើតឯកសារ .env (សូមមើល .env.example)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# ចាប់ផ្តើមម៉ាស៊ីនមេ
+# Start server
 omniroute
-# ឬប្រើច្រកផ្ទាល់ខ្លួន៖
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI ផ្ទុក `.env` ដោយស្វ័យប្រវត្តិពី `~/.omniroute/.env` ឬ `./.env`។
+CLI ផ្ទុក `.env` ដោយស្វ័យប្រវត្តិពី `~/.omniroute/.env` ឬ `./.env`។ `./.env` ក្នុងថតដែលធ្វើការអាចកំណត់តែបញ្ជីអនុញ្ញាតខ្លីប៉ុណ្ណោះ (ច្រក, `REQUIRE_API_KEY`, មូលដ្ឋាន និងការកំណត់ពណ៌); ដាក់អ្វីៗផ្សេងទៀតនៅក្នុង `~/.omniroute/.env`។ សូមមើល [កិច្ចសន្យាចាប់ផ្តើម CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env) ។
 
 ### របៀប Tray
 

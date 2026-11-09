@@ -321,34 +321,39 @@ Content-Type: application/json
 }
 ```
 
-ผู้ให้บริการที่รองรับ ได้แก่ OpenAI (GPT Image 2), xAI (Grok Image), Together AI (FLUX), Fireworks AI, Nebius (FLUX), Hyperbolic, NanoBanana, **OpenRouter**, **ZenMux**, SD WebUI (ภายในเครื่อง), ComfyUI (ภายในเครื่อง)
+ผู้ให้บริการที่รองรับ ได้แก่ OpenAI (GPT Image 2), xAI (Grok Image), Together AI (FLUX), Fireworks AI, Nebius (FLUX), Hyperbolic, NanoBanana, **OpenRouter**, **ZenMux**, SD WebUI (ภายในเครื่อง) และ ComfyUI (ภายในเครื่อง)
 
-`n` จะส่งคืนภาพจำนวน `n` ภาพใน `data[]` ผู้ให้บริการที่ API ต้นทางส่งคืนภาพหนึ่งภาพต่อการเรียกหนึ่งครั้ง
+`n` จะส่งคืนภาพจำนวน `n` ภาพใน `data[]` ผู้ให้บริการที่ API ต้นทางส่งคืนภาพหนึ่งภาพต่อการเรียกใช้หนึ่งครั้ง
 (Black Forest Labs, Stability AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik,
-NVIDIA NIM, Cloudflare Workers AI) จะมีการเรียกต้นทางแยกกัน `n` ครั้ง โดยมีการเรียกพร้อมกันได้สูงสุด 4 ครั้ง ค่า
-`seed` คงที่จะถูกเพิ่มตามดัชนีการเรียก (`seed`, `seed + 1`, …) ดังนั้นภาพจะแตกต่างกันแต่ยังคงสร้างซ้ำได้
-`n` จำกัดสูงสุดที่ 10 คำขอจะล้มเหลวทั้งหมดหากการเรียกครั้งใดครั้งหนึ่งล้มเหลว รายการรูปแบบที่ทำ fan-out อยู่ใน
-`SINGLE_IMAGE_FANOUT_FORMATS` ที่
+NVIDIA NIM, Cloudflare Workers AI) จะมีการเรียกใช้ API ต้นทางแยกกัน `n` ครั้ง โดยมีการเรียกใช้งานพร้อมกันสูงสุด 4 ครั้ง ค่า
+`seed` แบบคงที่จะถูกเลื่อนตามดัชนีของการเรียกใช้ (`seed`, `seed + 1`, …) ดังนั้นภาพจะแตกต่างกันแต่ยังสามารถสร้างซ้ำได้
+`n` จำกัดไว้ที่ 10 คำขอทั้งหมดจะล้มเหลวหากการเรียกใช้ครั้งใดครั้งหนึ่งล้มเหลว รายการรูปแบบที่ใช้ fan-out อยู่ใน
+`SINGLE_IMAGE_FANOUT_FORMATS` ใน
 `open-sse/handlers/imageGeneration/fanOut.ts`
 
-ZenMux ใช้การเชื่อมต่อคีย์ API ที่มีอยู่ซ้ำ และรองรับคำนำหน้า `zenmux/` หรือ `zm/`:
+ZenMux จะนำการเชื่อมต่อ API-key ที่มีอยู่กลับมาใช้ใหม่ และรองรับคำนำหน้า `zenmux/` หรือ `zm/`:
 
 - `zenmux/openai/gpt-image-2` ใช้ OpenAI Images API ของ ZenMux ตัวเลือกต่าง ๆ ได้แก่ `size`,
   `quality`, `n`, `output_format`, `output_compression`, `background` และ `response_format`
-- ผู้เผยแพร่รายอื่น เช่น `zm/meta/muse-image-1.0` ใช้ปลายทาง Vertex AI `:predict` ของ ZenMux `n` จะจับคู่กับ
-  `sampleCount`, `aspect_ratio` กับ `aspectRatio` และ `image_size`
-  (`1K`, `2K`, `4K`) กับ `sampleImageSize` ค่า `size` ในหน่วยพิกเซลจะระบุเพียงอัตราส่วนภาพ
-  ไม่ได้รับประกันขนาดพิกเซล อัตราส่วนที่รองรับ ความละเอียด และจำนวนภาพจะแตกต่างกันไปตามโมเดล
+- ผู้เผยแพร่รายอื่น เช่น `zm/meta/muse-image-1.0` ใช้ปลายทาง Vertex AI `:predict` ของ ZenMux โดย `n` จะจับคู่กับ
+  `sampleCount`, `aspect_ratio` จับคู่กับ `aspectRatio` และ `image_size`
+  (`1K`, `2K`, `4K`) จับคู่กับ `sampleImageSize` ค่า `size` ในหน่วยพิกเซลจะระบุเพียงอัตราส่วนภาพ
+  ไม่ได้รับประกันขนาดพิกเซลจริง อัตราส่วนภาพ ความละเอียด และจำนวนที่รองรับจะแตกต่างกันไปตามโมเดล
 - `zm/inclusionai/ming-image-0.1-design` จะเลือกขนาดของภาพเอง ให้ละเว้น `size`,
-  `aspect_ratio` และ `image_size`; การระบุค่าเหล่านี้จะส่งคืน HTTP 400 สามารถขอรูปแบบ PNG, JPEG และ WebP
+  `aspect_ratio` และ `image_size` หากระบุค่าอย่างชัดเจนจะส่งคืน HTTP 400 สามารถขอภาพในรูปแบบ PNG, JPEG และ WebP
   ได้ด้วย `output_format`
 
 การผสานการทำงานนี้รองรับการสร้างภาพจากข้อความ ไม่รองรับการแก้ไขภาพอ้างอิง ผลลัพธ์จาก Vertex
 จะถูกปรับให้อยู่ในรูปแบบ `data[].b64_json`; `response_format: "url"` จะส่งคืน URL HTTPS จากต้นทาง
-หรือ data URL แบบ base64 เมื่อมีเฉพาะไบต์ของภาพเท่านั้น ผลลัพธ์ที่ว่างเปล่า/ถูกกรองจะส่งคืนข้อผิดพลาด
-แทนที่จะส่งคืนผลสำเร็จที่ว่างเปล่า การเข้าถึงโมเดลขึ้นอยู่กับบัญชี ZenMux ดูที่
-[Vertex API ของ ZenMux](https://docs.zenmux.ai/api/vertexai/generate-images) และ
+หรือ data URL ที่เข้ารหัสด้วย base64 เมื่อมีเฉพาะไบต์ของภาพเท่านั้น ผลลัพธ์ที่ว่างเปล่าหรือถูกกรอง
+จะส่งคืนข้อผิดพลาดแทนที่จะส่งคืนผลสำเร็จที่ไม่มีข้อมูล การเข้าถึงโมเดลขึ้นอยู่กับบัญชี ZenMux
+ดู [Vertex API ของ ZenMux](https://docs.zenmux.ai/api/vertexai/generate-images) และ
 [OpenAI Images API](https://docs.zenmux.ai/api/openai/generate-an-image)
+
+การเชื่อมต่อสำหรับการลงชื่อเข้าใช้ Microsoft 365 Copilot จะให้บริการ
+`copilot-m365-web/m365-copilot-image` ผ่านเครื่องมือสร้างภาพในตัวของ Copilot: ใช้การสนทนา Copilot หนึ่งครั้งต่อภาพหนึ่งภาพ
+(`n` 1–4), `size` มีผลต่อการกำหนดเพียงแนวการวางภาพ และภาพจะถูกส่งคืนแบบฝังอยู่ในผลลัพธ์
+(`b64_json` หรือ data URL สำหรับ `response_format: "url"`) ดู [Microsoft 365 Copilot](../providers/COPILOT-M365.md#image-generation)
 
 ```bash
 # แสดงรายการโมเดลภาพทั้งหมด
@@ -801,17 +806,19 @@ POST /v1/providers/{provider}/images/generations
 
 ---
 
-## API การค้นหา
+## Search API
 
-ชั้นนามธรรมของผู้ให้บริการเว็บ/การค้นหา (Tavily, Brave, Exa, Serper และอื่น ๆ)
+สิ่งที่ทำหน้าที่เป็นนามธรรมสำหรับผู้ให้บริการเว็บ/การค้นหา (Tavily, Brave, Exa, Serper ฯลฯ)
 
-| Method | Path                   | Description                                                                       |
-| ------ | ---------------------- | --------------------------------------------------------------------------------- |
-| GET    | `/v1/search`           | แสดงรายการผู้ให้บริการการค้นหาที่กำหนดค่าไว้พร้อมความสามารถ                       |
-| POST   | `/v1/search`           | เรียกใช้คำค้นหา — เนื้อหาจะถูกตรวจสอบโดย `v1SearchSchema` และรองรับการแคช/รวมคำขอ |
-| GET    | `/v1/search/analytics` | สถิติผลลัพธ์/เวลาแฝง/แคชแยกตามผู้ให้บริการ                                        |
+| Method | Path                   | Description                                                                              |
+| ------ | ---------------------- | ---------------------------------------------------------------------------------------- |
+| GET    | `/v1/search`           | แสดงรายการผู้ให้บริการการค้นหาที่กำหนดค่าไว้ + ความสามารถ                                |
+| POST   | `/v1/search`           | เรียกใช้คำค้นหา — body จะได้รับการตรวจสอบโดย `v1SearchSchema` และรองรับการแคช/การรวมคำขอ |
+| GET    | `/v1/search/analytics` | สถิติ hit/latency/cache แยกตามผู้ให้บริการ                                               |
 
-**การยืนยันตัวตน:** คีย์ API แบบ Bearer (`extractApiKey` + `isValidApiKey`) นโยบายการค้นหาจะถูกบังคับใช้ผ่าน `enforceApiKeyPolicy`
+**การตรวจสอบสิทธิ์:** คีย์ API แบบ Bearer (`extractApiKey` + `isValidApiKey`) โดยมีการบังคับใช้นโยบายการค้นหาผ่าน `enforceApiKeyPolicy`
+
+**การเลือกอัตโนมัติ:** หากไม่มี `provider` ระบบจะเรียกใช้ผู้ให้บริการที่มีราคาถูกที่สุดและมีการกำหนดค่าการเชื่อมต่อไว้ก่อน และผู้ให้บริการที่มีราคาถูกเป็นลำดับถัดไปจะเป็นตัวสำรอง หากไม่มีการกำหนดค่าอื่นใด ผู้ให้บริการสำรองสุดท้ายแบบฟรี (`duckduckgo-free`) จะถูกใช้เท่านั้น Self-hosted SearXNG จะถือว่ามีการกำหนดค่าแล้วเมื่อการเชื่อมต่อเก็บ `baseUrl` จริงไว้ (ไม่ใช่ค่าเริ่มต้นของแคตตาล็อก `http://localhost:8888/search`) จากนั้นจะถูกจัดลำดับเป็นผู้ให้บริการราคา $0 ก่อนผู้ให้บริการที่ใช้คีย์ โดยมีผู้ให้บริการที่ใช้คีย์และมีราคาถูกที่สุดเป็นตัวสำรอง รวมถึงกรณีที่ SearXNG ตอบกลับด้วย 400, 401, 403 หรือ 404 ด้วย `baseUrl` ที่ไม่ใช่ URL `http(s)` ที่ถูกต้อง หรือชี้ไปยังที่อยู่ข้อมูลเมตาของคลาวด์ จะไม่ถือว่ามีการกำหนดค่า การเชื่อมต่อ SearXNG ที่เก็บโทเค็นจะจัดลำดับในลักษณะนี้เฉพาะเมื่อใช้ `https://` หรือ loopback `http://` เท่านั้น หากเป็น `http://` ระยะไกลแบบไม่เข้ารหัส จะไม่ถูกใช้เป็นตัวสำรองและยังคงเป็นตัวเลือกสุดท้าย โดยจะใช้เฉพาะเมื่อไม่มีการกำหนดค่าผู้ให้บริการรายอื่น หรือเมื่อมีการร้องขอด้วยชื่อโดยตรงเท่านั้น ซึ่งในสองกรณีดังกล่าวจะส่งโทเค็นเป็นข้อความที่ไม่ได้เข้ารหัส
 
 ### `provider_options` ของ Exa และ Tavily
 
@@ -968,28 +975,28 @@ CLI จะอัปเกรด `base_url + /responses` เป็น WebSocket �
 
 ---
 
-## การใช้งานแบบบริการตนเอง (`/api/usage/om-usage`)
+## การใช้บริการตนเอง (`/api/usage/om-usage`)
 
-API key ใด ๆ สามารถอ่านการใช้งานและโควตาของ **ตนเอง** ได้ — ไม่ต้องใช้การตรวจสอบสิทธิ์การจัดการ นี่คือ endpoint ที่ไคลเอ็นต์ (CLI, แผง OmniCopilot) ใช้เพื่อแสดงค่าใช้จ่ายของคีย์ให้เจ้าของคีย์ทราบ
+คีย์ API ใดๆ ก็สามารถอ่านได้**ของตัวเอง** การใช้งานและโควต้า — ไม่มีการตรวจสอบสิทธิ์การจัดการ นี่คือจุดสิ้นสุดที่ลูกค้า (CLI ซึ่งเป็นแผง OmniCopilot ) ใช้เพื่อแสดงการใช้จ่ายของผู้ถือหลัก
 
 ```bash
-# รูปแบบข้อความ (สัญญาเดิม — ข้อความธรรมดาสำหรับเทอร์มินัล)
+# Text form (the historical contract — plain text for a terminal)
 curl -H "Authorization: Bearer <your-api-key>" \
   http://localhost:20128/api/usage/om-usage
 
-# รูปแบบมีโครงสร้าง — สิ่งที่ UI ใช้งาน
+# Structured form — what a UI consumes
 curl -H "Authorization: Bearer <your-api-key>" \
   "http://localhost:20128/api/usage/om-usage?format=json"
 ```
 
-คีย์ต้องเปิดใช้ **`allowUsageCommand`** (ปิดไว้โดยค่าเริ่มต้น — ตัวจัดการ API key ของแดชบอร์ดใช้สลับค่านี้แยกตามคีย์) หากไม่ได้เปิดใช้ endpoint จะตอบกลับ `403`
+ที่สำคัญต้องมี**`allowUsageCommand`** เปิดใช้งาน (ปิดโดยค่าเริ่มต้น — ตัวจัดการคีย์ API ของแดชบอร์ดจะสลับตามคีย์) หากไม่มีจุดปลายก็จะตอบ `403`
 
-`?format=json` ส่งคืนโครงสร้างที่จำแนกประเภท เพื่อให้ผู้เรียกไม่ต้องอ่านฟิลด์ข้อมูลจากการปฏิเสธ เมื่อสำเร็จ:
+`?format=json` ส่งคืนรูปแบบที่เลือกปฏิบัติ ดังนั้นผู้โทรจะไม่อ่านฟิลด์ข้อมูลจากการปฏิเสธ เมื่อประสบความสำเร็จ:
 
 ```jsonc
 {
   "allowed": true,
-  // มีเฉพาะเมื่อคีย์เลือกใช้ขีดจำกัดการใช้งานต่อคีย์ (USD รายวัน/รายสัปดาห์):
+  // present only when the key opted into per-key usage limits (daily/weekly/5-hour USD):
   "personal": {
     "dailySpentUsd": 1.25,
     "dailyLimitUsd": 5,
@@ -998,9 +1005,9 @@ curl -H "Authorization: Bearer <your-api-key>" \
     "weeklyLimitUsd": 20,
     "weeklyResetAtIso": "…" /* … */,
   },
-  // snapshot โควตาของ provider ที่เลือก หรือเป็น null เมื่อยังไม่มีสิ่งใดถูกแคช:
+  // the selected provider quota snapshot, or null when nothing is cached yet:
   "provider": { "connectionId": "…", "provider": "claude", "plan": "…", "quotas": {/* … */} },
-  // snapshot ของทุก connection เพื่อให้ UI แสดง provider หลายรายการเคียงข้างกันได้:
+  // every connection's snapshot, so a UI can render several providers side by side:
   "providers": [
     { "connectionId": "…", "provider": "claude" /* … */ },
     { "provider": "codex" /* … */ },
@@ -1008,13 +1015,9 @@ curl -H "Authorization: Bearer <your-api-key>" \
 }
 ```
 
-เมื่อถูกปฏิเสธ (คีย์ไม่ถูกต้อง `401` / ไม่ได้รับอนุญาต `403`) route เดียวกันนี้จะส่งคืน
-`{ "allowed": false, "error": { "message": "…" } }` — `personal`/`provider` ที่มีอยู่แต่เป็นค่าว่าง
-(คีย์ได้รับอนุญาต แต่ยังไม่มีข้อมูล) เป็นสถานะที่แตกต่างจากการปฏิเสธ และมีเพียงรูปแบบ JSON
-เท่านั้นที่แยกแยะสถานะเหล่านี้ได้
+ในการปฏิเสธ ( คีย์ที่ไม่ถูกต้อง `401` / ไม่อนุญาตให้ใช้ `403` ) เส้นทางเดียวกันจะส่งคืน `{ "allowed": false, "error": { "message": "…" } }` — `personal`/`provider` ที่มีอยู่แต่ว่างเปล่า (อนุญาตให้ใช้คีย์ แต่ยังไม่ได้เรียนรู้อะไรเลย) เป็นสถานะที่แตกต่างจากการปฏิเสธ และมีเพียงแบบฟอร์ม JSON เท่านั้นที่แยกแยะได้
 
-**Auth:** Bearer API key ของผู้เรียกเอง ซึ่งตรวจสอบด้วย `isValidApiKey` — นี่ไม่ใช่
-management surface (`/api/keys/…`) ซึ่งยังคงอยู่ภายใต้ `requireManagementAuth`
+**รับรองความถูกต้อง:** คีย์ Bearer API ของผู้เรียกซึ่งตรวจสอบกับ `isValidApiKey` — นี่คือ _not_ พื้นผิวการจัดการ (`/api/keys/…`) ซึ่งอยู่ข้างหลัง `requireManagementAuth`
 
 ### เปอร์เซ็นต์โควตาดิบเทียบกับเปอร์เซ็นต์ที่ปรับตามจุดตัด
 
@@ -1264,40 +1267,41 @@ wrapper ที่เข้ากันได้กับ OpenAI แบบโป�
 | `/api/usage/model-latency-stats` | GET             | ค่ารวมเวลาแฝงแบบต่อเนื่องแยกตามผู้ให้บริการ/โมเดล (ค่าเฉลี่ย/p50/p95/p99 อัตราความสำเร็จ); ตัวกรอง: `windowHours`/`minSamples`/`maxRows`/`provider`/`model` (#6873)                                                                                                                                           |
 | `/api/usage/cache-health`        | GET             | สรุปสถานะแคชพรอมต์จาก `call_logs` — อัตราส่วนการเขียน/อ่าน การกระจายขนาดการเขียน p50/p90/p99 ความเข้มข้นของการเขียนปริมาณมาก การแยกตามโมเดล และผลวินิจฉัย `healthy`/`degraded`/`thrash`/`no-data`; พารามิเตอร์คำค้น `range` (`1h`\|`24h`\|`7d`\|`30d`, ค่าเริ่มต้น `24h`) และ `model` ที่เป็นตัวเลือก (#8827) |
 
-### สิทธิ์ของคีย์ API
+### สิทธิ์คีย์API
 
-`PATCH /api/keys/{id}` ใช้อัปเดตสิทธิ์ของคีย์ที่มีอยู่ เช่นเดียวกับเส้นทาง `/api/keys*` ทุกเส้นทาง จำเป็นต้องมีการอนุญาตการจัดการ (ดู [การตรวจสอบสิทธิ์การจัดการ](../guides/MANAGEMENT-AUTH.md)) ไม่ใช่คีย์สำหรับการอนุมาน ส่งเฉพาะฟิลด์ที่ต้องการเปลี่ยนแปลงเท่านั้น หากคำขอไม่มีฟิลด์เหล่านี้เลย ระบบจะปฏิเสธด้วย `No valid fields to update` ฟิลด์ที่รองรับกำหนดโดย `updateKeyPermissionsSchema` ใน `src/shared/validation/schemas/keys.ts`
+`PATCH /api/keys/{id}` อัปเดตสิทธิ์ของคีย์ที่มีอยู่ เช่นเดียวกับทุกเส้นทาง `/api/keys*` จำเป็นต้องมีการอนุญาตการจัดการ (ดู [Management Authentication](../guides/MANAGEMENT-AUTH.md) ) ไม่ใช่คีย์การอนุมาน ส่งเฉพาะฟิลด์ที่คุณต้องการเปลี่ยนแปลง คำขอที่ไม่มีสิ่งใดเลยจะถูกปฏิเสธด้วย `No valid fields to update` ฟิลด์ที่ยอมรับถูกกำหนดโดย `updateKeyPermissionsSchema` ใน `src/shared/validation/schemas/keys.ts`
 
-| ฟิลด์                                       | ประเภท                                                               | หมายเหตุ                                                                                                                                  |
-| ------------------------------------------- | -------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| `name`                                      | string, 1-200 chars                                                  |                                                                                                                                           |
-| `isActive`                                  | boolean                                                              |                                                                                                                                           |
-| `isBanned`                                  | boolean                                                              |                                                                                                                                           |
-| `expiresAt`                                 | ISO 8601 datetime หรือ `null`                                        | `null` จะล้างวันหมดอายุ                                                                                                                   |
-| `modelAccessMode`                           | `all` \| `restricted`                                                | `allowedModels` ต้องว่างเปล่าเมื่อโหมดเป็น `all`                                                                                          |
-| `allowedModels`, `blockedModels`            | อาร์เรย์ของสตริง สูงสุด 1000                                         |                                                                                                                                           |
-| `allowedCombos`                             | อาร์เรย์ของสตริง สูงสุด 500                                          | กำหนดว่า key นี้สามารถเรียกใช้ combo ใดได้บ้าง ส่วนโมเดลโดยตรงจะถูกควบคุมโดย `modelAccessMode` / `allowedModels`                          |
-| `connectionAccessMode`                      | `all` \| `restricted`                                                | `allowedConnections` ต้องไม่ว่างเปล่าเมื่อเป็น `restricted` และต้องว่างเปล่าเมื่อเป็น `all`                                               |
-| `allowedConnections`                        | อาร์เรย์ของ UUID สูงสุด 100                                          |                                                                                                                                           |
-| `allowAutoCombos`                           | boolean                                                              | `false` จะปฏิเสธคำขอโมเดล `auto/*` ที่ใช้ key นี้ ส่วน key ที่ไม่เคยตั้งค่านี้จะได้รับอนุญาต                                              |
-| `catalogScope`                              | `all` \| `combos` \| `models`                                        | สิ่งที่ `GET /v1/models` แสดงสำหรับ key นี้ (เฉพาะ combo เฉพาะโมเดล หรือทั้งสองอย่าง) โดยจะไม่เปลี่ยนแปลงสิ่งที่ key นี้สามารถเรียกใช้ได้ |
-| `forcedModel`                               | string สูงสุด 300 chars หรือ `null`                                  | กำหนดเส้นทางคำขอแชตไปยังโมเดล/combo นี้ โดยมีลำดับความสำคัญเหนือ `X-Route-Model` และ `body.model` แต่ข้อจำกัดของ key ยังคงมีผล            |
-| `noLog`, `autoResolve`                      | boolean                                                              |                                                                                                                                           |
-| `throttleDelayMs`                           | integer, 0-300000                                                    |                                                                                                                                           |
-| `maxSessions`                               | integer, 0-10000                                                     |                                                                                                                                           |
-| `rateLimits`                                | อาร์เรย์ของ `{ limit, window }` (จำนวนเต็มบวก สูงสุด 50) หรือ `null` | `null` จะล้างขีดจำกัด                                                                                                                     |
-| `accessSchedule`                            | ออบเจ็กต์กำหนดเวลาหรือ `null`                                        | `null` จะล้างกำหนดเวลา                                                                                                                    |
-| `scopes`                                    | อาร์เรย์ของสตริง สูงสุด 32                                           |                                                                                                                                           |
-| `allowedEndpoints`                          | อาร์เรย์ของสตริง สูงสุด 20                                           |                                                                                                                                           |
-| `streamDefaultMode`                         | `legacy` \| `json`                                                   |                                                                                                                                           |
-| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                 | ดู [การข้ามแคชต่อคีย์](#per-key-cache-bypass)                                                                                             |
-| `compressionEnabled`                        | boolean                                                              |                                                                                                                                           |
-| `codexServiceMode`                          | หนึ่งในโหมดบริการของ Codex                                           |                                                                                                                                           |
-| `disableNonPublicModels`                    | boolean                                                              |                                                                                                                                           |
-| `allowUsageCommand`                         | boolean                                                              |                                                                                                                                           |
-| `usageLimitEnabled`                         | boolean                                                              |                                                                                                                                           |
-| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | number >= 0 หรือ `null`                                              |                                                                                                                                           |
-| `chaosModeEnabled`                          | boolean                                                              |                                                                                                                                           |
+| ฟิลด์                                       | ประเภท                                                               | หมายเหตุ                                                                                                                                                                                                                                                 |
+| ------------------------------------------- | -------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`                                      | string, 1-200 chars                                                  |                                                                                                                                                                                                                                                          |
+| `isActive`                                  | boolean                                                              |                                                                                                                                                                                                                                                          |
+| `isBanned`                                  | boolean                                                              |                                                                                                                                                                                                                                                          |
+| `expiresAt`                                 | ISO 8601 datetime หรือ `null`                                        | `null` จะล้างวันหมดอายุ                                                                                                                                                                                                                                  |
+| `modelAccessMode`                           | `all` \| `restricted`                                                | `allowedModels` ต้องว่างเปล่าเมื่อโหมดเป็น `all`                                                                                                                                                                                                         |
+| `allowedModels`, `blockedModels`            | อาร์เรย์ของสตริง มากถึง 1,000                                        |                                                                                                                                                                                                                                                          |
+| `allowedCombos`                             | อาร์เรย์ของสตริง สูงสุด 500                                          | กำหนดว่า key นี้สามารถเรียกใช้ combo ใดได้บ้าง ส่วนโมเดลโดยตรงจะถูกควบคุมโดย `modelAccessMode` / `allowedModels`                                                                                                                                         |
+| `connectionAccessMode`                      | `all` \| `restricted`                                                | `allowedConnections` ต้องไม่ว่างเปล่าเมื่อเป็น `restricted` และต้องว่างเปล่าเมื่อเป็น `all`                                                                                                                                                              |
+| `allowedConnections`                        | อาร์เรย์ของ UUID สูงสุด 100                                          |                                                                                                                                                                                                                                                          |
+| `allowAutoCombos`                           | boolean                                                              | `false` จะปฏิเสธคำขอโมเดล `auto/*` ที่ใช้ key นี้ ส่วน key ที่ไม่เคยตั้งค่านี้จะได้รับอนุญาต                                                                                                                                                             |
+| `catalogScope`                              | `all` \| `combos` \| `models`                                        | สิ่งที่ `GET /v1/models` แสดงสำหรับ key นี้ (เฉพาะ combo เฉพาะโมเดล หรือทั้งสองอย่าง) โดยจะไม่เปลี่ยนแปลงสิ่งที่ key นี้สามารถเรียกใช้ได้                                                                                                                |
+| `forcedModel`                               | string สูงสุด 300 chars หรือ `null`                                  | กำหนดเส้นทางคำขอแชตไปยังโมเดล/combo นี้ โดยมีลำดับความสำคัญเหนือ `X-Route-Model` และ `body.model` แต่ข้อจำกัดของ key ยังคงมีผล                                                                                                                           |
+| `noLog`, `autoResolve`                      | บูลีน                                                                |                                                                                                                                                                                                                                                          |
+| `throttleDelayMs`                           | integer, 0-300000                                                    |                                                                                                                                                                                                                                                          |
+| `maxSessions`                               | integer, 0-10000                                                     |                                                                                                                                                                                                                                                          |
+| `rateLimits`                                | อาร์เรย์ของ `{ limit, window }` (จำนวนเต็มบวก สูงสุด 50) หรือ `null` | `null` จะล้างขีดจำกัด                                                                                                                                                                                                                                    |
+| `accessSchedule`                            | ออบเจ็กต์กำหนดเวลาหรือ `null`                                        | `null` จะล้างกำหนดเวลา                                                                                                                                                                                                                                   |
+| `scopes`                                    | อาร์เรย์ของสตริง สูงสุด 32                                           |                                                                                                                                                                                                                                                          |
+| `allowedEndpoints`                          | อาร์เรย์ของสตริง สูงสุด 20                                           |                                                                                                                                                                                                                                                          |
+| `streamDefaultMode`                         | `legacy` \| `json`                                                   |                                                                                                                                                                                                                                                          |
+| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                 | ดู [การข้ามแคชต่อคีย์](#per-key-cache-bypass)                                                                                                                                                                                                            |
+| `compressionEnabled`                        | boolean                                                              |                                                                                                                                                                                                                                                          |
+| `codexServiceMode`                          | หนึ่งในโหมดบริการของ Codex                                           |                                                                                                                                                                                                                                                          |
+| `disableNonPublicModels`                    | boolean                                                              |                                                                                                                                                                                                                                                          |
+| `allowUsageCommand`                         | boolean                                                              |                                                                                                                                                                                                                                                          |
+| `usageLimitEnabled`                         | boolean                                                              |                                                                                                                                                                                                                                                          |
+| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | หมายเลข >= 0 หรือ `null`                                             |                                                                                                                                                                                                                                                          |
+| `fiveHourUsageLimitUsd`                     | หมายเลข >= 0 หรือ `null`                                             | ทบงบประมาณ USD 5 ชั่วโมง บังคับใช้เช่นเดียวกับขีดจำกัดรายวันและรายสัปดาห์ (`usageLimitEnabled`, `UNPRICED_USAGE_BUDGET_POLICY`) `retry-after` คือเมื่อการใช้จ่ายที่เก่าแก่ที่สุดในช่วงกรอบเวลานั้นหมดลง ซึ่งอาจปล่อยให้คีย์เกินขีดจำกัดยังคงถูกบล็อกอยู่ |
+| `chaosModeEnabled`                          | boolean                                                              |                                                                                                                                                                                                                                                          |
 
 ```bash
 curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
@@ -1347,6 +1351,34 @@ curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
 | `/api/modality-bridge/stats`         | GET        | `attempts`, ความสำเร็จ/`bridged`, ความล้มเหลว, แคชฮิต, `totalLatencyMs`, `latencySamples`, `averageLatencyMs` ที่มีหน่วยเป็นจำนวนตัวอย่าง และเวลาที่ใช้งานล่าสุด (รีเซ็ตเมื่อเริ่มระบบใหม่; ต้องมีสิทธิ์การจัดการ)                                                                                                                                                                                           |
 | `/api/modality-bridge/video/runtime` | GET        | ตรวจสอบ trusted-loopback อย่างเข้มงวดก่อนการยืนยันสิทธิ์/โพรบการจัดการ; ความพร้อมใช้งานและเวอร์ชันของ FFmpeg/ffprobe ที่ผ่านการทำความสะอาดข้อมูล (no-store)                                                                                                                                                                                                                                                  |
 | `/api/modality-bridge/video/extract` | POST       | โบรกเกอร์ไบต์ภายในที่ผ่านการยืนยันสิทธิ์และใช้ trusted-loopback; อินพุต 50 MiB, คิวที่มีขอบเขต/เอาต์พุต 32 MiB, `503` เมื่อความจุเต็ม, `499` เมื่อการเชื่อมต่อถูกตัด, `504` เมื่อเกินกำหนดเวลา; ไม่ใช่ API อัปโหลดสาธารณะ                                                                                                                                                                                    |
+
+### การเจาะดูเฟรมวิดีโอ
+
+`GET /api/v1/video-bridge/drilldown` อ่านแฮนเดิลแบบ opaque ที่ผูกกับ tenant ซึ่งส่งคืนใน
+`x-omniroute-video-drilldown` หลังจากคำขอ Video Bridge ที่มีการให้ความยินยอมอย่างชัดเจน
+ทั้งการอ่านและ `DELETE` ต้องใช้คีย์ API ที่ถูกต้องและสิทธิ์
+`modalityBridgeVideoDrilldownRemoteEnabled` ที่ผู้ปฏิบัติงานอนุมัติแยกต่างหากเสมอ
+การเก็บรักษาใน Production ยังต้องมี `modalityBridgeVideoDrilldownEnabled` และ `drilldown: true`
+อย่างเคร่งครัดในแต่ละพาร์ตด้วย หากคีย์มีรายการอนุญาต endpoint ที่ไม่ว่าง จะต้องมี
+`video` สำหรับทั้ง GET และ DELETE ไม่ว่าผู้เรียกจะใช้ `/v1` หรือ `/api/v1`
+
+คำค้น GET: ต้องมี `handle`; `variant` เป็นตัวเลือก (`preview`, `standard`, `detail`),
+`limit` (1–8; ยอมรับ `frames` แบบเดิม แต่ไม่สามารถใช้ร่วมกับ `limit` ได้),
+`page` ที่เริ่มนับจากศูนย์ และวินาที `start`/`end` เมื่อระบุขอบเขตโฟกัสทั้งสองค่า
+`end` ต้องมากกว่า `start` ระบบจะปฏิเสธคีย์คำค้นที่ซ้ำหรือไม่รู้จัก การตอบกลับที่สำเร็จประกอบด้วย
+`derivation`, `durationSeconds`, `frames`, `hasMore`, `page`, `variant` และอาจมี
+`focusWindow`; JSON แบบ no-store จำกัดขนาดไว้ที่ 32 MiB รวม Base64 ผลลัพธ์ที่มีขนาดเกินจะส่งคืน 413
+ให้ร้องขอจำนวนเฟรมที่น้อยลง
+
+`DELETE /api/v1/video-bridge/drilldown?handle=...` ส่งคืน `{ "removed": 0|1 }`
+GET ที่ใช้แฮนเดิลที่ไม่รู้จัก หมดอายุ หรือข้ามคีย์ จะตอบกลับเหมือนกันเป็น 404; DELETE ข้ามคีย์
+ไม่สามารถลบรายการของเจ้าของได้ การเข้าถึงที่ถูกปิดใช้งานส่งคืน 403 การตรวจสอบสิทธิ์ที่ขาดหายไปหรือไม่ถูกต้อง
+ส่งคืน 401 คำค้นที่ไม่ถูกต้องส่งคืน 400 การยกเลิกส่งคืน 499 และข้อผิดพลาดชั่วคราวส่งคืน 503
+แฮนเดิลมีผลเฉพาะในโปรเซส หมดอายุหลังจากสิบนาที และไม่คงอยู่หลังการรีสตาร์ต
+แฮนเดิลใหม่ใช้ `v1.` ตามด้วยโทเค็น Base64URL แบบสุ่มขนาด 32 ไบต์ โดยเก็บไว้เฉพาะแฮชของโทเค็น
+โทเค็นแบบเดิมที่เป็นเลขฐานสิบหก 64 หลักยังคงสามารถอ่านตามรูปแบบไวยากรณ์ได้เพื่อความเข้ากันได้
+ดู [แนวป้องกัน Video Bridge](../security/GUARDRAILS.md#video-bridge-videobridgets-videobridgepipelinets)
+สำหรับรายละเอียดเกี่ยวกับความยินยอม โควตา และการสร้าง variant
 
 ### การสำรองข้อมูลและการส่งออก/นำเข้า
 
@@ -1444,17 +1476,17 @@ curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
 
 ### API ภายใน / ระบบ
 
-| Endpoint                 | Method | Description                                               |
-| ------------------------ | ------ | --------------------------------------------------------- |
-| `/api/init`              | GET    | ตรวจสอบการเริ่มต้นแอปพลิเคชัน (ใช้เมื่อเรียกใช้ครั้งแรก)  |
-| `/api/tags`              | GET    | แท็กโมเดลที่เข้ากันได้กับ Ollama (สำหรับไคลเอ็นต์ Ollama) |
-| `/api/restart`           | POST   | เรียกใช้การรีสตาร์ตเซิร์ฟเวอร์อย่างราบรื่น                |
-| `/api/shutdown`          | POST   | เรียกใช้การปิดเซิร์ฟเวอร์อย่างราบรื่น                     |
-| `/api/system/env/repair` | POST   | ซ่อมแซมตัวแปรสภาพแวดล้อมของผู้ให้บริการ OAuth             |
-| `/api/system/version`    | GET    | เวอร์ชันปัจจุบัน/ล่าสุด สถานะการอัปเดต ช่องทางการเผยแพร่  |
-| `/api/system/version`    | POST   | เริ่มการอัปเดตที่รับรู้การนำไปใช้งานไปยังเวอร์ชันล่าสุด   |
+| Endpoint                 | Method | Description                                                   |
+| ------------------------ | ------ | ------------------------------------------------------------- |
+| `/api/init`              | GET    | เริ่มบริการซิงค์เบื้องหลัง (ต้องใช้การตรวจสอบสิทธิ์การจัดการ) |
+| `/api/tags`              | GET    | แท็กโมเดลที่เข้ากันได้กับ Ollama (สำหรับไคลเอ็นต์ Ollama)     |
+| `/api/restart`           | POST   | เรียกใช้การรีสตาร์ตเซิร์ฟเวอร์อย่างราบรื่น                    |
+| `/api/shutdown`          | POST   | เรียกใช้การปิดเซิร์ฟเวอร์อย่างราบรื่น                         |
+| `/api/system/env/repair` | POST   | ซ่อมแซมตัวแปรสภาพแวดล้อมของผู้ให้บริการ OAuth                 |
+| `/api/system/version`    | GET    | เวอร์ชันปัจจุบัน/ล่าสุด สถานะการอัปเดต และช่องทางการเผยแพร่   |
+| `/api/system/version`    | POST   | เริ่มการอัปเดตที่คำนึงถึงการติดตั้งใช้งานไปยังเวอร์ชันล่าสุด  |
 
-> **หมายเหตุ:** ระบบใช้ปลายทางเหล่านี้ภายใน หรือใช้เพื่อความเข้ากันได้กับไคลเอ็นต์ Ollama โดยทั่วไปผู้ใช้ปลายทางจะไม่เรียกใช้ปลายทางเหล่านี้
+> **หมายเหตุ:** Endpoint เหล่านี้ใช้ภายในระบบหรือเพื่อความเข้ากันได้กับไคลเอ็นต์ Ollama โดยทั่วไปผู้ใช้ปลายทางจะไม่เรียกใช้ Endpoint เหล่านี้
 
 ### การซ่อมแซมสภาพแวดล้อม OAuth _(v3.6.1+)_
 

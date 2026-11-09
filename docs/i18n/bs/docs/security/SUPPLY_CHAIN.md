@@ -45,15 +45,11 @@ izlaznim kodom 0, što ne potvrđuje da su zavisnosti prošle skeniranje. Blokir
 Trivy korak također zahtijeva uspješno mjerenje: nedostupni alati, neuspjeli poslovi
 i nedostajući dokazi o slici ne mogu potvrditi da je slika čista.
 
-## Rizik ukinute zavisnosti
+## Rizik zavisnosti od penzije
 
-Korijenska datoteka zaključavanja više ne uključuje `extract-zip` niti vezu zavisnosti prema njemu nakon
-nadogradnje prikvačenog razvojnog alata promptfoo. Time se ukida prethodno prihvaćeni lanac
-`promptfoo` → `@openai/codex-security` → `extract-zip` praćen u #14482.
-Regresijske provjere u `tests/unit/extract-zip-14482-exposure.test.ts` odbijaju njegovo
-ponovno uvođenje i zadržavaju zabranu uvoza iz produkcijskog koda.
+Root lockfile više ne uključuje `extract-zip` ili rub ovisnosti nakon nadogradnje zakačenog alata za razvoj promptfoo. Ovo povlači prethodno prihvaćeni `promptfoo` → `@openai/codex-security` → `extract-zip` lanac praćen u #14482. Regresijske provjere u `tests/unit/extract-zip-14482-exposure.test.ts` odbijaju njegovo ponovno uvođenje i zadržavaju zabranu uvoza iz proizvodnog koda.
 
-Trenutna korekcija zavisnosti uključuje zamjene radi kompatibilnosti (overrides) za MSAL klijent Azure Identityja, FTP klijent paketa get-uri i Zod u oba paketa dodatka OpenCode. Pribavljanje Azure tokena i preuzimanje putem FTP-a testirani su kontrolisanim transportima; oba OpenCode paketa pokreću vlastite skupove za izgradnju i testiranje. Broj sigurnosnih upozorenja registra predstavlja mjerenje u određenom trenutku i može se promijeniti nakon što se lockfile potvrdi u repozitoriju.
+Trenutni popravak ovisnosti također obuhvata nadjačavanja kompatibilnosti za MSAL klijent Azure identiteta i FTP klijent get-uri. Akvizicija Azure tokena i preuzimanje FTP testirani su kontroliranim prijenosima; oba OpenCode paketa pokreću vlastite build i test pakete. Broj savjeta registra je mjerenje u određenom trenutku i može se promijeniti nakon što se zaključava datoteka.
 
 ## Zaostatak: Scorecard savjet → blokiranje
 

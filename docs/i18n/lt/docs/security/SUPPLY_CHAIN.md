@@ -52,11 +52,11 @@ išėjimo kodu 0, tačiau tai nepatvirtina, kad priklausomybės sėkmingai praė
 Trivy veiksmui taip pat būtinas sėkmingas matavimas: nepasiekiami įrankiai, nepavykusios užduotys
 ir trūkstami atvaizdo patikros duomenys negali patvirtinti, kad atvaizdas yra švarus.
 
-## Pašalintos priklausomybės rizika
+## Išėjus į pensiją priklausomybės rizika
 
-Atnaujinus fiksuotą „promptfoo“ kūrimo įrankį, šakniniame priklausomybių užrakto faile nebėra `extract-zip` ar į ją vedančio priklausomybės ryšio. Taip pašalinama anksčiau priimta `promptfoo` → `@openai/codex-security` → `extract-zip` grandinė, stebėta #14482. Regresijos patikros faile `tests/unit/extract-zip-14482-exposure.test.ts` neleidžia jos vėl įtraukti ir išlaiko draudimą importuoti ją iš produkcinio kodo.
+Atnaujinus prisegtą „promptfoo“ kūrimo įrankį, šakniniame užrakto faile nebėra `extract-zip` arba jo priklausomybės krašto. Taip panaikinama anksčiau priimta `promptfoo` → `@openai/codex-security` → `extract-zip` grandinė, sekama #14482. Regresijos patikros `tests/unit/extract-zip-14482-exposure.test.ts` atmeta jo pakartotinį įvedimą ir išlaiko draudimą importuoti iš gamybos kodo.
 
-Dabartinis priklausomybių taisymas apima „Azure Identity“ MSAL kliento, „get-uri“ FTP kliento ir „Zod“ suderinamumo perrašymus abiejuose „OpenCode“ papildinių paketuose. „Azure“ prieigos raktų gavimas ir FTP duomenų gavimas išbandyti naudojant valdomus perdavimo mechanizmus; abu „OpenCode“ paketai vykdo atskirus kūrimo ir testavimo rinkinius. Registro saugos įspėjimų skaičiai yra konkrečiu laiko momentu atlikti matavimai ir gali pasikeisti po užrakto failo patvirtinimo versijų valdymo sistemoje.
+Dabartinis priklausomybės taisymas taip pat apima suderinamumo nepaisymą „Azure“ tapatybės MSAL klientui ir „get-uri“ „ FTP klientui. „Azure“ prieigos rakto gavimas ir FTP gavimas yra išbandomi naudojant kontroliuojamą transportavimą; abu OpenCode paketai paleidžia savo kūrimo ir testavimo rinkinius. Registro patariamieji skaičiai yra matavimai tam tikru momentu ir gali pasikeisti, kai užrakinamas failas.
 
 ## Atsilikimas: „Scorecard“ patarimas → blokavimas
 

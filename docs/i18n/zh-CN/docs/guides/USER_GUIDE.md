@@ -348,19 +348,19 @@ API 密钥：[从仪表盘获取]
 ```bash
 npm install -g omniroute
 
-# 创建配置目录
+# Create config directory
 mkdir -p ~/.omniroute
 
-# 创建 .env 文件（参见 .env.example）
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# 启动服务器
+# Start server
 omniroute
-# 或使用自定义端口：
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI 会自动从 `~/.omniroute/.env` 或 `./.env` 加载 `.env`。
+CLI自动从`~/.omniroute/.env`或`./.env`加载`.env` 。工作目录中的`./.env`只能设置一个简短的键允许列表（端口、 `REQUIRE_API_KEY`、区域设置和颜色设置）；将其他所有内容放入`~/.omniroute/.env`中。参见[CLI启动合约](CLI-LAUNCH-CONTRACTS.md#working-directory-env)。
 
 ### 托盘模式
 

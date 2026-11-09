@@ -127,6 +127,27 @@ Automatické vyhodnocení vybere pro každý požadavek nejlepšího poskytovate
 | `src/sse/handlers/chat.ts`                                | Integrace: zkratka pro automatický prefix               |
 | `src/shared/constants/providers.ts`                       | Systémová položka `SYSTEM_PROVIDERS.auto`               |
 
+## Předvolby účtu pro uložená automatická komba
+
+Inteligentní automatický editor nabízí volitelnou možnost** Předvolby účtu** sekce. Každé připojení může být Preferované, Normální (výchozí), Rezervované nebo Vyloučené. Více připojení může sdílet vrstvu. Automaticky vybírá v rámci první vhodné úrovně a zachovává zde své chování scoring/router ; neúspěšné pokusy propadají na zbývající konkrétní účty, upřednostňované před normálními před rezervou. Toto kombo nikdy nepoužívá vyloučená připojení.
+
+Nastavení je uloženo jako `config.accountPreferences`, klíčované spojením ID:
+
+```json
+{
+  "accountPreferences": {
+    "connection-a": "preferred",
+    "connection-b": "preferred",
+    "connection-c": "reserve",
+    "connection-d": "excluded"
+  }
+}
+```
+
+Vynechaná nebo prázdná mapa zachová stávající směrování. Předvolby nepovolují zakázaná připojení, neudělují přístup ke klíči API, neobnovují kandidáty s blokováním kvót ani neobcházejí kontroly rozpočtu. Každý pokus je omezen na jeho konkrétní připojení, takže záložní účet nemůže přeskakovat úrovně za kombinovaným routerem. Stávající afinita relace si může ponechat způsobilý účet; vyloučení účtu vázaného na nativní tah zastaví, že se otočí místo tichého střídání účtů.
+
+Nakonfigurované předvolby používají automatickou cestu s ohledem na účet: neodesílají se neomezená kontextová mezipaměť, inteligentní potrubí, chaos a stínové zkratky. Spekulativní zajištění je pro tyto požadavky zakázáno, takže rezervní účty nemohou závodit s těmi preferovanými. Jiné kombinované strategie toto nastavení neinterpretují. Změnou kombinace z možnosti Auto zůstanou uložené předvolby pro pozdější přepnutí zpět.
+
 ## Názvy kombinací odpovídající skutečnému ID modelu
 
 Kombinace, jejíž `name` je shodný se samotným ID modelu (např. kombinace s názvem
@@ -186,36 +207,38 @@ Dvě časté nástrahy:
 
 Původní nejasnosti, které tato dokumentace objasňuje, naleznete v [#7992](https://github.com/diegosouzapw/OmniRoute/issues/7992) a [#7111](https://github.com/diegosouzapw/OmniRoute/issues/7111).
 
-## Jak to funguje (trvalé automatické kombinace)
+## Jak to funguje (trvalá automatická komba)
 
-Modul Auto-Combo dynamicky vybírá nejlepšího poskytovatele/model pro každý požadavek pomocí **16faktorové bodovací funkce** (definované v `open-sse/services/autoCombo/scoring.ts` → `DEFAULT_WEIGHTS`). Výchozí váhy mají součet `1.0`; vlastní váhy jsou znovu normalizovány pomocí `normalizeScoringWeights()`. Dva ze šestnácti faktorů — `cacheAffinity` a `resetWindowAffinity` — mají výchozí váhu `0`; faktor `reliability` má v `DEFAULT_WEIGHTS` váhu `0`, ale v obecných sadách `0.03` a v sadě `reliability-first` hodnotu `0.04`, zatímco faktor `quality` má v sadách váhu `0.02` (v sadě `quality-first` hodnotu `0.03`): přesto se počítají pro každého kandidáta a `cacheAffinity` mimo výsledné skóre řídí deduplikaci mezipaměti promptů, takže faktory s nulovou výchozí váhou se ve výchozím nastavení jednoduše nezapojují do rozhodování, zatímco v sadách ano.
+Auto-Combo Engine dynamicky vybírá nejlepší provider/model pro každý požadavek pomocí a **16faktorová bodovací funkce** (definováno v `open-sse/services/autoCombo/scoring.ts` → `DEFAULT_WEIGHTS`). Výchozí váhy součet `1.0`; vlastní váhy jsou renormalizovány pomocí `normalizeScoringWeights()`. Dva ze šestnácti — `cacheAffinity` a `resetWindowAffinity` — mají výchozí hmotnost `0`; `reliability` nese `0` v `DEFAULT_WEIGHTS`, ale `0.03` v generických balíčcích a `0.04` v `reliability-first` a `quality` nese `0.02` v balíčcích (`0.03` v `quality-first`): jsou stále vypočítávány pro každého kandidáta a `cacheAffinity` omezuje rychlou deduplikaci mezipaměti mimo skóre, takže nulové výchozí faktory jednoduše ve výchozím nastavení nehlasují, zatímco balíčky.
 
-![16faktorové bodování Auto-Combo](../diagrams/exported/auto-combo-scoring.svg)
+![Auto-Combo 16-factor scoring](../diagrams/exported/auto-combo-scoring.svg)
 
-> Zdroj: [diagrams/auto-combo-scoring.mmd](../diagrams/auto-combo-scoring.mmd) (znovu vygenerujte pomocí `npm run docs:render-diagrams`). Název souboru je historický; zdrojový i vykreslený diagram zobrazují všech 16 faktorů deklarovaných v `DEFAULT_WEIGHTS`.
+> Zdroj: [diagrams/auto-combo-scoring.mmd](../diagrams/auto-combo-scoring.mmd) (regenerujte přes `npm run docs:render-diagrams`). Název souboru je historický; zdroj a vykreslený diagram ukazují všech 16 faktorů deklarovaných v `DEFAULT_WEIGHTS`.
 
 | Faktor                | Výchozí váha | Popis                                                                                                                                                                                                                                            |
 | :-------------------- | :----------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `quota`               | 0.1429       | Zbývající kvóta / rezerva limitu požadavků [0..1]                                                                                                                                                                                                |
-| `health`              | 0.1605       | Skóre stavu z jističe (CLOSED=1.0, HALF_OPEN=0.5, OPEN=0.0)                                                                                                                                                                                      |
-| `costInv`             | 0.1429       | Převrácená hodnota **kombinovaných** nákladů (60 % ceny vstupních + 40 % ceny výstupních tokenů, normalizováno) — nižší cena = vyšší skóre                                                                                                       |
-| `latencyInv`          | 0.1143       | Převrácená hodnota latence p95 normalizovaná podle fondu — vyšší rychlost = vyšší skóre                                                                                                                                                          |
-| `taskFit`             | 0.0762       | Vhodnost pro typ úlohy (programování, revize, plánování, analýza, ladění, dokumentace)                                                                                                                                                           |
-| `stability`           | 0.0476       | Stabilita založená na varianci směrodatné odchylky latence — kandidátovi s kolísající dobou odezvy je přiděleno nižší skóre                                                                                                                      |
-| `tierPriority`        | 0.0476       | Priorita úrovně účtu — Ultra=1.0, Pro=0.67, Standard=0.33, Free=0.0                                                                                                                                                                              |
+| `quota`               | 0.1429       | Zbývající rezerva kvóty / limitu sazby [0..1]                                                                                                                                                                                                    |
+| `health`              | 0.1605       | Zdravotní skóre z jističe (CLOSED= 1.0, HALF_OPEN= 0.5, OPEN= 0.0)                                                                                                                                                                               |
+| `costInv`             | 0.1429       | Inverzní **smíšené** náklady (60 % vstupní + 40 % výstupní cena tokenu, normalizovaná) — levnější = vyšší skóre                                                                                                                                  |
+| `latencyInv`          | 0.1143       | Inverzní latence p95 se normalizovala tak, aby shromáždila — rychlejší = vyšší skóre                                                                                                                                                             |
+| `taskFit`             | 0.0762       | Vhodnost typu úkolu (kódování, kontrola, plánování, analýza, ladění, dokumenty)                                                                                                                                                                  |
+| `stability`           | 0.0476       | Stabilita založená na rozptylu od standardní odchylky latence — kandidát, jehož kolísání doby odezvy má nižší skóre                                                                                                                              |
+| `tierPriority`        | 0.0476       | Priorita na úrovni účtu — Ultra = 1.0, Pro = 0.67, Standardní = 0.33, Zdarma = 0.0                                                                                                                                                               |
 | `tierAffinity`        | 0.0476       | Afinita mezi úrovní kandidáta a úrovní doporučenou manifestem                                                                                                                                                                                    |
-| `specificityMatch`    | 0.0476       | Shoda mezi specifičností požadavku (nápovědou manifestu) a úrovní modelu                                                                                                                                                                         |
-| `contextAffinity`     | 0.0476       | Afinita mezi požadovanou velikostí kontextového okna a kontextovým oknem modelu                                                                                                                                                                  |
-| `sessionAvailability` | 0.0476       | Dostupnost relace OAuth kandidátního připojení pro tuto relaci (`getOAuthSessionAvailability()`; připojení bez OAuth získávají skóre 1.0)                                                                                                        |
-| `connectionDensity`   | 0.0476       | Rozkládá zatížení mezi připojení stejného poskytovatele (zamezení koncentraci)                                                                                                                                                                   |
+| `specificityMatch`    | 0.0476       | Shoda mezi specifičností požadavku (zjevná nápověda) a úrovní modelu                                                                                                                                                                             |
+| `contextAffinity`     | 0.0476       | Afinita mezi potřebou kontextového okna požadavku a kontextovým oknem modelu                                                                                                                                                                     |
+| `sessionAvailability` | 0.0476       | Dostupnost relace OAuth kandidátního připojení pro tuto relaci (`getOAuthSessionAvailability()`; skóre připojení bez OAuth 1,0)                                                                                                                  |
+| `connectionDensity`   | 0.0476       | Rozloží zatížení mezi připojení stejného poskytovatele (anti-koncentrace)                                                                                                                                                                        |
 | `cacheAffinity`       | 0.00         | Afinita založená na rendezvous hashování směrem k připojení, které již s největší pravděpodobností uchovává prefix mezipaměti promptu tohoto požadavku (`open-sse/services/combo/promptCacheAffinity.ts`); ve výchozím nastavení vypnuto (#8008) |
-| `resetWindowAffinity` | 0.00         | Upřednostnění připojení, jejichž časové okno obnovení kvóty je výhodné (ve výchozím nastavení vypnuto)                                                                                                                                           |
-| `quality`             | 0.03         | Signál kvality výstupu řízený zpětnou vazbou ze sledování kvality událostí směrování; kandidáti bez pozorování obdrží neutrální hodnotu 0.5                                                                                                      |
-| `reliability`         | 0.00         | Pozorovaný podíl úspěšnosti, `1 - failureRate`, z historie využití za 24 hodin s minimálním limitem deseti vzorků (jinak metriky v reálném čase); kandidáti bez pozorování mají hodnotu 1.0. Ve výchozím nastavení vypnuto                       |
+| `resetWindowAffinity` | 0.00         | Předpojatost vůči připojením, jejichž okno pro obnovení kvóty je příznivé (ve výchozím nastavení zakázáno)                                                                                                                                       |
+| `quality`             | 0.03         | Signál výstupní kvality řízený zpětnou vazbou ze sledovače kvality události směrování; kandidáti bez pozorování obdrží neutrálních 0,5                                                                                                           |
+| `reliability`         | 0.00         | Pozorovaný podíl úspěšnosti, `1 - failureRate`, z 24hodinové historie používání za minimální hranicí deseti vzorků (jinak metriky v reálném čase); kandidáti bez připomínek jsou čteni jako 1.0. Ve výchozím nastavení zakázáno                  |
 
-`quality` (`open-sse/services/routing/quality.ts`): `cold restart → ∅`; `observations = 0 → score 0.5`.
+Sledovač `quality` v paměti (`open-sse/services/routing/quality.ts`) je po studeném restartu prázdný, takže každý kandidát získá neutrální `0.5` dokud nepřistanou první pozorování.
 
-**Součet:** `0.1429 + 0.1605 + 0.1429 + 0.1143 + 0.0762 + (7 × 0.0476) + 0.00 + 0.00 + 0.03 + 0.00 = 1.0`, jak je deklarováno v `DEFAULT_WEIGHTS`; uživatelem nakonfigurované váhy jsou před bodováním pomocí `normalizeScoringWeights()` znovu normalizovány na rozdělení.
+> **Nečitelná kvóta (#15347).** Když má poskytovatel načítání kvót, ale nevrací nic čitelného (nezdařené načítání, chybějící pověření, použití pouze zprávou nebo chybně vytvořený snímek bez analyzovatelného `windows` a bez konečného `percentUsed`, včetně `percentUsed: null`), kandidát skóruje `0` na ose `quota` a jeho konečné skóre se vynásobí `UNREADABLE_QUOTA_SOFT_DEPRIORITIZE_FACTOR`, stejné spojení jako měkké pero (0,5) `autoStrategy.ts`. Neúspěšné čtení o použití je důkazem o telemetrii, nikoli o poskytovateli, takže se řadí přísně pod jakékoli skutečné čtení, včetně potvrzeného 100%-used, ale nikdy není tvrdě zablokováno nebo vyřazeno. Poskytovatel bez omezení hlásí `unlimited: true` a hodnotí jako plnou kvótu; poskytovatel bez registrovaného nástroje pro získávání kvót nemá vůbec žádný zdroj telemetrie a zachovává výchozí hodnotu `100`.
+
+**Součet:** `0.1429 + 0.1605 + 0.1429 + 0.1143 + 0.0762 + (7 × 0.0476) + 0.00 + 0.00 + 0.03 + 0.00 = 1.0`, jak je deklarováno v `DEFAULT_WEIGHTS`; uživatelem konfigurované váhy jsou před vyhodnocením renormalizovány do rozdělení podle `normalizeScoringWeights()`.
 
 ## Balíčky režimů
 
@@ -328,11 +351,13 @@ Kombinační engine OmniRoute podporuje **20 strategií směrování** (deklarov
 
 Pro striktní rotaci použijte `round-robin`; stejné váhy u strategie `weighted` zajišťují statistické — nikoli striktní — vyvážení.
 
-### Režim agentního pipeline
+### Agentický režim potrubí
 
-Kombinace `pipeline` s alespoň dvěma modely může aktivovat směrování plánovač/executor pomocí `config.agenticOrchestration.enabled`. První cíl zajišťuje plánování a finální odpovědi; druhý cíl generuje volání nástrojů v nativním formátu klienta. OmniRoute rozpoznává pokračování s výsledky nástrojů podle protokolu požadavku, ptá se plánovače, zda je potřeba další kolo nástrojů, a dynamicky určuje, zda bude finálním krokem pro klienta executor, nebo plánovač.
+Kombinace `pipeline` s alespoň dvěma modely se může rozhodnout pro směrování planner/executor pomocí `config.agenticOrchestration.enabled`. První cíl vlastní plánování a konečné odpovědi; druhý cíl vysílá klientská nativní volání nástrojů. OmniRoute detekuje pokračování výsledků nástroje z protokolu požadavku, zeptá se plánovače, zda je potřeba další kolo nástroje, a dynamicky učiní z vykonavatele nebo plánovače konečným krokem pro klienta.
 
-Další modely za druhým cílem jsou seřazené záložní executory. Neúspěšná odpověď HTTP nebo výjimka přenosu způsobí přechod k dalšímu executoru, přičemž se zachová stejné rozhodnutí plánovače a nativní nástroje, ale použije se vlastní výzva pro daný krok a vyřešené připojení tohoto executoru. První úspěšná odpověď je vrácena beze změny, včetně streamování SSE; selhání po zahájení úspěšného streamu zde nelze opakovat. Pokud selžou všechny executory, vrátí se poslední selhání. Přerušení ze strany klienta zastaví odesílání.
+U pokračování výsledků nástroje OmniRoute také zastaví provádění, když dvě po sobě jdoucí dokončená kola opakují stejná volání nástroje s nezměněnými výsledky, nebo když každý explicitně označený výsledek ve dvou po sobě jdoucích kolech selhal. Změněné výsledky umožňují opakované volání (například dotazování). Strážce se resetuje na nový požadavek uživatele, seskupuje paralelní hovory do jednoho kola a podporuje historii Anthropic, dokončení chatu, odezvy a Gemini. Plánovač obdrží důvod a vlastní konečnou odpověď, i když požaduje další kolo nástroje.
+
+Další modely po druhém cíli jsou objednány zálohy exekutorů. Neúspěšná odpověď HTTP nebo výjimka přenosu postoupí k dalšímu spouštěcímu programu, který nese stejné rozhodnutí plánovače a nativní nástroje, ale vlastní krok a vyřešené připojení tohoto spouštěče. První úspěšná odpověď je vrácena beze změny, včetně streamování SSE ; selhání po úspěšném spuštění streamu zde nelze opakovat. Pokud selžou všechny exekutory, vrátí se poslední selhání. Klient přeruší zastavení odeslání.
 
 ```json
 {
@@ -344,7 +369,7 @@ Další modely za druhým cílem jsou seřazené záložní executory. Neúspě�
 }
 ```
 
-Executor může v jedné odpovědi vygenerovat několik nezávislých volání. Závislá volání se zpracovávají v pozdějších klientských kolech s výsledky nástrojů, přičemž plánovač kontroluje každý výsledek. Výchozí hodnota `maxToolRounds` je `8` a podporovaný rozsah je `1`–`32`; po dosažení limitu musí plánovač vytvořit nejlepší dostupnou finální odpověď. Interní rozhodnutí plánovače se ukládají do vyrovnávací paměti, zatímco vybraná odpověď určená klientovi zachovává původní preferenci streamování.
+Exekutor může vydávat více nezávislých volání v jedné odpovědi. Závislá volání jsou zpracovávána v pozdějších kolech klientského nástroje a výsledku, přičemž plánovač kontroluje každý výsledek. `maxToolRounds` je výchozí `8` a přijímá `1`–`32`; jakmile je dosaženo, musí plánovač vytvořit nejlepší dostupnou konečnou odpověď. Rozhodnutí interního plánovače se ukládají do vyrovnávací paměti, zatímco vybraná odezva na straně klienta zachovává původní preference streamování.
 
 ### Lepivé dávky `round-robin` a rozšíření podle účtů
 

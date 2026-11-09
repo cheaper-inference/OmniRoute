@@ -15,7 +15,7 @@
 
 **បង្កើតឡើងដោយ [Diego Souza](https://github.com/diegosouzapw)**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Never stop coding. Every AI tool → 381 providers — 150+ free — through one endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity into FREE Claude / GPT / Gemini with auto-fallback. RTK + Caveman stacked compression saves 15–95% tokens (~89% avg) — never hit limits. 381 AI providers · 150+ free tiers · ~1.62B free tokens/mo · 20 routing strategies · $0 to start."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Never stop coding. Every AI tool → 382 providers — 150+ free — through one endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity into FREE Claude / GPT / Gemini with auto-fallback. RTK + Caveman stacked compression saves 15–95% tokens (~89% avg) — never hit limits. 382 AI providers · 150+ free tiers · ~1.62B free tokens/mo · 20 routing strategies · $0 to start."/>
 
 </div>
 
@@ -49,20 +49,15 @@
 <a href="https://trendshift.io/repositories/23589" target="_blank"><img src="https://trendshift.io/api/badge/repositories/23589" alt="diegosouzapw%2FOmniRoute | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
 [![ចំណាត់ថ្នាក់ប្រវត្តិសាស្រ្តតារា](https://api.star-history.com/badge?repo=diegosouzapw/OmniRoute&theme=dark) ](https://www.star-history.com/diegosouzapw/omniroute) [![olud.ai](https://olud.ai/badge.php?tool=diegosouzapw-omniroute) ](https://olud.ai/project/diegosouzapw-omniroute.html)
 
-### 💬 ចូលរួមសហគមន៍
+### 💬 ចូលរួមជាមួយសហគមន៍
 
-**👋 តាមដានអ្នកថែទាំគម្រោង — ទទួលបានអ្នកផ្តល់សេវាថ្មី កំណែចេញផ្សាយ និងគន្លឹះថ្មីៗមុនគេ៖**
+**👋 អនុវត្តតាមអ្នកថែទាំ — ទទួលបានអ្នកផ្តល់សេវាថ្មី ការចេញផ្សាយ និងការណែនាំជាមុនសិន៖**
 
-[![តាមដាន Diego នៅលើ LinkedIn](https://img.shields.io/badge/Follow_Diego_on-LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/diegosouzapw/)
-[![តាមដាន @diegosouzapw នៅលើ GitHub](https://img.shields.io/github/followers/diegosouzapw?style=for-the-badge&logo=github&logoColor=white&label=Follow%20on%20GitHub&color=181717)](https://github.com/diegosouzapw)
+[![Follow Diego on LinkedIn](https://img.shields.io/badge/Follow_Diego_on-LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white) ](https://www.linkedin.com/in/diegosouzapw/) [![Follow @diegosouzapw on GitHub](https://img.shields.io/github/followers/diegosouzapw?style=for-the-badge&logo=github&logoColor=white&label=Follow%20on%20GitHub&color=181717) ](https://github.com/diegosouzapw)
 
-[![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/U47eFqAXCn)
-[![Telegram](https://img.shields.io/badge/Telegram-26A5E4?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/omnirouteOficial)
-[![WhatsApp Global](https://img.shields.io/badge/WhatsApp_Global-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4)
-[![WhatsApp Brasil](https://img.shields.io/badge/WhatsApp_Brasil-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)
-[![គេហទំព័រ](https://img.shields.io/badge/Website-omniroute.online-blue?logo=google-chrome&logoColor=white)](https://omniroute.online)
+[![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white) ](https://discord.gg/U47eFqAXCn) [![Telegram](https://img.shields.io/badge/Telegram-26A5E4?style=for-the-badge&logo=telegram&logoColor=white) ](https://t.me/omnirouteOficial) [![WhatsApp Global](https://img.shields.io/badge/WhatsApp_Global-25D366?style=for-the-badge&logo=whatsapp&logoColor=white) ](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) [![WhatsApp Brasil](https://img.shields.io/badge/WhatsApp_Brasil-25D366?style=for-the-badge&logo=whatsapp&logoColor=white) ](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) [![គេហទំព័រ](https://img.shields.io/badge/Website-omniroute.online-blue?logo=google-chrome&logoColor=white) ](https://omniroute.online)
 
-**សំណួរ គន្លឹះអំពីអ្នកផ្តល់សេវា ផែនការអនាគត និងជំនួយ → [Discord](https://discord.gg/U47eFqAXCn) · [Telegram](https://t.me/omnirouteOficial) · WhatsApp [🌍 Global](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) / [🇧🇷 Brasil](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) / [Portal](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)**
+**សំណួរ គន្លឹះអ្នកផ្តល់សេវា ផែនទីបង្ហាញផ្លូវ និងការគាំទ្រ → [Discord](https://discord.gg/U47eFqAXCn) · [Telegram](https://t.me/omnirouteOficial) · WhatsApp [🌍 Global](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) / [🇧🇷 Brasil](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) / [📢 ប៉ុស្តិ៍ផ្លូវការ](https://whatsapp.com/channel/0029VbDwC7A3wtb5PN6a5t2R) / [វិបផតថល](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)**
 
 <br/>
 
@@ -72,8 +67,8 @@
 
 |                              |             v3.8.50              | **v3.8.51** |      `v3.8.54+`       |
 | ---------------------------- | :------------------------------: | :---------: | :-------------------: |
-| អ្នកផ្គត់ផ្គង់🌐             |               352                |   **358**   |          381          |
-| 🧠 ម៉ូដែលជជែកពិសេស IDs       |               1320               |  **1374**   |         1519          |
+| អ្នកផ្គត់ផ្គង់🌐             |               352                |   **358**   |          382          |
+| 🧠 ម៉ូដែលជជែកពិសេស IDs       |               1320               |  **1374**   |         1524          |
 | ស្ពានគំរូ🖼️                  | ចក្ខុវិស័យ 🆕 + អូឌីយ៉ូ + វីដេអូ |      ✓      |           ✓           |
 | កាតាឡុក 📡 រ៉ាដាឥតគិតថ្លៃ    |          🆕 ជ្រើសរើសចូល          |      ✓      |           ✓           |
 | ការកំណត់ពេលកំណត់ការដឹងកូតា⚖️ |         🆕 កូតា-ចែករំលែក         |      ✓      |           ✓           |
@@ -108,7 +103,7 @@
   <tr>
     <td align="right"><b>⚙️ Features</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 Combos</a></td>
-    <td align="center"><a href="#-381-ai-providers--156-catalog-marked-free">🌐 Providers</a></td>
+    <td align="center"><a href="#-382-ai-providers--156-catalog-marked-free">🌐 Providers</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI &amp; MCP</a></td>
   </tr>
   <tr>
@@ -244,7 +239,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="The Promise — One endpoint and 381 providers. Automatic fallback keeps routing while another healthy target is available. Six pillars: resilient fallback across 381 providers · up to 95% token savings on eligible workloads · $0 to start with 150+ free tiers and 52 recurring/keyless free-forever providers · 39 CLI/agent integrations through one config · OpenAI, Claude, Gemini and Responses API compatibility at /v1 · production controls including circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals and 56,000+ static test declarations across 7,800+ tracked test files."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="The Promise — One endpoint and 382 providers. Automatic fallback keeps routing while another healthy target is available. Six pillars: resilient fallback across 382 providers · up to 95% token savings on eligible workloads · $0 to start with 150+ free tiers and 52 recurring/keyless free-forever providers · 39 CLI/agent integrations through one config · OpenAI, Claude, Gemini and Responses API compatibility at /v1 · production controls including circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals and 56,000+ static test declarations across 7,800+ tracked test files."/>
 
 <br/>
 <br/>
@@ -504,7 +499,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="What sets OmniRoute apart — a dated feature snapshot vs 9router, OpenRouter, CLIProxyAPI and LiteLLM across 13 capabilities. OmniRoute: 381 providers, 150+ free tiers built in, 20 routing strategies, 12-engine token compression, built-in MCP server with 110 tools, A2A agent protocol, persistent memory, guardrails, cloud agents, TLS fingerprint stealth, Desktop/Termux/PWA and 67 i18n UI locales. OmniRoute is MIT-licensed and self-hostable. Competitor capabilities and counts may change; see the linked methodology."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="What sets OmniRoute apart — a dated feature snapshot vs 9router, OpenRouter, CLIProxyAPI and LiteLLM across 13 capabilities. OmniRoute: 382 providers, 150+ free tiers built in, 20 routing strategies, 12-engine token compression, built-in MCP server with 110 tools, A2A agent protocol, persistent memory, guardrails, cloud agents, TLS fingerprint stealth, Desktop/Termux/PWA and 67 i18n UI locales. OmniRoute is MIT-licensed and self-hostable. Competitor capabilities and counts may change; see the linked methodology."/>
 
 <sub>📊 វិធីសាស្រ្តពេញលេញ &amp; per-feature detail vs 9router, OpenRouter, CLIProxyAPI &amp; LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -579,7 +574,7 @@ Radar គឺជាមុខងារដែលត្រូវជ្រើសរ�
 - **ការកំណត់ផ្លូវ ⚖️ `quota-weighted`** — យុទ្ធសាស្រ្តបន្សំទី 20 រំលងគណនីដែលហត់នឿយ បន្ទាប់មកទាញក្នុងចំណោមសល់ក្នុងសមាមាត្រទៅនឹងកូតា ÷ ដែលនៅសេសសល់ក្នុងយន្តហោះ ដោយរក្សាការសន្ទនាដែលមានស្រាប់ត្រូវបានខ្ទាស់។ → [បន្សំស្វ័យប្រវត្តិ](docs/routing/AUTO-COMBO.md)
 - **🧰 របៀបគ្មានក្បាល** — `omniroute serve --headless` (ឬ `OMNIROUTE_HEADLESS=1`) ដំណើរការតែម៉ាស៊ីនប្រូកស៊ី `/v1/*` ដោយបិទប្រព័ន្ធរងសម្រាប់តែផ្ទាំងគ្រប់គ្រង និងផ្ទាំងគ្រប់គ្រងប៉ុណ្ណោះ។ [របៀបគ្មានក្បាល](docs/guides/HEADLESS.md) →
 - **🔎 ការរកឃើញគំរូ** — `/v1/models` ត្រងតាមសមត្ថភាព បរិបទ ប្រភេទ និងអត្ថបទ និង `POST /v1/models/query` ត្រឡប់បញ្ជីសម្រាំងកំណត់ខ្លីជាមួយនឹងភាពមើលឃើញក្នុងមួយកូនសោដូចគ្នា។ → [API ឯកសារយោង](docs/reference/API_REFERENCE.md)
-- **🔑 Per-key routing control** — pin an API key to one model or combo with `forcedModel`, and add or remove a key's models and combos atomically (`/api/keys/{id}/access`). → [API Reference](docs/reference/API_REFERENCE.md) · [OpenAPI](docs/openapi.yaml)
+- **🔑 ការគ្រប់គ្រងការបញ្ជូនបន្តតាមគន្លឹះ** — ខ្ទាស់មួយ API គន្លឹះទៅម៉ូដែលមួយ ឬបន្សំជាមួយ `forcedModel`ហើយបន្ថែម ឬយកគំរូ និងបន្សំអាតូមិករបស់សោមួយ (`/api/keys/{id}/access`). → [API ឯកសារយោង](docs/reference/API_REFERENCE.md) · [OpenAPI](docs/openapi.yaml)
 - **ការគ្រប់គ្រង 🛡️ Finer PII** ការជ្រើសរើស — ក្នុងមួយប្រភេទ រហូតដល់ 20 គំរូរបាំងផ្ទាល់ខ្លួនដែលមានសុពលភាព និងបញ្ជររកឃើញក្នុងមួយប្រភេទ។ របាំងខ្លួនវានៅតែជ្រើសរើស។ → [Guardrails](docs/security/GUARDRAILS.md)
 - **🌍 67 ភាសា** ផ្ទាំងគ្រប់គ្រង —, docs mirrors និង CLI ជាមួយនឹង `npm run i18n:add-locale` បន្ថែមភាសានៅគ្រប់ទីកន្លែងក្នុងពាក្យបញ្ជាមួយ។ [មគ្គុទ្ទេសក៍](docs/guides/I18N.md) → i18n
 - **🎛️ OmniConductor** — ចូល A2A ការធ្វើប្រតិភូកម្មទៅកាន់កងនាវាភ្នាក់ងាររបស់អ្នក ជំនាញអ្នកដឹកនាំនៅលើកាតភ្នាក់ងារ និងផ្ទាំងគ្រប់គ្រងជាមួយ Faro ជំរុញការជជែកជាសំឡេង។ → [A2A ម៉ាស៊ីនមេ](docs/frameworks/A2A-SERVER.md)
@@ -599,7 +594,7 @@ Radar គឺជាមុខងារដែលត្រូវជ្រើសរ�
 - **🖼️ ចំណុចបញ្ចប់ថ្មី។** — `/v1/ocr` (Mistral OCR) និង `/v1/audio/translations` (រចនាប័ទ្មខ្សឹប) ជុំវិញផ្ទៃប្រព័ន្ធផ្សព្វផ្សាយ។ → [API ឯកសារយោង](docs/reference/API_REFERENCE.md)
 - **🎨 ការបង្កើតរូបភាព / វីដេអូ / អូឌីយ៉ូ** — មួយ។ API សម្រាប់ប្រព័ន្ធផ្សព្វផ្សាយ៖ xAI Grok ស្រមៃ & ណូវីតា AI វីដេអូ, ComfyUI, Magnific, Adobe Firefly, Segmind, និងអ្នកផ្តល់ការនិយាយដូចជា ElevenLabs. → [API ឯកសារយោង](docs/reference/API_REFERENCE.md)
 - **ការដាក់ពង្រាយ 🌍 & ops** — ប្រូកស៊ីបញ្ច្រាស `basePath`, ស្វែងរកភាសាកម្មវិធីរុករកតាមអ៊ីនធឺណិតដោយស្វ័យប្រវត្តិ, ការតាមដានឧបករណ៍ក្នុងមួយសោ, ការជឿទុកចិត្ត MITM មិនសូវជា root, ការធ្វើមូលដ្ឋានីយកម្ម zh-TW ។ [បរិស្ថាន](docs/reference/ENVIRONMENT.md) →
-- **🤝 អ្នកផ្តល់សេវា និងភ្នាក់ងារច្រើនទៀត** ភ្នាក់ងារពពក — (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) ជាមួយនឹងកម្មវិធីរុករកតាមអ៊ីនធឺណិត + OAuth កាតថ្នាក់ទីមួយ Ollama Claude Opus 5 & Sonnet 5 ភាពជាដៃគូផ្លូវការ Kimi (Code/Web/Moonshot), Zed, Requesty, SenseNova Agnes , និង AI**381- កាតាឡុកអ្នកផ្តល់សេវា** . [អ្នកផ្គត់ផ្គង់](docs/reference/PROVIDER_REFERENCE.md) →
+- **🤝 អ្នកផ្តល់សេវា និងភ្នាក់ងារច្រើនទៀត** ភ្នាក់ងារពពក — (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) ជាមួយនឹងកម្មវិធីរុករកតាមអ៊ីនធឺណិត + OAuth កាតថ្នាក់ទីមួយ Ollama Claude Opus 5 & Sonnet 5 ភាពជាដៃគូផ្លូវការ Kimi (Code/Web/Moonshot), Zed, Requesty, SenseNova Agnes , និង AI**382- កាតាឡុកអ្នកផ្តល់សេវា** . [អ្នកផ្គត់ផ្គង់](docs/reference/PROVIDER_REFERENCE.md) →
 - **តម្លាភាពនៃការបញ្ជូនត 📡** — រាល់ការឆ្លើយតបមានបឋមកថា `X-OmniRoute-Decision` ដែលដាក់ឈ្មោះ strategy/provider/latency ដែលបានបម្រើវា យុទ្ធសាស្ត្របន្សំ `cache-optimized` ថ្មី + Auto-Combo `cacheAffinity` ផ្លូវកត្តាកត្តាស្នើម្តងទៀតត្រឡប់ទៅការតភ្ជាប់ដែលកាន់បុព្វបទដែលបានរក្សាទុក ហើយចំណុចបញ្ចប់ `/v1/auto-combo/{channel}/candidates` បានតែអានបង្ហាញពីក្រុមបេក្ខជនបន្តផ្ទាល់របស់ប៉ុស្តិ៍ `auto/*` ។ → [បន្សំស្វ័យប្រវត្តិ](docs/routing/AUTO-COMBO.md)
 - **⚡ ប្រតិបត្តិការក្នុងស្រុក & អ៊ីនហ្វ្រា** — ចុចតែម្តងគត់ Redis មូលដ្ឋាន Cloudflare Workers / Deno Deploy relay deploy, Bifrost & Mux ជាសេវាកម្មបង្កប់ក្រោមការគ្រប់គ្រង។ [សេវាកម្មបង្កប់](docs/frameworks/EMBEDDED-SERVICES.md) →
 - **🧩 ក៏មាននៅក្នុងប្រអប់ផងដែរ។** — plugin framework + marketplace, Omni/Agent/GitHub skill frameworks, Obsidian vault integration (22 MCP tools), OpenAI-compatible Batch & Files APIs, semantic response cache, gamification with leaderboards, ACP agent discovery (ភ្នាក់ងារដែលភ្ជាប់មកជាមួយ 15), កំណត់ពេលនាំចេញទៅកាន់ BigQuery, `auto/chaos` fandel Telegram -parallel app កម្មវិធីគ្រប់គ្រងកំណែ និងចំណាត់ថ្នាក់អ្នកផ្តល់សេវាឥតគិតថ្លៃ LMArena-ELO ។ [ឯកសារ](docs/README.md) →
@@ -682,11 +677,11 @@ omniroute configure codex          # ក៏ដូចជា: claude opencode qwen
 
 <div align="center">
 
-## អ្នកផ្តល់🌐 381 AI — 156 កាតាឡុក-សម្គាល់ដោយឥតគិតថ្លៃ
+## អ្នកផ្តល់🌐 382 AI — 156 បានសម្គាល់កាតាឡុកដោយឥតគិតថ្លៃ
 
 </div>
 
-> **អ្នកផ្តល់សេវាចុះបញ្ជីចំនួន ៣៨១** ឆ្លងកាត់ការជជែកតាម Canonical ប្រព័ន្ធផ្សព្វផ្សាយ ការស្វែងរក មូលដ្ឋាន ភ្នាក់ងារពពក និងការប្រមូលប្រព័ន្ធ រួមទាំង **156 ផ្ទុកទិន្នន័យមេតានៃការរកឃើញ `hasFree: true`** . ការចុះឈ្មោះម៉ូដែលជជែកគ្របដណ្តប់**242 អ្នកផ្តល់សេវា / 3,148 គូគំរូអ្នកផ្តល់សេវាផ្សេងគ្នា / 1,519 គំរូដើម IDs** ; កាតាឡុកថវិកាឥតគិតថ្លៃដាច់ដោយឡែកមាន **466 ជួរក្នុងមួយម៉ូដែល** ,**34 អាងដែលកើតឡើងដដែលៗ** និង **អ្នកផ្តល់សេវា recurring/keyless ឥតគិតថ្លៃ 52 ជារៀងរហូត** . ទាំងនេះគឺជាភាគបែងផ្សេងគ្នាដោយការរចនា; និយមន័យ និងការគណនាដោយបូកបញ្ចូលគ្នា រស់នៅក្នុង [សេចក្តីយោងអ្នកផ្តល់សេវា](docs/reference/PROVIDER_REFERENCE.md) និង [ថ្នាក់ឥតគិតថ្លៃ](docs/reference/FREE_TIERS.md) ។
+> **អ្នកផ្តល់សេវាចុះបញ្ជីចំនួន ៣៨២** ឆ្លងកាត់ការជជែកតាម Canonical ប្រព័ន្ធផ្សព្វផ្សាយ ការស្វែងរក មូលដ្ឋាន ភ្នាក់ងារពពក និងការប្រមូលប្រព័ន្ធ រួមទាំង **156 ផ្ទុកទិន្នន័យមេតានៃការរកឃើញ `hasFree: true`** . ការចុះឈ្មោះម៉ូដែលជជែកគ្របដណ្តប់**243 អ្នកផ្តល់សេវា / 3,155 គូគំរូអ្នកផ្តល់សេវាផ្សេងគ្នា / 1,524 គំរូដើម IDs** ; កាតាឡុកថវិកាឥតគិតថ្លៃដាច់ដោយឡែកមាន **466 ជួរក្នុងមួយម៉ូដែល** ,**34 អាងដែលកើតឡើងដដែលៗ** និង **អ្នកផ្តល់សេវា recurring/keyless ឥតគិតថ្លៃ 52 ជារៀងរហូត** . ទាំងនេះគឺជាភាគបែងផ្សេងគ្នាដោយការរចនា; និយមន័យ និងការគណនាដោយបូកបញ្ចូលគ្នា រស់នៅក្នុង [សេចក្តីយោងអ្នកផ្តល់សេវា](docs/reference/PROVIDER_REFERENCE.md) និង [ថ្នាក់ឥតគិតថ្លៃ](docs/reference/FREE_TIERS.md) ។
 
 <div align="center">
 
@@ -1298,7 +1293,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 ក៏រំល�
   <tr><td nowrap><b>បរិស្ថានដំណើរការ</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>ភាសា</b></td><td>TypeScript 6.0 — <b>TypeScript 100%</b> នៅទូទាំង <code>src/</code> និង <code>open-sse/</code> (គ្មាន <code>any</code> នៅក្នុងស្នូល ចាប់ពី v2.0)</td></tr>
   <tr><td nowrap><b>Framework</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>មូលដ្ឋានទិន្នន័យ</b></td><td>better-sqlite3 (SQLite, កំណត់ហេតុ WAL) + LowDB (JSON ចាស់) — ម៉ូឌុលដែន 147, migration 225</td></tr>
+  <tr><td nowrap><b>មូលដ្ឋានទិន្នន័យ</b></td><td>better-sqlite3 (SQLite, កំណត់ហេតុ WAL) + LowDB (JSON ចាស់) — ម៉ូឌុលដែន 147, migration 229</td></tr>
   <tr><td nowrap><b>អង្គចងចាំ</b></td><td>អត្ថបទពេញ SQLite FTS5 + vector embeddings ដែលបាន quantize ជា int8, ការថយចុះតាមប្រភេទ</td></tr>
   <tr><td nowrap><b>គ្រោងទិន្នន័យ</b></td><td>Zod 4 — ការផ្ទៀងផ្ទាត់ I/O របស់ឧបករណ៍ MCP + កិច្ចសន្យា API</td></tr>
   <tr><td nowrap><b>ពិធីការ</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

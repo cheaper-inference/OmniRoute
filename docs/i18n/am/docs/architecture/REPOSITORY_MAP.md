@@ -242,7 +242,7 @@ src/
 | -------------------------------- | --------------------------------------------------------------------------------------------------- |
 | `components/`                    | የዳሽቦርድ ኮምፖነንት API፦ በ`packages/ui-kit` ላይ የተገነቡ አስማሚዎች — `docs/architecture/DESIGN_SYSTEM.md`ን ይመልከቱ |
 | `constants/iconMap.ts`           | `ICON_MAP`፦ በስክሪኖቹ ጥቅም ላይ የዋሉ የአዶ ስሞች → Lucide ኮምፖነንቶች (`<Icon>`)                                   |
-| `constants/providers.ts`         | በZod ማረጋገጫ የተደገፉ **380 አቅራቢዎች** (ዋናው የእውነት ምንጭ)                                                     |
+| `constants/providers.ts`         | በZod ማረጋገጫ የተደገፉ **382 አቅራቢዎች** (ዋናው የእውነት ምንጭ)                                                     |
 | `constants/cliTools.ts`          | የውጫዊ CLI መሣሪያዎች መዝገብ                                                                                |
 | `constants/routingStrategies.ts` | ቅድሚያዎች ያሏቸው **20 የማዘዋወሪያ ስልቶች**                                                                     |
 | `constants/publicApiRoutes.ts`   | የBearer (ከአስተዳደር ማረጋገጫ በተቃራኒ) ማረጋገጫ የሚፈልጉ መስመሮች                                                     |
@@ -393,26 +393,26 @@ open-sse/
 
 ## `docs/` — ሕዝባዊ ዶኩመንቴሽን (7 የሥር ፋይሎች + 17 ንዑስ ማውጫዎች)
 
-### የከፍተኛ ደረጃ መመሪያዎች
+### ከፍተኛ ደረጃ መመሪያዎች
 
-| ሰነድ                         | ዓላማ                                                                               |
-| --------------------------- | --------------------------------------------------------------------------------- |
-| `ARCHITECTURE.md`           | ከፍተኛ-ደረጃ አርክቴክቸር፣ የንዑስ-ስርዓት ካርታ፣ የዳሽቦርድ ገጽ                                        |
-| `CODEBASE_DOCUMENTATION.md` | የምህንድስና ማጣቀሻ፦ ማውጫዎች፣ ሞጁሎች፣ ስምምነቶች                                                 |
-| `FEATURES.md`               | የባህሪያት ማትሪክስ ከ v3.8 ዋና ዋና ነገሮች ጋር                                                 |
-| `USER_GUIDE.md`             | የመጨረሻ-ተጠቃሚ መመሪያ (ማዋቀር፣ ሞዴሎች፣ combos፣ CLIs፣ ኦዲዮ፣ ወዘተ.)                             |
-| `API_REFERENCE.md`          | የ API endpoints ማጣቀሻ ከ auth ሞዴል ጋር                                                |
-| `openapi.yaml`              | OpenAPI 3.0 ስፔክ (121 paths)                                                       |
-| `SETUP_GUIDE.md`            | የመጫኛ ዘዴዎች (npm, npx, Docker, Electron, Termux, ምንጭ)                               |
-| `ENVIRONMENT.md`            | ሁሉም env ተለዋዋጮች (~800 የተሰነዱ፣ ~3,050 መስመሮች `.env.example`)                          |
-| `TROUBLESHOOTING.md`        | የተለመዱ ስህተቶች + v3.8.0 የታወቁ ችግሮች                                                    |
-| `RELEASE_CHECKLIST.md`      | ሙሉ የልቀት ፍሰት (skills፣ husky፣ conventional commits፣ ማሰማራት)                          |
-| `COVERAGE_PLAN.md`          | የሽፋን ግቦች እና አሁናዊ ሁኔታ                                                              |
-| `FREE_TIERS.md`             | የተመረጡ ነጻ-ደረጃ አቅራቢዎች (48+ ነጻ + 11 OAuth)                                           |
-| `CLI-TOOLS.md`              | የውጭ CLI ውህደቶች + ውስጣዊ OmniRoute CLI                                                |
-| `I18N.md`                   | i18n አርክቴክቸር፣ ቋንቋ መጨመር፣ 67 locales                                                |
-| `UNINSTALL.md`              | ንጹህ የማስወገጃ ደረጃዎች                                                                  |
-| `PROVIDER_REFERENCE.md`     | **በራስ-ሰር የተፈጠረ** የ380 አቅራቢዎች ካታሎግ (እንደገና ማመንጨት፦ `npm run gen:provider-reference`) |
+| ሰነድ                         | ዓላማ                                                                     |
+| --------------------------- | ----------------------------------------------------------------------- |
+| `ARCHITECTURE.md`           | ከፍተኛ-ደረጃ አርክቴክቸር፣ የንዑስ-ስርዓት ካርታ፣ የዳሽቦርድ ገጽ                              |
+| `CODEBASE_DOCUMENTATION.md` | የምህንድስና ማጣቀሻ፦ ማውጫዎች፣ ሞጁሎች፣ ስምምነቶች                                       |
+| `FEATURES.md`               | የባህሪያት ማትሪክስ ከ v3.8 ዋና ዋና ነገሮች ጋር                                       |
+| `USER_GUIDE.md`             | የመጨረሻ-ተጠቃሚ መመሪያ (ማዋቀር፣ ሞዴሎች፣ combos፣ CLIs፣ ኦዲዮ፣ ወዘተ.)                   |
+| `API_REFERENCE.md`          | የ API endpoints ማጣቀሻ ከ auth ሞዴል ጋር                                      |
+| `openapi.yaml`              | OpenAPI 3.0 ስፔክ (121 paths)                                             |
+| `SETUP_GUIDE.md`            | የመጫኛ ዘዴዎች (npm, npx, Docker, Electron, Termux, ምንጭ)                     |
+| `ENVIRONMENT.md`            | ሁሉም env ተለዋዋጮች (~800 የተሰነዱ፣ ~3,050 መስመሮች `.env.example`)                |
+| `TROUBLESHOOTING.md`        | የተለመዱ ስህተቶች + v3.8.0 የታወቁ ችግሮች                                          |
+| `RELEASE_CHECKLIST.md`      | ሙሉ የልቀት ፍሰት (skills፣ husky፣ conventional commits፣ ማሰማራት)                |
+| `COVERAGE_PLAN.md`          | የሽፋን ግቦች እና አሁናዊ ሁኔታ                                                    |
+| `FREE_TIERS.md`             | የተመረጡ ነጻ-ደረጃ አቅራቢዎች (48+ ነጻ + 11 OAuth)                                 |
+| `CLI-TOOLS.md`              | የውጭ CLI ውህደቶች + ውስጣዊ OmniRoute CLI                                      |
+| `I18N.md`                   | i18n አርክቴክቸር፣ ቋንቋ መጨመር፣ 67 locales                                      |
+| `UNINSTALL.md`              | ንጹህ የማስወገጃ ደረጃዎች                                                        |
+| `PROVIDER_REFERENCE.md`     | **በራስ የመነጨ** የ382 አቅራቢዎች ካታሎግ (regen: `npm run gen:provider-reference`) |
 
 ### የንዑስ-ስርዓት ጥልቅ ትንታኔዎች
 

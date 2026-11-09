@@ -325,7 +325,7 @@ GET /v1/embeddings
 
 ---
 
-## Ġenerazzjoni tal-Immaġini
+## Ġenerazzjoni tal-Immaġni
 
 ```bash
 POST /v1/images/generations
@@ -339,30 +339,22 @@ Content-Type: application/json
 }
 ```
 
-Il-fornituri disponibbli jinkludu OpenAI (GPT Image 2), xAI (Grok Image), Together AI (FLUX), Fireworks AI, Nebius (FLUX), Hyperbolic, NanoBanana, **OpenRouter**, **ZenMux**, SD WebUI (lokali), ComfyUI (lokali).
+Fornituri disponibbli jinkludu OpenAI (GPT Image 2 ), xAI (Grok Image ), Together AI (FLUX), Fireworks AI, Nebius (FLUX), Hyperbolic, NanoBanana,**OpenRouter** ,**ZenMux** , SD WebUI (lokali), ComfyUI (lokali).
 
-`n` jirritorna `n` immaġini f’`data[]`. Il-fornituri li l-API upstream tagħhom tirritorna immaġini waħda għal kull sejħa
-(Black Forest Labs, Stability AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik,
-NVIDIA NIM, Cloudflare Workers AI) jirċievu `n` sejħiet upstream separati, b’massimu ta’ 4 sejħiet għaddejjin fl-istess ħin. `seed`
-fissat jiġi aġġustat skont l-indiċi tas-sejħa (`seed`, `seed + 1`, …), sabiex l-immaġini jkunu differenti iżda jibqgħu riproduċibbli. `n` huwa limitat għal 10. It-talba kollha tfalli jekk tonqos kwalunkwe sejħa. Il-lista ta’ formati fan-out tinsab f’`SINGLE_IMAGE_FANOUT_FORMATS` f’
-`open-sse/handlers/imageGeneration/fanOut.ts`.
+`n` jirritorna immaġini `n` `data[]`. Fornituri li API upstream tagħhom jirritorna immaġni waħda għal kull sejħa (Black Forest Labs, Stability AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik, NVIDIA NIM, Cloudflare Workers AI) jiksbu `n` sejħiet upstream separati, l-iktar 4 waqt it-titjira. `seed` fiss huwa kkumpensat bl-indiċi tas-sejħa (`seed`, `seed + 1`, ...), għalhekk l-immaġini huma differenti iżda jibqgħu riproduċibbli. `n` huwa limitat għal 10. It-talba tfalli kollha kemm hi jekk xi sejħa tonqos. Il-lista ta' formati ta' fan-out hija `SINGLE_IMAGE_FANOUT_FORMATS` `open-sse/handlers/imageGeneration/fanOut.ts`.
 
-ZenMux jerġa’ juża l-konnessjoni eżistenti taċ-ċavetta API u jaċċetta l-prefissi `zenmux/` jew `zm/`:
+ZenMux jerġa' juża l-konnessjoni eżistenti taċ-ċavetta API u jaċċetta prefissi `zenmux/` jew `zm/` :
 
-- `zenmux/openai/gpt-image-2` juża l-API OpenAI Images ta’ ZenMux. L-għażliet jinkludu `size`,
-  `quality`, `n`, `output_format`, `output_compression`, `background`, u `response_format`.
-- Pubblikaturi oħra, bħal `zm/meta/muse-image-1.0`, jużaw l-endpoint `:predict` ta’ Vertex AI. `n` jiġi mmappjat għal `sampleCount`, `aspect_ratio` għal `aspectRatio`, u `image_size`
-  (`1K`, `2K`, `4K`) għal `sampleImageSize`. `size` f’pixels jipprovdi biss proporzjon tal-aspett,
-  mhux dimensjonijiet garantiti f’pixels. Il-proporzjonijiet, ir-riżoluzzjonijiet u l-għadd appoġġjati jvarjaw skont il-mudell.
-- `zm/inclusionai/ming-image-0.1-design` jagħżel id-dimensjonijiet tiegħu stess. Ħalli barra `size`,
-  `aspect_ratio`, u `image_size`; valuri espliċiti jirritornaw HTTP 400. PNG, JPEG, u WebP
-  jistgħu jintalbu b’`output_format`.
+- `zenmux/openai/gpt-image-2` juża ZenMux's OpenAI Images API. Għażliet jinkludu `size`, `quality`, `n`, `output_format`, `output_compression`, `background`, u `response_format`.
+- Pubblikaturi oħra, bħal `zm/meta/muse-image-1.0`, jużaw l-endpoint Vertex AI `:predict` ' ZenMux. `n` mapep għal `sampleCount`, `aspect_ratio` għal `aspectRatio`, u `image_size` (`1K`, `2K`, `4K`) għal `sampleImageSize`. Pixel `size` jipprovdi biss proporzjon tal-aspett, mhux garantit dimensjonijiet tal-pixel. Il-proporzjonijiet, ir-riżoluzzjonijiet u l-għadd appoġġjati jvarjaw skont il-mudell.
+- `zm/inclusionai/ming-image-0.1-design` jagħżel id-dimensjonijiet tiegħu. Ħalli barra `size`, `aspect_ratio`, u `image_size`; valuri espliċiti jirritornaw HTTP 400. PNG, JPEG, u WebP jistgħu jintalbu `output_format`.
 
-Din l-integrazzjoni tappoġġja l-ġenerazzjoni ta’ immaġini minn test, mhux l-editjar ta’ immaġini ta’ referenza. L-output ta’ Vertex jiġi normalizzat għal `data[].b64_json`; `response_format: "url"` jirritorna URL HTTPS upstream jew URL ta’ data base64 meta jkunu disponibbli biss il-bytes tal-immaġini. Outputs vojta/iffiltrati jirritornaw żball minflok suċċess vojt. L-aċċess għall-mudelli jiddependi mill-kont ZenMux. Ara [ZenMux's Vertex API](https://docs.zenmux.ai/api/vertexai/generate-images) u
-[OpenAI Images API](https://docs.zenmux.ai/api/openai/generate-an-image).
+Din l-integrazzjoni tappoġġja l-ġenerazzjoni minn test għal immaġni, mhux editjar ta 'immaġni ta' referenza. L-output tal-vertiċi huwa normalizzat għal `data[].b64_json`; `response_format: "url"` jirritorna HTTPS URL upstream jew URL tad-data base64 meta bytes tal-immaġni biss huma disponibbli. outputs Empty/filtered jirritorna żball aktar milli suċċess vojt. L-aċċess għall-mudell jiddependi fuq il-kont ZenMux. [ZenMux's Vertex API](https://docs.zenmux.ai/api/vertexai/generate-images) u [OpenAI Images API](https://docs.zenmux.ai/api/openai/generate-an-image).
+
+Konnessjoni ta' sinjal Microsoft 365 Copilot isservi `copilot-m365-web/m365-copilot-image` permezz tal-għodda ta' immaġini integrata ta' Copilot: dawra Copilot waħda għal kull immaġini (`n` 1–4), `size` tmexxi biss l-orjentazzjoni, u immaġini rritornati inline (`b64_json`, jew data URL għal `response_format: "url"`). Ara [Microsoft 365 Copilot](../providers/COPILOT-M365.md#image-generation).
 
 ```bash
-# Elenka l-mudelli kollha tal-immaġini
+# List all image models
 GET /v1/images/generations
 ```
 
@@ -800,17 +792,19 @@ Ipproċessar ta’ lottijiet kompatibbli ma’ OpenAI.
 
 ---
 
-## API tat-Tiftix
+## Fittex API
 
-Astrazzjoni tal-fornituri tat-tiftix fuq il-Web (Tavily, Brave, Exa, Serper, eċċ.).
+Web/search fornitur estrazzjoni (Tavily, Brave, Exa, Serper, eċċ.).
 
-| Metodu | Mogħdija               | Deskrizzjoni                                                                                                      |
-| ------ | ---------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| GET    | `/v1/search`           | Jelenka l-fornituri tat-tiftix konfigurati + il-kapaċitajiet tagħhom                                              |
-| POST   | `/v1/search`           | Iwettaq mistoqsija ta’ tiftix — il-korp jiġi vvalidat minn `v1SearchSchema`, u jappoġġja l-caching u l-koalescing |
-| GET    | `/v1/search/analytics` | Statistika għal kull fornitur dwar ir-riżultati, il-latency u l-cache                                             |
+| Metodu | Mogħdija               | Deskrizzjoni                                                                                      |
+| ------ | ---------------------- | ------------------------------------------------------------------------------------------------- |
+| GET    | `/v1/search`           | Elenka l-fornituri tat-tiftix konfigurati + kapaċitajiet                                          |
+| POST   | `/v1/search`           | Mexxi mistoqsija ta' tfittxija — body validat minn `v1SearchSchema`, jappoġġja caching/coalescing |
+| GET    | `/v1/search/analytics` | Per-provider hit/latency/cache stats                                                              |
 
-**Awtentikazzjoni:** Ċavetta API Bearer (`extractApiKey` + `isValidApiKey`). Il-politika tat-tiftix tiġi infurzata permezz ta’ `enforceApiKeyPolicy`.
+**Awth:** Bearer API key (`extractApiKey` + `isValidApiKey`). Politika ta' tfittxija infurzata permezz `enforceApiKeyPolicy`.
+
+**Agħżel awtomatikament:** mingħajr `provider`, l-orħos fornitur b'konnessjoni kkonfigurata jaħdem l-ewwel u l-irħas li jmiss huwa l-failover. Fornituri tal-aħħar riżors b'xejn (`duckduckgo-free`) jintużaw biss meta xejn ieħor ma jkun ikkonfigurat. SearXNG self-hosted jgħodd bħala kkonfigurat ladarba l-konnessjoni tiegħu taħżen `baseUrl` reali (mhux il-katalgu default `http://localhost:8888/search`): imbagħad jikklassifika bħala fornitur ta '$0 qabel dawk b'keyed, bl-orħos fornitur keyed bħala failover, inkluż meta SearXNG iwieġeb 400, 401, 403 jew 403 jew URL `baseUrl` li ma jkunx validu `http(s)` jew 404. punti f'indirizz ta' metadata ta' cloud ma jgħoddux. Konnessjoni SearXNG li taħżen token tikklassifika b'dan il-mod biss fuq `https://` jew loopback `http://`. Fuq `http://` sempliċi remot qatt ma huwa failover u jibqa 'l-aħħar għażla, użat biss meta l-ebda fornitur ieħor ma jkun ikkonfigurat jew meta mitlub b'isem, għalhekk jibgħat it-token f'test ċar f'dawk iż-żewġ każijiet.
 
 ### `provider_options` ta’ Exa u Tavily
 
@@ -960,26 +954,26 @@ Huma eliġibbli biss it-turns bi `stream: false` mingħajr għodod, storja tal-g
 
 ## Użu self-service (`/api/usage/om-usage`)
 
-Kwalunkwe ċavetta API tista’ taqra l-użu u l-kwoti **tagħha stess** — mingħajr awtentikazzjoni ta’ amministrazzjoni. Dan huwa l-endpoint li juża klijent (CLI, il-panel OmniCopilot) biex juri lid-detentur taċ-ċavetta kemm nefaq.
+Kwalunkwe ċavetta API tista 'taqra **tagħha stess** użu u kwoti — ebda ġestjoni awth. Dan huwa l-endpoint li klijent (CLI, il-pannell OmniCopilot ) juża biex juri detentur taċ-ċavetta li jonfqu.
 
 ```bash
-# Forma testwali (il-kuntratt storiku — test sempliċi għal terminal)
+# Text form (the historical contract — plain text for a terminal)
 curl -H "Authorization: Bearer <your-api-key>" \
   http://localhost:20128/api/usage/om-usage
 
-# Forma strutturata — dak li jikkonsma UI
+# Structured form — what a UI consumes
 curl -H "Authorization: Bearer <your-api-key>" \
   "http://localhost:20128/api/usage/om-usage?format=json"
 ```
 
-Iċ-ċavetta jrid ikollha **`allowUsageCommand`** attivat (mitfi awtomatikament — il-maniġer taċ-ċwievet API tad-dashboard jaqilbu għal kull ċavetta). Mingħajru, l-endpoint jirrispondi bi `403`.
+Iċ-ċavetta għandu jkollha **`allowUsageCommand`** attivat (off b'mod awtomatiku — il-maniġer taċ-ċavetta tal-API tad-dashboard jibdelha għal kull ċavetta). Mingħajrha l-endpoint iwieġeb `403`.
 
-`?format=json` jirritorna struttura diskriminata sabiex min jagħmel is-sejħa qatt ma jaqra qasam tad-dejta minn rifjut. F’każ ta’ suċċess:
+`?format=json` jirritorna forma diskriminata sabiex min iċempel qatt ma jaqra qasam tad-dejta minn rifjut. Dwar is-suċċess:
 
 ```jsonc
 {
   "allowed": true,
-  // preżenti biss meta ċ-ċavetta tagħżel limiti tal-użu għal kull ċavetta (USD kuljum/kull ġimgħa):
+  // present only when the key opted into per-key usage limits (daily/weekly/5-hour USD):
   "personal": {
     "dailySpentUsd": 1.25,
     "dailyLimitUsd": 5,
@@ -988,9 +982,9 @@ Iċ-ċavetta jrid ikollha **`allowUsageCommand`** attivat (mitfi awtomatikament 
     "weeklyLimitUsd": 20,
     "weeklyResetAtIso": "…" /* … */,
   },
-  // l-istampa tal-kwota tal-provider magħżul, jew null meta għad m’hemm xejn fil-cache:
+  // the selected provider quota snapshot, or null when nothing is cached yet:
   "provider": { "connectionId": "…", "provider": "claude", "plan": "…", "quotas": {/* … */} },
-  // l-istampa ta’ kull konnessjoni, sabiex UI tkun tista’ tirrendi diversi providers maġenb xulxin:
+  // every connection's snapshot, so a UI can render several providers side by side:
   "providers": [
     { "connectionId": "…", "provider": "claude" /* … */ },
     { "provider": "codex" /* … */ },
@@ -998,11 +992,9 @@ Iċ-ċavetta jrid ikollha **`allowUsageCommand`** attivat (mitfi awtomatikament 
 }
 ```
 
-F’każ ta’ rifjut (`401` ċavetta ħażina / `403` mhux permess), l-istess rotta tirritorna
-`{ "allowed": false, "error": { "message": "…" } }` — `personal`/`provider` preżenti iżda vojt
-(iċ-ċavetta hija permessa, iżda għadu ma nkiseb xejn) hija stat differenti minn rifjut, u l-forma JSON biss tiddistingwihom.
+Fuq rifjut (ċavetta `401` ħażina / `403` mhux permess) l-istess rotta tirritorna `{ "allowed": false, "error": { "message": "…" } }` — `personal`/`provider` preżenti iżda vojta (ċavetta permessa, xejn ma tgħallimt s'issa) hija stat differenti minn rifjut, u l-formola JSON biss tiddistingwihom.
 
-**Awtentikazzjoni:** iċ-ċavetta API Bearer tal-persuna li tagħmel is-sejħa, ivvalidata b’`isValidApiKey` — din mhijiex il-wiċċ ta’ amministrazzjoni (`/api/keys/…`), li jibqa’ wara `requireManagementAuth`.
+**Awth:** iċ-ċavetta Bearer API ta' min iċempel stess, ivvalidata `isValidApiKey` — din hija _mhux_ il-wiċċ ta 'ġestjoni (`/api/keys/…`), li jibqa' wara `requireManagementAuth`.
 
 ### Perċentwali tal-kwota mhux ipproċessati vs. aġġustati skont il-limitu
 
@@ -1250,40 +1242,41 @@ u l-ktajjen ta’ preċedenza f’`src/lib/modelCapabilityLimits.ts`.
 | `/api/usage/model-latency-stats` | GET             | Aggregat kumulattiv tal-latenza għal kull fornitur/mudell (medja/p50/p95/p99, rata ta' suċċess); filtri: `windowHours`/`minSamples`/`maxRows`/`provider`/`model` (#6873)                                                                                                                                                                                       |
 | `/api/usage/cache-health`        | GET             | Sommarju tal-istat tal-cache tal-prompts fuq `call_logs` — proporzjon tal-kitba/qari, distribuzzjoni tad-daqs tal-kitbiet p50/p90/p99, konċentrazzjoni tal-kitbiet kbar, tqassim għal kull mudell, u verdett `healthy`/`degraded`/`thrash`/`no-data`; parametri tal-mistoqsija `range` (`1h`\|`24h`\|`7d`\|`30d`, default `24h`) u `model` fakultattiv (#8827) |
 
-### Permessi taċ-ċwievet API
+### Permessi ewlenin API
 
-`PATCH /api/keys/{id}` jaġġorna l-permessi ta' ċavetta eżistenti. Bħal kull rotta `/api/keys*`, teħtieġ awtorizzazzjoni għall-ġestjoni (ara [Awtentikazzjoni tal-Ġestjoni](../guides/MANAGEMENT-AUTH.md)), mhux ċavetta għall-inference. Ibgħat biss l-oqsma li trid tibdel; talba mingħajr ebda wieħed minnhom tiġi rrifjutata b'`No valid fields to update`. L-oqsma aċċettati huma definiti minn `updateKeyPermissionsSchema` f'`src/shared/validation/schemas/keys.ts`.
+`PATCH /api/keys/{id}` jaġġorna l-permessi ta' ċavetta eżistenti. Bħal kull rotta `/api/keys*` teħtieġ awtorizzazzjoni ta 'ġestjoni (ara [Awtentikazzjoni ta' Ġestjoni](../guides/MANAGEMENT-AUTH.md) ), mhux ċavetta ta 'inferenza. Ibgħat biss l-oqsma li trid tibdel; talba bl-ebda wieħed minnhom hija miċħuda ma ' `No valid fields to update`. L-oqsma aċċettati huma definiti minn `updateKeyPermissionsSchema` `src/shared/validation/schemas/keys.ts`.
 
-| Qasam                                       | Tip                                                                    | Noti                                                                                                                                                  |
-| ------------------------------------------- | ---------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `name`                                      | string, 1-200 karattru                                                 |                                                                                                                                                       |
-| `isActive`                                  | boolean                                                                |                                                                                                                                                       |
-| `isBanned`                                  | boolean                                                                |                                                                                                                                                       |
-| `expiresAt`                                 | data u ħin ISO 8601 jew `null`                                         | `null` ineħħi d-data tal-iskadenza                                                                                                                    |
-| `modelAccessMode`                           | `all` \| `restricted`                                                  | `allowedModels` għandu jkun vojt meta l-modalità tkun `all`                                                                                           |
-| `allowedModels`, `blockedModels`            | firxa ta' strings, sa 1000                                             |                                                                                                                                                       |
-| `allowedCombos`                             | firxa ta' strings, sa 500                                              | Jiddetermina liema kombinazzjonijiet iċ-ċavetta tista' ssejjaħ; il-mudelli diretti huma rregolati minn `modelAccessMode` / `allowedModels`            |
-| `connectionAccessMode`                      | `all` \| `restricted`                                                  | `allowedConnections` għandu jkun mhux vojt meta jkun `restricted` u vojt meta jkun `all`                                                              |
-| `allowedConnections`                        | firxa ta' UUIDs, sa 100                                                |                                                                                                                                                       |
-| `allowAutoCombos`                           | boolean                                                                | `false` jirrifjuta t-talbiet għal mudelli `auto/*` b'din iċ-ċavetta; ċwievet li qatt ma jistabbilixxuh huma permessi                                  |
-| `catalogScope`                              | `all` \| `combos` \| `models`                                          | Dak li `GET /v1/models` jelenka għal din iċ-ċavetta (kombinazzjonijiet biss, mudelli biss, jew it-tnejn); ma jbiddilx dak li ċ-ċavetta tista' ssejjaħ |
-| `forcedModel`                               | string sa 300 karattru, jew `null`                                     | Jgħaddi t-talbiet taċ-chat lejn dan il-mudell/kombinazzjoni, minflok `X-Route-Model` u `body.model`; il-limiti taċ-ċavetta għadhom japplikaw          |
-| `noLog`, `autoResolve`                      | boolean                                                                |                                                                                                                                                       |
-| `throttleDelayMs`                           | numru sħiħ, 0-300000                                                   |                                                                                                                                                       |
-| `maxSessions`                               | numru sħiħ, 0-10000                                                    |                                                                                                                                                       |
-| `rateLimits`                                | firxa ta' `{ limit, window }` (numri sħaħ pożittivi, sa 50) jew `null` | `null` ineħħi l-limiti                                                                                                                                |
-| `accessSchedule`                            | oġġett ta' skeda jew `null`                                            | `null` ineħħi l-iskeda                                                                                                                                |
-| `scopes`                                    | firxa ta' strings, sa 32                                               |                                                                                                                                                       |
-| `allowedEndpoints`                          | firxa ta' strings, sa 20                                               |                                                                                                                                                       |
-| `streamDefaultMode`                         | `legacy` \| `json`                                                     |                                                                                                                                                       |
-| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                   | Ara [Bypass tal-cache għal kull ċavetta](#per-key-cache-bypass)                                                                                       |
-| `compressionEnabled`                        | boolean                                                                |                                                                                                                                                       |
-| `codexServiceMode`                          | wieħed mill-modi tas-servizz ta' Codex                                 |                                                                                                                                                       |
-| `disableNonPublicModels`                    | boolean                                                                |                                                                                                                                                       |
-| `allowUsageCommand`                         | boolean                                                                |                                                                                                                                                       |
-| `usageLimitEnabled`                         | boolean                                                                |                                                                                                                                                       |
-| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | number >= 0 or `null`                                                  |                                                                                                                                                       |
-| `chaosModeEnabled`                          | boolean                                                                |                                                                                                                                                       |
+| Qasam                                       | Tip                                                                    | Noti                                                                                                                                                                                                                                                                                 |
+| ------------------------------------------- | ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `name`                                      | string, 1-200 karattru                                                 |                                                                                                                                                                                                                                                                                      |
+| `isActive`                                  | boolean                                                                |                                                                                                                                                                                                                                                                                      |
+| `isBanned`                                  | boolean                                                                |                                                                                                                                                                                                                                                                                      |
+| `expiresAt`                                 | data u ħin ISO 8601 jew `null`                                         | `null` ineħħi d-data tal-iskadenza                                                                                                                                                                                                                                                   |
+| `modelAccessMode`                           | `all` \| `restricted`                                                  | `allowedModels` għandu jkun vojt meta l-modalità tkun `all`                                                                                                                                                                                                                          |
+| `allowedModels`, `blockedModels`            | firxa ta 'kordi, sa 1000                                               |                                                                                                                                                                                                                                                                                      |
+| `allowedCombos`                             | firxa ta' strings, sa 500                                              | Jiddetermina liema kombinazzjonijiet iċ-ċavetta tista' ssejjaħ; il-mudelli diretti huma rregolati minn `modelAccessMode` / `allowedModels`                                                                                                                                           |
+| `connectionAccessMode`                      | `all` \| `restricted`                                                  | `allowedConnections` għandu jkun mhux vojt meta jkun `restricted` u vojt meta jkun `all`                                                                                                                                                                                             |
+| `allowedConnections`                        | firxa ta' UUIDs, sa 100                                                |                                                                                                                                                                                                                                                                                      |
+| `allowAutoCombos`                           | boolean                                                                | `false` jirrifjuta t-talbiet għal mudelli `auto/*` b'din iċ-ċavetta; ċwievet li qatt ma jistabbilixxuh huma permessi                                                                                                                                                                 |
+| `catalogScope`                              | `all` \| `combos` \| `models`                                          | Dak li `GET /v1/models` jelenka għal din iċ-ċavetta (kombinazzjonijiet biss, mudelli biss, jew it-tnejn); ma jbiddilx dak li ċ-ċavetta tista' ssejjaħ                                                                                                                                |
+| `forcedModel`                               | string sa 300 karattru, jew `null`                                     | Jgħaddi t-talbiet taċ-chat lejn dan il-mudell/kombinazzjoni, minflok `X-Route-Model` u `body.model`; il-limiti taċ-ċavetta għadhom japplikaw                                                                                                                                         |
+| `noLog`, `autoResolve`                      | boolean                                                                |                                                                                                                                                                                                                                                                                      |
+| `throttleDelayMs`                           | numru sħiħ, 0-300000                                                   |                                                                                                                                                                                                                                                                                      |
+| `maxSessions`                               | numru sħiħ, 0-10000                                                    |                                                                                                                                                                                                                                                                                      |
+| `rateLimits`                                | firxa ta' `{ limit, window }` (numri sħaħ pożittivi, sa 50) jew `null` | `null` ineħħi l-limiti                                                                                                                                                                                                                                                               |
+| `accessSchedule`                            | oġġett ta' skeda jew `null`                                            | `null` ineħħi l-iskeda                                                                                                                                                                                                                                                               |
+| `scopes`                                    | firxa ta' strings, sa 32                                               |                                                                                                                                                                                                                                                                                      |
+| `allowedEndpoints`                          | firxa ta' strings, sa 20                                               |                                                                                                                                                                                                                                                                                      |
+| `streamDefaultMode`                         | `legacy` \| `json`                                                     |                                                                                                                                                                                                                                                                                      |
+| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                   | Ara [Bypass tal-cache għal kull ċavetta](#per-key-cache-bypass)                                                                                                                                                                                                                      |
+| `compressionEnabled`                        | boolean                                                                |                                                                                                                                                                                                                                                                                      |
+| `codexServiceMode`                          | wieħed mill-modi tas-servizz ta' Codex                                 |                                                                                                                                                                                                                                                                                      |
+| `disableNonPublicModels`                    | boolean                                                                |                                                                                                                                                                                                                                                                                      |
+| `allowUsageCommand`                         | boolean                                                                |                                                                                                                                                                                                                                                                                      |
+| `usageLimitEnabled`                         | boolean                                                                |                                                                                                                                                                                                                                                                                      |
+| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | numru >= 0 jew `null`                                                  |                                                                                                                                                                                                                                                                                      |
+| `fiveHourUsageLimitUsd`                     | numru >= 0 jew `null`                                                  | Baġit USD rolling ta' 5 sigħat, infurzat bħall-limiti ta' kuljum u ta' kull ġimgħa (`usageLimitEnabled`, `UNPRICED_USAGE_BUDGET_POLICY`). `retry-after` huwa meta l-eqdem jonfqu fit-tieqa tixjieħ, li tista 'tħalli ċavetta 'l bogħod ħafna fuq il-limitu tagħha għadha imblukkata. |
+| `chaosModeEnabled`                          | boolean                                                                |                                                                                                                                                                                                                                                                                      |
 
 ```bash
 curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
@@ -1333,6 +1326,14 @@ curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
 | `/api/modality-bridge/stats`         | GET        | `attempts` fil-memorja, suċċessi/`bridged`, fallimenti, cache hits, `totalLatencyMs`, `latencySamples`, `averageLatencyMs` denominat bil-kampjuni, u l-ħin tal-aħħar użu (jiġi rrisettjat wara restart; awtentikazzjoni tal-ġestjoni)                                                                                                                                                                                              |
 | `/api/modality-bridge/video/runtime` | GET        | Kontroll strett ta’ trusted-loopback qabel l-awtentikazzjoni/sonda tal-ġestjoni; disponibbiltà u verżjonijiet sanitizzati ta’ FFmpeg/ffprobe (no-store)                                                                                                                                                                                                                                                                            |
 | `/api/modality-bridge/video/extract` | POST       | Broker intern awtentikat ta’ bytes trusted-loopback; input ta’ 50 MiB, kju limitat/output ta’ 32 MiB, kapaċità `503`, skonnessjoni `499`, skadenza `504`; mhuwiex API pubblika ta’ upload                                                                                                                                                                                                                                          |
+
+### drill-down tal-qafas tal-vidjo
+
+`GET /api/v1/video-bridge/drilldown` jaqra manku opak marbut mal-kerrej ritornat `x-omniroute-video-drilldown` wara talba ta' Video Bridge mogħtija b'mod espliċitu. Kemm il-qari kif ukoll `DELETE` dejjem jeħtieġu ċavetta API valida u l-permess `modalityBridgeVideoDrilldownRemoteEnabled` indipendenti tal-operatur. Iż-żamma tal-produzzjoni teħtieġ addizzjonalment `modalityBridgeVideoDrilldownEnabled` u `drilldown: true` strett għal kull parti. Jekk iċ-ċavetta għandha lista ta' permessi ta' endpoint mhux vojta, għandha tinkludi `video` kemm għal GET kif ukoll DELETE, kemm jekk min iċempel juża `/v1` jew `/api/v1`.
+
+GET query: required `handle`; `variant` fakultattiv (`preview`, `standard`, `detail`), `limit` (1–8; `frames` tal-wirt huwa aċċettat iżda ma jistax jiġi kkombinat ma `limit`), `page` ibbażat fuq żero, u `start`/`end` sekondi. Meta jiġu forniti ż-żewġ limiti ta' fokus, `end` għandu jkun akbar minn `start`. Duplicate/unknown query keys huma miċħuda. Risposti b'suċċess fihom `derivation`, `durationSeconds`, `frames`, `hasMore`, `page`, `variant`, u `focusWindow` fakultattiv ; JSON no-store huwa limitat għal 32 MiB inkluż Base64. L-output ta 'daqs eċċessiv jirritorna 413; titlob inqas frejms.
+
+`DELETE /api/v1/video-bridge/drilldown?handle=...` jirritorna `{ "removed": 0|1 }`. Mhux magħruf, skadut u cross-key GETs huma indistingwibbli 404 tweġibiet; cross-key DELETE ma jistax ineħħi d-dħul tas-sid. Aċċess b'diżabilità jirritorna 403, awtentikazzjoni missing/invalid 401, mistoqsijiet invalidi 400, kanċellazzjoni 499 u żbalji temporanji 503. Il-mankijiet huma proċess lokali, jiskadu wara għaxar minuti, u ma jkampawx mill-ġdid. Mankijiet ġodda jużaw `v1.` flimkien ma 'token Base64URL każwali ta' 32 byte; jinżammu biss token hashes. Legacy 64-hex tokens jibqgħu sintattikament jinqraw għall-kompatibilità. Ara [l-guardrails tal-Pont tal-Vidjo](../security/GUARDRAILS.md#video-bridge-videobridgets-videobridgepipelinets) għall-kunsens, il-kwoti u d-dettalji tad-derivazzjoni tal-varjanti.
 
 ### Backup u Esportazzjoni/Importazzjoni
 
@@ -1436,19 +1437,19 @@ It-tweġiba ta’ GET tinkludi `agents[]` (id, name, binary, version, installed,
 
 Dawn l-endpoints jirriflettu l-format tal-API ta’ Gemini għal klijenti li jistennew kompatibbiltà nattiva mal-SDK ta’ Gemini.
 
-### APIs Interni / tas-Sistema
+### Internal / System APIs
 
-| Endpoint                 | Metodu | Deskrizzjoni                                                               |
-| ------------------------ | ------ | -------------------------------------------------------------------------- |
-| `/api/init`              | GET    | Kontroll tal-inizjalizzazzjoni tal-applikazzjoni (użat mal-ewwel tħaddim)  |
-| `/api/tags`              | GET    | Tags tal-mudelli kompatibbli ma’ Ollama (għall-klijenti ta’ Ollama)        |
-| `/api/restart`           | POST   | Attiva r-ristartjar gradwali tas-server                                    |
-| `/api/shutdown`          | POST   | Attiva l-għeluq gradwali tas-server                                        |
-| `/api/system/env/repair` | POST   | Sewwi l-varjabbli tal-ambjent tal-fornitur OAuth                           |
-| `/api/system/version`    | GET    | Verżjoni attwali/l-aktar reċenti, status tal-aġġornament, kanal tar-rilaxx |
-| `/api/system/version`    | POST   | Ibda aġġornament li jqis id-deployment għall-aktar verżjoni reċenti        |
+| Endpoint                 | Metodu | Deskrizzjoni                                                                |
+| ------------------------ | ------ | --------------------------------------------------------------------------- |
+| `/api/init`              | GET    | Ibda servizzi ta' sinkronizzazzjoni fl-isfond (awtifikazzjoni tal-ġestjoni) |
+| `/api/tags`              | GET    | Tikketti tal-mudell kompatibbli ma' Ollama (għall-klijenti Ollama )         |
+| `/api/restart`           | POST   | Trigger graceful server restart                                             |
+| `/api/shutdown`          | POST   | Trigger għeluq graceful tas-server                                          |
+| `/api/system/env/repair` | POST   | Tiswija OAuth provider ambjentali varjabbli                                 |
+| `/api/system/version`    | GET    | verżjoni Current/latest, status ta 'aġġornament, kanal ta' rilaxx           |
+| `/api/system/version`    | POST   | Ibda aġġornament konxju tal-iskjerament għall-aħħar verżjoni                |
 
-> **Nota:** Dawn l-endpoints jintużaw internament mis-sistema jew għall-kompatibbiltà mal-klijenti ta’ Ollama. Normalment ma jissejħux mill-utenti finali.
+> **Nota:** Dawn l-endpoints jintużaw internament mis-sistema jew għall-kompatibilità tal-klijent Ollama. Normalment ma jissejħux mill-utenti finali.
 
 ### Tiswija tal-Ambjent OAuth _(v3.6.1+)_
 

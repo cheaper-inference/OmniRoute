@@ -291,6 +291,95 @@ Pakkausyhdistelmät ovat nimettyjä pakkausprofiileja, jotka voidaan liittää r
 
 Hallintapaneelin sijainti: `Dashboard -> Context & Cache -> Compression Combos`.
 
+## Edellytykset / käyttäjäopas (CCR & session-dedup)
+
+CCR (`ccr`) ja `session-dedup` korvaavat tai poistavat tekstin ja jättävät a** merkki** takana. Tämä osio on käyttäjille tarkoitettu ohje asiakkaan kytkemiseen, kahden merkin lukemiseen ja poistetun sisällön hakemiseen tai diagnosointiin. Jokaisen moottorin mekaniikka on käsitelty edellä; tämä on "miten annan sen" -taso.
+
+### Kuljetukset ja päätepisteet
+
+MCP palvelimeen, joka paljastaa CCR työkalut, pääsee kolmella tavalla. Oletusperusarvo URL on `http://localhost:20128` (`OMNIROUTE_BASE_URL`):
+
+| Kuljetus                                  | URL / komento                           | Huomautuksia                                                                                                                                      |
+| ----------------------------------------- | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Striimattava HTTP (asiakas, suositeltava) | `http://localhost:20128/api/mcp/stream` | Päätepiste, jonka kanssa nykyiset MCP asiakkaat puhuvat.                                                                                          |
+| Vanha SSE singleton                       | `http://localhost:20128/api/mcp/sse`    | Vanhempi singleton kuljetus. Se** sulkeutuu** suoratoistettavat istunnot; käytä `streamable-http` asiakkaita `/api/mcp/stream` vastaan, älä tätä. |
+| stdio                                     | `omniroute --mcp`                       | IDE MCP -konfiguraatiolle, joka synnyttää prosessin. `--dev` lippua ei ole; `omniroute --mcp` on stdio-sisääntulopiste.                           |
+
+### Tallennustasot (mikä kestää uudelleenkäynnistyksen)
+
+CCR on a** kaksitasoinen** myymälä, ei vain muistissa:
+
+- **Kuuma muistitaso** — lohkokohtainen korkki 2 MiB, pääasiallinen 16 MiB, globaali 64 MiB. Merkintöjen oletusarvo on 24 h TTL (enintään 7 päivää). Täydellinen MCP haku muistista on rajoitettu arvoon 256 KiB; kaikki suurempi on edelleen tavoitettavissa ranged / grep -tilojen kautta.
+- **Kestävä SQLite -taso** (`ccr_blocks`, `COMPRESSION_CCR_DURABLE_STORE`, oletuksena päällä) — tukee muistitasoa, jotta lohko selviytyy LRU -häätöstä, uudelleenkäynnistyksestä tai palautuksesta toiseen ilmentymään. Rivi säilyttää lohkon TTL, joten sen TTL ohi oleva lohko on poissa molemmista tasoista.
+
+Kolme suojusta pitävät kestävän tason rajallisena — a lohko pysyy vain muistissa, kun:
+
+1. lohko on ohi** 512 KB** (`MAX_DURABLE_BLOCK_BYTES`);
+2. suoritusaika on pilvikäyttöaika (ei paikallista levyä);
+3. `COMPRESSION_CCR_DURABLE_STORE=false`.
+
+Joten "lohko katosi" ei ole pelkkä uudelleenkäynnistystarina: sub-512 KB -lohko paikallisessa, ei-pilvikäyttöympäristössä selviää uudelleenkäynnistyksestä kestävän tason kautta, kunnes sen TTL loppuu. Katso muuttujan [ympäristöviite](../reference/ENVIRONMENT.md).
+
+### Kaksi merkkiä
+
+| Merkki                                | Merkitys                                                                                                                                                           | Mitä mallin pitäisi tehdä                                                                                                                                                                                                    |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `[CCR retrieve hash=<24hex> chars=N]` | Suuri lohko tallennettiin sisältöosoitteeseen.                                                                                                                     | Soita `omniroute_ccr_retrieve`** 24 hex hash kopioitu sanatarkasti** saadaksesi alkuperäisen tekstin takaisin.                                                                                                               |
+| `[dedup:ref sha=…]`                   | `session-dedup` elided teksti, joka on jo lähetetty saman istunnon aikaisemmassa vuorossa. Tämä on an** tahallinen katsominen taaksepäin** , ei menetys tai virhe. | Tehdä** ei** soita mihin tahansa työkaluun ja tee** ei** yritä "rekonstruoida" se. Tekstin ensimmäinen esiintyminen on kanoninen kopio; nykyistä vuoroa ei koskaan kirjoiteta uudelleen, se poistetaan myöhemmässä vuorossa. |
+
+`[dedup:ref]` -katselu on tahallinen protokollapäätös. — ei ole olemassa lähetystä edeltävää rekonstruktiota. Käsittele sitä niin, että "tämä teksti oli jo aiemmin tässä istunnossa".
+
+### Asiakkaan edellytykset
+
+- **Avain (stdio):** stdio-soittajalla ei ole pyyntökohtaista identiteettiä, joten se todennetaan `OMNIROUTE_API_KEY` (asetettu MCP -palvelimen `env` ssä). Ilman sitä soittaja on anonyymi ja työkalut, jotka vaativat päämiehen, voivat heiketä.
+- **`tools[]` on ruiskutuksen ennakkoehto.** CCR retrieve-protocol -käsky (#8033) injektoidaan** vain** kun pyynnön mainostettu `tools[]` osoittaa, että asiakas voi todella saavuttaa `omniroute_ccr_retrieve`. Osuma on erottimella (`__`, `.`, `/`, `:`) rajattu loppuosuus, — ei koskaan paljaalla osamerkkijonolla — joten nimiavaroitu nimi, kuten `mcp__gateway__omniroute_ccr_retrieve` lasketaan silti. Puuttuva tai ei-vastaava `tools[]` tarkoittaa, että käskyä _ei_ syötetä suunnittelun mukaan.
+- **`codemode:false` (OpenCode asiakkaat).** OpenCode on oletuksena Code Mode, joka mainostaa vain alkuperäisiä työkalujaan mallille ja** ei** laita MCP työkalut alkuperäiseen `tools[]` luetteloon. Aseta `codemode: false` MCP -palvelinmerkintään, jotta `omniroute_ccr_*` työkaluja mainostetaan. Tämä on a** asiakas** asetus, ei OmniRoute. Se ei saa vielä CCR -käskyä: OpenCode nimeää työkalun `<server>_<tool>`, joten palvelin nimeltä `omniroute` paljastaa `omniroute_omniroute_ccr_retrieve`, eikä `_` ole yksi sovitetuista erottimista.
+- **Rehtorit.** Tallennus ja haku eristetään todennettua pääkäyttäjää kohti (per API -avainta). Avain näkee vain omat lohkonsa.
+
+### Laajuudet työkalua kohden
+
+Soveltamisalan valvonta on aina käytössä kapea-alaisille HTTP/SSE soittajille. `omniroute_` CCR -työkalut vaativat:
+
+| Työkalu                  | Laajuus             |
+| ------------------------ | ------------------- |
+| `omniroute_ccr_store`    | `write:compression` |
+| `omniroute_ccr_delete`   | `write:compression` |
+| `omniroute_ccr_retrieve` | `read:compression`  |
+| `omniroute_ccr_inspect`  | `read:compression`  |
+| `omniroute_ccr_list`     | `read:compression`  |
+| `omniroute_ccr_stats`    | `read:compression`  |
+
+Puuttuva laajuus palauttaa an**MCP työkaluvirheen tulos** (`isError: true`, ei HTTP 403 — `403 LOCAL_ONLY` on erillinen loopback-reitinvartijan todennus): `Error: Insufficient MCP scopes for <tool>. Missing: <scope>.` Pienin kaukosäätimen avaimessa voi olla `mcp:connect` (valtuuttaa `/api/mcp/` paikallisen carve-out-toiminnon) sekä sen tarvitseman erityisen read/write alueen.
+
+### Asiakasmatriisi
+
+| Asiakas             | Kuljetus                                       | Konfigurointi käytettäväksi                                                                                                                                                                                                               | `tools[]` mainostettu? (→ CCR -ohje syötetty)                                                                                                                                              |
+| ------------------- | ---------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Claude koodi        | suoratoisto-http                               | `claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream`                                                                                                                                                         | Kyllä — MCP-yhteensopiva; pistetään.                                                                                                                                                       |
+| Cursor / Cline      | `stdio`** tai** `streamable-http`              | stdio: `omniroute --mcp` ja `OMNIROUTE_API_KEY` `env`:ssä; tai MCP -etäsyöttö, joka osoittaa `http://localhost:20128/api/mcp/stream` (katso [asennusopas → MCP Client Configuration](../guides/SETUP_GUIDE.md#mcp-client-configuration) ) | Kyllä, — mainostaa `omniroute_ccr_*` -työkaluja.                                                                                                                                           |
+| OpenCode            | suoratoisto-http                               | `opencode mcp add omniroute --url http://localhost:20128/api/mcp/stream` plus `codemode: false`                                                                                                                                           | Vain `codemode: false` mainostetut työkalut; ohjetta ei edelleenkään syötetä, koska `omniroute_omniroute_ccr_retrieve` ei täsmää (katso [Asiakkaan edellytykset](#client-prerequisites) ). |
+| OpenAI-yhteensopiva | OpenAI-yhteensopiva HTTP (chatin täydennykset) | tavallinen keskustelun täydennysasiakas OpenAI-yhteensopivaa päätepistettä vastaan                                                                                                                                                        | **Ei koskaan** — tavallista OpenAI-yhteensopivaa soittajaa ei koskaan käsketty soittamaan työkaluun, eikä ohjetta anneta.                                                                  |
+
+### Hakurajoitukset ja sivutus
+
+MCP -työkalun tekstitulokset leikataan `mcpAccessibility.maxTextChars` ympärille (oletus `50000`). Lohkon `full` -palautuksen yläraja on 256 KiB —** ei ole rajatonta täyttä hakua** . Kun lohkon `chars=N` on suuri, sivua se sen sijaan, että vedät koko jutun:
+
+- Nyrkkisääntö:**`chars > 40000` → käytä `mode`** , ei koskaan paljain täynnä.
+- `mode:"grep"` — regex `pattern` sovitettu rivi riviltä, jopa 1 000 vastaavaa riviä (`unique: true` drops toistaa), edullisin "etsi yksi tarvitsemani rivi".
+- `mode:"lines"` — 1-indeksoitu rivialue; tarvitsee sekä `start` että `end`.
+- `mode:"head"` / `mode:"tail"` — first/last `n` rivit.
+- `mode:"stats"` — rivit, merkit ja tavut laskevat ilman runkoa.
+
+Käytä `mode:"lines"` komentoa `start`/`end` kävelläksesi pitkän lohkon sivuilla sen sijaan, että pyytäisit koko asiaa kerralla.
+
+### Työkalun nimeäminen
+
+Hakutyökalun nimi on tällä hetkellä `omniroute_ccr_retrieve` ( `omniroute_` -etuliite on päivätty palvelinten välisten nimien törmäysten kiertotapa). Selvempi rajoitetun päätetyökalun nimi ja korjaus MCP JSON -tuloksille katkaistu merkkijono puolivälissä seurataan alkupään seurantatoimia; tämä sivu dokumentoi vain nykyisen toimituksen.
+
+### Istunnon elinkaari
+
+Streamable-HTTP-istunnot ovat tyhjäkäynnillä ja palvelin kerää ne; lepotila - ikkuna on `OMNIROUTE_MCP_SESSION_IDLE_MS` konfiguroinut , ja se on `DEFAULT_MCP_SESSION_IDLE_MS` : ssä `open-sse/mcp-server/httpTransport.ts`. Joutokäynnin oireena on HTTP 404, jossa on `Unknown Mcp-Session-Id` — Korjaustoimenpide on yhdistää uudelleen tai käynnistää istunto uudelleen,**ei** kiertää avainta, muuttaa laajuutta tai nimetä työkalu uudelleen.
+
 ## API-rajapinta
 
 | Reitti                                 | Tarkoitus                                                          |
@@ -373,7 +462,7 @@ etuliitteet jne.).
 
 ## Validointi
 
-Tämän alueen keskeiset tarkistuspisteet ovat:
+Tämän alueen keskitetyt portit ovat:
 
 ```bash
 node --import tsx/esm --test tests/unit/compression/rtk-*.test.ts tests/unit/compression/pipeline-integration.test.ts tests/unit/compression/context-compression-api.test.ts

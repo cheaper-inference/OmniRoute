@@ -355,24 +355,24 @@ Modell: cc/claude-opus-4-7
 
 ## 🚀 Telepítés
 
-### Globális npm-telepítés (ajánlott)
+### Globális npm telepítés (ajánlott)
 
 ```bash
 npm install -g omniroute
 
-# Konfigurációs könyvtár létrehozása
+# Create config directory
 mkdir -p ~/.omniroute
 
-# .env fájl létrehozása (lásd: .env.example)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# Kiszolgáló indítása
+# Start server
 omniroute
-# Vagy egyéni porttal:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-A CLI automatikusan betölti a `.env` fájlt a `~/.omniroute/.env` vagy a `./.env` helyről.
+A CLI automatikusan betölti `.env` `~/.omniroute/.env` ből vagy `./.env` ből. A munkakönyvtárban található `./.env` csak egy rövid engedélyezési listát állíthat be a kulcsokból (portok, `REQUIRE_API_KEY`, területi és színbeállítások); minden mást tegyél `~/.omniroute/.env`. Lásd [CLI indítási szerződéseket](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### Tálcamód
 

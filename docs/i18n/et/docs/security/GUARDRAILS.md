@@ -43,144 +43,52 @@ Madalamad prioriteedinumbrid käivituvad **esimesena**.
 
 ### Vision Bridge (`visionBridge.ts`) — Modality Bridge PR-1
 
-GLM 5.3 põhimudelil ja variantidel `glm-5.3-{low,high,max}` on
-registri/spetsifikatsiooni metaandmetes selgesõnaliselt märgitud
-`supportsVision:false`. GLM 5.3 Flash variandid on endiselt natiivse
-visiooniga mudelid. Claude Code'i marsruut `/v1/messages` siseneb jagatud
-`handleChat` pre-call guardrail-ahelasse **enne** Claude–OpenAI tõlget;
-pesastatud `Read` tööriistatulemuste pildid tuleb kirjeldada või käsitleda
-enne, kui see tõlge need OpenAI `image_url` sisusse tõstab (#17069).
+GLM 5.3 põhimudelil ja `glm-5.3-{low,high,max}` on selgesõnalised `supportsVision:false` registry/spec metaandmed. GLM 5.3 Flashi variandid jäävad natiivse nägemisega mudeliteks. Claude Code'i `/v1/messages` marsruut siseneb jagatud `handleChat` eelkõnede kaitsepiirde ketti** enne** Claude-to-OpenAI tõlge; pesastatud `Read` tööriista tulemuse kujutisi tuleb kirjeldada või käsitleda enne, kui tõlge tõstab need OpenAI `image_url` sisuks (#17069).
 
-Püüab kinni pilte sisaldavad päringud, mis on suunatud **visioonita
-mudelitele**, ja suunab kas kogu päringu ümber visioonivõimelisse mudelisse
-või asendab pildiosad seadistatava visioonimudeli toodetud
-tekstikirjeldustega enne ülesvoo väljakutset. See võimaldab ainult-teksti
-pakkujatel multimodaalseid sissekandeid läbipaistvalt käsitleda.
+Peatab pilti kandvad taotlused, mille eesmärk on** mittenägemise mudelid** ja suunab kogu päringu ümber nägemisvõimelisele mudelile või asendab pildiosad tekstikirjeldustega, mis on loodud konfigureeritava nägemismudeli poolt enne ülesvoolu kutsumist. See võimaldab ainult tekstiteenuse pakkujatel multimodaalseid koormusi läbipaistvalt käsitleda.
 
-Töövoog:
+Voog:
 
-1. Jäta vahele, kui sihtmudel toetab juba visiooni (välja arvatud juhul, kui
-   see esineb sundsildamise loendis `isVisionBridgeForcedModel`).
-2. Eralda pildiosad funktsiooniga `extractImageParts(messages)`
-   (`visionBridgeHelpers.ts`), mis delegeerib töö **ühendatud
-   meediumidetektorile** `detectMediaParts()` failis
-   `open-sse/utils/mediaParts.ts` — ainus tõeallikas, mida jagatakse kombo
-   ühilduvusfiltriga. Eraldamine on lubatud loendi kaudu piiratud kujudega,
-   mille `replaceImageParts` suudab tagasi liita (extract↔replace leping):
-   OpenAI `image_url`, Anthropic base64 `source.type:"base64"`, Anthropic
-   URL `source.type:"url"` ja Responses API `input_image`. Sobivad pildid,
-   mis on pesastatud Claude Code'i `tool_result.content`-i ja Responses'i
-   tööriistaväljundite sisse, samuti eraldatakse ja asendatakse nende
-   algsetel teedel; ainult-indikaatorit sisaldavad kujud on kombofiltri
-   materjal ja neid ei eraldata. Kui ühtegi ei leita, jäta vahele.
-3. Lahenda käitusaegne seadistus funktsiooniga
-   `resolveVisionBridgeRuntimeSettings()`
-   (`src/shared/constants/modalityBridgeDefaults.ts`): uued `modalityBridge*`
-   seadistusvõtmed võidavad; pärandvõtmed `visionBridge*` jäävad **ühe
-   tsükli varulahenduseks** (tagasipööramise aken). Kui sild on keelatud,
-   jäta vahele enne igasugust meedia läbimist.
-4. Režiimivalija (`modalityBridgeVisionMode`, vt allolevat tabelit)
-   otsustab ümbersuunamise ja kirjeldamise vahel. Ümbersuunamine tagastab
-   `modifiedPayload`, kus on vahetatud ainult `model`, pluss meta
-   `{ rerouted, fromModel, toModel, imagesKept }`.
-5. Kirjeldamise tee: piira piltide arv väärtusega `maxImages`, koosta
-   ülesandest teadlik prompt, konsulteeri kirjelduste vahemäluga, kutsu
-   visioonimudel **paralleelselt** (`Promise.allSettled`) ja süsti nende
-   asemele tekstiosad `[Image N]: <description>`. Ebaõnnestunud kirjeldus
-   annab `null`: algne pilt säilitatakse tundmatute või visioonivõimeliste
-   sihtmudelite jaoks (#4012), kuid **kinnitatud ainult-teksti otsene
-   sihtmudel** või null-visiooniga kombo saab iga kirjeldamata pildi jaoks
-   selgesõnalise tekstikohatäite
-   `(unavailable — no vision-capable provider connected)`, sealhulgas
-   osaliste tõrgete ja kirjelduskõnede ülempiirilt välja jäävate piltide
-   korral (#17069). Olemasolev kõigi-katkestuste korral rakenduv kombo
-   kirjeldamise varulahendus jääb paika (#8430).
-6. Tagasta `modifiedPayload` + meta (`imagesProcessed`, `descriptions`,
-   `processingTimeMs`, `visionModel`).
+1. Jätke vahele, kui sihtmudel juba toetab nägemist (välja arvatud juhul, kui see on sundsildade loendis `isVisionBridgeForcedModel`).
+2. Ekstraktige pildiosad `extractImageParts(messages)` (`visionBridgeHelpers.ts`) kaudu, mis delegeerib** ühtne meediadetektor** `detectMediaParts()` in `open-sse/utils/mediaParts.ts` — on ainus tõeallikas, mida jagatakse kombineeritud ühilduvusfiltriga. Ekstraheerimine on loetletud kujundites, mida `replaceImageParts` saab tagasi liita (väljavõte ↔ asendab lepingu): OpenAI `image_url`, Anthropic base64 `source.type:"base64"`, Anthropic URL `source.type:"url"` ja Vastused API `input_image`. Sobivad kujutised, mis on pesastatud Claude Code `tool_result.content` ja Responses tööriista väljunditesse, ekstraheeritakse ja asendatakse nende algsete radadega; ainult indikaatoriga kujundid on kombineeritud filtriga materjalid ja neid ei ekstraheerita. Jätke vahele, kui ühtegi ei leitud.
+3. Lahendage käitusaja konfiguratsioon `resolveVisionBridgeRuntimeSettings()` (`src/shared/constants/modalityBridgeDefaults.ts`) kaudu: uued `modalityBridge*` seadete võtmed võidavad; pärand `visionBridge*` võtmed jäävad a** ühe tsükli varu** (tagasipööramise aken). Kui sild on keelatud, jätke vahele enne meedia läbimist.
+4. Režiimi valija (`modalityBridgeVisionMode`, vt allolevat tabelit) otsustab marsruudi ümbersuunamise või kirjeldamise. Reroute tagastab `modifiedPayload` kus on vahetatud ainult `model`, pluss meta `{ rerouted, fromModel, toModel, imagesKept }`.
+5. Kirjeldage teed: piirake kujutisi aadressil `maxImages`, koostage ülesandeteadlik viip, vaadake kirjelduse vahemälu, helistage nägemismudelile** paralleelselt** (`Promise.allSettled`) ja sisestage nende asemele `[Image N]: <description>` tekstiosad. Ebaõnnestunud kirjeldus annab tulemuseks `null`: toorpilt säilib unknown/vision-capable sihtmärkide (#4012) jaoks, kuid** kinnitatud ainult tekstiga otsesihtmärk** või zero-vision combo saab selgesõnalise `(unavailable — no vision-capable provider connected)` -teksti tünga iga kirjeldamata pildi jaoks, sealhulgas osaliste tõrgete ja piltide jaoks, mis ületavad kirjeldamise-kutsumise piiri (#17069). Olemasolev kõik-ebaõnnestunud kombinatsioon, mis kirjeldab tagavara, jääb paika (#8430).
+6. Tagasta `modifiedPayload` + meta (`imagesProcessed`, `descriptions`, `processingTimeMs`, `visionModel`).
 
-#### Režiimivalija (`modalityBridgeVisionMode`)
+#### Režiimi valija (`modalityBridgeVisionMode`)
 
-| Režiim     | Vaikimisi | Käitumine                                                                                                                                                                                                                                                                                      |
-| ---------- | --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `auto`     | ✔         | Pärandheuristika, puutumata (#6640/#7204): mitte-kombo/`auto/` mudelid suunatakse ümber parimale visioonimudelile, välja arvatud juhul, kui algsel mudelil on juba kasutatavad mandaadid (siis luuakse kirjeldus); kombosihtkohad loovad alati kirjelduse.                                     |
-| `describe` |           | Alati kirjeldus — ümbersuunamisplokk jäetakse täielikult vahele; kasutaja valitud mudel vastab alati.                                                                                                                                                                                          |
-| `reroute`  |           | Sunnitud ümbersuunamine: mandaadiga mudeli säilitamise kaitsest möödatakse. Ümbersuunamis-**sihtkoha** mandaadikaitse kehtib endiselt — kui kasutatavat visioonisihtkohta pole, blokeerib sild selge veateatega, selle asemel et kirjeldust luua või saata toorpildid ainult-teksti sihtkohta. |
+| Režiim     | Vaikimisi | Käitumine                                                                                                                                                                                                                                                                                       |
+| ---------- | --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `auto`     | ✔         | Pärandheuristiline, puutumata (#6640/#7204): mittekombo/`auto/` mudelid suunavad ümber parimale nägemismudelile, välja arvatud juhul, kui algsel mudelil on juba kasutatavad mandaadid (seejärel kirjeldage); kombineeritud sihtmärgid kirjeldavad alati.                                       |
+| `describe` |           | Kirjeldage alati — ümbersuunamise plokk jäetakse täielikult vahele; kasutaja valitud mudel vastab alati.                                                                                                                                                                                        |
+| `reroute`  |           | Sunniviisiline marsruudi muutmine: mandaadi säilitamise mudeli valvur on möödas. Ümbermarsruut-** sihtmärk** Mandaadivalvur rakendab endiselt — kui kasutatavat nägemise sihtmärki pole, sild blokeerib selge veaga, mitte ei kirjelda või saadab töötlemata pilte ainult tekstiga sihtmärgile. |
 
-Sunnitud režiimid lühistuvad **enne** automaatse heuristika käivitumist; `auto`
-käitumine on baitide haaval identne PR-1-eelse kaitsemehhanismiga.
+Sundrežiimide lühis** enne** automaatne heuristiline töö; `auto` käitumine on baitidena pre-PR-1 kaitsepiirdega.
 
 #### API-võtme ulatus (`visionBridgeKeyScope.ts`)
 
-Kui helistaja API-võti piirab `allowedConnections`, kvoodikogumeid
-(`allowedQuotas`) või mudeleid (`allowedModels` / `blockedModels` /
-`modelAccessMode: "restricted"` / `disableNonPublicModels`), valib sild ainult
-sellised ümbersuunamis- ja kirjeldusmudeleid, mida võti tohib kasutada, ja
-ühendustel, mida võti tohib kasutada. Kirjeldusepäring läbib seejärel alati
-OmniRoute'i enesetsükli päisega `x-omniroute-self-loop-key-id`, nii et
-vastuvõttev vestluspäring jõustab selle võtme ühenduse- ja mudelipoliitika
-uuesti. `enforceApiKeyPolicy()` arvestab seda päist ainult koos enesetsükli
-kanduriga (bearer), seega saab see juurdepääsu ainult kitsendada, ja id, mis ei
-lahene, lükatakse tagasi.
+Kui helistaja API klahv piirab `allowedConnections`, kvoodikogumeid (`allowedQuotas`) või mudeleid (`allowedModels` / `blockedModels` / `modelAccessMode: "restricted"` / `disableNonPublicModels`), valib sild ainult ümbermarsruudi ja kirjeldab mudeleid, mida võti võib kasutada, ühenduste puhul, mida võti võib kasutada. Kirjeldav kõne läbib seejärel alati OmniRoute eneseahela `x-omniroute-self-loop-key-id` päisega, nii et vastuvõttev vestlustaotlus jõustab uuesti selle võtme ühenduse ja mudeli poliitika. `enforceApiKeyPolicy()` austab seda päist ainult koos eneseahela kandjaga, nii et see saab juurdepääsu ainult kitsendada ja ID, mis ei lahene, lükatakse tagasi.
 
-Kui võtme jaoks pole ühtegi visioonimudelit lubatud, lükkab **kinnitatud
-ainult-teksti sihtkoht** pildipäringu kohapeal tagasi selge HTTP 400-ga, selle
-asemel et edastada pildibaite võimetule ülemvoolupakkujale (#17069). Tundmatu
-või sisemise visioonivõimekusega sihtkohtade puhul säilitab kirjeldustee oma
-varasema fail-open käitumise (meta `{ skipped: true, reason: "no_permitted_vision_model" }`).
-Päringud ilma võtmeta ja võtmed ilma nende piiranguteta käituvad täpselt nii
-nagu varem.
+Kui võtme jaoks pole nägemismudelit lubatud, a** kinnitatud ainult teksti sihtmärk** lükkab pildipäringu lokaalselt tagasi selge HTTP 400-ga, selle asemel, et edastada pildibaidid võimetusse ülesvoolu (#17069). Tundmatu või loomuliku nägemisvõimega sihtmärkide puhul säilitab kirjeldatav tee oma varasema tõrkeavamiskäitumise (meta `{ skipped: true, reason: "no_permitted_vision_model" }`). Päringud ilma võtmeta ja võtmed ilma nende piiranguteta käituvad täpselt nagu varem.
 
-#### Ülesandeteadlik kirjeldusprompt (`modalityBridgeVisionTaskAware`)
+#### Ülesanneteadlik kirjeldamisviip (`modalityBridgeVisionTaskAware`)
 
-Vaikimisi **true**. `composeVisionPrompt()` (`visionBridgeHelpers.ts`) lisab
-põhilisele kirjelduspromptile **viimase kasutaja sõnumi** teksti (kärbituna 500
-märgini), suunates kirjelduse sellele, mida kasutaja tegelikult küsis
-(codex-vision-proxy muster), ja palub visioonimudelil nähtava teksti
-transkribeerida. Kui lipp on välja lülitatud — või kasutajateksti pole —
-kasutatakse põhiprompti muutmata kujul.
+Vaikimisi** tõsi** . `composeVisionPrompt()` (`visionBridgeHelpers.ts`) lisab teksti** viimane kasutaja sõnum** (kärbitud 500 tähemärgini) kirjeldusviiba alusele, suunates kirjelduse selle poole, mida kasutaja tegelikult küsis (koodeks-nägemise-puhverserveri muster) ja paludes nägemismudelil nähtavat teksti transkribeerida. Kui lipp on välja lülitatud — või kasutajateksti — puudub, kasutatakse põhiviipa muutmata kujul.
 
-Kirjelduse enesetsükli enda OpenAI-ühilduv päring (`callVisionModelSingle()`
-failis `visionBridgeHelpers.ts`) nõuab alati `image_url.detail: "high"` —
-tingimusteta, iga helistaja/pakkuji puhul, ilma et see sõltuks ühestki
-kliendisignaalist. Madala detailsusega töötlemine halvendab OCR-i täpsust just
-selle teksti-transkribeerimisülesande puhul, mida see prompt nõuab, seega
-nõuab kirjelduspäring ise alati kõrget detailsust, olenemata sellest, millist
-detailsustaset algne sissetulev päring kasutas. See mõjutab ainult sisemise
-kirjelduspäringu keha; see ei muuda, kuidas OmniRoute edastab helistaja enda
-`image_url.detail` väärtust esmasel päringul — seda vaikimisi rakendatakse
-eraldi ja ainult tuvastatud OpenCode'i klientide puhul, funktsioonis
-`defaultImageDetail()` (`open-sse/handlers/chatCore/upstreamBody.ts`).
-Kirjelduse enesetsükli Anthropic'i ülekandevormingu harul pole `detail` välja
-ja kumbki vaikimisi seda ei mõjuta.
+Kirjeldava eneseahela enda OpenAI-ga ühilduv päring (`callVisionModelSingle()` in `visionBridgeHelpers.ts`) taotleb alati tingimusteta `image_url.detail: "high"` — iga caller/provider kohta, mis ei ole seotud ühegi kliendi signaaliga. Madala detailiga diskreetimine halvendab OCR täpsust täpselt selle teksti transkriptsiooniülesande jaoks, mida see viip küsib, nii et kirjelduskutse ise nõuab alati suurt üksikasja, olenemata sellest, millist detailsuse taset algne sissetulev päring kasutas. See mõjutab ainult sisemise kirjelduse päringu keha; see ei muuda seda, kuidas OmniRoute edastab helistaja enda `image_url.detail` esmasel päringul — mida vaikimisi rakendatakse eraldi ja ainult tuvastatud OpenCode klientidele `defaultImageDetail()` (`open-sse/handlers/chatCore/upstreamBody.ts`). Kirjeldava eneseahela Anthropic traatvormingus harul puudub `detail` väli ja kumbki vaikimisi seda ei mõjuta.
 
-#### Kirjelduse väljundi ülempiir (`modalityBridgeVisionMaxChars`)
+#### Kirjeldage väljundkorki (`modalityBridgeVisionMaxChars`)
 
-| Võti                           | Vaikimisi | Vahemik           |
-| ------------------------------ | --------- | ----------------- |
-| `modalityBridgeVisionMaxChars` | `0`       | `0` või 100–50000 |
+| Võti                           | Vaikimisi | Vahemik            |
+| ------------------------------ | --------- | ------------------ |
+| `modalityBridgeVisionMaxChars` | `0`       | `0` või 100–50 000 |
 
-`0` (vaikimisi) tähendab **ülempiiri puudumist** — `callVisionModel()`
-tagastatud kirjeldus antakse muutmata kujul edasi, säilitades olemasoleva
-käitumise. Iga väärtus vahemikus 100–50000 kärpib kirjeldust `…` järelliitega,
-enne kui see liidetakse tagasi kujul `[Image N]: <description>`
-(`VisionBridgeGuardrail.preCall()` failis `src/lib/guardrails/visionBridge.ts`).
-Suurendage seda detailirohkete OCR-ülesannete korral, kus allavoolu mudel vajab
-täielikku transkriptsiooni; vähendage seda, et piirata tokenikasutust sõnakate
-visioonimudelite puhul. Armatuurlaua väli asub Visiooni vahekaardi täpsemate
-sätete paneelil (`modality-bridge-max-chars` failis `ModalityBridgeVisionTab.tsx`)
-ja tõstab iga väärtuse vahemikus 1–99 kuni 100 alampiirini, jättes samas
-selgesõnalise `0` puutumata — `0` on omaette kehtiv Zod-i väärtus
-(`z.union([z.literal(0), z.number().int().min(100).max(50000)])`), mitte pelgalt
-"määramata" vaikeväärtus.
+`0` (vaikimisi) tähendab** korki pole** — `callVisionModel()` tagastatud kirjeldus edastatakse muutmata kujul, säilitades olemasoleva käitumise. Iga väärtus vahemikus 100–50 000 kärbib kirjelduse `…` järelliitega, enne kui see liidetakse tagasi kui `[Image N]: <description>` (`VisionBridgeGuardrail.preCall()` in `src/lib/guardrails/visionBridge.ts`). Suurendage seda detailirohkete OCR ülesannete jaoks, kus allavoolumudel vajab täielikku transkriptsiooni; alandage seda vestluslike nägemismudelite puhul piiratud märgikasutusele. Armatuurlaua väli asub vahekaardi Vision paneelil Advanced (`modality-bridge-max-chars` in `ModalityBridgeVisionTab.tsx`) ja fikseerib mis tahes väärtuse vahemikus 1 kuni 99 kuni 100 korruseni, jättes samal ajal selgesõnalise `0` puutumata. — `0` on kehtiv Zod väärtus omaette (`z.union([z.literal(0), z.number().int().min(100).max(50000)])`), mitte ainult vaikeväärtus "unset".
 
-#### Kirjelduse vahemälu (`modalityBridge/bridgeCache.ts`)
+#### Vahemälu kirjeldamine (`modalityBridge/bridgeCache.ts`)
 
-Mälusisene LRU + TTL vahemälu kirjeldusväljundite jaoks, jagatud kogu protsessi
-ulatuses. Võti = `sha256(imageRef + composedPrompt + configuredBridgeModel)`
-pikkusprefiksi raamistusega (väljapiiride kollisioone ei teki). Mudelikomponent
-on **konfigureeritud** sillamudel, mitte tegelikult vastanud mudel —
-`callVisionModel` võib sisemiselt varule lülituda ja katsekaupa võtmestamine
-killustaks vahemälu. Ebaõnnestunud kirjeldusi ei hoita kunagi vahemällu. Sätted:
+Mälusisene LRU + TTL vahemälu väljundite kirjeldamiseks, jagatud kogu protsessi ulatuses. Klahv = `sha256(imageRef + composedPrompt + configuredBridgeModel)` pikkus-eesliide raamimisega (väljapiiride kokkupõrkeid pole). Mudeli komponent on** konfigureeritud** sillamudel, mitte mudel, mis tegelikult vastas — `callVisionModel` võib sisemiselt tagasi langeda ja katse kohta sisestamine killustaks vahemälu. Ebaõnnestunud kirjeldusi ei salvestata kunagi vahemällu. Seaded:
 
 | Võti                            | Vaikimisi | Vahemik |
 | ------------------------------- | --------- | ------- |
@@ -188,102 +96,29 @@ killustaks vahemälu. Ebaõnnestunud kirjeldusi ei hoita kunagi vahemällu. Sät
 | `modalityBridgeCacheTtlMinutes` | `60`      | 1–1440  |
 | `modalityBridgeCacheMaxEntries` | `200`     | 10–5000 |
 
-#### Kaugpildi normaliseerimine (self-loop describe/base64 fetch)
+#### Pildi kaugnormaliseerimine (isesilmus describe/base64 toomine)
 
-Kui sild hangib **kaugpildi** ise — Anthropic'i describe-isekõne ja
-claude-wire-vormingu base64-teisenduse
-(`ensureBase64ImagesForClaudeWire`), mõlemad läbi
-`fetchRemoteImageAsDataUri()` failis `visionBridgeHelpers.ts` — juhitakse
-saadud data URI enne visioonimudeli päringusse manustamist läbi
-`normalizeDataUri()` (`open-sse/utils/imageNormalize.ts`). Ülisuured pildid
-vähendatakse **2048px pikema servani** (vastab suurusepiirangule, mida
-OpenAI/Anthropic juba serveripoolel rakendavad), mis kärpib üleslaadimise
-baitide hulka/latentsust muutmata seda, mida visioonimudel näeb. Suuruse
-muutmiseks kasutatakse `sharp`-i, mis laaditakse dünaamilise impordi kaudu:
-platvormil, kus selle natiivbinaari laadimine ebaõnnestub, **ei viska**
-`normalizeDataUri()` **kunagi viga** — see lülitub tagasi algsete baitide
-läbilaskmisele, nii et describe/base64-teisenduse tee töötab alati edasi.
-Mittepildibaidid (fetch, mis ei tagastanud dekodeeritavat pilti) lastakse
-samuti puutumatult läbi. See normaliseerimine piirdub piltidega, mille sild
-hangib omaenda isekõne jaoks — seda ei rakendata kunagi kutsuja toorele
-läbilaske-payloadile, kooskõlas ainult-opt-in mutatsiooniprintsiibiga
-(karm reegel nr 20).
+Kui sild tõmbab a** kaugjuhtimispult** pilt ise — Anthropic kirjeldab isekutsumist ja claude-wire-formaadis base64 teisendust (`ensureBase64ImagesForClaudeWire`), mõlemad `fetchRemoteImageAsDataUri()` kaudu `visionBridgeHelpers.ts` — edastatakse saadud andmed URI läbi `normalizeDataUri()` (`open-sse/utils/imageNormalize.ts`), enne kui need manustatakse nägemismudeli päringusse. Liiga suured pildid vähendatakse väärtuseni a** 2048 pikslit pikk serv** (vastab suuruse muutmise piirile OpenAI/Anthropic rakenda juba serveripoolt), mis kärbib bytes/latency üleslaadimist, muutmata seda, mida nägemismudel näeb. Suuruse muutmine kasutab dünaamilise impordi kaudu laaditud `sharp`: platvormil, kus selle algse binaarfaili laadimine ebaõnnestub, `normalizeDataUri()`** ei viska kunagi** — see langeb tagasi algsete baitide läbipääsuks, nii et describe/base64-conversion tee töötab alati. Ka mittepildibaidid (toomine, mis ei tagastanud dekodeeritavat pilti) lastakse läbi puutumatult. See normaliseerimine hõlmab kujutisi, mille sild tõmbab enda helistamiseks — ja seda ei rakendata kunagi helistaja töötlemata läbipääsu kasulikule koormusele, mis on kooskõlas ainult lubamise mutatsiooni põhimõttega (hard Rule #20).
 
-#### Seadete skeem + migratsioon
+#### Seadistuste skeem + migratsioon
 
-Uued `modalityBridge*`-võtmed valideeritakse Zodiga `updateSettingsSchema`-s
-(`src/shared/validation/settingsSchemas.ts`): `modalityBridgeVisionEnabled`,
-`modalityBridgeVisionMode`, `modalityBridgeVisionModel`,
-`modalityBridgeVisionTaskAware`, `modalityBridgeVisionPrompt`,
-`modalityBridgeVisionTimeout`, `modalityBridgeVisionMaxImages`,
-`modalityBridgeVisionMaxChars`, `modalityBridgeCache*`-kolmik ja Audio
-Bridge'i poolt kasutatav `modalityBridgeAudio*`-grupp. Migratsioon
-`141_modality_bridge_settings.sql` kopeerib olemasolevad pärand-
-`visionBridge*`-väärtused vastavatesse uutesse võtmetesse (idempotentne, ei
-k kirjuta kunagi üle operaatori seatud `modalityBridge*`-väärtust);
-pärandvõtmed jäävad aktsepteerituks lugemis-tagasivaruna üheks
-väljalasketsükliks.
+Uued `modalityBridge*` klahvid on Zod-valideeritud `updateSettingsSchema` (`src/shared/validation/settingsSchemas.ts`): `modalityBridgeVisionEnabled`, `modalityBridgeVisionMode`, `modalityBridgeVisionModel`, `modalityBridgeVisionTaskAware`, `modalityBridgeVisionPrompt`, `modalityBridgeVisionTimeout`, `modalityBridgeVisionMaxImages`, `modalityBridgeVisionMaxChars`, `modalityBridgeCache*` trio ja `modalityBridgeAudio*` rühm, mida kasutab Audio Bridge. Migreerimine `141_modality_bridge_settings.sql` kopeerib olemasolevad `visionBridge*` pärandväärtused vastavatesse uutesse võtmetesse (idempotentne, ei kirjuta kunagi üle operaatori määratud `modalityBridge*` väärtust); pärandvõtmed jäävad lugemiseks ühe väljalasketsükli jooksul aktsepteerituks.
 
-#### Läbipaistvuspäis + statistika
+#### Läbipaistvuse päise + statistika
 
-Describe-teisendatud vastused kannavad päist
-`x-omniroute-modality-bridge: image->text;model=<visionModel>;parts=<n>`
-(ehitab `buildModalityBridgeHeader()` failis `modalityBridge/bridgeStats.ts`,
-lisab `withModalityBridgeHeader()` failis `src/sse/handlers/chatHelpers.ts`).
-Ümbersuunatud päringud **ei saa** päist — payload jäi puutumata ja mudeli
-vahetus on juba nähtav vastuse keha `model`-väljal.
+Kirjelda-transformeeritud vastused sisaldavad `x-omniroute-modality-bridge: image->text;model=<visionModel>;parts=<n>` (ehitatud `buildModalityBridgeHeader()` -ga `modalityBridge/bridgeStats.ts`, tembeldatud `withModalityBridgeHeader()` -ga `src/sse/handlers/chatHelpers.ts`). Ümbersuunatud taotlused saavad** ei** header — kasulik koormus jäi puutumata ja mudeli vahetus on juba nähtav vastuse keha `model` väljal.
 
-`GET /api/modality-bridge/stats` (haldusautentimine, sama tase kui
-`GET /api/settings`) tagastab mälusisensed modaalsusepõhised loendurid
-`{ attempts, successes, bridged, cacheHits, failures, totalLatencyMs,
-latencySamples, averageLatencyMs, lastUsedAt }` modaalsuste `vision`, `audio`
-ja `video` jaoks. `averageLatencyMs` kasutab nimetajana `latencySamples`-i,
-mitte kõiki katseid; ilma ajastuseta operatsioon ei fabritseeri
-nullmillisekundilist näidist. `bridged` jääb edukate teisenduste
-tagasiühilduvaks aliaseks; ebaõnnestunud katsed seda ei suurenda. Loendurid
-lähtestuvad protsessi taaskäivitusel tahtlikult (telemeetria, mitte
-arvestus).
+`GET /api/modality-bridge/stats` (halduse autentimine, sama tasand kui `GET /api/settings`) tagastab `vision`, `audio` ja `video` mälusisesed modaalsusloendurid `{ attempts, successes, bridged, cacheHits, failures, totalLatencyMs, latencySamples, averageLatencyMs, lastUsedAt }`. `averageLatencyMs` kasutab nimetajana `latencySamples`, mitte kõiki katseid; ilma ajastuseta toiming ei valmista null-millisekundilist näidist. `bridged` jääb edukate teisenduste tagasiühilduvaks aliaseks; ebaõnnestunud katsed seda ei suurenda. Loendurid lähtestatakse protsessi taaskäivitamisel disaini järgi (telemeetria, mitte arvestus).
 
 #### Armatuurlaua konfiguratsioon
 
-Spetsiaalne armatuurlaua leht on `/dashboard/settings/modality-bridge`. Selle
-URL-aadresseeritavad vahekaardid `Vision`, `Audio` ja `Video` säilitavad
-päringuparameetrid `tab`-väärtuse vahetamisel. Vision-vahekaart paljastab
-lubamise, režiimi, mudeli valiku (sh automaatse vaikeväärtuse),
-ülesandeteadliku promptimise, täiustatud
-timeouti/pildi/kirjelduse-pikkuse/vahemälu piirangud, käitusaja loendurid ja
-kaitstud näidispäringu. Audio-vahekaart on samuti aktiivne: see paljastab
-lubamise, ainult-STT mudelivalija koos Auto-valikuga, timeouti/max-klipi
-piirangud, heli loendurid ja `input_audio` näidistesti. Video-vahekaart on
-funktsionaalne: see teavitab FFmpeg/ffprobe'i käitusaja olekust — üks
-neljast selgesõnalisest UI-olekust (`unknown`, kui sondeerimine on käimas
-või ei saanud lõpule viidud, `restricted` mitte-loopback armatuurlaua
-hostil, kus sondeerimine jäetakse kliendipoolel vahele, `unavailable`, kui
-on sondeeritud ja puudumine kinnitatud, või `available` koos FFmpeg/ffprobe'i
-versioonidega) — salvestab enable/model/frame/video/timeout piirangud,
-filtreerib mudelivalija visioonivõimelistele mudelitele ja paljastab video
-loendurid.
+The dedicated dashboard page is `/dashboard/settings/modality-bridge`. Its URL-addressable `Vision`, `Audio`, and `Video` tabs preserve query parameters while switching the `tab` value. The Vision tab exposes enablement, mode, model selection (including the automatic default), task-aware prompting, advanced timeout/image/description-length/cache limits, runtime counters, and a guarded sample request. The Audio tab is also live: it exposes enablement, an STT-only model picker with Auto, timeout/max-clip limits, audio counters, and an `input_audio` sample test. The Video tab is functional: it reports the FFmpeg/ffprobe runtime state — one of four explicit UI states (`unknown` while the probe is in flight or could not complete, `restricted` on a non-loopback dashboard host where the probe is skipped client-side, `unavailable` once probed and confirmed missing, or `available` with the FFmpeg/ffprobe versions) — persists enable/model/frame/video/timeout limits, filters the model picker to vision-capable models, and exposes video counters.
 
-Endine Vision Bridge'i kaart AI-seadete all on ühilduvuslink uuele lehele;
-see ei oma enam vormi teist koopiat. Media Providers lingib ka Image-to-Text
-ja Speech-to-Text töövood vastavate Modality Bridge'i vahekaartidega,
-eemaldamata olemasolevat Speech-to-Text mänguväljakut.
+Endine Vision Bridge'i kaart AI sätete all on ühilduvuslink uuele lehele; ta ei oma enam vormi teist eksemplari. Meediapakkujad lingivad ka pildist tekstiks ja kõne tekstiks töövood vastavate modaalsussilla vahekaartidega, eemaldamata olemasolevat kõne tekstiks mänguväljakut.
 
-**Self-loop'i sissepääsu möödapääs:** kui describe-kõne suunatakse läbi
-OmniRoute'i enda `/v1` self-loop'i (mitte-standardne pakkujamudel), saadab
-alampäring `x-omniroute-admission-bypass: internal` ja autenditakse
-lahendatud self-loop'i mandaadiga — kohalik `sk_omniroute` sentinel
-kohalikus režiimis või operaatori konfigureeritud `OMNIROUTE_API_KEY` /
-`ROUTER_API_KEY` keskkonnavõti (#1350), et `REQUIRE_API_KEY=true` juurutused
-saaksid endiselt describe-kõnet käivitada. Möödapääsu austatakse ainult
-nende täpsete mandaatide puhul, nii et välised kliendid ei saa päist
-sissepääsu vahelejätmiseks kasutada.
+**Iseahela sissepääsu ümbersõit:** kui kirjeldab kõne marsruute läbi OmniRoute enda `/v1` eneseahela (mittestandardne teenusepakkuja mudel), saadab alampäring `x-omniroute-admission-bypass: internal` ja autentitakse lahendatud eneseahela mandaadiga — kohalik `sk_omniroute` sentinel kohalikus režiimis või operaatori konfigureeritud `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` env kirjeldab võtit ( `REQUIRE_API_KEY=true` #1350 env) helistada. Möödasõitu arvestatakse ainult nende täpsete mandaatide puhul, nii et välised kliendid ei saa päist sissepääsu vahelejätmiseks kasutada.
 
-Pärandvaikeväärtused asuvad failis `src/shared/constants/visionBridgeDefaults.ts`;
-uued režiimi/ülesandeteadlikkuse/vahemälu vaikeväärtused ja seadete lahendaja
-asuvad failis `src/shared/constants/modalityBridgeDefaults.ts`. Guardrail
-pakub `deps` konstruktorivalikut, et testid saaksid süstida võltsitud
-`getSettings` ja `callVisionModel` implementatsioone.
+Pärandvaikeväärtused elavad `src/shared/constants/visionBridgeDefaults.ts` keeles ; uued mode/task-aware/cache vaikesätted ja seadete lahendaja töötavad `src/shared/constants/modalityBridgeDefaults.ts`. Kaitsepiire paljastab `deps` konstruktori valiku, nii et testid võivad sisestada võltsitud `getSettings` ja `callVisionModel` -rakendusi.
 
 ### Audio Bridge (`audioBridge.ts`) — Modality Bridge PR-3
 
@@ -316,221 +151,97 @@ Käituskeskkonna sätted talletatakse andmebaasis ja valideeritakse Zodiga:
 
 ### Videosild (`videoBridge.ts`, `videoBridgePipeline.ts`)
 
-Püüab enne teadaoleva loomuliku videotoeta sihtmudeli kutsumist kinni Chat Completionsi `messages` ja Responses API `input` tipptaseme videoosad. Toetatud vormingud on `input_video`, `video_url`, `video_source`, HTTPS-URL-id ja `data:video/*;base64,...` andme-URI-d. Tekstis olevaid lihtsaid failinimesid ei käsitleta videona.
+Peatab vestluse lõpuleviimise `messages` ja vastused API `input` tipptasemel videoosad, enne kui kutsutakse sihtmärki, millel puudub teadaoleva videotugi. Toetatud kujundid on `input_video`, `video_url`, `video_source`, HTTPS URLs ja `data:video/*;base64,...` URIs. Tekstis olevaid lihtsaid failinimesid ei käsitleta videona.
 
-`VideoBridgeGuardrail.preCall` (`videoBridge.ts`) vastutab päringu läbimise, võimekuse ja reeglite kontrolli, päringupõhise agregeerimise ning vastuse sisu eest. Iga video töötlemine — hankimine, terviktulemuse vahemälu, kaadrijada kirjeldamine (mis ühendab ka kutsuja deklareeritud helitranskriptsiooni) ning katsepõhised mõõdikud, katkestamine ja puhastamine — on peidetud funktsiooni `processVideoPart` taha failis `videoBridgePipeline.ts`; seda kutsutakse tsükli `preCall` sees üks kord iga videoosa kohta. See moodul määratleb ka selgesõnalised pordipiirid `VideoMediaBrokerPort` (baitide hankimine ja valimisse kuuluvate kaadrite eraldamine), `VideoAudioTranscriptionPort` (kutsuja deklareeritud helitranskriptsiooni ühendamine valimisse kuuluvate kaadrite kirjeldustega) ja `VideoDrilldownPort` (kaadrite süvaanalüüsi püsivuse piir; pole veel funktsiooniga `processVideoPart` ühendatud — praegu kirjutab süvaanalüüsi kirjeid ainult eraldi marsruut `/api/modality-bridge/video/drilldown`).
+`VideoBridgeGuardrail.preCall` (`videoBridge.ts`) owns request traversal, the capability/policy check, per-request aggregation, and the response payload. Per-video work — acquisition, the whole-result cache, describing a frame sequence (which fuses any caller-declared audio transcript), and per-attempt metrics/abort/cleanup — is hidden behind `processVideoPart` in `videoBridgePipeline.ts`, called once per video part inside `preCall`'s loop. That module also defines the explicit port boundaries `VideoMediaBrokerPort` (acquiring bytes and extracting sampled frames), `VideoAudioTranscriptionPort` (fusing a caller-declared audio transcript with the sampled captions), and `VideoDrilldownPort` (the legacy raw-store shape). Production STT and frame retention are composed around the describing port through `createVideoSttAdapter` and `createVideoDrilldownAdapter`; the latter uses the shared opaque-handle lifecycle.
 
-Avalik `/v1` päringutee ei impordi ega käivita kunagi alamprotsessi. Kaugvideod laaditakse alla 50 MiB piiranguga; tekstisisesel base64-videol on konservatiivne 36 MiB dekodeeritud mahu piir video kohta, et mudeli, sõnumite ja raaminduse ümbris jääks avalike JSON-päringute 50 MiB vastuvõtupiiri sisse. Tekstisisest pikkust ja dekodeeritud mahu hinnangut kontrollitakse enne mälu eraldamist. HTTPS on nõutav nii algse kaug-URL-i kui ka iga ümbersuunamise korral ning kasutatakse olemasolevat ainult avalikke aadresse lubavat väljaminevate ühenduste kaitset koos DNS-i sidumisega. Seejärel liiguvad baidid üle täpselt määratud sisemise vahenduspiiri `POST /api/modality-bridge/video/extract`. See marsruut on ühtaegu `LOCAL_ONLY` ja `SPAWN_CAPABLE`, võtab vastu ainult protsessipõhiselt autenditud usaldusväärse tagasisideaadressi kaudu saabunud päringuid ega aktsepteeri kunagi URL-i, failisüsteemi teed, käivitatavat faili ega argumentide loendit. API päringukeha mahu töötlemisahel ja töötleja inkrementaalne päringukeha lugeja jõustavad teineteisest sõltumatult vahendussisendi 50 MiB piirangu. Selle piiratud järjekord töötleb korraga üht eraldustoimingut, lubab nelja ootel tööd ja piirab ootel sisendi kogumahu 100 MiB-ni.
+Avalik `/v1` päringu tee ei impordi ega kutsu kunagi alamprotsessi. Kaugvideod laaditakse alla 50 MiB piiranguga; tekstisisesetel base64 videotel on konservatiivne 36 MiB dekodeeritud video kohta, nii et model/messages/framing ümbrik võib jääda avaliku JSON taotluse 50 MiB piirangu piiridesse. Reasisese pikkuse ja dekodeeritud suuruse hinnanguid kontrollitakse enne eraldamist. HTTPS on nõutav esialgsel kaugjuhtimispuldil URL ja igal ümbersuunamisel, kasutades olemasolevat ainult avalikku väljamineku kaitset koos DNS kinnitamisega. Seejärel ületavad baidid täpse sisemise `POST /api/modality-bridge/video/extract` maakleri piiri. See marsruut on nii `LOCAL_ONLY` kui ka `SPAWN_CAPABLE`, aktsepteerib ainult protsessipõhiseid autentitud usaldusväärse tagasisilmuse taotlusi ega aktsepteeri kunagi URL, failisüsteemi teed, täitmisfaili ega argumentide loendit. API korpuse suurusega torujuhe ja käitleja inkrementaalne korpuse lugeja jõustavad sõltumatult 50 MiB maakleri sisendi piiri. Selle piiratud järjekord käivitab ühe ekstraktsiooni korraga, võimaldab nelja ootel tööd ja piirab ootel sisendit kiirusel 100 MiB.
 
-Brokeri sees loeb `ffprobe` privaatset kohalikku faili; fikseeritud vormingute lubatud-loend välistab esitusloendi- ja manifestivormingud. Lubatud MOV-perekonna konteinerite puhul jäävad välised MOV-andmeviited vaikimisi keelatuks ja fikseeritud käsk ei lülita neid sisse. Nii `ffprobe` kui ka `ffmpeg` kasutavad ainult `file`-protokolli lubatud-loendit, ühte lõime, fikseeritud argumentide massiive, ilma shellita ning käivitatavaid faile, mis lahendatakse `PATH`-ist. Attached-picture-tüüpi kaanevood ei ole esituskandidaadid. Kõik esitatavad vood peavad vastama piirangutele ning selgesõnalist vaikevoogu eelistatakse enne deterministlikku madalaima indeksiga tagasilangemist. Videod on piiratud 600 sekundi, 8 192 piksli mõõtme kohta ja 33 554 432 lähtepiksliga. FFmpeg võtab 1–16 keskpunkti JPEG-kaadrit, vähendab pikema serva kuni 1 024 pikslini ilma väiksemaid sisendeid suurendamata ega saa kunagi URL-i. Diskreetimine on vaikimisi `uniform`. Valikuline `scene_aware` ja eksperimentaalne `segment_aware` poliitika teevad ühe täiendava fikseeritud FFmpeg-läbimise juba valideeritud kohaliku voo üle, valivad piiratud `showinfo` stseeni-ajatemplid ning langevad detektori tõrke, ajalõpu, vigase väljundi või tühja kandidaatide hulga korral deterministlikult tagasi samade ühtlaste keskpunktide juurde. Segmenditeadlik režiim jaotab keskpunkti näidised proportsionaalselt valideeritud stseeniintervallidega; segmenditeadlikke tõendeid ja tagasilangemise käitumist kirjeldatakse allpool. Range 16 kaadri ülempiir rakendatakse igas poliitikas pärast valikut. Kui stseeniteadlikul päringul on vaid ühe kaadri eelarve, kasutatakse aktiivse kogu video või fookusakna ühtlast keskpunkti ja teatatakse `policyEffective: uniform`: üks valitud stseenikaader ei suuda säilitada mõlemat ajalist otsa. Kutsuja võib soovi korral esitada lõpliku fookusakna (`start`/`end` sekundites); piirid kinnitatakse meedia kestusele, ümberpööratud või mittelõplikud aknad lükatakse tagasi ning kõiki diskreetimispoliitikaid rakendatakse ainult normaliseeritud intervallis. Saadud aken kaasatakse diskreetimise metaandmetesse ja ebausaldusväärse kirjelduse eesliitesse, et allavoolu mudelid saaksid eristada fokuseeritud katkendit kogu ajajoonest.
+Maakleri sees loeb `ffprobe` privaatset kohalikku faili; fikseeritud vormingu lubade loend välistab esitusloendi ja manifesti vormingud. Lubatud MOV-perekonna konteinerite puhul jäävad välised MOV -andmete viited vaikimisi keelatuks ja fikseeritud käsk ei luba neid kasutada. Nii `ffprobe` kui ka `ffmpeg` kasutavad `file` -only protokolli valget nimekirja, ühte lõime, fikseeritud argumentide massiive, kesta pole ja `PATH`-st lahendatud käivitatavaid faile. Manustatud piltide kaanevood ei ole esitatavad kandidaadid. Kõik esitatavad vood peavad vastama piirangutele ja enne deterministlikku madalaima indeksiga tagavaraks on eelistatud selgesõnaline vaikevoog. Videod on piiratud 600 sekundiga, 8192 pikslit mõõtme kohta ja 33 554 432 lähtepikslit. FFmpeg proovib 1–16 keskpunkti JPEG kaadrit, skaleerib pika serva alla maksimaalselt 1024 pikslini ilma väiksemaid sisendeid suurendamata ja ei saa kunagi URL. Sampling on vaikimisi `uniform`. Valikulised `scene_aware` ja eksperimentaalsed `segment_aware` -poliitikad sooritavad ühe täiendava fikseeritud FFmpeg käigu üle juba kinnitatud kohaliku voo, valivad piiratud `showinfo` -stseeni ajatemplid ja taanduvad deterministlikult samadele ühtsetele keskpunktidele detektori rikke, ajalõpu, vigase väljundi või tühja kandidaatide komplekti korral. Segmenditeadlik režiim eraldab keskpunkti näidised proportsionaalselt kinnitatud stseeni intervallidega; segmenditeadlikud tõendid ja varukäitumine on üksikasjalikult kirjeldatud allpool. Kõva 16-kaadri piirik rakendatakse pärast valimist igas poliitikas. Kui stseenipõhisel päringul on ainult ühe kaadri eelarve, kasutab see aktiivse täisvideo- või fookusakna ühtset keskpunkti ja teatab `policyEffective: uniform`: üks valitud stseenikaader ei suuda säilitada mõlemat ajalist otsa. Helistaja võib valikuliselt pakkuda piiratud fookusakna (`start`/`end` sekundit); piirid seatakse kandja kestusele, vastupidised või mittelõplikud aknad lükatakse tagasi ja kõik diskreetimispoliitikad viiakse läbi ainult normaliseeritud intervalli sees. Saadud aken sisaldub valimi metaandmetes ja ebausaldusväärse kirjelduse eesliites, nii et allavoolu mudelid suudavad eristada keskendunud väljavõtet kogu ajajoonest.
 
-Semantiline kirjeldusfookus on eraldi, selgesõnaline seadistus. Vaikimisi `full` analüüsirežiim säilitab olemasoleva kaadri-prompti ega edasta päringuteksti kunagi kirjeldusmudelile. Režiimis `focused` loeb sild ainult sama Chat- või Responses-konteineri viimast mittetühja kasutaja loodud `text`/`input_text` väärtust, normaliseerib selle NFC-ks, koondab juhtmärgid ja tühikud ning piirab selle 500 Unicode'i koodipunktiga. Tühi tulemus langeb tagasi täpse `full`-prompti juurde. Kasutatav vihje seerianakse JSON-ina spetsiaalses ebausaldusväärse kasutajakonteksti blokis ja see võib ainult prioriseerida jälgitavaid detaile; see ei saa tühistada eraldi hoiatust meedias nähtavate või kuuldavate juhiste järgimise vastu. Tekstiline fookus ei tuleta kunagi `start`/`end` väärtusi ega muuda ajalist diskreetijat.
+Semantilise pealdise fookus on eraldiseisev, selgesõnaline seade. Vaikimisi `full` analüüsirežiim säilitab olemasoleva kaadriviipa ega edasta kunagi päringu teksti tiitrite mudelile. `focused` režiimis loeb sild ainult uusimat mittetühja kasutaja poolt loodud `text`/`input_text` samast vestluse või vastuste konteinerist, normaliseerib selle väärtuseks NFC, ahendab juhtmärgid ja tühikuid ning piirab selle 500 Unicode'i koodipunktiga. Tühi tulemus langeb tagasi täpselt `full` viipale. Kasutatav vihje jadatakse JSON -ks spetsiaalses ebausaldusväärse kasutaja konteksti plokis ja see võib seada esikohale ainult jälgitavad üksikasjad; see ei saa tühistada eraldi hoiatust meedias nähtavate või kuuldavate juhiste järgimise eest. Tekstiline fookus ei järelda kunagi `start`/`end` ega muuda ajalist proovivõtturit.
 
-#### FU-07 struktuursed segmenditõendid
+#### FU-07 struktuurse segmendi tõendid
 
-`segment_aware` kasutab ühte piiratud eelanalüüsi läbimist juba valideeritud kohaliku videovoo üle. Fikseeritud filtriaahel skaleerib esmalt laiuse kuni 320 pikslini, tuvastab stseenimuudatused ja külmunud intervallid, seejärel võtab 1 kaader sekundis näidiseid udususe, keskmise heleduse (luma) ning ruumilise ja ajalise teabe kohta. Läbimine on piiratud 600 struktuurse näidisega, ühe FFmpeg/filtri lõimega, sama ainult `file`-protokolli ja konteinerite lubatud-loendiga, 1 MiB protsessi-väljundi piiriga ning kuni 30 sekundiga brokeri ühise katkestuse/tähtaja piires. See ei võta päringust kunagi vastu käsku, filtrit, teed ega URL-i.
+`segment_aware` kasutab ühte piiratud eelanalüüsi läbimist juba kinnitatud kohaliku videovoo üle. Fikseeritud filtriahel ulatub esmalt maksimaalselt 320 piksli laiuseni, tuvastab stseeni muutused ja külmutatud intervallid, seejärel proovib 1 kaader sekundis hägususe, keskmise valgustugevuse ja spatial/temporal teabe jaoks. Pääs on piiratud 600 struktuurinäidise, ühe FFmpeg/filter lõime, sama `file` -only protokolli ja konteineri lubamisloenditega, 1 MiB protsessiväljundiga ja maksimaalselt 30 sekundiga maakleri jagatud abort/deadline. See ei võta kunagi päringust vastu käsku, filtrit, teed ega URL d.
 
-Struktuursed väärtused on deterministlikud diskreetimistõendid, mitte semantiline videomõistmine. Need ei tuleta subjekte, tegevusi, kirjeldusi, kõnet ega kasutaja kavatsust. Stseeni- ja külmumispiirid moodustavad segmendid; külmutuse ulatus, udusus, säritus, ruumiline detail ja ajaline muutus mõjutavad ainult seda, kuidas olemasolev 1–16 kaadri eelarve jaotatakse. Täielikult külmunud segmendi ülempiir on üks kaader, samas kui külmutamata segmendid konkureerivad ülejäänud eelarve pärast. Kui piire on rohkem kui kaadreid, säilitatakse ühtlane ajajoone katvus, nii et kiired varajased lõiked ei saa varjata pikka lõpusegmenti. Stseenipiirid, mis jäävad külmumispiiri 1-sekundilise analüüsieraldusvõime piiresse, liidetakse.
+Struktuuriväärtused on deterministlikud näidistõendid, mitte semantiline videomõistmine. Need ei järelda teemasid, tegevusi, pealdisi, kõnet ega kasutaja kavatsusi. Stseeni ja külmutamise piirid moodustavad segmente; katvuse külmutamine, hägusus, säritus, ruumilised üksikasjad ja ajaline muutus mõjutavad ainult seda, kuidas olemasolevat 1–16 kaadri eelarvet jaotatakse. Täielikult külmutatud segment on piiratud ühe kaadriga, samal ajal kui külmutamata segmendid võistlevad ülejäänud eelarve pärast. Kui piire ületab kaadreid, säilib ühtne ajaskaala katvus, nii et kiired varased kärped ei suuda varjata pikka lõpuosa. Stseeni piirid külmutuspiiri 1-sekundilise analüüsi eraldusvõime piires liidetakse.
 
-Puuduvad filtrid, vigane või tühi tõendusmaterjal, detektori viga või piiratud eelanalüüsi ajalõpp viivad avatud tagasilangemiseni täpse ühtlase keskpunkti poliitika juurde. Kutsuja katkestus või brokeri tähtaeg ei lange avatult tagasi: see lõpetab käimasoleva alamprotsessi, takistab hilisemat kaadrite eraldamist ning privaatne ajutine kataloogipuu eemaldatakse `finally`-plokis.
+Puuduvad filtrid, malformed/empty tõendid, detektori viga või piiratud eelanalüüsi ajalõpp ei vasta täpselt ühtsele keskpunktipoliitikale. Helistaja katkestamise või vahendaja tähtaja avamine ei õnnestu: see lõpetab lennu ajal toimuva alamprotsessi, takistab hilisemat kaadri väljavõtmist ja privaatne ajutine puu eemaldatakse `finally` st.
 
-`scripts/perf/video-bridge-fu07-eval.ts` genereerib deterministlikud tegelikud FFmpeg-testandmestikud deduplikatsioonijärgse kirjelduskutsete kokkuhoiu, tiheda liikumise eelarvejaotuse, udususe/särituse/SI-TI tõendite, pika sabaga kiirete lõigete ning järkjärgulise hajumise valepositiivsete jaoks. See salvestab eelanalüüsi reaalaja ning kui `/usr/bin/time` on saadaval, ka alamprotsessi CPU aja ja tipp-RSS-i. Selle kvaliteedikontrollid on ainult struktuursed oraaklid. Tegeliku kirjeldusmudeli kvaliteet jääb olekusse `HOLD`, kuna sellel testiraamistikul pole volitatud lõpp-punkti ega fikseeritud hindajat. Rahaline kokkuhoid jääb samuti olekusse `HOLD`, kui `--caption-cost-per-call-usd` ei anna selgesõnalist positiivset hinnangut kõne kohta; skript ei fabritseeri kunagi kumbagi tulemust.
+`scripts/perf/video-bridge-fu07-eval.ts` genereerib deterministlikke reaalseid FFmpeg seadmeid, et säästa pärast subtiitrite helistamist, tiheda liikumise eelarvejaotust, blur/exposure/SI-TI tõendeid, kiireid pika sabaga kärpeid ja järk-järgult hääbuvaid valepositiivseid tulemusi. See salvestab eelanalüüsi seina aja ja kui `/usr/bin/time` on saadaval, siis alam- CPU ja tipp- RSS. Selle kvaliteedikontrollid on ainult struktuurilised oraaklid. Tiitrite mudeli tegelik kvaliteet jääb `HOLD`, kuna sellel rakmel pole volitatud lõpp-punkti ega külmunud kohtunikku. Rahaline kokkuhoid jääb samuti `HOLD` välja arvatud juhul, kui `--caption-cost-per-call-usd` esitab selgesõnalist positiivset hinnangut kõne kohta; stsenaarium ei valmista kunagi kumbagi tulemust.
 
-Iga kaader on piiratud 4 MiB-ga, kõik töötlemata kaadrid kokku 23 MiB-ga ja serialiseeritud vahendaja vastus 32 MiB-ga. Privaatne ajutine kataloog eemaldatakse `finally`-plokis. OmniRoute ei sisalda komplektis FFmpeg'i ega võta vastu kohandatud käivitusfaili teed. Enne kirjelduste loomist rakendab sild konservatiivse visuaalse deduplikatsiooni etapi: iga JPEG vähendatakse 16×16 halltoonipuhvriks ja seda võrreldakse ainult viimati säilitatud kaadriga. Kui soovitud kirjelduste eelarve on suurem kui üks kaader, annab ekstraheerimine piiratud kandidaatide kogumi, mis on kuni kaks korda suurem sellest eelarvest ega ületa kunagi 16 kaadrit. Soovitud ülempiir rakendatakse alles pärast deduplikatsiooni, kusjuures lõpliku harvendamise ajal säilitatakse esimene ja viimane valitud kandidaat, kui eelarve on vähemalt kaks. Versiooniga `grayscale-16x16-mean-cells-v2` poliitika kasutab suuremat kahest väärtusest: keskmise heleduse delta või nende pisipildirakkude osakaalu, mille normaliseeritud delta on vähemalt 0,05. Duplikaadi lävi on konstant 0,04, mis on valitud ennustatavuse nimel, mitte käitusaegse seadistusena. See sekundaarne kõrgkontrastiline signaal säilitab väikesed liikumised ja nähtava teksti muutused, mida pelgalt keskmisel põhinev võrdlus võib varjata. Võrdleja- või dekoodrivead jätavad tee avatuks (fail open) ja katvus säilib. Väljundi metaandmed eraldavad ekstraheeritud kandidaadid, edukalt kasutatud kaadrid ja välja jäetud visuaalsed duplikaadid.
+Iga kaader on piiratud 4 MiB, kõik töötlemata kaadrid kokku kuni 23 MiB ja järjestatud vahendaja vastus on 32 MiB. Privaatne ajutine kataloog eemaldatakse `finally`. OmniRoute ei komplekteeri FFmpeg ega aktsepteeri kohandatud käivitatavat teed. Enne pealdiste lisamist rakendab sild konservatiivset visuaalset dubleerimise pääsu: iga JPEG vähendatakse 16 × 16 halltoonides puhvriks ja seda võrreldakse ainult viimase säilitatud kaadriga. Kui taotletud subtiitrite eelarve on suurem kui üks kaader, pakub väljavõte piiratud kandidaatide kogumit, mille eelarve on kuni kaks korda suurem ja mitte kunagi rohkem kui 16 kaadrit. Taotletud ülempiir rakendatakse alles pärast dubleerimise eemaldamist, kusjuures esimesed ja viimased valitud kandidaadid säilivad lõpliku harvendamise ajal, kui eelarve on vähemalt kaks. Versioonitud `grayscale-16x16-mean-cells-v2` poliitika kasutab suuremat, kui keskmine luma delta ja pisipildirakkude suhe, mille normaliseeritud delta on vähemalt 0,05. Duplikaatlävi on konstant 0,04, mis on valitud pigem prognoositavuse huvides, mitte käitusaja seadistusena. See teisene suure kontrastsusega signaal säilitab väikese liikumise ja nähtava teksti muutused, mida ainult keskmine võrdlus võib varjata. Võrdleja või dekoodri tõrked ei avane ja säilitavad levi. Väljundmetaandmed eraldavad eraldatud kandidaadid, edukalt kasutatud kaadrid ja visuaalsed duplikaadid eemaldatakse.
 
-Selgesõnaliselt märgistatud videoosa võib taotleda ajatempliga kontaktlehte. Sild koostab kuni 4-veerulise ja 16-kaadrilise JPEG-võrgustiku. Iga 512-piksline ruut põletab oma lähteajatempli kõrgkontrastilisse alumisse ribasse, samal ajal kui samad ajatemplid jäävad tekstimetaandmetesse allavoolu seostamiseks ja auditeerimiseks. Valmis JPEG jääb 32 MiB piiri alla. Kui `sharp` ei suuda võrgustikku dekodeerida ega koostada, naaseb sild üksikute JPEG-kaadrite juurde; kliendi katkestus levib siiski läbi leheoperatsiooni.
+Selgelt märgitud videoosa võib nõuda ajatempliga kontaktilehte. Sild ehitab maksimaalselt 4-sambalise 16-raamilise JPEG võrgu. Iga 512-piksline lahter põletab oma lähteajatempli suure kontrastsusega alumisse riba, samas kui samad ajatemplid jäävad teksti metaandmetesse allavoolu seostamiseks ja auditeerimiseks. Täielik JPEG jääb 32 MiB piiriks. Kui `sharp` ei suuda dekodeerida ega koostada ruudustikku, langeb sild tagasi üksikute JPEG kaadrite juurde; kliendi katkestamine levib endiselt lehetoimingu kaudu.
 
-Edendamise tõendid on tahtlikult eraldatud sünteetilisest koostamise mikrobenchmarkist. `scripts/perf/video-bridge-contact-sheet-eval.ts` määratleb skeemiversiooniga A/B-testiraamistiku tegelike OpenAI-ühilduvate visioonimudelite jaoks. See mõõdab pakkuja teatatud tokeneid, otsast lõpuni mõõdetud seinakella latentsust (sealhulgas lehe koostamist), mudelikõnede arvu ja manifestis määratletud faktide säilimist. Mudelite töötlemata vastuseid aruandesse ei kirjutata; säilitatakse ainult SHA-256 räsid ja sobitatud faktide ID-d. Testiraamistik ei tee võrgu- ega tasulisi mudelikõnesid, kui pole antud `--execute-real` lippu ning seadistatud `--model`, `OMNIROUTE_BASE_URL` ja `OMNIROUTE_API_KEY`. Ilma selle selgesõnalise tegeliku käivituseta jääb selle masinloetavaks otsuseks `HOLD`; sünteetilised koormuse ja kõnedearvu mõõtmised üksi ei ole edendamise tõendid.
+Edendamise tõendid on teadlikult sünteetilise koostise mikromõõdust eraldatud. `scripts/perf/video-bridge-contact-sheet-eval.ts` määratleb skeemiversiooniga A/B rakmed tõeliste OpenAI-ga ühilduvate nägemismudelite jaoks. See mõõdab pakkuja teatatud märke, seina latentsust (sealhulgas lehe koostist), mudelikõnede arvu ja manifesti määratletud faktide säilitamist. Toormudeli vastuseid aruandesse ei kirjutata; säilitatakse ainult SHA-256 kokkuvõtted ja sobitatud fakti IDs. Rakmed ei tee võrgu- ega tasulise mudeli kõnet, välja arvatud juhul, kui `--execute-real` on läbitud ja `--model`, `OMNIROUTE_BASE_URL` ja `OMNIROUTE_API_KEY` on konfigureeritud. Ilma selle selgesõnalise tegeliku käivitamiseta jääb selle masinloetav otsus `HOLD`; Sünteetilised payload/call-count mõõtmised üksi ei ole edendamise tõendid.
 
-Kutsuja võib toetatud videoosale lisada valikulise `transcript.cues` massiivi, kui tal on juba olemas joondatud tekst. Iga vihje peab sisaldama välja `text`, lõplikku `start`/`end`-intervalli sonditud kestuse piires ning lubatud loendis olevat välja `source` (`client`, `embedded` või `audio-bridge`); `confidence` vaikeväärtus on `1` ja see peab jääma `0` ja `1` vahele. Täpsed duplikaatvihjed liidetakse kokku. OmniRoute ei käivita kunagi transkribeerimist nende metaandmete põhjal: valideeritud vihjed kopeeritakse kirjeldatud tulemusse koos allika, usaldusväärsuse ja intervalliga ning need renderdatakse ebausaldusväärsete vaatlustena koos kaadrite kirjeldustega. Kehtetu, vahemikust väljas olev või päritoluta tekst lükatakse tagasi, seda ei segata kirjeldusvoogu. Mõlemad päringukeha transkriptsioonikanalid normaliseerivad esitatud päritolu väärtusele `client`, sealhulgas isedeklareeritud `embedded`- või `audio-bridge`-siltide puhul. Neid usaldusväärseid silte saab määrata ainult serverile kuuluv adapter ainult koodis kasutatava `trustedSource`-argumendi kaudu; päringu JSON-väli ei jõua selle argumendini. Transkriptsioonitekst jääb olenemata oma päritolust ebausaldusväärseks meediast tuletatud sisuks ega tohi kunagi olla autoriseerimise aluseks.
+Helistajad võivad toetatud videoosale lisada valikulise `transcript.cues` massiivi, kui neil on juba joondatud tekst. Iga näpunäide peab sisaldama `text`, lõplikku `start`/`end` intervalli uuritava kestuse sees ja valgesse nimekirja kantud `source` (`client`, `embedded` või `audio-bridge`); `confidence` vaikeväärtus on `1` ja see peab jääma `0` ja `1` vahele. Täpsed korduvad vihjed on ahendatud. OmniRoute ei alusta kunagi nendest metaandmetest transkriptsiooni: kinnitatud näpunäited kopeeritakse kirjeldatud tulemusesse koos allika, usaldusväärsuse ja intervalliga ning renderdatakse ebausaldusväärsete vaatlustena koos kaadri pealdistega. Vale, vahemikust väljas või lähtekohata tekst lükatakse pigem tagasi kui segatakse subtiitrite voogu. Mõlemad päringuteksti transkriptsioonikanalid normaliseerivad `client` esitatud lähtekoha, sealhulgas enesekehtestatud `embedded` või `audio-bridge` sildid. Ainult serverile kuuluv adapter saab neid usaldusväärseid silte määrata ainult koodipõhise `trustedSource` argumendi kaudu; päringu JSON väli ei jõua selle argumendini. Sõltumata selle päritolust jääb transkriptsioonitekst ebausaldusväärseks meediast tuletatud sisuks ja see ei tohi kunagi määrata autoriseerimist.
 
-Edasijõudnud kutsuja võib sama video jaoks esitada `audioTranscript`-raja; seda käsitletakse kliendi esitatud tekstina, mitte serveripoolse transkribeerimise tõendina. Fusiooniliides käitab visuaalseid ja helivaatlusi ühe tähtaja ja katkestussignaali all, järjestab need ühisel ajajoonel, liidab täpsed duplikaadid kokku ja teatab osalise tulemuse, kui õnnestub vaid üks pool. Kehtetu `audioTranscript` degradeerub samaks osaliseks tulemuseks — visuaalne kirjeldus säilib ja heliharu salvestab puhastatud tõrkekoodi — selle asemel et kogu video nurjata. Harudepõhine kättesaadavus, osalise tulemuse lipp ja puhastatud tõrkekoodid säilitatakse kirjeldatud tulemuses, turvapiirete metaandmetes (`audioFusionRuns`/`audioFusionPartials`/`audioFusionFailureCodes`), tulemusvahemälu metaandmetes ja silla fusiooniloendurites. Vaikimisi Video Bridge'i tee ei kasuta kõne tekstiks teisendamist ega lae alla teist meediakoopiat; ilma selle selgesõnalise rajata jääb see ainult videotöötluseks.
+Edasijõudnud helistaja võib pakkuda samale videole `audioTranscript` -raja; seda käsitletakse kliendi pakutava tekstina, mitte serveri transkriptsiooni tõendina. Fusiooniõmblus teostab visuaalseid ja helivaatlusi ühe tähtaja ja katkestamissignaali alusel, tellib need ühisele ajajoonele, ahendab täpsed duplikaadid ja teatab osalise tulemuse, kui ainult üks pool õnnestub. Kehtetu `audioTranscript` taandub osaliseks tulemuseks — visuaalne kirjeldus jäetakse alles ja heliharu salvestab terve video ebaõnnestumise asemel puhastatud tõrkekoodi —. Harupõhine saadavus, osaline lipp ja puhastatud tõrkekoodid säilitatakse kirjeldatud tulemuses, kaitsepiirde metaandmetes (`audioFusionRuns`/`audioFusionPartials`/ `audioFusionFailureCodes`), tulemuste vahemälu metaandmetes ja silla fusiooniloendurites. Video Bridge'i vaiketee ei kutsu kõnet tekstiks ega laadi alla teist meediumikoopiat; ilma selle selgesõnalise rajata jääb see ainult videoks.
 
-**Transkriptsioonide säilitamine (#12150 P1).** See rakendub automaatselt alati, kui
-eraldi lubatav videosild renderdab transkriptsioonilõigu — eraldi
-säilitamislippu pole. Kui päring renderdab mis tahes transkriptsioonilõigu (kutsuja määratud
-`transcript` või ühendatud `audioTranscript`), märgib kaitsepiire selle
-`videoBridgeObserved`-iks ja loob videokirjelduse redigeeritud varikoopia —
-identse renderduse, milles iga lõigu vabatekstiline sisu asendatakse tekstiga
-`[redacted-video-transcript]`. See luuakse struktureeritud lõiguvälja asendamisega
-enne stringi koostamist (mitte kunagi lamendatud teksti sõeludes, mistõttu ei saa
-säilida mingi lõigu sisu — ei pahatahtlik ega tavapärane, sealhulgas märki `]`
-sisaldavad tekstid, nagu `[inaudible]`/`[music]`). Säilitatavas väljakutselogi
-päringukehas asendatakse iga videost tuletatud tekstiosa selle redigeeritud
-varikoopiaga, kasutades sisu võrdsuse alusel sobitamist; ankur `fullText` loetakse
-uuesti lõpetatud väljakutseeelse kaitsepiirde lastist, mistõttu õnnestub sobitamine
-ka pärast seda, kui kaitsepiirdeahela hilisemad kaitsepiirded (isikuandmete ja
-mandaatide maskeerijad prioriteetidega 10/95) on kirjeldusteksti kohapeal ümber
-kirjutanud ning süsteemiviiba, üleandmise või mälu lisamine on sõnumimassiivi
-ümber kujundanud. Mudelile ülesvoolu saadetav keha jääb muutmata. Vaadeldud päring
-ei lisa ka püsivasse Memorysse midagi (vahele jäetakse nii päringust kui ka
-vastusest tuletatud eraldamine), mistõttu ei saa mudeli enda vastus
-transkriptsiooniteksti Memorysse tagasi kajastada.
+**Transkriptsiooni säilitamine (#12150 P1).** See kehtib automaatselt iga kord, kui Video Bridge (ise lubatav) renderdab ärakirja — puudub eraldi säilituslipp. Kui päring renderdab mis tahes transkripti viite (helistaja poolt deklareeritud `transcript` või ühendatud `audioTranscript`), märgib kaitsepiirde selle `videoBridgeObserved` ja loob videokirjelduse — redigeeritud varju identse renderduse, milles iga vihje vabatekstiline keha asendatakse `[redacted-video-transcript]`, mis on ehitatud enne stringne asendamise teel. lamestatud tekst, nii et ükski vihje sisu — vastandlik või tavaline, sealhulgas `]` sisaldavad kehad, nagu `[inaudible]`/`[music]` — ei saa ellu jääda). Püsiva kõnelogi päringu keha vahetab iga videost tuletatud tekstiosa selle redigeeritud varju vastu, sobitades sisu võrdsusega; `fullText` ankur loetakse uuesti valmis kõneeelse kaitsepiirde kasulikust koormusest, nii et vaste õnnestub ikkagi pärast seda, kui hilisemad keti kaitsepiirded ( PII ja mandaadi maskeerijad, prioriteedid 10/95) kirjutavad kirjeldusteksti paika ja pärast system-prompt/handoff/memory süstimist sõnumimassiivi ümber kujundavad. Mudelile ülesvoolu saadetud kere on muutumatu. Täheldatud päring ei sisalda ka püsivat mälu (nii päringu kui ka vastusest tuletatud ekstraktimine jäetakse vahele), seega ei saa mudeli enda vastus transkriptsiooni teksti mällu kajada.
 
-**Video toorväljad (#12430).** Kui sild on lubatud ja natiivse videotoe olemasolu
-pole teada või see puudub, aktiveerivad määratletud väljad `transcript`/`audioTranscript`
-samuti `videoBridgeObserved`, isegi pärast kirjelduse loomise nurjumist või
-`maxVideos` piirangu rakendumist. `null` ja tühjad stringid lähevad arvesse;
-puuduvad väljad ja videoga mitteseotud metaandmed mitte. Säilitatavates koopiates
-need väljad redigeeritakse või jäetakse päring välja ning vahemäludest/Memoryst
-minnakse mööda.
+**Toorvideoväljad (#12430).** Kui sild on lubatud ja natiivne videotugi on tundmatu või puudub, aktiveerivad määratletud `transcript`/`audioTranscript` väljad ka `videoBridgeObserved` isegi pärast kirjelduse ebaõnnestumist või `maxVideos` piirangut. `null` ja tühjad stringid loevad; puuduvad väljad ja mitte-video metaandmed seda ei tee. Säilitatud koopiad redigeerivad need väljad või jätavad taotluse välja ja caches/Memory jäetakse mööda.
 
-Neil varuteedel teisendatakse kutsuja kehtivad lõigud toetatud `text`/`input_text`
-osadeks, mitte ebastandardseteks teenusepakkuja väljadeks. Mõlemad päringuga
-kaasa antud rajad jäävad ebausaldusväärseteks `client`-vaatlusteks koos selgesõnalise
-hoiatusega, et videole ei koostatud kirjeldust ja ajatempleid ei kontrollitud
-meediumi suhtes. Olemasolevad 256 lõigu / 64 KiB kogupiirangud ja lõigupõhised
-piirangud rakenduvad mõlemale rajale ühiselt; ajatemplid peavad mahtuma vahendaja
-600-sekundilise ülempiiri ja mis tahes määratud fookusakna sisse. Vigased rajad
-hüljatakse ning neid ei edastata suvalise tekstina; kehtivat paarisrada võib
-endiselt kasutada, kui nende ühine piirang pole ületatud. Null- ja tühjad väljad
-teksti ei lisa. See varumehhanism ei lisa meediumi hankimist ega transkribeerimist.
-Transkriptsiooni laiendusväljad eemaldatakse varumehhanismi videokandjast ja selle
-`video_url`/`source` objektidest. OpenAI edastusvormingu lubatud loend jääb
-rangeks; videokandjad, mille natiivtugi pole teada, jäävad saadavale ning teadaolevad
-ainult teksti toetavad sihtkohad säilitavad turvalised markerid. Struktureeritud
-redigeerimisvarjud kaitsevad lisatud transkriptsiooniteksti, samas kui kutsujale
-kuuluv algne päring jääb muutmata. Natiivse toega sihtkohad ja keelatud sillad
-säilitavad oma senise möödaviigukäitumise.
+Nendel varuteedel muutuvad kehtivad helistaja näpunäited toetatud `text`/`input_text` osadeks, mitte mittestandardseteks pakkujaväljadeks. Mõlemad päringuga esitatud lood jäävad ebausaldusväärseteks `client` vaatlusteks koos selgesõnalise hoiatusega, et videot ei kirjeldatud ja ajatempleid ei kontrollitud meedia suhtes. Olemasolevad 256-cue/64-KiB kogu- ja tähisepõhised eelarved kehtivad kahele rajale koos; ajatemplid peavad sobima maakleri 600-sekundilise ülemmäära ja mis tahes kaasasoleva fookusaknaga. Kehtetud rajad visatakse kõrvale, mitte ei edastata suvalise tekstina; kehtivat õde-venda võib siiski kasutada, kui nende kogueelarvet ei ületata. Null/empty väljad ei lisa teksti. See varu ei lisa meediumitoomist ega transkriptsiooni. Transkriptsioonilaiendi väljad eemaldatakse varuvideokandjast ja selle `video_url`/`source` objektidest. OpenAI juhtme lubade loend jääb rangeks; Tundmatud videokandjad jäävad kättesaadavaks ja teadaolevad ainult tekstisihtmärgid hoiavad turvalisi markereid. Struktureeritud redigeerimisvarjud kaitsevad lisatud ärakirja teksti, samas kui algne helistaja päring jääb muutumatuks. Native-toega sihtmärgid ja puudega sillad säilitavad oma olemasoleva möödasõidukäitumise.
 
-Täiendavad säilitatavad koopiad kasutavad sama vaadeldud päringu signaali.
-Kaitsepiirde-eelne kliendipäringu töötlemata hetktõmmis, mälus olev ootel päring
-ja varakult tagasilükatud päringu logi asendavad videote osades olevad
-transkriptsiooniväljad struktuurselt; konveieri etappide ja konteksti üleandmise
-poolt sünteesitud stringiviibad redigeeritakse säilitatava päringukeha
-talletuskohas. Säilitatud marker `video_content_removed` paneb
-`previous_response_id` abil jätkamise turvaliselt nurjuma, selle asemel et
-taastada tahtlikult kõrvaldatud tekst. Kui vaadeldud päring kaotab enne logimist
-mõne osapõhise redigeerimisvarju või kui mitmest videovarjust kas või ühe
-sobitamine pärast päringu hilisemaid muudatusi nurjub, jäetakse säilitatav
-päringukeha tervenisti välja, selle asemel et säilitada osaliselt redigeeritud
-transkriptsioon.
+Täiendavad säilitatud koopiad kasutavad sama vaadeldava taotluse signaali. Toores kaitsepiirde-eelne kliendipäringu hetktõmmis, mälus olev ootel päring ja varajase tagasilükatud taotluse logi asendavad struktuurselt videoosade transkriptsioonivälju; konveieri etappide ja konteksti üleandmise kaudu sünteesitud stringiviibad redigeeritakse püsitaotluse keha valamu juures. Püsiv `video_content_removed` marker muudab `previous_response_id` jätkamise ebaõnnestumise, selle asemel, et taastada teksti, mis oli tahtlikult ära visatud. Kui vaadeldud päring kaotab osade kaupa redigeerimisvarju enne logimist või isegi üks mitmest videovarjust ei ühti pärast hilisemaid päringu mutatsioone, jäetakse osaliselt redigeeritud transkripti säilitamise asemel säilitatud päringu põhiosa täielikult välja.
 
-Vaadeldud päringu puhul võib mudeli vastus tsiteerida transkriptsiooni mis tahes
-osa ilma struktureeritud lõigupiirita. Seetõttu asendatakse selle säilitatava
-väljakutselogi `responseBody` väljajätmismarkeriga; üksikasjalikku
-konveieriartefakti (mis võib sisaldada ülesvoolu- ja kliendikehi ning voogedastuse
-tükke) ei säilitata. Semantiliste, idempotentsuse ja põhjenduskorduse vahemälude
-lugemistest ja kirjutamistest minnakse selle päringu puhul mööda. Teenusepakkuja
-päring ja kliendile nähtav vastus jäävad muutmata. Varased ühenduse elushoidmise
-baidid eemaldatakse ajutisest puhvrist, kui üksikasjalik artefakt välja jäetakse.
-Kiro vigase EventStreami hoiatus esitab ainult lasti baitide arvu, mitte kunagi
-selle sisu ega JSON-i parseri töötlemata viga.
-See ei väida, et auditeeritud on kõik mitteseotud teenusepakkuja või pistikprogrammi
-diagnostikad; säilitatavate talletuskohtade laiem kontroll on jälgitav ülesandes
-#11658.
+Vaadeldud päringu puhul võib mudeli vastus tsiteerida ärakirja mis tahes osa ilma struktureeritud vihjepiirita. Selle püsiv kõnelogi `responseBody` on seetõttu asendatud väljajätmise markeriga; üksikasjalikku torujuhtme artefakti (mis võib sisaldada upstream/client kehasid ja voojuppe) ei säilitata. Semantiline, idempotentsus ja arutluskäikude taasesitamise vahemälu ignoreerivad selle päringu lugemist ja kirjutamist. Pakkuja päring ja kliendile nähtav vastus jäävad muutumatuks. Kui detailne artefakt jäetakse välja, tühjendatakse ajutisest puhvrist varajased säilitusbaidid. Kiro vigane EventStream hoiatus teatab ainult kasuliku koormuse baitide arvu, mitte kunagi selle sisu ega JSON parseri töötlemata viga. See ei väida, et iga sõltumatu provider/plugin -diagnostika on auditeeritud; laiemat retented-sink pühkimist jälgitakse #11658.
 
-Sisemise `/api/modality-bridge/video/drilldown` elutsükkel on eraldiseisev
-tagasisideaadressi ja loaga autenditud vahemälu alamsüsteem. Iga toiming nõuab
-ka kanoonilist läbipaistmatut turvasubjekti ID-d. Enne tootmiskutsuja lubamist
-peab see tuletama ID autenditud rentnikust ega tohi kunagi edastada kliendi
-valitud väärtust. Vahemäluvõtmed seovad selle turvasubjekti kanooniliste seansi-
-ja videoviite ID-dega, talletavad ainult nende SHA-256 põhjal tuletatud võtmeid
-ning piiravad nii lugemise kui ka kustutamise sama turvasubjektiga. Vahemälu
-talletab iga kirje kohta kuni 16 tuletatud JPEG-kaadrit, aegub need kümne minuti
-pärast ning toetab piiratud `start`/`end` lugemisi või seansi selgesõnalist
-kustutamist.
+Sisemine `/api/modality-bridge/video/drilldown` elutsükkel on eraldiseisev loopback/token-authenticated vahemälu substraat. Iga toiming nõuab ka kanoonilist läbipaistmatut printsiipi ID. Enne tootmishelistaja lubamist peab see tuletama selle ID autentitud rentnikult ega tohi kunagi edastada kliendi valitud väärtust. Vahemälu võtmed seovad selle printsiibi kanoonilise seansi ja videoviite IDs, salvestavad ainult nende SHA-256-derived võtmed ja hõlmavad nii lugemist kui ka kustutamist samasse printsiipi. Vahemällu salvestatakse kuni 16 tuletatud JPEG kaadrit sisestuse kohta, aegub need kümne minuti pärast ja see toetab piiratud `start`/`end` lugemist või selgesõnalist seansi kustutamist.
 
-Iga turvasubjekt on piiratud 16 kirje ja 64 MiB kanooniliste JPEG-andmetega. Need
-piirangud on sõltumatud globaalsest 64 kirje / 256 MiB ülempiirist: turvasubjekti
-kvoodisurve eemaldab enne globaalse LRU-väljatõstmise kaalumist ainult selle
-turvasubjekti kõige kauem kasutamata kirjed. Aegunud kirjed eemaldatakse vahemälu
-kasutamisel nii turvasubjekti kui ka globaalsest arvestusest, samas kui tühistamine
-ja valideerimise nurjumine ei kinnita osalist asendust.
+Iga printsiip on piiratud 16 kirjega ja 64 MiB kanooniliste JPEG andmetega. Need piirangud ei sõltu globaalsest 64-entry/256 MiB ülemmäärast: printsipaali kvoodi surve tõstab enne globaalse LRU väljatõstmise kaalumist välja ainult selle printsipaali kõige vähem hiljuti kasutatud kanded. Aegunud kanded pühitakse nii põhi- kui ka globaalsest vahemälutegevuse arvestusest, samas kui tühistamise ja kinnitamise ebaõnnestumine ei too kaasa osalist asendamist.
 
-Vahemälu lükkab tagasi mittekanoonilise Base64, liigse täidise, mitte-JPEG meedia, vigased või
-kärpitud JPEG-id ning JPEG-id, mis tekitavad hoiatuse piiratud täispildi `sharp`-dekodeerimise
-käigus. See kodeerib iga aktsepteeritud pildi ümber kanooniliseks JPEG-iks, tuletab laiuse ja
-kõrguse dekodeeritud baitidest, selle asemel et usaldada väljakutsuja välju, ning viskab ära
-kõik lõpus olevad polüglot-baidid, selle asemel et neid säilitada. Mõlema kvoodi arvele
-läheb ainult piiratud kanooniline tihendatud puhver. JSON-i ülekandelimiit arvestab
-32 MiB dekodeeritud sisendi ülempiiri puhul ka Base64 üldkulusid. Iga
-salvestatud tuletis registreerib oma valideeritud JPEG-vormingu/-eraldusvõime, valimipoliitika,
-tuletise versiooni, loomisaja, serveris arvutatud sisuräsi ja räsitud vanemviite koos
-usaldusväärse väljakutsuja vanem-sisu räsiga. Tühistamist kontrollitakse
-asünkroonsete dekodeerimis-/räsimisfaaside vahel enne aatomilist vahemällu kinnitamist.
+Vahemälu lükkab tagasi mittekanoonilise Base64, liigse polsterduse, mitte-JPEG-meediumi, väära vorminguga või kärbitud JPEGs ja JPEGs, mis annavad hoiatuse piiratud täispildi `sharp` dekodeerimisel. See kodeerib iga aktsepteeritud kujutise uuesti kanooniliseks JPEG, tuletab helistajaväljade usaldamise asemel dekodeeritud baitidest laiuse ja kõrguse ning jätab need allesjäämise asemel kõrvale kõik järgnevad polüglotibaidid. Mõlema kvoodi alla arvestatakse ainult piiratud kanoonilist tihendatud puhvrit. JSON juhtmepiirang sisaldab Base64 üldkulusid 32 MiB dekodeeritud sisendiga lae jaoks. Iga salvestatud tuletis salvestab selle kinnitatud JPEG format/resolution, proovivõtupoliitika, tuletamisversiooni, loomise aja, serveri poolt arvutatud sisu räsi ja räsi vanemaviide pluss usaldusväärse helistaja põhisisu räsi. Tühistamist kontrollitakse asünkroonsete decode/hash faaside vahel enne aatomi vahemälu sidumist.
 
-See osa ei ühenda veel tootmisprodutsenti marsruudiga ega paku mitme eraldusvõimega
-variantide valikut. Läbipaistva Video Bridge'i päringuteed ei koorma seetõttu lisatöö,
-samas kui rentnikuga seotud põhisubjekti tuletamine ja kogu FU-08 mitme eraldusvõimega
-elutsükkel jäävad selgesõnaliseks järeltegevuseks, mitte valmiskäitumisena
-dokumenteerituks.
+Tootmistootja kasutab juba tuletatud maakleri kaadreid uuesti alles pärast edukat visuaalset analüüsi, ilma teise videota download/extraction. See nõuab operaatorit `modalityBridgeVideoDrilldownEnabled=true`, ranget osade kaupa `drilldown: true` ja autentitud API-võtme kirjet ID. Kliendi deklareeritud principal/session väärtused ei määra kunagi omandiõigust. Ilma kõigi kolme tingimuseta see ei räsi, ei muuda nende suurust ega säilita täiendavaid kaadreid. Säilitamise ebaõnnestumine säilitab kasutatava visuaalse vastuse. Nõusolekutaotlused mööduvad kogu video tulemuste vahemälust, nii et vahemällu salvestatud tulemusi ei esitata kunagi uuesti.
 
-Kaadrid kirjeldatakse järjestikku konfigureeritud Video-mudeliga. Tühi
-Video-alistus pärib Visioni seade; kui mõlemad on tühjad, valib Visioni
-automaatruter efektiivse nägemisvõimelise mudeli. Edukad kirjeldused
-asendavad algse osa stabiilse `[Video description:` eesliitega, mis samal ajal
-märgib teksti ebausaldusväärse meediast tuletatud vaatlusena ja käsib allavoolu
-mudelitel mitte järgida meediast leitud juhiseid. Kaadrikirjelduse vahemälu võtmed
-sisaldavad JPEG-baitide, viiba, ajatemplit ja efektiivset mudelit; vahemällu salvestatakse
-ainult edukaid kirjeldusi. Vahemälu kirjed säilitavad tegeliku eduka produtsendi mudeli,
-sealhulgas varumudeli; sild teatab `mixed`, kui erinevad kaadrid on toodetud erinevate
-mudelitega. Vahemälu tabamus taaskasutab seda produtsendi identiteeti, selle asemel et
-seda ümber märgistada soovitud marsruutimiskavaks. Kogu video tulemusvahemälu võtmeks
-on iga sisend, mis muudab väljundit — viip, efektiivne mudel, valimipoliitika,
-kaadrite arv, semantilise analüüsi režiim, normaliseeritud fookusvihje SHA-256
-sõrmejälg, fookusaken, `transcript`, `audioTranscript` ja kontaktlehe lipp — nii et
-nende dimensioonide muutmine on vahemälu möödalask, mitte kunagi aegunud taaskasutus.
-Visuaalse deduplikatsiooni poliitika versioon, lävi ja piiratud kandidaatkaadrite arv
-on samuti selgesõnaliselt tulemusvahemälu võtmes ja metaandmetes; poliitika muudatus
-ei saa seetõttu taaskasutada aegunud kogu video kirjeldust. Tulemusvahemälu v4
-metaandmed säilitavad režiimi ja sõrmejälje, mitte kunagi toorest kasutajaülesannet.
-Kaitsepiirde metaandmed teatavad nii soovitud kui ka efektiivse analüüsirežiimi;
-soovitud `focused`-režiim ilma kasutatava kasutajatekstita teatatakse tegelikult
-kui `full`.
+Edukad JSON ja SSE vastused paljastavad piiratud `x-omniroute-video-drilldown` päises kuni neli läbipaistmatut käepidet. Volitatud brauseri päritolu saavad seda päist lugeda ilma CORS päritolupoliitikat laiendamata. Uued käepidemed kasutavad `v1.<32-byte random base64url token>` ja register säilitab ainult nende SHA-256 räsi. reader/header parser aktsepteerib ka pärand-64-kuueteistkümnendmärke. Autenditud avalik tarbija on `GET /api/v1/video-bridge/drilldown?handle=...`, mida piirab sõltumatult `modalityBridgeVideoDrilldownRemoteEnabled=true`. Selgesõnaline püsiv vale tühistab juurdepääsu isegi siis, kui `OMNIROUTE_VIDEO_BRIDGE_DRILLDOWN_REMOTE_ENABLED` env pärandvaru on lubatud. Tootmise säilitamisel on analoogne pärand `OMNIROUTE_VIDEO_BRIDGE_DRILLDOWN_ENABLED` tagavara. Mõlemad varud on vaikimisi välja lülitatud.
 
-Kaitsepiire eraldab iga toetatud videoosa, kuid ei kirjelda rohkem kui
-`modalityBridgeVideoMaxVideos`. Sihtmärgi puhul, mille kohta on tõestatud
-`supportsVideo === false`, muutuvad ebaõnnestunud ja limiiti ületanud videod
-selgesõnalisteks ohututeks tekstimärkideks, nii et ükski toores video ei jää alles.
-Kui võimekus on teadmata, säilitavad need osad oma videokandja; iga varutranskriptsioon
-järgib ülaltoodud piiratud tekstiteisendust. Sihtmärgid, mille puhul
-`supportsVideo === true`, mööduvad sillast. Kliendi päringu katkestussignaal levib läbi
-allalaadimise, maaklerjärjekorra, alamprotsesside ja kirjelduskutsete; katkestused
-peatuvad videote vahel ega lase kunagi tõrke korral toormeediat läbi.
+Tarbija saab autentitud võtme omandiõiguse ja rakendab võtmepoliitikat: nii GET kui ka DELETE kuuluvad `video` lõpp-punkti kategooriasse, sealhulgas `/v1` ja `/api/v1` varjunimed. Võtmed, mille lõpp-punktide lubade loend ei ole tühi, peavad sisaldama `video`; piiranguteta võtmed jäävad ühilduvaks. Tarbija tagastab sama 404 tundmatu, aegunud ja mõne teise võtme käepidemete eest. See aktsepteerib `variant=preview|standard|detail` (maksimaalne JPEG mõõde 320/640/1280, mitte kunagi suurendatud), `limit=1..8` (või pärand `frames` pseudonüüm, mitte kunagi mõlemat), nullpõhine `page` ja valikulised `start`/`end` teravustamissekundid. Dubleerivad päringuklahvid ja pööratud fookuse aknad lükatakse tagasi. Igal tagastatud variandil on selle tegeliku sisu ja tegeliku eraldusvõime metaandmete räsi, mis on lingitud säilitatud allikaga. Variandid tuletatakse lugemisel, mitte salvestatakse täiendavalt säilitatud koopiatena. JSON vastus, sealhulgas Base64/envelope, on piiratud väärtusega 32 MiB; liiga suur leht tagastab 413 ja klient peab taotlema vähem kaadreid. Loeb iga suuruse muutmise ümber oleva kontrolli tühistamise ja kontrollib enne naasmist uuesti käepideme kehtivust. `DELETE` omaniku järgi on idempotentne; kustutamine või TTL aegumine vabastab säilitatud allika ja kasutusarvestuse.
 
-Käitusaegsed seaded on andmebaasipõhised ja Zod-valideeritud:
+Jagatud pood on protsessi kohalik: käepidemed aeguvad taaskäivitamisel ja neid ei saa sõltumatute OmniRoute protsesside vahel üle kanda. Haldusstatistika näitab tõhusat säilitamis-/kaugpoliitikat ja koondab ainult säilitatud entries/bytes, mitte kunagi meediat, viiteid, peamist IDs ega käepidemeid. Videoseadete paneel näitab neid väärtusi ja võib säilitada mõlema nõusoleku lüliti. See rakendusdokumentatsioon ei ole reaalajas juurutamise ega reklaamimise tõendusmaterjal; reaalse mudeli vastuvõtmist jälgitakse eraldi.
 
-| Võti                                | Vaikimisi   | Vahemik / käitumine                                                                                                |
-| ----------------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------ |
-| `modalityBridgeVideoEnabled`        | `false`     | Valikuline käitusaegne, opt-in põhimõttel                                                                          |
-| `modalityBridgeVideoAnalysisMode`   | `"full"`    | `full` säilitab üldised kirjeldused; `focused` kasutab piiratud, ebausaldusväärset viimase kasutaja konteksti      |
-| `modalityBridgeVideoModel`          | `""`        | Pärib Vision Bridge'i mudeli                                                                                       |
-| `modalityBridgeVideoFrameCount`     | `8`         | 1–16                                                                                                               |
-| `modalityBridgeVideoSamplingPolicy` | `"uniform"` | `uniform`, `scene_aware` või proportsionaalne `segment_aware`; detektori tõrke korral lülitub tagasi `uniform`-ile |
-| `modalityBridgeVideoMaxVideos`      | `1`         | 1–4                                                                                                                |
-| `modalityBridgeVideoTimeout`        | `120000`    | 1000–120000 ms                                                                                                     |
+Kaadrite pealdised on järjestikku koos konfigureeritud videomudeliga. Tühi video alistamine pärib sätte Vision; kui mõlemad on tühjad, valib Visioni automaatruuter tõhusa nägemisvõimelise mudeli. Edukad pealdised asendavad algse osa stabiilse `[Video description:` eesliitega, mis märgib teksti ka kui ebausaldusväärset meediast tulenevat vaatlust ja käsib allavoolu mudelitel mitte järgida meedias leiduvaid juhiseid. Raami-tiitrite vahemäluklahvid hõlmavad JPEG baite, viipa, ajatemplit ja efektiivset mudelit; vahemällu salvestatakse ainult edukad subtiitrid. Vahemälu kirjed säilitavad tegeliku eduka tootja mudeli, sealhulgas varumudeli; sild teatab `mixed` kui erinevad mudelid valmistasid erinevaid raame. Vahemälu tabamus kasutab seda tootja identiteeti uuesti, selle asemel et sildistada see uuesti taotletud marsruutimisplaaniks. Kogu video tulemuste vahemälu on sisestatud igasse sisendisse, mis muudab väljundi — viipa, tõhusat mudelit, diskreetimise poliitikat, kaadrite arvu, semantilise analüüsi režiimi, normaliseeritud fookuse vihje SHA-256 sõrmejälge, fookuse akent, `transcript`, `audioTranscript` ja kontaktilehe lippu —, nii et nende mõõtmete muutmine ei ole kunagi vahemälu väärkasutus. Visuaalne dedup poliitika versioon, lävi ja piiratud kandidaatkaadrite arv on samuti selgelt väljendatud tulemuste vahemälu võtmes ja metaandmetes; poliitika muudatus ei saa seetõttu taaskasutada aegunud kogu video kirjeldust. Tulemuste vahemälu v4 metaandmed säilitavad režiimi ja sõrmejälje, mitte kunagi töötlemata kasutaja ülesannet. Guardraili metaandmed kajastavad nii nõutud kui ka tõhusaid analüüsirežiime; taotletud `focused` -režiim ilma kasutatava kasutajatekstita teatatakse tõhusalt `full`.
 
-Pärandis säilinud Video ajalõpu väärtused üle 120 sekundi piiratakse
-maakleri tähtajani; uued seadete kirjutamised üle selle piiri lükatakse tagasi.
-`GET /api/modality-bridge/video/runtime` nõuab enne autentimist või käituseaja
-sondeerimist usaldusväärset tempeldatud loopback-päritolu, seejärel nõuab haldusautentimist.
-See tagastab ainult `available`, puhastatud FFmpeg/ffprobe versioonid ja fikseeritud
-põhjuse, kui käitusaeg pole saadaval. Sisemine ekstraktsiooni lõpp-punkt ei ole
-avalik üleslaadimise API: järjekorra küllastumine tagastab `503` koos `Retry-After`-iga,
-väljakutsuja ühenduse katkemine tagastab `499` ja fikseeritud maakleri tähtaeg tagastab `504`.
-Teisendatud vastused lisavad kesksele `x-omniroute-modality-bridge` päisele
-`video->text;model=<visionModel>;parts=<videos>` ilma Vision- või Audio-segmente eemaldamata.
+Kaitsepiire eraldab kõik toetatud video osad, kuid ei kirjelda rohkem kui `modalityBridgeVideoMaxVideos`. Kui sihtmärgil on tõestatud `supportsVideo === false`, muutuvad ebaõnnestunud ja ülepiiranguga videod selgesõnalisteks ohututeks tekstimarkeriteks, nii et ükski toorvideo ei jää ellu. Kui võime pole teada, säilitavad need osad oma videokandja; mis tahes varutranskriptsioon järgib ülaltoodud piiratud teksti teisendust. Sihtmärgid `supportsVideo === true` ga mööduvad sillast. Kliendi päringu katkestamise signaal levib allalaadimise, vahendaja järjekorra, alamprotsesside ja pealdiskutsete kaudu; katkestused peatuvad videote vahel ja ei katke kunagi toormeedia jaoks avatud.
 
-### PII Masker (`piiMasker.ts`)
+Käitusaja sätted on DB-ga tagatud ja Zod-valideeritud:
 
-Töötab **mõlemas** etapis.
+| Võti                                | Vaikimisi   | Vahemik / käitumine                                                                                        |
+| ----------------------------------- | ----------- | ---------------------------------------------------------------------------------------------------------- |
+| `modalityBridgeVideoEnabled`        | `false`     | Valikuline käitusaeg, luba                                                                                 |
+| `modalityBridgeVideoAnalysisMode`   | `"full"`    | `full` säilitab üldised pealdised; `focused` kasutab piiratud, ebausaldusväärset uusima kasutaja konteksti |
+| `modalityBridgeVideoModel`          | `""`        | Pärige Vision Bridge'i mudel                                                                               |
+| `modalityBridgeVideoFrameCount`     | `8`         | 1–16                                                                                                       |
+| `modalityBridgeVideoSamplingPolicy` | `"uniform"` | `uniform`, `scene_aware` või proportsionaalne `segment_aware`; detektori rike langeb tagasi `uniform`      |
+| `modalityBridgeVideoMaxVideos`      | `1`         | 1–4                                                                                                        |
+| `modalityBridgeVideoTimeout`        | `120000`    | 1000–120 000 ms                                                                                            |
 
-- **`preCall`** kloonib kasuliku koormuse, käib läbi väljad `system`, `messages`, `input` ja `prompt` (kaasa arvatud lihtsad stringi-elemendid) ning rakendab string-tüüpi `content`/`text` väljadele funktsiooni `processPII()` (moodulist `@/shared/utils/inputSanitizer`). Kui `PII_REDACTION_ENABLED=true`, varjatakse tuvastatud PII väljuvas kasulikus koormuses. See ei sõltu muutujast `INPUT_SANITIZER_MODE` (mis juhib ainult prompt-injektsiooni poliitikat). Kui varjamine on välja lülitatud, salvestab väljakutse tuvastuste arvud ilma sisu ümber kirjutamata.
-- **`postCall`** sügavkloonib vastuse, käivitab `sanitizePIIResponse()` ning Responses-API-kuju maskerija (`maskResponsesOutput` — katab `output_text` ja `output[].content[].text`). Kui midagi varjatakse, asendab muudetud vastus originaali.
+Pärand püsinud video ajalõpu väärtused, mis on suuremad kui 120 sekundit, on fikseeritud maakleri tähtajaga; uued seaded kirjutab üle, et limiit lükatakse tagasi. `GET /api/modality-bridge/video/runtime` nõuab enne autentimist või käitusaegset kontrollimist usaldusväärse templiga tagasisilmuse asukohta, seejärel nõuab see haldusautentimist. See tagastab ainult `available`, puhastatud FFmpeg/ffprobe versioonid ja fikseeritud põhjuse, kui käitusaeg pole saadaval. Sisemine väljavõtte lõpp-punkt ei ole avalik üleslaadimine API: järjekorra küllastus tagastab `503` pluss `Retry-After`, helistaja lahtiühendamine tagastab `499` ja maakleri fikseeritud tähtaeg tagastab `504`. Teisendatud vastused lisavad `video->text;model=<visionModel>;parts=<videos>` kesksele `x-omniroute-modality-bridge` päisele ilma nägemis- või helisegmente eemaldamata.
 
-Kaitseraud ei blokeeri kunagi; see ainult annoteerib (`meta.detections`, `meta.redacted`) või kirjutab ümber.
+### PII masker (`piiMasker.ts`)
 
-#### Tüübipõhine valik, kohandatud mustrid ja tuvastuste loendurid
+Jookseb edasi **mõlemad** etapid.
 
-**Armatuurlaud → Seaded → Turvalisus → PII maskeerimine** valib, _mida_ maskeeritakse. See ei lülita maskeerimist sisse: selleks on endiselt `PII_REDACTION_ENABLED` (päring) ja `PII_RESPONSE_SANITIZATION` (vastus + SSE), mis mõlemad on vaikimisi välja lülitatud.
+- **`preCall`** kloonib kasuliku koormuse, kõnnib `system`, `messages`, `input` ja `prompt` (kaasa arvatud tavalised stringiüksused) ning rakendab `processPII()` (alates `@/shared/utils/inputSanitizer`) stringi `content`/`text` väljadele. Kui `PII_REDACTION_ENABLED=true`, redigeeritakse tuvastatud PII väljaminevas kasulikus koormuses. See ei sõltu `INPUT_SANITIZER_MODE` (mis kontrollib ainult kiire süstimise poliitikat). Kui redigeerimine on välja lülitatud, salvestab kõne tuvastusloendeid sisu ümber kirjutamata.
+- **`postCall`** sügavalt kloonib vastuse, käivitab `sanitizePIIResponse()` pluss Responses-API-kuju maskeerija (`maskResponsesOutput` — hõlmab `output_text` ja `output[].content[].text`). Redigeerimise korral asendab muudetud vastus originaali.
 
-- **Tüübipõhine valik** — sisseehitatud id-d on loetletud failis `src/shared/constants/piiTypes.ts` (`PII_BUILTIN_TYPES`). Määramata jätmine tähendab kõiki tüüpe (käitumine enne selle seade lisandumist). Päringumootori muster `ssn_us` vastendatakse tüübile `ssn`. Mallid (Minimaalne, Standardne, Finants, Brasiilia, USA, GDPR, POPIA, Täielik) täidavad kasutajaliideses ainult märkeruudud.
-- **GDPR-i ja POPIA identifikaatorid** — kaksteist sisseehitatud ID-d EL-i ja Lõuna-Aafrika isikuidentifikaatorite jaoks (tabel allpool). Nende regulaaravaldised, validaatorid ja jurisdiktsioonisildid asuvad ühes tabelis `src/shared/utils/piiPatterns.ts`, mida kasutavad nii vastusepuhastaja (`src/lib/piiSanitizer.ts`) kui päringumaskija (`src/shared/utils/inputSanitizer.ts`). Vaste varjatakse ainult siis, kui validaator selle heaks kiidab; paljas numbrijada ei piisa kunagi. Operaator, kes salvestas kitsendatud valiku enne nende ID-de olemasolu, säilitab senise käitumise kuni uute ID-de märkimiseni.
-- **Kohandatud mustrid** — kuni 20 regulaaravaldise või metamärgimustri (`*` = kuni 64 mittetühikumärki, `?` = üks). Vasted asendatakse väärtusega `[CUSTOM_REDACTED]`. Iga muster läbib `compilePiiCustomPattern()` (`src/shared/utils/piiCustomPatterns.ts`): kuni 500 tähemärki, lipud on piiratud väärtustega `g i m s u`, muster peab kompileeruma, läbima `safe-regex` kontrolli (katastroofiline tagasiminek) ning ei tohi anda vastet tühjale sõnele ega varjamise kohatäitele. Muster, mis kontrolli ei läbi, lükatakse tagasi salvestamisel ja testimisel ning talletatud rida, mis ei läbi, jäetakse käitusajal kompileerimise asemel vahele. Kohandatud mustreid käivitatakse ainult siis, kui maskeerimine on sisse lülitatud.
-- **Tuvastuste loendurid** — tüübipõhised arvud (mitte kunagi vastetud väärtused), mida hoitakse mälus ja mis lähtestatakse taaskäivitusel (`src/lib/pii/piiDetectionStats.ts`). Need suurenevad ainult siis, kui maskeerimine on sisse lülitatud.
+Kaitsepiire ei blokeeri kunagi; see ainult märgib (`meta.detections`, `meta.redacted`) või kirjutab ümber.
 
-Seaded asuvad tabelis `key_value` (nimeruum `pii_settings`, `src/lib/db/piiSettings.ts`) ja neid loetakse läbi 1 s vahemälu. API:
+#### Tüübi valik, kohandatud mustrid ja tuvastusloendurid
+
+**Armatuurlaud → sätted → turvalisus → PII maskeerimine** valib _mis_ on maskeeritud. See ei lülita maskeerimist sisse: see on endiselt `PII_REDACTION_ENABLED` (taotlus) ja `PII_RESPONSE_SANITIZATION` (vastus + SSE), mõlemad vaikimisi välja lülitatud.
+
+- **Valik tüübi järgi** — sisseehitatud ID-d on loetletud `src/shared/constants/piiTypes.ts` (`PII_BUILTIN_TYPES`). Määramata tähendab igat tüüpi (käitumine enne selle sätte olemasolu). Päringumootori `ssn_us` muster kaardistab `ssn` ga. Mallid (minimaalne, standardne, finants, brasiilia, USA, GDPR, POPIA, täismall) täidavad ainult UI märkeruudud.
+- **GDPR ja POPIA identifikaatorid** — kaksteist sisseehitatud ID-d, mis katavad EU ja Lõuna-Aafrika isikuidentifikaatorid (tabel allpool). Nende regexid, valideerijad ja jurisdiktsioonimärgendid asuvad ühes tabelis `src/shared/utils/piiPatterns.ts`, mida tarbivad nii vastuse puhastaja (`src/lib/piiSanitizer.ts`) kui ka päringu maskeerija (`src/shared/utils/inputSanitizer.ts`). Vaste redigeeritakse ainult siis, kui selle valija selle vastu võtab; tühjast numbrite jooksust ei piisa kunagi. Operaator, kes salvestas kitsendatud valiku enne nende ID-de olemasolu, säilitab oma käitumise seni, kuni uued ID-d on märgitud.
+- **Kohandatud mustrid** — kuni 20 regex- või metamärgimustrit (`*` = kuni 64 mitte-tühimärki, `?` = üks). Mängudest saab `[CUSTOM_REDACTED]`. Iga muster läbib `compilePiiCustomPattern()` (`src/shared/utils/piiCustomPatterns.ts`): maksimaalselt 500 tähemärki, lipud piirduvad `g i m s u`, peavad kompileerima, peavad läbima `safe-regex` (katastroofiline taganemine) ega tohi ühtida tühja stringi või redigeerimiskohahoidjaga. Ebaõnnestunud muster lükatakse salvestamisel ja testimisel tagasi ning ebaõnnestunud salvestatud rida jäetakse kompileerimise asemel käitusajal vahele. Kohandatud mustrid töötavad ainult siis, kui maskeerimine on sisse lülitatud.
+- **Tuvastamisloendurid** — loendab tüübi kohta (väärtused pole kunagi ühtinud), hoitakse mälus ja lähtestatakse taaskäivitamisel (`src/lib/pii/piiDetectionStats.ts`). Need suurenevad ainult maskeerimise ajal.
+
+Sätted asuvad `key_value` tabelis (nimeruum `pii_settings`, `src/lib/db/piiSettings.ts`) ja neid loetakse 1 s vahemälu kaudu. API:
 
 | Meetod | Tee                      | Otstarve                                                              |
 | ------ | ------------------------ | --------------------------------------------------------------------- |
@@ -538,9 +249,9 @@ Seaded asuvad tabelis `key_value` (nimeruum `pii_settings`, `src/lib/db/piiSetti
 | `PUT`  | `/api/settings/pii`      | Asendab `enabledTypes` (`null` = kõik) ja/või `customPatterns`        |
 | `POST` | `/api/settings/pii/test` | Proovib ühte mustrit kuni 8 KB suurusel valimil; midagi ei salvestata |
 
-Kõik kolm nõuavad haldusautentimist ja valideerivad päringu keha Zodiga (`src/shared/validation/schemas/piiSettings.ts`).
+Kõik kolm nõuavad haldamise autentimist ja kinnitavad keha Zod ga (`src/shared/validation/schemas/piiSettings.ts`). Kui sisselogimine on keelatud (`requireLogin=false`), on `GET` ja testi lõpp-punkt avatud, kuid `PUT` vajab siiski armatuurlaua seanssi, `manage` -scope API -võtit, kirjutusulatusega või kõrgema `oma_` pääsuluba või tagasisilmuse kaudu saadetud CLI -luba või siseteenuse luba.
 
-#### GDPR-i (EL) ja POPIA (Lõuna-Aafrika) identifikaatorid
+#### GDPR (EU) ja POPIA (Lõuna-Aafrika) identifikaatorid
 
 | ID                  | Identifikaator                 | Valideerimine                                                                 |
 | ------------------- | ------------------------------ | ----------------------------------------------------------------------------- |
@@ -557,7 +268,7 @@ Kõik kolm nõuavad haldusautentimist ja valideerivad päringu keha Zodiga (`src
 | `za_vat`            | Lõuna-Aafrika käibemaksunumber | 10 numbrit algusega `4` **ja** "VAT" / "BTW" eelneva 48 märgi seas            |
 | `za_tax_ref`        | Lõuna-Aafrika maksuviide       | 10 numbrit algusega `0`-`3`, Luhn **ja** "tax" / "SARS" eelneva 48 märgi seas |
 
-Kuna ainult numbritest koosnevad vormingud kattuvad tellimusnumbrite, järgunumbrite ja ajatemplitega, vajavad nõrgimad (`za_vat`, `za_tax_ref`) märksõnavihjet ning paljast kümnekohalist `0..` numbrit ei käsitleta Lõuna-Aafrika telefoninumbrina. Tühikutega IBAN-e (`GB29 NWBK ...`) ei sobitata. Voogteekonnal otsitakse vihjet ainult käesolevast tükist. ID-d paiknevad üldistest telefonimustritest eespool, nii et valideeritud identifikaator säilitab oma kohatäitja (`[IBAN_REDACTED]`, `[NL_BSN_REDACTED]`, ...). Mallid `gdpr` ja `popia` valivad vastavalt EL-i ja Lõuna-Aafrika ID-d. Maskimine ise jääb eraldi lubatavaks (Hard Rule #20): miski siin ei muuda funktsioonilipu vaikeväärtust.
+Kuna ainult numbrilised vormingud põrkuvad tellimusnumbrite, järgunumbrite ja ajatemplitega, vajavad nõrgimad (`za_vat`, `za_tax_ref`) märksõna näpunäidet ja tühja kümnekohalist `0..` numbrit ei käsitleta Lõuna-Aafrika telefoninumbrina. Tühikutega IBANs (`GB29 NWBK ...`) ei sobi. Voogesitusteel vaadatakse vihjet ainult praeguse tüki seest. ID-d asuvad üldiste telefonimustrite ees, seega säilitab kinnitatud identifikaator oma kohahoidja (`[IBAN_REDACTED]`, `[NL_BSN_REDACTED]`, ...). Mallid `gdpr` ja `popia` valivad vastavalt EU ja Lõuna-Aafrika ID-d. Maskeerimine jääb valikuliseks (Hard Rule #20): siin ei muuda miski funktsiooni lipu vaikeseadet.
 
 ### Prompt-injektsioon (`promptInjection.ts`)
 

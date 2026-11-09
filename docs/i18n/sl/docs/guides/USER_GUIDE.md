@@ -348,19 +348,19 @@ Model: cc/claude-opus-4-7
 ```bash
 npm install -g omniroute
 
-# Ustvarite konfiguracijski imenik
+# Create config directory
 mkdir -p ~/.omniroute
 
-# Ustvarite datoteko .env (glejte .env.example)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# Zaženite strežnik
+# Start server
 omniroute
-# Ali z vrati po meri:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI samodejno naloži `.env` iz `~/.omniroute/.env` ali `./.env`.
+CLI samodejno naloži `.env` iz `~/.omniroute/.env` ali `./.env`. `./.env` v delovnem imeniku lahko nastavi le kratek seznam dovoljenih ključev (vrata, `REQUIRE_API_KEY`, področne in barvne nastavitve); vse ostalo daj v `~/.omniroute/.env`. Oglejte si [pogodbe o lansiranju CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### Način sistemske vrstice
 

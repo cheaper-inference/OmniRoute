@@ -242,7 +242,7 @@ src/
 | -------------------------------- | --------------------------------------------------------------------------------------------- |
 | `components/`                    | 대시보드 컴포넌트 API: `packages/ui-kit`의 어댑터 — `docs/architecture/DESIGN_SYSTEM.md` 참조 |
 | `constants/iconMap.ts`           | `ICON_MAP`: 화면에서 사용하는 아이콘 이름 → Lucide 컴포넌트(`<Icon>`)                         |
-| `constants/providers.ts`         | Zod 검증이 적용된 **380개 제공자**(신뢰할 수 있는 단일 출처)                                  |
+| `constants/providers.ts`         | **382개 제공업체** Zod 검증 포함(진실의 출처)                                                 |
 | `constants/cliTools.ts`          | 외부 CLI 도구 레지스트리                                                                      |
 | `constants/routingStrategies.ts` | 우선순위가 지정된 **20개 라우팅 전략**                                                        |
 | `constants/publicApiRoutes.ts`   | 관리 인증이 아닌 Bearer 인증이 필요한 경로                                                    |
@@ -395,24 +395,24 @@ open-sse/
 
 ### 최상위 가이드
 
-| 문서                        | 목적                                                                                 |
-| --------------------------- | ------------------------------------------------------------------------------------ |
-| `ARCHITECTURE.md`           | 상위 수준 아키텍처, 서브시스템 맵, 대시보드 화면                                     |
-| `CODEBASE_DOCUMENTATION.md` | 엔지니어링 레퍼런스: 디렉터리, 모듈, 컨벤션                                          |
-| `FEATURES.md`               | v3.8 하이라이트가 포함된 기능 매트릭스                                               |
-| `USER_GUIDE.md`             | 최종 사용자 매뉴얼 (설정, 모델, 콤보, CLI, 오디오 등)                                |
-| `API_REFERENCE.md`          | 인증 모델이 포함된 API 엔드포인트 레퍼런스                                           |
-| `openapi.yaml`              | OpenAPI 3.0 스펙 (121개 경로)                                                        |
-| `SETUP_GUIDE.md`            | 설치 방법 (npm, npx, Docker, Electron, Termux, 소스)                                 |
-| `ENVIRONMENT.md`            | 모든 환경 변수 (약 800개 문서화, 약 3,050줄의 `.env.example`)                        |
-| `TROUBLESHOOTING.md`        | 일반적인 오류 + v3.8.0 알려진 이슈                                                   |
-| `RELEASE_CHECKLIST.md`      | 전체 릴리스 흐름 (스킬, husky, conventional commits, 배포)                           |
-| `COVERAGE_PLAN.md`          | 커버리지 목표 및 현재 상태                                                           |
-| `FREE_TIERS.md`             | 선별된 무료 티어 프로바이더 (무료 48개 이상 + OAuth 11개)                            |
-| `CLI-TOOLS.md`              | 외부 CLI 통합 + 내부 OmniRoute CLI                                                   |
-| `I18N.md`                   | i18n 아키텍처, 언어 추가 방법, 67개 로케일                                           |
-| `UNINSTALL.md`              | 클린 제거 단계                                                                       |
-| `PROVIDER_REFERENCE.md`     | **자동 생성**된 380개 프로바이더 카탈로그 (재생성: `npm run gen:provider-reference`) |
+| 문서                        | 목적                                                                            |
+| --------------------------- | ------------------------------------------------------------------------------- |
+| `ARCHITECTURE.md`           | 상위 수준 아키텍처, 서브시스템 맵, 대시보드 화면                                |
+| `CODEBASE_DOCUMENTATION.md` | 엔지니어링 레퍼런스: 디렉터리, 모듈, 컨벤션                                     |
+| `FEATURES.md`               | v3.8 하이라이트가 포함된 기능 매트릭스                                          |
+| `USER_GUIDE.md`             | 최종 사용자 매뉴얼 (설정, 모델, 콤보, CLI, 오디오 등)                           |
+| `API_REFERENCE.md`          | 인증 모델이 포함된 API 엔드포인트 레퍼런스                                      |
+| `openapi.yaml`              | OpenAPI 3.0 스펙 (121개 경로)                                                   |
+| `SETUP_GUIDE.md`            | 설치 방법 (npm, npx, Docker, Electron, Termux, 소스)                            |
+| `ENVIRONMENT.md`            | 모든 환경 변수 (약 800개 문서화, 약 3,050줄의 `.env.example`)                   |
+| `TROUBLESHOOTING.md`        | 일반적인 오류 + v3.8.0 알려진 이슈                                              |
+| `RELEASE_CHECKLIST.md`      | 전체 릴리스 흐름 (스킬, husky, conventional commits, 배포)                      |
+| `COVERAGE_PLAN.md`          | 커버리지 목표 및 현재 상태                                                      |
+| `FREE_TIERS.md`             | 선별된 무료 티어 프로바이더 (무료 48개 이상 + OAuth 11개)                       |
+| `CLI-TOOLS.md`              | 외부 CLI 통합 + 내부 OmniRoute CLI                                              |
+| `I18N.md`                   | i18n 아키텍처, 언어 추가 방법, 67개 로케일                                      |
+| `UNINSTALL.md`              | 클린 제거 단계                                                                  |
+| `PROVIDER_REFERENCE.md`     | **자동 생성** 382개 제공업체 카탈로그(재생성: `npm run gen:provider-reference`) |
 
 ### 서브시스템 심층 분석
 

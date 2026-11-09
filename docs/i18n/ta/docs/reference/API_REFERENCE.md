@@ -14,37 +14,37 @@ OpenAI-உடன் இணக்கமான நெறிமுறை மற்�
 
 ---
 
-## உள்ளடக்க அட்டவணை
+## பொருளடக்கம்
 
-- [Chat Completions](#chat-completions)
-- [Exclusive Managed Session Leases](#exclusive-managed-session-leases)
-- [Embeddings](#embeddings)
-- [Image Generation](#image-generation)
-- [Document OCR](#document-ocr)
-- [List Models](#list-models)
-- [Provider Plugin Manifest](#provider-plugin-manifest)
-- [Compatibility Endpoints](#compatibility-endpoints)
-- [Files API](#files-api)
-- [Batches API](#batches-api)
-- [Search API](#search-api)
-- [WebSocket Streaming](#websocket-streaming)
-- [Quotas & Issues Reporting](#quotas--issues-reporting)
-- [Semantic Cache](#semantic-cache)
-- [CLIProxyAPI Management Compatibility](#cliproxyapi-management-compatibility)
-- [Dashboard & Management](#dashboard--management)
-- [Combo Management](#combo-management)
-- [Webhooks](#webhooks)
-- [Registered Keys (Auto-Management)](#registered-keys-auto-management)
-- [Agents Protocol](#agents-protocol)
-- [Management Proxies](#management-proxies)
-- [Resilience (extended)](#resilience-extended)
-- [Skills](#skills)
-- [Memory](#memory)
-- [MCP Server](#mcp-server)
-- [A2A Server](#a2a-server)
-- [Cloud, Evals & Assess](#cloud-evals--assess)
-- [Request Processing](#request-processing)
-- [Authentication](#authentication)
+- [அரட்டை நிறைவுகள்](#chat-completions)
+- [பிரத்தியேக நிர்வகிக்கப்பட்ட அமர்வு குத்தகைகள்](#exclusive-managed-session-leases)
+- [உட்பொதிப்புகள்](#embeddings)
+- [பட உருவாக்கம்](#image-generation)
+- [ஆவணம் OCR](#document-ocr)
+- [பட்டியல் மாதிரிகள்](#list-models)
+- [வழங்குநர் செருகுநிரல் மேனிஃபெஸ்ட்](#provider-plugin-manifest)
+- [பொருந்தக்கூடிய இறுதிப்புள்ளிகள்](#compatibility-endpoints)
+- [கோப்புகள் API](#files-api)
+- [தொகுதிகள் API](#batches-api)
+- [API தேடுங்கள்](#search-api)
+- [WebSocket ஸ்ட்ரீமிங்](#websocket-streaming)
+- [ஒதுக்கீடுகள் & சிக்கல்கள் அறிக்கை](#quotas--issues-reporting)
+- [சொற்பொருள் கேச்](#semantic-cache)
+- [CLIProxyAPI மேலாண்மை இணக்கத்தன்மை](#cliproxyapi-management-compatibility)
+- [டாஷ்போர்டு & மேலாண்மை](#dashboard--management)
+- [சேர்க்கை மேலாண்மை](#combo-management)
+- [வெப்ஹூக்ஸ்](#webhooks)
+- [பதிவு செய்யப்பட்ட விசைகள் (தானியங்கு மேலாண்மை)](#registered-keys-auto-management)
+- [முகவர்கள் நெறிமுறை](#agents-protocol)
+- [மேலாண்மை ப்ராக்ஸிகள்](#management-proxies)
+- [மீள்தன்மை (நீட்டிக்கப்பட்ட)](#resilience-extended)
+- [திறன்கள்](#skills)
+- [நினைவகம்](#memory)
+- [MCP சேவையகம்](#mcp-server)
+- [A2A சேவையகம்](#a2a-server)
+- [கிளவுட், ஏவல்ஸ் & மதிப்பீடு](#cloud-evals--assess)
+- [கோரிக்கை செயலாக்கம்](#request-processing)
+- [அங்கீகாரம்](#authentication)
 
 ---
 
@@ -332,35 +332,22 @@ Content-Type: application/json
 }
 ```
 
-கிடைக்கும் வழங்குநர்களில் OpenAI (GPT Image 2), xAI (Grok Image), Together AI (FLUX), Fireworks AI, Nebius (FLUX), Hyperbolic, NanoBanana, **OpenRouter**, **ZenMux**, SD WebUI (உள்ளூர்), ComfyUI (உள்ளூர்) ஆகியவை அடங்கும்.
+கிடைக்கக்கூடிய வழங்குநர்களில் OpenAI (GPT படம் 2), xAI (Grok படம்), Together AI (FLUX), Fireworks AI, Nebius (FLUX), ஹைபர்போலிக், NanoBanana,**OpenRouter** ,**ZenMux** , SD WebUI (உள்ளூர்), ComfyUI (உள்ளூர்).
 
-`n` என்பது `data[]` இல் `n` படங்களைத் திருப்பி வழங்கும். upstream API ஒவ்வொரு அழைப்பிற்கும் ஒரு படத்தைத் திருப்பி வழங்கும் வழங்குநர்களுக்கு
-(Black Forest Labs, Stability AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik,
-NVIDIA NIM, Cloudflare Workers AI), அதிகபட்சம் ஒரே நேரத்தில் 4 அழைப்புகள் இயக்கப்படும் வகையில்
-`n` தனித்தனி upstream அழைப்புகள் செய்யப்படும். நிலையான `seed`, அழைப்பு குறியீட்டால் (`seed`, `seed + 1`, …) மாற்றியமைக்கப்படும்; இதனால் படங்கள் வேறுபட்டவையாக இருந்தாலும் மீண்டும் உருவாக்கக்கூடியவையாக இருக்கும். `n` இன் அதிகபட்ச மதிப்பு 10. ஏதேனும் ஓர் அழைப்பு தோல்வியடைந்தால், கோரிக்கை முழுவதுமாகத் தோல்வியடையும். fan-out வடிவங்களின் பட்டியல்
-`open-sse/handlers/imageGeneration/fanOut.ts` இல் உள்ள `SINGLE_IMAGE_FANOUT_FORMATS` ஆகும்.
+`n` `n` படங்களை `data[]` இல் வழங்குகிறது. ஒரு அழைப்புக்கு ஒரு படத்தை அப்ஸ்ட்ரீம் API வழங்கும் வழங்குநர்கள் (Black Forest Labs, Stability AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik, NVIDIA NIM, Cloudflare Workers AI) அதிகபட்சம் 4 விமானங்களில் `n` தனி அப்ஸ்ட்ரீம் அழைப்புகளைப் பெறுவார்கள். நிலையான `seed` ஆனது அழைப்பு குறியீட்டால் ஈடுசெய்யப்படுகிறது (`seed`, `seed + 1`, …), எனவே படங்கள் வேறுபடும் ஆனால் மீண்டும் உருவாக்கக்கூடியதாக இருக்கும். `n` 10 ஆக உள்ளது. ஏதேனும் அழைப்பு தோல்வியுற்றால் கோரிக்கை முழுவதுமாக தோல்வியடையும். ஃபேன்-அவுட் வடிவங்களின் பட்டியல் `open-sse/handlers/imageGeneration/fanOut.ts` இல் `SINGLE_IMAGE_FANOUT_FORMATS` ஆகும்.
 
-ZenMux, ஏற்கனவே உள்ள API-key இணைப்பை மீண்டும் பயன்படுத்துகிறது; மேலும் `zenmux/` அல்லது `zm/` முன்னொட்டுகளை ஏற்கிறது:
+ZenMux ஏற்கனவே உள்ள API-விசை இணைப்பை மீண்டும் பயன்படுத்துகிறது மற்றும் `zenmux/` அல்லது `zm/` முன்னொட்டுகளை ஏற்கிறது:
 
-- `zenmux/openai/gpt-image-2`, ZenMux-ன் OpenAI Images API-ஐப் பயன்படுத்துகிறது. விருப்பங்களில் `size`,
-  `quality`, `n`, `output_format`, `output_compression`, `background`, மற்றும் `response_format` ஆகியவை அடங்கும்.
-- `zm/meta/muse-image-1.0` போன்ற பிற வெளியீட்டாளர்கள், ZenMux-ன் Vertex AI `:predict`
-  endpoint-ஐப் பயன்படுத்துகின்றனர். `n` என்பது `sampleCount` ஆகவும், `aspect_ratio` என்பது
-  `aspectRatio` ஆகவும், `image_size` (`1K`, `2K`, `4K`) என்பது `sampleImageSize` ஆகவும் மாற்றப்படும். பிக்சல்
-  `size`, உறுதியான பிக்சல் பரிமாணங்களை வழங்காமல், aspect ratio-வை மட்டுமே வழங்கும். ஆதரிக்கப்படும் விகிதங்கள்,
-  தெளிவுத்திறன்கள் மற்றும் எண்ணிக்கைகள் மாதிரிக்கு ஏற்ப மாறுபடும்.
-- `zm/inclusionai/ming-image-0.1-design`, அதன் சொந்த பரிமாணங்களைத் தேர்ந்தெடுக்கும். `size`,
-  `aspect_ratio`, மற்றும் `image_size` ஆகியவற்றைத் தவிர்க்கவும்; வெளிப்படையான மதிப்புகள் HTTP 400-ஐத் திருப்பி வழங்கும். `output_format` மூலம் PNG, JPEG, மற்றும் WebP ஆகியவற்றைக் கோரலாம்.
+- `zenmux/openai/gpt-image-2` ZenMux இன் OpenAI படங்கள் API பயன்படுத்துகிறது. விருப்பங்களில் `size`, `quality`, `n`, `output_format`, `output_compression`, `background` மற்றும் `response_format` ஆகியவை அடங்கும்.
+- `zm/meta/muse-image-1.0` போன்ற பிற வெளியீட்டாளர்கள், ZenMux இன் வெர்டெக்ஸ் AI `:predict` இறுதிப்புள்ளியைப் பயன்படுத்துகின்றனர். `n` வரைபடங்கள் `sampleCount`, `aspect_ratio` to `aspectRatio`, மற்றும் `image_size` (`1K`, `2K`, `4K`) க்கு `sampleImageSize`. ஒரு பிக்சல் `size` ஒரு விகிதத்தை மட்டுமே வழங்குகிறது, பிக்சல் பரிமாணங்களுக்கு உத்தரவாதம் இல்லை. ஆதரிக்கப்படும் விகிதங்கள், தீர்மானங்கள் மற்றும் எண்ணிக்கைகள் மாதிரியைப் பொறுத்து மாறுபடும்.
+- `zm/inclusionai/ming-image-0.1-design` அதன் சொந்த பரிமாணங்களைத் தேர்ந்தெடுக்கிறது. `size`, `aspect_ratio` மற்றும் `image_size` ஐத் தவிர்க்கவும்; வெளிப்படையான மதிப்புகள் HTTP 400 ஐத் தருகின்றன. PNG, JPEG, மற்றும் WebP ஆகியவற்றை `output_format` உடன் கோரலாம்.
 
-இந்த ஒருங்கிணைப்பு, உரையிலிருந்து படத்தை உருவாக்குவதை ஆதரிக்கிறது; reference-image editing-ஐ ஆதரிக்காது. Vertex
-வெளியீடு `data[].b64_json` ஆக இயல்பாக்கப்படுகிறது; `response_format: "url"` என்பது upstream
-HTTPS URL-ஐத் திருப்பி வழங்கும், அல்லது பட bytes மட்டுமே கிடைக்கும்போது base64 data URL-ஐத் திருப்பி வழங்கும். காலியான/வடிகட்டப்பட்ட வெளியீடுகள்,
-காலியான வெற்றிப் பதிலாக அல்லாமல், பிழையைத் திருப்பி வழங்கும். மாதிரி அணுகல், ZenMux கணக்கைப் பொறுத்தது.
-[ZenMux-ன் Vertex API](https://docs.zenmux.ai/api/vertexai/generate-images) மற்றும்
-[OpenAI Images API](https://docs.zenmux.ai/api/openai/generate-an-image) ஆகியவற்றைப் பார்க்கவும்.
+இந்த ஒருங்கிணைப்பு உரை-க்கு-பட உருவாக்கத்தை ஆதரிக்கிறது, குறிப்பு-பட எடிட்டிங் அல்ல. வெர்டெக்ஸ் வெளியீடு `data[].b64_json` க்கு இயல்பாக்கப்படுகிறது; `response_format: "url"` ஒரு அப்ஸ்ட்ரீம் HTTPS URL அல்லது ஒரு base64 தரவு URL பட பைட்டுகள் மட்டுமே இருக்கும் போது வழங்கும். Empty/filtered வெளியீடுகள் வெற்று வெற்றியைக் காட்டிலும் பிழையைத் தரும். மாதிரி அணுகல் ZenMux கணக்கைப் பொறுத்தது. [ZenMux இன் வெர்டெக்ஸ் API](https://docs.zenmux.ai/api/vertexai/generate-images) மற்றும் [OpenAI படங்கள் API](https://docs.zenmux.ai/api/openai/generate-an-image) பார்க்கவும்.
+
+ஒரு Microsoft 365 Copilot உள்நுழைவு இணைப்பு Copilot இன் உள்ளமைக்கப்பட்ட படக் கருவி மூலம் `copilot-m365-web/m365-copilot-image` உதவுகிறது: ஒரு படத்திற்கு ஒரு Copilot திருப்பம் (`n` 1–4), `size` திசையை மட்டும் திசை திருப்பும், மற்றும் படங்கள் இன்லைனில் திரும்பும் (`b64_json`, அல்லது `response_format: "url"` க்கு ஒரு தரவு URL ). [Microsoft 365 Copilot](../providers/COPILOT-M365.md#image-generation) ஐப் பார்க்கவும்.
 
 ```bash
-# அனைத்து பட மாதிரிகளையும் பட்டியலிடுக
+# List all image models
 GET /v1/images/generations
 ```
 
@@ -780,17 +767,19 @@ OpenAI-இணக்கமான பேட்ச் செயலாக்கம�
 
 ---
 
-## தேடல் API
+## API தேடுங்கள்
 
-வலை/தேடல் வழங்குநர் abstraction (Tavily, Brave, Exa, Serper போன்றவை).
+Web/search வழங்குநர் சுருக்கம் (Tavily, Brave, Exa, Serper, முதலியன).
 
-| Method | Path                   | Description                                                                                                |
-| ------ | ---------------------- | ---------------------------------------------------------------------------------------------------------- |
-| GET    | `/v1/search`           | உள்ளமைக்கப்பட்ட தேடல் வழங்குநர்கள் மற்றும் திறன்களின் பட்டியல்                                             |
-| POST   | `/v1/search`           | தேடல் வினவலை இயக்குதல் — உடல் `v1SearchSchema` மூலம் சரிபார்க்கப்படுகிறது; caching/coalescing ஆதரவு உள்ளது |
-| GET    | `/v1/search/analytics` | ஒவ்வொரு வழங்குநருக்குமான hit/latency/cache புள்ளிவிவரங்கள்                                                 |
+| முறை | பாதை                   | விளக்கம்                                                                                           |
+| ---- | ---------------------- | -------------------------------------------------------------------------------------------------- |
+| GET  | `/v1/search`           | உள்ளமைக்கப்பட்ட தேடல் வழங்குநர்களின் + திறன்களைப் பட்டியலிடுங்கள்                                  |
+| POST | `/v1/search`           | `v1SearchSchema` ஆல் சரிபார்க்கப்பட்ட தேடல் வினவல் — ஐ இயக்கவும், caching/coalescing ஐ ஆதரிக்கிறது |
+| GET  | `/v1/search/analytics` | ஒவ்வொரு வழங்குநருக்கும் hit/latency/cache புள்ளிவிவரங்கள்                                          |
 
-**அங்கீகாரம்:** Bearer API key (`extractApiKey` + `isValidApiKey`). தேடல் கொள்கை `enforceApiKeyPolicy` மூலம் அமல்படுத்தப்படுகிறது.
+**அங்கீகாரம்:** தாங்கி API விசை (`extractApiKey` + `isValidApiKey`). தேடல் கொள்கை `enforceApiKeyPolicy` வழியாக செயல்படுத்தப்பட்டது.
+
+**தானாகத் தேர்ந்தெடு:** `provider` இல்லாமல், கட்டமைக்கப்பட்ட இணைப்பைக் கொண்ட மலிவான வழங்குநர் முதலில் இயங்குகிறார், அடுத்த மலிவானது தோல்வியாகும். இலவச லாஸ்ட் ரிசார்ட் வழங்குநர்கள் (`duckduckgo-free`) வேறு எதுவும் கட்டமைக்கப்படாத போது மட்டுமே பயன்படுத்தப்படும். ஒரு சுய-ஹோஸ்ட் செய்யப்பட்ட SearXNG ஆனது அதன் இணைப்பு உண்மையான `baseUrl` சேமித்தவுடன் கட்டமைக்கப்பட்டதாகக் கணக்கிடப்படும் (கேட்லாக் இயல்புநிலை `http://localhost:8888/search` அல்ல): இது விசையை விட $0 வழங்குநராக தரவரிசைப்படுத்துகிறது, SearXNG 400, 401, 40403 `baseUrl` URL `http(s)` கிளவுட்-மெட்டாடேட்டா முகவரியில் உள்ள புள்ளிகள் கணக்கிடப்படாது. டோக்கனைச் சேமிக்கும் SearXNG இணைப்பு `https://` அல்லது loopback `http://` க்கு மேல் மட்டுமே தரவரிசைப்படுத்துகிறது. ரிமோட் ப்ளைன் `http://` இல் இது ஒருபோதும் தோல்வியடைவதில்லை மற்றும் கடைசி முயற்சியாக இருக்கும், வேறு எந்த வழங்குநரும் உள்ளமைக்கப்படாதபோது அல்லது பெயரால் கோரப்படும் போது மட்டுமே பயன்படுத்தப்படும், எனவே அந்த இரண்டு நிகழ்வுகளிலும் டோக்கனை தெளிவான உரையில் அனுப்புகிறது.
 
 ### Exa மற்றும் Tavily `provider_options`
 
@@ -952,28 +941,28 @@ terminal quota error (`402`/`429`/`503`, அதன் body ஒதுக்கீ
 
 ---
 
-## சுயசேவைப் பயன்பாடு (`/api/usage/om-usage`)
+## சுய சேவை பயன்பாடு (`/api/usage/om-usage`)
 
-எந்த API key-யும் **தனது சொந்த** பயன்பாடு மற்றும் ஒதுக்கீடுகளைப் படிக்கலாம் — management auth தேவையில்லை. ஒரு key holder-க்கு அவர்களின் செலவைக் காட்ட client (CLI, OmniCopilot panel) பயன்படுத்தும் endpoint இதுவாகும்.
+எந்த API விசையையும் படிக்க முடியும்**அதன் சொந்த** பயன்பாடு மற்றும் ஒதுக்கீடுகள் — மேலாண்மை அங்கீகாரம் இல்லை. இது ஒரு கிளையண்ட் (CLI, OmniCopilot பேனல்) ஒரு முக்கிய வைத்திருப்பவருக்கு அவர்கள் செலவழிப்பதைக் காட்டப் பயன்படுத்தும் இறுதிப் புள்ளியாகும்.
 
 ```bash
-# உரை வடிவம் (வரலாற்றுச் contract — terminal-க்கான plain text)
+# Text form (the historical contract — plain text for a terminal)
 curl -H "Authorization: Bearer <your-api-key>" \
   http://localhost:20128/api/usage/om-usage
 
-# கட்டமைக்கப்பட்ட வடிவம் — UI பயன்படுத்துவது
+# Structured form — what a UI consumes
 curl -H "Authorization: Bearer <your-api-key>" \
   "http://localhost:20128/api/usage/om-usage?format=json"
 ```
 
-இந்த key-க்கு **`allowUsageCommand`** இயக்கப்பட்டிருக்க வேண்டும் (இயல்புநிலையில் முடக்கப்பட்டுள்ளது — dashboard-இன் API-key manager இதை ஒவ்வொரு key-க்கும் மாற்றுகிறது). இது இல்லையெனில் endpoint `403` பதிலை வழங்கும்.
+சாவி கண்டிப்பாக இருக்க வேண்டும்**`allowUsageCommand`** இயக்கப்பட்டது (இயல்புநிலையாக — டாஷ்போர்டின் API-விசை மேலாளர் அதை ஒரு விசைக்கு மாற்றுகிறது). அது இல்லாமல் இறுதிப்புள்ளி `403` பதிலளிக்கிறது.
 
-`?format=json` வேறுபடுத்தப்பட்ட வடிவத்தைத் திருப்பி வழங்குகிறது; எனவே ஒரு caller ஒருபோதும் மறுப்புப் பதிலிலிருந்து data field-ஐப் படிக்காது. வெற்றியடைந்தபோது:
+`?format=json` பாரபட்சமான வடிவத்தை வழங்குகிறது, எனவே அழைப்பாளர் மறுப்பிலிருந்து தரவுப் புலத்தைப் படிக்க மாட்டார். வெற்றி குறித்து:
 
 ```jsonc
 {
   "allowed": true,
-  // key தனிப்பட்ட பயன்பாட்டு வரம்புகளை (தினசரி/வாராந்திர USD) தேர்வுசெய்திருந்தால் மட்டுமே இருக்கும்:
+  // present only when the key opted into per-key usage limits (daily/weekly/5-hour USD):
   "personal": {
     "dailySpentUsd": 1.25,
     "dailyLimitUsd": 5,
@@ -982,9 +971,9 @@ curl -H "Authorization: Bearer <your-api-key>" \
     "weeklyLimitUsd": 20,
     "weeklyResetAtIso": "…" /* … */,
   },
-  // தேர்ந்தெடுக்கப்பட்ட provider-இன் quota snapshot, இதுவரை எதுவும் cache செய்யப்படவில்லை என்றால் null:
+  // the selected provider quota snapshot, or null when nothing is cached yet:
   "provider": { "connectionId": "…", "provider": "claude", "plan": "…", "quotas": {/* … */} },
-  // ஒவ்வொரு connection-இன் snapshot; இதனால் UI பல provider-களை அருகருகே காட்ட முடியும்:
+  // every connection's snapshot, so a UI can render several providers side by side:
   "providers": [
     { "connectionId": "…", "provider": "claude" /* … */ },
     { "provider": "codex" /* … */ },
@@ -992,11 +981,9 @@ curl -H "Authorization: Bearer <your-api-key>" \
 }
 ```
 
-மறுப்பின்போது (`401` தவறான key / `403` அனுமதிக்கப்படவில்லை), அதே route
-`{ "allowed": false, "error": { "message": "…" } }` என்பதைத் திருப்பி வழங்கும் — காலியாக இருந்தாலும் இருக்கும் `personal`/`provider`
-(key அனுமதிக்கப்பட்டது, இதுவரை எதுவும் அறியப்படவில்லை) என்பது மறுப்பிலிருந்து வேறுபட்ட நிலையாகும்; மேலும் JSON வடிவம் மட்டுமே இந்த இரு நிலைகளையும் வேறுபடுத்திக் காட்டுகிறது.
+மறுத்தால் (`401` மோசமான விசை / `403` அனுமதிக்கப்படவில்லை) அதே பாதை `{ "allowed": false, "error": { "message": "…" } }` — தற்போது-ஆனால்-வெறுமை `personal`/`provider` (விசை அனுமதிக்கப்படுகிறது, இதுவரை எதுவும் கற்றுக் கொள்ளப்படவில்லை) என்பது மறுப்பிலிருந்து வேறுபட்ட நிலையாகும், மேலும் JSON படிவம் மட்டுமே அவற்றை வேறுபடுத்துகிறது.
 
-**அங்கீகாரம்:** caller-இன் சொந்த Bearer API key, `isValidApiKey` மூலம் சரிபார்க்கப்படுகிறது — இது _management surface_ (`/api/keys/…`) அல்ல; அது `requireManagementAuth`-க்கு பின்னால் தொடர்ந்தும் இருக்கும்.
+**அங்கீகாரம்:** அழைப்பாளரின் சொந்த தாங்கி API விசை, `isValidApiKey` — உடன் சரிபார்க்கப்பட்டது, இது _not_ மேலாண்மை மேற்பரப்பு (`/api/keys/…`), இது `requireManagementAuth` பின்னால் இருக்கும்.
 
 ### Raw மற்றும் Cutoff-Adjusted ஒதுக்கீட்டு சதவீதங்கள்
 
@@ -1237,40 +1224,41 @@ Implementation: `src/lib/modelCapabilities.ts`-இல் உள்ள `getResolv
 | `/api/usage/model-latency-stats` | GET             | வழங்குநர்/மாடலுக்கு ஏற்ப சுழலும் தாமதத் திரட்டு (avg/p50/p95/p99, வெற்றிவிகிதம்); வடிகட்டிகள்: `windowHours`/`minSamples`/`maxRows`/`provider`/`model` (#6873)                                                                                                                                                                                                                |
 | `/api/usage/cache-health`        | GET             | `call_logs`-இல் உள்ள அழைப்பு தற்காலிகச் சேமிப்பகத்தின் ஆரோக்கியச் சுருக்கம் — எழுதுதல்/வாசித்தல் விகிதம், p50/p90/p99 எழுதுதல்-அளவு விநியோகம், அதிக-எழுதுதல் செறிவு, ஒவ்வொரு மாடலுக்குமான பிரிப்பு, மேலும் `healthy`/`degraded`/`thrash`/`no-data` தீர்ப்பு; வினவல் அளவுருக்கள் `range` (`1h`\|`24h`\|`7d`\|`30d`, இயல்புநிலை `24h`) மற்றும் விருப்பத்தேர்வான `model` (#8827) |
 
-### API விசை அனுமதிகள்
+### API முக்கிய அனுமதிகள்
 
-`PATCH /api/keys/{id}` ஏற்கனவே உள்ள விசையின் அனுமதிகளைப் புதுப்பிக்கிறது. ஒவ்வொரு `/api/keys*` வழித்தடத்தையும் போலவே, இதற்கும் மேலாண்மை அங்கீகாரம் தேவைப்படுகிறது ([மேலாண்மை அங்கீகாரம்](../guides/MANAGEMENT-AUTH.md)-ஐப் பார்க்கவும்); inference key தேவையில்லை. நீங்கள் மாற்ற விரும்பும் புலங்களை மட்டும் அனுப்பவும்; அவற்றில் எதுவும் இல்லாத கோரிக்கை `No valid fields to update` என்ற செய்தியுடன் நிராகரிக்கப்படும். ஏற்கப்படும் புலங்கள் `src/shared/validation/schemas/keys.ts`-இல் உள்ள `updateKeyPermissionsSchema` மூலம் வரையறுக்கப்படுகின்றன.
+`PATCH /api/keys/{id}` ஏற்கனவே உள்ள விசையின் அனுமதிகளைப் புதுப்பிக்கிறது. ஒவ்வொரு `/api/keys*` வழியையும் போலவே இதற்கு நிர்வாக அங்கீகாரம் தேவை ( [மேலாண்மை அங்கீகாரத்தைப்](../guides/MANAGEMENT-AUTH.md) பார்க்கவும்), அனுமான விசை அல்ல. நீங்கள் மாற்ற விரும்பும் புலங்களை மட்டும் அனுப்பவும்; அவற்றில் எதுவுமில்லாத கோரிக்கை `No valid fields to update` உடன் நிராகரிக்கப்பட்டது. ஏற்றுக்கொள்ளப்பட்ட புலங்கள் `src/shared/validation/schemas/keys.ts` இல் `updateKeyPermissionsSchema` ஆல் வரையறுக்கப்படுகின்றன.
 
-| புலம்                                       | வகை                                                                        | குறிப்புகள்                                                                                                                                                                     |
-| ------------------------------------------- | -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `name`                                      | சரம், 1-200 எழுத்துகள்                                                     |                                                                                                                                                                                 |
-| `isActive`                                  | பூலியன்                                                                    |                                                                                                                                                                                 |
-| `isBanned`                                  | பூலியன்                                                                    |                                                                                                                                                                                 |
-| `expiresAt`                                 | ISO 8601 தேதி நேரம் அல்லது `null`                                          | `null` காலாவதியை அழிக்கும்                                                                                                                                                      |
-| `modelAccessMode`                           | `all` \| `restricted`                                                      | பயன்முறை `all` ஆக இருக்கும்போது `allowedModels` காலியாக இருக்க வேண்டும்                                                                                                         |
-| `allowedModels`, `blockedModels`            | அதிகபட்சம் 1000 சரங்களைக் கொண்ட வரிசை                                      |                                                                                                                                                                                 |
-| `allowedCombos`                             | அதிகபட்சம் 500 சரங்களைக் கொண்ட வரிசை                                       | இந்த விசை அழைக்கக்கூடிய சேர்க்கைகளை நிர்ணயிக்கிறது; நேரடி மாதிரிகள் `modelAccessMode` / `allowedModels` மூலம் கட்டுப்படுத்தப்படுகின்றன                                          |
-| `connectionAccessMode`                      | `all` \| `restricted`                                                      | `restricted` ஆக இருக்கும்போது `allowedConnections` காலியாக இல்லாமல் இருக்க வேண்டும்; `all` ஆக இருக்கும்போது காலியாக இருக்க வேண்டும்                                             |
-| `allowedConnections`                        | அதிகபட்சம் 100 UUID-களைக் கொண்ட வரிசை                                      |                                                                                                                                                                                 |
-| `allowAutoCombos`                           | பூலியன்                                                                    | `false` ஆக இருந்தால், இந்த விசையுடன் `auto/*` மாதிரிகளுக்கான கோரிக்கைகள் நிராகரிக்கப்படும்; இதை ஒருபோதும் அமைக்காத விசைகள் அனுமதிக்கப்படும்                                     |
-| `catalogScope`                              | `all` \| `combos` \| `models`                                              | இந்த விசைக்காக `GET /v1/models` பட்டியலிடுவது என்ன என்பதை நிர்ணயிக்கிறது (சேர்க்கைகள் மட்டும், மாதிரிகள் மட்டும் அல்லது இரண்டும்); விசை அழைக்கக்கூடியவற்றை இது மாற்றாது         |
-| `forcedModel`                               | அதிகபட்சம் 300 எழுத்துகளைக் கொண்ட சரம் அல்லது `null`                       | `X-Route-Model` மற்றும் `body.model` ஆகியவற்றைக் காட்டிலும் முன்னுரிமையுடன் அரட்டை கோரிக்கைகளை இந்த மாதிரி/சேர்க்கைக்கு வழிமாற்றுகிறது; விசையின் வரம்புகள் தொடர்ந்து பொருந்தும் |
-| `noLog`, `autoResolve`                      | பூலியன்                                                                    |                                                                                                                                                                                 |
-| `throttleDelayMs`                           | முழு எண், 0-300000                                                         |                                                                                                                                                                                 |
-| `maxSessions`                               | முழு எண், 0-10000                                                          |                                                                                                                                                                                 |
-| `rateLimits`                                | `{ limit, window }` வரிசை (நேர்ம முழு எண்கள், அதிகபட்சம் 50) அல்லது `null` | `null` வரம்புகளை அழிக்கும்                                                                                                                                                      |
-| `accessSchedule`                            | அட்டவணைப் பொருள் அல்லது `null`                                             | `null` அட்டவணையை அழிக்கும்                                                                                                                                                      |
-| `scopes`                                    | அதிகபட்சம் 32 சரங்களைக் கொண்ட வரிசை                                        |                                                                                                                                                                                 |
-| `allowedEndpoints`                          | அதிகபட்சம் 20 சரங்களைக் கொண்ட வரிசை                                        |                                                                                                                                                                                 |
-| `streamDefaultMode`                         | `legacy` \| `json`                                                         |                                                                                                                                                                                 |
-| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                       | [ஒவ்வொரு விசைக்கும் கேச் பைபாஸ்](#per-key-cache-bypass) என்பதைப் பார்க்கவும்                                                                                                    |
-| `compressionEnabled`                        | பூலியன்                                                                    |                                                                                                                                                                                 |
-| `codexServiceMode`                          | Codex சேவை முறைகளில் ஒன்று                                                 |                                                                                                                                                                                 |
-| `disableNonPublicModels`                    | boolean                                                                    |                                                                                                                                                                                 |
-| `allowUsageCommand`                         | boolean                                                                    |                                                                                                                                                                                 |
-| `usageLimitEnabled`                         | boolean                                                                    |                                                                                                                                                                                 |
-| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | number >= 0 or `null`                                                      |                                                                                                                                                                                 |
-| `chaosModeEnabled`                          | boolean                                                                    |                                                                                                                                                                                 |
+| புலம்                                       | வகை                                                                        | குறிப்புகள்                                                                                                                                                                                                                                                              |
+| ------------------------------------------- | -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `name`                                      | சரம், 1-200 எழுத்துகள்                                                     |                                                                                                                                                                                                                                                                          |
+| `isActive`                                  | பூலியன்                                                                    |                                                                                                                                                                                                                                                                          |
+| `isBanned`                                  | பூலியன்                                                                    |                                                                                                                                                                                                                                                                          |
+| `expiresAt`                                 | ISO 8601 தேதி நேரம் அல்லது `null`                                          | `null` காலாவதியை அழிக்கும்                                                                                                                                                                                                                                               |
+| `modelAccessMode`                           | `all` \| `restricted`                                                      | பயன்முறை `all` ஆக இருக்கும்போது `allowedModels` காலியாக இருக்க வேண்டும்                                                                                                                                                                                                  |
+| `allowedModels`, `blockedModels`            | சரங்களின் வரிசை, 1000 வரை                                                  |                                                                                                                                                                                                                                                                          |
+| `allowedCombos`                             | அதிகபட்சம் 500 சரங்களைக் கொண்ட வரிசை                                       | இந்த விசை அழைக்கக்கூடிய சேர்க்கைகளை நிர்ணயிக்கிறது; நேரடி மாதிரிகள் `modelAccessMode` / `allowedModels` மூலம் கட்டுப்படுத்தப்படுகின்றன                                                                                                                                   |
+| `connectionAccessMode`                      | `all` \| `restricted`                                                      | `restricted` ஆக இருக்கும்போது `allowedConnections` காலியாக இல்லாமல் இருக்க வேண்டும்; `all` ஆக இருக்கும்போது காலியாக இருக்க வேண்டும்                                                                                                                                      |
+| `allowedConnections`                        | அதிகபட்சம் 100 UUID-களைக் கொண்ட வரிசை                                      |                                                                                                                                                                                                                                                                          |
+| `allowAutoCombos`                           | பூலியன்                                                                    | `false` ஆக இருந்தால், இந்த விசையுடன் `auto/*` மாதிரிகளுக்கான கோரிக்கைகள் நிராகரிக்கப்படும்; இதை ஒருபோதும் அமைக்காத விசைகள் அனுமதிக்கப்படும்                                                                                                                              |
+| `catalogScope`                              | `all` \| `combos` \| `models`                                              | இந்த விசைக்காக `GET /v1/models` பட்டியலிடுவது என்ன என்பதை நிர்ணயிக்கிறது (சேர்க்கைகள் மட்டும், மாதிரிகள் மட்டும் அல்லது இரண்டும்); விசை அழைக்கக்கூடியவற்றை இது மாற்றாது                                                                                                  |
+| `forcedModel`                               | அதிகபட்சம் 300 எழுத்துகளைக் கொண்ட சரம் அல்லது `null`                       | `X-Route-Model` மற்றும் `body.model` ஆகியவற்றைக் காட்டிலும் முன்னுரிமையுடன் அரட்டை கோரிக்கைகளை இந்த மாதிரி/சேர்க்கைக்கு வழிமாற்றுகிறது; விசையின் வரம்புகள் தொடர்ந்து பொருந்தும்                                                                                          |
+| `noLog`, `autoResolve`                      | பூலியன்                                                                    |                                                                                                                                                                                                                                                                          |
+| `throttleDelayMs`                           | முழு எண், 0-300000                                                         |                                                                                                                                                                                                                                                                          |
+| `maxSessions`                               | முழு எண், 0-10000                                                          |                                                                                                                                                                                                                                                                          |
+| `rateLimits`                                | `{ limit, window }` வரிசை (நேர்ம முழு எண்கள், அதிகபட்சம் 50) அல்லது `null` | `null` வரம்புகளை அழிக்கும்                                                                                                                                                                                                                                               |
+| `accessSchedule`                            | அட்டவணைப் பொருள் அல்லது `null`                                             | `null` அட்டவணையை அழிக்கும்                                                                                                                                                                                                                                               |
+| `scopes`                                    | அதிகபட்சம் 32 சரங்களைக் கொண்ட வரிசை                                        |                                                                                                                                                                                                                                                                          |
+| `allowedEndpoints`                          | அதிகபட்சம் 20 சரங்களைக் கொண்ட வரிசை                                        |                                                                                                                                                                                                                                                                          |
+| `streamDefaultMode`                         | `legacy` \| `json`                                                         |                                                                                                                                                                                                                                                                          |
+| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                       | [ஒவ்வொரு விசைக்கும் கேச் பைபாஸ்](#per-key-cache-bypass) என்பதைப் பார்க்கவும்                                                                                                                                                                                             |
+| `compressionEnabled`                        | பூலியன்                                                                    |                                                                                                                                                                                                                                                                          |
+| `codexServiceMode`                          | Codex சேவை முறைகளில் ஒன்று                                                 |                                                                                                                                                                                                                                                                          |
+| `disableNonPublicModels`                    | boolean                                                                    |                                                                                                                                                                                                                                                                          |
+| `allowUsageCommand`                         | boolean                                                                    |                                                                                                                                                                                                                                                                          |
+| `usageLimitEnabled`                         | boolean                                                                    |                                                                                                                                                                                                                                                                          |
+| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | எண் >= 0 அல்லது `null`                                                     |                                                                                                                                                                                                                                                                          |
+| `fiveHourUsageLimitUsd`                     | எண் >= 0 அல்லது `null`                                                     | தினசரி மற்றும் வாராந்திர வரம்புகள் (`usageLimitEnabled`, `UNPRICED_USAGE_BUDGET_POLICY`) போன்று 5 மணிநேர USD வரவுசெலவுத் திட்டத்தைச் செயல்படுத்துகிறது. `retry-after` என்பது சாளரத்தில் பழமையான செலவினங்கள் வயதாகும்போது, அதன் வரம்பை விட ஒரு விசையை இன்னும் தடுக்கலாம். |
+| `chaosModeEnabled`                          | boolean                                                                    |                                                                                                                                                                                                                                                                          |
 
 ```bash
 curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
@@ -1320,6 +1308,14 @@ curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
 | `/api/modality-bridge/stats`         | GET        | நினைவகத்தில் உள்ள `attempts`, வெற்றிகள்/`bridged`, தோல்விகள், தற்காலிகச் சேமிப்பு வெற்றிகள், `totalLatencyMs`, `latencySamples`, மாதிரி-அடிப்படையிலான `averageLatencyMs`, மற்றும் கடைசிப் பயன்பாட்டு நேரம் (மறுதொடக்கத்தில் மீட்டமைக்கப்படும்; நிர்வாக அங்கீகாரம் தேவை)                                                                                                                                                                     |
 | `/api/modality-bridge/video/runtime` | GET        | நிர்வாக அங்கீகாரம்/ஆய்வுக்கு முன் கடுமையான நம்பகமான loopback சரிபார்ப்பு; சுத்திகரிக்கப்பட்ட FFmpeg/ffprobe கிடைப்புத்தன்மை மற்றும் பதிப்புகள் (no-store)                                                                                                                                                                                                                                                                                   |
 | `/api/modality-bridge/video/extract` | POST       | உள்புற அங்கீகரிக்கப்பட்ட நம்பகமான loopback byte broker; 50 MiB உள்ளீடு, வரையறுக்கப்பட்ட queue/32 MiB வெளியீடு, `503` திறன் வரம்பு, `499` துண்டிப்பு, `504` காலக்கெடு; பொதுப் பதிவேற்ற API அல்ல                                                                                                                                                                                                                                              |
+
+### வீடியோ பிரேம் டிரில்-டவுன்
+
+`GET /api/v1/video-bridge/drilldown` வெளிப்படையாக ஒப்புக்கொள்ளப்பட்ட வீடியோ பிரிட்ஜ் கோரிக்கைக்குப் பிறகு, `x-omniroute-video-drilldown` ல் திரும்பிய வாடகைதாரருக்குக் கட்டுப்பட்ட ஒளிபுகா கைப்பிடியைப் படிக்கிறது. ரீட் மற்றும் `DELETE` ஆகிய இரண்டிற்கும் எப்போதும் செல்லுபடியாகும் API விசையும் ஆபரேட்டரின் சுயாதீனமான `modalityBridgeVideoDrilldownRemoteEnabled` அனுமதியும் தேவைப்படும். உற்பத்தித் தக்கவைப்புக்கு கூடுதலாக `modalityBridgeVideoDrilldownEnabled` மற்றும் கண்டிப்பான ஒவ்வொரு பகுதி `drilldown: true` தேவைப்படுகிறது. விசையானது காலியாகாத இறுதிப்புள்ளி அனுமதிப்பட்டியலைக் கொண்டிருந்தால், அழைப்பாளர் `/v1` அல்லது `/api/v1` பயன்படுத்தினாலும், GET மற்றும் DELETE இரண்டிற்கும் `video` உள்ளடக்கியிருக்க வேண்டும்.
+
+GET வினவல்: தேவையான `handle`; விருப்பமான `variant` (`preview`, `standard`, `detail`), `limit` (1–8; மரபு `frames` ஏற்றுக்கொள்ளப்பட்டது ஆனால் `limit` உடன் இணைக்க முடியாது), பூஜ்ஜிய அடிப்படையிலான `page` மற்றும் `start`/`end` வினாடிகள். இரண்டு ஃபோகஸ் வரம்புகளும் வழங்கப்படும் போது, `end` `start` விட அதிகமாக இருக்க வேண்டும். Duplicate/unknown வினவல் விசைகள் நிராகரிக்கப்பட்டன. வெற்றிகரமான பதில்களில் `derivation`, `durationSeconds`, `frames`, `hasMore`, `page`, `variant` மற்றும் விருப்பமான `focusWindow` ஆகியவை உள்ளன; ஸ்டோர் இல்லாத JSON ஆனது Base64 உட்பட 32 MiB ஆக மூடப்பட்டுள்ளது. மிகைப்படுத்தப்பட்ட வெளியீடு 413 வருமானம்; குறைவான பிரேம்களைக் கோருங்கள்.
+
+`DELETE /api/v1/video-bridge/drilldown?handle=...` `{ "removed": 0|1 }` ஐ வழங்குகிறது. தெரியாத, காலாவதியான மற்றும் குறுக்கு-விசை GETs ஆகியவை பிரித்தறிய முடியாத 404 பதில்கள்; குறுக்கு விசை DELETE உரிமையாளரின் உள்ளீட்டை அகற்ற முடியாது. முடக்கப்பட்ட அணுகல் 403, missing/invalid அங்கீகாரம் 401, தவறான வினவல்கள் 400, ரத்துசெய்தல் 499 மற்றும் தற்காலிகப் பிழைகள் 503. கைப்பிடிகள் செயல்முறை-உள்ளூர், பத்து நிமிடங்களுக்குப் பிறகு காலாவதியாகும் மற்றும் மறுதொடக்கம் செய்யப்படாது. புதிய கைப்பிடிகள் `v1.` மற்றும் 32-பைட் சீரற்ற Base64URL டோக்கனைப் பயன்படுத்துகின்றன; டோக்கன் ஹாஷ்கள் மட்டுமே தக்கவைக்கப்படுகின்றன. லெகசி 64-ஹெக்ஸ் டோக்கன்கள் இணக்கத்தன்மைக்காக தொடரியல் ரீதியாக படிக்கக்கூடியதாக இருக்கும். ஒப்புதல், ஒதுக்கீடுகள் மற்றும் மாறுபட்ட வழித்தோன்றல் விவரங்களுக்கு [வீடியோ பிரிட்ஜ் காவலர்களைப்](../security/GUARDRAILS.md#video-bridge-videobridgets-videobridgepipelinets) பார்க்கவும்.
 
 ### காப்புப்பிரதி & ஏற்றுமதி/இறக்குமதி
 
@@ -1426,19 +1422,19 @@ GET பதிலில் `agents[]` (id, name, binary, version, installed, prot
 
 இந்த endpoint-கள், சொந்த Gemini SDK இணக்கத்தன்மையை எதிர்பார்க்கும் கிளையண்டுகளுக்காக Gemini-யின் API வடிவத்தைப் பின்பற்றுகின்றன.
 
-### உள் / கணினி API-கள்
+### உள் / அமைப்பு APIs
 
-| Endpoint                 | Method | Description                                                                |
-| ------------------------ | ------ | -------------------------------------------------------------------------- |
-| `/api/init`              | GET    | பயன்பாட்டுத் தொடக்கச் சரிபார்ப்பு (முதல் இயக்கத்தில் பயன்படுத்தப்படுகிறது) |
-| `/api/tags`              | GET    | Ollama-இணக்கமான மாதிரி குறிச்சொற்கள் (Ollama கிளையண்டுகளுக்காக)            |
-| `/api/restart`           | POST   | சேவையகத்தைச் சீராக மறுதொடக்கம் செய்யத் தொடங்குதல்                          |
-| `/api/shutdown`          | POST   | சேவையகத்தைச் சீராக நிறுத்தத் தொடங்குதல்                                    |
-| `/api/system/env/repair` | POST   | OAuth வழங்குநர் சூழல் மாறிகளைச் சரிசெய்தல்                                 |
-| `/api/system/version`    | GET    | தற்போதைய/சமீபத்திய பதிப்பு, புதுப்பிப்பு நிலை, வெளியீட்டு சேனல்            |
-| `/api/system/version`    | POST   | சமீபத்திய பதிப்பிற்கான deployment-aware புதுப்பிப்பைத் தொடங்குதல்          |
+| இறுதிப்புள்ளி            | முறை | விளக்கம்                                                                       |
+| ------------------------ | ---- | ------------------------------------------------------------------------------ |
+| `/api/init`              | GET  | பின்னணி ஒத்திசைவு சேவைகளைத் தொடங்கவும் (மேலாண்மை அங்கீகாரம்)                   |
+| `/api/tags`              | GET  | ஒல்லாமா-இணக்கமான மாதிரி குறிச்சொற்கள் ( Ollama வாடிக்கையாளர்களுக்கு)           |
+| `/api/restart`           | POST | அழகான சேவையக மறுதொடக்கத்தைத் தூண்டவும்                                         |
+| `/api/shutdown`          | POST | அழகான சர்வர் பணிநிறுத்தத்தைத் தூண்டவும்                                        |
+| `/api/system/env/repair` | POST | OAuth வழங்குநர் சூழல் மாறிகளை சரிசெய்தல்                                       |
+| `/api/system/version`    | GET  | Current/latest பதிப்பு, புதுப்பிப்பு நிலை, வெளியீடு சேனல்                      |
+| `/api/system/version`    | POST | சமீபத்திய பதிப்பிற்கான வரிசைப்படுத்தல் விழிப்புணர்வு புதுப்பிப்பைத் தொடங்கவும் |
 
-> **குறிப்பு:** இந்த endpoint-கள் கணினியால் உள்நாட்டில் அல்லது Ollama கிளையண்ட் இணக்கத்தன்மைக்காகப் பயன்படுத்தப்படுகின்றன. இறுதிப் பயனர்களால் இவை வழக்கமாக அழைக்கப்படுவதில்லை.
+> **குறிப்பு:** இந்த இறுதிப்புள்ளிகள் கணினி அல்லது Ollama கிளையன்ட் இணக்கத்தன்மைக்கு உள்நாட்டில் பயன்படுத்தப்படுகின்றன. அவை பொதுவாக இறுதிப் பயனர்களால் அழைக்கப்படுவதில்லை.
 
 ### OAuth சூழல் சரிசெய்தல் _(v3.6.1+)_
 

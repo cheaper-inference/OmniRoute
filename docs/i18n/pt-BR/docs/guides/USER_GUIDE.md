@@ -355,24 +355,24 @@ Modelo: cc/claude-opus-4-7
 
 ## 🚀 Implantação
 
-### Instalação global via npm (Recomendado)
+### Instalação global do npm (recomendado)
 
 ```bash
 npm install -g omniroute
 
-# Criar o diretório de configuração
+# Create config directory
 mkdir -p ~/.omniroute
 
-# Criar o arquivo .env (consulte .env.example)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# Iniciar o servidor
+# Start server
 omniroute
-# Ou com uma porta personalizada:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-A CLI carrega automaticamente o `.env` de `~/.omniroute/.env` ou `./.env`.
+O CLI carrega automaticamente `.env` de `~/.omniroute/.env` ou `./.env`. Um `./.env` no diretório de trabalho pode definir apenas uma pequena lista de chaves permitidas (portas, `REQUIRE_API_KEY`, configurações de localidade e cores); coloque todo o resto em `~/.omniroute/.env`. Consulte [os contratos de lançamento CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### Modo de bandeja
 

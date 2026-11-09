@@ -355,24 +355,24 @@ Modelis: cc/claude-opus-4-7
 
 ## 🚀 Diegimas
 
-### Visuotinis diegimas naudojant npm (rekomenduojama)
+### Visuotinis npm diegimas (rekomenduojama)
 
 ```bash
 npm install -g omniroute
 
-# Sukurkite konfigūracijos katalogą
+# Create config directory
 mkdir -p ~/.omniroute
 
-# Sukurkite .env failą (žr. .env.example)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# Paleiskite serverį
+# Start server
 omniroute
-# Arba naudodami pasirinktinį prievadą:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI automatiškai įkelia `.env` iš `~/.omniroute/.env` arba `./.env`.
+CLI automatiškai įkelia `.env` iš `~/.omniroute/.env` arba `./.env`. Darbiniame kataloge esantis `./.env` gali nustatyti tik trumpą leidžiamųjų klavišų sąrašą (prievadai, `REQUIRE_API_KEY`, lokalės ir spalvų parametrai); visa kita sudėkite į `~/.omniroute/.env`. Žr. [CLI paleidimo sutartis](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### Sistemos dėklo režimas
 

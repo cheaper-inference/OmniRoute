@@ -339,25 +339,32 @@ Content-Type: application/json
 
 Watoa huduma wanaopatikana ni pamoja na OpenAI (GPT Image 2), xAI (Grok Image), Together AI (FLUX), Fireworks AI, Nebius (FLUX), Hyperbolic, NanoBanana, **OpenRouter**, **ZenMux**, SD WebUI (ya ndani), ComfyUI (ya ndani).
 
-`n` hurejesha picha `n` katika `data[]`. Watoa huduma ambao API yao ya upstream hurejesha picha moja kwa kila ombi
+`n` hurejesha picha `n` katika `data[]`. Watoa huduma ambao API yao ya upstream hurejesha picha moja kwa kila mwito
 (Black Forest Labs, Stability AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik,
-NVIDIA NIM, Cloudflare Workers AI) hupokea maombi `n` tofauti ya upstream, yakiwa si zaidi ya 4 kwa wakati mmoja. `seed` isiyobadilika huongezwa kwa faharasa ya ombi (`seed`, `seed + 1`, …), hivyo picha hutofautiana lakini hubaki zinazoweza kutengenezwa tena. `n` ina kikomo cha 10. Ombi lote hushindikana ikiwa ombi lolote litashindikana. Orodha ya fomati za fan-out iko katika `SINGLE_IMAGE_FANOUT_FORMATS` kwenye
+NVIDIA NIM, Cloudflare Workers AI) hupokea miito tofauti `n` ya upstream, huku kukiwa na miito isiyozidi 4 kwa wakati mmoja. `seed` isiyobadilika huongezwa kwa faharasa ya mwito (`seed`, `seed + 1`, …), hivyo picha hutofautiana lakini hubaki zinazoweza kuzalishwa tena. `n` ina kikomo cha 10. Ombi lote hushindikana ikiwa mwito wowote utashindwa. Orodha ya miundo ya fan-out iko katika
+`SINGLE_IMAGE_FANOUT_FORMATS` ndani ya
 `open-sse/handlers/imageGeneration/fanOut.ts`.
 
-ZenMux hutumia tena muunganisho uliopo wa API-key na hukubali viambishi awali vya `zenmux/` au `zm/`:
+ZenMux hutumia tena muunganisho uliopo wa API-key na hukubali viambishi awali vya
+`zenmux/` au `zm/`:
 
 - `zenmux/openai/gpt-image-2` hutumia API ya OpenAI Images ya ZenMux. Chaguo ni pamoja na `size`,
   `quality`, `n`, `output_format`, `output_compression`, `background`, na `response_format`.
-- Wachapishaji wengine, kama vile `zm/meta/muse-image-1.0`, hutumia endpoint ya Vertex AI `:predict`
-  ya ZenMux. `n` hubadilishwa kuwa `sampleCount`, `aspect_ratio` kuwa `aspectRatio`, na `image_size`
-  (`1K`, `2K`, `4K`) kuwa `sampleImageSize`. `size` ya pikseli hutoa uwiano wa picha pekee,
-  si vipimo vya pikseli vilivyohakikishwa. Uwiano unaotumika, rezolusheni na idadi hutofautiana kulingana na modeli.
+- Wachapishaji wengine, kama vile `zm/meta/muse-image-1.0`, hutumia endpoint ya Vertex AI `:predict` ya ZenMux. `n` huwekwa kwenye `sampleCount`, `aspect_ratio` kwenye `aspectRatio`, na `image_size`
+  (`1K`, `2K`, `4K`) kwenye `sampleImageSize`. `size` ya pikseli hutoa tu uwiano wa
+  vipimo, wala si vipimo vya pikseli vinavyohakikishwa. Uwiano unaotumika, maazimio, na idadi hutofautiana kulingana na modeli.
 - `zm/inclusionai/ming-image-0.1-design` huchagua vipimo vyake yenyewe. Acha `size`,
   `aspect_ratio`, na `image_size` bila kuwekwa; thamani zilizoainishwa wazi hurejesha HTTP 400. PNG, JPEG, na WebP
   zinaweza kuombwa kwa kutumia `output_format`.
 
-Muunganisho huu unaunga mkono utengenezaji wa picha kutoka kwa maandishi, si uhariri wa picha ya marejeleo. Matokeo ya Vertex hurekebishwa kuwa `data[].b64_json`; `response_format: "url"` hurejesha URL ya upstream ya HTTPS au URL ya data ya base64 wakati baiti za picha pekee zinapatikana. Matokeo matupu/yaliochujwa hurejesha hitilafu badala ya mafanikio matupu. Ufikiaji wa modeli hutegemea akaunti ya ZenMux. Tazama [Vertex API ya ZenMux](https://docs.zenmux.ai/api/vertexai/generate-images) na
+Muunganisho huu unaunga mkono uundaji wa picha kutoka kwa maandishi, si uhariri wa picha za marejeo. Matokeo ya Vertex husawazishwa kuwa `data[].b64_json`; `response_format: "url"` hurejesha URL ya upstream ya HTTPS au URL ya data ya base64 wakati baiti za picha pekee ndizo zinapatikana. Matokeo yaliyo tupu/yaliyichujwa
+hurejesha hitilafu badala ya mafanikio yasiyo na data. Ufikiaji wa modeli hutegemea akaunti ya ZenMux.
+Tazama [API ya Vertex ya ZenMux](https://docs.zenmux.ai/api/vertexai/generate-images) na
 [API ya OpenAI Images](https://docs.zenmux.ai/api/openai/generate-an-image).
+
+Muunganisho wa kuingia wa Microsoft 365 Copilot hutumia `copilot-m365-web/m365-copilot-image`
+kupitia zana ya picha iliyojengwa ndani ya Copilot: zamu moja ya Copilot kwa kila picha (`n` 1–4), `size` ikielekeza mwelekeo pekee, na picha zikirejeshwa zikiwa ndani ya jibu (`b64_json`, au URL ya data kwa
+`response_format: "url"`). Tazama [Microsoft 365 Copilot](../providers/COPILOT-M365.md#image-generation).
 
 ```bash
 # Orodhesha miundo yote ya picha
@@ -780,15 +787,26 @@ Uchakataji wa makundi unaoendana na OpenAI.
 
 ## API ya Utafutaji
 
-Muhtasari wa watoa huduma wa wavuti/utafutaji (Tavily, Brave, Exa, Serper, n.k.).
+Abstraction ya watoa huduma wa wavuti/utafutaji (Tavily, Brave, Exa, Serper, n.k.).
 
-| Mbinu | Njia                   | Maelezo                                                                                                                   |
-| ----- | ---------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| GET   | `/v1/search`           | Orodhesha watoa huduma wa utafutaji waliowekwa + uwezo                                                                    |
-| POST  | `/v1/search`           | Tekeleza swali la utafutaji — mwili huthibitishwa na `v1SearchSchema`, na huwezesha kuhifadhi/kupanga maombi yanayofanana |
-| GET   | `/v1/search/analytics` | Takwimu za kila mtoa huduma kuhusu mafanikio/muda wa kusubiri/kache                                                       |
+| Mbinu | Njia                   | Maelezo                                                                                                              |
+| ----- | ---------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| GET   | `/v1/search`           | Orodhesha watoa huduma wa utafutaji waliosanidiwa + uwezo wao                                                        |
+| POST  | `/v1/search`           | Tekeleza swali la utafutaji — mwili unathibitishwa na `v1SearchSchema`, unaauni uhifadhi wa akiba/kuunganisha maombi |
+| GET   | `/v1/search/analytics` | Takwimu za majaribio ya hit, muda wa majibu na akiba kwa kila mtoa huduma                                            |
 
-**Uthibitishaji:** Ufunguo wa API wa Bearer (`extractApiKey` + `isValidApiKey`). Sera ya utafutaji hutekelezwa kupitia `enforceApiKeyPolicy`.
+**Uthibitishaji:** Ufunguo wa API wa Bearer (`extractApiKey` + `isValidApiKey`). Sera ya utafutaji inatekelezwa kupitia `enforceApiKeyPolicy`.
+
+**Uteuzi otomatiki:** bila `provider`, mtoa huduma wa gharama nafuu zaidi aliye na muunganisho uliosanidiwa huendeshwa
+kwanza, na anayefuata kwa gharama ndiye njia mbadala. Watoa huduma wa bure wa mwisho wa matumizi (`duckduckgo-free`)
+hutumika tu wakati hakuna kingine kilichosanidiwa. SearXNG inayojipangisha huhesabiwa kuwa imesanidiwa mara tu muunganisho
+wake unapohifadhi `baseUrl` halisi (si katalogi-msingi `http://localhost:8888/search`): kisha hupangwa kama mtoa huduma wa $0
+mbele ya wale wenye funguo, huku mtoa huduma mwenye ufunguo wa gharama nafuu zaidi akiwa njia mbadala, ikijumuisha wakati
+SearXNG inapojibu 400, 401, 403 au 404. `baseUrl` ambayo si URL halali ya `http(s)` au inayoelekeza kwenye anwani ya metadata
+ya wingu haihesabiwi. Muunganisho wa SearXNG unaohifadhi tokeni hupangwa kwa njia hii tu kupitia `https://` au loopback
+`http://`. Kupitia `http://` ya mbali isiyo na usimbaji fiche, kamwe si njia mbadala na hubaki kuwa chaguo la mwisho,
+ikitumika tu wakati hakuna mtoa huduma mwingine aliyesanidiwa au inapoitishwa kwa jina, kwa hivyo hutuma tokeni hiyo
+bila usimbaji fiche katika hali hizo mbili.
 
 ### `provider_options` za Exa na Tavily
 
@@ -954,33 +972,28 @@ uhakika huishia katika `needs_confirmation` badala ya kutumwa mara mbili. Chanzo
 
 ---
 
-## Matumizi ya kujihudumia (`/api/usage/om-usage`)
+## Matumizi ya huduma ya kibinafsi (`/api/usage/om-usage`)
 
-Ufunguo wowote wa API unaweza kusoma matumizi na viwango vyake vya matumizi — hakuna
-uthibitishaji wa usimamizi unaohitajika. Hiki ndicho kituo ambacho mteja (CLI, paneli ya
-OmniCopilot) hutumia kumwonyesha mwenye ufunguo matumizi yake.
+Kitufe chochote API kinaweza kusoma **yake mwenyewe** matumizi na upendeleo — hakuna usimamizi auth. Hiki ndicho sehemu ya mwisho mteja (CLI, paneli ya OmniCopilot ) hutumia kuonyesha mwenye ufunguo matumizi yake.
 
 ```bash
-# Muundo wa maandishi (mkataba wa kihistoria — maandishi wazi kwa terminal)
+# Text form (the historical contract — plain text for a terminal)
 curl -H "Authorization: Bearer <your-api-key>" \
   http://localhost:20128/api/usage/om-usage
 
-# Muundo uliopangwa — kile ambacho kiolesura hutumia
+# Structured form — what a UI consumes
 curl -H "Authorization: Bearer <your-api-key>" \
   "http://localhost:20128/api/usage/om-usage?format=json"
 ```
 
-Ufunguo lazima uwe na **`allowUsageCommand`** iliyowezeshwa (imezimwa kwa chaguo-msingi —
-kidhibiti cha funguo za API kwenye dashibodi huibadilisha kwa kila ufunguo). Bila hiyo,
-kituo hurudisha `403`.
+Ufunguo lazima uwe nao **`allowUsageCommand`** kuwezeshwa (kuzimwa kwa chaguo-msingi — kidhibiti cha ufunguo wa dashibodi hukigeuza kwa kila kitufe). Bila hivyo mwisho hujibu `403`.
 
-`?format=json` hurudisha muundo unaotofautisha hali ili mpigaji asiwahi kusoma sehemu ya data
-kutoka kwenye jibu la kukataliwa. Linapofaulu:
+`?format=json` hurejesha umbo lililobaguliwa ili mpigaji simu kamwe asisome sehemu ya data bila kukataa. Juu ya mafanikio:
 
 ```jsonc
 {
   "allowed": true,
-  // huwepo tu wakati ufunguo umechagua vikomo vya matumizi kwa kila ufunguo (USD ya kila siku/kila wiki):
+  // present only when the key opted into per-key usage limits (daily/weekly/5-hour USD):
   "personal": {
     "dailySpentUsd": 1.25,
     "dailyLimitUsd": 5,
@@ -989,9 +1002,9 @@ kutoka kwenye jibu la kukataliwa. Linapofaulu:
     "weeklyLimitUsd": 20,
     "weeklyResetAtIso": "…" /* … */,
   },
-  // muhtasari wa kiwango cha matumizi cha mtoa huduma aliyechaguliwa, au null wakati bado hakuna kilichohifadhiwa:
+  // the selected provider quota snapshot, or null when nothing is cached yet:
   "provider": { "connectionId": "…", "provider": "claude", "plan": "…", "quotas": {/* … */} },
-  // muhtasari wa kila muunganisho, ili kiolesura kiweze kuonyesha watoa huduma kadhaa kwa kulinganisha:
+  // every connection's snapshot, so a UI can render several providers side by side:
   "providers": [
     { "connectionId": "…", "provider": "claude" /* … */ },
     { "provider": "codex" /* … */ },
@@ -999,14 +1012,9 @@ kutoka kwenye jibu la kukataliwa. Linapofaulu:
 }
 ```
 
-Linapokataliwa (`401` ufunguo mbaya / `403` hairuhusiwi), njia hiyo hiyo hurudisha
-`{ "allowed": false, "error": { "message": "…" } }` — `personal`/`provider`
-iliyopo lakini tupu (ufunguo unaruhusiwa, hakuna taarifa iliyojifunzwa bado) ni hali
-tofauti na kukataliwa, na ni muundo wa JSON pekee unaotofautisha hali hizo.
+Inapokataa (`401` ufunguo mbaya / `403` hairuhusiwi) njia hiyo hiyo inarudisha `{ "allowed": false, "error": { "message": "…" } }` — `personal`/`provider` ya sasa-lakini-tupu (ufunguo unaruhusiwa, hakuna kitu kilichojifunza bado) ni hali tofauti na kukataa, na ni fomu ya JSON pekee inayowatofautisha.
 
-**Uthibitishaji:** ufunguo wa API wa Bearer wa mpigaji mwenyewe, unaothibitishwa kwa
-`isValidApiKey` — huu **si** uso wa usimamizi (`/api/keys/…`), ambao unaendelea kulindwa na
-`requireManagementAuth`.
+**Uthibitishaji:** ufunguo wa API wa mpigaji mwenyewe, uliothibitishwa na `isValidApiKey` — huu ni _sio uso wa usimamizi (`/api/keys/…`), ambao unabaki nyuma ya `requireManagementAuth`.
 
 ### Asilimia za Kiwango cha Matumizi Ghafi dhidi ya Zilizorekebishwa kwa Kikomo
 
@@ -1242,40 +1250,41 @@ na minyororo ya kipaumbele katika `src/lib/modelCapabilityLimits.ts`.
 | `/api/usage/model-latency-stats` | GET             | Jumla inayosonga ya ucheleweshaji kwa kila mtoa huduma/modeli (wastani/p50/p95/p99, kiwango cha mafanikio); vichujio: `windowHours`/`minSamples`/`maxRows`/`provider`/`model` (#6873)                                                                                                                                                                  |
 | `/api/usage/cache-health`        | GET             | Muhtasari wa hali ya akiba ya vidokezo kwenye `call_logs` — uwiano wa kuandika/kusoma, usambazaji wa ukubwa wa uandishi wa p50/p90/p99, mkusanyiko wa maandishi mazito, mgawanyo kwa modeli, na uamuzi wa `healthy`/`degraded`/`thrash`/`no-data`; vigezo vya hoja `range` (`1h`\|`24h`\|`7d`\|`30d`, chaguo-msingi `24h`) na `model` ya hiari (#8827) |
 
-### Ruhusa za funguo za API
+### Ruhusa muhimu API
 
-`PATCH /api/keys/{id}` husasisha ruhusa za ufunguo uliopo. Kama kila njia ya `/api/keys*`, inahitaji uidhinishaji wa usimamizi (tazama [Uthibitishaji wa Usimamizi](../guides/MANAGEMENT-AUTH.md)), si ufunguo wa inference. Tuma sehemu unazotaka kubadilisha pekee; ombi lisilo na sehemu yoyote kati ya hizo hukataliwa kwa `No valid fields to update`. Sehemu zinazokubaliwa zimefafanuliwa na `updateKeyPermissionsSchema` katika `src/shared/validation/schemas/keys.ts`.
+`PATCH /api/keys/{id}` inasasisha ruhusa za ufunguo uliopo. Kama kila njia ya `/api/keys*` inahitaji idhini ya usimamizi (tazama [Uthibitishaji wa Usimamizi](../guides/MANAGEMENT-AUTH.md) ), sio ufunguo wa uelekezaji. Tuma sehemu unazotaka kubadilisha tu; ombi lisilo na hata mmoja wao linakataliwa na `No valid fields to update`. Sehemu zinazokubalika zimefafanuliwa na `updateKeyPermissionsSchema` katika `src/shared/validation/schemas/keys.ts`.
 
-| Sehemu                                      | Aina                                                                   | Maelezo                                                                                                                                                      |
-| ------------------------------------------- | ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `name`                                      | mfuatano, vibambo 1-200                                                |                                                                                                                                                              |
-| `isActive`                                  | boolean                                                                |                                                                                                                                                              |
-| `isBanned`                                  | boolean                                                                |                                                                                                                                                              |
-| `expiresAt`                                 | tarehe na wakati wa ISO 8601 au `null`                                 | `null` huondoa muda wa kuisha                                                                                                                                |
-| `modelAccessMode`                           | `all` \| `restricted`                                                  | `allowedModels` lazima iwe tupu wakati hali ni `all`                                                                                                         |
-| `allowedModels`, `blockedModels`            | safu ya mifuatano, hadi 1000                                           |                                                                                                                                                              |
-| `allowedCombos`                             | safu ya mifuatano, hadi 500                                            | Hudhibiti michanganyiko ambayo ufunguo unaweza kuita; miundo ya moja kwa moja inadhibitiwa na `modelAccessMode` / `allowedModels`                            |
-| `connectionAccessMode`                      | `all` \| `restricted`                                                  | `allowedConnections` lazima isiwe tupu wakati wa `restricted` na iwe tupu wakati wa `all`                                                                    |
-| `allowedConnections`                        | safu ya UUID, hadi 100                                                 |                                                                                                                                                              |
-| `allowAutoCombos`                           | boolean                                                                | `false` hukataa maombi ya miundo ya `auto/*` yenye ufunguo huu; funguo ambazo hazijawahi kuiweka zinaruhusiwa                                                |
-| `catalogScope`                              | `all` \| `combos` \| `models`                                          | Kinachoorodheshwa na `GET /v1/models` kwa ufunguo huu (michanganyiko pekee, miundo pekee, au vyote viwili); hakibadilishi kile ambacho ufunguo unaweza kuita |
-| `forcedModel`                               | mfuatano wa hadi vibambo 300, au `null`                                | Huelekeza maombi ya mazungumzo kwenye muundo/mchanganyiko huu, ikitangulizwa kuliko `X-Route-Model` na `body.model`; vikomo vya ufunguo bado vinatumika      |
-| `noLog`, `autoResolve`                      | boolean                                                                |                                                                                                                                                              |
-| `throttleDelayMs`                           | nambari kamili, 0-300000                                               |                                                                                                                                                              |
-| `maxSessions`                               | nambari kamili, 0-10000                                                |                                                                                                                                                              |
-| `rateLimits`                                | safu ya `{ limit, window }` (nambari kamili chanya, hadi 50) au `null` | `null` huondoa vikomo                                                                                                                                        |
-| `accessSchedule`                            | kipengee cha ratiba au `null`                                          | `null` huondoa ratiba                                                                                                                                        |
-| `scopes`                                    | safu ya mifuatano, hadi 32                                             |                                                                                                                                                              |
-| `allowedEndpoints`                          | safu ya mifuatano, hadi 20                                             |                                                                                                                                                              |
-| `streamDefaultMode`                         | `legacy` \| `json`                                                     |                                                                                                                                                              |
-| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                   | Tazama [Kupita akiba kwa kila ufunguo](#per-key-cache-bypass)                                                                                                |
-| `compressionEnabled`                        | boolean                                                                |                                                                                                                                                              |
-| `codexServiceMode`                          | mojawapo ya hali za huduma ya Codex                                    |                                                                                                                                                              |
-| `disableNonPublicModels`                    | boolean                                                                |                                                                                                                                                              |
-| `allowUsageCommand`                         | boolean                                                                |                                                                                                                                                              |
-| `usageLimitEnabled`                         | boolean                                                                |                                                                                                                                                              |
-| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | number >= 0 or `null`                                                  |                                                                                                                                                              |
-| `chaosModeEnabled`                          | boolean                                                                |                                                                                                                                                              |
+| Sehemu                                      | Aina                                                                   | Maelezo                                                                                                                                                                                                                                                                                      |
+| ------------------------------------------- | ---------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`                                      | mfuatano, vibambo 1-200                                                |                                                                                                                                                                                                                                                                                              |
+| `isActive`                                  | boolean                                                                |                                                                                                                                                                                                                                                                                              |
+| `isBanned`                                  | boolean                                                                |                                                                                                                                                                                                                                                                                              |
+| `expiresAt`                                 | tarehe na wakati wa ISO 8601 au `null`                                 | `null` huondoa muda wa kuisha                                                                                                                                                                                                                                                                |
+| `modelAccessMode`                           | `all` \| `restricted`                                                  | `allowedModels` lazima iwe tupu wakati hali ni `all`                                                                                                                                                                                                                                         |
+| `allowedModels`, `blockedModels`            | safu ya masharti, hadi 1000                                            |                                                                                                                                                                                                                                                                                              |
+| `allowedCombos`                             | safu ya mifuatano, hadi 500                                            | Hudhibiti michanganyiko ambayo ufunguo unaweza kuita; miundo ya moja kwa moja inadhibitiwa na `modelAccessMode` / `allowedModels`                                                                                                                                                            |
+| `connectionAccessMode`                      | `all` \| `restricted`                                                  | `allowedConnections` lazima isiwe tupu wakati wa `restricted` na iwe tupu wakati wa `all`                                                                                                                                                                                                    |
+| `allowedConnections`                        | safu ya UUID, hadi 100                                                 |                                                                                                                                                                                                                                                                                              |
+| `allowAutoCombos`                           | boolean                                                                | `false` hukataa maombi ya miundo ya `auto/*` yenye ufunguo huu; funguo ambazo hazijawahi kuiweka zinaruhusiwa                                                                                                                                                                                |
+| `catalogScope`                              | `all` \| `combos` \| `models`                                          | Kinachoorodheshwa na `GET /v1/models` kwa ufunguo huu (michanganyiko pekee, miundo pekee, au vyote viwili); hakibadilishi kile ambacho ufunguo unaweza kuita                                                                                                                                 |
+| `forcedModel`                               | mfuatano wa hadi vibambo 300, au `null`                                | Huelekeza maombi ya mazungumzo kwenye muundo/mchanganyiko huu, ikitangulizwa kuliko `X-Route-Model` na `body.model`; vikomo vya ufunguo bado vinatumika                                                                                                                                      |
+| `noLog`, `autoResolve`                      | boolean                                                                |                                                                                                                                                                                                                                                                                              |
+| `throttleDelayMs`                           | nambari kamili, 0-300000                                               |                                                                                                                                                                                                                                                                                              |
+| `maxSessions`                               | nambari kamili, 0-10000                                                |                                                                                                                                                                                                                                                                                              |
+| `rateLimits`                                | safu ya `{ limit, window }` (nambari kamili chanya, hadi 50) au `null` | `null` huondoa vikomo                                                                                                                                                                                                                                                                        |
+| `accessSchedule`                            | kipengee cha ratiba au `null`                                          | `null` huondoa ratiba                                                                                                                                                                                                                                                                        |
+| `scopes`                                    | safu ya mifuatano, hadi 32                                             |                                                                                                                                                                                                                                                                                              |
+| `allowedEndpoints`                          | safu ya mifuatano, hadi 20                                             |                                                                                                                                                                                                                                                                                              |
+| `streamDefaultMode`                         | `legacy` \| `json`                                                     |                                                                                                                                                                                                                                                                                              |
+| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                   | Tazama [Kupita akiba kwa kila ufunguo](#per-key-cache-bypass)                                                                                                                                                                                                                                |
+| `compressionEnabled`                        | boolean                                                                |                                                                                                                                                                                                                                                                                              |
+| `codexServiceMode`                          | mojawapo ya hali za huduma ya Codex                                    |                                                                                                                                                                                                                                                                                              |
+| `disableNonPublicModels`                    | boolean                                                                |                                                                                                                                                                                                                                                                                              |
+| `allowUsageCommand`                         | boolean                                                                |                                                                                                                                                                                                                                                                                              |
+| `usageLimitEnabled`                         | boolean                                                                |                                                                                                                                                                                                                                                                                              |
+| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | nambari >= 0 au `null`                                                 |                                                                                                                                                                                                                                                                                              |
+| `fiveHourUsageLimitUsd`                     | nambari >= 0 au `null`                                                 | Bajeti ya USD ya saa 5, inayotekelezwa kama vile vikomo vya kila siku na vya wiki (`usageLimitEnabled`, `UNPRICED_USAGE_BUDGET_POLICY`). `retry-after` ni wakati matumizi ya zamani zaidi kwenye dirisha yanazeeka, ambayo inaweza kuacha ufunguo mbali zaidi ya kikomo chake bado umezuiwa. |
+| `chaosModeEnabled`                          | boolean                                                                |                                                                                                                                                                                                                                                                                              |
 
 ```bash
 curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
@@ -1325,6 +1334,34 @@ curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
 | `/api/modality-bridge/stats`         | GET        | `attempts` za ndani ya kumbukumbu, mafanikio/`bridged`, kushindwa, mafanikio ya akiba, `totalLatencyMs`, `latencySamples`, `averageLatencyMs` inayohesabiwa kwa sampuli, na muda wa matumizi ya mwisho (huwekwa upya wakati wa kuwasha upya; uthibitishaji wa usimamizi)                                                                                                                                                    |
 | `/api/modality-bridge/video/runtime` | GET        | Ukaguzi mkali wa trusted-loopback kabla ya uthibitishaji wa usimamizi/probe; upatikanaji na matoleo ya FFmpeg/ffprobe yaliyosafishwa (no-store)                                                                                                                                                                                                                                                                             |
 | `/api/modality-bridge/video/extract` | POST       | Dalali wa ndani wa baiti unaothibitishwa kupitia trusted-loopback; ingizo la 50 MiB, foleni yenye kikomo/matokeo ya 32 MiB, uwezo wa `503`, kukatika kwa `499`, muda wa mwisho wa `504`; si API ya umma ya kupakia                                                                                                                                                                                                          |
+
+### Uchunguzi wa kina wa fremu za video
+
+`GET /api/v1/video-bridge/drilldown` husoma kishikio kisicho wazi kilichofungamanishwa na tenant kinachorejeshwa katika
+`x-omniroute-video-drilldown` baada ya ombi la Video Bridge lililoidhinishwa waziwazi.
+Usomaji na `DELETE` kila mara huhitaji API key halali na ruhusa huru ya mwendeshaji ya
+`modalityBridgeVideoDrilldownRemoteEnabled`. Uhifadhi wa uzalishaji pia huhitaji
+`modalityBridgeVideoDrilldownEnabled` na `drilldown: true` kali kwa kila sehemu.
+Ikiwa key ina orodha isiyo tupu ya endpoints zinazoruhusiwa, lazima iwe na `video` kwa GET na DELETE,
+bila kujali mpigaji anatumia `/v1` au `/api/v1`.
+
+GET query: `handle` inahitajika; `variant` ni ya hiari (`preview`, `standard`, `detail`),
+`limit` (1–8; `frames` ya zamani inakubaliwa lakini haiwezi kutumiwa pamoja na `limit`),
+`page` yenye msingi wa sifuri, na sekunde za `start`/`end`. Mipaka yote miwili ya kulenga
+ikitolewa, `end` lazima iwe kubwa kuliko `start`. Vifunguo vya query vilivyorudiwa au visivyojulikana
+hukatalika. Majibu yaliyofaulu huwa na `derivation`, `durationSeconds`, `frames`,
+`hasMore`, `page`, `variant`, na `focusWindow` ya hiari; JSON ya no-store ina kikomo cha
+32 MiB ikijumuisha Base64. Matokeo makubwa kupita kiasi hurejesha 413; omba fremu chache.
+
+`DELETE /api/v1/video-bridge/drilldown?handle=...` hurejesha `{ "removed": 0|1 }`.
+GET za vishikio visivyojulikana, vilivyoisha muda na vya cross-key haziwezi kutofautishwa na majibu ya 404;
+DELETE ya cross-key haiwezi kuondoa ingizo la mmiliki. Ufikiaji uliozimwa hurejesha 403, uthibitishaji
+uliokosekana/usio halali 401, query zisizo halali 400, kughairi 499 na hitilafu za muda 503.
+Vishikio ni vya ndani ya mchakato, huisha baada ya dakika kumi, na haviendelei baada ya kuwasha upya.
+Vishikio vipya hutumia `v1.` pamoja na token ya nasibu ya Base64URL yenye baiti 32; heshi za token pekee
+ndizo huhifadhiwa. Token za zamani zenye herufi 64 za hex bado zinaweza kusomwa kisintaksia kwa uoanifu.
+Tazama [vidhibiti vya Video Bridge](../security/GUARDRAILS.md#video-bridge-videobridgets-videobridgepipelinets)
+kwa maelezo ya idhini, viwango na uundaji wa variant.
 
 ### Hifadhi Nakala na Hamisha/Ingiza
 
@@ -1430,17 +1467,17 @@ Endpoint hizi zinaakisi umbizo la API ya Gemini kwa wateja wanaotarajia uoanifu 
 
 ### API za Ndani / Mfumo
 
-| Endpoint                 | Method | Description                                                                 |
-| ------------------------ | ------ | --------------------------------------------------------------------------- |
-| `/api/init`              | GET    | Ukaguzi wa uanzishaji wa programu (hutumika wakati wa uendeshaji wa kwanza) |
-| `/api/tags`              | GET    | Lebo za modeli zinazoana na Ollama (kwa wateja wa Ollama)                   |
-| `/api/restart`           | POST   | Anzisha upya seva kwa utaratibu salama                                      |
-| `/api/shutdown`          | POST   | Zima seva kwa utaratibu salama                                              |
-| `/api/system/env/repair` | POST   | Rekebisha vigeu vya mazingira vya mtoa huduma wa OAuth                      |
-| `/api/system/version`    | GET    | Toleo la sasa/karibuni, hali ya sasisho, kituo cha matoleo                  |
-| `/api/system/version`    | POST   | Anzisha sasisho linalozingatia uwekaji hadi toleo la karibuni               |
+| Endpoint                 | Method | Maelezo                                                                         |
+| ------------------------ | ------ | ------------------------------------------------------------------------------- |
+| `/api/init`              | GET    | Anzisha huduma za ulandanishi za chinichini (uthibitishaji wa usimamizi)        |
+| `/api/tags`              | GET    | Lebo za modeli zinazoendana na Ollama (kwa wateja wa Ollama)                    |
+| `/api/restart`           | POST   | Anzisha upya seva kwa utaratibu                                                 |
+| `/api/shutdown`          | POST   | Zima seva kwa utaratibu                                                         |
+| `/api/system/env/repair` | POST   | Rekebisha vigezo vya mazingira vya watoa huduma wa OAuth                        |
+| `/api/system/version`    | GET    | Toleo la sasa/la hivi karibuni, hali ya sasisho, kituo cha uchapishaji          |
+| `/api/system/version`    | POST   | Anzisha sasisho linalozingatia uchapishaji kwenda kwenye toleo la hivi karibuni |
 
-> **Kumbuka:** Endpoint hizi hutumiwa ndani na mfumo au kwa uoanifu na wateja wa Ollama. Kwa kawaida hazitumiwi na watumiaji wa mwisho.
+> **Kumbuka:** Vituo hivi hutumiwa ndani na mfumo au kwa uoanifu wa mteja wa Ollama. Kwa kawaida haviitwi na watumiaji wa mwisho.
 
 ### Urekebishaji wa Mazingira ya OAuth _(v3.6.1+)_
 

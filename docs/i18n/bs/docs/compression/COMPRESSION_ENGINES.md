@@ -1,10 +1,10 @@
-# Mehanizmi kompresije (Bosanski)
+# Compression Engines (Bosanski)
 
 🌐 **Languages:** 🇺🇸 [English](../../../../compression/COMPRESSION_ENGINES.md) · 🇪🇹 [am](../../../am/docs/compression/COMPRESSION_ENGINES.md) · 🇸🇦 [ar](../../../ar/docs/compression/COMPRESSION_ENGINES.md) · 🇦🇿 [az](../../../az/docs/compression/COMPRESSION_ENGINES.md) · 🇧🇬 [bg](../../../bg/docs/compression/COMPRESSION_ENGINES.md) · 🇧🇩 [bn](../../../bn/docs/compression/COMPRESSION_ENGINES.md) · 🇨🇿 [cs](../../../cs/docs/compression/COMPRESSION_ENGINES.md) · 🇩🇰 [da](../../../da/docs/compression/COMPRESSION_ENGINES.md) · 🇩🇪 [de](../../../de/docs/compression/COMPRESSION_ENGINES.md) · 🇬🇷 [el](../../../el/docs/compression/COMPRESSION_ENGINES.md) · 🇪🇸 [es](../../../es/docs/compression/COMPRESSION_ENGINES.md) · 🇪🇪 [et](../../../et/docs/compression/COMPRESSION_ENGINES.md) · 🇮🇷 [fa](../../../fa/docs/compression/COMPRESSION_ENGINES.md) · 🇫🇮 [fi](../../../fi/docs/compression/COMPRESSION_ENGINES.md) · 🇫🇷 [fr](../../../fr/docs/compression/COMPRESSION_ENGINES.md) · 🇮🇪 [ga](../../../ga/docs/compression/COMPRESSION_ENGINES.md) · 🇮🇳 [gu](../../../gu/docs/compression/COMPRESSION_ENGINES.md) · 🇳🇬 [ha](../../../ha/docs/compression/COMPRESSION_ENGINES.md) · 🇮🇱 [he](../../../he/docs/compression/COMPRESSION_ENGINES.md) · 🇮🇳 [hi](../../../hi/docs/compression/COMPRESSION_ENGINES.md) · 🇭🇷 [hr](../../../hr/docs/compression/COMPRESSION_ENGINES.md) · 🇭🇺 [hu](../../../hu/docs/compression/COMPRESSION_ENGINES.md) · 🇦🇲 [hy](../../../hy/docs/compression/COMPRESSION_ENGINES.md) · 🇮🇩 [id](../../../id/docs/compression/COMPRESSION_ENGINES.md) · 🇳🇬 [ig](../../../ig/docs/compression/COMPRESSION_ENGINES.md) · 🇮🇹 [it](../../../it/docs/compression/COMPRESSION_ENGINES.md) · 🇯🇵 [ja](../../../ja/docs/compression/COMPRESSION_ENGINES.md) · 🇬🇪 [ka](../../../ka/docs/compression/COMPRESSION_ENGINES.md) · 🇰🇭 [km](../../../km/docs/compression/COMPRESSION_ENGINES.md) · 🇮🇳 [kn](../../../kn/docs/compression/COMPRESSION_ENGINES.md) · 🇰🇷 [ko](../../../ko/docs/compression/COMPRESSION_ENGINES.md) · 🇱🇹 [lt](../../../lt/docs/compression/COMPRESSION_ENGINES.md) · 🇱🇻 [lv](../../../lv/docs/compression/COMPRESSION_ENGINES.md) · 🇮🇳 [ml](../../../ml/docs/compression/COMPRESSION_ENGINES.md) · 🇮🇳 [mr](../../../mr/docs/compression/COMPRESSION_ENGINES.md) · 🇲🇾 [ms](../../../ms/docs/compression/COMPRESSION_ENGINES.md) · 🇲🇹 [mt](../../../mt/docs/compression/COMPRESSION_ENGINES.md) · 🇲🇲 [my](../../../my/docs/compression/COMPRESSION_ENGINES.md) · 🇳🇵 [ne](../../../ne/docs/compression/COMPRESSION_ENGINES.md) · 🇳🇱 [nl](../../../nl/docs/compression/COMPRESSION_ENGINES.md) · 🇳🇴 [no](../../../no/docs/compression/COMPRESSION_ENGINES.md) · 🇮🇳 [or](../../../or/docs/compression/COMPRESSION_ENGINES.md) · 🇮🇳 [pa](../../../pa/docs/compression/COMPRESSION_ENGINES.md) · 🇵🇭 [phi](../../../phi/docs/compression/COMPRESSION_ENGINES.md) · 🇵🇱 [pl](../../../pl/docs/compression/COMPRESSION_ENGINES.md) · 🇵🇹 [pt](../../../pt/docs/compression/COMPRESSION_ENGINES.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/compression/COMPRESSION_ENGINES.md) · 🇷🇴 [ro](../../../ro/docs/compression/COMPRESSION_ENGINES.md) · 🇷🇺 [ru](../../../ru/docs/compression/COMPRESSION_ENGINES.md) · 🇱🇰 [si](../../../si/docs/compression/COMPRESSION_ENGINES.md) · 🇸🇰 [sk](../../../sk/docs/compression/COMPRESSION_ENGINES.md) · 🇸🇮 [sl](../../../sl/docs/compression/COMPRESSION_ENGINES.md) · 🇷🇸 [sr](../../../sr/docs/compression/COMPRESSION_ENGINES.md) · 🇸🇪 [sv](../../../sv/docs/compression/COMPRESSION_ENGINES.md) · 🇰🇪 [sw](../../../sw/docs/compression/COMPRESSION_ENGINES.md) · 🇮🇳 [ta](../../../ta/docs/compression/COMPRESSION_ENGINES.md) · 🇮🇳 [te](../../../te/docs/compression/COMPRESSION_ENGINES.md) · 🇹🇭 [th](../../../th/docs/compression/COMPRESSION_ENGINES.md) · 🇹🇷 [tr](../../../tr/docs/compression/COMPRESSION_ENGINES.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/compression/COMPRESSION_ENGINES.md) · 🇵🇰 [ur](../../../ur/docs/compression/COMPRESSION_ENGINES.md) · 🇺🇿 [uz](../../../uz/docs/compression/COMPRESSION_ENGINES.md) · 🇻🇳 [vi](../../../vi/docs/compression/COMPRESSION_ENGINES.md) · 🇳🇬 [yo](../../../yo/docs/compression/COMPRESSION_ENGINES.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/compression/COMPRESSION_ENGINES.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/compression/COMPRESSION_ENGINES.md)
 
 ---
 
-OmniRoute kompresija je izgrađena oko ugovora o mehanizmima. Režim može pokrenuti jedan mehanizam direktno (`caveman` ili `rtk`) ili deterministički složeni cjevovod koji izvršava više mehanizama redom.
+OmniRoute kompresija je izgrađena oko ugovora motora. Režim može direktno pokrenuti jedan motor (`caveman` ili `rtk`) ili deterministički naslagani cjevovod koji izvršava više motora po redu.
 
 ## Načini rada
 
@@ -237,6 +237,95 @@ Kompresijske kombinacije su imenovane kompresijske profilne postavke koje se mog
 
 Površina nadzorne ploče (Dashboard): `Dashboard -> Context & Cache -> Compression Combos`.
 
+## Preduvjeti / vodič za operatera (CCR & session-dedup)
+
+CCR (`ccr`) i `session-dedup` zamjenjuju ili brišu tekst i ostavljaju a** marker** iza. Ovaj odjeljak je referenca za operatera za povezivanje klijenta, čitanje dva markera i dohvaćanje ili dijagnosticiranje izbrisanog sadržaja. Mehanika svakog motora je pokrivena gore; ovo je sloj "kako da ga pokrenem".
+
+### Transport i krajnje tačke
+
+Do MCP servera koji izlaže CCR alate može se doći na tri načina. Zadana baza URL je `http://localhost:20128` (`OMNIROUTE_BASE_URL`):
+
+| Transport                                             | URL / komanda                           | Bilješke                                                                                                                                 |
+| ----------------------------------------------------- | --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| HTTP koji se može prenositi (klijent, preporučuje se) | `http://localhost:20128/api/mcp/stream` | Krajnja tačka sa kojom trenutno razgovaraju MCP klijenti.                                                                                |
+| Naslijeđeni SSE singleton                             | `http://localhost:20128/api/mcp/sse`    | Stariji singleton transport. To** zatvara** streamable sessions; koristite `streamable-http` klijente protiv `/api/mcp/stream`, ne ovog. |
+| stdio                                                 | `omniroute --mcp`                       | Za konfiguraciju IDE MCP koja pokreće proces. Ne postoji `--dev` zastava; `omniroute --mcp` je stdio ulazna tačka.                       |
+
+### Nivoi pohrane (ono što preživi nakon ponovnog pokretanja)
+
+CCR je a** dvoslojni** trgovina, ne samo u memoriji:
+
+- **Vrući nivo u memoriji** — kapa po bloku 2 MiB, po principalu 16 MiB, globalno 64 MiB. Unosi su podrazumevani na 24 h TTL (maksimalno 7 dana). Potpuno MCP preuzimanje iz memorije ograničeno je na 256 KiB; sve veće je i dalje dostupno kroz rangirane / grep modove.
+- **Izdržljiv SQLite nivo** (`ccr_blocks`, `COMPRESSION_CCR_DURABLE_STORE`, uključeno po defaultu) — podržava nivo u memoriji tako da blok preživi LRU izbacivanje, ponovno pokretanje ili preuzimanje na drugoj instanci. Red zadržava TTL bloka, tako da blok iza njegovog TTL nestaje sa oba nivoa.
+
+Tri štitnika drže izdržljivi nivo ograničenim — blok ostaje samo u memoriji kada:
+
+1. blok je gotov** 512 KB** (`MAX_DURABLE_BLOCK_BYTES`);
+2. vrijeme izvođenja je vrijeme izvođenja u oblaku (bez lokalnog diska);
+3. `COMPRESSION_CCR_DURABLE_STORE=false`.
+
+Dakle, "blok je nestao" nije potpuna priča o ponovnom pokretanju: sub-512 KB blok na lokalnom, ne-cloud runtime-u preživljava ponovno pokretanje preko trajnog nivoa sve dok njegov TTL ne ponestane. Pogledajte [Referenca za okruženje](../reference/ENVIRONMENT.md) za varijablu.
+
+### Dva markera
+
+| Marker                                | Značenje                                                                                                                                       | Šta model treba da uradi                                                                                                                                                                                     |
+| ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `[CCR retrieve hash=<24hex> chars=N]` | Veliki blok je pohranjen sa adresom sadržaja.                                                                                                  | Pozovi `omniroute_ccr_retrieve` sa** 24-hex heš kopiran doslovno** da vratite originalni tekst.                                                                                                              |
+| `[dedup:ref sha=…]`                   | `session-dedup` je uklonjen tekst koji je već poslan u ranijem dijelu iste sesije. Ovo je an** namjerno osvrtanje** , a ne gubitak ili greška. | Uradi** ne** pozovite bilo koji alat i uradite** ne** pokušajte da ga "rekonstruišete". Prvo pojavljivanje teksta je kanonska kopija; trenutni red se nikada ne prepisuje, već se dedupira u kasnijem krugu. |
+
+`[dedup:ref]` look-back je namjerna odluka protokola — nema rekonstrukcije prije slanja. Tretirajte to kao da je "ovaj tačan tekst već bio na žici ranije u ovoj sesiji."
+
+### Preduslovi za klijente
+
+- **Ključ (stdio):** stdio pozivalac ne nosi identitet po zahtevu, tako da se autentifikuje sa `OMNIROUTE_API_KEY` (podešen u `env` serveru MCP ). Bez toga pozivatelj je anoniman i alati koji zahtijevaju principal mogu degradirati.
+- **`tools[]` je preduslov za injekciju.** Ubrizgava se CCR instrukcija protokola preuzimanja (#8033).** samo** kada oglašeni `tools[]` zahtjeva dokaže da klijent zaista može doći do `omniroute_ccr_retrieve`. Podudaranje je podudaranje zadnjeg segmenta ograničeno separatorom (`__`, `.`, `/`, `:`) — nikada nije goli podniz — tako da se ime u prostoru između imena kao što je `mcp__gateway__omniroute_ccr_retrieve` i dalje računa. Odsutan ili nepodudaran `tools[]` znači da se instrukcija _nije_ ubrizgava po dizajnu.
+- **`codemode:false` (OpenCode klijenti).** OpenCode podrazumevano je na Code Mode, koji oglašava samo svoje izvorne alate modelu i** ne** stavite MCP alate na izvornu `tools[]` listu. Postavite `codemode: false` na unos MCP servera tako da se `omniroute_ccr_*` alati oglašavaju. Ovo je a** klijent** postavka, a ne OmniRoute. Još ne dobija CCR instrukciju ubrizganu: OpenCode imenuje alat `<server>_<tool>`, tako da server nazvan `omniroute` izlaže `omniroute_omniroute_ccr_retrieve`, a `_` nije jedan od podudarnih separatora.
+- **Direktori.** Skladištenje i dohvaćanje su izolirani prema ovlaštenom principalu (po API ključu). Ključ vidi samo svoje blokove.
+
+### Opseg po alatu
+
+Sprovođenje opsega je uvijek uključeno za HTTP/SSE pozivaoce uskog opsega. `omniroute_` CCR alati zahtijevaju:
+
+| Alat                     | Obim                |
+| ------------------------ | ------------------- |
+| `omniroute_ccr_store`    | `write:compression` |
+| `omniroute_ccr_delete`   | `write:compression` |
+| `omniroute_ccr_retrieve` | `read:compression`  |
+| `omniroute_ccr_inspect`  | `read:compression`  |
+| `omniroute_ccr_list`     | `read:compression`  |
+| `omniroute_ccr_stats`    | `read:compression`  |
+
+Opseg koji nedostaje vraća an** rezultat greške alata MCP** (`isError: true`, a ne HTTP 403 — `403 LOCAL_ONLY` je odvojena petlja za zaštitu rute auth): `Error: Insufficient MCP scopes for <tool>. Missing: <scope>.` Minimalni daljinski ključ može držati `mcp:connect` (ovlašćuje `/api/mcp/` lokalno izdvajanje) plus specifičan read/write opseg koji mu je potreban.
+
+### Klijentska matrica
+
+| Klijent             | Transport                                        | Konfiguracija za korištenje                                                                                                                                                                                                                                 | `tools[]` reklamirao? (→ CCR instrukcija ubrizgana)                                                                                                                                                          |
+| ------------------- | ------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Claude Code         | streamable-http                                  | `claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream`                                                                                                                                                                           | Da — MCP-sposoban; ubrizgan.                                                                                                                                                                                 |
+| Cursor / Cline      | `stdio`** ili** `streamable-http`                | stdio: `omniroute --mcp` sa `OMNIROUTE_API_KEY` u `env`; ili udaljeni MCP ulaz koji pokazuje na `http://localhost:20128/api/mcp/stream` (pogledajte [Vodič za postavljanje → MCP Client Configuration](../guides/SETUP_GUIDE.md#mcp-client-configuration) ) | Da — reklamira `omniroute_ccr_*` alate.                                                                                                                                                                      |
+| OpenCode            | streamable-http                                  | `opencode mcp add omniroute --url http://localhost:20128/api/mcp/stream`, plus `codemode: false`                                                                                                                                                            | Alati koji se oglašavaju samo sa `codemode: false`; instrukcija još uvijek nije ubrizgana, jer se `omniroute_omniroute_ccr_retrieve` ne podudara (pogledajte [Preduslovi klijenta](#client-prerequisites) ). |
+| OpenAI-kompatibilan | HTTP kompatibilan s OpenAI (završetak razgovora) | standardni klijent za dovršavanje razgovora u odnosu na krajnju tačku kompatibilnu s OpenAI                                                                                                                                                                 | **Nikad** — običnom OpenAI-kompatibilnom pozivaocu nikada nije rečeno da pozove alat, a instrukcija se ne ubrizgava.                                                                                         |
+
+### Ograničenja preuzimanja i paginacija
+
+Rezultati teksta alata MCP su isečeni oko `mcpAccessibility.maxTextChars` (podrazumevano `50000`). `full` preuzimanje bloka je ograničeno na 256 KiB —** nema neograničenog potpunog preuzimanja** . Kada je `chars=N` bloka velik, prelistajte ga umjesto da povlačite cijelu stvar:
+
+- pravilo:**`chars > 40000` → koristite `mode`** , nikad puna.
+- `mode:"grep"` — regex `pattern` uparen red po red, do 1000 podudarnih linija (`unique: true` ispušta ponavljanja), najjeftinije za "pronađi jedan red koji mi treba."
+- `mode:"lines"` — 1-indeksirani raspon linija; treba i `start` i `end`.
+- `mode:"head"` / `mode:"tail"` — first/last `n` linije.
+- `mode:"stats"` — broj redova, karaktera i bajtova bez tijela.
+
+Koristite `mode:"lines"` sa `start`/`end` da hodate po dugačkom bloku stranica umjesto da tražite cijelu stvar odjednom.
+
+### Imenovanje alata
+
+Alat za dohvaćanje se trenutno zove `omniroute_ccr_retrieve` (prefiks `omniroute_` je zaobilazno rješenje za međuserverske kolizije imena). Čišće ime alata sa ograničenim sufiksom i popravka za MCP JSON rezultate skraćene u sredini niza prate se kao uzvodno praćenje; ova stranica dokumentira samo trenutno, isporučeno ponašanje.
+
+### Životni ciklus sesije
+
+Streamable-HTTP sesije ne rade i server ih koristi; prozor mirovanja konfiguriše `OMNIROUTE_MCP_SESSION_IDLE_MS`, vraćajući se na `DEFAULT_MCP_SESSION_IDLE_MS` u `open-sse/mcp-server/httpTransport.ts`. Simptom neaktivne sesije je HTTP 404 sa `Unknown Mcp-Session-Id` — a lijek je ponovno povezivanje ili ponovno pokretanje sesije,**ne** za rotiranje ključa, promjenu opsega ili preimenovanje alata.
+
 ## API površina
 
 | Ruta                                   | Svrha                                                                     |
@@ -287,7 +376,7 @@ Kompresija izlaže pet MCP alata:
 
 ## Validacija
 
-Ciljane provjere za ovo područje su:
+Fokusirane kapije za ovo područje su:
 
 ```bash
 node --import tsx/esm --test tests/unit/compression/rtk-*.test.ts tests/unit/compression/pipeline-integration.test.ts tests/unit/compression/context-compression-api.test.ts

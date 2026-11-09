@@ -45,15 +45,11 @@ avslutningskode 0, noe som ikke fastslår at avhengighetene besto skanningen. De
 Trivy-trinnet krever også en vellykket måling: utilgjengelige verktøy, mislykkede jobber
 og manglende dokumentasjon for avbildningen kan ikke bekrefte at en avbildning er fri for sårbarheter.
 
-## Risiko ved utfaset avhengighet
+## pensjonert avhengighetsrisiko
 
-Rotlåsfilen inneholder ikke lenger `extract-zip` eller en avhengighetskant til den etter
-oppgraderingen av det versjonsfestede utviklingsverktøyet promptfoo. Dette fjerner den tidligere aksepterte
-`promptfoo` → `@openai/codex-security` → `extract-zip`-kjeden som spores i #14482.
-Regresjonskontrollene i `tests/unit/extract-zip-14482-exposure.test.ts` avviser at den
-gjeninnføres, og opprettholder forbudet mot importer fra produksjonskode.
+Rot-låsefilen inkluderer ikke lenger `extract-zip` eller en avhengighetskant til den etter oppgradering av det festede promptfoo-utviklingsverktøyet. Dette trekker tilbake den tidligere aksepterte `promptfoo` → `@openai/codex-security` → `extract-zip` -kjeden sporet i #14482. Regresjonskontrollene i `tests/unit/extract-zip-14482-exposure.test.ts` avviser gjeninnføringen og beholder forbudet mot import fra produksjonskode.
 
-Den nåværende avhengighetsreparasjonen inkluderer kompatibilitetsoverstyringer for Azure Identitys MSAL-klient, get-uris FTP-klient og Zod i begge OpenCode-pluginpakkene. Innhenting av Azure-tokener og FTP-henting testes med kontrollerte transporter. Begge OpenCode-pakkene kjører sine egne bygg- og testserier. Antall sikkerhetsvarsler i pakkeregisteret er øyeblikksmålinger og kan endres etter at låsefilen er innlemmet.
+Den nåværende avhengighetsreparasjonen omfatter også kompatibilitetsoverstyringer til Azure-identitets MSAL klient og get-uris FTP klient. Azure-tokenanskaffelse og FTP henting er testet med kontrollerte transporter; begge OpenCode pakkene kjører sine egne bygge- og testsuiter. Registerrådgivende tellinger er målinger på et tidspunkt og kan endres etter at låsefilen er begått.
 
 ## Restanse: Scorecard-rådgivning → blokkering
 
