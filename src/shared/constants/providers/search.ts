@@ -3,6 +3,17 @@
  * Pure data literal; re-exported by the providers.ts barrel. No behavior change.
  */
 export const SEARCH_PROVIDERS = {
+  "deepseek-search": {
+    id: "deepseek-search",
+    alias: "deepseek-search",
+    name: "DeepSeek Search",
+    icon: "search",
+    color: "#4D6BFE",
+    textIcon: "DS",
+    website: "https://api-docs.deepseek.com/guides/search/",
+    authHint: "Same API key as DeepSeek; Search and Fetch are billed per successful request",
+    serviceKinds: ["webSearch", "webFetch"],
+  },
   "perplexity-search": {
     id: "perplexity-search",
     serviceKinds: ["webSearch"],

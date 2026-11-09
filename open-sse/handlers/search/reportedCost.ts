@@ -108,13 +108,15 @@ export function readReportedUsage(
  * `extraResultCost` for every result returned above `includedResults`, plus
  * `contentsCostPerResult[key]` per result for each `contents.<key>` the request
  * sets. With `resultBlockSize`, the base price is charged once per started block
- * of that many results (at least one). Rounded to 6 decimals (no float dust).
+ * of that many results (at least one). A provider with `chargeForEmptyResults: false`
+ * costs 0 when the call returned no results. Rounded to 6 decimals (no float dust).
  */
 export function computeSearchCostUsd(
   config: SearchProviderConfig,
   requestBody: unknown,
   resultCount: number
 ): number {
+  if (config.chargeForEmptyResults === false && resultCount === 0) return 0;
   if (!config.costByMode && !config.resultBlockSize) return config.costPerQuery;
   const parsed = parseRequestBody(requestBody);
   const total =
