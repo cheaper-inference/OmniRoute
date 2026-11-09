@@ -1,1 +1,0 @@
-- **fix(context):** Chinese, Japanese and Korean prompts are no longer counted at one quarter of their real token cost, so context-fit and compaction limits trigger before the upstream rejects the request
