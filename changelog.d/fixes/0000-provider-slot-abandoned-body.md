@@ -1,0 +1,1 @@
+- **fix(routing):** A streamed provider response that the client never reads (30 s) or stops pulling (300 s) now releases its provider slot, so abandoned responses no longer strand capacity. Limits: `PROVIDER_BODY_UNREAD_TIMEOUT_MS` and `PROVIDER_BODY_INACTIVITY_TIMEOUT_MS` (0 disables).

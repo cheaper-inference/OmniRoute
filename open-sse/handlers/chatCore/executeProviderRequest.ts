@@ -28,7 +28,7 @@ import {
   readNonStreamingResponseBody,
   readResponseTextWithinCap,
 } from "./nonStreamingResponseBody.ts";
-import { wrapReadableStreamWithFinalize } from "./streamFinalize.ts";
+import { guardAbandonedBody } from "./abandonedBodyGuard.ts";
 import {
   normalizeExecutorResult,
   executeWithUpstreamStartTimeout,
@@ -635,7 +635,7 @@ export async function executeProviderRequest(
                   }
                 );
               } else {
-                clientBody = wrapReadableStreamWithFinalize(originalBody, releaseAccountSemaphore);
+                clientBody = guardAbandonedBody(originalBody, releaseAccountSemaphore);
               }
 
               return {
