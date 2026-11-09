@@ -1,0 +1,1 @@
+- **fix(config):** runtime settings hot reload now reloads once per 250 ms window when the database files change, instead of once per request-log write.
