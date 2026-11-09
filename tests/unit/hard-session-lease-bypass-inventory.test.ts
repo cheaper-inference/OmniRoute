@@ -191,7 +191,10 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     // management route; the per-model probes it dispatches still go through the
     // fenced chat pipeline, so it never selects a connection itself (class C).
     "src/app/api/models/test-all/route.ts": 1,
-    "src/app/api/monitoring/health/route.ts": 1,
+    // The health payload reads every row for its counts; `?provider=<id>` reads the active rows
+    // of one provider for a pool summary (counts only). Both are monitoring reads behind
+    // management auth, never connection selection or dispatch (class C).
+    "src/app/api/monitoring/health/route.ts": 2,
     "src/app/api/oauth/[provider]/[action]/route.ts": 4,
     // Microsoft 365 sign-in: behind the OAuth route's management guard, the authorize step reads
     // the rows only to confirm a reconnect target exists; no selection or dispatch (class C).
