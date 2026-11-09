@@ -1,0 +1,1 @@
+- **fix(audit):** Audit-log details that arrive as a JSON string are redacted like object details before they are stored, and stored rows are redacted again when read.
