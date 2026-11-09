@@ -31,6 +31,7 @@ import {
 import {
   isPricingProviderConfigured,
   modelsMatchingSearch,
+  pricingDisplayModeOptions,
   providersForComparison,
   type PricingDisplayMode,
 } from "./pricingTabFilters";
@@ -688,18 +689,11 @@ export default function PricingTab() {
             label={t("providers")}
             value={displayMode}
             onChange={(v) => setDisplayMode(v as PricingDisplayMode)}
-            options={[
-              { value: "all", label: `${t("pricingAll")} (${allProviders.length})` },
-              // Without both Configured inputs the count would be wrong, so it is not offered.
-              ...(configurationLoaded
-                ? [
-                    {
-                      value: "configured",
-                      label: `${tGlobal("providers.showConfiguredOnly")} (${configuredCount})`,
-                    },
-                  ]
-                : []),
-            ]}
+            options={pricingDisplayModeOptions(
+              `${t("pricingAll")} (${allProviders.length})`,
+              `${tGlobal("providers.showConfiguredOnly")} (${configuredCount})`,
+              configurationLoaded
+            )}
           />
 
           <FilterSelect

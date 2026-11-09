@@ -113,3 +113,15 @@ test("the Compare empty state only suggests searching when nothing was searched 
   );
   assert.equal(compareEmptyMessageKey({ searchQuery: "", providerCount: 0 }), "noProvidersMatch");
 });
+
+test("the Providers filter offers Configured only once its inputs have loaded", async () => {
+  const { pricingDisplayModeOptions } =
+    await import("../../src/app/(dashboard)/dashboard/settings/components/pricingTabFilters.ts");
+  assert.deepEqual(pricingDisplayModeOptions("All (3)", "Configured (1)", false), [
+    { value: "all", label: "All (3)" },
+  ]);
+  assert.deepEqual(pricingDisplayModeOptions("All (3)", "Configured (1)", true), [
+    { value: "all", label: "All (3)" },
+    { value: "configured", label: "Configured (1)" },
+  ]);
+});
