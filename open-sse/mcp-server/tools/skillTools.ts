@@ -1,6 +1,12 @@
 import { z } from "zod";
-import { skillRegistry } from "@/lib/skills/registry";
-import { skillExecutor } from "@/lib/skills/executor";
+// Lazy-loaded: the skills executor pulls in the memory/embeddings chain
+// (~50+ MB retained heap at import). Loaded on first skill tool invocation.
+async function getSkillRegistry() {
+  return (await import("@/lib/skills/registry")).skillRegistry;
+}
+async function getSkillExecutor() {
+  return (await import("@/lib/skills/executor")).skillExecutor;
+}
 import { resolveMcpToolOwnerId } from "../mcpCallerIdentity.ts";
 import type { McpToolExtraLike } from "../scopeEnforcement.ts";
 
@@ -31,8 +37,8 @@ export const skillTools = {
     inputSchema: SkillListSchema,
     handler: async (args: z.infer<typeof SkillListSchema>, extra?: McpToolExtraLike) => {
       const owner = await resolveMcpToolOwnerId(extra, args.apiKeyId);
-      await skillRegistry.loadFromDatabase(owner);
-      const skills = skillRegistry.list(owner);
+      await (await getSkillRegistry()).loadFromDatabase(owner);
+      const skills = (await getSkillRegistry()).list(owner);
 
       let filtered = skills;
       if (args.name) {
@@ -63,8 +69,10 @@ export const skillTools = {
     inputSchema: SkillEnableSchema,
     handler: async (args: z.infer<typeof SkillEnableSchema>, extra?: McpToolExtraLike) => {
       const owner = (await resolveMcpToolOwnerId(extra, args.apiKeyId)) ?? args.apiKeyId;
-      await skillRegistry.loadFromDatabase(owner);
-      const skill = await skillRegistry.setEnabledById(args.skillId, owner, args.enabled);
+      await (await getSkillRegistry()).loadFromDatabase(owner);
+      const skill = await (
+        await getSkillRegistry()
+      ).setEnabledById(args.skillId, owner, args.enabled);
       if (!skill) {
         throw new Error(`Skill not found: ${args.skillId}`);
       }
@@ -80,7 +88,9 @@ export const skillTools = {
     inputSchema: SkillExecuteSchema,
     handler: async (args: z.infer<typeof SkillExecuteSchema>, extra?: McpToolExtraLike) => {
       const owner = (await resolveMcpToolOwnerId(extra, args.apiKeyId)) ?? args.apiKeyId;
-      const execution = await skillExecutor.execute(args.skillName, args.input, {
+      const execution = await (
+        await getSkillExecutor()
+      ).execute(args.skillName, args.input, {
         apiKeyId: owner,
         sessionId: args.sessionId,
       });
@@ -107,7 +117,7 @@ export const skillTools = {
     }),
     handler: async (args: { apiKeyId?: string; limit?: number }, extra?: McpToolExtraLike) => {
       const owner = await resolveMcpToolOwnerId(extra, args.apiKeyId);
-      const executions = skillExecutor.listExecutions(owner, args.limit || 50);
+      const executions = (await getSkillExecutor()).listExecutions(owner, args.limit || 50);
 
       return {
         executions: executions.map((e) => ({
