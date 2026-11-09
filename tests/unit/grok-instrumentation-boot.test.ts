@@ -23,8 +23,20 @@ function loadModule<T>(relative: string, modules: Record<string, unknown>, conte
     {
       exports,
       require: (id: string) => {
-        if (!(id in modules)) throw new Error(`Unmocked module: ${id}`);
-        return modules[id];
+        if (id in modules) return modules[id];
+        // Boot keeps gaining modules; a new one is isolation noise here, not a
+        // behaviour the harness is asserting. Explicit stubs always win.
+        if (id.startsWith("@/") || id.startsWith("@omniroute/"))
+          return new Proxy(
+            {},
+            {
+              get: (_target, prop) =>
+                // A function on "then" would make the namespace look like a thenable
+                // and hang any await on it.
+                typeof prop === "symbol" || prop === "then" ? undefined : () => undefined,
+            }
+          );
+        throw new Error(`Unmocked module: ${id}`);
       },
       ...context,
     },
