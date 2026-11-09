@@ -10,6 +10,14 @@
 
 export const RENAMED_MIGRATION_COMPATIBILITY = [
   {
+    // PR #19325 used 228 before upstream's catalog cleanup claimed that slot.
+    // Match the name too: canonical cleanup records must never be rehomed.
+    fromVersion: "228",
+    fromName: "usage_history_calculated_cost",
+    toVersion: "230",
+    toName: "usage_history_calculated_cost",
+  },
+  {
     fromVersion: "022",
     fromName: "call_logs_summary_storage",
     toVersion: "025",

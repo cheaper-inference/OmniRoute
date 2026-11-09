@@ -646,6 +646,16 @@ function isSchemaAlreadyApplied(
         hasColumn(db, "usage_history", "provider_credits") &&
         hasColumn(db, "usage_history", "provider_cost_usd")
       );
+    case "230":
+      // Draft/house builds applied this schema at 228. Ledger compatibility
+      // frees that slot; this guard also handles a schema ahead of its ledger.
+      return (
+        migration.name === "usage_history_calculated_cost" &&
+        hasColumn(db, "usage_history", "calculated_cost_usd") &&
+        hasColumn(db, "usage_history", "billing_unit") &&
+        hasColumn(db, "usage_history", "billing_quantity") &&
+        hasColumn(db, "usage_history", "billing_unit_price_usd")
+      );
     default:
       return false;
   }
