@@ -1,0 +1,1 @@
+- **fix(resilience):** a DashScope key with no balance (400 `Arrearage`) or without the model service (403 `AccessDenied.Unpurchased`) now parks as credits exhausted instead of being retried every few seconds; a ban phrase quoted inside a 408, 429 or 5xx body no longer gives the account a one-year permanent cooldown

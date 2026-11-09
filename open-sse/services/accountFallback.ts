@@ -307,6 +307,13 @@ export const ACCOUNT_SUSPENDED_BILLING_PATTERNS = [
   /\b(?:spending limit|billing|invoice|payment)\b[\s\S]{0,120}?\bsuspended\b/i,
 ];
 
+// DashScope (Alibaba Model Studio) reports an unpaid account as 400/403 with code `Arrearage`
+// or `AccessDenied.Unpurchased`. Both stay true until the owner pays, so the key must park.
+// Anchored on the vendor code or its exact sentence, and only on 400/403: a 429 that quotes
+// "good standing" is a throttle, and generic AccessDenied / model_not_found never match.
+export const DASHSCOPE_DEAD_ACCOUNT_RE =
+  /\barrearage\b|please make sure your account is in good standing|accessdenied\.unpurchased|please make sure you are eligible for using the model/i;
+
 // Context overflow patterns — the prompt exceeds the model's maximum context length.
 // Different providers phrase this differently. Used to decide whether a 400 error
 // should trigger combo fallback (a different model may have a larger context window).
@@ -2047,8 +2054,14 @@ export function checkFallbackError(
   }
 
   if (errorText) {
-    // T06 (sub2api #1037): Permanent account deactivation — do NOT retry, mark as permanent failure
-    if (isAccountDeactivated(errorStr)) {
+    // T06 (sub2api #1037): Permanent account deactivation — do NOT retry, mark as permanent failure.
+    // A 408/429/5xx body that merely quotes a ban phrase is a transient failure, not a ban.
+    if (
+      status !== HTTP_STATUS.REQUEST_TIMEOUT &&
+      status !== HTTP_STATUS.RATE_LIMITED &&
+      status < HTTP_STATUS.SERVER_ERROR &&
+      isAccountDeactivated(errorStr)
+    ) {
       return {
         shouldFallback: true,
         cooldownMs: 365 * 24 * 60 * 60 * 1000, // 1 year = effectively permanent
@@ -2077,6 +2090,23 @@ export function checkFallbackError(
     // treat it like a credits-exhausted account so it stops being retried
     // every few minutes until billing is fixed (see ACCOUNT_SUSPENDED_BILLING_PATTERNS).
     if (isAccountSuspendedForBilling(errorStr)) {
+      return {
+        shouldFallback: true,
+        cooldownMs: COOLDOWN_MS.paymentRequired ?? 3600 * 1000, // 1h cooldown
+        reason: RateLimitReason.QUOTA_EXHAUSTED,
+        creditsExhausted: true,
+      };
+    }
+
+    // DashScope unpaid account (400 Arrearage / 403 AccessDenied.Unpurchased): park the key as
+    // credits_exhausted instead of retrying a dead key every few seconds.
+    if (
+      (status === HTTP_STATUS.BAD_REQUEST || status === HTTP_STATUS.FORBIDDEN) &&
+      (DASHSCOPE_DEAD_ACCOUNT_RE.test(errorStr) ||
+        DASHSCOPE_DEAD_ACCOUNT_RE.test(
+          `${structuredError?.code ?? ""} ${structuredError?.type ?? ""}`
+        ))
+    ) {
       return {
         shouldFallback: true,
         cooldownMs: COOLDOWN_MS.paymentRequired ?? 3600 * 1000, // 1h cooldown
