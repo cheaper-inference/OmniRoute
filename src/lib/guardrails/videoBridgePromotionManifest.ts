@@ -25,8 +25,7 @@ export const VIDEO_BRIDGE_PROMOTION_CASE_KINDS = [
 ] as const;
 
 export type VideoBridgePromotionCaseKind =
-  | (typeof VIDEO_BRIDGE_PROMOTION_CASE_KINDS)[number]
-  | "real_sanitized";
+  (typeof VIDEO_BRIDGE_PROMOTION_CASE_KINDS)[number] | "real_sanitized";
 
 /** #11656 requires "at least three repetitions per case and model". */
 export const VIDEO_BRIDGE_PROMOTION_MIN_REPETITIONS = 3;
