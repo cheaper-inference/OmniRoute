@@ -2022,10 +2022,13 @@ export async function getProviderCredentials(
     ) {
       const selectedPriority = connection.priority || 999;
       const selectedAvailability = getOAuthSessionAvailability(connection.id, options.sessionKey);
+      const isPriorityStrategy =
+        strategy === "fill-first" || strategy === "priority" || strategy === "cost-optimized";
+      const maxAllowedPriority = isPriorityStrategy ? selectedPriority : selectedPriority + 1;
       const moreAvailablePeer = [...orderedConnections]
         .filter(
           (candidate) =>
-            candidate.authType === "oauth" && (candidate.priority || 999) <= selectedPriority + 1
+            candidate.authType === "oauth" && (candidate.priority || 999) <= maxAllowedPriority
         )
         .sort(
           (a, b) =>
