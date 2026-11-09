@@ -143,7 +143,9 @@ describe("ModelCompatPopover param-filter target re-point (#8910)", () => {
     putFails = false;
     await act(async () => setInputValue(blockInput()!, `${blockInput()!.value}, extra`));
     await act(async () => {
-      document.body.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
+      // The kit Popover (Radix) attaches its outside-press listener on the next task.
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      document.body.dispatchEvent(new MouseEvent("pointerdown", { bubbles: true }));
     });
     await flushEffects();
 
@@ -253,7 +255,9 @@ describe("ModelCompatPopover param-filter target re-point (#8910)", () => {
     // Once alpha recovers, the preserved draft is written to alpha and the indicator clears.
     failing = new Set();
     await act(async () => {
-      document.body.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
+      // The kit Popover (Radix) attaches its outside-press listener on the next task.
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      document.body.dispatchEvent(new MouseEvent("pointerdown", { bubbles: true }));
     });
     await flushEffects();
     expect(byProvider.alpha.models).toEqual({ "gpt-test": { block: ["alpha-draft"], allow: [] } });
